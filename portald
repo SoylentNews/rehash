@@ -46,19 +46,19 @@ my %savedBlocks;
 #my ($basedir,$datadir)=getvars("basedir","datadir");
 
 sub makeTmp {
-	if(-f '/tmp/portald.pid') {
-	my $log = `tail -n 3 $I{datadir}/logs/portald.log`;
-	#sendEmail($siteadmin,'portal - frickin - d',"Portald has failed. You may want to fix it in the near future. Here are the last 3 lines of the log:\n$log");
+	if (-f "$I{datadir}/logs/portald.pid") {
+		my $log = `tail -n 3 $I{datadir}/logs/portald.log`;
+		#sendEmail($siteadmin,'portal - frickin - d',"Portald has failed. You may want to fix it in the near future. Here are the last 3 lines of the log:\n$log");
 	} else {
-		open LOCK,">/tmp/portald.pid"
-			or die "Can't open /tmp/portald.pid: $!";
+		open LOCK, "> $I{datadir}/logs/portald.pid"
+			or die "Can't open $I{datadir}/logs/portald.pid: $!";
 		print LOCK "$$";
 		close LOCK;
 	}
 }
 
 sub deleteTmp {
-	unlink '/tmp/portald.pid' or warn "Can't unlink /tmp/portald.pid: $!";
+	unlink "$I{datadir}/logs/portald.pid" or warn "Can't unlink $I{datadir}/logs/portald.pid: $!";
 }
 
 ################################################################################
@@ -255,10 +255,13 @@ sub getRDF {
 				Start => \&start_handler
 		);
 
-		my $d = $url =~ /^http/ ? geturl($url) : $url;
+		unless (my $d = geturl($url)) {
+			portaldLog("failed to get $bid");
+			return;
+		}
 
 		$d =~ s/&(?!(?:[a-zA-Z0-9]+|#\d+);)/&amp;/g; #s/&/&amp;/g;
-		$p->parse($d);
+		$p->parse($d) or portaldLog("$bid did not parse properly");
 		setblock($bid, "$str$other");
 	}
 }
@@ -302,6 +305,7 @@ portaldLog("Launching Portald");
 
 $|++;
 $I{dbh} ||= sqlconnect();
+require 'portald-site' if -e 'portald-site';
 portaldLog("Updating Portal Box Thingees");
 
 getSectionMenu2();
@@ -309,7 +313,7 @@ getSectionMenu2();
 # loop through all the RDF sites
 my $columns = "bid,url,rdf,retrieve";
 my $tables = "sectionblocks";
-my $where = "rdf is not null and retrieve =1";
+my $where = "rdf != '' and retrieve=1";
 my $other = "";
 my $RDFlist = sqlSelectAll($columns, $tables, $where, $other);
 
@@ -335,6 +339,9 @@ foreach (keys %savedBlocks) {
 }
 
 # $I{dbh}->do("UNLOCK TABLES");
+
+# from 'portald-site'
+newSemiRandomBlock() if defined &newSemiRandomBlock;
 
 portaldLog("Sucessfully Saved Portals");
 

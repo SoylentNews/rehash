@@ -48,6 +48,11 @@ my %my_conf = (
 	submiss_ts	=> 1,	# print timestamp in submissions view
 	articles_only	=> 0,	# show only Articles in submission count in admin menu
 	admin_timeout	=> 30,	# time in minutes before idle admin session ends
+	allow_anonymous	=> 1,	# allow anonymous posters
+	use_dept	=> 1,	# use "dept." field
+	max_depth	=> 7,	# max depth for nesting of comments
+	approvedtags    => [qw(B I P A LI OL UL EM BR TT STRONG BLOCKQUOTE DIV)],
+	defaultsection  => 'articles',  # default section for articles
 
 # this controls the life of %storyBank
 	story_expire	=> 600,
@@ -77,8 +82,44 @@ my %my_conf = (
 
 # very important - if you set this to one, make sure 
 # that you can use IPC::Shareable on your system
-	use_ipc		=> 0,
-	post_limit	=> 10,	# seconds delay before repeat posting
+	use_ipc			=> 0,
+	post_limit		=> 10,	# seconds delay before repeat posting
+	max_posts_allowed	=> 30,	# maximum number of posts per day allowed
+	max_submissions_allowed => 20,	# maximum number of submissions per day allowed
+	submission_speed_limit	=> 300,	# how fast they can submit
+
+	# see Slash::fixHref()
+	fixhrefs => [
+		[
+			qr/^malda/,
+			sub {
+				$_[0] =~ s|malda|http://cmdrtaco.net|;
+				return(
+					$_[0],
+					"Everything that used to be in /malda is now located at http://cmdrtaco.net"
+				);
+			}
+		],
+
+		[
+			qr/^pudge/,
+			sub {
+				$_[0] =~ s|pudge|http://pudge.net|;
+				return($_[0], 0);
+			}
+		],
+
+		[
+			qr/^linux/,
+			sub {
+				return(
+					"http://cmdrtaco.net/$_[0]",
+					"Everything that used to be in /linux is now located at http://cmdrtaco.net/linux"
+				);
+			}
+		],
+
+	],
 );
 
 # these keys dependent on values set above
@@ -88,6 +129,10 @@ $my_conf{imagedir}	= "$my_conf{rootdir}/images";
 $my_conf{rdfimg}	= "$my_conf{imagedir}/topics/topicslash.gif";
 $my_conf{cookiepath}	= URI->new($my_conf{rootdir})->path . '/';
 
+# who to send daily stats reports to (email => subject)
+$my_conf{stats_reports} = {
+	$my_conf{adminmail}	=> "$my_conf{sitename} Stats Report",
+};
 
 # $$ for use by slashd, etc., for when there is no $ENV{SERVER_NAME}
 $Slash::conf{lc $ENV{SERVER_NAME}} = \%my_conf;

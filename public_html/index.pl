@@ -55,8 +55,8 @@ sub main {
 	header($title, $SECT->{section});
 	checkForM2(); # if $I{U}{uid}==1;
 		
-	my $block = Slash::getEvalBlock("index");
-	my $execme = Slash::prepEvalBlock($block);
+	my $block = getEvalBlock("index");
+	my $execme = prepEvalBlock($block);
 
 	eval $execme;
 

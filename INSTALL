@@ -2,23 +2,23 @@ NAME
     INSTALL - Slash Installation
 
 SOFTWARE REQUIREMENTS
-    Whatever versions listed are the versions recommended. You may
-    try a newer version, and it should work, but it is not
-    guaranteed (of course, nothing in here is guaranteed anyway :).
-    Don't try to use anything older than these listed versions.
+    Whatever versions listed are the versions recommended. You may try a
+    newer version, and it should work, but it is not guaranteed (of course,
+    nothing in here is guaranteed anyway :). Don't try to use anything older
+    than these listed versions.
 
-    This document is still evolving, so there may be unintended
-    omissions or various steps may be over- or under-explained. It's
-    assumed that you have some working experience with some form of
-    Unix, Apache, SQL database, and perl.
+    This document is still evolving, so there may be unintended omissions or
+    various steps may be over- or under-explained. It's assumed that you
+    have some working experience with some form of Unix, Apache, SQL
+    database, and perl.
 
-    Note: This page looks best in a browser (the HTML version of it
-    is in the docs/ directory). You can print it out, but some of
-    the ASCII illustrations may get munged in printing; however, the
-    directions will certainly appear good enough to read.
+    Note: This page looks best in a browser (the HTML version of it is in
+    the docs/ directory). You can print it out, but some of the ASCII
+    illustrations may get munged in printing; however, the directions will
+    certainly appear good enough to read.
 
-    See the Slash web site, with support, docs, latest downloads,
-    and more, at http://slashcode.com/.
+    See the Slash web site, with support, docs, latest downloads, and more,
+    at http://slashcode.com/.
 
   Database, webserver, etc.
 
@@ -95,8 +95,8 @@ SOFTWARE REQUIREMENTS
     File-Spec-0.8
                 http://search.cpan.org/search?dist=File-Spec-0.8
 
-    Mail-Sender-0.7.00
-                http://search.cpan.org/search?dist=Mail-Sender
+    Mail-Sendmail-0.77
+                http://search.cpan.org/search?dist=Mail-Sendmail
 
     Compress-Zlib-1.08
                 http://search.cpan.org/search?dist=Compress-Zlib
@@ -110,11 +110,11 @@ SOFTWARE REQUIREMENTS
     ipc_shareable-0.30
                 http://search.cpan.org/search?dist=ipc_shareable
 
-        Note: IPC::Shareable is only needed for the troll speed
-        limit feature, which is off by default (settable via the
-        `use_ipc' variable in slashdotrc.pl). Also, on all of our
-        test systems, some of the tests in `make test' failed, but
-        the module seems to work fine for our purposes regardless.
+        Note: IPC::Shareable is only needed for the troll speed limit
+        feature, which is off by default (settable via the `use_ipc'
+        variable in slashdotrc.pl). Also, on all of our test systems, some
+        of the tests in `make test' failed, but the module seems to work
+        fine for our purposes regardless.
 
   Slash Code
 
@@ -162,8 +162,8 @@ PRE-INSTALLATION THOUGHTS
                 +-----------------+                           +-----------+
                            |_________________ DBI __________________|
 
-    db separate on one server, slashdot code and apache on another,
-    exported to web servers
+    db separate on one server, slashdot code and apache on another, exported
+    to web servers
                 server 1                server2                               server 3 .. n
                 +-----------+     +-----------------+                         +-----------+
                 | slash db  |     |                 |                         |           |
@@ -172,58 +172,50 @@ PRE-INSTALLATION THOUGHTS
                 +-----------+     +-----------------+                         +-----------+
                       |______ DBI _________|_______________________________________|
 
-    There are many ways this can be done. The key is to think about
-    how the site will be put together before starting the
-    installation.
+    There are many ways this can be done. The key is to think about how the
+    site will be put together before starting the installation.
 
 INSTALLATION AND SETUP
     Perform these tasks as root.
 
     1.  Create the group "slash".
 
-    2.  Create the user "slash" with slashdot gid. Note: if using
-        multiple webservers, and using NFS, make sure that this
-        user:group is created with the same UID and GID on all
-        involved systems.
+    2.  Create the user "slash" with slashdot gid. Note: if using multiple
+        webservers, and using NFS, make sure that this user:group is created
+        with the same UID and GID on all involved systems.
 
-        Note: For security's sake, you may wish to add the web
-        server user (e.g., "nobody") to the "slash" group, and then
-        set your permissions so that all the files are writable by
-        user and group and not world, to keep other users on the
-        system from modifying the files.
+        Note: For security's sake, you may wish to add the web server user
+        (e.g., "nobody") to the "slash" group, and then set your permissions
+        so that all the files are writable by user and group and not world,
+        to keep other users on the system from modifying the files.
 
-    3.  Unpack the slash code tarball in the slash user's home
-        directory. This will place everything where it should
-        belong.
+    3.  Unpack the slash code tarball in the slash user's home directory.
+        This will place everything where it should belong.
 
     4.  chown everything in this tree as slash:slash (i.e., `chown -R
-        slash:slash /home/slash'). chmod the main directory to be
-        readable and executable by all (i.e., `chmod a+rx
-        /home/slash').
+        slash:slash /home/slash'). chmod the main directory to be readable
+        and executable by all (i.e., `chmod a+rx /home/slash').
 
     5.  Create the directory apache will be installed into (i.e.,
-        /usr/local/apache). The default install uses a separate
-        directory for apache logs, which should also be created as
-        /usr/local/apache_logs. Alternatively, change httpd.conf to
-        point to a different location. See the section below on
-        installing perl modules for more information about the
-        default installation.
+        /usr/local/apache). The default install uses a separate directory
+        for apache logs, which should also be created as
+        /usr/local/apache_logs. Alternatively, change httpd.conf to point to
+        a different location. See the section below on installing perl
+        modules for more information about the default installation.
 
-        Multiple slash instances can run under virtual hosts on the
-        same httpd. See vhost.httpd.conf for an example of how this
-        works. Pay special attention to the configuration section
-        under the text "# MAIN SLASHCODE SPECIFIC STUFF STARTS HERE
-        #".
+        Multiple slash instances can run under virtual hosts on the same
+        httpd. See vhost.httpd.conf for an example of how this works. Pay
+        special attention to the configuration section under the text "#
+        MAIN SLASHCODE SPECIFIC STUFF STARTS HERE #".
 
-        For virtual hosts, you should create a separate account and
-        Slash installation for each virtual host, so repeat the
-        instructions relating to creation of accounts for each
-        virtual host.
+        For virtual hosts, you should create a separate account and Slash
+        installation for each virtual host, so repeat the instructions
+        relating to creation of accounts for each virtual host.
 
-    6.  Install MySQL. Please refer to MySQL documentation for
-        compilation and/or installation notes for any questions with
-        this. Find the script that runs mysql (probably safe_mysqld)
-        and add this to the beginning of it:
+    6.  Install MySQL. Please refer to MySQL documentation for compilation
+        and/or installation notes for any questions with this. Find the
+        script that runs mysql (probably safe_mysqld) and add this to the
+        beginning of it:
 
                 TZ=GMT
                 export TZ
@@ -232,37 +224,35 @@ INSTALLATION AND SETUP
 
                 mysql mysql < sql/slashdb_create.sql
 
-        This will create both the slash db user and slash db. If you
-        are using virtual hosts, or want to otherwise change the db
-        user or db name, edit this script before running it to use
-        the proper db user and db name. This script creates the user
-        slash with the password "changethis". Immediately change the
-        password for slash in mysql:
+        This will create both the slash db user and slash db. If you are
+        using virtual hosts, or want to otherwise change the db user or db
+        name, edit this script before running it to use the proper db user
+        and db name. This script creates the user slash with the password
+        "changethis". Immediately change the password for slash in mysql:
 
                 mysql mysql
                 update user set Password = password('newpassword') where User = 'slash';
                 flush privileges;
 
-        Note: The slash db user is created with several privileges
-        such as drop and create table, so it's up to you to modify
-        those privileges to something more restrictive if you feel
-        uncomfortable with these settings. We'd suggest you don't
-        let other users on the database have access to this user.
+        Note: The slash db user is created with several privileges such as
+        drop and create table, so it's up to you to modify those privileges
+        to something more restrictive if you feel uncomfortable with these
+        settings. We'd suggest you don't let other users on the database
+        have access to this user.
 
-    8.  Run the slash schema creation script and load sample slash db
-        data dump. This dump has minimal data for the system to
-        work. This data is needed in the database for the site to
-        work at all. It has a very plain, basic design, that has a
-        lot of HTML comments in each block to give an idea of how
-        the site works. Other data in this dump is tables that the
-        system needs to do things such as time conversion for user
-        date format strings. Please refer to the database schema and
-        database schema documentation to understand how the database
+    8.  Run the slash schema creation script and load sample slash db data
+        dump. This dump has minimal data for the system to work. This data
+        is needed in the database for the site to work at all. It has a very
+        plain, basic design, that has a lot of HTML comments in each block
+        to give an idea of how the site works. Other data in this dump is
+        tables that the system needs to do things such as time conversion
+        for user date format strings. Please refer to the database schema
+        and database schema documentation to understand how the database
         schema works.
 
-        Replace `HOSTNAME' (or `HOSTNAME:PORT') below with the
-        server's hostname (this is the name you will call the server
-        in the browser, used for default links in the HTML).
+        Replace `HOSTNAME' (or `HOSTNAME:PORT') below with the server's
+        hostname (this is the name you will call the server in the browser,
+        used for default links in the HTML).
 
                 cd sql
                 mysql -uslash -pnewpassword slash < slashschema_create.sql
@@ -272,18 +262,17 @@ INSTALLATION AND SETUP
 
     9.  Install perl.
 
-        On Slashdot and Slashcode, we have all of the modules
-        installed in the Apache directory, so that we can NFS mount
-        that one directory on several machines, and they all have
-        the same modules and configuration. If you want to do that,
-        when the configuration process asks where you want to put
-        perl modules (both system and local) have it put them in the
-        directory tree you'll install apache in (i.e.,
-        /usr/local/apache/lib). Otherwise, the default installation
-        directories are usually fine.
+        On Slashdot and Slashcode, we have all of the modules installed in
+        the Apache directory, so that we can NFS mount that one directory on
+        several machines, and they all have the same modules and
+        configuration. If you want to do that, when the configuration
+        process asks where you want to put perl modules (both system and
+        local) have it put them in the directory tree you'll install apache
+        in (i.e., /usr/local/apache/lib). Otherwise, the default
+        installation directories are usually fine.
 
-    10. Untar apache and mod_perl. Build mod_perl. Have its build
-        process build and install apache for you:
+    10. Untar apache and mod_perl. Build mod_perl. Have its build process
+        build and install apache for you:
 
                 perl Makefile.PL APACHE_SRC=/where_you_have_the_source DO_HTTPD=1 \
                         USE_APACI=1 PERL_MARK_WHERE=1 EVERYTHING=1 \
@@ -294,97 +283,88 @@ INSTALLATION AND SETUP
 
         This will install both mod_perl and apache.
 
-    11. Install the listed perl modules in the order listed in the
-        section on "Perl Modules". You can use CPAN if you want, or
-        ftp, untar and do it yourself. Use whichever does the job.
+    11. Install the listed perl modules in the order listed in the section
+        on "Perl Modules". You can use CPAN if you want, or ftp, untar and
+        do it yourself. Use whichever does the job.
 
-        Note that the module versions Slash has been tested with are
-        given; use other versions at your own risk. We actually
-        think that the current version of each module as of this
-        note will work, so if you are brave, go ahead and install
-        the latest.
+        Note that the module versions Slash has been tested with are given;
+        use other versions at your own risk. We actually think that the
+        current version of each module as of this note will work, so if you
+        are brave, go ahead and install the latest.
 
-        You can get the files via FTP yourself from CPAN and then
-        install each by hand, or, if you can get the CPAN module
-        running, you can use that. There are several ways to use the
-        CPAN shell to install modules. You can install each one
-        individually:
+        You can get the files via FTP yourself from CPAN and then install
+        each by hand, or, if you can get the CPAN module running, you can
+        use that. There are several ways to use the CPAN shell to install
+        modules. You can install each one individually:
 
                 perl -MCPAN -e shell
                 # some configuration / initialization stuff
                 > install DBI
 
-        Or, you can install all of them at once using the
-        Bundle::Slash module. This method is the easiest, but if
-        something does not work right, it can be more of a pain to
-        track it down.
+        Or, you can install all of them at once using the Bundle::Slash
+        module. This method is the easiest, but if something does not work
+        right, it can be more of a pain to track it down.
 
                 cd /home/slash
                 perl -MCPAN -e "install 'Bundle::Slash'"
 
-        You may also want to use CPAN shell to install
-        Bundle::libnet, Bundle::LWP, Bundle::DBI,
-        Bundle::DBD::mysql, and then the rest of the modules. See
-        the manpage the perlmodinstall manpage for more information
-        about using CPAN and installing modules.
+        You may also want to use CPAN shell to install Bundle::libnet,
+        Bundle::LWP, Bundle::DBI, Bundle::DBD::mysql, and then the rest of
+        the modules. See the manpage the perlmodinstall manpage for more
+        information about using CPAN and installing modules.
 
-        Note: Compress::Zlib is now required, and it won't install
-        properly if the zlib development headers are not available.
-        See the documentation for Compress::Zlib for more
-        information.
+        Note: Compress::Zlib is now required, and it won't install properly
+        if the zlib development headers are not available. See the
+        documentation for Compress::Zlib for more information.
 
-        Note: File::Spec is now required, but a version beyond what
-        comes with perl 5.00503 is required. Use `make install
-        UNINST=1` to remove the version that comes with perl while
-        installing the new version. Even if using the CPAN shell you
-        can do this:
+        Note: File::Spec is now required, but a version beyond what comes
+        with perl 5.00503 is required. Use `make install UNINST=1` to remove
+        the version that comes with perl while installing the new version.
+        Even if using the CPAN shell you can do this:
 
                 cpan> test File::Spec     # download, make, and test
                 cpan> look File::Spec     # opens shell to proper dir
                 % make install UNINST=1   # install from shell
 
     12. Copy the slash httpd.conf from the untarred slash code tarball's
-        directory httpd (i.e., /home/slash/httpd/httpd.conf) to
-        apache's conf directory. Take time to look over the file to
-        make sure that it matches your site's specific setup.
-        Similarly edit /home/slash/slashdotrc.pl.
+        directory httpd (i.e., /home/slash/httpd/httpd.conf) to apache's
+        conf directory. Take time to look over the file to make sure that it
+        matches your site's specific setup. Similarly edit
+        /home/slash/slashdotrc.pl.
 
-        For httpd.conf, pay close attention to directories and to
-        the number of servers and the max clients and requests. The
-        defaults are similar to Slashdot's defaults, but most sites
-        will not need 20 servers with over 100 maximum requests per
-        child process.
+        For httpd.conf, pay close attention to directories and to the number
+        of servers and the max clients and requests. The defaults are
+        similar to Slashdot's defaults, but most sites will not need 20
+        servers with over 100 maximum requests per child process.
 
         In slashdotrc.pl, make sure you have reasonable defaults for
-        everything. If you are upgrading, then you will likely want
-        to make a copy of your old slashdotrc.pl and copy those
-        values into the new file, since it is subject to change
-        significantly from one release to the next.
+        everything. If you are upgrading, then you will likely want to make
+        a copy of your old slashdotrc.pl and copy those values into the new
+        file, since it is subject to change significantly from one release
+        to the next.
 
-        If your web server is inside a firewall, you may wish to set
-        the basedomain variable to "", so all links will be relative
-        to /.
+        If your web server is inside a firewall, you may wish to set the
+        basedomain variable to "", so all links will be relative to /.
 
-        If you are doing virtual hosting for multple Slash sites,
-        see the instructions at the bottom of slashdotrc.pl and the
-        sample configuration at the bottom of httpd.conf.
+        If you are doing virtual hosting for multple Slash sites, see the
+        instructions at the bottom of slashdotrc.pl and the sample
+        configuration at the bottom of httpd.conf.
 
-    13. Create /etc/apache.listen (where `MY.IP.ADD.RESS' is the IP
-        address Apache will be listening on):
+    13. Create /etc/apache.listen (where `MY.IP.ADD.RESS' is the IP address
+        Apache will be listening on):
 
                 echo "Listen MY.IP.ADD.RESS:80" > /etc/apache.listen
 
     14. Start apache.
 
-    15. Copy the slashd startup script from the Slash source directory
-        (i.e. /home/slash/utils) slashd into the init.d directory
-        (/etc/init.d on Debian). Chown it to the slash user (i.e.,
-        `chown slash:slash /etc/init.d/slashd') and then chmod it
-        u+s and g+s (i.e., `chmod u+s /etc/init.d/slashd', `chmod
-        g+s /etc/init.d/slashd') Create all the links to this file
-        for the various run levels. Note: this script is a startup
-        script, and is not the same script as the slashd in the same
-        directory as Slash.pm.
+    15. Copy the slashd startup script from the Slash source directory (i.e.
+        /home/slash/utils) slashd into the init.d directory (/etc/init.d on
+        Debian). Chown it to the slash user (i.e., `chown slash:slash
+        /etc/init.d/slashd') and then chmod it u+s and g+s (i.e., `chmod u+s
+        /etc/init.d/slashd', `chmod g+s /etc/init.d/slashd') Create all the
+        links to this file for the various run levels. Note: this script is
+        a startup script, and is not the same script as the slashd in the
+        same directory as Slash.pm.
 
     16. Start slashd with the startup script (i.e., `/etc/init.d/slashd
         start').
@@ -393,13 +373,11 @@ INSTALLATION AND SETUP
 
                 http://whateveryoursiteiscalled.com/admin.pl
 
-        The admin user/password is God/pete (you'll need to change
-        this).
+        The admin user/password is God/pete (you'll need to change this).
 
-        This page allows you to approve submissions to be run as
-        stories, add new stories, edit stories, edit the blocks of
-        html, code, and variables that control the look and feel of
-        the site.
+        This page allows you to approve submissions to be run as stories,
+        add new stories, edit stories, edit the blocks of html, code, and
+        variables that control the look and feel of the site.
 
         The system has 7 users:
 
@@ -411,11 +389,10 @@ INSTALLATION AND SETUP
                 user3
                 user4
 
-        The passwords are all "change". As that implies, you should
-        change it. It's clear text, so simply change it via the
-        database, although you can use the server administration,
-        too. If you do not change all your passwords, you almost
-        certainly will get haX0rD.
+        The passwords are all "change". As that implies, you should change
+        it. It's clear text, so simply change it via the database, although
+        you can use the server administration, too. If you do not change all
+        your passwords, you almost certainly will get haX0rD.
 
                 mysql -uslash -pslashpass slash
 
@@ -434,19 +411,19 @@ INSTALLATION AND SETUP
 
   Running Slash on Multiple Servers
 
-    1.  Make sure that each of those servers has an EXACT copy of the
-        entire apache tree (modules and all).
+    1.  Make sure that each of those servers has an EXACT copy of the entire
+        apache tree (modules and all).
 
-    2.  Either remote copy recursively, or simply export the entire
-        apache tree via NFS (read-only) to the servers you intend to
-        be the web servers.
+    2.  Either remote copy recursively, or simply export the entire apache
+        tree via NFS (read-only) to the servers you intend to be the web
+        servers.
 
-    3.  Make sure that whatever box is running slashd has all of its
-        code and static documents exported to those web servers as
-        well (read-only).
+    3.  Make sure that whatever box is running slashd has all of its code
+        and static documents exported to those web servers as well
+        (read-only).
 
-    4.  Make sure that the slash user in mysql can access the database
-        from any host that has the code on it:
+    4.  Make sure that the slash user in mysql can access the database from
+        any host that has the code on it:
 
                 mysql mysql
                 insert into user values
@@ -461,28 +438,27 @@ INSTALLATION AND SETUP
 
   Database Upgrades From Previous Versions
 
-    Slash is data. When we release a new version, it often has
-    updates to the database, too. As such, updates can be difficult.
+    Slash is data. When we release a new version, it often has updates to
+    the database, too. As such, updates can be difficult.
 
-    We have provided upgrade scripts from previous versions of
-    slash. Each script upgrades from the version immediately
-    preceding it, so 0.9.2 users, to upgrade to 0.9.5, would need to
-    run the 0.9.3 scripts, then the 0.9.4 scripts, then the 0.9.5
-    scripts.
+    We have provided upgrade scripts from previous versions of slash. Each
+    script upgrades from the version immediately preceding it, so 0.9.2
+    users, to upgrade to 0.9.5, would need to run the 0.9.3 scripts, then
+    the 0.9.4 scripts, then the 0.9.5 scripts.
 
-    The scripts are stored in sql/updates/x.x.x/, where x.x.x is the
-    version to upgrade to. The .sql scripts can be run like so:
+    The scripts are stored in sql/updates/x.x.x/, where x.x.x is the version
+    to upgrade to. The .sql scripts can be run like so:
 
             mysql -uslash -pslashpass slash < updatescript.sql
 
-    The Perl scripts should be run, however, from the main slash
-    directory, so all of the libraries can be found:
+    The Perl scripts should be run, however, from the main slash directory,
+    so all of the libraries can be found:
 
             cd /home/slash
             ./sql/updates/0.9.5/updatescript.pl
 
-    You may also at some point choose to reinitialize the database
-    from scratch. For that, you can do something like this:
+    You may also at some point choose to reinitialize the database from
+    scratch. For that, you can do something like this:
 
             mysql mysql
             mysql> drop database slash;
@@ -498,35 +474,33 @@ INSTALLATION AND SETUP
 
     If you have already installed slash-0.9.2, you may use the
     alter_database.sql script to update the database, then run
-    blocks_update.pl (make sure you change the connect string) if
-    you don't want to start your database over from scratch.
-    However, the blocks table contains a lot of updated data in
-    slash-0.9.3 that must be fixed in order for slash-0.9.3 to work
-    at all: global variables in the blocks (like $rootdir and
-    $fg[2]) must be changed to the new style ($I{rootdir} and
-    $I{fg}[2]}). You can do this by hand, or use the dumped data in
+    blocks_update.pl (make sure you change the connect string) if you don't
+    want to start your database over from scratch. However, the blocks table
+    contains a lot of updated data in slash-0.9.3 that must be fixed in
+    order for slash-0.9.3 to work at all: global variables in the blocks
+    (like $rootdir and $fg[2]) must be changed to the new style ($I{rootdir}
+    and $I{fg}[2]}). You can do this by hand, or use the dumped data in
     slashblocks_dump.sql.
 
   Upgrade 0.9.3 -> 0.9.4
 
-    The tables blocks and sectionblocks needed to be fixed to make
-    it so that they had a 1:1 correlation on every record for the
-    admin interface to be able to work correctly. There was a bad
-    mismatch between the two tables. We've added processes to help
-    upgrade for those that have put a lot of work into customizing
-    their sites and don't want to lose any of their work. First,
-    back up the blocks table by doing a dump, or simply back up
-    individual blocks by doing the following:
+    The tables blocks and sectionblocks needed to be fixed to make it so
+    that they had a 1:1 correlation on every record for the admin interface
+    to be able to work correctly. There was a bad mismatch between the two
+    tables. We've added processes to help upgrade for those that have put a
+    lot of work into customizing their sites and don't want to lose any of
+    their work. First, back up the blocks table by doing a dump, or simply
+    back up individual blocks by doing the following:
 
     1.  Check to see that your block has an entry in both blocks and
-        sectionblocks in the case the admin.pl didn't get it in
-        there properly:
+        sectionblocks in the case the admin.pl didn't get it in there
+        properly:
 
                 select count(*) from blocks where bid = 'myownblock';
                 select count(*) from sectionblocks where bid = 'myownblock';
 
-    2.  If there's only one of the bids in either record, you can insert
-        an entry by hand for that record as shown here.
+    2.  If there's only one of the bids in either record, you can insert an
+        entry by hand for that record as shown here.
 
         If it is blocks that it's missing from, for a static block:
 
@@ -540,9 +514,8 @@ INSTALLATION AND SETUP
 
                 insert into sectionblocks values ('','myownblock',0,'',0,NULL,NULL,0);
 
-        If there are more than one record for a bid in
-        sectionblocks, delete one of them (probably the one without
-        a section).
+        If there are more than one record for a bid in sectionblocks, delete
+        one of them (probably the one without a section).
 
     3.  If you want to back up a specific block, try something like:
 
@@ -550,49 +523,54 @@ INSTALLATION AND SETUP
                 select * from sectionblocks where bid = 'myownblock' into outfile '/tmp/blocks.myownblock.txt';
 
     4.  Run the sql script blocks_fix.sql. This script makes sure every
-        record has a match in each table, and also modifies the bid
-        column in sectionblocks to be the same as it is in blocks,
-        as well as some other fixes to some of the blocks:
+        record has a match in each table, and also modifies the bid column
+        in sectionblocks to be the same as it is in blocks, as well as some
+        other fixes to some of the blocks:
 
                 mysql -uslash -pslashpass < blocks_fix.sql
 
-        Keep note of any errors you might see. On a new 0.9.3
-        distribution, untouched, unmodified data, this worked
-        without incident.
+        Keep note of any errors you might see. On a new 0.9.3 distribution,
+        untouched, unmodified data, this worked without incident.
 
-    5.  Run the sql script blocks_alter.sql. This script drops the
-        existing primary key on sectionblocks, which is a
-        combination of bid and section, and creates a new primary
-        key on bid (which prevents duplicates of the same bid).
+    5.  Run the sql script blocks_alter.sql. This script drops the existing
+        primary key on sectionblocks, which is a combination of bid and
+        section, and creates a new primary key on bid (which prevents
+        duplicates of the same bid).
 
                 mysql -uslash -pslashpass < blocks_alter.sql
 
-        If this gives you an error, it is most likely due to the
-        fact that there are duplicate bids in sectionblocks.
-        Identify those records and delete the extra one, then retry
-        this script. All block ids (bid) must be unique.
+        If this gives you an error, it is most likely due to the fact that
+        there are duplicate bids in sectionblocks. Identify those records
+        and delete the extra one, then retry this script. All block ids
+        (bid) must be unique.
 
-    6.  If you deleted any of the blocks that you backed up as show in
-        step 3, you can restore those blocks this way:
+    6.  If you deleted any of the blocks that you backed up as show in step
+        3, you can restore those blocks this way:
 
                 load data infile '/tmp/blocks.myownblock.txt' INTO TABLE blocks;
                 load data infile '/tmp/sectionblocks.myownblock.txt' INTO TABLE sectionblocks;
 
   Upgrade 0.9.4 -> 0.9.5
 
-    Just run the scripts in the sql/updates/0.9.5/ directory. The
-    scripts blocks_backup.sql and fix_matchname.pl will update the
-    data and structure of the database, and everyone should run
-    them. The script blocks_update.sql should only be run by people
-    who want some of their blocks data changed. Examine the script
-    and CHANGES and determine if you want to run the script, or
-    whatever.
+    Just run the scripts in the sql/updates/0.9.5/ directory. The scripts
+    blocks_backup.sql and fix_matchname.pl will update the data and
+    structure of the database, and everyone should run them. The script
+    blocks_update.sql should only be run by people who want some of their
+    blocks data changed. Examine the script and CHANGES and determine if you
+    want to run the script, or whatever.
 
   Upgrade 0.9.5 -> 1.0.0 
 Just run the script update_db-1.0.0.sql in the sql/updates/1.0.0/ directory, and
 make sure you have the latest code.
 
+  Upgrade 1.0.0 -> 1.0.0.1 
+Just run the script update_db-1.0.0.1.sql in the sql/updates/1.0.0.1/
+directory, and make sure you have the latest code.
+
+  Upgrade 1.0.0.1 -> 1.0.2 
+Just run the script update_db-1.0.2.sql in the sql/updates/1.0.2/
+directory, and make sure you have the latest code.
+
 AUTHOR
-    Patrick Galbraith and Chris Nandor. Last Modified March 30,
-    2000.
+    Patrick Galbraith and Chris Nandor. Last Modified May 16, 2000.
 

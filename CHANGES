@@ -1,4 +1,110 @@
-slash-1.0.2, 2000.04.xx
+slash-1.0.3, 2000.05.xx
+-----------------------
+
+*	Fixed 404.pl to strip HTML that may have been passed in
+	through the URL; this had been identified as a way to
+	redirect a user to a bad URL with a SCRIPT that would
+	be executed once displayed in the browser (drwiii)
+
+*	Changed $admin mail in 404.pl to $I{adminmail}
+
+*	Fixed longstanding bug in admin.pl preventing logging in
+	after a logout without doing a GET reload of admin.pl
+	(toast@ruka.org)
+
+*	Changed autoUrl() in admin.pl back to previous state;
+	instead, run text through stripByMode directly from
+	editstory()
+
+*	Fixed bad sqlInsert call in admin.pl's blockSave()
+
+*	Minor HTML tweaks to admin.pl, article.pl
+
+*	Changed "commentkey" table to "formkeys", so it can be
+	used for other form keys, like the submission forms,
+	in comments.pl
+
+*	In comments.pl's undoModeration(), don't let the score
+	go above 5 or lower than -1
+
+*	Added stats_reports hashref to slashdotrc.pl and dailyStuff;
+	contains mail addresses for daily stats reports to go to
+
+*	Changed test for last meta-moderation in metamod.pl's
+	isEligible(); previous test would say user had recently
+	meta-moderated if they never had
+
+*	Log errors getting RDFs in portald (cday)
+
+*	Changed test for fetching RDFs in portald to attempt
+	if "rdf" column is not empty, instead of not null
+
+*	Added call to execute a "portald-site" program; sites can put
+	any extra code they might want to add to portald into this
+	extra file (for example, in order to set blocks that are not
+	RDF files, using other parsing schemes, etc.)
+
+*	Switched to Mail::Sendmail instead of Mail::Sender
+	(this is still subject to change in the future, but we
+	got sick of Mail::Sender and Mail::Sendmail was an
+	easy replacement); added to Bundle::Slash and INSTALL
+
+*	Moved the approvedtags array to slashdotrc.pl
+
+*	Only get nickname of anonymous user if we don't have it already
+
+*	Fixed bug in Slash::pollbooth where <INPUT> tag was not closed
+
+*	Turned off print of SQL Error string to browser in
+	Slash::sqlSelect
+
+*	Fixed some of the logic in Slash::stripByMode for "nohtml",
+	Slash::stripBadHtml, and Slash::approvetag for properly
+	dealing with user submissions, the occasional exploit attempt,
+	etc. (dtaylor, et al)
+
+*	Added the time since last action for Slash::currentAdminUsers()
+
+*	Fixed duplicate HTML header problem in Slash::header() by only
+	printing header if $title is true (so it will not print in the
+	header include files)
+
+*	Try to catch bad points values for posts in
+	Slash::selectComments()
+
+*	Set a threshhold of how deep comments can nest on a page;
+	the default is 7, but can be set with the max_depth parameter
+	in slashdotrc.pl; comments can be posted to any depth, but will
+	only be displayed at depth of max_depth from the parent comment
+	on any given page
+
+*	Fixed comment HTML in ULs by putting sub-lists properly wrapped in
+	the parent LI tags (ToastyKen)
+
+*	To slashd, added sigtrap to slashd (so if something kills slashd,
+	it will be logged), automatic directory creation to prog2file,
+	bare-bones WML creation
+
+*	Background dailyStuff when running from slashd
+
+*	Added formkey checking, similar to comments.pl stuff, to
+	submit.pl
+
+*	Added grid to submit.pl list showing various views and counts in
+	each
+
+*	Print karma next to submittor's name in submit.pl
+
+*	Fixed font sizes for submit.pl and for pollbooth
+
+*	Fixed typo in topics.pl s/Catagories/Categories/
+
+*	Added MAXLENGTH="20" to new user nickname form element in
+	users.pl, and a truncating of the user nickname before it is
+	checked for validity and added to the database
+
+
+slash-1.0.2, 2000.04.12
 -----------------------
 
 *	Got rid of "Slash::" from some function calls in
@@ -59,6 +165,10 @@ slash-1.0.2, 2000.04.xx
 *	Fixed portald to put its pid file in logs/, not /tmp/
 
 *	Removed spurious '";' text in pollBooth.pl
+
+*	Added maximum posts per IP address via $I{max_posts_allowed} in 
+	slashdotrc.pl and modified comments.pl to use it. Also created table 
+	"abusers" to log anyone who exceeds the maximum postings for the day.
 
 
 slash-1.0.1, 2000.04.03

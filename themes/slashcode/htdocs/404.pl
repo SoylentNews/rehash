@@ -34,26 +34,24 @@ sub main {
 
 	$ENV{REQUEST_URI} ||= "";
 
-	my $url = substr($ENV{REQUEST_URI}, 1);
+	my $url = stripByMode(substr($ENV{REQUEST_URI}, 1), 'exttrans');
 
-	my $admin = $I{r}->server->server_admin;
+	my $admin = $I{adminmail};
 
 	header("404 File Not Found");
 
 	print "<H1>404 File Not Found</H1>\nThe requested URL ($url) is not found.\n";
 
-	my($new_url, $errnum) = Slash::fixHref($url, 1);
+	my($new_url, $errnum) = fixHref($url, 1);
 
-	if ($errnum == 1) {
+	if ($errnum && $errnum !~ /^\d+$/) {
+	    print qq|<P>$errnum, so you probably want to be here: <A HREF="$new_url">$new_url</A>\n|;
+	} elsif ($errnum == 1) {
 		print "<P>Someone <I>probably</I> just forgot the \"http://\" part of the URL, and you might really want to be here: <A HREF=\"$new_url\">$new_url</A>.\n";
 	} elsif ($errnum == 2) {
 		print "<P>Someone <I>probably</I> just forgot the \"ftp://\" part of the URL, and you might really want to be here: <A HREF=\"$new_url\">$new_url</A>.\n";
 	} elsif ($errnum == 3) {
 		print "<P>Someone <I>probably</I> just forgot the \"mailto:\" part of the URL, and you might really want to be here: <A HREF=\"$new_url\">$new_url</A>.\n";
-	} elsif ($errnum == 4) {
-		print "<P>Everything that used to be in /malda is now located at http://cmdrtaco.net, so you probably want to be here: <A HREF=\"$new_url\">$new_url</A>.\n";
-	} elsif ($errnum == 5) {
-		print "<P>Everything that used to be in /linux is now located at http://cmdrtaco.net/linux, so you probably want to be here: <A HREF=\"$new_url\">$new_url</A>.\n";
 	} elsif ($errnum == 6) {
 		print "<P>All of the older articles have been moved to /articles/older, so you probably want to be here: <A HREF=\"$new_url\">$new_url</A>.\n";
 	} elsif ($errnum == 7) {

@@ -48,7 +48,7 @@ sub main {
 	$section = "admin" if $seclev > 100;
 	header("$I{sitename} Submissions", $section);
 	# print "from $I{F}{from} email $I{F}{email} subject $I{F}{subj}<BR>\n";
-	
+
 	#adminMenu() if $seclev > 100;
 
 	if ($op eq "list" && ($seclev > 99 || $I{submiss_view})) {
@@ -72,6 +72,25 @@ sub main {
 
 	} elsif ($op eq "PreviewStory") {
 		titlebar("100%", "$I{sitename} Submission Preview", "c");
+
+		my @rand_array = ( 'a' .. 'z', 'A' .. 'Z', 0 .. 9 );
+
+		# generate a random key to use for the form
+		$I{F}{formkey} = join("",
+			map { $rand_array[rand @rand_array] }  0 .. 9) ;
+
+		# insert the fact that the form has been displayed,
+		# but not submitted at this point
+		sqlInsert("formkeys", {
+			formkey		=> $I{F}{formkey},
+			formname	=> 'submissions',
+			sid		=> 'submission',
+			uid		=> $I{U}{uid},
+			host_name	=> $ENV{REMOTE_ADDR},
+			-ts		=> 'now()',
+			value		=> 0
+		});
+
 		displayForm($I{F}{from}, $I{F}{email}, $I{F}{section});
 
 	} elsif ($op eq "viewsub" && ($seclev > 99 || $I{submiss_view})) {
@@ -127,6 +146,7 @@ sub previewForm {
 	($subid, my($email, $name, $title, $tid, $introtext,$time)) =
 		sqlSelect("subid,email,name,subj,tid,story,time",
 		"submissions","subid='$subid'");
+
 	$introtext =~ s/\n\n/\n<P>/gi;
 	$introtext .= " ";
 	$introtext =~  s{(?!"|=)(.|\n|^)(http|ftp|gopher|telnet)://(.*?)(\W\s)?[\s]}
@@ -150,9 +170,12 @@ sub previewForm {
 
 	my @fs = (
 		$I{query}->textfield(-name => 'title', -default => $title, -size => 50),
-		lockTest($title),
-		$I{query}->textfield(-name => 'dept', -default => '', -size => 50)
+		lockTest($title)
 	);
+
+	push @fs, sprintf("\n\t\tdept %s<BR>",
+		$I{query}->textfield(-name => 'dept', -default => '', -size => 50)
+	) if $I{use_dept};
 
 	print <<EOT;
 	<P>Submitted by <B>$name <A HREF="$email">$email</A></B> at $time
@@ -165,14 +188,13 @@ EOT
 
 	<FORM ACTION="$I{rootdir}/admin.pl" METHOD="POST">
 		<INPUT TYPE="hidden" NAME="subid" VALUE="$subid">
-		<BR>title %s<BR>%s
-		dept %s<BR>
+		<BR>title %s<BR>%s%s
 
 ADMIN
 
 	if ($admin) {
 		selectTopic("tid", $tid);
-		selectSection("section", "articles");
+		selectSection("section", $I{F}{section} || $I{defaultsection});
 	}
 
 	print <<ADMIN if $admin;
@@ -202,7 +224,7 @@ sub rmSub {
 			"aid='$I{U}{aid}'"
 		);
 	}
-		
+
 	foreach (keys %{$I{F}}) {
 		next unless /(.*)_(.*)/;
 		my($t,$n) = ($1,$2);
@@ -275,53 +297,73 @@ EOT
 
 	$I{F}{del} = 0 if $admin;
 
-	my $c = sqlSelectMany("note,count(*)", "submissions WHERE del=$I{F}{del} GROUP BY note");
+	my $c = sqlSelectMany("section,note,count(*)", "submissions WHERE del=$I{F}{del} GROUP BY section,note");
 
-	print qq!\n<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="3"><TR>\n\t!;
-	print $I{F}{note} ? "<TD>" : qq!<TD BGCOLOR="$I{bg}[2]"><B>!;
+	print qq!\n<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="3" BGCOLOR="$I{bg}[2]"><TR>\n\t!;
 
-	print qq!<A HREF="$ENV{SCRIPT_NAME}?section=$I{F}{section}&op=list">Unclassified</A> !;
-	print $I{F}{note} ? "</TD>" : "</B></TD>";
+	my $cur_section_str = $I{F}{section} || 'All Sections'; # Unfortunately, "articles" seems to be hardcoded
+	my $cur_note_str = $I{F}{note} || 'Unclassified';
 
-	while(my($note, $cnt) = $c->fetchrow) {
-		print $I{F}{note} eq $note ? qq!<TD BGCOLOR="$I{bg}[2]"><B>! : "<TD>";
-		print <<EOT;
-<A HREF="$ENV{SCRIPT_NAME}?section=$I{F}{section}&op=list&note=$note">$note</A> ($cnt)
-EOT
-		print $I{F}{note} eq $note ? "</B></TD>" : "</TD>";
+	my(%all_sections, %all_notes, %sn);
+	%all_sections = map { ($_ || 'All Sections') => 1 } keys %{$I{sectionBank}};
+
+	while (my($section, $note, $cnt) = $c->fetchrow) {
+		my $section_str = $section;
+		$all_sections{$section_str} = 1;
+		my $note_str = $note || 'Unclassified';
+		$all_notes{$note_str} = 1;
+		$sn{$section_str}{$note_str} = $cnt;
 	}
 
 	$c->finish;
 
-	if (!$I{U}{asection}) {
-		print "<TD> | </TD>";
-		print $I{F}{section} ? "<TD>" : qq!<TD BGCOLOR="$I{bg}[2]"><B>!;
-
-		print qq!<A HREF="$ENV{SCRIPT_NAME}?op=list&note=$I{F}{note}">All Sections</A> !;
-		print $I{F}{section} ? "</TD>" : "</B></TD>";
-
-		my $c = sqlSelectMany("section, count(*)",
-			"submissions WHERE del=$I{F}{del} GROUP BY section");
-
-		while (my($section, $cnt) = $c->fetchrow) {
-			print $section eq $I{F}{section}
-				? qq!<TD BGCOLOR="$I{bg}[2]"><B>!
-				: "<TD>";
-			print <<EOT;
-<A HREF="$ENV{SCRIPT_NAME}?section=$section&op=list&note=$I{F}{note}">$section</A> ($cnt)
-EOT
-			print $section eq $I{F}{section} ? "</B></TD>" : "</TD>";
+	for my $note_str (keys %all_notes) {
+		$sn{'All Sections'}{$note_str} = 0;
+		for (grep { $_ ne 'All Sections' } keys %sn) {
+			$sn{'All Sections'}{$note_str} += $sn{$_}{$note_str};
 		}
+	}
+	$all_sections{'All Sections'} = 1;
 
-		$c->finish;
+	print qq!<TR ALIGN="RIGHT"><TD></TD>!;
 
+	for my $section_str (	map  { $_->[0] }
+				sort { $a->[1] cmp $b->[1] }
+				map  { [$_, ($_ eq 'All Sections' ? '' : $_)] }
+				keys %all_sections) {
+
+	    	my $section = $section_str eq 'All Sections' ? '' : $section_str;
+		print qq!<TD>&nbsp;<B><A HREF="$ENV{SCRIPT_NAME}?section=$section&op=list">$section_str</A></B>&nbsp;</TD>!;
+		print "<TD></TD>" if $section_str eq 'All Sections';
 	}
 
-	print "</TR></TABLE>";
+	print "</TR>\n";
+
+	for my $note_str (	map  { $_->[0] }
+				sort { $a->[1] cmp $b->[1] }
+				map  { [$_, ($_ eq 'Unclassified' ? '' : $_)] }
+				keys %all_notes) {
+		my $note = $note_str eq 'Unclassified' ? '' : $note_str;
+
+		print qq!<TR ALIGN="RIGHT">\n!;
+		print qq!<TD>&nbsp;<B><A HREF="$ENV{SCRIPT_NAME}?note=$note&op=list">$note_str</A></B>&nbsp;</TD>!;
+
+		for my $section_str (sort keys %all_sections) {
+			my $section = $section_str eq 'All Sections' ? '' : $section_str;
+			$sn{$section_str}{$note_str} = 0 if !$sn{$section_str}{$note_str};
+			my $bgcolor = qq! BGCOLOR="$I{bg}[1]"!
+				if $note_str eq $cur_note_str && $section_str eq $cur_section_str;
+			print qq!<TD$bgcolor><A HREF="$ENV{SCRIPT_NAME}?section=$section&op=list&note=$note">$sn{$section_str}{$note_str}</A>&nbsp;</TD>!;
+			print "<TD></TD>" if $section_str eq 'All Sections';
+		}
+		print "</TR>\n";
+	}
+
+	print "</TABLE>\n";
 
 	my $sql = "SELECT subid, subj, date_format(" . getDateOffset("time") .
-		',"m/d  H:i"), tid,note,email,name,section,comment FROM submissions ';
-	$sql .= "  WHERE $I{F}{del}=del and (";
+		',"m/d  H:i"), tid,note,email,name,section,comment,submissions.uid,karma FROM submissions,users_info';
+	$sql .= "  WHERE submissions.uid=users_info.uid AND $I{F}{del}=del AND (";
 	$sql .= $I{F}{note} ? "note=" . $I{dbh}->quote($I{F}{note}) : "isnull(note)";
 	$sql .= "		or note=' ' " unless $I{F}{note};
 	$sql .= ")";
@@ -339,12 +381,12 @@ EOT
 
 	print qq!\n\n<TABLE WIDTH="95%" CELLPADDING="0" CELLSPACING="0" BORDER="0">\n!;
 	while (my($subid, $subj, $time, $tid, $note, $email, $name,
-		$section, $comment) = $cursor->fetchrow) {
+		$section, $comment, $uid, $karma) = $cursor->fetchrow) {
 
 		$select{$note || 'DEFAULT'} = ' SELECTED';
 		print $admin ? <<ADMIN : <<USER;
 	<TR><TD><NOBR>
-		<INPUT TYPE="TEXT" NAME="comment_$subid" VALUE="$comment" SIZE="15">
+		<FONT SIZE="1"><INPUT TYPE="TEXT" NAME="comment_$subid" VALUE="$comment" SIZE="15">
 		<SELECT NAME="note_$subid">
 			<OPTION$select{DEFAULT}></OPTION>
 			<OPTION$select{Hold}>Hold</OPTION>
@@ -359,21 +401,22 @@ USER
 		$name  =~ s/<(.*)>//g;
 		$email =~ s/<(.*)>//g;
 
+		$karma = $uid > -1 && defined $karma ? " ($karma)" : "";
+
 		my @strs = (substr($subj, 0, 35), substr($name, 0, 20), substr($email, 0, 20));
+		my $s = $section ne $I{defaultsection} ? "&section=$section" : "";
 		printf(($admin ? <<ADMIN : <<USER), @strs);
 
-		<INPUT TYPE="CHECKBOX" NAME="del_$subid">
+		</FONT><INPUT TYPE="CHECKBOX" NAME="del_$subid">
 	</NOBR></TD><TD>$ptime</TD><TD>
-		<FONT SIZE="1">
-			<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}">%s&nbsp;</A>
-		</FONT>
-	</TD><TD><FONT SIZE="2">%s<BR>%s</FONT></TD></TR>
+		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}">%s&nbsp;</A>
+	</TD><TD><FONT SIZE="2">%s$karma<BR>%s</FONT></TD></TR>
 ADMIN
 	<TD>\u$section</TD><TD>$ptime</TD>
 	<TD>
-		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}">%s&nbsp;</A>
+		<A HREF="$ENV{SCRIPT_NAME}?op=viewsub&subid=$subid&note=$I{F}{note}$s">%s&nbsp;</A>
 	</TD><TD><FONT SIZE="-1">%s<BR>%s</FONT></TD></TR>
-	<TR><TD COLSPAN="6"><IMG SRC="$I{imagedir}/pix.gif" ALT="" HEIGHT="3"></TD></TR>
+	<TR><TD COLSPAN="7"><IMG SRC="$I{imagedir}/pix.gif" ALT="" HEIGHT="3"></TD></TR>
 USER
 	}
 
@@ -416,6 +459,9 @@ EOT
 
 	$section = "articles" unless $section;
 	print qq!\n<FORM ACTION="$ENV{SCRIPT_NAME}" METHOD="POST">\n!;
+	print qq|<INPUT TYPE="hidden" NAME="formkey" VALUE="$I{F}{formkey}">\n|
+		if $I{F}{op} eq 'PreviewStory';
+
 	print getblock("submit_before");
 
 	$user = $I{F}{from} || $user;
@@ -454,7 +500,7 @@ EOT
 
 		print qq!<P>$user writes <I>"$I{F}{story}"</I></P>!;
 	}
-		
+
 	print formLabel("The Scoop",
 		"HTML is fine, but double check those URLs and HTML tags!");
 	print <<EOT;
@@ -471,37 +517,119 @@ EOT
 
 #################################################################
 sub saveSub {
-	if (length $I{F}{subj} < 2) {
-		print "Please enter a reasonable subject.\n";
-		displayForm($I{F}{from}, $I{F}{email}, $I{F}{section});
-		return;
-	}	
+	my $valid_formkeys;
+	my $is_a_valid_key = 0;
+	my($id, $interval);
 
-	print "Perhaps you would like to enter an email address or a URL next time.<P>"
-		unless length $I{F}{email} > 2;
+	($interval) = sqlSelect(
+		"time_to_sec(now()) - time_to_sec(max(submit_ts)) as time_interval",
+		"formkeys",
+		"host_name ='$ENV{REMOTE_ADDR}' and formname = 'submissions'"
+	);
 
-	print "This story has been submitted anonymously<P>"
-		unless length $I{F}{from} > 2;
+	# if the interval is less than the post_limit, let them know
+	if ($interval && $interval < $I{submission_speed_limit} && $interval > 0) {
+		print <<EOT;
+<B>Slow down cowboy!</B><BR>
+<P>$I{sitename} requires you to wait $I{submission_speed_limit} seconds between
+each submission in order to allow everyone to have a fair chance to post a story.</P>
+It's been $interval seconds since your last attempt to post a submission!<BR>
+EOT
+	} else {
+		if (length $I{F}{subj} < 2) {
+			print "Please enter a reasonable subject.\n";
+			displayForm($I{F}{from}, $I{F}{email}, $I{F}{section});
+			return;
+		}	
 
-	print "<B>There are currently ",
-		sqlSelect("count(*)", "submissions", "del=0"),
-		" submissions pending.</B><P>";
-		
-	print getblock("submit_after");
-	my($sec, $min, $hour, $mday, $mon, $year) = localtime;
+		print "Perhaps you would like to enter an email address or a URL next time.<P>"
+			unless length $I{F}{email} > 2;
 
-	my $subid="$hour$min$sec.$mon$mday$year";
-	sqlInsert("submissions", {
-		email	=> $I{F}{email},
-		uid	=> $I{U}{uid},
-		name	=> $I{F}{from},
-		story	=> $I{F}{story},
-		-'time'	=> 'now()',
-		subid	=> $subid,
-		subj	=> $I{F}{subj},
-		tid	=> $I{F}{tid},
-		section	=> $I{F}{section}
-	});
+		print "This story has been submitted anonymously<P>"
+			unless length $I{F}{from} > 2;
+
+		my($times_submitted) = sqlSelect( 
+			"count(*) as times_submitted", "formkeys","host_name = '$ENV{REMOTE_ADDR}' AND to_days(ts) = to_days(now()) AND formname = 'submissions'");
+
+		if ($times_submitted <= $I{max_submissions_allowed}) {
+			# make sure that there's a valid form key, and we only care about the last 4 hours!
+			$valid_formkeys = sqlSelectAll("formkey", "formkeys",
+				"(time_to_sec(now()) - time_to_sec(ts)) < 14400 AND formname = 'comments'");
+			for (@{$valid_formkeys}) {
+				$is_a_valid_key++ if $I{F}{formkey} eq $_->[0];
+			}
+
+			if (($I{F}{formkey} !~ /\w{10}/ || $I{F}{formkey} =~ /^(.)\1+$/ ) && !$is_a_valid_key) {
+				print qq|<B>Invalid form key!</B>\n|;
+			} else {
+				my $interval_string = "";
+				# find out if this form has been submitted already
+				my($submitted_already, $interval) = sqlSelect(
+					"value,(time_to_sec(now()) - time_to_sec(ts)) as time_interval",
+					"formkeys","formkey='$I{F}{formkey}' and formname = 'submissions'");
+
+				# Ok, this isn't necessary, but it makes it look better than saying:
+				#  "blah blah submitted 23333332288 seconds ago" 
+				# call me anal.
+				if ($interval > 60) {
+					if ($interval > 3600) {
+						my $hours = int($interval/3600);
+						my $minutes = int( ($interval % 3600) / 60);
+						$interval_string = "$hours hours ";
+						$interval_string .= ", $minutes minutes " if $minutes > 0;
+					} else {
+						my $minutes = int($interval / 60);
+						$interval_string = "$minutes minutes ";
+					}
+				} else {
+					$interval_string = "$interval seconds ";
+				} 
+
+				# unless the form has been submitted, submit it
+				unless ($submitted_already) {
+					print "<B>There are currently ",
+					sqlSelect("count(*)", "submissions", "del=0"),
+					" submissions pending.</B><P>";
+
+					print getblock("submit_after");
+					my($sec, $min, $hour, $mday, $mon, $year) = localtime;
+
+					my $subid="$hour$min$sec.$mon$mday$year";
+					sqlInsert("submissions", {
+						email	=> $I{F}{email},
+						uid	=> $I{U}{uid},
+						name	=> $I{F}{from},
+						story	=> $I{F}{story},
+						-'time'	=> 'now()',
+						subid	=> $subid,
+						subj	=> $I{F}{subj},
+						tid	=> $I{F}{tid},
+						section	=> $I{F}{section}
+					});
+
+					# update formkeys to show that there has been a successful pos t,
+					# and increment the value from 0 to 1 (shouldn't ever get past 1)
+					# meaning that yes, this form has been submitted, so don't try i t again.
+					sqlUpdate("formkeys", { 
+						-value		=> 'value+1',
+						cid		=> 0,
+						-submit_ts	=> 'now()',
+						comment_length	=> length($I{F}{subj})
+					}, "formkey=" . $I{dbh}->quote($I{F}{formkey}));
+
+				} else {
+					# else print an error
+					print <<EOT;
+			<B>Easy does it!</B>
+			<P>This submission has been submitted already, $interval_string ago.
+			No need to try again.</P>
+EOT
+				}
+			}
+		} else {
+			print qq|You have submitted $times_submitted. The maximum submissions for a day are $I{max_submissions_allowed}.\n|;
+		}
+	}
 }
 
 main();

@@ -189,7 +189,7 @@ EOT
 	
 	$I{U}{noscores} = 1; # Keep Things Impartial
 
-	my $c=sqlSelectMany("comments.cid,".Slash::getDateFormat("date","time").",
+	my $c = sqlSelectMany("comments.cid," . getDateFormat("date","time") . ",
 		subject,comment,nickname,homepage,fakeemail,realname,
 		users.uid as uid,sig,comments.points as points,pid,comments.sid as sid,
 		moderatorlog.id as id,title,moderatorlog.reason as modreason,
@@ -261,7 +261,7 @@ sub isEligible {
 		"uid=$I{U}{uid}"
 	);
 
-	if ($lastmm == 0) {
+	if ($lastmm eq "0") {
 		print "You have recently meta moderated.";
 		return 0;
 	}

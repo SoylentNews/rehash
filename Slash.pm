@@ -29,7 +29,7 @@ use CGI ();
 use DBI;
 use Date::Manip;
 use Apache::SIG ();
-use Mail::Sender;
+use Mail::Sendmail;
 use File::Spec::Functions;
 Apache::SIG->set;
 
@@ -38,16 +38,16 @@ BEGIN {
 	$SIG{__WARN__} = sub { warn @_ unless $_[0] =~ /Use of uninitialized value/ };
 
 	require Exporter;
-	use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS %I %conf $CRLF);
-	$VERSION = '1.0.0';
+	use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS %I $CRLF);
+	$VERSION = '1.0.3';
 	@ISA	 = 'Exporter';
 	@EXPORT  = qw(
-		sqlSelectMany sqlSelect sqlSelectHash sqlSelectAll
+		sqlSelectMany sqlSelect sqlSelectHash sqlSelectAll approveTag
 		sqlSelectHashref sqlUpdate sqlInsert sqlReplace sqlConnect
 		sqlTableExists sqlSelectColumns getSlash linkStory getSection
-		selectForm selectGeneric selectTopic selectSection
+		selectForm selectGeneric selectTopic selectSection fixHref
 		getvars getvar setvar newvar getblock getsid getsiddir getWidgetBlock
-		writelog anonLog pollbooth stripByMode header footer
+		writelog anonLog pollbooth stripByMode header footer pollItem
 		prepEvalBlock prepBlock nukeBlockCache blockCache formLabel
 		titlebar fancybox portalbox printComments displayStory
 		sendEmail getOlderStories selectStories timeCalc getBlockBank
@@ -62,21 +62,6 @@ getSlashConf();
 # The actual connect statement appears in this function.  Edit it.
 sqlConnect();
 
-$I{reasons} = [
-	'Normal',	# "Normal"
-	'Offtopic',	# Bad Responses
-	'Flamebait',
-	'Troll',
-	'Redundant',
-	'Insightful',	# Good Responses
-	'Interesting',
-	'Informative',
-	'Funny',
-	'Overrated',	# The last 2 are "Special"
-	'Underrated'
-];
-
-$I{badreasons} = 4; # number of "Bad" reasons in @$I{reasons}, skip 0 (which is neutral)
 
 ###############################################################################
 #
@@ -93,13 +78,29 @@ sub getSlashConf {
 	require($Slash::home{$serv} ? catfile($Slash::home{$serv}, 'slashdotrc.pl')
 	    : 'slashdotrc.pl');
 
-	$serv = exists $conf{lc $ENV{SERVER_NAME}}
+	$serv = exists $Slash::conf{lc $ENV{SERVER_NAME}}
 		? lc $ENV{SERVER_NAME}
 		: 'DEFAULT';
 
-	*I = $conf{$ENV{SERVER_NAME} ? $serv : $$};
+	*I = $Slash::conf{$ENV{SERVER_NAME} ? $serv : $$};
 
-	return *I{HASH};
+	$I{reasons} = [
+		'Normal',	# "Normal"
+		'Offtopic',	# Bad Responses
+		'Flamebait',
+		'Troll',
+		'Redundant',
+		'Insightful',	# Good Responses
+		'Interesting',
+		'Informative',
+		'Funny',
+		'Overrated',	# The last 2 are "Special"
+		'Underrated'
+	];
+
+	$I{badreasons} = 4; # number of "Bad" reasons in @$I{reasons}, skip 0 (which is neutral)
+
+	return \%I;
 }
 
 
@@ -120,6 +121,8 @@ sub getSlash {
 
 	$I{F}{ssi} ||= '';
 	$ENV{SCRIPT_NAME} ||= '';
+
+	($I{anon_name}) = sqlSelect('nickname', 'users', 'uid=-1') unless $I{anon_name};
 
 	my $op = $I{query}->param('op') || '';
 
@@ -736,18 +739,13 @@ sub writelog {
 # used by dailyStuff, users.pl, and someday submit.pl
 sub sendEmail {
 	my($addr, $subject, $content) = @_;
-	my $sender = new Mail::Sender {
+	sendmail(
 		smtp => $I{smtp_server},
-		from => $I{adminmail},
-	};
-
-	$sender->MailMsg({
-		to => $addr,
 		subject => $subject,
-		msg => $content}
-	);
-
-	$sender->Close;
+		to => $addr,
+		body => $content,
+		from => $I{mailfrom}
+	) or warn $Mail::Sendmail::error;
 }
 
 
@@ -894,7 +892,7 @@ sub pollbooth {
 		if ($x == 0) { 
 			$tablestuff = <<EOT;
 <FORM ACTION="$I{rootdir}/pollBooth.pl">
-\t<INPUT TYPE="hidden" NAME="qid" VALUE="$qid"
+\t<INPUT TYPE="hidden" NAME="qid" VALUE="$qid">
 <B>$question</B>
 EOT
 			$tablestuff .= <<EOT if $I{currentSection};
@@ -961,10 +959,10 @@ sub sqlSelect {
 	my $c = $I{dbh}->prepare_cached($sql) or die "Sql has gone away\n";
 	if (!$c->execute) {
 		apacheLog($sql);
-		print "\n<P><B>SQL Error</B><BR>\n";
+		# print "\n<P><B>SQL Error</B><BR>\n";
 		# kill 9,$$;
 		return undef;
-	} 
+	}
 	my @r = $c->fetchrow;
 	$c->finish;
 	return @r;
@@ -1148,9 +1146,6 @@ sub sqlConnect {
 # (pretty much the last legacy of daveCode[tm] by demaagd@imagegroup.com
 # 
 
-$I{approvedtags} = [qw(B I P A LI OL UL EM BR TT STRONG BLOCKQUOTE DIV),
-	'DIV .*?', 'P .*?'];
-
 ########################################################
 sub stripByMode {
 	my $str = shift;
@@ -1173,7 +1168,9 @@ sub stripByMode {
 		$str =~ s/\t/    /g;
 		$str =~ s/<BR>\n?( +)/"<BR>\n" . ("&nbsp; " x length($1))/ieg;
 	} elsif ($fmode eq 'nohtml') {
-		$str =~ s/\<(.*?)\>//g;
+		$str =~ s/<.*?>//g;
+		$str =~ s/<//g;
+		$str =~ s/>//g;
 	} else {
 		$str = stripBadHtml($str);
 	}
@@ -1188,6 +1185,8 @@ sub stripBadHtml  {
 	$str =~ s/<(?!.*?>)//gs; 
 	$str =~ s/<(.*?)>/approveTag($1)/sge;
 
+	$str =~ s/></> </g;
+
 	return $str;
 }
 
@@ -1196,6 +1195,13 @@ sub fixHref {
 	my($rel_url, $print_errs) = @_;
 	my $abs_url; # the "fixed" URL
 	my $errnum; # the errnum for 404.pl
+
+	for my $qr (@{$I{fixhrefs}}) {
+	    if ($rel_url =~ $qr->[0]) {
+		my @ret = $qr->[1]->($rel_url);
+		return $print_errs ? @ret : $ret[0];
+	    }
+	}
 
 	if ($rel_url =~ /^www\.\w+/) {
 		# errnum 1
@@ -1214,18 +1220,6 @@ sub fixHref {
 		$abs_url = "mailto:$rel_url";
 		return ($abs_url, 3) if $print_errs;
 		return $abs_url;
-
-	} elsif ($rel_url =~ /^malda/) {
-		# errnum 4
-		$rel_url =~ s|malda|http://cmdrtaco.net|;
-		return ($rel_url, 4) if $print_errs;
-		return $rel_url;
-
-	} elsif ($rel_url =~ /^linux/) {
-		# errnum 5
-		$rel_url = "http://cmdrtaco.net/$rel_url";
-		return ($rel_url, 5) if $print_errs;
-		return $rel_url;
 
 	} elsif ($rel_url =~ /^articles/ && $rel_url =~ /\.shtml$/) {
 		# errnum 6
@@ -1300,19 +1294,23 @@ sub approveTag {
 		return qq!<A HREF="$1">$1</A>!;
 	}
 
+	$tag =~ s/\bstyle\s*=(.*)$//i;
+
 	# Take care of Links
-	if ($tag =~ /href=(.*)/i) {
+	if ($tag =~ /href\s*=(.*)/i) {
 		my $url = $1;
-		$url =~ s/[\" ]//g;
+		$url =~ s/[" ]//g;
+		$url =~ s/^'(.+?)'$/$1/g;
 		$url = fixHref($url) || $url;
 		$url =~ s|^\s*\w+script\b.*$||i;
 		return qq!<A HREF="$url">!;
 	}
 
 	# Validate all other tags
-	$tag = uc $tag;
+	$tag =~ s|^(/?\w+)|\U$1|;
+
 	foreach my $goodtag (@{$I{approvedtags}}) {
-		return "<$tag>" if $tag eq $goodtag || $tag eq "/$goodtag";
+		return "<$tag>" if $tag =~ /^$goodtag$/ || $tag =~ m|^/$goodtag$|;
 	}
 } 
 
@@ -1373,7 +1371,7 @@ EOT
 	| <A HREF="$I{rootdir}/admin.pl?op=listfilters">Comment Filters</A>
 EOT
 
-	print <<EOT if $seclev >= 10000 && $ENV{SCRIPT_NAME} =~ /admin/;
+	print <<EOT if $seclev >= 10000;
 	| <A HREF="$I{rootdir}/admin.pl?op=authors">Authors</A>
 	| <A HREF="$I{rootdir}/admin.pl?op=vars">Variables</A>
 EOT
@@ -1390,18 +1388,32 @@ sub formLabel {
 ########################################################
 sub currentAdminUsers {
 	my $o;
-	my $c = sqlSelectMany('aid,lasttitle', 'sessions',
-		'aid!=' . $I{dbh}->quote($I{U}{aid}) . ' GROUP BY aid'
+	my $c = sqlSelectMany('aid,now()-lasttime,lasttitle', 'sessions',
+			      'aid=aid GROUP BY aid'
+#		'aid!=' . $I{dbh}->quote($I{U}{aid}) . ' GROUP BY aid'
 	);
 
-	while (my($aid, $lasttitle) = $c->fetchrow) {
+	while (my($aid, $lastsecs, $lasttitle) = $c->fetchrow) {
 		$o .= qq!\t<TR><TD BGCOLOR="$I{bg}[3]">\n!;
 		$o .= qq!\t<A HREF="$I{rootdir}/admin.pl?op=authors&thisaid=$aid">!
 			if $I{U}{aseclev} > 10000;
 		$o .= qq!<FONT COLOR="$I{fg}[3]" SIZE="${\( $I{fontbase} + 2 )}"><B>$aid</B></FONT>!;
 		$o .= '</A> ' if $I{U}{aseclev} > 10000;
-		$o .= qq!</TD><TD BGCOLOR="$I{bg}[2]"><FONT COLOR="$I{fg}[2]" SIZE="${\( $I{fontbase} + 2 )}">! .
-			"$lasttitle</FONT>&nbsp;</TD></TR>";
+
+		if ($aid eq $I{U}{aid}) {
+		    $lastsecs = "-";
+		} elsif ($lastsecs <= 99) {
+		    $lastsecs .= "s";
+		} elsif ($lastsecs <= 99*60) {
+		    $lastsecs = int($lastsecs/60+0.5) . "m";
+		} else {
+		    $lastsecs = int($lastsecs/3600+0.5) . "h";
+		}
+
+		$lasttitle = "&nbsp;/&nbsp;$lasttitle" if $lasttitle && $lastsecs;
+
+		$o .= qq!</TD><TD BGCOLOR="$I{bg}[2]"><FONT COLOR="$I{fg}[1]" SIZE="${\( $I{fontbase} + 2 )}">! .
+		    "$lastsecs$lasttitle</FONT>&nbsp;</TD></TR>";
 	}
 
 	$c->finish;
@@ -1413,52 +1425,17 @@ EOT
 
 ########################################################
 sub getAd {
-	# this code is specific to our ad server, and is in here as an example
-	# what you want is something that creates html to appear in the ad section
-	# it can be anything that creates this. It just basically ends up in the 
-	# variable $adhtml, which is then displayed at the top if $I{run_ads} is set to 1. 
 	return "<!--#perl sub=\"sub { require Slash; use Slash; print Slash::getAd(); }\" -->"
 		unless $ENV{SCRIPT_NAME};
 
 	anonLog() unless $ENV{SCRIPT_NAME} =~ /\.pl/; # Log non .pl pages
 
-	# Cache ourselves 1000 banner ads
-	if (defined $I{bannerads} && @{$I{bannerads}}) {
-	} else {
-		my $c = sqlSelectMany('ssLayer', 'slashslices');
-		while (my($l) = $c->fetchrow) {
-			push @{$I{bannerads}}, $l;
-		}
-		$c->finish;
-	}
-
-	my $ad = $I{bannerads}[ int rand 1000 ];
-
-	# Check for servfu?
-	if ($ad =~ /servfu/) {
-		$ad .= <<EOT;
-<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0">
-	<TR><TD WIDTH="1"><SCRIPT LANGUAGE="JAVASCRIPT">
-<!--
-now = new Date();
-tail = now.getTime();
-document.write("<IMG SRC=\\"http://209.207.224.245/Slashdot/pc.gif?\$location," + tail + "\\" WIDTH=\\"1\\" HEIGHT=\\"1\\"><BR>");
-//-->
-</SCRIPT>
-<NOSCRIPT>
-<IMG SRC="http://209.207.224.245/Slashdot/pc.gif?\$location,\$random" WIDTH="1" HEIGHT="1">
-</NOSCRIPT></TD></TR></TABLE><P>
+	my $ad .= <<EOT;
+<center>
+$ENV{AD_BANNER_1}
+</center>
+<p>
 EOT
-
-	} else {
-		$ad = blockCache('advertisement');
-	}
-
-
-	my $random = int rand 9999999;
-	my $location = $ENV{SCRIPT_NAME} || 'static';
-	$ad =~ s/\$random/$random/g;
-	$ad =~ s/\$location/$location/g;
 	return $ad;
 }
 
@@ -1505,7 +1482,7 @@ sub header {
 
 	$title =~ s/<(.*?)>//g;
 
-	print <<EOT;
+	print <<EOT if $title;
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <HTML><HEAD><TITLE>$title</TITLE>
 EOT
@@ -1581,11 +1558,11 @@ sub footer {
 	my $menu = prepBlock($vertmenu);
 
 	my $horizmenu = eval $menu;
-        $horizmenu =~ s/^\s*//mg;
-        $horizmenu =~ s/^-\s*//mg;
-        $horizmenu =~ s/\s*$//mg;
-        $horizmenu =~ s/<HR(?:>|\s[^>]*>)//g;
-        $horizmenu = sprintf "[ %s ]", join ' | ', split /<BR>/, $horizmenu;
+	$horizmenu =~ s/^\s*//mg;
+	$horizmenu =~ s/^-\s*//mg;
+	$horizmenu =~ s/\s*$//mg;
+	$horizmenu =~ s/<HR(?:>|\s[^>]*>)//g;
+	$horizmenu = sprintf "[ %s ]", join ' | ', split /<BR>/, $horizmenu;
 
 	my $execme = getWidgetBlock('footer');
 	print eval $execme;
@@ -1682,6 +1659,9 @@ sub selectComments {
 		$C->{points}-- if length($C->{comment}) < $I{U}{clsmall}
 			&& $C->{points} > -1 && $I{U}{clsmall};
 
+		# fix points in case they are out of bounds
+		$C->{points} = $C->{points} < -1 ? -1 : $C->{points} > 5 ? 5 : $C->{points};
+
 		my $tmpkids = $comments->[$C->{cid}]{kids};	
 		my $tmpvkids = $comments->[$C->{cid}]{visiblekids};
 		$comments->[$C->{cid}] = $C;
@@ -1701,7 +1681,7 @@ sub selectComments {
 
 	getCommentTotals($comments);
 	updateCommentTotals($sid, $comments) if $I{F}{ssi};
-	reparentComments($comments) if $I{U}{reparent};
+	reparentComments($comments);
 	return($comments,$count);
 }
 
@@ -1729,19 +1709,54 @@ sub updateCommentTotals {
 ########################################################
 sub reparentComments {
 	my $comments = shift;
+	my $depth = $I{max_depth} || 7;
+
+	return unless $depth || $I{U}{reparent};
+
+	# adjust depth for root pid or cid
+	if (my $cid = $I{F}{cid} || $I{F}{pid}) {
+		while ($cid && (my($pid) =
+			sqlSelect('pid', 'comments',
+				"sid='$I{F}{sid}' and cid=$cid")
+		)) {
+			$depth++;
+			$cid = $pid;
+		}
+	}
+
 	for (my $x = 1; $x < @$comments; $x++) {
 		next unless $comments->[$x];
 
-		next if $comments->[$x]{points} < $I{U}{threshold};
 		my $pid = $comments->[$x]{pid};
 		my $reparent;
 
-		while ($pid && $comments->[$pid]{points} < $I{U}{threshold}) {
-			$pid = $comments->[$pid]{pid};
-			$reparent = 1;
+		# do threshold reparenting thing
+		unless ($comments->[$x]{points} < $I{U}{threshold}) {
+			while ($pid && $comments->[$pid]{points} < $I{U}{threshold}) {
+				$pid = $comments->[$pid]{pid};
+				$reparent = 1;
+			}
+		}
+
+		if ($depth && ! $reparent) { # don't reparent again!
+			# set depth of this comment based on parent's depth
+			$comments->[$x]{depth} = ($pid ? $comments->[$pid]{depth} : 0) + 1;
+
+			# go back each pid until we find one with depth less than $depth
+			while ($pid && $comments->[$pid]{depth} >= $depth) {
+				$pid = $comments->[$pid]{pid};
+				$reparent = 1;
+			}
 		}
 
 		if ($reparent) {
+			# remove child from old parent
+			@{$comments->[$comments->[$x]{pid}]{kids}} =
+				grep { $_ != $x }
+				@{$comments->[$comments->[$x]{pid}]{kids}};
+			$comments->[$x]{realpid} = $comments->[$x]{pid};
+
+			# add child to new parent
 			$comments->[$x]{pid} = $pid;
 			push @{$comments->[$pid]{kids}}, $x;
 		}
@@ -1891,7 +1906,7 @@ EOT
 
 	if ($cid) {
 		my $C = $comments->[$cid];
-		dispComment($C) if $cid;
+		dispComment($C);
 
 		# Next and previous.
 		my($n, $p);
@@ -1992,12 +2007,12 @@ sub linkCommentPages {
 
 	for (my $x = 0; $x < $total; $x += $I{U}{commentlimit}) {
 		$links .= ' | ' if $page++ > 0;
-		$links .= "<B>(" if $x == $I{F}{startat};
+		$links .= "<B>(" if $I{F}{startat} && $x == $I{F}{startat};
 		$links .= linkComment({
 			sid => $sid, pid => $pid, cid => $cid,
 			subject => $page, startat => $x
 		});
-		$links .= ")</B>" if $x == $I{F}{startat};
+		$links .= ")</B>" if $I{F}{startat} && $x == $I{F}{startat};
 	}
 	if ($I{U}{breaking}) {
 		$links .= " ($I{sitename} Overload: CommentLimit $I{U}{commentlimit})";
@@ -2023,7 +2038,7 @@ sub linkComment {
 	if ($comment) {
 		$x .= "&cid=$C->{cid}";
 	} else {
-		$x .= "&pid=$C->{pid}";
+		$x .= "&pid=" . ($C->{realpid} || $C->{pid});
 		$x .= "#$C->{cid}" if $C->{cid};
 	}
 
@@ -2077,6 +2092,7 @@ sub displayThread {
 		}
 
 		my $highlight = 1 if $C->{points} >= $I{U}{highlightthresh};
+		my $finish_list = 0;
 
 		if ($full || $highlight) {
 			print "<TABLE>" if $lvl && $indent;
@@ -2086,8 +2102,9 @@ sub displayThread {
 			$displayed++;
 		} else {
 			my $pcnt = @{$comments->[$C->{pid}]{kids} } + 0;
-			printf "\t\t<LI>%s</LI>\n",
-				linkComment($C, $pcnt > $I{U}{commentspill}, "1")
+			printf "\t\t<LI>%s\n",
+				linkComment($C, $pcnt > $I{U}{commentspill}, "1");
+			$finish_list++;
 		}
 
 		if ($C->{kids}) {
@@ -2097,6 +2114,9 @@ sub displayThread {
 			print "\n\t</UL>\n" if $indent;
 			print "\n\t</TD></TR>\n" if $cagedkids;
 		}
+
+		print "</LI>\n" if $finish_list;
+
 		last if $displayed >= $I{U}{commentlimit};
 	}
 
@@ -2126,7 +2146,8 @@ EOT
 
 	$C->{nickname} =~ s/ /+/g;
 
-	my $userinfo = <<EOT unless $C->{nickname} eq "Anonymous+Coward";
+	(my $anon_name = $I{anon_name}) =~ s/ /+/g;
+	my $userinfo = <<EOT unless $C->{nickname} eq $anon_name;
 (<A HREF="$I{rootdir}/users.pl?op=userinfo\&nick=$C->{nickname}">User Info</A>)
 EOT
 
@@ -2201,7 +2222,6 @@ sub dispStory {
 		# Need Header
 		my $SECT = getSection($S->{section});
 		$title = "$SECT->{title}: $S->{title}";
-		# $title =~ s/Slashdot://g;
 	}
 
 	titlebar($I{titlebar_width}, $title);
@@ -2547,7 +2567,7 @@ sub lockTest {
 	while (my($thissubj, $aid) = $c->fetchrow) {
 		if ($aid ne $I{U}{aid} && (my $x = matchingStrings($thissubj, $subj))) {
 			$msg .= <<EOT
-<B>$x%</B> matching with <FONT COLOR="$I{fg}[2]">$thissubj</FONT> by <B>$aid</B><BR>
+<B>$x%</B> matching with <FONT COLOR="$I{fg}[1]">$thissubj</FONT> by <B>$aid</B><BR>
 EOT
 		}
 	}

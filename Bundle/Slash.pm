@@ -1,6 +1,6 @@
 package Bundle::Slash;
 
-$VERSION = '1.0.2';
+$VERSION = '1.0.3';
 
 1;
 
@@ -32,7 +32,7 @@ XML::Parser
 
 Date::Manip
 
-Mail::Sender
+Mail::Sendmail
 
 Apache::DBI
 
@@ -48,8 +48,10 @@ Image::Size
 =head1 DESCRIPTION
 
 Should we do IPC::Shareable too?  It is not as stable, it seems.
+Ah, but now there is a new version!
 
-Bundle::CPAN would be nice, but Archive::Tar seems broken now.
+Bundle::CPAN would be nice, but Archive::Tar seems broken now.  Ah,
+but now it is fixed!  We will come back and re-address this soon.
 
 mod_perl must be installed by hand, because of the special configuration
 required for it.

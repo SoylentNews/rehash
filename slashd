@@ -24,9 +24,13 @@
 #
 #  $Id$
 ###############################################################################
+use sigtrap;
 use strict;
 use vars '%I';
 use Slash;
+use Carp;
+use File::Basename;
+use File::Path;
 use LWP::UserAgent;
 use HTTP::Request;
 use URI::Escape;
@@ -36,6 +40,8 @@ my $totalChangedStories = 1;
 
 open STDERR, ">> $I{datadir}/logs/slashd.log"
 	or die "Can't open STDERR to $I{datadir}/logs/slashd.log: $!";
+
+sub END { Carp::cluck("why am I here?") }
 
 sub slashdPid {
 	open PID,">$I{datadir}/logs/slashd.pid"
@@ -104,8 +110,9 @@ sub geturl {
 
 sub prog2file {
 	my($c, $f) = @_;
-
 	my $d = `$c`;
+	my $dir = dirname($f);
+	mkpath($dir, 0, 0755) unless -e $dir;
 	if (length($d) > 0) {
 		open F, ">$f" or die "Can't open $f: $!";
 		print F $d;
@@ -186,7 +193,7 @@ sub save2file {
 #################################
 sub newmotd {
 	return unless -x '/usr/games/fortune';
-	chomp(my $t= `/usr/games/fortune -s`);
+	chomp(my $t = `/usr/games/fortune -s`);
 	setblock('motd', $t) if $t;
 }
 
@@ -311,7 +318,7 @@ sub getBackendStories {
 		topics.tid as tid
 		    FROM stories,topics
 		   WHERE ((displaystatus = 0 and \"$section\"=\"\")
-		      OR (section=\"$section\" and displaystatus>-1)) 
+		      OR (section=\"$section\" and displaystatus > -1)) 
 		     AND time < now()
 		     AND writestatus > -1
 		     AND stories.tid=topics.tid
@@ -374,7 +381,49 @@ EOT
 }
 
 #################################
-sub newxml {
+sub newwml {
+	my $section = shift;
+	my $c = getBackendStories($section);
+
+	my $x = <<EOT;
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC "-//PHONE.COM//DTD WML 1.1//EN" "http://www.phone.com/dtd/wml11.dtd" > 
+<wml>
+                        <head><meta http-equiv="Cache-Control" content="max-age=3600" forua="true"/></head>
+<!--  Dev  -->
+
+<!-- TOC -->
+<card title="$I{sitename}" id="$I{sitename}">
+<do label="Home" type="options">
+<go href="/index.wml"/>
+</do>
+<p align="left"><b>$I{sitename}</b>
+<select>
+EOT
+
+        my $z = 0;
+        my $body;
+        while (my $S = $c->fetchrow_hashref) {
+                $x .= qq|<option title="View" onpick="/wml.pl?sid=$S->{sid}">| .
+                	xmlEncodeStr(stripByMode($S->{title})) . 
+                	"</option>\n";
+                $z++;
+        }     
+        $c->finish;
+
+        $x .= <<EOT;
+</select>
+</p>
+</card>
+</wml>
+EOT
+
+	(my $file = $section || lc $I{sitename}) =~ s/\W+//g;
+        save2file("$I{basedir}/$file.wml", $x);
+}
+
+#################################
+sub newxml { huh(@_);
 	my $section = shift;
 	my $c = getBackendStories($section);
 
@@ -388,7 +437,7 @@ EOT
 		$x.= sprintf <<EOT, xmlEncodeStr($S->{title}), xmlEncodeStr($S->{dept});
 	<story>
 		<title>%s</title>
-		<url>$I{rootdir}/$S->{section}/$S->{sid}.shtml</url>
+		<url>$I{rootdir}/article.pl?sid=$S->{sid}</url>
 		<time>$S->{'time'}</time>
 		<author>$S->{aid}</author>
 		<department>%s</department>
@@ -479,6 +528,7 @@ sub openBackend {
 	newultra();
 	newxml();
 	newrdf();
+	newwml();
 	newmega();
 	my $sec = sqlSelectMany("section", "sections");
 	while(my($s) = $sec->fetchrow) {
@@ -496,9 +546,7 @@ sub makeDir {
 	my $yearid = substr($sid, 0, 2);
 	my $dayid = substr($sid, 6, 2);
 
-	mkdir "$I{basedir}/$section/$yearid", 0755;
-	mkdir "$I{basedir}/$section/$yearid/$monthid", 0755;
-	mkdir "$I{basedir}/$section/$yearid/$monthid/$dayid", 0755;
+	mkpath "$I{basedir}/$section/$yearid/$monthid/$dayid", 0, 0755;
 }
 
 #################################
@@ -572,7 +620,7 @@ sub freshenup {
 sub writePollBooth {
 	$I{currentSection} = "redhat";
 	my $poll = pollbooth("", "rh");
-	$poll = qq!\n<FONT FACE="$I{mainfontface}" SIZE="2">$poll</FONT>\n!;
+	$poll = qq!\n<FONT FACE="$I{mainfontface}" SIZE="1">$poll</FONT>\n!;
 	save2file("$I{basedir}/pollbooth.html", $poll);
 	$I{currentSection} = "";
 }
@@ -637,9 +685,9 @@ while (1) {
 		newfooter();
 		setheadertopics();
 		openBackend();
-		if ($I{run_ads}) {
-			getSlicesTable();
-		}
+
+#		getSlicesTable() if $I{run_ads};
+
 		system("$I{datadir}/portald &");
 		sleep(60 * 2);
 
@@ -650,7 +698,7 @@ while (1) {
 			newmotd();
 			setvar("today", $today);
 			slashdLog("It's Tomorrow: Run Slashd daily Voodoo");
-			system("$I{datadir}/dailyStuff");
+			system("$I{datadir}/dailyStuff &");
 		}
 		$last = time;
 
@@ -665,3 +713,4 @@ while (1) {
 	}
 	sleep(60 * $I{updatemin}); # Sleep for 5 minutes
 }
+__END__

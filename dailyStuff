@@ -186,10 +186,10 @@ sub generateDailyMail {
 	return unless @$E;
 	for (@{$E}) {
 		my($sid, $title, $section, $aid, $tid, $time, $dept) = @$_;
+		$dept = $I{use_dept} ? "\n     from the $dept dept." : "";
 
 		$r .= <<EOT;
-$title
-     from the $dept dept.
+$title$dept
      posted by $aid on $time ($tid)
      $I{rootdir}/article.pl?sid=$sid
 EOT
@@ -240,7 +240,9 @@ sub prog2file {
 
 # Send a message to the shite admin.
 if ($I{send_mail} == 1) {
-	sendEmail($I{adminmail}, "$I{sitename} Stats Report ", $email);
+	for (keys %{$I{stats_reports}}) {
+		sendEmail($_, $I{stats_reports}{$_}, $email);
+	}
 	mailingList();
 }
 

@@ -4,7 +4,7 @@ README - Slashdot Readme
 
 =head1 DESCRIPTION
 
-This is the README file for Slash, release 1.0.2. Please read all
+This is the README file for Slash, release 1.0.3. Please read all
 documentation carefully.  The various documents explain the database
 schema, the various fields in the database, and some of the reasoning
 behind the design of the schema, installation and setup.
@@ -14,6 +14,10 @@ is simple: use the new code in the new distribution, and make sure that
 you have the new values and configurations in your copies of
 F<slashdotrc.pl> and F<httpd.conf>.  If you neglect to upgrade these
 last two, your site likely will not work.
+
+Also, double-check every line of F<CHANGES> to see if anything has changed
+to affect your site (like a change from Mail::Sender to Mail::Sendmail,
+for example).
 
 B<Note>: This page looks best in a browser (the HTML version of it is in
 the F<docs/> directory). You can print it out, but some of the ASCII
@@ -87,4 +91,4 @@ See F<INSTALL>.
 
 =head1 AUTHOR
 
-Patrick Galbraith and Chris Nandor.  Last Modified March 29, 2000.
+Patrick Galbraith and Chris Nandor.  Last Modified May 16, 2000.

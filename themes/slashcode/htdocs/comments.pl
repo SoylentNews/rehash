@@ -121,46 +121,61 @@ EOT
 			$I{PT}{$id} = time();
 
 		} else {
-			# find out if this form has been submitted already
-			my($submitted_already, $interval) = sqlSelect(
-				"value,(time_to_sec(now()) - time_to_sec(ts)) as time_interval",
-				"commentkey","formkey='$I{F}{formkey}'");
+			my ($times_posted) = sqlSelect( 
+				"count(*) as times_posted",
+				"formkeys",
+				"host_name = '$ENV{REMOTE_ADDR}' AND to_days(ts) = to_days(now()) AND formname = 'comments'");
 
-			# interval of when it was submitted (this won't be used unless it's already been submitted)
-			my $interval_string = "";
+			if ($times_posted <= $I{max_posts_allowed}) {
 
-			# Ok, this isn't necessary, but it makes it look better than saying:
-			#  "blah blah submitted 23333332288 seconds ago" 
-			# call me anal.
-			if ($interval > 60) {
-				if ($interval > 3600) {
-					my $hours = int($interval/3600);
-					my $minutes = int( ($interval % 3600) / 60);
-					$interval_string = "$hours hours ";
-					$interval_string .= ", $minutes minutes " if $minutes > 0;
+				# find out if this form has been submitted already
+				my($submitted_already, $interval) = sqlSelect(
+					"value,(time_to_sec(now()) - time_to_sec(ts)) as time_interval",
+					"formkeys","formkey='$I{F}{formkey}' and formname = 'comments'");
+
+				# interval of when it was submitted (this won't be used unless it's already been submitted)
+				my $interval_string = "";
+	
+				# Ok, this isn't necessary, but it makes it look better than saying:
+				#  "blah blah submitted 23333332288 seconds ago" 
+				# call me anal.
+				if ($interval > 60) {
+					if ($interval > 3600) {
+						my $hours = int($interval/3600);
+						my $minutes = int( ($interval % 3600) / 60);
+							$interval_string = "$hours hours ";
+							$interval_string .= ", $minutes minutes " if $minutes > 0;
+					} else {
+						my $minutes = int($interval / 60);
+						$interval_string = "$minutes minutes ";
+					}
 				} else {
-					my $minutes = int($interval / 60);
-					$interval_string = "$minutes minutes ";
-				}
-			} else {
-				$interval_string = "$interval seconds ";
-			} 
+					$interval_string = "$interval seconds ";
+				} 
 
-			# unless the form has been submitted, submit it
-			unless ($submitted_already) {
-				($I{U}{karma}) = sqlSelect("karma", "users_info", "uid=$I{U}{uid}") if $I{U}{uid} > 0;
-				submitComment();
-			} else {
+				# unless the form has been submitted, submit it
+				unless ($submitted_already) {
+					($I{U}{karma}) = sqlSelect("karma", "users_info", "uid=$I{U}{uid}") if $I{U}{uid} > 0;
+					submitComment();
+				} else {
 				# else print an error
 				print <<EOT;
 <B>Easy does it!</B>
 <P>This comment has been submitted already, $interval_string ago.
 No need to try again.</P>
 EOT
+				}
+			} else {
+				# logem' so we can banem'
+                                sqlInsert("abusers", {
+                                        host_name => $ENV{REMOTE_ADDR},
+                                        pagename => $ENV{SCRIPT_NAME},
+                                        -ts => 'now()',
+                                });
 
-			}
+                                print qq|<b>You've reached your maximum allowed posts for today !</b>\n|;
+                        }
 		} 
-
 		# reset their time
 		$I{PT}{$id} = time if exists $I{PT};
 
@@ -178,8 +193,9 @@ EOT
 			$I{F}{formkey} = join("",
 				map { $rand_array[rand @rand_array] }  0 .. 9) ;
 			# insert the fact that the form has been displayed, but not submitted at this point
-			sqlInsert("commentkey", {
+			sqlInsert("formkeys", {
 				formkey		=> $I{F}{formkey},
+				formname 	=> 'comments', 
 				sid		=> $I{F}{sid},
 				uid		=> $I{U}{uid},
 				host_name	=> $ENV{REMOTE_ADDR},
@@ -189,8 +205,8 @@ EOT
 		}
 
 		# make sure that there's a valid form key, and we only care about the last 4 hours!
-		$valid_formkeys = sqlSelectAll("formkey", "commentkey",
-			"(time_to_sec(now()) - time_to_sec(ts)) < 14400");
+		$valid_formkeys = sqlSelectAll("formkey", "formkeys",
+			"(time_to_sec(now()) - time_to_sec(ts)) < 14400 AND formname = 'comments'");
 		for (@{$valid_formkeys}) {
 			# DEBUG
 			# print "formkeys $_->[0] formkey $I{F}{formkey}<BR>\n";
@@ -310,9 +326,18 @@ sub editComment {
 		print <<EOT;
 <TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" WIDTH="95%" ALIGN="CENTER">
 EOT
-		Slash::dispComment($reply);
+		dispComment($reply);
 		print "\n</TABLE><P>\n\n";
 	}
+
+	if (!$I{allow_anonymous} && (!$I{U}{uid} || $I{U}{uid} < 1)) {
+	    print <<EOT;
+Sorry, anonymous posting has been turned off.
+Please <A HREF="$I{rootdir}/users.pl">register and log in</A>.
+EOT
+	    return;
+	}
+
 	
 	if ($I{F}{postercomment}) {
 		titlebar("95%", "Preview Comment"); 
@@ -417,9 +442,11 @@ EOT
 	print qq!\t\t<INPUT TYPE="CHECKBOX"$checked NAME="nobonus"> No Score +1 Bonus\n!
 		if $I{U}{karma} > 25 and $I{U}{uid} > 0;
 
-	$checked = $I{F}{postanon} ? ' CHECKED' : '';
-	print qq!\t\t<INPUT TYPE="CHECKBOX"$checked NAME="postanon"> Post Anonymously<BR>\n!
+        if ($I{allow_anonymous}) {
+	    $checked = $I{F}{postanon} ? ' CHECKED' : '';
+	    print qq!\t\t<INPUT TYPE="CHECKBOX"$checked NAME="postanon"> Post Anonymously<BR>\n!
 		if $I{U}{karma} > -1 and $I{U}{uid} > 0;
+        }
 
 	print <<EOT;
 		<INPUT TYPE="SUBMIT" NAME="op" VALUE="Submit">
@@ -475,6 +502,15 @@ this IP or user account has been moderated down more than 5 times in the
 last 24 hours.  If you think this is unfair, you should contact
 $I{adminmail}.  If you are being a troll, now is the time for you to
 either grow up, or change your IP.
+EOT
+
+		return;
+	}
+
+	if (!$I{allow_anonymous} && ($I{U}{uid} < 1 || $I{F}{postanon})) { 
+		print <<EOT;
+Sorry, anonymous posting has been turned off.
+Please <A HREF="$I{rootdir}/users.pl">register and log in</A>.
 EOT
 
 		return;
@@ -694,7 +730,7 @@ sub previewForm {
 	$tempComment .= '<BR>' . $I{U}{sig};
 
 	my $preview = {
-		nickname  => $I{F}{postanon} ? 'Anonymous Coward' : $I{U}{nickname},
+		nickname  => $I{F}{postanon} ? $I{anon_name} : $I{U}{nickname},
 		pid	  => $I{F}{pid},
 		homepage  => $I{F}{postanon} ? '' : $I{U}{homepage},
 		fakeemail => $I{F}{postanon} ? '' : $I{U}{fakeemail},
@@ -800,8 +836,22 @@ EOT
 			"uid=" . $I{dbh}->quote($I{U}{uid}), 1
 		);
 
+		
+		# update formkeys to show that there has been a successful post,
+		# and increment the value from 0 to 1 (shouldn't ever get past 1)
+		# meaning that yes, this form has been submitted, so don't try it again.
+		sqlUpdate(
+			"formkeys", { 
+				-value		=> 'value+1',
+				cid		=> $maxCid, 
+				-submit_ts	=> 'now()',
+				comment_length	=> length($I{F}{postercomment})
+			}, "formkey=".$I{dbh}->quote($I{F}{formkey}));
+
 		my($tc, $mp, $cpp) = getvars(
-			"totalComments", "maxPoints", "commentsPerPoint"
+			"totalComments",
+			"maxPoints",
+			"commentsPerPoint"
 		);
 
 		setvar("totalComments", ++$tc);
@@ -872,9 +922,11 @@ sub moderateCid {
 	# Check if $uid has seclev and Credits
 	return unless $reason;
 	
-	if ($I{U}{points} && !($I{U}{aseclev} > 99 && $I{authors_unlimited})) {
-		print "You don't have any moderator points.";
-		return;
+	if ($I{U}{points} < 1) {
+		unless ($I{U}{aseclev} > 99 && $I{authors_unlimited}) {
+			print "You don't have any moderator points.";
+			return;
+		}
 	}
 
 	my($cuid, $ppid, $subj, $points, $oldreason) = sqlSelect(
@@ -990,7 +1042,7 @@ sub hasPosted {
 # If you moderate, and then post, all your moderation is undone.
 sub undoModeration {
 	my($sid) = @_;
-	return if $I{U}{uid} == -1;
+	return if $I{U}{uid} == -1 || ($I{U}{aseclev} > 99 && $I{authors_unlimited});
 	my $c=sqlSelectMany("cid,val", "moderatorlog",
 		"uid=$I{U}{uid} and sid=" . $I{dbh}->quote($sid)
 	);
@@ -1001,13 +1053,15 @@ sub undoModeration {
 			$I{dbh}->quote($sid)
 		);
 
+		# Insure scores still fall within the proper boundaries
+		my $scorelogic = $val < 0 ? "points < 5" : "points > -1";
 		sqlUpdate(
 			"comments",
-			{ -points=>"points+".(-1*$val) },
-			"cid=$cid and sid=" . $I{dbh}->quote($sid)
+			{ -points => "points+" . (-1 * $val) },
+			"cid=$cid and sid=" . $I{dbh}->quote($sid) . " AND $scorelogic"
 		);
 
-		print "Undoing moderation to Comment \#$cid<BR>";
+		print "Undoing moderation to Comment #$cid<BR>";
 	}	
 	$c->finish;
 }

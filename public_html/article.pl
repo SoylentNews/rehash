@@ -85,7 +85,7 @@ sub main {
 	# Display this section's Section Block (if Found)
 	fancybox(200, $SECT->{title}, getblock($SECT->{section}));
 
-	print qq!</TD></TR><TR><TD COLSPAN="2">\n!;
+	print qq!</TD></TR><TR><TD COLSPAN="3">\n!;
 
 	printComments($I{F}{sid});
 	writelog($SECT->{section}, $I{F}{sid}) unless $I{F}{ssi};

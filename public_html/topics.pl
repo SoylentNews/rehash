@@ -113,7 +113,7 @@ sub listTopics {
 					 FROM topics
 				     ORDER BY alttext");
 
-	titlebar("99%", "Current Topic Catagories");
+	titlebar("99%", "Current Topic Categories");
 	my $x = 0;
 	$cursor->execute;
 

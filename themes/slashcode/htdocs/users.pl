@@ -227,6 +227,7 @@ sub newUser {
 
 	$I{F}{newuser} =~ s/\s+/ /g;
 	$I{F}{newuser} = stripByMode($I{F}{newuser}, "nohtml");
+	$I{F}{newuser} = substr($I{F}{newuser}, 0, 20);
 
 	(my $matchname = lc $I{F}{newuser}) =~ s/[^a-zA-Z0-9]//g;
 
@@ -241,11 +242,10 @@ sub newUser {
 		" realemail=" . $I{dbh}->quote($I{F}{email})
 	);
 
-	local $_ = $I{F}{newuser};
-	if (!$cnt && !/Anonymous Coward/i && $I{F}{email} =~ /\@/) {
+	if (!$cnt && $I{F}{email} =~ /\@/) {
 		titlebar("100%", "User $I{F}{newuser} created.");
 
-		$I{F}{pubkey} = stripByMode($I{F}{pubkey},"html");
+		$I{F}{pubkey} = stripByMode($I{F}{pubkey}, "html");
 
 		sqlInsert("users", {
 			realemail	=> $I{F}{email}, 
@@ -966,15 +966,18 @@ EOT
 
 	titlebar("100%", $I{F}{unickname} ? "Error Logging In" : "Login");
 
-	print $I{F}{unickname} ? <<EOT1 : <<EOT2;
-	Danger will robinson!  You didn't login!  You apparently put
+	print $I{F}{unickname} ? <<EOT1 : $I{allow_anonymous} ? <<EOT2 : <<EOT3;
+	Danger, Will Robinson!  You didn't login!  You apparently put
 	in the wrong password, or the wrong nickname, or else space 
 	aliens have infested the server.  I'd suggest trying again,
-	or clicking that mail password button if you forgot your passwd.
+	or clicking that mail password button if you forgot your password.
 EOT1
 	Logging in will allow you to post comments as yourself.  If you
-	don't login, you will only be able to post as The Anonymous Coward.
+	don't login, you will only be able to post as $I{anon_name}.
 EOT2
+	Logging in will allow you to post comments.  If you
+	don't login, you will not be able to post.
+EOT3
 
 	$I{F}{unickname} ||= $I{F}{newuser};
 
@@ -1004,7 +1007,7 @@ EOT2
 
 	print <<EOT;
 
-	<INPUT TYPE="TEXT" NAME="newuser" SIZE="20" VALUE="$I{F}{newuser}">
+	<INPUT TYPE="TEXT" NAME="newuser" SIZE="20" MAXLENGTH="20" VALUE="$I{F}{newuser}">
 	<BR> and an <B>valid email address </B> address to send your registration
 	information. This address will <B>not</B> be displayed on $I{sitename}.
 	<INPUT TYPE="TEXT" NAME="email" SIZE="20" VALUE="$I{F}{email}"><BR>

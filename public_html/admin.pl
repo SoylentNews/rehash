@@ -26,6 +26,7 @@
 use strict;
 use lib '../';
 use vars '%I';
+use Image::Size;
 use Slash;
 
 sub main {
@@ -186,7 +187,7 @@ sub main {
 sub adminLoginForm {	
 	print "\n<!-- begin admin login form -->\n<CENTER>",
 		$I{query}->startform(-method => 'POST', -action => $ENV{SCRIPT_NAME}),
-		$I{query}->hidden(-name => 'op', -default => 'adminlogin'),
+		$I{query}->hidden(-name => 'op', -default => 'adminlogin', -override => 1),
 		'<TABLE><TR><TD ALIGN="RIGHT">Login</TD>
 		<TD>', $I{query}->textfield(-name => 'aaid'), "</TD></TR>",
 		'<TR><TD ALIGN="RIGHT">Password</TD>
@@ -500,17 +501,15 @@ EOT
 	</TR>
 	<TR>	
 		<TD VALIGN="TOP"><B>Block</B><BR>
-		<INPUT TYPE="SUBMIT" NAME="blockrevert" VALUE="Revert to default">
-		<BR><INPUT TYPE="SUBMIT" NAME="blocksavedef" VALUE="Save as default">
-		(Make sure this is what you want!)
+		<P>
+			<INPUT TYPE="SUBMIT" VALUE="Save Block" NAME="blocksave"><BR>
+			<INPUT TYPE="SUBMIT" NAME="blockrevert" VALUE="Revert to default">
+			<BR><INPUT TYPE="SUBMIT" NAME="blocksavedef" VALUE="Save as default">
+			(Make sure this is what you want!)
+		</P>
 		</TD>
 		<TD ALIGN="left" COLSPAN="2">
 		<TEXTAREA ROWS="15" COLS="100" NAME="block">$block</TEXTAREA>
-		</TD>
-	</TR>
-	<TR>	
-		<TD COLSPAN="3">
-		<INPUT TYPE="SUBMIT" VALUE="Save Block" NAME="blocksave"></P>
 		</TD>
 	</TR>
 EOT
@@ -567,14 +566,13 @@ sub blockSave {
 	if ($bid) {
 		my ($rows) = sqlSelect('count(*)', 'blocks', 'bid=' . $I{dbh}->quote($bid)); 
 	
-		if($I{F}{save_new} && $rows > 0) {
+		if ($I{F}{save_new} && $rows > 0) {
 			print qq[<P><B>This block, $bid, already exists! <BR>Hit the "back" button, and try another bid (look at the blocks pulldown to see if you are using an existing one.)</P>]; 
 			return;
 		}	
 
-		if($rows == 0)
-		{
-			sqlInsert('blocks', { bid => $bid }, seclev => 500);
+		if ($rows == 0) {
+			sqlInsert('blocks', { bid => $bid, seclev => 500 });
 			sqlInsert('sectionblocks', { bid => $bid });
 			print "Inserted $bid<BR>";
 		}
@@ -805,7 +803,7 @@ EOT
 
 		print <<EOT;
 		<BR><BR>Tid<BR><INPUT TYPE="TEXT" NAME="tid" VALUE="$tid"><BR>
-		<BR>Dimensions<BR>
+		<BR>Dimensions (leave blank to determine automatically)<BR>
 		Width: <INPUT TYPE="TEXT" NAME="width" VALUE="$width" SIZE="4">
 		Height: <INPUT TYPE="TEXT" NAME="height" VALUE="$height" SIZE="4"><BR>
 		<BR>Alt Text<BR>
@@ -847,7 +845,10 @@ sub topicDelete {
 ##################################################################
 sub topicSave {
 	if ($I{F}{tid}) {
-		my ($rows) = sqlSelect('count(*)', 'topics', 'tid=' . $I{dbh}->quote($I{F}{tid})); 
+		my($rows) = sqlSelect('count(*)', 'topics', 'tid=' . $I{dbh}->quote($I{F}{tid}));
+		if (!$I{F}{width} && !$I{F}{height}) {
+		    @{ $I{F} }{'width', 'height'} = imgsize("$I{datadir}/public_html/images/topics/$I{F}{image}");
+		}
 		if($rows == 0 ) {
 			sqlInsert('topics', {
 				tid	=> $I{F}{tid},
@@ -868,6 +869,7 @@ sub topicSave {
 		);
 	}
 	print "<B>Saved $I{F}{tid}!</B><BR>" if ! DBI::errstr;
+	$I{F}{nexttid} = $I{F}{tid};
 }
 ##################################################################
 sub listtopics {
@@ -983,7 +985,7 @@ sub importText {
 ##################################################################
 sub linkNode {
 	my $n = shift;
-	return $n . '<SUP><A HREF="http://everything.blockstackers.com/everything.pl?node='
+	return $n . '<SUP><A HREF="http://www.everything2.com/index.pl?node='
 		. $I{query}->escape($n) . '">[?]</A></SUP>';
 }
 
@@ -1115,8 +1117,8 @@ EOT
 		$S->{commentstatus} = $I{F}{commentstatus} if exists $I{F}{commentstatus};
 		$S->{dept} =~ s/ /-/gi;
 
-		$S->{introtext} = autoUrl($I{F}{section}, $S->{introtext});
-		$S->{bodytext} = autoUrl($I{F}{section}, $S->{bodytext});
+		$S->{introtext} = autoUrl($I{F}{section}, stripByMode($S->{introtext}, 'html'));
+		$S->{bodytext} = autoUrl($I{F}{section}, stripByMode($S->{bodytext}, 'html'));
 
 		$T = getTopic($S->{tid});
 		$I{F}{aid} ||= $I{U}{aid};
@@ -1203,11 +1205,16 @@ EOT
 		$I{query}->textfield(-name => 'title', -default => $S->{title}, -size => 50),
 		'</TD></TR>';
 
-	print qq!<TR><TD BGCOLOR="$I{bg}[3]"><FONT COLOR="$I{fg}[3]"> <B>Dept</B> </FONT></TD>\n<TD BGCOLOR="$I{bg}[2]"> !,
-		$I{query}->textfield(-name => 'dept', -default => $S->{dept}, -size => 50),
-		qq!</TD></TR>\n<TR><TD BGCOLOR="$I{bg}[3]">&nbsp; </TD>\n<TD BGCOLOR="$I{bg}[2]"><FONT COLOR="$I{fg}[2]">!,
-		lockTest($S->{title});
+	if ($I{use_dept}) {
+		print qq!<TR><TD BGCOLOR="$I{bg}[3]"><FONT COLOR="$I{fg}[3]"> <B>Dept</B> </FONT></TD>\n!,
+			qq!<TD BGCOLOR="$I{bg}[2]"> !,
+			$I{query}->textfield(-name => 'dept', -default => $S->{dept}, -size => 50),
+			qq!</TD></TR>\n!;
+	}
 
+	print qq!<TR><TD BGCOLOR="$I{bg}[3]">&nbsp; </TD>\n!,
+		qq!<TD BGCOLOR="$I{bg}[2]"><FONT COLOR="$I{fg}[2]">!,
+		lockTest($S->{title});
 
 	# selectForm("statuscodes","writestatus",$S->{writestatus});
 	unless ($I{U}{asection}) {
@@ -1401,7 +1408,7 @@ sub listFilters {
         my $filter_hashref = sqlSelectAll("*","content_filters");
 	my ($header,$footer);
 
-	$header = Slash::getWidgetBlock('list_filters_header');
+	$header = getWidgetBlock('list_filters_header');
 	print eval $header;
 
         for(@$filter_hashref) {
@@ -1442,7 +1449,7 @@ EOT
 	# this has to be here - it really screws up the block editor
 	my $textarea = qq|<TEXTAREA NAME="err_message" cols="50" rows="2">$err_message</TEXTAREA>|;
 
-	$header = Slash::getWidgetBlock('edit_filter');
+	$header = getWidgetBlock('edit_filter');
 	print eval $header;
 
 	print qq|</FORM>\n<!-- end editFilter -->\n|;
