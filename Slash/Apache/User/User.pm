@@ -224,6 +224,8 @@ sub handler {
 				$slashdb->getUserAuthenticate($tmpuid, $value, 0, 1);
 		}
 
+		# we don't want to set a cookie etc. if user is using a $logtoken,
+		# as that is just for RSS etc.
 		if (!$logtoken && $uid && $op ne 'userclose') {
 			# set cookie every time, in case session_login
 			# value changes, or time is almost expired on
@@ -243,21 +245,22 @@ sub handler {
 	 		} elsif ($user_temp->{state}{login_temp} eq 'yes') {
  				setCookie('user', bakeUserCookie($uid, $cookvalue), 2);
 	 		}
-		} elsif (!$logtoken) {
+
+		# blank out user cookie and make anon if user wants to log out, or
+		# uses a bad cookie
+		} elsif (!$logtoken && dbAvailable()) {
 			if ($op eq 'userclose') {
 				$slashdb->deleteLogToken($uid);
 			}
 
 			$uid = $constants->{anonymous_coward_uid};
 			delete $cookies->{user};
+			# if you are here, chances are your cookie is bad,
+			# so we blank it out for you.  you're welcome.
 			setCookie('user', '');
 		}
 
 	} elsif ($op eq 'userclose') {
-		# It may be faster to just let the delete fail then test -Brian
-		# well, uid is undef here ... can't use it to test
-		# until it is defined :-) -- pudge
-		# Went boom without if. --Brian
 		# When did we comment out this? This means that even
 		# if an author logs out, the other authors will
 		# not know about it. Bad....
