@@ -1,4 +1,4 @@
-slash-1.0.3, 2000.05.16
+slash-1.0.3, 2000.05.18
 -----------------------
 
 *	Fixed 404.pl to strip HTML that may have been passed in
@@ -12,9 +12,7 @@ slash-1.0.3, 2000.05.16
 	after a logout without doing a GET reload of admin.pl
 	(toast@ruka.org)
 
-*	Changed autoUrl() in admin.pl back to previous state;
-	instead, run text through stripByMode directly from
-	editstory()
+*	Changed autoUrl() in admin.pl back to previous state
 
 *	Fixed bad sqlInsert call in admin.pl's blockSave()
 
@@ -109,6 +107,11 @@ slash-1.0.3, 2000.05.16
 
 *	Took out apparently unneeded flush/lock/unlock surrounding
 	"delete from accesslog" statement in dailyStuff
+
+*	Added http_proxy option for portald and in slashdotrc.pl
+
+*	Changed utils/slashd to use /home/slash instead of
+	/home/slashdot by default
 
 
 slash-1.0.2, 2000.04.12
