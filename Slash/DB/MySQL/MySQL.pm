@@ -4398,8 +4398,10 @@ sub getSlashConf {
 	my $confdata = $self->sqlSelectAll('name, value', 'vars');
 	return if !defined $confdata;
 	my %conf = map { $_->[0], $_->[1] } @{$confdata};
-	# This allows you to do stuff like constant.plugin.Zoo in a template and know that the plugin is installed -Brian
-	my $plugindata = $self->sqlSelectColArrayref('value', 'site_info', "name='plugin'");
+	# This allows you to do stuff like constant.plugin.Zoo in a template
+	# and know that the plugin is installed -Brian
+	my $plugindata = $self->sqlSelectColArrayref('value', 'site_info',
+		"name='plugin'");
 	for (@$plugindata) {
 		$conf{plugin}{$_} = 1;
 	}
