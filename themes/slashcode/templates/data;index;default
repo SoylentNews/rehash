@@ -42,8 +42,8 @@ __template__
 	<B>[% "$cc.0 of " IF cc.0.defined %][% cc.1 %]</B> comment[% cc.3 != 1 ? 's' : '' %]
 
 [% CASE 'seclink' %]
-	[% IF section.url %]
-		<A HREF="[% section.url %]/">[% section.title %]</A>
+	[% IF section.rootdir %]
+		<A HREF="[% section.rootdir %]/">[% section.title %]</A>
 	[% ELSE %]
 		[% IF user.is_anon; url="$constants.rootdir/$name/"; 
 		   ELSE; url="$constants.rootdir/index.pl?section=$name"; END -%]

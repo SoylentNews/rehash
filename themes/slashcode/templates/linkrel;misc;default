@@ -17,7 +17,7 @@ __template__
 <LINK REL="search"    HREF="[% constants.rootdir %]/search.pl" TITLE="Search [% constants.sitename | strip_attribute %]">
 
 [%- IF link.section;
-	myurl = link.section.url || "${constants.rootdir}/${link.section.section}" %]
+	myurl = link.section.rootdir || "${constants.rootdir}/${link.section.section}" %]
 <LINK REL="parent"    HREF="[% myurl %]/" TITLE="[% link.section.title | strip_attribute %]">
 [%- END %]
 

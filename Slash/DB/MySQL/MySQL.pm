@@ -5382,6 +5382,15 @@ sub getSection {
 	} else {
 		$answer = _genericGetCache($data);
 	}
+
+	if (ref $answer) {
+		# add rootdir, form figured dynamically -- pudge
+		my $constants = getCurrentStatic();
+		$answer->{rootdir} = set_rootdir($answer->{url},
+			getCurrentStatic('rootdir')
+		);
+	}
+
 	return $answer;
 }
 

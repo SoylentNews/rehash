@@ -21,8 +21,8 @@ __name__
 dispStory
 __template__
 [% IF magic;
-	IF section.url;
-		title = "<A HREF=\"$section.url/\">";
+	IF section.rootdir;
+		title = "<A HREF=\"$section.rootdir/\">";
 	ELSE;
 		IF user.is_anon;
 			title = "<A HREF=\"$constants.rootdir/$story.section/\">";

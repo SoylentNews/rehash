@@ -65,6 +65,7 @@ use vars qw($VERSION @EXPORT);
 	grepn
 	html2text
 	root2abs
+	set_rootdir
 	strip_anchor
 	strip_attribute
 	strip_code
@@ -118,6 +119,38 @@ sub root2abs {
 	}
 	return $rootdir;
 }
+
+#========================================================================
+
+=head2 set_rootdir()
+
+Make sure all your rootdirs use the same scheme (even if that scheme is no
+scheme), and absolutedir's scheme can still be section-specific, and we don't
+need an extra var for rootdir/absolutedir.
+
+In the future, even this behavior should perhaps be overridable (so
+sites could have http for the main site, and https for sections, for
+example).
+
+=over 4
+
+=item Return value
+
+rootdir variable, converted to proper scheme.
+
+=back
+
+=cut
+
+sub set_rootdir {
+	my($sectionurl, $rootdir) = @_;
+	my $rooturi    = new URI $rootdir, "http";
+	my $sectionuri = new URI $sectionurl, "http";
+
+	$sectionuri->scheme($rooturi->scheme || undef);
+	return $sectionuri->as_string;
+}
+
 
 #========================================================================
 
@@ -2041,7 +2074,7 @@ sub _link_to_slashlink {
 	my $abs = $constants->{absolutedir};
 	my $sections = $slashdb->getSections();
 	my @sect_urls = grep { $_ }
-		map { $sections->{$_}{url} }
+		map { $sections->{$_}{rootdir} }
 		sort keys %$sections;
 	my $any_host = "(?:"
 		. join("|", $abs, @sect_urls)

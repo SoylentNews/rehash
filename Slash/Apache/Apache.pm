@@ -82,7 +82,7 @@ sub SlashVirtualUser ($$$) {
 			# Must not just copy the form_override info
 			$new_cfg->{form_override} = {}; 
 			$new_cfg->{absolutedir} = $_->{url};
-			$new_cfg->{rootdir} = _set_rootdir($_->{url}, $cfg->{constants}{rootdir});
+			$new_cfg->{rootdir} = set_rootdir($_->{url}, $cfg->{constants}{rootdir});
 			$new_cfg->{cookiedomain} = $_->{cookiedomain} if $_->{cookiedomain};
 			$new_cfg->{real_rootdir} = $_->{url} if $_->{isolate};  # you gotta keep 'em separated, unh!
 			$new_cfg->{defaultsection} = $_->{section};
@@ -165,26 +165,12 @@ sub SlashSectionHost ($$$$) {
 	# Must not just copy the form_override info
 	$new_cfg->{form_override} = {}; 
 	$new_cfg->{absolutedir} = $url;
-	$new_cfg->{rootdir} = _set_rootdir($url, $cfg->{constants}{rootdir});
+	$new_cfg->{rootdir} = set_rootdir($url, $cfg->{constants}{rootdir});
 	$new_cfg->{basedomain} = $hostname;
 	$new_cfg->{defaultsection} = $section;
 	$new_cfg->{static_section} = $section;
 	$new_cfg->{form_override}{section} = $section;
 	$cfg->{site_constants}{$hostname} = $new_cfg;
-}
-
-# this will make sure all your rootdirs use the same scheme
-# (even if that scheme is no scheme), and absolutedir's scheme can
-# still be section-specific, and we don't need an extra var for
-# rootdir/absolutedir; however, in the future, even this should
-# perhaps be overridable -- pudge
-sub _set_rootdir {
-	my($sectionurl, $rootdir) = @_;
-	my $rooturi    = new URI $rootdir, "http";
-	my $sectionuri = new URI $sectionurl, "http";
-
-	$sectionuri->scheme($rooturi->scheme || undef);
-	return $sectionuri->as_string;
 }
 
 sub SlashCompileTemplates ($$$) {

@@ -431,10 +431,8 @@ sub linkStory {
 	}
 
 	# We need to make sure we always get the right link -Brian
-	my($url);
-	unless ($url = $slashdb->getSection($story_link->{section}, 'url')) {
-		$url = $constants->{real_rootdir};
-	} 
+	my $section = $slashdb->getSection($story_link->{section});
+	my $url = $section->{rootdir} || $constants->{real_rootdir};
 
 	return _hard_linkStory($story_link, $mode, $threshold, $dynamic, $url)
 		if $constants->{comments_hardcoded} && !$user->{light};
