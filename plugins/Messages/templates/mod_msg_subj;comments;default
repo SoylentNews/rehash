@@ -11,6 +11,6 @@ en_US
 __name__
 mod_msg_subj
 __template__
-Moderation of your comment, [% comment.subject %]
+Moderation of "[% comment.subject %]"
 __seclev__
 500

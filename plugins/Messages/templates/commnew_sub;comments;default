@@ -11,6 +11,6 @@ en_US
 __name__
 commnew_subj
 __template__
-New Comment: [% reply.subject %]
+New Comment "[% reply.subject %]" by [% reply.nickname %]
 __seclev__
 500

@@ -11,6 +11,6 @@ en_US
 __name__
 messagenew_subj
 __template__
-New Journal Entry for [% journal.nickname %]
+New Journal Entry by [% journal.nickname %], "[% journal.description %]"
 __seclev__
 100

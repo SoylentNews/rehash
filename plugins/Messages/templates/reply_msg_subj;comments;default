@@ -11,6 +11,6 @@ en_US
 __name__
 reply_msg_subj
 __template__
-Reply to your comment, [% parent.subject %], by [% reply.nickname %]
+Reply to "[% parent.subject %]" by [% reply.nickname %]
 __seclev__
 500

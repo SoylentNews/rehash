@@ -11,6 +11,6 @@ en_US
 __name__
 journrep_subj
 __template__
-Reply to your journal, [% discussion.title %], by [% reply.nickname %]
+Reply to "[% discussion.title %]" by [% reply.nickname %]
 __seclev__
 500

@@ -11,7 +11,7 @@ en_US
 __name__
 messagenew_subj
 __template__
-New Submission: [% submission.subj %]
+New Submission "[% submission.subj %]"
 
 __seclev__
 100

@@ -11,6 +11,6 @@ en_US
 __name__
 msg_email_subj
 __template__
-[ [% constants.sitename %] Message ] [% msg.subject || msg.type %]
+[[% constants.sitename %]] [% msg.subject || msg.type %]
 __seclev__
 500
