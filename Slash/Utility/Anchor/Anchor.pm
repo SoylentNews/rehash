@@ -148,9 +148,15 @@ sub header {
 	setCurrentSkin($skin_name || determineCurrentSkin());
 	getSkinColors();
 
-	# This is ALWAYS displayed. Let the template handle title.
+	# This is ALWAYS displayed. Let the template handle the title
+	# of the whole webpage itself.
 	my $template_vars = { title => $data->{title} };
-	$template_vars->{meta_desc} = $options->{meta_desc} if $options->{meta_desc};
+	# Other data that the template may want:  the text for the
+	# meta-description tag, and if a story is being displayed,
+	# the title of the story.
+	for my $key (qw( meta_desc story_title )) {
+		$template_vars->{$key} = $options->{$key} if $options->{$key};
+	}
 	slashDisplay('html-header', $template_vars, { Nocomm => 1,  Return => $options->{Return}, Page => $options->{Page} })
 		unless $options->{noheader};
 

@@ -121,7 +121,10 @@ sub main {
 		}
 		my $meta_desc = "$story->{title} -- article related to $a.";
 
-		header($links, $story->{section}, { meta_desc => $meta_desc }) or return;
+		header($links, $story->{section}, {
+			story_title => $story->{title},
+			meta_desc => $meta_desc,
+		}) or return;
 
 		# Can't do this before getStoryByTime because
 		# $story->{time} is passed to an SQL request.
