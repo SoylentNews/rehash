@@ -175,6 +175,8 @@ $werder = new Silly::Werder;
 				points          => $score,
 		};
 		my $cid = $slashdb->createComment($clean_comment);
+		my $tc = $slashdb->getVar('totalComments', 'value', 1);
+		$slashdb->setVar('totalComments', ++$tc);
 		$slashdb->setStory($sid, { writestatus => 'dirty' }) if $sid;
 	        $family_tree{$cid} = $pid if ! $opts{T};
 		$deep_tree{$cid} = $deep_tree{$pid}+1 if $opts{t};

@@ -5745,6 +5745,8 @@ sub getVar {
 sub setUser {
 	my($self, $uid, $hashref, $options) = @_;
 #use Data::Dumper; print STDERR "setUser params: " . Dumper([ $uid, $hashref, $options ]) if $options;
+	return 0 unless $uid;
+
 	my(@param, %update_tables, $cache);
 	my $tables = [qw(
 		users users_comments users_index

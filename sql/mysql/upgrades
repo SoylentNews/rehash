@@ -674,7 +674,19 @@ INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES (10, '
 # each installed site that uses plugins/Zoo:
 # ln -s /usr/local/slash/plugins/Zoo/zoo_run_people_log.pl /usr/local/slash/site/sitename/tasks/
 
+# End of T_2_3_0_41, Start of T_2_3_0_42
+
+# In case you happened to create modreasons between 2002/08/28 and
+# 2002/08/29, you may need to run this.  If it gives errors, that
+# means you're OK.  If your site inserted different reasons with
+# id's of 0 and 1, check them now.  If you ran the above SQL updates
+# as they appear now, running these won't hurt (but won't help
+# either).
+ALTER TABLE modreasons CHANGE id id TINYINT UNSIGNED NOT NULL PRIMARY KEY;
+INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 0, 'Normal',        0, 0,  0, 0.5);
+INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 1, 'Offtopic',      1, 1, -1, 0.5);
+
 # SLASHDOT LAST UPDATED HERE
 
-# End of T_2_3_0_41
+# End of T_2_3_0_42
 

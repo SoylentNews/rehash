@@ -104,7 +104,7 @@ sub editpoll {
 	my($form, $slashdb, $constants) = @_;
 
 	my($qid) = $form->{'qid'};
-	unless ($constants->{is_admin}) {
+	unless (getCurrentUser('is_admin')) {
 		default(@_);
 		return;
 	}

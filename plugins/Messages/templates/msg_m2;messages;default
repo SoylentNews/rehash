@@ -8,7 +8,7 @@ this user is metamoderated.
 
 * m2 = List of hashrefs containing the following keys:
 	title	- Title of the discussion in which the moderated comment appears.
-	url	- URL of the discussion in question
+	url	- URL of the comment in question
 	subj	- subject of moderated comment
 	vote	- moderation vote on that comment
 	reason  - Reason given for original moderation
@@ -28,8 +28,8 @@ __template__
 [% vote_result = { '-1' => 'Unfair', '1' => 'Fair' }; %]
 
 [% IF msg.mode == 1 %]<P>[% END %]
-Some of your past moderations have been meta moderated by [% num_metamods %]
-other [% constants.sitename %] readers. Here are the exciting results:
+Some of your past moderations have been meta-moderated by other
+[% constants.sitename %] readers. Here are the exciting results:
 
 [% IF msg.mode == 1%]
 <UL>
