@@ -250,6 +250,7 @@ EOT
 		my $message_users = $messages->getMessageUsers(MSG_CODE_ADMINMAIL);
 		$data{template_name} = 'display';
 		$data{subject} = { template_name => 'subj' };
+		$data{template_page} = 'adminmail';
 		for (@$message_users) {
 			$messages->create($_, MSG_CODE_ADMINMAIL, \%data);
 		}
