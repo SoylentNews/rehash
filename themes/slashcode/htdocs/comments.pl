@@ -1430,7 +1430,7 @@ sub moderate {
 	# ascending, maybe also by val ascending, or some way to try to
 	# get the single-point-spends first and then to only do the
 	# multiple-point-spends if the user still has points.
-	my $can_del = ($constants->{authors_unlimited} && $user->{seclev} > $constants->{authors_unlimited})
+	my $can_del = ($constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited})
 		|| $user->{acl}{candelcomments_always};
 	for my $key (sort keys %{$form}) {
 		if ($can_del && $key =~ /^del_(\d+)$/) {
@@ -1538,14 +1538,17 @@ sub undoModeration {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
-	# We abandon this operation if:
+	# We abandon this operation, thus allowing mods to remain while
+	# the post goes forward, if:
 	#	1) Moderation is off
-	#	2) The user is anonymous (they aren't allowed to anyway).
-	#	3) The user's seclev is too low and they don't have the ACL
+	#	2) The user is anonymous (posting anon is the only way
+	#	   to contribute to a discussion after you moderate)
+	#	3) The user has the "always modpoints" ACL
+	#	4) The user has a sufficient seclev
 	return if !$constants->{allow_moderation}
 		|| $user->{is_anon}
-		|| ( (!$constants->{authors_unlimited} || $user->{seclev} < $constants->{authors_unlimited})
-			&& !$user->{acl}{modpoints_always});
+		|| $user->{acl}{modpoints_always}
+		|| $constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited};
 
 	if ($sid !~ /^\d+$/) {
 		$sid = $slashdb->getDiscussionBySid($sid, 'header');
