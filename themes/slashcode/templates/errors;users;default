@@ -90,8 +90,21 @@ __template__
 	to re-register, then please log in as that user, first.<BR>
 
 [% CASE 'emailexists_err' %]
-	Sorry, the email address "[% form.realemail | strip_literal %]" already
-	exists in our user database, or is invalid.<BR>
+[% 
+   IF form.realemail; email = form.realemail | stripliteral;
+   ELSE; email = form.email | stripliteral;
+   END;
+-%]
+	Sorry, the email address "[% email %]" already exists in our user
+	database. If you've forgotten your password to an existing account,
+        please go <A HREF="[% env.script_name %]?op=mailpasswdform">here</A>.
+        <BR>
+
+[% CASE 'email_invalid' %]
+	Sorry! The email address "[% form.realemail | strip_literal %]" is
+	either a null string or a malformed email address. Please 
+	<A HREF="[% constants.rootdir %]/users.pl?op=newuserform">re-enter your
+	email address</A>, again.
 
 [% CASE 'sig_too_long_err' %]
 	Sorry, adding domain tags to your sig made it too long. Please try again,
