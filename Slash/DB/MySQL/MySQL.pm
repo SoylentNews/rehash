@@ -2555,9 +2555,14 @@ sub checkStoryViewable {
 	}
 	return 1 unless $stoid;
 
-	$start_tid ||= getCurrentStatic('mainpage_nexus_tid');
-	my @nexuses = $self->getNexusChildrenTids($start_tid);
-	my $nexus_clause = join ',', @nexuses, $start_tid;
+	my @nexuses;
+	if ($start_tid) {
+		push @nexuses, $start_tid;
+	} else {
+		@nexuses = $self->getNexusTids();
+	}
+	
+	my $nexus_clause = join ',', @nexuses;
 
 	my $count = $self->sqlCount(
 		"stories, story_topics_rendered",
@@ -5351,6 +5356,43 @@ sub moderateComment {
 	return 1;
 }
 
+sub displaystatusForStories {
+	my ($self, $stoids) = (@_);
+	my $constants = getCurrentStatic();
+	my $ds = {};
+	return {} unless $stoids and @$stoids;
+	my $stoid_list = join ',', @$stoids;
+
+	my @sections_nexuses = grep {$_ != $constants->{mainpage_nexus_tid}} $self->getNexusTids();
+	my $section_nexus_list = join ',',@sections_nexuses;
+
+	my $mainpage = $self->sqlSelectAllHashref(
+		      'stoid',
+                      'DISTINCT stories.stoid',
+                      'stories, story_topics_rendered AS str ',
+                      "stories.stoid=str.stoid AND str.tid=$constants->{mainpage_nexus_tid} " .
+                      "AND stories.stoid IN ($stoid_list)",
+      );
+
+	my $sectional = $self->sqlSelectAllHashref(
+		      'stoid',
+                      'DISTINCT stories.stoid',
+                      'stories, story_topics_rendered AS str ',
+                      "stories.stoid=str.stoid AND str.tid in($section_nexus_list) " .
+                      "AND stories.stoid IN ($stoid_list)",
+	);
+	foreach (@$stoids) {
+		if ($mainpage->{$_}) {
+			$ds->{$_} = 0;
+		} elsif ($sectional->{$_} ) {
+			$ds->{$_} = 1;
+		} else {
+			$ds->{$_} = -1;
+		}
+	}
+	return $ds;
+}
+
 # XXXSECTIONTOPICS
 # Allow computation of old displaystatus value.  Hopefully this can
 # go away completely and we can come up with a different name and
@@ -7474,19 +7516,11 @@ sub getStoryList {
 		push @$stoids, $story->{stoid};
 	}
 
-	my $stoid_list = join ', ', @$stoids;
-	my $sectionals = $self->sqlSelectColArrayref(
-		'DISTINCT stories.stoid',
-		'stories LEFT JOIN story_topics_rendered AS str ' .
-		"ON stories.stoid=str.stoid AND str.tid=$constants->{mainpage_nexus_tid} " .
-		"AND stories.stoid IN ($stoid_list)",
-		'str.stoid IS NULL',
-	);
+	my $ds = $self->displaystatusForStories($stoids);
 
-	for my $i (0 .. $#{$list}) {
-		$list->[$i]{displaystatus} = $sectionals->[$i] ? 0 : 1;
+	foreach my $story (@$list) {
+		$story->{displaystatus} = $ds->{$story->{stoid}};
 	}
-
 	return($count, $list);
 }
 
