@@ -62,8 +62,9 @@ my @people = keys %people;
 
 my $zoo = getObject("Slash::Zoo");
 for (@people) {
-	$zoo->rebuildUser($_);
-	print "Rebuilding $_\n";
+	my $people = $zoo->rebuildUser($_);
+	$slashdb->setUser($_, { people => $people});
+
 }
 
 $slashdb->sqlUpdate('vars', { -value => 'now()'}, 'name="zoo_timer"');

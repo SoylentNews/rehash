@@ -28,7 +28,9 @@ $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
 my $zoo = getObject("Slash::Zoo");
 
-$zoo->rebuildUser($opts{'U'});
+my $people = $zoo->rebuildUser($opts{'U'});
+$slashdb->setUser($opts{'U'}, { people => $people});
+
 
 sub usage {
 	print "*** $_[0]\n" if $_[0];

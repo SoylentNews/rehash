@@ -287,24 +287,25 @@ sub rebuildUser {
 	my $first =  $self->sqlSelectAllHashrefArray('*', 'people', "uid = $uid");
 	my $second =  $self->sqlSelectAllHashrefArray('*', 'people_nthdegree', "uid = $uid");
 	my $people;
+
 	for (@$first) {
 		if ($_->{type} eq 'friend') {
-			$people->{FRIEND()} = $_->{person}; 
+			$people->{FRIEND()}{$_->{person}} = 1;
 		} elsif ($_->{type} eq 'foe') {
-			$people->{FOE()} = $_->{person}; 
+			$people->{FOE()}{$_->{person}} = 1;
 		}
 		if ($_->{perceive} eq 'fan') {
-			$people->{FAN()} = $_->{person}; 
+			$people->{FAN()}{$_->{person}} = 1;
 		} elsif ($_->{type} eq 'freak') {
-			$people->{FREAK()} = $_->{person}; 
+			$people->{FREAK()}{$_->{person}} = 1;
 		}
 	}
 
 	for (@$second) {
 		if ($_->{type} eq 'fof') {
-			$people->{FOF()}{$_->{person}} = $_->{friend}; 
+			$people->{FOF()}{$_->{person}}{$_->{friend}} = 1;
 		} elsif ($_->{type} eq 'eof') {
-			$people->{EOF()}{$_->{person}} = $_->{friend};
+			$people->{EOF()}{$_->{person}}{$_->{friend}} = 1;
 		}
 	}
 
