@@ -64,11 +64,11 @@ $constants = getCurrentStatic();
 		$title =~ s/\W+$// if rand(1) < 0.9;
 		$title =~ s/<[^>]+>//g;
 		$title =~ s/\b(\w)/\U$1/g if rand(1) < 0.4;
-	        my $introtext = make_werds(20 + rand 40 + rand 50, 0.3);
+		my $introtext = make_werds(20 + rand 40 + rand 50, 0.3);
 		$introtext .= typical_remark() if rand(1) < 0.05;
 		$introtext = slashizeLinks($introtext);
 		$introtext = balanceTags($introtext);
-	        my $bodytext = '';
+		my $bodytext = '';
 		if (rand(1) < 0.1) {
 			$bodytext = make_werds(20 + (rand 30) * (rand 50), 0.1);
 			$bodytext =~ s{([.?!] )}{
@@ -81,8 +81,8 @@ $constants = getCurrentStatic();
 		$dept =~ s/<[^>]+>//g;
 		$dept =~ s/\s+/-/g;
 		$dept =~ s/\W+$// if rand(1) < 0.9;
-	        my $author = getRandomAuthorID();
-	        my $submitter = getRandomUserID($min_uid, $max_uid);
+		my $author = getRandomAuthorID();
+		my $submitter = getRandomUserID($min_uid, $max_uid);
 		my $time = UnixDate(ParseDateString(
 			"epoch ".get_time($opts{t})),
 			"%Y-%m-%d %H-%M-%S");
@@ -137,11 +137,11 @@ $constants = getCurrentStatic();
 		} else {
 			warn "($count) Story could not be created";
 		}
-        	$count--;
+		$count--;
 	}
 	my $t1 = new Benchmark;
 	print "$opts{num_stories} stories created in: ",
-        	timestr(timediff($t1, $t0), 'noc'),"\n";
+		timestr(timediff($t1, $t0), 'noc'),"\n";
 }
 
 # subroutines
@@ -176,22 +176,22 @@ sub getRandomAuthorID {
 		$ok = 1;
 		$ok = 0 if $rand_uid == $constants->{anonymous_coward_uid};
 	}
-        return $rand_uid;
+	return $rand_uid;
 }
 
 sub getRandomTopicID {
 	# Yes, inefficient.  I do not care.
 	my $tids = $slashdb->sqlSelectAll("tid", "topics");
 	my @tids = map { $_->[0] } @$tids;
-        my $rand_tid = @tids[ rand @tids ];
-        return $rand_tid;
+	my $rand_tid = @tids[ rand @tids ];
+	return $rand_tid;
 }
 
 sub getRandomUserID {
 	my($min_uid, $max_uid) = @_;
-        my $rand_uid = $slashdb->sqlSelect("uid", "users",
-                "uid BETWEEN $min_uid AND $max_uid", "ORDER BY RAND() LIMIT 1");
-        return $rand_uid;
+	my $rand_uid = $slashdb->sqlSelect("uid", "users",
+		"uid BETWEEN $min_uid AND $max_uid", "ORDER BY RAND() LIMIT 1");
+	return $rand_uid;
 }
 
 sub make_werds {

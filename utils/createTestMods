@@ -87,7 +87,7 @@ my(%comments, %comment_data);
 		my $did = (exists $opts{r}) ?
 			$discussions->[rand $#{$discussions} + 1] : 
 			$discussion_id;
-                if (!$did) {
+		if (!$did) {
 			print "Cannot create comments, no discussions found.\n";
 			exit 0;
 		}
@@ -96,7 +96,7 @@ my(%comments, %comment_data);
 			$comments{$did} = [
 				map { $_ = $_->[0] }
 				@{$slashdb->sqlSelectAll(
-				 	'cid', 'comments', "sid=$did"
+					'cid', 'comments', "sid=$did"
 				)}
 			];
 
@@ -108,7 +108,7 @@ my(%comments, %comment_data);
 			);
 		}
 		
-	 	# Determine the moderator.
+		# Determine the moderator.
 		my $uid = ($opts{R}) ? 
 				getRandomUserID($comment_data{$did}) :
 				$opts{U};
@@ -171,7 +171,7 @@ EOT
 	}
 	my $t1 = new Benchmark;
 	print "$opts{num_mods} moderations created in: ",
-        	timestr(timediff($t1, $t0), 'noc'),"\n";
+		timestr(timediff($t1, $t0), 'noc'),"\n";
 }
 
 # subroutines
@@ -215,45 +215,45 @@ sub getRandomUserID {
 		$ret = getRandomUserID(@_), last if $_ == $ret;
 	}
 	--$depth;
-        return $ret;
+	return $ret;
 } }
 
 # CLOSURE!
 { 
 my(@subnets) = ();
 sub setRandomIPID {
-        my $user = shift;
-        my $seed = int(rand(65536));
+	my $user = shift;
+	my $seed = int(rand(65536));
 
-        if (!@subnets) {
-                # We now generate 10 random subnets which we will use for
-                # the rest of this execution.
-                srand(12345); 
-                while (@subnets < 10) {
-                        my $subnet = sprintf "%d.%d.%d",
-                                1+rand 254, 1+rand 254, 1+rand 254;
-                        push @subnets, $subnet;
-                }
-        }
+	if (!@subnets) {
+		# We now generate 10 random subnets which we will use for
+		# the rest of this execution.
+		srand(12345); 
+		while (@subnets < 10) {
+			my $subnet = sprintf "%d.%d.%d",
+				1+rand 254, 1+rand 254, 1+rand 254;
+			push @subnets, $subnet;
+		}
+	}
 
-        srand($user->{uid} + (time % 5));
-        my $uid10 = $user->{uid} % 10;
-        my $quad3;
-        my $fourth;
-        if ($uid10 < rand(10)) {
-                $quad3 = $subnets[$uid10];
-                if ($uid10 < rand(10)) {
-                        $fourth = $uid10 + 1 + (int($user->{uid}/50) % 254);
-                } else {
-                        $fourth = 1+int(rand(4))*int(rand(4))*int(rand(12));
-                }
-        } else {
-                $quad3 = $subnets[rand($#subnets + 1)];
-                $fourth = 1+int(rand(16))*int(rand(16));
-        }
-        $user->{subnetid} = md5_hex("$quad3.0");
-        $user->{ipid} = md5_hex("$quad3.$fourth");
-        srand($$ + time + $seed);
+	srand($user->{uid} + (time % 5));
+	my $uid10 = $user->{uid} % 10;
+	my $quad3;
+	my $fourth;
+	if ($uid10 < rand(10)) {
+		$quad3 = $subnets[$uid10];
+		if ($uid10 < rand(10)) {
+			$fourth = $uid10 + 1 + (int($user->{uid}/50) % 254);
+		} else {
+			$fourth = 1+int(rand(4))*int(rand(4))*int(rand(12));
+		}
+	} else {
+		$quad3 = $subnets[rand($#subnets + 1)];
+		$fourth = 1+int(rand(16))*int(rand(16));
+	}
+	$user->{subnetid} = md5_hex("$quad3.0");
+	$user->{ipid} = md5_hex("$quad3.$fourth");
+	srand($$ + time + $seed);
 }
 }
 
