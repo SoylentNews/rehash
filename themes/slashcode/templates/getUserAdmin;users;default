@@ -117,7 +117,6 @@ __template__
 				<TD><INPUT TYPE="SUBMIT" NAME="saveuseradmin" VALUE="Save [% IF useredit.nickname; useredit.nickname | strip_attribute; END %]"></TD>
 			</TR>
 [% END %]
-			</FORM>
 			[% IF ! useredit.nonuid %]
 				[% IF constants.subscribe %]
 				<TR>
@@ -247,6 +246,7 @@ __template__
 
 
 		[% END %]
+		</FORM>
 		</TABLE>
 		</TD>
 	</TR>
