@@ -15,6 +15,7 @@ use Slash::Utility;
 
 use vars qw(
 	%task	$me	$task_exit_flag
+	$has_proc_processtable
 	$irc	$conn	$nick	$channel
 	$remarks_active	$next_remark_id	$next_handle_remarks	$hushed
 	$next_check_slashd
@@ -97,6 +98,8 @@ sub ircinit {
 	$conn->add_global_handler(433,	\&on_nick_taken);
 	$conn->add_handler('msg',	\&on_msg);
 	$conn->add_handler('public',	\&on_public);
+
+	$has_proc_processtable = eval { require Proc::ProcessTable };
 }
 
 sub ircshutdown {
@@ -338,8 +341,7 @@ sub cmd_slashd {
 
 sub check_slashd {
 	my $parent_pid_str = "";
-	my $pt = eval { require Proc::ProcessTable };
-	if (!$pt) {
+	if (!$has_proc_processtable) {
 		# Don't know whether slashd is still present, can't check.
 		# Return 0 meaning slashd is not not OK [sic], and a blank
 		# string.
