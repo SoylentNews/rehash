@@ -90,7 +90,7 @@ IF !useredit.is_anon;
 
 		IF user.uid == useredit.uid OR user.is_admin;
 			'<BR>Karma: ';
-			PROCESS karma karma=useredit.karma is_admin=useredit.is_admin;
+			PROCESS karma karma=useredit.karma admin_flag=user.is_admin;
 		END;
 
 		IF useredit.aim;
