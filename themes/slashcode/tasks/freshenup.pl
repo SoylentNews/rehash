@@ -148,25 +148,42 @@ $task{$me}{code} = sub {
 			$filename = "$basedir/$sid.shtml";
 			$logmsg = "$me updated $sid ($title)";
 		}
-		prog2file(
+		my($success, $stderr_text) = prog2file(
 			"$basedir/article.pl",
-			$filename, {
+			$filename,
+			{
 				args =>		$args,
 				verbosity =>	verbosity(),
 				handle_err =>	1,
-		});
-		slashdLog($logmsg) if verbosity() >= 2;
+			} );
+		my $do_log = (verbosity() >= 2);
+		if (!$success) {
+			$logmsg .= " success='$success'";
+			$do_log ||= (verbosity() >= 1);
+		}
+		if ($stderr_text) {
+			$stderr_text =~ s/\s+/ /g;
+			$logmsg .= " stderr: '$stderr_text'";
+			$do_log ||= (verbosity() >= 1);
+		}
 
 		# Now we extract what we need from the file we created
+		my $set_ok = 0;
 		my($cc, $hp) = _read_and_unlink_cchp_file($cchp_file, $cchp_param);
 		if (defined($cc)) {
 			# all is well, data was found
-			$slashdb->setStory($sid, { 
+			$set_ok = $slashdb->setStory($sid, { 
 				writestatus  => 'ok',
 				commentcount => $cc,
 				hitparade    => $hp,
 			});
 		}
+		if (!$set_ok) {
+			$logmsg .= " setStory retval is '$set_ok'";
+			$do_log ||= (verbosity() >= 1);
+		}
+
+		slashdLog($logmsg) if $do_log;
 	}
 
 	my $w = $slashdb->getVar('writestatus', 'value', 1);
