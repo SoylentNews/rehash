@@ -4710,8 +4710,12 @@ sub getBanList {
 	} elsif ($mcd && !keys %$banlist_ref) {
 		# If the caller said it was OK to use the cache, but
 		# there's nothing in the cache, try MCD first.
-		$banlist_ref = $mcd->get($mcdkey);
-		return $banlist_ref if $banlist_ref && scalar(keys %$banlist_ref);
+		if ($banlist_ref && scalar(keys %$banlist_ref)) {
+			$banlist_ref = $mcd->get($mcdkey);
+			$self->{_banlist_cache} = $banlist_ref;
+			$self->{_banlist_cache_time} ||= time();
+			return $banlist_ref;
+		}
 	}
 
 	# If there's nothing in the cache, fill it from the DB.
@@ -4799,7 +4803,12 @@ sub getNorssList {
 		# If the caller said it was OK to use the cache, but
 		# there's nothing in the cache, try MCD first.
 		$norsslist_ref = $mcd->get($mcdkey);
-		return $norsslist_ref if $norsslist_ref && scalar(keys %$norsslist_ref);
+		if ($norsslist_ref && scalar(keys %$norsslist_ref)) {
+			$norsslist_ref = $mcd->get($mcdkey);
+			$self->{_norsslist_cache} = $norsslist_ref;
+			$self->{_norsslist_cache_time} ||= time();
+			return $norsslist_ref;
+		}
 	}
 
 	# If there's nothing in the cache, fill it from the DB.
@@ -4864,7 +4873,12 @@ sub getNopalmList {
 		# If the caller said it was OK to use the cache, but
 		# there's nothing in the cache, try MCD first.
 		$nopalmlist_ref = $mcd->get($mcdkey);
-		return $nopalmlist_ref if $nopalmlist_ref && scalar(keys %$nopalmlist_ref);
+		if ($nopalmlist_ref && scalar(keys %$nopalmlist_ref)) {
+			$nopalmlist_ref = $mcd->get($mcdkey);
+			$self->{_nopalmlist_cache} = $nopalmlist_ref;
+			$self->{_nopalmlist_cache_time} ||= time();
+			return $nopalmlist_ref;
+		}
 	}
 
 	if (!keys %$nopalmlist_ref) {
