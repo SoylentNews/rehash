@@ -85,6 +85,10 @@ gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
          type    => 'areastackedindex',
          stats   => ['grand_total', 'rss_page', 'palm_page'];
 
+      PROCESS make_graph gtitle => 'Comments',
+         type    => 'area',
+         stats   => ['comments'];
+
       PROCESS make_graph gtitle => 'Users',
          type    => 'areapercentage',
          stats   => ['unique', 'unique_users'];
@@ -169,6 +173,18 @@ youngest elig: uid [% ints(stats_data.youngest_modelig_uid) %], created on [% st
    PROCESS make_graph gtitle => 'Scores',
       type  => 'areastackedindex',
       stats => ['comments_score_5', 'comments_score_4', 'comments_score_3', 'comments_score_2', 'comments_score_1', 'comments_score_0', 'comments_score_-1'];
+
+   PROCESS make_graph gtitle => 'Total Comments',
+      type    => 'area',
+      stats   => ['comments'];
+
+   PROCESS make_graph gtitle => 'Total Moderations',
+      type    => 'area',
+      stats   => ['m1_up_total', 'm1_down_total'];
+
+   PROCESS make_graph gtitle => 'Total Metamoderations',
+      type    => 'area',
+      stats   => ['m2_fair_total', 'm2_unfair_total'];
 
    END;
 
