@@ -505,10 +505,9 @@ sub pollbooth {
 	my $constants = getCurrentStatic();
 	my $sect = getCurrentUser('currentSection');
 
-	# If no/undef qid, but pollbooth was called anyway, display
-	# the current (sitewide) poll.
-	$qid = $slashdb->getVar('currentqid', 'value') unless $qid;
-	# If no/undef qid and no sitewide poll, short-circuit out.
+	# This special qid means to use the current (sitewide) poll.
+	$qid = $slashdb->getVar('currentqid', 'value') if $qid eq '_currentqid';
+	# If no qid (or no sitewide poll), short-circuit out.
 	return "" if $qid eq "";
 
 	my $poll = $slashdb->getPoll($qid);

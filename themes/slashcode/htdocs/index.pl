@@ -206,7 +206,7 @@ sub displayStandardBlocks {
 			$return .= portalbox(
 				$constants->{fancyboxwidth},
 				$boxBank->{$bid}{title},
-				pollbooth('', 1),
+				pollbooth('_currentqid', 1),
 				$boxBank->{$bid}{bid},
 				$boxBank->{$bid}{url}
 			);

@@ -92,7 +92,7 @@ EOT
 
 #################################################################
 sub getSlashdotPoll {
-	setblock("poll", pollbooth("", 1));
+	setblock("poll", pollbooth('_currentqid', 1));
 }
 
 
