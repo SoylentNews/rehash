@@ -155,6 +155,8 @@ sub getRepeatMods {
 		 usersorg.nickname AS orgnick,
 		 COUNT(*) AS c, val,
 		 MAX(ts) AS latest,
+		 IF(MAX(ts) > DATE_SUB(NOW(), INTERVAL 24 HOUR),
+			1, 0) AS isrecent,
 		 usersdest.uid AS destuid,
 		 usersdest.nickname AS destnick,
 		 usersdesti.karma AS destkarma",
@@ -331,17 +333,12 @@ sub getAdminModsInfo {
 			? $nup*100/($nup+$ndown)
 			: 0;
 		# Add the m1 data for this admin.
-		$hr->{$nickname}{m1_text} = sprintf("%4d up, %4d dn (%3.0f%% up)",
-			$nup, $ndown, $percent);
-		$hr->{$nickname}{m2_text} = "" if !exists($m2_uid_val_hr->{$uid});
 		$hr->{$nickname}{uid} = $uid;
 		$hr->{$nickname}{m1_up} = $nup;
 		$hr->{$nickname}{m1_down} = $ndown;
 		# If this admin had m1 activity today but no m2 activity,
 		# blank out that field.
 		if (!exists($m2_uid_val_hr->{$uid})) {
-			$hr->{$nickname}{m2_text} = "";
-			# Not really necessary
 			# $hr->{$nickname}{m2_fair} = 0;
 			# $hr->{$nickname}{m2_unfair} = 0;
 		}
@@ -361,33 +358,20 @@ sub getAdminModsInfo {
 			: 0;
 		# Add the m2 data for this admin.
 		$hr->{$nickname}{uid} = $uid;
-		$hr->{$nickname}{m2_text} = sprintf("\@ %5d fair, %5d un",
-			$nfair, $nunfair);
-		if ($nfair+$nunfair >= 20) { # this number is pretty arbitrary
-			$hr->{$nickname}{m2_text} .= sprintf(" (%5.1f%% un)",
-				$percent);
-		} else {
-			$hr->{$nickname}{m2_text} .= " " x  12;
-		}
 		# Also calculate overall-month percentage.
 		my $nfair_mo   = $m2_uid_val_mo_hr->{$uid} {1}{count} || 0;
 		my $nunfair_mo = $m2_uid_val_mo_hr->{$uid}{-1}{count} || 0;
 		$percent = ($nfair_mo+$nunfair_mo > 0)
 			? $nunfair_mo*100/($nfair_mo+$nunfair_mo)
 			: 0;
-		if ($nfair_mo+$nunfair_mo >= 20) { # again, pretty arbitrary
-			$hr->{$nickname}{m2_text} .= sprintf(" (mo: %5.1f%%)",
-				$percent);
-		}
-		# Trim off whitespace at the end;
-		$hr->{$nickname}{m2_text} =~ s/\s+$//;
 		# Set another few data points.
 		$hr->{$nickname}{m2_fair} = $nfair;
 		$hr->{$nickname}{m2_unfair} = $nunfair;
+		$hr->{$nickname}{m2_fair_mo} = $nfair_mo;
+		$hr->{$nickname}{m2_unfair_mo} = $nunfair_mo;
 		# If this admin had m2 activity today but no m1 activity,
 		# blank out that field.
 		if (!exists($m1_uid_val_hr->{$uid})) {
-			$hr->{$nickname}{m1_text} = "";
 			# Not really necessary
 			# $hr->{$nickname}{m1_up} = 0;
 			# $hr->{$nickname}{m1_down} = 0;

@@ -19,6 +19,8 @@ __template__
    used total: [% used_total %] yesterday ([% used_total_pool %]% of pool, [% used_total_comments  %]% of comments)
       used -1: [% used_minus_1 %] yesterday ([% used_minus_1_percent %]%)
       used +1: [% used_plus_1  %] yesterday ([% used_plus_1_percent  %]%)
+oldest unM2'd: [% oldest_unm2d_days %] days
+
 [% admin_mods_text;
 IF repeat_mods;
 	FOREACH dir = [ '-1', '1' ];
@@ -28,7 +30,7 @@ REPEAT [% dirword %]MODS:
 [%			FOREACH orguid = repeat_mods.$dir.keys.nsort;
 				FOREACH destuid = repeat_mods.$dir.$orguid.keys.nsort;
 					hr = repeat_mods.$dir.$orguid.$destuid;
-constants.absolutedir_secure %]/~[% hr.orgnick | fixparam %] ([% hr.orguid %]):  [% hr.c %] to [% hr.destnick %] ([% hr.destuid %], K:[% hr.destkarma %])
+constants.absolutedir_secure %]/~[% hr.orgnick | fixparam %] ([% hr.orguid %]):  [% hr.c %] to [% hr.destnick %] ([% hr.destuid %], K:[% hr.destkarma %])[% IF hr.isrecent; " *"; END %]
 [%				END;
 			END;
 		END;

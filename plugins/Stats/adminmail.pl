@@ -43,6 +43,10 @@ $task{$me}{code} = sub {
 	my $sdTotalHits = $stats->getVar('totalhits', 'value', 1);
 	$sdTotalHits = $sdTotalHits + $count->{'total'};
 
+	my $reasons = $slashdb->getReasons();
+	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
+	my $reasons_m2able = join(",", @reasons_m2able);
+
 	my $admin_clearpass_warning = '';
 	if ($constants->{admin_check_clearpass}) {
 		my $clear_admins = $stats->getAdminsClearpass();
@@ -69,6 +73,15 @@ EOT
 	my $accesslog_rows = $stats->sqlCount('accesslog');
 	my $formkeys_rows = $stats->sqlCount('formkeys');
 	my $modlog_rows = $stats->sqlCount('moderatorlog', 'active=1');
+	my $modlog_rows_needmeta = $stats->sqlCount('moderatorlog',
+		"active=1 AND reason IN ($reasons_m2able)"
+	);
+	my($oldest_unm2d) = $stats->sqlSelect(
+		"UNIX_TIMESTAMP(MIN(ts))",
+		"moderatorlog",
+		"active=1 AND reason IN ($reasons_m2able) AND m2status=0"
+	);
+	$oldest_unm2d ||= 0;
 	my $metamodlog_rows = $stats->sqlCount('metamodlog', 'active=1');
 
 	my $mod_points = $stats->getPoints;
@@ -171,28 +184,7 @@ EOT
 	} );
 
 	my $admin_mods = $stats->getAdminModsInfo($yesterday, $weekago);
-	my $admin_mods_text = "";
-	my($num_admin_mods, $num_mods) = (0, 0);
-	if ($admin_mods) {
-		for my $nickname (sort { lc($a) cmp lc($b) } keys %$admin_mods) {
-			$admin_mods_text .= sprintf("%13.13s: %26s %-46s\n",
-				$nickname,
-				$admin_mods->{$nickname}{m1_text},
-				$admin_mods->{$nickname}{m2_text}
-			);
-			if ($nickname eq '~Day Total') {
-				$num_mods += $admin_mods->{$nickname}{m1_up};
-				$num_mods += $admin_mods->{$nickname}{m1_down};
-			} else {
-				$num_admin_mods += $admin_mods->{$nickname}{m1_up};
-				$num_admin_mods += $admin_mods->{$nickname}{m1_down};
-			}
-		}
-		$admin_mods_text =~ s/ +$//gm;
-		$admin_mods_text .= sprintf("%13.13s: %4d of %4d (%6.2f%%)\n",
-			"Admin Mods", $num_admin_mods, $num_mods,
-			($num_mods ? $num_admin_mods*100/$num_mods : 0));
-	}
+	my $admin_mods_text = getAdminModsText($admin_mods);
 
 	$mod_data{repeat_mods} = $stats->getRepeatMods({
 		min_count => $constants->{mod_stats_min_repeat}
@@ -231,7 +223,8 @@ EOT
 
 	$mod_data{modlog} = sprintf("%8d", $modlog_rows);
 	$mod_data{metamodlog} = sprintf("%8d", $metamodlog_rows);
-	$mod_data{xmodlog} = sprintf("%.1fx", ($modlog_rows  ? $metamodlog_rows/$modlog_rows  : 0));
+	$mod_data{xmodlog} = sprintf("%.1fx", ($modlog_rows_needmeta ? $metamodlog_rows/$modlog_rows_needmeta : 0));
+	$mod_data{oldest_unm2d_days} = sprintf("%.1f", (time-$oldest_unm2d)/86400);
 	$mod_data{mod_points} = sprintf("%8d", $mod_points);
 	$mod_data{used_total} = sprintf("%8d", $modlog_total);
 	$mod_data{used_total_pool} = sprintf("%.1f", ($mod_points ? $modlog_total*100/$mod_points : 0));
@@ -341,5 +334,54 @@ EOT
 
 	return ;
 };
+
+sub getAdminModsText {
+	my($am) = @_;
+	return "" if !$am or !scalar(keys %$am);
+
+	my $text = sprintf("%-13s   %4s %4s %5s    %5s %5s %6s %14s\n",
+		"Nickname",
+		"M1up", "M1dn", "M1up%",
+		"M2fr", "M2un", " M2un%", " M2un% (month)"
+	);
+	my($num_admin_mods, $num_mods) = (0, 0);
+	for my $nickname (sort { lc($a) cmp lc($b) } keys %$am) {
+		my $amn = $am->{$nickname};
+		my $m1_up_percent = 0;
+		$m1_up_percent = $amn->{m1_up}*100
+			/ ($amn->{m1_up} + $amn->{m1_down})
+			if $amn->{m1_up} + $amn->{m1_down} > 0;
+		my $m2_un_percent = 0;
+		$m2_un_percent = $amn->{m2_unfair}*100
+			/ ($amn->{m2_unfair} + $amn->{m2_fair})
+			if $amn->{m2_unfair} + $amn->{m2_fair} > 20;
+		my $m2_un_percent_mo = 0;
+		$m2_un_percent_mo = $amn->{m2_unfair_mo}*100
+			/ ($amn->{m2_unfair_mo} + $amn->{m2_fair_mo})
+			if $amn->{m2_unfair_mo} + $amn->{m2_fair_mo} > 20;
+		$text .= sprintf("%13.13s   %4d %4d %4d%%    %5d %5d %5.1f%% %5.1f%%\n",
+			$nickname,
+			$amn->{m1_up},
+			$amn->{m1_down},
+			$m1_up_percent,
+			$amn->{m2_fair},
+			$amn->{m2_unfair},
+			$m2_un_percent,
+			$m2_un_percent_mo
+		);
+		if ($nickname eq '~Day Total') {
+			$num_mods += $amn->{m1_up};
+			$num_mods += $amn->{m1_down};
+		} else {
+			$num_admin_mods += $amn->{m1_up};
+			$num_admin_mods += $amn->{m1_down};
+		}
+	}
+	$text .= sprintf("%d of %d mods (%.2f%%) were performed by admins.\n",
+		$num_admin_mods,
+		$num_mods,
+		($num_mods ? $num_admin_mods*100/$num_mods : 0));
+	return $text;
+}
 
 1;
