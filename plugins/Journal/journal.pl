@@ -58,7 +58,7 @@ sub main {
 		save		=> [ $user_ok,		\&saveArticle		], # formkey
 		remove		=> [ $user_ok,		\&removeArticle		],
 
-		editprefs	=> [ $user_ok,		\&editPrefs		],
+		editprefs	=> [ !$user->{is_anon},	\&editPrefs		],
 		setprefs	=> [ $user_ok,		\&setPrefs		],
 
 		list		=> [ 1,			\&listArticle		],
@@ -427,7 +427,11 @@ sub displayArticle {
 
 sub editPrefs {
 	my($journal, $constants, $user, $form, $slashdb) = @_;
-	
+
+	my $nickname	= $user->{nickname};
+	my $uid		= $user->{uid};
+	_printHead("userhead", { nickname => $nickname, uid => $uid, menutype => 'prefs' });
+
 	my $theme	= _checkTheme($user->{'journal_theme'});
 	my $themes	= $journal->themes;
 	slashDisplay('journaloptions', {
@@ -449,7 +453,7 @@ sub setPrefs {
 		if defined $form->{journal_theme};
 
 	$slashdb->setUser($user->{uid}, \%prefs);
-	
+
 	editPrefs(@_);
 }
 
@@ -695,16 +699,15 @@ sub _validFormkey {
 }
 
 sub _printHead {
-	my($head, $data, $new_header) = @_;
+	my($head, $data, $edit_the_uid) = @_;
 	my $title = getData($head, $data);
 	header($title);
 
+	$data->{menutype} ||= 'users';
 	$data->{width} = '100%';
 	$data->{title} = $title;
-	$data->{tab_selected} = 'journal';
-	$data->{style} = 'tabbed';
 
-	if ($new_header) {
+	if ($edit_the_uid) {
 		my $slashdb = getCurrentDB();
 		my $useredit = $data->{uid}
 			? $slashdb->getUser($data->{uid})

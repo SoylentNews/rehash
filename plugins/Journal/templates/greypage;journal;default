@@ -12,7 +12,7 @@ __name__
 greypage
 __template__
 [% USE Slash %]
-<TABLE>
+<P><TABLE>
 	[% FOREACH article = articles %]
 		<TR><TD ALIGN="LEFT" BGCOLOR="#C0C0C0" COLSPAN="2">
 			<FONT FACE="[% constants.mainfontface %]" size="+1" color="#000000">

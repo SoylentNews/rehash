@@ -12,7 +12,7 @@ __name__
 bluebox
 __template__
 [% USE Slash %]
-<TABLE BORDER="0" BGCOLOR="#000000" WIDTH="100%">
+<P><TABLE BORDER="0" BGCOLOR="#000000" WIDTH="100%">
 	<TR><TD>
 		[% FOREACH article = articles %]
 		<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" BORDER="0" CELLPADDING="5" CELLSPACING="0">

@@ -12,7 +12,7 @@ __name__
 generic
 __template__
 [% USE Slash %]
-<TABLE BORDER="0" BGCOLOR="[% user.bg.3 %]" WIDTH="100%"><TR><TD>
+<P><TABLE BORDER="0" BGCOLOR="[% user.bg.3 %]" WIDTH="100%"><TR><TD>
 	[% FOREACH article = articles %]
 	<TABLE WIDTH="100%" BGCOLOR="[% user.bg.0 %]" BORDER="0" CELLPADDING="5" CELLSPACING="0">
 		<TR VALIGN="TOP"><TD ALIGN="RIGHT" BGCOLOR="[% user.bg.3 %]">

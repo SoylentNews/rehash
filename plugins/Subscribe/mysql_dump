@@ -1,3 +1,4 @@
+INSERT INTO menus (menu, label, sel_label, value, seclev, showanon, menuorder) VALUES ('users','Subscription','subscription','/subscribe.pl',1,0,30);
 INSERT INTO vars (name, value, description) VALUES ('paypal', 1, 'Use Paypal for subscriptions?');
 INSERT INTO vars (name, value, description) VALUES ('paypal_amount', '5.00', 'How much a subscription costs, in U.S. dollars with 2 decimal places');
 INSERT INTO vars (name, value, description) VALUES ('paypal_business', 'yourname@example.com', 'Email of Paypal business acct');

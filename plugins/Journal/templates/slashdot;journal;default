@@ -12,7 +12,7 @@ __name__
 slashdot
 __template__
 [% USE Slash %]
-<TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
+<P><TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
 	[% FOREACH article = articles %]
 		[% FOREACH diatribe = article.article; topic = diatribe.topic %]
   <TR><TD>

@@ -115,16 +115,10 @@ INSERT INTO discussions (id, sid, title, url, ts, topic, uid, commentcount, flag
 # Dumping data for table 'menus'
 #
 
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','New User','[% constants.rootdir %]/users.pl?op=newuseradmin',10000,1);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Your Info','[% constants.rootdir %]/~[% user.nickname | fixparam %]/',1,10);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Log out','[% constants.rootdir %]/my/logout/',1,20);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','<b>Preferences:</b>','',1,30);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Homepage','[% constants.rootdir %]/my/homepage/',1,40);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Comments','[% constants.rootdir %]/my/comments/',1,50);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','You','[% constants.rootdir %]/my/',1,60);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Password','[% constants.rootdir %]/my/password/',1,70);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','[% USE Slash %][% IF Slash.db.getMiscUserOpts.size %]Misc[% END %]', '[% constants.rootdir %]/my/misc/',1,75);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('topics','Recent Topics','[% constants.rootdir %]/topics.pl?op=toptopics',0,80);
+INSERT INTO menus (menu, label, sel_label, value, seclev, showanon, menuorder) VALUES ('users','Logout','logout','/my/logout',1,0,10);
+INSERT INTO menus (menu, label, sel_label, value, seclev, showanon, menuorder) VALUES ('users','Preferences','preferences','/users.pl?op=edituser',1,0,20);
+INSERT INTO menus (menu, label, sel_label, value, seclev, showanon, menuorder) VALUES ('users','Password','password','/users.pl?op=changepasswd',1,0,40);
+INSERT INTO menus (menu, label, sel_label, value, seclev, showanon, menuorder) VALUES ('users','[% USE Slash; user.nickname | strip_literal %]','me','/~[% USE Slash; user.nickname | strip_literal %]',1,0,50);
 
 #
 # Dumping data for table 'metamodlog'

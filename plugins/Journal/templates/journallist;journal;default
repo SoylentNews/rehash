@@ -12,10 +12,17 @@ __name__
 journallist
 __template__
 [% USE Slash %]
-[% showopts = !user.is_anon && (uid == user.uid) %]
-[% PROCESS journaloptions IF showopts %]
 
-[% PROCESS titlebar title => "$nickname's Journal Entries", width => "100%" %]
+[% showopts = !user.is_anon && (uid == user.uid) %]
+[%# No need to provide general options here, that's what the
+    Preferences tab is for. We do show the option to edit/delete
+    individual entries though. - Jamie %]
+[%# PROCESS journaloptions IF showopts %]
+
+[%# And having a second titlebar looks wrong to me... - Jamie %]
+[%# PROCESS titlebar title => "$nickname's Journal Entries", width => "100%" %]
+<P>
+
 [% IF showopts %]<FORM METHOD="POST" ACTION="[% constants.rootdir %]/journal.pl">
 <INPUT TYPE="hidden" NAME="op" VALUE="remove">[% END %]
 <TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
