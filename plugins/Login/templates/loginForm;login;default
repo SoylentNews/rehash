@@ -12,65 +12,64 @@ en_US
 __name__
 loginForm
 __template__
-[% title = 'Log In' %]
-[% title = 'Error Logging In' IF form.unickname %]
+[% title = form.unickname ? 'Error Logging In' : 'Log In' %]
 
 [% PROCESS titlebar width="75%" %]
 
-<FORM ACTION="[% env.script_name %]" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="userlogin">
-<TABLE WIDTH="75%">
+<form action="[% env.script_name %]" method="POST">
+<input type="HIDDEN" name="op" value="userlogin">
+<table width="75%">
 [% IF form.unickname %]
-	<TR><TD COLSPAN="2">
-	<P>
+	<tr><td colspan="2">
+	<p>
 	Danger, Will Robinson!  You didn't log in!  You apparently put
 	in the wrong password, or the wrong nickname.  Either try again,
-	or <A HREF="[% env.script_name %]?op=mailpasswdform">have your
-	password mailed to you</A> if you forgot your password.
-	</P>
+	or <a href="[% env.script_name %]?op=mailpasswdform">have your
+	password mailed to you</a> if you forgot your password.
+	</p>
 
 	[% IF constants.allow_anonymous %]
-		<P>
+		<p>
 	   	Logging in will allow you to post comments as yourself.  If you
 		don't log in, you will only be able to post as
 		[% Slash.getCurrentAnonymousCoward("nickname") %].
-		</P>
+		</p>
 
 	[% ELSE %]
-		<P>
+		<p>
 		You can only post comments if you have a valid account.
-		</P>
+		</p>
 
 	[% END %]
-	</TD></TR>
+	</td></tr>
 [% END %]
 
-	<TR>
-		<TD><B>Nickname</B></TD>
-		<TD><INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="[% form.unickname | strip_attribute %]">
-		</TD>
-	</TR>
-	<TR>
-		<TD><B>Password:</B> (6-20 characters long)</TD>
-		<TD><INPUT TYPE="PASSWORD" NAME="upasswd" SIZE="20" MAXLENGTH="20">
-		</TD>
-	</TR>
-	<TR>
-		<TD><INPUT TYPE="CHECKBOX" NAME="login_temp" VALUE="yes"> Public Terminal</TD>
-		<TD><INPUT TYPE="SUBMIT" NAME="userlogin" VALUE="Log in"></TD>
-	</TR>
-</TABLE>
-</FORM>
+	<tr>
+		<td><b>Nickname</b></td>
+		<td><input type="TEXT" name="unickname" size="20" value="[% form.unickname | strip_attribute %]">
+		</td>
+	</tr>
+	<tr>
+		<td><b>Password:</b> (6-20 characters long)</td>
+		<td><input type="PASSWORD" name="upasswd" size="20" maxlength="20">
+		</td>
+	</tr>
+	<tr>
+		<td><input type="CHECKBOX" name="login_temp" value="yes"> Public Terminal</td>
+		<td><input type="SUBMIT" name="userlogin" value="Log in"></td>
+	</tr>
+</table>
+</form>
 
-<P>
-Forget your password? <A HREF="[% env.script_name %]?op=mailpasswdform">Have your
-password mailed to you</A> by entering your email address, nickname, or uid.<BR>
-<A HREF="[% env.script_name %]?op=newuserform">Create a new account</A>
-if you don't have one already.<BR>
-</P>
+<p>
+Forget your password? <a href="[% env.script_name %]?op=mailpasswdform">Have your
+password mailed to you</a> by entering your nickname, uid, or email address.<br>
+<a href="[% env.script_name %]?op=newuserform">Create a new account</a>
+if you don't have one already.<br>
+</p>
 
 
 __seclev__
 500
 __version__
-$Id$
+

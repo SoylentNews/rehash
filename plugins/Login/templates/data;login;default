@@ -31,6 +31,12 @@ __template__
 [% CASE 'mailpasswdhead' %]
 	Mail Password
 
+[% CASE 'newuserformhead' %]
+	Create Account
+
+[% CASE 'newuserhead' %]
+	Account Created
+
 [% CASE 'prefshead' %]
 	Change Login Preferences
 
@@ -51,6 +57,46 @@ __template__
 
 [% CASE 'passchanged' %]
 	Preferences changed.
+
+[% CASE 'email_invalid' %]
+	The email address "[% (form.realemail || form.email) | strip_literal %]" is
+	not a valid email address. Please try again, with a properly
+	formatted email address.
+
+[% CASE 'email_do_not_match' %]
+	The email addresses you've entered do not match.  Please re-enter
+	your email address information again.
+
+[% CASE 'duplicate_user' %]
+	The nickname '[% nick %]', or another similar to it, is already in use.
+	Please choose another.
+
+[% CASE 'new_user_open_proxy' %]
+	According to our tests, you are trying to create an account 
+	from an HTTP proxy that is open to the world.  Please close the proxy or
+	ask your sysadmin to do so, because open proxies are used to spam web
+	sites like this one. 
+
+	<p>Feel free to contact [% constants.adminmail_ban %] if you have questions.
+	Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
+
+[% CASE 'newuser_msg' %]
+	[% title = BLOCK %]User [% form.newusernick | strip_literal %] created[% END %]
+	[% PROCESS titlebar title=title width="100%" %]
+	<b>email</b>=[% form.email | strip_literal %]<br>
+	<b>user id</b>=[% uid %]<br>
+	<b>nick</b>=[% form.newusernick | strip_literal %]<br>
+	<b>passwd</b>=mailed to [% form.email | strip_literal %]<br>
+	<p>Once you receive your password, you can
+	<a href="[% constants.rootdir %]/login.pl">log in and set your account up.</a>
+
+[% CASE 'email_exists' %]
+	The email address "[% (form.realemail || form.email) | strip_literal %]"
+	already exists in our user database. If you've forgotten your password
+	to an existing account, you can
+	<a href="[% env.script_name %]?op=mailpasswdform">have your
+	password mailed to you</a>.
+
 
 [% CASE 'mail_nonickname' %]
 	User was not found.  No password was mailed.

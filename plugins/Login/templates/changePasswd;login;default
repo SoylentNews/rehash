@@ -12,26 +12,26 @@ en_US
 __name__
 changePasswd
 __template__
-<H2>[% IF form.note == "Please change your password now!";
+<h2>[% IF form.note == "Please change your password now!";
 	"Please change your password now! ";
-END; note %]</H2>
+END; note %]</h2>
 
 [% title = "Change password for $user.nickname ($user.uid)" %]
 [% PROCESS prefs_titlebar tab_selected='password' %]
 
-<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.5 %]">
-	<TR>
-		<TD>
+<table align="CENTER" width="100%" bgcolor="[% user.bg.5 %]">
+	<tr>
+		<td>
 [% IF constants.offer_insecure_login_link -%]
-		<P>You can automatically log in by clicking
-		 <A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% user.logtoken | fixparam %]">This Link</A> and Bookmarking the resulting page. 
+		<p>You can automatically log in by clicking
+		 <a href="[% constants.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% user.logtoken | fixparam %]">This Link</a> and Bookmarking the resulting page. 
 		This is totally insecure, but very convenient.
-		</P>
+		</p>
 [%- END %]
 
-		<FORM ACTION="[% env.script_name %]" METHOD="POST">
+		<form action="[% env.script_name %]" method="POST">
 		[% PROCESS formkey_tag %]
-		<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% user.uid %]">
+		<input type="HIDDEN" name="uid" value="[% user.uid %]">
 
 [%- session = Slash.db.getDescriptions('session_login');
    session_sel = Slash.createSelect('session_login', session, user.session_login, 1);
@@ -44,26 +44,26 @@ END; note %]</H2>
    clocation_sel = Slash.createSelect('cookie_location', clocation, user.cookie_location, 1, 0, clocation_order);
 -%]
 
-		My <B><A HREF="[% constants.rootdir %]/faq/accounts.shtml#ac1200">login session</A></B> [% session_sel %] and [% clocation_sel %]
+		My <b><a href="[% constants.rootdir %]/faq/accounts.shtml#ac1200">login session</a></b> [% session_sel %] and [% clocation_sel %]
 
-		<P>Note: changing your password or login cookie preferences will disable all
+		<p>Note: changing your password or login cookie preferences will disable all
 		other cookies for this account, requiring all other browsers using this account
-		to reauthenticate.</P>
+		to reauthenticate.</p>
 
 		[% PROCESS formLabel value => "Current Password" comment => "To change your password, enter your current password" %]
-		<INPUT TYPE="PASSWORD" NAME="oldpass" SIZE="20" MAXLENGTH="20" VALUE=""><BR>
+		<input type="PASSWORD" name="oldpass" size="20" maxlength="20" value=""><br>
 
 		[% PROCESS formLabel value => "New Password" comment => "Enter your new password twice, must be 6-20 chars long" %]
-		<INPUT TYPE="PASSWORD" NAME="pass1" SIZE="20" MAXLENGTH="20">
-		<INPUT TYPE="PASSWORD" NAME="pass2" SIZE="20" MAXLENGTH="20">
+		<input type="PASSWORD" name="pass1" size="20" maxlength="20">
+		<input type="PASSWORD" name="pass2" size="20" maxlength="20">
 
-		</TD>
-	</TR>
-</TABLE>
+		</td>
+	</tr>
+</table>
 
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="saveprefs">
-<INPUT TYPE="SUBMIT" VALUE="Change Login Prefs">
-</FORM>
+<input type="HIDDEN" name="op" value="saveprefs">
+<input type="SUBMIT" value="Change Login Prefs">
+</form>
 
 __seclev__
 500

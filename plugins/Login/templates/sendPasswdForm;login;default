@@ -11,57 +11,57 @@ en_US
 __name__
 sendPasswdForm
 __template__
-<H2>[% note %]</H2>
+[% IF note %][% note %][% END %]
 
-<FORM ACTION="[% env.script_name %]" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="mailpasswd">
+<form action="[% env.script_name %]" method="POST">
+<input type="HIDDEN" name="op" value="mailpasswd">
 [% PROCESS formkey_tag %]
 
-<TABLE WIDTH="75%">
-	<TR>
-		<TD>
+<table width="75%">
+	<tr>
+		<td>
 [% PROCESS titlebar title="Mail Password" width="100%" %]
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-		<P>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<p>
 		Forget your password? Enter your nickname, UID, or email address
 		here to have the system mail your password to you.
-		</P>
-		</TD>
-	</TR>
-	<TR>
-		<TD><B>Nickname/UID/Email</B>
-		<INPUT TYPE="TEXT" NAME="unickname" SIZE="20" VALUE="[% form.unickname | strip_attribute %]">
-		<BR>
+		</p>
+		</td>
+	</tr>
+	<tr>
+		<td><b>Nickname/UID/Email</b>
+		<input type="TEXT" name="unickname" size="20" value="[% form.unickname | strip_attribute %]">
+		<br>
 [% IF constants.plugin.HumanConf && constants.hc && constants.hc_sw_mailpasswd && user.state.hc %]
 	[% IF user.state.hcinvalid %]
 		[% user.state.hcerror %]
 	[% ELSE %]
-		<TABLE CELLSPACING=1 BORDER=0><TR VALIGN="MIDDLE">
-		<TD>[% user.state.hcquestion %]</TD>
-		<TD>[% user.state.hchtml %]</TD>
-		<TD><INPUT TYPE="TEXT" NAME="hcanswer"
-			VALUE=""
-			SIZE=8 MAXLENGTH=8></TD>
-		</TR></TABLE>
-		<INPUT TYPE="SUBMIT" NAME="mailpasswd" VALUE="Mail Password">
+		<table cellspacing=1 border=0><tr valign="MIDDLE">
+		<td>[% user.state.hcquestion %]</td>
+		<td>[% user.state.hchtml %]</td>
+		<td><input type="TEXT" name="hcanswer"
+			value=""
+			size=8 maxlength=8></td>
+		</tr></table>
+		<input type="SUBMIT" name="mailpasswd" value="Mail Password">
 	[% END %]
 [% ELSE %]
-		<INPUT TYPE="SUBMIT" NAME="mailpasswd" VALUE="Mail Password">
+		<input type="SUBMIT" name="mailpasswd" value="Mail Password">
 [% END %]
 
-		</TD>
-	</TR>
-</TABLE>
-</FORM>
+		</td>
+	</tr>
+</table>
+</form>
 [% IF user.is_anon %]
-<P>
-<A HREF="[% env.script_name %]?op=userlogin">Log in to [% constants.sitename %]</A>.<BR>
-<A HREF="[% env.script_name %]?op=newuserform">Create a new account</A>
+<p>
+<a href="[% env.script_name %]?op=userlogin">Log in to [% constants.sitename %]</a>.<br>
+<a href="[% env.script_name %]?op=newuserform">Create a new account</a>
 if you don't have one already.
-</P>
+</p>
 [% END %]
 
 

@@ -1,0 +1,9 @@
+# $Id$
+name=Login
+description="Login system for users"
+htdoc=login.pl
+template=templates/changePasswd;login;default
+template=templates/data;login;default
+template=templates/loginForm;login;default
+template=templates/newUserForm;login;default
+template=templates/sendPasswdForm;login;default
