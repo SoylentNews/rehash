@@ -135,6 +135,8 @@ CASE "not enough points" %]
 	or Cache::Memcached does not support the <tt>stats()</tt> call.
 	No stats are available.
 
+[% CASE "no-tid-specified" %]
+	<b>Please go back and select a topic before proceeding.</b>
 [% # COMMENT TABLE NOT AVAILABLE FOR WRITING
 CASE "comment_db_down" %]
 Database maintenance is currently taking place.  Some items such

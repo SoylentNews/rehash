@@ -44,6 +44,7 @@ __template__
 
 	<br><input type="checkbox" name="nexus" value="1"[% topic.nexus ? ' checked' : '' %]>
 	[%- PROCESS formLabel value => "Nexus", comment => "grouping of related stories", nobreak => 1 %]
+	[% IF topic.nexus %]<br /><a href="[% gSkin.rootdir %]/admin.pl?op=topic_extras&amp;tid=[% topic.tid %]">Edit topic extras for this topic</a><br />[% END %]
 
 	<br><input type="checkbox" name="submittable" value="1"[% topic.submittable ? ' checked' : '' %]>
 	[%- PROCESS formLabel value => "Submittable", comment => "users can submit stories under this topic", nobreak => 1 %]

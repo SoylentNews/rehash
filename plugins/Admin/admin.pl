@@ -129,6 +129,18 @@ sub main {
 			adminmenu	=> 'config',
 			tab_selected	=> 'topics',
 		},
+		topic_extras 	=> {
+			function 	=> \&topicExtrasEdit,
+			seclev		=> 10000,
+			adminmenu	=> 'config',
+			tab_selected	=> 'topics',
+		},
+		update_extras 	=> {
+			function 	=> \&topicExtrasEdit,
+			seclev		=> 10000,
+			adminmenu	=> 'config',
+			tab_selected	=> 'topics',
+		},
 		vars 		=> {	# varsave, varedit
 			function 	=> \&varEdit,
 			seclev		=> 10000,
@@ -893,6 +905,54 @@ sub topicEdit {
 		image_select		=> $image_select,
 		topic_param		=> $topic_param,
 	});
+}
+
+sub topicExtrasEdit {
+	my($form, $slashdb, $user, $constants) = @_;
+	my $extras = [];
+	if ($form->{tid}) {
+		if ($form->{op} eq "update_extras") {
+			updateTopicNexusExtras($form->{tid});
+		}
+		$extras = $slashdb->getNexusExtras($form->{tid}, {content_type => "all"});
+		slashDisplay("topicExtrasEdit", {
+			extras => $extras
+		});
+	} else {
+		print getData("no-tid-specified");
+	}
+}
+
+sub updateTopicNexusExtras {
+	my ($tid) = @_;
+	my $form = getCurrentForm();
+	my $slashdb = getCurrentDB();
+	return unless $tid;
+
+	foreach my $key (keys %$form) {
+		if ($key =~/^ex_del_(\d+)$/ && $form->{$key}) {
+			$slashdb->deleteNexusExtra($1);
+		} elsif ($key =~ /^ex_kw_new$/ and $form->{ex_kw_new}) {
+			my $extra = {};
+			$extra->{extras_keyword} = $form->{ex_kw_new};
+			$extra->{extras_textname} = $form->{ex_tn_new};
+			$extra->{type} = $form->{ex_ty_new};
+			$extra->{content_type} = $form->{ex_ct_ty_new};
+			$extra->{required} = $form->{ex_rq_new};
+			$extra->{ordering} = $form->{ex_ordering_new};
+			$slashdb->createNexusExtra($tid, $extra);
+		} elsif ($key =~/^ex_kw_(\d+)$/) {
+			my $id = $1;
+			my $extra = {};
+			$extra->{extras_keyword} = $form->{"ex_kw_$id"};
+			$extra->{extras_textname} = $form->{"ex_tn_$id"};
+			$extra->{type} = $form->{"ex_ty_$id"};
+			$extra->{content_type} = $form->{"ex_ct_ty_$id"};
+			$extra->{required} = $form->{"ex_rq_$id"};
+			$extra->{ordering} = $form->{"ex_ordering_$id"};
+			$slashdb->updateNexusExtra($id, $extra);
+		}
+	}
 }
 
 ##################################################################
