@@ -91,7 +91,7 @@ __template__
 
 		[% tilde_ed %]
 
-		<INPUT TYPE="SUBMIT" VALUE="Save"> <INPUT TYPE="SUBMIT" NAME="restore_defaults" VALUE="Restore Defaults">
+		<INPUT TYPE="SUBMIT" VALUE="Save"> <INPUT TYPE="SUBMIT" NAME="restore_defaults" VALUE="Restore Defaults"> <INPUT TYPE="SUBMIT" NAME="restore_exbox_defaults" VALUE="Restore Default Slashboxes">
 		</TD>
 	</TR>
 </TABLE>
