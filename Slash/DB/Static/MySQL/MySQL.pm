@@ -117,15 +117,15 @@ sub getNewStoryTopic {
 	# work for all sites except those that post tons of duplicate
 	# topic stories.
 	$needed = $needed*3 + 5;
-	my $sth = $self->sqlSelectMany(
-		'alttext, image, width, height, stories.tid as tid',
-		'stories, topics',
+	my $ar = $self->sqlSelectAllHashrefArray(
+		"alttext, image, width, height, stories.tid AS tid",
+		"stories, topics",
 		"stories.tid=topics.tid AND displaystatus = 0
-		AND writestatus != 'delete' AND time < NOW()",
+		 AND writestatus != 'delete' AND time < NOW()",
 		"ORDER BY time DESC LIMIT $needed"
 	);
 
-	return $sth;
+	return $ar;
 }
 
 ########################################################

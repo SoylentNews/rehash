@@ -17,12 +17,12 @@ $task{$me}{code} = sub {
 
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
-	my $sth = $slashdb->getNewStoryTopic();
+	my $ar = $slashdb->getNewStoryTopic();
 	my($html, $num_stories, $cur_tid) = ('', 0);
 	my $block = '';
 	my $topics = $slashdb->getDescriptions('topics');
 	my %tid_list = ( );
-	while (my $cur_story = $sth->fetchrow_hashref) {
+	while (my $cur_story = shift @$ar) {
 		my $cur_tid = $cur_story->{tid};
 		# We only want unique topics to be shown.
 		next if exists $tid_list{$cur_story->{tid}};
@@ -56,7 +56,6 @@ $task{$me}{code} = sub {
 			last;
 		}
 	}
-	$sth->finish();
 	my($tpid) = $slashdb->getTemplateByName('recentTopics', 'tpid');
 	$slashdb->setTemplate($tpid, { template => $html });
 	$slashdb->setBlock('recenttopics', {
