@@ -250,7 +250,7 @@ thread_col_2 = user.colors.bg_2;
 		the_label = '';
 	END;
 	the_label = the_label _ the_comment.disc_title; %]
-	<TR bgcolor="[% thread_toggle ? thread_col_1 : thread_col_2; %]"><TD VALIGN="TOP" COLSPAN="[% colspan %]" align="right"><FONT SIZE="2">&nbsp;&nbsp;&nbsp;attached to <A HREF="[% the_comment.url %]">[% the_label %]</A></FONT></TD></TR>
+	<TR bgcolor="[% thread_toggle ? thread_col_1 : thread_col_2; %]"><TD VALIGN="TOP" COLSPAN="[% colspan %]" align="right"><FONT SIZE="2">&nbsp;&nbsp;&nbsp;attached to <A HREF="[% the_comment.url | strip_urlattr %]">[% the_label %]</A></FONT></TD></TR>
 [% END %]
 
 [% BLOCK nick_and_uid;

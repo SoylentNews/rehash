@@ -72,7 +72,7 @@ ELSE;
 		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
 	];
 	IF constants.plugin.Zoo; tabs.push(
-		{ link = "/zoo.pl?op=check&uid=$uid", label = "Relation", sel_label = "relation" },
+		{ link = "/zoo.pl?op=check&amp;uid=$uid", label = "Relation", sel_label = "relation" },
 	); END;
 	IF constants.plugin.Journal; tabs.push(
 		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
