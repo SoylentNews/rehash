@@ -20,19 +20,15 @@ __template__
     accesslog: [% accesslog %] rows total
      formkeys: [% formkeys %] rows total
      comments: [% comments %] posted yesterday
-  Users/IPIDS: [% distinct_comment_posters_uids %] distinct uids [% IPIDS %] distinct IPIDS posted comments
-             : [% comments_uids %] distinct uids [% comments_ipids %] distinct IPIDS used comments
-             : [% article_uids %] distinct uids [% article_ipids %] distinct IPIDS used articles
-             : [% search_uids %] distinct uids [% search_ipids %] distinct IPIDS used search
-             : [% journal_uids %] distinct uids [% journal_ipids %] distinct IPIDS used journals
-             : [% palm_uids %] distinct uids [% palm_ipids %] distinct IPIDS used palm pages
-             : [% rss_uids %] distinct uids [% rss_ipids %] distinct IPIDS used rss pages
-    pageviews: [% comments_page %] for comments ([% comments_bytes %])
-             : [% article_page %] for articles ([% article_bytes %])
-             : [% search_page %] for searches ([% search_bytes %])
-             : [% journal_page %] for journals ([% journal_bytes %])
-             : [% palm_page %] for palm ([% palm_bytes %])
-             : [% rss_page %] for rss ([% rss_bytes %])
+
+               distinct uids | distinct IPIDS | pageviews
+ posted comm.: [% distinct_comment_posters_uids %]         [% IPIDS %]
+     comments: [% comments_uids %]         [% comments_ipids %]          [% comments_page %] ([% comments_bytes %])
+     articles: [% article_uids %]         [% article_ipids %]          [% article_page %] ([% article_bytes %])
+       search: [% search_uids %]         [% search_ipids %]          [% search_page %] ([% search_bytes %])
+     journals: [% journal_uids %]         [% journal_ipids %]          [% journal_page %] ([% journal_bytes %])
+         palm: [% palm_uids %]         [% palm_ipids %]          [% palm_page %] ([% palm_bytes %])
+          rss: [% rss_uids %]         [% rss_ipids %]          [% rss_page %] ([% rss_bytes %])
   submissions: [% submissions %] submissions 
  sub/comments: [% sub_comments %]% of the submissions came from comment posters from this day
 
