@@ -117,8 +117,8 @@ sub _set {
 	}
 
 	my $data = $self->sqlSelectColArrayref('uid', 'people', "person=$uid AND type='friend'");
-	my $list = join (',', @$data);
 	push @$data, $person;
+	my $list = join (',', @$data);
 	$self->sqlDo("UPDATE users_info SET people_status='dirty' WHERE uid IN ($list)");
 }
 
