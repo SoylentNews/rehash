@@ -141,8 +141,6 @@ sub previewForm {
 	($subid, my($email, $name, $title, $tid, $introtext, $time, $comment)) =
 		sqlSelect("subid,email,name,subj,tid,story,time,comment",
 		"submissions", "subid=$subid_dbi");
-	($email, $name, $introtext) = processSub($email, $name, $introtext);
-
 
 	if ($comment && $admin) {
 		# This probably should be a block.
@@ -502,10 +500,8 @@ EOT
 
 EOT
 
-		my $story = $I{F}{story};
-		($user, $fakeemail, $story) = processSub($user, $fakeemail, $story);
-		$story = stripByMode($story, 'html');
-		print qq!<P>$user writes $story</P>!;
+		my $story = processSub($fakeemail, $user, $I{F}{story});
+		print stripByMode($story, 'html');
 	}
 
 	print formLabel("The Scoop",
@@ -551,9 +547,7 @@ sub saveSub {
 		my($sec, $min, $hour, $mday, $mon, $year) = localtime;
 
 		my $subid = "$hour$min$sec.$mon$mday$year";
-		($I{F}{from}, $I{F}{email}, $I{F}{story}) = processSub(
-			$I{F}{from}, $I{F}{email}, $I{F}{story}
-		);
+		$I{F}{story} = processSub($I{F}{from}, $I{F}{email}, $I{F}{story});
 
 		sqlInsert("submissions", {
 			email	=> $I{F}{email},
@@ -576,10 +570,14 @@ sub processSub {
 	my($email, $name, $introtext) = @_;
 	$introtext =~ s/\n\n/\n<P>/gi;
 	$introtext .= " ";
+
+	# this is kinda experimental ... esp. the $extra line
+	# we know it can break real URLs, but probably will preserve
+	# real URLs more often than it will break them
 	$introtext =~  s{(?<!["=>])(http|ftp|gopher|telnet)://([$URI::uric#]+)}{
 		my($proto, $url) = ($1, $2);
 		my $extra = '';
-		$extra = ',' if $url =~ s/,$//;
+		$extra = $1 if $url =~ s/([?!;:.,']+)$//;
 		$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
 		qq[<A HREF="$proto://$url">$proto://$url</A>$extra];
 	}ogie;
@@ -601,7 +599,7 @@ sub processSub {
 
 	}
 
-	return($email, $name, $introtext);
+	return $introtext;
 }
 
 main();
