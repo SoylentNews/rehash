@@ -81,7 +81,7 @@ sub friends {
 	my ($self) = @_;
 	my $uid = $ENV{SLASH_USER};
 	my $sql;
-	$sql .= "SELECT u.nickname, j.friend, MAX(jo.date) as date ";
+	$sql .= " SELECT u.nickname, j.friend, MAX(jo.date) as date ";
 	$sql .= " FROM journals as jo, journal_friends as j,users as u ";
 	$sql .= " WHERE j.uid = $uid AND j.friend = u.uid AND j.friend = jo.uid";
 	$sql .= " GROUP BY u.nickname ORDER BY date DESC";
@@ -122,11 +122,11 @@ sub topFriends {
 	my ($self, $limit) = @_;
 	$limit ||= 10;
 	my $sql;
-	$sql .= "SELECT count(j.uid) as c, u.nickname, j.uid, max(date)";
-	$sql .= " FROM journals as j,users as u WHERE ";
-	$sql .= " j.uid = u.uid";
-	$sql .= " GROUP BY u.nickname ORDER BY c DESC";
-	$sql .= " LIMIT $limit";
+	$sql .= " SELECT count(friend) as c, nickname, friend, max(date) ";
+	$sql .= " FROM journal_friends, users, journals ";
+	$sql .= " WHERE friend=users.uid ";
+	$sql .= " GROUP BY nickname ";
+	$sql .= " ORDER BY c DESC ";
 	$self->sqlConnect;
 	my $losers = $self->{_dbh}->selectall_arrayref($sql);
 
@@ -137,10 +137,11 @@ sub topRecent {
 	my ($self, $limit) = @_;
 	$limit ||= 10;
 	my $sql;
-	$sql .= " SELECT count(friend) as c, nickname, friend";
-	$sql .= " FROM journal_friends, users ";
-	$sql .= " WHERE friend=users.uid ";
-	$sql .= " GROUP BY friend ORDER BY c DESC";
+	$sql .= " SELECT count(jo.id), u.nickname, u.uid, MAX(jo.date) as date ";
+	$sql .= " FROM journals as jo ,users as u ";
+	$sql .= " WHERE jo.uid=u.uid ";
+	$sql .= " GROUP BY u.nickname ";
+	$sql .= " ORDER BY date DESC ";
 	$sql .= " LIMIT $limit";
 	$self->sqlConnect;
 	my $losers = $self->{_dbh}->selectall_arrayref($sql);
