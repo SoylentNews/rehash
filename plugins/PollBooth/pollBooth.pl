@@ -162,7 +162,7 @@ sub editpoll {
 sub savepoll {
 	my($form, $slashdb, $constants) = @_;
 
-	unless ($constants->{is_admin}) {
+	unless (getCurrentUser('is_admin')) {
 		default(@_);
 		return;
 	}
