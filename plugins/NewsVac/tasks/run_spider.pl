@@ -19,7 +19,9 @@
 #	performance and should not be used unless you REALLY know what you are
 #	doing.
 #
-#	* Consider adding in a limit here? *
+#	iterations = If the spiders option is not given, this value
+#	represents the maximum number of spiders that will be run during this
+#	execution.
 
 use strict;
 
@@ -51,29 +53,25 @@ $task{$me}{code} = sub {
 	$constants->{cache_enabled} = 1 
 		unless $constants->{task_options}{disable_template_cache};
 
-	# Get our plugin.
-	my $newsvac = getObject('Slash::NewsVac');
-	slashdLogDie("NewsVac Plugin failed to load, correctly!") 
-		unless $newsvac;
-
+	# Initialize Cron parser (for the timespecs).
 	my $cron = init_cron();
-	slashdLogDie("Schedule::Cron failed to load, properly!")
+	slashdLogDie('Schedule::Cron failed to load, properly!')
 		unless $cron;
 
-	# Grab spider list from database. Ideally, the plugin should provide
-	# this list instead of us going directly to the dB, but we're being
-	# fast 'n dirty, here. Clean up, later.
-	my $spiders;
-	my $st_list = $slashdb->sqlSelectAllHashrefArray(
-		'*', 'spider_timespec'
-	);
-	# And because there may be more than one timespec per miner, we 
-	# arrange it all by hash of array-refs.
-	push @{$spiders->{$_->{name}}}, $_ for @{$st_list};
+	# Initialize our plugin.
+	my $newsvac = getObject('Slash::NewsVac');
+
+	# First step: Grab all of the timespecs so we can check them.
+	my $spiders = $newsvac->getAllSpiderTimespecs();
 
 	# If we're using user-specified miner names, then we only store an
 	# array of scalars (each scalar being the name of a spider to run).
 	my @run_spiders = split(':', $constants->{task_options}{spiders});
+
+	my $iterations = 
+		$constants->{task_options}{iterations} ||
+		$constants->{slashd_max_spiders};
+	undef $iterations if $iterations == 0;
 
 	my $now = $slashdb->sqlSelect('UNIX_TIMESTAMP()');
 	if (! @run_spiders) {
@@ -84,16 +82,28 @@ $task{$me}{code} = sub {
 					$_->{timespec}, $_->{last_run}
 				);
 
-				slashdLog("$s Times: $next_time. ($now)");
-	
-				if ($next_time < $now || !$_->{last_run}) {
+				slashdLog(<<EOT) if verbosity() >= 3;
+$s Times: $_->{timespec} | $next_time | $now | $_->{last_run}
+EOT
+					
+				if ($next_time <= $now || !$_->{last_run}) {
 					# If no user-specified miners, we push
 					# an array ref of:
 					# 	(minername, timespec ID)
 					push 	@run_spiders, 
 						[$s, $_->{timespec_id}];
 
-					slashdLog("Running $s");
+					my $data = {
+						spider	=> $s,
+						count	=> $iterations,
+					};
+					slashdLog(
+						getData(
+							'task_spider_stale', 
+							$data
+						)
+					) if verbosity() >=2 ;
+
 					last;
 				}
 			}
@@ -103,15 +113,20 @@ $task{$me}{code} = sub {
 	# We hope this routine is FORKED from slashd, because the only safe
 	# thing to do at this point is to execute each spider that hasn't
 	# been run since the last time it was checked. If this task isn't
-	# being forked, it could be a long time before other site tasks 
-	# are executed.
+	# executed with a non-blocking fork, it may be a long time before
+	# oher tasks are executed.
 	my(@executed_spiders);
-	for (@run_spiders) {
-		my $spider_name = ref $_ ? $_->[0] : $_;
+	for my $rs (@run_spiders) {
+		# We gotta use a locally defined loop variable here because
+		# $_ is unsafe with all of the calls to $newsvac methods.
+		my $spider_name = (ref $rs eq 'ARRAY') ? $rs->[0] : $rs;
+
+		slashdLog("Running spider '$spider_name'") 
+			if verbosity() >=2;
 
 		# Lock NewsVac, which forces its error messages into its 
 		# own log file and also does poor man's resource locking
-		# in the lack anything better.
+		# in the lack of anything better. 
 		$newsvac->lockNewsVac();
 
 		# Execute miner.
@@ -119,34 +134,50 @@ $task{$me}{code} = sub {
 		# Perform ROBOsubmission only if the spider exists.
 		$newsvac->robosubmit() unless $rc == 0;
 
-		# Any Clean up?
-
 		# Don't write to the database if miners were user-specified.
 		# This can be determined simply by whether or not our loop
-		# value is a reference.
-		if (ref $_ eq 'ARRAY') {
-			$slashdb->sqlUpdate('spiders', {
-				-last_run => 'UNIX_TIMESTAMP()'
-			}, "timespec_id=$_->[1]");
+		# value is an array reference.
+		if (ref $rs eq 'ARRAY') {
+			slashdLog("Updating timespec_id $rs->[1]");
+
+			# Consider adding a "duration" field to 
+			# spider_timespecs and recording that info with this
+			# call as well.
+			$newsvac->markTimespecAsRun($rs->[1]);
 		}
 
 		push @executed_spiders, $spider_name;
+
+		# Reset our NewsVac object to as close to pristine as wecan
+		# get it.
+		$newsvac->Reset();
+
+		# Honor the max iteration count if it has been defined.
+		if (defined $iterations) {
+			last if ! --$iterations;
+		}
 	}
 
 	# Restore $user.
 	$user->{currentPage} = $oldPage;
 
-	return "Spiders executed: " .  join(' ', @executed_spiders) 
-		if @executed_spiders;
-	return "No spiders executed.";
+	my $summary;
+	$summary = @executed_spiders ? 
+		"Spiders executed: " .  join(' ', @executed_spiders) :
+		"No spiders executed.";
+
+	# If forked, log the summary -- Actually, the idiom used here is 
+	# incorrect, since it assumes that slashd will fork if the task
+	# preference for forking is honored. What Slashd may need to do for
+	# such tasks is to set $task{$me}{forked} so the task knows that the
+	# fork did indeed occur, rather than just running based on its 
+	# preference.
+	#
+	# In the meantime, this is left here as a reminder.
+	slashdLog($summary) if $task{$me}{'fork'} && $0 =~ m!/slashd!;
+
+	return $summary;
 };
-
-
-#sub init_cron {
-#	sub null_dispatcher { die "null_dispatcher called, there's a bug" }
-#	my $cron = Schedule::Cron->new(\&null_dispatcher);
-#	return $cron;
-#}
 
 
 1;

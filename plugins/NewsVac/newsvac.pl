@@ -476,7 +476,7 @@ sub show_miner_rel_info {
 		}
 	}
 
-	slashDisplay('show_miner_rel_info', { 
+	slashDisplay('showMinerRelInf', { 
 		arrayref 	=> $ar,
 	});
 }
@@ -739,7 +739,7 @@ sub updateSpider {
 			next if !defined $1;
 			my $id = $1;
 
-			# Test the given timespec.
+			# Test the given timespec only if we aren't deleting it.
 			eval {
 				sub dispatch { };
 				
@@ -747,7 +747,7 @@ sub updateSpider {
 				$cron->get_next_execution_time(
 					$form->{"timespec_${id}_timespec"}
 				);
-			};
+			} unless $form->{"timespec_${id}_del"};
 			if ($@) {
 				my $err = <<EOT;
 Error in '$form->{"timespec_${id}_timespec"}': $@

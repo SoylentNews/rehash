@@ -3,13 +3,13 @@ default
 __description__
 
 __title__
-
+show_miner_rel_info
 __page__
 newsvac
 __lang__
 en_US
 __name__
-show_miner_rel_info
+showMinerRelInf
 __template__
 <p>
 <table width="100%">

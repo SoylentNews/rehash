@@ -59,6 +59,8 @@ use base 'Slash::DB::MySQL';
 use Fcntl;
 use POSIX qw( tmpnam );
 use FileHandle;
+use File::Path;
+use File::Spec::Functions;
 use Time::HiRes;
 use Time::Local;
 use Digest::MD5;
@@ -121,32 +123,60 @@ sub new {
 	$self->{virtual_user} = $user;
 	$self->sqlConnect;                   
 
-	# Create the user agent.
-	my $ua_class = $self->{ua_class};
+	# Establish the options for use in the constructor of 
+	# $self->{hp}.
+	$self->{hp_options} = {
+		api_version	=> 3,
+		text_h		=> [ [ ], 'dtext' ],
+	};
+
+	# Now perform class initializations.
+	$self->Reset();
+
+	return $self;
+}
+
+############################################################
+# Clean up object and reset all member variables.
+sub Reset { 
+	my($self) = @_;
+
+	# Remove the lock file.
+	if ($self->{using_lock}) {
+		_doLockRelease('newsvac');
+		$self->{using_lock} = 0;
+		# Give the filesystem time to remove the PID file.
+		sleep 1;
+	}
+
+	# Use any resetting procedures defined by the super-class.
+	$self->init();
+	# XXX --- Left out of the SUPER: backport?
+	# Nuke the cache elements, too.
+	delete $self->{$_} for grep { /_cache_?/ } keys %{$self};
+	# XXX ---
+
+	# Delete stale data members.
+	delete $self->{sd};
+	# Reset others to sensible start-up values.
+	$self->timing_clear();
+
+	# Reinitialize our sub-classes.
+	delete $self->{ua};
+	delete $self->{hp};
+
+	my($ua_class, $hp_class) = @{$self}{qw(ua_class hp_class)};
+
+	# User-Agent Class initialization.
 	$self->{ua} = $ua_class->new();
 	$self->{ua}->agent(getData('spider_useragent', {
 		version => $VERSION,
 	}));
 	$self->{ua}->cookie_jar(new HTTP::Cookies);
 
-	# and the parsing object.
+	# Parser Class initialization.
+	$self->{hp} = $hp_class->new(%{$self->{hp_options}});
 	$self->{hp_parsedtext} = [ ];
-	my $hp_class = $self->{hp_class};
-
-	$self->{hp} = $hp_class->new(
-		api_version	=> 3,
-		text_h		=> [$self->{hp_parsedtext}, 'dtext'],
-	);
-
-	return $self;
-}
-
-############################################################
-
-# Destructor which formally removes the lock.
-sub DESTROY { 
-	my($self) = @_;
-	doLogExit('newsvac') if $self->{using_lock}; 
 }
 
 ############################################################
@@ -194,7 +224,8 @@ sub lockNewsVac {
 	my($self) = @_;
 
 	eval {
-		doLogInit('newsvac');
+		_doLogInit('newsvac');
+		_doLock();
 	};
 	# This is not an equality test. This is an assignment-null test.
 	if ($_ = $@) {
@@ -2343,7 +2374,7 @@ Foooooooo.
 =cut
 
 sub get_parse_code_method {
-	my ($self, $code) = @_;
+	my($self, $code) = @_;
 
 	return \&parse_html_linkextor	if $code eq 'html_linkextor';
 	return \&parse_miner		if $code eq 'miner';
@@ -5144,6 +5175,51 @@ sub setSpider {
 
 ############################################################
 
+=head2 markTimespecAsRun(timespec_id)
+
+Marks a given timespec in the 'spider_timespec' table with
+the current timestamp indicating that its run has been
+successful at this time.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $timespec_id
+
+Numeric value containing ID of timespec that was used in spider run.
+
+=back
+
+=item Return value
+
+Result of Slash::DB::sqlUpdate() call that sets the spider data.
+
+=item Side effects
+
+Updates the 'last_run' field of the corresponding row in the 'spider_timespec'
+table.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
+sub markTimespecAsRun {
+	my($self, $timespec_id) = @_;
+
+	$self->sqlUpdate('spider_timespec', {
+		-last_run => 'UNIX_TIMESTAMP()',
+	}, 'timespec_id=' . $self->sqlQuote($timespec_id));
+}
+
+############################################################
+
 =head2 setSpiderTimespecs(spider_id, timespecs)
 
 Update's the data for a given spider in the NewsVac database.
@@ -5267,6 +5343,52 @@ sub getSpiderTimespecs {
 	return $returnable;
 }
 
+############################################################
+
+=head2 getAllSpiderTimespecs( )
+
+Retrieves all time specifications and stores the data into a hash reference using
+the spider names as keys.
+
+=over 4
+
+=item Parameters
+
+None.
+
+=item Return value
+
+Returns a hashref with spider names as keys and an array reference of timespec
+data as the associated value. Each element in the array ref represents a distinct time
+specification for that spider.
+
+=item Side effects
+
+None.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
+sub getAllSpiderTimespecs {
+	my($self) = @_;
+
+	# Grab spider timespecs list from database.
+	my $returnable;
+	my $st_list = $self->sqlSelectAllHashrefArray(
+		'*', 'spider_timespec'
+	);
+
+	# And because there may be more than one timespec per miner, we 
+	# arrange it all by hash of array-refs.
+	push @{$returnable->{$_->{name}}}, $_ for @{$st_list};
+
+	return $returnable;
+}
 
 ############################################################
 
@@ -5567,6 +5689,7 @@ sub deleteKeyword {
 }
 
 ############################################################
+
 =head2 sqlInsert($table, $data, [, $extra])
 
 Overrides Slash::DB::Utility::sqlInsert() to allow for the 
@@ -5610,6 +5733,7 @@ Inserts rows into the table specified.
 =back
 
 =cut
+
 sub sqlInsert {
 	my($self, $table, $data, $extra) = @_;
 	my($names, $values);
@@ -5639,144 +5763,8 @@ sub sqlInsert {
 	return $self->sqlDo($sql);
 }
 
-############################################################
-=head2 setSubmission($subid, $data)
-
-Overrides Slash::DB::MySQL::setSubmission
-
-This may eventually get backported to the core. I hope so.
-
-=over 4
-
-=item Parameters
-
-=over 4
-
-=item $subid
-
-The submission ID to update.
-
-=item $data
-
-Hashref containing the data to update, with keys in the hash matching to the
-fieldnames of the 'submission' table. Any element in the hashref that does
-not match a field name in that table will be an assumed parameter and stored
-in the 'submissions_param' table.
-
-=back
-
-=item Return value
-
-None.
-
-=item Side effects
-
-Changes the associated record in the 'submissions' and/or 'submission_param'
-tables.
-
-=item Dependencies
-
-=back
-
-=cut
-sub setSubmission {
-	my($self, $subid, $data) = @_;
-	my(@param, %update_tables, $cache);
-
-	my $param_table = 'submission_param';
-
-	$cache = _genericGetCacheName($self, 'submissions');
-	my %update_data;
-	for (keys %{$data}) {
-		my($clean_val);
-
-		($clean_val = $_) =~ s/^-//;
-		my $key = $self->{$cache}{$clean_val};
-
-		# $update_table{$key} should either be null or 'submissions'.
-		if ($key) {
-			$update_data{$_} = $data->{$_} if defined $data->{$_};
-		} else {
-			push @param, [$_, $data->{$_}];
-		}
-	}
-
-	# Write to main table.
-	$self->sqlUpdate(
-		'submissions', 
-		\%update_data, 
-		'subid=' . $self->sqlQuote($subid)
-	) if keys %update_data;
-
-	# Write to param table.
-	for (@param) {
-		$self->sqlReplace($param_table, {
-			subid	=> $subid,
-			name	=> $_->[0],
-			value	=> $_->[1],
-		}) if defined $_->[1];
-	}
-}
-
-############################################################
-=head2 _genericGetCacheName($tables)
-
-This re-implements the private Slash::DB necessary for cache
-access for our overrides, above. See Slash::DB::_getGenericCacheName()
-for more details
-
-=over 4
-
-=item Parameters
-
-=over 4
-
-=item
-
-=back
-
-=item Return value
-
-
-=item Side effects
-
-
-=item Dependencies
-
-=back
-
-=cut
-
-# I don't know why this wasn't inherited, but it might be due to the fact that
-# it's "private" in Slash::DB::MySQL.
-sub _genericGetCacheName {
-	my($self, $tables) = @_;
-	my $cache;
-
-	if (ref($tables) eq 'ARRAY') {
-		$cache = '_' . join ('_', sort(@{$tables}), 'cache_tables_keys');
-		unless (keys %{$self->{$cache}}) {
-			for my $table (@{$tables}) {
-				my $keys = $self->getKeys($table);
-				for (@{$keys}) {
-					$self->{$cache}{$_} = $table;
-				}
-			}
-		}
-	} else {
-		$cache = '_' . $tables . 'cache_tables_keys';
-		unless (keys %{$self->{$cache}}) {
-			my $keys = $self->getKeys($tables);
-			for (@{$keys}) {
-				$self->{$cache}{$_} = $tables;
-			}
-		}
-	}
-	return $cache;
-}
-
-
 ##############################################################
+
 =head2 errLog(message_list)
 
 Writes an error message to the proper log file. If this module
@@ -5809,13 +5797,14 @@ None.
 =back
 
 =cut
+
 sub errLog {
 	my($self) = @_;
 
 	# We get a little obtuse to avoide the allergic reactions from use
 	# of shift().
 	if ($self->{use_locking}) {
-		doLog('newsvac', [ @_[1..$#_] ]);
+		_doLog('newsvac', [ @_[1..$#_] ]);
 		return;
 	}
 
@@ -5824,12 +5813,118 @@ sub errLog {
 }
 
 
+=head1 UTILITY FUNCTIONS
+
+These functions are part of NewsVac, but are not exported and are considered
+private.
+
+=cut
+
 ############################################################
 # These are not methods, but utility functions.  Don't pass them $self!
 # These should probably be private.
 ############################################################
 
+=head2 _doLogInit( )
+
+Creates a log file in the data directory, using the given parameter.
+
+=over 4
+
+=item Parameters
+
+None.
+
+=item Return value
+
+None
+
+=item Side effects
+
+None.
+
+=item Dependencies
+
+=back
+
+=cut
+
+sub _doLogInit {
+	my($fname) = 'newsvac';
+
+	my $dir     = getCurrentStatic('logdir');
+	my $file    = catfile($dir, "$fname.log");
+
+	mkpath $dir, 0, 0775;
+	open(STDERR, ">> $file\0") or die "Can't append STDERR to $file: $!";
+	_doLog($fname, ["Placing lock $fname"]);
+}
+
+sub _doLock {
+	my($fname) = 'newsvac';
+
+	my $fh      = gensym();
+	my $dir     = getCurrentStatic('logdir');
+	my $file    = catfile($dir, "$fname.lock");
+
+	# Question, why do we do this? Can't we kill use this 
+	# information instead of having to remove the pid file
+	# every time slashd crashes? -- Cliff
+	if (-r $file) {
+		die "Cannot read LOCK file, ${file}:\n$!\n"
+			if !open(LOCK, $file);
+		my $lock = <LOCK>;
+		close LOCK;
+		chomp($lock);
+		# This isn't 100% but WILL prevent us from restarting
+		# a daemon over an existing copy, which was the 
+		# intent, right?
+		die "Please stop existing $fname (lock '$lock'), first";
+	}
+
+	open $fh, "> $file\0" or die "Can't open $file: $!";
+	printf $fh "$$ %s", scalar localtime;
+	close $fh;
+
+	# do this for all things, not just ones needing a .pid
+	$SIG{TERM} = $SIG{INT} = sub {
+		_doLog($fname, ["Removing lock $fname"]);
+		unlink $file;
+		exit 0;
+	};
+}
+
+sub _doLockRelease {
+	my($fname) = 'newsvac';
+
+	my $dir     = getCurrentStatic('logdir');
+	my $file    = catfile($dir, "$fname.lock");
+
+	_doLog($fname, ["Releasing lock $fname"]);
+	# fails silently even if $file does not exist
+	unlink $file;
+}
+
+sub _doLog {
+	my($fname, $msg, $stdout, $sname) = @_;
+	chomp(my @msg = @$msg);
+
+	$sname    ||= '';
+	$sname     .= ' ' if $sname;
+	my $fh      = gensym();
+	my $dir     = getCurrentStatic('logdir');
+	my $file    = catfile($dir, "$fname.log");
+	my $log_msg = scalar(localtime) . " $sname@msg\n";
+
+	open $fh, ">> $file\0" or die "Can't append to $file: $!\nmsg: @msg\n";
+	print $fh $log_msg;
+	print     $log_msg if $stdout;
+	close $fh;
+}
+
+
 ############################################################
+
 =head2 foo( [, ])
 
 Foooooooo.
@@ -6056,7 +6151,11 @@ sub round {
 	my $sign = ($exp >= 0) ? -1 : 1;
 	my $base = ($sign == 1) ? 10 ** ($sign * abs($exp) + 1) : 1;
 	my $adjnum = ($sign == 1) ? $num * $base : $num;
-	my $rounder = 0.5 * (10 ** ($sig - 1));
+
+	# I think this is being applied incorrectly, for now, just round to the
+	# nearest 1 and see how things look
+	#my $rounder = 0.5 * (10 ** ($sig - 1));
+	my $rounder = 0.5;
 	
 	return int($adjnum + $rounder) / $base;
 }

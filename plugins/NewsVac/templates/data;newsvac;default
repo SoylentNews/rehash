@@ -512,7 +512,7 @@ Master query regular expression used: "[% regex %]"
 
 [% CASE "robosubmit_result" -%]
 -- robosubmit: Completed!
-Out of original [% total %], [% worth %] worthy, [% unworthy %] unworthy in [%
+Out of original [% total %], [% worthy %] worthy, [% unworthy %] unworthy in [%
 duration -%] seconds.
 
 [% CASE "show_miner_rel_info" -%]
@@ -614,5 +614,8 @@ Access denied. Your security level isn't high enough. Sorry.
 
 [% CASE "invalid_op" -%]
 Invalid Operation '[% form.op %]' specified. No such operation exists.
+
+[% CASE "task_spider_stale" -%]
+Spider '[% spider %]' is stale [% IF count %](iter: [% count %])[% END -%]
 
 [% END %]
