@@ -787,8 +787,13 @@ sub moderatorCommentLog {
 	my $title = $options->{title};
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
 
-	my $seclev = getCurrentUser('seclev');
+	# If the user doesn't want even to see the numeric score of
+	# a comment, they certainly don't want to see all this detail.
+	return "" if $user->{noscores};
+
+	my $seclev = $user->{seclev};
 	my $mod_admin = $seclev >= $constants->{modviewseclev} ? 1 : 0;
 
 	my $asc_desc = $type eq 'cid' ? 'ASC' : 'DESC';
