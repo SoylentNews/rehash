@@ -2,6 +2,7 @@
 description="Admin Interface"
 name=Admin
 mysql_dump=dump
+mysql_schema=mysql_schema.sql
 pg_dump=dump
 htdoc=admin.pl
 task=refresh_uncommon.pl
