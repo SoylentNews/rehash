@@ -7359,26 +7359,26 @@ sub updateStory {
 
 }
 
-sub _getSlashConf_rawvars {
-	my($self) = @_;
-	my $mcd = $self->getMCD();
-	my $mcdkey;
-	my $got_from_memcached = 0;
-	my $vars_hr;
-	if ($mcd) {
-		$mcdkey = "$self->{_mcd_keyprefix}:vars";
-		if ($vars_hr = $mcd->get($mcdkey)) {
-			$got_from_memcached = 1;
-		}
-	}
-	$vars_hr ||= $self->sqlSelectAllKeyValue('name, value', 'vars');
-	if ($mcd && !$got_from_memcached) {
-		# Cache this for about 10 minutes.
-		my $expire_time = $vars_hr->{story_expire} || 600;
-		$mcd->set($mcdkey, $vars_hr, $expire_time);
-	}
-	return $vars_hr;
-}
+#sub _getSlashConf_rawvars {
+#	my($self) = @_;
+#	my $mcd = $self->getMCD();
+#	my $mcdkey;
+#	my $got_from_memcached = 0;
+#	my $vars_hr;
+#	if ($mcd) {
+#		$mcdkey = "$self->{_mcd_keyprefix}:vars";
+#		if ($vars_hr = $mcd->get($mcdkey)) {
+#			$got_from_memcached = 1;
+#		}
+#	}
+#	$vars_hr ||= $self->sqlSelectAllKeyValue('name, value', 'vars');
+#	if ($mcd && !$got_from_memcached) {
+#		# Cache this for about 10 minutes.
+#		my $expire_time = $vars_hr->{story_expire} || 600;
+#		$mcd->set($mcdkey, $vars_hr, $expire_time);
+#	}
+#	return $vars_hr;
+#}
 
 ########################################################
 # Now, the idea is to not cache here, since we actually
@@ -7387,11 +7387,17 @@ sub _getSlashConf_rawvars {
 sub getSlashConf {
 	my($self) = @_;
 
-	# Get the raw vars data (possibly from a memcached cache).
+#	# Get the raw vars data (possibly from a memcached cache).
+#
+#	my $vars_hr = $self->_getSlashConf_rawvars();
+#	return if !defined $vars_hr;
+#	my %conf = %$vars_hr;
 
-	my $vars_hr = $self->_getSlashConf_rawvars();
-	return if !defined $vars_hr;
-	my %conf = %$vars_hr;
+	# get all the data, yo! However make sure we can return if any DB
+	# errors occur.
+	my $confdata = $self->sqlSelectAll('name, value', 'vars');
+	return if !defined $confdata;
+	my %conf = map { $_->[0], $_->[1] } @{$confdata};
 
 	# Now start adding and tweaking the data for various reasons:
 	# convenience, fixing bad data, etc.
