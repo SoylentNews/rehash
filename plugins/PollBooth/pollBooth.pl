@@ -160,16 +160,15 @@ sub savepoll {
 #################################################################
 sub vote {
 	my($qid, $aid) = @_;
-	my($minaid, $maxaid);
 
 	my $qid_dbi = $I{dbh}->quote($qid);
 
-	# Existence check. $minaid is included since I'm not sure if it will 
-	# always be one.
-	($minaid,$maxaid) = 
-		sqlSelect("min(aid),max(aid)", "pollanswers", "qid=$qid_dbi") if $qid;
-	if (!$minaid && !$maxaid) {
-		print "Invalid poll!<BR>";
+	# get valid answer IDs
+	my(%all_aid) = map { ($_->[0], 1) }
+		@{sqlSelectAll("aid", "pollanswers", "qid=$qid_dbi")} if $qid;
+
+	if (! keys %all_aid) {
+ 		print "Invalid poll!<BR>";
 		# Non-zero denotes error condition and that comments should not be 
 		# printed.
 		return 1;
@@ -181,6 +180,7 @@ sub vote {
 	if ($I{U}{uid} == -1 && ! $I{allow_anonymous}) {
 		$notes = "You may not vote anonymously.  " .
 		    qq[Please <A HREF="$I{rootdir}/users.pl">log in</A>.];
+
 	} elsif ($aid > 0) {
 		my($id) = sqlSelect("id","pollvoters",
 			"qid=$qid_dbi AND 
@@ -194,7 +194,7 @@ sub vote {
 				$notes .= " (proxy for $ENV{HTTP_X_FORWARDED_FOR})";
 			}
 
-		} elsif ($aid >= $minaid && $aid <= $maxaid) {
+		} elsif (exists $all_aid{$aid}) {
 			$notes = "Your vote ($aid) has been registered.";
 			sqlInsert("pollvoters", {
 				qid	=> $qid, 
