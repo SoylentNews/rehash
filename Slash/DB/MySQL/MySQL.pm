@@ -3467,9 +3467,14 @@ sub markNexusDirty {
 
 ########################################################
 sub markSkinClean {
-	my($self, $id) = @_;
-	my $nexus = $self->getNexusFromSkid($self->getSkidFromName($id));
-	errorLog("no nexus found for id '$id'") if !$nexus;
+	my($self, $skid) = @_;
+	my $skid_q = $self->sqlQuote($skid);
+	$self->sqlUpdate(
+		"skins",
+		{ -last_rewrite => 'NOW()' },
+		"skid = $skid_q");
+	my $nexus = $self->getNexusFromSkid($self->getSkidFromName($skid));
+	errorLog("no nexus found for id '$skid'") if !$nexus;
 	$self->sqlDelete('topic_nexus_dirty', "tid = $nexus");
 }
 
@@ -6019,7 +6024,7 @@ sub createMetaMod {
 			-lastmm =>	'NOW()',
 			mods_saved =>	'',
 		}, "uid=$m2_user->{uid} AND mods_saved != ''");
-		$self->setUser_delete_memcached_by_stoid($m2_user->{uid});
+		$self->setUser_delete_memcached($m2_user->{uid});
 		if (!$rows) {
 			# The update failed, presumably because the user clicked
 			# the MetaMod button multiple times quickly to try to get

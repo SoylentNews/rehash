@@ -286,12 +286,13 @@ $task{$me}{code} = sub {
 	if ($constants->{task_options}{run_all}) {
 		$dirty_skins = [ keys %{ $skins                    } ];
 	} else {
-		$dirty_skins = [ keys %{ $slashdb->getSkinsDirty() } ];
+		$dirty_skins = $slashdb->getSkinsDirty();
 	}
 	for my $cleanme (@$dirty_skins) { $dirty_skins{$cleanme} = 1 }
 
 	$args = "$vu ssi=yes";
 	if ($dirty_skins{$constants->{mainpage_skid}} ne "" || $w ne "ok") {
+		my $mp_skid = $constants->{mainpage_skid};
 		my($base) = split(/\./, $gSkin->{index_handler});
 		$slashdb->setVar("writestatus", "ok");
 		prog2file(
@@ -301,6 +302,8 @@ $task{$me}{code} = sub {
 				verbosity =>	verbosity(),
 				handle_err =>	0
 		});
+		$slashdb->markSkinClean($mp_skid);
+		delete $dirty_skins{$mp_skid};
 	}
 
 	if ($do_all) {

@@ -2352,15 +2352,11 @@ sub getTopRecentRealemailDomains {
 sub getSkinsDirty {
 	my($self) = @_;
 	my $skin_ids = $self->sqlSelectColArrayref(
-		'DISTINCT skid', 'skins, topic_nexus_dirty',
-		'skins.nexus = topic_nexus_dirty.tid
+		'DISTINCT skid',
+		'skins LEFT JOIN topic_nexus_dirty ON skins.nexus = topic_nexus_dirty.tid',
+		'topic_nexus_dirty.tid IS NOT NULL
 		 OR skins.last_rewrite < DATE_SUB(NOW(), INTERVAL max_rewrite_secs SECOND)');
-	my $skins = $self->getSkins();
-	my $ret_hr = { };
-	for my $id (@$skin_ids) {
-		$ret_hr->{$id} = { %{$skins->{$id}} };
-	}
-	return $ret_hr;
+	return $skin_ids || [ ];
 }
 
 ########################################################
