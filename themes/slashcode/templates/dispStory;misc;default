@@ -41,9 +41,9 @@ END %]
 		<TD BACKGROUND="[% constants.imagedir %]/gl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 		<TD BGCOLOR="#E6E6E6" WIDTH="100%">
 			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR>
-				<TD BGCOLOR="#E6E6E6">
+				<TD BGCOLOR="[% IF story.is_future; "#CCCCFF"; ELSE; "#E6E6E6"; END %]">
 					<FONT FACE="[% constants.mainfontface %]" SIZE="1">posted by <A HREF="[% author.homepage %]">[% author.nickname %]</A>
-						[% user.aton %] [% story.storytime %]</FONT>
+						[% story.atstorytime %]</FONT>
 						[% IF constants.plugin.Print %] 
 							&nbsp;&nbsp;<A HREF="[% constants.rootdir -%]/print.pl?sid=[% story.sid %]"><IMG SRC="[% constants.imagedir %]/print.gif" BORDER="0"></A>
 						[% END %]
@@ -60,7 +60,7 @@ END %]
 	<TR>
 		<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
 		<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%">
-			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.bg.1 %]">
+			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% IF story.is_future; "#CCCCFF"; ELSE; user.bg.1; END %]">
 				[% IF user.noicons %][ <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><B>[% topic.alttext %]</B></A> ]
 				[% ELSE %]<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"
 					><IMG SRC="[% topic.image %]" WIDTH="[% topic.width %]"

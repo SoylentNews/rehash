@@ -19,8 +19,8 @@ sub main {
 	my $story;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	#Yeah, I am being lazy and paranoid  -Brian
-	#Always check the main DB for story status since it will always be accurate -Brian
+	# Yeah, I am being lazy and paranoid  -Brian
+	# Always check the main DB for story status since it will always be accurate -Brian
 	if (!($user->{author} || $user->{is_admin})
 		&& !$slashdb->checkStoryViewable($form->{sid})) {
 		$story = '';
@@ -30,7 +30,7 @@ sub main {
 
 	if ($story) {
 		my $SECT = $slashdb->getSection($story->{section});
-    # This should be a getData call for title
+		# This should be a getData call for title
 		my $title = "$constants->{sitename} | $story->{title}";
 		$story->{introtext} = parseSlashizedLinks($story->{introtext});
 		$story->{bodytext} =  parseSlashizedLinks($story->{bodytext});
@@ -45,6 +45,11 @@ sub main {
 							past => $past,
 							future => $future,
 						}, { Return => 1 });
+		}
+
+		if ($story->{is_future}) {
+			$story->{time} = $constants->{subscriber_future_name};
+			$user->{state}{buyingpage} = 1;
 		}
 
 		# set things up to use the <LINK> tag in the header
@@ -77,16 +82,21 @@ sub main {
 			prev			=> $prev,
 		});
 
-		#Still not happy with this logic -Brian
+		# Still not happy with this logic -Brian
 		if ($story->{discussion}) {
 			my $discussion = $reader->getDiscussion($story->{discussion});
-			# This is to get tid in comments. It would be a mess to pass it directly to every comment -Brian
+			$discussion->{is_future} = $story->{is_future};
+			# This is to get tid in comments. It would be a mess to pass it
+			# directly to every comment -Brian
 			my $tids = $reader->getStoryTopicsJustTids($story->{sid}); 
 			my $tid_string = join('&amp;tid=', @$tids);
 			$user->{state}{tid} = $tid_string;
-			# If no comments ever have existed just skip the display of the comment header bar -Brian
+			# If no comments ever have existed just skip the display
+			# of the comment header bar -Brian
 			printComments($discussion)
-				if $discussion && !($discussion->{commentcount} > 0 && $discussion->{commentstatus} eq 'disabled');
+				if $discussion
+					&& !( $discussion->{commentcount} > 0
+						&& $discussion->{commentstatus} eq 'disabled' );
 		}
 	} else {
 		my $message = getData('no_such_sid');

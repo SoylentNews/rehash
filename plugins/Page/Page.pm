@@ -145,9 +145,12 @@ sub displayStories {
 
 	my $storystruct = [];
 
-	my $stories = $self->getStoriesEssentials(
+	my $ess_hr = $self->getStoriesEssentials(
 		$limit, $section, $tid, $misc
 	);
+	my $stories = $ess_hr->{stories};
+	$user->{state}{buyingpage} = 1 if $ess_hr->{seeing_future};
+
 	my $i = 0;
 
 	# Now the loop below can be replaced by:
@@ -158,7 +161,12 @@ sub displayStories {
 		my $section = $story->[1];
 		my $title = $story->[2];
 		my $time = $story->[9];
-		my $storytime = timeCalc($time, '%B %d, %Y');
+		my $atstorytime;
+		if ($story->{is_future}) {
+			$atstorytime = $constants->{subscribe_future_name};
+		} else {
+			$atstorytime = $user->{aton} . " " . timeCalc($time, '%B %d, %Y');
+		}
 
 		if ($other->{titles_only}) {
 			my $storycontent = $self->getStoryTitleContent({ 
@@ -200,7 +208,11 @@ sub prepareStory {
 
 	return if ! $storyref;
 
-	$storyref->{storytime} = timeCalc($storyref->{'time'});
+	if ($storyref->{is_future}) {
+		$storyref->{atstorytime} = $constants->{subscribe_future_name};
+	} else {
+		$storyref->{atstorytime} = $user->{aton} . " " . timeCalc($storyref->{'time'});
+	}
 
 	$storyref->{introtext} = parseSlashizedLinks($storyref->{introtext});
 	$storyref->{bodytext} =  parseSlashizedLinks($storyref->{bodytext});

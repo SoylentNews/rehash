@@ -13,6 +13,9 @@ en_US
 __name__
 mainmenu
 __template__
+[% IF user.state.buyingpage %]
+<NOBR>$-Paid-Page-$</NOBR><P>
+[% END %]
 		<A HREF="[% constants.rootdir %]/about.shtml">About</A><BR>
 		<A HREF="[% constants.rootdir %]/faq.shtml">FAQ</A><BR>
 		<A HREF="[% constants.rootdir %]/comments.pl">Discussions</A><BR>

@@ -43,8 +43,9 @@ sub main {
 
 	my $artcount = $user->{is_anon} ? $section->{artcount} : $user->{maxstories};
 
-	my $title = getData('head', { section => $section });
-	header($title, $section->{section});
+	# The {buyingpage} state must be set before header() is called to
+	# properly display the mainmenu in the left column.
+	
 
 	my $limit = $artcount;
 	if ($form->{issue}) {
@@ -53,10 +54,23 @@ sub main {
 		$limit = $user->{maxstories};
 	}
 
-	$stories = $reader->getStoriesEssentials(
+	my $ess_hr = $reader->getStoriesEssentials(
 		$limit, $form->{section},
 		'',
 	);
+	$stories = $ess_hr->{stories};
+	$user->{state}{buyingpage} = 1 if $ess_hr->{seeing_future};
+
+	my $title = getData('head', { section => $section });
+	header($title, $section->{section});
+
+	for my $story (@$stories) {
+		if ($story->[10]) {
+			$story->[3] =
+				$story->[5] =
+				$story->[7] = $constants->{subscriber_future_name};
+		}
+	}
 
 	# displayStories() pops stories off the front of the @$stories array.
 	# Whatever's left is fed to displayStandardBlocks for use in the

@@ -18,18 +18,21 @@ __template__
 <TR><TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]" SIZE="2">
 		[% IF discussion.commentstatus == "disabled" %]
 			New comment creation has been disabled on this discussion.
+		[% ELSIF discussion.is_future %]
+			Posting will only be possible
+			[% constants.subscribe_future_name %]
 		[% ELSIF discussion.commentstatus == "friends_only" %]
 			[% d_nickname = Slash.db.getUser(discussion.uid, 'nickname') %]
 			This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" SIZE="2">[% d_nickname %] ([% discussion.uid %])</FONT></A> as friends only. Offer them a bribe and maybe they will let you post.
 		[% ELSIF discussion.commentstatus == "friends_fof_only" %]
 			[% d_nickname = Slash.db.getUser(discussion.uid, 'nickname') %]
-			This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" SIZE="2">[% d_nickname %] ([% discussion.uid %])</FONT></A> as friends and friend's of friends only. Offer them or one of their friends a bribe and maybe they will let you post.
+			This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" SIZE="2">[% d_nickname %] ([% discussion.uid %])</FONT></A> as friends and friends of friends only. Offer them or one of their friends a bribe and maybe they will let you post.
 		[% ELSIF discussion.commentstatus == "no_foe" %]
 			[% d_nickname = Slash.db.getUser(discussion.uid, 'nickname') %]
 			This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" SIZE="2">[% d_nickname %] ([% discussion.uid %])</FONT></A> as no Foes. They don't want you in their sandbox.
 		[% ELSIF discussion.commentstatus == "no_foe_eof" %]
 			[% d_nickname = Slash.db.getUser(discussion.uid, 'nickname') %]
-			This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" SIZE="2">[% d_nickname %] ([% discussion.uid %])</FONT></A> as no Foes and no Friend's foes. They and their friends think you suck.
+			This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname | fixparam %]/"><FONT COLOR="[% user.fg.3 %]" SIZE="2">[% d_nickname %] ([% discussion.uid %])</FONT></A> as no Foes and no Friends' foes. They and their friends think you suck.
 		[% ELSE %]
 			This discussion has been archived.
 			No new comments can be posted.

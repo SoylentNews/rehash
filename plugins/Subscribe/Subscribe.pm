@@ -56,6 +56,9 @@ sub _subscribeDecisionPage {
                 ||  !$uid
                 ||   $user->{is_anon};
 
+	# Any part of the code can set this user state variable at any time.
+	return 1 if $user->{state}{buyingpage};
+
 	# If the user hasn't paid for any pages, or has already bought
 	# (used up) all the pages they've paid for, then they are not
 	# buying this one.

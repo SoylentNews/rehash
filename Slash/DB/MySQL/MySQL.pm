@@ -1980,7 +1980,27 @@ sub checkStoryViewable {
 	my($self, $sid) = @_;
 	return unless $sid;
 
-	my $count = $self->sqlCount('stories', "sid='$sid' AND  displaystatus != -1 AND time < now()");
+	my($column_time, $where_time) = $self->_stories_time_clauses(1);
+	my $count = $self->sqlCount(
+		'stories',
+		"sid='$sid' AND displaystatus != -1 AND $where_time",
+	);
+	return $count;
+}
+
+########################################################
+# Returns 1 if and only if a discussion is viewable only to subscribers
+# (and admins).
+sub checkDiscussionIsInFuture {
+	my($self, $discussion) = @_;
+	return 0 unless $discussion && $discussion->{sid};
+	my($column_time, $where_time) = $self->_stories_time_clauses(1, 'ts');
+	my $count = $self->sqlCount(
+		'discussions',
+		"id='$discussion->{id}' AND type != 'archived'
+		 AND $where_time
+		 AND ts >= NOW()"
+	);
 	return $count;
 }
 
@@ -1989,11 +2009,18 @@ sub checkStoryViewable {
 # $id is a discussion id. -Brian
 sub checkDiscussionPostable {
 	my($self, $id) = @_;
-	return unless $id;
+	return 0 unless $id;
+	my $constants = getCurrentStatic();
 
 	# This should do it. 
-	my $count = $self->sqlSelect('id', 'discussions', "id='$id' AND  type != 'archived' AND ts < now()");
-	return unless $count;
+	my($column_time, $where_time) = $self->_stories_time_clauses(
+		$constants->{subscribe_future_post},
+		"ts");
+	my $count = $self->sqlCount(
+		'discussions',
+		"id='$id' AND type != 'archived' AND $where_time",
+	);
+	return 0 unless $count;
 
 	# Now, we are going to get paranoid and run the story checker against it
 	my $sid;
@@ -4688,7 +4715,29 @@ sub countStoriesBySubmitter {
 	return $count;
 }
 
+########################################################
+sub _stories_time_clauses {
+	my($self, $try_future, $column_name) = @_;
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	$column_name ||= "time";
+	my($is_future_column, $where);
 
+	my $secs = $constants->{subscribe_future_secs};
+	# Tweak $secs here somewhat, based on something...?
+	if ($try_future
+		&& $constants->{subscribe}
+		&& $secs
+		&& $user->{is_subscriber}) {
+		$is_future_column = "IF($column_name < NOW(), 0, 1) AS is_future";
+		$where = "$column_name < DATE_ADD(NOW(), INTERVAL $secs SECOND)";
+	} else {
+		$is_future_column = '0 AS is_future';
+		$where = "$column_name < NOW()";
+	}
+
+	return ($is_future_column, $where);
+}
 
 ########################################################
 # Be nice if we could control more of what this 
@@ -4706,13 +4755,15 @@ sub getStoriesEssentials {
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	$section ||= $constants->{section};
+	my $seeing_future = 0;
 
 	$limit ||= 15;
-	my $columns;
-	$columns = 'sid, section, title, time, commentcount, hitparade, tid';
 
-	my $where = "time < NOW() ";
-	#my $where = " time + INTERVAL 0 DAY<NOW() ";
+	my($column_time, $where_time) = $self->_stories_time_clauses(1);
+	my $columns = "sid, section, title, time, commentcount, hitparade, tid, $column_time";
+
+	my $where = "$where_time ";
+
 	# Added this to narrow the query a bit more, I need
 	# see about the impact on this -Brian
 	$where .= "AND writestatus != 'delete' ";
@@ -4805,23 +4856,28 @@ EOT
 		# storyTitleOnly template for the index page plugin
 		# I just need the raw time that's in the db
 		$data = [
-			@$data[0..4], 
-			$data->[3], 
-			$data->[5], 
-			$data->[3], 
-			$data->[6], 
-			$data->[3], 
+			@$data[0..4],
+			$data->[3],
+			$data->[5],
+			$data->[3],
+			$data->[6],
+			$data->[3],
+			$data->[7],
 		];
 		formatDate([$data], 3, 3, '%A %B %d %I %M %p');
 		formatDate([$data], 5, 5, '%Y%m%d'); # %Q
 		formatDate([$data], 7, 7, '%s');
 		next if $form->{issue} && $data->[5] > $form->{issue};
 		push @stories, [@$data];
+		$seeing_future = 1 if $data->[10];
 		last if ++$count >= $limit;
 	}
 	$cursor->finish;
 
-	return \@stories;
+	return {
+		seeing_future	=> $seeing_future,
+		stories		=> \@stories,
+	};
 }
 
 
@@ -5666,7 +5722,8 @@ sub getStory {
 		# but why do a join if it's not needed?
 		my($append, $answer, $db_id);
 		$db_id = $self->sqlQuote($id);
-		$answer = $self->sqlSelectHashref('*', 'stories', "sid=$db_id");
+		my($column_clause) = $self->_stories_time_clauses(1);
+		$answer = $self->sqlSelectHashref("*, $column_clause", 'stories', "sid=$db_id");
 		$append = $self->sqlSelectHashref('*', 'story_text', "sid=$db_id");
 		for my $key (keys %$append) {
 			$answer->{$key} = $append->{$key};

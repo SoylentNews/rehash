@@ -89,8 +89,9 @@ sub topTopics {
 			? 10 : $top->{cnt} < 3 || $form->{all}
 			? 3 : $top->{cnt};
 
+		my $ess_hr = $slashdb->getStoriesEssentials($limit, $section->{section}, $top->{tid});
 		$top->{stories} = getOlderStories(
-			$slashdb->getStoriesEssentials($limit, $section->{section}, $top->{tid}),
+			$ess_hr->{stories},
 			$section
 		);
 		if ($top->{image} =~ /^\w+\.\w+$/) {
