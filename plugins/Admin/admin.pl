@@ -1628,6 +1628,7 @@ sub updateStory {
 		dept		=> $form->{dept},
 		'time'		=> $time,
 		displaystatus	=> $form->{displaystatus},
+		commentstatus	=> $form->{commentstatus},
 		writestatus	=> $form->{writestatus},
 		bodytext	=> $form->{bodytext},
 		introtext	=> $form->{introtext},
@@ -1818,6 +1819,7 @@ sub saveStory {
 		relatedtext	=> $form->{relatedtext},
 		subid		=> $form->{subid},
 		subsection	=> $form->{subsection},
+		commentstatus	=> $form->{commentstatus},
 	};
 	my $extras = $slashdb->getSectionExtras($data->{section});
 	if ($extras && @$extras) {

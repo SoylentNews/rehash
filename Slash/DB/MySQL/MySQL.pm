@@ -5299,6 +5299,7 @@ sub createStory {
 	}
 	my $section = $self->getSection($story->{section});
 	my $rootdir = $section->{rootdir} || $constants->{rootdir};
+	my $comment_codes = $self->getDescriptions("commentcodes");
 
 	my $id = $self->createDiscussion( {
 		title		=> $story->{title},
@@ -5306,7 +5307,7 @@ sub createStory {
 		topic		=> $story->{tid},
 		url		=> "$rootdir/article.pl?sid=$story->{sid}&tid=$story->{topic}",
 		sid		=> $story->{sid},
-		commentstatus	=> $story->{commentstatus} || 'enabled',
+		commentstatus	=> $comment_codes->{$story->{commentstatus}} ? $story->{commentstatus} : getCurrentStatic('defaultcommentstatus'),
 		ts		=> $story->{'time'}
 	});
 	unless ($id) {
@@ -5345,6 +5346,8 @@ sub updateStory {
 		print STDERR "Failed to set topics for story\n";
 		goto error;
 	}
+
+	my $comment_codes = $self->getDescriptions("commentcodes");
 	my $dis_data = {
 		sid		=> $sid,
 		title		=> $data->{title},
@@ -5352,7 +5355,7 @@ sub updateStory {
 		url		=> "$constants->{rootdir}/article.pl?sid=$sid",
 		ts		=> $data->{'time'},
 		topic		=> $data->{tid},
-		commentstatus	=> $data->{commentstatus}
+		commentstatus	=> $comment_codes->{$data->{commentstatus}} ? $data->{commentstatus} : getCurrentStatic('defaultcommentstatus'),
 	};
 	unless ($self->setStoryTopics($sid, createStoryTopicData($self))) {
 		print STDERR "Failed to set topics for story\n";
