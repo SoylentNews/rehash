@@ -793,7 +793,7 @@ sub topicEdit {
 		if (!$form->{topicnew} && $form->{nexttid}) {
 			$topic = $slashdb->getTopic($form->{nexttid}, 0, 1);
 			my $topic_image = $slashdb->getTopicImage($topic->{default_image}, 0, 1);
-			%$topic = (%$topic_image, %$topic);
+			%$topic = (%$topic_image, %$topic) if ref $topic_image;
 		} else {
 			$topic = {};
 		}
