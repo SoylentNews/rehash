@@ -83,7 +83,7 @@ END %]
 					[% topic2 = Slash.db.getTopic(tid) %]
 					[% IF user.noicons %]
 						[ <A HREF="[% gSkin.rootdir %]/search.pl?topic=[% topic2.tid %]"><B>[% topic2.textname %]</B></A> ]<BR>
-					[% ELSE %]
+					[% ELSIF topic2.image %]
 						<A HREF="[% gSkin.rootdir %]/search.pl?topic=[% topic2.tid %]">
 							<IMG
 								SRC="[% constants.imagedir %]/topics/[% topic2.image %]"
