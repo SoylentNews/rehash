@@ -1999,8 +1999,7 @@ sub updateStory {
 #print STDERR "admin.pl before render data: " . Dumper($data);
 	my $rendered_hr = $slashdb->renderTopics($chosen_hr);
 	$data->{primaryskid} = $slashdb->getPrimarySkidFromRendered($rendered_hr);
-	my $extracolumns = $slashdb->getNexusExtras(
-		$slashdb->getNexusFromSkid($data->{primaryskid}) );
+	my $extracolumns = $slashdb->getNexusExtrasForChosen($chosen_hr);
 #print STDERR "admin.pl extracolumns '@$extracolumns'\n";
 	if ($extracolumns && @$extracolumns) {
 		for my $ex_ar (@$extracolumns) {
@@ -2312,8 +2311,7 @@ sub saveStory {
 	my $extras = $slashdb->getNexusExtrasForChosen($chosen_hr);
 	for my $extra_ar (@$extras) {
 		my($textname, $keyword, $type) = @$extra_ar;
-		# type 'list' not really supported
-		next unless $type eq 'text';
+		next unless $type eq 'text' || $type eq "textarea" || $type eq "list";
 		$data->{$keyword} = $form->{$keyword};
 	}
 
