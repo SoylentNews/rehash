@@ -711,16 +711,16 @@ sub getCurrentStatic {
 
 	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
 		my $const_cfg = Apache::ModuleConfig->get($r, 'Slash::Apache');
-# XXXSKIN - this should probably go away, along with SlashSectionHost,
-# SlashSetFormHost, and SlashSetVarHost in Slash::Apache, except ...
-		my $hostname = $r->header_in('host');
-		$hostname =~ s/:\d+$//;
-		if ($const_cfg->{'site_constants'}{$hostname}) { 
-			$constants = $const_cfg->{site_constants}{$hostname};
-		} else {
-# XXXSKIN - ... this would be the one line to keep
+## XXXSKIN - this should probably go away, along with SlashSectionHost,
+## SlashSetFormHost, and SlashSetVarHost in Slash::Apache, except ...
+#		my $hostname = $r->header_in('host');
+#		$hostname =~ s/:\d+$//;
+#		if ($const_cfg->{'site_constants'}{$hostname}) { 
+#			$constants = $const_cfg->{site_constants}{$hostname};
+#		} else {
+## XXXSKIN - ... this would be the one line to keep
 			$constants = $const_cfg->{'constants'};
-		}
+#		}
 	} else {
 		$constants = $static_constants;
 	}
