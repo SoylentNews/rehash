@@ -125,6 +125,20 @@ CREATE TABLE backup_blocks (
 ) TYPE = myisam;
 
 #
+# Table structure for table 'classes'
+#
+
+DROP TABLE IF EXISTS classes;
+CREATE TABLE classes (
+	id mediumint UNSIGNED NOT NULL auto_increment,
+	class varchar(255) NOT NULL,
+	db_type enum("writer","reader","log","search") DEFAULT "writer" NOT NULL,
+	fallback enum("writer","reader","log","search"),
+	UNIQUE class_key (class),
+	PRIMARY KEY (id)
+) TYPE = myisam;
+
+#
 # Table structure for table 'blocks'
 #
 
@@ -252,6 +266,19 @@ CREATE TABLE dateformats (
 	id tinyint UNSIGNED DEFAULT '0' NOT NULL,
 	format varchar(32),
 	description varchar(64),
+	PRIMARY KEY (id)
+) TYPE = myisam;
+
+#
+# Table structure for table 'dbs'
+#
+
+DROP TABLE IF EXISTS dbs;
+CREATE TABLE dbs (
+	id mediumint UNSIGNED NOT NULL auto_increment,
+	virtual_user varchar(100) NOT NULL,
+	isalive enum("no","yes") DEFAULT "no" NOT NULL,
+	type enum("writer","reader","log","search") DEFAULT "reader" NOT NULL,
 	PRIMARY KEY (id)
 ) TYPE = myisam;
 
