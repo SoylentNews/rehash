@@ -14,6 +14,7 @@ INSERT INTO message_codes (code, type, seclev, modes) VALUES (5, 'Journal Entry 
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (6, 'New Submission', 100, '0');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (7, 'Reply to Journal', 1, '');
 INSERT INTO message_codes (code, type, seclev, modes) VALUES (8, 'New Comment', 1000000, '');
+#INSERT INTO message_codes (code, type, seclev, modes) VALUES (9, 'Interuser Messages', 1, '');
 
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('users','Inbox','[% constants.rootdir %]/my/inbox/',1,17);
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('messages','Inbox','[% constants.rootdir %]/my/inbox/',1,13);
@@ -23,5 +24,12 @@ INSERT INTO vars (name, value, description) VALUES ('message_process_count','100
 INSERT INTO vars (name, value, description) VALUES ('message_send_expire','7','Number of days to hold message in delivery queue');
 INSERT INTO vars (name, value, description) VALUES ('message_web_expire','31','Number of days to keep message on web site');
 INSERT INTO vars (name, value, description) VALUES ('commentnew_msg', '0', 'Allow sending of a message on every posted comment (dangerous)');
+
+# IUM
+#INSERT INTO vars (name, value, description) VALUES ('messages_send_minkarma','1','Minimum karma to send a message');
+#INSERT INTO vars (name, value, description) VALUES ('messages_send_createdelay','1','Days of account existence before messages may be sent');
+#INSERT INTO vars (name, value, description) VALUES ('messages_send_maxsize','4096','maximum bytes of sent messages');
+#INSERT INTO vars (name, value, description) VALUES ('message_web_maxtotal','50','maximum messages in inbox (oldest deleted)');
+#INSERT INTO vars (name, value, description) VALUES ('max_messagesend_allowed','5','maximum number of messages sent per timeframe allowed');
 
 INSERT INTO vars (name, value, description) VALUES ('message_threshold','1','Default threshold for a comment to trigger a message');
