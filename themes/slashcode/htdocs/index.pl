@@ -334,15 +334,15 @@ sub displayStories {
 		# to sufficiently fill the homepage (typically 10), then we're
 		# done -- put the story back on the list (so it'll correctly
 		# appear in the Older Stuff box) and exit.
-		my $day = timeCalc($story->{time},'%A %B %d');
-		my($w) = join ' ', (split m/ /, $day)[0 .. 2];
+		my $day = timeCalc($story->{time}, '%A %B %d');
+		my($w) = join ' ', (split / /, $day)[0 .. 2];
 		$today ||= $w;
 		if (++$x > $cnt && $today ne $w) {
 			unshift @$stories, $story;
 			last;
 		}
 
-		my @threshComments = split m/,/, $story->{hitparade};  # posts in each threshold
+		my @threshComments = split /,/, $story->{hitparade};  # posts in each threshold
 
 		$other->{is_future} = 1 if $story->{is_future};
 		my $storytext = displayStory($story->{sid}, '', $other);
