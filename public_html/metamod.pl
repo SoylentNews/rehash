@@ -35,7 +35,10 @@ sub main {
 
 	$I{U}{karma}=sqlSelect("karma","users_info","uid=$I{U}{uid}") if $I{U}{uid} > 0;
 	header("Meta Moderation");
-	$I{F}{cid}=~s/[^0-9]//g;  # Some browser wants to send invalid chars
+
+	# This validation now performed in Slash.pm This section will be removed
+	# in the near future.
+	# $I{F}{cid}=~s/[^0-9]//g;  # Some browser wants to send invalid chars
 
 	my $id = isEligible();
 	if (!$id) {
@@ -68,9 +71,16 @@ sub metaModerate {
 	# Sum Elements from Form and Update User Record
 	my $y = 0;
 
+	# Meta-mod changes need to be re-applied from code backups! 
+
 	foreach (keys %{$I{F}}) {
-		$I{F}{$_} =~ s/[^\+\-]//g; # Some protection
-		if (/mm(.*)/) {
+		# Meta mod form data can only be a '+' or '-' so we apply some
+		# protection from taint.
+		$I{F}{$_} =~ s/[^\+\-]//g;
+
+		# Strict check on form data since experience shows that people will
+		# exploit any hole for any given purpose. Even just to be annoying.
+		if (/^mm(\d+)$/) {
 			$I{metamod_sum}-- if $I{F}{$_} eq "-";
 			$I{metamod_sum}++ if $I{F}{$_} eq "+";
 		}
@@ -131,10 +141,16 @@ sub metaMod {
 
 	# Update $muid's Karma
 	if ($muid && $val) {
-		sqlUpdate("users_info", { -karma => "karma+1" },
-			"$muid=uid and karma<10") if $val eq "+";
-		sqlUpdate("users_info", { -karma => "karma-1" },
-			"$muid=uid and karma>-10") if $val eq "-";
+		if ($val eq '+') {
+			sqlUpdate("users_info", { -m2fair => "m2fair+1" }, "uid=$muid");
+			sqlUpdate("users_info", { -karma => "karma+1" },
+				"$muid=uid and karma<10");
+		} elsif ($val eq '-') {
+			sqlUpdate("users_info", { -m2unfair => "m2unfair+1" },
+				"uid=$muid");
+			sqlUpdate("users_info", { -karma => "karma-1" },
+				"$muid=uid and karma>-10");
+		}
 		sqlInsert("metamodlog", {
 			-mmid => $mmid,
 			-uid  => $muid,

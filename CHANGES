@@ -38,10 +38,12 @@ slash-1.0.6, 2000.06.xx
 	been called something better) to track which moderation attempts
 	actually succeed. Done mainly due to the fact that there are some
 	situations where we may want to make certain moderations that don't
-	get applied still applicable to M2 review.
+	get applied still applicable to M2 review. comments.pl and article.pl
+	have been made aware of this new field.
 
-*	Updated comments.pl and article.pl to be aware of the 'active' 
-	field in moderatorlog.
+*	Metamoderation results are now counted. The number of times a 
+	user's moderation is voted fair or unfair is now counted in
+	users_info (columns m2fair and m2unfair)
 
 
 slash-1.0.5, 2000.06.13
