@@ -2493,7 +2493,7 @@ sub _url_to_domain_tag {
 
 	# Add a title tag to make this all friendly for those with vision
 	# and similar issues -Brian
-	$href =~ s/>/ TITLE="$info">/ if $info ne '?';
+	$href =~ s/>/ title="$info">/ if $info ne '?';
 	return "$href$body</a $info>";
 }
 
