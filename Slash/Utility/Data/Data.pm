@@ -44,6 +44,7 @@ use vars qw($VERSION @EXPORT);
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 @EXPORT	   = qw(
 	addDomainTags
+	createStoryTopicData
 	slashizeLinks
 	approveCharref
 	parseDomainTags
@@ -2803,6 +2804,39 @@ sub sitename2filename {
 	my($section) = @_;
 	(my $filename = $section || lc getCurrentStatic('sitename')) =~ s/\W+//g;
 	return $filename;
+}
+
+##################################################################
+sub createStoryTopicData {
+	my ($slashdb, $form) = @_;	
+	$form ||= getCurrentForm();
+	# Probably should not be changing stid
+	my @tids;
+	if ($form->{_multi}{stid} eq 'ARRAY') {
+		for (@{$form->{_multi}{stid}}) {
+			push @tids, $_;
+		}
+	}
+	push @tids, $form->{stid} if $form->{stid};
+	push @tids, $form->{tid} if $form->{tid};
+	my @original = @tids;
+	my $loop_protection = 0;
+	for my $tid (@tids) {
+		my $new_tid = $slashdb->sqlSelect("parent_topic", "topics", "tid = $tid");
+		push @tids, $new_tid if $new_tid && grep(!/$new_tid/,@tids);
+		#This is here to kill some runaway logic loop
+		$loop_protection++;
+		last if $loop_protection > 30;
+	}
+
+	my %tid_ref;
+	for my $tid (@tids) {
+		# Jump to the next tid if it is zero
+		next unless $tid;
+		$tid_ref{$tid} =  scalar(grep(/^$tid$/,@original))  ? 'no' : 'yes' ;
+	}
+
+	return \%tid_ref;
 }
 
 

@@ -106,32 +106,17 @@ $constants = getCurrentStatic();
 # This logic is not quite right -Brian
 		my $sid = $slashdb->createStory($story);
 		my $reloDB = getObject("Slash::Relocate");
-		if ($reloDB) {
+		if ($reloDB && $sid) {
 			$slashdb->setStory($sid, { 
 				introtext => $reloDB->href2SlashTag($introtext, $sid),
 				bodytext => $reloDB->href2SlashTag($bodytext, $sid),
 			});
 		}
 		if ($sid) {
-			my $id = $slashdb->createDiscussion( {
-				title => $story->{title},
-				section => $section,
-				topic => $tid,
-				url => "$rootdir/article.pl?sid=$sid",
-				sid => $sid,
-				uid => $author,
-				ts => $time
-				});
-			if ($id) {
-				$slashdb->setStory($sid, { discussion => $id });
-			} else {
-				warn "could not create discussion for story '$sid'";
-			}
-			print "($count) Story created: $sid $id $time $title\n";
+			print "($count) Story created: $sid $time $title\n";
 		} else {
 			warn "($count) Story could not be created";
 		}
-		$slashdb->setStoryTopics($sid, { $story->{tid} => 'yes' });
         	$count--;
 	}
 	my $t1 = new Benchmark;

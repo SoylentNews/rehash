@@ -59,6 +59,12 @@ Article [% form.sid %] Saved
 [% CASE 'saveStory-title' %]
 Inserted [% form.sid %] [% form.title %]
 
+[% CASE 'story_update_failed' %]
+Updating [% form.sid %] [% form.title %] failed. Best two out of three?
+
+[% CASE 'story_creation_failed' %]
+Failed creating "[% form.title %]". Please try again, the more you play, the more you pay
+
 [% CASE 'blockEdit-title' %]
 Site Block Editor
 

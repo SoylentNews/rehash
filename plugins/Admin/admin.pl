@@ -1606,7 +1606,7 @@ sub updateStory {
 		? $slashdb->getTime()
 		: $form->{'time'};
 
-	$slashdb->setStoryTopics($form->{sid}, _createStoryTopicData($slashdb, $form));
+	$slashdb->setStoryTopics($form->{sid}, createStoryTopicData($slashdb, $form));
 	$form->{introtext} = slashizeLinks($form->{introtext});
 	$form->{bodytext} =  slashizeLinks($form->{bodytext});
 	$form->{introtext} = balanceTags($form->{introtext});
@@ -1642,27 +1642,14 @@ sub updateStory {
 		}
 	}
 
-	$slashdb->setStory($form->{sid}, $data);
-	my $dis_data = {
-		sid	=> $data->{sid},
-		title	=> $data->{title},
-		section	=> $data->{section},
-		url	=> "$constants->{rootdir}/article.pl?sid=$data->{sid}",
-		ts	=> $data->{'time'},
-		topic	=> $data->{tid},
-		commentstatus	=> $form->{commentstatus}
-	};
-
-
-	$slashdb->setDiscussionBySid($data->{sid}, $dis_data);
-	if ($data->{displaystatus} < 1) {
-		$slashdb->setVar('writestatus', 'dirty');
-		$slashdb->setSection($data->{section}, { writestatus => 'dirty' });
+	unless($slashdb->updateStory($form->{sid}, $data)) {
+		titlebar('100%', getTitle('story_update_failed'));
+		editStory(@_);
+	} else {
+		titlebar('100%', getTitle('updateStory-title'));
+		# make sure you pass it the goods
+		listStories(@_);
 	}
-
-	titlebar('100%', getTitle('updateStory-title'));
-	# make sure you pass it the goods
-	listStories(@_);
 }
 
 ##################################################################
@@ -1842,39 +1829,14 @@ sub saveStory {
 	my $sid = $slashdb->createStory($data);
 
 	if ($sid) {
-		my $section = $slashdb->getSection($form->{section});
-		my $rootdir = $section->{rootdir} || $constants->{rootdir};
-
-		my $id = $slashdb->createDiscussion( {
-			title	=> $form->{title},
-			section	=> $form->{section},
-			topic	=> $topic,
-			url	=> "$rootdir/article.pl?sid=$sid&tid=$topic",
-			sid	=> $sid,
-			commentstatus	=> $form->{commentstatus},
-			ts	=> $form->{'time'}
-		});
-		if ($id) {
-			$slashdb->setStory($sid, { discussion => $id });
-		} else {
-			# Probably should be a warning sent to the browser
-			# for this error, though it should be rare.
-			errorLog("could not create discussion for story '$sid'");
-		}
-		$data->{discussion} = $id;
-		# Take all secondary topics and shove them into the array for the story
-		$slashdb->setStoryTopics($form->{sid}, _createStoryTopicData($slashdb, $form));
-
 		slashHook('admin_save_story_success', { story => $data });
+		titlebar('100%', getTitle('saveStory-title'));
+		listStories(@_);
 	} else {
 		slashHook('admin_save_story_failed', { story => $data });
-		titlebar('100%', getData('story_creation_failed'));
-		listStories(@_);
-		return;
+		titlebar('100%', getTitle('story_creation_failed'));
+		editStory(@_);
 	}
-
-	titlebar('100%', getTitle('saveStory-title'));
-	listStories(@_);
 }
 
 ##################################################################
@@ -1884,38 +1846,6 @@ sub getTitle {
 	$hashref->{value} = $value;
 	return slashDisplay('titles', $hashref,
 		{ Return => 1, Nocomm => $nocomm });
-}
-
-##################################################################
-sub _createStoryTopicData {
-	my ($slashdb, $form) = @_;	
-	# Probably should not be changing stid
-	my @tids;
-	if ($form->{_multi}{stid} eq 'ARRAY') {
-		for (@{$form->{_multi}{stid}}) {
-			push @tids, $_;
-		}
-	}
-	push @tids, $form->{stid} if $form->{stid};
-	push @tids, $form->{tid} if $form->{tid};
-	my @original = @tids;
-	my $loop_protection = 0;
-	for my $tid (@tids) {
-		my $new_tid = $slashdb->sqlSelect("parent_topic", "topics", "tid = $tid");
-		push @tids, $new_tid if $new_tid && grep(!/$new_tid/,@tids);
-		#This is here to kill some runaway logic loop
-		$loop_protection++;
-		last if $loop_protection > 30;
-	}
-
-	my %tid_ref;
-	for my $tid (@tids) {
-		# Jump to the next tid if it is zero
-		next unless $tid;
-		$tid_ref{$tid} =  scalar(grep(/^$tid$/,@original))  ? 'no' : 'yes' ;
-	}
-
-	return \%tid_ref;
 }
 
 createEnvironment();

@@ -2606,13 +2606,14 @@ sub setStory {
 		}
 	}
 
+	my $ok;
 	for my $table (keys %update_tables) {
 		my %minihash;
 		for my $key (@{$update_tables{$table}}){
 			$minihash{$key} = $hashref->{$key}
 				if defined $hashref->{$key};
 		}
-		$self->sqlUpdate($table, \%minihash, 'sid=' . $self->sqlQuote($sid));
+		$ok = $self->sqlUpdate($table, \%minihash, 'sid=' . $self->sqlQuote($sid));
 	}
 
 	for (@param)  {
@@ -2622,6 +2623,8 @@ sub setStory {
 			value	=> $_->[1]
 		}) if defined $_->[1];
 	}
+
+	return $ok;
 }
 
 ########################################################
@@ -5224,8 +5227,7 @@ sub createStory {
 	my($self, $story) = @_;
 
 	my $constants = getCurrentStatic();
-
-	$story ||= getCurrentForm();
+	$self->{_dbh}->{AutoCommit} = 0;
 
 	# yes, this format is correct, don't change it :-)
 	my $sidformat = '%02d/%02d/%02d/%02d%0d2%02d';
@@ -5239,7 +5241,6 @@ sub createStory {
 	# Karma to the user
 	my $suid;
 	if ($story->{subid}) {
-		my $constants = getCurrentStatic();
 		my($suid) = $self->sqlSelect(
 			'uid', 'submissions',
 			'subid=' . $self->sqlQuote($story->{subid})
@@ -5280,57 +5281,95 @@ sub createStory {
 			$story->{sid} = sprintf($sidformat, @lt[reverse 0..5]);
 		}
 	}
-	$self->sqlInsert('story_text', { sid => $story->{sid}});
-	$self->setStory($story->{sid}, $story);
+	unless($self->sqlInsert('story_text', { sid => $story->{sid}})) {
+		print STDERR "Failed to Insert story Text\n";
+		goto error;
+	}
+	unless($self->setStory($story->{sid}, $story)) {
+		print STDERR "Failed to Insert most of story\n";
+		goto error;
+	}
+	my $section = $self->getSection($story->{section});
+	my $rootdir = $section->{rootdir} || $constants->{rootdir};
+
+	my $id = $self->createDiscussion( {
+		title	=> $story->{title},
+		section	=> $story->{section},
+		topic	=> $story->{tid},
+		url	=> "$rootdir/article.pl?sid=$story->{sid}&tid=$story->{topic}",
+		sid	=> $story->{sid},
+		commentstatus	=> $story->{commentstatus},
+		ts	=> $story->{'time'}
+	});
+	unless($id) {
+		print STDERR "Failed to create discussion for story\n";
+		goto error;
+	}
+	unless($self->setStory($story->{sid}, { discussion => $id })) {
+		print STDERR "Failed to set  discussion for story\n";
+		goto error;
+	}
+	# Take all secondary topics and shove them into the array for the story
+	unless($self->setStoryTopics($story->{sid}, createStoryTopicData($self))) {
+		print STDERR "Failed to set topics for story\n";
+		goto error;
+	}
+
+	$self->{_dbh}->commit;
+	$self->{_dbh}->{AutoCommit} = 1;
 
 	return $story->{sid};
+
+	error:
+	$self->{_dbh}->rollback;
+	$self->{_dbh}->{AutoCommit} = 1;
+	return "";
 }
 
 ##################################################################
 sub updateStory {
-	my($self, $story) = @_;
+	my($self, $sid, $data) = @_;
 	my $constants = getCurrentStatic();
+	$self->{_dbh}->{AutoCommit} = 0;
 
-	my $time = ($story->{fastforward})
-		? $self->getTime()
-		: $story->{'time'};
-
-	# Should be a getSection call in here to find the right rootdir -Brian
-	my $data = {
-		sid	=> $story->{sid},
-		title	=> $story->{title},
-		section	=> $story->{section},
-		url	=> "$constants->{rootdir}/article.pl?sid=$story->{sid}",
-		ts	=> $time,
-		topic	=> $story->{tid},
+	unless($self->setStory($sid, $data)) {
+		print STDERR "Failed to set topics for story\n";
+		goto error;
+	}
+	my $dis_data = {
+		sid	=> $sid,
+		title	=> $data->{title},
+		section	=> $data->{section},
+		url	=> "$constants->{rootdir}/article.pl?sid=$sid",
+		ts	=> $data->{'time'},
+		topic	=> $data->{tid},
+		commentstatus	=> $data->{commentstatus}
 	};
+	unless($self->setStoryTopics($sid, createStoryTopicData($self))) {
+		print STDERR "Failed to set topics for story\n";
+		goto error;
+	}
 
 
-	$self->sqlUpdate('discussions', $data, 
-		'sid = ' . $self->sqlQuote($story->{sid}));
+	unless($self->setDiscussionBySid($sid, $dis_data)) {
+		print STDERR "Failed to set discussion data for story\n";
+		goto error;
+	}
+	if ($data->{displaystatus} < 1) {
+		$self->setVar('writestatus', 'dirty');
+		$self->setSection($data->{section}, { writestatus => 'dirty' });
+	}
 
-	$data = {
-		uid		=> $story->{uid},
-		tid		=> $story->{tid},
-		dept		=> $story->{dept},
-		'time'		=> $time,
-		day_published	=> $time,
-		title		=> $story->{title},
-		section		=> $story->{section},
-		displaystatus	=> $story->{displaystatus},
-		writestatus	=> $story->{writestatus},
-	};
+	$self->{_dbh}->commit;
+	$self->{_dbh}->{AutoCommit} = 1;
 
-	$self->sqlUpdate('stories', $data, 
-		'sid=' . $self->sqlQuote($story->{sid}));
+	return $sid;
 
-	$self->sqlUpdate('story_text', {
-		bodytext	=> $story->{bodytext},
-		introtext	=> $story->{introtext},
-		relatedtext	=> $story->{relatedtext},
-	}, 'sid=' . $self->sqlQuote($story->{sid}));
+	error:
+	$self->{_dbh}->rollback;
+	$self->{_dbh}->{AutoCommit} = 1;
 
-	$self->_saveExtras($story);
+	return "";
 }
 
 ########################################################
@@ -5742,27 +5781,6 @@ sub getRecentComments {
 	);
 
 	return $ar;
-}
-
-##################################################################
-# Probably should make this private at some point
-sub _saveExtras {
-	my($self, $story) = @_;
-
-	# Update main-page write status if saved story is marked 
-	# "Always Display" or "Never Display".
-	$self->setVar('writestatus', 'dirty') if $story->{displaystatus} < 1;
-
-	my $extras = $self->getSectionExtras($story->{section});
-	return unless $extras;
-	for (@$extras) {
-		my $key = $_->[1];
-		$self->sqlReplace('story_param', { 
-			sid	=> $story->{sid}, 
-			name	=> $key,
-			value	=> $story->{$key},
-		}) if $story->{$key};
-	}
 }
 
 ########################################################
@@ -6351,8 +6369,12 @@ sub setStoryTopics {
 	$self->sqlDo("DELETE from story_topics where sid = '$sid'");
 
 	for my $key (keys %{$topic_ref}) {
-	    $self->sqlInsert("story_topics", { sid => $sid, tid => $key, is_parent  => $topic_ref->{$key} });
+	    unless ($self->sqlInsert("story_topics", { sid => $sid, tid => $key, is_parent  => $topic_ref->{$key} })) {
+	    	return 0;
+	    }
 	}
+
+	return 1;
 }
 
 ########################################################
@@ -6760,6 +6782,7 @@ sub _genericGetCacheName {
 sub _genericSet {
 	my($table, $table_prime, $param_table, $self, $id, $value) = @_;
 
+	my $ok;
 	if ($param_table) {
 		my $cache = _genericGetCacheName($self, $table);
 
@@ -6783,11 +6806,11 @@ sub _genericSet {
 			$self->sqlReplace($param_table, { $table_prime => $id, name => $_->[0], value => $_->[1]});
 		}
 	} else {
-		$self->sqlUpdate($table, $value, $table_prime . '=' . $self->sqlQuote($id));
+		$ok = $self->sqlUpdate($table, $value, $table_prime . '=' . $self->sqlQuote($id));
 	}
 
 	my $table_cache= '_' . $table . '_cache';
-	return unless keys %{$self->{$table_cache}};
+	return $ok unless keys %{$self->{$table_cache}};
 
 	my $table_cache_time= '_' . $table . '_cache_time';
 	$self->{$table_cache_time} = time();
@@ -6795,6 +6818,8 @@ sub _genericSet {
 		$self->{$table_cache}{$id}{$_} = $value->{$_};
 	}
 	$self->{$table_cache}{$id}{'_modtime'} = time();
+
+	return $ok;
 }
 
 ########################################################
