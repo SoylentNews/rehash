@@ -308,7 +308,7 @@ sub cmd_daddypants {
 
 	if ($info->{text} =~ /^\s*([a-zA-Z]+)/) {
 		$args{when} = $1;
-	} elsif ($info->{text} =~ /^\s*(\d+\s+days)/) {
+	} elsif ($info->{text} =~ /^\s*(-?\d+\s+(?:minute|hour|day)s?)/) {
 		$args{when} = $1;
 	} elsif ($info->{text} && $info->{text} =~ /^(-?\d+)/) {
 		$args{time} = $info->{text};
