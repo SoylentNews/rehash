@@ -121,14 +121,48 @@ function [% name %]_search_key_handler(type, e) {
 
 	var key = e.which || e.keyCode;
 
-	[% name %]_search(type);
+	if (key == 27) { // esc
+		[% name %]_close(type);
+
+		e.returnValue = true;
+		return true;
+	} else {
+		var searchobj = document.getElementById(name + "-searchfield");
+		var searchstring = searchobj.value;
+		var len  = searchstring.length;
+		var last = searchstring.substring(len-1, len);
+
+		var add = 0;
+		if (last == '+') {
+			add = 1;
+		} else if (last == '=') {
+			add = 2;
+		}
+
+		// adding only works with st, not stc ... but stc
+		// is used only for secondary topic list for editing
+		// topics, so it's not something used much, so i don't care
+		if (add) {
+			searchobj.value = '';
+			[% name %]_search(type, searchstring.substring(0, len-1), add);
+			searchobj.focus();
+
+			e.returnValue = true;
+			return true;
+		} else {
+			[% name %]_search(type);
+
+			e.returnValue = false;
+			return false;
+		}
+	}
 
 	e.returnValue = false;
 	return false;
 }
 
 /* find topics matching string */
-function [% name %]_search(type, searchstring) {
+function [% name %]_search(type, searchstring, add) {
 	var name = "[% name %]";
 	if (type) {
 		name = name + "-" + type;
@@ -141,6 +175,7 @@ function [% name %]_search(type, searchstring) {
 	searchstring = searchstring.toLowerCase();
 
 	var tids = new Array;
+	var c = 0;
 	for (var i = 0; i <= [% name %]_max_id; i++) {
 		var obj = document.getElementById("[% name %]-fullname-" + i);
 		if (obj) {
@@ -169,9 +204,18 @@ function [% name %]_search(type, searchstring) {
 			}
 
 			if (j) {
+				c++;
 				var tidobj = document.getElementById("[% name %]-tid-" + i);
-				var thistid = new Array (myname, i, tidobj.value);
-				tids[tidobj.value] = thistid;
+				if (add && c == 1) {
+					if (add == 1) { // add normally
+						[% name %]_main_add_really(i, myname, [% name %]_get_weight(i), 1);
+					} else if (add == 2) { // add as front page (second-highest weight)
+						[% name %]_main_add_really(i, myname, [% constants.topic_popup_weights.keys.nsort.reverse.1 %], 1);
+					}
+				} else if (!add) {
+					var thistid = new Array (myname, i, tidobj.value);
+					tids[tidobj.value] = thistid;
+				}
 			}
 		}
 	}
@@ -357,6 +401,11 @@ function [% name %]_show(type) {
 	if (type) {
 		name = name + "-" + type;
 		iname = iname + "_" + type;
+
+		if (type == 'ab') {
+			var searchobj = document.getElementById(name + "-searchfield");
+			searchobj.focus();
+		}
 	}
 
 	var mybuttons = new Array ('[% names.join("','") %]');
