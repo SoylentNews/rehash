@@ -43,7 +43,7 @@ __template__
 			<FONT COLOR="[% user.fg.3 %]">Login/Create an Account</FONT>
 		</A>
 [% ELSE %]
-		<A HREF="[% constants.rootdir %]/users.pl?op=editcomm">
+		<A HREF="[% constants.rootdir %]/my/comments/">
 			<FONT COLOR="[% user.fg.3 %]">Preferences</FONT>
 		</A>
 [% END %]
