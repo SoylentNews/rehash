@@ -1508,6 +1508,16 @@ sub fudgeurl {
 	my $uri = new URI $url;
 	my $scheme = undef;
 	$scheme = $uri->scheme if $uri && $uri->can("scheme");
+
+
+        # modify scheme:/ to scheme:// for $schemes defined below
+        # need to recreate $uri after doing so to make userinfo
+        # clearing work for something like http:/foo.com...@bar.com
+
+        my $schemes_to_mod = {http=>1,https=>1,ftp=>1};
+       	$url = $uri->canonical->as_string;
+        $url=~s|^$scheme:/([^/])|$scheme://$1| if $schemes_to_mod->{$scheme};
+        $uri = new URI $url;
 	if ($uri && !$scheme && $uri->can("authority") && $uri->authority) {
 		# The URI has an authority but no scheme, e.g. "//sitename.com/".
 		# URI.pm doesn't always handle this well.  E.g. host() returns
