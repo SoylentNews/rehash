@@ -1381,15 +1381,6 @@ sub prepareUser {
 	$user->{state}{post}	= $method eq 'POST' ? 1 : 0;
 	@{$user}{qw[ipid subnetid classbid hostip]} = get_ipids($hostip);
 
-        # stats for clampe - remove when research done
-        if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME} =~ /comments/
-	  && defined $form->{'savechanges'}
-          && !$user->{is_anon}) {
-		my $fname = catfile('clampe', $user->{ipid});
-                my $savelog = "IPID: $user->{ipid} UID: $user->{uid} NewThresh: $form->{threshold} NewDispmode: $form->{dispmode} NewSort: $form->{commentsort} OldThresh: $user->{threshold} OldDispmode: $user->{dispmode} OldSort: $user->{commentsort}";
-                doClampeLog($fname, [$savelog]);
-         }
-
 	my @defaults = (
 		['mode', 'thread'], qw[
 		savechanges commentsort threshold
