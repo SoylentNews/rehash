@@ -126,6 +126,9 @@ my %descriptions = (
 
 	'skins-submittable'
 		=> sub { $_[0]->sqlSelectMany('skid,title', 'skins', "submittable='yes'") },
+	
+	'topics-submittable'
+		=> sub { $_[0]->sqlSelectMany('tid,textname', 'topics', "submittable='yes'") },
 
 	'static_block'
 		=> sub { $_[0]->sqlSelectMany('bid,bid', 'blocks', "$_[2] >= seclev AND type != 'portald'") },
@@ -1177,6 +1180,7 @@ sub getTopicTree {
 
 	for my $tid (keys %$topics) {
 		$tree_ref->{$tid} = $topics->{$tid};
+		$tree_ref->{$tid}{submittable} = $topics->{$tid}{submittable} eq "yes" ? 1 : 0;
 	}
 	for my $tid (keys %$topic_nexus) {
 		$tree_ref->{$tid}{nexus} = 1;
@@ -3062,6 +3066,7 @@ sub saveTopic {
 		image		=> $image,
 		width		=> $topic->{width} || '',
 		height		=> $topic->{height} || '',
+		submittable	=> $topic->{submittable} eq 'no' ? 'no' : 'yes',
 	};
 
 	if ($rows == 0) {
@@ -8577,11 +8582,14 @@ sub getRecentComments {
 	my $constants = getCurrentStatic();
 	my($min, $max) = ($constants->{comment_minscore},
 		$constants->{comment_maxscore});
+	my $primaryskid;
 	$min = $options->{min} if defined $options->{min};
 	$max = $options->{max} if defined $options->{max};
 	my $sid = $options->{sid} if defined $options->{sid};
+	$primaryskid = $options->{primaryskid};
 	$max = $min if $max < $min;
 	my $startat = $options->{startat} || 0;
+	
 	my $num = $options->{num} || 100; # should be a var
 
 	my $max_cid = $self->getMaxCid();
@@ -8596,6 +8604,9 @@ sub getRecentComments {
 		$where_extra  = " AND comments.cid BETWEEN $start_cid and $end_cid ";
 		$limit_clause = " LIMIT $num"; 
 	}
+	if ($primaryskid) {
+		$where_extra = " AND discussions.primaryskid = ".$self->sqlQuote($primaryskid)
+	}
 
 	my $ar = $self->sqlSelectAllHashrefArray(
 		"comments.sid AS sid, comments.cid AS cid,
@@ -8604,17 +8615,19 @@ sub getRecentComments {
 		 comments.uid AS uid, points AS score,
 		 lastmod, comments.reason AS reason,
 		 users.nickname AS nickname,
+		 discussions.primaryskid,
 		 comment_text.comment AS comment,
 		 SUM(val) AS sum_val,
 		 IF(moderatorlog.cid IS NULL, 0, COUNT(*))
 		 	AS num_mods",
-		"comments, users, comment_text
+		"comments, users, discussions, comment_text
 		 LEFT JOIN moderatorlog
 		 	ON comments.cid=moderatorlog.cid
 			AND moderatorlog.active=1",
 		"comments.uid=users.uid
 		 AND comments.cid = comment_text.cid
 		 AND comments.points BETWEEN $min AND $max
+		 AND comments.sid = discussions.id
 		 $where_extra",
 		"GROUP BY comments.cid
 		 ORDER BY comments.cid DESC
@@ -9784,6 +9797,15 @@ sub getTopics {
 
 	return $answer;
 }
+
+########################################################
+sub getTopicParamsForTid {
+	my ($self, $tid) = @_;
+	my $tid_q = $self->sqlQuote($tid);
+	return $self->sqlSelectAllHashrefArray("*", "topic_param", "tid = $tid_q");
+}
+
+
 
 ########################################################
 # As of 2004/04:
