@@ -54,7 +54,7 @@ sub new {
 		if (getCurrentStatic('adminmail_check_replication')) {
 			my $wait_sec = 600;
 			my $num_try = 0;
-			my $max_tries = 20;
+			my $max_tries = 12;
 			
 			my $caught_up = 0;
 			while (!$caught_up) {
