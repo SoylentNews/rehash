@@ -38,7 +38,7 @@ sub new {
 	# TTF fonts which could scale, and try to find good point
 	# sizes for them too (names of TTF fonts should be stored
 	# in a var).
-	$self->{imagemargin} = 6;
+	$self->{imagemargin} = $constants->{hc_q1_maxrad} || 6;
 
 	my @possible_fonts = @{$constants->{hc_possible_fonts}};
 	@possible_fonts = ( gdMediumBoldFont, gdLargeFont, gdGiantFont ) if !@possible_fonts;
@@ -433,7 +433,9 @@ sub drawImage {
 	);
 	$gdtextalign->set(text => $gdtext->get("text"));
 	$gdtextalign->set_font($gdtext->get("font") , $gdtext->get("ptsize"));
-	$gdtextalign->draw(int($width/2), int($height/2), 0);
+	my $max_angle = $constants->{hc_q1_maxrad} || 0.2;
+	my $angle = (rand(1)*2-1) * $max_angle;
+	$gdtextalign->draw(int($width/2), int($height/2), $angle);
 
 	return($answer, $image);
 }

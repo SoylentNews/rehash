@@ -4681,8 +4681,7 @@ sub moderateComment {
 		$karma_change = 0 if $poster_was_anon;
 		my $comment_change_hr =
 			$self->setCommentForMod($cid, $val, $reason,
-				$comment->{reason}, $karma_change,
-				!$poster_was_anon);
+				$comment->{reason});
 		if (!defined($comment_change_hr)) {
 			# This shouldn't happen;  the only way we believe it
 			# could is if $val is 0, the comment is already at
@@ -5176,8 +5175,7 @@ sub deleteVar {
 # after the change and return that data in a hashref.
 # If not, it will just return 1.
 sub setCommentForMod {
-	my($self, $cid, $val, $newreason, $oldreason, $karma,
-		$need_point_change) = @_;
+	my($self, $cid, $val, $newreason, $oldreason) = @_;
 
 	$val += 0;
 	return undef if !$val;
@@ -5195,21 +5193,17 @@ sub setCommentForMod {
 	);
 	my $averagereason = $self->getCommentMostCommonReason($cid,
 		$allreasons_hr,
-		$newreason, $oldreason),
+		$newreason, $oldreason);
 
 	# Changes we're going to make to this comment.  Note
 	# that the pointsmax GREATEST() gets called after
 	# points is assigned, thanks to assn_order.
-	my $karma_val = sprintf("%+d", $karma || 0);
-	my $karma_abs_val = sprintf("%+d", abs($karma) || 0);
 	my $update = {
 		-points =>	"points$val",
 		-pointsmax =>	"GREATEST(pointsmax, points)",
 		reason =>	$averagereason,
 		lastmod =>	$user->{uid},
 	};
-	$update->{-karma}     = "karma$karma_val"         if $karma_val;
-	$update->{-karma_abs} = "karma_abs$karma_abs_val" if $karma_abs_val;
 
 	# If more than n downmods, a comment loses its karma bonus.
 	my $reasons = $self->getReasons;
@@ -5250,27 +5244,38 @@ sub setCommentForMod {
 	# and make the comments table InnoDB and this will work.
 	# Oh well.  Meanwhile, the worst thing that will happen is
 	# a few wrong points logged here and there.
+
+	$self->{_dbh}->{AutoCommit} = 0;
+
 	my $hr = { };
-	if ($need_point_change) {
-		$self->{_dbh}->{AutoCommit} = 0;
-		($hr->{cid}, $hr->{points_before}, $hr->{points_orig}, $hr->{points_max}) =
-			$self->sqlSelect("cid, points, pointsorig, pointsmax",
-				"comments", "cid=$cid", "LOCK IN SHARE MODE");
+	($hr->{cid}, $hr->{points_before}, $hr->{points_orig}, $hr->{points_max}) =
+		$self->sqlSelect("cid, points, pointsorig, pointsmax",
+			"comments", "cid=$cid", "LOCK IN SHARE MODE");
+	$hr->{points_change} = $val;
+	$hr->{points_after} = $hr->{points_before} + $val;
+
+	my $ckarma_val;
+	if (!$constants->{mod_down_karmacoststyle}) {
+		$ckarma_val = $val;
+	} elsif ($val < 0) {
+		$ckarma_val = ($hr->{points_before}+$val) - $hr->{points_max};
+	} else {
+		$ckarma_val = $val;
 	}
+	if ($ckarma_val) {
+		my $ckarma_abs_val = abs($ckarma_val);
+		$update->{-ckarma}     = sprintf("ckarma%+d", $ckarma_val);
+		$update->{-ckarma_abs} = sprintf("ckarma_abs%+d", $ckarma_abs_val);
+	}
+
 	my $changed = $self->sqlUpdate("comments", $update, $where, {
 		assn_order => [ "-points", "-pointsmax" ]
 	});
-	if ($need_point_change) {
-		$self->{_dbh}->commit;
-		$self->{_dbh}->{AutoCommit} = 1;
-		$hr->{points_change} = $changed ? $val : 0;
-		$hr->{points_after} = $hr->{points_before} + $hr->{points_change};
-	}
-	if ($need_point_change) {
-		return $changed ? $hr : undef;
-	} else {
-		return $changed ? 1 : undef;
-	}
+
+	$self->{_dbh}->commit;
+	$self->{_dbh}->{AutoCommit} = 1;
+
+	return $changed ? $hr : undef;
 }
 
 ########################################################
