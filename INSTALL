@@ -104,6 +104,21 @@ UPGRADING
         Currently, there are no differences in the schema or the database
         data between versions of Slash 2.0.
 
+    Listed below are additions/deletions of templates from version to
+    version. Feel free to delete (or not) ones that are no longer used, but
+    please do add to your site templates that have been added to the
+    distribution. Add or delete, for your site, all the changes from your
+    current version up through the version you're upgrading to.
+
+    Slash 2.0.0-pre2
+        Added
+            plugins/Journal/templates/pagination;journal;default
+            plugins/Journal/templates/pagination;search;default
+            themes/slashcode/templates/dispLinkComment;misc;default
+        Deleted
+            plugins/Journal/templates/journalitem;journal;default
+            plugins/Search/templates/linksearch;search;default
+
   Slash 1.0 -> Slash 2.0
 
     Please read the complete documentation of utils/slash1toslash2. It is a
