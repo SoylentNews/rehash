@@ -51,11 +51,11 @@ $task{$me}{code} = sub {
 
 	slashdLog("Send Admin Mail Begin for $yesterday");
 	# lets do the errors
-	$data{not_found} = $stats->countByStatus("404");
+	$data{not_found} = $logdb->countByStatus("404");
 	$statsSave->createStatDaily("not_found", $data{not_found});
 
-	my $errors = $stats->getErrorStatuses();
-	my $error_count = $stats->countErrorStatuses();
+	my $errors = $logdb->getErrorStatuses();
+	my $error_count = $logdb->countErrorStatuses();
 	$data{error_count} = $error_count;
 	$statsSave->createStatDaily("error_count", $data{error_count});
 	$data{errors} = {};
@@ -196,14 +196,14 @@ EOT
 	my $unique_ips = $logdb->countDailyByPageDistinctIPID();
 
 	my $grand_total = $logdb->countDailyByPage('');
-	$data{grand_total} = $grand_total;
+	$data{grand_total} =  sprintf("%8d", $grand_total);
 	my $grand_total_static = $logdb->countDailyByPage('',{ static => 'yes' } );
-	$data{grand_total_static} = $grand_total_static;
+	$data{grand_total_static} = sprintf("%8d", $grand_total_static);
 	my $total_static = $logdb->countDailyByPage('', {
 		static => 'yes',
 		no_op => $constants->{op_exclude_from_countdaily}
 	} );
-	$data{total_static} = $total_static;
+	$data{total_static} = sprintf("%8d", $total_static);
 	my $total_subscriber = $logdb->countDailySubscribers($stats->getRecentSubscribers());
 	my $total_secure = $stats->countDailySecure();
 	for my $op (@PAGES) {
@@ -451,6 +451,8 @@ EOT
 	$data{users} = sprintf("%8d", $unique_users);
 	$data{accesslog} = sprintf("%8d", $accesslog_rows);
 	$data{formkeys} = sprintf("%8d", $formkeys_rows);
+	$data{error_count} = sprintf("%8d", $data{error_count});
+	$data{not_found} = sprintf("%8d", $data{not_found});
 
 	$mod_data{comments} = sprintf("%8d", $comments);
 	$mod_data{modlog} = sprintf("%8d", $modlogs);

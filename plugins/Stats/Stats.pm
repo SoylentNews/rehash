@@ -378,7 +378,7 @@ sub getErrorStatuses {
 		if $options->{section};
 	$where .= " AND status BETWEEN 500 AND 600 ";
 
-	$self->sqlSelectAllHashrefArray("status, count(ops) as count", "accesslog_temp_errors", $where, " GROUP BY status ORDER BY status ");
+	$self->sqlSelectAllHashrefArray("status, count(op) as count, op", "accesslog_temp_errors", $where, " GROUP BY status ORDER BY status ");
 }
 
 ########################################################
