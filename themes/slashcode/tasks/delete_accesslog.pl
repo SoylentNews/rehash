@@ -13,7 +13,7 @@ use vars qw( %task $me );
 # If you notice any issues, decrease LIMIT.
 # -Brian
 
-$task{$me}{timespec} = '22 * * * *'; #Normally run once an hour
+$task{$me}{timespec} = '22 * * * *'; # Normally run once an hour
 $task{$me}{timespec_panic_1} = '20 1,2,3,4,5,6 * * *'; # Just run at night if an issue pops up
 $task{$me}{timespec_panic_2} = ''; # In a pinch don't do anything
 $task{$me}{fork} = SLASHD_NOWAIT;
@@ -22,28 +22,40 @@ $task{$me}{code} = sub {
 	my $log_user = getCurrentStatic('log_db_user');
 	my $logdb = $log_user ? getObject('Slash::DB', $log_user ) : $slashdb;
 	my $counter = 0;
-	my $FAILURES = 10; # This is probably related to a lock failure
-	my $id = $logdb->sqlSelect('max(id)', 'accesslog', "ts < DATE_ADD(now(), INTERVAL -60 HOUR)");
+	my $hoursback = 60;
+	my $failures = 10; # This is probably related to a lock failure
+	my $id = $logdb->sqlSelect('MAX(id)',
+		'accesslog',
+		"ts < DATE_SUB(NOW(), INTERVAL $hoursback HOUR)");
 
-	my ($rows, $total);
+	if (!$id) {
+		slashdLog("no accesslog rows older than $hoursback hours");
+		return "nothing to do";
+	}
 
-	label:
-	while ($rows = $logdb->sqlDo("DELETE FROM accesslog WHERE id < $id LIMIT 100000")) {
+	my $rows;
+	my $total = 0;
+	my $limit = 100_000;
+
+	MAINLOOP:
+	while ($rows = $logdb->sqlDelete("accesslog", "id < $id", $limit)) {
 		$total += $rows;
-		my $div = $total/100000;
-		slashdLog("delete_accesslog: Deleted thus far $div x 10^5 rows " . localtime());
 		last if $rows eq "0E0";
+		slashdLog("deleted so far $total of $limit rows");
+	}
+	if ($logdb->sqlError && $counter < $failures) {
+		slashdLog("sql error: " . $logdb->sqlError);
+		sleep 5;
+		$counter++;
+		goto MAINLOOP;
 	}
 
-	if ($logdb->sqlError && $counter < $FAILURES) {
-		slashdLog("delete_accesslog: Error occured (" . $logdb->sqlError . ")");
-		sleep(5);
-					$counter++;
-		goto label;
+	if ($counter >= $failures) {
+		slashdLog("more than $failures errors occured, accesslog is probably locked");
+		return "failures, accesslog probably locked, $total rows deleted";
 	}
-	if ($counter >= $FAILURES) {
-		slashdLog("delete_accesslog: More then $FAILURES errors occured, accesslog is probably locked.");
-	}
+	return "success, $total rows deleted";
 };
 
 1;
+
