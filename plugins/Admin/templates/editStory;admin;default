@@ -13,12 +13,9 @@ en_US
 __name__
 editStory
 __template__
-[%
-        section = form.section || user.section;
-%]
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
-[% IF section %]
-<INPUT TYPE="HIDDEN" NAME="section" VALUE="[% section %]">
+[% IF user.section %]
+<INPUT TYPE="HIDDEN" NAME="user.section" VALUE="[% user.section %]">
 [% END %]
 
 [% IF form.title %]
