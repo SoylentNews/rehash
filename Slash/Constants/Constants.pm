@@ -106,6 +106,7 @@ These constants are for message delivery modes and message type codes.
 	MSG_CODE_JOURNAL_REPLY
 	MSG_CODE_NEW_COMMENT
 	MSG_CODE_INTERUSER
+	MSG_CODE_ADMINMAIL
 
 =cut
 
