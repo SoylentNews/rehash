@@ -18,7 +18,7 @@ __template__
 <TR><TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]" SIZE="2">
 		This discussion has been archived.
 		No new comments can be posted.
-</TD></TR>
+</FONT></TD></TR>
 
 __seclev__
 10000
