@@ -316,7 +316,7 @@ sub printComments {
 		lvl		=> $lvl,
 	});
 
-	return if $user->{state}{nocomment} || $user->{mode} eq 'nocomment';
+	return if (($user->{state}{nocomment} || $user->{mode} eq 'nocomment') && !$form->{comment_override_display});
 
 	my($comment, $next, $previous);
 	if ($cid) {
