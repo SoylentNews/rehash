@@ -1213,9 +1213,10 @@ sub dispComment {
 	}
 
 	$comment->{sig} = parseDomainTags($comment->{sig}, $comment->{fakeemail});
-	if ($user->{sigdash} && $comment->{sig}) {
+	if ($comment->{sig}) {
 		$comment->{sig} =~ s/^\s*-{1,5}\s*<(?:P|BR)>//i;
-		$comment->{sig} = "--<BR>$comment->{sig}";
+		$comment->{sig} = getData('sigdash', {}, 'comments')
+			. $comment->{sig};
 	}
 
 	my $reasons = $reader->getReasons();
@@ -1645,7 +1646,6 @@ sub getData {
 	my $var  = $cache->{getdata}{ $name->{tempdata}{tpid} } ||= { };
 
 	if (defined $var->{$value}) {
-#		print STDERR "getData $$ value='$value' tpid='$name->{tempdata}{tpid}' len=" . length($var->{$value}) . " cache_hit\n";
 		return $var->{$value};
 	}
 
@@ -1656,7 +1656,6 @@ sub getData {
 		$cache->{getdata}{_last_refresh} ||= time;
 		$var->{$value} = $str;
 	}
-#	print STDERR "getData $$ value='$value' tpid='$name->{tempdata}{tpid}' len=" . length($str) . " cache_miss\n";
 	return $str;
 }
 

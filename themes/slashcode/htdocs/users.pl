@@ -1984,7 +1984,6 @@ sub editComm {
 	my $r_check  = $user_edit->{reparent}		 ? $constants->{markup_checked_attribute} : '';
 	my $n_check  = $user_edit->{noscores}		 ? $constants->{markup_checked_attribute} : '';
 	my $s_check  = $user_edit->{nosigs}		 ? $constants->{markup_checked_attribute} : '';
-	my $d_check  = $user_edit->{sigdash}		 ? $constants->{markup_checked_attribute} : '';
 	my $b_check  = $user_edit->{nobonus}		 ? $constants->{markup_checked_attribute} : '';
 	my $sb_check = $user_edit->{nosubscriberbonus}	 ? $constants->{markup_checked_attribute} : '';
 	my $p_check  = $user_edit->{postanon}		 ? $constants->{markup_checked_attribute} : '';
@@ -2006,7 +2005,6 @@ sub editComm {
 		r_check			=> $r_check,
 		n_check			=> $n_check,
 		s_check			=> $s_check,
-		d_check			=> $d_check,
 		b_check			=> $b_check,
 		sb_check		=> $sb_check,
 		p_check			=> $p_check,
@@ -2474,7 +2472,6 @@ sub saveComm {
 		noscores		=> ($form->{noscores}   ? 1 : 0),
 		hardthresh		=> ($form->{hardthresh} ? 1 : 0),
 		no_spell		=> ($form->{no_spell}   ? 1 : undef),
-		sigdash			=> ($form->{sigdash} ? 1 : undef),
 		nobonus			=> ($form->{nobonus} ? 1 : undef),
 		nosubscriberbonus	=> ($form->{nosubscriberbonus} ? 1 : undef),
 		postanon		=> ($form->{postanon} ? 1 : undef),

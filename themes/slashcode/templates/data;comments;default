@@ -74,13 +74,15 @@ __template__
 	<P>[% num %] MetaModeration(s) Completed.
 
 [% CASE 'moderating' %]
+	[% returnme.data_constant = 1 %]
 	Moderating...
 
 [% CASE 'metamoderating' %]
+	[% returnme.data_constant = 1 %]
 	MetaModerating...
 
 [% CASE 'deletecid' %]
-	Delete form.cid
+	Delete [% form.cid || strip_nohtml %]
 
 [% CASE 'try_journals' %]
 	No discussion or comments found for this request.
@@ -90,6 +92,10 @@ __template__
 	    (You must be <a href="[% gSkin.rootdir %]/login.pl">logged in</a>
 	    to create a journal entry.)
 	[% END %]
+
+[% CASE 'sigdash' %]
+	[% returnme.data_constant = 1 %]
+	--<br>
 
 [% END %]
 

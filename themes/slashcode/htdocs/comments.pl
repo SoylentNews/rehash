@@ -781,14 +781,20 @@ sub previewForm {
 		or return;
 
 	$tempComment = addDomainTags($tempComment);
+
+	# XXX We really should be calling dispComment() here, rather than
+	# duplicating code.
+
 	$tempComment = parseDomainTags($tempComment,
 		!$form->{postanon} && $user->{fakeemail});
 
 	my $sig = $user->{sig};
-	if ($user->{sigdash} && $user->{sig}) {
+	if ($sig) {
 		$sig =~ s/^\s*-{1,5}\s*<(?:P|BR)>//i;
-		$sig = "--<BR>$sig";
+		$sig = getData('sigdash', {}, 'comments')
+			. $sig;
 	}
+
 	my $discussion = $slashdb->getDiscussion($form->{sid}) || 0;	
 	my $extras = [];	
 	my $disc_skin = $slashdb->getSkin($discussion->{primaryskid});

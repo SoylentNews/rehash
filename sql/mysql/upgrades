@@ -2786,3 +2786,6 @@ ALTER TABLE submissions ADD INDEX time_emaildomain (time, emaildomain);
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_39, Start of T_2_5_0_40 - 2004/11/24
+
+DELETE FROM users_param WHERE name='sigdash';
+

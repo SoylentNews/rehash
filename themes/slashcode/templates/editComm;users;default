@@ -117,12 +117,8 @@ __template__
 		They still <B>apply</B> you just don't see them.)
 		<INPUT TYPE="CHECKBOX" NAME="noscores"[% n_check %]>
 
-		<P><B>Signature Dash</B> (Prefix everyone's signature with "--" to make
-		it blazingly obvious where comment ends and sig begins)
-		<INPUT TYPE="CHECKBOX" NAME="sigdash"[% d_check %]>
-
-		[%# doesn't this need to be flexible for sites that
-		    already have different reasons, in the code?  why
+		[%# XXX this needs to be flexible for sites that
+		    already have different reasons, in the code.  why
 		    not just loop over the reasons already existing,
 		    like it did before?
 		 %]
