@@ -364,7 +364,7 @@ sub displayStories {
 				if $cc || $thresh;
 		}
 
-		if ($thissection ne $constants->{defaultsection} && !$form->{section}) {
+		if ($thissection ne $constants->{defaultsection} && (!$form->{section} || $form->{section} eq 'index')) {
 			my($section) = $reader->getSection($thissection);
 			push @links, getData('seclink', {
 				name	=> $thissection,
