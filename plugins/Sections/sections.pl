@@ -262,7 +262,7 @@ sub saveSection {
 	my $found = $slashdb->getSection($section, 'section', 1);
 	if ($found) {
 		$slashdb->setSection($section, {
-			qid		=> $form->{qid},
+			qid		=> $form->{qid} || 0,
 			title		=> $form->{title},
 			issue		=> $form->{issue},
 			artcount	=> $form->{artcount},
@@ -278,7 +278,7 @@ sub saveSection {
 	} else {
 		my $return = $slashdb->createSection({
 			section		=> $section,
-			qid		=> $form->{qid},
+			qid		=> $form->{qid} || 0,
 			title		=> $form->{title},
 			issue		=> $form->{issue},
 			artcount	=> $form->{artcount},
