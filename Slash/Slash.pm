@@ -1193,6 +1193,13 @@ EOT
 	$comment->{fakeemail_vis} = ellipsify($comment->{fakeemail});
 	push @{$user->{state}{cids}}, $comment->{cid};
 
+	# stats for clampe
+	if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME}) {
+		my $fname = catfile('clampe', $user->{ipid});
+		my $comlog = "IPID: $user->{ipid} UID: $user->{uid} SID: $comment->{sid} CID: $comment->{cid} Dispmode: $user->{mode} Thresh: $user->{threshold} CIPID: $comment->{ipid} CUID: $comment->{uid}";
+		doLog($fname, $comlog);	
+	}
+
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
 		$can_mod, $reasons
