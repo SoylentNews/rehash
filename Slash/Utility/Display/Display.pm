@@ -1116,7 +1116,9 @@ sub createMenu {
 		if (@$items) {
 			$menu_text .= slashDisplay($menu,
 				{ items =>	$items,
-				  color =>	$color },
+				  color =>	$color,
+				  lightfontcolor => $options->{lightfontcolor} || ""
+				},
 				{ Return => 1, Page => 'menu' });
 		}
 	}
