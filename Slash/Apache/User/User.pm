@@ -229,7 +229,7 @@ sub handler {
 			}
 		}
 
-		my($tmpuid, $value) = eatUserCookie($logtoken || $cookies->{user}->value);
+		my($tmpuid, $value) = eatUserCookie($logtoken || ($cookies->{user} && $cookies->{user}->value));
 		my $cookvalue;
 		if ($tmpuid && $tmpuid > 0 && $tmpuid != $constants->{anonymous_coward_uid}) {
 			($uid, $cookvalue) =
