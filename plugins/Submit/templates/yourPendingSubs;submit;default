@@ -49,7 +49,7 @@ and their status within the system:</P>
 			END;
 	END %]
 	([% status %])
-	[% summary.$status = summary.$status + 1 %]
+	[% summary.$status = summary.$status.defined ? summary.$status + 1 : 1 %]
 	</LI>
 [% END %]
 </UL>
