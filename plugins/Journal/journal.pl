@@ -74,6 +74,17 @@ sub main {
 	# journal.pl waits until it's inside the op's subroutine to print
 	# its header.  Headers are bottlenecked through _printHead.
 
+	# this is a hack, think more on it, OK for now -- pudge
+	# I think this needs to be part of cramming all possible
+	# user init code into getUser(). Saving a few nanoseconds
+	# here and there is not worth my staying up until 11 PM
+	# trying to figure out what fields get set where. - Jamie
+	# agreed, but the problem is that section is determined by header(),
+	# and that determines color.  we could set the color in the
+	# user init code, and then change it later in header() only
+	# if section is defined, perhaps. -- pudge
+	Slash::Utility::Anchor::getSectionColors();
+
 	my $op = $form->{'op'};
 	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED]) {
 		$op = 'default';
@@ -700,12 +711,6 @@ sub editArticle {
 sub _validFormkey {
 	my(@checks) = @_ ? @_ : qw(max_post_check interval_check formkey_check);
 	my $error;
-	# this is a hack, think more on it, OK for now -- pudge
-	# I think this needs to be part of cramming all possible
-	# user init code into getUser(). Saving a few nanoseconds
-	# here and there is not worth my staying up until 11 PM
-	# trying to figure out what fields get set where. - Jamie
-	Slash::Utility::Anchor::getSectionColors();
 	for (@checks) {
 		last if formkeyHandler($_, 0, 0, \$error);
 	}

@@ -22,16 +22,16 @@ __template__
 
 [% CASE 'userhead' %]
 [% IF user.light %]
-	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">Journal</A>
+	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/">Journal</A> of <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> ([% uid %])
 [% ELSE %]
-	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/"><FONT COLOR="#FFFFFF">Journal</FONT></A>
+	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/"><FONT COLOR="[% user.fg.0 %]">Journal</FONT></A> of <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="[% user.fg.0 %]">[% nickname | strip_literal %]</FONT></A> ([% uid %])  [% PROCESS zoo_icons person=uid implied="" %]
 [% END %]
 
 [% CASE 'friendhead' %]
 [% IF user.light %]
 	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/">Friends</A>
 [% ELSE %]
-	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/"><FONT COLOR="#FFFFFF">Friends</FONT></A>
+	<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="[% user.fg.0 %]">[% nickname %]</FONT></A>'s <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/"><FONT COLOR="[% user.fg.0 %]">Friends</FONT></A>
 [% END %]
 
 [% CASE 'nousers' %]

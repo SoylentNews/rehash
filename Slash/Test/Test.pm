@@ -128,6 +128,9 @@ sub slashTest {
 	eval { createEnvironment() };
 	die $@ if $@ && !$noerr;
 
+	# this should later be done automatically by the user init code
+	Slash::Utility::Anchor::getSectionColors();
+
 	$::slashdb   = getCurrentDB();
 	$::constants = getCurrentStatic();
 	$::user      = getCurrentUser();
