@@ -24,7 +24,7 @@ __template__
 	[% PROCESS mid_tab link="/admin.pl" label="Stories" selected=( page == 'stories' ) next=( page == 'new' ) %]
 	[% PROCESS mid_tab link="/admin.pl?op=edit" label="New" selected=( page == 'new' ) next=( page == 'submissions' ) %]
 	[% subs = Slash.db.getSubmissionCount() %]
-	[% PROCESS mid_tab link="/submit.pl?op=list" label="$subs Submissions" selected=( page == 'submissions' ) next=( page == 'poll' ) %]
+	[% PROCESS mid_tab link="/submit.pl?op=list" label="$subs&nbsp;Submissions" selected=( page == 'submissions' ) next=( page == 'poll' ) %]
 	[% PROCESS mid_tab link="/pollBooth.pl?op=edit" label="Poll" selected=( page == 'poll' ) next=( page == 'config' ) %]
 	[% PROCESS mid_tab link="/admin.pl?op=topics" label="Config" selected=( page == 'config' ) next=( page == 'info' ) %]
 	[% PROCESS mid_tab link="/admin.pl?op=recent" label="Info" selected=( page == 'info' ) next=( page == 'help' ) %]
