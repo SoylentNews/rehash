@@ -635,6 +635,7 @@ Fry:But this is HDTV. It's got better resolution than the real world.
 Fry:I'm gonna be a science fiction hero, just like Uhura, or Captain Janeway, or Xena!
 Fry:Make up some feelings and tell her you have them.
 Fry:I'm not a robot like you. I don't like having disks crammed into me... unless they're Oreos, and then only in the mouth.
+Fry:Sweet justice! Sweet, juicy justice!
 Fry:I must be a robot. Why else would human women refuse to date me?
 Fry:Hey look, it's that guy you are!
 Fry:That doesn't look like an "L", unless you count lower case.
