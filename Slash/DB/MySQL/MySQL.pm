@@ -4637,8 +4637,10 @@ sub getCommentText {
 		}
 
 		return \%return;
-	} else {
+	} elsif ($cid) {
 		return $self->sqlSelect("comment", "comment_text", "cid=$cid");
+	} else {
+		return {};
 	}
 }
 
