@@ -12,6 +12,7 @@ en_US
 __name__
 listStories
 __template__
+[% skins = Slash.db.getSkins %]
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="100%">
 		[% IF constants.label_ui %]
 	<TR>
@@ -81,6 +82,7 @@ FOREACH story = storylistref;
 	   # differ from the section being displayed.  So list it. %]
 		<TD>
 		<FONT SIZE="2">
+		[% story.skinname = skins.${story.primaryskid}.name || "_none" %]
 		[% IF story.skinname.match("^_") %]
 			[% story.skinname.substr(0, 5) %]
 		[% ELSE %]
