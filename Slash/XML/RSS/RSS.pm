@@ -162,7 +162,7 @@ sub create {
 	my %channel = (
 		title		=> $constants->{sitename},
 		description	=> $constants->{slogan},
-		'link'		=> $constants->{absolutedir} . '/',
+		'link'		=> $constants->{absolutedir_secure} . '/',
 
 		# dc
 		date		=> $self->date2iso8601(),
