@@ -109,9 +109,9 @@ my %users;
 
 for my $tz (sort keys %tzs) {
 	my $dat = $tzs{$tz};
-	next if $tz eq $dat->[0] && $dat->[1] == 0;
+	next if $tz eq $dat->[0] && !$dat->[1];
 
-	if ($dat->[1] != 0) {
+	if ($dat->[1]) {
 		print "Converting users for $tz to manual DST ($dat->[1])\n" if $DEBUG;
 		$sth1->execute($tz);
 		my @uids = map { $_->[0] } @{ $sth1->fetchall_arrayref };
