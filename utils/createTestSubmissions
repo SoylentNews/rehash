@@ -3,13 +3,16 @@
 # Copyright 1997-2004 by Open Source Development Network. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
-# Based on jamie's createTestStories. Any bugs are probably HIS fault.
+
+# Based on jamie's createTestStories. Any bugs are probably HIS fault
+# but I'll take the heat for them, because he's a really cool guy.
+# - Cliff
 
 BEGIN {
-	{
+	eval {
 		require Silly::Werder;
 		Silly::Werder->import;
-	}
+	};
 	die "Installation of Silly::Werder is required for this util, sorry!\n"
 		if $@;
 }
@@ -38,6 +41,11 @@ $opts{num_subs} = $ARGV[0] || 10;
 usage('Invalid number of submissions') 
 	if $opts{num_subs} !~ /^\d+$/ || $opts{num_subs} < 0;
 
+# Optional. Used later.
+eval { require Time::HiRes };
+my $shortDelay = 0;
+$shortDelay = 1 if $INC{'Time/HiRes.pm'} && Time::HiRes->can('usleep');
+
 createEnvironment($opts{u});
 setCurrentSkin(determineCurrentSkin());
 $slashdb = getCurrentDB();
@@ -57,7 +65,7 @@ if (exists $opts{'U'}) {
 # main program logic (in braces to offset nicely)
 {
 	my $max_uid = $slashdb->countUsers({ max => 1});
-	my $min_uid = $slashdb->sqlSelect("MIN(uid)", "users");
+	my $min_uid = $slashdb->sqlSelect('MIN(uid)', 'users');
 
 	my $user_name = $user->{nickname} if $opts{'U'};
 
@@ -92,16 +100,20 @@ if (exists $opts{'U'}) {
 		my $time = UnixDate(
 			ParseDateString('epoch ' . get_time(-1)),
 
-			'%Y-%m-%d %H:%M:%S'
+			"'%Y-%m-%d %H:%M:%S'"
 		);
 
 		my $tid = getRandomTopicID();
-		my $section = $opts{'S'} || getRandomSection();
+		my $section = $opts{'S'} || getRandomSkin();
 
-		my $name;
-		$name = $user_name || sprintf 'Random %s User', make_werds(1);
+		my $name = make_werds(1);
+		$name =~ s/[.?!]$//;
+		$name = $user_name || sprintf 'Random %s User', $name;
 
 		my $weight = $min_weight + rand($max_weight - $min_weight);
+		my $comment;
+		$comment = typical_remark() if rand(1) > 0.87;
+		$comment =~ s/^ //;
 
 		my $submission = {
 			name 		=> $name,
@@ -109,9 +121,10 @@ if (exists $opts{'U'}) {
 			tid		=> $tid,
 			'time'		=> $time,
 			subj		=> $subject,
-			section		=> $section,
+			primaryskid	=> $section,
 			story		=> $story,
 			weight		=> $weight,
+			comment		=> $comment,
 		};
 
 		print Dumper($submission), "\n\n" if $opts{'D'};
@@ -126,7 +139,13 @@ C
 F
 			
 		$count--;
-		sleep 1 if $count; # otherwise subids may collide!
+
+		# Slight delay or subids may collide.
+		if ($INC{'Time/HiRes.pm'} && Time::HiRes->can('usleep')) {
+			Time::HiRes::usleep(50000) if $count;
+		} else {
+			sleep 1 if $count;
+		}
 	}
 	my $t1 = new Benchmark;
 	print "$opts{num_subs} submissions created in: ",
@@ -154,15 +173,17 @@ sub get_time {
 
 sub getRandomTopicID {
 	# Yes, inefficient.  I do not care.
-	my $tids = $slashdb->sqlSelectAll("tid", "topics");
+	my $tids = $slashdb->sqlSelectAll('tid', 'topics');
 	my @tids = map { $_->[0] } @$tids;
 	my $rand_tid = @tids[ rand @tids ];
 	return $rand_tid;
 }
 
-sub getRandomSection {
+sub getRandomSkin {
 	# Yes, inefficient.  I do not care.
-	my $sections = $slashdb->sqlSelectAll("section", "sections", "1=1 AND type='contained'", "ORDER BY RAND()");
+	my $sections = $slashdb->sqlSelectAll(
+		'skid', 'skins', '', 'ORDER BY RAND()'
+	);
 	my @sections = map { $_->[0] } @$sections;
 	my $num = rand @sections;
 	$num = 0 if rand(1) < 1/3;
@@ -172,8 +193,11 @@ sub getRandomSection {
 
 sub getRandomUserID {
 	my($min_uid, $max_uid) = @_;
-	my $rand_uid = $slashdb->sqlSelect("uid", "users",
-		"uid BETWEEN $min_uid AND $max_uid", "ORDER BY RAND() LIMIT 1");
+	my $rand_uid = $slashdb->sqlSelect(
+			'uid', 'users',
+			"uid BETWEEN $min_uid AND $max_uid",
+			'ORDER BY RAND() LIMIT 1'
+	);
 	return $rand_uid;
 }
 
@@ -195,21 +219,28 @@ sub make_werds {
 		http://us.imdb.com/		http://www.kernel.org
 		http://ic.ac.uk			http://cr.yp.to/
 		http://www.verizonreallyreallyreallysucks.com/
-		ftp://ftp.kernel.org/		ftp://ftp.gnu.org/gnu/Licenses/COPYING-2.0
-		news:news.admin.net-abuse.email gopher://ccat.sas.upenn.edu:3333/11/Fiction/
+		ftp://ftp.kernel.org/
+		ftp://ftp.gnu.org/gnu/Licenses/COPYING-2.0
+		news:news.admin.net-abuse.email
+		gopher://ccat.sas.upenn.edu:3333/11/Fiction/
 		http://List-Etiquette.com/about/
 		http://slashdot.org/features/99/03/31/0137221.shtml
 		http://www.nap.edu/readingroom/books/newpath/chap2.html
 		http://www.forthnet.gr/forthnet/isoc/short.history.of.internet
 		http://www.freenix.fr/unix/linux/HOWTO/French-HOWTO.html
-		http://www.linux.org.mx/	http://www.linux.net.mx/linux.php
-		http://www.linux.org.uk/diary/	http://hepwww.ph.qmw.ac.uk/HEPpc/
-		http://www.w3.org		http://peipa.essex.ac.uk/tp-linux/
+		http://www.linux.org.mx/
+		http://www.linux.net.mx/linux.php
+		http://www.linux.org.uk/diary/
+		http://hepwww.ph.qmw.ac.uk/HEPpc/
+		http://www.w3.org
+		http://peipa.essex.ac.uk/tp-linux/
 		http://www.crosswinds.net/~tvquotes/futurama/2.html
+		www.google.com			bad_link
+		b.a.d l.i.n.k . .. ... ....
+		mailto:jamie@slashdot.org	mailto:pater@slashdot.org
+		mailto:cliff@slashdot.org	mailto:pudge@slashdot.org
 		http://www.google.com/search?q=cache:h58W7o4qU-w:www.space.com/sciencefiction/tv/futurama_gore_000516_wg.html+Futurama+Fry&amp;hl=en
 		http://dmoz.org/Regional/Europe/United_Kingdom/Wales/Isle_of_Anglesey/Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch/
-		www.google.com			bad_link b.a.d l.i.n.k . .. ... ....
-		mailto:jamie@slashdot.org	mailto:pater@slashdot.org
 	);
 	push @links, 'http://directory.google.com/Top/Arts/Literature/Authors/C/Carroll,_Lewis/Works/Hunting_of_the_Snark,_The/';
 	my $comment;
