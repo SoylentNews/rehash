@@ -20,6 +20,8 @@ __template__
 [% USE Slash;
 	IF submission.email && submission.name;
 		subtext = "<A HREF=\"$submission.email\">$submission.name</A> writes <i>\"$submission.story\"</i>";
+	ELSIF (submission.name == constants.anon_name) && constants.anon_name_alt;
+		subtext = "$constants.anon_name_alt writes <i>\"$submission.story\"</i>";
 	ELSIF submission.name;
 		subtext = "$submission.name writes <i>\"$submission.story\"</i>";
 	ELSE;
