@@ -91,7 +91,7 @@ sub findComments {
 	my $skin = $reader->getSkin($form->{section});
 
 	# XXXSKIN - discussions.section needs to be fixed somehow to new system
-	if ($skin->{skid} eq $constants->{mainpage_skid}) {
+	if ($skin->{skid} == $constants->{mainpage_skid}) {
 		$where .= " AND discussions.section IN ('" . join("','", @{$skin->{contained}}) . "')" 
 			if $skin->{contained} && @{$skin->{contained}};
 	} else {
@@ -197,7 +197,8 @@ sub findStory {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $skin = $reader->getSkin($form->{section});
 
-	if ($skin->{skid} eq $constants->{mainpage_skid}) {
+	# XXXSKIN - stories.section is no more; I think we want to JOIN against story_topics_rendered on the stoid's WHERE s_t_r.tid=$skin->{nexus}
+	if ($skin->{skid} == $constants->{mainpage_skid}) {
 		$where .= " AND stories.section IN ('" . join("','", @{$skin->{contained}}) . "')" 
 			if $skin->{contained} && @{$skin->{contained}};
 	} else {
@@ -494,7 +495,7 @@ sub findDiscussion {
 	my $skin = $reader->getSkin($form->{section});
 
 	# XXXSKIN - discussions.section needs to be fixed somehow to new system
-	if ($skin->{skid} eq $constants->{mainpage_skid}) {
+	if ($skin->{skid} == $constants->{mainpage_skid}) {
 		$where .= " AND section IN ('" . join("','", @{$skin->{contained}}) . "')" 
 			if $skin->{contained} && @{$skin->{contained}};
 	} else {
