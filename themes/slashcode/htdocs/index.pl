@@ -171,8 +171,8 @@ sub do_rss {
 		my $story = $reader->getStory($_->{sid});
 		$story->{introtext} = parseSlashizedLinks($story->{introtext});
 		$story->{introtext} = processSlashTags($story->{introtext});
-		$story->{introtext} =~ s{(HREF|SRC)\s*=\s*"(//[^/"]+)"}
-		                        {$1 . '="' . url2abs($2) . '"'}ieg;
+		$story->{introtext} =~ s{(HREF|SRC)\s*=\s*"(//[^/]+)}
+		                        {$1 . '="' . url2abs($2)}sieg;
 		push @rss_stories, { story => $story };
 	}
 
