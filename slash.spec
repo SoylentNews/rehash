@@ -35,10 +35,10 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/slash
 /etc/rc3.d/S99slash
 /etc/rc6.d/K99slash
-/usr/lib/perl5/site_perl/5.6.0/i386-linux/auto/Slash*
-/usr/lib/perl5/site_perl/5.6.0/i386-linux/Slash*
-/usr/lib/perl5/site_perl/5.6.0/Slash*
-/usr/share/man/man3/Slash*
+%{_libdir}/perl5/site_perl/*/*/auto/Slash*
+%{_libdir}/perl5/site_perl/*/*/Slash*
+%{_libdir}/perl5/site_perl/*/Slash*
+%{_mandir}/man3/Slash*
 /usr/local/slash*
 
 %changelog
