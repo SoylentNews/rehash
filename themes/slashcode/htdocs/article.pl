@@ -85,7 +85,7 @@ sub main {
 			my $last = pop @topic_desc;
 			$a = join(', ', @topic_desc) . ", and $last";
 		}
-		my $meta_desc = "$story->{title}--article related to $a.";
+		my $meta_desc = "$story->{title} -- article related to $a.";
 
 		header($links, $story->{section}, { meta_desc => $meta_desc }) or return;
 
@@ -119,8 +119,9 @@ sub main {
 			# If no comments ever have existed and commentstatus is disabled,
 			# just skip the display of the comment header bar -Brian
 			printComments($discussion)
-				if $discussion && !(
-					!$discussion->{commentcount} && $discussion->{commentstatus} eq 'disabled'
+				if $discussion && ! (
+					   !$discussion->{commentcount}
+					&&  $discussion->{commentstatus} eq 'disabled'
 				);
 		}
 	} else {
