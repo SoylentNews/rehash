@@ -119,6 +119,11 @@ slash-1.0.6, 2000.06.xx
 
 *	User's ID (UID) added to comment headers.
 
+*	Names of the comment poster have been removed during metamoderation.
+
+*	Fixed a minor bug in metamod.pl that inadvertantly stopped the injection
+	of new eligible users into the metamoderation pool.
+
 
 slash-1.0.5, 2000.06.13
 -----------------------
