@@ -336,6 +336,19 @@ sub IndexHandler {
 		return OK;
 	}
 
+# The vote is still out on whether I will do this or not -Brian
+#	if ($uri =~ /^\/\d\d\/\d\d\/\d\d\/\d*\.shtml/) {
+#		my $basedir  = $constants->{basedir};
+#		my ($realfile)  = split /\?/, $uri;
+#		my $section = $constants->{defaultsection};
+#	print STDERR "DEFAULT $section\n";
+#
+#		$r->uri("/$section/$realfile");
+#		$r->filename("$basedir/$section/$realfile");
+#		writeLog('shtml');
+#		return OK;
+#	}
+
 	if (!$dbon && $uri !~ /\.shtml/) {
 		my $basedir  = $constants->{basedir};
 

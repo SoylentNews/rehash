@@ -1019,17 +1019,6 @@ sub main {
 	footer();
 }
 
-sub notDoneYet {
-	my($slashdb, $form, $user, $udbt) = @_;
-
-	titlebar('100%', <<EOT);
-Op '$form->{op}' -- This functionality hasn't been written yet!
-EOT
-
-	listMiners(@_);
-}
-
-
 main();
 1;
 

@@ -438,13 +438,16 @@ sub linkStory {
 		# an article needs to make the link dynamic if it's the
 		# "n comments" link, where threshold = -1.  For maximum
 		# compatibility we check against the AC's threshold.
-		$dynamic = 1 if $threshold != $slashdb->getUser(
-			$constants->{anonymous_coward_uid},
-			'threshold'
-		);
+		$dynamic = 1 if $threshold != getCurrentAnonymousCoward('threshold');
 	}
 
-	return _hard_linkStory($story_link, $mode, $threshold, $dynamic)
+	# We need to make sure we always get the right link -Brian
+	my ($url);
+	unless ($url = $slashdb->getSection($story_link->{section}, 'url')) {
+		$url = $constants->{real_rootdir};
+	} 
+
+	return _hard_linkStory($story_link, $mode, $threshold, $dynamic, $url)
 		if $constants->{comments_hardcoded} && !$user->{light};
 
 	return slashDisplay('linkStory', {
@@ -453,7 +456,7 @@ sub linkStory {
 		tid		=> $story_link->{tid},
 		sid		=> $story_link->{sid},
 		section		=> $story_link->{section},
-		url		=> $slashdb->getSection($story_link->{section}, 'url'),
+		url		=> $url,
 		text		=> $story_link->{'link'},
 		dynamic		=> $dynamic,
 	}, { Return => 1, Nocomm => 1 });
@@ -1064,19 +1067,18 @@ sub lockTest {
 ########################################################
 # this sucks, but it is here for now
 sub _hard_linkStory {
-	my($story_link, $mode, $threshold, $dynamic) = @_;
+	my($story_link, $mode, $threshold, $dynamic, $url, $url_flag) = @_;
 	my $constants = getCurrentStatic();
 
 	if ($dynamic) {
-	    my $link = qq[<A HREF="$constants->{rootdir}/article.pl?sid=$story_link->{sid}];
+	    my $link = qq[<A HREF="$url/article.pl?sid=$story_link->{sid}];
 	    $link .= "&amp;mode=$mode" if $mode;
 	    $link .= "&amp;tid=$story_link->{tid}" if $story_link->{tid};
 	    $link .= "&amp;threshold=$threshold" if defined($threshold);
 	    $link .= qq[">$story_link->{link}</A>];
 	    return $link;
 	} else {
-	    # this looks wrong ... tid=$tid won't have much effect on .shtml -- pudge
-	    return qq[<A HREF="$constants->{rootdir}/$story_link->{section}/$story_link->{sid}.shtml?tid=$story_link->{tid}">$story_link->{link}</A>];
+	    return qq[<A HREF="$url/$story_link->{section}/$story_link->{sid}.shtml?tid=$story_link->{tid}">$story_link->{link}</A>];
 	}
 }
 

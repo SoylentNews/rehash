@@ -16,6 +16,5 @@ __name__
 ssihead
 __template__
 <!--#include virtual="[% dir %]/[% section %]slashhead.inc"-->
-
 __seclev__
 10000

@@ -48,17 +48,22 @@ $task{$me}{code} = sub {
 	my $sites = $yass->getActive();
 	my $junk;
 	my $ua = LWP::UserAgent->new();
+	my ($winners, $losers);
 	for (@$sites) {
-		print "$_->{url} ($constants->{yass_extra}) \n";
+		print "$_->{id}\t$_->{url}";
 		my $response = $ua->get($_->{url} . $constants->{yass_extra});
 		if ($response->is_success) {
 			$yass->success($_->{id});
-			print "\tactive\t$_->{url}\n";
+			print "\tactive\n";
+			$winners++;
 		} else {
 			$yass->failed($_->{id});
-			print "\tdead\t$_->{url}\n";
+			print "\tdead\n";
+			$losers++;
 		}
 	}
+	my $total = $winners + $losers;
+	slashdLog("Total sites $total\tActive Sites $winners\tFailed sites $losers);
 	slashdLog('Checking YASS sites End');
 
 	return ;

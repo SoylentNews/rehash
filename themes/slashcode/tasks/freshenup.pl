@@ -106,11 +106,12 @@ $task{$me}{code} = sub {
 	}
 
 	for my $key (keys %updates) {
+		my $section = $slashdb->getSection($key);
+		createCurrentHostname($section->{hostname});
 		next unless $key;
-		my $index_handler = $slashdb->getSection($key, 'index_handler');
-		my($base) = split(/\./, $index_handler);
+		my($base) = split(/\./, $section->{index_handler});
 		prog2file(
-			"$constants->{basedir}/$index_handler", 
+			"$constants->{basedir}/$section->{index_handler}", 
 			"$vu ssi=yes section=$key",
 			"$constants->{basedir}/$key/$base.shtml",
 			verbosity()

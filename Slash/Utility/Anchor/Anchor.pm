@@ -272,7 +272,11 @@ The 'ssihead' template block.
 sub ssiHead {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $slashdb = getCurrentDB();
 	(my $dir = $constants->{rootdir}) =~ s|^(?:https?:)?//[^/]+||;
+	my $hostname = $slashdb->getSection($user->{currentSection}, 'hostname')
+		if $user->{currentSection};
+	my $section = 
 
 	slashDisplay('ssihead', {
 		dir	=> $dir,

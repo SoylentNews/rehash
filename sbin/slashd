@@ -465,6 +465,9 @@ sub main {
 				# Sadly, at this point there is no easy way to
 				# get $summary back from this child to the
 				# parent process for logging.
+				# What do you mean by this? Do you mean having the child write to the log file,
+				# or are you talking about something different? We can open up a pipe if you 
+				# directly want some information. 	-Brian
 				exit;
 			}
 			waitpid($pid, 0);
