@@ -70,7 +70,7 @@ sub getDaddyList {
 	my $link = "$gSkin->{absolutedir}/admin.pl";
 
 	my $shift_types = @$daddies > 1
-		? [ split /,/, $constants->{shift_shift_types} ]
+		? $schedule->{shift_types}
 		: [ $when ];
 
 	my $editors = $schedule->getEditors;
@@ -121,8 +121,6 @@ sub showShifts {
 	my $num_weeks = $constants->{shift_schedule_weeks};
 	my $shifts = $schedule->getCurrentShifts($num_weeks);
 
-	my $shift_types = [ split /,/, $constants->{shift_shift_types} ];
-	
 	my $schedule_weeks;
 	my $cur_week = $schedule->getCurrentGregorianWeek;
 	for (0 .. $num_weeks) {
@@ -142,7 +140,7 @@ sub showShifts {
 		days_of_week	=> \@dow,
 		default_shifts	=> $defaults,
 		shifts 		=> $shifts,
-		shift_types 	=> $shift_types,
+		shift_types 	=> $schedule->{shift_types},
 		weeks		=> $schedule_weeks,
 		curr_day	=> $day,
 	});

@@ -46,6 +46,23 @@ sub new {
 	$self->{virtual_user} = $user;
 	$self->sqlConnect;
 
+	my $static_shift_defs = getCurrentStatic('shift_definitions');
+
+	# What about error handling for bad shift definitions?
+	#
+	# How about warnings for overlapping shifts, or should that
+	# be allowed? Hmmmm.....	- Cliff
+	for (split /:/, $static_shift_defs) {
+		my($s_name, $s_times) = split /,/, $_;
+		my($start, $len) = split /=/, $s_times;
+
+		$self->{shift_defs}{$s_name} = {
+			start	 => $start,
+			'length' => $len,
+		};
+	}
+	$self->{shift_types} = [ keys %{ $self->{shift_defs} } ];
+
 	return $self;
 }
 
@@ -367,11 +384,13 @@ sub getShift {
 	my($self, $when) = @_;
 	my $constants = getCurrentStatic();
 
-	my $shift_types = [ split /,/, $constants->{shift_shift_types} ];
 	my $tzcode   = $constants->{shift_shifts_tz};
 
 	# hr begin in our defined TZ, length in hours
 	my @shifts = map { [ split /=/ ] } split /,/, $constants->{shift_shifts};
+	my @shifts = map {
+		[ @{ %{ $self->{shift_defs}{$_} } }{qw(start length)} ]
+	} @{ $self->{shift_types} };
 
 	# we only need to find out needed week, day of week, and hour
 	# if we need today/tomorrow/$x days, don't need hour
@@ -417,7 +436,7 @@ sub getShift {
 			$dow  = $time[6];
 			$day  = $self->getDayOfWeekOffset($dow);
 		}
-		@slots = 0 .. $#{$shift_types};
+		@slots = 0 .. $#{ $self->{shift_types} };
 	} else {
 		my $slot;
 		my $hr = $time[2];
@@ -448,7 +467,7 @@ sub getShift {
 			if ($when eq 'now') {
 				# we have it
 			} elsif ($when eq 'next') {
-				if (++$slot > $#{$shift_types}) {
+				if (++$slot > $#{ $self->{shift_types} }) {
 					$time += 86400;
 					@time = localtime($time);
 					$dow  = $time[6];
@@ -475,8 +494,6 @@ sub getDaddy {
 	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
 
-	my $shift_types = [ split /,/, $constants->{shift_shift_types} ];
-
 	my($time, $day, $slots) = $self->getShift($when);
 
 	my $default = $self->getCurrentDefaultShifts;
@@ -496,7 +513,8 @@ sub getDaddy {
 		}
 		$data;
 	} map {
-		$current->{$week}{$day}{$shift_types->[$_]} || $default->{$day}{$shift_types->[$_]}
+		$current->{$week}{$day}{ $self->{shift_types}[$_] } ||
+			$default->{$day}{ $self->{shift_types}[$_] }
 	} @$slots;
 
 	return \@daddies;
