@@ -104,19 +104,22 @@ my $start_time = Time::HiRes::time;
 			$user->{story_always_nexus};
 		push @{$gse_hr->{tid}}, split /,/, $always_tid_str
 			if $always_tid_str;
-		$gse_hr->{uid} = [ split /,/, $user->{story_always_author} ]
-			if $user->{story_always_author};
 	}
-	# Now exclude characteristics.  The only tricky thing here is that
+	# Now exclude characteristics.  One tricky thing here is that
 	# we never exclude the nexus for the current skin -- if the user
 	# went to foo.sitename.com explicitly, then they're going to see
-	# stories about foo, regardless of their prefs.
-	my $never_tid_str = join ",",
-		$user->{story_never_topic},
-		$user->{story_never_nexus};
-	my @never_tids =
-		grep { $_ != $gSkin->{nexus} }
-		split /,/, $never_tid_str;
+	# stories about foo, regardless of their prefs.  Another tricky
+	# thing is that story_never_topic doesn't get used unless a var
+	# and/or this user's subscriber status are set a particular way.
+	my @never_tids = split /,/, $user->{story_never_nexus};
+	if ($constants->{story_never_topic_allow} == 2
+		|| ($user->{is_subscriber} && $constants->{story_never_topic_allow} == 1)
+	) {
+		push @never_tids, split /,/, $user->{story_never_topic};
+	}
+	@never_tids =
+		grep { /^'?\d+'?$/ && $_ != $gSkin->{nexus} }
+		@never_tids;
 	$gse_hr->{tid_exclude} = [ @never_tids ] if @never_tids;
 	$gse_hr->{uid_exclude} = [ split /,/, $user->{story_never_author} ]
 		if $user->{story_never_author};
