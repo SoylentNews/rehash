@@ -9911,11 +9911,11 @@ sub getSimilarStories {
 			my $word_weight = 0;
 			my $wr = qr{(?i:\b\Q$word\E)};
 			my $m = log(length $word);
-			$word_weight *= 1.5 if $text_words->{$word}{is_url};
-			$word_weight *= 2.5 if $text_words->{$word}{is_url_with_path};
 			$word_weight += 2.0*$m * (() = $s->{title} =~     m{$wr}g);
 			$word_weight += 1.0*$m * (() = $s->{introtext} =~ m{$wr}g);
 			$word_weight += 0.5*$m * (() = $s->{bodytext} =~  m{$wr}g);
+			$word_weight *= 1.5 if $text_words->{$word}{is_url};
+			$word_weight *= 2.5 if $text_words->{$word}{is_url_with_path};
 			$s->{word_hr}{$word} = $word_weight if $word_weight > 0;
 			$s->{weight} += $word_weight;
 		}
