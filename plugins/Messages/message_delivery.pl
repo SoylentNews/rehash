@@ -27,9 +27,23 @@ $task{$me}{code} = sub {
 
 	messagedLog("$me begin");
 
+	my @time = localtime();
+	$time[5] += 1900;
+	$time[4] += 1;
+	my $now = sprintf "%04d-%02d-%02d", @time[5, 4, 3];
+	my $last_deferred = $slashdb->getVar('messages_last_deferred', 'value') || 0;
+
 	my($successes, $failures) = (0, 0);
 	my $count = $constants->{message_process_count} || 10;
-	my $msgs  = $messages->gets($count);
+
+	my $msgs;
+	if ($last_deferred != $now) {
+		$msgs = $messages->gets($count);
+		$slashdb->setVar('messages_last_deferred', $now);
+	} else {
+		$msgs = $messages->gets($count, { 'send' => 'now' });
+	}
+
 	my @good  = $messages->process(@$msgs);
 
 	my %msgs  = map { ($_->{id}, $_) } @$msgs;
@@ -49,7 +63,7 @@ $task{$me}{code} = sub {
 	if ($successes or $failures) {
 		return "sent $successes ok, $failures failed";
 	} else {
-		return ;
+		return;
 	}
 };
 

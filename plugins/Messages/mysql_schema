@@ -6,9 +6,10 @@ CREATE TABLE message_drop (
         code    INT(11) DEFAULT '-1' NOT NULL,
         date    TIMESTAMP NOT NULL,
         altto   VARCHAR(50) DEFAULT '' NOT NULL,
+        send	ENUM('now', 'defer', 'collective') DEFAULT 'now' NOT NULL,
         message BLOB DEFAULT '' NOT NULL,
         PRIMARY KEY (id)
-) TYPE=MYISAM;
+);
 
 DROP TABLE IF EXISTS message_web;
 CREATE TABLE message_web (

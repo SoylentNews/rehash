@@ -47,7 +47,7 @@ use Slash::Utility;
 
 #========================================================================
 
-=head2 create(TO_ID, TYPE, MESSAGE [, FROM_ID, ALTTO])
+=head2 create(TO_ID, TYPE, MESSAGE [, FROM_ID, ALTTO, SEND])
 
 Will drop a serialized message into message_drop.
 
@@ -87,6 +87,11 @@ a system message (0 is default).
 This is an alternate "TO" address (e.g., to send a message from
 a user of the system to a user outside the system).
 
+=item SEND
+
+This can defer sending until the next day, with the value 'defer'.
+Default is 'now'.
+
 =back
 
 =item Return value
@@ -102,7 +107,7 @@ Whatever templates are passed in.
 =cut
 
 sub create {
-	my($self, $uid, $type, $data, $fid, $altto) = @_;
+	my($self, $uid, $type, $data, $fid, $altto, $send) = @_;
 	my $message;
 
 	# must not contain non-numeric
@@ -178,7 +183,7 @@ sub create {
 		return 0;
 	}
 
-	my($msg_id) = $self->_create($uid, $code, $message, $fid, $altto);
+	my($msg_id) = $self->_create($uid, $code, $message, $fid, $altto, $send);
 	return $msg_id;
 }
 
@@ -270,6 +275,8 @@ sub process {
 		if ($self->send($msg)) {
 			push @success, $msg->{id}
 				if $self->delete($msg->{id});
+		} else {
+			$self->defer($msg->{id});
 		}
 	}
 	return @success;
@@ -627,12 +634,56 @@ An arrayref of hashrefs of rendered messages.
 =cut
 
 sub gets {
-	my($self, $count) = @_;
+	my($self, $count, $extra) = @_;
 
-	my $msgs = $self->_gets($count) or return 0;
+	my $msgs = $self->_gets($count, $extra) or return 0;
 	$self->render($_) for @$msgs;
 	return $msgs;
 }
+
+#========================================================================
+
+=head2 defer(IDS)
+
+Defer the messages of the given IDS in the messages queue, to be
+sent later (usually at night).
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item IDS
+
+A list of message IDS to defer.
+
+=back
+
+=item Return value
+
+Number of messages deferred.
+
+=item Side effects
+
+None.
+
+=item Dependencies
+
+=back
+
+=cut
+
+sub defer {
+	my($self, @ids) = @_;
+
+	my $count;
+	for (@ids) {
+		$count += $self->_defer($_);
+	}
+	return $count;
+}
+
 
 #========================================================================
 
