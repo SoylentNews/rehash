@@ -5583,17 +5583,18 @@ sub getStoryByTime {
 
 	$key .= "|$time" if $key;
 
+	my $now = $self->sqlQuote( time2str('%Y-%m-%d %H:%M:00', time, 'GMT') );
+	
 	return $cache->{$key} if $key && defined $cache->{$key};
 
 	my $returnable = $self->sqlSelectHashref(
 		'stories.stoid, sid, title, stories.tid',
 		'stories, story_text, story_topics_rendered',
-
 		"stories.stoid = story_text.stoid
 		 AND stories.stoid = story_topics_rendered.stoid
-		 AND '$time' > DATE_SUB(NOW(), INTERVAL $bytime_delay DAY)
+		 AND '$time' > DATE_SUB($now, INTERVAL $bytime_delay DAY)
 		 AND time $sign '$time'
-		 AND time < NOW()
+		 AND time <= $now
 		 AND in_trash = 'no'
 		 $where",
 
