@@ -1340,7 +1340,8 @@ ALTER TABLE comment_text ADD FOREIGN KEY (cid) REFERENCES comments(cid);
 #ALTER TABLE discussions ADD FOREIGN KEY (topic) REFERENCES topics(tid);
 #ALTER TABLE metamodlog ADD FOREIGN KEY (mmid) REFERENCES moderatorlog(id);
 ALTER TABLE pollquestions ADD FOREIGN KEY (discussion) REFERENCES discussions(id);
-ALTER TABLE pollquestions ADD FOREIGN KEY (uid) REFERENCES users(uid);
+# This doesn't work, since in the install pollquestions is populated before users, alphabetically
+#ALTER TABLE pollquestions ADD FOREIGN KEY (uid) REFERENCES users(uid);
 # This doesn't work, makes createStory die
 #ALTER TABLE stories ADD FOREIGN KEY (uid) REFERENCES users(uid);
 # These don't work, should check why...
