@@ -1,5 +1,5 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2001 by Open Source Development Network. See README
+# Copyright 1997-2002 by Open Source Development Network. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -3100,7 +3100,7 @@ sub getCommentReply {
 	my($self, $sid, $pid) = @_;
 	my $sid_quoted = $self->sqlQuote($sid);
 	my $reply = $self->sqlSelectHashref(
-		"date,subject,comments.points as points,
+		"date,date as time,subject,comments.points as points,
 		comment_text.comment as comment,realname,nickname,
 		fakeemail,homepage,comments.cid as cid,sid,
 		users.uid as uid",
@@ -3116,7 +3116,6 @@ sub getCommentReply {
 	# For a comment we're replying to, there's no need to mod.
 	$reply->{no_moderation} = 1;
 
-	formatDate([$reply]);
 	return $reply;
 }
 
