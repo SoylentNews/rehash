@@ -257,7 +257,8 @@ sub displayStories {
 
 		}
 
-		if ($thissection ne $I{defaultsection}) {
+		if ($thissection ne $I{defaultsection}
+			&& (! $I{F}{section} || $I{F}{section} eq $I{defaultsection})) {
 			my($SEC) = getSection($thissection);
 			print qq' | <A HREF="$I{rootdir}/$thissection/">$SEC->{title}</A>';
 		}
