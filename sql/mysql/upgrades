@@ -2025,10 +2025,6 @@ INSERT INTO vars (name, value, description) VALUES ('allow_anon_poll_voting', '1
 
 ALTER TABLE moderatorlog ADD COLUMN points_orig tinyint DEFAULT NULL;
 
-# USEPERL LAST UPDATED HERE
-
-# SLASHCODE LAST UPDATED HERE
-
 ### do these ONLY IF you want cookies to work everywhere by default ...
 ### it may invalidate existing user cookies if you've previously
 ### been using logtokens, so beware -- pudge
@@ -2087,4 +2083,10 @@ ALTER TABLE users_info ADD INDEX initdomain (initdomain), ADD INDEX created_ipid
 # perl -MSlash::Test=virtusername -e 'my $arr = $reader_db->sqlSelectAll("uid, realemail", "users"); for my $ar (@$arr) { next unless $ar->[1]; $d=fullhost_to_domain($ar->[1]); push @{$du{$d}}, $ar->[0] } undef $arr; while (($k, $v) = each %du) { $in = join(",", @$v); $slashdb->sqlUpdate("users_info", { initdomain => $k }, "uid IN ($in)"); sleep(0.1) if scalar(@$v) > 100 }'
 
 INSERT INTO vars (name, value, description) VALUES ('istroll_max_halflives', '3', 'Max number of times to cut the TrollModval impact of a downmod in half');
+
+# USEPERL LAST UPDATED HERE
+
+# SLASHCODE LAST UPDATED HERE
+
+# End of T_2_3_0_133, Start of T_2_3_0_134 - 2004/02/03
 
