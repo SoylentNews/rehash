@@ -795,6 +795,7 @@ sub showInfo {
 	my $id = $hr->{uid} || 0;
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
@@ -807,6 +808,7 @@ sub showInfo {
 	my $commentstruct = [];
 	my $requested_user = {};
 	my $time_period = $constants->{admin_comment_display_days} || 30;
+	my $cid_for_time_period = $reader->getVar("min_cid_for_$time_period\_days",'value', 1) || 0;
 	my $admin_time_period_limit = $constants->{admin_daysback_commentlimit} || 100;
 	my $admin_non_time_limit    = $constants->{admin_comment_subsequent_pagesize} || 24;
 
@@ -965,18 +967,16 @@ sub showInfo {
 		if ($form->{fieldname}) {
 			if ($form->{fieldname} eq 'ipid') {
 				$commentcount 		= $reader->countCommentsByIPID($netid);
-				$commentcount_time 	= $reader->countCommentsByIPID($netid,
-					{ limit_days => $time_period });
+				$commentcount_time 	= $reader->countCommentsByIPID($netid, { cid_at_or_after => $cid_for_time_period });
 				$comments = getCommentListing("ipid", $netid,
-					$min_comment, $time_period, $commentcount, $commentcount_time, 
+					$min_comment, $time_period, $commentcount, $commentcount_time, $cid_for_time_period, 
 					$non_admin_limit, $admin_time_period_limit, $admin_non_time_limit)
 						if $commentcount;
 			} elsif ($form->{fieldname} eq 'subnetid') {
 				$commentcount 		= $reader->countCommentsBySubnetID($netid);
-				$commentcount_time	= $reader->countCommentsBySubnetID($netid,
-					{ limit_days => $time_period });
+				$commentcount_time	= $reader->countCommentsBySubnetID($netid, { cid_at_or_after => $cid_for_time_period });
 				$comments = getCommentListing("subnetid", $netid,
-					$min_comment, $time_period, $commentcount, $commentcount_time, 
+					$min_comment, $time_period, $commentcount, $commentcount_time, $cid_for_time_period,
 					$non_admin_limit, $admin_time_period_limit, $admin_non_time_limit)
 						if $commentcount;
 
@@ -988,15 +988,15 @@ sub showInfo {
 			# Last resort; here for backwards compatibility mostly.
 			my $type;
 			($commentcount,$type) = $reader->countCommentsByIPIDOrSubnetID($netid);
-			$commentcount_time = $reader->countCommentsByIPIDOrSubnetID($netid, {limit_days => $time_period });
+			$commentcount_time = $reader->countCommentsByIPIDOrSubnetID($netid, { cid_at_or_after => $cid_for_time_period });
 			if ($type eq "ipid") {
 				$comments = getCommentListing("ipid", $netid,
-					$min_comment, $time_period, $commentcount, $commentcount_time, 
+					$min_comment, $time_period, $commentcount, $commentcount_time, $cid_for_time_period,
 					$non_admin_limit, $admin_time_period_limit, $admin_non_time_limit)
 						if $commentcount;
 			} elsif ($type eq "subnetid") {
 				$comments = getCommentListing("subnetid", $netid,
-					$min_comment, $time_period, $commentcount, $commentcount_time, 
+					$min_comment, $time_period, $commentcount, $commentcount_time,  $cid_for_time_period,
 					$non_admin_limit, $admin_time_period_limit, $admin_non_time_limit)
 						if $commentcount;
 			}
@@ -1005,10 +1005,9 @@ sub showInfo {
 		$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
 
 		$commentcount      = $reader->countCommentsByUID($requested_user->{uid});
-		$commentcount_time = $reader->countCommentsByUID($requested_user->{uid},
-			{ limit_days => $time_period });
+		$commentcount_time = $reader->countCommentsByUID($requested_user->{uid}, { cid_at_or_after => $cid_for_time_period });
 		$comments = getCommentListing("uid", $requested_user->{uid},
-			$min_comment, $time_period, $commentcount, $commentcount_time,
+			$min_comment, $time_period, $commentcount, $commentcount_time, $cid_for_time_period,
 			$non_admin_limit, $admin_time_period_limit, $admin_non_time_limit,
 			{ use_uid_cid_cutoff => 1 })
 				if $commentcount;
@@ -1216,7 +1215,6 @@ sub showInfo {
 	}
 
 	if ($user_change && %$user_change) {
-		my $slashdb = getCurrentDB();
 		$slashdb->setUser($user->{uid}, $user_change);
 	}
 
@@ -2928,7 +2926,7 @@ sub setToDefaults {
 #################################################################
 sub getCommentListing {
 	my ($type, $value,
-		$min_comment, $time_period, $cc_all, $cc_time_period,
+		$min_comment, $time_period, $cc_all, $cc_time_period, $cid_for_time_period,
 		$non_admin_limit, $admin_time_limit, $admin_non_time_limit,
 		$options) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
@@ -2949,7 +2947,7 @@ sub getCommentListing {
 	
 		if ($user->{is_admin}) {
 			if ($cc_time_period >= $admin_non_time_limit) {
-				$s_opt->{limit_days} = $time_period;
+				$s_opt->{cid_at_or_after} = $cid_for_time_period;
 				$num_wanted = $admin_time_limit;
 			} else {
 				$num_wanted = $admin_non_time_limit;
@@ -2962,7 +2960,7 @@ sub getCommentListing {
 			}
 		} else {
 			if ($cc_time_period >= $non_admin_limit ) {
-				$s_opt->{limit_days} = $time_period;
+				$s_opt->{cid_at_or_after} = $cid_for_time_period;
 				$num_wanted = $non_admin_limit;
 			} else {
 				$num_wanted = $non_admin_limit;
