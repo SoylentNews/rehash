@@ -2349,12 +2349,6 @@ sub deleteOldFormkeys {
 }
 
 ########################################################
-sub countAccesslogDaily {
-	my($self) = @_;
-	return $self->sqlCount("accesslog", "TO_DAYS(NOW()) - TO_DAYS(ts)=1");
-}
-
-########################################################
 # For tasks/run_moderatord.pl
 sub countM2M1Ratios {
 	my($self, $longterm) = @_;
