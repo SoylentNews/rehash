@@ -1278,7 +1278,7 @@ ALTER TABLE pollquestions ADD FOREIGN KEY (uid) REFERENCES users(uid);
 #ALTER TABLE stories ADD FOREIGN KEY (uid) REFERENCES users(uid);
 #ALTER TABLE stories ADD FOREIGN KEY (tid) REFERENCES topics(tid);
 #ALTER TABLE stories ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
-ALTER TABLE story_text ADD FOREIGN KEY (sid) REFERENCES stories(sid);
+ALTER TABLE story_text ADD FOREIGN KEY (stoid) REFERENCES stories(stoid);
 ALTER TABLE story_topics_chosen ADD FOREIGN KEY (tid) REFERENCES topics(tid);
 ALTER TABLE story_topics_rendered ADD FOREIGN KEY (tid) REFERENCES topics(tid);
 ALTER TABLE submissions ADD FOREIGN KEY (uid) REFERENCES users(uid);
