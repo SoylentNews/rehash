@@ -13,14 +13,15 @@ en_US
 __name__
 footer
 __template__
-</TD></TR>
+</TD>
 
-<TR><TD COLSPAN="3" ROWSPAN="3">&nbsp;
+[% PROCESS maintable_end %]
 
 [% oldpage = user.currentPage;
    user.currentPage = 'misc';
    PROCESS 'footer';
    user.currentPage = 'messages';
 %]
+
 __seclev__
 10000

@@ -15,14 +15,13 @@ __template__
 
 </TD>
 
-<TD>&nbsp;</TD>
+[% PROCESS maintable_td %]&nbsp;</TD>
 
-<TD VALIGN="TOP" WIDTH="[% constants.fancyboxwidth + 10 %]">[% PROCESS userboxes %]</TD>
+[% PROCESS maintable_td valign="TOP" width="[% constants.fancyboxwidth + 10 %]">[% PROCESS userboxes %]</TD>
 </TR>
 
-<TR>
-
-<TD VALIGN="TOP" COLSPAN="3">
+[% PROCESS maintable_tr %]
+[% PROCESS maintable_td valign="TOP" colspan="3" %]
 
 __seclev__
 500
