@@ -1004,7 +1004,11 @@ sub countDailyByPages {
 ########################################################
 sub countFromRSSStatsBySections {
 	my ($self) = @_;
-	$self->sqlSelectAllHashref("skid", "skid,count(*) AS cnt, count(DISTINCT uid) AS uids, count(DISTINCT host_addr) as ipids", "accesslog_temp", 'referer="rss"', "GROUP By skid");
+	$self->sqlSelectAllHashref("skid",
+		"skid, count(*) AS cnt, COUNT(DISTINCT uid) AS uids, COUNT(DISTINCT host_addr) AS ipids",
+		"accesslog_temp",
+		"referer='rss'",
+		"GROUP BY skid");
 }
 
 ########################################################
@@ -1012,7 +1016,7 @@ sub countDailyByPageDistinctIPID {
 	# This is so lame, and so not ANSI SQL -Brian
 	my($self, $op, $options) = @_;
 	my $constants = getCurrentStatic();
-	
+
 	my $where = "1=1 ";
 	$where .= "AND op='$op' "
 		if $op;
