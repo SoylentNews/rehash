@@ -2485,3 +2485,7 @@ CREATE TABLE topic_param (
 # log_db_qps task.  If your site isn't very busy it may not matter
 # To turn off image logging:
 # UPDATE vars set value = 'NONE' where name='accesslog_imageregex';
+
+UPDATE vars SET name='m1_pointgrant_factor_upfairratio', description='Factor of upmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)' WHERE name='m1_pointgrant_factor_fairratio';
+INSERT INTO vars (name,value,description) SELECT 'm1_pointgrant_factor_downfairratio', value, 'Factor of downmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)' FROM vars WHERE name='m1_pointgrant_factor_upfairratio';
+

@@ -775,7 +775,8 @@ INSERT INTO vars (name, value, description) VALUES ('lonetags','P|LI|BR|IMG','Ta
 INSERT INTO vars (name, value, description) VALUES ('m1_eligible_hitcount','3','Number of hits on comments.pl before user can be considered eligible for moderation');
 INSERT INTO vars (name, value, description) VALUES ('m1_eligible_percentage','0.8','Percentage of users eligible to moderate');
 INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_end', '0.8888', 'Ending percentage into the pool of eligible moderators (used by moderatord)');
-INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_fairratio', '1.3', 'Factor of fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)');
+INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_upfairratio', '1.3', 'Factor of upmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)');
+INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_downfairratio', '1.3', 'Factor of downmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)');
 INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_fairtotal', '1.3', 'Factor of fairness total in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)');
 INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_stirratio', '1.3', 'Factor of stirred-points ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)');
 INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_start', '0.167', 'Starting percentage into the pool of eligible moderators (used by moderatord)');

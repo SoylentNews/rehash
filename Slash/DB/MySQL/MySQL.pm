@@ -2947,10 +2947,9 @@ sub saveTopic {
 	# so we can't just take additional params and put them in
 	# the param table; for now, put them in $options -- pudge
 	my($self, $topic, $options) = @_;
-	my($tid) = $topic->{tid} || 0;
+	my $tid = $topic->{tid} || 0;
 
-	# This seems like a wasted query to me... *shrug* -Cliff
-	my($rows) = $self->sqlSelect('COUNT(*)', 'topics', "tid=$tid");
+	my $rows = $self->sqlCount('topics', "tid=$tid");
 
 	my $image = $topic->{image2} || $topic->{image};
 
@@ -2994,6 +2993,7 @@ sub saveTopic {
 				$self->sqlDo("SET AUTOCOMMIT=1");
 				errorLog("$DBI::errstr");
 				# only try a few times before giving up
+				# Don't we want to return false on failure? - Jamie
 				return -1 if ++$tries > 5;
 				goto RETRY;
 			}
@@ -3567,7 +3567,7 @@ sub setStory {
 	$hashref->{in_trash} = $hashref->{in_trash} ? 'yes' : 'no' if defined $hashref->{in_trash};
 
 	my $chosen_hr = delete $hashref->{topics_chosen};
-	if ($chosen_hr) {
+	if ($chosen_hr && keys %$chosen_hr) {
 		# If a topics_chosen hashref was given, we write not just that,
 		# but also topics_rendered, primaryskid and tid.
 		$self->setStoryTopicsChosen($stoid, $chosen_hr);
@@ -3600,7 +3600,6 @@ sub setStory {
 				if defined $hashref->{$key};
 		}
 		$ok = $self->sqlUpdate($table, \%minihash, "stoid=$stoid");
-#print STDERR "setStory ok '$ok' after sqlUpdate table '$table' stoid '$stoid' minihash keys '" . join(" ", sort keys %minihash) . "'\n" if !$ok;
 	}
 
 	for (@param)  {
@@ -3642,7 +3641,12 @@ sub setStory_delete_memcached_by_stoid {
 	my $constants = getCurrentStatic();
 	my $mcddebug = $constants->{memcached_debug};
 
+	# Make sure the list of stoids is unique.
 	$stoid_list = [ $stoid_list ] if !ref($stoid_list);
+	return if !$stoid_list || !@$stoid_list;
+	my %stoids = ( map { ($_, 1) } @$stoid_list );
+	$stoid_list = [ sort { $a <=> $b } keys %stoids ];
+
 	for my $stoid (@$stoid_list) {
 		my $mcdkey = "$self->{_mcd_keyprefix}:st:";
 		# The "3" means "don't accept new writes to this key for 3 seconds."
@@ -4660,15 +4664,21 @@ sub getBanList {
 	$banlist_ref = $self->{_banlist_cache} ||= {};
 
 	if ($refresh) {
+		# If the caller asked us to refresh from the DB,
+		# then zap the cache.
 		%$banlist_ref = ();
-	} elsif (!keys %$banlist_ref && $mcd && !$refresh) {
+	} elsif ($mcd && !keys %$banlist_ref) {
+		# If the caller said it was OK to use the cache, but
+		# there's nothing in the cache, try MCD first.
 		$banlist_ref = $mcd->get($mcdkey);
-		return $banlist_ref if $banlist_ref;
+		return $banlist_ref if $banlist_ref && scalar(keys %$banlist_ref);
 	}
+
+	# If there's nothing in the cache, fill it from the DB.
 
 	if (!keys %$banlist_ref) {
 		if ($debug) {
-			print STDERR scalar(gmtime) . " gBL pid $$ (re)fetching Ban data\n";
+			print STDERR scalar(gmtime) . " pid $$ gBL (re)fetching ban\n";
 		}
 		my $list = $self->sqlSelectAll(
 			"ipid, subnetid, uid",
@@ -4689,6 +4699,9 @@ sub getBanList {
 
 		if ($mcd) {
 			$mcd->set($mcdkey, $banlist_ref, $constants->{banlist_expire} || 900);
+			if ($debug) {
+				print STDERR scalar(gmtime) . " gBL pid $$ set mcd key '$mcdkey' keycount " . scalar(keys %$banlist_ref) . "\n";
+			}
 		}
 	}
 
@@ -4727,15 +4740,33 @@ sub getNorssList {
 	my($self, $refresh) = @_;
 	my $constants = getCurrentStatic();
 	my $debug = $constants->{debug_db_cache};
+	my $mcd = $self->getMCD();
+	my $mcdkey = "$self->{_mcd_keyprefix}:al:norss" if $mcd;
+	my $norsslist_ref;
 
-	_genericCacheRefresh($self, 'norsslist', $constants->{banlist_expire});
-	my $norsslist_ref = $self->{_norsslist_cache} ||= {};
+	# Randomize the expire time a bit;  it's not good for the DB
+	# to have every process re-ask for this at the exact same time.
+	my $expire_time = $constants->{banlist_expire};
+	$expire_time += int(rand(60)) if $expire_time;
+	_genericCacheRefresh($self, 'norsslist', $expire_time);
+	$norsslist_ref = $self->{_norsslist_cache} ||= {};
 
-	%$norsslist_ref = () if $refresh;
+	if ($refresh) {
+		# If the caller asked us to refresh from the DB,
+		# then zap the cache.
+		%$norsslist_ref = ();
+	} elsif ($mcd && !keys %$norsslist_ref) {
+		# If the caller said it was OK to use the cache, but
+		# there's nothing in the cache, try MCD first.
+		$norsslist_ref = $mcd->get($mcdkey);
+		return $norsslist_ref if $norsslist_ref && scalar(keys %$norsslist_ref);
+	}
+
+	# If there's nothing in the cache, fill it from the DB.
 
 	if (!keys %$norsslist_ref) {
 		if ($debug) {
-			print STDERR scalar(gmtime) . " gNL pid $$ (re)fetching Norss data\n";
+			print STDERR scalar(gmtime) . " pid $$ gNL (re)fetching norss\n";
 		}
 		my $list = $self->sqlSelectAll(
 			"ipid, subnetid",
@@ -4751,6 +4782,13 @@ sub getNorssList {
 		# number of keys at the top of this "if")
 		$norsslist_ref->{_junk_placeholder} = 1;
 		$self->{_norsslist_cache_time} = time() if !$self->{_norsslist_cache_time};
+
+		if ($mcd) {
+			$mcd->set($mcdkey, $norsslist_ref, $constants->{banlist_expire} || 900);
+			if ($debug) {
+				print STDERR scalar(gmtime) . " gNL pid $$ set mcd key '$mcdkey' keycount " . scalar(keys %$norsslist_ref) . "\n";
+			}
+                }
 	}
 
 	if ($debug) {
@@ -4767,15 +4805,31 @@ sub getNopalmList {
 	my($self, $refresh) = @_;
 	my $constants = getCurrentStatic();
 	my $debug = $constants->{debug_db_cache};
+        my $mcd = $self->getMCD();
+        my $mcdkey = "$self->{_mcd_keyprefix}:al:nopalm" if $mcd;
+        my $nopalmlist_ref;
 
-	_genericCacheRefresh($self, 'nopalmlist', $constants->{banlist_expire});
-	my $nopalmlist_ref = $self->{_nopalmlist_cache} ||= {};
+	# Randomize the expire time a bit;  it's not good for the DB
+	# to have every process re-ask for this at the exact same time.
+	my $expire_time = $constants->{banlist_expire};
+	$expire_time += int(rand(60)) if $expire_time;
+	_genericCacheRefresh($self, 'nopalmlist', $expire_time);
+	$nopalmlist_ref = $self->{_nopalmlist_cache} ||= {};
 
-	%$nopalmlist_ref = () if $refresh;
+	if ($refresh) {
+		# If the caller asked us to refresh from the DB,
+		# then zap the cache.
+		%$nopalmlist_ref = ();
+	} elsif ($mcd && !keys %$nopalmlist_ref) {
+		# If the caller said it was OK to use the cache, but
+		# there's nothing in the cache, try MCD first.
+		$nopalmlist_ref = $mcd->get($mcdkey);
+		return $nopalmlist_ref if $nopalmlist_ref && scalar(keys %$nopalmlist_ref);
+	}
 
 	if (!keys %$nopalmlist_ref) {
 		if ($debug) {
-			print STDERR scalar(gmtime) . " gNL pid $$ (re)fetching Nopalm data\n";
+			print STDERR scalar(gmtime) . " gNL pid $$ (re)fetching nopalm\n";
 		}
 		my $list = $self->sqlSelectAll(
 			"ipid, subnetid",
@@ -4791,6 +4845,13 @@ sub getNopalmList {
 		# number of keys at the top of this "if")
 		$nopalmlist_ref->{_junk_placeholder} = 1;
 		$self->{_nopalmlist_cache_time} = time() if !$self->{_nopalmlist_cache_time};
+
+		if ($mcd) {
+			$mcd->set($mcdkey, $nopalmlist_ref, $constants->{banlist_expire} || 900);
+			if ($debug) {
+				print STDERR scalar(gmtime) . " gNL pid $$ set mcd key '$mcdkey' keycount " . scalar(keys %$nopalmlist_ref) . "\n";
+			}
+                }
 	}
 
 	if ($debug) {
@@ -8379,6 +8440,173 @@ sub getStoidFromSid {
 	return $stoid;
 }
 
+########################################################
+
+# This doesn't check time on the story cache, it just stores data.
+#
+sub _write_stories_cache {
+	my($self, $story) = @_;
+	my $stoid = $story->{stoid};
+	my $sid = $story->{sid};
+	$self->{_stories_cache}{"stoid$stoid"} = $story;
+	$self->{_sid_conversion_cache}{$sid} = $stoid;
+}
+
+# This method is basically a bulk getStory() call, minus the "val"
+# parameter.  I'd like to call it getStories() since it is just the
+# multi-key version of getStory(), but that method name is already
+# taken.  Oh well.
+sub getStoriesData {
+	my($self, $stoids, $force_cache_freshen) = @_;
+	my $constants = getCurrentStatic();
+
+	# If our story cache is too old, expire it.
+	_genericCacheRefresh($self, 'stories', $constants->{story_expire});
+	my $stories_cache = $self->{_stories_cache};
+	my $table_cache = '_stories_cache';
+	my $table_cache_time = '_stories_cache_time';
+
+	# Sort the list of needed stoids, partly for neatness, partly
+	# to make sure we can't trash the data the arrayref points to,
+	# but mostly to be friendly to MySQL's query cache later.
+	$stoids = [ sort { $a <=> $b } @$stoids ];
+
+	# Declare some variables we may set and use later.
+	my $mcd;
+	my $mcdkey;
+
+	# Here's the value we'll be building up and returning.
+	my $retval = { };
+
+	# First let's figure out whether we need anything from outside
+	# the local cache -- if it's all in local cache, we're basically
+	# done, this method will just be copying some hashrefs from one
+	# place to another.  So first, whatever we have in local cache
+	# (assuming using it isn't forbidden by the caller), copy into
+	# our return value, then count up how many we need and how many
+	# we have.
+	my $n_stoids_needed = scalar(@$stoids);
+	if (!$force_cache_freshen) {
+		for my $stoid (@$stoids) {
+			$retval->{$stoid} = $stories_cache->{"stoid$stoid"}
+				if $stories_cache->{"stoid$stoid"};
+		}
+	}
+	my $n_in_local_cache = scalar(keys %$retval);
+
+	if ($n_in_local_cache < $n_stoids_needed
+		&& !$force_cache_freshen
+		and $mcd = $self->getMCD() ) {
+
+		# The local cache is missing at least one story's data,
+		# and we are allowed to use memcached, and we have a
+		# valid handle to memcached.  So, try to get the missing
+		# stories from memcached.
+
+		$mcdkey = "$self->{_mcd_keyprefix}:st:";
+		my @keys_needed =
+			map { "$mcdkey$_" }
+			grep { !exists $stories_cache->{"stoid$_"} }
+			@$stoids;
+		my $answer = $mcd->get_multi(@keys_needed);
+		# Convert the keys of the memcached data back into the
+		# raw stoids.
+		my @answer_stoids =
+			sort { $a <=> $b }
+			map { /^\Q$mcdkey\E(\d+)$/; $1 }
+			keys %$answer;
+		for my $stoid (
+			grep { !exists $retval->{$_} }
+			@answer_stoids
+		) {
+			$retval->{$stoid} = $answer->{"$mcdkey$stoid"};
+		}
+		$n_in_local_cache = scalar(keys %$retval);
+	}
+
+	my @stoids_memcached_could_use = ( );
+
+	if ($n_in_local_cache < $n_stoids_needed) {
+		# The local cache is still missing at least one story's
+		# data.  At this point we have to turn to the DB.
+
+		my($append, $answer, $stoid_clause);
+		my @stoids_needed =
+			sort 
+			grep { !exists $retval->{$_} }
+			@$stoids;
+		$stoid_clause = "stoid IN ("
+			. join(",", @stoids_needed)
+			. ")";
+		my($column_clause) = $self->_stories_time_clauses({
+			try_future => 1, must_be_subscriber => 0
+		});
+		$answer = $self->sqlSelectAllHashref(
+			"stoid",
+			"*, $column_clause",
+			"stories",
+			$stoid_clause);
+		$append = $self->sqlSelectAllHashref(
+			"stoid",
+			"*",
+			"story_text",
+			$stoid_clause);
+		for my $append_stoid (keys %$append) {
+			for my $column (keys %{$append->{$append_stoid}}) {
+				$answer->{$append_stoid}{$column} =
+					$append->{$append_stoid}{$column};
+			}
+		}
+		$append = $self->sqlSelectAllHashref(
+			[qw( stoid name )],
+			'stoid, name, value',
+			'story_param',
+			$stoid_clause);
+		for my $key (keys %$append) {
+			$answer->{$key} = $append->{$key};
+		}
+		for my $append_stoid (keys %$append) {
+			for my $name (keys %{$append->{$append_stoid}}) {
+				my $value = $append->{$append_stoid}{$name};
+				$answer->{$append_stoid}{$name} = $value;
+			}
+		}
+		# Put the data where we'll be returning it.
+		for my $stoid (@stoids_needed) {
+			$retval->{$stoid} = $answer->{$stoid};
+		}
+
+		# The stories not in the future should be written
+		# into both the local cache and memcached.
+		for my $stoid (@stoids_needed) {
+			my $story = $retval->{$stoid};
+			next if $story->{is_future};
+			# If this is the first data we're writing into the
+			# cache, mark the time -- this data, and any other
+			# stories we write into the cache for the next
+			# n seconds, will be expired at that time.
+			$self->{$table_cache_time} ||= time();
+			# Cache the data.
+			$self->_write_stories_cache($story);
+			# We got this data from the DB, so it's
+			# authoritative enough to write into memcached,
+			# if memcached is available.
+			$mcd->set("$mcdkey$stoid", $story, $constants->{story_expire})
+				if $mcd;
+		}
+	}
+
+	# All the data is in both $retval and the local cache now, except
+	# stories in the future which were not written into the local
+	# cache.  So return it.
+
+	return $retval;
+}
+
+# Once getStoriesData() is tested and working, this method should
+# reduce to a very simple wrapper:
+# return $self->getStoriesData([ $self->getStoidFromSidOrStoid($id) ],
+#	$val, $force_cache_freshen)
 sub getStory {
 	my($self, $id, $val, $force_cache_freshen) = @_;
 	my $constants = getCurrentStatic();
@@ -8386,7 +8614,7 @@ sub getStory {
 	# If our story cache is too old, expire it.
 	_genericCacheRefresh($self, 'stories', $constants->{story_expire});
 	my $table_cache = '_stories_cache';
-	my $table_cache_time= '_stories_cache_time';
+	my $table_cache_time = '_stories_cache_time';
 
 	# Accept either a stoid or a sid.
 	my $stoid = $self->getStoidFromSidOrStoid($id);
@@ -8409,7 +8637,7 @@ sub getStory {
 			my $mcdkey = "$self->{_mcd_keyprefix}:st:";
 			if (my $answer = $mcd->get("$mcdkey$stoid")) {
 				# Cache the result.
-				$self->{$table_cache}{"stoid$stoid"} = $answer;
+				$self->_write_stories_cache($answer);
 				$is_in_local_cache = 1;
 				$got_it_from_memcached = 1;
 #print STDERR "getStory $$ A2 id=$id mcd=$mcd try=$try_memcached answer='" . join(" ", sort keys %$answer) . "'\n";
@@ -8447,7 +8675,7 @@ sub getStory {
 		# write into the cache for the next n seconds, will be
 		# expired at that time.
 		$self->{$table_cache_time} = time() if !$self->{$table_cache_time};
-		# Cache the data (using two pointers to the same data).
+		# Cache the data.
 		$self->{$table_cache}{"stoid$stoid"} = $answer;
 		# Note that we got this from the DB, in which case it's
 		# authoritative enough to write into memcached later.

@@ -420,11 +420,6 @@ sub displayStories {
 	my $cnt = int($user_maxstories / 3);
 	my($return, $counter);
 
-	# shift them off, so we do not display them in the Older
-	# Stuff block later (simulate the old cursor-based
-	# method)
-	my $story;
-
 	# get some of our constant messages but do it just once instead
 	# of for every story
 	my $msg;
@@ -434,7 +429,28 @@ sub displayStories {
 	} else {
 		$msg->{words} = getData('words');
 	}
-	
+
+	# Pull the story data we'll be needing into a cache all at once,
+	# to avoid making multiple calls to the DB.
+#	my $n_future_stories = scalar grep { $_->{is_future} } @$stories;
+#	my $n_for_cache = $cnt + $n_future_stories;
+#	$n_for_cache = scalar(@$stories) if $n_for_cache > scalar(@$stories);
+	my @stoids_for_cache =
+		map { $_->{stoid} }
+		grep { !$_->{is_future} }
+		@$stories;
+#	@stoids_for_cache = @stoids_for_cache[0..$n_for_cache-1]
+#		if $#stoids_for_cache > $n_for_cache;
+	my $stories_data_cache;
+	$stories_data_cache = $reader->getStoriesData(\@stoids_for_cache)
+		if @stoids_for_cache;
+
+	# Shift them off, so we do not display them in the Older Stuff block
+	# later (this simulates the old cursor-based method from circa 1997
+	# which was actually not all that smart, but umpteen layers of caching
+	# makes it quite tolerable here in 2004 :)
+	my $story;
+
 	while ($story = shift @$stories) {
 		my($tmpreturn, $other, @links);
 
@@ -461,7 +477,7 @@ sub displayStories {
 		my @threshComments = split /,/, $story->{hitparade};  # posts in each threshold
 
 		$other->{is_future} = 1 if $story->{is_future};
-		my $storytext = displayStory($story->{sid}, '', $other);
+		my $storytext = displayStory($story->{sid}, '', $other, $stories_data_cache);
 
 		$tmpreturn .= $storytext;
 

@@ -1387,7 +1387,7 @@ Rendered story
 =cut
 
 sub displayStory {
-	my($stoid, $full, $options) = @_;	
+	my($stoid, $full, $options, $story_cache) = @_;	
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
@@ -1397,11 +1397,21 @@ sub displayStory {
 	
 	my $return;
 	my $story;
-	if ($options->{get_cacheable}) {
+	if ($story_cache && $story_cache->{$stoid}) {
+		# If the caller passed us a ref to a cache of all the
+		# story data we need, great!  Use it.
+		$story = $story_cache->{$stoid};
+	} elsif ($options->{force_cache_freshen}) {
+		# If the caller is insisting that we go to the main DB
+		# rather than using any cached data or even a reader,
+		# then do that.  This is done when e.g. freshenup.pl
+		# wants to write the "rendered" version of a story.
 		my $slashdb = getCurrentDB();
-		$story = $slashdb->getStory($stoid, "", $options->{get_cacheable});
+		$story = $slashdb->getStory($stoid, "", $options->{force_cache_freshen});
 		$story->{is_future} = 0;
 	} else {
+		# The above don't apply;  just use a reader (and maybe
+		# its cache will save a trip to the actual DB).
 		$story = $reader->getStory($stoid);
 	}
 
@@ -1409,7 +1419,7 @@ sub displayStory {
 	# from the DB.
 	if (	   !$constants->{no_prerendered_stories}
 		&& $constants->{cache_enabled}
-		&& $story->{rendered} && !$options->{get_cacheable}
+		&& $story->{rendered} && !$options->{force_cache_freshen}
 		&& !$form->{light} && !$user->{light}
 		&& (!$form->{ssi} || $form->{ssi} ne 'yes')
 		&& !$user->{noicons}
@@ -1450,7 +1460,7 @@ sub displayStory {
 	} else {
 		$atstorytime = $user->{aton} . " " . timeCalc($story->{'time'}, $df);
 	}
-	$return =~ s/\Q__TIME_TAG__\E/$atstorytime/ unless $options->{get_cacheable};
+	$return =~ s/\Q__TIME_TAG__\E/$atstorytime/ unless $options->{force_cache_freshen};
 
 	return $return;
 }
@@ -1500,8 +1510,9 @@ sub getOlderStories {
 	my $form = getCurrentForm();
 
 	for my $story (@$stories) {
-		#Use one call and parse it, its cheaper :) -Brian
-		my($day_of_week, $month, $day, $secs) = split m/ /, timeCalc($story->{time}, "%A %B %d %s");
+		# Use one call and parse it, it's cheaper :) -Brian
+		my($day_of_week, $month, $day, $secs) =
+			split m/ /, timeCalc($story->{time}, "%A %B %d %s");
 		$day =~ s/^0//;
 		$story->{day_of_week} = $day_of_week;
 		$story->{month} = $month;

@@ -98,7 +98,7 @@ $task{$me}{code} = sub {
 			Slash::Utility::Anchor::getSkinColors();
 
 			$rendered = displayStory($stoid,
-				'', { get_cacheable => 1 });
+				'', { force_cache_freshen => 1 });
 		}
 		$story_set{$stoid}{rendered} = $rendered;
 		$story_set{$stoid}{writestatus} = 'dirty';

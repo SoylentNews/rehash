@@ -36,7 +36,7 @@ sub main {
 
 	print "Updating " .  scalar(@$sids) ." \n";
 	for my $sid (@$sids) {
-		$slashdb->setStory($sid, { rendered => displayStory($sid,'', { get_cacheable => 1})});
+		$slashdb->setStory($sid, { rendered => displayStory($sid,'', { force_cache_freshen => 1})});
 	}
 }
 

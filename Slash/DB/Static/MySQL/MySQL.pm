@@ -1164,9 +1164,10 @@ sub factorEligibleModerators {
 	my($self, $orig_uids, $wtf, $info_hr) = @_;
 	return $orig_uids if !$orig_uids || !@$orig_uids || scalar(@$orig_uids) < 10;
 
-	$wtf->{fairratio} ||= 0;	$wtf->{fairratio} = 0	if $wtf->{fairratio} == 1;
-	$wtf->{fairtotal} ||= 0;	$wtf->{fairtotal} = 0	if $wtf->{fairtotal} == 1;
-	$wtf->{stirratio} ||= 0;	$wtf->{stirratio} = 0	if $wtf->{stirratio} == 1;
+	$wtf->{upfairratio} ||= 0;	$wtf->{upfairratio} = 0		if $wtf->{upfairratio} == 1;
+	$wtf->{downfairratio} ||= 0;	$wtf->{downfairratio} = 0	if $wtf->{downfairratio} == 1;
+	$wtf->{fairtotal} ||= 0;	$wtf->{fairtotal} = 0		if $wtf->{fairtotal} == 1;
+	$wtf->{stirratio} ||= 0;	$wtf->{stirratio} = 0		if $wtf->{stirratio} == 1;
 
 	return $orig_uids if !$wtf->{fairratio} || !$wtf->{fairtotal} || !$wtf->{stirratio};
 
@@ -1177,7 +1178,7 @@ sub factorEligibleModerators {
 	my $uids_in = join(",", @$orig_uids);
 	my $u_hr = $self->sqlSelectAllHashref(
 		"uid",
-		"uid, m2fair, m2unfair, totalmods, stirred",
+		"uid, up_fair, down_fair, up_unfair, down_unfair, totalmods, stirred",
 		"users_info",
 		"uid IN ($uids_in)",
 	);
@@ -1187,20 +1188,44 @@ sub factorEligibleModerators {
 	# Note that we only calculate the *ratio* if there are a decent
 	# number of votes, otherwise we leave it undef.
 	for my $uid (keys %$u_hr) {
-		# Fairness ratio.
+		# Upmod fairness ratio.
 		my $ratio = undef;
-		if ($u_hr->{$uid}{m2fair}+$u_hr->{$uid}{m2unfair} >= 5) {
-			$ratio = $u_hr->{$uid}{m2fair}
-				/ ($u_hr->{$uid}{m2fair}+$u_hr->{$uid}{m2unfair});
+		my $denom = $u_hr->{$uid}{up_fair} + $u_hr->{$uid}{up_unfair};
+		if ($denom >= 5) {
+			$ratio = $u_hr->{$uid}{up_fair} / $denom;
 		}
-		$u_hr->{$uid}{m2fairratio} = $ratio;
+		$u_hr->{$uid}{upfairratio} = $ratio;
+		# Downmod fairness ratio.
+		$ratio = undef;
+		$denom = $u_hr->{$uid}{down_fair} + $u_hr->{$uid}{down_unfair};
+		if ($denom >= 5) {
+			$ratio = $u_hr->{$uid}{down_fair} / $denom;
+		}
+		$u_hr->{$uid}{downfairratio} = $ratio;
 		# Spent-to-stirred ratio.
 		$ratio = undef;
-		if ($u_hr->{$uid}{totalmods}+$u_hr->{$uid}{stirred} >= 10) {
-			$ratio = $u_hr->{$uid}{totalmods}
-				/ ($u_hr->{$uid}{totalmods}+$u_hr->{$uid}{stirred});
+		$denom = $u_hr->{$uid}{totalmods} + $u_hr->{$uid}{stirred};
+		if ($denom >= 10) {
+			$ratio = $u_hr->{$uid}{totalmods} / $denom;
 		}               
 		$u_hr->{$uid}{stirredratio} = $ratio;
+	}
+
+	# Get some stats into the $u_hr hashref that will make some
+	# code later on easier.  Sum the total number of fair votes,
+	# so up_fair+down_fair = total_fair.  And sum the fair
+	# ratios too, to give a very general idea of total fairness.
+	for my $uid (%$u_hr) {
+		$u_hr->{$uid}{total_fair} =
+			  ($u_hr->{$uid}{up_fair} || 0)
+			+ ($u_hr->{$uid}{down_fair} || 0);
+		$u_hr->{$uid}{totalfairratio} = $u_hr->{$uid}{upfairratio}
+			if defined($u_hr->{$uid}{upfairratio});
+		if (defined($u_hr->{$uid}{downfairratio})) {
+			$u_hr->{$uid}{totalfairratio} =
+				($u_hr->{$uid}{totalfairratio} || 0)
+				+ $u_hr->{$uid}{downfairratio};
+		}
 	}
 
 	if ($wtf->{fairtotal}) {
@@ -1210,11 +1235,11 @@ sub factorEligibleModerators {
 		# code).  If there's a tie in that, the secondary sort is
 		# by ratio, and tertiary is random.
 		my @new_uids = sort {
-				$u_hr->{$a}{m2fair} <=> $u_hr->{$b}{m2fair}
+				$u_hr->{$a}{total_fair} <=> $u_hr->{$b}{total_fair}
 				||
-				( defined($u_hr->{$a}{m2fairratio})
-					&& defined($u_hr->{$b}{m2fairratio})
-				  ? $u_hr->{$a}{m2fairratio} <=> $u_hr->{$b}{m2fairratio}
+				( defined($u_hr->{$a}{totalfairratio})
+					&& defined($u_hr->{$b}{totalfairratio})
+				  ? $u_hr->{$a}{totalfairratio} <=> $u_hr->{$b}{totalfairratio}
 				  : 0 )
 				||
 				int(rand(1)*2)*2-1
@@ -1226,7 +1251,6 @@ sub factorEligibleModerators {
 			\@new_uids);
 	}
 
-	if ($wtf->{fairratio}) {
 		# Assign a token likeliness factor based on the ratio of
 		# "fair" to "unfair" M2s assigned to each user's
 		# moderations.  In order not to be "prejudiced" against
@@ -1235,18 +1259,38 @@ sub factorEligibleModerators {
 		# list.  Sort by ratio first (that's the point of this
 		# code);  if there's a tie in ratio, the secondary sort
 		# order is total m2fair, and tertiary is random.
+		# Do this separately by first up fairness ratio, then
+		# down fairness ratio.
+
+	if ($wtf->{upfairratio}) {
 		my @new_uids = sort {
-			  	$u_hr->{$a}{m2fairratio} <=> $u_hr->{$b}{m2fairratio}
+			  	$u_hr->{$a}{upfairratio} <=> $u_hr->{$b}{upfairratio}
 				||
-				$u_hr->{$a}{m2fair} <=> $u_hr->{$b}{m2fair}
+				$u_hr->{$a}{total_fair} <=> $u_hr->{$b}{total_fair}
 				||
 				int(rand(1)*2)*2-1
-			} grep { defined($u_hr->{$_}{m2fairratio}) }
+			} grep { defined($u_hr->{$_}{upfairratio}) }
 			@$orig_uids;
 		# Assign the factors in the hashref according to this
 		# sort order.  Those that sort first get the lowest value,
 		# the approximate middle gets 1, the last get highest.
-		_set_factor($u_hr, $wtf->{fairratio}, 'factor_m2ratio',
+		_set_factor($u_hr, $wtf->{upfairratio}, 'factor_upfairratio',
+			\@new_uids);
+	}
+
+	if ($wtf->{downfairratio}) {
+		my @new_uids = sort {
+			  	$u_hr->{$a}{downfairratio} <=> $u_hr->{$b}{downfairratio}
+				||
+				$u_hr->{$a}{total_fair} <=> $u_hr->{$b}{total_fair}
+				||
+				int(rand(1)*2)*2-1
+			} grep { defined($u_hr->{$_}{downfairratio}) }
+			@$orig_uids;
+		# Assign the factors in the hashref according to this
+		# sort order.  Those that sort first get the lowest value,
+		# the approximate middle gets 1, the last get highest.
+		_set_factor($u_hr, $wtf->{downfairratio}, 'factor_downfairratio',
 			\@new_uids);
 	}
 
@@ -1288,7 +1332,9 @@ sub factorEligibleModerators {
 	for my $uid (@$orig_uids) {
 		my $factor = 1;
 		for my $field (qw(
-			factor_m2total factor_m2ratio factor_stirredratio
+			factor_m2total
+			factor_upfairratio factor_downfairratio
+			factor_stirredratio
 		)) {
 			$factor *= $u_hr->{$uid}{$field}
 				if defined($u_hr->{$uid}{$field});
