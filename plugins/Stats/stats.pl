@@ -25,7 +25,7 @@ sub main {
 		: $slashdb;
 	my $stats     = getObject('Slash::Stats', $logdb->{virtual_user});
 
-	my $admin      = $user->{seclev} >= $constants->{stats_admin_seclev} || 100;
+	my $admin      = $user->{seclev} >= ($constants->{stats_admin_seclev} || 100);
 	my $admin_post = $admin && $user->{state}{post};
 
 	# possible value of "op" parameter in form
