@@ -5,6 +5,71 @@
 # and who you are. If your changes occur after a certain release tag
 # then you need to place your changes there.
 
+# BEGIN tf23's additions 
+# for required changes to update a site from fry to devel 
+# this matches cvs diff -r fry -r T_2_3_0_10 -U3 sql/mysql/slashschema_create.sql
+#
+
+ALTER TABLE vars CHANGE name name varchar(48) DEFAULT '' NOT NULL;
+
+ALTER TABLE accesslist CHANGE uid uid mediumint UNSIGNED NOT NULL;
+
+ALTER TABLE blocks ADD rss_template varchar(30);
+ALTER TABLE blocks ADD items smallint NOT NULL DEFAULT '0';
+ALTER TABLE blocks ADD FOREIGN KEY (rss_template) REFERENCES templates(name);
+
+ALTER TABLE sections ADD FOREIGN KEY (feature_story) REFERENCES stories(sid);
+
+DROP TABLE IF EXISTS story_topics;
+CREATE TABLE story_topics (
+  id int(5) NOT NULL auto_increment,
+  sid varchar(16) NOT NULL default '',
+  tid smallint(5) unsigned default NULL,
+  FOREIGN KEY (sid) REFERENCES stories(sid),
+  FOREIGN KEY (tid) REFERENCES topics(tid),
+  PRIMARY KEY (id),
+  INDEX tid (tid),
+  INDEX sid (sid)
+) TYPE = myisam;
+
+DROP TABLE IF EXISTS string_param;
+CREATE TABLE string_param (
+       param_id smallint UNSIGNED NOT NULL auto_increment,
+       type varchar(16) NOT NULL,
+       code varchar(16) NOT NULL,
+       name varchar(32) NOT NULL,
+       UNIQUE code_key (type,code),
+       PRIMARY KEY (param_id)
+) TYPE = myisam;
+
+DROP TABLE IF EXISTS submission_param;
+CREATE TABLE submission_param (
+       param_id mediumint UNSIGNED NOT NULL auto_increment,
+       subid varchar(15) NOT NULL,
+       name varchar(32) DEFAULT '' NOT NULL,
+       value text DEFAULT '' NOT NULL,
+       UNIQUE submission_key (subid,name),
+       PRIMARY KEY (param_id)
+) TYPE = myisam;
+
+ALTER TABLE templates ADD COLUMN journal_last_entry_date datetime;
+
+DROP TABLE IF EXISTS users_hits;
+CREATE TABLE users_hits (
+       uid mediumint UNSIGNED NOT NULL,
+       lastclick TIMESTAMP,
+       hits int DEFAULT '0' NOT NULL,
+       PRIMARY KEY (uid)
+) TYPE = myisam;
+
+ALTER TABLE users_index CHANGE COLUMN exsect exsect varchar(255);
+
+ALTER TABLE users_info ADD people blob;
+
+DROP TABLE IF EXISTS temp_zoo;
+
+# END tf23's additions
+
 # (from sometime prior to when we had this file)
 ALTER TABLE users_info DROP COLUMN hits;
 
