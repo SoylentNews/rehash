@@ -29,7 +29,7 @@ getOlderStories
 __template__
 [% this_today = '';
    c = 0;
-   max_older_stories = section.artcount / 2 || 15;
+   max_older_stories = section.artcount_max / 2 || 15;
    FOREACH story = stories;
    	day = "$story.day_of_week $story.month $story.day";
 	IF this_today != day;
