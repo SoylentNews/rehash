@@ -1104,12 +1104,12 @@ my %mode_actions = (
 			encode_high_bits
 			processCustomTags
 			remove_trailing_lts
+			url2html
 			approveTags
 			space_between_tags
 			encode_html_ltgt_stray
 			encode_html_amp_ifnotent
 			approveCharrefs
-			url2html
 			breakHtml_ifwhitefix
 			whitespace_tagify
 			newline_indent			)],
@@ -1119,12 +1119,12 @@ my %mode_actions = (
 			encode_high_bits
 			processCustomTags
 			remove_trailing_lts
+			url2html
 			approveTags
 			space_between_tags
 			encode_html_ltgt_stray
 			encode_html_amp_ifnotent
 			approveCharrefs
-			url2html
 			breakHtml_ifwhitefix		)],
 	CODE, [qw(
 			newline_to_local
@@ -2169,7 +2169,7 @@ sub url2html {
 	# we know this can break real URLs, but probably will
 	# preserve real URLs more often than it will break them
 	$text =~  s{(?<!['"=>])((?:$scheme_regex):/{0,2}[$URI::uric#]+)}{
-		my $url   = $1;
+		my $url   = fudgeurl($1);
 		my $extra = '';
 		$extra = $1 if $url =~ s/([?!;:.,']+)$//;
 		$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
