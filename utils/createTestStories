@@ -123,7 +123,6 @@ $constants = getCurrentStatic();
 			warn "($count) Story could not be created";
 		}
         	$count--;
-		sleep 1 if $count; # otherwise sids will collide!
 	}
 	my $t1 = new Benchmark;
 	print "$opts{num_stories} stories created in: ",
