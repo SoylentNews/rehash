@@ -1790,7 +1790,8 @@ sub createSubmission {
 	$data->{subnetid} = getCurrentUser('subnetid');
 	$data->{email} = delete $submission->{email} || '';
 	my $emailuri = URI->new($data->{email});
-	my $emailhost = $emailuri ? $emailuri->host() : "";
+	my $emailhost = "";
+	$emailhost = $emailuri->host() if $emailuri && $emailuri->can("host");
 	$data->{emaildomain} = fullhost_to_domain($emailhost);
 	$data->{uid} = delete $submission->{uid} || getCurrentStatic('anonymous_coward_uid'); 
 	$data->{'-time'} = delete $submission->{'time'};
