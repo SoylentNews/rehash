@@ -323,7 +323,7 @@ sub IndexHandler {
 	# my $dbon = $slashdb->sqlConnect(); 
 	my $dbon = ! -e "$constants->{datadir}/dboff";
 
-	if ($uri eq '/') {
+	if ($uri eq '/' && $constants->{index_handler} ne 'IGNORE') {
 		my $basedir = $constants->{basedir};
 
 		# $USER_MATCH defined above

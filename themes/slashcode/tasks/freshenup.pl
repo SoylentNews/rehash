@@ -266,6 +266,7 @@ $task{$me}{code} = sub {
 			next unless $key;
 			my $index_handler = $section->{index_handler}
 				|| $constants->{index_handler};
+			next if $index_handler eq 'IGNORE';
 			my($base) = split(/\./, $index_handler);
 			prog2file(
 				"$basedir/$index_handler", 
