@@ -722,21 +722,6 @@ MEMBER is passed in then only its value will be returned.
 sub getCurrentStatic {
 	my($value) = @_;
 
-	# This is for testing and debugging.  Some values of data
-	# were moved from $constants into $current_skin, and anything that
-	# used to call getCurrentStatic('foo') now needs to call
-	# getCurrentSkin('foo').  Throw an error on those values:
-	for my $badval (qw(
-		absolutedir rootdir cookiedomain defaulttopic
-		defaultdisplaystatus defaultcommentstatus
-		basedomain index_handler absolutedir_secure
-		defaultsubsection defaultsection static_section
-	)) {
-		next unless $value eq $badval;
-		errorLog("getCurrentStatic('$value') called - should call getCurrentSkin");
-		last;
-	}
-
 	my $constants;
 
 	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
