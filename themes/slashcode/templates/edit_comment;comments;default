@@ -191,6 +191,9 @@ IF do_br %]<BR>[% END %]
 	</TD></TR><TR>
 		<TD VALIGN="TOP" ALIGN="RIGHT">Allowed HTML: </TD><TD><FONT SIZE="1">
 			&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
+		[% IF constants.approvedtags.grep("ECODE").0 %]
+			(Use "ECODE" instead of "PRE" or "CODE".)
+		[% END %]
 		</FONT>
 	</TD></TR>
 </TABLE>

@@ -16,6 +16,7 @@ use vars qw($VERSION);
 
 sub main {
 	my $slashdb   = getCurrentDB();
+	my $reader    = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
@@ -25,9 +26,12 @@ sub main {
 
 	# possible value of "op" parameter in form
 	my %ops = (
-		userlogin	=> [ 1,				\&userLogin	],
-		changeprefs	=> [ $user_ok,			\&changePrefs	],
-		saveprefs	=> [ $post_ok && $user_ok,	\&savePrefs	],
+		userlogin	=> [ 1,				\&loginForm		],
+		userclose	=> [ $user_ok,			\&loginForm		],
+		mailpasswdform	=> [ 1,				\&mailPasswdForm	],
+		mailpasswd	=> [ 1,				\&mailPasswd		],
+		changeprefs	=> [ $user_ok,			\&changePrefs		],
+		saveprefs	=> [ $post_ok && $user_ok,	\&savePrefs		],
 	);
 
 	my $op = $form->{'op'};
@@ -42,14 +46,112 @@ sub main {
 		return;
 	}
 
-	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form);
+	$ops{$op}[FUNCTION]->($slashdb, $reader, $constants, $user, $form);
 	writeLog($user->{nickname});
 }
 
 
 #################################################################
+sub loginForm {
+	my($slashdb, $reader, $constants, $user, $form) = @_;
+
+	header(getData('loginhead'));
+	slashDisplay('loginForm');
+	footer();
+}
+
+#################################################################
+sub mailPasswdForm {
+	my($slashdb, $reader, $constants, $user, $form, $note) = @_;
+
+	header(getData('mailpasswdhead'));
+	slashDisplay('sendPasswdForm', { note => $note });
+	footer();
+}
+
+#################################################################
+sub mailPasswd {
+	my($slashdb, $reader, $constants, $user, $form) = @_;
+
+	my $error = 0;
+	my @note;
+	my $uid = $user->{uid};
+
+	if ($form->{unickname}) {
+		if ($form->{unickname} =~ /\@/) {
+			$uid = $reader->getUserEmail($form->{unickname});
+
+		} elsif ($form->{unickname} =~ /^\d+$/) {
+			my $tmpuser = $reader->getUser($form->{unickname}, ['nickname', 'uid']);
+			$uid = $tmpuser->{uid};
+
+		} else {
+			$uid = $reader->getUserUID($form->{unickname});
+		}
+	}
+
+	if (!$uid || isAnon($uid)) {
+		push @note, getData('mail_nonickname');
+		$error++;
+	}
+
+	my $user_send = $reader->getUser($uid);
+
+	if (!$error) {
+		if ($reader->checkReadOnly('ipid') || $reader->checkReadOnly('subnetid')) {
+			### the above methods are *wrong*
+			push @note, getData('mail_readonly');
+			$error++;
+
+		} elsif ($reader->checkMaxMailPasswords($user_send)) {
+			push @note, getData('mail_toooften');
+			$error++;
+		}
+	}
+
+	if ($error) {
+		my $note = join ' ', @note;
+		$slashdb->resetFormkey($form->{formkey});
+		return mailPasswdForm(@_, $note);
+	}
+
+	my $newpasswd = $slashdb->getNewPasswd($uid);
+	my $tempnick  = fixparam($user_send->{nickname});
+	my $subject   = getData('mail_subject', { nickname => $user_send->{nickname} });
+
+	# Pull out some data passed in with the request.  Only the IP
+	# number is actually trustworthy, the others could be forged.
+	# Note that we strip the forgeable ones to make sure there
+	# aren't any "<>" chars which could fool a stupid mail client
+	# into parsing a plaintext email as HTML.
+	my $r = Apache->request;
+	my $remote_ip = $r->connection->remote_ip;
+
+	my $xff = $r->header_in('X-Forwarded-For') || '';
+	$xff =~ s/\s+/ /g;
+	$xff = substr(strip_notags($xff), 0, 20);
+
+	my $ua = $r->header_in('User-Agent') || '';
+	$ua =~ s/\s+/ /g;
+	$ua = substr(strip_attribute($ua), 0, 60);
+
+	my $msg = getData('mail_msg', {
+		newpasswd	=> $newpasswd,
+		tempnick	=> $tempnick,
+		remote_ip	=> $remote_ip,
+		x_forwarded_for	=> $xff,
+		user_agent	=> $ua,
+	});
+
+	doEmail($uid, $subject, $msg);
+	$slashdb->setUserMailPasswd($user_send);
+	mailPasswdForm(@_, getData('mail_mailed_note'));
+}
+
+
+#################################################################
 sub changePrefs {
-	my($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $reader, $constants, $user, $form, $note) = @_;
 
 	# I am not going to add admin-modification right now,
 	# because they way it is currently done sucks.  we should
@@ -57,18 +159,19 @@ sub changePrefs {
 	# damned code everywhere, and i will not be a party to
 	# such madness.
 
-	header(getData('prefs'));
-	slashDisplay('changePasswd');
+	header(getData('prefshead'));
+	slashDisplay('changePasswd', { note => $note });
 	footer();
 }
 
 
 #################################################################
 sub savePrefs {
-	my($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $reader, $constants, $user, $form) = @_;
 
 	my $error = 0;
-	my $note;
+	my @note;
+	my $uid = $user->{uid};
 
 	my $changepass = 0;
 	if ($form->{pass1} || $form->{pass2} || length($form->{pass1}) || length($form->{pass2})) {
@@ -77,29 +180,31 @@ sub savePrefs {
 
 	if ($changepass) {
 		if ($form->{pass1} ne $form->{pass2}) {
-			$note .= getData('passnomatch');
+			push @note, getData('passnomatch');
 			$error++;
 		}
 
 		if (!$form->{pass1} || length $form->{pass1} < 6) {
-			$note .= getData('passtooshort');
+			push @note, getData('passtooshort');
 			$error++;
 		}
 
 		if ($form->{pass1} && length $form->{pass1} >= 20) {
-			$note .= getData('passtoolong');
+			push @note, getData('passtoolong');
 			$error++;
 		}
 
-		my $return_uid = $slashdb->getUserAuthenticate($uid, $form->{oldpass}, 1);
+		my $return_uid = $reader->getUserAuthenticate($uid, $form->{oldpass}, 1);
 		if (!$return_uid || $return_uid != $uid) {
-			$note .= getData('oldpassbad');
+			push @note, getData('oldpassbad');
 			$error++;
 		}
 	}
 
+	my $note;
 	if ($error) {
-		$form->{note} = $note;
+		push @note, getData('notchanged');
+		$note = join ' ', @note;
 	} else {
 		my $user_save = {};
 		$user_save->{passwd} = $form->{pass1} if $changepass;
@@ -120,13 +225,13 @@ sub savePrefs {
 
 		getOtherUserParams($user_save);
 		$slashdb->setUser($user->{uid}, $user_save) ;
-		$form->{note} = getData('passchanged');
+		$note = getData('passchanged');
 
 		my $value  = $slashdb->getLogToken($uid, 1);
 		my $cookie = bakeUserCookie($uid, $slashdb->getLogToken($uid, 1));
 		setCookie('user', $cookie, $user_save->{session_login});
 	}
-	changePrefs(@_);
+	changePrefs(@_, $note);
 }
 
 createEnvironment();

@@ -55,6 +55,9 @@ __template__
 		Allowed HTML: 
 		<FONT SIZE="1">
 			&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
+		[% IF constants.approvedtags.grep("ECODE").0 %]
+			(Use "ECODE" instead of "PRE" or "CODE".)
+		[% END %]
 		</FONT>
 	</TD></TR>
 </TABLE>
