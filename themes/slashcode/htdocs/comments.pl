@@ -1420,13 +1420,27 @@ sub moderate {
 	my $sid = $form->{sid};
 	my $was_touched = 0;
 
+	my $meta_mods_performed = 0;
+	if($user->{is_admin}){
+		$meta_mods_performed = metaModerate();		
+	}
+
+	if($form->{meta_mod_only}){
+		titlebar("100%", "MetaModerating...");
+		print getData("metamoderate_message");
+		print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
+		return;
+	}
+
 	if ($discussion->{type} eq 'archived'
 		&& !$constants->{comments_moddable_archived}) {
+		print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
 		print getData('archive_error');
 		return;
 	}
 
 	if (! $constants->{allow_moderation}) {
+		print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
 		print getData('no_moderation');
 		return;
 	}
@@ -1443,6 +1457,7 @@ sub moderate {
 			|| $user->{acl}{modpoints_always};
 
 	slashDisplay('mod_header');
+	print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
 
 	# Handle Deletions, Points & Reparenting
 	# It would be nice to sort these by current score of the comments
@@ -1499,6 +1514,43 @@ sub moderate {
 			$slashdb->setStory($discussion->{sid}, { writestatus => 'dirty' });
 		}
 	}
+}
+
+sub metaModerate {
+	my($id) = @_;
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+	
+	# for now at least no one should be hitting this unless they're an admin
+	return 0 unless $user->{is_admin};
+
+	# The user is only allowed to metamod the mods they were given.
+	my @mods_saved = $slashdb->getModsSaved();
+	my %mods_saved = map { ( $_, 1 ) } @mods_saved;
+
+	# %m2s is the data structure we'll be building.
+	my %m2s = ( );
+
+	for my $key (keys %{$form}) {
+		# Metamod form data can only be a '+' or a '-'.
+		next unless $form->{$key} =~ /^[+-]$/;
+		# We're only looking for the metamod inputs.
+		next unless $key =~ /^mm(\d+)$/;
+		my $mmid = $1;
+		# Only the user's given mods can be used, unless they're an admin.
+		next unless $mods_saved{$mmid} || $user->{is_admin};
+		# This one's valid.  Store its data in %m2s.
+		$m2s{$mmid}{is_fair} = ($form->{$key} eq '+') ? 1 : 0;
+	}
+
+	# The createMetaMod() method does all the heavy lifting here.
+	# Re m2_multicount:  if this var is set, then our vote for
+	# reason r on cid c applies potentially to *all* mods of
+	# reason r on cid c.
+	$slashdb->createMetaMod($user, \%m2s, $constants->{m2_multicount});
+	return scalar keys %m2s;
 }
 
 ##################################################################
