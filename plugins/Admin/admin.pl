@@ -1806,7 +1806,6 @@ sub updateStory {
 
 	my $tid_ref;
 	my $default_set = 0;
-	my $topic = $form->{tid};
 
 	$form->{dept} =~ s/ /-/g;
 
@@ -1814,6 +1813,7 @@ sub updateStory {
 		unless $form->{aid};
 
 	my($chosen_hr) = extractChosenFromForm($form);
+	my($topic) = $slashdb->getTopiclistFromChosen($chosen_hr);
 #use Data::Dumper; print STDERR "admin.pl updateStory chosen_hr: " . Dumper($chosen_hr) . "admin.pl updateStory form: " . Dumper($form);
 
 	my $time = findTheTime();
