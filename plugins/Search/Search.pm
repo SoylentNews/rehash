@@ -223,7 +223,7 @@ sub findStory {
 	$columns .= "users.nickname as nickname, stories.title as title, stories.sid as sid, "; 
 	$columns .= "time, commentcount, stories.section as section,";
 	$columns .= "stories.tid as tid ";
-	$columns .= "TRUNCATE((((MATCH (stories.title) AGAINST($query) + (MATCH (introtext,bodytext) AGAINST($query)))) / 2), 1) as scored, "
+	$columns .= ", TRUNCATE((((MATCH (stories.title) AGAINST($query) + (MATCH (introtext,bodytext) AGAINST($query)))) / 2), 1) as scored, "
 		if ($form->{query} && $sort == 2);
 
 	my $tables = "stories,users";
