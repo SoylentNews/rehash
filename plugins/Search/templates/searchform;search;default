@@ -45,7 +45,7 @@ __template__
 	<br>
 
 	[% IF journal_option %]
-	<INPUT TYPE="RADIO" NAME="journal_only" VALUE="1"[% IF form.journal_only == '1' %] CHECKED[% END %]> Users with Journals
+	<INPUT TYPE="CHECKBOX" NAME="journal_only" VALUE="1"[% IF form.journal_only == '1' %] CHECKED[% END %]> Users with Journals
 	[% END %]
 
 	[% IF authors %]
