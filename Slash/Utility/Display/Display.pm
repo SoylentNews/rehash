@@ -1272,19 +1272,21 @@ sub cleanSlashTags {
 
 sub _cleanSlashLink {
 	my($tokens, $token, $newtext) = @_;
-	my $relocateDB = getObject('Slash::Relocate');
+	my $reloDB = getObject('Slash::Relocate');
 
-	if (!$token->[1]{id}) {
-		my $link  = $relocateDB->create({ url => $token->[1]{href} });
-		my $href  = strip_attribute($token->[1]{href});
-		my $title = strip_attribute($token->[1]{title});
-		$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="link">#is;
-	} else {
-		my $url   = $relocateDB->get($token->[1]{id}, 'url');
-		my $link  = $relocateDB->create({ url => $token->[1]{href} });
-		my $href  = strip_attribute($token->[1]{href});
-		my $title = strip_attribute($token->[1]{title});
-		$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="link">#is;
+	if ($reloDB) {
+		if (!$token->[1]{id}) {
+			my $link  = $reloDB->create({ url => $token->[1]{href} });
+			my $href  = strip_attribute($token->[1]{href});
+			my $title = strip_attribute($token->[1]{title});
+			$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="link">#is;
+		} else {
+			my $url   = $reloDB->get($token->[1]{id}, 'url');
+			my $link  = $reloDB->create({ url => $token->[1]{href} });
+			my $href  = strip_attribute($token->[1]{href});
+			my $title = strip_attribute($token->[1]{title});
+			$$newtext =~ s#\Q$token->[3]\E#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="link">#is;
+		}
 	}
 }
 
@@ -1460,19 +1462,17 @@ sub _slashImage {
 sub _slashLink {
 	my($tokens, $token, $newtext) = @_;
 
-	my $reloDB = getObject('Slash::Relocate', { db_type => 'reader' });
-	my($content);
 	my $text = $tokens->get_text("/slash");
-	if ($reloDB) {
-		$content = slashDisplay('hrefLink', {
-			id    => $token->[1]{id},
-			title => $token->[1]{title} || $text,
-			text  => $text,
-		}, {
-			Return => 1,
-			Nocomm => 1,
-		});
-	}
+	my $content = slashDisplay('hrefLink', {
+		id		=> $token->[1]{id},
+		href		=> $token->[1]{href},
+		title		=> $token->[1]{title} || $token->[1]{href} || $text,
+		text		=> $text,
+	}, {
+		Return => 1,
+		Nocomm => 1,
+	});
+
 	$content ||= Slash::getData('SLASH-UNKNOWN-LINK');
 
 	$$newtext =~ s#\Q$token->[3]$text</SLASH>\E#$content#is;

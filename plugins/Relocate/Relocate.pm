@@ -72,7 +72,7 @@ sub getStoriesForLinks {
 sub href2SlashTag {
 	my($self, $text, $sid, $options) = @_;
 	my $user = getCurrentUser();
-	return $text unless $text && $sid;
+	return $text unless $text && $sid && getCurrentStatic('relocate_href2slash');
 	my $tokens = HTML::TokeParser->new(\$text);
 	if ($tokens) {
 		while (my $token = $tokens->get_tag(qw| a slash |)) {
