@@ -23,7 +23,7 @@ __template__
 [% journal.nickname %] has posted a new journal entry on [% constants.sitename %].
 
     [% journal.description | decode_entities %]
-    [% constants.absolutedir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]
+    [% absolutedir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]
 
 [% END %]
 

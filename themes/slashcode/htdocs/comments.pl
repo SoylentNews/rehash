@@ -1643,8 +1643,7 @@ sub send_mod_msg {
 		my $discussion = $slashdb->getDiscussion($sid);
 		if ($discussion->{sid}) {
 			# Story discussion, link to it.
-			$discussion->{realurl} =
-				"$constants->{absolutedir}/article.pl?sid=$discussion->{sid}";
+			$discussion->{realurl} = "/article.pl?sid=$discussion->{sid}";
 		} else {
 			# Some other kind of discussion,
 			# probably poll, journal entry, or
@@ -1655,8 +1654,7 @@ sub send_mod_msg {
 			# for journal.pl or pollBooth.pl etc.,
 			# but that is not great.  maybe a field in discussions
 			# for whether or not url is trusted. -- pudge
-			$discussion->{realurl} =
-				"$constants->{absolutedir}/comments.pl?sid=$discussion->{id}";
+			$discussion->{realurl} = "/comments.pl?sid=$discussion->{id}";
 		}
 
 		my $data  = {

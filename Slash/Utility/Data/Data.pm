@@ -193,6 +193,7 @@ Fixed URL.
 
 sub url2abs {
 	my($url, $base) = @_;
+	my $newurl;
 
 	# set base only if not already set, and rootdir exists
 	if (!$base && getCurrentStatic('rootdir')) {
@@ -200,12 +201,14 @@ sub url2abs {
 	}
 
 	if ($base) {
-		$url = URI->new_abs($url, $base)->canonical->as_string;
+		$newurl = URI->new_abs($url, $base)->canonical->as_string;
 	} elsif ($url !~ m|^https?://|i) {	# no base or rootdir, best we can do
-		$url =~ s|^/*|/|;
+		$newurl =~ s|^/*|/|;
 	}
 
-	return $url;
+	$newurl =~ s|/$|| if $url !~ m|/$|;
+
+	return $newurl;
 }
 
 #========================================================================

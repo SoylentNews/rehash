@@ -52,8 +52,8 @@ Some of your past moderations have been meta-moderated by other
 	[%- reason = m2item.reason -%]
 	- "[% m2item.subj | decode_entities %]" from the discussion [% discussion | decode_entities %]
 	which you moderated as "[% reason.name %]" was voted [% vote_result.${m2item.vote} %]
-[% url=m2item.url; IF url; IF !m2item.url.search('^http:'); url="http:$url"; END -%]
-	<[% url %]>
+[% IF m2item.url -%]
+	<[% Slash.url2abs(m2item.url, absolutedir) %]>
 
 [%- END %]
 [% END %]

@@ -25,11 +25,11 @@ __template__
 
 [% reply.nickname %] has posted a comment in reply to your journal entry.
     [% reply.subject | decode_entities %]
-    [% constants.absolutedir %]/comments.pl?sid=[% reply.sid %]&cid=[% reply.cid %]
+    [% absolutedir %]/comments.pl?sid=[% reply.sid %]&cid=[% reply.cid %]
 
 Attached to:
     [% discussion.title | decode_entities %]
-    [% Slash.url2abs(discussion.url) %]
+    [% Slash.url2abs(discussion.url, absolutedir) %]
 
 [% END %]
 __seclev__

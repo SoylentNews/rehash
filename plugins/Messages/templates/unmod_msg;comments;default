@@ -17,7 +17,7 @@ __template__
 A user <I>had</I> given a moderation of <B>[% reasons.${moderation.reason}.name %] ([% moderation.value %])</B> to
 your comment, <B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid
 %]">[% comment.subject %]</A></B>, attached to
-<B><A HREF="[% discussion.realurl %]">[% discussion.title %]</A></B>.  That moderation has now been undone,
+<B><A HREF="[% constants.rootdir %][% discussion.realurl %]">[% discussion.title %]</A></B>.  That moderation has now been undone,
 probably due to the user posting in the discussion after moderating in it.
 Your comment is currently scored <B>[% reasons.${comment.reason} %] ([% comment.points %])</B>.
 </P>
@@ -26,11 +26,11 @@ Your comment is currently scored <B>[% reasons.${comment.reason} %] ([% comment.
 
 A user had given a moderation of "[% reasons.${moderation.reason}.name %]" ([% moderation.value %]) to your comment.
     [% comment.subject | decode_entities %]    
-    [% constants.absolutedir %]/comments.pl?sid=[% comment.sid %]&cid=[% comment.cid %]
+    [% absolutedir %]/comments.pl?sid=[% comment.sid %]&cid=[% comment.cid %]
 
 Attached to:
     [% discussion.title | decode_entities %]
-    [% discussion.realurl %]
+    [% absolutedir %][% discussion.realurl %]
 
 That moderation has now been undone, probably due to the user posting
 in the discussion after moderating in it. Your comment is currently

@@ -439,7 +439,7 @@ sub _getMailingUsers {
 	my $users  = $self->_getMailingUsersRaw($code);
 	my $fields = [qw(
 		realemail exsect extid exaid
-		sectioncollapse daily_mail_special
+		sectioncollapse daily_mail_special seclev
 	)];
 	$users     = { map { $_ => $self->getUser($_, $fields) } @$users };
 	return $users;

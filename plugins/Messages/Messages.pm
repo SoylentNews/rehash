@@ -855,6 +855,8 @@ The rendered template.
 
 sub callTemplate {
 	my($self, $data, $msg) = @_;
+	my $slashdb   = getCurrentDB();
+	my $constants = getCurrentStatic();
 	my $name;
 
 	if (ref($data) eq 'HASH' && exists $data->{_NAME}) {
@@ -867,15 +869,30 @@ sub callTemplate {
 	}
 
 	my $opt  = {
-		Return	=> 1,
-		Nocomm	=> 1,
-		Page	=> 'messages',
+		Return  => 1,
+		Nocomm  => 1,
+		Page    => 'messages',
 		Section => 'NONE',
 	};
 
 	# set Page and Section as from the caller
 	$opt->{Page}    = delete($data->{_PAGE})    if exists $data->{_PAGE};
 	$opt->{Section} = delete($data->{_SECTION}) if exists $data->{_SECTION};
+
+	# $msg->{user} could be a ref to some, but not all, user info, or a UID.  heh.
+	my $seclev = ref $msg->{user}
+		? $msg->{user}{seclev}
+			? $msg->{user}{seclev}
+			: $msg->{user}{uid}
+				? $slashdb->getUser($msg->{user}{uid}, 'seclev')
+				: 0
+		: $msg->{user}
+			? $slashdb->getUser($msg->{user}, 'seclev')
+			: 0;
+
+	$data->{absolutedir} = $seclev && $seclev >= 100
+		? $constants->{absolutedir_secure}
+		: $constants->{absolutedir};
 
 	my $new = slashDisplay($name, { %$data, msg => $msg }, $opt);
 	return $new;

@@ -236,7 +236,7 @@ sub save_prefs {
 		my $coderef = $messages->getMessageCode($code);
 		if ($user->{seclev} < $coderef->{seclev} || !exists($form->{"deliverymodes_$code"})) {
 			$params{$code} = MSG_MODE_NONE;
-		} elsif (!$user->{is_subscriber} && $coderef->{subscribe}) {
+		} elsif ($coderef->{subscribe} && !isSubscriber($user)) {
 			$params{$code} = MSG_MODE_NONE;
 		} else {
 			$params{$code} = fixint($form->{"deliverymodes_$code"});

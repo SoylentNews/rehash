@@ -18,7 +18,7 @@ __template__
 <P>
 <B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]"
 >[% comment.subject %]</A></B>, posted to
-<B><A HREF="[% discussion.realurl %]">[% discussion.title %]</A></B>, has been moderated
+<B><A HREF="[% constants.rootdir %][% discussion.realurl %]">[% discussion.title %]</A></B>, has been moderated
 <B>[% reasons.${moderation.reason}.name %] ([% moderation.value %])</B>.
 </P>
 
@@ -30,11 +30,11 @@ It is currently scored <B>[% reasons.${comment.reason}.name %] ([% comment.point
 
 A user has moderated your comment "[% reasons.${moderation.reason}.name %]" ([% moderation.value %]).
     [% comment.subject | decode_entities %]    
-    [% constants.absolutedir %]/comments.pl?sid=[% comment.sid %]&cid=[% comment.cid %]
+    [% absolutedir %]/comments.pl?sid=[% comment.sid %]&cid=[% comment.cid %]
 
 Attached to:
     [% discussion.title | decode_entities %]
-    [% discussion.realurl %]
+    [% absolutedir %][% discussion.realurl %]
 
 It is currently scored [% reasons.${comment.reason}.name %] ([% comment.points %]).
 [% END %]

@@ -36,11 +36,11 @@ If you'd like to, view or edit your
 [% ELSIF type == 'neutral' %]
 [% zoo_user.nickname %] ([% zoo_user.uid %]) has ceased their relationship with you.
 [% END %]
-    [% constants.absolutedir %]/~[% zoo_user.nickname | fixparam %]/
+    [% absolutedir %]/~[% zoo_user.nickname | fixparam %]/
 
 If you'd like to view or edit any of your relationships, go to:
-	[% constants.absolutedir %]/my/friends
-	[% constants.absolutedir %]/my/foes
+    [% absolutedir %]/my/friends
+    [% absolutedir %]/my/foes
 
 [% END %]
 

@@ -60,6 +60,10 @@ sub daily_generateDailyMailees {
 			$user->{daily_mail_special} ||= '';
 			$key .= '|' . $user->{daily_mail_special};
 
+			# this may not be available, so manufacture on the fly ...
+			my $is_admin = $user->{seclev} >= 100 ? 1 : 0;
+			$key .= '|' . $is_admin;
+
 			if (exists $mkeys->{$key}) {
 				push @{$mkeys->{$key}{mails}}, $user->{realemail};
 			} else {
@@ -69,6 +73,7 @@ sub daily_generateDailyMailees {
 					map { ($_ => $user->{$_}) }
 					qw(sectioncollapse exaid extid exsect daily_mail_special)
 				};
+				$mkeys->{$key}{user}{is_admin} = $is_admin;
 			}
 		}
 	}
@@ -104,8 +109,12 @@ sub daily_generateDailyMail {
 		push @$stories, \%story;
 	}
 
+	my $absolutedir = $user->{is_admin}
+		? $constants->{absolutedir_secure}
+		: $constants->{absolutedir};
+
 	return slashDisplay($mailing,
-		{ stories => $stories, urlize => \&daily_urlize },
+		{ stories => $stories, urlize => \&daily_urlize, absolutedir => $absolutedir },
 		{ Return => 1, Nocomm => 1, Page => 'messages', Section => 'NONE' }
 	);
 }
