@@ -2139,13 +2139,9 @@ INSERT INTO vars (name, value, description) VALUES ('mod_limit_with_comments', '
 INSERT INTO vars (name, value, description) VALUES ('show_m2s_with_mods', '1', 'Show metamods intertwined with mods?');
 INSERT INTO vars (name, value, description) VALUES ('m2_limit_with_mods', '', 'Maximum number of metamods to show intertwined with a group of mods (Empty string for no limit)');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # End of T_2_3_0_138, Start of T_2_3_0_139 - 2004/02/25
 
 INSERT INTO vars (name, value, description) VALUES ('anchortags_bridge_breaks', '0', 'Are <A> tags allowed to stretch across breaking tags (defined in approvedtags_break)?');
-
-# SLASHDOT LAST UPDATED HERE
 
 # SLASHCLUSTER LAST UPDATED HERE
 
@@ -2154,3 +2150,10 @@ INSERT INTO vars (name, value, description) VALUES ('anchortags_bridge_breaks', 
 ALTER TABLE message_drop CHANGE COLUMN message message MEDIUMBLOB DEFAULT '' NOT NULL;
 
 INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr', 'a:href_RU img:src_RU,alt,width,height,longdesc_U', 'definition of approvedtags attributes in the following format a:href_RU img:src_RU,alt,width,height,longdesc_U see Slash::Utility::Data.pm for more details');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_3_0_140, Start of T_2_3_0_141 - 2004/03/03
+
