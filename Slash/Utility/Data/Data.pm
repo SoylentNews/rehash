@@ -105,8 +105,8 @@ use vars qw($VERSION @EXPORT);
 Convert C<rootdir> to its absolute equivalent.  By default, C<rootdir> is
 protocol-inspecific (such as "//www.example.com") and for redirects needs
 to be converted to its absolute form.  There is an C<absolutedir> var, but
-it is protocol-specific, and we want to inherit the protocol.  So if
-C<$ENV{HTTPS}> is true, we use HTTPS, else we use HTTP.
+it is protocol-specific, and we want to inherit the protocol.  So if we're
+connected over HTTPS, we use HTTPS, else we use HTTP.
 
 =over 4
 
@@ -120,8 +120,9 @@ rootdir variable, converted to absolute with proper protocol.
 
 sub root2abs {
 	my $rootdir = getCurrentStatic('rootdir');
+	my $is_ssl = ConnectionIsSSL();
 	if ($rootdir =~ m|^//|) {
-		$rootdir = ($ENV{HTTPS} ? 'https:' : 'http:') . $rootdir;
+		$rootdir = ($is_ssl ? 'https:' : 'http:') . $rootdir;
 	}
 	return $rootdir;
 }
