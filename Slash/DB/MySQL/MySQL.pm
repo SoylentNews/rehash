@@ -97,6 +97,14 @@ my %descriptions = (
 	'non_nexus_topics'
 		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid,textname', 'topics LEFT JOIN topic_nexus ON topic_nexus.tid=topics.tid', "topic_nexus.tid IS NULL") },
 	
+	'highlighted-topics-submittable'
+		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid, IF(topic_nexus.tid IS NULL, textname, CONCAT("*",textname))', 'topics LEFT JOIN topic_nexus ON topic_nexus.tid=topics.tid', "submittable='yes'") },
+	
+	
+	'non_nexus_topics-submittable'
+		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid,textname', 'topics LEFT JOIN topic_nexus ON topic_nexus.tid=topics.tid', "topic_nexus.tid IS NULL AND submittable='yes'") },
+	
+	
 	'non_nexus_topics-storypickable'
 		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid,textname', 'topics LEFT JOIN topic_nexus ON topic_nexus.tid=topics.tid', "topic_nexus.tid IS NULL AND storypickable='yes'") },
 
