@@ -2493,4 +2493,18 @@ INSERT INTO vars (name,value,description) SELECT 'm1_pointgrant_factor_downfairr
 INSERT INTO vars (name, value, description) VALUES ('top10comm_days','1','Look back (n) days to display the Top 10 Comments slashbox');
 INSERT INTO vars (name, value, description) VALUES ('dbs_revive_seconds','30','After a DB goes from isalive=no to yes, ramp up accesses to it over how many seconds?');
 
+
+# Only run these on your search db
+ALTER TABLE submissions TYPE=MyISAM;
+ALTER TABLE submissions ADD FULLTEXT subj (subj,story);
+
+# Depending on when you converted your site to section/topics 
+# you may or may not need to run these.  If your stats_daily 
+# table has a section column you need to run these
+
+UPDATE stats_daily set skid=0 where section='all';
+ALTER TABLE stats_daily DROP COLUMN section;
+
+ALTER TABLE topic_nexus_extras MODIFY COLUMN extras_id MEDIUMINT UNSIGNED NOT NULL auto_increment;
+
 INSERT INTO vars (name, value, description) VALUES ('topic_popup_open', '1', 'Expand all topics by default, or not');
