@@ -271,7 +271,7 @@ sub formatDate {
 	my($data, $col, $as, $format) = @_;
 	errorLog('Not arrayref'), return unless ref($data) eq 'ARRAY';
 
-	if ($col && $col =~ /^\d+$/) {   # LoL
+	if (defined($col) && $col =~ /^\d+$/) {   # LoL
 		$as = defined($as) ? $as : $col;
 		for (@$data) {
 			errorLog('Not arrayref'), return unless ref eq 'ARRAY';

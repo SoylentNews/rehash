@@ -138,6 +138,37 @@ __template__
 				<TD WIDTH="100">&nbsp;</TD>
 				<TD ALIGN="LEFT">Spent: [% useredit.totalmods %], Stirred: [% useredit.stirred %] [% IF useredit.stirredpercent %]([% useredit.stirredpercent %]%)[% END %]</TD>
 			</TR>
+[% IF constants.subscribe %]
+			<TR>
+				<TD WIDTH="100">&nbsp;</TD>
+				<TD ALIGN="LEFT">Subscriber pages - "Bought" (Used): [% useredit.hits_bought %], Bought Today: [% useredit.hits_bought_today %], Paid For: [% useredit.hits_paidfor %]</TD>
+			</TR>
+[% IF useredit.subscribe_payments %]
+			<TR>
+				<TD WIDTH="100">&nbsp;</TD>
+				<TD ALIGN="LEFT"><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="[% user.bg.2 %]" WIDTH="100%">
+				<TR>
+					<TH>Date</TH>
+					<TH>Email</TH>
+					<TH>$</TH>
+					<TH>Pages</TH>
+					<TH>Method</TH>
+					<TH>TransID</TH>
+				</TR>
+[% FOREACH sp = useredit.subscribe_payments %]
+				<TR>
+					<TD>&nbsp;[% sp.0 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.1 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.2 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.3 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.4 %]&nbsp;</TD>
+					<TD>&nbsp;[% sp.5 %]&nbsp;</TD>
+				</TR>
+[% END %]
+				</TABLE></TD>
+			</TR>
+[% END %]
+[% END %]
 			<TR>
 				<TD WIDTH="100"><B>Tokens</B></TD>
 				<TD ALIGN="LEFT"><INPUT TYPE="TEXT" NAME="tokens" SIZE="6" VALUE="[% useredit.tokens | strip_attribute %]">&nbsp;&nbsp;
