@@ -38,7 +38,7 @@ count = 0;
 			<TD>[% IF admin_flag %]<A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% END %][% sub.subj %][% IF admin_flag %]</A>[% END %]</TD>
 			<TD>[% IF admin_flag %][% PROCESS nick_and_uid uid=sub.uid nickname=Slash.db.getUser(sub.uid, 'nickname'); %][% END %]</TD>
 			<TD>[% IF admin_flag %][% PROCESS link_ipid ipid = sub.ipid ipid_vis=Slash.vislenify(ipid); %][% END %]</TD>
-			<TD>[% Slash.timeCalc(time) %]</TD>
+			<TD>[% Slash.timeCalc(sub.time) %]</TD>
 			<TD>[% IF admin_flag || user.uid == sub.uid %]
 				[% SWITCH sub.del %]
 					[%- CASE 0 -%]
