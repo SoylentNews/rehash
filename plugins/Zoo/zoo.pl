@@ -290,13 +290,13 @@ sub action {
 sub check {
 	my($zoo, $constants, $user, $form, $slashdb) = @_;
 
-	if ($form->{uid} && $form->{type}) {
+	_printHead("mainhead");
+	if ($form->{uid}) {
 		if ($zoo->count() > $constants->{people_max}) {
-			_printHead("mainhead");
 			print getData("over_socialized");
+			return 0;
 		}
 		
-		_printHead("mainhead");
 		if ($form->{uid} == $user->{uid} || $form->{uid} == $constants->{anonymous_coward_uid}  ) {
 			print getData("no_go");
 			return 0;
@@ -308,7 +308,7 @@ sub check {
 			uid => $form->{uid},
 			nickname => $nickname,
 			type => $type,
-			 });
+		});
 	} 
 }
 
