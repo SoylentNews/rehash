@@ -1060,4 +1060,7 @@ CREATE TABLE accesslog_admin (
 #This was missed sometime in the past -Brian
 INSERT INTO vars (name, value, description) VALUES ('delayed_inserts_off','1','This turns off delayed inserts (which you probably want to do)');
 
+# You need to manually copy/symlink stats.pl from plugins/Stats into htdocs to use
+# the new stats.pl program
+
 # USEPERL LAST UPDATED HERE
