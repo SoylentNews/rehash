@@ -222,6 +222,14 @@ sub getArchiveList {
 
 
 ########################################################
+# For balance_readers.pl
+sub deleteOldDBReaderStatus {
+	my($self, $secs_back) = @_;
+	$self->sqlDelete("dbs_readerstatus",
+		"ts < DATE_SUB(NOW(), INTERVAL $secs_back SECOND)");
+}
+
+########################################################
 # For dailystuff
 sub deleteRecycledComments {
 	my($self) = @_;

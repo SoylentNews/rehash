@@ -2695,6 +2695,7 @@ sub getDBs {
 			$weight = int($weight * $db->{_weight_factor} + 1);
 		}
 
+		# XXX Don't do weight this way.
 		push @{$databases{$db->{type}}}, ($db) x $weight;
 	}
 
@@ -2723,6 +2724,41 @@ sub getDB {
 }
 
 } # end closure surrounding getDBs and getDB
+
+#################################################################
+
+# Writing to the dbs_readerstatus table.
+
+sub createDBReaderStatus {
+	my($self, $hr) = @_;
+	return $self->sqlInsert("dbs_readerstatus", $hr);
+}
+
+#################################################################
+
+# Methods for reading and writing the dbs_readerstatus_queries table.
+
+sub getDBReaderStatusQueryId {
+	my($self, $text) = @_;
+	my $id = $self->getDBReaderStatusQueryId_raw($text)
+		|| $self->createDBReaderStatusQuery($text);
+	return $id;
+}
+
+sub getDBReaderStatusQueryId_raw {
+	my($self, $text) = @_;
+	my $text_q = $self->sqlQuote($text);
+	return $self->sqlSelect("rsqid", "dbs_readerstatus_queries",
+		"text = $text_q");
+}
+
+sub createDBReaderStatusQuery {
+	my($self, $text) = @_;
+	$self->sqlInsert("dbs_readerstatus_queries",
+		{ rsqid => undef, text => $text },
+		{ ignore => 1 });
+	return $self->getLastInsertId();
+}
 
 #################################################################
 sub getDBVirtualUsers {

@@ -709,6 +709,8 @@ INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_lasti
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_weeks', '8', 'number of weeks back to compare current stats to');
 INSERT INTO vars (name, value, description) VALUES ('currentqid',1,'The Current Question on the homepage pollbooth');
 INSERT INTO vars (name, value, description) VALUES ('datadir','/usr/local/slash/www.example.com','What is the root of the install for Slash');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_adjust_delay','5','Number of seconds between each adjustment of reader DB weights');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_expire_secs', 86400 * 7,'Number of seconds worth of dbs_readerstatus log to keep around');
 INSERT INTO vars (name, value, description) VALUES ('dbs_revive_seconds','30','After a DB goes from isalive=no to yes, ramp up accesses to it over how many seconds?');
 INSERT INTO vars (name, value, description) VALUES ('debug_db_cache','0','If set, then write debug info for the Slash::DB cache to STDERR');
 INSERT INTO vars (name, value, description) VALUES ('debug_maintable_border','0','Border on the main table (for debugging purposes)');

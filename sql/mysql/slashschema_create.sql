@@ -329,6 +329,36 @@ CREATE TABLE dbs (
 ) TYPE=InnoDB;
 
 #
+# Table structure for table 'dbs_readerstatus'
+#
+
+DROP TABLE IF EXISTS dbs_readerstatus;
+CREATE TABLE dbs_readerstatus (
+	ts datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	dbid mediumint UNSIGNED NOT NULL,
+	was_alive enum("no","yes") DEFAULT "yes" NOT NULL,
+	was_reachable enum("no","yes") DEFAULT "yes",
+	was_running enum("no","yes") DEFAULT "yes",
+	slave_lag_secs float DEFAULT '0',
+	query_bog_secs float DEFAULT '0',
+	bog_rsqid mediumint UNSIGNED DEFAULT NULL,
+	KEY ts_dbid (ts, dbid),
+	KEY ts_bog (ts, bog_rsqid, query_bog_secs)
+) TYPE=InnoDB;
+
+#
+# Table structure for table 'dbs_readerstatus_queries'
+#
+
+DROP TABLE IF EXISTS dbs_readerstatus_queries;
+CREATE TABLE dbs_readerstatus_queries (
+	rsqid mediumint UNSIGNED NOT NULL auto_increment,
+	text varchar(255),
+	PRIMARY KEY (rsqid),
+	KEY text (text)
+) TYPE=InnoDB;
+
+#
 # Table structure for table 'discussions'
 #
 

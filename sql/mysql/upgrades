@@ -2726,3 +2726,28 @@ ALTER TABLE pollquestions CHANGE COLUMN discussion discussion mediumint UNSIGNED
 
 INSERT INTO vars (name, value, description) VALUES ('mod_stats_lookback_days','30','Number of days to look back for repeat mods');
 
+DROP TABLE IF EXISTS dbs_readerstatus;
+CREATE TABLE dbs_readerstatus (
+	ts datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	dbid mediumint UNSIGNED NOT NULL,
+	was_alive enum("no","yes") DEFAULT "yes" NOT NULL,
+	was_reachable enum("no","yes") DEFAULT "yes",
+	was_running enum("no","yes") DEFAULT "yes",
+	slave_lag_secs float DEFAULT '0',
+	query_bog_secs float DEFAULT '0',
+	bog_rsqid mediumint UNSIGNED DEFAULT NULL,
+	KEY ts_dbid (ts, dbid),
+	KEY ts_bog (ts, bog_rsqid, query_bog_secs)
+) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS dbs_readerstatus_queries;
+CREATE TABLE dbs_readerstatus_queries (
+	rsqid mediumint UNSIGNED NOT NULL auto_increment,
+	text varchar(255),
+	PRIMARY KEY (rsqid),
+	KEY text (text)
+) TYPE=InnoDB;
+
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_adjust_delay','5','Number of seconds between each adjustment of reader DB weights');
+INSERT INTO vars (name, value, description) VALUES ('dbs_reader_expire_secs', 86400 * 7,'Number of seconds worth of dbs_readerstatus log to keep around');
+
