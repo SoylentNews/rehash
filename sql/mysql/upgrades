@@ -1215,4 +1215,5 @@ ALTER TABLE accesslog ADD secure TINYINT DEFAULT 0 NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('accesslog_insert_cachesize','0','Cache accesslog inserts and do this many all at once (0 to disable, if enabled, suggest value of 5 or so)');
 INSERT INTO vars (name, value, description) VALUES ('index_gse_backup_prob','0','Probability that index.pl getStoriesEssentials will look to backup_db_user instead of the main db: 0=never, 1=always');
 INSERT INTO vars (name, value, description) VALUES ('selectcomm_backup_prob','0','Probability that Slash.pm selectComments will look to backup_db_user instead of the main db: 0=never, 1=always');
+INSERT INTO vars (name, value, description) VALUES ('prepuser_backup_prob','0','Probability that Environment.pm prepareUser will look to backup_db_user instead of the main db: 0=never, 1=always');
 

@@ -1136,7 +1136,16 @@ sub prepareUser {
 		$user->{is_anon} = 1;
 
 	} else {
-		$user  = $slashdb->getUser($uid); # getUserInstance($uid, $uri) {}
+		my $fetchdb;
+		if ($constants->{prepuser_backup_prob}
+			&& $constants->{backup_db_user}
+			&& rand(1) < $constants->{prepuser_backup_prob}) {
+			$fetchdb = getObject('Slash::DB', $constants->{backup_db_user});
+			$fetchdb ||= $slashdb; # In case it fails
+		} else {
+			$fetchdb = $slashdb;
+		}
+		$user = $fetchdb->getUser($uid);
 		$user->{is_anon} = 0;
 	}
 
