@@ -2027,9 +2027,8 @@ sub savePasswd {
 
 		# only set cookie if user is current user
 		if ($form->{uid} eq $user->{uid}) {
-			my $value  = $slashdb->getLogToken($form->{uid}, 1);
-			my $cookie = bakeUserCookie($uid, $slashdb->getLogToken($form->{uid}, 1));
-			setCookie('user', $cookie, $user_edits_table->{session_login});
+			$user->{logtoken} = bakeUserCookie($uid, $slashdb->getLogToken($form->{uid}, 1));
+			setCookie('user', $user->{logtoken}, $user_edits_table->{session_login});
 		}
 	}
 
