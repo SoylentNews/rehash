@@ -20,18 +20,18 @@ __template__
        thisname.push(leaf.label) %]
 <div nowrap>
 [%-    IF leaf.has_children -%]
-<img id="[% name %]-plus-[% leaf.id %]" width=16 height=16 src="[% image_path %][% UNLESS leaf.open %]minus[% ELSE %]plus[% END %].png" onclick="[% name %]_toggle_expand([% leaf.id %])"><span id="[% name %]-line-[% leaf.id %]" ondblclick="[% name %]_ok()" onclick="[% name %]_toggle_select([% leaf.id %],[% leaf.value | html %])">
+<img id="[% name %]-plus-[% leaf.id %]" width=16 height=16 src="[% image_path %][% IF leaf.open %]minus[% ELSE %]plus[% END %].png" onclick="[% name %]_toggle_expand([% leaf.id %])"><span id="[% name %]-line-[% leaf.id %]" ondblclick="[% name %]_ok()" onclick="[% name %]_toggle_select([% leaf.id %],[% leaf.value | html %])">
 [%-    ELSE -%]
 <img width=16 height=16 src="[% image_path %]L.png"><span id="[% name %]-line-[% leaf.id %]" ondblclick="[% name %]_ok()" onclick="[% name %]_toggle_select([% leaf.id %],[% leaf.value | html %])">
 [%-    END -%]
-<img id="[% name %]-node-[% leaf.id %]" width=16 height=16 src="[% image_path %]open_node.png" valign="bottom"><a href="javascript:void(0);">[% leaf.label %]</a>
+<img id="[% name %]-node-[% leaf.id %]" width=16 height=16 src="[% image_path %][% IF leaf.open %]open[% ELSE %]closed[% END %]_node.png" valign="bottom"><a href="javascript:void(0);">[% leaf.label %]</a>
 [%-    IF slashtopics.${leaf.value}.image -%]
 <input type="hidden" id="[% name %]-img-[% leaf.id %]" value="[% constants.imagedir %]/topics/[% slashtopics.${leaf.value}.image %]">
 [%-    END -%]
 <input type="hidden" id="[% name %]-weight-[% leaf.id %]" value="[% constants.topic_popup_defaultweight || 1 %]"><input type="hidden" id="[% name %]-fullname-[% leaf.id %]" value="[% thisname.join(' :: ') %]"></span></div>
 [%-    IF leaf.has_children;
          thisparent.push(leaf.value) -%]
-<div id="[% name %]-desc-[% leaf.id %]" class="hpts-block" [% UNLESS leaf.open %]style="display: block"[% ELSE %]style="display: none"[% END %] nowrap>
+<div id="[% name %]-desc-[% leaf.id %]" class="hpts-block" [% IF leaf.open %]style="display: block"[% ELSE %]style="display: none"[% END %] nowrap>
 [%-    ELSE;
          CALL thisname.pop();
        END;

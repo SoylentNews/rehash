@@ -2493,3 +2493,4 @@ INSERT INTO vars (name,value,description) SELECT 'm1_pointgrant_factor_downfairr
 INSERT INTO vars (name, value, description) VALUES ('top10comm_days','1','Look back (n) days to display the Top 10 Comments slashbox');
 INSERT INTO vars (name, value, description) VALUES ('dbs_revive_seconds','30','After a DB goes from isalive=no to yes, ramp up accesses to it over how many seconds?');
 
+INSERT INTO vars (name, value, description) VALUES ('topic_popup_open', '1', 'Expand all topics by default, or not');

@@ -69,6 +69,8 @@ sub getPopupTree {
 	my $constants	= getCurrentStatic();
 	my $tree	= $reader->getTopicTree;
 
+	$constants->{topic_popup_open} = 1 unless defined $constants->{topic_popup_open};
+
 	my $data;
 	my %topics;
 	for my $tid (map  { $_->[0] }
@@ -76,8 +78,9 @@ sub getPopupTree {
 	             map  { [ $_, lc $tree->{$_}{textname} ] } keys %$tree) {
 		next unless $tid; # just in case someone added a bad tid
 		my $top = $tree->{$tid};
-		@{$topics{$tid}}{qw(value label height width image)} = (
-			$tid, @{$top}{qw(textname height width image)}
+		@{$topics{$tid}}{qw(value label height width image open)} = (
+			$tid, @{$top}{qw(textname height width image)},
+			$constants->{topic_popup_open} ? 1 : 0
 		);
 
 		if (scalar keys %{$top->{parent}}) {
