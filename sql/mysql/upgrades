@@ -824,7 +824,6 @@ INSERT INTO vars (name, value, description) VALUES ('log_db_user','','The virtua
 INSERT INTO vars (name, value, description) VALUES ('search_text_length','80','This will tell search how many characters should be returned for text bodies in searches (think introtext for stories and article for journals).');
 INSERT INTO vars (name, value, description) VALUES ('search_method', '', 'Method to use to weight scores for search returns (and to narrow down possible matches)');
 
-# USEPERL LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_3_0_50, Start of T_2_3_0_51
@@ -860,4 +859,6 @@ DELETE FROM vars WHERE name='commentsPerPoint';
 # value on the new system.
 UPDATE users_param SET name='people_bonus_anonymous', value='-3' WHERE name='anon_comments' AND value='1';
 DELETE FROM users_param WHERE name='anon_comments';
+
+# USEPERL LAST UPDATED HERE
 
