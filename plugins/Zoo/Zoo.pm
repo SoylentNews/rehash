@@ -437,10 +437,17 @@ SQL
 
 sub deleteZooJobs {
 	my ($self, $list) = @_;
+	my $return;
+
 	if (ref($list)) {
-		$self->sqlDo("DELETE FROM people_log WHERE id IN (" . join(",", @$list) . ")");
+		$return = $self->sqlDo("DELETE FROM people_log WHERE id IN (" . join(",", @$list) . ")");
 	} else {
-		$self->sqlDo("DELETE FROM people_log WHERE id = $list ");
+		$return = $self->sqlDo("DELETE FROM people_log WHERE id = $list ");
+	}
+	if ($return) {
+		$self->{_dbh}->commit; 
+	} else {
+		$self->{_dbh}->rollback; 
 	}
 }
 
@@ -449,6 +456,7 @@ sub getZooJobs {
 	$limit = "LIMIT $limit"
 		if $limit;
 
+	$self->{_dbh}->{AutoCommit} = 0; 
 	return $self->sqlSelectAllHashrefArray('*', 'people_log', '', "ORDER BY id " . $limit);
 }
 
