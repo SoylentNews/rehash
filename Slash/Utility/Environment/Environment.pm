@@ -590,7 +590,8 @@ Returns no value.
 =cut
 
 sub createCurrentStatic {
-	($static_constants, $static_site_constants) = @_;
+	($static_constants) = @_;
+	$static_site_constants = $_[1] if defined $_[1];
 }
 
 #========================================================================
