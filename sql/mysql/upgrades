@@ -1445,7 +1445,7 @@ ALTER TABLE topics ADD default_image mediumint UNSIGNED DEFAULT 0 NOT NULL;
 # If your main DB is running MySQL 4.x, you can use this line.
 UPDATE topics,topic_images SET default_image=topic_images.id WHERE topic_images.name=topics.name;
 # If your main DB is running MySQL 3.x, you must use these lines.
-SELECT CONCAT("UPDATE topics SET default_image=", topic_images.id, " WHERE name=", topics.name, ";") INTO OUTFILE "/tmp/topicsimages" FROM topics, topic_images WHERE topics.name = topic_images.name;
+SELECT CONCAT("UPDATE topics SET default_image=", topic_images.id, " WHERE name='", topics.name, "';") INTO OUTFILE "/tmp/topicsimages" FROM topics, topic_images WHERE topics.name = topic_images.name;
 SOURCE "/tmp/topicsimages";
 
 ALTER TABLE topics DROP width;
