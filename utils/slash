@@ -10,109 +10,176 @@
 # 	with assists from:
 #		Jamie McCarthy
 #		Cliff Wood
-#
-
-# This prolly ain't 100% accurate, but it should be good enough.
-OS=`uname | awk '{print $1}'`
+#		... and a cast of several.
 
 PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:\
-				/usr/local/sbin:/usr/bin/X11:/usr/X11R6/bin"
+			/usr/local/sbin:/usr/bin/X11:/usr/X11R6/bin";
 
 # Slash home
-DATADIR=/usr/local/slash
-SLASHD="$DATADIR/sbin/slashd"
-SLASHSITE=$DATADIR/slash.sites
-
-# This is where you store the running PID of the slashd's you start
-# Under Redhat people like to place this in /var/run
-#RUNNING_PID=/var/run
-RUNNING_PID=$DATADIR
+PROGNAME="slashd";
+DATADIR="/usr/local/slash";
+SLASHD="$DATADIR/sbin/$PROGNAME";
+SLASHSITE="$DATADIR/slash.sites";
 
 # To figure out where things are...
-TZ=GMT
-export TZ
-WHICH_CAT=`which cat`
-WHICH_CUT=`which cut`
+TZ="GMT";
+export TZ;
+
+WHICH_CAT=`which cat`;
+WHICH_CUT=`which cut`;
+WHICH_PS=`which ps`;
+WHICH_GREP=`which grep`;
+WHICH_UNAME=`which uname`;
+WHICH_AWK=`which awk`;
+
+# This prolly ain't 100% accurate, but it should be good enough.
+OS=`$WHICH_UNAME | $WHICH_AWK '{print $1}'`;
 
 if [ ! -f $SLASHSITE ] ; then
-	echo "[0;31mNOT[1;m Starting slashd:[0;31m No[1;m $SLASHSITE";
+	echo "[0;31mNOT[1;m Starting $PROGNAME:[0;31m No[1;m $SLASHSITE";
 	exit 0;
 fi
 
-GRAB_CONFIG=`$WHICH_CAT $SLASHSITE | $WHICH_CUT -d"#" -f1` 
-if [ -z "`echo $GRAB_CONFIG | grep :`" ]; then
-	echo "[0;31mNOT[1;m Starting/stopping slashd:[0;31m No[1;m sites in $SLASHSITE";
+GRAB_CONFIG=`$WHICH_CAT $SLASHSITE | $WHICH_CUT -d"#" -f1`;
+
+start_slashd () {
+	# There are differing syntaxes of "su" between OSes
+	# and even between different distributions of the same
+	# OS. If you have an OS that isn't listed here (or is
+	# a different case of one listed here [ie Red Hat Linux,
+	# Debian Linux]) please add in the necessary logic and
+	# send in a patch. Thanks!
+
+	# if you aren't using GMT for internal dates, please change
+	# the appropriate lines, below.  But why wouldn't you?
+
+	if [ "$OS" = "FreeBSD" ] ; then
+		TZ=GMT su $USERNAME -c "$SLASHD $VIRTUAL_USER_NAME" &
+	elif [ "$OS" = "Linux" ] ; then 
+		su - $USERNAME -c "TZ=GMT $SLASHD $VIRTUAL_USER_NAME" &
+	else
+		su - $USERNAME -c "TZ=GMT $SLASHD $VIRTUAL_USER_NAME" &
+	fi
+}
+
+break_parts () {
+	# This is used over and over to break apart the need
+	# variables.
+
+	VIRTUAL_USER_NAME=`echo $server_name | $WHICH_CUT -d":" -f1`;
+	USERNAME=`echo $server_name | $WHICH_CUT -d":" -f2`;
+	SITENAME=`echo $server_name | $WHICH_CUT -d":" -f3`;
+	RUNNINGPID="$DATADIR/site/$SITENAME/logs/$PROGNAME.pid";
+}
+
+stop_slashd () {
+	# This will restart and remove any left over PID files
+	# since they can't help anyone. Oh wait, they are useful
+	# to verify is slashd is really running. The keepalive
+	# choice looks for thoses PID files to see if slashd
+	# is hanging about.
+
+	if [ -f $RUNNINGPID ] ; then
+		echo -n "Stopping $PROGNAME $VIRTUAL_USER_NAME: ";
+		if ! kill `$WHICH_CAT $RUNNINGPID` ; then
+			echo -n "...using kill -9 to make sure ...";
+			sleep 3;
+			kill -9 `$WHICH_CAT $RUNNINGPID`;
+			rm -f $RUNNINGPID;
+		fi
+		echo "ok.";
+	else
+		echo "$PROGNAME $VIRTUAL_USER_NAME has no PID file";
+	fi
+}
+
+check_variable () {
+	# Just want to print things out so I can see what we are 
+	# getting.
+
+	echo "VIRTUAL_USER_NAME=$VIRTUAL_USER_NAME";
+	echo "USERNAME=$USERNAME";
+	echo "SITENAME=$SITENAME";
+	echo "RUNNINGPID=${RUNNINGPID}";
+	echo "PID=`cat ${RUNNINGPID}`";
+}
+
+
+# OK now that we set thing above it just matter of calling them in the right
+# order. I broke thing up in to functions since I was tired of retyping the 
+# same things over and over.
+
+if [ -z "`echo $GRAB_CONFIG | $WHICH_GREP :`" ] ; then
+	echo "[0;31mNOT[1;m Starting/stopping $PROGNAME:[0;31m No[1;m sites in $SLASHSITE";
 	exit 0;
 fi
 
 case "$1" in
-  start)
-    cd $DATADIR
-		for server_name in $GRAB_CONFIG
-		do
-			SERVER_NAME=`echo $server_name |$WHICH_CUT -d":" -f1`
-			USERNAME=`echo $server_name |$WHICH_CUT -d":" -f2`
-			echo -n "Starting slashd $SERVER_NAME: "
-
-			# There are differing syntaxes of 'su' between OSes
-			# and even between different distributions of the same
-			# OS. If you have an OS that isn't listed here (or is
-			# a different case of one listed here [ie Red Hat Linux,
-			# Debian Linux]) please add in the necessary logic and
-			# send in a patch. Thanks!
-			#
-			# - Slashteam (slashteam@osdn.com)
-
-			# if you aren't using GMT for internal dates, please change
-			# the appropriate lines, below.
-			if [ "$OS" = "FreeBSD" ] ; then
-				TZ=GMT su $USERNAME -c "$SLASHD $SERVER_NAME" &
-			elif [ "$OS" = "Linux" ] ; then 
-				su - $USERNAME -c "TZ=GMT $SLASHD $SERVER_NAME" &
-			else
-				su - $USERNAME -c "TZ=GMT $SLASHD $SERVER_NAME" &
-			fi
-# this is handled by slashd
-#			echo $! > $RUNNING_PID/site/$SITENAME/logs/slashd.pid
-			echo "ok PID = $! "
+	start)
+		for server_name in $GRAB_CONFIG; do
+			break_parts;
+			echo -n "Starting $PROGNAME $VIRTUAL_USER_NAME: ";
+			start_slashd;
+			echo "ok PID = $!";
 		done
-    ;;
-  stop)
-    cd $DATADIR
-    for server_name in $GRAB_CONFIG
-    do
-			SERVER_NAME=`echo $server_name |$WHICH_CUT -d":" -f1`
-			USERNAME=`echo $server_name |$WHICH_CUT -d":" -f2`
-			SITENAME=`echo $server_name |$WHICH_CUT -d":" -f3`
-			if [ -f $RUNNING_PID/site/$SITENAME/logs/slashd.pid ] ;then
-				echo -n "Stopping slashd $SERVER_NAME: "
-				if ! kill `cat $RUNNING_PID/site/$SITENAME/logs/slashd.pid` ;then
-					echo -n "...using kill -9..."
-					sleep 3
-					kill -9 `cat $RUNNING_PID/site/$SITENAME/logs/slashd.pid`
-					rm -f $RUNNING_PID/site/$SITENAME/logs/slashd.pid
+		;;
+
+	stop)
+		for server_name in $GRAB_CONFIG; do
+			break_parts;
+			stop_slashd;
+		done
+		;;
+
+	keepalive)
+		for server_name in $GRAB_CONFIG; do
+			break_parts;
+			if [ ! -f $RUNNINGPID ] ;then
+				echo -n "Restarting $PROGNAME $VIRTUAL_USER_NAME, no PID file: ";
+				start_slashd;
+				echo "ok PID = $!";
+			else
+				# OK, this might not work on every platform since the "ps"
+				# is different on alot of OSes.
+				# Once people submit fixes I will pull this into a similar
+				# check like the one for "su".
+				if ! $WHICH_PS wh -p `$WHICH_CAT $RUNNINGPID` | $WHICH_GREP $PROGNAME > /dev/null ; then
+					echo -n "Restarting $PROGNAME $VIRTUAL_USER_NAME, no valid PID file: ";
+					rm -f $RUNNINGPID;
+					start_slashd;
+					echo "ok PID = $!";
 				fi
-# this is handled by slashd
-#				rm -f $RUNNING_PID/site/$SITENAME/logs/slashd.pid
-				echo "ok."
-			else
-				echo "Slashd $SERVER_NAME has no PID file"
 			fi
 		done
+		;;
 
-      ;;
-  restart)
-    cd $DATADIR
-		$0 stop
-		sleep 2
-		$0 start
-    ;;
-  *)
-    echo "Debian Usage: /etc/init.d/$0 {start|stop|restart}"
-    echo "Redhat Usage: /etc/rc.d/init.d/$0 {start|stop|restart}"
-    echo "Other Usage: /usr/local/sbin/$0 {start|stop|restart}"
-    exit 1
-    ;;
+	restart)
+		$0 stop;
+		echo -n "Sleeping 10 seconds to be clean: "; 
+		sleep 10;
+		echo "ok.";
+		$0 start;
+		;;
+
+	checkvars)
+		echo "The contents of $SLASHSITE:";
+		for server_name in $GRAB_CONFIG; do
+			echo "  $server_name";
+		done
+		for server_name in $GRAB_CONFIG; do
+			echo "";
+			break_parts;
+			check_variable;
+		done
+		echo "";
+		;;
+
+	*)
+		echo "Debian Usage: /etc/init.d/$0 {start|stop|restart|keepalive|checkvars}";
+		echo "Redhat Usage: /etc/rc.d/init.d/$0 {start|stop|restart|keepalive|checkvars}";
+		echo "Other Usage: /usr/local/sbin/$0 {start|stop|restart|keepalive|checkvars}";
+		exit 1;
+		;;
 esac
 
-exit 0 ;
+exit 0;
