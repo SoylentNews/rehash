@@ -331,7 +331,8 @@ clicking the "Edit User Info" and "Customize..." links you see up top there so y
 customize $I{sitename}, change your password, or just click pretty widgets to kill time.
 EOT
 
-			if ($I{U}{seclev}) {
+			# Users should be able to see their own points.
+			if ($I{U}{uid} == $uid) {
 				print <<EOT;
 <P>You're a moderator with $points points. Please read the
 <A HREF="$I{rootdir}/moderation.shtml">Moderator Guidelines</A> before you do any moderation.

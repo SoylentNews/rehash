@@ -151,14 +151,18 @@ EOT
 	my($change, $excon);
 	if ($y > $I{m2_mincheck}) {
 		if (!$flag && karmaBonus()) {
-			# Bonus Karma For Helping Out
-			($change, $excon) = ($I{m2_bonus}, "and karma<$I{m2_maxbonus}");
+			# Bonus Karma For Helping Out - the idea here, is to not let 
+			# meta-moderators get the +1 posting bonus.
+			($change, $excon) =
+				("karma$I{m2_bonus}", "and karma<$I{m2_maxbonus}");
+			$change = $I{m2_maxbonus}
+				if $I{m2_maxbonus} < $I{U}{karma} + $I{m2_bonus};
 		} elsif ($flag == 2) {
 			# Penalty for Abuse
-			($change, $excon) = ($I{m2_penalty}, '');
+			($change, $excon) = ("karma$I{m2_penalty}", '');
 		}
 		# Update karma.
-		sqlUpdate("users_info", { -karma => "karma$change" },
+		sqlUpdate("users_info", { -karma => $change },
 			"uid=$I{U}{uid} $excon") if $change;
 	}
 }
@@ -179,15 +183,13 @@ sub metaMod {
 	if ($muid && $val && !$flag) {
 		if ($val eq '+') {
 			sqlUpdate("users_info", { -m2fair => "m2fair+1" }, "uid=$muid");
-			# The idea here is to not let meta moderators get the comment
-			# bonus...
+			# The only limit on karma accumulated by good moderators is the 
+			# the system limit.
 			sqlUpdate("users_info", { -karma => "karma+1" },
-				"$muid=uid and karma<$I{m2_maxbonus}");
+				"$muid=uid and karma<$I{maxkarma}");
 		} elsif ($val eq '-') {
 			sqlUpdate("users_info", { -m2unfair => "m2unfair+1" },
 				"uid=$muid");
-			# ...while sufficiently bad moderators can still get the 
-			# comment penalty.
 			sqlUpdate("users_info", { -karma => "karma-1" },
 				"$muid=uid and karma>$I{badkarma_limit}");
 		}
@@ -203,7 +205,7 @@ sub metaMod {
 		-flag => $flag
 	});
 
-	# We used to pring UID, instead now it might be better to print the
+	# We used to print UID, instead, it might be better to print the
 	# moderation ID if we print anything at all (which might be an option).
 	print "<BR>Updating moderation #$mmid with $val" if $I{U}{aseclev} > 10;
 }
@@ -240,9 +242,10 @@ and try to be impartial and fair.  You are not moderating to make your
 opinions heard, you are trying to help promote a rational discussion. 
 Play fairly and help make $I{sitename} a little better for everyone.</LI>
 
-<LI>Scores are removed.  You can click thru and get them if you want them,
-but they shouldn't be a factor in your M2 decision.</LI>
-
+<LI>Scores and information identifying the posters of these comments have been
+removed to help prevent bias in meta moderation. You can click thru and get themif you really need to know, you can click through and see the original message,
+but we encourage you not to do this unless you need more context to fairly
+meta moderate.</LI> 
 </UL>
 
 <FORM ACTION="$ENV{SCRIPT_NAME}" METHOD="POST">
@@ -317,7 +320,7 @@ sub isEligible {
 
 	my($tuid) = sqlSelect("count(*)", "users");
 	
-	if ($I{U}{uid} > int($tuid * 0.75) ) {
+	if ($I{U}{uid} > int($tuid * $I{m2_percentage}) ) {
 		print "You haven't been a $I{sitename} user long enough.";
 		return 0;
 	}

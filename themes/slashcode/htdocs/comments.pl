@@ -56,6 +56,10 @@ sub main {
 		$I{F}{op} = "Preview";
 	}
 
+	# Find out user's karma.
+	($I{U}{karma}) = sqlSelect("karma", "users_info", "uid=$I{U}{uid}")
+		if $I{U}{uid} > 0;
+
 	unless ($I{F}{sid}) {
 		# Posting from outside discussions...
 		$I{F}{sid} = $ENV{HTTP_REFERER} ? crypt($ENV{HTTP_REFERER}, 0) : '';
@@ -74,7 +78,6 @@ sub main {
 	if ($I{F}{op} eq "Submit") {
 
 		if (checkSubmission("comments", $I{post_limit}, $I{max_posts_allowed}, $id)) {
-			($I{U}{karma}) = sqlSelect("karma", "users_info", "uid=$I{U}{uid}") if $I{U}{uid} > 0;
 			submitComment();
 		}
 
@@ -88,15 +91,10 @@ sub main {
 			updateFormkeyId();
 		}
 
-		# find out their Karma
-		($I{U}{karma}) = sqlSelect("karma", "users_info",
-			"uid=$I{U}{uid}") if $I{U}{uid} > 0;
 		editComment($id);
 
 
 	} elsif ($I{F}{op} eq "delete" && $I{U}{aseclev}) {
-		($I{U}{karma}) = sqlSelect("karma", "users_info", "uid=$I{U}{uid}")
-			if $I{U}{uid} > 0;
 		titlebar("99%", "Delete $I{F}{cid}");
 
 		my $delCount = deleteThread($I{F}{sid}, $I{F}{cid});
@@ -106,8 +104,6 @@ sub main {
 		print "Deleted $delCount items from story $I{F}{sid}\n";
 
 	} elsif ($I{F}{op} eq "moderate") {
-		($I{U}{karma}) = sqlSelect("karma", "users_info", "uid=$I{U}{uid}")
-			if $I{U}{uid} > 0;
 		titlebar("99%", "Moderating $I{F}{sid}");
 		moderate();
 		printComments($I{F}{sid}, $I{F}{pid}, $I{F}{cid}, $commentstatus);
@@ -873,10 +869,8 @@ sub moderateCid {
 		});
 
 		# Adjust comment posters karma
-		sqlUpdate(
-			"users_info",
-			{ -karma => "karma$val" }, 
-			"uid=$cuid"
+		sqlUpdate("users_info", { -karma => "karma$val" }, 
+			"uid=$cuid AND karma<$I{maxkarma}"
 		) if $val && $cuid > 0;
 
 		# Adjust moderators total mods

@@ -286,6 +286,8 @@ sub checkForM2 {
 	my($d) = sqlSelect('to_days(now()) - to_days(lastmm)',
 		'users_info', "uid=$I{U}{uid}");
 	return unless $d;
+	my($tuid) = sqlSelect('count(*)', 'users');
+	return unless $I{U}{uid} < int($tuid * $I{m2_userpercentage});
 	print qq'Have you <A HREF="$I{rootdir}/metamod.pl">Meta Moderated</A> Today?<BR>';
 }
 
