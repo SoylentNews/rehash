@@ -213,7 +213,7 @@ sub list {
 	my($slashdb, $constants, $user, $form, $stats) = @_;
 
 	my $stats_data = {};
-	my($stats_name, $sep_name_select, $stats_name_pre, $days);
+	my($stats_name, $sep_name_select, $stats_name_pre);
 	my $days = $form->{stats_days} || 1;
 	
 	#############################################################
