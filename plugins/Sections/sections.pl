@@ -206,12 +206,13 @@ sub editSection {
 		print getData('subsection_removed');
 	}
 
-	my $qid = $this_section->{qid} ? 
-		createSelect('qid', 
-			$slashdb->getPollQuestions(),
-			$this_section->{qid},
-			1
-		) : '';
+	my $qid;
+#	my $qid = $this_section->{qid} ? 
+#		createSelect('qid', 
+#			$slashdb->getPollQuestions(),
+#			$this_section->{qid},
+#			1
+#		) : '';
 	my $issue = createSelect('issue', 
 		$slashdb->getDescriptions('issuemodes'),
 		$this_section->{issue}, 
