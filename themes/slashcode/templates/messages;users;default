@@ -133,11 +133,8 @@ please contact the site administrator immediately.
 [% CASE 'mailpasswd_mailed_msg' %]
 	<P>The password for [% name %] was just emailed.<BR>
 
-[% CASE 'savename_msg' %]
-	<P>Saving [% name.substr(0,20) %]<BR><P>
-
 [% CASE 'savenickname_msg' %]
-	<P>Saving [% nickname.substr(0,20) %].<BR>
+	<P>Saving [% nickname.substr(0,20) | strip_literal %].<BR>
 
 [% CASE 'changeemail_msg' %]
 	Notifying [% realemail | strip_literal %] of the change to their account.<BR>
@@ -148,10 +145,7 @@ please contact the site administrator immediately.
 	Password changed for [% nick %], UID [% uid %].<BR>
 
 [% CASE 'savemiscopts_msg' %]
-	[% PROCESS titlebar title="Option(s) Changed." width="100%" %]
-[% FOREACH opt = update.keys %]
-        <BR>Your option [% opt %] was set to [% update.opt %].
-[% END %]
+	<P>Option(s) changed.<BR>
 
 [% CASE 'no_registration_needed' %]
 	<P>Hello, [% user.nickname %]. Your account is currently registered with

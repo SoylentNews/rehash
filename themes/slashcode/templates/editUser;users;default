@@ -24,6 +24,8 @@ __template__
 
 <TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.bg.1 %]"><TR><TD>
 
+[% note %]
+
 [% IF constants.offer_insecure_login_link %]
 You can automatically log in by clicking
 <A HREF="[% constants.rootdir %]/index.pl?op=userlogin&amp;upasswd=[% useredit.passwd | fixparam %]&amp;unickname=[% useredit.nickname | fixparam %]">This Link</A>

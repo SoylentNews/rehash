@@ -27,6 +27,8 @@ editComm
 __template__
 [% PROCESS prefs_titlebar tab_selected='comments' %]
 
+[% note %]
+
 [% admin_block %]
 
 <FORM ACTION="[% env.script_name %]" METHOD="POST">

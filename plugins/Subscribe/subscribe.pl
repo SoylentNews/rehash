@@ -157,11 +157,11 @@ sub save {
 		$hbtm;
 	$slashdb->setUser($user_edit->{uid}, $user_update);
 
-	print "<p>Subscription options saved.\n<p>";
 	titlebar("100%", "Editing Subscription...", {
 		template =>		'prefs_titlebar',
 		tab_selected =>		'subscription',
 	});
+	print "<p>Subscription options saved.\n<p>";
 	slashDisplay("edit", {
 		user_edit => $user_edit,
 		user_newvalues => $user_newvalues,

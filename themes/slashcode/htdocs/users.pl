@@ -1310,6 +1310,7 @@ sub changePasswd {
 sub editUser {
 	my($hr) = @_;
 	my $id = $hr->{uid} || '';
+	my $note = $hr->{note} || '';
 
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
@@ -1353,7 +1354,8 @@ sub editUser {
 		admin_flag		=> $admin_flag,
 		title			=> $title,
 		editkey 		=> $plugins->{'PubKey'} ? editKey($user_edit->{uid}) : '',
-		admin_block		=> $admin_block
+		admin_block		=> $admin_block,
+		note			=> $note,
 	});
 }
 
@@ -1361,6 +1363,7 @@ sub editUser {
 sub editHome {
 	my($hr) = @_;
 	my $id = $hr->{uid} || '';
+	my $note = $hr->{note} || '';
 
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
@@ -1423,7 +1426,8 @@ sub editHome {
 		i_check			=> $i_check,
 		w_check			=> $w_check,
 		s_check			=> $s_check,
-		tilde_ed		=> $tilde_ed
+		tilde_ed		=> $tilde_ed,
+		note			=> $note,
 	});
 }
 
@@ -1431,6 +1435,7 @@ sub editHome {
 sub editComm {
 	my($hr) = @_;
 	my $id = $hr->{uid} || '';
+	my $note = $hr->{note} || '';
 
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
@@ -1555,6 +1560,7 @@ sub editComm {
 		people_select		=> \%people_select,
 		new_user_percent_select	=> $new_user_percent_select,
 		new_user_bonus_select	=> $new_user_bonus_select,
+		note			=> $note,
 	});
 }
 
@@ -1911,9 +1917,7 @@ sub saveUser {
 	getOtherUserParams($user_edits_table);
 	$slashdb->setUser($uid, $user_edits_table);
 
-	print getMessage('note', { note => $note }) if $note;
-
-	editUser({ uid => $uid });
+	editUser({ uid => $uid, note => $note });
 }
 
 
@@ -1944,8 +1948,8 @@ sub saveComm {
 	my $name = $user->{seclev} && $form->{name} ?
 		$form->{name} : $user->{nickname};
 
-	my $savename = getMessage('savename_msg', { name => $name });
-	print $savename;
+	my $note = getMessage('savenickname_msg',
+		{ nickname => $name });
 
 	print getError('cookie_err') if isAnon($uid) || !$name;
 
@@ -2017,7 +2021,7 @@ sub saveComm {
 	getOtherUserParams($users_comments_table);
 	$slashdb->setUser($uid, $users_comments_table);
 
-	editComm({ uid => $uid });
+	editComm({ uid => $uid, note => $note });
 }
 
 #################################################################
@@ -2038,10 +2042,11 @@ sub saveHome {
 
 	my $name = $user->{seclev} && $form->{name} ?
 		$form->{name} : $user->{nickname};
-
 	$name = substr($name, 0, 20);
 
-	# users_cookiemsg
+	my $note = getMessage('savenickname_msg',
+		{ nickname => $name });
+
 	if (isAnon($uid) || !$name) {
 		my $cookiemsg = getError('cookie_err');
 		print $cookiemsg;
@@ -2114,7 +2119,7 @@ sub saveHome {
 	getOtherUserParams($users_index_table);
 	$slashdb->setUser($uid, $users_index_table);
 
-	editHome({ uid => $uid });
+	editHome({ uid => $uid, note => $note });
 }
 
 #################################################################
@@ -2128,9 +2133,11 @@ sub saveHome {
 # users click and accidentally edit their own settings: no really important
 # data should be stored in this way.
 sub editMiscOpts {
+	my($hr) = @_;
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser(); 
 	my $constants = getCurrentStatic();
+	my $note = $hr->{note} || "";
 
 	return if $user->{is_anon}; # shouldn't be, but can't hurt to check
 
@@ -2147,6 +2154,7 @@ sub editMiscOpts {
 #		useredit	=> $user_edit,
 		title		=> $title,
 		opts		=> $opts,
+		note		=> $note,
 	});
 }
 
@@ -2178,10 +2186,10 @@ sub saveMiscOpts {
 
 	# Inform the user the change was made.  Since we don't
 	# require formkeys, we always want to print a message to
-	# make sure the user sees what s/he did.
-	print getMessage('savemiscopts_msg', $update);
-
-	editMiscOpts();
+	# make sure the user sees what s/he did.  This is done
+	# by passing in a note which ends up passed to the
+	# editMiscOpts template, which displays it.
+	editMiscOpts({ note => getMessage('savemiscopts_msg') });
 }
 
 #################################################################

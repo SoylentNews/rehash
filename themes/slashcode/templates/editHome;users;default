@@ -24,6 +24,8 @@ editHome
 __template__
 [% PROCESS prefs_titlebar tab_selected='home' %]
 
+[% note %]
+
 [% admin_block %]
 
 <FORM ACTION="[% env.script_name %]" METHOD="POST">
