@@ -1617,8 +1617,8 @@ sub createAccessLog {
 
 	if ( $op eq 'index' && $dat =~ m|^([^/]*)| ) {
 		my $firstword = $1;
-		if ($self->getSkinFromName($firstword)) {
-			$skin_name = $1;
+		if ($self->getSkidFromName($firstword)) {
+			$skin_name = $firstword;
 		}
 	}
 
@@ -1626,8 +1626,8 @@ sub createAccessLog {
 		$dat = $2;
 		$op = 'article';
 		my $firstword = $1;
-		if ($self->getSkinFromName($firstword)) {
-			$skin_name = $1;
+		if ($self->getSkidFromName($firstword)) {
+			$skin_name = $firstword;
 		}
 	}
 
