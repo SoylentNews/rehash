@@ -281,8 +281,8 @@ sub userSearchRSS {
 	for my $entry (@$users) {
 			my $time = timeCalc($entry->[3]);
 			$rss->add_item(
-				title	=> xmlencode("$entry->[0]"),
-				'link'	=> xmlencode_plain($constants->{absolutedir} . '/users.pl?nick=' . $entry->[0]),
+				title	=> xmlencode("$entry->[2]"),
+				'link'	=> xmlencode_plain($constants->{absolutedir} . '/users.pl?nick=' . $entry->[2]),
 			);
 	}
 	return $rss->as_string;
