@@ -299,8 +299,13 @@ sub ssiFoot {
 
 ########################################################
 sub getAd {
-	my($num, $log) = @_; #$_[0] || 1;
+	my($num, $log) = @_;
 	$num ||= 1;
+
+	my $subscribe = getObject('Slash::Subscribe');
+	if ($subscribe and $subscribe->buyingThisPage()) {
+		return "\n<!-- subscriber, no ad -->\n";
+	}
 
 	unless ($ENV{SCRIPT_NAME}) {
 		$log = $log ? " Slash::createLog('$log');" : "";

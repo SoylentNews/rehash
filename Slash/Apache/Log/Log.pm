@@ -42,11 +42,13 @@ sub UserLog {
 	return if !$user or !$user->{uid} or $user->{is_anon};
 	my $slashdb = getCurrentDB();
 
-	$slashdb->setUser($user->{uid}, {
-			-hits => 'hits +1'
-	});
+	my $user_update = { -hits => 'hits+1' };
+	my $subscribe = getObject('Slash::Subscribe');
+	if ($subscribe and $subscribe->buyingThisPage($r)) {
+		$user_update->{-hits_bought} = 'hits_bought+1';
+	}
+	$slashdb->setUser($user->{uid}, $user_update);
 
-	
 	return OK;
 }
 
