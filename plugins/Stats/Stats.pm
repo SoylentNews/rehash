@@ -73,29 +73,14 @@ sub new {
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX section(section)");
 		$self->sqlDo("ALTER TABLE accesslog_temp_errors ADD INDEX status(status)");
 
-		# The status line =200 is temp till I can go through and fix more of this
-		# to make use of if -Brian
-		# Having put errors into the _errors table, this is fine the way it is,
-		# now, right? -Jamie 2003/05/20
-		my $sql = "INSERT INTO accesslog_temp SELECT * FROM accesslog WHERE ts $self->{_day_between_clause} AND status=200 FOR UPDATE";
-		$self->sqlDo($sql);
-		if(!($count = $self->sqlSelect("count(id)", "accesslog_temp"))) {
-			for (1..4) {
-				sleep 5;
-				$self->sqlDo($sql);
-				last if $self->sqlSelect("count(id)", "accesslog_temp");
-			}
-		}
-
-		$sql = "INSERT INTO accesslog_temp_errors SELECT * FROM accesslog WHERE ts $self->{_day_between_clause} AND status != 200 FOR UPDATE";
-		$self->sqlDo($sql);
-		if(!($count = $self->sqlSelect("count(id)", "accesslog_temp_errors"))) {
-			for (1..4) {
-				sleep 5;
-				$self->sqlDo($sql);
-				last if $self->sqlSelect("count(id)", "accesslog_temp_errors");
-			}
-		}
+		return undef unless $self->_do_insert_select(
+			"accesslog_temp",
+			"ts $self->{_day_between_clause} AND status  = 200",
+			3, 60);
+		return undef unless $self->_do_insert_select(
+			"accesslog_temp_errors",
+			"ts $self->{_day_between_clause} AND status != 200",
+			3, 60);
 	}
 
 	return $self;
@@ -1342,7 +1327,51 @@ sub getAllStats {
 	return \%returnable;
 }
 
+########################################################
+sub _do_insert_select {
+	my($self, $table, $where_clause, $retries, $sleep_time) = @_;
+	my $try_num = 0;
+	my $rows = 0;
+	I_S_LOOP: while (!$rows) {
 
+		my $sql = "INSERT INTO $table"
+			. " SELECT * FROM accesslog WHERE $where_clause FOR UPDATE";
+		$rows = $self->sqlDo($sql);
+		# Apparently this insert can, under some circumstances,
+		# including mismatched lib versions, succeed but return
+		# 0 (or 0E0?) for the number of rows affected.  Check
+		# instead for an undef, which indicates an actual error.
+		last I_S_LOOP if defined $rows;
+
+		# This should be a more reliable test, try it too.
+		sleep 1;
+		my $any_rows = $self->sqlSelect("1", $table, $where_clause, "LIMIT 1");
+		if ($any_rows) {
+			print STDERR scalar(localtime) . " INSERT-SELECT $table reported 0 rows inserted, but apparently succeeded with '$any_rows' rows, proceeding\n";
+			last I_S_LOOP;
+		}
+
+		# Apparently the INSERT-SELECT failed.  This may be due to
+		# a known bug in at least one version of MySQL under some
+		# circumstance.  If appropriate, sleep and try it again.
+		if (++$try_num < $retries) {
+			print STDERR scalar(localtime) . " INSERT-SELECT $table failed on attempt $try_num, sleeping $sleep_time and retrying\n";
+			sleep $sleep_time;
+		} else {
+			print STDERR scalar(localtime) . " INSERT-SELECT $table still failed, giving up\n";
+			return undef;
+		}
+
+		$any_rows = $self->sqlSelect("1", $table, "", "LIMIT 1");
+		if ($any_rows) {
+			print STDERR scalar(localtime) . " after mere sleep, INSERT-SELECT $table now says it succeeded with '$any_rows' rows, proceeding\n";
+			last I_S_LOOP;
+		}
+	}
+	return $self;
+}
+
+########################################################
 sub DESTROY {
 	my($self) = @_;
 	#$self->sqlDo("DROP TABLE $self->{_table}");
