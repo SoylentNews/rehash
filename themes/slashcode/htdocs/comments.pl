@@ -1419,8 +1419,9 @@ sub moderate {
 	titlebar("100%", "Moderating...");
 
 	$hasPosted = $slashdb->countCommentsBySidUID($sid, $user->{uid})
-		unless $constants->{authors_unlimited}
-			&& $user->{seclev} >= $constants->{authors_unlimited};
+		unless ($constants->{authors_unlimited}
+				&& $user->{seclev} >= $constants->{authors_unlimited})
+			|| $user->{acl}{modpoints_always};
 
 	slashDisplay('mod_header');
 
@@ -1429,10 +1430,12 @@ sub moderate {
 	# ascending, maybe also by val ascending, or some way to try to
 	# get the single-point-spends first and then to only do the
 	# multiple-point-spends if the user still has points.
+	my $can_del = ($constants->{authors_unlimited} && $user->{seclev} > $constants->{authors_unlimited})
+		|| $user->{acl}{candelcomments_always};
 	for my $key (sort keys %{$form}) {
-		if ($user->{seclev} > 100 and $key =~ /^del_(\d+)$/) {
+		if ($can_del && $key =~ /^del_(\d+)$/) {
 			$total_deleted += deleteThread($sid, $1);
-		} elsif (!$hasPosted and $key =~ /^reason_(\d+)$/) {
+		} elsif (!$hasPosted && $key =~ /^reason_(\d+)$/) {
 			my $ret_val = $slashdb->moderateComment($sid, $1, $form->{$key});
 			
 			# error conditions -- need to call getError
@@ -1480,14 +1483,13 @@ sub moderate {
 	}
 }
 
-
-
 ##################################################################
 # Given an SID & A CID this will delete a comment, and all its replies
 sub deleteThread {
 	my($sid, $cid, $level, $comments_deleted) = @_;
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
 
 	$level ||= 0;
 
@@ -1495,7 +1497,8 @@ sub deleteThread {
 	my @delList;
 	$comments_deleted = \@delList if !$level;
 
-	return unless $user->{seclev} >= 1000;
+	return unless ($constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited})
+		|| $user->{acl}{candelcomments_always};
 
 	my $delkids = $slashdb->getCommentChildren($cid);
 
@@ -1538,11 +1541,11 @@ sub undoModeration {
 	# We abandon this operation if:
 	#	1) Moderation is off
 	#	2) The user is anonymous (they aren't allowed to anyway).
-	#	3) The user is an author with a high enough security level
-	#	   and that option is turned on.
-	return if !$constants->{allow_moderation} || $user->{is_anon} ||
-		  ( $constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited}
-		    && $user->{author} );
+	#	3) The user's seclev is too low and they don't have the ACL
+	return if !$constants->{allow_moderation}
+		|| $user->{is_anon}
+		|| ( (!$constants->{authors_unlimited} || $user->{seclev} < $constants->{authors_unlimited})
+			&& !$user->{acl}{modpoints_always});
 
 	if ($sid !~ /^\d+$/) {
 		$sid = $slashdb->getDiscussionBySid($sid, 'header');

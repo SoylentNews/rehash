@@ -454,7 +454,7 @@ sub _can_mod {
 		       $constants->{authors_unlimited}
 		    && $user->{seclev} >= $constants->{authors_unlimited}
 		) || (
-		       $user->{acl}{alwaysmodpoints}
+		       $user->{acl}{modpoints_always}
 		) );
 
 	return $retval;

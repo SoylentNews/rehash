@@ -1953,3 +1953,6 @@ ALTER TABLE links add stats_type VARCHAR(24);
 
 
 ALTER TABLE accesslist ADD estimated_users SMALLINT UNSIGNED DEFAULT 1;
+
+REPLACE INTO vars SET description='Seclev for which authors have unlimited comment-moderation and -deletion power (see also the ACLs)' WHERE name='authors_unlimited';
+

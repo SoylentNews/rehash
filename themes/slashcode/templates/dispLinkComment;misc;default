@@ -3,6 +3,12 @@ default
 __description__
 Display a comment link string (reply, parent, etc.), included by
 dispComment
+
+It's silly to do the complex check over and over to see whether the user
+can delete comments.  This is done in several templates but this one's
+the worst.  We should have a _can_del in Slash.pm and pass a can_del in
+to this template in a field, just like can_mod.
+
 __title__
 
 __page__
@@ -29,7 +35,7 @@ __template__
 			| <a href="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;threshold=[% user.threshold %]&amp;commentsort=[% user.commentsort %]&amp;mode=[% user.mode %]&amp;cid=[% cid %]&amp;pid=[% cid %]">View this thread</a>
 		[% END %]
 
-		[% IF !(user.state.discussion_archived) && (original_pid || can_mod || user.is_admin) %] | [% END %]
+		[% IF !(user.state.discussion_archived) && ( original_pid || can_mod || ((constants.authors_unlimited && user.seclev >= constants.authors_unlimited) || user.acl.candelcomments_always) ) %] | [% END %]
 
 		[% IF original_pid %][% Slash.linkComment({
 			sid	=> sid,
@@ -39,15 +45,16 @@ __template__
 			subject_only => 1,
 		}, 1) %][% END %]
 		
-		[% IF original_pid && ( can_mod || user.is_admin) %] | [% END %]
+		[% IF original_pid && ( can_mod || ((constants.authors_unlimited && user.seclev >= constants.authors_unlimited) || user.acl.candelcomments_always) ) %] | [% END %]
 
 		[% IF can_mod %]
 		[% Slash.createSelect("reason_$cid", reasons, '', 1, 1) 
 		%][% END %]
 
-		[% IF can_mod && user.is_admin %] | [% END %]
+		[% IF can_mod && ((constants.authors_unlimited && user.seclev >= constants.authors_unlimited) || user.acl.candelcomments_always) %] | [% END %]
 
-		[% IF user.is_admin %]
+		[% IF (constants.authors_unlimited && user.seclev >= constants.authors_unlimited)
+			|| user.acl.candelcomments_always %]
 		<INPUT TYPE="CHECKBOX" NAME="del_[% cid %]">
 		[% END %]
 		]
