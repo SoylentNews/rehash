@@ -53,7 +53,7 @@ $task{$me}{code} = sub {
 		for my $msg (@$msgs) {
 			if ($msg->{code} == $code) {
 				push @{ $collective{ $code }{ $msg->{user}{uid} } }, $msg;
-				delete $msgs->[$c];
+				$msgs->[$c] = undef;
 			}
 			$c++;
 		}
@@ -94,6 +94,7 @@ $task{$me}{code} = sub {
 		}
 	}
 
+	@$msgs = grep { $_ } @$msgs;
 	my @good  = $messages->process(@$msgs);
 
 	my %msgs  = map { ($_->{id}, $_) } @$msgs;
