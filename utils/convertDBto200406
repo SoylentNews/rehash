@@ -702,7 +702,6 @@ CREATE TABLE story_text_new (
         PRIMARY KEY (stoid)
 ) TYPE=MyISAM;
 INSERT INTO story_text_new (stoid, title, introtext, bodytext, relatedtext, rendered) SELECT stories_new.stoid, stories_new.title, introtext, bodytext, relatedtext, rendered FROM stories_new, story_text WHERE stories_new.sid=story_text.sid;
-# ALTER TABLE stories_new DROP COLUMN writestatus;
 DROP TABLE IF EXISTS story_topics_chosen_new;
 CREATE TABLE story_topics_chosen_new (
         stoid MEDIUMINT UNSIGNED NOT NULL,
@@ -937,6 +936,9 @@ print <<EOT;
 # RENAME TABLES accesslog_admin_new TO accesslog_admin, accesslog_new TO accesslog, blocks_new TO blocks, discussions_new TO discussions, skin_colors_new TO skin_colors, skins_new TO skins, stories_new TO stories, story_dirty_new TO story_dirty, story_param_new TO story_param, story_text_new TO story_text, story_topics_chosen_new TO story_topics_chosen, story_topics_rendered_new TO story_topics_rendered, submissions_new TO submissions, templates_new TO templates, topic_nexus_extras_new TO topic_nexus_extras, topic_nexus_new TO topic_nexus, topic_nexus_dirty_new TO topic_nexus_dirty, topic_parents_new TO topic_parents, topics_new TO topics, stats_daily_new TO stats_daily, menus_new TO menus, story_files_new TO story_files;
 
 # ALTER TABLE skins ADD FOREIGN KEY etc.
+
+# If you don't want to do error checking
+# ALTER TABLE stories DROP COLUMN writestatus;
 
 # Then 'make install' the June 2004 code.
 
