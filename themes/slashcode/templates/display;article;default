@@ -23,24 +23,23 @@ __template__
 
 <P>
 
+[% IF constants.use_prev_next_link %]
 [% n = BLOCK; PROCESS nextStory s=stories.next; END %]
 [% p = BLOCK; PROCESS nextStory s=stories.prev; END %]
 [% IF p %] <BR>&lt;&nbsp; [% p %][% END %]
-[% IF n %] [% IF p %] | [% ELSE %]<BR>[% END %][% n %] &nbsp;&gt; [% END %]
+[% IF n %] [% IF p %] | [% ELSE %]<BR>[% END %][% n %] &nbsp;&gt; [% END; END %]
 
-<!--
-[%# this stuff won't be used right now ... it works, but the layout sucks %]
-[%# so modify it for your own site if you wish %]
+[% IF constants.use_prev_next_link_section %]
 [% n = BLOCK; PROCESS nextStory s=stories.s_next; END %]
 [% p = BLOCK; PROCESS nextStory s=stories.s_prev; END %]
 [% IF p %] <BR>Section: &lt;&nbsp; [% p %][% END %]
-[% IF n %] [% IF p %] | [% ELSE %]<BR>[% END %][% n %] &nbsp;&gt; [% END %]
+[% IF n %] [% IF p %] | [% ELSE %]<BR>[% END %][% n %] &nbsp;&gt; [% END; END %]
 
+[% IF constants.use_prev_next_link_series %]
 [% n = BLOCK; PROCESS nextStory s=stories.t_next; END %]
 [% p = BLOCK; PROCESS nextStory s=stories.t_prev; END %]
 [% IF p %] <BR>Series: &lt;&nbsp; [% p %][% END %]
-[% IF n %] [% IF p %] | [% ELSE %]<BR>[% END %][% n %] &nbsp;&gt; [% END %]
--->
+[% IF n %] [% IF p %] | [% ELSE %]<BR>[% END %][% n %] &nbsp;&gt; [% END; END %]
 
 </P><P>&nbsp;</P></TD>
 

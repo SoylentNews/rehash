@@ -60,26 +60,33 @@ sub main {
 		my %stories;
 		my $prev_next_linkrel = '';
 		if ($constants->{use_prev_next_link}) {
-#			my $topics = $reader->getStoryTopics($form->{sid}, 1);
-#			my $alltopics = $reader->getTopics;
-#			my @topics = grep { $alltopics->{$_}{series} } keys %$topics;
-#			warn "More than one series?  Using only first ($topics[0]) for $form->{sid}"
-#				if @topics > 1;
-			my $use_series  = $story->{tid} if $reader->getTopic($story->{tid})->{series};
-			my $use_section = $story->{section} if $SECT->{type} eq 'contained';
-			unless ($story->{is_future}) {
-				$stories{'next'}   = $reader->getStoryByTime('>', $story);
-				$stories{'s_next'} = $reader->getStoryByTime('>', $story, { section => $use_section })
-					if $use_section;
-				$stories{'t_next'} = $reader->getStoryByTime('>', $story, { topic => $use_series })
-					if $use_series;
-			}
+			# section and series links must be defined as separate
+			# constants in vars
+			my($use_section, $use_series);
+			$use_section = $story->{section} if
+				$constants->{use_prev_next_link_section} &&
+				$SECT->{type} eq 'contained';
+			$use_series  = $story->{tid}     if 
+				$constants->{use_prev_next_link_series} &&
+				$reader->getTopic($story->{tid})->{series};
 
 			$stories{'prev'}   = $reader->getStoryByTime('<', $story);
-			$stories{'s_prev'} = $reader->getStoryByTime('<', $story, { section => $use_section })
-				if $use_section;
-			$stories{'t_prev'} = $reader->getStoryByTime('<', $story, { topic => $use_series })
-				if $use_series;
+			$stories{'next'}   = $reader->getStoryByTime('>', $story)
+				unless $story->{is_future};
+
+			if ($use_section) {
+				my @a = ($story, { section => $use_section });
+				$stories{'s_prev'} = $reader->getStoryByTime('<', @a);
+				$stories{'s_next'} = $reader->getStoryByTime('>', @a)
+					unless $story->{is_future};
+			}
+
+			if ($use_series) {
+				my @a = ($story, { topic => $use_series });
+				$stories{'t_prev'} = $reader->getStoryByTime('<', @a);
+				$stories{'t_next'} = $reader->getStoryByTime('>', @a)
+					unless $story->{is_future};
+			}
 
 			# you should only have one next/prev link, so do series first, then sectional,
 			# then main, each if applicable -- pudge

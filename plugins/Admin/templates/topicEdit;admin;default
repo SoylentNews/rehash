@@ -36,28 +36,26 @@ __template__
 			[% PROCESS formLabel value => "Parent Topic", comment => "" %]
 			[% Slash.createSelect('parent_topic', parent_topic_values, topic.parent_topic, 1, 0, 1)%]	
 
+			[% PROCESS formLabel value => "Is a Series", comment => "Denotes a group of stories in a series, and this topic must be selected first for each story in the series" %]
+			<INPUT TYPE="checkbox" NAME="series" VALUE="1"[% topic.series ? ' CHECKED' : '' %]>
+
 			[% PROCESS formLabel value => "Dimensions", comment => "leave blank to determine automatically" %]
 			Width: <INPUT TYPE="TEXT" NAME="width" VALUE="[% topic.width %]" SIZE="4">
-			Height: <INPUT TYPE="TEXT" NAME="height" VALUE="[% topic.height %]" SIZE="4"><BR>
-			<BR>
+			Height: <INPUT TYPE="TEXT" NAME="height" VALUE="[% topic.height %]" SIZE="4">
 
-				[% IF images_flag %]
-
-				[% PROCESS formLabel value => "Image", comment => "" %]
+			[% IF images_flag %]
+				[% PROCESS formLabel value => "Image", comment => "if you enter a value in the Image URL field below, the image pulldown will be ignored" %]
 				[% image_select %]
-				<BR><BR>
-				<FONT SIZE="-2">(note: if you enter a value in the field below, the image pulldown will be ignored)</FONT><BR>
-				Or enter image URL:
+				<BR>Image URL:
 				<INPUT TYPE="TEXT" LENGTH="40" NAME="image2" VALUE="[% image2 %]">
-				<BR>
 
-				[% ELSE %]
-
+			[% ELSE %]
 				[% PROCESS formLabel value => "No images were found in the topic images directory", comment => "" %]
-					([% constants.basedir %]/images/topics).<BR>
-					<INPUT TYPE="TEXT" NAME="image" VALUE="[% image %]">
+				([% constants.basedir %]/images/topics).<BR>
+				<INPUT TYPE="TEXT" NAME="image" VALUE="[% image %]">
 
-				[% END %]
+			[% END %]
+			<P>
 			<INPUT TYPE="SUBMIT" NAME="topicnew" VALUE="Create new topic">
 			<INPUT TYPE="SUBMIT" NAME="topicsave" VALUE="Save Topic">
 			<INPUT TYPE="SUBMIT" NAME="topicdelete" VALUE="Delete Topic">

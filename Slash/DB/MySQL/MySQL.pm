@@ -2310,6 +2310,7 @@ sub saveTopic {
 		image		=> $image,
 		width		=> $topic->{width},
 		height		=> $topic->{height},
+		series		=> $topic->{series} ? 1 : 0,
 	};
 
 	my $data2 = {
