@@ -1100,3 +1100,5 @@ UPDATE users_param SET value = 'disabled' WHERE name = 'journal_discuss' AND val
 
 # USEPERL LAST UPDATED HERE
 
+INSERT INTO vars (name, value, description) VALUES ('stats_sfnet_groupids','4421','List of sf.net group IDs to keep stats on');
+

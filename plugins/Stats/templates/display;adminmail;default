@@ -72,5 +72,17 @@ For [% section.section_name %]
 
 -----------------------
 
+[% FOR groupid = sfnet.keys.nsort;
+        "SF.net group $groupid:\n";
+        FOR issue = sfnet.$groupid.keys.sort;
+                "\t$issue: ";
+                sfnet.$groupid.$issue.open;
+                " open; ";
+                sfnet.$groupid.$issue.total;
+                " total\n";
+        END;
+END %]
+-----------------------
+
 __seclev__
 100

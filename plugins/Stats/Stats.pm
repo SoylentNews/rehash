@@ -16,6 +16,7 @@ use DBIx::Password;
 use Slash;
 use Slash::Utility;
 use Slash::DB::Utility;
+use LWP::UserAgent;
 
 use vars qw($VERSION);
 use base 'Slash::DB::Utility';
@@ -690,6 +691,35 @@ sub countDaily {
 	return \%returnable;
 }
 
+sub countSfNetIssues {
+	my($self, $group_id) = @_;
+	my $constants = getCurrentStatic();
+	my $url = "http://sf.net/export/projhtml.php?group_id=$group_id&mode=full&no_table=1";
+	my $ua = new LWP::UserAgent;
+	my $request = new HTTP::Request('GET', $url);
+        $ua->proxy(http => $constants->{http_proxy}) if $constants->{http_proxy};
+        $ua->timeout(30);
+        my $result = $ua->request($request);
+	my $content = $result->is_success ? $result->content : "";
+	if (!$content) {
+		return { };
+	}
+	my $hr = { };
+	while ($content =~ m{
+		>
+		([\w\s]+)
+		</A>
+		\s*
+		\( \s* <B>
+		(\d+) \s+ open \s* / \s* (\d+) \s* total
+		</B> \s* \)
+	}gx) {
+		my($tracker, $open, $total) = ($1, $2, $3);
+		$hr->{$tracker}{open} = $open;
+		$hr->{$tracker}{total} = $total;
+	}
+	return $hr;
+}
 
 ########################################################
 sub getAllStats {

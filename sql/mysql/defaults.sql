@@ -822,6 +822,7 @@ INSERT INTO vars (name, value, description) VALUES ('slashdir','/usr/local/slash
 INSERT INTO vars (name, value, description) VALUES ('slogan','Slash Site','Slogan of the site');
 INSERT INTO vars (name, value, description) VALUES ('smtp_server','localhost','The mailserver for the site');
 INSERT INTO vars (name, value, description) VALUES ('stats_reports','admin@example.com','Who to send daily stats reports to');
+INSERT INTO vars (name, value, description) VALUES ('stats_sfnet_groupids','4421','List of sf.net group IDs to keep stats on');
 INSERT INTO vars (name, value, description) VALUES ('stir','3','Number of days before unused moderator points expire');
 INSERT INTO vars (name, value, description) VALUES ('story_expire','600','Default expiration time for story cache');
 INSERT INTO vars (name, value, description) VALUES ('submiss_ts','1','print timestamp in submissions view');

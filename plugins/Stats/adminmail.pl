@@ -267,6 +267,7 @@ EOT
 	$statsSave->createStatDaily("mod_points_lost_spent_plus_1", $modlog_yest_hr->{+1}{spent});
 	$statsSave->createStatDaily("mod_points_lost_spent_minus_1", $modlog_yest_hr->{-1}{spent});
 	$statsSave->createStatDaily("m2_freq", $constants->{m2_freq} || 86400);
+	$statsSave->createStatDaily("m2_consensus", $constants->{m2_consensus} || 0);
 	$statsSave->createStatDaily("m2_points_lost_spent", $metamodlogs_yest_total);
 	$statsSave->createStatDaily("m2_points_lost_spent_fair", $metamodlogs_yest_fair);
 	$statsSave->createStatDaily("m2_points_lost_spent_unfair", $metamodlogs_yest_unfair);
@@ -364,6 +365,21 @@ EOT
 				slave_name =>	$slave_name,
 				bytes =>	$bytes,
 			}, 'adminmail') . "\n";
+		}
+	}
+
+	$data{sfnet} = { };
+	my $gids = $constants->{stats_sfnet_groupids};
+	if ($gids && @$gids) {
+		for my $groupid (@$gids) {
+			my $hr = $stats->countSfNetIssues($groupid);
+			for my $issue (sort keys %$hr) {
+				my $lc_issue = lc($issue);
+				$lc_issue =~ s/\W+//g;
+				$statsSave->createStatDaily("sfnet_${groupid}_${lc_issue}_open", $hr->{$issue}{open});
+				$statsSave->createStatDaily("sfnet_${groupid}_${lc_issue}_total", $hr->{$issue}{total});
+				$data{sfnet}{$groupid}{$issue} = $hr->{$issue};
+			}
 		}
 	}
 

@@ -563,7 +563,6 @@ sub _convertModsToComments {
 		);
 	}
 
-	my $consensus = $constants->{m2_consensus};
 	my $mods_text = join(",", @mods);
 
 	# We can and probably should get the cid/reason data in
@@ -5171,6 +5170,7 @@ sub getSlashConf {
 		op_exclude_from_countdaily =>   [qw( rss )],
 		mod_stats_reports =>		[ $conf{adminmail_mod} ],
 		stats_reports =>		[ $conf{adminmail} ],
+		stats_sfnet_groupids =>		[ 4421 ],
 		submit_categories =>		[ ],
 	);
 	my %conf_fixup_hashes = (
