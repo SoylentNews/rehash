@@ -61,7 +61,7 @@ $SIG{__WARN__} = sub { warn @_ unless $_[0] =~ /Use of uninitialized value/ };
 ########################################################
 # Behold, the beast that is threaded comments
 sub selectComments {
-	my($header, $cid) = @_;
+	my($header, $cid, $options) = @_;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
@@ -87,11 +87,16 @@ sub selectComments {
 	$cache_read_only = 1 if timeCalc($header->{ts}, '%s') <
 		time - 3600 * $constants->{comment_cache_max_hours};
 
-	my $thisComment = $slashdb->getCommentsForUser(
-		$header->{id}, 
-		$cid, 
-		$cache_read_only
-	);
+	my $thisComment;
+	if ($options->{use_writer}) {
+		$thisComment = $slashdb->getCommentsForUser( $header->{id}, $cid, $cache_read_only);
+	} elsif ($constants->{backup_db_user} &&  rand(1) < 0.5) {
+		my $backupdb = getObject('Slash::DB', $constants->{backup_db_user});
+		$thisComment = $backupdb->getCommentsForUser( $header->{id}, $cid, $cache_read_only);
+	} else {
+		$thisComment = $slashdb->getCommentsForUser( $header->{id}, $cid, $cache_read_only);
+	}
+
 	if (!$thisComment) {
 		_print_cchp($header);
 		return ( {}, 0 );
@@ -451,7 +456,7 @@ and 'printCommComments' template blocks.
 =cut
 
 sub printComments {
-	my($discussion, $pid, $cid) = @_;
+	my($discussion, $pid, $cid, $options) = @_;
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
@@ -469,7 +474,7 @@ sub printComments {
 	my $lvl = 0;
 
 	# Get the Comments
-	my($comments, $count) = selectComments($discussion, $cidorpid);
+	my($comments, $count) = selectComments($discussion, $cidorpid, { use_writer => $options->{use_writer}});
 
 	if ($cidorpid && !exists($comments->{$cidorpid})) {
 		# No such comment in this discussion.
@@ -970,8 +975,8 @@ sub dispComment {
 		if ($constants->{comments_hardcoded}) {
 			$comment->{ipid_display} = <<EOT;
 <BR><FONT FACE="$constants->{mainfontface}" SIZE=1>IPID:
-<A HREF="$constants->{rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{ipid}&amp;fieldname=ipid">$comment->{ipid_vis}</A>&nbsp;&nbsp;SubnetID: 
-<A HREF="$constants->{rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{subnetid}&amp;fieldname=subnetid">$comment->{subnetid_vis}</A></FONT>
+<A HREF="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{ipid}&amp;fieldname=ipid">$comment->{ipid_vis}</A>&nbsp;&nbsp;SubnetID: 
+<A HREF="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{subnetid}&amp;fieldname=subnetid">$comment->{subnetid_vis}</A></FONT>
 EOT
 		} else {
 			$comment->{ipid_display} = slashDisplay(
@@ -1360,7 +1365,7 @@ sub _hard_dispComment {
 		if ($comment->{journal_last_entry_date} =~ /[1-9]/) {
 			$userinfo_to_display .= " | " if $userinfo_to_display;
 			$userinfo_to_display .= sprintf('Last Journal: <A HREF="%s/~%s/journal/">%s</A>',
-				$constants->{rootdir},
+				$constants->{real_rootdir},
 				$nick,
 				timeCalc($comment->{journal_last_entry_date})
 			);
@@ -1369,7 +1374,7 @@ sub _hard_dispComment {
 
 		my $nick_literal = strip_literal($comment->{nickname});
 		my $nick_param = fixparam($comment->{nickname});
-		$user_nick_to_display = qq{<A HREF="$constants->{rootdir}/~$nick_param">$nick_literal ($comment->{uid})</A>};
+		$user_nick_to_display = qq{<A HREF="$constants->{real_rootdir}/~$nick_param">$nick_literal ($comment->{uid})</A>};
 		if ($comment->{fakeemail}) {
 			my $mail_literal = strip_literal($comment->{fakeemail_vis});
 			my $mail_param = fixparam($comment->{fakeemail});
