@@ -2658,7 +2658,7 @@ sub getModderCommenterIPIDSummary {
 	push @where, "cuid = $ac_uid" if $options->{only_anon_comments};
 	push @where, "id >= $options->{start_at_id}" if $options->{start_at_id};
 	push @where, "id <= $options->{end_at_id}" if $options->{end_at_id};
-	push @where, "ipid is not null and ipid!=''" if $options->{need_defined_ipid};
+	push @where, "comments.ipid is not null and comments.ipid!=''" if $options->{need_defined_ipid};
 	my $where = join(" AND ", @where);
 	my $mods = $self->sqlSelectAllHashref(
 			[qw(uid ipid)],
