@@ -169,6 +169,18 @@ These constants are used to define different constants in the people system.
 
 # 1 2 3 4 5 6
 
+=head2 slashd
+
+These constants are used to define different constants in the people system.
+
+	SLASHD_LOG_NEXT_TASK
+	SLASHD_WAIT
+	SLASHD_NOWAIT
+
+=cut
+
+# -1 0 1
+
 __END__
 
 =head1 TODO

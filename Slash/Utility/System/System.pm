@@ -26,6 +26,7 @@ LONG DESCRIPTION.
 
 use strict;
 use Email::Valid;
+use Fcntl qw(:flock :seek);
 use File::Basename;
 use File::Path;
 use File::Spec::Functions;
@@ -281,6 +282,8 @@ sub doLog {
 	my $log_msg = scalar(localtime) . " $sname@msg\n";
 
 	open $fh, ">> $file\0" or die "Can't append to $file: $!\nmsg: @msg\n";
+	flock($fh, LOCK_EX);
+	seek($fh, 0, SEEK_END);
 	print $fh $log_msg;
 	print     $log_msg if $stdout;
 	close $fh;
