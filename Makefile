@@ -249,8 +249,11 @@ install: slash plugins
 reload: install
 	apachectl stop
 	apachectl start
+
 #   cleanup
 clean:
+	(cd Slash; if [ ! -f Makefile ]; then perl Makefile.PL; fi; make clean)
+	(cd plugins; make clean)
 
 dist: $(DISTVNAME).tar$(SUFFIX)
 
