@@ -91,11 +91,13 @@ Bundle::DBD::mysql	- ???
 
 DBIx::Password
 
-Apache::Test
-
 Apache::DBI
 
-Apache::Request		- libapreq; also includes Apache::Cookie
+Apache::Test		- may need to put Apache's 'httpd' and 'apxs' into $PATH before installing
+
+Apache::Cookie		- may need to put Apache's 'httpd' and 'apxs' into $PATH before installing
+
+Apache::Request		- libapreq
 
 AppConfig		- Should be installed with TT, but sometimes not?
 
@@ -106,5 +108,7 @@ Template		- Template Toolkit
 
 mod_perl must be installed by hand, because of the special configuration
 required for it.
+
+Optional but recommended modules include:  Cache::Memcached Silly::Werder
 
 =cut
