@@ -49,7 +49,6 @@ sub init {
 	$height = $opts{r} || 20;
 	$sleep = $opts{s} || 10;
 	$min_pl_time = defined($opts{t}) ? $opts{t} : 1;
-print "min_pl '$min_pl_time'\n";
 
 	createEnvironment($virtuser);
 
@@ -242,7 +241,7 @@ sub print_proclist {
 		my $pl = $db->{proclist};
 		for my $line (@$pl) {
 			my $text = substr($line->{text}, 0, $width - 13);
-			printf "%8s %3d %s\n", $line->{vu}, $line->{Time}, $text;
+			printf "%-8s %4d %s\n", $line->{vu}, $line->{Time}, $text;
 			++$lines_since_header;
 		}
 	}
@@ -305,13 +304,19 @@ sub getProclist {
 			$info =~ s/\b$abbr\b/$abbreviations{$abbr}/gi;
 		}
 		push @$proclist, {
-			Time	=> sprintf("%4d", $$S{Time}),
+			Time	=> $$S{Time},
 			vu	=> $db->{vu},
 			text	=> $info,
 		};
 
 	}
 	$sth->finish();
+
+	@$proclist = sort {
+		$b->{Time} <=> $a->{Time}
+		||
+		$a->{text} <=> $b->{text}
+	} @$proclist;
 
 	$db->{threads} = $threads;
 	$db->{threads_active} = $active;
