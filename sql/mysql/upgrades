@@ -2179,8 +2179,6 @@ INSERT INTO vars (name, value, description) VALUES ('hof_do_not_count', '', 'Do 
 
 INSERT INTO vars (name, value, description) VALUES ('accesslog_imageregex', '^/images/hc/', 'Image hits will only be written into accesslog if their URL path matches this regex, empty string for all, NONE for none');
 
-# censorware.net, mccarthy.vg, slash.mccarthy.vg last updated here
-
 INSERT INTO vars (name, value, description) VALUES ('m2_consequences_repeats','3=-4|5=-12|10=-100','Token penalties for modding same user multiple times, applied at M2 reconcile time');
 
 INSERT INTO vars (name, value, description) VALUES ('comment_karma_limit','','Max karma that a single comment can cost a user, normally negative values or 0 to never take karma with downmods, empty string for unlimited');
@@ -2749,8 +2747,6 @@ INSERT INTO vars (name, value, description) VALUES ('dbs_reader_expire_secs', 86
 
 INSERT INTO vars (name, value, description) VALUES ('mod_token_assignment_delay', '2', 'Pause in seconds between batches of assigning token changes');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_37, Start of T_2_5_0_38 - 2004/11/16
@@ -2768,4 +2764,8 @@ DELETE FROM vars WHERE name='search_db_user';
 ALTER TABLE discussions ADD COLUMN archivable enum("no","yes") DEFAULT 'yes' NOT NULL;
 
 UPDATE vars SET value=300 WHERE name='freshenup_max_stories';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_38, Start of T_2_5_0_39 - 2004/11/23
 
