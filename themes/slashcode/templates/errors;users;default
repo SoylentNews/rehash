@@ -64,8 +64,7 @@ __template__
 
 [% CASE 'duplicate_user' %]
 [% PROCESS titlebar width="95%" title="User already exists" %]
-	The nickname [% nick %] has already been taken. Please try another
-	choice<BR>
+	The nickname [% nick %] or another similar to it has already been taken.        Please try another choice.<BR>
 
 [% CASE 'checklist_err' %]
 [% PROCESS titlebar width="95%" title="Too many options" %]
