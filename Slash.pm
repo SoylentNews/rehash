@@ -1241,8 +1241,8 @@ sub fixHref {
 
 	for my $qr (@{$I{fixhrefs}}) {
 		if ($rel_url =~ $qr->[0]) {
-		my @ret = $qr->[1]->($rel_url);
-		return $print_errs ? @ret : $ret[0];
+			my @ret = $qr->[1]->($rel_url);
+			return $print_errs ? @ret : $ret[0];
 		}
 	}
 

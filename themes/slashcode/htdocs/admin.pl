@@ -1453,9 +1453,9 @@ sub editFilter {
 EOT
 	my($regex, $modifier, $field, $ratio, $minimum_match,
 		$minimum_length, $maximum_length, $err_message) =
-	sqlSelect("regex,modifier,field,ratio,minimum_match," .
-		"minimum_length,maximum_length,err_message",
-		"content_filters","filter_id=$filter_id");
+		sqlSelect("regex,modifier,field,ratio,minimum_match," .
+			"minimum_length,maximum_length,err_message",
+			"content_filters","filter_id=$filter_id");
 
 	# this has to be here - it really screws up the block editor
 	my $textarea = <<EOT;

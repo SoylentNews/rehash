@@ -79,7 +79,6 @@ sub main {
 		# but not submitted at this point
 		insertFormkey("submissions",$id,"submission");	
 
-
 		displayForm($I{F}{from}, $I{F}{email}, $I{F}{section}, $id);
 
 	} elsif ($op eq "viewsub" && ($seclev > 99 || $I{submiss_view})) {
@@ -134,7 +133,7 @@ sub previewForm {
 	my($writestatus) = getvars("defaultwritestatus");
 	($subid, my($email, $name, $title, $tid, $introtext, $time, $comment)) =
 		sqlSelect("subid,email,name,subj,tid,story,time,comment",
-		"submissions","subid=$subid_dbi");
+		"submissions", "subid=$subid_dbi");
 
 	$introtext =~ s/\n\n/\n<P>/gi;
 	$introtext .= " ";
