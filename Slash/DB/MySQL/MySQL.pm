@@ -334,14 +334,17 @@ sub createComment {
 	$comment->{pointsorig} = $comment->{points} || 0;
 	$comment->{pointsmax}  = $comment->{points} || 0;
 
-	$self->{_dbh}->{AutoCommit} = 0;
+#	$self->{_dbh}{AutoCommit} = 0;
+	$self->sqlDo("SET AUTOCOMMIT=0");
 
 	my $cid;
 	if ($self->sqlInsert('comments', $comment)) {
 		$cid = $self->getLastInsertId();
 	} else {
-		$self->{_dbh}->rollback;
-		$self->{_dbh}->{AutoCommit} = 1;
+#		$self->{_dbh}->rollback;
+#		$self->{_dbh}{AutoCommit} = 1;
+		$self->sqlDo("ROLLBACK");
+		$self->sqlDo("SET AUTOCOMMIT=1");
 		errorLog("$DBI::errstr");
 		return -1;
 	}
@@ -350,8 +353,10 @@ sub createComment {
 			cid	=> $cid,
 			comment	=>  $comment_text,
 	})) {
-		$self->{_dbh}->rollback;
-		$self->{_dbh}->{AutoCommit} = 1;
+#		$self->{_dbh}->rollback;
+#		$self->{_dbh}{AutoCommit} = 1;
+		$self->sqlDo("ROLLBACK");
+		$self->sqlDo("SET AUTOCOMMIT=1");
 		errorLog("$DBI::errstr");
 		return -1;
 	}
@@ -366,14 +371,18 @@ sub createComment {
 		{ -commentcount	=> 'commentcount+1' },
 		"id=$comment->{sid}",
 	)) {
-		$self->{_dbh}->rollback;
-		$self->{_dbh}->{AutoCommit} = 1;
+#		$self->{_dbh}->rollback;
+#		$self->{_dbh}{AutoCommit} = 1;
+		$self->sqlDo("ROLLBACK");
+		$self->sqlDo("SET AUTOCOMMIT=1");
 		errorLog("$DBI::errstr");
 		return -1;
 	} 
 
-	$self->{_dbh}->commit;
-	$self->{_dbh}->{AutoCommit} = 1;
+#	$self->{_dbh}->commit;
+#	$self->{_dbh}{AutoCommit} = 1;
+	$self->sqlDo("COMMIT");
+	$self->sqlDo("SET AUTOCOMMIT=1");
 
 	return $cid;
 }
@@ -1394,12 +1403,17 @@ sub _writeAccessLogCache {
 	my($self) = @_;
 	return unless ref($self->{_accesslog_insert_cache})
 		&& @{$self->{_accesslog_insert_cache}};
-	$self->{_dbh}{AutoCommit} = 0;
+#	$self->{_dbh}{AutoCommit} = 0;
+	$self->sqlDo("SET AUTOCOMMIT=0");
 	while (my $hr = shift @{$self->{_accesslog_insert_cache}}) {
 		$self->sqlInsert('accesslog', $hr, { delayed => 1 });
 	}
 	$self->{_dbh}->commit;
 	$self->{_dbh}{AutoCommit} = 1;
+#	$self->{_dbh}->commit;
+#	$self->{_dbh}{AutoCommit} = 1;
+	$self->sqlDo("COMMIT");
+	$self->sqlDo("SET AUTOCOMMIT=1");
 }
 
 ##########################################################
@@ -1991,7 +2005,8 @@ sub createUser {
 		"matchname=" . $self->sqlQuote($matchname)
 	))[0] || $self->existsEmail($email);
 
-	$self->{_dbh}->{AutoCommit} = 0;
+#	$self->{_dbh}{AutoCommit} = 0;
+	$self->sqlDo("SET AUTOCOMMIT=0");
 
 	$self->sqlInsert("users", {
 		uid		=> '',
@@ -2004,8 +2019,10 @@ sub createUser {
 
 	my $uid = $self->getLastInsertId({ table => 'users', prime => 'uid' });
 	unless ($uid) {
-		$self->{_dbh}->rollback;
-		$self->{_dbh}->{AutoCommit} = 1;
+#		$self->{_dbh}->rollback;
+#		$self->{_dbh}{AutoCommit} = 1;
+		$self->sqlDo("ROLLBACK");
+		$self->sqlDo("SET AUTOCOMMIT=1");
 	}
 	return unless $uid;
 	$self->sqlInsert("users_info", {
@@ -2043,6 +2060,10 @@ sub createUser {
 
 	$self->{_dbh}->commit;
 	$self->{_dbh}->{AutoCommit} = 1;
+#	$self->{_dbh}->commit;
+#	$self->{_dbh}{AutoCommit} = 1;
+	$self->sqlDo("COMMIT");
+	$self->sqlDo("SET AUTOCOMMIT=1");
 
 	$self->sqlInsert("users_count", { uid => $uid });
 
@@ -5245,7 +5266,8 @@ sub setCommentForMod {
 	# Oh well.  Meanwhile, the worst thing that will happen is
 	# a few wrong points logged here and there.
 
-	$self->{_dbh}->{AutoCommit} = 0;
+#	$self->{_dbh}{AutoCommit} = 0;
+	$self->sqlDo("SET AUTOCOMMIT=0");
 
 	my $hr = { };
 	($hr->{cid}, $hr->{points_before}, $hr->{points_orig}, $hr->{points_max}) =
@@ -5274,6 +5296,10 @@ sub setCommentForMod {
 
 	$self->{_dbh}->commit;
 	$self->{_dbh}->{AutoCommit} = 1;
+#	$self->{_dbh}->commit;
+#	$self->{_dbh}{AutoCommit} = 1;
+	$self->sqlDo("COMMIT");
+	$self->sqlDo("SET AUTOCOMMIT=1");
 
 	return $changed ? $hr : undef;
 }
@@ -6041,7 +6067,8 @@ sub createStory {
 	my($self, $story) = @_;
 
 	my $constants = getCurrentStatic();
-	$self->{_dbh}{AutoCommit} = 0;
+#	$self->{_dbh}{AutoCommit} = 0;
+	$self->sqlDo("SET AUTOCOMMIT=0");
 
 	# yes, this format is correct, don't change it :-)
 	my $sidformat = '%02d/%02d/%02d/%02d%0d2%02d';
@@ -6138,12 +6165,18 @@ sub createStory {
 
 	$self->{_dbh}->commit;
 	$self->{_dbh}{AutoCommit} = 1;
+#	$self->{_dbh}->commit;
+#	$self->{_dbh}{AutoCommit} = 1;
+	$self->sqlDo("COMMIT");
+	$self->sqlDo("SET AUTOCOMMIT=1");
 
 	return $story->{sid};
 
 	error: {
-		$self->{_dbh}->rollback;
-		$self->{_dbh}{AutoCommit} = 1;
+#		$self->{_dbh}->rollback;
+#		$self->{_dbh}{AutoCommit} = 1;
+		$self->sqlDo("ROLLBACK");
+		$self->sqlDo("SET AUTOCOMMIT=1");
 		return "";
 	}
 }
@@ -6152,7 +6185,8 @@ sub createStory {
 sub updateStory {
 	my($self, $sid, $data) = @_;
 	my $constants = getCurrentStatic();
-	$self->{_dbh}{AutoCommit} = 0;
+#	$self->{_dbh}{AutoCommit} = 0;
+	$self->sqlDo("SET AUTOCOMMIT=0");
 
 	$data->{body_length} = length($data->{bodytext});
 	$data->{word_count} = countWords($data->{introtext}) + countWords($data->{bodytext});
@@ -6208,6 +6242,10 @@ sub updateStory {
 
 	$self->{_dbh}->commit;
 	$self->{_dbh}{AutoCommit} = 1;
+#	$self->{_dbh}->commit;
+#	$self->{_dbh}{AutoCommit} = 1;
+	$self->sqlDo("COMMIT");
+	$self->sqlDo("SET AUTOCOMMIT=1");
         $self->updatePollFromStory($sid, {
         	date		=> 1,
         	topic		=> 1,
@@ -6218,8 +6256,10 @@ sub updateStory {
 	return $sid;
 
 	error: {
-		$self->{_dbh}->rollback;
-		$self->{_dbh}{AutoCommit} = 1;
+#		$self->{_dbh}->rollback;
+#		$self->{_dbh}{AutoCommit} = 1;
+		$self->sqlDo("ROLLBACK");
+		$self->sqlDo("SET AUTOCOMMIT=1");
 		return "";
 	}
 }
