@@ -133,11 +133,8 @@ $task{$me}{code} = sub {
 		$skinname = $slashdb->getSkin($skid)->{name} if $skid;
 
 		my $mp_tid = $constants->{mainpage_nexus_tid};
-		my $viewable_anywhere = $slashdb->checkStoryViewable($story->{stoid}, $mp_tid);
-		my $mainpaged = $slashdb->checkStoryInNexus($story->{stoid}, $mp_tid);
-		my $displaystatus = -1;
-		$displaystatus = 1 if $viewable_anywhere;
-		$displaystatus = 0 if $mainpaged;
+		my $displaystatus = $slashdb->_displaystatus($story->{stoid});
+		
 		slashdLog("Displaystatus $displaystatus for sid '$sid'");
 
 		slashdLog("Updating $sid") if verbosity() >= 3;
