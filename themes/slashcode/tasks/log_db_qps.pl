@@ -24,9 +24,9 @@ $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my $db_stats = {};
+	my $save_vars = {};
 
 	my $stats = getObject('Slash::Stats::Writer');
-	my $sleep_time = $constants->{qps_sample_time} || 15;
 	my $vus = $slashdb->getDBVirtualUsers();
 	push @$vus, $slashdb->{virtual_user} unless scalar grep { $_ eq $slashdb->{virtual_user} } @$vus;
 
@@ -47,47 +47,59 @@ $task{$me}{code} = sub {
 		});
 	}
 
-	my $time_start = Time::HiRes::time;
-
-	# Need to hit the actual accesslog if we're going to get a meaningful correlation
-	# between queries performed and pages.  For a busy site you can lower the qps_sample_time
-	# to lower the hit on the log db, for lower traffic sites  you might want to raise that
-	# number to make this a more meaningful statistic
-
-	my $logdb = getObject('Slash::DB', { db_type => "log" });
-	my $start_accesslog_id = $logdb->sqlSelect("MAX(id)", "accesslog");
 	my $queries = 0;
 
+	
+	my $last_time = $slashdb->getVar("db_questions_lasttime", "value", 1);
 	for my $db (@dbs) {
-		$db_stats->{$db->{vu}}{start_q} = $db->{db}->showQueryCount();
+		$save_vars->{"db_questions_last_$db->{vu}"} = $db->{db}->showQueryCount();
 	}
-	Time::HiRes::sleep($sleep_time);	
-	
-	for my $db (@dbs) {
-		$db_stats->{$db->{vu}}{end_q} = $db->{db}->showQueryCount();
-		$db_stats->{$db->{vu}}{diff_q} = $db_stats->{$db->{vu}}{end_q} - $db_stats->{$db->{vu}}{start_q};
-	}
-	my $end_accesslog_id = $logdb->sqlSelect("MAX(id)", "accesslog");
 
-
-	my $time_end = Time::HiRes::time;
-	my $pages = $logdb->sqlCount("accesslog", "id BETWEEN " . ($start_accesslog_id +1) . " AND $end_accesslog_id" . " AND op != 'image'") || 1;
-
-	my $elapsed = $time_end - $time_start;
-	$elapsed ||= 1;
+	my $new_last_time = time;
 	
-	my $time = $slashdb->getTime();
+	my $logdb = getObject('Slash::DB', { db_type => "log" });
+	my $accesslog_last = $slashdb->getVar('db_questions_accesslog_last','value', 1);
+	my $new_accesslog_last = $save_vars->{db_questions_accesslog_last} = $logdb->sqlSelect("MAX(id)", "accesslog");
+	$save_vars->{db_questions_lasttime} = $new_last_time;
 	
+	my $time = $slashdb->getTime();	
 	my ($hour) = $time =~/^\d{4}-\d{2}-\d{2} (\d{2}):\d{2}:\d{2}/;
-	slashdLog("$time | $hour\n");
-
-	for my $db (@dbs) {
-		$queries += $db_stats->{$db->{vu}}{diff_q};
-		$db_stats->{$db->{vu}}{qps} = $db_stats->{$db->{vu}}{diff_q} / $elapsed;
-		$stats->createStatDaily("qps_$db->{vu}_$hour", $db_stats->{$db->{vu}}{qps});
+	
+	my $elapsed = 0;
+	my $pages = 0;
+	
+	$elapsed = $new_last_time - $last_time if $last_time;
+	if ($accesslog_last && $new_accesslog_last) {
+		$pages = $new_accesslog_last - $accesslog_last;
 	}
-	my $qpp = $queries / $pages;
-	$stats->createStatDaily("qpp_$hour", $qpp);
+
+	if($elapsed and $elapsed > 0 ) {
+		for my $db (@dbs) {
+			my $vu = $db->{vu};
+			my $last = $slashdb->getVar("db_questions_last_$vu", "value", 1 );
+			my $new_last = $save_vars->{"db_questions_last_$vu"};
+			my $diff = $new_last - $last;
+			if($elapsed > 0 && $diff > 0) {
+				$queries += $diff;
+				my $qps = $diff / $elapsed;
+				$stats->createStatDaily("qps_$db->{vu}_$hour", $qps);
+			}
+		}
+	}
+	
+	foreach (keys %$save_vars) {
+		my $cur_val = $slashdb->getVar($_, 'value', 1);
+		if (!defined $cur_val) {
+			$slashdb->createVar($_, $save_vars->{$_});
+		} else {
+			$slashdb->setVar($_, $save_vars->{$_});
+		}
+	}
+	my $qpp = 0;
+	if ($pages > 0) {
+		$qpp = $queries / $pages;
+		$stats->createStatDaily("qpp_$hour", $qpp);
+	}
 	return "q: $queries p: $pages e: $elapsed qpp: $qpp";
 };
 
