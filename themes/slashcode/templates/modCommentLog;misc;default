@@ -105,13 +105,12 @@ __template__
 
 
 </TD><TD ALIGN="RIGHT">[% a_count %]</TD>
-			<TD ALIGN="RIGHT">[% PROCESS percentage sum =>  a_m2_down, count => a_count %]</TD><TD ALIGN="RIGHT">[% PROCESS percentage sum=> a_m2_offside; count => a_m2_count %]</TD></TR>
+			<TD ALIGN="RIGHT">[% PROCESS percentage sum =>  a_m2_down, count => a_count %]</TD><TD ALIGN="RIGHT">[% PROCESS percentage sum=> a_m2_offside, count => a_m2_count %]</TD></TR>
 			</TABLE>	
 		</TD></TR>
 	[% END %]
 
 </TABLE>
-
 [% END %]
 
 [% modifiers = [
