@@ -36,8 +36,8 @@ __template__
 
 
 
-<TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0" [% IF type!="cid" %]WIDTH="100%"[% END %]>
 [% IF mods.size > 0  %]
+<TABLE BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER" BORDER="0" CELLPADDING="2" CELLSPACING="0" [% IF type!="cid" %]WIDTH="100%"[% END %]>
 	[% total_cols = 5 %]	
 	
 	<tr BGCOLOR="[% user.bg.3 %]">
