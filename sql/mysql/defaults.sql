@@ -921,6 +921,7 @@ INSERT INTO vars (name, value, description) VALUES ('submiss_ts','1','print time
 INSERT INTO vars (name, value, description) VALUES ('submiss_view','1','allow users to view submissions queue');
 INSERT INTO vars (name, value, description) VALUES ('submission_bonus','3','Bonus given to user if submission is used');
 INSERT INTO vars (name, value, description) VALUES ('submissions_speed_limit','300','How fast they can submit');
+INSERT INTO vars (name, value, description) VALUES ('submit_domains_invalid', 'example.com', 'space separated list of domains that are not valid for submitting stories');
 INSERT INTO vars (name, value, description) VALUES ('submit_categories','Back','Extra submissions categories');
 INSERT INTO vars (name, value, description) VALUES ('submit_extra_sort_key', '', 'Provides an additional submission list sorted on the given field name');
 INSERT INTO vars (name, value, description) VALUES ('submit_forgetip_hours','720','Hours after which a submissions\'s ipid/subnetid are forgotten; set very large to disable');
