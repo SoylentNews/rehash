@@ -64,8 +64,9 @@ sub getsByUid {
 }
 
 sub getsByUids {
-	my($self, $uids, $start, $limit) = @_;
+	my($self, $uids, $start, $limit, $options) = @_;
 	my $list = join(",", @$uids);
+	my $answer;
 	my $order = "ORDER BY journals.date DESC";
 	$order .= " LIMIT $start, $limit" if $limit;
 
@@ -74,15 +75,27 @@ sub getsByUids {
 	# correctly uses an index on uid.  Logically they are the same and
 	# the DB *really* should be smart enough to pick up on that, but no.
 	# At least, not in MySQL 3.23.49a.
-	my $where = "users.uid IN ($list) AND journals.id=journals_text.id AND users.uid=journals.uid";
 
-	my $answer = $self->sqlSelectAll(
-		'journals.date, article, description, journals.id,
-		 posttype, tid, discussion, users.uid, users.nickname',
-		'journals, journals_text, users',
-		$where,
-		$order
-	);
+	if($options->{titles_only}) {
+		my $where = "users.uid IN ($list) AND users.uid=journals.uid";
+
+		$answer = $self->sqlSelectAllHashrefArray(
+			'description, id, nickname',
+			'journals, users',
+			$where,
+			$order
+		);
+	} else {
+		my $where = "users.uid IN ($list) AND journals.id=journals_text.id AND users.uid=journals.uid";
+
+		$answer = $self->sqlSelectAll(
+			'journals.date, article, description, journals.id,
+			 posttype, tid, discussion, users.uid, users.nickname',
+			'journals, journals_text, users',
+			$where,
+			$order
+		);
+	}
 	return $answer;
 }
 

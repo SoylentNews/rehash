@@ -29,6 +29,9 @@ __template__
 [% CASE 'userboxhead' %]
 	[% user.nickname %]'s Slashbox
 
+[% CASE 'friends_journal_head' %]
+	Your Friend's Journals
+
 [% CASE 'userboxdefault' %]
 	This is your user space.  Love it.
 

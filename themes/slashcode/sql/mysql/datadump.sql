@@ -36,6 +36,7 @@ INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, ti
 INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve, all_sections) VALUES ('userlogin','',1000,'static','','index',4,'Login',1,NULL,NULL,0,1);
 INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('newestthree','<!-- newestthree -->',100,'static','','',0,'Newest Three',1,NULL,NULL,0);
 INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('recenttopics','none yet',500,'static','Recent Topics','index',0,'Recent Topics',1,'',NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, section, ordernum, title, portal, url, rdf, retrieve) VALUES ('friends_journal','',1,'portald','This adds a box where all of your friend\'s latest journal entries will be displayed.','index',5,'Friend\'s Journal Entries',1,NULL,NULL,0);
 
 
 #
