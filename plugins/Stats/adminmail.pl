@@ -209,7 +209,7 @@ EOT
 	} );
 	$data{total_static} = sprintf("%8d", $total_static);
 	my $total_subscriber = $logdb->countDailySubscribers($stats->getRecentSubscribers());
-	my $total_secure = $stats->countDailySecure();
+	my $total_secure = $logdb->countDailySecure();
 	for my $op (@PAGES) {
 		my $uniq = $logdb->countDailyByPageDistinctIPID($op);
 		my $pages = $logdb->countDailyByPage($op);
