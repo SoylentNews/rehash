@@ -3021,12 +3021,15 @@ sub getSubmissionsPending {
 	my($self, $uid) = @_;
 	my $submissions;
 
-	if ($uid) {
-		$submissions = $self->sqlSelectAll("time, subj, section, tid, del", "submissions", "uid=$uid");
-	} else {
-		$uid = getCurrentUser('uid');
-		$submissions = $self->sqlSelectAll("time, subj, section, tid, del", "submissions", "uid=$uid");
-	}
+	$uid ||= getCurrentUser('uid');
+
+	$submissions = $self->sqlSelectAll(
+		"time, subj, section, tid, del",
+		"submissions",
+		"uid=$uid",
+		"ORDER BY time ASC"
+	);
+
 	return $submissions;
 }
 
