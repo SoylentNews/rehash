@@ -585,14 +585,25 @@ sub handle_remarks {
 
 	my $constants = getCurrentStatic();
 	$next_remark_id ||= $slashdb->getVar('ircslash_nextremarkid', 'value', 1) || 1;
+	my $system_remarks_ar = $slashdb->getRemarksStarting($next_remark_id, { type => "system" });
+	
+	my $max_rid = 0;
+	for my $system_remarks_hr (@$system_remarks_ar) {
+		$conn->privmsg($channel, $system_remarks_hr->{remark});
+		$max_rid = $system_remarks_hr->{rid} if $system_remarks_hr->{rid} > $max_rid;
+	}
 
-	my $remarks_ar = $slashdb->getRemarksStarting($next_remark_id);
+	if ($max_rid) {
+		$next_remark_id = $max_rid + 1;
+		$slashdb->setVar('ircslash_nextremarkid', $next_remark_id);
+	}
+	
+	my $remarks_ar = $slashdb->getRemarksStarting($next_remark_id, { type => "user"});
 	return unless $remarks_ar && @$remarks_ar;
 
 	my %story = ( );
 	my %stoid_count = ( );
 	my %uid_count = ( );
-	my $max_rid = 0;
 	for my $remark_hr (@$remarks_ar) {
 		my $stoid = $remark_hr->{stoid};
 		$stoid_count{$stoid}++;
