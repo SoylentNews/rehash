@@ -3664,6 +3664,7 @@ sub setCommentCleanup {
 
 	$val += 0;
 	return 0 if !$val;
+	$val = "+$val" if $val > 0;
 
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
