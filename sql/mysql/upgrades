@@ -1230,7 +1230,6 @@ CREATE TABLE classes (
   PRIMARY KEY (id)
 ) TYPE = myisam;
 
-DROP TABLE IF EXISTS dbs;
 CREATE TABLE dbs (
   id mediumint UNSIGNED NOT NULL auto_increment,
   virtual_user varchar(100) NOT NULL,
@@ -1257,3 +1256,11 @@ ALTER TABLE accesslog ADD status smallint UNSIGNED DEFAULT 200 NOT NULL;
 ALTER TABLE accesslog_admin ADD status smallint UNSIGNED DEFAULT 200 NOT NULL;
 
 ALTER TABLE topics ADD parent_topic smallint UNSIGNED DEFAULT 0 NOT NULL;
+
+
+ALTER TABLE message_codes ADD COLUMN subscribe TINYINT(1) DEFAULT '0' NOT NULL;
+INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (12, 'Relationship Change', 1, '', 'collective', 1);
+
+# run `./plugins/Messages/populate_message_log_stats.plx VIRTUAL_USER` to
+# update the messaging stats in stats_daily, using the last several weeks
+# of stats in message_log
