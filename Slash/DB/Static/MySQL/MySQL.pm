@@ -875,6 +875,7 @@ sub fetchEligibleModerators_users {
 		sort { $a <=> $b } # don't know if this helps MySQL but it can't hurt... much
 		grep { $_ <= $youngest_uid }
 		keys %$count_hr;
+	my @uids_start = @uids;
 
 	# What is a good splice_count?  Well I was seeing entries show
 	# up in the *.slow log for a size of 5000, so smaller is good.
@@ -901,7 +902,8 @@ sub fetchEligibleModerators_users {
 		map { [ $count_hr->{$_}{uid}, $count_hr->{$_}{c} ] }
 		sort { $count_hr->{$a}{c} <=> $count_hr->{$b}{c}
 			|| int(rand(3))-1 }
-		keys %$count_hr
+		grep { defined $count_hr->{$_} }
+		@uids_start
 	];
 	return $return_ar;
 }
