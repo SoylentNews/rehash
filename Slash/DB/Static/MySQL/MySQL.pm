@@ -2051,7 +2051,7 @@ sub getTopRecentRealemailDomains {
 		"initdomain, COUNT(*) AS c",
 		"users_info",
 		"uid >= $min_uid",
-		"GROUP BY domain ORDER BY c DESC, domain LIMIT $num");
+		"GROUP BY domain ORDER BY c DESC, initdomain LIMIT $num");
 }
 
 ########################################################
