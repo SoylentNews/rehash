@@ -30,6 +30,11 @@ Meta Moderation
 <P>An error occurred during processing. Please re-load your meta-moderation form
 and try again.</P>
 
+[% CASE 'thanks' %]
+Your moderations have been meta moderated.  Thanks for participating.
+You may want to go back <A HREF="[% constants.rootdir %]/">home</A> or perhaps
+to <A HREF="[% constants.rootdir %]/users.pl">your user page</A>.
+
 [% END %]
 
 __seclev__

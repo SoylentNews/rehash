@@ -628,73 +628,72 @@ EOT
 }
 
 ########################################################
-# For moderatord
-sub tokens2points {
+# For run_moderatord.pl
+# Slightly new logic.  Now users can accumulate tokens beyond the
+# "trade-in" limit and the token_retention var is obviated.
+# Any user with more than $tokentrade tokens is forced to cash
+# them in for points, but they get to keep any excess tokens.
+sub convert_tokens_to_points {
 	my($self) = @_;
+
 	my $constants = getCurrentStatic();
-	my @log;
-	# rtbl
-	my $cursor = $self->sqlSelectMany(
-		'uid', 
-		'users_info',
-		"tokens >= $constants->{maxtokens}"
+	my %granted = ( );
+
+	my $maxtokens = $constants->{maxtokens} || 60;
+	my $tokperpt = $constants->{tokensperpoint} || 8;
+	my $maxpoints = $constants->{maxpoints} || 5;
+	my $pointtrade = $maxpoints;
+	my $tokentrade = $pointtrade * $tokperpt;
+	$tokentrade = $maxtokens if $tokentrade > $maxtokens; # sanity check
+
+	my @uids = $self->sqlSelectColArrayref(
+		"uid",
+		"users_info",
+		"tokens >= $tokentrade",
+		"ORDER BY uid",
 	);
 
-	# For some reason, the underlying calls to setUser will not work
-	# without the extra locks on users_acl or users_param.
-	$self->sqlTransactionStart('LOCK TABLES
-		users READ,
-		users_acl READ,
-		users_info WRITE,
-		users_comments WRITE,
-		users_param READ,
-		users_prefs WRITE'
-	);
-	# rtbl
-	while (my($uid) = $cursor->fetchrow) {
+	# Locking tables is no longer required since we're doing the
+	# update all at once on just one table and since we're using
+	# + and - instead of using absolute values. - Jamie 2002/08/08
+
+	for my $uid (@uids) {
+		my($tokens, $points);
+
 		my $rtbl = $self->getUser($uid, 'rtbl') || 0;
+		if ($rtbl) {
+			$tokens = 0;
+			$points = 0;
+		} else {
+			$tokens = "LEAST(tokens,$maxtokens) - $tokentrade",
+			$points = "points + $pointtrade",
+		}
 
-		# rtbl
-		push @log, Slash::getData(
-			($rtbl) ? 'moderatord_tokennotgrantmsg' :
-				  'moderatord_tokengrantmsg',
-			{ uid => $uid }
-		);
-
+		$granted{$uid} = $rtbl ? 0 : 1;
 		$self->setUser($uid, {
-			-lastgranted	=> 'now()',
-			-tokens		=> ($rtbl) ? 
-				'0' :
-				"tokens*$constants->{token_retention}",
-			-points		=> ($rtbl) ?
-				'0' :
-				($constants->{maxtokens} /
-				 $constants->{tokensperpoint}),
+			-lastgranted	=> 'NOW()',
+			-tokens		=> $tokens,
+			-points		=> $points,
 		});
 	}
 
-	$cursor->finish;
+	# We used to do some fancy footwork with a cursor and locking
+	# tables.  The only difference between that code and this is that
+	# it only limited points to maxpoints for users with karma >= 0
+	# and seclev < 100.  These aren't meaningful limitations, so these
+	# updates should work as well.  - Jamie 2002/08/08
+	$self->sqlUpdate(
+		"users_comments",
+		{ points => $maxpoints },
+		"points > $maxpoints"
+	);
+	$self->sqlUpdate(
+		"users_comments",
+		{ tokens => $maxtokens },
+		"tokens > $maxtokens"
+	);
 
-	$cursor = $self->sqlSelectMany('users.uid as uid',
-		'users,users_comments,users_info',
-		"karma >= 0 AND
-		points > $constants->{maxpoints} AND
-		seclev < 100 AND
-		users.uid=users_comments.uid AND
-		users.uid=users_info.uid");
-	$self->sqlTransactionFinish();
-
-	$self->sqlTransactionStart("LOCK TABLES users_comments WRITE");
-	while (my($uid) = $cursor->fetchrow) {
-		# No update of lastgranted here as this is just a limiter.
-		# these points should expire as per normal.
-		$self->sqlUpdate('users_comments', {
-			points => $constants->{maxpoints},
-		}, "uid=$uid");
-	}
-	$self->sqlTransactionFinish();
-
-	return \@log;
+	return \%granted;
 }
 
 ########################################################
@@ -775,60 +774,44 @@ sub getAccessLogInfo {
 }
 
 ########################################################
-# For moderatord
+# For run_moderatord.pl
 sub fetchEligibleModerators {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
-	my $eligibleUsers =
-		$self->getLastUser() * $constants->{m1_eligible_percentage};
+	my $hitcount = defined($constants->{m1_eligible_hitcount})
+		? $constants->{m1_eligible_hitcount} : 3;
+	my $eligible_users = $self->getLastUser()
+		* ($constants->{m1_eligible_percentage} || 0.8);
 
-	# Should this list include authors if var[authors_unlimited] is 
-	# non-zero?
+	# Whether the var "authors_unlimited" is set or not, it doesn't
+	# much matter whether we return admins in this list.
+
 	my $returnable =
-		$self->sqlSelectAll("users_info.uid,count(*) as c",
-			"users_info,users_prefs, accesslog",
-			"users_info.uid < $eligibleUsers
+		$self->sqlSelectAll(
+			"users_info.uid, COUNT(*) AS c",
+			"users_info, users_prefs, accesslog",
+			"users_info.uid < $eligible_users
 			 AND users_info.uid=accesslog.uid
 			 AND users_info.uid=users_prefs.uid
-			 AND (op='article' or op='comments')
+			 AND (op='article' OR op='comments')
 			 AND willing=1
 			 AND karma >= 0
 			 GROUP BY users_info.uid
-			 HAVING c >= $constants->{m1_eligible_hitcount}
+			 HAVING c >= $hitcount
 			 ORDER BY c");
-	# Would it be better to NOT use the HAVING clause here and instead 
-	# iterate thru a statement handle and triggering on [c] as the old code
-	# did?
-	#
-	# Another idea:
-	#	ALTER TABLE accesslog ADD INDEX uid (uid);
-	#
-	# Then SELECT ON/GROUP BY accesslog.uid?
 
 	return $returnable;
 }
 
 ########################################################
-# For moderatord
+# For run_moderatord.pl
 sub updateTokens {
-	my($self, $modlist) = @_;
-
-	my $num_empty_uids = 0;
-	for my $uid (@{$modlist}) {
-		#if ($uid) {
-		#	++$num_empty_uids;
-		#	next;
-		#}
+	my($self, $uidlist) = @_;
+	for my $uid (@{$uidlist}) {
 		$self->setUser($uid, {
 			-tokens	=> "tokens+1",
 		});
 	}
-	if ($num_empty_uids) {
-		errorLog("$num_empty_uids empty uids in updateTokens");
-	}
-	# if ($num_empty_uids) {
-	#	errorLog("$num_empty_uids empty uids in updateTokens");
-	#}
 }
 
 ########################################################
@@ -871,28 +854,26 @@ sub checkUserExpiry {
 }
 
 ########################################################
-# For moderation scripts.
-#	This sub returns the moderatorlog IDs
-#	that are eligible for consensus metamoderation.
-#
-sub getMetamodIDs {
+# Get an arrayref of moderatorlog rows that are ready to have
+# their M2's reconciled.  This used to be complex to figure out but
+# now it's easy;  moderatorlog rows start with m2status=0, graduate
+# to m2status=1 when they are ready to be reconciled by the task,
+# and move to m2status=2 when they are reconciled.
+sub getModsNeedingReconcile {
 	my($self) = @_;
 
-	my($thresh, $num) = (
-		getCurrentStatic('m2_consensus'),
-		getCurrentStatic('m2_batchsize')
-	);
-	my $list = $self->sqlSelectAll(
-		'distinct moderatorlog.id', 'moderatorlog, metamodlog',
-		"m2count >= $thresh
-		AND moderatorlog.id=metamodlog.mmid
-		AND cuid IS NOT NULL
-		AND flag = 10",
-		($num) ? "LIMIT $num" : ''
-	);
-	$_ = $_->[0] for @{$list};
+	my $batchsize = getCurrentStatic("m2_batchsize");
+	my $limit = "";
+	$limit = "LIMIT $batchsize" if $batchsize;
 
-	return $list;
+	my $mods_ar = $self->sqlSelectAllHashrefArray(
+		'*',
+		'moderatorlog',
+		'm2status=1',
+		"ORDER BY id $limit",
+	);
+
+	return $mods_ar;
 }
 
 ########################################################
@@ -909,33 +890,6 @@ sub getMetaModerations {
 	);
 
 	return $ret;
-}
-
-########################################################
-# For moderation scripts.
-#
-#
-sub updateM2Flag {
-	my($self, $id, $val) = @_;
-
-	$self->sqlUpdate('metamodlog', {
-		-flag => $val,
-	}, "id=$id");
-}
-
-########################################################
-# For moderation scripts.
-#
-# Clears metamod flag for a given MMID.
-sub clearM2Flag {
-	my($self, $id) = @_;
-
-	# Note that we only update flags that are in the:
-	#	10 - M2 Pending
-	# state.
-	$self->sqlUpdate('metamodlog', {
-		-flag => '0',
-	}, "flag=10 and mmid=$id");
 }
 
 ########################################################

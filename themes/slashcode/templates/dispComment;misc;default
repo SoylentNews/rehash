@@ -28,7 +28,7 @@ __template__
 			<TD BGCOLOR="[% user.bg.3 %]"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
 			<TD BGCOLOR="[% user.bg.3 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0"><TR><TD>
 				<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]"><A NAME="[% cid %]"><B>[% subject %]</B></A>
-[% UNLESS user.noscores %] (Score:[% points %][% IF reason %], [% constants.reasons.$reason %][% END %])[% END %]
+[% UNLESS user.noscores %] (Score:[% points %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
 </FONT>
 			</TD></TR></TABLE></TD>
 			<TD BGCOLOR="[% user.bg.3 %]" ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>

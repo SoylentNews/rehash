@@ -13,7 +13,7 @@ __name__
 dispLinkComment
 __template__
 [% USE Slash %]
-[% IF (user.mode != 'archive' && nickname != "-") %]
+[% IF (user.mode != 'archive' && user.mode != 'metamod' && nickname != "-") %]
 	[% pid = realpid || pid %]
 	<TR><TD><FONT SIZE="2">
 

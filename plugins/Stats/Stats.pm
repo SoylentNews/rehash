@@ -53,6 +53,20 @@ sub createStatDaily {
 }
 
 ########################################################
+sub updateStatDaily {
+	my($self, $day, $name, $update_clause, $options) = @_;
+
+	my $where = "day = " . $self->sqlQuote($day);
+	$where .= " AND name = " . $self->sqlQuote($name);
+	my $section = $options->{section} || 'all';
+	$where .= " AND section = " . $self->sqlQuote($section);
+
+	return $self->sqlUpdate('stats_daily', {
+		-value =>	$update_clause,
+	}, $where);
+}
+
+########################################################
 sub getPoints {
 	my($self) = @_;
 	return $self->sqlSelect('SUM(points)', 'users_comments');
@@ -147,18 +161,12 @@ sub getRepeatMods {
 		"users AS usersorg,
 		 moderatorlog,
 		 users AS usersdest,
-		 users_info AS usersdesti
-		 LEFT JOIN users_param
-			ON usersorg.uid=users_param.uid
-			   AND users_param.name='rtbl'",
+		 users_info AS usersdesti",
 		"usersorg.uid=moderatorlog.uid
 		 AND usersorg.seclev < 100
 		 AND moderatorlog.cuid=usersdest.uid
 		 AND usersdest.uid=usersdesti.uid
-		 AND (
-			   users_param.value IS NULL
-			OR users_param.value = 0
-		 ) AND usersdest.uid != $ac_uid",
+		 AND usersdest.uid != $ac_uid",
 		"GROUP BY usersorg.uid, usersdest.uid, val
 		 HAVING c >= $min_count
 			AND latest >= DATE_SUB(NOW(), INTERVAL $within HOUR)

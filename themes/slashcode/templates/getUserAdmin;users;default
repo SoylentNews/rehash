@@ -175,9 +175,15 @@ __template__
 				<TD>&nbsp;</TD> 
 			</TR>
 			<TR>
-				<TD WIDTH="100"><B>Real time black list</B></TD>
-				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="checkbox" NAME="rtbl" [% useredit.rtbl %]>&nbsp;&nbsp;
-				Reason <INPUT TYPE="TEXT" NAME="rtbl_reason" VALUE="[% useredit.rtbl_reason | strip_attribute %]"></TD>
+				<TD WIDTH="100"><B>Moderation:</B></TD>
+				<TD ALIGN="LEFT" WIDTH="100">Fair: [% useredit.m2fair %], Unfair: [% useredit.m2unfair %]
+				[% IF useredit.m2fair+useredit.m2unfair > 0 %]([%
+				useredit.m2unfair*100/(useredit.m2fair+useredit.m2unfair) %]%)
+			</TR>
+			<TR>
+				<TD WIDTH="100"><B>Tokens</B></TD>
+				<TD ALIGN="LEFT" WIDTH="100"><INPUT TYPE="TEXT" NAME="tokens" SIZE="6" VALUE="[% useredit.tokens | strip_attribute %]">&nbsp;&nbsp;
+				Latest M2 Info: <INPUT TYPE="TEXT" NAME="m2_info" VALUE="[% useredit.m2_info | strip_attribute %]"></TD>
 			</TR>
 			<TR>
 				<TD COLSPAN=3 HEIGHT=10></TD>

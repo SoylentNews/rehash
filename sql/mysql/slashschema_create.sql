@@ -318,14 +318,17 @@ CREATE TABLE menus (
 
 DROP TABLE IF EXISTS metamodlog;
 CREATE TABLE metamodlog (
+	id mediumint UNSIGNED NOT NULL AUTO_INCREMENT,
 	mmid mediumint DEFAULT '0' NOT NULL,
-	uid mediumint UNSIGNED NOT NULL,
+	uid mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	val tinyint  DEFAULT '0' NOT NULL,
 	ts datetime,
-	id mediumint UNSIGNED NOT NULL auto_increment,
-	flag mediumint DEFAULT '0' NOT NULL,
+	active tinyint DEFAULT '1' NOT NULL,
 	INDEX byuser (uid),
-	PRIMARY KEY (id)
+	INDEX mmid (mmid),
+	PRIMARY KEY (id),
+	FOREIGN KEY (uid) REFERENCES users(uid),
+	FOREIGN KEY (mmid) REFERENCES moderatorlog(id)
 ) TYPE = myisam;
 
 #
@@ -361,12 +364,27 @@ CREATE TABLE moderatorlog (
 	reason tinyint UNSIGNED DEFAULT '0',
 	active tinyint DEFAULT '1' NOT NULL,
 	m2count mediumint UNSIGNED DEFAULT '0' NOT NULL,
+	m2status tinyint DEFAULT '0' NOT NULL,
 	PRIMARY KEY (id),
 	KEY sid (sid,cid),
 	KEY sid_2 (sid,uid,cid),
 	KEY cid (cid)
 ) TYPE = myisam;
 
+#
+# Table structure for table 'modreasons'
+#
+
+DROP TABLE IF EXISTS modreasons;
+CREATE TABLE modreasons (
+	id tinyint UNSIGNED NOT NULL,
+	name char(32) DEFAULT '' NOT NULL,
+	m2able tinyint DEFAULT '1' NOT NULL,
+	listable tinyint DEFAULT '1' NOT NULL,
+	val tinyint DEFAULT '0' NOT NULL,
+	fairfrac float DEFAULT '0.5' NOT NULL,
+	PRIMARY KEY (id)
+) TYPE=myisam;
 
 #
 # Table structure for table 'pollanswers'
@@ -907,12 +925,13 @@ CREATE TABLE users_info (
 	bio text,
 	tokens mediumint DEFAULT '0' NOT NULL,
 	lastgranted date DEFAULT '0000-00-00' NOT NULL,
+	m2info varchar(64) DEFAULT '' NOT NULL,
 	karma mediumint DEFAULT '0' NOT NULL,
 	maillist tinyint DEFAULT '0' NOT NULL,
 	totalcomments mediumint UNSIGNED DEFAULT '0',
 	lastmm date DEFAULT '0000-00-00' NOT NULL,
+	mods_saved varchar(120) DEFAULT '' NOT NULL,
 	lastaccess date DEFAULT '0000-00-00' NOT NULL,
-	lastmmid mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	m2fair mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	m2unfair mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	m2fairvotes mediumint UNSIGNED DEFAULT '0' NOT NULL,

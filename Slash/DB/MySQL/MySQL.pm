@@ -19,7 +19,7 @@ use base 'Slash::DB::Utility';
 
 # Fry: How can I live my life if I can't tell good from evil?
 
-# For the getDecriptions() method
+# For the getDescriptions() method
 my %descriptions = (
 	'sortcodes'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='sortcodes'") },
@@ -212,6 +212,7 @@ my %descriptions = (
 			'ORDER BY name'
 		);
 	},
+
 );
 
 ########################################################
@@ -335,6 +336,77 @@ sub createComment {
 }
 
 ########################################################
+# Given a fractional value representing the fraction of fair M2
+# votes, returns the token/karma consequences of that fraction
+# in a hashref.  Makes the very complex var m2_consequences a
+# little easier to use.  Note that the value returned has three
+# fields:  a float, its sign, and an SQL expression which may be
+# either an integer or an IF().
+sub getM2Consequences {
+	my($self, $frac) = @_;
+	my $constants = getCurrentStatic();
+	my $c = $constants->{m2_consequences};
+	my $retval = { };
+	for my $ckey (sort { $a <=> $b } keys %$c) {
+		if ($frac <= $ckey) {
+			my @vals = @{$c->{$ckey}};
+			for my $key (qw(	m2_fair_tokens
+						m2_unfair_tokens
+						m1_tokens
+						m1_karma )) {
+				$retval->{$key}{num} = shift @vals;
+			}
+			for my $key (keys %$retval) {
+				$self->_set_csq($key, $retval->{$key});
+			}
+#use Data::Dumper; print STDERR "frac '$frac' ckey '$ckey' retval " . Dumper($retval);
+			last;
+		}
+	}
+	return $retval;
+}
+
+sub _set_csq {
+	my($self, $key, $hr) = @_;
+	my $n = $hr->{num};
+	if (!$n) {
+		$hr->{chance} = $hr->{sign} = 0;
+		$hr->{sql_base} = $hr->{sql_possible} = "";
+		$hr->{sql_and_where} = undef;
+		return ;
+	}
+
+	my $constants = getCurrentStatic();
+	my $column = 'tokens';
+	$column = 'karma' if $key =~ /karma$/;
+	my $max = ($column eq 'tokens')
+		? $constants->{m2_consequences_token_max}
+		: $constants->{m2_maxbonus_karma};
+	my $min = ($column eq 'tokens')
+		? $constants->{m2_consequences_token_min}
+		: $constants->{minkarma};
+
+	my $sign = 1; $sign = -1 if $n < 0;
+	$hr->{sign} = $sign;
+	
+	my $a = abs($n);
+	my $i = int($a);
+
+	$hr->{chance} = $a - $i;
+	if ($sign > 0) {
+		$hr->{sql_and_where}{$column} = "$column < $max";
+		$hr->{sql_base} = $i ? "LEAST($column+$i, $max)" : "";
+		$hr->{sql_possible} = "LEAST($column+" . ($i+1) . ", $max)"
+			if $hr->{chance};
+	} else {
+		$hr->{sql_and_where}{$column} = "$column > $min";
+		$hr->{sql_base} = $i ? "GREATEST($column-$i, $min)" : "";
+		$hr->{sql_possible} = "GREATEST($column-" . ($i+1) . ", $min)"
+			if $hr->{chance};
+	}
+}
+
+########################################################
 sub setModeratorLog {
 	my($self, $comment, $uid, $val, $reason, $active) = @_;
 
@@ -352,165 +424,304 @@ sub setModeratorLog {
 }
 
 ########################################################
-#this is broke right now -Brian
-#
-# Work, dammit! - Cliff
-# 
+# A friendlier interface to the "mods_saved" param.  Has probably
+# more sanity-checking than it needs.
+sub getModsSaved {
+	my($self, $user) = @_;
+	$user = getCurrentUser() if !$user;
+
+	my $mods_saved = $user->{mods_saved} || "";
+	return ( ) if !$mods_saved;
+	my %mods_saved =
+		map { ( $_, 1 ) }
+		grep /^\d+$/,
+		split ",", $mods_saved;
+	return sort { $a <=> $b } keys %mods_saved;
+}
+
+sub setModsSaved {
+	my($self, $user, $mods_saved_ar) = @_;
+	$user = getCurrentUser() if !$user;
+
+	my $mods_saved_txt = join(",", grep /^\d+$/, @$mods_saved_ar);
+	$self->setUser($user->{uid}, { mods_saved => $mods_saved_txt });
+}
+
+########################################################
 # This is the method that returns the list of comments for a user to
-# metamod, at any given time.
-sub getMetamodComments {
+# metamod, at any given time.  Its logic was changed significantly
+# in August 2002.
+sub getMetamodsForUser {
 	my($self, $user, $num_comments) = @_;
+	my $constants = getCurrentStatic();
 
-	#require Benchmark;
-	#my $t0 = new Benchmark;
+	# First step is to see what the user already has marked down to
+	# be metamoderated.  If there are any such id's, that still
+	# aren't done being M2'd, keep those on the user's to-do list.
+	# (I.e., once a user sees a list of mods, they keep seeing that
+	# same list until they click the button;  reloading the page
+	# won't give them new mods.)  If after this check, the list is
+	# short of the requisite number, fill up the list, re-save it,
+	# and return it.
 
-	# We first check to see if we have any moderator records that need
-	# processing at the current count level If not, we then increment the
-	# count level and use that.
-	#
-	# If the vars are cached, might we have a race condition here?
-	my $thresh = $self->getVar('m2_consensus', 'value');
-	my $previousM2s = [
-		map { $_ = $_->[0] }
-		@{$self->sqlSelectAll('mmid', 'metamodlog', "uid=$user->{uid}")}
-	];
-	my $M2mods = [];
-	$self->sqlTransactionStart('LOCK TABLES moderatorlog READ, vars WRITE');
-	my $modpos = $user->{lastmmid} ||
-		     $self->getVar('m2_modlog_pos', 'value');
-	my $timesthru = $self->getVar('m2_modlog_cycles', 'value');
-	my($minMod, $maxMod) =
-		$self->sqlSelect('min(id), max(id)', 'moderatorlog');
-	$minMod--;
-	my($count, $num) = (0, $num_comments);
-	while ($num && $count < 2) {
-		my @excluded;
+	# Get saved list of mods to M2 (and check its formatting).
 
-		@excluded = map { $_ = $_->{id} } (@excluded = @{$M2mods})
-			if @{$M2mods};
-		push @excluded, @{$previousM2s} if scalar @{$previousM2s};
-		$modpos = $minMod if $modpos < $minMod ||
-			             $maxMod - $modpos < $num_comments;
-		my $cond = "moderatorlog.uid != $user->{uid}
-			AND moderatorlog.cuid != $user->{uid}
-			AND moderatorlog.reason <= 8
-			AND moderatorlog.id > $modpos
-			AND moderatorlog.m2count < $thresh";
-		{
-			local $" = ',';
-			$cond .= " AND id NOT IN (@excluded)"
-				if scalar @excluded;
-		}
+	my @mods_saved = $self->getModsSaved();
 
-		my $result = $self->sqlSelectAllHashrefArray(
-			'id, cid AS mcid, reason AS modreason',
-			'moderatorlog',
-			$cond,
-			"ORDER BY id LIMIT $num"
+	# See which still need M2'ing.
+
+	if (@mods_saved) {
+		my $mods_saved = join(",", @mods_saved);
+		my $mods_not_done = $self->sqlSelectColArrayref(
+			"id",
+			"moderatorlog",
+			"id IN ($mods_saved) AND active=1 AND m2status = 0"
 		);
-
-		if ($result) {
-			push @{$M2mods}, @{$result};
-			$num -= scalar @{$result};
-		}
-
-		# We only do this the first time thru.
-		if ($num && ! $count) {
-			$self->setVar('m2_modlog_cycles', $timesthru + 1);
-			$modpos = $minMod;
-		}
-		$count++;
-	}
-	# Only write position change if it changes for the user.
-	$self->setVar('m2_modlog_pos', $M2mods->[-1]{id})
-		if @{$M2mods} && !$user->{lastmmid};
-	$self->sqlTransactionFinish();
-
-	# Note in error log if we've picked up less than the requested number
-	# of comments.
-	if ($num) {
-		my @list = @{$M2mods};
-		$_ = $_->{id} for @list;
-		local $" = ', ';
-		errorLog(<<EOT);
-M2 - Gave U#$user->{uid} less than $num_comments comments: [@list]
-EOT
-
+		@mods_saved = grep /^\d+$/, split ",", @$mods_not_done;
 	}
 
-	# Update user if necessary. Users are STUCK at the same moderations
-	# for M2 until they submit the form (or those comments fall out of 
-	# the moderatorlog.
-	$self->setUser($user->{uid}, { lastmmid => $modpos })
-		if !$user->{lastmmid};
+	# If we need more, get more.
 
-	my(@comments);
-	push @comments, $_->{mcid} for @{$M2mods};
+	my $num_needed = $num_comments - scalar(@mods_saved);
+	if ($num_needed) {
+		my %mods_saved = map { ( $_, 1 ) } @mods_saved;
+		my $new_mods = $self->getMetamodsForUserRaw($user->{uid},
+			$num_needed, \%mods_saved);
+		for my $id (@$new_mods) { $mods_saved{$id} = 1 }
+		@mods_saved = sort { $a <=> $b } keys %mods_saved;
+	}
+	$self->setModsSaved($user, \@mods_saved);
 
-	# Retrieve the remaining data.
-	my $comments;
-	{
-		local $" = ',';
-		$comments = $self->sqlSelectAllHashref(
-			'cid',
-			'comments.cid, comments.sid as sid, date,
-			subject, discussions.sid as discussions_sid,
-			comment,comments.uid,pid, reason, sig, title, nickname',
+	# If we didn't get enough, that's OK, but note it in the
+	# error log.
+
+	if (scalar(@mods_saved) < $num_comments) {
+		errorLog("M2 gave uid $user->{uid} "
+			. scalar(@mods_saved)
+			. " comments, wanted $num_comments: "
+			. join(",", @mods_saved)
+		);
+	}
+
+	# OK, we have the list of moderations this user needs to M2,
+	# and we have updated the user's data so the next time they
+	# come back they'll see the same list.  Now just retrieve
+	# the necessary data for those moderations and return it.
 	
-			'comments, comment_text, discussions, users',
+	return $self->_convertModsToComments(@mods_saved);
+}
 
-			"comments.cid in (@comments)
-			AND comments.cid=comment_text.cid
-			AND comments.uid=users.uid
-			AND discussions.id=comments.sid"
-		) if @comments;
+{ # closure
+my %anonymize = ( ); # gets set inside the function
+sub _convertModsToComments {
+	my($self, @mods) = @_;
+	my $constants = getCurrentStatic();
+
+	return { } unless scalar(@mods);
+
+	if (!scalar(keys %anonymize)) {
+		%anonymize = (
+			nickname =>	'-',
+			uid =>		getCurrentStatic('anonymous_coward_uid'),
+			points =>	0,
+		);
 	}
 
-	my @finalM2mods;
-	for my $m2Mod (@{$M2mods}) {
-		while (my($key, $val) = each %{$comments->{$m2Mod->{mcid}}}) {
+	my $consensus = $constants->{m2_consensus};
+	my $mods_text = join(",", @mods);
 
-			$m2Mod->{$key} = $val;
+	# We can and probably should get the cid/reason data in
+	# getMetamodsForUserRaw(), but it's only a minor performance
+	# slowdown for now.
 
+	my $mods_hr = $self->sqlSelectAllHashref(
+		"id",
+		"id, cid, reason AS modreason",
+		"moderatorlog",
+		"id IN ($mods_text)"
+	);
+	my @cids = map { $mods_hr->{$_}{cid} } keys %$mods_hr;
+	my $cids_text = join(",", @cids);
+
+	# Get the comment data required to show the user the list of mods.
+
+	my $comments_hr = $self->sqlSelectAllHashref(
+		"cid",
+		"comments.cid AS cid, comments.sid AS sid,
+		 comments.uid AS uid,
+		 date, subject, pid, reason, comment,
+		 discussions.sid AS discussions_sid,
+		 title,
+		 sig, nickname",
+		"comments, comment_text, discussions, users",
+		"comments.cid IN ($cids_text)
+		 AND comments.cid = comment_text.cid
+		 AND comments.uid = users.uid
+		 AND comments.sid = discussions.id"
+	);
+
+	# Put the comment data into the mods hashref.
+
+	for my $mod_id (keys %$mods_hr) {
+		my $mod_hr = $mods_hr->{$mod_id};	# This mod.
+		my $cid = $mod_hr->{cid};
+		my $com_hr = $comments_hr->{$cid};	# This mod's comment.
+		for my $key (keys %$com_hr) {
+			next if exists($mod_hr->{$key});
+			my $val = $com_hr->{$key};
 			# Anonymize comment identity a bit for fairness.
-			$m2Mod->{$key} = '-' if $key eq 'nickname';
-			$m2Mod->{$key} = getCurrentStatic(
-				'anonymous_coward_uid'
-			) if $key eq 'uid';
-			$m2Mod->{$key} = '0' if $key eq 'points';
-			# No longer anonymizing sig.
-			#$m2Mod->{$key} = '' if $key eq 'sig';
+			$val = $anonymize{$key} if exists $anonymize{$key};
+			$mod_hr->{$key} = $val;
 		}
-		# We also need to provide the url, but the question is,
-		# where to link to?
-		if ($m2Mod->{discussions_sid}) {
+		if ($mod_hr->{discussions_sid}) {
 			# This is a comment posted to a story discussion, so
 			# we can link straight to the story, providing even
 			# more context for this comment.
-			$m2Mod->{url} = getCurrentStatic('rootdir')
-				. "/article.pl?sid=$m2Mod->{discussions_sid}";
+			$mod_hr->{url} = getCurrentStatic('rootdir')
+				. "/article.pl?sid=$mod_hr->{discussions_sid}";
 		} else {
 			# This is a comment posted to a discussion that isn't
 			# a story.  It could be attached to a poll, a journal
 			# entry, or nothing at all (user-created discussion).
 			# Whatever the case, we can't trust the url field, so
 			# we should just link to the discussion itself.
-			$m2Mod->{url} = getCurrentStatic('rootdir')
-				. "/comments.pl?sid=$m2Mod->{sid}";
+			$mod_hr->{url} = getCurrentStatic('rootdir')
+				. "/comments.pl?sid=$mod_hr->{sid}";
 		}
-		$m2Mod->{no_moderation} = 1;
-
-		delete $m2Mod->{mcid};
-		# make sure we have a good moderation for an existing comment
-		push @finalM2mods, $m2Mod if $m2Mod->{cid} && $m2Mod->{sid};
+		$mod_hr->{no_moderation} = 1;
 	}
-	#my $t1 = new Benchmark;
-	#printf STDERR "M2 Time: %s\n", 
-	#	Benchmark::timestr(Benchmark::timediff($t1, $t0), 'noc');
 
-# format in the template instead
-#	formatDate($M2mods);
-	return \@finalM2mods;
+	# Copy the hashref into an arrayref, along the way doing a last-minute
+	# check to make sure every comment has an sid.  We're going to sort
+	# this arrayref first by sid, then by cid, and last by mod id, so mods
+	# that share a story or even a comment will appear together, saving
+	# the user a bit of confusion.
+
+	my @final_mods = ( );
+	for my $mod_id (
+		sort {
+			$mods_hr->{$a}{sid} <=> $mods_hr->{$b}{sid}
+			||
+			$mods_hr->{$a}{cid} <=> $mods_hr->{$b}{cid}
+			||
+			$a <=> $b
+		} keys %$mods_hr
+	) {
+		# This "next" is a holdover from old code - is this really
+		# necessary!?  Every cid has a discussion and every
+		# discussion has an sid.
+		next unless $mods_hr->{$mod_id}{sid};
+		push @final_mods, $mods_hr->{$mod_id};
+	}
+
+	return \@final_mods;
+}
+}
+
+sub getReasons {
+	my($self) = @_;
+	my $cache_enabled = getCurrentStatic('cache_enabled');
+	my $reasons = $self->{_reasons_cache} || undef;
+	if (!$reasons) {
+		$reasons = $self->sqlSelectAllHashref(
+			"id", "*", "modreasons"
+		);
+		$self->{_reasons_cache} = $reasons if $cache_enabled;
+	}
+	if ($cache_enabled) {
+		# Return a copy of the cache, just in case anyone munges it up.
+		$reasons = {( %$reasons )};
+	}
+	return $reasons;
+}
+
+# Get a list of moderations that the given uid is able to metamod,
+# with the oldest not-yet-done mods given highest priority.
+sub getMetamodsForUserRaw {
+	my($self, $uid, $num_needed, $already_have_hr) = @_;
+	my $uid_q = $self->sqlQuote($uid);
+	my $constants = getCurrentStatic();
+
+	my $reasons = $self->getReasons();
+	my $m2able_reasons = join(",",
+		sort grep { $reasons->{$_}{m2able} }
+		keys %$reasons);
+	return [ ] unless $m2able_reasons;
+
+	my $consensus = $constants->{m2_consensus};
+	my $consensus_frac = sprintf("%.4f",
+		$constants->{m2_consensus_waitmult}/$consensus);
+
+	my $days_back = $constants->{archive_delay};
+	my $days_back_cushion = int($days_back/10);
+	$days_back_cushion = 2 if $days_back_cushion < 2;
+	$days_back -= $days_back_cushion;
+
+	my($min_old) = $self->sqlSelect("MIN(id)", "moderatorlog");
+	my($max_old) = $self->sqlSelect("MAX(id)", "moderatorlog",
+		"ts < DATE_SUB(NOW(), INTERVAL $days_back DAY)");
+	$min_old = 0 if !$min_old;
+	$max_old = 0 if !$max_old;
+	my $min_new = $max_old+1;
+	my($max_new) = $self->sqlSelect("MAX(id)", "moderatorlog");
+	$min_new = $max_new if $min_new > $max_new;
+	my $old_range = $max_old-$min_old; $old_range = 1 if $old_range < 1;
+	my $new_range = $max_new-$min_new; $new_range = 1 if $new_range < 1;
+
+	my $already_list = join ",", sort keys %$already_have_hr;
+	my $already_clause = "";
+	$already_clause = " AND id NOT IN ($already_list)" if $already_list;
+
+	# We need to consult two tables to get a list of moderatorlog IDs
+	# that it's OK to M2:  moderatorlog of course, and metamodlog to
+	# check that this user hasn't M2'd them before.  Because this is
+	# necessarily a table scan on moderatorlog, speed will be essential.
+	# We're going to do the select on moderatorlog first, then run its
+	# results through the other two tables to exclude what we can't use.
+	# However, since we can't predict how many of our hits will be
+	# deemed "bad" (unusable), we may have to loop around more than
+	# once to get enough.
+	my @ids = ( );
+	my $mod_hr;
+	GETMODS: while ($num_needed > 0) {
+		my $limit = $num_needed*2+10; # get more, hope it's enough
+		$mod_hr = { };
+		$mod_hr = $self->sqlSelectAllHashref(
+			"id",
+			"id, cid, IF(
+				id BETWEEN $min_old AND $max_old,
+				(id-$min_old)/$old_range + RAND()
+					+ m2count*$consensus_frac,
+				(id-$min_new)/$new_range + RAND()
+					+ m2count*$consensus_frac
+					+ $consensus_frac+2
+			) AS rank",
+			"moderatorlog",
+			"uid != $uid_q AND cuid != $uid_q
+			 AND m2status = 0
+			 AND reason IN ($m2able_reasons)
+			 AND active=1
+			 $already_clause",
+			"ORDER BY rank LIMIT $limit"
+		);
+		last GETMODS if !$mod_hr || !scalar(keys %$mod_hr);
+
+		# Exclude any moderations this user has already metamodded.
+		my $mod_ids = join ",", keys %$mod_hr;
+		my %mod_ids_bad = map { ( $_, 1 ) }
+			$self->sqlSelectColArrayref("mmid", "metamodlog",
+				"mmid IN ($mod_ids) AND uid = $uid_q");
+
+		my @new_ids =
+			sort { $mod_hr->{$a}{rank} <=> $mod_hr->{$b}{rank} }
+			grep { !$mod_ids_bad{$_} }
+			keys %$mod_hr;
+		$#new_ids = $num_needed-1 if $#new_ids > $num_needed-1;
+		push @ids, @new_ids;
+		$num_needed -= scalar(@new_ids);
+	}
+
+	return \@ids;
 }
 
 ########################################################
@@ -908,7 +1119,8 @@ sub getSessionInstance {
 			$self->sqlDo("DELETE from sessions WHERE uid = '$uid' AND " .
 				"session != $session_in_q"
 			);
-			$self->sqlUpdate('sessions', {-lasttime => 'now()'},
+			$self->sqlUpdate('sessions',
+				{ -lasttime => 'now()' },
 				"session = $session_in_q"
 			);
 			$session_out = $session_in;
@@ -2155,8 +2367,7 @@ sub setStory {
 			$minihash{$key} = $hashref->{$key}
 				if defined $hashref->{$key};
 		}
-		# Why the trailing "1" parameter, here? 
-		$self->sqlUpdate($table, \%minihash, 'sid=' . $self->sqlQuote($sid), 1);
+		$self->sqlUpdate($table, \%minihash, 'sid=' . $self->sqlQuote($sid));
 	}
 
 	for (@param)  {
@@ -3201,14 +3412,11 @@ sub countStory {
 }
 
 ##################################################################
-sub checkForMetaModerator {
+sub metamodEligible {
 	my($self, $user) = @_;
 
 	# Easy tests the user can fail to be ineligible to metamod.
-	return 0 if $user->{is_anon}
-		|| !$user->{willing}
-		||  $user->{karma} < 0
-		||  $user->{rtbl};
+	return 0 if $user->{is_anon} || !$user->{willing} ||  $user->{karma} < 0;
 
 	# Not eligible if has already metamodded today.
 	my $current_date = time2str("%Y-%m-%d", time, 'GMT');
@@ -3309,90 +3517,102 @@ sub getStoryByTimeAdmin {
 }
 
 ########################################################
-sub setModeratorVotes {
-	my($self, $uid, $metamod) = @_;
-	$self->sqlUpdate("users_info", {
-		-m2unfairvotes	=> "m2unfairvotes+$metamod->{unfair}",
-		-m2fairvotes	=> "m2fairvotes+$metamod->{fair}",
-		-lastmm		=> 'now()',
-		lastmmid	=> 0
-	}, "uid=$uid");
-}
-
-########################################################
+# Input: %$m2s is a hash whose keys are moderatorlog IDs (mmids) and
+# values are hashrefs with keys "is_fair" (0=unfair, 1=fair).
+# Return: nothing.
+# Note that karma changes are done in the run_moderatord task.
 sub setMetaMod {
-	my($self, $m2victims, $flag, $ts) = @_;
-
+	my($self, $m2_user, $m2s) = @_;
 	my $constants = getCurrentStatic();
-	my $returns = [];
+	my $consensus = $constants->{m2_consensus};
+	my $rows;
 
-	# Update $muid's Karma
-	$self->sqlTransactionStart(qq(
-LOCK TABLES users_info WRITE, metamodlog WRITE, moderatorlog WRITE
-	));
-	for (keys %{$m2victims}) {
-		my $muid = $m2victims->{$_}[0];
-		my $val = $m2victims->{$_}[1];
-		next unless $val;
-		push(@$returns , [$muid, $val]);
+	# If this user has no saved mods, by definition nothing they try
+	# to M2 is valid.
+	return if !$m2_user->{mods_saved};
 
-		my $mmid = $_;
-		if ($muid && $val) {
-			if ($val eq '+') {
-				$self->sqlUpdate("users_info", {
-					-m2fair => "m2fair+1"
-				}, "uid=$muid");
+	# The user is only allowed to metamod the mods they were given.
+	my @mods_saved = $self->getModsSaved();
+	my %mods_saved = map { ( $_, 1 ) } @mods_saved;
 
-				# Karma changes are now deferred until reconcile time.
-				#
-				#$self->sqlUpdate(
-				#	"users_info", { -karma => "karma+1" },
-				#	"$muid=uid AND
-				#	karma<$constants->{m2_maxbonus}"
-				#);
-			} elsif ($val eq '-') {
-				$self->sqlUpdate("users_info", {
-					-m2unfair => "m2unfair+1",
-				}, "uid=$muid");
-
-				# Karma changes are now deferred until reconcile time.
-				#
-				#$self->sqlUpdate(
-				#	"users_info", { -karma => "karma-1" },
-				#	"$muid=uid AND
-				#	karma>$constants->{badkarma}"
-				#);
-			}
-		}
-		# Time is now fixed at form submission time to ease 'debugging'
-		# of the moderation system, ie 'GROUP BY uid, ts' will give
-		# you the M2 votes for a specific user ordered by M2 'session'
-		$self->sqlInsert("metamodlog", {
-			-mmid => $mmid,
-			-uid  => $ENV{SLASH_USER},
-			-val  => ($val eq '+') ? '+1' : '-1',
-			-ts   => "from_unixtime($ts)",
-			-flag => $flag
-		});
-		$self->sqlUpdate('moderatorlog', {
-			-m2count => 'm2count+1',
-		}, "id=$mmid");
+	# Whatever happens below, as soon as we get here, this user has
+	# done their M2 for the day and gets their list of OK mods cleared.
+	my $mods_saved_q = $self->sqlQuote($m2_user->{mods_saved});
+	$rows = $self->sqlUpdate("users_info", {
+		-lastmm =>	'NOW()',
+		mods_saved =>	'',
+	}, "uid=$m2_user->{uid} AND mods_saved=$mods_saved_q");
+	if (!$rows) {
+		# The update failed, presumably because the user clicked
+		# the MetaMod button multiple times quickly to try to get
+		# their decisions to count twice.  The user did not count
+		# on our awesome powers of atomicity.  Do nothing.
+		return ;
 	}
-	$self->sqlTransactionFinish();
 
-	return $returns;
-}
+	my($voted_fair, $voted_unfair) = (0, 0);
+	for my $mmid (keys %$m2s) {
+		my $mod_uid = $self->getModeratorLog($mmid, 'uid');
+		my $is_fair = $m2s->{$mmid}{is_fair};
 
-########################################################
-sub getModeratorLast {
-	my($self, $uid) = @_;
-	my $last = $self->sqlSelectHashref(
-		"(to_days(now()) - to_days(lastmm)) as lastmm, lastmmid",
-		"users_info",
-		"uid=$uid"
-	);
+		# Increment the m2count on the moderation in question.  If
+		# this increment pushes it to the current consensus threshold,
+		# change its m2status from 0 ("eligible for M2") to 1
+		# ("all done with M2'ing, but not yet reconciled").  Note
+		# that we insist not only that the count be above the
+		# current consensus point, but that it be odd -- if we
+		# recently lowered the var m2_consensus, there may be some
+		# mods "trapped" with an even number of M2s.
 
-	return $last;
+		$rows = 0;
+		$rows = $self->sqlUpdate(
+			"moderatorlog", {
+				-m2count =>	"m2count+1",
+				-m2status =>	"IF(m2count >= $consensus
+							AND MOD(m2count, 2) = 1,
+							1, 0)",
+			},
+			"id=$mmid AND m2status=0",
+			{ assn_order => [qw( -m2count -m2status )] },
+		) unless $m2_user->{tokens} < 0;
+
+		if ($rows) {
+			# If a row was successfully updated, then there are
+			# other updates we need to do too.  First, tally the
+			# counts for the affected user.
+			my $ui_hr = { };
+			if ($is_fair)	{ ++$voted_fair;   $ui_hr->{-m2fair}   = "m2fair+1" }
+			else		{ ++$voted_unfair; $ui_hr->{-m2unfair} = "m2unfair+1" }
+			$self->sqlUpdate("users_info", $ui_hr, "uid=$mod_uid");
+			# Then insert a row into metamodlog.
+			$self->sqlInsert("metamodlog", {
+				mmid =>		$mmid,
+				uid =>		$m2_user->{uid},
+				val =>		($is_fair ? '+1' : '-1'),
+				-ts =>		"NOW()",
+				active =>	1,
+			});
+		} else {
+			# If a row was not successfully updated, probably the
+			# moderation in question was assigned to more than
+			# $consensus users, and the other users pushed it up to
+			# the $consensus limit already.  Or this user has
+			# gotten bad M2 and has negative tokens.
+			$self->sqlInsert("metamodlog", {
+				mmid =>		$mmid,
+				uid =>		$m2_user->{uid},
+				val =>		($is_fair ? '+1' : '-1'),
+				-ts =>		"NOW()",
+				active =>	0,
+			});
+		}
+
+	}
+
+	$self->sqlUpdate("users_info", {
+		-m2fairvotes	=> "m2fairvotes+$voted_fair",
+		-m2unfairvotes	=> "m2unfairvotes+$voted_unfair",
+	}, "uid=$m2_user->{uid}");
 }
 
 ########################################################
@@ -3467,19 +3687,29 @@ sub setCommentCleanup {
 # moderations done to a comment.  If no mods, return undef.  Tiebreakers
 # break ties, first tiebreaker found wins.  "cid" is a key in moderatorlog
 # so this is not a table scan.
+# A clever thing to do here would be to take the SUM of all mods; if
+# positive, only consider positive mod reasons, and if negative, only
+# negative.  If zero, use the current logic. XXX - Jamie 2002/08/14
 sub getCommentMostCommonReason {
 	my($self, $cid, @tiebreaker_reasons) = @_;
+
+	my $reasons = $self->getReasons();
+	my $listable_reasons = join(",",
+		sort grep { $reasons->{$_}{listable} }
+		keys %$reasons);
+	return undef if !$listable_reasons;
 	my $hr = $self->sqlSelectAllHashref(
 		"reason",
-		"reason, COUNT(*) as c",
+		"reason, COUNT(*) AS c",
 		"moderatorlog",
-		"cid=$cid AND active=1",
+		"cid=$cid AND active=1
+		 AND reason IN ($listable_reasons)",
 		"GROUP BY reason"
 	);
-	# Overrated and Underrated can't show up as a comment's reason.
-	delete $hr->{9}; delete $hr->{10};
+
 	# If no mods, return undef.
 	return undef if !keys %$hr;
+
 	# Sort first by popularity and secondarily by reason.
 	# "reason" is a numeric field, so we sort $a<=>$b numerically.
 	my @sorted_keys = sort {
@@ -3506,7 +3736,6 @@ sub getCommentMostCommonReason {
 	# sorted_keys is already sorted, making this easy).
 	return $sorted_keys[0];
 }
-
 
 ########################################################
 sub getCommentReply {
@@ -4469,9 +4698,7 @@ sub updateStory {
 
 
 	$self->sqlUpdate('discussions', $data, 
-	'sid = ' . $self->sqlQuote($story->{sid}));
-
-	$data = {};
+		'sid = ' . $self->sqlQuote($story->{sid}));
 
 	$data = {
 		uid		=> $story->{uid},
@@ -4487,7 +4714,7 @@ sub updateStory {
 	};
 
 	$self->sqlUpdate('stories', $data, 
-	'sid=' . $self->sqlQuote($story->{sid}));
+		'sid=' . $self->sqlQuote($story->{sid}));
 
 	$self->sqlUpdate('story_text', {
 		bodytext	=> $story->{bodytext},
@@ -4539,6 +4766,10 @@ sub getSlashConf {
 	$conf{allow_deletions}  ||= 1;
 	$conf{authors_unlimited}  = 100 if !defined $conf{authors_unlimited}
 		|| $conf{authors_unlimited} == 1;
+		# m2_consensus must be odd
+	$conf{m2_consensus}       = 2*int(($conf{m2_consensus} || 5)/2) + 1
+		if !$conf{m2_consensus}
+		   || ($conf{m2_consensus}-1)/2 != int(($conf{m2_consensus}-1)/2);
 	# For all fields that it is safe to default to -1 if their
 	# values are not present...
 	for (qw[min_expiry_days max_expiry_days min_expiry_comm max_expiry_comm]) {
@@ -4553,12 +4784,6 @@ sub getSlashConf {
 	# -- pudge
 	for (qw[rootdir absolutedir imagedir basedir]) {
 		$conf{$_} =~ s|/+$||;
-	}
-
-	if (!$conf{m2_maxbonus} || $conf{m2_maxbonus} > $conf{maxkarma}) {
-		# this was changed on slashdot in 6/2001
-		# $conf{m2_maxbonus} = int $conf{goodkarma} / 2;
-		$conf{m2_maxbonus} = 1;
 	}
 
 	my $fixup = sub {
@@ -4579,6 +4804,7 @@ sub getSlashConf {
 		for my $str (@$ar) {
 			my($k, $v) = split(/=/, $str);
 			$v = 1 if !defined($v);
+			$v = [ split ",", $v ] if $v =~ /,/;
 			$hr->{$k} = $v;
 		}
 		$hr;
@@ -4595,9 +4821,6 @@ sub getSlashConf {
 		fixhrefs =>			[ ],
 		lonetags =>			[ ],
 		op_exclude_from_countdaily =>   [qw( rss )],
-		reasons =>			[qw( Normal Offtopic Flamebait Troll Redundant
-						     Insightful Interesting Informative Funny
-						     Overrated Underrated )],
 		stats_reports =>		[ $conf{adminmail} ],
 		submit_categories =>		[ ],
 	);
@@ -4608,6 +4831,16 @@ sub getSlashConf {
 		comments_perday_bykarma =>	[  -1 => 2,		25 => 25,	99999 => 50          ],
 		karma_adj =>			[ -10 => 'Terrible',	-1 => 'Bad',	    0 => 'Neutral',
 						   12 => 'Positive',	25 => 'Good',	99999 => 'Excellent' ],
+		m2_consequences =>		[ 0.00 => [qw(  0    +2   -100 -1   )],
+						  0.15 => [qw( -2    +1    -40 -1   )],
+						  0.30 => [qw( -0.5  +0.5  -20  0   )],
+						  0.35 => [qw(  0     0    -10  0   )],
+						  0.49 => [qw(  0     0     -4  0   )],
+						  0.60 => [qw(  0     0     +1  0   )],
+						  0.70 => [qw(  0     0     +2  0   )],
+						  0.80 => [qw( +0.01 -1     +3  0   )],
+						  0.90 => [qw( +0.02 -2     +4  0   )],
+						  1.00 => [qw( +0.05  0     +5 +0.5 )],	]
 	);
 	for my $key (keys %conf_fixup_arrays) {
 		if (defined($conf{$key})) {
@@ -4648,8 +4881,6 @@ sub getSlashConf {
 		my $regex = '(\s+)' . "((?:<[^>]+>)*$dotchar+)" . '(\S)';
 		$conf{comment_nonstartwordchars_regex} = qr{$regex}i;
 	}
-
-	$conf{badreasons} = 4 unless defined $conf{badreasons};
 
 	# for fun ... or something
 	$conf{colors} = $self->sqlSelect("block", "blocks", "bid='colors'");
@@ -5509,7 +5740,8 @@ sub getVar {
 
 ########################################################
 sub setUser {
-	my($self, $uid, $hashref) = @_;
+	my($self, $uid, $hashref, $options) = @_;
+#use Data::Dumper; print STDERR "setUser params: " . Dumper([ $uid, $hashref, $options ]) if $options;
 	my(@param, %update_tables, $cache);
 	my $tables = [qw(
 		users users_comments users_index
@@ -5554,34 +5786,52 @@ sub setUser {
 		}
 	}
 
+	my $rows = 0;
 	for my $table (keys %update_tables) {
-		my %minihash;
-		for my $key (@{$update_tables{$table}}){
-			$minihash{$key} = $hashref->{$key}
-				if defined $hashref->{$key};
+		my $where = "uid=$uid";
+		my %minihash = ( );
+		for my $key (@{$update_tables{$table}}) {
+			if (defined $hashref->{$key}) {
+				$minihash{$key} = $hashref->{$key};
+				if ($options->{and_where}) {
+					my $and_where = undef;
+					(my $clean_val = $key) =~ s/^-//;
+					if (defined($options->{and_where}{$clean_val})) {
+						$and_where = $options->{and_where}{$clean_val};
+					} elsif (defined($options->{and_where}{"-$clean_val"})) {
+						$and_where = $options->{and_where}{"-$clean_val"};
+					}
+					if (defined($and_where)) {
+						$where .= " AND ($and_where)";
+					}
+#print STDERR "key '$key' minihash{$key} '$minihash{$key}' clean_val '$clean_val' and_where '$and_where' where '$where' options " . Dumper($options) if defined($options) && keys %$options;
+				}
+			}
 		}
-		$self->sqlUpdate($table, \%minihash, 'uid=' . $uid, 1);
+		$rows += $self->sqlUpdate($table, \%minihash, $where);
 	}
 	# What is worse, a select+update or a replace?
 	# I should look into that. (REPLACE is faster) -Brian
 	for (@param)  {
 		if ($_->[1] eq "") {
-			$self->sqlDelete('users_param', 
+			$rows += $self->sqlDelete('users_param', 
 				"uid = $uid AND name = " . $self->sqlQuote($_->[0]));
 		} elsif ($_->[0] eq "acl") {
-			$self->sqlReplace('users_acl', {
+			$rows += $self->sqlReplace('users_acl', {
 				uid	=> $uid,
 				name	=> $_->[1]{name},
 				value	=> $_->[1]{value},
 			});
 		} else {
-			$self->sqlReplace('users_param', {
+			$rows += $self->sqlReplace('users_param', {
 				uid	=> $uid,
 				name	=> $_->[0],
 				value	=> $_->[1],
 			}) if defined $_->[1];
 		}
 	}
+
+	return $rows;
 }
 
 ########################################################

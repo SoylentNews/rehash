@@ -582,7 +582,6 @@ DELETE FROM templates WHERE name='listRepository' AND page='repository' AND sect
 ALTER TABLE string_param MODIFY COLUMN code VARCHAR(128) NOT NULL;
 ALTER TABLE subsections ADD COLUMN alttext VARCHAR(40) NOT NULL;
 
-
 # End of T_2_3_0_38, Start of T_2_3_0_39
 
 ALTER TABLE metamodlog ADD INDEX mmid (mmid);
@@ -596,18 +595,26 @@ ALTER TABLE metamodlog ADD INDEX mmid (mmid);
 ALTER TABLE sections DROP INDEX section;
 ALTER TABLE sections ADD UNIQUE section (section);
 
-# Ok, you will have a few new things you need to do at this point
+# Ok, you will have a few new things you need to do at this point.
+#
 # 1) If you use zoo images make sure the eof/fof gifs are installed.
-# 2) You will also need to make sure the new task for zoo is in place if you want FOF/EOF
-# 3) If number two is true then you need to run the rebuild script for users.
-#    WARNING number three may take an hour or so depending on the size of  your database 
-#    (like Slashdot will probably be an hour or so). This won't hurt anything but during 
-#    the process users will not have their friends till the script gets to their account.
-#    FOF/EOF will show up slowly as the task works its way through them. Never run multiple
-#    copies of the task at once. It does 2000 entries at a time so it may take some time 
-#    to catch up if you have a large DB. This means it will only process as shipped 2K*24 
-#    entries per-day. This is far more then what even Slashdot does in a give day.
-#    -Brian
+#
+# 2) You will also need to make sure the new task for zoo is in place if
+# you want FOF/EOF
+#
+# 3) If number two is true then you need to run the rebuild script for
+# users.
+#
+#    WARNING number three may take an hour or so depending on the size of
+#    your database (like Slashdot will probably be an hour or so). This
+#    won't hurt anything but during the process users will not have their
+#    friends till the script gets to their account.  FOF/EOF will show up
+#    slowly as the task works its way through them. Never run multiple
+#    copies of the task at once. It does 2000 entries at a time so it
+#    may take some time to catch up if you have a large DB. This means
+#    it will only process as shipped 2000*24 entries per-day. This is far
+#    more then what even Slashdot does in a given day.  -Brian
+
 DROP TABLE IF EXISTS people_log;
 CREATE TABLE people_log (
 	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
@@ -619,5 +626,46 @@ CREATE TABLE people_log (
 );
 
 INSERT INTO vars (name,value,description) VALUES ('zoo_process_limit','2000','Number of FOF/FOE to process during job run');
+
 # SLASHCODE LAST UPDATED HERE
 # LINUX.COM LAST UPDATED HERE
+
+DELETE FROM vars WHERE name IN ('badreasons', 'm2_bonus', 'm2_consensus_trigger', 'm2_dissension_penalty', 'm2_maxunfair', 'm2_mincheck', 'm2_minority_trigger', 'm2_modlog_cycles', 'm2_modlog_pos', 'm2_penalty', 'm2_reward_pool', 'm2_toomanyunfair', 'reasons', 'token_retention');
+INSERT INTO vars (name, value, description) VALUES ('m2_comments','10','Number of comments for meta-moderation - if more than about 15, doublecheck that users_info.mods_saved is large enough');
+INSERT INTO vars (name, value, description) VALUES ('m2_consensus', '7', 'Number of M2 votes per M1 before it is reconciled by consensus - if not odd, will be forced to next highest odd number');
+INSERT INTO vars (name, value, description) VALUES ('m2_consensus_waitmult', '1', 'How long should old M2-needing mods wait for the fresh blood?');
+INSERT INTO vars (name, value, description) VALUES ('m2_consequences','0.00=0,+2,-100,-1|0.15=-5,+1,-40,-1|0.30=-1,+0.5,-20,0|0.35=0,0,-10,0|0.49=0,0,-4,0|0.60=0,0,+1,0|0.70=0,0,+2,0|0.80=+0.01,-2,+3,0|0.90=+0.02,-5,+4,0|1.00=+0.05,0,+5,+0.5','Rewards and penalties for M2ers and moderator, up to the given amount of fairness (0.0-1.0): numbers are 1, tokens to fair-voters, 2, tokens to unfair-voters, 3, tokens to moderator, and 4, karma to moderator');
+INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_max','25','Maximum number of tokens a user can have, for being on the consensus side of an M2 or being judged Fair, to merit gaining tokens');
+INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_min','-999999','Minimum number of tokens a user must have, for being on the consensus side of an M2 to merit gaining tokens');
+UPDATE vars SET name='m2_maxbonus_karma' WHERE name='m2_maxbonus';
+
+
+ALTER TABLE moderatorlog ADD COLUMN m2status TINYINT DEFAULT '0' NOT NULL;
+ALTER TABLE metamodlog DROP COLUMN flag;
+ALTER TABLE metamodlog ADD COLUMN active TINYINT DEFAULT '1' NOT NULL;
+ALTER TABLE users_info DROP COLUMN lastmmid;
+ALTER TABLE users_info ADD COLUMN m2info VARCHAR(64) DEFAULT '' NOT NULL AFTER lastgranted;
+ALTER TABLE users_info ADD COLUMN mods_saved VARCHAR(120) DEFAULT '' NOT NULL AFTER lastmm;
+DROP TABLE IF EXISTS modreasons;
+CREATE TABLE modreasons (
+	id tinyint UNSIGNED NOT NULL AUTO_INCREMENT,
+	name char(32) DEFAULT '' NOT NULL,
+	m2able tinyint DEFAULT '1' NOT NULL,
+	listable tinyint DEFAULT '1' NOT NULL,
+	val tinyint DEFAULT '0' NOT NULL,
+	fairfrac float DEFAULT '0.5' NOT NULL,
+	PRIMARY KEY (id)
+) TYPE=myisam;
+# Insert your site's reasons, of course, if they differ.
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 0, 'Normal',	0, 0,  0, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 1, 'Offtopic',	1, 1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 2, 'Flamebait',	1, 1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 3, 'Troll',		1, 1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 4, 'Redundant',	1, 1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 5, 'Insightful',	1, 1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 6, 'Interesting',	1, 1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 7, 'Informative',	1, 1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 8, 'Funny',		1, 1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 9, 'Overrated',	0, 0, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES (10, 'Underrated',	0, 0,  1, 0.5);
+

@@ -4,9 +4,7 @@ __description__
 Template that describes the message that is printed after a user
 metamoderates.
 
-* changes = arrayref of arrayref of UIDs that have changes in points
 * count = number of metamoderations
-* metamod = hashref of various metamod info (unfair == number of unfairs, fair == number of fairs)
 __title__
 
 __page__
@@ -16,16 +14,8 @@ en_US
 __name__
 metaModerate
 __template__
-[% IF count > 0 %]
-[% IF user.seclev > 10 %]<UL>[% FOR c = changes %]
-<LI>Updating UID #[% c.0 %] for [% c.1 %]
-[% END %]</UL>[% END %]
-[% count %] moderations have been meta moderated.  Thanks for participating.
+Your moderations have been meta moderated.  Thanks for participating.
 You may wanna go back <A HREF="[% constants.rootdir %]/">home</A> or perhaps to
 <A HREF="[% constants.rootdir %]/users.pl">your user page</A>.
-[% IF user.seclev > 10 %]<P>Total unfairs is [% metamod.unfair %][% END %]
-[% ELSE %]
-Hey, you didn't actually metamoderate anything! Perhaps you want to <A HREF="[% constants.rootdir %]/metamod.pl">go back and try again</A> or <A HREF="[% constants.rootdir %]/">forget it</A>.
-[% END %]
 __seclev__
 1000

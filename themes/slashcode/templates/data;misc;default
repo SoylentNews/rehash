@@ -97,9 +97,9 @@ each submission of [% env.script_name %] in order to allow everyone to have a fa
 
 [% new_comments %] comments becomes [% new_comments * constants.tokenspercomment %] tokens.
 [% IF stirredpoints %]Stirred out [% stirredpoints %] points, so 
-[%- ELSE %]So[% END %] the total token pool=[% tokenpool %]t
+[%- ELSE %]So[% END %] the total number of tokens=[% num_tokens %]
 First [% last_user  * constants.m1_eligible_percentage %] accounts available.
-Eligible: [% eligible %] / Start at [% st %] end at [% fi %] / First score is [% constants.m1_eligible_hitcount %].
+Eligible: [% eligible %] (min clicks [% constants.m1_eligible_hitcount %]) / Start at [% start %] ([% least %] clicks), end at [% end %] ([% most %] clicks)
 Incremented token-count on [% num_updated %] users.
 
 [% CASE 'moderatord_tokengrantmsg' %]

@@ -19,7 +19,7 @@ my $PROGNAME = basename($0);
 my (%opts);
 # Remember to doublecheck these match usage()!
 usage('Options used incorrectly') unless getopts('hFD:u:v', \%opts);
-usage() if ($opts{'h'} || !keys %opts);
+usage() if $opts{'h'};
 version() if $opts{'v'};
 	
 $opts{'u'} ||= 'slash';
@@ -30,6 +30,7 @@ usage('Invalid number of meta-moderations')
 createEnvironment($opts{u});
 $slashdb = getCurrentDB();
 $constants = getCurrentStatic();
+my $reasons = $slashdb->getReasons();
 
 # Insure we don't exceed the maximum number of moderations that can be made.
 {
@@ -61,9 +62,8 @@ $constants = getCurrentStatic();
 		my($m2user, $comments);
 		if ($m2uid) {
 			$m2user = $slashdb->getUser($m2uid);
-			$comments = $slashdb->getMetamodComments(
-				$m2user,
-				$constants->{m2_comments}
+			$comments = $slashdb->getMetamodsForUser(
+				$m2user, $constants->{m2_comments}
 			);
 
 			# OK, so this guy is finished as an M2.
@@ -85,19 +85,33 @@ EOT
 		}
 
 		for (@{$comments}) {
-			# Our M2 "vote" which is randomly determined with a 
-			# heavy bias towards "fair".
-			my $val = (rand 11 > 1) ? '+' : '-';
-			$slashdb->sqlInsert("metamodlog", {
-				-mmid => $_->{id},
-				-uid  => $m2user->{uid},
-				-val  => ($val eq '+') ? '+1' : '-1',
-				-ts   => "now()",
-				-flag => 10,
+			# Our M2 vote starts off with a bias towards "fair".
+			my $unfair_frac = 0.15;
+			$unfair_frac = 0.50 if $reasons->{$_->{reason}}{val} == -1;
+			# Some mods are more likely to be unfair than others.
+			# They are just bad mods.  Don't hold it against them.
+			my $old_rand = rand(2**30);
+			srand($_->{id});
+			my $mod_bias = rand(2)*rand(2);
+			$unfair_frac *= $mod_bias;
+			# And some users are more likely to vote fair or unfair
+			# than others:  about 10 percentage points (up or down)
+			# is the average variance.
+			srand($m2user->{uid});
+			my $user_bias = rand(0.3)+rand(0.3)-0.3;
+			$unfair_frac += $user_bias;
+			# Oh, and try to keep the random flow going outside
+			# this little hiccup of nonrandomness.
+			srand($old_rand);
+			# OK, decide whether the vote is for fair or unfair.
+			my $is_fair = (rand(1) < $unfair_frac) ? 0 : 1;
+
+			# Do the metamod.
+			$slashdb->setMetaMod($m2user, {
+				$_->{id}, { is_fair => $is_fair }
 			});
-			$slashdb->sqlUpdate('moderatorlog', {
-				-m2count => 'm2count+1',
-			}, "id=$_->{id}");
+
+			# Check where the m2count got to.
 			my $m2_count = $slashdb->sqlSelect(
 				'm2count',
 				'moderatorlog',
@@ -107,24 +121,18 @@ EOT
 			$m2count++;
 			if ($opts{D} > 2) {
 				printf <<EOT, $m2_count, $constants->{m2_consensus}
-M2($m2count): ID #$_->{id}, M2Mod = $m2user->{uid}, Val = $val, C=%d/%d 
+M2($m2count): ID #$_->{id}, M2Mod = $m2user->{uid}, is_fair = $is_fair, C=%d/%d 
 EOT
 
 			}
 		}
-		# This user has now metamoderated. We should clear the 
-		# lastmmid field.
-		$slashdb->setUser($m2user->{uid}, { lastmmid => 0 });
 
 		$curcount = getM2ClosedCount() if ! $opts{F};
 	}} while (!$opts{F} && $curcount-$startcount < $opts{num_closed}) ||
 		$opts{F};
 	} # LOOP
-		
-	my $now_closed = $slashdb->sqlCount(
-		'moderatorlog',
-		"m2count >= $constants->{m2_consensus}"
-	);
+
+	my $now_closed = getM2ClosedCount();
 	my $closed = $now_closed - $cur_closed;
 
 	printf "Exhausted M2 on %d users\n", getRandomUID('size');
@@ -173,7 +181,7 @@ sub getRandomUID {
 		$uid_list = $slashdb->sqlSelectAll(
 			'users.uid',
 			'users, users_prefs, users_info',
-			"karma > 0 AND willing > 0 AND users.uid < $max_uid AND
+			"karma >= 0 AND willing > 0 AND users.uid < $max_uid AND
 			users.uid=users_prefs.uid AND users.uid=users_info.uid
 			AND users.uid!=$constants->{anonymous_coward_uid}"
 		);

@@ -1163,9 +1163,9 @@ sub prepareUser {
 		}
 	}
 
-	if ($user->{commentlimit} > $constants->{breaking} &&
-	    $user->{mode} ne 'archive')
-	{
+	if ($user->{commentlimit} > $constants->{breaking}
+		&& $user->{mode} ne 'archive'
+		&& $user->{mode} ne 'metamod') {
 		$user->{commentlimit} = int($constants->{breaking} / 2);
 		$user->{breaking} = 1;
 	} else {
@@ -1250,7 +1250,9 @@ Hashref of cleaned-up data.
 =cut
 
 {
-	my %multivalue = map {($_ => 1)} qw(section_multiple);
+	my %multivalue = map {($_ => 1)} qw(
+		section_multiple
+	);
 
 	# fields that are numeric only
 	my %nums = map {($_ => 1)} qw(
@@ -1350,7 +1352,7 @@ sub filter_param {
 	if (exists $nums{$key}) {
 		$data = fixint($data);
 	} elsif (exists $alphas{$key}) {
-		$data =~ s|\W+||g;
+		$data =~ s|[^a-zA-Z0-9_]+||g;
 	} elsif (exists $special{$key}) {
 		$special{$key}->($data);
 	} else {

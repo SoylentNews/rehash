@@ -16,7 +16,7 @@ __template__
 		<TD>
 		<A NAME="[% cid %]"><H4>[% subject %]</H4></A>
 		by [% nickname | strip_literal %] on [% Slash.timeCalc(time) %]
-		[% UNLESS user.noscores %] (Score:[% points %][% IF reason %], [% constants.reasons.$reason %][% END %])[% END %]
+		[% UNLESS user.noscores %] (Score:[% points %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
 		(<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</A>)
 		[% UNLESS is_anon %]<BR>(<A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">User #[% uid %] Info</A>)
 		[% IF homepage && homepage.length > 8 %]<A HREF="[% homepage %]">[% homepage | strip_literal %]</A>[% END %]

@@ -294,7 +294,7 @@ INSERT INTO users_index (uid, extid, exaid, exsect, exboxes, maxstories, noboxes
 # Dumping data for table 'users_info'
 #
 
-INSERT INTO users_info (uid, totalmods, realname, bio, tokens, lastgranted, karma, maillist, totalcomments, lastmm, lastaccess, lastmmid, m2fair, m2unfair, m2fairvotes, m2unfairvotes, upmods, downmods, session_login) VALUES (1,0,'Anonymous Coward','',0,'0000-00-00',0,0,0,'0000-00-00','0000-00-00',0,0,0,0,0,0,0,0);
+INSERT INTO users_info (uid, totalmods, realname, bio, tokens, lastgranted, karma, maillist, totalcomments, lastmm, lastaccess, m2fair, m2unfair, m2fairvotes, m2unfairvotes, upmods, downmods, session_login) VALUES (1,0,'Anonymous Coward','',0,'0000-00-00',0,0,'0000-00-00','0000-00-00',0,0,0,0,0,0,0,0);
 
 #
 # Dumping data for table 'users_param'

@@ -121,6 +121,27 @@ sub createSelect {
 
 	if (ref $hashref eq 'ARRAY') {
 		$hashref = { map { ($_, $_) } @$hashref };
+	} else {
+		# If $hashref is a hash whose elements are also hashrefs, and
+		# they all have the field "name", then copy it into another
+		# hashref that pulls those "name" fields up one level.  Talk
+		# about wacky convenience features!
+		my @keys = keys %$hashref;
+		my $all_name = 1;
+		for my $key (@keys) {
+			if (!ref($hashref->{$key})
+				|| !ref($hashref->{$key}) eq 'HASH'
+				|| !defined($hashref->{$key}{name})) {
+				$all_name = 0;
+				last;
+			}
+		}
+		if ($all_name) {
+			$hashref = {
+				map { ($_, $hashref->{$_}{name}) }
+				keys %$hashref
+			};
+		}
 	}
 
 	return unless (ref $hashref eq 'HASH' && keys %$hashref);

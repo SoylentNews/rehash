@@ -20,48 +20,19 @@ sub main {
 
 	header(getData('header'), $section->{section});
 
-	my $ineligible = $user->{is_anon} || $user->{rtbl} ||
-			 !$slashdb->checkForMetaModerator($user);		
-
 	if (!$constants->{allow_moderation}) {
 		print getData('no_moderation');
-	} elsif ($ineligible) {
+	} elsif (!$slashdb->metamodEligible($user)) {
 		print getData('not-eligible');
+	} elsif ($op eq 'MetaModerate') {
+		metaModerate();
 	} else {
-		#my $last =
-		#	($slashdb->getModeratorLast($user->{uid}))->{lastmmid};
-		#unless ($last) {
-			#$last = $slashdb->getModeratorLogRandom($uid);
-			#$slashdb->setUser($user->{uid}, {
-			#	lastmmid => $last,
-			#});
-		#}
-
-		if ($op eq 'MetaModerate') {
-			metaModerate();
-		} else {
-			displayTheComments();
-		}
+		displayTheComments();
 	}
 
 	writeLog($op);
 	footer();
 }
-
-#################################################################
-# This is deprecated and not used in this scope.
-# 	- Cliff 08/24/01
-#
-#sub karmaBonus {
-#	my $constants = getCurrentStatic();
-#	my $user = getCurrentUser();
-#
-#	my $x = $constants->{m2_maxbonus} - $user->{karma};
-#
-#	return 0 unless $x > 0;
-#	return 1 if rand($constants->{m2_maxbonus}) < $x;
-#	return 0;
-#}
 
 #################################################################
 sub metaModerate {
@@ -71,50 +42,27 @@ sub metaModerate {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
-	my(%metamod, @mmids);
-	my $y = $constants->{m2_comments};
-	$metamod{unfair} = $metamod{fair} = 0;
-	for (keys %{$form}) {
-		# Meta mod form data can only be a '+' or a '-' so we apply some
-		# protection from taint.
-		next if $form->{$_} !~ /^[+-]$/; # bad input, bad!
-		if (/^mm(\d+)$/) {
-			# Sanity check. If this isn't right, then someone's
-			# fiddling with the form.
-			if ($y < 1) {
-				print getData('unexpected_item');
-				return;
-			}		
-			push(@mmids, $1) if $form->{$_};
-			$metamod{unfair}++ if $form->{$_} eq '-';
-			$metamod{fair}++ if $form->{$_} eq '+';
-			$y--;
-		}
+	# The user is only allowed to metamod the mods they were given.
+	my @mods_saved = $slashdb->getModsSaved();
+	my %mods_saved = map { ( $_, 1 ) } @mods_saved;
+
+	my %m2s = ( );
+	for my $key (keys %{$form}) {
+		# Metamod form data can only be a '+' or a '-'.
+		next unless $form->{$key} =~ /^[+-]$/;
+		# We're only looking for the metamod inputs.
+		next unless $key =~ /^mm(\d+)$/;
+		my $mmid = $1;
+		# Only the user's given mods can be used.
+		next unless $mods_saved{$mmid};
+		# This one's valid.  Store its data in %m2s.
+		$m2s{$mmid}{is_fair} = ($form->{$key} eq '+') ? 1 : 0;
 	}
 
-	my %m2victims;
-	for (@mmids) {
-		$m2victims{$_} = [ $slashdb->getModeratorLog($_, 'uid'),
-				   $form->{"mm$_"} ];
-	}
+	# The setMetaMod() method does all the heavy lifting here.
+	$slashdb->setMetaMod($user, \%m2s);
 
-	# Obsoleted by consensus moderation:
-	#	vars.m2_mincheck, vars.m2_maxunfair, vars.m2_toomanyunfair
-	# M2 validation is now determined by long term analysis. This analysis
-	# is now left to the slashd moderation Task, which can vary by theme.
-	#
-	# Note the use of a naked "10" here for the M2 flag. This is used
-	# to denote M2 entries that have yet to be reconciled.
-	my $changes = $slashdb->setMetaMod(\%m2victims, 10, scalar time);
-	my $count = $constants->{m2_comments} - $y;
-
-	slashDisplay('metaModerate', {
-		changes	=> $changes,
-		count	=> $count,
-		metamod	=> \%metamod,
-	});
-
-	$slashdb->setModeratorVotes($user->{uid}, \%metamod) if $count > 0;
+	print getData('thanks');
 }
 
 #################################################################
@@ -124,56 +72,21 @@ sub displayTheComments {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
-	my $comments = $slashdb->getMetamodComments(
+	my $reasons = $slashdb->getReasons();
+	my $comments = $slashdb->getMetamodsForUser(
 		$user, $constants->{m2_comments}
 	);
 
 	# We set this to prevent the "Reply" and "Parent" links from
 	# showing up. If the metamoderator needs context, they can use
 	# the CID link.
-	$user->{mode} = 'archive';
+	$user->{mode} = 'metamod';
 
 	slashDisplay('dispTheComments', {
 		comments 	=> $comments,
+		reasons		=> $reasons,
 	});
 }
-
-#################################################################
-# This is going to break under replication
-#
-# Yeah, this should be a lot more flexible, but lets leave that
-# issue for when we revamp security. For now, we'll just use
-# $slashdb->checkForMetaModerator(). What we do lose is the
-# reporting behind WHY a user can't M2, which isn't all that
-# critical right now, since they will get an error of some sort.
-#						- Cliff
-#sub isEligible {
-#	my $slashdb = getCurrentDB();
-#	my $constants = getCurrentStatic();
-#	my $user = getCurrentUser();
-#
-#	my $tuid = $slashdb->countUsers();
-#	my $last = $slashdb->getModeratorLast($user->{uid});
-#
-#	my $result = slashDisplay('isEligible', {
-#		user_count	=> $tuid,
-#		'last'		=> $last,
-#	}, { Return => 1, Nocomm => 1 });
-#
-#	if ($result ne 'Eligible') {
-#		print $result;
-#		return 0;
-#	}
-#
-#	# Eligible for M2. Determine M2 comments by selecting random starting
-#	# point in moderatorlog.
-#	unless ($last->{'lastmmid'}) {
-#		$last->{'lastmmid'} = $slashdb->getModeratorLogRandom();
-#		$slashdb->setUser($user->{uid}, { lastmmid => $last->{'lastmmid'} });
-#	}
-#
-#	return $last->{'lastmmid'}; # Hooray!
-#}
 
 #################################################################
 createEnvironment();

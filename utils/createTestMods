@@ -142,11 +142,9 @@ my(%comments, %comment_authors);
 			};
 
 			my($modval, $reason, $active);
-			$reason = int(rand $#{$constants->{reasons}}) + 1;
-			$modval = ($reason > $constants->{badreasons}) ?
-				1 : -1;
-			$modval = -1 if $reason == 8;
-			$modval = 1 if $reason == 9;
+			my $reasons = $slashdb->getReasons();
+			$reason = (keys %$reasons)[rand(scalar(keys %$reasons)-1) + 1];
+			$modval = $reasons->{$reason}{val};
 			$slashdb->setModeratorLog(
 				$comment,
 				$uid,

@@ -171,6 +171,22 @@ INSERT INTO dateformats (id, format, description) VALUES (17,'%Y.%m.%d %k:%M','1
 
 
 #
+# Dumping data for table 'modreasons'
+#
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 0, 'Normal',        0, 0,  0, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 1, 'Offtopic',      1, 1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 2, 'Flamebait',     1, 1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 3, 'Troll',         1, 1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 4, 'Redundant',     1, 1, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 5, 'Insightful',    1, 1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 6, 'Interesting',   1, 1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 7, 'Informative',   1, 1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 8, 'Funny',         1, 1,  1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES ( 9, 'Overrated',     0, 0, -1, 0.5);
+INSERT INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES (10, 'Underrated',    0, 0,  1, 0.5);
+
+
+#
 # Dumping data for table 'pollanswers'
 #
 
@@ -713,7 +729,7 @@ INSERT INTO vars (name, value, description) VALUES ('istroll_downmods_subnet','6
 INSERT INTO vars (name, value, description) VALUES ('istroll_downmods_user','4','Downmods at which a user is considered a troll');
 INSERT INTO vars (name, value, description) VALUES ('istroll_ipid_hours','72','Hours back that getIsTroll checks IPs for comment mods');
 INSERT INTO vars (name, value, description) VALUES ('istroll_uid_hours','72','Hours back that getIsTroll checks uids for comment mods');
-INSERT INTO vars (name, value, description) VALUES ('karma_adj','-10=Terrible|-1=Bad|0=Neutral|12=Positive|25=Good|99999=Excellent','Adjectives that describe karma, used if karma_obfuscate is set (best to keep aligned with badkarma, m2_maxbonus, and goodkarma)');
+INSERT INTO vars (name, value, description) VALUES ('karma_adj','-10=Terrible|-1=Bad|0=Neutral|12=Positive|25=Good|99999=Excellent','Adjectives that describe karma, used if karma_obfuscate is set (best to keep aligned with badkarma, m2_maxbonus_karma, and goodkarma)');
 INSERT INTO vars (name, value, description) VALUES ('karma_obfuscate','0','Should users see, not their numeric karma score, but instead an adjective describing their approximate karma?');
 INSERT INTO vars (name, value, description) VALUES ('label_ui','0','Whether to label some things in the admin ui');
 INSERT INTO vars (name, value, description) VALUES ('lastComments','0','Last time we checked comments for moderation points');
@@ -727,20 +743,13 @@ INSERT INTO vars (name, value, description) VALUES ('m1_eligible_percentage','0.
 INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_end', '0.8888', 'Ending percentage into the pool of eligible moderators (used by moderatord)');
 INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_start', '0.167', 'Starting percentage into the pool of eligible moderators (used by moderatord)');
 INSERT INTO vars (name, value, description) VALUES ('m2_batchsize', 50, 'Maximum number of moderations processed for M2 reconciliation per execution of moderation daemon.');
-INSERT INTO vars (name, value, description) VALUES ('m2_bonus','+1','Bonus for participating in meta-moderation');
-INSERT INTO vars (name, value, description) VALUES ('m2_comments','10','Number of comments for meta-moderation');
-INSERT INTO vars (name, value, description) VALUES ('m2_consensus', 9, 'Number of M2 votes per M1 before it is reconciled by consensus, best if this is an odd number.');
-INSERT INTO vars (name, value, description) VALUES ('m2_consensus_trigger', '0.75', 'Weighted average of consensus votes to dissentor votes which determines a "clear victory" in M2.');
-INSERT INTO vars (name, value, description) VALUES ('m2_dissension_penalty', '-1', 'Penalty assessed for each "head" of dissension when M2 penalties are triggered.');
-INSERT INTO vars (name, value, description) VALUES ('m2_maxbonus','12','Usually 1/2 of goodkarma');
-INSERT INTO vars (name, value, description) VALUES ('m2_maxunfair','0.5','Minimum % of unfairs for M2 penalty (deprecated)');
-INSERT INTO vars (name, value, description) VALUES ('m2_mincheck','3','Usually 1/3 of m2_comments (deprecated)');
-INSERT INTO vars (name, value, description) VALUES ('m2_minority_trigger', '0.05', 'If weighted average of dissension votes to consensus votes is less than this value, this will trigger M2 penalties.');
-INSERT INTO vars (name, value, description) VALUES ('m2_modlog_cycles', '0', 'Number of times Metamoderation has processed the entire moderation log.');
-INSERT INTO vars (name, value, description) VALUES ('m2_modlog_pos', '0', 'Value of ID of last ID processed by a Meta-Moderator. Basically, this an indicator as to where the next set of M2 comments will be.');
-INSERT INTO vars (name, value, description) VALUES ('m2_penalty','-1','Penalty for misuse of meta-moderation (deprecated)');
-INSERT INTO vars (name, value, description) VALUES ('m2_reward_pool', '4', 'Amount of point pool to award users participating in M2. Users cannot receive more than 1 point from the point pool.');
-INSERT INTO vars (name, value, description) VALUES ('m2_toomanyunfair','0.3','Minimum % of unfairs for which M2 is ignored (deprecated)');
+INSERT INTO vars (name, value, description) VALUES ('m2_comments','10','Number of comments for meta-moderation - if more than about 15, doublecheck that users_info.mods_saved is large enough');
+INSERT INTO vars (name, value, description) VALUES ('m2_consensus', '9', 'Number of M2 votes per M1 before it is reconciled by consensus - if not odd, will be forced to next highest odd number');
+INSERT INTO vars (name, value, description) VALUES ('m2_consensus_waitmult', '1', 'How long should old M2-needing mods wait for the fresh blood?');
+INSERT INTO vars (name, value, description) VALUES ('m2_consequences','0.00=0,+2,-100,-1|0.15=-2,+1,-40,-1|0.30=-0.5,+0.5,-20,0|0.35=0,0,-10,0|0.49=0,0,-4,0|0.60=0,0,+1,0|0.70=0,0,+2,0|0.80=+0.01,-1,+3,0|0.90=+0.02,-2,+4,0|1.00=+0.05,0,+5,+0.5','Rewards and penalties for M2ers and moderator, up to the given amount of fairness (0.0-1.0): numbers are 1, tokens to fair-voters, 2, tokens to unfair-voters, 3, tokens to moderator, and 4, karma to moderator');
+INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_max','25','Maximum number of tokens a user can have, for being on the consensus side of an M2 or being judged Fair, to merit gaining tokens');
+INSERT INTO vars (name, value, description) VALUES ('m2_consequences_token_min','-999999','Minimum number of tokens a user must have, for being on the consensus side of an M2 to merit gaining tokens');
+INSERT INTO vars (name, value, description) VALUES ('m2_maxbonus_karma','12','Usually about half of goodkarma');
 INSERT INTO vars (name, value, description) VALUES ('m2_userpercentage','0.9','UID must be below this percentage of the total userbase to metamoderate');
 INSERT INTO vars (name, value, description) VALUES ('mailfrom','admin@example.com','All mail addressed from the site looks like it is coming from here');
 INSERT INTO vars (name, value, description) VALUES ('mainfontface','verdana,helvetica,arial','Fonts');
@@ -834,7 +843,6 @@ INSERT INTO vars (name, value, description) VALUES ('textarea_cols', '50', 'Defa
 INSERT INTO vars (name, value, description) VALUES ('textarea_rows', '10', 'Default # of rows for content TEXTAREA boxes');
 INSERT INTO vars (name, value, description) VALUES ('titlebar_width','100%','The width of the titlebar');
 INSERT INTO vars (name, value, description) VALUES ('today','730512','(Obviated) Today converted to days past a long time ago');
-INSERT INTO vars (name, value, description) VALUES ('token_retention', '0.25', 'Amount of tokens a user keeps at cleanup time.');
 INSERT INTO vars (name, value, description) VALUES ('tokenspercomment','6','Number of tokens to feed the system for each comment');
 INSERT INTO vars (name, value, description) VALUES ('tokensperpoint','8','Number of tokens per point');
 INSERT INTO vars (name, value, description) VALUES ('top10comm_num','10','Number of comments wanted for the Top 10 Comments slashbox (if not 10, you ought to rename it maybe)');

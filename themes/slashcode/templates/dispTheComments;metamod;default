@@ -67,7 +67,7 @@ to do this unless you need more context to fairly meta moderate.<BR><BR></LI>
 %]
 	<TR><TD>
 		Original Discussion: <B><A HREF="[% C.url %]">[% C.title %]</A></B><BR>
-		Rating: <B>[% constants.reasons.${C.modreason} %]</B>.<BR>
+		Rating: <B>[% reasons.${C.modreason}.name %]</B>.<BR>
 		This rating is <B>Unfair
 			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="-">
 			<INPUT TYPE="RADIO" NAME="mm[% C.id %]" VALUE="0" CHECKED>

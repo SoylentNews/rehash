@@ -129,9 +129,9 @@ sub selectComments {
 
 		# Adjust reasons. Do we need a reason?
 		# Are you threatening me?
-		my $reason =  $constants->{reasons}[$C->{reason}];
-		$C->{points} += $user->{"reason_alter_$reason"} 
-				if ($user->{"reason_alter_$reason"});
+		my $reason_name = $slashdb->getReasons()->{$C->{reason}}{name};
+		$C->{points} += $user->{"reason_alter_$reason_name"} 
+				if ($user->{"reason_alter_$reason_name"});
 
 		# Keep your friends close but your enemies closer.
 		# Or ignore them, we don't care.
@@ -430,7 +430,9 @@ sub printComments {
 		if $comments->{$cidorpid}
 			&& $comments->{$cidorpid}{visiblekids};
 
-	$lvl++ if $user->{mode} ne 'flat' && $user->{mode} ne 'archive'
+	$lvl++ if $user->{mode} ne 'flat'
+		&& $user->{mode} ne 'archive'
+		&& $user->{mode} ne 'metamod'
 		&& $cc > $user->{commentspill}
 		&& ( $user->{commentlimit} > $cc ||
 		     $user->{commentlimit} > $user->{commentspill} );
@@ -540,7 +542,8 @@ sub moderatorCommentLog {
 	}
 	return unless @$mods; # skip it, if no mods to show
 
-	my(@return, @reasonHist, $reasonTotal);
+	my($reasons, @return, @reasonHist, $reasonTotal);
+	$reasons = $slashdb->getReasons();
 
 	for my $mod (@$mods) {
 		next unless $mod->{active};
@@ -557,6 +560,7 @@ sub moderatorCommentLog {
 		mods		=> $mods,
 		reasonTotal	=> $reasonTotal,
 		reasonHist	=> \@reasonHist,
+		reasons		=> $reasons,
 		show_cid	=> $show_cid,
 		show_modder	=> $show_modder,
 		mod_to_from	=> $mod_to_from,
@@ -623,8 +627,11 @@ sub displayThread {
 	# Yes it does! - Cliff 9/18/01
 	# 
 	# FYI: 'archive' means we're to write the story to .shtml at the close
-	# of the discussion without page breaks.
-	if ($user->{mode} eq 'flat' || $user->{mode} eq 'archive') {
+	# of the discussion without page breaks.  'metamod' means we're doing
+	# metamoderation.
+	if ($user->{mode} eq 'flat'
+		|| $user->{mode} eq 'archive'
+		|| $user->{mode} eq 'metamod') {
 		$indent = 0;
 		$full = 1;
 	} elsif ($user->{mode} eq 'nested') {
@@ -686,7 +693,11 @@ sub displayThread {
 		last if $displayed >= $user->{commentlimit};
 	}
 
-	if ($hidden && ! $user->{hardthresh} && $user->{mode} ne 'archive') {
+	if ($hidden
+		&& ! $user->{hardthresh}
+		&& $user->{mode} ne 'archive'
+		&& $user->{mode} ne 'metamod') {
+
 		$return .= $const->{cagebigbegin} if $cagedkids;
 		my $link = linkComment({
 			sid		=> $sid,
@@ -699,6 +710,7 @@ sub displayThread {
 		$return .= slashDisplay('displayThread', { 'link' => $link },
 			{ Return => 1, Nocomm => 1 });
 		$return .= $const->{cagebigend} if $cagedkids;
+
 	}
 
 	return $return;
@@ -738,15 +750,16 @@ The 'dispComment' template block.
 
 sub dispComment {
 	my($comment) = @_;
+	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
 	my($comment_shrunk, %reasons);
 
-	if ($form->{mode} ne 'archive' &&
-	    length($comment->{comment}) > $user->{maxcommentsize} &&
-	    $form->{cid} ne $comment->{cid})
+	if ($form->{mode} ne 'archive'
+		&& length($comment->{comment}) > $user->{maxcommentsize}
+		&& $form->{cid} ne $comment->{cid})
 	{
 		# We remove the domain tags so that strip_html will not
 		# consider </a blah> to be a non-approved tag.  We'll
@@ -769,12 +782,7 @@ sub dispComment {
 		$comment->{sig} = "--<BR>$comment->{sig}";
 	}
 
-	my @reasons = ( );
-	@reasons = @{$constants->{reasons}}
-		if $constants->{reasons} and ref($constants->{reasons}) eq 'ARRAY';
-	for (0 .. scalar(@reasons) - 1) {
-		$reasons{$_} = $reasons[$_];
-	}
+	my $reasons = $slashdb->getReasons();
 
 	my $can_mod = _can_mod($comment);
 
@@ -814,13 +822,13 @@ EOT
 
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
-		$can_mod, \%reasons
+		$can_mod, $reasons
 	) if $constants->{comments_hardcoded} && !$user->{light};
 
 	return slashDisplay('dispComment', {
 		%$comment,
 		comment_shrunk	=> $comment_shrunk,
-		reasons		=> \%reasons,
+		reasons		=> $reasons,
 		can_mod		=> $can_mod,
 		is_anon		=> isAnon($comment->{uid}),
 	}, { Return => 1, Nocomm => 1 });
@@ -1159,7 +1167,7 @@ sub _hard_dispComment {
 		$score_to_display .= "(Score:$comment->{points}";
 
 		if ($comment->{reason}) {
-			$score_to_display .= ", $reasons->{$comment->{reason}}";
+			$score_to_display .= ", $reasons->{$comment->{reason}}{name}";
 		}
 
 		$score_to_display .= ")";
@@ -1244,7 +1252,10 @@ EOT
 	# archive mode or if we are in metamod. Nicknames are always equal to
 	# '-' in metamod. This logic is extremely old and could probably be
 	# better formulated.
-	if ($user->{mode} ne 'archive' and $comment->{nickname} ne "-") {
+	if ($user->{mode} ne 'archive'
+		&& $user->{mode} ne 'metamod'
+		&& $comment->{nickname} ne "-") { # this last test probably useless
+
 		my $reply = (linkComment({
 			sid	=> $comment->{sid},
 			pid	=> $comment->{cid},
@@ -1278,6 +1289,7 @@ EOT
 			</TD></TR>
 			<TR><TD>
 EOT
+
 	}
 	return $return;
 }

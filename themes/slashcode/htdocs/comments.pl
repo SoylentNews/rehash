@@ -1306,16 +1306,11 @@ sub moderateCid {
 		}
 	}
 
-	my $val = "-1";
-	if ($reason == 9) { # Overrated
-		$val = "-1";
-	} elsif ($reason == 10) { # Underrated
-		$val = "+1";
-	} elsif ($reason > $constants->{badreasons}) {
-		$val = "+1";
-	}
 	# Add moderation value to display arguments.
-	$dispArgs->{'val'} = $val;
+	my $reasons = $slashdb->getReasons();
+	my $val = $reasons->{$reason}{val};
+	$val = "+1" if $val == 1;
+	$dispArgs->{val} = $val;
 
 	my $scorecheck = $comment->{points} + $val;
 	my $active = 1;

@@ -50,8 +50,8 @@ __template__
 			[% moderation.score %]
 		</TD>
 [% END %]
-		<TD ALIGN="RIGHT"> <B>[% moderation.val %]</B> </TD>
-		<TD> [% constants.reasons.${moderation.reason} %] </TD>
+		<TD ALIGN="RIGHT"> <B>[% IF moderation.val > 0; "+"; END; moderation.val %]</B> </TD>
+		<TD> [% reasons.${moderation.reason}.name %] </TD>
 [% IF show_modder %]
 		<TD> &nbsp; [% moderation.nickname | strip_literal %] (<A HREF="[%
 			constants.rootdir %]/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=[%
@@ -70,7 +70,7 @@ __template__
 	<FONT COLOR="[% user.bg.3 %]"><B>Moderation Totals</B></FONT>:
 	[% FOREACH i = [0 .. reasonHist.max] %]
 		[% IF reasonHist.$i %]
-			[% constants.reasons.$i %]=[% reasonHist.$i %],
+			[% reasons.$i.name %]=[% reasonHist.$i %],
 		[% END %]
 	[% END %]
 	<B>Total=[% reasonTotal %]</B>.
