@@ -1095,11 +1095,11 @@ sub _hard_dispComment {
 	my $people_display;
 	unless ($user->{is_anon} || isAnon($comment->{uid}) || $comment->{uid} == $user->{uid}) {
 		if ($user->{people}{$comment->{uid}} == FRIEND) {
-			$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$comment->{uid}"><IMG BORDER=0 SRC="$constants->{imagedir}/friend.gif" ALT="Friend" TITLE="Friend"></A>|;
+			$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$comment->{uid}"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/friend.gif" ALT="Friend" TITLE="Friend"></A>|;
 		} elsif ($user->{people}{$comment->{uid}} == FOE) {
-			$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$comment->{uid}"><IMG BORDER=0 SRC="$constants->{imagedir}/foe.gif" ALT="Foe" TITLE="Foe"></A> |;
+			$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=deletecheck&amp;uid=$comment->{uid}"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/foe.gif" ALT="Foe" TITLE="Foe"></A> |;
 		} else {
-			$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=addcheck&amp;type=friend&amp;uid=$comment->{uid}"><IMG BORDER=0 SRC="$constants->{imagedir}/neutral.gif" ALT="Alter Relationship" TITLE="Alter Relationship"></A>|;
+			$people_display = qq|<A HREF="$constants->{rootdir}/zoo.pl?op=addcheck&amp;type=friend&amp;uid=$comment->{uid}"><IMG BORDER="0" WIDTH="12" HEIGHT="12" SRC="$constants->{imagedir}/neutral.gif" ALT="Alter Relationship" TITLE="Alter Relationship"></A>|;
 		}
 	}
 	
