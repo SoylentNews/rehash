@@ -19,7 +19,7 @@ version() if $opts{v};
 my $virtuser = $opts{u} || 'slashdot';
 my $width = $opts{w} || 76;
 my $height = $opts{r} || 20;
-my $sleep = $opts{s} || 10;
+my $sleep = $opts{'s'} || 10;
 
 createEnvironment($virtuser);
 
