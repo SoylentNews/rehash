@@ -1784,6 +1784,7 @@ ALTER TABLE sections CHANGE COLUMN last_update last_update TIMESTAMP DEFAULT '20
 UPDATE sections SET defaultsubsection='0' WHERE defaultsubsection IS NULL;
 ALTER TABLE sections CHANGE COLUMN defaultsubsection defaultsubsection SMALLINT UNSIGNED DEFAULT '0' NOT NULL;
 
+ALTER TABLE discussions CHANGE topic topic smallint UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE discussions ADD INDEX topic (topic);
 ALTER TABLE discussions ADD FOREIGN KEY (topic) REFERENCES topics(tid);
 
