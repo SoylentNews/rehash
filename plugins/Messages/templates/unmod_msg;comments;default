@@ -11,6 +11,10 @@ en_US
 __name__
 unmod_msg
 __template__
+[% 
+	cur_score = comment.points + comment.tweak;
+	cur_score = Slash.constrain_score(cur_score);
+%]
 [% IF msg.mode == 1 %]
 
 <P>
@@ -19,7 +23,7 @@ your comment, <B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid
 %]">[% comment.subject %]</A></B>, attached to
 <B><A HREF="[% constants.rootdir %][% discussion.realurl %]">[% discussion.title %]</A></B>.  That moderation has now been undone,
 probably due to the user posting in the discussion after moderating in it.
-Your comment is currently scored <B>[% reasons.${comment.reason}.name %] ([% comment.points %])</B>.
+Your comment is currently scored <B>[% reasons.${comment.reason}.name %] ([% cur_score %])</B>.
 </P>
 
 [% ELSE %]
@@ -34,7 +38,7 @@ Attached to:
 
 That moderation has now been undone, probably due to the user posting
 in the discussion after moderating in it. Your comment is currently
-scored [% reasons.${comment.reason}.name %] ([% comment.points %]).
+scored [% reasons.${comment.reason}.name %] ([% cur_score %]).
 [% END %]
 
 __seclev__
