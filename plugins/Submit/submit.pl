@@ -419,8 +419,15 @@ sub displayForm {
 	my $extracolumns = $slashdb->getSectionExtras($form->{section}
 		|| $section || $constants->{defaultsection}) || [ ];
 
+	my $fixedstory;
+	if ($form->{sub_type} && $form->{sub_type} eq 'plain') {
+		$fixedstory = strip_plaintext(url2html($form->{story}));
+	} else {
+		$fixedstory = strip_html(url2html($form->{story}));
+	}
+
 	slashDisplay('displayForm', {
-		fixedstory	=> strip_html(url2html($form->{story})),
+		fixedstory	=> $fixedstory,
 		savestory	=> $form->{story} && $form->{subj} && $form->{tid},
 		username	=> $form->{name} || $username,
 		fakeemail	=> processSub($fakeemail, $known),
@@ -464,7 +471,11 @@ sub saveSub {
 		}
 	}
 
-	$form->{story} = strip_html(url2html($form->{story}));
+	if ($form->{sub_type} && $form->{sub_type} eq 'plain') {
+		$form->{story} = strip_plaintext(url2html($form->{story}));
+	} else {
+		$form->{story} = strip_html(url2html($form->{story}));
+	}
 	# Maybe $form->{story} = balanceTags($form->{story}) here?
 
 	my $uid ||= $form->{name}
