@@ -13,14 +13,14 @@ display
 __template__
 [% constants.sitename %] Stats for [% day %]
 
-        total: [% total %] ([% grand_total %])([% total_bytes %])
-       unique: [% unique %]
-        users: [% users %]
 [% admin_clearpass_warning %][% backup_lag %]
 
-               UIDs     | IPIDS   | Pages
+               UIDs     | IPIDS    | Pages
+        total: [% users %]   [% unique %]   [% total %]
+  grand total:        -          -   [% grand_total %] ([% total_bytes %])
         posts: [% distinct_comment_posters_uids %]   [% IPIDS %]
      comments: [% comments_uids %]   [% comments_ipids %]   [% comments_page %] ([% comments_bytes %])
+        index:        -          -   [% homepage %]
      articles: [% article_uids %]   [% article_ipids %]   [% article_page %] ([% article_bytes %])
        search: [% search_uids %]   [% search_ipids %]   [% search_page %] ([% search_bytes %])
      journals: [% journal_uids %]   [% journal_ipids %]   [% journal_page %] ([% journal_bytes %])
@@ -33,7 +33,6 @@ __template__
  sub/comments: [% sub_comments %]% of the submissions came from comment posters from this day
 
    total hits: [% total_hits %]
-     homepage: [% homepage %]
 
 -----------------------
 [% FOREACH section = sections -%]
