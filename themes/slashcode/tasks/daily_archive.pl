@@ -24,33 +24,39 @@ $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 	my $basedir = $constants->{basedir};
 
+	# Takes approx. 6 minutes on Slashdot
 	slashdLog('Updating User Logins Begin');
-	$slashdb->updateStamps();
+	$slashdb->updateLastaccess();
 	slashdLog('Updating User Logins End');
 
+	# Takes approx. 30 seconds on Slashdot
 	slashdLog('Update Total Counts Begin');
 	my $totalHits = $slashdb->getVar("totalhits", '', 1);
 	my $count = $slashdb->countAccesslogDaily();
 	$slashdb->setVar("totalhits", $totalHits);
 	slashdLog('Update Total Counts End');
 
+	# Takes approx. 45 minutes on Slashdot
 	slashdLog('Daily Deleting Begin');
 	$slashdb->deleteDaily();
 	slashdLog('Daily Deleting End');
 
 	# Mark discussions as archived.
 	$slashdb->updateArchivedDiscussions();
+
 	# Archive stories.
 	my $limit = $constants->{task_options}{archive_limit} || 500;
 	my $dir   = $constants->{task_options}{archive_dir}   || 'ASC';
 	my $astories = $slashdb->getArchiveList($limit, $dir);
 	if ($astories && @{$astories}) {
+		# Takes approx. 2 minutes on Slashdot
 		slashdLog('Daily Archival Begin');
 		my @count = archiveStories($virtual_user, $constants,
 			$slashdb, $user, $astories);
 		slashdLog("Daily Archival End ($count[0] articles in $count[1]s)");
 	}
 
+	# Takes approx. 5 seconds on Slashdot
 	slashdLog('Begin Daily Comment Recycle');
 	my $msg = $slashdb->deleteRecycledComments();
 	slashdLog("End Daily Comment Recycle ($msg recycled)");
