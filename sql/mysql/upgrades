@@ -117,13 +117,12 @@ INSERT INTO vars (name, value, description) VALUES ('message_threshold','1','Def
 # Start of T_2_3_0_16
 
 # Browser bug workaround
-INSERT INTO vars (name, value, description) VALUES ('comment_nonstartwordchars','.,;:/','Chars which cannot start a word (will be forcibly separated from the rest of the word by a space) - this works around a Windows/MSIE "widening" bug - set blank for no action')
-;
+INSERT INTO vars (name, value, description) VALUES ('comment_nonstartwordchars','.,;:/','Chars which cannot start a word (will be forcibly separated from the rest of the word by a space) - this works around a Windows/MSIE "widening" bug - set blank for no action');
 
 # Size changes and new column -Brian
 ALTER TABLE sections CHANGE url url varchar(128) DEFAULT '' NOT NULL;
-ALTER TABLE sections CHANGE hostname	hostname varchar(128) DEFAULT '' NOT NULL;
-ALTER TABLE sections ADD	cookiedomain varchar(128) DEFAULT '' NOT NULL;
+ALTER TABLE sections CHANGE hostname hostname varchar(128) DEFAULT '' NOT NULL;
+ALTER TABLE sections ADD cookiedomain varchar(128) DEFAULT '' NOT NULL;
 # freshenup.pl chunks article .shtml files
 INSERT INTO vars (name, value, description) VALUES ('freshenup_max_stories','100','Maximum number of article.shtml files to write at a time in freshenup.pl');
 
@@ -132,12 +131,12 @@ INSERT INTO vars (name, value, description) VALUES ('freshenup_max_stories','100
 # New hooks table
 DROP TABLE IF EXISTS hooks;
 CREATE TABLE hooks (
-	id mediumint(5) UNSIGNED NOT NULL auto_increment,
-	param varchar(50) DEFAULT '' NOT NULL,
-	class varchar(100) DEFAULT '' NOT NULL,
-	subroutine varchar(100) DEFAULT '' NOT NULL,
-	PRIMARY KEY (id),
-	UNIQUE hook_param (param,class,subroutine)
+   id mediumint(5) UNSIGNED NOT NULL auto_increment,
+   param varchar(50) DEFAULT '' NOT NULL,
+   class varchar(100) DEFAULT '' NOT NULL,
+   subroutine varchar(100) DEFAULT '' NOT NULL,
+   PRIMARY KEY (id),
+   UNIQUE hook_param (param,class,subroutine)
 ) TYPE = myisam;
 
 ALTER TABLE stories ADD COLUMN qid MEDIUMINT UNSIGNED DEFAULT NULL;
@@ -155,12 +154,12 @@ ALTER TABLE pollquestions DROP COLUMN sid;
 # New submission_param table
 DROP TABLE IF EXISTS submission_param;
 CREATE TABLE submission_param (
-	param_id mediumint UNSIGNED NOT NULL auto_increment,
-	subid varchar(15) NOT NULL,
-	name varchar(32) DEFAULT '' NOT NULL,
-	value text DEFAULT '' NOT NULL,
-	UNIQUE submission_key (subid,name),
-	PRIMARY KEY (param_id)
+   param_id mediumint UNSIGNED NOT NULL auto_increment,
+   subid varchar(15) NOT NULL,
+   name varchar(32) DEFAULT '' NOT NULL,
+   value text DEFAULT '' NOT NULL,
+   UNIQUE submission_key (subid,name),
+   PRIMARY KEY (param_id)
 ) TYPE = myisam;
 
 # This is the multi section topic stuff for Foundries
@@ -178,8 +177,8 @@ ALTER TABLE submissions ADD COLUMN weight float DEFAULT '0' NOT NULL;
 
 #New index_handler bits
 INSERT INTO vars (name, value, description) VALUES ('index_handler','index.pl','The perl servlet to call fo conections to the root of the server.');
-ALTER TABLE sections ADD COLUMN	index_handler varchar(30) DEFAULT "index.pl" NOT NULL;
-ALTER TABLE sections ADD COLUMN	writestatus ENUM("ok","dirty") DEFAULT 'ok' NOT NULL,
+ALTER TABLE sections ADD COLUMN index_handler varchar(30) DEFAULT "index.pl" NOT NULL;
+ALTER TABLE sections ADD COLUMN writestatus ENUM("ok","dirty") DEFAULT 'ok' NOT NULL;
 
 #slashd_log table
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Slashd','[% constants.rootdir %]/admin.pl?op=slashd',500,17);
@@ -188,13 +187,13 @@ INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('admin','Slash
 # were any sites updated with that?
 DROP TABLE IF EXISTS slashd_status;
 CREATE TABLE slashd_status (
-	task varchar(50) NOT NULL default '',
-	next_begin DATETIME,
-	in_progress TINYINT NOT NULL DEFAULT '0',
-	last_completed DATETIME,
-	summary VARCHAR(255) NOT NULL DEFAULT '',
-	duration float(6,2) DEFAULT '0.00' NOT NULL,
-	PRIMARY KEY  (task)
+   task varchar(50) NOT NULL default '',
+   next_begin DATETIME,
+   in_progress TINYINT NOT NULL DEFAULT '0',
+   last_completed DATETIME,
+   summary VARCHAR(255) NOT NULL DEFAULT '',
+   duration float(6,2) DEFAULT '0.00' NOT NULL,
+   PRIMARY KEY  (task)
 ) TYPE=MyISAM;
 
 # Remember pollBooth is now a plugin!
@@ -212,7 +211,7 @@ INSERT INTO string_param (Type, code, name) VALUES ('section_topic_type','topic_
 
 # another small change for topic types
 ALTER TABLE section_topics MODIFY COLUMN type varchar(16) NOT NULL DEFAULT 'topic_1';
-UPDATE section_topics SET type = 'topic_1' WHERE topic = '1';
+UPDATE section_topics SET type = 'topic_1' WHERE type = '1';
 
 # Change for plugins/Subscribe
 ALTER TABLE subscribe_payments ADD COLUMN method VARCHAR(6) AFTER transaction_id;
@@ -222,3 +221,5 @@ ALTER TABLE comments ADD KEY countreplies (pid,sid);
 
 # Not read just yet but I am leaving it here as a note -Brian
 # ALTER TABLE blocks ADD autosubmit enum("no","yes") DEFAULT 'no' NOT NULL;
+
+# SLASHCODE/USEPERL
