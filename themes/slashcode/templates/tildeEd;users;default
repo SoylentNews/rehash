@@ -109,6 +109,9 @@ __template__
 
 </TR></TABLE>
 
+[% IF constants.story_never_topic_allow == 2
+	|| (user.is_subscriber && constants.story_never_topic_allow == 1) %]
+
 <BR>
 
 [%-	######################
@@ -144,6 +147,8 @@ __template__
 
 	</TR>
 </TABLE>
+
+[% END %]
 
 <p>
 
