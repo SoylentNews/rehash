@@ -1115,7 +1115,19 @@ sub showInfo {
 	my $submissions = $reader->getSubmissionsByNetID($netid, $fieldkey)
 		if $requested_user->{nonuid};
 
-	if ($requested_user->{nonuid}) {
+	my $modval = 0;
+	my $trollpoint = 0;
+        my $ipid_hoursback = $constants->{istroll_ipid_hours} || 72;
+	my $uid_hoursback = $constants->{istroll_uid_hours} || 72;
+
+	if($requested_user->{nonuid}){
+		if($form->{fieldname} eq "ipid"){
+			$modval = $reader->calcModval("ipid = '$id'", $ipid_hoursback, {});
+			$trollpoint = $reader->calcTrollPoint("ipid");
+		} elsif($form->{fieldname} eq "subnetid"){
+			$modval = $reader->calcModval("subnetid = '$id'", $ipid_hoursback, {});
+			$trollpoint = $reader->calcTrollPoint("subnetid");
+		}
 		slashDisplay('netIDInfo', {
 			title			=> $title,
 			id			=> $id,
@@ -1130,6 +1142,9 @@ sub showInfo {
 			reasons			=> $reader->getReasons(),
 			subcount		=> $subcount,
 			submissions		=> $submissions,
+			modval			=> $modval,
+			trollpoint		=> $trollpoint,
+			hr_hours_back		=> $ipid_hoursback
 		});
 
 	} else {
@@ -1157,6 +1172,9 @@ sub showInfo {
 
 		my $lastjournal = _get_lastjournal($uid);
 
+		$modval = $reader->calcModval("comments.uid = $user->{uid}", $uid_hoursback);
+		$trollpoint = $reader->calcTrollPoint("uid");
+
 		slashDisplay('userInfo', {
 			title			=> $title,
 			uid			=> $uid,
@@ -1174,6 +1192,9 @@ sub showInfo {
 			storycount 		=> $storycount,
 			reasons			=> $reader->getReasons(),
 			lastjournal		=> $lastjournal,
+			modval			=> $modval,
+			trollpoint		=> $trollpoint,
+			hr_hours_back		=> $ipid_hoursback
 		});
 	}
 
@@ -1523,12 +1544,19 @@ sub changePasswd {
 	my $session = $slashdb->getDescriptions('session_login');
 	my $session_select = createSelect('session_login', $session, $user_edit->{session_login}, 1);
 
+	my $got_oldpass = 0;
+	if($form->{oldpass}){
+		my $return_uid = $slashdb->getUserAuthenticate($id, $form->{oldpass});
+		$got_oldpass = 1 if $id == $return_uid;
+	}
+
 	slashDisplay('changePasswd', {
 		useredit 		=> $user_edit,
 		admin_flag		=> $suadmin_flag,
 		title			=> $title,
 		session 		=> $session_select,
 		admin_block		=> $admin_block,
+		got_oldpass		=> $got_oldpass
 	});
 }
 
@@ -1993,10 +2021,21 @@ sub savePasswd {
 		$error_flag++;
 	}
 
-	if (length $form->{pass1} < 6 && $form->{pass1} && $form->{pass1} ne "") {
+	if (length $form->{pass1} < 6 || !$form->{pass1} || $form->{pass1}  eq "") {
 		$$note .= getError('saveuser_passtooshort_err', { titlebar => 0 }, 0, 1)
 			if $note;
 		$error_flag++;
+	}
+
+	if (!$user->{is_admin}){
+		# not an admin -- check old password before changing passwd
+		my $return_uid = $slashdb->getUserAuthenticate($uid, $form->{oldpass});
+		if( $return_uid != $uid ){
+			$$note .= getError('saveuser_badoldpass_err', { titlebar => 0 }, 0, 1) 
+				if $note;
+			$error_flag++;
+
+		}
 	}
 
 	if (! $error_flag) {
@@ -2732,6 +2771,7 @@ sub getUserAdmin {
 		$accesslist->{reason}	||= $info_hr->{reason};
 		$accesslist->{ts}	||= $info_hr->{ts};
 		$accesslist->{adminuid}	||= $info_hr->{adminuid};
+		$accesslist->{estimated_users} ||= $info_hr->{estimated_users};
 		$accesslist->{$access_type} = " CHECKED";
 	}
 	if (exists $accesslist->{adminuid}) {
