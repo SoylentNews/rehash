@@ -1695,7 +1695,7 @@ sub editComm {
 		new_user_percent_select	=> $new_user_percent_select,
 		new_user_bonus_select	=> $new_user_bonus_select,
 		note			=> $note,
-		karma_bonus			=> $karma_bonus,
+		karma_bonus		=> $karma_bonus,
 		small_length_bonus_select => $small_length_bonus_select,
 		long_length_bonus_select => $long_length_bonus_select,
 	});

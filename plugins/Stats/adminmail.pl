@@ -173,6 +173,7 @@ EOT
 	} );
 	$data{total_static} = $total_static;
 	my $total_subscriber = $logdb->countDailySubscribers($stats->getRecentSubscribers());
+	my $total_secure = $stats->countDailySecure();
 	for (qw|index article search comments palm journal rss|) {
 		my $uniq = $logdb->countDailyByPageDistinctIPID($_);
 		my $pages = $logdb->countDailyByPage($_);
@@ -269,9 +270,15 @@ EOT
 				my $prefix = "duration_";
 				$prefix .= $is_static eq 'yes' ? 'st_' : 'dy_';
 				$prefix .= "${op}_${hour}_";
-				for my $statname (qw( avg stddev )) {
-					my $value = $static_op_hour->{$is_static}{$op}{$hour}{"dur_$statname"};
-					$statsSave->createStatDaily("$prefix$statname", $value);
+				my $this_hr = $static_op_hour->{$is_static}{$op}{$hour};
+				my @dur_keys =
+					grep /^dur_(mean|stddev|ile_\d+)$/,
+					keys %$this_hr;
+				for my $dur_key (@dur_keys) {
+					my($statname) = $dur_key =~ /^dur_(.+)/;
+					$statname = "$prefix$statname";
+					my $value = $this_hr->{$dur_key};
+					$statsSave->createStatDaily($statname, $value);
 				}
 			}
 		}
@@ -284,9 +291,15 @@ EOT
 			$prefix .= $is_static eq 'yes' ? 'st_' : 'dy_';
 			$prefix .= "${localaddr}_";
 			$prefix =~ s/\W+/_/g; # change "."s in localaddr into "_"s
-			for my $statname (qw( avg stddev )) {
-				my $value = $static_localaddr->{$is_static}{$localaddr}{"dur_$statname"};
-				$statsSave->createStatDaily("$prefix$statname", $value);
+			my $this_hr = $static_localaddr->{$is_static}{$localaddr};
+			my @dur_keys =
+				grep /^dur_(mean|stddev|ile_\d+)$/,
+				keys %$this_hr;
+			for my $dur_key (@dur_keys) {
+				my($statname) = $dur_key =~ /^dur_(.+)/;
+				$statname = "$prefix$statname";
+				my $value = $this_hr->{$dur_key};
+				$statsSave->createStatDaily($statname, $value);
 			}
 		}
 	}
@@ -294,6 +307,7 @@ EOT
 	$statsSave->createStatDaily("total", $count->{total});
 	$statsSave->createStatDaily("total_static", $total_static);
 	$statsSave->createStatDaily("total_subscriber", $total_subscriber);
+	$statsSave->createStatDaily("total_secure", $total_secure);
 	$statsSave->createStatDaily("grand_total", $grand_total);
 	$statsSave->createStatDaily("grand_total_static", $grand_total_static);
 	$statsSave->createStatDaily("total_bytes", $total_bytes);
@@ -340,6 +354,8 @@ EOT
 	$data{total} = sprintf("%8d", $count->{total});
 	$data{total_bytes} = sprintf("%0.1f MB",$total_bytes/(1024*1024));
 	$data{grand_total_bytes} = sprintf("%0.1f MB",$grand_total_bytes/(1024*1024));
+	$data{total_subscriber} = sprintf("%8d", $total_subscriber);
+	$data{total_secure} = sprintf("%8d", $total_secure);
 	$data{unique} = sprintf("%8d", $count->{unique}), 
 	$data{users} = sprintf("%8d", $count->{unique_users});
 	$data{accesslog} = sprintf("%8d", $accesslog_rows);
@@ -437,7 +453,7 @@ EOT
 		}
 	}
 
-	$data{top_referers} = $logdb->getTopReferers();
+	$data{top_referers} = $logdb->getTopReferers({count => 20});
 
 	my $new_users_yest = $slashdb->getNumNewUsersSinceDaysback(1)
 		- $slashdb->getNumNewUsersSinceDaysback(0);

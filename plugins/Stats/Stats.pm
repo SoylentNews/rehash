@@ -752,16 +752,28 @@ sub countDaily {
 }
 
 ########################################################
+sub countDailySecure {
+	my($self) = @_;
+	return $self->sqlCount("accesslog_temp", "secure=1");
+}
+
+########################################################
 sub getRecentSubscribers {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 	return 0 unless $constants->{subscribe};
-	my $subscribers = $self->sqlSelectColArrayref(
+	my $subscribers_all = $self->sqlSelectColArrayref(
 		"uid",
 		"users_hits",
 		"hits_paidfor > hits_bought
 		 AND lastclick >= DATE_SUB(NOW(), INTERVAL 48 HOUR)",
 	);
+	return [ ] unless $subscribers_all && @$subscribers_all;
+	my $uid_list = join(", ", @$subscribers_all);
+	my $subscribers = $self->sqlSelectColArrayref(
+		"uid",
+		"users",
+		"uid in ($uid_list) AND seclev < 100");
 
 	return $subscribers;
 }
@@ -783,30 +795,160 @@ sub getDurationByStaticOpHour {
 	@ops = @{$options->{ops}} if $options->{ops} && @{$options->{ops}};
 	my $ops = join(", ", map { $self->sqlQuote($_) } @ops);
 
-	return $self->sqlSelectAllHashref(
+	# First get the stats that are easy, the AVG() and STDDEV()
+	# which the DB feeds to us.
+	my $hr = $self->sqlSelectAllHashref(
 		[qw( static op hour )],
-		"static,
-		 op,
-		 SUBSTRING(ts, 12, 2) AS hour,
-		 AVG(duration) AS dur_avg, STDDEV(duration) AS dur_stddev",
+		"static, op, HOUR(ts) AS hour,
+		 COUNT(*) AS c,
+		 AVG(duration) AS dur_mean, STDDEV(duration) AS dur_stddev",
 		"accesslog_temp",
 		"op IN ($ops)",
 		"GROUP BY static, op, hour"
 	);
+
+	# Now we need the stats that are hard, the various percentiles
+	# in the duration list for each static/localaddr key
+	# (including the median, which is just the 50th %ile).
+
+	# Pick a duration precision.  The more precise, the more data
+	# to chew through.  I think 10 ms should be good enough and yet
+	# not run us out of memory processing even Slashdot's log.
+	my $precision = 0.010;
+
+	my $ile_hr = $self->sqlSelectAllHashref(
+		[qw( static op hour dur_round )],
+		"static, op, HOUR(ts) AS hour,
+		 ROUND(duration/$precision)*$precision AS dur_round,
+		 COUNT(*) AS c",
+		"accesslog_temp",
+		"op IN ($ops)",
+		"GROUP BY static, op, hour, dur_round"
+	);
+use Data::Dumper; print "ile_hr " . Dumper($ile_hr);
+
+	_calc_percentiles($hr, $ile_hr, 3);
+
+	return $hr;
 }
 
 ########################################################
 sub getDurationByStaticLocaladdr {
 	my($self) = @_;
 
-	return $self->sqlSelectAllHashref(
+	# First get the stats that are easy, the AVG() and STDDEV()
+	# which the DB feeds to us.
+	my $hr = $self->sqlSelectAllHashref(
 		[qw( static local_addr )],
 		"static, local_addr,
-		 AVG(duration) AS dur_avg, STDDEV(duration) AS dur_stddev",
+		 COUNT(*) AS c,
+		 AVG(duration) AS dur_mean, STDDEV(duration) AS dur_stddev",
 		"accesslog_temp",
 		"",
 		"GROUP BY static, local_addr"
 	);
+
+	# Now we need the stats that are hard, the various percentiles
+	# in the duration list for each static/localaddr key
+	# (including the median, which is just the 50th %ile).
+
+	# Pick a duration precision.  The more precise, the more data
+	# to chew through.  I think 10 ms should be good enough and yet
+	# not run us out of memory processing even Slashdot's log.
+	my $precision = 0.010;
+
+	my $ile_hr = $self->sqlSelectAllHashref(
+		[qw( static local_addr dur_round )],
+		"static, local_addr,
+		 ROUND(duration/$precision)*$precision AS dur_round,
+		 COUNT(*) AS c",
+		"accesslog_temp",
+		"",
+		"GROUP BY static, local_addr, dur_round"
+	);
+
+	_calc_percentiles($hr, $ile_hr, 2);
+
+	return $hr;
+}
+
+sub _calc_percentiles {
+	my($main_hr, $ile_hr, $key_depth, $percentiles) = @_;
+
+	# List of percentiles we want.  The expensive part is doing this
+	# at all, so we might as well grab more than just the median!
+	$percentiles = [qw( 10 50 90 95 99 )]
+		if !$percentiles || !@$percentiles;
+
+	# Go through a somewhat convoluted process to walk the keys of the
+	# hashrefs, given that we have a scalar numeric that tells us how
+	# deep those keys go.  Essentially we're doing an any-depth version
+	# of "for $i {for $j {for $k ... } }"
+	my $keys = [ ];
+	my $keyset = [ ];
+	ADD_KEYS: while (1) {
+		while (scalar(@$keyset) < $key_depth) {
+			my $ile_hr_entry = $ile_hr;
+			for my $key (@$keyset) {
+				$ile_hr_entry = $ile_hr_entry->{$key};
+			}
+			my $next_key = each %$ile_hr_entry;
+			if (defined $next_key) {
+				push @$keyset, $next_key;
+			} else {
+				pop @$keyset;
+				last ADD_KEYS if !@$keyset;
+			}
+		}
+		push @$keys, [ @$keyset ];
+		pop @$keyset;
+	}
+	while (my $keyset = shift @$keys) {
+
+		my $main_hr_entry = $main_hr;
+		my $ile_hr_entry = $ile_hr;
+		for my $key (@$keyset) {
+			$main_hr_entry = $main_hr_entry->{$key};
+			$ile_hr_entry = $ile_hr_entry->{$key};
+		}
+
+		my $cur_count = 0;
+		my $total_count = $main_hr_entry->{c};
+		next unless $total_count; # sanity check
+		my $cur_duration = 0;
+		# Get the list of all the rounded durations that we
+		# had returned (for this value of static/localaddr).
+		my @rounds = sort { $a <=> $b } keys %$ile_hr_entry;
+		# Start counting with the current percentile at 0.
+		# For each one that we need, walk up through the
+		# list of rounded durations totalling up how many
+		# hits took that long (or faster).  If the percentage
+		# of hits out of total hits (for this value of
+		# static/localaddr) equals or exceeds the percentile
+		# that is needed, this duration corresponds to that
+		# percentile.  Store it in the main hashref (not
+		# ile_hr, it will be thrown away) with a key of
+		# "ile_50" for the median, "ile_95" for the
+		# 95th percentile, etc.
+		my $cur_ile = 0;
+		for my $ile_needed (@$percentiles) {
+			my $ile_frac = $ile_needed/100;
+			# Note, if we wanted to get really fancy in
+			# this next while loop, we could also do
+			# interpolation between this $cur_ile and
+			# the next $cur_ile, effectively almost
+			# doubling $precision.  I don't think it's
+			# necessary;  our sample sets should be
+			# plenty large enough and RAM is cheap.
+			while ($cur_ile <= $ile_frac && @rounds) {
+				$cur_duration = shift @rounds;
+				$cur_count += $ile_hr_entry->{$cur_duration}{c};
+				$cur_ile = $cur_count / $total_count;
+			}
+			my $ile_key = sprintf("dur_ile_%02d", $ile_needed);
+			$main_hr_entry->{$ile_key} = $cur_duration;
+		}
+	}
 }
 
 ########################################################

@@ -1367,6 +1367,7 @@ sub createAccessLog {
 		duration	=> $duration,
 		local_addr	=> $local_addr,
 		static		=> $user->{state}{_dynamic_page} ? 'no' : 'yes',
+		secure		=> Slash::Apache::ConnectionIsSecure(),
 		referer		=> $ENV{HTTP_REFERER},
 	}, { delayed => 1 });
 }
@@ -1403,7 +1404,7 @@ sub createAccessLogAdmin {
 		section		=> $section,
 		bytes		=> $r->bytes_sent,
 		op		=> $op,
-		form	=> freeze($form),
+		form		=> freeze($form),
 		-ts		=> 'NOW()',
 		query_string	=> $ENV{QUERY_STRING} || '0',
 		user_agent	=> $ENV{HTTP_USER_AGENT} || '0',

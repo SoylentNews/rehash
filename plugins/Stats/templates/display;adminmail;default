@@ -23,6 +23,9 @@ __template__
  static total:        -          -    [% total_static %]
 gstatic total:        -          -    [% grand_total_static %]
   grand total:        -          -    [% grand_total %] ([% grand_total_bytes %])
+ secure total:        -          -    [% total_secure %]
+[% IF constants.subscribe %]sbscrbr total:        -          -    [% total_subscriber %]
+[% END %]
         posts: [% distinct_comment_posters_uids %]   [% IPIDS %]
      comments: [% comments_uids %]   [% comments_ipids %]   [% comments_page %] ([% comments_bytes %])
         index:        -          -   [% homepage %]
