@@ -255,7 +255,7 @@ sub ConnectionIsSSL {
 	return 1 if $https_on;
 
 	return 1 
-		if $r->connection->remote_ip eq '127.0.0.1' && $r->header_in('X-SSL-On') eq 'yes'; 
+		if $r->header_in('X-SSL-On') eq 'yes'; 
 
 	# Nope, it's not SSL.  We're out of ideas, if the above didn't
 	# work we must not be on SSL.
