@@ -332,10 +332,12 @@ sub templateEdit {
 		}
 
 		$page_select = createSelect('page', $pages, $page, 1);
-		$savepage_select = createSelect('savepage', $pages, $templateref->{page}, 1) if $templateref->{tpid};
+		$savepage_select = createSelect('savepage', $pages, $templateref->{page}, 1)
+			if $templateref->{tpid};
 		$template_select = createSelect('tpid', $templates, $tpid, 1, 0, \@ordered);
 		$section_select = createSelect('section', $sections, $section, 1);
-		$savesection_select = createSelect('savesection', $sections, $templateref->{section}, 1) if $templateref->{tpid};
+		$savesection_select = createSelect('savesection', $sections, $templateref->{section}, 1)
+			if $templateref->{tpid};
 	}
 
 	if (!$form->{templatenew} && $tpid && $templateref->{tpid}) {
@@ -1028,7 +1030,7 @@ sub editStory {
 			my $temp_body;
 			$form->{bodytext} = '';
 			my $fh = $upload->fh;
-			while (<$fh>) {
+			while(<$fh>) {
 				$form->{bodytext} .= $_;
 			}
 		}
@@ -1099,8 +1101,14 @@ sub editStory {
 		$storycontent = dispStory($storyref, $author, $topic, 'Full');
 
 		$user->{currentSection} = $tmp;
-		$storyref->{relatedtext} = getRelated("$storyref->{title} $storyref->{bodytext} $storyref->{introtext}")
-			. otherLinks($slashdb->getAuthor($storyref->{uid}, 'nickname'), $storyref->{tid}, $storyref->{uid});
+		$storyref->{relatedtext} =
+			getRelated(
+				"$storyref->{title} $storyref->{bodytext} $storyref->{introtext}"
+			) . otherLinks(
+				$slashdb->getAuthor($storyref->{uid}, 'nickname'),
+				$storyref->{tid}, 
+				$storyref->{uid}
+			);
 
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
@@ -1123,7 +1131,8 @@ sub editStory {
 		$storyref->{displaystatus}  = $slashdb->getVar('defaultdisplaystatus', 'value');
 		$storyref->{commentstatus}  = $slashdb->getVar('defaultcommentstatus', 'value');
 		$storyref->{tid}	    = $slashdb->getVar('defaulttopic', 'value');
-		$storyref->{section}	    = $user->{section} ? $user->{section} : $slashdb->getVar('defaultsection', 'value');
+		$storyref->{section}	    = $user->{section} ?
+			$user->{section} : $slashdb->getVar('defaultsection', 'value');
 
 		$storyref->{'time'} = $slashdb->getTime();
 		$storyref->{uid} = $user->{uid};
@@ -1140,26 +1149,39 @@ sub editStory {
 
 
 	if ($constants->{multitopics_enabled}) {
-	    $multi_topics = $slashdb->getDescriptions('topics_section', $storyref->{section});
-	    $story_topics = $slashdb->getStoryTopics($storyref->{sid});
-	    $story_topics->{$storyref->{tid}} ||= 1 ; 
+		$multi_topics = $slashdb->getDescriptions(
+	    		'topics_section', 
+			$storyref->{section}
+		);
+		$story_topics = $slashdb->getStoryTopics($storyref->{sid});
+		$story_topics->{$storyref->{tid}} ||= 1 ; 
 	}
 
+	# Topic list is sorted alpha, by VALUE. These calls to createSelect
+	# should really be moved to the templates at some point.
+	# - Cliff
 	if ($constants->{use_alt_topic}) {
 		$topic_select = createSelect('tid',
-			$slashdb->getDescriptions('topics_section_type', $section, $constants->{use_alt_topic}),
-			$storyref->{tid}, 1
+			$slashdb->getDescriptions(
+				'topics_section_type', 
+				$section, 
+				$constants->{use_alt_topic}
+			),
+			$storyref->{tid}, 1, 0, 1
 		);
 	} else {
 		if ($section) {
 	    		$topic_select = createSelect('tid',
-	    			$slashdb->getDescriptions('topics_section', $section),
-	    			$storyref->{tid}, 1
+	    			$slashdb->getDescriptions(
+					'topics_section', 
+					$section
+				),
+	    			$storyref->{tid}, 1, 0, 1
 	    		);
 		} else {
 	    		$topic_select = createSelect('tid',
 	    			$slashdb->getDescriptions('topics'),
-	    			$storyref->{tid}, 1
+	    			$storyref->{tid}, 1, 0, 1
 	    		);
 		}
 	}
@@ -1191,7 +1213,11 @@ sub editStory {
 	$fastforward_check	= 'CHECKED' if $form->{fastforward};
 	$shortcuts_check	= 'CHECKED' if $form->{shortcuts};
 
-	$slashdb->setSession($user->{uid}, { lasttitle => $storyref->{title} });
+	$slashdb->setSession($user->{uid}, {
+		lasttitle => $storyref->{title},
+		last_sid  => $sid,
+		last_subid=> '',
+	});
 
 	my $ispell_comments = {
 		introtext =>    get_ispell_comments($storyref->{introtext}),
@@ -1234,6 +1260,10 @@ printf STDERR "getSimilarStories duration: %0.3f\n", $duration;
 
 	my $slashdtext = get_slashd_box();
 
+	# We probably should just pass the raw data instead of the formatted
+	# <SELECT> into this template and let the template deal with the
+	# HTML, here. Formatting these elements outside of the template
+	# just defeats the purpose!	-- Cliff 2002-08-07
 	slashDisplay('editStory', {
 		storyref 		=> $storyref,
 		story			=> $story,
