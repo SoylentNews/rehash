@@ -416,22 +416,34 @@ sub prog2file {
 	}
 	my $bytes = length $data;
 
-	my $dir = dirname($filename);
-	my @created = mkpath($dir, 0, 0775) unless -e $dir;
-	if (!-e $dir or !-d _ or !-w _) {
-		$err_str .= " mkpath($dir) failed '"
-			. (-e _) . (-d _) . (-w _)
-			. " '@created'";
-	} elsif ($bytes == 0) {
-		$err_str .= " no data";
-	} else {
-		my $fh = gensym();
-		if (!open $fh, "> $filename\0") {
-			$err_str .= " could not write to '$filename': '$!'";
+	if ($stderr_text =~ /\b(ID \d+, \w+;\w+;\w+) :/) {
+		my $template = $1;
+		my $error = "task operation aborted, error in template $template";
+		$err_str .= " $error";
+		# template error, don't write file
+		if (defined &main::slashdErrnote) {
+			main::slashdErrnote("$error: $stderr_text");
 		} else {
-			print $fh $data;
-			close $fh;
-			$success = 1;
+			doLog('slashd', ["$error: $stderr_text"]);
+		}
+	} else {
+		my $dir = dirname($filename);
+		my @created = mkpath($dir, 0, 0775) unless -e $dir;
+		if (!-e $dir or !-d _ or !-w _) {
+			$err_str .= " mkpath($dir) failed '"
+				. (-e _) . (-d _) . (-w _)
+				. " '@created'";
+		} elsif ($bytes == 0) {
+			$err_str .= " no data";
+		} else {
+			my $fh = gensym();
+			if (!open $fh, "> $filename\0") {
+				$err_str .= " could not write to '$filename': '$!'";
+			} else {
+				print $fh $data;
+				close $fh;
+				$success = 1;
+			}
 		}
 	}
 

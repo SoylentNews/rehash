@@ -184,6 +184,10 @@ $task{$me}{code} = sub {
 			$stderr_text =~ s/\s+/ /g;
 			$logmsg .= " stderr: '$stderr_text'";
 			$do_log ||= (verbosity() >= 1);
+			if ($stderr_text =~ /\b(ID \d+, \w+;\w+;\w+) :/) {
+				# template error, skip
+				next;
+			}
 		}
 
 		# if we wrote a section page previously replace
