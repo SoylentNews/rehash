@@ -183,15 +183,18 @@
 
 <P>
         There is one if you go to AvantGo, which basically uses the URL 
-        <A HREF="http://slashdot.org/palm">http://slashdot.org/palm</A>, which is
+        <A HREF="http://slashdot.org/palm/">http://slashdot.org/palm/</A>.
+	This is
         also the URL where the Slashdot clipping app gets its content, which 
-        can be downloaded from <A HREF="ftp://ftp.slashdot.org/pub/slashdot.pqa">
-        ftp://ftp.slashdot.org/pub/slashdot.pqa.</a>
+        you used to be able to download from
+	<A HREF="ftp://ftp.slashdot.org/pub/slashdot.pqa">
+        ftp://ftp.slashdot.org/pub/slashdot.pqa</a>
+	but, sorry, that's not supported anymore.
 
         <BR><BR>
         <I><SMALL>
-        Answered by: <A HREF="mailto:capttofu@slashdot.org">CaptTofu</A> <BR>
-        Last Modified: 12/01/00 <BR>
+        Answered by: <A HREF="mailto:jamie@slashdot.org">Jamie</A> <BR>
+        Last Modified: 10/24/03 <BR>
         </SMALL></I> 
 </P>
 
