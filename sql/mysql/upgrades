@@ -825,7 +825,6 @@ INSERT INTO vars (name, value, description) VALUES ('log_db_user','','The virtua
 INSERT INTO vars (name, value, description) VALUES ('search_text_length','80','This will tell search how many characters should be returned for text bodies in searches (think introtext for stories and article for journals).');
 INSERT INTO vars (name, value, description) VALUES ('search_method', '', 'Method to use to weight scores for search returns (and to narrow down possible matches)');
 
-# SLASHCODE LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
 
@@ -840,3 +839,4 @@ INSERT INTO vars (name, value, description) VALUES ('search_method', '', 'Method
 #SOURCE /tmp/site_symlinks;
 
 # LINUX.COM LAST UPDATED HERE
+# SLASHCODE LAST UPDATED HERE
