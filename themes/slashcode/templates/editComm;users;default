@@ -235,7 +235,7 @@ __template__
 		[% posttype_select %]
 
 [% IF user.karma > constants.goodkarma %]
-		<P><B>No Score +1 Bonus</B>
+		<P><B>No Karma Bonus</B>
 		<INPUT TYPE="checkbox" NAME="nobonus"[% b_check %]>
 [% END %]
 
