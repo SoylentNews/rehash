@@ -89,6 +89,9 @@ Slash::DB::Utility
 Slash::DB::MySQL
 	and Slash::DB::Static::MySQL
 	no more postgres
+MySQL replication
+	tips for setting it up...?
+	fulltext indexes, (only) necessary on search db which should be a slave
 Slash::Utility::Anchor, headers and footers and ads
 hooks, not really implemented
 Slash::Test
@@ -397,6 +400,9 @@ report.
 =head1 CHANGES
 
 $Log$
+Revision 1.5  2003/06/30 19:06:30  jamie
+MySQL notes.
+
 Revision 1.4  2003/06/23 13:28:16  jamie
 Bad syntax, but includes the skeleton of what I hope this will become.
 
