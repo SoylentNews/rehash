@@ -1629,7 +1629,7 @@ sub getRandUsersCreatedYest {
 			NOW(), INTERVAL 1 DAY
 		 ), 1, 10)");
 	my $users_ar = $self->sqlSelectAllHashrefArray(
-		"uid, nickname",
+		"uid, nickname, realemail",
 		"users",
 		"uid BETWEEN $min AND $max_uid",
 		"ORDER BY RAND() LIMIT $num");

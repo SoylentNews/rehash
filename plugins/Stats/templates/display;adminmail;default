@@ -46,7 +46,7 @@ gstatic total:        -          -    [% grand_total_static %]
 
 -----------------------
 [% rand_users_yest.size %] random users created yesterday:
-[% FOREACH ru = rand_users_yest %][% ru.nickname %] ([% ru.uid %])  [% IF loop.count mod 4 == 0 && !loop.last; "\n"; END %][% END %]
+[% FOREACH ru = rand_users_yest %][% ru.nickname %] ([% ru.uid %]) <[% ru.realemail %]>[% IF !loop.last %]  [% IF loop.count mod 2 == 0; "\n"; END %][% END %][% END %]
 
 -----------------------
 [% FOREACH section = sections -%]
