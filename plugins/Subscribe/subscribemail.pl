@@ -17,6 +17,7 @@ $task{$me}{code} = sub {
 		$backupdb = $slashdb;
 	}
 	my $sub_static = getObject("Slash::Subscribe::Static", { db_type => 'reader' });
+	my $subscribe = getObject('Slash::Subscribe', { db_type => 'reader' });
 
 	slashdLog('Send Subscribe Mail Begin');
 
@@ -126,8 +127,10 @@ $task{$me}{code} = sub {
 		$statsSave->createStatDaily("subscribe_renew_users",	$renew_count);
 		$statsSave->createStatDaily("subscribe_renew_pages",	$sum_renew_pages);
 		$statsSave->createStatDaily("subscribe_renew_payments",	$sum_renew_payments);
-		# If the runout stat doesn't already exist for yesterday, create it.
+		# If the runout and bought stats don't already exist for yesterday,
+		# create them.
 		$statsSave->createStatDaily("subscribe_runout", 0);
+		$statsSave->createStatDaily("subscribe_hits_bought", 0);
 
 		$statsSave->createStatDaily("subscribers_total", $num_total_subscribers);
 		$statsSave->createStatDaily("subscribers_current", $num_current_subscribers);
@@ -172,6 +175,12 @@ $task{$me}{code} = sub {
 			push @stats, $stats[0]+$stats[3];
 			push @stats, $stats[1]+$stats[4];
 			push @stats, $stats[2]+$stats[5];
+			$tmp = $stats->getStatLastNDays("subscribe_hits_bought", 30) || 0;
+			push @stats, $tmp;
+			$statsSave->createStatDaily('subscribe_hits_bought_last30', $tmp);
+			$tmp = $subscribe->convertPagesToDollars($stats[-1]);
+			push @stats, $tmp;
+			$statsSave->createStatDaily('subscribe_dollars_bought_last30', $tmp);
 			push @stats, $stats->getStatLastNDays("subscribe_runout",		30) || 0;
 			$monthly_stats = sprintf(<<EOT, @stats);
    Monthly Stats (Average Per Day)
@@ -180,6 +189,7 @@ $task{$me}{code} = sub {
 New:        %5.2f   %5d   \$%7.2f
 Renew:      %5.2f   %5d    %7.2f
 Total:      %5.2f   %5d   \$%7.2f
+Used up:            %5d   \$%7.2f
 Ran out:    %5.2f
 EOT
 		}
