@@ -140,11 +140,7 @@ my(%comments, %comment_data);
 			}
 
 			my $cid = $cidbatch[-1];
-			my $comment = {
-				sid => $did,
-				cid => $cid,
-				uid => $comment_data{$did}{$cid}{uid},
-			};
+			my $comment = $slashdb->getComment($cid);
 
 			my($modval, $reason, $active);
 			my $reasons = $slashdb->getReasons();
