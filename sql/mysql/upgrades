@@ -1200,8 +1200,6 @@ UPDATE message_codes SET type = 'Journal Reply' WHERE code = 7;
 INSERT INTO users_param (uid, name, value) SELECT uid, "clbig_bonus", "+1" FROM users_comments WHERE clbig > 0;
 INSERT INTO users_param (uid, name, value) SELECT uid, "clsmall_bonus", "-1" FROM users_comments WHERE clsmall > 0;
 
-# USEPERL LAST UPDATED HERE
-
 ALTER TABLE accesslist ADD isproxy enum("no","yes") DEFAULT "no" NOT NULL;
 
 # SLASHCODE LAST UPDATED HERE
@@ -1258,9 +1256,12 @@ ALTER TABLE accesslog_admin ADD status smallint UNSIGNED DEFAULT 200 NOT NULL;
 ALTER TABLE topics ADD parent_topic smallint UNSIGNED DEFAULT 0 NOT NULL;
 
 ALTER TABLE message_codes ADD COLUMN subscribe TINYINT(1) DEFAULT '0' NOT NULL;
+ALTER TABLE message_codes ADD COLUMN send ENUM('now', 'defer', 'collective') DEFAULT 'now' NOT NULL;
+UPDATE message_codes SET send = 'collective' WHERE code IN (2, 3);
 INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (12, 'Relationship Change', 1, '', 'collective', 1);
 
-# run `./plugins/Messages/populate_message_log_stats.plx VIRTUAL_USER` to
+# run `perl ./plugins/Messages/populate_message_log_stats.plx VIRTUAL_USER` to
 # update the messaging stats in stats_daily, using the last several weeks
 # of stats in message_log
 
+# USEPERL LAST UPDATED HERE
