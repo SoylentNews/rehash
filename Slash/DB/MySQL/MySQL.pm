@@ -1920,6 +1920,15 @@ sub checkStoryViewable {
 	my($column_time, $where_time) = $self->_stories_time_clauses({
 		try_future => 1, must_be_subscriber => 1
 	});
+
+	# if there is no sid in the DB, assume that it is an old poll
+	# or something that has a "fake" sid
+	my $exists = $self->sqlCount(
+		'stories',
+		"sid='$sid'"
+	);
+	return 1 unless $exists;
+
 	my $count = $self->sqlCount(
 		'stories',
 		"sid='$sid' AND displaystatus != -1 AND $where_time",
