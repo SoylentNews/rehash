@@ -1,0 +1,26 @@
+__section__
+default
+__description__
+* info = the "tournament" info hashref
+
+__title__
+
+__page__
+dilemma
+__lang__
+en_US
+__name__
+maininfo
+__template__
+[% USE Slash %]
+<P>[% PROCESS titlebar title => 'Dilemma Info' %]
+<tt>
+[% FOREACH key = info.keys %]
+<p><b>[% key | strip_html %]:</b> [% info.$key | strip_html %]
+[% END %]
+</tt>
+
+__seclev__
+10000
+__version__
+$Id$

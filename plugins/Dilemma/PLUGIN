@@ -1,0 +1,10 @@
+# $Id$
+name=Dilemma
+description="Prisoner's Dilemma tournaments
+htdoc=dilemma.pl
+task=dilemma_backend.pl
+mysql_schema=mysql_schema.sql
+mysql_dump=mysql_dump.sql
+template=templates/data;dilemma;default
+template=templates/maininfo;dilemma;default
+

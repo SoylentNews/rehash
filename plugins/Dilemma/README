@@ -1,0 +1,8 @@
+This is a mathematical toy, not meant to be installed on production
+websites.  It serves primarily as sample code to demonstrate how to
+write a plugin with all the major components:  SQL schema, SQL data,
+templates, slashd task, and frontend webpage script.
+
+This code doesn't really do anything yet.  It uses the Safe module
+but of course don't put any perl code into your DB that shouldn't
+be executed.  Use at your own risk.
