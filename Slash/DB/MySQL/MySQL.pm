@@ -1858,6 +1858,12 @@ sub setStory {
 	)];
 
 	$cache = _genericGetCacheName($self, $tables);
+	if ($hashref->{displaystatus} == 0) {
+		my $section = $hashref->{section} ? $hashref->{section} : $self->getStory($sid, 'section');
+		my $isolate = $self->getSection($section, 'isolate');
+		$hashref->{displaystatus} = 1
+			if ($isolate);
+	}
 
 	for (keys %$hashref) {
 		(my $clean_val = $_) =~ s/^-//;
@@ -3965,6 +3971,11 @@ sub createStory {
 			'subid=' . $self->sqlQuote($story->{subid})
 		);
 	}
+	if ($story->{displaystatus} == 0) {
+		my $isolate = $self->getSection($story->{section}, 'isolate');
+		$story->{displaystatus} = 1
+			if ($isolate);
+	}
 
 	my $data = {
 		sid		=> $sid,
@@ -3997,43 +4008,49 @@ sub createStory {
 
 ##################################################################
 sub updateStory {
-	my($self) = @_;
-	my $form = getCurrentForm();
+	my($self, $story) = @_;
 	my $constants = getCurrentStatic();
 
-	my $time = ($form->{fastforward})
+	my $time = ($story->{fastforward})
 		? $self->getTime()
-		: $form->{'time'};
+		: $story->{'time'};
+
+	if ($story->{displaystatus} == 0) {
+		my $section = $story->{section} ? $story->{section}  : $self->getStory($story->{sid}, 'section');
+		my $isolate = $self->getSection($section, 'isolate');
+		$story->{displaystatus} = 1
+			if ($isolate);
+	}
 
 	$self->sqlUpdate('discussions', {
-		sid	=> $form->{sid},
-		title	=> $form->{title},
-		section	=> $form->{section},
-		url	=> "$constants->{rootdir}/article.pl?sid=$form->{sid}",
+		sid	=> $story->{sid},
+		title	=> $story->{title},
+		section	=> $story->{section},
+		url	=> "$constants->{rootdir}/article.pl?sid=$story->{sid}",
 		ts	=> $time,
-		topic	=> $form->{tid},
-	}, 'sid = ' . $self->sqlQuote($form->{sid}));
+		topic	=> $story->{tid},
+	}, 'sid = ' . $self->sqlQuote($story->{sid}));
 
 
 	$self->sqlUpdate('stories', {
-		uid		=> $form->{uid},
-		tid		=> $form->{tid},
-		dept		=> $form->{dept},
+		uid		=> $story->{uid},
+		tid		=> $story->{tid},
+		dept		=> $story->{dept},
 		'time'		=> $time,
-		title		=> $form->{title},
-		section		=> $form->{section},
-		displaystatus	=> $form->{displaystatus},
-		commentstatus	=> $form->{commentstatus},
-		writestatus	=> $form->{writestatus},
-	}, 'sid=' . $self->sqlQuote($form->{sid}));
+		title		=> $story->{title},
+		section		=> $story->{section},
+		displaystatus	=> $story->{displaystatus},
+		commentstatus	=> $story->{commentstatus},
+		writestatus	=> $story->{writestatus},
+	}, 'sid=' . $self->sqlQuote($story->{sid}));
 
 	$self->sqlUpdate('story_text', {
-		bodytext	=> $form->{bodytext},
-		introtext	=> $form->{introtext},
-		relatedtext	=> $form->{relatedtext},
-	}, 'sid=' . $self->sqlQuote($form->{sid}));
+		bodytext	=> $story->{bodytext},
+		introtext	=> $story->{introtext},
+		relatedtext	=> $story->{relatedtext},
+	}, 'sid=' . $self->sqlQuote($story->{sid}));
 
-	$self->_saveExtras($form);
+	$self->_saveExtras($story);
 }
 
 ########################################################
