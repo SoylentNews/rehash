@@ -14,6 +14,8 @@ __template__
 [% USE Slash %]
 <P>[% Slash.horizmenu() %]
 
+<P><A HREF="[% constants.rootdir %]/[% Slash.sitename2filename(user.currentSection) %].rss">RSS</A>
+
 <FORM METHOD="GET" ACTION="[% constants.rootdir %]/search.pl">
   <INPUT TYPE="TEXT" NAME="query" VALUE="" SIZE="20">
   <INPUT TYPE="submit" VALUE="Search [% constants.sitename %]">
