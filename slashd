@@ -423,7 +423,7 @@ EOT
 }
 
 #################################
-sub newxml { huh(@_);
+sub newxml {
 	my $section = shift;
 	my $c = getBackendStories($section);
 
@@ -433,7 +433,7 @@ xmlns:backslash="$I{rootdir}/backslash.dtd">
 
 EOT
 
-	while(my $S = $c->fetchrow_hashref) {
+	while (my $S = $c->fetchrow_hashref) {
 		$x.= sprintf <<EOT, xmlEncodeStr($S->{title}), xmlEncodeStr($S->{dept});
 	<story>
 		<title>%s</title>
