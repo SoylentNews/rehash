@@ -34,15 +34,8 @@ Some of your past moderations have been meta-moderated by other
 [% IF msg.mode == 1%]
 <UL>
 [% FOREACH m2item = m2 -%]
-	[% 
-		IF m2item.url;
-			comment = "<A HREF=\"$m2item.url\">$m2item.subj</A>";
-		ELSE;
-			comment = "$m2item.subj";
-		END;
-	-%]
 	<LI> "<A HREF="[% constants.rootdir; m2item.url | strip_attribute %]">[% m2item.subj %]</A>" from the discussion
-	"[% $m2item.title %]" which you moderated as <B>[% m2item.reason.name %]</B> was voted 
+	"[% m2item.title %]" which you moderated as <B>[% m2item.reason.name %]</B> was voted 
 	<B>[% vote_result.${m2item.vote} %]</B>.
 
 [% END %]
