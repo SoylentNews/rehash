@@ -164,7 +164,7 @@ sub selectComments {
 
 		# This deals with what will appear.
 		$comments->{$C->{pid}}{visiblekids}++
-			if $C->{points} >= ($user->{threshold} || $min);
+			if $C->{points} >= (defined $user->{threshold} ? $user->{threshold} : $min);
 
 		# Can't mod in a discussion that you've posted in.
 		# Just a point rule -Brian
