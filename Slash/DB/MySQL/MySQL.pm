@@ -3093,19 +3093,19 @@ sub getAccessListInfo {
 
 	if ($user_check) {
 		if ($user_check->{uid} =~ /^\d+$/ && !isAnon($user_check->{uid})) {
-			$where = "WHERE uid = $user_check->{uid}";
+			$where = "uid = $user_check->{uid}";
 		} elsif ($user_check->{md5id}) {
-			$where = "WHERE ipid = '$user_check->{md5id}'";
+			$where = "ipid = '$user_check->{md5id}'";
 		} elsif ($user_check->{ipid}) {
-			$where = "WHERE ipid = '$user_check->{ipid}'";
+			$where = "ipid = '$user_check->{ipid}'";
 		} elsif ($user_check->{subnetid}) {
-			$where = "WHERE subnetid = '$user_check->{subnetid}'";
+			$where = "subnetid = '$user_check->{subnetid}'";
 		} else {
 			return {};
 		}
 	} else {
 		$user_check = $self->getCurrentUser();
-		$where = "WHERE (ipid = '$user_check->{ipid}' OR subnetid = '$user_check->{subnetid}')";
+		$where = "(ipid = '$user_check->{ipid}' OR subnetid = '$user_check->{subnetid}')";
 	}
 
 	if ($column eq 'isbanned') {
@@ -3115,7 +3115,7 @@ sub getAccessListInfo {
 	}
 	
 
-	$ref = $self->sqlSelectAll("reason, ts", "accesslist $where");
+	$ref = $self->sqlSelectAll("reason, ts", 'accesslist', $where);
 	$aclinfo->{reason} = '';
 
 	for (@$ref) {
