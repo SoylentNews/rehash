@@ -52,6 +52,13 @@ WHILE mt_colspan > 0;
 	user.state.mt.cols.5; "' -->";
 	mt_colspan = mt_colspan - 1;
 END;
+currow = user.state.mt.currow || 0;
+curcol = curcol + 1;
+WHILE user.state.mt.cols.$curcol && user.state.mt.cols.$curcol >= currow;
+	"<!-- skipping col '"; curcol; "' -->";
+	curcol = curcol + 1;
+END;
+curcol = curcol - 1;
 user.state.mt.curcol = curcol;
 mt_align=""; mt_valign=""; mt_rowspan = 0; mt_colspan=0; mt_width=""; mt_height=""
 %]

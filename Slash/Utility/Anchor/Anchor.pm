@@ -148,6 +148,7 @@ sub header {
 		unless $options->{noheader};
 
 	$user->{state}{mt}{curcol} = 0;
+	$user->{state}{mt}{currow} = 0;
 	$user->{state}{mt}{cols} = [ ];
 
 	# ssi = 1 IS NOT THE SAME as ssi = 'yes'

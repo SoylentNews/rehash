@@ -20,15 +20,18 @@ __template__
 
 [%
 user.state.mt.curcol = 1;
-min_cols = 999;
+min_rows = 999;
 FOR rowcheck = user.state.mt.cols;
 	NEXT IF loop.first;
-	IF rowcheck < min_cols;
-		min_cols = rowcheck;
+	IF rowcheck < min_rows;
+		min_rows = rowcheck;
 		user.state.mt.curcol = loop.index;
 	END;
 END;
-user.state.mt.curcol = user.state.mt.curcol - 1
+user.state.mt.curcol = user.state.mt.curcol - 1;
+IF min_rows == 999; min_rows = 0; END;
+user.state.mt.currow = min_rows + 1;
+"<!-- setting user.state.mt.currow to '"; user.state.mt.currow; "' -->";
 %]
 
 __seclev__
