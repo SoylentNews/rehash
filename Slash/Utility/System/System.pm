@@ -32,6 +32,7 @@ use File::Spec::Functions;
 use File::Temp 'tempfile';
 use Mail::Sendmail;
 use Slash::Custom::Bulkmail;	# Mail::Bulkmail
+use Slash::Utility::Data;
 use Slash::Utility::Environment;
 use Symbol 'gensym';
 use Time::HiRes ();
