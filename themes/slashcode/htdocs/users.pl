@@ -1898,7 +1898,8 @@ sub saveUserAdmin {
 		$user_edits_table->{tokens} = $form->{tokens};
 		$user_edits_table->{m2info} = $form->{m2info};
 
-		my $was_author = ($slashdb->getAuthor($id)->{author}) ? 1 : 0;
+		my $author = $slashdb->getAuthor($id);
+		my $was_author = ($author && $author->{author}) ? 1 : 0;
 
 		$slashdb->setUser($id, $user_edits_table);
 		$note .= getMessage('saveuseradmin_saveduser', { field => $user_editfield_flag, id => $id });
