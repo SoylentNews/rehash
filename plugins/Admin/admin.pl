@@ -863,6 +863,7 @@ sub getRelated {
 	# And slurp in all the URLs just for good measure
 	while ($story_content =~ m|<A(.*?)>(.*?)</A>|sgi) {
 		my($url, $label) = ($1, $2);
+		$label = strip_notags($label);
 		$label =~ s/(\S{30})/$1 /g;
 		my $str = qq[<LI><A$url>$label</A></LI>\n];
 		$related_text .= $str unless $related_text =~ /\Q$str\E/
