@@ -2157,8 +2157,6 @@ INSERT INTO vars (name, value, description) VALUES ('store_com_page1_min_cid_for
 
 INSERT INTO vars (name, value, description) VALUES ('submissions_listing_page_size', 24, "Number of submissions shown per page on a user page.  Set to 0 to show all");
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # End of T_2_3_0_141, Start of T_2_3_0_142 - 2004/03/09
 
 # SLASHCLUSTER LAST UPDATED HERE
@@ -2193,3 +2191,8 @@ INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder
 INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Banned','banned','[% constants.rootdir %]/users.pl?op=listbanned',100,0,7);
 INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Info','stats','[% constants.rootdir %]/stats.pl',100,0,8);
 INSERT INTO menus(id, menu, label, sel_label, value, seclev, showanon, menuorder) VALUES (NULL,'security','Config','config','[% constants.rootdir %]/admin.pl?op=topics',10000,0,9);
+
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_3_0_144, Start of T_2_3_0_145 - 2004/03/23
