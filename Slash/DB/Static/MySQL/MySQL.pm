@@ -616,13 +616,14 @@ sub tokens2points {
 sub stirPool {
 	my($self) = @_;
 	my $stir = getCurrentStatic('stir');
-	my $cursor = $self->sqlSelectMany("points,users.uid as uid",
-			"users,users_comments,users_info",
-			"users.uid=users_comments.uid AND
-			 users.uid=users_info.uid AND
-			 seclev <= 1 AND
+	# Note that this query should not affect editors, although it used
+	# to, hence we've removed seclev, and the users table from this 
+	# query, entirely.
+	my $cursor = $self->sqlSelectMany("points,users_comments.uid AS uid",
+			"users_comments,users_info",
+			"users_info.uid=users_comments.uid AND
 			 points > 0 AND
-			 to_days(now())-to_days(lastgranted) > $stir");
+			 TO_DAYS(now())-TO_DAYS(lastgranted) > $stir");
 
 	my $revoked = 0;
 
