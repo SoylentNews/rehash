@@ -204,6 +204,12 @@ sub topFriends {
 	return $losers;
 }
 
+sub count {
+  my($self, $uid) = @_;
+  $self->sqlCount('people', "uid = $uid AND type is not NULL");
+} 
+
+
 sub getFriendsWithJournals {
 	my($self) = @_;
 	my $uid = $ENV{SLASH_USER};
