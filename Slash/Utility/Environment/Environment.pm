@@ -1225,7 +1225,7 @@ sub filter_params {
 
 	# fields that have ONLY a-zA-Z0-9_
 	my %alphas = map {($_ => 1)} qw(
-		mode section type
+		formkey mode section type
 	);
 
 	# regexes to match dynamically generated numeric fields
