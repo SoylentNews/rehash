@@ -63,7 +63,7 @@ END %]
 			<TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% IF story.is_future; "#CCCCFF"; ELSE; user.bg.1; END %]">
 				<TABLE ALIGN="RIGHT"><TR><TD ALIGN="RIGHT">
 				[% IF user.noicons %]
-					[ <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><B>[% topic.alttext %]</B></A> ]
+					[ <A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]"><B>[% topic.alttext %]</B></A> ]<BR>
 				[% ELSE %]
 					[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
 					<A HREF="[% constants.rootdir %]/search.pl?topic=[% topic.tid %]">
@@ -72,7 +72,7 @@ END %]
 							WIDTH="[% image.width %]" HEIGHT="[% image.height %]" BORDER="0"
 							ALIGN="RIGHT" HSPACE="20" VSPACE="10"
 							ALT="[% topic.alttext %]"
-							TITLE="[%topic.alttext %]"></A>
+							TITLE="[%topic.alttext %]"></A><BR>
 				[% END %]
 				[% FOREACH tid = stid %]
 					[% IF story.tid == tid ; NEXT ; END %]
