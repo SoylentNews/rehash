@@ -1339,11 +1339,11 @@ sub createAbuse {
 	my($self, $reason, $remote_addr, $script_name, $query_string) = @_;
 	# logem' so we can banem'
 	$self->sqlInsert("abusers", {
-		host_name => $remote_addr,
-		pagename  => $script_name,
-		querystring => $query_string,
-		reason    => $reason,
-		-ts   => 'now()',
+		host_name	=> $remote_addr,
+		pagename	=> $script_name,
+		querystring	=> $query_string,
+		reason		=> $reason,
+		-ts		=> 'now()',
 	});
 }
 
@@ -2647,7 +2647,8 @@ sub setUser {
 	# What is worse, a select+update or a replace?
 	# I should look into that.
 	for (@param)  {
-		$self->sqlReplace('users_param', { uid => $uid, name => $_->[0], value => $_->[1]});
+		$self->sqlReplace('users_param', { uid => $uid, name => $_->[0], value => $_->[1]})
+			if defined $_->[1];
 	}
 }
 
