@@ -2331,11 +2331,10 @@ INSERT INTO vars (name, value, description) VALUES ('user_comments_force_index',
 
 INSERT INTO vars (name, value, description) VALUES ('ignore_uid_date_index', '1', 'Ignore uid_date index on comments where it may slow performance');
 
-# End of T_2_3_0_156, Start of T_2_3_0_157 - 2004/06/01
-
+######################################################################
 ######################################################################
 
-# End of T_2_3_0_157, Start of T_2_5_0_1 - 2004/07/01
+# End of T_2_3_0_156, Start of T_2_5_0_1 - 2004/07/01
 
 # End of T_2_5_0_1, Start of T_2_5_0_2 - 2004/07/02
 
@@ -2343,16 +2342,11 @@ INSERT INTO vars (name, value, description) VALUES ('ignore_uid_date_index', '1'
 
 # End of T_2_5_0_3, Start of T_2_5_0_4 - 2004/07/02
 
-# You want to run utils/convertDBto200406 here, then follow its
-# instructions, read its output.  Shut your site down and execute
-# the commands it gives.  Then if all looks well, do a 'make install'
-# and run utils/convertDBto200406_suggest and execute whatever of
-# _its_ commands you see fit to.  Finally, run
-# utils/convertDBto200406_render.  Of course, you need more detailed
-# instructions than this because without them you don't know what
-# the heck you're reading or what you "see fit to," but we're working
-# on those instructions, they aren't written yet.  This is the fun
-# part about cutting-edge code, isn't it!
+######################################################################
+# See the comments at the top of utils/convertDBto200406 (v 1.28 or
+# later) for instructions on upgrading a Slash site from a T_2_3_* tag
+# to a T_2_5_* tag!
+######################################################################
 
 # You probably want to install the CPAN module GraphViz here, along
 # with whatever it needs;  see plugins/Admin/README for details.
@@ -2831,4 +2825,11 @@ INSERT INTO vars (name, value, description) VALUES ('dbsparklines_ymin',-20,'Min
 # End of T_2_5_0_44, Start of T_2_5_0_45 - 2005/01/11
 
 # End of T_2_5_0_45, Start of T_2_5_0_46 - 2005/01/18
+
+# Your site almost certainly is using 6-hex-digit colors in the hexcolor
+# fields, which should be prefixed with "#".  If you want to use textual
+# color names, change them (from e.g. "#000000" to "black") after the
+# UPDATE below.
+ALTER TABLE skin_colors CHANGE COLUMN hexcolor skincolor CHAR(12) DEFAULT '' NOT NULL;
+UPDATE skin_colors SET skincolor=CONCAT("#", skincolor);
 

@@ -10,9 +10,40 @@
 # rewrite.
 
 # Running this script outputs the SQL necessary to do this.
-# Suggest you pipe it to a file and read it over, then shut down
-# slashd and apache, and run it.  Then 'make install' the new
-# version of the code.  Then start apache/slashd back up.
+# The suggested procedure for updating a pre-June-2004 Slash site
+# to a post-June-2004 version of the code is this:
+#
+#  1. back everything up! see the "Back up" directions in the
+#     "UNINSTALLING" section of the INSTALL file
+#  2. do a 'cvs update' to tag T_2_3_0_156, the last T_2_3_* tag
+#  3. do the usual update to a tag:  shut down slashd/apache,
+#     apply sql/mysql/upgrades files, restart slashd/apache
+#  4. do a 'cvs update' to tag T_2_5_0_4, the first bugfixed
+#     T_2_5_* tag
+#  4. run this script and pipe its output to a file
+#  5. read that file over and try to make sure it makes sense for
+#     your site (yes, this is pretty subjective)
+#  6. shut down slashd and apache
+#  7. pipe the file with this script's output to mysql
+#  8. errors? resolve them (again, subjective, sorry)
+#  9. 'make install'
+# 10. run utils/convertDBto200406_suggest, which will offer
+#     suggestions for making your topic tree simpler, which you
+#     should do but can ignore if you prefer
+# 11. run utils/convertDBto200406_render
+# 12. start up slashd and apache and make sure the site works OK
+#
+# After that's done, you can continue along the usual upgrade
+# path in the T_2_5_* series.
+#
+# However, since these instructions were only added to this file
+# around T_2_5_0_46, you probably want to save a copy of them so
+# when you cvs update this file to T_2_5_0_4 they don't go away :)
+#
+# As of T_2_5_0_46, there are still bugs in this upgrade process.
+# I'm not sure what they are though.  If someone wants to give me
+# a detailed description of difficulties encountered, I'll do my
+# best to fix them as time permits.  - Jamie
 
 use strict;
 use File::Basename;

@@ -641,7 +641,7 @@ sub _convertModsToComments {
 	my $constants = getCurrentStatic();
 	my $mainpage_skid = $constants->{mainpage_skid};
 
-	return { } unless scalar(@mods);
+	return [ ] unless scalar(@mods);
 
 	if (!scalar(keys %anonymize)) {
 		%anonymize = (
@@ -10892,7 +10892,7 @@ sub getSkins {
 		# Massage the skin_colors data into this hashref in an
 		# appropriate place.
 		for my $name (keys %{$colors->{$color_skid}}) {
-			$skins_ref->{$skid}{hexcolors}{$name} = $colors->{$color_skid}{$name}{hexcolor};
+			$skins_ref->{$skid}{skincolors}{$name} = $colors->{$color_skid}{$name}{skincolor};
 		}
 
 		$skins_ref->{$skid}{basedomain} = $skins_ref->{$host_skid}{hostname};

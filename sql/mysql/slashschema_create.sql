@@ -760,7 +760,7 @@ DROP TABLE IF EXISTS skin_colors;
 CREATE TABLE skin_colors (
 	skid SMALLINT UNSIGNED NOT NULL,
 	name VARCHAR(24) NOT NULL,
-	hexcolor CHAR(6) NOT NULL,
+	skincolor CHAR(12) NOT NULL,
 	UNIQUE skid_name (skid, name)
 ) TYPE=InnoDB;
 

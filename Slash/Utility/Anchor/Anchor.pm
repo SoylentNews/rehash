@@ -718,7 +718,7 @@ sub getSkinColors {
 
 	# The normal situation (no colorblock param in the URL).
 	if (my $gSkin = getCurrentSkin()) {
-		$user->{colors} = $gSkin->{hexcolors};
+		$user->{colors} = $gSkin->{skincolors};
 		return 1;
 	}
 
