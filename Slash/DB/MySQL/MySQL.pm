@@ -8552,6 +8552,14 @@ sub getForumParents {
 
 ########################################################
 # for ubb_like_forums
+sub getForumFirstPostHashref {
+	my($self, $forum_id) = @_;
+
+	return $self->sqlSelectHashref("*", 'comments', "sid=$forum_id", 'ORDER BY comments.cid ASC LIMIT 1');
+}
+
+########################################################
+# for ubb_like_forums
 sub getForumLastPostHashref {
 	my($self, $forum_id) = @_;
 
