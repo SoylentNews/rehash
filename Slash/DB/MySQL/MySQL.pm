@@ -7359,6 +7359,7 @@ sub updateStory {
 
 }
 
+########################################################
 sub _getSlashConf_rawvars {
 	my($self) = @_;
 	my $vu = $self->{virtual_user};
@@ -9986,8 +9987,11 @@ sub _genericSet {
 		# need for a fully sql92 database.
 		# transactions baby, transactions... -Brian
 		for (@param)  {
-			$self->sqlReplace($param_table,
-				{ $table_prime => $id, name => $_->[0], value => $_->[1] });
+			$self->sqlReplace($param_table, {
+				$table_prime => $id,
+				name         => $_->[0],
+				value        => $_->[1]
+			});
 		}
 	} else {
 		$ok = $self->sqlUpdate($table, $value, $table_prime . '=' . $self->sqlQuote($id));
@@ -10226,8 +10230,11 @@ sub _genericGets {
 				if ($self->{$cache}{$clean_val}) {
 					push @$get_values, $_;
 				} else {
-					my $val = $self->sqlSelectAll("$table_prime, name, value",
-						$param_table, "name='$_'");
+					my $val = $self->sqlSelectAll(
+						"$table_prime, name, value",
+						$param_table,
+						"name='$_'"
+					);
 					for my $row (@$val) {
 						push @$params, $row;
 					}
@@ -10253,8 +10260,11 @@ sub _genericGets {
 				$qlid = $self->_querylog_start('SELECT', $table);
 				$sth = $self->sqlSelectMany($values, $table);
 			} else {
-				my $val = $self->sqlSelectAll("$table_prime, name, value",
-					$param_table, "name=$values");
+				my $val = $self->sqlSelectAll(
+					"$table_prime, name, value",
+					$param_table,
+					"name=$values"
+				);
 				for my $row (@$val) {
 					push @$params, $row;
 				}
@@ -10437,7 +10447,7 @@ sub getMenus {
 sub sqlReplace {
 	my($self, $table, $data) = @_;
 	my($names, $values);
- 
+
 	for (keys %$data) {
 		if (/^-/) {
 			$values .= "\n  $data->{$_},";
@@ -10447,10 +10457,10 @@ sub sqlReplace {
 		}
 		$names .= "$_,";
 	}
- 
+
 	chop($names);
 	chop($values);
- 
+
 	my $sql = "REPLACE INTO $table ($names) VALUES($values)\n";
 	$self->sqlConnect();
 	my $qlid = $self->_querylog_start('REPLACE', $table);
