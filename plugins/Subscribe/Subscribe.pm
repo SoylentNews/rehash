@@ -64,10 +64,12 @@ sub _subscribeDecisionPage {
                 || ( $user->{hits_bought}
 			&& $user->{hits_bought} >= $user->{hits_paidfor} );
 
+	# If ads aren't on, the user isn't buying this one.
+	my $constants = getCurrentStatic();
+	return 0 if !$constants->{run_ads};
+
 	# Has the user exceeded the maximum number of pages they want
 	# to buy *today*?
-
-	my $constants = getCurrentStatic();
 	my @gmt = gmtime;
 	my $today = sprintf("%04d%02d%02d", $gmt[5]+1900, $gmt[4]+1, $gmt[3]);
 	if ($today eq substr($user->{lastclick}, 0, 8)) {
