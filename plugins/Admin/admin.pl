@@ -1000,7 +1000,7 @@ sub getRelated {
 		my($a_attr, $label) = ($1, $2);
 		if ($a_attr =~ m/(\bTITLE\s*=\s*(["'])(.*?)\2)/si) {
 			$label = $3;
-			$a_attr =~ s/$1//;
+			$a_attr =~ s/\Q$1\E//;
 		}
 
 		$a_attr =~ /\bHREF\s*=\s*(["'])(.*?)\1/;
