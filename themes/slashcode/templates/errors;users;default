@@ -64,7 +64,9 @@ __template__
 
 [% CASE 'checklist_err' %]
 [% PROCESS titlebar width="100%" title="Too many options" %]
-	You selected too many options<BR>
+[%# 15 is an approximation, an upper bound %]
+	The maximum number of selections is [% constants.checklist_length div 15 %].
+	You selected too many.<BR>
 
 [% CASE 'saveuser_passnomatch_err' %]
 	[% IF titlebar %]
