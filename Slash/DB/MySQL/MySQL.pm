@@ -1100,7 +1100,7 @@ sub undoModeration {
 		# they are still eligible to be metamodded.
 		$self->sqlUpdate("moderatorlog",
 			{ active => 0 },
-			"cid=$cid and uid=$uid"
+			"cid=$cid AND uid=$uid"
 		);
 
 		# Restore modded user's karma, again within the proper boundaries.
@@ -1483,7 +1483,7 @@ sub createAccessLog {
 	if ($op eq 'image' && $constants->{accesslog_imageregex}) {
 		return if $constants->{accesslog_imageregex} eq 'NONE';
 		my $uri = $r->uri;
-		print STDERR scalar(localtime) . " createAccessLog image url '" . ($r->uri) . "'\n";
+#		print STDERR scalar(localtime) . " createAccessLog image url '" . ($r->uri) . "'\n";
 		return unless $uri =~ $constants->{accesslog_imageregex};
 		$dat ||= $uri;
 	}
@@ -5785,14 +5785,14 @@ sub setCommentForMod {
 ########################################################
 # This gets the mathematical mode, in other words the most common,
 # of the moderations done to a comment.  If no mods, return undef.
-# Tiebreakers break ties, first tiebreaker found wins.  "cid"
-# is a key in moderatorlog so this is not a table scan.
-# A clever thing to do here would be to check the comment's
-# "points" vs. "pointsorig";  if the score has overall gone
-# up, only consider positive mod reasons, and if down, only
-# negative.  If zero, use the current logic.  Maybe later...
+# If a comment's net moderation is down, choose only one of the
+# negative mods, and the opposite for up.  Tiebreakers break ties,
+# first tiebreaker found wins.  "cid" is a key in moderatorlog
+# so this is not a table scan.
 sub getCommentMostCommonReason {
-	my($self, $cid, $allreasons_hr, @tiebreaker_reasons) = @_;
+	my($self, $cid, $allreasons_hr, $new_reason, @tiebreaker_reasons) = @_;
+	$new_reason = 0 if !$new_reason;
+	unshift @tiebreaker_reasons, $new_reason if $new_reason;
 
 	my $reasons = $self->getReasons();
 	my $listable_reasons = join(",",
@@ -5819,6 +5819,41 @@ sub getCommentMostCommonReason {
 			 AND reason IN ($listable_reasons)",
 			"GROUP BY reason"
 		);
+	}
+
+	# If no mods that are listable, return undef.
+	return undef if !keys %$hr;
+
+	# We need to know if the comment has been moderated net up,
+	# net down, or to a net tie, and if not a tie, restrict
+	# ourselves to choosing only reasons from that direction.
+	# Note this isn't atomic with the actual application of, or
+	# undoing of, the moderation in question.  Oh well!  If two
+	# mods are applied at almost exactly the same time, there's
+	# a one in a billion chance the comment will end up with a
+	# wrong (but still plausible) reason field.  I'm not going
+	# to worry too much about it.
+	# Also, I'm doing this here, with a separate for loop to
+	# screen out unacceptable reasons, instead of putting this
+	# "if" into the same for loop above, because it may save a
+	# query (if a comment is modded entirely with Under/Over).
+	my($points, $pointsorig) = $self->sqlSelect(
+		"points, pointsorig", "comments", "cid=$cid");
+	if ($new_reason) {
+		# This mod hasn't been taken into account in the
+		# DB yet, but it's about to be applied.
+		$points += $reasons->{$new_reason}{val};
+	}
+	my $needval = $points - $pointsorig;
+	if ($needval) {
+		   if ($needval >  1) { $needval =  1 }
+		elsif ($needval < -1) { $needval = -1 }
+		my $new_hr = { };
+		for my $reason (keys %$hr) {
+			$new_hr->{$reason} = $hr->{$reason}
+				if $reasons->{$hr->{$reason}{reason}}{val} == $needval;
+		}
+		$hr = $new_hr;
 	}
 
 	# If no mods that are listable, return undef.
