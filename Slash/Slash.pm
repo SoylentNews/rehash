@@ -1472,38 +1472,48 @@ script can have it's own data template (specified by the PAGE
 parameter). If PAGE is unspecified, snippets will be retrieved from
 the last page visited by the user as determined by Slash::Apache::User.
 
+=item Notes
+
+This is in Slash.pm instead of Slash::Utility because it depends on Slash::Display,
+which also depends on Slash::Utility.  Slash::Utility can call Slash::getData
+(note package name), because Slash.pm should always be loaded by scripts first
+before loading Slash::Utility, so as long as nothing in Slash::Utility requires
+getData for compilation, we should be good (except, note that the environment
+Slash::Display depends on needs to be there, so you can't call getData before
+createCurrentDB and friends are called ... see note in prepareUser).
+
 =back
 
 =cut
+
 sub getData {
 	my($value, $hashref, $page) = @_;
-	my $cache=getCurrentCache();
+	my $cache = getCurrentCache();
 	_dataCacheRefresh($cache);
-	
+
 	$hashref ||= {};
 	$hashref->{value} = $value;
 	$hashref->{returnme} = {};
 	my %opts = ( Return => 1, Nocomm => 1 );
 	$opts{Page} = $page || 'NONE' if defined $page;
+
+	my $name = slashDisplayName('data', $hashref, { %opts, GetName => 1 });
+	my $var  = $cache->{getdata}{ $name->{tempdata}{tpid} };
+
+	return $var->{$value} if defined $var->{$value};
 	
-	
-	my $name=slashDisplayName('data', $hashref, {%opts,GetName=>1});
-	if(defined $cache->{getdata}{$name->{tempdata}{tpid}}{$value}){
-		return $cache->{getdata}{$name->{tempdata}{tpid}}{$value};
-	}
-	
-	my $str=slashDisplay($name, $hashref, %opts);
-	
-	if($hashref->{returnme}{data_constant}){
-		$cache->{getdata}{_last_refresh}=time() unless $cache->{getdata}{_last_refresh};
-		$cache->{getdata}{$name->{tempdata}{tpid}}{$value}=$str;
+	my $str = slashDisplay($name, $hashref, %opts);
+
+	if ($hashref->{returnme}{data_constant}) {
+		$cache->{getdata}{_last_refresh} = time() unless $cache->{getdata}{_last_refresh};
+		$var->{$value} = $str;
 	}
 	return $str;
 }
 
-sub _dataCacheRefresh{
-	my ($cache) = @_;
-	if($cache->{getdata}{_last_refresh} < (time() - $cache->{getdata}{_expiration})){
+sub _dataCacheRefresh {
+	my($cache) = @_;
+	if ($cache->{getdata}{_last_refresh} < (time() - $cache->{getdata}{_expiration})) {
 		$cache->{getdata} = {};
 		$cache->{getdata}{_last_refresh} = time();
 		$cache->{getdata}{_expiration} = getCurrentStatic('block_expire');
