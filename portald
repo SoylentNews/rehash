@@ -255,7 +255,8 @@ sub getRDF {
 				Start => \&start_handler
 		);
 
-		unless (my $d = geturl($url)) {
+		my $d = geturl($url);
+		if (!$d) {
 			portaldLog("failed to get $bid");
 			return;
 		}
