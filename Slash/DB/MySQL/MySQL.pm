@@ -3081,6 +3081,16 @@ sub getCommentChildren {
 }
 
 ########################################################
+sub getCommentsStartingAt {
+	my($self, $start_at, $options) = @_;
+	my $limit = $options->{limit} ? "LIMIT $options->{limit}" : "";
+	my $order = $options->{order} eq "DESC" ? "DESC" : "ASC";
+	my($comments) = $self->sqlSelectAllHashrefArray('*', 'comments', "cid >= $start_at", "ORDER BY cid $order $limit");
+	return $comments;
+}
+
+
+########################################################
 # Does what it says, deletes one comment.
 # For optimization's sake (not that Slashdot really deletes a lot of
 # comments, currently one every four years!) commentcount and hitparade
