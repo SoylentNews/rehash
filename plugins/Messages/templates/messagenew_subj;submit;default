@@ -1,0 +1,17 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+submit
+__lang__
+en_US
+__name__
+messagenew_subj
+__template__
+New Submission: [% submission.subj %]
+
+__seclev__
+100

@@ -1,0 +1,15 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+messages
+__lang__
+en_US
+__name__
+msg_web_subj
+__template__
+[% msg.type %]
+__seclev__
+500

@@ -1,0 +1,28 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+messages
+__lang__
+en_US
+__name__
+msg_email
+__template__
+[% msg.message %]
+
+======================================================================
+
+You have received this message because you subscribed to it
+on [% constants.sitename %].  To stop receiving this and other
+messages from [% constants.sitename %], or to add more messages
+or change your preferences, please go to your user page.
+
+	[% constants.absolutedir %]/my/
+
+You can log in and change your preferences from there.
+
+__seclev__
+500

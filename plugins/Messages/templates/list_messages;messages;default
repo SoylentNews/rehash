@@ -1,0 +1,73 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+messages
+__lang__
+en_US
+__name__
+list_messages
+__template__
+[% USE Slash %]
+[% Slash.createMenu("users") %]
+[% Slash.createMenu("messages") %]
+[% PROCESS titlebar title => "$constants.sitename Messages for $user.nickname", width => "100%" %]
+
+[% IF note %]<H2>[% note %]</H2>[% END %]
+
+[% IF message_list.size %]
+<P>These messages will be kept in the system for only
+<B>[% constants.message_web_expire || 31 %] days</B>, whether they
+have been read or not.  After [% constants.message_web_expire || 31 %] days, they
+<B>will be deleted</B>.</P>
+
+<P>Messages marked with "<FONT COLOR="[% user.bg.3 %]">*</FONT>" are unread.</P>
+
+<FORM ACTION="[% constants.rootdir %]/messages.pl" METHOD="POST">
+<TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+[% FOREACH message = message_list %]
+  <TR>
+    <TD VALIGN="TOP">[% IF ! message.readed
+      %]<FONT COLOR="[% user.bg.3 %]">*</FONT>[% ELSE
+      %]&nbsp;[% END %]</TD>
+    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/messages.pl?op=display&amp;id=[%
+			message.id
+		%]"><B>[% message.subject || 'Message' %]</B></A></TD>
+    <TD VALIGN="TOP"><EM>[% Slash.timeCalc(message.date) %]</EM></TD>
+    <TD VALIGN="TOP" ALIGN="CENTER"><INPUT TYPE="checkbox" NAME="del_[% message.id %]" VALUE="1"></TD>
+  </TR>
+[% END %]
+  <TR><TD COLSPAN="2">&nbsp;</TD><TD ALIGN="RIGHT"><NOSCRIPT>&nbsp;</NOSCRIPT><SCRIPT TYPE="text/javascript" LANGUAGE="Javascript" CHARSET="iso-8859-1">
+<!--
+[%# this JavaScript should not actually be a problem for anyone, but %]
+[%# if it is, it is easy to strip out ... %]
+function selectall (myform) {
+	for (var i = 0; i < myform.elements.length; i++)
+		myform.elements[i].checked = true;
+}
+document.write('<INPUT TYPE="button" VALUE="Select All" ONCLICK="selectall(this.form)"> ');
+//-->
+</SCRIPT></TD><TD ALIGN="CENTER">
+<INPUT TYPE="submit" VALUE="Delete Messages"></TD></TR>
+</TABLE>
+
+<INPUT TYPE="hidden" NAME="op" VALUE="deletemsgs">
+</FORM>
+
+[% ELSE %]
+
+<P>
+You have no messages waiting on the system.  Either none
+have been sent, or they have been deleted or purged from
+the system, or they have been sent via another delivery
+method.
+</P>
+
+[% END %]
+
+
+__seclev__
+500

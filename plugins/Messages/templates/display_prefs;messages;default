@@ -1,0 +1,68 @@
+__section__
+default
+__description__
+* note = Note to display
+* messagecodes = hashref of message codes
+* displaymodes = hashref of delivery modes
+__title__
+
+__page__
+messages
+__lang__
+en_US
+__name__
+display_prefs
+__template__
+[% USE Slash %]
+[% messages = Slash.getObject("Slash::Messages") %]
+[% Slash.createMenu("users") %]
+[% Slash.createMenu("messages") %]
+[% PROCESS titlebar title => "Message Preferences", width => "100%" %]
+
+<P><B>[% note %]</B></P>
+
+<FORM ACTION="[% env.script_name %]" METHOD="POST">
+<TABLE ALIGN="CENTER" WIDTH="95%" BGCOLOR="[% user.bg.2 %]">
+	<TR><TD WIDTH="200" VALIGN="TOP">
+[% mailcount = 0;
+   FOR code = messagecodes.sort;
+      # this is not so bad, it is cached, but could be improved
+      mcode = messages.getMessageCode(code);
+      IF mcode.modes == 0;
+         mailonly = 1;
+         mailcount = mailcount + 1;
+      ELSE;
+         mailonly = 0;
+      END;
+%]
+<INPUT TYPE="checkbox" NAME="messagecodes_[% code %]" VALUE="1"[%
+   key = "messagecodes_$code";
+   user.$key ? " CHECKED" : ""
+%]> [% messagecodes.$code; " *" IF mailonly %]<BR>[% END %]
+	</TD><TD VALIGN="TOP">
+		<B>Message Types</B> <BR>
+Check off each message type you would like to receive.
+[% IF mailcount %]
+<P>The items marked with "*" cannot be sent to your web mailbox, but
+instead will be sent via email if selected.
+[% END %]
+	</TD></TR>	<TR><TD WIDTH="200" VALIGN="MIDDLE">
+[% Slash.createSelect('deliverymodes', deliverymodes, user.deliverymodes, 1, 1) %]
+	</TD><TD VALIGN="TOP">
+		<B>Delivery Mode</B> <BR>
+Currently, your options for receiving messages is either via email, or via the web interface.
+If you don't have your email address registered with the system, you will receive
+messages via the web, regardless of how your preference is set here.  Daily headlines
+and newsletter will only be sent via email.  Messages delivered via the web will be kept in
+the system for only <B>[% constants.message_web_expire || 31 %] days</B>, whether they
+have been read or not.  After [% constants.message_web_expire || 31 %] days, they
+<B>will be deleted</B>.
+	</TD></TR>
+	<TR><TD COLSPAN="2">
+		<INPUT TYPE="hidden" NAME="op" VALUE="save_prefs">
+		<INPUT TYPE="submit" VALUE="Save Prefs">
+	</TD></TR>
+</TABLE>
+</FORM>
+__seclev__
+500

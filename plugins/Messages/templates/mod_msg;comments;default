@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+comments
+__lang__
+en_US
+__name__
+mod_msg
+__template__
+[% IF msg.mode == 1 %]
+
+<P>
+A user has given a <B>[% constants.reasons.${moderation.reason} %] ([% moderation.value %])</B> moderation to
+your comment, <B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid
+%]">[% comment.subject %]</A></B>, attached to
+<B><A HREF="[% discussion.realurl %]">[% discussion.title %]</A></B>.
+Your comment is currently scored <B>[% constants.reasons.${comment.reason} %] ([% comment.points %])</B>.
+</P>
+
+[% ELSE %]
+
+A user has given a "[% constants.reasons.${moderation.reason} %]" ([% moderation.value %]) moderation to
+your comment.
+    [% comment.subject %]    
+    [% constants.absolutedir %]/comments.pl?sid=[% comment.sid %]&cid=[% comment.cid %]
+
+Attached to:
+    [% discussion.title %]
+    [% discussion.realurl %]
+
+Your comment is currently scored [% comment.points %].
+[% END %]
+
+__seclev__
+500

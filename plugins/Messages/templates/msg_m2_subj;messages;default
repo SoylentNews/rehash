@@ -1,0 +1,16 @@
+__section__
+default
+__description__
+Subject used for Metamoderation Update messages.
+__title__
+Metamoderation Results Message Subject
+__page__
+messages
+__lang__
+en_US
+__name__
+msg_m2_subj
+__template__
+[ [% constants.sitename %] Message ] Your Moderations Have Been Metamoderated
+__seclev__
+500

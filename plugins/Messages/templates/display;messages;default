@@ -1,0 +1,50 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+messages
+__lang__
+en_US
+__name__
+display
+__template__
+[% USE Slash %]
+[% PROCESS titlebar title => "$constants.sitename Message for $user.nickname", width => "100%" %]
+[% Slash.createMenu('messages') %]
+
+[% IF message && message.user.uid == user.uid %]
+
+<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="2">
+  <TR><TD BGCOLOR="[% user.bg.2 %]">
+    <B>[% message.subject %]</B><BR>
+    sent by <B>[% constants.sitename %] Message System</B>
+    on [% Slash.timeCalc(message.date) %]<BR>
+  </TD></TR>
+  <TR><TD BGCOLOR="[% user.bg.1 %]">
+    [% message.message %]
+  </TD></TR>
+  <TR><TD ALIGN="LEFT">
+    <FORM ACTION="[%constants.rootdir %]/messages.pl" METHOD="POST">
+    <INPUT TYPE="hidden" NAME="id" VALUE="[% message.id %]">
+    <INPUT TYPE="hidden" NAME="op" VALUE="delete_message">
+    <INPUT TYPE="submit" VALUE="Delete Message">
+    </FORM>
+  </TD></TR>
+</TABLE>
+
+[% ELSE %]
+
+<P>
+This message was not found on the system.  Either this message
+has been deleted or purged from the system, or it has been sent
+via another delivery method, or it was not sent to you, but
+to another user.
+</P>
+
+[% END %]
+
+__seclev__
+500

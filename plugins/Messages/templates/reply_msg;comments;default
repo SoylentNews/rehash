@@ -1,0 +1,42 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+comments
+__lang__
+en_US
+__name__
+reply_msg
+__template__
+[% IF msg.mode == 1 %]
+
+<P>
+[% reply.nickname %] has posted a comment,
+<B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% reply.sid %]&amp;cid=[% reply.cid
+%]">[% reply.subject %]</A></B>, in reply to your comment,
+<B><A HREF="[% constants.rootdir %]/comments.pl?sid=[% parent.sid %]&amp;cid=[% parent.cid
+%]">[% parent.subject %]</A></B>, attached to
+<B><A HREF="[% discussion.realurl %]">[% discussion.title %]</A></B>.
+</P>
+
+[% ELSE %]
+
+[% reply.nickname %] has posted a comment in reply to your comment.
+    [% reply.subject %]    
+    [% constants.absolutedir %]/comments.pl?sid=[% reply.sid %]&cid=[% reply.cid %]
+
+Replied to:
+    [% parent.subject %]    
+    [% constants.absolutedir %]/comments.pl?sid=[% parent.sid %]&cid=[% parent.cid %]
+
+Attached to:
+    [% discussion.title %]
+    [% discussion.realurl %]
+
+[% END %]
+
+__seclev__
+500

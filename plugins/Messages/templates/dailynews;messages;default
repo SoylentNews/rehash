@@ -1,0 +1,65 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+messages
+__lang__
+en_US
+__name__
+dailynews
+__template__
+[% USE Slash %]
+[% USE num = format("\n%5d. %s") %]
+[% USE box = format("| %-67.67s|\n") %]
+[% topics = Slash.db.getTopics(); # sigh %]
+[% constants.sitename %] Daily Newsletter
+
+[% sponsor = PROCESS emailsponsor; IF sponsor -%]
+======================================================================
+[% sponsor %]
+======================================================================
+
+
+[%- END -%]
+In this issue:[% FOR story = stories.reverse %]
+    * [% story.title %][% END %]
+
+[% FOR story = stories.reverse; topicname = topics.${story.tid}.name;
+%]+--------------------------------------------------------------------+
+[% 
+	box(story.title);
+	IF constants.use_dept;
+		box("  from the $story.dept dept.");
+	END;
+
+	stime = Slash.timeCalc(story.time, "%A %B %d, @%H:%M");
+	box("  posted by $story.author on $stime ($topicname)");
+	box("  $constants.absolutedir/article.pl?sid=$story.sid");
+%]+--------------------------------------------------------------------+
+
+[% story.asciitext; IF story.refs.size %]
+
+[% IF !constants.newsletter_body && story.bodytext -%]
+This story continues at:
+    [% constants.absolutedir %]/article.pl?sid=[% story.sid %]
+
+[% END %]Discuss this story at:
+    [% constants.absolutedir %]/comments.pl?sid=[% story.sid %]
+
+Links:[%
+  count = -1;
+  FOR ref = story.refs;
+    count = count + 1;
+    num(count, ref); #urlize(ref));
+ END;
+END %]
+
+
+[% END %]
+Copyright 1997-2001 [% constants.sitepublisher %].  All rights reserved.
+
+__seclev__
+500

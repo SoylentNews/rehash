@@ -1,0 +1,57 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+messages
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'header' %]
+[% constants.sitename %] Message Center
+
+[% CASE 'prefs saved' %]
+Preferences Saved
+
+[% CASE 'type not found' %]
+message type [% type %] not found
+
+[% CASE 'user not found' %]
+User [% uid %] not found
+
+[% CASE 'no template' %]
+No template name
+
+[% CASE 'wrong type' %]
+Cannot accept data of type [% type %]
+
+[% CASE 'no delivery mode' %]
+No delivery mode for user [% uid %]
+
+[% CASE 'no message code' %]
+Not allowed to send message type [% code %] to user [% uid %]
+
+[% CASE 'send_mail false' %]
+Not allowed to send mail; send_mail variable is false
+
+[% CASE 'send mail error' %]
+Error sending to '[% addr %]' for user [% uid %]: [% error %]
+
+[% CASE 'newsletter subject' %]
+Daily Stories
+
+[% CASE 'headlines subject' %]
+Daily Headlines
+
+[% CASE 'unknown mode' %]
+Unknown delivery mode '[% mode %]' for user [% uid %]
+
+[% END %]
+__seclev__
+500

@@ -1,0 +1,80 @@
+__section__
+default
+__description__
+Message body that is sent back to a user whenever a moderation from
+this user is metamoderated.
+
+* num_m2mods = Number of metamoderators involved over ALL listed results.
+
+* m2 = List of hashrefs containing the following keys:
+	title	- Title of the discussion in which the moderated comment appears.
+	url	- URL of the discussion in question
+	subj	- subject of moderated comment
+	vote	- moderation vote on that comment
+	reason  - Reason given for original moderation
+
+* change = Total amount of karma change over listed results.
+
+__title__
+Metamoderation Message Body
+__page__
+messages
+__lang__
+en_US
+__name__
+msg_m2
+__template__
+
+[% vote_result = { '-1' => 'Unfair', '1' => 'Fair' }; %]
+
+[% IF msg.mode == 1 %]<P>[% END %]
+Some of your past moderations have been meta moderated by [% num_metamods %]
+other [% constants.sitename %] readers. Here are the exciting results:
+
+[% IF msg.mode == 1%]
+<UL>
+[% FOREACH m2item = m2 -%]
+	[% 
+		IF m2item.url;
+			discussion = "<A HREF=\"$m2item.url\">$m2item.title</A>";
+		ELSE;
+			discussion = "$m2item.title";
+		END;
+	-%]
+	<LI> "[% m2item.subj %]" from the discussion [% discussion %] which you
+	moderated as <B>[% m2item.reason %]</B> was voted 
+	<B>[% vote_result.${m2item.vote} %]</B>
+
+[% END %]
+</UL>
+[% ELSE %]
+[% FOREACH m2item = m2 -%]
+	[%- reason = m2item.reason -%]
+	- "[% m2item.subj %]" from the discussion [% discussion %]
+	which you moderated as "[% reason %]" was voted [% vote_result.${m2item.vote} %]
+[% url=m2item.url; IF url; IF !m2item.url.search('^http:'); url="http:$url"; END -%]
+	<[% url %]>
+
+[%- END %]
+[% END %]
+[%- END -%]
+[%
+	msg1 = '';
+	msg2 = '';
+	IF change > 0;
+		msg1="outstanding";
+		msg2="granted";
+	ELSIF change < 0;
+		msg1="poor";
+		msg2="penalized";
+	END;
+	IF change < 0;
+		change = change * -1;
+	END;
+%][% IF msg1 && msg2 %]
+For your [% msg1 %] moderation, you are [% msg2 %] [% change %] karma.
+[% END %]
+[% IF msg.mode == 1 %]<P>[% END %]Thank you for moderating.
+
+__seclev__
+500
