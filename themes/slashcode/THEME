@@ -171,6 +171,7 @@ template=templates/linkrel;misc;default
 template=templates/listAbuses;users;default
 template=templates/listBanned;users;default
 template=templates/listComments;users;default
+template=templates/listMetamods;users;default
 template=templates/listReadOnly;users;default
 template=templates/listSubmissions;users;default
 template=templates/listTopics;topics;default
