@@ -1271,8 +1271,8 @@ EOT
 	print qq!<INPUT TYPE="TEXT" NAME="time" VALUE="$S->{sqltime}" size="16"> <BR>!;
 
 	printf "\t[ %s | %s", $I{query}->checkbox('fixquotes'), $I{query}->checkbox('autonode');
-	printf(qq! | %s | <A HREF="$I{rootdir}/pollBooth.pl?qid=$sid&op=edit">Related Poll</A>!,
-		$I{query}->checkbox('fastforward')) if $sid;
+	printf(qq! | %s | <A HREF="%s/pollBooth.pl?qid=%s&op=edit">Related Poll</A>!,
+		$I{query}->checkbox('fastforward'), $I{rootdir}, $sid) if $sid;
 	print " ]\n";
 
 	print <<EOT;
@@ -1295,10 +1295,10 @@ EOT
 			my($sect, $col) = split m/_/;
 			$S->{$_} = $I{F}{$_} || $S->{$_};
 
-			printf <<EOT, $I{query}->textfield({ -name => $_, -value => $S->{$_}, -size => 64 });
+			printf <<EOT, $col, $I{query}->textfield({ -name => $_, -value => $S->{$_}, -size => 64 });
 
 	<TR><TD BGCOLOR="$I{bg}[3]">
-		<FONT COLOR="$I{fg}[3]"> <B>$col</B> </FONT>
+		<FONT COLOR="$I{fg}[3]"> <B>%s</B> </FONT>
 	</TD><TD BGCOLOR="$I{bg}[2]">
 		<FONT SIZE="${\( $I{fontbase} + 2 )}"> %s </FONT>
 	</TD></TR>
@@ -1397,19 +1397,19 @@ EOT
 			print "\t\t[$x]\n"
 		}
 
-		printf <<EOT, substr($tid, 0, 5);
+		printf <<EOT, $I{rootdir}, $sid, $title, $aid, substr($tid, 0, 5);
 	</TD><TD>
-		<A HREF="$I{rootdir}/article.pl?sid=$sid">$title&nbsp;</A>
+		<A HREF="%s/article.pl?sid=%s">%s&nbsp;</A>
 	</TD><TD>
-		<FONT SIZE="${\( $I{fontbase} + 2 )}"><B>$aid</B></FONT>
+		<FONT SIZE="${\( $I{fontbase} + 2 )}"><B>%s</B></FONT>
 	</TD><TD>
 		<FONT SIZE="${\( $I{fontbase} + 2 )}">%s</FONT>
 	</TD>
 EOT
 
-		printf <<EOT, substr($section,0,5) unless $I{U}{asection} || $I{F}{section};
+		printf <<EOT, $ENV{SCRIPT_NAME}, $section, substr($section, 0, 5) unless $I{U}{asection} || $I{F}{section};
 	<TD>
-		<FONT SIZE="${\( $I{fontbase} + 2 )}"><A HREF="$ENV{SCRIPT_NAME}?section=$section">%s</A>
+		<FONT SIZE="${\( $I{fontbase} + 2 )}"><A HREF="%s?section=%s">%s</A>
 	</TD>
 EOT
 
