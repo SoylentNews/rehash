@@ -556,6 +556,12 @@ sub main {
 	# daemonize
 	close STDOUT;
 
+	# this is a ridiculous fix for a ridiculous bug:
+	# http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-09/msg00956.html
+	# so we are stealing STDOUT's fd so it can't be used elsewhere;
+	# it's ridiculous that we should have to -- pudge
+	open my $fh, '>', catfile($constants->{logdir}, 'openwarn');
+
 	MAINLOOP: while (1) {
 		if (verbosity() >= 4) {
 			slashdLog("Beginning MAINLOOP");
