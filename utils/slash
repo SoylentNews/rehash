@@ -4,7 +4,7 @@
 # written by patrick galbraith 
 
 # slash home
-DATADIR=/home/slashdot
+DATADIR=/home/slash
 
 case "$1" in
   start)
