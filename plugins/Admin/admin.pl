@@ -974,7 +974,7 @@ sub editStory {
 		$storybox = fancybox($constants->{fancyboxwidth}, 'Related Links', $storyref->{relatedtext}, 0, 1);
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
-		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext_wordcount});
+		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
 
 	} else { # New Story
 		$extracolumns = $slashdb->getSectionExtras($storyref->{section}) || [ ];
