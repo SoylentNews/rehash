@@ -53,6 +53,7 @@ use vars qw($VERSION @EXPORT);
 	changePassword
 	chopEntity
 	commify
+	countTotalVisibleKids
 	countWords
 	decode_entities
 	ellipsify
