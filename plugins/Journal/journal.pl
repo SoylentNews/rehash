@@ -518,6 +518,7 @@ sub saveArticle {
 		$journal->set($form->{id}, \%update);
 
 		return $form->{id} if $ws;
+		$form = { id => $form->{id} };
 
 	} else {
 		my $id = $journal->create($description,
@@ -563,10 +564,12 @@ sub saveArticle {
 				$messages->create($_, MSG_CODE_JOURNAL_FRIEND, $data);
 			}
 		}
+
 		return $id if $ws;
+		$form = { id => $id };
 	}
 
-	listArticle(@_);
+	displayArticle($journal, $constants, $user, $form, $slashdb);
 }
 
 sub articleMeta {
@@ -721,8 +724,9 @@ sub add_entry {
 
 	my $form = _save_params(0, @_) || {};
 
-	$form->{posttype} ||= $user->{posttype};
-	$form->{tid} ||= $constants->{journal_default_topic};
+	$form->{posttype}		||= $user->{posttype};
+	$form->{journal_discuss}	||= $user->{journal_discuss};
+	$form->{tid}			||= $constants->{journal_default_topic};
 
 	no strict 'refs';
 	my $saveArticle = *{ $user->{state}{packagename} . '::saveArticle' };
