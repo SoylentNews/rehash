@@ -28,7 +28,7 @@ use base 'Slash::DB::MySQL';
 sub sqlShowMasterStatus {
 	my($self) = @_;
 
-	#$self->sqlConnect();
+	$self->sqlConnect();
 	my $stat = $self->{_dbh}->prepare("SHOW MASTER STATUS");
 	$stat->execute;
 	my $statlist = [];
@@ -42,7 +42,7 @@ sub sqlShowMasterStatus {
 sub sqlShowSlaveStatus {
 	my($self) = @_;
 
-	#$self->sqlConnect();
+	$self->sqlConnect();
 	my $stat = $self->{_dbh}->prepare("SHOW SLAVE STATUS");
 	$stat->execute;
 	my $statlist = [];
