@@ -16,6 +16,8 @@ __template__
 
 [% constants.sitename %] Stats for [% day %]
 
+[% constants.absolutedir_secure %]/stats.pl?op=report&report=main&stats_days=7
+
                    UIDs      IPIDs      Pages 
         total: [% users %]   [% unique %]   [% total %] ([% total_bytes %])
  static total:        -          -    [% total_static %]
