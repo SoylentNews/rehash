@@ -138,7 +138,7 @@ sub run {
 
 	# And print the key for the hitrate column because it's not
 	# very intuitive.
-	print "InnoDB cache (h)itrate key:   + >98%   - 94-98%   X <94%   ? unknown\n";
+	print "InnoDB cache (h)itrate key:   + >99%   - 96-99%   X <96%   ? unknown\n";
 
 	while (1) {
 
@@ -252,9 +252,9 @@ sub print_first_line {
 		if ($db->{innostatus_query}) {
 			if (!defined($db->{hitrate})) {
 				print " ?";
-			} elsif ($db->{hitrate} >= 98) {
+			} elsif ($db->{hitrate} >= 99) {
 				print " +";
-			} elsif ($db->{hitrate} >= 94) {
+			} elsif ($db->{hitrate} >= 96) {
 				print " -";
 			} else {
 				print " X";
@@ -425,7 +425,7 @@ For each DB, the data is:
 	sps	Slow queries per second
 	qpp	Queries per page
 	h	InnoDB cache hit rate percent (MySQL 4.x only)
-		("+" means > 98%, "-" means 94-98%, "X" means < 94%)
+		("+" means > 99%, "-" means 96-99%, "X" means < 96%)
 EOT
 	exit 0;
 }
