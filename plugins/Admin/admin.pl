@@ -1021,6 +1021,18 @@ sub editStory {
 		$sid = $slashdb->getStory($form->{sid}, 'sid')
 			if ($form->{sid});
 	}
+	# Basically, we upload the bodytext if we realize a name has been passed in -Brian
+	if ($form->{bodytext_file}) {
+		my $upload = $form->{query_apache}->upload;
+		if ($upload) {
+			my $temp_body;
+			$form->{bodytext} = '';
+			my $fh = $upload->fh;
+			while(<$fh>) {
+				$form->{bodytext} .= $_;
+			}
+		}
+	}
 
 	my($extracolumn_flag) = (0, 0);
 	my($storyref, $story, $author, $topic, $storycontent, $locktest,
