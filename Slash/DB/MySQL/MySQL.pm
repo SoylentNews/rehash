@@ -851,8 +851,8 @@ sub getModeratorCommentLog {
 	elsif ($type eq 'cuid') {	$where_clause = "moderatorlog.cuid=$vq AND moderatorlog.uid=users.uid"	}
 	elsif ($type eq 'subnetid') {	$where_clause = "comments.subnetid=$vq AND moderatorlog.uid=users.uid"	}
 	elsif ($type eq 'ipid') {	$where_clause = "comments.ipid=$vq     AND moderatorlog.uid=users.uid"	}
-	elsif ($type eq 'bsubnetid') {	$where_clause = "comments.subnetid=$vq AND comments.uid=users.uid"	}
-	elsif ($type eq 'bipid') {	$where_clause = "comments.ipid=$vq     AND comments.uid=users.uid"	}
+	elsif ($type eq 'bsubnetid') {	$where_clause = "moderatorlog.subnetid=$vq AND comments.uid=users.uid"	}
+	elsif ($type eq 'bipid') {	$where_clause = "moderatorlog.ipid=$vq     AND comments.uid=users.uid"	}
 	return [ ] unless $where_clause;
 
 	my $comments = $self->sqlSelectMany("comments.sid AS sid,
