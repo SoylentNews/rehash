@@ -560,8 +560,9 @@ sub undoModeration {
 		my $adjust = -$val;
 		$adjust =~ s/^([^+-])/+$1/;
 		$comm_update->{-points} =
-			"GREATEST($min_score,"
-			. " LEAST($max_score, points $adjust))";
+			$adjust > 0
+			? "LEAST($max_score, points $adjust)"
+			: "GREATEST($min_score, points $adjust)";
 
 		# Recalculate the comment's reason.
 		$comm_update->{reason} = $self->getCommentMostCommonReason($cid)
@@ -574,8 +575,9 @@ sub undoModeration {
 		# here's a place to take it out.
 		$self->sqlUpdate(
 			"users_info",
-			{ -karma =>	"GREATEST($min_karma,"
-					. " LEAST($max_karma, karma $adjust))" },
+			{ -karma =>	$adjust > 0
+					? "LEAST($max_karma, karma $adjust)"
+					: "GREATEST($min_karma, karma $adjust)" },
 			"uid=$cuid"
 		);
 
