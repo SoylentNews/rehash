@@ -4482,7 +4482,7 @@ sub getSlashdStatus {
 	$answer->{next_begin_hhmm} =
 		substr($answer->{next_begin}, 11, 5)
 		if defined($answer->{next_begin});
-	$answer->{summary_trim} =
+	$answer->{summary_trunc} =
 		substr($answer->{summary}, 0, 30)
 		if $answer->{summary};
 	return $answer;
@@ -4503,7 +4503,7 @@ sub getSlashdStatuses {
 		$answer->{$task}{next_begin_hhmm} =
 			substr($answer->{$task}{next_begin}, 11, 5)
 			if defined($answer->{$task}{next_begin});
-		$answer->{$task}{summary_trim} =
+		$answer->{$task}{summary_trunc} =
 			substr($answer->{$task}{summary}, 0, 30)
 			if $answer->{$task}{summary};
 	}
