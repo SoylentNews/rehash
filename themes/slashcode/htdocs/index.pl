@@ -59,10 +59,9 @@ sub main {
 		'',
 	);
 
-	my ($first_date,$last_date)=($stories->[0]->{time},$stories->[-1]->{time});
-	$first_date=~s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
-	$last_date=~s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
-
+	my($first_date, $last_date) = ($stories->[0]{time}, $stories->[-1]{time});
+	$first_date =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
+	$last_date  =~ s/(\d\d\d\d)-(\d\d)-(\d\d).*$/$1$2$3/;
 
 	my $title = getData('head', { section => $section });
 	header($title, $section->{section}) or return;
@@ -94,8 +93,10 @@ sub main {
 	# index_more block (aka Older Stuff).
 	$Stories = displayStories($stories);
 
-	my $StandardBlocks = displayStandardBlocks($section, $stories, {first_date=> $first_date, last_date=>$last_date});
-	
+	my $StandardBlocks = displayStandardBlocks($section, $stories,
+		{ first_date => $first_date, last_date => $last_date }
+	);
+
 	slashDisplay('index', {
 		metamod_elig	=> scalar $reader->metamodEligible($user),
 		future_plug	=> $future_plug,
@@ -209,7 +210,7 @@ sub displayStandardBlocks {
 				$constants->{fancyboxwidth},
 				getData('morehead'),
 				getOlderStories($older_stories_essentials, $section,
-						{first_date => $other->{first_date}, last_date => $other->{last_date} }),
+					{ first_date => $other->{first_date}, last_date => $other->{last_date} }),
 				$bid,
 				'',
 				$getblocks
@@ -344,7 +345,7 @@ sub displayStories {
 			sid	=> $story->{sid},
 			tid	=> $story->{tid},
 			section	=> $story->{section}
-		}, "",$ls_other);
+		}, "", $ls_other);
 
 		my $link;
 
