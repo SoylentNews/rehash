@@ -77,6 +77,8 @@ use vars qw($VERSION @EXPORT);
 	strip_nohtml
 	strip_notags
 	strip_plaintext
+	strip_paramattr
+	strip_urlattr
 	timeCalc
 	url2abs
 	xmldecode
