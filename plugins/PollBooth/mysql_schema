@@ -6,7 +6,7 @@
 DROP TABLE IF EXISTS auto_poll;
 CREATE TABLE auto_poll (
 	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
-	section varchar(30) NOT NULL,
+	primaryskid SMALLINT UNSIGNED,
 	qid mediumint UNSIGNED,
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;

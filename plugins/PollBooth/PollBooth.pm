@@ -37,12 +37,12 @@ sub createAutoPollFromStory {
 	my ($options) = @_;
 	my $slashdb = getCurrentDB();
 	my $story = $options->{story};
-	my $qid = $slashdb->sqlSelect('qid', 'auto_poll', "section = '$story->{section}'");
+	my $qid = $slashdb->sqlSelect('qid', 'auto_poll', "primaryskid = '$story->{primaryskid}'");
 	if ($qid) {
 		my $question = $slashdb->getPollQuestion($qid, 'question');
 		my $answers = $slashdb->getPollAnswers($qid, [ qw| answer | ]);
 		my $newpoll = {
-			section => $story->{section},
+			primaryskid => $story->{primaryskid},
 			topic => $story->{tid},
 			question  => $question,
 			autopoll => 'yes',
