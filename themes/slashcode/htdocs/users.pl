@@ -2555,14 +2555,9 @@ sub saveHome {
 	setToDefaults($users_index_table, {}, $defaults) if $form->{restore_defaults};
 	if ($form->{restore_exbox_defaults}) {
 		my $exboxdef = "'";
-		my @exboxlist;
 		my($boxBank, $skinBoxes) = $slashdb->getPortalsCommon();
 
-		foreach my $bid (keys %$boxBank) {
-			push @exboxlist, $bid;
-		}		
-
-		$exboxdef .= join "','", @exboxlist;
+		$exboxdef .= join "','", @{$skinBoxes->{$constants->{mainpage_skid}}};
 		$exboxdef .= "'";
 
 		my $default_boxes = {
