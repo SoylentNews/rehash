@@ -175,6 +175,19 @@ $task{$me}{code} = sub {
 	my $totalChangedStories = 0;
 	my $do_log;
 	my $logmsg;
+
+	# If 100 or more stories are marked as dirty, there is a backlog
+	# that we aren't able to get to in the 90-second chunks here.
+	# So extend more time to complete that work.  Note that since we
+	# cue off the number of stories returned, this will only be
+	# triggered during a $do_all pass, since otherwise the number of
+	# stories to process is capped at 3.
+	my $extra_minutes = int( scalar(@$stories)/100 );
+	if ($extra_minutes) {
+		$extra_minutes = 5 if $extra_minutes > 5;
+		$timeout_shtml += 60 * $extra_minutes;
+	}
+
 	STORIES_FRESHEN: for my $story (@$stories) {
 
 		$do_log = (verbosity() >= 2);
@@ -186,6 +199,8 @@ $task{$me}{code} = sub {
 		# Since this task is run every minute, quitting after
 		# 90 seconds of work should mean we only stomp on the
 		# one invocation following.
+		# (But if there are many backlogged dirty stories, we
+		# may stomp on 2, 3, or more invocations -- oh well.)
 		if (time > $start_time + $timeout_shtml) {
 			slashdLog("Aborting stories at freshen, too much elapsed time");
 			last STORIES_FRESHEN;
