@@ -1014,6 +1014,14 @@ a database user.
 
 =back
 
+If slashd doesn't seem to be working, check its log and make sure
+it has permission to write its files. It is probably running as
+your Apache user "nobody", and if that user doesn't have write
+permission to your web directories and/or .shtml and .rss files
+and so on, slashd's current behavior is to log an error and die.
+(If you want to make slashd run as a different unix system user,
+edit the second field in C</usr/local/slash/slash.sites>.)
+
 =back
 
 If you've doublechecked all this, you're sure you followed the
