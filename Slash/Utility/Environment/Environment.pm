@@ -2116,7 +2116,8 @@ sub slashProfInit {
 }
 
 sub slashProfEnd {
-	return unless getCurrentStatic('use_profiling');
+	my $use_profiling = getCurrentStatic('use_profiling');
+	return unless $use_profiling;
 	return unless @prof;
 
 	my $first = $prof[0][0];
@@ -2178,7 +2179,7 @@ EOT
 		# mark new beginning
 		$begin{$prof->[5]} = $t1 if $prof->[5];
 
-		printf STDERR <<'EOT', $$, $where, $t2, $s2, $t1, $s1;
+		printf STDERR <<'EOT', $$, $where, $t2, $s2, $t1, $s1 if $use_profiling > 1;
 %-6d: %-64.64s % 6d ms (%6.6s%%) / % 6d ms (%6.6s%%)
 EOT
 	}
