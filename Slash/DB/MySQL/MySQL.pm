@@ -6305,7 +6305,7 @@ sub getTopics {
 
 ########################################################
 sub getTopicImage {
-	my $answer = _genericgetcache({
+	my $answer = _genericGetCache({
 		table		=> 'topic_images',
 		table_prime	=> 'id',
 		arguments	=> \@_,
