@@ -387,7 +387,6 @@ sub getShift {
 	my $tzcode   = $constants->{shift_shifts_tz};
 
 	# hr begin in our defined TZ, length in hours
-	my @shifts = map { [ split /=/ ] } split /,/, $constants->{shift_shifts};
 	my @shifts = map {
 		[ @{ %{ $self->{shift_defs}{$_} } }{qw(start length)} ]
 	} @{ $self->{shift_types} };
