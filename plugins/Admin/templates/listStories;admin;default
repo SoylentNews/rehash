@@ -100,7 +100,7 @@ FOREACH story = storylistref;
 		</FONT>
 		</TD>
 		<TD>
-		<FONT SIZE="2">[% story.comments %]</FONT>
+		<FONT SIZE="2">[% story.commentcount %]</FONT>
 		</TD>
 
 		<TD><FONT SIZE="2">[% story.td2 %]&nbsp;
