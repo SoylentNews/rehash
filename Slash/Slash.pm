@@ -46,7 +46,7 @@ $VERSION   	= '2.003000';  # v2.3.0
 	gensym
 
 	dispComment displayStory displayThread dispStory
-	getOlderStories moderatorCommentLog printComments
+	getOlderStories getOlderDays moderatorCommentLog printComments
 );
 
 
@@ -1502,7 +1502,7 @@ The 'getOlderStories' template block.
 
 sub getOlderStories {
 	my($stories, $section, $stuff) = @_;
-	my($count, $newstories, $today);
+	my($count, $newstories);
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
@@ -1525,22 +1525,7 @@ sub getOlderStories {
 		});
 	}
 
-	my $yesterday;
-	# week prior to yesterday (oldest story we'll get back when we do
-	# a getStoriesEssentials for yesterday's issue)
-	my $week_ago;
-	if ($form->{issue}) {
-		my($y, $m, $d) = $form->{issue} =~ /^(\d\d\d\d)(\d\d)(\d\d)$/;
-		$yesterday = timeCalc(scalar localtime(
-			timelocal(0, 0, 12, $d, $m - 1, $y - 1900) - 86400
-		), '%Y%m%d');
-		$week_ago = timeCalc(scalar localtime(
-			timelocal(0, 0, 12, $d, $m - 1, $y - 1900) - 86400 * 8 
-		), '%Y%m%d');
-	} else {
-		$yesterday = $reader->getDay(1);
-		$week_ago = $reader->getDay(8);
-	}
+	my($today, $tomorrow, $yesterday, $week_ago) = getOlderDays($form->{issue});
 
 	$form->{start} ||= 0;
 
@@ -1553,6 +1538,8 @@ sub getOlderStories {
 		stories		=> $stories,
 		section		=> $section,
 		cur_time	=> time,
+		today		=> $today,
+		tomorrow	=> $tomorrow,
 		yesterday	=> $yesterday,
 		week_ago	=> $week_ago,
 		start		=> int($artcount/3) + $form->{start},	
@@ -1561,6 +1548,35 @@ sub getOlderStories {
 	}, 1);
 }
 
+#========================================================================
+sub getOlderDays {
+	my($issue) = @_;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my($today, $tomorrow, $yesterday, $week_ago);
+	# week prior to yesterday (oldest story we'll get back when we do
+	# a getStoriesEssentials for yesterday's issue)
+	if ($issue) {
+		my($y, $m, $d) = $issue =~ /^(\d\d\d\d)(\d\d)(\d\d)$/;
+		if ($y) {
+			$today    = $reader->getDay(0);
+			$tomorrow = timeCalc(scalar localtime(
+				timelocal(0, 0, 12, $d, $m - 1, $y - 1900) + 86400
+			), '%Y%m%d');
+			$yesterday = timeCalc(scalar localtime(
+				timelocal(0, 0, 12, $d, $m - 1, $y - 1900) - 86400
+			), '%Y%m%d');
+			$week_ago  = timeCalc(scalar localtime(
+				timelocal(0, 0, 12, $d, $m - 1, $y - 1900) - 86400 * 8 
+			), '%Y%m%d');
+		}
+	} else {
+		$today     = $reader->getDay(0);
+		$tomorrow  = $reader->getDay(-1);
+		$yesterday = $reader->getDay(1);
+		$week_ago  = $reader->getDay(8);
+	}
+	return($today, $tomorrow, $yesterday, $week_ago);
+}
 
 #========================================================================
 

@@ -1,0 +1,44 @@
+__section__
+default
+__description__
+This displays text for a next/previous link below the stories on the index page.
+
+Passed parameters include today, tomorrow, yesterday, and week_ago, to be passed
+to the issue= parameter of the query string.
+
+__title__
+
+__page__
+index
+__lang__
+en_US
+__name__
+next_prev_issue
+__template__
+[% myformat = '%B %e' %]
+[% mydelim = ' | ' %]
+
+[% IF older_stories %]
+[% myformat = '%b. %e' %]
+[% ELSE %]
+&lt;&nbsp; 
+[% END %]
+
+[%- IF today < tomorrow     # issue is today -%]
+<a href="[% constants.rootdir %]/index.pl?issue=[% yesterday %]">Yesterday's News</a>
+[%- ELSE -%]
+<a href="[% constants.rootdir %]/">Today's News</a>[% mydelim %]
+[%- IF today > tomorrow # issue is older than yesterday -%]
+<a href="[% constants.rootdir %]/index.pl?issue=[% tomorrow %]">[% Slash.timeCalc(tomorrow, myformat, 0) %]</a>[% mydelim %]
+[%- END -%]
+<a href="[% constants.rootdir %]/index.pl?issue=[% yesterday %]">[% Slash.timeCalc(yesterday, myformat, 0) %]</a>
+[%- END -%]
+
+[% IF older_stories %]
+[% ELSE %]
+ &nbsp;&gt;
+[% END %]
+__seclev__
+10000
+__version__
+$Id$

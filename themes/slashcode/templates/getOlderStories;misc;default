@@ -27,13 +27,13 @@ en_US
 __name__
 getOlderStories
 __template__
-[% today = '';
+[% this_today = '';
    c = 0;
    max_older_stories = section.artcount / 2 || 15;
    FOREACH story = stories;
    	day = "$story.day_of_week $story.month $story.day";
-	IF today != day;
-		today = day;
+	IF this_today != day;
+		this_today = day;
 		IF !section or section.section == 'index' %]
 			<P><B>[% IF cur_time && story.secs && cur_time-story.secs > 7*86400
 				%]<FONT SIZE="4"><A HREF="[% constants.rootdir %]/index.pl?issue=[% story.issue %]&amp;mode=[% user.currentMode %]"
@@ -57,8 +57,7 @@ __template__
 
 [% IF !section or section.section == 'index' %]
 <P ALIGN="RIGHT"><B><A HREF="[% constants.rootdir %]/search.pl?start=[% start %]">Older Articles</A></B>
-<BR><B><A HREF="[% constants.rootdir %]/index.pl?mode=[% user.currentMode %]&amp;issue=[% yesterday %]"
->Yesterday's Edition</A></B>
+<BR><B>[% PROCESS next_prev_issue older_stories = 1 %]</B>
 [% ELSIF section.issue %]
 <P ALIGN="RIGHT">
 	[% IF section.issue == 1 || section.issue == 3 %]
@@ -66,8 +65,7 @@ __template__
 >Older Articles</A></B>
 	[% END %]
 	[% IF (section.issue == 2 || section.issue == 3) and first_date >= yesterday and last_date <= yesterday %]
-<BR><A HREF="[% constants.rootdir %]/index.pl?section=[% section.section %]&amp;mode=[% user.currentMode %]&amp;issue=[% yesterday %]"
->Yesterday's Edition</A></B>
+<BR><B>[% PROCESS next_prev_issue older_stories = 1 %]</B>
 	[% END %]
 [% END %]
 

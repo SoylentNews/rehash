@@ -497,9 +497,19 @@ sub displayStories {
 		$tmpreturn .= slashDisplay('storylink', {
 			links	=> \@links,
 			sid	=> $story->{sid},
-		}, { Return => 1});
+		}, { Return => 1 });
 
 		$return .= $tmpreturn;
+	}
+
+	unless ($constants->{index_no_prev_next_day}) {
+		my($today, $tomorrow, $yesterday, $week_ago) = getOlderDays($form->{issue});
+		$return .= slashDisplay('next_prev_issue', {
+			today		=> $today,
+			tomorrow	=> $tomorrow,
+			yesterday	=> $yesterday,
+			week_ago	=> $week_ago,
+		}, { Return => 1 });
 	}
 
 	return $return;
