@@ -198,7 +198,7 @@ sub slashDisplay {
 		);
 	} else {
 		# we don't want to have to call this here, but because
-		# it is cached the performance his it is generally light,
+		# it is cached the performance hit is generally light,
 		# and this is the only good way to get the actual name,
 		# page, section, we bite the bullet and do it
 		$tempdata = $slashdb->getTemplateByName($name, [qw(tpid page section)]);
@@ -206,6 +206,8 @@ sub slashDisplay {
 		# we could, at this point, just return from the
 		# function if $tempdata->{tpid} is undef ...
 		# do we want to try?  for now leave it in.
+		# Returning from here would be a bad idea unless
+		# $user->{current*} are restored to original values.
 
 		$tempname = "ID $tempdata->{tpid}, " .
 			"$name;$tempdata->{page};$tempdata->{section}";
