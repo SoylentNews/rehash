@@ -183,11 +183,18 @@ sub previewForm {
 	my $admin_flag = $user->{seclev} >= 100 ? 1 : 0;
 
 	my $sub = $slashdb->getSubmission($form->{subid});
-
-	my $topic = $slashdb->getTopic($sub->{tid});
 	
+	my @topics;
+	
+	my $topic = $slashdb->getTopic($sub->{tid});
+	push @topics, $sub->{tid} if $sub->{tid};
+
 	my $nexus_id = $slashdb->getNexusFromSkid($sub->{primaryskid} || $constants->{mainpage_skid});
-	my $extracolumns = $slashdb->getNexusExtras($nexus_id) || [ ];
+	push @topics, $nexus_id if $nexus_id;
+
+	my $chosen_hr = genChosenHashrefForTopics(\@topics);
+	
+	my $extracolumns = $slashdb->getNexusExtrasForChosen($chosen_hr) || [ ];
 	vislenify($sub); # add $sub->{ipid_vis}
 
 	my $email_known = "";
@@ -431,7 +438,7 @@ sub displayForm {
 	}
 
 	my $skins = $slashdb->getSkins();
-	my $topic_values = $slashdb->getDescriptions('non_nexus_topics');
+	my $topic_values = $slashdb->getDescriptions('topics-submittable');
 	my $skin_values = $slashdb->getDescriptions('skins-submittable');
 
 	$form->{tid} ||= 0;
@@ -458,10 +465,14 @@ sub displayForm {
 		# we assume this is like if form.email is passed in
 		$fakeemail = strip_attribute($user->{fakeemail});
 	}
-
+	my @topics = ();
 	my $nexus_id = $slashdb->getNexusFromSkid($form->{primaryskid} || $constants->{submission_default_skid} || $constants->{mainpage_skid});
+	push @topics, $nexus_id if $nexus_id;
+	push @topics, $form->{tid} if $form->{tid};
 
-	my $extracolumns = $slashdb->getNexusExtras($nexus_id) || [ ];
+	my $chosen_hr = genChosenHashrefForTopics(\@topics);
+	
+	my $extracolumns = $slashdb->getNexusExtrasForChosen($chosen_hr) || [ ];
 
 	my $fixedstory;
 	if ($form->{sub_type} && $form->{sub_type} eq 'plain') {
@@ -541,8 +552,17 @@ sub saveSub {
 		tid		=> $form->{tid},
 		primaryskid	=> $form->{primaryskid}
 	};
+	my @topics = ();
 	my $nexus = $slashdb->getNexusFromSkid($form->{primaryskid} || $constants->{mainpage_skid});
-	my $extras = $slashdb->getNexusExtras($nexus) || [];
+
+	push @topics, $nexus;
+	push @topics, $form->{tid} if $form->{tid};
+	
+	my $chosen_hr = genChosenHashrefForTopics(\@topics);
+
+	my $extras = $slashdb->getNexusExtrasForChosen($chosen_hr) || [];
+
+	
 	if ($extras && @$extras) {
 		for (@$extras) {
 			my $key = $_->[1];
@@ -616,6 +636,20 @@ sub url2html {
 }
 
 #################################################################
+
+sub genChosenHashrefForTopics {
+	my ($topics) = @_;
+	my $constants = getCurrentStatic();
+	my $chosen_hr ={};
+	for my $tid (@$topics) {
+		$chosen_hr->{$tid} = 
+		$tid == $constants->{mainpage_tid}
+		? 30
+		: $constants->{topic_popup_defaultweight} || 10;
+	}
+	return $chosen_hr;
+}
+
 createEnvironment();
 main();
 
