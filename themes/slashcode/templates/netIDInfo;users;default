@@ -105,7 +105,7 @@ SubnetID [% netid_vis %] has posted [% commentcount %] comments.
 
 [% IF subcount > 0 %]
 	[% FOREACH sub = submissions %]
-	<A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj %]</A> on [% Slash.timeCalc(sub.time) %] by <A HREF="[% constants.rootdir %]/users.pl?uid=[% sub.uid %]>[% sub.name %]</A><BR>
+	<A HREF="[% constants.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj %]</A> on [% Slash.timeCalc(sub.time) %] by <A HREF="[% constants.rootdir %]/users.pl?uid=[% sub.uid %]">[% sub.name %]</A><BR>
 	[% END %]
 	<BR>
 [% END %]
