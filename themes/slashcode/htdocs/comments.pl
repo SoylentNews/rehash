@@ -137,9 +137,10 @@ sub commentIndex {
 	titlebar("90%", "Several Active Discussions");
 	print qq!<MULTICOL COLS="2">\n!;
 
-	my $c = sqlSelectMany("sid,title,url",
-		"discussions where ts <= now() order by ts desc LIMIT 50"
-	);
+	my $c = sqlSelectMany("discussions.sid,discussions.title,discussions.url",
+						  <<SQL);
+discussions,stories where displaystatus > -1 and discussions.sid=stories.sid and time <= now() order by time desc LIMIT 50
+SQL
 
 	while (my $C = $c->fetchrow_hashref) {
 		$C->{title} ||= "untitled";

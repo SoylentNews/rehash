@@ -131,8 +131,8 @@ sub previewForm {
 	my $admin = $I{U}{aseclev} > 99;
 
 	my($writestatus) = getvars("defaultwritestatus");
-	($subid, my($email, $name, $title, $tid, $introtext,$time)) =
-		sqlSelect("subid,email,name,subj,tid,story,time",
+	($subid, my($email, $name, $title, $tid, $introtext,$time,$comment)) =
+		sqlSelect("subid,email,name,subj,tid,story,time,comment",
 		"submissions","subid='$subid'");
 
 	$introtext =~ s/\n\n/\n<P>/gi;
@@ -141,6 +141,14 @@ sub previewForm {
 			{<A HREF="$1://$2">link</A> }gi;
 	$introtext =~ s/\s+$//;
 	$introtext = qq!<I>"$introtext"</I>! if $name;
+
+	if ($comment && $admin) {
+		# This probably should be a block.
+		print <<EOT;
+<P>Submission Notes:
+<TABLE WIDTH="95%"><TR><TD BGCOLOR="$I{bg}[2]"><FONT SIZE=-1 COLOR="$I{fg}[2]">$comment</FONT></TD></TR></TABLE>
+EOT
+	}
 
 	if ($email) {
 		local $_ = $email;

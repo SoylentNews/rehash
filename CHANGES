@@ -1,6 +1,12 @@
 slash-1.0.5, 2000.06.xx
 -----------------------
 
+*	Now shows author comments while viewing the submission as opposed to
+	trying to scroll through the small input box in the submissions list.
+
+*	Fixed bug in comments.pl::commentIndex() which would display stories
+	that were 'Never Display' or that had not yet gone 'live'.
+
 *	Added some fixes for Slash::reparentComments()
 
 *	Fixed HTTP header for Slash::header() and 404.pl to return
