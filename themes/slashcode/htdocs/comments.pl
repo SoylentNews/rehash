@@ -1239,8 +1239,14 @@ sub submitComment {
 	my $tweak = 0;
 	if (!$user->{is_anon} && !$form->{postanon}) {
 		$pts = $user->{defaultpoints};
-		$tweak-- if $user->{karma} < 0;
-		$tweak-- if $user->{karma} < $constants->{badkarma};
+
+		if($constants->{karma_posting_penalty_style} == 0){
+			$pts-- if $user->{karma} < 0;
+			$pts-- if $user->{karma} < $constants->{badkarma};
+                } else {
+			$tweak-- if $user->{karma} < 0;
+			$tweak-- if $user->{karma} < $constants->{badkarma};
+		}
 		# Enforce proper ranges on comment points.
 		my($minScore, $maxScore) =
 			($constants->{comment_minscore}, $constants->{comment_maxscore});
