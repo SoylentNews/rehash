@@ -803,8 +803,12 @@ sub showInfo {
 	my($title, $admin_block, $fieldkey) = ('', '', '');
 	my $comments = undef;
 	my $commentcount = 0;
+	my $commentcount_time = 0;
 	my $commentstruct = [];
 	my $requested_user = {};
+	my $time_period = $constants->{admin_comment_display_days} || 30;
+	my $admin_time_period_limit = $constants->{admin_daysback_commentlimit} || 100;
+	my $admin_non_time_limit      = $constants->{admin_comment_subsequent_pagesize} || 24;
 
 	my($points, $nickmatch_flag, $uid, $nick);
 	my($mod_flag, $karma_flag, $n) = (0, 0, 0);
@@ -931,17 +935,8 @@ sub showInfo {
 
 	my($netid, $netid_vis) = ('', '');
 
-	my $comment_search_options = {};
 	my $comment_time;
-	if ($admin_flag) {
-		if (!$min_comment && !$form->{no_time_restriction}) {
-			$comment_time = $constants->{admin_comment_display_days};
-			$comment_search_options->{limit_days}= $comment_time;
-			$comments_wanted = $constants->{admin_daysback_commentlimit};
-		} else {
-			$comments_wanted = $constants->{admin_comment_subsequent_pagesize};
-		}
-	}
+	my $non_admin_limit = $comments_wanted;
 
 	if ($requested_user->{nonuid}) {
 		$requested_user->{fg} = $user->{fg};
@@ -969,59 +964,40 @@ sub showInfo {
 
 		if ($form->{fieldname}) {
 			if ($form->{fieldname} eq 'ipid') {
-				$commentcount = $reader->countCommentsByIPID(
-					$netid, $comments_wanted, $min_comment);
-				$comments = $reader->getCommentsByIPID(
-					$netid, $comments_wanted, $min_comment, $comment_search_options);
-				# if we didn't get any comments back with day limit, try w/o
-				if ($commentcount && !@$comments){
-					delete $comment_search_options->{limit_days};
-					$comment_time = "";
-					$comments = $reader->getCommentsByIPID(
-						$netid, $comments_wanted, $min_comment, $comment_search_options);
-				}
+				$commentcount 		= $reader->countCommentsByIPID($netid);
+				$commentcount_time 	= $reader->countCommentsByIPID($netid, {limit_days => $time_period});
+				$comments = getCommentListing("ipid", $netid, $min_comment, $time_period, $commentcount, $commentcount_time, 
+								$non_admin_limit, $admin_time_period_limit, $admin_non_time_limit) if $commentcount;
 			} elsif ($form->{fieldname} eq 'subnetid') {
-				$commentcount = $reader->countCommentsBySubnetID(
-					$netid, $comments_wanted, $min_comment);
-				$comments = $reader->getCommentsBySubnetID(
-					$netid, $comments_wanted, $min_comment, $comment_search_options);
-				if ($commentcount && !@$comments){
-					delete $comment_search_options->{limit_days};
-					$comment_time = "";
-					$comments = $reader->getCommentsBySubnetID(
-						$netid, $comments_wanted, $min_comment, $comment_search_options);
-				}
+				$commentcount 		= $reader->countCommentsBySubnetID($netid);
+				$commentcount_time	= $reader->countCommentsBySubnetID($netid, {limit_days => $time_period});
+				$comments = getCommentListing("subnetid", $netid, $min_comment, $time_period, $commentcount, $commentcount_time, 
+								$non_admin_limit, $admin_time_period_limit, $admin_non_time_limit) if $commentcount;
+
 			} else {
 				delete $form->{fieldname};
 			}
 		}
 		if (!defined($comments)) {
 			# Last resort; here for backwards compatibility mostly.
-			$commentcount = $reader->countCommentsByIPIDOrSubnetID(
-				$netid, $comments_wanted, $min_comment);
-			$comments = $reader->getCommentsByIPIDOrSubnetID(
-				$netid, $comments_wanted, $min_comment, $comment_search_options);
-			if ($commentcount && !@$comments){
-				delete $comment_search_options->{limit_days};
-				$comment_time = "";
-				$comments = $reader->getCommentsByIPIDOrSubnetID(
-					$netid, $comments_wanted, $min_comment, $comment_search_options);
+			my $type;
+			($commentcount,$type) = $reader->countCommentsByIPIDOrSubnetID($netid);
+			$commentcount_time = $reader->countCommentsByIPIDOrSubnetID($netid, {limit_days => $time_period });
+			if($type eq "ipid"){
+					$comments = getCommentListing("ipid", $netid, $min_comment, $time_period, $commentcount, $commentcount_time, 
+									$non_admin_limit, $admin_time_period_limit, $admin_non_time_limit) if $commentcount;
+			} elsif($type eq "subnetid"){
+					$comments = getCommentListing("subnetid", $netid, $min_comment, $time_period, $commentcount, $commentcount_time, 
+									$non_admin_limit, $admin_time_period_limit, $admin_non_time_limit) if $commentcount;
 			}
 		}	
 	} else {
 		$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
 
-		$commentcount =
-			$reader->countCommentsByUID($requested_user->{uid});
-		$comments = $reader->getCommentsByUID(
-			$requested_user->{uid}, $comments_wanted, $min_comment, $comment_search_options) if $commentcount;
-		if ($commentcount && !@$comments){
-			delete $comment_search_options->{limit_days};
-			$comment_time = "";
-			$comments = $reader->getCommentsByUID(
-				$requested_user->{uid}, $comments_wanted, $min_comment, $comment_search_options) if $commentcount;
-		}	
-
+		$commentcount 		= $reader->countCommentsByUID($requested_user->{uid});
+		$commentcount_time	= $reader->countCommentsByUID($requested_user->{uid}, {limit_days => $time_period });
+		$comments = getCommentListing("uid", $requested_user->{uid}, $min_comment, $time_period, $commentcount, $commentcount_time, $non_admin_limit,
+						 $admin_time_period_limit, $admin_non_time_limit, { use_uid_cid_cutoff => 1}) if $commentcount;
 		$netid = $requested_user->{uid};
 	}
 
@@ -1122,7 +1098,8 @@ sub showInfo {
 
 	my $cid_list = [ keys %$cids_seen ];
 	my $cids_to_mods = {};
-	if ($admin_flag && $constants->{show_mods_with_comments}) {
+	if ($admin_flag && $constants->{show_mods_with_comments} && 
+		(defined $form->{show_m1s} ? $form->{show_m1s} : $user->{mod_with_comm})) {
 		my $comment_mods = $reader->getModeratorCommentLog("DESC",
 			$constants->{mod_limit_with_comments}, "cidin", $cid_list);
 	
@@ -1140,9 +1117,11 @@ sub showInfo {
 		$constants->{user_submitter_display_default}
 	) unless !$storycount || $requested_user->{nonuid};
 
+	my $sub_limit = $constants->{submissions_listing_page_size} || "";
+
 	my $subcount = $reader->countSubmissionsByNetID($netid, $fieldkey)
 		if $requested_user->{nonuid};
-	my $submissions = $reader->getSubmissionsByNetID($netid, $fieldkey)
+	my $submissions = $reader->getSubmissionsByNetID($netid, $fieldkey, $sub_limit)
 		if $requested_user->{nonuid};
 
         my $ipid_hoursback = $constants->{istroll_ipid_hours} || 72;
@@ -1192,6 +1171,10 @@ sub showInfo {
 		}
 
 		my $lastjournal = _get_lastjournal($uid);
+		
+		my $sub_limit = $constants->{submissions_listing_page_size} || "";
+		my $subcount = $reader->countSubmissionsByUID($uid);
+		my $submissions = $reader->getSubmissionsByUID($uid, $sub_limit);
 
 		slashDisplay('userInfo', {
 			title			=> $title,
@@ -1212,7 +1195,9 @@ sub showInfo {
 			lastjournal		=> $lastjournal,
 			hr_hours_back		=> $ipid_hoursback,
 			cids_to_mods		=> $cids_to_mods,
-			comment_time		=> $comment_time
+			comment_time		=> $comment_time,
+			submissions		=> $submissions,
+			subcount		=> $subcount
 		});
 	}
 
@@ -1845,15 +1830,18 @@ sub editComm {
 		'bytelimit', $formats, $user_edit->{bytelimit}, 1
 	);
 
-	my $h_check  = $user_edit->{hardthresh}		? ' CHECKED' : '';
-	my $r_check  = $user_edit->{reparent}		? ' CHECKED' : '';
-	my $n_check  = $user_edit->{noscores}		? ' CHECKED' : '';
-	my $s_check  = $user_edit->{nosigs}		? ' CHECKED' : '';
-	my $d_check  = $user_edit->{sigdash}		? ' CHECKED' : '';
-	my $b_check  = $user_edit->{nobonus}		? ' CHECKED' : '';
-	my $sb_check = $user_edit->{nosubscriberbonus}	? ' CHECKED' : '';
-	my $p_check  = $user_edit->{postanon}		? ' CHECKED' : '';
-	my $nospell_check = $user_edit->{no_spell}	? ' CHECKED' : '';
+	my $h_check  = $user_edit->{hardthresh}		 ? ' CHECKED' : '';
+	my $r_check  = $user_edit->{reparent}		 ? ' CHECKED' : '';
+	my $n_check  = $user_edit->{noscores}		 ? ' CHECKED' : '';
+	my $s_check  = $user_edit->{nosigs}		 ? ' CHECKED' : '';
+	my $d_check  = $user_edit->{sigdash}		 ? ' CHECKED' : '';
+	my $b_check  = $user_edit->{nobonus}		 ? ' CHECKED' : '';
+	my $sb_check = $user_edit->{nosubscriberbonus}	 ? ' CHECKED' : '';
+	my $p_check  = $user_edit->{postanon}		 ? ' CHECKED' : '';
+	my $nospell_check = $user_edit->{no_spell}	 ? ' CHECKED' : '';
+	my $s_mod_check = $user_edit->{mod_with_comm}	 ? ' CHECKED' : '';
+	my $s_m2_check = $user_edit->{m2_with_mod}	 ? ' CHECKED' : '';
+	my $s_m2c_check = $user_edit->{m2_with_comm_mod} ? ' CHECKED' : '';
 
 	$formats = $slashdb->getDescriptions('postmodes');
 	$posttype_select = createSelect(
@@ -1872,6 +1860,9 @@ sub editComm {
 		b_check			=> $b_check,
 		sb_check		=> $sb_check,
 		p_check			=> $p_check,
+		s_mod_check		=> $s_mod_check,
+		s_m2_check		=> $s_m2_check,
+		s_m2c_check		=> $s_m2c_check,
 		nospell_check		=> $nospell_check,
 		commentmodes_select	=> $commentmodes_select,
 		commentsort_select	=> $commentsort_select,
@@ -2342,7 +2333,11 @@ sub saveComm {
 		textarea_cols		=> ($form->{textarea_cols} != $constants->{textarea_cols}
 						? $form->{textarea_cols} : undef),
 		user_comment_sort_type	=> ($form->{user_comment_sort_type} != 2
-						? $form->{user_comment_sort_type} : undef )
+						? $form->{user_comment_sort_type} : undef ),
+		mod_with_comm		=> ($form->{mod_with_comm} ? 1 : undef),
+		m2_with_mod		=> ($form->{m2_with_mod} ? 1 : undef),
+        	m2_with_comm_mod		=> ($form->{m2_with_mod_on_comm} ? 1 : undef),
+
 	};
 	
 	# set our default values for the items where an empty-string won't do 
@@ -2917,7 +2912,72 @@ sub setToDefaults {
  	}
 }
 #################################################################
+sub getCommentListing {
+	my ($type, $value, $min_comment, $time_period, $cc_all, $cc_time_period, $non_admin_limit, $admin_time_limit, $admin_non_time_limit, $options) = @_;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	my $store_cutoff = $options->{use_uid_cid_cutoff} ? $constants->{store_com_page1_min_cid_for_user_com_cnt} : 0;
+	
+	my $s_opt = {};
+	my $num_wanted = 0;
+	if ($min_comment) {
+		if ($user->{is_admin}) {
+			$num_wanted = $admin_non_time_limit;
+		} else {
+			$num_wanted = $non_admin_limit;
+		}
+	} else {
+	
+		if ($user->{is_admin}) {
+			if ($cc_time_period >= $admin_non_time_limit) {
+				$s_opt->{limit_days} = $time_period;
+				$num_wanted = $admin_time_limit;
+			} else {
+				$num_wanted = $admin_non_time_limit;
+				if($store_cutoff){
+					my $min_cid = $reader->getUser($value,"com_num_".$num_wanted."_at_or_after_cid");
+					$s_opt->{cid_at_or_after} = $min_cid if $min_cid=~/^\d+$/;
+				}
+			}
+		} else {
+			if ($cc_time_period >= $non_admin_limit ) {
+				$s_opt->{limit_days} = $time_period;
+				$num_wanted = $non_admin_limit;
+			} else {
+				$num_wanted = $non_admin_limit;
+				if($store_cutoff){
+					my $min_cid = $reader->getUser($value,"com_num_".$num_wanted."_at_or_after_cid");
+					$s_opt->{cid_at_or_after} = $min_cid if $min_cid=~/^\d+$/;
+				}
+			}
+		}
+	}
+	if ($type eq "uid") {
 
+		my $comments;
+		$comments =  $reader->getCommentsByUID($value, $num_wanted, $min_comment, $s_opt) if $cc_all;
+		if ($store_cutoff && ($comments and $cc_all >=$store_cutoff and $min_comment==0) 
+			and (scalar @$comments==$num_wanted)){
+			my $min_cid;
+			foreach(@$comments){
+				$min_cid=$_->{cid} if !defined $min_cid || ($_->{cid} < $min_cid); 
+			}
+			if($min_cid =~/^\d+$/){
+				$slashdb->setUser($value, {"com_num_".$num_wanted."_at_or_after_cid" => $min_cid });
+			}
+			
+		}
+		return $comments;
+	} elsif ($type eq "ipid"){
+		return $reader->getCommentsByIPID($value, $num_wanted, $min_comment, $s_opt) if $cc_all;
+	} elsif ($type eq "subnetid"){
+		return $reader->getCommentsBySubnetID($value, $num_wanted, $min_comment, $s_opt) if $cc_all;
+	} else {
+		return $reader->getCommentsByIPIDOrSubnetID($value, $num_wanted, $min_comment, $s_opt) if $cc_all;
+	}
+}
 createEnvironment();
 main();
 
