@@ -2352,16 +2352,22 @@ sub determineCurrentSkin {
 
 		if (!$skin) {
 			$skin = getCurrentStatic('mainpage_skid');
-			errorLog("determineCurrentSkin called but no skin found for $hostname\n");
+			if (!$skin) {
+				errorLog("determineCurrentSkin called but no skin found (even default) for $hostname\n");
+			} else {
+				errorLog("determineCurrentSkin called but no skin found (so using default) for $hostname\n");
+			}
 		}
 	} else {
 		my $form = getCurrentForm();
 		$skin   = $reader->getSkidFromName($form->{section}) if $form->{section};
-		$skin ||= $reader->getCurrentStatic('mainpage_skid');
+		$skin ||= getCurrentStatic('mainpage_skid');
+		if (!$skin) {
+			# this should never happen
+			errorLog("determineCurrentSkin called but no skin found (even default)");
+		}
 	}
  
-	# this should never happen
-	errorLog("determineCurrentSkin called but no skin found") if !$skin;
 	return $skin;
 }
 
