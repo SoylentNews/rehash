@@ -276,27 +276,31 @@ sub rebuildUser {
 	my $people;
 
 	my @friends;
-	for (@$data) {
-		if ($_->{type} eq 'friend') {
-			$people->{FRIEND()}{$_->{person}} = 1;
-			push @friends, $_->{person};
-		} elsif ($_->{type} eq 'foe') {
-			$people->{FOE()}{$_->{person}} = 1;
-		}
-		if ($_->{perceive} eq 'fan') {
-			$people->{FAN()}{$_->{person}} = 1;
-		} elsif ($_->{perceive} eq 'freak') {
-			$people->{FREAK()}{$_->{person}} = 1;
+	if ($data) {
+		for (@$data) {
+			if ($_->{type} eq 'friend') {
+				$people->{FRIEND()}{$_->{person}} = 1;
+				push @friends, $_->{person};
+			} elsif ($_->{type} eq 'foe') {
+				$people->{FOE()}{$_->{person}} = 1;
+			}
+			if ($_->{perceive} eq 'fan') {
+				$people->{FAN()}{$_->{person}} = 1;
+			} elsif ($_->{perceive} eq 'freak') {
+				$people->{FREAK()}{$_->{person}} = 1;
+			}
 		}
 	}
 
 	my $list = join (',', @friends);
-	$data =  $self->sqlSelectAllHashrefArray('*', 'people', "uid IN ($list) AND type IS NOT NULL");
-	for (@$data) {
-		if ($_->{type} eq 'friend') {
-			$people->{FOF()}{$_->{person}}{$_->{friend}} = 1;
-		} elsif ($_->{type} eq 'foe') {
-			$people->{EOF()}{$_->{person}}{$_->{friend}} = 1;
+	if ($list) {
+		$data =  $self->sqlSelectAllHashrefArray('*', 'people', "uid IN ($list) AND type IS NOT NULL");
+		for (@$data) {
+			if ($_->{type} eq 'friend') {
+				$people->{FOF()}{$_->{person}}{$_->{friend}} = 1;
+			} elsif ($_->{type} eq 'foe') {
+				$people->{EOF()}{$_->{person}}{$_->{friend}} = 1;
+			}
 		}
 	}
 
