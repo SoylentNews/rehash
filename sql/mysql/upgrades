@@ -260,7 +260,6 @@ CREATE TABLE rss_raw (
 # A nice useful var.
 INSERT INTO vars (name, value, description) VALUES ('admin_formkeys', '0', 'Do admins have to bother with formkeys?');
 
-# LINUX.COM
 
 # End of T_2_3_0_21
 
@@ -282,7 +281,20 @@ ALTER TABLE submissions ADD COLUMN signature varchar(32) DEFAULT '' NOT NULL;
 ALTER TABLE submissions ADD UNIQUE story_signature(signature);
 UPDATE submissions SET signature=MD5(story);
 ALTER TABLE submissions MODIFY COLUMN signature varchar(32) NOT NULL;
+# LINUX.COM
+
+# This expands blocks to get data from sites that require logins via a cookie
+ALTER TABLE blocks ADD COLUMN rss_cookie varchar(255),
+
+#We ran into URLs that were longer then 50 characters 
+ALTER TABLE submissions MODIFY COLUMN email varchar(255) DEFAULT '' NOT NULL;
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 UPDATE vars SET value=100 WHERE name="authors_unlimited";
+
+#Needed for search, not used in submissions "yet"
+INSERT INTO string_param (type, code, name) VALUES ('submission-notes','','Unclassified');
+INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Hold','Hold');
+INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Quick','Quick');
+INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Back','Back');

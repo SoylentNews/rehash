@@ -116,6 +116,7 @@ CREATE TABLE blocks (
 	rss_template varchar(30),
 	items smallint NOT NULL DEFAULT '0', 
 	autosubmit enum("no","yes") DEFAULT 'no' NOT NULL,
+	rss_cookie varchar(255),
 	FOREIGN KEY (rss_template) REFERENCES templates(name),
 	PRIMARY KEY (bid),
 	KEY type (type),

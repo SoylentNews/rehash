@@ -216,6 +216,10 @@ INSERT INTO site_info VALUES ('','form','comments','comments submission form');
 INSERT INTO string_param (type, code, name) VALUES ('section_topic_type','topic_1','Default');
 INSERT INTO string_param (type, code, name) VALUES ('yes_no','yes','yes');
 INSERT INTO string_param (type, code, name) VALUES ('yes_no','no','no');
+INSERT INTO string_param (type, code, name) VALUES ('submission-notes','','Unclassified');
+INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Hold','Hold');
+INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Quick','Quick');
+INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Back','Back');
 
 
 #
