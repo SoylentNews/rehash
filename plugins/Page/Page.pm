@@ -15,6 +15,8 @@ use vars qw($VERSION @EXPORT);
 use base 'Exporter';
 use base 'Slash::DB::Utility';
 
+($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+
 #################################################################
 # Ok, so we want a nice module to do the front page and utilise 
 # subsections. We also want to scrap the old way of doign things.
