@@ -5484,6 +5484,9 @@ sub getSlashConf {
 	# for fun ... or something
 	$conf{colors} = $self->sqlSelect("block", "blocks", "bid='colors'");
 
+	# We only need to do this on startup.
+	$conf{classes} = $self->getClasses();
+
 	return \%conf;
 }
 

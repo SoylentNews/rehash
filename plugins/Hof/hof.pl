@@ -19,7 +19,7 @@ sub main {
 	my($hofDB);
 
 	if ($constants->{backup_db_user}) {
-		$hofDB = getObject('Slash::Hof', $constants->{backup_db_user});
+		$hofDB = getObject('Slash::Hof', { db_type => 'reader' });
 	} else {
 		$hofDB = getObject('Slash::Hof');
 	}

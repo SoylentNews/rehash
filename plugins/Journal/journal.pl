@@ -17,7 +17,7 @@ use vars qw($VERSION);
 sub main {
 	my $journal   = getObject('Slash::Journal');
 	my $constants = getCurrentStatic();
-	my $slashdb   = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
 
@@ -93,18 +93,18 @@ sub main {
 	# hijack RSS feeds
 	if ($form->{content_type} eq 'rss') {
 		if ($op eq 'top' && $top_ok) {
-			displayTopRSS($journal, $constants, $user, $form, $slashdb);
+			displayTopRSS($journal, $constants, $user, $form, $reader);
 		} else {
-			displayRSS($journal, $constants, $user, $form, $slashdb);
+			displayRSS($journal, $constants, $user, $form, $reader);
 		}
 	} else {
-		$ops{$op}[FUNCTION]->($journal, $constants, $user, $form, $slashdb);
+		$ops{$op}[FUNCTION]->($journal, $constants, $user, $form, $reader);
 		footer();
 	}
 }
 
 sub displayTop {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $reader) = @_;
 	my $journals;
 
 	_printHead("mainhead");
@@ -130,7 +130,7 @@ sub displayTop {
 }
 
 sub displayFriends {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $reader) = @_;
 
 	redirect("$constants->{rootdir}/search.pl?op=journals") 
 		if $user->{is_anon};
@@ -149,7 +149,7 @@ sub displayFriends {
 }
 
 sub searchUsers {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $reader) = @_;
 
 	if (!$form->{nickname}) {
 		_printHead("mainhead");
@@ -193,9 +193,9 @@ sub searchUsers {
 }
 
 sub displayRSS {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $reader) = @_;
 
-	$user		= $slashdb->getUser($form->{uid}, ['nickname', 'fakeemail']) if $form->{uid};
+	$user		= $reader->getUser($form->{uid}, ['nickname', 'fakeemail']) if $form->{uid};
 	my $uid		= $form->{uid} || $user->{uid};
 	my $nickname	= $user->{nickname};
 
@@ -226,7 +226,7 @@ sub displayRSS {
 }
 
 sub displayTopRSS {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $reader) = @_;
 
 	my $journals;
 	if ($form->{type} eq 'count' && $constants->{journal_top_posters}) {
@@ -258,14 +258,14 @@ sub displayTopRSS {
 }
 
 sub displayArticleFriends {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $reader) = @_;
 	my($date, $forward, $back, $nickname, $uid);
 	my @collection;
 	my $zoo   = getObject('Slash::Zoo');
 
 	if ($form->{uid} || $form->{nick}) {
-		$uid		= $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
-		$nickname	= $slashdb->getUser($uid, 'nickname');
+		$uid		= $form->{uid} ? $form->{uid} : $reader->getUserUID($form->{nick});
+		$nickname	= $reader->getUser($uid, 'nickname');
 	} else {
 		$nickname	= $user->{nickname};
 		$uid		= $user->{uid};
@@ -304,10 +304,10 @@ sub displayArticleFriends {
 		$back = -1;
 	}
 
-	my $topics = $slashdb->getTopics();
+	my $topics = $reader->getTopics();
 	for my $article (@$articles) {
 		my $commentcount = $article->[6]
-			? $slashdb->getDiscussion($article->[6], 'commentcount')
+			? $reader->getDiscussion($article->[6], 'commentcount')
 			: 0;
 
 		# should get comment count, too -- pudge
@@ -334,15 +334,15 @@ sub displayArticleFriends {
 }
 
 sub displayArticle {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $reader) = @_;
 	my($date, $forward, $back, @sorted_articles, $nickname, $uid, $discussion);
 	my $collection = {};
 	my $user_change = {};
 	my $head_data = {};
 
 	if ($form->{uid} || $form->{nick}) {
-		$uid		= $form->{uid} ? $form->{uid} : $slashdb->getUserUID($form->{nick});
-		$nickname	= $slashdb->getUser($uid, 'nickname');
+		$uid		= $form->{uid} ? $form->{uid} : $reader->getUserUID($form->{nick});
+		$nickname	= $reader->getUser($uid, 'nickname');
 		if ($uid && $uid != $user->{uid}
 			&& !isAnon($uid) && !$user->{is_anon}) {
 			# Store the fact that this user last looked at that user.
@@ -375,6 +375,7 @@ sub displayArticle {
 	unless ($articles && @$articles) {
 		print getData('noentries_found');
 		if ($user_change && %$user_change) {
+			my $slashdb   = getCurrentDB();
 			$slashdb->setUser($user->{uid}, $user_change);
 		}
 		return;
@@ -399,7 +400,7 @@ sub displayArticle {
 		$back = -1;
 	}
 
-	my $topics = $slashdb->getTopics();
+	my $topics = $reader->getTopics();
 	for my $article (@$articles) {
 		my($date_current) = timeCalc($article->[0], "%A %B %d, %Y");
 		if ($date ne $date_current) {
@@ -411,13 +412,13 @@ sub displayArticle {
 
 		my $commentcount;
 		if ($form->{id}) {
-			$discussion = $slashdb->getDiscussion($article->[6]);
+			$discussion = $reader->getDiscussion($article->[6]);
 			$commentcount = $article->[6]
 				? $discussion->{commentcount}
 				: 0;
 		} else {
 			$commentcount = $article->[6]
-				? $slashdb->getDiscussion($article->[6], 'commentcount')
+				? $reader->getDiscussion($article->[6], 'commentcount')
 				: 0;
 		}
 
@@ -434,7 +435,7 @@ sub displayArticle {
 	}
 
 	push @sorted_articles, $collection;
-	my $theme = _checkTheme($slashdb->getUser($uid, 'journal_theme'));
+	my $theme = _checkTheme($reader->getUser($uid, 'journal_theme'));
 
 	my $show_discussion = $form->{id} && !$constants->{journal_no_comments_item} && $discussion;
 	my $zoo   = getObject('Slash::Zoo');
@@ -453,12 +454,13 @@ sub displayArticle {
 	}
 
 	if ($user_change && %$user_change) {
+		my $slashdb   = getCurrentDB();
 		$slashdb->setUser($user->{uid}, $user_change);
 	}
 }
 
 sub editPrefs {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $reader) = @_;
 
 	my $nickname	= $user->{nickname};
 	my $uid		= $user->{uid};
@@ -473,7 +475,7 @@ sub editPrefs {
 }
 
 sub setPrefs {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $reader) = @_;
 
 	my %prefs;
 	$prefs{journal_discuss} = $user->{journal_discuss} =
@@ -484,13 +486,14 @@ sub setPrefs {
 		_checkTheme($form->{journal_theme})
 		if defined $form->{journal_theme};
 
+	my $slashdb   = getCurrentDB();
 	$slashdb->setUser($user->{uid}, \%prefs);
 
 	editPrefs(@_);
 }
 
 sub listArticle {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $reader) = @_;
 
 	my $uid = $form->{uid} || $ENV{SLASH_USER};
 	if (isAnon($uid)) {
@@ -501,7 +504,7 @@ sub listArticle {
 	my $themes	= $journal->themes;
 	my $theme	= _checkTheme($user->{'journal_theme'});
 	my $nickname	= $form->{uid}
-		? $slashdb->getUser($form->{uid}, 'nickname')
+		? $reader->getUser($form->{uid}, 'nickname')
 		: $user->{nickname};
 
 	_printHead("userhead",
@@ -524,7 +527,7 @@ sub listArticle {
 }
 
 sub saveArticle {
-	my($journal, $constants, $user, $form, $slashdb, $ws) = @_;
+	my($journal, $constants, $user, $form, $reader, $ws) = @_;
 	$form->{description} =~ s/[\r\n].*$//s;  # strip anything after newline
 	my $description = strip_notags($form->{description});
 
@@ -539,7 +542,9 @@ sub saveArticle {
 
 	return 0 unless _validFormkey($ws ? qw(max_post_check interval_check) : ());
 
+	my $slashdb   = getCurrentDB();
 	if ($form->{id}) {
+
 		my %update;
 		my $article = $journal->get($form->{id});
 
@@ -626,11 +631,11 @@ sub saveArticle {
 		$form = { id => $id };
 	}
 
-	displayArticle($journal, $constants, $user, $form, $slashdb);
+	displayArticle($journal, $constants, $user, $form, $reader);
 }
 
 sub articleMeta {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $reader) = @_;
 
 	if ($form->{id}) {
 		my $article = $journal->get($form->{id});
@@ -642,7 +647,7 @@ sub articleMeta {
 }
 
 sub removeArticle {
-	my($journal, $constants, $user, $form, $slashdb) = @_;
+	my($journal, $constants, $user, $form, $reader) = @_;
 
 	for my $id (grep { $_ = /^del_(\d+)$/ ? $1 : 0 } keys %$form) {
 		$journal->remove($id);
@@ -652,7 +657,7 @@ sub removeArticle {
 }
 
 sub editArticle {
-	my($journal, $constants, $user, $form, $slashdb, $nohead) = @_;
+	my($journal, $constants, $user, $form, $reader, $nohead) = @_;
 	# This is where we figure out what is happening
 	my $article = {};
 	my $posttype;
@@ -669,6 +674,7 @@ sub editArticle {
 	} else {
 		$article  = $journal->get($form->{id}) if $form->{id};
 		$posttype = $article->{posttype};
+		my $slashdb   = getCurrentDB();
 		$slashdb->createFormkey('journal');
 	}
 
@@ -679,14 +685,14 @@ sub editArticle {
 		my $strip_desc = strip_notags($article->{description});
 
 		my $commentcount = $article->{discussion}
-			? $slashdb->getDiscussion($article->{discussion}, 'commentcount')
+			? $reader->getDiscussion($article->{discussion}, 'commentcount')
 			: 0;
 
 		my $disp_article = {
 			article		=> $strip_art,
 			date		=> $article->{date},
 			description	=> $strip_desc,
-			topic		=> $slashdb->getTopic($article->{tid}),
+			topic		=> $reader->getTopic($article->{tid}),
 			id		=> $article->{id},
 			discussion	=> $article->{discussion},
 			commentcount	=> $commentcount,
@@ -704,7 +710,7 @@ sub editArticle {
 		});
 	}
 
-	my $formats = $slashdb->getDescriptions('postmodes');
+	my $formats = $reader->getDescriptions('postmodes');
 	my $format_select = createSelect('posttype', $formats, $posttype, 1);
 
 	slashDisplay('journaledit', {
@@ -741,9 +747,9 @@ sub _printHead {
 	$data->{title} = $title;
 
 	if ($edit_the_uid) {
-		my $slashdb = getCurrentDB();
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		my $useredit = $data->{uid}
-			? $slashdb->getUser($data->{uid})
+			? $reader->getUser($data->{uid})
 			: getCurrentUser();
 		$data->{useredit} = $useredit;
 	}
@@ -814,7 +820,8 @@ sub add_entry {
 	no strict 'refs';
 	my $saveArticle = *{ $user->{state}{packagename} . '::saveArticle' };
 	$slashdb->createFormkey('journal');
-	my $id = $saveArticle->($journal, $constants, $user, $form, $slashdb, 1);
+	my $reader = getObject('Slash::DB', { db_type => 'reader' }); # We need it for the eventual display
+	my $id = $saveArticle->($journal, $constants, $user, $form, $reader, 1);
 	return $id;
 }
 

@@ -76,6 +76,7 @@ sub poll_booth {
 #################################################################
 sub default {
 	my($form, $slashdb, $constants) = @_;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	if (!$form->{'qid'}) {
 		listpolls(@_);
@@ -84,10 +85,10 @@ sub default {
 	} else {
 		my $vote = vote(@_);
 		if ($constants->{poll_discussions}) {
-			my $discussion_id = $slashdb->getPollQuestion(
+			my $discussion_id = $reader->getPollQuestion(
 				$form->{'qid'}, 'discussion'
 			);
-			my $discussion = $slashdb->getDiscussion($discussion_id)
+			my $discussion = $reader->getDiscussion($discussion_id)
 				if $discussion_id;
 			if ($discussion) {
 				printComments($discussion);
@@ -219,14 +220,15 @@ sub savepoll {
 #################################################################
 sub vote_return {
 	my($form, $slashdb) = @_;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	my $qid = $form->{'qid'};
 	my $aid = $form->{'aid'};
 	return unless $qid && $aid;
 
 	my(%all_aid) = map { ($_->[0], 1) }
-		@{$slashdb->getPollAnswers($qid, ['aid'])};
-	my $poll_open = $slashdb->isPollOpen($qid);
+		@{$reader->getPollAnswers($qid, ['aid'])};
+	my $poll_open = $reader->isPollOpen($qid);
 	my $has_voted = $slashdb->hasVotedIn($qid);
 
 	if ($has_voted) {
@@ -241,13 +243,14 @@ sub vote_return {
 #################################################################
 sub vote {
 	my($form, $slashdb) = @_;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	my $qid = $form->{'qid'};
 	my $aid = $form->{'aid'};
 	return unless $qid;
 
 	my(%all_aid) = map { ($_->[0], 1) }
-		@{$slashdb->getPollAnswers($qid, ['aid'])};
+		@{$reader->getPollAnswers($qid, ['aid'])};
 
 	if (! keys %all_aid) {
 		print getData('invalid');
@@ -256,12 +259,12 @@ sub vote {
 		return;
 	}
 
-	my $question = $slashdb->getPollQuestion($qid, ['voters', 'question']);
+	my $question = $reader->getPollQuestion($qid, ['voters', 'question']);
 	my $notes = getData('display');
 	if (getCurrentUser('is_anon') && !getCurrentStatic('allow_anonymous')) {
 		$notes = getData('anon');
 	} elsif ($aid > 0) {
-		my $poll_open = $slashdb->isPollOpen($qid);
+		my $poll_open = $reader->isPollOpen($qid);
 		my $has_voted = $slashdb->hasVotedIn($qid);
 
 		if ($has_voted) {
@@ -279,8 +282,8 @@ sub vote {
 		}
 	}
 
-	my $answers  = $slashdb->getPollAnswers($qid, ['answer', 'votes']);
-	my $maxvotes = $slashdb->getPollVotesMax($qid);
+	my $answers  = $reader->getPollAnswers($qid, ['answer', 'votes']);
+	my $maxvotes = $reader->getPollVotesMax($qid);
 	my @pollitems;
 	for (@$answers) {
 		my($answer, $votes) = @$_;
@@ -316,9 +319,9 @@ sub deletepolls {
 #################################################################
 sub listpolls {
 	my($form) = @_;
-	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $min = $form->{min} || 0;
-	my $questions = $slashdb->getPollQuestionList($min);
+	my $questions = $reader->getPollQuestionList($min);
 	my $sitename = getCurrentStatic('sitename');
 
 	# Just me, but shouldn't title be in the template?

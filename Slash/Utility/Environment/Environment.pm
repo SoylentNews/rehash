@@ -1761,7 +1761,7 @@ sub getObject {
 			$vuser = $data->{virtual_user};
 
 		} else {
-			my $classes = getCurrentDB()->getClasses();
+			my $classes = getCurrentStatic('classes');
 
 			# try passed db first, then db for given class
 			my $db_type  = $data->{db_type}  || $classes->{$class}{db_type};
