@@ -41,17 +41,17 @@ This discussion was created by <A HREF="[% constants.rootdir %]/~[% d_nickname |
 		[% END %]
 
 		[% IF discussion.type != 'archived' %]
-			[% msg %] [% type %].
+			[% msg %] [% type %].  [% snark %]
 		[% ELSE %]
 			[% IF discussion.commentstatus == 'friends_only'
 			|| discussion.commentstatus == 'friends_fof_only'
 			|| discussion.commentstatus == 'no_foe'
 			|| discussion.commentstatus == 'no_foe_eof' %]
-				[% msg %] [% type %].  [% snark %]
+				[% msg %] [% type %], but now has been archived.
 			[% ELSE %]
 				This discussion has been archived.
-				No new comments can be posted.
 			[% END %]
+			No new comments can be posted.
 		[% END %]
 	[% END %]
 </FONT></TD></TR>
