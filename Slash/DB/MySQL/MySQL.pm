@@ -2513,7 +2513,6 @@ sub savePollQuestion {
 	$poll->{section}  ||= getCurrentStatic('defaultsection');
 	$poll->{voters}   ||= "0";
 	$poll->{autopoll} ||= "no";
-	$poll->{autopoll} ||= "no";
 	$poll->{polltype} ||= "section";
 
 	my $qid_quoted = "";
@@ -2523,10 +2522,16 @@ sub savePollQuestion {
 	$sid_quoted = $self->sqlQuote($poll->{sid}) if $poll->{sid};
 
 	# get hash of fields to update based on the linked story
-	my $data=$self->getPollUpdateHashFromStory($poll->{sid},{topic=>1, section=>1, date=>1, polltype=>1 }) if $poll->{sid};
+	my $data = $self->getPollUpdateHashFromStory($poll->{sid}, {
+		topic		=> 1,
+		section		=> 1,
+		date		=> 1,
+		polltype	=> 1
+	}) if $poll->{sid};
+
 	# replace form values with those from story
-	foreach(keys %$data){
-		$poll->{$_}=$data->{$_};
+	foreach (keys %$data){
+		$poll->{$_} = $data->{$_};
 	}
 
 	if ($poll->{qid}) {
@@ -2592,21 +2597,22 @@ sub savePollQuestion {
 }
 
 sub updatePollFromStory{
-	my ($self,$sid,$opts) = @_;
-	my ($data,$qid) = $self->getPollUpdateHashFromStory($sid,$opts);
-	if($qid){
-		$self->sqlUpdate("pollquestions",$data,"qid=".$self->sqlQuote($qid));
+	my($self, $sid, $opts) = @_;
+	my($data, $qid) = $self->getPollUpdateHashFromStory($sid, $opts);
+	if ($qid){
+		$self->sqlUpdate("pollquestions", $data, "qid=" . $self->sqlQuote($qid));
 	}
 }
 sub getPollUpdateHashFromStory{
-	my ($self,$sid,$opts) = @_;
-	my $story_ref=$self->sqlSelectHashref("sid,qid,time,section,tid,displaystatus","stories","sid=".$self->sqlQuote($sid));
+	my($self, $sid, $opts) = @_;
+	my $story_ref=$self->sqlSelectHashref("sid,qid,time,section,tid,displaystatus", "stories", "sid=" . $self->sqlQuote($sid));
 	my $data;
-	if($story_ref->{qid}){
-		$data->{date}=$story_ref->{time} if $opts->{date};
-		$data->{polltype}=$story_ref->{displaystatus} >= 0 ? "story" : "nodisplay" if $opts->{polltype};
-		$data->{topic}=$story_ref->{tid} if $opts->{topic};
-		$data->{section}=$story_ref->{section} if $opts->{section};
+
+	if ($story_ref->{qid}) {
+		$data->{date}		= $story_ref->{time} if $opts->{date};
+		$data->{polltype}	= $story_ref->{displaystatus} >= 0 ? "story" : "nodisplay" if $opts->{polltype};
+		$data->{topic}		= $story_ref->{tid} if $opts->{topic};
+		$data->{section}	= $story_ref->{section} if $opts->{section};
 	}
 	# return the hash of fields and values to update for the poll
 	# if asked for the array return the qid of the poll too
@@ -2668,8 +2674,7 @@ sub getPollQuestionList {
 	$where .= " AND pollquestions.topic = $other->{topic} " if $other->{topic};
        
 	$where .= " AND date <= NOW() " unless $admin;
-	my $limit;
-	$limit = $other->{limit} || 20;
+	my $limit = $other->{limit} || 20;
 
 	my $questions = $self->sqlSelectAll(
 		'qid, question, date, voters, commentcount, polltype, date>now() as future,pollquestions.topic',
@@ -4014,13 +4019,12 @@ sub currentAdmin {
 #
 sub getTopNewsstoryTopics {
 	my($self, $limit, $section) = @_;
-        $section="" if $section eq "index";
+        $section = "" if $section eq "index";
 	my $all = 1 if !$limit;
 
 	$limit =~ s/\D+//g;
 	$limit = 10 if !$limit || $limit == 1;
-        my $sect_clause;
-        $sect_clause=" AND section='$section' " if $section;
+        my $sect_clause =" AND section='$section' " if $section;
 	my $other  = $all ? '' : "LIMIT $limit";
 	my $topics = $self->sqlSelectAllHashrefArray(
 		"topics.tid AS tid, alttext, COUNT(*) AS cnt, default_image, MAX(time) AS tme",
@@ -4040,9 +4044,9 @@ sub getTopNewsstoryTopics {
 		$_->{count}  = delete $_->{cnt};
 		$_->{'time'} = delete $_->{tme};
 	}
+
 	return $topics;
 }
-
 
 sub getTopPollTopics {
 	my($self, $limit) = @_;
@@ -4071,7 +4075,6 @@ sub getTopPollTopics {
 	}
 	return $topics;
 }
-
 
 
 ##################################################################
@@ -5559,6 +5562,7 @@ sub updateStory {
 		topic		=> $data->{tid},
 		commentstatus	=> $comment_codes->{$data->{commentstatus}} ? $data->{commentstatus} : getCurrentStatic('defaultcommentstatus'),
 	};
+
 	unless ($self->setStoryTopics($sid, createStoryTopicData($self))) {
 		print STDERR "Failed to set topics for story\n";
 		goto error;
@@ -5569,14 +5573,25 @@ sub updateStory {
 		print STDERR "Failed to set discussion data for story\n";
 		goto error;
 	}
+
+	my $days_to_archive = $constants->{'archive_delay'};
+	$self->sqlUpdate('discussions', { type => 'open' },
+		"sid='$sid' AND type='archived' AND ((TO_DAYS(NOW()) - TO_DAYS(ts)) <= $constants->{archive_delay})"
+	);
+
 	if ($data->{displaystatus} < 1) {
 		$self->setVar('writestatus', 'dirty');
 		$self->setSection($data->{section}, { writestatus => 'dirty' });
 	}
-	
+
 	$self->{_dbh}->commit;
 	$self->{_dbh}{AutoCommit} = 1;
-        $self->updatePollFromStory($sid,{date=>1,topic=>1,section=>1,polltype=>1});
+        $self->updatePollFromStory($sid, {
+        	date		=> 1,
+        	topic		=> 1,
+        	section		=> 1,
+        	polltype	=> 1
+        });
 
 	return $sid;
 
