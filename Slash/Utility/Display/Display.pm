@@ -1278,22 +1278,22 @@ sub _hard_linkComment {
 
 #========================================================================
 my $slashTags = {
-	'image' => \&_slashImage,
-	'story' => \&_slashStory,
-	'user' => \&_slashUser,
-	'link' => \&_slashLink,
-	'break' => \&_slashPageBreak,
-	'comment' => \&_slashComment,
-	'journal' => \&_slashJournal,
+	'image'    => \&_slashImage,
+	'story'    => \&_slashStory,
+	'user'     => \&_slashUser,
+	'link'     => \&_slashLink,
+	'break'    => \&_slashPageBreak,
+	'comment'  => \&_slashComment,
+	'journal'  => \&_slashJournal,
 };
 
 my $cleanSlashTags = {
-	'story' => \&_cleanSlashStory,
-	'user' => \&_cleanSlashUser,
-	'nickname' => \&_cleanSlashUser, #Alternative syntax
-	'link' => \&_cleanSlashLink,
-	'comment' => \&_cleanSlashComment,
-	'journal' => \&_cleanSlashJournal,
+	'story'    => \&_cleanSlashStory,
+	'user'     => \&_cleanSlashUser,
+	'nickname' => \&_cleanSlashUser, # alternative syntax
+	'link'     => \&_cleanSlashLink,
+	'comment'  => \&_cleanSlashComment,
+	'journal'  => \&_cleanSlashJournal,
 };
 
 sub cleanSlashTags {
@@ -1305,12 +1305,12 @@ sub cleanSlashTags {
 	$text =~ s#<slash-(image|story|user|file|break|link|comment|journal)#<slash type="$1"#gis;
 	my $tokens = HTML::TokeParser->new(\$text);
 	while (my $token = $tokens->get_tag('slash')) {
-		my $type = lc($token->[1]->{type});
+		my $type = lc($token->[1]{type});
 		if (ref($cleanSlashTags->{$type}) eq 'CODE') {
 			$cleanSlashTags->{$type}($tokens, $token,\$newtext);
-		} elsif ($token->[1]->{href}) {
+		} elsif ($token->[1]{href}) {
 			$cleanSlashTags->{'link'}($tokens, $token,\$newtext);
-		} elsif ($token->[1]->{story}) {
+		} elsif ($token->[1]{story}) {
 			$cleanSlashTags->{'story'}($tokens, $token,\$newtext);
 		}
 	}
@@ -1319,12 +1319,13 @@ sub cleanSlashTags {
 }
 
 sub _cleanSlashUser {
-	my ($tokens, $token, $newtext) = @_;
-	return unless $token->[1]->{user} || $token->[1]->{nickname} || $token->[1]->{uid};
+	my($tokens, $token, $newtext) = @_;
 
-	my $user = $token->[1]->{user} || $token->[1]->{nickname} || $token->[1]->{uid};
+	my $user = $token->[1]{user} || $token->[1]{nickname} || $token->[1]{uid};
+	return unless $user;
+
 	my $slashdb = getCurrentDB();
-	my ($uid, $nickname);
+	my($uid, $nickname);
 	if ($user =~ /^\d+$/) {
 		$uid = $user;
 		$nickname = $slashdb->getUser($uid, 'nickname');
@@ -1341,23 +1342,23 @@ sub _cleanSlashUser {
 
 sub _cleanSlashStory {
 	my ($tokens, $token, $newtext) = @_;
-	return unless $token->[1]->{story};
+	return unless $token->[1]{story};
 
 	my $text;
-	if ($token->[1]->{text}) {
-		$text = $token->[1]->{text};
+	if ($token->[1]{text}) {
+		$text = $token->[1]{text};
 	} else {
 		$text = $tokens->get_text("/slash");
 	}
 
 	my $slashdb = getCurrentDB();
-	my $title = $token->[1]->{title} 
-	? strip_attribute($token->[1]->{title}) 
-		: strip_attribute($slashdb->getStory($token->[1]->{story}, 'title', 1));
-	my $sid = strip_attribute($token->[1]->{story});
+	my $title = $token->[1]{title} 
+	? strip_attribute($token->[1]{title}) 
+		: strip_attribute($slashdb->getStory($token->[1]{story}, 'title', 1));
+	my $sid = strip_attribute($token->[1]{story});
 
 	my $content = qq|<SLASH STORY="$sid" TITLE="$title" TYPE="STORY">$text</SLASH>|;
-	if ($token->[1]->{text}) {
+	if ($token->[1]{text}) {
 		$$newtext =~ s#$token->[3]#$content#is;
 	} else {
 		$$newtext =~ s#$token->[3]$text</SLASH>#$content#is;
@@ -1368,16 +1369,16 @@ sub _cleanSlashLink {
 	my ($tokens, $token, $newtext) = @_;
 	my $relocateDB = getObject('Slash::Relocate');
 
-	if (!$token->[1]->{id}) {
-		my $link = $relocateDB->create({ url => $token->[1]->{href}});
-		my $href = strip_attribute($token->[1]->{href});
-		my $title = strip_attribute($token->[1]->{title});
+	if (!$token->[1]{id}) {
+		my $link  = $relocateDB->create({ url => $token->[1]{href} });
+		my $href  = strip_attribute($token->[1]{href});
+		my $title = strip_attribute($token->[1]{title});
 		$$newtext =~ s#$token->[3]#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
 	} else {
-		my $url = $relocateDB->get($token->[1]->{id}, 'url');
-		my $link = $relocateDB->create({ url => $token->[1]->{href}});
-		my $href = strip_attribute($token->[1]->{href});
-		my $title = strip_attribute($token->[1]->{title});
+		my $url   = $relocateDB->get($token->[1]{id}, 'url');
+		my $link  = $relocateDB->create({ url => $token->[1]{href} });
+		my $href  = strip_attribute($token->[1]{href});
+		my $title = strip_attribute($token->[1]{title});
 		$$newtext =~ s#$token->[3]#<SLASH HREF="$href" ID="$link" TITLE="$title" TYPE="LINK">#is;
 	}
 }
@@ -1397,7 +1398,7 @@ sub processSlashTags {
 
 	return $newtext unless $tokens;
 	while (my $token = $tokens->get_tag('slash')) {
-		my $type = lc($token->[1]->{type});
+		my $type = lc($token->[1]{type});
 		if (ref($slashTags->{$type}) eq 'CODE') {
 			$slashTags->{$type}($tokens, $token,\$newtext);
 		} else {
@@ -1405,7 +1406,6 @@ sub processSlashTags {
 			print STDERR "BAD TAG $token->[0]:$type\n";
 			$newtext =~ s/$token->[3]/$content/;
 		}
-
 	}
 
 	if ($user->{stats}{pagebreaks} && !$user->{state}{editing}) {
@@ -1414,7 +1414,7 @@ sub processSlashTags {
 # -Brian
 		my @parts = split /<slash type="break">/is, $newtext;
 		if ($form->{page}) {
-			$newtext = $parts[$form->{page} -1];
+			$newtext = $parts[$form->{page} - 1];
 		} else {
 			$newtext = $parts[0];
 		}
@@ -1424,68 +1424,68 @@ sub processSlashTags {
 }
 
 sub _slashImage {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 
 	my $content = slashDisplay('imageLink', {
-			id => $token->[1]->{id},
-			title => $token->[1]->{title},
-			}, { Return => 1 });
+		id    => $token->[1]{id},
+		title => $token->[1]{title},
+	}, { Return => 1 });
 	$content ||= getData('SLASH-UKNOWN-IMAGE');
 
 	$$newtext =~ s/$token->[3]/$content/;
 }
 
 sub _slashStory {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 
-	my $sid = $token->[1]->{story};
+	my $sid = $token->[1]{story};
 	my $text = $tokens->get_text("/slash");
 	my $content = linkStory({
-			'link'	=> $text,
-			sid	=> $token->[1]->{story},
-			title	=> $token->[1]->{title},
-			});
+		'link'	=> $text,
+		sid	=> $token->[1]{story},
+		title	=> $token->[1]{title},
+	});
 	$content ||= getData('SLASH-UKNOWN-STORY');
 
 	$$newtext =~ s#$token->[3]$text</SLASH>#$content#is;
 }
 
 sub _slashUser {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 
 	my $content = slashDisplay('userLink', {
-			uid => $token->[1]->{uid},
-			nickname => $token->[1]->{nickname}, 
-			}, { Return => 1 });
+		uid      => $token->[1]{uid},
+		nickname => $token->[1]{nickname}, 
+	}, { Return => 1 });
 	$content ||= getData('SLASH-UKNOWN-USER');
 
 	$$newtext =~ s/$token->[3]/$content/;
 }
 
 sub _slashFile {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 
 	my $content = slashDisplay('fileLink', {
-			id => $token->[1]->{id},
-			title => $token->[1]->{title},
-			}, { Return => 1 });
+		id    => $token->[1]{id},
+		title => $token->[1]{title},
+	}, { Return => 1 });
 	$content ||= getData('SLASH-UKNOWN-FILE');
 
 	$$newtext =~ s/$token->[3]/$content/;
 }
 
 sub _slashLink {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 
 	my $reloDB = getObject('Slash::Relocate', { db_type => 'reader' });
-	my ($content);
+	my($content);
 	my $text = $tokens->get_text("/slash");
 	if ($reloDB) {
 		$content = slashDisplay('hrefLink', {
-				id => $token->[1]->{id},
-				title => $token->[1]->{title} || $token->[1]->{href} || $text,
-				text => $text,
-				}, { Return => 1 });
+			id    => $token->[1]{id},
+			title => $token->[1]{title} || $token->[1]{href} || $text,
+			text  => $text,
+		}, { Return => 1 });
 	}
 	$content ||= getData('SLASH-UKNOWN-LINK');
 
@@ -1493,7 +1493,7 @@ sub _slashLink {
 }
 
 sub _slashPageBreak {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 	my $user = getCurrentUser();
 
 	$user->{stats}{pagebreaks}++;
@@ -1502,36 +1502,36 @@ sub _slashPageBreak {
 }
 
 sub _slashComment {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 }
 
 sub _slashJournal {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 }
 
 sub _slashSlash {
-	my ($tokens, $token, $newtext) = @_;
+	my($tokens, $token, $newtext) = @_;
 
-	my ($content, $data);
-	if ($token->[1]->{href}) {
+	my($content, $data);
+	if ($token->[1]{href}) {
 		my $reloDB = getObject('Slash::Relocate', { db_type => 'reader' });
 		$data = $tokens->get_text("/slash");
 		if ($reloDB) {
 			$content = slashDisplay('hrefLink', {
-					id => $token->[1]->{id},
-					title => $token->[1]->{href},
-					text => $data,
-					}, { Return => 1 });
+				id    => $token->[1]{id},
+				title => $token->[1]{href},
+				text  => $data,
+			}, { Return => 1 });
 		}
 		$content ||= getData('SLASH-UKNOWN-LINK');
-	} elsif ($token->[1]->{story}) {
+	} elsif ($token->[1]{story}) {
 		$data = $tokens->get_text("/slash");
 		my $reader = getObject('Slash::DB', { db_type => 'reader' });
 		$content = linkStory({
-				'link'	=> $data,
-				sid	=> $token->[1]->{story},
-				title	=> $reader->getStory($token->[1]->{story}, 'title'),
-				});
+			'link'	=> $data,
+			sid	=> $token->[1]{story},
+			title	=> $reader->getStory($token->[1]{story}, 'title'),
+		});
 		$content ||= getData('SLASH-UKNOWN-STORY');
 	} # More of these type can go here.
 
