@@ -59,12 +59,7 @@ sub daily_generateDailyMailees {
 				story_never_topic	story_never_author	story_never_nexus
 				story_always_topic	story_always_author	story_always_nexus
 			)}) {
-				# Pudge: I took out the "next unless $_;" that
-				# was here.  I think we need "|||123|||" to
-				# be distinct from "|123|||||" if you see what
-				# I mean.  - Jamie 2004/10/05
-				$value ||= "";
-				$key .= "|$value";
+				$key .= '|' . join(',', sort m/'(.+?)'/g);
 			}
 			# allow us to make certain emails sent individually,
 			# by including a unique value in users_param for
