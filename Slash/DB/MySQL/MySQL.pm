@@ -4755,6 +4755,7 @@ sub getSlashConf {
 		# If absolutedir_secure is not defined, it defaults to the
 		# same as absolutedir.
 	$conf{absolutedir_secure} ||= $conf{absolutedir};
+	$conf{adminmail_mod}	||= $conf{adminmail};
 	$conf{basedir}		||= "$conf{datadir}/public_html";
 	$conf{imagedir}		||= "$conf{rootdir}/images";
 	$conf{rdfimg}		||= "$conf{imagedir}/topics/topicslash.gif";

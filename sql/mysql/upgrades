@@ -688,5 +688,8 @@ INSERT IGNORE INTO modreasons (id, name, m2able, listable, val, fairfrac) VALUES
 
 # SLASHDOT LAST UPDATED HERE
 
-# End of T_2_3_0_42
+# End of T_2_3_0_42, Start of T_2_3_0_43
+
+# Set to email address(es) appropriate for your site, of course.
+INSERT INTO vars (name, value, description) VALUES ('adminmail_mod','admin@example.com','All admin mail about moderation goes here');
 

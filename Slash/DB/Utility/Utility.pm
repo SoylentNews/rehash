@@ -499,7 +499,6 @@ sub sqlUpdate {
 	my @data_fields = ( );
 	my $order_hr = { };
 	if ($options && (!ref($options) || ref($options) ne 'ARRAY')) {
-#use Data::Dumper; print STDERR "sqlUpdate A: " . Dumper([ $table, $data, $where, $options ]);
 	}
 	if ($options && $options->{assn_order}) {
 		# Reorder the data fields into the order given.  Any
@@ -513,7 +512,6 @@ sub sqlUpdate {
 		for my $i (0..$#$order_ar) {
 			$order_hr->{$order_ar->[$i]} = $i + 1;
 		}
-#print STDERR "sqlUpdate B: order_ar " . Dumper($order_ar) . "order_hr " . Dumper($order_hr);
 	}
 	# In any case, the field names are sorted.  This is new
 	# behavior as of August 2002.  It should not break anything,
@@ -524,7 +522,6 @@ sub sqlUpdate {
 		||
 		$a cmp $b
 	} keys %$data;
-#if ($options) { print STDERR "sqlUpdate C: data_fields '@data_fields'\n" }
 
 	for my $field (@data_fields) {
 		if ($field =~ /^-/) {
