@@ -7527,7 +7527,8 @@ sub getStoryList {
 	foreach my $story (@$list) {
 #		$story->{displaystatus} = $self->_displaystatus($story->{stoid}, { no_time_restrict => 1 });
 		$story->{skinname} ||= 'mainpage';
-		$story->{topic} = $self->getTopic($story->{tid})->{keyword};
+		my $topic = $self->getTopic($story->{tid});
+		$story->{topic} = $topic->{keyword} if $topic;
 		push @$stoids, $story->{stoid};
 	}
 
