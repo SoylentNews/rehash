@@ -2296,8 +2296,6 @@ INSERT INTO vars (name, value, description) VALUES ('email_domains_invalid', 'ex
 UPDATE vars SET description='Format for HC images (png, jpeg)' WHERE name='hc_image_format';
 UPDATE vars SET value='jpeg' WHERE name='hc_image_format' AND value='jpg';
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_3_0_153, Start of T_2_3_0_154 - 2004/05/11
 
 INSERT INTO vars (name, value, description) VALUES ('submit_domains_invalid', 'example.com peoplesprimary.com', 'space separated list of domains that are not valid for submitting stories');
@@ -2314,6 +2312,8 @@ INSERT INTO vars (name, value, description) VALUES ('m2_oldzone', '0', 'Starting
 
 # SLASHDOT LAST UPDATED HERE
 
+# SLASHCLUSTER LAST UPDATED HERE
+
 # End of T_2_3_0_154, Start of T_2_3_0_155 - 2004/05/18
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats', '', 'Stores current performance stats in a var for display to admins');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_disp', '1', 'Show current performance stats?');
@@ -2325,3 +2325,6 @@ ALTER TABLE comments ADD INDEX uid_date (uid,date);
 
 # Switching this on may help performance on large sites.  Don't turn on until you've created the uid_date index
 INSERT INTO vars (name, value, description) VALUES ('user_comments_force_index', '0', 'Give user comments query hint to use specific index?');
+
+# End of T_2_3_0_155, Start of T_2_3_0_156 - 2004/05/25
+
