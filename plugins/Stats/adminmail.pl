@@ -45,7 +45,7 @@ $task{$me}{code} = sub {
 	# average hits per story for each in the e-mail	
 
 	my @ah_days = ($yesterday);
-	for my $db(1..$cc_days_back){
+	for my $db(1,2){
 		my @day = localtime(time-86400*($days_back+$db));
 		my $day = sprintf "%4d-%02d-%02d",
         	        $day[5] + 1900, $day[4] + 1, $day[3];
@@ -268,10 +268,7 @@ EOT
 		$statsSave->createStatDaily("${op}_page", $pages);
 		if($op eq "article"){
 			my $avg = $stats->getAverageHitsPerStoryOnDay($yesterday, $pages);
-			#my $num_stories=$stats->getNumberStoriesPerDay($yesterday);
-			#my $avg = $num_stories ? ($pages / $num_stories) : 0;
 			$statsSave->createStatDaily("avg_hits_per_story", $avg);
-			$data{avg_hits_per_story} = sprintf("%12.1f",$avg);
 		}
 	}
 	#Other not recorded
@@ -362,8 +359,6 @@ EOT
 
 			if($op eq "article"){
 				my $avg = $stats->getAverageHitsPerStoryOnDay($yesterday, $pages, { section => $section });
-				#my $num_stories=$stats->getNumberStoriesPerDay($yesterday, { section => $section });
-				#my $avg = $num_stories ? ($pages / $num_stories) : 0;
 				$statsSave->createStatDaily("avg_hits_per_story", $avg, { section => $section });
 			}
 		}
@@ -537,7 +532,7 @@ EOT
 	}
 	
 	foreach my $day (@ah_days){
-		my $avg = $stats->sqlSelect("value","stats_daily",'day="$day" and section="all"');
+		my $avg = $stats->sqlSelect("value","stats_daily","day='$day' and section='all' and name='avg_hits_per_story'");
 		push @{$data{avg_hits_per_story}}, sprintf("%12.1f", $avg);
 	}
 
