@@ -24,7 +24,7 @@ __template__
 [% ELSE %]
 
 [% reply.nickname %] has posted a new comment on [% constants.sitename %].
-    [% reply.subject %]    
+    [% reply.subject %]
     [% constants.absolutedir %]/comments.pl?sid=[% reply.sid %]&cid=[% reply.cid %]
 
 Attached to:
