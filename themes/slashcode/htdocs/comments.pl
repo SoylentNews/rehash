@@ -868,7 +868,7 @@ sub validateComment {
 		my $is_trusted = $slashdb->checkIsTrusted($user->{ipid});
 		if ($is_trusted ne 'yes') {
 			my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
-print STDERR scalar(localtime) . " comments.pl cfop returned '$is_proxy'\n";
+print STDERR scalar(localtime) . " comments.pl cfop returned '$is_proxy' for '$user->{hostip}'\n";
 			if ($is_proxy) {
 				$$error_message = getError('open proxy', {
 					unencoded_ip	=> $ENV{REMOTE_ADDR},
