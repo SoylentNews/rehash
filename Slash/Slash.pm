@@ -1658,7 +1658,7 @@ sub displayThread {
 	unless ($const) {
 		for (map { ($_ . "begin", $_ . "end") }
 			qw(table cage cagebig indent comment)) {
-			$const->{$_} = getData($_);
+			$const->{$_} = getData($_, '', '');
 		}
 	}
 
@@ -1715,7 +1715,7 @@ sub displayThread {
 			sid		=> $sid,
 			threshold	=> $constants->{comment_minscore},
 			pid		=> $pid,
-			subject		=> getData('displayThreadLink', { hidden => $hidden })
+			subject		=> getData('displayThreadLink', { hidden => $hidden }, '')
 		});
 		$return .= slashDisplay('displayThread', { 'link' => $link },
 			{ Return => 1, Nocomm => 1 });
@@ -2119,9 +2119,9 @@ sub intervalString {
 		if ($interval > 3600) {
 			$hours = int($interval/3600);
 			if ($hours > 1) {
-				$interval_string = $hours . ' ' . getData('hours');
+				$interval_string = $hours . ' ' . getData('hours', '', '');
 			} elsif ($hours > 0) {
-				$interval_string = $hours . ' ' . getData('hour');
+				$interval_string = $hours . ' ' . getData('hour', '', '');
 			}
 			$minutes = int(($interval % 3600) / 60);
 
@@ -2132,13 +2132,13 @@ sub intervalString {
 		if ($minutes > 0) {
 			$interval_string .= ", " if $hours;
 			if ($minutes > 1) {
-				$interval_string .= $minutes . ' ' . getData('minutes');
+				$interval_string .= $minutes . ' ' . getData('minutes', '', '');
 			} else {
-				$interval_string .= $minutes . ' ' . getData('minute');
+				$interval_string .= $minutes . ' ' . getData('minute', '', '');
 			}
 		}
 	} else {
-		$interval_string = $interval . ' ' . getData('seconds');
+		$interval_string = $interval . ' ' . getData('seconds', '', '');
 	}
 
 	return($interval_string);
@@ -2151,12 +2151,12 @@ sub submittedAlready {
 
 	# find out if this form has been submitted already
 	my($submitted_already, $submit_ts) = $slashdb->checkForm($formkey, $formname)
-		or errorMessage(getData('noformkey')), return;
+		or errorMessage(getData('noformkey', '', '')), return;
 
 		if ($submitted_already) {
 			errorMessage(getData('submitalready', {
 				interval_string => intervalString(time() - $submit_ts)
-			}));
+			}, ''));
 		}
 		return($submitted_already);
 }
@@ -2190,7 +2190,7 @@ sub checkSubmission {
 		errorMessage(getData('speedlimit', {
 			limit_string	=> intervalString($limit),
 			interval_string	=> intervalString($interval)
-		}));
+		}, ''));
 		return;
 
 	} else {
@@ -2199,7 +2199,7 @@ sub checkSubmission {
 
 			unless ($formkey && $slashdb->checkFormkey($formkey_earliest, $formname, $id, $formkey)) {
 				$slashdb->createAbuse("invalid form key", $ENV{REMOTE_ADDR}, $ENV{SCRIPT_NAME}, $ENV{QUERY_STRING});
-				errorMessage(getData('invalidformkey'));
+				errorMessage(getData('invalidformkey', '', ''));
 				return;
 			}
 
@@ -2213,7 +2213,7 @@ sub checkSubmission {
 			errorMessage(getData('maxposts', {
 				max		=> $max,
 				timeframe	=> intervalString($constants->{formkey_timeframe})
-			}));
+			}, ''));
 			return;
 		}
 	}
@@ -2329,7 +2329,7 @@ sub getData {
 	$hashref ||= {};
 	$hashref->{value} = $value;
 	my %opts = ( Return => 1, Nocomm => 1 );
-	$opts{Page} = $page if defined $page;
+	$opts{Page} = $page || 'NONE' if defined $page;
 	return slashDisplay('data', $hashref, \%opts);
 }
 
