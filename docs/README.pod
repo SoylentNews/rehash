@@ -3,14 +3,6 @@
 README - Slash Readme
 
 
-=head1 WARNING
-
-This release of Slash is PRERELEASE software.  Run at your own risk. There
-may be bugs, and documentation is not yet finished or wrong.  We feel this
-release is stable for production use, as we use it on http://slashcode.com/,
-but it may have more problems than one would expect from a final release.
-
-
 =head1 DESCRIPTION
 
 Slash -- Slashdot Like Automated Storytelling Homepage -- is the code
@@ -30,11 +22,11 @@ Through a plugin system, developers can add functionality to Slash.
 Through themes and templates (which are written using Template Toolkit),
 the look and feel of a Slash site can be customized.
 
-See F<INSTALL> for information about installing Slash, including hardware
+See F<INSTALL> for information about B<installing> Slash, including hardware
 and software requirements.  Read that document carefully, and follow the
 instructions as precisely as possible.
 
-Also see F<INSTALL> for information on upgrading from previous versions
+Also see F<INSTALL> for information on B<upgrading> from previous versions
 of Slash.
 
 As noted in the FAQ, please send any bug reports, and subscribe to

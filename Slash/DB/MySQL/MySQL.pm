@@ -256,7 +256,7 @@ sub getMetamodComments {
 	my $comments = [];
 	while (my $comment = $sth->fetchrow_hashref) {
 		# Anonymize comment that is to be metamoderated.
-		@{$comment}{qw(nickname uid points)} = ('-', -1, 0);
+		@{$comment}{qw(nickname uid points sig)} = ('-', -1, 0, '');
 		push @$comments, $comment;
 	}
 	$sth->finish;
@@ -1761,7 +1761,7 @@ sub setCommentCleanup {
 		unless $user->{seclev} >= 100 && $constants->{authors_unlimited};
 
 	if ($val ne "+0" && $self->sqlDo($strsql)) {
-		$self->setModeratorLog($cid, $sid, $user->{uid}, $modreason, $val);
+		$self->setModeratorLog($cid, $sid, $user->{uid}, $val, $modreason);
 
 		# Adjust comment posters karma
 		if ($cuid != $constants->{anonymous_coward}) {

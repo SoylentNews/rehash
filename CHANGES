@@ -1,3 +1,42 @@
+slash-2.0.0, 2001.05.09
+-----------------------
+
+*	Fix to count in Search properly from Older Stories box
+
+*	Add substr() scalar op in slashDisplay
+
+*	Doc updates
+
+*	Don't show sig or moderation/link stuff in metamod.pl
+
+*	Show story body in light mode
+
+*	Put proper values in site.conf for port and for hostname
+	(when hostname and site name didn't match, or port was
+	different)
+
+*	Keep journals together by date properly for local timezone
+
+*	Add new DB method, getLastInsertId, to replace
+	MySQL-specific LAST_INSERT_ID() selects
+
+*	Remove more instances of DATE_FORMAT()
+
+*	Fix bug in saving to moderatorlog; see INSTALL for DB
+	fix
+
+*	Add in dump file for Search plugin
+
+*	Collapse illegal characters in search to spaces, instead
+	of just removing them
+
+*	Don't include department and description in RSS file if
+	not included
+
+*	Allow deleting of several fields in users.pl preferences
+	(before, blanking them out left them alone)
+
+
 slash-2.0.0-pre3, 2001.04.25
 ----------------------------
 

@@ -5,7 +5,7 @@ INSTALL - Slash Installation
 
 =head1 SYNOPSIS
 
-This document describes how to install Slash 1.1.x / 2.0.x
+This document describes how to install Slash 2.0
 (code-named "bender").  For instructions on installation
 of previous versions of Slash, see the INSTALL document
 included with those distributions.
@@ -15,7 +15,7 @@ BSD and other Unix OSes should work similarly. We've had reports of the
 1.0.x version of Slash running on Windows, but have done no testing and
 have no further information.
 
-PostgreSQL support in Slash 1.1.x is currently alpha-quality,
+PostgreSQL support in Slash 2.0 is currently alpha-quality,
 while MySQL support is beta-quality.
 
 Slash can always be downloaded from SourceForge, and from the
@@ -117,10 +117,37 @@ template with the new template.
 
 =item Data
 
-Currently, there are no differences in the schema or the database data
-between versions of Slash 2.0.
+Currently, there are no differences in the schema between versions of Slash 2.0.
+There are a few data differences.
+
+=over 4
+
+=item Slash 2.0.0-pre1 -E<gt> Slash-2.0.0 release
+
+
+=over 4
+
+=item Journal Data
+
+In the vars table, "journal_default_display" is set to "0".  It should default
+to "10".
+
+Also, "journal_user_count" is no longer in use and may be deleted.
+
+See F<plugins/Journal/dump>.
+
+=item Search Data
+
+"search_default_display" should be defined in the vars table, with a default
+of "30".
+
+See F<plugins/Search/dump>.
 
 =back
+
+=back
+
+=item Templates
 
 Listed below are additions/deletions of templates from version to version.
 Feel free to delete (or not) ones that are no longer used, but please do
@@ -130,7 +157,7 @@ through the version you're upgrading to.
 
 =over 4
 
-=item Slash 2.0.0-pre2
+=item Slash 2.0.0-pre2 -E<gt> Slash 2.0.0
 
 =over 4
 
@@ -160,7 +187,7 @@ through the version you're upgrading to.
 
 =back
 
-=head2 Slash 1.0 -> Slash 2.0
+=head2 Slash 1.0 -E<gt> Slash 2.0
 
 Please read the complete documentation of F<utils/slash1toslash2>.
 It is a program that will convert your database from Slash 1.0
@@ -384,7 +411,8 @@ or F<$SLASH_PREFIX/sites/sitename/sitename.conf> more than once,
 or if this file shares contents with directives in httpd.conf,
 that your Slash site WILL break. The directives in
 F<$SLASH_PREFIX/slash.conf> should be run only ONCE in any any
-site context.
+site context.  Read through F<$SLASH_PREFIX/slash.conf> to make
+sure it all looks proper.
 
 =item 6.
 
@@ -401,6 +429,8 @@ Answer the questions.  When done, another configuration
 file will be created at F<$SLASH_PREFIX/$SITENAME/$SITENAME.conf>.
 You can put its contents unto your httpd.conf, or you can just C<Include>
 it in your httpd.conf.
+
+Read the message printed at the end of running install_slashsite.
 
 =item 7.
 

@@ -98,6 +98,10 @@ with a much better answer. If the theme or plugin is one not included with
 the Slash distribution, you should contact the theme's or plugin's creator
 directly.
 
+=head1 SEE ALSO
+
+Slash::Display(3).
+
 =head1 VERSION
 
 $Id$

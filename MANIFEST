@@ -184,6 +184,7 @@ plugins/Search/MANIFEST
 plugins/Search/Makefile.PL
 plugins/Search/PLUGIN
 plugins/Search/Search.pm
+plugins/Search/dump
 plugins/Search/search.pl
 plugins/Search/templates/commentsearch;search;default
 plugins/Search/templates/pagination;search;default
@@ -210,7 +211,6 @@ themes/slashcode/htdocs/getting_started.shtml
 themes/slashcode/htdocs/hof.pl
 themes/slashcode/htdocs/images/660000.gif
 themes/slashcode/htdocs/images/admin_bracket.gif
-themes/slashcode/htdocs/images/andover.gif
 themes/slashcode/htdocs/images/bsb.gif
 themes/slashcode/htdocs/images/bsbr.gif
 themes/slashcode/htdocs/images/bsr.gif

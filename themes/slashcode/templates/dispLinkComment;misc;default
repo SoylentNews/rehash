@@ -12,7 +12,7 @@ en_US
 __name__
 dispLinkComment
 __template__
-[% IF user.mode != 'archive' %]
+[% IF user.mode != 'archive' && nickname != "-" %]
 	[% pid = realpid || pid %]
 	<TR><TD><FONT SIZE="2">
 
