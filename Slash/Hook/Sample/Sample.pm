@@ -18,14 +18,14 @@ use vars qw($VERSION);
 
 sub sample {
 	my($luggage, $options) = @_;
-	#my ($constants, $slashdb, $user, $form) = @$luggage;
+	my ($constants, $slashdb, $user, $form) = @$luggage;
 	errorLog("Sample Hook called");
 	return 1;
 }
 
 sub ingar {
 	my($luggage, $options) = @_;
-	#my ($constants, $slashdb, $user, $form) = @$luggage;
+	my ($constants, $slashdb, $user, $form) = @$luggage;
 	errorLog("My name is Ingar, I am from Ikea, you killed my brother, prepare to die");
 	return 1;
 }
