@@ -385,7 +385,7 @@ sub userdir_handler {
 	# returning it, we have to re-encode it with fixparam().  that
 	# will change if somehow Apache/mod_perl no longer decodes before
 	# returning the data. -- pudge
-	if ($saveuri =~ m[^/~(.+)]) {
+	if ($saveuri =~ m[^/(?:%7[eE]|~)(.+)]) {
 		# this won't work if the nick has a "/" in it ...
 		my($nick, $op, $extra) = split /\//, $1, 4;
 		for ($nick, $op, $extra) {
