@@ -1,0 +1,42 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+search
+__lang__
+en_US
+__name__
+commentsearch
+__template__
+[% USE Slash %]
+<P>This search covers the name, email, subject and contents of comments that are posted.<P>
+[% IF comments %]
+	[% x = start ? start : 1 %]
+	[% FOREACH comment=comments %]
+		[% user_email = Slash.db.getUser(comment.8, ['fakeemail', 'nickname']) %]
+		[% IF comment.10 %]
+			<BR><B>[% comment.10 %]</B>
+		[% ELSE %]
+			<BR><B>[% x %]</B>
+		[% END %] 
+
+			<A HREF="[% comment.1 %]&amp;cid=[% comment.9 %]">[% comment.5 %]</A>
+
+			by <A HREF="mailto:[% user_email.fakeemail | fixparam %]">[% user_email.nickname %]</A> on [% Slash.timeCalc(comment.7) %]<BR>
+			<FONT SIZE="2">attached to 
+			<A HREF="[% comment.1 %]">[% comment.3 %]</A> 
+			posted on [% Slash.timeCalc(comment.6) %]</FONT><BR>
+		[% x = x + 1 %]
+	[% END %]
+	[% PROCESS pagination %]
+[% ELSE %]
+	No Matches Found for your query
+[% END %]
+<P>
+
+
+__seclev__
+100

@@ -1,0 +1,15 @@
+Changes
+MANIFEST
+Makefile.PL
+PLUGIN
+Search.pm
+dump
+mysql_prep
+search.pl
+templates/commentsearch;search;default
+templates/nosearch;search;default
+templates/pagination;search;default
+templates/searchform;search;default
+templates/storysearch;search;default
+templates/usersearch;search;default
+test.pl

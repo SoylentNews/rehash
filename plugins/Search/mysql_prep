@@ -1,0 +1,6 @@
+ALTER TABLE stories add fulltext (title);
+ALTER TABLE story_text add fulltext (introtext,bodytext);
+ALTER TABLE comments add fulltext (subject);
+ALTER TABLE comment_text add fulltext (comment);
+# ALTER TABLE blocks add fulltext (description,title,block);
+ALTER TABLE users add fulltext (nickname);

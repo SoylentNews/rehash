@@ -1,0 +1,2 @@
+INSERT INTO vars (name, value, description) VALUES ('search_db_user', '', 'Enter a valid DBIx::Password user if you want search to run on a different DB then the default');
+INSERT INTO vars (name, value, description) VALUES ('search_default_display', '30', 'Defualt number of entries to display on Search page');

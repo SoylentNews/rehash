@@ -1,0 +1,25 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+search
+__lang__
+en_US
+__name__
+nosearch
+__template__
+<blockquote><p>Sorry, search is down at the moment.
+Until it's back up, you may wish to search
+[% constants.sitename %] through Google:<br>
+<FORM METHOD="GET" ACTION="http://www.google.com/search">
+<INPUT TYPE="NAME" NAME="query" VALUE="[% form.query | strip_attribute %]" WIDTH="20" SIZE="20" LENGTH="20">
+<INPUT TYPE="HIDDEN" NAME="as_sitesearch" VALUE="[% constants.basedomain %]">
+<INPUT TYPE="SUBMIT" VALUE="Google [% constants.sitename %]">
+</FORM>
+</blockquote><p>
+
+__seclev__
+100
