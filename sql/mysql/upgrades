@@ -505,8 +505,6 @@ INSERT INTO message_codes (code, type, seclev, modes) VALUES (11, 'Email Story',
 INSERT INTO vars (name, value, description) VALUES ('comments_perday_bykarma','-1=2|25=25|99999=50','Number of comments allowed to be posted per day, by karma score.');
 INSERT INTO vars (name, value, description) VALUES ('comments_perday_anon','10','Number of comments allowed to be posted per day, by any one IPID, anonymously.');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of R_2_3_0_32, Start of T_2_3_0_33
 
 INSERT INTO vars (name, value, description) VALUES ('users_bio_length','1024','Length allowed for user bio');
@@ -554,11 +552,16 @@ ALTER TABLE stats_daily ADD FOREIGN KEY (section) REFERENCES sections(section);
 
 # For plugins/Stats (ignore if you're not using that plugin):
 INSERT INTO vars (name, value, description) VALUES ('op_exclude_from_countdaily','rss','Ops to omit from daily counts in adminmail');
+INSERT INTO vars (name, value, description) VALUES ('mod_stats_min_repeat','2','Minimum number repeat mods to appear in mod stats');
+
+INSERT INTO vars (name, value, description) VALUES ('cookiesecure','1','Set the secure flag in cookies if SSL is on?');
+
+# Need a CPAN install of Date::Calc and XML::Simple!
 
 # End of T_2_3_0_36
 
 # USEPERL LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
 
-INSERT INTO vars (name, value, description) VALUES ('mod_stats_min_repeat','2','Minimum number repeat mods to appear in mod stats');
 
