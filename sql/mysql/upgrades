@@ -2102,7 +2102,7 @@ DROP TABLE IF EXISTS slashd_errnotes;
 CREATE TABLE slashd_errnotes (
         ts DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
         taskname VARCHAR(50) NOT NULL DEFAULT 'SLASHD',
-	line MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+        line MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
         errnote VARCHAR(255) NOT NULL DEFAULT '',
         moreinfo TEXT DEFAULT NULL,
         INDEX (ts),
@@ -2116,10 +2116,6 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('hc_pool_secs_before_
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_margin', '6', 'For question 1 (images), margin around the image in pixels');
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_maxrad', '0.2', 'For question 1 (images), maximum number of radians to rotate (positive or negative, so the range is twice this)');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# End of T_2_3_0_135, Start of T_2_3_0_136 - 2004/02/10
-
 # SLASHDOT LAST UPDATED HERE
 
 # SLASHCLUSTER LAST UPDATED HERE
@@ -2131,4 +2127,8 @@ UPDATE message_codes SET acl = 'stats' WHERE code = 10;
 INSERT INTO message_codes (code, type, seclev, modes, acl) VALUES (14, 'Daily Moderation Stats', 100, 0, 'stats');
 
 INSERT INTO vars (name, value, description) VALUES ('tids_in_urls', '0', 'Want tid=1&tid=2 in story and discussion-related URLs?');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_3_0_136, Start of T_2_3_0_137 - 2004/02/17
 
