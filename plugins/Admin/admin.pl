@@ -25,7 +25,6 @@ sub main {
 
 	my($tbtitle);
 
-
 	my $ops = {
 		slashd		=> {
 			function	=> \&displaySlashd,
@@ -1162,7 +1161,7 @@ sub editStory {
 				$storyref->{$field});
 		}
 
-		$topic = $slashdb->getTopic($storyref->{tid});
+		#$topic = $slashdb->getTopic($storyref->{tid});
 		$form->{uid} ||= $user->{uid};
 		#$author = $slashdb->getAuthor($form->{uid});
 		$subid = $form->{subid};
