@@ -489,6 +489,7 @@ sub cmd_dbs {
 		sleep 1;
 		$conn->privmsg($channel, $r);
 	}
+	slashdLog("dbs: cmd from $info->{event}{nick}");
 }
 
 { # closure
