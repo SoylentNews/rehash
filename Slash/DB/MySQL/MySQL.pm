@@ -3195,7 +3195,7 @@ sub getUIDStruct {
 
 	for (@$uidlist) {
 		my $uid;
-		$uid->{nickname} = $slashdb->getUser($_->[0], 'nickname');
+		$uid->{nickname} = $self->getUser($_->[0], 'nickname');
 		$uid->{comments} = 1;
 		$uidstruct->{$_->[0]} = $uid;
 	}
@@ -3207,7 +3207,7 @@ sub getUIDStruct {
 			$uidstruct->{$_->[0]}{submissions} = 1;
 		} else {
 			my $uid;
-			$uid->{nickname} = $slashdb->getUser($_->[0], 'nickname');
+			$uid->{nickname} = $self->getUser($_->[0], 'nickname');
 			$uid->{submissions} = 1;
 			$uidstruct->{$_->[0]} = $uid;
 		}
@@ -3220,9 +3220,10 @@ sub getUIDStruct {
 			$uidstruct->{$_->[0]}{moderatorlog} = 1;
 		} else {
 			my $uid;
-			$uid->{nickname} = $slashdb->getUser($_->[0], 'nickname');
+			$uid->{nickname} = $self->getUser($_->[0], 'nickname');
 			$uid->{moderatorlog} = 1;
 			$uidstruct->{$_->[0]} = $uid;
+		}
 	}
 
 	return $uidstruct;
