@@ -15,6 +15,12 @@ $task{$me}{code} = sub {
 	my($friends_cache, @deletions);
 
 	my $zoo = getObject('Slash::Zoo');
+	my @today = localtime();
+	my $today = sprintf "%4d-%02d-%02d", 
+		$today[5] + 1900, $today[4] + 1, $today[3];
+
+	my $stats = getObject('Slash::Stats::Writer', '', { day => $today  });
+	$stats->createStatDaily("zoo_counts", "0");	
 
 	slashdLog('Zoo fof/eof Begin');
 	for (1..$constants->{zoo_process_limit}) {
@@ -36,7 +42,9 @@ $task{$me}{code} = sub {
 					}
 				}
 			}
-			$zoo->deleteZooJobs($job->{id})
+			if($zoo->deleteZooJobs($job->{id})) {
+				$stats->updateStatDaily("zoo_counts", "value+1");	
+			}
 		}
 	}
 	slashdLog('Zoo fof/eof End');

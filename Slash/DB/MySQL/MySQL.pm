@@ -1642,6 +1642,9 @@ sub existsEmail {
 
 #################################################################
 # Replication issue. This needs to be a two-phase commit.
+# Ok, this is now a transaction. This means that if we lose the DB
+# while this is going on, we won't end up with a half created user.
+# -Brian
 sub createUser {
 	my($self, $matchname, $email, $newuser) = @_;
 	return unless $matchname && $email && $newuser;
@@ -1650,6 +1653,8 @@ sub createUser {
 		"uid", "users",
 		"matchname=" . $self->sqlQuote($matchname)
 	))[0] || $self->existsEmail($email);
+
+	$self->{_dbh}->{AutoCommit} = 0;
 
 	$self->sqlInsert("users", {
 		uid		=> '',
@@ -1660,9 +1665,11 @@ sub createUser {
 		passwd		=> encryptPassword(changePassword())
 	});
 
-# This is most likely a transaction problem waiting to
-# bite us at some point. -Brian
 	my $uid = $self->getLastInsertId('users', 'uid');
+	unless ($uid) {
+		$self->{_dbh}->rollback;
+		$self->{_dbh}->{AutoCommit} = 1;
+	}
 	return unless $uid;
 	$self->sqlInsert("users_info", {
 		uid 			=> $uid,
@@ -1673,7 +1680,6 @@ sub createUser {
 	$self->sqlInsert("users_comments", { uid => $uid });
 	$self->sqlInsert("users_index", { uid => $uid });
 	$self->sqlInsert("users_hits", { uid => $uid });
-	$self->sqlInsert("users_count", { uid => $uid });
 
 	# All param fields should be set here, as some code may not behave
 	# properly if the values don't exist.
@@ -1699,6 +1705,11 @@ sub createUser {
 		'user_expiry_days'	=> $constants->{min_expiry_days},
 #		'emaildisplay'		=> 2,
 	});
+
+	$self->{_dbh}->commit;
+	$self->{_dbh}->{AutoCommit} = 1;
+
+	$self->sqlInsert("users_count", { uid => $uid });
 
 	return $uid;
 }

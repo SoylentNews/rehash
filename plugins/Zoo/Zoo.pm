@@ -449,6 +449,7 @@ sub deleteZooJobs {
 	} else {
 		$self->{_dbh}->rollback; 
 	}
+	$self->{_dbh}->{AutoCommit} = 1; 
 }
 
 sub getZooJobs {

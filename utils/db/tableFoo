@@ -1,0 +1,78 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2002 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use strict;
+use File::Basename;
+use Getopt::Std;
+use DBIx::Password;
+
+use vars qw( $slashdb $constants  );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+
+my %opts;
+srand(time() ^ ($$+($$<<15)));
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hu:vt:o', \%opts);
+usage() if $opts{'h'};
+version() if $opts{'v'};
+$opts{'u'} ||= 'slash';
+usage() if @ARGV;
+
+main();
+
+sub main {
+	my $db = DBIx::Password->connect("$opts{'u'}") || die "Sorry, invalid DBIx::Password usernaname";
+	my $tables = $db->selectcol_arrayref("SHOW TABLES");
+	for (@$tables) {
+		print "Processing $_\n";
+		if ($opts{'t'}) {
+			$db->do("ALTER TABLE $_ type=$opts{'t'}");
+		}
+		if ($opts{'o'}) {
+			$db->do("OPTIMIZE TABLE $_");
+		}
+	}
+}
+
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] [#users]
+
+This converts all of your tables to the Innodb type by default. If you pass in a table
+type this will be used instead.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-t	Convert all tables to a new type
+	-o	Optimize (fix) tables
+
+EOT
+	exit;
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2002 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__
