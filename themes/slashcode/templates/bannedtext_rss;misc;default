@@ -20,21 +20,21 @@ __template__
 	CASE 'abuse';
 	items.push({
 		title       => "Why Do I Not Get the Latest Stories in RSS?",
-		link        => "$constants.absolutedir/faq/",
-		description => "Your RSS reader is abusing the $constants.sitename server.  You are requesting pages more often than our terms of service allow.  Please see the FAQ for more information, or email $constants.adminmail_ban."
+		link        => constants.absolutedir _ "/faq/",
+		description => "Your RSS reader is abusing the " _ constants.sitename _ " server.  You are requesting pages more often than our terms of service allow.  Please see the FAQ for more information, or email " _ constants.adminmail_ban _ "."
 	});
 
 	CASE 'ban';
 	items.push({
 		title       => "Why is My IP Banned?",
-		link        => "$constants.absolutedir/faq/accounts.shtml#ac900",
+		link        => constants.absolutedir _ "/faq/accounts.shtml#ac900",
 		description => "Perhaps your IP was used to abuse the web site or perform a DoS attack, or you share a proxy server with someone who has.  Please see the FAQ for more information."
 	});
 
 	items.push({
 		title       => "How do I unban my IP?",
 		link        => "$constants.absolutedir/faq/accounts.shtml#ac1000",
-		description => "Email $constants.adminmail_ban.  Make sure to include the IP in question, and any other pertinent information.  If you are connecting through a proxy server, you might need to have your proxy server's admin contact us instead of you.  Please see the FAQ for more information."
+		description => "Email " _ constants.adminmail_ban _ ".  Make sure to include the IP in question, and any other pertinent information.  If you are connecting through a proxy server, you might need to have your proxy server's admin contact us instead of you.  Please see the FAQ for more information."
 	});
 
 END %]
