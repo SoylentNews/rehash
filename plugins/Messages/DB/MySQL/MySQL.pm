@@ -94,8 +94,12 @@ sub setPrefs {
 	my $prime = $self->{_prefs_prime1};
 	my $where = $prime . '=' . $self->sqlQuote($uid);
 
+	#First we delete, then we insert, this allows us to remove -1 type entries
+	# Basically it keeps defaults out of the DB, and makes it smaller :)
+	$self->sqlDelete("$table", "uid = $uid");
 	for my $code (keys %$prefs) {
-		$self->sqlReplace($table, {
+		next if $prefs->{$code} == -1;
+		$self->sqlInsert($table, {
 			uid	=> $uid,
 			code	=> $code,
 			mode	=> $prefs->{$code},
