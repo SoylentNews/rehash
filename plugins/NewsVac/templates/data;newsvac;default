@@ -197,7 +197,7 @@ URL ID List: [% url_ids.join(', ') %]
 
 [% CASE "request_oldinfodisplay" -%]
 -- Old Information:
-[% FOR k=old_info.sort -%]
+[% FOR k=old_info.keys.sort -%]
 	[% k %]: [% IF old_info.$k %][% old_info.$k %][% ELSE %]<UNDEF>[% END
 	-%]
 

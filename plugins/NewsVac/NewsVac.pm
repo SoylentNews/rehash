@@ -95,7 +95,6 @@ my %nvdescriptions = (
 	},
 );
 
-
 ############################################################
 
 sub new {
@@ -113,6 +112,7 @@ sub new {
 		debug           =>      2,
 		using_lock	=>	0,
 		callback	=>	{},
+		hp_parsedtext	=>	[ ],
 	};
  
  	# Allow a var to override default User Agent class.
@@ -127,7 +127,7 @@ sub new {
 	# $self->{hp}.
 	$self->{hp_options} = {
 		api_version	=> 3,
-		text_h		=> [ [ ], 'dtext' ],
+		text_h		=> [ $self->{hp_parsedtext}, 'dtext' ],
 	};
 
 	# Now perform class initializations.
@@ -151,10 +151,6 @@ sub Reset {
 
 	# Use any resetting procedures defined by the super-class.
 	$self->init();
-	# XXX --- Left out of the SUPER: backport?
-	# Nuke the cache elements, too.
-	delete $self->{$_} for grep { /_cache_?/ } keys %{$self};
-	# XXX ---
 
 	# Delete stale data members.
 	delete $self->{sd};
@@ -176,7 +172,6 @@ sub Reset {
 
 	# Parser Class initialization.
 	$self->{hp} = $hp_class->new(%{$self->{hp_options}});
-	$self->{hp_parsedtext} = [ ];
 }
 
 ############################################################
@@ -229,17 +224,65 @@ sub lockNewsVac {
 	};
 	# This is not an equality test. This is an assignment-null test.
 	if ($_ = $@) {
-		# Die with a detailed locking message.
+		# If we've trapped an error, then either another process is
+		# using NewsVac....
 		die getData('newsvac_locked', {
-			error_message => $@,
-		}, 'newsvac') if /^Please stop existing/;
-		# Otherwise we've caught something terminal
+				error_message => $@,
+			}, 'newsvac')
+		if /^Please stop existing/;
+
+		# or we've caught something terminal, either way stop
+		# execution.
 		die getData('unexpected_init_err', {
-			error_message => $@,
+				error_message => $@,
 		}, 'newsvac');
 	}
 
+	# If we're here, we've go the resource all to ourselves, woo-hoo!
 	return($self->{using_lock} = 1);
+}
+
+############################################################
+
+=head2 _Die(message_list)
+
+Removes lock and forcibly terminates NewsVac with a message sent to the logs.
+Used in place of C<die()> to terminate on an error condition.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item @message_list
+
+List of messages to send to the logs. These are written out to the logs in 
+the given order.
+
+=back
+
+=item Return value
+
+None.
+
+=item Side effects
+
+Lock file is removed and execution forcibly terminated.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
+sub _Die {
+	my($self, @message_list) = @_;
+
+	$self->_doLockRelease() if $self->{using_lock};
+	die join "\n", @message_list;
 }
 
 ############################################################
@@ -896,7 +939,7 @@ sub add_urls_return_ids {
 		my $rc = $self->sqlInsert('url_info', {
 			url		=> $_,
 			url_digest	=> $digest{$_},
-		}, 'IGNORE'); 
+		}, { ignore => 1 }); 
 	}
 
    	$self->urls_to_ids(@urls);
@@ -950,7 +993,7 @@ sub add_rels_mark_valid {
 			parse_code	=> $_->[2],
 			type		=> $_->[3],
 			first_verified	=> $_->[4],
-		}, 'IGNORE');
+		}, { ignore => 1 });
 	}
     
 	my @parts;
@@ -1983,6 +2026,7 @@ sub request {
 		# filename for large responses might be nice.
 		my $response = '';
 		eval {
+			# This die() is legal.
 			local $SIG{ALRM} = sub { die 'timeout' };
 			alarm $timeout + 1;
 			$response = $self->{ua}->request($request);
@@ -2089,13 +2133,13 @@ sub request {
 		# on the ID and then UPDATE it later.
 		$self->sqlInsert('url_content', { 
 			url_id => $url_id 
-		}, 'IGNORE');
+		}, { ignore => 1 });
 		$self->sqlInsert('url_message_body', {
 			url_id => $url_id 
-		}, 'IGNORE');
+		}, { ignore => 1});
         	$self->sqlInsert('url_plaintext', {
 			url_id => $url_id
-		}, 'IGNORE');
+		}, { ignore => 1});
 
 		# For url_content table, copy all from the update reference, 
 		# but the 'message_body' and 'plaintext' fields.
@@ -2896,7 +2940,7 @@ sub parse_miner {
 		nugget_keys => \@nugget_keys,
 	})) if $self->{debug} > 1;
 	if ($tweak_code) {
-		die "tweak_code contains attempted system call!!!"
+		$self->_Die("tweak_code contains attempted system call!!!")
 			if $tweak_code =~ /`|(system|exec|open) /;
 		for (@nugget_keys) {
 			my $cancel = 0;
@@ -3054,9 +3098,14 @@ sub parse_plaintext {
 
 	if ($info_ref->{content_type} =~ /^text\/html\b/) {
 		eval {
+			# This die() is legal.
 			local $SIG{ALRM} = sub { die "timeout" };
 			alarm $timeout;
 
+			# Uses our HTML Parser to strip out plaintext from the
+			# HTML.
+			#
+			# This is a cute trick, see below.
 			$#{$self->{hp_parsedtext}} = -1;
 			$self->{hp}->parse($content_ref->{message_body});
 			$content_ref->{plaintext} = join('',
@@ -3064,6 +3113,10 @@ sub parse_plaintext {
 				@{$self->{hp_parsedtext}}
 			);
 			$changed = 1 if $content_ref->{plaintext};
+			# By assigning a -1 to the index of class arrayref 
+			# 'hp_parsedtext', we effectively clear the array WITHOUT
+			# reallocating it, which is important since our HTML Parser
+			# class needs this.
 			$#{$self->{hp_parsedtext}} = -1;
 	
 #			my $lynx_cmd = qq
@@ -3695,7 +3748,6 @@ EOT
 
 	my $sth = $self->sqlSelectMany($fields, $tables, $where, $other);
 
-	my($sec, $min, $hour, $mday, $mon, $year) = localtime(int($start_time)); 
         my($i, %submitworthy, @sub) = (0);
         while (my($miner_name, $nugget_url_id, $nugget_url, $url, $title, 
 		   $time, $plaintext, $matches) = $sth->fetchrow())
@@ -3707,8 +3759,6 @@ EOT
 
                 my $nugget_info = $self->nugget_url_to_info($nugget_url);
                 $plaintext =~ s{\s+}{ }g;
-                $sub[$i]{subid} = "$hour$min$sec$i.$mon$mday$year";
-                $sub[$i]{'time'} = $time;
                 $sub[$i]{subj} = $nugget_info->{title} || $title;
                 $sub[$i]{name} = $nugget_info->{source} || '';
                 $sub[$i]{miner} = $miner_name || '';
@@ -3834,19 +3884,18 @@ EOT
                 }
 
 		# Create submission.
-		my $subid =  $_->{subid};
-		$self->sqlInsert("submissions", { subid => $subid });
-		$self->setSubmission($subid, {
+		my $subid = $self->createSubmission({
                         email 		=> $_->{miner},
 			uid 		=> $constants->{anonymous_coward_uid},
 			name 		=> $_->{name},
 			story 		=> $_->{story},
-			time 		=> $_->{'time'},
 			subj 		=> $_->{subj},
 			tid 		=> $constants->{newsvac_topic},
 			section 	=> $constants->{newsvac_section},
 			weight 		=> $_->{weight},
-			keywords 	=> $_->{keywords}
+		});
+		$self->setSubmission($subid, {
+			keywords 	=> $_->{keywords},
 		});
 			
                 $submitworthy{$_->{nugget_url_id}} = 1;            
@@ -3858,7 +3907,7 @@ EOT
 		$self->sqlInsert('nugget_sub', {
 			url_id 		=> $_,
                         submitworthy 	=> $submitworthy{$_}
-		}, 'IGNORE');
+		}, { ignore => 1 });
                 $submitworthy{$_} ? ++$worthy : ++$unworthy;
         }
         $sth->finish(); # not really necessary
@@ -5692,6 +5741,8 @@ sub deleteKeyword {
 
 =head2 sqlInsert($table, $data, [, $extra])
 
+DEPRECATED! TO BE REMOVED IN NEXT COMMIT ASSUMING ALL STILL WORKS!
+
 Overrides Slash::DB::Utility::sqlInsert() to allow for the 
 	INSERT INTO x IGNORE ...
 Format, specific to MySQL. This should be back-ported to 
@@ -5734,34 +5785,34 @@ Inserts rows into the table specified.
 
 =cut
 
-sub sqlInsert {
-	my($self, $table, $data, $extra) = @_;
-	my($names, $values);
-
-	my %extra;
-	$extra{lc $_} = 1 for split /,\s*/, $extra;
+#sub sqlInsert {
+#	my($self, $table, $data, $extra) = @_;
+#	my($names, $values);
+#
+#	my %extra;
+#	$extra{lc $_} = 1 for split /,\s*/, $extra;
 	# We can now reuse $extra.
-	$extra = '';
-	$extra .= ' /*! DELAYED */' if $extra{delayed};
-	$extra .= ' IGNORE' if $extra{ignore};
-
-	for (keys %$data) {
-		if (/^-/) {
-			$values .= "\n  $data->{$_},";
-			s/^-//;
-		} else {
-			$values .= "\n  " . $self->sqlQuote($data->{$_}) . ',';
-		}
-		$names .= "$_,";
-	}
-
-	chop($names);
-	chop($values);
-
-	my $sql = "INSERT$extra INTO $table ($names) VALUES($values)\n";
-	$self->sqlConnect();
-	return $self->sqlDo($sql);
-}
+#	$extra = '';
+#	$extra .= ' /*! DELAYED */' if $extra{delayed};
+#	$extra .= ' IGNORE' if $extra{ignore};
+#
+#	for (keys %$data) {
+#		if (/^-/) {
+#			$values .= "\n  $data->{$_},";
+#			s/^-//;
+#		} else {
+#			$values .= "\n  " . $self->sqlQuote($data->{$_}) . ',';
+#		}
+#		$names .= "$_,";
+#	}
+#
+#	chop($names);
+#	chop($values);
+#
+#	my $sql = "INSERT$extra INTO $table ($names) VALUES($values)\n";
+#	$self->sqlConnect();
+#	return $self->sqlDo($sql);
+#}
 
 ##############################################################
 
@@ -5804,7 +5855,7 @@ sub errLog {
 	# We get a little obtuse to avoide the allergic reactions from use
 	# of shift().
 	if ($self->{use_locking}) {
-		_doLog('newsvac', [ @_[1..$#_] ]);
+		_doLog([ @_[1..$#_] ]);
 		return;
 	}
 
@@ -5827,7 +5878,8 @@ private.
 
 =head2 _doLogInit( )
 
-Creates a log file in the data directory, using the given parameter.
+Creates a NewsVac log file (newsvac.log) in the Slash data directory for 
+the running site.
 
 =over 4
 
@@ -5841,9 +5893,11 @@ None
 
 =item Side effects
 
-None.
+Creates $DATADIR/newsvac.log on the local filesystem.
 
 =item Dependencies
+
+None.
 
 =back
 
@@ -5855,10 +5909,45 @@ sub _doLogInit {
 	my $dir     = getCurrentStatic('logdir');
 	my $file    = catfile($dir, "$fname.log");
 
+	# This die is also acceptable because _doLogInit() is called BEFORE
+	# any lock file is written to disk.
 	mkpath $dir, 0, 0775;
 	open(STDERR, ">> $file\0") or die "Can't append STDERR to $file: $!";
-	_doLog($fname, ["Placing lock $fname"]);
+	_doLog(["Placing lock $fname"]);
 }
+
+=head2 _doLock( )
+
+Creates a NewsVac LOCK file in the Slash data directory for the running site.
+If another lock file is present, then it is expected that another process
+is running this same code. This represents a fatal error and this code 
+will terminate in favor of the other one. In the case that this code
+failed to clean up after itself and there is no other process running, you 
+should be safe to delete the lock file and then restart a new instance.
+
+=over 4
+
+=item Parameters
+
+None.
+
+=item Return value
+
+None
+
+=item Side effects
+
+Creates $DATADIR/newsvac.lock on the local filesystem. Creates SIGINT and
+SIGTERM handlers which will delete the lock file if situations allow such 
+signals to be caught.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
 
 sub _doLock {
 	my($fname) = 'newsvac';
@@ -5867,9 +5956,13 @@ sub _doLock {
 	my $dir     = getCurrentStatic('logdir');
 	my $file    = catfile($dir, "$fname.lock");
 
-	# Question, why do we do this? Can't we kill use this 
-	# information instead of having to remove the pid file
-	# every time slashd crashes? -- Cliff
+	# By the end of this routine, the lock file has been created and 
+	# no further die()s can be called within the call flow of this 
+	# object. Please use _Die() instead, as that properly removes the 
+	# lock file.
+	
+	# Test for lock file existence. If it does, die(), but the caller
+	# should be trapping this.
 	if (-r $file) {
 		die "Cannot read LOCK file, ${file}:\n$!\n"
 			if !open(LOCK, $file);
@@ -5882,17 +5975,43 @@ sub _doLock {
 		die "Please stop existing $fname (lock '$lock'), first";
 	}
 
-	open $fh, "> $file\0" or die "Can't open $file: $!";
+	open $fh, "> $file\0" or die "Can't create LOCK $file: $!";
 	printf $fh "$$ %s", scalar localtime;
 	close $fh;
 
-	# do this for all things, not just ones needing a .pid
+	# Make best attempt to catch fatal signals and Do The Right Thing.
 	$SIG{TERM} = $SIG{INT} = sub {
-		_doLog($fname, ["Removing lock $fname"]);
+		_doLog(["Removing lock $fname"]);
 		unlink $file;
 		exit 0;
 	};
 }
+
+=head2 _doLockRelease( )
+
+Removes existing NewsVac LOCK if one exists.
+
+=over 4
+
+=item Parameters
+
+None.
+
+=item Return value
+
+None
+
+=item Side effects
+
+Removes $DATADIR/newsvac.lock from the local filesystem if it exists.
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
 
 sub _doLockRelease {
 	my($fname) = 'newsvac';
@@ -5900,13 +6019,58 @@ sub _doLockRelease {
 	my $dir     = getCurrentStatic('logdir');
 	my $file    = catfile($dir, "$fname.lock");
 
-	_doLog($fname, ["Releasing lock $fname"]);
+	_doLog(["Releasing lock $fname"]);
 	# fails silently even if $file does not exist
 	unlink $file;
 }
 
+=head2 _doLog(msg, stdout, sname)
+
+Writes data to the NewsVac log file. This routine is a modified form of the
+logging routines in Slash::Utility::System. Please do not use this routine
+directly, use C<errLog()> instead.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item $fname
+
+=item @$msg
+
+An array reference containing the list of messages to be appended to the log
+file.
+
+=item $stdout
+
+=item $sname
+
+=back
+
+The use of the $stdout and $sname parameters is deprecated and this code
+and is left for possible future use.
+
+=item Return value
+
+None
+
+=item Side effects
+
+Appends an entry to $DATADIR/newsvac.log
+
+=item Dependencies
+
+None.
+
+=back
+
+=cut
+
 sub _doLog {
-	my($fname, $msg, $stdout, $sname) = @_;
+	my($msg, $stdout, $sname) = @_;
+	my $fname = 'newsvac';
 	chomp(my @msg = @$msg);
 
 	$sname    ||= '';
@@ -5916,7 +6080,8 @@ sub _doLog {
 	my $file    = catfile($dir, "$fname.log");
 	my $log_msg = scalar(localtime) . " $sname@msg\n";
 
-	open $fh, ">> $file\0" or die "Can't append to $file: $!\nmsg: @msg\n";
+	open $fh, ">> $file\0" or
+		warn "Can't append to $file: $!\nmsg: @msg\n";
 	print $fh $log_msg;
 	print     $log_msg if $stdout;
 	close $fh;

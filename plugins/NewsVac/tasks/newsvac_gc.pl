@@ -18,6 +18,9 @@ $task{$me}{timespec} = '5 4 * * Sat,Sun';	# @ 4:05am on the weekends.
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
+	my $oldPage = $user->{currentPage};
+	$user->{currentPage} = 'newsvac';
+
 	# Get our plugin.
 	my $newsvac = getObject('Slash::NewsVac');
 	slashdLogDie("NewsVac Plugin failed to load, correctly!") 
@@ -39,6 +42,8 @@ $task{$me}{code} = sub {
 		$slashdb->sqlCount('rel'),
 		$slashdb->sqlCount('url_message_body')
 	);
+
+	$user->{currentPage} = $oldPage;
 
 	return sprintf <<EOT, map { $_ = $init[$_] - $fin[$_]; } (0 .. $#fin);
 Garbage collection completed. Cleaned %d urls, %d rels and %d mbs.
