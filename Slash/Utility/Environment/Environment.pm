@@ -1297,6 +1297,8 @@ sub filter_params {
 	my %form;
 
 	if (ref($apr) eq "HASH") {
+		# for now, we cannot have more than simple key->value
+		# (see createEnvironment())
 		%form = %$apr;
 	} else {
 		for ($apr->param) {
