@@ -109,9 +109,11 @@ $task{$me}{code} = sub {
 		my $section = $slashdb->getSection($key);
 		createCurrentHostname($section->{hostname});
 		next unless $key;
-		my($base) = split(/\./, $section->{index_handler});
+		my $index_handler = $section->{index_handler}
+			|| $constants->{index_handler};
+		my($base) = split(/\./, $index_handler);
 		prog2file(
-			"$constants->{basedir}/$section->{index_handler}", 
+			"$constants->{basedir}/$index_handler", 
 			"$vu ssi=yes section=$key",
 			"$constants->{basedir}/$key/$base.shtml",
 			verbosity()
