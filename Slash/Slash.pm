@@ -551,6 +551,7 @@ sub moderatorCommentLog {
 	$reasons = $slashdb->getReasons();
 
 	for my $mod (@$mods) {
+		vislenify($mod); # add $mod->{ipid_vis}
 		next unless $mod->{active};
 		$reasonHist[$mod->{reason}]++;
 		$reasonTotal++;
@@ -799,15 +800,11 @@ sub dispComment {
 
 	# ipid/subnetid need munging into one text string
 	if ($user->{seclev} >= 100 && $comment->{ipid} && $comment->{subnetid}) {
-		my $vislength = $constants->{id_md5_vislength};
-		my $short_ipid = $comment->{ipid};
-		$short_ipid = substr($short_ipid, 0, $vislength) if $vislength;
-		my $short_subnetid = $comment->{subnetid};
-		$short_subnetid = substr($short_subnetid, 0, $vislength) if $vislength;
+		vislenify($comment); # create $comment->{ipid_vis} and {subnetid_vis}
 		$comment->{ipid_display} = <<EOT;
 <BR><FONT FACE="$constants->{mainfontface}" SIZE=1>IPID:
-<A HREF="$constants->{rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{ipid}&amp;fieldname=ipid">$short_ipid</A>&nbsp;&nbsp;SubnetID: 
-<A HREF="$constants->{rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{subnetid}&amp;fieldname=subnetid">$short_subnetid</A></FONT>
+<A HREF="$constants->{rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{ipid}&amp;fieldname=ipid">$comment->{ipid_vis}</A>&nbsp;&nbsp;SubnetID: 
+<A HREF="$constants->{rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{subnetid}&amp;fieldname=subnetid">$comment->{subnetid_vis}</A></FONT>
 EOT
 	} else {
 		$comment->{ipid_display} = "";

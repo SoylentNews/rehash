@@ -184,7 +184,7 @@ sub previewForm {
                 if $topic->{image} =~ /^\w+\.\w+$/;
 
 	my $extracolumns = $slashdb->getSectionExtras($sub->{section}) || [ ];
-	my $ipid_vis = $constants->{id_md5_vislength} ? substr($sub->{ipid}, 0, $constants->{id_md5_vislength}) : $sub->{ipid};
+	vislenify($sub); # add $sub->{ipid_vis}
 
 	my $email_known = "";
 	$email_known = "mailto" if $sub->{email} eq $user->{fakeemail};
@@ -202,7 +202,7 @@ sub previewForm {
 		subid		=> $form->{subid},
 		topic		=> $topic,
 		ipid		=> $sub->{ipid},
-		ipid_vis	=> $ipid_vis,
+		ipid_vis	=> $sub->{ipid_vis},
 		admin_flag 	=> $admin_flag,
 		extras 		=> $extracolumns,
 		lockTest	=> lockTest($sub->{subj}),

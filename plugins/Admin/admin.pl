@@ -1661,10 +1661,9 @@ sub displayRecent {
 		num	=> 30,
 	}) || [ ];
 
-	my $id_vislen = $constants->{id_md5_vislength};
 	my $subj_vislen = 30;
 	for my $comm (@$recent_comments) {
-		$comm->{ipid_vis} = substr($comm->{ipid}, 0, $id_vislen);
+		vislenify($comm); # add $comm->{ipid_vis}
 		$comm->{subject_vis} = substr($comm->{subject}, 0, $subj_vislen);
 		$comm->{date} = substr($comm->{date}, 5); # strip off year
 	}

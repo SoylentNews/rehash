@@ -81,6 +81,7 @@ use vars qw($VERSION @EXPORT);
 	xmldecode
 	xmlencode
 	xmlencode_plain
+	vislenify
 );
 
 # really, these should not be used externally, but we leave them
@@ -2351,6 +2352,57 @@ The decoded string.
 		}
 
 		return $text;
+	}
+}
+
+#========================================================================
+
+=head2 vislenify (ID_OR_HASHREF [, LEN])
+
+Given an MD5 string such as an IPID or SubnetID, converts it to
+the length as determined by the id_md5_vislength var.  If passed
+a hashref, looks for any and all of the keys ipid, subnetid, and
+md5id, and if found, adds the same keys with _vis appended and
+shortened values.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item ID_OR_HASHREF
+
+Either a 32-char MD5 ID string, or a hashref as described above.
+
+=item LEN
+
+Usually not necessary;  if present, overrides the var id_md5_vislength.
+
+=back
+
+=item Return value
+
+If scalar ID passed in, returns new value.  If hashref passed in,
+it is modified in place.
+
+=back
+
+=cut
+
+sub vislenify {
+	my($id_or_hashref, $len) = @_;
+	$len ||= getCurrentStatic('id_md5_vislength') || 32;
+	if (ref $id_or_hashref) {
+		return unless ref($id_or_hashref) eq 'HASH';
+		my $hr = $id_or_hashref;
+		for my $key (qw( ipid subnetid md5id )) {
+			if ($hr->{$key}) {
+				$hr->{"${key}_vis"} = substr($hr->{$key}, 0, $len);
+			}
+		}
+	} else {
+		return substr($id_or_hashref, 0, $len);
 	}
 }
 

@@ -941,15 +941,14 @@ sub showInfo {
 		} else {
 			$netid = $requested_user->{subnetid} ;
 		}
-		$netid_vis = $netid;
-		$netid_vis = substr($netid, 0, $constants->{id_md5_vislength})
-			if $constants->{id_md5_vislength};
-
-		$title = getTitle('user_netID_user_title', {
+		my $data = {
 			id => $id,
 			md5id => $netid,
-			md5id_vis => $netid_vis,
-		});
+		};
+		vislenify($data); # add $data->{md5id_vis}
+		$netid_vis = $data->{md5id_vis};
+
+		$title = getTitle('user_netID_user_title', $data);
 
 		
 		$admin_block = getUserAdmin($netid, $fieldkey, 0) if $admin_flag;
