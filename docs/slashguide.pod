@@ -25,7 +25,112 @@ DIV.pod TD {
 
 =head1 NAME
 
-slashguide - The guide to using Slash version 2.0.
+slashguide - The Slash Developer's and Administrator's Guidebook
+
+=head2 Who is this guide for?
+
+Anyone who wants to run a Slash site.  By "run" we mean install, maintain,
+administer, and oversee.  You'll learn what the major components of the
+software are, and background to help you diagnose problems.  You won't
+become best friends with every single function in the API but you will
+
+This guide is also for developers who would like to add to the Slash code,
+whether sharing patches publicly (thanks!) or working on your own site
+privately.
+
+You must be familiar with Perl.  If you aren't confident you know about
+objects and methods, basic regexes, and how to use CPAN, you won't get
+much out of this.  You should know some SQL;  if you don't know what a
+one-to-many relationship is, or why a performance goal is to reduce the
+number of tables used in a join, you won't get much out of this.
+
+This guide is probably too in-depth for authors who just post stories
+to a Slash site;  you need a tutorial on admin.pl (and someday we hope
+to have one for you).
+
+This guide is for the Slash code as of mid-2003, and much of what is here
+will not apply to version 2.0.  Some may not apply to 2.2.
+
+the regime of themes and plugins
+	Slash::Install makes it happen
+	themes can inherit from other themes
+	plugins modify themes by adding htdocs files, adding tasks, adding templates,
+		changing schemas, 
+basic page layout
+	left column
+	middle column
+	right column (usually present, sometimes not)
+	differences between slashcode and slashdot themes (xoxox vs. xxoxo, mainly)
+installation
+	symlinks and side effects of using them
+	template-tool and symlink-tool
+	my preferred method of customizing a theme (cp -a themes/foo themes/bar)
+	the other way (the slashdot theme way) of customizing a theme (override slashcode where necessary)
+Templates
+	1;2;3 and search order
+	how template-tool lets themes override plugins (needed rarely, but sometimes)
+	hard-rendering
+		Slash/Slash.pm:sub _hard_dispComment {
+		Slash/Utility/Display/Display.pm:sub _hard_linkStory {
+		Slash/Utility/Display/Display.pm:sub _hard_linkComment {
+	speed and RAM concerns
+Blocks
+	static, portald, and color
+Vars
+	getCurrentStatic = constants
+The other quasi-globals
+	getCurrentDB
+	getCurrentUser
+	getCurrentForm
+	and the lesser-knowns like getCurrentAnonymousCoward
+Apache configuration
+	PerlAccessHandlers, PerlCleanupHandlers, PerlTransHandlers
+Slash::DB::Utility
+Slash::DB::MySQL
+	and Slash::DB::Static::MySQL
+	no more postgres
+Slash::Utility::Anchor, headers and footers and ads
+hooks, not really implemented
+Slash::Test
+Slash::Constants
+slashd and tasks
+	freshenup and the importance of rendered .shtml pages
+	adminmail and stats_daily
+users
+	the users_* tables, why so many?
+	the A.C.
+	seclevs
+		and the coming acl system
+		authors vs. admins vs. regular users
+stories, story_text
+	they own discussions, and normal form is broken by pulling up disc data into stories table
+	writestatus, freshenup, and the archiving process
+	the hitparade, freshenup, and the kludgy comment-counting process
+	displaystatus: AD/sectional/ND
+	performance issues, mostly thanks to "ORDER BY time"
+	someday we'll have a numeric primary key
+discussions and comments
+	discussion id at the root, cid-pid tree growing from it
+	some discussions get archived, some get recycled
+	/comments.pl?op=user_created_index
+	commentstatus ("who can post?")
+other discussion owners: journals, polls, user-created
+moderation
+	goals
+	the rules: tokens, handing out tokens (tasks/run_moderatord.pl),
+		points, expiration (stirring), inactive, other modifiers
+meta-moderation
+	goals
+	the rules: tokens, inactive, frequency,
+		reconcilation (tasks/run_moderatord.pl)
+plugins/Messages: the messaging system
+	(pudge: what to say about this?)
+accesslist and Slash::Apache::Banlist
+writing RSS pages: open_backend.pl
+plugins/HumanConf
+sections
+	index.pl isn't always the homepage
+	subdirectories and virtualhosts
 
 =head2 So I have Slash installed, what do I do now? 
 
@@ -292,6 +397,9 @@ report.
 =head1 CHANGES
 
 $Log$
+Revision 1.4  2003/06/23 13:28:16  jamie
+Bad syntax, but includes the skeleton of what I hope this will become.
+
 Revision 1.3  2002/04/22 14:01:50  pudge
 Various login fixes: s/(log)(in|out)/$1 $2/gi for @verbs; add proper links to creating accounts etc. on login forms; fix ~$nickname URIs for when $nickname contains some encoded characters (like "/").
 
