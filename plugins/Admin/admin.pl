@@ -1831,7 +1831,10 @@ sub moderate {
 	my($sid, $cid);
 
 	titlebar("100%", "Moderating...");
-
+	if(!dbAvailable("write_comments"){
+		print getData("comments_db_down");
+		return;
+	}
 	for my $key (sort keys %{$form}) {
 		if ($key =~ /^reason_(\d+)_(\d+)$/) {
 			($sid, $cid) = ($1, $2);

@@ -134,7 +134,10 @@ CASE "not enough points" %]
 	<p>Looks like memcached is not running, it's turned off in vars,
 	or Cache::Memcached does not support the <tt>stats()</tt> call.
 	No stats are available.
-
+[% # COMMENT TABLE NOT AVAILABLE FOR WRITING
+CASE "comment_db_down" %]
+Database maintenance is currently taking place.  Some items such
+as comment posting and moderation are currently unavailable.
 [% END %]
 __seclev__
 10000
