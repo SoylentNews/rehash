@@ -396,6 +396,9 @@ function [% name %]_load_names () {
 			myselect[i].text = myselecti[i].value + " (" + myselectw[i].value + ")";
 		}
 	}
+
+	myselect[0].selected  = true;
+	[% name %]_select_weight();
 }
 
 function useragent_opera () {

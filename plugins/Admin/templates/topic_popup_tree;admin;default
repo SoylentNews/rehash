@@ -87,8 +87,6 @@ __template__
 <option value="[% stid_names.$this_stid %]">[% stid_names.$this_stid %]</option>
 [%- END %]</select>
 
-<script language="javascript">[% name %]_load_names();</script>
-
 <select name="[% name %]_main_weights" size=1 onchange="[% name %]_change_weight()">
 <option value="4">4 - Mainpageworthy (priority)</option>
 <option value="3">3 - Mainpageworthy</option>
@@ -101,6 +99,8 @@ __template__
 <input type="button" value="Revert Weights" onmouseup="[% name %]_revert_weights()">
 <input type="button" value="Choose Topics"  onmouseup="[% name %]_show()">
 <input type="button" value="Remove Topic"   onmouseup="[% name %]_remove()">
+
+<script language="javascript">[% name %]_load_names();</script>
 
 __seclev__
 10000
