@@ -245,7 +245,7 @@ sub _set {
 }
 
 sub addFof {
-	my($self, $uid, $person) = @_;
+	my($self, $uid, $person, $original) = @_;
 	my $slashdb = getCurrentDB();
 
 	# First we do the main person
@@ -256,12 +256,12 @@ sub addFof {
 	}
 	my $people = $slashdb->getUser($uid, 'people');
 	# First we clean up, then we reapply
-	$people->{FOF()}{$person} += 1;
+	$people->{FOF()}{$person}{$original} = 1;
 	$slashdb->setUser($uid, { people => $people });
 }
 
 sub addEof {
-	my($self, $uid, $person) = @_;
+	my($self, $uid, $person, $original) = @_;
 	my $slashdb = getCurrentDB();
 
 	# First we do the main person
@@ -272,12 +272,12 @@ sub addEof {
 	}
 	my $people = $slashdb->getUser($uid, 'people');
 	# First we clean up, then we reapply
-	$people->{EOF()}{$person} += 1;
+	$people->{EOF()}{$person}{$original} = 1;
 	$slashdb->setUser($uid, { people => $people });
 }
 
 sub deleteFof {
-	my($self, $uid, $person) = @_;
+	my($self, $uid, $person, $original) = @_;
 	my $slashdb = getCurrentDB();
 
 	# First we do the main person
@@ -288,17 +288,16 @@ sub deleteFof {
 		$self->sqlUpdate('people', { -fof => "fof - 1" }, "uid = $uid AND person = $person");
 	}
 	my $people = $slashdb->getUser($uid, 'people');
-	# First we clean up, then we reapply
-	if ($people->{FOF()}{$person} >= 1) {
-		$people->{FOF()}{$person} -= 1;
-	} else {
-		delete $people->{FOF()}{$person};
-	}
+	# First we clean up
+	delete $people->{FOF()}{$person}{$original};
+	# Now delete the hash if there are no longer people pointing to it
+	delete $people->{FOF()}{$person}
+		unless (keys %{$people->{FOF()}{$person}});
 	$slashdb->setUser($uid, { people => $people });
 }
 
 sub deleteEof {
-	my($self, $uid, $person) = @_;
+	my($self, $uid, $person, $original) = @_;
 	my $slashdb = getCurrentDB();
 
 	# First we do the main person
@@ -309,12 +308,11 @@ sub deleteEof {
 		$self->sqlUpdate('people', { '-eof' => "eof - 1" }, "uid = $uid AND person = $person");
 	}
 	my $people = $slashdb->getUser($uid, 'people');
-	# First we clean up, then we reapply
-	if ($people->{EOF()}{$person} >= 1) {
-		$people->{EOF()}{$person} -= 1;
-	} else {
-		delete $people->{EOF()}{$person};
-	}
+	# First we clean up
+	delete $people->{EOF()}{$person}{$original};
+	# Now delete the hash if there are no longer people pointing to it
+	delete $people->{EOF()}{$person}
+		unless (keys %{$people->{EOF()}{$person}});
 	$slashdb->setUser($uid, { people => $people });
 }
 

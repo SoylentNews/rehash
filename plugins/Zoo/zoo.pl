@@ -170,7 +170,7 @@ sub friends {
 			if ($editable) {
 				print getData('yournofriends');
 			} else {
-				print getData('nofriends', { nickname => $nick });
+				print getData('nofriends', { nickname => $nick, uid => $uid });
 			}
 		}
 	}
@@ -200,7 +200,7 @@ sub fof {
 			_printHead("yourfriendsoffriendshead");
 			$implied = FOF;
 		} else {
-			_printHead("friendsoffriendshead", { nickname => $nick });
+			_printHead("friendsoffriendshead", { nickname => $nick, uid => $uid });
 		}
 		
 		if (@$friends) {
@@ -209,7 +209,7 @@ sub fof {
 			if ($editable) {
 				print getData('yournofriendsoffriends');
 			} else {
-				print getData('nofriendsoffriends', { nickname => $nick });
+				print getData('nofriendsoffriends', { nickname => $nick, uid => $uid });
 			}
 		}
 	}
@@ -248,7 +248,7 @@ sub enof {
 			if ($editable) {
 				print getData('yournofriendsenemies');
 			} else {
-				print getData('nofriendsenemies', { nickname => $nick });
+				print getData('nofriendsenemies', { nickname => $nick, uid => $uid });
 			}
 		}
 	}
@@ -287,7 +287,7 @@ sub foes {
 			if ($editable) {
 				print getData('yournofoes');
 			} else {
-				print getData('nofoes', { nickname => $nick });
+				print getData('nofoes', { nickname => $nick, uid => $uid });
 			}
 		}
 	}
@@ -305,7 +305,6 @@ sub fans {
 		$nick = $user->{nick};
 	}
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
-	#my $fans = $zoo->getFans($uid);
 	my $fans = $zoo->getRelationships($uid, FAN);
 
 	if ($form->{content_type} eq 'rss') {
@@ -324,7 +323,7 @@ sub fans {
 			if ($editable) {
 				print getData('yournofans');
 			} else {
-				print getData('nofans', { nickname => $nick });
+				print getData('nofans', { nickname => $nick, uid => $uid });
 			}
 		}
 	}
@@ -362,7 +361,7 @@ sub freaks {
 			if ($editable) {
 				print getData('yournofreaks');
 			} else {
-				print getData('nofreaks', { nickname => $nick });
+				print getData('nofreaks', { nickname => $nick, uid => $uid });
 			}
 		}
 	}
@@ -397,7 +396,7 @@ sub all {
 			if ($editable) {
 				print getData('yournoall');
 			} else {
-				print getData('noall', { nickname => $nick });
+				print getData('noall', { nickname => $nick, uid => $uid });
 			}
 		}
 	}
@@ -448,7 +447,7 @@ sub check {
 
 	if ($form->{uid}) {
 		my $nickname = $slashdb->getUser($form->{uid}, 'nickname');
-		my $compare = $slashdb->getUser($form->{uid}, 'people');
+		#my $compare = $slashdb->getUser($form->{uid}, 'people');
 		_printHead("confirm", { nickname => $nickname, uid => $form->{uid}  });
 		if ($form->{uid} == $user->{uid} || $form->{uid} == $constants->{anonymous_coward_uid}  ) {
 			print getData("no_go");
@@ -465,14 +464,14 @@ sub check {
 #			}
 #		}
 		my (%mutual, @mutual);
-		for my $person (keys %{$user->{people}{FOF()}}) {
-			if ($compare->{FOF()}{$person}) {
+		if ($user->{people}{FOF()}{$form->{uid}}) {
+			for my $person (keys %{$user->{people}{FOF()}{$form->{uid}}}) {
 				push @{$mutual{FOF()}}, $person;
 				push @mutual, $person;
 			}
 		}
-		for my $person (keys %{$user->{people}{EOF()}}) {
-			if ($compare->{EOF()}{$person}) {
+		if ($user->{people}{EOF()}{$form->{uid}}) {
+			for my $person (keys %{$user->{people}{EOF()}{$form->{uid}}}) {
 				push @{$mutual{EOF()}}, $person;
 				push @mutual, $person;
 			}
@@ -498,7 +497,9 @@ sub _printHead {
 	my($head, $data) = @_;
 	my $title = getData($head, $data);
 	header($title);
+	print STDERR "ZOO zoohead \n";
 	slashDisplay("zoohead", { title => $title });
+	print STDERR "ZOO zoohead \n";
 }
 
 sub _rss {

@@ -1,9 +1,9 @@
 INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends','[% constants.rootdir %]/my/friends/',1,1);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Fans','[% constants.rootdir %]/my/fans/',1,1);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes','[% constants.rootdir %]/my/foes/',1,1);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Freaks','[% constants.rootdir %]/my/freaks/',1,1);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends of Friends','[% constants.rootdir %]/my/friends/friends',1,1);
-INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes of Friends','[% constants.rootdir %]/my/friends/foes',1,1);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Fans','[% constants.rootdir %]/my/fans/',1,2);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes','[% constants.rootdir %]/my/foes/',1,3);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Freaks','[% constants.rootdir %]/my/freaks/',1,4);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Friends of Friends','[% constants.rootdir %]/my/friends/friends',1,5);
+INSERT INTO menus (menu, label, value, seclev, menuorder) VALUES ('zoo','Foes of Friends','[% constants.rootdir %]/my/friends/foes',1,6);
 INSERT INTO vars (name,value,description) VALUES ('people_max','200','Maximum number of friends/foes you can have');
 INSERT INTO vars (name,value,description) VALUES ('people_max_subscriber','400','Maximum number of friends/foes you can have');
 INSERT INTO vars (name,value,description) VALUES ('zoo_process_limit','2000','Number of FOF/FOE to process during job run');

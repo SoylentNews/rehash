@@ -23,15 +23,15 @@ $task{$me}{code} = sub {
 		for(@$friends) {
 			if ($job->{type} eq 'friend') {
 				if ($job->{action} eq 'add') {
-					$zoo->addFof($_, $job->{person});
+					$zoo->addFof($_, $job->{person}, $job->{uid});
 				} else {
-					$zoo->deleteFof($_, $job->{person});
+					$zoo->deleteFof($_, $job->{person}, $job->{uid});
 				}
 			} else {
 				if ($job->{action} eq 'add') {
-					$zoo->addEof($_, $job->{person});
+					$zoo->addEof($_, $job->{person}, $job->{uid});
 				} else {
-					$zoo->deleteEof($_, $job->{person});
+					$zoo->deleteEof($_, $job->{person}, $job->{uid});
 				}
 			}
 		}

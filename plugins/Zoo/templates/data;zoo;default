@@ -21,28 +21,28 @@ __template__
 	[% constants.sitename %] Friend/Foe System
 
 [% CASE 'confirm' %]
-	Your Relationship with [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Your Relationship with <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF"><A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A></FONT></A>([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'nofriends' %]
-	[% nickname %]([% uid %]) is all alone in the world.
+	<A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>([% uid %]) is all alone in the world.
 
 [% CASE 'nofans' %]
-	[% nickname %]([% uid %]) is either loved by all or just invisible.
+	<A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>([% uid %]) is either loved by all or just invisible.
 
 [% CASE 'nofreaks' %]
-	[% nickname %]([% uid %]) is hated by no one.
+	<A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>([% uid %]) is hated by no one.
 
 [% CASE 'nofoes' %]
-	[% nickname %]([% uid %]) loves everyone or plays their cards very close to their chest.
+	<A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>([% uid %]) loves everyone or plays their cards very close to their chest.
 
 [% CASE 'nofriendsoffriends' %]
-	[% nickname %]([% uid %]) friend's have no friends, they need better friends.
+	<A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>([% uid %]) friend's have no friends, they need better friends.
 
 [% CASE 'nofriendsenemies' %]
-	[% nickname %]([% uid %]) friend's have no foes.
+	<A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>([% uid %]) friend's have no foes.
 
 [% CASE 'noall' %]
-	[% nickname %] is unknown to the world
+	<A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>([% uid %]) is unknown to the world
 
 [% CASE 'yournofriends' %]
 	You are alone in the world.
@@ -69,25 +69,25 @@ __template__
 	No one knows you exist.
 
 [% CASE 'friendshead' %]
-	Friends of [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Friends of <A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'foeshead' %]
-	Foes of [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Foes of <A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'fanshead' %]
-	Fans of [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Fans of <A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'freakshead' %]
-	Freaks of [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Freaks of <A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'friendsenemieshead' %]
-	Foes of the Friends of [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Foes of the Friends of <A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'friendsoffriendshead' %]
-	Friends of the Friends of [% nickname %]([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
+	Friends of the Friends of <A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'yourhead' %]
-	Everyone who thinks anything about [% nickname %]
+	Everyone who thinks anything about <A HREF="[% constants.rootdir %]/[% nickname | fixparam %]/"><FONT COLOR="#FFFFFF">[% nickname %]</FONT></A>
 
 [% CASE 'yourfriendshead' %]
 	Your friends	

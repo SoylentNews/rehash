@@ -24,7 +24,7 @@ __template__
 	<TABLE>
 		<TR>
 			<TD>
-				So do you want to remove your relationship with <B>[% nickname | strip_literal %]</B>? 
+				So do you want to remove your relationship with <B><A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A></B>? 
 			</TD>
 			<TD>
 				<INPUT TYPE="RADIO" NAME="type" VALUE="neutral"[% IF type == 'neutral' %]CHECKED[% END %]> 
@@ -56,11 +56,11 @@ Curious <A HREF="[% constants.rootdir %]/faq/com-mod.shtml#cm2200"> what these i
 <TABLE WIDTH="100%">
 	<TR>
 		<TD>
-			<P><FONT COLOR="[% user.bg.3 %]"><B>Friends of Friends</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif" ALT="Friends of Friends">  
+			<P><FONT COLOR="[% user.bg.3 %]"><B>Fans of <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A></B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif" ALT="Friends of Friends">  
 			&nbsp;<A HREF="/my/comments/">[% IF user.people_bonus_fof %]([% user.people_bonus_fof %])</A> [% END %]
 		</TD>
 		<TD>
-			<P><FONT COLOR="[% user.bg.3 %]"><B>Foes of Friends</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif" ALT="Foes of Friends"> 
+			<P><FONT COLOR="[% user.bg.3 %]"><B>Freaks of <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A></B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif" ALT="Foes of Friends"> 
 			&nbsp;<A HREF="/my/comments/">[% IF user.people_bonus_eof %]([% user.people_bonus_eof %])</A> [% END %]
 		</TD>
 	</TR>
