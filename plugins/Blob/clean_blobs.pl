@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
+use Slash::Constants ':slashd';
 use Slash::Display;
 
 use vars qw( %task $me );
