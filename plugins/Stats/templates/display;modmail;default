@@ -13,6 +13,8 @@ display
 __template__
 [% constants.sitename %] Moderation Stats for [% day %]
 
+[% constants.absolutedir_secure %]/stats.pl?op=report&report=mod&stats_days=7
+
      comments: [% comments %] posted yesterday
    modlog all: [% modlog %] rows (not counting [% modlog_inactive_percent %]% inactive)
     m2log all: [% metamodlog %] rows ([% xmodlog %] modlog) (not counting [% metamodlog_inactive_percent %]% inactive)

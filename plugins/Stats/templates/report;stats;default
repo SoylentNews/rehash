@@ -28,7 +28,9 @@ __template__
 %]
 
 [% reports = {
-      'main' => 'Main Report'
+      'main'      => 'Main Report',
+      'mod'       => 'Moderation Report',
+      'subscribe' => 'Subscription Report'
 } %]
 
 [% SWITCH form.report;

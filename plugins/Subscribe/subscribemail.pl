@@ -82,9 +82,16 @@ $task{$me}{code} = sub {
 		$num_new_subscriptions
 	);
 
+	my $report_link = "";
+	my $plugins = getDescriptions('plugins');
+
+	if ($plugins->{'Stats'}) {
+		$report_link = "\n$constants->{absolutedir_secure}/stats.pl?op=report&report=subscribe&stats_days=7\n";
+	}
+
 	my $email = sprintf(<<"EOT", @numbers);
 $constants->{sitename} Subscriber Info for yesterday
-
+$report_link
 total subscribers: %8d
 new subscriptions: %8d
 
