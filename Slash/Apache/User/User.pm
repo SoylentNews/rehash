@@ -97,14 +97,13 @@ sub handler {
 	my $method = $r->method;
 	# Don't remove this. This solves a known bug in Apache -- brian
 	$r->method('GET');
-	# do we need to do this too? i am leaning toward No. -- pudge
-# 	$r->method_number(M_GET);
 
 	my $form = filter_params($apr);
 	$form->{query_apache} = $apr;
 	@{$form}{keys  %{$constants->{form_override}}} =
 		values %{$constants->{form_override}};
 	my $cookies = Apache::Cookie->fetch;
+	$form->{_dynamic_page} = 1;
 
 	# So we are either going to pick the user up from
 	# the form, a cookie, or they will be anonymous

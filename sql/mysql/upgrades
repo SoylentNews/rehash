@@ -1127,3 +1127,4 @@ INSERT INTO vars (name, value, description) VALUES ('stats_admin_seclev','100','
 
 INSERT INTO vars (name, value, description) VALUES ('comments_more_seclev','100','Seclev required to see More Comments (special: 2 means subscribers)');
 
+ALTER TABLE accesslog ADD static enum("yes","no") DEFAULT "yes";

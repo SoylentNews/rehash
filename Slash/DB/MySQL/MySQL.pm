@@ -1349,6 +1349,7 @@ sub createAccessLog {
 		user_agent	=> $ENV{HTTP_USER_AGENT} || '0',
 		duration	=> $duration,
 		local_addr	=> $local_addr,
+		static	=> $form->{_dynamic_page} ? 'no' : 'yes',
 	}, { delayed => 1 });
 }
 

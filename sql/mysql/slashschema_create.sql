@@ -63,6 +63,7 @@ CREATE TABLE accesslog (
 	bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,
 	duration FLOAT DEFAULT 0.0 NOT NULL,
 	local_addr VARCHAR(16) DEFAULT '' NOT NULL,
+	static enum("yes","no") DEFAULT "yes",
 	INDEX host_addr_part (host_addr(16)),
 	INDEX op_part (op(12), section),
 	INDEX ts (ts),
