@@ -771,7 +771,7 @@ sub getLastUser {
 sub pagesServed {
 	my($self) = @_;
 	my $returnable = $self->sqlSelectAll("count(*),ts",
-			"accesslog", "1=1",
+			"accesslog", "to_days(now()) - to_days(ts) <= 1",
 			"GROUP BY ts ORDER BY ts ASC");
 
 	return $returnable;
