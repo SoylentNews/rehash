@@ -20,13 +20,13 @@ __template__
 [% END %]
 [% subs = Slash.db.getSubmissionCount() %]
 [% tabs = [
-	{ link = "/admin.pl",			label = "Stories",		sel_label = "stories" },
-	{ link = "/admin.pl?op=edit",		label = "New",			sel_label = "new" },
-	{ link = "/submit.pl?op=list",		label = "$subs&nbsp;Submissions", sel_label = "submissions" },
-	{ link = "/pollBooth.pl?op=edit",	label = "Poll",			sel_label = "poll" },
-	{ link = "/admin.pl?op=topics",		label = "Config",		sel_label = "topics" },
-	{ link = "/admin.pl?op=recent",		label = "Info",			sel_label = "recent" },
-	{ link = "/getting_started.shtml",	label = "Help",			sel_label = "help" },
+	{ link = "$constants.rootdir/admin.pl",			label = "Stories",		sel_label = "stories" },
+	{ link = "$constants.rootdir/admin.pl?op=edit",		label = "New",			sel_label = "new" },
+	{ link = "$constants.rootdir/submit.pl?op=list",	label = "$subs&nbsp;Submissions", sel_label = "submissions" },
+	{ link = "$constants.rootdir/pollBooth.pl?op=edit",	label = "Poll",			sel_label = "poll" },
+	{ link = "$constants.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "topics" },
+	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Info",			sel_label = "recent" },
+	{ link = "$constants.rootdir/getting_started.shtml",	label = "Help",			sel_label = "help" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page; %]
 __seclev__

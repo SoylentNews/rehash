@@ -16,15 +16,16 @@ info
 __template__
 
 [% tabs = [
-	{ link = "/admin.pl",			label = "Stories",		sel_label = "stories" },
-	{ link = "/admin.pl?op=siteinfo",	label = "Site",			sel_label = "site" },
-	{ link = "/users.pl?op=topabusers",	label = "Abusers",		sel_label = "abusers" },
-	{ link = "/users.pl?op=listreadonly",	label = "Read&nbsp;Only",	sel_label = "readonly" },
-	{ link = "/users.pl?op=listbanned",	label = "Banned",		sel_label = "banned" },
-	{ link = "/admin.pl?op=slashd",		label = "Slashd",		sel_label = "slashd" },
-	{ link = "/admin.pl?op=recent",		label = "Recent",		sel_label = "recent" },
-	{ link = "/admin.pl?op=topics",		label = "Config",		sel_label = "config" },
-	{ link = "/getting_started.shtml",	label = "Help",			sel_label = "help" },
+	{ link = "$constants.rootdir/admin.pl",			label = "Stories",		sel_label = "stories" },
+	{ link = "$constants.rootdir/stats.pl",			label = "Stats",		sel_label = "stats" },
+	{ link = "$constants.rootdir/admin.pl?op=siteinfo",	label = "Site",			sel_label = "site" },
+	{ link = "$constants.rootdir/users.pl?op=topabusers",	label = "Abusers",		sel_label = "abusers" },
+	{ link = "$constants.rootdir/users.pl?op=listreadonly",	label = "Read&nbsp;Only",	sel_label = "readonly" },
+	{ link = "$constants.rootdir/users.pl?op=listbanned",	label = "Banned",		sel_label = "banned" },
+	{ link = "$constants.rootdir/admin.pl?op=slashd",	label = "Slashd",		sel_label = "slashd" },
+	{ link = "$constants.rootdir/admin.pl?op=recent",	label = "Recent",		sel_label = "recent" },
+	{ link = "$constants.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "config" },
+	{ link = "$constants.rootdir/getting_started.shtml",	label = "Help",			sel_label = "help" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page; %]
 
