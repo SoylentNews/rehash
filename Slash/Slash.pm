@@ -823,8 +823,7 @@ sub moderatorCommentLog {
 	# in this template were moderations, and if there were none,
 	# we could short-circuit here if @$mods was empty.  But now,
 	# the template handles that decision.
-	
-	my $seen_mods={};
+	my $seen_mods = {};
 	for my $mod (@$mods) {
 		$seen_mods->{$mod->{id}}++;
 		vislenify($mod); # add $mod->{ipid_vis}
@@ -878,7 +877,7 @@ sub moderatorCommentLog {
 	$this_user = $slashdb->getUser($value) if $type eq "uid";	
 	my $mod_ids = [keys %$seen_mods];
 	my $mods_to_m2s;
-	if($constants->{show_m2s_with_mods}){
+	if ($constants->{show_m2s_with_mods}) {
 		$mods_to_m2s = $slashdb->getMetamodsForMods($mod_ids, $constants->{m2_limit_with_mods});
 	}
 	

@@ -922,7 +922,6 @@ sub showInfo {
 		color =>	'colored',
 		tab_selected =>	$hr->{tab_selected_1} || "",
 	});
-	
 
 	my $comments_wanted = $user->{show_comments_num}
 		|| $constants->{user_comment_display_default};
@@ -932,10 +931,10 @@ sub showInfo {
 
 	my($netid, $netid_vis) = ('', '');
 
-	my $comment_search_options={};
+	my $comment_search_options = {};
 	my $comment_time;
-	if($admin_flag){
-		if(!$min_comment and !$form->{no_time_restriction}){
+	if ($admin_flag) {
+		if (!$min_comment and !$form->{no_time_restriction}) {
 			$comment_time = $constants->{admin_comment_display_days};
 			$comment_search_options->{limit_days}= $comment_time;
 			$comments_wanted = $constants->{admin_daysback_commentlimit};
@@ -1093,15 +1092,15 @@ sub showInfo {
 	@$commentstruct = sort {$b->{sid} <=> $a->{sid}} @$commentstruct;
 
 	my $cid_list = [ keys %$cids_seen ];
-	my $cids_to_mods={};
-	if($admin_flag and $constants->{show_mods_with_comments}){
+	my $cids_to_mods = {};
+	if ($admin_flag and $constants->{show_mods_with_comments}) {
 		my $comment_mods = $reader->getModeratorCommentLog("DESC", $constants->{mod_limit_with_comments}, "cidin", $cid_list);
 	
 		# Loop through mods and group them by the sid they're attached to
-		while(my $mod = shift @$comment_mods){
+		while (my $mod = shift @$comment_mods) {
 			push @{$cids_to_mods->{$mod->{cid}}}, $mod;
 		}
-	} 
+	}
 
 	my $storycount =
 		$reader->countStoriesBySubmitter($requested_user->{uid})

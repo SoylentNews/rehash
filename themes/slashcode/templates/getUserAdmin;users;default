@@ -92,7 +92,7 @@ __template__
 				[% IF accesslist.adminnick %]<font size=-1>  by [% accesslist.adminnick %]</font>[% END %]
 				</TD>
 			</TR>
-			[% IF useredit.nonuid && accesslist.estimate_users%]
+			[% IF useredit.nonuid && accesslist.estimate_users %]
 			<TR>
 				<TD VALIGN="TOP"><B>Estimated Users</B></TD>
 				<TD>[% accesslist.estimated_users %]</TD>

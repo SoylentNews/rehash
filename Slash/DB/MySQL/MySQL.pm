@@ -833,12 +833,12 @@ sub getModeratorCommentLog {
 	} else {
 		$limit = "";
 	}
-	my $cidlist;
-	
-	if($type eq "cidin"){
-		if(ref $value eq "ARRAY" and @$value){
+
+	my $cidlist;	
+	if ($type eq "cidin") {
+		if (ref $value eq "ARRAY" and @$value) {
 			$cidlist = join(',', @$value);
-		} elsif(!ref $value and $value){
+		} elsif (!ref $value and $value) {
 			$cidlist = $value;
 		} else {
 			return [];
@@ -854,7 +854,7 @@ sub getModeratorCommentLog {
 					$ipid_table = "comments"						    }
 	elsif ($type eq 'cid')       {	$where_clause = "moderatorlog.cid=$vq      AND moderatorlog.uid=users.uid"  }
 	elsif ($type eq 'cuid')      {	$where_clause = "moderatorlog.cuid=$vq     AND moderatorlog.uid=users.uid"  }
-	elsif ($type eq 'cidin')      {	$where_clause = "moderatorlog.cid in($cidlist)     AND moderatorlog.uid=users.uid"  }
+	elsif ($type eq 'cidin')     {	$where_clause = "moderatorlog.cid in($cidlist)     AND moderatorlog.uid=users.uid"  }
 	elsif ($type eq 'subnetid')  {	$where_clause = "comments.subnetid=$vq     AND moderatorlog.uid=users.uid"  }
 	elsif ($type eq 'ipid')      {	$where_clause = "comments.ipid=$vq         AND moderatorlog.uid=users.uid"  }
 	elsif ($type eq 'bsubnetid') {	$where_clause = "moderatorlog.subnetid=$vq AND moderatorlog.uid=users.uid"  }
@@ -924,14 +924,14 @@ sub getMetamodCountsForModsByType {
 # particular moderation id.
 
 sub getMetamodsForMods {
-	my ($self, $ids, $limit ) = @_;
+	my($self, $ids, $limit) = @_;
 	my $id_str = join ',', @$ids;
 	return {} unless @$ids;
 	$limit = " limit $limit" if $limit;
 	my $m2s = $self->sqlSelectAllHashrefArray("id,mmid,metamodlog.uid as uid,val,ts,active,nickname","metamodlog,users",
 							"mmid in($id_str) and metamodlog.uid=users.uid order by mmid desc $limit");
-	my $mods_to_m2s={};
-	while(my $m2 = shift @$m2s){
+	my $mods_to_m2s = {};
+	while (my $m2 = shift @$m2s) {
 		push @{$mods_to_m2s->{$m2->{mmid}}}, $m2;
 	}
 	return $mods_to_m2s;
@@ -4849,7 +4849,7 @@ sub _calc_karma_token_loss {
 ##################################################################
 sub metamodEligible {
 	my($self, $user) = @_;
-	
+
 	# Easy tests the user can fail to be ineligible to metamod.
 	return 0 if $user->{is_anon} || !$user->{willing} || $user->{karma} < 0;
 
@@ -4859,7 +4859,7 @@ sub metamodEligible {
 	# and thus Jim Jones really did it with the monkey wrench in the
 	# blue room -Brian
 	#return 1 if $user->{is_admin};
-	
+
 	# Not eligible if metamodded too recently.
 	my $constants = getCurrentStatic();
 	my $m2_freq = $constants->{m2_freq} || 86400;
