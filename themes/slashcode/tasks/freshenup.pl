@@ -280,7 +280,7 @@ sub _read_and_unlink_cchp_file {
 		($constants->{maxscore}-$constants->{minscore}+1));
 
 	# Now we extract what we need from the file we created
-	sleep 3;
+	Time::HiRes::sleep(0.5); # let filesystem settle
 	if (!open(my $cchp_fh, "<", $cchp_file)) {
 		warn "cannot open $cchp_file for reading, $!";
 	} else {
