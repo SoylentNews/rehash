@@ -49,7 +49,7 @@ __template__
 	<FORM ACTION="[% constants.rootdir %]/pollBooth.pl">
 		[%- IF returnto -%]
 		<INPUT TYPE="HIDDEN" NAME="op" VALUE="vote_return">
-		<INPUT TYPE="HIDDEN" NAME="returnto" VALUE="[% returnto %]">
+		<INPUT TYPE="HIDDEN" NAME="returnto" VALUE="[% returnto | strip_attribute %]">
 		[%- END -%]
 		<INPUT TYPE="hidden" NAME="qid" VALUE="[% qid | strip_attribute %]">
 		[% IF user.currentSection %]
