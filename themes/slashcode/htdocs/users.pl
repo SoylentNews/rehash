@@ -1285,22 +1285,23 @@ sub editComm {
 	# And this was wrong, see we display +3 not 3. So the display was a bit off :)
 	my @range = map { $_ > 0 ? '+' . $_ : $_ } ($lo .. $hi);
 
-	# And now we have to fix all of the users :(   -Brian
-	# is this temporary, to fix bad DB entries?
-	# if so, we should just change the DB; the code's not
-	# been released yet, so we don't have to worry about
-	# other sites. -- pudge
-	for (qw| friend foe fan freak |) {
-		my $key = "people_bonus_$_";
-		$user->{$key} = "+$user->{$key}"
-			if $user->{$key} && $user->{$key} > 0 && $user->{$key} !~ /^\+./;
-	}
-
-	for (qw| Intersting Troll Insightful Offtopic Flamebait Funny Informative Redundant |) {
-		my $key = "reason_alter_$_";
-		$user->{$key} = "+$user->{$key}"
-			if $user->{$key} && $user->{$key} > 0 && $user->{$key} !~ /^\+./;
-	}
+# Commented out, will be removed later  -Brian
+#	# And now we have to fix all of the users :(   -Brian
+#	# is this temporary, to fix bad DB entries?
+#	# if so, we should just change the DB; the code's not
+#	# been released yet, so we don't have to worry about
+#	# other sites. -- pudge
+#	for (qw| friend foe fan freak |) {
+#		my $key = "people_bonus_$_";
+#		$user->{$key} = "+$user->{$key}"
+#			if $user->{$key} && $user->{$key} > 0 && $user->{$key} !~ /^\+./;
+#	}
+#
+#	for (qw| Intersting Troll Insightful Offtopic Flamebait Funny Informative Redundant |) {
+#		my $key = "reason_alter_$_";
+#		$user->{$key} = "+$user->{$key}"
+#			if $user->{$key} && $user->{$key} > 0 && $user->{$key} !~ /^\+./;
+#	}
 
 	for (@reasons) {
 		my $key = "reason_alter_$_";
@@ -1758,12 +1759,6 @@ sub saveComm {
 		my $key = "reason_alter_$_";
 		my $answer = $form->{$key};
 		$answer = 0 if $answer !~ /^[\-+]?\d+$/;
-		# I picked a bad name for a key, filter_params strips the + sign which I need.
-		# This just fixes that. -Brian
-		# we can change filter_params to allow /^\+/,
-		# can't we? -- pudge
-		$answer = "+$user->{$key}"
-			if $answer > 0 && $answer !~ /^\+./;
 		$users_comments_table->{$key} = ($answer == 0) ? '' : $answer;
 	}
 
