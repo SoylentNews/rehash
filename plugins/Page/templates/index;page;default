@@ -18,7 +18,7 @@ __template__
 			<tr>
 				<!- begin whats new -->
 				<td width="60%" valign="top">
-				<p>[% PROCESS topicbar title="WHAT'S NEW" %]
+				<p>[% PROCESS titlebar title="WHAT'S NEW" %]
 				[% 
 					misc.count = 3;
 					whatsnew = index.displayStoriesByTitle(form.section,misc);
@@ -34,7 +34,7 @@ __template__
 				<!-- end whats new -->
 
                 <!-- begin feature article -->
-                <p>[% PROCESS topicbar title="FEATURE ARTICLE" %]
+                <p>[% PROCESS titlebar title="FEATURE ARTICLE" %]
 				[% 
 				misc.subsection = 'features';
 				misc.count	= 1;
@@ -50,7 +50,7 @@ __template__
 
 
 				<!-- begin news -->
-				<p>[% PROCESS topicbar title="NEWS" %]
+				<p>[% PROCESS titlebar title="NEWS" %]
 				[% 
 				misc.subsection = 'news';
 				news = index.displayStories(form.section, misc);
@@ -70,7 +70,7 @@ __template__
 				</td>
 				<td><img src="[% constants.imagedir %]/pix.gif" width="16" height="1" alt=""></td>
 				<td width="40%" valign="top"> 
-				<p>[% PROCESS topicbar title="CALENDAR" %]
+				<p>[% PROCESS titlebar title="CALENDAR" %]
 				<!-- SECTION [% form.section %] -->
 				[% 
 					section = form.section;
@@ -96,7 +96,7 @@ __template__
 				<! -- end calendar -->
 				
 				<!-- begin past features -->
-				<p>[% PROCESS topicbar title="PAST FEATURES" %]
+				<p>[% PROCESS titlebar title="PAST FEATURES" %]
 				[% 
 					misc.subsection = 'features';
 					pastfeatures = index.displayStoriesByTitle(form.section, misc);
@@ -112,7 +112,7 @@ __template__
 				<!-- end pastfeatures -->
 				
 				<!-- guided opinion -->	
-				<p>[% PROCESS topicbar title="GUIDED OPINION" %]
+				<p>[% PROCESS titlebar title="GUIDED OPINION" %]
 				[% 
 					misc.subsection = 'opinion';
 					opinion = index.displayStories(form.section, misc);
@@ -124,7 +124,7 @@ __template__
 				<!-- end guided opinion -->
 	
 				<!-- begin new forum -->
-				<p>[% PROCESS topicbar title="NEW FORUM THREAD" %]
+				<p>[% PROCESS titlebar title="NEW FORUM THREAD" %]
 				[%  
 
 				searchobj = Slash.getObject('Slash::Search');

@@ -14,6 +14,7 @@ use Data::Dumper;
 use vars qw($VERSION @EXPORT);
 use base 'Exporter';
 use base 'Slash::DB::Utility';
+use base 'Slash::DB::MySQL';
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -24,15 +25,14 @@ use base 'Slash::DB::Utility';
 # Patrick 'CaptTofu' Galbraith
 # 6.9.02
 
-
-
 #################################################################
+
 sub new {
 	my ($class, $user) = @_;
 
 	my $self = {};
 
-	my $slashdb = getCurrentDB();
+	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();
 
@@ -47,6 +47,7 @@ sub new {
 }
 
 #################################################################
+
 sub displayStoriesByTitle {
 	my ($self, $section, $other) = @_;
 
@@ -60,41 +61,103 @@ sub displayStoriesByTitle {
 }
 
 #################################################################
+# Handles display of a pre-fetched essentials list or a 
+# list of story data.
+#
+# Ideally, all display routines would then do the basic fetch 
+# (ie thru getStoriesEssentials, or something like it) and
+# use this routine for display, but that modification can be left
+# until someone has the time to do it. 	- Cliff 2002/08/10
+
+sub displayStoryList {
+	my ($self, $list, $other) = @_;
+
+	my $returnable = [];
+	for (@{$list}) {
+		my $data;
+
+		if (ref $_ eq 'HASH') {
+			if ($other->{title_only}) {
+				$data->{widget} = 
+					self->getStoryTitleContent($_);
+			} else {
+				$data->{widget} = 
+					$self->getStoryContent($_) .
+					$self->getLinksContent($_, $other);
+			}
+			$data->{sid} = $_->{sid};
+			$data->{fulldata} = $_ if $other->{retrieve_data};
+		} elsif (ref $_ eq 'ARRAY') {
+			# Handle data from getStoryEssentials()
+			my($sid, $time, $title) = @{$_}[0, 9, 2];
+
+			$data->{essentials} = $_ if $other->{retrieve_essentials};
+			if ($other->{titles_only}) {
+				$data->{widget} = $self->getStoryTitleContent({ 
+					sid 	=> $sid,
+					'time' 	=> $time,
+					title 	=> $title,
+				});
+				$data->{sid} = $sid;
+			} else {
+				my $story = $self->prepareStory($sid);
+				$data->{fulldata} = $story if $other->{retrieve_data};
+	
+				$data->{sid} = $sid;
+				$data->{widget} = 
+					$self->getStoryContent($story) .
+					$self->getLinksContent($story, $other);
+			} 
+		}
+
+		push @{$returnable}, $data;
+	}
+
+	return $returnable;
+}
+
+#################################################################
+
 sub displayStories {
 	my ($self, $section, $other) = @_;
 
-	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
-
 	my $misc = {};
 	$misc->{subsection} = $other->{subsection};
-	my $tid = $other->{tid} ? $other->{tid} : '';
+	my $tid = $other->{tid} || '';
 
-	my $limit = '';
-
+	my $limit = $other->{count};
 	if ($misc->{subsection}) {
-		my $subsections = $slashdb->getDescriptions('section_subsection_names', $section); 
+		my $subsections = $self->getDescriptions(
+			'section_subsection_names', $section
+		); 
 		# from title to id
 		$misc->{subsection} = $subsections->{$other->{subsection}};
-		$limit = $other->{count} || $slashdb->getSubSection($misc->{subsection}, 'artcount');
+		$limit ||= $self->getSubSection(
+			$misc->{subsection}, 'artcount'
+		);
 	} else {
-		$limit = $other->{count} || $slashdb->getSection($section, 'artcount');
+		$limit ||= $self->getSection($section, 'artcount');
 	}
 
 	my $storystruct = [];
 
-	my $stories = $slashdb->getStoriesEssentials($limit, $section, $tid, $misc);
+	my $stories = $self->getStoriesEssentials(
+		$limit, $section, $tid, $misc
+	);
 	my $i = 0;
+
+	# Now the loop below can be replaced by:
+	# 	return $self->displayStoryList($stories, $other)
+	# - Cliff
 	while (my $story = shift @{$stories}) {
 		my $sid = $story->[0];
 		my $title = $story->[2];
 		my $time = $story->[9];
 		my $storytime = timeCalc($time, '%B %d, %Y');
-
-		my $storyref = {};
 
 		if ($other->{titles_only}) {
 			my $storycontent = $self->getStoryTitleContent({ 
@@ -102,35 +165,36 @@ sub displayStories {
 					'time' 	=> $time, 
 					title 	=> $title
 			});
-
-			$storystruct->[$i]{sid} = $sid;
 			$storystruct->[$i]{widget} = $storycontent;
-			$i++;
-
 		} else {
-			$storyref = $self->prepareStory($sid);
+			my $storyref = $self->prepareStory($sid);
+			$storyref->{other_topics} = 
+				$self->getStoryTopics($sid, 2);
 
 			my $storycontent = '';
 			$storycontent .= $self->getStoryContent($storyref);
-			$storycontent .= $self->getLinksContent($storyref);
-			$storystruct->[$i]{sid} = $sid;
+			$storycontent .= $self->getLinksContent(
+				$storyref, $other
+			);
 			$storystruct->[$i]{widget} = $storycontent;
-			$i++;
 		} 
-
+		$storystruct->[$i]{essentials} = $story 
+			if $other->{retrieve_essentials};
+		$storystruct->[$i++]{sid} = $sid;
 	}
+
 	return($storystruct);
 }
 
 #########################################################
+
 sub prepareStory {
 	my($self, $sid) = @_;	
 
-	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 
 	# get the body, introtext... 
-	my $storyref = $slashdb->getStory($sid);
+	my $storyref = $self->getStory($sid);
 
 	return if ! $storyref;
 
@@ -139,26 +203,35 @@ sub prepareStory {
 	$storyref->{introtext} = parseSlashizedLinks($storyref->{introtext});
 	$storyref->{bodytext} =  parseSlashizedLinks($storyref->{bodytext});
 
-	$storyref->{authorref} = $slashdb->getAuthor($storyref->{uid});
+	$storyref->{authorref} = $self->getAuthor($storyref->{uid});
 
-	$storyref->{topicref} = $slashdb->getTopic($storyref->{tid});
+	$storyref->{topicref} = $self->getTopic($storyref->{tid});
 	$storyref->{topicref}{image} = "$constants->{imagedir}/topics/$storyref->{topicref}{image}" if $storyref->{topicref}{image} =~ /^\w+\.\w+$/; 
 
-	$storyref->{sectionref} = $slashdb->getSection($storyref->{section});
+	$storyref->{sectionref} = $self->getSection($storyref->{section});
 
 	return($storyref);
 }
 
 
 #########################################################
+
 sub getLinksContent { 
-	my ($self,$storyref) = @_;
+	my ($self, $storyref, $other) = @_;
+
+	if ($other->{custom_links}) {
+		# For when the default links just aren't what we want, we
+		# just build and display them in a special template.
+		return slashDisplay('customLinks', {
+			story => $storyref,
+			style => $other->{style},
+		}, { Return => 1 });
+	}
 
 	my (@links, $link, $thresh,@cclink);	
 
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
-	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 
 	# posts in each threshold
@@ -214,7 +287,7 @@ sub getLinksContent {
 	
 	if ($storyref->{section} ne $constants->{defaultsection} 
 		&& !$form->{section}) {
-		my ($section) = $slashdb->getSection($storyref->{section});
+		my ($section) = $self->getSection($storyref->{section});
 
 		push @links, getData('seclink', {
 			name	=> $storyref->{section},
@@ -233,7 +306,9 @@ sub getLinksContent {
 
 	return($storycontent);
 }
+
 #########################################################
+
 sub getStoryContent {
 	my($self, $storyref) = @_;	
 
@@ -246,7 +321,9 @@ sub getStoryContent {
 	
 	return($storycontent);
 }
+
 #########################################################
+
 sub getStoryTitleContent {
 	my($self, $storyref) = @_;	
 
