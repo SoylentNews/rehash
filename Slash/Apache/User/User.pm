@@ -633,6 +633,7 @@ Fry:I'm going to continue never washing this cheek again.
 Fry:I haven't had time off since I was twenty-one through twenty-four.
 Fry:The spoon's in the foot powder.
 Fry:You mean Bender is the evil Bender? I'm shocked! Shocked! Well not that shocked.
+Fry:I'm literally angry with rage!
 EOT
 
 1;
