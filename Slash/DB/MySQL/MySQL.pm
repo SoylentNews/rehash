@@ -870,7 +870,8 @@ sub getTemplateList {
 
 ########################################################
 sub getModeratorCommentLog {
-	my($self, $asc_desc, $limit, $type, $value) = @_;
+	my($self, $asc_desc, $limit, $type, $value, $options) = @_;
+	$options ||= {};
 	$asc_desc ||= 'ASC';
 	$asc_desc = uc $asc_desc;
 	$asc_desc = 'ASC' if $asc_desc ne 'DESC';
@@ -894,8 +895,12 @@ sub getModeratorCommentLog {
 	elsif ($type eq 'ipid') {	$where_clause = "comments.ipid=$vq         AND moderatorlog.uid=users.uid"	}
 	elsif ($type eq 'bsubnetid') {	$where_clause = "moderatorlog.subnetid=$vq AND moderatorlog.uid=users.uid"	}
 	elsif ($type eq 'bipid') {	$where_clause = "moderatorlog.ipid=$vq     AND moderatorlog.uid=users.uid"	}
-	elsif ($type eq 'global') {	$where_clause = "1=1 "								}
+	elsif ($type eq 'global') {	$where_clause = "moderatorlog.uid=users.uid "								}
 	return [ ] unless $where_clause;
+
+	my $time_clause;
+	$time_clause = " AND ts > DATE_SUB(now(), INTERVAL $options->{hours_back} HOUR)" if $options->{hours_back};
+
 
 	my $qlid = $self->_querylog_start("SELECT", "moderatorlog, users, comments");
 	my $sth = $self->sqlSelectMany("comments.sid AS sid,
@@ -911,7 +916,8 @@ sub getModeratorCommentLog {
 		 $select_extra",
 		"moderatorlog, users, comments",
 		"$where_clause
-		 AND moderatorlog.cid=comments.cid",
+		 AND moderatorlog.cid=comments.cid 
+		 $time_clause",
 		"ORDER BY ts $asc_desc $limit"
 	);
 	my(@comments, $comment);
