@@ -33,7 +33,7 @@ IF form.refresh %]
 [% p = BLOCK; PROCESS nextStory s=prev; END %]
 [% IF p %] &lt;&nbsp; [% p %][% END %]
 [% IF n %] [% IF p %] | [% END %][% n %] &nbsp;&gt; [% END %]
-<P>&nbsp;</TD><TD>&nbsp;</TD><TD WIDTH="210" ALIGN="RIGHT" VALIGN="TOP">
+<P>&nbsp;</TD><TD>&nbsp;</TD><TD WIDTH="[% constants.fancyboxwidth + 10 %]" ALIGN="RIGHT" VALIGN="TOP">
 
 [% PROCESS userboxes;
 

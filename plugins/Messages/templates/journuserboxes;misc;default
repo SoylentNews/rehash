@@ -17,7 +17,7 @@ __template__
 
 <TD>&nbsp;</TD>
 
-<TD VALIGN="TOP">[% PROCESS userboxes %]</TD>
+<TD VALIGN="TOP" WIDTH="[% constants.fancyboxwidth + 10 %]">[% PROCESS userboxes %]</TD>
 </TR>
 
 <TR>

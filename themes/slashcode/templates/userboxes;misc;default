@@ -15,6 +15,9 @@ en_US
 __name__
 userboxes
 __template__
+
+<IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="[% constants.fancyboxwidth + 10 %]" HEIGHT="1" BORDER="0">
+
 [%
 
 IF !useredit; useredit = user; END;
