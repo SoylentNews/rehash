@@ -189,23 +189,18 @@ __template__
 	[% FOR extra = extras %]
 	<TR>
 		<TD BGCOLOR="[% user.bg.3 %]"><FONT COLOR="[% user.fg.3 %]">
-		[% # yeah, I know... %]
-		<!-- extra.2 [% extra.2 %] -->
 		<B>[% extra.0 %]</B> </FONT></TD>
+		<TD BGCOLOR="[% user.bg.2 %]">
 		[% IF extra.2 == 'text' %]
-		<TD BGCOLOR="[% user.bg.2 %]">
-		<INPUT TYPE="TEXT" NAME="[% extra.1 %]" VALUE="[% storyref.${extra.1} | strip_attribute %]" SIZE="50">
+			<INPUT TYPE="TEXT" NAME="[% extra.1 %]" VALUE="[% storyref.${extra.1} | strip_attribute %]" SIZE="50">
 		[% ELSIF extra.2 == 'list' %]
-		<TD BGCOLOR="[% user.bg.2 %]">
-		[% # section:value %]
-		[% pulldown = "$extra.3:$extra.1" %]
-		[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), storyref.${extra.1}, 1, 1) %]	
+			[% pulldown = "$extra.3:$extra.1" %]
+			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), storyref.${extra.1}, 1, 1) %]	
 		[% ELSE %]
-		[% pulldown = extra.1 %]
-		<TD BGCOLOR="[% user.bg.2 %]">
-		[% pulldown_section = form.section || user.section || storyref.section %]
-		<!-- pulldown [% pulldown %] pulldown section [% pulldown_section %] -->
-		[% Slash.createSelect(pulldown, Slash.db.getDescriptions('topics_section_type', pulldown_section, pulldown), storyref.$pulldown, 1, 1) %]	
+			[% pulldown = extra.1 %]
+			<TD BGCOLOR="[% user.bg.2 %]">
+			[% pulldown_section = form.section || user.section || storyref.section %]
+			[% Slash.createSelect(pulldown, Slash.db.getDescriptions('topics_section_type', pulldown_section, pulldown), storyref.$pulldown, 1, 1) %]
 		[% END %]
 		</TD>
 	</TR>

@@ -59,12 +59,11 @@ TITLE="[% topic.alttext %]"></A>
 		[% IF extra.2 == 'text' %]
 			<INPUT TYPE="text" NAME="[% extra.1 %]" VALUE="[% submission.${extra.1} | strip_attribute %]" SIZE="50">
 		[% ELSIF extra.2 == 'list' %]
-			[% # section:value %]
 			[% pulldown = "$extra.3:$extra.1" %]
-			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), submission.${extra.1}, 1, 1) %]	
+			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), submission.${extra.1}, 1, 1) %]
 		[% ELSE %]
 			[% type = extra.1 %]
-			[% Slash.createSelect(type, Slash.db.getDescriptions('topics_section_type', section, type), submission.$type, 1, 1) %]	
+			[% Slash.createSelect(type, Slash.db.getDescriptions('topics_section_type', section, type), submission.$type, 1, 1) %]
 		[% END %]
 	[% END %]
 		<BR>
