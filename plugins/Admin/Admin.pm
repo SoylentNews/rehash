@@ -43,7 +43,6 @@ sub getAccesslogAbusersByID {
 	my($self, $options) = @_;
 	my $min_id = $options->{min_id} || 0;
 	my $thresh_count = $options->{thresh_count} || 100;
-	my $thresh_secs = $options->{thresh_secs} || 5;
 	my $thresh_hps = $options->{thresh_hps} || 0.1;
 	my $limit = 500;
 	my $ar = $self->sqlSelectAllHashrefArray(
@@ -55,7 +54,6 @@ sub getAccesslogAbusersByID {
 		"id >= $min_id",
 		"GROUP BY host_addr,op
 		 HAVING c >= $thresh_count
-			AND secs >= $thresh_secs
 			AND hps >= $thresh_hps
 		 ORDER BY maxts DESC, c DESC
 		 LIMIT $limit"

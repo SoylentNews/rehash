@@ -1710,7 +1710,6 @@ sub displayRecentRequests {
 
 	my $options = { min_id => $min_id };
 	$options->{thresh_count} = defined($form->{thresh_count}) ? $form->{thresh_count} : 100;
-	$options->{thresh_secs}  = defined($form->{thresh_secs} ) ? $form->{thresh_secs}  : 5;
 	$options->{thresh_hps}   = defined($form->{thresh_hps}  ) ? $form->{thresh_hps}   : 0.1;
 
 	my $start_time = Time::HiRes::time;
@@ -1727,7 +1726,6 @@ sub displayRecentRequests {
 		min_id_ts	=> $min_id_ts,
 		max_id		=> $max_id,
 		thresh_count	=> $options->{thresh_count},
-		thresh_secs	=> $options->{thresh_secs},
 		thresh_hps	=> $options->{thresh_hps},
 		data		=> $data,
 		select_secs	=> sprintf("%0.3f", $duration),
