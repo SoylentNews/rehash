@@ -860,13 +860,15 @@ sub validateComment {
 	}
 
 	# New check (March 2004):  depending on the settings of
-	# two vars and whether the user is posting anonymous, we
+	# a var and whether the user is posting anonymous, we
 	# might scan the IP they're coming from to see if we can use
 	# some commonly-used proxy ports to access our own site.
 	# If we can, they're coming from an open HTTP proxy, which
 	# we don't want to allow to post.
-	if ($constants->{comments_portscan_all_for_proxy}
-		|| $user->{is_anon} && $constants->{comments_portscan_anon_for_proxy}) {
+	if ($constants->{comments_portscan}
+		&& ( $constants->{comments_portscan} == 2
+			|| $constants->{comments_portscan} == 1 && $user->{is_anon} )
+	) {
 		my $is_trusted = $slashdb->checkIsTrusted($user->{ipid});
 		if ($is_trusted ne 'yes') {
 #use Time::HiRes; my $start_time = Time::HiRes::time;
