@@ -559,7 +559,6 @@ INSERT INTO vars (name, value, description) VALUES ('cookiesecure','1','Set the 
 
 # End of T_2_3_0_36, Start of T_2_3_0_37
 
-
 # from foundries integrations
 ALTER TABLE string_param MODIFY COLUMN code varchar(128) NOT NULL;
 ALTER TABLE menus MODIFY COLUMN label varchar(255) DEFAULT '' NOT NULL;
@@ -589,3 +588,6 @@ ALTER TABLE subsections ADD COLUMN alttext VARCHAR(40) NOT NULL;
 # SLASHCODE LAST UPDATED HERE
 
 # End of T_2_3_0_38
+
+ALTER TABLE metamodlog ADD INDEX mmid (mmid);
+
