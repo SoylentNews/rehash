@@ -2847,3 +2847,9 @@ INSERT INTO vars (name, value, description) VALUES ('hc_q1_linethick', '2', 'For
 
 # End of T_2_5_0_46, Start of T_2_5_0_47 - 2005/02/02
 
+ALTER TABLE remarks ADD type ENUM("system","user") DEFAULT "user";
+
+# These are only necessary if the Subscribe plugin is installed
+INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (15, 'Subscription Running Low', 1, '', 'now', 1);
+INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (16, 'Subscription Expired', 1, '', 'now', 1);
+

@@ -688,6 +688,7 @@ CREATE TABLE remarks (
 	stoid MEDIUMINT UNSIGNED NOT NULL,
 	time DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
 	remark varchar(100),
+	type ENUM("system","user") DEFAULT "user",
 	PRIMARY KEY (rid),
 	INDEX uid (uid),
 	INDEX stoid (stoid),
