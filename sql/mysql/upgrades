@@ -2839,12 +2839,6 @@ ALTER TABLE users MODIFY sig varchar(200);
 # Change for plugins/HumanConf (ignore if not using that plugin)
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_linethick', '2', 'For question 1 (images), thickness of the lines that are drawn to confuse OCR');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_46, Start of T_2_5_0_47 - 2005/02/02
 
 ALTER TABLE remarks ADD type ENUM("system","user") DEFAULT "user";
@@ -2853,3 +2847,10 @@ ALTER TABLE remarks ADD type ENUM("system","user") DEFAULT "user";
 INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (15, 'Subscription Running Low', 1, '', 'now', 1);
 INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (16, 'Subscription Expired', 1, '', 'now', 1);
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
+
+# End of T_2_5_0_47, Start of T_2_5_0_48 - 2005/02/08
