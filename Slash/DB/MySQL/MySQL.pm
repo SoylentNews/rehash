@@ -312,7 +312,8 @@ sub createComment {
 	my $comment_text = $comment->{comment};
 	delete $comment->{comment};
 	$comment->{signature} = md5_hex($comment_text);
-	$comment->{-date} = 'now()';
+	$comment->{-date} = 'NOW()';
+	$comment->{len} = length($comment_text);
 	$comment->{pointsorig} = $comment->{points} || 0;
 
 	$self->{_dbh}->{AutoCommit} = 0;
