@@ -3798,7 +3798,7 @@ sub getTopNewsstoryTopics {
 	my($self, $all) = @_;
 	my $when = "AND to_days(now()) - to_days(time) < 14" unless $all;
 	my $order = $all ? "ORDER BY alttext" : "ORDER BY cnt DESC";
-	my $topics = $self->sqlSelectAll("topics.tid, alttext, image, width, height, count(*) as cnt",
+	my $topics = $self->sqlSelectAllHashrefArray("topics.tid as tid, alttext, count(*) as cnt",
 		'topics,stories',
 		"topics.tid=stories.tid
 		$when
@@ -6300,8 +6300,8 @@ sub getTopicImage {
 sub getTopicImageBySection {
 	my($self, $topic, $section, $values, $cache) = @_;
 	my $image_sections = $self->getDescriptions("topic_images_section");
+	# Yes the hash lookup is right, review the getDescription call if you have questions
 	my $image_id = $image_sections->{"$topic->{tid}|$section"} || $topic->{default_image};	
-#	print STDERR "TOPIC $topic->{tid}|$section:$topic->{default_image}:$image_id\n";
 	my $answer = _genericGetCache({
 		table		=> 'topic_images',
 		table_prime	=> 'id',

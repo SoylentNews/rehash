@@ -71,12 +71,10 @@ sub topTopics {
 	my $constants = getCurrentStatic();
 	my $section = $reader->getSection();
 
-	my(@topics, $topics);
-	$topics = $reader->getTopNewsstoryTopics($form->{all});
+	my $topics = $reader->getTopNewsstoryTopics($form->{all});
 
-	for (@$topics) {
-		my $top = $topics[@topics] = {};
-		@{$top}{qw(tid alttext image width height cnt)} = @$_;
+	for my $top (@$topics) {
+		print STDERR "TOPIC $top->{name} \n";
 		$top->{count} = $reader->countStory($top->{tid});
 
 		my $limit = $top->{cnt} > 10
@@ -91,7 +89,7 @@ sub topTopics {
 	slashDisplay('topTopics', {
 		title		=> 'Recent Topics',
 		width		=> '90%',
-		topics		=> \@topics,
+		topics		=> $topics,
 		currtime	=> timeCalc(scalar localtime),
 	});
 }
