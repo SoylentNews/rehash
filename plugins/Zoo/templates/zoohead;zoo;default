@@ -25,7 +25,7 @@ __template__
 [% PROCESS user_titlebar title=title tab_selected=tab_selected_2 %]
 [% UNLESS page == 'relation' %]
 	[% IF uid == user.uid && !user.is_anon %]
-		<TABLE BGCOLOR="[% user.bg.1 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
+		<TABLE BGCOLOR="[% user.bg.5 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
 			<TR>
 				<TD><FONT SIZE=-1>
 					[ <A HREF="[% constants.rootdir %]/my/friends/friends">Friends of Friends</A> | <A HREF="[% constants.rootdir %]/my/friends/foes">Foes of Friends</A> ]
@@ -34,7 +34,7 @@ __template__
 			</TR>
 		</TABLE>
 	[% ELSE %]
-		<TABLE BGCOLOR="[% user.bg.1 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
+		<TABLE BGCOLOR="[% user.bg.5 %]" BORDER="0"  WIDTH="100%" CELLPADDING="2" CELLSPACING="0">
 			<TR>
 				<TD><FONT SIZE=-1>
 					[ <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/friends">Friends of Friends</A> | <A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/friends/foes">Foes of Friends</A> ]
