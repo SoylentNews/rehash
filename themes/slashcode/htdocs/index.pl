@@ -44,7 +44,7 @@ sub main {
 	my $artcount = $user->{is_anon} ? $section->{artcount} : $user->{maxstories};
 
 	my $title = getData('head', { section => $section });
-	header($title, $section->{section}, { tab_selected => 'home' });
+	header($title, $section->{section});
 
 	my $limit = $section->{type} eq 'collected' ?
 		$user->{maxstories} : $artcount;

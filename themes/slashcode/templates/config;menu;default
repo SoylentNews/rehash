@@ -15,7 +15,6 @@ __name__
 config
 __template__
 [% tabs = [
-	{ link = "/",				label = "Home",		sel_label = "home" },
 	{ link = "/admin.pl",			label = "Stories",	sel_label = "stories" },
 	{ link = "/admin.pl?op=topics",		label = "Topics",	sel_label = "topics" },
 	{ link = "/admin.pl?op=blocks",		label = "Blocks",	sel_label = "blocks" },

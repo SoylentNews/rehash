@@ -16,7 +16,6 @@ info
 __template__
 
 [% tabs = [
-	{ link = "/",				label = "Home",			sel_label = "home" },
 	{ link = "/admin.pl",			label = "Stories",		sel_label = "stories" },
 	{ link = "/admin.pl?op=siteinfo",	label = "Site",			sel_label = "site" },
 	{ link = "/users.pl?op=topabusers",	label = "Abusers",		sel_label = "abusers" },

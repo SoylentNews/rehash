@@ -20,7 +20,6 @@ __template__
 [% END %]
 [% subs = Slash.db.getSubmissionCount() %]
 [% tabs = [
-	{ link = "/",				label = "Home",			sel_label = "home" },
 	{ link = "/admin.pl",			label = "Stories",		sel_label = "stories" },
 	{ link = "/admin.pl?op=edit",		label = "New",			sel_label = "new" },
 	{ link = "/submit.pl?op=list",		label = "$subs&nbsp;Submissions", sel_label = "submissions" },
