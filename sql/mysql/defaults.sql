@@ -608,6 +608,9 @@ INSERT INTO vars (name, value, description) VALUES ('admin_check_clearpass', '0'
 INSERT INTO vars (name, value, description) VALUES ('admin_clearpass_disable', '0', 'Should admins who send their Slash passwords in the clear have their admin privileges removed until they change their passwords?');
 INSERT INTO vars (name, value, description) VALUES ('admin_formkeys', '0', 'Do admins have to bother with formkeys?');
 INSERT INTO vars (name, value, description) VALUES ('admin_secure_ip_regex', '^127\\.', 'IP addresses or networks known to be secure.');
+INSERT INTO vars (name, value, description) VALUES ('admin_story_lookahead_default', 365*86400, 'In the admin.pl storylist, how many seconds to look into the future for all stories by default (but see skins_admin_story_lookahead_mainpage)');
+INSERT INTO vars (name, value, description) VALUES ('admin_story_lookahead_infinite', '0', 'In the admin.pl storylist, always show all future stories no matter how far in the future?');
+INSERT INTO vars (name, value, description) VALUES ('admin_story_lookahead_mainpage', 72*3600, 'In the admin.pl storylist, how many seconds to look into the future for stories on the mainpage');
 INSERT INTO vars (name, value, description) VALUES ('admin_timeout','30','time in minutes before idle admin session ends');
 INSERT INTO vars (name, value, description) VALUES ('adminmail','admin@example.com','All admin mail goes here');
 INSERT INTO vars (name, value, description) VALUES ('adminmail_ban','admin@example.com','All admin mail about users being banned goes here');
