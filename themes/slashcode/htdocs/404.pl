@@ -24,7 +24,7 @@ sub main {
 
 	header('404 File Not Found');
 
-	my($new_url, $errnum) = fixHref($url, 1);
+	my($new_url, $errnum) = fixHref($ENV{REQUEST_URI}, 1);
 
 	if ($errnum && $errnum !~ /^\d+$/) {
 		slashDisplay('main', {

@@ -37,7 +37,6 @@ sub set {
 	my(%j1, %j2);
 	%j1 = %$values;
 	$j2{article}  = delete $j1{article};
-	$j2{original} = delete $j1{original};
 
 	$self->sqlUpdate('journals', \%j1, "id=$id");
 	$self->sqlUpdate('journals_text', \%j2, "id=$id");
@@ -51,7 +50,7 @@ sub getsByUid {
 	$where .= " AND journals.id = $id" if $id;
 
 	my $answer = $self->sqlSelectAll(
-		'date, article, description, journals.id',
+		'date, article, description, journals.id, posttype',
 		'journals, journals_text', $where, $order
 	);
 	return $answer;
@@ -67,7 +66,7 @@ sub list {
 }
 
 sub create {
-	my($self, $description, $article, $original, $posttype) = @_;
+	my($self, $description, $article, $posttype) = @_;
 	return unless $description;
 	return unless $article;
 	my $uid = $ENV{SLASH_USER};
@@ -82,7 +81,6 @@ sub create {
 	$self->sqlInsert("journals_text", {
 		id		=> $id,
 		article 	=> $article,
-		original	=> $original,
 	});
 
 	my($date) = $self->sqlSelect('date', 'journals', "id=$id");
@@ -203,7 +201,7 @@ sub get {
 		}
 	} else {
 		$answer = $self->sqlSelectHashref('*', 'journals', "id=$id");
-		@{$answer}{qw(article original)} = $self->sqlSelect('article,original', 'journals_text', "id=$id");
+		($answer->{article}) = $self->sqlSelect('article', 'journals_text', "id=$id");
 	}
 
 	return $answer;

@@ -60,7 +60,7 @@ sub main {
 		$r->status(200);
 		$r->send_http_header;
 		$r->rflush;
-		$r->print(displayRSS($form, $journal));
+		$r->print(displayRSS($form, $journal, $constants));
 		$r->status(200);
 	} else {
 		my $uid = $form->{'uid'};
@@ -92,28 +92,17 @@ sub displayTop {
 	my($form, $journal, $constants) = @_;
 	my $journals;
 	$journals = $journal->top($constants->{journal_top});
-	slashDisplay('journaltop', {
-		journals => $journals,
-		url => '/journal.pl',
-	});
+	slashDisplay('journaltop', { journals => $journals });
 	$journals = $journal->topFriends($constants->{journal_top});
-	slashDisplay('journaltop', {
-		journals => $journals,
-		url => '/journal.pl',
-	});
+	slashDisplay('journaltop', { journals => $journals });
 	$journals = $journal->topRecent($constants->{journal_top});
-	slashDisplay('journaltop', {
-		journals => $journals,
-		url => '/journal.pl',
-	});
+	slashDisplay('journaltop', { journals => $journals });
 }
 
 sub displayFriends {
 	my($form, $journal) = @_;
 	my $friends = $journal->friends();
-	slashDisplay('journalfriends', {
-		friends	=> $friends,
-	});
+	slashDisplay('journalfriends', { friends => $friends });
 }
 
 sub displayRSS {
@@ -151,7 +140,7 @@ sub displayRSS {
 			$rss->add_item(
 				title	=> xmlencode($article->[2]),
 				'link'	=> xmlencode("$constants->{absolutedir}/journal.pl?op=get&id=$article->[3]"),
-				description => xmlencode("$nickname wrote: " . $article->[1])
+				description => xmlencode("$nickname wrote: " . strip_mode($article->[1], $article->[4]))
 		);
 	}
 	return $rss->as_string;
@@ -179,13 +168,21 @@ sub displayArticle {
 	for my $article (@$articles) {
 		my($date_current, $time) =  split / /, $article->[0], 2;	
 		if ($date eq $date_current) {
-			push @{$collection->{article}} , { article =>  $article->[1], date =>  $article->[0], description => $article->[2]};
+			push @{$collection->{article}}, {
+				article		=> strip_mode($article->[1], $article->[4]),
+				date		=> $article->[0],
+				description	=> $article->[2]
+			};
 		} else {
 			push @sorted_articles, $collection if ($date and (keys %$collection));
 			$collection = {};
 			$date = $date_current;
 			$collection->{day} = $date;
-			push @{$collection->{article}} , { article =>  $article->[1], date =>  $article->[0], description => $article->[2]};
+			push @{$collection->{article}}, {
+				article		=> strip_mode($article->[1], $article->[4]),
+				date		=> $article->[0],
+				description	=> $article->[2]
+			};
 		}
 	}
 	push @sorted_articles, $collection;
@@ -220,18 +217,17 @@ sub listArticle {
 
 sub saveArticle {
 	my($form, $journal) = @_;
-	my $article = strip_mode($form->{article}, $form->{posttype});
 	my $description = strip_nohtml($form->{description});
 
 	if ($form->{id}) {
 		$journal->set($form->{id}, {
 			description	=> $description,
-			article		=> $article,
-			original	=> $form->{article},
+			article		=> $form->{article},
 			posttype	=> $form->{posttype},
 		});
 	} else {
-		$journal->create($description, $article, $form->{article}, $form->{posttype});
+		$journal->create($description, $form->{article},
+			$form->{article}, $form->{posttype});
 	}
 	listArticle(@_);
 }
@@ -260,21 +256,23 @@ sub editArticle {
 	my($form, $journal, $constants) = @_;
 	# This is where we figure out what is happening
 	my $article = {};
+	my $posttype;
 
 	if ($form->{state}) {
 		$article->{date}	= scalar(localtime(time()));
 		$article->{article}	= $form->{article};
 		$article->{description}	= $form->{description};
 		$article->{id}		= $form->{id};
+		$posttype		= $form->{posttype};
 	} else {
-		$article = $journal->get($form->{id}) if $form->{id};
+		$article  = $journal->get($form->{id}) if $form->{id};
+		$posttype = $article->{posttype};
 	}
-	
+
+	$posttype ||= getCurrentUser('posttype');
+
 	if ($article->{article}) {
-		# don't strip if we can get original from DB
-		my $strip_art = $article->{original}
-			? $article->{article}
-			: strip_mode($article->{article}, $form->{posttype});
+		my $strip_art = strip_mode($article->{article}, $posttype);
 		my $strip_desc = strip_nohtml($article->{description});
 		my $disp_article = {
 			date		=> $article->{date},
@@ -293,8 +291,6 @@ sub editArticle {
 
 	my $slashdb = getCurrentDB();
 	my $formats = $slashdb->getDescriptions('postmodes');
-	my $posttype = $form->{posttype} || $article->{posttype} || getCurrentUser('posttype');
-
 	my $format_select = createSelect('posttype', $formats, $posttype, 1);
 
 	slashDisplay('journaledit', {

@@ -14,7 +14,6 @@ DROP TABLE IF EXISTS journals_text;
 CREATE TABLE journals_text (
 	id int(5) NOT NULL,
 	article text,
-	original text,
 	PRIMARY KEY (id)
 );
 
