@@ -75,30 +75,6 @@ __template__
 		Search [% constants.sitename %]
 	[% END %]
 
-[% CASE 'stories_rss_title' %]
-	[% returnme.data_constant = 1 %]
-	constants.sitename Story Search
-
-[% CASE 'comments_rss_title' %]
-	[% returnme.data_constant = 1 %]
-	constants.sitename Comment Search
-
-[% CASE 'journals_rss_title' %]
-	[% returnme.data_constant = 1 %]
-	constants.sitename Journal Search
-
-[% CASE 'polls_rss_title' %]
-	[% returnme.data_constant = 1 %]
-	constants.sitename Poll Search
-
-[% CASE 'users_rss_title' %]
-	[% returnme.data_constant = 1 %]
-	constants.sitename Users Search
-
-[% CASE 'submissions_rss_title' %]
-	[% returnme.data_constant = 1 %]
-	constants.sitename Submission Search
-
 [% END %]
 
 __seclev__

@@ -53,19 +53,18 @@ sub main {
  
 	my $rss = $form->{content_type} eq 'rss' && $constants->{search_rss_enabled};
 
-	unless ($rss) {
-		my $query = strip_notags($form->{query});
-		my $header_title   = getData('search_header_title',   { text => $query });
-		my $titlebar_title = getData('search_titlebar_title', { text => $query });
-		header($header_title) or return;
-		titlebar('100%', $titlebar_title);
-	}
+	my $querystring    = strip_notags($form->{query});
+	my $header_title   = getData('search_header_title',   { text => $querystring });
+	my $titlebar_title = getData('search_titlebar_title', { text => $querystring });
 
 	# Here, panic mode is handled without needing to call the
 	# individual search subroutines;  we're going to tell the
 	# user the same thing in each case anyway.
 	if ($constants->{panic} >= 1 || $constants->{search_google} || !$searchDB) {
+		header($header_title) or return;
+		titlebar('100%', $titlebar_title);
 		slashDisplay('nosearch');
+		footer();
 
 	# this is the bulk of it, where the MAGIC happens!
 	} elsif ($ops->{$form->{op}}) {
@@ -78,7 +77,7 @@ sub main {
 		$query{topic} = $topics;
 
 		my %opts = (
-			# XXX for now, we accept any value for sort,
+			# we accept any value for sort,
 			# and deal with filtering in the API
 			sort		=> $form->{sort},
 			records_start	=> $form->{start},
@@ -107,18 +106,22 @@ sub main {
 				op	=> $form->{op},
 				rss	=> $return->{rss},
 				results	=> $return->{results},
-			}, { Return => 0 });
+			}, { Return => 0, Nocomm => 1 });
 
 			if (@{$return->{rss}{items}}) {
 				xmlDisplay(rss => $return->{rss});
 			} else {
-				# we do this here, because we might not know
+				# we redirect here, because we might not know
 				# if the op can do RSS until we get the result
 				redirect("$constants->{rootdir}/searchtoo.pl?start=$opts{records_start}&$args");
 				return;
 			}
 				
 		} else {
+			# XXX add RSS linkrel here ? ...
+			header($header_title) or return;
+			titlebar('100%', $titlebar_title);
+
 			slashDisplay('searchform', { op => $form->{op} });
 
 			if (! @{$return->{results}{records}}) {
@@ -131,10 +134,10 @@ sub main {
 					args	=> $args,
 				});
 			}
+
+			footer();
 		}
 	}
-
-	footer() unless $rss;
 
 	my $keys = join '|', keys %$ops;
 	writeLog($form->{query}) if $form->{op} =~ /^(?:$keys)$/;
@@ -148,19 +151,12 @@ sub defaultSearch {
 	$return{results}   = $searchDB->findRecords($form->{op} => $query, $opts);
 
 	(my $singular_name = $form->{op}) =~ s/([^s])s$/$1/;
-	$singular_name = 'story' if $singular_name eq 'storie';
+	$singular_name     = 'story' if $singular_name eq 'storie';
 
 	$return{template}  = $singular_name . 'search';
-	$return{noresults} = 'no' . $form->{op};
+	$return{noresults} = getData('no' . $form->{op});
 
-	if ($rss) {
-		$return{rss}{channel} = {
-			title		=> getData($form->{op} . '_rss_title'),
-			'link'		=> "$gSkin->{absolutedir}/searchtoo.pl",
-		};
-		$return{rss}{description} = getData($form->{op} . '_rss_description')
-			|| $return{rss}{title};
-	}
+	$return{rss}       = {} if $rss; # populate via searchrss template
 
 	return \%return;
 }

@@ -187,6 +187,8 @@ sub testSearch {
 <p>
 EOT
 
+	$return{rss} = {} if $rss;
+
 	return \%return;
 }
 
