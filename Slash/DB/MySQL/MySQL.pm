@@ -4156,7 +4156,7 @@ sub _get_insert_and_where_accesslist {
 				"ipid = '$user_check->{md5id}'",
 				"subnetid = '$user_check->{md5id}'",
 			];
-			$insert_hr->{ipid} = $user_check->{ipid};
+			$insert_hr->{ipid} = $insert_hr->{subnetid} = $user_check->{md5id};
 		} else {
 			return undef;
 		}
