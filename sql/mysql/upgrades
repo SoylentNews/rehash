@@ -14,17 +14,17 @@ UPDATE users_param SET value = CONCAT("+",value) WHERE (name LIKE "reason%" OR n
 CREATE TABLE temp_zoo SELECT * FROM people;
 DROP TABLE IF EXISTS people;
 CREATE TABLE people (
-										 	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
-											uid MEDIUMINT UNSIGNED NOT NULL,
-											person MEDIUMINT UNSIGNED NOT NULL,
-											type enum("friend","foe"),
-											perceive enum("fan","freak"),
-											fof MEDIUMINT UNSIGNED NOT NULL  DEFAULT 0, 
-											eof MEDIUMINT UNSIGNED NOT NULL  DEFAULT 0,
-											UNIQUE degree_of_separation (uid,person),
-											PRIMARY KEY (id)
-											);
-INSERT INTO people (uid,person,type) VALUES  SELECT uid, person, type from temp_zoo;
+  id MEDIUMINT UNSIGNED NOT NULL auto_increment,
+  uid MEDIUMINT UNSIGNED NOT NULL,
+  person MEDIUMINT UNSIGNED NOT NULL,
+  type enum("friend","foe"),
+  perceive enum("fan","freak"),
+  fof MEDIUMINT UNSIGNED NOT NULL  DEFAULT 0, 
+  eof MEDIUMINT UNSIGNED NOT NULL  DEFAULT 0,
+  UNIQUE degree_of_separation (uid,person),
+  PRIMARY KEY (id)
+);
+INSERT INTO people (uid,person,type) SELECT uid, person, type from temp_zoo;
 
 
 # This was removed from the bonus system a while ago. -Brian
