@@ -26,7 +26,7 @@ __template__
 		}) %][% END %]
 
 		[% IF user.mode == 'parents' && !form.pid%]
-			| <a href="[% constants.rootdir %]comments.pl?sid=[% sid %]&amp;threshold=[% user.threshold %]&amp;commentsort=[% user.commentsort %]&amp;mode=[% user.mode %]&amp;cid=[% cid %]&amp;pid=[% cid %]">View this thread</a>
+			| <a href="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;threshold=[% user.threshold %]&amp;commentsort=[% user.commentsort %]&amp;mode=[% user.mode %]&amp;cid=[% cid %]&amp;pid=[% cid %]">View this thread</a>
 		[% END %]
 
 		[% IF !(user.state.discussion_archived) && (original_pid || can_mod || user.is_admin) %] | [% END %]
