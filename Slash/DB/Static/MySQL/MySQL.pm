@@ -566,7 +566,7 @@ sub updateLastaccess {
 				);
 				# If there is more to do, sleep for a moment so we don't
 				# hit the DB too hard.
-				Time::HiRes::sleep(0.2) if @uids;
+				sleep 2 if @uids;
 			}
 		}
 	} else {
