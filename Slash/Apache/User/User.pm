@@ -627,8 +627,12 @@ sub userdir_handler {
 	# will change if somehow Apache/mod_perl no longer decodes before
 	# returning the data. -- pudge
 	if ($saveuri =~ m[^/(?:%7[eE]|~)(.+)]) {
-		my($nick, $op, $extra) = split /\//, $1, 4;
-		for ($nick, $op, $extra) {
+		my($string, $query) = ($1, '');
+		if ($string =~ s/\?(.+)$//) {
+			$query = $1;
+		}
+		my($nick, $op, $extra, $more) = split /\//, $string, 4;
+		for ($nick, $op, $extra, $more) {
 			s/%([a-fA-F0-9]{2})/pack('C', hex($1))/ge;
 		}
 
@@ -651,13 +655,23 @@ sub userdir_handler {
 
 		} elsif ($op eq 'journal') {
 			my $args = "op=display&nick=$nick&uid=$uid";
-			if ($extra && $extra =~ /^\d+$/) {
-				$args .= "&id=$extra";
-			} elsif ($extra && $extra =~ /^rss$/) {
-				$args .= "&content_type=rss";
-			} elsif ($extra && $extra =~ /^friends$/) {
-				$args =~ s/display/friendview/;
+			$extra .= '/' . $more;
+			if ($extra) {
+				if ($extra =~ /^(\d+)\/$/) {
+					$args .= "&id=$1";
+				}
+				if ($extra =~ s/^friends\///) {
+					$args =~ s/display/friendview/;
+				}
+				if ($extra =~ /^rss(\/(\d+::\w+)?)?$/) {
+					if ($2) {
+						(my $logtoken = $2) =~ s/::/%3A%3A/;
+						$args .= "&logtoken=$2";
+					}
+					$args .= "&content_type=rss";
+				}
 			}
+			$args .= "&$query";
 			$r->args($args);
 			$r->uri('/journal.pl');
 			$r->filename($constants->{basedir} . '/journal.pl');

@@ -1962,6 +1962,13 @@ sub createAccessLog {
 	);
 	$status ||= $r->status;
 	my $skid = $reader->getSkidFromName($skin_name);
+
+	my $query_string = $ENV{QUERY_STRING} || 'none';
+	my $referrer     = $r->header_in("Referer");
+	if (!$referrer && $query_string =~ /\bfrom=(\w+)\b/) {
+		$referrer = $1;
+	}
+
 	my $insert = {
 		host_addr	=> $ipid,
 		subnetid	=> $subnetid,
@@ -1971,13 +1978,13 @@ sub createAccessLog {
 		bytes		=> $bytes,
 		op		=> $op,
 		-ts		=> 'NOW()',
-		query_string	=> $ENV{QUERY_STRING} || 'none',
+		query_string	=> $query_string,
 		user_agent	=> $ENV{HTTP_USER_AGENT} || 'undefined',
 		duration	=> $duration,
 		local_addr	=> $local_addr,
 		static		=> $user->{state}{_dynamic_page} ? 'no' : 'yes',
 		secure		=> $user->{state}{ssl} || 0,
-		referer		=> $r->header_in("Referer"),
+		referer		=> $referrer,
 		status		=> $status,
 	};
 	return if !$user->{is_admin} && $constants->{accesslog_disable};

@@ -17,11 +17,23 @@ __template__
 	(constants.rss_allow_index > 1 && user.is_subscriber)
 		||
 	(constants.rss_allow_index > 2 && !user.is_anon)
-))
+));
+   IF rsslink_style == 'journal'
+%][% Slash.root2abs() %]/~[% link.nickname | strip_paramattr %]/journal/rss/[% user.logtoken | fixparam %][%
+   ELSIF rsslink_style == 'journalfriends'
+%][% Slash.root2abs() %]/~[% link.nickname | strip_paramattr %]/journal/friends/rss/[% user.logtoken | fixparam %][%
+   ELSE
 %][% Slash.root2abs() %]/index.pl?content_type=rss&amp;logtoken=[% user.logtoken | fixparam %][%
-ELSE
+   END;
+ELSE;
+   IF rsslink_style == 'journal'
+%][% Slash.root2abs() %]/~[% link.nickname | strip_paramattr %]/journal/rss[%
+   ELSIF rsslink_style == 'journalfriends'
+%][% Slash.root2abs() %]/~[% link.nickname | strip_paramattr %]/journal/friends/rss[%
+   ELSE
 %][% gSkin.rootdir %]/[% Slash.sitename2filename(gSkin.name) %].rss[%
-END -%]
+   END;
+END; rsslink_style = '' -%]
 __seclev__
 10000
 __version__

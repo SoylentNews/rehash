@@ -300,7 +300,11 @@ sub create {
 						$encoded_item->{$key} = $desc if $desc;
 					}
 				} else {
-					$encoded_item->{$key} = $self->encode($item->{$key}, $key);
+					my $data = $item->{$key};
+					if ($key eq 'link') {
+						$data = _tag_link($data);
+					}
+					$encoded_item->{$key} = $self->encode($data, $key);
 				}
 			}
 
@@ -366,8 +370,10 @@ sub rss_story {
 
 	$encoded_item->{title}  = $self->encode($story->{title})
 		if $story->{title};
-	$encoded_item->{'link'} = $self->encode("$channel->{'link'}article.pl?sid=$story->{sid}", 'link')
-		if $story->{sid};
+	$encoded_item->{'link'} = $self->encode(
+		_tag_link("$channel->{'link'}article.pl?sid=$story->{sid}"),
+		'link'
+	) if $story->{sid};
 
 	if ($version >= 0.91) {
 		my $desc = $self->rss_item_description($item->{description} || $story->{introtext});
@@ -469,6 +475,15 @@ sub rss_item_description {
 	}
 
 	return $desc;
+}
+
+sub _tag_link {
+	my($link) = @_;
+	if ($link =~ /\?/) {
+		$link .= '&from=rss';
+	} else {
+		$link .= '?from=rss';
+	}
 }
 
 1;

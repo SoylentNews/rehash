@@ -205,28 +205,44 @@ sub searchUsers {
 sub displayRSS {
 	my($journal, $constants, $user, $form, $reader, $gSkin) = @_;
 
-	my $juser	= $form->{uid} ? $reader->getUser($form->{uid}, ['nickname', 'fakeemail']) : $user;
-	my $uid		= $form->{uid} || $user->{uid};
-	my $nickname	= $juser->{nickname};
-	my $tree	= $reader->getTopicTree;
+	my($juser, $articles);
+	if ($form->{uid} || $form->{nick}) {
+		my $uid = $form->{uid} ? $form->{uid} : $reader->getUserUID($form->{nick});
+		$juser  = $reader->getUser($uid);
+	} else {
+		$juser  = $user;
+	}
 
-	my $articles = $journal->getsByUid($uid, 0, 15);
+	if ($form->{op} eq 'friendview') {
+		my $zoo   = getObject('Slash::Zoo');
+		my $uids  = $zoo->getFriendsUIDs($juser->{uid});
+		$articles = $journal->getsByUids($uids, 0, $constants->{journal_default_display});
+	} else {
+		$articles = $journal->getsByUid($juser->{uid}, 0, $constants->{journal_default_display});
+	}
+
 	my @items;
-	my $usertext = $nickname;
 	for my $article (@$articles) {
+		my($nickname, $juid);
+		if ($form->{op} eq 'friendview') {
+			$nickname = $article->[8];
+			$juid     = $article->[7];
+		} else {
+			$nickname = $juser->{nickname};
+			$juid     = $juser->{uid};
+		}
+
 		push @items, {
 			story		=> {
 				'time'		=> $article->[0],
+				uid		=> $juid,
+				tid		=> $article->[5],
 			},
 			title		=> $article->[2],
 			description	=> strip_mode($article->[1], $article->[4]),
 			'link'		=> "$gSkin->{absolutedir}/~" . fixparam($nickname) . "/journal/$article->[3]",
-			creator		=> $usertext,
-			subject		=> $tree->{$article->[5]}{keyword},
 		};
 	}
-
-	$usertext .= " <$juser->{fakeemail}>" if $juser->{fakeemail};
 
 	my $rss_html = $constants->{journal_rdfitemdesc_html} && (
 		$user->{is_admin}
@@ -234,14 +250,27 @@ sub displayRSS {
 		($constants->{journal_rdfitemdesc_html} == 1)
 			||
 		($constants->{journal_rdfitemdesc_html} > 1 && $user->{is_subscriber})
+			||
+		($constants->{journal_rdfitemdesc_html} > 2 && !$user->{is_anon})
 	);
+
+	my($title, $journals, $link);
+	if ($form->{op} eq 'friendview') {
+		$title    = "$juser->{nickname}'s Friends'";
+		$journals = 'Journals';
+		$link     = '/journal/friends/';
+	} else {
+		$title    = "$juser->{nickname}'s";
+		$journals = 'Journal';
+		$link     = '/journal/';
+	}
 
 	xmlDisplay(rss => {
 		channel => {
-			title		=> "${nickname}'s $constants->{sitename} Journal",
-			description	=> "${nickname}'s Journal",
-			'link'		=> "$gSkin->{absolutedir}/~" . fixparam($nickname) . "/journal/",
-			creator		=> $usertext,
+			title		=> "$title $journals",
+			description	=> "$title $constants->{sitename} $journals",
+			'link'		=> "$gSkin->{absolutedir}/~" . fixparam($juser->{nickname}) . $link,
+			creator		=> $juser->{nickname},
 		},
 		image	=> 1,
 		items	=> \@items,
@@ -297,7 +326,7 @@ sub displayArticleFriends {
 	my($journal, $constants, $user, $form, $reader) = @_;
 	my($date, $forward, $back, $nickname, $uid);
 	my @collection;
-	my $zoo   = getObject('Slash::Zoo');
+	my $zoo = getObject('Slash::Zoo');
 
 	if ($form->{uid} || $form->{nick}) {
 		$uid		= $form->{uid} ? $form->{uid} : $reader->getUserUID($form->{nick});
