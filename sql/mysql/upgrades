@@ -1113,7 +1113,6 @@ ALTER TABLE moderatorlog ADD INDEX uid (uid), ADD INDEX cuid (cuid);
 
 ALTER TABLE accesslog ADD COLUMN duration FLOAT DEFAULT 0.0 NOT NULL, ADD COLUMN local_addr VARCHAR(16) DEFAULT '' NOT NULL;
 
-# USEPERL LAST UPDATED HERE
 # DEVCHANNEL LAST UPDATED HERE
 
 # End of T_2_3_0_63, Start of T_2_3_0_64
@@ -1129,3 +1128,5 @@ INSERT INTO vars (name, value, description) VALUES ('comments_more_seclev','100'
 
 ALTER TABLE accesslog ADD static enum("yes","no") DEFAULT "yes";
 ALTER TABLE accesslog ADD referer varchar(254);
+
+# USEPERL LAST UPDATED HERE
