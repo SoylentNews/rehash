@@ -12,14 +12,52 @@ en_US
 __name__
 futurestorybox
 __template__
-[% USE Slash %]
-[% FOREACH story = future %]
-	<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> [% Slash.timeCalc(story.time, "%H:%M", 0) %] <br>
-[% END %]
-	<B>[% present.title %]</B> [% Slash.timeCalc(present.time, "%H:%M", 0) %] <br>
-[% FOREACH story = past %]
-	<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> [% Slash.timeCalc(story.time, "%H:%M", 0) %] <br>
-[% END %]
+<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" WIDTH="100%">
+
+[% futuretoday = Slash.timeCalc(Slash.db.getTime, "%Y-%m-%d", 0);
+   MACRO futurestorywrite(story, nohref) BLOCK;
+   futurecolor = "";
+   futuretext  = "";
+   futuretime  = "";
+
+   IF story.displaystatus > 0;
+	futurecolor = "#CCCCCC";
+   ELSIF story.displaystatus < 0;
+	futurecolor = "#999999";
+   END;
+
+   IF nohref;
+	futuretext = story.title;
+   ELSE;
+	futuretext = BLOCK -%]
+<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A>
+	[%- END;
+   END;
+
+   IF Slash.timeCalc(story.time, "%Y-%m-%d", 0) == futuretoday;
+	futuretime = Slash.timeCalc(story.time, "%H:%M", 0);
+   ELSE;
+	futuretime = Slash.timeCalc(story.time, "%H:%M %Y-%m-%d", 0);
+   END;
+
+   # match FONT stuff to fancybox, bgcolor stuff to listStories
+   -%]
+<TR><TD BGCOLOR="[% futurecolor %]"><FONT FACE="[% constants.mainfontface %]" SIZE="1">
+	[% futuretext %] [% futuretime %]
+</FONT></TD></TR>
+[%- END %]
+
+
+[% FOREACH story = future;
+	futurestorywrite(story);
+END;
+futurestorywrite(present, 1);
+FOREACH story = past;
+	futurestorywrite(story);
+END %]
+
+</TABLE>
+
 __seclev__
 10000
 __version__

@@ -4212,7 +4212,7 @@ sub getStoryByTimeAdmin {
 
 	my $time = $story->{'time'};
 	my $returnable = $self->sqlSelectAllHashrefArray(
-			'title, sid, time',
+			'title, sid, time, displaystatus',
 			'stories',
 			"time $sign '$time' AND writestatus != 'delete' $where",
 			"ORDER BY time $order LIMIT $limit"
@@ -5680,18 +5680,20 @@ sub getStoryList {
 		. 'time, name, stories.subsection,stories.section, displaystatus, stories.writestatus';
 	my $tables = 'stories LEFT JOIN topics ON stories.tid=topics.tid'; # 'stories, topics';
 	my $where = ''; # stories.tid=topics.tid ";
+	my @where;
 	# See getSubmissionsForUser() on why the following is like this. -Brian
 	my $SECT = $self->getSection($user->{section} || $form->{section});
 	if ($SECT->{type} eq 'collected') {
-		$where .= "stories.section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
+		push @where, "stories.section IN ('" . join("','", @{$SECT->{contained}}) . "')" 
 			if $SECT->{contained} && @{$SECT->{contained}};
 	} else {
-		$where .= "stories.section = " . $self->sqlQuote($SECT->{section});
+		push @where, "stories.section = " . $self->sqlQuote($SECT->{section});
 	}
-	$where .= "time < DATE_ADD(NOW(), INTERVAL 72 HOUR) "
+	push @where, "time < DATE_ADD(NOW(), INTERVAL 72 HOUR) "
 		if $form->{section} eq "";
 	my $other = "ORDER BY time DESC LIMIT $first_story, $num_stories";
 
+	$where = join ' AND ', @where;
 	my $count = $self->sqlSelect("COUNT(*)", $tables, $where);
 
 	my $list = $self->sqlSelectAll($columns, $tables, $where, $other);

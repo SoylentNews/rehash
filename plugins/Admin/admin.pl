@@ -1378,9 +1378,9 @@ sub editStory {
 	}
 
 	my $authortext = slashDisplay('futurestorybox', {
-		past => $past,
-		present => $storyref,
-		future => $future,
+		past	=> $past,
+		present	=> $storyref,
+		future	=> $future,
 	}, { Return => 1 });
 
 	my $slashdtext = get_slashd_box();
