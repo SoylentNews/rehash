@@ -209,9 +209,16 @@ __template__
 		[% new_user_percent_select %]% (new users in the last X percentage of the userbase)<br>
 		[% new_user_bonus_select %] (modifier assigned to new user posts)<br>
 
-		<P><B>Limit</B> (only display this many comments, 
-		for best results, set this to a low number and sort by score)<BR>
+		<P><B>Comment Limit</B> (only display this many comments, 
+		for best results, set this to a low number and sort by score)
+		If set above [% constants.breaking %], then it is reset to
+		[% result = constants.breaking / 2; result; %]<BR>
 		<INPUT TYPE="TEXT" NAME="commentlimit" SIZE="6" VALUE="[% user_edit.commentlimit %]">
+
+		<P><B>Comment Byte Limit</B> (number of bytes of comments
+		to display. If this is reached before comment limit, break
+		break the page, else use above comment limit)<BR>
+		<INPUT TYPE="TEXT" NAME="bytelimit" SIZE="6" VALUE="[% user_edit.bytelimit %]">
 
 		<P><B>Index Spill</B> (When an article has this many comments,
 		it switches to indexed mode)<BR>

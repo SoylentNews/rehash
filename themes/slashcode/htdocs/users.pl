@@ -2214,6 +2214,7 @@ sub saveComm {
 		clbig			=> $form->{clbig},
 		clbig_bonus		=> $clbig_bonus,
 		commentlimit		=> $form->{commentlimit},
+		bytelimit		=> $form->{bytelimit},
 		commentsort		=> $form->{commentsort},
 		commentspill		=> $form->{commentspill},
 		domaintags		=> ($form->{domaintags} != 2 ? $form->{domaintags} : undef),
