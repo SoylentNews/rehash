@@ -1,0 +1,62 @@
+__section__
+default
+__description__
+Template describes the layout for the "Edit Keyword" screen.
+__title__
+NewsVac - Edit Keyword
+__page__
+newsvac
+__lang__
+en_US
+__name__
+editKeyword
+__seclev__
+10000
+__template__
+[%
+
+IF form.keyword_id || data.id;
+	this_id = form.keyword_id || data.id;
+	INCLUDE titlebar
+		width="100%", 
+		title="Editing Keyword ID #$this_id";
+ELSE;
+	INCLUDE titlebar
+		width="100%",
+		title="Adding New Keyword into Tag '$form.keyword_tag'";
+END;
+
+# In case we have an error on create, this should pick up whatever 
+# data was entered on the previous form.
+IF form.keyword_id == 0;
+	data.id 	= form.keyword_id,
+	data.tag 	= form.keyword_tag,
+	data.regex	= form.keyword_regex,
+	data.weight	= form.keyword_weight;
+END;
+
+-%]
+
+<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="updatekeyword">
+<INPUT TYPE="HIDDEN" NAME="keyword_id" VALUE="[% kw_id %]">
+
+<P><B>Tag:</B>&nbsp;&nbsp;
+<INPUT TYPE="TEXT" NAME="keyword_tag" VALUE="[% data.tag %]">
+
+<P><B>Reg Ex:</B>&nbsp;&nbsp;
+<INPUT TYPE="TEXT" NAME="keyword_regex" VALUE="[% data.regex %]" SIZE=40>
+
+<P><B>Weight:</B>&nbsp;&nbsp;
+<INPUT TYPE="TEXT" NAME="keyword_weight" VALUE="[% data.weight %]" SIZE=10>
+
+<P>
+<INPUT TYPE="SUBMIT" VALUE="Save Keyword">
+<INPUT TYPE="SUBMIT" NAME="deletekeyword" VALUE="Delete Keyword">
+</FORM>
+<P>
+<FORM ACTION="[% constants.rootdir %]/newsvac.pl" METHOD="POST">
+<INPUT TYPE="HIDDEN" NAME="op" VALUE="addkeyword">
+<INPUT TYPE="SUBMIT" VALUE="Add Keyword using Tag">:&nbsp;&nbsp;
+<INPUT TYPE="TEXT" NAME="keyword_tag" VALUE="" SIZE=10>
+</FORM>
