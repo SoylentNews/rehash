@@ -1,0 +1,43 @@
+__section__
+default
+__description__
+Template to link polls to current polls
+
+questions = recent pollquestions
+sid       = story sid we want to link to one of these
+__title__
+Useless title to template
+__page__
+pollBooth
+__lang__
+en_US
+__name__
+linkstory
+__seclev__
+10000
+__template__
+[% PROCESS titlebar %]
+<P>Click the correct link to choose which poll you would like to attach to the story you've selected.  You
+can also use the form below to select the poll qid you like to attach the story to.
+
+<TABLE width="99%">
+	[% FOREACH question = questions %]
+	<TR>
+		<TD VALIGN="TOP" ALIGN="LEFT">
+				<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</A>
+		</TD>
+		<TD>
+			<A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% question.0 %]&amp;op=edit&amp;override_sid=[% sid | fixparam %]">Attach poll to story</A>
+		</TD>
+	</TR>
+	[% END %]
+	<TR>
+		<TD colspan="2">
+			<FORM method="GET">
+			<INPUT TYPE="hidden" name="override_sid" value="[% sid %]">
+			<INPUT TYPE="hidden" name="op" value="edit">
+			Poll qid to attach story to: <INPUT TYPE="text" name="qid" size="8">
+			<INPUT TYPE="submit" name="attach" value="Attach Story to Poll">
+			</FORM>
+		</TD>
+</TABLE>

@@ -1,0 +1,31 @@
+__section__
+default
+__description__
+sid = story sid to detach poll from
+qid = poll qid
+warning = warnings associated with poll
+__title__
+detachpoll;pollBooth;default
+__page__
+pollBooth
+__lang__
+en_US
+__name__
+detachpoll
+__seclev__
+10000
+__template__
+[% PROCESS titlebar width='100%' %]
+[% IF warning.no_sid %]
+	<B>No story sid given--could not complete operation.</B>
+[% ELSIF warning.no_sid_qid_match %]
+	<B>Warning: </B>The poll qid you specified ('[% qid %]') does not appear to be currently attached to the story sid specified ('[% sid %]').  This could mean that the story doesn't have a poll attached to it or is linked to a different poll.  <P>If you're sure you want to detach any polls currently connected to this story click <A HREF="[% constants.rootdir %]/pollBooth.pl?sid=[% sid | fixparam %]&amp;qid=[% qid | fixparam %]&amp;op=detach&amp;force=1">continue</A>.
+
+[% ELSE %]
+	Poll detached from story successfully.<BR>
+	You can now <A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% sid |fixparam %]">edit</A> or <A HREF="[% constants.rootdir %]/article.pl?sid=[% sid |fixparam %]">view</A> the story.<BR><BR>
+	[% IF qid %]
+	You can also continue on <A HREF="[% constants.rootdir %]/pollBooth.pl?op=edit&amp;qid=[% qid |fixparam %]">edit</A> or <A HREF="[% constants.rootdir %]/pollBooth.pl?qid=[% qid |fixparam %]">view</A> the poll that was attached to this story.<BR>
+
+	[% END %]
+[% END %]
