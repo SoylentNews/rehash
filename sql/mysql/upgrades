@@ -1152,3 +1152,11 @@ INSERT INTO vars (name, value, description) VALUES ('m2_modlogid_max_old','0','A
 INSERT INTO vars (name, value, description) VALUES ('m2_modlogid_min_new','0','Approximate min moderatorlog id that counts as new');
 INSERT INTO vars (name, value, description) VALUES ('m2_modlogid_max_new','0','Approximate max moderatorlog id');
 
+INSERT INTO vars (name, value, description) VALUES ('lastlookmemory','3600','Amount of time the uid last looked-at will be remembered/displayed');
+
+# Not really necessary to do this, it will only make a difference for a
+# short time anyway and may add many rows to users_param... but for any
+# sites that want to, feel free.
+# SELECT CONCAT("INSERT INTO users_param (uid, name, value) VALUES (", uid, ", 'lastlooktime', ", UNIX_TIMESTAMP(NOW()), ")") INTO OUTFILE '/tmp/lastlooktime' FROM users_param WHERE name='lastlookuid' ORDER BY uid;
+# SOURCE '/tmp/lastlooktime';
+

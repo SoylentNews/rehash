@@ -1018,7 +1018,9 @@ sub createMenu {
 	if ($menu eq 'users'
 		&& $user->{lastlookuid}
 		&& $user->{lastlookuid} =~ /^\d+$/
-		&& $user->{lastlookuid} != $user->{uid}) {
+		&& $user->{lastlookuid} != $user->{uid}
+		&& ($user->{lastlooktime} || 0) >= time - ($constants->{lastlookmemory} || 3600)
+	) {
 		my $lastlook_user = $slashdb->getUser($user->{lastlookuid});
 		my $nick_fix = fixparam($lastlook_user->{nickname});
 		my $nick_attribute = strip_attribute($lastlook_user->{nickname});

@@ -347,7 +347,9 @@ sub displayArticle {
 			# Store the fact that this user last looked at that user.
 			# For maximal convenience in stalking.
 			$user_change->{lastlookuid} = $uid;
+			$user_change->{lastlooktime} = time;
 			$user->{lastlookuid} = $uid;
+			$user->{lastlooktime} = time;
 		}
 	} else {
 		$nickname	= $user->{nickname};

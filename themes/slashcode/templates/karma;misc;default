@@ -1,0 +1,35 @@
+__section__
+default
+__description__
+Displays a karma score or adjective.
+
+* karma = the karma to display
+* admin_flag = is the displaying user qualified to see the number?
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+karma
+__template__
+[% USE Slash %]
+
+[% IF constants.karma_obfuscate;
+	FOREACH score = constants.karma_adj.keys.nsort;
+		IF useredit.karma <= score;
+			constants.karma_adj.$score;
+			IF admin_flag;
+				" ("; useredit.karma; ")";
+			END;
+			LAST;
+		END;
+	END;
+ELSE;
+	useredit.karma;
+END; %]
+
+__seclev__
+1000

@@ -17,8 +17,6 @@ user_titlebar
 __template__
 [% uid = uid || user.uid %]
 
-[%# <!-- user_titlebar tab_selected=tab_selected uid=uid --> %]
-
 [% IF user.uid == uid && !user.is_anon;
 	title = title || "$user.nickname (This is you!)";
 	url_nick = user.nickname | fixparam;

@@ -715,6 +715,7 @@ INSERT INTO vars (name, value, description) VALUES ('istroll_uid_hours','72','Ho
 INSERT INTO vars (name, value, description) VALUES ('karma_adj','-10=Terrible|-1=Bad|0=Neutral|12=Positive|25=Good|99999=Excellent','Adjectives that describe karma, used if karma_obfuscate is set (best to keep aligned with badkarma, m2_maxbonus_karma, and goodkarma)');
 INSERT INTO vars (name, value, description) VALUES ('karma_obfuscate','0','Should users see, not their numeric karma score, but instead an adjective describing their approximate karma?');
 INSERT INTO vars (name, value, description) VALUES ('label_ui','0','Whether to label some things in the admin ui');
+INSERT INTO vars (name, value, description) VALUES ('lastlookmemory','3600','Amount of time the uid last looked-at will be remembered/displayed');
 INSERT INTO vars (name, value, description) VALUES ('lastComments','0','Last time we checked comments for moderation points');
 INSERT INTO vars (name, value, description) VALUES ('lastsrandsec','awards','Last Block used in the semi-random block');
 INSERT INTO vars (name, value, description) VALUES ('lenient_formkeys','0','0 - only ipid, 1 - ipid OR subnetid, in formkey validation check');

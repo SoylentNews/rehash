@@ -9,6 +9,7 @@ Display user's info
 * commentstruct = arrayref of comments
 * nickmatch_flag = current user is same as viewed user
 * mod_flag = is moderator
+	(no need for this anymore)
 * karma_flag = boolean for display karma
 * admin_block = admin stuff
 * admin_flag = boolean for whether to display admin stuff
@@ -36,13 +37,6 @@ and probably would be more interested in the Preferences links you see
 up top there, where you can customize [% constants.sitename %],
 change your password, or just click pretty widgets to kill time.
 
-[% IF mod_flag %]
-<P>You're a moderator with [% points %] point[% points == 1 ? '' : 's' %]
-[%- IF points && useredit.points_expire %] (expire on [% useredit.points_expire %])[% END %].
-Please read the
-<A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
-before you do any moderation.<BR><P>
-[% END %]
 [% IF ! useredit.registered %]
 <P>This account is currently expired. Please <A HREF="[% constants.rootdir %]/users.pl?op=validateuser">re-register</A> at your earliest opportunity.<BR><P>
 [% END %]
@@ -67,21 +61,8 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
 <BR>
 [% END %]
 [% IF karma_flag && (admin_flag || nickmatch_flag)  %]
-	<B>Karma:</B>
-	[% IF constants.karma_obfuscate;
-		FOREACH score = constants.karma_adj.keys.nsort;
-			IF useredit.karma <= score;
-				constants.karma_adj.$score;
-				IF admin_flag;
-					" ("; useredit.karma; ") ";
-				END;
-				" (mostly affected by moderation done to your comments)";
-				LAST;
-			END;
-		END;
-	ELSE;
-		useredit.karma; "  (mostly the sum of moderation done to your comments)";
-	END; %]<BR>
+	<B>Karma:</B> [% PROCESS karma karma=useredit.karma admin_flag=admin_flag %]
+	(mostly affected by moderation done to your comments)<BR>
 [% END %]
 
 <P>
@@ -116,12 +97,22 @@ Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A
  <BR>[% Slash.parseDomainTags(useredit.bio, useredit.fakeemail) | strip_html %]<BR>
 [% END %]
 
-<BR>
+</TD>
+
+<TD VALIGN="TOP">[% PROCESS userboxes %]</TD>
+</TR>
+
+<TR><TD>&nbsp;</TD>
+
+<TD COLSPAN="2">
+
 [% IF commentcount > 0 %]
 	[% commenttitle =
 		  ((min_comment == 0) ? "" : "$commentstruct.size of ")
 		_ "$useredit.nickname's "
-		_ ((commentstruct.size == commentcount || min_comment > 0) ? "" : "Latest $commentstruct.size of $commentcount ")
+		_ ((commentstruct.size == commentcount || min_comment > 0)
+			? ""
+			: "Latest $commentstruct.size of $commentcount ")
 		_ "Comment"
 		_ (commentcount == 1 ? "" : "s") %]
 	[% PROCESS titlebar width="100%" title = commenttitle %]

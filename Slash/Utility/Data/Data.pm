@@ -53,6 +53,7 @@ use vars qw($VERSION @EXPORT);
 	chopEntity
 	countWords
 	decode_entities
+	ellipsify
 	encryptPassword
 	findWords
 	fixHref
@@ -2421,6 +2422,60 @@ sub vislenify {
 	} else {
 		return substr($id_or_ref, 0, $len);
 	}
+}
+
+#========================================================================
+
+=head2 ellipsify (TEXT [, LEN])
+
+Given any text, makes sure it's not too long by shrinking its
+length to at most LEN, putting an ellipse in the middle.  If the
+LEN is too short to allow an ellipse in the middle, it just does
+an ellipse at the end, or in the worst case, a substr.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item TEXT
+
+Any text.
+
+=item LEN
+
+Usually not necessary;  if present, overrides the var
+comments_max_email_len (email is what this function was designed to
+work on).
+
+=back
+
+=item Return value
+
+New value.
+
+=back
+
+=cut
+
+sub ellipsify {
+	my($text, $len) = @_;
+	$len ||= getCurrentStatic('comments_max_email_len') || 40;
+	if (length($text) > $len) {
+		my $len2 = int(($len-7)/2);
+		if ($len2 >= 4) {
+			$text = substr($text, 0, $len2)
+				. " ... "
+				. substr($text, -$len2);
+		} elsif ($len >= 8) {
+			$text = substr($text, 0, $len-4)
+				. " ...";
+		} else {
+			$text = substr($text, 0, $len);
+		}
+	}
+	return $text;
 }
 
 #========================================================================

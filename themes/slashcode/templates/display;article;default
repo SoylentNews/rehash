@@ -20,13 +20,12 @@ en_US
 __name__
 display
 __template__
-[% USE Slash %]
+[% USE Slash;
 
-[% data = Slash.displayStory(story.sid, 'Full'); data.0 %]
+data = Slash.displayStory(story.sid, 'Full'); data.0;
 
-[% IF form.refresh %]
+IF form.refresh %]
 <FONT COLOR="white" SIZE="1">How Refreshing! ([% form.sid %]) </FONT>
-
 [% END %]
 <P>
 
@@ -36,66 +35,21 @@ __template__
 [% IF n %] [% IF p %] | [% END %][% n %] &nbsp;&gt; [% END %]
 <P>&nbsp;</TD><TD>&nbsp;</TD><TD WIDTH="210" ALIGN="RIGHT" VALIGN="TOP">
 
-[% # -- User's Article Box. %]
-[% IF user.is_anon;
-	# User is anonymous
-	contents = BLOCK;
-		PROCESS userlogin
-			return_url = "${constants.rootdir}/article.pl?sid=${form.sid}";
-	END;
-	PROCESS fancybox
-		title		= "${constants.sitename} Login"
-		contents	= contents
-		center		= 1;
-ELSE;
-	# User is logged in.
-	M = BLOCK %][ <A HREF="[% constants.rootdir %]/my/homepage/">Preferences</A>[% END %]
-	[% IF user.seclev > 99 && user.uid;
-		M = BLOCK %]
-[% M %] | <A HREF="[% constants.rootdir %]/admin.pl">Admin</A> |
-	  <A HREF="[% constants.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">Editor</A>
-		[% END;
-	END;
-	M = "$M ]<P>\n";
-	IF user.points || user.seclev > 99;
-		M = BLOCK %]
-[% M %]<A HREF="[% constants.rootdir %]/~[% user.nickname | fixparam %]/">You</A> have moderator access and
-<B>[% user.points %]</B> point[% user.points == 1 ? '' : 's' %].
-Welcome to those of you just joining: <B>please</B>
-read the <A HREF="[% constants.rootdir %]/moderation.shtml">moderator guidelines</A>
-for instructions. (<B>updated 9.9!</B>)
+[% PROCESS userboxes;
 
-<P>
-
-&middot; You can't post & moderate the same discussion.
-<BR>&middot; Concentrate on Promoting more than Demoting.
-<BR>&middot; Browse at -1 to keep an eye out for abuses.
-<BR>&middot; <A HREF="mailto:[% constants.adminmail %]">Mail the admin</A> URLs showing abuse
-(the cid link please!).
-		[% END;
-	END;
-	M = "$M<P> $user.mylinks ";
-	# User can be logged in as both a regular user and author. This box should probably
-	# show both names to make the user aware.
-	name = user.nickname;
-	IF user.uid; name = "$name &nbsp;($user.uid)"; END;
-	PROCESS fancybox
-		title		= name
-		contents	= M
-		center		= 1;
-END %]
-
-[% IF show_poll;
+IF show_poll;
 	PROCESS fancybox
 		title		= 'Article Poll'
 		contents	= poll
 		center		= 1;
 END;
 
-PROCESS fancybox
-	title		= 'Related Links'
-	contents	= story.relatedtext
-	center		= 1;
+IF story.relatedtext;
+	PROCESS fancybox
+		title		= 'Related Links'
+		contents	= story.relatedtext
+		center		= 1;
+END;
 
 IF authortext;
 	PROCESS fancybox
@@ -109,7 +63,7 @@ IF section_block.block;
 		title		= section.title
 		contents	= section_block.block
 		center		= 1;
-END; %]
+END %]
 
 </TD></TR><TR><TD COLSPAN="4">
 

@@ -813,16 +813,7 @@ EOT
 	}
 
 	# we need a display-friendly fakeemail string
-	$comment->{fakeemail_vis} = $comment->{fakeemail};
-	my $mel = $constants->{comments_max_email_len};
-	if (length($comment->{fakeemail}) > $mel) {
-		my $mel2 = int(($mel-5)/2);
-		$comment->{fakeemail_vis} =
-			substr($comment->{fakeemail}, 0, $mel2)
-			. " ... "
-			. substr($comment->{fakeemail}, -$mel2, $mel2)
-			if $mel2 > 3;
-	}
+	$comment->{fakeemail_vis} = ellipsify($comment->{fakeemail});
 
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,

@@ -1,0 +1,135 @@
+__section__
+default
+__description__
+Displays the three user boxes (fancybox's).
+
+* useredit = user being viewed ("edit" is for historical reasons)
+  (if not given, the standard "user" will be used)
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+userboxes
+__template__
+[% USE Slash;
+
+IF !useredit; useredit = user; END;
+
+IF user.is_anon;
+
+	# The user we're displaying this page for is not logged in.
+	# Show the login block.
+
+	title = "$constants.sitename Login";
+	IF form.sid;
+		contents = BLOCK %]
+			[% PROCESS userlogin
+				return_url = "$constants.rootdir/article.pl?sid=$form.sid" %]
+		[% END;
+	ELSE;
+		contents = BLOCK %]
+			[% PROCESS userlogin %]
+		[% END;
+	END;
+	PROCESS fancybox
+		title		= title
+		contents	= contents
+		center		= 1;
+
+END;
+
+IF !useredit.is_anon;
+
+	# First box:  general user info
+
+	title = FILTER strip_literal; useredit.nickname; END;
+	title = title _ " ($useredit.uid)";
+	contents = BLOCK;
+		'<A HREF="'; constants.rootdir; '/~';
+			FILTER fixparam; useredit.nickname; END; '/">';
+                        useredit.nickname; '</A> ';
+		IF user.uid != useredit.uid;
+			PROCESS zoo_icons person=useredit.uid implied="";
+		END;
+		IF user.uid == useredit.uid OR user.is_admin;
+			# Looking at ourselves; show our real email info.
+			'<BR><A HREF="mailto:';
+				FILTER fixparam; useredit.realemail; END; '">';
+				Slash.ellipsify(useredit.realemail); '</A>';
+			'<BR>&nbsp;&nbsp;';
+			IF useredit.fakeemail;
+				'shown as <A HREF="mailto:';
+				FILTER fixparam; useredit.fakeemail; END; '">';
+				Slash.ellipsify(useredit.fakeemail); '</A>';
+			ELSE;
+				'(email not shown publicly)';
+			END;
+		ELSE;
+			# Looking at someone else; show fake email info.
+			'<BR><A HREF="mailto:';
+				FILTER fixparam; useredit.fakeemail; END; '">';
+				Slash.ellipsify(useredit.fakeemail); '</A>';
+		END;
+                IF useredit.homepage;
+                        '<BR><A HREF="';
+			FILTER fixparam; useredit.homepage; END; '">';
+                        Slash.ellipsify(useredit.homepage); '</A>';
+                END;
+		IF user.uid == useredit.uid OR user.is_admin;
+			'<BR>Karma: ';
+			PROCESS karma karma=useredit.karma is_admin=useredit.is_admin;
+		END;
+                IF useredit.bio;
+                        '<BR>'; useredit.bio;
+                END;
+	END;
+	PROCESS fancybox
+		title		= title
+		contents	= contents
+		center		= 1;
+
+	# Second box:  info about moderation, if applicable
+	# Note this applies to the current user, not the user
+	# being examined.
+
+	IF user.points || user.is_admin;
+		title = "Moderation";
+		contents = BLOCK %]
+<A HREF="[% constants.rootdir %]/~[% FILTER fixparam; user.nickname; END %]/">You</A>
+have moderator access
+[% IF user.is_admin %](because you're an admin)[% END %]
+and <B>[% user.points %]</B> point[% user.points == 1 ? '' : 's' %].
+Welcome to those of you just joining: <B>please</B>
+read the <A HREF="[% constants.rootdir %]/moderation.shtml">moderator guidelines</A>
+for instructions.
+<P>&middot; You can't post &amp; moderate the same discussion.
+<BR>&middot; Concentrate on promoting more than demoting.
+<BR>&middot; Browse at -1 to keep an eye out for abuses.
+<BR>&middot; <A HREF="mailto:[% constants.adminmail %]">Mail the admin</A>
+URLs showing abuse (the cid link please!).
+		[% END;
+		PROCESS fancybox
+			title		= title
+			contents	= contents
+			center		= 1;
+	END;
+
+	# Third box:  user space, if applicable
+	# Again, this is for the current user, not the edited user.
+
+	IF user.mylinks;
+		title = "User Space";
+		contents = user.mylinks;
+		PROCESS fancybox
+			title		= title
+			contents	= contents
+			center		= 1;
+	END;
+END %]
+
+__seclev__
+1000

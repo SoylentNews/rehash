@@ -13,8 +13,6 @@ en_US
 __name__
 prefs_titlebar
 __template__
-[%# <!-- prefs_titlebar tab_selected=tab_selected uid=user.uid --> %]
-
 [% title = title || "$user.nickname (This is you!)";
 PROCESS titlebar title=title width="100%";
 
