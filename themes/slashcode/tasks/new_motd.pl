@@ -16,8 +16,8 @@ $task{$me}{code} = sub {
 
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
-	return unless -x '/usr/games/fortune';
-	chomp(my $t = `/usr/games/fortune -s`);
+	return unless -x '/usr/local/games/fortune';
+	chomp(my $t = `/usr/local/games/fortune -s`);
 
 	if ($t) {
 		my $tpid = $slashdb->getTemplateByName("motd", "tpid");
