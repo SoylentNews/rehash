@@ -269,6 +269,44 @@ sub reparentComments {
 	}
 }
 
+# I wonder if much of this logic should be moved out to the theme.
+# This logic can then be placed at the theme level and would eventually
+# become what is put into $comment->{no_moderation}. As it is, a lot
+# of the functionality of the moderation engine is intrinsically linked
+# with how things behave on Slashdot.	- Cliff 6/6/01
+# I rearranged the order of these tests (check anon first for speed)
+# and pulled some of the tests from dispComment/_hard_dispComment
+# back here as well, just to have it all in one place. - Jamie 2001/08/17
+# And now it becomes a function of its own - Jamie 2002/02/26
+sub _can_mod {
+	my($comment) = @_;
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0)
+		unless $comment->{time_unixepoch};
+	return
+		   !$user->{is_anon}
+		&& $constants->{allow_moderation}
+		&& !$comment->{no_moderation}
+		&& ( (
+		       $user->{points} > 0
+		    && $user->{willing}
+		    && $comment->{uid} != $user->{uid}
+		    && $comment->{lastmod} != $user->{uid}
+		    && $comment->{ipid} ne $user->{ipid}
+		    && (!$constants->{mod_same_subnet_forbid}
+			|| $comment->{subnetid} ne $user->{subnetid} )
+		    && (!$user->{state}{discussion_archived}
+			|| $constants->{comments_moddable_archived})
+		    && $comment->{time_unixepoch} >= time() - 3600*
+			($constants->{comments_moddable_hours}
+			|| 24*$constants->{archive_delay})
+		) || (
+		       $user->{seclev} >= 100
+		    && $constants->{authors_unlimited}
+		) );
+}
+
 #========================================================================
 
 =head2 printComments(SID [, PID, CID])
@@ -373,10 +411,7 @@ sub printComments {
 	}
 
 	slashDisplay('printCommComments', {
-		can_moderate	=> 
-			( ($user->{seclev} >= 100 || $user->{points}) &&
-			  !$user->{is_anon} ) &&
-			getCurrentStatic('allow_moderation'),
+		can_moderate	=> _can_mod($comment),
 		comment		=> $comment,
 		comments	=> $comments,
 		'next'		=> $next,
@@ -680,34 +715,7 @@ sub dispComment {
 		$reasons{$_} = $reasons[$_];
 	}
 
-	# I wonder if much of this logic should be moved out to the theme.
-	# This logic can then be placed at the theme level and would eventually
-	# become what is put into $comment->{no_moderation}. As it is, a lot
-	# of the functionality of the moderation engine is intrinsically linked
-	# with how things behave on Slashdot.	- Cliff 6/6/01
-	# I rearranged the order of these tests (check anon first for speed)
-	# and pulled some of the tests from dispComment/_hard_dispComment
-	# back here as well, just to have it all in one place. - Jamie 2001/08/17
-	my $can_mod =	   !$user->{is_anon}
-			&& $constants->{allow_moderation}
-			&& !$comment->{no_moderation}
-			&& ( (
-			       $user->{points} > 0
-			    && $user->{willing}
-			    && $comment->{uid} != $user->{uid}
-			    && $comment->{lastmod} != $user->{uid}
-			    && $comment->{ipid} ne $user->{ipid}
-			    && (!$constants->{mod_same_subnet_forbid}
-				|| $comment->{subnetid} ne $user->{subnetid} )
-			    && (!$user->{state}{discussion_archived}
-				|| $constants->{comments_moddable_archived})
-			    && $comment->{time_unixepoch} >= time() - 3600*
-				($constants->{comments_moddable_hours}
-				|| 24*$constants->{archive_delay})
-			) || (
-			       $user->{seclev} >= 100
-			    && $constants->{authors_unlimited}
-			) );
+	my $can_mod = _can_mod($comment);
 
 	# don't inherit these ...
 	for (qw(sid cid pid date subject comment uid points lastmod
@@ -1190,10 +1198,7 @@ EOT
 			subject	=> 'Parent',
 		}, 1);
 		my $mod_select = '';
-		if ($can_mod && (
-			$constants->{comments_moddable_archived}
-			|| !$user->{state}{discussion_archived}
-		)) {
+		if ($can_mod) {
 			$mod_select = " | "
 				. createSelect("reason_$comment->{cid}",
 					$reasons, '', 1, 1);

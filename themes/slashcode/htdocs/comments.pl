@@ -1019,7 +1019,8 @@ sub moderate {
 	my $sid = $form->{sid};
 	my $was_touched = 0;
 
-	if ($discussion->{type} eq 'archived') {
+	if ($discussion->{type} eq 'archived'
+		&& !$constants->{comments_moddable_archived}) {
 		print getData('archive_error');
 		return;
 	}
@@ -1099,6 +1100,7 @@ sub moderateCid {
 	}
 
 	my $comment = $slashdb->getComment($cid);
+	$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0);
 
 	# The user should not have been been presented with the menu
 	# to moderate if any of the following tests trigger, but,
@@ -1117,6 +1119,10 @@ sub moderateCid {
 		# with the same *subnet* as the current user.
 		return if $constants->{mod_same_subnet_forbid}
 			and $user->{subnetid} eq $comment->{subnetid};
+		# Do not allow moderation of comments that are too old.
+		return unless $comment->{time_unixepoch} >= time() - 3600*
+			($constants->{comments_moddable_hours}
+				|| 24*$constants->{archive_delay});
 	}
 
 	my $dispArgs = {
