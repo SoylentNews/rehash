@@ -365,7 +365,8 @@ sub authorDelete {
 
 	if ($form->{authordelete_confirm}) {
 		$slashdb->deleteAuthor($aid);
-		print getMessage('authorDelete-deleted-msg', { aid => $aid }) if ! DBI::errstr;
+		print getMessage('authorDelete-deleted-msg', { aid => $aid })
+			unless $DBI::errstr;
 	} elsif ($form->{authordelete_cancel}) {
 		print getMessage('authorDelete-canceled-msg', { aid => $aid});
 	}
@@ -1108,27 +1109,21 @@ sub listStories {
 	my $storylist = $slashdb->getStoryList();
 
 	my $storylistref = [];
-
-	my($hits, $comments, $sid, $title, $aid, $time, $tid, $section, 
-	$displaystatus, $writestatus, $td, $td2, $yesterday, $tbtitle,
-	$count, $left, $substrtid, $sectionflag);
-
+	my($count, $left, $sectionflag);
 	my($i, $canedit) = (0, 0);
 
 	for (@$storylist) {
-		($hits, $comments, $sid, $title, $aid, $time, $tid, $section,
+		my($hits, $comments, $sid, $title, $aid, $time_plain, $tid, $section,
 			$displaystatus, $writestatus) = @$_;
-		$time = timeCalc($time, '%H:%M');
-		my $td = timeCalc($time, '%A %B %d');
-		my $td2 = timeCalc($time, '%m/%d');
+		my $time = timeCalc($time_plain, '%H:%M');
+		my $td   = timeCalc($time_plain, '%A %B %d');
+		my $td2  = timeCalc($time_plain, '%m/%d');
 
-		$substrtid = substr($tid, 0, 5);
-		
+		my $substrtid = substr($tid, 0, 5);
 		$title = substr($title, 0, 50) . '...' if (length $title > 55);
-
+		my $tbtitle = fixparam($title);
 		if ($user->{uid} eq $aid || $user->{seclev} >= 100) {
 			$canedit = 1;
-			$tbtitle = fixparam($title);
 		} 
 
 		$x++;
@@ -1151,6 +1146,7 @@ sub listStories {
 			td2		=> $td2,
 			writestatus	=> $writestatus,
 			displaystatus	=> $displaystatus,
+			tbtitle		=> $tbtitle,
 		};
 		
 		$i++;
