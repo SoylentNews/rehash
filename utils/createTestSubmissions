@@ -160,12 +160,11 @@ sub getRandomTopicID {
 
 sub getRandomSection {
 	# Yes, inefficient.  I do not care.
-	my $sections = $slashdb->sqlSelectColArrayref(
-		"section", "sections", undef, "ORDER BY id"
-	);
-	my $num = rand @{$sections};
+	my $sections = $slashdb->sqlSelectAll("section", "sections", "1=1 AND type='contained'", "ORDER BY RAND()");
+	my @sections = map { $_->[0] } @$sections;
+	my $num = rand @sections;
 	$num = 0 if rand(1) < 1/3;
-        my $rand_section = $sections->[$num];
+        my $rand_section = $sections[$num];
         return $rand_section;
 }
 
