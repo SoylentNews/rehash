@@ -418,7 +418,9 @@ sub main {
 		# user's karma doesn't get them out of having to prove
 		# they're a human for creating a *new* user.)
                 my $options = {};
-		if (	   !$constants->{hc_sw_newuser}
+		if (	   !$constants->{plugin}{HumanConf}
+			|| !$constants->{hc}
+			|| !$constants->{hc_sw_newuser}
 			   	&& ($formname eq 'users/nu' || $op eq 'newuserform')
 			|| !$constants->{hc_sw_mailpasswd}
 			   	&& ($formname eq 'users/mp' || $op eq 'mailpasswdform')

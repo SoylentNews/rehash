@@ -153,7 +153,7 @@ IF do_br %]<BR>[% END %]
 %]
 
 
-[% IF constants.hc && constants.hc_sw_comments && user.state.hc %]
+[% IF constants.plugin.HumanConf && constants.hc && constants.hc_sw_comments && user.state.hc %]
 	[% IF user.state.hcinvalid %]
 		[% user.state.hcerror %]
 	[% ELSE %]

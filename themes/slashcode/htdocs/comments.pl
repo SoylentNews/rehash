@@ -212,7 +212,10 @@ sub main {
 		# yeah, the next step is to loop through the array of $ops->{$op}{check}
 		my $formname;
 		my $options = {};
-		$options->{no_hc} = 1 if !$constants->{hc_sw_comments}
+		$options->{no_hc} = 1 if
+			   !$constants->{plugin}{HumanConf}
+			|| !$constants->{hc}
+			|| !$constants->{hc_sw_comments}
 			|| (!$user->{is_anon}
 			   && $user->{karma} > $constants->{hc_maxkarma});
  
