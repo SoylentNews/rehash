@@ -13,7 +13,8 @@ use Data::Dumper;
 use Slash::Utility;
 use Storable qw(thaw freeze);
 use URI ();
-use vars qw($VERSION);
+use Slash::Custom::ParUserAgent;
+use vars qw($VERSION $_proxy_port);
 use base 'Slash::DB';
 use base 'Slash::DB::Utility';
 use Slash::Constants ':messages';
@@ -402,11 +403,23 @@ sub getModPointsNeeded {
 }
 
 ########################################################
+# At the time of creating a moderation, the caller can decide
+# whether this moderation needs more or fewer M2 votes to
+# reach consensus.  Passing in 0 for $m2needed means to use
+# the default.  Passing in a positive or negative value means
+# to add that to the default.  Fractional values are fine;
+# the result will always be rounded to an odd number.
 sub createModeratorLog {
-	my($self, $comment, $user, $val, $reason, $active, $points_spent) = @_;
+	my($self, $comment, $user, $val, $reason, $active, $points_spent, $m2needed) = @_;
 
 	$active = 1 unless defined $active;
 	$points_spent = 1 unless defined $points_spent;
+
+	$m2needed ||= 0;
+	$m2needed += getCurrentStatic('m2_consensus');
+	$m2needed = 1 if $m2needed < 1;		# minimum of 1
+	$m2needed = int($m2needed/2)*2+1;	# always an odd number
+
 	$self->sqlInsert("moderatorlog", {
 		uid	=> $user->{uid},
 		ipid	=> $user->{ipid} || "",
@@ -420,6 +433,7 @@ sub createModeratorLog {
 		active 	=> $active,
 		spent	=> $points_spent,
 		points_orig => $comment->{points},
+		m2needed => $m2needed,
 	});
 }
 
@@ -3741,6 +3755,105 @@ sub checkReadOnly {
 	return 0;
 }
 
+sub getKnownOpenProxy {
+	my($self, $ip) = @_;
+	return 0 unless $ip;
+	my $ip_q = $self->sqlQuote($ip);
+	my $hours_back = getCurrentStatic('comments_portscan_cachehours') || 48;
+	my $port = $self->sqlSelect("port",
+		"open_proxies",
+		"ip = $ip_q AND ts >= DATE_SUB(NOW(), INTERVAL $hours_back HOUR)");
+print STDERR "getKnownOpenProxy returning " . (defined($port) ? "'$port'" : "undef") . " for ip '$ip'\n";
+	return $port;
+}
+
+sub setKnownOpenProxy {
+	my($self, $ip, $port) = @_;
+	return 0 unless $ip;
+print STDERR "setKnownOpenProxy doing sqlReplace ip '$ip' port '$port'\n";
+	return $self->sqlReplace("open_proxies", {
+		ip =>	$ip,
+		port =>	$port,
+		-ts =>	'NOW()',
+	});
+}
+
+sub checkForOpenProxy {
+	my($self, $ip) = @_;
+	if (!$ip) {
+		my $r = Apache->request;
+		$ip = $r->connection->remote_ip if $r;
+	}
+	# If we don't have an IP address, it can't be an open proxy.
+	return 0 if !$ip;
+
+	# If the IP address is already one we have listed, use the
+	# existing listing.
+	my $port = $self->getKnownOpenProxy($ip);
+	if (defined $port) {
+#print STDERR scalar(localtime) . " cfop no need to check, port is '$port'\n";
+		return $port;
+	}
+#print STDERR scalar(localtime) . " cfop ip '$ip' not known, checking\n";
+
+	# No known answer;  probe the IP address and get an answer.
+	my $constants = getCurrentStatic();
+	my $ports = $constants->{comments_portscan_ports} || '80 8080 8000 3128';
+	my @ports = grep /^\d+$/, split / /, $ports;
+	return 0 if !@ports;
+	my $timeout = $constants->{comments_portscan_timeout} || 5;
+	my $ok_url = "$constants->{absolutedir}/ok.txt";
+
+	my $pua = Slash::Custom::ParUserAgent->new();
+	$pua->redirect(1);
+	$pua->max_redirect(3);
+	$pua->max_hosts(scalar(@ports));
+	$pua->max_req(scalar(@ports));
+
+#use LWP::Debug;
+#use Data::Dumper;
+#LWP::Debug::level("+trace"); LWP::Debug::level("+debug");
+
+	local $_proxy_port = undef;
+	sub _cfop_callback {
+		my($data, $response, $protocol) = @_;
+		if ($response->is_success()) {
+			# We got one success;  the IP is a proxy;
+			# we can quit listening on any of the
+			# other ports that may have connected,
+			# returning immediately from the wait().
+			# So we want to return C_ENDALL.  Except
+			# C_ENDALL doesn't seem to _work_, it
+			# crashes in _remove_current_connection.
+			# Argh.  So we use C_LASTCON.
+			my $orig_req = $response->request();
+			$_proxy_port = $orig_req->{_slash_proxytest_port} || 1;
+#print STDERR scalar(localtime) . " _cfop_callback protocol '$protocol' port '$_proxy_port' succ '" . $response->is_success() . "'\n";
+			return LWP::Parallel::UserAgent::C_LASTCON;
+		}
+#print STDERR scalar(localtime) . " _cfop_callback protocol '$protocol' succ '0'\n";
+	}
+
+#print STDERR scalar(localtime) . " cfop beginning registering\n";
+	for my $port (@ports) {
+		# We switch to a new proxy every time thru.
+		$pua->proxy('http', "http://$ip:$port/");
+		my $req = HTTP::Request->new(GET => $ok_url);
+		$req->{_slash_proxytest_port} = $port;
+#print STDERR scalar(localtime) . " cfop registering for proxy '$pua->{proxy}{http}'\n";
+		$pua->register($req, \&_cfop_callback);
+	}
+	print STDERR scalar(localtime) . Dumper($pua);
+	$pua->wait($timeout);
+#print STDERR scalar(localtime) . " cfop done with wait, returning " . (defined $_proxy_port ? 'undef' : "'$port'") . "\n";
+	$_proxy_port = 0 if !$_proxy_port;
+
+	# Store this value so we don't keep probing the IP.
+	$self->setKnownOpenProxy($ip, $_proxy_port);
+
+	return $_proxy_port;
+}
+
 ##################################################################
 # For backwards compatibility, returns just the number of comments if
 # called in scalar context, or a list of (number of comments, sum of
@@ -5227,15 +5340,14 @@ sub createMetaMod {
 		# change its m2status from 0 ("eligible for M2") to 1
 		# ("all done with M2'ing, but not yet reconciled").  Note
 		# that we insist not only that the count be above the
-		# current consensus point, but that it be odd -- if we
-		# recently lowered the var m2_consensus, there may be some
-		# mods "trapped" with an even number of M2s.
+		# current consensus point, but that it be odd, in case
+		# something weird happens.
 
 		$rows = 0;
 		$rows = $self->sqlUpdate(
 			"moderatorlog", {
 				-m2count =>	"m2count+1",
-				-m2status =>	"IF(m2count >= $consensus
+				-m2status =>	"IF(m2count >= m2needed
 							AND MOD(m2count, 2) = 1,
 							1, 0)",
 			},

@@ -319,7 +319,7 @@ sub _deleteThread {
 #}
 
 ########################################################
-# For dailystuff
+# For daily_forget.pl
 sub forgetCommentIPs {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
@@ -382,7 +382,7 @@ sub forgetCommentIPs {
 }
 
 ########################################################
-# For dailystuff
+# For daily_forget.pl
 sub forgetSubmissionIPs {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
@@ -426,6 +426,18 @@ sub forgetSubmissionIPs {
 		$self->setVar('submit_forgetip_minsubid', $nextsubid);
 	}
 	return $nextsubid - $minsubid;
+}
+
+########################################################
+# For daily_forget.pl
+sub forgetOpenProxyIPs {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+
+	my $hours = $constants->{comments_portscan_cachehours} || 48;
+	$hours++;
+	return $self->sqlDelete("open_proxies",
+		"ts < DATE_SUB(NOW(), INTERVAL $hours HOUR)");
 }
 
 ########################################################
@@ -1431,7 +1443,9 @@ sub _csq_bonuses {
 printf STDERR "%s m2_consequences change from '%d' to '%.2f' because '%s' id %d cid %d uid %d\n",
 scalar(localtime), $num_orig, $num, join(" ", @applied), $mod_hr->{id}, $mod_hr->{cid}, $mod_hr->{uid};
 
-	$retval->{m1_tokens}{num} = sprintf("%+.3f", $num);
+	$retval->{csq_token_change}{num} ||= 0;
+	$retval->{csq_token_change}{num} += $num - $num_orig;
+	$retval->{m1_tokens}{num} = sprintf("%+.2f", $num);
 }
 
 sub _set_csq {
@@ -1902,8 +1916,30 @@ sub countAccesslogDaily {
 }
 
 ########################################################
-# For portald
+# For tasks/run_moderatord.pl
+sub countM2M1Ratios {
+	my($self, $longterm) = @_;
 
+	my $reasons = $self->getReasons();
+	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
+	my $reasons_m2able = join(",", @reasons_m2able);
+
+	my @ratios = ( );
+	for my $daysback (7, 28) {
+		my $m1 = $self->sqlCount("moderatorlog");
+	}
+	my $daysback = $longterm ? 28 : 7;
+
+	return $self->sqlCount("moderatorlog");
+}
+
+sub countM2 {
+	my($self) = @_;
+	return 0;
+}
+
+########################################################
+# For portald
 sub createRSS {
 	my($self, $bid, $item) = @_;
 	# this will go away once we require Digest::MD5 2.17 or greater

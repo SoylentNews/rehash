@@ -32,6 +32,17 @@ CASE "no anonymous posting" %]
 Sorry, anonymous posting has been turned off. Please
 <A HREF="[% constants.rootdir %]/users.pl">register and log in</A>.
 
+[% # OPEN PROXY.
+CASE "open proxy" %]
+Sorry, but according to our tests, you are trying to post anonymously
+from an open HTTP proxy.  Please close the proxy or ask your sysadmin
+to do so, because open proxies are used to spam web boards like this
+one. If you really can't close it and still want to post, you'll have to
+<A HREF="[% constants.rootdir %]/users.pl">register and log in</A>.
+<p>If you have questions, mention your IP number
+<tt>[% unencoded_ip %]</tt> and that the proxy is on
+port <tt>[% port %]</tt>.
+
 [% # ALREADY POSTED.
 CASE "already posted" %]
 You've already posted something in this discussion<BR>

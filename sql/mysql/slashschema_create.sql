@@ -482,6 +482,7 @@ CREATE TABLE moderatorlog (
 	active tinyint DEFAULT '1' NOT NULL,
 	spent tinyint DEFAULT '1' NOT NULL,
 	m2count mediumint UNSIGNED DEFAULT '0' NOT NULL,
+	m2needed mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	m2status tinyint DEFAULT '0' NOT NULL,
 	points_orig tinyint DEFAULT NULL,
 	PRIMARY KEY (id),
@@ -510,6 +511,19 @@ CREATE TABLE modreasons (
 	fairfrac float DEFAULT '0.5' NOT NULL,
 	unfairname varchar(32) DEFAULT '' NOT NULL,
 	PRIMARY KEY (id)
+) TYPE=InnoDB;
+
+#
+# Table structure for table 'open_proxies'
+#
+
+DROP TABLE IF EXISTS open_proxies;
+CREATE TABLE open_proxies (
+        ip	VARCHAR(15) NOT NULL,
+	port	SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+	ts	DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+	PRIMARY KEY (ip),
+	KEY ts (ts)
 ) TYPE=InnoDB;
 
 #

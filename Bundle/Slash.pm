@@ -110,7 +110,7 @@ mod_perl must be installed by hand, because of the special configuration
 required for it.
 
 Optional but recommended modules include:  Cache::Memcached Silly::Werder
-GD GD::Text Apache::SSI
+GD GD::Text Apache::SSI LWP::Parallel::UserAgent
 
 
 =cut

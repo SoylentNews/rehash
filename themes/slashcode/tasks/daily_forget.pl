@@ -17,7 +17,8 @@ $task{$me}{code} = sub {
 	my($virtualuser, $constants, $slashdb, $user) = @_;
 	my $forgotten1 = $slashdb->forgetCommentIPs();
 	my $forgotten2 = $slashdb->forgetSubmissionIPs();
-	return "forgot approx $forgotten1 comment IPs, $forgotten2 submission IPs";
+	my $forgotten3 = $slashdb->forgetOpenProxyIPs();
+	return "forgot approx $forgotten1 comment IPs, $forgotten2 submission IPs, $forgotten3 open proxy IPs";
 };
 
 1;

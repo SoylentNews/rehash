@@ -71,6 +71,7 @@ htdoc=htdocs/slashguide.shtml
 htdoc=htdocs/index.pl
 htdoc=htdocs/metamod.pl
 htdoc=htdocs/moderation.shtml
+htdoc=htdocs/ok.txt
 htdoc=htdocs/topics.pl
 htdoc=htdocs/users.pl
 mysql_dump=sql/mysql/datadump.sql
