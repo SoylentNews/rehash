@@ -2335,10 +2335,32 @@ sub _url_to_domain_tag {
 	my $absolutedir = getCurrentStatic('absolutedir');
 	my $uri = URI->new_abs($link, $absolutedir);
 	my $uri_str = $uri->as_string;
-	my($info, $host, $scheme) = ("", "", "");
-	if ($uri->can("host") and $host = $uri->host) {
-		$info = fullhost_to_domain($host);
-	} elsif ($uri->can("scheme") and $scheme = $uri->scheme) {
+
+	my($info, $scheme) = ('', '');
+	if ($uri->can('host')) {
+		my $host;
+		unless (($host = $uri->host)
+				&&
+			$uri->can('scheme')
+				&&
+			($scheme = $uri->scheme)
+		) {
+			# If this URL is malformed in a particular
+			# way ("scheme:///host"), treat it the way
+			# that many browsers will (rightly or
+			# wrongly) treat it.
+			if ($uri_str =~ s|$scheme:///+|$scheme://|) {
+				$uri = URI->new_abs($uri_str, $absolutedir);
+				$uri_str = $uri->as_string;
+				$host = $uri->host;
+			}
+		}
+		$info = fullhost_to_domain($host) if $host;
+	}
+
+	if (!$info && ($scheme || (
+		$uri->can('scheme') && ($scheme = $uri->scheme)
+	))) {
 		# Most schemes, like ftp or http, have a host.  Some,
 		# most notably mailto and news, do not.  For those,
 		# at least give the user an idea of why not, by
@@ -2352,17 +2374,16 @@ sub _url_to_domain_tag {
 		} else {
 			$info = lc $scheme;
 		}
-	} else {
-		$info = "?";
 	}
-	if ($info ne "?") {
-		$info =~ tr/A-Za-z0-9.-//cd;
-	}
+
+	$info =~ tr/A-Za-z0-9.-//cd if $info;
+
 	if (length($info) == 0) {
-		$info = "?";
+		$info = '?';
 	} elsif (length($info) >= 25) {
-		$info = substr($info, 0, 10) . "..." . substr($info, -10);
+		$info = substr($info, 0, 10) . '...' . substr($info, -10);
 	}
+
 	# Add a title tag to make this all friendly for those with vision
 	# and similar issues -Brian
 	$href =~ s/>/ TITLE="$info">/ if $info ne '?';
