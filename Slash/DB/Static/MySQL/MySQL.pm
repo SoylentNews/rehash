@@ -1990,7 +1990,7 @@ sub getStoriesToDelete {
 # For freshenup.pl
 #
 # Returns up to $limit stories that need to have their .shtml
-# files rewritted (which mainly means they have a row present
+# files rewritten (which mainly means they have a row present
 # in the story_dirty table), starting with the most recent.
 sub getStoriesToRefresh {
 	my($self, $limit, $tid) = @_;
@@ -1999,7 +1999,7 @@ sub getStoriesToRefresh {
 	$tid_clause = " AND story_topics_rendered.tid = $tid" if $tid;
 
 	my $retval = $self->sqlSelectAllHashrefArray(
-		"stories.stoid AS stoid, sid, primaryskid, title, time",
+		"DISTINCT stories.stoid AS stoid, sid, primaryskid, title, time",
 		"stories, story_text, story_topics_rendered
 		 LEFT JOIN story_dirty ON stories.stoid=story_dirty.stoid",
 		"time < NOW()
