@@ -28,14 +28,15 @@ require URI;
 # change this according to site specifics
 
 my %my_conf = (
-	adminmail	=> 'admin@yoursite.com',
+	adminmail	=> 'admin@example.com',
+	mailfrom	=> 'reply-to@example.com',
 	siteowner	=> 'slash',
 	datadir		=> '/home/slash',
-	basedomain	=> 'www.yoursite.com',    # add ":PORT" here if required
-	cookiedomain	=> '', # ".yoursite.com', # off by default
+	basedomain	=> 'www.example.com',    # add ":PORT" here if required
+	cookiedomain	=> '', # ".example.com', # off by default
 	siteadmin	=> 'admin',
 	siteadmin_name	=> 'Slash Admin',
-	smtp_server	=> 'smtp.yoursite.com',
+	smtp_server	=> 'smtp.example.com',
 	sitename	=> 'Slash Site',
 	slogan		=> 'Slashdot Like Automated Storytelling Homepage',
 	breaking	=> 100,

@@ -1,4 +1,4 @@
-slash-1.0.3, 2000.05.xx
+slash-1.0.3, 2000.05.16
 -----------------------
 
 *	Fixed 404.pl to strip HTML that may have been passed in
@@ -102,6 +102,10 @@ slash-1.0.3, 2000.05.xx
 *	Added MAXLENGTH="20" to new user nickname form element in
 	users.pl, and a truncating of the user nickname before it is
 	checked for validity and added to the database
+
+*	Added mailfrom to slashdotrc.pl and Slash.pm; it is the
+	address mail is sent from; also changed default hostnames
+	in slashdotrc.pl to "example.com"
 
 
 slash-1.0.2, 2000.04.12
