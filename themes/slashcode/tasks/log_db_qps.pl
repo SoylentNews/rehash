@@ -62,7 +62,7 @@ $task{$me}{code} = sub {
 	my $accesslog_last = $slashdb->getVar('db_questions_accesslog_last','value', 1);
 	my $new_accesslog_last =
 		$save_vars->{db_questions_accesslog_last} =
-			$logdb->sqlSelect("MAX(id)", "accesslog");
+			$logdb->sqlSelect("MAX(id)", "accesslog") || 1;
 	$save_vars->{db_questions_lasttime} = $new_last_time;
 
 	my $time = $slashdb->getTime();	
