@@ -1215,6 +1215,7 @@ sub displayStory {
 		&& !$user->{noicons}
 		&& !$form->{issue}
 		&& $constants->{section} eq 'index'
+		&& $user->{currentSection} eq 'index'
 		&& !$full
 		&& !$options->{is_future}	 # can $story->{is_future} ever matter?
 	) {
