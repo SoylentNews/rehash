@@ -775,3 +775,8 @@ UPDATE menus SET menuorder=10 WHERE label='Recent' AND menu='admin';
 
 REPLACE INTO menus (menu, label, value, seclev, menuorder) values ('admin', 'Advanced', '[% constants.rootdir %]/topics.pl', 500, 11);
 
+UPDATE stats_daily SET name='m2_points_lost_spent' WHERE name='m2_points_spent';
+UPDATE stats_daily SET name='mod_points_lost_spent' WHERE name='mod_points_spent';
+UPDATE stats_daily SET name='mod_points_lost_spent_plus_1' WHERE name='mod_points_spent_plus_1';
+UPDATE stats_daily SET name='mod_points_lost_spent_minus_1' WHERE name='mod_points_spent_minus_1';
+

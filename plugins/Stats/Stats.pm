@@ -29,8 +29,13 @@ sub new {
 
 	bless($self, $class);
 	$self->{virtual_user} = $user;
-	my @time = localtime();
-	$self->{_day} = $options->{day} ? $options->{day} : sprintf "%4d-%02d-%02d", $time[5] + 1900, $time[4] + 1, $time[3];
+
+	# The default _day is yesterday.  (86400 seconds = 1 day)
+	my @yest_lt = localtime(time - 86400);
+	$self->{_day} = $options->{day}
+		? $options->{day}
+		: sprintf("%4d-%02d-%02d", $yest_lt[5] + 1900, $yest_lt[4] + 1, $yest_lt[3]);
+
 	$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp");
 	my $sth = $self->{_dbh}->prepare("SHOW CREATE TABLE accesslog");
 	$sth->execute();
@@ -69,12 +74,63 @@ sub getAdminsClearpass {
 
 ########################################################
 sub countModeratorLog {
-	my($self) = @_;
+	my($self, $options) = @_;
 
-	my $used = $self->sqlCount(
-		'moderatorlog',
-		"ts BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'"
+	my @clauses = ( );
+
+	my $day = $self->{_day};
+	$day = $options->{day} if $options->{day};
+	push @clauses, "ts BETWEEN '$day 00:00' AND '$day 23:59:59'"
+		if $options->{oneday_only};
+
+	push @clauses, "active=1" if $options->{active_only};
+
+	if ($options->{m2able_only}) {
+		my $reasons = $self->getReasons();
+		my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
+		my $reasons_m2able = join(",", @reasons_m2able);
+		push @clauses, "reason IN ($reasons_m2able)"
+	}
+
+	my $where = join(" AND ", @clauses) || "";
+	my $count = $self->sqlCount("moderatorlog", $where);
+	return $count;
+}
+
+########################################################
+sub countMetamodLog {
+	my($self, $options) = @_;
+
+	my @clauses = ( );
+
+	my $day = $self->{_day};
+	$day = $options->{day} if $options->{day};
+	push @clauses, "ts BETWEEN '$day 00:00' AND '$day 23:59:59'"
+		if $options->{oneday_only};
+
+	push @clauses, "active=1" if $options->{active_only};
+
+	if ($options->{val}) {
+		push @clauses, "val=" . $self->sqlQuote($options->{val});
+	}
+
+	my $where = join(" AND ", @clauses) || "";
+	my $count = $self->sqlCount("moderatorlog", $where);
+	return $count;
+}
+
+########################################################
+sub getOldestUnm2dMod {
+	my($self) = @_;
+	my $reasons = $self->getReasons();
+	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
+	my $reasons_m2able = join(",", @reasons_m2able);
+	my($oldest) = $self->sqlSelect(
+		"UNIX_TIMESTAMP(MIN(ts))",
+		"moderatorlog",
+		"active=1 AND reason IN ($reasons_m2able) AND m2status=0"
 	);
+	return $oldest || 0;
 }
 
 ########################################################
@@ -225,7 +281,7 @@ sub getCommentsByDistinctUIDPosters {
 
 	my $used = $self->sqlSelect(
 		"COUNT(DISTINCT uid)", $tables, 
-		"date BETWEEN '$self->{_date} 00:00' AND '$self->{_date} 23:59:59'
+		"date BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'
 		$section_where",
 		'',
 		{ distinct => 1 }
@@ -413,7 +469,8 @@ sub countSubmissionsByCommentIPID {
 	my $slashdb = getCurrentDB();
 	my $in_list = join(",", map { $slashdb->sqlQuote($_) } @$ipids);
 
-	my $where = "(time BETWEEN '$self->{_date} 00:00' AND '$self->{_date} 23:59:59') AND ipid IN ($in_list)";
+	my $where = "time BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59'
+		AND ipid IN ($in_list)";
 	$where .= " AND section = '$options->{section}'" if $options->{section};
 
 	my $used = $self->sqlCount(
@@ -500,7 +557,7 @@ sub countUsersByPage {
 		if $op;
 	$where .= " AND section='$options->{section}' "
 		if $options->{section};
-	$self->sqlSelect("count(DISTINCT uid)", "accesslog_temp", $where);
+	$self->sqlSelect("COUNT(DISTINCT uid)", "accesslog_temp", $where);
 }
 
 ########################################################
@@ -534,7 +591,7 @@ sub countDailyByPageDistinctIPID {
 		if $op;
 	$where .= " AND section='$options->{section}' "
 		if $options->{section};
-	$self->sqlSelect("count(DISTINCT host_addr)", "accesslog_temp", $where);
+	$self->sqlSelect("COUNT(DISTINCT host_addr)", "accesslog_temp", $where);
 }
 
 ########################################################

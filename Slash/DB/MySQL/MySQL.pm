@@ -392,6 +392,8 @@ sub _set_csq {
 	my $i = int($a);
 
 	$hr->{chance} = $a - $i;
+	$hr->{num_base} = $i * $sign;
+	$hr->{num_possible} = ($i+1) * $sign;
 	if ($sign > 0) {
 		$hr->{sql_and_where}{$column} = "$column < $max";
 		$hr->{sql_base} = $i ? "LEAST($column+$i, $max)" : "";

@@ -78,26 +78,43 @@ EOT
 	my $comments = $stats->countCommentsDaily();
 	my $accesslog_rows = $stats->sqlCount('accesslog');
 	my $formkeys_rows = $stats->sqlCount('formkeys');
-	my $modlogs = $stats->sqlCount('moderatorlog', 'active=1');
-	my $modlogs_yest = $stats->sqlCount('moderatorlog',
-		"active=1 AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'");
-	my $modlogs_needmeta = $stats->sqlCount('moderatorlog',
-		"active=1 AND reason IN ($reasons_m2able)");
-	my $modlogs_needmeta_yest = $stats->sqlCount('moderatorlog',
-		"active=1 AND ts BETWEEN '$yesterday 00:00' AND '$yesterday 23:59:59'
-		 AND reason IN ($reasons_m2able)");
-	my($oldest_unm2d) = $stats->sqlSelect(
-		"UNIX_TIMESTAMP(MIN(ts))",
-		"moderatorlog",
-		"active=1 AND reason IN ($reasons_m2able) AND m2status=0"
-	);
-	$oldest_unm2d ||= 0;
+
+	my $modlogs = $stats->countModeratorLog({
+		active_only	=> 1,
+	});
+	my $modlogs_yest = $stats->countModeratorLog({
+		active_only	=> 1,
+		oneday_only	=> 1,
+	});
+	my $modlogs_needmeta = $stats->countModeratorLog({
+		active_only	=> 1,
+		m2able_only	=> 1,
+	});
+	my $modlogs_needmeta_yest = $stats->countModeratorLog({
+		active_only	=> 1,
+		oneday_only	=> 1,
+		m2able_only	=> 1,
+	});
+
+	my $metamodlogs = $stats->countMetamodLog({
+		active_only	=> 1,
+	});
+	my $metamodlogs_yest_fair = $stats->countMetamodLog({
+		active_only	=> 1,
+		oneday_only	=> 1,
+		val		=> 1,
+	});
+	my $metamodlogs_yest_unfair = $stats->countMetamodLog({
+		active_only	=> 1,
+		oneday_only	=> 1,
+		val		=> -1,
+	});
+	my $metamodlogs_yest_total = $metamodlogs_yest_fair + $metamodlogs_yest_unfair;
+
+	my $oldest_unm2d = $stats->getOldestUnm2dMod();
 	my $youngest_modelig_uid = $stats->getYoungestEligibleModerator();
 	my $youngest_modelig_created = $stats->getUser($youngest_modelig_uid,
 		'created_at');
-	my $metamodlogs = $stats->sqlCount('metamodlog', 'active=1');
-	my $metamodlogs_yest = $stats->sqlCount('metamodlog',
-		'active=1 AND ts >= DATE_SUB(NOW(), INTERVAL 2 DAY)');
 
 	my $mod_points_pool = $stats->getPointsInPool();
 	my $used = $stats->countModeratorLog();
@@ -212,10 +229,13 @@ EOT
 	$statsSave->createStatDaily("consensus", $consensus);
 	$statsSave->createStatDaily("mod_points_pool", $mod_points_pool);
 	$statsSave->createStatDaily("mod_points_needmeta", $modlogs_needmeta_yest);
-	$statsSave->createStatDaily("mod_points_spent", $modlog_yest_total);
-	$statsSave->createStatDaily("mod_points_spent_plus_1", $modlog_yest_hr->{+1}{count});
-	$statsSave->createStatDaily("mod_points_spent_minus_1", $modlog_yest_hr->{-1}{count});
-	$statsSave->createStatDaily("m2_points_spent", $metamodlogs_yest);
+	$statsSave->createStatDaily("mod_points_lost_spent", $modlog_yest_total);
+	$statsSave->createStatDaily("mod_points_lost_spent_plus_1", $modlog_yest_hr->{+1}{count});
+	$statsSave->createStatDaily("mod_points_lost_spent_minus_1", $modlog_yest_hr->{-1}{count});
+	$statsSave->createStatDaily("m2_freq", $constants->{m2_freq} || 86400);
+	$statsSave->createStatDaily("m2_points_lost_spent", $metamodlogs_yest_total);
+	$statsSave->createStatDaily("m2_points_lost_spent_fair", $metamodlogs_yest_fair);
+	$statsSave->createStatDaily("m2_points_lost_spent_unfair", $metamodlogs_yest_unfair);
 	$statsSave->createStatDaily("oldest_unm2d", $oldest_unm2d);
 
 	for my $nickname (keys %$admin_mods) {
@@ -243,9 +263,9 @@ EOT
 	$mod_data{modlog} = sprintf("%8d", $modlogs);
 	$mod_data{modlog_yest} = sprintf("%8d", $modlogs_yest);
 	$mod_data{metamodlog} = sprintf("%8d", $metamodlogs);
-	$mod_data{metamodlog_yest} = sprintf("%8d", $metamodlogs_yest);
+	$mod_data{metamodlog_yest} = sprintf("%8d", $metamodlogs_yest_total);
 	$mod_data{xmodlog} = sprintf("%.1fx", ($modlogs_needmeta ? $metamodlogs/$modlogs_needmeta : 0));
-	$mod_data{xmodlog_yest} = sprintf("%.1fx", ($modlogs_needmeta_yest ? $metamodlogs_yest/$modlogs_needmeta_yest : 0));
+	$mod_data{xmodlog_yest} = sprintf("%.1fx", ($modlogs_needmeta_yest ? $metamodlogs_yest_total/$modlogs_needmeta_yest : 0));
 	$mod_data{consensus} = sprintf("%8d", $consensus);
 	$mod_data{oldest_unm2d_days} = sprintf("%10.1f", $oldest_unm2d ? (time-$oldest_unm2d)/86400 : -1);
 	$mod_data{youngest_modelig_uid} = sprintf("%d", $youngest_modelig_uid);

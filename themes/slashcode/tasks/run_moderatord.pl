@@ -262,17 +262,15 @@ sub reconcile_m2 {
 	# hashrefs with values title, url, subject, vote, reason).
 	my %m2_results = ( );
 
-	# We load the optional plugin objects here, so we save a few cycles.
+	# We load the optional plugin object here.
 	my $messages = getObject('Slash::Messages');
-	my $statsSave = getObject('Slash::Stats::Writer', '');
-	my $stats_created = 0;
-	my @lt = localtime();
-	my $today = sprintf "%4d-%02d-%02d", $lt[5] + 1900, $lt[4] + 1, $lt[3];
+	my $statsSave = getObject('Slash::Stats::Writer');
 
 	# $mod_ids is an arrayref of moderatorlog IDs which need to be
 	# reconciled.
 	my $mods_ar = $slashdb->getModsNeedingReconcile();
 
+	my %newstats = ( );
 	for my $mod_hr (@$mods_ar) {
 
 		# Get data about every M2 done to this moderation.
@@ -300,6 +298,8 @@ sub reconcile_m2 {
 			# XXX bug, this is happening, fix this - Jamie 2002/08/30
 			# XXX still happening... but seems to be related to a bug
 			# from Aug. 28 or so that has been fixed.  2002/09/02
+			# XXX at this point I'm assuming a bug in assn_order
+			# - Jamie 2002/09/23
 		}
 
 		my $winner_val = 0;
@@ -314,15 +314,28 @@ sub reconcile_m2 {
 		my $csq = $slashdb->getM2Consequences($fair_frac);
 
 		# First update the moderator's tokens.
-		$sql = ($csq->{m1_tokens}{num}
-				&& rand(1) < $csq->{m1_tokens}{chance})
+		my $use_possible = $csq->{m1_tokens}{num}
+			&& rand(1) < $csq->{m1_tokens}{chance};
+		$sql = $use_possible
 			? $csq->{m1_tokens}{sql_possible}
 			: $csq->{m1_tokens}{sql_base};
-		$slashdb->setUser(
-			$mod_hr->{uid},
-			{ -tokens => $sql },
-			{ and_where => $csq->{m1_tokens}{sql_and_where} }
-		) if $sql;
+		if ($sql) {
+			$slashdb->setUser(
+				$mod_hr->{uid},
+				{ -tokens => $sql },
+				{ and_where => $csq->{m1_tokens}{sql_and_where} }
+			);
+			if ($statsSave) {
+				my $token_change = $use_possible
+					? $csq->{m1_tokens}{num_possible}
+					: $csq->{m1_tokens}{num_base};
+				if ($token_change > 0) {
+					$newstats{mod_tokens_gain_m1fair} += $token_change;
+				} elsif ($token_change < 0) {
+					$newstats{mod_tokens_lost_m1unfair} -= $token_change;
+				}
+			}
+		}
 
 		# Now update the moderator's karma.
 		$sql = ($csq->{m1_karma}{num}
@@ -352,21 +365,36 @@ sub reconcile_m2 {
 			}
 			my $key = "m2_fair_tokens";
 			$key = "m2_unfair_tokens" if $m2->{val} == -1;
-			$sql = ($csq->{$key}{num}
-					&& rand(1) < $csq->{$key}{chance})
+			my $use_possible = $csq->{$key}{num}
+				&& rand(1) < $csq->{$key}{chance};
+			$sql = $use_possible
 				? $csq->{$key}{sql_possible}
 				: $csq->{$key}{sql_base};
-			$slashdb->setUser(
-				$m2->{uid},
-				{ -tokens => $sql },
-				{ and_where => $csq->{$key}{sql_and_where} }
-			) if $sql;
+			if ($sql) {
+				$slashdb->setUser(
+					$m2->{uid},
+					{ -tokens => $sql },
+					{ and_where => $csq->{$key}{sql_and_where} }
+				);
+			}
+			if ($statsSave) {
+				my $token_change = $use_possible
+					? $csq->{$key}{num_possible}
+					: $csq->{$key}{num_base};
+				if ($token_change > 0) {
+					$newstats{mod_tokens_gain_m2majority} += $token_change;
+				} elsif ($token_change < 0) {
+					$newstats{mod_tokens_lost_m2minority} -= $token_change;
+				}
+			}
 		}
 
-		# Store these stats into the stats_daily table.
-		reconcile_stats($statsSave, $stats_created, $today,
-			$mod_hr->{reason}, $nfair, $nunfair);
-		$stats_created = 1;
+		if ($statsSave) {
+			my $reason_name = $reasons->{$mod_hr->{reason}}{name};
+			$newstats{"m2_${reason_name}_fair"} += $nfair;
+			$newstats{"m2_${reason_name}_unfair"} += $nunfair;
+			$newstats{"m2_${reason_name}_${nfair}_${nunfair}"}++;
+		}
 
 		# Store data for the message we may send.
 		if ($messages) {
@@ -406,6 +434,14 @@ sub reconcile_m2 {
 			-m2status => 2,
 		}, "id=$mod_hr->{id}");
 
+	}
+
+	# Update stats to reflect all the token and M2-judgment
+	# information we just learned.
+	if ($statsSave) {
+		for my $key (keys %newstats) {
+			$statsSave->addStatDaily($key, $newstats{$key});
+		}
 	}
 
 	# Optional: Send message to original moderator indicating that
