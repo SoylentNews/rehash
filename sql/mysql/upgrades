@@ -561,7 +561,12 @@ INSERT INTO vars (name, value, description) VALUES ('cookiesecure','1','Set the 
 # End of T_2_3_0_36
 
 # USEPERL LAST UPDATED HERE
-ALTER TABLE string_param MODIFY COLUMN code varchar(128) NOT NULL;
 # FOUNDRIES TEST SITE LAST UPDATED HERE
 # SLASHCODE LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
+
+# from foundries integrations
+ALTER TABLE string_param MODIFY COLUMN code varchar(128) NOT NULL;
+ALTER TABLE menus MODIFY COLUMN label varchar(255) DEFAULT '' NOT NULL;
+ALTER TABLE rss_raw MODIFY COLUMN description text;
+ALTER TABLE section_extras MODIFY COLUMN type enum("text","list","topics") DEFAULT 'text' NOT NULL;

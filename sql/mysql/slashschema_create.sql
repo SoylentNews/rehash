@@ -507,7 +507,7 @@ CREATE TABLE section_extras (
 	section varchar(30) NOT NULL,
 	name varchar(100) NOT NULL,
 	value varchar(100) NOT NULL,
-	type enum("text","list", "topics") DEFAULT 'text' NOT NULL,
+	type enum("text","list","topics") DEFAULT 'text' NOT NULL,
 	FOREIGN KEY (section) REFERENCES sections(section),
 	UNIQUE extra (section,name),
 	PRIMARY KEY (param_id)
@@ -687,7 +687,7 @@ DROP TABLE IF EXISTS string_param;
 CREATE TABLE string_param (
 	param_id smallint UNSIGNED NOT NULL auto_increment,
 	type varchar(32) NOT NULL,
-	code varchar(32) NOT NULL,
+	code varchar(128) NOT NULL,
 	name varchar(64) NOT NULL,
 	UNIQUE code_key (type,code),
 	PRIMARY KEY (param_id)
