@@ -42,11 +42,7 @@ and their status within the system:</P>
 		CASE 1;
 			status="rejected";
 		CASE 2;
-			IF story_viewable;
-				status='accepted';
-			ELSE;
-				status='pending';
-			END;
+			status='accepted';
 	END %]
 	([% status %])
 	[% summary.$status = summary.$status.defined ? summary.$status + 1 : 1 %]
