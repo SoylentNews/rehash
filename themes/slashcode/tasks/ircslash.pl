@@ -51,6 +51,9 @@ $task{$me}{code} = sub {
 
 	while (!$task_exit_flag && !$clean_exit_flag) {
 		$irc->do_one_loop();
+		if ($@ && $@ =~ /No active connections left/) {
+			return "Connection lost, exiting to let slashd retry later";
+		}
 		Time::HiRes::sleep(0.5); # don't waste CPU
 		if (time() >= $next_handle_remarks) {
 			$next_handle_remarks = time() + $remark_delay;
@@ -83,7 +86,7 @@ $task{$me}{code} = sub {
 
 	ircshutdown();
 
-	return sprintf("exiting after %d seconds", time - $start_time);
+	return "exiting";
 };
 
 sub ircinit {
@@ -198,6 +201,7 @@ my %cmds = (
 	whois		=> \&cmd_whois,
 	daddypants	=> \&cmd_daddypants,
 	slashd		=> \&cmd_slashd,
+	quote		=> \&cmd_quote,
 );
 sub handle_cmd {
 	my($self, $cmd, $event) = @_;
@@ -335,6 +339,69 @@ sub cmd_daddypants {
 	$self->privmsg($channel, $result);
 	slashdLog("daddypants: $result, cmd from $info->{event}{nick}");
 }
+
+{ # closure
+my %exchange = ( );
+sub cmd_quote {
+	my($self, $info) = @_;
+
+	my $symbol = $info->{text};
+	return unless $symbol;
+	$symbol = uc($symbol);
+
+	my $fq = eval { require Finance::Quote };
+	return unless $fq;
+
+	$fq = Finance::Quote->new();
+	$fq->set_currency("USD");
+
+	my %stock_raw = ( );
+
+	my $exchange = $exchange{$symbol} || "";
+	if ($exchange) {
+		%stock_raw = $fq->fetch($exchange, $symbol);
+	} else {
+		TRY: for my $try (qw( nasdaq nyse europe canada )) {
+			%stock_raw = $fq->fetch($try, $symbol);
+			if (!%stock_raw) {
+				# Nope, didn't get it.  Try again.
+				next TRY;
+			}
+			# OK, we got it.
+			$exchange{$symbol} = $try;
+			last TRY;
+		}
+	}
+
+	# Finance::Quote returns its data in a goofy format, not nested
+	# hashrefs, but with the symbol name preceding the field name,
+	# separated by the $; character.  Pull out the data for just the
+	# one symbol we asked about.
+	my %stock = ( );
+	for my $key (keys %stock_raw) {
+		my($dummy, $realfieldname) = split /$;/, $key;
+		$stock{$realfieldname} = $stock_raw{$key};
+	}
+
+	# Add more useful data to that hash.
+	if ($stock{year_range} =~ /^\s*([\d.]+)\D+([\d.]+)/) {
+		($stock{year_low}, $stock{year_high}) = ($1, $2);
+	}
+	for my $key (qw( open close last high low year_high year_low )) {
+		$stock{$key} = sprintf( "%.2f", $stock{$key}) if $stock{$key};
+	}
+	for my $key (qw( net p_change )) {
+		$stock{$key} = sprintf("%+.2f", $stock{$key}) if $stock{$key};
+	}
+	$stock{symbol} = $symbol;
+
+	# Generate and emit the response.
+	my $response = getIRCData('quote_response', { stock => \%stock });
+	$self->privmsg($channel, $response);
+	slashdLog("stock: " . Dumper(\%stock));
+	slashdLog("quote: $response, cmd from $info->{event}{nick}");
+}
+} # end closure
 
 sub cmd_slashd {
 	my($self, $info) = @_;

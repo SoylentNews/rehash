@@ -55,6 +55,13 @@ __template__
 [% CASE 'slashd_parent_gone' %]
 	ATTENTION: my parent slashd process is gone. Since this task is still around, the parent's death is probably unplanned. Restarting it would be good.
 
+[% CASE 'quote_response' %]
+	[% IF !stock.success %]
+		ERROR: [% stock.errormsg %]
+	[% ELSE %]
+		Price for [% stock.name %] at [% stock.time %]: [% stock.last %] ([% stock.net %] from last close/open [% stock.close %]/[% stock.open %]) -- Today's lo-hi [% stock.low %]-[% stock.high %] -- Year lo-hi [% stock.year_low %]-[% stock.year_high %]
+	[% END %]
+
 [% CASE DEFAULT %]
 	-- MISSING USER MESSAGE SEGMENT -- [[% value %]] block not found.
 
