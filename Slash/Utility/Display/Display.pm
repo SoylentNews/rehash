@@ -1283,6 +1283,7 @@ my $slashTags = {
 	'user'     => \&_slashUser,
 	'link'     => \&_slashLink,
 	'break'    => \&_slashPageBreak,
+	'file'    => \&_slashFile,
 	'comment'  => \&_slashComment,
 	'journal'  => \&_slashJournal,
 };
