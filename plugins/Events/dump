@@ -20,3 +20,6 @@ INSERT INTO code_param (type, name, code) VALUES ('months','December', 12);
 INSERT INTO code_param (type, name, code) VALUES ('years','2001', 1);
 INSERT INTO code_param (type, name, code) VALUES ('years','2002', 2);
 INSERT INTO code_param (type, name, code) VALUES ('years','2003', 3);
+INSERT INTO code_param (type, name, code) VALUES ('years','2004', 4);
+INSERT INTO code_param (type, name, code) VALUES ('years','2005', 5);
+INSERT INTO code_param (type, name, code) VALUES ('years','2006', 6);
