@@ -7662,7 +7662,7 @@ sub _gse_sectioncollapse {
 	my %tid_x = ( );
 	%tid_x = map {( $_, 1 )} @$tid_x_ar if $tid_x_ar;
 	my @all = sort { $a <=> $b }
-		grep !$tid_x{$_}
+		grep { !$tid_x{$_} }
 		keys %nexuses;
 	return \@all;
 }
