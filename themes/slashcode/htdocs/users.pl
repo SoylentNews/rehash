@@ -1122,7 +1122,6 @@ sub showInfo {
 
 	} else {
 		if (! $requested_user->{uid}) {
-			
 			print getError('userinfo_idnf_err', { id => $id, fieldkey => $fieldkey});
 			return;
 		}
@@ -1158,6 +1157,8 @@ sub showInfo {
 			$title = getTitle('userInfo_user_title', { nick => $nick, uid => $uid });
 		}
 
+		my $lastjournal = _get_lastjournal($uid);
+
 		slashDisplay('userInfo', {
 			title			=> $title,
 			uid			=> $uid,
@@ -1174,12 +1175,87 @@ sub showInfo {
 			stories 		=> $stories,
 			storycount 		=> $storycount,
 			reasons			=> $slashdb->getReasons(),
+			lastjournal		=> $lastjournal,
 		});
 	}
 
 	if ($user_change && %$user_change) {
 		$slashdb->setUser($user->{uid}, $user_change);
 	}
+}
+
+sub _get_lastjournal {
+	my($uid) = @_;
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $lastjournal = undef;
+	if (my $journal = getObject('Slash::Journal', { db_type => 'reader' })) {
+		my $j = $journal->getsByUid($uid, 0, 1);
+		if ($j && @$j) {
+			# Yep, there are 1 or more journals... get the first.
+			$j = $j->[0];
+		}
+		if ($j && @$j) {
+			# Yep, that first journal exists and has entries...
+			# convert from stupid numeric array to a hashref.
+			my @field = qw(	date article description id
+					posttype tid discussion		);
+			$lastjournal = { };
+			for my $i (0..$#field) {
+				$lastjournal->{$field[$i]} = $j->[$i];
+			}
+		}
+	}
+
+	if ($lastjournal) {
+
+		# Strip the article field for display.
+		$lastjournal->{article} = strip_mode($lastjournal->{article},
+			$lastjournal->{posttype});
+
+		# For display, include a reduced-size version, where the
+		# size is based on the user's maxcomment size (which
+		# defaults to 4K) and can't have too many line-breaking
+		# tags.
+		my $art_shrunk = $lastjournal->{article};
+		my $maxsize = int($user->{maxcommentsize} / 25);
+		$maxsize =  80 if $maxsize <  80;
+		$maxsize = 600 if $maxsize > 600;
+		$art_shrunk = chopEntity($art_shrunk, $maxsize);
+
+		my $approvedtags_break = $constants->{approvedtags_break}
+			|| [qw(HR BR LI P OL UL BLOCKQUOTE DIV)];
+		my $break_tag = join '|', @$approvedtags_break;
+		if (scalar(() = $art_shrunk =~ /<(?:$break_tag)>/gi) > 2) {
+			$art_shrunk =~ s/\A
+			(
+				(?: <(?:$break_tag)> )?
+				.*?   <(?:$break_tag)>
+				.*?
+			)	<(?:$break_tag)>.*
+			/$1/six;
+			if (length($art_shrunk) < 15) {
+				# This journal entry has too much whitespace
+				# in its first few chars;  scrap it.
+				return undef;
+			}
+			$art_shrunk = chopEntity($art_shrunk);
+		}
+		if (length($art_shrunk) < length($lastjournal->{article})) {
+			$art_shrunk .= " ...";
+		}
+		$lastjournal->{article_shrunk} = $art_shrunk;
+
+		# Now default:  normalize the text and count comments.
+		$art_shrunk = strip_html($art_shrunk);
+		$art_shrunk = balanceTags($art_shrunk);
+		if ($lastjournal->{discussion}) {
+			$lastjournal->{commentcount} = $reader->getDiscussion(
+				$lastjournal->{discussion}, 'commentcount');
+		}
+	}
+	return $lastjournal;
 }
 
 #####################################################################

@@ -16,6 +16,7 @@ Display user's info
 	(no real need for this, could just use user.is_admin)
 * fieldkey = the field key used to decide what we're looking at
 * reasons = hashref from $slashdb->getReasons()
+* lastjournal = last journal posted
 
 __title__
 
@@ -49,12 +50,17 @@ change your password, or just click pretty widgets to kill time.
 [% admin_block %]
 [% END %]
 
-<P>
-[% IF useredit.journal_last_entry_date.search('[1-9]') %]
-<A HREF="[% constants.rootdir %]/~[% useredit.nick_plain | fixparam %]/journal/">
-Last Journal Entry was [% Slash.timeCalc(useredit.journal_last_entry_date) %]</A>
-[ <A HREF="[% constants.rootdir %]/journal.pl?op=list&amp;uid=[% useredit.uid %]">List</A> ]
+[% IF lastjournal %]
+<P>Last journal entry:
+<B><A HREF="[% constants.rootdir %]/~[% useredit.nick_plain | fixparam %]/journal/">[%
+lastjournal.description | strip_notags %]</A></B>
+([% lastjournal.commentcount || 0 %] comment[% IF lastjournal.commentcount != 1 %]s[% END %])
+<P>[% lastjournal.article_shrunk %]
+[% ELSE %]
+<P><I>(No journal entries.)</I>
 [% END %]
+
+<BR>[% Slash.createMenu("journal", { style => "oldstyle" }) %]
 
 </TD>
 
