@@ -1,0 +1,34 @@
+#! /bin/sh
+# /etc/init.d/slashd
+#
+# written by patrick galbraith 
+
+# slash home
+DATADIR=/home/slashdot
+
+case "$1" in
+  start)
+    echo -n "Starting slashd: "
+    cd $DATADIR
+    ./slashd &
+    echo "ok."
+    ;;
+  stop)
+    echo -n "Stopping slashd: "
+    kill `cat $DATADIR/logs/slashd.pid`
+    echo "ok."
+      ;;
+  restart)
+    echo -n "Restarting slashd: "
+    kill `cat $DATADIR/logs/slashd.pid`
+    cd $DATADIR
+    ./slashd &
+    echo "ok."
+    ;;
+  *)
+    echo "Usage: /etc/init.d/$NAME {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0

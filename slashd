@@ -1,0 +1,667 @@
+#!/usr/bin/perl -w
+
+###############################################################################
+# slashd - the primary "daemon" that runs various tasks and generates
+# static pages 
+#
+# Copyright (C) 1997 Rob "CmdrTaco" Malda
+# malda@slashdot.org
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#
+#
+#  $Id$
+###############################################################################
+use strict;
+use vars '%I';
+use Slash;
+use LWP::UserAgent;
+use HTTP::Request;
+use URI::Escape;
+
+*I = getSlashConf();
+my $totalChangedStories = 1;
+
+open STDERR, ">> $I{datadir}/logs/slashd.log"
+	or die "Can't open STDERR to $I{datadir}/logs/slashd.log: $!";
+
+sub slashdPid {
+	open PID,">$I{datadir}/logs/slashd.pid"
+		or die "Can't open $I{datadir}/logs/slashd.pid: $!";
+	print PID $$;
+	close PID;
+}
+
+sub slashdLog {
+	my $dir = "$I{datadir}/logs";
+	unless (-e $dir) {
+		mkdir $dir, 0755 or die "Can't mkdir $dir: $!";
+	}
+
+	open LOG, ">>$dir/slashd.log"
+		or die "Can't append to $dir/slashd.log: $!";
+	print LOG localtime() . "\t", join("\t", @_), "\n";
+	close LOG;
+}
+
+sub copy {
+	my($from, $to) = @_;
+	# Make sure that $to exists
+
+	my $t = $to;
+	$t =~ s|(.*)/(.*)|$1|;
+	my @dirs = split m/\//, $t;
+
+	my $d;
+	foreach (@dirs) {
+		$d .= "/$_";
+		slashdLog "mkdir $d";
+		mkdir $d, 0755;
+	}
+
+	open FROM, $from or die "Can't open $from: $!";
+	open TO, ">>$to" or die "Can't append to $to: $!";
+	while (<FROM>) { print TO }
+	close FROM;
+	close TO;
+}
+
+
+sub xmlEncodeStr  {
+	my $s = shift;
+	$s =~ s/&/&amp;/g;
+	$s =~ s/</&lt;/g;
+	$s =~ s/>/&gt;/g;
+
+	return $s;
+}
+
+sub geturl {
+	my $ua = new LWP::UserAgent;
+	my $request = new HTTP::Request('GET', $_[0]);
+
+	my $result = $ua->request($request);
+
+	if ($result->is_success) {
+		return $result->content;
+	} else {
+		return 0;
+	}
+}
+
+
+sub prog2file {
+	my($c, $f) = @_;
+
+	my $d = `$c`;
+	if (length($d) > 0) {
+		open F, ">$f" or die "Can't open $f: $!";
+		print F $d;
+		close F;
+		return "1";
+
+	} else {
+		return "0";
+	}
+}
+
+sub moveImages {
+	if (opendir DIR, "/tmp/slash") {
+		my @files = readdir(DIR);
+		foreach my $old (@files) {
+			my $new = "$I{basedir}/$old";
+			$new =~ s|~|/|g;
+			if (substr($old, 0, 1) ne ".") {
+				copy("/tmp/slash/$old", $new);
+				unlink "/tmp/slash/$old"
+					or warn "Can't unlink /tmp/slash/$old: $!";
+			}
+		}
+	}
+}
+
+#################################
+sub setheadertopics {
+	my $c = sqlSelectMany("alttext,image,width,height,newstories.tid",
+				"newstories,topics",
+				"newstories.tid=topics.tid
+				  AND displaystatus = 0
+				  AND writestatus >= 0
+				  AND time < now()
+			     ORDER BY time DESC");
+
+	my($x, $r, $t);
+
+	while (($x < 5) && (my($alttext, $image, $width, $height, $tid) = $c->fetchrow)) {
+		local $_ = $t;
+		if (! /$tid/) {	
+			$r .= <<EOT;
+	<TD><A HREF="$I{rootdir}/search.pl?topic=$tid"><IMG
+		SRC="$I{imagedir}/topics/$image" WIDTH="$width" HEIGHT="$height"
+		BORDER="0" ALT="$alttext"></A>
+	</TD>
+
+EOT
+			$t .= $tid;
+			$x++;
+		}
+	}
+	$c->finish;
+	setblock("topics", $r);
+}
+
+#################################
+sub setblock {
+	my($bid, $block)=@_;
+	$block = $I{dbh}->quote($block);
+	$I{dbh}->do("UPDATE blocks SET block=$block WHERE bid='$bid'");
+}
+
+#################################
+sub getminute {
+	my($sec, $min) = gmtime;
+	return $min;
+}
+
+#################################
+sub save2file {
+	my($f, $d) = @_;
+	open FH,">$f" or die "Can't open $f: $!";
+	print FH $d;
+	close FH;
+}
+
+#################################
+sub newmotd {
+	return unless -x '/usr/games/fortune';
+	chomp(my $t= `/usr/games/fortune -s`);
+	setblock('motd', $t) if $t;
+}
+
+#################################
+# I suppose I'll let the secret out: for a few months, before the moderation
+# system came into being, this little function faked "First Posts" and then
+# deleted them when a real comment came along.  Worked pretty well, and nobody
+# figured it out.  I disabled it when the moderation came online feeling that
+# it was a cleaner solution. -CT
+sub fpsBeDamned {
+	my @subjects=('First!','First Post!','First Comment','
+			I got it!','Got it again!',
+			'FIRST COMMENT!!!', 'First one?', 'FIRST COMMENT!',
+			'first',
+			'mine','first!');
+
+	my @comments=('its just to easy!','damn I am so good!',
+			'who has the best kungfu?',
+			'did I get it?', 'I beat everyone!','got it!',
+			'hahahahahahahaha!',
+			'hehe');
+
+	my $c = sqlSelectMany("sid","stories","commentcount=0 and writestatus=1 " .
+		"and displaystatus=0 and (section='articles' or section='features')");
+
+	while (my($sid) = $c->fetchrow) {
+		sleep( rand(30) + 30 );
+		slashdLog("(Attaching first post to $sid)");
+		my $subj = $subjects[rand @subjects];
+		my $comment = $comments[rand @comments];
+		$I{dbh}->do("INSERT into comments values (
+			'$sid',1,0,
+			now(),
+			'FirstPost',0,
+			'$subj',
+			'$comment',
+			0,-1,0,-1)");
+		sqlUpdate("stories", { commentcount => 1 }, "sid='$sid'");
+	}
+
+	$c->finish;
+	if (my($sid, $cid) = sqlSelect("stories.sid,cid", "comments,stories", 
+			"comments.sid=stories.sid AND commentcount > 1
+			AND host_name='FirstPost' LIMIT 1")) {
+		slashdLog("(Removing the *cough* first post $sid)");
+		$I{dbh}->do("delete from comments where sid='$sid' AND host_name='FirstPost'");
+	}
+}
+
+#################################
+sub updateStoryIndex {
+	my %stories;
+
+	foreach my $sid (@_) {
+		$stories{$sid} = sqlSelectHashref("*","stories","sid='$sid'");
+	}
+	$I{dbh}->do("LOCK TABLES newstories WRITE");
+
+	foreach my $sid (keys %stories) {
+		sqlReplace("newstories", $stories{$sid}, "sid='$sid'");
+	}
+
+	$I{dbh}->do("UNLOCK TABLES");
+}
+
+#################################
+sub sectionHeaders {
+	my $section = shift;
+	local *FH;
+
+	$I{F}{ssi} = 1;
+	open FH,">$I{basedir}/$section/slashhead.inc"
+		or die "Can't open $I{basedir}/$section/slashhead.inc: $!";
+	*STDOUT = *FH;
+	header("", $section, "thread");
+	close FH;
+
+	$I{F}{ssi} = 0;
+	open FH, ">$I{basedir}/$section/slashfoot.inc"
+		or die "Can't open $I{basedir}/$section/slashfoot.inc: $!";
+	*STDOUT = *FH;
+	footer();
+	close FH;
+
+	$I{F}{ssi} = 1;
+	open FH, ">$I{basedir}/$section/slashhead_F.inc"
+		or die "Can't open $I{basedir}/$section/slashhead_F.inc: $!";
+	*STDOUT = *FH;
+	header("", $section, "flat");
+	close FH;
+
+	$I{F}{ssi} = 0;
+	open FH, ">$I{basedir}/$section/slashfoot_F.inc"
+		or die "Can't open $I{basedir}/$section/slashfoot_F.inc: $!";
+	*STDOUT = *FH;
+	footer();
+	close FH;
+}
+
+#################################
+sub newfooter {
+	local *FH;
+	local *SO = *STDOUT;
+
+	sectionHeaders("");
+	my $c = sqlSelectMany("section", "sections");
+	while (my($section) = $c->fetchrow) {
+		mkdir "$I{basedir}/$section", 0755;
+		sectionHeaders($section);
+	}
+
+	$c->finish;
+	*STDOUT = *SO;
+}
+
+#################################
+sub getBackendStories {
+	my $section = shift;
+
+	my $c = $I{dbh}->prepare("SELECT stories.sid,title,time,dept,aid,alttext,
+		image,commentcount,section,introtext,bodytext,
+		topics.tid as tid
+		    FROM stories,topics
+		   WHERE ((displaystatus = 0 and \"$section\"=\"\")
+		      OR (section=\"$section\" and displaystatus>-1)) 
+		     AND time < now()
+		     AND writestatus > -1
+		     AND stories.tid=topics.tid
+		ORDER BY time DESC
+		   LIMIT 10");
+
+		  # AND time < date_add(now(), INTERVAL 4 HOUR)
+
+	$c->execute;
+	return $c;
+}
+
+#################################
+sub newrdf {
+	my $section = shift;
+	my $c = getBackendStories($section);
+
+	my $SECT = getSection($section);
+	$SECT->{title} = "$I{sitename}: $SECT->{title}" unless $SECT->{isolate};
+
+	my @fs = (xmlEncodeStr($SECT->{title}),
+		$section ? "/index.pl?section=$section" : '',
+		xmlEncodeStr($I{sitename})
+	);
+
+	my $x = sprintf <<EOT, @fs;
+<?xml version="1.0"?><rdf:RDF
+xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+xmlns="http://my.netscape.com/rdf/simple/0.9/">
+
+	<channel>
+		<title>%s</title>
+		<link>$I{rootdir}%s</link>
+		<description>$I{slogan}</description>
+	</channel>
+
+	<image>
+		<title>%s</title>
+		<url>$I{rdfimg}</url>
+		<link>$I{rootdir}</link>
+	</image>
+
+EOT
+
+	while (my $S = $c->fetchrow_hashref) {
+		$x .= sprintf <<EOT, xmlEncodeStr($S->{title});
+	<item>
+		<title>%s</title>
+		<link>$I{rootdir}/article.pl?sid=$S->{sid}</link>
+	</item>
+
+EOT
+	}
+	$c->finish;
+
+	$x .= "</rdf:RDF>\n";
+
+	(my $file = $section || lc $I{sitename}) =~ s/\W+//g;
+	save2file("$I{basedir}/$file.rdf", $x);
+}
+
+#################################
+sub newxml {
+	my $section = shift;
+	my $c = getBackendStories($section);
+
+	my $x = <<EOT;
+<?xml version="1.0"?><backslash
+xmlns:backslash="$I{rootdir}/backslash.dtd">
+
+EOT
+
+	while(my $S = $c->fetchrow_hashref) {
+		$x.= sprintf <<EOT, xmlEncodeStr($S->{title}), xmlEncodeStr($S->{dept});
+	<story>
+		<title>%s</title>
+		<url>$I{rootdir}/$S->{section}/$S->{sid}.shtml</url>
+		<time>$S->{'time'}</time>
+		<author>$S->{aid}</author>
+		<department>%s</department>
+		<topic>$S->{tid}</topic>
+		<comments>$S->{commentcount}</comments>
+		<section>$S->{section}</section>
+		<image>$S->{image}</image>
+	</story>
+
+EOT
+	}
+
+	$c->finish;
+
+	$x .= "</backslash>\n";
+	(my $file = $section || lc $I{sitename}) =~ s/\W+//g;
+	save2file("$I{basedir}/$file.xml", $x);
+}
+
+#################################
+sub newmega {
+	my $c = getBackendStories();
+	my $y = 0;    
+	my $um = <<EOT;
+Welcome to megamode.txt
+%%
+EOT
+
+	while (($y < 11) && (my($sid, $title, $time, $dept, $aid, $topic, $image,
+			$commentcount, $section, $introtext, $bodytext) =
+			$c->fetchrow)) {
+		$y++;
+		$introtext =~ s/[\n\r]/ /g;
+		$bodytext =~ s/[\n\r]/ /g;
+
+		$um .= <<EOT;
+$title
+$I{rootdir}/$section/$sid.shtml
+$time EDT
+$aid
+$dept
+$topic
+$commentcount
+$section
+$image
+$introtext<P><A HREF="$I{rootdir}/article.pl?sid=$sid">Read More...</A> Comments:<B>$commentcount</B>
+
+%%
+EOT
+	}
+
+	$c->finish;
+	save2file("$I{basedir}/megamode.txt", $um);
+}
+
+#################################
+sub newultra {
+	my $c = getBackendStories();
+	my $y = 0;
+	my $um = <<EOT;
+WARNING:ultramode.txt will soon be obsolete.  Please us slashdot.xml or slashdot.rdf instead!  You have been warned!
+%%
+EOT
+
+	while (($y < 11) && (my($sid, $title, $time, $dept, $aid, $topic, $image,
+			$commentcount,$section) = $c->fetchrow)) {
+		$y++;
+
+		$um .= <<EOT;
+$title
+$I{rootdir}/$section/$sid.shtml
+$time EDT
+$aid
+$dept
+$topic
+$commentcount
+$section
+$image
+%%
+EOT
+	}
+	$c->finish;
+	save2file("$I{basedir}/ultramode.txt", $um);
+}
+
+#################################
+sub openBackend {
+	newultra();
+	newxml();
+	newrdf();
+	newmega();
+	my $sec = sqlSelectMany("section", "sections");
+	while(my($s) = $sec->fetchrow) {
+		newxml($s);
+		newrdf($s);
+	}
+	$sec->finish;
+}
+
+#################################
+sub makeDir {
+	my($section, $sid) = @_;
+
+	my $monthid = substr($sid, 3, 2);
+	my $yearid = substr($sid, 0, 2);
+	my $dayid = substr($sid, 6, 2);
+
+	mkdir "$I{basedir}/$section/$yearid", 0755;
+	mkdir "$I{basedir}/$section/$yearid/$monthid", 0755;
+	mkdir "$I{basedir}/$section/$yearid/$monthid/$dayid", 0755;
+}
+
+#################################
+# This is the normal, every 60 seconds stuff
+sub freshenup {
+	sqlConnect();
+	moveImages();
+
+	my %updates;
+	my $c = sqlSelectMany("sid,title,section", "stories", "writestatus=1");
+	my @updatedsids;
+
+	while (my($sid, $title, $section) = $c->fetchrow) {
+		slashdLog("Updating $title $sid");
+		$updates{$section} = 1;
+		makeDir($section, $sid);
+		$totalChangedStories++;
+
+		if (prog2file("$I{basedir}/article.pl sid=$sid\\\&ssi=yes\\\&mode=thread",
+			"$I{basedir}/$section/$sid.shtml")) {
+
+			# Don't need this any more.
+			prog2file("$I{basedir}/article.pl sid=$sid\\\&ssi=yes\\\&mode=flat",
+				"$I{basedir}/$section/$sid"."_F.shtml");
+
+			# Disabled because I handle this in SSI article generate- save a locking UPDATE wherever possible...
+			# sqlUpdate("stories",{writestatus=>0},"sid=".$dbh->quote($sid));
+			# sleep 1; # Let http catch up a bit...
+			push @updatedsids, $sid;
+		} else {
+			slashdLog("Trouble Updating $sid");
+		}
+	}
+
+	$c->finish;
+
+	updateStoryIndex(@updatedsids);
+
+	my $x = 0;
+	$c = sqlSelectMany("sid,section", "stories", "writestatus=5");
+	while (my($sid, $section) = $c->fetchrow) {
+		$x++;
+		$updates{$section} = 1;
+		unlink "$I{basedir}/$section/$sid.shtml"
+			or warn "Can't unlink $I{basedir}/$section/$sid.shtml: $!";
+		unlink "$I{basedir}/$section/${sid}_F.shtml"
+			or warn "Can't unlink $I{basedir}/$section/${sid}_F.shtml: $!";
+		$I{dbh}->do("DELETE from stories where sid='$sid'");
+		$I{dbh}->do("DELETE from newstories where sid='$sid'");
+		slashdLog("Deleting $sid");
+	}
+	$c->finish;
+
+	my($w) = getvar("writestatus");
+
+	if ($updates{articles} ne "" || $w ne "0") {
+		setvar("writestatus", "0");
+		prog2file("$I{basedir}/index.pl ssi=yes", "$I{basedir}/index.shtml");
+		# prog2file("$I{basedir}/index.pl ssi=yes\\\&mode=flat","$I{basedir}/index_F.shtml");
+	}
+
+	foreach my $key (keys %updates) {
+		next unless $key;
+		prog2file("$I{basedir}/index.pl ssi=yes\\\&section=$key",
+			"$I{basedir}/$key/index.shtml");
+		# prog2file("$I{basedir}/index.pl ssi=yes\\\&mode=flat\\\&section=$key","$I{basedir}/$key/index_F.shtml");
+	}
+}
+
+#######################################
+sub writePollBooth {
+	$I{currentSection} = "redhat";
+	my $poll = pollbooth("", "rh");
+	$poll = qq!\n<FONT FACE="$I{mainfontface}" SIZE="2">$poll</FONT>\n!;
+	save2file("$I{basedir}/pollbooth.html", $poll);
+	$I{currentSection} = "";
+}
+
+#######################################
+sub getSlicesTable {
+	my $adfu_dbh = DBI->connect($I{adfu_dsn}, $I{adfu_dbuser},
+		$I{adfu_dbpass}) or die "Can't connect to adfu: $!";
+
+	my $count = 1;
+	$I{dbh}->do("LOCK TABLES slashslices WRITE");
+	$I{dbh}->do("DELETE FROM slashslices");
+
+	my $adfu_sth = $adfu_dbh->prepare("SELECT ssID, ssRUID, ssLayer FROM slashslices");
+	$adfu_sth->execute;
+
+	while (my($ssID, $ssRUID, $ssLayer) = $adfu_sth->fetchrow_array) {
+	    next if $ssID eq "" || $ssRUID eq "";
+		unless ($ssLayer =~ /servfu\.pl/) {
+			$ssLayer = <<EOT;
+<TABLE ALIGN="LEFT" BORDER="0" CELLPADDING="0" CELLSPACING="0">
+	<TR><TD WIDTH="1"><IMG SRC="http://209.207.224.220/servfu.pl?c,$ssRUID,\$random"
+		WIDTH="1" HEIGHT="1"><BR></TD></TR>
+</TABLE>$ssLayer
+EOT
+		}
+
+		$ssLayer =~ s/'/''/g;
+
+		$I{dbh}->do("INSERT INTO slashslices (ssID, ssRank, ssRUID, ssLayer) " .
+			"VALUES ($ssID, " . $count++ . ", $ssRUID, '$ssLayer')");
+	}
+
+	$adfu_sth->finish;
+	$adfu_dbh->disconnect;
+
+	for (my $i = $count; $i <= 1000; $i++) {
+		my $randnum = int(rand($count - 1)) + 1;
+		my ($ssID, $ssRUID, $ssLayer) = $I{dbh}->selectrow_array(
+			"SELECT ssID, ssRUID, ssLayer from slashslices WHERE ssRank=$randnum"
+		);
+
+		next if $ssID eq "" || $ssRUID eq "";
+		$ssLayer =~ s/'/''/g;
+
+		$I{dbh}->do("INSERT INTO slashslices (ssID, ssRank, ssRUID, ssLayer) " .
+			"VALUES ($ssID, $i, $ssRUID, '$ssLayer')");
+	}
+
+	$I{dbh}->do("UNLOCK TABLES");
+}
+
+slashdPid();
+slashdLog("Starting up Slashd with pid $$");
+
+my $last = my $modlast = 0;
+while (1) {
+	freshenup();
+	if ((time - $last) > 60 * 60 ) { # Every Hour
+		slashdLog("Doing Hourly Update");
+		nukeBlockCache();
+		newfooter();
+		setheadertopics();
+		openBackend();
+		if ($I{run_ads}) {
+			getSlicesTable();
+		}
+		system("$I{datadir}/portald &");
+		sleep(60 * 2);
+
+		my($today) = sqlSelect("to_days(now())");
+		my($yesterday) = getvars("today");
+
+		if ($today ne $yesterday) {
+			newmotd();
+			setvar("today", $today);
+			slashdLog("It's Tomorrow: Run Slashd daily Voodoo");
+			system("$I{datadir}/dailyStuff");
+		}
+		$last = time;
+
+	} elsif ((time - $modlast) > (60 * 60 * 2)) { # Every 2 Hours
+		slashdLog("Running Moderatord");
+		system("$I{datadir}/moderatord");
+		prog2file("$I{basedir}/hof.pl ssi=yes", "$I{basedir}/hof.shtml");
+		prog2file("$I{basedir}/topics.pl ssi=yes", "$I{basedir}/topics.shtml");
+		prog2file("$I{basedir}/cheesyportal.pl ssi=yes",
+			  "$I{basedir}/cheesyportal.shtml");
+		$modlast = time;
+	}
+	sleep(60 * $I{updatemin}); # Sleep for 5 minutes
+}

@@ -1,0 +1,35 @@
+Some more info to help Debian users.  Please read the main INSTALL first.
+
+Author: Bernard de Rubinat <bernard@netgames.org>
+
+The methods in INSTALL work fine for Debian, but many will prefer the
+apt-get method.  For each package below, you can use:
+
+    apt-get install PACKAGE
+
+Unlisted packages do not exist; install those using other methods.
+
+Software                Package
+------------------------------------------
+MySQL                   mysql-server
+                        mysql-client
+mod_perl                libapache-mod-perl
+perl                    perl-5.005-base
+                     or perl-5.005
+Apache                  apache
+
+
+Perl modules            Package
+------------------------------------------
+DBI                     libdbi-perl
+msql-mysql-modules      libdbd-mysql-perl
+ApacheDBI               libapache-dbi-perl
+Apache-DBILogger        libapache-dbilogger-perl
+libnet                  libnet-perl
+HTML-Parser             libhtml-parser-perl
+XML-Parser              libxml-parser-perl
+MIME-Base64             libmime-base64-perl
+Digest-MD5              libdigest-md5-perl
+URI                     liburi-perl
+libwww-perl             libwww-perl
+DateManip               libdate-manip-perl

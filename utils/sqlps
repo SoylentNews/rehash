@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+
+###############################################################################
+# this gives a process list of the database
+###############################################################################
+@p=split /\|\n/, `mysqladmin -u root processlist`;
+foreach(@p) {
+	if(!/^\+/ and !/Sleep/ and !/localhost/) {
+		s/\s/ /g;
+		s/  / /g;
+		s/[^_\'\-\+\.A-Z0-9\(\) ,=\|]//gi;
+		s/SELECT(.*)FROM/SELECT:FROM/g;
+		my @x=split(/\|/);
+		
+		$x[3]=~s/\.dn\.net//g;
+		
+		my $s="$x[3]$x[6]\t$x[8]";
+		
+		$s=substr ($s,1,75);
+		print "$s\n";
+	}
+}
+
+print "\n";

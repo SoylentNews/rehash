@@ -1,0 +1,103 @@
+features		
+topics	static	<P>The topics block.</P>
+perlnews	portald	
+story_trailer	eval	<P>The code that's evaled to create the closing part of the story block.</P>
+quicklinks		
+books		
+commentswarning		
+freshmeat	portald	
+motd		
+poll	portald	
+postvote		
+titlebar		<P>This is the html that makes up the bar above each story, containing the actual title of the story.</P>
+fancybox		
+advertisement		
+footer	static	This is the block that makes up the bottom of the page
+mainmenu		
+slashdot	portald	
+pdabuzz	portald	
+header		
+admin_header		
+pollitem		
+story		
+comment	eval	
+submit_before		
+submit_after		
+newusermsg		
+slash		
+menu	static	This is the main site menu block
+uptime	portald	
+radio		
+colors	color	<P>This is a comma delimited list of colors that are split by comma and assigned to two arrays: $I{fg} and $I{bg}. <BR>The first half of these colors go into $I{fg} and the last half go into $I{bg}.</P>
+microunices	portald	
+index	eval	This is the main block of html and code that gets evaled to create the mainindex page.
+more		
+mysite		
+sfnews	portald	
+linuxtuneup	portald	
+newstrolls	portald	
+freaktech	portald	
+light_index		
+Excite	portald	
+DejaNews	portald	
+Comics	portald	
+AllMusic	portald	
+light_story		
+light_header		
+light_titlebar		
+light_fancybox		
+light_footer		
+newsstock	portald	
+light_comment		
+themes	portald	
+lunch	portald	
+perlcom	portald	
+pricewatch	portald	
+smug	portald	
+rand	portald	
+srandblock		
+technetcast	portald	
+portalmap		
+Weather24	portald	
+Shopper.com	portald	
+MetaCrawler	portald	
+brunching	portald	
+wunderground	portald	
+mozillanewsbot	portald	
+emailsponsor		
+index2		
+mozillaorg	portald	
+story_link		<P>The eval code that creates the block that has the link to the article.plwith the sid of the particular story.</P>
+linuxnewbie	portald	
+qmovies		
+linuxpower	portald	
+everything	portald	
+secfocus	portald	
+absolutegame	portald	
+worldnewyork	portald	
+userlogin	static	<P>This is the block that has the login fields for the user</P>
+WomensMusicNews	portald	
+rivaextreme	portald	
+freespace2	portald	
+linuxm68k	portald	
+protest	portald	
+storymore		
+cringely	portald	
+pbsonline	portald	
+nextlevel	portald	
+listology	portald	
+linuxdev	portald	
+exosci	portald	
+technocrat	portald	
+gnome	portald	
+osopinion	portald	
+admin_footer	static	<P>This is the block on the bottom of the page when that a logged in author will see.</P>
+dailydaemon	portald	
+lwndaily	portald	
+list_filters_header		
+perlmonks	portald	Perl Monks Website
+awards		
+organisation	eval	<P>evaled code that composes the menu block containing organisation-specific links</P>
+list_filters_footer		
+edit_filter		
+slashcode	portald	
