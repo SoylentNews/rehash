@@ -732,7 +732,7 @@ sub topicEdit {
 
 	if (!$form->{topicdelete}) {
 		if (!$form->{topicnew} && $form->{nexttid}) {
-			$topic = $slashdb->getTopic($form->{nexttid});
+			$topic = $slashdb->getTopic($form->{nexttid}, 0, 1);
 		} else {
 			$topic = {};
 		}
