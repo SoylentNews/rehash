@@ -24,13 +24,13 @@ edit
 __template__
 [% IF !user.is_admin; user_edit = user; END %]
 
-<P>Hit the PayPal link below to subscribe to [% constants.sitename %].
+<P>Hit the PayPal or credit-card link below to subscribe to
+[% constants.sitename %].
 You will be able to purchase banner-ad-free pages.
-Currently, payment is only through PayPal.
-(<A HREF="[% constants.rootdir %]/faq/subscriptions.shtml#ss400">Why PayPal?</A>)
 
 <CENTER><TABLE BORDER=0 CELLPADDING=3><TR>
 <TD>[% PROCESS paypalbut %]</TD>
+<TD>[% PROCESS ccbut %]</TD>
 </TR></TABLE></CENTER>
 
 [%
