@@ -18,13 +18,13 @@ __name__
 mid_tab
 __template__
 [% IF tab_is_selected %]
-	<TD [% details.bg_tab_sel %]>&nbsp;<A HREF="[% link %]"><B><FONT COLOR="[% details.fg_tab_sel_color %]">[% label %]</FONT></B></A>&nbsp;</TD>
+	<TD [% details.bg_tab_sel %]><NOBR>&nbsp;<A HREF="[% link %]"><B><FONT COLOR="[% details.fg_tab_sel_color %]">[% label %]</FONT></B></A>&nbsp;</NOBR></TD>
 	<TD VALIGN="TOP"><IMG [% details.lt_sel_rt_unsel %]></TD>
 [% ELSIF next_tab_is_selected %]
-	<TD [% details.bg_tab_unsel %]>&nbsp;<A HREF="[% link %]"><FONT COLOR="[% details.fg_tab_unsel_color %]">[% label %]</FONT></A>&nbsp;</TD>
+	<TD [% details.bg_tab_unsel %]><NOBR>&nbsp;<A HREF="[% link %]"><FONT COLOR="[% details.fg_tab_unsel_color %]">[% label %]</FONT></A>&nbsp;</NOBR></TD>
 	<TD VALIGN="TOP"><IMG [% details.lt_unsel_rt_sel %]></TD>
 [% ELSE %]
-	<TD [% details.bg_tab_unsel %]>&nbsp;<A HREF="[% link %]"><FONT COLOR="[% details.fg_tab_unsel_color %]">[% label %]</FONT></A>&nbsp;</TD>
+	<TD [% details.bg_tab_unsel %]><NOBR>&nbsp;<A HREF="[% link %]"><FONT COLOR="[% details.fg_tab_unsel_color %]">[% label %]</FONT></A>&nbsp;</NOBR></TD>
 	<TD VALIGN="TOP"><IMG [% details.lt_unsel_rt_unsel %]></TD>
 [% END %]
 __seclev__
