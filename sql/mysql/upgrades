@@ -1182,7 +1182,6 @@ INSERT INTO vars (name, value, description) VALUES ('mod_karma_bonus_max_downmod
 ALTER TABLE message_drop ADD COLUMN send ENUM('now', 'defer', 'collective') DEFAULT 'now' NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('message_last_deferred','','The last date that deferred messages were sent');
 
-# SLASHCODE LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('comments_mod_totals_exact','1','Show exact moderation counts?');
 
@@ -1206,3 +1205,4 @@ INSERT INTO users_param (uid, name, value) SELECT uid, "clbig_bonus", "+1" FROM 
 INSERT INTO users_param (uid, name, value) SELECT uid, "clsmall_bonus", "-1" FROM users_comments WHERE clsmall > 0;
 
 # USEPERL LAST UPDATED HERE
+# SLASHCODE LAST UPDATED HERE
