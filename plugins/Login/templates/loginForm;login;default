@@ -20,6 +20,7 @@ __template__
 <input type="HIDDEN" name="op" value="userlogin">
 <table width="75%">
 [% IF form.unickname %]
+	[% user_uid = Slash.db.getUserUID(form.unickname) %]
 	<tr><td colspan="2">
 	<p>
 	Danger, Will Robinson!  You didn't log in!  You apparently put
@@ -27,6 +28,17 @@ __template__
 	or <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have your
 	password mailed to you</a> if you forgot your password.
 	</p>
+	[% IF user_uid and Slash.db.getUser(user_uid, "waiting_for_account_verify") %]
+	<p>
+		<b>Note:</b> A request to verify your account information has been sent to
+		the e-mail associated with this account.  Your password has been reset.  This
+		is likely the reason you're having difficult logging in at the moment.
+	</p>
+	<p>
+		Please check your e-mail for your updated login information or <a href="[% constants.real_rootdir %]/login.pl?op=mailpasswdform">have the updated password mailed to you</a>.
+		
+	</p>
+	[% END %]
 
 	[% IF constants.allow_anonymous %]
 		<p>
