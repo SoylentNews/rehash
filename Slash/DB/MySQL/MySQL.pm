@@ -4094,10 +4094,8 @@ sub createDiscussion {
 ########################################################
 sub createStory {
 	my($self, $story) = @_;
-	unless ($story) {
-		$story ||= getCurrentForm();
-	}
-	#Create a sid
+	$story ||= getCurrentForm();
+	# Create a sid
 	my($sec, $min, $hour, $mday, $mon, $year) = localtime;
 	$year = $year % 100;
 	# yes, this format is correct, don't change it :-)
