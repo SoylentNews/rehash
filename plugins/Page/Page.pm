@@ -128,6 +128,7 @@ sub displayStories {
 
 	my $misc = {};
 	my $tid = $other->{tid};
+	my $offset = $other->{offset};
 	if ($section) {
 		my $skin = $self->getSkin($section);
 		$tid ||= $self->getNexusFromSkid($skin->{skid});
@@ -140,7 +141,7 @@ sub displayStories {
 
 	my $storystruct = [];
 
-	my $stories = $self->getStoriesEssentials({ limit => $limit, tid => $tid });
+	my $stories = $self->getStoriesEssentials({ limit => $limit, tid => $tid, offset => $offset });
 
 	my $i = 0;
 
