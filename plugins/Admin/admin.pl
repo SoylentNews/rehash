@@ -1246,6 +1246,7 @@ sub editStory {
 	my $page = 'index';
 	# If the user is a section only admin, we do that, if they have filled out a form we do that but 
 	# if none of these apply we just do defaultsection -Brian
+	# XXXSKIN - ???
 	my $section = $user->{section} || $form->{section} || $constants->{defaultsection};
 
 	for (keys %{$form}) { $storyref->{$_} = $form->{$_} }
