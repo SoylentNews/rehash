@@ -948,7 +948,7 @@ EOT
 	# If a user is unwilling to moderate, we should cancel all points, lest
 	# they be preserved when they shouldn't be.
 	sqlUpdate("users_comments", { points => 0 }, "uid=$uid AND uid>0", 1)
-		unkess $I{F}{willing};
+		unless $I{F}{willing};
 
 	# Update users with the $H thing we've been playing with for this whole damn sub
 	sqlUpdate("users_index", $H, "uid=" . $uid . " AND uid>0", 1);
