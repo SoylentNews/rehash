@@ -69,6 +69,16 @@ sub setDates {
 	$self->sqlDo("INSERT INTO event_dates (sid,begin,end) VALUES ('$sid', '$begin', '$end')");
 }
 
+sub minDate {
+	my ($self, $sid) = @_;
+	return $self->sqlSelect("MIN(begin)", 'event_dates', "sid = '$sid'" );
+}
+
+sub maxDate {
+	my ($self, $sid) = @_;
+	return $self->sqlSelect("MAX(end)", 'event_dates', "sid = '$sid'" );
+}
+
 sub deleteDates {
 	my ($self, $id) = @_;
 	$self->sqlDo("DELETE FROM event_dates WHERE id = $id");
