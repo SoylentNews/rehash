@@ -476,8 +476,7 @@ sub stripByMode {
 		$str =~ s/>/&gt;/g;
 		### this is not ideal; we want breakHtml to be
 		### entity-aware
-		# attributes are inside tags, and don't need to be
-		# broken up
+		# attributes are inside tags, and don't need to be broken up
 		$str = breakHtml($str) unless $no_white_fix || $fmode == ATTRIBUTE;
 
 	} elsif ($fmode == PLAINTEXT) {
@@ -743,8 +742,11 @@ sub processCustomTags {
 =head2 breakHtml(TEXT, MAX_WORD_LENGTH)
 
 Private function.  Break up long words in some text.  Will ignore the
-contents of HTML tags.  Called from C<stripByMode> functions.  Handles
-spaces before dot-words so as to best work around a Microsoft bug.
+contents of HTML tags.  Called from C<stripByMode> functions -- if
+there are any HTML tags in the text, C<stripBadHtml> will have been
+called first.  Handles spaces before dot-words so as to best work around a
+Microsoft bug.  This code largely contributed by Joe Groff <joe at pknet
+dot com>.
 
 =over 4
 
@@ -772,54 +774,74 @@ The text.
 
 sub breakHtml {
 	my($text, $mwl) = @_;
-	my($new);
-
 	my $constants = getCurrentStatic();
+	$mwl = $mwl || $constants->{breakhtml_wordlength} || 50;
 
-	# these are tags that "break" a word;
+	# These are tags that "break" a word;
 	# a<P>b</P> breaks words, y<B>z</B> does not
 	my $approvedtags_break = $constants->{'approvedtags_break'}
 		|| [qw(HR BR LI P OL UL BLOCKQUOTE DIV)];
 	my $break_tag = join '|', @$approvedtags_break;
-	$break_tag = qr{$break_tag}i;
+	$break_tag = qr{(?:$break_tag)}i;
 
-	$mwl = $mwl || $constants->{'breakhtml_wordlength'} || 50;
+	# This is the regex that finds a char that, at the start of
+	# a word, will trigger Microsoft's bug.  It's already been
+	# set up for us, it just needs a shorter name.
+	my $nswcr = $constants->{comment_nonstartwordchars_regex};
 
-	my $ie_bug_char = qr{[,./:;]};	# Characters IE deems worthy of turning
-					# into nbsps
-
-	$new = $text;
-
-	# The old breaking loop was way too hairy and didn't
-	# work properly anyway, so I'm replacing it with this far simpler
-	# code. -jcg
+	# And we also need a regex that will find an HTML entity or
+	# character references, excluding ones that would break words:
+	# a non-breaking entity.
+	my $nbe = qr{ (?:
+		&
+		(?! \# (?:32|x20) )
+		(\#?[a-zA-Z0-9]+)
+		;
+	) }xi;
 
 	# First, convert spaces before an IE bug character into an nbsp.
 	# This ensures that the standard word-breaking mechanism works
-	# despite the IE 'feature' of placing an nbsp behind these characters.
-	$new =~ s{\s+($ie_bug_char)}{\xA0$1}gs;
+	# despite the IE 'feature' of making the space before these chars
+	# effectively non-breaking.
+	$text =~ s{\s+($nswcr)}{&nbsp;$1}gs;
 
 	# Mark off breaking tags
-	$new =~ s{<(/?(?:$break_tag))>}{ <$1> }gs;
+	$text =~ s{
+		\s*
+		(</?$break_tag>)
+		\s*
+	}{ <$1> }gsx;
+
 	# Temporarily hide whitespace inside tags so that the regex below
 	# won't accidentally catch attributes, e.g. the HREF= of an A tag.
-	$new =~ s{(<[^>\s]*)\s}{$1\x00}gs;
-	# Break up overlong words, treating HTML tags as single characters
-	$new =~ s[(
-                    (?:^|\G|\s)		# Must start at a word bound
-                    (?:
-                      (?>(?:<[^>]+>)*)	# Eat up HTML tags
-                      \S
-		    ){$mwl}		# $mwl non-HTML-tag chars in a row
-		  )][$1 ]gsx;
-	# Unhide tag whitespace
-	$new =~ s{\x00}{ }g;
-	# If one of our spaces landed before an IE bug character, drop in
-	# an nbsp to prevent getting around the filter by evenly spacing
-	# bug characters every $mwl characters.
-	$new =~ s{ ($ie_bug_char)}{ &nbsp;$1}gs;
+	1 while $text =~ s{
+		(<[^>\s]*)	# Seek in a tab up to its
+		\s+		# first whitespace
+	}{$1\x00}gsx;		# and replace the space with NUL
 
-	return $new;
+	# Break up overlong words, treating entities/character references
+	# as single characters and ignoring HTML tags.
+	$text =~ s{(
+		(?:^|\G|\s)		# Must start at a word bound
+		(?:
+			(?>(?:<[^>]+>)*)	# Eat up HTML tags
+			(?:			# followed by either
+				$nbe		# an entity (char. ref.)
+			|	\S		# or an ordinary char
+			)
+		){$mwl}			# $mwl non-HTML-tag chars in a row
+	)}{$1 }gsx;
+
+	# Change the NULs back to whitespace.
+	$text =~ s{\x00}{ }g;
+
+	# If one of our spaces landed before an IE bug character, drop in
+	# an nbsp to work around the IE bug.  This mildly affects rendering
+	# for non-IE readers (grumble), but prevents getting around the
+	# filter by evenly spacing bug characters every $mwl characters.
+	$text =~ s{ ($nswcr)}{ &nbsp;$1}gs;
+
+	return $text;
 }
 
 #========================================================================
