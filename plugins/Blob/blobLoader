@@ -1,0 +1,84 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2002 by Open Source Development Network. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+use strict;
+use File::Basename;
+use Getopt::Std;
+use Slash;
+use Slash::Utility;
+use Slash::Constants ':people';
+
+use vars qw( $slashdb $werder $constants $junk );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hu:f:c:vs:', \%opts);
+usage() if $opts{'h'};
+$opts{'u'} ||= 'slash';
+usage("You must supply a filename and a content/type") unless $opts{'f'} && $opts{'c'};
+
+createEnvironment($opts{u});
+$constants = getCurrentStatic();
+my $blobs = getObject("Slash::Blob");
+
+unless (-f $opts{f}) {
+	print "$opts{f} does not exist\n";
+	exit(0);
+}
+
+my ($file, $data);
+open($file, $opts{f});
+while (<$file>) {
+	$data .= $_;
+}
+close($file);
+my $id = $blobs->create({ 
+												 seclev => $opts{s},
+												 mime_type => $opts{c},
+												 data => $data,
+												 });
+print "Stored in $id\n";
+
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] [#users]
+
+You can use this to load binaries into blobs.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-f	filename
+	-c	content/type
+	-s	seclev
+
+EOT
+	exit;
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2002 by Open Source Development Network. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__

@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS blobs;
+CREATE TABLE blobs (
+	id VARCHAR(32) NOT NULL,
+	mime_type VARCHAR(80) NOT NULL,
+	seclev mediumint UNSIGNED NOT NULL DEFAULT '0',
+	reference_count mediumint UNSIGNED NOT NULL DEFAULT '1',
+	data LONGBLOB NOT NULL,
+	PRIMARY KEY (id)
+);
