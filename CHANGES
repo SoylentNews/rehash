@@ -117,6 +117,10 @@ slash-1.0.5, 2000.06.13
 	nicknames; authors should have their user nicknames reserved
 	already
 
+*	Added some programs to contrib directory: user2author and
+	sendAdminMail from madmag, and recentcomm, for getting
+	the most recent comments
+
 *	Plenty of minor code cleanups
 
 
