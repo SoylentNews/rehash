@@ -760,7 +760,8 @@ sub editComment {
 		indextype	=> $form->{indextype},
 		preview		=> $preview,
 		reply		=> $reply,
-		gotmodwarning	=> $gotmodwarning
+		gotmodwarning	=> $gotmodwarning,
+		newdiscussion	=> $form->{newdiscussion}
 	});
 }
 
