@@ -54,7 +54,11 @@ TITLE="[% topic.textname %]"></A>
 	[% IF submission.uid != constants.anonymous_coward_uid %]
 		[% IF num_from_uid >= 20 %]<B>[% END %]
 		[% num_from_uid %] submission[% IF num_from_uid != 1 %]s[% END %]
-		from [% submitter.nickname %] ([% accepted_from_uid %] accepted)
+		from [% submitter.nickname %]
+		[% IF submitter.realemail %]
+			&lt;<a href="mailto:[% submitter.realemail | strip_attribute %]">[% submitter.realemail | strip_literal %]</a>&gt;
+		[% END %]
+		([% accepted_from_uid %] accepted)
 		[%- IF num_from_uid >= 20 %]</B>[% END -%]
 		[%- IF submission.emaildomain %]
 			and
