@@ -185,16 +185,20 @@ sub bulkEmail {
 	return $return;
 }
 
+# doEmail may be used to send mail to any arbitrary email address,
+# as $tuser is normally a UID, but may be an email address
 sub doEmail {
-	my($uid, $subject, $content, $code, $pr) = @_;
+	my($tuser, $subject, $content, $code, $pr) = @_;
 
 	my $messages = getObject("Slash::Messages");
 	if ($messages) {
-		$messages->quicksend($uid, $subject, $content, $code, $pr);
+		$messages->quicksend($tuser, $subject, $content, $code, $pr);
 	} else {
-		my $slashdb = getCurrentDB();
-		my $addr = $slashdb->getUser($uid, 'realemail');
-		sendEmail($addr, $subject, $content, $pr);
+		if ($tuser !~ /\D/) {
+			my $slashdb = getCurrentDB();
+			$tuser = $slashdb->getUser($tuser, 'realemail');
+		}
+		sendEmail($tuser, $subject, $content, $pr);
 	}
 }
 

@@ -703,7 +703,7 @@ The hashref containing the rendered message data.
 
 sub render {
 	my($self, $msg, $notemplate) = @_;
-	my $constants = getCurrentStatic;
+	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
 
 	$msg->{user}		= $msg->{user}  ? $slashdb->getUser($msg->{user})  : { uid => 0 };
