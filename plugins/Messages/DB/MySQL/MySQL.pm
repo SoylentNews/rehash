@@ -325,8 +325,8 @@ sub deleteMessages {
 	# set defaults
 	my $constants = getCurrentStatic();
 	my $sendx = $constants->{message_send_expire}  || 7;
-	my $webx  = $constants->{message_web_expire}   || 31;
-	my $webmx = $constants->{message_web_maxtotal} || 50;
+	my $webx  = $constants->{message_web_expire}   || 14;
+	my $webmx = $constants->{message_web_maxtotal} || 25;
 	my $logx  = $constants->{archive_delay}        || 14;
 
 	# delete message log entries
