@@ -958,26 +958,37 @@ sub importText {
 }
 
 ##################################################################
-# Generated the 'Related Links' for Stories
+# Generates the 'Related Links' for Stories
 sub getRelated {
 	my($story_content, $tid) = @_;
 
 	my $slashdb = getCurrentDB();
 	my $rl = $slashdb->getRelatedLinks();
-	my $related_text = "";
+	my @related_text = ( );
 	my @rl_keys = sort keys %$rl;
+
+	my @tids = ( $tid );
+	if (ref($tid) && ref($tid) eq 'ARRAY') {
+		@tids = @$tid;
+	}
+	my $tid_regex = "^_topic_id_"
+		. "(?:"
+			. join("|", map { "\Q$_" } @tids)
+		. ")"
+		. "(?!\\d)";
+use Data::Dumper; print STDERR "getRelated tid_regex '$tid_regex' for tid " . Dumper($tid);
 
 	if ($rl) {
 		my @matchkeys =
 			sort grep {
-				$rl->{$_}{keyword} =~ /^_topic_id_$tid(?!\d)/
+				$rl->{$_}{keyword} =~ $tid_regex
 				||
 				$rl->{$_}{keyword} !~ /^_topic_id_/
 					&& $story_content =~ /\b$rl->{$_}{keyword}\b/i
 			} @rl_keys;
 		for my $key (@matchkeys) {
 			my $str = qq[&middot; <A HREF="$rl->{$key}{link}">$rl->{$key}{name}</A><BR>\n];
-			$related_text .= $str unless $related_text =~ /\Q$str\E/;
+			push @related_text, $str;
 		}
 	}
 
@@ -991,14 +1002,27 @@ sub getRelated {
 			$a_attr =~ s/$1//;
 		}
 
+		$a_attr =~ /\bHREF\s*=\s*(["'])(.*?)\1/;
+		my $a_href = $2;
+		# If we want to exclude certain types of links from appearing
+		# in Related Links, we can make that decision based on the
+		# link target here.
+
 		$label = strip_notags($label);
 		$label =~ s/(\S{30})/$1 /g;
 		my $str = qq[&middot; <A $a_attr>$label</A><BR>\n];
-		$related_text .= $str unless $related_text =~ /\Q$str\E/
-			|| $label eq "?" || $label eq "[?]";
+		push @related_text, $str unless $label eq "?" || $label eq "[?]";
 	}
 
-	return $related_text;
+	# Check to make sure we don't include the same link twice.
+	my %related_text = ( );
+	my $return_str = "";
+	for my $rt (@related_text) {
+		next if $related_text{$rt};
+		$return_str .= $rt;
+		$related_text{$rt} = 1;
+	}
+	return $return_str;
 }
 
 ##################################################################
@@ -1007,13 +1031,17 @@ sub otherLinks {
 
 	my $slashdb = getCurrentDB();
 
-	my $topic = $slashdb->getTopic($tid);
+	my $topics = $slashdb->getTopics();
+	my @tids = ( $tid );
+	if (ref($tid) && ref($tid) eq 'ARRAY') {
+		@tids = ( @$tid );
+	}
 
 	return slashDisplay('otherLinks', {
 		uid		=> $uid,
 		aid		=> $aid,
-		tid		=> $tid,
-		topic		=> $topic,
+		tids		=> \@tids,
+		topics		=> $topics,
 	}, { Return => 1, Nocomm => 1 });
 }
 
@@ -1122,10 +1150,13 @@ sub editStory {
 
 	my $newarticle = 1 if (!$sid && !$form->{sid});
 
-	# Editting a story that has yet to go into the DB, basically previewing. -Brian 
+	# Editing a story that has yet to go into the DB...
+	# basically previewing. -Brian 
 	if ($form->{title}) {
-		# Section authors get forced into their section, if not we see what section has been set to. 
-		# This fails we grab the defaultsection for a new story.  -Brian
+
+		# Section authors get forced into their section.  If not,
+		# we see what section has been set to.  If this fails,
+		# we grab the defaultsection for a new story.  -Brian
 		$form->{section} = $user->{section} if $user->{section};
 		$form->{section} ||= $constants->{defaultsection};
 		my $SECT = $slashdb->getSection($form->{section});
@@ -1165,14 +1196,23 @@ sub editStory {
 			$storyref->{'time'} = $form->{'time'};
 		}
 
+		# (I presume this wrapped around some other code which
+		# has since been deleted, so we can delete this now,
+		# right?) - Jamie 2003/05/13
 		my $tmp = $user->{currentSection};
 		$user->{currentSection} = $storyref->{section};
-
 		$user->{currentSection} = $tmp;
+
+		# Get the related text.
+		if (ref($form->{_multi}{stid}) eq 'ARRAY') {
+			@stid = grep { $_ } @{$form->{_multi}{stid}};
+		} elsif ($form->{stid}) {
+			@stid = $form->{stid};
+		}
 		$storyref->{relatedtext} =
 			getRelated(
 				"$storyref->{title} $storyref->{introtext} $storyref->{bodytext}",
-				$storyref->{tid}
+				\@stid
 			) . otherLinks(
 				$slashdb->getAuthor($storyref->{uid}, 'nickname'),
 				$storyref->{tid}, 
@@ -1182,31 +1222,30 @@ sub editStory {
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
-		if (ref($form->{_multi}{stid}) eq 'ARRAY') {
-			for (@{$form->{_multi}{stid}}) {
-				push @stid, $_ if $_;
-			}
-		} else {
-			push @stid, $form->{stid} if $form->{stid};
-		}
 
 	} elsif (defined $sid) { # Loading an existing SID
+
 		my $tmp = $user->{currentSection};
 		$user->{currentSection} = $slashdb->getStory($sid, 'section', 1);
 		$user->{state}{editing} = 1;
 		$storyref = $slashdb->getStory($sid, '', 1);
 		
 		$storyref->{writestatus} = 'dirty';
-		$storyref->{commentstatus}  = ($slashdb->getDiscussion($storyref->{discussion}, 'commentstatus') || 'disabled'); # If there is no discussion attached then just disable -Brian
+		$storyref->{commentstatus} = ($slashdb->getDiscussion($storyref->{discussion}, 'commentstatus') || 'disabled'); # If there is no discussion attached then just disable -Brian
 		$extracolumns = $slashdb->getSectionExtras($user->{currentSection}) || [ ];
 		$user->{currentSection} = $tmp;
 		# Get wordcounts
 		$storyref->{introtext_wordcount} = countWords($storyref->{introtext});
 		$storyref->{bodytext_wordcount} = countWords($storyref->{bodytext});
 		$subid = $storyref->{subid};
-		# Remove the original
-		@stid = grep(!/^$storyref->{tid}$/, @{$slashdb->getStoryTopicsJustTids($sid, { no_parents => 1 })});
+
+		# Remove the original topic id.  Why don't we do this above,
+		# when we're previewing?
+		@stid = grep { $_ != $storyref->{tid} }
+			@{ $slashdb->getStoryTopicsJustTids($sid, { no_parents => 1 }) };
+
 	} else { # New Story
+
 		my $SECT = $slashdb->getSection($section);
 		$extracolumns		    = $slashdb->getSectionExtras($SECT->{section}) || [ ];
 		$storyref->{displaystatus}  = $SECT->{defaultdisplaystatus};
@@ -1219,6 +1258,7 @@ sub editStory {
 		$storyref->{uid} = $user->{uid};
 		$storyref->{writestatus} = "dirty";
 		$subid = $form->{subid};
+
 	}
 
 	if ($storyref->{title}) {
@@ -1591,15 +1631,26 @@ sub updateStory {
 	my $tid_ref;
 	my $default_set = 0;
 	my $topic = $form->{tid};
-	my $stopic = $form->{stid};
 
 	$form->{dept} =~ s/ /-/g;
 
 	$form->{aid} = $slashdb->getStory($form->{sid}, 'aid', 1)
 		unless $form->{aid};
 
-	$form->{relatedtext} = getRelated("$form->{title} $form->{bodytext} $form->{introtext}", $topic)
-		. otherLinks($slashdb->getAuthor($form->{uid}, 'nickname'), $topic, $form->{uid});
+	my @stid = ( );
+	if (ref($form->{_multi}{stid}) eq 'ARRAY') {
+		@stid = grep { $_ } @{$form->{_multi}{stid}};
+	} elsif ($form->{stid}) {
+		@stid = $form->{stid};
+	}
+	$form->{relatedtext} = getRelated(
+			"$form->{title} $form->{bodytext} $form->{introtext}",
+			$topic
+		) . otherLinks(
+			$slashdb->getAuthor($form->{uid}, 'nickname'),
+			$topic,
+			$form->{uid}
+		);
 
 	my $time = ($form->{fastforward})
 		? $slashdb->getTime()
@@ -1787,9 +1838,17 @@ sub saveStory {
 		$form->{section} = $user->{section} ? $user->{section} : $edituser->{section};
 	}
 	$form->{dept} =~ s/ /-/g;
+
+	my @stid = ( );
+	if (ref($form->{_multi}{stid}) eq 'ARRAY') {
+		@stid = grep { $_ } @{$form->{_multi}{stid}};
+	} elsif ($form->{stid}) {
+		@stid = $form->{stid};
+	}
 	my $story_text = "$form->{title} $form->{bodytext} $form->{introtext}";
 	$form->{relatedtext} = getRelated($story_text, $form->{tid})
 		. otherLinks($edituser->{nickname}, $form->{tid}, $edituser->{uid});
+
 	$form->{introtext} = slashizeLinks($form->{introtext});
 	$form->{bodytext} =  slashizeLinks($form->{bodytext});
 	$form->{introtext} = balanceTags($form->{introtext});

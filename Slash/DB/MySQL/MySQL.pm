@@ -6270,13 +6270,17 @@ sub getStoryTopics {
 }
 
 ########################################################
+# There are atomicity issues here if two admins click Update at
+# the same time :) - Jamie 2003/05/13
 sub setStoryTopics {
 	my($self, $sid, $topic_ref) = @_;
 
 	$self->sqlDo("DELETE from story_topics where sid = '$sid'");
 
-	for my $key (keys %{$topic_ref}) {
-		unless ($self->sqlInsert("story_topics", { sid => $sid, tid => $key, is_parent  => $topic_ref->{$key} })) {
+	for my $key (sort keys %{$topic_ref}) {
+		unless ($self->sqlInsert("story_topics", 
+			{ sid => $sid, tid => $key, is_parent => $topic_ref->{$key} }
+		)) {
 			return 0;
 		}
 	}

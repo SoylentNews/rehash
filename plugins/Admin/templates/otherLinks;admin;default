@@ -2,6 +2,11 @@ __section__
 default
 __description__
 
+* tids = array of the story's topic ids
+* uid = uid of the author of the story
+* aid = getAuthor() for the author of the story
+* topics = getTopics()
+
 __title__
 
 __page__
@@ -11,7 +16,9 @@ en_US
 __name__
 otherLinks
 __template__
-&middot; <A HREF="[% constants.rootdir %]/search.pl?topic=[% tid | fixparam %]">More on [% topic.alttext %]</A><BR>
+[% FOR tid = tids %]
+&middot; <A HREF="[% constants.rootdir %]/search.pl?topic=[% tid | fixparam %]">More on [% topics.tid.alttext %]</A><BR>
+[% END %]
 &middot; <A HREF="[% constants.rootdir %]/search.pl?op=stories&amp;author=[% uid | fixparam %]">Also by [% aid %]</A>
 __seclev__
 500
