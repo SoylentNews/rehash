@@ -1194,6 +1194,12 @@ sub prepareUser {
 		$user->{currentPage} = 'misc';
 	}
 
+	if ($constants->{subscribe}
+		&& $user->{hits_paidfor}
+		&& $user->{hits_bought} < $user->{hits_paidfor}) {
+		$user->{is_subscriber} = 1;
+	}
+
 	if ($user->{seclev} >= 100) {
 		$user->{is_admin} = 1;
 		my $sid;
