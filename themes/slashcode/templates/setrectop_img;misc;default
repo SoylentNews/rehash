@@ -18,7 +18,7 @@ __template__
 <TD><A HREF="[% constants.rootdir %]/search.pl?topic=[% id %]"><IMG
                 SRC="[% image %]"
                 WIDTH="[% width %]" HEIGHT="[% height %]"
-                BORDER="0" ALT="[% alttext %]"></A>
+                BORDER="0" ALT="[% alttext %]" TITLE="[% alttext %]"></A>
 </TD>
 
 __seclev__
