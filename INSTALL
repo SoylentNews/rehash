@@ -405,6 +405,25 @@ INSTALLATION
         can put its contents unto your httpd.conf, or you can just "Include"
         it in your httpd.conf.
 
+        NOTE: As of December 2004, you'll see installation errors saying
+        that the table type of InnoDB doesn't support FULLTEXT indexes. This
+        is a known bug that would be too complicated to properly work around
+        at the moment (sorry). The real fix for it is coming soon. For now,
+        your best bet is to issue the following commands after installation
+        finishes:
+
+                ALTER TABLE comments TYPE=MyISAM;
+                ALTER TABLE comment_text TYPE=MyISAM;
+                ALTER TABLE pollquestions TYPE=MyISAM;
+                ALTER TABLE story_text TYPE=MyISAM;
+                ALTER TABLE users TYPE=MyISAM;
+                ALTER TABLE comments ADD FULLTEXT subject (subject);
+                ALTER TABLE comment_text ADD FULLTEXT comment (comment);
+                ALTER TABLE pollquestions ADD FULLTEXT question (question);
+                ALTER TABLE story_text ADD FULLTEXT title (title),
+                        ADD FULLTEXT intro_body (introtext, bodytext);
+                ALTER TABLE users ADD FULLTEXT nickname (nickname);
+
         NOTE: Read the message printed at the end of running
         install_slashsite. Failure to pay attention here is another common
         reason we see for Slash installations not working.
