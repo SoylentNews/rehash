@@ -97,7 +97,7 @@ gstatic total:        -          -    [% ints(stats_data.grand_total_static) %]
 
 END %]
 
-[% PROCESS titlebar title => reports.${form.report} _ ' for ' _ constants.sitename %]
+[% PROCESS titlebar title => reports.${form.report} _ ' for ' _ constants.sitename, width => '100%' %]
 
 <FORM METHOD="POST" ACTION="[% env.script_name %]">
    [% Slash.createSelect('report', reports, form.report, 1) %]
