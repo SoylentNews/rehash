@@ -236,6 +236,21 @@ sub getSubscriberList {
 	);
 }
 
+sub getSubscriptionsForUser {
+	my($self, $uid) = @_;
+	my $slashdb = getCurrentDB();
+	my $uid_q = $slashdb->sqlQuote($uid);
+	my $sp = $slashdb->sqlSelectAll(
+		"ts, email, payment_gross, pages, method, transaction_id",
+		"subscribe_payments",
+		"uid = $uid_q",
+		"ORDER BY spid",
+	);
+	$sp ||= [ ];
+	formatDate($sp, 0);
+	return $sp;
+}
+
 1;
 
 __END__

@@ -2573,16 +2573,9 @@ sub getUserAdmin {
 		$user_edit->{stirredpercent} = sprintf("%.2f",
 			$user_edit->{stirred}*100/$mod_total);
 	}
-	if ($constants->{subscribe}) {
-		my $sp = $slashdb->sqlSelectAll(
-			"ts, email, payment_gross, pages, method, transaction_id",
-			"subscribe_payments",
-			"uid = '$user_edit->{uid}'",
-			"ORDER BY spid",
-		);
-		$sp ||= [ ];
-		formatDate($sp, 0);
-		$user_edit->{subscribe_payments} = $sp;
+	if ($constants->{subscribe} and my $subscribe = getObject('Slash::Subscribe')) {
+		$user_edit->{subscribe_payments} =
+			$subscribe->getSubscriptionsForUser($user_edit->{uid});
 	}
 
 	return slashDisplay('getUserAdmin', {

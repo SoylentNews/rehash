@@ -146,14 +146,14 @@ __template__
 [% IF useredit.subscribe_payments %]
 			<TR>
 				<TD WIDTH="100">&nbsp;</TD>
-				<TD ALIGN="LEFT"><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="[% user.bg.2 %]" WIDTH="100%">
+				<TD ALIGN="LEFT"><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" BGCOLOR="[% user.bg.2 %]">
 				<TR>
-					<TH>Date</TH>
-					<TH>Email</TH>
-					<TH>$</TH>
-					<TH>Pages</TH>
-					<TH>Method</TH>
-					<TH>TransID</TH>
+					<TH>&nbsp;Date&nbsp;</TH>
+					<TH>&nbsp;Email&nbsp;</TH>
+					<TH>&nbsp;$&nbsp;</TH>
+					<TH>&nbsp;Pages&nbsp;</TH>
+					<TH>&nbsp;Method&nbsp;</TH>
+					<TH>&nbsp;TransID&nbsp;</TH>
 				</TR>
 [% FOREACH sp = useredit.subscribe_payments %]
 				<TR>
