@@ -1474,8 +1474,6 @@ CREATE TABLE users_acl (
 
 INSERT INTO vars (name, value, description) VALUES ('subscribe_future_plug','0','If subscribe_future_secs > 0, do non-subscribers get to know when a future story is coming up, even though they cannot see it?');
 
-# SLASHCODE LAST UPDATED HERE
-
 # End of T_2_3_0_90, Start of T_2_3_0_91 - 2003/04/25
 # End of T_2_3_0_91, Start of T_2_3_0_92 - 2003/04/25
 # End of T_2_3_0_92, Start of T_2_3_0_93 - 2003/04/30
@@ -1866,6 +1864,7 @@ ALTER TABLE sections CHANGE COLUMN title title VARCHAR(64) DEFAULT '' NOT NULL, 
 
 # USEPERL LAST UPDATED HERE
 # SLASHDOT LAST UPDATED HERE
+# SLASHCODE LAST UPDATED HERE
 
 # End of T_2_3_0_114, Start of T_2_3_0_115 - 2003/08/28
 
