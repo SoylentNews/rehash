@@ -2152,6 +2152,13 @@ sub getAllTemplateIds {
 	);
 }
 
+sub getCidForDaysBack {
+	my ($self, $days, $startat_cid) = @_;
+	$days ||= 0;
+	$startat_cid ||= 0;
+	return $self->sqlSelect("min(cid)", "comments", "cid > $startat_cid and date > DATE_SUB(NOW(), INTERVAL $days day)");
+}
+
 1;
 
 __END__
