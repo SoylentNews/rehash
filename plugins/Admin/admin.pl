@@ -1733,7 +1733,11 @@ sub displayRecentRequests {
 
 	my $min_id_ts ||= $logdb->getAccesslog($min_id, 'ts');
 
-	my $options = { min_id => $min_id };
+	my $options = {
+		logdb		=> $logdb,
+		slashdb		=> $slashdb,
+		min_id		=> $min_id,
+	};
 	$options->{thresh_count} = defined($form->{thresh_count}) ? $form->{thresh_count} : 100;
 	$options->{thresh_hps}   = defined($form->{thresh_hps}  ) ? $form->{thresh_hps}   : 0.1;
 

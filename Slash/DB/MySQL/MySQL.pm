@@ -745,6 +745,14 @@ sub getMetamodsForUserRaw {
 		$already_cid_list = join(",", sort keys %$already_cids_hr);
 	}
 
+	my $backupdb;
+	if ($constants->{backup_db_user}) {
+		$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
+		$backupdb ||= $self;
+	} else {
+		$backupdb = $self;
+	}
+
 	# We need to consult two tables to get a list of moderatorlog IDs
 	# that it's OK to M2:  moderatorlog of course, and metamodlog to
 	# check that this user hasn't M2'd them before.  Because this is
@@ -796,7 +804,7 @@ EOT
 		$already_cid_clause = " AND cid NOT IN ($already_cid_list)"
 			if $already_cid_list;
 		$mod_hr = { };
-		$mod_hr = $self->sqlSelectAllHashref(
+		$mod_hr = $backupdb->sqlSelectAllHashref(
 			"id",
 			"id, cid,
 			 m2count + $consensus * $if_expr + RAND() AS rank",
@@ -837,7 +845,7 @@ EOT
 		push @ids, @new_ids;
 		$num_needed -= scalar(@new_ids);
 	}
-	if ($getmods_loops > 5) {
+	if ($getmods_loops > 3) {
 		use Data::Dumper;
 		print STDERR "GETMODS looped the max number of times,"
 			. " returning '@ids' for uid '$uid'"
@@ -5525,7 +5533,7 @@ sub getSimilarStories {
 		if $not_original_sid;
 	my $backupdb;
 	if ($constants->{backup_db_user}) {
-		$backupdb = getObject('Slash::DB', $constants->{backup_db_user})
+		$backupdb = getObject('Slash::DB', $constants->{backup_db_user});
 	} else {
 		$backupdb = getCurrentDB();
 	}

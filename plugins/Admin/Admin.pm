@@ -56,11 +56,14 @@ sub getRecentSubs {
 
 sub getAccesslogAbusersByID {
 	my($self, $options) = @_;
+	my $slashdb = $options->{slashdb} || $self;
+	my $logdb = $options->{logdb} || $self;
 	my $min_id = $options->{min_id} || 0;
 	my $thresh_count = $options->{thresh_count} || 100;
 	my $thresh_hps = $options->{thresh_hps} || 0.1;
 	my $limit = 500;
-	my $ar = $self->sqlSelectAllHashrefArray(
+
+	my $ar = $logdb->sqlSelectAllHashrefArray(
 		"COUNT(*) AS c, host_addr AS ipid, op,
 		 MIN(ts) AS mints, MAX(ts) AS maxts,
 		 UNIX_TIMESTAMP(MAX(ts))-UNIX_TIMESTAMP(MIN(ts)) AS secs,
@@ -79,7 +82,7 @@ sub getAccesslogAbusersByID {
 	# as banned and put the reason in too.
 	my @ipids = map { $self->sqlQuote($_->{ipid}) } @$ar;
 	my $ipids = join(",", @ipids);
-	my $hr = $self->sqlSelectAllHashref(
+	my $hr = $slashdb->sqlSelectAllHashref(
 		"ipid",
 		"ipid, ts, reason",
 		"accesslist",
