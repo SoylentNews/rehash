@@ -74,25 +74,27 @@ __template__
 				<INPUT TYPE="HIDDEN" NAME="op" VALUE="admin">
 		
 				[% IF field == 'uid' %]
-				<INPUT TYPE="HIDDEN" NAME="uid" value="[% useredit.uid %]"></TD>
+				<TD><INPUT TYPE="HIDDEN" NAME="uid" value="[% useredit.uid %]"></TD>
 		
 				[% ELSIF field == 'ipid' %]
-				<INPUT TYPE="HIDDEN" NAME="ipid" value="[% useredit.ipid %]"></TD>
+				<TD><INPUT TYPE="HIDDEN" NAME="ipid" value="[% useredit.ipid %]"></TD>
 		
 				[% ELSIF field == 'md5id' %]
-				<INPUT TYPE="HIDDEN" NAME="md5id" value="[% useredit.md5id %]"></TD>
+				<TD><INPUT TYPE="HIDDEN" NAME="md5id" value="[% useredit.md5id %]"></TD>
 		
 				[% ELSIF field == 'subnetid' %]
-				<INPUT TYPE="HIDDEN" NAME="subnetid" value="[% useredit.subnetid %]"></TD>
+				<TD><INPUT TYPE="HIDDEN" NAME="subnetid" value="[% useredit.subnetid %]"></TD>
 				[% END %]
 		
-				<TD VALIGN="MIDDLE"><B>UID/NetID/Nickname:</B> 
-				<INPUT TYPE="TEXT" NAME="userfield" VALUE="[% form.userfield | strip_attribute %]"></TD>
+				<TD VALIGN="MIDDLE">
+					<B>UID/NetID/Nickname:</B> 
+					<INPUT TYPE="TEXT" NAME="userfield" VALUE="[% form.userfield | strip_attribute %]">
+				</TD>
 				<TD VALIGN="MIDDLE">
 				<TABLE>
 					<TR>
 						<TD><INPUT TYPE="SUBMIT" NAME="userinfo" VALUE="User Info"></TD>
-						<TD><INPUT TYPE="SUBMIT" NAME="edituser" VALUE="Edit User"> </TD> 
+						<TD><INPUT TYPE="SUBMIT" NAME="edituser" VALUE="Edit User"></TD> 
 						<TD><INPUT TYPE="SUBMIT" NAME="changepasswd" VALUE="Change Password"></TD>
 					</TR>
 					<TR>
