@@ -25,7 +25,7 @@ en_US
 __name__
 pollbooth
 __template__
-[% IF has_activated or user.is_admin %]
+[% IF has_activated || user.is_admin %]
 [% IF !can_vote %]
 
 	<B>[% question %]</B>
@@ -68,4 +68,4 @@ __template__
 __seclev__
 10000
 __version__
- $Id$
+$Id$
