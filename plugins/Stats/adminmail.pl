@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 use strict;
 use Slash::Constants qw( :messages :slashd );
@@ -164,15 +164,15 @@ EOT
 
 	my $sdTotalHits = $backupdb->getVar('totalhits', 'value', 1);
 	my $daily_total = $logdb->countDailyByPage('', {
-			no_op => $constants->{op_exclude_from_countdaily},
-			});
+		no_op => $constants->{op_exclude_from_countdaily},
+	});
 	$sdTotalHits = $sdTotalHits + $daily_total;
 	# Need to figure in the main section plus what the handler is.
 	# This doesn't work for the other sites... -Brian
 	my $homepage = $logdb->countDailyByPage('', {
-			section => 'index',
-			no_op => $constants->{op_exclude_from_countdaily},
-			});
+		section => 'index',
+		no_op   => $constants->{op_exclude_from_countdaily},
+	});
 
 
 	my $grand_total = $logdb->countDailyByPage('');
