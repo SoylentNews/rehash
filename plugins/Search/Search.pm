@@ -87,15 +87,11 @@ sub findComments {
 		
 	}
 
+	my $gSkin = getCurrentSkin();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $skin = $reader->getSkin($form->{section});
-
-	# XXXSKIN - discussions.section needs to be fixed somehow to new system
-	if ($skin->{skid} == $constants->{mainpage_skid}) {
-		$where .= " AND discussions.section IN ('" . join("','", @{$skin->{contained}}) . "')" 
-			if $skin->{contained} && @{$skin->{contained}};
-	} else {
-		$where .= " AND discussions.section = " . $self->sqlQuote($skin->{section});
+	my $skin = $reader->getSkin($form->{section} || $gSkin->{skid});
+	if ($skin->{skid} != $constants->{mainpage_skid}) {
+		$where .= " AND discussions.primaryskid = $skin->{skid}";
 	}
 
 	my $other;
@@ -194,15 +190,12 @@ sub findStory {
 		if $form->{submitter};
 	$where .= " AND displaystatus != -1";
 
+	my $gSkin = getCurrentSkin();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $skin = $reader->getSkin($form->{section});
-
-	# XXXSKIN - stories.section is no more; I think we want to JOIN against story_topics_rendered on the stoid's WHERE s_t_r.tid=$skin->{nexus}
-	if ($skin->{skid} == $constants->{mainpage_skid}) {
-		$where .= " AND stories.section IN ('" . join("','", @{$skin->{contained}}) . "')" 
-			if $skin->{contained} && @{$skin->{contained}};
-	} else {
-		$where .= " AND stories.section = " . $self->sqlQuote($skin->{section});
+	my $skin = $reader->getSkin($form->{section} || $gSkin->{skid});
+	if ($skin->{skid} != $constants->{mainpage_skid}) {
+		# XXXSKIN this is wrong, we want to join on story_topics_rendered
+		$where .= " AND stories.primaryskid = $skin->{skid}";
 	}
 
 	# Here we find the possible sids that could have this tid and
@@ -491,15 +484,11 @@ sub findDiscussion {
 	$where .= " AND topic=" . $self->sqlQuote($form->{tid})
 		if $form->{tid};
 
+	my $gSkin = getCurrentSkin();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $skin = $reader->getSkin($form->{section});
-
-	# XXXSKIN - discussions.section needs to be fixed somehow to new system
-	if ($skin->{skid} == $constants->{mainpage_skid}) {
-		$where .= " AND section IN ('" . join("','", @{$skin->{contained}}) . "')" 
-			if $skin->{contained} && @{$skin->{contained}};
-	} else {
-		$where .= " AND section = " . $self->sqlQuote($skin->{section});
+	my $skin = $reader->getSkin($form->{section} || $gSkin->{skid});
+	if ($skin->{skid} != $constants->{mainpage_skid}) {
+		$where .= " AND discussions.primaryskid = $skin->{skid}";
 	}
 
 	$where .= " AND uid=" . $self->sqlQuote($form->{uid})
