@@ -273,6 +273,7 @@ sub get_sql_type_from_state {
 		|| $state =~ /waiting for binlog update/
 		|| $state eq 'init'
 		|| $state eq 'creating table'
+		|| $state eq 'Locked'
 		|| $state eq 'preparing'
 		|| $state eq 'removing tmp table'
 		|| $state eq 'query end'
