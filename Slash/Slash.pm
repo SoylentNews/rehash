@@ -1503,7 +1503,7 @@ sub getData {
 
 	if (defined $var->{$value}) {
 #		print STDERR "getData $$ value='$value' cache_hit\n";
-		return $val->{$value};
+		return $var->{$value};
 	}
 
 	my $str = slashDisplay($name, $hashref, $opts);
