@@ -553,6 +553,9 @@ sub main {
 		# NOTE: perl 5.8 has safe signals.
 	};
 
+	# daemonize
+	close STDOUT;
+
 	MAINLOOP: while (1) {
 		if (verbosity() >= 4) {
 			slashdLog("Beginning MAINLOOP");
