@@ -324,7 +324,7 @@ ALTER TABLE humanconf_pool ADD COLUMN inuse TINYINT DEFAULT '0' NOT NULL AFTER l
 ALTER TABLE stories ADD subsection SMALLINT UNSIGNED DEFAULT 0 NOT NULL;
 ALTER TABLE sections DROP feature_story;
 # LINUX.COM
-ALTER TABLE accesslog ADD bytes mediumint UNSIGNED DEFAULT 0 NOT NULL;
-INSERT INTO message_codes (code, type, seclev, modes) VALUES (10, 'Daily Site Stats', 100, '');
 # OSDN LAST UPDATED HERE
 # USEPERL LAST UPDATED HERE
+ALTER TABLE accesslog ADD bytes mediumint UNSIGNED DEFAULT 0 NOT NULL;
+INSERT INTO message_codes (code, type, seclev, modes) VALUES (10, 'Daily Site Stats', 100, '');
