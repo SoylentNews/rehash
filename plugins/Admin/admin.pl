@@ -1867,7 +1867,7 @@ sub moderate {
 		}
 	}
 	my $startat = $form->{startat} || 0;
-	if($form->{returnto}){
+	if ($form->{returnto}) {
 		print getData('moderate_recent_message_returnto', { returnto => $form->{returnto} });
 	} else {
 		print getData('moderate_recent_message', { startat => $startat });
