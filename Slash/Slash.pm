@@ -1187,8 +1187,9 @@ sub displayStory {
 	if ($options->{get_cacheable}) {
 		my $slashdb = getCurrentDB();
 		$story = $slashdb->getStory($sid, "", $options->{get_cacheable});
+		$story->{is_future} = 0;
 	} else {
-		$story = $reader->getStory($sid, "", $options->{get_cacheable});
+		$story = $reader->getStory($sid);
 	}
 	# Sites without an "index" section will never use this, which is probably ok.
 	if (!$form->{light} && !$user->{no_icons} && !$form->{issue} && $constants->{section} eq 'index' && $story->{rendered} && !$full && !$options->{get_cacheable} && !$options->{is_future}) {
