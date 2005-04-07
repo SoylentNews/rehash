@@ -80,6 +80,7 @@ $task{$me}{code} = sub {
 		my $tour_info = $dilemma_reader->getDilemmaTournamentInfo($trid);
 		if (need_a_draw($tour_info)) {
 			draw_maingraph($tour_info);
+			$dilemma_db->markTournamentGraphDrawn($trid);
 			$drew{$trid} = 1;
 		}
 	}
@@ -102,7 +103,7 @@ $task{$me}{code} = sub {
 			# into compressed XML.
 			$return_str .= do_logdatadump(
 				$virtual_user, $constants, $slashdb, $user, $info, $gSkin,
-				$dilemma_reader, $wait_factor);
+				$trid, $dilemma_reader, $wait_factor);
 		}
 		$return_str .= "] ";
 	}
@@ -169,10 +170,57 @@ sub draw_maingraph {
 	# Y axis: data serieses: the agent counts of each species...
 	my $y_max = 0;
 	my @dsids = sort { $a <=> $b } keys %$species;
+	# Here's the big SELECT.  This can return megabytes.
+	my $stats_hr = $dilemma_reader->getAllStats($trid);
+	# First get the least and greatest mean food per agent
+	# at each tick.
+	my $last_tick = $tour_info->{last_tick};
+	my $min_food_ratio_ar = [ (0) x $last_tick ];
+	my $max_food_ratio_ar = [ (0) x $last_tick ];
+	for my $t (0 .. $last_tick-1) {
+		my $min = $tour_info->{birth_food};
+		my $max = 0;
+		my $t1 = $t+1;
+		for my $dsid (@dsids) {
+			my $na = $stats_hr->{num_alive}{$t1}{$dsid}{value};
+			next unless $na > 0;
+			my $sf = $stats_hr->{sumfood}{$t1}{$dsid}{value};
+			my $mean = $sf/$na;
+			$min = $mean if $mean < $min;
+			$max = $mean if $max < $mean;
+		}
+		$min_food_ratio_ar->[$t] = $min;
+		$max_food_ratio_ar->[$t] = $max;
+	}
+#print STDERR "stats_hr: " . Dumper($stats_hr) if $trid == 2;
 	for my $dsid (@dsids) {
-		my $stats = $dilemma_reader->getStatsBySpecies($trid, $dsid);
-		die "getStatsBySpecies err" if !defined $stats;
-		push @$alldata_ar, $stats;
+		my $num_alive_ar = [ (0) x $last_tick ];
+		my $food_ratio_ar = [ (0) x $last_tick ];
+		for my $t (0 .. $last_tick-1) {
+			my $t1 = $t+1;
+			my $na = $stats_hr->{num_alive}{$t1}{$dsid}{value} || 0;
+			$num_alive_ar->[$t] = $na;
+			next unless $na > 0;
+			my $sf = $stats_hr->{sumfood}{$t1}{$dsid}{value};
+			$food_ratio_ar->[$t] = $sf/$na;
+		}
+		# Bump each tick's num_alive up fractionally by an amount
+		# relative to where this species falls along the spectrum
+		# of least mean food to most mean food at this tick.
+		for my $t (0 .. $last_tick-1) {
+			my $frac = 0;
+			if ($food_ratio_ar->[$t]) {
+				$frac = 0.8 *
+					  ($food_ratio_ar->[$t] - $min_food_ratio_ar->[$t])
+					/ ($max_food_ratio_ar->[$t] - $min_food_ratio_ar->[$t]);
+			}
+			$num_alive_ar->[$t] += $frac;
+		}
+#print STDERR "dsid=$dsid num_alive_ar: '@$num_alive_ar'\n" if $trid == 2;
+#print STDERR "dsid=$dsid food_ratio_ar: '@$food_ratio_ar'\n" if $trid == 2;
+#print STDERR "dsid=$dsid min_food_ratio_ar: '@$min_food_ratio_ar'\n" if $trid == 2;
+#print STDERR "dsid=$dsid max_food_ratio_ar: '@$max_food_ratio_ar'\n" if $trid == 2;
+		push @$alldata_ar, $num_alive_ar;
 		for my $n (@{$alldata_ar->[$#$alldata_ar]}) {
 			$y_max = $n if $n > $y_max;
 		}
@@ -183,7 +231,6 @@ sub draw_maingraph {
 	unshift @$alldata_ar, $dilemma_reader->getAveragePlay($trid, { max => $y_max });
 	unshift @$legend_ar, "avgplay";
 	# X axis: ticks
-	my $last_tick = $tour_info->{last_tick};
 	unshift @$alldata_ar, [ 1 .. $last_tick ];
 	# Display the data
 	my $template_data = {
@@ -204,10 +251,9 @@ sub draw_maingraph {
 
 sub do_logdatadump {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin,
-		$dilemma_reader, $wait_factor) = @_;
+		$trid, $dilemma_reader, $wait_factor) = @_;
 
-	# XXX really should iterate over tournaments here, setting
-	# $trid and passing it to getLogDataDump
+return " do_logdatadump disabled for now";
 
 	my $return_str = "";
 	my($compbytes, $uncompbytes) = (0, 0);
@@ -223,7 +269,7 @@ sub do_logdatadump {
 	# by far the huge chunk of the data, is an SQL statement handle;
 	# we'll be going through it piece by piece and writing compressed
 	# XML as we go.
-	my $ldd_hr = $dilemma_reader->getLogDataDump();
+	my $ldd_hr = $dilemma_reader->getLogDataDump($trid);
 	my $species_info_hr = $ldd_hr->{species_info};
 	my $agents_info_hr = $ldd_hr->{agents_info};
 	my $meetlog_sth = $ldd_hr->{meetlog_sth};

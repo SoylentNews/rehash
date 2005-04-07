@@ -68,21 +68,21 @@ sub getDilemmaStatNameIDs {
 
 #################################################################
 sub getDilemmaSpeciesInfo {
-	my($self) = @_;
+	my($self, $trid) = @_;
 	my $species = $self->getDilemmaSpecies();
 	my $count = $self->sqlSelectAllHashref(
 		[qw( dsid alive )],
 		"dsid, alive, COUNT(*) AS c, SUM(food) AS sumfood",
 		"dilemma_agents",
-		"",
+		"trid=$trid",
 		"GROUP BY dsid, alive");
 	my $species_info = { };
 	for my $dsid (keys %$species) {
 		$species_info->{$dsid}{name} = $species->{$dsid}{name};
 		$species_info->{$dsid}{code} = $species->{$dsid}{code};
-		$species_info->{$dsid}{sumfood} = $species->{$dsid}{sumfood};
-		$species_info->{$dsid}{alivecount} = $count->{$dsid}{yes}{c} || 0;
-		$species_info->{$dsid}{totalcount} = ($count->{$dsid}{yes}{c}
+		$species_info->{$dsid}{sumfood}		=  $count->{$dsid}{yes}{sumfood} || 0;
+		$species_info->{$dsid}{alivecount}	=  $count->{$dsid}{yes}{c} || 0;
+		$species_info->{$dsid}{totalcount}	= ($count->{$dsid}{yes}{c}
 			+ $count->{$dsid}{no}{c}) || 0;
 	}
 	return $species_info;
@@ -90,11 +90,12 @@ sub getDilemmaSpeciesInfo {
 
 #################################################################
 sub getDilemmaAgentsInfo {
-	my($self) = @_;
+	my($self, $trid) = @_;
 	return $self->sqlSelectAllHashref(
 		"daid",
 		"daid, dsid, born",
-		"dilemma_agents");
+		"dilemma_agents",
+		"trid=$trid");
 }
 
 #################################################################
@@ -149,6 +150,15 @@ sub getUniqueRandomAgents {
 }
 
 #################################################################
+sub markTournamentGraphDrawn {
+	my($self, $trid) = @_;
+	return unless $trid;
+	return $self->sqlUpdate("dilemma_tournament_info",
+		{ -graph_drawn_tick => "last_tick" },
+		"trid=$trid");
+}
+
+#################################################################
 sub reproduceAgents {
 	my($self, $daids) = @_;
 	return undef unless $daids && @$daids;
@@ -156,7 +166,7 @@ sub reproduceAgents {
 	# Find what tournament ID these agents are in (and confirm they're
 	# in the same one!)
 	my $daids_str = join(", ", @$daids);
-	my $trids = $self->sqlSelectAll("DISTINCT trid",
+	my $trids = $self->sqlSelectColArrayref("DISTINCT trid",
 		"dilemma_agents",
 		"daid IN ($daids_str)");
 	if (!$trids || scalar(@$trids) != 1) {
@@ -258,9 +268,9 @@ sub doTickHousekeeping {
 	my $fat_daids = $self->sqlSelectColArrayref(
 		"daid",
 		"dilemma_agents",
-		"food >= $birth_food_q");
+		"food >= $birth_food_q AND trid=$trid");
 	my $species_births_hr = $self->reproduceAgents($fat_daids);
-print STDERR "species_births_hr: " . Dumper($species_births_hr);
+#print STDERR "species_births_hr: " . Dumper($species_births_hr);
 	# Update the species stats for the births.
 	for my $dsid (keys %$species_births_hr) {
 		my $dsid_q = $self->sqlQuote($dsid);
@@ -283,14 +293,14 @@ print STDERR "species_births_hr: " . Dumper($species_births_hr);
 	my $count_alive = $self->countAliveAgents($trid);
 	if ($tour_info->{last_tick} >= $tour_info->{max_tick} || $count_alive <= 1) {
 		$self->sqlUpdate("dilemma_tournament_info",
-			{ alive => 'no' },
+			{ active => 'no' },
 			"trid=$trid");
 		$retval = 0;
 	}
 	my $last_tick = $tour_info->{last_tick};
 
 	# Write count and food info for the species into dilemma_stats.
-	my $species = $self->getDilemmaSpeciesInfo();
+	my $species = $self->getDilemmaSpeciesInfo($trid);
 	my $stat_name_ids = $self->getDilemmaStatNameIDs();
 	my $num_alive_id = $stat_name_ids->{num_alive};
 	my $sumfood_id = $stat_name_ids->{sumfood};
@@ -318,14 +328,31 @@ print STDERR "species_births_hr: " . Dumper($species_births_hr);
 	return $retval;
 }
 
-# fix this. right now it just returns num_alive and it's meant
-# to pull out more data
+sub getAllStats {
+	my($self, $trid) = @_;
+	return undef unless $trid;
+	my $stat_names = $self->getDilemmaStatNameIDs();
+	my $hr = $self->sqlSelectAllHashref(
+		[qw( dstnmid tick dsid )],
+		"dstnmid, tick, dsid, value",
+		"dilemma_stats",
+		"trid=$trid",
+		undef,
+		{ thin => 1 }
+	);
+	my $return_hr = { };
+	for my $stat_name (keys %$stat_names) {
+		$return_hr->{$stat_name} = $hr->{ $stat_names->{$stat_name} };
+	}
+	return $return_hr;
+}
+
 sub getStatsBySpecies {
-	my($self, $trid, $dsid) = @_;
+	my($self, $trid, $dsid, $name) = @_;
 	die "getStatsBySpecies bad trid '$trid'" unless $trid && $trid =~ /^\d+$/;
 	die "getStatsBySpecies bad dsid '$dsid'" unless $dsid && $dsid =~ /^\d+$/;
 	my $stat_names = $self->getDilemmaStatNameIDs();
-	my $dstnmid = $stat_names->{num_alive};
+	my $dstnmid = $stat_names->{$name};
 	return undef unless $dstnmid;
 	return $self->sqlSelectColArrayref(
 		"value",
@@ -726,10 +753,10 @@ sub logMeeting {
 }
 
 sub getLogDataDump {
-	my($self) = @_;
+	my($self, $trid) = @_;
 
-	my $species_info_hr = $self->getDilemmaSpeciesInfo();
-	my $agents_info_hr = $self->getDilemmaAgentsInfo();
+	my $species_info_hr = $self->getDilemmaSpeciesInfo($trid);
+	my $agents_info_hr = $self->getDilemmaAgentsInfo($trid);
 	my $meetlog_sth = $self->sqlSelectMany(
 		"meetid, trid, tick, foodsize",
 		"dilemma_meetlog",
