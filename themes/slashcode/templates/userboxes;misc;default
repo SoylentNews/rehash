@@ -85,10 +85,11 @@ IF !useredit.is_anon;
 		IF useredit.homepage;
 			'<BR><A HREF="';
 			useredit.homepage | strip_attribute;
+			'"';
 			IF useredit.karma <= constants.goodkarma;
 				' rel="nofollow"';
 			END;
-			'">';
+			'>';
 			Slash.ellipsify(Slash.strip_literal(useredit.homepage)); '</A>';
 		END;
 
