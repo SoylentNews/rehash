@@ -33,14 +33,13 @@ use Email::Valid;
 use HTML::Entities qw(:DEFAULT %char2entity %entity2char);
 use HTML::FormatText;
 use HTML::TreeBuilder;
+use Lingua::Stem;
 use POSIX qw(UINT_MAX);
 use Safe;
 use Slash::Constants qw(:strip);
 use Slash::Utility::Environment;
 use URI;
-#use URI::Find 0.15;
 use XML::Parser;
-use Lingua::Stem;
 
 use base 'Exporter';
 use vars qw($VERSION @EXPORT);
@@ -1055,7 +1054,6 @@ my %actions = (
 			# !! assume Latin-1 !!
 			my $constants = getCurrentStatic();
 			if ($constants->{draconian_charset}) {
-				my $convert = $constants->{draconian_charset_convert};
 				# anything not CRLF tab space or ! to ~ in Latin-1
 				# is converted to entities, where approveCharrefs or
 				# encode_html_amp takes care of them later
@@ -1104,7 +1102,6 @@ my %mode_actions = (
 			encode_high_bits
 			processCustomTags
 			remove_trailing_lts
-			url2html
 			approveTags
 			space_between_tags
 			encode_html_ltgt_stray
@@ -1119,7 +1116,6 @@ my %mode_actions = (
 			encode_high_bits
 			processCustomTags
 			remove_trailing_lts
-			url2html
 			approveTags
 			space_between_tags
 			encode_html_ltgt_stray
@@ -2132,43 +2128,14 @@ sub chopEntity {
 }
 
 
-
-=pod
-{
-@Slash::Utility::Data::URI::Find::ISA = 'URI::Find';
-sub Slash::Utility::Data::URI::Find::uri_re {
-	my $self = shift;
-	# ignore URLs beginning with " (i.e., the ones
-	# already inside tags)
-	return '(?<!["\'a-zA-Z=>])' . $self->URI::Find::uri_re;
-}
-
-my $finder = Slash::Utility::Data::URI::Find->new(sub {
-	my($uri, $orig_uri) = @_;
-	my($nuri, $extra) = ($uri, '');
-	# URL can only end in / or \w; don't like it? then
-	# use one of the other methods for making an a href tag!
-	# if we don't do this, we get a lot of URLs with
-	# punctuation at the end of them.  we can add more chars
-	# here if necessary, or go the other way and subtract
-	# chars (see rev 1.110 of submit.pl)
-	if ($nuri =~ s/([^\w\/]+)$//) {
-		$extra = $1;
-	}
-	return qq|<a href="$nuri">$nuri</a>$extra|;
-});
-=cut
-
 sub url2html {
 	my($text) = @_;
-
-	return $text if getCurrentStatic('url2html_skip');
 
 	my $scheme_regex = _get_scheme_regex();
 
 	# we know this can break real URLs, but probably will
 	# preserve real URLs more often than it will break them
-	$text =~  s{(?<!['"=>])((?:$scheme_regex):/{0,2}[$URI::uric#]+)}{
+	$text =~  s{(?<!['":=>])((?:$scheme_regex):/{0,2}[$URI::uric#]+)}{
 		my $url   = fudgeurl($1);
 		my $extra = '';
 		$extra = $1 if $url =~ s/([?!;:.,']+)$//;
@@ -2176,12 +2143,8 @@ sub url2html {
 		qq[<a href="$url">$url</a>$extra];
 	}ogie;
 
-#	$finder->find(\$text);
-
 	return $text;
 }
-
-#}
 
 
 sub noFollow {
