@@ -65,7 +65,7 @@ sub getDaypassesAvailable {
 					minduration =>	$minduration,
 					startts =>	time - 60,
 					endts =>	time + 3600,
-					acl =>		$acl,
+					aclreq =>	$acl,
 				} ];
 			} else {
 				$_getDA_cache = [ ];
