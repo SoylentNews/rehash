@@ -25,6 +25,7 @@ sub slashHook {
 	my($param, $options) = @_;
 	my $slashdb = getCurrentDB();
 
+	my $retval = undef;
 	my $hooks = $slashdb->getHooksByParam($param);
 	for my $hook (@$hooks) {
 		my $class = $hook->{class};
@@ -52,13 +53,16 @@ sub slashHook {
 			$code = \&{ $function };
 		}
 		if (defined (&$code)) {
-			unless ($code->($options)) {
+			$retval = $code->($options);
+			if (!$retval) {
 				errorLog("Failed executing hook ($param) - $function");
 			}
 		} else {
 			errorLog("Failed trying to do hook ($param) - $function");
 		}
 	}
+
+	$retval;
 }
 
 1;
