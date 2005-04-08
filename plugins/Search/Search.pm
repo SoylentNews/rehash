@@ -182,8 +182,8 @@ sub findStory {
 	my $gSkin = getCurrentSkin();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $skin = $reader->getSkin($form->{section});
-	$skin ||= $reader->getSkin($gSkin->{skid} || $constants->{mainpage_skid});
+	my $skin = $reader->getSkin($form->{section} || $gSkin->{skid});
+	$skin ||= $constants->{mainpage_skid};
 	if ($skin->{skid} && $skin->{skid} != $constants->{mainpage_skid}) {
 		# XXXSKIN this is wrong, we want to join on story_topics_rendered
 		# by putting $skin->{nexus} into the list of tids we demand
