@@ -2068,7 +2068,7 @@ sub fudgeurl {
 		if ($url =~ /#/) {
 			# no # is OK, unless ...
 			$url =~ s/#/%23/g;
-			if ($url =~ m|^https?://$|i) {
+			if ($url =~ m|^https?://|i) {
 				# HTTP, in which case the first # is OK
 				$url =~ s/%23/#/;
 			}
