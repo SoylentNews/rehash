@@ -238,13 +238,13 @@ sub doTickHousekeeping {
 	my $idle_food_q = $self->sqlQuote($tour_info->{idle_food});
 	$self->sqlUpdate("dilemma_agents",
 		{ -food => "food - $idle_food_q" },
-		"alive = 'yes'");
+		"alive = 'yes' AND trid=$trid");
 	# Get the stats per species
 	my $species_stats_hr = $self->sqlSelectAllHashref(
 		"dsid",
 		"dsid, COUNT(*) AS c",
 		"dilemma_agents",
-		"alive = 'yes' AND food <= 0",
+		"alive = 'yes' AND food <= 0 AND trid=$trid",
 		"GROUP BY dsid");
 	# Update the species stats for the deaths.
 	for my $dsid (keys %$species_stats_hr) {
@@ -259,7 +259,7 @@ sub doTickHousekeeping {
 	# Kill off the newly dead agents.
 	$self->sqlUpdate("dilemma_agents",
 		{ alive => 'no' },
-		"food <= 0 AND alive = 'yes'");
+		"food <= 0 AND alive = 'yes' AND trid=$trid");
 	
 	##########
 	# Any agents with food stores exceeding the birth_food,
