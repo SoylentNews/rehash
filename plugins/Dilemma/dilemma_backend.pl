@@ -177,6 +177,7 @@ sub draw_maingraph {
 	my $last_tick = $tour_info->{last_tick};
 	my $min_food_ratio_ar = [ (0) x $last_tick ];
 	my $max_food_ratio_ar = [ (0) x $last_tick ];
+	my $min_spread = $tour_info->{birth_food}/4;
 	for my $t (0 .. $last_tick-1) {
 		my $min = $tour_info->{birth_food};
 		my $max = 0;
@@ -188,6 +189,23 @@ sub draw_maingraph {
 			my $mean = $sf/$na;
 			$min = $mean if $mean < $min;
 			$max = $mean if $max < $mean;
+		}
+		# The spread must always be at least a certain size,
+		# namely, 1/4 of the birth_food, to prevent minor
+		# changes from having over-large effect on the graph.
+		#
+		if ($max-$min < $min_spread) {
+			my $middle = ($max+$min)/2;
+			if ($middle < $min_spread/2) {
+				$min = 0;
+				$max = $min_spread;
+			} elsif ($middle > $tour_info->{birth_food} - $min_spread/2) {
+				$min = $tour_info->{birth_food} - $min_spread;
+				$max = $tour_info->{birth_food};
+			} else {
+				$min = $middle - $min_spread/2;
+				$max = $middle + $min_spread/2;
+			}
 		}
 		$min_food_ratio_ar->[$t] = $min;
 		$max_food_ratio_ar->[$t] = $max;
