@@ -59,9 +59,10 @@ sub getDaypassesAvailable {
 			my $minduration = $constants->{daypass_offer_method1_minduration} || 10;
 			my $avail = $self->checkAdposRegex($pos, $regex);
 			if ($avail) {
+				my $adnum = $constants->{daypass_adnum} || 13;
 				$_getDA_cache = [ {
 					daid =>		999, # dummy placeholder, not used
-					adnum =>	$pos,
+					adnum =>	$adnum,
 					minduration =>	$minduration,
 					startts =>	time - 60,
 					endts =>	time + 3600,
@@ -81,6 +82,7 @@ sub getDaypassesAvailable {
 sub checkAdposRegex {
 	my($self, $pos, $regex) = @_;
 	my $ad_text = getAd($pos);
+	return 0 if !$ad_text;
 	my $neg = 0;
 	if (substr($regex, 0, 1) eq '!') {
 		# Strip off leading char.
