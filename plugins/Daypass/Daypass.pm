@@ -44,19 +44,53 @@ sub getDaypassesAvailable {
 		|| !$_getDA_cached_nextcheck
 		|| $_getDA_cached_nextcheck <= time()) {
 
-		# (Re)load the cache from a reader DB.
-		my $reader = getObject('Slash::DB', { db_type => 'reader' });
-		$_getDA_cache = $reader->sqlSelectAllHashrefArray(
-			"daid, adnum, minduration,
-			 UNIX_TIMESTAMP(starttime) AS startts, UNIX_TIMESTAMP(endtime) AS endts, aclreq",
-			"daypass_available");
 		$_getDA_cached_nextcheck = time() + ($constants->{daypass_cache_expire} || 300);
+		if (!$constants->{daypass_offer_method}) {
+			# (Re)load the cache from a reader DB.
+			my $reader = getObject('Slash::DB', { db_type => 'reader' });
+			$_getDA_cache = $reader->sqlSelectAllHashrefArray(
+				"daid, adnum, minduration,
+				 UNIX_TIMESTAMP(starttime) AS startts, UNIX_TIMESTAMP(endtime) AS endts, aclreq",
+				"daypass_available");
+		} else {
+			my $pos = $constants->{daypass_offer_method1_adpos} || 31;
+			my $regex = $constants->{daypass_offer_method1_regex} || '!placeholder';
+			my $acl = $constants->{daypass_offer_method1_acl} || '';
+			my $minduration = $constants->{daypass_offer_method1_minduration} || 10;
+			my $avail = $self->checkAdposRegex($pos, $regex);
+			if ($avail) {
+				$_getDA_cache = [ {
+					daid =>		999, # dummy placeholder, not used
+					adnum =>	$pos,
+					minduration =>	$minduration,
+					startts =>	time - 60,
+					endts =>	time + 3600,
+					acl =>		$acl,
+				} ];
+			} else {
+				$_getDA_cache = [ ];
+			}
+		}
 
 	}
 
 	return $_getDA_cache;
 }
 } # end closure
+
+sub checkAdposRegex {
+	my($self, $pos, $regex) = @_;
+	my $ad_text = getAd($pos);
+	my $neg = 0;
+	if (substr($regex, 0, 1) eq '!') {
+		# Strip off leading char.
+		$neg = 1;
+		$regex = substr($regex, 1);
+	}
+	my $avail = ($ad_text =~ /$regex/) ? 1 : 0;
+	$avail = !$avail if $neg;
+	return $avail;
+}
 
 sub getDaypass {
 	my($self) = @_;
@@ -207,7 +241,15 @@ sub doOfferDaypass {
 
 sub getOfferText {
 	my($self) = @_;
-	return Slash::getData('offertext', {}, 'daypass');
+	my $constants = getCurrentStatic();
+	my $text = "";
+	if (!$constants->{daypass_offer_method}) {
+		$text = Slash::getData('offertext', {}, 'daypass');
+	} else {
+		my $pos = $constants->{daypass_offer_method1_adpos} || 31;
+		$text = getAd($pos);
+	}
+	return $text;
 }
 
 #################################################################

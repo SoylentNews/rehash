@@ -1,5 +1,5 @@
 # Create a row in this table to indicate which daypass is available
-# when.
+# when.  Times are in GMT.
 
 CREATE TABLE daypass_available (
 	daid		SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -36,6 +36,7 @@ CREATE TABLE daypass_needs (
 # looking at the daypass page(s).  Once they have confirmed their key
 # by completing the daypass page viewing, key_confirmed is set to
 # non-NULL and a row for that user is created in daypass_users.
+# Times are in GMT.
 
 CREATE TABLE daypass_keys (
 	dpkid			INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -51,7 +52,8 @@ CREATE TABLE daypass_keys (
 
 # Any user with a row in this table for their uid with a goodon that
 # is today's date is considered to have a daypass.  For now, users
-# must be logged-in to get a daypass.
+# must be logged-in to get a daypass.  The time is NOT necessarily
+# in GMT, the timezone is specified in the var daypass_tz.
 
 CREATE TABLE daypass_users (
 	uid		MEDIUMINT UNSIGNED NOT NULL,
