@@ -123,7 +123,7 @@ use vars qw($VERSION @EXPORT);
 sub nickFix {
 	my($nick) = @_;
 	my $constants = getCurrentStatic();
-	my $nc = $constants->{nick_chars} || join("", 'a' .. 'z');
+	my $nc = $constants->{nick_chars} || join('', 'a' .. 'z');
 	$nick =~ s/\s+/ /g;
 	$nick =~ s/[^$nc]+//g;
 	$nick = substr($nick, 0, $constants->{nick_maxlen});
@@ -218,7 +218,7 @@ sub issueAge {
 	my($issue) = @_;
 	return 0 unless $issue =~ /^\d{8}$/;
 	my $user = getCurrentUser();
-	my $issue_unix_timestamp = timeCalc("${issue}0000", "%s", -$user->{off_set});
+	my $issue_unix_timestamp = timeCalc("${issue}0000", '%s', -$user->{off_set});
 	my $age = (time - $issue_unix_timestamp) / 86400;
 	$age = 0.00001 if $age == 0; # don't return 0 on success
 	return $age;
@@ -342,8 +342,8 @@ rootdir variable, converted to proper scheme.
 
 sub set_rootdir {
 	my($sectionurl, $rootdir) = @_;
-	my $rooturi    = new URI $rootdir, "http";
-	my $sectionuri = new URI $sectionurl, "http";
+	my $rooturi    = new URI $rootdir, 'http';
+	my $sectionuri = new URI $sectionurl, 'http';
 
 	$sectionuri->scheme($rooturi->scheme || undef);
 	return $sectionuri->as_string;
@@ -422,12 +422,12 @@ sub cleanRedirectUrlFromForm {
 	my $gSkin = getCurrentSkin();
 	my $form = getCurrentForm();
 
-	my $formname = $redirect_formname ? "returnto_$redirect_formname" : "returnto";
+	my $formname = $redirect_formname ? "returnto_$redirect_formname" : 'returnto';
 	my $formname_confirm = "${formname}_confirm";
-	my $returnto = $form->{$formname} || "";
+	my $returnto = $form->{$formname} || '';
 	return undef if !$returnto;
 
-	my $returnto_confirm = $form->{$formname_confirm} || "";
+	my $returnto_confirm = $form->{$formname_confirm} || '';
 
 	my $returnto_passwd = $constants->{returnto_passwd};
 	my $confirmed = md5_hex("$returnto$returnto_passwd") eq $returnto_confirm;
@@ -680,14 +680,14 @@ randomness.
 =cut
 
 sub createLogToken {
-	my $str = "";
+	my $str = '';
 	my $need_srand = 0;
 	while (length($str) < 22) {
 		if ($need_srand) {
 			srand();
 			$need_srand = 0;
 		}
-		my $r = rand(UINT_MAX) . ":" . rand(UINT_MAX);
+		my $r = rand(UINT_MAX) . ':' . rand(UINT_MAX);
 		my $md5 = md5_base64($r);
 		$md5 =~ tr/A-Za-z0-9//cd;
 		$str .= substr($md5, int(rand 8) + 5, 3);
@@ -943,7 +943,7 @@ sub _charsetConvert {
 	if ($constants->{draconian_charset_convert}) {
 		if ($constants->{draconian_charrefs}) {
 			if ($constants->{good_numeric}{$char}) {
-				$str = sprintf("&#%u;", $char);
+				$str = sprintf('&#%u;', $char);
 			} else { # see if char is in %good_entity
 				my $ent = $char2entity{chr $char};
 				if ($ent) {
@@ -957,7 +957,7 @@ sub _charsetConvert {
 	}
 
 	# fall further back
-	$str ||= sprintf("&#%u;", $char);
+	$str ||= sprintf('&#%u;', $char);
 	return $str;
 }
 
@@ -1036,7 +1036,7 @@ my %actions = (
 			${$_[0]} = "<TT>${$_[0]}</TT>";			},
 	newline_indent => sub {
 			${$_[0]} =~ s{<BR>\n?( +)} {
-				"<BR>\n" . ("&nbsp; " x length($1))
+				"<BR>\n" . ('&nbsp; ' x length($1))
 			}ieg;						},
 	remove_tags => sub {
 			${$_[0]} =~ s/<.*?>//gs;			},
@@ -1681,7 +1681,7 @@ sub approveTag {
 	}
 
 	# Build the hash of approved tags.
-	my $approvedtags = getCurrentStatic("approvedtags");
+	my $approvedtags = getCurrentStatic('approvedtags');
 	my %approved =
 		map  { (uc($_), 1)   }
 		grep { $_ ne 'ECODE' }
@@ -1692,7 +1692,7 @@ sub approveTag {
 	my($taglead, $slash, $t) = $wholetag =~ m{^(\s*(/?)\s*(\w+))};
 	my $t_uc = uc $t;
 	if (!$approved{$t_uc}) {
-		return "";
+		return '';
 	}
 	
 	# These are now stored in a var approvedtags_attr
@@ -1713,7 +1713,7 @@ sub approveTag {
 	# }
 	# this is decoded in Slash/DB/MySQL.pm getSlashConf
 
-	my $attr = getCurrentStatic("approvedtags_attr") || {};
+	my $attr = getCurrentStatic('approvedtags_attr') || {};
 
 
 	if ($slash) {
@@ -1753,7 +1753,7 @@ sub approveTag {
 		}
 		# If the required attributes were not all present, the whole
 		# tag is invalid.
-		return "" unless $num_req_found == scalar(keys %required);
+		return '' unless $num_req_found == scalar(keys %required);
 
 	} else {
 
@@ -1814,6 +1814,7 @@ sub approveCharref {
 		# Probably a numeric character reference.
 		if ($charref =~ /^#x([0-9a-f]+)$/i) {
 			# Hexadecimal encoding.
+			$charref =~ s/^#X/#x/; # X should work fine, but x is better
 			$decimal = hex($1); # always returns a positive integer
 		} elsif ($charref =~ /^#(\d+)$/) {
 			# Decimal encoding.
@@ -1852,7 +1853,7 @@ sub approveCharref {
 	} elsif ($ok) {
 		return "&$charref;";
 	} else {
-		return "";
+		return '';
 	}
 }
 
@@ -2086,7 +2087,7 @@ sub fudgeurl {
 sub _get_scheme_regex {
 	my $constants = getCurrentStatic();
 	if (! $constants->{approved_url_schemes_regex}) {
-		$constants->{approved_url_schemes_regex} = join("|", map { lc } @{$constants->{approved_url_schemes}});
+		$constants->{approved_url_schemes_regex} = join('|', map { lc } @{$constants->{approved_url_schemes}});
 		$constants->{approved_url_schemes_regex} = qr{(?:$constants->{approved_url_schemes_regex})};
 	}
 	return $constants->{approved_url_schemes_regex};
@@ -2406,7 +2407,7 @@ The parsed HTML.
 
 sub parseDomainTags {
 	my($html, $recommended, $notags, $notitle) = @_;
-	return "" if !defined($html) || $html eq "";
+	return '' if !defined($html) || $html eq '';
 
 	my $user = getCurrentUser();
 
@@ -2487,8 +2488,8 @@ sub _slashlink_to_link {
 	# here, but it really doesn't matter.
 
 	# Load up special values and delete them from the attribute list.
-	my $sn = delete $attr{sn} || "";
-	my $skin_id = delete $attr{sect} || "";
+	my $sn = delete $attr{sn} || '';
+	my $skin_id = delete $attr{sect} || '';
 
 	# skin_id could be a name, a skid, or blank, or invalid.
 	# In any case, get its skin hashref and its name.
@@ -2504,12 +2505,12 @@ sub _slashlink_to_link {
 		$skin_root = URI->new_abs($skin_root, $options->{absolute})
 			->as_string;
 	}
-	my $frag = delete $attr{frag} || "";
+	my $frag = delete $attr{frag} || '';
 	# Generate the return value.
-	my $url = "";
+	my $url = '';
 	if ($sn eq 'comments') {
 		$url .= qq{$skin_root/comments.pl?};
-		$url .= join("&",
+		$url .= join('&',
 			map { qq{$_=$attr{$_}} }
 			sort keys %attr);
 		$url .= qq{#$frag} if $frag;
@@ -2524,7 +2525,7 @@ sub _slashlink_to_link {
 			$url .= qq{#$frag} if $frag;
 		} else {
 			$url .= qq{$skin_root/article.pl?};
-			$url .= join("&",
+			$url .= join('&',
 				map { qq{$_=$attr{$_}} }
 				sort keys %attr);
 			$url .= qq{#$frag} if $frag;
@@ -2576,9 +2577,9 @@ sub addDomainTags {
 		my $old_in_a = $in_a;
 		my $new_in_a = !$2;
 		$in_a = $new_in_a;
-		(($old_in_a && $new_in_a) ? "</A>" : "") . $1
+		(($old_in_a && $new_in_a) ? '</A>' : '') . $1
 	}gixe;
-	$html .= "</A>" if $in_a;
+	$html .= '</A>' if $in_a;
 
 	# Now, since we know that every <A> has a </A>, this pattern will
 	# match and let the subroutine above do its magic properly.
@@ -2597,7 +2598,7 @@ sub addDomainTags {
 		</A\b[^>]*>
 	}{
 		$3	? _url_to_domain_tag($1, $2, $3)
-			: ""
+			: ''
 	}gisex;
 
 	# If there were unmatched <A> tags in the original, balanceTags()
@@ -2616,7 +2617,7 @@ sub fullhost_to_domain {
 	my($fullhost) = @_;
 	my $info = lc $fullhost;
 	if ($info =~ m/^([\d.]+)\.in-addr\.arpa$/) {
-		$info = join(".", reverse split /\./, $1);
+		$info = join('.', reverse split /\./, $1);
 	}
 	if ($info =~ m/^(\d{1,3}\.){3}\d{1,3}$/) {
 		# leave a numeric IP address alone
@@ -2634,7 +2635,7 @@ sub fullhost_to_domain {
 		my @info = split /\./, $info;
 		my $num_levels = scalar @info;
 		if ($num_levels >= 3) {
-			$info = join(".", @info[-3..-1]);
+			$info = join('.', @info[-3..-1]);
 		}
 	}
 	return $info;
@@ -3137,11 +3138,11 @@ sub ellipsify {
 		my $len2 = int(($len-7)/2);
 		if ($len2 >= 4) {
 			$text = substr($text, 0, $len2)
-				. " ... "
+				. ' ... '
 				. substr($text, -$len2);
 		} elsif ($len >= 8) {
 			$text = substr($text, 0, $len-4)
-				. " ...";
+				. ' ...';
 		} else {
 			$text = substr($text, 0, $len);
 		}
@@ -3565,7 +3566,7 @@ sub createStoryTopicData {
 	my @original = @tids;
 	my %original_seen = map { ($_, 1) } @original;
 
-	my $topics = $slashdb->getTopics();
+	my $topics = $slashdb->getTopics;
 	my %seen = map { ($_, 1) } @tids;
 	for my $tid (@tids) {
 		my $new_tid = $topics->{$tid}{parent_topic};
