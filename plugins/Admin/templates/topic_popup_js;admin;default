@@ -402,10 +402,11 @@ function [% name %]_show(type) {
 		name = name + "-" + type;
 		iname = iname + "_" + type;
 
-		if (type == 'ab') {
-			var searchobj = document.getElementById(name + "-searchfield");
-			searchobj.focus();
-		}
+// Moz unhappy with this
+//		if (type == 'ab') {
+//			var searchobj = document.getElementById(name + "-searchfield");
+//			searchobj.focus();
+//		}
 	}
 
 	var mybuttons = new Array ('[% names.join("','") %]');
