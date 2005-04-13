@@ -2896,8 +2896,6 @@ ALTER TABLE dilemma_stats DROP COLUMN name;
 ALTER TABLE dilemma_meetlog ADD COLUMN trid INT UNSIGNED NOT NULL AFTER meetid, DROP INDEX tick, ADD INDEX trid_tick (trid, tick);
 UPDATE dilemma_meetlog SET trid=1;
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_55, Start of T_2_5_0_56 - 2005/04/05
@@ -2939,4 +2937,7 @@ INSERT INTO vars (name, value, description) VALUES ('xhtml','0','Boolean for whe
 #
 #############
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_57, Start of T_2_5_0_58 - 2005/04/13
 
