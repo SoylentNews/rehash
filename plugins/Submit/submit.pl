@@ -563,7 +563,7 @@ sub displayForm {
 		$fixedstory =~ s/^<(?:P|BR)(?:>|\s[^>]*>)//i;
 		$fixedstory =~ s/<(?:P|BR)(?:>|\s[^>]*>)$//i;
 	}
-	$fixedstory = balanceTags($fixedstory);
+	$fixedstory = balanceTags($fixedstory, { deep_nesting => 1 });
 
 	slashDisplay('displayForm', {
 		fixedstory	=> $fixedstory,
@@ -616,7 +616,7 @@ sub saveSub {
 	} else {
 		$form->{story} = strip_html(url2html($form->{story}));
 	}
-	$form->{story} = balanceTags($form->{story});
+	$form->{story} = balanceTags($form->{story}, { deep_nesting => 1 });
 
 	my $uid ||= $form->{name}
 		? getCurrentUser('uid')

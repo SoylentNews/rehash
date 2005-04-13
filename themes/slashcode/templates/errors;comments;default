@@ -167,10 +167,8 @@ and (optionally, but preferably) your IP number
 "<tt>[% unencoded_ip %]</tt>" and your username "<tt>[% user.nickname | strip_literal %]</tt>"[%
 END %].
 
-[% # NESTING TOO DEEP
-CASE "nesting too deep" %]
-You can only post nested lists and blockquotes [% constants.nesting_maxdepth %]
-levels deep. Please fix your UL, OL, DL, and BLOCKQUOTE tags.
+[% CASE "broken html" %]
+Your comment could not be processed.  Please try again.
 
 [% # LOW CHARS-PER-LINE
 CASE "low chars-per-line" %]

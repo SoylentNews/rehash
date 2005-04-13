@@ -1023,8 +1023,8 @@ my %actions = (
 	space_between_tags => sub {
 			${$_[0]} =~ s/></> </g;				},
 	whitespace_tagify => sub {
-			${$_[0]} =~ s/\n/<BR>/gi;  # pp breaks
-			${$_[0]} =~ s/(?:<BR>\s*){2,}<BR>/<BR><BR>/gi;
+			${$_[0]} =~ s/\n/<br>/gi;  # pp breaks
+			${$_[0]} =~ s/(?:<br>\s*){2,}<br>/<br><br>/gi;
 			# Preserve leading indents / spaces
 			# can mess up internal tabs, oh well
 			${$_[0]} =~ s/\t/    /g;			},
@@ -1033,10 +1033,10 @@ my %actions = (
 				("&nbsp; " x (length($1)/2)) .
 				(defined($2) ? "&nbsp;$2" : "")
 			}eg;
-			${$_[0]} = "<TT>${$_[0]}</TT>";			},
+			${$_[0]} = "<tt>${$_[0]}</tt>";			},
 	newline_indent => sub {
-			${$_[0]} =~ s{<BR>\n?( +)} {
-				"<BR>\n" . ('&nbsp; ' x length($1))
+			${$_[0]} =~ s{<br>\n?( +)} {
+				"<br>\n" . ('&nbsp; ' x length($1))
 			}ieg;						},
 	remove_tags => sub {
 			${$_[0]} =~ s/<.*?>//gs;			},
@@ -1348,7 +1348,8 @@ sub processCustomTags {
 	## -- pudge
 
 	# ECODE must be in approvedtags
-	if (grep /^ECODE$/, @{$constants->{approvedtags}}) {
+	if (grep /^ecode$/i, @{$constants->{approvedtags}}) {
+		$str =~ s|<(/?)literal>|<${1}ecode>|gi;  # we used to accept "literal" too
 		my $ecode   = 'ecode';
 		my $open    = qr[\n* <\s* (?:$ecode) (?: \s+ END="(\w+)")? \s*> \n*]xsio;
 		my $close_1 = qr[($open (.*?) \n* <\s* /\2    \s*> \n*)]xsio;  # if END is used
@@ -1683,33 +1684,35 @@ sub approveTag {
 	# Build the hash of approved tags.
 	my $approvedtags = getCurrentStatic('approvedtags');
 	my %approved =
-		map  { (uc($_), 1)   }
-		grep { $_ ne 'ECODE' }
+		map  { (lc, 1)   }
+		grep { !/^ecode$/i }
 		@$approvedtags;
 
 	# We can do some checks at this point.  $t is the tag minus its
-	# properties, e.g. for "<A HREF=foo>", $t will be "A".
+	# properties, e.g. for "<a href=foo>", $t will be "a".
 	my($taglead, $slash, $t) = $wholetag =~ m{^(\s*(/?)\s*(\w+))};
-	my $t_uc = uc $t;
-	if (!$approved{$t_uc}) {
+	my $t_lc = lc $t;
+	if (!$approved{$t_lc}) {
+		$Slash::Data::Utility::approveTag::removed->{$t_lc}++
+			if getCurrentStatic('approveTag_debug');
 		return '';
 	}
 	
 	# These are now stored in a var approvedtags_attr
 	#
 	# A string in the format below:
-	# a:href_RU img:src_RU,alt,width,height,longdesc_U
+	# a:href_RU img:src_RU,alt_N,width,height,longdesc_U
 	# 
 	# Is decoded into the following data structure for attribute
 	# approval
 	#
 	# {
-	#	A =>	{ HREF =>	{ ord => 1, req => 1, url => 1 } },
-	#	IMG =>	{ SRC =>	{ ord => 1, req => 1, url => 1 },
-	#		  ALT =>	{ ord => 2                     },
-	#		  WIDTH =>	{ ord => 3                     },
-	#		  HEIGHT =>	{ ord => 4                     },
-	#		  LONGDESC =>	{ ord => 5,           url => 1 }, },
+	#	a =>	{ href =>	{ ord => 1, req => 1, url => 1 } },
+	#	img =>	{ src =>	{ ord => 1, req => 1, url => 1 },
+	#		  alt =>	{ ord => 2, req => 2           },
+	#		  width =>	{ ord => 3                     },
+	#		  height =>	{ ord => 4                     },
+	#		  longdesc =>	{ ord => 5,           url => 1 }, },
 	# }
 	# this is decoded in Slash/DB/MySQL.pm getSlashConf
 
@@ -1719,13 +1722,13 @@ sub approveTag {
 	if ($slash) {
 
 		# Close-tags ("</A>") never get attributes.
-		$wholetag = "/$t";
+		$wholetag = "/$t_lc";
 
-	} elsif ($attr->{$t_uc}) {
+	} elsif ($attr->{$t_lc}) {
 
 		# This is a tag with attributes, verify them.
 
-		my %allowed = %{$attr->{$t_uc}};
+		my %allowed = %{$attr->{$t_lc}};
 		my %required =
 			map  { $_, $allowed{$_}  }
 			grep { $allowed{$_}{req} }
@@ -1736,29 +1739,40 @@ sub approveTag {
 		# look_down() can return a string for some kinds of bogus data
 		return "" unless $elem && ref($elem) eq 'HTML::Element';
 		my @attr_order =
-			sort { $allowed{uc $a}{ord} <=> $allowed{uc $b}{ord} }
-			grep { !/^_/ && exists $allowed{uc $_} }
+			sort { $allowed{lc $a}{ord} <=> $allowed{lc $b}{ord} }
+			grep { !/^_/ && exists $allowed{lc $_} }
 			$elem->all_attr_names;
 		my %attr_data  = map { ($_, $elem->attr($_)) } @attr_order;
-		my $num_req_found = 0;
-		$wholetag = "$t_uc";
+		my %found;
+		$wholetag = $t_lc;
+
 		for my $a (@attr_order) {
-			my $a_uc = uc $a;
-			next unless $allowed{$a_uc};
-			my $data = $attr_data{$a};
-			$data = fudgeurl($data) if $allowed{$a_uc}{url};
+			my $a_lc = lc $a;
+			next unless $allowed{$a_lc};
+			my $data = $attr_data{$a_lc};
+			$data = fudgeurl($data) if $allowed{$a_lc}{url};
 			next unless $data;
-			$wholetag .= qq{ $a_uc="$data"};
-			++$num_req_found if $required{$a_uc};
+			$wholetag .= qq{ $a_lc="$data"};
+			++$found{$a_lc} if $required{$a_lc};
 		}
+
 		# If the required attributes were not all present, the whole
-		# tag is invalid.
-		return '' unless $num_req_found == scalar(keys %required);
+		# tag is invalid, unless req == 2, in which case we fudge it
+		for my $a (keys %required) {
+			my $a_lc = lc $a;
+			next if $found{$a_lc};
+			if ($required{$a}{req} == 2) {
+				# is there some better default than "*"?
+				$wholetag .= qq{ $a_lc="*"};
+			} else {
+				return '';
+			}
+		}
 
 	} else {
 
 		# No attributes allowed.
-		$wholetag = $t;
+		$wholetag = $t_lc;
 
 	}
 
@@ -1823,6 +1837,9 @@ sub approveCharref {
 			# Unknown, assume flawed.
 			$ok = 0;
 		}
+
+		# NB: 1114111/10FFFF is highest allowed by Unicode spec,
+		# but 917631/E007F is highest with actual glyph
 		$ok = 0 if $decimal <= 0 || $decimal > 65534; # sanity check
 		if ($constants->{draconian_charrefs}) {
 			if (!$constants->{good_numeric}{$decimal}) {
@@ -1840,7 +1857,8 @@ sub approveCharref {
 				$ok = $latin1_to_ascii{$decimal} ? 2 : 0;
 			}
 		} else {
-			$ok = 0 if $constants->{bad_entity}{$entity};
+			$ok = 0 if $constants->{bad_entity}{$entity}
+				|| ($constants->{draconian_charset} && ! exists $entity2char{$entity});
 		}
 	} elsif ($ok == 1) {
 		# Unknown character reference type, assume flawed.
@@ -2246,7 +2264,7 @@ sub HTML::FormatText::AddRefs::get_refs {
 
 #========================================================================
 
-=head2 balanceTags(HTML [, DEEP_NESTING])
+=head2 balanceTags(HTML [, OPTIONS])
 
 Balances HTML tags; if tags are not closed, close them; if they are not
 open, remove close tags; if they are in the wrong order, reorder them
@@ -2262,10 +2280,23 @@ open, remove close tags; if they are in the wrong order, reorder them
 
 The HTML to balance.
 
-=item DEEP_NESTING
+=item OPTIONS
 
-Integer for how deep to allow nesting indenting tags, 0 means
-no limit.
+A hashref for various options.
+
+=over 4
+
+=item deep_nesting
+
+Integer for how deep to allow nesting indenting tags, 0 means no limit, 1 means
+to use var (nesting_maxdepth).  Default is 0.
+
+=item deep_su
+
+Integer for how deep to allow nesting sup/sub tags, 0 means no limit, 1 means
+to use var (nest_su_maxdepth).  Default is 0.
+
+=back
 
 =back
 
@@ -2275,93 +2306,379 @@ The balanced HTML.
 
 =item Dependencies
 
-The 'approvedtags' and 'lonetags' entries in the vars table.
+The 'approvedtags' entry in the vars table.
 
 =back
 
 =cut
 
-sub balanceTags {
-	my($html, $max_nest_depth) = @_;
-	my(%tags, @stack, $match, %lone, $tag, $close, $whole);
-	my $constants = getCurrentStatic();
+{
+	# these are the tags we know about.
+	# they are hardcoded because the code must know about each one at 
+	# a fairly low level; if you want to add more, then we need to
+	# change the code for them.  in theory we could generalize it more,
+	# using vars for all this, but that is a low priority.
+	my %known_tags	= map { ( lc, 1 ) } qw(
+		b i p br a ol ul li dl dt dd em strong tt blockquote div ecode
+		img hr big small sub sup cite code
+		h1 h2 h3 h4 h5 h6
+	);
+	# NB: ECODE is excluded because it is handled elsewhere.
+	
+	# tags that are indented, so we can make sure indentation level is not too great
+	my %is_nesting  = map { ( lc, 1 ) } qw(ol ul dl blockquote);
 
-	# set up / get preferences
-	if (@{$constants->{lonetags}}) {
-		# ECODE is an exception, to be handled elsewhere
-		$match = join '|', grep !/^ECODE$/,
-			@{$constants->{approvedtags}};
-	} else {
-		$constants->{lonetags} = [qw(P LI BR IMG)];
-		$match = join '|', grep !/^(?:P|LI|BR|ECODE)$/,
-			@{$constants->{approvedtags}};
+	# or sub-super level
+	my %is_suscript = map { ( lc, 1 ) } qw(sub sup);
+
+	# block elements cannot be inside certain other elements; this defines which are which
+	my %is_block    = map { ( lc, 1 ) } qw(p ol ul li dl dt dd blockquote div hr h1 h2 h3 h4 h5 h6);
+	my %no_block    = map { ( lc, 1 ) } qw(p dt b i strong em tt cite code big small sub sup a h1 h2 h3 h4 h5 h6);
+
+	# when a style tag is cut off prematurely because of a newly introduced block
+	# element, we want to re-start the style inside the block; it is not perfect,
+	# but that's why we're here, innit?
+	my %is_style    = map { ( lc, 1 ) } qw( b i strong em tt cite code big small);
+
+	# tags that CAN be empty
+	my %empty	= map { ( lc, 1 ) } qw(p br img hr);
+	# tags that HAVE to be empty
+	my %really_empty = %empty;
+	# for now p is the only one ... var?
+	delete $really_empty{'p'};
+
+
+	# define the lists, and the content elements in the lists, in both directions
+	my %lists = (
+		dl	=> ['dd', 'dt'],
+		ul	=> ['li'],
+		ol	=> ['li'],
+	);
+	my %needs_list = (
+		dd	=> qr/dl/,
+		dt	=> qr/dl/,
+		li	=> qr/ul|ol/,
+	);
+
+	# regexes to use later
+	my $list_re = join '|', keys %lists;
+	my %lists_re;
+	for my $list (keys %lists) {
+		my $re = join '|', @{$lists{$list}};
+		$lists_re{$list} = qr/$re/;
 	}
-	%lone = map { ($_, 1) } @{$constants->{lonetags}};
-	my %is_breaking = map { ( $_, 1 ) } @{$constants->{approvedtags_break}};
 
-	while ($html =~ /(<(\/?)($match)\b[^>]*>)/igo) { # loop over tags
-		($tag, $close, $whole) = (uc($3), $2, $1);
+sub balanceTags {
+	my($html, $options) = @_;
+	my $constants = getCurrentStatic();
+	my $cache = getCurrentCache();
 
+	my($max_nest_depth, $max_su_depth) = (0, 0);
+	if (ref $options) {
+		$max_nest_depth = $options->{deep_nesting} == 1 ? $constants->{nesting_maxdepth} : $options->{deep_nesting};
+		$max_su_depth   = $options->{deep_su}      == 1 ? $constants->{nest_su_maxdepth} : $options->{deep_su};
+	} else {
+		# deprecated
+		$max_nest_depth = $options == 1 ? $constants->{nesting_maxdepth} : $options;
+	}
+
+	my(%tags, @stack, $tag, $close, $whole, $both, @list, $nesting_level, $su_level);
+
+	# cache this regex
+	# if $options->{admin} then allow different regex ... also do in approveTag
+	my $match = $cache->{balanceTags}{match};
+	if (!$match) {
+		$match = join '|', grep $known_tags{$_},
+			map lc, @{$constants->{approvedtags}};
+		$cache->{balanceTags}{match} = $match = qr/$match/;
+	}
+
+	## this is the main loop.  it finds a tag, any tag
+	while ($html =~ /(<(\/?)($match)\b[^>]*?( \/)?>)/sig) { # loop over tags
+		($tag, $close, $whole, $both) = (lc($3), $2, $1, $4);
+#		printf "DEBUG:%d:%s:%s: %d:%s\n%s\n\n", pos($html), $tag, $whole, scalar(@stack), "@stack", $html;
+
+		# this is a closing tag (note: not an opening AND closing tag,
+		# like <br /> ... that is handled with opening tags)
 		if ($close) {
-			if (@stack && $tags{$tag}) {
-				# Close the tag on the top of the stack
+			# we have opened this tag already, handle closing of it
+			if (!$really_empty{$tag} && @stack && $tags{$tag}) {
+				# the tag is the one on the top of the stack,
+				# remove from stack and counter, and move on
 				if ($stack[-1] eq $tag) {
-					$tags{$tag}--;
 					pop @stack;
+					$tags{$tag}--;
 
-				# Close tag somewhere else in stack
-				} else {
-					my $p = pos($html) - length($whole);
-					if (exists $lone{$stack[-1]}) {
-						pop @stack;
-					} else {
-						substr($html, $p, 0) = "</$stack[-1]>";
+					# we keep track of lists in an add'l stack,
+					# so pop off that one too
+					if ($lists{$tag}) {
+						my $pop = pop @list;
+						# this should always be equal, else why
+						# would it be bottom of @stack too?
+						# so warn if it isn't ...
+						warn "huh?  $tag ne $pop?" if $tag ne $pop;
 					}
-					pos($html) = $p;  # don't remove this from stack, go again
+
+				# Close tag somewhere else in stack; add it to the
+				# text and then loop back to catch it properly
+				# XXX we could optimize here so we don't need to loop back
+				} else {
+					_substitute(\$html, $whole, "</$stack[-1]>", 1);
 				}
 
+			# Close tag not on stack; just delete it, since it is
+			# obviously not needed
 			} else {
-				# Close tag not on stack; just delete it
-				my $p = pos($html) - length($whole);
-				substr($html, $p, length($whole)) = '';
-				pos($html) = $p;
+				_substitute(\$html, $whole, '');
 			}
 
+
+		# this is an open tag (or combined, like <br />)
 		} else {
+			# the tag nests, and we don't want to nest too deeply,
+			# so just remove it if we are in too deep already
+			if ($is_nesting{$tag} && $max_nest_depth) {
+				my $cur_depth = 0;
+				$cur_depth += $tags{$_} for keys %is_nesting;
+				if ($cur_depth >= $max_nest_depth) {
+					_substitute(\$html, $whole, '');
+					next;
+				}
+			}
+
+			# the tag nests, and we don't want to nest too deeply,
+			# so just remove it if we are in too deep already
+			if ($is_suscript{$tag} && $max_su_depth) {
+				my $cur_depth = 0;
+				$cur_depth += $tags{$_} for keys %is_suscript;
+				if ($cur_depth >= $max_su_depth) {
+					_substitute(\$html, $whole, '');
+					next;
+				}
+			}
+
+			# we are directly inside a list (UL), but this tag must be
+			# a list element (LI)
+			# this comes now because it could include a closing tag
+			if (@stack && $lists{$stack[-1]} && !(grep { $tag eq $_ } @{$lists{$stack[-1]}}) ) {
+				my $replace = $lists{$stack[-1]}[0];
+				_substitute(\$html, $whole, "<$replace>$whole");
+				$tags{$replace}++;
+				push @stack, $replace;
+			}
+
+			if ($needs_list{$tag}) {
+				# tag needs a list, like an LI needs a UL or OL, but we
+				# are not inside one: replace it with a P.  not pretty,
+				# but you should be more careful about what you put in there!
+				if (!@list || $list[-1] !~ /^(?:$needs_list{$tag})$/) {
+					my $replace = @list ? $lists{$list[-1]}[0] : 'p';
+					_substitute(\$html, $whole, "<$replace>");
+					pos($html) -= length("<$replace>");
+					next;  # try again
+
+				# we are inside a list (UL), and opening a new list item (LI),
+				# but a previous one is already open
+				} else {
+					for my $check (reverse @stack) {
+						last if $check =~ /^(?:$needs_list{$tag})/;
+						if ($needs_list{$check}) {
+							my $newtag = '';
+							while (my $pop = pop @stack) {
+								$tags{$pop}--;
+								$newtag .= "</$pop>";
+								last if $needs_list{$pop};
+							}
+							_substitute(\$html, $whole, $newtag . $whole);
+							last;
+						}
+					}
+				}
+			}
+
+			# if we are opening a block tag, make sure no open no_block
+			# tags are on the stack currently.  if they are, close them
+			# first!
+			if ($is_block{$tag} || $tag eq 'a' || $tag eq 'br') {
+				# a is a special case for a and br: we do not want a or b tags
+				# to be included in a tags, even though they are not blocks;
+				# another var for this special case?
+				my @no_block = ($tag eq 'a' || $tag eq 'br') ? 'a' : keys %no_block; 
+				my $newtag  = '';  # close no_block tags
+				my $newtag2 = '';  # re-open closed style tags inside block
+
+				while (grep { $tags{$_} } @no_block) {
+					my $pop = pop @stack;
+					$tags{$pop}--;
+					$newtag .= "</$pop>";
+					if ($is_style{$pop}) {
+						$newtag2 = "<$pop>" . $newtag2;
+					}
+				}
+
+				if ($newtag) {
+					_substitute(\$html, $whole, $newtag . $whole . $newtag2);
+					# loop back to catch newly added tags properly
+					# XXX we could optimize here so we don't need to loop back
+					pos($html) -= length($whole . $newtag2);
+					next;
+				}
+			}
+
+			# the tag must be an empty tag, e.g. <br />; if it has $both, do
+			# nothing, else add the " /".  since we are closing the tag
+			# here, we don't need to add it to the stack
+			if ($really_empty{$tag} || ($empty{$tag} && $both)) {
+				# this is the only difference we have between
+				# XHTML and HTML, in this part of the code
+				if ($constants->{xhtml} && !$both) {
+					(my $newtag = $whole) =~ s/^<(.+?)>$/<$1 \/>/;
+					_substitute(\$html, $whole, $newtag);
+				} elsif (!$constants->{xhtml} && $both) {
+					(my $newtag = $whole) =~ s/^<(.+?)>$/<$1>/;
+					_substitute(\$html, $whole, $newtag);
+				}
+				next;
+			}
+
+			# opening a new tag to be added to the stack
 			$tags{$tag}++;
 			push @stack, $tag;
 
-			# No <A>...</A> tag is allowed to stretch over a
-			# breaking tag.  If we're currently in <A> text
-			# and this is a breaking tag, insert a </A> before
-			# it, and yank the <A> out of the middle of the
-			# stack so we don't try to close it later.
-			# Actually, do that as many times as we have
-			# nested <A>s (which we shouldn't have anyway).
-			if (!$constants->{anchortags_bridge_breaks}
-				&& $is_breaking{$tag}
-				&& $tags{A}) {
-				my $p = pos($html) - length($whole);
-				substr($html, $p, 0) = ("</A>" x $tags{A});
-				@stack = grep !/^A$/, @stack;
-				$tags{A} = 0;
-			}
-
-			if ($max_nest_depth) {
-				my $cur_depth = 0;
-				for (qw( UL OL DIV BLOCKQUOTE DL )) { $cur_depth += $tags{$_} }
-				return undef if $cur_depth > $max_nest_depth;
-			}
+			# we keep track of lists in an add'l stack, for
+			# the immediately above purpose, so push it on here
+			push @list, $tag if $lists{$tag};
 		}
 
 	}
 
-	$html =~ s/\s+$//;
+	$html =~ s/\s+$//s;
 
 	# add on any unclosed tags still on stack
-	$html .= join '', map { "</$_>" } grep { !exists $lone{$_} } reverse @stack;
+	$html .= join '', map { "</$_>" } grep { !exists $really_empty{$_} } reverse @stack;
+
+	# cheap and easy hack to make sure everything in a blockquote is also
+	# inside another block element; extra divs don't hurt anything
+	$html =~ s|<blockquote>|<blockquote><div>|gi;
+	$html =~ s|</blockquote>|</div></blockquote>|gi;
+
+	_validateLists(\$html);
+	_removeEmpty(\$html);
 
 	return $html;
+}
+
+sub _removeEmpty {
+	my($html) = @_;
+	my $p = getCurrentStatic('xhtml') ? '<p />' : '<p>';
+	$$html =~ s|<p>\s*</p>|$p|g;
+	$$html =~ s|<(\w+)>\s*</\1>||g;
+}
+
+
+# validate the structure of lists ... essentially, make sure
+# they are properly nested, that everything in a list is inside
+# a proper li/dt/dd, etc.
+
+sub _validateLists {
+	my($html) = @_;
+
+	# each nested list is cleaned up and then stored in the hash,
+	# to be expanded later
+	my %full;
+	# counter for %full
+	my $j = 0;
+	
+	# the main loop finds paired list tags, and what is between them,
+	# like <ul> ... </ul>
+	while ($$html =~ m:(<($list_re)>(.*?)</\2>):sig) {
+		my($whole, $list, $content) = ($1, $2, $3);
+		# if we don't have an innermost list, but there's another
+		# list nested inside this one, increment pos and try again
+		if ($content =~ /<(?:$list_re)>/) {
+			pos($$html) -= length($whole) - length("<$list>");
+			next;
+		}
+
+		# the default element to use inside the list, for content
+		# that is not inside any proper element
+		my $inside = $lists{$list}[0];
+		my $re     = $lists_re{$list};
+
+		# since we are looking at innermost lists, we do not
+		# need to worry about stacks or nesting, just keep
+		# track of the current element that we are in
+		my $in    = '';
+
+		# the secondary loop finds either a tag, or text between tags
+		while ($content =~ m!\s*([^<]+|<(.+?)>)!sig) {
+			my($whole, $tag) = ($1, $2);
+			next if $whole !~ /\S/;
+			# we only care here if this is one that can be inside a list
+			if ($tag) {
+				# if open tag ...
+				if ($tag =~ /^(?:$re)$/) {
+					# add new close tag if we are current inside a tag
+					_substitute(\$content, $whole, "</$in>$whole") if $in;
+					# set new open tag
+					$in = $tag;
+					next;
+
+				# if close tag ...
+				} elsif ($tag =~ /^\/(?:$re)$/) {
+					# remove if we are not already inside a tag
+					_substitute(\$content, $whole, '') unless $in;
+					# this should never happen, as we've already
+					# balanced the tags
+					warn "huh?  $tag ne /$in?" if $tag ne "/$in";
+					# set to no open tag
+					$in = '';
+					next;
+				}
+			}
+
+			# we are NOT an appropriate tag, or inside one, so
+			# create one to be inside of
+			if (!$in) {
+				$in = $inside;
+				_substitute(\$content, $whole, "<$inside>$whole");
+			}
+		}
+
+		# now done with loop, so add rest of $in if there is any
+		$content .= "</$in>" if $in;
+
+		# we have nesting to deal with, so replace this part
+		# with a temporary token and cache the result in the hash
+		$full{$j} = "<$list>$content</$list>";
+		_substitute($html, $whole, "<FULL-$j>");
+		$j++;
+		pos($$html) = 0;  # start over
+	}
+
+	# expand it all back out
+	while ($j--) {
+		last if $j < 0;
+		$$html =~ s/<FULL-$j>/$full{$j}/;
+	}
+
+	return 1;
+}
+
+# put a string into the current position in that string, and update
+# pos() accordingly
+sub _substitute {
+	my($full, $old, $new, $zeropos) = @_;
+	# zeropos is for when we add a close tag or somesuch, but don't touch
+	# the stack, and just let the code handle it by keeping pos right in
+	# front of the new tag
+
+	my $len  = length $old;
+
+	my $p = pos($$full) - $len;
+	substr($$full, $p, ($zeropos ? 0 : $len)) = $new;
+	pos($$full) = $p + ($zeropos ? 0 : length($new));
+}
 }
 
 #========================================================================
@@ -2467,12 +2784,12 @@ The parsed HTML.
 sub parseSlashizedLinks {
 	my($html, $options) = @_;
 	$html =~ s{
-		<A[ ]HREF="__SLASHLINK__"
+		<a[ ]href="__SLASHLINK__"
 		([^>]+)
 		>
 	}{
 		_slashlink_to_link($1, $options)
-	}gxe;
+	}igxe;
 	return $html;
 }
 
@@ -2531,7 +2848,7 @@ sub _slashlink_to_link {
 			$url .= qq{#$frag} if $frag;
 		}
 	}
-	return q{<A HREF="} . strip_urlattr($url) . q{">};
+	return q{<a href="} . strip_urlattr($url) . q{">};
 }
 
 #========================================================================
@@ -2572,14 +2889,14 @@ sub addDomainTags {
 	my $in_a = 0;
 	$html =~ s
 	{
-		( < (/?) A \b[^>]* > )
+		( < (/?) a \b[^>]* > )
 	}{
 		my $old_in_a = $in_a;
 		my $new_in_a = !$2;
 		$in_a = $new_in_a;
-		(($old_in_a && $new_in_a) ? '</A>' : '') . $1
+		(($old_in_a && $new_in_a) ? '</a>' : '') . $1
 	}gixe;
-	$html .= '</A>' if $in_a;
+	$html .= '</a>' if $in_a;
 
 	# Now, since we know that every <A> has a </A>, this pattern will
 	# match and let the subroutine above do its magic properly.
@@ -2590,12 +2907,12 @@ sub addDomainTags {
 
 	$html =~ s
 	{
-		(<A\s+HREF="		# $1 is the whole <A HREF...>
+		(<a\s+href="		# $1 is the whole <A HREF...>
 			([^">]*)	# $2 is the URL (quotes guaranteed to
 					# be there thanks to approveTag)
 		">)
 		(.*?)			# $3 is whatever's between <A> and </A>
-		</A\b[^>]*>
+		</a\b[^>]*>
 	}{
 		$3	? _url_to_domain_tag($1, $2, $3)
 			: ''
@@ -2608,7 +2925,7 @@ sub addDomainTags {
 	# and doesn't overlap, so now we can just remove the extra ones,
 	# which are easy to tell because they DON'T have domain tags.
 
-	$html =~ s{</A>}{}g;
+	$html =~ s{</a>}{}gi;
 
 	return $html;
 }
@@ -2852,7 +3169,7 @@ sub _link_to_slashlink {
 	# If we have something good in %attr, we can go ahead and
 	# use our custom tag.  Concatenate it together.
 	if ($attr{sn}) {
-		$retval = q{<A HREF="__SLASHLINK__" }
+		$retval = q{<a href="__SLASHLINK__" }
 			. join(" ",
 				map { qq{$_="} . strip_attribute($attr{$_}) . qq{"} }
 				sort keys %attr)

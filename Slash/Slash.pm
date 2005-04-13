@@ -695,7 +695,7 @@ sub printComments {
 			# add them back at the last step.  In-between, we chop
 			# the comment down to size, then massage it to make sure
 			# we still have good HTML after the chop.
-			$more_comment_text->{$cid} =~ s{</A[^>]+>}{</A>}gi;
+			$more_comment_text->{$cid} =~ s{</a[^>]+>}{</a>}gi;
 			my $text = chopEntity($more_comment_text->{$cid},
 				$user->{maxcommentsize});
 			$text = strip_html($text);

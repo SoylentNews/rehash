@@ -634,10 +634,9 @@ sub validateComment {
 		}
 	}
 
-	unless (defined($$comm = balanceTags($$comm, $constants->{nesting_maxdepth}))) {
-		# If we didn't return from right here, one or more later
-		# error messages would overwrite this one.
-		$$error_message = getError('nesting too deep');
+	unless (defined($$comm = balanceTags($$comm, { deep_nesting => 1 }))) {
+		# only time this should return an error is if the HTML is busted
+		$$error_message = getError('broken html');
 		return ;
 	}
 

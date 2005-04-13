@@ -39,6 +39,7 @@ setCurrentSkin(determineCurrentSkin());
 my $gSkin = getCurrentSkin();
 my $totalChangedStories = 1;
 
+my $br = $constants->{xhtml} ? '<br />' : '<br>';
 my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
 
 ################################################################################
@@ -69,30 +70,30 @@ sub geturl {
 ################################################################################
 
 sub getTop10Comments {
-	my $A =	$backupdb->getTop10Comments();
+	my $A =	$backupdb->getTop10Comments;
 
-	my $reasons = $slashdb->getReasons();
+	my $reasons = $slashdb->getReasons;
 
 	my $block;
 	foreach (@$A) {
 		my($sid, $title, $cid, $subj, $d, $nickname, $points, $reason) = @$_;
 		$block .= <<EOT;
 
-&middot; <B><A HREF="$gSkin->{rootdir}/comments.pl?sid=$sid&amp;cid=$cid">$subj</A>
+&middot; <b><a href="$gSkin->{rootdir}/comments.pl?sid=$sid&amp;cid=$cid">$subj</a>
 	($points points, $reasons->{$reason}{name})
-	by $nickname</B>
+	by $nickname</b>
 	on $d
-	<FONT SIZE="1">attached to
-	<A HREF="$gSkin->{rootdir}/article.pl?sid=$sid">$title</A></FONT><BR>
+	<small>attached to
+	<a href="$gSkin->{rootdir}/article.pl?sid=$sid">$title</a></small>$br
 EOT
 	}
-	setblock("top10comments", $block);
+	setblock('top10comments', $block);
 
 }
 
 #################################################################
 sub getSlashdotPoll {
-	setblock("poll", pollbooth('_currentqid', 1));
+	setblock('poll', pollbooth('_currentqid', 1));
 }
 
 
@@ -111,22 +112,22 @@ The fortune command.
 #################################################################
 sub getUptime {
 	my $x = `/usr/bin/uptime`;
-	$x = "<B>time:</B> $x";
-	$x =~ s/up/\n<BR><B>uptime:<\/B>/g;
-	$x =~ s/load average:/\n<BR><B>load average:<\/B>/;
+	$x = "<b>time:</b> $x";
+	$x =~ s/up/\n$br<b>uptime:<\/b>/g;
+	$x =~ s/load average:/\n<br><b>load average:<\/b>/;
 	my $ps = `/bin/ps aux | /usr/bin/wc -l`;
 	$ps--;
-	$x .= "<BR><B>processes:</B> $ps <BR>";
+	$x .= "$br<b>processes:</b> $ps$br";
 
 	my $stats = $x;
 
 #	my $tc = $constants->{totalComments};
 	my $th = $constants->{totalhits};
 
-#	$stats .= "<B>yesterday:</B> $yesterday<BR>
-#		<B>today:</B> $today<BR>
-#		<B>ever:</B> $th<BR>";
-	$stats .= "<B>totalhits:</B> $th<BR>";
+#	$stats .= "<b>yesterday:</b> $yesterday<br>
+#		<b>today:</b> $today<br>
+#		<b>ever:</b> $th<br>";
+	$stats .= "<b>totalhits:</b> $th$br";
 
 	setblock('uptime', $stats);
 }

@@ -2279,7 +2279,7 @@ sub saveUser {
 	for my $key (keys %extr) {
 		my $dat = $extr{$key};
 		$dat = strip_html($dat);
-		$dat = balanceTags($dat, 1); # only 1 nesting tag (UL, OL, BLOCKQUOTE) allowed
+		$dat = balanceTags($dat, { deep_nesting => 2 }); # only 2 nesting tags (UL, OL, BLOCKQUOTE) allowed
 		$dat = addDomainTags($dat) if $dat;
 
 		# If the sig becomes too long to fit (domain tagging causes

@@ -2874,13 +2874,9 @@ INSERT INTO vars (name, value, description) VALUES ('daypass_offer_onlywhentmf',
 
 # End of T_2_5_0_53, Start of T_2_5_0_54 - 2005/03/29
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 INSERT INTO vars (name, value, description) VALUES ('daypass_tz', 'PST', 'What timezone are daypasses considered to be in (this determines where "midnight" starts and ends the day)');
 
 # End of T_2_5_0_54, Start of T_2_5_0_55 - 2005/03/31
-
-# SLASHDOT LAST UPDATED HERE
 
 # Changes for plugins/Dilemma (ignore if not using that plugin)
 INSERT INTO vars (name, value, description) VALUES ('dilemma_draw_graph_ticks', '100', 'Draw graph every this many ticks (roughly -- before this tickcount, draw every time; after 20x this tickcount, draw 1/3 as often');
@@ -2900,6 +2896,10 @@ ALTER TABLE dilemma_stats DROP COLUMN name;
 ALTER TABLE dilemma_meetlog ADD COLUMN trid INT UNSIGNED NOT NULL AFTER meetid, DROP INDEX tick, ADD INDEX trid_tick (trid, tick);
 UPDATE dilemma_meetlog SET trid=1;
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
 # End of T_2_5_0_55, Start of T_2_5_0_56 - 2005/04/05
 
 # Changes for plugins/Daypass (ignore if not using that plugin)
@@ -2911,4 +2911,32 @@ INSERT INTO vars (name, value, description) VALUES ('daypass_offer_method1_mindu
 INSERT INTO vars (name, value, description) VALUES ('daypass_offer_method1_regex', '!placeholder for ad position', 'If daypass_offer_method is 1, what regex on that ad text tells us that a daypass is available? A leading ! inverts logic (regex match means daypass not available)');
 
 # End of T_2_5_0_56, Start of T_2_5_0_57 - 2005/04/08
+
+#############
+# be careful with below, make sure right for your site
+
+# this is not required, but highly advised; it shouldn't have an adverse
+# effect on most sites, but on sites that use alternative charsets ... dunno
+UPDATE vars SET value = '1' WHERE name = 'draconian_charset';
+
+# look at this carefully, make sure it has all the tags you want, and none you don't
+# note that you cannot introduce new tags this way anymore, those must be added in
+# the code directly, then *enabled* here
+REPLACE INTO vars (name, value, description) VALUES ('approvedtags','b|i|p|br|a|ol|ul|li|dl|dt|dd|em|strong|tt|blockquote|div|ecode','Tags that you can use');
+
+# we add N option and use it for alt
+REPLACE INTO vars (name, value, description) VALUES ('approvedtags_attr', 'a:href_RU img:src_RU,alt_N,width,height,longdesc_U', 'definition of approvedtags attributes in the following format a:href_RU img:src_RU,alt,width,height,longdesc_U see Slash::Utility::Data.pm for more details');
+
+# this should not need any modification
+INSERT INTO vars (name, value, description) VALUES ('approvedtags_break','p|br|ol|ul|li|dl|dt|dd|blockquote|div|img|hr|h1|h2|h3|h4|h5|h6','Tags that break words (see breakHtml())');
+
+# this still won't be in effect unless sub or sup is in approvedtags, of course
+INSERT INTO vars (name, value, description) VALUES ('nest_su_maxdepth','3','Maximum depth to which <SUP> and <SUB> tags can be nested');
+
+# HTML is recommended, but if you are using XHTML, by all means, set this to 1
+INSERT INTO vars (name, value, description) VALUES ('xhtml','0','Boolean for whether we are using XHTML');
+
+#
+#############
+
 

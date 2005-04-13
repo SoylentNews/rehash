@@ -477,7 +477,7 @@ sub rss_item_description {
 				$desc =~ s/[\w'-]+$//;  # don't trim in middle of word
 				if ($self->{rdfitemdesc_html}) {
 					$desc =~ s/<[^>]*$//;
-					$desc = balanceTags($desc);
+					$desc = balanceTags($desc, { deep_nesting => 1 });
 				}
 				$desc =~ s/\s+$//;
 				$desc .= '...';
