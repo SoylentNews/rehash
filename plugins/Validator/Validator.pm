@@ -94,9 +94,15 @@ use constant O_NONE    =>  8; # 0000 1000
 use vars qw($DEBUG $CFG $RSRC $VERSION $HAVE_IPC_RUN);
 #our $HAVE_SOAP_LITE;
 
+  #
+  # Strings
+  ($VERSION    =  q$Revision$) =~ s/Revision: ([\d\.]+) /$1/;
+
 
 use Slash::Constants ':messages';
 use Slash::Utility;
+use base 'Slash::DB';
+use base 'Slash::DB::Utility';
 
 #
 # Things inside BEGIN don't happen on every request in persistent
@@ -105,14 +111,14 @@ sub new {  # BEGIN
   my($class, $user) = @_;
   my $self = {};
 
-  my $plugin = getCurrentStatic('plugin');
-  return unless $plugin->{'Validator'};
+  my $constants = getCurrentStatic();
+  return unless $constants->{plugin}{Validator};
 
   bless($self, $class);
   $self->{virtual_user} = $user;
   $self->sqlConnect;
 
-  $ENV{W3C_VALIDATOR_CFG} = '/usr/local/validator/htdocs/config/validator.conf';
+  $ENV{W3C_VALIDATOR_CFG} = $constants->{slashdir} . '/plugins/Validator/validator/htdocs/config/validator.conf';
 
   #
   # Read Config Files.
@@ -162,11 +168,6 @@ sub new {  # BEGIN
   #
   # Set debug flag.
   $DEBUG = TRUE if $ENV{W3C_VALIDATOR_DEBUG} || $CFG->{DEBUG};
-
-  #
-  # Strings
-  $VERSION    =  q$Revision$;
-  $VERSION    =~ s/Revision: ([\d\.]+) /$1/;
 
   #
   # Use passive FTP by default.
@@ -3467,7 +3468,7 @@ sub check {
 
 sub isValid {
 	my($self, $data, $opts) = @_;
-	my $File = validate($data, $opts);
+	my $File = $self->validate($data, $opts);
 
 	if (@{$File->{Errors}}) {
 		my $messages = getObject('Slash::Messages');
