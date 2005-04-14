@@ -1,0 +1,5 @@
+# $Id$
+name=Validator
+description="HTML Validator"
+template=templates/html_invalid_subj;misc;default
+template=templates/html_invalid;misc;default
