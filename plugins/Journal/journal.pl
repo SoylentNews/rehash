@@ -240,7 +240,7 @@ sub displayRSS {
 				tid		=> $article->[5],
 			},
 			title		=> $article->[2],
-			description	=> strip_mode($article->[1], $article->[4]),
+			description	=> balanceTags(strip_mode($article->[1], $article->[4]), { deep_nesting => 1 }),
 			'link'		=> root2abs() . '/~' . fixparam($nickname) . "/journal/$article->[3]",
 		};
 	}
@@ -378,7 +378,7 @@ sub displayArticleFriends {
 
 		# should get comment count, too -- pudge
 		push @collection, {
-			article		=> strip_mode($article->[1], $article->[4]),
+			article		=> balanceTags(strip_mode($article->[1], $article->[4]), { deep_nesting => 1 }),
 			date		=> $article->[0],
 			description	=> strip_notags($article->[2]),
 			topic		=> $topics->{$article->[5]},
@@ -492,7 +492,7 @@ sub displayArticle {
 				: 0;
 		}
 
-		my $stripped_article = strip_mode($article->[1], $article->[4]);
+		my $stripped_article = balanceTags(strip_mode($article->[1], $article->[4]), { deep_nesting => 1 });
 		$stripped_article = noFollow($stripped_article)
 			unless $karma > $constants->{goodkarma};
 
@@ -657,7 +657,6 @@ sub saveArticle {
 
 		$journal->set($form->{id}, \%update);
 
-		return $form->{id} if $ws;
 		$form = { id => $form->{id} };
 
 	} else {
@@ -706,9 +705,23 @@ sub saveArticle {
 			}
 		}
 
-		return $id if $ws;
 		$form = { id => $id };
 	}
+
+	if ($constants->{validate_html}) {
+		my $validator = getObject('Slash::Validator');
+		my $article = $journal->get($form->{id});
+		my $strip_art = balanceTags(strip_mode($article->{article}, $article->{posttype}), { deep_nesting => 1 });
+		if ($user->{nickname} eq 'pudge') {
+			$strip_art .= '</div>';  # intentionally break to test
+		}
+		$validator->isValid($strip_art, {
+			data_type	=> 'journal',
+			data_id		=> $form->{id}
+		}) if $validator;
+	}
+
+	return $form->{id} if $ws;
 
 	displayArticle($journal, $constants, $user, $form, $reader);
 }
@@ -765,7 +778,7 @@ sub editArticle {
 	$posttype ||= $user->{'posttype'};
 
 	if ($article->{article}) {
-		my $strip_art = strip_mode($article->{article}, $posttype);
+		my $strip_art = balanceTags(strip_mode($article->{article}, $posttype), { deep_nesting => 1 });
 		my $strip_desc = strip_notags($article->{description});
 
 		my $commentcount = $article->{discussion}

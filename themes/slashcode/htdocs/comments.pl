@@ -1147,6 +1147,20 @@ sub submitComment {
 				$users{$usera}++;
 			}
 		}
+
+		if ($constants->{validate_html}) {
+			my $validator = getObject('Slash::Validator');
+			my $test = $tempComment;
+			if ($user->{nickname} eq 'pudge') {
+				$test .= '</div>';  # intentionally break to test
+			}
+			$validator->isValid($test, {
+				data_type	=> 'comment',
+				data_id		=> $maxCid
+			}) if $validator;
+		}
+
+
 		# If discussion created
 		if ($form->{newdiscussion}) {
 			if (!$header_emitted) {

@@ -676,7 +676,7 @@ sub rssSearch {
 	# we pop it off
 	if ($entries && @$entries) {
 		for (@$entries) {
-			$_->{title} = strip_plaintext($_->{introtext});
+			$_->{title} = strip_notags($_->{introtext});
 			$_->{description} = _shorten(strip_notags($_->{description}));
 		}
 		my $forward;

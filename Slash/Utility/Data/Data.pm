@@ -844,9 +844,9 @@ The manipulated string.
 
 { # closure for stripByMode
 
-my %latin1_to_ascii = (
+my %ansi_to_ascii = (
+	131	=> 'f',
 	133	=> '...',
-	135	=> 'f',
 	138	=> 'S',
 	140	=> 'OE',
 	142	=> 'Z',
@@ -932,8 +932,28 @@ my %latin1_to_ascii = (
 	255	=> 'y',
 );
 
+my %ansi_to_utf = (
+	131	=> 402,
+	133	=> 8230,
+	138	=> 352,
+	140	=> 338,
+	142	=> 381,
+	145	=> 8216,
+	146	=> 8217,
+	147	=> 8220,
+	148	=> 8221,
+	150	=> 8211,
+	151	=> 8212,
+	153	=> 8482,
+	154	=> 353,
+	156	=> 339,
+	158	=> 382,
+	159	=> 376,
+);
+
 # protect the hash by just returning it, for external use only
-sub _latin1_to_ascii { %latin1_to_ascii }
+sub _ansi_to_ascii { %ansi_to_ascii }
+sub _ansi_to_utf   { %ansi_to_utf }
 
 sub _charsetConvert {
 	my($char, $constants) = @_;
@@ -953,10 +973,16 @@ sub _charsetConvert {
 			}
 		}
 		# fall back
-		$str ||= $latin1_to_ascii{$char};
+		$str ||= $ansi_to_ascii{$char};
 	}
 
 	# fall further back
+	# if the char is a special one we don't recognize in Latin-1,
+	# convert it here.  this does not prevent someone from manually
+	# entering &#147; or some such, if they feel they need to, it is
+	# to help catch it when browsers send non-Latin-1 data even though
+	# they shouldn't
+	$char = $ansi_to_utf{$char} if $ansi_to_utf{$char};
 	$str ||= sprintf('&#%u;', $char);
 	return $str;
 }
@@ -975,10 +1001,10 @@ sub _fixupCharrefs {
 	$constants->{bad_entity}   = { map { $_, 1 } @{$constants->{charrefs_bad_entity}} };
 
 	$constants->{good_numeric} = { map { $_, 1 } @{$constants->{charrefs_good_numeric}},
-		grep { $_ < 128 || $_ > 159 } keys %latin1_to_ascii };
+		grep { $_ < 128 || $_ > 159 } keys %ansi_to_ascii };
 	$constants->{good_entity}  = { map { $_, 1 } @{$constants->{charrefs_good_entity}}, qw(apos quot),
 		grep { s/^&(\w+);$/$1/ } map { $char2entity{chr $_} }
-		grep { $_ < 128 || $_ > 159 } keys %latin1_to_ascii };
+		grep { $_ < 128 || $_ > 159 } keys %ansi_to_ascii };
 }
 
 my %action_data = ( );
@@ -1821,7 +1847,8 @@ sub approveCharref {
 	my $ok = 1; # Everything not forbidden is permitted.
 
 	_fixupCharrefs();
-	my %latin1_to_ascii = _latin1_to_ascii();
+	my %ansi_to_ascii = _ansi_to_ascii();
+	my $ansi_to_utf   = _ansi_to_utf();
 	my $decimal = 0;
 
 	if ($ok == 1 && $charref =~ /^#/) {
@@ -1843,7 +1870,7 @@ sub approveCharref {
 		$ok = 0 if $decimal <= 0 || $decimal > 65534; # sanity check
 		if ($constants->{draconian_charrefs}) {
 			if (!$constants->{good_numeric}{$decimal}) {
-				$ok = $latin1_to_ascii{$decimal} ? 2 : 0;
+				$ok = $ansi_to_ascii{$decimal} ? 2 : 0;
 			}
 		} else {
 			$ok = 0 if $constants->{bad_numeric}{$decimal};
@@ -1854,7 +1881,7 @@ sub approveCharref {
 		if ($constants->{draconian_charrefs}) {
 			if (!$constants->{good_entity}{$entity}) {
 				$decimal = ord $entity2char{$entity};
-				$ok = $latin1_to_ascii{$decimal} ? 2 : 0;
+				$ok = $ansi_to_ascii{$decimal} ? 2 : 0;
 			}
 		} else {
 			$ok = 0 if $constants->{bad_entity}{$entity}
@@ -1867,7 +1894,7 @@ sub approveCharref {
 
 	# special case for old-style broken entities we want to convert to ASCII
 	if ($ok == 2 && $decimal) {
-		return $latin1_to_ascii{$decimal};
+		return $ansi_to_ascii{$decimal};
 	} elsif ($ok) {
 		return "&$charref;";
 	} else {

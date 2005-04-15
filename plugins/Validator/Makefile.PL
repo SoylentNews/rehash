@@ -4,4 +4,5 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'	=> 'Slash::Validator',
     'VERSION_FROM' => 'Validator.pm', # finds $VERSION
+    'PM'	=> { 'Validator.pm' => '$(INST_LIBDIR)/Validator.pm' },
 );
