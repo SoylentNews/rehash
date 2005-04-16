@@ -225,6 +225,8 @@ open($file) returned: $!
 
 sub validate {
 	my($self, $data, $opts) = @_;
+# XXX: we will deal with this separately later ... -- pudge
+$data =~ s!<nobr>(.|&#?\w+;)<wbr></nobr>!$1!gi;
 #
 # Create a new CGI object.
 =begin comment
