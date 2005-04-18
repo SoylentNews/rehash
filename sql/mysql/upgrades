@@ -2896,8 +2896,6 @@ ALTER TABLE dilemma_stats DROP COLUMN name;
 ALTER TABLE dilemma_meetlog ADD COLUMN trid INT UNSIGNED NOT NULL AFTER meetid, DROP INDEX tick, ADD INDEX trid_tick (trid, tick);
 UPDATE dilemma_meetlog SET trid=1;
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_55, Start of T_2_5_0_56 - 2005/04/05
 
 # Changes for plugins/Daypass (ignore if not using that plugin)
@@ -2907,6 +2905,10 @@ INSERT INTO vars (name, value, description) VALUES ('daypass_offer_method1_acl',
 INSERT INTO vars (name, value, description) VALUES ('daypass_offer_method1_adpos', '31', 'If daypass_offer_method is 1, which ad position to check?');
 INSERT INTO vars (name, value, description) VALUES ('daypass_offer_method1_minduration', '10', 'Minimum time allowed before click');
 INSERT INTO vars (name, value, description) VALUES ('daypass_offer_method1_regex', '!placeholder for ad position', 'If daypass_offer_method is 1, what regex on that ad text tells us that a daypass is available? A leading ! inverts logic (regex match means daypass not available)');
+
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_56, Start of T_2_5_0_57 - 2005/04/08
 
