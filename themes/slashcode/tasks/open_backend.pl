@@ -74,6 +74,7 @@ sub _do_rss {
 
 	my $ext = $version == 0.9 ? 'rdf' : 'rss';
 	save2file("$constants->{basedir}/$file.$ext", $rss, \&fudge);
+	save2file("$constants->{basedir}/privaterss/$file.$ext", $rss, \&fudge);
 }
 
 sub newrdf { _do_rss(@_, "0.9") } # RSS 0.9
