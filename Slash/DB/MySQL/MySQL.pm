@@ -8974,8 +8974,18 @@ sub getSlashConf {
 						# See <http://www.iana.org/assignments/uri-schemes>
 		anonymous_coward_uids =>	[ $conf{anonymous_coward_uid} ],
 		approved_url_schemes =>		[qw( ftp http gopher mailto news nntp telnet wais https )],
-		approvedtags =>			[qw( b i p br a ol ul li dl dt dd em strong tt blockquote div ecode)],
-		approvedtags_break =>		[qw(     p br   ol ul li dl dt dd              blockquote div       img hr)],
+		approvedtags =>			[qw( b i p br a ol ul li dl dt dd em strong tt blockquote div ecode )],
+		approvedtags_break =>		[qw(     p br   ol ul li dl dt dd              blockquote div       img hr )],
+		# all known tags, plus table, pre, and slash; this can be overridden
+		# in vars, but since we make this all known tags by default ...
+		# easier to just keep it in here
+		approvedtags_admin =>		[qw( b i p br a ol ul li dl dt dd em strong tt blockquote div ecode
+						     img hr big small sub sup span
+						     dfn code samp kbd var cite address ins del
+						     h1 h2 h3 h4 h5 h6
+						     table thead tbody tfoot tr th td pre
+						     slash
+						)],
 		charrefs_bad_entity =>		[qw( zwnj zwj lrm rlm )],
 		charrefs_bad_numeric =>		[qw( 8204 8205 8206 8207 8236 8237 8238 )],
 		charrefs_good_entity =>		[qw( amp lt gt euro pound yen )],
@@ -9076,24 +9086,32 @@ sub getSlashConf {
 		$conf{$var} = [ map lc, @{$conf{$var}} ];
 	}
 
-	if ($conf{approvedtags_attr}) {
-		my $approvedtags_attr = $conf{approvedtags_attr};
-		$conf{approvedtags_attr} = {};
-		my @tags = split /\s+/, $approvedtags_attr;
-		foreach my $tag (@tags){
-			my($tagname, $attr_info) = $tag =~ /([^:]*):(.*)$/;
-			my @attrs = split ',', $attr_info;
-			my $ord = 1;
-			foreach my $attr (@attrs){
-				my($at, $extra) = split /_/, $attr;
-				$at = lc $at;
-				$tagname = lc $tagname;
-				$conf{approvedtags_attr}{$tagname}{$at}{ord} = $ord;
-				$conf{approvedtags_attr}{$tagname}{$at}{req} = 1 if $extra =~ /R/;
-				$conf{approvedtags_attr}{$tagname}{$at}{req} = 2 if $extra =~ /N/; # "necessary"
-				$conf{approvedtags_attr}{$tagname}{$at}{url} = 1 if $extra =~ /U/;
-				$ord++;
+	for my $attrname (qw(approvedtags_attr approvedtags_attr_admin)) {
+		if ($conf{$attrname}) {
+			my $approvedtags_attr = $conf{$attrname};
+			$conf{$attrname} = {};
+			my @tags = split /\s+/, $approvedtags_attr;
+			foreach my $tag (@tags){
+				my($tagname, $attr_info) = $tag =~ /([^:]*):(.*)$/;
+				my @attrs = split ',', $attr_info;
+				my $ord = 1;
+				foreach my $attr (@attrs){
+					my($at, $extra) = split /_/, $attr;
+					$at = lc $at;
+					$tagname = lc $tagname;
+					$conf{$attrname}{$tagname}{$at}{ord} = $ord;
+					$conf{$attrname}{$tagname}{$at}{req} = 1 if $extra =~ /R/;
+					$conf{$attrname}{$tagname}{$at}{req} = 2 if $extra =~ /N/; # "necessary"
+					$conf{$attrname}{$tagname}{$at}{url} = 1 if $extra =~ /U/;
+					$ord++;
+				}
 			}
+		}
+	}
+	if ($conf{approvedtags_attr} && $conf{approvedtags_attr_admin}) {
+		for (keys %{$conf{approvedtags_attr}}) {
+			# only add to _admin if not already in it
+			$conf{approvedtags_attr_admin}{$_} ||= $conf{approvedtags_attr}{$_};
 		}
 	}
 

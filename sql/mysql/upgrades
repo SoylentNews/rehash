@@ -2939,9 +2939,20 @@ INSERT INTO vars (name, value, description) VALUES ('xhtml','0','Boolean for whe
 #
 #############
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # End of T_2_5_0_57, Start of T_2_5_0_58 - 2005/04/13
 
 # End of T_2_5_0_58, Start of T_2_5_0_59 - 2005/04/15
+
+#############
+# be careful with below, make sure right for your site
+
+# add span, div, tables, and slash
+INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr_admin', 'div:id,class,title,style,dir,lang span:id,class,title,style,dir,lang slash:type_R,id,href_U,story,nickname,uid,user,align,width,height,title table:align,bgcolor,border,cellpadding,cellspacing,width tr:align,bgcolor,valign th:align,bgcolor,colspan,height,rowspan,valign,width td:align,bgcolor,colspan,height,rowspan,valign,width', 'see approvedtags_attr for more details');
+
+#
+#############
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_59, Start of T_2_5_0_60 - 2005/04/15
 
