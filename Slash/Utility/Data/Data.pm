@@ -32,6 +32,7 @@ use Digest::MD5 qw(md5_hex md5_base64);
 use Email::Valid;
 use HTML::Entities qw(:DEFAULT %char2entity %entity2char);
 use HTML::FormatText;
+use HTML::Tagset ();
 use HTML::TreeBuilder;
 use Lingua::Stem;
 use POSIX qw(UINT_MAX);
@@ -43,6 +44,15 @@ use XML::Parser;
 
 use base 'Exporter';
 use vars qw($VERSION @EXPORT);
+
+# without this, HTML::TreeBuilder will skip slash
+BEGIN {
+	$HTML::Tagset::isKnown{slash} = 1;
+	$HTML::Tagset::optionalEndTag{slash} = 1;
+	$HTML::Tagset::isBodyElement{slash} = 1;
+	$HTML::Tagset::isPhraseMarkup{slash} = 1;
+	$HTML::Tagset::linkElements{slash} = ['src', 'href'];
+}
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 @EXPORT	   = qw(
@@ -1692,8 +1702,29 @@ in HREFs through C<fudgeurl>.
 
 =cut
 
+{
+	# here's a simple hardcoded list of replacement tags, ones
+	# we don't really care about, or that are no longer valid.
+	# we just replace them with sane substitutes, if and only if
+	# they are not in approvedtags already
+	my %replace = (
+		em	=> 'i',
+		strong	=> 'b',
+		dfn	=> 'i',
+		code	=> 'tt',
+		samp	=> 'tt',
+		kbd	=> 'tt',
+		var	=> 'i',
+		cite	=> 'i',
+
+		address	=> 'i',
+		lh	=> 'li',
+		dir	=> 'ul',
+	);
+
 sub approveTag {
 	my($wholetag) = @_;
+	my $constants = getCurrentStatic();
 
 	$wholetag =~ s/^\s*(.*?)\s*$/$1/; # trim leading and trailing spaces
 	$wholetag =~ s/\bstyle\s*=(.*)$//is; # go away please
@@ -1707,8 +1738,10 @@ sub approveTag {
 		return qq!<a href="$url">$url</a>!;
 	}
 
-	# Build the hash of approved tags.
-	my $approvedtags = getCurrentStatic('approvedtags');
+	# Build the hash of approved tags
+	my $approvedtags = $Slash::Data::Utility::approveTag::admin && $constants->{approvedtags_admin}
+		? $constants->{approvedtags_admin}
+		: $constants->{approvedtags};
 	my %approved =
 		map  { (lc, 1)   }
 		grep { !/^ecode$/i }
@@ -1719,9 +1752,13 @@ sub approveTag {
 	my($taglead, $slash, $t) = $wholetag =~ m{^(\s*(/?)\s*(\w+))};
 	my $t_lc = lc $t;
 	if (!$approved{$t_lc}) {
-		$Slash::Data::Utility::approveTag::removed->{$t_lc}++
-			if getCurrentStatic('approveTag_debug');
-		return '';
+		if ($replace{$t_lc} && $approved{ $replace{$t_lc} }) {
+			$t = $t_lc = $replace{$t_lc};
+		} else {
+			$Slash::Data::Utility::approveTag::removed->{$t_lc}++
+				if $constants->{approveTag_debug};
+			return '';
+		}
 	}
 	
 	# These are now stored in a var approvedtags_attr
@@ -1742,16 +1779,16 @@ sub approveTag {
 	# }
 	# this is decoded in Slash/DB/MySQL.pm getSlashConf
 
-	my $attr = getCurrentStatic('approvedtags_attr') || {};
-
+	my $attr = $Slash::Data::Utility::approveTag::admin && $constants->{approvedtags_attr_admin}
+		? $constants->{approvedtags_attr_admin}
+		: $constants->{approvedtags_attr};
+	$attr ||= {};
 
 	if ($slash) {
-
 		# Close-tags ("</A>") never get attributes.
 		$wholetag = "/$t_lc";
 
 	} elsif ($attr->{$t_lc}) {
-
 		# This is a tag with attributes, verify them.
 
 		my %allowed = %{$attr->{$t_lc}};
@@ -1796,14 +1833,13 @@ sub approveTag {
 		}
 
 	} else {
-
 		# No attributes allowed.
 		$wholetag = $t_lc;
-
 	}
 
 	# If we made it here, the tag is valid.
 	return "<$wholetag>";
+}
 }
 
 #========================================================================
@@ -2347,11 +2383,12 @@ The 'approvedtags' entry in the vars table.
 	# using vars for all this, but that is a low priority.
 	my %known_tags	= map { ( lc, 1 ) } qw(
 		b i p br a ol ul li dl dt dd em strong tt blockquote div ecode
-		img hr big small sub sup cite code
+		img hr big small sub sup span
+		dfn code samp kbd var cite address ins del
 		h1 h2 h3 h4 h5 h6
 	);
 	# NB: ECODE is excluded because it is handled elsewhere.
-	
+
 	# tags that are indented, so we can make sure indentation level is not too great
 	my %is_nesting  = map { ( lc, 1 ) } qw(ol ul dl blockquote);
 
@@ -2359,13 +2396,13 @@ The 'approvedtags' entry in the vars table.
 	my %is_suscript = map { ( lc, 1 ) } qw(sub sup);
 
 	# block elements cannot be inside certain other elements; this defines which are which
-	my %is_block    = map { ( lc, 1 ) } qw(p ol ul li dl dt dd blockquote div hr h1 h2 h3 h4 h5 h6);
-	my %no_block    = map { ( lc, 1 ) } qw(p dt b i strong em tt cite code big small sub sup a h1 h2 h3 h4 h5 h6);
+	my %is_block    = map { ( lc, 1 ) } qw(p ol ul li dl dt dd blockquote div hr address h1 h2 h3 h4 h5 h6);
+	my %no_block    = map { ( lc, 1 ) } qw(b i strong em tt dfn code samp kbd var cite address ins del big small span p sub sup a h1 h2 h3 h4 h5 h6);
 
 	# when a style tag is cut off prematurely because of a newly introduced block
 	# element, we want to re-start the style inside the block; it is not perfect,
 	# but that's why we're here, innit?
-	my %is_style    = map { ( lc, 1 ) } qw( b i strong em tt cite code big small);
+	my %is_style    = map { ( lc, 1 ) } qw(b i strong em tt dfn code samp kbd var cite big small span);
 
 	# tags that CAN be empty
 	my %empty	= map { ( lc, 1 ) } qw(p br img hr);
@@ -2413,11 +2450,15 @@ sub balanceTags {
 
 	# cache this regex
 	# if $options->{admin} then allow different regex ... also do in approveTag
-	my $match = $cache->{balanceTags}{match};
+	my $matchname = $options->{admin} ? 'match_admin' : 'match';
+	my $varname   = $options->{admin} && $constants->{approvedtags_admin}
+		? 'approvedtags_admin'
+		: 'approvedtags';
+	my $match = $cache->{balanceTags}{$matchname};
 	if (!$match) {
 		$match = join '|', grep $known_tags{$_},
-			map lc, @{$constants->{approvedtags}};
-		$cache->{balanceTags}{match} = $match = qr/$match/;
+			map lc, @{$constants->{$varname}};
+		$cache->{balanceTags}{$matchname} = $match = qr/$match/;
 	}
 
 	## this is the main loop.  it finds a tag, any tag
