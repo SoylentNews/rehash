@@ -51,9 +51,9 @@ our %Formats = (
 );
 
 our %Sets = (
-#	article	=> {
-#		name => 'Article',
-#	},
+	article	=> {
+		name => 'Article',
+	},
 );
 
 
@@ -113,8 +113,8 @@ sub create {
 		$xml = $self->$request($options);
 	}
 
-	my $header = $self->header($options);
-	my $footer = $self->footer($options);
+	my $header = $self->head($options);
+	my $footer = $self->foot($options);
 
 	return $header . $xml . $footer;
 }
@@ -175,7 +175,7 @@ sub _print_record {
 	my $xml;
 
 	for my $record (@$records) {
-		# setSpec not included now, as no sets for now
+		# XXX setSpec hardcoded for now
 		my $identifier = $self->encode($record->{identifier}, 'link');
 		my $datestamp  = $self->date2iso8601($record->{datestamp}, 1);
 		$xml .= sprintf(<<EOT, $identifier, $datestamp);
@@ -183,6 +183,7 @@ sub _print_record {
    <header>
     <identifier>%s</identifier>
     <datestamp>%s</datestamp>
+    <setSpec>article</setSpec>
    </header>
    <metadata>
     <oai_dc:dc
@@ -396,7 +397,7 @@ EOT
 }
 
 
-sub header {
+sub head {
 	my($self, $options) = @_;
 	my $date    = $self->date2iso8601($options->{date}, 1);
 	my $url     = $self->encode($options->{url}, 'link');
@@ -452,7 +453,7 @@ $third
 EOT
 }
 
-sub footer {
+sub foot {
 	my($self, $options) = @_;
 	my $close = $options->{error} ? '' : " </$options->{request}>\n";
 	return <<EOT;
