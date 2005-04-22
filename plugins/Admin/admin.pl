@@ -1341,14 +1341,13 @@ sub editStory {
 		$extracolumns = $slashdb->getNexusExtrasForChosen($chosen_hr);
 
 		for my $field (qw( introtext bodytext )) {
-			$storyref->{$field} = $slashdb->autoUrl(
-				$form->{section}, $storyref->{$field});
-			$storyref->{$field} = slashizeLinks(
-				$storyref->{$field});
-			$storyref->{$field} = parseSlashizedLinks(
-				$storyref->{$field});
-			$storyref->{$field} = balanceTags(
-				$storyref->{$field});
+			local $Slash::Data::Utility::approveTag::admin = 1;
+			$storyref->{$field} = $slashdb->autoUrl($form->{section}, $storyref->{$field});
+			$storyref->{$field} = cleanSlashTags($storyref->{$field});
+			$storyref->{$field} = strip_html($storyref->{$field});
+			$storyref->{$field} = slashizeLinks($storyref->{$field});
+			$storyref->{$field} = parseSlashizedLinks($storyref->{$field});
+			$storyref->{$field} = balanceTags($storyref->{$field});
 		}
 
 		$form->{uid} ||= $user->{uid};
@@ -1543,12 +1542,8 @@ sub editStory {
 				# Max of 12 chars per word.
 				$word = substr($word, 0, 12);
 			}
-			if (length($sim->{title}) > 35) {
-				# Max of 35 char title.
-				$sim->{title} = substr($sim->{title}, 0, 30);
-				$sim->{title} =~ s/\s+\S+$//;
-				$sim->{title} .= "...";
-			}
+			# Max of 35 char title.
+			$sim->{title} = chopEntity($sim->{title}, 35);
 		}
 	}
 
@@ -1844,7 +1839,7 @@ sub listStories {
 		$story->{td2}    = timeCalc($time_plain, '%m/%d', 0);
 		$story->{aid}    = $slashdb->getAuthor($story->{uid}, 'nickname');
 		$story->{x}	 = ++$i;
-		$story->{title}  = substr($story->{title}, 0, 50) . '...' if (length $story->{title} > 55);
+		$story->{title}  = chopEntity($story->{title}, 50);
 		$story->{tbtitle} = fixparam($story->{title});
 	}
 
@@ -1952,19 +1947,19 @@ sub updateStory {
 
 	my $time = findTheTime();
 
-	$form->{introtext} = slashizeLinks($form->{introtext});
-	$form->{bodytext} =  slashizeLinks($form->{bodytext});
-	$form->{introtext} = balanceTags($form->{introtext});
-	$form->{bodytext} =  balanceTags($form->{bodytext});
+	for my $field (qw( introtext bodytext )) {
+		local $Slash::Data::Utility::approveTag::admin = 1;
+		$form->{$field} = cleanSlashTags($form->{$field});
+		$form->{$field} = strip_html($form->{$field});
+		$form->{$field} = slashizeLinks($form->{$field});
+		$form->{$field} = balanceTags($form->{$field});
+	}
 
 	my $reloDB = getObject("Slash::Relocate");
 	if ($reloDB) {
 		$form->{introtext} = $reloDB->href2SlashTag($form->{introtext}, $form->{sid});
 		$form->{bodytext} = $reloDB->href2SlashTag($form->{bodytext}, $form->{sid});
 	}
-
-	$form->{introtext} = cleanSlashTags($form->{introtext});
-	$form->{bodytext} = cleanSlashTags($form->{bodytext});
 
 	# grab our links for getRelated, but toss away the result -- pudge
 	processSlashTags("$form->{bodytext} $form->{introtext}");
@@ -2284,10 +2279,13 @@ sub saveStory {
 	$form->{relatedtext} = "<ul>\n$form->{relatedtext}\n</ul>"
 		if $form->{relatedtext} && $form->{relatedtext} =~ /^\s*<li>/;
 
-	$form->{introtext} = slashizeLinks($form->{introtext});
-	$form->{bodytext} =  slashizeLinks($form->{bodytext});
-	$form->{introtext} = balanceTags($form->{introtext});
-	$form->{bodytext} =  balanceTags($form->{bodytext});
+	for my $field (qw( introtext bodytext )) {
+		local $Slash::Data::Utility::approveTag::admin = 1;
+		$form->{$field} = cleanSlashTags($form->{$field});
+		$form->{$field} = strip_html($form->{$field});
+		$form->{$field} = slashizeLinks($form->{$field});
+		$form->{$field} = balanceTags($form->{$field});
+	}
 
 	my $time = findTheTime();
 	$slashdb->setCommonStoryWords();
