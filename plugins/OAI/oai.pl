@@ -29,7 +29,7 @@ sub main {
 		return;
 	}
 
-	my $request = $form->{verb};
+	my $verb = $form->{verb};
 	my %args;
 	for (keys %$form) {
 		next if /^(?:verb|query_apache)$/;
@@ -37,8 +37,8 @@ sub main {
 	}
 
 	xmlDisplay('OAI', {
-		request => $request,
-		args	=> \%args
+		verb => $verb,
+		args => \%args
 	});
 }
 

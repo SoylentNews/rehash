@@ -34,7 +34,7 @@ use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-our %Requests = (
+our %Verbs = (
 	GetRecord		=> \&GetRecord,
 	Identify		=> \&Identify,
 	ListIdentifiers		=> \&ListIdentifiers,
@@ -75,7 +75,7 @@ Hashref of parameters.  Currently supported options are below.
 
 =over 4
 
-=item request
+=item verb
 
 Required.  Must be one of C<GetRecord>, C<Identify>, C<ListIdentifiers>,
 C<ListMetadataFormats>, C<ListRecords>, C<ListSets>.
@@ -100,17 +100,17 @@ sub create {
 	my $gSkin = getCurrentSkin();
 
 	my $options = {
-		request	=> $params->{request},
+		verb	=> $params->{verb},
 		url	=> $params->{url} || "$constants->{absolutedir}/oai.pl", 
 		args	=> $params->{args} || {}
 	};
 
 	my $xml;
-	my $request = $Requests{$params->{request}};
-	if (! $request) {
+	my $verb = $Verbs{$params->{verb}};
+	if (! $verb) {
 		$options->{error} = 'badVerb';
 	} else {
-		$xml = $self->$request($options);
+		$xml = $self->$verb($options);
 	}
 
 	my $header = $self->head($options);
@@ -119,110 +119,6 @@ sub create {
 	return $header . $xml . $footer;
 }
 
-
-# oai:slashdot.org:article/$id
-sub _get_identifier {
-	my($self, $identifier) = @_;
-	my $slashdb = getObject('Slash::DB', { db_type => 'reader' });
-	my $constants = getCurrentStatic();
-
-	my $site = $constants->{basedomain};
-	my $data = { identifier => $identifier };
-
-	$identifier =~ m|^oai:\Q$site\E:(\w+)/(\w+)$|;
-	$data->{type} = $1;
-	$data->{id}   = $2;
-
-	if ($data->{type} eq 'article') {
-		my $record = $slashdb->getStory($data->{id});
-		if ($record) {
-			$data->{datestamp} = $record->{'time'};
-
-			my $md = {};
-			$md->{title}       = $record->{title};
-			$md->{creator}     = $slashdb->getUser($record->{uid}, 'nickname');
-			$md->{description} = $record->{introtext} . "\n<p>\n" . $record->{bodytext};
-			$md->{date}        = $record->{'time'};
-			$md->{identifier}  = "$constants->{absolutedir}/article.pl?sid=$record->{sid}";
-
-			my $topics = $slashdb->getStoryTopicsRendered($record->{stoid});
-			my $tree = $slashdb->getTopicTree;
-			$md->{subject} = [
-				map { $tree->{$_}{keyword} }
-				@$topics
-			];
-
-			$data->{metadata}  = $md;
-		}
-	}
-
-	return $data;
-}
-
-sub _create_identifier {
-	my($self, $data) = @_;
-	my $site = getCurrentStatic('basedomain');
-	my $identifier = 'oai:';
-
-	$identifier .= $site;
-	$identifier .= ":$data->{type}/$data->{id}";
-
-	return $identifier;
-}
-
-sub _print_record {
-	my($self, $records) = @_;
-	my $xml;
-
-	for my $record (@$records) {
-		# XXX setSpec hardcoded for now
-		my $identifier = $self->encode($record->{identifier}, 'link');
-		my $datestamp  = $self->date2iso8601($record->{datestamp}, 1);
-		$xml .= sprintf(<<EOT, $identifier, $datestamp);
-  <record>
-   <header>
-    <identifier>%s</identifier>
-    <datestamp>%s</datestamp>
-    <setSpec>article</setSpec>
-   </header>
-   <metadata>
-    <oai_dc:dc
-     xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
-     xmlns:dc="http://purl.org/dc/elements/1.1/"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/
-     http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
-EOT
-
-		# same on all: publisher, rights, type, format, language
-		# dunno: source, relation, coverage
-		for my $dc (qw(title creator subject description contributor date identifier)) {
-			next unless defined $record->{metadata}{$dc}
-				&& length $record->{metadata}{$dc};
-
-			my $values = $record->{metadata}{$dc};
-			unless (ref $values eq 'ARRAY') {
-				$values = [ $values ];
-			}
-
-			for (@$values) {
-				my $value = $dc eq 'date'
-					? $self->date2iso8601($_, 1)
-					: $self->encode($_, 'link');
-				$xml .= sprintf(<<EOT, $dc, $value, $dc);
-     <dc:%s>%s</dc:%s>
-EOT
-			}
-		}
-		$xml .= <<EOT;
-    </oai_dc:dc>
-   </metadata>
-  </record>
-EOT
-	}
-
-	return $xml;
-}
 
 sub GetRecord {
 	my($self, $options) = @_;
@@ -236,7 +132,7 @@ sub GetRecord {
 	if (keys %args || !$identifier || !$metadataPrefix) {
 		push @{$options->{error}}, 'badArgument';
 	}
-	if (!$Formats{$metadataPrefix}) {
+	if ($metadataPrefix && !$Formats{$metadataPrefix}) {
 		push @{$options->{error}}, 'cannotDisseminateFormat';
 	}
 
@@ -252,19 +148,84 @@ sub GetRecord {
 }
 
 
-sub ListIdentifiers {
+sub ListIdsOrRecords {
 	my($self, $options) = @_;
 	my $xml;
+	my %dates;
+
+	# copy args
+	my %args = map { $_ => $options->{args}{$_} } keys %{$options->{args}};
+	my $argnum		= scalar keys %{$options->{args}};
+	my $metadataPrefix	= delete $args{metadataPrefix};
+	my $set			= delete $args{set};
+	my $resumptionToken	= delete $args{resumptionToken};
+	$dates{from}		= delete $args{from};
+	$dates{'until'}		= delete $args{'until'};
+
+	# metadataPrefix required, and resumptionToken is exclusive
+	if ((keys %args || !$metadataPrefix) || ($resumptionToken && $argnum > 1)) {
+		push @{$options->{error}}, 'badArgument';
+	}
+	if ($metadataPrefix && !$Formats{$metadataPrefix}) {
+		push @{$options->{error}}, 'cannotDisseminateFormat';
+	}
+	if ($set && !keys %Sets) {
+		push @{$options->{error}}, 'noSetHierarchy';
+	}
+	# XXX need to support this somehow (and note it is exclusive!)
+	if ($resumptionToken) {
+		push @{$options->{error}}, 'badResumptionToken';
+	}
+	return if $options->{error};
+
+	for my $date (qw(from until)) {
+		next unless $dates{$date};
+		if ($dates{$date} =~ /^(\d{4})-(\d{2})-(\d{2})(T(\d{2}):(\d{2}):(\d{2})Z)?$/) {	
+			if (!$4) {
+				$dates{$date} .= $date eq 'from'
+					? 'T00:00:00Z'
+					: 'T23:59:59Z';
+			}
+		} else {
+			$options->{error} = {
+				badArgument => "Incorrectly formed '$date' date: $dates{$date}"
+			};
+			return;
+		}
+	}
+
+	if ($dates{from} && $dates{'until'} && $dates{from} gt $dates{'until'}) {
+		$options->{error} = {
+			badArgument => "'from' date $dates{from} is greater than 'until' date $dates{until}"
+		};
+		return;
+	}
+
+
+	my $records = $self->_find_records($options, \%dates, $set);
+	if (!@$records) {
+		push @{$options->{error}}, 'noRecordsMatch';
+		return;
+	} else {
+		$xml .= $self->_print_record($records, $options);
+	}
+
 
 	return $xml;
 }
 
 
+sub ListIdentifiers {
+	my($self, $options) = @_;
+	$options->{identifiers} = 1;
+	return $self->ListIdsOrRecords($options);
+}
+
+
 sub ListRecords {
 	my($self, $options) = @_;
-	my $xml;
-
-	return $xml;
+	$options->{records} = 1;
+	return $self->ListIdsOrRecords($options);
 }
 
 
@@ -277,7 +238,7 @@ sub ListMetadataFormats {
 	# if we do support identifier, also support
 	# idDoesNotExist and noMetadataFormats errors
 	if (grep {$_ ne 'identifier' } keys %{$options->{args}}) {
-		$options->{error} = 'badArgument';
+		push @{$options->{error}}, 'badArgument';
 		return;
 	}
 
@@ -405,7 +366,7 @@ sub head {
 	my $args = '';
 	# no args if error
 	if (!$options->{error}) {
-		$args = qq[ verb="$options->{request}"];
+		$args = qq[ verb="$options->{verb}"];
 		for my $key (keys %{$options->{args}}) {
 			my $val = strip_attribute($options->{args}{$key}, 'link');
 			$args .= qq[ $key="$val"];
@@ -430,6 +391,7 @@ sub head {
 				if ($str) {
 					$third .= sprintf(
 						qq[ <error code="$err">%s</error>\n],
+						$errs->{$err}
 					);
 				} else {
 					$third .= qq[ <error code="$err" />\n];
@@ -438,7 +400,7 @@ sub head {
 		}
 		chomp $third;
 	} else {
-		$third = " <$options->{request}>";	
+		$third = " <$options->{verb}>";	
 	}
 
 	return <<EOT;
@@ -455,11 +417,158 @@ EOT
 
 sub foot {
 	my($self, $options) = @_;
-	my $close = $options->{error} ? '' : " </$options->{request}>\n";
+	my $close = $options->{error} ? '' : " </$options->{verb}>\n";
 	return <<EOT;
 $close</OAI-PMH>      
 EOT
 }
+
+
+
+# oai:slashdot.org:article/$id
+sub _get_identifier {
+	my($self, $identifier) = @_;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $constants = getCurrentStatic();
+
+	my $site = $constants->{basedomain};
+	my $data = { identifier => $identifier };
+
+	$identifier =~ m|^oai:\Q$site\E:(\w+)/(\w+)$|;
+	$data->{type} = $1;
+	$data->{id}   = $2;
+
+	if ($data->{type} eq 'article') {
+		my $record = $reader->getStory($data->{id});
+		if ($record) {
+			$data->{datestamp} = $record->{'time'};
+
+			my $md = {};
+			$md->{title}       = $record->{title};
+			$md->{creator}     = $reader->getUser($record->{uid}, 'nickname');
+			# XXX: processSlashTags etc.
+			$md->{description} = $record->{introtext} . "\n<p>\n" . $record->{bodytext};
+			$md->{date}        = $record->{'time'};
+			$md->{identifier}  = "$constants->{absolutedir}/article.pl?sid=$record->{sid}";
+
+			my $topics = $reader->getStoryTopicsRendered($record->{stoid});
+			my $tree = $reader->getTopicTree;
+			$md->{subject} = [
+				map { $tree->{$_}{keyword} }
+				@$topics
+			];
+
+			$data->{metadata}  = $md;
+		}
+	}
+
+	return $data;
+}
+
+
+sub _create_identifier {
+	my($self, $data) = @_;
+	my $site = getCurrentStatic('basedomain');
+	my $identifier = 'oai:';
+
+	$identifier .= $site;
+	$identifier .= ":$data->{type}/$data->{id}";
+
+	return $identifier;
+}
+
+
+sub _print_record {
+	my($self, $records, $options) = @_;
+	my $xml;
+
+	for my $record (@$records) {
+		# XXX setSpec hardcoded for now
+		my $identifier = $self->encode($record->{identifier}, 'link');
+		my $datestamp  = $self->date2iso8601($record->{datestamp}, 1);
+		$xml .= <<'EOT' unless $options->{verb} eq 'ListIdentifiers';
+  <record>
+EOT
+
+		$xml .= sprintf(<<EOT, $identifier, $datestamp);
+   <header>
+    <identifier>%s</identifier>
+    <datestamp>%s</datestamp>
+    <setSpec>article</setSpec>
+   </header>
+EOT
+		next if $options->{verb} eq 'ListIdentifiers';
+		$xml .= <<'EOT';
+   <metadata>
+    <oai_dc:dc
+     xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/
+     http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+EOT
+
+		# same on all: publisher, rights, type, format, language
+		# dunno: source, relation, coverage
+		for my $dc (qw(title creator subject description contributor date identifier)) {
+			next unless defined $record->{metadata}{$dc}
+				&& length $record->{metadata}{$dc};
+
+			my $values = $record->{metadata}{$dc};
+			unless (ref $values eq 'ARRAY') {
+				$values = [ $values ];
+			}
+
+			for (@$values) {
+				my $value = $dc eq 'date'
+					? $self->date2iso8601($_, 1)
+					: $self->encode($_, 'link');
+				$xml .= sprintf(<<EOT, $dc, $value, $dc);
+     <dc:%s>%s</dc:%s>
+EOT
+			}
+		}
+		$xml .= <<EOT;
+    </oai_dc:dc>
+   </metadata>
+  </record>
+EOT
+	}
+
+	return $xml;
+}
+
+
+sub _find_records {
+	my($self, $options, $dates, $set) = @_;
+
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $type = $options->{type} || 'article';
+	my($records, @return);
+
+	my $timecol = 'time';
+
+	my $where = $dates->{from} && $dates->{'until'}
+		? "$timecol >= '$dates->{from}' AND $timecol <= '$dates->{'until'}'"
+		: $dates->{from}
+			? "$timecol >= '$dates->{from}'"
+			: $dates->{'until'}
+				? "$timecol <= '$dates->{'until'}'"
+				: '';
+
+	if ($type eq 'article') {
+		$records = $reader->sqlSelectAll('stoid', 'stories', $where, 'ORDER BY stoid');
+	}
+
+	for (@$records) {
+		my $identifier = $self->_create_identifier({ type => $type, id => $_->[0] });
+		push @return, $self->_get_identifier($identifier);
+	}
+
+	return \@return;
+}
+
+
 
 1;
 
