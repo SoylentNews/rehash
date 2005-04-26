@@ -8,7 +8,7 @@ Create drop-down HTML list
 * default = default key(s) to be selected - this can be a single string,
 	or a hashref where the hash keys with true values are the keys
 	that are selected (this would really only be useful when
-	"multiple" is also true, I believe)
+	"multiple" is also true)
 * numeric = boolean to sort keys numerically
 * ordered = an already sorted arrayref of the keys in items
 * multiple = boolean, whether MULTIPLE is specified in the <SELECT>
