@@ -861,6 +861,7 @@ Fry:Why use my own legs like an idiot when I can use a Chickenwalker?
 Fry:Hooray, we don't have to do anything!
 Fry:Prepare to be thought at!
 Fry:I did it!  And it's all thanks to the books at my local library.
+Fry:Existing is basically all I do!
 EOT
 
 1;
