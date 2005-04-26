@@ -3,11 +3,12 @@
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
+# This handler is called in the fourth Apache phase, access control.
+
 package Slash::Apache::Banlist;
 
 use strict;
 use Apache::Constants qw(:common);
-use Digest::MD5 'md5_hex';
 
 use Slash;
 use Slash::Display;
@@ -26,27 +27,30 @@ sub handler {
 	$Slash::Apache::User::request_start_time ||= Time::HiRes::time;
 
 	# Ok, this will make it so that we can reliably use Apache->request
-	Apache->request($r);
-	my $hostip = $r->connection->remote_ip;
 
-	my($cur_ip, $cur_subnet) = get_ipids($hostip, 1);
-	my($cur_ipid, $cur_subnetid) = get_ipids($hostip);
+	Apache->request($r);
+
+	# Get some information about the IP this request is coming from.
+
+	my $hostip = $r->connection->remote_ip;
+	my($cur_ip, $cur_subnet) = get_srcids({ ip => $hostip },
+		{ no_md5 => 1,	masks => [qw( ip subnet )] });
+	my($cur_ipid, $cur_subnetid) = get_srcids({ ip => $hostip },
+		{ 		masks => [qw( ip subnet )] });
+
+	# Set up DB objects.
 
 	my $slashdb = getCurrentDB();
 	my $reader_user = $slashdb->getDB('reader');
-
 	my $reader = getObject('Slash::DB', { virtual_user => $reader_user });
 	$reader->sqlConnect;
 
-	my $is_rss = $r->uri =~ m{(
-		\.(?:xml|rss|rdf)$
-			|
-		content_type=rss
-	)}x;  # also check for content_type in POST?
+	# Check what kind of access this is.
+	
+	my($is_rss, $is_palm) = _check_rss_and_palm($r);
 
-	my $is_palm = $r->uri =~ /^\/palm/;
+	# Abort this Apache request if this IP address is outright banned.
 
-	# check for ban
 	my $banlist = $reader->getBanList;
 	if ($banlist->{$cur_ipid} || $banlist->{$cur_subnetid}) {
 		# Send a special "you are banned" page if the user is
@@ -64,13 +68,17 @@ sub handler {
 		return FORBIDDEN;
 	}
 
-	# check for RSS abuse
+	# Send a special "RSS banned" page if this IP address is banned
+	# from reading RSS.
+
 	my $rsslist = $reader->getNorssList;
-	if ($is_rss && ($rsslist->{$cur_ipid} || $rsslist->{$cur_subnet})) {
+	if ($is_rss && ($rsslist->{$cur_ipid} || $rsslist->{$cur_subnetid})) {
 		return _send_rss($r, 'abuse', $cur_ipid);
 	}
 
-	# check for Palm abuse
+	# Send a special "Palm banned" page if this IP addresss is banned
+	# from reading Palm pages.
+
 	my $palmlist = $reader->getNopalmList;
 	if ($is_palm && ($palmlist->{$cur_ipid} || $palmlist->{$cur_subnet})) {
 		$r->custom_response(FORBIDDEN,
@@ -82,7 +90,21 @@ sub handler {
 		return FORBIDDEN;
 	}
 
+	# The IP address is not banned and can proceed.
+
 	return OK;
+}
+
+sub _check_rss_and_palm {
+	my($r) = @_;
+	my $is_rss = $r->uri =~ m{(
+		\.(?:xml|rss|rdf)$
+			|
+		content_type=rss
+	)}x;
+	# XXX Should we also check for content_type in POST?
+	my $is_palm = $r->uri =~ /^\/palm/;
+	return ($is_rss, $is_palm);
 }
 
 sub _send_rss {

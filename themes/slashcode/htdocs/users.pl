@@ -548,6 +548,7 @@ sub newUser {
 		return;
 	} elsif ($matchname ne '' && $form->{newusernick} ne '') {
 		if ($constants->{newuser_portscan}) {
+			# XXXSRCID Convert to use getAL2($srcid, 'trusted')
 			my $is_trusted = $slashdb->checkIsTrusted($user->{ipid});
 			if ($is_trusted ne 'yes') {
 				my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
@@ -626,6 +627,7 @@ sub mailPasswd {
 	my $uid = $hr->{uid} || 0;
 
 	my $slashdb = getCurrentDB();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $form = getCurrentForm();
 
 	print createMenu("users", {
@@ -655,9 +657,14 @@ sub mailPasswd {
 		$err_name = 'mailpasswd_notmailed_err';
 	}
 	if (!$err_name) {
-		$user_edit = $slashdb->getUser($uid);
+		# Check permissions of _this_ user, not the target
+		# user, to determine whether this IP is OK'd to
+		# send the mail to the target user.
+		# XXXSRCID This should check a separate field like
+		# 'openproxy' instead of piggybacking off of 'nopost'
+		my $srcids_to_check = $user->{srcids};
 		$err_name = 'mailpasswd_readonly_err'
-			if $slashdb->checkReadOnly;
+			if $reader->checkAL2($srcids_to_check, 'nopost');
 	}
 	if (!$err_name) {
 		$err_name = 'mailpasswd_toooften_err'
@@ -666,6 +673,7 @@ sub mailPasswd {
 	
 	if (!$err_name) {
 		if ($constants->{mailpasswd_portscan}) {
+			# XXXSRCID Convert to use getAL2($srcid, 'trusted')
 			my $is_trusted = $slashdb->checkIsTrusted($user->{ipid});
 			if ($is_trusted ne 'yes') {
 				my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
@@ -2076,20 +2084,75 @@ sub saveUserAdmin {
 		return ;
 	}
 
-	my @access_add = ( );
-	my @access_remove = ( );
-	for my $now (qw( ban nopost nosubmit nopalm norss nopalm proxy trusted )) {
-		# To affect the "now_trusted" bit, you need a seclev of 10000
-		# or higher.
-		next if $now eq 'trusted' && $user->{seclev} < 10000;
-		if ($form->{"accesslist_$now"} eq 'on') {
-			push @access_add, $now;
-		} else {
-			push @access_remove, $now;
-		}
+use Data::Dumper; $Data::Dumper::Sortkeys = 1;
+print STDERR "form: " . Dumper($form);
+
+	my $all_al2types = $reader->getAL2Types;
+	my $al2_change = { };
+
+	# First, get a hash of what aclams (AL2's and ACLs) this user
+	# had when the previous admin page was loaded.
+	# XXXSRCID Right now acl_old is just calculated for debugging
+	# printing purposes, not actually used.
+	my @al2_old = ( );
+	@al2_old =
+		@{ $form->{al2_old_multiple}   } if $form->{al2_old_multiple};
+	my %al2_old = ( map { ($_, 1) } @al2_old );
+	my @acl_old = ( );
+	@acl_old =
+		@{ $form->{acl_old_multiple}   } if $form->{acl_old_multiple};
+	my %acl_old = ( map { ($_, 1) } @acl_old );
+
+	# Next, get the list of the new data submitted.  Separate
+	# it out into AL2's which are legitimate.  Anything left
+	# over is an ACL.
+	my @al2_new_formfields = ( );
+	@al2_new_formfields = @{ $form->{aclams_new_multiple} } if $form->{aclams_new_multiple};
+	my @al2_new_submitted = map { s/^aclam_//; $_ } @al2_new_formfields;
+	my @al2_new = grep { exists $all_al2types->{$_} } @al2_new_submitted;
+	my %al2_new = ( map { ($_, 1) } @al2_new );
+	my @acl_new = grep { !$al2_new{$_} } @al2_new_submitted;
+	my %acl_new = ( map { ($_, 1) } @acl_new );
+print STDERR "al2_old: '@al2_old' al2_new: '@al2_new'\n";
+print STDERR "acl_old: '@acl_old' acl_new: '@acl_new'\n";
+
+	# Find out what changed for AL2's.
+	for my $al2 (@al2_old, @al2_new) {
+print STDERR "al2=$al2 old=$al2_old{$al2} new=$al2_new{$al2}\n";
+		next if $al2_old{$al2} == $al2_new{$al2};
+		$al2_change->{$al2} = $al2_new{$al2} ? 1 : 0;
 	}
-	my $reason = $form->{accesslist_reason};
-	$slashdb->changeAccessList($user_edit, \@access_add, \@access_remove, $reason);
+print STDERR "al2_change: " . Dumper($al2_change);
+	# If there's a comment, throw that in.
+	if ($form->{al2_new_comment}) {
+		$al2_change->{comment} = $form->{al2_new_comment};
+	}
+	$al2_change = undef if !keys %$al2_change;
+
+	# Find out what changed for ACL's.
+	my $acl_change = { };
+	for my $acl (@acl_old, @acl_new) {
+print STDERR "acl=$acl old=$acl_old{$acl} new=$acl_new{$acl}\n";
+		next if $acl_old{$acl} == $acl_new{$acl};
+		$acl_change->{$acl} = $acl_new{$acl} ? 1 : 0;
+	}
+print STDERR "acl_change: " . Dumper($acl_change);
+	$acl_change = undef if !keys %$acl_change;
+
+#	my @access_add = ( );
+#	my @access_remove = ( );
+#	for my $now (qw( ban nopost nosubmit nopalm norss nopalm proxy trusted )) {
+#		# To affect the "now_trusted" bit, you need a seclev of 10000
+#		# or higher.
+#		next if $now eq 'trusted' && $user->{seclev} < 10000;
+#		if ($form->{"accesslist_$now"} eq 'on') {
+#			push @access_add, $now;
+#		} else {
+#			push @access_remove, $now;
+#		}
+#	}
+#	my $reason = $form->{accesslist_reason};
+#	$slashdb->changeAccessList($user_edit, \@access_add, \@access_remove, $reason);
 
 	if ($form->{accesslist_ban} eq 'on') {
 		$slashdb->getBanList(1); # reload the list
@@ -2104,22 +2167,13 @@ sub saveUserAdmin {
 		$user_edits_table->{defaultpoints} = $form->{defaultpoints};
 		$user_edits_table->{tokens} = $form->{tokens};
 		$user_edits_table->{m2info} = $form->{m2info};
-
-		# As far as ACLs, first we set all the ACLs that we're
-		# setting, to 1.
-		$user_edits_table->{acl} = { map { ($_, 1) } @{$form->{newacls_multiple}} };
-		# Then we run through all the ACLs, and any that we're not
-		# setting, go to 0 so they get deleted..
-		my $all_acls_hr = $reader->getAllACLs();
-		my @all_acls = sort keys %$all_acls_hr;
-		for my $acl (@all_acls) {
-			$user_edits_table->{acl}{$acl} ||= 0;
-		}
+		$user_edits_table->{acl} = $acl_change if $acl_change;
 
 		my $author = $slashdb->getAuthor($id);
 		my $was_author = ($author && $author->{author}) ? 1 : 0;
 
 		$slashdb->setUser($id, $user_edits_table);
+		$slashdb->setAL2($id, $al2_change);
 
 		$note .= getMessage('saveuseradmin_saveduser', { field => $user_editfield_flag, id => $id });
 
@@ -2835,7 +2889,7 @@ sub saveMiscOpts {
 sub listReadOnly {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $readonlylist = $reader->getAccessList(0, 'nopost');
+	my $readonlylist = $reader->getAL2List('nopost');
 
 	slashDisplay('listReadOnly', {
 		readonlylist => $readonlylist,
@@ -2847,7 +2901,7 @@ sub listReadOnly {
 sub listBanned {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $bannedlist = $reader->getAccessList(0, 'ban');
+	my $bannedlist = $reader->getAL2List('ban');
 
 	slashDisplay('listBanned', {
 		bannedlist => $bannedlist,
@@ -3045,6 +3099,7 @@ sub getUserAdmin {
 
 	my($expired, $uidstruct, $readonly);
 	my($user_edit, $user_editfield, $ipstruct, $ipstruct_order, $authors, $author_flag, $topabusers, $thresh_select,$section_select);
+	my $srcid;
 	my $proxy_check = {};
 	my @accesshits;
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
@@ -3057,6 +3112,7 @@ sub getUserAdmin {
 	if ($field eq 'uid') {
 		$user_edit = $reader->getUser($id);
 		$user_editfield = $user_edit->{uid};
+		$srcid = convert_srcid( uid => $id );
 		$expired = $reader->checkExpired($user_edit->{uid}) ? $constants->{markup_checked_attribute} : '';
 		$ipstruct = $reader->getNetIDStruct($user_edit->{uid});
 		@accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{uid}) if defined($logdb);
@@ -3084,6 +3140,7 @@ sub getUserAdmin {
 	} elsif ($field eq 'ipid') {
 		$user_edit->{nonuid} = 1;
 		$user_edit->{ipid} = $id;
+		$srcid = convert_srcid( 32 => $id );
 		$user_editfield = $id;
 		$uidstruct = $reader->getUIDStruct('ipid', $user_edit->{ipid});
 		@accesshits = $logdb->countAccessLogHitsInLastX('host_addr', $user_edit->{ipid}) if defined($logdb);
@@ -3097,6 +3154,7 @@ sub getUserAdmin {
 
 	} elsif ($field eq 'subnetid') {
 		$user_edit->{nonuid} = 1;
+		$srcid = convert_srcid( 24 => $id );
 		if ($id =~ /^(\d+\.\d+\.\d+)(?:\.\d)?/) {
 			$id = $1 . ".0";
 			$user_edit->{subnetid} = $id;
@@ -3115,21 +3173,96 @@ sub getUserAdmin {
 		@accesshits = $logdb->countAccessLogHitsInLastX('uid', $user_edit->{uid}) if defined($logdb);
 	}
 
-	for my $access_type (qw( ban nopost nosubmit norss nopalm proxy trusted )) {
-		$accesslist->{$access_type} = "";
-		my $info_hr = $reader->getAccessListInfo($access_type, $user_edit);
-		next if !$info_hr; # no match
-		$accesslist->{reason}	||= $info_hr->{reason};
-		$accesslist->{ts}	||= $info_hr->{ts};
-		$accesslist->{adminuid}	||= $info_hr->{adminuid};
-		$accesslist->{estimated_users} ||= $info_hr->{estimated_users};
-		$accesslist->{$access_type} = $constants->{markup_checked_attribute};
+	##########
+	# Put together the array and hashref that the template will need
+	# to construct the list for display to the admin.
+	# Note that currently a srcid which is not a uid (i.e. which
+	# represents an IP address or masked IP network) cannot have
+	# any ACLs assigned to it.  This may change in the future.
+	# The term "aclam" is used because it has a field set for both
+	# every ACL and every access modifier (i.e. AL2 bit) that is set
+	# for this user or srcid.
+	# For now, ACLs will be listed for IPs as well.
+	# First get the list of ACLs that can be used.
+	my $all_acls_ar = $reader->getAllACLNames();
+	my $all_acls_hr = { map { ( $_, 1 ) } @$all_acls_ar };
+	# Add in any ACLs selected for this user (just in case
+	# getAllACLNames is cached and stale).
+	for my $acl (keys %{$user_edit->{acl}}) {
+		$all_acls_hr->{$acl} = 1;
 	}
-	if (exists $accesslist->{adminuid}) {
-		$accesslist->{adminnick} = $accesslist->{adminuid}
-			? $reader->getUser($accesslist->{adminuid}, 'nickname')
-			: '(unknown)';
+	# Start creating the $all_aclam_hr data, in which the keys are
+	# the HTML selection names that all begin with aclam_ and the
+	# the values are their names/descriptions shown to the admin.
+	# First put all the ACLs into the hash.
+	my $all_aclam_hr = { map { ( "aclam_$_", "ACL: $_" ) } keys %$all_acls_hr };
+	# Next put in all the al2 types.
+	my $all_al2types = $reader->getAL2Types;
+	for my $key (keys %$all_al2types) {
+		next if $key eq 'comment'; # skip the 'comment' type
+		$all_aclam_hr->{"aclam_$key"} = $all_al2types->{$key}{title};
 	}
+	# Finally, sort the keys of the hash into the order that we
+	# want them displayed to the admin (ACLs first).
+	my $all_acls_longkeys_hr = { map { ( "aclam_$_", 1 ) } keys %$all_acls_hr };
+	my $all_aclam_ar = [
+		sort {
+			(exists($all_acls_longkeys_hr->{$a}) ? -1 : 1) <=> (exists($all_acls_longkeys_hr->{$b}) ? -1 : 1)
+			||
+			$all_aclam_hr->{$a} cmp $all_aclam_hr->{$b}
+		} keys %$all_aclam_hr
+	];
+print STDERR "keys-all_aclam_hr: " . join("/", sort keys %$all_aclam_hr) . " keys-all_acls_hr: " . join("/", sort keys %$all_acls_hr) . " all_aclam_ar: '@$all_aclam_ar'\n";
+	# Now put together the hashref that identifies which of those
+	# items are selected for this user.
+	my $user_aclam_hr = { };
+	for my $acl (keys %{ $user_edit->{acl} }) {
+		$user_aclam_hr->{"aclam_$acl"} = 1;
+	}
+	my $al2_tid_comment = $all_al2types->{comment}{al2tid} || 0;
+print STDERR "al2_tid_comment='$al2_tid_comment'\n";
+	my $al2_log_ar = [ ];
+	my $al2_hr = { };
+	# XXXSRCID Once we get rid of the silly 'md5id' field and all the
+	# other bizarre backward-compatibility code paths early in this
+	# function, this won't be necessary, but until then we need this
+	# sanity check...
+	if ($srcid) {
+		# getAL2 works with either a srcids hashref or a single srcid
+		$al2_hr = $reader->getAL2($srcid);
+		for my $al2 (keys %{ $al2_hr }) {
+			$user_aclam_hr->{"aclam_$al2"} = 1;
+		}
+		$al2_log_ar = $reader->getAL2Log($srcid);
+	}
+	# Generate al2_nick_hr, which will be populated with keys of all
+	# the (presumably) admin uids who have logged rows for this al2,
+	# and values of their nicks.
+	my $al2_nick_hr = { };
+	for my $al2_log (@$al2_log_ar) {
+		my $uid = $al2_log->{adminuid};
+		next if !$uid; # odd error, might want to flag this
+		$al2_nick_hr->{$uid} ||= $reader->getUser($uid, 'nickname');
+	}
+print STDERR "al2_log_ar: " . Dumper($al2_log_ar);
+print STDERR "al2_nick_hr: " . Dumper($al2_nick_hr);
+	##########
+
+#	for my $access_type (qw( ban nopost nosubmit norss nopalm proxy trusted )) {
+#		$accesslist->{$access_type} = "";
+#		my $info_hr = $reader->getAccessListInfo($access_type, $user_edit);
+#		next if !$info_hr; # no match
+#		$accesslist->{reason}	||= $info_hr->{reason};
+#		$accesslist->{ts}	||= $info_hr->{ts};
+#		$accesslist->{adminuid}	||= $info_hr->{adminuid};
+#		$accesslist->{estimated_users} ||= $info_hr->{estimated_users};
+#		$accesslist->{$access_type} = $constants->{markup_checked_attribute};
+#	}
+#	if (exists $accesslist->{adminuid}) {
+#		$accesslist->{adminnick} = $accesslist->{adminuid}
+#			? $reader->getUser($accesslist->{adminuid}, 'nickname')
+#			: '(unknown)';
+#	}
 
 	$user_edit->{author} = ($user_edit->{author} == 1) ? $constants->{markup_checked_attribute} : '';
 	if (! $user->{nonuid}) {
@@ -3178,12 +3311,19 @@ sub getUserAdmin {
 		$ipid_karma = $reader->getNetIDKarma("ipid", $ipid) if $ipid;
 	}
 
-	my $all_acls = $reader->getAllACLs();
-	my $all_acls_hr = { map { ( $_, $_ ) } keys %$all_acls };
 	return slashDisplay('getUserAdmin', {
 		field			=> $field,
 		useredit		=> $user_edit,
-		accesslist		=> $accesslist,
+
+		srcid			=> $srcid,
+		all_aclam_ar		=> $all_aclam_ar,
+		all_aclam_hr		=> $all_aclam_hr,
+		user_aclam_hr		=> $user_aclam_hr,
+		al2_old			=> $al2_hr,
+		al2_log			=> $al2_log_ar,
+		al2_tid_comment		=> $al2_tid_comment,
+		al2_nick		=> $al2_nick_hr,
+
 		userinfo_flag		=> $user_editinfo_flag,
 		userfield		=> $user_editfield,
 		ipstruct		=> $ipstruct,

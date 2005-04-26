@@ -1860,6 +1860,13 @@ sub _set_csq {
         }
 }
 
+# XXXSRCID This needs to actually be, like, written.
+sub recalcAL2 {
+        my($self, $srcid) = @_;
+	my $log = $self->getAL2Log($srcid);
+	# remember to delete from memcached
+}
+
 ########################################################
 # For dailyStuff
 # 	This should only be run once per day, if this isn't

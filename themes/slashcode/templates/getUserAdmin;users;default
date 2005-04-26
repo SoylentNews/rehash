@@ -75,23 +75,34 @@ __template__
 			</TR>
 			[% END %]
 			<TR>
-				<TD VALIGN="TOP"><B>Restrictions</B></TD>
-				<TD>
-				<INPUT TYPE="checkbox" NAME="accesslist_ban" [% accesslist.ban | strip_attribute %]>&nbsp;Banned &nbsp;
-				<INPUT TYPE="checkbox" NAME="accesslist_nopost" [% accesslist.nopost | strip_attribute %]>&nbsp;Comments &nbsp;
-				<INPUT TYPE="checkbox" NAME="accesslist_nosubmit" [% accesslist.nosubmit | strip_attribute %]>&nbsp;Submissions &nbsp;
-				<INPUT TYPE="checkbox" NAME="accesslist_norss" [% accesslist.norss | strip_attribute %]>&nbsp;No&nbsp;RSS &nbsp;
-				<INPUT TYPE="checkbox" NAME="accesslist_nopalm" [% accesslist.nopalm | strip_attribute %]>&nbsp;No&nbsp;Palm  
-				[% IF field == 'ipid' || field == 'md5id' %]
-					&nbsp;<INPUT TYPE="checkbox" NAME="accesslist_proxy" [% accesslist.proxy | strip_attribute %]>&nbsp;Proxy &nbsp;
-					<INPUT TYPE="checkbox" NAME="accesslist_trusted" [% accesslist.trusted | strip_attribute %]>&nbsp;Trusted &nbsp;
+				<TD VALIGN="TOP"><B>ACLs and<br>Access Modifiers</B></TD>
+				<TD VALIGN="TOP" ALIGN="LEFT">
+
+				<input type="hidden" name="aclams_srcid" value="[% srcid %]">
+				[% FOR acl = useredit.acl.keys %]
+					<input type="hidden" name="acl_old_multiple" value="[% acl %]">
 				[% END %]
-				<BR><INPUT TYPE="TEXT" SIZE="40" MAXLENGTH="255" NAME="accesslist_reason" VALUE="[% accesslist.reason | strip_attribute %]">	
-				[% IF accesslist.ts || accesslist.adminnick %]<BR>[% END %]
-				[% IF accesslist.ts %]<font size=-1>[% accesslist.ts %]</font>[% END %]
-				[% IF accesslist.adminnick %]<font size=-1>  by [% accesslist.adminnick %]</font>[% END %]
+				[% FOR al2 = al2_old.keys %]
+					<input type="hidden" name="al2_old_multiple" value="[% al2_old.${al2}.name %]">
+				[% END %]
+				[% Slash.createSelect("aclams_new_multiple",
+					all_aclam_hr, user_aclam_hr,
+					1, '', all_aclam_ar, 1) %]
+				&nbsp;
+				<textarea name="al2_new_comment" cols="30" rows="3" wrap="virtual"></textarea>
 				</TD>
 			</TR>
+			[% FOREACH com = al2_log.reverse %]
+				[%# Don't show every log entry: just the comments %]
+				[% NEXT UNLESS com.al2tid == al2_tid_comment %]
+			<TR>
+				<TD VALIGN="TOP" ALIGN="RIGHT">[% com.ts %]&nbsp;</TD>
+				<TD VALIGN="TOP" ALIGN="LEFT">&nbsp;<i>[% al2_nick.${com.adminuid} || com.adminuid || '?' %]:</i>
+				[%# XXXSRCID strip_html this? or trust admins to type valid HTML? %]
+				[% com.comment %]</TD>
+			</TR>
+			[% END %]
+
 			[% IF subnet_karma.defined %]
 			<tr>
 				<td><b>Karma</b></td><td><font size="-1"><b>[% IF ipid_karma.defined %]IPID Karma: [% ipid_karma %] [% END %]Subnet Karma: [% subnet_karma %] [% IF post_restrictions.no_post %]All posting disabled[% ELSIF post_restrictions.no_anon%]Anonymous Posting Disabled[% END %]</b></font></TD>
@@ -151,19 +162,11 @@ __template__
 			</TR>
 			[% END %]
 
-[% IF all_acls %]
-			<TR>
-				<TD WIDTH="100"><B>ACLs</B></TD>
-				<TD ALIGN="LEFT">[% Slash.createSelect("newacls_multiple", all_acls, useredit.acl, 1, '', 1, 1) %]
-				<INPUT TYPE="SUBMIT" NAME="saveuseradmin" VALUE="Save [% IF useredit.nickname; useredit.nickname | strip_attribute; END %]">
-				 </TD>
-			</TR>
-[% ELSE %]
 			<TR>
 				<TD>&nbsp;</TD>
 				<TD><INPUT TYPE="SUBMIT" NAME="saveuseradmin" VALUE="Save [% IF useredit.nickname; useredit.nickname | strip_attribute; END %]"></TD>
 			</TR>
-[% END %]
+
 			[% IF ! useredit.nonuid %]
 				[% IF constants.subscribe && (useredit.subscribe_payments.size or useredit.subscribe_purchases.size) %]
 				<TR>
@@ -313,4 +316,4 @@ __template__
 __seclev__
 10000
 __version__
-
+$Id$

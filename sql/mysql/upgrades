@@ -2928,7 +2928,7 @@ REPLACE INTO vars (name, value, description) VALUES ('approvedtags','b|i|p|br|a|
 REPLACE INTO vars (name, value, description) VALUES ('approvedtags_attr', 'a:href_RU img:src_RU,alt_N,width,height,longdesc_U', 'definition of approvedtags attributes in the following format a:href_RU img:src_RU,alt,width,height,longdesc_U see Slash::Utility::Data.pm for more details');
 
 # this should not need any modification
-INSERT INTO vars (name, value, description) VALUES ('approvedtags_break','p|br|ol|ul|li|dl|dt|dd|blockquote|div|img|hr|h1|h2|h3|h4|h5|h6','Tags that break words (see breakHtml())');
+REPLACE INTO vars (name, value, description) VALUES ('approvedtags_break','p|br|ol|ul|li|dl|dt|dd|blockquote|div|img|hr|h1|h2|h3|h4|h5|h6','Tags that break words (see breakHtml())');
 
 # this still won't be in effect unless sub or sup is in approvedtags, of course
 INSERT INTO vars (name, value, description) VALUES ('nest_su_maxdepth','3','Maximum depth to which <SUP> and <SUB> tags can be nested');
@@ -2955,4 +2955,51 @@ INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr_admin', '
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # End of T_2_5_0_59, Start of T_2_5_0_60 - 2005/04/15
+
+CREATE TABLE al2 (
+	srcid		BIGINT UNSIGNED NOT NULL DEFAULT '0',
+	value		INT UNSIGNED NOT NULL DEFAULT '0',
+	updatecount	INT UNSIGNED NOT NULL DEFAULT '0',
+	PRIMARY KEY (srcid)
+) TYPE=InnoDB;
+
+CREATE TABLE al2_log (
+	al2lid		INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	srcid		BIGINT UNSIGNED NOT NULL DEFAULT '0',
+	ts		DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+	adminuid	MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	al2tid		TINYINT UNSIGNED NOT NULL DEFAULT '0',
+	val		ENUM('set', 'clear') DEFAULT NULL,
+	PRIMARY KEY (al2lid),
+	INDEX ts (ts),
+	INDEX srcid_ts (srcid, ts)
+) TYPE=InnoDB;
+
+CREATE TABLE al2_log_comments (
+	al2lid		INT UNSIGNED NOT NULL DEFAULT '0',
+	comment		TEXT NOT NULL DEFAULT '',
+	PRIMARY KEY (al2lid)
+) TYPE=InnoDB;
+
+CREATE TABLE al2_types (
+	al2tid		TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	bitpos		TINYINT UNSIGNED DEFAULT NULL,
+	name		VARCHAR(30) NOT NULL DEFAULT '',
+	title		VARCHAR(64) NOT NULL DEFAULT '',
+	PRIMARY KEY (al2tid),
+	UNIQUE name (name),
+	UNIQUE bitpos (bitpos)
+) TYPE=InnoDB;
+
+INSERT INTO al2_types VALUES (1, NULL, 'comment', 'Comment');
+INSERT INTO al2_types VALUES (2, 0, 'ban', 'Ban');
+INSERT INTO al2_types VALUES (3, 1, 'expired', 'Expired');
+INSERT INTO al2_types VALUES (4, 2, 'nopost', 'No Comment Post');
+INSERT INTO al2_types VALUES (5, 3, 'nopalm', 'No Palm');
+INSERT INTO al2_types VALUES (6, 4, 'norss', 'No RSS');
+INSERT INTO al2_types VALUES (7, 5, 'nosubmit', 'No Story Submit');
+INSERT INTO al2_types VALUES (8, 6, 'trusted', 'Trusted');
+INSERT INTO al2_types VALUES (9, 7, 'proxy', 'Valid Proxy');
+
+# run utils/accesslisttoal2 -u YOURSITEUSERNAME
 

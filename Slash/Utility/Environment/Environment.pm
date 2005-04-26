@@ -28,6 +28,7 @@ use strict;
 use Apache::ModuleConfig;
 use Digest::MD5 'md5_hex';
 use Time::HiRes;
+use Socket qw( inet_aton inet_ntoa );
 
 use base 'Exporter';
 use vars qw($VERSION @EXPORT);
@@ -71,7 +72,6 @@ use vars qw($VERSION @EXPORT);
 	isSubscriber
 	prepareUser
 	filter_params
-	get_ipids
 
 	setUserDate
 	isDST
@@ -91,6 +91,15 @@ use vars qw($VERSION @EXPORT);
 	writeLog
 
 	determineCurrentSkin
+
+	get_ipids
+	get_srcids
+	convert_srcid
+	get_srcid_prependbyte
+	get_srcid_sql_in
+	get_srcid_sql_out
+	get_srcid_type
+	decode_srcid_prependbyte
 
 );
 
@@ -1428,7 +1437,10 @@ sub prepareUser {
 	}
 
 	$user->{state}{post}	= $method eq 'POST' ? 1 : 0;
-	@{$user}{qw[ipid subnetid classbid hostip]} = get_ipids($hostip);
+	$user->{srcids}		= get_srcids({ ip => $hostip });
+	@{$user}{qw[ipid subnetid classbid hostip]} = get_ipids();
+#	@{$user}{qw[ipid subnetid classbid hostip]} = get_srcids({ ip => $hostip },
+#		{ return_only => [qw( ipid subnetid classbid ip )] });
 
 	my @defaults = (
 		['mode', 'thread'], qw[
@@ -1597,37 +1609,6 @@ sub saveUserDBs {
 	for my $type (keys %$user_types) {
 		$user->{state}{dbs}{$type} = $user_types->{$type};
 	}
-}
-
-#========================================================================
-
-sub get_ipids {
-	my($hostip, $no_md5, $locationid) = @_;
-
-	$locationid = getCurrentStatic('cookie_location') if @_ > 2 && !$locationid;
-
-	if (!$hostip && $ENV{GATEWAY_INTERFACE}) {
-		my $r = Apache->request;
-		$hostip = $r->connection->remote_ip;
-	} elsif (!$hostip) {
-		$hostip = '';
-	}
-
-	my $ipid = $no_md5 ? $hostip : md5_hex($hostip);
-	(my $subnetid = $hostip) =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
-	$subnetid = $no_md5 ? $subnetid : md5_hex($subnetid);
-	(my $classbid = $hostip) =~ s/(\d+\.\d+)\.\d+\.\d+/$1\.0\.0/;
-	$classbid = $no_md5 ? $classbid : md5_hex($classbid);
-
-	if ($locationid) {
-		return $locationid eq 'classbid' ? $classbid
-		     : $locationid eq 'subnetid' ? $subnetid
-		     : $locationid eq 'ipid'     ? $ipid
-		     : $locationid eq 'ip'       ? $hostip
-		     : '';
-	}
-
-	return($ipid, $subnetid, $classbid, $hostip);
 }
 
 #========================================================================
@@ -2513,6 +2494,451 @@ sub determineCurrentSkin {
 	}
  
 	return $skin;
+}
+
+#========================================================================
+# XXXSRCID eliminate this or bring it back or something
+sub get_ipids {
+	my($hostip, $no_md5, $locationid) = @_;
+ 
+	$locationid = getCurrentStatic('cookie_location') if @_ > 2 && !$locationid;
+ 
+	if (!$hostip && $ENV{GATEWAY_INTERFACE}) {
+		my $r = Apache->request;
+		$hostip = $r->connection->remote_ip;
+	} elsif (!$hostip) {
+		$hostip = '';
+	}
+ 
+	my $ipid = $no_md5 ? $hostip : md5_hex($hostip);
+	(my $subnetid = $hostip) =~ s/(\d+\.\d+\.\d+)\.\d+/$1\.0/;
+	$subnetid = $no_md5 ? $subnetid : md5_hex($subnetid);
+	(my $classbid = $hostip) =~ s/(\d+\.\d+)\.\d+\.\d+/$1\.0\.0/;
+	$classbid = $no_md5 ? $classbid : md5_hex($classbid);
+ 
+	if ($locationid) {
+		return $locationid eq 'classbid' ? $classbid
+		     : $locationid eq 'subnetid' ? $subnetid
+		     : $locationid eq 'ipid'     ? $ipid
+		     : $locationid eq 'ip'       ? $hostip
+		     : '';
+	}
+ 
+	return($ipid, $subnetid, $classbid, $hostip);
+}
+
+#========================================================================
+
+=head2 get_srcids
+
+Converts an IP address and/or user id to a hashref containing one or
+more srcids.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item DATA
+
+A hashref containing one or more of two possible fields:  (1) "uid",
+whose value is a user id;  and/or (2) "ip", whose value is a text string
+representing an IPv4 address in the form of "1.2.3.4" (IPv6 is not
+yet supported), or a false value which means to use the current Apache
+connection's remote_ip if invoked within Apache, or the dummy value
+"0.0.0.0" otherwise.
+
+=item OPTIONS
+
+An optional hashref containing zero or more options.  The option
+'no_md5', if its field is any true value, ensures that IPs encoded into
+the returned hashref, while still masked, are not MD5'd but kept in string
+"1.2.3.4" form.
+
+The option 'masks' can be a scalar containing a single value or an
+arrayref containing multiple values.  By default, only two masked-off
+values of an IP are encoded:  a 32-bit and a 24-bit mask (the IP itself
+and its Class C subnet).  Any additional values between 1 and 32 may be
+passed in in 'masks' and those additional mask sizes will also be
+calculated and encoded in the returned hashref.
+
+The option 'return_only' will change the returned value from a hashref
+with multiple fields into a scalar which is the value of just one of what
+one of those fields would have been.  The value of 'return_only' can be:
+(1) the string "uid" to return just the uid, (2) an integer between
+1 and 32 (which will be implied into the 'masks' option as well),
+(3) one of the three strings "ipid", "subnetid", or "classbid" which
+are the equivalent of the integers 32, 24, and 16 respectively, or
+(4) the string "cookie_location", which will be replaced by the value
+of the var 'cookie_location'.
+
+=back
+
+=item Return value
+
+The uid and/or ip converted to an encoded hashref.  If a uid was passed
+in, the field "uid" stores the converted uid (which happens to be the
+uid itself).  If an ip was passed in, there will be one or more fields
+whose names are integer values between 1 and 32 and whose values are
+64-bit (16-char) hex strings with the encoded values of the ip.
+There will also be the convenience field "ip" set which contains the
+original ip value passed in.  (But see OPTIONS:  if return_only is set,
+only one of the fields of the hashref will be returned.)
+
+=back
+
+=cut
+
+sub get_srcids {
+	my($hr, $options) = @_;
+	$hr ||= { };
+	my $retval = { };
+	my($no_md5, $return_only, $masks) = _get_srcids_options($options);
+
+	# UIDs are the easy part.  The encoded value of a uid is the uid
+	# itself, in decimal form, so we just pass this input along to
+	# the output.
+	if (my $uid = $hr->{uid}) {
+		$retval->{uid} = $uid;
+	}
+
+	# IPs are the tricky part.
+	if (defined(my $ip = $hr->{ip})) {
+		if (!defined($no_md5)) {
+			# Error in options passed.
+			warn "Error in options passed to get_srcids";
+			return undef;
+		}
+		if (!$ip) {
+			if ($ENV{GATEWAY_INTERFACE}) {
+				my $r = Apache->request;
+				$ip = $r->connection->remote_ip;
+			} elsif (!$ip) {
+				$ip = '0.0.0.0';
+			}
+		}
+
+		$retval->{ip} = $ip; # return the IP passed in, for convenience
+
+		# For each entry in @$masks, we truncate the IPv4 address
+		# to that many bits (so 32 is the whole IP address, this
+		# works the same way as a /32 mask).  Then convert to
+		# a text string of the dotted-quad, truncate to the
+		# proper width, and prepend the code indicating what kind
+		# of mask has been applied.
+
+		# XXX For IPv6, here's where we need to decide how to
+		# extend the value of 'masks' to a 128-bit IP address.
+		# For IPv4, we convert the string "1.2.3.4" to the
+		# number 0x01020304.
+		my $n = unpack("N", inet_aton($ip));
+
+		for my $mask (@$masks) {
+			my $prepend_code = get_srcid_prependbyte({
+				type =>         'ipid',
+				mask =>         $mask,
+			});
+			my $bitmask = ~( 2**(32-$mask) - 1 );
+			my $nm = $n & $bitmask;
+			my $str = inet_ntoa(pack("N", $nm));
+			my $val;
+			if ($no_md5) {
+				$val = $str;
+			} else {
+				my $md5 = md5_hex($str);
+				my $md5_trunc = substr($md5, 0, 14);
+				$val = lc("$prepend_code$md5_trunc");
+			}
+			$retval->{$mask} = $val;
+		}
+
+	}
+
+	if ($return_only) {
+		# Return just the value(s) requested, no hashref
+		# wrapper around them.
+		my @retvals = ( );
+		for my $field (@$return_only) {
+			push @retvals, $retval->{$field};
+		}
+		return @retvals;
+	}
+
+	return $retval;
+}
+
+{ # closure
+my %mask_size_name = (
+	ipid =>         32,
+	subnetid =>     24,
+	classbid =>     16,
+);
+
+sub convert_srcid {
+	my($type, $old_id_str) = @_;
+	# UIDs are easy, they haven't changed.
+	return $old_id_str if $type eq 'uid';
+	# IPIDs get a prepended byte and a truncate.
+	if ($type =~ /^(ipid|subnetid)$/) {
+		my $str_trunc = substr($old_id_str, 0, 14);
+		my $prependbyte = get_srcid_prependbyte({
+			type => 'ipid',
+			mask => $mask_size_name{$type}
+		});
+		return "$prependbyte$str_trunc";
+	}
+	# XXXSRCID this is a logic error but handle it better
+	die "logic error convert_srcid: type='$type' ois='$old_id_str'";
+}
+
+sub _get_srcids_options {
+	my($options) = @_;
+	my $no_md5 = $options->{no_md5} || 0;
+
+	my $return_only = '';
+	if (defined $options->{return_only}) {
+		# Pass in no defined value for the return_only field,
+		# and get_srcids returns the whole hashref.
+		# Pass in a defined value which is either a common
+		# name of a mask size, or an integer indicating a
+		# mask size, and this function returns only that one
+		# value out of the hashref.
+		# Pass in the word 'cookie_location', and this function
+		# returns only the one value named in the var 'cookie_location'.
+		if ($options->{return_only} eq 'cookie_location') {
+			$return_only = getCurrentStatic('cookie_location');
+		} else {
+			$return_only = $options->{return_only};
+		}
+		my %ro = ( );
+		my @k = ref($return_only) ? @$return_only : ( $return_only );
+		for my $k (@k) {
+			if ($k =~ /^\d+$/ && $k >= 1 && $k <= 32) {
+				# It's already a valid number indicating mask size.
+				$ro{$k} = 1;
+			} else {
+				if ($mask_size_name{$k}) {
+					# It's the name of a valid mask.
+					$ro{ $mask_size_name{$k} } = 1;
+				} elsif ( $mask_size_name{"{$k}id"} ) {
+					# It's the name of a valid mask
+					# minus the "id", which is close
+					# enough.
+					$ro{ $mask_size_name{"${k}id"} } = 1;
+				} else {
+					# Invalid value, abort.
+					return undef;
+				}
+			}
+		}
+		$return_only = [ sort { $a <=> $b } keys %ro ];
+	}
+
+	my $masks = [ ];
+	if ($return_only) {
+		# If we've been asked to return specific values,
+		# calculate just those values.
+		$masks = [ @$return_only ];
+	} else {
+		if (defined $options->{masks}) {
+			$masks = $options->{masks};
+			if (!ref $masks) {
+				$masks = [ $masks ];
+			}
+		}
+		@$masks = sort grep { /^\d+$/ } @$masks;
+		if (!@$masks) {
+			# Bad or no option passed in;  use default.
+			# XXXSRCID This should be a var.
+			$masks = [qw( 16 24 32 )];
+		}
+	}
+
+	# Return the options the caller's caller asked for.
+	return ($no_md5, $return_only, $masks);
+}
+} # closure
+
+#========================================================================
+
+=head2 get_srcid_prependbyte
+
+This returns the two-character hex code that should be prepended
+to a 14-character hex value to create the 16-character hex value
+representing either a user ID or an encoded IP address MD5.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item PARAMS
+
+A hash of the parameters.  'type' is a required parameter; its only
+defined values so far are 'ipid', indicating an encoded IP address of
+some type, or 'uid', indicating a user ID.  Other values may be
+possible in future.
+
+=over 4
+
+If 'type' eq 'ipid', the parameter 'mask' must be present, a number
+from 1 to 32 indicating how many bits will be present.  For example,
+a 24 here would have the same meaning as in '192.168.0.0/24',
+signifying the address is a Class C.
+
+=back
+
+=over 4
+
+If 'type' eq 'uid', no other parameters are necessary.
+
+=back
+
+=back
+
+=item Return value
+
+Two-character hex code to prepend.  The bit values of this code are
+currently defined as follows:
+
+=over 4
+
+bits 0-2 (MSBs): 0b000=uid; 0b001=IPv4 ipid; other values reserved
+for future use.
+
+bits 3-7 (LSBs): if uid, all 0; if IPv4 ipid, 32 minus the mask
+size (so 0b00000 indicates a mask size of 32, 0b01000 24, etc.)
+
+=back
+
+Thus the most commonly returned values will be: "00" = uid,
+"20" = ipid, "28" = subnetid, "30" = classbid.
+
+=cut
+
+sub get_srcid_prependbyte {
+	my($hr) = @_;
+	my $val = 0;
+	my $type = $hr->{type};
+	if ($type eq 'ipid') {
+		my $mask32 = 32 - $hr->{mask};
+		$val = 0x20 + $mask32;
+	} else {
+		$val = 0x00;
+	}
+	return sprintf("%02x", $val);
+}
+
+#========================================================================
+
+=head2 decode_srcid_prependbyte(BYTE)
+
+Decodes the byte encoded by encode_prepend_byte.  Returns a
+hashref with fields 'type' and, if type is 'ipid', 'mask'.
+
+=cut
+
+sub decode_srcid_prependbyte {
+	my($byte) = @_;
+	my $val = hex($byte);
+	my $type = ($val & 0b11100000) >> 5;
+	if ($type == 0) {
+		return { type => 'uid' };
+	}
+	my $mask = 32 - ($val & 0b00011111);
+	return {
+		type => 'ipid',
+		mask => $mask,
+	};
+}
+
+#========================================================================
+
+=head2 get_srcid_sql_in
+
+Pass this a srcid, either in decimal form (which is what uids will
+typically be in) or as a 64-bit (16-char) hex string, and it will return
+an SQL function or value which can be used as part of a test against
+or an assignment into an SQL integer value.  This value should _not_ be
+quoted but rather inserted directly into an SQL request.  For example,
+if passed "123" (a user id), will return "'123'" (same value,
+quoted);  if passed "200123456789abcd" (an encoded IP), will return
+"CONV('200123456789abcd', 16, 10)" which can be used as an assignment
+into or test against a BIGINT column.
+
+For speed, does not do error-checking against the value passed in.
+
+Usage:
+
+$slashdb->sqlInsert("al2", { srcid => get_srcid_sql_in($srcid) });
+
+=cut
+
+sub get_srcid_sql_in {
+	my($srcid) = @_;
+	my $slashdb = getCurrentDB();
+	my $srcid_q = $slashdb->sqlQuote($srcid);
+	my $type = get_srcid_type($srcid);
+	if ($type eq 'uid') {
+		return $srcid_q;
+	}
+	return "CONV($srcid_q, 16, 10)";
+}
+
+#========================================================================
+
+=head2 get_srcid_sql_out
+
+Pass this the name of a column with srcid data, and it returns the SQL
+necessary to retrieve data from that column in srcid format.  The
+column data is returned in decimal format if it can be represented in
+decimal in an ordinarily-compiled perl, as a hex string otherwise.
+
+Usage:
+
+$slashdb->sqlSelectColArrayref(get_srcid_sql_out('srcid') . ' AS srcid',
+'al2', 'value=1');
+
+=cut
+
+sub get_srcid_sql_out {
+	my($colname) = @_;
+	return "IF($colname < (1 << 31), $colname, CONV($colname, 10, 16))";
+}
+
+#========================================================================
+
+=head2 get_srcid_type
+
+Pass this a srcid, either in decimal form (which is what uids will
+typically be in) or as a 64-bit (16-char) hex string, and it will return
+the name of the field in a srcid hashref that the data belongs in: either
+"uid" for a uid, or an integer between 1 and 32 for an encoded IP.
+
+For speed, does not do error-checking against the value passed in.
+
+=cut
+
+sub get_srcid_type {
+	my($srcid) = @_;
+	my $is_hex = ( length($srcid) == 16 || $srcid !~ /^\d+$/ );
+	if (!$is_hex) {
+		# Only uids are allowed to be passed around in decimal
+		# form, so this must be a uid.
+		return 'uid';
+	}
+	# Read the code on the front of the string.
+	my $code = substr($srcid, 0, 2);
+	if ($code eq '00') {
+		# Hex-encoded UID.
+		return 'uid';
+	}
+	# That code indicates an IP, and its least significant 5 bits
+	# encode the size of the mask used on that IP, which we return.
+	my $decval = hex($code);
+	return $decval & 0b00011111;
 }
 
 #========================================================================

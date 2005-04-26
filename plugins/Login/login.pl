@@ -91,6 +91,7 @@ sub newUser {
 		$error = 1;
 	} elsif ($matchname ne '' && $form->{newusernick} ne '') {
 		if ($constants->{newuser_portscan}) {
+			# XXXSRCID Convert to use getAL2($srcid, 'trusted')
 			my $is_trusted = $slashdb->checkIsTrusted($user->{ipid});
 			if ($is_trusted ne 'yes') {
 				my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
@@ -216,7 +217,7 @@ sub mailPasswd {
 	my $user_send = $reader->getUser($uid);
 
 	if (!$error) {
-		if ($reader->checkReadOnly(nopost => { ipid => $user->{ipid} })) {
+		if ($reader->checkAL2($user->{srcids}, 'nopost')) {
 			push @note, getData('mail_readonly');
 			$error = 1;
 

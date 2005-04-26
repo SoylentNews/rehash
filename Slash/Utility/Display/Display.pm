@@ -84,7 +84,11 @@ hashref, where the keys and values are the same.
 
 =item DEFAULT
 
-Default value for the list.
+Default value for the list.  If MULTIPLE is not set,
+this should be the key in DATA that should start out
+selected in the popup.  If MULTIPLE is set, this should
+be a hashref;  keys which are present and which have
+true values will all start out selected in the popup.
 
 =item RETURN
 
@@ -100,6 +104,14 @@ If an arrayref is passed, an already-sorted array reference of keys.
 If non-ref, then an arrayref of hash keys is created sorting the
 hash values, alphabetically and case-insensitively.
 If ORDERED is passed in either form, then the NSORT parameter is ignored.
+### Pudge: would the change below be worth making?  All it would do
+### is, in the case where DATA is passed in as an arrayref and the
+### desired behavior is to present the items in that order (which
+### would probably be typical for callers that pass in an arrayref),
+### ORDERED could be passed in as 0 instead of a copy of DATA. -Jamie
+#If ORDERED is false, and DATA is passed in a hashref, then its keys are
+#sorted in string order.  If ORDERED is false, and DATA is passed in an
+#arrayref, then the data is presented in that arrayref's order.
 
 =item MULTIPLE
 
@@ -127,6 +139,13 @@ sub createSelect {
 	my($label, $hashref, $default, $return, $nsort, $ordered, $multiple) = @_;
 
 	if (ref $hashref eq 'ARRAY') {
+### Pudge: see above. -Jamie
+###		if (!$ordered) {
+###			# If ORDERED is false, and DATA is passed in an
+###			# arrayref, then the data is presented in that
+###			# arrayref's order.
+###			$ordered = \@{ $hashref };
+###		}
 		$hashref = { map { ($_, $_) } @$hashref };
 	} else {
 		# If $hashref is a hash whose elements are also hashrefs, and

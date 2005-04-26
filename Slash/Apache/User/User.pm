@@ -161,17 +161,13 @@ sub handler {
 		# as "nopost" -- those are mostly open proxies.  Check both
 		# the ipid and the subnetid (we can't use values in $user
 		# because that doesn't get set up until prepareUser is called,
-		# later in this function).  Note we don't have to MD5 the
-		# values, checkReadOnly() knows how to do that.
+		# later in this function).  XXXSRCID: really should have a
+		# separate 'openproxy' attribute instead of piggybacking off
+		# 'nopost'.
 		my $read_only = 0;
 		my $hostip = $r->connection->remote_ip;
-		my($ip, $subnet) = get_ipids($hostip, 1);
-		if ($slashdb->checkReadOnly('nopost', { ipid => $ip })) {
-			$read_only = 1;
-		} else {
-			$read_only = 1 if $slashdb->checkReadOnly('nopost', {
-				subnetid => $subnet });
-		}
+		my $srcids = get_srcids({ ip => $hostip });
+		$read_only = 1 if $reader->checkAL2($srcids, 'nopost');
 
 		my $newpass;
 		if ($read_only || !$tmpuid) {

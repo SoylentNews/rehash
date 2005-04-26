@@ -121,6 +121,57 @@ CREATE TABLE accesslog_artcom (
 ) TYPE=InnoDB;
 
 #
+# Table structure for table 'al2'
+#
+
+CREATE TABLE al2 (
+	srcid           BIGINT UNSIGNED NOT NULL DEFAULT '0',
+	value           INT UNSIGNED NOT NULL DEFAULT '0',
+	updatecount     INT UNSIGNED NOT NULL DEFAULT '0',
+	PRIMARY KEY (srcid)
+) TYPE=InnoDB;
+
+#
+# Table structure for table 'al2_log'
+#
+
+CREATE TABLE al2_log (
+	al2lid          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	srcid           BIGINT UNSIGNED NOT NULL DEFAULT '0',
+	ts              DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+	adminuid        MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	al2tid          TINYINT UNSIGNED NOT NULL DEFAULT '0',
+	val             ENUM('set', 'clear') DEFAULT NULL,
+	PRIMARY KEY (al2lid),
+	INDEX ts (ts),
+	INDEX srcid_ts (srcid, ts)
+) TYPE=InnoDB;
+
+#
+# Table structure for table 'al2_log_comments'
+#
+
+CREATE TABLE al2_log_comments (
+	al2lid          INT UNSIGNED NOT NULL DEFAULT '0',
+	comment         TEXT NOT NULL DEFAULT '',
+	PRIMARY KEY (al2lid)
+) TYPE=InnoDB;
+
+#
+# Table structure for table 'al2_types'
+#
+
+CREATE TABLE al2_types (
+	al2tid          TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	bitpos          TINYINT UNSIGNED DEFAULT NULL,
+	name            VARCHAR(30) NOT NULL DEFAULT '',
+	title           VARCHAR(64) NOT NULL DEFAULT '',
+	PRIMARY KEY (al2tid),
+	UNIQUE name (name),
+	UNIQUE bitpos (bitpos)
+) TYPE=InnoDB;
+
+#
 # Table structure for table 'authors_cache'
 #
 

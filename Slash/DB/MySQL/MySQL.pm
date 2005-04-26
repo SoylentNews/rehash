@@ -4627,7 +4627,8 @@ sub createFormkey {
 	my $last_submitted = $self->getLastTs($formname, 1);
 
 	my $formkey = "";
-	my $num_tries = 50;
+#	my $num_tries = 50; # XXXSRCID - it's silly for us to keep this so high
+	my $num_tries = 10;
 	while (1) {
 		$formkey = getFormkey();
 		my $rows = $self->sqlInsert('formkeys', {
@@ -5082,109 +5083,7 @@ sub checkExpired {
 sub checkAllowAnonymousPosting {
 	my($self, $anon_uid) = @_;
 	$anon_uid ||= getCurrentAnonymousCoward('uid');
-	return ! $self->checkReadOnly('nopost', { uid => $anon_uid });
-}
-
-##################################################################
-sub checkReadOnly {
-	my($self, $access_type, $user_check) = @_;
-	# We munge access_type directly into the SQL so make SURE it is
-	# one of the supported columns.
-	$access_type = 'nopost' if !$access_type
-		|| $access_type !~ /^(ban|nopost|nosubmit|norss|nopalm|proxy|trusted)$/;
-
-	$user_check ||= getCurrentUser();
-	my $constants = getCurrentStatic();
-
-	my $where_ary = [ ];
-
-	# Please check to make sure this is what you want;
-	# isAnon already checks for numeric uids -- pudge
-	# This looks right;  if the {uid} field of %$user_check
-	# is not defined, we ignore uid and put together our
-	# test based on another field. -- Jamie
-	my $anonnopost_ref = undef;
-	if ($user_check->{uid} && $user_check->{uid} =~ /^\d+$/) {
-		my $uid = $user_check->{uid};
-		if (!isAnon($uid)) {
-			$where_ary = [ "uid = $uid" ];
-		} else {
-			# This is the new allow_anonymous... if an
-			# anonymous user is not to post, it has a
-			# 'now_nopost' entry in accesslist.  Cache this
-			# value for all anonymous users, for speed.
-			my $expire_time = $constants->{banlist_expire};
-			$expire_time += int(rand(60)) if $expire_time;
-			_genericCacheRefresh($self, 'anonnopost', $expire_time);
-			$anonnopost_ref = $self->{_anonnopost_cache} ||= {};
-			if (defined($anonnopost_ref->{$uid})) {
-				# The nopost entry for this anon user
-				# is already cached;  return it.
-				if ($constants->{debug_db_cache}) {
-					print STDERR scalar(gmtime) . " cRO $$ anonnopost cached for $uid: $anonnopost_ref->{$uid}\n";
-				}
-				return $anonnopost_ref->{$uid};
-			}
-
-			# It's not cached;  we're going to find it
-			# and cache it.
-			$where_ary = [ "uid = $uid" ];
-			if ($constants->{debug_db_cache}) {
-				print STDERR scalar(gmtime) . " cRO $$ anonnopost not cached for $uid\n";
-			}
-
-		}
-	} elsif ($user_check->{md5id}) {
-		# To do this with a WHERE is very slow!  Both the ipid
-		# and the subnetid columns are indexed, but if you OR
-		# them, MySQL does a table scan.  So instead of that,
-		# we're going to do two checks and boolean OR the result.
-		$where_ary = [
-			"ipid = '$user_check->{md5id}'",
-			"subnetid = '$user_check->{md5id}'",
-		];
-	} elsif ($user_check->{ipid}) {
-		my $tmpid = $user_check->{ipid} =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}/ ? 
-				md5_hex($user_check->{ipid}) : $user_check->{ipid}; 
-		$where_ary = [ "ipid = '$tmpid'" ];
-
-	} elsif ($user_check->{subnetid}) {
-		my $tmpid = $user_check->{subnetid} =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}/ ? 
-				md5_hex($user_check->{subnetid}) : $user_check->{subnetid}; 
-		$where_ary = [ "subnetid = '$tmpid'" ];
-	} else {
-		my $tmpid = $user_check->{ipid} =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}/ ? 
-				md5_hex($user_check->{ipid}) : $user_check->{ipid}; 
-		$where_ary = [ "ipid = '$tmpid'" ];
-	}
-
-	for my $where (@$where_ary) {
-		# Setting nopost blocks posting, nosubmit blocks submitting.
-		$where .= " AND now_$access_type = 'yes'";
-		# For when we get user expiration working.
-		$where .= " AND reason != 'expired'";
-	}
-
-	# If any rows in the table match any of the where clauses,
-	# then we're readonly.
-	my $retval = 0;
-	my $where;
-	while ($where = shift @$where_ary) {
-		if ($self->sqlCount("accesslist", $where)) {
-			$retval = 1;
-			last;
-		}
-	}
-
-	if (defined($anonnopost_ref)) {
-		# We need to write our answer into the cache.
-		$anonnopost_ref->{$user_check->{uid}} = $retval;
-		$self->{_anonnopost_cache_time} ||= time();
-		if ($constants->{debug_db_cache}) {
-			print STDERR scalar(gmtime) . " cRO $$ anonnopost cache written for $user_check->{uid}: $retval\n";
-		}
-	}
-	return $retval;
+	return !$self->checkAL2({ uid => $anon_uid }, 'nopost');
 }
 
 sub getKnownOpenProxy {
@@ -5530,6 +5429,30 @@ sub getSubnetFromIPID {
 }
 
 ########################################################
+# XXXSRCID For performance reasons, this should be generated periodically
+# for all subnets that have posted recently, and the values of any such
+# restrictions written using setAL2.  Lookups would then be very fast.
+sub getNetIDPostingRestrictions {
+	my($self, $type, $value) = @_;
+	my $constants = getCurrentStatic();
+	my $restrictions = { no_anon => 0, no_post => 0 };
+	if ($type eq "subnetid") {
+		my $subnet_karma_comments_needed = $constants->{subnet_comments_posts_needed};
+		my($subnet_karma, $subnet_post_cnt) = $self->getNetIDKarma("subnetid", $value);
+		my($sub_anon_max, $sub_anon_min, $sub_all_max, $sub_all_min ) = @{$constants->{subnet_karma_post_limit_range}};
+		if ($subnet_post_cnt >= $subnet_karma_comments_needed) {
+			if ($subnet_karma >= $sub_anon_min && $subnet_karma <= $sub_anon_max) {
+				$restrictions->{no_anon} = 1;
+			}
+			if ($subnet_karma >= $sub_all_min && $subnet_karma <= $sub_all_max) {
+				$restrictions->{no_post} = 1;
+			}
+		}
+	}
+	return $restrictions;
+}
+
+########################################################
 sub getBanList {
 	my($self, $refresh) = @_;
 	my $constants = getCurrentStatic();
@@ -5598,27 +5521,6 @@ sub getBanList {
 	}
 
 	return $banlist_ref;
-}
-
-########################################################
-sub getNetIDPostingRestrictions {
-	my($self, $type, $value) = @_;
-	my $constants = getCurrentStatic();
-	my $restrictions = { no_anon => 0, no_post => 0 };
-	if ($type eq "subnetid") {
-		my $subnet_karma_comments_needed = $constants->{subnet_comments_posts_needed};
-		my($subnet_karma, $subnet_post_cnt) = $self->getNetIDKarma("subnetid", $value);
-		my($sub_anon_max, $sub_anon_min, $sub_all_max, $sub_all_min ) = @{$constants->{subnet_karma_post_limit_range}};
-		if ($subnet_post_cnt >= $subnet_karma_comments_needed) {
-			if ($subnet_karma >= $sub_anon_min && $subnet_karma <= $sub_anon_max) {
-				$restrictions->{no_anon} = 1;
-			}
-			if ($subnet_karma >= $sub_all_min && $subnet_karma <= $sub_all_max) {
-				$restrictions->{no_post} = 1;
-			}
-		}
-	}
-	return $restrictions;
 }
 
 ########################################################
@@ -5869,78 +5771,333 @@ sub countAccessLogHitsInLastX {
 ##################################################################
 # Pass this private utility method a user hashref and, based on the
 # uid/ipid/subnetid fields, it returns:
-# 1. an arrayref of WHERE clauses that can be used to select rows
-#    from accesslist that apply to this user;
-# 2. a hashref meant to be passed to sqlUpdate() if it is desired
-#    to create a row in accesslist for this user.
-sub _get_insert_and_where_accesslist {
-	my($self, $user_check) = @_;
+# 1. a WHERE clause that can be used to select rows from accesslist
+#    that apply to this user;
+# 2. an arrayref of srcid's suitable for passing to sqlUpdate() etc.
+# (This method used to be a lot more complicated;  the conversion
+# from accesslist to al2 let us simplify it a lot.)
+sub _get_where_and_valuelist_al2 {
+	my($self, $srcids) = @_;
+	$srcids ||= getCurrentUser('srcids');
 
-	my($where_ary, $insert_hr);
-
-	$user_check ||= getCurrentUser();
-	if ($user_check) {
-		if ($user_check->{uid} && $user_check->{uid} =~ /^\d+$/ && !isAnon($user_check->{uid})) {
-			$where_ary = [ "uid = $user_check->{uid}" ];
-			$insert_hr->{uid} = $user_check->{uid};
-		} elsif ($user_check->{ipid}) {
-			$where_ary = [ "ipid = '$user_check->{ipid}'" ];
-			$insert_hr->{ipid} = $user_check->{ipid};
-		} elsif ($user_check->{subnetid}) {
-			$where_ary = [ "subnetid = '$user_check->{subnetid}'" ];
-			$insert_hr->{subnetid} = $user_check->{subnetid};
-		} elsif ($user_check->{md5id}) {
-			$where_ary = [
-				"ipid = '$user_check->{md5id}'",
-				"subnetid = '$user_check->{md5id}'",
-			];
-			$insert_hr->{ipid} = $insert_hr->{subnetid} = $user_check->{md5id};
-		} else {
-			return undef;
-		}
+	my @values = ( );
+	for my $k (keys %$srcids) {
+		my $v = $srcids->{$k};
+		push @values, get_srcid_sql_in($v);
 	}
 
-	return($where_ary, $insert_hr);
+	return(
+		"srcid IN (" . join(",", @values) . ")",
+		[ @values ]
+	);
 }
 
 ##################################################################
-# returns a hashref with reason and ts fields
-sub getAccessListInfo {
-	my($self, $access_type, $user_check) = @_;
-	$access_type = 'nopost' if !$access_type
-		|| $access_type !~ /^(ban|nopost|nosubmit|norss|nopalm|proxy|trusted)$/;
 
-	my $constants = getCurrentStatic();
-	my $ref = {};
-	my($where_ary) = $self->_get_insert_and_where_accesslist($user_check);
-	for my $where (@$where_ary) {
-		$where .= " AND now_$access_type = 'yes'";
+{ # closure
+my %_al2_types = ( );
+sub _load_al2_types {
+	my($self) = @_;
+	%_al2_types = %{ $self->sqlSelectAllHashref('name', '*', 'al2_types') };
+}
+sub getAL2Types {
+	my($self) = @_;
+	$self->_load_al2_types if !keys %_al2_types;
+	# Return a copy of the cache, just in case anyone munges it up.
+	my $types = {( %_al2_types )};
+	return $types;
+}
+} # end closure
+
+{ # closure
+my %_al2_types_by_id = ( );
+sub getAL2TypeById {
+	my($self, $al2tid) = @_;
+	# Return from cache if available.
+	return $_al2_types_by_id{$al2tid} if defined($_al2_types_by_id{$al2tid});
+	# Need to scan the hash.
+	my $al2types = $self->getAL2Types;
+	my $name = '';
+	for my $n (keys %$al2types) {
+		if ($al2types->{$n}{al2tid} eq $al2tid) {
+			$name = $n;
+			last;
+		}
+	}
+	if (!$name) {
+		return undef;
+	} else {
+		# Cache only valid answers.  If new types are added,
+		# they will appear in the cache.
+		$_al2_types_by_id{$al2tid} = $al2types->{$name};
+		return $al2types->{$name};
+	}
+}
+} # end closure
+
+##################################################################
+
+# $slashdb->setAL2('201234567890abcd',
+# 	{ norss => 0, trusted => 1, comment => 'we love these guys' },
+# 	{ adminuid => 78724 });
+
+# This method always succeeds.  It returns 1 if a row was actually
+# added to al2, 0 if there was merely an existing row that was updated.
+
+sub setAL2 {
+	my($self, $srcid, $type_hr, $options) = @_;
+	my $adminuid = $options->{adminuid} || getCurrentUser('uid') || 0;
+	my $ts_sql = $options->{ts} ? $self->sqlQuote($options->{ts}) : 'NOW()';
+
+	my $al2types = $self->getAL2Types;
+	my $srcid_sql_in = get_srcid_sql_in($srcid);
+	# First check the al2 table to get an updatecount for any
+	# existing row for this srcid.  It's quite possible there
+	# is none, which is fine.
+	my($oldcount, $oldvalue) = $self->sqlSelect('updatecount, value',
+		'al2', "srcid=$srcid_sql_in");
+	my $did_add_row = defined($oldcount) ? 0 : 1;
+	$oldcount ||= 0; $oldvalue ||= 0;
+	# Now INSERT the rows for all these changes into al2_log,
+	# one row for each field in type_hr
+	my $newvalue = $oldvalue;
+	# Run the loop to log the changes in type id order.
+	my @types =
+		map { $_->{name} }
+		grep { $_ && $_->{name} }
+		map { $self->getAL2TypeById($_) }
+		sort { $a <=> $b }
+		map { $al2types->{$_}{al2tid} }
+		keys %$type_hr;
+#use Data::Dumper; $Data::Dumper::Sortkeys = 1;
+#print STDERR "srcid=$srcid srcid_sql_in=$srcid_sql_in types='@types' for type_hr: " . Dumper($type_hr);
+	for my $type (@types) {
+		# undef for a type field means "don't change or log anything"
+		next if !defined $type_hr->{$type};
+		my $value = $type_hr->{$type};
+		# Drop a row in the log for this type.
+		my $rows = $self->createAL2Log({
+			srcid_sql_in =>	$srcid_sql_in,
+			ts_sql =>	$ts_sql,
+			adminuid =>	$adminuid,
+			type =>		$type,
+			value =>	$value,
+		});
+		# XXXSRCID error-checking! failure here should abort
+		# this whole method, and I want to wrap this
+		# method in a transaction so I can ROLLBACK in that case.
+		# Now update the new value that we're going to write
+		# back, for this type.
+		my $bitpos = $al2types->{$type}{bitpos};
+		# undef for a bit position means "don't change value
+		# of any bits"
+		next if !defined($bitpos);
+		my $bitmask = 1 << $bitpos;
+		if ($value) {
+			$newvalue |=  $bitmask;
+		} else {
+			$newvalue &= ~$bitmask;
+		}
+	}
+	# Now do an INSERT IGNORE into al2 just to be sure that a
+	# row exists for the next operation we're going to do.  If
+	# there was no row before, $oldcount will be 0 which is the
+	# value we're going to insert, which is what we want.
+	$self->sqlInsert('al2', {
+			-srcid =>	$srcid_sql_in,
+			updatecount =>	0,
+		}, { ignore => 1 });
+	# Now UPDATE the row with that srcid, which might be the one
+	# we just inserted or might not, to reflect the new data.
+	# If updatecount is not what we expect, it means atomicity
+	# is broken because some other process updated it since the
+	# first SELECT that got the updatecount.  That's fine, we
+	# let that other process's change stand and trust that the
+	# task will update the value soon enough.
+	my $updated = $self->sqlUpdate('al2', {
+			-srcid =>	$srcid_sql_in,
+			value =>	$newvalue,
+		}, "srcid=$srcid_sql_in AND updatecount=$oldcount");
+	if ($updated) {
+		# XXXSRCID Invalidate memcached cache here if and only
+		# if the sqlUpdate succeeded.  Failure is not an error
+		# however.
+	}
+	return $did_add_row;
+}
+
+sub createAL2Log {
+	my($self, $hr) = @_;
+	my $al2types = $self->getAL2Types;
+	my $al2tid = $al2types->{ $hr->{type} }{al2tid};
+
+	# The "val" column is an ENUM that's either the word "set" or
+	# "clear", but in the case of the "comment" type, it's NULL.
+	my $val = $hr->{value} ? 'set' : 'clear';
+	$val = undef if $hr->{type} eq 'comment';
+
+	my $rows = $self->sqlInsert("al2_log", {
+		-srcid =>	$hr->{srcid_sql_in},
+		-ts =>		$hr->{ts_sql} || 'NOW()',
+		adminuid =>	$hr->{adminuid} || getCurrentUser('uid'),
+		al2tid =>	$al2tid,
+		val =>		$val,
+	});
+	if (!$rows) {
+		warn scalar(localtime) . " $$ createAL2Log log insert failed '$hr->{srcid_sql_in}'";
+	}
+	if ($rows && $hr->{type} eq 'comment') {
+		# The type named 'comment' is a special case:  we insert
+		# a row into al2_log_comments as well.
+		my $al2lid = $self->getLastInsertId();
+		$rows = $self->sqlInsert("al2_log_comments", {
+			al2lid =>	$al2lid,
+			comment =>	$hr->{value},
+		});
+		if (!$rows) {
+			warn scalar(localtime) . " $$ createAL2Log comment insert failed '$al2lid' '$hr->{srcid_sql_in}'";
+		}
+	}
+	return $rows;
+}
+
+# Passing in multiple srcids here is A-OK because typically the user
+# will _have_ multiple srcids (ipid, subnetid, and maybe uid).  Or,
+# it works fine with a single srcid, either scalar or in a hashref.
+
+sub getAL2 {
+	my($self, $srcids) = @_;
+
+	if (!$srcids || (ref($srcids) && !keys(%$srcids))) {
+		$srcids = getCurrentUser('srcids');
+	} elsif (!ref($srcids)) {
+		$srcids = { get_srcid_type($srcids) => $srcids };
 	}
 
-	my $info = undef;
-	for my $where (@$where_ary) {
-		$ref = $self->sqlSelectAll("reason, ts, adminuid, estimated_users", 'accesslist', $where);
-		for my $row (@$ref) {
-			$info ||= { };
-			if (!exists($info->{reason}) || $info->{reason} eq '') {
-				$info->{reason}	= $row->[0];
-				$info->{ts}	= $row->[1];
-				$info->{adminuid} = $row->[2];
-				$info->{estimated_users} = $row->[3];
-			} elsif ($info->{reason} ne $row->[0]) {
-				$info->{reason}	= 'multiple';
-				$info->{ts}	= 'multiple';
-				$info->{adminuid} = 0;
-				$info->{estimated_users} = $row->[3];
-				# At this point we're done, since the
-				# reason and time can't change anymore,
-				# so short-circuit out of the loop.
-				return $info;
+	# XXXSRCID Try to use memcached to retrieve this data.
+use Data::Dumper; $Data::Dumper::Sortkeys = 1;
+print STDERR "getAL2 srcids: " . Dumper($srcids);
+	my($where) = $self->_get_where_and_valuelist_al2($srcids);
+	my $values = $self->sqlSelectColArrayref('value', 'al2', $where);
+print STDERR "getAL2 where: '$where' values: " . Dumper($values);
+
+	# The al2.value column ORs together for all the AL2 rows that
+	# apply for a user.  E.g. if the subnet has 'nopost' set, the
+	# IP has 'nosubmit' and the uid has 'trusted', all three of
+	# those will be returned.
+	my $bitvector = 0;
+	for my $value (@$values) {
+		$bitvector |= $value;
+	}
+	
+	# Return a hashref with one field set for each bit set.
+	my $al2types = $self->getAL2Types;
+	my $retval = { };
+	for my $name (keys %$al2types) {
+		if (defined($al2types->{$name}{bitpos})
+			&& ( $bitvector & ( 1 << $al2types->{$name}{bitpos} ) )
+		) {
+			$retval->{$name} = $al2types->{$name};
+		}
+print STDERR "getAL2 name=$name bv=$bitvector bp=$al2types->{$name}{bitpos}\n";
+	}
+print STDERR "getAL2 retval: " . Dumper($retval);
+	return $retval;
+}
+
+# We only allow passing in one srcid here because this is mainly for
+# admin display, and the admin will be editing only one srcid at a
+# time.
+#	$access_type = 'nopost' if !$access_type
+#		|| $access_type !~ /^(ban|nopost|nosubmit|norss|nopalm|proxy|trusted)$/;
+
+sub getAL2Log {
+	my($self, $srcid) = @_;
+	my $constants = getCurrentStatic();
+
+	if (!ref($srcid)) {
+		$srcid = { get_srcid_type($srcid) => $srcid };
+	}
+use Data::Dumper; $Data::Dumper::Sortkeys = 1;
+	print STDERR "getAL2Log srcid: " . Dumper($srcid);
+	my($where) = $self->_get_where_and_valuelist_al2($srcid);
+
+	# Do the main select on al2_log to pull in all the changes made
+	# for this srcid.
+	my $rows = $self->sqlSelectAllHashrefArray(
+		'*, UNIX_TIMESTAMP(ts) AS ts_ut',
+		'al2_log', $where,
+		"ORDER BY al2lid");
+	my @al2lids = ( );
+	for my $row (@$rows) {
+		push @al2lids, $row->{al2lid};
+	}
+
+	# Do a second select on al2_log_comments to pull in any comment
+	# data there may be and attach it to each row.
+	if (@al2lids) {
+		my $al2lids_where = join(", ", @al2lids);
+		my $comments = $self->sqlSelectAllKeyValue('al2lid, comment',
+			'al2_log_comments',
+			"al2lid IN ($al2lids_where)");
+		for my $row (@$rows) {
+			if ($comments->{ $row->{al2lid} }) {
+				$row->{comment} = $comments->{ $row->{al2lid} };
 			}
 		}
 	}
 
-	return $info;
+	# For convenience, pull the al2_type information for each row and
+	# attach that as well.
+	my $al2types = $self->getAL2Types;
+	for my $row (@$rows) {
+		my $al2tid = $row->{al2tid};
+		my $al2type = $self->getAL2TypeById($al2tid)->{name};
+		if (!$al2type) {
+			# Sanity checking.
+			warn "no al2type for '$al2tid'";
+			next;
+		}
+		$row->{bitpos} = $al2types->{$al2type}{bitpos};
+		$row->{name}   = $al2types->{$al2type}{name};
+		$row->{title}  = $al2types->{$al2type}{title};
+	}
+
+	return $rows;
+}
+
+sub checkAL2 {
+	my($self, $srcids, $type) = @_;
+	my $data = $self->getAL2($srcids);
+	return $data->{$type} ? 1 : 0;
+}
+
+sub getAL2List {
+	my($self, $type_name, $offset, $count) = @_;
+	$offset ||= 0; $count ||= 0;
+	my $where = "";
+	if ($type_name) {
+		# Return only al2 entries with this kind of access modifier.
+		# (or access restriction).
+		my $al2types = $self->getAL2Types;
+		my $bitpos = $al2types->{$type_name}{bitpos};
+		# Sanity check, probably redundant.
+		if (!$al2types->{$type_name} || !defined($al2types->{$type_name}{bitpos})) {
+			warn scalar(localtime) . " $$ getAL2List failed sanity check '$type_name'";
+			return [ ];
+		}
+		my $mask = 1 << $bitpos;
+		$where = "(value & $mask) > 0";
+	}
+	my $other = "";
+	# XXXSRCID Double-check this logic, I wrote it in a taxi
+	if ($count) {
+		$other = "LIMIT $offset, $count";
+	}
+	my $srcids = $self->sqlSelectColArrayref(
+		get_srcid_sql_out('srcid'),
+		"al2", $where, $other);
+	return $srcids;
 }
 
 ##################################################################
@@ -5949,15 +6106,16 @@ sub getAccessListInfo {
 # can be identified by uid, ipid, or subnetid.  The old reason will be
 # overwritten with whatever's passed in.
 sub changeAccessList {
-	my($self, $user_check, $now_here, $now_gone, $reason) = @_;
+	my($self, $srcid, $now_here, $now_gone, $reason) = @_;
 
-	my($where_ary) = $self->_get_insert_and_where_accesslist($user_check);
+	die "broken still"; # XXXSRCID
+	my($where_ary) = $self->_get_where_and_valuelist_al2($srcid);
 	my $where = join(" OR ", @$where_ary);
 	my $ar = $self->sqlSelectAllHashrefArray("*", "accesslist", $where);
 
 	if (!@$ar) {
 		# No existing columns;  just add what has to be added.
-		return $self->setAccessList($user_check, $now_here, $reason);
+		return $self->setAccessList($srcid, $now_here, $reason);
 	}
 
 	# We have existing columns.  Pull out the union of the "yes"
@@ -5976,7 +6134,7 @@ sub changeAccessList {
 	for my $col (@$now_here) { $new_now{$col} = 'yes' }
 	for my $col (@$now_gone) { delete $new_now{$col}  }
 	my @new_now = grep { $new_now{$_} eq 'yes' } keys %new_now;
-	return $self->setAccessList($user_check, \@new_now, $reason);
+	return $self->setAccessList($srcid, \@new_now, $reason);
 }
 
 ##################################################################
@@ -5984,7 +6142,7 @@ sub setAccessList {
 	# Old comment: Do not use this method to set/unset expired or isproxy
 	# New comment: Feel free to use this method to set isproxy.  "Expired"
 	# is still not functional. - Jamie 2003/03/04
-	my($self, $user_check, $new_now, $reason) = @_;
+	my($self, $srcid, $new_now, $reason) = @_;
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
@@ -5993,8 +6151,9 @@ sub setAccessList {
 
 	my $where = "reason != 'expired'";
 
-	my($where_ary, $insert_hr) = $self->_get_insert_and_where_accesslist($user_check);
-	# Hopefully the $user_check we're given will specify its data type
+die "broken still sAL";
+	my($where_ary, $insert_hr) = $self->_get_where_and_valuelist_al2($srcid);
+	# Hopefully the $srcid we're given will specify its data type
 	# but in case we're passed just an {md5id}, we will get two clauses
 	# returned in $where_ary and we'll need to join them.
 	$where .= " AND (" . join(" OR ", @$where_ary) . ")";
@@ -6042,7 +6201,7 @@ sub setAccessList {
 }
 
 #################################################################
-# XXX Should probably cache this instead of relying on MySQL's query cache.
+# XXXSRCID Should probably cache this instead of relying on MySQL's query cache.
 sub checkIsProxy {
 	my($self, $ipid) = @_;
 
@@ -6054,7 +6213,7 @@ sub checkIsProxy {
 }
 
 #################################################################
-# XXX Should probably cache this instead of relying on MySQL's query cache.
+# XXXSRCID Should probably cache this instead of relying on MySQL's query cache.
 sub checkIsTrusted {
 	my($self, $ipid) = @_;
 
@@ -7270,6 +7429,9 @@ sub setCommentForMod {
 	# and make the comments table InnoDB and this will work.
 	# Oh well.  Meanwhile, the worst thing that will happen is
 	# a few wrong points logged here and there.
+	# XXX Hey, comments table is InnoDB now.  That comment
+	# above needs to be revised, and it might be time to look
+	# over the code too.
 
 #	$self->{_dbh}{AutoCommit} = 0;
 	$self->sqlDo("SET AUTOCOMMIT=0");
@@ -8440,6 +8602,9 @@ sub calcModval {
 	$modval;
 }
 
+# XXXSRCID This really should be weighted for time.  Double-check
+# with EXPLAIN and real-world data to make sure the indexes on
+# those columns are being used.
 sub getNetIDKarma {
 	my($self, $type, $id) = @_;
 	my($count, $karma);
@@ -8891,6 +9056,10 @@ sub getSlashConf {
 	for my $plugin (@$plugindata) {
 		$conf{plugin}{$plugin} = 1;
 	}
+
+	# This really should be a separate piece of data returned by
+	# getReasons() the same way getTopicTree() works.  It's only part
+	# of $constants for historical, er, reasons.
 	$conf{reasons} = $self->sqlSelectAllHashref(
 		"id", "*", "modreasons"
 	);
@@ -11236,6 +11405,8 @@ sub getUsersNicknamesByUID {
 ########################################################
 # Get the complete list of all acl/uid pairs used on this site.
 # (We assume this to be on the order of < 10K rows returned.)
+# XXX That assumption may no longer be valid.  We need to
+# XXX consider whether this needs to change.
 # The list is returned as a hashref whose keys are the acl names
 # and whose values are an arrayref of uids that have that acl
 # permission.
@@ -11249,6 +11420,19 @@ sub getAllACLs {
 		push @{$hr->{$acl}}, $uid;
 	}
 	return $hr;
+}
+
+########################################################
+# Get the complete list of all ACLs used on this site,
+# but without returning any data about which user(s) have
+# them.
+# XXX This _really_ should be cached for on the order of 5 minutes.
+sub getAllACLNames {
+	my($self) = @_;
+	my $acls = $self->sqlSelectColArrayref('acl', 'users_acl', '',
+		'GROUP BY acl ORDER BY acl');
+	$acls ||= [ ];
+	return $acls;
 }
 
 ########################################################
