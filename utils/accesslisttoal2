@@ -48,15 +48,28 @@ my @ipids     = sort               keys %ipids;
 my @subnetids = sort               keys %subnetids;
 
 for my $uid (@uids) {
+	next unless $uid;
 	my @ids = grep { $al1->{$_}{uid} == $uid } keys %$al1;
-#print STDERR "ids for uid=$uid: '@ids'\n";
-	do_inserts($uid, [@ids]);
+print STDERR "ids for uid=$uid: '@ids'\n";
+	do_inserts(convert_srcid(uid => $uid), [@ids]);
+}
+
+for my $ipid (@ipids) {
+	next unless $ipid;
+	my @ids = grep { $al1->{$_}{ipid} eq $ipid } keys %$al1;
+print STDERR "ids for ipid=$ipid: '@ids'\n";
+	do_inserts(convert_srcid(ipid => $ipid), [@ids]);
+}
+
+for my $subnetid (@subnetids) {
+	next unless $subnetid;
+	my @ids = grep { $al1->{$_}{subnetid} eq $subnetid } keys %$al1;
+print STDERR "ids for subnetid=$subnetid: '@ids'\n";
+	do_inserts(convert_srcid(subnetid => $subnetid), [@ids]);
 }
 
 sub do_inserts {
 	my($id, $al1_ids) = @_;
-	# XXXSRCID new_id is the same for uid, but not for ipid/subnetid
-	my $new_id = $id;
 	for my $al1_id (@$al1_ids) {
 		my $row = $al1->{$al1_id};
 		my $old_bitmap = $curbitmap->{ $row->{$id} } || 0;
@@ -83,7 +96,7 @@ sub do_inserts {
 		my $options = { adminuid => $row->{adminuid} || 0 };
 		$options->{ts} = $row->{ts} if $row->{ts};
 #print STDERR "setting for row: " . Dumper($row) . "changed_types: " . Dumper($changed_types) . "options: " . Dumper($options);
-		$slashdb->setAL2($new_id, $changed_types, $options);
+		$slashdb->setAL2($id, $changed_types, $options);
 	}
 }
 
