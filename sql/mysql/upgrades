@@ -2952,43 +2952,41 @@ INSERT INTO vars (name, value, description) VALUES ('approvedtags_attr_admin', '
 #
 #############
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # End of T_2_5_0_59, Start of T_2_5_0_60 - 2005/04/15
 
 CREATE TABLE al2 (
-	srcid		BIGINT UNSIGNED NOT NULL DEFAULT '0',
-	value		INT UNSIGNED NOT NULL DEFAULT '0',
-	updatecount	INT UNSIGNED NOT NULL DEFAULT '0',
-	PRIMARY KEY (srcid)
+    srcid       BIGINT UNSIGNED NOT NULL DEFAULT '0',
+    value       INT UNSIGNED NOT NULL DEFAULT '0',
+    updatecount INT UNSIGNED NOT NULL DEFAULT '0',
+    PRIMARY KEY (srcid)
 ) TYPE=InnoDB;
 
 CREATE TABLE al2_log (
-	al2lid		INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	srcid		BIGINT UNSIGNED NOT NULL DEFAULT '0',
-	ts		DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-	adminuid	MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
-	al2tid		TINYINT UNSIGNED NOT NULL DEFAULT '0',
-	val		ENUM('set', 'clear') DEFAULT NULL,
-	PRIMARY KEY (al2lid),
-	INDEX ts (ts),
-	INDEX srcid_ts (srcid, ts)
+    al2lid      INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    srcid       BIGINT UNSIGNED NOT NULL DEFAULT '0',
+    ts      DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+    adminuid    MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+    al2tid      TINYINT UNSIGNED NOT NULL DEFAULT '0',
+    val     ENUM('set', 'clear') DEFAULT NULL,
+    PRIMARY KEY (al2lid),
+    INDEX ts (ts),
+    INDEX srcid_ts (srcid, ts)
 ) TYPE=InnoDB;
 
 CREATE TABLE al2_log_comments (
-	al2lid		INT UNSIGNED NOT NULL DEFAULT '0',
-	comment		TEXT NOT NULL DEFAULT '',
-	PRIMARY KEY (al2lid)
+    al2lid      INT UNSIGNED NOT NULL DEFAULT '0',
+    comment     TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY (al2lid)
 ) TYPE=InnoDB;
 
 CREATE TABLE al2_types (
-	al2tid		TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	bitpos		TINYINT UNSIGNED DEFAULT NULL,
-	name		VARCHAR(30) NOT NULL DEFAULT '',
-	title		VARCHAR(64) NOT NULL DEFAULT '',
-	PRIMARY KEY (al2tid),
-	UNIQUE name (name),
-	UNIQUE bitpos (bitpos)
+    al2tid      TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    bitpos      TINYINT UNSIGNED DEFAULT NULL,
+    name        VARCHAR(30) NOT NULL DEFAULT '',
+    title       VARCHAR(64) NOT NULL DEFAULT '',
+    PRIMARY KEY (al2tid),
+    UNIQUE name (name),
+    UNIQUE bitpos (bitpos)
 ) TYPE=InnoDB;
 
 INSERT INTO al2_types VALUES (1, NULL, 'comment', 'Comment');
@@ -3002,4 +3000,8 @@ INSERT INTO al2_types VALUES (8, 6, 'trusted', 'Trusted');
 INSERT INTO al2_types VALUES (9, 7, 'proxy', 'Valid Proxy');
 
 # run utils/accesslisttoal2 -u YOURSITEUSERNAME
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_60, Start of T_2_5_0_61 - 2005/04/26
 
