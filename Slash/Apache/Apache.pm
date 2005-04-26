@@ -241,6 +241,8 @@ sub SlashCompileTemplates ($$$) {
 	$slashdb->{_dbh}->disconnect;
 }
 
+# This handler is called in the first Apache phase, post-read-request.
+#
 # This can be used in conjunction with mod_proxy_add_forward or somesuch,
 # if you use a frontend/backend Apache setup, where all requests come
 # from 127.0.0.1 or some other predictable IP number(s).  For speed, we
