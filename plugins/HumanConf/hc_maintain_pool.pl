@@ -7,7 +7,7 @@
 use strict;
 use Slash::Utility;
 
-use vars qw( %task $me );
+use vars qw( %task $me $task_exit_flag );
 
 $task{$me}{timespec} = '10,40 * * * *';
 $task{$me}{timespec_panic_1} = '';
@@ -24,6 +24,7 @@ $task{$me}{code} = sub {
 	my($deleted, $inserted, $cursize, $hcoff) = (0, 0, 0, '');
 	if ($constants->{hc}) {
 		$deleted = $humanconf->deleteOldFromPool() || 0;
+		return "del $deleted, aborted after deleteOldFromPool" if $task_exit_flag;
 		$inserted = $humanconf->fillPool() || 0;
 		$cursize = $humanconf->getPoolSize() || 0;
 	} else {
