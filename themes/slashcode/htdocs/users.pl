@@ -3140,7 +3140,7 @@ sub getUserAdmin {
 	} elsif ($field eq 'ipid') {
 		$user_edit->{nonuid} = 1;
 		$user_edit->{ipid} = $id;
-		$srcid = convert_srcid( 32 => $id );
+		$srcid = convert_srcid( ipid => $id );
 		$user_editfield = $id;
 		$uidstruct = $reader->getUIDStruct('ipid', $user_edit->{ipid});
 		@accesshits = $logdb->countAccessLogHitsInLastX('host_addr', $user_edit->{ipid}) if defined($logdb);
@@ -3154,7 +3154,7 @@ sub getUserAdmin {
 
 	} elsif ($field eq 'subnetid') {
 		$user_edit->{nonuid} = 1;
-		$srcid = convert_srcid( 24 => $id );
+		$srcid = convert_srcid( ipid => $id );
 		if ($id =~ /^(\d+\.\d+\.\d+)(?:\.\d)?/) {
 			$id = $1 . ".0";
 			$user_edit->{subnetid} = $id;
