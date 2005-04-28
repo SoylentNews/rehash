@@ -5076,7 +5076,7 @@ sub checkExpired {
 	return $rows ? 1 : 0;
 }
 
-##################################################################
+###################################################################
 # Just a convenience method, a wrapper around checkReadOnly that is
 # almost as easy to call as $constants->{allow_anonymous} used to be.
 # (This should only be passed a UID known to be anonymous.)
@@ -5489,16 +5489,14 @@ sub getBanList {
 		if ($debug) {
 			print STDERR scalar(gmtime) . " pid $$ gBL (re)fetching ban\n";
 		}
-		my $list = $self->sqlSelectAll(
-			"ipid, subnetid, uid",
-			"accesslist",
-			"now_ban = 'yes'");
+		my $list = $self->getAL2List('ban');
 		for (@$list) {
-			$banlist_ref->{$_->[0]} = 1 if $_->[0];
-			$banlist_ref->{$_->[1]} = 1 if $_->[1];
-			$banlist_ref->{$_->[2]} = 1 if $_->[2]
-				&& $_->[2] != $constants->{anon_coward_uid};
+			$banlist_ref->{$_} = 1;
 		}
+		# Just in case the anonymous coward got accidentally onto
+		# the list:  we don't allow the A.C. to be banned from
+		# the entire site!
+		delete $banlist_ref->{ $constants->{anon_coward_uid} };
 		# why this? in case there are no banned users.
 		# (this should be unnecessary;  we could use another var to
 		# indicate whether the cache is fresh, besides checking its
@@ -5561,13 +5559,9 @@ sub getNorssList {
 		if ($debug) {
 			print STDERR scalar(gmtime) . " pid $$ gNL (re)fetching norss\n";
 		}
-		my $list = $self->sqlSelectAll(
-			"ipid, subnetid",
-			"accesslist",
-			"now_norss = 'yes'");
+		my $list = $self->getAL2List('norss');
 		for (@$list) {
-			$norsslist_ref->{$_->[0]} = 1 if $_->[0];
-			$norsslist_ref->{$_->[1]} = 1 if $_->[1];
+			$norsslist_ref->{$_} = 1;
 		}
 		# why this? in case there are no RSS-banned users.
 		# (this should be unnecessary;  we could use another var to
@@ -5629,13 +5623,9 @@ sub getNopalmList {
 		if ($debug) {
 			print STDERR scalar(gmtime) . " gNL pid $$ (re)fetching nopalm\n";
 		}
-		my $list = $self->sqlSelectAll(
-			"ipid, subnetid",
-			"accesslist",
-			"now_nopalm = 'yes'");
+		my $list = $self->getAL2List('nopalm');
 		for (@$list) {
-			$nopalmlist_ref->{$_->[0]} = 1 if $_->[0];
-			$nopalmlist_ref->{$_->[1]} = 1 if $_->[1];
+			$nopalmlist_ref->{$_} = 1;
 		}
 		# why this? in case there are no Palm-banned users.
 		# (this should be unnecessary;  we could use another var to
@@ -5975,11 +5965,11 @@ sub getAL2 {
 	}
 
 	# XXXSRCID Try to use memcached to retrieve this data.
-use Data::Dumper; $Data::Dumper::Sortkeys = 1;
-print STDERR "getAL2 srcids: " . Dumper($srcids);
+#use Data::Dumper; $Data::Dumper::Sortkeys = 1;
+#print STDERR "getAL2 srcids: " . Dumper($srcids);
 	my($where) = $self->_get_where_and_valuelist_al2($srcids);
 	my $values = $self->sqlSelectColArrayref('value', 'al2', $where);
-print STDERR "getAL2 where: '$where' values: " . Dumper($values);
+#print STDERR "getAL2 where: '$where' values: " . Dumper($values);
 
 	# The al2.value column ORs together for all the AL2 rows that
 	# apply for a user.  E.g. if the subnet has 'nopost' set, the
@@ -5999,9 +5989,9 @@ print STDERR "getAL2 where: '$where' values: " . Dumper($values);
 		) {
 			$retval->{$name} = $al2types->{$name};
 		}
-print STDERR "getAL2 name=$name bv=$bitvector bp=$al2types->{$name}{bitpos}\n";
+#print STDERR "getAL2 name=$name bv=$bitvector bp=$al2types->{$name}{bitpos}\n";
 	}
-print STDERR "getAL2 retval: " . Dumper($retval);
+if ($retval && keys %$retval) { print STDERR "getAL2 retval keys: '" . join(" ", sort keys %$retval) . "'\n"; }
 	return $retval;
 }
 
@@ -6018,8 +6008,8 @@ sub getAL2Log {
 	if (!ref($srcid)) {
 		$srcid = { get_srcid_type($srcid) => $srcid };
 	}
-use Data::Dumper; $Data::Dumper::Sortkeys = 1;
-	print STDERR "getAL2Log srcid: " . Dumper($srcid);
+#use Data::Dumper; $Data::Dumper::Sortkeys = 1;
+#print STDERR "getAL2Log srcid: " . Dumper($srcid);
 	my($where) = $self->_get_where_and_valuelist_al2($srcid);
 
 	# Do the main select on al2_log to pull in all the changes made
