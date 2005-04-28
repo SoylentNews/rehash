@@ -375,7 +375,9 @@ sub forgetStoryTextRendered {
 	my $days_back = $constants->{freshenup_text_render_daysback} || 7;
 	return $self->sqlUpdate(
 		"story_text, stories",
-		{ rendered => undef },
+		{ rendered => undef,
+		  -last_update => 'last_update'
+		},
 		"story_text.stoid = stories.stoid
 		 AND rendered IS NOT NULL
 		 AND time < DATE_SUB(NOW(), INTERVAL $days_back DAY)");

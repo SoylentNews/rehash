@@ -101,7 +101,9 @@ $task{$me}{code} = sub {
 		my $sid_q = $slashdb->sqlQuote($sid);
 		$successes += $slashdb->sqlUpdate(
 			"stories",
-			{ -hits => "hits + $sid_count{$sid}" },
+			{ -hits => "hits + $sid_count{$sid}",
+			  -last_update => 'last_update'
+			},
 			"sid = $sid_q",
 		);
 		$total_hits += $sid_count{$sid};
