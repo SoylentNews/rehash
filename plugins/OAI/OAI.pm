@@ -155,15 +155,38 @@ sub ListIdsOrRecords {
 
 	# copy args
 	my %args = map { $_ => $options->{args}{$_} } keys %{$options->{args}};
-	my $argnum		= scalar keys %{$options->{args}};
+	my $resumptionToken	= delete $args{resumptionToken};
+
+	if ($resumptionToken) {
+		# resumptionToken is exclusive
+		if (scalar(keys %{$options->{args}}) > 1) {
+			push @{$options->{error}}, 'badArgument';
+		}
+
+		my $rt_args = $self->_parse_resumptionToken($resumptionToken);
+		if (keys %$rt_args) {
+			my $optargs = $options->{args};
+			$optargs->{metadataPrefix}	= delete $rt_args->{metadataPrefix};
+			$optargs->{set}			= delete $rt_args->{set};
+			$optargs->{from}		= delete $rt_args->{from};
+			$optargs->{'until'}		= delete $rt_args->{'until'};
+			$options->{nextStart}		= delete $rt_args->{nextStart};
+			%args = map { $_ => $options->{args}{$_} } keys %{$options->{args}};
+			delete $args{resumptionToken};
+		} else {
+			push @{$options->{error}}, 'badResumptionToken';
+		}
+
+		return if $options->{error};
+	}
+
 	my $metadataPrefix	= delete $args{metadataPrefix};
 	my $set			= delete $args{set};
-	my $resumptionToken	= delete $args{resumptionToken};
 	$dates{from}		= delete $args{from};
 	$dates{'until'}		= delete $args{'until'};
 
-	# metadataPrefix required, and resumptionToken is exclusive
-	if ((keys %args || !$metadataPrefix) || ($resumptionToken && $argnum > 1)) {
+	# metadataPrefix required
+	if (keys %args || !$metadataPrefix) {
 		push @{$options->{error}}, 'badArgument';
 	}
 	if ($metadataPrefix && !$Formats{$metadataPrefix}) {
@@ -172,11 +195,14 @@ sub ListIdsOrRecords {
 	if ($set && !keys %Sets) {
 		push @{$options->{error}}, 'noSetHierarchy';
 	}
-	# XXX need to support this somehow (and note it is exclusive!)
-	if ($resumptionToken) {
-		push @{$options->{error}}, 'badResumptionToken';
-	}
 	return if $options->{error};
+
+	if (defined $options->{nextStart} && $options->{nextStart} =~ /\D/) {
+		$options->{error} = {
+			badArgument => "nextStart must be an integer"
+		};
+		return;
+	}
 
 	for my $date (qw(from until)) {
 		next unless $dates{$date};
@@ -202,7 +228,7 @@ sub ListIdsOrRecords {
 	}
 
 
-	my $records = $self->_find_records($options, \%dates, $set);
+	my($records, $next) = $self->_find_records($options, \%dates, $set);
 	if (!@$records) {
 		push @{$options->{error}}, 'noRecordsMatch';
 		return;
@@ -210,6 +236,10 @@ sub ListIdsOrRecords {
 		$xml .= $self->_print_record($records, $options);
 	}
 
+	$xml .= $self->_print_resumptionToken($options, $next) if $next;
+
+	# clean up ... we know if we are here, this is correct
+	$options->{args} = { resumptionToken => $resumptionToken } if $resumptionToken; 
 
 	return $xml;
 }
@@ -305,7 +335,7 @@ sub Identify {
 			# we could use a new var for this, and have multiple values
 			$value = $constants->{adminmail};
 		} elsif ($el eq 'earliestDatestamp') {
-			# XXX this should be better somehow ... probably a var
+			# XXX this could be better somehow ... probably a var
 			$value = Slash::XML->date2iso8601(0, 1);
 		} elsif ($el eq 'deletedRecord') {
 			# no, persistent, transient
@@ -336,7 +366,7 @@ sub ListSets {
 	if (!keys %Sets) {
 		push @{$options->{error}}, 'noSetHierarchy';
 	}
-	# resumptionToken is only allowed argument, and we ignore it at this time
+	# resumptionToken is the only allowed argument, and we ignore it at this time
 	if (grep {$_ ne 'resumptionToken' } keys %{$options->{args}}) {
 		push @{$options->{error}}, 'badArgument';
 	}
@@ -419,7 +449,7 @@ sub foot {
 	my($self, $options) = @_;
 	my $close = $options->{error} ? '' : " </$options->{verb}>\n";
 	return <<EOT;
-$close</OAI-PMH>      
+$close</OAI-PMH>
 EOT
 }
 
@@ -441,15 +471,29 @@ sub _get_identifier {
 	if ($data->{type} eq 'article') {
 		my $record = $reader->getStory($data->{id});
 		if ($record) {
-			$data->{datestamp} = $record->{'time'};
+			($data->{datestamp} = $record->{'last_update'}) =~
+				s{^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})}
+				 {$1-$2-$3T$4:$5:$6Z}x;
 
 			my $md = {};
 			$md->{title}       = $record->{title};
 			$md->{creator}     = $reader->getUser($record->{uid}, 'nickname');
-			# XXX: processSlashTags etc.
-			$md->{description} = $record->{introtext} . "\n<p>\n" . $record->{bodytext};
 			$md->{date}        = $record->{'time'};
 			$md->{identifier}  = "$constants->{absolutedir}/article.pl?sid=$record->{sid}";
+
+			$md->{description} = <<EOT;
+<div>
+$record->{introtext}
+</div>
+EOT
+			$md->{description} .= <<EOT if $record->{bodytext};
+
+<div>
+$record->{bodytext}
+</div>
+EOT
+			$md->{description} = parseSlashizedLinks(processSlashTags($md->{description}));
+
 
 			my $topics = $reader->getStoryTopicsRendered($record->{stoid});
 			my $tree = $reader->getTopicTree;
@@ -482,6 +526,8 @@ sub _print_record {
 	my($self, $records, $options) = @_;
 	my $xml;
 
+	my $source = [ getCurrentStatic('basedomain') ];
+
 	for my $record (@$records) {
 		# XXX setSpec hardcoded for now
 		my $identifier = $self->encode($record->{identifier}, 'link');
@@ -510,11 +556,15 @@ EOT
 
 		# same on all: publisher, rights, type, format, language
 		# dunno: source, relation, coverage
-		for my $dc (qw(title creator subject description contributor date identifier)) {
-			next unless defined $record->{metadata}{$dc}
-				&& length $record->{metadata}{$dc};
-
-			my $values = $record->{metadata}{$dc};
+		for my $dc (qw(source title creator subject description contributor date identifier)) {
+			my $values;
+			if ($dc eq 'source') {
+				$values = $source;
+			} else {
+				next unless defined $record->{metadata}{$dc}
+					&& length $record->{metadata}{$dc};
+				$values = $record->{metadata}{$dc};
+			}
 			unless (ref $values eq 'ARRAY') {
 				$values = [ $values ];
 			}
@@ -542,33 +592,77 @@ EOT
 sub _find_records {
 	my($self, $options, $dates, $set) = @_;
 
+	my $limit  = 100; # XXX var, oai_list_limit?
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $type = $options->{type} || 'article';
 	my($records, @return);
 
-	my $timecol = 'time';
+	my $timecol = 'last_update';
 
-	my $where = $dates->{from} && $dates->{'until'}
-		? "$timecol >= '$dates->{from}' AND $timecol <= '$dates->{'until'}'"
-		: $dates->{from}
-			? "$timecol >= '$dates->{from}'"
-			: $dates->{'until'}
-				? "$timecol <= '$dates->{'until'}'"
-				: '';
+	my $start = $options->{nextStart} || 1;
+
+	my @where;
+	push @where, "$timecol >= '$dates->{from}'" if $dates->{from};
+	push @where, "$timecol <= '$dates->{'until'}'" if $dates->{'until'};
+	push @where,  "__ID__ >= $start";
+
+	my $where = join ' AND ', @where;
 
 	if ($type eq 'article') {
-		$records = $reader->sqlSelectAll('stoid', 'stories', $where, 'ORDER BY stoid');
+		$where =~ s/__ID__/stoid/;
+		$records = $reader->sqlSelectAll(
+			'stoid', 'stories', $where,
+			"ORDER BY stoid LIMIT " . ($limit + 1)
+		) || [];
 	}
 
-	for (@$records) {
-		my $identifier = $self->_create_identifier({ type => $type, id => $_->[0] });
+	for my $i (0 .. $limit-1) {
+		my $record = $records->[$i] or last;
+		my $identifier = $self->_create_identifier({ type => $type, id => $record->[0] });
 		push @return, $self->_get_identifier($identifier);
 	}
 
-	return \@return;
+	my $next = $records->[$limit] ? $records->[$limit][0] : 0;
+	return \@return, $next;
 }
 
+sub _print_resumptionToken {
+	my($self, $options, $next) = @_;
+	return unless $next;
+	my $xml;
 
+	my $resumptionToken = "nextStart=$next";
+	for my $name (qw(metadataPrefix set from until)) {
+		my $value = strip_attribute($options->{args}{$name});
+		$resumptionToken .= "&$name=$value" if $value;
+	}
+
+	$xml = sprintf <<EOT, $self->encode($resumptionToken, 'link');
+  <resumptionToken>%s</resumptionToken>
+EOT
+
+	return $xml;
+}
+
+sub _parse_resumptionToken {
+	my($self, $resumptionToken) = @_;
+
+	my(%rt_args, $error);
+
+	my @pairs = split /&/, $resumptionToken;
+	return unless @pairs;
+
+	for my $pair (@pairs) {
+		my($name, $value) = split /=/, $pair, 2;
+		if ($name =~ /^(?:metadataPrefix|set|from|until|nextStart)$/) {
+			$rt_args{$name} = $value;
+		} else {
+			return;
+		}
+	}
+
+	return \%rt_args;
+}
 
 1;
 

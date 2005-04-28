@@ -22,7 +22,13 @@ sub main {
 	my $form      = getCurrentForm();
 	my $gSkin     = getCurrentSkin();
 
-	my $allowed = 1;  # XXX
+	my $allowed = 1;
+	if ($constants->{oai_allowed_ip} && $ENV{GATEWAY_INTERFACE}) {
+		$allowed = 0;
+		for my $ip (split /\|/, $constants->{oai_allowed_ip}) {
+			$allowed = 1, last if $user->{hostip} eq $ip;
+		}
+	}
 
 	if (!$allowed) {
 		redirect("$gSkin->{rootdir}/");
