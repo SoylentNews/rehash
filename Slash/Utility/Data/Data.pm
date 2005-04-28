@@ -1727,7 +1727,6 @@ sub approveTag {
 	my $constants = getCurrentStatic();
 
 	$wholetag =~ s/^\s*(.*?)\s*$/$1/; # trim leading and trailing spaces
-	$wholetag =~ s/\bstyle\s*=(.*)$//is; # go away please
 
 	# Take care of URL:foo and other HREFs
 	# Using /s means that the entire variable is treated as a single line
