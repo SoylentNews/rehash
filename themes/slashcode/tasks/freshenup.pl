@@ -310,8 +310,8 @@ $task{$me}{code} = sub {
 	if ($do_setstories) {
 		for my $stoid (sort { $a <=> $b } keys %story_set) {
 			my $options = undef;
-			$options->{last_updated} = $story_set{last_updated}
-				if $story_set{last_updated};
+			$options->{last_update} = $story_set{$stoid}{last_update}
+				if $story_set{$stoid}{last_update};
 			my $set_ok = $slashdb->setStory($stoid, $story_set{$stoid}, $options);
 			if (!$set_ok) {
 				$logmsg .= "; setStory($stoid) '$set_ok'";
