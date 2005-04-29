@@ -3472,9 +3472,9 @@ sub isValid {
 	my($self, $data, $opts) = @_;
 	my $File = $self->validate($data, $opts);
 
-	if (@{$File->{Errors}}) {
+	if (grep { $_->{type} ne 'W' } @{$File->{Errors}}) {
 		my $messages = getObject('Slash::Messages');
-		if ($messages) {
+		if ($messages && $opts->{message}) {
 			my $users = $messages->getMessageUsers(MSG_CODE_HTML_INVALID);
 			my $msg   = {
 				template_name	=> 'html_invalid',

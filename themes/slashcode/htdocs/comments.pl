@@ -1152,7 +1152,8 @@ sub submitComment {
 			}
 			$validator->isValid($test, {
 				data_type	=> 'comment',
-				data_id		=> $maxCid
+				data_id		=> $maxCid,
+				message		=> 1
 			}) if $validator;
 		}
 

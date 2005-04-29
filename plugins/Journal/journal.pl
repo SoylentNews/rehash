@@ -717,7 +717,8 @@ sub saveArticle {
 		}
 		$validator->isValid($strip_art, {
 			data_type	=> 'journal',
-			data_id		=> $form->{id}
+			data_id		=> $form->{id},
+			message		=> 1
 		}) if $validator;
 	}
 
