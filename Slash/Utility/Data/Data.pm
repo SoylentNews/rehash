@@ -1754,7 +1754,8 @@ sub approveTag {
 	}
 
 	# Build the hash of approved tags
-	my $approvedtags = $Slash::Data::Utility::approveTag::admin && $constants->{approvedtags_admin}
+	# XXX someday maybe should be an option, not a global var ...
+	my $approvedtags = $Slash::Utility::Data::approveTag::admin && $constants->{approvedtags_admin}
 		? $constants->{approvedtags_admin}
 		: $constants->{approvedtags};
 	my %approved =
@@ -1770,12 +1771,12 @@ sub approveTag {
 		if ($replace{$t_lc} && $approved{ $replace{$t_lc} }) {
 			$t = $t_lc = $replace{$t_lc};
 		} else {
-			$Slash::Data::Utility::approveTag::removed->{$t_lc}++
+			$Slash::Utility::Data::approveTag::removed->{$t_lc}++
 				if $constants->{approveTag_debug};
 			return '';
 		}
 	}
-	
+
 	# These are now stored in a var approvedtags_attr
 	#
 	# A string in the format below:
@@ -1794,7 +1795,7 @@ sub approveTag {
 	# }
 	# this is decoded in Slash/DB/MySQL.pm getSlashConf
 
-	my $attr = $Slash::Data::Utility::approveTag::admin && $constants->{approvedtags_attr_admin}
+	my $attr = $Slash::Utility::Data::approveTag::admin && $constants->{approvedtags_attr_admin}
 		? $constants->{approvedtags_attr_admin}
 		: $constants->{approvedtags_attr};
 	$attr ||= {};
