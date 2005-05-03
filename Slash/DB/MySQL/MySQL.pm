@@ -5764,21 +5764,24 @@ sub countAccessLogHitsInLastX {
 }
 
 ##################################################################
-# Pass this private utility method a user hashref and, based on the
-# uid/ipid/subnetid fields, it returns:
+# Pass this private utility method a hashref or arrayref and, based
+# on the uid/ipid/subnetid fields in that data, it returns:
 # 1. a WHERE clause that can be used to select rows from accesslist
 #    that apply to this user;
 # 2. an arrayref of srcid's suitable for passing to sqlUpdate() etc.
-# (This method used to be a lot more complicated;  the conversion
-# from accesslist to al2 let us simplify it a lot.)
 sub _get_where_and_valuelist_al2 {
 	my($self, $srcids) = @_;
 	$srcids ||= getCurrentUser('srcids');
 
 	my @values = ( );
-	for my $k (keys %$srcids) {
-		my $v = $srcids->{$k};
-		push @values, get_srcid_sql_in($v);
+	if (ref($srcids) eq 'HASH') {
+		@values = map { get_srcid_sql_in($_) } values %$srcids;
+	} elsif (ref($srcids) eq 'ARRAY') {
+		@values = map { get_srcid_sql_in($_) } @$srcids;
+	} else {
+		use Data::Dumper;
+		warn "logic error: arg to _get_where_and_valuelist_al2 was: " . Dumper($srcids);
+		return undef;
 	}
 
 	return(
@@ -5957,14 +5960,23 @@ sub createAL2Log {
 }
 
 # Passing in multiple srcids here is A-OK because typically the user
-# will _have_ multiple srcids (ipid, subnetid, and maybe uid).  Or,
-# it works fine with a single srcid, either scalar or in a hashref.
+# will _have_ multiple srcids (ipid, subnetid, and maybe uid).
+# Multiple srcids can be passed in as an arrayref or as the values in
+# a hashref.  Or, it works fine with a single srcid, either scalar or
+# in a hashref.
 
 sub getAL2 {
 	my($self, $srcids) = @_;
 
-	if (!$srcids || (ref($srcids) && !keys(%$srcids))) {
+	# If an empty value is passed in for srcids, use the current user.
+	if (!$srcids) {
 		$srcids = getCurrentUser('srcids');
+	} elsif (ref($srcids) eq 'ARRAY' && !@$srcids) {
+		$srcids = getCurrentUser('srcids');
+	} elsif (ref($srcids) eq 'HASH' && !keys(%$srcids)) {
+		$srcids = getCurrentUser('srcids');
+
+	# If a scalar is passed in for srcids, make it into a simple hashref.
 	} elsif (!ref($srcids)) {
 		$srcids = { get_srcid_type($srcids) => $srcids };
 	}
@@ -6000,11 +6012,8 @@ if ($retval && keys %$retval) { print STDERR "getAL2 retval keys: '" . join(" ",
 	return $retval;
 }
 
-# We only allow passing in one srcid here because this is mainly for
-# admin display, and the admin will be editing only one srcid at a
-# time.
-#	$access_type = 'nopost' if !$access_type
-#		|| $access_type !~ /^(ban|nopost|nosubmit|norss|nopalm|proxy|trusted)$/;
+# Passing in more than one srcid in a hashref is allowed, but the
+# typical use for this will be just one at a time.
 
 sub getAL2Log {
 	my($self, $srcid) = @_;
@@ -6031,6 +6040,9 @@ sub getAL2Log {
 	# Do a second select on al2_log_comments to pull in any comment
 	# data there may be and attach it to each row.
 	if (@al2lids) {
+		# XXXSRCID This could be a weensy bit more efficient by
+		# having an @al2lids_comment which only includes those
+		# rows for which al2tid == $all_al2types->{comment}{al2tid}
 		my $al2lids_where = join(", ", @al2lids);
 		my $comments = $self->sqlSelectAllKeyValue('al2lid, comment',
 			'al2_log_comments',
@@ -6059,6 +6071,23 @@ sub getAL2Log {
 	}
 
 	return $rows;
+}
+
+# Convenience method to return an arrayref of all comments that
+# have been posted for a srcid. Adminuids and timestamps for
+# those comments are not included, just the text.  Returns the
+# comments in chronological order.
+
+sub getAL2Comments {
+	my($self, $srcids) = @_;
+	my $com_ar = [ ];
+	my $al2_log = $self->getAL2Log($srcids);
+	return $com_ar unless $al2_log && @$al2_log;
+	for my $row (@$al2_log) {
+		next unless $row->{comment};
+		push @$com_ar, $row->{comment};
+	}
+	return $com_ar;
 }
 
 sub checkAL2 {

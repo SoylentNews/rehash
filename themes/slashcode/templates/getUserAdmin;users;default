@@ -89,7 +89,9 @@ __template__
 					all_aclam_hr, user_aclam_hr,
 					1, '', all_aclam_ar, 1) %]
 				&nbsp;
-				<textarea name="al2_new_comment" cols="30" rows="3" wrap="virtual"></textarea>
+				[% rowcount = useredit.acl.keys.size + al2_old.keys.keys.size - 1;
+				   IF rowcount < 3; rowcount = 3; END %]
+				<textarea name="al2_new_comment" cols="40" rows="[% rowcount %]" wrap="virtual"></textarea>
 				</TD>
 			</TR>
 			[% FOREACH com = al2_log.reverse %]

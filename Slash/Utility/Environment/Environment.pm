@@ -99,6 +99,7 @@ use vars qw($VERSION @EXPORT);
 	get_srcid_sql_in
 	get_srcid_sql_out
 	get_srcid_type
+	get_srcid_vis
 	decode_srcid_prependbyte
 
 );
@@ -2939,6 +2940,27 @@ sub get_srcid_type {
 	# encode the size of the mask used on that IP, which we return.
 	my $decval = hex($code);
 	return $decval & 0b00011111;
+}
+
+#========================================================================
+
+=head2 get_srcid_vis
+
+Pass this a srcid, either in decimal form (which is what uids will
+typically be in) or as a 64-bit (16-char) hex string, and it will return
+a short text string suitable for display, typically as the text that
+is linked in HTML.
+
+For speed, does not do error-checking against the value passed in.
+
+=cut
+
+sub get_srcid_vis {
+	my($srcid) = @_;
+	my $type = get_srcid_type($srcid);
+	return $srcid if $type eq 'uid';
+	my $vislen = getCurrentStatic('id_md5_vislength') || 5;
+	return substr($srcid, 2, $vislen);
 }
 
 #========================================================================
