@@ -35,7 +35,7 @@ sub handler {
 	my $hostip = $r->connection->remote_ip;
 	my($cur_ip, $cur_subnet) = get_srcids({ ip => $hostip },
 		{ no_md5 => 1,	return_only => [qw( ip subnet )] });
-	my($cur_ipid, $cur_subnetid) = get_srcids({ ip => $hostip },
+	my($cur_srcid_ip, $cur_srcid_subnet) = get_srcids({ ip => $hostip },
 		{ 		return_only => [qw( ip subnet )] });
 
 	# Set up DB objects.
@@ -53,11 +53,11 @@ sub handler {
 
 	my $banlist = $reader->getBanList;
 #use Data::Dumper; $Data::Dumper::Sortkeys=1;
-#print STDERR "cur_ipid='$cur_ipid' cur_subnetid='$cur_subnetid' banlist: " . Dumper($banlist);
-	if ($banlist->{$cur_ipid} || $banlist->{$cur_subnetid}) {
+#print STDERR "cur_srcid_ip='$cur_srcid_ip' cur_srcid_subnet='$cur_srcid_subnet' banlist: " . Dumper($banlist);
+	if ($banlist->{$cur_srcid_ip} || $banlist->{$cur_srcid_subnet}) {
 		# Send a special "you are banned" page if the user is
 		# hitting RSS.
-		return _send_rss($r, 'ban', $cur_ipid) if $is_rss;
+		return _send_rss($r, 'ban', $cur_srcid_ip) if $is_rss;
 		# Send our usual "you are banned" page, whether the user
 		# is on palm or not.  It's mostly text so palm users
 		# should not have a problem with it.
@@ -74,15 +74,15 @@ sub handler {
 	# from reading RSS.
 
 	my $rsslist = $reader->getNorssList;
-	if ($is_rss && ($rsslist->{$cur_ipid} || $rsslist->{$cur_subnetid})) {
-		return _send_rss($r, 'abuse', $cur_ipid);
+	if ($is_rss && ($rsslist->{$cur_srcid_ip} || $rsslist->{$cur_srcid_subnet})) {
+		return _send_rss($r, 'abuse', $cur_srcid_ip);
 	}
 
 	# Send a special "Palm banned" page if this IP addresss is banned
 	# from reading Palm pages.
 
 	my $palmlist = $reader->getNopalmList;
-	if ($is_palm && ($palmlist->{$cur_ipid} || $palmlist->{$cur_subnet})) {
+	if ($is_palm && ($palmlist->{$cur_srcid_ip} || $palmlist->{$cur_subnet})) {
 		$r->custom_response(FORBIDDEN,
 			slashDisplay('bannedtext_palm',
 				{ ip => $cur_ip },
@@ -110,11 +110,11 @@ sub _check_rss_and_palm {
 }
 
 sub _send_rss {
-	my($r, $type, $ipid) = @_;
+	my($r, $type, $srcid_ip) = @_;
 	http_send({
 		content_type	=> 'text/xml',
 		status		=> 202,
-		content		=> _get_rss_msg($type, $ipid),
+		content		=> _get_rss_msg($type, $srcid_ip),
 	});
 
 	return DONE;
@@ -127,21 +127,21 @@ sub _send_rss {
 my(%RSS);
 
 sub _get_rss_msg {
-	my($type, $ipid) = @_;
+	my($type, $srcid_ip) = @_;
 	$type ||= 'abuse';
-	$ipid ||= '(unknown)';
+	$srcid_ip ||= '(unknown)';
 
-	return $RSS{$type}{$ipid} if exists $RSS{$type}{$ipid};
+	return $RSS{$type}{$srcid_ip} if exists $RSS{$type}{$srcid_ip};
 
 	# template puts data in $items
 	my $items = [];
 	slashDisplay('bannedtext_rss', {
-		items	=> $items,
-		type	=> $type,
-		ipid	=> $ipid,
+		items		=> $items,
+		type		=> $type,
+		srcid_ip	=> $srcid_ip,
 	}, { Return => 1 });
 
-	return $RSS{$type}{$ipid} = xmlDisplay(rss => {
+	return $RSS{$type}{$srcid_ip} = xmlDisplay(rss => {
 		rdfitemdesc	=> 1,
 		items		=> $items,
 	}, { Return => 1 } );
