@@ -2898,6 +2898,7 @@ Pass this the name of a column with srcid data, and it returns the SQL
 necessary to retrieve data from that column in srcid format.  The
 column data is returned in decimal format if it can be represented in
 decimal in an ordinarily-compiled perl, as a hex string otherwise.
+"Non-decimal characters in the result will be uppercase," say the docs.
 
 Usage:
 
