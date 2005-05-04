@@ -34,9 +34,9 @@ sub handler {
 
 	my $hostip = $r->connection->remote_ip;
 	my($cur_ip, $cur_subnet) = get_srcids({ ip => $hostip },
-		{ no_md5 => 1,	masks => [qw( ip subnet )] });
+		{ no_md5 => 1,	return_only => [qw( ip subnet )] });
 	my($cur_ipid, $cur_subnetid) = get_srcids({ ip => $hostip },
-		{ 		masks => [qw( ip subnet )] });
+		{ 		return_only => [qw( ip subnet )] });
 
 	# Set up DB objects.
 
@@ -52,6 +52,8 @@ sub handler {
 	# Abort this Apache request if this IP address is outright banned.
 
 	my $banlist = $reader->getBanList;
+#use Data::Dumper; $Data::Dumper::Sortkeys=1;
+#print STDERR "cur_ipid='$cur_ipid' cur_subnetid='$cur_subnetid' banlist: " . Dumper($banlist);
 	if ($banlist->{$cur_ipid} || $banlist->{$cur_subnetid}) {
 		# Send a special "you are banned" page if the user is
 		# hitting RSS.
