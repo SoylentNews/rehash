@@ -2565,14 +2565,14 @@ passed in in 'masks' and those additional mask sizes will also be
 calculated and encoded in the returned hashref.
 
 The option 'return_only' will change the returned value from a hashref
-with multiple fields into a scalar which is the value of just one of what
-one of those fields would have been.  The value of 'return_only' can be:
-(1) the string "uid" to return just the uid, (2) an integer between
-1 and 32 (which will be implied into the 'masks' option as well),
+with multiple fields into an array which contains the values of one or
+more of what those fields would have been.  The value(s) of 'return_only'
+can be: (1) the string "uid" to return just the uid, (2) an integer
+between 1 and 32 (which will be implied into the 'masks' option as well),
 (3) one of the three strings "ipid", "subnetid", or "classbid" which
-are the equivalent of the integers 32, 24, and 16 respectively, or
-(4) the string "cookie_location", which will be replaced by the value
-of the var 'cookie_location'.
+are the equivalent of the integers 32, 24, and 16 respectively, or (4)
+the string "cookie_location", which will be replaced by the value of
+the var 'cookie_location'.
 
 =back
 
@@ -2632,7 +2632,8 @@ sub get_srcids {
 		# XXX For IPv6, here's where we need to decide how to
 		# extend the value of 'masks' to a 128-bit IP address.
 		# For IPv4, we convert the string "1.2.3.4" to the
-		# number 0x01020304.
+		# number 0x01020304, mask it, then convert back to
+		# dotted-quad string.
 		my $n = unpack("N", inet_aton($ip));
 
 		for my $mask (@$masks) {
@@ -2649,7 +2650,7 @@ sub get_srcids {
 			} else {
 				my $md5 = md5_hex($str);
 				my $md5_trunc = substr($md5, 0, 14);
-				$val = lc("$prepend_code$md5_trunc");
+				$val = uc("$prepend_code$md5_trunc");
 			}
 			$retval->{$mask} = $val;
 		}
@@ -2714,26 +2715,27 @@ sub _get_srcids_options {
 		}
 		my %ro = ( );
 		my @k = ref($return_only) ? @$return_only : ( $return_only );
+		my @ret = ( );
 		for my $k (@k) {
 			if ($k =~ /^\d+$/ && $k >= 1 && $k <= 32) {
 				# It's already a valid number indicating mask size.
-				$ro{$k} = 1;
+				push @ret, $k;
 			} else {
 				if ($mask_size_name{$k}) {
 					# It's the name of a valid mask.
-					$ro{ $mask_size_name{$k} } = 1;
+					push @ret, $mask_size_name{$k};
 				} elsif ( $mask_size_name{"{$k}id"} ) {
 					# It's the name of a valid mask
 					# minus the "id", which is close
 					# enough.
-					$ro{ $mask_size_name{"${k}id"} } = 1;
+					push @ret, $mask_size_name{"${k}id"};
 				} else {
 					# Invalid value, abort.
 					return undef;
 				}
 			}
 		}
-		$return_only = [ sort { $a <=> $b } keys %ro ];
+		$return_only = \@ret;
 	}
 
 	my $masks = [ ];
