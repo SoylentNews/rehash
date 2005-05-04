@@ -2609,6 +2609,7 @@ sub get_srcids {
 		if (!defined($no_md5)) {
 			# Error in options passed.
 			warn "Error in options passed to get_srcids";
+#use Data::Dumper; $Data::Dumper::Sortkeys=1; print STDERR "options: " . Dumper($options);
 			return undef;
 		}
 		if (!$ip) {
@@ -2724,13 +2725,14 @@ sub _get_srcids_options {
 				if ($mask_size_name{$k}) {
 					# It's the name of a valid mask.
 					push @ret, $mask_size_name{$k};
-				} elsif ( $mask_size_name{"{$k}id"} ) {
+				} elsif ( $mask_size_name{"${k}id"} ) {
 					# It's the name of a valid mask
 					# minus the "id", which is close
 					# enough.
 					push @ret, $mask_size_name{"${k}id"};
 				} else {
 					# Invalid value, abort.
+#use Data::Dumper; $Data::Dumper::Sortkeys=1; print STDERR "k='$k' options: " . Dumper($options);
 					return undef;
 				}
 			}
