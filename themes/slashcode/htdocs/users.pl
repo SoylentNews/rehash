@@ -2054,6 +2054,7 @@ sub saveUserAdmin {
 	my($user_edits_table, $user_edit) = ({}, {});
 	my $author_flag;
 	my $note = '';
+	my $srcid;
 	my $id;
 	my $user_editfield_flag;
 	my $banned = 0;
@@ -2062,22 +2063,26 @@ sub saveUserAdmin {
 		$user_editfield_flag = 'uid';
 		$id = $form->{uid};
 		$user_edit = $slashdb->getUser($id);
+		$srcid = $id;
 
 	} elsif ($form->{subnetid}) {
 		$user_editfield_flag = 'subnetid';
 		($id, $user_edit->{subnetid})  = ($form->{subnetid}, $form->{subnetid});
 		$user_edit->{nonuid} = 1;
+		$srcid = convert_srcid(subnetid => $id);
 
 	} elsif ($form->{ipid}) {
 		$user_editfield_flag = 'ipid';
 		($id, $user_edit->{ipid})  = ($form->{ipid}, $form->{ipid});
 		$user_edit->{nonuid} = 1;
+		$srcid = convert_srcid(ipid => $id);
 
 	} elsif ($form->{md5id}) {
 		$user_editfield_flag = 'md5id';
 		my $fieldname = $form->{fieldname} || 'md5id';
 		($id, $user_edit->{$fieldname})
 			= ($form->{md5id}, $form->{md5id});
+		warn "form field md5id specified, no srcid saving possible";
 
 	} else {
 		# If we were not fed valid data, don't do anything.
@@ -2158,6 +2163,10 @@ print STDERR "acl_change: " . Dumper($acl_change);
 		$slashdb->getBanList(1); # reload the list
 	}
 
+	if ($user->{is_admin} && $srcid) {
+		$slashdb->setAL2($srcid, $al2_change);
+	}
+
 	if ($user->{is_admin} && ($user_editfield_flag eq 'uid' ||
 		$user_editfield_flag eq 'nickname')) {
 
@@ -2173,7 +2182,6 @@ print STDERR "acl_change: " . Dumper($acl_change);
 		my $was_author = ($author && $author->{author}) ? 1 : 0;
 
 		$slashdb->setUser($id, $user_edits_table);
-		$slashdb->setAL2($id, $al2_change);
 
 		$note .= getMessage('saveuseradmin_saveduser', { field => $user_editfield_flag, id => $id });
 
