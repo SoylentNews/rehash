@@ -41,11 +41,13 @@ $task{$me}{code} = sub {
 			++$non_autosubmit;
 		} else {
 			my $blockskin = $slashdb->getSkin($block->{skin});
+			# createSubmission expects much of the data to be filtered
+			# already.  so deal!
 			my $submission = {
-				email	=> $rss->{link},
-				name	=> $block->{title},
+				email	=> strip_attribute($rss->{link}),
+				name	=> strip_nohtml($block->{title}),
 				story	=> $description,
-				subj	=> $rss->{title},
+				subj	=> strip_attribute($rss->{title}),
 				primaryskid => $blockskin->{skid},
 			};
 			$subid = $slashdb->createSubmission($submission);
