@@ -303,9 +303,9 @@ my @elements = qw(
 
 my @descriptions;
 push @descriptions, <<'EOT';
-   <oai-identifier 
-    xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai-identifier 
-    http://www.openarchives.org/OAI/2.0/oai-identifier.xsd">
+   <oai-identifier xmlns="http://www.openarchives.org/OAI/2.0/oai-identifier"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai-identifier http://www.openarchives.org/OAI/2.0/oai-identifier.xsd">
    <scheme>oai</scheme>
    <repositoryIdentifier>DLIST.OAI2</repositoryIdentifier>
    <delimiter>:</delimiter>
@@ -437,8 +437,7 @@ sub head {
 <?xml version="1.0" encoding="UTF-8" ?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/
-         http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+         xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
  <responseDate>$date</responseDate>
  <request$args>$url</request>
 $third
@@ -546,12 +545,10 @@ EOT
 		next if $options->{verb} eq 'ListIdentifiers';
 		$xml .= <<'EOT';
    <metadata>
-    <oai_dc:dc
-     xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
-     xmlns:dc="http://purl.org/dc/elements/1.1/"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/
-     http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+    <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+               xmlns:dc="http://purl.org/dc/elements/1.1/"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
 EOT
 
 		# same on all: publisher, rights, type, format, language
