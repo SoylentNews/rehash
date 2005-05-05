@@ -4632,7 +4632,6 @@ sub createFormkey {
 	my $last_submitted = $self->getLastTs($formname, 1);
 
 	my $formkey = "";
-#	my $num_tries = 50; # XXXSRCID - it's silly for us to keep this so high
 	my $num_tries = 10;
 	while (1) {
 		$formkey = getFormkey();
