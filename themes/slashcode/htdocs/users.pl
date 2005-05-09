@@ -3118,19 +3118,19 @@ sub getUserAdmin {
 
 	$field ||= 'uid';
 	if ($field eq 'uid') {
-		$user_edit = $reader->getUser($id);
+		$user_edit = $slashdb->getUser($id);
 		$user_editfield = $user_edit->{uid};
 		$srcid = convert_srcid( uid => $id );
-		$expired = $reader->checkExpired($user_edit->{uid}) ? $constants->{markup_checked_attribute} : '';
-		$ipstruct = $reader->getNetIDStruct($user_edit->{uid});
+		$expired = $slashdb->checkExpired($user_edit->{uid}) ? $constants->{markup_checked_attribute} : '';
+		$ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
 		@accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{uid}) if defined($logdb);
 		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
 	} elsif ($field eq 'nickname') {
-		$user_edit = $reader->getUser($reader->getUserUID($id));
+		$user_edit = $slashdb->getUser($slashdb->getUserUID($id));
 		$user_editfield = $user_edit->{nickname};
-		$expired = $reader->checkExpired($user_edit->{uid}) ? $constants->{markup_checked_attribute} : '';
-		$ipstruct = $reader->getNetIDStruct($user_edit->{uid});
+		$expired = $slashdb->checkExpired($user_edit->{uid}) ? $constants->{markup_checked_attribute} : '';
+		$ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
 		@accesshits = $logdb->countAccessLogHitsInLastX('uid', $user_edit->{uid}) if defined($logdb);
 		$section_select = createSelect('section', $sectionref, $user_edit->{section}, 1);
 
@@ -3138,10 +3138,10 @@ sub getUserAdmin {
 		$user_edit->{nonuid} = 1;
 		$user_edit->{md5id} = $id;
 		if ($form->{fieldname} && $form->{fieldname} =~ /^(ipid|subnetid)$/) {
-			$uidstruct = $reader->getUIDStruct($form->{fieldname}, $user_edit->{md5id});
+			$uidstruct = $slashdb->getUIDStruct($form->{fieldname}, $user_edit->{md5id});
 			@accesshits = $logdb->countAccessLogHitsInLastX($form->{fieldname}, $user_edit->{md5id}) if defined($logdb);
 		} else {
-			$uidstruct = $reader->getUIDStruct('md5id', $user_edit->{md5id});
+			$uidstruct = $slashdb->getUIDStruct('md5id', $user_edit->{md5id});
 			@accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{md5id}) if defined($logdb);
 		}
 
@@ -3150,7 +3150,7 @@ sub getUserAdmin {
 		$user_edit->{ipid} = $id;
 		$srcid = convert_srcid( ipid => $id );
 		$user_editfield = $id;
-		$uidstruct = $reader->getUIDStruct('ipid', $user_edit->{ipid});
+		$uidstruct = $slashdb->getUIDStruct('ipid', $user_edit->{ipid});
 		@accesshits = $logdb->countAccessLogHitsInLastX('host_addr', $user_edit->{ipid}) if defined($logdb);
 
 		if ($form->{userfield} =~/^\d+\.\d+\.\d+\.(\d+)$/) {
@@ -3171,13 +3171,13 @@ sub getUserAdmin {
 		}
 
 		$user_editfield = $id;
-		$uidstruct = $reader->getUIDStruct('subnetid', $user_edit->{subnetid});
+		$uidstruct = $slashdb->getUIDStruct('subnetid', $user_edit->{subnetid});
 		@accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{subnetid}) if defined($logdb);
 
 	} else {
-		$user_edit = $id ? $reader->getUser($id) : $user;
+		$user_edit = $id ? $slashdb->getUser($id) : $user;
 		$user_editfield = $user_edit->{uid};
-		$ipstruct = $reader->getNetIDStruct($user_edit->{uid});
+		$ipstruct = $slashdb->getNetIDStruct($user_edit->{uid});
 		@accesshits = $logdb->countAccessLogHitsInLastX('uid', $user_edit->{uid}) if defined($logdb);
 	}
 
@@ -3237,11 +3237,11 @@ print STDERR "al2_tid_comment='$al2_tid_comment'\n";
 	# sanity check...
 	if ($srcid) {
 		# getAL2 works with either a srcids hashref or a single srcid
-		$al2_hr = $reader->getAL2($srcid);
+		$al2_hr = $slashdb->getAL2($srcid);
 		for my $al2 (keys %{ $al2_hr }) {
 			$user_aclam_hr->{"aclam_$al2"} = 1;
 		}
-		$al2_log_ar = $reader->getAL2Log($srcid);
+		$al2_log_ar = $slashdb->getAL2Log($srcid);
 	}
 	# Generate al2_nick_hr, which will be populated with keys of all
 	# the (presumably) admin uids who have logged rows for this al2,
@@ -3250,7 +3250,7 @@ print STDERR "al2_tid_comment='$al2_tid_comment'\n";
 	for my $al2_log (@$al2_log_ar) {
 		my $uid = $al2_log->{adminuid};
 		next if !$uid; # odd error, might want to flag this
-		$al2_nick_hr->{$uid} ||= $reader->getUser($uid, 'nickname');
+		$al2_nick_hr->{$uid} ||= $slashdb->getUser($uid, 'nickname');
 	}
 print STDERR "al2_log_ar: " . Dumper($al2_log_ar);
 print STDERR "al2_nick_hr: " . Dumper($al2_nick_hr);
@@ -3258,7 +3258,7 @@ print STDERR "al2_nick_hr: " . Dumper($al2_nick_hr);
 
 #	for my $access_type (qw( ban nopost nosubmit norss nopalm proxy trusted )) {
 #		$accesslist->{$access_type} = "";
-#		my $info_hr = $reader->getAccessListInfo($access_type, $user_edit);
+#		my $info_hr = $slashdb->getAccessListInfo($access_type, $user_edit);
 #		next if !$info_hr; # no match
 #		$accesslist->{reason}	||= $info_hr->{reason};
 #		$accesslist->{ts}	||= $info_hr->{ts};
@@ -3268,7 +3268,7 @@ print STDERR "al2_nick_hr: " . Dumper($al2_nick_hr);
 #	}
 #	if (exists $accesslist->{adminuid}) {
 #		$accesslist->{adminnick} = $accesslist->{adminuid}
-#			? $reader->getUser($accesslist->{adminuid}, 'nickname')
+#			? $slashdb->getUser($accesslist->{adminuid}, 'nickname')
 #			: '(unknown)';
 #	}
 
@@ -3305,15 +3305,19 @@ print STDERR "al2_nick_hr: " . Dumper($al2_nick_hr);
 	my $post_restrictions = {};
 	my ($subnet_karma, $ipid_karma);
 
-	if ($ipid and !$subnetid) {
+	if ($ipid && !$subnetid) {
 		$ipid = md5_hex($ipid) if length($ipid) != 32;
 		$proxy_check->{ipid} = $ipid;
 		$proxy_check->{currently} = $slashdb->getKnownOpenProxy($ipid, "ipid");
-		$subnetid = $reader->getSubnetFromIPID($ipid);
+		# This next call is very slow.
+		$subnetid = $reader->getSubnetFromIPIDBasedOnComments($ipid);
 	}
 
 	if ($subnetid) {
 		$subnetid = md5_hex($subnetid) if length($subnetid) != 32;
+		# These next three calls can be very slow.  In fact, getNetIDKarma
+		# is actually called twice on the same subnetid;  if we can cache
+		# that data somehow that wouldn't be a bad idea.
 		$post_restrictions = $reader->getNetIDPostingRestrictions("subnetid", $subnetid);
 		$subnet_karma = $reader->getNetIDKarma("subnetid", $subnetid);
 		$ipid_karma = $reader->getNetIDKarma("ipid", $ipid) if $ipid;

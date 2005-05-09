@@ -5425,10 +5425,14 @@ sub getNetIDStruct {
 }
 
 ########################################################
-sub getSubnetFromIPID {
+# Performance on this is pretty much guaranteed to be horrid.
+# Code which is not admin-only should not call this.
+sub getSubnetFromIPIDBasedOnComments {
 	my($self, $ipid) = @_;
 	my $ipid_q = $self->sqlQuote($ipid);
-	my($subnet) = $self->sqlSelect("subnetid", "comments", "ipid = $ipid_q AND subnetid IS NOT NULL and subnetid!=''", "LIMIT 1");
+	my($subnet) = $self->sqlSelect('subnetid', 'comments',
+		"ipid = $ipid_q AND subnetid IS NOT NULL AND subnetid != ''",
+		'LIMIT 1');
 	return $subnet;
 }
 
@@ -5855,6 +5859,7 @@ sub setAL2 {
 		'al2', "srcid=$srcid_sql_in");
 	my $did_add_row = defined($oldcount) ? 0 : 1;
 	$oldcount ||= 0; $oldvalue ||= 0;
+print STDERR "setAL2 did_add_row=$did_add_row, after select value oldvalue=$oldvalue\n";
 	# Now INSERT the rows for all these changes into al2_log,
 	# one row for each field in type_hr
 	my $newvalue = $oldvalue;
@@ -5895,6 +5900,7 @@ sub setAL2 {
 		} else {
 			$newvalue &= ~$bitmask;
 		}
+print STDERR "setAL2 after type=$type newvalue=$newvalue\n";
 	}
 	# Now do an INSERT IGNORE into al2 just to be sure that a
 	# row exists for the next operation we're going to do.  If
@@ -5914,7 +5920,9 @@ sub setAL2 {
 	my $updated = $self->sqlUpdate('al2', {
 			-srcid =>	$srcid_sql_in,
 			value =>	$newvalue,
+			-updatecount =>	'updatecount+1',
 		}, "srcid=$srcid_sql_in AND updatecount=$oldcount");
+print STDERR "setAL2 rows updated=$updated\n";
 	if ($updated) {
 		# XXXSRCID Invalidate memcached cache here if and only
 		# if the sqlUpdate succeeded.  Failure is not an error
