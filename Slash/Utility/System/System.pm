@@ -394,9 +394,14 @@ sub save2file {
 		return if $current eq $new;
 	}
 
-	open my $fh, '>', $file or die "Can't open > $file: $!";
-	print $fh $data;
-	close $fh;
+	if (open my $fh, '>', $file) {
+		print $fh $data;
+		close $fh;
+		return 1;
+	} else {
+		warn "Can't open > $file: $!";
+		return 0;
+	}
 }
 
 
