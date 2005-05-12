@@ -145,7 +145,7 @@ CREATE TABLE al2_log (
 	PRIMARY KEY (al2lid),
 	INDEX ts (ts),
 	INDEX srcid_ts (srcid, ts),
-	INDEX al2tid_val_adminuid_srcid (al2tid, val, adminuid, srcid)
+	INDEX al2tid_val_srcid (al2tid, val, srcid)
 ) TYPE=InnoDB;
 
 #
