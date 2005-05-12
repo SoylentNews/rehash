@@ -3005,10 +3005,14 @@ INSERT INTO al2_types VALUES (9, 7, 'proxy', 'Valid Proxy');
 
 REPLACE INTO vars (name, value, description) VALUES ('approvedtags_attr_admin', 'a:href_U,name,title div:id,class,title,style,dir,lang span:id,class,title,style,dir,lang slash:type_R,id,href_U,story,nickname,uid,user,align,width,height,title table:align,bgcolor,border,cellpadding,cellspacing,width tr:align,bgcolor,valign th:align,bgcolor,colspan,height,rowspan,valign,width td:align,bgcolor,colspan,height,rowspan,valign,width', 'inherits from approvedtags_attr');
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_62, Start of T_2_5_0_63 - 2005/05/03
+
+# End of T_2_5_0_63, Start of T_2_5_0_64 - 2005/05/10
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
-# End of T_2_5_0_63, Start of T_2_5_0_64 - 2005/05/10
+# End of T_2_5_0_64, Start of T_2_5_0_65 - 2005/05/10
+
+# SLASHDOT LAST UPDATED HERE
+
+
