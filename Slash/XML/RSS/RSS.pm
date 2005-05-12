@@ -494,11 +494,13 @@ sub rss_item_description {
 
 sub _tag_link {
 	my($link) = @_;
-	if ($link =~ /\?/) {
-		$link .= '&from=rss';
+	my $uri = URI->new($link);
+	if (my $orig_query = $uri->query) {
+		$uri->query("$orig_query&from=rss");
 	} else {
-		$link .= '?from=rss';
+		$uri->query("from=rss");
 	}
+	return $uri->as_string;
 }
 
 1;
