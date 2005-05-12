@@ -144,7 +144,8 @@ CREATE TABLE al2_log (
 	val             ENUM('set', 'clear') DEFAULT NULL,
 	PRIMARY KEY (al2lid),
 	INDEX ts (ts),
-	INDEX srcid_ts (srcid, ts)
+	INDEX srcid_ts (srcid, ts),
+	INDEX al2tid_val_adminuid_srcid (al2tid, val, adminuid, srcid)
 ) TYPE=InnoDB;
 
 #
