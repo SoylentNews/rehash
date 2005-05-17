@@ -645,6 +645,14 @@ EOT
 			# new way
 			my $minithin = getObject('Slash::MiniThin', { db_type => 'reader' });
 			$minithin->minithin;
+			# append Falk ads here temporarily
+			if ($constants->{use_falk} && $constants->{plugin}{Falk}) {
+				my $falk = getObject('Slash::Falk', { db_type => 'reader' });
+				$falk->falk(1);  # append
+			}
+		} elsif ($constants->{use_falk} && $constants->{plugin}{Falk}) {
+			my $falk = getObject('Slash::Falk', { db_type => 'reader' });
+			$falk->falk;
 		} else {
 			# old way
 			prepAds();
@@ -655,7 +663,7 @@ EOT
 		# we need the ad wrapped in a fancybox
 		if (defined $user->{state}{ad}{$num}
 			&& $user->{state}{ad}{$num} !~ /^<!-- no pos/
-			&& $user->{state}{ad}{$num} !~ /^<!-- place/) {
+			&& $user->{state}{ad}{$num} !~ /^<!-- (?:fDA )place/) {
 			# if we're called from shtml, we won't have colors
 			# set, so we should get some set before making a
 			# box.				-- Pater
