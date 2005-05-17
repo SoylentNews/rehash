@@ -124,6 +124,7 @@ sub _send_rss {
 # templates don't work with Slash::XML right now,
 # and redirecting will cause *more* traffic than
 # just spitting it out here; so cache it in $RSS_*
+# XXX that really should be a cache that eventually expires
 my(%RSS);
 
 sub _get_rss_msg {

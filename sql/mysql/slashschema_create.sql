@@ -122,6 +122,9 @@ CREATE TABLE accesslog_artcom (
 
 #
 # Table structure for table 'al2'
+# (The 'value' column could and should be of type BIT(32), if
+# Slash required MySQL 5.0.5 or later.  Since we don't, the
+# code in MySQL.pm treats the INT UNSIGNED like a bit field.)
 #
 
 CREATE TABLE al2 (
