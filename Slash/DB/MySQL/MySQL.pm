@@ -5859,7 +5859,7 @@ sub setAL2 {
 		'al2', "srcid=$srcid_sql_in");
 	my $did_add_row = defined($oldcount) ? 0 : 1;
 	$oldcount ||= 0; $oldvalue ||= 0;
-print STDERR "setAL2 did_add_row=$did_add_row, after select value oldvalue=$oldvalue\n";
+#print STDERR "setAL2 did_add_row=$did_add_row, after select value oldvalue=$oldvalue\n";
 	# Now INSERT the rows for all these changes into al2_log,
 	# one row for each field in type_hr
 	my $newvalue = $oldvalue;
@@ -5900,7 +5900,7 @@ print STDERR "setAL2 did_add_row=$did_add_row, after select value oldvalue=$oldv
 		} else {
 			$newvalue &= ~$bitmask;
 		}
-print STDERR "setAL2 after type=$type newvalue=$newvalue\n";
+#print STDERR "setAL2 after type=$type newvalue=$newvalue\n";
 	}
 	# Now do an INSERT IGNORE into al2 just to be sure that a
 	# row exists for the next operation we're going to do.  If
@@ -5922,7 +5922,7 @@ print STDERR "setAL2 after type=$type newvalue=$newvalue\n";
 			value =>	$newvalue,
 			-updatecount =>	'updatecount+1',
 		}, "srcid=$srcid_sql_in AND updatecount=$oldcount");
-print STDERR "setAL2 rows updated=$updated\n";
+#print STDERR "setAL2 rows updated=$updated\n";
 	if ($updated) {
 		# XXXSRCID Invalidate memcached cache here if and only
 		# if the sqlUpdate succeeded.  Failure is not an error
@@ -6118,7 +6118,15 @@ sub getAL2List {
 			return [ ];
 		}
 		my $mask = 1 << $bitpos;
-		$where = "(value & $mask) > 0";
+		# It may seem silly to limit the value column twice, but
+		# it can speed things up.  MySQL will only use an index
+		# for a clause where a column appears unmodified on one
+		# side of an (in)equality.  We provide the "value > x"
+		# clause even though the second clause limits the results
+		# more strictly, so MySQL can make a reasonable decision
+		# about whether to use that first clause to pull rows
+		# using an index instead of doing a table scan.
+		$where = "value >= $mask AND (value & $mask) > 0";
 	}
 	my $other = "";
 	# XXXSRCID Double-check this logic, I wrote it in a taxi

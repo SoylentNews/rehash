@@ -131,7 +131,8 @@ CREATE TABLE al2 (
 	srcid           BIGINT UNSIGNED NOT NULL DEFAULT '0',
 	value           INT UNSIGNED NOT NULL DEFAULT '0',
 	updatecount     INT UNSIGNED NOT NULL DEFAULT '0',
-	PRIMARY KEY (srcid)
+	PRIMARY KEY (srcid),
+	INDEX value (value)
 ) TYPE=InnoDB;
 
 #
