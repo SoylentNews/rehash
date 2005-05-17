@@ -2049,7 +2049,6 @@ sub saveUserAdmin {
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	my($user_edits_table, $user_edit) = ({}, {});
 	my $author_flag;
@@ -2092,6 +2091,7 @@ sub saveUserAdmin {
 use Data::Dumper; $Data::Dumper::Sortkeys = 1;
 print STDERR "form: " . Dumper($form);
 
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $all_al2types = $reader->getAL2Types;
 	my $al2_change = { };
 
@@ -3202,8 +3202,11 @@ sub getUserAdmin {
 	# Start creating the $all_aclam_hr data, in which the keys are
 	# the HTML selection names that all begin with aclam_ and the
 	# the values are their names/descriptions shown to the admin.
-	# First put all the ACLs into the hash.
-	my $all_aclam_hr = { map { ( "aclam_$_", "ACL: $_" ) } keys %$all_acls_hr };
+	# First put all the ACLs into the hash, if we're editing a user.
+	my $all_aclam_hr = { };
+	if (!$user_edit->{nonuid}) {
+		$all_aclam_hr = { map { ( "aclam_$_", "ACL: $_" ) } keys %$all_acls_hr };
+	}
 	# Next put in all the al2 types.
 	my $all_al2types = $reader->getAL2Types;
 	for my $key (keys %$all_al2types) {
