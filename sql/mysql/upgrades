@@ -3009,14 +3009,14 @@ REPLACE INTO vars (name, value, description) VALUES ('approvedtags_attr_admin', 
 
 # End of T_2_5_0_63, Start of T_2_5_0_64 - 2005/05/10
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # End of T_2_5_0_64, Start of T_2_5_0_65 - 2005/05/10
-
-# SLASHDOT LAST UPDATED HERE
 
 ALTER TABLE al2_log ADD INDEX al2tid_val_srcid (al2tid, val, srcid);
 ALTER TABLE al2 ADD INDEX value (value);
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_65, Start of T_2_5_0_66 - 2005/05/17
 
