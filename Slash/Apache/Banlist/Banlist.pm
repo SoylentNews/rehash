@@ -37,6 +37,7 @@ sub handler {
 		{ no_md5 => 1,	return_only => [qw( ip subnet )] });
 	my($cur_srcid_ip, $cur_srcid_subnet) = get_srcids({ ip => $hostip },
 		{ 		return_only => [qw( ip subnet )] });
+#print STDERR scalar(localtime) . " hostip='$hostip' cur_ip='$cur_ip' cur_subnet='$cur_subnet' cur_srcid_ip='$cur_srcid_ip' cur_srcid_subnet='$cur_srcid_subnet'\n";
 
 	# Set up DB objects.
 
@@ -142,10 +143,15 @@ sub _get_rss_msg {
 		srcid_ip	=> $srcid_ip,
 	}, { Return => 1 });
 
-	return $RSS{$type}{$srcid_ip} = xmlDisplay(rss => {
+	$RSS{$type}{$srcid_ip} = xmlDisplay(rss => {
 		rdfitemdesc	=> 1,
 		items		=> $items,
 	}, { Return => 1 } );
+	if (!$RSS{$type}{$srcid_ip}) {
+		# Just a quick sanity error check.
+		errorLog("xmlDisplay for type='$type' srcid_ip='$srcid_ip' empty");
+	}
+	return $RSS{$type}{$srcid_ip};
 }
 
 }
