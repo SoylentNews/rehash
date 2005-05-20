@@ -291,10 +291,11 @@ sub http_send {
 	$r->status($opt->{status});
 	$r->send_http_header;
 	$r->rflush;
+#print STDERR "http_send sent, header_only='" . ($r->header_only) . "' length(content)='" . length($opt->{content}) ."'\n";
 	return 1 if $r->header_only;
 
 	if ($opt->{content}) {
-		print $opt->{content};
+		$r->print($opt->{content});
 		$r->rflush;
 	}
 
