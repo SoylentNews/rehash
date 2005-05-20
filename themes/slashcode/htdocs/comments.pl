@@ -488,11 +488,23 @@ sub validateComment {
 	}
 
 	my $srcids_to_check = $user->{srcids};
+
 	# We skip the UID test for anonymous users (anonymous posting
 	# is banned by setting nopost for the anonymous uid, and we
 	# want to check that separately elsewhere).
 	delete $srcids_to_check->{uid} if $user->{is_anon};
-	my $read_only = $reader->checkAL2($srcids_to_check, 'nopost');
+
+	# If the user is anonymous, check to see whether anonymous
+	# posting is turned off for this srcid.
+	my $read_only = 0;
+	$read_only = 1 if $user->{is_anon}
+		&& $reader->checkAL2($srcids_to_check, 'nopostanon');
+
+	# Whether the user is anonymous or not, check to see whether
+	# all posting is turned off for this srcid.
+	$read_only ||= $reader->checkAL2($srcids_to_check, 'nopost');
+
+	# If posting is disabled, return the error message.
 	if ($read_only) {
 		$$error_message = getError('readonly');
 		$form_success = 0;

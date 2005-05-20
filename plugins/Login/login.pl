@@ -217,7 +217,12 @@ sub mailPasswd {
 	my $user_send = $reader->getUser($uid);
 
 	if (!$error) {
-		if ($reader->checkAL2($user->{srcids}, 'nopost')) {
+		# A user coming from a srcid that's been marked as not
+		# acceptable for posting from also does not get to
+		# mail a password to anyone.
+		if ($reader->checkAL2($user->{srcids}, 'nopost')
+			|| $reader->checkAL2($user->{srcids}, 'nopostanon')
+		) {
 			push @note, getData('mail_readonly');
 			$error = 1;
 

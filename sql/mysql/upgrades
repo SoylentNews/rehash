@@ -3020,3 +3020,6 @@ ALTER TABLE al2 ADD INDEX value (value);
 
 # End of T_2_5_0_65, Start of T_2_5_0_66 - 2005/05/17
 
+SELECT @maxbitpos := MAX(bitpos) FROM al2_types;
+INSERT INTO al2_types VALUES (NULL, @maxbitpos+1, 'nopostanon', 'No Comment Post Anon');
+

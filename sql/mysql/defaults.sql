@@ -24,6 +24,7 @@ INSERT INTO al2_types VALUES (6, 4, 'norss', 'No RSS');
 INSERT INTO al2_types VALUES (7, 5, 'nosubmit', 'No Story Submit');
 INSERT INTO al2_types VALUES (8, 6, 'trusted', 'Trusted');
 INSERT INTO al2_types VALUES (9, 7, 'proxy', 'Valid Proxy');
+INSERT INTO al2_types VALUES (10, 8, 'nopostanon', 'No Comment Post Anon');
 
 
 #
