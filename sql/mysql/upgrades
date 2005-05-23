@@ -2856,8 +2856,6 @@ INSERT INTO message_codes (code, type, seclev, modes, send, subscribe) VALUES (1
 
 INSERT INTO misc_user_opts (name, optorder, seclev, default_val, vals_regex, short_desc, long_desc, opts_html) VALUES ('disable_submit_bin_refresh',100,100,'0',NULL,'Disable bin refresh?','Do you want to disable refreshing the submissions bin?',NULL);
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_50, Start of T_2_5_0_51 - 2005/03/01
 
 # End of T_2_5_0_51, Start of T_2_5_0_52 - 2005/03/08
@@ -3018,8 +3016,12 @@ ALTER TABLE al2 ADD INDEX value (value);
 
 # SLASHDOT LAST UPDATED HERE
 
+# SLASHCLUSTER LAST UPDATED HERE
+
 # End of T_2_5_0_65, Start of T_2_5_0_66 - 2005/05/17
 
 SELECT @maxbitpos := MAX(bitpos) FROM al2_types;
 INSERT INTO al2_types VALUES (NULL, @maxbitpos+1, 'nopostanon', 'No Comment Post Anon');
 
+# add class/style for table elements, for convenience
+REPLACE INTO vars (name, value, description) VALUES ('approvedtags_attr_admin', 'a:href_U,name,title div:id,class,title,style,dir,lang span:id,class,title,style,dir,lang slash:type_R,id,href_U,story,nickname,uid,user,align,width,height,title table:align,bgcolor,border,cellpadding,cellspacing,width,style,class tr:align,bgcolor,valign,style,class th:align,bgcolor,colspan,height,rowspan,valign,width,style,class td:align,bgcolor,colspan,height,rowspan,valign,width,style,class', 'inherits from approvedtags_attr');
