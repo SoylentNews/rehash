@@ -2651,8 +2651,8 @@ sub balanceTags {
 
 	# cheap and easy hack to make sure everything in a blockquote is also
 	# inside another block element; extra divs don't hurt anything
-	$html =~ s|<blockquote>|<blockquote><div>|gi;
-	$html =~ s|</blockquote>|</div></blockquote>|gi;
+	$html =~ s|<blockquote> (?!<div>)|<blockquote><div>|gi;
+	$html =~ s|(?<!</div>) </blockquote>|</div></blockquote>|gi;
 
 	_validateLists(\$html);
 	_removeEmpty(\$html);
