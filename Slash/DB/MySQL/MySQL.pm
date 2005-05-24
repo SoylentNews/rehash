@@ -4838,18 +4838,39 @@ sub checkPostInterval {
 	$formname ||= getCurrentUser('currentPage');
 	my $user      = getCurrentUser();
 	my $constants = getCurrentStatic();
-	my $slashdb   = getCurrentDB();
+
+	my $speedlimit_name = "${formname}_speed_limit";
+	my $speedlimit_anon_name = "${formname}_anon_speed_limit";
 	my $speedlimit = 0;
-	if ($user->{is_anon}) {
-		$speedlimit = $constants->{"${formname}_anon_speed_limit"} || $constants->{"${formname}_speed_limit"} || 0;
-		if ($formname eq "comments") {
-			my $num_comm = $slashdb->getNumCommPostedAnonByIPID($user->{ipid});
-			my $multiplier = $constants->{comments_anon_speed_limit_mult} || 1;
-			$speedlimit *= ($multiplier ** $num_comm);
+	$speedlimit = $constants->{$speedlimit_anon_name} if $user->{is_anon};
+	$speedlimit ||= $constants->{$speedlimit_name} || 0;
+
+	# If this user has access modifiers applied, check for possible
+	# different speed limits based on those.  First match, if any,
+	# wins.
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $srcids = getCurrentUser('srcids');
+	my $al2_hr = $reader->getAL2($srcids) if $srcids;
+	my $al2_name_used = "_none_";
+	AL2_NAME: for my $al2_name (sort keys %$al2_hr) {
+		my $speedlimit_name_al2 = "${speedlimit_name}_$al2_name";
+		if (defined $constants->{$speedlimit_name_al2}) {
+			$al2_name_used = $al2_name;
+			$speedlimit = $constants->{$speedlimit_name_al2};
+			last AL2_NAME;
 		}
-	} else {
-		$speedlimit = $constants->{"${formname}_speed_limit"} || 0;
 	}
+
+	# Anonymous comment posting can be forced slower progressively.
+	if ($user->{is_anon} && $formname eq "comments"
+		&& $constants->{comments_anon_speed_limit_mult}
+	) {
+		my $multiplier = $constants->{comments_anon_speed_limit_mult};
+		my $num_comm = $reader->getNumCommPostedAnonByIPID($user->{ipid});
+		$speedlimit *= ($multiplier ** $num_comm) if $multiplier != 1;
+		$speedlimit = int($speedlimit + 0.5);
+	}
+
 	my $formkey_earliest = time() - $constants->{formkey_timeframe};
 
 	my $where = $self->_whereFormkey();
@@ -4863,7 +4884,7 @@ sub checkPostInterval {
 		$where);
 
 	$interval ||= 0;
-	print STDERR "CHECK INTERVAL $interval speedlimit $speedlimit\n" if $constants->{DEBUG};
+	print STDERR "CHECK INTERVAL $interval speedlimit $speedlimit al2_used $al2_name_used\n" if $constants->{DEBUG};
 
 	return ($interval < $speedlimit && $speedlimit > 0) ? $interval : 0;
 }
