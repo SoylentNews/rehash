@@ -4836,9 +4836,20 @@ sub updateFormkey {
 sub checkPostInterval {
 	my($self, $formname) = @_;
 	$formname ||= getCurrentUser('currentPage');
-
+	my $user      = getCurrentUser();
 	my $constants = getCurrentStatic();
-	my $speedlimit = $constants->{"${formname}_speed_limit"} || 0;
+	my $slashdb   = getCurrentDB();
+	my $speedlimit = 0;
+	if ($user->{is_anon}) {
+		$speedlimit = $constants->{"${formname}_anon_speed_limit"} || $constants->{"${formname}_speed_limit"} || 0;
+		if ($formname eq "comments") {
+			my $num_comm = $slashdb->getNumCommPostedAnonByIPID($user->{ipid});
+			my $multiplier = $constants->{comments_anon_speed_limit_mult} || 1;
+			$speedlimit *= ($multiplier ** $num_comm);
+		}
+	} else {
+		$speedlimit = $constants->{"${formname}_speed_limit"} || 0;
+	}
 	my $formkey_earliest = time() - $constants->{formkey_timeframe};
 
 	my $where = $self->_whereFormkey();
@@ -5238,7 +5249,7 @@ sub getNumCommPostedAnonByIPID {
 	my $table_extras = "";
 	$table_extras .= " IGNORE INDEX(uid_date)" if $constants->{ignore_uid_date_index};
 	my $ar = $self->sqlSelectArrayRef(
-		"COUNT(*) AS count, SUM(pointsorig-points) AS sum",
+		"COUNT(*) AS count, SUM(points-pointsorig) AS sum",
 		"comments $table_extras",
 		"ipid=$ipid
 		 AND uid=$ac_uid
@@ -5247,6 +5258,7 @@ sub getNumCommPostedAnonByIPID {
 	);
 	my($num_comm, $sum_mods) = @$ar;
 	$sum_mods ||= 0;
+
 	if (wantarray()) {
 		return ($num_comm, $sum_mods);
 	} else {
