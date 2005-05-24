@@ -663,6 +663,7 @@ EOT
 	if ($num == 2 && $need_box) {
 		# we need the ad wrapped in a fancybox
 		if (defined $user->{state}{ad}{$num}
+			&& $user->{state}{ad}{$num} =~ /\S/
 			&& $user->{state}{ad}{$num} !~ /^<!-- no pos/
 			&& $user->{state}{ad}{$num} !~ /^<!-- (?:fDA )place/) {
 			# if we're called from shtml, we won't have colors
@@ -670,7 +671,7 @@ EOT
 			# box.				-- Pater
 			getSkinColors() unless $user->{colors};
 
-			return fancybox($constants->{fancyboxwidth}, 'Advertisement', "<CENTER>" . $user->{state}{ad}{$num} . "</CENTER>", 1, 1);
+			return fancybox($constants->{fancyboxwidth}, 'Advertisement', '<div align="center">' . $user->{state}{ad}{$num} . '</div>', 1, 1);
 		} else { return ""; }
 	} else {
 		return $user->{state}{ad}{$num} || "";
