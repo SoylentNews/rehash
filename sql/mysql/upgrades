@@ -3025,3 +3025,7 @@ INSERT INTO al2_types VALUES (NULL, @maxbitpos+1, 'nopostanon', 'No Comment Post
 
 # add class/style for table elements, for convenience
 REPLACE INTO vars (name, value, description) VALUES ('approvedtags_attr_admin', 'a:href_U,name,title div:id,class,title,style,dir,lang span:id,class,title,style,dir,lang slash:type_R,id,href_U,story,nickname,uid,user,align,width,height,title table:align,bgcolor,border,cellpadding,cellspacing,width,style,class tr:align,bgcolor,valign,style,class th:align,bgcolor,colspan,height,rowspan,valign,width,style,class td:align,bgcolor,colspan,height,rowspan,valign,width,style,class', 'inherits from approvedtags_attr');
+
+INSERT INTO vars (name, value, description) VALUES ('comments_anon_speed_limit','0','seconds delay before repeat posting for anonymous user.  If 0 uses defaults to speed_limit for all users');
+
+INSERT INTO vars (name, value, description) VALUES ('comments_anon_speed_limit_mult','1', 'Multiply speedlimit by this amount for each comment previously posted in the past 24 hours');
