@@ -789,7 +789,9 @@ INSERT INTO vars (name, value, description) VALUES ('ircslash_channel_password',
 INSERT INTO vars (name, value, description) VALUES ('ircslash_dbalert_bogthresh','30','Alert the IRC channel when DB query bog exceeds this value, in seconds, for the last minute average');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_dbalert_lagthresh','30','Alert the IRC channel when DB replication lag exceeds this value, in seconds, for the last minute average');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_ircname','','Name to use on IRC server (defaults to "(slashsite) slashd")');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_jabber_users','','Pipe-separated list of userids ("userid" or "userid/resource") to send Jabber messages to, instead of sending to channel');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_lastremarkid','','Id of the last remark seen');
+INSERT INTO vars (name, value, description) VALUES ('ircslash_lcr_sites','','Pipe-separated list of site names to use for lcr cmd');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_nick','','Nick to use on IRC server (has a reasonable default)');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_port','6667','Port to use on IRC server');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_remarks_delay','5','How often, in seconds, to poll for new remarks');
@@ -806,6 +808,16 @@ INSERT INTO vars (name, value, description) VALUES ('istroll_downmods_user','4',
 INSERT INTO vars (name, value, description) VALUES ('istroll_max_halflives', '3', 'Max number of times to cut the TrollModval impact of a downmod in half');
 INSERT INTO vars (name, value, description) VALUES ('istroll_ipid_hours','72','Hours back that getIsTroll checks IPs for comment mods');
 INSERT INTO vars (name, value, description) VALUES ('istroll_uid_hours','72','Hours back that getIsTroll checks uids for comment mods');
+INSERT INTO vars (name, value, description) VALUES ('jabberslash','0','Enable the ircslash task for Jabber, and connect to a Jabber channel whenever slashd starts');
+INSERT INTO vars (name, value, description) VALUES ('jabberslash_channel','jabberslash','Which channel to join');
+INSERT INTO vars (name, value, description) VALUES ('jabberslash_channel_password','','Password for jabberslash_channel');
+INSERT INTO vars (name, value, description) VALUES ('jabberslash_channel_server','jabberslash','Which Jabber server to use for the channel (defaults to jabberslash_server)');
+INSERT INTO vars (name, value, description) VALUES ('jabberslash_ircname','','Account name to use on Jabber server (defaults to "(slashsite) slashd")');
+INSERT INTO vars (name, value, description) VALUES ('jabberslash_nick','','Nick to use on IRC server (has a reasonable default); is used for jabber Resource and channel alias');
+INSERT INTO vars (name, value, description) VALUES ('jabberslash_password','','Password for jabberslash_ircname account');
+INSERT INTO vars (name, value, description) VALUES ('jabberslash_port','5222','Port to use on Jabber server');
+INSERT INTO vars (name, value, description) VALUES ('jabberslash_server','jabber.org','Which Jabber server to connect to');
+INSERT INTO vars (name, value, description) VALUES ('jabberslash_tls','0','Try to connect using TLS?');
 INSERT INTO vars (name, value, description) VALUES ('karma_adj','-10=Terrible|-1=Bad|0=Neutral|12=Positive|25=Good|99999=Excellent','Adjectives that describe karma, used if karma_obfuscate is set (best to keep aligned with badkarma, m2_maxbonus_karma, and goodkarma)');
 INSERT INTO vars (name, value, description) VALUES ('karma_obfuscate','0','Should users see, not their numeric karma score, but instead an adjective describing their approximate karma?');
 INSERT INTO vars (name, value, description) VALUES ('karma_posting_penalty_style', '0', '0=old (starting score decremented), 1=new (display score shown lower, comment can suffer results of additional downvotes)');
