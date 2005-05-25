@@ -584,6 +584,13 @@ sub printComments {
 
 	return if $user->{state}{nocomment} || $user->{mode} eq 'nocomment';
 
+	# stats for clampe 	 
+        if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME}) { 	 
+		my $fname = catfile('clampe', $user->{ipid});
+		my $comlog = "UID: $user->{uid} #Comments: $count"; 	 
+		doClampeLog($fname, [$comlog]); 	 
+	}
+
 	my($comment, $next, $previous);
 	if ($cid) {
 		my($next, $previous);
