@@ -3012,8 +3012,6 @@ REPLACE INTO vars (name, value, description) VALUES ('approvedtags_attr_admin', 
 ALTER TABLE al2_log ADD INDEX al2tid_val_srcid (al2tid, val, srcid);
 ALTER TABLE al2 ADD INDEX value (value);
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # SLASHCLUSTER LAST UPDATED HERE
@@ -3043,3 +3041,7 @@ INSERT INTO vars (name, value, description) VALUES ('jabberslash_server','jabber
 INSERT INTO vars (name, value, description) VALUES ('jabberslash_tls','0','Try to connect using TLS?');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_jabber_users','','Pipe-separated list of userids ("userid" or "userid/resource") to send Jabber messages to, instead of sending to channel');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_lcr_sites','','Pipe-separated list of site names to use for lcr cmd');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_66, Start of T_2_5_0_67 - 2005/05/24
