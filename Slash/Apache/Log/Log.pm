@@ -146,9 +146,9 @@ sub UserLog {
 	$slashdb->setUser($user->{uid}, $user_update) if $user_update && %$user_update;
 
 	# stats for clampe
-        if ($constants->{clampe_stats} && $user->{uid} > 827000 && $user->{uid} < 832000) {
-                my $fname = catfile('clampe', $user->{uid});
-                my $comlog = "URL: $ENV{REQUEST_URI} IPID: $user->{ipid} UID: $user->{uid} Dispmode: $user->{mode} Thresh: $user->{threshold} Karma: $user->{karma}";
+        if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME} && $user->{currentPage} =~ /users|index|comments|article/) {
+                my $fname = catfile('clampe', $user->{ipid});
+                my $comlog = "URL: $ENV{REQUEST_URI} Page: $user->{currentPage} UID: $user->{uid} Dispmode: $user->{mode} Thresh: $user->{threshold} Sort: $user->{commentsort} SaveChanges: $form->{savechanges}";
                 doClampeLog($fname, [$comlog]);
         }
 
