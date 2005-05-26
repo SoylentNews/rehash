@@ -21,6 +21,7 @@ use vars qw(
 	$remarks_active	$next_remark_id	$next_handle_remarks
 );
 
+$! = 0;
 $task{$me}{timespec} = '* * * * *';
 $task{$me}{on_startup} = 1;
 $task{$me}{fork} = SLASHD_NOWAIT;
@@ -28,8 +29,6 @@ $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
 	return unless $constants->{ircslash} || $constants->{jabberslash};
 
-	require Net::IRC if $constants->{ircslash};
-	require Net::Jabber if $constants->{jabberslash};
 	$has_proc_processtable ||= eval { require Proc::ProcessTable };
 
 	my $start_time = time;
@@ -88,6 +87,8 @@ sub ircinit {
 	my $constants = getCurrentStatic();
 	return 0 unless $constants->{ircslash};
 
+	require Net::IRC;
+
 	my $server =	$constants->{ircslash_server}
 				|| 'irc.slashnet.org';
 	my $port =	$constants->{ircslash_port}
@@ -130,6 +131,8 @@ sub ircinit {
 sub jabberinit {
 	my $constants = getCurrentStatic();
 	return 0 unless $constants->{jabberslash};
+
+	require Net::Jabber;
 
 	$jserver =	$constants->{jabberslash_server}
 				|| 'jabber.org';
