@@ -147,6 +147,7 @@ sub UserLog {
 
 	# stats for clampe
         if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME} && $user->{currentPage} =~ /users|index|comments|article/) {
+		my $form = getCurrentForm();
                 my $fname = catfile('clampe', $user->{ipid});
                 my $comlog = "URL: $ENV{REQUEST_URI} Page: $user->{currentPage} UID: $user->{uid} Dispmode: $user->{mode} Thresh: $user->{threshold} Sort: $user->{commentsort} SaveChanges: $form->{savechanges}";
                 doClampeLog($fname, [$comlog]);
