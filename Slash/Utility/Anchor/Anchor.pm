@@ -295,7 +295,7 @@ sub http_send {
 	return 1 if $r->header_only;
 
 	if ($opt->{content}) {
-		$r->print($opt->{content});
+		print $opt->{content};
 		$r->rflush;
 	}
 
