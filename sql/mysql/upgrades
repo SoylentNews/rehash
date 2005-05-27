@@ -3011,9 +3011,6 @@ REPLACE INTO vars (name, value, description) VALUES ('approvedtags_attr_admin', 
 
 ALTER TABLE al2_log ADD INDEX al2tid_val_srcid (al2tid, val, srcid);
 ALTER TABLE al2 ADD INDEX value (value);
-
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_65, Start of T_2_5_0_66 - 2005/05/17
 
 SELECT @maxbitpos := MAX(bitpos) FROM al2_types;
@@ -3043,5 +3040,7 @@ INSERT INTO vars (name, value, description) VALUES ('ircslash_lcr_sites','','Pip
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
+
+# SLASHCLUSTER LAST UPDATED HERE
 
 # End of T_2_5_0_66, Start of T_2_5_0_67 - 2005/05/24
