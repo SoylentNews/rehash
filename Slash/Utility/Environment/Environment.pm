@@ -2682,8 +2682,15 @@ sub convert_srcid {
 	my($type, $old_id_str) = @_;
 	# UIDs are easy, they haven't changed.
 	return $old_id_str if $type eq 'uid';
-	# IPIDs get a prepended byte and a truncate.
-	if ($type =~ /^(ipid|subnetid)$/) {
+	# IPs, Subnets, and Class B's get converted to MD5s and then
+	# treated like IPIDs, SubnetIDs, and ClassBIDs..
+	if ($mask_size_name{"${type}id"}) {
+		$old_id_str = md5_hex($old_id_str);
+		$type = "${type}id";
+	}
+	# IPIDs, SubnetIDs, and ClassBIDs get a prepended byte and a
+	# truncate to convert them..
+	if ($mask_size_name{$type}) {
 		my $str_trunc = lc(substr($old_id_str, 0, 14));
 		my $prependbyte = get_srcid_prependbyte({
 			type => 'ipid',
