@@ -191,7 +191,7 @@ sub validFormkeyHC {
 		# wasted by previous incorrect answers.
                 return 'invalidhc';
         }
-        if ($form->{hcanswer} && $form->{hcanswer} eq $answer) {
+        if ($form->{hcanswer} && lc($form->{hcanswer}) eq lc($answer)) {
 		# Correct answer submitted.
                 return 'ok';
         }
