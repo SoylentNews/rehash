@@ -27,11 +27,6 @@ __template__
 CASE "login error" %]
 <P><B>Login for "[% form.unickname %]" has failed</B>. Please try again. [% form.op %]<BR><P>
 
-[% # NO ANONYMOUS POSTING.
-CASE "no anonymous posting" %]
-Sorry, anonymous posting has been turned off. Please
-<A HREF="[% gSkin.rootdir %]/users.pl">register and log in</A>.
-
 [% # OPEN PROXY.
 CASE "open proxy" %]
 Sorry, but according to our tests, you are trying to post [% IF !constants.comments_portscan==2 %]anonymously [% END %]
