@@ -422,8 +422,12 @@ sub editComment {
 	my $pid = $form->{pid} || 0; # this is guaranteed numeric, from filter_params
 	my $reply = $slashdb->getCommentReply($sid, $pid);
 
-	if ($user->{is_anon} && !$slashdb->checkAllowAnonymousPosting($user->{uid})) {
-		print getError('no anonymous posting');
+	# If anon posting is turned off, forbid it.  The "post anonymously"
+	# checkbox should not appear in such a case, but check that field
+	# just in case the user fudged it.
+	if (($user->{is_anon} || $form->{postanon})
+		&& !$slashdb->checkAllowAnonymousPosting($user->{uid})) {
+		print getError('anonymous disallowed');
 		return;
 	}
 
@@ -491,13 +495,16 @@ sub validateComment {
 
 	# We skip the UID test for anonymous users (anonymous posting
 	# is banned by setting nopost for the anonymous uid, and we
-	# want to check that separately elsewhere).
+	# want to check that separately elsewhere).  Note that
+	# checking the "post anonymously" checkbox doesn't eliminate
+	# a uid check for a logged-in user.
 	delete $srcids_to_check->{uid} if $user->{is_anon};
 
-	# If the user is anonymous, check to see whether anonymous
-	# posting is turned off for this srcid.
+	# If the user is anonymous, or has checked the 'post anonymously'
+	# box, check to see whether anonymous posting is turned off for
+	# this srcid.
 	my $read_only = 0;
-	$read_only = 1 if $user->{is_anon}
+	$read_only = 1 if ($user->{is_anon} || $form->{postanon})
 		&& $reader->checkAL2($srcids_to_check, 'nopostanon');
 
 	# Whether the user is anonymous or not, check to see whether
@@ -545,7 +552,8 @@ sub validateComment {
 	# controls it (that var is turned into a hashref in MySQL.pm when
 	# the vars table is read in, whose keys we loop over to find the
 	# appropriate level).
-	
+	# See also comments_maxposts in formkeyErrors - Jamie 2005/05/30
+
 	my $min_cid_1_day_old = $slashdb->getVar('min_cid_last_1_days','value', 1) || 0;
 	
 	if ($user->{is_anon} && $constants->{comments_perday_anon}

@@ -4571,37 +4571,6 @@ sub _getLastFkCount {
 }
 
 ########################################################
-# gives a true or false of whether the system has given
-# out more than the allowed unused formkeys per form
-# over the formkey timeframe
-sub getUnsetFkCount {
-	my($self, $formname) = @_;
-	my $constants = getCurrentStatic();
-
-	my $formkey_earliest = time() - $constants->{formkey_timeframe};
-	my $where = $self->_whereFormkey();
-	$where .=  " AND formname = '$formname'";
-	$where .= " AND ts >= $formkey_earliest";
-	$where .= " AND value = 0";
-
-	my $unused = 0;
-
-	my $max_unused = $constants->{"max_${formname}_unusedfk"};
-
-	if ($max_unused) {
-		($unused) = $self->sqlSelect(
-			"count(*) >= $max_unused",
-			"formkeys",
-			$where);
-
-		return $unused;
-
-	} else {
-		return(0);
-	}
-}
-
-########################################################
 sub updateFormkeyId {
 	my($self, $formname, $formkey, $uid, $rlogin, $upasswd) = @_;
 
@@ -5139,7 +5108,7 @@ sub getKnownOpenProxy {
 }
 
 sub setKnownOpenProxy {
-	my($self, $ip, $port) = @_;
+	my($self, $ip, $port, $duration) = @_;
 	return 0 unless $ip;
 	my $xff;
 	if ($port) {
@@ -5150,13 +5119,15 @@ sub setKnownOpenProxy {
 	$xff ||= undef;
 	$xff = $1 if $xff && length($xff) > 15
 		&& $xff =~ /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/;
+	$duration = undef if !$duration;
 #print STDERR scalar(localtime) . " setKnownOpenProxy doing sqlReplace ip '$ip' port '$port'\n";
 	return $self->sqlReplace("open_proxies", {
 		ip =>	$ip,
 		port =>	$port,
+		dur =>	$duration,
 		-ts =>	'NOW()',
 		xff =>	$xff,
-		-ipid => "md5('$ip')"
+		-ipid => "MD5('$ip')"
 	});
 }
 
@@ -5204,7 +5175,7 @@ sub checkForOpenProxy {
 #use Data::Dumper;
 #LWP::Debug::level("+trace"); LWP::Debug::level("+debug");
 
-	my $start_time = time;
+	my $start_time = Time::HiRes::time;
 
 	local $_proxy_port = undef;
 	sub _cfop_callback {
@@ -5243,15 +5214,16 @@ sub checkForOpenProxy {
 		$pua->register($req, \&_cfop_callback);
 	}
 #print STDERR scalar(localtime) . "pua: " . Dumper($pua);
-	my $elapsed = time - $start_time;
-	my $wait_timeout = $timeout - $elapsed;
+	my $elapsed = Time::HiRes::time - $start_time;
+	my $wait_timeout = int($timeout - $elapsed + 0.5);
 	$wait_timeout = 1 if $wait_timeout < 1;
 	$pua->wait($wait_timeout);
 #print STDERR scalar(localtime) . " cfop done with wait, returning " . (defined $_proxy_port ? 'undef' : "'$port'") . "\n";
 	$_proxy_port = 0 if !$_proxy_port;
+	$elapsed = Time::HiRes::time - $start_time;
 
 	# Store this value so we don't keep probing the IP.
-	$self->setKnownOpenProxy($ip, $_proxy_port);
+	$self->setKnownOpenProxy($ip, $_proxy_port, $elapsed);
 
 	return $_proxy_port;
 }
