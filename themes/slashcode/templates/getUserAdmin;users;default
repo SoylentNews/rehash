@@ -20,7 +20,6 @@ en_US
 __name__
 getUserAdmin
 __template__
-
 <TABLE BORDER="0" WIDTH="100%">
 	<TR>
 		<TD>
@@ -39,6 +38,8 @@ __template__
 				<INPUT TYPE="HIDDEN" NAME="fieldname" VALUE="[% form.fieldname | strip_attribute %]">
 				[%- ELSIF field == 'subnetid' -%]
 				<INPUT TYPE="HIDDEN" NAME="subnetid" value="[% useredit.subnetid | strip_attribute %]">
+				[%- ELSIF field == 'srcid' -%]
+				<INPUT TYPE="HIDDEN" NAME="srcid" value="[% useredit.srcid | strip_attribute %]">
 				[%- END -%]
 
 				<TD VALIGN="TOP"><B>User</B></TD>

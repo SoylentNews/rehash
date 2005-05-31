@@ -914,18 +914,24 @@ sub showInfo {
 	} elsif ($user->{is_admin}) {
 		$id ||= $form->{userfield} || $user->{uid};
 		if ($id =~ /^\d+$/) {
-			$fieldkey = 'uid';
-			$requested_user = $reader->getUser($id);
-			$uid = $requested_user->{uid};
-			$nick = $requested_user->{nickname};
-			if ((my $conflict_id = $reader->getUserUID($id)) && $form->{userinfo}) {
-				slashDisplay('showInfoConflict', {
-					op		=> 'userinfo',
-					id		=> $uid,
-					nick		=> $nick,
-					conflict_id	=> $conflict_id
-				});
-				return 1;
+			if (length($id) == 19) {
+				$requested_user->{nonuid} = 1;
+				$fieldkey = "srcid";
+				$requested_user->{$fieldkey} = $id;
+			} else {
+				$fieldkey = 'uid';
+				$requested_user = $reader->getUser($id);
+				$uid = $requested_user->{uid};
+				$nick = $requested_user->{nickname};
+				if ((my $conflict_id = $reader->getUserUID($id)) && $form->{userinfo}) {
+					slashDisplay('showInfoConflict', {
+						op		=> 'userinfo',
+						id		=> $uid,
+						nick		=> $nick,
+						conflict_id	=> $conflict_id
+					});
+					return 1;
+				}
 			}
 
 		} elsif (length($id) == 32) {
@@ -937,7 +943,6 @@ sub showInfo {
 				$fieldkey = 'md5id';
 			}
 			$requested_user->{$fieldkey} = $id;
-
 		} elsif ($id =~ /^(\d{1,3}\.\d{1,3}.\d{1,3}\.0)$/ 
 				|| $id =~ /^(\d{1,3}\.\d{1,3}\.\d{1,3})\.?$/) {
 			$fieldkey = 'subnetid';
@@ -1019,9 +1024,12 @@ sub showInfo {
 		} elsif ($requested_user->{md5id}) {
 			$netid = $requested_user->{md5id} ;
 
+		} elsif ($requested_user->{srcid}) {
+			$netid = $requested_user->{srcid} ;
 		} else {
 			$netid = $requested_user->{subnetid} ;
 		}
+
 		my $data = {
 			id => $id,
 			md5id => $netid,
@@ -2082,6 +2090,13 @@ sub saveUserAdmin {
 		($id, $user_edit->{$fieldname})
 			= ($form->{md5id}, $form->{md5id});
 		warn "form field md5id specified, no srcid saving possible";
+	
+	} elsif ($form->{srcid}) {
+		$user_editfield_flag = 'srcid';
+		my $fieldname = $form->{fieldname} || 'srcid';
+		($id, $user_edit->{$fieldname})
+			= ($form->{srcid}, $form->{srcid});
+		$srcid = $id;
 
 	} else {
 		# If we were not fed valid data, don't do anything.
@@ -2163,10 +2178,10 @@ print STDERR "acl_change: " . Dumper($acl_change);
 		$slashdb->getBanList(1); # reload the list
 	}
 
+
 	if ($user->{is_admin} && $srcid) {
 		$slashdb->setAL2($srcid, $al2_change);
 	}
-
 	if ($user->{is_admin} && ($user_editfield_flag eq 'uid' ||
 		$user_editfield_flag eq 'nickname')) {
 
@@ -3099,6 +3114,7 @@ sub getUserAdmin {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $logdb = getObject('Slash::DB', { db_type => 'log_slave' });
 
+
 	my $user	= getCurrentUser();
 	my $form	= getCurrentForm();
 	my $constants	= getCurrentStatic();
@@ -3174,6 +3190,11 @@ sub getUserAdmin {
 		$uidstruct = $slashdb->getUIDStruct('subnetid', $user_edit->{subnetid});
 		@accesshits = $logdb->countAccessLogHitsInLastX($field, $user_edit->{subnetid}) if defined($logdb);
 
+	} elsif ($field eq "srcid") {
+		$user_edit->{nonuid} = 1;
+		$user_edit->{srcid}  = $id;
+		$srcid = $id;
+		
 	} else {
 		$user_edit = $id ? $slashdb->getUser($id) : $user;
 		$user_editfield = $user_edit->{uid};
