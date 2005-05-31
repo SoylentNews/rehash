@@ -30,6 +30,8 @@ __template__
 	[% useredit.ipid_vis %] - [% constants.sitename %] IPID
 	[%- ELSIF fieldkey == 'subnetid' -%]
 	[% useredit.subnetid_vis %] - [% constants.sitename %] SubnetID
+	[%- ELSIF fieldkey == 'srcid' -%]
+	[% useredit.srcid %] - [% constants.sitename %] SRCID
 	[%- ELSE -%]
 	[% useredit.md5id_vis %] - [% constants.sitename %] md5ID
 	[%- END -%]
