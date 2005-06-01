@@ -325,6 +325,7 @@ my %cmds = (
 	ignore		=> \&cmd_ignore,
 	unignore	=> \&cmd_unignore,
 	whois		=> \&cmd_whois,
+	excuse		=> \&cmd_excuse,
 	daddypants	=> \&cmd_daddypants,
 	slashd		=> \&cmd_slashd,
 	dbs		=> \&cmd_dbs,
@@ -503,6 +504,25 @@ sub cmd_whois {
 	} else {
 		send_msg(getIRCData('useris',
 			{ nickname => $user->{nickname}, uid => $uid }), { $service => 1 });
+	}
+}
+
+sub cmd_excuse {
+	my($service, $info) = @_;
+	require Net::Telnet;
+	my $host = 'bob.bob.bofh.org';
+	my $port = 666;
+	my $t = Net::Telnet->new(
+		Host	=> $host,
+		Errmode	=> "return",
+		Port	=> $port
+	);  
+	if (defined $t) {
+		$t->waitfor("/Your excuse is: /"); 
+		my $reply = $t->get;
+		send_msg($reply, { $service => 1 });
+	} else { 
+		send_msg("The server at $host (port $port) appears to be down.", { $service => 1 });
 	}
 }
 
