@@ -48,7 +48,7 @@ sub main {
 	}
 
 	if (!$ops{$op}[ALLOWED]) {
-		redirect("$gSkin->{rootdir}/users.pl");
+		redirect("$gSkin->{rootdir}/");
 		return;
 	}
 
