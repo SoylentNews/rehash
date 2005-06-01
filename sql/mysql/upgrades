@@ -3049,3 +3049,5 @@ INSERT INTO vars (name, value, description) VALUES ('ircslash_lcr_sites','','Pip
 
 ALTER TABLE open_proxies ADD COLUMN dur FLOAT DEFAULT NULL AFTER port;
 
+# End of T_2_5_0_68, Start of T_2_5_0_69 - 2005/05/31
+
