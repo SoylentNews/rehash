@@ -556,7 +556,7 @@ sub validateComment {
 
 	my $min_cid_1_day_old = $slashdb->getVar('min_cid_last_1_days','value', 1) || 0;
 	
-	if ($user->{is_anon} && $constants->{comments_perday_anon}
+	if (($user->{is_anon} || $form->{postanon}) && $constants->{comments_perday_anon}
 		&& !$user->{is_admin}) {
 		my($num_comm, $sum_mods) = $reader->getNumCommPostedAnonByIPID(
 			$user->{ipid}, 24, $min_cid_1_day_old);
