@@ -6025,7 +6025,7 @@ sub getAL2 {
 		}
 #print STDERR "getAL2 name=$name bv=$bitvector bp=$al2types->{$name}{bitpos}\n";
 	}
-if ($retval && keys %$retval) { print STDERR "getAL2 retval keys: '" . join(" ", sort keys %$retval) . "'\n"; }
+#if ($retval && keys %$retval) { print STDERR "getAL2 retval keys: '" . join(" ", sort keys %$retval) . "'\n"; }
 	return $retval;
 }
 
