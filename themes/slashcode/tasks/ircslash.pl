@@ -184,7 +184,7 @@ sub ircshutdown {
 }
 
 sub jabbershutdown {
-	$jabber->disconnect if $jabber->Connected;
+	$jabber->disconnect if $jabber && $jabber->Connected;
 }
 
 sub on_connect {
