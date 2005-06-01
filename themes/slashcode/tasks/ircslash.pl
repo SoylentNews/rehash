@@ -174,6 +174,8 @@ sub jabberinit {
 }
 
 sub ircshutdown {
+	return 0 unless $constants->{ircslash} && $conn;
+
 	$conn->quit("exiting");
 	# The disconnect seems to be unnecessary, and throws an error
 	# in my testing, but just to be sure let's call it anyway.
@@ -184,7 +186,9 @@ sub ircshutdown {
 }
 
 sub jabbershutdown {
-	$jabber->disconnect if $jabber && $jabber->Connected;
+	return 0 unless $constants->{jabberslash} && $jabber;
+
+	$jabber->disconnect if $jabber->Connected;
 }
 
 sub on_connect {
