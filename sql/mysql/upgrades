@@ -3037,8 +3037,6 @@ INSERT INTO vars (name, value, description) VALUES ('jabberslash_tls','0','Try t
 INSERT INTO vars (name, value, description) VALUES ('ircslash_jabber_users','','Pipe-separated list of userids ("userid" or "userid/resource") to send Jabber messages to, instead of sending to channel');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_lcr_sites','','Pipe-separated list of site names to use for lcr cmd');
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # SLASHCLUSTER LAST UPDATED HERE
@@ -3049,8 +3047,12 @@ INSERT INTO vars (name, value, description) VALUES ('ircslash_lcr_sites','','Pip
 
 ALTER TABLE open_proxies ADD COLUMN dur FLOAT DEFAULT NULL AFTER port;
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
 # End of T_2_5_0_68, Start of T_2_5_0_69 - 2005/05/31
 
 # Changes for plugins/HumanConf (ignore if not using that plugin)
 UPDATE vars SET description='HumanConf switch for posting comments: 0=off, 1=anon only, 2=also logged-in with low karma' WHERE name='hc_sw_comments';
+
+# End of T_2_5_0_69, Start of T_2_5_0_70 - 2005/06/01
 
