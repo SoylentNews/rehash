@@ -219,12 +219,24 @@ sub main {
 		# yeah, the next step is to loop through the array of $ops->{$op}{check}
 		my $formname;
 		my $options = {};
+
+		# Disable HumanConf, if...
 		$options->{no_hc} = 1 if
+				# HumanConf is not running...
 			   !$constants->{plugin}{HumanConf}
 			|| !$constants->{hc}
-			|| !$constants->{hc_sw_comments}
-			|| (!$user->{is_anon}
-			   && $user->{karma} > $constants->{hc_maxkarma});
+				# ...or it's turned off for comments...
+			|| $constants->{hc_sw_comments} == 0
+				# ...or it's turned off for logged-in users
+				# and this user is logged-in...
+			|| $constants->{hc_sw_comments} == 1
+			   && !$user->{is_anon}
+				# ...or it's turned off for logged-in users
+				# with high enough karma, and this user
+				# qualifies.
+			|| $constants->{hc_sw_comments} == 2
+			   && !$user->{is_anon}
+			   &&  $user->{karma} > $constants->{hc_maxkarma};
  
 		my $done = 0;
 		DO_CHECKS: while (!$done) {

@@ -3051,3 +3051,6 @@ ALTER TABLE open_proxies ADD COLUMN dur FLOAT DEFAULT NULL AFTER port;
 
 # End of T_2_5_0_68, Start of T_2_5_0_69 - 2005/05/31
 
+# Changes for plugins/HumanConf (ignore if not using that plugin)
+UPDATE vars SET description='HumanConf switch for posting comments: 0=off, 1=anon only, 2=also logged-in with low karma' WHERE name='hc_sw_comments';
+
