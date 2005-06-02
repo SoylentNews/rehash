@@ -3320,27 +3320,20 @@ sub deleteSubmission {
 
 	# This might need some cleaning up if nothing is using it.
 	if ($form->{subid} && !$options->{nodelete}) {
-		$self->sqlUpdate("submissions", { del => 1 },
-			"subid=" . $self->sqlQuote($form->{subid})
-		);
+		my $subid_q = $self->sqlQuote($form->{subid});
 
-		# Brian mentions that this isn't atomic and that two updates
-		# executing this code with the same UID will cause problems.
-		# I say, that if you have 2 processes executing this code 
-		# at the same time, with the same uid, that you have a SECURITY
-		# BREACH. Caveat User.			- Cliff
+		# skip if someone got here first
+		unless ($self->sqlSelect('del', 'submissions', "subid=$subid_q")) {
+			$self->sqlUpdate("submissions",
+				{ del => 1 }, "subid=$subid_q"
+			);
 
-		# I don't understand what would be a security
-		# breach.  If someone has two windows open and
-		# deletes from one, and while that request is
-		# pending does it from the other, that's no
-		# security breach. -- pudge
+			$self->setUser($uid,
+				{ -deletedsubmissions => 'deletedsubmissions+1' }
+			);
 
-		$self->setUser($uid,
-			{ deletedsubmissions => 
-				getCurrentUser('deletedsubmissions') + 1,
-		});
-		push @subid, $form->{subid};
+			push @subid, $form->{subid};
+		}
 	}
 
 	for (keys %{$form}) {
@@ -3348,6 +3341,8 @@ sub deleteSubmission {
 		# the logic below should always check $t.
 		next unless /^(\w+)_(\d+)$/;
 		my($t, $n) = ($1, $2);
+		my $n_q = $self->sqlQuote($n);
+
 		if ($t eq "note" || $t eq "comment" || $t eq "skid") {
 			$form->{"note_$n"} = "" if $form->{"note_$n"} eq " ";
 			if ($form->{$_}) {
@@ -3362,21 +3357,30 @@ sub deleteSubmission {
 					$sub{-note} = 'NULL';
 				}
 
-				$self->sqlUpdate("submissions", \%sub,
-					"subid=" . $self->sqlQuote($n));
-			}
-		} elsif ($t eq 'del' && !$options->{nodelete}) {
-			if ($options->{accepted}) {
-				$self->sqlUpdate("submissions", { del => 2 },
-					'subid=' . $self->sqlQuote($n));
-			} else {
-				$self->sqlUpdate("submissions", { del => 1 },
-					'subid=' . $self->sqlQuote($n));
-				$self->setUser($uid,
-					{ -deletedsubmissions => 'deletedsubmissions+1' }
+				$self->sqlUpdate('submissions',
+					\%sub, "subid=$n_q"
 				);
 			}
-			push @subid, $n;
+
+		} elsif ($t eq 'del' && !$options->{nodelete}) {
+			if ($options->{accepted}) {
+				$self->sqlUpdate('submissions',
+					{ del => 2 }, "subid=$n_q"
+				);
+				push @subid, $n;
+
+			} else {
+				# skip if someone got here first
+				unless ($self->sqlSelect('del', 'submissions', "subid=$n_q")) {
+					$self->sqlUpdate('submissions',
+						{ del => 1 }, "subid=$n_q"
+					);
+					$self->setUser($uid,
+						{ -deletedsubmissions => 'deletedsubmissions+1' }
+					);
+					push @subid, $n;
+				}
+			}
 		}
 	}
 
