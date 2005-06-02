@@ -37,6 +37,10 @@ $task{$me}{code} = sub {
 
 	# Find out where in the accesslog we need to start scanning from.
 	# Don't start scanning from too far back.
+	# XXX We need to make this getObject() NOT fall back on the log
+	# (from the log_slave).  To do so impacts performance.  And
+	# afterwards, it can throw an error because counthits_lastmaxid
+	# can reflect the max from the master when the slave is behind.
 	my $logdb = getObject('Slash::DB', { db_type => "log_slave" });
 	my $lastmaxid = ($slashdb->getVar('counthits_lastmaxid', 'value', 1) || 0) + 1;
 	my $newmaxid = $logdb->sqlSelect("MAX(id)", "accesslog");
@@ -45,7 +49,12 @@ $task{$me}{code} = sub {
                 slashdLog("Nothing to do, lastmaxid '$lastmaxid', newmaxid '$newmaxid'");
 		if ($lastmaxid > $newmaxid + 2) {
 			# Something odd is going on... this ID is off.
-			slashdErrnote("counthits_lastmaxid '$lastmaxid' is higher than it should be '$newmaxid' -- maybe accesslog got rebuilt, or db unavailable and failover order is incorrect?");
+			slashdErrnote(<<EOT
+counthits_lastmaxid '$lastmaxid' is higher than it should be '$newmaxid'.
+Maybe accesslog got rebuilt, or more likely the log_slave was unavailable
+and failover went to the master, now back to the slave.
+EOT
+);
 		}
                 return "";
         }
