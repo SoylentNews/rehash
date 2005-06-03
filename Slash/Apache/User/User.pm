@@ -863,6 +863,7 @@ Fry:Hooray, we don't have to do anything!
 Fry:Prepare to be thought at!
 Fry:I did it!  And it's all thanks to the books at my local library.
 Fry:Existing is basically all I do!
+Fry:It's a widely-believed fact!
 EOT
 
 1;
