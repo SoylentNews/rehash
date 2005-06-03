@@ -7673,15 +7673,22 @@ sub getCommentMostCommonReason {
 sub getCommentReply {
 	my($self, $sid, $pid) = @_;
 
+	my $constants = getCurrentStatic();
+
 	# If we're not replying to anything, we already know the answer.
 	return { } if !$pid;
 
 	my $sid_quoted = $self->sqlQuote($sid);
-	my $reply = $self->sqlSelectHashref(
+	my $select =
 		"date,date as time,subject,comments.points as points,comments.tweak as tweak,
 		comment_text.comment as comment,realname,nickname,
 		fakeemail,homepage,comments.cid as cid,sid,
-		users.uid as uid,reason",
+		users.uid as uid,reason, karma_bonus";
+	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
+		$select .= ", subscriber_bonus";
+	}
+	my $reply = $self->sqlSelectHashref(
+		$select,
 		"comments,comment_text,users,users_info,users_comments",
 		"sid=$sid_quoted
 		AND comments.cid=$pid
