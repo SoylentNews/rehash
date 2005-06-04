@@ -4845,7 +4845,9 @@ sub checkPostInterval {
 		$speedlimit = int($speedlimit + 0.5);
 	}
 
-	my $formkey_earliest = time() - $constants->{formkey_timeframe};
+	my $timeframe = $constants->{formkey_timeframe};
+	$timeframe = $speedlimit if $speedlimit > $timeframe;
+	my $formkey_earliest = getTime({ unix_format => 1 }) - $timeframe;
 
 	my $where = $self->_whereFormkey();
 	$where .= " AND formname = '$formname' ";
