@@ -4835,8 +4835,9 @@ sub checkPostInterval {
 	}
 
 	# Anonymous comment posting can be forced slower progressively.
-	if ($user->{is_anon} && $formname eq "comments"
+	if ($formname eq 'comments'
 		&& $constants->{comments_anon_speed_limit_mult}
+		&& ($user->{is_anon} || getCurrentForm('postanon'))
 	) {
 		my $multiplier = $constants->{comments_anon_speed_limit_mult};
 		my $num_comm = $reader->getNumCommPostedAnonByIPID($user->{ipid});
@@ -4852,7 +4853,7 @@ sub checkPostInterval {
 
 	my $now = time();
 	my($interval) = $self->sqlSelect(
-		"$now - max(submit_ts)",
+		"$now - MAX(submit_ts)",
 		"formkeys",
 		$where);
 
