@@ -4845,22 +4845,22 @@ sub checkPostInterval {
 		$speedlimit = int($speedlimit + 0.5);
 	}
 
+	my $time = $self->getTime({ unix_format => 1 });
 	my $timeframe = $constants->{formkey_timeframe};
 	$timeframe = $speedlimit if $speedlimit > $timeframe;
-	my $formkey_earliest = getTime({ unix_format => 1 }) - $timeframe;
+	my $formkey_earliest = $time - $timeframe;
 
 	my $where = $self->_whereFormkey();
 	$where .= " AND formname = '$formname' ";
 	$where .= "AND ts >= $formkey_earliest";
 
-	my $now = time();
 	my($interval) = $self->sqlSelect(
-		"$now - MAX(submit_ts)",
+		"$time - MAX(submit_ts)",
 		"formkeys",
 		$where);
 
 	$interval ||= 0;
-	print STDERR "CHECK INTERVAL $interval speedlimit $speedlimit al2_used $al2_name_used\n" if $constants->{DEBUG};
+	print STDERR "CHECK INTERVAL $interval speedlimit $speedlimit al2_used $al2_name_used f_e $formkey_earliest\n" if $constants->{DEBUG};
 
 	return ($interval < $speedlimit && $speedlimit > 0) ? $interval : 0;
 }
