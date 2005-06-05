@@ -95,7 +95,7 @@ hitting 'reply' and submitting a comment.</P>
 [% # POST LIMIT
 CASE "comments post limit" %]
 [% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
-<P>[% constants.sitename %] requires you to wait [% limit %] between
+<P>[% constants.sitename %] requires you to wait between
 each successful posting of a comment to allow everyone a fair chance
 at posting a comment.</P>
 <P>It's been [% interval %] since you last successfully posted a comment</P>
@@ -103,7 +103,7 @@ at posting a comment.</P>
 [% # POST LIMIT
 CASE "discussions post limit" %]
 [% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
-<P>[% constants.sitename %] requires you to wait [% limit %] between
+<P>[% constants.sitename %] requires you to wait between
 each successful creation of a discussion .</P>
 <P>It's been [% interval %] since you last successfully created a discussion</P>
 
