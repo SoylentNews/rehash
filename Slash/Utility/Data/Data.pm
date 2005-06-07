@@ -49,6 +49,9 @@ use XML::Parser;
 use base 'Exporter';
 use vars qw($VERSION @EXPORT);
 
+# whitespace regex
+our $WS_RE = qr{(?: \s | </? (?:br|p) (?:\ /)?> )*}x;
+
 # without this, HTML::TreeBuilder will skip slash
 BEGIN {
 	$HTML::Tagset::isKnown{slash} = 1;
@@ -2664,7 +2667,6 @@ sub balanceTags {
 sub _removeEmpty {
 	my($html) = @_;
 	my $p    = getCurrentStatic('xhtml') ? '<p />' : '<p>';
-	my $ws_re = qr{(?: \s | </? (?:br|p) (?:\ /)?> )*}x;
 
 	$$html =~ s|<p>\s*</p>|$p|g;
 	while ($$html =~ m|<(\w+)>\s*</\1>|) {
@@ -2675,8 +2677,8 @@ sub _removeEmpty {
 	# lists, where we are more likely to mistakenly run into it,
 	# where it will cause more problems
 	for my $re (values %lists_re) {
-		while ($$html =~ m|<($re)>$ws_re</\1>|) {
-			$$html =~ s|<($re)>$ws_re</\1>\s*||g;
+		while ($$html =~ m|<($re)>$WS_RE</\1>|) {
+			$$html =~ s|<($re)>$WS_RE</\1>\s*||g;
 		}
 	}
 }
