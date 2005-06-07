@@ -3045,8 +3045,6 @@ INSERT INTO vars (name, value, description) VALUES ('ircslash_lcr_sites','','Pip
 
 ALTER TABLE open_proxies ADD COLUMN dur FLOAT DEFAULT NULL AFTER port;
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # End of T_2_5_0_68, Start of T_2_5_0_69 - 2005/05/31
 
 # Changes for plugins/HumanConf (ignore if not using that plugin)
@@ -3055,4 +3053,8 @@ UPDATE vars SET description='HumanConf switch for posting comments: 0=off, 1=ano
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_69, Start of T_2_5_0_70 - 2005/06/01
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_70, Start of T_2_5_0_71 - 2005/06/07
 
