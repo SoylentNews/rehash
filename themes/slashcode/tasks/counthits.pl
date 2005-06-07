@@ -49,12 +49,11 @@ $task{$me}{code} = sub {
                 slashdLog("Nothing to do, lastmaxid '$lastmaxid', newmaxid '$newmaxid'");
 		if ($lastmaxid > $newmaxid + 2) {
 			# Something odd is going on... this ID is off.
-			slashdErrnote(<<EOT
+			slashdErrnote(<<EOT);
 counthits_lastmaxid '$lastmaxid' is higher than it should be '$newmaxid'.
 Maybe accesslog got rebuilt, or more likely the log_slave was unavailable
 and failover went to the master, now back to the slave.
 EOT
-);
 		}
                 return "";
         }
