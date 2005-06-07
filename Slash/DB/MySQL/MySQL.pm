@@ -239,14 +239,14 @@ my %descriptions = (
 
 ########################################################
 sub _whereFormkey {
-	my($self) = @_;
+	my($self, $options) = @_;
 
 	my $ipid = getCurrentUser('ipid');
 	my $uid = getCurrentUser('uid');
 	my $where;
 
 	# anonymous user without cookie, check host, not ipid
-	if (isAnon($uid)) {
+	if (isAnon($uid) || $options->{force_ipid}) {
 		$where = "ipid = '$ipid'";
 	} else {
 		$where = "uid = '$uid'";
@@ -4815,7 +4815,7 @@ sub checkPostInterval {
 	my $speedlimit_name = "${formname}_speed_limit";
 	my $speedlimit_anon_name = "${formname}_anon_speed_limit";
 	my $speedlimit = 0;
-	$speedlimit = $constants->{$speedlimit_anon_name} if $user->{is_anon};
+	$speedlimit = $constants->{$speedlimit_anon_name} if $user->{is_anon} || getCurrentForm("postanon");
 	$speedlimit ||= $constants->{$speedlimit_name} || 0;
 
 	# If this user has access modifiers applied, check for possible
@@ -4849,8 +4849,10 @@ sub checkPostInterval {
 	my $timeframe = $constants->{formkey_timeframe};
 	$timeframe = $speedlimit if $speedlimit > $timeframe;
 	my $formkey_earliest = $time - $timeframe;
-
-	my $where = $self->_whereFormkey();
+	
+	my $options = {};
+	$options->{force_ipid} = 1 if getCurrentForm("postanon");
+	my $where = $self->_whereFormkey($options);
 	$where .= " AND formname = '$formname' ";
 	$where .= "AND ts >= $formkey_earliest";
 
