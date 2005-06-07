@@ -3322,12 +3322,12 @@ sub deleteSubmission {
 	if ($form->{subid} && !$options->{nodelete}) {
 		my $subid_q = $self->sqlQuote($form->{subid});
 
-		# skip if someone got here first
-		unless ($self->sqlSelect('del', 'submissions', "subid=$subid_q")) {
-			$self->sqlUpdate("submissions",
-				{ del => 1 }, "subid=$subid_q"
-			);
+		# Try updating del to 1, but only if it's still 0
+		my $rows = $self->sqlUpdate("submissions",
+			{ del => 1 }, "subid=$subid_q AND del=0"
+		);
 
+		if ($rows) {
 			$self->setUser($uid,
 				{ -deletedsubmissions => 'deletedsubmissions+1' }
 			);
@@ -3370,11 +3370,11 @@ sub deleteSubmission {
 				push @subid, $n;
 
 			} else {
-				# skip if someone got here first
-				unless ($self->sqlSelect('del', 'submissions', "subid=$n_q")) {
-					$self->sqlUpdate('submissions',
-						{ del => 1 }, "subid=$n_q"
-					);
+				# Try updating del to 1, but only if it's still 0
+				my $rows = $self->sqlUpdate('submissions',
+					{ del => 1 }, "subid=$n_q AND del=0"
+				);
+				if ($rows) {
 					$self->setUser($uid,
 						{ -deletedsubmissions => 'deletedsubmissions+1' }
 					);
