@@ -4809,35 +4809,42 @@ sub updateFormkey {
 sub checkPostInterval {
 	my($self, $formname) = @_;
 	$formname ||= getCurrentUser('currentPage');
-	my $user      = getCurrentUser();
+	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+	my $form = getCurrentForm();
+
+	my $counts_as_anon =
+		   $user->{is_anon}
+		|| $user->{karma} < $constants->{formkey_minloggedinkarma}
+		|| $form->{postanon};
 
 	my $speedlimit_name = "${formname}_speed_limit";
 	my $speedlimit_anon_name = "${formname}_anon_speed_limit";
-	my $speedlimit = 0;
-	$speedlimit = $constants->{$speedlimit_anon_name} if $user->{is_anon} || getCurrentForm("postanon");
+	my $speedlimit = $counts_as_anon ? $constants->{$speedlimit_anon_name} : 0;
 	$speedlimit ||= $constants->{$speedlimit_name} || 0;
 
 	# If this user has access modifiers applied, check for possible
 	# different speed limits based on those.  First match, if any,
 	# wins.
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $srcids = getCurrentUser('srcids');
-	my $al2_hr = $reader->getAL2($srcids) if $srcids;
+	my $srcids = $user->{srcids};
+	my $al2_hr = $srcids ? $reader->getAL2($srcids) : { };
 	my $al2_name_used = "_none_";
 	AL2_NAME: for my $al2_name (sort keys %$al2_hr) {
-		my $speedlimit_name_al2 = "${speedlimit_name}_$al2_name";
-		if (defined $constants->{$speedlimit_name_al2}) {
+		my $sl_name_al2 = $counts_as_anon
+			? "${speedlimit_anon_name}_$al2_name"
+			: "${speedlimit_name}_$al2_name";
+		if (defined $constants->{$sl_name_al2}) {
 			$al2_name_used = $al2_name;
-			$speedlimit = $constants->{$speedlimit_name_al2};
+			$speedlimit = $constants->{$sl_name_al2};
 			last AL2_NAME;
 		}
 	}
 
 	# Anonymous comment posting can be forced slower progressively.
 	if ($formname eq 'comments'
+		&& $counts_as_anon
 		&& $constants->{comments_anon_speed_limit_mult}
-		&& ($user->{is_anon} || getCurrentForm('postanon'))
 	) {
 		my $multiplier = $constants->{comments_anon_speed_limit_mult};
 		my $num_comm = $reader->getNumCommPostedAnonByIPID($user->{ipid});
@@ -4851,10 +4858,10 @@ sub checkPostInterval {
 	my $formkey_earliest = $time - $timeframe;
 	
 	my $options = {};
-	$options->{force_ipid} = 1 if getCurrentForm("postanon");
+	$options->{force_ipid} = 1 if $form->{postanon};
 	my $where = $self->_whereFormkey($options);
-	$where .= " AND formname = '$formname' ";
-	$where .= "AND ts >= $formkey_earliest";
+	$where .= " AND formname = '$formname'";
+	$where .= " AND ts >= $formkey_earliest";
 
 	my($interval) = $self->sqlSelect(
 		"$time - MAX(submit_ts)",
@@ -4862,7 +4869,7 @@ sub checkPostInterval {
 		$where);
 
 	$interval ||= 0;
-	print STDERR "CHECK INTERVAL $interval speedlimit $speedlimit al2_used $al2_name_used f_e $formkey_earliest\n" if $constants->{DEBUG};
+	print STDERR "CHECK INTERVAL $interval speedlimit $speedlimit al2_used $al2_name_used f_e $formkey_earliest uid $user->{uid} c_a_n $counts_as_anon\n" if $constants->{DEBUG};
 
 	return ($interval < $speedlimit && $speedlimit > 0) ? $interval : 0;
 }
