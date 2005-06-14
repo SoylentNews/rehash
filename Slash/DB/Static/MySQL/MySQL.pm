@@ -613,8 +613,8 @@ sub deleteOldModRows {
 	# First delete from the bottom up for the moderatorlog.
 
 	my $junk_bottom = $reader->sqlSelect('MIN(id)', 'moderatorlog');
-	my $need_bottom = $reader->sqlSelect('MIN(id)',
-		'moderatorlog',
+	my $need_bottom = $reader->sqlSelectNumericKeyAssumingMonotonic(
+		'moderatorlog', 'min', 'id',
 		"ts >= DATE_SUB(NOW(), INTERVAL $archive_delay_mod DAY)");
 	while ($need_bottom && $junk_bottom < $need_bottom) {
 		$junk_bottom += $max_rows;
@@ -627,8 +627,8 @@ sub deleteOldModRows {
 	# Now delete from the bottom up for the metamodlog.
 
 	$junk_bottom = $reader->sqlSelect('MIN(id)', 'metamodlog');
-	$need_bottom = $reader->sqlSelect('MIN(id)',
-		'metamodlog',
+	$need_bottom = $reader->sqlSelectNumericKeyAssumingMonotonic(
+		'metamodlog', 'min', 'id',
 		"ts >= DATE_SUB(NOW(), INTERVAL $archive_delay_mod DAY)");
 	while ($need_bottom && $junk_bottom < $need_bottom) {
 		$junk_bottom += $max_rows;
@@ -2551,14 +2551,12 @@ sub getLastUIDCreatedBeforeDaysBack {
 	$yesterday = substr($yesterday, 0, 10);
 	my $where = '';
 	if ($where) {
-		$where = "created_at < DATE_SUB('$yesterday 00:00',INTERVAL $num_days DAY)";
+		$where = "created_at < DATE_SUB('$yesterday 00:00', INTERVAL $num_days DAY)";
 	} else {
 		$where = "created_at < '$yesterday 00:00'";
 	}
-	return $self->sqlSelect(
-		"MAX(uid)",
-		"users_info",
-		$where);
+	return $self->sqlSelectNumericKeyAssumingMonotonic(
+		'users_info', 'max', 'uid', $where);
 }
 
 ########################################################
