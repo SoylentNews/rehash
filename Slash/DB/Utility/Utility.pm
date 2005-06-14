@@ -791,7 +791,8 @@ sub sqlSelectAllKeyValue {
 # Note that there must not be "holes" in the table where a value of the
 # numeric key is missing even though there are values present both above
 # and below it, or the answer may impose an incorrectly strict limitation
-# (this bug may be fixed in the future).
+# (this bug may be fixed in the future).  This includes "holes" in the
+# values for that key in the rows returned by the where clause.
 #
 # For example, if you wanted to count the number of distinct uids in
 # a very large accesslog table in several hours, the easy way is:
