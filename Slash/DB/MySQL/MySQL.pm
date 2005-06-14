@@ -5132,9 +5132,8 @@ sub setKnownOpenProxy {
 		$xff = $r->header_in('X-Forwarded-For') if $r;
 #use Data::Dumper; print STDERR "sKOP headers_in: " . Dumper([ $r->headers_in ]) if $r;
 	}
-	$xff ||= undef;
-	$xff = $1 if $xff && length($xff) > 15
-		&& $xff =~ /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/;
+	$xff = undef unless $xff && length($xff) >= 7
+		&& $xff =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/;
 	$duration = undef if !$duration;
 #print STDERR scalar(localtime) . " setKnownOpenProxy doing sqlReplace ip '$ip' port '$port'\n";
 	return $self->sqlReplace("open_proxies", {

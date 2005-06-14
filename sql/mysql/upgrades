@@ -3060,3 +3060,5 @@ UPDATE vars SET description='HumanConf switch for posting comments: 0=off, 1=ano
 
 INSERT INTO vars (name, value, description) VALUES ('formkey_minloggedinkarma','1','The min karma a user must have to "count" as a logged-in user for some purposes');
 
+ALTER TABLE open_proxies CHANGE COLUMN xff xff VARCHAR(40) DEFAULT NULL;
+
