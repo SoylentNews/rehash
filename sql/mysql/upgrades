@@ -3050,11 +3050,9 @@ ALTER TABLE open_proxies ADD COLUMN dur FLOAT DEFAULT NULL AFTER port;
 # Changes for plugins/HumanConf (ignore if not using that plugin)
 UPDATE vars SET description='HumanConf switch for posting comments: 0=off, 1=anon only, 2=also logged-in with low karma' WHERE name='hc_sw_comments';
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_69, Start of T_2_5_0_70 - 2005/06/01
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
+# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_70, Start of T_2_5_0_71 - 2005/06/07
 
@@ -3064,4 +3062,8 @@ ALTER TABLE open_proxies CHANGE COLUMN xff xff VARCHAR(40) DEFAULT NULL;
 
 # Changes for plugins/HumanConf (ignore if not using that plugin)
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_lettersomit', 'hlou', 'For question 1 (images), which letters should never appear? Lowercase');
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_72, Start of T_2_5_0_73 - 2005/06/14
 
