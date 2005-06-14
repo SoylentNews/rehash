@@ -115,7 +115,7 @@ the system doesn't permit. Either submit your discussion, or don't.
 
 [% CASE "comments_speed" %]
 [% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
-<P>[% constants.sitename %] requires you to wait [% limit %] between
+<P>[% constants.sitename %] requires you to wait between
 each [% IF attempt %] attempt to reply to [% ELSE %] successful posting of [% END %]
  a comment to allow everyone a fair chance at posting a comment.</P>
 	[% IF interval %]
