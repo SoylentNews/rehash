@@ -766,6 +766,111 @@ sub sqlSelectAllKeyValue {
 }
 
 ########################################################
+# This is a little different from the other sqlSelect* methods.
+#
+# Its reason for existing is that sometimes, for performance reasons,
+# you want to do a select on a large table that is limited by a key
+# that differs from the column you actually want to limit by, though
+# both of them increase (or decrease) together.  For example, perhaps
+# you want to do a SELECT on an accesslog table with millions of rows
+# based on a range of accesslog.ts, but to make sure the query optimizer
+# restricts by primary key, you'd prefer to determine the range of
+# accesslog.id that spans the rows in question, and offer that as
+# part of the WHERE clause as well.  The optimizer doesn't know that
+# the columns id and ts increase together, but you do.  Telling the
+# optimizer that it can restrict by the numeric key may not make your
+# query faster, but it might, and in non-pathological situations it
+# won't make it slower.
+#
+# This method will return a boundary value of a numeric key column
+# based on an inequality test for a different column that must be
+# approximately monotonic with the key.  It will always return quickly,
+# since it uses a binary search to narrow down the value sought, and
+# all its SELECTs are primary key lookups.
+#
+# Note that there must not be "holes" in the table where a value of the
+# numeric key is missing even though there are values present both above
+# and below it, or the answer may impose an incorrectly strict limitation
+# (this bug may be fixed in the future).
+#
+# For example, if you wanted to count the number of distinct uids in
+# a very large accesslog table in several hours, the easy way is:
+#
+# $c = $slashdb->sqlSelect("COUNT(DISTINCT uid)", "accesslog",
+#     "ts BETWEEN '2001-01-01 01:00:00' AND '2001-01-01 03:00:00'");
+#
+# but it may be faster, and certainly won't be significantly slower,
+# to do:
+#
+# $minid = $slashdb->sqlSelectNumericKeyAssumingMonotonic("accesslog", "min", "id", "ts >= '2001-01-01 01:00:00'");
+# $maxid = $slashdb->sqlSelectNumericKeyAssumingMonotonic("accesslog", "max", "id", "ts <= '2001-01-01 03:00:00'");
+# $c = $slashdb->sqlSelect("COUNT(DISTINCT uid)", "accesslog",
+#     "id BETWEEN $minid AND $maxid");
+
+sub sqlSelectNumericKeyAssumingMonotonic {
+	my($self, $table, $minmax, $keycol, $clause) = @_;
+
+	# Set up $minmax appropriately.
+	$minmax = uc($minmax);
+	if ($minmax !~ /^(MIN|MAX)$/) {
+		die "sqlSelectNumericKeyAssumingMonotonic called with minmax='$minmax'";
+	}
+	# In MixedCaps to avoid typo bugs and make the code perhaps
+	# a bit clearer.  This is the opposite of $minmax.
+	my $MaxMin = $minmax eq 'MIN' ? 'MAX' : 'MIN';
+
+	# We pretend the "left" end of the table is the end pointed to
+	# by whichever direction $minmax points, and the "right" end
+	# is the end $MaxMin points to.
+	# First, seed the leftmost variable with the id at the left end
+	# of the table.
+	my $leftmost = $self->sqlSelect("$minmax($keycol)", $table);
+	# If no such id, the table is empty.
+	return undef unless $leftmost;
+	# If the test actually passes for that id, then it's not a
+	# failure at all, and we know our answer already.
+	return $leftmost if $self->sqlSelect($keycol, $table, "$keycol=$leftmost AND ($clause)");
+
+	# Next, seed the rightmost with the id at the right end.
+	my $rightmost = $self->sqlSelect("$MaxMin($keycol)", $table);
+	# If that test fails, then there are no rows satisfying the
+	# desired condition, so we know our answer.
+	return undef if !$self->sqlSelect($keycol, $table, "$keycol=$rightmost AND ($clause)");
+
+	# Now iterate a binary search into the table.
+	my $answer = undef;
+	while (!$answer) {
+		# If we're really close, just do the SELECT.
+		if (abs($leftmost - $rightmost) < 100) {
+			my($min, $max);
+			if ($minmax eq 'MIN') { $min = $leftmost; $max = $rightmost }
+					 else { $min = $rightmost; $max = $leftmost }
+			$answer = $self->sqlSelect("$minmax($keycol)", $table,
+				"$keycol BETWEEN $min AND $max
+				 AND ($clause)");
+			if (!$answer) {
+				# Table may have changed, that's one of
+				# the risks of using this method.  Return
+				# the approximately correct answer that
+				# was, at least at one time, valid.
+				$answer = $leftmost;
+			}
+		}
+		last if $answer;
+		# If we're not that close, narrow it down.
+		my $middle = int(($leftmost + $rightmost) / 2);
+		my $hit = $self->sqlSelect($keycol, $table,
+			"$keycol=$middle AND ($clause)");
+		if ($hit) {
+			$rightmost = $middle;
+		} else {
+			$leftmost = $middle;
+		}
+	}
+	return $answer;
+}
+
+########################################################
 sub sqlUpdate {
 	my($self, $tables, $data, $where, $options) = @_;
 
