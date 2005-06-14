@@ -12,8 +12,6 @@ use Slash::Utility;
 use Slash::XML;
 use URI;
 
-sub fixStory (\$$);
-
 #################################################################
 sub main {
 	my $slashdb = getCurrentDB();
@@ -548,8 +546,7 @@ sub displayForm {
 		$fakeemail = strip_attribute($user->{fakeemail});
 	}
 
-	my $fixedstory = $form->{story};
-	fixStory($fixedstory, { sub_type => $form->{sub_type} });
+	my $fixedstory = fixStory($form->{story}, { sub_type => $form->{sub_type} });
 
 	slashDisplay('displayForm', {
 		fixedstory	=> $fixedstory,
@@ -597,7 +594,7 @@ sub saveSub {
 		}
 	}
 
-	fixStory($form->{story}, { sub_type => $form->{sub_type} });
+	$form->{story} = fixStory($form->{story}, { sub_type => $form->{sub_type} });
 
 	my $uid ||= $form->{name}
 		? getCurrentUser('uid')
@@ -685,31 +682,33 @@ sub processSub {
 }
 
 #################################################################
-sub fixStory (\$$) {
+sub fixStory {
 	my($str, $opts) = @_; 
 
 	if ($opts->{sub_type} && $opts->{sub_type} eq 'plain') {
-		$$str = strip_plaintext(url2html($$str));
+		$str = strip_plaintext(url2html($str));
 	} else {
-		$$str = strip_html(url2html($$str));
+		$str = strip_html(url2html($str));
 	}
 
 	# remove leading and trailing whitespace
-	$$str =~ s/^$Slash::Utility::Data::WS_RE+//i;
-	$$str =~ s/$Slash::Utility::Data::WS_RE+$//i;
+	$str =~ s/^$Slash::Utility::Data::WS_RE+//io;
+	$str =~ s/$Slash::Utility::Data::WS_RE+$//io;
 
 	# and let's just get rid of these P tags; we don't need them, and they
 	# cause too many problems in submissions
 	unless (getCurrentStatic('submit_keep_p')) {
-		$$str =~ s|</p>||g;
-		$$str =~ s|<p(?: /)?>|<br><br>|g;
+		$str =~ s|</p>||g;
+		$str =~ s|<p(?: /)?>|<br><br>|g;
 	}
 
-	$$str = balanceTags($$str, { deep_nesting => 1 });
+	$str = balanceTags($str, { deep_nesting => 1 });
 
 	# do it again, just in case balanceTags added more ...
-	$$str =~ s/^$Slash::Utility::Data::WS_RE+//i;
-	$$str =~ s/$Slash::Utility::Data::WS_RE+$//i;
+	$str =~ s/^$Slash::Utility::Data::WS_RE+//io;
+	$str =~ s/$Slash::Utility::Data::WS_RE+$//io;
+
+	return $str;
 }
 
 #################################################################
