@@ -3062,3 +3062,6 @@ INSERT INTO vars (name, value, description) VALUES ('formkey_minloggedinkarma','
 
 ALTER TABLE open_proxies CHANGE COLUMN xff xff VARCHAR(40) DEFAULT NULL;
 
+# Changes for plugins/HumanConf (ignore if not using that plugin)
+INSERT INTO vars (name, value, description) VALUES ('hc_q1_lettersomit', 'hlou', 'For question 1 (images), which letters should never appear? Lowercase');
+

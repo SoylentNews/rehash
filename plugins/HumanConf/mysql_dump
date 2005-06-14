@@ -9,6 +9,7 @@ INSERT INTO vars (name, value, description) VALUES ('hc_formname_regex', '^(?:co
 INSERT INTO vars (name, value, description) VALUES ('hc_maxkarma', '25', 'Maximum karma at which users need HumanConf (beyond this we assume they are human) - set large negative to exempt all logged-in users, set large positive if all users must comply');
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_prefnumpixels', '1000', 'For question 1 (images), preferred number of pixels');
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_margin', '6', 'For question 1 (images), margin around the image in pixels');
+INSERT INTO vars (name, value, description) VALUES ('hc_q1_lettersomit', 'hlou', 'For question 1 (images), which letters should never appear?');
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_linethick', '2', 'For question 1 (images), thickness of the lines that are drawn to confuse OCR');
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_maxrad', '0.2', 'For question 1 (images), maximum number of  radians to rotate (positive or negative, so the range is twice this)');
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_numchars', '3', 'For question 1 (images), number of chars of text in the answer');
@@ -22,3 +23,4 @@ INSERT INTO vars (name, value, description) VALUES ('hc_sw_comments', '0', 'Huma
 INSERT INTO vars (name, value, description) VALUES ('hc_sw_mailpasswd', '1', 'HumanConf switch for mailing a password');
 INSERT INTO vars (name, value, description) VALUES ('hc_sw_newuser', '1', 'HumanConf switch for creating a new user');
 INSERT INTO vars (name, value, description) VALUES ('hc_image_format','jpeg','Format for HC images (png, jpeg, etc.)');
+

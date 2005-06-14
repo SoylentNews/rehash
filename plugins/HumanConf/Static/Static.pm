@@ -574,12 +574,10 @@ sub drawImage {
 sub shortRandText {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
+	my $omit = $constants->{hc_q1_lettersomit} || 'hlou';
+	my $omit_regex = qr{[^$omit]};
 	my $num_chars = $constants->{hc_q1_numchars} || 3;
-	my @c = ('a'..'g', 'i'..'k',
-		# Noel, Noel
-		# (we don't use letters that could be confused
-		# with numbers or other letters)
-		'm', 'n', 'p'..'t', 'v'..'z');
+	my @c = grep /$omit_regex/, ('a' .. 'z');
 	my $text = "";
 	while (!$text) {
 		for (1..$num_chars) {
