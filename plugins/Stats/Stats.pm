@@ -38,13 +38,20 @@ sub new {
 	$self->sqlConnect;
 
 	# The default _day is yesterday.  (86400 seconds = 1 day)
+	# Build _day_between_clause for testing the usual DATETIME column
+	# type against the day in question, and _ts_between_clause for
+	# testing the somewhat rarer TIMESTAMP column type.
 	my @yest_lt = localtime(time - 86400);
 	$self->{_day} = $options->{day}
 		? $options->{day}
 		: sprintf("%4d-%02d-%02d", $yest_lt[5] + 1900, $yest_lt[4] + 1, $yest_lt[3]);
 	$self->{_day_between_clause} = " BETWEEN '$self->{_day} 00:00' AND '$self->{_day} 23:59:59' ";
+	$self->{_day_min_clause} = " >= '$self->{_day} 00:00'";
+	$self->{_day_max_clause} = " <= '$self->{_day} 23:59:59'";
 	($self->{_ts} = $self->{_day}) =~ s/-//g;
 	$self->{_ts_between_clause}  = " BETWEEN '$self->{_ts}000000' AND '$self->{_ts}235959' ";
+	$self->{_ts_min_clause} = " >= '$self->{_ts}000000'";
+	$self->{_ts_max_clause} = " <= '$self->{_ts}235959'";
 
 	my @today_lt = localtime(time);
 	my $today = sprintf("%4d-%02d-%02d", $today_lt[5] + 1900, $today_lt[4] + 1, $today_lt[3]);
@@ -113,37 +120,53 @@ sub new {
 			$self->sqlDo($new_sql);
 		}
 
-		# Add in the indexes we need.
-		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX uid (uid)");
-		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX skid_op (skid,op)");
-		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX op_uid_skid (op, uid, skid)");
-		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX referer (referer(4))");
-		$self->sqlDo("ALTER TABLE accesslog_temp_errors ADD INDEX status_op_skid (status, op, skid)");
-		$self->sqlDo("ALTER TABLE accesslog_temp_subscriber ADD INDEX skid (skid)");
-		$self->sqlDo("ALTER TABLE accesslog_temp_other ADD INDEX skid (skid)");
-		$self->sqlDo("ALTER TABLE accesslog_temp_rss ADD INDEX skid (skid)");
-	
+		# Create the accesslog_temp table, then add indexes to its data.
+		my $minid = $self->sqlSelectNumericKeyAssumingMonotonic(
+			'accesslog', 'min', 'id',
+			"ts $self->{_day_min_clause}");
+		my $maxid = $self->sqlSelectNumericKeyAssumingMonotonic(
+			'accesslog', 'max', 'id',
+			"ts $self->{_day_max_clause}");
 		return undef unless $self->_do_insert_select(
 			"accesslog_temp",
 			"*",
 			"accesslog",
-			"ts $self->{_day_between_clause} AND status  = 200 AND op != 'rss'",
+			"id BETWEEN $minid AND $maxid AND ts $self->{_day_between_clause}
+			 AND status  = 200 AND op != 'rss'",
 			3, 60);
+		# Some of these (notably ts) may be redundant but that's OK,
+		# they will just throw errors we don't care about.  They're here
+		# in case the table on the DB we're operating on has had its ts
+		# index removed.
+		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX uid (uid)");
+		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX skid_op (skid,op)");
+		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX op_uid_skid (op, uid, skid)");
+		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX referer (referer(4))");
+		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX ts (ts)");
+		$self->sqlDo("ALTER TABLE accesslog_temp_errors ADD INDEX ts (ts)");
+		$self->sqlDo("ALTER TABLE accesslog_temp_subscriber ADD INDEX ts (ts)");
+		$self->sqlDo("ALTER TABLE accesslog_temp_other ADD INDEX ts (ts)");
+		$self->sqlDo("ALTER TABLE accesslog_temp_rss ADD INDEX ts (ts)");
+
+		# Create the other accesslog_temp_* tables and add their indexes.
 		return undef unless $self->_do_insert_select(
 			"accesslog_temp_rss",
 			"*",
 			"accesslog",
-			"ts $self->{_day_between_clause} AND status  = 200 AND op = 'rss'",
+			"id BETWEEN $minid AND $maxid AND ts $self->{_day_between_clause}
+			 AND status  = 200 AND op = 'rss'",
 			3, 60);
 		return undef unless $self->_do_insert_select(
 			"accesslog_temp_errors",
 			"*",
 			"accesslog",
-			"ts $self->{_day_between_clause} AND status != 200",
+			"id BETWEEN $minid AND $maxid AND ts $self->{_day_between_clause}
+			 AND status != 200",
 			3, 60);
+
 		my $stats_reader = getObject('Slash::Stats', { db_type => 'reader' });	
 		my $recent_subscribers = $stats_reader->getRecentSubscribers();
-		
+
 		if ($recent_subscribers && @$recent_subscribers) {
 			my $recent_subscriber_uidlist = join(", ", @$recent_subscribers);
 		
@@ -170,6 +193,14 @@ sub new {
 			"accesslog_temp",
 			"op NOT IN ($page_list)",
 			3, 60);
+
+		# Add in the indexes we need for those tables.
+		$self->sqlDo("ALTER TABLE accesslog_temp_errors ADD INDEX status_op_skid (status, op, skid)");
+		$self->sqlDo("ALTER TABLE accesslog_temp_subscriber ADD INDEX skid (skid)");
+		$self->sqlDo("ALTER TABLE accesslog_temp_other ADD INDEX skid (skid)");
+		$self->sqlDo("ALTER TABLE accesslog_temp_rss ADD INDEX skid (skid)");
+
+		# Two more accesslog_temp_* tables, these with no special indexes.
 		return undef unless $self->_do_insert_select(
 			"accesslog_temp_host_addr",
 			"host_addr, IF(uid = $constants->{anonymous_coward_uid}, 'yes', 'no')",
