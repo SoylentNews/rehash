@@ -28,10 +28,9 @@ $task{$me}{code} = sub {
 	my $counter = 0;
 	my $hoursback = $constants->{accesslog_hoursback} || 60;
 	my $failures = 10; # This is probably related to a lock failure
-	my $id = $logdb->sqlSelect('MAX(id)',
-		'accesslog',
+	my $id = $logdb->sqlSelectNumericKeyAssumingMonotonic(
+		'accesslog', 'max', 'id',
 		"ts < DATE_SUB(NOW(), INTERVAL $hoursback HOUR)");
-
 	if (!$id) {
 		slashdLog("no accesslog rows older than $hoursback hours");
 		return "nothing to do";
