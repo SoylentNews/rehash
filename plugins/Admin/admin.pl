@@ -2201,8 +2201,7 @@ sub displayRecentSubs {
 		return;
 	}
 
-	my $admindb = getObject("Slash::Admin", { db_type => 'log_slave' });
-
+	my $admindb = getObject("Slash::Admin");
 	my $startat = $form->{startat} || 0;
 	my $subs = $admindb->getRecentSubs($startat);
 	slashDisplay('recent_subs', {
