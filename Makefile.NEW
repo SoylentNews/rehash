@@ -32,7 +32,7 @@ GROUP = nobody
 CP = cp
 
 # Plugins (any directory in plugins/)
-PLUGINS = `find . -name CVS -prune -o -type d -maxdepth 1 -print`
+PLUGINS = `find . -maxdepth 1 -name CVS -prune -o -type d -print`
 
 # Perl scripts, grouped by directory.
 BINFILES = `find bin -name CVS -prune -o -type f -print`

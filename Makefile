@@ -38,7 +38,7 @@ UNAME = `uname`
 MAKE = make -s
 
 # Plugins (any directory in plugins/)
-PLUGINS = `find . -name CVS -prune -o -type d -name [a-zA-Z]\* -maxdepth 1 -print`
+PLUGINS = `find . -maxdepth 1 -name CVS -prune -o -type d -name [a-zA-Z]\* -print`
 
 # Perl scripts, grouped by directory.
 BINFILES = `find bin -name CVS -prune -o -name [a-zA-Z]\* -type f -print`
