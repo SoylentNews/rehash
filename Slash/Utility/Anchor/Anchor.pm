@@ -665,7 +665,7 @@ EOT
 		if (defined $user->{state}{ad}{$num}
 			&& $user->{state}{ad}{$num} =~ /\S/
 			&& $user->{state}{ad}{$num} !~ /^<!-- no pos/
-			&& $user->{state}{ad}{$num} !~ /^<!-- (?:fDA )place/) {
+			&& $user->{state}{ad}{$num} !~ /^<!-- (?:fDA )?place/) {
 			# if we're called from shtml, we won't have colors
 			# set, so we should get some set before making a
 			# box.				-- Pater
