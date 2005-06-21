@@ -141,6 +141,19 @@ These constants are used for web programs, for the op hashes.
 
 # 0 1
 
+=head2 reskey
+
+These constants are used for resource keys.
+
+	RESKEY_NOOP
+	RESKEY_SUCCESS
+	RESKEY_FAILURE
+	RESKEY_DEATH
+
+=cut
+
+# -1 0 1 2
+
 =head2 strip
 
 These constants are used to define the modes passed to stripByMode().  Only
