@@ -1,0 +1,51 @@
+__section__
+default
+__description__
+Repository for random data elements.
+
+* value = the name of the data element to retrieve
+
+Each data element may have any number of other variables.
+__title__
+
+__page__
+reskey
+__lang__
+en_US
+__name__
+data
+__template__
+[% SWITCH value %]
+
+[% CASE 'create failed' %]
+	An unknown error has occurred.  Please try again.
+
+[% CASE 'touch-use failed' %]
+	This form is no longer valid.  Please return to the beginning and try again.
+
+[% CASE 'reskey not found' %]
+	Requested resource is invalid.  Please return to the beginning and try again.
+
+[% CASE 'has no acl' %]
+	You do not have the permission required to access this resource.
+
+[% CASE 'has acl_no' %]
+	You have been banned from accessing this resource.
+
+[% CASE 'is_admin too low' %]
+	Only admins may access this resource.
+
+[% CASE 'is_subscriber too low' %]
+	Only subscribers may access this resource.
+
+[% CASE 'seclev too low' %]
+	You do not have the permission required to access this resource.
+
+[% CASE 'karma too low' %]
+	You do not have the permission required to access this resource.
+
+[% END %]
+__seclev__
+10000
+__version__
+$Id$
