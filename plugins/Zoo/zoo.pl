@@ -611,6 +611,7 @@ sub action {
 		return 1;
 	} else {
 		if (testSocialized($zoo, $constants, $user) && ($form->{type} ne 'neutral' || $form->{op} eq 'delete' )) {
+			_printHead("mainhead", { nickname => $user->{nick}, uid => $user->{uid} }) or return;
 			print getData("no_go");
 			return 1;
 		}
