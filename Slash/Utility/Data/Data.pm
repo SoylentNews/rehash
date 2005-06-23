@@ -1939,7 +1939,8 @@ sub approveCharref {
 		}
 	} elsif ($ok == 1 && $charref =~ /^([a-z0-9]+)$/i) {
 		# Character entity.
-		my $entity = lc $1;
+#		my $entity = lc $1;
+		my $entity = $1;  # case matters
 		if ($constants->{draconian_charrefs}) {
 			if (!$constants->{good_entity}{$entity}) {
 				$decimal = ord $entity2char{$entity};
