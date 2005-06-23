@@ -788,7 +788,7 @@ sub cmd_dbs {
 # first checks come after 1 minute, so we are sure we joined the
 # IRC channel OK.
 my $next_check_dbs = $^T + 60;
-my $next_report_bad_dbs = $^T + 60;
+my $next_report_bad_dbs = 0;
 sub possible_check_dbs {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
