@@ -1758,6 +1758,8 @@ sub write_to_temp_file {
 sub get_ispell_comments {
 	my($text) = @_;
 	$text = strip_nohtml($text);
+	return "" unless $text && $text =~ /\S/;
+
 	# don't split to scalar context, it clobbers @_
 	my $n_text_words = scalar(my @junk = split /\W+/, $text);
 	my $slashdb = getCurrentDB();
@@ -1776,33 +1778,47 @@ sub get_ispell_comments {
 	$ok = $ok ? ($ok->{template} || "") : "";
 	$ok =~ s/\s+/\n/g;
 
-	local *ISPELL;
+	my $ispell_fh;
 	my $tmptext = write_to_temp_file($text);
 	my $tmpok = "";
 	$tmpok = write_to_temp_file($ok) if $ok;
 	my $tmpok_flag = "";
 	$tmpok_flag = " -p $tmpok" if $tmpok;
-	if (!open(ISPELL, "$ispell -a -B -S -W 3$tmpok_flag < $tmptext 2> /dev/null |")) {
+	if (!open($ispell_fh, "$ispell -a -B -S -W 3$tmpok_flag < $tmptext 2> /dev/null |")) {
 		errorLog("could not pipe to $ispell from $tmptext, $!");
 		return "could not pipe to $ispell from $tmptext, $!";
 	}
-	my %w;
-	while (defined(my $line = <ISPELL>)) {
+	my %misspelled_count = ( );
+	my %misspelled_suggestion = ( );
+	while (defined(my $line = <$ispell_fh>)) {
 		# Grab all ispell's flagged words and put them in the hash
-		$w{$1}++ if $line =~ /^[#?&]\s+(\S+)/;
+		$misspelled_count{$1}++ if $line =~ /^[#?&]\s+(\S+)/;
+		# If this is a "&" line, there may be one or more suggestions
+		# separated by commas and terminated by newlines;  they may
+		# contain spaces.  Grab the first one and put it in the hash.
+		if ($line =~ /^\& (.+) \d+ \d+: ([^,\r\n]+)/) {
+			$misspelled_suggestion{$1} = $2;
+		}
 	}
-	close ISPELL;
+	close $ispell_fh;
 	unlink $tmptext, $tmpok;
 
-	my $comm = '';
-	for my $word (sort {lc($a) cmp lc($b) or $a cmp $b} keys %w) {
+	my($non_rec, $sugg) = ('', '');
+	for my $word (sort {lc($a) cmp lc($b) or $a cmp $b} keys %misspelled_count) {
 		# if it's a repeated error, ignore it
-		next if $w{$word} >= 2 and $w{$word} > $n_text_words*0.002;
+		next if    $misspelled_count{$word} >= 2
+			&& $misspelled_count{$word} > $n_text_words*0.002;
 		# a misspelling; report it
-		$comm = "ispell doesn't recognize:" if !$comm;
-		$comm .= " $word";
+		$non_rec = getData('ispell_nonrec') if !$non_rec;
+		$non_rec .= " $word,";
+		next if !$misspelled_suggestion{$word};
+		# ispell has a suggestion
+		$sugg = getData('ispell_sugg') if !$sugg;
+		$sugg .= " $misspelled_suggestion{$word},";
 	}
-	return $comm;
+	$non_rec =~ s/,$//;
+	$sugg =~ s/,$//;
+	return "$non_rec$sugg";
 }
 
 ##################################################################
