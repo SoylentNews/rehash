@@ -6,7 +6,7 @@
 ##
 ##  Makefile -- Plugins Makefile, implements only one target: clean.
 ##
-PLUGINS=`find . -name CVS -prune -o -maxdepth 1 -type d -print | sed 's/^\\.$$//'`
+PLUGINS=`find . -maxdepth 1 -name CVS -prune -o -type d -print | sed 's/^\\.$$//'`
 
 all: clean
 
