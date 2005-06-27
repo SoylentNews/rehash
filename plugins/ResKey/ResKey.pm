@@ -166,8 +166,14 @@ sub _createActionMethod {
 	return sub {
 		my($self) = @_;
 		$self->{type} = $name;
-		return 0 unless $self->_check;
-		return $self->$method_name();
+		my $ok = $self->_check;
+
+		# don't bother if type is create, and checks failed
+		if ($self->{type} ne 'create' || $ok) {
+			$ok = $self->$method_name();
+		}
+
+		return $ok;
 	};
 }
 
@@ -225,17 +231,13 @@ sub _create {
 	my $ok = 0;
 	my $num_tries = 10;
 
-	my $srcid = get_srcid_sql_in(
-		$user->{srcids}{ $constants->{reskey_srcid_masksize} || 24 }
-	);
-
 	while (1) {
 		my $reskey = getAnonId(1);
 		my $rows = $slashdb->sqlInsert('reskeys', {
 			reskey		=> $reskey,
 			rkrid		=> $self->{rkrid},
 			uid		=> $user->{uid},
-			-srcid_ip	=> $srcid,
+			-srcid_ip	=> $self->_getSrcid,
 			-create_ts	=> 'NOW()',
 		});
 
@@ -269,6 +271,7 @@ sub _create {
 *_touch = \&_use;
 sub _use {
 	my($self) = @_;
+	my $failed = !$self->success;
 	$self->_init;
 
 	my(%update, $where);
@@ -277,7 +280,11 @@ sub _use {
 		-last_ts	=> 'NOW()',
 	);
 
-	if ($self->{type} eq 'use') {
+	if ($failed) {
+		%update = (%update,
+			-failures	=> 'failures+1',
+		);
+	} elsif ($self->{type} eq 'use') {
 		%update = (%update,
 			-submit_ts	=> 'NOW()',
 			is_alive	=> 'no',
@@ -317,23 +324,22 @@ sub _update {
 	my $reskey_obj = $self->get;
 	return 0 unless $reskey_obj;
 
-	my $srcid = get_srcid_sql_in(
-		$user->{srcids}{ $constants->{reskey_srcid_masksize} || 24 }
-	);
+	my $srcid = $self->_getSrcid;
 
-	my $where_base = "rkid=$reskey_obj->{rkid} AND srcid_ip=$srcid AND is_alive='yes'";
+	my $where_base = "rkid=$reskey_obj->{rkid} AND is_alive='yes'";
 	if ($$where) {
 		$$where .= " AND $where_base";
 	} else {
 		$$where = "$where_base";
 	}
 
-	# if user has logged in since getting reskey, we update
-	# the uid
+	# if user has logged in since getting reskey, we update the uid,
+	# but still check this time by srcid
 	if (isAnon($reskey_obj->{uid}) && !$user->{is_anon}) {
 		$update->{uid} = $user->{uid};
-	} else {
-		$$where .= " AND uid=$user->{uid}";
+		$$where .= ' AND srcid_ip=' . $self->_getSrcid;
+	} else {  # use uid or srcid as appropriate
+		$$where .= ' AND ' . $self->_whereUser;
 	}
 
 	return 1;
@@ -383,7 +389,6 @@ sub _check {  # basically same for _checkUse, maybe share same code
 	return $self->success;
 }
 
-
 #========================================================================
 sub errstr {
 	my($self) = @_;
@@ -395,6 +400,7 @@ sub errstr {
 	if ($error) {
 		if (ref($error) eq 'ARRAY') {
 			$error->[2] ||= 'reskey';
+			$error->[1]{reskey} = $self;
 			$errstr = getData(@$error);
 		} else {
 			$errstr = $error;
@@ -423,6 +429,34 @@ sub get {
 	}
 
 	return $self->{_reskey_obj} = $reskey_obj;
+}
+
+#========================================================================
+sub _getSrcid {
+	my($self) = @_;
+	return $self->{_srcid_ip} if $self->{_srcid_ip};
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	return $self->{_srcid_ip} = get_srcid_sql_in(
+		$user->{srcids}{ $constants->{reskey_srcid_masksize} || 24 }
+	);
+}
+
+#========================================================================
+sub _whereUser {
+	my($self, $options) = @_;
+
+	my $user = getCurrentUser();
+	my $where;
+
+	# anonymous user without cookie, check host, not srcid
+	if ($user->{is_anon} || $options->{force_srcid}) {
+		$where = 'srcid_ip=' . $self->_getSrcid;
+	} else {
+		$where = "uid=$user->{uid}";
+	}
+
+	return $where;
 }
 
 #========================================================================
@@ -472,12 +506,24 @@ sub _getChecks {
 		return 0;
 	}
 
-	$checks = $checks_cache->{ $self->{type} }{ $self->{resname} } =
-		$reader->sqlSelectColArrayref(
-			'class', 'reskey_resource_checks',
-			"type=$type_q AND rkrid=$self->{rkrid}",
-			"ORDER BY ordernum, rkrcid"
-		) || [];
+	# this select will group by ordernum, so if there is a conflict,
+	# the actual type (create, touch, use) will override the "all"
+	# pseudotype
+
+	# setting a specific ordernum to the classname "" (empty string)
+	# will effectively disable that check
+	my $checks_select = $reader->sqlSelectAllHashref(
+		'ordernum', 'class, ordernum', 'reskey_resource_checks',
+		"rkrid=$self->{rkrid} AND (type=$type_q OR type='all')",
+		"ORDER BY ordernum, type DESC, rkrcid"
+	);
+
+	$checks = [];
+	for my $ordernum (sort { $a <=> $b } keys %$checks_select) {
+		push @$checks, $checks_select->{$ordernum}{class}
+			if $checks_select->{$ordernum}{class};
+	}
+	$checks_cache->{ $self->{type} }{ $self->{resname} } = $checks;
 
 	unless (@$checks) {
 		errorLog("No checks for $self->{type} / $self->{resname}");
@@ -498,3 +544,35 @@ Slash(3).
 =head1 VERSION
 
 $Id$
+
+
+Check Classes:
+
+(default: DEATH, rather than FAILURE [which is non-fatal])
+
+User - DONE
+	* simple checks for:
+		* karma
+		* seclev
+		* is_subscriber
+		* is_admin
+
+Limit
+	* min duration between uses (FAILURE) - DONE
+	* min duration betwen creation and use (FAILURE) - DONE
+	* max touches per reskey?
+	* max # of creations/uses per time period (DEATH?) - DONE
+	* max simultaneous reskeys
+		* report error, or invalidate old ones?
+	* all above subject to increasing limits per user specifics
+
+HumanConf
+AL2 - DONE
+Proxy Scan - DONE
+ACL - DONE
+	* if an ACL required, make sure user has it
+		* is_admin bypasses this check (by default)
+	* if an ACL prohibits access, make sure user does NOT have it
+		* no bypass
+POST?  - not sure if this is better handled in .pl as we always have
+
