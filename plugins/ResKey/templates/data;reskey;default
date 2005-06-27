@@ -17,21 +17,27 @@ data
 __template__
 [% SWITCH value %]
 
+[%# General %]
 [% CASE 'create failed' %]
 	An unknown error has occurred.  Please try again.
 
 [% CASE 'touch-use failed' %]
 	This form is no longer valid.  Please return to the beginning and try again.
 
+
 [% CASE 'reskey not found' %]
 	Requested resource is invalid.  Please return to the beginning and try again.
 
+
+[%# ACL %]
 [% CASE 'has no acl' %]
 	You do not have the permission required to access this resource.
 
 [% CASE 'has acl_no' %]
 	You have been banned from accessing this resource.
 
+
+[%# User %]
 [% CASE 'is_admin too low' %]
 	Only admins may access this resource.
 
@@ -43,6 +49,32 @@ __template__
 
 [% CASE 'karma too low' %]
 	You do not have the permission required to access this resource.
+
+
+[%# AL2 %]
+[% CASE 'nopost al2 failure' %]
+	You are not allowed to use this resource.
+
+[% CASE 'nopostanon al2 failure' %]
+	You are not allowed to use this resource.
+
+
+[%# Duration %]
+[% CASE 'too many uses' %]
+	You have used this resource too much; please try again later.
+
+[% CASE 'use duration too short' %]
+	You must wait a little bit before using this resource; please try again later.
+
+[% CASE 'creation-use duration too short' %]
+	You must wait a little bit before using this resource; please try again later.
+
+
+[%# ProxyScan %]
+[% CASE 'open proxy' %]
+	You may not post using an open proxy.
+
+
 
 [% END %]
 __seclev__

@@ -43,7 +43,7 @@ DROP TABLE IF EXISTS reskey_resource_checks;
 CREATE TABLE reskey_resource_checks (
     rkrcid      SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
     rkrid       TINYINT UNSIGNED NOT NULL,
-    type        ENUM('create', 'touch', 'use') NOT NULL,
+    type        ENUM('create', 'touch', 'use', 'all') NOT NULL,
     class       VARCHAR(255),
     ordernum    SMALLINT UNSIGNED DEFAULT 0,
     PRIMARY KEY (rkrcid),
