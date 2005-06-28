@@ -3,7 +3,7 @@ use Slash::ResKey;
 
 my $reskey;
 
-for (1..2) {
+for (1..1) {
 	$reskey = new Slash::ResKey 'comments';
 
 	handle($reskey->create);
