@@ -8,16 +8,17 @@ package Slash::ResKey::Checks::AL2::NoPost;
 use warnings;
 use strict;
 
+use Slash::ResKey::Checks::AL2;
 use Slash::Utility;
 use Slash::Constants ':reskey';
 
-use base 'Slash::ResKey::Checks::AL2';
+use base 'Slash::ResKey';
 
 our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 sub _Check {
 	my($self) = @_;
-	return $self->AL2Check('nopost');
+	return AL2Check($self, 'nopost');
 }
 
 1;

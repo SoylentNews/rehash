@@ -8,10 +8,11 @@ package Slash::ResKey::Checks::AL2::AnonNoPost;
 use warnings;
 use strict;
 
+use Slash::ResKey::Checks::AL2;
 use Slash::Utility;
 use Slash::Constants ':reskey';
 
-use base 'Slash::ResKey::Checks::AL2';
+use base 'Slash::ResKey';
 
 our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -21,7 +22,8 @@ sub _Check {
 	my $user = getCurrentUser();
 
 	if ($user->{is_anon}) {
-		return $self->AL2Check(
+		return AL2Check(
+			$self,
 			{ uid => getCurrentAnonymousCoward('uid') },
 			'nopost'
 		);
