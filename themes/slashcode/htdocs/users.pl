@@ -913,7 +913,11 @@ sub showInfo {
 
 	} elsif ($user->{is_admin}) {
 		$id ||= $form->{userfield} || $user->{uid};
-		if ($id =~ /^\d+$/) {
+		if ($id =~ /^[0-9a-f]{16}$/) {
+			$requested_user->{nonuid} = 1;
+			$fieldkey = "srcid";
+			$requested_user->{$fieldkey} = $id;
+		} elsif ($id =~ /^\d+$/) {
 			# If it's longer than a uid could possibly be, it
 			# must be a srcid.  The uid column right now is a
 			# MEDIUMINT (max 16M) but at most might someday
