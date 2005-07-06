@@ -232,8 +232,7 @@ sub on_public {
 
 sub j_on_auth {
 	my $constants = getCurrentStatic();
-	$jchannel    = $constants->{jabberslash_channel}
-			|| 'jabberslash';
+	$jchannel    = $constants->{jabberslash_channel} or return;
 	$jchanserver = $constants->{jabberslash_channel_server}
 			|| $constants->{jabberslash_server};
 	my $password = $constants->{jabberslash_channel_password}
