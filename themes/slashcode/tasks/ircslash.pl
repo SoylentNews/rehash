@@ -391,6 +391,10 @@ sub send_msg {
 				}
 				push @to, $to;
 			}
+			# append bot nick to msg, else if two bots sharing
+			# same account, we don't know which is which,
+			# in privmsg
+			$msg = "[$jnick] $msg";
 		# ... or the channel
 		} else {
 			$type = 'groupchat';
