@@ -3071,3 +3071,8 @@ INSERT INTO vars (name, value, description) VALUES ('hc_q1_lettersomit', 'hlou',
 
 # End of T_2_5_0_74, Start of T_2_5_0_75 - 2005/06/28
 
+# Changes for plugins/HumanConf (ignore if not using that plugin)
+# and if you use the first, you may want to customize the second
+INSERT INTO vars (name, value, description) VALUES ('hc_q1_usedict', '', 'For question 1 (images), use words from a dictionary? if blank, no; otherwise, value is the absolute path to the newline-delimited file e.g. /usr/dict/words and hc_q1_lettersomit is ignored');
+INSERT INTO vars (name, value, description) VALUES ('hc_q1_usedict_excl', 'shiny$ metal ^daffodil', 'If hc_q1_usedict is set, space-sep list of regexes to exclude from words to use');
+
