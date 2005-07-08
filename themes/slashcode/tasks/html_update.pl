@@ -11,7 +11,7 @@ use Slash::Constants ':slashd';
 use vars qw( %task $me );
 
 $task{$me}{timespec} = '0 0 0 * *';
-$task{$me}{timespec_panic_1} = 1; # if panic, this can wait
+$task{$me}{timespec_panic_1} = ''; # if panic, this can wait
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
@@ -59,8 +59,8 @@ $task{$me}{code} = sub {
 
 		# max is last comment posted under "old" spec, (needs to be figured out manually)
 		# lst is last comment updated here
-		$set->{max} = $constants->{"html_update_$set->{table}_max"};
-		$set->{lst} = $constants->{"html_update_$set->{table}_lst"};
+		($set->{max}) = $slashdb->getVar("html_update_$set->{table}_max", 'value', 1);
+		($set->{lst}) = $slashdb->getVar("html_update_$set->{table}_lst", 'value', 1);
 
 		unless ($set->{max}) {
 			($set->{max}) = $slashdb->sqlSelect("MAX($set->{id})", $set->{table});
@@ -70,6 +70,7 @@ $task{$me}{code} = sub {
 		# old table is the previous data itself
 		$set->{table_old} = $set->{table} . '_old';
 
+		slashdLog("Attempting to update HTML for $name $set->{lst} through $set->{max}");
 		while ($set->{lst} < $set->{max}) {
 			my $next = $set->{lst} + 1;
 			my $max = $set->{lst} + $update_num;
@@ -80,16 +81,19 @@ $task{$me}{code} = sub {
 			my $cols = join ',', $set->{id}, @{$set->{fields}};
 			my $fetch = $reader->sqlSelectAllHashref(
 				$set->{id}, $cols, $set->{table},
-				"$set->{id} >= $next AND $set->{id} <= $max"
+				"$set->{id} BETWEEN $next AND $max"
 			);
 
 			last unless keys %$fetch;
+
+			my $admin = 0;
+			$admin = 1 if $name eq 'stories';
 
 			for my $id (sort { $a <=> $b } keys %$fetch) {
 				my(%oldhtml, %html);
 				for my $field (@{$set->{fields}}) {
 					$oldhtml{$field} = $fetch->{$id}{$field};
-					$html{$field}    = _html_update_fix($fetch->{$id}{$field});
+					$html{$field}    = _html_update_fix($fetch->{$id}{$field}, 0, $admin);
 				}
 
 				$slashdb->sqlInsert($set->{table_old}, {
@@ -98,12 +102,13 @@ $task{$me}{code} = sub {
 				});
 
 				if ($name eq 'stories') {
-					# slower, but more correct
-					my $story = $reader->getStory($id);
-					@{$story}{keys %html} = values %html;
-					$story->{is_dirty} = 1;
-					$slashdb->updateStory($id, $story);
+					$html{is_dirty} = 1;
+					$html{-last_update} = 'last_update';
+					$slashdb->setStory($id, \%html);
 				} else {
+					if ($name =~ /^user/) {
+						$slashdb->setUser_delete_memcached($id);
+					}
 					$slashdb->sqlUpdate($set->{table}, \%html,
 						"$set->{id} = $id"
 					);
@@ -127,13 +132,21 @@ $task{$me}{code} = sub {
 };
 
 sub _html_update_fix {
-	my($html, $strip) = @_;
+	my($html, $strip, $admin) = @_;
 
 	# we can strip page-widening stuff, but for now, we don't,
 	# as we have no solution in CSS to page-widening at this point
 	$html =~ s!<nobr>(.|&#?\w+;)<wbr></nobr> !$1!gi if $strip;
 
-	$html = balanceTags(strip_html($html), { deep_nesting => 1 });
+	if ($admin) {
+		local $Slash::Utility::Data::approveTag::admin = 1;
+		$html = cleanSlashTags($html);
+		$html = strip_html($html);
+		$html = slashizeLinks($html);
+		$html = balanceTags($html);
+	} else {
+		$html = balanceTags(strip_html($html), { deep_nesting => 1 });
+	}
 
 	return $html;
 }
@@ -184,25 +197,29 @@ CREATE TABLE story_text_old (
 
 
 INSERT INTO vars VALUES ('html_update_comment_text_max', 0, 'last posted under old spec');
-INSERT INTO vars VALUES ('html_update_comment_text_lst', 0, 'last processed');
+INSERT INTO vars VALUES ('html_update_comment_text_lst', 0, 'last comment processed by html_update');
 
 INSERT INTO vars VALUES ('html_update_users_max', 0, 'last posted under old spec');
-INSERT INTO vars VALUES ('html_update_users_lst', 0, 'last processed');
+INSERT INTO vars VALUES ('html_update_users_lst', 0, 'last processed by html_update');
 
 INSERT INTO vars VALUES ('html_update_users_info_max', 0, 'last posted under old spec');
-INSERT INTO vars VALUES ('html_update_users_info_lst', 0, 'last processed');
+INSERT INTO vars VALUES ('html_update_users_info_lst', 0, 'last processed by html_update');
 
 INSERT INTO vars VALUES ('html_update_users_prefs_max', 0, 'last posted under old spec');
-INSERT INTO vars VALUES ('html_update_users_prefs_lst', 0, 'last processed');
+INSERT INTO vars VALUES ('html_update_users_prefs_lst', 0, 'last processed by html_update');
 
 INSERT INTO vars VALUES ('html_update_story_text_max', 0, 'last posted under old spec');
-INSERT INTO vars VALUES ('html_update_story_text_lst', 0, 'last processed');
+INSERT INTO vars VALUES ('html_update_story_text_lst', 0, 'last processed by html_update');
 
 
 
-REPLACE INTO vars VALUES ('html_update_comment_text_lst', 0, 'last processed');
-REPLACE INTO vars VALUES ('html_update_users_lst', 0, 'last processed');
-REPLACE INTO vars VALUES ('html_update_users_info_lst', 0, 'last processed');
-REPLACE INTO vars VALUES ('html_update_users_prefs_lst', 0, 'last processed');
-REPLACE INTO vars VALUES ('html_update_story_text_lst', 0, 'last processed');
+REPLACE INTO vars VALUES ('html_update_comment_text_lst', 0, 'last processed by html_update');
+REPLACE INTO vars VALUES ('html_update_users_lst', 0, 'last processed by html_update');
+REPLACE INTO vars VALUES ('html_update_users_info_lst', 0, 'last processed by html_update');
+REPLACE INTO vars VALUES ('html_update_users_prefs_lst', 0, 'last processed by html_update');
+REPLACE INTO vars VALUES ('html_update_story_text_lst', 0, 'last processed by html_update');
 
+
+UPDATE story_text AS good, story_text_old AS old SET good.title = old.title, good.introtext = old.introtext, good.bodytext = old.bodytext, good.relatedtext = old.relatedtext WHERE good.stoid = old.stoid;
+
+UPDATE users_info AS good, users_info_old AS old SET good.bio = old.bio WHERE good.uid = old.uid;
