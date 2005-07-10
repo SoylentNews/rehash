@@ -67,7 +67,7 @@ sub UserLog {
 	my $constants = getCurrentStatic();
 
 	# stats for clampe
-        if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME} && $user->{currentPage} =~ /users|index|article/) {
+        if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME} && $user->{currentPage} =~ /users|index/) {
 		my $form = getCurrentForm();
                 my $fname = catfile('clampe', $user->{ipid});
 		my $change = $form->{op} eq 'Change' ? 1 : 0;
