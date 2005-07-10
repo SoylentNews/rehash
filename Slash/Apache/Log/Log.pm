@@ -64,6 +64,16 @@ sub UserLog {
 	my($r) = @_;
 
 	my $user = getCurrentUser();
+
+	# stats for clampe
+        if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME} && $user->{currentPage} =~ /users|index|article/) {
+		my $form = getCurrentForm();
+                my $fname = catfile('clampe', $user->{ipid});
+		my $change = $form->{op} eq 'Change' ? 1 : 0;
+                my $comlog = "URL: $ENV{REQUEST_URI} Page: $user->{currentPage} UID: $user->{uid} IPID: $user->{ipid} Dispmode: $user->{mode} Thresh: $user->{threshold} Sort: $user->{commentsort} Changes: $change";
+                doClampeLog($fname, [$comlog]);
+        }
+
 	return if !$user || !$user->{uid} || $user->{is_anon};
 
 	my $user_update = undef;
@@ -144,15 +154,6 @@ sub UserLog {
 		print STDERR scalar(gmtime) . " $$ mcd UserLog id=$user->{uid} setUser: upd '$user_update' keys '" . join(" ", sort keys %$user_update) . "'\n";
 	}
 	$slashdb->setUser($user->{uid}, $user_update) if $user_update && %$user_update;
-
-	# stats for clampe
-        if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME} && $user->{currentPage} =~ /users|index|comments|article/) {
-		my $form = getCurrentForm();
-                my $fname = catfile('clampe', $user->{ipid});
-		my $change = $form->{op} eq 'Change' ? 1 : 0;
-                my $comlog = "URL: $ENV{REQUEST_URI} Page: $user->{currentPage} UID: $user->{uid} IPID: $user->{ipid} Dispmode: $user->{mode} Thresh: $user->{threshold} Sort: $user->{commentsort} Changes: $change";
-                doClampeLog($fname, [$comlog]);
-        }
 
 	return OK;
 }
