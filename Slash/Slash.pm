@@ -585,7 +585,7 @@ sub printComments {
 	# stats for clampe 	 
         if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME}) {
 		my $fname = catfile('clampe', $user->{ipid});
-		my $change = $form{op} eq 'Change' ? 1 : 0;
+		my $change = $form->{op} eq 'Change' ? 1 : 0;
 		my $comlog = "URL: $ENV{REQUEST_URI} Page: $user->{currentPage} UID: $user->{uid} IPID: $user->{ipid} Dispmode: $user->{mode} Thresh: $user->{threshold} Sort: $user->{commentsort} Changes: $change #Comments: $count";
 		doClampeLog($fname, [$comlog]); 	 
 	}

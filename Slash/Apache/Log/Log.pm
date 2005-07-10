@@ -64,6 +64,7 @@ sub UserLog {
 	my($r) = @_;
 
 	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
 
 	# stats for clampe
         if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME} && $user->{currentPage} =~ /users|index|article/) {
@@ -78,7 +79,6 @@ sub UserLog {
 
 	my $user_update = undef;
 	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
 
 	# First check to see if this is an admin who sent a password
 	# in cleartext.  If so and if we want to flag that, flag it
