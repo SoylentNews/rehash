@@ -13,36 +13,39 @@ __name__
 aclEdit
 __template__
 
-<P>Existing ACLs and users that have their permissions:
+<p>Existing ACLs and users that have their permissions:
 
-<P><TABLE CELLSPACING=2 BORDER=0>
+<p><table cellspacing=2 border=0>
 [% FOREACH acl = acls.keys %]
-	<TR>
-		<TD>[% acl | strip_nohtml %]</TD>
-		<TD ALIGN="RIGHT">([% acls.$acl.size %])</TD>
-		<TD>
+	<tr>
+		<td>[% acl | strip_nohtml %]</td>
+		<td align="right">([% acls.$acl.size %])</td>
+		<td>
 		[% FOREACH uid = acls.$acl.nsort %]
-			<A HREF="[% gSkin.rootdir %]/users.pl?uid=[% uid | strip_attribute %]">[% uid %]</A>
+			<a href="[% gSkin.rootdir %]/users.pl?uid=[% uid | strip_attribute %]">[% uid %]</a>
 		[% END %]
-		</TD>
-	</TR>
+		</td>
+	</tr>
 [% END %]
-</TABLE>
+</table>
 
-<FORM ACTION="[% env.script_name %]" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="acls">
-	<P>Enter name of new ACL category to create:
-	<INPUT TYPE="TEXT" NAME="thisname" VALUE="">
-	<INPUT TYPE="SUBMIT" NAME="aclsave" VALUE="Create">
-	<BR>(It will be assigned to you, for starters, after which you will
+<form action="[% env.script_name %]" method="post">
+<fieldset>
+<legend>ACL Editor</legend>
+<input type="hidden" name="op" value="acls">
+	<label>Enter name of new ACL category to create:</label>
+	<input type="text" name="thisname" value="">
+	<input type="submit" name="aclsave" value="Create" class="button">
+	<br>(It will be assigned to you, for starters, after which you will
 	be able to assign it to other users by editing them in users.pl.
 	To delete a category, simply remove it from all users.)
-	<BR>Recognized ACL categories so far: <tt>candelcomments_always modpoints_always stats</tt>
+	<br>Recognized ACL categories so far: <tt>candelcomments_always modpoints_always stats</tt>
 	<br>Don't name an ACL the same as an AL2 type, or there
 	will be trouble! Current AL2 types: <tt>comment ban
 	expired nopost nopalm norss nosubmit trusted proxy</tt>
 	<!-- XXXSRCID The code needs to check getAL2Types() to prevent that error from even being possible -->
-</FORM>
+	</fieldset>
+</form>
 
 __seclev__
 500
