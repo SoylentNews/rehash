@@ -9,8 +9,8 @@ use strict;
 use Slash::Constants ':slashd';
 
 use vars qw( %task $me );
-
-$task{$me}{timespec} = '0 0 0 * *';
+$!=0;
+$task{$me}{timespec} = '0 0 * * *';
 $task{$me}{timespec_panic_1} = ''; # if panic, this can wait
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
@@ -54,7 +54,7 @@ $task{$me}{code} = sub {
 	my $limit = 3_000;
 	my $update_num = 10_000;
 
-	for my $name (keys %sets) {
+	for my $name (reverse sort keys %sets) {
 		my $set = $sets{$name};
 
 		# max is last comment posted under "old" spec, (needs to be figured out manually)
@@ -68,7 +68,7 @@ $task{$me}{code} = sub {
 		}
 
 		# old table is the previous data itself
-		$set->{table_old} = $set->{table} . '_old';
+		$set->{table_old} = $set->{table} . '_html_update_old';
 
 		slashdLog("Attempting to update HTML for $name $set->{lst} through $set->{max}");
 		while ($set->{lst} < $set->{max}) {
@@ -90,11 +90,15 @@ $task{$me}{code} = sub {
 			$admin = 1 if $name eq 'stories';
 
 			for my $id (sort { $a <=> $b } keys %$fetch) {
-				my(%oldhtml, %html);
+				my(%oldhtml, %html, $ok);
 				for my $field (@{$set->{fields}}) {
-					$oldhtml{$field} = $fetch->{$id}{$field};
-					$html{$field}    = _html_update_fix($fetch->{$id}{$field}, 0, $admin);
+					if (length $fetch->{$id}{$field}) {
+						$oldhtml{$field} = $fetch->{$id}{$field};
+						$html{$field}    = _html_update_fix($fetch->{$id}{$field}, $field, 0, $admin);
+						$ok = 1;
+					}
 				}
+				next unless $ok;
 
 				$slashdb->sqlInsert($set->{table_old}, {
 					$set->{id} => $id,
@@ -114,8 +118,8 @@ $task{$me}{code} = sub {
 					);
 				}
 
+			} continue {
 				$set->{lst} = $id;
-
 				if ($set->{lst} =~ /000$/) {
 					slashdLog("Updated HTML for $name through $set->{lst}");
 				}
@@ -132,7 +136,18 @@ $task{$me}{code} = sub {
 };
 
 sub _html_update_fix {
-	my($html, $strip, $admin) = @_;
+	my($html, $field, $strip, $admin) = @_;
+
+	my $limit = 0;
+	if ($field eq 'bio') {
+		$limit = getCurrentStatic('users_bio_length') || 1024;
+	} elsif ($field eq 'sig') {
+		$limit = 120;
+	} elsif ($field eq 'mylinks') {
+		$limit = 255;
+	}
+
+	$html = chopEntity($html, $limit) if $limit;
 
 	# we can strip page-widening stuff, but for now, we don't,
 	# as we have no solution in CSS to page-widening at this point
@@ -145,7 +160,16 @@ sub _html_update_fix {
 		$html = slashizeLinks($html);
 		$html = balanceTags($html);
 	} else {
-		$html = balanceTags(strip_html($html), { deep_nesting => 1 });
+		$html = balanceTags(strip_html($html), { deep_nesting => 2 });
+	}
+
+	while ($limit > 0 && length($html) > $limit) {
+		$limit -= 10;
+		$html = balanceTags(chopEntity($html, $limit), { deep_nesting => 2 });
+	}
+
+	if ($html && $field =~ /^(?:sig|bio|comment)$/) {
+		$html = addDomainTags($html);
 	}
 
 	return $html;
@@ -156,36 +180,36 @@ sub _html_update_fix {
 
 __END__
 
-DROP TABLE IF EXISTS comment_text_old;
-CREATE TABLE comment_text_old (
+DROP TABLE IF EXISTS comment_text_html_update_old;
+CREATE TABLE comment_text_html_update_old (
 	cid mediumint UNSIGNED NOT NULL,
 	comment text NOT NULL,
 	PRIMARY KEY (cid)
 );
 
-DROP TABLE IF EXISTS users_old;
-CREATE TABLE users_old (
+DROP TABLE IF EXISTS users_html_update_old;
+CREATE TABLE users_html_update_old (
 	uid mediumint UNSIGNED NOT NULL,
 	sig varchar(200),
-	PRIMARY KEY (uid),
+	PRIMARY KEY (uid)
 );
 
-DROP TABLE IF EXISTS users_info_old;
-CREATE TABLE users_info_old (
+DROP TABLE IF EXISTS users_info_html_update_old;
+CREATE TABLE users_info_html_update_old (
 	uid mediumint UNSIGNED NOT NULL,
 	bio text,
-	PRIMARY KEY (uid),
+	PRIMARY KEY (uid)
 );
 
-DROP TABLE IF EXISTS users_prefs_old;
-CREATE TABLE users_prefs_old (
+DROP TABLE IF EXISTS users_prefs_html_update_old;
+CREATE TABLE users_prefs_html_update_old (
 	uid mediumint UNSIGNED NOT NULL,
 	mylinks varchar(255) DEFAULT '' NOT NULL,
-	PRIMARY KEY (uid),
+	PRIMARY KEY (uid)
 );
 
-DROP TABLE IF EXISTS story_text_old;
-CREATE TABLE story_text_old (
+DROP TABLE IF EXISTS story_text_html_update_old;
+CREATE TABLE story_text_html_update_old (
 	stoid MEDIUMINT UNSIGNED NOT NULL,
 	title VARCHAR(100) DEFAULT '' NOT NULL,
 	introtext text,
@@ -198,28 +222,29 @@ CREATE TABLE story_text_old (
 
 INSERT INTO vars VALUES ('html_update_comment_text_max', 0, 'last posted under old spec');
 INSERT INTO vars VALUES ('html_update_comment_text_lst', 0, 'last comment processed by html_update');
-
-INSERT INTO vars VALUES ('html_update_users_max', 0, 'last posted under old spec');
-INSERT INTO vars VALUES ('html_update_users_lst', 0, 'last processed by html_update');
-
-INSERT INTO vars VALUES ('html_update_users_info_max', 0, 'last posted under old spec');
-INSERT INTO vars VALUES ('html_update_users_info_lst', 0, 'last processed by html_update');
-
-INSERT INTO vars VALUES ('html_update_users_prefs_max', 0, 'last posted under old spec');
-INSERT INTO vars VALUES ('html_update_users_prefs_lst', 0, 'last processed by html_update');
-
-INSERT INTO vars VALUES ('html_update_story_text_max', 0, 'last posted under old spec');
-INSERT INTO vars VALUES ('html_update_story_text_lst', 0, 'last processed by html_update');
+INSERT INTO vars VALUES ('html_update_users_max',        0, 'last posted under old spec');
+INSERT INTO vars VALUES ('html_update_users_lst',        0, 'last processed by html_update');
+INSERT INTO vars VALUES ('html_update_users_info_max',   0, 'last posted under old spec');
+INSERT INTO vars VALUES ('html_update_users_info_lst',   0, 'last processed by html_update');
+INSERT INTO vars VALUES ('html_update_users_prefs_max',  0, 'last posted under old spec');
+INSERT INTO vars VALUES ('html_update_users_prefs_lst',  0, 'last processed by html_update');
+INSERT INTO vars VALUES ('html_update_story_text_max',   0, 'last posted under old spec');
+INSERT INTO vars VALUES ('html_update_story_text_lst',   0, 'last processed by html_update');
 
 
 
-REPLACE INTO vars VALUES ('html_update_comment_text_lst', 0, 'last processed by html_update');
-REPLACE INTO vars VALUES ('html_update_users_lst', 0, 'last processed by html_update');
-REPLACE INTO vars VALUES ('html_update_users_info_lst', 0, 'last processed by html_update');
-REPLACE INTO vars VALUES ('html_update_users_prefs_lst', 0, 'last processed by html_update');
-REPLACE INTO vars VALUES ('html_update_story_text_lst', 0, 'last processed by html_update');
 
 
-UPDATE story_text AS good, story_text_old AS old SET good.title = old.title, good.introtext = old.introtext, good.bodytext = old.bodytext, good.relatedtext = old.relatedtext WHERE good.stoid = old.stoid;
+#### in case you need to revert:
+#REPLACE INTO vars VALUES ('html_update_comment_text_lst', 0, 'last processed by html_update');
+#REPLACE INTO vars VALUES ('html_update_users_lst',        0, 'last processed by html_update');
+#REPLACE INTO vars VALUES ('html_update_users_info_lst',   0, 'last processed by html_update');
+#REPLACE INTO vars VALUES ('html_update_users_prefs_lst',  0, 'last processed by html_update');
+#REPLACE INTO vars VALUES ('html_update_story_text_lst',   0, 'last processed by html_update');
 
-UPDATE users_info AS good, users_info_old AS old SET good.bio = old.bio WHERE good.uid = old.uid;
+#UPDATE story_text   AS good, story_text_html_update_old   AS old SET good.title = old.title, good.introtext = old.introtext, good.bodytext = old.bodytext, good.relatedtext = old.relatedtext WHERE good.stoid = old.stoid;
+#UPDATE users        AS good, users_html_update_old        AS old SET good.sig = old.sig         WHERE good.uid = old.uid;
+#UPDATE users_info   AS good, users_info_html_update_old   AS old SET good.bio = old.bio         WHERE good.uid = old.uid;
+#
+UPDATE users_prefs  AS good, users_prefs_html_update_old  AS old SET good.mylinks = old.mylinks WHERE good.uid = old.uid;
+#UPDATE comment_text AS good, comment_text_html_update_old AS old SET good.comment = old.comment WHERE good.uid = old.uid;
