@@ -813,7 +813,7 @@ sub main {
 
 		# kill the dbh, we have too many problems
 		# if it sticks around during a fork -- pudge
-		$slashdb->getMCD()->disconnect_all();
+		$slashdb->getMCD()->disconnect_all() if $slashdb->getMCD();
 		$slashdb->{_dbh}->disconnect if $slashdb->{_dbh};
 		undef $slashdb->{_dbh};
 
