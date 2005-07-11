@@ -1520,7 +1520,7 @@ sub editStory {
 	});
 
 	my $ispell_comments = {
-		introtext =>    get_ispell_comments($storyref->{introtext}),
+		introtext =>    get_ispell_comments("$storyref->{title} $storyref->{introtext}"),
 		bodytext =>     get_ispell_comments($storyref->{bodytext}),
 	} unless $user->{no_spell};
 
