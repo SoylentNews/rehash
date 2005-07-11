@@ -39,7 +39,7 @@ $task{$me}{code} = sub {
 
 	}
 
-	slashdLog("old: $old new: $new");
+	return "old: $old new: $new";
 };
 
 sub load_from_source {
