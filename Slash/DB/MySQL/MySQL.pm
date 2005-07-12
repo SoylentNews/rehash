@@ -4287,7 +4287,7 @@ sub setStory {
 	# keep the value the same.
 	# Note:  this isn't exactly right.  If the stories table is the
 	# only one being written to, we shouldn't set last_update
-	# manually, we should let it be set iff another column changes.
+	# manually, we should let it be set if another column changes.
 	# Doing it this way doesn't really hurt anything though.
 
 	if (!exists($change_hr->{last_update})
@@ -9238,7 +9238,7 @@ sub getSlashConf {
 						)],
 		charrefs_bad_entity =>		[qw( zwnj zwj lrm rlm )],
 		charrefs_bad_numeric =>		[qw( 8204 8205 8206 8207 8236 8237 8238 )],
-		charrefs_good_entity =>		[qw( amp lt gt euro pound yen )],
+		charrefs_good_entity =>		[qw( amp lt gt euro pound yen rsquo lsquo rdquo ldquo ndash mdash )],
 		charrefs_good_numeric =>	[ ],
 		cur_performance_stat_ops =>	[ ],
 		fixhrefs =>			[ ],
