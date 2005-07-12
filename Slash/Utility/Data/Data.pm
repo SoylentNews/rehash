@@ -1423,7 +1423,12 @@ sub processCustomTags {
 			my $substr = substr($str, $pos);
 			if ($substr =~ m/^$close/si) {
 				my $len = length($1);
-				my $code = strip_code($3);
+				my $codestr = $3;
+				# remove these if they were added by url2html; I know
+				# this is a rather cheesy way to do this, but c'est la vie
+				# -- pudge
+				$codestr =~ s{<a href="[^"]+" rel="url2html-$$">(.+?)</a>}{$1}g;
+				my $code = strip_code($codestr);
 				my $newstr = "<blockquote>$code</blockquote>";
 				substr($str, $pos, $len) = $newstr;
 				pos($str) = $pos + length($newstr);
@@ -2249,7 +2254,7 @@ sub url2html {
 		my $extra = '';
 		$extra = $1 if $url =~ s/([?!;:.,']+)$//;
 		$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
-		qq[<a href="$url">$url</a>$extra];
+		qq[<a href="$url" rel="url2html-$$">$url</a>$extra];
 	}ogie;
 
 	return $text;
