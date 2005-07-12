@@ -2009,6 +2009,7 @@ sub updateStory {
 		introtext	=> $form->{introtext},
 		relatedtext	=> $form->{relatedtext},
 		-rendered	=> 'NULL', # freshenup.pl will write this
+		is_dirty	=> 1
 	};
 
 	for (qw(dept bodytext relatedtext)) {
