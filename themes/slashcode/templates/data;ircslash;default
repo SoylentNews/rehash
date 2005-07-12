@@ -20,7 +20,10 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'help' %]
-	Commands: help, [un]hush, [un]ignore, slashd, ping, who, whois (uid|nick), lcr [SITE], lcrset SITE TAG, quote (symbol), dbs, [% IF plugins.daddypants %], daddypants [now|next|today|tomorrow|n days][% END %]
+	Commands: help, [un]hush, [un]ignore, slashd, ping, who, whois (UID|NICK), lcr [SITE], lcrset SITE TAG, quote SYMBOL, dbs, re[% IF plugins.daddypants %], daddypants [now|next|today|tomorrow|N days][% END %]
+
+[% CASE 're' %]
+	Welcome back, [% nickname %]
 
 [% CASE 'exiting' %]
 	Exiting (slashd should restart me within a minute)
