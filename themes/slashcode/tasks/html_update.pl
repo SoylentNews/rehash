@@ -108,14 +108,20 @@ $task{$me}{code} = sub {
 				if ($name eq 'stories') {
 					$html{is_dirty} = 1;
 					$html{-last_update} = 'last_update';
-					$slashdb->setStory($id, \%html);
+					my $success = $slashdb->setStory($id, \%html);
+					if (!$success) {
+						slashdLog("setStory failed for id=$id");
+					}
 				} else {
 					if ($name =~ /^user/) {
 						$slashdb->setUser_delete_memcached($id);
 					}
-					$slashdb->sqlUpdate($set->{table}, \%html,
+					my $rows = $slashdb->sqlUpdate($set->{table}, \%html,
 						"$set->{id} = $id"
 					);
+					if (!$rows) {
+						slashdLog("update failed for $set->{table} $set->{id}=$id");
+					}
 				}
 
 			} continue {
