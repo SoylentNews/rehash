@@ -510,7 +510,8 @@ sub drawImage {
 	my $poly = new GD::Polygon;
 	if ($width+$height > 100) {
 		# Draw a grid of lines on the image, same color as the text.
-		my $pixels_between = ($width+$height)/8;
+		my $lc = $constants->{hc_q1_linecloseness} || 8;
+		my $pixels_between = ($width+$height)/$lc;
 		$pixels_between = 20 if $pixels_between < 20;
 		my $offset = int(rand($pixels_between));
 		my $x = int(rand($pixels_between));
