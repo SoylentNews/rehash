@@ -4287,8 +4287,8 @@ sub setStory {
 	# keep the value the same.
 	# Note:  this isn't exactly right.  If the stories table is the
 	# only one being written to, we shouldn't set last_update
-	# manually, we should let it be set if another column changes.
-	# Doing it this way doesn't really hurt anything though.
+	# manually, we should let it be set if and only if another column
+	# changes.  Doing it this way doesn't really hurt anything though.
 
 	if (!exists($change_hr->{last_update})
 		&& !exists($change_hr->{-last_update})) {
