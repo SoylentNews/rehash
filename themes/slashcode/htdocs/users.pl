@@ -2355,21 +2355,20 @@ sub saveUser {
 		}
 	}
 
-	# The schema is 160 chars but we limit their input to 120.
-	my(%extr, $err_message);
-	$extr{sig} = chopEntity($form->{sig}, 120);
-	$extr{bio} = chopEntity($form->{bio}, $constants->{users_bio_length} || 1024);
+	my(%extr, $err_message, %limit);
+	$limit{sig} = 120;  # schema is 200, give an extra buffer for domain tags
+	$limit{bio} = $constants->{users_bio_length} || 1024; # can be up to 2^16
 
-	for my $key (keys %extr) {
-		my $dat = $extr{$key};
+	for my $key (keys %limit) {
+		my $dat = chopEntity($form->{$key}, $limit{$key});
 		$dat = strip_html($dat);
-		$dat = balanceTags($dat, { deep_nesting => 2 });
+		$dat = balanceTags($dat, { deep_nesting => 2, length => $limit{$key} });
 		$dat = addDomainTags($dat) if $dat;
 
 		# If the sig becomes too long to fit (domain tagging causes
 		# string expansion and tag balancing can too), warn the user to
 		# use shorter domain names and don't save their change.
-		if ($key eq 'sig' && defined($dat) && length($dat) > 160) {
+		if ($key eq 'sig' && defined($dat) && length($dat) > 200) {
 			print getError('sig_too_long_err');
 			$extr{sig} = undef;
 		}
@@ -2784,7 +2783,13 @@ sub saveHome {
 	# purpose), plus the fact that this could be used to amplify the
 	# seriousness of any future vulnerabilities, means it's way past
 	# time to shut this feature down.  - Jamie 2002/03/06
-	$user_edits_table->{mylinks} = balanceTags(strip_html($form->{mylinks} || ''), { deep_nesting => 2 });
+
+	# it's a VARCHAR ...
+	my $mylinks_limit = 255;
+	$user_edits_table->{mylinks} = balanceTags(strip_html(
+		chopEntity($form->{mylinks} || '', $mylinks_limit)
+	), { deep_nesting => 2, length => $mylinks_limit });
+
 	$user_edits_table->{mylinks} = '' unless defined $user_edits_table->{mylinks};
 
 	$error = 1;

@@ -457,7 +457,9 @@ sub cmd_exit {
 
 sub cmd_re {
 	my($service, $info) = @_;
-	send_msg(getIRCData('re', { nickname => $info->{event}{nick} }), { $service => 1 });
+	send_msg(getIRCData('re', {
+		nickname	=> $info->{text} || $info->{event}{nick},
+	}), { $service => 1 });
 }
 
 sub cmd_ignore {
