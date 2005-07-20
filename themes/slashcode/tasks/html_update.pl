@@ -166,12 +166,7 @@ sub _html_update_fix {
 		$html = slashizeLinks($html);
 		$html = balanceTags($html);
 	} else {
-		$html = balanceTags(strip_html($html), { deep_nesting => 2 });
-	}
-
-	while ($limit > 0 && length($html) > $limit) {
-		$limit -= 10;
-		$html = balanceTags(chopEntity($html, $limit), { deep_nesting => 2 });
+		$html = balanceTags(strip_html($html), { deep_nesting => 2, length => $limit });
 	}
 
 	if ($html && $field =~ /^(?:sig|bio|comment)$/) {
