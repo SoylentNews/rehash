@@ -93,6 +93,7 @@ sub deleteOldFromPool {
 	my $delrows = 0;
 	my $loop_num = 1;
 	my $remaining_to_delete = $want_delete;
+	my $successfully_deleted = 0;
 	my $secs = $constants->{hc_pool_secs_before_del} || 21600;
 	my $lastused_max_secs = $secs * 2;
 	$lastused_max_secs = 86400*3 if $lastused_max_secs < 86400*3;
@@ -175,17 +176,9 @@ sub deleteOldFromPool {
 				"humanconf_pool",
 				"hcpid IN ($hcpids_list)"
 			);
-			if ($new_delrows != $remaining_to_delete) {
-				warn "HumanConf warning: deleted number"
-					. " of rows '$new_delrows'"
-					. " not equal to attempted number to delete"
-					. " '$remaining_to_delete'";
-			}
+			$successfully_deleted += $new_delrows;
 			$remaining_to_delete -= $new_delrows;
 			$delrows += $new_delrows;
-		} else {
-			warn "HumanConf warning: no rows to delete; attempted"
-				. " '$remaining_to_delete'";
 		}
 
 		# Pass 5:
@@ -198,6 +191,10 @@ sub deleteOldFromPool {
 		);
 
 		++$loop_num;
+	}
+
+	if ($loop_num > 1) {
+		slashdLog("deleteOldFromPool looped $loop_num times, deleted $successfully_deleted of $want_delete");
 	}
 	
 	# Return the number of rows successfully deleted.  This
