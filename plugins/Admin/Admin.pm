@@ -8,6 +8,7 @@ package Slash::Admin;
 use strict;
 use DBIx::Password;
 use Slash;
+use Slash::Display;
 use Slash::Utility;
 
 use vars qw($VERSION);
@@ -117,6 +118,134 @@ sub getAccesslogAbusersByID {
 	return $ar;
 }
 
+
+##################################################################
+# Generates the 'Related Links' for Stories
+sub getRelated {
+	my($self, $story_content, $tid) = @_;
+
+	my $slashdb = getCurrentDB();
+	my $user    = getCurrentUser();
+
+	my $rl = $slashdb->getRelatedLinks;
+	my @related_text = ( );
+	my @rl_keys = sort keys %$rl;
+
+	my @tids = ( $tid );
+	if (ref($tid) && ref($tid) eq 'ARRAY') {
+		@tids = @$tid;
+	}
+	my $tid_regex = "^_topic_id_"
+		. "(?:"
+			. join("|", map { "\Q$_" } @tids)
+		. ")"
+		. "(?!\\d)";
+
+	if ($rl) {
+		my @matchkeys =
+			sort grep {
+				$rl->{$_}{keyword} =~ $tid_regex
+				||
+				$rl->{$_}{keyword} !~ /^_topic_id_/
+					&& $story_content =~ /\b$rl->{$_}{keyword}\b/i
+			} @rl_keys;
+		for my $key (@matchkeys) {
+			# Instead of hard-coding the HTML here, we should
+			# do something a little more flexible.
+			my $str = qq[<li><a href="$rl->{$key}{link}">$rl->{$key}{name}</a></li>\n];
+			push @related_text, $str;
+		}
+	}
+
+	# And slurp in all of the anchor links (<A>) from the story just for
+	# good measure.  If TITLE attribute is present, use that for the link
+	# label; otherwise just use the A content.
+	while ($story_content =~ m|<a\s+(.*?)>(.*?)</a>|sgi) {
+		my($a_attr, $label) = ($1, $2);
+		next unless $a_attr =~ /\bhref\s*=\s*["']/si;
+		if ($a_attr =~ m/(\btitle\s*=\s*(["'])(.*?)\2)/si) {
+			$label = $3;
+			$a_attr =~ s/\Q$1\E//;
+		}
+
+		$a_attr =~ /\bhref\s*=\s*(["'])(.*?)\1/;
+		my $a_href = $2;
+		# If we want to exclude certain types of links from appearing
+		# in Related Links, we can make that decision based on the
+		# link target here.
+
+		$a_href =~ /(\w\.\w?)$/;
+		my $a_href_domain = $1;
+
+		$label = strip_notags($label);
+		$label =~ s/(\S{30})/$1 /g;
+		# Instead of hard-coding the HTML here, we should
+		# do something a little more flexible.
+		my $str;
+		if (submitDomainAllowed($a_href_domain)) {
+			$str = qq[<li><a $a_attr>$label</a></li>\n];
+		} else {
+			$str = qq[<li><blink><b><a style="color: #FF0000;" $a_attr>$label</a></b></blink></li>\n];
+		}
+		push @related_text, $str unless $label eq "?" || $label eq "[?]";
+	}
+
+	for (@{$user->{state}{related_links}}) {
+		push @related_text, sprintf(
+			# Instead of hard-coding the HTML here, we should
+			# do something a little more flexible.
+			qq[<li><a href="%s">%s</a></li>\n],
+			strip_attribute($_->[1]), $_->[0]
+		);
+	}
+
+	# Check to make sure we don't include the same link twice.
+	my %related_text = ( );
+	my $return_str = "";
+	for my $rt (@related_text) {
+		next if $related_text{$rt};
+		$return_str .= $rt;
+		$related_text{$rt} = 1;
+	}
+	return $return_str;
+}
+
+##################################################################
+sub otherLinks {
+	my($self, $aid, $tid, $uid) = @_;
+
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+
+	my $topics = $reader->getTopics;
+	my @tids = ( $tid );
+	if (ref($tid) && ref($tid) eq 'ARRAY') {
+		@tids = @$tid;
+	}
+
+	return slashDisplay('otherLinks', {
+		uid		=> $uid,
+		aid		=> $aid,
+		tids		=> \@tids,
+		topics		=> $topics,
+	}, { Return => 1, Nocomm => 1 });
+}
+
+##################################################################
+sub relatedLinks {
+	my($self, $story_content, $tids, $nick, $uid) = @_;
+	my $relatedtext = $self->getRelated($story_content, $tids) .
+		$self->otherLinks($nick, $tids, $uid);
+
+	# If getRelated and otherLinks seem to be putting <li>
+	# tags around each item, they probably want a <ul></ul>
+	# surrounding the whole list.  This is a bit hacky but
+	# should help make strictly parsed versions of HTML
+	# work better.
+	$relatedtext = "<ul>\n$relatedtext\n</ul>"
+		if $relatedtext && $relatedtext =~ /^\s*<li>/;
+
+	return $relatedtext;
+}
 
 sub DESTROY {
 	my($self) = @_;

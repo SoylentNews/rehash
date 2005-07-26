@@ -10,8 +10,10 @@ use Slash::Constants ':slashd';
 
 use vars qw( %task $me );
 $!=0;
-$task{$me}{timespec} = '0 0 * * *';
-$task{$me}{timespec_panic_1} = ''; # if panic, this can wait
+# only run from runtask
+$task{$me}{standalone} = 1;
+# this line should not be needed, but for now, is
+$task{$me}{timespec} = '0 0 0 0 0';
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
@@ -50,15 +52,16 @@ $task{$me}{code} = sub {
 	);
 
 
-	my $time  = time();
-	my $limit = 3_000;
 	my $update_num = 10_000;
+
+	my $admindb = getObject('Slash::Admin');
+	my %authors;
 
 	for my $name (reverse sort keys %sets) {
 		my $set = $sets{$name};
 
-		# max is last comment posted under "old" spec, (needs to be figured out manually)
-		# lst is last comment updated here
+		# max is last thingy saved under "old" spec, (needs to be figured out manually)
+		# lst is last thingy updated with this task
 		($set->{max}) = $slashdb->getVar("html_update_$set->{table}_max", 'value', 1);
 		($set->{lst}) = $slashdb->getVar("html_update_$set->{table}_lst", 'value', 1);
 
@@ -76,7 +79,7 @@ $task{$me}{code} = sub {
 			my $max = $set->{lst} + $update_num;
 			$max = $set->{max} if $max > $set->{max};
 
-			slashdLog("Updating HTML for $name $next through $set->{max}");
+			slashdLog("Updating HTML for $name $next through $max");
 
 			my $cols = join ',', $set->{id}, @{$set->{fields}};
 			my $fetch = $reader->sqlSelectAllHashref(
@@ -84,7 +87,13 @@ $task{$me}{code} = sub {
 				"$set->{id} BETWEEN $next AND $max"
 			);
 
-			last unless keys %$fetch;
+			my $keycount = scalar keys %$fetch;
+			if (!$keycount) {
+				slashdLog("No records for $name");
+				last;
+			} else {
+				slashdLog("Processing $keycount records for $name");
+			}
 
 			my $admin = 0;
 			$admin = 1 if $name eq 'stories';
@@ -92,18 +101,37 @@ $task{$me}{code} = sub {
 			for my $id (sort { $a <=> $b } keys %$fetch) {
 				my(%oldhtml, %html, $ok);
 				for my $field (@{$set->{fields}}) {
+					if ($name eq 'stories' && $field eq 'relatedtext') {
+						$oldhtml{$field} = $fetch->{$id}{$field};
+						next;
+					}
+
 					if (length $fetch->{$id}{$field}) {
 						$oldhtml{$field} = $fetch->{$id}{$field};
 						$html{$field}    = _html_update_fix($fetch->{$id}{$field}, $field, 0, $admin);
-						$ok = 1;
+						$ok = 1 if $oldhtml{$field} ne $html{$field};
 					}
 				}
 				next unless $ok;
 
+				if ($name eq 'stories') {
+					my $text = "$html{title} $html{introtext} $html{bodytext}";
+					my $tids = $slashdb->getTopiclistFromChosen($slashdb->getStoryTopicsChosen($id));
+					my $uid = $slashdb->getStory($id, 'uid');
+					my $nick = $authors{$uid} ||= $reader->getUser($uid, 'nickname');
+					$html{relatedtext} = $admindb->relatedLinks(
+						$text, $tids, $nick, $uid
+					);
+
+use Data::Dumper;
+print Dumper [$uid, $nick, $tids, $html{relatedtext}];
+exit;
+				}
+
 				$slashdb->sqlInsert($set->{table_old}, {
 					$set->{id} => $id,
 					%oldhtml
-				});
+				}, { ignore => 1 });
 
 				if ($name eq 'stories') {
 					$html{is_dirty} = 1;
@@ -131,9 +159,7 @@ $task{$me}{code} = sub {
 				}
 			}
 
-			slashdLog("Done updating HTML for $name $next through $set->{max}");
-
-			last if time() > $time + $limit;
+			slashdLog("Done updating HTML for $name $next through $max");
 		}
 
 		$slashdb->setVar("html_update_$set->{table}_lst", $set->{lst})
