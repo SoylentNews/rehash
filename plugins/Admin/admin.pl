@@ -1334,6 +1334,7 @@ sub editStory {
 		my($chosen_hr) = extractChosenFromForm($form);
 		$storyref->{topics_chosen} = $chosen_hr;
 		my $rendered_hr = $slashdb->renderTopics($chosen_hr);
+		$storyref->{topics_rendered} = $rendered_hr;
 		$storyref->{primaryskid} = $slashdb->getPrimarySkidFromRendered($rendered_hr);
 		$storyref->{topiclist} = $slashdb->getTopiclistFromChosen($chosen_hr,
 			{ skid => $storyref->{primaryskid} });
@@ -1354,11 +1355,6 @@ sub editStory {
 		$subid = $form->{subid};
 		$sid = $form->{sid};
 
-		$storyref->{topics_chosen} = $chosen_hr;
-		$storyref->{topics_rendered} = $rendered_hr;
-		$storyref->{primaryskid} = $slashdb->getPrimarySkidFromRendered($rendered_hr);
-		$storyref->{topiclist} = $slashdb->getTopiclistFromChosen($chosen_hr,
-			{ skid => $storyref->{primaryskid} });
 		# not normally set here, so we force it to be safe
 		$storyref->{tid} = $storyref->{topiclist};
 
@@ -1693,7 +1689,12 @@ sub getDescForTopicsRendered {
 
 	my $desc;
 	if (!@sorted_nexuses) {
-		$desc = "This story will not appear.";
+		$desc = "This story will not appear because ";
+		if (!%$topics_rendered) {
+			$desc .= "no topics are selected.";
+		} else {
+			$desc .= "no topics in any nexuses are selected.";
+		}
 	} else {
 		$desc = "This story ";
 		if ($display) {
