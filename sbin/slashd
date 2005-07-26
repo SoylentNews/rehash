@@ -317,10 +317,6 @@ EOT
 			slashdLog("requiring '$fullname' caused error: $!");
 			$ok = 0;
 		}
-		if (!defined($task{$file}{timespec})) {
-			slashdLog("'$fullname' did not set timespec properly");
-			$ok = 0;
-		}
 		if (!$task{$file}{code} or ref $task{$file}{code} ne 'CODE') {
 			slashdLog("'$fullname' did not set code properly");
 			$ok = 0;
@@ -329,7 +325,11 @@ EOT
 		# MAY OR MAY NOT want to run on an automated AND/OR a manual
 		# type basis: this allows the user to decide.
 		if ($task{$file}{standalone}) {
-			slashdLog("'$fullname' available via runtask, only!");
+			slashdLog("'$fullname' only runs via runtask (this is not an error)");
+			$ok = 0;
+		}
+		if (!defined($task{$file}{timespec})) {
+			slashdLog("'$fullname' did not set timespec properly");
 			$ok = 0;
 		}
 		if ($ok) {

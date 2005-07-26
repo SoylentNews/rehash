@@ -183,10 +183,6 @@ EOT
 			slashdLog("requiring '$fullname' caused error: $!");
 			$ok = 0;
 		}
-		if (!$task{$file}{timespec}) {
-			slashdLog("'$fullname' did not set timespec properly");
-			$ok = 0;
-		}
 		if (!$task{$file}{code} or ref $task{$file}{code} ne 'CODE') {
 			slashdLog("'$fullname' did not set code properly");
 			$ok = 0;
