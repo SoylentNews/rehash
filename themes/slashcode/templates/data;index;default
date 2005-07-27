@@ -52,7 +52,7 @@ __template__
 
 [% CASE 'readmore' %]
 	[% returnme.data_constant = 1 %] 
-	<B>Read More...</B>
+	<b>Read More...</b>
 
 [% CASE 'bytes' %]
 	[% returnme.data_constant = 1 %] 
@@ -63,10 +63,12 @@ __template__
 	words in story
 
 [% CASE 'comments' %]
-	<B>[% IF cc.0 -%]
-<A HREF="[% cc.0.0 | strip_attribute %]"[% IF cc.0.2 %] TITLE="[% cc.0.2 | strip_attribute %]"[% END %]>[% cc.0.1 | strip_html %]</A> of 
+	<li class="comments">
+[% IF cc.0 -%]
+<a href="[% cc.0.0 | strip_attribute %]"[% IF cc.0.2 %] title="[% cc.0.2 | strip_attribute %]"[% END %]>[% cc.0.1 | strip_html %]</a> of 
 	[%- END -%]
-<A HREF="[% cc.1.0 | strip_attribute %]"[% IF cc.1.2 %] TITLE="[% cc.1.2 | strip_attribute %]"[% END %]>[% cc.1.1 | strip_html %]</A></B> comment[% cc.3 != 1 ? 's' : '' %]
+<a href="[% cc.1.0 | strip_attribute %]"[% IF cc.1.2 %] title="[% cc.1.2 | strip_attribute %]"[% END %]>[% cc.1.1 | strip_html %]</a> comment[% cc.3 != 1 ? 's' : '' %]
+	</li>
 
 [% CASE 'edit' %]
 	Edit

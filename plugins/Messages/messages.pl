@@ -208,19 +208,21 @@ sub display_prefs {
 		color =>	'colored',
 		tab_selected =>	'preferences',
 	});
-	slashDisplay('prefs_titlebar', {
+	slashDisplay('journuserboxes');
+	my $prefs_titlebar = slashDisplay('prefs_titlebar', {
 		nickname => $user->{nickname},
 		uid => $user->{uid},
 		tab_selected => 'messages'
-	});
-	print createMenu('messages');
-	slashDisplay('journuserboxes');
+	}, { Return => 1 });
+	my $messages_menu =  createMenu('messages');
 	slashDisplay('display_prefs', {
 		userm		=> $userm,
 		prefs		=> $prefs,
 		note		=> $note,
 		messagecodes	=> $messagecodes,
 		deliverymodes	=> $deliverymodes,
+		prefs_titlebar	=> $prefs_titlebar,
+		messages_menu	=> $messages_menu
 	});
 	footer();
 }
@@ -271,17 +273,19 @@ sub list_messages {
 		color =>	'colored',
 		tab_selected =>	'me',
 	});
-	slashDisplay('user_titlebar', {
+	slashDisplay('journuserboxes');
+	my $user_titlebar = slashDisplay('user_titlebar', {
 		nickname => $user->{nickname},
 		uid => $user->{uid},
 		tab_selected => 'messages'
-	});
-	print createMenu('messages'); # [ Message Preferences | Inbox ]
-	slashDisplay('journuserboxes');
+	}, { Return => 1} );
+	my $messages_menu = createMenu('messages'); # [ Message Preferences | Inbox ]
 	slashDisplay('list_messages', {
 		note		=> $note,
 		messagecodes	=> $messagecodes,
 		message_list	=> $message_list,
+		messages_menu 	=> $messages_menu,
+		user_titlebar	=> $user_titlebar,
 	});
 	footer();
 }

@@ -15,8 +15,6 @@ en_US
 __name__
 karma
 __template__
-[% USE Slash %]
-
 [% IF constants.karma_obfuscate;
 	FOREACH score = constants.karma_adj.keys.nsort;
 		IF useredit.karma <= score;

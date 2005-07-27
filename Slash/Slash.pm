@@ -1139,9 +1139,12 @@ sub displayThread {
 
 		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
 			$return .= $const->{cagebegin} if $cagedkids;
-			$return .= $const->{indentbegin} if $indent;
-			$return .= displayThread($sid, $cid, $lvl+1, $comments, $const);
-			$return .= $const->{indentend} if $indent;
+			my $thread = displayThread($sid, $cid, $lvl+1, $comments, $const);
+			if ($thread) {
+				$return .= $const->{indentbegin} if $indent;
+				$return .= $thread;
+				$return .= $const->{indentend} if $indent;
+			}
 			$return .= $const->{cageend} if $cagedkids;
 
 			# in flat or nested mode, all visible kids will

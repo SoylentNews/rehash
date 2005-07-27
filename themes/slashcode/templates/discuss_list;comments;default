@@ -20,22 +20,22 @@ __template__
 	<tr>
 		<td align="left">
 [% IF discussions.size > 0  %]
-<TABLE WIDTH="100%" cellpadding="0" cellspacing="0">
-<TR bgcolor="[% user.colors.bg_3 %]"><TH ALIGN="LEFT"><font color="[% user.colors.fg_0 %]" size=-1>Discussion</font></TH><TH ALIGN="LEFT"><font color="[% user.colors.fg_0 %]" size=-1>Referrer</font></TH><TH ALIGN="LEFT"><font color="[% user.colors.fg_0 %]" size=-1>Last Update</font></TH><TH ALIGN="RIGHT"><font color="[% user.colors.fg_0 %]" size=-1>Comment Count</font></TH></TR>
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr bgcolor="[% user.colors.bg_3 %]"><th align="LEFT">Discussion</th><th align="LEFT">Referrer</th><th align="LEFT">Last Update</th><th align="RIGHT">Comment Count</th></tr>
 [% FOR discussion = discussions %]
-	<TR bgcolor="[% user.colors.bg_2 %]"><TD><A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
-IF discussion.title.defined %][% discussion.title | strip_html %][% ELSE %]untitled[% END %]</A></TD>
-	<TD><A HREF="[% discussion.url | strip_attribute %]">referrer</A></TD><TD>[% Slash.timeCalc(discussion.last_update) %]</TD><TD ALIGN="RIGHT">[% discussion.commentcount %] comment[% discussion.commentcount == 1 ? "&nbsp;" : "s" %] </TD></TR>
+	<tr bgcolor="[% user.colors.bg_2 %]"><td><a href="[% gSkin.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
+IF discussion.title.defined %][% discussion.title | strip_html %][% ELSE %]untitled[% END %]</a></td>
+	<td><a href="[% discussion.url | strip_attribute %]">referrer</a></td><td>[% Slash.timeCalc(discussion.last_update) %]</td><td align="RIGHT">[% discussion.commentcount %] comment[% discussion.commentcount == 1 ? "&nbsp;" : "s" %] </td></tr>
 [% END %]
 [% END %]
-</TABLE>
-<P>
+</table>
+<p>
 [% PROCESS pagination label=label %]
 		</td>
 	</tr>
 </table>
 
-<P>
+<p>
 
 [% IF user.seclev >= constants.discussion_create_seclev && !suppress_create;
     # PROCESS discreate topic=constants.discussion_default_topic label=label; 

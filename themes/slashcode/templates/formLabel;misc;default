@@ -16,9 +16,9 @@ en_US
 __name__
 formLabel
 __template__
-[% UNLESS nobreak %]<p>[% END %]<font color="[% user.colors.bg_3 %]"><b>[% value | strip_html %]</b></font>
-[% IF comment %]([% comment | strip_html %])[% END %][% UNLESS nobreak %]<br>[% END; nobreak = 0 %]
-
+<label [% IF class %]class="[% class %]"[% END %]>
+	[% value | strip_html %]
+</label>
 __seclev__
 10000
 __version__

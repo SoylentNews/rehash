@@ -16,8 +16,6 @@ en_US
 __name__
 index
 __template__
-[% USE Slash %]
-
 <p>
 
 [% UNLESS user.is_anon %]

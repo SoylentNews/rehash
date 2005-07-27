@@ -12,27 +12,27 @@ en_US
 __name__
 futurestorybox
 __template__
-<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" WIDTH="100%">
 
+<ul id="future">
 [% futuretoday = Slash.timeCalc(Slash.db.getTime, "%Y-%m-%d", 0);
    MACRO futurestorywrite(story, nohref) BLOCK;
    futuretext  = "";
    futuretime  = "";
-   futurecolor = "#FFFFFF";
+   futureclass = "future";
 
    IF !story.displaystatus;
-        futurecolor = "#FFFFFF";
+        futureclass = "future";
    ELSIF story.displaystatus > 0;
-	futurecolor = "#CCCCCC";
+	futureclass = "futureg";
    ELSIF story.displaystatus < 0;
-	futurecolor = "#999999";
+	futureclass = "futurel";
    END;
 
    IF nohref;
 	futuretext = story.title;
    ELSE;
 	futuretext = BLOCK -%]
-<A HREF="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A>
+<a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</a>
 	[%- END;
    END;
 
@@ -42,11 +42,10 @@ __template__
 	futuretime = Slash.timeCalc(story.time, "%H:%M %Y-%m-%d", 0);
    END;
 
-   # match FONT stuff to fancybox, bgcolor stuff to listStories
    -%]
-<TR><TD BGCOLOR="[% futurecolor %]"><FONT FACE="[% constants.mainfontface %]" SIZE="1">
-	[% futuretext %] [% futuretime %]
-</FONT></TD></TR>
+	<li class="[% futureclass %]">
+		[% futuretext %] <em>[% futuretime %]</em>
+	</li>
 [%- END %]
 
 
@@ -60,8 +59,7 @@ END;
 FOREACH story = past;
 	futurestorywrite(story);
 END %]
-
-</TABLE>
+</ul>
 
 __seclev__
 10000

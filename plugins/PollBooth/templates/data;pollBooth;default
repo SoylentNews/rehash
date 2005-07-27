@@ -32,7 +32,7 @@ __template__
 	Story is already attatched to a different poll.  Please detach poll from that story before saving.
 [% CASE 'invalid' %]
 	[% returnme.data_constant = 1 %]
-	Invalid poll!<BR>
+	Invalid poll!<br>
 
 [% CASE 'display' %]
 	[% returnme.data_constant = 1 %]
@@ -41,7 +41,7 @@ __template__
 [% CASE 'anon' %]
 	[% returnme.data_constant = 1 %]
 	You may not vote anonymously.  Please
-	<A HREF="[% constants.real_rootdir %]/users.pl">log in</A>.
+	<a href="[% constants.real_rootdir %]/users.pl">log in</a>.
 
 [% CASE 'uid_voted' %]
 	[% user.nickname | strip_literal %] at [% env.remote_addr %] has already voted.

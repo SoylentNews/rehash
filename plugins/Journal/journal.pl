@@ -115,7 +115,7 @@ sub displayTop {
 	my($journal, $constants, $user, $form, $reader) = @_;
 	my $journals;
 
-	_printHead("mainhead") or return;
+	_printHead('mainhead') or return;
 
 	# this should probably be in a separate template, so the site admins
 	# can select the order themselves -- pudge
@@ -135,6 +135,7 @@ sub displayTop {
 		slashDisplay('journaltop', { journals => $journals, type => 'friend' });
 	}
 
+	print getData('journalfoot');
 }
 
 sub displayFriends {
@@ -145,7 +146,7 @@ sub displayFriends {
 
 	_validFormkey('generate_formkey') or return;
 
-	_printHead("mainhead") or return;
+	_printHead('mainhead') or return;
 
 	my $zoo = getObject('Slash::Zoo');
 	my $friends = $zoo->getFriendsWithJournals;
@@ -156,13 +157,14 @@ sub displayFriends {
 		slashDisplay('searchusers');
 	}
 
+	print getData('journalfoot');
 }
 
 sub searchUsers {
 	my($journal, $constants, $user, $form, $reader) = @_;
 
 	if (!$form->{nickname}) {
-		_printHead("mainhead") or return;
+		_printHead('mainhead') or return;
 		slashDisplay('searchusers');
 		return;
 	}
@@ -181,7 +183,7 @@ sub searchUsers {
 	}
 
 	# print the lovely headers
-	_printHead("mainhead") or return;
+	_printHead('mainhead') or return;
 
 	# if false or empty ref, no users
 	if (!$results || (ref($results) eq 'ARRAY' && @$results < 1)) {
@@ -200,6 +202,8 @@ sub searchUsers {
 			search	=> 1,
 		});
 	}
+
+	print getData('journalfoot');
 }
 
 sub displayRSS {
@@ -337,7 +341,7 @@ sub displayArticleFriends {
 		$uid		= $user->{uid};
 	}
 
-	_printHead("friendhead", { nickname => $nickname, uid => $uid }) or return;
+	_printHead('friendhead', { nickname => $nickname, uid => $uid }) or return;
 
 	# clean it up
 	my $start = fixint($form->{start}) || 0;
@@ -397,6 +401,8 @@ sub displayArticleFriends {
 		back		=> $back,
 		forward		=> $forward,
 	});
+
+	print getData('journalfoot');
 }
 
 sub displayArticle {
@@ -434,7 +440,7 @@ sub displayArticle {
 		return displayFriends(@_);
 	}
 
-	_printHead("userhead", $head_data, 1) or return;
+	_printHead('userhead', $head_data, 1) or return;
 
 	# clean it up
 	my $start = fixint($form->{start}) || 0;
@@ -523,6 +529,8 @@ sub displayArticle {
 		show_discussion	=> $show_discussion,
 	});
 
+	print getData('journalfoot');
+
 	if ($show_discussion) {
 		printComments($discussion);
 	}
@@ -538,7 +546,7 @@ sub editPrefs {
 
 	my $nickname	= $user->{nickname};
 	my $uid		= $user->{uid};
-	_printHead("userhead", { nickname => $nickname, uid => $uid, menutype => 'prefs' }) or return;
+	_printHead('userhead', { nickname => $nickname, uid => $uid, menutype => 'prefs' }) or return;
 
 	my $theme	= _checkTheme($user->{'journal_theme'});
 	my $themes	= $journal->themes;
@@ -546,6 +554,8 @@ sub editPrefs {
 		default		=> $theme,
 		themes		=> $themes,
 	});
+
+	print getData('journalfoot');
 }
 
 sub setPrefs {
@@ -581,7 +591,7 @@ sub listArticle {
 		? $reader->getUser($form->{uid}, 'nickname')
 		: $user->{nickname};
 
-	_printHead("userhead",
+	_printHead('userhead',
 		{ nickname => $nickname, uid => $form->{uid} || $user->{uid} },
 		1) or return;
 
@@ -598,6 +608,8 @@ sub listArticle {
 	} else {
 		print getData('noentries', { nickname => $nickname });
 	}
+
+	print getData('journalfoot');
 }
 
 sub saveArticle {
@@ -611,7 +623,7 @@ sub saveArticle {
 		$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
 		if ($d !~ /\S/) {		# require SOME non-whitespace
 			unless ($ws) {
-				_printHead("mainhead") or return;
+				_printHead('mainhead') or return;
 				print getData('no_desc_or_article');
 				editArticle(@_, 1);
 			}
@@ -665,7 +677,7 @@ sub saveArticle {
 
 		unless ($id) {
 			unless ($ws) {
-				_printHead("mainhead") or return;
+				_printHead('mainhead') or return;
 				print getData('create_failed');
 			}
 			return 0;
@@ -732,8 +744,9 @@ sub articleMeta {
 
 	if ($form->{id}) {
 		my $article = $journal->get($form->{id});
-		_printHead("mainhead") or return;
+		_printHead('mainhead') or return;
 		slashDisplay('meta', { article => $article });
+		print getData('journalfoot');
 	} else {
 		listArticle(@_);
 	}
@@ -762,7 +775,7 @@ sub editArticle {
 	}
 
 	unless ($nohead) {
-		_printHead("mainhead") or return;
+		_printHead('mainhead') or return;
 	}
 
 	if ($form->{state}) {
@@ -815,6 +828,8 @@ sub editArticle {
 		article		=> $article,
 		format_select	=> $format_select,
 	});
+
+	print getData('journalfoot');
 }
 
 sub _validFormkey {
@@ -832,7 +847,7 @@ sub _validFormkey {
 	}
 
 	if ($error) {
-		_printHead("mainhead") or return;
+		_printHead('mainhead') or return;
 		print $error;
 		return 0;
 	} else {
@@ -875,7 +890,7 @@ sub _printHead {
 		errorLog(sprintf("currentPageBusted: %s\n", Dumper([getCurrentForm(), \%ENV, $user])));
 	}
 
-	slashDisplay("journalhead", $data);
+	slashDisplay('journalhead', $data);
 }
 
 sub _checkTheme {

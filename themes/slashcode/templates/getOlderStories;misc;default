@@ -29,27 +29,39 @@ __template__
 [% this_today = '';
    c = 0;
    max_older_stories = gSkin.artcount_max / 2 || 15;
-   FOREACH story = stories;
+   %]
+<ul>
+	[%
+	FOREACH story = stories;
    	day = "$story.day_of_week $story.month $story.day";
 	IF this_today != day;
 		this_today = day; %]
-		<p><b><font size="4"><a href="[% gSkin.rootdir %]/index.pl?issue=[% story.issue | strip_paramattr %]">
+		[% IF story != stories.first %]
+			</ul>
+		</li>
+		[% END %]
+		<li>
+			<a href="[% gSkin.rootdir %]/index.pl?issue=[% story.issue | strip_paramattr %]">
 		[%- IF cur_time && story.secs && cur_time-story.secs < 7*86400
 		    # If the story is within the last week, show (and link) the day-of-week -%]
-			[% story.day_of_week %]</a></font> [% story.month %] [% story.day %]
+			[% story.day_of_week %]</a> [% story.month %] [% story.day %]
 		[%- ELSE
 		    # Otherwise, show the whole date, because just the day would confuse -%]
-			[% story.month %] [% story.day %]</a></font>
+			[% story.month %] [% story.day %]</a>
 		[%- END -%]
-		</b></p>
+		<ul>
 	[%- END %]
-	&middot;
-	<A HREF="[% story.link.0 | strip_urlattr %]"[% IF story.link.2 %] TITLE="[% story.link.2 | strip_attribute %]"[% END %]>[% story.link.1 %]</A>
-	([% story.commentcount %])<BR>
-	[% start = start + 1; c = c + 1; LAST IF c >= max_older_stories %]
+	<li>
+		<a href="[% story.link.0 | strip_urlattr %]"[% IF story.link.2 %] title="[% story.link.2 | strip_attribute %]"[% END %]>[% story.link.1 %]</a>
+		<em>([% story.commentcount %])</em>
+		[% start = start + 1; c = c + 1; LAST IF c >= max_older_stories %]
+	</li>
 [% END %]
-
-<p align="right">
+			</li>	
+		</ul>
+	</li>
+</ul>
+<p>
 
 [% # only do this if we want to have an "Older Articles" link
    # pointing back in time into search.pl
@@ -64,6 +76,7 @@ __template__
    # (why wouldn't we??) %]
 
 <br><b>[% PROCESS next_prev_issue older_stories = 1 %]</b>
+</p>
 
 __seclev__
 10000

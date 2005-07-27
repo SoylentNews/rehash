@@ -359,6 +359,41 @@ CREATE TABLE content_filters (
 ) TYPE=InnoDB;
 
 #
+# Table structure for table 'css_type'
+#
+DROP TABLE IF EXISTS css_type;
+CREATE TABLE css_type (
+	ctid TINYINT(3) UNSIGNED NOT NULL AUTO_INCREMENT,
+	name VARCHAR(32) NOT NULL DEFAULT '',
+	ordernum TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+	PRIMARY KEY  (ctid)
+) TYPE=InnoDB;
+
+#
+# Table structure for table 'css'
+#
+
+DROP TABLE IF EXISTS css;
+CREATE TABLE css (
+	csid int(11) NOT NULL AUTO_INCREMENT,
+	rel VARCHAR(32) DEFAULT 'stylesheet',
+	type VARCHAR(32) DEFAULT 'text/css',
+	media VARCHAR(32) DEFAULT 'screen, projection',
+	file VARCHAR(64),
+	title VARCHAR(32),
+	skid INT(11) DEFAULT '0',
+	page VARCHAR(32) DEFAULT '',
+	admin ENUM('no','yes') DEFAULT 'no',
+	theme VARCHAR(32) DEFAULT '',
+	ctid TINYINT(4) NOT NULL DEFAULT '0',
+	ordernum int(11) DEFAULT '0',
+	PRIMARY KEY  (csid),
+	KEY ctid (ctid),
+	KEY page_skid (page,skid),
+	KEY skid_page (skid,page)
+) TYPE=InnoDB;
+
+#
 # Table structure for table 'dateformats'
 #
 

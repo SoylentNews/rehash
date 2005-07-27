@@ -1,0 +1,83 @@
+body
+{
+	background: #fff;
+}
+
+/* Header */
+#slogan h2
+{
+	color: #000;
+}
+
+/* links */
+#links, #links div.block, #links div.content
+{
+	background: transparent;
+}
+
+#links div.title
+{
+	background: #000;
+}
+
+#links h4
+{
+	background: transparent;
+	color: #fff;
+}
+
+#links h4 a { color: #fff; }
+
+/* slashboxes */
+#slashboxes, #slashboxes div.block, #slashboxes h4, #slashboxes div.content
+{
+	background: transparent;
+}
+
+#slashboxes div.title
+{
+	background: #000;
+}
+
+#slashboxes h4 a { color: #fff; }
+
+/* General */
+.generaltitle, .article, .journalgeneric
+{
+	background: transparent;
+}
+
+.generaltitle div.title, .article div.title, .journalgeneric div.title
+{
+	background: transparent;
+	border-bottom: 1px solid #000;
+	height: 100%;
+}
+
+.generaltitle h3, .article h3, .journalgeneric h3
+{
+	background: transparent;
+	color: #000;
+}
+
+.generaltitle h3 a, .article h3 a, .generaltitle h3 a:visited, .article h3 a:visited, .journalgeneric h3 a, .journalgeneric h3 a:visited
+{
+        color: #600;
+}
+
+.generalbody, .article .details, .journalgeneric .details
+{
+        border: none;
+        background: transparent; 
+}
+
+.article div.body, .journalgeneric div.body
+{
+        border: 1px solid #fff;
+        background: transparent; 
+}
+
+div.storylinks, div.storylinks ul, div.storylinks div
+{
+        background: transparent; 
+}

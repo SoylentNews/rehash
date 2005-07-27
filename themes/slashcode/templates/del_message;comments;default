@@ -14,7 +14,7 @@ en_US
 __name__
 del_message
 __template__
-[% total_deleted %] comments deleted. Comment count set to [% comment_count %]<BR>
+[% total_deleted %] comments deleted. Comment count set to [% comment_count %]<br>
 
 __seclev__
 1000

@@ -13,14 +13,14 @@ journalsearch
 __template__
 [% FOREACH journal=results.records %]
 	<b><a href="[% gSkin.rootdir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]">[% journal.description %]</a></b><br>
-	<font size="-1">On [% Slash.timeCalc(journal.date) %]</font><br>
+	On [% Slash.timeCalc(journal.date) %]<br>
 	[% shorten( Slash.strip_notags(journal.article) ) %]<br>
-	<font size="-1">
+	
 	Author: <a href="[% gSkin.rootdir %]/~[% journal.nickname | fixparam %]/">[% journal.nickname | strip_literal %]</a>
 	[% IF journal.score %]<br>
 	Score: ([% journal.score %])
 	[% END %]
-	</font>
+	
 	<p>
 [% END %]
 [% PROCESS pagination %]

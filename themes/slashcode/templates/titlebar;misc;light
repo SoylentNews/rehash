@@ -14,8 +14,9 @@ en_US
 __name__
 titlebar
 __template__
-<H2>[% title %]</H2>
 [% future = 0 %]
+
+<h2>[% title %]</h2>
 
 __seclev__
 10000

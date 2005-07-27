@@ -28,9 +28,6 @@ __name__
 listComments
 __template__
 [% 
-light_text_color = "#AAAAAA";
-light_text_color2 = "#444444";
-light_bgcolor ="#EEEEEE";
 total_cols = 7;
 a_count=0; a_down=0; 
 unanimous=0; unresolved=0;
@@ -38,8 +35,9 @@ a_m2_down=0; a_m2_up=0; a_m2_count=0; a_m2_unfair_votes=0;
 moddable_items=0;
 prev_com = {};
 thread_toggle = 0;
-thread_col_1 = "DDDDDD";
-thread_col_2 = user.colors.bg_2;
+row_class_1 = "data_hl1";
+row_class_2 = "data_hl2";
+row_class_3 = "data_hl3";
 %]
 [% total_mods_shown=0; %]
 [% IF commentcount > 0 %]
@@ -61,14 +59,14 @@ thread_col_2 = user.colors.bg_2;
 			commenttitle = commenttitle _ " comments for last $comment_time days ";
 		END %]
 	[% IF commentstruct.size > 0 and admin_flag %]
-		<FORM METHOD="POST" ACTION="[% gSkin.rootdir %]/admin.pl">
-		<INPUT TYPE="hidden" NAME="op" VALUE="moderate_recent">
+		<form method="post" action="[% gSkin.rootdir %]/admin.pl">
+		<input type="hidden" name="op" value="moderate_recent">
 		[%	
 			returnto_base = PROCESS base_url;
 			returnto_tail = PROCESS state_url;
 			returnto = returnto_base _ returnto_url;
 		%]
-		<INPUT TYPE="hidden" name="returnto" value="[% returnto | strip_attribute %]">
+		<input type="hidden" name="returnto" value="[% returnto | strip_attribute %]">
 	[% END %]
 	[% IF title %]
 		[% show_m1s = form.show_m1s.defined ? form.show_m1s : user.mod_with_comm %]
@@ -77,23 +75,23 @@ thread_col_2 = user.colors.bg_2;
 		   	self_url = PROCESS base_url;
 		   	url_tail = PROCESS state_url override = { show_m1s => show_m1s_op};
 		   	self_url = self_url  _ url_tail;
-		   	extra = "<TD width=\"14\" bgcolor=\"" _ user.colors.bg_3 _ "\"><A HREF='" _ self_url _ "'><IMG SRC=\"" _  constants.imagedir _ (show_m1s ? "/contract.gif" : "/expand.gif") _ "\"  ALT=\"\" WIDTH=\"14\" HEIGHT=\"14\" BORDER=0></A></TD>";
+		   	extra = "<td width=\"14\" bgcolor=\"" _ user.colors.bg_3 _ "\"><a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (show_m1s ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\" border=0></a></td>";
 		   END;
 		%]
 		[% PROCESS titlebar width="100%" title = commenttitle td_extra = extra -%]
 		[% td_extra = "" %]
 	[% END %]
-	<TABLE width="100%" border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.colors.bg_2 %]">
-	<TR bgcolor="[% user.colors.bg_3 %]">
-		[% IF type=="netid"; total_cols = total_cols + 1; %]<TH align=left><FONT color="[% user.colors.fg_3 %]" size=-1>User</FONT></TH>[% END %]
-		<TH align=left><FONT color="[% user.colors.fg_3 %]" size=-1>Subject</Font>[% IF admin_flag %]<Font color="[% light_text_color %]" size=-1> / Moderator</FONT>[% END %]</TH>
-		<TH align=left><FONT color="[% user.colors.fg_3 %]" size=-1>Datestamp</FONT></TH>
-		<TH align=left>[% IF admin_flag and constants.show_mods_with_comments %]<Font color="[% light_text_color %]" size=-1>M2</FONT>[% END %]</TH>
-		<TH align=left><FONT color="[% user.colors.fg_3 %]" size=-1>Replies</FONT></TH>
-		<TH align=left>[% IF admin_flag %]<Font color="[% light_text_color %]" size=-1>CK</FONT>[% END %]</TH>
-		<TH align=left>[% IF admin_flag %]<FONT color="[% light_text_color %]" size=-1>IPID</FONT>[% END %]</TH>
-		<TH align=left><FONT color="[% user.colors.fg_3 %]" size=-1>Score</FONT></TH>
-	</TR>
+	<table width="100%" border="0" cellpadding="3" cellspacing="0" class="data">
+	<tr class="data_head">
+		[% IF type=="netid"; total_cols = total_cols + 1; %]<th>User</th>[% END %]
+		<th>Subject[% IF admin_flag %] / Moderator[% END %]</th>
+		<th>Datestamp</th>
+		<th>[% IF admin_flag and constants.show_mods_with_comments %]M2[% END %]</th>
+		<th>Replies</th>
+		<th>[% IF admin_flag %]CK[% END %]</th>
+		<th>[% IF admin_flag %]IPID[% END %]</th>
+		<th>Score</th>
+	</tr>
 	[% n = min_comment %]
 	[% prev_comm_sid = 0; total_replies=0; total_karma=0; total_score=0; shown_comments=0 %]
 	[% FOREACH comment = commentstruct;  
@@ -114,38 +112,38 @@ thread_col_2 = user.colors.bg_2;
 		%]
 		[% IF prev_comm_sid && prev_comm_sid != comment.sid; %][% PROCESS attached_to_row the_comment = prev_com colspan=total_cols %] [% thread_toggle=!thread_toggle; END %]
 		[%-
-		'<TR bgcolor="'; thread_toggle ? thread_col_1 : thread_col_2; '">';
+		'<tr class="'; thread_toggle ? row_class_1 : row_class_2; '">';
 		IF type == "netid";
-		'<TD valign="TOP"><NOBR>';
+		'<td valign="top"><nobr>';
 		%]
 		[%- PROCESS nick_and_uid nickname=comment.nickname uid=comment.uid -%]
 		[%-	
-		'</NOBR></TD>';
+		'</nobr></td>';
 		END;
 		IF admin_flag and comment.type!="archived";
 			moddable_items=moddable_items+1;
 		END;
-		'<TD VALIGN="TOP">';
-			IF min_comment > 0; '<B>'; n; '</B> '; END;
-			'<A HREF="';
+		'<td valign="top">';
+			IF min_comment > 0; '<b>'; n; '</b> '; END;
+			'<a href="';
 				gSkin.rootdir;
 				'/comments.pl?sid='; comment.sid;
 				'&amp;cid='; comment.cid;
 			'">';
 			comment.subj;
-			'</A>&nbsp;';
-		'</TD>';
-		'<TD VALIGN="TOP"><NOBR>&nbsp;'; IF comment.type == "archived"; "*"; END; Slash.timeCalc(comment.cdate); '</NOBR></TD>';
-		'<TD></TD>';
-		'<TD VALIGN="TOP" align="right"><NOBR>&nbsp;'; replies; '</NOBR></TD>';
-		'<TD align="right">'; IF admin_flag; comment.karma; END; '</TD>';
-		'<TD>'; 
+			'</a>&nbsp;';
+		'</td>';
+		'<td valign="top"><nobr>&nbsp;'; IF comment.type == "archived"; "*"; END; Slash.timeCalc(comment.cdate); '</nobr></td>';
+		'<td></td>';
+		'<td valign="top" align="right"><nobr>&nbsp;'; replies; '</nobr></td>';
+		'<td align="right">'; IF admin_flag; comment.karma; END; '</td>';
+		'<td>'; 
 			IF admin_flag; -%]
 			 	[%- PROCESS link_ipid ipid=comment.ipid ipid_vis=comment.ipid_vis -%]
 			[% END; 
-		'</TD>';
-		'<TD VALIGN="TOP"><NOBR>&nbsp;'; %][% PROCESS make_reason_mod_select text = score _ reasontext reasons = reasons comment=comment admin_flag=admin_flag %][% '</NOBR></TD>';
-		"</TR>\n";
+		'</td>';
+		'<td valign="top"><nobr>&nbsp;'; %][% PROCESS make_reason_mod_select text = score _ reasontext reasons = reasons comment=comment admin_flag=admin_flag %][% '</nobr></td>';
+		"</tr>\n";
 		%]
 		[% IF admin_flag and constants.show_mods_with_comments %]
 			[%- FOREACH m = cids_to_mods.${comment.cid}; total_mods_shown = total_mods_shown+1; %]
@@ -167,15 +165,15 @@ thread_col_2 = user.colors.bg_2;
 					END;
 				 END -%]
 				[% IF form.show_m1s.defined ? form.show_m1s : user.mod_with_comm %]
-				<tr bgcolor="[% light_bgcolor %]">
-				[% IF type=="netid" %]<TD></TD>[% END %]
-				<td align=right><font size=-1  color="[% light_text_color2 %]">[% PROCESS nick_and_uid nickname=m.nickname uid=m.uid %]</font></td>
-				<td><font size=-1 color="[% light_text_color2 %]">[% Slash.timeCalc(m.ts) %][% IF !m.active %]*[% END %]</font></td>
-				<td><font  color="[% light_text_color2 %]" size=-1>[% PROCESS make_m2_string moderation=m reasons=reasons%]</font></td>
+				<tr class="[% row_class_3 %]">
+				[% IF type=="netid" %]<td></td>[% END %]
+				<td align=right>[% PROCESS nick_and_uid nickname=m.nickname uid=m.uid %]</td>
+				<td>[% Slash.timeCalc(m.ts) %][% IF !m.active %]*[% END %]</td>
+				<td>[% PROCESS make_m2_string moderation=m reasons=reasons%]</td>
 				<td> </td>
 				<td> </td>
 				<td>[% PROCESS link_ipid ipid=m.ipid ipid_vis=Slash.vislenify(m.ipid) %]</td>
-				<td> <font size=-1 color="[% light_text_color2 %]">[% IF m.val > 0; "+"; END; m.val %], [% reasons.${m.reason}.name %] </font></td>
+				<td>[% IF m.val > 0; "+"; END; m.val %], [% reasons.${m.reason}.name %] </td>
 				
  </tr>
 				[% END %]
@@ -198,45 +196,45 @@ thread_col_2 = user.colors.bg_2;
 					[%
 
 					IF admin_flag and constants.show_mods_with_comments and total_mods_shown>0; %]
-						<TR><TD colspan="[% total_cols %]">[% PROCESS horiz_rule %]</TD></TR>
+						<tr class="[% row_class_1 %]><td colspan="[% total_cols %]">[% PROCESS horiz_rule %]</td></tr>
 						[%
-						'<TR bgcolor="' _ light_bgcolor _ '">';
+						'<tr class="' _ row_class_3 _ '">';
 						IF type=="netid"; 
-							"<TD></TD>"; 
+							"<td></td>"; 
 						END; 
-						'<td align=right><font  color="' _ light_text_color2 _ '" size=-1> Total Moderations: ' _ a_count _ '</font></td>';
-				 	  	'<td align=left><font  color="' _ light_text_color2 _ '" size=-1>';%][% unanimous %] Unanimous [% a_m2_up %] Fair [% a_m2_down %] Unfair [% unresolved %] Unresolved</font></td>
+						'<td align="right"> Total Moderations: ' _ a_count _ '</td>';
+				 	  	'<td align="left">';%][% unanimous %] Unanimous [% a_m2_up %] Fair [% a_m2_down %] Unfair [% unresolved %] Unresolved</td>
 						[%-
- 						'<td align=left colspan=3><font color="' _ light_text_color2 _ '" size=-1>' %][% a_m2_unfair_votes %] Unfair ([% Slash.getData('percentage', { sum=> a_m2_unfair_votes, count => a_m2_count}, "misc") %])</font></td> [%
+						'<td align="left" colspan="3">' %][% a_m2_unfair_votes %] Unfair ([% Slash.getData('percentage', { sum=> a_m2_unfair_votes, count => a_m2_count}, "misc") %])</td> [%
 						'<td></td>';
-				      		'<td align=left><font  color="' _ light_text_color2 _ '" size=-1>';%] [% Slash.getData('percentage',{ sum=>a_down, count => a_count},"misc") %] Downmods</a> </td>[%
+				      		'<td align="left">';%] [% Slash.getData('percentage',{ sum=>a_down, count => a_count},"misc") %] Downmods</a> </td>[%
 						'</tr>';
 					END;
 
-					"<TR><TD "; IF type=="netid"; 'COLSPAN="2"'; END; ">";
+					"<tr><td "; IF type=="netid"; 'colspan="2"'; END; ">";
 					IF commentcount > n && (user.seclev > constants.comments_more_seclev
 						|| (constants.comments_more_seclev == 2 && user.is_subscriber)); %]
-						 	<A HREF="[% PROCESS base_url %][% PROCESS state_url override = { min_comment => n } %]">[% commentcount - n %] More Comment[% IF (commentcount-n)>1 %]s[% END %]...</A>
+						 	<a href="[% PROCESS base_url %][% PROCESS state_url override = { min_comment => n } %]">[% commentcount - n %] More Comment[% IF (commentcount-n)>1 %]s[% END %]...</a>
 					[% END %]
-					</TD>
-<TD></TD><TD></TD>
-					<TD align="right">[% IF admin_flag %]<B>[% total_replies %]</B>[% END %]</TD>
-					<TD align="right">[% IF admin_flag %]<B>[% total_karma %]</B>[% END %]</TD>
-					<TD></TD>
-					<TD>[% IF admin_flag %]<B>[% avg_score %][% IF reason_most_hits>0 %], [% reason_most %][% END %]</B>
-						[% IF moddable_items %]<BR><INPUT TYPE="SUBMIT" VALUE="Moderate">[% END %]
-					[% END %]</TD>
-					</TR>
-					<TR><TD colspan="[% total_cols %]" align="center">
-						<font size=-1>Logged in users can choose whether or not they'd like comments shown grouped by discussion on their 
-						[% IF !user.is_anon %]<A HREF="[% gSkin.rootdir %]/users.pl?op=editcomm">[% END %]comment settings page[% IF !user.is_anon %]</A><BR>[% END %]
-						[% IF constants.subscribe and !user.is_subscriber %]<BR>Subscribers can view entire comment history for all users[% END %]					 
-						</font> 
-					</TD></TR>
+					</td>
+<td></td><td></td>
+					<td align="right">[% IF admin_flag %]<b>[% total_replies %]</b>[% END %]</td>
+					<td align="right">[% IF admin_flag %]<b>[% total_karma %]</b>[% END %]</td>
+					<td></td>
+					<td>[% IF admin_flag %]<b>[% avg_score %][% IF reason_most_hits>0 %], [% reason_most %][% END %]</b>
+						[% IF moddable_items %]<br><input type="submit" value="Moderate">[% END %]
+					[% END %]</td>
+					</tr>
+					<tr><td colspan="[% total_cols %]" align="center">
+						Logged in users can choose whether or not they'd like comments shown grouped by discussion on their 
+						[% IF !user.is_anon %]<a href="[% gSkin.rootdir %]/users.pl?op=editcomm">[% END %]comment settings page[% IF !user.is_anon %]</a><br>[% END %]
+						[% IF constants.subscribe and !user.is_subscriber %]<br>Subscribers can view entire comment history for all users[% END %]					 
+						 
+					</td></tr>
 		[% END %]				
-		</TABLE>
+		</table>
 		[%- IF commentstruct.size > 0 and admin_flag -%]
-			</FORM>
+			</form>
 		[%- END -%]
  [% END %]
 
@@ -250,24 +248,24 @@ thread_col_2 = user.colors.bg_2;
 		the_label = '';
 	END;
 	the_label = the_label _ the_comment.disc_title; %]
-	<TR bgcolor="[% thread_toggle ? thread_col_1 : thread_col_2; %]"><TD VALIGN="TOP" COLSPAN="[% colspan %]" align="right"><FONT SIZE="2">&nbsp;&nbsp;&nbsp;attached to <A HREF="[% the_comment.url | strip_urlattr %]">[% the_label %]</A></FONT></TD></TR>
+	<tr class="[% thread_toggle ? row_class_1 : row_class_2; %]"><td valign="top" colspan="[% colspan %]" align="right">&nbsp;&nbsp;&nbsp;attached to <a href="[% the_comment.url | strip_urlattr %]">[% the_label %]</a></td></tr>
 [% END %]
 
 [% BLOCK nick_and_uid;
 	nickname | strip_literal;
 	IF uid != constants.anonymous_coward_uid;
-		' (<A HREF="';
+		' (<a href="';
 		gSkin.rootdir;
 		'/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=';
 		uid;
 		'">';
 		uid;
-		'</A>)';
+		'</a>)';
 	END;
 END %]
 
 [% BLOCK link_ipid %]
-<A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</A>
+<a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</a>
 [% END %]
 
 [% BLOCK make_m2_string; 
@@ -276,7 +274,7 @@ END %]
 		m2unfair_str = "-";
 	ELSE;
 		IF moderation.m2status > 0; 
-			m2fair_str = "<B><I>" _ moderation.m2fair _ "</I></B>"; m2unfair_str = "<B><I>" _ moderation.m2unfair _ "</I></B>";
+			m2fair_str = "<b><i>" _ moderation.m2fair _ "</i></b>"; m2unfair_str = "<b><i>" _ moderation.m2unfair _ "</i></b>";
 	        ELSE;
 			m2fair_str = moderation.m2fair; m2unfair_str =  moderation.m2unfair;
         	END;

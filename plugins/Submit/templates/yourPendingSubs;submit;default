@@ -15,15 +15,14 @@ en_US
 __name__
 yourPendingSubs
 __template__
-[% USE Slash %]
 [% topics = Slash.db.getTopics(); # sigh %]
 [% skins = Slash.db.getSkins(); %]
 [% PROCESS titlebar title = "Your recent submissions" %]
 
-<P>Here are your recent submissions to [% constants.sitename %],
-and their status within the system:</P>
+<p>Here are your recent submissions to [% constants.sitename %],
+and their status within the system:</p>
 
-<UL>
+[% IF submissions.size > 0 %]<ul>[% END %]
 [% summary = { };  %]
 [% cur_time = Slash.db.getTime() %] 
 [% FOREACH submission = submissions %]
@@ -34,7 +33,7 @@ and their status within the system:</P>
 		del     = submission.del
 	%]
 
-	<LI>[% time %] [% subj %] ([% section %],[% topic %])
+	<li>[% time %] [% subj %] ([% section %],[% topic %])
 	[% story_viewable = submission.del == 2 and submission.sid and submission.story_time.lt(cur_time) and submission.displaystatus!=-1 %]
 	[% SWITCH submission.del;
 		CASE 0; 
@@ -46,18 +45,17 @@ and their status within the system:</P>
 	END %]
 	([% status %])
 	[% summary.$status = summary.$status.defined ? summary.$status + 1 : 1 %]
-	</LI>
+	</li>
 [% END %]
-</UL>
+[% IF submissions.size > 0 %]</ul>[% END %]
 
+[% IF summary.keys.size > 0 %]
 Summary:&nbsp; 
-<UL>
+<ul>
 [% FOREACH status = summary.keys %]
-	<LI>&nbsp; [% status %] ([% summary.$status %])</LI>
+	<li>&nbsp; [% status %] ([% summary.$status %])</li>
 [% END %]
-</UL>
-
-[% IF summary.keys > 0 %]
+</ul>
 <p>Note: grousing about rejected submissions is Offtopic and usually
 gets moderated that way.
 <a href="[% constants.real_rootdir %]/faq/editorial.shtml#ed200">It happens</a>,

@@ -49,12 +49,14 @@ use vars qw($VERSION @EXPORT);
 	matchingStrings
 	pollbooth
 	portalbox
+	portalsidebox
 	processSlashTags
 	selectMode
 	selectSection
 	selectSortcode
 	selectThreshold
 	selectTopic
+	sidebox
 	titlebar
 );
 
@@ -834,27 +836,23 @@ sub fancybox {
 	my($width, $title, $contents, $center, $return, $class, $id) = @_;
 	return unless $title && $contents;
 
-	my $tmpwidth = $width;
-	# allow width in percent or raw pixels
-	my $pct = 1 if $tmpwidth =~ s/%$//;
-	# used in some blocks
-	my $mainwidth = $tmpwidth-4;
-	my $insidewidth = $mainwidth-8;
-	if ($pct) {
-		for ($mainwidth, $insidewidth) {
-			$_ .= '%';
-		}
-	}
-
 	slashDisplay('fancybox', {
 		width		=> $width,
 		contents	=> $contents,
 		title		=> $title,
 		center		=> $center,
-		mainwidth	=> $mainwidth,
-		insidewidth	=> $insidewidth,
 		class           => $class,
 		id              => $id,
+	}, $return);
+}
+
+sub sidebox {
+	my ($title, $contents, $name, $return) = @_;
+	return unless $title && $contents;
+	slashDisplay('sidebox', {
+		contents	=> $contents,
+		title		=> $title,
+		name            => $name,
 	}, $return);
 }
 
@@ -935,6 +933,32 @@ sub portalbox {
 	}
 
 	fancybox($width, $title, $contents, 0, 1, $class, $id);
+}
+
+sub portalsidebox {
+	my($title, $contents, $bid, $url, $getblocks, $name) = @_;
+	return unless $title && $contents;
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	$getblocks ||= 'index';
+
+	$title = slashDisplay('portalboxtitle', {
+		title	=> $title,
+		url	=> $url,
+	}, { Return => 1, Nocomm => 1 });
+
+	if (
+		   ($user->{slashboxes} && $getblocks == $constants->{mainpage_skid})
+		|| ($user->{slashboxes} && $constants->{slashbox_sections})
+	) {
+		$title = slashDisplay('portalmap', {
+			title	=> $title,
+			bid	=> $bid,
+		}, { Return => 1, Nocomm => 1 });
+	}
+	$name ||= $bid;
+
+	sidebox($title, $contents, $name, 1);
 }
 
 #========================================================================

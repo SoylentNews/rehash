@@ -11,84 +11,90 @@ en_US
 __name__
 confirm
 __template__
-[% USE Slash %]
-<FORM ACTION="[% gSkin.rootdir %]/zoo.pl" METHOD="POST">
-<P>
+<form action="[% gSkin.rootdir %]/zoo.pl" method="POST">
 [% IF over_socialized %]
-	You have over [% IF user.is_subscriber && constants.people_max_subscriber %] [% constants.people_max_subscriber %] [% ELSE %] [% constants.people_max %] [% END %] friends and foes at the moment. This puts you over our limit of[% IF constants.subscriber && constants.people_max_subscriber %] [% constants.people_max_subscriber %] [% ELSE %] [% constants.people_max %] [% END %] relationships that we allow. At this point you may only remove relationships with users. <br>
+<p>	You have over [% IF user.is_subscriber && constants.people_max_subscriber %] [% constants.people_max_subscriber %] [% ELSE %] [% constants.people_max %] [% END %] friends and foes at the moment. This puts you over our limit of[% IF constants.subscriber && constants.people_max_subscriber %] [% constants.people_max_subscriber %] [% ELSE %] [% constants.people_max %] [% END %] relationships that we allow. At this point you may only remove relationships with users. <br>
 	[% IF constants.subscriber && constants.people_max_subscriber && !user.is_subscriber %]
-		If you would like to up your limit to [% constants.people_max_subscriber %] you might want to consider <A HREF="[% gSkin.rootdir %]/subscribe.pl">subscribing</A>. 
+		If you would like to up your limit to [% constants.people_max_subscriber %] you might want to consider <a href="[% gSkin.rootdir %]/subscribe.pl">subscribing</a>. 
 	[% END %]
-	<TABLE>
-		<TR>
-			<TD>
-				So do you want to remove your relationship with <B><A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A></B>? 
-			</TD>
-			<TD>
-				<INPUT TYPE="RADIO" NAME="type" VALUE="neutral"[% IF type == 'neutral'; constants.markup_checked_attribute; END %]> 
-			</TD>
-			<TD>
-				&nbsp;&nbsp;<INPUT TYPE="submit" VALUE="Yup, I'm positive"></P>
-			</TD>
-		</TR>
-	</TABLE>
+</p>
+	<table>
+		<tr>
+			<td>
+				So do you want to remove your relationship with <b><a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</a></b>? 
+			</td>
+			<td>
+				<input type="radio" name="type" value="neutral"[% IF type == 'neutral'; constants.markup_checked_attribute; END %]> 
+			</td>
+			<td>
+				&nbsp;&nbsp;<input type="submit" value="Yup, I'm positive">
+			</td>
+		</tr>
+	</table>
 [% ELSE %]
-	<TABLE>
-		<TR>
-			<TD>
+	<table>
+		<tr>
+			<td>
 			Change this?
-			</TD>
-			<TD>
-				[% UNLESS over_socialized %] <INPUT TYPE="RADIO" NAME="type" VALUE="friend"[% IF type == 'friend'; constants.markup_checked_attribute; END %]> <IMG BORDER=0 SRC="[% constants.imagedir %]/friend.gif" ALT="Friend">&nbsp;Friend<br>[% END %]
-				<INPUT TYPE="RADIO" NAME="type" VALUE="neutral"[% IF type == 'neutral'; constants.markup_checked_attribute; END %]> <IMG BORDER=0 SRC="[% constants.imagedir %]/neutral.gif" ALT="Neutral">&nbsp;Neutral<br>
-				[% UNLESS over_socialized %] <INPUT TYPE="RADIO" NAME="type" VALUE="foe"[% IF type == 'foe'; constants.markup_checked_attribute; END %]> <IMG BORDER=0 SRC="[% constants.imagedir %]/foe.gif" ALT="Foe">&nbsp;Foe <br> [% END %]
-			</TD>
-			<TD>
-				&nbsp;&nbsp;<INPUT TYPE="submit" VALUE="Yup, I'm positive"></P>
-			</TD>
-		</TR>
-	</TABLE>
+			</td>
+			<td>
+				[% UNLESS over_socialized %] <input type="radio" name="type" value="friend"[% IF type == 'friend'; constants.markup_checked_attribute; END %]> <img src="[% constants.imagedir %]/friend.gif" alt="Friend">&nbsp;Friend<br>[% END %]
+				<input type="radio" name="type" value="neutral"[% IF type == 'neutral'; constants.markup_checked_attribute; END %]> <img src="[% constants.imagedir %]/neutral.gif" alt="Neutral">&nbsp;Neutral<br>
+				[% UNLESS over_socialized %] <input type="radio" name="type" value="foe"[% IF type == 'foe'; constants.markup_checked_attribute; END %]> <img src="[% constants.imagedir %]/foe.gif" alt="Foe">&nbsp;Foe <br> [% END %]
+			</td>
+			<td>
+				&nbsp;&nbsp;<input type="submit" value="Yup, I'm positive">
+			</td>
+		</tr>
+	</table>
 [% END %]
-<P>
-<B>Important Stuff:</B>
-<LI> Your relationships are public information, and visible to other [% constants.sitename %] readers.
-<LI> Updates to friends and foes are cached and may take a few minutes to take effect.
-<LI> Curious <A HREF="[% gSkin.rootdir %]/faq/com-mod.shtml#cm2200">what these icons mean</A>
-or <A HREF="[% gSkin.rootdir %]/faq/com-mod.shtml#cm2200">where you change their values?</A>
-<P>
-<FONT COLOR="[% user.colors.bg_3 %]" size="+1"><B>Your Friends who ...</B></FONT><br>
-<TABLE WIDTH="100%">
-	<TR>
-		<TD>
-			<P><FONT COLOR="[% user.colors.bg_3 %]"><B>Consider <A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> a Friend</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/fof.gif" ALT="Friends of Friends">  
-			&nbsp;<A HREF="[% gSkin.rootdir %]/my/comments">[% IF user.people_bonus_fof %]([% user.people_bonus_fof %])[% ELSE %](+0)[% END %]</A>
-		</TD>
-		<TD>
-			<P><FONT COLOR="[% user.colors.bg_3 %]"><B>Consider <A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> a Foe</B></FONT> <IMG BORDER=0 SRC="[% constants.imagedir %]/eof.gif" ALT="Foes of Friends"> 
-			&nbsp;<A HREF="[% gSkin.rootdir %]/my/comments">[% IF user.people_bonus_eof %]([% user.people_bonus_eof %])[% ELSE %](+0)[% END %]</A>
-		</TD>
-	</TR>
-	<TR>
-		<TD VALIGN="top">
+
+<p><b>Important Stuff:</b></p>
+
+<ul>
+<li> Your relationships are public information, and visible to other [% constants.sitename %] readers.</li>
+<li> Updates to friends and foes are cached and may take a few minutes to take effect.</li>
+<li> Curious <a href="[% gSkin.rootdir %]/faq/com-mod.shtml#cm2200">what these icons mean</a>
+or <a href="[% gSkin.rootdir %]/faq/com-mod.shtml#cm2200">where you change their values?</a></li>
+</ul>
+
+<p><b>Your Friends who ...</b></p>
+
+<table width="100%">
+	<tr>
+		<td>
+			<b>Consider <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</a> a Friend</b> <img src="[% constants.imagedir %]/fof.gif" alt="Friends of Friends">  
+			&nbsp;<a href="[% gSkin.rootdir %]/my/comments">[% IF user.people_bonus_fof %]([% user.people_bonus_fof %])[% ELSE %](+0)[% END %]</a>
+		</td>
+		<td>
+			<b>Consider <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</a> a Foe</b> <img src="[% constants.imagedir %]/eof.gif" alt="Foes of Friends"> 
+			&nbsp;<a href="[% gSkin.rootdir %]/my/comments">[% IF user.people_bonus_eof %]([% user.people_bonus_eof %])[% ELSE %](+0)[% END %]</a>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">
 		[% FOREACH geek = mutual.${Slash.FOF} %]
-			<A HREF="[% gSkin.rootdir %]/~[% uids_2_nicknames.$geek.nickname | fixparam %]/">[% uids_2_nicknames.$geek.nickname  | strip_literal %]</A>([% geek %]) [% PROCESS zoo_icons person=geek implied=Slash.FOF %]<BR>
+			<a href="[% gSkin.rootdir %]/~[% uids_2_nicknames.$geek.nickname | fixparam %]/">[% uids_2_nicknames.$geek.nickname  | strip_literal %]</a>([% geek %]) [% PROCESS zoo_icons person=geek implied=Slash.FOF %]<br>
 		[% END %]
 		&nbsp;
-		</TD>
-		<TD VALIGN="top">
+		</td>
+		<td valign="top">
 		[% FOREACH geek = mutual.${Slash.EOF} %]
-			<A HREF="[% gSkin.rootdir %]/~[% uids_2_nicknames.$geek.nickname | fixparam %]/">[% uids_2_nicknames.$geek.nickname  | strip_literal %]</A>([% geek %]) [% PROCESS zoo_icons person=geek implied=Slash.EOF %]<BR>
+			<a href="[% gSkin.rootdir %]/~[% uids_2_nicknames.$geek.nickname | fixparam %]/">[% uids_2_nicknames.$geek.nickname  | strip_literal %]</a>([% geek %]) [% PROCESS zoo_icons person=geek implied=Slash.EOF %]<br>
 		[% END %]
 		&nbsp;
-		</TD>
-	</TR>
-</TABLE>
+		</td>
+	</tr>
+</table>
 
 
-<INPUT TYPE="hidden" NAME="formkey" VALUE="[% form.formkey %]">
-<INPUT TYPE="hidden" NAME="op" VALUE="action">
-<INPUT TYPE="hidden" NAME="uid" VALUE="[% uid %]">
-</FORM>
+<div>
+<input type="hidden" name="formkey" value="[% form.formkey %]">
+<input type="hidden" name="op" value="action">
+<input type="hidden" name="uid" value="[% uid %]">
+</div>
+
+</form>
 
 __seclev__
 500

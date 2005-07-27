@@ -15,10 +15,10 @@ __template__
 [% SWITCH value %]
 
 [% CASE 'adminLogin-title' %]
-back<I>Slash</I> Log In
+back<i>Slash</i> Log In
 
 [% CASE 'adminLogout-title' %]
-back<I>Slash</I> Buh Bye
+back<i>Slash</i> Buh Bye
 
 [% CASE 'listFilters-title' %]
 List of comment filters
@@ -48,7 +48,7 @@ New filter# [% filter_id %].
 Filter# [% form.filter_id %] saved.
 
 [% CASE 'updateFilter-deleted-title' %]
-<B>Deleted filter# [% form.filter_id %]!</B>
+<b>Deleted filter# [% form.filter_id %]!</b>
 
 [% CASE 'updateStory-title' %]
 Article [% form.sid %] Saved
@@ -85,7 +85,7 @@ New filter# [% filter_id %] .
 Filter# [% form.filter_id %] saved.
 
 [% CASE 'updateFilter-delete-title' %]
-<B>Deleted filter# [% form.filter_id %]!</B>
+<b>Deleted filter# [% form.filter_id %]!</b>
 
 [% CASE 'templateEdit-title' %]
 Site Template Editor

@@ -21,27 +21,43 @@ en_US
 __name__
 editHome
 __template__
+[% orig_title = title %]
+<div id="slashboxes">
+[% PROCESS userboxes %]
+</div>
+[% title = orig_title %]
+<div id="users-blocks">
 [% PROCESS prefs_titlebar tab_selected='home' %]
-
+<div class="generalbody">
 [% note %]
 
 [% admin_block %]
 
-<FORM ACTION="[% env.script_name %]" METHOD="POST">
-
+<form action="[% env.script_name %]" method="post">
+<fieldset>
+<legend>Homepage settings</legend>
 [% PROCESS formkey_tag %]
 
-<INPUT TYPE="HIDDEN" NAME="formname" VALUE="edithome">
-<INPUT TYPE="HIDDEN" NAME="op" VALUE="savehome">
-<INPUT TYPE="HIDDEN" NAME="uid" VALUE="[% user_edit.uid %]">
+<input type="hidden" name="formname" value="edithome">
+<input type="hidden" name="op" value="savehome">
+<input type="hidden" name="uid" value="[% user_edit.uid %]">
 
-<TABLE ALIGN="CENTER" WIDTH="100%" BGCOLOR="[% user.colors.bg_5 %]">
-	<TR>
-		<TD>
-		<B>Date/Time Format</B>
+		<label>
+			Current Date/Time
+		</label>
+		<div class="note">
+			Using saved preferences
+		</div>
+		[% Slash.timeCalc() %]
+
+		<label>
+			Date/Time Format
+		</label>
 		[% tzformat_select %]
 
-		<BR><B>Time Zone / Daylight Savings Time</B>
+		<label>
+			Time Zone / Daylight Savings Time
+		</label>
 		[%
 		USE this_format = format('%+0.4d %s');
 		this_tzdescs = Slash.db.getDescriptions('tzdescription');
@@ -65,32 +81,46 @@ __template__
 		}, user_edit.dst, 1);
 		%]
 
-		<P><INPUT TYPE="CHECKBOX" NAME="light"[% l_check %]>
-		<B>Light</B> (reduce the complexity of [% constants.sitename %]'s HTML for
-		AvantGo, Lynx, or slow connections)
 
-		<P><INPUT TYPE="CHECKBOX" NAME="noicons"[% i_check %]>
-		<B>No Icons</B> (disable topic icon images on stories)
+<!-- Possible removal due to CSS styling availabilty --> 
+		<label>
+			<input type="checkbox" name="light"[% l_check %]> Light
+		</label>
+		<div class="note">
+			Reduce the complexity of [% constants.sitename %]'s HTML for AvantGo, Lynx, or slow connections
+		</div>
 
-		<P><B>Maximum Stories</B> The default is 30.  The main
-		column displays 1/3rd of these at minimum, and all of
-		today's stories at maximum.<BR>
-		<INPUT TYPE="TEXT" NAME="maxstories" SIZE="3" VALUE="[% user_edit.maxstories %]">
+		<label>
+			<input type="checkbox" name="noicons"[% i_check %]> No Icons
+		</label> 
+		<div class="notes">
+			Disable topic icon images on stories.
+		</div>
+
+		<label>
+			Maximum Stories <input type="text" name="maxstories" size="3" value="[% user_edit.maxstories %]">
+		</label>
+		<div class="notes">
+			The default is 30.  The main column displays 1/3rd of these at minimum, and all of today's stories at maximum.
+		</div>
 
 		[%# We're not using the moderation FAQ for now.      %]
 		[%# It will return...when we rewrite it. - Cliff     %]
-		<P><INPUT TYPE="CHECKBOX" NAME="willing"[% w_check %]>
-        	<B>Willing to Moderate</B> By default all users are willing to
-		Moderate. Uncheck this if you aren't interested.
-
+		<label>
+			<input type="checkbox" name="willing"[% w_check %]> Willing to Moderate 
+		</label>
+		<div class="notes">
+			By default all users are willing to Moderate. Uncheck this if you aren't interested.
+		</div>
 		[% tilde_ed %]
 
-		<INPUT TYPE="SUBMIT" VALUE="Save"> <INPUT TYPE="SUBMIT" NAME="restore_defaults" VALUE="Restore Defaults"> <INPUT TYPE="SUBMIT" NAME="restore_slashbox_defaults" VALUE="Restore Default Slashboxes">
-		</TD>
-	</TR>
-</TABLE>
-
-</FORM>
+		<input type="submit" value="Save" class="button">
+		<input type="submit" name="restore_defaults" value="Restore Defaults" class="button">
+		<input type="submit" name="restore_slashbox_defaults" value="Restore Default Slashboxes" class="button">
+</fieldset>
+</form>
+</div>
+</div>
 __seclev__
 500
 __version__

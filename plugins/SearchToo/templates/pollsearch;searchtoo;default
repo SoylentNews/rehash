@@ -15,13 +15,13 @@ __template__
 	[% skin = Slash.db.getSkin(poll.skin) %]
 	[% link = skin.url ? skin.url : gSkin.rootdir %]
 	<b><a href="[% link %]/pollBooth.pl?qid=[% poll.qid %]">[% poll.question %]</a></b><br>
-	<font size="-1">
+	
 	On [% Slash.timeCalc(poll.date) %]<br>
 	Voters: [% poll.voters %]<br>
 	[% IF poll.score %]
 			Score: [% poll.score %]
 	[% END %]
-	</font>
+	
 	<p>
 [% END %]
 [% PROCESS pagination %]

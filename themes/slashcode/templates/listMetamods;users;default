@@ -12,8 +12,6 @@ __template__
 
 [% IF metamods.size > 0 %]
 	[%
-		bg_col_1 = "DDDDDD";
-		bg_col_2 = user.colors.bg_2;
 		bg_toggle = 0;
 		total_m2s = 0;
 		done_m2s = 0;
@@ -24,27 +22,25 @@ __template__
 		
 	%]
 
-	<table border="0" align="center" width="100%" cellspacing="0" cellpadding="0">
 	[% IF title %]
 		[% m2_listing_op = m2_listing ? 0 : 1;
 		   self_url = PROCESS base_url_m2 value=the_user.uid;
 		   url_tail = PROCESS state_url_m2 override = { m2_listing => m2_listing_op };
 		   self_url = self_url  _ url_tail;
-		   extra = "<td width=\"14\" bgcolor=\"" _ user.colors.bg_3 _ "\"><a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (m2_listing ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\" bordeR=0></a></td>";
+		   extra = "<td width=\"14\" bgcolor=\"" _ user.colors.bg_3 _ "\"><a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (m2_listing ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\" border=0></a></td>";
 		%]
-		<tr><td align="center">[% PROCESS titlebar width="100%" title=title td_extra = extra %]</td></tr>
+		[% PROCESS titlebar width="100%" title=title td_extra = extra %]
 	[% END %]
-	<tr><td align="center">
 	<table cellspacing="0" cellpadding="2" width="100%">
-	<tr bgcolor="[% user.colors.bg_3 %]">
-		<th align="left"><font size="-1" color="[% user.colors.fg_3 %]">Date</font></th>
-		<th align="left"><font size="-1" color="[% user.colors.fg_3 %]">Comment</font></th>
-		<th align="left"><font size="-1" color="[% user.colors.fg_3 %]">Mod</font></th>
-		<th align="left"><font size="-1" color="[% user.colors.fg_3 %]">Vote</font></th>
-		<th align="left"><font size="-1" color="[% user.colors.fg_3 %]">M2</font></th>
-		<th align="center"><font size="-1" color="[% user.colors.fg_3 %]">Unan</font></th>
-		<th align="center"><font size="-1" color="[% user.colors.fg_3 %]">Off</font></th>
-		<th align="center"><font size="-1" color="[% user.colors.fg_3 %]">LD</font></th>
+	<tr class="data_head">
+		<th>Date</th>
+		<th>Comment</th>
+		<th>Mod</th>
+		<th>Vote</th>
+		<th>M2</th>
+		<th align="center">Unan</th>
+		<th align="center">Off</th>
+		<th align="center">LD</th>
 	</tr>
 	[% FOREACH m2 = metamods %]
 	[%
@@ -80,9 +76,9 @@ __template__
 		END;
 	%]
 	[% IF m2_listing %]
-	<TR BGCOLOR="[% bg_toggle ? bg_col_1 : bg_col_2 %]">
+	<tr bgcolor="[% bg_toggle ? "data_hl1" : "data_hl2" %]">
 		[% bg_toggle = !bg_toggle %]
-		<td><font size="-1">[% Slash.timeCalc(m2.ts) %]</font></td>
+		<td>[% Slash.timeCalc(m2.ts) %]</td>
 		<td><a href="[% gSkin.rootdir %]/comments.pl?sid=[% m2.sid %]&amp;cid=[% m2.cid %]">[% m2.subject %]</a></td>
 		<td>[% IF m2.modval > 0 %]+[% ELSIF m2.modval < 0 %]-[% END %][% m2.modval %] [% reasons.${m2.reason}.name %]</td>
 		<td>[% IF m2.val>0 %]Fair[% ELSE %]Unfair[% END %]</td>
@@ -105,29 +101,28 @@ __template__
 	[% END %]
 	[% END %]
 	[% IF m2_listing %]
-	<tr bgcolor="[% user.colors.bg_2 %]"><TD COLSPAN="8">[% PROCESS horiz_rule %]</td></tr>
+	<tr class="data_hl2"><td colspan="8">[% PROCESS horiz_rule %]</td></tr>
 	[% END %]
-	<tr bgcolor="[% user.colors.bg_2 %]"><td colspan="2"><font size="-1" ><B>Total: [% total_m2s %] Complete: [% done_m2s %] ([% Slash.getData('percentage', { sum=> done_m2s, count => total_m2s}, 'misc') %])</b></font></td>
-	<td colspan="3"><font size="-1"><b>
+	<tr class="data_hl2"><td colspan="2"><b>Total: [% total_m2s %] Complete: [% done_m2s %] ([% Slash.getData('percentage', { sum=> done_m2s, count => total_m2s}, 'misc') %])</b></td>
+	<td colspan="3"><b>
 		Unfair Votes: [% unfair_m2s %]
 		([% Slash.getData('percentage', { sum => unfair_m2s, count => total_m2s}, 'misc') %]) 
-	</b></font></td>
-	<td align="center"><font size="-1"><b>
+	</b></td>
+	<td align="center"><b>
 		[% unanimous_m2s %]<br>
 		([% Slash.getData('percentage', { sum => unanimous_m2s, count => done_m2s}, 'misc') %]) 
-	</b></font></td>
-	<td align="center"><font size="-1"><b>
+	</b></td>
+	<td align="center"><b>
 		[% offside_m2s %]<br>
 		([% Slash.getData('percentage', { sum => offside_m2s, count => done_m2s}, 'misc') %]) 
-	</b></font></td>
-	<td align="center"><font size="-1"><b>
+	</b></td>
+	<td align="center"><b>
 		[% lone_dissent_m2s %]<br>
 		([% Slash.getData('percentage', { sum => lone_dissent_m2s, count => done_m2s}, 'misc') %]) 
-	</b></font></td>
+	</b></td>
 
 	</tr>
 	</table>
-	</td></tr></table>
 		
 [% END %]
 

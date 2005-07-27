@@ -19,7 +19,7 @@ __template__
 WHILE user.state.mt.curcol < user.state.mt.cols.max;
 	nextcurcol = user.state.mt.curcol + 1;
 	IF user.state.mt.cols.$nextcurcol < user.state.mt.currow;
-		PROCESS maintable_td; "&nbsp;</TD>";
+		PROCESS maintable_td; "&nbsp;</td>";
 	ELSE;
 		user.state.mt.curcol = nextcurcol;
 	END;
@@ -27,7 +27,7 @@ END;
 user.state.mt.curcol = 0;
 %]
 
-</TR>
+</tr>
 
 __seclev__
 10000

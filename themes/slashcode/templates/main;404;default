@@ -16,29 +16,33 @@ en_US
 __name__
 main
 __template__
-<H1>404 File Not Found</H1>
+<div id="wide">
+[% PROCESS titlebar title="404 File Not Found" %]
+<div class="generalbody">
 The requested URL ([% origin %]) was not found.<p>
 [% IF message %]
-	<P>[% message %], so you probably want to be here: <A HREF="[% url %]">[% url %]</A>
+	<p>[% message %], so you probably want to be here: <a href="[% url %]">[% url %]</a>
 [% ELSE %]
 [% SWITCH error %]
 	[% CASE 1 %]
-		<P>Someone <I>probably</I> just forgot the "http://" part of the URL, and you might really want to be here: <A HREF="[% url %]">[% url %]</A>.
+		<p>Someone <i>probably</i> just forgot the "http://" part of the URL, and you might really want to be here: <a href="[% url %]">[% url %]</a>.
 	[% CASE 2 %]
-		<P>Someone <I>probably</I> just forgot the "ftp://" part of the URL, and you might really want to be here: <A HREF="[% url %]">[% url %]</A>.
+		<p>Someone <i>probably</i> just forgot the "ftp://" part of the URL, and you might really want to be here: <a href="[% url %]">[% url %]</a>.
 	[% CASE 3 %]
-		<P>Someone <I>probably</I> just forgot the "mailto:" part of the URL, and you might really want to be here: <A HREF="[% url %]">[% url %]</A>.
+		<p>Someone <i>probably</i> just forgot the "mailto:" part of the URL, and you might really want to be here: <a href="[% url %]">[% url %]</a>.
 	[% CASE 6 %]
-		<P>All of the older articles have been moved to /articles/older, so you probably want to be here: <A HREF="[% url %]">[% url %]</A>.
+		<p>All of the older articles have been moved to /articles/older, so you probably want to be here: <a href="[% url %]">[% url %]</a>.
 	[% CASE 7 %]
-		<P>All of the older features have been moved to /features/older, so you probably want to be here: <A HREF="[% url %]">[% url %]</A>.
+		<p>All of the older features have been moved to /features/older, so you probably want to be here: <a href="[% url %]">[% url %]</a>.
 	[% CASE 8 %]
-		<P>All of the older book reviews have been moved to /books/older, so you probably want to be here: <A HREF="[% url %]">[% url %]</A>.
+		<p>All of the older book reviews have been moved to /books/older, so you probably want to be here: <a href="[% url %]">[% url %]</a>.
 	[% CASE 9 %]
-		<P>All of the older Ask [% constants.sitename %] articles have been moved to /ask[% constants.sitename.lc %]/older, so you probably want to be here: <A HREF="[% url %]">[% url %]</A>.
+		<p>All of the older Ask [% constants.sitename %] articles have been moved to /ask[% constants.sitename.lc %]/older, so you probably want to be here: <a href="[% url %]">[% url %]</a>.
 [% END %]
 [% END %]
-<P>If you feel like it, mail the url, and where ya came from to <A HREF="mailto:[% constants.adminmail | strip_attribute %]">[% constants.adminmail %].</A>
+<p>If you feel like it, mail the url, and where ya came from to <a href="mailto:[% constants.adminmail | strip_attribute %]">[% constants.adminmail %].</a>
+</div>
+</div>
 __seclev__
 10000
 __version__

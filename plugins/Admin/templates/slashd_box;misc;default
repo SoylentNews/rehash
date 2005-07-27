@@ -16,23 +16,36 @@ en_US
 __name__
 slashd_box
 __template__
-[% USE Slash %]
+<ul id="slashd">
 	[% FOREACH task = tasks_next %]
-		[% task.task %] [% task.next_begin_hhmm %]<BR>
+		<li>
+			[% task.task %] <em>[% task.next_begin_hhmm %]</em>
+		</li>
 	[% END %]
 [% IF tasks_inprogress.size > 0 %]
 	[% FOREACH task = tasks_inprogress %]
-		<B>[% task.task %]</B> <i>in progress</i><BR>
+		<li class="highlight">
+			[% task.task %] <em>in progress</em>
+		</li>
 	[% END %]
 [% ELSE %]
-	<b>no tasks in progress</b><BR>
+	<li>
+		no tasks in progress
+	</li>
 [% END %]
 	[% FOREACH task = tasks_last %]
-		[% task.task %] [% task.last_completed_hhmm %]<BR>
+		<li>
+			[% task.task %] <em>[% task.last_completed_hhmm %]</em>
 		[% IF task.summary_trunc %]
-			&nbsp;&nbsp;&nbsp;[% task.summary_trunc %]<BR>
+			<ul>
+				<li>
+					[% task.summary_trunc %]
+				</li>
+			</ul>
 		[% END %]
+		</li>
 	[% END %]
+</ul>
 __seclev__
 10000
 __version__

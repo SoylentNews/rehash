@@ -14,7 +14,7 @@ formkey_tag
 __template__
 
 [% IF form.formkey %]
-<INPUT TYPE="HIDDEN" NAME="formkey" VALUE="[% form.formkey %]">
+<input type="hidden" name="formkey" value="[% form.formkey %]">
 [% END %]
 
 __seclev__

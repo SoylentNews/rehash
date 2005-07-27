@@ -20,19 +20,19 @@ __template__
 
 # ALREADY MODERATED.
 CASE "already moderated" %]
-<LI>[% subject %]([% sid %]-[% cid %], <B>Already moderated</B>)</LI>
+<li>[% subject %]([% sid %]-[% cid %], <b>Already moderated</b>)</li>
 [%
 
 # SCORE LIMIT.
 CASE "score limit" %]
-<LI>[% subject %] ([% sid %]-[% cid %], <B>Comment already at limit</B>)</LI>
+<li>[% subject %] ([% sid %]-[% cid %], <b>Comment already at limit</b>)</li>
 [%
 
 # (COMMENT SUCCESSFULLY) MODERATED.
 CASE "moderated" %]
-<LI>[% val %] ([% reasons.$reason.name %]) [% subject %] ([% sid %]-[% cid %],
-<B>[% points %]</B> point[% points == 1 ? '' : 's' %] left)
-</LI>
+<li>[% val %] ([% reasons.$reason.name %]) [% subject %] ([% sid %]-[% cid %],
+<b>[% points %]</b> point[% points == 1 ? '' : 's' %] left)
+</li>
 [% END %]
 __seclev__
 1000

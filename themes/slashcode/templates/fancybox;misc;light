@@ -11,7 +11,7 @@ en_US
 __name__
 fancybox
 __template__
-<H3>[% title %]</H3><P>[% contents %]</P>
+<h3>[% title %]</h3><p>[% contents %]</p>
 __seclev__
 10000
 __version__

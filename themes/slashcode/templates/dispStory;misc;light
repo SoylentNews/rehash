@@ -15,54 +15,54 @@ __template__
 [% IF magic;
 	thisskin = Slash.db.getSkin(story.primaryskid);
 	IF thisskin.rootdir;
-		title = "<A HREF=\"$thisskin.rootdir/\">";
+		title = "<a href=\"$thisskin.rootdir/\">";
 	ELSE;
 		IF user.is_anon;
-			title = "<A HREF=\"$gSkin.rootdir/$thisskin.name/\">";
+			title = "<a href=\"$gSkin.rootdir/$thisskin.name/\">";
 		ELSE;
-			title = "<A HREF=\"$gSkin.rootdir/index.pl?section=$story.primaryskid\">";
+			title = "<a href=\"$gSkin.rootdir/index.pl?section=$story.primaryskid\">";
 		END;
 	END;
-	title = "$title$thisskin.title</A>: $story.title";
+	title = "$title$thisskin.title</a>: $story.title";
 ELSE;
 	title = story.title;
 END %]
 
 [% PROCESS titlebar future=story.is_future %]
 
-<A HREF="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">[% topic.textname %]</A> | 
-<B>Posted by [% author.nickname | strip_literal %] [% story.atstorytime %]</B><BR>
+<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">[% topic.textname %]</a> | 
+<b>Posted by [% author.nickname | strip_literal %] [% story.atstorytime %]</b><br>
 
 [% IF constants.use_dept && story.dept %]
-<FONT SIZE="2"><B>from the [% story.dept %] dept.</B></FONT><BR>
+<b>from the [% story.dept %] dept.</b><br>
 [% END %]
 
-[% mypagemenu = PROCESS pagemenu; IF mypagemenu %]<FONT SIZE="2">[% mypagemenu %]</FONT><BR>[% END %]
+[% mypagemenu = PROCESS pagemenu; IF mypagemenu %][% mypagemenu %]<br>[% END %]
 
 [% story.introtext %]
 
-[% IF full && user.is_admin && !preview %]<P><A HREF="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</A>[% END %]
+[% IF full && user.is_admin && !preview %]<p><a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</a>[% END %]
 
-[% IF story.is_future && !user.is_admin %]<P><FONT SIZE="-1">See any serious problems with this story?
+[% IF story.is_future && !user.is_admin %]<p>See any serious problems with this story?
 [% IF constants.ircslash_remarks %]
 	Paste a short message here (if it's a dupe, the URL would be great)
-	<form action="[% gSkin.rootdir %]/index.pl" method="POST">
-	<input type="TEXT" name="remark" size="20" maxlength="100">
-	<input type="HIDDEN" name="sid" value="[% story.sid | strip_attribute %]">
+	<form action="[% gSkin.rootdir %]/index.pl" method="post">
+	<input type="text" name="remark" size="20" maxlength="100">
+	<input type="hidden" name="sid" value="[% story.sid | strip_attribute %]">
 	</form>
 	or email
 [% ELSE %]
 	Email
 [% END %]
-<A HREF="mailto:[% constants.adminmail %]?subject=[DP]%20[% story.title | strip_paramattr %]">our on-duty editor</A>.</FONT>
+<a href="mailto:[% constants.adminmail %]?subject=[DP]%20[% story.title | strip_paramattr %]">our on-duty editor</a>.
 [% END %]
 
 [% IF full && (story.bodytext || story.books_publisher) %]
 
-<P>[% IF constants.run_ads && constants.ad_messaging_num; Slash.getAd(constants.ad_messaging_num); END %]
+<p>[% IF constants.run_ads && constants.ad_messaging_num; Slash.getAd(constants.ad_messaging_num); END %]
 [% story.bodytext %]
 [% ELSE %]
-<P>
+<p>
 [% IF constants.run_ads && constants.ad_messaging_num; Slash.getAd(constants.ad_messaging_num); END %]
 [% END %]
 __seclev__

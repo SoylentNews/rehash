@@ -1,0 +1,720 @@
+body, div, form, h1, h2, h3, h4, h5, h6, #links ul li, #links ul, #topnav, img
+{
+	padding: 0;
+	margin: 0;
+}
+
+body
+{
+	color: #000;
+	font-family: serif;
+	position: relative;
+}
+
+sup
+{
+	margin: 0 0 -.3em 0;
+	padding: 0;
+}
+
+a
+{
+	word-wrap: break-word;
+	color: #600;
+}
+
+a:visited { color: #000; }
+a:hover { text-decoration: none; }
+img { border: none; }
+#jump { display: none; }
+
+/* layout */
+
+#frame
+{
+	margin: .8em;
+	position: relative;
+}
+
+#contents
+{
+	width: auto;
+	z-index: 1;
+	position: relative;
+	padding: 0;
+	margin: 0 0 0 7.2em;
+}
+
+#messages, #submit, #comments, #login, #404, #pollBooth, #wide, #search, #authors, #topics
+{
+	overflow: visible;
+	height: 100%;
+	z-index: 2;
+	position: relative;
+	margin: 0 0 1em 0;
+	padding: 0;
+}
+
+#articles, #users-blocks, #polls
+{
+	overflow: visible;
+	height: 100%;
+	z-index: 2;
+	position: relative;
+	margin: 0 15.6em 1em 0;
+	padding: 0;
+}
+
+/* Header */
+#logo h1 a
+{
+	width: 115px;
+	height: 80px;
+	background: url(images/logo.gif) no-repeat;
+	text-indent: -700em;
+	display: block;
+	text-decoration: none;
+	float: left;
+	position: relative;
+}
+
+#topnav
+{
+	z-index: 0;
+	position: relative;
+	height: auto;
+	margin: 0 0 .1em 0;
+}
+
+#topnav h4 a
+{
+	text-align: center;
+	padding: 0 .6em;
+	text-decoration: none;
+}
+
+#topnav h4
+{
+	text-align: center;
+	margin: 0 auto;
+	white-space: nowrap;
+}
+
+#topnav li a
+{
+	text-align: center;
+	padding: 0 .6em;
+	text-decoration: none;
+}
+
+#topnav ul
+{
+	text-align: center;
+	margin: 0 auto;
+	white-space: nowrap;
+}
+
+#topnav li img 
+{
+	vertical-align:middle;
+}
+
+#topnav li
+{
+	text-align: center;
+	margin: 0 auto;
+	white-space: nowrap;
+	display: inline;
+	list-style: none;
+}
+
+#slogan h2
+{
+	padding: .3em;
+	margin: 0 0 .3em 0;
+	clear: both;
+}
+
+/* links */
+#links
+{
+	float: left;
+	width: 6.6em;
+	z-index: 0;
+	position: relative;
+	padding: 0;
+}
+
+#links div.block
+{
+	padding: 0;
+	margin: 0 0 1em 0;
+	position: relative;
+}
+
+#links div.title
+{
+	background: #999;
+	padding: 0;
+	margin: 0;
+	position: relative;
+}
+
+#links h4
+{
+	margin: 0;
+	padding: .3em .6em;
+	color: #fff;
+	position: relative;
+}
+
+#links h4 a, #links h4 a:visited { color: #fff; }
+
+#links div.content
+{
+	padding: .3em .3em .6em .3em;
+	position: relative;
+}
+
+#links em
+{
+	font-weight: bold;
+	margin: .3em 0 .3em .8em;
+	font-style: normal;
+}
+
+#links h2
+{
+	background: #ddd;
+	position: relative;
+	margin: 0;
+	padding: .2em 0 0 .3em;
+}
+
+#links h2 a, #links h2 { color: #444; }
+#links ul li { list-style: none; }
+#links ul { margin: 0; }
+
+#navigation-content li.user
+{
+	background: #ddd;
+	position: relative;
+	margin: 1em 0 0 0;
+	padding: .2em 0 0 0;
+	color: #444;
+}
+
+#navigation-content ul ul
+{
+	margin: 0;
+	padding: .3em 0 .3em .6em;
+	background: #fff;
+}
+
+/* slashboxes */
+#slashboxes
+{
+	float: right;
+	width: 15em;
+	z-index: 0;
+	position: relative;
+	margin: 0 0 .3em 0;
+	padding: 0;
+}
+
+#slashboxes div.block
+{
+	margin: 0 0 1em 0;
+	position: relative;
+}
+
+#slashboxes div.title
+{
+	background: #999;
+	padding: 0;
+	margin: 0;
+	position: relative;
+}
+
+#slashboxes h4
+{
+	margin: 0;
+	padding: .3em .6em;
+	color: #fff;
+	position: relative;
+	z-index: 4;
+}
+
+#slashboxes h4 a, #slashboxes h4 a:visited  { color: #fff; }
+
+#slashboxes div.content
+{
+	margin: 0;
+	padding: .3em .6em .6em .6em;
+	position: relative;
+}
+
+#slashboxes h4 img.map
+{
+	position: absolute;
+	right: .3em;
+}
+
+#slashboxes ul
+{
+	padding: 0 .3em;
+	margin: 0 1em;
+	position: relative;
+}
+
+/* login content */
+#slashboxes #userlogin-content legend,
+#slashboxes #login-content legend,
+#login legend { display: none; }
+
+#slashboxes #userlogin-content fieldset,
+#slashboxes #login-content fieldset,
+#login fieldset
+{
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+/* olderstuff content */
+#slashboxes #olderstuff-content ul
+{
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+#slashboxes #olderstuff-content ul li a
+{
+	font-size: 150%;
+	font-weight: bold;
+}
+
+#slashboxes #olderstuff-content ul li ul li a, #slashboxes #olderstuff-content p
+{
+	font-size: 100%;
+	font-weight: normal;
+}
+
+#slashboxes #olderstuff-content ul li ul
+{
+	list-style: disc;
+	padding: 0 0 0 1.3em;
+	margin: 0;
+}
+
+/* General */
+.generaltitle
+{
+	padding: 0;
+	margin: 0;
+	position: relative;
+}
+
+.generaltitle div.title
+{
+	background: #999;
+	padding: 0;
+	margin: 0;
+	position: relative;
+}
+
+.generaltitle h3
+{
+	margin: 0;
+	padding: .3em .8em .2em .8em;
+	color: #fff;
+	position: relative;
+}
+
+.generaltitle h3 a, .generaltitle h3 a:visited
+{
+	color: #fff;
+	position: relative;
+}
+
+.generalbody
+{
+	padding: 1em;
+	margin: 0 0 1em 0;
+	height: 100%;
+	width: auto;
+	z-index: 2;
+	position: relative;
+}
+
+
+/* articles */
+.article
+{
+	padding: 0;
+	margin: 0;
+	position: relative;
+}
+
+.article div.title
+{
+	background: #999;
+	padding: 0;
+	margin: 0;
+	position: relative;
+}
+
+.article h3
+{
+	margin: 0;
+	padding: .3em .8em .2em .8em;
+	color: #fff;
+	position: relative;
+}
+
+.article h3 a, .article h3 a:visited { color: #fff; }
+
+.article .details
+{
+	padding: .4em 1em;
+	margin: 0;
+	position: relative;
+}
+
+
+.article .body
+{
+	padding: 1em;
+	margin: 0;
+	min-height: 50px;
+}
+
+.article .details strong
+{
+	font-weight: bold;
+	position: relative;
+}
+
+.topic
+{
+	margin: 0 .4em .4em 0;
+	float: right;
+	position: relative;
+}
+
+.topic img
+{
+	display: block;
+	position: relative;
+	z-index: 10;
+}
+
+.intro p
+{
+	margin: 0 0 1em 0;
+	position: relative;
+}
+.full {
+        margin: 1em 0 0 0;
+        position: relative;
+}
+div.storylinks
+{
+	margin: 0 0 1em 0;
+	padding: 0;
+}
+
+div.storylinks div
+{
+	margin: 0;
+	padding: 0;
+}
+
+div.storylinks ul
+{
+	padding: .4em .4em .6em .4em;
+	margin: 0;
+}
+
+div.storylinks ul li
+{
+	border-left: 1px solid #555;
+	padding: 0 .2em 0 .4em;
+	list-style: none;
+	display: inline;
+}
+
+div.storylinks ul li.more
+{
+	border: none;
+	font-weight: bold;
+}
+
+div.storylinks ul li.comments a
+{
+	font-weight: bold;
+}
+
+/* Footer */
+#footer
+{
+	clear: both;
+	z-index: 0;
+	position: relative;
+	font-weight: normal;
+}
+
+#footer em
+{
+	text-align: center;
+	padding: 1.6em 0;
+	vertical-align: middle;
+	font-style: italic;
+	position: relative;
+}
+
+.copyright
+{
+	clear: both;
+	text-align: center;
+	position: relative;
+}
+
+/* Bottom Nav */
+
+.btmnav
+{
+        color: #999;
+        text-align: center;
+        margin: 0 0 .4em 0;
+        position: relative;
+}
+
+.btmnav ul li
+{
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: inline;
+}
+
+.btmnav ul li a
+{
+	border-left: 1px solid #555;
+	color: #999;
+        padding: 0 .4em;
+}
+
+.btmnav ul li.begin a { border: none; padding: 0 .4em 0 0; }
+
+.btmnav ul li a:visited { color: #000; }
+
+
+/* Usermenu */
+#usermenu
+{
+	background: #fff;
+	margin: 0;
+	padding: .3em;
+	border: 1px solid #aaa;
+	border-bottom: none;
+	height: 100%;
+}
+
+ul.menu
+{
+	padding: 0;
+	font-size: 85.5%;
+	margin: .3em 0 0 .3em;
+}
+
+ul.menu li
+{
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: inline;
+	white-space: nowrap;
+}
+
+ul.menu li a
+{
+	border-left: 1px solid #ccc;
+	padding: 0 .3em;
+	width: auto;
+}
+
+ul.menu li a.begin
+{
+	border: none;
+	padding: 0 .3em;
+}
+
+ul.menu li a:visited { color: #600; }
+
+ul.menu li.selected a
+{
+	font-weight: bold;
+	text-decoration: none;
+	color: #000;
+	padding: 0 .3em;
+}
+html > body .generalbody ul.menu, .submenu
+{
+        margin: -1em 0 3em 0;
+}
+.generalbody ul.menu, .submenu
+{
+	margin: -1em 0 1em 0;
+	padding: 0;
+	font-size: 70%;
+	font-family: arial, sans-serif;
+	display: block;
+}
+html > body .generalbody ul.menu li, .submenu li
+{
+        float: left;
+}
+.generalbody ul.menu li, .submenu li
+{
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: inline
+}
+
+.generalbody ul.menu li a, .submemu li a
+{
+	border-left: 1px solid #ccc;
+	border-bottom: none;
+	padding: 0 .3em 0 .3em;
+}
+
+.generalbody ul.menu li a.begin, .submenu li a.begin
+{
+	border: none;
+	padding: 0 .3em 0 .3em;
+}
+
+#usermenu ul.menu li.selected a, .generalbody ul.menu li.selected a, .submenu li.selected a {
+        font-weight: bold;
+        text-decoration: none;
+        color: #000;
+}
+
+/* Messaging */
+.message { padding: 1em; }
+
+.error
+{
+	padding: 1em;
+	color: #600;
+	font-weight: bold;
+}
+
+
+
+/* Forms */
+fieldset
+{
+	margin: 0 0 1em 0;
+	padding: 0 1em 1em 1em;
+	border: 1px solid #aaa;
+}
+
+#footer fieldset, #slashboxes fieldset { border: none; }
+
+legend
+{
+	color: #aaa;
+	font-family: arial, helvetica, sans-serif;
+	font-size: 75.5%;
+	font-weight: bold;
+	margin: 1em 0;
+}
+
+label
+{
+	display: block;
+	font-weight: bold;
+	padding: 1em 0 0 0;
+}
+
+label.checkbox { font-weight: normal; }
+
+input.button
+{
+	display: inline;
+	margin: 1em 0 0 0;
+}
+
+/* Data tables */
+.data_head
+{
+	color: #fff;
+	background: #600;
+	font-size: 75.5%;
+	font-family: arial, sans-serif;
+}
+
+.data_head th { text-align: left; }
+
+.data_hl1
+{
+	background: #ccc;
+	font-size: 75.5%;
+	font-family: arial, sans-serif;
+}
+
+.data_hl1 td { border-top: 1px solid #fff; }
+
+.data_hl2
+{
+	background: #ddd;
+	font-size: 75.5%;
+	font-family: arial, sans-serif;
+}
+
+.data_hl2 td { border-top: 1px solid #fff; }
+
+.data_hl3
+{
+	background: #eee;
+	font-size: 75.5%;
+	font-family: arial, sans-serif;
+}
+
+.data_hl3 td { border-top: 1px solid #fff; }
+
+/* Authors */
+#authors h2
+{
+        display: inline;
+}
+#authors .intro
+{
+        display: block;
+        margin: .3em;
+}
+
+/* Misc */
+.notes, .note
+{
+	font-family: arial, sans-serif;
+	font-size: 75.5%;
+	display: block;
+	padding: .3em;
+}
+
+pre, code 
+{
+	overflow: auto;
+	overflow-x: auto;
+	position: relative;
+	width: 90%;
+	padding: 0 0 0 1em;
+	margin: 0;
+}
+
+

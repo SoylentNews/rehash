@@ -13,7 +13,10 @@ en_US
 __name__
 editKey
 __template__
-<P><B>Public Key</B><BR><TEXTAREA NAME="pubkey" ROWS="4" COLS="60">[% pubkey | strip_literal %]</TEXTAREA>
+
+[% PROCESS formLabel value => 'Public Key' %]
+<textarea name="pubkey" rows="4" cols="30">[% pubkey | strip_literal %]</textarea>
+
 __seclev__
 500
 __version__

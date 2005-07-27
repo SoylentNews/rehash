@@ -191,6 +191,7 @@ sub header {
 	# Should we also pass thru {page} here or is that outdated?
 #print STDERR "header(options->page) defined: '$options->{page}' for title '$data->{title}'\n" if defined($options->{page});
 	$data->{tab_selected} = $options->{tab_selected} if $options->{tab_selected};
+	$data->{nopageid} = $options->{nopageid};
 
 	if ($options->{admin} && $user->{is_admin}) {
 		$user->{state}{adminheader} = 1;
@@ -344,7 +345,7 @@ sub footer {
 	my $display;
 
         if ($form->{ssi} && $form->{ssi} eq 'yes') {
-                ssiHeadFoot('footer', $options);
+		ssiHeadFoot('footer', $options);
                 return 1;
         }
 
@@ -433,10 +434,15 @@ sub ssiHeadFoot {
 
 	# if there's a special .inc header for this page, use it, else it's
 	# business as usual.
-	$page = '' unless ($page ne 'misc' && $slashdb->existsTemplate({
-		name	=> $headorfoot,
-	        skin	=> $gSkin->{name},
-	        page	=> $user->{currentPage} }));
+	$page = '' unless ($page ne 'misc' && 
+		$slashdb->existsTemplate({
+			name	=> $headorfoot,
+		        skin	=> $gSkin->{name},
+	        	page	=> $user->{currentPage} 
+		}) 
+
+	);
+	
 
 	my $ssiheadorfoot = 'ssi' . substr($headorfoot, 0, 4);
 
@@ -662,10 +668,10 @@ EOT
 			# box.				-- Pater
 			getSkinColors() unless $user->{colors};
 
-			return fancybox($constants->{fancyboxwidth}, 'Advertisement', '<div align="center">' . $user->{state}{ad}{$num} . '</div>', 1, 1);
-		} else { return ""; }
+			return sidebox('Advertisement', qq'<div class="ad$num" align="center">' . $user->{state}{ad}{$num} . "</div>", "advertisement");
+		} else { return ''; }
 	} else {
-		return $user->{state}{ad}{$num} || "";
+		return $user->{state}{ad}{$num} ? qq'<div class="ad$num">$user->{state}{ad}{$num}</div>': '';
 	}
 }
 
@@ -677,9 +683,7 @@ sub getSectionBlock {
 	my($name) = @_;
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
-	my $thissect = $user->{light}
-		? 'light'
-		: $user->{currentSection};
+	my $thissect = $user->{currentSection};
 
 	my $block;
 	if ($thissect && $thissect ne 'index') {

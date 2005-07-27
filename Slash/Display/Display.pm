@@ -124,10 +124,6 @@ the user is in, but it can be overridden by setting this parameter.
 If a template in the current skin is not found, it defaults
 to skin "default".
 
-Skin will also default first to "light" if the user is in light
-mode (and fall back to "default," again, if no template for the
-"light" skin exists).
-
 A Skin value of "NONE" will cause no skin to be defined, so
 "default" will be used.
 
@@ -255,9 +251,6 @@ sub slashDisplayName {
 
 	if ($opt->{Skin} && $opt->{Skin} eq 'NONE') {
 		$user->{currentSkin} = 'default';
-	# light is a special case
-	} elsif ($user->{light}) {
-		$user->{currentSkin} = 'light';
 	} elsif ($opt->{Skin}) {
 		$user->{currentSkin} = $opt->{Skin};
 	}

@@ -31,34 +31,35 @@ cur_time = Slash.db.getTime();
 [% admin_link_user = admin_flag && !useredit.uid && !useredit.nickname %]
 [% admin_link_ipid = admin_flag && !useredit.ipid %]
 [% IF submissions.size > 0 %]
-	[% PROCESS titlebar width="100%" title = title -%]
-	<TABLE width="100%" border=0 cellpadding=3 cellspacing=0 bgcolor="[% user.colors.bg_2 %]">
-		<TR bgcolor="[% user.colors.bg_3 %]">
-			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% user.colors.fg_3 %]">Title</FONT></TH>
-			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% light_text_color %]">[% IF admin_link_user %]User[% END %]</FONT></TH>
-			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% light_text_color %]">[% IF admin_link_ipid %]IPID[% END %]</FONT></TH>
-			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% user.colors.fg_3 %]">Datestamp</FONT></TH>
-			<TH ALIGN="LEFT"><FONT SIZE=-1 COLOR="[% light_text_color %]">[% IF admin_flag %]State[% END %]</FONT></TH>
-		</TR>
+	[% PROCESS titlebar title = title -%]
+	<div class="generalbody">
+	<table width="100%" border=0 cellpadding=3 cellspacing=0>
+		<tr class="data_head">
+			<th>Title</th>
+			<th>[% IF admin_link_user %]User[% END %]</th>
+			<th>[% IF admin_link_ipid %]IPID[% END %]</th>
+			<th>Datestamp</th>
+			<th>[% IF admin_flag %]State[% END %]</th>
+		</tr>
 		[% FOREACH sub = submissions %]
 		[% story_viewable = sub.del == 2 and sub.sid and sub.story_time.lt(cur_time) and sub.displaystatus!=-1 %]
 		[% link_sid = sub.del == 2 and sub.sid and story_viewable %]
 		[% link_subid = admin_flag and !link_sid %]
-		<TR bgcolor="[% bg_toggle ? bg_col_1 : bg_col_2 %]">
+		<tr class="[% bg_toggle ? "data_hl1" : "data_hl2" %]">
 			[% bg_toggle = !bg_toggle %]
-			<TD>
+			<td>
 				[%- IF link_sid -%]
-					<A HREF="[% gSkin.rootdir %]/article.pl?sid=[% sub.sid %]">[% sub.story_title %]</A>
+					<a href="[% gSkin.rootdir %]/article.pl?sid=[% sub.sid %]">[% sub.story_title %]</a>
 				[%- ELSIF link_subid -%]
-					<A HREF="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj %]</A>
+					<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% sub.subid %]">[% sub.subj %]</a>
 				[%- ELSE -%]
 					[% sub.subj %]
 				[%- END -%]
-			</TD>
-			<TD>[% IF admin_link_user %][% PROCESS nick_and_uid uid=sub.uid nickname=Slash.db.getUser(sub.uid, 'nickname'); %][% END %]</TD>
-			<TD>[% IF admin_link_ipid %][% PROCESS link_ipid ipid = sub.ipid ipid_vis=Slash.vislenify(ipid); %][% END %]</TD>
-			<TD>[% Slash.timeCalc(sub.time) %]</TD>
-			<TD>[% IF admin_flag || user.uid == sub.uid %]
+			</td>
+			<td>[% IF admin_link_user %][% PROCESS nick_and_uid uid=sub.uid nickname=Slash.db.getUser(sub.uid, 'nickname'); %][% END %]</td>
+			<td>[% IF admin_link_ipid %][% PROCESS link_ipid ipid = sub.ipid ipid_vis=Slash.vislenify(ipid); %][% END %]</td>
+			<td>[% Slash.timeCalc(sub.time) %]</td>
+			<td>[% IF admin_flag || user.uid == sub.uid %]
 				[% SWITCH sub.del %]
 					[%- CASE 0 -%]
 						Pending
@@ -69,35 +70,37 @@ cur_time = Slash.db.getTime();
 						[% approved = approved + 1; %]	
 				[%- END -%]
 			     [%-  END -%]
-			</TD>
-		</TR>
+			</td>
+		</tr>
 		[% total = total + 1 %]
 		[% END %]
 		[% IF admin_flag %]
-		<TR><TD colspan="5">[% PROCESS horiz_rule %]</TD></TR>
-		<TR><TD colspan="2"><B>Total: [% total %]</TD><TD COLSPAN="3"><B>Accepted: [% Slash.getData('percentage',{ sum => approved, count=> total},"misc") %]</B></TD></TR>
+		<tr class="data_hl1"><td colspan="5">[% PROCESS horiz_rule %]</td></tr>
+		<tr class="data_hl1"><td colspan="2"><b>Total: [% total %]</td><td colspan="3"><b>Accepted: [% Slash.getData('percentage',{ sum => approved, count=> total},"misc") %]</b></td></tr>
 		[% ELSIF user.uid != sub.uid %]
-		<tr><td colspan="5"><i>(Rejected submissions are not listed.)</i></td></tr>
+		<tr class="data_hl1"><td colspan="5"><i>(Rejected submissions are not listed.)</i></td></tr>
 		[% END %]
-	</TABLE>
+	</table>
+</div>
 [% END %]
 
 [% BLOCK nick_and_uid;
 	nickname | strip_literal;
 	IF uid != constants.anonymous_coward_uid;
-		' (<A HREF="';
+		' (<a href="';
 		gSkin.rootdir;
 		'/users.pl?op=userinfo&amp;fieldname=uid&amp;userfield=';
 		uid;
 		'">';
 		uid;
-		'</A>)';
+		'</a>)';
 	END;
 END %]
 
 [% BLOCK link_ipid %]
-<A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</A>
+<a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% ipid | strip_attribute %]&amp;fieldname=ipid">[% ipid_vis %]</a>
 [% END %]
+
 __seclev__
 10000
 __version__

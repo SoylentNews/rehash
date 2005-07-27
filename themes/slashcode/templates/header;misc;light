@@ -12,18 +12,18 @@ __name__
 header
 __template__
 [% INCLUDE linkrel %]
-</HEAD>
-<BODY>
+</head>
+<body>
 
-<H1>[% constants.sitename %]</H1>
+<h1>[% constants.sitename %]</h1>
 
-<H2>[% constants.slogan %]</H2>
+<h2>[% constants.slogan %]</h2>
 
-<A HREF="[% constants.real_rootdir %]/"><IMG SRC="[% constants.rdfimg %]" BORDER="0"></A>
+<a href="[% constants.real_rootdir %]/"><img src="[% constants.rdfimg %]" border="0"></a>
 
-<P>[% Slash.horizmenu() %]</P>
+<p>[% Slash.horizmenu() %]</p>
 [% IF user.is_admin %]
-	<P>[% Slash.createMenu(adminmenu) %]</P>
+	<p>[% Slash.createMenu(adminmenu) %]</p>
 [% END %]
 
 __seclev__

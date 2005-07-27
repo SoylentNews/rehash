@@ -14,9 +14,9 @@ __template__
 <p>
 [% FOREACH entry = results.records %]
 		<b><a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&subid=[% entry.subid %]">[% entry.subj %]</a></b><br>
-		<font size="-1">On [% Slash.timeCalc(entry.time) %]</font><br>
+		On [% Slash.timeCalc(entry.time) %]<br>
 		[% shorten( Slash.strip_notags(entry.story) ) %]<br>
-		<font size="-1">
+		
 		[% submission_state = Slash.db.getDescriptions('submission-state') %]
 		[% skin = Slash.db.getSkin(entry.skid) %]
 		Section: [% IF skin.name == 'mainpage' %]<a href="[% constants.real_rootdir %]/submit.pl?op=list">Main</a>[% ELSE %]<a href="[% skin.url ? skin.url : gSkin.rootdir %]/submit.pl?section=[% entry.skin %]&amp;op=list">[% skin.title %]</a>[% END %] &gt;
@@ -31,7 +31,7 @@ __template__
 		[% IF entry.score %]
 			Score: [% entry.score %]<br>
 		[% END %]
-		</font>
+		
 		<p>
 [% END %]
 <p>

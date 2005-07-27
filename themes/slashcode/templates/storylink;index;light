@@ -11,13 +11,13 @@ en_US
 __name__
 storylink
 __template__
-<P><B>(</B>
+<p><b>(</b>
 [% FOREACH storylinks = links; IF storylinks.ref == 'ARRAY' %]
-<A HREF="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</A>
+<a href="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] title="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</a>
 [% ELSE; storylinks; END %]
 [% UNLESS loop.last %] | [% END %]
 [% END %]
-<B>)</B></P>
+<b>)</b></p>
 
 __seclev__
 10000

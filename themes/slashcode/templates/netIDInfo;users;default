@@ -24,19 +24,16 @@ en_US
 __name__
 netIDInfo
 __template__
-
-[% USE Slash %]
-
 [% IF admin_flag %]
 
 [% PROCESS titlebar width="100%" %]
 [% admin_block %]
-<P>
+<p>
 [% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount reasons=reasons cids_to_mods=cids_to_mods type="netid"  netid=netid netid_vis=netid_vis comment_time = comment_time %]
 
 [% fieldname = form.fieldname | strip_literal %]
 
-<P>
+<p>
 [% IF fieldname == 'ipid' || fieldname == 'subnetid' %]
 	[% mod_options.hr_hours_back = hr_hours_back;
 	   mod_options.title="Moderations performed by $netid_vis";
@@ -45,15 +42,15 @@ __template__
 	   mod_options.need_m2_button = 1;
 	   mod_options.meta_mod_only = 1;
 	 %]
-	<P>
+	<p>
 	[% Slash.moderatorCommentLog("b$fieldname", netid, mod_options) %]
 	[% IF !constants.show_mods_with_comments %]
-		<P>
+		<p>
 		[% mod_options.title="Moderations performed on $netid_vis's comment" %]
 		[% Slash.moderatorCommentLog(fieldname, netid, mod_options) %] 
 	[% END %]
 [% END %]
-<BR><B>
+<br><b>
 [% IF subcount > 0 %]
 [% title = "$netid_vis's " _ ((subcount>submissions.size) ? "Latest " : "") _ "Submissions"; %]
 [% PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions %]

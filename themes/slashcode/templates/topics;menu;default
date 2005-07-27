@@ -16,7 +16,7 @@ topics
 __template__
 [
 [% FOR i = items %]
-	<A HREF="[% i.value %]">[% i.label %]</A>
+	<a href="[% i.value %]">[% i.label %]</a>
 	[% " | " UNLESS loop.last %]
 [% END %]
 ]

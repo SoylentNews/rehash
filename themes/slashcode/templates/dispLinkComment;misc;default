@@ -18,10 +18,10 @@ en_US
 __name__
 dispLinkComment
 __template__
-[% USE Slash %]
 [% IF user.mode != 'metamod' %]
 	[% IF user.is_admin || original_pid || !user.state.discussion_archived %]
-		<TR><TD><FONT SIZE="2">
+	<tr>
+		<td class="commentSub">
 
 		[ [% IF !user.state.discussion_archived && !user.state.discussion_future_nopost %][% Slash.linkComment({
 			sid	=> sid,
@@ -55,10 +55,10 @@ __template__
 
 		[% IF (constants.authors_unlimited && user.seclev >= constants.authors_unlimited)
 			|| user.acl.candelcomments_always %]
-		<INPUT TYPE="CHECKBOX" NAME="del_[% cid %]">
+		<input type="checkbox" name="del_[% cid %]">
 		[% END %]
 		]
-		</FONT></TD></TR>
+		</td></tr>
 
 	[% END %]
 [% END %]

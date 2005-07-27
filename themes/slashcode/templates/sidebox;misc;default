@@ -1,0 +1,29 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+sidebox
+__seclev__
+10000
+__template__
+<div class="block">
+	<div class="title" [% IF name %]id="[% name | strip_attribute %]-title"[% END %]>
+		<h4>
+			[% title %]
+		</h4>
+	</div>
+	<div class="content" [% IF name %]id="[% name | strip_attribute %]-content"[% END %]>
+		[% contents %]
+	</div>
+</div>
+__seclev__
+10000
+__version__
+$Id$

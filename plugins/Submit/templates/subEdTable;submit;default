@@ -22,42 +22,39 @@ __name__
 subEdTable
 __template__
 [% PROCESS titlebar %]
+<div class="generalbody">
+	<form action="[% env.script_name %]" method="post">
+		<fieldset>
+			<legend>Submissions List</legend>
+			<input type="hidden" name="op" value="list">
+					Classification
+					<select name="note">
+					[% FOREACH note = notes %]
+						<option value="[% note.1 %]"[% IF note.1 == cur_note %] selected[% END %]>[% s = skins.0.0; n = note.0; sn.$s.$n || '0'; ' '; note.0 %]</option>
+					[% END %]
+					</select>
 
-<form action="[% env.script_name %]" method="POST">
-<input type="hidden" name="op" value="list">
-<table bgcolor="[% user.colors.bg_2 %]" width="100%"><tr><td>
+					Section
+					<select name="skin">
+					[% FOREACH skin = skins %]
+						<option value="[% skin.1 %]"[% IF skin.1 == cur_skin %] selected[% END %]>[% s = skin.0; n = notes.0.0; sn.$s.$n || '0'; ' '; skin.0 %]</option>
+					[% END %]
+					</select>
 
-Classification
-<select name="note">
-[% FOREACH note = notes %]
-<option value="[% note.1 %]"[% IF note.1 == cur_note %] selected[% END %]>[% s = skins.0.0; n = note.0; sn.$s.$n || '0'; ' '; note.0 %]</option>
-[% END %]
-</select>
+					Filter
+					<input name="filter" value="[% form.filter %]" size="30">
 
-Section
-<select name="skin">
-[% FOREACH skin = skins %]
-	<option value="[% skin.1 %]"[% IF skin.1 == cur_skin %] selected[% END %]>[% s = skin.0; n = notes.0.0; sn.$s.$n || '0'; ' '; skin.0 %]</option>
-[% END %]
-</select>
+					Results	
+					<select name="limit">
+						<option value="all"[% IF form.limit == 'all' %] selected[% END %]>All</option>
+						<option value="10"[% IF form.limit == 10 %] selected[% END %]>10</option>
+						<option value="25"[% IF form.limit == 25 %] selected[% END %]>25</option>
+						<option value="50"[% IF form.limit == 50 %] selected[% END %]>50</option>
+					</select>
 
-Filter
-<input name="filter" value="[% form.filter %]" size="30">
-
-Results	
-<select name="limit">
-<option value="all"[% IF form.limit == 'all' %] selected[% END %]>All</option>
-<option value="10"[% IF form.limit == 10 %] selected[% END %]>10</option>
-<option value="25"[% IF form.limit == 25 %] selected[% END %]>25</option>
-<option value="50"[% IF form.limit == 50 %] selected[% END %]>50</option>
-</select>
-
-<input type="SUBMIT" value="Filter Submissions">
-</td></tr>
-
-</table>
-</form>
-
+					<input type="submit" value="Filter Submissions">
+		</fieldset>
+	</form>
 __seclev__
 10000
 __version__

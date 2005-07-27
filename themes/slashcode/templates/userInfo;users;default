@@ -17,7 +17,7 @@ Display user's info
 * fieldkey = the field key used to decide what we're looking at
 * reasons = hashref from $slashdb->getReasons()
 * lastjournal = last journal posted
-* hr_hours_back = number of hours back to show a <HR> for
+* hr_hours_back = number of hours back to show a <hr> for
 * cids_to_mods = hashref keyed by cid containing arrays of moderations done to that cid
 * comment_time = number of days back we are limiting the comments shown to.  If 0 or undefined we're showing comments sequentially w/o time limits
 
@@ -30,95 +30,99 @@ en_US
 __name__
 userInfo
 __template__
-[% USE Slash %]
-[% PROCESS user_titlebar tab_selected='info' %]
-
-[% IF nickmatch_flag %]
-
-<P>This is <B>your</B> User Info page.  There are thousands more, but
-this one is yours.  You most likely are not so interested in yourself,
-and probably would be more interested in the Preferences links you see
-up top there, where you can customize [% constants.sitename %],
-change your password, or just click pretty widgets to kill time.
-
-[% IF ! useredit.registered %]
-<P>This account is currently expired. Please <A HREF="[% gSkin.rootdir %]/users.pl?op=validateuser">re-register</A> at your earliest opportunity.<BR><P>
-[% END %]
-
-<P>[% PROCESS horiz_rule %]</P>
-
-[% END %]
-
-[% IF admin_flag %]
-[% admin_block %]
-[% END %]
-
-[% IF lastjournal %]
-<P>Last journal entry:
-<B><A HREF="[% gSkin.rootdir %]/~[% useredit.nick_plain | fixparam %]/journal/">[%
-lastjournal.description | strip_notags %]</A></B>,
-[% Slash.timeCalc(useredit.journal_last_entry_date) %]
-([% lastjournal.commentcount || 0 %] comment[% IF lastjournal.commentcount != 1 %]s[% END %])
-[% IF lastjournal.article_shrunk %]<P>[% lastjournal.article_shrunk; END %]
-[% ELSE %]
-<P><I>(No journal entries.)</I>
-[% END %]
-
-<BR>[% Slash.createMenu("journal", { style => "oldstyle" }) %]
-
-</TD>
-
-[% PROCESS maintable_td %]&nbsp;</TD>
-[% PROCESS maintable_td mt_width=(constants.fancyboxwidth + 10) mt_height="1" mt_valign="TOP" mt_align="CENTER" -%]
+[% orig_title = title %]
+<div id="slashboxes">
 [% PROCESS userboxes %]
-</TD>
-[% PROCESS maintable_tr_end %]
+</div>
+[% title = orig_title %]
+<div id="users-blocks">
+[% PROCESS user_titlebar tab_selected='info' %]
+	<div class="generalbody">
+	[% IF nickmatch_flag %]
 
-[% PROCESS maintable_tr %]
-[% PROCESS maintable_td mt_valign="TOP" mt_colspan="4" %]
+	<p>
+		This is <b>your</b> User Info page.  There are thousands more, but this one is yours.  You most likely are not so interested in yourself, and probably would be more interested in the Preferences links you see up top there, where you can customize [% constants.sitename %], change your password, or just click pretty widgets to kill time.
+	</p>
 
-[% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time%]
+		[% IF ! useredit.registered %]
+			<div class="error">
+				This account is currently expired. Please <a href="[% gSkin.rootdir %]/users.pl?op=validateuser">re-register</a> at your earliest opportunity.<br>
+			</div>
+		[% END %]
 
-<P>
-[% IF admin_flag %]
-        [% mod_options.title = "Moderations performed by ${useredit.nickname}";
-	   mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
-	   mod_options.need_m2_form = 1;
-	   mod_options.need_m2_button = 1;
-	   mod_options.meta_mod_only = 1;
-	 %]
-	<P>
-	[% Slash.moderatorCommentLog('uid', useredit.uid, mod_options) %]
-	[% IF !constants.show_mods_with_comments %]
-	<P>
-	[% mod_options.title = "Moderations performed on ${useredit.nickname}'s comments";
-	   mod_options.hr_hours_back = hr_hours_back %]
-	[% Slash.moderatorCommentLog('cuid', useredit.uid, mod_options) %]
+	<hr>
 	[% END %]
-[% END %]
 
-<P>
-[% IF admin_flag;
-	m2_title = "${useredit.nickname}'s Recent M2s";
-	m2_listing = form.m2_listing.defined ? form.m2_listing : user.show_m2_listing;
-	PROCESS listMetamods
-		title = m2_title 
-		m2_listing = m2_listing 
-		metamods = metamods 
-		the_user = useredit;
-	"<P>";
-END %]
+	[% IF admin_flag %]
+		[% admin_block %]
+	[% END %]
 
-[% IF submissions.size > 0  %]
-[% IF admin_flag or useredit.uid == user.uid;
-	title = "${useredit.nickname}'s Recent Submissions";
-   ELSE;
-	title = "${useredit.nickname}'s Recently Accepted Submissions";
-END %]
-[% PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions %]
-[% END %]
+	[% IF lastjournal %]
+		<p>
+			Last journal entry:
+			<b>
+				<a href="[% gSkin.rootdir %]/~[% useredit.nick_plain | fixparam %]/journal/">
+					[% lastjournal.description | strip_notags %]
+				</a>
+			</b>,
+			[% Slash.timeCalc(useredit.journal_last_entry_date) %]
+			([% lastjournal.commentcount || 0 %] comment[% IF lastjournal.commentcount != 1 %]s[% END %])
+			[% IF lastjournal.article_shrunk %]
+				<p>
+					[% lastjournal.article_shrunk; END %]
+			[% ELSE %]
+				<p>
+					<i>
+						(No journal entries.)
+					</i>
+				</p>
+			[% END %]
 
+			[% Slash.createMenu("journal", style => "tabbed") %]
+			[% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time%]
+			[% IF admin_flag %]
+				<p>	
+        				[% mod_options.title = "Moderations performed by ${useredit.nickname}";
+					   mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
+					   mod_options.need_m2_form = 1;
+					   mod_options.need_m2_button = 1;
+					   mod_options.meta_mod_only = 1;
+					 %]
+				</p>
+				<p>
+					[% Slash.moderatorCommentLog('uid', useredit.uid, mod_options) %]
+				</p>
+				[% IF !constants.show_mods_with_comments %]
+					<p>
+						[% mod_options.title = "Moderations performed on ${useredit.nickname}'s comments";
+						   mod_options.hr_hours_back = hr_hours_back %]
+						[% Slash.moderatorCommentLog('cuid', useredit.uid, mod_options) %]
+					</p>
+				[% END %]
+			[% END %]
+		</p>
+		<p>
+			[% IF admin_flag;
+				m2_title = "${useredit.nickname}'s Recent M2s";
+				m2_listing = form.m2_listing.defined ? form.m2_listing : user.show_m2_listing;
+				PROCESS listMetamods
+				title = m2_title 
+				m2_listing = m2_listing 
+				metamods = metamods 
+				the_user = useredit;
+				"<p>";
+			END %]
 
+			[% IF submissions.size > 0  %]
+			[% IF admin_flag or useredit.uid == user.uid;
+				title = "${useredit.nickname}'s Recent Submissions";
+			   ELSE;
+				title = "${useredit.nickname}'s Recently Accepted Submissions";
+			END %]
+			[% PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions %]
+		[% END %]
+	</div>
+</div>
 __seclev__
 500
 __version__

@@ -19,7 +19,9 @@ __template__
 <!--#include virtual="[% dir %]/[% skin %]slashhead-[% page %].inc"-->
 [%- ELSE -%]
 <!--#include virtual="[% dir %]/[% skin %]slashhead.inc"-->
-[%- END -%]
+[%- END %]
+[% id_page = user.currentPage || "general" %]
+<div id="[% id_page %]">
 __seclev__
 10000
 __version__

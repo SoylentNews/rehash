@@ -15,7 +15,7 @@ __name__
 maintable_tr
 __template__
 
-<TR[% IF mt_valign %] VALIGN="[% mt_valign %]"[% END %]>
+<TR[% IF mt_valign %] valign="[% mt_valign %]"[% END %]>
 
 [%
 user.state.mt.curcol = 1;

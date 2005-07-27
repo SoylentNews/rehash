@@ -23,12 +23,12 @@ __template__
 
 [% IF msg.mode == 1 %]
 
-<P>
+<p>
 [% reply.nickname | strip_literal %] has posted a new comment on [% constants.sitename %],
-<B><A HREF="[% thisroot %]/comments.pl?sid=[% reply.sid %]&amp;cid=[% reply.cid
-%]">[% reply.subject %]</A></B>, attached to
-<B><A HREF="[% discussion.url %]">[% discussion.title %]</A></B>.
-</P>
+<b><a href="[% thisroot %]/comments.pl?sid=[% reply.sid %]&amp;cid=[% reply.cid
+%]">[% reply.subject %]</a></b>, attached to
+<b><a href="[% discussion.url %]">[% discussion.title %]</a></b>.
+</p>
 
 [% ELSE %]
 

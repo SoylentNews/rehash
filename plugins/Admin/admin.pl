@@ -1039,8 +1039,8 @@ sub importImage {
 	}
 
 	my($w, $h) = imgsize("/tmp/slash/$tf");
-	return qq[<IMG SRC="$rootdir/$section/] .  getsiddir() . $filename
-		. qq[" WIDTH="$w" HEIGHT="$h" ALT="$section">];
+	return qq[<img src="$rootdir/$section/] .  getsiddir() . $filename
+		. qq[" width="$w" height="$h" alt="$section">];
 }
 
 ##################################################################

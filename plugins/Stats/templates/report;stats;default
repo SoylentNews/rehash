@@ -125,14 +125,14 @@ END;
 %]
 
 [%
-      "Relocated links<BR>";
+      "Relocated links<br>";
       FOREACH key = stats_data_big.names.sort;
-         "$key<BR>";
+         "$key<br>";
          PROCESS make_graph
             skid  => '0',
             type     => 'area',
             statdata => [ key ];
-         "<P>";
+         "<p>";
        END;
 
       END;
@@ -161,15 +161,15 @@ END %]
 
 [% PROCESS titlebar title => ((reports.${form.report} || 'Available Reports') _ ' for ' _ constants.sitename), width => '100%' %]
 
-<FORM METHOD="POST" ACTION="[% env.script_name %]">
+<form method="post" action="[% env.script_name %]">
    [% PROCESS formLabel value => "Reports" %]
    [% Slash.createSelect('report', reports, form.report, 1) %]
    &nbsp;&nbsp;Range: [% PROCESS stats_days %]
    &nbsp;&nbsp;Sections: [% Slash.createSelect('stats_skid', skins, form.stats_skid, 1) %]
 
-   <INPUT TYPE="hidden" NAME="op" VALUE="report">
-   <INPUT TYPE="submit">
-</FORM>
+   <input type="hidden" name="op" value="report">
+   <input type="submit">
+</form>
 
 [% reportblock %]
 __seclev__

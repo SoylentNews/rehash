@@ -15,19 +15,19 @@ zoo_msg
 __template__
 [% IF msg.mode == Slash.MSG_MODE_WEB %]
 
-<P>
+<p>
 [% IF type == 'friend' || type == 'foe' || type == 'bitch' %]
-<B><A HREF="[% gSkin.rootdir %]/~[% zoo_user.nickname | fixparam %]/"
->[% zoo_user.nickname | strip_literal %]</A></B> ([% zoo_user.uid %]) has made you their <B>[% type %]</B>.
+<b><a href="[% gSkin.rootdir %]/~[% zoo_user.nickname | fixparam %]/"
+>[% zoo_user.nickname | strip_literal %]</a></b> ([% zoo_user.uid %]) has made you their <b>[% type %]</b>.
 [% ELSIF type == 'neutral' %]
-<B><A HREF="[% gSkin.rootdir %]/~[% zoo_user.nickname | fixparam %]/"
->[% zoo_user.nickname | strip_literal %]</A></B> ([% zoo_user.uid %]) has ceased their relationship with you.
+<b><a href="[% gSkin.rootdir %]/~[% zoo_user.nickname | fixparam %]/"
+>[% zoo_user.nickname | strip_literal %]</a></b> ([% zoo_user.uid %]) has ceased their relationship with you.
 [% END %]
-</P>
+</p>
 
 If you'd like to, view or edit your
-<A HREF="[% gSkin.rootdir %]/my/friends">friends</A> and 
-<A HREF="[% gSkin.rootdir %]/my/foes">foes</A>.
+<a href="[% gSkin.rootdir %]/my/friends">friends</a> and 
+<a href="[% gSkin.rootdir %]/my/foes">foes</a>.
 
 [% ELSE %]
 

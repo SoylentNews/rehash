@@ -1,8 +1,9 @@
 <HTML>
 <HEAD>
 	<TITLE>About Slashcode</TITLE>
-<!--#include virtual="/slashhead.inc"-->
 
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
 
 <H1>About This Site</H1>
 

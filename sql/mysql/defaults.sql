@@ -122,6 +122,30 @@ INSERT INTO commentmodes (mode, name, description) VALUES ('nocomment','No Comme
 # Dumping data for table 'content_filters'
 #
 
+#
+# Dumping data for table 'css'
+#
+
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','base.css','Slashcode',0,'','no','',1,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','Slashcode',0,'comments','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','Slashcode',0,'article','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','print','print.css','',0,'','no','',5,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','admin.css','Slashcode',0,'','yes','',1,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','Slashcode',0,'pollBooth','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode_lite.css','Slashcode',0,'','no','light',4,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','Slashcode',0,'journal','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode_lite.css','Slashcode',0,'','no','light',4,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','Slashcode',0,'journal','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode.css','Slashcode',0,'','no','',3,0);
+
+#
+# Dumping data for table 'css_type'
+#
+INSERT INTO css_type (ctid, name, ordernum) VALUES (1,'base',1);
+INSERT INTO css_type (ctid, name, ordernum) VALUES (2,'page',2);
+INSERT INTO css_type (ctid, name, ordernum) VALUES (3,'theme',3);
+INSERT INTO css_type (ctid, name, ordernum) VALUES (4,'user_theme',4);
+INSERT INTO css_type (ctid, name, ordernum) VALUES (5,'print',5);
 
 #
 # Dumping data for table 'dateformats'
@@ -717,6 +741,7 @@ INSERT INTO vars (name, value, description) VALUES ('cookiedomain','','Domain fo
 INSERT INTO vars (name, value, description) VALUES ('cookiepath','/','Path on server for cookie to be active');
 INSERT INTO vars (name, value, description) VALUES ('cookiesecure','1','Set the secure flag in cookies if SSL is on?');
 INSERT INTO vars (name, value, description) VALUES ('counthits_lastmaxid','1','Last accesslog id scanned by counthits task');
+INSERT INTO vars (name, value, description) VALUES ('css_expire','3600','Time in seconds before css cache expires');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_pps', '', 'Pages per second the site is running at');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats', '', 'Stores current performance stats in a var for display to admins');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_disp', '1', 'Show current performance stats?');

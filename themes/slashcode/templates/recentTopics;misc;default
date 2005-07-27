@@ -14,17 +14,14 @@ recentTopics
 __instructions__
 placeholder
 __template__
-	<TD><A HREF="[% gSkin.rootdir %]/search.pl?tid=6"><IMG
-		SRC="[% constants.imagedir %]/topics/topicnews.gif"
-		WIDTH="34" HEIGHT="44"
-		BORDER="0" ALT="News"></A>
-	</TD>
-	<TD><A HREF="[% gSkin.rootdir %]/search.pl?tid=8"><IMG
-		SRC="[% constants.imagedir %]/topics/topicslashdot.gif"
-		WIDTH="100" HEIGHT="34"
-		BORDER="0" ALT="Slashdot"></A>
-	</TD>
-
+	<a href="[% gSkin.rootdir %]/search.pl?tid=6"><img
+		src="[% constants.imagedir %]/topics/topicnews.gif"
+		width="34" height="44"
+		alt="News"></a>
+	<a href="[% gSkin.rootdir %]/search.pl?tid=8"><img
+		src="[% constants.imagedir %]/topics/topicslashdot.gif"
+		width="100" height="34"
+		alt="Slashdot"></a>
 __seclev__
 500
 __version__

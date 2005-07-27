@@ -18,7 +18,6 @@ en_US
 __name__
 maininfo
 __template__
-[% USE Slash %]
 <p>[% PROCESS titlebar title => 'Dilemma Info' width='100%' %]
 <tt>
 [% FOREACH key = info.keys.sort %]

@@ -13,20 +13,37 @@ en_US
 __name__
 userlogin
 __template__
+
 [%# we log in via main ("real") rootdir, return to current rootdir %]
 [% IF !return_url; return_url = gSkin.rootdir _ '/'; END %]
-<form action="[% constants.real_rootdir %]/login.pl" method="POST">
-<b>Nickname:</b><br>
-<input type="TEXT" name="unickname" size="20" value=""><br>
-<b>Password:</b><br>
-<input type="HIDDEN" name="returnto" value="[% return_url | strip_urlattr %]">
-<input type="HIDDEN" name="op" value="userlogin">
-<input type="PASSWORD" name="upasswd" size="20"><br>
-<input type="CHECKBOX" name="login_temp" value="yes"> Public Terminal<br>
-<input type="SUBMIT" name="userlogin" value="Log in">
+<form action="[% constants.real_rootdir %]/login.pl" method="post">
+<fieldset>
+	<legend></legend>
+	<label>
+		Nickname
+	</label>
+	<input type="text" name="unickname" size="20" value="">
+	<label>
+		Password
+	</label>
+	<input type="hidden" name="returnto" value="[% return_url | strip_urlattr %]">
+	<input type="hidden" name="op" value="userlogin">
+	<input type="password" name="upasswd" size="20">
+	<label class="checkbox">
+		<input type="checkbox" name="login_temp" value="yes">
+		Public Terminal
+	</label>
+	<input type="submit" name="userlogin" value="Log in" class="button">
+	</fieldset>
 </form>
+<p>
+	[ <b>
+		<a href="[% constants.real_rootdir %]/login.pl?op=newuserform">
+			Create a new account
+		</a>
+	</b> ]
+</p>
 
-<p>[ <b><a href="[% constants.real_rootdir %]/login.pl?op=newuserform">Create a new account</a></b> ]
 __seclev__
 10000
 __version__

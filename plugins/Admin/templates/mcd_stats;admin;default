@@ -11,59 +11,59 @@ en_US
 __name__
 mcd_stats
 __template__
-<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="100%">
+<table border="0" cellpadding="2" cellspacing="0" width="100%">
 
-	<TR>
-		<TH>Server</TH>
-		<TH>Bytes</TH>
-		<TH>Sets</TH>
-		<TH>Gets, Hit</TH>
-		<TH>Gets, Miss</TH>
-		<TH>Gets, Hit %</TH>
-		<TH>Connections</TH>
-		<TH>Read</TH>
-		<TH>Written</TH>
-		<TH>Items</TH>
-		<TH>Alloc</TH>
-		<TH>Arena Size</TH>
-		<TH>Alloc %</TH>
-	</TR>
+	<tr>
+		<th>Server</th>
+		<th>Bytes</th>
+		<th>Sets</th>
+		<th>Gets, Hit</th>
+		<th>Gets, Miss</th>
+		<th>Gets, Hit %</th>
+		<th>Connections</th>
+		<th>Read</th>
+		<th>Written</th>
+		<th>Items</th>
+		<th>Alloc</th>
+		<th>Arena Size</th>
+		<th>Alloc %</th>
+	</tr>
 
 [% FOREACH server = stats.hosts.keys.sort %]
-	<TR>
-		<TD ALIGN="LEFT"> [% server %]</TD>
-		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.bytes.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.cmd_set.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.get_hits.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.get_misses.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.get_hit_percent %]</TD>
-		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.total_connections.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.bytes_read.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.bytes_written.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.hosts.$server.misc.curr_items.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.hosts.$server.malloc.total_alloc.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.hosts.$server.malloc.arena_size.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.hosts.$server.malloc.total_alloc_percent %]</TD>
-	</TR>
+	<tr>
+		<td align="left"> [% server %]</td>
+		<td align="right">[% stats.hosts.$server.misc.bytes.size2si %]</td>
+		<td align="right">[% stats.hosts.$server.misc.cmd_set.size2si %]</td>
+		<td align="right">[% stats.hosts.$server.misc.get_hits.size2si %]</td>
+		<td align="right">[% stats.hosts.$server.misc.get_misses.size2si %]</td>
+		<td align="right">[% stats.hosts.$server.misc.get_hit_percent %]</td>
+		<td align="right">[% stats.hosts.$server.misc.total_connections.size2si %]</td>
+		<td align="right">[% stats.hosts.$server.misc.bytes_read.size2si %]</td>
+		<td align="right">[% stats.hosts.$server.misc.bytes_written.size2si %]</td>
+		<td align="right">[% stats.hosts.$server.misc.curr_items.size2si %]</td>
+		<td align="right">[% stats.hosts.$server.malloc.total_alloc.size2si %]</td>
+		<td align="right">[% stats.hosts.$server.malloc.arena_size.size2si %]</td>
+		<td align="right">[% stats.hosts.$server.malloc.total_alloc_percent %]</td>
+	</tr>
 [% END %]
 
-	<TR>
-		<TD ALIGN="LEFT"><B>Total</B></TD>
-		<TD ALIGN="RIGHT">[% stats.total.bytes.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.total.cmd_set.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.total.get_hits.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.total.get_misses.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.total.get_hit_percent %]</TD>
-		<TD ALIGN="RIGHT">[% stats.total.total_connections.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.total.bytes_read.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.total.bytes_written.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.total.curr_items.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.total.malloc_total_alloc.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.total.malloc_arena_size.size2si %]</TD>
-		<TD ALIGN="RIGHT">[% stats.total.malloc_total_alloc_percent %]</TD>
-	</TR>
+	<tr>
+		<td align="left"><b>Total</b></td>
+		<td align="right">[% stats.total.bytes.size2si %]</td>
+		<td align="right">[% stats.total.cmd_set.size2si %]</td>
+		<td align="right">[% stats.total.get_hits.size2si %]</td>
+		<td align="right">[% stats.total.get_misses.size2si %]</td>
+		<td align="right">[% stats.total.get_hit_percent %]</td>
+		<td align="right">[% stats.total.total_connections.size2si %]</td>
+		<td align="right">[% stats.total.bytes_read.size2si %]</td>
+		<td align="right">[% stats.total.bytes_written.size2si %]</td>
+		<td align="right">[% stats.total.curr_items.size2si %]</td>
+		<td align="right">[% stats.total.malloc_total_alloc.size2si %]</td>
+		<td align="right">[% stats.total.malloc_arena_size.size2si %]</td>
+		<td align="right">[% stats.total.malloc_total_alloc_percent %]</td>
+	</tr>
 
-</TABLE>
+</table>
 
 __seclev__
 500

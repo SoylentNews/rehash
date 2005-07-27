@@ -20,27 +20,27 @@ en_US
 __name__
 stockquotes
 __template__
-<TABLE border=0 width="100%" cellspacing=1 cellpadding=0>
-<TR>
-<TD><FONT FACE="verdana,helvetica,arial" SIZE="1"><b>Corp.</b></font></TD>
-<TD align="right"><FONT FACE="verdana,helvetica,arial" SIZE="1"><b>$now</b></font></TD>
-<TD align="right"><FONT FACE="verdana,helvetica,arial" SIZE="1"><b>$year</b></font></TD>
-<TD align="right"><FONT FACE="verdana,helvetica,arial" SIZE="1"><b>$cap</b></font></TD>
-</TR>
+<table border=0 width="100%" cellspacing=1 cellpadding=0>
+<tr>
+<td><b>Corp.</b></td>
+<td align="right"><b>$now</b></td>
+<td align="right"><b>$year</b></td>
+<td align="right"><b>$cap</b></td>
+</tr>
 [% FOR stock = stocks %]
-<TR>
-<TD><FONT FACE="verdana,helvetica,arial" SIZE="1"><a href="[% stock.url %]">[% stock.name %]</a></font></TD>
-<TD align="right"><FONT FACE="verdana,helvetica,arial" SIZE="1">&nbsp;[% stock.last %]</font></TD>
-<TD align="right"><FONT FACE="verdana,helvetica,arial" SIZE="1">&nbsp;[% stock.year_lo %]-[% stock.year_hi %]</font></TD>
-<TD align="right"><FONT FACE="verdana,helvetica,arial" SIZE="1">&nbsp;[% stock.cap %]</font></TD>
-</TR>
+<tr>
+<td><a href="[% stock.url %]">[% stock.name %]</a></td>
+<td align="right">&nbsp;[% stock.last %]</td>
+<td align="right">&nbsp;[% stock.year_lo %]-[% stock.year_hi %]</td>
+<td align="right">&nbsp;[% stock.cap %]</td>
+</tr>
 [% END %]
-</TABLE>
-<br><FONT FACE="verdana,helvetica,arial" SIZE="1"><i>Last update:
+</table>
+<br><i>Last update:
 [% last_update %] (15+ min delay).  For informational purposes
 only. Not intended for trading purposes. If you're silly enough to do
 something based on this data, we're not liable.</i><br><i>Data courtesy
-<a href="http://search.cpan.org/search?dist=Finance-Quote">Finance::Quote</a>.</i></font>
+<a href="http://search.cpan.org/search?dist=Finance-Quote">Finance::Quote</a>.</i>
 
 __seclev__
 500

@@ -17,18 +17,18 @@ __name__
 udiscuss_list
 __template__
 [% PROCESS titlebar title=title width='100%' %]
-<MULTICOLS COLS=2>
+<multicol cols=2>
 [% FOR discussion = discussions %]
 	[% nickname = Slash.db.getUser(discussion.uid, 'nickname') %]
-	<LI><A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
-IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]</A>
-	created by <A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> on [% Slash.timeCalc(discussion.ts) %]
+	<li><a href="[% gSkin.rootdir %]/comments.pl?sid=[% discussion.id %]">[%
+IF discussion.title.defined %][% discussion.title %][% ELSE %]untitled[% END %]</a>
+	created by <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</a> on [% Slash.timeCalc(discussion.ts) %]
 [% END %]
-</MULTICOL>
-<P>
+</multicol>
+<p>
 [% PROCESS pagination label=label %]
 
-<P>
+<p>
 
 [% IF user.seclev >= constants.discussion_create_seclev && !suppress_create;
     # PROCESS discreate topic=constants.discussion_default_topic label=label; 

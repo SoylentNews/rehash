@@ -11,7 +11,11 @@ en_US
 __name__
 default
 __template__
-&middot; <a href="[% item.link | strip_attribute %]">[% item.title | strip_notags %]</a><br[% ' /' IF constants.xhtml %]>
+<li>
+	<a href="[% item.link | strip_attribute %]">
+		[% item.title | strip_notags %]
+	</a>
+</li>
 __seclev__
 10000
 __version__

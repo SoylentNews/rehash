@@ -11,45 +11,45 @@ en_US
 __name__
 searchform
 __template__
-<table width="100%" cellpadding="3" cellspacing="0" border="0"><tr><td>
-
+<div class="generalbody">
 [% IF tref.image %]
-	<IMG SRC="[% constants.imagedir %]/topics/[% tref.image %]"
-	ALIGN="RIGHT" BORDER="0" ALT="[% tref.alttext %]"
-	HSPACE="30" VSPACE="10" WIDTH="[% tref.width %]"
-	HEIGHT="[% tref.height %]">
+	<div class="topic">
+		<a href="http://[% gSkin.rootdir %]/search.pl?tid=[% tref.tid %]">
+			<img src="[% constants.imagedir %]/topics/[% tref.image %]" width="[% tref.width %]" height="[% tref.height %]" alt="[% tref.alttext %]" title="[% tref.alttext %]">
+		</a>
+	</div>
 [% END %]
 
-<FORM ACTION="[% gSkin.rootdir %]/search.pl" METHOD="GET">
-	<br>
+<form action="[% gSkin.rootdir %]/search.pl" method="get">
+<fieldset>
+	<legend>Search [% form.query %]</legend>
 	<input type="hidden" name="tid" value="[% form.tid %]">
-	<INPUT TYPE="TEXT" SIZE="40" NAME="query" VALUE="[% form.query %]">
+	<input type="text" size="40" name="query" value="[% form.query %]">
 	[% IF authors %]
 		[% Slash.createSelect("author", authors, form.author, 1, 0, 1) %]
 	[% END %]
 	[% Slash.createSelect("sort", sort, form.sort, 1) %]
 
-	<INPUT TYPE="SUBMIT" VALUE="Search"><BR>
+	<input type="submit" value="Search"><BR>
 
-	<INPUT TYPE="RADIO" NAME="op" VALUE="stories"[% IF op == 'stories'; constants.markup_checked_attribute; END %]> Stories
-	<INPUT TYPE="RADIO" NAME="op" VALUE="comments"[% IF op == 'comments'; constants.markup_checked_attribute; END %]> Comments
-	<INPUT TYPE="RADIO" NAME="op" VALUE="users"[% IF op == 'users'; constants.markup_checked_attribute; END %]> Users
-	<INPUT TYPE="RADIO" NAME="op" VALUE="polls"[% IF op == 'polls'; constants.markup_checked_attribute; END %]> Polls
+	<input type="radio" name="op" value="stories"[% IF op == 'stories'; constants.markup_checked_attribute; END %]> Stories
+	<input type="radio" name="op" value="comments"[% IF op == 'comments'; constants.markup_checked_attribute; END %]> Comments
+	<input type="radio" name="op" value="users"[% IF op == 'users'; constants.markup_checked_attribute; END %]> Users
+	<input type="radio" name="op" value="polls"[% IF op == 'polls'; constants.markup_checked_attribute; END %]> Polls
 	[% IF constants.search_journal_enabled %]
-		<INPUT TYPE="RADIO" NAME="op" VALUE="journals"[% IF op == 'journals'; constants.markup_checked_attribute; END %]> Journals
+		<input type="radio" name="op" value="journals"[% IF op == 'journals'; constants.markup_checked_attribute; END %]> Journals
 	[% END %]
 	[% IF constants.rss_store %]
 		[% IF constants.search_rss_enabled || user.is_admin %]
-			<INPUT TYPE="RADIO" NAME="op" VALUE="rss"[% IF op == 'rss'; constants.markup_checked_attribute; END %]> RSS Headlines
+			<input type="radio" name="op" value="rss"[% IF op == 'rss'; constants.markup_checked_attribute; END %]> RSS Headlines
 		[% END %]
 	[% END %]
 	[% IF constants.submiss_view || user.is_admin %]
-		<INPUT TYPE="RADIO" NAME="op" VALUE="submissions"[% IF op == 'submissions'; constants.markup_checked_attribute; END %]> Submissions
+		<input type="radio" name="op" value="submissions"[% IF op == 'submissions'; constants.markup_checked_attribute; END %]> Submissions
 	[% END %]
-	<br>
-
+	<div class="options">
 	[% IF journal_option %]
-	<INPUT TYPE="CHECKBOX" NAME="journal_only" VALUE="1"[% IF form.journal_only == '1'; constants.markup_checked_attribute; END %]> Users with Journals
+	<input type="checkbox" name="journal_only" value="1"[% IF form.journal_only == '1'; constants.markup_checked_attribute; END %]> Users with Journals
 	[% END %]
 
 	[% IF submission_notes %]
@@ -58,13 +58,13 @@ __template__
 
 	[% IF threshhold %]
 		Threshold [% threshold_select %]
-		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% form.sid %]">
+		<input type="hidden" name="sid" value="[% form.sid %]">
 	[% END %]
-	<P>
-</FORM>
+	</div>
+	</fieldset>
+</form>
 
 [% IF sections || topics %]
-</td></tr><tr><td>
 [%
    topics = Slash.db.getTopicTree();
 
@@ -84,7 +84,8 @@ __template__
    listex = listnames.size mod 3;
    i = 0;
 %]
-<b><a href="[% gSkin.rootdir %]/search.pl">[% constants.sitename %]</a>
+<div class="sectiontitle">
+<a href="[% gSkin.rootdir %]/search.pl">[% constants.sitename %]</a>
 [% IF !topics.${form.tid}.nexus && topics.${form.tid}.parent;
    thisparent = topics.${form.tid}.parent.keys.nsort.0;
    IF thisparent == constants.mainpage_nexus_tid;
@@ -95,14 +96,12 @@ __template__
 [% END; END; IF form.tid %]
 :: <a href="[% gSkin.rootdir %]/search.pl?tid=[% form.tid %]">[% topics.${form.tid}.textname %]</a>
 [% END; IF listnames.size %]
-Topics</b>
+Topics
 [% END %]
-</td></tr><tr><td>
 
 [% IF listnames.size %]
 <table cellpadding="10" width="100%">
 <tr><td valign="top">
-<font size="-1">
 <ul>
 [% FOREACH s = listnames.keys.sort -%]
 <li><a href="[% gSkin.rootdir %]/search.pl?tid=[% listnames.$s %]">[% s %]</a>[%
@@ -117,15 +116,12 @@ END %]</li>
        END;
 %]</ul></td>
 <td valign="top">
-<font size="-1">
-<ul>[% END; END # FOREACH %]
+<ul>[% END; END # FOREACH %]</ul>
 </td></tr>
 </table>
 [% END # IF listnames.size %]
-
+</div>
 [% END # IF sections || topics %]
-</td></tr></table>
-
 
 __seclev__
 100

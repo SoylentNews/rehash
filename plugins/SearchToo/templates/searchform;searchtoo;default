@@ -29,10 +29,10 @@ __template__
 	height="[% tref.height %]">
 [% END %]
 
-<form action="[% gSkin.rootdir %][% env.script_name %]" method="GET">
+<form action="[% gSkin.rootdir %][% env.script_name %]" method="get">
 	<br>
 	<input type="hidden" name="tid" value="[% form.tid %]">
-	<input type="TEXT" size="40" name="query" value="[% form.query %]">
+	<input type="text" size="40" name="query" value="[% form.query %]">
 	[% IF op == 'stories';
 		authors = Slash.db.getDescriptions("all-authors");
 		newauthors = { "" => Slash.getData("all_authors") };
@@ -46,27 +46,27 @@ __template__
 	   Slash.createSelect("sort", sort, form.sort, 1)
 	%]
 
-	<input type="SUBMIT" value="Search"><br>
+	<input type="submit" value="Search"><br>
 
-	<input type="RADIO" name="op" value="stories"[% IF op == 'stories'; constants.markup_checked_attribute; END %]> Stories
-	<input type="RADIO" name="op" value="comments"[% IF op == 'comments'; constants.markup_checked_attribute; END %]> Comments
-	<input type="RADIO" name="op" value="users"[% IF op == 'users'; constants.markup_checked_attribute; END %]> Users
-	<input type="RADIO" name="op" value="polls"[% IF op == 'polls'; constants.markup_checked_attribute; END %]> Polls
+	<input type="radio" name="op" value="stories"[% IF op == 'stories'; constants.markup_checked_attribute; END %]> Stories
+	<input type="radio" name="op" value="comments"[% IF op == 'comments'; constants.markup_checked_attribute; END %]> Comments
+	<input type="radio" name="op" value="users"[% IF op == 'users'; constants.markup_checked_attribute; END %]> Users
+	<input type="radio" name="op" value="polls"[% IF op == 'polls'; constants.markup_checked_attribute; END %]> Polls
 	[% IF constants.search_journal_enabled %]
-		<input type="RADIO" name="op" value="journals"[% IF op == 'journals'; constants.markup_checked_attribute; END %]> Journals
+		<input type="radio" name="op" value="journals"[% IF op == 'journals'; constants.markup_checked_attribute; END %]> Journals
 	[% END %]
 	[% IF constants.rss_store %]
 		[% IF constants.search_rss_enabled || user.is_admin %]
-			<input type="RADIO" name="op" value="rss"[% IF op == 'rss'; constants.markup_checked_attribute; END %]> RSS Headlines
+			<input type="radio" name="op" value="rss"[% IF op == 'rss'; constants.markup_checked_attribute; END %]> RSS Headlines
 		[% END %]
 	[% END %]
 	[% IF constants.submiss_view || user.is_admin %]
-		<input type="RADIO" name="op" value="submissions"[% IF op == 'submissions'; constants.markup_checked_attribute; END %]> Submissions
+		<input type="radio" name="op" value="submissions"[% IF op == 'submissions'; constants.markup_checked_attribute; END %]> Submissions
 	[% END %]
 	<br>
 
 	[% IF op == 'users' %]
-	<input type="CHECKBOX" name="journal_only" value="1"[% IF form.journal_only == '1'; constants.markup_checked_attribute; END %]> Users with Journals
+	<input type="checkbox" name="journal_only" value="1"[% IF form.journal_only == '1'; constants.markup_checked_attribute; END %]> Users with Journals
 	[% END %]
 
 	[% IF op == 'submissions';
@@ -79,7 +79,7 @@ __template__
 		threshold_select = Slash.createSelect('threshold', formats, form.threshold, 1);
 	%]
 		Threshold [% threshold_select %]
-		<input type="HIDDEN" name="sid" value="[% form.sid %]">
+		<input type="hidden" name="sid" value="[% form.sid %]">
 	[% END %]
 	<p>
 </form>
@@ -123,7 +123,7 @@ Topics</b>
 [% IF listnames.size %]
 <table cellpadding="10" width="100%">
 <tr><td valign="top">
-<font size="-1">
+
 <ul>
 [% FOREACH s = listnames.keys.sort -%]
 <li><a href="[% gSkin.rootdir %][% env.script_name %]?tid=[% listnames.$s %]">[% s %]</a>[%
@@ -138,7 +138,7 @@ END %]</li>
        END;
 %]</ul></td>
 <td valign="top">
-<font size="-1">
+
 <ul>[% END; END # FOREACH %]
 </td></tr>
 </table>

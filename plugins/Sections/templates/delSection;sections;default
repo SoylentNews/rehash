@@ -13,14 +13,14 @@ en_US
 __name__
 delSection
 __template__
-		<FORM ACTION="[% env.script_name %]" METHOD="POST">
-		<P>
+		<form action="[% env.script_name %]" method="post">
+		<p>
 		Do you really want to delete the [% section %] section?
-		<INPUT TYPE="HIDDEN" NAME="section" VALUE="[% section %]">
-		<INPUT TYPE="SUBMIT" NAME="deletesection_cancel" VALUE="Cancel">
-		<INPUT TYPE="SUBMIT" NAME="deletesection_confirm" VALUE="Delete [% section %]">
-		</P>
-		</FORM>
+		<input type="hidden" name="section" value="[% section %]">
+		<input type="submit" name="deletesection_cancel" value="Cancel">
+		<input type="submit" name="deletesection_confirm" value="Delete [% section %]">
+		</p>
+		</form>
 
 __seclev__
 10000

@@ -71,7 +71,7 @@ __template__
 	MetaModeration completed.
 
 [% CASE 'metamods_performed' %]
-	<P>[% num %] MetaModeration(s) Completed.
+	<p>[% num %] MetaModeration(s) Completed.
 
 [% CASE 'moderating' %]
 	[% returnme.data_constant = 1 %]

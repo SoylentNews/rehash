@@ -86,8 +86,8 @@ SWITCH gtitle;
 
   CASE 'Hits';
   IF (form.stats_skid && form.stats_skid != 0);
-      %] <B>[% gtitle %]</B> graph for [% form.stats_skid %] is unavailable.
-	Try the <B>Pages</B> graph instead.
+      %] <b>[% gtitle %]</b> graph for [% form.stats_skid %] is unavailable.
+	Try the <b>Pages</b> graph instead.
      [%
 #      PROCESS make_graph
 #         showtotal => 1,

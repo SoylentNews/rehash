@@ -11,9 +11,7 @@ en_US
 __name__
 recent_mods
 __template__
-
-[% USE Slash %]
-<P>
+<p>
 	[% mod_options.hours_back = 72 %]
         [% mod_options.title = "Latest Moderations";
 	   mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;

@@ -20,7 +20,7 @@ __template__
 [% 	IF submission.storyonly;
 		subtext = submission.story;
 	ELSIF submission.email && submission.name;
-		subtext = "<A HREF=\"$submission.email\">$submission.name</A> writes <i>\"$submission.story\"</i>";
+		subtext = "<a href=\"$submission.email\">$submission.name</a> writes <i>\"$submission.story\"</i>";
 	ELSIF (submission.name == constants.anon_name) && constants.anon_name_alt;
 		subtext = "$constants.anon_name_alt writes <i>\"$submission.story\"</i>";
 	ELSIF submission.name;

@@ -26,49 +26,50 @@ __name__
 pollbooth
 __template__
 [% IF has_activated or user.is_admin %]
-[% IF user.is_admin %]
-	[% IF !has_activated %]
-	(Poll not yet active)<BR>
-	[% END %]
-[% END %]
-[% IF !can_vote %]
-
-	<B>[% question %]</B>
-
-	[% FOREACH ans = answers %]
-		<BR>&middot; [% ans.answer %] ([% ans.votes %])
-	[% END %]
-
-	<P><EM>[% IF has_voted %](You've already voted.)[% ELSIF !poll_open %](Poll is closed.)[% END %]</EM><BR>
-	[ <A HREF="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
-	<A HREF="[% gSkin.rootdir %]/pollBooth.pl"><B>Polls</B></A> ] <BR>
-	Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
-
-[% ELSE %]
-
-	<FORM ACTION="[% gSkin.rootdir %]/pollBooth.pl">
-		[%- IF returnto -%]
-		<INPUT TYPE="HIDDEN" NAME="op" VALUE="vote_return">
-		<INPUT TYPE="HIDDEN" NAME="returnto" VALUE="[% returnto | strip_attribute %]">
-		[%- END -%]
-		<INPUT TYPE="hidden" NAME="qid" VALUE="[% qid | strip_attribute %]">
-		[% IF user.currentSkin %]
-		<INPUT TYPE="hidden" NAME="section" VALUE="[% user.currentSkin | strip_attribute %]">
+	[% IF user.is_admin %]
+		[% IF !has_activated %]
+		(Poll not yet active)<br>
 		[% END %]
-	<B>[% question %]</B>
+	[% END %]
+	[% IF !can_vote %]
+
+		<b>[% question %]</b>
 
 	[% FOREACH ans = answers %]
-		<BR><INPUT TYPE="radio" NAME="aid"
-		VALUE="[% ans.aid | strip_attribute %]">[% ans.answer | strip_html %]
+		<li>[% ans.answer %] <em>([% ans.votes %])</em></li>
 	[% END %]
 
-	<BR><INPUT TYPE="submit" VALUE="Vote">
-	[ <A HREF="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><B>Results</B></A> |
-	<A HREF="[% gSkin.rootdir %]/pollBooth.pl"><B>Polls</B></A> ] <BR>
-	Comments:<B>[% comments %]</B> | Votes:<B>[% voters %]</B>
-	</FORM>
+		<p><em>[% IF has_voted %](You've already voted.)[% ELSIF !poll_open %](Poll is closed.)[% END %]</em><br>
+		[ <a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><b>Results</b></a> |
+		<a href="[% gSkin.rootdir %]/pollBooth.pl"><b>Polls</b></a> ] <br>
+		Comments:<b>[% comments %]</b> | Votes:<b>[% voters %]</b>
 
-[% END %]
+	[% ELSE %]
+	
+		<form action="[% gSkin.rootdir %]/pollBooth.pl">
+			<fieldset>
+				<legend>Poll</legend>
+			[%- IF returnto -%]
+				<input type="hidden" name="op" value="vote_return" >
+				<input type="hidden" name="returnto" value="[% returnto | strip_attribute %]" >
+			[%- END -%]
+				<input type="hidden" name="qid" value="[% qid | strip_attribute %]" >
+			[% IF user.currentSkin %]
+				<input type="hidden" name="section" value="[% user.currentSkin | strip_attribute %]" >
+			[% END %]
+				<b>[% question %]</b>
+
+			[% FOREACH ans = answers %]
+				<br><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]" >[% ans.answer | strip_html %]
+			[% END %]
+
+				<br><input type="submit" value="Vote" >
+				[ <a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><b>Results</b></a> |
+				<a href="[% gSkin.rootdir %]/pollBooth.pl"><b>Polls</b></a> ] <br>
+				Comments:<b>[% comments %]</b> | Votes:<b>[% voters %]</b>
+			</fieldset>
+		</form>
+	[% END %]
 [% END %]
 __seclev__
 10000

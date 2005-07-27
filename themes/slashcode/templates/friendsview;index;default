@@ -15,9 +15,11 @@ en_US
 __name__
 friendsview
 __template__
+<ul>
 [% FOR article = articles %]
-	<LI><A HREF="[% gSkin.rootdir %]/~[% article.nickname | fixparam %]/journal/[% article.id %]">[% article.description %]</A> - <A HREF="[% gSkin.rootdir %]/~[% article.nickname | fixparam %]">[% article.nickname | strip_literal %]</A>
+	<li><a href="[% gSkin.rootdir %]/~[% article.nickname | fixparam %]/journal/[% article.id %]">[% article.description %]</a> - <a href="[% gSkin.rootdir %]/~[% article.nickname | fixparam %]">[% article.nickname | strip_literal %]</a>
 [% END %]
+</ul>
 __seclev__
 10000
 __version__

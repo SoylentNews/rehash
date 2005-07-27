@@ -1,0 +1,80 @@
+html>body #comments { margin: 0 auto .2em 0; width: 100%; }
+
+#comments
+{
+	clear: right;
+	z-index: 2;
+	position: relative;
+	margin: 0 -15.6em .2em 0;
+        width: 98%;
+}
+.commentwrap {
+	background: #fff;
+        position: relative;
+        border: 1px solid #aaa;
+	clear: right;
+}
+html > body .commentwrap table {
+        width: 100%;
+        margin: 0;
+}
+.commentwrap table {
+        width: 99%;
+	margin: .3em;
+}
+
+.commentBox
+{
+	background: #555;
+	text-align: center;
+	color: #fff;
+}
+
+.commentBox a { color: #fff; }
+.commentBox a:visited { color: #fff; }
+
+.commentBoxForm
+{
+	background: #ccc;
+	text-align: center;
+}
+.commentwrap legend
+{
+        display: none;
+}
+.commentwrap fieldset, .commentswrap form
+{
+        margin:0;
+        padding: 0;
+        border: none;
+}
+.commentTop .details {font-size: 75.5%; margin: 0; padding: 0;}
+.commentTop .details small {font-size: 100%;}
+
+.commentTop
+{
+	background: #ddd;
+	border: 1px solid #ccc;
+	padding: .3em;
+}
+
+.commentSub
+{
+	background: #eee;
+	padding: .3em;
+	font-size: 80%;
+	border: 1px solid #ddd;
+	margin: 0;
+}
+
+.commentTop H4 { display: inline; }
+
+.commentBody
+{
+	border: 1px solid #ddd;
+	border-bottom: none;
+	padding: .3em;
+}
+
+
+

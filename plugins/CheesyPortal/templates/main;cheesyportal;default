@@ -17,9 +17,9 @@ main
 __template__
 [% PROCESS titlebar %]
 
-<MULTICOL COLS="3">
+<multicol cols="3">
 [% FOREACH portal = portals %][% portal.box %][% END %]
-</MULTICOL>
+</multicol>
 
 __seclev__
 10000

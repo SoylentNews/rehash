@@ -15,7 +15,7 @@ __template__
 
 [% stories %]
 
-<P>
+<p>
 
 [% UNLESS user.noboxes; boxes; END %]
 

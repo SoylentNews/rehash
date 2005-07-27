@@ -68,11 +68,11 @@ __template__
 <table><tr><td><p>
 <input width="30" name="[% name %]_ab_searchfield" id="[% name %]-ab-searchfield" onkeyup="st_search_key_handler('ab', event);">
 <input width="30" type="button" value="Search" onclick="[% name %]_search('ab')">
-<font size="-2"><br>
+<br>
 [%- FOREACH letter = ['A' .. 'Z'] %]
 <a href="#" onclick="return [% name %]_search('ab','[% letter %]');">[% letter %]</a>
 [%- END %]
-<br></font>
+<br>
 </p><p>
 
     <div id="[% name %]-ab-searchlist">

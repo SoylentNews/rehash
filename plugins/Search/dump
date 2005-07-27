@@ -26,3 +26,6 @@ INSERT INTO soap_methods (class, method, seclev, formkeys) VALUES ('Slash::Searc
 # i am hoping to make it so we can just do something like
 # "search/SOAP_speed_limit" instead ... we'll see
 #INSERT INTO vars (name, value) VALUES ('test/get_uid_speed_limit', 10);
+
+
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','search.css','Slashcode',0,'search','no','',2,0);

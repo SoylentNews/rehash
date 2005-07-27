@@ -13,7 +13,7 @@ en_US
 __name__
 displayThread
 __template__
-	<LI><FONT SIZE="2"><B>[% link %] beneath your current threshold.</B></FONT>
+	<li><b>[% link %] beneath your current threshold.</b></li>
 
 __seclev__
 10000

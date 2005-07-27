@@ -23,17 +23,17 @@ __template__
 [% IF refresh %]
 	<META HTTP-EQUIV="Refresh" CONTENT="900; URL=[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;skin=[% form.skin | strip_attribute %]">
 [% END %]
-<FORM ACTION="[% env.script_name %]" METHOD="POST">
-<INPUT TYPE="HIDDEN" NAME="note" VALUE="[% form.note | strip_attribute %]">
-<INPUT TYPE="HIDDEN" NAME="skin" VALUE="[% form.skin | strip_attribute %]">
+<form action="[% env.script_name %]" method="post">
+<input type="hidden" name="note" value="[% form.note | strip_attribute %]">
+<input type="hidden" name="skin" value="[% form.skin | strip_attribute %]">
 
-<TABLE WIDTH="100%" CELLPADDING="0" CELLSPACING="0" BORDER="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
 
 [%# # temporarily disable %]
 [% IF 0 && weighted.size -%]
-	<TR><TD COLSPAN=4 ALIGN="CENTER"><NOBR>
+	<tr><td colspan="4" align="center"><nobr>
 	Top Submissions by Weight
-	</NOBR></TD></TR>
+	</nobr></td></tr>
 	[%	count = 0;
 			FOR sub = weighted;
 				PROCESS sub_display;
@@ -41,7 +41,7 @@ __template__
 				count = count + 1;
 				LAST IF count > constants.submit_num_weighted;
 		END -%]
-	<TR><TD COLSPAN=4 ALIGN="CENTER"><HR NOSHADE></TD></TR>
+	<tr><td colspan="4" align="center"><hr noshade></td></tr>
 [% END -%]
 
 [% separatecount = 0 %]
@@ -54,7 +54,7 @@ __template__
 [% END %]
 
 [% IF separatecount %]
-	<TR><TD COLSPAN="4"><HR></TD></TR>
+	<tr><td colspan="4"><hr></td></tr>
 	[% FOREACH sub = submissions -%]
 		[% IF sub.separate;
 			PROCESS sub_display;
@@ -63,49 +63,50 @@ __template__
 [% END %]
 
 
-</TABLE>
+</table>
 
-<P>
+<p>
 
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="Update">
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="Delete">
-<INPUT TYPE="SUBMIT" NAME="op" VALUE="Merge">
+<input type="submit" name="op" value="Update">
+<input type="submit" name="op" value="Delete">
+<input type="submit" name="op" value="Merge">
 
-<P>
-<a href="[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;skin=[% form.skin | strip_attribute %]&amp;toggle_bin_refresh=[% IF !refresh; "0"; ELSE; 1; END %]"><font size="-1">[% IF !refresh;  "Enable Bin Refresh"; ELSE; "Disable Bin Refresh"; END; %]</font></a>
+<p>
+<a href="[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;skin=[% form.skin | strip_attribute %]&amp;toggle_bin_refresh=[% IF !refresh; "0"; ELSE; 1; END %]">[% IF !refresh;  "Enable Bin Refresh"; ELSE; "Disable Bin Refresh"; END; %]</a>
 
-</FORM>
+</form>
 
 [% # Now we define that enignatic "sub_display" we referred to, earlier.
 BLOCK sub_display -%]
 	[% this_note = sub.note || '' %]
 
-	<TR><TD><NOBR>
-		<FONT SIZE="1"><INPUT TYPE="text" NAME="comment_[% sub.subid | strip_attribute %]" VALUE="[% sub.comment | strip_attribute %]" SIZE="20">
+	<tr><td><nobr>
+		<input type="text" name="comment_[% sub.subid | strip_attribute %]" value="[% sub.comment | strip_attribute %]" size="20">
 		[% Slash.createSelect("note_${sub.subid}", selection, this_note, 1) %]
 		[% Slash.createSelect("skid_${sub.subid}", Slash.db.getDescriptions('skins'), sub.primaryskid, 1, 0, 1) %]
 
 		[%# this is called del_ for legacy reasons, but is also use for merging %]
-		</FONT><INPUT TYPE="CHECKBOX" NAME="del_[% sub.subid %]">
-	</NOBR></TD><TD>
+		<input type="checkbox" name="del_[% sub.subid %]">
+	</nobr></td><td>
 	[% IF constants.submiss_ts %]
 		[% sub.time %]&nbsp;
 	[% END %]
-	</TD><TD>
-		<A HREF="[% env.script_name %]?op=viewsub&amp;table_skin=[% form.skin | strip_attribute %]&amp;table_note=[% form.note | strip_attribute %]&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %][% sub.sskin | strip_attribute %]"
-		>[% sub.strs.0 %]&nbsp;</A>
+	</td><td>
+		<a href="[% env.script_name %]?op=viewsub&amp;table_skin=[% form.skin | strip_attribute %]&amp;table_note=[% form.note | strip_attribute %]&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %][% sub.sskin | strip_attribute %]"
+		>[% sub.strs.0 %]&nbsp;</a>
 		[% IF constants.submit_show_weight %]
-			[% IF sub.keywords %]<BR><FONT SIZE="2">[% sub.keywords %] [% END %]
+			[% IF sub.keywords %]<br>[% sub.keywords %] [% END %]
 			[% IF sub.weight %] ([% sub.weight %])[% END %]
-			[% IF sub.url %] <B><A HREF="[% sub.url | strip_attribute %]">L</A></B>[% END %]
-			[% IF sub.keywords %]</FONT>[% END %]
+			[% IF sub.url %] <b><a href="[% sub.url | strip_attribute %]">L</a></b>[% END %]
+			[% IF sub.keywords %][% END %]
 		[% END %]
-	</TD><TD><FONT SIZE="2">[% sub.strs.1 %]
+	</td><td>[% sub.strs.1 %]
 	[% UNLESS sub.is_anon %]
 		([% sub.karma || 0 %])
 	[% END %]
-		<BR>[% sub.strs.2 %]</FONT></TD></TR>
+		<br>[% sub.strs.2 %]</td></tr>
 [% END %]
+</div>
 __seclev__
 10000
 __version__

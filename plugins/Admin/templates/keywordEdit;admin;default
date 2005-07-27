@@ -12,35 +12,35 @@ __name__
 keywordEdit
 __template__
 [% PROCESS titlebar width='100%' %]
-<TABLE>
-	<TR>
-		<FORM ACTION="[% env.script_name %]" METHOD="POST">
-			<TD VALIGN="TOP">
+<table>
+	<tr>
+		<form action="[% env.script_name %]" method="post">
+			<td valign="top">
 				[% PROCESS formLabel value => "Select a keyword" comment => "fill in the blanks and hit the create button to create a new keyword" %]
 				[% keywords_select %]
 
-				<INPUT TYPE="SUBMIT" NAME="keyworded" VALUE="Select keyword"><BR>
+				<input type="submit" name="keyworded" value="Select keyword"><br>
 
-				<BR><INPUT TYPE="HIDDEN" NAME="op" VALUE="edit_keyword"><BR>
+				<br><input type="hidden" name="op" value="edit_keyword"><br>
 
 				[% PROCESS formLabel value => "Keyword" comment => "this is what we will match against" %]
-				<INPUT TYPE="TEXT" NAME="keyword" VALUE="[% FILTER strip_attribute %][% keyword.keyword %][% END %]">
+				<input type="text" name="keyword" value="[% FILTER strip_attribute %][% keyword.keyword %][% END %]">
 
 				[% PROCESS formLabel value => "Name" comment => "this will be the label used in the related links box" %]
-				<INPUT TYPE="TEXT" NAME="name" VALUE="[% FILTER strip_attribute %][% keyword.name %][% END %]">
+				<input type="text" name="name" value="[% FILTER strip_attribute %][% keyword.name %][% END %]">
 
 				[% PROCESS formLabel value => "Link" comment => "this url is added to the related links box" %]
-				<INPUT TYPE="TEXT" NAME="link" VALUE="[% FILTER strip_attribute %][% keyword.link %][% END %]">
-				<BR>
+				<input type="text" name="link" value="[% FILTER strip_attribute %][% keyword.link %][% END %]">
+				<br>
 
-				<INPUT TYPE="SUBMIT" NAME="keywordnew" VALUE="Create Keyword">
-				<INPUT TYPE="SUBMIT" NAME="keywordsave" VALUE="Save Keyword">
-				<INPUT TYPE="SUBMIT" NAME="keyworddelete" VALUE="Delete Keyword">
+				<input type="submit" name="keywordnew" value="Create Keyword">
+				<input type="submit" name="keywordsave" value="Save Keyword">
+				<input type="submit" name="keyworddelete" value="Delete Keyword">
 
-			</TD>
-		</FORM>
-	</TR>
-</TABLE>
+			</td>
+		</form>
+	</tr>
+</table>
 
 __seclev__
 500

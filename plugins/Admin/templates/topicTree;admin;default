@@ -11,10 +11,12 @@ en_US
 __name__
 topicTree
 __template__
-[% PROCESS titlebar title=constants.sitename _ " Topic Tree Graphic" width='100%' %]
-<table width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td>
-<img src="[% constants.imagedir %]/topic_tree.png">
-</td></tr></table>
+
+[% PROCESS titlebar title=constants.sitename _ " Topic Tree Graphic" %]
+<div class="generalbody">
+	<img src="[% constants.imagedir %]/topic_tree.png" alt="topic tree">
+</div>
+
 __seclev__
 100
 __version__

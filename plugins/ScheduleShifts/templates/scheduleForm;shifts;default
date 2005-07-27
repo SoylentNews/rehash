@@ -26,8 +26,8 @@ __template__
 
 -%]
 
-<form action="[% env.script_name %]" method="POST">
-<input type="HIDDEN" name="op" value="save">
+<form action="[% env.script_name %]" method="post">
+<input type="hidden" name="op" value="save">
 
 [% PROCESS titlebar width=> "100%", title => "$constants.sitename Shifts" %]
 
@@ -36,13 +36,13 @@ __template__
 <tr bgcolor="[% user.colors.bg_3 %]">
   <th> </th>
 [%- FOR day = days_of_week -%]
-  <th><font color="[% user.colors.fg_0 %]">[% day.ucfirst %]</font></th>
+  <th>[% day.ucfirst %]</th>
 [%- END -%]
 </tr>
 
 [% FOR w = myweeks -%]
 <tr bgcolor="[% IF loop.index mod 2; myodd; ELSE; myeven; END %]">
-  <th bgcolor="[% user.colors.bg_3 %]"><font color="[% user.colors.fg_0 %]">[% w %]</font></th>
+  <th bgcolor="[% user.colors.bg_3 %]">[% w %]</th>
   [% FOR d = days_of_week -%]
     <td[% IF w == myweeks.1 && curr_day == d %] bgcolor="[% user.colors.bg_3 %]"[% END %]>[% FOR s = shift_types;
              key = "-2";
@@ -90,7 +90,7 @@ __template__
 [% END %]
 </table>
 
-<input type="SUBMIT" value="Save Schedule Changes">
+<input type="submit" value="Save Schedule Changes">
 </form>
 __seclev__
 10000

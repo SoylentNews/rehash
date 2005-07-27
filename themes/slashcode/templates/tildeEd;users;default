@@ -48,8 +48,9 @@ __template__
 <p>
 
 [% PROCESS titlebar title=title width="100%" %]
-
-[% criteria_msg %]
+<div class="message">
+	[% criteria_msg %]
+</div>	
 
 [% story023_data = Slash.db.getDescriptions('story023');
    checked = constants.markup_checked_attribute %]
@@ -59,96 +60,96 @@ __template__
 	######################
 -%]
 
-<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" WIDTH="100%">
-<TR>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
 
 [%-	# Sections (nexuses)
 -%]
 
-<TD VALIGN="TOP">
-<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
-	<TR>
-		<TH>Sections</TH>
-		<TH>&nbsp;All&nbsp;</TH>
-		<TH>Best</TH>
-		<TH>None</TH>
-	</TR>
+<td valign="top">
+<table border="0" cellpadding="2" cellspacing="0">
+	<tr>
+		<th>Sections</th>
+		<th>&nbsp;All&nbsp;</th>
+		<th>Best</th>
+		<th>None</th>
+	</tr>
 [% FOREACH nexustid = nexustid_order %]
-	<TR ALIGN="CENTER">
+	<tr align="center">
 		[%-	# really should have nexusref have another field for the
 			# url of the (first) skin that uses it, and link this in
 			# here, but ... I'm in a hurry
 		-%]
-		<TD ALIGN="LEFT">[% nexusref.$nexustid | strip_literal %]</TD>
+		<td align="left">[% nexusref.$nexustid | strip_literal %]</td>
 [% FOREACH value = [ 3 2 0 ] -%]
-		<TD><INPUT TYPE="RADIO" NAME="nexustid[% nexustid %]" VALUE="[% value %]"
-			[%- IF story023_default.nexus.$nexustid == value; checked; END %]></TD>
+		<td><input type="radio" name="nexustid[% nexustid %]" value="[% value %]"
+			[%- IF story023_default.nexus.$nexustid == value; checked; END %]></td>
 [%- END %]
-	</TR>
+	</tr>
 [% END %]
-</TABLE>
-</TD>
+</table>
+</td>
 
 [%-	# Authors
 -%]
 
-<TD VALIGN="TOP">
-<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
-	<TR>
-		<TH>Authors</TH>
-	</TR>
+<td valign="TOP">
+<table border="0" cellpadding="2" cellspacing="0">
+	<tr>
+		<th>Authors</th>
+	</tr>
 [% FOR aid = aid_order %]
-	<TR>
-		<TD><INPUT TYPE="CHECKBOX" NAME="aid[% aid %]"
+	<tr>
+		<td><input type="checkbox" name="aid[% aid %]"
 			[%- IF story023_default.author.$aid > 0; checked; END %]>
-			[% authorref.$aid | strip_literal %]</TD>
-	</TR>
+			[% authorref.$aid | strip_literal %]</td>
+	</tr>
 [% END %]
-</TABLE>
-</TD>
+</table>
+</td>
 
-</TR></TABLE>
+</tr></table>
 
 [% IF constants.story_never_topic_allow == 2
 	|| (user_edit.is_subscriber && constants.story_never_topic_allow == 1) %]
 
-<BR>
+<br>
 
 [%-	######################
 	# Topics
 	######################
 -%]
 
-<INPUT TYPE="HIDDEN" NAME="topictids_present" VALUE="1">
+<input type="hidden" name="topictids_present" value="1">
 
-<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0" ALIGN="CENTER">
-	<TR BGCOLOR="[% user_edit.colors.bg_3 %]">
-		<TH COLSPAN="6"><FONT COLOR="[% user_edit.colors.fg_3 %]">Topics</FONT></TH>
-	</TR>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" align="center">
+	<tr>
+		<th colspan="6">Topics</th>
+	</tr>
 
-	<TR><TD COLSPAN="6"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="100" HEIGHT="3"></TD></TR>
+	<tr><td colspan="6">&nbsp;</td></tr>
 
 [% FOREACH topictid = topictid_order -%]
 	[%- IF loop.index % 3 == 0 -%]
-		<TR BGCOLOR="[% user_edit.colors.bg_2 %]">
+		<tr>
 	[%- END -%]
-		<TD VALIGN="TOP"><INPUT TYPE="CHECKBOX" NAME="topictid[% topictid %]"
-			[%- IF story023_default.topic.$topictid > 0; checked; END %]></TD>
-		<TD VALIGN="TOP" ALIGN="LEFT">&nbsp;
+		<td valign="TOP"><input type="checkbox" name="topictid[% topictid %]"
+			[%- IF story023_default.topic.$topictid > 0; checked; END %]></td>
+		<td valign="TOP" align="left">&nbsp;
 	[%-	topicref.$topictid | strip_literal	-%]
-		</TD>
+		</td>
 	[%- IF loop.index % 3 == 2 -%]
-		</TR>
+		</tr>
 	[% END %]
 [%- END -%]
 [% remaining_cells = 2 - (topictid_order.max % 3);
    WHILE remaining_cells;
    	remaining_cells = remaining_cells - 1; -%]
-	<TD>&nbsp;</TD><TD>&nbsp;</TD>
+	<td>&nbsp;</td><td>&nbsp;</td>
 [%- END -%]
 
-	</TR>
-</TABLE>
+	</tr>
+</table>
 
 [% END %]
 
@@ -161,35 +162,37 @@ __template__
 
 [% PROCESS titlebar width='100%' title=customize_title %]
 
-<INPUT TYPE="CHECKBOX" NAME="useslashboxes"[% IF !user_edit.noboxes; checked; END %]> <B>Use Slashboxes</B>
+<input type="checkbox" name="useslashboxes"[% IF !user_edit.noboxes; checked; END %]> <b>Use Slashboxes</b>
 
-<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0" ALIGN="CENTER">
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
 [% FOREACH bid = box_order -%]
 	[%- IF loop.index % 3 == 0 -%]
-		<TR BGCOLOR="[% user.colors.bg_2 %]" VALIGN="TOP" ALIGN="LEFT">
+		<tr valign="top" align="left">
 	[%- END -%]
-		<TD><INPUT TYPE="CHECKBOX" NAME="showbox_[% bid | strip_paramattr %]"[% section_descref.$bid.checked %]>
-		<A HREF="[% env.script_name %]?op=previewbox&amp;bid=[% bid | strip_paramattr %]">
+		<td><input type="checkbox" name="showbox_[% bid | strip_paramattr %]"[% section_descref.$bid.checked %]>
+		<a href="[% env.script_name %]?op=previewbox&amp;bid=[% bid | strip_paramattr %]">
 		[% IF bid == 'srandblock' %]
 			Semi-Random Box
 		[% ELSE %]
 			[% section_descref.$bid.title || bid %]
 		[% END %]
-		</A></TD>
+		</a></td>
 	[%- IF loop.index % 3 == 2 -%]
-		</TR>
+		</tr>
 	[% END -%]
 [%- END -%]
 [%- remaining_cells = 2 - (box_order.max % 3);
    WHILE remaining_cells;
    	remaining_cells = remaining_cells - 1; -%]
-	<TD>&nbsp;</TD>
+	<td>&nbsp;</td>
 [%- END -%]
-	</TR>
-</TABLE>
+	</tr>
+</table>
 
-[% tilded_customize_msg %]
-[% tilded_box_msg %]
+<div class="notes">
+	[% tilded_customize_msg %]
+</div>
+	[% tilded_box_msg %]
 
 __seclev__
 500

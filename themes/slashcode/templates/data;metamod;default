@@ -18,9 +18,9 @@ __template__
 [% SWITCH value %]
 [% CASE 'not-eligible' %]
 	[% returnme.data_constant = 1 %] 
-	<BR>You are currently not eligible to Meta Moderate.<BR>
+	<br>You are currently not eligible to Meta Moderate.<br>
 	Return to
-	<A HREF="[% constants.real_rootdir %]/">the [% constants.sitename %] homepage</A>.<BR>
+	<a href="[% constants.real_rootdir %]/">the [% constants.sitename %] homepage</a>.<br>
 
 [% CASE 'header' %]
 	[% returnme.data_constant = 1 %] 
@@ -28,19 +28,19 @@ __template__
 
 [% CASE 'no_moderation' %]
 	[% returnme.data_constant = 1 %] 
-	<P>The moderation system for [% constants.sitename %] is currently down.</P>
+	<p>The moderation system for [% constants.sitename %] is currently down.</p>
 
 [% CASE 'unexpected_item' %]
 	[% returnme.data_constant = 1 %] 
-	<P>An error occurred during processing. Please re-load your meta-moderation form
-	and try again.</P>
+	<p>An error occurred during processing. Please re-load your meta-moderation form
+	and try again.</p>
 
 [% CASE 'thanks' %]
 	Thanks for meta-moderating some of [% constants.sitename %]'s many moderations.
 	This gives our moderators feedback and helps the whole system work!
 	<p>You probably want to go
-	<A HREF="[% constants.real_rootdir %]/">home</A> now, or maybe to
-	<A HREF="[% constants.real_rootdir %]/users.pl">your user page</A>.
+	<a href="[% constants.real_rootdir %]/">home</a> now, or maybe to
+	<a href="[% constants.real_rootdir %]/users.pl">your user page</a>.
 
 [% END %]
 

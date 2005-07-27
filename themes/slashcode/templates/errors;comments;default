@@ -16,16 +16,16 @@ en_US
 __name__
 errors
 __template__
+
 [% IF ! no_error_comment %]
 <!-- Error type: [% value %] -->
 [% END %]
 
-[% USE Slash %]
 [% SWITCH value;
 
 # LOGIN ERROR.
 CASE "login error" %]
-<P><B>Login for "[% form.unickname %]" has failed</B>. Please try again. [% form.op %]<BR><P>
+<p><b>Login for "[% form.unickname %]" has failed</b>. Please try again. [% form.op %]<br><p>
 
 [% # OPEN PROXY.
 CASE "open proxy" %]
@@ -33,7 +33,7 @@ Sorry, but according to our tests, you are trying to post [% IF !constants.comme
 from an open HTTP proxy.  Please close the proxy or ask your sysadmin or ISP 
 to do so, because open proxies are used to spam web boards like this
 one. [% IF constants.comments_portscan!=2 %]If you really can't close it and still want to post, you'll have to
-<A HREF="[% gSkin.rootdir %]/users.pl">register and log in</A>.[% END %]
+<a href="[% gSkin.rootdir %]/users.pl">register and log in</a>.[% END %]
 <p>If you have questions, mention that your proxy is at
 <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
 
@@ -44,12 +44,12 @@ as comment posting and moderation are currently unavailable.
 
 [% # ALREADY POSTED.
 CASE "already posted" %]
-You've already posted something in this discussion<BR>
+You've already posted something in this discussion<br>
 
 [% # ANONYMOUS DISALLOWED.
 CASE "anonymous disallowed" %]
 Sorry, anonymous posting has been turned off.
-Please <A HREF="[% gSkin.rootdir %]/users.pl">register and log in</A>.
+Please <a href="[% gSkin.rootdir %]/users.pl">register and log in</a>.
 
 [% # POST ANON OPTION DISABLED.
 CASE "postanon_option_disabled" %]
@@ -64,48 +64,48 @@ comment ... like the body or the subject!)
 
 [% # NO POINTS.
 CASE "no points" %]
-You don't have any moderator points.<BR>
+You don't have any moderator points.<br>
 
 [% # NO POINTS.
 CASE "not enough points" %]
-You don't have enough moderator points.<BR>
+You don't have enough moderator points.<br>
 
 [% # COMMENTS MAX POSTS.
 CASE "comments max posts" %]
-<BR><P><B>You've reached your maximum number of comments you can post: [% max_posts %] comments over [% timeframe %].
-</B></P>
+<br><p><b>You've reached your maximum number of comments you can post: [% max_posts %] comments over [% timeframe %].
+</b></p>
 
 [% # COMMENTS MAX POSTS.
 CASE "discussions max posts" %]
-<BR><P><B>You've reached your maximum number of discussions you can submit: [% max_posts %] discussions over [% timeframe %].
-</B></P>
+<br><p><b>You've reached your maximum number of discussions you can submit: [% max_posts %] discussions over [% timeframe %].
+</b></p>
 
 [% # INVALID FORMKEY
 CASE "invalid formkey" %]
 [% PROCESS titlebar width="100%" title="Invalid form key!" %]
-<BR><P><B>form key: [% formkey %] !</B></P>
+<br><p><b>form key: [% formkey %] !</b></p>
  
 [% # RESPONSE LIMIT 
 CASE "comments response limit" %]
 [% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
-<P>[% constants.sitename %] requires you to wait [% limit %] between
-hitting 'reply' and submitting a comment.</P>
-<P>It's been [% response %] since you hit 'reply'!</P>
+<p>[% constants.sitename %] requires you to wait [% limit %] between
+hitting 'reply' and submitting a comment.</p>
+<p>It's been [% response %] since you hit 'reply'!</p>
 
 [% # POST LIMIT
 CASE "comments post limit" %]
 [% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
-<P>[% constants.sitename %] requires you to wait between
+<p>[% constants.sitename %] requires you to wait between
 each successful posting of a comment to allow everyone a fair chance
-at posting a comment.</P>
-<P>It's been [% interval %] since you last successfully posted a comment</P>
+at posting a comment.</p>
+<p>It's been [% interval %] since you last successfully posted a comment</p>
 
 [% # POST LIMIT
 CASE "discussions post limit" %]
 [% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
-<P>[% constants.sitename %] requires you to wait between
-each successful creation of a discussion .</P>
-<P>It's been [% interval %] since you last successfully created a discussion</P>
+<p>[% constants.sitename %] requires you to wait between
+each successful creation of a discussion .</p>
+<p>It's been [% interval %] since you last successfully created a discussion</p>
 
 [% # USED FORM
 CASE "used form" %]
@@ -115,12 +115,12 @@ You can not use a form and hit the back button to use it again.
 
 [% # READ ONLY
 CASE "readonly" %]
-<BR><B>You can't post to this page.</B><br>
+<br><b>You can't post to this page.</b><br>
 
 [% # TOO MANY POSTS
 CASE "comments post limit daily" %]
 [% PROCESS titlebar width="100%" title="Call It A Night, Cowboy!" %]
-<P>[% constants.sitename %] only allows
+<p>[% constants.sitename %] only allows
 [% IF user.is_anon; "anonymous users";
 ELSE; "a user with your karma"; END %]
 to post [% limit %] times per day (more or less, depending on
@@ -129,7 +129,7 @@ moderation).
 ELSE; "You've already shared your thoughts"; END %]
 with us that many times. Take a breather, and come back and see us in
 24 hours or so.
-<P>If you think this is unfair, please email
+<p>If you think this is unfair, please email
 [% IF constants.adminmail_post; constants.adminmail_post;
 ELSE; constants.adminmail; END %]
 with your
@@ -167,13 +167,13 @@ Your comment could not be processed.  Please try again.
 
 [% # LOW CHARS-PER-LINE
 CASE "low chars-per-line" %]
-Your comment has too few characters per line (currently [% ratio %]).<BR>
+Your comment has too few characters per line (currently [% ratio %]).<br>
 
 [% # FILTER MESSAGE.
 CASE "filter message" %]
 [% PROCESS titlebar width="100%" title="Lameness filter encountered. Post aborted!" %]
 [% IF err_message %]
-<B>Reason: [% err_message %]</B><BR>
+<b>Reason: [% err_message %]</b><br>
 [% END %]
 
 [% # COMPRESS FILTER.
@@ -182,15 +182,15 @@ CASE "compress filter" %]
 Your comment violated the "[% ratio %]" compression filter. Try less
 whitespace and/or less repetition[%
 IF ratio == 'postersubj' %] in the subject line[% END %].
-<B>Comment aborted.</B>
+<b>Comment aborted.</b>
 
 [% # SUBMISSION ERROR.
 CASE "submission error" %]
-<P>There was an unknown error in the submission.<BR>
+<p>There was an unknown error in the submission.<br>
 
 [% # MAXCID EXCEEDED.
 CASE "maxcid exceeded" %]
-Don't you have anything better to do with your life?<BR>
+Don't you have anything better to do with your life?<br>
 
 [% # DUPLICATION ERROR.
 CASE "duplication error" %]
@@ -215,13 +215,13 @@ You do not have appropriate permissions to perform that action.
 [% CASE "nosubscription" %]
 [% PROCESS titlebar width="100%" title="Not subscriber, or not subscribed page" %]
 You can't see this discussion because it's scheduled in the future,
-where only subscribers can see it.<P>
+where only subscribers can see it.<p>
 Either you are not a subscriber to [% constants.sitename %], or you
 have indicated you don't want comments pages ad-free, or you have
 set your daily limit of ad-free pages to lower than
 the default [% constants.subscribe_hits_btmd %].
 Any of these three possible issues can be resolved at
-<A HREF="[% gSkin.rootdir %]/subscribe.pl">your subscription page</A>.<P>
+<a href="[% gSkin.rootdir %]/subscribe.pl">your subscription page</a>.<p>
 
 [% CASE "moderations to be lost" %]
 [% PROCESS titlebar width="100%" title="You've Already Moderated this Discussion" %]
@@ -236,7 +236,7 @@ to [% constants.sitename %], this is a bug. If not, someone sent you
 to a silly invalid URL.
 
 [% CASE %]
-An unexpected error has occurred.<BR><B>[% value %]</B><BR>
+An unexpected error has occurred.<br><b>[% value %]</b><br>
 [% END %]
 
 __seclev__

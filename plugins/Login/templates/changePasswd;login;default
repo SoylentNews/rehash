@@ -12,16 +12,17 @@ en_US
 __name__
 changePasswd
 __template__
-<h2>[% IF form.note == "Please change your password now!";
-	"Please change your password now! ";
-END; note %]</h2>
-
+<div id="slashboxes">
+        [% PROCESS userboxes %]
+</div>
 [% title = "Change password for $user.nickname ($user.uid)" %]
-[% PROCESS prefs_titlebar tab_selected='password' %]
+<div id="users-blocks">
+        [% PROCESS prefs_titlebar tab_selected='password' %]
+        <div class="generalbody">
+[% IF form.note == "Please change your password now!";
+        "Please change your password now! ";
+END; note %]
 
-<table align="CENTER" width="100%" bgcolor="[% user.colors.bg_5 %]">
-	<tr>
-		<td>
 [% IF constants.offer_insecure_login_link -%]
 		<p>You can automatically log in by clicking
 		 <a href="[% constants.real_rootdir %]/index.pl?op=userlogin&amp;logtoken=[% user.logtoken | fixparam %]">This Link</a> and Bookmarking the resulting page. 
@@ -29,9 +30,11 @@ END; note %]</h2>
 		</p>
 [%- END %]
 
-		<form action="[% constants.real_rootdir %]/login.pl" method="POST">
+		<form action="[% constants.real_rootdir %]/login.pl" method="post">
+		<fieldset>
+		<legend></legend>
 		[% PROCESS formkey_tag %]
-		<input type="HIDDEN" name="uid" value="[% user.uid %]">
+		<input type="hidden" name="uid" value="[% user.uid %]">
 
 [%- session = Slash.db.getDescriptions('session_login');
    session_sel = Slash.createSelect('session_login', session, user.session_login, 1);
@@ -50,21 +53,31 @@ END; note %]</h2>
 		other cookies for this account, requiring all other browsers using this account
 		to reauthenticate.</p>
 
-		[% PROCESS formLabel value => "Current Password" comment => "To change your password, enter your current password" %]
-		<input type="PASSWORD" name="oldpass" size="20" maxlength="20" value=""><br>
+			<label>
+				Current Password
+			</label>
+			<div class="note">
+				To change your password, enter your current password.
+			</div>
+		
+			<input type="password" name="oldpass" size="20" maxlength="20" value=""><br>
 
-		[% PROCESS formLabel value => "New Password" comment => "Enter your new password twice, must be 6-20 chars long" %]
-		<input type="PASSWORD" name="pass1" size="20" maxlength="20">
-		<input type="PASSWORD" name="pass2" size="20" maxlength="20">
+			<label>
+				New Password
+			</label>
+			<div class="note">
+				Enter your new password twice, must be 6-20 chars long.
+			</div>
+			<input type="password" name="pass1" size="20" maxlength="20">
+			<input type="password" name="pass2" size="20" maxlength="20">
 
-		</td>
-	</tr>
-</table>
 
-<input type="HIDDEN" name="op" value="saveprefs">
-<input type="SUBMIT" value="Change Login Prefs">
-</form>
-
+			<input type="hidden" name="op" value="saveprefs">
+			<input type="submit" value="Change Login Prefs" class="button">
+			</fieldset>
+		</form>
+	</div>
+</div>
 __seclev__
 500
 __version__

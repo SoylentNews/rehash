@@ -23,16 +23,16 @@ __template__
 
 [% CASE 'userhead' %]
 [% IF user.light %]
-	<A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/journal/">Journal</A> of <A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A> ([% uid %])
+	<a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/journal/">Journal</a> of <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</a> ([% uid %])
 [% ELSE %]
-	<A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/journal/"><FONT COLOR="[% user.colors.fg_0 %]">Journal</FONT></A> of <A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="[% user.colors.fg_0 %]">[% nickname | strip_literal %]</FONT></A> ([% uid %])  [% PROCESS zoo_icons person=uid implied="" %]
+	<a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/journal/">Journal</a> of <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</a> ([% uid %])  [% PROCESS zoo_icons person=uid implied="" %]
 [% END %]
 
 [% CASE 'friendhead' %]
 [% IF user.light %]
-	<A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname %]</A>'s <A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/friends/">Friends</A>
+	<a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</a>'s <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/friends/">Friends</a>
 [% ELSE %]
-	<A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/"><FONT COLOR="[% user.colors.fg_0 %]">[% nickname %]</FONT></A>'s <A HREF="[% gSkin.rootdir %]/~[% nickname | fixparam %]/friends/"><FONT COLOR="[% user.colors.fg_0 %]">Friends</FONT></A>
+	<a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</a>'s <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/friends/">Friends</a>
 [% END %]
 
 [% CASE 'nousers' %]
@@ -67,6 +67,9 @@ __template__
 [% CASE 'noentries_found' %]
 	[% returnme.data_constant = 1 %]
 	Sorry, the requested journal entries were not found.
+
+[% CASE 'journalfoot' %]
+	</div></div>
 
 [% END %]
 

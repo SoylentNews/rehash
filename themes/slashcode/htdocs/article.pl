@@ -142,6 +142,7 @@ sub main {
 		header($links, $story->{section}, {
 			story_title	=> $story->{title},
 			meta_desc	=> $meta_desc,
+			Page 		=> 'article',
 		}) or return;
 
 		# Can't do this before getStoryByTime because

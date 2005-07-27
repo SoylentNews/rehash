@@ -20,7 +20,7 @@ __template__
 
 [% CASE 'note' %]
 [% FOREACH n = note %]
-<H2>[% n %]</H2>
+<h2>[% n %]</h2>
 [% END %]
 
 [% CASE 'user_header' %]
@@ -41,17 +41,17 @@ __template__
 
 [% CASE 'newuser_msg' %]
 	[% PROCESS titlebar title=title width="100%" %]
-	<B>email</B>=[% form.email | strip_literal %]<BR>
-	<B>user id</B>=[% uid %]<BR>
-	<B>nick</B>=[% form.newusernick %]<BR>
-	<B>passwd</B>=mailed to [% form.email | strip_literal %]<BR>
+	<b>email</b>=[% form.email | strip_literal %]<br>
+	<b>user id</b>=[% uid %]<br>
+	<b>nick</b>=[% form.newusernick %]<br>
+	<b>passwd</b>=mailed to [% form.email | strip_literal %]<br>
 	[% IF suadmin_flag %]
-		<P>Now you can edit the newly created user  
-		<A HREF="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% uid %]">
-		[% form.newusernick %], UID [% uid %]</A></P>
+		<p>Now you can edit the newly created user  
+		<a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[% uid %]">
+		[% form.newusernick %], UID [% uid %]</a></p>
 	[% ELSE %]
-	<P>Once you receive your password, you can
-	<A HREF="[% gSkin.rootdir %]/login.pl">log in and set your account up.</A>
+	<p>Once you receive your password, you can
+	<a href="[% gSkin.rootdir %]/login.pl">log in and set your account up.</a>
 	[% END %]
 
 [% CASE 'reset_acct_msg' %]
@@ -93,7 +93,7 @@ but don't trust that value unless you know a reason to (we don't).[% END %]
 
 [% CASE 'userinfo_msg' %]
 
-<P>This is <B>your</B> User Info page.  There are thousands more, but
+<p>This is <b>your</b> User Info page.  There are thousands more, but
 this one is yours.  You most likely are not so interested in yourself,
 and probably would be more interested in the Preferences links you see
 up top there, where you can customize [% constants.sitename %],
@@ -108,18 +108,18 @@ change your password, or just click pretty widgets to kill time.
 	right alongside the rest of our stories.<p>
 
 [% CASE 'tilded_customize_msg' %]
-	<TABLE WIDTH="100%" BGCOLOR="[% user.colors.bg_2 %]" BORDER="0"><TR><TD>
-	<P><P>You can choose at most [% constants.slashboxes_maxnum %] boxes.
-	<BR>If you choose 
-	'<B>User Space</B>' above, the contents of this box will be inside:
-	<BR><TEXTAREA NAME="mylinks" rows=8 COLS="40" WRAP="VIRTUAL">[% userspace | strip_literal %]</TEXTAREA>
+	<table width="100%" bgcolor="[% user.colors.bg_2 %]" border="0"><tr><td>
+	<p><p>You can choose at most [% constants.slashboxes_maxnum %] boxes.
+	<br>If you choose 
+	'<b>User Space</b>' above, the contents of this box will be inside:
+	<br><textarea name="mylinks" rows=8 cols="40" wrap="VIRTUAL">[% userspace | strip_literal %]</textarea>
 
 [% CASE 'tilded_box_msg' %]
-	<P>If you find a problem, or have a reasonable suggestion
+	<p>If you find a problem, or have a reasonable suggestion
 	for new RSS feeds, please contact
-	<A HREF="mailto:[% constants.adminmail | strip_attribute %]">[% constants.siteadmin_name %]</A>.
+	<a href="mailto:[% constants.adminmail | strip_attribute %]">[% constants.siteadmin_name %]</a>.
 
-	<P></TD></TR></TABLE>
+	<p></td></tr></table>
 
 [% CASE 'saveuser_email_msg' %]
 The user account [% nickname %] on [% constants.sitename %] had this email associated
@@ -153,40 +153,40 @@ please contact the site administrator immediately.
 
 [% CASE 'dispform_new_msg_1' %]
 	If your registration attempt is failing, it is most likely because
-	you tried to register with a <B>duplicate nickname</B>, a <B>duplicate
-	email address</B>, or an <B>invalid email</B>.  You can try another below,
+	you tried to register with a <b>duplicate nickname</b>, a <b>duplicate
+	email address</b>, or an <b>invalid email</b>.  You can try another below,
 	or use the form on the left to either log in, or retrieve your forgotten password.
 
 [% CASE 'newuserform_msg' %]
-	Don't have an account yet? <A HREF="[% env.script_name %]?op=newuserform">How about creating one?</A>
+	Don't have an account yet? <a href="[% env.script_name %]?op=newuserform">How about creating one?</a>
 
 [% CASE 'dispform_new_msg_2' %]
 	What? You don't have an account yet?  Well, enter your preferred
-	<B>nick</B> name here:
+	<b>nick</b> name here:
 
 [% CASE 'mailpasswd_mailed_msg' %]
-	<P>The password for [% name %] was just emailed.<BR>
+	<p>The password for [% name %] was just emailed.<br>
 
 [% CASE 'savenickname_msg' %]
-	<P>Saving [% nickname.substr(0,20) | strip_literal %].<BR>
+	<p>Saving [% nickname.substr(0,20) | strip_literal %].<br>
 
 [% CASE 'changeemail_msg' %]
-	Notifying [% realemail | strip_literal %] of the change to their account.<BR>
+	Notifying [% realemail | strip_literal %] of the change to their account.<br>
 	E-mail address changed and re-registration information sent to:
-	[% form.realemail | strip_literal %]<BR>
+	[% form.realemail | strip_literal %]<br>
 
 [% CASE 'saveuser_passchanged_msg' %]
-	Password changed for [% nick %], UID [% uid %].<BR>
+	Password changed for [% nick %], UID [% uid %].<br>
 
 [% CASE 'savemiscopts_msg' %]
-	<P>Option(s) changed.<BR>
+	<p>Option(s) changed.<br>
 
 [% CASE 'no_registration_needed' %]
-	<P>Hello, [% user.nickname | strip_literal %]. Your account is currently registered with
-	the system. No re-registration is necessary at this time.<BR>
+	<p>Hello, [% user.nickname | strip_literal %]. Your account is currently registered with
+	the system. No re-registration is necessary at this time.<br>
 
 [% CASE DEFAULT %]
-	-- MISSING USER MESSAGE SEGMENT -- [[% value %]] block not found.<BR>
+	-- MISSING USER MESSAGE SEGMENT -- [[% value %]] block not found.<br>
 
 [% END %]
 __seclev__

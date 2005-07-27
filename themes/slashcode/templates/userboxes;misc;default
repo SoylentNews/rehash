@@ -36,7 +36,7 @@ IF user.is_anon;
 			[% PROCESS userlogin %]
 		[% END;
 	END;
-	Slash.fancybox(constants.fancyboxwidth, title, contents, 1, 1);
+	Slash.sidebox(title, contents, "userlogin", 1);
 
 END;
 
@@ -47,117 +47,117 @@ IF !useredit.is_anon;
 	title = useredit.nickname | strip_literal;
 	title = title _ " ($useredit.uid)";
 	contents = BLOCK;
-		'<A HREF="'; gSkin.rootdir; '/~';
+		'<a href="'; gSkin.rootdir; '/~';
 			useredit.nickname | strip_paramattr; '/">';
-                        useredit.nickname; '</A> ';
+                        useredit.nickname; '</a> ';
 		IF user.uid != useredit.uid;
 			PROCESS zoo_icons person=useredit.uid implied="";
 		END;
 		IF user.uid == useredit.uid OR user.is_admin;
 			# Looking at ourselves; show our real email info.
-			'<BR><A HREF="mailto:';
+			'<br><a href="mailto:';
 				useredit.realemail | strip_paramattr; '">';
-				Slash.ellipsify(Slash.strip_literal(useredit.realemail)); '</A>';
-			'<BR>&nbsp;&nbsp;';
+				Slash.ellipsify(Slash.strip_literal(useredit.realemail)); '</a>';
+			'<br>&nbsp;&nbsp;';
 			IF useredit.fakeemail;
 				IF useredit.fakeemail == useredit.realemail;
 					'(shown without obfuscation)';
 				ELSE;
-					'shown as <A HREF="mailto:';
+					'shown as <a href="mailto:';
 					useredit.fakeemail | strip_paramattr; '">';
-					Slash.ellipsify(Slash.strip_literal(useredit.fakeemail)); '</A>';
+					Slash.ellipsify(Slash.strip_literal(useredit.fakeemail)); '</a>';
 				END;
 			ELSE;
 				'(email not shown publicly)';
 			END;
 		ELSE;
 			# Looking at someone else; show fake email info.
-			'<BR>&nbsp;&nbsp;';
+			'<br>&nbsp;&nbsp;';
 			IF useredit.fakeemail;
-				'<A HREF="mailto:';
+				'<a href="mailto:';
 					useredit.fakeemail | strip_paramattr; '">';
-					Slash.ellipsify(Slash.strip_literal(useredit.fakeemail)); '</A>';
+					Slash.ellipsify(Slash.strip_literal(useredit.fakeemail)); '</a>';
 			ELSE;
 				'(email not shown publicly)';
 			END;
 		END;
 
 		IF useredit.homepage;
-			'<BR><A HREF="';
+			'<br><a href="';
 			useredit.homepage | strip_attribute;
 			'"';
 			IF useredit.karma <= constants.goodkarma;
 				' rel="nofollow"';
 			END;
 			'>';
-			Slash.ellipsify(Slash.strip_literal(useredit.homepage)); '</A>';
+			Slash.ellipsify(Slash.strip_literal(useredit.homepage)); '</a>';
 		END;
 
 		IF user.uid == useredit.uid OR user.is_admin;
-			'<BR>Karma: ';
+			'<br>Karma: ';
 			PROCESS karma karma=useredit.karma admin_flag=user.is_admin;
 		END;
 
 		IF user.is_admin AND !constants.subscribe_hits_only;
 			# If we're an admin and we're looking at a user
 			# for which there might be an accurate hit count.
-			'<BR>Hits: ';
+			'<br>Hits: ';
 			useredit.hits;
 		END;
 
 		IF useredit.aim;
-			'<BR><B>AOL IM:</B> ';
+			'<br><b>AOL IM:</b> ';
 			useredit.aim | strip_literal;
-			' (<B><A HREF="aim:addbuddy?screenname=';
+			' (<b><a href="aim:addbuddy?screenname=';
 			useredit.aim | strip_attribute;
-			'">Add Buddy</A>, ';
-			'<A HREF="aim:goim?screenname=';
+			'">Add Buddy</a>, ';
+			'<a href="aim:goim?screenname=';
 			useredit.aim | strip_attribute;
-			'&amp;message=Greetings!">Send Message</A></B>)';
+			'&amp;message=Greetings!">Send Message</a></b>)';
 		END;
 
 		IF useredit.yahoo;
-			'<BR><B>Yahoo! ID:</B> ';
-			'<A HREF="http://profiles.yahoo.com/';
+			'<br><b>Yahoo! ID:</b> ';
+			'<a href="http://profiles.yahoo.com/';
 			useredit.yahoo | strip_attribute;
 			'">';
 			useredit.yahoo | strip_literal;
-			'</A> (<B><A HREF="http://edit.yahoo.com/config/set_buddygrp?';
+			'</a> (<b><a href="http://edit.yahoo.com/config/set_buddygrp?';
 			'.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=';
 			useredit.yahoo | strip_attribute;
-			'">Add User</A>, ';
-			'<A HREF="http://edit.yahoo.com/config/send_webmesg?.target=';
+			'">Add User</a>, ';
+			'<a href="http://edit.yahoo.com/config/send_webmesg?.target=';
 			useredit.yahoo | strip_attribute;
-			'">Send Message</A></B>)';
+			'">Send Message</a></b>)';
 		END;
 
 		IF useredit.jabber;
-			'<BR><B>Jabber:</B> ';
+			'<br><b>Jabber:</b> ';
 			useredit.jabber | strip_literal;
 		END;
 
 		IF useredit.calendar_url;
-			'<BR><B>Public Calendar:</B> ';
-			'<A HREF="webcal://';
+			'<br><b>Public Calendar:</b> ';
+			'<a href="webcal://';
 			useredit.calendar_url | strip_attribute;
-			'">Subscribe</A>, <A HREF="http://';
+			'">Subscribe</a>, <a href="http://';
 			useredit.calendar_url | strip_attribute;
-			'">Download</A>';
+			'">Download</a>';
 		END;
 
                 IF useredit.bio;
-                        '<BR><HR NOSHADE SIZE="1">';
+                        '<br><hr>';
 			useredit.bio;
                 END;
 
 		IF user.is_admin AND hits;
-			'<BR><HR NOSHADE SIZE="1">';
+			'<br><hr>';
 			'This story has been viewed ';
 			hits;
 			' times.';
 		END;
 	END;
-	Slash.fancybox(constants.fancyboxwidth, title, contents, 1, 1);
+	Slash.sidebox(title, contents, "user-info", 1);
 
 	# Second box:  info about moderation, if applicable
 	# Note this applies to the current user, not the user
@@ -166,27 +166,28 @@ IF !useredit.is_anon;
 	IF user.points || user.is_admin;
 		title = "Moderation";
 		contents = BLOCK %]
-<A HREF="[% gSkin.rootdir %]/~[% user.nickname | fixparam %]/">You</A>
+<a href="[% gSkin.rootdir %]/~[% user.nickname | fixparam %]/">You</a>
 have moderator access
 [% IF user.is_admin %](because you're an admin)[% END %]
-and <B>[% user.points %]</B> point[% user.points == 1 ? '' : 's' %]
+and <b>[% user.points %]</b> point[% user.points == 1 ? '' : 's' %]
 [%- IF user.points && user.lastgranted %] (expire on [%
 	hours = constants.mod_stir_hours || (constants.stir * 24);
 	hours = hours * 3600;
 	hours = hours + user.off_set;
 	Slash.timeCalc(user.lastgranted, "%Y-%m-%d", hours); %])[% END %].
 [% IF user.points > 0 %]
-Welcome to those of you just joining: <B>please</B>
-read the <A HREF="[% gSkin.rootdir %]/moderation.shtml">moderator guidelines</A>
+Welcome to those of you just joining: <b>please</b>
+read the <a href="[% gSkin.rootdir %]/moderation.shtml">moderator guidelines</a>
 for instructions.
-<P>&middot; You can't post &amp; moderate the same discussion.
-<BR>&middot; Concentrate on promoting more than demoting.
-<BR>&middot; Browse at -1 to keep an eye out for abuses.
-<BR>&middot; <A HREF="mailto:[% constants.adminmail | strip_attribute %]">Mail the admin</A>
-URLs showing abuse (the cid link please!).
+<ul>
+	<li>You can't post &amp; moderate the same discussion.</li>
+	<li>Concentrate on promoting more than demoting.</li>
+	<li>Browse at -1 to keep an eye out for abuses.</li>
+	<li><a href="mailto:[% constants.adminmail | strip_attribute %]">Mail the admin</a> URLs showing abuse (the cid link please!).</li>
+</ul>
 [% END %]
 		[% END;
-		Slash.fancybox(constants.fancyboxwidth, title, contents, 1, 1);
+		Slash.sidebox(title, contents, "moderation", 1);
 	END;
 
 	# Third box:  user space, if applicable
@@ -196,11 +197,10 @@ URLs showing abuse (the cid link please!).
 		&& (!user.slashboxes || user.slashboxes.search("mysite"));
 		title = "User Space";
 		contents = user.mylinks;
-		Slash.fancybox(constants.fancyboxwidth, title, contents, 1, 1);
+		Slash.sidebox(title, contents, "mylinks", 1);
 	END;
 END %]
 
-<IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="[% constants.fancyboxwidth + 10 %]" HEIGHT="1" BORDER="0" ALT="">
 
 __seclev__
 1000

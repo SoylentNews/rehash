@@ -11,7 +11,7 @@ Create drop-down HTML list
 	"multiple" is also true)
 * numeric = boolean to sort keys numerically
 * ordered = an already sorted arrayref of the keys in items
-* multiple = boolean, whether MULTIPLE is specified in the <SELECT>
+* multiple = boolean, whether MULTIPLE is specified in the <select>
 
 __title__
 
@@ -23,9 +23,9 @@ __name__
 select
 __template__
 [% IF default.ref == 'HASH'; default_hr = default; ELSE; default_hr = { $default = 1 }; END %]
-<SELECT NAME="[% label %]"[% IF multiple %] MULTIPLE[% END %]>[% mylist = ordered ? ordered : numeric ? items.keys.nsort : items.keys.sort %]
-[% FOREACH item = mylist %]	[% IF default_hr.$item; selected = ' SELECTED'; ELSE; selected = ''; END %]<OPTION VALUE="[% item %]"[% selected %]>[% items.$item %]</OPTION>
-[% END %]</SELECT>
+<select name="[% label %]"[% IF multiple %] MULTIPLE[% END %]>[% mylist = ordered ? ordered : numeric ? items.keys.nsort : items.keys.sort %]
+[% FOREACH item = mylist %]	[% IF default_hr.$item; selected = ' selected'; ELSE; selected = ''; END %]<option value="[% item %]"[% selected %]>[% items.$item %]</option>
+[% END %]</select>
 
 __seclev__
 10000

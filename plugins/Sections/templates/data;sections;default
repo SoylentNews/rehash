@@ -23,20 +23,20 @@ __template__
 
 [% CASE 'notadmin' %]
 	[% returnme.data_constant = 1 %]
-	<PRE>I woke up in the Soho bar when a policeman knew my name. He said,
+	<pre>I woke up in the Soho bar when a policeman knew my name. He said,
          "You can go sleep at home tonite if you can get up and walk away."
          I staggered back to the underground and a breeze threw back my
          head. I remember throwing punches around and preachin' from my chair.
-                         From 'Who Are You' by God (aka Pete Townshend)<BR></PRE>
+                         From 'Who Are You' by God (aka Pete Townshend)<br></pre>
 
 [% CASE 'insert' %]
-	Inserted [% section %]<BR>
+	Inserted [% section %]<br>
 
 [% CASE 'update' %]
-	Updated [% section %]<BR>
+	Updated [% section %]<br>
 
 [% CASE 'failed' %]
-	Failed to create/update [% section %]<BR>
+	Failed to create/update [% section %]<br>
 
 [% CASE 'addhead' %]
 	[% returnme.data_constant = 1 %]
@@ -53,11 +53,11 @@ __template__
 	Saving [% form.section | strip_nohtml %] Section
 
 [% CASE 'subsection_added' %]
-	Subsection '[% form.new_subsection %]' added.<BR><BR>
+	Subsection '[% form.new_subsection %]' added.<br><br>
 
 [% CASE 'subsection_removed' %]
-	Operation "[% form.action %]" completed.<BR>
-	Subsection #[% form.DEL_subsection %] removed.<BR><BR>
+	Operation "[% form.action %]" completed.<br>
+	Subsection #[% form.DEL_subsection %] removed.<br><br>
 
 [% END %]
 

@@ -1,6 +1,7 @@
 <HTML>
  <TITLE>Slash Moderation</TITLE>
-<!--#include file="slashhead.inc"-->
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
 <P><FONT color=006666 size=5><B>Slash Moderation</B></FONT><BR>
 <I>last updated 9.9.99 by CmdrTaco</I>
 <P>This document will attempt to explain the moderation system that lies

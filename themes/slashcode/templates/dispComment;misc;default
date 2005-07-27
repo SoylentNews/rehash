@@ -22,79 +22,71 @@ en_US
 __name__
 dispComment
 __template__
-	<TR><TD>
-	<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
-		<TR VALIGN="TOP">
-			<TD BGCOLOR="[% user.colors.bg_3 %]"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
-			<TD BGCOLOR="[% user.colors.bg_3 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0"><TR><TD>
-				<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.colors.fg_0 %]"><A NAME="[% cid %]"><B>[% subject %]</B></A>
-[% UNLESS user.noscores %] (Score:[% IF points.length; points; ELSE; "?"; END %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
-</FONT>
-			</TD></TR></TABLE></TD>
-			<TD BGCOLOR="[% user.colors.bg_3 %]" ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
-		</TR>
-
-		<TR>
-			<TD BACKGROUND="[% constants.imagedir %]/gl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-			<TD BGCOLOR="#E6E6E6" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="#E6E6E6">
-
-<FONT FACE="[% constants.mainfontface %]" SIZE="1">by
-[% IF !is_anon %]<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</A>[% END %]
-[% IF !is_anon && subscriber_bonus == "yes"; " *"; END %]
-[% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
-[% IF !is_anon && fakeemail %]&lt;<A HREF="mailto:[% fakeemail | fixparam %]">[% fakeemail_vis | strip_literal %]</A>&gt;[% END %]
-on [% Slash.timeCalc(time) %]
-[% IF sid && cid %] (<A HREF="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</A>)</FONT>[% END %]
-
-[% has_homepage = homepage && homepage.length > 8;
-   has_journal = journal_last_entry_date.search('[1-9]');
-   IF !is_anon && (has_homepage || has_journal) %]
-	<BR><FONT FACE="[% constants.mainfontface %]" SIZE="1">(
-	[% IF has_homepage %]
-		<A HREF="[% homepage %]"[% IF (!karma_bonus) || (karma_bonus == 'no') %] REL="nofollow"[% END %]>[% homepage | strip_literal %]</A>
-		[% IF has_journal %] | [% END %]
-	[% END %]
-	[% IF has_journal %]
-		Last Journal:
-		<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]/journal/">[%
-			Slash.timeCalc(journal_last_entry_date) %]</A>
-	[% END %]
-	)</FONT>
-[% END %]
-
-[% ipid_display %]
-
-			</TD></TR></TABLE></TD>
-			<TD BACKGROUND="[% constants.imagedir %]/gr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-		</TR>
-
-		<TR><TD BGCOLOR="#006666" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD></TR>
-		<TR>
-			<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-			<TD BGCOLOR="[% user.colors.bg_1 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.colors.bg_1 %]">
-[% comment %]
-[% UNLESS user.nosigs %]
-	<BR>[% sig %]
-[% END %]
-
-[% IF comment_shrunk;
-	linkComment = Slash.linkComment({
-		sid	=> sid,
-		cid	=> cid,
-		pid	=> cid,
-		subject	=> 'Read the rest of this comment...',
-		subject_only => 1
-	}, 1) %]
-	<P><B>[% linkComment %]</B>
-[% END %]
-			</TD></TR></TABLE></TD>
-			<TD BACKGROUND="[% constants.imagedir %]/wr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-		</TR>
-		<TR><TD BGCOLOR="[% user.colors.bg_3 %]" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1" ALT=""></TD></TR>
-	</TABLE>
-	</TD></TR>
-
-[% PROCESS dispLinkComment %]
+	<tr>
+		<td>
+			<table cellpadding="0" cellspacing="0">
+				<tr>
+					<td class="commentTop">
+						<div class="title">
+							<h4><a name="[% cid %]">[% subject %]</a></h4>
+							[% UNLESS user.noscores %] (Score:[% IF points.length; points; ELSE; "?"; END %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
+						</div>
+						<div class="details">
+							by
+							[% IF !is_anon %]<a href="[% constants.real_rootdir %]/~[% nickname | fixparam %]">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</a>[% END %]
+							[% IF !is_anon && subscriber_bonus == "yes"; " *"; END %]
+							[% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
+							[% IF !is_anon && fakeemail %]&lt;<a href="mailto:[% fakeemail | fixparam %]">[% fakeemail_vis | strip_literal %]</a>&gt;[% END %]
+							on [% Slash.timeCalc(time) %]
+							[% IF sid && cid %] (<a href="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</a>)[% END %]
+							<small>
+								[% has_homepage = homepage && homepage.length > 8;
+					   			has_journal = journal_last_entry_date.search('[1-9]');
+				   				IF !is_anon && (has_homepage || has_journal) %]
+									<br>
+									(
+									[% IF has_homepage %]
+										<a href="[% homepage %]">[% homepage | strip_literal %]</a>
+										[% IF has_journal %] | [% END %]
+									[% END %]
+									[% IF has_journal %]
+										Last Journal:
+										<a href="[% constants.real_rootdir %]/~[% nickname | fixparam %]/journal/">[%
+										Slash.timeCalc(journal_last_entry_date) %]</a>
+									[% END %]
+									)
+								[% END %]
+							[% ipid_display %]
+							</small>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td class="commentBody">
+						[% comment %]
+						[% UNLESS user.nosigs %]
+							<br>[% sig %]
+						[% END %]
+					</td>
+				</tr>
+				[% IF comment_shrunk;
+					linkComment = Slash.linkComment({
+						sid     => sid,
+                                                cid     => cid,
+                                                pid     => cid,
+                                                subject => 'Read the rest of this comment...',
+                                                subject_only => 1
+				}, 1) %]
+				<tr>
+					<td>
+						<p><b>[% linkComment %]</b></p>
+					</td>
+				</tr>
+				[% END %]
+				[% PROCESS dispLinkComment %]
+			</table>
+		</td>
+	</tr>
 
 __seclev__
 10000

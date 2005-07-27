@@ -24,7 +24,7 @@ __template__
 [% CASE 'offertext' %]
 	[% returnme.data_constant = 1 %]
 	You're invited to <a href="/daypass.pl">earn a daypass</a>
-	and become an honorary subscriber for the day.<BR>
+	and become an honorary subscriber for the day.<br>
 
 [% END %]
 

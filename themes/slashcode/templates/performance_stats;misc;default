@@ -12,13 +12,13 @@ __template__
 [% pps = Slash.db.getVar('cur_performance_pps', 'value', 1) %]
 [% stats = Slash.db.getVar('cur_performance_stats', 'value', 1) %]
 [% items = stats.split('\|') %]
-[% IF pps.defined; "<font size='2'>"; pps; "&nbsp;pps</font><br>"; END; %]
+[% IF pps.defined; ""; pps; "&nbsp;pps<br>"; END; %]
 [% WHILE items.size > 0;
 	cur_set = items.splice(0, 3);
 	IF items.size > 0; %]
-		<font size="2">[% cur_set.0 %] [% cur_set.1 %]s [% cur_set.2 %] [% IF items.size >= 4 %] | [% END %][% IF items.size <= 3 %]<BR>[% END %]</font>
+		[% cur_set.0 %] [% cur_set.1 %]s [% cur_set.2 %] [% IF items.size >= 4 %] | [% END %][% IF items.size <= 3 %]<br>[% END %]
 	[% ELSE %]
-		<font size="2">[% cur_set.1 %][% IF cur_set.2%]% [% cur_set.2 %][% END %]</font>
+		[% cur_set.1 %][% IF cur_set.2%]% [% cur_set.2 %][% END %]
 	[% END %]
 [% END %]
 __seclev__
