@@ -6,14 +6,13 @@
 
 use strict;
 
+use Time::HiRes;
 use Slash::Constants ':slashd';
 
 use vars qw( %task $me );
 $!=0;
 # only run from runtask
 $task{$me}{standalone} = 1;
-# this line should not be needed, but for now, is
-$task{$me}{timespec} = '0 0 0 0 0';
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
@@ -90,7 +89,8 @@ $task{$me}{code} = sub {
 			my $keycount = scalar keys %$fetch;
 			if (!$keycount) {
 				slashdLog("No records for $name");
-				last;
+				$set->{lst} = $max;
+				next;  # not last; could be gap
 			} else {
 				slashdLog("Processing $keycount records for $name");
 			}
@@ -100,6 +100,7 @@ $task{$me}{code} = sub {
 
 			for my $id (sort { $a <=> $b } keys %$fetch) {
 				my(%oldhtml, %html, $ok);
+				my $start_time = Time::HiRes::time;
 				for my $field (@{$set->{fields}}) {
 					if ($name eq 'stories' && $field eq 'relatedtext') {
 						$oldhtml{$field} = $fetch->{$id}{$field};
@@ -122,10 +123,6 @@ $task{$me}{code} = sub {
 					$html{relatedtext} = $admindb->relatedLinks(
 						$text, $tids, $nick, $uid
 					);
-
-use Data::Dumper;
-print Dumper [$uid, $nick, $tids, $html{relatedtext}];
-exit;
 				}
 
 				$slashdb->sqlInsert($set->{table_old}, {
@@ -151,6 +148,9 @@ exit;
 						slashdLog("update failed for $set->{table} $set->{id}=$id");
 					}
 				}
+				my $duration = Time::HiRes::time - $start_time;
+				my $sleep_time = $duration * ($constants->{html_update_sleepfrac} || 0);
+				Time::HiRes::sleep($sleep_time) if $sleep_time > 0.00001;
 
 			} continue {
 				$set->{lst} = $id;
@@ -160,10 +160,10 @@ exit;
 			}
 
 			slashdLog("Done updating HTML for $name $next through $max");
-		}
 
-		$slashdb->setVar("html_update_$set->{table}_lst", $set->{lst})
-			if $set->{lst} ne $constants->{"html_update_$set->{table}_lst"};
+			$slashdb->setVar("html_update_$set->{table}_lst", $set->{lst})
+				if $set->{lst} ne $constants->{"html_update_$set->{table}_lst"};
+		}
 	}
 };
 
@@ -258,7 +258,7 @@ INSERT INTO vars VALUES ('html_update_users_prefs_lst',  0, 'last processed by h
 INSERT INTO vars VALUES ('html_update_story_text_max',   0, 'last posted under old spec');
 INSERT INTO vars VALUES ('html_update_story_text_lst',   0, 'last processed by html_update');
 
-
+INSERT INTO vars VALUES ('html_update_sleepfrac',        '0.0', 'How much to sleep while processing (0.0 = as fast as possible, 1.0 = 50% duty cycle)');
 
 
 
