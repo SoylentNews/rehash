@@ -158,10 +158,14 @@ INSERT INTO dateformats (id, format, description) VALUES (17,'%Y.%m.%d %k:%M','1
 # Dumping data for table 'dst'
 #
 
-INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('America',     1, 2,  1, 0, 3, 2, -1, 0, 9);
-INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('Europe',      1, 1, -1, 0, 2, 1, -1, 0, 9);
-INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('Australia',   1, 2, -1, 0, 9, 2, -1, 0, 2);
-INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('New Zealand', 0, 2,  1, 0, 9, 2,  3, 0, 2);
+# if the bill passes:
+#INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('America',     1, 2,  2, 0, 2, 2,  1, 0, 10);
+# old America dst line ... still used by Canada, Mexico, others?  maybe make an America region, and a U.S. region, and have new non-U.S. versions of the timezones?
+# or make timezone selectable?  (Rob was against this before)
+INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('America',     1, 2,  1, 0, 3, 2, -1, 0,  9);
+INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('Europe',      1, 1, -1, 0, 2, 1, -1, 0,  9);
+INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('Australia',   1, 2, -1, 0, 9, 2, -1, 0,  2);
+INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('New Zealand', 0, 2,  1, 0, 9, 2,  3, 0,  2);
 
 #
 # Dumping data for table 'formkeys'
