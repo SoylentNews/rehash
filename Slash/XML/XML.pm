@@ -98,7 +98,7 @@ sub xmlDisplay {
 
 	my($class, $file);
 	$type =~ s/[^\w]+//g;
-	for my $try (uc($type), $type) {
+	for my $try (uc($type), $type, ucfirst($type)) {
 		$class = "Slash::XML::$try";
 		$file  = "Slash/XML/$try.pm";
 
@@ -133,17 +133,26 @@ sub xmlDisplay {
 		return $content;
 	} else {
 		my $r = Apache->request;
+		my $content_type = 'text/xml';
+		my $suffix = 'xml';
 
+		# normalize for etag
 		my $temp = $content;
-		# normalize
-		if ($type eq 'rss') {
+
+		if ($type =~ /^rss$/i) {
 			$temp =~ s|[dD]ate>[^<]+</||;
+			$content_type = 'application/rss+xml';
+			$suffix = 'rss';
+		} elsif ($type =~ /^atom$/) {
+			$temp =~ s|updated>[^<]+</||;
+			$content_type = 'application/atom+xml';
+			$suffix = 'atom';
 		}
 
-		$opt->{filename} .= '.xml' if $opt->{filename} && $opt->{filename} !~ /\./;
+		$opt->{filename} .= ".$suffix" if $opt->{filename} && $opt->{filename} !~ /\./;
 
 		http_send({
-			content_type	=> 'text/xml',
+			content_type	=> $content_type,
 			filename	=> $opt->{filename},
 			etag		=> md5_hex($temp),
 			dis_type	=> 'inline',

@@ -24,6 +24,7 @@ $task{$me}{code} = sub {
 		newxml(@_, undef, $stories);
 		newrdf(@_, undef, $stories);
 		newrss(@_, undef, $stories);
+#		newatom(@_, undef, $stories);
 	}
 
 	my $skins = $slashdb->getSkins();
@@ -35,6 +36,7 @@ $task{$me}{code} = sub {
 			newxml(@_, $name, $stories);
 			newrdf(@_, $name, $stories);
 			newrss(@_, $name, $stories);
+#			newatom(@_, $name, $stories);
 		}
 	}
 
@@ -52,7 +54,9 @@ sub fudge {
 
 sub _do_rss {
 	my($virtual_user, $constants, $backupdb, $user, $info, $gSkin,
-		$name, $stories, $version) = @_;
+		$name, $stories, $version, $type) = @_;
+
+	$type ||= 'rss'
 
 	my $file    = sitename2filename($name);
 	my $skin    = {};
@@ -61,7 +65,7 @@ sub _do_rss {
 	my $title   = $constants->{sitename};
 	$title = "$title: $skin->{title}" if $skin->{skid} != $constants->{mainpage_skid};
 
-	my $rss = xmlDisplay('rss', {
+	my $rss = xmlDisplay($type, {
 		channel		=> {
 			title		=> $title,
 			'link'		=> $link,
@@ -72,13 +76,14 @@ sub _do_rss {
 		items		=> [ map { { story => $_ } } @$stories ],
 	}, 1);
 
-	my $ext = $version == 0.9 ? 'rdf' : 'rss';
+	my $ext = $version == 0.9 ? 'rdf' : $type;
 	save2file("$constants->{basedir}/$file.$ext", $rss, \&fudge);
 	save2file("$constants->{basedir}/privaterss/$file.$ext", $rss, \&fudge);
 }
 
-sub newrdf { _do_rss(@_, "0.9") } # RSS 0.9
-sub newrss { _do_rss(@_, "1.0") } # RSS 1.0
+sub newrdf  { _do_rss(@_, '0.9') } # RSS 0.9
+sub newrss  { _do_rss(@_, '1.0') } # RSS 1.0
+sub newatom { _do_rss(@_, '1.0', 'atom') } # Atom 1.0
 
 sub newxml {
 	my($virtual_user, $constants, $backupdb, $user, $info, $gSkin,

@@ -574,10 +574,11 @@ $include
     DirectoryIndex index.pl index.shtml
     ErrorDocument 404 /404.pl
 
-    AddType text/xml .rdf
-    AddType text/xml .rss
     AddType text/xml .xml
-    AddType text/xml .wml
+    AddType application/rss+xml .rdf
+    AddType application/rss+xml .rss
+    AddType application/atom+xml .atom
+    AddType text/vnd.wap.wml .wml
 
     # change default of "iso-8859-1" here (to, for example, utf-8)
     # if you change "content_type_webpage" in vars, and vice versa
