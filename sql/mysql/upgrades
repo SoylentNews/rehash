@@ -3037,8 +3037,6 @@ INSERT INTO vars (name, value, description) VALUES ('jabberslash_tls','0','Try t
 INSERT INTO vars (name, value, description) VALUES ('ircslash_jabber_users','','Pipe-separated list of userids ("userid" or "userid/resource") to send Jabber messages to, instead of sending to channel');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_lcr_sites','','Pipe-separated list of site names to use for lcr cmd');
 
-# SLASHCLUSTER LAST UPDATED HERE
-
 # End of T_2_5_0_66, Start of T_2_5_0_67 - 2005/05/24
 
 # End of T_2_5_0_67, Start of T_2_5_0_68 - 2005/05/28
@@ -3067,8 +3065,6 @@ INSERT INTO vars (name, value, description) VALUES ('hc_q1_lettersomit', 'hlou',
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_74, Start of T_2_5_0_75 - 2005/06/28
 
 # Changes for plugins/HumanConf (ignore if not using that plugin)
@@ -3076,4 +3072,12 @@ INSERT INTO vars (name, value, description) VALUES ('hc_q1_lettersomit', 'hlou',
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_usedict', '', 'For question 1 (images), use words from a dictionary? if blank, no; otherwise, value is the absolute path to the newline-delimited file e.g. /usr/dict/words and hc_q1_lettersomit is ignored');
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_usedict_excl', 'shiny$ metal ^daffodil', 'If hc_q1_usedict is set, space-sep list of regexes to exclude from words to use');
 INSERT INTO vars (name, value, description) VALUES ('hc_q1_linecloseness', '8', 'For question 1 (images), closeness of the lines drawn over the letters, higher means more density');
+
+# SLASHCLUSTER LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
+# End of T_2_5_0_75, Start of T_2_5_0_76 - 2005/07/20
+
+# End of T_2_5_0_76, Start of T_2_5_0_77 - 2005/07/27
 
