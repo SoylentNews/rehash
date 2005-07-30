@@ -3013,6 +3013,13 @@ ALTER TABLE al2_log ADD INDEX al2tid_val_srcid (al2tid, val, srcid);
 ALTER TABLE al2 ADD INDEX value (value);
 # End of T_2_5_0_65, Start of T_2_5_0_66 - 2005/05/17
 
+# Caution!  "Update statements that refer to user variables
+# (that is, variables of the form @var_name) are badly
+# replicated in 3.23 and 4.0. This is fixed in 4.1."
+# <http://dev.mysql.com/doc/mysql/en/replication-features.html>
+# If you are running reader DBs, you will definitely want to
+# check the al2_types table after the following command has
+# replicated to see if the data is correct.
 SELECT @maxbitpos := MAX(bitpos) FROM al2_types;
 INSERT INTO al2_types VALUES (NULL, @maxbitpos+1, 'nopostanon', 'No Comment Post Anon');
 
@@ -3130,12 +3137,19 @@ INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, 
 # Run this only if you don't already have this CSS file already in the table or whatever theme you may be using instead 
 INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode.css','Slashcode',0,'','no','',3,0);
 
+# Caution!  "Update statements that refer to user variables
+# (that is, variables of the form @var_name) are badly
+# replicated in 3.23 and 4.0. This is fixed in 4.1."
+# <http://dev.mysql.com/doc/mysql/en/replication-features.html>
+# If you are running reader DBs, you will definitely want to
+# check the css table after the following command has
+# replicated to see if the data is correct.
 SELECT @page_ctid := ctid FROM css_type where name="page";
-
-# Run this only if you search installed and don't currently have this line in your css file
+# Run this only if you have search installed and don't
+# currently have this line in your css file
 INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','search.css','Slashcode',0,'search','no','',@page_ctid,0);
-
-# Run this only if you pollBooth installed and don't currently have this line in your css file
+# Run this only if you have pollBooth installed and
+# don't currently have this line in your css file
 INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','polls.css','Slashcode',0,'pollBooth','no','',@page_ctid,0);
 
 UPDATE css set title="" where file="print.css";
