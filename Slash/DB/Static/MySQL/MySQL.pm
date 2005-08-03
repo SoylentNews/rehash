@@ -1230,7 +1230,7 @@ sub fetchEligibleModerators_accesslog_insertnew {
 	return if $lastmaxid > $newmaxid;
 	my $ac_uid = getCurrentStatic('anonymous_coward_uid');
 	$self->sqlDo("INSERT INTO accesslog_artcom (uid, ts, c)"
-		. " SELECT uid, AVG(ts) AS ts, COUNT(*) AS c"
+		. " SELECT uid, FROM_UNIXTIME(FLOOR(AVG(UNIX_TIMESTAMP(ts)))) AS ts, COUNT(*) AS c"
 		. " FROM accesslog"
 		. " WHERE id BETWEEN $lastmaxid AND $newmaxid"
 			. " AND (op='article' OR op='comments')"
