@@ -82,8 +82,8 @@ img { border: none; }
 {
 	z-index: 0;
 	position: relative;
-	height: auto;
-	mmargin: 0 0 2em 0;
+	height: 80px;
+	mmargin: 0 0 .1em 0;
 }
 
 #topnav h4 a
