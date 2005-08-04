@@ -187,10 +187,10 @@ img { border: none; }
 {
 	background: #ddd;
 	position: relative;
-	margin: 0;
-	padding: .2em 0 0 .3em;
+	font-size: 130%;
+	margin: 0 0 0 -.2em;
+	padding: 0 .2em;
 }
-
 #links h2 a, #links h2 { color: #444; }
 #links ul li { list-style: none; }
 #links ul { margin: 0; }
