@@ -148,8 +148,9 @@ __template__
 				<input type="text" name="tokens" size="6" value="[% useredit.tokens | strip_attribute %]">&nbsp;&nbsp;
 				<b>Latest M2 Info:</b> <input type="text" name="m2info" value="[% useredit.m2info | strip_attribute %]">
 			[% END %]
-
+				<p>
 				<input type="submit" name="saveuseradmin" value="Save [% IF useredit.nickname; useredit.nickname | strip_attribute; END %]" class="button">
+				</p>
 			[% IF ! useredit.nonuid %]
 				[% IF constants.subscribe && (useredit.subscribe_payments.size or useredit.subscribe_purchases.size) %]
 					<label>
