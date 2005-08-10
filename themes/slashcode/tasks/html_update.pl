@@ -50,6 +50,11 @@ $task{$me}{code} = sub {
 		},
 	);
 
+	# runtask -u slashusername -o only_set=stories,only_field=relatedtext html_update
+	# runtask -u slashusername -o only_set=stories,use_old=1 html_update
+	my $only_set   = $constants->{task_options}{only_set}   || '';
+	my $only_field = $constants->{task_options}{only_field} || '';
+	my $use_old    = $constants->{task_options}{use_old} || $only_field ? 1 : 0;
 
 	my $update_num = 10_000;
 
@@ -57,12 +62,15 @@ $task{$me}{code} = sub {
 	my %authors;
 
 	for my $name (reverse sort keys %sets) {
+		next if $only_set && $only_set ne $name;
+
 		my $set = $sets{$name};
 
 		# max is last thingy saved under "old" spec, (needs to be figured out manually)
 		# lst is last thingy updated with this task
 		($set->{max}) = $slashdb->getVar("html_update_$set->{table}_max", 'value', 1);
 		($set->{lst}) = $slashdb->getVar("html_update_$set->{table}_lst", 'value', 1);
+		$set->{lst} = 0 if $use_old;
 
 		unless ($set->{max}) {
 			($set->{max}) = $slashdb->sqlSelect("MAX($set->{id})", $set->{table});
@@ -71,6 +79,10 @@ $task{$me}{code} = sub {
 
 		# old table is the previous data itself
 		$set->{table_old} = $set->{table} . '_html_update_old';
+		# beware: this won't work for comments for Slashdot since we have it in two tables
+		if ($use_old) {
+			$set->{table} = $set->{table_old};
+		}
 
 		slashdLog("Attempting to update HTML for $name $set->{lst} through $set->{max}");
 		while ($set->{lst} < $set->{max}) {
@@ -95,15 +107,17 @@ $task{$me}{code} = sub {
 				slashdLog("Processing $keycount records for $name");
 			}
 
-			my $admin = 0;
-			$admin = 1 if $name eq 'stories';
+			my $admin = $name eq 'stories' ? 1 : 0;
 
 			for my $id (sort { $a <=> $b } keys %$fetch) {
 				my(%oldhtml, %html, $ok);
 				my $start_time = Time::HiRes::time;
 				for my $field (@{$set->{fields}}) {
+					next if $only_field && $only_field ne $field;
+
 					if ($name eq 'stories' && $field eq 'relatedtext') {
 						$oldhtml{$field} = $fetch->{$id}{$field};
+						$ok = 1 if $only_field && $only_field eq $field;
 						next;
 					}
 
@@ -115,7 +129,7 @@ $task{$me}{code} = sub {
 				}
 				next unless $ok;
 
-				if ($name eq 'stories') {
+				if ($name eq 'stories' && (!$only_field || $only_field eq 'relatedtext')) {
 					my $text = "$html{title} $html{introtext} $html{bodytext}";
 					my $tids = $slashdb->getTopiclistFromChosen($slashdb->getStoryTopicsChosen($id));
 					my $uid = $slashdb->getStory($id, 'uid');
@@ -125,10 +139,13 @@ $task{$me}{code} = sub {
 					);
 				}
 
+			# /. hack
+			unless ($name eq 'comments' && $id < 13_100_000) {
 				$slashdb->sqlInsert($set->{table_old}, {
 					$set->{id} => $id,
 					%oldhtml
-				}, { ignore => 1 });
+				}, { ignore => 1 }) unless $use_old;
+			}
 
 				if ($name eq 'stories') {
 					$html{is_dirty} = 1;
@@ -159,10 +176,13 @@ $task{$me}{code} = sub {
 				}
 			}
 
+			$slashdb->setVar("html_update_$set->{table}_lst", $set->{lst})
+				if $set->{lst} ne $constants->{"html_update_$set->{table}_lst"}
+				&& !$use_old;
+
 			slashdLog("Done updating HTML for $name $next through $max");
 
-			$slashdb->setVar("html_update_$set->{table}_lst", $set->{lst})
-				if $set->{lst} ne $constants->{"html_update_$set->{table}_lst"};
+			sleep(2);
 		}
 	}
 };
@@ -187,6 +207,7 @@ sub _html_update_fix {
 
 	if ($admin) {
 		local $Slash::Utility::Data::approveTag::admin = 1;
+		$html = parseSlashizedLinks($html);
 		$html = cleanSlashTags($html);
 		$html = strip_html($html);
 		$html = slashizeLinks($html);
