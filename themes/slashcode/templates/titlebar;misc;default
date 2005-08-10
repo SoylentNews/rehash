@@ -20,7 +20,9 @@ titlebar
 __template__
 
 [% future = 0 %]
-
+[% IF future %]
+<div class="future">
+[% END %]
 <div class="generaltitle">
 	<div class="title">
 		<h3>
@@ -28,6 +30,7 @@ __template__
 		</h3>
 	</div>
 </div>
+[% END %]
 
 __seclev__
 10000
