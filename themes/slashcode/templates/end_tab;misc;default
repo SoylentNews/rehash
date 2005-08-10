@@ -13,7 +13,7 @@ end_tab
 __template__
 
 [% IF tab_is_selected %]
-        <li[% details.selected %]><a href="[% link %]" class="end">[% label %]</a></li>
+        <li[% details.selected %]><a href="[% link %]" class="end"><b>[% label %]</b></a></li>
 [% ELSE %]
          <li[% details.unselected %]><a href="[% link %]" class="end">[% label %]</a></li>
 [% END %]
