@@ -707,7 +707,7 @@ input.button
 	padding: .3em;
 }
 
-pre, code 
+pre
 {
 	overflow: auto;
 	overflow-x: auto;
@@ -716,5 +716,3 @@ pre, code
 	padding: 0 0 0 1em;
 	margin: 0;
 }
-
-
