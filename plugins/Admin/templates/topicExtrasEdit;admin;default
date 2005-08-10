@@ -20,9 +20,9 @@ __template__
 		<fieldset>
 			[% topic = Slash.db.getTopic(form.tid) %]
 			<legend>
-				Editing extras for [% topic.textname %]
+				Editing extras for <a href="[% gSkin.rootdir %]/admin.pl?op=topics&amp;nexttid=[% form.tid %]">[% topic.textname %]</a>
 			</legend>
-			<input type="hidden" name="tid" value=[% form.tid | strip_attribute %]">
+			<input type="hidden" name="tid" value="[% form.tid | strip_attribute %]">
 			<table>
 				<tr>
 					<td><b>Id</b></td>
