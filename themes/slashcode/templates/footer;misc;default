@@ -18,7 +18,7 @@ __template__
 		<div id="footer">
 			<em>[% PROCESS motd %]</em>
 			<div class="search">
-				<form method="get" action="[% constants.rootdir %]/search.pl">
+				<form method="get" action="[% gSkin.rootdir %]/search.pl">
 					<fieldset>
 						<legend></legend>
 						<input type="text" name="query" value="" size="20">
