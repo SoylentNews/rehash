@@ -227,7 +227,11 @@ sub otherLinks {
 		aid		=> $aid,
 		tids		=> \@tids,
 		topics		=> $topics,
-	}, { Return => 1, Nocomm => 1 });
+	}, {
+		Return  => 1,
+		Nocomm  => 1,
+		Page	=> 'admin'
+	});
 }
 
 ##################################################################
