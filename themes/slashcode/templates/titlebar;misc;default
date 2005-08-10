@@ -19,7 +19,6 @@ __name__
 titlebar
 __template__
 
-[% future = 0 %]
 [% IF future %]
 <div class="future">
 [% END %]
@@ -33,6 +32,7 @@ __template__
 [% IF future %]
 </div>
 [% END %]
+[% future = 0 %]
 
 __seclev__
 10000
