@@ -30,6 +30,8 @@ __template__
 		</h3>
 	</div>
 </div>
+[% IF future %]
+</div>
 [% END %]
 
 __seclev__
