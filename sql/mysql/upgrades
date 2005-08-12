@@ -3160,3 +3160,4 @@ DELETE FROM vars where name = 'ssihead_inc_pages';
 DELETE FROM templates WHERE name = 'header' AND skin = 'default' AND page='article';
 UPDATE vars set description="Time in seconds before css cache expires" where name="css_expire";
 
+INSERT INTO vars (name, value, description) VALUES ('feed_types', 'rss|atom', 'Feed types allowed.');

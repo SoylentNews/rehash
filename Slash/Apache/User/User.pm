@@ -233,12 +233,12 @@ sub handler {
 			# or vars or somesuch, but how?  is there danger in
 			# opening it up to everything instead of closing it off?
 			if (
-				($constants->{rss_allow_index} && $form->{content_type} eq 'rss' && $uri =~ m{^/index\.pl$})
+				($constants->{rss_allow_index} && $form->{content_type} =~ $constants->{feed_types} && $uri =~ m{^/index\.pl$})
 					||
 				($constants->{plugin}{ScheduleShifts} && $uri =~ m{^/shifts\.pl$})
 					||
 				# hmmm ... journal.pl no work, because can be called as /journal/
-				($constants->{journal_rdfitemdesc_html} && $form->{content_type} eq 'rss' && $uri =~ m{\bjournal\b})
+				($constants->{journal_rdfitemdesc_html} && $form->{content_type} =~ $constants->{feed_types} && $uri =~ m{\bjournal\b})
 			) {
 				$logtoken = $form->{logtoken};
 			} else {
@@ -676,12 +676,12 @@ sub userdir_handler {
 				if ($extra =~ s/^friends\///) {
 					$args =~ s/display/friendview/;
 				}
-				if ($extra =~ /^rss(\/(\d+::\w+)?)?$/) {
+				if ($extra =~ m{^ (rss|atom) (?: / (\d+::\w+)? )? $}x) {
 					if ($2) {
 						(my $logtoken = $2) =~ s/::/%3A%3A/;
 						$args .= "&logtoken=$logtoken";
 					}
-					$args .= "&content_type=rss";
+					$args .= "&content_type=$1";
 				}
 			}
 			$args .= "&$query";

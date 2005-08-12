@@ -94,8 +94,8 @@ sub main {
 		$op = 'default';
 	}
 
-	# hijack RSS feeds
-	if ($form->{content_type} eq 'rss') {
+	# hijack feeds
+	if ($form->{content_type} =~ $constants->{feed_types}) {
 		if ($op eq 'top' && $top_ok) {
 			displayTopRSS($journal, $constants, $user, $form, $reader, $gSkin);
 		} else {
@@ -270,7 +270,7 @@ sub displayRSS {
 		$link     = '/journal/';
 	}
 
-	xmlDisplay(rss => {
+	xmlDisplay($form->{content_type} => {
 		channel => {
 			title		=> "$title $journals",
 			description	=> "$title $constants->{sitename} $journals",
@@ -316,7 +316,7 @@ sub displayTopRSS {
 		};
 	}
 
-	xmlDisplay(rss => {
+	xmlDisplay($form->{content_type} => {
 		channel => {
 			title		=> "$constants->{sitename} Journals",
 			description	=> "Top $constants->{journal_top} Journals",

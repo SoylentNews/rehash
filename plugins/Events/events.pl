@@ -29,7 +29,7 @@ sub main {
 
 	my $stories =  $events->getEventsByDay($date);
 	my $time = timeCalc($date, '%A %B %d', 0);
-	if ($form->{content_type} eq 'rss') {
+	if ($form->{content_type} =~ $constants->{feed_types}) {
 		my @items;
 		for my $entry (@$stories) {
 			push @items, {
@@ -38,7 +38,7 @@ sub main {
 			};
 		}
 
-		xmlDisplay(rss => {
+		xmlDisplay($form->{content_type} => {
 			channel => {
 				title		=> "$constants->{sitename} events for nick's $time",
 				'link'		=> "$gSkin->{absolutedir}/",

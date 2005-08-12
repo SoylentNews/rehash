@@ -132,7 +132,7 @@ sub main {
 	if ($r = Apache->request) {
 		return if $r->header_only;
 	}
-	footer() unless $form->{content_type} eq 'rss';
+	footer() unless $form->{content_type} =~ $constants->{feed_types};
 }
 
 sub list {
@@ -168,7 +168,7 @@ sub friends {
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	my $friends = $zoo->getRelationships($uid, FRIEND);
 		
-	if ($form->{content_type} eq 'rss') {
+	if ($form->{content_type} =~ $constants->{feed_types}) {
 		_rss($friends, $nick, 'friends');
 	} else {
 		my $implied;
@@ -238,7 +238,7 @@ sub fof {
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	my $friends = $zoo->getRelationships($uid, FOF);
 		
-	if ($form->{content_type} eq 'rss') {
+	if ($form->{content_type} =~ $constants->{feed_types}) {
 		_rss($friends, $nick, 'fof');
 	} else {
 		my $implied;
@@ -308,7 +308,7 @@ sub enof {
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	my $friends = $zoo->getRelationships($uid, EOF);
 		
-	if ($form->{content_type} eq 'rss') {
+	if ($form->{content_type} =~ $constants->{feed_types}) {
 		_rss($friends, $nick, 'friends');
 	} else {
 		my $implied;
@@ -373,7 +373,7 @@ sub foes {
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	my $foes = $zoo->getRelationships($uid, FOE);
 
-	if ($form->{content_type} eq 'rss') {
+	if ($form->{content_type} =~ $constants->{feed_types}) {
 		_rss($foes, $nick, 'foes');
 	} else {
 		my $implied;
@@ -438,7 +438,7 @@ sub fans {
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	my $fans = $zoo->getRelationships($uid, FAN);
 
-	if ($form->{content_type} eq 'rss') {
+	if ($form->{content_type} =~ $constants->{feed_types}) {
 		_rss($fans, $nick, 'fans');
 	} else {
 		my $implied;
@@ -502,7 +502,7 @@ sub freaks {
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	my $freaks = $zoo->getRelationships($uid, FREAK);
 
-	if ($form->{content_type} eq 'rss') {
+	if ($form->{content_type} =~ $constants->{feed_types}) {
 		_rss($freaks, $nick, 'freaks');
 	} else {
 		my $implied;
@@ -567,7 +567,7 @@ sub all {
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	my $people = $zoo->getRelationships($uid);
 
-	if ($form->{content_type} eq 'rss') {
+	if ($form->{content_type} =~ $constants->{feed_types}) {
 		_rss($people, $nick, 'people');
 	} else {
 		if ($editable) {
@@ -776,6 +776,7 @@ sub _printHead {
 sub _rss {
 	my($entries, $nick, $type) = @_;
 	my $constants = getCurrentStatic();
+	my $form      = getCurrentForm();
 	my $gSkin     = getCurrentSkin();
 	my @items;
 	for my $entry (@$entries) {
@@ -785,7 +786,7 @@ sub _rss {
 		};
 	}
 
-	xmlDisplay(rss => {
+	xmlDisplay($form->{content_type} => {
 		channel => {
 			title		=> "$constants->{sitename} $nick's ${type}",
 			'link'		=> "$gSkin->{absolutedir}/",

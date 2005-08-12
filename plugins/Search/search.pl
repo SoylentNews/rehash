@@ -70,7 +70,7 @@ sub main {
 			unless $constants->{submiss_view};
 	}
 
-	if ($form->{content_type} eq 'rss') {
+	if ($form->{content_type} =~ $constants->{feed_types}) {
 		# Here, panic mode is handled within the individual funcs.
 		# We want to return valid (though empty) RSS data even
 		# when search is down.
@@ -384,7 +384,7 @@ sub commentSearchRSS {
 		};
 	}
 
-	xmlDisplay(rss => {
+	xmlDisplay($form->{content_type} => {
 		channel => {
 			title		=> "$constants->{sitename} Comment Search",
 			'link'		=> "$gSkin->{absolutedir}/search.pl",
@@ -416,7 +416,7 @@ sub userSearchRSS {
 		};
 	}
 
-	xmlDisplay(rss => {
+	xmlDisplay($form->{content_type} => {
 		channel => {
 			title		=> "$constants->{sitename} User Search",
 			'link'		=> "$gSkin->{absolutedir}/search.pl",
@@ -451,7 +451,7 @@ sub storySearchRSS {
 		};
 	}
 
-	xmlDisplay(rss => {
+	xmlDisplay($form->{content_type} => {
 		channel => {
 			title		=> "$constants->{sitename} Story Search",
 			'link'		=> "$gSkin->{absolutedir}/search.pl",
@@ -487,7 +487,7 @@ sub pollSearchRSS {
 		};
 	}
 
-	xmlDisplay(rss => {
+	xmlDisplay($form->{content_type} => {
 		channel => {
 			title		=> "$constants->{sitename} Poll Search",
 			'link'		=> "$gSkin->{absolutedir}/search.pl",
@@ -564,7 +564,7 @@ sub journalSearchRSS {
 		};
 	}
 
-	xmlDisplay(rss => {
+	xmlDisplay($form->{content_type} => {
 		channel => {
 			title		=> "$constants->{sitename} Journal Search",
 			'link'		=> "$gSkin->{absolutedir}/search.pl",
@@ -647,7 +647,7 @@ sub submissionSearchRSS {
 		};
 	}
 
-	xmlDisplay(rss => {
+	xmlDisplay($form->{content_type} => {
 		channel => {
 			title		=> "$constants->{sitename} Submission Search",
 			'link'		=> "$gSkin->{absolutedir}/search.pl",
@@ -726,7 +726,7 @@ sub rssSearchRSS {
 		};
 	}
 
-	xmlDisplay(rss => {
+	xmlDisplay($form->{content_type} => {
 		channel => {
 			title		=> "$constants->{sitename} RSS Search",
 			'link'		=> "$gSkin->{absolutedir}/search.pl",

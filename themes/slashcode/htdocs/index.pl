@@ -44,7 +44,7 @@ my $start_time = Time::HiRes::time;
 	}
 
 
-	my $rss = $constants->{rss_allow_index} && $form->{content_type} eq 'rss' && (
+	my $rss = $constants->{rss_allow_index} && $form->{content_type} =~ $constants->{feed_types} && (
 		$user->{is_admin}
 			||
 		($constants->{rss_allow_index} > 1 && $user->{is_subscriber})
@@ -284,9 +284,9 @@ sub do_rss {
 	}
 
 	my $title = getData('rsshead', { skin => $skin_name });
-	my $name = lc($gSkin->{basedomain}) . '.rss';
+	my $name = lc($gSkin->{basedomain}) . '.' . $form->{content_type};
 
-	xmlDisplay('rss', {
+	xmlDisplay($form->{content_type} => {
 		channel	=> {
 			title	=> $title,
 		},

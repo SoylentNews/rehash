@@ -132,7 +132,7 @@ sub listEvents {
 	    $selectedref->{$_} = $form->{$_} ? $form->{$_} : int(timeCalc($slashdb->getTime(),$formatstring));
 	}	
 
-	if ($form->{content_type} eq 'rss') {
+	if ($form->{content_type} =~ $constants->{feed_types}) {
 		my @items;
 		for my $entry (@$stories) {
 			push @items, {
@@ -141,7 +141,7 @@ sub listEvents {
 			};
 		}
 
-		xmlDisplay(rss => {
+		xmlDisplay($form->{content_type} => {
 			channel => {
 				title		=> "$constants->{sitename} events",
 				'link'		=> "$gSkin->{absolutedir}/",

@@ -9394,6 +9394,15 @@ sub getSlashConf {
 		$conf{$regex} = qr{$conf{$regex}};
 	}
 
+	# anchor
+	for my $regex (qw(
+		feed_types
+	)) {
+		next if !$conf{$regex};
+		$conf{$regex} = qr{^(?:$conf{$regex})$};
+	}
+
+
 	for my $var (qw(approvedtags approvedtags_break lonetags)) {
 		$conf{$var} = [ map lc, @{$conf{$var}} ];
 	}

@@ -48,7 +48,7 @@ sub handler {
 
 	# Check what kind of access this is.
 	
-	my($is_rss, $is_palm) = _check_rss_and_palm($r);
+	my($is_rss, $is_palm, $feed_type) = _check_rss_and_palm($r);
 
 	# Abort this Apache request if this IP address is outright banned.
 
@@ -58,7 +58,7 @@ sub handler {
 	if ($banlist->{$cur_srcid_ip} || $banlist->{$cur_srcid_subnet}) {
 		# Send a special "you are banned" page if the user is
 		# hitting RSS.
-		return _send_rss($r, 'ban', $cur_srcid_ip) if $is_rss;
+		return _send_rss($r, 'ban', $cur_srcid_ip, $feed_type) if $is_rss;
 		# Send our usual "you are banned" page, whether the user
 		# is on palm or not.  It's mostly text so palm users
 		# should not have a problem with it.
@@ -101,21 +101,24 @@ sub handler {
 sub _check_rss_and_palm {
 	my($r) = @_;
 	my $is_rss = $r->uri =~ m{(
-		\.(?:xml|rss|rdf)$
+		\.(xml|rss|rdf|atom)$
 			|
-		content_type=rss
+		content_type=(rss|atom)
 	)}x;
+	my $feed_type = $1 || $2;
+	$feed_type = 'rss' unless $feed_type eq 'atom';
+
 	# XXX Should we also check for content_type in POST?
 	my $is_palm = $r->uri =~ /^\/palm/;
-	return ($is_rss, $is_palm);
+	return ($is_rss, $is_palm, $feed_type);
 }
 
 sub _send_rss {
-	my($r, $type, $srcid_ip) = @_;
+	my($r, $type, $srcid_ip, $feed_type) = @_;
 	http_send({
 		content_type	=> 'text/xml',
 		status		=> 202,
-		content		=> _get_rss_msg($type, $srcid_ip),
+		content		=> _get_rss_msg($type, $srcid_ip, $feed_type),
 	});
 
 	return DONE;
@@ -129,7 +132,7 @@ sub _send_rss {
 my(%RSS);
 
 sub _get_rss_msg {
-	my($type, $srcid_ip) = @_;
+	my($type, $srcid_ip, $feed_type) = @_;
 	$type ||= 'abuse';
 	$srcid_ip ||= '(unknown)';
 
@@ -143,7 +146,7 @@ sub _get_rss_msg {
 		srcid_ip	=> $srcid_ip,
 	}, { Return => 1 });
 
-	$RSS{$type}{$srcid_ip} = xmlDisplay(rss => {
+	$RSS{$type}{$srcid_ip} = xmlDisplay($feed_type => {
 		rdfitemdesc	=> 1,
 		items		=> $items,
 	}, { Return => 1 } );

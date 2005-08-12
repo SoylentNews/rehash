@@ -1,7 +1,7 @@
 __section__
 default
 __description__
-Return a proper link to RSS for current user.
+Return a proper link to feed for current user.
 __title__
 
 __page__
@@ -11,17 +11,20 @@ en_US
 __name__
 rsslink
 __template__
-[%- IF (constants.rss_allow_index && (
+[%- feed_type = feed_type || 'rss';
+    IF (constants.rss_allow_index && (
 	user.is_admin
 		||
 	(constants.rss_allow_index > 1 && user.is_subscriber)
 		||
 	(constants.rss_allow_index > 2 && !user.is_anon)
-))
-%][% Slash.root2abs() %]/index.pl?content_type=rss&amp;logtoken=[% user.logtoken | fixparam %][%
-ELSE
-%][% gSkin.rootdir %]/[% Slash.sitename2filename(gSkin.name) %].rss[%
-END -%]
+));
+%][% Slash.root2abs() %]/index.pl?content_type=[% feed_type %]&amp;logtoken=[% user.logtoken | fixparam %][%
+    ELSE
+%][% gSkin.rootdir %]/[% Slash.sitename2filename(gSkin.name) %].[% feed_type %][%
+    END;
+    feed_type = '';
+-%]
 __seclev__
 10000
 __version__

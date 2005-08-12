@@ -56,7 +56,7 @@ sub _do_rss {
 	my($virtual_user, $constants, $backupdb, $user, $info, $gSkin,
 		$name, $stories, $version, $type) = @_;
 
-	$type ||= 'rss'
+	$type ||= 'rss';
 
 	my $file    = sitename2filename($name);
 	my $skin    = {};
@@ -65,10 +65,14 @@ sub _do_rss {
 	my $title   = $constants->{sitename};
 	$title = "$title: $skin->{title}" if $skin->{skid} != $constants->{mainpage_skid};
 
+	my $ext = $version == 0.9 && $type eq 'rss' ? 'rdf' : $type;
+	my $filename = "$file.$ext";
+
 	my $rss = xmlDisplay($type, {
 		channel		=> {
 			title		=> $title,
 			'link'		=> $link,
+			selflink	=> "$link$filename",
 		},
 		version		=> $version,
 		textinput	=> 1,
@@ -76,9 +80,8 @@ sub _do_rss {
 		items		=> [ map { { story => $_ } } @$stories ],
 	}, 1);
 
-	my $ext = $version == 0.9 ? 'rdf' : $type;
-	save2file("$constants->{basedir}/$file.$ext", $rss, \&fudge);
-	save2file("$constants->{basedir}/privaterss/$file.$ext", $rss, \&fudge);
+	save2file("$constants->{basedir}/$filename", $rss, \&fudge);
+	save2file("$constants->{basedir}/privaterss/$filename", $rss, \&fudge);
 }
 
 sub newrdf  { _do_rss(@_, '0.9') } # RSS 0.9
