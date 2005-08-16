@@ -2458,7 +2458,7 @@ The 'approvedtags' entry in the vars table.
 		# blockquote not a list, but has similar semantics:
 		# everything in a blockquote needs to be in a block element,
 		# so we choose two that would fit the bill
-		blockquote	=> ['div', 'p'],
+		blockquote	=> ['div'],
 	);
 	my %needs_list = (
 		dd		=> qr/dl/,
@@ -2759,9 +2759,9 @@ sub _validateLists {
 				} elsif ($tag =~ /^\/(?:$re)$/) {
 					# remove if we are not already inside a tag
 					_substitute(\$content, $whole, '') unless $in;
-					# this should never happen, as we've already
-					# balanced the tags
-					warn "huh?  $tag ne /$in?" if $tag ne "/$in";
+					# this should not usually happen, as
+					# we've already balanced the tags
+					#warn "huh?  $tag ne /$in?" if $tag ne "/$in";
 					# set to no open tag
 					$in = '';
 					next;
