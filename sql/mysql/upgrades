@@ -3086,9 +3086,6 @@ INSERT INTO vars (name, value, description) VALUES ('hc_q1_linecloseness', '8', 
 
 # End of T_2_5_0_75, Start of T_2_5_0_76 - 2005/07/20
 
-# End of T_2_5_0_76, Start of T_2_5_0_77 - 2005/07/27
-
-
 INSERT INTO vars (name, value, description) VALUES ('ssihead_inc_pages', 'article', 'Pages that should always use their own .inc for ssihead');
 INSERT INTO vars (name, value, description) VALUES ('css_expire','3600','Time in seconds before css cache expires');
 
@@ -3161,3 +3158,5 @@ DELETE FROM templates WHERE name = 'header' AND skin = 'default' AND page='artic
 UPDATE vars set description="Time in seconds before css cache expires" where name="css_expire";
 
 INSERT INTO vars (name, value, description) VALUES ('feed_types', 'rss|atom', 'Feed types allowed.');
+
+# End of T_2_5_0_76, Start of T_2_5_0_77 - 2005/07/27
