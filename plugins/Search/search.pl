@@ -375,11 +375,15 @@ sub commentSearchRSS {
 		$comments = $searchDB->findComments($form, $start, 15, $form->{sort});
 	}
 
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+
 	my @items;
 	for my $entry (@$comments) {
 		my $time = timeCalc($entry->{date});
 		push @items, {
 			title	=> "$entry->{subject} ($time)",
+			time	=> $entry->{date},
+			creator	=> $reader->getUser($entry->{uid}, 'nickname'),
 			'link'	=> ($gSkin->{absolutedir} . "/comments.pl?sid=$entry->{did}&cid=$entry->{cid}"),
 		};
 	}
@@ -412,6 +416,7 @@ sub userSearchRSS {
 		my $time = timeCalc($entry->{journal_last_entry_date});
 		push @items, {
 			title	=> $entry->{nickname},
+			time	=> $entry->{journal_last_entry_date},
 			'link'	=> ($gSkin->{absolutedir} . '/users.pl?nick=' . $entry->{nickname}),
 		};
 	}
@@ -439,6 +444,8 @@ sub storySearchRSS {
 		$stories = $searchDB->findStory($form, $start, 15, $form->{sort});
 	}
 
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+
 	my @items;
 	for my $entry (@$stories) {
 		my $time = timeCalc($entry->{time});
@@ -446,6 +453,8 @@ sub storySearchRSS {
 		# so why didn't make it sectional?
 		push @items, {
 			title	=> $entry->{title},
+			time	=> $entry->{time},
+			creator	=> $reader->getUser($entry->{uid}, 'nickname'),
 			'link'	=> ($gSkin->{absolutedir} . '/article.pl?sid=' . $entry->{sid}),
 			description	=> $entry->{introtext}
 		};
@@ -483,6 +492,7 @@ sub pollSearchRSS {
 		my $link = $url || $gSkin->{absolutedir};
 		push @items, {
 			title	=> "$entry->{question} ($time)",
+			time	=> $entry->{date},
 			'link'	=> ($link . '/pollBooth.pl?qid=' . $entry->{qid}),
 		};
 	}
@@ -559,6 +569,8 @@ sub journalSearchRSS {
 		my $time = timeCalc($entry->{date});
 		push @items, {
 			title	=> "$entry->{description} ($time)",
+			time	=> $entry->{date},
+			creator	=> $entry->{nickname},
 			'link'	=> ($gSkin->{absolutedir} . '/~' . fixparam($entry->{nickname}) . '/journal/' . $entry->{id}),
 			description	=> $constants->{article},
 		};
@@ -642,6 +654,7 @@ sub submissionSearchRSS {
 		my $time = timeCalc($entry->{time});
 		push @items, {
 			title		=> "$entry->{subj} ($time)",
+			time		=> $entry->{time},
 			'link'		=> ($gSkin->{absolutedir} . '/submit.pl?subid=' . $entry->{subid}),
 			'description'	=> $entry->{story},
 		};
@@ -721,6 +734,7 @@ sub rssSearchRSS {
 		my $time = timeCalc($entry->[2]);
 		push @items, {
 			title	=> "$entry->{title} ($time)",
+			time	=> $entry->[2],
 			'link'	=> $entry->{link}, # No, this is not right -Brian
 			'description'	=> $entry->{description},
 		};

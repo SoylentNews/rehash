@@ -25,9 +25,11 @@ IF op == 'stories';
 		thisurl  = Slash.db.getSkin(entry.primaryskid).url || gSkin.absolutedir;
 		thislink = thisurl _ '/article.pl?sid=' _ entry.sid;
 		rss.items.push({
-			title => entry.title,
-			description => entry.introtext,
-			link => thislink
+			title		=> entry.title,
+			description	=> entry.introtext,
+			link		=> thislink,
+			time		=> entry.time,
+			creator		=> Slash.db.getUser(entry.uid, 'nickname'),
 		});
 	END;
 	rss.channel.title       = '$constants.sitename Story Search';
@@ -40,8 +42,10 @@ ELSIF op == 'comments';
 		thislink = gSkin.absolutedir _ '/comments.pl?sid=' _ entry.did _ '&cid=' _ entry.cid;
 		thistime = Slash.timeCalc(entry.date);
 		rss.items.push({
-			title => "$entry.subject ($thistime)",
-			link  => thislink
+			title		=> "$entry.subject ($thistime)",
+			link		=> thislink,
+			time		=> entry.date,
+			creator		=> Slash.db.getUser(entry.uid, 'nickname'),
 		});
 	END;
 	rss.channel.title       = '$constants.sitename Comment Search';
@@ -52,8 +56,9 @@ ELSIF op == 'users';
 		thisnick = entry.nickname | fixparam;
 		thislink = gSkin.absolutedir _ '/~' _ thisnick;
 		rss.items.push({
-			title => entry.nickname,
-			link  => thislink
+			title		=> entry.nickname,
+			link		=> thislink,
+			time		=> entry.journal_last_entry_date,
 		});
 	END;
 	rss.channel.title       = '$constants.sitename User Search';
@@ -65,8 +70,9 @@ ELSIF op == 'polls';
 		thislink = thisurl _ '/pollBooth.pl?qid=' _ entry.qid;
 		thistime = Slash.timeCalc(entry.date);
 		rss.items.push({
-			title => entry.nickname,
-			link  => thislink
+			title		=> entry.nickname,
+			link		=> thislink,
+			time		=> entry.date,
 		});
 	END;
 	rss.channel.title       = '$constants.sitename Poll Search';
@@ -78,8 +84,10 @@ ELSIF op == 'journals';
 		thislink = gSkin.absolutedir _ '/~' _ thisnick _ '/journal/' _ entry.id;
 		thistime = Slash.timeCalc(entry.date);
 		rss.items.push({
-			title => "$entry.description ($thistime)",
-			link  => thislink
+			title		=> "$entry.description ($thistime)",
+			link		=> thislink,
+			time		=> entry.date,
+			creator		=> entry.nickname,
 		});
 	END;
 	rss.channel.title       = '$constants.sitename Journal Search';
@@ -90,9 +98,10 @@ ELSIF op == 'submissions';
 		thislink = gSkin.absolutedir _ '/submit.pl?subid=' _ entry.subid;
 		thistime = Slash.timeCalc(entry.date);
 		rss.items.push({
-			title => "$entry.subj ($thistime)",
-			description => entry.story,
-			link  => thislink
+			title		=> "$entry.subj ($thistime)",
+			description	=> entry.story,
+			link		=> thislink,
+			time		=> entry.time,
 		});
 	END;
 	rss.channel.title       = '$constants.sitename Submission Search';
@@ -103,8 +112,8 @@ ELSIF op == 'submissions';
 ELSIF op == 'test';
 	FOREACH entry = results.records;
 		rss.items.push({
-			title => entry,
-			link  => gSkin.absolutedir _ '/search.pl?op=test'
+			title		=> entry,
+			link		=> gSkin.absolutedir _ '/search.pl?op=test'
 		});
 	END;
 	rss.channel.title       = '$constants.sitename Test Search';

@@ -275,7 +275,6 @@ sub displayRSS {
 			title		=> "$title $journals",
 			description	=> "$title $constants->{sitename} $journals",
 			'link'		=> root2abs() . '/~' . fixparam($juser->{nickname}) . $link,
-			creator		=> $juser->{nickname},
 		},
 		image	=> 1,
 		items	=> \@items,
@@ -724,9 +723,6 @@ sub saveArticle {
 		my $validator = getObject('Slash::Validator');
 		my $article = $journal->get($form->{id});
 		my $strip_art = balanceTags(strip_mode($article->{article}, $article->{posttype}), { deep_nesting => 1 });
-		if ($user->{nickname} eq 'pudge') {
-			$strip_art .= '</div>';  # intentionally break to test
-		}
 		$validator->isValid($strip_art, {
 			data_type	=> 'journal',
 			data_id		=> $form->{id},

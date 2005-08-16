@@ -8651,6 +8651,7 @@ sub getSubmissionForUser {
 			'submission_param',
 			"subid=" . $self->sqlQuote($sub->{subid})
 		);
+		$sub->{orig_time} = $sub->{'time'};
 		for my $key (keys %$append) {
 			$sub->{$key} = $append->{$key};
 		}

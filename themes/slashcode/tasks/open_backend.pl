@@ -24,7 +24,7 @@ $task{$me}{code} = sub {
 		newxml(@_, undef, $stories);
 		newrdf(@_, undef, $stories);
 		newrss(@_, undef, $stories);
-#		newatom(@_, undef, $stories);
+		newatom(@_, undef, $stories);
 	}
 
 	my $skins = $slashdb->getSkins();
@@ -36,7 +36,7 @@ $task{$me}{code} = sub {
 			newxml(@_, $name, $stories);
 			newrdf(@_, $name, $stories);
 			newrss(@_, $name, $stories);
-#			newatom(@_, $name, $stories);
+			newatom(@_, $name, $stories);
 		}
 	}
 

@@ -1205,9 +1205,6 @@ sub submitComment {
 		if ($constants->{validate_html}) {
 			my $validator = getObject('Slash::Validator');
 			my $test = parseDomainTags($tempComment);
-			if ($user->{nickname} eq 'pudge') {
-				$test .= '</div>';  # intentionally break to test
-			}
 			$validator->isValid($test, {
 				data_type	=> 'comment',
 				data_id		=> $maxCid,

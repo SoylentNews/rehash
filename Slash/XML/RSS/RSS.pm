@@ -178,6 +178,7 @@ sub create {
 		title		=> $constants->{sitename},
 		description	=> $constants->{slogan},
 		'link'		=> $absolutedir . '/',
+		selflink	=> '',
 
 		# dc
 		date		=> $self->date2iso8601(),
@@ -295,6 +296,11 @@ sub create {
 			if ($item->{story}) {
 				# set up story params in $encoded_item ref
 				$self->rss_story($item, $encoded_item, $version, \%channel);
+			} else {
+				$encoded_item->{dc}{date} = $self->encode($self->date2iso8601($item->{'time'}))
+					if $item->{'time'};
+				$encoded_item->{dc}{creator} = $self->encode($item->{creator})
+					if $item->{creator};
 			}
 
 			for my $key (keys %$item) {

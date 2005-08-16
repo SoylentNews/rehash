@@ -259,10 +259,13 @@ sub as_atom_1_0 {
 	foreach my $item (@{$self->{items}}) {
 		if ($item->{title}) {
 			$output .= "<entry>\n";
-			$output .= atom_encode($self, 'id', $item->{'link'});
-			$output .= atom_encode($self, 'title', $item->{title});
 
 			$val = $self->encode($item->{'link'});
+			$output .= qq[<id>$val</id>\n];
+
+			$output .= atom_encode($self, 'title', $item->{title});
+
+			# $val still same as directly above
 			$output .= qq[<link href="$val"/>\n];
 
 			# XXXX if at some point we can know this is the whole text
@@ -311,7 +314,7 @@ sub atom_encode {
 	return '' unless $value;
 	$value = $self->encode($value);
 	# XXX make this more robust?
-	my $type = $value =~ /(?:&amp;\w+;|&[lg]t;)/ ? 'html' : 'text';
+	my $type = $value =~ /(?:&amp;#?\w+;|&[lg]t;)/ ? 'html' : 'text';
 
 	# try parsing.  If well formed, replace the value and type
 	if ($type eq 'html' && $value =~ /&[lg]t;/) {
