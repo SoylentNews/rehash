@@ -18,9 +18,9 @@ __name__
 start_tab
 __template__
 [% IF tab_is_selected %]
-	<li[% details.selected %]><a href="[% link %]" class="begin"><b>[% label %]</b></a></li>
+	<li[% details.selected %]><b class="begin"><a href="[% link %]" class="begin">[% label %]</a></b></li>
 [% ELSE %]
-	<li[% details.unselected %]><a href="[% link %]" class="begin">[% label %]</a></li>
+	<li[% details.unselected %]><span class="begin"><a href="[% link %]" class="begin">[% label %]</a></span></li>
 [% END %]
 __seclev__
 10000
