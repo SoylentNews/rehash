@@ -51,7 +51,9 @@ to do this unless you need more context to fairly meta moderate.<br><br></li>
 </ul>
 
 <form action="[% gSkin.rootdir %]/metamod.pl" method="post">
-<table>
+[% IF comments.size %]
+<ul id="commentlisting">
+[% END %]
 [% FOR C = comments %]
 [%
 	Slash.dispComment(C);
@@ -59,7 +61,6 @@ to do this unless you need more context to fairly meta moderate.<br><br></li>
 		_ (C.pid || C.cid)
 		_ "&amp;threshold=-1&amp;mode=nested&amp;commentsort=0"
 %]
-	<tr><td>
 		Original Discussion: <b><a href="[% C.url %]">[% C.title %]</a></b><br>
 		Rating: <b>[% reasons.${C.modreason}.name %]</b>.<br>
 		This
@@ -72,12 +73,13 @@ to do this unless you need more context to fairly meta moderate.<br><br></li>
 		[% IF reasons.${C.modreason}.unfairname; reasons.${C.modreason}.name; ELSE; "Fair"; END %]
 		</b>&nbsp;&nbsp;|&nbsp;
 		<a href="[% context_url %]">See Context</a><hr>
-	</td></tr>
 [% END %]
-</table>
-
+[% IF comments.size %]
+</ul>
+[% END %]
+<p>
 <input type="submit" name="op" value="MetaModerate">
-
+</p>
 </form>
 
 __seclev__

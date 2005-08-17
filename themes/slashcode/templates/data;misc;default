@@ -19,16 +19,12 @@ __template__
 
 [% CASE 'tablebegin' %]
 	[% returnme.data_constant = 1 %] 
-	<table>
 [% CASE 'tableend' %]
 	[% returnme.data_constant = 1 %] 
-	</table>
 [% CASE 'cagebegin' %]
 	[% returnme.data_constant = 1 %] 
-	<tr><td>
 [% CASE 'cageend' %]
 	[% returnme.data_constant = 1 %] 
-	</td></tr>
 [% CASE 'commentbegin' %]
 	[% returnme.data_constant = 1 %] 
 	<li>
@@ -42,10 +38,22 @@ __template__
 	[% returnme.data_constant = 1 %] 
 	</ul>
 [% CASE 'cagebigbegin' %]
-	<tr><td bgcolor="[% user.colors.bg_2 %]">
+	[% returnme.data_constant = 1 %] 
 [% CASE 'cagebigend' %]
 	[% returnme.data_constant = 1 %] 
-	</td></tr>
+[% CASE 'fulllistbegin' %]
+        [% returnme.data_constant = 1 %]
+	<!-- "commentlist" will most likely change -->
+        <ul id="commentlist">
+[% CASE 'fulllistend' %]
+        [% returnme.data_constant = 1 %]
+        </ul>
+[% CASE 'fullcommentbegin' %]
+        [% returnme.data_constant = 1 %]
+        <li class="comment">
+[% CASE 'fullcommentend' %]
+        [% returnme.data_constant = 1 %]
+        </li>
 [% CASE 'displayThreadLink' %]
 	[% foo = hidden == 1 ? 'y' : 'ies'; hidden %] repl[% foo %]
 [% CASE 'atonish' %]
