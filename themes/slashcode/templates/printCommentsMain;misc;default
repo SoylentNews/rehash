@@ -19,11 +19,10 @@ en_US
 __name__
 printCommentsMain
 __template__
-<table width="100%" border="0" cellpadding="0" cellspacing="0" class="commentwrap">
-	<tr>
-		<td class="commentBox">
+<div class="commentwrap">
+<div class="commentBox">
 [% IF title %]
-		<a href="[% link | strip_urlattr %]">[% title %]</a>
+	<a href="[% link | strip_urlattr %]">[% title %]</a>
 [% ELSE %]
 	[% Slash.linkComment({
 		sid	=> sid,
@@ -37,13 +36,9 @@ __template__
 	|
 
 [% IF user.is_anon %]
-		<a href="[% gSkin.rootdir %]/users.pl">
-			Log in/Create an Account
-		</a>
+	<a href="[% gSkin.rootdir %]/users.pl">Log in/Create an Account</a>
 [% ELSE %]
-		<a href="[% gSkin.rootdir %]/my/comments">
-			Preferences
-		</a>
+		<a href="[% gSkin.rootdir %]/my/comments">Preferences</a>
 [% END %]
 
 		| [% Slash.linkComment({
@@ -55,32 +50,30 @@ __template__
 		}) %]
 
 [% IF user.points %]
-		| <b>[% user.points %]</b>
-		<a href="[% gSkin.rootdir %]/moderation.shtml">
-		moderator</a>
-		point[% user.points == 1 ? '' : 's' %]
+	| <b>[% user.points %]</b>
+	<a href="[% gSkin.rootdir %]/moderation.shtml">
+	moderator</a>
+	point[% user.points == 1 ? '' : 's' %]
 [% END %]
 
 [% IF count %]
-		| <b>[% count %]</b> comments
+	| <b>[% count %]</b> comments
 [% END %]
 
 [% IF lvl && user.mode == 'thread' %]
-		(Spill at <b>[% user.commentspill %]</b>!) | Index Only
+	(Spill at <b>[% user.commentspill %]</b>!) | Index Only
 [% END %]
 
 [% IF form.startat %]
 		| Starting at #[% form.startat %]
 [% END %]
 
-		| <a href="[% gSkin.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">
-Search Discussion</a>
-	</td></tr>
-
-	<tr><td class="commentBoxForm">
+		| <a href="[% gSkin.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">Search Discussion</a>
+	</div>
+	<div class="commentBoxForm">
 		<form action="[% gSkin.rootdir %]/comments.pl">
 		<fieldset>
-		<legend></legend>
+		<legend>Display Options</legend>
 		<input type="hidden" name="sid" value="[% sid %]">
 		[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
 		[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
@@ -102,18 +95,17 @@ Search Discussion</a>
 		[% END %]
 		</fieldset>
 		</form>
-	</td></tr>
-	<tr><td class="commentBox">
+	<div class="commentBox">
 		<small>
 		<b>The Fine Print:</b>
 		The following comments are owned by whoever posted them.  We are not responsible for them in any way.
 		</small>
-</td></tr>
+	</div>
 
 [% IF user.mode == 'nocomment' %]
-		</table>
+	</div>
 [% END %]
-
+</div>
 __seclev__
 10000
 __version__

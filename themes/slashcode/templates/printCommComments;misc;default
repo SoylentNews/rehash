@@ -26,20 +26,11 @@ __template__
 [% moderate_form   = can_moderate %]
 [% moderate_button = (can_moderate && user.mode != 'archive' && ( !user.state.discussion_archived || constants.comments_moddable_archived)) %]
 [% IF moderate_form %]
-	<tr>
-		<td>
- 		       <form action="[% gSkin.rootdir %]/comments.pl" method="post">
-  			      <fieldset>
-  					<legend> </legend>
-					<input type="hidden" name="sid" value="[% sid %]">
-					<input type="hidden" name="cid" value="[% cid %]">
-					<input type="hidden" name="pid" value="[% pid %]">
-					<table>
+	<form action="[% gSkin.rootdir %]/comments.pl" method="post">
 [% END %]
 [% IF cid %]
+	<ul id="commentlisting">
 	[% Slash.dispComment(comment) %]
-	</td></tr>
-	<tr><td align="center">
 
 	[% IF previous %]
 		&lt;&lt;[% Slash.linkComment(previous, 1) %]
@@ -61,45 +52,41 @@ __template__
 		[% Slash.linkComment(next, 1) %]&gt;&gt;
 	[% END %]
 
-	</td></tr>
-	<tr><td align="center">
 	[% Slash.moderatorCommentLog('cid', cid, { show_m2s => (form.show_m2s.defined ? form.show_m2s : user.m2_with_comm_mod), need_m2_form => !moderate_form, need_m2_button => 1, title=>" " }); %]
-	</td></tr>
 [% END %]
 
 	[% lcp %]
 	[% IF lvl %]
-	<tr><td>
 	[% END %]
-	[% Slash.displayThread(sid, pid, lvl, comments) %]
+	[% thread = Slash.displayThread(sid, pid, lvl, comments) %]
+	[% IF thread %]
+		[% UNLESS cid %]<ul id="commentlisting">[% END %]
+			[% thread %]
+		[% UNLESS cid %]</ul>[% END %]
+	[% END %]
+	[% IF cid %]</ul>[% END %]
 	[% IF lvl %]
-	</td></tr>
 	[% END %]
 	[% lcp %]
 
 [% IF moderate_form %]
-						<tr>
-							<td>
-							[% IF moderate_button %]
-								<p>Have you read the
-								<a href="[% gSkin.rootdir %]/moderation.shtml">Moderator Guidelines</a>
-								yet?
-								<input type="hidden" name="op" value="moderate">
-								<input type="submit" value="moderate" class="button">
-								[% IF (constants.authors_unlimited && user.seclev >= constants.authors_unlimited)
-									|| user.acl.candelcomments_always %]
-									[% PROCESS formNote note='Checked comments will be deleted.' %]
-								[% END %]
-							[% END %]
-							</td>
-						</tr>
-					</table>
-			        </fieldset>
-		        </form>
-		</td>
-	</tr>
+	[% IF moderate_button %]
+		<p>Have you read the
+		<a href="[% gSkin.rootdir %]/moderation.shtml">Moderator Guidelines</a>
+		yet?
+		<input type="hidden" name="op" value="moderate">
+		<input type="hidden" name="sid" value="[% sid %]">
+		<input type="hidden" name="cid" value="[% cid %]">
+		<input type="hidden" name="pid" value="[% pid %]">
+		<input type="submit" value="moderate" class="button">
+		[% IF (constants.authors_unlimited && user.seclev >= constants.authors_unlimited)
+			|| user.acl.candelcomments_always %]
+			[% PROCESS formNote note='Checked comments will be deleted.' %]
+		[% END %]
+	[% END %]
+	</form>
 [% END %]
-</table>
+</div>
 
 __seclev__
 10000

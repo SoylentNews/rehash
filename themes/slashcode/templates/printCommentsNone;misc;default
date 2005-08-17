@@ -19,9 +19,8 @@ en_US
 __name__
 printCommentsNone
 __template__
-<table width="100%" border="0" cellspacing="1" cellpadding="2">
-
-	<tr><td bgcolor="[% user.colors.bg_3 %]" align="CENTER">
+<div class="commentwrap">
+<div class="commentBox">
 [% IF title %]
 		<a href="[% link %]">[% title %]</a>
 [% ELSE %]
@@ -37,13 +36,9 @@ __template__
 	|
 
 [% IF user.is_anon %]
-		<a href="[% gSkin.rootdir %]/users.pl">
-			Log in/Create an Account
-		</a>
+		<a href="[% gSkin.rootdir %]/users.pl">Log in/Create an Account</a>
 [% ELSE %]
-		<a href="[% gSkin.rootdir %]/users.pl?op=editcomm">
-			Preferences
-		</a>
+		<a href="[% gSkin.rootdir %]/users.pl?op=editcomm">Preferences</a>
 [% END %]
 
 [% IF user.points %]
@@ -54,9 +49,8 @@ __template__
 [% END %]
 
 		| <a href="[% gSkin.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">Search Discussion</a>
-	</td></tr>
-
-	<tr><td bgcolor="[% user.colors.bg_2 %]" align="CENTER">
+	</div>
+	<div class="commentBoxForm">
 		<form action="[% gSkin.rootdir %]/comments.pl">
 		<input type="hidden" name="sid" value="[% sid %]">
 
@@ -70,14 +64,13 @@ __template__
 
 		<input type="submit" name="op" value="Change">
 		</form>
-	</td></tr>
-	<tr><td bgcolor="[% user.colors.bg_3 %]" align="CENTER">
+<div class="commentBox">
 <b>The Fine Print:</b>
 The following comments are owned by whoever posted them.
 We are not responsible for them in any way.
-</td></tr>
-</table>
-
+</div>
+</div>
+</div>
 __seclev__
 10000
 __version__
