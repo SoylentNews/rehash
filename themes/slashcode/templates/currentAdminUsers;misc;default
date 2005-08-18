@@ -16,7 +16,7 @@ en_US
 __name__
 currentAdminUsers
 __template__
-<table border="0" cellpadding="2" cellspacing="0">
+<table width="100%" border="0" cellpadding="2" cellspacing="0">
 
 [% FOREACH author = ids %]
 	[% id         = author.0;
@@ -25,7 +25,7 @@ __template__
 	   uid        = author.3;
 	%]
 
-	<tr class="data_hl1"><td>
+	<tr class="data_hl1"><td class="data_bgc1">
 		<a href="[% gSkin.rootdir %]/~[% id | fixparam %]/"><b>[% id %]</b></a>
 	</td><td>
 		[% lastsecs %]
@@ -38,7 +38,7 @@ __template__
 
 [% IF constants.cur_performance_stats_disp %]
 	<tr class="data_hl1">
-	<td valign="top">Performance</td>
+	<td valign="top" class="data_bgc1">Performance</td>
 	<td valign="top">[% PROCESS performance_stats %]</td>
 	</tr>
 [% END %]
@@ -46,7 +46,7 @@ __template__
 [% IF constants.dbsparklines_disp %]
 	[% FOR vu = reader_vus %]
 	<tr class="data_hl1">
-		<td valign="top">[% vu %]</td>
+		<td valign="top" class="data_bgc1">[% vu %]</td>
 		<td valign="top"><img src="[% gSkin.rootdir %]/images/dbsparklines/[% vu %]_[% constants.dbsparklines_pngsuffix %].png" width="[% constants.dbsparklines_width %]" height="[% constants.dbsparklines_height %]" alt="[% vu %] dbsparkline"></td>
 	</tr>
 	[% END %]
