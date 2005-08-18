@@ -1095,7 +1095,7 @@ sub displayThread {
 
 	unless ($const) {
 		for (map { ($_ . "begin", $_ . "end") }
-			qw(table cage cagebig indent comment)) {
+			qw(table cage cagebig indent comment fullcomment)) {
 			$const->{$_} = getData($_, '', '');
 		}
 	}
@@ -1137,22 +1137,23 @@ sub displayThread {
 			$finish_list++;
 		}
 
-		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
-			$return .= $const->{cagebegin} if $cagedkids;
-			my $thread = displayThread($sid, $cid, $lvl+1, $comments, $const);
-			if ($thread) {
-				$return .= $const->{indentbegin} if $indent;
-				$return .= $thread;
-				$return .= $const->{indentend} if $indent;
-			}
-			$return .= $const->{cageend} if $cagedkids;
+		$return .= $const->{fullcommentend} if ($user->{mode} eq 'flat');
 
+		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
+			if (my $str = displayThread($sid, $cid, $lvl+1, $comments, $const)) {
+				$return .= $const->{cagebegin} if $cagedkids;
+				$return .= $const->{indentbegin} if $indent;
+				$return .= $str;
+				$return .= "$const->{indentend}" if $indent;
+				$return .= $const->{cageend} if $cagedkids;
+			}
 			# in flat or nested mode, all visible kids will
 			# be shown, so count them.	-- Pater
 			$displayed += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
 		}
 
-		$return .= $const->{commentend} if $finish_list;
+		$return .= "$const->{commentend}" if $finish_list;
+		$return .= "$const->{fullcommentend}" if (($full || $highlight) && $user->{mode} ne 'flat');
 
 		last if $displayed >= $user->{commentlimit};
 	}
@@ -1259,9 +1260,8 @@ sub dispComment {
 		vislenify($comment); # create $comment->{ipid_vis} and {subnetid_vis}
 		if ($constants->{comments_hardcoded}) {
 			$comment->{ipid_display} = <<EOT;
-<BR><FONT FACE="$constants->{mainfontface}" SIZE=1>IPID:
-<A HREF="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{ipid}&amp;fieldname=ipid">$comment->{ipid_vis}</A>&nbsp;&nbsp;SubnetID: 
-<A HREF="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{subnetid}&amp;fieldname=subnetid">$comment->{subnetid_vis}</A></FONT>
+<a href="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{ipid}&amp;fieldname=ipid">$comment->{ipid_vis}</A>&nbsp;&nbsp;SubnetID: 
+<a href="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{subnetid}&amp;fieldname=subnetid">$comment->{subnetid_vis}</a>
 EOT
 		} else {
 			$comment->{ipid_display} = slashDisplay(
@@ -1825,19 +1825,23 @@ sub _hard_dispComment {
 		}
 	}
 	
-	my $title = qq|<a name="$comment->{cid}"><b>$comment->{subject}</b></a>|;
+	my $title = qq|<a name="$comment->{cid}">$comment->{subject}</a>|;
 	my $return = <<EOT;
-			<tr><td bgcolor="$user->{colors}{bg_2}">
-				<font size="3" color="$user->{colors}{fg_2}">
-				$title $score_to_display
-				</font>
-				<br>by $user_nick_to_display$zoosphere_display$user_email_to_display
-				on $time_to_display$comment_link_to_display
-				$userinfo_to_display $comment->{ipid_display}
-			</td></tr>
-			<tr><td>
-				$comment_to_display
-			</td></tr>
+		<li class="comment">
+			<div class="commentTop">
+				<div class="title">
+					<h4>$title</h4>
+				 	$score_to_display
+				</div>
+				<div class="details">
+					by $user_nick_to_display$zoosphere_display$user_email_to_display
+					on $time_to_display$comment_link_to_display
+					<small>$userinfo_to_display $comment->{ipid_display}</small>
+				</div>
+			</div>
+			<div class="commentBody">	
+			$comment_to_display
+			</div>
 EOT
 
 	# Do not display comment navigation and reply links if we are in
@@ -1871,18 +1875,14 @@ EOT
 				&& ( !$user->{state}{discussion_archived}
 					|| $constants->{comments_moddable_archived} );
 
-		push @link, qq|<INPUT TYPE="CHECKBOX" NAME="del_$comment->{cid}">|
+		push @link, qq|<input type="checkbox" name="del_$comment->{cid}">|
 			if $user->{is_admin};
 
 		my $link = join(" | ", @link);
 
 		if (@link) {
 			$return .= <<EOT;
-				<tr><td>
-					<font size="2">
 					[ $link ]
-					</font>
-				</td></tr>
 EOT
 		}
 
