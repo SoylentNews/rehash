@@ -15,7 +15,6 @@ __template__
 [% user_titlebar %]
 <div class="generalbody">
 [% messages_menu %]
-<p>
 
 [% IF user.is_anon %]
 
