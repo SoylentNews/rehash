@@ -195,8 +195,10 @@ sub deleteSubmissions {
 #################################################################
 sub blankForm {
 	my($constants, $slashdb, $user, $form) = @_;
+	print getData("submit_body_open");
 	yourPendingSubmissions(@_);
 	displayForm($user->{nickname}, $user->{fakeemail}, $form->{skin}, getData('defaulthead'));
+	print getData("submit_body_close");
 }
 
 #################################################################
@@ -210,13 +212,14 @@ sub yourPendingSubmissions {
 	my($constants, $slashdb, $user, $form) = @_;
 
 	return if $user->{is_anon};
-
+	print getData("submit_body_open");
 	if (my $submissions = $slashdb->getSubmissionsByUID($user->{uid}, "", { limit_days => 365 })) {
 		slashDisplay('yourPendingSubs', {
 			submissions	=> $submissions,
 			width		=> '100%',
 		});
 	}
+	print getData("submit_body_close");
 }
 
 #################################################################
