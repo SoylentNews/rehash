@@ -157,8 +157,8 @@ sub getNewStoryTopics {
 
 	my $topics = $self->getTopics;
 	for my $topic (@$ar) {
-		@{ $topic                   }{qw(alttext image width height)} =
-		@{ $topics->{$topic->{tid}} }{qw(alttext image width height)};
+		@{ $topic                   }{qw(textname image width height)} =
+		@{ $topics->{$topic->{tid}} }{qw(textname image width height)};
 	}
 
 	return $ar;

@@ -60,7 +60,7 @@ sub updateRecentTopics {
 				image	 => $cur_story->{image},
 				width	 => $cur_story->{width},
 				height	 => $cur_story->{height},
-				textname => $cur_story->{alttext},
+				textname => $cur_story->{textname},
 			}, 1);
 		}
 #		if ($num_stories <= $constants->{recent_topic_txt_count}) {
