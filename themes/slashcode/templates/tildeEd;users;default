@@ -191,8 +191,8 @@ __template__
 
 <div class="notes">
 	[% tilded_customize_msg %]
-</div>
 	[% tilded_box_msg %]
+</div>
 
 __seclev__
 500
