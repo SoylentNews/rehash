@@ -560,21 +560,13 @@ ul.menu li.selected a
 	color: #000;
 	padding: 0 .3em;
 }
-html > body .generalbody ul.menu, .submenu
-{
-        margin: -1em 0 3em 0;
-}
 .generalbody ul.menu, .submenu
 {
-	margin: -1em 0 1em 0;
+	margin: 1em 0 1em 0;
 	padding: 0;
 	font-size: 70%;
 	font-family: arial, sans-serif;
 	display: block;
-}
-html > body .generalbody ul.menu li, .submenu li
-{
-        float: left;
 }
 .generalbody ul.menu li, .submenu li
 {
