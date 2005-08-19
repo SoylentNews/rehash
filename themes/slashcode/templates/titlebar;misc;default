@@ -7,7 +7,7 @@ Prints the bar above each story, containing the actual title of the story.
 * title = text for title
 * future = boolean: whether story is in the future
 	(currently not used)
-* td_extra = extra_table cell(s) and contents to include after after the title table-cell
+* max_min_button = html for maximize / minimize buttons
 
 __title__
 
@@ -28,6 +28,9 @@ __template__
 			[% title %]
 		</h3>
 	</div>
+	[% IF max_min_button %]
+	<div class="max_min_button">[% max_min_button %]</div>
+	[% END %]
 </div>
 [% IF future %]
 </div>

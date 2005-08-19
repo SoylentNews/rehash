@@ -32,7 +32,6 @@ cur_time = Slash.db.getTime();
 [% admin_link_ipid = admin_flag && !useredit.ipid %]
 [% IF submissions.size > 0 %]
 	[% PROCESS titlebar title = title -%]
-	<div class="generalbody">
 	<table width="100%" border=0 cellpadding=3 cellspacing=0>
 		<tr class="data_head">
 			<th>Title</th>

@@ -27,9 +27,9 @@ __template__
 		   self_url = PROCESS base_url_m2 value=the_user.uid;
 		   url_tail = PROCESS state_url_m2 override = { m2_listing => m2_listing_op };
 		   self_url = self_url  _ url_tail;
-		   extra = "<td width=\"14\" bgcolor=\"" _ user.colors.bg_3 _ "\"><a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (m2_listing ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\" border=0></a></td>";
+		   extra = "<a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (m2_listing ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\"></a>";
 		%]
-		[% PROCESS titlebar width="100%" title=title td_extra = extra %]
+		[% PROCESS titlebar width="100%" title=title max_min_button = extra %]
 	[% END %]
 	<table cellspacing="0" cellpadding="2" width="100%">
 	<tr class="data_head">

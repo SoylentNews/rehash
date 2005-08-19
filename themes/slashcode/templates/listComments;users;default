@@ -60,6 +60,7 @@ row_class_3 = "data_hl3";
 		END %]
 	[% IF commentstruct.size > 0 and admin_flag %]
 		<form method="post" action="[% gSkin.rootdir %]/admin.pl">
+		<div>
 		<input type="hidden" name="op" value="moderate_recent">
 		[%	
 			returnto_base = PROCESS base_url;
@@ -75,11 +76,11 @@ row_class_3 = "data_hl3";
 		   	self_url = PROCESS base_url;
 		   	url_tail = PROCESS state_url override = { show_m1s => show_m1s_op};
 		   	self_url = self_url  _ url_tail;
-		   	extra = "<td width=\"14\" bgcolor=\"" _ user.colors.bg_3 _ "\"><a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (show_m1s ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\" border=0></a></td>";
+		   	extra = "<a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (show_m1s ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\"></a>";
 		   END;
 		%]
-		[% PROCESS titlebar width="100%" title = commenttitle td_extra = extra -%]
-		[% td_extra = "" %]
+		[% PROCESS titlebar width="100%" title = commenttitle max_min_button = extra -%]
+		[% max_min_button = "" %]
 	[% END %]
 	<table width="100%" border="0" cellpadding="3" cellspacing="0" class="data">
 	<tr class="data_head">
@@ -211,7 +212,7 @@ row_class_3 = "data_hl3";
 						'</tr>';
 					END;
 
-					"<tr><td "; IF type=="netid"; 'colspan="2"'; END; ">";
+					"<tr class=\"" _ row_class_2 _ "\"><td "; IF type=="netid"; 'colspan="2"'; END; ">";
 					IF commentcount > n && (user.seclev > constants.comments_more_seclev
 						|| (constants.comments_more_seclev == 2 && user.is_subscriber)); %]
 						 	<a href="[% PROCESS base_url %][% PROCESS state_url override = { min_comment => n } %]">[% commentcount - n %] More Comment[% IF (commentcount-n)>1 %]s[% END %]...</a>
@@ -225,7 +226,7 @@ row_class_3 = "data_hl3";
 						[% IF moddable_items %]<br><input type="submit" value="Moderate">[% END %]
 					[% END %]</td>
 					</tr>
-					<tr><td colspan="[% total_cols %]" align="center">
+					<tr class="[% row_class_2 %]"><td colspan="[% total_cols %]" align="center">
 						Logged in users can choose whether or not they'd like comments shown grouped by discussion on their 
 						[% IF !user.is_anon %]<a href="[% gSkin.rootdir %]/users.pl?op=editcomm">[% END %]comment settings page[% IF !user.is_anon %]</a><br>[% END %]
 						[% IF constants.subscribe and !user.is_subscriber %]<br>Subscribers can view entire comment history for all users[% END %]					 
@@ -234,7 +235,7 @@ row_class_3 = "data_hl3";
 		[% END %]				
 		</table>
 		[%- IF commentstruct.size > 0 and admin_flag -%]
-			</form>
+			</div></form>
 		[%- END -%]
  [% END %]
 
