@@ -2011,8 +2011,9 @@ sub createAccessLog {
 	$user ||= {};
 	$user->{state} ||= {};
 	
+	return if $op eq "css" && $constants->{accesslog_css_skip};
+	
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-
 	if ($op eq 'image' && $constants->{accesslog_imageregex}) {
 		return if $constants->{accesslog_imageregex} eq 'NONE';
 		my $uri = $r->uri;
