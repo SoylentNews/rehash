@@ -95,9 +95,11 @@ __template__
 [% CASE 'submit_body_open' %]
 	[% returnme.data_constant = 1 %]
 	<div class="generalbody">
+
 [% CASE 'submit_body_close' %]
 	[% returnme.data_constant = 1 %]
 	</div>
+
 [% END %]
 
 __seclev__
