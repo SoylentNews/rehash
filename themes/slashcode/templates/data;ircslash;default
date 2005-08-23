@@ -66,7 +66,8 @@ __template__
 	[% END %]
 
 [% CASE 'dbs_response' %]
-	[% FOREACH dbid = dbids;
+	[% ok = 1;
+	   FOREACH dbid = dbids;
 		IF	   dbs.$dbid.was_alive
 			&& dbs.$dbid.was_reachable
 			&& dbs.$dbid.was_running
@@ -77,6 +78,7 @@ __template__
 			# This DB is fine, don't bother mentioning it.
 			NEXT;
 		END;
+		ok = 0;
 		"lag "; dbs.$dbid.lag;
 		" bog "; dbs.$dbid.bog;
 		IF !dbs.$dbid.was_alive;	" DEAD!";
@@ -84,7 +86,9 @@ __template__
 		ELSIF !dbs.$dbid.was_running;	" STOPPED!";	END;
 		" - "; dbs.$dbid.virtual_user;
 		"\n";
-	END %]
+	   END;
+	   "All DBs OK." IF ok;
+	%]
 
 [% CASE 'dbalert_prefix' %]
 
