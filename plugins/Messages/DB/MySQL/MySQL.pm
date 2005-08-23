@@ -470,7 +470,7 @@ sub _getMessageUsers {
 	if ($acl) {
 		my $acl_q = $self->sqlQuote($acl);
 		my $aclt = "$table,users_acl";
-		my $aclw = " users_acl.uid = users_messages.uid AND users_acl.acl=$acl_q";
+		my $aclw = "$where AND users_acl.uid = users_messages.uid AND users_acl.acl=$acl_q";
 		my $aclu = $self->sqlSelectColArrayref($cols, $aclt, $aclw) || [];
 		push @users, @$aclu;
 	}
