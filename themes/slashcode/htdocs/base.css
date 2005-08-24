@@ -65,6 +65,10 @@ img { border: none; }
 	padding: 0;
 }
 
+#poll-content legend {
+  display: none;
+}
+
 /* Header */
 #logo h1 a
 {
