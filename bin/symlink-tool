@@ -214,6 +214,12 @@ if (@dotfiles) {
 ###############################################
 sub handle_file {
 	my($symlink_file, $target_file, $symlink_file_dot, $symlink_file_dot_short) = @_;
+
+	if (!-e $target_file) {
+		print "Target file '$target_file' missing, can't create symlink\n";
+		return 1;
+	}
+
 	if (!-e $symlink_file && -e $symlink_file_dot) {
 		# The symlink file is missing and in its place is a
 		# dotfile.  This site must have that file disabled,
@@ -226,6 +232,7 @@ sub handle_file {
 			print "Checking dotfile replacement at '$symlink_file'\n";
 		}
 	}
+
 	if (-e $symlink_file && !-l $symlink_file) {
 		# The file in place is not a symlink; compare it to
 		# what it should be and only replace it with a symlink
@@ -250,6 +257,7 @@ sub handle_file {
 			}
 		}
 	}
+
 	lstat($symlink_file);
 	if (!-e _) {
 		print "Symlink at '$symlink_file' missing, ";
