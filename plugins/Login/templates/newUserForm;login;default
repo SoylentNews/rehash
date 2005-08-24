@@ -42,7 +42,7 @@ __template__
 				<input type="text" name="email" value="" size="40">
 				<input type="text" name="email2" value="" size="40">
 				<div class="note">
-					Enter a valid email address <b>twice</b> to send your registration information to. This address will <b>not</b> be displayed on Slash Site without you setting your preferences to display it.
+					Enter a valid email address <b>twice</b> to send your registration information to. This address will <b>not</b> be displayed on [% constants.sitename %] without you setting your preferences to display it.
 				</div>
 				<label>
 					<input type="checkbox" name="comment_reply" value="1" checked> Replies to my comments will be mailed to me
