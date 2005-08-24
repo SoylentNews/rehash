@@ -1122,7 +1122,7 @@ sub createMenu {
 	my $user = getCurrentUser();
 	my $gSkin = getCurrentSkin();
 
-	return if $menu eq "users" && $constants->{users_menu_no_display};
+	return if $menu eq 'users' && $constants->{users_menu_no_display};
 
 	# The style of menu desired.  While we're "evolving" the way we do
 	# menus, createMenu() handles several different styles.
@@ -1293,9 +1293,7 @@ sub _hard_linkComment {
 	my $constants = getCurrentStatic();
 	my $gSkin = getCurrentSkin();
 
-	my $subject = $comment->{color}
-	? qq|$comment->{subject}|
-		: $comment->{subject};
+	my $subject = $comment->{subject};
 
 	my $display = qq|<a href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}|;
 	$display .= "&amp;op=$comment->{op}" if $comment->{op};
