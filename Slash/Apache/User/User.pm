@@ -665,7 +665,7 @@ sub userdir_handler {
 
 		} elsif ($op eq 'journal') {
 			my $args = "op=display&nick=$nick&uid=$uid";
-			$extra .= '/' . $more if length $more;
+			$extra .= '/' . $more;
 			if ($extra) {
 				if ($extra =~ /^(\d+)\/$/) {
 					$args .= "&id=$1";
@@ -708,7 +708,7 @@ sub userdir_handler {
 
 		} elsif ($op =~ /^(?:friends|fans|freaks|foes|zoo)$/) {
 			my $args = "op=$op&nick=$nick&uid=$uid";
-			$extra .= '/' . $more if length $more;
+			$extra .= '/' . $more;
 
 			if ($op eq 'friends' && $extra =~ s/^friends\///) {
 				$args =~ s/friends/fof/;
