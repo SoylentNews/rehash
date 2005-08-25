@@ -114,7 +114,6 @@ htdoc=htdocs/admin.css
 htdoc=htdocs/base.css
 htdoc=htdocs/comments.css
 htdoc=htdocs/print.css
-htdoc=htdocs/search.css
 htdoc=htdocs/slashcode.css
 htdoc=htdocs/slashcode_lite.css
 mysql_dump=sql/mysql/datadump.sql

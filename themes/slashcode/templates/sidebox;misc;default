@@ -23,7 +23,5 @@ __template__
 		[% contents %]
 	</div>
 </div>
-__seclev__
-10000
 __version__
 $Id$
