@@ -23,7 +23,10 @@ __template__
 [% IF form.pid %]
         [% PROCESS titlebar title="Reply to: $reply.subject" %]
         <div class="generalbody">
+		<ul id="commentlisting">
                 [% Slash.dispComment(reply) %]
+		</li>
+		</ul>
         </div>
 [% END %]
 
@@ -121,7 +124,7 @@ END %]
 				[% section_select %]
 		[% END %]
 			[% PROCESS formLabel value=>'URL' %]
-				<input type="text" name="url" value="[% form.url | strip_attribute %]" size=50>
+				<input type="text" name="url" value="[% form.url | strip_attribute %]" size="50">
 	[% END %]
 
 	[% PROCESS formLabel value => 'Subject' %]
@@ -136,7 +139,7 @@ END %]
 			[% pulldown = extra.1 %]
 			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',pulldown), form.${extra.1}, 1, 1) %]	
 		[% END %]
-		
+		</b>
 	[% END %]
 	
 		[% PROCESS formLabel value => 'Comment' %]

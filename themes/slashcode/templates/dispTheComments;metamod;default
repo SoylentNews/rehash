@@ -73,6 +73,7 @@ to do this unless you need more context to fairly meta moderate.<br><br></li>
 		[% IF reasons.${C.modreason}.unfairname; reasons.${C.modreason}.name; ELSE; "Fair"; END %]
 		</b>&nbsp;&nbsp;|&nbsp;
 		<a href="[% context_url %]">See Context</a><hr>
+	</li>
 [% END %]
 [% IF comments.size %]
 </ul>

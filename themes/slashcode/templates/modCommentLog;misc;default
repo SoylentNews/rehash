@@ -45,6 +45,7 @@ bg_toggle = 0;
 [% IF mods.size > 0  || show_uid_totals %]
 	[% IF user.is_admin and need_m2_form %]
 	<form  method="post" action="[% gSkin.rootdir %]/comments.pl">
+	<div>
 	[% END %]
 	[% IF meta_mod_only %]
 		<input type="hidden" name="meta_mod_only" value="1">
@@ -192,7 +193,6 @@ bg_toggle = 0;
 	<td><b>[% this_user.stirred %] Stirred</b></td>
 </tr>
 [% END %]
-        </table>
 [% IF user.is_admin and (need_m2_form || need_m2_button )%]
 	[% IF need_m2_button %]
 		<tr class="data_hl1"><td colspan="[% total_cols %]" align="right">
@@ -201,7 +201,9 @@ bg_toggle = 0;
 		</td></tr>
 	[% END %]
 [% END %]
-	[% IF need_m2_form %]	
+        </table>
+	[% IF need_m2_form %]
+		</div>	
 		</form>
 	[% END %]
 [% END %]
@@ -237,9 +239,9 @@ END;
 
 IF num_modifiers > 0 %]
 
-<table bgcolor="[% user.colors.bg_2 %]" align="center" border="0" cellpadding="2" cellspacing="0" width="300">
+<table align="center" border="0" cellpadding="2" cellspacing="0" width="300">
 
-	<tr class="[% user.colors.bg_3 %]">
+	<tr class="data_head">
 		<th align="left">Starting Score:&nbsp;&nbsp;&nbsp;</th>
 		<th colspan="2" align="right">[% modifier_hr.score_start || 0 %]</th>
 		<th align="left">&nbsp;point[% IF modifier_hr.score_start != 1 %]s[% END %]</th>
