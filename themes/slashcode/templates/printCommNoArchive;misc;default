@@ -13,9 +13,8 @@ en_US
 __name__
 printCommNoArchive
 __template__
-<table width="100%" border="0" cellspacing="1" cellpadding="2">
-
-<tr><td bgcolor="[% user.colors.bg_3 %]">
+<div class="commentwrap">
+<div class="commentBox">
 	[% IF discussion.is_future %]
 		Posting will only be possible
 		[% constants.subscribe_future_name %]
@@ -56,8 +55,8 @@ This discussion was created by <a href="[% gSkin.rootdir %]/~[% d_nickname | fix
 			[% msg %] [% type %].
 		[% END %]
 	[% END %]
-</td></tr>
-
+</div>
+</div>
 __seclev__
 10000
 __version__

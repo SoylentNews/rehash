@@ -26,11 +26,11 @@ __template__
 	<div class="title">
 		<h3>
 			[% title %]
+			[% IF max_min_button %]
+			<span class="max_min_button">[% max_min_button %]</span>
+			[% END %]
 		</h3>
 	</div>
-	[% IF max_min_button %]
-	<div class="max_min_button">[% max_min_button %]</div>
-	[% END %]
 </div>
 [% IF future %]
 </div>

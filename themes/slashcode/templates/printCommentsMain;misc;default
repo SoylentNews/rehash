@@ -27,7 +27,6 @@ __template__
 	[% Slash.linkComment({
 		sid	=> sid,
 		pid	=> pid,
-		color	=> user.colors.fg_3,
 		subject	=> 'Top',
 		subject_only => 1,
 	}) %]
@@ -44,7 +43,6 @@ __template__
 		| [% Slash.linkComment({
 			sid	=> sid,
 			pid	=> 0,
-			color	=> user.colors.fg_3,
 			subject	=> 'Top',
 			subject_only => 1,
 		}) %]
@@ -101,10 +99,7 @@ __template__
 		The following comments are owned by whoever posted them.  We are not responsible for them in any way.
 		</small>
 	</div>
-
-[% IF user.mode == 'nocomment' %]
 	</div>
-[% END %]
 </div>
 __seclev__
 10000
