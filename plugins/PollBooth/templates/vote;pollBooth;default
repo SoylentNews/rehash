@@ -40,7 +40,7 @@ __template__
 					<td align="right" class="barVotes">[% votes %] votes</td>
         			</tr>
 			</table>
-[% END %]
+		[% END %]
 		<b class="totalVotes">[% voters %] total votes.</b>
 		<br>
 		[

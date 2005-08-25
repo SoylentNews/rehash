@@ -15,13 +15,13 @@ __template__
 	[% back = back || 0;
 	   IF (back > -1) || forward %]
 				[% IF (back > -1) %]
-					<a href="[% gSkin.rootdir %]/search.pl?[% args %]&amp;start=[% back %]">&laquo; Last [% constants.search_default_display %] matches</A>
+					<a href="[% gSkin.rootdir %]/search.pl?[% args %]&amp;start=[% back %]">&laquo; Last [% constants.search_default_display %] matches</a>
 				[% END %]
 				[% IF (back > -1) && forward %]
 					|
 				[% END %]
 				[% IF forward %]
-					<a href="[% gSkin.rootdir %]/search.pl?[% args %]&amp;start=[% forward %]">Next [% constants.search_default_display %] matches &raquo;</A>
+					<a href="[% gSkin.rootdir %]/search.pl?[% args %]&amp;start=[% forward %]">Next [% constants.search_default_display %] matches &raquo;</a>
 				[% END %]
 	[% END %]
 	</div>

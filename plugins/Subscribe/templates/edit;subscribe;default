@@ -129,7 +129,7 @@ ends. Your day may vary.)
 	<p><table border=0 cellspacing=1 width="100%">
 	<tr><th>&nbsp;&nbsp;Ads&nbsp;&nbsp;</th>
 	<th>&nbsp;&nbsp;No&nbsp;Ads&nbsp;&nbsp;</th>
-	<th width="100%">&nbsp;&nbsp;</th></tr>
+	<th>&nbsp;&nbsp;</th></tr>
 
 	[% FOREACH page = pages %]
 
