@@ -141,3 +141,7 @@ html>body #admin { margin: 0 auto .2em 0; }
 	list-style: none;
 	display: inline;
 }
+
+.nex_remove {
+	color: #000;
+}
