@@ -11,6 +11,7 @@ en_US
 __name__
 footer-admin
 __template__
+</div>
 <div id="adminfooter">
         <hr>
         <div class="btmnav">
