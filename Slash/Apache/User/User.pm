@@ -556,78 +556,75 @@ sub userdir_handler {
 				$r->args($args);
 				$r->uri('/journal.pl');
 				$r->filename($constants->{basedir} . '/journal.pl');
+
 			} elsif ($op eq 'discussions') {
 				$r->args("op=personal_index");
 				$r->uri('/comments.pl');
 				$r->filename($constants->{basedir} . '/comments.pl');
+
 			} elsif ($op eq 'inbox') {
 				$r->args("op=list");
 				$r->uri('/messages.pl');
 				$r->filename($constants->{basedir} . '/messages.pl');
+
 			} elsif ($op eq 'messages') { # XXX change to be same as /inbox, move this to /my/preferences/messages
 				$r->args("op=display_prefs");
 				$r->uri('/messages.pl');
 				$r->filename($constants->{basedir} . '/messages.pl');
-			} elsif ($op eq 'friends') {
-				if ($extra eq 'friends') {
-					$r->args("op=fof");
-					$r->uri('/zoo.pl');
-					$r->filename($constants->{basedir} . '/zoo.pl');
-				} elsif ($extra eq 'foes') {
-					$r->args("op=eof");
-					$r->uri('/zoo.pl');
-					$r->filename($constants->{basedir} . '/zoo.pl');
-				} else {
-					$r->args("op=friends");
-					$r->uri('/zoo.pl');
-					$r->filename($constants->{basedir} . '/zoo.pl');
+
+			} elsif ($op =~ /^(?:friends|fans|freaks|foes|zoo)$/) {
+				my $args = "op=$op";
+
+				if ($op eq 'friends' && $extra =~ s/^friends\///) {
+					$args =~ s/friends/fof/;
+				} elsif ($op eq 'friends' && $extra =~ s/^foes\///) {
+					$args =~ s/friends/eof/;
+				} elsif ($op eq 'zoo') {
+					$args =~ s/zoo/all/;
 				}
-			} elsif ($op eq 'foes') {
-				$r->args("op=foes");
+
+				$r->args($args);
 				$r->uri('/zoo.pl');
 				$r->filename($constants->{basedir} . '/zoo.pl');
-			} elsif ($op eq 'fans') {
-				$r->args("op=fans");
-				$r->uri('/zoo.pl');
-				$r->filename($constants->{basedir} . '/zoo.pl');
-			} elsif ($op eq 'freaks') {
-				$r->args("op=freaks");
-				$r->uri('/zoo.pl');
-				$r->filename($constants->{basedir} . '/zoo.pl');
-			} elsif ($op eq 'zoo') {
-				$r->args("op=all");
-				$r->uri('/zoo.pl');
-				$r->filename($constants->{basedir} . '/zoo.pl');
+
 			} elsif ($op eq 'comments') {
 				$r->args("op=editcomm");
 				$r->uri('/users.pl');
 				$r->filename($constants->{basedir} . '/users.pl');
+
 			} elsif ($op eq 'homepage') {
 				$r->args("op=edithome");
 				$r->uri('/users.pl');
 				$r->filename($constants->{basedir} . '/users.pl');
+
 			} elsif ($op eq 'password') {
 				$r->args("op=changeprefs");
 				$r->uri('/login.pl');
 				$r->filename($constants->{basedir} . '/login.pl');
+
 			} elsif ($op eq 'logout') {
 				$r->args("op=userclose");
 				$r->uri('/login.pl');
 				$r->filename($constants->{basedir} . '/login.pl');
+
 			} elsif ($op eq 'misc') {
 				$r->args("op=editmiscopts");
 				$r->uri('/users.pl');
 				$r->filename($constants->{basedir} . '/users.pl');
+
 			} elsif ($op eq 'amigos') {
 				$r->args("op=friendview");
 				$r->uri('/journal.pl');
 				$r->filename($constants->{basedir} . '/journal.pl');
+
 			} else {
 				$r->args("op=edituser");
 				$r->uri('/users.pl');
 				$r->filename($constants->{basedir} . '/users.pl');
 			}
+
 			return OK;
+
 		} else {
 			$r->uri('/login.pl');
 			$r->filename($constants->{basedir} . '/login.pl');
@@ -668,7 +665,7 @@ sub userdir_handler {
 
 		} elsif ($op eq 'journal') {
 			my $args = "op=display&nick=$nick&uid=$uid";
-			$extra .= '/' . $more;
+			$extra .= '/' . $more if length $more;
 			if ($extra) {
 				if ($extra =~ /^(\d+)\/$/) {
 					$args .= "&id=$1";
@@ -709,32 +706,23 @@ sub userdir_handler {
 			$r->uri('/users.pl');
 			$r->filename($constants->{basedir} . '/users.pl');
 
-		} elsif ($op eq 'friends') {
-			if ($extra eq 'friends') {
-				$r->args("op=fof&nick=$nick&uid=$uid");
-				$r->uri('/zoo.pl');
-				$r->filename($constants->{basedir} . '/zoo.pl');
-			} elsif ($extra eq 'foes') {
-				$r->args("op=eof&nick=$nick&uid=$uid");
-				$r->uri('/zoo.pl');
-				$r->filename($constants->{basedir} . '/zoo.pl');
-			} else {
-				$r->args("op=friends&nick=$nick&uid=$uid");
-				$r->uri('/zoo.pl');
-				$r->filename($constants->{basedir} . '/zoo.pl');
+		} elsif ($op =~ /^(?:friends|fans|freaks|foes|zoo)$/) {
+			my $args = "op=$op&nick=$nick&uid=$uid";
+			$extra .= '/' . $more if length $more;
+
+			if ($op eq 'friends' && $extra =~ s/^friends\///) {
+				$args =~ s/friends/fof/;
+			} elsif ($op eq 'friends' && $extra =~ s/^foes\///) {
+				$args =~ s/friends/eof/;
+			} elsif ($op eq 'zoo') {
+				$args =~ s/zoo/all/;
 			}
-		} elsif ($op eq 'fans') {
-			$r->args("op=fans&nick=$nick&uid=$uid");
-			$r->uri('/zoo.pl');
-			$r->filename($constants->{basedir} . '/zoo.pl');
 
-		} elsif ($op eq 'freaks') {
-			$r->args("op=freaks&nick=$nick&uid=$uid");
-			$r->uri('/zoo.pl');
-			$r->filename($constants->{basedir} . '/zoo.pl');
+			if ($extra =~ m{^ (rss|atom) $}x) {
+				$args .= "&content_type=$1";
+			}
 
-		} elsif ($op eq 'foes') {
-			$r->args("op=foes&nick=$nick&uid=$uid");
+			$r->args($args);
 			$r->uri('/zoo.pl');
 			$r->filename($constants->{basedir} . '/zoo.pl');
 
