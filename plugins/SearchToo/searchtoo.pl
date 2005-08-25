@@ -172,9 +172,9 @@ sub _buildargs {
 		my $x = "";
 		$x =  $query->{$_} if defined $query->{$_} && $x eq "";
 		$x =~ s/ /+/g;
-		$uri .= "$_=$x&" unless $x eq "";
+		$uri .= "$_=$x&amp;" unless $x eq "";
 	}
-	$uri =~ s/&$//;
+	$uri =~ s/&amp;$//;
 
 	return fixurl($uri);
 }

@@ -155,7 +155,7 @@ sub _buildargs {
 		$x =~ s/ /+/g;
 		$uri .= "$_=$x&amp;" unless $x eq "";
 	}
-	$uri =~ s/&$//;
+	$uri =~ s/&amp;$//;
 
 	return fixurl($uri);
 }
