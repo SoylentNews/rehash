@@ -100,8 +100,9 @@ sub init {
 	}
 
 	# We already have a handle to the DB that writes accesslog, but let's get
-	# a separate copy in this special var for it.
-	$logdb = getObject('Slash::DB', { db_type => "log" });
+	# a separate copy in this special var for it.  We'll read from the slave
+	# instead of the master in case the master's using the Blackhole engine.
+	$logdb = getObject('Slash::DB', { db_type => "log_slave" });
 
 	$lines_since_header = 999999;
 	$num_cycles = 0;

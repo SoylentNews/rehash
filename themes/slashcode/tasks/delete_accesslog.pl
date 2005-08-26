@@ -24,11 +24,12 @@ $task{$me}{resource_locks} = { logdb => 1 };
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
+	my $log_slave = getObject('Slash::DB', { db_type => 'log_slave' } );
 	my $logdb = getObject('Slash::DB', { db_type => 'log' } );
 	my $counter = 0;
 	my $hoursback = $constants->{accesslog_hoursback} || 60;
 	my $failures = 10; # This is probably related to a lock failure
-	my $id = $logdb->sqlSelectNumericKeyAssumingMonotonic(
+	my $id = $log_slave->sqlSelectNumericKeyAssumingMonotonic(
 		'accesslog', 'max', 'id',
 		"ts < DATE_SUB(NOW(), INTERVAL $hoursback HOUR)");
 	if (!$id) {

@@ -2104,7 +2104,7 @@ sub displayRecentSubs {
 sub displayRecentWebheads {
 	my($form, $slashdb, $user, $constants) = @_;
 
-	my $admindb = getObject("Slash::Admin", { db_type => 'log' });
+	my $admindb = getObject("Slash::Admin", { db_type => 'log_slave' });
 
 	my $data_hr = $admindb->getRecentWebheads(10, 5000);
 

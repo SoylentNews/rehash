@@ -57,11 +57,11 @@ $task{$me}{code} = sub {
 
 	my $new_last_time = time;
 	
-	my $logdb = getObject('Slash::DB', { db_type => "log" });
-	my $accesslog_last = $slashdb->getVar('db_questions_accesslog_last','value', 1);
+	my $log_slave = getObject('Slash::DB', { db_type => 'log_slave' });
+	my $accesslog_last = $slashdb->getVar('db_questions_accesslog_last', 'value', 1);
 	my $new_accesslog_last =
 		$save_vars->{db_questions_accesslog_last} =
-			$logdb->sqlSelect("MAX(id)", "accesslog") || 1;
+			$log_slave->sqlSelect("MAX(id)", "accesslog") || 1;
 	$save_vars->{db_questions_lasttime} = $new_last_time;
 
 	my $time = $slashdb->getTime();	
@@ -75,7 +75,7 @@ $task{$me}{code} = sub {
 		if ($constants->{accesslog_imageregex} eq 'NONE') {
 			$pages = $new_accesslog_last - $accesslog_last;
 		} else {
-			$pages = $logdb->sqlCount("accesslog",
+			$pages = $log_slave->sqlCount("accesslog",
 				"id BETWEEN $accesslog_last AND $new_accesslog_last
 				 AND op != 'image'");
 		}
