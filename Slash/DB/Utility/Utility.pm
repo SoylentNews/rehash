@@ -806,7 +806,7 @@ sub sqlSelectAllKeyValue {
 # $minid = $slashdb->sqlSelectNumericKeyAssumingMonotonic("accesslog", "min", "id", "ts >= '2001-01-01 01:00:00'");
 # $maxid = $slashdb->sqlSelectNumericKeyAssumingMonotonic("accesslog", "max", "id", "ts <= '2001-01-01 03:00:00'");
 # $c = $slashdb->sqlSelect("COUNT(DISTINCT uid)", "accesslog",
-#     "id BETWEEN $minid AND $maxid");
+#     "id BETWEEN $minid AND $maxid AND ts BETWEEN '2001-01-01 01:00:00' AND '2001-01-01 03:00:00'");
 
 sub sqlSelectNumericKeyAssumingMonotonic {
 	my($self, $table, $minmax, $keycol, $clause) = @_;
