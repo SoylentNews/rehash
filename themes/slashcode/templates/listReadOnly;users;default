@@ -1,7 +1,7 @@
 __section__
 default
 __description__
-lists top abusers
+lists read-only IPs
 __title__
 admin interface siteInfo Template
 __page__

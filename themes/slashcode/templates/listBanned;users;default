@@ -1,7 +1,7 @@
 __section__
 default
 __description__
-lists top abusers
+lists banned IPs
 __title__
 admin interface Banlist Template
 __page__
