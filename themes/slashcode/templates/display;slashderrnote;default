@@ -16,7 +16,7 @@ __template__
 [%- FOR error = errors -%]
 [% error.taskname %] line [% error.line %] produced the following error:
 [% error.errnote %]
-[% error.moreinfo %]
+[% IF error.moreinfo.defined; error.moreinfo; END %]
 
 [%- END -%]
 __seclev__
