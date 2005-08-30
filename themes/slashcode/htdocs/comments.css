@@ -81,3 +81,5 @@ html > body .commentwrap table {
         margin: 0px;
         list-style: none;
 }
+
+#commentlisting li.comment { list-style: none; }
