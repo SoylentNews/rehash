@@ -13,7 +13,10 @@ __name__
 listStories
 __template__
 [% skins = Slash.db.getSkins %]
-<table border="0" cellpadding="2" cellspacing="0" width="100%">
+<div class="generalbody">
+<table border="0" cellpadding="2" cellspacing="0" width="100%" class="admin_story_list">
+
+
 		[% IF constants.label_ui %]
 	<tr>
 		<td><b>Edit</b></td>
@@ -40,10 +43,10 @@ FOREACH story = storylistref;
 		storiestoday = storiestoday > 1 ? storiestoday : '';
 %]
 	<tr>
-		<td align="right" bgcolor="[% user.colors.bg_2 %]">
+		<td class="lt_tb_col right">
 			[% storiestoday %]
 		</td>
-		<td colspan="7" align="right" bgcolor="[% user.colors.bg_3 %]">
+		<td colspan="7" align="right" class="tb_col right lt_text_col">
 			[% story.td %]
 		</td>
 	</tr>
@@ -53,14 +56,14 @@ FOREACH story = storylistref;
 	yesterday = story.td;
 	storiestoday = storiestoday + 1;
 
-	bgcolor = '#FFFFFF';
+	class = 'story_main';
 	IF story.displaystatus > 0;
-		bgcolor = '#CCCCCC';
+		class = 'story_sec';
 	ELSIF story.in_trash == 'yes' || story.displaystatus < 0;
-		bgcolor = '#999999';
+		class = 'story_nd';
 	END %]
 
-	<tr bgcolor="[% bgcolor %]">
+	<tr class="[% class %]">
 		<td align="right">
 		
 		[<a href="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">[% story.x %]</a>]
@@ -121,7 +124,7 @@ FOREACH story = storylistref;
 <b>
 <a href="[% env.script_name %]?section=[% form.section %]&amp;op=list&amp;next=[% story.x %]">[% left %] More</a></b></p>
 [% END %]
-
+</div>
 
 __seclev__
 500
