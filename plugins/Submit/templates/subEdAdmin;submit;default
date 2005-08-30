@@ -21,9 +21,10 @@ __template__
 	refresh = !user.opt_disable_submit_bin_refresh;
  END %]
 [% IF refresh %]
-	<META HTTP-EQUIV="Refresh" CONTENT="900; URL=[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;skin=[% form.skin | strip_attribute %]">
+	<meta http-equiv="Refresh" content="900; url=[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;skin=[% form.skin | strip_attribute %]">
 [% END %]
 <form action="[% env.script_name %]" method="post">
+<div>
 <input type="hidden" name="note" value="[% form.note | strip_attribute %]">
 <input type="hidden" name="skin" value="[% form.skin | strip_attribute %]">
 
@@ -73,7 +74,7 @@ __template__
 
 <p>
 <a href="[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;skin=[% form.skin | strip_attribute %]&amp;toggle_bin_refresh=[% IF !refresh; "0"; ELSE; 1; END %]">[% IF !refresh;  "Enable Bin Refresh"; ELSE; "Disable Bin Refresh"; END; %]</a>
-
+</div>
 </form>
 
 [% # Now we define that enignatic "sub_display" we referred to, earlier.
