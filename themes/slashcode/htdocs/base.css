@@ -712,3 +712,7 @@ pre
 	padding: 0 0 0 1em;
 	margin: 0;
 }
+
+.lt_tb_col { background: #ccc}
+.lt_text_col { color: #fff } 
+.right { text-align: right }

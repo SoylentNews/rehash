@@ -66,7 +66,7 @@ bg_toggle = 0;
 		<th align=right>Was</th>
 		<th align=right>Now</th>
 		<th align=right>Val</th>
-		<th align=left>Reason  / Metamod</th>
+		<th align=left>Reason  <span class="admin_data_label">/ Metamod</span></th>
 		<th align=right> M2</th>
 		[% IF mod_to_from == "from"; total_cols = total_cols + 2; %]
 			[% IF skip_ip_disp == 1 and both_mods; total_cols = total_cols - 1; ELSE %]
@@ -78,7 +78,7 @@ bg_toggle = 0;
 			[% IF both_mods and skip_ip_disp ==2; total_cols = total_cols - 1; ELSE  %]
 			<th align=left>IPID </th>
 			[% END %]
-			<th align=left>Moderatee / Metamoderator</th>
+			<th align=left>Moderatee <span class="admin_data_label">/ Metamoderator</span></th>
 		[% END %]
 	</tr>
 		[% hr_shown = 0; 

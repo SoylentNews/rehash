@@ -145,3 +145,9 @@ html>body #admin { margin: 0 auto .2em 0; }
 .nex_remove {
 	color: #000;
 }
+
+.admin_data_label { color: #aaa;}
+.story_main { background: #fff;}
+.story_sec { background: #ccc; }
+.story_nd { background: #999; }
+.admin_story_list { font-size: 80% }

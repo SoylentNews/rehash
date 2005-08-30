@@ -35,10 +35,10 @@ cur_time = Slash.db.getTime();
 	<table width="100%" border=0 cellpadding=3 cellspacing=0>
 		<tr class="data_head">
 			<th>Title</th>
-			<th>[% IF admin_link_user %]User[% END %]</th>
-			<th>[% IF admin_link_ipid %]IPID[% END %]</th>
+			<th>[% IF admin_link_user %]<span class="admin_data_label">User</span>[% END %]</th>
+			<th>[% IF admin_link_ipid %]<span class="admin_data_label">IPID</span>[% END %]</th>
 			<th>Datestamp</th>
-			<th>[% IF admin_flag %]State[% END %]</th>
+			<th>[% IF admin_flag %]<span class="admin_data_label">State</span>[% END %]</th>
 		</tr>
 		[% FOREACH sub = submissions %]
 		[% story_viewable = sub.del == 2 and sub.sid and sub.story_time.lt(cur_time) and sub.displaystatus!=-1 %]

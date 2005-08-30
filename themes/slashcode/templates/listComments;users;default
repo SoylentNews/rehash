@@ -85,12 +85,12 @@ row_class_3 = "data_hl3";
 	<table width="100%" border="0" cellpadding="3" cellspacing="0" class="data">
 	<tr class="data_head">
 		[% IF type=="netid"; total_cols = total_cols + 1; %]<th>User</th>[% END %]
-		<th>Subject[% IF admin_flag %] / Moderator[% END %]</th>
+		<th>Subject[% IF admin_flag %]<span class="admin_data_label"> / Moderator</span>[% END %]</th>
 		<th>Datestamp</th>
-		<th>[% IF admin_flag and constants.show_mods_with_comments %]M2[% END %]</th>
+		<th>[% IF admin_flag and constants.show_mods_with_comments %]<span class="admin_data_label">M2</span>[% END %]</th>
 		<th>Replies</th>
-		<th>[% IF admin_flag %]CK[% END %]</th>
-		<th>[% IF admin_flag %]IPID[% END %]</th>
+		<th>[% IF admin_flag %]<span class="admin_data_label">CK</span>[% END %]</th>
+		<th>[% IF admin_flag %]<span class="admin_data_label">IPID</span>[% END %]</th>
 		<th>Score</th>
 	</tr>
 	[% n = min_comment %]
