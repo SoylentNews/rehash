@@ -57,7 +57,8 @@ __template__
 		<input type="checkbox" name="del_[% cid %]">
 		[% END %]
 		]
-	[% END %]</div>
+		</div>
+	[% END %]
 
 [% END %]
 
