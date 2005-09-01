@@ -17,8 +17,8 @@ __template__
 [% key = "-1";
    author_list.$key = "-";
 
-   myodd   = '#dddddd';
-   myeven  = '#cccccc';
+   myodd   = 'data_hl1';
+   myeven  = 'data_hl2';
    myweeks = ['Default'];
    FOR w = weeks;
      myweeks.push(w);
@@ -33,7 +33,7 @@ __template__
 
 <table width="100%" cellpadding="5" cellspacing="0">
 
-<tr bgcolor="[% user.colors.bg_3 %]">
+<tr class="tb_col">
   <th> </th>
 [%- FOR day = days_of_week -%]
   <th>[% day.ucfirst %]</th>
@@ -41,8 +41,8 @@ __template__
 </tr>
 
 [% FOR w = myweeks -%]
-<tr bgcolor="[% IF loop.index mod 2; myodd; ELSE; myeven; END %]">
-  <th bgcolor="[% user.colors.bg_3 %]">[% w %]</th>
+<tr class="[% IF loop.index mod 2; myodd; ELSE; myeven; END %]">
+  <th class="tb_col">[% w %]</th>
   [% FOR d = days_of_week -%]
     <td[% IF w == myweeks.1 && curr_day == d %] bgcolor="[% user.colors.bg_3 %]"[% END %]>[% FOR s = shift_types;
              key = "-2";
