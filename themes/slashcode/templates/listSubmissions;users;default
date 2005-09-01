@@ -80,7 +80,6 @@ cur_time = Slash.db.getTime();
 		<tr class="data_hl1"><td colspan="5"><i>(Rejected submissions are not listed.)</i></td></tr>
 		[% END %]
 	</table>
-</div>
 [% END %]
 
 [% BLOCK nick_and_uid;
