@@ -45,6 +45,8 @@ sub updateRecentTopics {
 		my $cur_tid = $cur_story->{tid};
 		# We only want unique topics to be shown.
 		next if exists $tid_list{$cur_story->{tid}};
+		# Skip if story doesn't have an associated image
+		next unless $cur_story->{image};
 		$tid_list{$cur_story->{tid}}++;
 		++$num_stories;
 		if ($num_stories <= $constants->{recent_topic_img_count}) {
