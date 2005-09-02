@@ -101,7 +101,7 @@ sub getActive {
 		"yass_sites.sid as sid, url, title, id, failures", 
 		"yass_sites, stories", 
 		$where,
-		$order);
+		$order) || [];
 
 	return $sites;
 }

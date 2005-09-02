@@ -145,7 +145,7 @@ The complete RSS data as a string.
 
 sub create {
 	my($class, $param) = @_;
-	return unless exists $param->{items};
+	return unless ref($param->{items}) eq 'ARRAY';
 
 	my $self = bless {}, $class;
 
