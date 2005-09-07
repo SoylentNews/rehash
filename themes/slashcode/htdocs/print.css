@@ -2,7 +2,7 @@ body
 {
 	background: #fff;
 }
-#ostgnavbar, #topnav h4, #links, #slashboxes, #comments, .commentwrap, .btmnav, .search, #jump, .article .details img, #adminmenu, #footer table
+#ostgnavbar, #topnav h4, #topnav ul, #links, #slashboxes, #comments, .commentwrap, .btmnav, .search, #jump, .article .details img, #adminmenu, #footer table
 {
 	display: none;
 }
@@ -11,7 +11,6 @@ body
 {
 	color: #000;
 }
-.topnav ul {display: none;}
 .topic
 {
         margin: 0 .4em .4em 0;

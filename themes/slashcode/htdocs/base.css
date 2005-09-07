@@ -19,7 +19,6 @@ sup
 
 a
 {
-	word-wrap: break-word;
 	color: #600;
 }
 
@@ -706,7 +705,6 @@ input.button
 pre
 {
 	overflow: auto;
-	overflow-x: auto;
 	position: relative;
 	width: 90%;
 	padding: 0 0 0 1em;
