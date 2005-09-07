@@ -196,7 +196,7 @@ sub deleteSubmissions {
 sub blankForm {
 	my($constants, $slashdb, $user, $form) = @_;
 	print getData("submit_body_open");
-	yourPendingSubmissions(@_);
+	yourPendingSubmissions($constants, $slashdb, $user, $form, { skip_submit_body => 1 });
 	displayForm($user->{nickname}, $user->{fakeemail}, $form->{skin}, getData('defaulthead'));
 	print getData("submit_body_close");
 }
@@ -209,17 +209,17 @@ sub previewStory {
 
 #################################################################
 sub yourPendingSubmissions {
-	my($constants, $slashdb, $user, $form) = @_;
-
+	my($constants, $slashdb, $user, $form, $options) = @_;
+	$options ||= {};
 	return if $user->{is_anon};
-	print getData("submit_body_open");
+	print getData("submit_body_open") unless $options->{skip_submit_body};
 	if (my $submissions = $slashdb->getSubmissionsByUID($user->{uid}, "", { limit_days => 365 })) {
 		slashDisplay('yourPendingSubs', {
 			submissions	=> $submissions,
 			width		=> '100%',
 		});
 	}
-	print getData("submit_body_close");
+	print getData("submit_body_close") unless $options->{skip_submit_body};
 }
 
 #################################################################
@@ -657,14 +657,17 @@ sub saveSub {
 			$messages->create($_, MSG_CODE_NEW_SUBMISSION, $data);
 		}
 	}
-
+	
+	
+	print getData("submit_body_open");
 	slashDisplay('saveSub', {
 		title		=> 'Saving',
 		width		=> '100%',
 		missingemail	=> length($form->{email}) < 3,
 		anonsubmit	=> isAnon($uid) && length($form->{name}) < 3 && length($form->{email}) < 3,
 	});
-	yourPendingSubmissions(@_);
+	yourPendingSubmissions($constants, $slashdb, $user, $form, { skip_submit_body => 1 });
+	print getData("submit_body_close");
 
 	return(1);
 }
