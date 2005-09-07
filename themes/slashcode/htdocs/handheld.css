@@ -1,0 +1,46 @@
+body
+{
+	background: #fff;
+	font-family: sans-serif;
+	font-size: 100%;
+}
+
+ul li { display: block; }
+
+/* Header */
+#slogan h2
+{
+	color: #000;
+	margin: 0;
+	padding: 0;
+}
+
+#logo h1 a
+{
+	width: 140px;
+	height: 30px;
+	background: url("http://images.slashdot.org/palm/title_palm.gif") no-repeat;
+}
+
+/* links */
+.generaltitle, .article, .journalgeneric, .generaltitle div.title, .article div.title, .journalgeneric div.title, .generalbody, .article .details, .journalgeneric .details, .article div.body, .journalgeneric div.body, div.storylinks, div.storylinks ul, div.storylinks div
+{
+	margin: 0;
+	width: 140px;
+	padding: 0;
+	background: transparent;
+	border: none;
+}
+
+#links, #contents, #slashboxes
+{
+	float: none;
+	margin: 0;
+	padding: 0;
+	clear: both;
+	width: 200px;
+}
+
+#ostgnavbar, .btmnav, #slashboxes, #links, #topnav ul { display: none; }
+#topnav { height: 30px; }
+.generaltitle h3, .article h3, .journalgeneric h3 { background: #000; }
