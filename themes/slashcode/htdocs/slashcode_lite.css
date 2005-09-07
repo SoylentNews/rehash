@@ -83,4 +83,5 @@ div.storylinks, div.storylinks ul, div.storylinks div
         background: transparent; 
 	margin: 0 0 1em 0;
 }
-
+.btmnav ul li a {#555;}
+.btmnav {background: transparent}
