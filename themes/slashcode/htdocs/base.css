@@ -69,17 +69,14 @@ img { border: none; }
 }
 
 /* Header */
-#logo h1 a
-{
-	width: 115px;
-	height: 80px;
-	background: url("/images/logo.gif") no-repeat;
+#logo h1 a {
 	text-indent: -700em;
-	display: block;
-	text-decoration: none;
-	float: left;
-	position: relative;
+        display: block;
+        text-decoration: none;
+        float: left;
+        position: relative;
 }
+
 
 #topnav
 {

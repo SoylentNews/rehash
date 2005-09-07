@@ -22,11 +22,6 @@ a:visited { color: #000; }
 	width: 115px;
 	height: 80px;
 	background: url("/images/logo.gif") no-repeat;
-	text-indent: -700em;
-	display: block;
-	text-decoration: none;
-	float: left;
-	position: relative;
 }
 
 #slogan h2
