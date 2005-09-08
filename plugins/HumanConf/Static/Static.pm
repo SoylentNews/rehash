@@ -503,7 +503,7 @@ sub drawImage {
 	# Paint the white background.
 	$image->filledRectangle(0, 0, $width, $height, $background);
 
-	if ($image->has('setThickness')) {
+	if ($image->can('setThickness')) {
 		# I don't think GD prior to 2.07 has setThickness().
 		$image->setThickness($constants->{hc_q1_linethick} || 1);
 	}
