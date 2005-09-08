@@ -111,6 +111,7 @@ htdoc=htdocs/users.pl
 htdoc=htdocs/admin.css
 htdoc=htdocs/base.css
 htdoc=htdocs/comments.css
+htdoc=htdocs/handhelds.css
 htdoc=htdocs/print.css
 htdoc=htdocs/slashcode.css
 htdoc=htdocs/slashcode_lite.css
