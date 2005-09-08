@@ -3180,3 +3180,8 @@ ALTER TABLE shifts ENGINE=InnoDB;
 
 # End of T_2_5_0_78, Start of T_2_5_0_79 - 2005/09/01
 
+# Double check before running this.  No title is best unless you know you need a title on something custom you set up. 
+UPDATE css set title='';
+
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','handheld','handheld.css','',0,'','no','',7,0);
+INSERT INTO css_type (ctid, name, ordernum) VALUES (7, 'handheld', 7);

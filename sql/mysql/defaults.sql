@@ -126,17 +126,18 @@ INSERT INTO commentmodes (mode, name, description) VALUES ('nocomment','No Comme
 # Dumping data for table 'css'
 #
 
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','base.css','Slashcode',0,'','no','',1,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','Slashcode',0,'comments','no','',2,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','Slashcode',0,'article','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','base.css','',0,'','no','',1,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','',0,'comments','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','',0,'article','no','',2,0);
 INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','print','print.css','',0,'','no','',5,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','admin.css','Slashcode',0,'','yes','',1,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','Slashcode',0,'pollBooth','no','',2,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode_lite.css','Slashcode',0,'','no','light',4,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','Slashcode',0,'journal','no','',2,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode_lite.css','Slashcode',0,'','no','light',4,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','Slashcode',0,'journal','no','',2,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode.css','Slashcode',0,'','no','',3,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','admin.css','',0,'','yes','',1,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','',0,'pollBooth','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode_lite.css','',0,'','no','light',4,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','',0,'journal','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode_lite.css','',0,'','no','light',4,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','',0,'journal','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode.css','',0,'','no','',3,0);
+INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','',0,'metamod','no','',2,0);
 
 #
 # Dumping data for table 'css_type'
@@ -144,8 +145,11 @@ INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, 
 INSERT INTO css_type (ctid, name, ordernum) VALUES (1,'base',1);
 INSERT INTO css_type (ctid, name, ordernum) VALUES (2,'page',2);
 INSERT INTO css_type (ctid, name, ordernum) VALUES (3,'theme',3);
-INSERT INTO css_type (ctid, name, ordernum) VALUES (4,'user_theme',4);
-INSERT INTO css_type (ctid, name, ordernum) VALUES (5,'print',5);
+INSERT INTO css_type (ctid, name, ordernum) VALUES (4,'user_theme',5);
+INSERT INTO css_type (ctid, name, ordernum) VALUES (5,'print',6);
+INSERT INTO css_type (ctid, name, ordernum) VALUES (6,'skin',4);
+INSERT INTO css_type (ctid, name, ordernum) VALUES (7,'handheld',7);
+
 
 #
 # Dumping data for table 'dateformats'
@@ -645,6 +649,7 @@ INSERT INTO tzcodes (tz, off_set, description, dst_region, dst_tz, dst_off_set) 
 INSERT INTO vars (name, value, description) VALUES ('absolutedir','http://www.example.com','Absolute base URL of site; used for creating links external to site that need a complete URL');
 INSERT INTO vars (name, value, description) VALUES ('absolutedir_secure','','Absolute base URL of Secure HTTP site (blank if site has no HTTPS side)');
 INSERT INTO vars (name, value, description) VALUES ('accesslog_disable','0','Disable apache writing to accesslog?');
+INSERT INTO vars (name, value, description) VALUES ('accesslog_css_skip', '1', 'Skip logging css hits to accesslog table?');
 INSERT INTO vars (name, value, description) VALUES ('accesslog_imageregex', '^/images/hc/', 'Image hits will only be written into accesslog if their URL path matches this regex, empty string for all, NONE for none');
 INSERT INTO vars (name, value, description) VALUES ('accesslog_insert_cachesize','0','Cache accesslog inserts and do this many all at once (0 to disable, if enabled, suggest value of 5 or so)');
 INSERT INTO vars (name, value, description) VALUES ('ad_max', '6', 'Maximum ad number (must be at least ad_messaging_num)');
@@ -1054,6 +1059,7 @@ INSERT INTO vars (name, value, description) VALUES ('user_comments_force_index',
 INSERT INTO vars (name, value, description) VALUES ('user_submitter_display_default','24','Number of stories to display on user\'s info page');
 INSERT INTO vars (name, value, description) VALUES ('users_bio_length','1024','Length allowed for user bio');
 INSERT INTO vars (name, value, description) VALUES ('users_count','1','(Approximate) number of users registered on this slash site');
+INSERT INTO vars (name, value, description) VALUES ('users_menu_no_display', '0', 'Hide users menu?');
 INSERT INTO vars (name, value, description) VALUES ('users_show_info_seclev','0','Minimum seclev to view a user\s info');
 INSERT INTO vars (name, value, description) VALUES ('users_speed_limit','20','How fast a user can change their prefs');
 INSERT INTO vars (name, value, description) VALUES ('writestatus','dirty','Simple Boolean to determine if homepage needs rewriting');
