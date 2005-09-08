@@ -194,7 +194,7 @@ sub deleteOldFromPool {
 	}
 
 	if ($loop_num > 1) {
-		slashdLog("deleteOldFromPool looped $loop_num times, deleted $successfully_deleted of $want_delete");
+		warn "deleteOldFromPool looped $loop_num times, deleted $successfully_deleted of $want_delete";
 	}
 	
 	# Return the number of rows successfully deleted.  This
