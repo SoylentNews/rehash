@@ -762,7 +762,8 @@ REQUIREMENTS
                 http://httpd.apache.org/
 
         Since most of Apache 1.3.x's recent releases included security
-        fixes, we wouldn't recommend running an earlier version.
+        fixes, we wouldn't recommend running an earlier version. As far as
+        we know, Slash is not compatible with Apache 2.x.
 
     mod_perl
         Version 1.29.
