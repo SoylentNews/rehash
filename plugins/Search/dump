@@ -28,4 +28,4 @@ INSERT INTO soap_methods (class, method, seclev, formkeys) VALUES ('Slash::Searc
 #INSERT INTO vars (name, value) VALUES ('test/get_uid_speed_limit', 10);
 
 
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','search.css','Slashcode',0,'search','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','search.css','','','search','no','',2,0);

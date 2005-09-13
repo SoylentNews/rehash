@@ -3185,3 +3185,20 @@ UPDATE css set title='';
 
 INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','handheld','handheld.css','',0,'','no','',7,0);
 INSERT INTO css_type (ctid, name, ordernum) VALUES (7, 'handheld', 7);
+
+# Verify you want to delete these.  They are no longer needed by default slashcode theme, but may be needed if you have this template in your theme
+DELETE FROM templates WHERE name = "dispComment" AND page = "misc" AND skin = "light";
+DELETE FROM templates WHERE name = "dispStory" AND page = "misc" AND skin = "light";
+DELETE FROM templates WHERE name = "fancybox" AND page = "misc" AND skin = "light";
+DELETE FROM templates WHERE name = "storylink" AND page = "misc" AND skin = "light";
+DELETE FROM templates WHERE name = "titlebar" AND page = "misc" AND skin = "light";
+
+ALTER TABLE css ADD skin VARCHAR(32) DEFAULT ''AFTER skid;
+ALTER TABLE css DROP INDEX page_skid;
+ALTER TABLE css DROP INDEX skid_page;
+UPDATE css,skins SET css.skin = skins.name WHERE css.skid=skins.skid;
+ALTER TABLE css DROP skid;
+ALTER TABLE ADD INDEX page_skin (page,skin);
+ALTER TABLE ADD INDEX skin_page (skin,page);
+UPDATE css set theme='', skin='light' WHERE theme = "light";
+

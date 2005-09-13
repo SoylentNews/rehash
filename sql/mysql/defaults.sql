@@ -126,18 +126,18 @@ INSERT INTO commentmodes (mode, name, description) VALUES ('nocomment','No Comme
 # Dumping data for table 'css'
 #
 
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','base.css','',0,'','no','',1,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','',0,'comments','no','',2,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','',0,'article','no','',2,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','print','print.css','',0,'','no','',5,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','admin.css','',0,'','yes','',1,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','',0,'pollBooth','no','',2,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode_lite.css','',0,'','no','light',4,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','',0,'journal','no','',2,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode_lite.css','',0,'','no','light',4,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','',0,'journal','no','',2,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode.css','',0,'','no','',3,0);
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','',0,'metamod','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','base.css','','','','no','',1,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','','','comments','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','','','article','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','print','print.css','','','','no','',5,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','admin.css','','','','yes','',1,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','','','pollBooth','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode_lite.css','','','','no','light',4,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','','','journal','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode_lite.css','','','','no','light',4,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','','','journal','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','slashcode.css','','','','no','',3,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','','','metamod','no','',2,0);
 
 #
 # Dumping data for table 'css_type'

@@ -381,7 +381,7 @@ CREATE TABLE css (
 	media VARCHAR(32) DEFAULT 'screen, projection',
 	file VARCHAR(64),
 	title VARCHAR(32),
-	skid INT(11) DEFAULT '0',
+	skin VARCHAR(32) DEFAULT '',
 	page VARCHAR(32) DEFAULT '',
 	admin ENUM('no','yes') DEFAULT 'no',
 	theme VARCHAR(32) DEFAULT '',
@@ -389,8 +389,8 @@ CREATE TABLE css (
 	ordernum int(11) DEFAULT '0',
 	PRIMARY KEY  (csid),
 	KEY ctid (ctid),
-	KEY page_skid (page,skid),
-	KEY skid_page (skid,page)
+	KEY page_skin (page,skin),
+	KEY skin_page (skin,page),
 ) TYPE=InnoDB;
 
 #
