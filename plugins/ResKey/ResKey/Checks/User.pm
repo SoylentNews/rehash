@@ -11,7 +11,7 @@ use strict;
 use Slash::Utility;
 use Slash::Constants ':reskey';
 
-use base 'Slash::ResKey';
+use base 'Slash::ResKey::Key';
 
 our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -20,6 +20,10 @@ sub _Check {
 
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+
+	if ($constants->{"reskey_checks_adminbypass_$self->{resname}"} && $user->{is_admin}) {
+		return RESKEY_SUCCESS;
+	}
 
 	for my $check (qw(is_admin seclev is_subscriber karma)) {
 		my $value = $constants->{"reskey_checks_user_${check}_$self->{resname}"};

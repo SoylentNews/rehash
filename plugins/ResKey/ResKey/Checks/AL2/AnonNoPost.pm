@@ -12,7 +12,7 @@ use Slash::ResKey::Checks::AL2;
 use Slash::Utility;
 use Slash::Constants ':reskey';
 
-use base 'Slash::ResKey';
+use base 'Slash::ResKey::Key';
 
 our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -23,9 +23,8 @@ sub _Check {
 
 	if ($user->{is_anon}) {
 		return AL2Check(
-			$self,
+			$self, 'nopost',
 			{ uid => getCurrentAnonymousCoward('uid') },
-			'nopost'
 		);
 	} else {
 		return RESKEY_NOOP;

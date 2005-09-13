@@ -1,26 +1,27 @@
 use Slash::Test shift;
-use Slash::ResKey;
 
-my $reskey;
+my($reskey, $key);
 
 for (1..1) {
-	$reskey = new Slash::ResKey 'comments';
+	$reskey = getObject('Slash::ResKey');
+	$rkey = $reskey->key('comments');
 
-	handle($reskey->create);
-	handle($reskey->touch);
-	handle($reskey->touch);
-	handle($reskey->use);
-	handle($reskey->use);
+	handle($rkey->create);
+	handle($rkey->touch);
+	handle($rkey->touch);
+	handle($rkey->use);
+sleep 121;
+	handle($rkey->use);
 
-	print Dumper $reskey;
+	print Dumper $rkey;
 }
 
 
 sub handle {
 	my($success) = @_;
 	if ($success) {
-		printf "\u$reskey->{type}'d $reskey->{reskey}\n";
+		printf "\u$rkey->{type}'d $rkey->{reskey}\n";
 	} else {
-		printf "Error on %s: %s\n", $reskey->{type}, $reskey->errstr;
+		printf "Error on %s: %s\n", $rkey->{type}, $rkey->errstr;
 	}
 }

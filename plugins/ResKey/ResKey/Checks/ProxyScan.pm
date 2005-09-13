@@ -11,7 +11,7 @@ use strict;
 use Slash::Utility;
 use Slash::Constants ':reskey';
 
-use base 'Slash::ResKey';
+use base 'Slash::ResKey::Key';
 
 our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -21,6 +21,10 @@ sub _Check {
 	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
+
+	if ($constants->{"reskey_checks_adminbypass_$self->{resname}"} && $user->{is_admin}) {
+		return RESKEY_SUCCESS;
+	}
 
 	if ($slashdb->getAL2($user->{srcids}, 'trusted')) {
 		my $is_proxy = $slashdb->checkForOpenProxy($user->{srcids}{ip});

@@ -8,12 +8,13 @@ package Slash::ResKey::Checks::AL2;
 use warnings;
 use strict;
 
+use Exporter;
+
 use Slash::Utility;
 use Slash::Constants ':reskey';
 
-use base 'Slash::ResKey';
-
 our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our @EXPORT = qw(AL2Check);
 
 # simple AL2 check that others can inherit; returns death if check returns true
 sub AL2Check {

@@ -11,7 +11,7 @@ use strict;
 use Slash::Utility;
 use Slash::Constants ':reskey';
 
-use base 'Slash::ResKey';
+use base 'Slash::ResKey::Key';
 
 our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 

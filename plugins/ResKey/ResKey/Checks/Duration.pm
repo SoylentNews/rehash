@@ -11,7 +11,7 @@ use strict;
 use Slash::Utility;
 use Slash::Constants ':reskey';
 
-use base 'Slash::ResKey';
+use base 'Slash::ResKey::Key';
 
 our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -22,10 +22,14 @@ sub _Check {
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 
+	if ($constants->{"reskey_checks_adminbypass_$self->{resname}"} && $user->{is_admin}) {
+		return RESKEY_SUCCESS;
+	}
+
 	# maximum uses per timeframe
 	{
 		my $max_uses = $constants->{"reskey_checks_duration_max-uses_$self->{resname}"};
-		my $limit = $constants->{"reskey_checks_duration_timeframe_$self->{resname}"};
+		my $limit = $constants->{reskey_timeframe};
 		if ($max_uses && $limit) {
 			my $where = $self->_whereUser;
 			$where .= ' AND is_alive="no" AND ';

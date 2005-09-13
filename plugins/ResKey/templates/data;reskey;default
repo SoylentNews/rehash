@@ -24,7 +24,6 @@ __template__
 [% CASE 'touch-use failed' %]
 	This form is no longer valid.  Please return to the beginning and try again.
 
-
 [% CASE 'reskey not found' %]
 	Requested resource is invalid.  Please return to the beginning and try again.
 
