@@ -14,18 +14,46 @@ __template__
 [% INCLUDE linkrel %]
 </head>
 <body>
-
-<h1>[% constants.sitename %]</h1>
-
-<h2>[% constants.slogan %]</h2>
-
-<a href="[% constants.real_rootdir %]/"><img src="[% constants.rdfimg %]" border="0"></a>
-
-<p>[% Slash.horizmenu() %]</p>
 [% IF user.is_admin %]
-	<p>[% Slash.createMenu(adminmenu) %]</p>
+	<div id="adminmenu">
+        	<small>
+                	<b>
+                        	<a href="[% constants.real_rootdir %]">[% constants.sitename %]</a>
+                	</b>
+ 	               Admin:
+        	</small>
+	        [% Slash.createMenu(adminmenu) %]
+	</div>
 [% END %]
+<div id="jump">
+	<a href="#main-articles">Main Stories</a>
+	<br>
+	<a href="#blocks">Slash Boxes</a>
+</div>
 
+<div id="frame">
+	<div id="topnav">
+		<div id="logo">
+			<h1>
+				<a href="[% constants.real_rootdir %]">[% constants.sitename %]</a>
+			</h1>
+		</div>
+		<ul>
+			[% PROCESS recentTopics %]
+		</ul>
+		</div>
+		<div id="slogan">
+		<h2>
+			[% constants.slogan %]
+		</h2>
+		</div>
+		<div id="links">
+		</div>
+		<div id="contents">
+			[% UNLESS nopageid %]
+			[% id_page = user.currentPage || "general" %]
+			<div id="[% id_page %]">
+			[% END %]
 __seclev__
 10000
 __version__
