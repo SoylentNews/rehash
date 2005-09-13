@@ -909,32 +909,32 @@ sub getCSS {
 	my($self) = @_;
 	my $user = getCurrentUser();
 	my $page = $user->{currentPage};
-	my $skid = getCurrentSkin('skid');
+	my $skin = $user->{light} ? "light" : getCurrentSkin('name');
 	my $admin = $user->{is_admin};
-	my $theme = $user->{light} ? 'light' : "";
+	my $theme = $user->{css_theme};
 	my $constants = getCurrentStatic();
 	
 	my $expire_time = $constants->{css_expire} || 3600;
 	$expire_time += int(rand(60)) if $expire_time;
 	_genericCacheRefresh($self, 'css', $expire_time);
 	_genericCacheRefresh($self, 'css_pages', $expire_time);
-	_genericCacheRefresh($self, 'css_skids', $expire_time);
+	_genericCacheRefresh($self, 'css_skins', $expire_time);
 	_genericCacheRefresh($self, 'css_themes', $expire_time);
 	
 	my $css_ref 	 	= $self->{_css_cache} ||= {};
 	my $css_pages_ref	= $self->{_css_pages_cache};
-	my $css_skids_ref	= $self->{_css_skids_cache};
+	my $css_skins_ref	= $self->{_css_skins_cache};
 	my $css_themes_ref	= $self->{_css_themes_cache};
 
 	$css_pages_ref = $self->getCSSValuesHashForCol('page') if !$css_pages_ref;
-	$css_skids_ref = $self->getCSSValuesHashForCol('skid')   if !$css_skids_ref;
+	$css_skins_ref = $self->getCSSValuesHashForCol('skin')   if !$css_skins_ref;
 	$css_themes_ref= $self->getCSSValuesHashForCol('theme') if !$css_themes_ref;
 
 	$page   = '' if !$css_pages_ref->{$page};	
-	$skid   = 0  if !$css_skids_ref->{$skid};	
+	$skin   = ''  if !$css_skins_ref->{$skin};	
 	$theme  = '' if !$css_themes_ref->{$theme};	
 
-	return $css_ref->{$skid}{$page}{$admin}{$theme} if exists $css_ref->{$skid}{$page}{$admin}{$theme};
+	return $css_ref->{$skin}{$page}{$admin}{$theme} if exists $css_ref->{$skin}{$page}{$admin}{$theme};
 	
 	my @clauses;
 
@@ -942,8 +942,8 @@ sub getCSS {
         my $page_in = $page ? "(page = '' or page = $page_q)" : "page = ''";
         push @clauses, $page_in;
 
-        my $skid_in = $skid ? "(skid = 0 or skid = '$skid')" : "skid = 0";
-        push @clauses, $skid_in;
+        my $skin_in = $skin ? "(skin = '' or skin = '$skin')" : "skin = ''";
+        push @clauses, $skin_in;
 
         push @clauses, "admin='no'" if !$admin;
 	
@@ -956,7 +956,7 @@ sub getCSS {
 
         my $css = $self->sqlSelectAllHashrefArray("rel,type,media,file,title", "css, css_type", $where, "ORDER BY css_type.ordernum, css.ordernum");
 	
-	$css_ref->{$skid}{$page}{$admin}{$theme} = $css;
+	$css_ref->{$skin}{$page}{$admin}{$theme} = $css;
         return $css;
 }
 
@@ -10634,6 +10634,7 @@ sub getTemplateByName {
 		$page ||= 'misc';
 	}
 	unless ($skin) {
+		$skin = "light" if $user->{light};
 		$skin ||= getCurrentSkin('name');
 		$skin ||= 'default';
 	}

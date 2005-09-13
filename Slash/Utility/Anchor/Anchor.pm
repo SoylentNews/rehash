@@ -668,7 +668,7 @@ EOT
 			# box.				-- Pater
 			getSkinColors() unless $user->{colors};
 
-			return sidebox('Advertisement', qq'<div class="ad$num" align="center">' . $user->{state}{ad}{$num} . "</div>", "advertisement");
+			return sidebox('Advertisement', qq'<div class="ad$num" align="center">' . $user->{state}{ad}{$num} . "</div>", "advertisement", 1);
 		} else { return ''; }
 	} else {
 		return $user->{state}{ad}{$num} ? qq'<div class="ad$num">$user->{state}{ad}{$num}</div>': '';
@@ -683,7 +683,9 @@ sub getSectionBlock {
 	my($name) = @_;
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
-	my $thissect = $user->{currentSection};
+	my $thissect = $user->{light}
+		? 'light'
+		: $user->{currentSection};
 
 	my $block;
 	if ($thissect && $thissect ne 'index') {
