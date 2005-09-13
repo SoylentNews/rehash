@@ -255,7 +255,7 @@ sub slashDisplayName {
 
 	if ($opt->{Skin} && $opt->{Skin} eq 'NONE') {
 		$user->{currentSkin} = 'default';
-		# light is a special case
+	# light is a special case
 	} elsif ($user->{light}) {
 		$user->{currentSkin} = 'light';
 	} elsif ($opt->{Skin}) {
