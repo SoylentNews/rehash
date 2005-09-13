@@ -3198,7 +3198,7 @@ ALTER TABLE css DROP INDEX page_skid;
 ALTER TABLE css DROP INDEX skid_page;
 UPDATE css,skins SET css.skin = skins.name WHERE css.skid=skins.skid;
 ALTER TABLE css DROP skid;
-ALTER TABLE ADD INDEX page_skin (page,skin);
-ALTER TABLE ADD INDEX skin_page (skin,page);
+ALTER TABLE css ADD INDEX page_skin (page,skin);
+ALTER TABLE css ADD INDEX skin_page (skin,page);
 UPDATE css set theme='', skin='light' WHERE theme = "light";
 
