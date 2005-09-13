@@ -574,6 +574,7 @@ sub userdir_handler {
 
 			} elsif ($op =~ /^(?:friends|fans|freaks|foes|zoo)$/) {
 				my $args = "op=$op";
+				$extra .= '/';
 
 				if ($op eq 'friends' && $extra =~ s/^friends\///) {
 					$args =~ s/friends/fof/;
