@@ -4,4 +4,4 @@
 
 INSERT INTO hooks (param, class, subroutine) VALUES ('admin_save_story_success','Slash::PollBooth','createAutoPollFromStory');
 
-INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','polls.css','Slashcode',0,'pollBooth','no','',2,0);
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','polls.css','Slashcode','','pollBooth','no','',2,0);
