@@ -3168,8 +3168,6 @@ INSERT INTO vars (name, value, description) VALUES ('accesslog_css_skip', '1', '
 INSERT INTO css (rel, type, media, file, title, skid, page, admin, theme, ctid, ordernum) VALUES ('stylesheet','text/css','screen, projection','comments.css','Slashcode',0,'metamod','no','',2,0);
 INSERT INTO vars (name, value, description) VALUES ('users_menu_no_display', '0', 'Hide users menu?');
 
-# PUDGE LAST UPDATED HERE
-
 # End of T_2_5_0_77, Start of T_2_5_0_78 - 2005/08/25
 
 # Changes for plugins/ScheduleShifts (ignore if not using that plugin,
@@ -3201,4 +3199,6 @@ ALTER TABLE css DROP skid;
 ALTER TABLE css ADD INDEX page_skin (page,skin);
 ALTER TABLE css ADD INDEX skin_page (skin,page);
 UPDATE css set theme='', skin='light' WHERE theme = "light";
+
+# PUDGE LAST UPDATED HERE
 
