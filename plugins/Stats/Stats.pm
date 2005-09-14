@@ -1556,6 +1556,8 @@ sub getTopBadPasswordsByUID{
 	$other .= " HAVING count >= $options->{min}" if $min;
 	$other .= "  ORDER BY count DESC LIMIT $limit";
 
+	# XXXTIMESTAMP The _ts_between_clause works for MySQL 4.0 but
+	# not 4.1, which formats timestamps as YYYY-MM-DD HH:MM:SS.
 	return $self->sqlSelectAllHashrefArray(
 		"nickname, users.uid AS uid, count(DISTINCT password) AS count",
 		"badpasswords, users",
@@ -1573,6 +1575,8 @@ sub getTopBadPasswordsByIP{
 	$other .= " HAVING count >= $options->{min}" if $min;
 	$other .= "  ORDER BY count DESC LIMIT $limit";
 	
+	# XXXTIMESTAMP The _ts_between_clause works for MySQL 4.0 but
+	# not 4.1, which formats timestamps as YYYY-MM-DD HH:MM:SS.
 	return $self->sqlSelectAllHashrefArray(
 		"ip, count(DISTINCT password) AS count",
 		"badpasswords",
@@ -1590,6 +1594,8 @@ sub getTopBadPasswordsBySubnet{
 	$other .= " HAVING count >= $options->{min}" if $min;
 	$other .= "  ORDER BY count DESC LIMIT $limit";
 
+	# XXXTIMESTAMP The _ts_between_clause works for MySQL 4.0 but
+	# not 4.1, which formats timestamps as YYYY-MM-DD HH:MM:SS.
 	return $self->sqlSelectAllHashrefArray(
 		"subnet, count(DISTINCT password) AS count",
 		"badpasswords",

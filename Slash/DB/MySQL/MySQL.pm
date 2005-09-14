@@ -4478,7 +4478,7 @@ sub setStory {
 		}
 		my $lu = $self->sqlSelect("last_update", "stories",
 			"stoid=$stoid");
-#print STDERR "D lu '$lu' options->{lu} '$options->{last_update}'\n";
+print STDERR scalar(gmtime) . " stoid '$stoid' lu '$lu' options_lu '$options->{last_update}'\n";
 		if ($lu ne $options->{last_update}) {
 			$self->sqlDo("ROLLBACK");
 			$self->sqlDo("SET AUTOCOMMIT=1");
@@ -11869,6 +11869,9 @@ sub _getUser_do_selects {
 			print STDERR scalar(gmtime) . " $$ mcd gU_ds answer people thawed\n";
 		}
 	}
+	# And adjust the users_hits.lastclick value, a timestamp,
+	# to work the same in 4.1 and later as it did in 4.0.
+	$answer->{lastclick} =~ s/\D+//g if $answer->{lastclick};
 
 	return $answer;
 }
