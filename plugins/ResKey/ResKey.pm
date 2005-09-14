@@ -78,35 +78,112 @@ Slash(3).
 $Id$
 
 
-Check Classes:
+=head1 TODO
 
-(default: DEATH, rather than FAILURE [which is non-fatal])
+=head2 Check Classes
 
-User - DONE
-	* simple checks for:
-		* karma
-		* seclev
-		* is_subscriber
-		* is_admin
+The default failure value is DEATH, rather than FATAL, which is non-fatal:
+callers can choose to re-display the form on FAILURE, whereas with DEATH
+there's no reason to continue, but one must start over with a new form (if
+indeed even that).
 
-Limit
-	* min duration between uses (FAILURE) - DONE
-	* min duration betwen creation and use (FAILURE) - DONE
-	* max # of creations/uses per time period (DEATH?) - DONE
-	* max touches per reskey? - NOT DOING FOR NOW, IF EVER
-	* max simultaneous reskeys - NOT DOING FOR NOW, IF EVER
-		* report error, or invalidate old ones?
-	*** all above subject to increasing limits per user specifics
+=over 4
 
-HumanConf
-AL2 - DONE
-Proxy Scan - DONE
-ACL - DONE
-	* if an ACL required, make sure user has it
-		* is_admin bypasses this check (by default)
-	* if an ACL prohibits access, make sure user does NOT have it
-		* no bypass
-POST?  - probably best handled in .pl as we always have, though we could move it
+=item User (DONE)
+
+Admins can be skipped on these checks with a var.  Simple checks for:
+
+=over 4
+
+=item karma
+
+=item seclev
+
+=item is_subscriber
+
+=item is_admin
+
+=back
 
 
-test AnonNoPost
+=item Duration
+
+We need to implement limit modulation.
+
+=over 4
+
+=item min duration between uses (DONE)
+
+FAILURE
+
+=item min duration betwen creation and use (DONE)
+
+FAILURE
+
+=item max num of uses per time period (DONE)
+
+FAILURE
+
+=item max touches per reskey (NA)
+
+DEATH
+
+Not doing now, if ever.  But will add if we feel a need.
+
+=item max simultaneous reskeys (NA)
+
+FAILURE
+
+I don't think this is necessary, since we've worked out some atomicity problems.
+
+If we do: report error, or invalidate old reskeys?  Which ones?
+
+=back
+
+
+=item HumanConf
+
+Still needs implementation.
+
+
+=item AL2 (DONE)
+
+=over 4
+
+=item NoPost
+
+This user cannot post.
+
+=item NoPostAnon
+
+This user cannot post anonymoously.
+
+=item AnonNoPost
+
+This user is anonymous -- or is posting anonymously -- and the anonymous user
+cannot post.
+
+=back
+
+
+
+=item Proxy Scan (DONE)
+
+Simple wrapper around the proxy scan code.
+
+
+=item ACL (DONE)
+
+If an ACL required, make sure user has it (is_admin bypasses this check (by default)).
+
+If an ACL prohibits access, make sure user does NOT have it (no bypass).
+
+
+=item POST (NA)
+
+Probably best handled in .pl as we always have, though we could move it if we
+felt a need.
+
+
+=back
+
