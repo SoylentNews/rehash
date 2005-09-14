@@ -22,6 +22,9 @@ sub _Check {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
+	# this check assumes only one AC uid, and doesn't accept any
+	# other UIDs to be provided
+
 	if ($user->{is_anon} || $form->{postanon}) {
 		return AL2Check(
 			$self, 'nopost',
