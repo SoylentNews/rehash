@@ -10,7 +10,7 @@ for (1..1) {
 	handle($rkey->touch);
 	handle($rkey->touch);
 	handle($rkey->use);
-sleep 121;
+	sleep 5;
 	handle($rkey->use);
 
 	print Dumper $rkey;

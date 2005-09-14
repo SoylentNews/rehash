@@ -189,9 +189,14 @@ sub _createActionMethod {
 	return sub {
 		my($self) = @_;
 		$self->{type} = $name;
-		my $ok = $self->_check;
 
-		# don't bother if type is create, and checks failed
+		my $ok = 1;
+		$ok = $self->_fakeUse if $self->{type} eq 'use';
+		$ok = $self->_check if $ok;
+
+		# don't bother if type is create, and checks failed ...
+		# we only continue on for touch/use to update the DB
+		# to note we've been here, to clean up, etc.
 		if ($self->{type} ne 'create' || $ok) {
 			$ok = $self->$method_name();
 		}
@@ -239,8 +244,6 @@ sub _createCheckMethod {
 		};
 	};
 }
-
-
 
 #========================================================================
 sub _create {
@@ -298,7 +301,7 @@ sub _use {
 	$self->_save_errors if $failed;
 	$self->_init;
 
-	my(%update, $where);
+	my(%update, $where, $no_is_alive_check);
 	%update = (
 		-touches	=> 'touches+1',
 		-last_ts	=> 'NOW()',
@@ -308,14 +311,27 @@ sub _use {
 		%update = (%update,
 			-failures	=> 'failures+1',
 		);
-	} elsif ($self->{type} eq 'use') {
-		%update = (%update,
-			-submit_ts	=> 'NOW()',
-			is_alive	=> 'no',
-		);
 	}
 
-	$self->_update(\%update, \$where) or return 0;
+	if ($self->{type} eq 'use') {
+		# use() already set it to no, assuming success
+		$no_is_alive_check = 1;
+		if ($failed) {
+			# re-set these, as they were set by use(),
+			# assuming success
+			%update = (%update,
+				-submit_ts	=> 'NULL',
+				is_alive	=> 'yes',
+			);
+		} else {
+			# update the ts again, just to be clean
+			%update = (%update,
+				-submit_ts	=> 'NOW()',
+			);
+		}
+	}
+
+	$self->_update(\%update, \$where, $no_is_alive_check) or return 0;
 
 	my $slashdb = getCurrentDB();
 	my $rows = $slashdb->sqlUpdate('reskeys', \%update, $where);
@@ -341,7 +357,7 @@ sub _use {
 # and it is best for atomicity and performance to do them when we actually
 # update the reskey
 sub _update {
-	my($self, $update, $where) = @_;
+	my($self, $update, $where, $no_is_alive_check) = @_;
 
 	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
@@ -352,7 +368,8 @@ sub _update {
 
 	my $srcid = $self->_getSrcid;
 
-	my $where_base = "rkid=$reskey_obj->{rkid} AND is_alive='yes'";
+	my $where_base = "rkid=$reskey_obj->{rkid}";
+	$where_base .= " AND is_alive='yes'" unless $no_is_alive_check;
 	if ($$where) {
 		$$where .= " AND $where_base";
 	} else {
@@ -369,6 +386,36 @@ sub _update {
 	}
 
 	return 1;
+}
+
+#========================================================================
+# if we are going to use this reskey, set it as used
+# up front, then un-use it if use fails, for the sake
+# of faking atomicity
+sub _fakeUse {
+	my($self) = @_;
+	$self->_init;
+
+	my $where;
+	my %update = (
+		-submit_ts	=> 'NOW()',
+		is_alive	=> 'no',
+	);
+
+	$self->_update(\%update, \$where) or return 0;
+
+	my $slashdb = getCurrentDB();
+	my $rows = $slashdb->sqlUpdate('reskeys', \%update, $where);
+
+	if ($rows == 1) {
+		$self->success(1);
+	} else {
+		# we don't know what happened here ... bail
+		$self->death(1);
+		$self->error(['touch-use failed']);
+	}
+
+	return $self->success;
 }
 
 #========================================================================
