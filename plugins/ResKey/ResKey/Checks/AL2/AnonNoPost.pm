@@ -20,8 +20,9 @@ sub _Check {
 	my($self) = @_;
 
 	my $user = getCurrentUser();
+	my $form = getCurrentForm();
 
-	if ($user->{is_anon}) {
+	if ($user->{is_anon} || $form->{postanon}) {
 		return AL2Check(
 			$self, 'nopost',
 			{ uid => getCurrentAnonymousCoward('uid') },
