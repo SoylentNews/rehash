@@ -19,129 +19,117 @@ __template__
 
 [% CASE 'keywordDelete-message' %]
 	[% returnme.data_constant = 1 %]
-	Keyword has been deleted
+	<div class="message">Keyword has been deleted</div>
 
 [% CASE 'keywordSave-message' %]
 	[% returnme.data_constant = 1 %]
-	Keyword has been saved
+	<div class="message">Keyword has been saved</div>
 
 [% CASE 'aclSave-message' %]
-Created new user ACL <tt>[% form.thisname %]</tt><br>
+	<div class="message">Created new user ACL <tt>[% form.thisname %]</tt></div>
 
 [% CASE 'varSave-message' %]
-Saved [% form.thisname %]<br>
+	<div class="message">Saved [% form.thisname %]</div>
 
 [% CASE 'varDelete-message' %]
-<b>Deleted [% form.thisname %]!</b><br>
+	<div class="message"><strong>Deleted [% form.thisname %]!</strong></div>
 
 [% CASE 'authorInsert-message' %]
-	Inserted [% form.thisaid %]<br>
+	<div class="message">Inserted [% form.thisaid %]</div>
 
 [% CASE 'authorSave-message' %]
-	Saved [% form.thisaid %]<br>
+	<div class="message">Saved [% form.thisaid %]</div>
 
 [% CASE 'authorDelete-message' %]
-	<b>Deleted [% form.thisaid %]!</b><br>
+	<div class="message"><strong>Deleted [% form.thisaid %]!</strong></div>
 
 [% CASE 'authorDelete-confirm-message' %]
-	<b>Do you really want to delete [% aid %]?</b><br>
+	<div class="message warn"><strong>Do you really want to delete [% aid %]?</strong></div>
 	<input type="hidden" value="[% aid %]" name="thisaid">
 	<input type="submit" value="Cancel delete [% aid %]" name="authordelete_cancel">
 	<input type="submit" value="Delete [% aid %]" name="authordelete_confirm">
 
 [% CASE 'authorDelete-deleted-message' %]
-	<b>Deleted [% aid %]!</b><br>
+	<div class="message"><strong>Deleted [% aid %]!</strong></div>
 
 [% CASE 'authorDelete-cancel-message' %]
-	<b>Canceled Deletion of [% aid %]!</b><br>
+	<div class="message"><strong>Canceled Deletion of [% aid %]!</strong></div>
 
 [% CASE 'blockSave-exists-message' %]
-	<p><b>This block, [% bid %], already exists! <br>Hit the "back" button, and try another bid (look at the blocks pulldown to see if you are using an existing one.)</p>
+	<div class="message error"><strong>This block, [% bid %], already exists!</strong>
+<br>Hit the "back" button, and try another bid (look at the blocks pulldown to see if you are using an existing one.)</div>
 
 [% CASE 'templateSave-exists-message' %]
-	<p><b>This template, [% name %], TPID [% tpid %], already exists!
+	<div class="message error"><strong>This template, [% name %], TPID [% tpid %], already exists!</div>
 
 [% CASE 'blockSave-inserted-message' %]
-	Inserted [% bid %]<br>
+	<div class="message">Inserted [% bid %]</div>
 
 [% CASE 'templateSave-inserted-message' %]
-	Inserted template [% name %], TPID [% tpid %]<br>
+	<div class="message">Inserted template [% name %], TPID [% tpid %]</div>
 
 [% CASE 'blockSave-saved-message' %]
-	Saved [% bid %]<br>
+	<div class="message">Saved [% bid %]</div>
 
 [% CASE 'templateSave-saved-message' %]
-	Saved template [% name %], TPID [% tpid %]<br>
+	<div class="message">Saved template [% name %], TPID [% tpid %]</div>
 
 [% CASE 'seclev-message' %]
-	You don't have privileges to template name [% name %], TPID [% tpid %]<br>
+	<div class="message error">You don't have privileges to template name [% name %], TPID [% tpid %]</div>
 	
 [% CASE 'blockDelete-message' %]
-	<b>Deleted [% bid %]!</b><br>
+	<div class="message"><strong>Deleted [% bid %]!</strong></div>
 
 [% CASE 'templateDelete-message' %]
-	<b>Deleted [% name %], TPID [% tpid %]!</b><br>
+	<div class="message"><strong>Deleted [% name %], TPID [% tpid %]!</strong><br>
 
 [% CASE 'topicSave-message' %]
-	<b>Saved [% form.tid %]!</b><br>
+	<div class="message"><strong>Saved [% form.tid %]!</strong><br>
 
 [% CASE 'updateFilter-message' %]
 
 	[% IF ! form.regex %]
-	<b>You haven't typed in a regex.</b><br>
+	<div class="message error"><strong>You haven't typed in a regex.</strong><br>
 	[% END %]
 
 	[% IF ! form.field %]
-	<b>You haven't typed in a form field.</b><br>
+	<div class="message error"><strong>You haven't typed in a form field.</strong><br>
 	[% END %]
 
 [% CASE 'topicDelete-message' %]
-	<b>Deleted [% tid %]!</b><br>
+	<div class="message"><strong>Deleted [% tid %]!</strong><br>
 
 [% CASE 'clearpass-warning' %]
-	<blockquote><p align="CENTER"><b>**&nbsp;Your admin password has been sent
-	in the clear. Please return to
-	<a href="[% gSkin.absolutedir_secure %]">the secure site</a>
-	and then
-	<a href="[% gSkin.absolutedir_secure %]/my/password">change
-	your password</a>
-	immediately! If you have additional problems, please contact the
-	<a href="mailto:[% constants.adminmail | strip_attribute %]">site admin</a>.[%
-	IF moreinfo %] More info: "[% moreinfo | strip_literal %]".[%
-	END %]&nbsp;**</b></p></blockquote>
+	<blockquote><p align="CENTER" class="message warn"><strong>**&nbsp;Your admin password has been sent in the clear. Please return to <a href="[% gSkin.absolutedir_secure %]">the secure site</a> and then <a href="[% gSkin.absolutedir_secure %]/my/password">change your password</a> immediately! If you have additional problems, please contact the <a href="mailto:[% constants.adminmail | strip_attribute %]">site admin</a>.[% IF moreinfo %] More info: "[% moreinfo | strip_literal %]".[% END %]&nbsp;**</strong></p></blockquote>
 
 [% # NO POINTS.
 CASE "no points" %]
-	You don't have any moderator points.<br>
+	<div class="message">You don't have any moderator points.</div>
 
 [% # NO POINTS.
 CASE "not enough points" %]
-	You don't have enough moderator points.<br>
+	<div class="message warn">You don't have enough moderator points.</div>
 
 [% CASE "unknown_moderation_warning" %]
-	An unknown error occurred while moderating.<br>
+	<div class="message error">An unknown error occurred while moderating.</div>
 
 [% CASE "moderate_recent_message" %]
-	<p>Return to the set of
-	<a href="[% gSkin.rootdir %]/admin.pl?op=recent&amp;startat=[% startat %]">recent comments</a>
-	you were just moderating.</p>
+	<div class="message">Return to the set of <a href="[% gSkin.rootdir %]/admin.pl?op=recent&amp;startat=[% startat %]">recent comments</a> you were just moderating.</div>
 
 [% CASE "moderate_recent_message_returnto" %]
-	<p>Return to the set of
-	<a href="[% Slash.cleanRedirectUrl(returnto) %]">comments</a> you were just moderating.</p>
+	<div class="message">Return to the set of <a href="[% Slash.cleanRedirectUrl(returnto) %]">comments</a> you were just moderating.</div>
 
 [% CASE "no-mcd-stats" %]
-	<p>Looks like memcached is not running, it's turned off in vars,
-	or Cache::Memcached does not support the <tt>stats()</tt> call.
-	No stats are available.
+	<div class="message error">Looks like memcached is not running, it's turned off in vars, or Cache::Memcached does not support the <tt>stats()</tt> call.  No stats are available.</div>
 
 [% CASE "no-tid-specified" %]
-	<b>Please go back and select a topic before proceeding.</b>
+	<div class="message error"><strong>Please go back and select a topic before proceeding.</strong></div>
 
 [% # COMMENT TABLE NOT AVAILABLE FOR WRITING
 CASE "comment_db_down" %]
-	Database maintenance is currently taking place.  Some items such
-	as comment posting and moderation are currently unavailable.
+	<div class="message error">
+		Database maintenance is currently taking place.  Some items such as comment posting and moderation are currently unavailable.
+	</div>
 
 [% CASE "ispell_nonrec" %]
 	<i>ispell doesn't recognize:</i>
