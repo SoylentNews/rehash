@@ -390,7 +390,7 @@ CREATE TABLE css (
 	PRIMARY KEY  (csid),
 	KEY ctid (ctid),
 	KEY page_skin (page,skin),
-	KEY skin_page (skin,page),
+	KEY skin_page (skin,page)
 ) TYPE=InnoDB;
 
 #
