@@ -162,9 +162,9 @@ __template__
 
 [% PROCESS titlebar width='100%' title=customize_title %]
 
-<input type="checkbox" name="useslashboxes"[% IF !user_edit.noboxes; checked; END %]> <b>Use Slashboxes</b>
+<input type="checkbox" name="useslashboxes"[% IF !user_edit.noboxes; checked; END %]><strong>Use Slashboxes</strong>
 
-<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="slashboxes">
 [% FOREACH bid = box_order -%]
 	[%- IF loop.index % 3 == 0 -%]
 		<tr valign="top" align="left">
