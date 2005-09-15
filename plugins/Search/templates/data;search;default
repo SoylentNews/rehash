@@ -22,43 +22,43 @@ __template__
 	<div class="usersearch">
 		No usernames were found that match your query.
 	</div>
-
+</div>
 [% CASE 'nostories' %]
 	[% returnme.data_constant = 1 %]
 	<div class="storysearch">
 		No stories were found that match your query.
 	</div>
-
+</div>
 [% CASE 'nocomments' %]
 	[% returnme.data_constant = 1 %]
 	<div class="commentsearch">
 		No comments were found that match your query.
 	</div>
-
+</div>
 [% CASE 'nopolls' %]
 	[% returnme.data_constant = 1 %]
 	<div class="pollsearch">
 		No poll questions were found that match your query.
 	</div>
-
+</div>
 [% CASE 'nojournals' %]
 	[% returnme.data_constant = 1 %]
 	<div class="journalsearch">
 		No journals were found to match your query.
 	</div>
-
+</div>
 [% CASE 'nosubmissions' %]
 	[% returnme.data_constant = 1 %]
 	<div class="subsearch">
 		No submissions were found to match your query.
 	</div>
-
+</div>
 [% CASE 'norss' %]
 	[% returnme.data_constant = 1 %]
 	<div class="rsssearch">
 		No rss entries were found to match your query.
 	</div>
-
+</div>
 [% CASE 'all_sections' %]
 	[% returnme.data_constant = 1 %]
 	All Sections
