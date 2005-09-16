@@ -47,7 +47,7 @@ tildeEd
 __template__
 <p>
 
-[% PROCESS titlebar title=title width="100%" %]
+[% PROCESS titlebar title=title %]
 <div class="message">
 	[% criteria_msg %]
 </div>	
@@ -160,7 +160,7 @@ __template__
 	######################
 -%]
 
-[% PROCESS titlebar width='100%' title=customize_title %]
+[% PROCESS titlebar title=customize_title %]
 
 <input type="checkbox" name="useslashboxes"[% IF !user_edit.noboxes; checked; END %]><strong>Use Slashboxes</strong>
 
