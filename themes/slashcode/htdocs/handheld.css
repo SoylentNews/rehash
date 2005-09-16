@@ -2,6 +2,7 @@ body
 {
 	background: #fff;
 	font-family: sans-serif;
+	font-size: 100%;
 }
 
 ul li { display: block; }
@@ -12,20 +13,20 @@ ul li { display: block; }
 	color: #000;
 	margin: 0;
 	padding: 0;
+font-size: small;
 }
 
-#logo h1 a
-{
-}
 
-.generaltitle, .article, .journalgeneric, .generaltitle div.title, .article div.title, .journalgeneric div.title, .generalbody, .article .details, .journalgeneric .details, .article div.body, .journalgeneric div.body, div.storylinks, div.storylinks ul, div.storylinks div
+fieldset, .generaltitle, .article, .journalgeneric, .div.title, .generalbody, .details, div.body, div.storylinks, div.storylinks ul, div.storylinks div
 {
 	margin: 0;
 	padding: 0;
 	background: transparent;
 	border: none;
-	
 }
+
+.details 
+{font-size: small; padding: 0 0 .4em 0;}
 
 #links, #contents, #slashboxes
 {
@@ -33,9 +34,16 @@ ul li { display: block; }
 	margin: 0;
 	padding: 0;
 	clear: both;
-	width: 100%;
 }
+.article img
+{
+float: right; border:0;
+}   
 
-#ostgnavbar, .btmnav, #slashboxes, #links, #topnav ul { display: none; }
+#ostgnavbar, .btmnav, #slashboxes, #links, #topnav ul, #jump { display: none; }
 #topnav { height: 30px; }
-.generaltitle h3, .article h3, .journalgeneric h3 { background: #000; }
+.generaltitle h3, .article h3, .journalgeneric h3 {border-bottom: 1px solid #000; padding: .2em 0; margin: .5em 0 .2em 0;}
+div.storylinks {margin: 0 0 .5em 0}
+#footer {margin: 1em}
+#footer .search {margin: 1em 0;}
+#footer .copyright {margin: 1em 0 }
