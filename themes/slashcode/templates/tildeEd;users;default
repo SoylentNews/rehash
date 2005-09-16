@@ -163,33 +163,32 @@ __template__
 [% PROCESS titlebar title=customize_title %]
 
 <input type="checkbox" name="useslashboxes"[% IF !user_edit.noboxes; checked; END %]><strong>Use Slashboxes</strong>
-
-<table width="100%" border="0" cellpadding="0" cellspacing="0" class="slashboxes">
-[% FOREACH bid = box_order -%]
-	[%- IF loop.index % 3 == 0 -%]
-		<tr valign="top" align="left">
+<div class="uslashboxes">
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	[% FOREACH bid = box_order -%]
+		[%- IF loop.index % 3 == 0 -%]
+			<tr valign="top" align="left">
+		[%- END -%]
+			<td><input type="checkbox" name="showbox_[% bid | strip_paramattr %]"[% section_descref.$bid.checked %]>
+			<a href="[% env.script_name %]?op=previewbox&amp;bid=[% bid | strip_paramattr %]">
+			[% IF bid == 'srandblock' %]
+				Semi-Random Box
+			[% ELSE %]
+				[% section_descref.$bid.title || bid %]
+			[% END %]
+			</a></td>
+		[%- IF loop.index % 3 == 2 -%]
+			</tr>
+		[% END -%]
 	[%- END -%]
-		<td><input type="checkbox" name="showbox_[% bid | strip_paramattr %]"[% section_descref.$bid.checked %]>
-		<a href="[% env.script_name %]?op=previewbox&amp;bid=[% bid | strip_paramattr %]">
-		[% IF bid == 'srandblock' %]
-			Semi-Random Box
-		[% ELSE %]
-			[% section_descref.$bid.title || bid %]
-		[% END %]
-		</a></td>
-	[%- IF loop.index % 3 == 2 -%]
+	[%- remaining_cells = 2 - (box_order.max % 3);
+ 	  WHILE remaining_cells;
+   		remaining_cells = remaining_cells - 1; -%]
+		<td>&nbsp;</td>
+	[%- END -%]
 		</tr>
-	[% END -%]
-[%- END -%]
-[%- remaining_cells = 2 - (box_order.max % 3);
-   WHILE remaining_cells;
-   	remaining_cells = remaining_cells - 1; -%]
-	<td>&nbsp;</td>
-[%- END -%]
-	</tr>
-</table>
+	</table>
 
-<div class="notes">
 	[% tilded_customize_msg %]
 	[% tilded_box_msg %]
 </div>
