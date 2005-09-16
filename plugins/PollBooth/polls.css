@@ -3,7 +3,7 @@
 	font-weight: bold;
 	margin: 0 0 1em 0;
 	border: 1px #ddd solid;
-	font-size: 75.5%;
+	font-size: 80%;
 }
 
 .barAnswer
@@ -40,6 +40,8 @@
 #polls-wide li { margin: 0 0 1em 0; }
 .note ul 
 {
-	font-size: 75.5%;
+	font-size: 80%;
 	font-family: arial, sans-serif;
 }
+#pollBooth .generalbody table {width: 80%; margin: 0 0 1em 10%}
+#pollBooth .generalbody caption {margin-left: 10%}
