@@ -11,6 +11,7 @@ en_US
 __name__
 report
 __template__
+<div class="generalbody">
 [%
    # handy sprintf-style formats
    USE format;
@@ -172,6 +173,7 @@ END %]
 </form>
 
 [% reportblock %]
+</div>
 __seclev__
 1000
 __version__

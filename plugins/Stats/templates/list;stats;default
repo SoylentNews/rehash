@@ -11,7 +11,7 @@ en_US
 __name__
 list
 __template__
-
+<div class="generalbody">
 [% IF form.stats_skid.defined && form.type != 'graphs' && stats_data.${form.stats_skid}.names %]
     [% PROCESS dumphead %]
     <p>
@@ -76,54 +76,39 @@ __template__
 
 [% BLOCK doform %]
     <form method="post" action="[% env.script_name %]">
-	<fieldset>
-	<legend></legend>
-    	[% PROCESS formLabel value => label, comment => comment %]
-        [% select_box %]
-
-        &nbsp;&nbsp;Range: [% PROCESS stats_days %]
-
-        <input type="hidden" name="stats_skid" value="[% form.stats_skid %]">
-        <input type="hidden" name="op" value="list">
+	[% PROCESS formLabel value => label, comment => comment %]
+	[% select_box %]
+	&nbsp;&nbsp;Range: [% PROCESS stats_days %]
+       	<input type="hidden" name="stats_skid" value="[% form.stats_skid %]">
+	<input type="hidden" name="op" value="list">
         <input type="submit" class="button">
-	</fieldset>
     </form>
 [% END %]
 
 [% BLOCK dumphead %]
-	[% PROCESS titlebar title => "Available Raw Stats for $constants.sitename", width => '100%' %]
-
+	[% PROCESS titlebar title => "Available Raw Stats for $constants.sitename" %]
 	<form method="post" action="[% env.script_name %]">
-	<fieldset>
-	<legend></legend>
-	[% PROCESS formLabel value => "Section" %]
-	[% Slash.createSelect('stats_skid', skins, form.stats_skid, 1) %]
-
-	<input type="hidden" name="op" value="list">
-	<input type="submit" class="button">
-	</fieldset>
+		[% PROCESS formLabel value => "Section" %]
+		[% Slash.createSelect('stats_skid', skins, form.stats_skid, 1) %]
+		<input type="hidden" name="op" value="list">
+		<input type="submit" class="button">
 	</form>
 [% END %]
 
 [% BLOCK graphshead %]
-	[% PROCESS titlebar title => "Available Graphs for $constants.sitename", width => '100%' %]
-
+	[% PROCESS titlebar title => "Available Graphs for $constants.sitename" %]
 	<form method="post" action="[% env.script_name %]">
-	<fieldset>
-	<legend></legend>
-	[% PROCESS formLabel value => "Graphs" %]
-	[% PROCESS graphs # get mygraphs defined %]
-	[% Slash.createSelect('graphname', mygraphs, form.graphname, 1) %]
-	&nbsp;&nbsp;Range: [% PROCESS stats_days %]
-	&nbsp;&nbsp;Sections: [% Slash.createSelect('stats_skid', skins, form.stats_skid, 1) %]
-
-	<input type="hidden" name="op" value="list">
-	<input type="hidden" name="type" value="graphs">
-	<input type="submit" class="button">
-	</fieldset>
+		[% PROCESS formLabel value => "Graphs" %]
+		[% PROCESS graphs # get mygraphs defined %]
+		[% Slash.createSelect('graphname', mygraphs, form.graphname, 1) %]
+		&nbsp;&nbsp;Range: [% PROCESS stats_days %]
+		&nbsp;&nbsp;Sections: [% Slash.createSelect('stats_skid', skins, form.stats_skid, 1) %]
+		<input type="hidden" name="op" value="list">
+		<input type="hidden" name="type" value="graphs">
+		<input type="submit" class="button">
 	</form>
 [% END %]
-
+</div>
 __seclev__
 1000
 __version__
