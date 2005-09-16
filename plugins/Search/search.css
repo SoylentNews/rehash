@@ -10,19 +10,19 @@
 }
 
 #search form { margin: 0 0 1em 0; }
-.search-results .data { font-size: 75.5%; }
+.search-results .data { font-size: 80%; }
 
 .search-results .details
 {
-	font-size: 75.5%;
+	font-size: 80%;
 	margin: 0 0 1em 0;
 }
 
 .sectiontitle li {
-        font-size: 75.5%;
+        font-size: 80%;
 }
 
 .search-results .author {
-        font-size: 75.5%;
+        font-size: 80%;
         margin: 0 0 1em 0;
 }
