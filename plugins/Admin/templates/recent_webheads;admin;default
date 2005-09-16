@@ -13,8 +13,8 @@ en_US
 __name__
 recent_webheads
 __template__
-[% PROCESS titlebar title="Recent Webhead Data" width='100%' %]
-
+[% PROCESS titlebar title="Recent Webhead Data" %]
+<div class="generalbody">
 <table cellspacing="2" border="0">
 
 <tr>
@@ -57,7 +57,7 @@ __template__
 [% END %]
 
 </table>
-
+</div>
 __seclev__
 100
 __version__
