@@ -151,3 +151,4 @@ html>body #admin { margin: 0 auto .2em 0; }
 .story_sec { background: #ccc; }
 .story_nd { background: #999; }
 .admin_story_list, .submit_story_list { font-size: 80% }
+.user_admin { background: #ccc }
