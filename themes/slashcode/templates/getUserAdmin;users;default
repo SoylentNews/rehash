@@ -19,6 +19,7 @@ en_US
 __name__
 getUserAdmin
 __template__
+<div class="user_admin">
 <form action="[% env.script_name %]" method="post">
 <fieldset>
 	<legend>
@@ -277,6 +278,7 @@ __template__
 		 </fieldset>
 		 </form>
 		[% END %]
+</div>
 __seclev__
 10000
 __version__

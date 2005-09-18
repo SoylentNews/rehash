@@ -14,7 +14,6 @@ __template__
 			</div>	
 		</div>
 		<div id="footer">
-			[% PROCESS mainmenu %]
 			<em>[% PROCESS motd %]</em>
 			<div class="search">
 				<form method="get" action="[% gSkin.rootdir %]/search.pl">
@@ -28,6 +27,7 @@ __template__
 			<div class="copyright">
 				[% Slash.db.getBlock('footer', 'block' )  %]
 			</div>
+			[% PROCESS mainmenu %]
 			<div class="btmnav">
 				<ul>
 					<li class="begin">
