@@ -1,3 +1,19 @@
+#contents
+{
+     margin: 0 0 0 .3em;
+}
+
+#links, #slashboxes {
+	display: none;
+}
+
+#articles, #users-blocks, #polls
+{
+     margin: 0 .3em 1em 0;
+}
+
+
+
 body
 {
 	background: #fff;
@@ -83,5 +99,5 @@ div.storylinks, div.storylinks ul, div.storylinks div
         background: transparent; 
 	margin: 0 0 1em 0;
 }
-.btmnav ul li a {#555;}
+.btmnav ul li a, .btmnav ul li a:visited { color: #555;}
 .btmnav {background: transparent}
