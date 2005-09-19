@@ -17,9 +17,6 @@ __template__
 		<a href="[% gSkin.rootdir %]/about.shtml">About</a>
 	</li>
 	<li>
-		<a href="[% gSkin.rootdir %]/faq.shtml">FAQ</a>
-	</li>
-	<li>
 		<a href="[% gSkin.rootdir %]/comments.pl">Discussions</a>
 	</li>
 	<li>
@@ -31,19 +28,7 @@ __template__
 	<li>
 		<a href="[% gSkin.rootdir %]/topics.pl">Topics</a>
 	</li>
-	<li>
-		<a href="[% gSkin.rootdir %]/authors.pl">Authors</a>
-	</li>
 	
-	<li>
-		<a href="[% gSkin.rootdir %]/search.pl">Older Stuff</a>
-	</li>
-	<li>
-		<a href="[% gSkin.rootdir %]/pollBooth.pl">Past Polls</a>
-	</li>
-	<li>
-		<a href="[% gSkin.rootdir %]/submit.pl">Submit Story</a>
-	</li>
 		[% IF user.is_anon %]
 		<li>
 			<a href="[% gSkin.rootdir %]/my/">Create Account/Log in</a>
