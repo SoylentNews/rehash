@@ -81,6 +81,7 @@ sub main {
 		my $header_title   = getData('search_header_title',   { text => $text });
 		my $titlebar_title = getData('search_titlebar_title', { text => $text });
 		header($header_title) or return;
+		print getData("search_slashboxes");	
 		titlebar("100%", $titlebar_title);
 
 		$form->{op} = 'stories' unless exists $ops{$form->{op}};

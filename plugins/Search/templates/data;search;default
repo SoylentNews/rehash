@@ -88,8 +88,9 @@ __template__
 	[% ELSE %]
 		Search [% constants.sitename %]
 	[% END %]
-
+[% CASE 'search_slashboxes' # Not needed unless you have slashboxes on the search page %]
 [% END %]
+
 
 __seclev__
 10000
