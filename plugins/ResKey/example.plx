@@ -2,6 +2,8 @@ use Slash::Test shift;
 
 my($reskey, $key);
 
+#$Slash::ResKey::DEBUG = 1;
+
 for (1..1) {
 	$reskey = getObject('Slash::ResKey');
 	$rkey = $reskey->key('comments');
@@ -20,7 +22,7 @@ for (1..1) {
 sub handle {
 	my($success) = @_;
 	if ($success) {
-		printf "\u$rkey->{type}'d $rkey->{reskey}\n";
+		printf "%s'd %s\n", ucfirst($rkey->{type}), $rkey->reskey;
 	} else {
 		printf "Error on %s: %s\n", $rkey->{type}, $rkey->errstr;
 	}

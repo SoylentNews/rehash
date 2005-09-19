@@ -49,13 +49,17 @@ sub _Check {
 		}
 	}
 
+	# we only check these on use, not create or touch, because the limits
+	# are so short that there's no point in checking them until use, so
+	# as not to increase the chance of giving users a rather spurious error
+
 	# minimum duration between uses
-	{
+	if ($self->{type} eq 'use') {
 		my $limit = $constants->{"reskey_checks_duration_uses_$self->{resname}"};
 		if ($limit) {
 			my $where = $self->_whereUser;
 			$where .= ' AND is_alive="no" AND ';
-			$where .= "rkid != '$reskey_obj->{rkid}' AND " if $reskey_obj->{rkid};
+			$where .= "rkid != '$reskey_obj->{rkid}' AND ";
 			$where .= "submit_ts > DATE_SUB(NOW(), INTERVAL $limit SECOND)";
 
 			my $rows = $slashdb->sqlCount('reskeys', $where);
@@ -66,7 +70,7 @@ sub _Check {
 	}
 
 	# minimum duration between creation and use
-	 if ($self->{type} eq 'use') {  # $reskey_obj->{rkid}
+	if ($self->{type} eq 'use') {
 		my $limit = $constants->{"reskey_checks_duration_creation-use_$self->{resname}"};
 		if ($limit) {
 			my $where = "rkid=$reskey_obj->{rkid}";

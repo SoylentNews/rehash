@@ -35,6 +35,8 @@ use base 'Slash::DB::MySQL';
 our($AUTOLOAD);
 our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
+our $DEBUG = 0;
+
 #========================================================================
 sub new {
 	my($class, $user) = @_;
@@ -51,8 +53,9 @@ sub new {
 
 #========================================================================
 sub key {
-	my($self, $resource, $reskey) = @_;
-	return Slash::ResKey::Key->new($self->{virtual_user}, $resource, $reskey);
+	my($self, $resource, $reskey, $debug) = @_;
+	$debug = $DEBUG unless defined $debug;
+	return Slash::ResKey::Key->new($self->{virtual_user}, $resource, $reskey, $debug);
 }
 
 #========================================================================

@@ -33,7 +33,7 @@ our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 #========================================================================
 sub new {
-	my($class, $user, $resname, $reskey) = @_;
+	my($class, $user, $resname, $reskey, $debug) = @_;
 	my $rkrid;
 
 	my $plugin = getCurrentStatic('plugin');
@@ -42,7 +42,8 @@ sub new {
 	# we get the reskey automatically if it exists, can also
 	# override by passing
 	my $self = bless {
-		reskey  => $reskey || getCurrentForm('reskey')
+		debug	=> $debug,
+		_reskey	=> $reskey || getCurrentForm('reskey')
 	}, $class;
 
 	if ($resname =~ /[a-zA-Z]/) {
@@ -65,9 +66,26 @@ sub new {
 }
 
 #========================================================================
+# print out what method we're in
+sub _flow {
+	my($self, $name) = @_;
+	return unless $self->{debug};
+
+	my @caller1 = caller(1);
+	my $name1 = $caller1[3];
+
+	if ($name) {
+		$name1 =~ s/::[^:]+$/::$name/;
+	}
+
+	printf STDERR "ResKey flow: calling %-40s\n", $name1;
+}
+
+#========================================================================
 # call to reset values before doing anything requiring a return value
 sub _init {
 	my($self) = @_;
+	$self->_flow;
 	$self->{code} = 0;
 	delete $self->{_errstr};
 	delete $self->{_error};
@@ -79,6 +97,7 @@ sub _init {
 # sometimes we may wish to save/restore errors and codes
 sub _save_errors {
 	my($self) = @_;
+	$self->_flow;
 	$self->{_save_errors} = {
 		code    => $self->{code},
 		_errstr => $self->{_errstr},
@@ -89,6 +108,7 @@ sub _save_errors {
 
 sub _restore_errors {
 	my($self) = @_;
+	$self->_flow;
 	$self->{code}    = $self->{_save_errors}{code};
 	$self->{_errstr} = $self->{_save_errors}{_errstr};
 	$self->{_error}  = $self->{_save_errors}{_error};
@@ -124,7 +144,7 @@ sub AUTOLOAD {
 	if ($name =~ /^(?:noop|success|failure|death)$/) {
 		$sub = _createStatusAccessor($name, \@_);
 
-	} elsif ($name =~ /^(?:error)$/) {
+	} elsif ($name =~ /^(?:error|reskey)$/) {
 		$sub = _createAccessor($name, \@_);
 
 	} elsif ($name =~ /^(?:create|touch|use)$/) {
@@ -158,6 +178,7 @@ sub _createAccessor {
 	my $newname = "_$name";
 	return sub {
 		my($self, $value) = @_;
+		$self->_flow($name);
 		return $self->{$newname} = $value if $value;
 		return $self->{$newname};
 	};
@@ -171,6 +192,7 @@ sub _createStatusAccessor {
 	my $constant = $Slash::Constants::CONSTANTS{reskey}{"RESKEY_\U$name"};
 	return sub {
 		my($self, $set) = @_;
+		$self->_flow($name);
 		if ($set) {
 			$self->{code} = $constant;
 			return 1;
@@ -188,6 +210,7 @@ sub _createActionMethod {
 	my $method_name = "_$name";
 	return sub {
 		my($self) = @_;
+		$self->_flow($name);
 		$self->{type} = $name;
 
 		my $ok = 1;
@@ -237,6 +260,7 @@ sub _createCheckMethod {
 
 	return sub {
 		my($pkg, $self) = @_;
+		$self->_flow($name);
 		my($code, $error) = $meth->($self);
 		return {
 			code	=> $code,
@@ -248,6 +272,7 @@ sub _createCheckMethod {
 #========================================================================
 sub _create {
 	my($self) = @_;
+	$self->_flow;
 	$self->_init;
 
 	my $constants = getCurrentStatic();
@@ -268,7 +293,7 @@ sub _create {
 		});
 
 		if ($rows > 0) {
-			$self->{reskey} = $reskey;
+			$self->reskey($reskey);
 			$ok = 1;
 			last;
 		}
@@ -293,10 +318,11 @@ sub _create {
 }
 
 #========================================================================
-# _touch and _use are same, except _use also sets submit_ts and is_alive
+# _touch and _use are same, except _use also deals with submit_ts and is_alive
 *_touch = \&_use;
 sub _use {
 	my($self) = @_;
+	$self->_flow;
 	my $failed = !$self->success;
 	$self->_save_errors if $failed;
 	$self->_init;
@@ -358,6 +384,7 @@ sub _use {
 # update the reskey
 sub _update {
 	my($self, $update, $where, $no_is_alive_check) = @_;
+	$self->_flow;
 
 	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
@@ -394,6 +421,7 @@ sub _update {
 # of faking atomicity
 sub _fakeUse {
 	my($self) = @_;
+	$self->_flow;
 	$self->_init;
 
 	my $where;
@@ -421,6 +449,7 @@ sub _fakeUse {
 #========================================================================
 sub _check {  # basically same for _checkUse, maybe share same code
 	my($self) = @_;
+	$self->_flow;
 	$self->_init;
 
 	my $meth = $self->{type} . 'Check';
@@ -465,6 +494,7 @@ sub _check {  # basically same for _checkUse, maybe share same code
 #========================================================================
 sub errstr {
 	my($self) = @_;
+	$self->_flow;
 	return $self->{_errstr} if $self->{_errstr};
 
 	my $errstr;
@@ -473,7 +503,7 @@ sub errstr {
 	if ($error) {
 		if (ref($error) eq 'ARRAY') {
 			$error->[2] ||= 'reskey';
-			$error->[1]{reskey} = $self;
+			$error->[1]{rkey} = $self;
 			$errstr = getData(@$error);
 		} else {
 			$errstr = $error;
@@ -486,13 +516,14 @@ sub errstr {
 #========================================================================
 sub get {
 	my($self, $refresh) = @_;
+	$self->_flow;
 	return $self->{_reskey_obj} if !$refresh && $self->{_reskey_obj};
 
 	my $slashdb = getCurrentDB();
 	my $reskey_obj;
 
-	if ($self->{reskey}) {
-		my $reskey_q = $slashdb->sqlQuote($self->{reskey});
+	if ($self->reskey) {
+		my $reskey_q = $slashdb->sqlQuote($self->reskey);
 		$reskey_obj = $slashdb->sqlSelectHashref('*', 'reskeys', "reskey=$reskey_q");
 	}
 
@@ -505,14 +536,9 @@ sub get {
 }
 
 #========================================================================
-sub reskey {
-	my($self) = @_;
-	return $self->{reskey};
-}
-
-#========================================================================
 sub _getSrcid {
 	my($self) = @_;
+	$self->_flow;
 	return $self->{_srcid_ip} if $self->{_srcid_ip};
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
@@ -524,6 +550,7 @@ sub _getSrcid {
 #========================================================================
 sub _whereUser {
 	my($self, $options) = @_;
+	$self->_flow;
 
 	my $user = getCurrentUser();
 	my $where;
@@ -541,6 +568,7 @@ sub _whereUser {
 #========================================================================
 sub _getResources {
 	my($self) = @_;
+	$self->_flow;
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
@@ -566,6 +594,7 @@ sub _getResources {
 #========================================================================
 sub _getChecks {
 	my($self) = @_;
+	$self->_flow;
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
