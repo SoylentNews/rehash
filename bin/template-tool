@@ -32,7 +32,7 @@ my %opts;
 
 # Remember to doublecheck these match usage()!
 usage('Options used incorrectly')
-	unless getopts('cdilrsTtVvUg:D:O:P:S:p:f:u:B:h', \%opts);
+	unless getopts('cdilrsTtVvUDg:O:P:S:p:f:u:B:h', \%opts);
 usage() if ($opts{'h'} || !keys %opts);
 usage('Option -t requires -s or -U') if $opts{'t'} && !$opts{'s'} && !$opts{'U'};
 version() if $opts{'v'};
@@ -299,8 +299,9 @@ if ($opts{'s'}) {
 
 	for my $name (sort keys %templates_in_db) {
 		next if $templates_on_disk{$name};
-		print "id $templates_in_db{$name}\t$name is in the DB but not on disk\n";
 		++$stats{extraneous};
+		next unless $opts{D};
+		print "id $templates_in_db{$name}\t$name is in the DB but not on disk\n";
 	}
 
 	print "Different templates: $stats{different}\n"
@@ -606,6 +607,8 @@ Main options:
 	-U	Upgrade your templates to the latest for your theme and
 		plugins, scans base install dir (default /usr/local/slash)
 		and "does the right thing"
+	-D	Print out which templates are in the DB, but not on disk
+		(works only with -U)
 	-t	test saved files, this will return what files are new
 		or modified but does not change the templates
 
