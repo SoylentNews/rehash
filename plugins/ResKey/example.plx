@@ -2,11 +2,13 @@ use Slash::Test shift;
 
 my($reskey, $key);
 
-#$Slash::ResKey::DEBUG = 1;
+my $debug = 0;
 
 for (1..1) {
 	$reskey = getObject('Slash::ResKey');
-	$rkey = $reskey->key('comments');
+	$rkey = $reskey->key('comments', {
+		debug	=> $debug
+	});
 
 	handle($rkey->create);
 	handle($rkey->touch);
@@ -22,8 +24,9 @@ for (1..1) {
 sub handle {
 	my($success) = @_;
 	if ($success) {
-		printf "%s'd %s\n", ucfirst($rkey->{type}), $rkey->reskey;
+		printf "%s'd %s\n", ucfirst($rkey->type), $rkey->reskey;
 	} else {
-		printf "Error on %s: %s\n", $rkey->{type}, $rkey->errstr;
+		printf "Error on %s: %s\n", $rkey->type, $rkey->errstr;
+		print Dumper $rkey;
 	}
 }

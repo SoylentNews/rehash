@@ -15,7 +15,7 @@ use base 'Slash::ResKey::Key';
 
 our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-sub _Check {
+sub doCheck {
 	my($self) = @_;
 
 	my $constants = getCurrentStatic();

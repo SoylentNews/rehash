@@ -19,6 +19,78 @@ Slash::ResKey::Key - Resource management for Slash
 	if ($key->use) { ... }
 	else { print $key->errstr }
 
+
+=head1 DESCRIPTION
+
+After getting an object from C<key> (see L<Slash::ResKey>), you may perform
+three primary operations on the object.
+
+Each of these performs checks as defined for that object's resource, as listed
+in the C<reskey_resource_checks> table.  The rows in that table define the
+classes, and the order in which those classes are to be checked.  Each class
+defines the methods for executing the checks.
+
+=over 4
+
+=item create
+
+To create a reskey to be used, call C<create>.  After running the checks,
+a new reskey is inserted in the C<reskeys> table.
+
+=item touch
+
+When a reskey is tested, but not used up -- for example, in previewing, but
+not yet submitting, a comment -- call C<touch>.  This performs the checks,
+and marks the reskey as having been touched.
+
+=item use
+
+Call C<use> to finally use the reskey to unlock the resource, so it can
+be used.  After the checks are run, the reskey is invalidated and may not be
+used again.
+
+=back
+
+
+Each of the above methods returns true for success, and false for failure.
+For failure, you can check C<errstr> to get the error string to present to
+the user.
+
+There are two failure conditions, C<failure> and C<death>.  By default, most
+are C<death>, which means the reskey failure is fatal: you cannot try again.
+However, some checks -- such as the one to make sure there's been enough
+time between submission of comments -- are C<failure>.  If you wish to
+continue after a C<touch> or C<use> returns false, you may do so if C<failure>
+returns true:
+
+	unless ($rkey->use) {
+		if ($rkey->failure) {
+			# try again
+		} else {
+			# you're hosed
+		}
+	}
+
+You may also check the two success conditions, C<success> and C<noop>.
+
+You must also provide the reskey to the user in order for him to submit it
+back.  It is returned by the C<reskey> method.  Either pass the entire key
+object to the form, or just the reskey value itself:
+
+	slashDisplay('myForm', { rkey => $rkey->reskey });
+
+	<input type="hidden" name="reskey" value="[% rkey.reskey %]">
+
+Or:
+
+	slashDisplay('myForm', { reskey => $rkey->reskey });
+
+	<input type="hidden" name="reskey" value="[% reskey %]">
+
+
+There's also a C<get> method which returns the row from the C<reskeys>
+database for that reskey.
+
 =cut
 
 use warnings;
@@ -41,24 +113,24 @@ sub new {
 
 	# we get the reskey automatically if it exists, can also
 	# override by passing
-	my $self = bless {
-		debug	=> $debug,
-		_reskey	=> $reskey || getCurrentForm('reskey')
-	}, $class;
+	my $self = bless {}, $class;
+
+	$self->debug($debug);
+	$self->reskey($reskey || getCurrentForm('reskey'));
 
 	if ($resname =~ /[a-zA-Z]/) {
-		my $resources = $self->_getResources;
+		my $resources = $self->getResources;
 		$rkrid = $resources->{name}{$resname};
 	} elsif ($resname =~ /^\d+$/) {
-		my $resources = $self->_getResources;
+		my $resources = $self->getResources;
 		$rkrid = $resname;
 		$resname = $resources->{id}{$rkrid};
 	}
 
 	return unless $resname && $rkrid;
 
-	$self->{resname} = $resname;
-	$self->{rkrid}   = $rkrid;
+	$self->resname($resname);
+	$self->rkrid($rkrid);
 
 	$self->_init;
 
@@ -69,7 +141,8 @@ sub new {
 # print out what method we're in
 sub _flow {
 	my($self, $name) = @_;
-	return unless $self->{debug};
+	# accessor calls _flow ... so don't call debug()
+	return unless defined $self->{_debug} && $self->{_debug} > 1;
 
 	my @caller1 = caller(1);
 	my $name1 = $caller1[3];
@@ -86,7 +159,7 @@ sub _flow {
 sub _init {
 	my($self) = @_;
 	$self->_flow;
-	$self->{code} = 0;
+	$self->{_code} = 0;
 	delete $self->{_errstr};
 	delete $self->{_error};
 	delete $self->{_reskey_obj};
@@ -99,7 +172,7 @@ sub _save_errors {
 	my($self) = @_;
 	$self->_flow;
 	$self->{_save_errors} = {
-		code    => $self->{code},
+		_code    => $self->{_code},
 		_errstr => $self->{_errstr},
 		_error  => $self->{_error},
 	};
@@ -109,7 +182,7 @@ sub _save_errors {
 sub _restore_errors {
 	my($self) = @_;
 	$self->_flow;
-	$self->{code}    = $self->{_save_errors}{code};
+	$self->{_code}   = $self->{_save_errors}{_code};
 	$self->{_errstr} = $self->{_save_errors}{_errstr};
 	$self->{_error}  = $self->{_save_errors}{_error};
 	delete $self->{_save_errors};
@@ -144,13 +217,13 @@ sub AUTOLOAD {
 	if ($name =~ /^(?:noop|success|failure|death)$/) {
 		$sub = _createStatusAccessor($name, \@_);
 
-	} elsif ($name =~ /^(?:error|reskey)$/) {
+	} elsif ($name =~ /^(?:error|reskey|debug|rkrid|resname|type|code)$/) {
 		$sub = _createAccessor($name, \@_);
 
 	} elsif ($name =~ /^(?:create|touch|use)$/) {
 		$sub = _createActionMethod($name, \@_);
 	
-	} elsif ($name =~ /^(?:createCheck|touchCheck|useCheck)$/) {
+	} elsif ($name =~ /^(?:checkCreate|checkTouch|checkUse)$/) {
 		$sub = _createCheckMethod($name, \@_);
 	}
 
@@ -179,7 +252,7 @@ sub _createAccessor {
 	return sub {
 		my($self, $value) = @_;
 		$self->_flow($name);
-		return $self->{$newname} = $value if $value;
+		return $self->{$newname} = $value if defined $value;
 		return $self->{$newname};
 	};
 }
@@ -194,11 +267,11 @@ sub _createStatusAccessor {
 		my($self, $set) = @_;
 		$self->_flow($name);
 		if ($set) {
-			$self->{code} = $constant;
+			$self->code($constant);
 			return 1;
 		}
-		return 0 unless defined $self->{code};
-		return $self->{code} == $constant ? 1 : 0;
+		return 0 unless defined $self->code;
+		return $self->code == $constant ? 1 : 0;
 	};
 }
 
@@ -207,20 +280,20 @@ sub _createStatusAccessor {
 # they call private methods named same thing, but with underscore
 sub _createActionMethod {
 	my($name) = @_;
-	my $method_name = "_$name";
+	my $method_name = "db\u$name";
 	return sub {
 		my($self) = @_;
 		$self->_flow($name);
-		$self->{type} = $name;
+		$self->type($name);
 
 		my $ok = 1;
-		$ok = $self->_fakeUse if $self->{type} eq 'use';
-		$ok = $self->_check if $ok;
+		$ok = $self->fakeUse if $self->type eq 'use';
+		$ok = $self->check if $ok;
 
 		# don't bother if type is create, and checks failed ...
 		# we only continue on for touch/use to update the DB
 		# to note we've been here, to clean up, etc.
-		if ($self->{type} ne 'create' || $ok) {
+		if ($self->type ne 'create' || $ok) {
 			$ok = $self->$method_name();
 		}
 
@@ -229,32 +302,60 @@ sub _createActionMethod {
 }
 
 #========================================================================
-# the check methods are named similar to the main ones, but with
-# capital letters.  we could change this is someone hates it.
+# this creates a method for when createCheck/touchCheck/useCheck
+# is called.  it looks in the class for (in order): doCheckCreate,
+# doCheckCreateExtra, doCheck, doCheckExtra.
 #
-# if it is public (no underscore), then it is expected to
-# return a proper hashref, with code and error defined.
-# otherwise, we call the private method (with underscore), which
-# is expected to return two scalar values, a status code and
-# optional error string, which are then put into the hashref.
+# "Extra" is for future expansion, allowing a check method to return
+# more than just the two main arguments: code and error hashref.  Those
+# methods are used as-is, while the non-Extra versions are wrapped in
+# another method.
 #
-# this allows us to simultaneously have complex possibilities
-# for the future, and let simple methods still be simple.
-# we *could* handle this in the _check method itself, but
-# this is a bit cleaner, and we don't know if something other
-# than _check might be calling these methods in the future.
+# First, the specific method for the check type is tried (doCheckCreate),
+# then the Extra version of it; then the generic check method
+# for all check types is tried (doCheck), then finally the Extra version
+# of it.
+#
+# If none of those is found, then a method returning NOOP is returned.
+
 sub _createCheckMethod {
 	my($name, $args) = @_;
-	my $method_name = "_\u$name";
+	my($class, $self) = @$args;
 
-	my $meth = $args->[0]->can($method_name);
+	my $base  = 'doCheck';
+	my $extra = 'Extra';
+	my $base_name = "do\u$name";
+
+	# doCheckCreate
+	my $meth = $class->can($base_name);
+	print STDERR "  Using $base_name\n" if $meth && $self->debug;
+
+	# doCheckCreateExtra
 	if (!$meth) {
-		$meth = $args->[0]->can('Check');
-		return $meth if $meth;
+		$meth = $class->can($base_name.$extra);
+		if ($meth) {
+			print STDERR "  Using $base_name$extra\n" if $self->debug;
+			return $meth;
+		}
 	}
-	$meth ||= $args->[0]->can('_Check');
+
+	# doCheck
+	if (!$meth) {
+		$meth = $class->can($base);
+		print STDERR "  Using $base\n" if $meth && $self->debug;
+	}
+
+	# doCheckExtra
+	if (!$meth) {
+		$meth = $class->can($base.$extra);
+		if ($meth) {
+			print STDERR "  Using $base$extra\n" if $self->debug;
+			return $meth;
+		}
+	}
 
 	if (!$meth) {
+		print STDERR "  Using NOOP\n" if $self->debug;
 		return sub { return { code => RESKEY_NOOP } }
 	}
 
@@ -270,7 +371,7 @@ sub _createCheckMethod {
 }
 
 #========================================================================
-sub _create {
+sub dbCreate {
 	my($self) = @_;
 	$self->_flow;
 	$self->_init;
@@ -286,9 +387,9 @@ sub _create {
 		my $reskey = getAnonId(1);
 		my $rows = $slashdb->sqlInsert('reskeys', {
 			reskey		=> $reskey,
-			rkrid		=> $self->{rkrid},
+			rkrid		=> $self->rkrid,
 			uid		=> $user->{uid},
-			-srcid_ip	=> $self->_getSrcid,
+			-srcid_ip	=> $self->getSrcid,
 			-create_ts	=> 'NOW()',
 		});
 
@@ -302,7 +403,7 @@ sub _create {
 		# used.  Keep retrying as long as is reasonably possible.
 		if (--$num_tries <= 0) {
 			# Give up!
-			errorLog("Slash::ResKey::Key->_create failed: $reskey\n");
+			errorLog("Slash::ResKey::Key->create failed: $reskey\n");
 			last;
 		}
 	}
@@ -318,9 +419,9 @@ sub _create {
 }
 
 #========================================================================
-# _touch and _use are same, except _use also deals with submit_ts and is_alive
-*_touch = \&_use;
-sub _use {
+# dbTouch and dbUse are same, except dbUse also deals with submit_ts and is_alive
+*dbTouch = \&dbUse;
+sub dbUse {
 	my($self) = @_;
 	$self->_flow;
 	my $failed = !$self->success;
@@ -339,7 +440,7 @@ sub _use {
 		);
 	}
 
-	if ($self->{type} eq 'use') {
+	if ($self->type eq 'use') {
 		# use() already set it to no, assuming success
 		$no_is_alive_check = 1;
 		if ($failed) {
@@ -357,7 +458,7 @@ sub _use {
 		}
 	}
 
-	$self->_update(\%update, \$where, $no_is_alive_check) or return 0;
+	$self->update(\%update, \$where, $no_is_alive_check) or return 0;
 
 	my $slashdb = getCurrentDB();
 	my $rows = $slashdb->sqlUpdate('reskeys', \%update, $where);
@@ -382,7 +483,7 @@ sub _use {
 # some of these could be separate checks, but they happen for every reskey,
 # and it is best for atomicity and performance to do them when we actually
 # update the reskey
-sub _update {
+sub update {
 	my($self, $update, $where, $no_is_alive_check) = @_;
 	$self->_flow;
 
@@ -393,7 +494,7 @@ sub _update {
 	my $reskey_obj = $self->get;
 	return 0 unless $reskey_obj;
 
-	my $srcid = $self->_getSrcid;
+	my $srcid = $self->getSrcid;
 
 	my $where_base = "rkid=$reskey_obj->{rkid}";
 	$where_base .= " AND is_alive='yes'" unless $no_is_alive_check;
@@ -407,19 +508,37 @@ sub _update {
 	# but still check this time by srcid
 	if (isAnon($reskey_obj->{uid}) && !$user->{is_anon}) {
 		$update->{uid} = $user->{uid};
-		$$where .= ' AND srcid_ip=' . $self->_getSrcid;
+		$$where .= ' AND srcid_ip=' . $self->getSrcid;
 	} else {  # use uid or srcid as appropriate
-		$$where .= ' AND ' . $self->_whereUser;
+		$$where .= ' AND ' . $self->whereUser;
 	}
 
 	return 1;
 }
 
 #========================================================================
+sub whereUser {
+	my($self, $options) = @_;
+	$self->_flow;
+
+	my $user = getCurrentUser();
+	my $where;
+
+	# anonymous user without cookie, check host, not srcid
+	if ($user->{is_anon} || $options->{force_srcid}) {
+		$where = 'srcid_ip=' . $self->getSrcid;
+	} else {
+		$where = "uid=$user->{uid}";
+	}
+
+	return $where;
+}
+
+#========================================================================
 # if we are going to use this reskey, set it as used
 # up front, then un-use it if use fails, for the sake
 # of faking atomicity
-sub _fakeUse {
+sub fakeUse {
 	my($self) = @_;
 	$self->_flow;
 	$self->_init;
@@ -430,7 +549,7 @@ sub _fakeUse {
 		is_alive	=> 'no',
 	);
 
-	$self->_update(\%update, \$where) or return 0;
+	$self->update(\%update, \$where) or return 0;
 
 	my $slashdb = getCurrentDB();
 	my $rows = $slashdb->sqlUpdate('reskeys', \%update, $where);
@@ -447,16 +566,17 @@ sub _fakeUse {
 }
 
 #========================================================================
-sub _check {  # basically same for _checkUse, maybe share same code
+sub check {  # basically same for checkUse, maybe share same code
 	my($self) = @_;
 	$self->_flow;
 	$self->_init;
 
-	my $meth = $self->{type} . 'Check';
+	# checkUse
+	my $meth = 'check' . ucfirst($self->type);
 
 	# getChecks will return 0 for failure, and an empty hashref
 	# if we simply have no checks to perform
-	my $checks = $self->_getChecks;
+	my $checks = $self->getChecks;
 	if (!$checks) {
 		$self->death(1);
 		return 0;
@@ -469,23 +589,27 @@ sub _check {  # basically same for _checkUse, maybe share same code
 		errorLog("Can't load $class: $@"), next if $@;
 
 		# any data the $check needs will be in $self
-#print "Checking $class : $meth\n";
-		#Slash::ResKey::Checks::User->createCheck
+		print STDERR "Checking $class : $meth\n" if $self->debug;
+
+		#Slash::ResKey::Checks::User->checkUse
 		my $result = $class->$meth($self);
 
 		# higher number takes precedence
-		if ($result->{code} > $self->{code}) {
-			$self->{code} = $result->{code};
+		# (we start with success (code == 0), so
+		# noop (code == -1) is skipped)
+		if ($result->{code} > $self->code) {
+			$self->code($result->{code});
 
 			# otherwise not an error
-			if ($self->{code} > RESKEY_SUCCESS) {
+			if ($self->code > RESKEY_SUCCESS) {
 				$self->error($result->{error});
 			}
 
 			# no need to keep processing
-			last if $self->{code} >= RESKEY_DEATH;
+			last if $self->code >= RESKEY_DEATH;
 		}
-#print "Status: $result->{code} : $self->{code}\n";
+		printf STDERR ("  Status: %d : %d\n",
+			$result->{code}, $self->code) if $self->debug;
 	}
 
 	return $self->success;
@@ -536,10 +660,12 @@ sub get {
 }
 
 #========================================================================
-sub _getSrcid {
+sub getSrcid {
 	my($self) = @_;
 	$self->_flow;
+
 	return $self->{_srcid_ip} if $self->{_srcid_ip};
+
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	return $self->{_srcid_ip} = get_srcid_sql_in(
@@ -548,25 +674,7 @@ sub _getSrcid {
 }
 
 #========================================================================
-sub _whereUser {
-	my($self, $options) = @_;
-	$self->_flow;
-
-	my $user = getCurrentUser();
-	my $where;
-
-	# anonymous user without cookie, check host, not srcid
-	if ($user->{is_anon} || $options->{force_srcid}) {
-		$where = 'srcid_ip=' . $self->_getSrcid;
-	} else {
-		$where = "uid=$user->{uid}";
-	}
-
-	return $where;
-}
-
-#========================================================================
-sub _getResources {
+sub getResources {
 	my($self) = @_;
 	$self->_flow;
 
@@ -592,7 +700,7 @@ sub _getResources {
 }
 
 #========================================================================
-sub _getChecks {
+sub getChecks {
 	my($self) = @_;
 	$self->_flow;
 
@@ -606,11 +714,11 @@ sub _getChecks {
 	$reader->_genericCacheRefresh($name, $expire_time);
 	my $checks_cache = $reader->{$cache} ||= {};
 
-	my $checks = $checks_cache->{ $self->{type} }{ $self->{resname} };
+	my $checks = $checks_cache->{ $self->type }{ $self->resname };
 	return $checks if defined $checks;  # could be empty array
 
-	my $type_q = $reader->sqlQuote($self->{type});
-	unless ($self->{rkrid} && $self->{resname}) {
+	my $type_q = $reader->sqlQuote($self->type);
+	unless ($self->rkrid && $self->resname) {
 		return 0;
 	}
 
@@ -620,9 +728,10 @@ sub _getChecks {
 
 	# setting a specific ordernum to the classname "" (empty string)
 	# will effectively disable that check
+	my $rkrid = $self->rkrid;
 	my $checks_select = $reader->sqlSelectAllHashref(
 		'ordernum', 'class, ordernum', 'reskey_resource_checks',
-		"rkrid=$self->{rkrid} AND (type=$type_q OR type='all')",
+		"rkrid=$rkrid AND (type=$type_q OR type='all')",
 		"ORDER BY ordernum, type DESC, rkrcid"
 	);
 
@@ -631,10 +740,11 @@ sub _getChecks {
 		push @$checks, $checks_select->{$ordernum}{class}
 			if $checks_select->{$ordernum}{class};
 	}
-	$checks_cache->{ $self->{type} }{ $self->{resname} } = $checks;
+	$checks_cache->{ $self->type }{ $self->resname } = $checks;
 
 	unless (@$checks) {
-		errorLog("No checks for $self->{type} / $self->{resname}");
+		my($type, $resname) = ($self->type, $self->resname);
+		errorLog("No checks for $type / $resname");
 	}
 
 	return $checks;

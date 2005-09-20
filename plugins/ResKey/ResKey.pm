@@ -19,6 +19,21 @@ Slash::ResKey - Resource management for Slash
 	if ($key->use) { ... }
 	else { print $key->errstr }
 
+
+=head1 DESCRIPTION
+
+Slash::ResKey is for managing resources.  You get a key object by requesting
+a specific sort of resource with the C<key> method, which takes the name
+of the resource (an arbitrary string, defined in the database table
+C<reskey_resources>).
+
+Optionally, C<key> takes a hashref of keys "reskey" and "debug".  Debug levels
+are 0, 1, and 2, with default 0.  If you don't include a reskey, it will
+be determined automatically from C<getCurrentForm('reskey')>.
+
+See L<Slash::ResKey::Key> for more info on what to do with an object returned
+by <key>.
+
 =cut
 
 use warnings;
@@ -53,9 +68,15 @@ sub new {
 
 #========================================================================
 sub key {
-	my($self, $resource, $reskey, $debug) = @_;
-	$debug = $DEBUG unless defined $debug;
-	return Slash::ResKey::Key->new($self->{virtual_user}, $resource, $reskey, $debug);
+	my($self, $resource, $opts) = @_;
+	$opts ||= {};
+	$opts->{debug} = $DEBUG unless defined $opts->{debug};
+	return Slash::ResKey::Key->new(
+		$self->{virtual_user},
+		$resource,
+		$opts->{reskey},
+		$opts->{debug}
+	);
 }
 
 #========================================================================

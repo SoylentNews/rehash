@@ -15,18 +15,18 @@ use base 'Slash::ResKey::Key';
 
 our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-sub _Check {
+sub doCheck {
 	my($self) = @_;
 
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
-	if ($constants->{"reskey_checks_adminbypass_$self->{resname}"} && $user->{is_admin}) {
+	if ($constants->{'reskey_checks_adminbypass_' . $self->resname} && $user->{is_admin}) {
 		return RESKEY_SUCCESS;
 	}
 
 	for my $check (qw(is_admin seclev is_subscriber karma)) {
-		my $value = $constants->{"reskey_checks_user_${check}_$self->{resname}"};
+		my $value = $constants->{"reskey_checks_user_${check}_" . $self->resname};
 		if (defined $value && length $value && $user->{$check} < $value) {
 			return(RESKEY_DEATH, ["$check too low", { needed => $value }]);
 		}
