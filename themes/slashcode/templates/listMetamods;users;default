@@ -76,7 +76,7 @@ __template__
 		END;
 	%]
 	[% IF m2_listing %]
-	<tr bgcolor="[% bg_toggle ? "data_hl1" : "data_hl2" %]">
+	<tr class="[% bg_toggle ? "data_hl1" : "data_hl2" %]">
 		[% bg_toggle = !bg_toggle %]
 		<td>[% Slash.timeCalc(m2.ts) %]</td>
 		<td><a href="[% gSkin.rootdir %]/comments.pl?sid=[% m2.sid %]&amp;cid=[% m2.cid %]">[% m2.subject %]</a></td>
