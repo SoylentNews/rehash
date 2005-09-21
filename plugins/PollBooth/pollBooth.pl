@@ -53,7 +53,7 @@ sub main {
 sub poll_booth {
 	my($form) = @_;
 
-	print pollbooth($form->{'qid'}, 0, 1);
+	print getData("slashbox_head") . sidebox('Poll',pollbooth($form->{'qid'}, 0, 1),'poll', 1) . getData("slashbox_foot");
 }
 
 #################################################################
