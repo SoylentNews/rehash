@@ -21,8 +21,8 @@ en_US
 __name__
 subEdTable
 __template__
-[% PROCESS titlebar %]
 <div class="generalbody">
+[% PROCESS titlebar %]
 	<form action="[% env.script_name %]" method="post">
 		<fieldset>
 			<legend>Submissions List</legend>
