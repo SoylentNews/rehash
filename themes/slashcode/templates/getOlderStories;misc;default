@@ -41,6 +41,7 @@ __template__
 		</li>
 		[% END %]
 		<li>
+			<br>
 			<a href="[% gSkin.rootdir %]/index.pl?issue=[% story.issue | strip_paramattr %]">
 		[%- IF cur_time && story.secs && cur_time-story.secs < 7*86400
 		    # If the story is within the last week, show (and link) the day-of-week -%]
@@ -61,8 +62,8 @@ __template__
 		</ul>
 	</li>
 </ul>
-<p>
-
+<br>
+<div class="right">
 [% # only do this if we want to have an "Older Articles" link
    # pointing back in time into search.pl
    # (why wouldn't we??) %]
@@ -76,7 +77,7 @@ __template__
    # (why wouldn't we??) %]
 
 <br><b>[% PROCESS next_prev_issue older_stories = 1 %]</b>
-</p>
+</div>
 
 __seclev__
 10000
