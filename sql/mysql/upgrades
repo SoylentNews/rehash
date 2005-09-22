@@ -3081,8 +3081,6 @@ INSERT INTO vars (name, value, description) VALUES ('hc_q1_linecloseness', '8', 
 
 # SLASHCLUSTER LAST UPDATED HERE
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_75, Start of T_2_5_0_76 - 2005/07/20
 
 INSERT INTO vars (name, value, description) VALUES ('ssihead_inc_pages', 'article', 'Pages that should always use their own .inc for ssihead');
@@ -3174,8 +3172,6 @@ INSERT INTO vars (name, value, description) VALUES ('users_menu_no_display', '0'
 # and you almost certainly are not using it)
 ALTER TABLE shifts ENGINE=InnoDB;
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # End of T_2_5_0_78, Start of T_2_5_0_79 - 2005/09/01
 
 # Double check before running this.  No title is best unless you know you need a title on something custom you set up. 
@@ -3205,6 +3201,8 @@ UPDATE css set theme='', skin='light' WHERE theme = "light";
 # End of T_2_5_0_79, Start of T_2_5_0_80 - 2005/09/19
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_80, Start of T_2_5_0_81 - 2005/09/21
 
