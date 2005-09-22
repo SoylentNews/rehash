@@ -421,6 +421,11 @@ sub urlFromSite {
 	my $base = root2abs();
 	my $clean = URI->new_abs($url || $gSkin->{rootdir}, $base);
 
+	# obviously, file: URLs are local
+	if ($clean->scheme eq 'file') {
+		return 1;
+	}
+
 	my @site_domain = split m/\./, $gSkin->{basedomain};
 	my $site_domain = join '.', @site_domain[-2, -1];
 	$site_domain =~ s/:.+$//;	# strip port, if available
@@ -2057,7 +2062,7 @@ Prepares data to be a URL.  Such as:
 
 =over 4
 
-	my $url = fixparam($someurl);
+	my $url = fudgeurl($someurl);
 
 =item Parameters
 
@@ -2571,12 +2576,13 @@ sub balanceTags {
 			# we are directly inside a list (UL), but this tag must be
 			# a list element (LI)
 			# this comes now because it could include a closing tag
-			if (@stack && $lists{$stack[-1]} && !(grep { $tag eq $_ } @{$lists{$stack[-1]}}) ) {
-				my $replace = $lists{$stack[-1]}[0];
-				_substitute(\$html, $whole, "<$replace>$whole");
-				$tags{$replace}++;
-				push @stack, $replace;
-			}
+# this isn't necessary anymore, with _validateLists()
+#			if (@stack && $lists{$stack[-1]} && !(grep { $tag eq $_ } @{$lists{$stack[-1]}}) ) {
+#				my $replace = $lists{$stack[-1]}[0];
+#				_substitute(\$html, $whole, "<$replace>$whole");
+#				$tags{$replace}++;
+#				push @stack, $replace;
+#			}
 
 			if ($needs_list{$tag}) {
 				# tag needs a list, like an LI needs a UL or OL, but we
