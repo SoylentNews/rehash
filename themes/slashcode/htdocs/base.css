@@ -700,3 +700,4 @@ pre
 .lt_tb_col { background: #ccc; }
 .lt_text_col { color: #fff; }
 .right { text-align: right; }
+.sb_header { font-size: 125%; font-weight: bold; color: #600; }
