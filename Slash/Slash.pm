@@ -1260,7 +1260,7 @@ sub dispComment {
 		vislenify($comment); # create $comment->{ipid_vis} and {subnetid_vis}
 		if ($constants->{comments_hardcoded}) {
 			$comment->{ipid_display} = <<EOT;
-<a href="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{ipid}&amp;fieldname=ipid">$comment->{ipid_vis}</A>&nbsp;&nbsp;SubnetID: 
+<br>IPID: <a href="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{ipid}&amp;fieldname=ipid">$comment->{ipid_vis}</a>&nbsp;&nbsp;SubnetID: 
 <a href="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{subnetid}&amp;fieldname=subnetid">$comment->{subnetid_vis}</a>
 EOT
 		} else {
