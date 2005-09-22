@@ -38,7 +38,7 @@ img { border: none; }
 	margin: 0 0 0 7.2em;
 }
 
-#messages, #submit, #comments, #login, #404, #pollBooth, #wide, #search, #authors, #topics
+#messages, #submit, #comments, #login, #pollBooth, #wide, #search, #authors, #topics
 {
 	overflow: visible;
 	height: 100%;
