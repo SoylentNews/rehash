@@ -668,7 +668,7 @@ EOT
 			# box.				-- Pater
 			getSkinColors() unless $user->{colors};
 
-			return sidebox('Advertisement', qq'<div class="ad$num" align="center">' . $user->{state}{ad}{$num} . "</div>", "advertisement", 1);
+			return sidebox('Advertisement', qq'<div class="ad$num">' . $user->{state}{ad}{$num} . "</div>", "advertisement", 1);
 		} else { return ''; }
 	} else {
 		return $user->{state}{ad}{$num} ? qq'<div class="ad$num">$user->{state}{ad}{$num}</div>': '';
