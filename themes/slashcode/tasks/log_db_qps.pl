@@ -26,7 +26,22 @@ $task{$me}{code} = sub {
 	my $save_vars = {};
 
 	my $stats = getObject('Slash::Stats::Writer');
-	my $vus = $slashdb->getDBVirtualUsers();
+
+	# Get a list of the virtual users on this system, but only
+	# for DBs which are currently alive.
+	# Note that this task doesn't perform well if DBs are going
+	# alive and not-alive.  It always assumes the last time
+	# period measured is 1 hour...
+	my $dbs = $slashdb->getDBs();
+	my $vus = [
+		map { $dbs->{$_}{virtual_user} }
+		grep { $dbs->{$_}{isalive} eq 'yes' }
+		keys %$dbs
+	];
+
+	# Add the main virtual user if it's not already present
+	# (actually this should not be necessary, but it doesn't
+	# hurt anything).
 	push @$vus, $slashdb->{virtual_user}
 		unless scalar grep { $_ eq $slashdb->{virtual_user} } @$vus;
 
@@ -44,11 +59,10 @@ $task{$me}{code} = sub {
 		@dbs = ( {
 			vu => $slashdb->{virtual_user},
 			db => $slashdb
-		});
+		} );
 	}
 
 	my $queries = 0;
-
 	
 	my $last_time = $slashdb->getVar("db_questions_lasttime", "value", 1);
 	for my $db (@dbs) {
@@ -84,10 +98,10 @@ $task{$me}{code} = sub {
 	if ($elapsed && $elapsed > 0) {
 		for my $db (@dbs) {
 			my $vu = $db->{vu};
-			my $last = $slashdb->getVar("db_questions_last_$vu", "value", 1 );
-			my $new_last = $save_vars->{"db_questions_last_$vu"};
+			my $last = $slashdb->getVar("db_questions_last_$vu", "value", 1) || 0;
+			my $new_last = $save_vars->{"db_questions_last_$vu"} || 0;
 			my $diff = $new_last - $last;
-			if($elapsed > 0 && $diff > 0) {
+			if ($elapsed > 0 && $diff > 0) {
 				$queries += $diff;
 				my $qps = $diff / $elapsed;
 				$stats->createStatDaily("qps_$db->{vu}_$hour", $qps);
