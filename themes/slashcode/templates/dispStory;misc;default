@@ -56,7 +56,7 @@ END %]
 			[% IF user.noicons %]
 				[ <a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">[% topic.textname %]</a> ]
 			[% ELSIF topic.image %]
-				<a href="http://[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">
+				<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">
 					<img src="[% constants.imagedir %]/topics/[% topic.image %]" width="[% topic.width %]" height="[% topic.height %]" alt="[% topic.textname %]" title="[% topic.textname %]" >
 				</a>
 			[% END %]
