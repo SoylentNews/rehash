@@ -321,6 +321,15 @@ sub createComment {
 	$comment->{len} = length($comment_text);
 	$comment->{pointsorig} = $comment->{points} || 0;
 	$comment->{pointsmax}  = $comment->{points} || 0;
+	if ($comment->{pid}) {
+		# If we're being asked to parent this comment to another,
+		# verify that the other comment exists and is in this
+		# same discussion.
+		my $pid_sid = 0;
+		$pid_sid = $self->sqlSelect("sid", "comments",
+			"cid=" . $self->sqlQuote($comment->{pid}));
+		return -1 unless $pid_sid && $pid_sid == $comment->{sid};
+	}
 
 #	$self->{_dbh}{AutoCommit} = 0;
 	$self->sqlDo("SET AUTOCOMMIT=0");
