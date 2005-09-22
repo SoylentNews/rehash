@@ -236,7 +236,7 @@ function [% name %]_search(type, searchstring, add) {
 				'<div nowrap><span id="[% name %]-ab-line-' + tids[i][1] +
 				'" ondblclick="[% name %]_ok(\'ab\')" onclick="[% name %]_toggle_select(' +
 				tids[i][1] + ',' + tids[i][2] +
-				',\'ab\')"><a class="lt_text_col" href="javascript:void(0);">' + tids[i][0] +
+				',\'ab\')"><a class="topic_sel" href="javascript:void(0);">' + tids[i][0] +
 				'</a></span></div>';
 		}
 	}

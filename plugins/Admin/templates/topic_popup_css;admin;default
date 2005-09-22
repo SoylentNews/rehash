@@ -87,6 +87,8 @@ __template__
    padding-bottom:   10px;
 }
 
+#st-display a.topic_sel { color: #[% user.colors.fg_3 %]; }
+
 __seclev__
 10000
 __version__
