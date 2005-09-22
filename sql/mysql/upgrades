@@ -3170,7 +3170,7 @@ INSERT INTO vars (name, value, description) VALUES ('users_menu_no_display', '0'
 
 # Changes for plugins/ScheduleShifts (ignore if not using that plugin,
 # and you almost certainly are not using it)
-ALTER TABLE shifts ENGINE=InnoDB;
+ALTER TABLE shifts TYPE=InnoDB;
 
 # End of T_2_5_0_78, Start of T_2_5_0_79 - 2005/09/01
 
@@ -3205,4 +3205,6 @@ UPDATE css set theme='', skin='light' WHERE theme = "light";
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_80, Start of T_2_5_0_81 - 2005/09/21
+
+ALTER TABLE dbs_readerstatus CHANGE COLUMN had_weight had_weight tinyint UNSIGNED DEFAULT 1, CHANGE COLUMN had_weight_adjust had_weight_adjust float UNSIGNED DEFAULT 1;
 
