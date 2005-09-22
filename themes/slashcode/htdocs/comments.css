@@ -83,3 +83,4 @@ html > body .commentwrap table {
 }
 
 #commentlisting li.comment { list-style: none; }
+.comment_footer { text-align: center; background: #ddd }
