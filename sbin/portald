@@ -74,19 +74,20 @@ sub getTop10Comments {
 
 	my $reasons = $slashdb->getReasons;
 
-	my $block;
+	my $block = '<ul>';
 	foreach (@$A) {
 		my($sid, $title, $cid, $subj, $d, $nickname, $points, $reason) = @$_;
 		$block .= <<EOT;
 
-&middot; <b><a href="$gSkin->{rootdir}/comments.pl?sid=$sid&amp;cid=$cid">$subj</a>
+<li> <b><a href="$gSkin->{rootdir}/comments.pl?sid=$sid&amp;cid=$cid">$subj</a>
 	($points points, $reasons->{$reason}{name})
 	by $nickname</b>
 	on $d
 	<small>attached to
-	<a href="$gSkin->{rootdir}/article.pl?sid=$sid">$title</a></small>$br
+	<a href="$gSkin->{rootdir}/article.pl?sid=$sid">$title</a></small></li>
 EOT
 	}
+	$block .= '</ul>';
 	setblock('top10comments', $block);
 
 }
