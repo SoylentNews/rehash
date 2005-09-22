@@ -48,7 +48,7 @@ html > body .commentwrap table {
         padding: 0;
         border: none;
 }
-.linkCommentPage {text-align: center; padding: .3em;}
+.linkCommentPage {background: #ccc; text-align: center; margin: .3em; padding: .3em;}
 .commentTop .details {font-size: 75.5%; margin: 0; padding: 0;}
 .commentTop .details small {font-size: 100%;}
 
