@@ -72,7 +72,10 @@ sub showQueryCount {
 # For rss, rdf etc feeds, basically used by tasks.
 # Ultimately this should be subsumed into
 # getStoriesEssentials since they serve the same purpose.
-# XXXSECTIONTOPICS let's get the NOW() out of here
+# XXXSECTIONTOPICS let's get the NOW() out of here.
+# This is much slower than getStoriesEssentials but fortunately
+# is not called very often.  Its calling code really should be
+# rewritten to use getStoriesEssentials.
 sub getBackendStories {
 	my($self, $options) = @_;
 
