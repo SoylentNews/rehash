@@ -17,7 +17,7 @@ __template__
    position:         absolute;
    top:              0px;
    right:            0px;
-   border:           1px outset #[% user.colors.bg_3 %];
+   border:           1px outset [% user.colors.bg_3 %];
    background-color: #ffffff;
    filter:           progid:DXImageTransform.Microsoft.dropShadow( Color=bababa,offx=3,offy=3,positive=true);
 }
@@ -40,7 +40,7 @@ __template__
    margin-bottom:    4px;
    font-size:        large;
    color:            #ffffff;
-   background-color: #[% user.colors.bg_3 %];
+   background-color: [% user.colors.bg_3 %];
    width:            [% width %]px;
 }
 
@@ -56,7 +56,7 @@ __template__
    padding:          3px;
    text-align:       left;
    margin-top:       10px;
-   background-color: #[% user.colors.bg_3 %];
+   background-color: [% user.colors.bg_3 %];
    width:            [% width %]px;
 }
 
@@ -87,7 +87,7 @@ __template__
    padding-bottom:   10px;
 }
 
-#st-display a.topic_sel { color: #[% user.colors.fg_3 %]; }
+#st-display a.topic_sel { color: [% user.colors.fg_3 %]; }
 
 __seclev__
 10000
