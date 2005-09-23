@@ -526,6 +526,11 @@ sub templateSave {
 			$skin eq $temp->{skin} &&
 			$page eq $temp->{page});
 
+	# Strip non-unix newlines.
+	for (qw( template title description )) {
+		$form->{$_} =~ s/(\r\n|\r)/\n/g;
+	}
+
 	if ($form->{save_new}) {
 		if ($id->{tpid} || $exists) {
 			print getData('templateSave-exists-message', { tpid => $tpid, name => $name });
