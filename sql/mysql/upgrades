@@ -3200,11 +3200,16 @@ UPDATE css set theme='', skin='light' WHERE theme = "light";
 
 # End of T_2_5_0_79, Start of T_2_5_0_80 - 2005/09/19
 
+# End of T_2_5_0_80, Start of T_2_5_0_81 - 2005/09/21
+
+ALTER TABLE dbs_readerstatus CHANGE COLUMN had_weight had_weight tinyint UNSIGNED DEFAULT 1, CHANGE COLUMN had_weight_adjust had_weight_adjust float UNSIGNED DEFAULT 1;
+
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
 
-# End of T_2_5_0_80, Start of T_2_5_0_81 - 2005/09/21
+# End of T_2_5_0_81, Start of T_2_5_0_82 - 2005/09/23
 
-ALTER TABLE dbs_readerstatus CHANGE COLUMN had_weight had_weight tinyint UNSIGNED DEFAULT 1, CHANGE COLUMN had_weight_adjust had_weight_adjust float UNSIGNED DEFAULT 1;
+# Changes for plugins/Admin (which you are almost certainly using)
+INSERT INTO vars (name, value, description) VALUES ('ispell_is_really_aspell_with_lang', '', 'Some systems install aspell and a script that mimics the behavior of ispell; if yours does, set this to your preferred language name, e.g. "english"');
 
