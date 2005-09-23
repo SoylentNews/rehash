@@ -70,7 +70,7 @@ __template__
 <input width="30" type="button" value="Search" onclick="[% name %]_search('ab')">
 <br>
 [%- FOREACH letter = ['A' .. 'Z'] %]
-<a href="#" onclick="return [% name %]_search('ab','[% letter %]');">[% letter %]</a>
+<a href="#" class="topic_sel" onclick="return [% name %]_search('ab','[% letter %]');">[% letter %]</a>
 [%- END %]
 <br>
 </p><p>
