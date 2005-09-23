@@ -116,6 +116,9 @@ sub UserLog {
 		my @gmt = gmtime;
 		my $today = sprintf("%04d%02d%02d",
 			$gmt[5]+1900, $gmt[4]+1, $gmt[3]);
+		# See the code near the end of MySQL.pm _getUser_do_selects()
+		# which forces $user->{lastclick} to be in the numeric format
+		# originally used by the MySQL 4.0 TIMESTAMP column type.
 		if ($today eq substr($user->{lastclick}, 0, 8)) {
 			# User may or may not be a subscriber, and may or may not
 			# be buying this page.  The day has not rolled over.
