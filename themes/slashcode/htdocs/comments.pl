@@ -567,8 +567,8 @@ sub validateComment {
 		&& ( $constants->{comments_portscan} == 2
 			|| $constants->{comments_portscan} == 1 && $user->{is_anon} )
 	) {
-		my $is_trusted = $slashdb->checkIsTrusted($user->{ipid});
-		if ($is_trusted ne 'yes') {
+		my $is_trusted = $slashdb->checkAL2($user->{srcids}, 'trusted');
+		if (!$is_trusted) {
 #use Time::HiRes; my $start_time = Time::HiRes::time;
 			my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
 #my $elapsed = sprintf("%.3f", Time::HiRes::time - $start_time); print STDERR scalar(localtime) . " comments.pl cfop returned '$is_proxy' for '$user->{hostip}' in $elapsed secs\n";

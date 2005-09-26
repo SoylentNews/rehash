@@ -263,7 +263,8 @@ EOT
 	   $comments_ipids_anononly,
 	   $comments_ipids_loggedinonly,
 	   $comments_ipids_anonandloggedin) = $stats->countCommentsByDistinctIPIDPerAnon();
-	my $comments_proxyanon = $stats->countCommentsFromProxyAnon();
+# See comment for countCommentsFromProxyAnon.
+#	my $comments_proxyanon = $stats->countCommentsFromProxyAnon();
 	my $distinct_comment_posters_uids = $stats->getCommentsByDistinctUIDPosters();
 	my $comments_discussiontype_hr = $stats->countCommentsByDiscussionType();
 	slashdLog("Comment Posting Stats End");
@@ -623,7 +624,8 @@ EOT
 	$statsSave->createStatDaily("comments_ipids_anononly", $comments_ipids_anononly);
 	$statsSave->createStatDaily("comments_ipids_loggedinonly", $comments_ipids_loggedinonly);
 	$statsSave->createStatDaily("comments_ipids_anonandloggedin", $comments_ipids_anonandloggedin);
-	$statsSave->createStatDaily("comments_proxyanon", $comments_proxyanon);
+# See comment for countCommentsFromProxyAnon.
+#	$statsSave->createStatDaily("comments_proxyanon", $comments_proxyanon);
 	$statsSave->createStatDaily("distinct_comment_posters_uids", $distinct_comment_posters_uids);
 	for my $type (sort keys %$comments_discussiontype_hr) {
 		$statsSave->createStatDaily("comments_discussiontype_$type", $comments_discussiontype_hr->{$type});
@@ -688,9 +690,9 @@ EOT
 		}
 	}
 
-	my $accesslist_counts = $stats->getAccesslistCounts();
-	for my $key (keys %$accesslist_counts) {
-		$statsSave->createStatDaily("accesslist_$key", $accesslist_counts->{$key});
+	my $al2_counts = $stats->getAL2Counts();
+	for my $key (keys %$al2_counts) {
+		$statsSave->createStatDaily("al2count_$key", $al2_counts->{$key});
 	}
 	
 	foreach my $day (@ah_days){

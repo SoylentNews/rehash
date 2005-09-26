@@ -227,14 +227,27 @@ sub new {
 
 
 ########################################################
-sub getAccesslistCounts {
+sub getAL2Counts {
 	my($self) = @_;
 	my $hr = { };
-	for my $key (qw( ban nopost nosubmit norss nopalm proxy trusted )) {
-		$hr->{$key} = $self->sqlCount('accesslist',
-			"now_$key = 'yes'") || 0;
+	my $types = $self->getAL2Types();
+	my $type_count = $self->sqlSelectAllKeyValue(
+		'value, COUNT(*)',
+		'al2',
+		'',
+		'GROUP BY value');
+	for my $this_type (keys %$types) {
+		$hr->{$this_type} = 0;
+		my $this_value = 1 << $types->{$this_type}{bitpos};
+		for my $value (keys %$type_count) {
+			next unless $value & $this_value;
+			$hr->{$this_type} += $type_count->{$value};
+		}
 	}
-	$hr->{all} = $self->sqlCount('accesslist') || 0;
+	$hr->{all} = 0;
+	for my $value (keys %$type_count) {
+		$hr->{all} += $type_count->{$value};
+	}
 	return $hr;
 }
 
@@ -697,26 +710,28 @@ sub countCommentsByDistinctIPIDPerAnon {
 }
 
 ########################################################
-sub countCommentsFromProxyAnon {
-	my($self, $options) = @_;
-	my $constants = getCurrentStatic();
-
-	my $where = "date $self->{_day_between_clause}";
-	$where .= " AND discussions.id = comments.sid
-		    AND discussions.primaryskid = '$options->{skid}'"
-		if $options->{skid};
-
-	my $tables = 'comments, accesslist';
-	$tables .= ", discussions" if $options->{skid};
-
-	my $c = $self->sqlCount(
-		$tables,
-		"$where
-		 AND comments.ipid = accesslist.ipid
-		 AND accesslist.now_proxy = 'yes'
-		 AND comments.uid = $constants->{anonymous_coward_uid}");
-	return $c;
-}
+# XXX Maybe bring this back once Slash is entirely converted
+# to srcids. - Jamie 2005/07/21
+#sub countCommentsFromProxyAnon {
+#	my($self, $options) = @_;
+#	my $constants = getCurrentStatic();
+#
+#	my $where = "date $self->{_day_between_clause}";
+#	$where .= " AND discussions.id = comments.sid
+#		    AND discussions.primaryskid = '$options->{skid}'"
+#		if $options->{skid};
+#
+#	my $tables = 'comments, accesslist';
+#	$tables .= ", discussions" if $options->{skid};
+#
+#	my $c = $self->sqlCount(
+#		$tables,
+#		"$where
+#		 AND comments.ipid = accesslist.ipid
+#		 AND accesslist.now_proxy = 'yes'
+#		 AND comments.uid = $constants->{anonymous_coward_uid}");
+#	return $c;
+#}
 
 ########################################################
 sub countCommentsByDiscussionType {

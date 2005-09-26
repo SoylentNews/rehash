@@ -3213,3 +3213,5 @@ ALTER TABLE dbs_readerstatus CHANGE COLUMN had_weight had_weight tinyint UNSIGNE
 # Changes for plugins/Admin (which you are almost certainly using)
 INSERT INTO vars (name, value, description) VALUES ('ispell_is_really_aspell_with_lang', '', 'Some systems install aspell and a script that mimics the behavior of ispell; if yours does, set this to your preferred language name, e.g. "english"');
 
+DROP TABLE IF EXISTS accesslist;
+

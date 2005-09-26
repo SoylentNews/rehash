@@ -548,14 +548,13 @@ sub newUser {
 		return;
 	} elsif ($matchname ne '' && $form->{newusernick} ne '') {
 		if ($constants->{newuser_portscan}) {
-			# XXXSRCID Convert to use getAL2($srcid, 'trusted')
-			my $is_trusted = $slashdb->checkIsTrusted($user->{ipid});
-			if ($is_trusted ne 'yes') {
+			my $is_trusted = $slashdb->checkAL2($user->{srcids}, 'trusted');
+			if (!$is_trusted) {
 				my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
 				if ($is_proxy) {
 					print getError('new user open proxy', {
-					unencoded_ip	=> $ENV{REMOTE_ADDR},
-					port		=> $is_proxy,
+						unencoded_ip	=> $ENV{REMOTE_ADDR},
+						port		=> $is_proxy,
 					});
 					return;
 				}
@@ -673,9 +672,8 @@ sub mailPasswd {
 	
 	if (!$err_name) {
 		if ($constants->{mailpasswd_portscan}) {
-			# XXXSRCID Convert to use getAL2($srcid, 'trusted')
-			my $is_trusted = $slashdb->checkIsTrusted($user->{ipid});
-			if ($is_trusted ne 'yes') {
+			my $is_trusted = $slashdb->checkAL2($user->{srcids}, 'trusted');
+			if (!$is_trusted) {
 				my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
 				if ($is_proxy) {
 					$err_name = 'mailpasswd open proxy';
@@ -2160,32 +2158,10 @@ print STDERR "al2_change: " . Dumper($al2_change);
 	# Find out what changed for ACL's.
 	my $acl_change = { };
 	for my $acl (@acl_old, @acl_new) {
-print STDERR "acl=$acl old=$acl_old{$acl} new=$acl_new{$acl}\n";
 		next if $acl_old{$acl} == $acl_new{$acl};
 		$acl_change->{$acl} = $acl_new{$acl} ? 1 : 0;
 	}
-print STDERR "acl_change: " . Dumper($acl_change);
 	$acl_change = undef if !keys %$acl_change;
-
-#	my @access_add = ( );
-#	my @access_remove = ( );
-#	for my $now (qw( ban nopost nosubmit nopalm norss nopalm proxy trusted )) {
-#		# To affect the "now_trusted" bit, you need a seclev of 10000
-#		# or higher.
-#		next if $now eq 'trusted' && $user->{seclev} < 10000;
-#		if ($form->{"accesslist_$now"} eq 'on') {
-#			push @access_add, $now;
-#		} else {
-#			push @access_remove, $now;
-#		}
-#	}
-#	my $reason = $form->{accesslist_reason};
-#	$slashdb->changeAccessList($user_edit, \@access_add, \@access_remove, $reason);
-
-	if ($form->{accesslist_ban} eq 'on') {
-		$slashdb->getBanList(1); # reload the list
-	}
-
 
 	if ($user->{is_admin} && $srcid) {
 		$slashdb->setAL2($srcid, $al2_change);
@@ -3141,7 +3117,6 @@ sub getUserAdmin {
 	my @accesshits;
 	my $user_editinfo_flag = ($form->{op} eq 'userinfo' || ! $form->{op} || $form->{userinfo} || $form->{saveuseradmin}) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
-	my $accesslist;
 	my $sectionref = $reader->getDescriptions('skins');
 	$sectionref->{''} = getData('all_sections');
 
@@ -3257,7 +3232,6 @@ sub getUserAdmin {
 			$all_aclam_hr->{$a} cmp $all_aclam_hr->{$b}
 		} keys %$all_aclam_hr
 	];
-print STDERR "keys-all_aclam_hr: " . join("/", sort keys %$all_aclam_hr) . " keys-all_acls_hr: " . join("/", sort keys %$all_acls_hr) . " all_aclam_ar: '@$all_aclam_ar'\n";
 	# Now put together the hashref that identifies which of those
 	# items are selected for this user.
 	my $user_aclam_hr = { };
@@ -3265,7 +3239,6 @@ print STDERR "keys-all_aclam_hr: " . join("/", sort keys %$all_aclam_hr) . " key
 		$user_aclam_hr->{"aclam_$acl"} = 1;
 	}
 	my $al2_tid_comment = $all_al2types->{comment}{al2tid} || 0;
-print STDERR "al2_tid_comment='$al2_tid_comment'\n";
 	my $al2_log_ar = [ ];
 	my $al2_hr = { };
 	# XXXSRCID Once we get rid of the silly 'md5id' field and all the
@@ -3289,25 +3262,7 @@ print STDERR "al2_tid_comment='$al2_tid_comment'\n";
 		next if !$uid; # odd error, might want to flag this
 		$al2_nick_hr->{$uid} ||= $slashdb->getUser($uid, 'nickname');
 	}
-print STDERR "al2_log_ar: " . Dumper($al2_log_ar);
-print STDERR "al2_nick_hr: " . Dumper($al2_nick_hr);
 	##########
-
-#	for my $access_type (qw( ban nopost nosubmit norss nopalm proxy trusted )) {
-#		$accesslist->{$access_type} = "";
-#		my $info_hr = $slashdb->getAccessListInfo($access_type, $user_edit);
-#		next if !$info_hr; # no match
-#		$accesslist->{reason}	||= $info_hr->{reason};
-#		$accesslist->{ts}	||= $info_hr->{ts};
-#		$accesslist->{adminuid}	||= $info_hr->{adminuid};
-#		$accesslist->{estimated_users} ||= $info_hr->{estimated_users};
-#		$accesslist->{$access_type} = $constants->{markup_checked_attribute};
-#	}
-#	if (exists $accesslist->{adminuid}) {
-#		$accesslist->{adminnick} = $accesslist->{adminuid}
-#			? $slashdb->getUser($accesslist->{adminuid}, 'nickname')
-#			: '(unknown)';
-#	}
 
 	$user_edit->{author} = ($user_edit->{author} == 1) ? $constants->{markup_checked_attribute} : '';
 	if (! $user->{nonuid}) {

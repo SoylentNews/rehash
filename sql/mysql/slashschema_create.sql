@@ -29,43 +29,6 @@ CREATE TABLE abusers (
 	KEY ts (ts)
 ) TYPE=InnoDB;
 
-DROP TABLE IF EXISTS accesslist; 
-CREATE TABLE accesslist (
-	id mediumint(9) NOT NULL auto_increment,
-	adminuid mediumint(8) unsigned NOT NULL default '0',
-	uid mediumint(8) unsigned NOT NULL default '0',
-	ipid varchar(32) default NULL,
-	subnetid varchar(32) default NULL,
-	ts datetime NOT NULL default '0000-00-00 00:00:00',
-	reason varchar(255) NOT NULL default '',
-	now_ban enum('no','yes') NOT NULL default 'no',
-	now_nopost enum('no','yes') NOT NULL default 'no',
-	now_nosubmit enum('no','yes') NOT NULL default 'no',
-	now_norss enum('no','yes') NOT NULL default 'no',
-	now_nopalm enum('no','yes') NOT NULL default 'no',
-	now_proxy enum('no','yes') NOT NULL default 'no',
-	now_trusted enum('no','yes') NOT NULL default 'no',
-	was_ban enum('no','yes') NOT NULL default 'no',
-	was_nopost enum('no','yes') NOT NULL default 'no',
-	was_nosubmit enum('no','yes') NOT NULL default 'no',
-	was_norss enum('no','yes') NOT NULL default 'no',
-	was_nopalm enum('no','yes') NOT NULL default 'no',
-	was_proxy enum('no','yes') NOT NULL default 'no',
-	was_trusted enum('no','yes') NOT NULL default 'no',
-	estimated_users smallint UNSIGNED default 1,
-	PRIMARY KEY  (id),
-	KEY uid (uid),
-	KEY ipid (ipid),
-	KEY subnetid (subnetid),
-	KEY ts (ts),
-	KEY now_ban (now_ban),
-	KEY now_nopost (now_nopost),
-	KEY now_nosubmit (now_nosubmit),
-	KEY now_norss (now_norss),
-	KEY now_proxy (now_proxy),
-	KEY now_trusted (now_trusted)
-) TYPE=InnoDB;
-
 DROP TABLE IF EXISTS accesslog; 
 CREATE TABLE accesslog (
 	id int UNSIGNED NOT NULL auto_increment,
@@ -839,7 +802,7 @@ CREATE TABLE skins (
 	cookiedomain VARCHAR(128) DEFAULT '' NOT NULL,
 	index_handler VARCHAR(30) DEFAULT 'index.pl' NOT NULL,
 	max_rewrite_secs MEDIUMINT UNSIGNED DEFAULT '3600' NOT NULL,
-	last_rewrite TIMESTAMP NOT NULL,
+	last_rewrite timestamp NOT NULL,
 	ac_uid mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	PRIMARY KEY (skid),
 	UNIQUE name (name)
@@ -939,7 +902,7 @@ CREATE TABLE stories (
 	in_trash ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
 	day_published DATE DEFAULT '0000-00-00' NOT NULL,
 	qid MEDIUMINT UNSIGNED DEFAULT NULL,
-	last_update TIMESTAMP NOT NULL,
+	last_update timestamp NOT NULL,
 	body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	PRIMARY KEY (stoid),
@@ -1287,7 +1250,7 @@ CREATE TABLE users_comments (
 DROP TABLE IF EXISTS users_hits;
 CREATE TABLE users_hits (
 	uid mediumint UNSIGNED NOT NULL,
-	lastclick TIMESTAMP,
+	lastclick timestamp,
 	hits int DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid)
 ) TYPE=InnoDB;

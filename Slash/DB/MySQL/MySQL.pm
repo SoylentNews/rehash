@@ -5140,36 +5140,35 @@ sub createAbuse {
 }
 
 ##################################################################
-# Instead of setting nopost directly, with a goofy reason, the
-# accesslist table should have a column "now_expired", which
-# checkReadOnly knows to check.  But the expired-user code has
-# other problems to fix first... - Jamie 2003/03/23
 sub setExpired {
 	my($self, $uid) = @_;
-	if  ($uid && !$self->checkExpired($uid)) {
-		$self->setUser($uid, { expired => 1 });
-		$self->setAccessList({ uid => $uid }, [qw( nopost )], 'expired');
-	}
+	die "setExpired API not updated for AL2";
+#	if  ($uid && !$self->checkExpired($uid)) {
+#		$self->setUser($uid, { expired => 1 });
+#		$self->setAccessList({ uid => $uid }, [qw( nopost )], 'expired');
+#	}
 }
 
 ##################################################################
 sub setUnexpired {
 	my($self, $uid) = @_;
-	if ($uid && $self->checkExpired($uid)) {
-		$self->setUser($uid, { expired => 0 });
-		$self->setAccessList({ uid => $uid }, [ ], '');
-	}
+	die "setUnexpired API not updated for AL2";
+#	if ($uid && $self->checkExpired($uid)) {
+#		$self->setUser($uid, { expired => 0 });
+#		$self->setAccessList({ uid => $uid }, [ ], '');
+#	}
 }
 
 ##################################################################
 sub checkExpired {
 	my($self, $uid) = @_;
-	return 0 if !$uid;
-	my $rows = $self->sqlCount(
-		"accesslist",
-		"uid = '$uid' AND now_nopost = 'yes' AND reason = 'expired'"
-	);
-	return $rows ? 1 : 0;
+	die "checkExpired API not updated for AL2";
+#	return 0 if !$uid;
+#	my $rows = $self->sqlCount(
+#		"accesslist",
+#		"uid = '$uid' AND now_nopost = 'yes' AND reason = 'expired'"
+#	);
+#	return $rows ? 1 : 0;
 }
 
 ###################################################################
@@ -5755,21 +5754,6 @@ sub getNopalmList {
 }
 
 ##################################################################
-sub getAccessList {
-	my($self, $min, $access_type) = @_;
-	$min ||= 0;
-	my $max = $min + 100;
-
-	$access_type = 'nopost' if !$access_type
-		|| $access_type !~ /^(ban|nopost|nosubmit|norss|nopalm|proxy|trusted)$/;
-	$self->sqlSelectAllHashrefArray(
-		'*',
-		'accesslist',
-		"now_$access_type = 'yes'",
-		"ORDER BY ts DESC LIMIT $min, $max");
-}
-
-##################################################################
 sub countSubmissionsFromUID {
 	my($self, $uid, $options) = @_;
 	return 0 if !$uid || isAnon($uid);
@@ -5864,7 +5848,7 @@ sub countAccessLogHitsInLastX {
 ##################################################################
 # Pass this private utility method a hashref or arrayref and, based
 # on the uid/ipid/subnetid fields in that data, it returns:
-# 1. a WHERE clause that can be used to select rows from accesslist
+# 1. a WHERE clause that can be used to select rows from al2
 #    that apply to this user;
 # 2. an arrayref of srcid's suitable for passing to sqlUpdate() etc.
 sub _get_where_and_valuelist_al2 {
@@ -6247,128 +6231,24 @@ sub getAL2List {
 	return $srcids;
 }
 
-##################################################################
-# Add (set to "yes") zero or more columns in accesslist for a particular
-# user, and remove (set to "no") zero or more columns.  Note that "user"
-# can be identified by uid, ipid, or subnetid.  The old reason will be
-# overwritten with whatever's passed in.
-sub changeAccessList {
-	my($self, $srcid, $now_here, $now_gone, $reason) = @_;
-
-	die "broken still"; # XXXSRCID
-	my($where_ary) = $self->_get_where_and_valuelist_al2($srcid);
-	my $where = join(" OR ", @$where_ary);
-	my $ar = $self->sqlSelectAllHashrefArray("*", "accesslist", $where);
-
-	if (!@$ar) {
-		# No existing columns;  just add what has to be added.
-		return $self->setAccessList($srcid, $now_here, $reason);
-	}
-
-	# We have existing columns.  Pull out the union of the "yes"
-	# columns, change that by the $now_here and $now_gone we were
-	# passed, and write it back.
-	my @cols = map { /^now_(\w+)$/; $1 } grep { /^now_/ } keys %{$ar->[0]};
-	my %new_now = ( );
-	for my $col (@cols) {
-		$new_now{$col} = 'no';
-	}
-	for my $col (@cols) {
-		for my $row (@$ar) {
-			$new_now{$col} = 'yes' if $row->{"now_$col"} eq 'yes';
-		}
-	}
-	for my $col (@$now_here) { $new_now{$col} = 'yes' }
-	for my $col (@$now_gone) { delete $new_now{$col}  }
-	my @new_now = grep { $new_now{$_} eq 'yes' } keys %new_now;
-	return $self->setAccessList($srcid, \@new_now, $reason);
-}
-
-##################################################################
-sub setAccessList {
-	# Old comment: Do not use this method to set/unset expired or isproxy
-	# New comment: Feel free to use this method to set isproxy.  "Expired"
-	# is still not functional. - Jamie 2003/03/04
-	my($self, $srcid, $new_now, $reason) = @_;
-	my $user = getCurrentUser();
-	my $constants = getCurrentStatic();
-
-	# "Expired" isn't implemented yet.
-	return if $reason eq 'expired';
-
-	my $where = "reason != 'expired'";
-
-die "broken still sAL";
-	my($where_ary, $insert_hr) = $self->_get_where_and_valuelist_al2($srcid);
-	# Hopefully the $srcid we're given will specify its data type
-	# but in case we're passed just an {md5id}, we will get two clauses
-	# returned in $where_ary and we'll need to join them.
-	$where .= " AND (" . join(" OR ", @$where_ary) . ")";
-
-	# Set up the update hashref and the assignment order for it.
-	my $update_hr = { -ts => "NOW()" };
-	my %new_now_hash = map { ($_, 1) } @$new_now;
-	my @assn_order = ( );
-	for my $col (qw( ban nopost nosubmit norss nopalm proxy trusted )) {
-		$update_hr->{"-was_$col"} = "now_$col";
-		push @assn_order, "-was_$col";
-		$update_hr->{"now_$col"} = $new_now_hash{$col} ? "yes" : "no";
-		push @assn_order, "now_$col";
-	}
-	$update_hr->{reason} = $reason;
-
-	my $adminuid = getCurrentUser('uid');
-	$adminuid = 0 if isAnon($adminuid);
-	$insert_hr->{adminuid} = $update_hr->{adminuid} = $adminuid;
-
-	# Insert if necessary, then do the update.
-	my $rows = $self->sqlCount("accesslist", $where) || 0;
-	if ($rows == 0) {
-		# No row currently exists for this uid, ipid or subnetid.
-		# If we are setting anything to "yes" or have a reason,
-		# then we need to go ahead, otherwise there is no point
-		# to this.
-		if (exists $update_hr->{reason}
-			||
-			scalar grep { $update_hr->{$_} eq 'yes' }
-				grep /^now_/, keys %$update_hr
-		) {
-			# Insert a row.  Then we will update it.  Set
-			# $rows to indicate that this was done.
-			$rows = $self->sqlInsert("accesslist", $insert_hr);
-		}
-	}
-	if ($rows) {
-		# If there is 1 or more rows to update, or if there weren't
-		# but we inserted one, then do this update.
-		$rows = $self->sqlUpdate("accesslist", $update_hr, $where,
-			{ assn_order => [ @assn_order ] });
-	}
-	return $rows ? 1 : 0;
-}
-
 #################################################################
-# XXXSRCID Should probably cache this instead of relying on MySQL's query cache.
+# Grandfathered to work with AL2.  Deprecated.  Calling checkAL2()
+# directly is preferred.
 sub checkIsProxy {
 	my($self, $ipid) = @_;
-
-	my $ipid_q = $self->sqlQuote($ipid);
-	my $rows = $self->sqlCount("accesslist",
-		"ipid=$ipid_q AND now_proxy = 'yes'") || 0;
-
-	return $rows ? 'yes' : 'no';
+	my $result = $self->checkAL2(convert_srcid(ipid => $ipid), 'proxy')
+		? 'yes' : 'no';
+	return $result;
 }
 
 #################################################################
-# XXXSRCID Should probably cache this instead of relying on MySQL's query cache.
+# Grandfathered to work with AL2.  Deprecated.  Calling checkAL2()
+# directly is preferred.
 sub checkIsTrusted {
 	my($self, $ipid) = @_;
-
-	my $ipid_q = $self->sqlQuote($ipid);
-	my $rows = $self->sqlCount("accesslist",
-		"ipid=$ipid_q AND now_trusted = 'yes'") || 0;
-
-	return $rows ? 'yes' : 'no';
+	my $result = $self->checkAL2(convert_srcid(ipid => $ipid), 'trusted')
+		? 'yes' : 'no';
+	return $result;
 }
 
 ##################################################################
