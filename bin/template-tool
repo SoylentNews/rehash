@@ -110,6 +110,13 @@ if ($opts{'s'}) {
 			print STDERR "WARNING: could not readTemplateFile at $_\n";
 			next;
 		}
+		for my $key (keys %$template) {
+			if ($template->{$key} =~ /^([<>])\1{6} /m
+				|| $template->{$key} =~ /^=======$/m) {
+				print STDERR "WARNING: apparent CVS conflict notification string in $_, but updating anyway\n";
+				next TEMPLATE;
+			}
+		}
 		my $tsemi = join(";", @$template{'name','page','skin'});
 		my $temp2 = $slashdb->getTemplateByName($template->{name}, {
 			cache_flag      => 1,
@@ -207,7 +214,7 @@ if ($opts{'s'}) {
 	# just the filename.)
 	my %templates_on_disk = ( );
 
-	for (@$templates) {
+	TEMPLATE: for (@$templates) {
 	#stolen logic from above, should probably be made into subroutines
 		my($filename) = (File::Spec->splitpath($_))[2];
 		my $template = $install->readTemplateFile($_);
@@ -215,8 +222,15 @@ if ($opts{'s'}) {
 			|| !$template->{name}
 			|| !$template->{page}
 			|| !$template->{skin}) {
-			print STDERR "WARNING: could not readTemplateFile at $_\n";
-			next;
+			print STDERR "ERROR: could not readTemplateFile at $_\n";
+			next TEMPLATE;
+		}
+		for my $key (keys %$template) {
+			if ($template->{$key} =~ /^([<>])\1{6} /m
+				|| $template->{$key} =~ /^=======$/m) {
+				print STDERR "ERROR: apparent CVS conflict notification string in $_, skipping, use -s if you really want this\n";
+				next TEMPLATE;
+			}
 		}
 		my $tsemi = join(";", @$template{'name','page','skin'});
 		$templates_on_disk{$tsemi} = 1;
@@ -238,7 +252,7 @@ if ($opts{'s'}) {
 				&& $template->{instructions} =~ /placeholder/) {
 				print "\t$filename is placeholder, skipping\n"
 					if !$opts{t} && $opts{V};
-				next;
+				next TEMPLATE;
 			}
 			delete $template->{instructions};
 			my @diffs;
