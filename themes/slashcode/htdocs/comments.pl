@@ -857,7 +857,10 @@ sub previewForm {
 	my $extras = [];	
 	my $disc_skin = $slashdb->getSkin($discussion->{primaryskid});
 	
-	$extras =  $slashdb->getNexusExtrasForChosen({$disc_skin->{nexus} => 1}, {content_type => "comment"}) if $disc_skin && $disc_skin->{nexus};
+	$extras = $slashdb->getNexusExtrasForChosen(
+		{ $disc_skin->{nexus} => 1 },
+		{ content_type => "comment" })
+		if $disc_skin && $disc_skin->{nexus};
 
 	my $preview = {
 		nickname		=> $form->{postanon}
@@ -1063,7 +1066,7 @@ sub submitComment {
 		subject		=> $tempSubject,
 		comment		=> $tempComment,
 		sid		=> $id , 
-		pid		=> $form->{pid} ,
+		pid		=> $form->{pid},
 		ipid		=> $user->{ipid},
 		subnetid	=> $user->{subnetid},
 		uid		=> $posters_uid,
