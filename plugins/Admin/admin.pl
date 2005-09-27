@@ -1644,6 +1644,8 @@ sub write_to_temp_file {
 ##################################################################
 sub get_ispell_comments {
 	my($text) = @_;
+	my $constants = getCurrentStatic();
+
 	$text = strip_nohtml($text);
 	return "" unless $text && $text =~ /\S/;
 
