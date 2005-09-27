@@ -67,7 +67,7 @@ __template__
 	[% END %]
 
 	<div class="journalpage">	
-	[% IF !user.is_anon && uid && uid != user.uid %]
+	[% IF !user.is_anon && uid && uid != user.uid && !is_friend %]
                 <a href="[% gSkin.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Add Friend</a>
         [% END %]
 		[% PROCESS pagination %]

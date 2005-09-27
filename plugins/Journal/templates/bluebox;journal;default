@@ -45,7 +45,7 @@ __template__
 
 [% PROCESS pagination %]
 
-	[% IF !user.is_anon && uid && uid != user.uid %]
+	[% IF !user.is_anon && uid && uid != user.uid && !is_friend %]
 			<td align="right" bgcolor="#FFFFFF"><a href="[% gSkin.rootdir %]/zoo.pl?op=addcheck&amp;uid=[% uid %]&amp;type=friend">Add Friend</a>
 	[% END %]
 
