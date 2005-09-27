@@ -3196,15 +3196,11 @@ ALTER TABLE css ADD INDEX page_skin (page,skin);
 ALTER TABLE css ADD INDEX skin_page (skin,page);
 UPDATE css set theme='', skin='light' WHERE theme = "light";
 
-# PUDGE LAST UPDATED HERE
-
 # End of T_2_5_0_79, Start of T_2_5_0_80 - 2005/09/19
 
 # End of T_2_5_0_80, Start of T_2_5_0_81 - 2005/09/21
 
 ALTER TABLE dbs_readerstatus CHANGE COLUMN had_weight had_weight tinyint UNSIGNED DEFAULT 1, CHANGE COLUMN had_weight_adjust had_weight_adjust float UNSIGNED DEFAULT 1;
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
 
@@ -3215,3 +3211,8 @@ INSERT INTO vars (name, value, description) VALUES ('ispell_is_really_aspell_wit
 
 DROP TABLE IF EXISTS accesslist;
 
+# PUDGE LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_82, Start of T_2_5_0_83 - 2005/09/27
