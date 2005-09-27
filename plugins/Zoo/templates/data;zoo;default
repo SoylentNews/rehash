@@ -95,8 +95,8 @@ __template__
 [% CASE 'friendsoffriendshead' %]
 	Friends of the Friends of <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
-[% CASE 'yourhead' %]
-	Everyone who thinks anything about <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</a>
+[% CASE 'allhead' %]
+	Relationships of <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</a> ([% uid %]) [% PROCESS zoo_icons person=uid implied="" %]
 
 [% CASE 'yourfriendshead' %]
 	[% returnme.data_constant = 1 %]
@@ -122,9 +122,9 @@ __template__
 	[% returnme.data_constant = 1 %]
 	Your friends' foes
 
-[% CASE 'yourall' %]
+[% CASE 'yourallhead' %]
 	[% returnme.data_constant = 1 %]
-	This is how you see everyone and how everyone sees you.
+	Your relationships
 
 [% CASE 'no_go' %]
 	[% returnme.data_constant = 1 %]

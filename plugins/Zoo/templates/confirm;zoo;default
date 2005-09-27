@@ -89,7 +89,7 @@ or <a href="[% gSkin.rootdir %]/faq/com-mod.shtml#cm2200">where you change their
 
 
 <div>
-<input type="hidden" name="formkey" value="[% form.formkey %]">
+<input type="hidden" name="rkey" value="[% rkey %]">
 <input type="hidden" name="op" value="action">
 <input type="hidden" name="uid" value="[% uid %]">
 </div>
