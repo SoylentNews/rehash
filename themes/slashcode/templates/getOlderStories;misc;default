@@ -55,10 +55,9 @@ __template__
 	<li>
 		<a href="[% story.link.0 | strip_urlattr %]"[% IF story.link.2 %] title="[% story.link.2 | strip_attribute %]"[% END %]>[% story.link.1 %]</a>
 		<em>([% story.commentcount %])</em>
-		[% start = start + 1; c = c + 1; LAST IF c >= max_older_stories %]
 	</li>
+	[% start = start + 1; c = c + 1; LAST IF c >= max_older_stories %]
 [% END %]
-			</li>	
 		</ul>
 	</li>
 </ul>
