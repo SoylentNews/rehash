@@ -2,7 +2,7 @@ body
 {
         background: #fff;
 }
-#ostgnavbar, #topnav h4, #topnav ul, #links, #slashboxes, #comments, .commentwrap, .btmnav, .search, #jump, .article .details img, #adminmenu, #footer table, div.storylinks, div.storylinks ul, div.storylinks div
+#ostgnavbar, #topnav h4, #topnav ul, #links, #slashboxes, .btmnav, .search, #jump, .article .details img, #adminmenu, #footer table, div.storylinks, div.storylinks ul, div.storylinks div
 {
         display: none;
 }
