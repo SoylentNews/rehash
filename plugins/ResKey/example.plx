@@ -1,6 +1,7 @@
+use strict;
 use Slash::Test shift;
 
-my($reskey, $key);
+my($reskey, $rkey, $rkey2, $rkey3);
 
 my $debug = 0;
 
@@ -12,10 +13,23 @@ for (1..1) {
 
 	handle($rkey->create);
 	handle($rkey->touch);
-	handle($rkey->touch);
+
+	$rkey2 = $reskey->key('comments', {
+		debug	=> $debug,
+		reskey	=> $rkey->reskey,
+	});
+
+	handle($rkey2->touch);
+
 	handle($rkey->use);
 	sleep 5;
-	handle($rkey->use);
+
+	$::form->{rkey} = $rkey->reskey;
+	$rkey3 = $reskey->key('comments', {
+		debug	=> $debug,
+	});
+
+	handle($rkey3->use);
 
 	print Dumper $rkey;
 }

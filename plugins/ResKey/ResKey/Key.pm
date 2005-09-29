@@ -116,7 +116,7 @@ sub new {
 	my $self = bless {}, $class;
 
 	$self->debug($debug);
-	$self->reskey($reskey || getCurrentForm('reskey'));
+	$self->reskey($reskey || getCurrentForm('rkey'));
 
 	if ($resname =~ /[a-zA-Z]/) {
 		my $resources = $self->getResources;
