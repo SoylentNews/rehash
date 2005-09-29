@@ -286,9 +286,11 @@ sub _createActionMethod {
 		$self->_flow($name);
 		$self->type($name);
 
-		my $ok = 1;
-		$ok = $self->fakeUse if $self->type eq 'use';
-		$ok = $self->check if $ok;
+		if ($self->type eq 'use') {
+			return unless $self->fakeUse;
+		}
+
+		my $ok = $self->check;
 
 		# don't bother if type is create, and checks failed ...
 		# we only continue on for touch/use to update the DB
