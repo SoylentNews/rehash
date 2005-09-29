@@ -3202,8 +3202,6 @@ UPDATE css set theme='', skin='light' WHERE theme = "light";
 
 ALTER TABLE dbs_readerstatus CHANGE COLUMN had_weight had_weight tinyint UNSIGNED DEFAULT 1, CHANGE COLUMN had_weight_adjust had_weight_adjust float UNSIGNED DEFAULT 1;
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_81, Start of T_2_5_0_82 - 2005/09/23
 
 # Changes for plugins/Admin (which you are almost certainly using)
@@ -3214,5 +3212,7 @@ DROP TABLE IF EXISTS accesslist;
 # PUDGE LAST UPDATED HERE
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_82, Start of T_2_5_0_83 - 2005/09/27
