@@ -2199,10 +2199,10 @@ print STDERR "al2_change: " . Dumper($al2_change);
 
 	if (!$user_edit->{nonuid}) {
 		if ($form->{expired} eq 'on') {
-			$slashdb->setExpired($user_edit->{uid});
+#			$slashdb->setExpired($user_edit->{uid});
 
 		} else {
-			$slashdb->setUnexpired($user_edit->{uid});
+#			$slashdb->setUnexpired($user_edit->{uid});
 		}
 	}
 
