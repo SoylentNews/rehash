@@ -183,6 +183,7 @@ sub getRelated {
 		my $a_href_domain = $1;
 
 		$label = strip_notags($label);
+		next if $label !~ /\S/;
 		$label =~ s/(\S{30})/$1 /g;
 		# Instead of hard-coding the HTML here, we should
 		# do something a little more flexible.

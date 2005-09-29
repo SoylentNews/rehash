@@ -1346,7 +1346,6 @@ sub editStory {
 			# does, as we are bypassing it by going straight to
 			# dispStory() -- pudge
 			$story_copy{$field} = parseSlashizedLinks($storyref->{$field});
-			$story_copy{$field} = cleanSlashTags($storyref->{$field});
 			my $options = $field eq 'bodytext' ? { break => 1 } : undef;
 			$story_copy{$field} = processSlashTags($storyref->{$field}, $options);
 		}
@@ -1872,14 +1871,17 @@ sub updateStory {
 		$form->{bodytext} = $reloDB->href2SlashTag($form->{bodytext}, $form->{sid});
 	}
 
-	# grab our links for getRelated, but toss away the result -- pudge
-	processSlashTags("$form->{bodytext} $form->{introtext}");
+	my $story_text = "$form->{title} $form->{introtext} $form->{bodytext}";
+	{
+		local $Slash::Utility::Data::approveTag::admin = 1;
+		$story_text = parseSlashizedLinks($story_text);
+		$story_text = processSlashTags($story_text);
+	}
+
 	my $admindb = getObject('Slash::Admin');
 	$form->{relatedtext} = $admindb->relatedLinks(
-		"$form->{title} $form->{introtext} $form->{bodytext}",
-		$topic,
-		$slashdb->getAuthor($form->{uid}, 'nickname'),
-		$form->{uid}
+		$story_text, $topic,
+		$slashdb->getAuthor($form->{uid}, 'nickname'), $form->{uid}
 	);
 
 	$slashdb->setCommonStoryWords();
@@ -2170,12 +2172,6 @@ sub saveStory {
 	my($chosen_hr) = extractChosenFromForm($form);
 	my($tids) = $slashdb->getTopiclistFromChosen($chosen_hr);
 
-	my $story_text = "$form->{title} $form->{introtext} $form->{bodytext}";
-	my $admindb = getObject('Slash::Admin');
-	$form->{relatedtext} = $admindb->relatedLinks(
-		$story_text, $tids, $edituser->{nickname}, $edituser->{uid}
-	);
-
 	for my $field (qw( introtext bodytext )) {
 		local $Slash::Utility::Data::approveTag::admin = 1;
 		$form->{$field} = cleanSlashTags($form->{$field});
@@ -2183,6 +2179,18 @@ sub saveStory {
 		$form->{$field} = slashizeLinks($form->{$field});
 		$form->{$field} = balanceTags($form->{$field});
 	}
+
+	my $story_text = "$form->{title} $form->{introtext} $form->{bodytext}";
+	{
+		local $Slash::Utility::Data::approveTag::admin = 1;
+		$story_text = parseSlashizedLinks($story_text);
+		$story_text = processSlashTags($story_text);
+	}
+
+	my $admindb = getObject('Slash::Admin');
+	$form->{relatedtext} = $admindb->relatedLinks(
+		$story_text, $tids, $edituser->{nickname}, $edituser->{uid}
+	);
 
 	my $time = findTheTime();
 	$slashdb->setCommonStoryWords();
