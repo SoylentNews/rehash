@@ -165,6 +165,8 @@ sub action {
 	my $rkey = $reskey->key('zoo');
 	unless ($rkey->use) {
 		_printHead('mainhead', { errstr => $rkey->errstr, rkey => $rkey }) or return;
+		use Data::Dumper;
+		print STDERR Dumper({ reskey => $rkey });
 		return 1;
 	}
 
@@ -243,6 +245,8 @@ sub check {
 	my $rkey = $reskey->key('zoo');
 	unless ($rkey->create) {
 		_printHead('mainhead', { errstr => $rkey->errstr, rkey => $rkey }) or return;
+		use Data::Dumper;
+		print STDERR Dumper({ reskey => $rkey });
 		return 1;
 	}
 
