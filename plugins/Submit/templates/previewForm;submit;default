@@ -18,6 +18,8 @@ __name__
 previewForm
 __template__
 [% PROCESS formatSub %]
+[% PROCESS titlebar title="Submission Preview" %]
+<div class="generalbody">
 [% IF submission.sid %]
 	<p><a href="[% constants.real_rootdir %]/article.pl?sid=[% submission.sid %]">Link to Story</a>
 [% ELSIF submission.del == 2 %]
@@ -113,10 +115,10 @@ __template__
 		<input type="hidden" name="subid" value="[% subid %]">
 		<input type="hidden" name="topic_source" value="submission">
 		<input type="hidden" name="submitter" value="[% submitter.uid %]">
-		<br>title <input type="text" name="title" value="[% submission.subj %]" size="50" MAXLENGTH="50">
+		<label>title <input type="text" name="title" value="[% submission.subj %]" size="50" MAXLENGTH="50"></label>
 		<br>[% lockTest %]
 	[% IF constants.use_dept %]
-		dept <input type="text" name="dept" size="50">
+		<label>Dept&nbsp; <input type="text" name="dept" size="50"></label>
 	[% END %]
 	[% FOR extra = extras %]
 		<br>[% extra.1 %]
@@ -133,7 +135,7 @@ __template__
 	[% Slash.createSelect('tid', Slash.db.getDescriptions('highlighted-topics-submittable'), submission.tid, 1, 0, 1) %]
 
 		<input type="submit" name="op" value="preview"><br>
-		<br>Intro Copy<br>
+		<label>Intro Copy</label>
 	<textarea name="introtext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="VIRTUAL"
 >[% subtext | strip_literal %]</textarea><br>
 		<input type="submit" name="op" value="preview"><br>
@@ -165,7 +167,7 @@ __template__
 [% END %]
 </form>
 [% END %]
-
+</div>
 __seclev__
 10000
 __version__
