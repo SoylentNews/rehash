@@ -25,6 +25,7 @@ __template__
 [% ELSIF submission.del == 2 %]
 	<p><i>No link to story available</i></p>
 [% END %]
+<p>
 <div class="article">
 	[% PROCESS titlebar title=submission.subj %]
 	<div class="details">
@@ -41,6 +42,7 @@ __template__
 		[% subtext %]
 	</div>
 </div>
+</p>
 [% IF admin_flag -%]
 	<form action="[% gSkin.rootdir %]/submit.pl" method="post">
 	<input type="hidden" name="op" value="changesubmission">
@@ -116,7 +118,7 @@ __template__
 		<input type="hidden" name="topic_source" value="submission">
 		<input type="hidden" name="submitter" value="[% submitter.uid %]">
 		<label>title <input type="text" name="title" value="[% submission.subj %]" size="50" MAXLENGTH="50"></label>
-		<br>[% lockTest %]
+		[% lockTest %]
 	[% IF constants.use_dept %]
 		<label>Dept&nbsp; <input type="text" name="dept" size="50"></label>
 	[% END %]
