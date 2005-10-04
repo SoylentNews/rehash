@@ -299,11 +299,14 @@ img { border: none; }
 }
 
 /* General */
+* html .generaltitle 
+{
+	position: relative;
+}
 .generaltitle
 {
 	padding: 0;
 	margin: 0;
-	position: relative;
 }
 
 .generaltitle div.title
@@ -311,7 +314,6 @@ img { border: none; }
 	background: #999;
 	padding: 0;
 	margin: 0;
-	position: relative;
 }
 
 .generaltitle h3
@@ -319,13 +321,11 @@ img { border: none; }
 	margin: 0;
 	padding: .3em .8em .2em .8em;
 	color: #fff;
-	position: relative;
 }
 
 .generaltitle h3 a, .generaltitle h3 a:visited
 {
 	color: #fff;
-	position: relative;
 }
 
 .generalbody
@@ -335,15 +335,12 @@ img { border: none; }
 	height: 100%;
 	width: auto;
 	z-index: 2;
-	position: relative;
 }
-
 /* articles */
 .article
 {
 	padding: 0;
 	margin: 0;
-	position: relative;
 }
 
 .article div.title
@@ -351,15 +348,12 @@ img { border: none; }
 	background: #999;
 	padding: 0;
 	margin: 0;
-	position: relative;
 }
-
 .article h3
 {
 	margin: 0;
 	padding: .3em .8em .2em .8em;
 	color: #fff;
-	position: relative;
 }
 
 .article h3 a, .article h3 a:visited { color: #fff; }
