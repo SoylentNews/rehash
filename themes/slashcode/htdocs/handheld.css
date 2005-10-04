@@ -44,6 +44,13 @@ div.storylinks div,
 	font-size: 100%;
 }
 
+div.storylinks ul li
+{
+	list-style: none;
+	display: inline;
+}
+
+
 .details
 {
 	font-size: small;
