@@ -12,6 +12,7 @@ en_US
 __name__
 indexhead
 __template__
+<div class="indexhead">
 [% UNLESS user.is_anon %]
 [% IF metamod_elig %]
 Have you <b><a href="[% gSkin.rootdir %]/metamod.pl">Meta Moderated</a></b> recently?<br>
@@ -67,6 +68,7 @@ and we'll let you read it! :)<br>
 <a href="[% gSkin.rootdir %]/users.pl">[% user.nickname | strip_literal %]</a>
 ([% user.uid %]).</b><p>
 [% END %]
+</div>
 __seclev__
 10000
 __version__
