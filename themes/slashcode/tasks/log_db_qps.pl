@@ -123,7 +123,8 @@ $task{$me}{code} = sub {
 		$qpp = $queries / $pages;
 		$stats->createStatDaily("qpp_$hour", $qpp);
 	}
-	return "q: $queries p: $pages e: $elapsed qpp: $qpp";
+	return sprintf("q: %d p: %d e: %d qpp: %.3f",
+		$queries, $pages, $elapsed, $qpp);
 };
 
 1;
