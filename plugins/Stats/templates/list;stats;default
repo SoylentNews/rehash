@@ -76,28 +76,36 @@ __template__
 
 [% BLOCK doform %]
     <form method="post" action="[% env.script_name %]">
+	<fieldset>
+	<legend>List</legend>
 	[% PROCESS formLabel value => label, comment => comment %]
 	[% select_box %]
 	&nbsp;&nbsp;Range: [% PROCESS stats_days %]
        	<input type="hidden" name="stats_skid" value="[% form.stats_skid %]">
 	<input type="hidden" name="op" value="list">
         <input type="submit" class="button">
+	</fieldset>
     </form>
 [% END %]
 
 [% BLOCK dumphead %]
 	[% PROCESS titlebar title => "Available Raw Stats for $constants.sitename" %]
 	<form method="post" action="[% env.script_name %]">
+	<fieldset>
+	<legend>Stats</legend>
 		[% PROCESS formLabel value => "Section" %]
 		[% Slash.createSelect('stats_skid', skins, form.stats_skid, 1) %]
 		<input type="hidden" name="op" value="list">
 		<input type="submit" class="button">
+	</fieldset>
 	</form>
 [% END %]
 
 [% BLOCK graphshead %]
 	[% PROCESS titlebar title => "Available Graphs for $constants.sitename" %]
 	<form method="post" action="[% env.script_name %]">
+		<fieldset>
+		<legend>Graphs</legend>
 		[% PROCESS formLabel value => "Graphs" %]
 		[% PROCESS graphs # get mygraphs defined %]
 		[% Slash.createSelect('graphname', mygraphs, form.graphname, 1) %]
@@ -106,6 +114,7 @@ __template__
 		<input type="hidden" name="op" value="list">
 		<input type="hidden" name="type" value="graphs">
 		<input type="submit" class="button">
+		</fieldset>
 	</form>
 [% END %]
 </div>

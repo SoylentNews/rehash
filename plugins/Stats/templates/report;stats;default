@@ -11,7 +11,6 @@ en_US
 __name__
 report
 __template__
-<div class="generalbody">
 [%
    # handy sprintf-style formats
    USE format;
@@ -163,6 +162,8 @@ END %]
 [% PROCESS titlebar title => ((reports.${form.report} || 'Available Reports') _ ' for ' _ constants.sitename), width => '100%' %]
 
 <form method="post" action="[% env.script_name %]">
+   <fieldset>
+   <legend>Reports</legend>
    [% PROCESS formLabel value => "Reports" %]
    [% Slash.createSelect('report', reports, form.report, 1) %]
    &nbsp;&nbsp;Range: [% PROCESS stats_days %]
@@ -170,10 +171,10 @@ END %]
 
    <input type="hidden" name="op" value="report">
    <input type="submit">
+   </fieldset>
 </form>
 
 [% reportblock %]
-</div>
 __seclev__
 1000
 __version__
