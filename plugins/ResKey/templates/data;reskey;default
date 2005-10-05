@@ -62,6 +62,9 @@ __template__
 [% CASE 'too many uses' %]
 	You have used this resource too much; please try again later.
 
+[% CASE 'too many failures' %]
+	Requested resource is now invalid.  Please return to the beginning and try again.
+
 [% CASE 'use duration too short' %]
 	You must wait a little bit before using this resource; please try again later.
 
