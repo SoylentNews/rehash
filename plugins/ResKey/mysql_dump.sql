@@ -34,6 +34,7 @@ INSERT INTO vars VALUES ('reskey_checks_user_karma_comments', '', 'No minimum ka
 INSERT INTO vars VALUES ('reskey_checks_acl_no_comments', 'reskey_no_comments', 'No comment posting for you!');
 
 INSERT INTO vars VALUES ('reskey_checks_duration_max-uses_comments', 30, 'how many uses per timeframe');
+INSERT INTO vars VALUES ('reskey_checks_duration_max-failures_comments', 10, 'how many failures per reskey');
 INSERT INTO vars VALUES ('reskey_checks_duration_uses_comments', 120, 'min duration between uses');
 INSERT INTO vars VALUES ('reskey_checks_duration_creation-use_comments', 5, 'min duration between creation and use');
 
@@ -57,6 +58,7 @@ INSERT INTO vars VALUES ('reskey_checks_user_seclev_zoo', 1, 'Minimum seclev to 
 INSERT INTO vars VALUES ('reskey_checks_acl_no_zoo', 'reskey_no_zoo', 'No using zoo for you!');
 
 INSERT INTO vars VALUES ('reskey_checks_duration_max-uses_zoo', 30, 'how many uses per timeframe');
-INSERT INTO vars VALUES ('reskey_checks_duration_uses_zoo', 20, 'min duration between uses');
-INSERT INTO vars VALUES ('reskey_checks_duration_creation-use_zoo', 5, 'min duration between creation and use');
+INSERT INTO vars VALUES ('reskey_checks_duration_max-failures_zoo', 4, 'how many failures per reskey');
+INSERT INTO vars VALUES ('reskey_checks_duration_uses_zoo', 2, 'min duration between uses');
+INSERT INTO vars VALUES ('reskey_checks_duration_creation-use_zoo', 2, 'min duration between creation and use');
 

@@ -40,8 +40,15 @@ sub doCheckTouch {
 		return RESKEY_SUCCESS;
 	}
 
-	my @return = maxUsesPerTimeframe($self, $self->get);
-	return @return || RESKEY_SUCCESS;
+	my $reskey_obj = $self->get;
+
+	my @return = maxUsesPerTimeframe($self, $reskey_obj);
+	return @return if @return;
+
+	@return = maxFailures($self, $reskey_obj);
+	return @return if @return;
+
+	return RESKEY_SUCCESS;
 }
 
 sub doCheckUse {
@@ -59,6 +66,9 @@ sub doCheckUse {
 	my @return = maxUsesPerTimeframe($self, $reskey_obj);
 	return @return if @return;
 
+	@return = maxFailures($self, $reskey_obj);
+	return @return if @return;
+
 	# we only check these on use, not create or touch, because the limits
 	# are so short that there's no point in checking them until use, so
 	# as not to increase the chance of giving users a rather spurious error
@@ -73,6 +83,28 @@ sub doCheckUse {
 }
 
 
+
+sub maxFailures {
+	my($self, $reskey_obj) = @_;
+	$reskey_obj ||= {};
+
+	my $constants = getCurrentStatic();
+	my $slashdb = getCurrentDB();
+
+	my $max_failures = $constants->{'reskey_checks_duration_max-failures_' . $self->resname};
+	if ($max_failures && $reskey_obj->{rkid}) {
+		my $where = "rkid=$reskey_obj->{rkid} AND failures > $max_failures";
+		my $rows = $slashdb->sqlCount('reskeys', $where);
+		if ($rows) {
+			return(RESKEY_DEATH, ['too many failures', {
+				max_failures	=> $max_failures,
+				uses		=> $rows
+			}]);
+		}
+	}
+
+	return;
+}
 
 sub maxUsesPerTimeframe {
 	my($self, $reskey_obj) = @_;
