@@ -83,9 +83,8 @@ sub key {
 # For tasks/reskey_purge.pl
 sub purge_old {
 	my($self) = @_;
-	my $timeframe = getCurrentStatic('reskey_timeframe');
-	my $delete_before_time = time - ($timeframe || 14400);
-	$self->sqlDelete('reskeys', 'ts < $delete_before_time');
+	my $timeframe = getCurrentStatic('reskey_timeframe') || 14400;
+	$self->sqlDelete('reskeys', "create_ts < DATE_SUB(NOW(), INTERVAL $timeframe SECOND)");
 }
 
 1;
