@@ -3209,10 +3209,6 @@ INSERT INTO vars (name, value, description) VALUES ('ispell_is_really_aspell_wit
 
 DROP TABLE IF EXISTS accesslist;
 
-# PUDGE LAST UPDATED HERE
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # End of T_2_5_0_82, Start of T_2_5_0_83 - 2005/09/27
@@ -3221,4 +3217,12 @@ INSERT INTO vars (name, value, description) VALUES ('cvs_tag_currentcode','T_2_5
 
 INSERT INTO vars VALUES ('reskey_checks_duration_max-failures_zoo', 4, 'how many failures per reskey');
 INSERT INTO vars VALUES ('reskey_checks_duration_max-failures_comments', 10, 'how many failures per reskey');
+
+UPDATE vars SET value = 'T_2_5_0_83' WHERE name = 'cvs_tag_currentcode';
+
+# PUDGE LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# End of T_2_5_0_83, Start of T_2_5_0_84 - 2005/10/04
 
