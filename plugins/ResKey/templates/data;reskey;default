@@ -22,7 +22,7 @@ __template__
 	An unknown error has occurred.  Please try again.
 
 [% CASE 'touch-use failed' %]
-	This form is no longer valid.  Please return to the beginning and try again.
+	This resource is no longer valid.  Please return to the beginning and try again.
 
 [% CASE 'reskey not found' %]
 	Requested resource is invalid.  Please return to the beginning and try again.
@@ -63,7 +63,7 @@ __template__
 	You have used this resource too much; please try again later.
 
 [% CASE 'too many failures' %]
-	Requested resource is now invalid.  Please return to the beginning and try again.
+	This resource is no longer valid.  Please return to the beginning and try again.
 
 [% CASE 'use duration too short' %]
 	You must wait a little bit before using this resource; please try again later.
