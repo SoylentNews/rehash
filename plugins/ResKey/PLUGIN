@@ -4,4 +4,5 @@ name=ResKey
 mysql_dump=mysql_dump.sql
 mysql_schema=mysql_schema.sql
 template=templates/data;reskey;default
+template=templates/reskey_tag;misc;default
 task=tasks/reskey_purge.pl

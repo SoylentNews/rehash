@@ -77,15 +77,21 @@ You must also provide the reskey to the user in order for him to submit it
 back.  It is returned by the C<reskey> method.  Either pass the entire key
 object to the form, or just the reskey value itself:
 
-	slashDisplay('myForm', { rkey => $rkey->reskey });
+	slashDisplay('myForm', { rkey => $rkey });
 
 	<input type="hidden" name="reskey" value="[% rkey.reskey %]">
 
 Or:
 
-	slashDisplay('myForm', { reskey => $rkey->reskey });
+	slashDisplay('myForm', { reskey_value => $rkey->reskey });
 
-	<input type="hidden" name="reskey" value="[% reskey %]">
+	<input type="hidden" name="reskey" value="[% reskey_value %]">
+
+But the easiest way is to just pass the rkey object as the mentioned in the
+first example, and then call the F<reskey_tag> template, which does the
+right thing for you:
+
+	[% PROCESS reskey_tag %]
 
 
 There's also a C<get> method which returns the row from the C<reskeys>
@@ -116,7 +122,12 @@ sub new {
 	my $self = bless {}, $class;
 
 	$self->debug($debug);
-	$self->reskey($reskey || getCurrentForm('rkey'));
+
+	# from filter_param
+	$reskey =~ s|[^a-zA-Z0-9_]+||g if $reskey;
+
+	# reskey() to set the value is called only here and from dbCreate
+	$self->reskey($reskey || getCurrentForm('reskey'));
 
 	if ($resname =~ /[a-zA-Z]/) {
 		my $resources = $self->getResources;
@@ -401,7 +412,7 @@ sub dbCreate {
 			last;
 		}
 
-		# The INSERT failed because $formkey is already being
+		# The INSERT failed because $reskey is already being
 		# used.  Keep retrying as long as is reasonably possible.
 		if (--$num_tries <= 0) {
 			# Give up!

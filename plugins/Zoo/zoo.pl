@@ -315,7 +315,7 @@ sub check {
 		over_socialized		=> testSocialized($zoo, $constants, $user),
 		uids_2_nicknames	=> $uids_2_nicknames,
 		mutual 			=> \%mutual,
-		rkey			=> $rkey->reskey,
+		rkey			=> $rkey,
 	});
 
 	# Store the new user we're looking at, if any.
