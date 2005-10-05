@@ -98,14 +98,14 @@ CASE "comments post limit" %]
 <p>[% constants.sitename %] requires you to wait between
 each successful posting of a comment to allow everyone a fair chance
 at posting a comment.</p>
-<p>It's been [% interval %] since you last successfully posted a comment</p>
+<p>It's been [% interval %] since you last successfully posted a comment.</p>
 
 [% # POST LIMIT
 CASE "discussions post limit" %]
 [% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
 <p>[% constants.sitename %] requires you to wait between
 each successful creation of a discussion .</p>
-<p>It's been [% interval %] since you last successfully created a discussion</p>
+<p>It's been [% interval %] since you last successfully created a discussion.</p>
 
 [% # USED FORM
 CASE "used form" %]
