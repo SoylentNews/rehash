@@ -2684,6 +2684,13 @@ sub balanceTags {
 		while ($limit > 0 && length($html) > $limit) {
 			$limit -= 1;
 			$html = balanceTags(chopEntity($orightml, $limit), $options);
+
+			# until we get wrap fix in CSS
+			my $nobr  = () = $html =~ m|<nobr>|g;
+			my $wbr   = () = $html =~ m|<wbr>|g;
+			my $nobre = () = $html =~ m|</nobr>|g;
+			$html .= '<wbr>'   if $nobr > $wbr;
+			$html .= '</nobr>' if $nobr > $nobre;
 		}
 	}
 
