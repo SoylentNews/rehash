@@ -3220,9 +3220,9 @@ INSERT INTO vars VALUES ('reskey_checks_duration_max-failures_comments', 10, 'ho
 
 UPDATE vars SET value = 'T_2_5_0_83' WHERE name = 'cvs_tag_currentcode';
 
+# End of T_2_5_0_83, Start of T_2_5_0_84 - 2005/10/04
+
 # PUDGE LAST UPDATED HERE
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
-
-# End of T_2_5_0_83, Start of T_2_5_0_84 - 2005/10/04
 
