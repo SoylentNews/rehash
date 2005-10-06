@@ -2962,6 +2962,7 @@ sub getDBVirtualUsers {
 #################################################################
 # get list of DBs, never cache
 # (do caching in getSlashConf)
+# See code comment in getObject().
 sub getClasses {
 	my($self) = @_;
 	my $classes = $self->sqlSelectAllHashref('class', '*', 'classes');
@@ -9328,7 +9329,8 @@ sub getSlashConf {
 		}
 	}
 
-	# We only need to do this on startup.
+	# We only need to do this on startup.  This var isn't really used;
+	# see the code comment in getObject().
 	$conf{classes} = $self->getClasses();
 
 	return \%conf;

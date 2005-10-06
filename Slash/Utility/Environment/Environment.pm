@@ -2085,14 +2085,22 @@ sub getObject {
 	# clean up dangerous characters
 	$class =~ s/[^\w:]+//g;
 
-	# only if passed a hash, or no passed data at all
+	# Determine the db_type and the virtual user, based on the data
+	# passed in (if any), the 'classes' var (see getClasses()),
+	# and $user->{state}{dbs}.
 	if (!$data || ref $data eq 'HASH') {
+		# If we were passed a hash, or no data at all...
 		$data ||= {};
 		if ($data->{virtual_user}) {
 			$vuser = $data->{virtual_user};
 
 		} else {
-			# this really isn't used and is not well-tested anymore -- pudge
+			# For now, the $class specified is really only used to
+			# bless the returned object.  In theory setting rows in
+			# the classes table properly (which ends up in the var
+			# named 'classes') should also provide correct db_type
+			# and fallback data for that class.  But the classes
+			# table hasn't been tested in production.
 			my $classes = getCurrentStatic('classes');
 
 			# try passed db first, then db for given class
@@ -2104,15 +2112,14 @@ sub getObject {
 
 			return undef if $db_type && $fallback && !$vuser;
 		}
-	}
-
-	# if plain string, use it as vuser
-	elsif (!ref $data) {
+	} elsif (!ref $data) {
+		# If we were passed a plain string, use that as
+		# the virtual user...
 		$data = { virtual_user => $data };
 		$vuser = $data->{virtual_user};
 	}
 
-	# in the future, we may default to something else, but for now it is the writer
+	# The writer is the logical DB to default to if nothing is specified.
 	$vuser ||= $user->{state}{dbs}{writer} || getCurrentVirtualUser();
 	return undef unless $vuser && $class;
 
