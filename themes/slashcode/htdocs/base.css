@@ -299,7 +299,7 @@ img { border: none; }
 }
 
 /* General */
-* html .generaltitle,* html .generalbody,* html .article .body,* html .article .details,* html div.storylinks 
+* html .generaltitle,* html .generalbody,* html .article .body,* html .article .details
 {
 	position: relative;
 }
