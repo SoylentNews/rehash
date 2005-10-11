@@ -28,6 +28,7 @@ html > body .commentwrap table {
 	background: #555;
 	text-align: center;
 	color: #fff;
+	margin-top: 0.5em;
 }
 
 .commentBox a { color: #fff; }
@@ -37,6 +38,7 @@ html > body .commentwrap table {
 {
 	background: #ccc;
 	text-align: center;
+	padding-bottom: 0.5em;
 }
 .commentwrap legend
 {
@@ -82,6 +84,7 @@ html > body .commentwrap table {
         margin: 0px;
         list-style: none;
 }
-
+.comment { margin-bottom: 0.5em }
 #commentlisting li.comment { list-style: none; }
 .comment_footer { text-align: center; background: #ddd }
+.modsel { display: inline }
