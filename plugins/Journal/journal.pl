@@ -597,8 +597,6 @@ sub doSaveArticle {
 
 		$journal->set($form->{id}, \%update);
 
-		$form = { id => $form->{id} };
-
 	} else {
 		my $id = $journal->create($description,
 			$form->{article}, $form->{posttype}, $form->{tid});
@@ -641,7 +639,7 @@ sub doSaveArticle {
 			}
 		}
 
-		$form = { id => $id };
+		$form->{id} = $id;
 	}
 
 	if ($constants->{validate_html}) {
@@ -945,7 +943,7 @@ sub modify_entry {
 	my($err) = $saveArticle->($journal, $constants, $user, $entry, $reader, $gSkin, $rkey);
 	return if $err;
 
-	return getCurrentForm('id') == $id ? $id : undef;
+	return $id;
 }
 
 sub add_entry {
@@ -974,7 +972,7 @@ sub add_entry {
 	my($err) = $saveArticle->($journal, $constants, $user, $form, $reader, $gSkin, $rkey);
 	return if $err;
 
-	return getCurrentForm('id');
+	return $form->{id};
 }
 
 
