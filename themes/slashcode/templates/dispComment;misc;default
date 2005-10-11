@@ -60,7 +60,7 @@ __template__
 	<div class="commentBody">
 		[% comment %]
 		[% UNLESS user.nosigs %]
-			<br>[% sig %]
+			<div class="sig">[% sig %]</div>
 		[% END %]
 		
 	[% IF comment_shrunk;
