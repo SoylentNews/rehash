@@ -50,3 +50,12 @@ CREATE TABLE reskey_resource_checks (
     UNIQUE rkrid_name (rkrid, type, class)
 );
 
+DROP TABLE IF EXISTS reskey_vars;
+CREATE TABLE reskey_vars (
+    rkrid TINYINT UNSIGNED NOT NULL,
+    name VARCHAR(48) DEFAULT '' NOT NULL,
+    value TEXT,
+    description VARCHAR(255),
+    UNIQUE name_rkrid (name, rkrid)
+) TYPE=InnoDB;
+
