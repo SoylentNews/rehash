@@ -15,6 +15,7 @@ preview_comm
 __template__
 <ul id="commentlisting">
 [% Slash.dispComment(preview) %]
+</li>
 </ul>
 
 __seclev__
