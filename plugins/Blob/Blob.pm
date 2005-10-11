@@ -9,6 +9,7 @@ use strict;
 use DBIx::Password;
 use Slash;
 use Slash::Utility;
+use MIME::Types;
 use Digest::MD5 'md5_hex';
 
 use vars qw($VERSION);
@@ -17,32 +18,20 @@ use base 'Slash::DB::Utility';
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-# Mime/Type hash (couldn't find a module that I liked that would do this -Brian
-# there are plenty of other methods out there, this needs to be replaced -- pudge
-my %mimetypes = (
-	jpeg => 'image/jpeg',
-	jpg  => 'image/jpeg',
-	gif  => 'image/gif',
-	png  => 'image/png',
-	tiff => 'image/tiff',
-	tif  => 'image/tiff',
-	ps   => 'application/postscript',
-	eps  => 'application/postscript',
-	zip  => 'application/zip',
-	doc  => 'application/msword',
-	xls  => 'application/ms-excel',
-	pdf  => 'application/pdf',
-	gz   => 'application/x-gzip',
-	bz2  => 'application/x-bzip2',
-	rpm  => 'application/x-rpm',
+# When this plugin was first written, it used a hardcoded hash to
+# store MIME types.  Now we use the MIME::Types module.  But for
+# backwards compatibility, here are the overrides for just the
+# four types where our hardcoded hash differed from the (current)
+# values returned by MIME::Types.  Honestly my guess is that
+# MIME::Types is right and we were wrong, and we should remove
+# this (except for 'text'), but for now, let's make it completely
+# backwards compatible.
+
+my %mimetype_overrides = (
 	mp3  => 'audio/mp3',
-	ra   => 'audio/x-realaudio',
-	html => 'text/html',
-	htm  => 'text/html',
-	txt  => 'text/plain',
+	rpm  => 'application/x-rpm',
 	text => 'text/plain',
-	xml  => 'text/xml',
-	rtf  => 'text/rtf',
+	xls  => 'application/ms-excel',
 );
 
 sub new {
@@ -67,10 +56,14 @@ sub create {
 	my $prime = $self->{'_prime'};
 
 	$values->{seclev} ||= 0;
-	# Couldn't find a module that did this
 	if (!$values->{content_type} && $values->{filename}) {
 		(my $ext = lc $values->{filename}) =~ s/^.*\.([^.]+)$/$1/s;
-		$values->{content_type} = $mimetypes{$ext};
+		if ($mimetype_overrides{$ext}) {
+			$values->{content_type} = $mimetype_overrides{$ext};
+		} else {
+			my $m = MIME::Types->new();
+			$values->{content_type} = $m->mimeTypeOf($values->{filename}) if $m;
+		}
 	}
 	$values->{content_type} ||= 'application/octet-stream';
 
