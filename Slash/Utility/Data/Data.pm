@@ -2187,12 +2187,14 @@ sub fudgeurl {
 		$url = $uri->canonical->as_string;
 
 		if ($url =~ /#/) {
+			my $token = ':::INSERT__23__HERE:::';
 			# no # is OK, unless ...
-			$url =~ s/#/%23/g;
-			if ($url =~ m|^https?://|i) {
+			$url =~ s/#/$token/g;
+			if ($url =~ m|^https?://|i || $url =~ m|^/|) {
 				# HTTP, in which case the first # is OK
-				$url =~ s/%23/#/;
+				$url =~ s/$token/#/;
 			}
+			$url =~ s/$token/%23/g;
 		}
 	}
 
