@@ -74,8 +74,16 @@ sub handler {
 	my $reader_user = $slashdb->getDB('reader');
 	my $reader = getObject('Slash::DB', { virtual_user => $reader_user });
 
-	$r->header_out('X-Powered-By' => "Slash $Slash::VERSION");
-	random($r);
+	my $version_code = "Slash";
+	$version_code .= " $Slash::VERSION";
+	if ($constants->{cvs_tag_currentcode_emit}
+		&& $constants->{cvs_tag_currentcode}
+		&& $constants->{cvs_tag_currentcode} =~ /_(\d+)$/) {
+		$version_code .= sprintf("%03d", $1);
+	}
+	$r->header_out('X-Powered-By' => $version_code);
+
+	add_random_quote($r);
 
 	# let pass unless / or .pl
 	if ($gSkin->{rootdir}) {
@@ -429,7 +437,7 @@ sub handler {
 
 	createCurrentCookie($cookies);
 	createEnv($r) if $cfg->{env};
-	authors($r) if $form->{'slashcode_authors'};
+	add_author_quotes($r) if $form->{slashcode_authors};
 
 	# a special test mode for getting a new template
 	# object (hence, fresh cache) for each request
@@ -469,15 +477,15 @@ sub createEnv {
 }
 
 ########################################################
-# These are very import, do not delete these
-sub random {
+# These are very important, do not delete these
+sub add_random_quote {
 	my($r) = @_;
 	my $quote = $QUOTES[int(rand(@QUOTES))];
 	(my($who), $quote) = split(/: */, $quote, 2);
 	$r->header_out("X-$who" => $quote);
 }
 
-sub authors {
+sub add_author_quotes {
 	my($r) = @_;
 	$r->header_out('X-Author-Krow' => "You can't grep a dead tree.");
 	$r->header_out('X-Author-Pudge' => "Bite me.");
