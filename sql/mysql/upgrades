@@ -3209,8 +3209,6 @@ INSERT INTO vars (name, value, description) VALUES ('ispell_is_really_aspell_wit
 
 DROP TABLE IF EXISTS accesslist;
 
-# SLASHDOT LAST UPDATED HERE
-
 # End of T_2_5_0_82, Start of T_2_5_0_83 - 2005/09/27
 
 INSERT INTO vars (name, value, description) VALUES ('cvs_tag_currentcode','T_2_5_0_82','The current cvs tag that the code was updated to - this does not affect site behavior but may be useful for your records');
@@ -3226,6 +3224,8 @@ UPDATE vars SET value = 'T_2_5_0_83' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# SLASHDOT LAST UPDATED HERE
+
 # Install MIME::Types if any of your Slash sites are using the Blob plugin.
 
 # Changes for plugins/Daypass
@@ -3240,4 +3240,8 @@ CREATE TABLE daypass_confcodes (
 DROP TABLE daypass_users;
 
 INSERT INTO vars (name, value, description) VALUES ('cvs_tag_currentcode_emit','1','Emit cvs_tag_currentcode revision number in the X-Powered-By header. If you are paranoid or believe in security through obscurity feel free to leave this false, but in the event of a security hole it may help us contact you');
+
+UPDATE vars SET value = 'T_2_5_0_83' WHERE name = 'cvs_tag_currentcode';
+
+# End of T_2_5_0_84, Start of T_2_5_0_85 - 2005/10/11
 
