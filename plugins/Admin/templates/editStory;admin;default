@@ -83,6 +83,7 @@ __template__
 					[% END %]
 				</fieldset>
 			[% END %]
+			<div class="adminstoryform">
 			<fieldset id="st-display">
 				<legend>
 					Story Options
@@ -196,6 +197,7 @@ __template__
 				<div class="notes">[% ispell_comments.bodytext %]</div>
 				[% PROCESS editbuttons %]
 			</fieldset>
+			</div>
 		</div>
 	</form>
 </div>
