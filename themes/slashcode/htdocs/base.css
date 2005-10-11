@@ -349,14 +349,14 @@ img { border: none; }
 	padding: 0;
 	margin: 0;
 }
-.article h3
+#journal .article h3
 {
 	margin: 0;
 	padding: .3em .8em .2em .8em;
 	color: #fff;
 }
 
-.article h3 a, .article h3 a:visited { color: #fff; }
+#journal .article h3 a, #journal .article h3 a:visited { color: #fff; }
 
 .article .details
 {
