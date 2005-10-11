@@ -69,13 +69,16 @@ sub new {
 #========================================================================
 sub key {
 	my($self, $resource, $opts) = @_;
+
 	$opts ||= {};
 	$opts->{debug} = $DEBUG unless defined $opts->{debug};
+
 	return Slash::ResKey::Key->new(
 		$self->{virtual_user},
 		$resource,
 		$opts->{reskey},
-		$opts->{debug}
+		$opts->{debug},
+		$opts
 	);
 }
 
@@ -105,7 +108,7 @@ $Id$
 
 =head2 Check Classes
 
-The default failure value is DEATH, rather than FATAL, which is non-fatal:
+The default failure value is DEATH, rather than FAILURE, which is non-fatal:
 callers can choose to re-display the form on FAILURE, whereas with DEATH
 there's no reason to continue, but one must start over with a new form (if
 indeed even that).
