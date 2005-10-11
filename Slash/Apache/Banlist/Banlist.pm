@@ -76,7 +76,7 @@ sub handler {
 
 	my $rsslist = $reader->getNorssList;
 	if ($is_rss && ($rsslist->{$cur_srcid_ip} || $rsslist->{$cur_srcid_subnet})) {
-		return _send_rss($r, 'abuse', $cur_srcid_ip);
+		return _send_rss($r, 'abuse', $cur_srcid_ip, $feed_type);
 	}
 
 	# Send a special "Palm banned" page if this IP addresss is banned
@@ -110,7 +110,7 @@ sub _check_rss_and_palm {
 
 	# XXX Should we also check for content_type in POST?
 	my $is_palm = $r->uri =~ /^\/palm/;
-	return ($is_rss, $is_palm, $feed_type);
+	return($is_rss, $is_palm, $feed_type);
 }
 
 sub _send_rss {
@@ -135,6 +135,7 @@ sub _get_rss_msg {
 	my($type, $srcid_ip, $feed_type) = @_;
 	$type ||= 'abuse';
 	$srcid_ip ||= '(unknown)';
+	$feed_type ||= 'rss';
 
 	return $RSS{$type}{$srcid_ip} if exists $RSS{$type}{$srcid_ip};
 
