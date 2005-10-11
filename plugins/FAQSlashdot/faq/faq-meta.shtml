@@ -7,12 +7,11 @@
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
 
-        <table width="100%">
-                <tr>
-                        <td><a href="editorial.shtml">Next section</a></td>
-                        <td><a href="index.shtml">Index</a></td>
-                </tr>
-        </table>
+        <ul class="menu">
+               <li><a href="editorial.shtml">Next section</a></li>
+               <li><a href="index.shtml">Index</a></li>
+       	</ul>
+        
         <hr>
 
 <h2><a name="fm100" id="fm100">What is this document?</a></h2>
@@ -42,11 +41,11 @@
         </small></em></p>
 
         <hr>
-        <table width="100%">
-                <tr>
-                        <td><a href="editorial.shtml">Next section</a></td>
-                        <td><a href="index.shtml">Index</a></td>
-                </tr>
-        </table>
+        <ul class="menu">
+                
+                        <li><a href="editorial.shtml">Next section</a></li>
+                        <li><a href="index.shtml">Index</a></li>
+                </ul>
+        
 
 <!--#include virtual="/slashfoot.inc"-->

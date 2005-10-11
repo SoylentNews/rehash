@@ -7,13 +7,12 @@
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
 
-        <table width="100%">
-                <tr>
-                        <td><a href="friends.shtml">Previous section</a></td>
-                        <td><a href="slashmeta.shtml">Next section</a></td>
-                        <td><a href="index.shtml">Index</a></td>
-                </tr>
-        </table>
+        <ul class="menu">
+                 <li><a href="friends.shtml">Previous section</a></li>
+                 <li><a href="slashmeta.shtml">Next section</a></li>
+                 <li><a href="index.shtml">Index</a></li>
+        </ul>
+        
         <hr>
 
 <h2><a name="ss100" id="ss100">Why does Slashdot have subscriptions?</a></h2>
@@ -174,12 +173,12 @@ subscribers about 60.</li>
         </small></em></p>
 
         <hr>
-        <table width="100%">
-                <tr>
-                        <td><a href="friends.shtml">Previous section</a></td>
-                        <td><a href="slashmeta.shtml">Next section</a></td>
-                        <td><a href="index.shtml">Index</a></td>
-                </tr>
-        </table>
+        <ul class="menu">
+                
+                        <li><a href="friends.shtml">Previous section</a></li>
+                        <li><a href="slashmeta.shtml">Next section</a></li>
+                        <li><a href="index.shtml">Index</a></li>
+                </ul>
+        
 
 <!--#include virtual="/slashfoot.inc"-->

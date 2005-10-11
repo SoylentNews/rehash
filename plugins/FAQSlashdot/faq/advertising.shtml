@@ -6,14 +6,11 @@
 <!-- $Id$ -->
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
-
-        <table width="100%">
-                <tr>
-                        <td><a href="tech.shtml">Previous Section</a></td>
-                        <td><a href="suggestions.shtml">Next section</a></td>
-                        <td><a href="index.shtml">Index</a></td>
-                </tr>
-        </table>
+	<ul class="menu">
+               <li><a href="tech.shtml">Previous Section</a></li>
+               <li><a href="suggestions.shtml">Next section</a></li>
+               <li><a href="index.shtml">Index</a></li>
+	</ul>
         <hr>
 
 <h2><a name="ad100">Can I advertise on Slashdot?</a></h2>
@@ -47,12 +44,12 @@
         </small></em></p>
 
         <hr>
-        <table width="100%">
-                <tr>
-                        <td><a href="tech.shtml">Previous Section</a></td>
-                        <td><a href="suggestions.shtml">Next section</a></td>
-                        <td><a href="index.shtml">Index</a></td>
-                </tr>
-        </table>
+        <ul class="menu">
+                
+                        <li><a href="tech.shtml">Previous Section</a></li>
+                        <li><a href="suggestions.shtml">Next section</a></li>
+                        <li><a href="index.shtml">Index</a></li>
+                </ul>
+        
 
 <!--#include virtual="/slashfoot.inc"-->

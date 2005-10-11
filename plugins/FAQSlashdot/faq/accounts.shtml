@@ -6,14 +6,11 @@
 <!-- $Id$ -->
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
-
-        <table width="100%">
-                <tr>
-                        <td><a href="metamod.shtml">Previous section</a></td>
-                        <td><a href="friends.shtml">Next section</a></td>
-                        <td><a href="index.shtml">Index</a></td>
-                </tr>
-        </table>
+	<ul class="menu">
+            	<li><a href="metamod.shtml">Previous section</a></li>
+                <li><a href="friends.shtml">Next section</a></li>
+                <li><a href="index.shtml">Index</a></li>
+	</ul>
         <hr>
 
 <h2><a name="ac050">Why should I log in?</a></h2>
@@ -148,12 +145,12 @@
         </small></em></p>
 
         <hr>
-        <table width="100%">
-                <tr>
-                        <td><a href="metamod.shtml">Previous section</a></td>
-                        <td><a href="friends.shtml">Next section</a></td>
-                        <td><a href="index.shtml">Index</a></td>
-                </tr>
-        </table>
+        <ul class="menu">
+                
+                        <li><a href="metamod.shtml">Previous section</a></li>
+                        <li><a href="friends.shtml">Next section</a></li>
+                        <li><a href="index.shtml">Index</a></li>
+                </ul>
+        
 
 <!--#include virtual="/slashfoot.inc"-->
