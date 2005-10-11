@@ -20,7 +20,6 @@ our @EXPORT = qw(AL2Check);
 sub AL2Check {
 	my($self, $check, $srcids) = @_;
 
-	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 

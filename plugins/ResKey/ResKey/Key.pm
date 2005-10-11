@@ -111,7 +111,7 @@ our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 #========================================================================
 sub new {
-	my($class, $user, $resname, $reskey, $debug) = @_;
+	my($class, $user, $resname, $reskey, $debug, $opts) = @_;
 	my $rkrid;
 
 	my $plugin = getCurrentStatic('plugin');
@@ -761,6 +761,35 @@ sub getChecks {
 	}
 
 	return $checks;
+}
+
+#========================================================================
+sub getAllCheckVars {
+	my($self) = @_;
+
+	my $vars = $self->{_check_vars} ||= {};
+	return $vars if keys %$vars;
+
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+
+	my $all = $reader->sqlSelectAll('rkrid, name, value', 'reskey_vars');
+	for my $row (@$all) {
+		$vars->{ $row->[0] }{ $row->[1] } = $row->[2];
+	}
+
+	return $vars;
+}
+
+#========================================================================
+sub getCheckVars {
+	my($self) = @_;
+
+	if ($self->rkrid) {
+		my $vars = $self->getAllCheckVars;
+		return $vars->{ $self->rkrid };
+	}
+
+	return;
 }
 
 1;

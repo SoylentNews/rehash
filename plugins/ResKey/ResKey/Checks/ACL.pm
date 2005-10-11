@@ -18,22 +18,23 @@ our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 sub doCheck {
 	my($self) = @_;
 
-	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $check_vars = $self->getCheckVars;
 
-	my $acl = $constants->{'reskey_checks_acl_' . $self->resname};
-	my $acl_no = $constants->{'reskey_checks_acl_no_' . $self->resname};
+	my $acl    = $check_vars->{acl};
+	my $acl_no = $check_vars->{acl_no};
 
-	# by default, is_admin is an automatic exception to no ACL
+	# by default, is_admin is an automatic exception to lack of ACL
 	my $acl_nobypass_admin = (!$user->{is_admin} || (
 		$user->{is_admin} &&
-		$constants->{'reskey_checks_acl_nobypass_admin_' . $self->resname}
+		$check_vars->{acl_nobypass_admin}
 	));
 
 	if ($acl && !$user->{acl}{$acl} && $acl_nobypass_admin) {
 		return(RESKEY_DEATH, [ 'has no acl', { acl => $acl } ]);
 	}
 
+	# is_admin does not bypass acl_no
 	if ($acl_no && $user->{acl}{$acl_no}) {
 		return(RESKEY_DEATH, [ 'has acl_no', { acl => $acl_no } ]);
 	}

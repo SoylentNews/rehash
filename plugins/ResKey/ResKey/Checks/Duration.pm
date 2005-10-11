@@ -19,10 +19,10 @@ our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 sub doCheckCreate {
 	my($self) = @_;
 
-	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $check_vars = $self->getCheckVars;
 
-	if ($constants->{'reskey_checks_adminbypass_' . $self->resname} && $user->{is_admin}) {
+	if ($check_vars->{adminbypass} && $user->{is_admin}) {
 		return RESKEY_SUCCESS;
 	}
 
@@ -33,10 +33,10 @@ sub doCheckCreate {
 sub doCheckTouch {
 	my($self) = @_;
 
-	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $check_vars = $self->getCheckVars;
 
-	if ($constants->{'reskey_checks_adminbypass_' . $self->resname} && $user->{is_admin}) {
+	if ($check_vars->{adminbypass} && $user->{is_admin}) {
 		return RESKEY_SUCCESS;
 	}
 
@@ -54,10 +54,10 @@ sub doCheckTouch {
 sub doCheckUse {
 	my($self) = @_;
 
-	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $check_vars = $self->getCheckVars;
 
-	if ($constants->{'reskey_checks_adminbypass_' . $self->resname} && $user->{is_admin}) {
+	if ($check_vars->{adminbypass} && $user->{is_admin}) {
 		return RESKEY_SUCCESS;
 	}
 
@@ -82,16 +82,14 @@ sub doCheckUse {
 	return RESKEY_SUCCESS;
 }
 
-
-
 sub maxFailures {
 	my($self, $reskey_obj) = @_;
 	$reskey_obj ||= {};
 
-	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
+	my $check_vars = $self->getCheckVars;
 
-	my $max_failures = $constants->{'reskey_checks_duration_max-failures_' . $self->resname};
+	my $max_failures = $check_vars->{'duration_max-failures'};
 	if ($max_failures && $reskey_obj->{rkid}) {
 		my $where = "rkid=$reskey_obj->{rkid} AND failures > $max_failures";
 		my $rows = $slashdb->sqlCount('reskeys', $where);
@@ -112,8 +110,9 @@ sub maxUsesPerTimeframe {
 
 	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
+	my $check_vars = $self->getCheckVars;
 
-	my $max_uses = $constants->{'reskey_checks_duration_max-uses_' . $self->resname};
+	my $max_uses = $check_vars->{'duration_max-uses'};
 	my $limit = $constants->{reskey_timeframe};
 	if ($max_uses && $limit) {
 		my $where = $self->whereUser;
@@ -137,10 +136,10 @@ sub maxUsesPerTimeframe {
 sub minDurationBetweenUses {
 	my($self, $reskey_obj) = @_;
 
-	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
+	my $check_vars = $self->getCheckVars;
 
-	my $limit = $constants->{'reskey_checks_duration_uses_' . $self->resname};
+	my $limit = $check_vars->{duration_uses};
 	if ($limit) {
 		my $where = $self->whereUser;
 		$where .= ' AND is_alive="no" AND ';
@@ -158,14 +157,13 @@ sub minDurationBetweenUses {
 	return;
 }
 
-
 sub minDurationBetweenCreateAndUse {
 	my($self, $reskey_obj) = @_;
 
-	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
+	my $check_vars = $self->getCheckVars;
 
-	my $limit = $constants->{'reskey_checks_duration_creation-use_' . $self->resname};
+	my $limit = $check_vars->{'duration_creation-use'};
 	if ($limit) {
 		my $where = "rkid=$reskey_obj->{rkid}";
 		$where .= ' AND is_alive="no" AND ';
