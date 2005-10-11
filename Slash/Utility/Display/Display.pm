@@ -1322,7 +1322,7 @@ sub _hard_linkComment {
 		$display .= qq| by $comment->{nickname}|;
 		$display .= qq| (Score:$comment->{points})|
 			if !$user->{noscores} && $comment->{points};
-		$display .= timeCalc($comment->{date}) 
+		$display .= " " . timeCalc($comment->{date}) 
 			if $date;
 	}
 	$display .= "\n";
