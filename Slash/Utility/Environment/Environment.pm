@@ -1119,8 +1119,7 @@ sub isSubscriber {
 
 =head2 getAnonId([FORMKEY])
 
-Creates an anonymous ID that is used to set an AC cookie,
-with some random data (well, as random as random gets)
+Returns a string of random alphanumeric characters.
 
 =over 4
 
@@ -1128,11 +1127,15 @@ with some random data (well, as random as random gets)
 
 =over 4
 
-=item FORMKEY
+=item NOPREFIX
 
-Return the same value as normal, but without prepending with a '-1-'.
-The normal case, with '-1-', is for easy identification of cookies.
-This case is for use with formkeys.
+Don't prepend a "-1-" string. That prefix is no longer used anywhere in
+the code, so basically everyplace this function is used passes in true
+for noprefix.  All part of the slow evolution of the codebase!
+
+=item COUNT
+
+Number of characters (default 10).
 
 =back
 
@@ -1177,7 +1180,8 @@ User ID.
 
 =item VALUE
 
-Cookie's value.
+Cookie's value.  This used to be called 'passwd' but the value that gets
+put into user cookies now isn't a password anymore.
 
 =back
 
@@ -1191,8 +1195,8 @@ Created cookie.
 
 # create a user cookie from ingredients
 sub bakeUserCookie {
-	my($uid, $passwd) = @_;
-	my $cookie = $uid . '::' . $passwd;
+	my($uid, $value) = @_;
+	my $cookie = $uid . '::' . $value;
 	return $cookie;
 }
 
@@ -1230,8 +1234,8 @@ sub eatUserCookie {
 	my($cookie) = @_;
 	$cookie =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack('C', hex($1))/ge
 		unless $cookie =~ /^\d+::/;
-	my($uid, $passwd) = split(/::/, $cookie, 2);
-	return($uid, $passwd);
+	my($uid, $value) = split(/::/, $cookie, 2);
+	return($uid, $value);
 }
 
 #========================================================================
