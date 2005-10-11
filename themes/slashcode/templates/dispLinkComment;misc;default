@@ -47,8 +47,8 @@ __template__
 		[% IF original_pid && ( can_mod || ((constants.authors_unlimited && user.seclev >= constants.authors_unlimited) || user.acl.candelcomments_always) ) %] | [% END %]
 
 		[% IF can_mod %]
-		[% Slash.createSelect("reason_$cid", reasons, '', 1, 1) 
-		%][% END %]
+		<div class="modsel">[% Slash.createSelect("reason_$cid", reasons, '', 1, 1) 
+		%]</div>[% END %]
 
 		[% IF can_mod && ((constants.authors_unlimited && user.seclev >= constants.authors_unlimited) || user.acl.candelcomments_always) %] | [% END %]
 
