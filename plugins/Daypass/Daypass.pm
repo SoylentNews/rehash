@@ -8,10 +8,9 @@ package Slash::Daypass;
 use strict;
 use Slash::Utility;
 use Slash::DB::Utility;
+use Apache::Cookie;
 use vars qw($VERSION);
 use base 'Slash::DB::Utility';
-# For sqlReplace, for now
-use base 'Slash::DB::MySQL';
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -131,17 +130,12 @@ sub createDaypasskey {
 	# If no daypass was available, we can't return a key.
 	return "" if !$dp_hr;
 
-	my $user = getCurrentUser();
-	# Daypasses are not available to anonymous users (yet).
-	return "" if $user->{is_anon};
-
 	# How far in the future before this daypass can be confirmed?
 	# I.e. how much of the ad do we insist the user watch?
 	my $secs_ahead = $dp_hr->{minduration} || 0;
 
-	my $key = getAnonId(1);
+	my $key = getAnonId(1, 20);
 	my $rows = $self->sqlInsert('daypass_keys', {
-		uid			=> $user->{uid},
 		daypasskey		=> $key,
 		-key_given		=> 'NOW()',
 		-earliest_confirmable	=> "DATE_ADD(NOW(), INTERVAL $secs_ahead SECOND)",
@@ -158,30 +152,26 @@ sub confirmDaypasskey {
 	my($self, $key) = @_;
 	my $constants = getCurrentStatic();
 
-	my $user = getCurrentUser();
-	# Daypasses are not available to anonymous users (yet).
-	return "" if $user->{is_anon};
-
-	my $uid = $user->{uid};
 	my $key_q = $self->sqlQuote($key);
 
 	my $rows = $self->sqlUpdate(
 		"daypass_keys",
 		{ -key_confirmed => "NOW()" },
-		"uid = $uid
-		 AND daypasskey = $key_q
+		"daypasskey = $key_q
 		 AND earliest_confirmable <= NOW()");
 
+	my $confcode = "";
 	if ($rows > 0) {
+		$confcode = getAnonId(1, 20);
 		my $hr = {
-			uid	=> $uid,
-			goodon	=> $self->getGoodonDay(),
+			confcode =>	$confcode,
+			gooduntil =>	$self->getGoodUntil(),
 		};
-		$rows = $self->sqlReplace('daypass_users', $hr);
+		$rows = $self->sqlInsert('daypass_confcodes', $hr);
 	}
 
 	$rows = 0 if $rows < 1;
-	return $rows;
+	return $rows ? $confcode : 0;
 }
 
 sub getDaypassTZOffset {
@@ -197,30 +187,55 @@ sub getDaypassTZOffset {
 	return $timezones->{$dptz}{off_set} || 0;
 }
 
-sub getGoodonDay {
+sub getGoodUntil {
 	my($self) = @_;
 	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
 
+	# The business decision made here is that all daypasses expire
+	# at the same time, midnight in some timezone.  This seems to
+	# make more sense than having different users' daypasses expire
+	# at different times.  I'm not really happy about putting
+	# business logic in this .pm file but I doubt this decision
+	# will change.  But if it does, here's the line of code that
+	# needs to change.
 	my $off_set = $self->getDaypassTZOffset() || 0;
-	my $db_time = $slashdb->getTime({ add_secs => $off_set });
 
-	# Cheesy (and easy) way of doing this.  Yank the seconds and
-	# just return the (GMT) date.
-	return substr($db_time, 0, 10);
+	# Determine the final second on the day for the timezone in
+	# question, expressed in GMT time.  If the timezone is EST, for
+	# which the offset is -18000 seconds, we determine this by bumping
+	# the current GMT datetime -18000 seconds, taking the GMT date,
+	# appending the time 23:59:59 to it, and re-adding +18000 to
+	# that time.
+	my $gmt_end_of_tz_day =
+		$off_set
+		? $slashdb->sqlSelect("DATE_SUB(
+				CONCAT(
+					DATE( DATE_ADD( NOW(), INTERVAL $off_set SECOND ) ),
+					' 23:59:59'
+				),
+			INTERVAL $off_set SECOND)")
+		: $slashdb->sqlSelect("CONCAT(DATE(NOW()), ' 23:59:59')");
+	return $gmt_end_of_tz_day;
 }
 
 sub userHasDaypass {
 	my($self, $user) = @_;
-	my $slashdb = getCurrentDB();
-	# Anonymous users can't have a daypass.
-	return 0 if $user->{is_anon};
-	my $goodonday = $self->getGoodonDay();
-	my $off_set = $self->getDaypassTZOffset();
-	# Really should memcached this, here.
-	my $uid = $user->{uid};
-	my $goodonday_q = $self->sqlQuote($goodonday);
-	return 1 if $self->sqlCount("daypass_users", "uid=$uid AND goodon=$goodonday_q");
+	my $form = getCurrentForm();
+	return 0 unless $ENV{GATEWAY_INTERFACE};
+	my $cookies = Apache::Cookie->fetch;
+	return 0 unless $cookies && $cookies->{daypassconfcode};
+	my $confcode = $cookies->{daypassconfcode}->value();
+	my $confcode_q = $self->sqlQuote($confcode);
+
+	# We really should memcached this.  But the query cache
+	# will take a lot of the sting out of it.
+	my $gooduntil = $self->sqlSelect(
+		'UNIX_TIMESTAMP(gooduntil)',
+		'daypass_confcodes',
+		"confcode=$confcode_q");
+	# If it's expired, it's no good.
+	$gooduntil = 0 if $gooduntil && $gooduntil < time();
+	return $gooduntil ? 1 : 0;
 }
 
 sub doOfferDaypass {
@@ -229,16 +244,16 @@ sub doOfferDaypass {
 	# to offer daypasses is set to false, then no.
 	my $constants = getCurrentStatic();
 	return 0 unless $constants->{daypass} && $constants->{daypass_offer};
-	# If the user is not logged-in, or is a subscriber, then no.
+	# If the user is a subscriber, then no.
 	my $user = getCurrentUser();
-	return 0 if $user->{is_anon} || $user->{is_subscriber};
+	return 0 if $user->{is_subscriber};
 	# If the user already has a daypass, then no.
 	return 0 if $self->userHasDaypass($user);
 	# If there are no ads available for this user, then no.
 	my $dp_hr = $self->getDaypass();
 	return 0 unless $dp_hr;
-	# Otherwise, yes.
-	return 1;
+	# Otherwise, yes. Return its daid.
+	return $dp_hr->{daid};
 }
 
 sub getOfferText {

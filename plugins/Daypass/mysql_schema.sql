@@ -40,25 +40,23 @@ CREATE TABLE daypass_needs (
 
 CREATE TABLE daypass_keys (
 	dpkid			INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	uid			MEDIUMINT UNSIGNED NOT NULL,
 	daypasskey		CHAR(20) NOT NULL DEFAULT '',
+	daid			SMALLINT UNSIGNED NOT NULL DEFAULT 0,
 	key_given		DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 	earliest_confirmable	DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
 	key_confirmed		DATETIME DEFAULT NULL,
 	PRIMARY KEY dpkid (dpkid),
-	UNIQUE uid_daypasskey (uid, daypasskey),
+	UNIQUE daypasskey (daypasskey),
 	KEY key_given (key_given)
 ) TYPE=InnoDB;
 
-# Any user with a row in this table for their uid with a goodon that
-# is today's date is considered to have a daypass.  For now, users
-# must be logged-in to get a daypass.  The time is NOT necessarily
-# in GMT, the timezone is specified in the var daypass_tz.
+# Any user with a 'daypass_confcode' cookie in this table where the
+# confcode >= NOW() is considered to have a daypass.  It does not
+# matter whether the user is logged-in.  The time is in GMT.
 
-CREATE TABLE daypass_users (
-	uid		MEDIUMINT UNSIGNED NOT NULL,
-	goodon		DATE NOT NULL DEFAULT '0000-00-00',
-	PRIMARY KEY uid (uid),
-	KEY uid_goodon (uid, goodon)
+CREATE TABLE daypass_confcodes (
+	confcode	CHAR(20) NOT NULL DEFAULT '',
+	gooduntil	DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+	PRIMARY KEY confcode (confcode)
 ) TYPE=InnoDB;
 
