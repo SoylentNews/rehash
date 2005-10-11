@@ -17,7 +17,7 @@ __template__
 					<input type="hidden" name="id" value="[% article.id %]">
 					<input type="hidden" name="state" value="editing">
 					<input type="hidden" name="preview" value="active">
-					[% PROCESS formkey_tag %]
+					[% PROCESS reskey_tag %]
 
 					[% PROCESS formLabel value => "Subject", comment => "This is required" %]
 					<input type="text" name="description" size="60" maxlength="60" value="[% article.description | strip_attribute %]">

@@ -58,7 +58,7 @@ sub main {
 		removemeta	=> [ !$user->{is_anon},	\&articleMeta		],
 
 		preview		=> [ $user_ok,		\&editArticle		],
-		save		=> [ $user_ok,		\&saveArticle		], # formkey
+		save		=> [ $user_ok,		\&saveArticle		],
 		remove		=> [ $user_ok,		\&removeArticle		],
 
 		editprefs	=> [ !$user->{is_anon},	\&editPrefs		],
@@ -143,8 +143,6 @@ sub displayFriends {
 
 	redirect("$gSkin->{rootdir}/search.pl?op=journals") 
 		if $user->{is_anon};
-
-	_validFormkey('generate_formkey') or return;
 
 	_printHead('mainhead') or return;
 
@@ -540,6 +538,228 @@ sub displayArticle {
 	}
 }
 
+sub doSaveArticle {
+	my($journal, $constants, $user, $form, $reader, $gSkin, $rkey) = @_;
+
+	$form->{description} =~ s/[\r\n].*$//s;  # strip anything after newline
+	my $description = strip_notags($form->{description});
+
+	# from comments.pl
+	for ($description, $form->{article}) {
+		my $d = decode_entities($_);
+		$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
+		if ($d !~ /\S/) {		# require SOME non-whitespace
+			return(getData('no_desc_or_article'), 1);
+		}
+	}
+
+	unless ($rkey) {
+		my $reskey = getObject('Slash::ResKey');
+		$rkey = $reskey->key('journal');
+	}
+
+	unless ($rkey->use) {
+		return($rkey->errstr, $rkey->failure);
+	}
+
+	my $slashdb = getCurrentDB();
+	if ($form->{id}) {
+		my %update;
+		my $article = $journal->get($form->{id});
+
+		# note: comments_on is a special case where we are
+		# only turning on comments, not saving anything else
+		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled' && !$article->{discussion}) {
+			my $rootdir = $gSkin->{rootdir};
+			if ($form->{comments_on}) {
+				$description = $article->{description};
+				$form->{tid} = $article->{tid};
+			}
+			my $did = $slashdb->createDiscussion({
+				title	=> $description,
+				topic	=> $form->{tid},
+				commentstatus	=> $form->{journal_discuss},
+				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$form->{id}",
+			});
+			$update{discussion}  = $did;
+
+		# update description if changed
+		} elsif (!$form->{comments_on} && $article->{discussion} && $article->{description} ne $description) {
+			$slashdb->setDiscussion($article->{discussion}, { title => $description });
+		}
+
+		unless ($form->{comments_on}) {
+			for (qw(article tid posttype)) {
+				$update{$_} = $form->{$_} if defined $form->{$_};
+			}
+			$update{description} = $description;
+		}
+
+		$journal->set($form->{id}, \%update);
+
+		$form = { id => $form->{id} };
+
+	} else {
+		my $id = $journal->create($description,
+			$form->{article}, $form->{posttype}, $form->{tid});
+
+		unless ($id) {
+			return getData('create_failed');
+		}
+
+		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled') {
+			my $rootdir = $gSkin->{rootdir};
+			my $did = $slashdb->createDiscussion({
+				title	=> $description,
+				topic	=> $form->{tid},
+				commentstatus	=> $form->{journal_discuss},
+				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$id",
+			});
+			$journal->set($id, { discussion => $did });
+		}
+
+		# create messages
+		my $messages = getObject('Slash::Messages');
+		if ($messages) {
+			my $zoo = getObject('Slash::Zoo');
+			my $friends = $zoo->getFriendsForMessage;
+
+			my $data = {
+				template_name	=> 'messagenew',
+				subject		=> { template_name => 'messagenew_subj' },
+				journal		=> {
+					description	=> $description,
+					article		=> $form->{article},
+					posttype	=> $form->{posttype},
+					id		=> $id,
+					uid		=> $user->{uid},
+					nickname	=> $user->{nickname},
+				}
+			};
+			for (@$friends) {
+				$messages->create($_, MSG_CODE_JOURNAL_FRIEND, $data);
+			}
+		}
+
+		$form = { id => $id };
+	}
+
+	if ($constants->{validate_html}) {
+		my $validator = getObject('Slash::Validator');
+		my $article = $journal->get($form->{id});
+		my $strip_art = balanceTags(strip_mode($article->{article}, $article->{posttype}), { deep_nesting => 1 });
+		$validator->isValid($strip_art, {
+			data_type	=> 'journal',
+			data_id		=> $form->{id},
+			message		=> 1
+		}) if $validator;
+	}
+
+	return 0;
+}
+
+sub doEditArticle {
+	my($journal, $constants, $user, $form, $reader, $gSkin) = @_;
+	# This is where we figure out what is happening
+	my $article = {};
+	my $posttype;
+
+	$article = $journal->get($form->{id}) if $form->{id};
+	# you go now!
+	if ($article->{uid} && $article->{uid} != $user->{uid}) {
+		return getData('noedit');
+	}
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('journal');
+
+	if ($form->{state}) {
+		$rkey->touch;
+		return $rkey->errstr if $rkey->death;
+
+		$article->{date}	||= localtime;
+		$article->{article}	= $form->{article};
+		$article->{description}	= $form->{description};
+		$article->{tid}		= $form->{tid};
+		$posttype		= $form->{posttype};
+	} else {
+		$rkey->create or return $rkey->errstr;
+
+		$posttype = $article->{posttype};
+	}
+	$posttype ||= $user->{'posttype'};
+
+	if ($article->{article}) {
+		my $strip_art = balanceTags(strip_mode($article->{article}, $posttype), { deep_nesting => 1 });
+		my $strip_desc = strip_notags($article->{description});
+
+		my $commentcount = $article->{discussion}
+			? $reader->getDiscussion($article->{discussion}, 'commentcount')
+			: 0;
+
+		my $disp_article = {
+			article		=> $strip_art,
+			date		=> $article->{date},
+			description	=> $strip_desc,
+			topic		=> $reader->getTopic($article->{tid}),
+			id		=> $article->{id},
+			discussion	=> $article->{discussion},
+			commentcount	=> $commentcount,
+		};
+
+		my $theme = _checkTheme($user->{'journal_theme'});
+		my $zoo   = getObject('Slash::Zoo');
+		slashDisplay($theme, {
+			articles	=> [{ day => $article->{date}, article => [ $disp_article ] }],
+			uid		=> $article->{uid} || $user->{uid},
+			is_friend	=> $zoo->isFriend($user->{uid}, $article->{uid}),
+			back		=> -1,
+			forward		=> 0,
+			nickname	=> $user->{nickname},
+		});
+	}
+
+	my $formats = $reader->getDescriptions('postmodes');
+	my $format_select = createSelect('posttype', $formats, $posttype, 1);
+
+	slashDisplay('journaledit', {
+		article		=> $article,
+		format_select	=> $format_select,
+		rkey		=> $rkey
+	});
+
+	return 0;
+}
+
+sub saveArticle {
+	my($journal, $constants, $user, $form, $reader, $gSkin) = @_;
+
+	my($err, $retry) = doSaveArticle(@_[0..5]);
+	if ($err) {
+		_printHead('mainhead') or return;
+		print $err;
+		if ($retry) {
+			my $err = doEditArticle(@_);
+			print $err if $err;
+		}
+		print getData('journalfoot');
+		return 1;
+	}
+
+	displayArticle($journal, $constants, $user, $form, $reader);
+}
+
+sub editArticle {
+	my($journal, $constants, $user, $form, $reader, $gSkin) = @_;
+
+	_printHead('mainhead') or return;
+
+	my($err) = doEditArticle(@_);
+	print $err if $err;
+
+	print getData('journalfoot');
+}
+
 sub editPrefs {
 	my($journal, $constants, $user, $form, $reader) = @_;
 
@@ -611,246 +831,38 @@ sub listArticle {
 	print getData('journalfoot');
 }
 
-sub saveArticle {
-	my($journal, $constants, $user, $form, $reader, $gSkin, $ws) = @_;
-	$form->{description} =~ s/[\r\n].*$//s;  # strip anything after newline
-	my $description = strip_notags($form->{description});
-
-	# from comments.pl
-	for ($description, $form->{article}) {
-		my $d = decode_entities($_);
-		$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
-		if ($d !~ /\S/) {		# require SOME non-whitespace
-			unless ($ws) {
-				_printHead('mainhead') or return;
-				print getData('no_desc_or_article');
-				editArticle(@_, 1);
-			}
-			return 0;
-		}
-	}
-
-	return 0 unless _validFormkey($ws ? qw(max_post_check interval_check) : ());
-
-	my $slashdb = getCurrentDB();
-	if ($form->{id}) {
-
-		my %update;
-		my $article = $journal->get($form->{id});
-
-		# note: comments_on is a special case where we are
-		# only turning on comments, not saving anything else
-		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled' && !$article->{discussion}) {
-			my $rootdir = $gSkin->{rootdir};
-			if ($form->{comments_on}) {
-				$description = $article->{description};
-				$form->{tid} = $article->{tid};
-			}
-			my $did = $slashdb->createDiscussion({
-				title	=> $description,
-				topic	=> $form->{tid},
-				commentstatus	=> $form->{journal_discuss},
-				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$form->{id}",
-			});
-			$update{discussion}  = $did;
-
-		# update description if changed
-		} elsif (!$form->{comments_on} && $article->{discussion} && $article->{description} ne $description) {
-			$slashdb->setDiscussion($article->{discussion}, { title => $description });
-		}
-
-		unless ($form->{comments_on}) {
-			for (qw(article tid posttype)) {
-				$update{$_} = $form->{$_} if defined $form->{$_};
-			}
-			$update{description} = $description;
-		}
-
-		$journal->set($form->{id}, \%update);
-
-		$form = { id => $form->{id} };
-
-	} else {
-		my $id = $journal->create($description,
-			$form->{article}, $form->{posttype}, $form->{tid});
-
-		unless ($id) {
-			unless ($ws) {
-				_printHead('mainhead') or return;
-				print getData('create_failed');
-			}
-			return 0;
-		}
-
-		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled') {
-			my $rootdir = $gSkin->{rootdir};
-			my $did = $slashdb->createDiscussion({
-				title	=> $description,
-				topic	=> $form->{tid},
-				commentstatus	=> $form->{journal_discuss},
-				url	=> "$rootdir/~" . fixparam($user->{nickname}) . "/journal/$id",
-			});
-			$journal->set($id, { discussion => $did });
-		}
-
-		# create messages
-		my $messages = getObject('Slash::Messages');
-		if ($messages) {
-			my $zoo = getObject('Slash::Zoo');
-			my $friends = $zoo->getFriendsForMessage;
-
-			my $data = {
-				template_name	=> 'messagenew',
-				subject		=> { template_name => 'messagenew_subj' },
-				journal		=> {
-					description	=> $description,
-					article		=> $form->{article},
-					posttype	=> $form->{posttype},
-					id		=> $id,
-					uid		=> $user->{uid},
-					nickname	=> $user->{nickname},
-				}
-			};
-			for (@$friends) {
-				$messages->create($_, MSG_CODE_JOURNAL_FRIEND, $data);
-			}
-		}
-
-		$form = { id => $id };
-	}
-
-	if ($constants->{validate_html}) {
-		my $validator = getObject('Slash::Validator');
-		my $article = $journal->get($form->{id});
-		my $strip_art = balanceTags(strip_mode($article->{article}, $article->{posttype}), { deep_nesting => 1 });
-		$validator->isValid($strip_art, {
-			data_type	=> 'journal',
-			data_id		=> $form->{id},
-			message		=> 1
-		}) if $validator;
-	}
-
-	return $form->{id} if $ws;
-
-	displayArticle($journal, $constants, $user, $form, $reader);
-}
-
 sub articleMeta {
 	my($journal, $constants, $user, $form, $reader) = @_;
 
 	if ($form->{id}) {
-		my $article = $journal->get($form->{id});
-		_printHead('mainhead') or return;
-		slashDisplay('meta', { article => $article });
-		print getData('journalfoot');
-	} else {
-		listArticle(@_);
-	}
-}
-
-sub removeArticle {
-	my($journal, $constants, $user, $form, $reader) = @_;
-
-	for my $id (grep { $_ = /^del_(\d+)$/ ? $1 : 0 } keys %$form) {
-		$journal->remove($id);
+		my $reskey = getObject('Slash::ResKey');
+		my $rkey = $reskey->key('journal');
+		if ($rkey->create) {
+			my $article = $journal->get($form->{id});
+			_printHead('mainhead') or return;
+			slashDisplay('meta', { article => $article, rkey => $rkey });
+			print getData('journalfoot');
+			return 1;
+		}
 	}
 
 	listArticle(@_);
 }
 
-sub editArticle {
-	my($journal, $constants, $user, $form, $reader, $gSkin, $nohead) = @_;
-	# This is where we figure out what is happening
-	my $article = {};
-	my $posttype;
+sub removeArticle {
+	my($journal, $constants, $user, $form, $reader) = @_;
 
-	$article = $journal->get($form->{id}) if $form->{id};
-	# you go now!
-	if ($article->{uid} && $article->{uid} != $user->{uid}) {
-		return displayFriends(@_);
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('journal');
+
+	# XXX: don't bother printing reskey error?
+	if ($rkey->use) {
+		for my $id (grep { $_ = /^del_(\d+)$/ ? $1 : 0 } keys %$form) {
+			$journal->remove($id);
+		}
 	}
 
-	unless ($nohead) {
-		_printHead('mainhead') or return;
-	}
-
-	if ($form->{state}) {
-		$article->{date}	||= localtime;
-		$article->{article}	= $form->{article};
-		$article->{description}	= $form->{description};
-		$article->{tid}		= $form->{tid};
-		$posttype		= $form->{posttype};
-	} else {
-		my $slashdb = getCurrentDB();
-		$slashdb->createFormkey('journal');
-		$posttype = $article->{posttype};
-	}
-	$posttype ||= $user->{'posttype'};
-
-	if ($article->{article}) {
-		my $strip_art = balanceTags(strip_mode($article->{article}, $posttype), { deep_nesting => 1 });
-		my $strip_desc = strip_notags($article->{description});
-
-		my $commentcount = $article->{discussion}
-			? $reader->getDiscussion($article->{discussion}, 'commentcount')
-			: 0;
-
-		my $disp_article = {
-			article		=> $strip_art,
-			date		=> $article->{date},
-			description	=> $strip_desc,
-			topic		=> $reader->getTopic($article->{tid}),
-			id		=> $article->{id},
-			discussion	=> $article->{discussion},
-			commentcount	=> $commentcount,
-		};
-
-		my $theme = _checkTheme($user->{'journal_theme'});
-		my $zoo   = getObject('Slash::Zoo');
-		slashDisplay($theme, {
-			articles	=> [{ day => $article->{date}, article => [ $disp_article ] }],
-			uid		=> $article->{uid} || $user->{uid},
-			is_friend	=> $zoo->isFriend($user->{uid}, $article->{uid}),
-			back		=> -1,
-			forward		=> 0,
-			nickname	=> $user->{nickname},
-		});
-	}
-
-	my $formats = $reader->getDescriptions('postmodes');
-	my $format_select = createSelect('posttype', $formats, $posttype, 1);
-
-	slashDisplay('journaledit', {
-		article		=> $article,
-		format_select	=> $format_select,
-	});
-
-	print getData('journalfoot');
-}
-
-sub _validFormkey {
-	my(@checks) = @_ ? @_ : qw(max_post_check interval_check formkey_check);
-	my $form = getCurrentForm();
-	my $error;
-
-	my $formname = 0;
-	my @caller = caller(1);
-	$formname = 'zoo' if $checks[0] eq 'generate_formkey'
-		&& $caller[3] =~ /\bdisplayFriends$/;
-
-	for (@checks) {
-		last if formkeyHandler($_, $formname, 0, \$error);
-	}
-
-	if ($error) {
-		_printHead('mainhead') or return;
-		print $error;
-		return 0;
-	} else {
-		# why does anyone care the length?
-		getCurrentDB()->updateFormkey(0, length($form->{article}));
-		return 1;
-	}
+	listArticle(@_);
 }
 
 sub _printHead {
@@ -880,12 +892,6 @@ sub _printHead {
 		$data->{useredit} = $useredit;
 	}
 
-	if ($user->{currentPage} eq 'misc') {
-		local $Slash::Utility::MAX_ERROR_LOG_LEVEL = 0;
-		use Data::Dumper;
-		errorLog(sprintf("currentPageBusted: %s\n", Dumper([getCurrentForm(), \%ENV, $user])));
-	}
-
 	slashDisplay('journalhead', $data);
 }
 
@@ -912,53 +918,63 @@ use Slash::Utility;
 
 sub modify_entry {
 	my($class, $id) = (shift, shift);
+
 	my $journal   = getObject('Slash::Journal');
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
-	my $slashdb   = getCurrentDB();
 	my $gSkin     = getCurrentSkin();
-
-	$id =~ s/\D+//g;
+	my $reader    = getObject('Slash::DB', { db_type => 'reader' });
 
 	return if $user->{is_anon};
 
+	$id =~ s/\D+//g;
 	my $entry = $journal->get($id);
 	return unless $entry->{id};
-	my $form = _save_params(1, @_) || {};
 
+	my $form = _save_params(1, @_) || {};
 	for (keys %$form) {
 		$entry->{$_} = $form->{$_} if defined $form->{$_};
 	}
 
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('journal-soap');
+	$rkey->create or return;
+
 	no strict 'refs';
-	my $saveArticle = *{ $user->{state}{packagename} . '::saveArticle' };
-	my $newid = $saveArticle->($journal, $constants, $user, $entry, $slashdb, $gSkin, 1);
-	return $newid == $id ? $id : undef;
+	my $saveArticle = *{ $user->{state}{packagename} . '::doSaveArticle' };
+	my($err) = $saveArticle->($journal, $constants, $user, $entry, $reader, $gSkin, $rkey);
+	return if $err;
+
+	return getCurrentForm('id') == $id ? $id : undef;
 }
 
 sub add_entry {
-	my $class = shift;
+	my($class) = (shift);
+
 	my $journal   = getObject('Slash::Journal');
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
-	my $slashdb   = getCurrentDB();
 	my $gSkin     = getCurrentSkin();
+	my $reader    = getObject('Slash::DB', { db_type => 'reader' });
 
 	return if $user->{is_anon};
 
 	my $form = _save_params(0, @_) || {};
-
 	$form->{posttype}		||= $user->{posttype};
 	$form->{tid}			||= $constants->{journal_default_topic};
 	$form->{journal_discuss}	= $user->{journal_discuss}
 		unless defined $form->{journal_discuss};
 
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('journal-soap');
+	$rkey->create or return;
+
 	no strict 'refs';
-	my $saveArticle = *{ $user->{state}{packagename} . '::saveArticle' };
-	$slashdb->createFormkey('journal');
-	my $reader = getObject('Slash::DB', { db_type => 'reader' }); # We need it for the eventual display
-	my $id = $saveArticle->($journal, $constants, $user, $form, $reader, $gSkin, 1);
-	return $id;
+	my $saveArticle = *{ $user->{state}{packagename} . '::doSaveArticle' };
+	my($err) = $saveArticle->($journal, $constants, $user, $form, $reader, $gSkin, $rkey);
+	return if $err;
+
+	return getCurrentForm('id');
 }
 
 
@@ -967,9 +983,15 @@ sub delete_entry {
 	my $journal   = getObject('Slash::Journal');
 	my $user      = getCurrentUser();
 
+	return if $user->{is_anon};
+
 	$id =~ s/\D+//g;
 
-	return if $user->{is_anon};
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('journal-soap');
+	$rkey->create or return;
+	$rkey->use or return;
+
 	return $journal->remove($id);
 }
 

@@ -17,6 +17,7 @@ __template__
 	<form action="[% gSkin.rootdir %]/journal.pl" method="post">
 		<fieldset>
 			<legend>Delete entry</legend>
+			[% PROCESS reskey_tag %]
 			<input type="hidden" name="op" value="remove">
 			<input type="hidden" name="[% name %]" value="1">
 			<div class="message">

@@ -14,13 +14,13 @@ __template__
 	[% back = back || 0;
 	   IF (back > -1) || forward %]
 				[% IF forward %]
-					<a href="[% gSkin.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% forward %]">&lt;Next [% constants.journal_default_display %] entries</a>
-				[% END %]
+					<a href="[% gSkin.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% forward %]">&lt; Previous [% constants.journal_default_display %] entries</a>
+ 				[% END %]
 				[% IF (back > -1) && forward %]
 					|
 				[% END %]
 				[% IF (back > -1) %]
-					<a href="[% gSkin.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% back %]">Last [% constants.journal_default_display %] entries&gt;</a>
+					<a href="[% gSkin.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% back %]">Next [% constants.journal_default_display %] entries &gt;</a>
 				[% END %]
 	[% END %]
 __seclev__

@@ -35,6 +35,9 @@ __template__
 	<a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</a>'s <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/friends/">Friends</a>
 [% END %]
 
+[% CASE 'noedit' %]
+	You may not edit this journal entry.
+
 [% CASE 'nousers' %]
 	No users with journals found matching "[% form.nickname | strip_literal %]".
 

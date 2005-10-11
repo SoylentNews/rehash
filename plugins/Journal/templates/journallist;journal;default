@@ -11,20 +11,25 @@ en_US
 __name__
 journallist
 __template__
-[% showopts = !user.is_anon && (uid == user.uid) %]
-[%# No need to provide general options here, that's what the
-    Preferences tab is for. We do show the option to edit/delete
-    individual entries though. - Jamie %]
-[%# PROCESS journaloptions IF showopts %]
+[% showform = !user.is_anon && (uid == user.uid);
+   IF showform;
+       reskey = Slash.getObject('Slash::ResKey');
+       rkey = reskey.key('journal');
+       IF !rkey.create;  # didn't work, bail
+           showform = 0;
+       END;
+   END;
+%]
 
-[%# And having a second titlebar looks wrong to me... - Jamie %]
+[%# Having a second titlebar looks wrong to me... - Jamie %]
 [%# PROCESS titlebar title => "$nickname's Journal Entries", width => "100%" %]
 
-[% IF showopts %]
+[% IF showform %]
 		<form method="post" action="[% gSkin.rootdir %]/journal.pl">
 			<fieldset>
 				<legend>List of Journal Entries</legend>
 				<input type="hidden" name="op" value="remove">
+				[% PROCESS reskey_tag %]
 [% END %]
 <table width="90%" border="0" cellpadding="2" cellspacing="0">
 	<tr>
@@ -35,20 +40,20 @@ __template__
 	<tr>
 		<td valign="top"><a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/journal/[% article.0 %]"><b>[% article.2 %]</b></a></td>
 		<td valign="top"><em>[% Slash.timeCalc(article.1) %]</em></td>
-	[%- IF showopts %]
+	[%- IF showform %]
 		<td valign="top"><a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% article.0 %]">[edit]</a></td>
 		<td valign="top" align="center"><input type="checkbox" name="del_[% article.0 %]" value="1"></td>
 	[%- END %]
 	</tr>
 [% END %]
-[%- IF showopts %]
+[%- IF showform %]
 	<tr>
 		<td colspan="3">&nbsp;</td>
 		<td align="center"><input type="submit" value="Delete Articles"></td>
 	</tr>
 [% END -%]
 </table>
-	[% IF showopts %]
+	[% IF showform %]
 			</fieldset>
 		</form>
 	[% END %]
