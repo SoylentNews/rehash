@@ -1136,7 +1136,6 @@ sub displayThread {
 				linkComment($comment, $pntcmt, 1);
 			$finish_list++;
 		}
-
 		$return .= $const->{fullcommentend} if ($user->{mode} eq 'flat');
 
 		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
@@ -1157,7 +1156,6 @@ sub displayThread {
 
 		last if $displayed >= $user->{commentlimit};
 	}
-
 	if ($hidden
 		&& ! $user->{hardthresh}
 		&& $user->{mode} ne 'archive'
@@ -1723,7 +1721,7 @@ sub _hard_dispComment {
 	} elsif ($user->{nosigs}) {
 		$comment_to_display = $comment->{comment};
 	} else {
-		$comment_to_display = "$comment->{comment}<br>$comment->{sig}";
+		$comment_to_display = "$comment->{comment}<div class=\"sig\">$comment->{sig}</div>";
 	}
 
 	$time_to_display = timeCalc($comment->{date});
@@ -1869,8 +1867,8 @@ EOT
 			subject_only => 1,
 		}, 1) if $comment->{original_pid};
 
-		push @link, createSelect("reason_$comment->{cid}",
-			$reasons, '', 1, 1) if $can_mod
+		push @link, "<div class=\"modsel\">".createSelect("reason_$comment->{cid}",
+			$reasons, '', 1, 1)."</div>" if $can_mod
 				&& $user->{mode} ne 'archive'
 				&& ( !$user->{state}{discussion_archived}
 					|| $constants->{comments_moddable_archived} );
