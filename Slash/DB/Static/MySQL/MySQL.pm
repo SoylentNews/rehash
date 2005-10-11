@@ -2121,8 +2121,8 @@ sub getStoriesToRefresh {
 	my $stoid_clause = "";
 	
 	if ($options->{stoid}) {
-		my @stoids;
-		if(ref $options->{stoid} eq "ARRAY") {
+		my @stoids = ( );
+		if (ref $options->{stoid} eq "ARRAY") {
 			@stoids = @{$options->{stoid}}
 		} elsif (!ref $options->{stoid}) {
 			push @stoids, $options->{stoid};
