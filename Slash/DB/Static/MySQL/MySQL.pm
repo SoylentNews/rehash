@@ -2113,10 +2113,25 @@ sub getStoriesToDelete {
 # files rewritten (which mainly means they have a row present
 # in the story_dirty table), starting with the most recent.
 sub getStoriesToRefresh {
-	my($self, $limit, $tid) = @_;
+	my($self, $limit, $tid, $options) = @_;
+	$options ||= {};
 	$limit ||= 10;
 	my $tid_clause = "";
 	$tid_clause = " AND story_topics_rendered.tid = $tid" if $tid;
+	my $stoid_clause = "";
+	
+	if ($options->{stoid}) {
+		my @stoids;
+		if(ref $options->{stoid} eq "ARRAY") {
+			@stoids = @{$options->{stoid}}
+		} elsif (!ref $options->{stoid}) {
+			push @stoids, $options->{stoid};
+		}
+		if (@stoids) {
+			my $stoid_in = join ',', map { $self->sqlQuote($_) } @stoids;
+			$stoid_clause = " AND stories.stoid IN ($stoid_in) ";
+		}
+	}
 
 	# Include story_topics_rendered in this select just to make
 	# sure there is at least one topic assigned to such stories.
@@ -2131,7 +2146,8 @@ sub getStoriesToRefresh {
 		 AND stories.stoid = story_text.stoid
 		 AND story_dirty.stoid IS NOT NULL
 		 AND stories.stoid = story_topics_rendered.stoid
-		 $tid_clause",
+		 $tid_clause
+		 $stoid_clause",
 		"ORDER BY time DESC LIMIT $limit");
 	return [ ] if !@$retval;
 
