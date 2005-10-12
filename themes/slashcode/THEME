@@ -238,7 +238,6 @@ template=templates/maintable_end;misc;default
 template=templates/messages;users;default
 template=templates/metakeywordsd;misc;default
 template=templates/mid_tab;misc;default
-template=templates/miniAdminMenu;users;default
 template=templates/modCommentLog;misc;default
 template=templates/mod_footer;comments;default
 template=templates/mod_header;comments;default

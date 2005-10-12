@@ -435,7 +435,6 @@ themes/slashcode/templates/main;authors;default
 themes/slashcode/templates/mainmenu;misc;default
 themes/slashcode/templates/messages;users;default
 themes/slashcode/templates/metaModerate;metamod;default
-themes/slashcode/templates/miniAdminMenu;users;default
 themes/slashcode/templates/modCommentLog;misc;default
 themes/slashcode/templates/mod_footer;comments;default
 themes/slashcode/templates/mod_header;comments;default
