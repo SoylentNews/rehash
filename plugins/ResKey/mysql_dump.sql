@@ -2,6 +2,22 @@
 # $Id$
 #
 
+### Possible reskey_vars (default is undef/false unless specified):
+# adminbypass        - 1/0 - If admin, bypass checks for duration, proxy, ACL, and user
+# 
+# user_is_admin      - 1/0 - Requires user to be admin
+# user_is_subscriber - 1/0 - Requires user to be subscriber
+# user_seclev        - \d+ - Minimum seclev to use resource
+# user_karma         - \d+ - Minimum karma to use resource
+# 
+# acl                - \s+ - If this ACL present, can use resource
+# acl_no             - \s+ - If this ACL present, can't use resource
+# 
+# duration_max-failures - \d+ - how many failures per reskey
+# duration_max-uses     - \d+ - how many uses per timeframe
+# duration_uses         - \d+ - min duration (in seconds) between uses
+# duration_creation-use - \d+ - min duration between (in seconds) creation and use
+
 
 INSERT INTO vars VALUES ('reskey_srcid_masksize', 24, 'which srcid mask size to use for reskeys');
 INSERT INTO vars VALUES ('reskey_timeframe', 14400, 'Default timeframe base to use for max-uses (in seconds)');
@@ -33,7 +49,6 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'use', 'Slash::ResKey::Check
 INSERT INTO reskey_vars VALUES (1, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
 INSERT INTO reskey_vars VALUES (1, 'acl_no', 'reskey_no_comments', 'If this ACL present, can\'t use resource');
 INSERT INTO reskey_vars VALUES (1, 'user_seclev', 0, 'Minimum seclev to use resource');
-INSERT INTO reskey_vars VALUES (1, 'user_karma', '', 'No minimum karma to use resource');
 INSERT INTO reskey_vars VALUES (1, 'duration_max-uses',      30, 'how many uses per timeframe');
 INSERT INTO reskey_vars VALUES (1, 'duration_max-failures',  10, 'how many failures per reskey');
 INSERT INTO reskey_vars VALUES (1, 'duration_uses',         120, 'min duration (in seconds) between uses');
