@@ -24,10 +24,9 @@ sub doCheck {
 	my $acl    = $check_vars->{acl};
 	my $acl_no = $check_vars->{acl_no};
 
-	# by default, is_admin is an automatic exception to lack of ACL
+	# is_admin is an exception to lack of ACL if adminbypass set
 	my $acl_nobypass_admin = (!$user->{is_admin} || (
-		$user->{is_admin} &&
-		$check_vars->{acl_nobypass_admin}
+		$user->{is_admin} && !$check_vars->{adminbypass}
 	));
 
 	if ($acl && !$user->{acl}{$acl} && $acl_nobypass_admin) {
