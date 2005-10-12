@@ -3346,3 +3346,8 @@ UPDATE vars SET value = 'T_2_5_0_84' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# Changes for plugins/ResKey (which you should be using)
+ALTER TABLE reskeys CHANGE COLUMN reskey reskey CHAR(20) DEFAULT '' NOT NULL, TYPE=InnoDB;
+ALTER TABLE reskey_resources TYPE=InnoDB;
+ALTER TABLE reskey_resource_checks TYPE=InnoDB;
+
