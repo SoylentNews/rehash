@@ -18,11 +18,11 @@ our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 sub doCheck {
 	my($self) = @_;
 
-	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
+	my $check_vars = $self->getCheckVars;
 
-	if ($constants->{"reskey_checks_adminbypass_$self->{resname}"} && $user->{is_admin}) {
+	if ($check_vars->{adminbypass} && $user->{is_admin}) {
 		return RESKEY_SUCCESS;
 	}
 
