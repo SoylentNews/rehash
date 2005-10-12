@@ -87,9 +87,10 @@ Or:
 
 	<input type="hidden" name="reskey" value="[% reskey_value %]">
 
-But the easiest way is to just pass the rkey object as the mentioned in the
-first example, and then call the F<reskey_tag> template, which does the
-right thing for you:
+But the easiest way is to just call the F<reskey_tag> template, which does the
+right thing for you (you don't even need to pass anything to slashDisplay;
+just make sure the reskey work is done in your code before calling this
+in your template):
 
 	[% PROCESS reskey_tag %]
 
@@ -123,12 +124,6 @@ sub new {
 
 	$self->debug($debug);
 
-	# from filter_param
-	$reskey =~ s|[^a-zA-Z0-9_]+||g if $reskey;
-
-	# reskey() to set the value is called only here and from dbCreate
-	$self->reskey($reskey || getCurrentForm('reskey'));
-
 	if ($resname =~ /[a-zA-Z]/) {
 		my $resources = $self->getResources;
 		$rkrid = $resources->{name}{$resname};
@@ -142,6 +137,15 @@ sub new {
 
 	$self->resname($resname);
 	$self->rkrid($rkrid);
+
+
+	# from filter_param
+	$reskey =~ s|[^a-zA-Z0-9_]+||g if $reskey;
+
+	# reskey() to set the value is called only here and from dbCreate
+	# this is the only place $form->{reskey} is looked at
+	$self->reskey($reskey || getCurrentForm('reskey'));
+
 
 	$self->_init;
 
@@ -263,7 +267,13 @@ sub _createAccessor {
 	return sub {
 		my($self, $value) = @_;
 		$self->_flow($name);
-		return $self->{$newname} = $value if defined $value;
+		if (defined $value) {
+			if ($name eq 'reskey') {
+				my $user = getCurrentUser();
+				$user->{state}{$name} = $value;
+			}
+			$self->{$newname} = $value;
+		}
 		return $self->{$newname};
 	};
 }
@@ -397,7 +407,7 @@ sub dbCreate {
 	my $num_tries = 10;
 
 	while (1) {
-		my $reskey = getAnonId(1);
+		my $reskey = getAnonId(1, 20);
 		my $rows = $slashdb->sqlInsert('reskeys', {
 			reskey		=> $reskey,
 			rkrid		=> $self->rkrid,

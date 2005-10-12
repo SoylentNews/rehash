@@ -19,7 +19,7 @@ __template__
    IF rkey;
    	this_reskey = rkey.reskey;
    ELSE;
-   	this_reskey = form.reskey;
+   	this_reskey = user.state.reskey;
    END;
    IF this_reskey %]
 <input type="hidden" name="reskey" value="[% this_reskey %]">
