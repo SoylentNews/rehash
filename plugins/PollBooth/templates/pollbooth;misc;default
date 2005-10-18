@@ -59,10 +59,6 @@ __template__
 		<form action="[% gSkin.rootdir %]/pollBooth.pl" method="post">
 			<fieldset>
 				<legend>Poll</legend>
-			[%- IF returnto -%]
-				<input type="hidden" name="op" value="vote_return">
-				<input type="hidden" name="returnto" value="[% returnto | strip_attribute %]">
-			[%- END -%]
 				<input type="hidden" name="qid" value="[% qid | strip_attribute %]">
 			[% IF user.currentSkin %]
 				<input type="hidden" name="section" value="[% user.currentSkin | strip_attribute %]">

@@ -21,7 +21,7 @@ __template__
 <div id="slashboxes">
 [% Slash.sidebox(
 	Slash.db.getBlock('poll', 'title'),
-	Slash.pollbooth('_currentqid', 1, 0, 1),
+	Slash.pollbooth('_currentqid', 1, 0),
 	'poll',
         1);
 %]

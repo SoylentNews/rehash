@@ -543,7 +543,7 @@ sub linkStory {
 
 #========================================================================
 
-=head2 pollbooth(QID [, NO_TABLE, CENTER, RETURNTO])
+=head2 pollbooth(QID [, NO_TABLE, CENTER])
 
 Creates a voting pollbooth.
 
@@ -567,13 +567,6 @@ If false, then will be formatted inside a C<fancybox>.
 Whether or not to center the tabled pollbooth (only
 works with NO_TABLE).
 
-=item RETURNTO
-
-If this parameter is specified, the voting widget will take the vote and return
-the user to the specified URI. Note that you WILL NOT be able to redirect
-outside of the site using this parameter for security reasons (hence the need for
-URIs as opposed to URLs).
-
 =back
 
 =item Return value
@@ -594,7 +587,7 @@ The 'pollbooth' template block.
 # attention
 
 sub pollbooth {
-	my($qid, $no_table, $center, $returnto) = @_;
+	my($qid, $no_table, $center) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $gSkin = getCurrentSkin();
@@ -625,7 +618,6 @@ sub pollbooth {
 		can_vote	=> $can_vote,
 		voters		=> $poll->{pollq}{voters},
 		comments	=> $n_comments,
-		returnto	=> $returnto,
 	}, 1);
 }
 
