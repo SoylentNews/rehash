@@ -3106,6 +3106,7 @@ CREATE TABLE css (
 	theme VARCHAR(32) DEFAULT '',
 	ctid TINYINT(4) NOT NULL DEFAULT '0',
 	ordernum int(11) DEFAULT '0',
+	ie_cond VARCHAR(16) DEFAULT '',
 	PRIMARY KEY  (csid),
 	KEY ctid (ctid),
 	KEY page_skid (page,skid),
@@ -3376,4 +3377,5 @@ INSERT INTO reskey_vars VALUES (5, 'duration_uses',          10, 'min duration (
 INSERT INTO reskey_vars VALUES (5, 'duration_creation-use',   2, 'min duration (in seconds) between creation and use');
 
 # PUDGE LAST UPDATED HERE
+ALTER TABLE css ADD ie_cond VARCHAR(16) DEFAULT '';
 
