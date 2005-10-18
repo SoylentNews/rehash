@@ -20,9 +20,9 @@ __template__
 	<table cellspacing=2 border=0>
 	[% FOREACH acl = acls.keys %]
 		<tr>
-			<td>[% acl | strip_nohtml %]</td>
-			<td align="right">([% acls.$acl.size %])</td>
-			<td>
+			<td valign="top">[% acl | strip_nohtml %]</td>
+			<td valign="top" align="right">([% acls.$acl.size %])</td>
+			<td valign="top">
 			[% FOREACH uid = acls.$acl.nsort %]
 				<a href="[% gSkin.rootdir %]/users.pl?uid=[% uid | strip_attribute %]">[% uid %]</a>
 			[% END %]
