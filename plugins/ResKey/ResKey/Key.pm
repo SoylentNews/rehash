@@ -268,6 +268,7 @@ sub _createAccessor {
 		my($self, $value) = @_;
 		$self->_flow($name);
 		if (defined $value) {
+			# cache the reskey in the user object for easy access
 			if ($name eq 'reskey') {
 				my $user = getCurrentUser();
 				$user->{state}{$name} = $value;
@@ -312,6 +313,11 @@ sub _createActionMethod {
 		}
 
 		my $ok = $self->check;
+# fake an error
+#		if ($self->type eq 'use') {
+#			$self->death(1);
+#			$self->error(['dummy error']);
+#		}
 
 		# don't bother if type is create, and checks failed ...
 		# we only continue on for touch/use to update the DB
@@ -447,8 +453,12 @@ sub dbCreate {
 sub dbUse {
 	my($self) = @_;
 	$self->_flow;
-	my $failed = !$self->success;
-	$self->_save_errors if $failed;
+	my($failed, $failure_string);
+	if (!$self->success) {
+		$failed = $self->error;
+		$failure_string = ref($failed) ? $failed->[0] : $failed;
+		$self->_save_errors;
+	}
 	$self->_init;
 
 	my(%update, $where, $no_is_alive_check);
@@ -496,7 +506,21 @@ sub dbUse {
 		# which may require additional SELECTs to find out
 		# exactly what the problem is, or we could just
 		# say the reskey is not valid
-		$self->error(['touch-use failed']);
+		$failure_string = 'touch-use failed';
+		$self->error([$failure_string]);
+	}
+
+	if ($failure_string) {
+		my $reskey_obj = $self->get;
+		if ($reskey_obj) {
+			my $rkid = $reskey_obj->{rkid};
+			if ($rkid) {
+				$slashdb->sqlReplace('reskey_failures', {
+					rkid	=> $rkid,
+					failure	=> $failure_string
+				});
+			}
+		}
 	}
 
 	return $self->success;

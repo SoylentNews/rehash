@@ -31,6 +31,16 @@ __template__
 		(Poll not yet active)<br>
 		[% END %]
 	[% END %]
+
+	[% IF can_vote;
+	      reskey = Slash.getObject('Slash::ResKey');
+	      rkey = reskey.key('pollbooth');
+	      IF !rkey.create;  # didn't work, bail
+	         can_vote = 0;
+	      END;
+	   END
+	%]
+
 	[% IF !can_vote %]
 
 		<b>[% question %]</b>
@@ -46,24 +56,25 @@ __template__
 
 	[% ELSE %]
 	
-		<form action="[% gSkin.rootdir %]/pollBooth.pl">
+		<form action="[% gSkin.rootdir %]/pollBooth.pl" method="post">
 			<fieldset>
 				<legend>Poll</legend>
 			[%- IF returnto -%]
-				<input type="hidden" name="op" value="vote_return" >
-				<input type="hidden" name="returnto" value="[% returnto | strip_attribute %]" >
+				<input type="hidden" name="op" value="vote_return">
+				<input type="hidden" name="returnto" value="[% returnto | strip_attribute %]">
 			[%- END -%]
-				<input type="hidden" name="qid" value="[% qid | strip_attribute %]" >
+				<input type="hidden" name="qid" value="[% qid | strip_attribute %]">
 			[% IF user.currentSkin %]
-				<input type="hidden" name="section" value="[% user.currentSkin | strip_attribute %]" >
+				<input type="hidden" name="section" value="[% user.currentSkin | strip_attribute %]">
 			[% END %]
 				<b>[% question %]</b>
 
 			[% FOREACH ans = answers %]
-				<br><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]" >[% ans.answer | strip_html %]
+				<br><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]">[% ans.answer | strip_html %]
 			[% END %]
 
-				<br><input type="submit" value="Vote" >
+				<br><input type="submit" value="Vote">
+				[% PROCESS reskey_tag %]
 				[ <a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><b>Results</b></a> |
 				<a href="[% gSkin.rootdir %]/pollBooth.pl"><b>Polls</b></a> ] <br>
 				Comments:<b>[% comments %]</b> | Votes:<b>[% voters %]</b>

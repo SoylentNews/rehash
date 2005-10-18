@@ -4,20 +4,20 @@
 
 DROP TABLE IF EXISTS reskeys;
 CREATE TABLE reskeys (
-    rkid       INT NOT NULL AUTO_INCREMENT,
-    reskey     CHAR(20) DEFAULT '' NOT NULL,	# unique resource key string
-    rkrid      TINYINT UNSIGNED NOT NULL,	# points to reskey_resources.rkrid
+    rkid        INT NOT NULL AUTO_INCREMENT,
+    reskey      CHAR(20) DEFAULT '' NOT NULL,	# unique resource key string
+    rkrid       TINYINT UNSIGNED NOT NULL,	# points to reskey_resources.rkrid
 
-    uid        MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
-    srcid_ip   BIGINT UNSIGNED DEFAULT 0 NOT NULL,
+    uid         MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
+    srcid_ip    BIGINT UNSIGNED DEFAULT 0 NOT NULL,
 
-    failures   TINYINT DEFAULT 0 NOT NULL,                          # number of failures of this key
-    touches    TINYINT DEFAULT 0 NOT NULL,                          # number of touches (not including failures, or successful uses) of this key
-    is_alive   ENUM('yes', 'no') DEFAULT 'yes' NOT NULL,
+    failures    TINYINT DEFAULT 0 NOT NULL,                          # number of failures of this key
+    touches     TINYINT DEFAULT 0 NOT NULL,                          # number of touches (not including failures, or successful uses) of this key
+    is_alive    ENUM('yes', 'no') DEFAULT 'yes' NOT NULL,
 
-    create_ts  DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,     # on create
-    last_ts    DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,     # last use
-    submit_ts  DATETIME DEFAULT NULL,                               # on success
+    create_ts   DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,     # on create
+    last_ts     DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,     # last use
+    submit_ts   DATETIME DEFAULT NULL,                               # on success
 
     PRIMARY KEY (rkid),
     UNIQUE reskey (reskey),
@@ -27,6 +27,13 @@ CREATE TABLE reskeys (
     KEY create_ts (create_ts),
     KEY last_ts (last_ts),
     KEY submit_ts (submit_ts)
+) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS reskey_failures;
+CREATE TABLE reskey_failures (
+    rkid        INT NOT NULL,
+    failure     VARCHAR(255) DEFAULT '' NOT NULL,
+    PRIMARY KEY (rkid)
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS reskey_resources;
@@ -49,9 +56,9 @@ CREATE TABLE reskey_resource_checks (
 
 DROP TABLE IF EXISTS reskey_vars;
 CREATE TABLE reskey_vars (
-    rkrid TINYINT UNSIGNED NOT NULL,
-    name VARCHAR(48) DEFAULT '' NOT NULL,
-    value TEXT,
+    rkrid       TINYINT UNSIGNED NOT NULL,
+    name        VARCHAR(48) DEFAULT '' NOT NULL,
+    value       TEXT,
     description VARCHAR(255),
     UNIQUE name_rkrid (name, rkrid)
 ) TYPE=InnoDB;

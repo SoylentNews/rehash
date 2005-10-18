@@ -3223,10 +3223,6 @@ UPDATE vars SET value = 'T_2_5_0_83' WHERE name = 'cvs_tag_currentcode';
 
 # End of T_2_5_0_83, Start of T_2_5_0_84 - 2005/10/04
 
-# PUDGE LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 # Install MIME::Types if any of your Slash sites are using the Blob plugin.
 
 # Changes for plugins/Daypass
@@ -3291,7 +3287,6 @@ INSERT IGNORE INTO reskey_resource_checks VALUES (NULL, 2, 'all', 'Slash::ResKey
 INSERT IGNORE INTO reskey_resource_checks VALUES (NULL, 2, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
 INSERT IGNORE INTO reskey_resource_checks VALUES (NULL, 2, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
 INSERT IGNORE INTO reskey_resource_checks VALUES (NULL, 2, 'all', 'Slash::ResKey::Checks::Duration',            601);
-INSERT IGNORE INTO reskey_resource_checks VALUES (NULL, 2, 'use', 'Slash::ResKey::Checks::ProxyScan',          1001);
 
 ### vars
 INSERT INTO reskey_vars VALUES (2, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
@@ -3310,7 +3305,6 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 3, 'all', 'Slash::ResKey::Check
 INSERT INTO reskey_resource_checks VALUES (NULL, 3, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
 INSERT INTO reskey_resource_checks VALUES (NULL, 3, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
 INSERT INTO reskey_resource_checks VALUES (NULL, 3, 'all', 'Slash::ResKey::Checks::Duration',            601);
-INSERT INTO reskey_resource_checks VALUES (NULL, 3, 'use', 'Slash::ResKey::Checks::ProxyScan',          1001);
 
 ### vars
 INSERT INTO reskey_vars VALUES (3, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
@@ -3330,7 +3324,6 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 4, 'all', 'Slash::ResKey::Check
 INSERT INTO reskey_resource_checks VALUES (NULL, 4, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
 INSERT INTO reskey_resource_checks VALUES (NULL, 4, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
 INSERT INTO reskey_resource_checks VALUES (NULL, 4, 'all', 'Slash::ResKey::Checks::Duration',            601);
-INSERT INTO reskey_resource_checks VALUES (NULL, 4, 'use', 'Slash::ResKey::Checks::ProxyScan',          1001);
 
 ### vars
 INSERT INTO reskey_vars VALUES (4, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
@@ -3346,8 +3339,41 @@ UPDATE vars SET value = 'T_2_5_0_84' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# SLASHDOT LAST UPDATED HERE
+
 # Changes for plugins/ResKey (which you should be using)
 ALTER TABLE reskeys CHANGE COLUMN reskey reskey CHAR(20) DEFAULT '' NOT NULL, TYPE=InnoDB;
 ALTER TABLE reskey_resources TYPE=InnoDB;
 ALTER TABLE reskey_resource_checks TYPE=InnoDB;
+
+# we only want this for comments, though you may wish it for other things ...
+DELETE FROM reskey_resource_checks WHERE class = 'Slash::ResKey::Checks::ProxyScan';
+
+DROP TABLE IF EXISTS reskey_failures;
+CREATE TABLE reskey_failures (
+    rkid        INT NOT NULL,
+    failure     VARCHAR(255) DEFAULT '' NOT NULL,
+    PRIMARY KEY (rkid)
+) TYPE=InnoDB;
+
+INSERT INTO reskey_resources VALUES (5, 'pollbooth');
+
+##### pollbooth
+### checks
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::AL2::AnonNoPost',     301);
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::Duration',            601);
+
+### vars
+INSERT INTO reskey_vars VALUES (5, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (5, 'acl_no', 'reskey_no_pollbooth', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (5, 'duration_max-uses',      10, 'how many uses per timeframe');
+INSERT INTO reskey_vars VALUES (5, 'duration_max-failures',   3, 'how many failures per reskey');
+INSERT INTO reskey_vars VALUES (5, 'duration_uses',          10, 'min duration (in seconds) between uses');
+INSERT INTO reskey_vars VALUES (5, 'duration_creation-use',   2, 'min duration (in seconds) between creation and use');
+
+# PUDGE LAST UPDATED HERE
 

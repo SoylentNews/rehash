@@ -917,6 +917,10 @@ use Slash::Utility;
 sub modify_entry {
 	my($class, $id) = (shift, shift);
 
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('journal-soap');
+	$rkey->create or return;
+
 	my $journal   = getObject('Slash::Journal');
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
@@ -934,10 +938,6 @@ sub modify_entry {
 		$entry->{$_} = $form->{$_} if defined $form->{$_};
 	}
 
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('journal-soap');
-	$rkey->create or return;
-
 	no strict 'refs';
 	my $saveArticle = *{ $user->{state}{packagename} . '::doSaveArticle' };
 	my($err) = $saveArticle->($journal, $constants, $user, $entry, $reader, $gSkin, $rkey);
@@ -948,6 +948,10 @@ sub modify_entry {
 
 sub add_entry {
 	my($class) = (shift);
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('journal-soap');
+	$rkey->create or return;
 
 	my $journal   = getObject('Slash::Journal');
 	my $constants = getCurrentStatic();
@@ -963,10 +967,6 @@ sub add_entry {
 	$form->{journal_discuss}	= $user->{journal_discuss}
 		unless defined $form->{journal_discuss};
 
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('journal-soap');
-	$rkey->create or return;
-
 	no strict 'refs';
 	my $saveArticle = *{ $user->{state}{packagename} . '::doSaveArticle' };
 	my($err) = $saveArticle->($journal, $constants, $user, $form, $reader, $gSkin, $rkey);
@@ -978,6 +978,11 @@ sub add_entry {
 
 sub delete_entry {
 	my($class, $id) = @_;
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('journal-soap');
+	$rkey->create or return;
+
 	my $journal   = getObject('Slash::Journal');
 	my $user      = getCurrentUser();
 
@@ -985,9 +990,6 @@ sub delete_entry {
 
 	$id =~ s/\D+//g;
 
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('journal-soap');
-	$rkey->create or return;
 	$rkey->use or return;
 
 	return $journal->remove($id);
@@ -995,6 +997,11 @@ sub delete_entry {
 
 sub get_entry {
 	my($class, $id) = @_;
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('journal-soap');
+	$rkey->create or return;
+
 	my $journal   = getObject('Slash::Journal');
 	my $constants = getCurrentStatic();
 	my $slashdb   = getCurrentDB();
@@ -1017,6 +1024,11 @@ sub get_entry {
 
 sub get_entries {
 	my($class, $uid, $num) = @_;
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('journal-soap');
+	$rkey->create or return;
+
 	my $journal   = getObject('Slash::Journal');
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
@@ -1049,6 +1061,11 @@ sub get_entries {
 # SOAP working (this will be in the Search SOAP API, i think)
 sub get_uid_from_nickname {
 	my($self, $nick) = @_;
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('journal-soap');
+	$rkey->create or return;
+
 	return getCurrentDB()->getUserUID($nick);
 }
 

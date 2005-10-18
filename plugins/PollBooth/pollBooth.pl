@@ -409,6 +409,13 @@ sub vote_return {
 	my $aid = $form->{'aid'};
 	return unless $qid && $aid;
 
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('pollbooth');
+	unless ($rkey->use) {
+		print $rkey->errstr;
+		return;
+	}
+
 	my(%all_aid) = map { ($_->[0], 1) }
 		@{$reader->getPollAnswers($qid, ['aid'])};
 	my $poll_open = $reader->isPollOpen($qid);

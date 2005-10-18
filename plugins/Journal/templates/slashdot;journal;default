@@ -54,18 +54,7 @@ __template__
                 [% END %]
         [% END %]
         <div class="journalpage">
-        [% back = back || 0;
-           IF (back > -1) || forward %]
-                                [% IF forward %]
-                                        <a href="[% gSkin.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% forward %]">&lt; Previous  [% constants.journal_default_display %] entries</a>
-                                [% END %]
-                                [% IF (back > -1) && forward %]
-                                        |
-                                [% END %]
-                                [% IF (back > -1) %]
-                                        <a href="[% gSkin.rootdir %]/journal.pl?op=display&amp;uid=[% uid %]&amp;start=[% back %]">Next [% constants.journal_default_display %] entries &gt;</a>
-                                [% END %]
-        [% END %]
+		[% PROCESS pagination %]
                 <br>
                 <a href="[% gSkin.rootdir %]/journal.pl?op=list&amp;uid=[% uid %]" class="all">List all Journal entries</a>
         </div>

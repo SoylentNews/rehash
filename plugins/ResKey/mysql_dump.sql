@@ -26,6 +26,7 @@ INSERT INTO reskey_resources VALUES (1, 'comments');
 INSERT INTO reskey_resources VALUES (2, 'zoo');
 INSERT INTO reskey_resources VALUES (3, 'journal');
 INSERT INTO reskey_resources VALUES (4, 'journal-soap');
+INSERT INTO reskey_resources VALUES (5, 'pollbooth');
 
 
 
@@ -65,7 +66,6 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 2, 'all', 'Slash::ResKey::Check
 INSERT INTO reskey_resource_checks VALUES (NULL, 2, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
 INSERT INTO reskey_resource_checks VALUES (NULL, 2, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
 INSERT INTO reskey_resource_checks VALUES (NULL, 2, 'all', 'Slash::ResKey::Checks::Duration',            601);
-INSERT INTO reskey_resource_checks VALUES (NULL, 2, 'use', 'Slash::ResKey::Checks::ProxyScan',          1001);
 
 ### vars
 INSERT INTO reskey_vars VALUES (2, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
@@ -89,7 +89,6 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 3, 'all', 'Slash::ResKey::Check
 INSERT INTO reskey_resource_checks VALUES (NULL, 3, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
 INSERT INTO reskey_resource_checks VALUES (NULL, 3, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
 INSERT INTO reskey_resource_checks VALUES (NULL, 3, 'all', 'Slash::ResKey::Checks::Duration',            601);
-INSERT INTO reskey_resource_checks VALUES (NULL, 3, 'use', 'Slash::ResKey::Checks::ProxyScan',          1001);
 
 ### vars
 INSERT INTO reskey_vars VALUES (3, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
@@ -109,7 +108,6 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 4, 'all', 'Slash::ResKey::Check
 INSERT INTO reskey_resource_checks VALUES (NULL, 4, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
 INSERT INTO reskey_resource_checks VALUES (NULL, 4, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
 INSERT INTO reskey_resource_checks VALUES (NULL, 4, 'all', 'Slash::ResKey::Checks::Duration',            601);
-INSERT INTO reskey_resource_checks VALUES (NULL, 4, 'use', 'Slash::ResKey::Checks::ProxyScan',          1001);
 
 ### vars
 INSERT INTO reskey_vars VALUES (4, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
@@ -121,4 +119,22 @@ INSERT INTO reskey_vars VALUES (4, 'duration_max-uses',      30, 'how many uses 
 INSERT INTO reskey_vars VALUES (4, 'duration_max-failures',  10, 'how many failures per reskey');
 INSERT INTO reskey_vars VALUES (4, 'duration_uses',          30, 'min duration (in seconds) between uses');
 
+
+
+##### pollbooth
+### checks
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::AL2::AnonNoPost',     301);
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::Duration',            601);
+
+### vars
+INSERT INTO reskey_vars VALUES (5, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (5, 'acl_no', 'reskey_no_pollbooth', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (5, 'duration_max-uses',      10, 'how many uses per timeframe');
+INSERT INTO reskey_vars VALUES (5, 'duration_max-failures',   3, 'how many failures per reskey');
+INSERT INTO reskey_vars VALUES (5, 'duration_uses',          10, 'min duration (in seconds) between uses');
+INSERT INTO reskey_vars VALUES (5, 'duration_creation-use',   2, 'min duration (in seconds) between creation and use');
 

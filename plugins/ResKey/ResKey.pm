@@ -88,6 +88,16 @@ sub purge_old {
 	my($self) = @_;
 	my $timeframe = getCurrentStatic('reskey_timeframe') || 14400;
 	$self->sqlDelete('reskeys', "create_ts < DATE_SUB(NOW(), INTERVAL $timeframe SECOND)");
+
+	my $rkids = $self->sqlSelectAll('rkf.rkid',
+		'reskey_failures AS rkf LEFT JOIN reskeys AS rk ON rk.rkid=rkf.rkid',
+		'rk.rkid IS NULL'
+	);
+
+	if (@$rkids) {
+		my $rkid_string = join ',', map { $_->[0] } @$rkids;
+		$self->sqlDelete('reskey_failures', "rkid IN ($rkid_string)");
+	}
 }
 
 1;
