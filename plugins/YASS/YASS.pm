@@ -32,19 +32,38 @@ sub new {
 
 sub getSidsURLs {
 	my ($self) = @_;
-	$self->sqlSelectAll("sid, value", "story_param", "name='url'");
+	# This was originally written to return an arrayref of
+	# arrayrefs of two values: sid, url.  Since the stories
+	# tables converted to stoids, this became a little more
+	# complicated, but that's OK.
+	my $stoid_value_hr = $self->sqlSelectAllHashref(
+		'stoid',
+		'stoid, value',
+		'story_param',
+		"name='url'");
+	return [ ] if !$stoid_value_hr || !%$stoid_value_hr;
+	my @stoids = sort keys %$stoid_value_hr;
+	my $stoids_in = join(',', @stoids);
+	my $sid_stoid_ar = $self->sqlSelectAll('sid, stoid', 'stories',
+		"stoid IN ($stoids_in)");
+	# The duples are [sid,stoid] now; replace them in place with
+	# [sid,value].
+	for my $duple (@$sid_stoid_ar) {
+		$duple->[1] = $stoid_value_hr->{ $duple->[1] } || '';
+	}
+	return $sid_stoid_ar;
 }
 
 sub create {
 	my ($self, $hash) = @_;
-	$hash->{'-touched'} = "now()";
+	$hash->{'-touched'} = "NOW()";
 	$self->sqlInsert('yass_sites', $hash);
 }
 
 sub success {
 	my ($self, $id) = @_;
 	my %hash;
-	$hash{'-touched'} = "now()";
+	$hash{'-touched'} = "NOW()";
 	$hash{failures} = "0";
 	$self->sqlUpdate('yass_sites', \%hash, "id = $id");
 }
@@ -72,7 +91,7 @@ sub exists {
 sub failed {
 	my ($self, $id) = @_;
 	my %hash;
-	$hash{'-touched'} = "now()";
+	$hash{'-touched'} = "NOW()";
 	$hash{-failures} = "failures+1";
 	$self->sqlUpdate('yass_sites', \%hash, "id = $id");
 }
@@ -91,15 +110,12 @@ sub getActive {
 		$order = "ORDER BY title ASC";
 	}
 
-	if($all) {
-		$where = "stories.sid = yass_sites.sid",
-	} else {
-		$where = "stories.sid = yass_sites.sid and failures < $failures",
-	}
+	$where = 'stories.sid = yass_sites.sid AND stories.stoid=story_text.stoid';
+	$where .= " AND failures < $failures" if !$all;
 
 	my $sites = $self->sqlSelectAllHashrefArray(
-		"yass_sites.sid as sid, url, title, id, failures", 
-		"yass_sites, stories", 
+		"yass_sites.sid AS sid, url, title, id, failures", 
+		"yass_sites, stories, story_text", 
 		$where,
 		$order) || [];
 
