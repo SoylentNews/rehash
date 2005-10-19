@@ -37,9 +37,7 @@ label.checkbox { display: inline; }
 	margin: 0;
 	position: relative;
 }
-#adminmenu small {
-	font-size: 85%;
-}
+#adminmenu small { font-size: 85%; }
 
 #adminmenu ul.menu
 {
@@ -142,15 +140,12 @@ html>body #admin { margin: 0 auto .2em 0; }
 	display: inline;
 }
 
-.nex_remove {
-	color: #000;
-}
-
+.nex_remove { color: #000; }
 .admin_data_label { color: #aaa;}
 .story_main { background: #fff;}
 .story_sec { background: #ccc; }
 .story_nd { background: #999; }
-.admin_story_list, .submit_story_list { font-size: 80% }
-.user_admin { background: #ccc }
+.admin_story_list, .submit_story_list { font-size: 80%; }
+.user_admin { background: #ccc; }
 body .adminstoryform fieldset {background: #ccc; }
-body .adminstoryform legend { display:  none };
+body .adminstoryform legend { display: none;}
