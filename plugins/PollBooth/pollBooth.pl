@@ -408,13 +408,6 @@ sub vote {
 	my $aid = $form->{'aid'};
 	return unless $qid && $aid;
 
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('pollbooth');
-	unless ($rkey->use) {
-		print $rkey->errstr;
-		return;
-	}
-
 	my(%all_aid) = map { ($_->[0], 1) }
 		@{$reader->getPollAnswers($qid, ['aid'])};
 
@@ -430,6 +423,13 @@ sub vote {
 	if (getCurrentUser('is_anon') && !getCurrentStatic('allow_anon_poll_voting')) {
 		$notes = getData('anon');
 	} elsif ($aid > 0) {
+		my $reskey = getObject('Slash::ResKey');
+		my $rkey = $reskey->key('pollbooth');
+		unless ($rkey->use) {
+			print $rkey->errstr;
+			return;
+		}
+
 		my $poll_open = $reader->isPollOpen($qid);
 		my $has_voted = $slashdb->hasVotedIn($qid);
 
