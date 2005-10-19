@@ -1,10 +1,8 @@
+a { color: #00E; }
+
 #contents
 {
      margin: 0 0 0 .3em;
-}
-
-#links {
-	display: none;
 }
 
 #articles, #users-blocks, #polls
@@ -52,7 +50,7 @@ body
 
 #slashboxes div.title
 {
-	background: #066;
+	background: #000;
 }
 
 #slashboxes h4 a { color: #fff; }
