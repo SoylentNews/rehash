@@ -19,7 +19,7 @@ __template__
 	</tr>
 	<tr>
 		<td>
-			<h2>New Sites:</h2>
+			<h2>Most Recent Sites:</h2>
 			[% FOREACH site = new_sites %]
 				<a href="[% site.url %]">[% site.title %]</a><br>
 			[% END %]
