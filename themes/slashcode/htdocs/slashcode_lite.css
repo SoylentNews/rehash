@@ -3,7 +3,7 @@
      margin: 0 0 0 .3em;
 }
 
-#links, #slashboxes {
+#links {
 	display: none;
 }
 
@@ -52,7 +52,7 @@ body
 
 #slashboxes div.title
 {
-	background: #000;
+	background: #066;
 }
 
 #slashboxes h4 a { color: #fff; }
@@ -75,6 +75,7 @@ body
 	background: transparent;
 	color: #000;
 	margin-left: 0;
+	padding: 0;
 }
 
 .generaltitle h3 a, .article h3 a, .generaltitle h3 a:visited, .article h3 a:visited, .journalgeneric h3 a, .journalgeneric h3 a:visited
