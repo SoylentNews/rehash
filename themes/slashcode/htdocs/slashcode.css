@@ -7,9 +7,7 @@ a:visited { color: #000; }
 #contents
 {
 	min-width: 37em;
-	height: 100%;
 }
-#articles, #users-blocks, #polls { height: 100%; }
 
 /* Header */
 #logo h1 a
@@ -99,7 +97,6 @@ a:visited { color: #000; }
 	border-top: none;
 }
 
-.generalbody .article .body, .generalbody .article { height: 100%; }
 
 /* articles */
 .article { background: #933 url("/images/bg_red.gif") repeat-x; }
@@ -133,7 +130,6 @@ div.storylinks
 	background: #eee url("/images/bg_storylinks.gif") bottom repeat-x;
 	font-size: 80%;
 	font-family: sans-serif;
-	height: 100%;
 }
 
 div.storylinks div { background: url("/images/cbr_ltgrey.gif") bottom right no-repeat; }
@@ -225,7 +221,7 @@ div.storylinks ul li { border-left: 1px solid #555; }
 #journalgrey { border: 3px solid #999; padding: 3px;}
 #journalgrey div.storylinks, #journalblue div.storylinks { background: transparent; }
 #journalgrey div.storylinks ul, #journalblue div.storylinks ul { background: transparent; }
-#journalgrey .body, #journalblue .body {height: 100%; min-height: 60px; }
+#journalgrey .body, #journalblue .body {min-height: 60px; }
 #journalblue div.storylinks ul li,  #journalgrey div.storylinks ul li { border: none; margin: 0; padding: 0; }
 #journalblue .journaldate { background: #369; font-weight: bold; padding: 3px; }
 #journalblue { border: 3px solid #000; }
