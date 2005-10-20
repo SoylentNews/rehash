@@ -1,10 +1,5 @@
 a { color: #00E; }
 
-#contents
-{
-     margin: 0 0 0 .3em;
-}
-
 #articles, #users-blocks, #polls
 {
      margin: 0 .3em 1em 0;
