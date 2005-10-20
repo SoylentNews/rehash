@@ -18,7 +18,7 @@ __template__
 	<div class="generalbody">
 		<form action="[% constants.real_rootdir %]/login.pl" method="post">
 			<fieldset>
-			<legend> </legend>
+			<legend>Login</legend>
 			<input type="hidden" name="op" value="userlogin">
 			[% IF form.unickname %]
 				[% user_uid = Slash.db.getUserUID(form.unickname) %]
