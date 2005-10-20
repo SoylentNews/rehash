@@ -116,6 +116,7 @@ sub maxUsesPerTimeframe {
 	my $limit = $constants->{reskey_timeframe};
 	if ($max_uses && $limit) {
 		my $where = $self->whereUser;
+		$where .= ' AND rkrid=' . $self->rkrid;
 		$where .= ' AND is_alive="no" AND ';
 		$where .= "rkid != '$reskey_obj->{rkid}' AND " if $reskey_obj->{rkid};
 		$where .= "submit_ts > DATE_SUB(NOW(), INTERVAL $limit SECOND)";
@@ -142,8 +143,9 @@ sub minDurationBetweenUses {
 	my $limit = $check_vars->{duration_uses};
 	if ($limit) {
 		my $where = $self->whereUser;
+		$where .= ' AND rkrid=' . $self->rkrid;
 		$where .= ' AND is_alive="no" AND ';
-		$where .= "rkid != '$reskey_obj->{rkid}' AND ";
+		$where .= "rkid != '$reskey_obj->{rkid}' AND " if $reskey_obj->{rkid};
 		$where .= "submit_ts > DATE_SUB(NOW(), INTERVAL $limit SECOND)";
 
 		my $rows = $slashdb->sqlCount('reskeys', $where);
@@ -164,8 +166,9 @@ sub minDurationBetweenCreateAndUse {
 	my $check_vars = $self->getCheckVars;
 
 	my $limit = $check_vars->{'duration_creation-use'};
-	if ($limit) {
+	if ($limit && $reskey_obj->{rkid}) {
 		my $where = "rkid=$reskey_obj->{rkid}";
+		$where .= ' AND rkrid=' . $self->rkrid;
 		$where .= ' AND is_alive="no" AND ';
 		$where .= "create_ts > DATE_SUB(NOW(), INTERVAL $limit SECOND)";
 

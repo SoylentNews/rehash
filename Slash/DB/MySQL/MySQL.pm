@@ -3964,6 +3964,7 @@ sub hasPollActivated{
 # specially taken to mean a conflation of IP address (possibly thru proxy)
 # and uid, such that only one anonymous reader can post from any given
 # IP address.
+# XXXX NO LONGER USED, REPLACED BY reskeys -- pudge 2005-10-20
 sub hasVotedIn {
 	my($self, $qid) = @_;
 	my $constants = getCurrentStatic();

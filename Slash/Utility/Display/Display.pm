@@ -605,8 +605,6 @@ sub pollbooth {
 	my $n_comments = $reader->countCommentsBySid(
 		$poll->{pollq}{discussion});
 	my $poll_open = $reader->isPollOpen($qid);
-	my $has_voted = $reader->hasVotedIn($qid);
-	my $can_vote = !$has_voted && $poll_open;
 
 	return slashDisplay('pollbooth', {
 		question	=> $poll->{pollq}{question},
@@ -614,8 +612,6 @@ sub pollbooth {
 		qid		=> $qid,
 		has_activated   => $reader->hasPollActivated($qid),
 		poll_open	=> $poll_open,
-		has_voted	=> $has_voted,
-		can_vote	=> $can_vote,
 		voters		=> $poll->{pollq}{voters},
 		comments	=> $n_comments,
 	}, 1);

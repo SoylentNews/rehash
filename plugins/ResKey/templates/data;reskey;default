@@ -77,6 +77,10 @@ __template__
 	You may not post using an open proxy.
 
 
+[%# Post %]
+[% CASE 'post method required' %]
+	You must access this resource using the appropriate method.
+	
 
 [% END %]
 __seclev__

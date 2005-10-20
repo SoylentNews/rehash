@@ -5,5 +5,8 @@ use DBIx::Password;
 WriteMakefile(
     'NAME'	=> 'Slash::PollBooth',
     'VERSION_FROM' => 'PollBooth.pm', # finds $VERSION
-    'PM'	=> { 'PollBooth.pm' => '$(INST_LIBDIR)/PollBooth.pm' },
+    'PM'	=> {
+	'PollBooth.pm' => '$(INST_LIBDIR)/PollBooth.pm',
+	'ResKey.pm'    => '$(INST_LIBDIR)/PollBooth/ResKey.pm',
+    },
 );

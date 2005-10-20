@@ -124,7 +124,9 @@ INSERT INTO reskey_vars VALUES (4, 'duration_uses',          30, 'min duration (
 ##### pollbooth
 ### checks
 INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'use', 'Slash::ResKey::Checks::Post',                151);
 INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::PollBooth::ResKey',                   251);
 INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::AL2::AnonNoPost',     301);
 INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
 INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);

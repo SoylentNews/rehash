@@ -49,6 +49,10 @@ Call C<use> to finally use the reskey to unlock the resource, so it can
 be used.  After the checks are run, the reskey is invalidated and may not be
 used again.
 
+(There is also a C<createuse> method, which first creates the reskey, and then
+attempts to use it, for forms that don't need a preexisting reskey already
+in the form from a previous C<create>.  Treat it as a C<use>.)
+
 =back
 
 
@@ -116,11 +120,11 @@ sub new {
 	my $rkrid;
 
 	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'ResKey'};
+	return 0 unless $plugin->{'ResKey'};
 
 	# we get the reskey automatically if it exists, can also
 	# override by passing
-	my $self = bless {}, $class;
+	my $self = bless { _opts => $opts }, $class;
 
 	$self->debug($debug);
 
@@ -133,7 +137,7 @@ sub new {
 		$resname = $resources->{id}{$rkrid};
 	}
 
-	return unless $resname && $rkrid;
+	return 0 unless $resname && $rkrid;
 
 	$self->resname($resname);
 	$self->rkrid($rkrid);
@@ -232,10 +236,10 @@ sub AUTOLOAD {
 	if ($name =~ /^(?:noop|success|failure|death)$/) {
 		$sub = _createStatusAccessor($name, \@_);
 
-	} elsif ($name =~ /^(?:error|reskey|debug|rkrid|resname|type|code)$/) {
+	} elsif ($name =~ /^(?:error|reskey|debug|rkrid|resname|type|code|opts)$/) {
 		$sub = _createAccessor($name, \@_);
 
-	} elsif ($name =~ /^(?:create|touch|use)$/) {
+	} elsif ($name =~ /^(?:create|touch|use|createuse)$/) {
 		$sub = _createActionMethod($name, \@_);
 	
 	} elsif ($name =~ /^(?:checkCreate|checkTouch|checkUse)$/) {
@@ -298,18 +302,27 @@ sub _createStatusAccessor {
 }
 
 #========================================================================
-# for the main methods: create, touch, use
+# for the main methods: create, touch, use (and createuse)
 # they call private methods named same thing, but with underscore
 sub _createActionMethod {
 	my($name) = @_;
-	my $method_name = "db\u$name";
 	return sub {
 		my($self) = @_;
 		$self->_flow($name);
 		$self->type($name);
 
+		# first create a reskey, skipping the checks.
+		# your job to make sure any check needed for
+		# create is done for use, too.
+		if ($self->type eq 'createuse') {
+			$self->type('use');
+			unless ($self->reskey) {
+				$self->dbCreate;
+			}
+		}
+
 		if ($self->type eq 'use') {
-			return unless $self->fakeUse;
+			return 0 unless $self->fakeUse;
 		}
 
 		my $ok = $self->check;
@@ -323,6 +336,7 @@ sub _createActionMethod {
 		# we only continue on for touch/use to update the DB
 		# to note we've been here, to clean up, etc.
 		if ($self->type ne 'create' || $ok) {
+			my $method_name = 'db' . ucfirst($self->type);
 			$ok = $self->$method_name();
 		}
 

@@ -8,8 +8,6 @@ Prints a pollbooth
 * qid = question ID
 * has_activated = has this poll become active?
 * poll_open = is this poll still open?
-* has_voted = has this user already voted?
-* can_vote = can this user still vote?
 * voters = number of voters
 * comments = number of comments
 * primaryskid = primaryskid
@@ -28,28 +26,30 @@ __template__
 [% IF has_activated or user.is_admin %]
 	[% IF user.is_admin %]
 		[% IF !has_activated %]
-		(Poll not yet active)<br>
+		(Poll not yet active.)<br>
 		[% END %]
 	[% END %]
 
-	[% IF can_vote;
+	[% can_vote = poll_open ? 1 : 0 %]
+
+	[% IF env.script_name && can_vote;
 	      reskey = Slash.getObject('Slash::ResKey');
-	      rkey = reskey.key('pollbooth');
+	      rkey = reskey.key('pollbooth', { qid => qid });
 	      IF !rkey.create;  # didn't work, bail
 	         can_vote = 0;
 	      END;
-	   END
+	   ELSE;	
+	      rkey = '';
+	   END;
 	%]
 
 	[% IF !can_vote %]
+		<b>[% question | strip_literal %]</b>
+	   [% FOREACH ans = answers %]
+		<li>[% ans.answer | strip_literal %] <em>([% ans.votes %])</em></li>
+	   [% END %]
 
-		<b>[% question %]</b>
-
-	[% FOREACH ans = answers %]
-		<li>[% ans.answer %] <em>([% ans.votes %])</em></li>
-	[% END %]
-
-		<p><em>[% IF has_voted %](You've already voted.)[% ELSIF !poll_open %](Poll is closed.)[% END %]</em><br>
+		<p><em>[% IF rkey && rkey.errstr %]([% rkey.errstr %])[% ELSIF !poll_open %](Poll is closed.)[% END %]</em><br>
 		[ <a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><b>Results</b></a> |
 		<a href="[% gSkin.rootdir %]/pollBooth.pl"><b>Polls</b></a> ] <br>
 		Comments:<b>[% comments %]</b> | Votes:<b>[% voters %]</b>
@@ -63,14 +63,14 @@ __template__
 			[% IF user.currentSkin %]
 				<input type="hidden" name="section" value="[% user.currentSkin | strip_attribute %]">
 			[% END %]
-				<b>[% question %]</b>
+				<b>[% question | strip_literal %]</b>
 
 			[% FOREACH ans = answers %]
-				<br><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]">[% ans.answer | strip_html %]
+				<br><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]">[% ans.answer | strip_literal %]
 			[% END %]
 
 				<br><input type="submit" value="Vote">
-				[% PROCESS reskey_tag %]
+				[% IF env.gateway_interface; PROCESS reskey_tag; END %]
 				[ <a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1"><b>Results</b></a> |
 				<a href="[% gSkin.rootdir %]/pollBooth.pl"><b>Polls</b></a> ] <br>
 				Comments:<b>[% comments %]</b> | Votes:<b>[% voters %]</b>

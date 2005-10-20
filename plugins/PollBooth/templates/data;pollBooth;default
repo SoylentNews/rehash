@@ -73,6 +73,13 @@ __template__
 [% CASE 'slashbox_foot' %]
 	</div>
 
+[%# for ResKeys %]
+[% CASE 'no qid' %]
+	The poll ID is missing.
+
+[% CASE 'already voted' %]
+	You've already voted.
+
 [% END %]
 
 __seclev__

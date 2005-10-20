@@ -423,22 +423,18 @@ sub vote {
 	if (getCurrentUser('is_anon') && !getCurrentStatic('allow_anon_poll_voting')) {
 		$notes = getData('anon');
 	} elsif ($aid > 0) {
-		my $reskey = getObject('Slash::ResKey');
-		my $rkey = $reskey->key('pollbooth');
-		unless ($rkey->use) {
-			print $rkey->errstr;
-			return;
-		}
-
 		my $poll_open = $reader->isPollOpen($qid);
-		my $has_voted = $slashdb->hasVotedIn($qid);
 
-		if ($has_voted) {
-			# Specific reason why can't vote.
-			$notes = getData('uid_voted');
-		} elsif (!$poll_open) {
+		if (!$poll_open) {
 			# Voting is closed on this poll.
 			$notes = getData('poll_closed');
+		}
+
+		my $reskey = getObject('Slash::ResKey');
+		my $rkey = $reskey->key('pollbooth', { qid => $qid });
+
+		if (!$rkey->createuse) {
+			$notes = $rkey->errstr;
 		} elsif (exists $all_aid{$aid}) {
 			$notes = getData('success', { aid => $aid });
 			$slashdb->createPollVoter($qid, $aid);
