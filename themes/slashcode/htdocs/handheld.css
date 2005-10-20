@@ -1,111 +1,66 @@
 body
 {
-	background: #fff;
-	font-family: sans-serif;
-	font-size: 100%;
+        background: #fff;
+        font-family: sans-serif;
+        font-size: 100%;
+        margin: 0;
+        padding: 0;
 }
-
-ul li { display: block; }
+#frame {margin: 0 2px; padding: 0;}
+ul li { display: inline; margin: 0 .2em; }
 
 /* Header */
+#logo h1 a {padding: 0 5px; height: 20px; background: #000; color: #fff; font-size: 14px;}
 #slogan h2
 {
-	color: #000;
-	margin: 0;
-	padding: 0;
-	font-size: small;
+        display: block;
+        color: #000;
+        margin: 0 0 1em 0;
+        padding: 0 5px;
+        font-size: x-small;
 }
-
-fieldset, 
-.generaltitle, 
-.article, 
-.journalgeneric, 
-.generaltitle .div.title, 
-.article .div.title, 
-.journalgeneric .div.title, 
-.generalbody, 
-.generaltitle .div.details, 
-.article .div.details, 
-.journalgeneric .div.details,
-.generaltitle .div.body, 
-.article .div.body, 
-.journalgeneric .div.body,
-div.storylinks, 
-div.storylinks ul, 
-div.storylinks div,
-#articles, 
-#users-blocks, 
-#polls
-{
-	margin: 0;
-	padding: 0;
-	background: transparent;
-	border: none;
-	font-size: 100%;
-}
-
-div.storylinks ul li
-{
-	list-style: none;
-	display: inline;
-}
-
-
+h3 {margin: .6em 0 0 0;}
 .details
 {
-	font-size: small;
-	padding: 0 0 .4em 0;
+        font-size: x-small;
+        color: #666;
+        padding: 0;
+        margin: 0;
 }
-
-#links, #contents, #slashboxes
+.article .body {font-size: small;}
+.storylinks ul
 {
-	float: none;
-	margin: 0;
-	padding: 0;
-	clear: both;
+        margin: 0;
+        display: inline;
+        font-size: small;
 }
 
-.article .topic
+.btmnav ul, ul, .aduserbox #articles, .admin #articles, div#search.aduserbox .generaltitle, div#search.aduserbox .generalbody, #contents, #messages, #submit, #comments, #login, #pollBooth, #wide, #search, #authors, #topics, #articles, #users-blocks, #polls
 {
-	float: right;
-	border: 0;
+        margin: 0;
+        padding: 0;
 }
+.generaltitle, .generaltitle div.title { background: transparent; }
+.generaltitle h3 a {color: #00e;}
+.generaltitle h3 {padding: 0; margin: 0; color: #000;}
+.article .topic img, #ostgnavbar, #slashboxes, #links, #topnav ul, #jump { display: none; }
+#topnav { margin: 0; padding: 0; height: 20px; }
 
-#ostgnavbar, #slashboxes, #links, #topnav ul, #jump { display: none; }
-#topnav { height: 30px; }
-
-.generaltitle h3, .article h3, .journalgeneric h3
-{
-	border-bottom: 1px solid #000;
-	padding-top: .2em;
-	padding-bottom: .2em;
-	margin: .5em 0 .2em 0;
-}
-
-div.storylinks { margin: 0 0 .5em 0; }
 #footer { margin: 1em; }
 
 #footer .search
 {
-	margin: 1em 0;
-	float: none;
-	clear: both;
+        margin: 1em 0;
+        float: none;
+        clear: both;
 }
 
 #footer .rightcontent
 {
-	margin: 2.4em 0 0 0;
-	float: none;
-	clear: both;
+        margin: 2.4em 0 0 0;
+        float: none;
+        clear: both;
 }
 
 #footer .copyright { margin: 1em 0; }
-.btmnav ul li a, 
-.btmnav ul li a:visited { color: #066; }
-
-.btmnav ul
-{
-	margin: 0;
-	padding: 0;
-}
-
+a, a:visited, .btmnav ul li a, .btmnav ul li a:visited { color: #00e; }
