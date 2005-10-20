@@ -92,29 +92,18 @@ img { border: none; }
 	white-space: nowrap;
 }
 
-#topnav li a
-{
-	text-align: center;
-	padding: 0 .6em;
-	text-decoration: none;
-}
-
-#topnav ul
-{
-	text-align: center;
-	margin: 0 auto;
-	white-space: nowrap;
-}
-
-#topnav li img { vertical-align: middle; }
-
-#topnav li
-{
-	text-align: center;
-	margin: 0 auto;
-	white-space: nowrap;
-	display: inline;
+#topnav ul {
+	position: absolute;
+	right: 0;
+	margin: 0;
+	width: 50%;
 	list-style: none;
+}
+
+#topnav li {
+	float:left;
+	text-align: center;
+	width:19%;
 }
 
 #slogan h2
