@@ -26,49 +26,53 @@ $task{$me}{code} = sub {
 
 	slashdLog('Checking YASS sites Begin');
 	my $sids = $yass->getSidsURLs();
-	for (@$sids) {
-		print "checking \t$_->[1]\n";
-		my $value = $yass->exists($_->[0], $_->[1]);
-		if ($value == 1) {
-			print "\texists\n";
+	for my $duple (@$sids) {
+		my($sid, $url) = @$duple;
+		my $logentry;
+		$logentry = "checking sid='$sid' url='$url'...";
+		my $value = $yass->exists($sid, $url);
+		if ($value == -1) {
+			$logentry .= " ok.";
 		} elsif ($value) {
-			my $rdf = $slashdb->getStory($_->[0], 'rdf');
-			$yass->setURL($value, $_->[1], $rdf);
-			print "\tupdating\n";
+			my $rdf = $slashdb->getStory($sid, 'rdf');
+			$yass->setURL($value, $url, $rdf);
+			$logentry .= " updated.";
 		} else {
-			my $rdf = $slashdb->getStory($_->[0], 'rdf');
-			my $time = $slashdb->getStory($_->[0], 'time');
+			my $rdf = $slashdb->getStory($sid, 'rdf');
+			my $time = $slashdb->getStory($sid, 'time');
 			my $return = $yass->create({
-				 sid => $_->[0],
-				 url => $_->[1],
+				 sid => $sid,
+				 url => $url,
 				 rdf => $rdf ? $rdf : '',
 				 created => $time,
-			 });
-			print "\tadding\n";
+			});
+			$logentry .= " added.";
 		}
+		slashdLog($logentry);
 	}
 	my $sites = $yass->getActive();
 	my $junk;
 	my $ua = LWP::UserAgent->new();
 	my($winners, $losers);
-	for (@$sites) {
-		print "$_->{id}\t$_->{url}";
-		my $response = $ua->get($_->{url} . $constants->{yass_extra});
+	for my $hr (@$sites) {
+		my $logentry;
+		$logentry = "checking id=$hr->{id} url='$hr->{url}'...";
+		my $response = $ua->get($hr->{url} . $constants->{yass_extra});
 		if ($response->is_success) {
-			$yass->success($_->{id});
-			print "\tactive\n";
+			$yass->success($hr->{id});
+			$logentry .= " active.";
 			$winners++;
 		} else {
-			$yass->failed($_->{id});
-			print "\tdead\n";
+			$yass->failed($hr->{id});
+			$logentry .= " dead.";
 			$losers++;
 		}
+		slashdLog($logentry);
 	}
 	my $total = $winners + $losers;
-	slashdLog("Total sites $total\tActive Sites $winners\tFailed sites $losers");
 	slashdLog('Checking YASS sites End');
 
-	return ;
+	return "$total sites, $winners active, $losers dead";
 };
 
 1;
