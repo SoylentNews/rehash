@@ -18,7 +18,11 @@ our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 sub doCheck {
 	my($self) = @_;
 
-	my $slashdb = getCurrentDB();
+	if (!$ENV{GATEWAY_INTERFACE}) {
+		return RESKEY_SUCCESS;
+	}
+
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $user = getCurrentUser();
 	my $check_vars = $self->getCheckVars;
 
@@ -26,8 +30,8 @@ sub doCheck {
 		return RESKEY_SUCCESS;
 	}
 
-	if ($slashdb->getAL2($user->{srcids}, 'trusted')) {
-		my $is_proxy = $slashdb->checkForOpenProxy($user->{srcids}{ip});
+	if (!$reader->getAL2($user->{srcids}, 'trusted')) {
+		my $is_proxy = $reader->checkForOpenProxy($user->{srcids}{ip});
 		if ($is_proxy) {
 			return(RESKEY_DEATH, ['open proxy', {
 				unencoded_ip	=> $ENV{REMOTE_ADDR},
