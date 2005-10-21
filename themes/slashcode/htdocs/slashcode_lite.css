@@ -2,16 +2,19 @@ a { color: #00E; }
 
 #articles, #users-blocks, #polls
 {
-     margin: 0 .3em 1em 0;
+     margin: 0 15.6em 1em 0;
 }
 
-
-
-body
+body, #frame, .generaltitle, .article, .journalgeneric, #links, #links div.title, #links h4, #links div.content, #slashboxes div.content, #links div.block, #slashboxes div.block,  #slashboxes div.title, #slashboxes h4, #slashboxes, .btmnav
 {
 	background: transparent;
 }
+div.storylinks div ul, .article .body, .journalgeneric .body, .article .details, .journalgeneric .details 
 
+{
+margin-left: 0;
+padding-left: 0;
+}
 /* Header */
 #slogan h2
 {
@@ -19,42 +22,14 @@ body
 }
 
 /* links */
-#links, #links div.block, #links div.content
-{
-	background: transparent;
-}
-
-#links div.title
+#slashboxes div.title, #links div.title
 {
 	background: #000;
 }
 
-#links h4
-{
-	background: transparent;
-	color: #fff;
-}
-
-#links h4 a { color: #fff; }
-
-/* slashboxes */
-#slashboxes, #slashboxes div.block, #slashboxes h4, #slashboxes div.content
-{
-	background: transparent;
-}
-
-#slashboxes div.title
-{
-	background: #000;
-}
-
-#slashboxes h4 a { color: #fff; }
+#links h4 a, #slashboxes h4 a { color: #fff; }
 
 /* General */
-.generaltitle, .article, .journalgeneric
-{
-	background: transparent;
-}
 
 .generaltitle div.title, .article div.title, .journalgeneric div.title
 {
@@ -76,22 +51,17 @@ body
         color: #666;
 }
 
-.generalbody, .article .details, .journalgeneric .details
+.generalbody, .article .details, .journalgeneric .details, .article div.body, .journalgeneric div.body
 {
         border: none;
         background: transparent; 
 }
 
-.article div.body, .journalgeneric div.body
-{
-        border: 1px solid #fff;
-        background: transparent; 
-}
-
-div.storylinks, div.storylinks ul, div.storylinks div
+div.storylinks, div.storylinks div ul, div.storylinks div
 {
         background: transparent; 
 	margin: 0 0 1em 0;
 }
 .btmnav ul li a, .btmnav ul li a:visited { color: #555;}
-.btmnav {background: transparent}
+
+
