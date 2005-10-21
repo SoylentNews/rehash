@@ -50,8 +50,9 @@ be used.  After the checks are run, the reskey is invalidated and may not be
 used again.
 
 (There is also a C<createuse> method, which first creates the reskey, and then
-attempts to use it, for forms that don't need a preexisting reskey already
-in the form from a previous C<create>.  Treat it as a C<use>.)
+immediately attempts to use it, for forms that don't need a preexisting
+reskey already in the form from a previous C<create>.  Treat it as
+a C<use>.)
 
 =back
 
@@ -77,9 +78,11 @@ returns true:
 
 You may also check the two success conditions, C<success> and C<noop>.
 
-You must also provide the reskey to the user in order for him to submit it
-back.  It is returned by the C<reskey> method.  Either pass the entire key
-object to the form, or just the reskey value itself:
+Assuming you're calling C<create> and later C<use>, rather than just
+C<createuse>, you'll want to send the created reskey's value to the
+user so that it can be submitted back later.  It is returned by the
+C<reskey> method.  Either pass the entire key object to the form, or
+just the reskey value itself:
 
 	slashDisplay('myForm', { rkey => $rkey });
 
@@ -107,6 +110,7 @@ database for that reskey.
 use warnings;
 use strict;
 
+use Time::HiRes;
 use Slash;
 use Slash::Constants ':reskey';
 use Slash::Utility;
@@ -241,7 +245,7 @@ sub AUTOLOAD {
 
 	} elsif ($name =~ /^(?:create|touch|use|createuse)$/) {
 		$sub = _createActionMethod($name, \@_);
-	
+
 	} elsif ($name =~ /^(?:checkCreate|checkTouch|checkUse)$/) {
 		$sub = _createCheckMethod($name, \@_);
 	}
@@ -250,7 +254,7 @@ sub AUTOLOAD {
 	if ($sub) {
 		no strict 'refs';
 
-#print "Creating new method $full\n";
+#print STDERR "Creating new method $full\n";
 
 		*{$full} = $sub;
 		return $sub if $can;
@@ -264,7 +268,7 @@ sub AUTOLOAD {
 }
 
 #========================================================================
-# we may have various simple accessors
+# we have various simple accessors
 sub _createAccessor {
 	my($name) = @_;
 	my $newname = "_$name";
@@ -272,10 +276,11 @@ sub _createAccessor {
 		my($self, $value) = @_;
 		$self->_flow($name);
 		if (defined $value) {
-			# cache the reskey in the user object for easy access
 			if ($name eq 'reskey') {
+				# Setting reskey() is special, it gets
+				# stored in the $user object as well.
 				my $user = getCurrentUser();
-				$user->{state}{$name} = $value;
+				$user->{state}{reskey} = $value;
 			}
 			$self->{$newname} = $value;
 		}
@@ -424,15 +429,24 @@ sub dbCreate {
 	my $user = getCurrentUser();
 
 	my $ok = 0;
-	my $num_tries = 10;
+	my $srcid = $self->getSrcid;
 
-	while (1) {
-		my $reskey = getAnonId(1, 20);
+	# XXX We really should pull this repeat-insert-getAnonId
+	# loop into a utility function in Environment.pm.  It's
+	# repeated in createFormkey (and would be in
+	# createDaypasskey except I don't think it's even worth
+	# bothering).  When we do pull it out, remember to lose
+	# the 'use Time::HiRes' :)
+	my $reskey = '';
+	my $try_num = 1;
+	my $num_tries = 10;
+	while ($try_num < $num_tries) {
+		$reskey = getAnonId(1, 20);
 		my $rows = $slashdb->sqlInsert('reskeys', {
 			reskey		=> $reskey,
 			rkrid		=> $self->rkrid,
 			uid		=> $user->{uid},
-			-srcid_ip	=> $self->getSrcid,
+			-srcid_ip	=> $srcid,
 			-create_ts	=> 'NOW()',
 		});
 
@@ -443,12 +457,21 @@ sub dbCreate {
 		}
 
 		# The INSERT failed because $reskey is already being
-		# used.  Keep retrying as long as is reasonably possible.
-		if (--$num_tries <= 0) {
-			# Give up!
-			errorLog("Slash::ResKey::Key->create failed: $reskey\n");
-			last;
-		}
+		# used.  Presumably this would be due to a collision
+		# in the randomly-generated string, which indicates
+		# there's a problem with the RNG (since with a true
+		# RNG this would happen once every kajillion years).
+		# Keep retrying, but we're going to log this once
+		# we're done.
+		++$try_num;
+		# Pause before trying again;  in the event of a
+		# problem with the RNG, lots of places in the code
+		# are probably trying this all at once and this may
+		# make the site fail more gracefully.
+		Time::HiRes::sleep(rand($try_num));
+	}
+	if ($try_num > 1) {
+		errorLog("Slash::ResKey::Key->create INSERT failed $try_num times: uid=$user->{uid} rkrid=$self->{rkrid} reskey=$reskey");
 	}
 
 	if ($ok) {
@@ -482,30 +505,27 @@ sub dbUse {
 	);
 
 	if ($failed) {
-		%update = (%update,
-			-failures	=> 'failures+1',
-		);
+		$update{-failures} = 'failures+1';
 	}
 
 	if ($self->type eq 'use') {
-		# use() already set it to no, assuming success
+		# use(), or to be precise fakeUse() called by the
+		# use() method created by _createActionMethod(),
+		# already set is_alive to no, assuming success.
 		$no_is_alive_check = 1;
 		if ($failed) {
 			# re-set these, as they were set by use(),
 			# assuming success
-			%update = (%update,
-				-submit_ts	=> 'NULL',
-				is_alive	=> 'yes',
-			);
+			$update{-submit_ts} = 'NULL';
+			$update{is_alive} = 'yes';
 		} else {
 			# update the ts again, just to be clean
-			%update = (%update,
-				-submit_ts	=> 'NOW()',
-			);
+			$update{-submit_ts} = 'NOW()';
 		}
 	}
 
-	$self->update(\%update, \$where, $no_is_alive_check) or return 0;
+	$self->getUpdateClauses(\%update, \$where,
+		$no_is_alive_check) or return 0;
 
 	my $slashdb = getCurrentDB();
 	my $rows = $slashdb->sqlUpdate('reskeys', \%update, $where);
@@ -544,7 +564,7 @@ sub dbUse {
 # some of these could be separate checks, but they happen for every reskey,
 # and it is best for atomicity and performance to do them when we actually
 # update the reskey
-sub update {
+sub getUpdateClauses {
 	my($self, $update, $where, $no_is_alive_check) = @_;
 	$self->_flow;
 
@@ -565,20 +585,23 @@ sub update {
 		$$where = $where_base;
 	}
 
-	# if user has logged in since getting reskey, we update the uid,
-	# but still check this time by srcid
+	# If user has logged in since getting reskey, we update the uid,
+	# but still check this time by srcid. - Pudge
+	# And if the user has logged OUT since getting the reskey,
+	# getWhereUserClause will just treat them as anon, as,
+	# presumably, the caller script will also.
 	if (isAnon($reskey_obj->{uid}) && !$user->{is_anon}) {
 		$update->{uid} = $user->{uid};
 		$$where .= ' AND srcid_ip=' . $self->getSrcid;
 	} else {  # use uid or srcid as appropriate
-		$$where .= ' AND ' . $self->whereUser;
+		$$where .= ' AND ' . $self->getWhereUserClause;
 	}
 
 	return 1;
 }
 
 #========================================================================
-sub whereUser {
+sub getWhereUserClause {
 	my($self, $options) = @_;
 	$self->_flow;
 
@@ -610,7 +633,7 @@ sub fakeUse {
 		is_alive	=> 'no',
 	);
 
-	$self->update(\%update, \$where) or return 0;
+	$self->getUpdateClauses(\%update, \$where) or return 0;
 
 	my $slashdb = getCurrentDB();
 	my $rows = $slashdb->sqlUpdate('reskeys', \%update, $where);
