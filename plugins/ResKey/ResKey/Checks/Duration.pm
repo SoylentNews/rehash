@@ -115,7 +115,7 @@ sub maxUsesPerTimeframe {
 	my $max_uses = $check_vars->{'duration_max-uses'};
 	my $limit = $constants->{reskey_timeframe};
 	if ($max_uses && $limit) {
-		my $where = $self->whereUser;
+		my $where = $self->getWhereUserClause;
 		$where .= ' AND rkrid=' . $self->rkrid;
 		$where .= ' AND is_alive="no" AND ';
 		$where .= "rkid != '$reskey_obj->{rkid}' AND " if $reskey_obj->{rkid};
@@ -142,7 +142,7 @@ sub minDurationBetweenUses {
 
 	my $limit = $check_vars->{duration_uses};
 	if ($limit) {
-		my $where = $self->whereUser;
+		my $where = $self->getWhereUserClause;
 		$where .= ' AND rkrid=' . $self->rkrid;
 		$where .= ' AND is_alive="no" AND ';
 		$where .= "rkid != '$reskey_obj->{rkid}' AND " if $reskey_obj->{rkid};

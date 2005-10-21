@@ -49,7 +49,8 @@ Call C<use> to finally use the reskey to unlock the resource, so it can
 be used.  After the checks are run, the reskey is invalidated and may not be
 used again.
 
-(There is also a C<createuse> method, which first creates the reskey, and then
+(There is also a C<createuse> method, which first creates the reskey if
+necesssary [it won't create one if it is already supplied], and then
 immediately attempts to use it, for forms that don't need a preexisting
 reskey already in the form from a previous C<create>.  Treat it as
 a C<use>.)
@@ -517,7 +518,7 @@ sub dbUse {
 			# re-set these, as they were set by use(),
 			# assuming success
 			$update{-submit_ts} = 'NULL';
-			$update{is_alive} = 'yes';
+			$update{is_alive}   = 'yes';
 		} else {
 			# update the ts again, just to be clean
 			$update{-submit_ts} = 'NOW()';
