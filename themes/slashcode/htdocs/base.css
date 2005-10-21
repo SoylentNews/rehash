@@ -96,14 +96,14 @@ img { border: none; }
 	position: absolute;
 	right: 0;
 	margin: 0;
-	width: 50%;
+	width: 60%;
 	list-style: none;
 }
 
 #topnav li {
 	float:left;
 	text-align: center;
-	width:19%;
+	width:20%;
 }
 
 #slogan h2
