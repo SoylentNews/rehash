@@ -134,10 +134,10 @@ div.storylinks
 }
 
 div.storylinks div { background: url("/images/cbr_ltgrey.gif") bottom right no-repeat; }
-div.storylinks div ul { height: 1.3em;} 
-div.storylinks ul 
+div.storylinks div ul { height: 1em;} 
+div.storylinks div ul 
 {
-	padding: 0 1em; 
+	padding: .6em 1em; 
 	margin: 0; 
 	background: url("/images/cbl_ltgrey.gif") bottom left no-repeat;
 }
