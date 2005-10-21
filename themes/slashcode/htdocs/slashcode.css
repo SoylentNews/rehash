@@ -130,11 +130,22 @@ div.storylinks
 	background: #eee url("/images/bg_storylinks.gif") bottom repeat-x;
 	font-size: 80%;
 	font-family: sans-serif;
+	
 }
 
 div.storylinks div { background: url("/images/cbr_ltgrey.gif") bottom right no-repeat; }
-div.storylinks ul { background: url("/images/cbl_ltgrey.gif") bottom left no-repeat; }
-div.storylinks ul li { border-left: 1px solid #555; }
+div.storylinks div ul { height: 1.3em;} 
+div.storylinks ul 
+{
+	padding: 0 1em; 
+	margin: 0; 
+	background: url("/images/cbl_ltgrey.gif") bottom left no-repeat;
+}
+div.storylinks ul li 
+{ 
+	padding: .3em; 
+	border-left: 1px solid #555; 
+}
 
 /* Footer */
 #footer { font-family: sans-serif; }
