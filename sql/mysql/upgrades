@@ -3372,7 +3372,7 @@ INSERT INTO reskey_vars VALUES (5, 'duration_creation-use',   2, 'min duration (
 
 ALTER TABLE css ADD ie_cond VARCHAR(16) DEFAULT '';
 
-UPDATE vars SET value = 'T_2_5_0_84' WHERE name = 'cvs_tag_currentcode';
+UPDATE vars SET value = 'T_2_5_0_85' WHERE name = 'cvs_tag_currentcode';
 
 # End of T_2_5_0_85, Start of T_2_5_0_86 - 2005/10/18
 
