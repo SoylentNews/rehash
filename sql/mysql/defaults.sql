@@ -755,7 +755,7 @@ INSERT INTO vars (name, value, description) VALUES ('cur_performance_stat_ops', 
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_lastid', '0', 'accesslogid to start searching at');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_weeks', '8', 'number of weeks back to compare current stats to');
 INSERT INTO vars (name, value, description) VALUES ('currentqid',1,'The Current Question on the homepage pollbooth');
-INSERT INTO vars (name, value, description) VALUES ('cvs_tag_currentcode','T_2_5_0_82','The current cvs tag that the code was updated to - this does not affect site behavior but may be useful for your records');
+INSERT INTO vars (name, value, description) VALUES ('cvs_tag_currentcode','T_2_5_0_85','The current cvs tag that the code was updated to - this does not affect site behavior but may be useful for your records');
 INSERT INTO vars (name, value, description) VALUES ('datadir','/usr/local/slash/www.example.com','What is the root of the install for Slash');
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_disp','0','Display dbsparklines in the currentAdminUsers box?');
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_height',40,'Pixel height of sparkline graphs');
@@ -867,7 +867,7 @@ INSERT INTO vars (name, value, description) VALUES ('lenient_formkeys','0','0 - 
 INSERT INTO vars (name, value, description) VALUES ('log_admin','1','This turns on/off entries to the accesslog. If you are a small site and want a true number for your stats turn this off.');
 INSERT INTO vars (name, value, description) VALUES ('log_db_user','','The virtual user of the database that the code should write accesslog to. If you don\'t know what this is for, you should leave it blank.');
 INSERT INTO vars (name, value, description) VALUES ('logdir','/usr/local/slash/www.example.com/logs','Where should the logs be found?');
-INSERT INTO vars (name, value, description) VALUES ('login_speed_limit', '20', 'How fast a user can create users, etc.'); 
+INSERT INTO vars (name, value, description) VALUES ('login_speed_limit', '20', 'How fast a user can create users, etc.');
 INSERT INTO vars (name, value, description) VALUES ('login_temp_minutes', '10', 'Minutes before a temporary login expires');
 INSERT INTO vars (name, value, description) VALUES ('m1_eligible_hitcount','3','Number of hits on comments.pl before user can be considered eligible for moderation');
 INSERT INTO vars (name, value, description) VALUES ('m1_eligible_percentage','0.8','Percentage of users eligible to moderate');
@@ -928,7 +928,7 @@ INSERT INTO vars (name, value, description) VALUES ('max_discussions_unusedfk','
 INSERT INTO vars (name, value, description) VALUES ('max_expiry_comm','250','Largest value for comment expiry trigger.');
 INSERT INTO vars (name, value, description) VALUES ('max_expiry_days','365','Largest value for duration expiry trigger.');
 INSERT INTO vars (name, value, description) VALUES ('max_items','15','max number of rss items by default');
-INSERT INTO vars (name, value, description) VALUES ('max_login_allowed', '10', 'How many forms a user can submit'); 
+INSERT INTO vars (name, value, description) VALUES ('max_login_allowed', '10', 'How many forms a user can submit');
 INSERT INTO vars (name, value, description) VALUES ('max_submission_size','32000','max size of submission before warning message is displayed');
 INSERT INTO vars (name, value, description) VALUES ('max_submissions_allowed','20','maximum number of submissions per timeframe allowed');
 INSERT INTO vars (name, value, description) VALUES ('max_submissions_unusedfk','10','How many unused formkeys are permitted');
