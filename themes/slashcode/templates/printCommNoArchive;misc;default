@@ -13,6 +13,7 @@ en_US
 __name__
 printCommNoArchive
 __template__
+<a name="comments">
 <div class="commentwrap">
 <div class="commentBox">
 	[% IF discussion.is_future %]

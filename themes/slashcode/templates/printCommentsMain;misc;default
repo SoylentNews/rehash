@@ -19,6 +19,7 @@ en_US
 __name__
 printCommentsMain
 __template__
+<a name="comments"></a>
 <div class="commentwrap">
 <div class="commentBox">
 [% IF title %]
