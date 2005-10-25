@@ -53,7 +53,7 @@ END %]
 					[% mypagemenu = PROCESS pagemenu; IF mypagemenu %]<br>[% mypagemenu %][% END %] 
 		<div class="topic">
 			[% seen_topics.${topic.tid} = 1 %]
-			[% IF user.noicons %]
+			[% IF user.noicons || user.simpledesign || user.lowbandwidth %]
 				[ <a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">[% topic.textname %]</a> ]
 			[% ELSIF topic.image %]
 				<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">
@@ -64,7 +64,7 @@ END %]
 				[% IF seen_topics.$tid ; NEXT ; END %]
 				[% seen_topics.$tid = 1 %]
 				[% topic2 = Slash.db.getTopic(tid) %]
-					[% IF user.noicons %]
+					[% IF user.noicons || user.simpledesign || user.lowbandwidth %]
 						[ <a href="[% gSkin.rootdir %]/search.pl?tid=[% topic2.tid %]" class="topic2">[% topic2.textname %]</a> ]
 					[% ELSIF topic2.image %]
 						<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic2.tid %]" class="topic2">
