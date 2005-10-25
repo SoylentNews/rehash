@@ -16,7 +16,9 @@ __template__
 			</div>	
 		</div>
 		<div id="footer">
+			[% UNLESS user.lowbandwidth %]
 			<em>[% PROCESS motd %]</em>
+			[% END %]
 			<div class="search">
 				<form method="get" action="[% gSkin.rootdir %]/search.pl">
 					<fieldset>

@@ -23,7 +23,9 @@ editHome
 __template__
 [% orig_title = title %]
 <div id="slashboxes">
+[% UNLESS user.lowbandwidth %]
 [% PROCESS userboxes %]
+[% END %]
 </div>
 [% title = orig_title %]
 <div id="users-blocks">
@@ -84,10 +86,17 @@ __template__
 
 <!-- Possible removal due to CSS styling availabilty --> 
 		<label>
-			<input type="checkbox" name="light"[% l_check %]> Light
+			<input type="checkbox" name="simpledesign"[% sd_check %]>Simple Design
 		</label>
 		<div class="note">
-			Reduce the complexity of [% constants.sitename %]'s HTML for AvantGo, Lynx, or slow connections
+			Simplifies the design of [% constants.sitename %] to strip away some of the excesses  
+of the UI.
+		</div>
+		<label>
+			<input type="checkbox" name="lowbandwidth"[% lb_check %]>Low Bandwidth
+		</label>
+		<div class="note">
+			Reduces the size of pages for people with slower network connections
 		</div>
 
 		<label>

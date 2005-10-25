@@ -17,7 +17,9 @@ editMiscOpts
 __template__
 [% orig_title = title %]
 <div id="slashboxes">
+[% UNLESS user.lowbandwidth %]
 [% PROCESS userboxes %]
+[% END %]
 </div>
 [% title = orig_title %]
 <div id="users-blocks">
