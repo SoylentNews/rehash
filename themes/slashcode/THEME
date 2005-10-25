@@ -114,6 +114,7 @@ htdoc=htdocs/handheld.css
 htdoc=htdocs/print.css
 htdoc=htdocs/slashcode.css
 htdoc=htdocs/slashcode_lite.css
+htdoc=htdocs/slashcode_low_bw.css
 mysql_dump=sql/mysql/datadump.sql
 mysql_prep=sql/mysql/prep.sql
 pg_dump=sql/postgresql/datadump.sql
