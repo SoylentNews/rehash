@@ -1451,7 +1451,7 @@ sub prepareUser {
 	my @defaults = (
 		['mode', 'thread'], qw[
 		savechanges commentsort threshold
-		posttype noboxes light
+		posttype noboxes lowbandwidth simpledesign
 	]);
 
 	for my $param (@defaults) {
