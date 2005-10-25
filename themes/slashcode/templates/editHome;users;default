@@ -5,10 +5,11 @@ Edit preferences
 
 * title = passed to titlebar
 * user_edit = hashref of preferences
-* l_check = boolean to check l? light mode
 * b_check = boolean to check b? noboxes
 * i_check = boolean to check i? noicons
 * w_check = boolean to check w? willing
+* lb_check = boolean to check lowbandwidth 
+* sd_check = boolean to check simpledesign 
 * tzformat_select = popup for time format
 * tilde_ed = checkbox thing for selecting authors, topics, sections, boxes
 
