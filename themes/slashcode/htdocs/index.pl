@@ -394,6 +394,8 @@ sub displayStandardBlocks {
 	}
 
 	for my $bid (@boxes) {
+		next if $user->{lowbandwidth}  && $constants->{lowbandwidth_bids_regex} eq "NONE";
+		next if $user->{lowbandwidth} && !($bid =~ $constants->{lowbandwidth_bids_regex} );
 		if ($bid eq 'mysite') {
 			$return .= portalsidebox(
 				getData('userboxhead'),
