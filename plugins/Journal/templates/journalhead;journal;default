@@ -13,7 +13,9 @@ journalhead
 __template__
 [% orig_title = title %]
 <div id="slashboxes">
+[% UNLESS user.lowbandwidth %]
 [% PROCESS userboxes %]
+[% END %]
 [% title = orig_title %]
 </div>
 <div id="users-blocks">
