@@ -28,9 +28,11 @@ __template__
 	</div>
 [% END %]
 <div id="jump">
-	<a href="#main-articles">Main Stories</a>
+	<a href="#main-articles">Stories</a>
 	<br>
 	<a href="#blocks">Slash Boxes</a>
+	<br>
+	<a href="#comments">Comments</a>
 </div>
 
 <div id="frame">
@@ -40,9 +42,11 @@ __template__
 				<a href="[% constants.real_rootdir %]">[% constants.sitename %]</a>
 			</h1>
 		</div>
+		[% UNLESS user.lowbandwidth %]
 		<ul>
 			[% PROCESS recentTopics %]
 		</ul>
+		[% END %]
 		</div>
 		<div id="slogan">
 		<h2>
@@ -50,8 +54,10 @@ __template__
 		</h2>
 		</div>
 		<div id="links">
-			[% text = INCLUDE mainmenu; Slash.sidebox("Navigation", text, "navigation", 1) %]
-			[% text = INCLUDE organisation; Slash.sidebox(constants.sitename, text, "sitebox", 1) %]
+			[% UNLESS user.lowbandwidth %]
+				[% text = INCLUDE mainmenu; Slash.sidebox("Navigation", text, "navigation", 1) %]
+				[% text = INCLUDE organisation; Slash.sidebox(constants.sitename, text, "sitebox", 1) %]
+			[% END %]
 		</div>
 		<div id="contents">
 			[% UNLESS nopageid %]
