@@ -49,7 +49,8 @@ sub getDaypassesAvailable {
 			my $reader = getObject('Slash::DB', { db_type => 'reader' });
 			$_getDA_cache = $reader->sqlSelectAllHashrefArray(
 				"daid, adnum, minduration,
-				 UNIX_TIMESTAMP(starttime) AS startts, UNIX_TIMESTAMP(endtime) AS endts, aclreq",
+				 UNIX_TIMESTAMP(starttime) AS startts, UNIX_TIMESTAMP(endtime) AS endts,
+				 aclreq",
 				"daypass_available");
 		} else {
 			my $pos = $constants->{daypass_offer_method1_adpos} || 31;
@@ -113,7 +114,8 @@ sub getDaypass {
 		if ($hr->{aclreq}) {
 			$user ||= getCurrentUser();
 			print STDERR scalar(localtime) . " $$ cannot get user in getDaypass\n" if !$user;
-			next unless $user && $user->{acl}{ $hr->{aclreq} };
+			next unless $user && !$user->{is_anon}
+				&& $user->{acl}{ $hr->{aclreq} };
 		}
 		push @ads_available, $hr;
 	}
@@ -210,7 +212,10 @@ sub getGoodUntil {
 		$off_set
 		? $slashdb->sqlSelect("DATE_SUB(
 				CONCAT(
-					DATE( DATE_ADD( NOW(), INTERVAL $off_set SECOND ) ),
+					SUBSTRING(
+						DATE_ADD( NOW(), INTERVAL $off_set SECOND ),
+						1, 10
+					),
 					' 23:59:59'
 				),
 			INTERVAL $off_set SECOND)")
