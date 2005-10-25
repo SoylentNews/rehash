@@ -321,14 +321,21 @@ sub createComment {
 	$comment->{len} = length($comment_text);
 	$comment->{pointsorig} = $comment->{points} || 0;
 	$comment->{pointsmax}  = $comment->{points} || 0;
+
+	$comment->{sid} = $self->getStoidFromSidOrStoid($comment->{sid})
+		or return -1;
+
 	if ($comment->{pid}) {
-		# If we're being asked to parent this comment to another,
-		# verify that the other comment exists and is in this
-		# same discussion.
-		my $pid_sid = 0;
-		$pid_sid = $self->sqlSelect("sid", "comments",
-			"cid=" . $self->sqlQuote($comment->{pid}));
-		return -1 unless $pid_sid && $pid_sid == $comment->{sid};
+		$comment->{pid} = $self->getStoidFromSidOrStoid($comment->{pid});
+		if ($comment->{pid}) {
+			# If we're being asked to parent this comment to another,
+			# verify that the other comment exists and is in this
+			# same discussion.
+			my $pid_sid = 0;
+			$pid_sid = $self->sqlSelect("sid", "comments",
+				"cid=" . $self->sqlQuote($comment->{pid}));
+			return -1 unless $pid_sid && $pid_sid == $comment->{sid};
+		}
 	}
 
 #	$self->{_dbh}{AutoCommit} = 0;
