@@ -1862,7 +1862,6 @@ sub editHome {
 	$formats = $slashdb->getDescriptions('dateformats');
 	$tzformat_select = createSelect('tzformat', $formats, $user_edit->{dfid}, 1);
 
-	my $l_check = $user_edit->{light}	? $constants->{markup_checked_attribute} : '';
 	my $lb_check = $user_edit->{lowbandwidth} ? $constants->{markup_checked_attribute} : '';
 	my $sd_check = $user_edit->{simpledesign} ? $constants->{markup_checked_attribute} : '';
 	my $i_check = $user_edit->{noicons}	? $constants->{markup_checked_attribute} : '';
@@ -1875,7 +1874,6 @@ sub editHome {
 		admin_block		=> $admin_block,
 		user_edit		=> $user_edit,
 		tzformat_select		=> $tzformat_select,
-		l_check			=> $l_check,
 		i_check			=> $i_check,
 		w_check			=> $w_check,
 		lb_check		=> $lb_check,
@@ -2743,7 +2741,6 @@ sub saveHome {
 
 		maxstories	=> 30, # XXXSKIN fix this later
 		noboxes		=> ($form->{useslashboxes} ? 0 : 1),
-		light		=> ($form->{light} ? 1 : 0),
 		lowbandwidth	=> ($form->{lowbandwidth} ? 1 : 0),
 		simpledesign	=> ($form->{simpledesign} ? 1 : 0),
 		noicons		=> ($form->{noicons} ? 1 : 0),
