@@ -949,10 +949,11 @@ sub getCSS {
 	my $lowbandwidth = $user->{lowbandwidth} ? "yes" : "no";
 
 	$page   = '' if !$css_pages_ref->{$page};	
-	$skin   = ''  if !$css_skins_ref->{$skin};	
+	$skin   = '' if !$css_skins_ref->{$skin};	
 	$theme  = '' if !$css_themes_ref->{$theme};	
 
-	return $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth} if exists $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth};
+	return $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}
+		if exists $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth};
 	
 	my @clauses;
 
