@@ -65,5 +65,5 @@ div.storylinks, div.storylinks div ul, div.storylinks div
 .btmnav ul li a, .btmnav ul li a:visited { color: #555;}
 
 
-.commentBox { background: #000; }
+.commentBox, .commentTop { background: #000; }
 .commentBoxForm { background: #ccc;}
