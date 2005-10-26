@@ -9,7 +9,7 @@ a:visited { color: #000; }
 	min-width: 37em;
 }
 
-body #articles
+body #index #articles
 {
 	margin: 0 15.6em 1em 0;
 	position: relative;
