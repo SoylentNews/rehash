@@ -64,6 +64,17 @@ div.storylinks, div.storylinks div ul, div.storylinks div
 }
 .btmnav ul li a, .btmnav ul li a:visited { color: #555;}
 
+.article div.details
+{
+	background: transparent;
+	border-top: 0px;
+	border: 0px;
+}
+
+.article div.body {
+	border: 0px;
+}
+
 
 .commentBox, .commentTop { background: #000; }
 .commentBoxForm { background: #ccc;}
