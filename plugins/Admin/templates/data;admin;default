@@ -97,7 +97,11 @@ __template__
 	[% END %]
 
 [% CASE 'topicDelete-message' %]
+	[% IF !form.tid %]
+	<div class="message"><strong>Deletion failed!</strong><br>
+	[% ELSE %]
 	<div class="message"><strong>Deleted [% tid %]!</strong><br>
+	[% END %]
 
 [% CASE 'clearpass-warning' %]
 	<blockquote><p align="CENTER" class="message warn"><strong>**&nbsp;Your admin password has been sent in the clear. Please return to <a href="[% gSkin.absolutedir_secure %]">the secure site</a> and then <a href="[% gSkin.absolutedir_secure %]/my/password">change your password</a> immediately! If you have additional problems, please contact the <a href="mailto:[% constants.adminmail | strip_attribute %]">site admin</a>.[% IF moreinfo %] More info: "[% moreinfo | strip_literal %]".[% END %]&nbsp;**</strong></p></blockquote>
