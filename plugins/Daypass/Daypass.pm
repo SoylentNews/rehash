@@ -220,6 +220,12 @@ sub getGoodUntil {
 				),
 			INTERVAL $off_set SECOND)")
 		: $slashdb->sqlSelect("CONCAT(DATE(NOW()), ' 23:59:59')");
+	# If there was an error of some kind, note it and at least
+	# return a legal value.
+	if (!$gmt_end_of_tz_day) {
+		errorLog("empty gmt_end_of_tz_day '$off_set' " . time);
+		$gmt_end_of_tz_day = '0000-00-00 00:00:00';
+	}
 	return $gmt_end_of_tz_day;
 }
 
