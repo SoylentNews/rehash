@@ -3387,3 +3387,31 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::PollBooth::Re
 
 # PUDGE LAST UPDATED HERE
 
+INSERT INTO vars (name, value, description) VALUES ('lowbandwidth_bids_regex','_more$','bids we want to show in low bandwidth mode.  NONE if we don\'t want to show any');
+
+ALTER TABLE css ADD lowbandwidth ENUM("no","yes") DEFAULT "no";
+
+
+# Caution!  "Update statements that refer to user variables
+# (that is, variables of the form @var_name) are badly
+# replicated in 3.23 and 4.0. This is fixed in 4.1."
+# <http://dev.mysql.com/doc/mysql/en/replication-features.html>
+# If you are running reader DBs, you will definitely want to
+# check the css table after the following command has
+# replicated to see if the data is correct.
+#
+# Or if you want to be safe just do the select manually and replace
+# @ut_ctid with the result of the select
+
+SELECT @ut_ctid := ctid FROM css_type where name="user_theme";
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum, ie_cond, lowbandwidth) VALUES ('stylesheet','text/css','screen, projection','slashcode_low_bw.css','','','','no','',@ut_ctid, 99, "", "yes");
+
+# Removing light section templates.  Light as a section no longer exists so these can go.
+DELETE FROM templates where skin="light";
+
+
+# Run this perl script for each of your sites' virtual users.  This will set all users with light mode turned on to have 
+# simpledesign and lowbandwidth settings turned on initially
+# Replace virtusername with the virtual user for your site
+# perl -MSlash::Test=virtusername -e 'my $uids = $slashdb->sqlSelectColArrayref("uid","users_prefs","light=1"); $slashdb->setUser($_, {simpledesign => 1, lowbandwidth => 1}) foreach @$uids;'
+
