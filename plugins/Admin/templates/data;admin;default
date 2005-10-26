@@ -81,26 +81,26 @@ __template__
 	<div class="message"><strong>Deleted [% bid %]!</strong></div>
 
 [% CASE 'templateDelete-message' %]
-	<div class="message"><strong>Deleted [% name %], TPID [% tpid %]!</strong><br>
+	<div class="message"><strong>Deleted [% name %], TPID [% tpid %]!</strong></div>
 
 [% CASE 'topicSave-message' %]
-	<div class="message"><strong>Saved [% form.tid %]!</strong><br>
+	<div class="message"><strong>Saved [% form.tid %]!</strong></div>
 
 [% CASE 'updateFilter-message' %]
 
 	[% IF ! form.regex %]
-	<div class="message error"><strong>You haven't typed in a regex.</strong><br>
+	<div class="message error"><strong>You haven't typed in a regex.</strong></div>
 	[% END %]
 
 	[% IF ! form.field %]
-	<div class="message error"><strong>You haven't typed in a form field.</strong><br>
+	<div class="message error"><strong>You haven't typed in a form field.</strong></div>
 	[% END %]
 
 [% CASE 'topicDelete-message' %]
 	[% IF !form.tid %]
-	<div class="message"><strong>Deletion failed!</strong><br>
+	<div class="message"><strong>Deletion failed!</strong></div>
 	[% ELSE %]
-	<div class="message"><strong>Deleted [% tid %]!</strong><br>
+	<div class="message"><strong>Deleted [% tid %]!</strong></div>
 	[% END %]
 
 [% CASE 'clearpass-warning' %]
