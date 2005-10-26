@@ -85,7 +85,10 @@ __template__
 		%]
 
 
-<!-- Possible removal due to CSS styling availabilty --> 
+<!-- Possible removal due to CSS styling availabilty -->
+
+		Light Mode has been replaced by 2 toggle-able settings.  These are 'lowbandwidth' and 'simpledesign'.  
+		You can use them individually, or together. 
 		<label>
 			<input type="checkbox" name="simpledesign"[% sd_check %]>Simple Design
 		</label>
