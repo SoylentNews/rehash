@@ -3385,8 +3385,6 @@ DELETE FROM reskey_vars WHERE rkrid=5 AND name='duration_creation-use';
 INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'use', 'Slash::ResKey::Checks::Post',                151);
 INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::PollBooth::ResKey',                   251);
 
-# PUDGE LAST UPDATED HERE
-
 INSERT INTO vars (name, value, description) VALUES ('lowbandwidth_bids_regex','_more$','bids we want to show in low bandwidth mode.  NONE if we don\'t want to show any');
 
 ALTER TABLE css ADD lowbandwidth ENUM("no","yes") DEFAULT "no";
@@ -3414,4 +3412,10 @@ DELETE FROM templates where skin="light";
 # simpledesign and lowbandwidth settings turned on initially
 # Replace virtusername with the virtual user for your site
 # perl -MSlash::Test=virtusername -e 'my $uids = $slashdb->sqlSelectColArrayref("uid","users_prefs","light=1"); $slashdb->setUser($_, {simpledesign => 1, lowbandwidth => 1}) foreach @$uids;'
+
+# 2005-10-26
+UPDATE vars SET value = 'T_2_5_0_86' WHERE name = 'cvs_tag_currentcode';
+
+# PUDGE LAST UPDATED HERE
+
 
