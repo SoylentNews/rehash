@@ -42,7 +42,7 @@ __template__
 				<a href="[% constants.real_rootdir %]">[% constants.sitename %]</a>
 			</h1>
 		</div>
-		[% UNLESS user.lowbandwidth %]
+		[% UNLESS user.lowbandwidth || user.simpledesign %]
 		<ul>
 			[% PROCESS recentTopics %]
 		</ul>
