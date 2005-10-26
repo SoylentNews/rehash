@@ -13,6 +13,11 @@ __name__
 indexhead
 __template__
 <div class="indexhead">
+[% IF form.light %]
+Light Mode has been replaced by 2 toggle-able settings.  These are  
+<a href="[% gSkin.rootdir %]/index.pl?lowbandwidth=1">'lowbandwidth'</a> and <a href="[% gSkin.rootdir %]/index.pl?simpledesign=1">'simpledesign'</a>.  You can use them individually, or  
+<a href="[% gSkin.rootdir %]/index.pl?simpledesign=1&amp;lowbandwidth=1">together</a>.  Both variables are also available in the <a href="[% gSkin.rootdir %]/users.pl?op=edithome">preferences page</a> to all logged in users.<br>
+[% END %]
 [% UNLESS user.is_anon %]
 [% IF metamod_elig %]
 Have you <b><a href="[% gSkin.rootdir %]/metamod.pl">Meta Moderated</a></b> recently?<br>
