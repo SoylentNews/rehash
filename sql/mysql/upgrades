@@ -3376,10 +3376,6 @@ UPDATE vars SET value = 'T_2_5_0_85' WHERE name = 'cvs_tag_currentcode';
 
 # End of T_2_5_0_85, Start of T_2_5_0_86 - 2005/10/18
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 DELETE FROM reskey_vars WHERE rkrid=5 AND name='duration_creation-use';
 
 INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'use', 'Slash::ResKey::Checks::Post',                151);
@@ -3417,7 +3413,9 @@ UPDATE css set theme="light", skin="" WHERE file="slashcode_lite.css";
 # 2005-10-26
 UPDATE vars SET value = 'T_2_5_0_86' WHERE name = 'cvs_tag_currentcode';
 
-
 # PUDGE LAST UPDATED HERE
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
