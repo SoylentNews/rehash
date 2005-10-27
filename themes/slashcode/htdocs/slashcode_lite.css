@@ -77,5 +77,5 @@ div.storylinks, div.storylinks div ul, div.storylinks div
 }
 
 
-.commentBox, .commentTop { background: #000; }
-.commentBoxForm { background: #ccc;}
+.commentBox, { background: #000; }
+.commentBoxForm, .commentTop { background: #ccc;}
