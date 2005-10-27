@@ -3389,7 +3389,6 @@ INSERT INTO vars (name, value, description) VALUES ('lowbandwidth_bids_regex','_
 
 ALTER TABLE css ADD lowbandwidth ENUM("no","yes") DEFAULT "no";
 
-
 # Caution!  "Update statements that refer to user variables
 # (that is, variables of the form @var_name) are badly
 # replicated in 3.23 and 4.0. This is fixed in 4.1."
@@ -3413,8 +3412,11 @@ DELETE FROM templates where skin="light";
 # Replace virtusername with the virtual user for your site
 # perl -MSlash::Test=virtusername -e 'my $uids = $slashdb->sqlSelectColArrayref("uid","users_prefs","light=1"); $slashdb->setUser($_, {simpledesign => 1, lowbandwidth => 1}) foreach @$uids;'
 
+UPDATE css set theme="light", skin="" WHERE file="slashcode_lite.css";
+
 # 2005-10-26
 UPDATE vars SET value = 'T_2_5_0_86' WHERE name = 'cvs_tag_currentcode';
+
 
 # PUDGE LAST UPDATED HERE
 
