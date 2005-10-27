@@ -15,6 +15,7 @@ div.storylinks div ul, .article .body, .journalgeneric .body, .article .details,
 margin-left: 0;
 padding-left: 0;
 }
+div.storylinks { border: 0px; }
 /* Header */
 #slogan h2
 {
