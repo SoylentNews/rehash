@@ -1,5 +1,4 @@
 # $Id$
-This is a Bundle file for Slash, the code that runs Slashdot.  See
-http://slashcode.com/ for more information.  It is geared toward Slash
-2.2.x and later versions, but should work fine for older versions of
-Slash, too.
+
+This is an API for writing Slash clients.  Read the POD for more information.
+Right now, it is only useful for writing SOAP clients for Slash journals.

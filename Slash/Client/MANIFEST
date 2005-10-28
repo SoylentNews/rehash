@@ -1,0 +1,7 @@
+Client.pm
+Journal/Journal.pm
+Makefile.PL
+MANIFEST
+README
+t/journal.t
+t/pod.t
