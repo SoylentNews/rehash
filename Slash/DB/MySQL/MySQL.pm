@@ -6594,7 +6594,8 @@ sub moderateComment {
 	# to moderate if any of the following tests trigger, but,
 	# an unscrupulous user could have faked their submission with
 	# or without us presenting them the menu options.  So do the
-	# tests again.
+	# tests again.  XXX  These tests are basically copy-and-pasted
+	# from Slash.pm _can_mod, which should be rectified.
 	unless ($superAuthor) {
 		# Do not allow moderation of any comments with the same UID as the
 		# current user (duh!).

@@ -4,6 +4,7 @@ __description__
 The printing of the comments
 
 * can_moderate = boolean for whether current user is eligible to moderate
+	at least one comment
 * comment = hashref of main comment to display (if cid is specified)
 * comments = big ol' arrayref of comments
 * next = hashref of next comment for "next" link
@@ -23,8 +24,10 @@ en_US
 __name__
 printCommComments
 __template__
-[% moderate_form   = can_moderate %]
-[% moderate_button = (can_moderate && user.mode != 'archive' && ( !user.state.discussion_archived || constants.comments_moddable_archived)) %]
+[% moderate_form   = can_moderate || user.acl.candelcomments_always %]
+[% moderate_button = (can_moderate
+	&& user.mode != 'archive'
+	&& ( !user.state.discussion_archived || constants.comments_moddable_archived)) %]
 [% IF moderate_form %]
 	<form action="[% gSkin.rootdir %]/comments.pl" method="post">
 [% END %]

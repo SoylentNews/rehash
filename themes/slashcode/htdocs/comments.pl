@@ -886,8 +886,12 @@ sub previewForm {
 			? 1 : 0;
 	}
 
+	#####
+	# Set the user mode temporarily to 'archive' for purposes of
+	# displaying this comment.
 	my $tm = $user->{mode};
 	$user->{mode} = 'archive';
+
 	my $previewForm;
 	if ($form->{newdiscussion} && $user->{seclev} < $constants->{discussion_create_seclev}) { 
 		$previewForm = slashDisplay('newdiscussion', {
@@ -899,7 +903,9 @@ sub previewForm {
 			preview => $preview,
 		}, 1);
 	}
+
 	$user->{mode} = $tm;
+	#####
 
 	return $previewForm;
 }

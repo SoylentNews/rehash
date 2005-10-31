@@ -428,38 +428,52 @@ sub _can_mod {
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
-	# set time_unixepoch to current time if we aren't passed a
-	# comment this is the case for the check for the moderate button
-	# on the article page 
+	# Do some easy and high-priority initial tests.  If any of
+	# these is true, this comment is not moderatable, and these
+	# override the ACL and seclev tests.
+	return 0 if !$comment;
+	return 0 if
+		    $user->{is_anon}
+		|| !$constants->{allow_moderation}
+		||  $comment->{no_moderation};
+	
+	# More easy tests.  If any of these is true, the user has
+	# authorization to mod any comments, regardless of any of
+	# the tests that come later.
+	return 1 if
+		    $constants->{authors_unlimited}
+		&&  $user->{seclev} >= $constants->{authors_unlimited};
+	return 1 if
+		    $user->{acl}{modpoints_always};
 
-	$comment->{time_unixepoch} = time unless $comment;
-	$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0)
-		unless $comment->{time_unixepoch};
-	my $retval =
-		   !$user->{is_anon}
-		&& $constants->{allow_moderation}
-		&& !$comment->{no_moderation}
-		&& ( (
-		       $user->{points} > 0
-		    && $user->{willing}
-		    && $comment->{uid} != $user->{uid}
-		    && $comment->{lastmod} != $user->{uid}
-		    && $comment->{ipid} ne $user->{ipid}
-		    && (!$constants->{mod_same_subnet_forbid}
-		    	|| $comment->{subnetid} ne $user->{subnetid} )
-		    && (!$user->{state}{discussion_archived}
-			|| $constants->{comments_moddable_archived})
-		    && ($comment->{time_unixepoch} >= time() - 3600*
-			($constants->{comments_moddable_hours}
-			|| 24*$constants->{archive_delay}))
-		) || (
-		       $constants->{authors_unlimited}
-		    && $user->{seclev} >= $constants->{authors_unlimited}
-		) || (
-		       $user->{acl}{modpoints_always}
-		) );
+	# OK, the user is an ordinary user, so see if they have mod
+	# points and do some other fairly ordinary tests to try to
+	# rule out whether they can mod.
+	return 0 if
+		    $user->{points} <= 0
+		|| !$user->{willing}
+		||  $comment->{uid} == $user->{uid}
+		||  $comment->{lastmod} == $user->{uid}
+		||  $comment->{ipid} eq $user->{ipid};
+	return 0 if
+		    $constants->{mod_same_subnet_forbid}
+		&&  $comment->{subnetid} eq $user->{subnetid};
+	return 0 if
+		   !$constants->{comments_moddable_archived}
+		&&  $user->{state}{discussion_archived};
 
-	return $retval;
+	# Last test; this one involves a bit of calculation to set
+	# time_unixepoch in the comment structure itself, which is
+	# why we saved it for last.  timeCalc() is not the world's
+	# fastest function.
+	$comment->{time_unixepoch} ||= timeCalc($comment->{date}, "%s", 0);
+	my $hours = $constants->{comments_moddable_hours}
+		|| 24 * $constants->{archive_delay};
+	return 0 if $comment->{time_unixepoch} < time - 3600*$hours;
+
+	# All the ordinary tests passed, there's nothing stopping
+	# this user from modding this comment.
+	return 1;
 }
 
 #========================================================================
@@ -610,12 +624,26 @@ sub printComments {
 	# Flat and theaded mode don't index, even on large stories, so they
 	# need to use more, smaller pages. if $cid is 0, then we get the
 	# totalviskids for the story 		--Pater
-	my $total = ($user->{mode} eq 'flat' || $user->{mode} eq 'nested') ? $comments->{$cidorpid}{totalvisiblekids} : $cc;
+	my $total = ($user->{mode} eq 'flat' || $user->{mode} eq 'nested')
+		? $comments->{$cidorpid}{totalvisiblekids}
+		: $cc;
 
 	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $total);
 
+	# Figure out whether to show the moderation button.  We do, but
+	# only if at least one of the comments is moderatable.
+	my $can_mod_any = _can_mod($comment);
+	if (!$can_mod_any) {
+		CID: for my $cid (keys %$comments) {
+			if (_can_mod($comments->{$cid})) {
+				$can_mod_any = 1;
+				last CID;
+			}
+		}
+	}
+
 	my $comment_html = slashDisplay('printCommComments', {
-		can_moderate	=> _can_mod($comment),
+		can_moderate	=> $can_mod_any,
 		comment		=> $comment,
 		comments	=> $comments,
 		'next'		=> $next,
