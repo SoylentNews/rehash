@@ -32,5 +32,5 @@ CREATE TABLE journal_themes (
 	PRIMARY KEY (id)
 );
 
-ALTER TABLE journals ADD FOREIGN KEY (tid) REFERENCES topics(tid);
+#ALTER TABLE journals ADD FOREIGN KEY (tid) REFERENCES topics(tid);
 
