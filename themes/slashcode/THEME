@@ -310,7 +310,6 @@ plugin=PollBooth
 plugin=Print
 plugin=PubKey
 plugin=Search
-plugin=Sections
 plugin=Submit
 plugin=Stats
 plugin=Zoo
