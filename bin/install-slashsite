@@ -102,7 +102,7 @@ What is hostname of your Slash site
 ($host_noport = $hostname) =~ s/:.+$//;
 
 unless ($opts{'o'}) {
-	print "\nWhat user would you like to run your Slash site as? [nobody] ";
+	print "\nWhat unix user would you like to run your Slash site as? [nobody] ";
 	chomp($owner = <STDIN>);
 	$owner ||= 'nobody';
 } else {
@@ -119,7 +119,7 @@ unless ($opts{'g'}) {
 	my $tmpgroup;
 	$tmpgroup = getgrgid($owner_id) if $Config{d_getgrent};
 	$tmpgroup = defined($tmpgroup) ? $tmpgroup : 'nobody';
-	print "\nWhat group would you like to run your Slash site under? [$tmpgroup] ";
+	print "\nWhat unix group would you like to run your Slash site under? [$tmpgroup] ";
 	chomp($group = <STDIN>);
 	$group ||= $tmpgroup;
 } else {
