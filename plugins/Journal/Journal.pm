@@ -57,7 +57,9 @@ sub getsByUid {
 
 	my $answer = $self->sqlSelectAll(
 		'date, article, description, journals.id, posttype, tid, discussion',
-		'journals, journals_text', $where, $order
+		'journals, journals_text',
+		$where,
+		$order
 	);
 	return $answer;
 }
@@ -65,38 +67,72 @@ sub getsByUid {
 sub getsByUids {
 	my($self, $uids, $start, $limit, $options) = @_;
 	return unless @$uids;
-	my $list = join(",", @$uids);
+	my $uids_list = join(",", @$uids);
 	my $answer;
 	my $order = "ORDER BY journals.date DESC";
 	$order .= " LIMIT $start, $limit" if $limit;
 
-	# Note - if the *.uid table in the where clause is journals, MySQL
-	# does a table scan on journals_text.  Make it users and it
-	# correctly uses an index on uid.  Logically they are the same and
-	# the DB *really* should be smart enough to pick up on that, but no.
-	# At least, not in MySQL 3.23.49a.
+	# The list may be quite large, potentially hundreds or even
+	# thousands of users, forming a significant portion of all the
+	# journal-writing users on a site.  We're splitting this select
+	# up into three separate ones.  The uid_date_id index lets this
+	# first select succeed without even hitting the data (and yes
+	# the ",id" component of that index is required for this to be
+	# true, at least on the version of MySQL and the data set I
+	# tested it on for Slashdot).
 
-	if ($options->{titles_only}) {
-		my $where = "users.uid IN ($list) AND users.uid=journals.uid";
+	# First, get the list of journal IDs for the UIDs given.
+	my $journals_hr = $self->sqlSelectAllKeyValue(
+		'id, uid',
+		'journals',
+		"uid IN ($uids_list)",
+		$order);
 
-		$answer = $self->sqlSelectAllHashrefArray(
-			'description, id, nickname',
-			'journals, users',
-			$where,
-			$order
-		);
+	# Second, pull nickname from users for the uids identified.
+	my @uids_found = sort keys %{( map { ($_, 1) } values %$journals_hr )};
+	my $uids_found_list = join(',', @uids_found);
+	my $uid_nick_hr = $self->sqlSelectAllKeyValue(
+		'uid, nickname',
+		'users',
+		"uid IN ($uids_found_list)");
+
+	# Third, pull the required data from journals, and if necessary
+	# journals_text.  If in the last few moments any journals from
+	# the first select have become unavailable, that's OK, we just
+	# won't return any information about them.
+	# Oh, and yes, it is _insane_ that this method returns an
+	# arrayref of nine-element arrayrefs normally, but an arrayref
+	# of hashrefs if called with the "titles_only" option.
+	# That should be fixed someday.
+	my @journal_ids_found = sort keys %$journals_hr;
+	my $journal_ids_found_list = join(',', @journal_ids_found);
+	my $t_o = $options->{titles_only};
+	my $columns =	$t_o	? 'id, description'
+				: 'date, article, description, journals.id,
+				   posttype, tid, discussion, journals.uid';
+	my $tables =	$t_o	? 'journals'
+				: 'journals, journals_text';
+	my $where =	$t_o	? "journals.id IN ($journal_ids_found_list)"
+				: "journals.id IN ($journal_ids_found_list)
+				   AND journals_text.id = journals.id";
+	my $retval;
+	if ($t_o) {
+		$retval = $self->sqlSelectAllHashrefArray(
+			$columns, $tables, $where, $order);
+		for my $hr (@$retval) {
+			my $id = $hr->{id};
+			my $uid = $journals_hr->{$id};
+			$hr->{nickname} = $uid_nick_hr->{$uid};
+		}
 	} else {
-		my $where = "users.uid IN ($list) AND journals.id=journals_text.id AND users.uid=journals.uid";
-
-		$answer = $self->sqlSelectAll(
-			'journals.date, article, description, journals.id,
-			 posttype, tid, discussion, users.uid, users.nickname',
-			'journals, journals_text, users',
-			$where,
-			$order
-		);
+		$retval = $self->sqlSelectAll(
+			$columns, $tables, $where, $order);
+		for my $ar (@$retval) {
+			my $uid = $ar->[7];
+			push @$ar, $uid_nick_hr->{$uid};
+		}
 	}
-	return $answer;
+	return $retval;
 }
 
 sub list {
@@ -114,7 +150,9 @@ sub listFriends {
 	my $list = join(",", @$uids);
 	my $order = "ORDER BY date DESC";
 	$order .= " LIMIT $limit" if $limit;
-	my $answer = $self->sqlSelectAll('id, journals.date, description, journals.uid, users.nickname', 'journals,users', "journals.uid in ($list) AND users.uid=journals.uid", $order);
+	my $answer = $self->sqlSelectAll('id, journals.date, description, journals.uid, users.nickname',
+		'journals,users',
+		"journals.uid in ($list) AND users.uid=journals.uid", $order);
 
 	return $answer;
 }

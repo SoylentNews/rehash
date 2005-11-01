@@ -17,7 +17,7 @@ use vars qw($VERSION);
 sub main {
 	my $journal   = getObject('Slash::Journal');
 	my $constants = getCurrentStatic();
-	my $reader    = getObject('Slash::DB', { db_type => 'reader' });
+	my $reader    = getObject('Slash::Journal', { db_type => 'reader' });
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
 	my $gSkin     = getCurrentSkin();
@@ -120,12 +120,12 @@ sub displayTop {
 	# this should probably be in a separate template, so the site admins
 	# can select the order themselves -- pudge
 	if ($constants->{journal_top_recent}) {
-		$journals = $journal->topRecent;
+		$journals = $reader->topRecent;
 		slashDisplay('journaltop', { journals => $journals, type => 'recent' });
 	}
 
 	if ($constants->{journal_top_posters}) {
-		$journals = $journal->top;
+		$journals = $reader->top;
 		slashDisplay('journaltop', { journals => $journals, type => 'top' });
 	}
 
@@ -167,7 +167,7 @@ sub searchUsers {
 		return;
 	}
 
-	my $results = $journal->searchUsers($form->{nickname});
+	my $results = $reader->searchUsers($form->{nickname});
 
 	# if nonref and true, then display user journal
 	if ($results && !ref($results)) {
@@ -217,11 +217,11 @@ sub displayRSS {
 	if ($form->{op} eq 'friendview') {
 		my $zoo   = getObject('Slash::Zoo');
 		my $uids  = $zoo->getFriendsUIDs($juser->{uid});
-		$articles = $journal->getsByUids($uids, 0, $constants->{journal_default_display} * 3);
+		$articles = $reader->getsByUids($uids, 0, $constants->{journal_default_display} * 3);
 	} else {
 		# give an extra 3 * the normal HTML default display ... we can
 		# make a new var if we really need one -- pudge
-		$articles = $journal->getsByUid($juser->{uid}, 0, $constants->{journal_default_display} * 3);
+		$articles = $reader->getsByUid($juser->{uid}, 0, $constants->{journal_default_display} * 3);
 	}
 
 	my @items;
@@ -288,13 +288,13 @@ sub displayTopRSS {
 	my $type;
 	if ($form->{type} eq 'count' && $constants->{journal_top_posters}) {
 		$type = 'count';
-		$journals = $journal->top;
+		$journals = $reader->top;
 	} elsif ($form->{type} eq 'friends' && $constants->{journal_top_friend}) {
 		$type = 'friends';
 		my $zoo   = getObject('Slash::Zoo');
 		$journals = $zoo->topFriends;
 	} elsif ($constants->{journal_top_recent}) {
-		$journals = $journal->topRecent;
+		$journals = $reader->topRecent;
 	}
 
 	my @items;
@@ -441,7 +441,7 @@ sub displayArticle {
 
 	# clean it up
 	my $start = fixint($form->{start}) || 0;
-	my $articles = $journal->getsByUid($uid, $start,
+	my $articles = $reader->getsByUid($uid, $start,
 		$constants->{journal_default_display} + 1, $form->{id}
 	);
 
@@ -565,7 +565,7 @@ sub doSaveArticle {
 	my $slashdb = getCurrentDB();
 	if ($form->{id}) {
 		my %update;
-		my $article = $journal->get($form->{id});
+		my $article = $reader->get($form->{id});
 
 		# note: comments_on is a special case where we are
 		# only turning on comments, not saving anything else
@@ -644,7 +644,7 @@ sub doSaveArticle {
 
 	if ($constants->{validate_html}) {
 		my $validator = getObject('Slash::Validator');
-		my $article = $journal->get($form->{id});
+		my $article = $reader->get($form->{id});
 		my $strip_art = balanceTags(strip_mode($article->{article}, $article->{posttype}), { deep_nesting => 1 });
 		$validator->isValid($strip_art, {
 			data_type	=> 'journal',
@@ -662,7 +662,7 @@ sub doEditArticle {
 	my $article = {};
 	my $posttype;
 
-	$article = $journal->get($form->{id}) if $form->{id};
+	$article = $reader->get($form->{id}) if $form->{id};
 	# you go now!
 	if ($article->{uid} && $article->{uid} != $user->{uid}) {
 		return getData('noedit');
@@ -766,7 +766,7 @@ sub editPrefs {
 	_printHead('userhead', { nickname => $nickname, uid => $uid, menutype => 'prefs' }) or return;
 
 	my $theme	= _checkTheme($user->{'journal_theme'});
-	my $themes	= $journal->themes;
+	my $themes	= $reader->themes;
 	slashDisplay('journaloptions', {
 		default		=> $theme,
 		themes		=> $themes,
@@ -801,8 +801,8 @@ sub listArticle {
 		return displayFriends(@_);
 	}
 
-	my $list 	= $journal->list($uid);
-	my $themes	= $journal->themes;
+	my $list 	= $reader->list($uid);
+	my $themes	= $reader->themes;
 	my $theme	= _checkTheme($user->{'journal_theme'});
 	my $nickname	= $form->{uid}
 		? $reader->getUser($form->{uid}, 'nickname')
@@ -836,7 +836,7 @@ sub articleMeta {
 		my $reskey = getObject('Slash::ResKey');
 		my $rkey = $reskey->key('journal');
 		if ($rkey->create) {
-			my $article = $journal->get($form->{id});
+			my $article = $reader->get($form->{id});
 			_printHead('mainhead') or return;
 			slashDisplay('meta', { article => $article, rkey => $rkey });
 			print getData('journalfoot');
@@ -899,8 +899,8 @@ sub _checkTheme {
 	my $constants	= getCurrentStatic();
 	return $constants->{journal_default_theme} if !$theme;
 
-	my $journal	= getObject('Slash::Journal');
-	my $themes	= $journal->themes;
+	my $reader	= getObject('Slash::Journal', { db_type => 'reader' });
+	my $themes	= $reader->themes;
 
 	return $constants->{journal_default_theme}
 		unless grep $_ eq $theme, @$themes;
@@ -925,12 +925,12 @@ sub modify_entry {
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $gSkin     = getCurrentSkin();
-	my $reader    = getObject('Slash::DB', { db_type => 'reader' });
+	my $reader    = getObject('Slash::Journal', { db_type => 'reader' });
 
 	return if $user->{is_anon};
 
 	$id =~ s/\D+//g;
-	my $entry = $journal->get($id);
+	my $entry = $reader->get($id);
 	return unless $entry->{id};
 
 	my $form = _save_params(1, @_) || {};
@@ -1003,16 +1003,17 @@ sub get_entry {
 	$rkey->createuse or return;
 
 	my $journal   = getObject('Slash::Journal');
+	my $reader    = getObject('Slash::Journal', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $slashdb   = getCurrentDB();
 	my $gSkin     = getCurrentSkin();
 
 	$id =~ s/\D+//g;
 
-	my $entry = $journal->get($id);
+	my $entry = $reader->get($id);
 	return unless $entry->{id};
 
-	$entry->{nickname} = $slashdb->getUser($entry->{uid}, 'nickname');
+	$entry->{nickname} = $reader->getUser($entry->{uid}, 'nickname');
 	$entry->{url} = "$gSkin->{absolutedir}/~" . fixparam($entry->{nickname}) . "/journal/$entry->{id}";
 	$entry->{discussion_id} = delete $entry->{'discussion'};
 	$entry->{discussion_url} = "$gSkin->{absolutedir}/comments.pl?sid=$entry->{discussion_id}"
@@ -1029,22 +1030,21 @@ sub get_entries {
 	my $rkey = $reskey->key('journal-soap-get');
 	$rkey->createuse or return;
 
-	my $journal   = getObject('Slash::Journal');
+	my $reader    = getObject('Slash::Journal', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
-	my $slashdb   = getCurrentDB();
 	my $gSkin     = getCurrentSkin();
 
 	$uid =~ s/\D+//g;
 	$num =~ s/\D+//g;
 
-	$user		= $slashdb->getUser($uid, ['nickname']) if $uid;
+	$user		= $reader->getUser($uid, ['nickname']) if $uid;
 	$uid		= $uid || $user->{uid};
 	my $nickname	= $user->{nickname};
 
 	return unless $uid;
 
-	my $articles = $journal->getsByUid($uid, 0, $num || 15);
+	my $articles = $reader->getsByUid($uid, 0, $num || 15);
 	my @items;
 	for my $article (@$articles) {
 		push @items, {

@@ -12,7 +12,7 @@ CREATE TABLE journals (
 	discussion MEDIUMINT  UNSIGNED,
 	tid SMALLINT UNSIGNED NOT NULL,
 	PRIMARY KEY (id),
-	KEY uidarticle (uid),
+	KEY uid_date_id (uid,date,id),
 	KEY IDandUID (id,uid),
 	KEY tid (tid)
 );

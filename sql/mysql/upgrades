@@ -3426,3 +3426,6 @@ INSERT INTO vars (name, value, description) VALUES ('css_use_imagedir','0','Plac
 # for that because I don't think there's a good programmatic way to
 # determine the name of those keys.
 
+# plugins/Journal (ignore if not using that plugin)
+ALTER TABLE journals ADD INDEX uid_date_id (uid, date, id);
+
