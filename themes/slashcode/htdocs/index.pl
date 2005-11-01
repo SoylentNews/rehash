@@ -439,12 +439,12 @@ sub displayStandardBlocks {
 				$getblocks
 			);
 		} elsif ($bid eq 'friends_journal' && $constants->{plugin}{Journal} && $constants->{plugin}{Zoo}) {
-			my $journal = getObject("Slash::Journal");
-			my $zoo = getObject("Slash::Zoo");
+			my $journal = getObject("Slash::Journal", { db_type => 'reader' });
+			my $zoo = getObject("Slash::Zoo", { db_type => 'reader' });
 			my $uids = $zoo->getFriendsUIDs($user->{uid});
 			my $articles = $journal->getsByUids($uids, 0,
-				$constants->{journal_default_display}, { titles_only => 1})
-				if ($uids && @$uids);
+				$constants->{journal_default_display}, { titles_only => 1 })
+				if $uids && @$uids;
 			# We only display if the person has friends with data
 			if ($articles && @$articles) {
 				$return .= portalsidebox(

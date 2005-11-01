@@ -344,7 +344,7 @@ sub displayArticleFriends {
 	my $start = fixint($form->{start}) || 0;
 	my $uids = $zoo->getFriendsUIDs($uid);
 	my $articles = $journal->getsByUids($uids, $start,
-		$constants->{journal_default_display} + 1, $form->{id}
+		$constants->{journal_default_display} + 1
 	);
 
 	unless ($articles && @$articles) {
