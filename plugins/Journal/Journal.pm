@@ -67,8 +67,8 @@ sub getsByUid {
 sub getsByUids {
 	my($self, $uids, $start, $limit, $options) = @_;
 	return unless @$uids;
+	my $t_o = $options->{titles_only};
 	my $uids_list = join(",", @$uids);
-	my $answer;
 	my $order = "ORDER BY journals.date DESC";
 	$order .= " LIMIT $start, $limit" if $limit;
 
@@ -87,9 +87,10 @@ sub getsByUids {
 		'journals',
 		"uid IN ($uids_list)",
 		$order);
-
+	return unless $journals_hr;
+	
 	# Second, pull nickname from users for the uids identified.
-	my @uids_found = sort keys %{( map { ($_, 1) } values %$journals_hr )};
+	my @uids_found = sort keys %{ { map { ($_, 1) } values %$journals_hr } };
 	my $uids_found_list = join(',', @uids_found);
 	my $uid_nick_hr = $self->sqlSelectAllKeyValue(
 		'uid, nickname',
@@ -106,7 +107,6 @@ sub getsByUids {
 	# That should be fixed someday.
 	my @journal_ids_found = sort keys %$journals_hr;
 	my $journal_ids_found_list = join(',', @journal_ids_found);
-	my $t_o = $options->{titles_only};
 	my $columns =	$t_o	? 'id, description'
 				: 'date, article, description, journals.id,
 				   posttype, tid, discussion, journals.uid';
