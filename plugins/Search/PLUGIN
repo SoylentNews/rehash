@@ -1,7 +1,7 @@
 # $Id$
 name=Search
 htdoc=search.pl
-htdoc=search.css
+css=search.css
 mysql_dump=dump
 mysql_prep=mysql_prep
 description=Slash Search is the default search engine for Slash.
