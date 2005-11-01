@@ -749,6 +749,7 @@ INSERT INTO vars (name, value, description) VALUES ('cookiepath','/','Path on se
 INSERT INTO vars (name, value, description) VALUES ('cookiesecure','1','Set the secure flag in cookies if SSL is on?');
 INSERT INTO vars (name, value, description) VALUES ('counthits_lastmaxid','1','Last accesslog id scanned by counthits task');
 INSERT INTO vars (name, value, description) VALUES ('css_expire','3600','Time in seconds before css cache expires');
+INSERT INTO vars (name, value, description) VALUES ('css_use_imagedir','0','Place .css files in imagedir instead for your rootdir?  You may want to utilize this if you are using boa or another lightweight webserver to serve images.  Run symlink-tool after switching var');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_pps', '', 'Pages per second the site is running at');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats', '', 'Stores current performance stats in a var for display to admins');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_disp', '1', 'Show current performance stats?');
