@@ -3414,8 +3414,6 @@ UPDATE vars SET value = 'T_2_5_0_86' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # You should update all your THEME and PLUGIN files to use css= instead of htdoc= for .css files that are managed through the site's css table
@@ -3431,3 +3429,6 @@ ALTER TABLE journals ADD INDEX uid_date_id (uid, date, id);
 
 # 2005-11-01
 UPDATE vars SET value = 'T_2_5_0_87' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
