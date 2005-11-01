@@ -575,7 +575,7 @@ sub _getList {
 			my($key, $val) = split(/=/, $_, 2);
 			$key = lc $key;
 			if ($key =~ /^(
-				htdoc | htdoc_code | htdoc_faq | 
+				css | htdoc | htdoc_code | htdoc_faq | 
 				image | image_award | image_banner | image_faq |
 				no-template | include_theme | task | template | sbin | misc | topic
 			)s?$/x) {
