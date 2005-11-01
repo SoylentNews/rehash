@@ -14,7 +14,7 @@
 use strict;
 use File::Basename;
 use File::Path;
-use File::Spec::Functions qw( :DEFAULT splitpath );
+use File::Spec::Functions qw( :DEFAULT splitpath splitdir);
 use Slash;
 use Slash::Utility;
 use Slash::DB;
@@ -72,16 +72,25 @@ my $plugin_list = $install->_getList(
 # to have a list of all the files that our theme references.
 my %theme_subdir_files = ( );
 my %plugin_subdir_files = ( );
-
+my %theme_css_translate = ();
+my %plugin_css_translate = ();
 # First, pull in the files referenced by the theme.
-my @theme_htdocs_keys = grep /^(htdoc|image|topic)/, keys %$theme_hr;
+my @theme_htdocs_keys = grep /^(htdoc|image|topic|css)/, keys %$theme_hr;
 for my $key (@theme_htdocs_keys) {
 	next unless $key && $theme_hr->{$key};
+	if ($key eq "css" and $constants->{css_use_imagedir}) {		
+		if (ref($theme_hr->{$key}) && ref($theme_hr->{$key}) eq "ARRAY") {
+			$theme_css_translate{$_} = 1 foreach @{$theme_hr->{$key}};
+		} else {
+			$theme_css_translate{$theme_hr->{$key}} = 1;
+		}
+	}
 	push @{$theme_subdir_files{htdocs}},
 		ref($theme_hr->{$key}) && ref($theme_hr->{$key}) eq 'ARRAY'
 			? @{$theme_hr->{$key}}
 			: $theme_hr->{$key};
 }
+
 for my $key (qw( tasks misc )) {
 	my $src_key = $key;
 	$src_key =~ s/s$//; # theme "task" becomes theme_subdir_files "tasks"
@@ -96,7 +105,7 @@ for my $key (qw( tasks misc )) {
 my %plugin_htdocs_keys = ( );
 my @plugin_htdocs_keys = ( );
 for my $plugin (keys %$plugin_list) {
-	for my $key (grep /^(htdoc|image|topic)/, keys %{$plugin_list->{$plugin}}) {
+	for my $key (grep /^(htdoc|image|topic|css)/, keys %{$plugin_list->{$plugin}}) {
 		$plugin_htdocs_keys{$key} = 1;
 	}
 }
@@ -105,6 +114,13 @@ for my $plugin (keys %$plugin_list) {
 	my $plugin_hr = $plugin_list->{$plugin};
 	for my $key (@plugin_htdocs_keys) {
 		next unless $key && $plugin_hr->{$key};
+		if ($key eq "css" and $constants->{css_use_imagedir}) {		
+			if (ref($plugin_hr->{$key}) && ref($plugin_hr->{$key}) eq "ARRAY") {
+				$plugin_css_translate{$plugin}{$_} = 1 foreach @{$plugin_hr->{$key}};
+			} else {
+				$plugin_css_translate{$plugin}{$_} = $plugin_hr->{$key};
+			}
+		}
 		push @{$plugin_subdir_files{$plugin}{htdocs}},
 			ref($plugin_hr->{$key}) && ref($plugin_hr->{$key}) eq 'ARRAY'
 				? @{$plugin_hr->{$key}}
@@ -125,6 +141,8 @@ for my $plugin (keys %$plugin_list) {
 #print "plugin_list: " . Dumper($plugin_list);
 #print "theme_subdir_files: " . Dumper(\%theme_subdir_files);
 #print "plugin_subdir_files: " . Dumper(\%plugin_subdir_files);
+#print "theme css translate: " . Dumper(\%theme_css_translate);
+#print "plugin css translate: " . Dumper(\%plugin_css_translate);
 
 my $theme_dir = $theme_hr->{dir};
 my $site_dir = $constants->{datadir};
@@ -148,6 +166,9 @@ for my $subdir (sort keys %theme_subdir_files) {
 		my $site_rel_file = $target_file;
 		1 while $site_rel_file =~ s{^\.\.\/[^/]+/}{};
 		my $site_file_abs = canonpath(catfile($site_dir, $site_rel_file));
+
+		$site_file_abs 	= css_translate($site_file_abs) if ($theme_css_translate{$target_file});
+
 		if ($processed{$site_file_abs}) {
 			if ($verbose) {
 				print "Skipping file in theme, already processed: '$site_file_abs'\n";
@@ -162,6 +183,8 @@ for my $subdir (sort keys %theme_subdir_files) {
 		# '/usr/local/slash/site/mysite/tasks/.spamarmor.pl'
 		# $theme_file_abs is e.g.
 		# '/usr/local/slash/theme/slashcode/tasks/spamarmor.pl'
+
+
 		$num_changes += handle_file($site_file_abs, $theme_file_abs,
 			$site_file_abs_dot, $site_file_abs_dot_short);
 		$processed{$site_file_abs} = 1;
@@ -182,6 +205,9 @@ for my $plugin (sort keys %plugin_subdir_files) {
 			# do that here.
 			$site_rel_file =~ s{^(?:$subdir/)?}{$subdir/};
 			my $site_file_abs = canonpath(catfile($site_dir, $site_rel_file));
+			
+			$site_file_abs 	= css_translate($site_file_abs) if ($plugin_css_translate{$plugin}{$target_file});
+
 #print "plugin '$plugin' subdir '$subdir' site_rel_file '$site_rel_file' site_file_abs '$site_file_abs'\n";
 			if ($processed{$site_file_abs}) {
 				if ($verbose) {
@@ -197,6 +223,7 @@ for my $plugin (sort keys %plugin_subdir_files) {
 			# '/usr/local/slash/site/mysite/tasks/.adminmail.pl
 			# $plugin_file_abs is e.g.
 			# '/usr/local/slash/plugin/Stats/adminmail.pl'
+			
 			$num_changes += handle_file($site_file_abs, $plugin_file_abs,
 				$site_file_abs_dot, $site_file_abs_dot_short);
 			$processed{$site_file_abs} = 1;
@@ -299,6 +326,16 @@ sub handle_file {
 	return 1;
 }
 
+###############################################
+sub css_translate {
+	my ($file_abs) = @_;
+	my $seen_htdocs = 0;
+	my ($volume, $dirs, $file) = splitpath($file_abs);
+	my @dirs = splitdir($dirs);
+	push @dirs, "images";
+	return catfile(@dirs, $file);
+	
+}
 ###############################################
 sub dotfile {
 	my($file_abs) = @_;
