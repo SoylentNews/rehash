@@ -1305,7 +1305,7 @@ EOT
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
 		$can_mod, $reasons
-	) if $constants->{comments_hardcoded} && !$user->{light};
+	) if $constants->{comments_hardcoded};
 
 	return slashDisplay('dispComment', {
 		%$comment,
@@ -1468,7 +1468,8 @@ sub displayStory {
 	if (	   !$constants->{no_prerendered_stories}
 		&& $constants->{cache_enabled}
 		&& $story->{rendered} && !$options->{force_cache_freshen}
-		&& !$form->{light} && !$user->{light}
+		&& !$form->{simpledesign} && !$user->{simpledesign}
+		&& !$form->{lowbandwidth} && !$user->{lowbandwidth}
 		&& (!$form->{ssi} || $form->{ssi} ne 'yes')
 		&& !$user->{noicons}
 		&& !$form->{issue}
