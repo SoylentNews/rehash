@@ -219,7 +219,7 @@ sub getGoodUntil {
 					' 23:59:59'
 				),
 			INTERVAL $off_set SECOND)")
-		: $slashdb->sqlSelect("CONCAT(DATE(NOW()), ' 23:59:59')");
+		: $slashdb->sqlSelect("CONCAT(SUBSTRING(NOW(), 1, 10), ' 23:59:59')");
 	# If there was an error of some kind, note it and at least
 	# return a legal value.
 	if (!$gmt_end_of_tz_day) {
