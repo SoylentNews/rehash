@@ -81,7 +81,8 @@ sub _do_rss {
 	}, 1);
 
 	save2file("$constants->{basedir}/$filename", $rss, \&fudge);
-	save2file("$constants->{basedir}/privaterss/$filename", $rss, \&fudge);
+	save2file("$constants->{basedir}/privaterss/$filename", $rss, \&fudge)
+		if -d "$constants->{basedir}/privaterss/";
 }
 
 sub newrdf  { _do_rss(@_, '0.9') } # RSS 0.9
