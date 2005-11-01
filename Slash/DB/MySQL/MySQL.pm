@@ -10537,7 +10537,6 @@ sub getTemplateByName {
 		$page ||= 'misc';
 	}
 	unless ($skin) {
-#		$skin = "light" if $user->{light};
 		$skin ||= getCurrentSkin('name');
 		$skin ||= 'default';
 	}
