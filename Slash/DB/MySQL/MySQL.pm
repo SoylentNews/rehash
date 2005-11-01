@@ -6596,6 +6596,7 @@ sub moderateComment {
 	# or without us presenting them the menu options.  So do the
 	# tests again.  XXX  These tests are basically copy-and-pasted
 	# from Slash.pm _can_mod, which should be rectified.
+	# use reskeys instead ...
 	unless ($superAuthor) {
 		# Do not allow moderation of any comments with the same UID as the
 		# current user (duh!).

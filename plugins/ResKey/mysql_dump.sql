@@ -27,6 +27,8 @@ INSERT INTO reskey_resources VALUES (2, 'zoo');
 INSERT INTO reskey_resources VALUES (3, 'journal');
 INSERT INTO reskey_resources VALUES (4, 'journal-soap');
 INSERT INTO reskey_resources VALUES (5, 'pollbooth');
+INSERT INTO reskey_resources VALUES (6, 'submit');
+INSERT INTO reskey_resources VALUES (7, 'journal-soap-get');
 
 
 
@@ -120,6 +122,20 @@ INSERT INTO reskey_vars VALUES (4, 'duration_max-failures',  10, 'how many failu
 INSERT INTO reskey_vars VALUES (4, 'duration_uses',          30, 'min duration (in seconds) between uses');
 
 
+##### journal-soap-get
+### checks
+INSERT INTO reskey_resource_checks VALUES (NULL, 7, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 7, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 7, 'all', 'Slash::ResKey::Checks::Duration',            601);
+
+### vars
+INSERT INTO reskey_vars VALUES (7, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+#INSERT INTO reskey_vars VALUES (7, 'acl',    'reskey_journal-soap', 'If this ACL present, can use resource');
+INSERT INTO reskey_vars VALUES (7, 'acl_no', 'reskey_no_journal', 'If this ACL present, can\'t use resource');
+#INSERT INTO reskey_vars VALUES (7, 'user_is_subscriber', 1, 'Require user to be subscriber');
+INSERT INTO reskey_vars VALUES (7, 'duration_max-failures',   1, 'how many failures per reskey');
+
+
 
 ##### pollbooth
 ### checks
@@ -139,4 +155,25 @@ INSERT INTO reskey_vars VALUES (5, 'duration_max-uses',      10, 'how many uses 
 INSERT INTO reskey_vars VALUES (5, 'duration_max-failures',   3, 'how many failures per reskey');
 INSERT INTO reskey_vars VALUES (5, 'duration_uses',          10, 'min duration (in seconds) between uses');
 INSERT INTO reskey_vars VALUES (5, 'duration_creation-use',   2, 'min duration (in seconds) between creation and use');
+
+
+
+##### submit
+### checks
+INSERT INTO reskey_resource_checks VALUES (NULL, 6, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 6, 'use', 'Slash::ResKey::Checks::Post',                151);
+INSERT INTO reskey_resource_checks VALUES (NULL, 6, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 6, 'all', 'Slash::PollBooth::ResKey',                   251);
+INSERT INTO reskey_resource_checks VALUES (NULL, 6, 'all', 'Slash::ResKey::Checks::AL2::AnonNoPost',     301);
+INSERT INTO reskey_resource_checks VALUES (NULL, 6, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 6, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+INSERT INTO reskey_resource_checks VALUES (NULL, 6, 'all', 'Slash::ResKey::Checks::Duration',            601);
+
+### vars
+INSERT INTO reskey_vars VALUES (6, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (6, 'acl_no', 'reskey_no_submit', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (6, 'duration_max-uses',      20, 'how many uses per timeframe');
+INSERT INTO reskey_vars VALUES (6, 'duration_max-failures',  10, 'how many failures per reskey');
+INSERT INTO reskey_vars VALUES (6, 'duration_uses',         300, 'min duration (in seconds) between uses');
+INSERT INTO reskey_vars VALUES (6, 'duration_creation-use',  20, 'min duration (in seconds) between creation and use');
 

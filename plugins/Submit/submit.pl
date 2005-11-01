@@ -6,7 +6,7 @@
 
 use strict;
 use Slash 2.003;	# require Slash 2.3.x
-use Slash::Constants qw(:messages);
+use Slash::Constants qw(:messages :web);
 use Slash::Display;
 use Slash::Utility;
 use Slash::XML;
@@ -18,17 +18,31 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
-	my $formkey = $form->{formkey};
-	my $formname = 'submissions';
+
+	my $submiss_view = $constants->{submiss_view} || $user->{is_admin};
+
+	my %ops = (
+		blankform		=> [1,			\&blankForm],
+		previewstory		=> [1,			\&previewStory],
+		pending			=> [!$user->{is_anon},	\&yourPendingSubmissions],
+		submitstory		=> [1,			\&saveSub],
+		list			=> [$submiss_view,	\&submissionEd],
+		viewsub			=> [$submiss_view,	\&previewForm],
+		update			=> [$user->{is_admin},	\&updateSubmissions],
+		'delete'		=> [$user->{is_admin},	\&deleteSubmissions],
+		merge			=> [$user->{is_admin},	\&mergeSubmissions],
+		changesubmission	=> [$user->{is_admin},	\&changeSubmission],
+	);
+
+	$ops{default} = $ops{blankform};
+
+	my $op = lc($form->{op} || 'default');
+	$op = 'default' if !$ops{$op} || !$ops{$op}[ALLOWED];
 
 	$form->{del}	||= 0;
-	$form->{op}	||= '';
-	my $error_flag = 0;
-	my $success = 0;
 
-	if (($form->{content_type} =~ $constants->{feed_types}) && ($form->{op} eq 'list') && $constants->{submiss_view}) {
-		my $success = displayRSS($slashdb, $constants, $user, $form);
-		return if $success;
+	if (($form->{content_type} =~ $constants->{feed_types}) && ($op eq 'list') && $submiss_view) {
+		return if displayRSS($slashdb, $constants, $user, $form);
 	}
 
 	# this really should not be done now, but later, it causes
@@ -43,104 +57,22 @@ sub main {
 
 	# Show submission title on browser's titlebar.
 	my($tbtitle);
-	if ($form->{subid} and $form->{op} ne "changesubmission") {
+	if ($form->{subid} && $op ne "changesubmission") {
 		$tbtitle = $slashdb->getSubmission($form->{subid}, [ 'subj' ]);
 		$tbtitle = $tbtitle->{subj} if $tbtitle;
 		$tbtitle =~ s/^"?(.+?)"?$/$1/ if $tbtitle;
 	}
-	# Passing title by param now unnecessary.
-	#my($tbtitle) = $form->{title};
-
-	my $ops = {
-		# initial form, no formkey needed due to 'preview' requirement
-		blankform		=> {
-			seclev		=> 0,
-			checks		=> ['max_post_check', 'generate_formkey'],
-			function 	=> \&blankForm,
-		},
-		previewstory	=> {
-			seclev		=>  0,
-			checks		=> ['update_formkeyid'],
-			function 	=> \&previewStory,
-		},
-		pending	=> {
-			seclev		=>  1,
-			function 	=> \&yourPendingSubmissions,
-		},
-		submitstory	=> {
-			function	=> \&saveSub,
-			seclev		=> 0,
-			post		=> 1,
-			checks		=> [ qw (max_post_check valid_check response_check
-						interval_check formkey_check) ],
-		},
-		list		=> {
-			seclev		=> $constants->{submiss_view} ? 0 : 100,
-			function	=> \&submissionEd,
-		},
-		viewsub		=> {
-			seclev		=> $constants->{submiss_view} ? 0 : 100,
-			function	=> \&previewForm,
-		},
-		update		=> {
-			seclev		=> 100,
-			function	=> \&updateSubmissions,
-		},
-		delete		=> {
-			seclev		=> 100,
-			function	=> \&deleteSubmissions,
-		},
-		merge		=> {
-			seclev		=> 100,
-			function	=> \&mergeSubmissions,
-		},
-		changesubmission	=> {
-			seclev		=> 100,
-			function	=> \&changeSubmission,
-		},
-	};
-
-	$ops->{default} = $ops->{blankform};
-
-	my $op = lc($form->{op});
-	$op ||= 'default';
-	$op = 'default' if (
-		($user->{seclev} < $ops->{$op}{seclev})
-			||
-		! $ops->{$op}{function}
-	);
 
 	# the submissions tab should always be highlighted,
 	# being submit.pl and all
-	my $data = {
-		admin => 1,
-		tab_selected => 'submissions',
-	};
 	header(
-		getData('header', { tbtitle => $tbtitle } ),
-		'', $data
+		getData('header', { tbtitle => $tbtitle } ), '', {
+			admin => 1,
+			tab_selected => 'submissions',
+		}
 	) or return;
 
-	if ($user->{seclev} < 100) {
-		if ($ops->{$op}{checks}) {
-			for my $check (@{$ops->{$op}{checks}}) {
-				$ops->{$op}{update_formkey} = 1
-					if ($check eq 'formkey_check');
-				$error_flag = formkeyHandler(
-					$check, $formname, $formkey
-				);
-				last if $error_flag;
-			}
-		}
-	}
-
-	# call the method
-	$success = $ops->{$op}{function}->($constants, $slashdb, $user, $form)
-		if ! $error_flag;
-
-	if ($ops->{$op}{update_formkey} && $success && ! $error_flag) {
-		my $updated = $slashdb->updateFormkey($formkey, $form->{tid}, length($form->{story}));
-	}
+	$ops{$op}[FUNCTION]->($constants, $slashdb, $user, $form);
 
 	footer();
 }
@@ -195,16 +127,37 @@ sub deleteSubmissions {
 #################################################################
 sub blankForm {
 	my($constants, $slashdb, $user, $form) = @_;
-	print getData("submit_body_open");
+	print getData('submit_body_open');
 	yourPendingSubmissions($constants, $slashdb, $user, $form, { skip_submit_body => 1 });
-	displayForm($user->{nickname}, $user->{fakeemail}, $form->{skin}, getData('defaulthead'));
-	print getData("submit_body_close");
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('submit');
+	if ($rkey->create) {
+		displayForm($user->{nickname}, $user->{fakeemail}, $form->{skin}, getData('defaulthead'));
+	} else {
+		print $rkey->errstr;
+	}		
+
+	print getData('submit_body_close');
 }
 
 #################################################################
 sub previewStory {
 	my($constants, $slashdb, $user, $form) = @_;
-	displayForm($form->{name}, $form->{email}, $form->{skin}, getData('previewhead'));
+
+	my $error_message = '';
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('submit');
+	unless ($rkey->touch) {
+		$error_message = $rkey->errstr;
+		if ($rkey->death) {
+			print $error_message;
+			return 0;
+		}
+	}		
+
+	displayForm($form->{name}, $form->{email}, $form->{skin}, getData('previewhead'), '', $error_message);
 }
 
 #################################################################
@@ -571,6 +524,18 @@ sub displayForm {
 sub saveSub {
 	my($constants, $slashdb, $user, $form) = @_;
 
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('submit');
+	unless ($rkey->use) {
+		my $error_message = $rkey->errstr;
+		if ($rkey->death) {
+			print $error_message;
+		} else {
+			displayForm($form->{name}, $form->{email}, $form->{skin}, '', '', $error_message);
+		}
+		return 0;
+	}		
+
 	$form->{name} ||= '';
 
 	if (length($form->{subj}) < 2) {
@@ -640,7 +605,6 @@ sub saveSub {
 
 	my $messagesub = { %$submission };
 	$messagesub->{subid} = $slashdb->createSubmission($submission);
-	# $slashdb->formSuccess($form->{formkey}, 0, length($form->{subj}));
 
 	my $messages = getObject('Slash::Messages');
 	if ($messages) {

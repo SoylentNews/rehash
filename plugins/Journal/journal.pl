@@ -999,8 +999,8 @@ sub get_entry {
 	my($class, $id) = @_;
 
 	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('journal-soap');
-	$rkey->create or return;
+	my $rkey = $reskey->key('journal-soap-get');
+	$rkey->createuse or return;
 
 	my $journal   = getObject('Slash::Journal');
 	my $constants = getCurrentStatic();
@@ -1026,8 +1026,8 @@ sub get_entries {
 	my($class, $uid, $num) = @_;
 
 	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('journal-soap');
-	$rkey->create or return;
+	my $rkey = $reskey->key('journal-soap-get');
+	$rkey->createuse or return;
 
 	my $journal   = getObject('Slash::Journal');
 	my $constants = getCurrentStatic();
@@ -1063,8 +1063,8 @@ sub get_uid_from_nickname {
 	my($self, $nick) = @_;
 
 	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('journal-soap');
-	$rkey->create or return;
+	my $rkey = $reskey->key('journal-soap-get');
+	$rkey->createuse or return;
 
 	return getCurrentDB()->getUserUID($nick);
 }
@@ -1092,7 +1092,15 @@ sub _save_params {
 		return;
 	}
 
-	$form{journal_discuss} = 'enabled' if $form{journal_discuss} == 1;
+	if ($form{journal_discuss}) {
+		my $user = getCurrentUser();
+		$form{journal_discuss} = $user->{journal_discuss} eq 'disabled'
+			? 'enabled'
+			: $user->{journal_discuss};
+	} elsif (defined $form{journal_discuss}) {
+		$form{journal_discuss} = 'disabled';
+	}
+
 	$form{tid} =~ s/\D+//g;
 
 	return \%form;
