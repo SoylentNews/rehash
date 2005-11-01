@@ -683,9 +683,7 @@ sub getSectionBlock {
 	my($name) = @_;
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
-	my $thissect = $user->{light}
-		? 'light'
-		: $user->{currentSection};
+	my $thissect = $user->{currentSection};
 
 	my $block;
 	if ($thissect && $thissect ne 'index') {
