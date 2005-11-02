@@ -343,7 +343,7 @@ sub displayArticleFriends {
 	# clean it up
 	my $start = fixint($form->{start}) || 0;
 	my $uids = $zoo->getFriendsUIDs($uid);
-	my $articles = $journal->getsByUids($uids, $start,
+	my $articles = $journal_reader->getsByUids($uids, $start,
 		$constants->{journal_default_display} + 1
 	);
 
