@@ -6595,8 +6595,10 @@ sub moderateComment {
 	# an unscrupulous user could have faked their submission with
 	# or without us presenting them the menu options.  So do the
 	# tests again.  XXX  These tests are basically copy-and-pasted
-	# from Slash.pm _can_mod, which should be rectified.
-	# use reskeys instead ...
+	# from Slash.pm _can_mod, which should be rectified. -Jamie
+	# use reskeys instead ... -Pudge
+	# One or more reskey checks will need to invoke can_mod or some
+	# subset of it. -Jamie
 	unless ($superAuthor) {
 		# Do not allow moderation of any comments with the same UID as the
 		# current user (duh!).
