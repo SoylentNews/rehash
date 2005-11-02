@@ -15,6 +15,7 @@ en_US
 __name__
 yourPendingSubs
 __template__
+<div>
 [% topics = Slash.db.getTopics(); # sigh %]
 [% skins = Slash.db.getSkins(); %]
 [% PROCESS titlebar title = "Your recent submissions" %]
@@ -61,6 +62,7 @@ gets moderated that way.
 <a href="[% constants.real_rootdir %]/faq/editorial.shtml#ed200">It happens</a>,
 don't take it personally.
 [% END %]
+</div>
 
 __seclev__
 10000
