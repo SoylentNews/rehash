@@ -39,7 +39,7 @@ sub main {
 	my $op = lc($form->{op} || 'default');
 	$op = 'default' if !$ops{$op} || !$ops{$op}[ALLOWED];
 
-	$form->{del}	||= 0;
+	$form->{del} ||= 0;
 
 	if (($form->{content_type} =~ $constants->{feed_types}) && ($op eq 'list') && $submiss_view) {
 		return if displayRSS($slashdb, $constants, $user, $form);
