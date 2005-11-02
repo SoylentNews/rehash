@@ -1261,7 +1261,11 @@ Value to be placed in the cookie.
 
 =item SESSION
 
-Flag to determine if the cookie should be a session cookie.
+Flag to determine if the cookie should be a session cookie.  "1" means
+yes, expire it after the current session.  "2" means to expire it
+according to the login_temp_minutes var.  And a value that looks like
+a session time, like "+24h", is passed along directly (in that case,
+expires 24 hours from now).
 
 =back
 
@@ -1316,6 +1320,8 @@ sub setCookie {
 	# lines, and uncomment the one right above "bake"
 	if (!$val) {
 		$cookie->expires('-1y');  # delete
+	} elsif ($session && $session =~ /^\+\d+[mhdy]$/) {
+		$cookie->expires($session);
 	} elsif ($session && $session > 1) {
 		my $minutes = $constants->{login_temp_minutes};
 		$cookie->expires("+${minutes}m");
