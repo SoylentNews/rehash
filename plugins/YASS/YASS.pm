@@ -49,7 +49,7 @@ sub getSidsURLs {
 	# The duples are [sid,stoid] now; replace them in place with
 	# [sid,value].
 	for my $duple (@$sid_stoid_ar) {
-		$duple->[1] = $stoid_value_hr->{ $duple->[1] } || '';
+		$duple->[1] = $stoid_value_hr->{ $duple->[1] }{value} || '';
 	}
 	return $sid_stoid_ar;
 }
