@@ -749,6 +749,8 @@ sub sqlSelectAllKeyValue {
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;
 
+	$self->sqlConnect() or return undef;
+
 	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $H = $self->{_dbh}->selectall_arrayref($sql);
 	unless ($H) {
