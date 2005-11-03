@@ -70,7 +70,8 @@ sub getsByUids {
 	my $t_o = $options->{titles_only};
 	my $uids_list = join(",", @$uids);
 	my $order = "ORDER BY journals.date DESC";
-	$order .= " LIMIT $start, $limit" if $limit;
+	my $order_limit = $order;
+	$order_limit .= " LIMIT $start, $limit" if $limit;
 
 	# The list may be quite large, potentially hundreds or even
 	# thousands of users, forming a significant portion of all the
@@ -86,7 +87,7 @@ sub getsByUids {
 		'id, uid',
 		'journals',
 		"uid IN ($uids_list)",
-		$order);
+		$order_limit);
 	return unless $journals_hr && %$journals_hr;
 	
 	# Second, pull nickname from users for the uids identified.
