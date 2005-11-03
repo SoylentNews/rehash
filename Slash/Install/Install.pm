@@ -273,6 +273,7 @@ sub _install {
 	my $prefix_site = $self->getValue('site_install_directory');
 
 	my %stuff = ( # [relative directory, executable]
+		css		=> ["htdocs",			1],
 		htdoc		=> ["htdocs",			1],
 		htdoc_code	=> ["htdocs/code",		0],
 		htdoc_faq	=> ["htdocs/faq",		0],
