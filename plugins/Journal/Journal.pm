@@ -87,7 +87,7 @@ sub getsByUids {
 		'journals',
 		"uid IN ($uids_list)",
 		$order);
-	return unless $journals_hr;
+	return unless $journals_hr && %$journals_hr;
 	
 	# Second, pull nickname from users for the uids identified.
 	my @uids_found = sort keys %{ { map { ($_, 1) } values %$journals_hr } };
