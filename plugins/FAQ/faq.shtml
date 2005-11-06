@@ -176,6 +176,10 @@
         <p>When you have exhausted the documentation, do your best to isolate the problem. If you can, find out what is causing the problem. Try to repeat the error, and document what you do to cause it. Try doing things a little bit differently to see if the problem persists under different but similar conditions. If you are inclined, try to track down in the code where it is happening. If there is a log that is kept (by portald or httpd, for instance) look in there for error messages. If an error message is given, do your best to find out what is producing the message. Is it Apache, mysql, slashd, portald, users.pl?</p>
         <p>In other words, get all of the information you can about the error. This is done for two reasons: first, you may solve the problem yourself, or discover exactly what the error is. Second, if you can't solve it, then you can give us as much information as possible to try to solve it.</p>
         <p>So when all of these avenues have been exhausted, and the problem persists, send in the information you have gathered (including relevant information about your system setup, and the complete error messages, if applicable) to the appropriate forum. This may be in the form of a bug report to Server 51, or a post to the mailing list, or a story submission to Ask Slashdot. If you solve the problem with code changes, use <tt>diff -c oldfile newfile &gt; patchfile</tt> to create a patch and send it in to us. See the FAQ under <a href="#Slashcodecom">Slashcode.com</a> above for more information on how to contact us. And thank you!</p>
-        <p><em>Last update: $Id$</em></p>
+        <p><em>Last update: <!--
+($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+-->
+$Id$
+</em></p>
 
 <!--#include virtual="/slashfoot.inc"-->
