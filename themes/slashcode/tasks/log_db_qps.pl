@@ -110,11 +110,11 @@ $task{$me}{code} = sub {
 	}
 	
 	foreach my $varname (keys %$save_vars) {
-		my $cur_val = $slashdb->getVar($varname, 'value', 1);
-		if (!defined $cur_val) {
-			$slashdb->createVar($varname, $save_vars->{$varname});
-		} else {
+		my $varname_exists = $slashdb->getVar($varname, 'name', 1);
+		if ($varname_exists) {
 			$slashdb->setVar($varname, $save_vars->{$varname});
+		} else {
+			$slashdb->createVar($varname, $save_vars->{$varname});
 		}
 	}
 
