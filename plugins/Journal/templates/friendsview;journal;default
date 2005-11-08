@@ -11,47 +11,32 @@ en_US
 __name__
 friendsview
 __template__
-[% FOREACH diatribe = articles %]
-<div class="journalgeneric">
-	[% topic = diatribe.topic %]
-                        <div class="article">
-                                <div class="title">
-                                        <h3>
-                                                [% diatribe.description %]
-                                        </h3>
-                                </div>
-                                <div class="details">
-					Posted by <a href="[% gSkin.rootdir %]/~[% diatribe.nickname | fixparam %]/journal/">[% diatribe.nickname | strip_literal %]</a> [% user.aton %]
-                                	<i>[% Slash.timeCalc(diatribe.date) %]</i> (<a href="[% gSkin.rootdir %]/~[% diatribe.nickname | fixparam %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>)
-                                [% IF diatribe.discussion %]
-                                        <br>
-					<a href="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</a>
-                                [% END %]
-                                </div>
-                                <div class="body">
-                                        <div class="topic">
-                                                <a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><img src="[% constants.imagedir %]/topics/[% topic.image %]" width="[% topic.width %]" height="[% topic.height %]" alt="[% topic.textname %]"></a>
-                                        </div>
-                                        <div class="intro">
-                                                [% diatribe.article %]
-                                        </div>
-                                </div>
+[% FOREACH diatribe = article.article; topic = diatribe.topic %]
+<div id="journalgeneric">
+	<div class="article">
+		<div class="title">
+			<h3>[% diatribe.description %]</h3>
+		</div>
+		<div class="details">
+			Posted by <a href="[% gSkin.rootdir %]/~[% diatribe.nickname | fixparam %]/journal/">[% diatribe.nickname | strip_literal %]</a> [% user.aton %]
+			<i>[% Slash.timeCalc(diatribe.date) %]</i> (<a href="[% gSkin.rootdir %]/~[% diatribe.nickname | fixparam %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>)
+			[% IF diatribe.discussion %]
+				<br>
+				<a href="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</a>
+			[% END %]
+		</div>
+
+		<div class="body">
+			<div class="topic">
+				<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><img src="[% constants.imagedir %]/topics/[% topic.image %]" width="[% topic.width %]" height="[% topic.height %]" alt="[% topic.textname %]"></a>
 			</div>
+			<div class="intro">[% diatribe.article %]</div>
+		</div>
+	</div>
 
 [% END %]
 	<div class="journalpage">
-	[% back = back || 0 %]
-	[% IF (back > -1) || forward %]
-				[% IF forward %]
-					<a href="[% gSkin.rootdir %]/journal.pl?op=friendview&amp;uid=[% uid %]&amp;start=[% forward %]">&lt; Previous  [% constants.journal_default_display %] entries</a>
-				[% END %]
-				[% IF (back > -1) && forward %]
-					|
-				[% END %]
-				[% IF (back > -1) %]
-					<a href="[% gSkin.rootdir %]/journal.pl?op=friendview&amp;uid=[% uid %]&amp;start=[% back %]">Next [% constants.journal_default_display %] entries &gt;</a>
-				[% END %]
-	[% END %]
+		[% PROCESS pagination %]
 	</div>
 </div>
 
