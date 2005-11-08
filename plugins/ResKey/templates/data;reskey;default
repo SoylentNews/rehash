@@ -51,6 +51,9 @@ __template__
 
 
 [%# AL2 %]
+[% CASE 'nosubmit al2 failure' %]
+	You are not allowed to use this resource.
+
 [% CASE 'nopost al2 failure' %]
 	You are not allowed to use this resource.
 
