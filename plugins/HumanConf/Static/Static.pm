@@ -193,8 +193,8 @@ sub deleteOldFromPool {
 		++$loop_num;
 	}
 
-	if ($loop_num > 1) {
-		warn "deleteOldFromPool looped $loop_num times, deleted $successfully_deleted of $want_delete";
+	if ($loop_num > 2) {
+		warn scalar(gmtime) . " hc_maintain_pool.pl deleteOldFromPool looped $loop_num times, deleted $successfully_deleted of $want_delete";
 	}
 	
 	# Return the number of rows successfully deleted.  This
@@ -265,11 +265,11 @@ sub addPool {
 		# (Collisions should only occur one time in a zillion, but
 		# it's always a good idea to check.)
 		my $encoded_name = $self->encode_hcpid($hcpid + $randomfactor);
-		$filename = sprintf("%02d/%s$extension", $hcpid%100, $encoded_name);
+		$filename = sprintf("%02d/%s%s", $hcpid % 100, $encoded_name, $extension);
 		$full_filename = "$dir/$filename";
 		if (-e $full_filename) {
 			$filename = "";
-			$randomfactor = rand(1000);
+			$randomfactor = int(rand(1000));
 		}
 	}
 	my $full_dir = $full_filename;
@@ -321,14 +321,24 @@ sub get_sizediff {
 	return $diff;
 }
 
+sub get_new_gdtext {
+	my($self, $text) = @_;
+	my $constants = getCurrentStatic();
+
+	my $gdtext = new GD::Text();
+	$gdtext->font_path($constants->{hc_fontpath} || '/usr/share/fonts/truetype');
+	$gdtext->set_text($text);
+
+	return $gdtext;
+}
+
 sub get_font_args {
 	my($self, $text) = @_;
 	my $constants = getCurrentStatic();
 
+	my $gdtext = $self->get_new_gdtext($text);
+
 	$self->{prefnumpixels} = $constants->{hc_q1_prefnumpixels} || 1000;
-	my $gdtext = new GD::Text();
-	$gdtext->font_path($constants->{hc_fontpath} || '/usr/share/fonts/truetype');
-	$gdtext->set_text($self->shortRandText());
 
 	my @pf = @{ $self->{possible_fonts} };
 	my $font = @pf[rand @pf];
@@ -431,7 +441,8 @@ sub get_font_args {
 
 	# Hopefully this is a narrow range so we can just check values
 	# within it to find the answer we want.  (This could be better
-	# optimized, but let's just get it working first :)
+	# optimized, but at this point, image generation happens very
+	# quickly, so I'm satisfied so far.)
 	$min_so_far = 2**31 - 1;
 	$best_size = undef;
 	DO_TRY: for $next_try ($left .. $right) {
@@ -450,19 +461,6 @@ sub get_font_args {
 	return($font, $best_size);
 }
 
-sub get_new_gdtext {
-	my($self, $text) = @_;
-	my $constants = getCurrentStatic();
-
-	my $gdtext = new GD::Text();
-	$gdtext->font_path($constants->{hc_fontpath} || '/usr/share/fonts/truetype');
-	$gdtext->set_text($text);
-	my @font_args = $self->get_font_args($text);
-	$gdtext->set_font(@font_args);
-
-	return $gdtext;
-}
-
 sub drawImage {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
@@ -479,8 +477,12 @@ sub drawImage {
 	# Set up the text object (this could probably be cached in $self,
 	# but it hardly takes any time to do it over and over).
 	my $answer = $self->shortRandText();
+	my @font_args = $self->get_font_args($answer);
 	my $gdtext = $self->get_new_gdtext($answer);
+	$gdtext->set_font(@font_args);
 
+	# Based on the font size for this word, and the resulting size
+	# of the drawn text, set up the image object.
 	my($width, $height) = ($gdtext->get("width")+$self->{imagemargin},
 		$gdtext->get("height")+$self->{imagemargin});
 	my $image = new GD::Image($width, $height);
@@ -557,17 +559,53 @@ sub drawImage {
 		$image->setPixel($px, $py, @dotcolor[rand($n_dotcolors)]);
 	}
 
-	# Superimpose the text over the random stuff.
-	my $gdtextalign = new GD::Text::Align(
+	# Set up an alignment box so we can determine where to put the
+	# text on the image.
+	my $gdtextalign_bbox = new GD::Text::Align(
 		$image,
-		halign=>"center", valign=>"center",
-		color => $textcolor
+		halign => 'center', valign => 'center',
+		text   => $answer,
 	);
-	$gdtextalign->set(text => $gdtext->get("text"));
-	$gdtextalign->set_font($gdtext->get("font") , $gdtext->get("ptsize"));
+	$gdtextalign_bbox->set_font(@font_args);
+	my($center_x, $center_y) = (int($width/2), int($height/2));
+	# Pick an angle between $max_angle/4 and $max_angle, randomly
+	# positive or negative.
 	my $max_angle = $constants->{hc_q1_maxrad} || 0.2;
-	my $angle = (rand(1)*2-1) * $max_angle;
-	$gdtextalign->draw(int($width/2), int($height/2), $angle);
+	my $angle = (rand(1)*0.75)*$max_angle + $max_angle/4;
+	$angle *= -1 if rand(1) < 0.5;
+	# The variable names stand for lower left x coordinate, etc.
+	my($ll_x, $ll_y, $lr_x, $lr_y, $ur_x, $ur_y, $ul_x, $ul_y) =
+		$gdtextalign_bbox->bounding_box($center_x, $center_y, 0);
+#print STDERR "aligned $answer center=$center_x, $center_y angle=$angle bb: $ll_x, $ll_y, $lr_x, $lr_y, $ur_x, $ur_y, $ul_x, $ul_y\n";
+
+	# We're done with the alignment box now.  Place the text on the
+	# image according to the bounding box.  Split the string into a
+	# left and right half and draw them separately.
+	my $string_break = int(rand(length($answer)-2))+1;
+	my $answer_left = substr($answer, 0, $string_break);
+	my $angle_left = $angle;
+	my $gdtextalign_left = new GD::Text::Align(
+		$image,
+		halign => 'left', valign => 'center',
+		colour => $textcolor, # apparently Australians prefer a 'u'
+		text   => $answer_left,
+	);
+	$gdtextalign_left->set_font(@font_args);
+	my $cl_y = int(($ll_y+$ul_y)/2);
+	my @bb = $gdtextalign_left->draw(int($ul_x), $cl_y, $angle);
+#printf STDERR "gdta_left drew left-top $answer_left at ul_x=$ul_x,cl_y=$cl_y angle=%.4f, bb: @bb\n", $angle;
+	my $answer_right = substr($answer, $string_break);
+	my $angle_right = rand(1) < 0.5 ? $angle : -$angle;
+	my $gdtextalign_right = new GD::Text::Align(
+		$image,
+		halign => 'right', valign => 'center',
+		colour => $textcolor, # apparently Australians prefer a 'u'
+		text   => $answer_right,
+	);
+	$gdtextalign_right->set_font(@font_args);
+	my $cr_y = int(($lr_y+$ur_y)/2);
+	@bb = $gdtextalign_right->draw(int($lr_x), $cr_y, $angle);
+#printf STDERR "gdta_right drew right-bottom $answer_right at lr_x=$lr_x,cr_y$cr_y angle=%.4f, bb: @bb\n", $angle;
 
 	return($answer, $image);
 }
