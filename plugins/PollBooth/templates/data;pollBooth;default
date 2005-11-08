@@ -38,11 +38,6 @@ __template__
 	[% returnme.data_constant = 1 %]
 	Displaying poll results.
 
-[% CASE 'anon' %]
-	[% returnme.data_constant = 1 %]
-	You may not vote anonymously.  Please
-	<a href="[% constants.real_rootdir %]/users.pl">log in</a>.
-
 [% CASE 'uid_voted' %]
 	[% user.nickname | strip_literal %] at [% env.remote_addr %] has already voted.
 	[% IF env.http_x_forwarded_for %]
@@ -68,16 +63,25 @@ __template__
 	You must provide one or more answers.
 
 [% CASE 'slashbox_head' %]
+	[% returnme.data_constant = 1 %]
 	<div id="slashboxes">
 
 [% CASE 'slashbox_foot' %]
+	[% returnme.data_constant = 1 %]
 	</div>
 
 [%# for ResKeys %]
+[% CASE 'anon' %]
+	[% returnme.data_constant = 1 %]
+	You may not vote anonymously.  Please
+	<a href="[% constants.real_rootdir %]/users.pl">log in</a>.
+
 [% CASE 'no qid' %]
+	[% returnme.data_constant = 1 %]
 	The poll ID is missing.
 
 [% CASE 'already voted' %]
+	[% returnme.data_constant = 1 %]
 	You've already voted.
 
 [% END %]

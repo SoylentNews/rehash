@@ -23,6 +23,10 @@ sub doCheck {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
+	if ($user->{is_anon} && !$constants->{allow_anon_poll_voting}) {
+		return(RESKEY_DEATH, ['anon', {}, 'pollBooth']);
+	}
+
 	my $qid = $self->opts->{qid};
 
 	return(RESKEY_DEATH, ['no qid', {}, 'pollBooth']) unless $qid;
