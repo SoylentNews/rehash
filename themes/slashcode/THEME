@@ -309,6 +309,7 @@ plugin=Messages
 plugin=PollBooth
 plugin=Print
 plugin=PubKey
+plugin=ResKey
 plugin=Search
 plugin=Submit
 plugin=Stats
