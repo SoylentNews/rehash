@@ -1095,7 +1095,7 @@ sub getSkinInfo {
 sub convert_tokens_to_points {
 	my($self, $n_wanted) = @_;
 
-	my $reader_db = getObject("Slash::DB", { db_type => 'reader' });
+	my $reader = getObject("Slash::DB", { db_type => 'reader' });
 
 	my $constants = getCurrentStatic();
 	my %granted = ( );
@@ -1103,7 +1103,7 @@ sub convert_tokens_to_points {
 	return unless $n_wanted;
 
 	# Sanity check.
-	my $n_users = $reader_db->countUsers();
+	my $n_users = $reader->countUsers();
 	$n_wanted = int($n_users/10) if $n_wanted > int($n_users)/10;
 
 	my $maxtokens = $constants->{maxtokens} || 60;
@@ -1114,7 +1114,7 @@ sub convert_tokens_to_points {
 	$tokentrade = $maxtokens if $tokentrade > $maxtokens; # sanity check
 	my $half_tokentrade = int($tokentrade/2); # another sanity check
 
-	my $uids = $reader_db->sqlSelectColArrayref(
+	my $uids = $reader->sqlSelectColArrayref(
 		"uid",
 		"users_info",
 		"tokens >= $half_tokentrade",

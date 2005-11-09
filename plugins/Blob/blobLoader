@@ -40,7 +40,7 @@ while (<$fh>) {
 close($fh);
 
 my $content = {
-	seclev =>	$opts{s},
+	seclev =>	$opts{'s'},
 	content_type =>	$opts{c} || undef,
 	data =>		$data,
 	filename =>	$opts{f},
