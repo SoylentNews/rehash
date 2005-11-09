@@ -289,6 +289,7 @@ sub give_out_tokens {
 sub reconcile_m2 {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
+	my $reader_db = getObject('Slash::DB', { db_type => 'reader' });
 	my $consensus = $constants->{m2_consensus};
 	my $reasons = $slashdb->getReasons();
 	my $sql;
@@ -304,7 +305,7 @@ sub reconcile_m2 {
 
 	# $mod_ids is an arrayref of moderatorlog IDs which need to be
 	# reconciled.
-	my $mods_ar = $slashdb->getModsNeedingReconcile();
+	my $mods_ar = $reader_db->getModsNeedingReconcile();
 
 	my $both0 = { };
 	my $tievote = { };
@@ -312,7 +313,7 @@ sub reconcile_m2 {
 	for my $mod_hr (@$mods_ar) {
 
 		# Get data about every M2 done to this moderation.
-		my $m2_ar = $slashdb->getMetaModerations($mod_hr->{id});
+		my $m2_ar = $reader_db->getMetaModerations($mod_hr->{id});
 
 		my $nunfair = scalar(grep { $_->{active} && $_->{val} == -1 } @$m2_ar);
 		my $nfair   = scalar(grep { $_->{active} && $_->{val} ==  1 } @$m2_ar);
