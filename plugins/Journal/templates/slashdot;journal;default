@@ -15,31 +15,27 @@ __template__
     [% FOREACH article = articles %]
 	<div class="journaldate">[% Slash.timeCalc(article.day,"%A %B %d, %Y") %]</div>
 	[% FOREACH diatribe = article.article; topic = diatribe.topic %]
-	<div class="article">
-		<div class="details">[% Slash.timeCalc(diatribe.date, "%I:%M %p") %]</div>
-		<div class="title">
-			<h3>[% diatribe.description %]</h3>
-		</div>
-		<div class="adminoptions">
-			[
-			[%- IF !user.is_anon && user.uid == uid %]
-				<a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Edit</a> |
-				<a href="[% gSkin.rootdir %]/journal.pl?op=removemeta&amp;id=[% diatribe.id %]">Delete</a> |
-			[% END %]
-
-			[%- IF diatribe.discussion; IF !show_discussion %]
-				<a href="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</a> |
-			[%- END; ELSIF user.uid == uid %]
-				<a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Enable Comments</a> |
-			[%- END %]
-				<a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>
-			]
-		</div>
-
-		<div class="body">
-			<div class="intro">[% diatribe.article %]</div>
-		</div>
+	<div class="details">[% Slash.timeCalc(diatribe.date, "%I:%M %p") %]</div>
+	<div class="title">
+		<h3>[% diatribe.description %]</h3>
 	</div>
+	<div class="adminoptions">
+		[
+		[%- IF !user.is_anon && user.uid == uid %]
+			<a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Edit</a> |
+			<a href="[% gSkin.rootdir %]/journal.pl?op=removemeta&amp;id=[% diatribe.id %]">Delete</a> |
+		[% END %]
+
+		[%- IF diatribe.discussion; IF !show_discussion %]
+			<a href="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</a> |
+		[%- END; ELSIF user.uid == uid %]
+			<a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% diatribe.id %]">Enable Comments</a> |
+		[%- END %]
+			<a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>
+		]
+	</div>
+
+	<div class="intro">[% diatribe.article %]</div>
 	[% END %]
     [% END %]
 
