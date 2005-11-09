@@ -18,6 +18,7 @@ use vars qw($VERSION);
 # have my power of attorney.
 
 my $timeout = 30; # This should eventualy be a parameter that is configurable
+my $query_ref_regex = qr{(HASH|ARRAY|SCALAR|GLOB|CODE|LVALUE|IO|REF)\(0x[0-9a-f]{3,}\)}; # this too
 
 ########################################################
 # Generic methods for libraries.
@@ -458,8 +459,17 @@ sub _querylog_writecache {
 # Useful SQL Wrapper Functions
 ########################################################
 
+sub _refCheck {
+	my($self, $where) = @_;
+	return unless $where =~ $query_ref_regex;
+	my @c = caller(1);
+	my $w2 = $where; $w2 =~ s/\s+/ /g;
+	warn scalar(gmtime) . " query text contains ref string ($c[0] $c[1] $c[2] $c[3]): $w2\n";
+}
+
 sub sqlSelectMany {
 	my($self, $select, $from, $where, $other, $options) = @_;
+	$self->_refCheck($where);
 
 	my $distinct = ($options && $options->{distinct}) ? "DISTINCT" : "";
 	my $sql = "SELECT $distinct $select ";
@@ -483,6 +493,7 @@ sub sqlSelectMany {
 # $options is a hash, add optional pieces here.
 sub sqlSelect {
 	my($self, $select, $from, $where, $other, $options) = @_;
+	$self->_refCheck($where);
 	my $distinct = ($options && $options->{distinct}) ? "DISTINCT" : "";
 	my $sql = "SELECT $distinct $select ";
 	$sql .= "FROM $from " if $from;
@@ -512,6 +523,7 @@ sub sqlSelect {
 ########################################################
 sub sqlSelectArrayRef {
 	my($self, $select, $from, $where, $other) = @_;
+	$self->_refCheck($where);
 	my $sql = "SELECT $select ";
 	$sql .= "FROM $from " if $from;
 	$sql .= "WHERE $where " if $where;
@@ -541,6 +553,7 @@ sub sqlSelectHash {
 ##########################################################
 sub sqlCount {
 	my($self, $table, $where) = @_;
+	$self->_refCheck($where);
 
 	my $sql = "SELECT COUNT(*) AS count FROM $table";
 	$sql .= " WHERE $where" if $where;
@@ -558,6 +571,7 @@ sub sqlCount {
 ########################################################
 sub sqlSelectHashref {
 	my($self, $select, $from, $where, $other) = @_;
+	$self->_refCheck($where);
 
 	my $sql = "SELECT $select ";
 	$sql .= "FROM $from " if $from;
@@ -582,6 +596,7 @@ sub sqlSelectHashref {
 ########################################################
 sub sqlSelectColArrayref {
 	my($self, $select, $from, $where, $other, $options) = @_;
+	$self->_refCheck($where);
 	my $distinct = ($options && $options->{distinct}) ? "DISTINCT" : "";
 
 	my $sql = "SELECT $distinct $select ";
@@ -625,6 +640,7 @@ sub sqlSelectColArrayref {
 # array ref of all records
 sub sqlSelectAll {
 	my($self, $select, $from, $where, $other) = @_;
+	$self->_refCheck($where);
 
 	my $sql = "SELECT $select ";
 	$sql .= "FROM $from " if $from;
@@ -659,6 +675,7 @@ sub sqlSelectAll {
 # hash ref of all records
 sub sqlSelectAllHashref {
 	my($self, $id, $select, $from, $where, $other, $options) = @_;
+	$self->_refCheck($where);
 	# Yes, if $id is not in $select things will be bad
 	
 	# Allow $id to be an arrayref to collect multiple rows of results
@@ -708,6 +725,7 @@ sub sqlSelectAllHashref {
 # array ref of all records
 sub sqlSelectAllHashrefArray {
 	my($self, $select, $from, $where, $other) = @_;
+	$self->_refCheck($where);
 
 	my $sql = "SELECT $select ";
 	$sql .= "FROM $from " if $from;
@@ -743,6 +761,7 @@ sub sqlSelectAllHashrefArray {
 # hashref, keys first column, values the second
 sub sqlSelectAllKeyValue {
 	my($self, $select, $from, $where, $other) = @_;
+	$self->_refCheck($where);
 
 	my $sql = "SELECT $select ";
 	$sql .= "FROM $from " if $from;
@@ -812,6 +831,7 @@ sub sqlSelectAllKeyValue {
 
 sub sqlSelectNumericKeyAssumingMonotonic {
 	my($self, $table, $minmax, $keycol, $clause) = @_;
+	$self->_refCheck($clause);
 
 	# Set up $minmax appropriately.
 	$minmax = uc($minmax);
@@ -876,6 +896,7 @@ sub sqlSelectNumericKeyAssumingMonotonic {
 ########################################################
 sub sqlUpdate {
 	my($self, $tables, $data, $where, $options) = @_;
+	$self->_refCheck($where);
 
 	# If no changes were passed in, there's nothing to do.
 	# (And if we tried to proceed we'd generate an SQL error.)
@@ -943,6 +964,7 @@ sub sqlUpdate {
 ########################################################
 sub sqlDelete {
 	my($self, $table, $where, $limit) = @_;
+	$self->_refCheck($where);
 	return unless $table;
 	my $sql = "DELETE FROM $table";
 	$sql .= " WHERE $where" if $where;
@@ -1004,6 +1026,7 @@ sub sqlQuote {
 #################################################################
 sub sqlDo {
 	my($self, $sql) = @_;
+	$self->_refCheck($sql);
 	$self->sqlConnect() or return undef;
 	my $rows = $self->{_dbh}->do($sql);
 	unless ($rows) {
