@@ -604,7 +604,7 @@ sub drawImage {
 	);
 	$gdtextalign_right->set_font(@font_args);
 	my $cr_y = int(($lr_y+$ur_y)/2);
-	@bb = $gdtextalign_right->draw(int($lr_x), $cr_y, $angle);
+	@bb = $gdtextalign_right->draw(int($lr_x), $cr_y, $angle_right);
 #printf STDERR "gdta_right drew right-bottom $answer_right at lr_x=$lr_x,cr_y$cr_y angle=%.4f, bb: @bb\n", $angle;
 
 	return($answer, $image);
