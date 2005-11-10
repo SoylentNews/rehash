@@ -11,7 +11,7 @@ en_US
 __name__
 friendsview
 __template__
-[% FOREACH diatribe = article.article; topic = diatribe.topic %]
+[% FOREACH diatribe = articles; topic = diatribe.topic %]
 <div id="journalgeneric">
 	<div class="article">
 		<div class="title">
