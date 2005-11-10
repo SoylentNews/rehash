@@ -23,7 +23,10 @@ sub AL2Check {
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 
-	$srcids ||= $user->{srcids};
+	if (!$srcids) {
+		$srcids = {%{ $user->{srcids} }};
+		$srcids->{uid} = $user->{uid};
+	}
 
 	if ($slashdb->checkAL2($srcids, $check)) {
 		return(RESKEY_DEATH, ["$check al2 failure"]);
