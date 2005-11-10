@@ -1449,7 +1449,7 @@ sub prepareUser {
 	}
 
 	$user->{state}{post}	= $method eq 'POST' ? 1 : 0;
-	$user->{srcids}		= get_srcids({ ip => $hostip });
+	$user->{srcids}		= get_srcids({ ip => $hostip, uid => $uid });
 	@{$user}{qw[ipid subnetid classbid hostip]} = get_ipids();
 #	@{$user}{qw[ipid subnetid classbid hostip]} = get_srcids({ ip => $hostip },
 #		{ return_only => [qw( ipid subnetid classbid ip )] });
