@@ -2243,8 +2243,12 @@ Chomped string.
 =cut
 
 sub chopEntity {
-	my($text, $length) = @_;
-	$text = substr($text, 0, $length) if $length;
+	my($text, $length, $end) = @_;
+	if ($length && $end) {
+		$text = substr($text, -$length);
+	} elsif ($length) {
+		$text = substr($text, 0, $length);
+	}	
 	$text =~ s/&#?[a-zA-Z0-9]*$//;
 	$text =~ s/<[^>]*$//;
 	return $text;
@@ -3614,14 +3618,14 @@ sub ellipsify {
 	if (length($text) > $len) {
 		my $len2 = int(($len-7)/2);
 		if ($len2 >= 4) {
-			$text = substr($text, 0, $len2)
+			$text = chopEntity($text, $len2)
 				. ' ... '
-				. substr($text, -$len2);
+				. chopEntity($text, $len2, 1);
 		} elsif ($len >= 8) {
-			$text = substr($text, 0, $len-4)
+			$text = chopEntity($text, $len-4)
 				. ' ...';
 		} else {
-			$text = substr($text, 0, $len);
+			$text = chopEntity($text, $len);
 		}
 	}
 	return $text;
