@@ -147,7 +147,7 @@ IF !useredit.is_anon;
 
                 IF useredit.bio;
                         '<br><hr>';
-			useredit.bio;
+			Slash.parseDomainTags(useredit.bio);
                 END;
 
 		IF user.is_admin AND hits;
