@@ -11,8 +11,8 @@ en_US
 __name__
 friendsview
 __template__
-[% FOREACH diatribe = articles; topic = diatribe.topic %]
 <div id="journalgeneric">
+[% FOREACH diatribe = articles; topic = diatribe.topic %]
 	<div class="article">
 		<div class="title">
 			<h3>[% diatribe.description %]</h3>
@@ -33,11 +33,11 @@ __template__
 			<div class="intro">[% diatribe.article %]</div>
 		</div>
 	</div>
-
 [% END %]
-	<div class="journalpage">
-		[% PROCESS pagination %]
-	</div>
+</div>
+
+<div class="journalpage">
+	[% PROCESS pagination %]
 </div>
 
 __seclev__
