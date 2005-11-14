@@ -1141,6 +1141,8 @@ sub showInfo {
 		# pollquestions.
 		my($discussion) = $reader->getDiscussion($comment->{sid});
 
+		# This is a pretty crappy way to determine what type of object
+		# the discussion is attached to. - Jamie
 		if ($discussion->{url} =~ /journal/i) {
 			$type = 'journal';
 		} elsif ($discussion->{url} =~ /poll/i) {
@@ -1148,6 +1150,7 @@ sub showInfo {
 		} else {
 			$type = 'story';
 		}
+
 		$comment->{points} += $user->{karma_bonus}
 			if $user->{karma_bonus} && $comment->{karma_bonus} eq 'yes';
 		$comment->{points} += $user->{subscriber_bonus}
