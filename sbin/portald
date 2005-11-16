@@ -144,13 +144,13 @@ sub setblock {
 
 #################################################################
 sub getRDF {
-	#gets an RDF file, and formats it as a /. block
+	#gets an RDF file, and formats it as a Slash block
 
 	my($bid, $url, $other) = @_;
 	my $rss = new XML::RSS;
 	my $template_name = $slashdb->getBlock($bid, 'rss_template');
 	my $items ||= $slashdb->getBlock($bid, 'items');
-	$items ||= $constants->{max_items};
+	$items ||= $constants->{rss_max_items_incoming};
 	$template_name ||= $constants->{default_rss_template};
 
 	my $d;

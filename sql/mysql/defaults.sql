@@ -929,7 +929,6 @@ INSERT INTO vars (name, value, description) VALUES ('max_discussions_allowed','3
 INSERT INTO vars (name, value, description) VALUES ('max_discussions_unusedfk','10','How many unused formkeys are permitted');
 INSERT INTO vars (name, value, description) VALUES ('max_expiry_comm','250','Largest value for comment expiry trigger.');
 INSERT INTO vars (name, value, description) VALUES ('max_expiry_days','365','Largest value for duration expiry trigger.');
-INSERT INTO vars (name, value, description) VALUES ('max_items','15','max number of rss items by default');
 INSERT INTO vars (name, value, description) VALUES ('max_login_allowed', '10', 'How many forms a user can submit');
 INSERT INTO vars (name, value, description) VALUES ('max_submission_size','32000','max size of submission before warning message is displayed');
 INSERT INTO vars (name, value, description) VALUES ('max_submissions_allowed','20','maximum number of submissions per timeframe allowed');
@@ -997,7 +996,9 @@ INSERT INTO vars (name, value, description) VALUES ('returnto_passwd',CONCAT('ch
 INSERT INTO vars (name, value, description) VALUES ('rootdir','//www.example.com','Base URL of site; used for creating on-site links that need protocol-inspecific URL (so site can be used via HTTP and HTTPS at the same time)');
 INSERT INTO vars (name, value, description) VALUES ('rss_allow_index', '0', 'Allow RSS feeds to be served from index.pl (1 = admins, 2 = subscribers, 3 = all logged-in users)');
 INSERT INTO vars (name, value, description) VALUES ('rss_expire_days','7','Number of days till we blank the data from the database (the signatures still stick around though)');
-INSERT INTO vars (name, value, description) VALUES ('rss_store','0','Should we be saving incomming submissions for rss');
+INSERT INTO vars (name, value, description) VALUES ('rss_max_items_incoming','15','Max number of rss items shown in a slashbox, by default');
+INSERT INTO vars (name, value, description) VALUES ('rss_max_items_outgoing','15','Max number of rss items emitted in an rss/rdf/atom feed');
+INSERT INTO vars (name, value, description) VALUES ('rss_store','0','Should we be saving incoming submissions for rss');
 INSERT INTO vars (name, value, description) VALUES ('run_ads','0','Should we be running ads?');
 INSERT INTO vars (name, value, description) VALUES ('runtask_verbosity','3','How much information runtask should write to slashd.log: 0-3 or empty string to use slashd_verbosity');
 INSERT INTO vars (name, value, description) VALUES ('sbindir','/usr/local/slash/sbin','Where are the sbin scripts kept');

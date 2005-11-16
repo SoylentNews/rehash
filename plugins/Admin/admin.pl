@@ -667,7 +667,7 @@ sub blockEdit {
 	$blockform_flag = 1 if ((! $form->{blockdelete_confirm} && $bid) || $form->{blocknew});
 
 	my $title = getTitle('blockEdit-title', { bid => $bid }, 1);
-	$blockref->{items} ||= $constants->{max_items};
+	$blockref->{items} ||= $constants->{rss_max_items_incoming};
 
 	slashDisplay('blockEdit', {
 		bid 			=> $bid,

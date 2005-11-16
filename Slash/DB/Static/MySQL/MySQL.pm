@@ -79,6 +79,7 @@ sub showQueryCount {
 sub getBackendStories {
 	my($self, $options) = @_;
 
+	my $limit = $options->{limit} || 10;
 	my $topic = $options->{topic} || getCurrentStatic('mainpage_nexus_tid');
 
 	my $select = "stories.stoid AS stoid, sid, title, stories.tid AS tid, primaryskid, time,
@@ -91,7 +92,7 @@ sub getBackendStories {
 		AND stories.stoid = story_topics_rendered.stoid
 		AND story_topics_rendered.tid=$topic";
 
-	my $other = "ORDER BY time DESC LIMIT 10";
+	my $other = "ORDER BY time DESC LIMIT $limit";
 
 	my $returnable = $self->sqlSelectAllHashrefArray($select, $from, $where, $other);
 

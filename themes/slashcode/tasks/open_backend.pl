@@ -17,9 +17,10 @@ $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
 
-	my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $max_items = $constants->{rss_max_items_outgoing} || 10;
 
-	my $stories = $backupdb->getBackendStories;
+	my $stories = $reader->getBackendStories({ limit => $max_items });
 	if ($stories && @$stories) {
 		newxml(@_, undef, $stories);
 		newrdf(@_, undef, $stories);
@@ -31,7 +32,7 @@ $task{$me}{code} = sub {
 	for my $skid (keys %$skins) {
 		my $name = $skins->{$skid}{name};
 		my $nexus = $skins->{$skid}{nexus};
-		$stories = $backupdb->getBackendStories({ topic => $nexus });
+		$stories = $reader->getBackendStories({ limit => $max_items, topic => $nexus });
 		if ($stories && @$stories) {
 			newxml(@_, $name, $stories);
 			newrdf(@_, $name, $stories);
@@ -53,14 +54,14 @@ sub fudge {
 }
 
 sub _do_rss {
-	my($virtual_user, $constants, $backupdb, $user, $info, $gSkin,
+	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin,
 		$name, $stories, $version, $type) = @_;
 
 	$type ||= 'rss';
 
 	my $file    = sitename2filename($name);
 	my $skin    = {};
-	$skin       = $backupdb->getSkin($name) if $name;
+	$skin       = $slashdb->getSkin($name) if $name;
 	my $link    = ($skin->{url}  || $gSkin->{absolutedir}) . '/';
 	my $title   = $constants->{sitename};
 	$title = "$title: $skin->{title}" if $skin->{skid} != $constants->{mainpage_skid};
@@ -90,7 +91,7 @@ sub newrss  { _do_rss(@_, '1.0') } # RSS 1.0
 sub newatom { _do_rss(@_, '1.0', 'atom') } # Atom 1.0
 
 sub newxml {
-	my($virtual_user, $constants, $backupdb, $user, $info, $gSkin,
+	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin,
 		$name, $stories) = @_;
 
 	my $x = <<EOT;
@@ -101,7 +102,7 @@ EOT
 
 	for my $story (@$stories) {
 		my @str = (xmlencode($story->{title}), xmlencode($story->{dept}));
-		my $author = $backupdb->getAuthor($story->{uid}, 'nickname');
+		my $author = $slashdb->getAuthor($story->{uid}, 'nickname');
 		$x.= <<EOT;
 	<story>
 		<title>$str[0]</title>
