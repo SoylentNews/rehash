@@ -24,7 +24,8 @@ my %checks = (
 my $client = Slash::Client::Journal->new({
 	host => $host,
 	uid  => '-',  # NOTE: setting uid/pass to bad values ensures
-	pass => '-'   # we don't get logged in, which is what we want
+	pass => '-'   # we don't get logged in, which is what we want,
+	              # to ensure we don't delete anything by accident
 });
 ok($client, 'Create object');
 
