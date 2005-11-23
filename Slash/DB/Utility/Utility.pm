@@ -461,7 +461,7 @@ sub _querylog_writecache {
 
 sub _refCheck {
 	my($self, $where) = @_;
-	return unless $where =~ $query_ref_regex;
+	return if !$where || $where !~ $query_ref_regex;
 	my @c = caller(1);
 	my $w2 = $where; $w2 =~ s/\s+/ /g;
 	warn scalar(gmtime) . " query text contains ref string ($c[0] $c[1] $c[2] $c[3]): $w2\n";

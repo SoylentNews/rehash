@@ -7331,7 +7331,7 @@ sub countUsers {
 	# from memcached.
 	my $count = undef;
 	my $mcd = $self->getMCD();
-	my $mcdkey = "$self->{_mcd_keyprefix}:uc";
+	my $mcdkey = "$self->{_mcd_keyprefix}:uc" if $mcd;
 	if (!$actual && $mcd) {
 		if ($count = $mcd->get($mcdkey)) {
 			return $count;
@@ -9326,6 +9326,7 @@ sub getSlashConf {
 				my $ord = 1;
 				foreach my $attr (@attrs){
 					my($at, $extra) = split /_/, $attr;
+					$extra ||= '';
 					$at = lc $at;
 					$tagname = lc $tagname;
 					$conf{$attrname}{$tagname}{$at}{ord} = $ord;
