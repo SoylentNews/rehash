@@ -3812,7 +3812,7 @@ sub findWords {
 		# The default weight for each chunk of text is 1.
 		my $weight_factor = $args_hr->{$key}{weight} || 1;
 
-		my $text = $args_hr->{$key}{text};
+		my $text = $args_hr->{$key}{text} || '';
 
 		# Pull out linked URLs from $text and treat them specially.
 		# We only recognize the two most common types of link.
