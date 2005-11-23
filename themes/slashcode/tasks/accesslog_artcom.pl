@@ -48,8 +48,9 @@ $task{$me}{code} = sub {
 			slashdErrnote($err);
 			return $err;
 		}
+		$lastmaxid = 0;
 	}
-	my $newmaxid = $log_db->sqlSelect("MAX(id)", "accesslog");
+	my $newmaxid = $log_db->sqlSelect("MAX(id)", "accesslog") || $lastmaxid;
 	$lastmaxid = $newmaxid - $maxrows if $lastmaxid < $newmaxid - $maxrows;
 	my $youngest_eligible_uid = $slashdb->getYoungestEligibleModerator();
 	$log_db->fetchEligibleModerators_accesslog_insertnew($lastmaxid+1, $newmaxid,

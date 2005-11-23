@@ -387,8 +387,8 @@ $task{$me}{code} = sub {
 	for my $cleanme (@$dirty_skins) { $dirty_skins{$cleanme} = 1 }
 
 	$args = "$vu ssi=yes";
-	if ($dirty_skins{$constants->{mainpage_skid}} ne "" || $w ne "ok") {
-		my $mp_skid = $constants->{mainpage_skid};
+	my $mp_skid = $constants->{mainpage_skid} || 1;
+	if ($dirty_skins{$mp_skid} || $w ne "ok") {
 		my($base) = split(/\./, $gSkin->{index_handler});
 		$slashdb->setVar("writestatus", "ok");
 		prog2file(

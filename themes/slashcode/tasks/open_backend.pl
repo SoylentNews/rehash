@@ -64,7 +64,8 @@ sub _do_rss {
 	$skin       = $slashdb->getSkin($name) if $name;
 	my $link    = ($skin->{url}  || $gSkin->{absolutedir}) . '/';
 	my $title   = $constants->{sitename};
-	$title = "$title: $skin->{title}" if $skin->{skid} != $constants->{mainpage_skid};
+	$title = "$title: $skin->{title}"
+		if $skin->{skid} != $constants->{mainpage_skid} && $skin->{title};
 
 	my $ext = $version == 0.9 && $type eq 'rss' ? 'rdf' : $type;
 	my $filename = "$file.$ext";

@@ -317,7 +317,7 @@ EOT
 			slashdLog("requiring '$fullname' caused error: $!");
 			$ok = 0;
 		}
-		if (!$task{$file}{code} or ref $task{$file}{code} ne 'CODE') {
+		if (!$task{$file}{code} || ref $task{$file}{code} ne 'CODE') {
 			slashdLog("'$fullname' did not set code properly");
 			$ok = 0;
 		}
@@ -334,6 +334,9 @@ EOT
 		}
 		if ($ok) {
 			$success{$file} = 1;
+			# Allow a default value for at least this one field
+			# (and maybe others, later... haven't decided yet)
+			$task{$file}{fork} ||= SLASHD_NOWAIT;
 		} else {
 			delete $task{$file} if $task{$file};
 			$failure{$file} = 1;
