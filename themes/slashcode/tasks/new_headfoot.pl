@@ -42,11 +42,19 @@ $task{$me}{code} = sub {
 sub skinHeaders {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin, $skin) = @_;
 
-	my($skinname);
+	my $skinname = '';
 	if ($skin) {
 		$skinname = $skin->{name};
 		createCurrentHostname($skin->{hostname});
 	}
+	# What to do here if !$skin?  Does that mean to use $gSkin?
+	# Or return without doing anything?  An empty string passed to
+	# getHeadFootPages() means to use the template skin 'default'.
+	# Apparently, for years, we've been passing open() a filename
+	# like /u/l/s/s/foo/htdocs//slashhead.inc and it's been
+	# quietly fixing the double-slash for us.  If I'm correct in
+	# understanding how this has been working, we want to start
+	# using File::Path to construct $file below. - Jamie 2005/11/23
 
 	my $form = getCurrentForm();
 
