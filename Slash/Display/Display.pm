@@ -250,7 +250,7 @@ sub slashDisplayName {
 
 	# allow slashDisplay(NAME, DATA, RETURN) syntax
 	if (! ref $opt) {
-		$opt = $opt == 1 ? { Return => 1 } : {};
+		$opt = ($opt && $opt == 1) ? { Return => 1 } : {};
 	}
 
 	if ($opt->{Skin} && $opt->{Skin} eq 'NONE') {
