@@ -4016,7 +4016,7 @@ sub countTotalVisibleKids {
 	my $last_updated_uid = 0;
 	$pid               ||= 0;
 
-	$total += $comments->{$pid}{visiblekids};
+	$total += $comments->{$pid}{visiblekids} || 0;
 
 	for my $cid (@{$comments->{$pid}{kids}}) {
 		my($num_kids, $date_test, $uid) =

@@ -1195,7 +1195,7 @@ sub showInfo {
 	@$commentstruct = sort {
 		$b->{disc_time} cmp $a->{disc_time} || $b->{sid} <=> $a->{sid}
 	} @$commentstruct
-		unless $user->{user_comment_sort_type} == 1;
+		unless $user->{user_comment_sort_type} && $user->{user_comment_sort_type} == 1;
 
 	my $cid_list = [ keys %$cids_seen ];
 	my $cids_to_mods = {};

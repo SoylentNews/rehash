@@ -19,7 +19,7 @@ my $start_time = Time::HiRes::time;
 	my $slashdb	= getCurrentDB();
 	my $reader	= getObject('Slash::DB', { db_type => 'reader' });
 
-	if ($form->{op} eq 'userlogin' && !$user->{is_anon}
+	if ($form->{op} && $form->{op} eq 'userlogin' && !$user->{is_anon}
 			# Any login attempt, successful or not, gets
 			# redirected to the homepage, to avoid keeping
 			# the password or nickname in the query_string of
@@ -35,14 +35,14 @@ my $start_time = Time::HiRes::time;
 	# why is this commented out?  -- pudge
 	# $form->{mode} = $user->{mode} = "dynamic" if $ENV{SCRIPT_NAME};
 
-	for ($form->{op}) {
-		my $c;
-		upBid($form->{bid}), $c++ if /^u$/;
-		dnBid($form->{bid}), $c++ if /^d$/;
-		rmBid($form->{bid}), $c++ if /^x$/;
-		redirect($ENV{HTTP_REFERER} || $ENV{SCRIPT_NAME}), return if $c;
+	# Handle moving a block up or down, or removing it.
+	if ($form->{bid} && $form->{op} && $form->{op} =~ /^[udx]$/) {
+		   if ($form->{op} eq 'u') { upBid($form->{bid}) }
+		elsif ($form->{op} eq 'd') { dnBid($form->{bid}) }
+		else                       { rmBid($form->{bid}) }
+		redirect($ENV{HTTP_REFERER} || $ENV{SCRIPT_NAME});
+		return;
 	}
-
 
 	my $rss = $constants->{rss_allow_index} && $form->{content_type} =~ $constants->{feed_types} && (
 		$user->{is_admin}
@@ -375,7 +375,8 @@ sub displayStandardBlocks {
 
 	return if $user->{noboxes};
 
-	my(@boxes, $return, $boxcache);
+	my $return = '';
+	my(@boxes, $boxcache);
 	my($boxBank, $skinBoxes) = $reader->getPortalsCommon();
 	my $getblocks = $skin->{skid} || $constants->{mainpage_skid};
 
@@ -465,13 +466,14 @@ sub displayStandardBlocks {
 			);
 
 		} else {
-			$return .= $boxcache->{$bid} ||= portalsidebox(
+			$boxcache->{$bid} ||= portalsidebox(
 				$boxBank->{$bid}{title},
 				$reader->getBlock($bid, 'block'),
 				$boxBank->{$bid}{bid},
 				$boxBank->{$bid}{url},
 				$getblocks
 			);
+			$return .= $boxcache->{$bid};
 		}
 	}
 

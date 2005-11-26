@@ -79,6 +79,7 @@ $task{$me}{code} = sub {
 		$type = $percent_diff <= 0 ? "fast" : "slow";
 		push @results, $percent_diff, $abs_percent_diff, $type;
 	} else {
+		$percent_diff = 0;
 		push @results, "", "No past performance data for comparison";
 	}
 

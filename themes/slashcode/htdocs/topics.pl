@@ -14,12 +14,15 @@ sub main {
 	my $form    = getCurrentForm();
 	my $user    = getCurrentUser();
 
-	my $data = ($form->{op} eq 'hierarchy') ? { admin => 1, adminmenu => 'info', tab_selected => 'hierarchy' } : {};
+	my $hierarchy_op = $form->{op} && $form->{op} eq 'hierarchy';
+	my $data = $hierarchy_op
+		? { admin => 1, adminmenu => 'info', tab_selected => 'hierarchy' }
+		: { };
 	header(getData('head'), $form->{section}, $data) or return;
 
 	print createMenu('topics');
 
-	if ($form->{op} eq 'hierarchy') {
+	if ($hierarchy_op) {
 		hierarchy();
 	} else {
 		listTopics();

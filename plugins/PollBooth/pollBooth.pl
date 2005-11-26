@@ -28,8 +28,7 @@ sub main {
 		linkstory	=> \&link_story_to_poll
 	);
 
-	my $op = $form->{op};
-	$op = 'default' unless $ops{$form->{op}};
+	my $op = $form->{op} && $ops{$form->{op}} ? $form->{op} : 'default';
 
 	if (defined $form->{aid}) {
 		# Only allow a short range of answer ids here.

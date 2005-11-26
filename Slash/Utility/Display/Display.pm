@@ -476,7 +476,9 @@ sub linkStory {
 
 	my $story_ref = $reader->getStory($story_link->{stoid} || $story_link->{sid});
 
-	$story_link->{link} = $story_ref->{title} if $story_link->{'link'} eq '';
+	if (defined $story_link->{link} && $story_link->{link} eq '') {
+		$story_link->{link} = $story_ref->{title};
+	}
 	$title = $story_link->{link};
 	$story_link->{skin} ||= $story_link->{section} || $story_ref->{primaryskid};
 	if ($constants->{tids_in_urls}) {
@@ -822,7 +824,7 @@ The 'fancybox' template block.
 
 sub fancybox {
 	my($width, $title, $contents, $center, $return, $class, $id) = @_;
-	return unless $title && $contents;
+	return '' unless $title && $contents;
 
 	slashDisplay('fancybox', {
 		width		=> $width,
@@ -836,7 +838,7 @@ sub fancybox {
 
 sub sidebox {
 	my ($title, $contents, $name, $return) = @_;
-	return unless $title && $contents;
+	return '' unless $title && $contents;
 	slashDisplay('sidebox', {
 		contents	=> $contents,
 		title		=> $title,
@@ -900,7 +902,7 @@ The 'fancybox', 'portalboxtitle', and
 
 sub portalbox {
 	my($width, $title, $contents, $bid, $url, $getblocks, $class, $id) = @_;
-	return unless $title && $contents;
+	return '' unless $title && $contents;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	$getblocks ||= 'index';
@@ -925,7 +927,7 @@ sub portalbox {
 
 sub portalsidebox {
 	my($title, $contents, $bid, $url, $getblocks, $name) = @_;
-	return unless $title && $contents;
+	return '' unless $title && $contents;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	$getblocks ||= 'index';

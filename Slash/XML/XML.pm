@@ -126,7 +126,7 @@ sub xmlDisplay {
 	}
 
 	if (! ref $opt) {
-		$opt = $opt == 1 ? { Return => 1 } : {};
+		$opt = ($opt && $opt == 1) ? { Return => 1 } : {};
 	}
 
 	if ($opt->{Return}) {

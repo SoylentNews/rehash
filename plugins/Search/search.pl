@@ -53,6 +53,9 @@ sub main {
 
 	# switch search mode to poll if in polls skin and other
 	# search type isn't specified
+# I've caught gSkin being {} here, on a test box.  Not sure if that's a
+# bug or just a misconfiguration of mine. - Jamie 2005-11-26
+#use Data::Dumper; print STDERR "search.pl gSkin: " . Dumper($gSkin) if !$gSkin->{name};
 	if ($gSkin->{name} eq 'polls' && !$form->{op}) {
 		$form->{op} = 'polls';
 		$form->{section} = '';
@@ -70,7 +73,7 @@ sub main {
 			unless $constants->{submiss_view};
 	}
 
-	if ($form->{content_type} =~ $constants->{feed_types}) {
+	if ($form->{content_type} && $form->{content_type} =~ $constants->{feed_types}) {
 		# Here, panic mode is handled within the individual funcs.
 		# We want to return valid (though empty) RSS data even
 		# when search is down.
@@ -269,10 +272,11 @@ sub storySearch {
 	my $start = $form->{start} || 0;
 	my $stories = $searchDB->findStory($form, $start, $constants->{search_default_display} + 1, $form->{sort});
 
+	my $topic_ref = $form->{tid} ? $slashdb->getTopic($form->{tid}) : { };
 	slashDisplay('searchform', {
 		sections	=> 1, # _skins(),
 		topics		=> 1, # _topics(),
-		tref		=> $slashdb->getTopic($form->{tid}),
+		tref		=> $topic_ref,
 		op		=> $form->{op},
 		authors		=> _authors(),
 		'sort'		=> _sort(),

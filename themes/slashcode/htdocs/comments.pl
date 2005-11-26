@@ -192,7 +192,7 @@ sub main {
 
 #print STDERR scalar(localtime) . " $$ A op=$op header_emitted=$header_emitted\n";
 
-	if ($user->{is_anon} && length($form->{upasswd}) > 1) {
+	if ($user->{is_anon} && $form->{upasswd} && length($form->{upasswd}) > 1) {
 		if (!$header_emitted) {
 			header($title, $section) or return;
 			$header_emitted = 1;
@@ -453,6 +453,7 @@ sub editComment {
 	# or even user (get those all automatically if not passed);
 	# but that might be dangerous, since $reply/$comment is a little
 	# bit specific -- pudge
+	# Yeah, this API needs to be... saner. Agreed. - Jamie
 	$reply->{points} = Slash::_get_points(
 		$reply, $user,
 		$constants->{comment_minscore}, $constants->{comment_maxscore},

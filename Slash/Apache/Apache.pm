@@ -289,16 +289,18 @@ sub ConnectionIsSSL {
 
 	# That probably didn't work so let's get that data the hard way.
 	my $r = Apache->request;
+	return 0 if !$r;
 	my $subr = $r->lookup_uri($r->uri);
-	my $https_on = ($subr && $subr->subprocess_env('HTTPS') eq 'on')
-		? 1 : 0;
-	return 1 if $https_on;
+	if ($subr) {
+		my $se = $subr->subprocess_env('HTTPS');
+		return 1 if $se && $se eq 'on'; # https is on
+	}
 
-	return 1 
-		if $r->header_in('X-SSL-On') eq 'yes'; 
+	my $x = $r->header_in('X-SSL-On');
+	return 1 if $x && $x eq 'yes'; 
 
-	# Nope, it's not SSL.  We're out of ideas, if the above didn't
-	# work we must not be on SSL.
+	# We're out of ideas.  If the above didn't work we must not be
+	# on SSL.
 	return 0;
 }
 

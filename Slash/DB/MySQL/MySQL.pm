@@ -3168,8 +3168,8 @@ sub getCommentChildren {
 ########################################################
 sub getCommentsStartingAt {
 	my($self, $start_at, $options) = @_;
-	my $limit = $options->{limit} ? "LIMIT $options->{limit}" : "";
-	my $order = $options->{order} eq "DESC" ? "DESC" : "ASC";
+	my $limit = ($options->{limit} && $options->{limit}) ? "LIMIT $options->{limit}" : "";
+	my $order = ($options->{order} && $options->{order} eq "DESC") ? "DESC" : "ASC";
 	my($comments) = $self->sqlSelectAllHashrefArray('*', 'comments', "cid >= $start_at", "ORDER BY cid $order $limit");
 	return $comments;
 }
@@ -4152,7 +4152,7 @@ sub getPollQuestionList {
 	my($self, $offset, $other) = @_;
 	my($where);
 
-	my $justStories = $other->{type} eq "story" ? 1 : 0 ;
+	my $justStories = ($other->{type} && $other->{type} eq 'story') ? 1 : 0;
 
 	$offset = 0 if $offset !~ /^\d+$/;
 	my $admin = getCurrentUser('is_admin');
@@ -6459,6 +6459,8 @@ sub getPortalsCommon {
 			}
 		} else {
 			my $skin = $self->getSkin($SB->{skin});
+			next if !$skin;
+			$tmp{$skin->{skid}} ||= [ ];
 			push @{$tmp{$skin->{skid}}}, $SB->{bid};
 		}
 	}
@@ -7659,22 +7661,23 @@ sub getCommentReply {
 
 	my $sid_quoted = $self->sqlQuote($sid);
 	my $select =
-		"date,date as time,subject,comments.points as points,comments.tweak as tweak,
-		comment_text.comment as comment,realname,nickname,
-		fakeemail,homepage,comments.cid as cid,sid,
-		users.uid as uid,reason, karma_bonus";
+		"date, date AS time, subject,
+		 comments.points AS points, comments.tweak AS tweak, pointsorig, tweak_orig,
+		 comment_text.comment AS comment, realname, nickname,
+		 fakeemail, homepage, comments.cid AS cid, sid,
+		 users.uid AS uid, reason, karma_bonus";
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
 		$select .= ", subscriber_bonus";
 	}
 	my $reply = $self->sqlSelectHashref(
 		$select,
-		"comments,comment_text,users,users_info,users_comments",
+		"comments, comment_text, users, users_info, users_comments",
 		"sid=$sid_quoted
-		AND comments.cid=$pid
-		AND users.uid=users_info.uid
-		AND users.uid=users_comments.uid
-		AND comment_text.cid=$pid
-		AND users.uid=comments.uid"
+		 AND comments.cid=$pid
+		 AND users.uid=users_info.uid
+		 AND users.uid=users_comments.uid
+		 AND comment_text.cid=$pid
+		 AND users.uid=comments.uid"
 	) || {};
 
 	# For a comment we're replying to, there's no need to mod.
@@ -10935,11 +10938,12 @@ sub getTopiclistFromChosen {
 			# NOT a nexus (nexus topics go at the end).
 		   (exists $tree->{$a}{nexus} ? 1 : 0) <=> (exists $tree->{$b}{nexus} ? 1 : 0)
 			# Next highest priority is whether this topic
-			# has an icon.
+			# has an icon.  Topics with icons come first.
+			# XXX IS THIS LOGIC BACKWARDS? - Jamie 2005-11-24
 		|| ($tree->{$a}{image} ? 1 : 0) <=> ($tree->{$b}{image} ? 1 : 0)
 			# Next highest priority is whether this topic
 			# (at this weight) is in the preferred skid.
-		|| $in_skid{$b} <=> $in_skid{$a}
+		|| ($in_skid{$b} || 0) <=> ($in_skid{$a} || 0)
 			# Next priority is the topic's weight
 		|| $chosen_hr->{$b} <=> $chosen_hr->{$a}
 			# Next priority is alphabetical sort
@@ -12193,6 +12197,19 @@ sub _genericGetCache {
 	my $table_prime = $passed->{'table_prime'} || 'id';
 	my $param_table = $passed->{'param_table'};
 	my($self, $id, $values, $cache_flag) = @{$passed->{'arguments'}};
+
+if (!defined $id) {
+	my @caller_info = ( );
+	for (my $lvl = 1; $lvl < 99; ++$lvl) {
+		my @c = caller($lvl);
+		last unless @c;
+		next if $c[0] =~ /^Template/;
+		push @caller_info, "$c[1] $c[0] line $c[2] $c[3]";
+		last if scalar(@caller_info) >= 5;
+	}
+	print STDERR "_genericGetCache called with table=$table, table_prime=$table_prime, and undef id: @caller_info\n";
+	return undef;
+}
 
 	my $table_cache = '_' . $table . '_cache';
 	my $table_cache_time= '_' . $table . '_cache_time';
