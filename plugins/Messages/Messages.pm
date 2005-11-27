@@ -968,6 +968,10 @@ always return a list of (code, description).
 
 sub getDescription {
 	my($self, $codetype, $key) = @_;
+	if (!defined($key) || !length($key)) {
+print STDERR "Message.pm getDescription called with codetype='$codetype' key='$key'\n";
+return;
+}
 
 	my $codes = $self->getDescriptions($codetype);
 
