@@ -95,7 +95,7 @@ sub main {
 	}
 
 	# hijack feeds
-	if ($form->{content_type} =~ $constants->{feed_types}) {
+	if ($form->{content_type} && $form->{content_type} =~ $constants->{feed_types}) {
 		if ($op eq 'top' && $top_ok) {
 			displayTopRSS($journal, $constants, $user, $form, $journal_reader, $gSkin);
 		} else {
@@ -285,11 +285,11 @@ sub displayTopRSS {
 	my($journal, $constants, $user, $form, $journal_reader, $gSkin) = @_;
 
 	my $journals;
-	my $type;
-	if ($form->{type} eq 'count' && $constants->{journal_top_posters}) {
+	my $type = '';
+	if ($form->{type} && $form->{type} eq 'count' && $constants->{journal_top_posters}) {
 		$type = 'count';
 		$journals = $journal_reader->top;
-	} elsif ($form->{type} eq 'friends' && $constants->{journal_top_friend}) {
+	} elsif ($form->{type} && $form->{type} eq 'friends' && $constants->{journal_top_friend}) {
 		$type = 'friends';
 		my $zoo   = getObject('Slash::Zoo');
 		$journals = $zoo->topFriends;
