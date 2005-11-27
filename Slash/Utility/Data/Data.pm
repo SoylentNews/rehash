@@ -139,6 +139,7 @@ BEGIN {
 
 sub nickFix {
 	my($nick) = @_;
+	return '' if !$nick;
 	my $constants = getCurrentStatic();
 	my $nc = $constants->{nick_chars} || join('', 'a' .. 'z');
 	$nick =~ s/\s+/ /g;
@@ -431,6 +432,7 @@ sub urlFromSite {
 	$site_domain =~ s/:.+$//;	# strip port, if available
 
 	my @host = split m/\./, ($clean->can('host') ? $clean->host : '');
+	return 0 if scalar(@host) < 2;
 	my $host = join '.', @host[-2, -1];
 
 	return $site_domain eq $host;
@@ -2178,7 +2180,7 @@ sub fudgeurl {
 			}
 		}
 
-		if ($scheme eq 'mailto') {
+		if ($scheme && $scheme eq 'mailto') {
 			if (my $query = $uri->query) {
 				$query =~ s/@/%40/g;
 				$uri->query($query);
@@ -2268,6 +2270,7 @@ sub url2html {
 		my $extra = '';
 		$extra = $1 if $url =~ s/([?!;:.,']+)$//;
 		$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
+print STDERR "url2html s/// url='$url' extra='$extra'\n" if !defined($url) || !defined($extra);
 		qq[<a href="$url" rel="url2html-$$">$url</a>$extra];
 	}ogie;
 
@@ -2494,8 +2497,12 @@ sub balanceTags {
 
 	my($max_nest_depth, $max_su_depth) = (0, 0);
 	if (ref $options) {
-		$max_nest_depth = $options->{deep_nesting} == 1 ? $constants->{nesting_maxdepth} : $options->{deep_nesting};
-		$max_su_depth   = $options->{deep_su}      == 1 ? $constants->{nest_su_maxdepth} : $options->{deep_su};
+		$max_nest_depth = ($options->{deep_nesting} && $options->{deep_nesting} == 1)
+			? $constants->{nesting_maxdepth}
+			: ($options->{deep_nesting} || 0);
+		$max_su_depth   = ($options->{deep_su} && $options->{deep_su} == 1)
+			? $constants->{nest_su_maxdepth}
+			: ($options->{deep_su} || 0);
 	} else {
 		# deprecated
 		$max_nest_depth = $options == 1 ? $constants->{nesting_maxdepth} : $options;
@@ -2562,7 +2569,7 @@ sub balanceTags {
 			# so just remove it if we are in too deep already
 			if ($is_nesting{$tag} && $max_nest_depth) {
 				my $cur_depth = 0;
-				$cur_depth += $tags{$_} for keys %is_nesting;
+				$cur_depth += $tags{$_} || 0 for keys %is_nesting;
 				if ($cur_depth >= $max_nest_depth) {
 					_substitute(\$html, $whole, '');
 					next;
@@ -2750,7 +2757,8 @@ sub _validateLists {
 
 		# the default element to use inside the list, for content
 		# that is not inside any proper element
-		my $inside = $lists{$list}[0];
+		my $inside = $lists{$list}[0] || '';
+print STDERR "_validateLists logic error, no entry for list '$list'\n" if !$inside;
 		my $re     = $lists_re{$list};
 
 		# since we are looking at innermost lists, we do not
@@ -3000,6 +3008,7 @@ sub _slashlink_to_link {
 		# Different behavior here, depending on whether we are
 		# outputting for a dynamic page, or a static one.
 		# This is the main reason for doing slashlinks at all!
+print STDERR "_slashlink_to_link skin_id=$skin_id sl='$sl' ssi='$ssi' skin_name='$skin_name' attr{sid}='$attr{sid}' skin_root='$skin_root'\n" if !$skin_name || !$attr{sid} || !$skin_root;
 		if ($ssi) {
 			$url .= qq{$skin_root/};
 			$url .= qq{$skin_name/$attr{sid}.shtml};

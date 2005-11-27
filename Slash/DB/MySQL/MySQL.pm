@@ -6156,18 +6156,17 @@ sub getAL2Log {
 
 	# For convenience, pull the al2_type information for each row and
 	# attach that as well.
-	my $al2types = $self->getAL2Types;
 	for my $row (@$rows) {
 		my $al2tid = $row->{al2tid};
-		my $al2type = $self->getAL2TypeById($al2tid)->{name};
+		my $al2type = $self->getAL2TypeById($al2tid);
 		if (!$al2type) {
 			# Sanity checking.
 			warn "no al2type for '$al2tid'";
 			next;
 		}
-		$row->{bitpos} = $al2types->{$al2type}{bitpos};
-		$row->{name}   = $al2types->{$al2type}{name};
-		$row->{title}  = $al2types->{$al2type}{title};
+		$row->{bitpos} = $al2type->{bitpos};
+		$row->{name}   = $al2type->{name};
+		$row->{title}  = $al2type->{title};
 	}
 
 	return $rows;
