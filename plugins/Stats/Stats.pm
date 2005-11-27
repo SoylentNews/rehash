@@ -1084,9 +1084,13 @@ sub getSummaryStats {
 	push @where, "skid = ".$self->sqlQuote($options->{skid}) if $options->{skid};
 
 	my $where = join ' AND ', @where;
-	my $table_suffix = $options->{table_suffix};
+	my $table_suffix = $options->{table_suffix} || '';
 	
-	$self->sqlSelectHashref("COUNT(DISTINCT host_addr) AS cnt, COUNT(DISTINCT uid) as uids, COUNT(*) as pages, SUM(bytes) as bytes", "accesslog_temp$table_suffix", $where);
+	$self->sqlSelectHashref(
+		"COUNT(DISTINCT host_addr) AS cnt, COUNT(DISTINCT uid) AS uids,
+		 COUNT(*) AS pages, SUM(bytes) AS bytes",
+		"accesslog_temp$table_suffix",
+		$where);
 }
 
 

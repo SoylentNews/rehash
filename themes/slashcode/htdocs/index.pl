@@ -44,13 +44,13 @@ my $start_time = Time::HiRes::time;
 		return;
 	}
 
-	my $rss = $constants->{rss_allow_index} && $form->{content_type} =~ $constants->{feed_types} && (
-		$user->{is_admin}
-			||
-		($constants->{rss_allow_index} > 1 && $user->{is_subscriber})
-			||
-		($constants->{rss_allow_index} > 2 && !$user->{is_anon})
-	);
+	my $rss = $constants->{rss_allow_index}
+		&& $form->{content_type} && $form->{content_type} =~ $constants->{feed_types}
+		&& (
+			   $user->{is_admin}
+			|| ($constants->{rss_allow_index} > 1 && $user->{is_subscriber})
+			|| ($constants->{rss_allow_index} > 2 && !$user->{is_anon})
+		);
 
 	# $form->{logtoken} is only allowed if using rss
 	if ($form->{logtoken} && !$rss) {
