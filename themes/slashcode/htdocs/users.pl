@@ -3024,7 +3024,7 @@ sub displayForm {
 
 	my($title, $title2, $msg1, $msg2) = ('', '', '', '');
 
-	if ($form->{op} eq 'userclose') {
+	if ($op eq 'userclose') {
 		$title = getMessage('userclose');
 
 	} elsif ($op eq 'displayForm') {
