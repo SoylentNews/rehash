@@ -55,7 +55,7 @@ sub main {
 	# search type isn't specified
 # I've caught gSkin being {} here, on a test box.  Not sure if that's a
 # bug or just a misconfiguration of mine. - Jamie 2005-11-26
-#use Data::Dumper; print STDERR "search.pl gSkin: " . Dumper($gSkin) if !$gSkin->{name};
+use Data::Dumper; print STDERR "search.pl gSkin: " . Dumper($gSkin) if !$gSkin->{name};
 	if ($gSkin->{name} eq 'polls' && !$form->{op}) {
 		$form->{op} = 'polls';
 		$form->{section} = '';
