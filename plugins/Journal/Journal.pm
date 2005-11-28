@@ -446,8 +446,10 @@ sub createStoryFromJournal {
 	my $text = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
 	
 	my $skid = $options->{skid} || $constants->{journal2submit_skid} || $constants->{mainpage_skid};
-	
+
 	my %story = (
+		title		=> $src_journal->{description},
+		uid		=> $journal_user->{uid},
 		introtext	=> $text,
 		bodytext	=> '',
 		'time'		=> $slashdb->getTime(), 
@@ -469,14 +471,15 @@ sub createStoryFromJournal {
 	# 20/10 is for section-only, 40/30 is for mainpage
 	
 
-	my $skin = $slashdb->getSkin($story{skid});
+	my $skin = $slashdb->getSkin($skid);
 	my $skin_nexus = $skin->{nexus};
  	
 	# May need to change
-	$story{topics_chosen} = { $story{tid} => 10, $skin_nexus => 20 };
+	$story{topics_chosen} = { $src_journal->{tid} => 10, $skin_nexus => 20 };
+ 
  	
 	my $topiclist = $slashdb->getTopiclistFromChosen(
- 		{ skid => $story{skid} }
+ 		$story{topics_chosen}
 	);
 
 	my $admindb = getObject('Slash::Admin');
