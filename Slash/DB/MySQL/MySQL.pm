@@ -8877,6 +8877,7 @@ sub createStory {
 		my $comment_codes = $self->getDescriptions('commentcodes_extended');
 
 		my $discussion = {
+			uid		=> $story->{uid},
 			title		=> $story->{title},
 			primaryskid	=> $primaryskid,
 			topic		=> $tids->[0],
