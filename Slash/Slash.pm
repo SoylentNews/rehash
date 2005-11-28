@@ -50,6 +50,9 @@ $VERSION   	= '2.005000';  # v2.5.0
 );
 
 
+# this is the worst damned warning ever, so SHUT UP ALREADY!
+$SIG{__WARN__} = sub { warn @_ unless $_[0] =~ /Use of uninitialized value/ };
+
 # BENDER: Fry, of all the friends I've had ... you're the first.
 
 

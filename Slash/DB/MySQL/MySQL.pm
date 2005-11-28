@@ -8881,7 +8881,6 @@ sub createStory {
 			title		=> $story->{title},
 			primaryskid	=> $primaryskid,
 			topic		=> $tids->[0],
-			# XXXSECTIONTOPICS pudge, check this, rootdir look right to you?
 			url		=> "$rootdir/article.pl?sid=$story->{sid}"
 						. ($tids->[0] && $constants->{tids_in_urls}
 						  ? "&tid=$tids->[0]" : ""),

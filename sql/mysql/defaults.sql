@@ -997,7 +997,7 @@ INSERT INTO vars (name, value, description) VALUES ('rootdir','//www.example.com
 INSERT INTO vars (name, value, description) VALUES ('rss_allow_index', '0', 'Allow RSS feeds to be served from index.pl (1 = admins, 2 = subscribers, 3 = all logged-in users)');
 INSERT INTO vars (name, value, description) VALUES ('rss_expire_days','7','Number of days till we blank the data from the database (the signatures still stick around though)');
 INSERT INTO vars (name, value, description) VALUES ('rss_max_items_incoming','15','Max number of rss items shown in a slashbox, by default');
-INSERT INTO vars (name, value, description) VALUES ('rss_max_items_outgoing','15','Max number of rss items emitted in an rss/rdf/atom feed');
+INSERT INTO vars (name, value, description) VALUES ('rss_max_items_outgoing','10','Max number of rss items emitted in an rss/rdf/atom feed');
 INSERT INTO vars (name, value, description) VALUES ('rss_store','0','Should we be saving incoming submissions for rss');
 INSERT INTO vars (name, value, description) VALUES ('run_ads','0','Should we be running ads?');
 INSERT INTO vars (name, value, description) VALUES ('runtask_verbosity','3','How much information runtask should write to slashd.log: 0-3 or empty string to use slashd_verbosity');

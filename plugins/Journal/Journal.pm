@@ -38,12 +38,12 @@ sub set {
 	my($self, $id, $values) = @_;
 	my $uid = $ENV{SLASH_USER};
 	my $constants = getCurrentStatic();
-	
+
 	return unless $self->sqlSelect('id', 'journals', "uid=$uid AND id=$id");
 
 	my(%j1, %j2);
 	%j1 = %$values;
-	
+
 	# verify we're allowed to do this at some point, ie can't unset if it's already set
 	if (defined $j1{submit} && $constants->{journal_allow_journal2submit} ) {
 		my $cur_submit = $self->get($id, "submit");
@@ -53,7 +53,7 @@ sub set {
 			$j1{submit} = $submit;
 		}
 	}
-	
+
 	$j2{article}  = delete $j1{article};
 	$j1{"-last_update"} = 'now()';
 
@@ -102,7 +102,7 @@ sub getsByUids {
 		"uid IN ($uids_list)",
 		$order_limit);
 	return unless $journals_hr && %$journals_hr;
-	
+
 	# Second, pull nickname from users for the uids identified.
 	my @uids_found = sort keys %{ { map { ($_, 1) } values %$journals_hr } };
 	my $uids_found_list = join(',', @uids_found);
@@ -386,9 +386,9 @@ sub get {
 }
 
 sub updateStoryFromJournal {
-	my ($self, $src_journal) = @_;
+	my($self, $src_journal) = @_;
 	my $slashdb = getCurrentDB();
-	
+
 	my $stoid = $slashdb->sqlSelect("stoid", "journal_transfer", "id=$src_journal->{id}");
 	return unless $stoid;
 
@@ -400,7 +400,7 @@ sub updateStoryFromJournal {
 }
 
 sub createSubmissionFromJournal {
-	my ($self, $src_journal) = @_;
+	my($self, $src_journal) = @_;
 	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
 
@@ -408,7 +408,7 @@ sub createSubmissionFromJournal {
 
 	my $story = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
 	#perhaps need more string cleanup from submit.pl's findStory here
-	
+
 	my $primaryskid = $constants->{journal2submit_skid} || $constants->{mainpage_skid};
 
 	my $submission = {
@@ -424,7 +424,7 @@ sub createSubmissionFromJournal {
 		by		=> $journal_user->{nickname},
 		by_url 		=> $journal_user->{fakeemail},
 	};
-	
+
 	my $subid = $slashdb->createSubmission($submission);
 	if ($subid) {
 		$self->logJournalTransfer($src_journal->{id}, $subid);
@@ -435,7 +435,7 @@ sub createSubmissionFromJournal {
 }
 
 sub createStoryFromJournal { 
-	my ($self, $src_journal, $options) = @_;
+	my($self, $src_journal, $options) = @_;
 	$options ||= {};
 
 	my $slashdb = getCurrentDB();
@@ -444,7 +444,7 @@ sub createStoryFromJournal {
 	my $journal_user = $slashdb->getUser($src_journal->{uid});
 
 	my $text = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
-	
+
 	my $skid = $options->{skid} || $constants->{journal2submit_skid} || $constants->{mainpage_skid};
 
 	my %story = (
@@ -469,7 +469,7 @@ sub createStoryFromJournal {
 	# flags (ok), primaryskid, commentstatus (enabled), archivable?
 	# this sets weight (front page, etc.) ... not sure which weight to use;
 	# 20/10 is for section-only, 40/30 is for mainpage
-	
+
 
 	my $skin = $slashdb->getSkin($skid);
 	my $skin_nexus = $skin->{nexus};
@@ -496,26 +496,26 @@ sub createStoryFromJournal {
 }
 
 sub logJournalTransfer {
-	my ($self, $id, $subid, $stoid) = @_;
+	my($self, $id, $subid, $stoid) = @_;
 	my $slashdb = getCurrentDB();
 	$stoid ||=0;
 	$subid ||=0;
 	return if !$id;
-	
+
 	$slashdb->sqlInsert("journal_transfer", { id => $id, subid => $subid, stoid => $stoid });
 }
 
 sub hasJournalTransferred {
-	my ($self, $id) = @_;
+	my($self, $id) = @_;
 	return $self->sqlCount("journal_transfer", "id=$id")
 }
 
 sub promoteJournal {
-	my ($data) = @_;
+	my($data) = @_;
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $journal = getObject('Slash::Journal'); 
-	
+
 	return unless $constants->{journal_allow_journal2submit};
 	return unless $data && $data->{id};
 	my $src_journal = $journal->get($data->{id});
