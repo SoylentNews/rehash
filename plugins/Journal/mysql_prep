@@ -6,6 +6,6 @@ ALTER TABLE journals add fulltext (description);
 ALTER TABLE journals_text add fulltext (article);
 
 INSERT INTO vars (name, description, value) VALUES ("journal2submit_skid", "skid to submit journal entries to, if not set they go to mainpage skid", 0);
-INSERT INTO vars (name, description, value) VALUES ("journal_allow_journal2submit", "Allow journals to be subitted as submissions?", 0);
+INSERT INTO vars (name, description, value) VALUES ("journal_allow_journal2submit", "Allow journals to be submitted as submissions?", 0);
 
 INSERT INTO hooks (param, class, subroutine) VALUES ('journal_save_success', 'Slash::Journal', 'promoteJournal');
