@@ -370,8 +370,8 @@ sub reparentComments {
 	for my $x (sort { $a <=> $b } keys %$comments) {
 		next if $x == 0; # exclude the fake "cid 0" comment
 
-		my $pid = $comments->{$x}{pid};
-		my $reparent;
+		my $pid = $comments->{$x}{pid} || 0;
+		my $reparent = 0;
 
 		# do threshold reparenting thing
 		if ($user->{reparent} && $comments->{$x}{points} >= $user->{threshold}) {
@@ -381,7 +381,7 @@ sub reparentComments {
 				$reparent = 1;
 			}
 
-			if ($reparent && $tmppid >= ($form->{cid} || $form->{pid})) {
+			if ($reparent && $tmppid >= ($form->{cid} || $form->{pid} || 0)) {
 				$pid = $tmppid;
 			} else {
 				$reparent = 0;
@@ -390,7 +390,7 @@ sub reparentComments {
 
 		if ($depth && !$reparent) { # don't reparent again!
 			# set depth of this comment based on parent's depth
-			$comments->{$x}{depth} = ($pid ? $comments->{$pid}{depth} : 0) + 1;
+			$comments->{$x}{depth} = ($pid ? ($comments->{$pid}{depth} ||= 0) : 0) + 1;
 
 			# go back each pid until we find one with depth less than $depth
 			while ($pid && $comments->{$pid}{depth} >= $depth) {
@@ -401,7 +401,7 @@ sub reparentComments {
 
 		if ($reparent) {
 			# remove child from old parent
-			if ($pid >= ($form->{cid} || $form->{pid})) {
+			if ($pid >= ($form->{cid} || $form->{pid} || 0)) {
 				@{$comments->{$comments->{$x}{pid}}{kids}} =
 					grep { $_ != $x }
 					@{$comments->{$comments->{$x}{pid}}{kids}}
