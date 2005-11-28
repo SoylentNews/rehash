@@ -37,12 +37,25 @@ sub new {
 sub set {
 	my($self, $id, $values) = @_;
 	my $uid = $ENV{SLASH_USER};
-
+	my $constants = getCurrentStatic();
+	
 	return unless $self->sqlSelect('id', 'journals', "uid=$uid AND id=$id");
 
 	my(%j1, %j2);
 	%j1 = %$values;
+	
+	# verify we're allowed to do this at some point, ie can't unset if it's already set
+	if (defined $j1{submit} && $constants->{journal_allow_journal2submit} ) {
+		my $cur_submit = $self->get($id, "submit");
+		unless ($cur_submit eq "yes") {
+			my $submit = "yes";
+			$submit = "no" if $j1{submit} eq "no" || !$j1{submit};
+			$j1{submit} = $submit;
+		}
+	}
+	
 	$j2{article}  = delete $j1{article};
+	$j1{"-last_update"} = 'now()';
 
 	$self->sqlUpdate('journals', \%j1, "id=$id") if keys %j1;
 	$self->sqlUpdate('journals_text', \%j2, "id=$id") if $j2{article};
@@ -159,11 +172,13 @@ sub listFriends {
 }
 
 sub create {
-	my($self, $description, $article, $posttype, $tid) = @_;
+	my($self, $description, $article, $posttype, $tid, $submit) = @_;
 
 	return unless $description;
 	return unless $article;
 	return unless $tid;
+
+	$submit = $submit ? "yes" : "no";
 
 	my $uid = $ENV{SLASH_USER};
 	$self->sqlInsert("journals", {
@@ -172,6 +187,7 @@ sub create {
 		tid		=> $tid,
 		-date		=> 'now()',
 		posttype	=> $posttype,
+		submit		=> $submit,
 	});
 
 	my($id) = $self->getLastInsertId({ table => 'journals', prime => 'id' });
@@ -368,6 +384,156 @@ sub get {
 
 	return $answer;
 }
+
+sub updateStoryFromJournal {
+	my ($self, $src_journal) = @_;
+	my $slashdb = getCurrentDB();
+	
+	my $stoid = $slashdb->sqlSelect("stoid", "journal_transfer", "id=$src_journal->{id}");
+	return unless $stoid;
+
+	my $data = {};
+	$data->{title} = $src_journal->{description};
+	$data->{introtext} = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
+
+	$slashdb->updateStory($stoid, $data);
+}
+
+sub createSubmissionFromJournal {
+	my ($self, $src_journal) = @_;
+	my $slashdb   = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my $journal_user = $slashdb->getUser($src_journal->{uid});
+
+	my $story = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
+	#perhaps need more string cleanup from submit.pl's findStory here
+	
+	my $primaryskid = $constants->{journal2submit_skid} || $constants->{mainpage_skid};
+
+	my $submission = {
+		email		=> $journal_user->{fakeemail},
+		uid		=> $journal_user->{uid},
+		name		=> $journal_user->{nickname},
+		story		=> $story,
+		subj		=> $src_journal->{description},
+		tid		=> $src_journal->{tid},
+		primaryskid 	=> $primaryskid,
+		journal_id 	=> $src_journal->{id},
+		journal_disc 	=> $src_journal->{discussion},
+		by		=> $journal_user->{nickname},
+		by_url 		=> $journal_user->{fakeemail},
+	};
+	
+	my $subid = $slashdb->createSubmission($submission);
+	if ($subid) {
+		$self->logJournalTransfer($src_journal->{id}, $subid);
+	} else {
+		print STDERR ("Failed attempting to transfer journal id: $src_journal->{id}\n");
+	}
+	return $subid;
+}
+
+sub createStoryFromJournal { 
+	my ($self, $src_journal, $options) = @_;
+	$options ||= {};
+
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my $journal_user = $slashdb->getUser($src_journal->{uid});
+
+	my $text = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
+	
+	my $skid = $options->{skid} || $constants->{journal2submit_skid} || $constants->{mainpage_skid};
+	
+	my %story = (
+		introtext	=> $text,
+		bodytext	=> '',
+		'time'		=> $slashdb->getTime(), 
+		commentstatus	=> 'enabled',  # ?
+	#	discussion_id	=> $src_journal->{discussion}, # journal's discussion ID
+		journal_id 	=> $src_journal->{id},
+		journal_disc	=> $src_journal->{discussion},
+		by		=> $journal_user->{nickname},
+		by_url 		=> $journal_user->{fakeemail},
+	);
+
+	$story{neverdisplay} = $options->{neverdisplay} if $options->{neverdisplay};
+													       
+													       
+	# XXX: we need to update, in the discussion:
+	# stoid, sid, title, url, topic, ts (story's timestamp), type (open), uid?,
+	# flags (ok), primaryskid, commentstatus (enabled), archivable?
+	# this sets weight (front page, etc.) ... not sure which weight to use;
+	# 20/10 is for section-only, 40/30 is for mainpage
+	
+
+	my $skin = $slashdb->getSkin($story{skid});
+	my $skin_nexus = $skin->{nexus};
+ 	
+	# May need to change
+	$story{topics_chosen} = { $story{tid} => 10, $skin_nexus => 20 };
+ 	
+	my $topiclist = $slashdb->getTopiclistFromChosen(
+ 		{ skid => $story{skid} }
+	);
+
+	my $admindb = getObject('Slash::Admin');
+ 	$story{relatedtext} = $admindb->relatedLinks(
+		"$story{title} $story{introtext} $story{bodytext}",
+ 	       $topiclist,
+ 	       '', # user's nickname
+ 	       '', # user's uid
+        );
+
+	my $sid = $slashdb->createStory(\%story);
+	my $stoid = $slashdb->getStoidFromSidOrStoid($sid);
+	$self->logJournalTransfer($src_journal->{id}, 0, $stoid);
+}
+
+sub logJournalTransfer {
+	my ($self, $id, $subid, $stoid) = @_;
+	my $slashdb = getCurrentDB();
+	$stoid ||=0;
+	$subid ||=0;
+	return if !$id;
+	
+	$slashdb->sqlInsert("journal_transfer", { id => $id, subid => $subid, stoid => $stoid });
+}
+
+sub hasJournalTransferred {
+	my ($self, $id) = @_;
+	return $self->sqlCount("journal_transfer", "id=$id")
+}
+
+sub promoteJournal {
+	my ($data) = @_;
+	my $constants = getCurrentStatic();
+	my $user      = getCurrentUser();
+	my $journal = getObject('Slash::Journal'); 
+	
+	return unless $constants->{journal_allow_journal2submit};
+	return unless $data && $data->{id};
+	my $src_journal = $journal->get($data->{id});
+	if ($src_journal->{submit} eq "yes") {
+		my $transferred = $journal->hasJournalTransferred($data->{id});
+		if ($user->{acl}{journal_to_story}) {
+			unless ($transferred) {
+				$journal->createStoryFromJournal($src_journal, { neverdisplay => 1} );
+			} else {
+				$journal->updateStoryFromJournal($src_journal);	
+			}
+		} else {
+			unless ($transferred) {
+				$journal->createSubmissionFromJournal($src_journal);
+			} else {
+				# Apply edit?
+			}
+		}
+	}
+}
+
 
 sub DESTROY {
 	my($self) = @_;
