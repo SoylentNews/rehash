@@ -42,6 +42,22 @@ __template__
 					<textarea wrap="virtual" name="article" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]">[% article.article | strip_literal %]</textarea>
 					<br>
 					[% format_select %]
+					<br>
+					[% IF constants.journal_allow_journal2submit %]
+						[% IF article.id && article.submit == "yes" %]
+							<div class="note">
+							This journal entry has been marked as submittable.  You can't undo this.
+							</div>
+						[% ELSE %]
+							<label>Submit<input type="checkbox" name="submit" [% IF form.submit; constants.markup_checked_attribute; END %]></label>
+							[% submit_note = "<ul>";
+							   submit_note = submit_note _ "<li>Comments must be enabled</li>";
+						 	   submit_note = submit_note _ "</ul>" %]
+							%]
+							[% PROCESS formNote note => "Allow journal to be submitted as a story? If you do this: $submit_note" %]
+						[% END %]
+					<br>
+					[% END %]
 					<input type="submit" name="op" value="preview" class="button">
 				[% IF form.preview || article.id %]
 					<input type="submit" name="op" value="save" class="button">
@@ -57,6 +73,7 @@ __template__
 			<br>
 			<b>URLs</b> <code>&lt;URL:http://example.com/&gt;</code> will auto-link a URL
 		</div>
+		
 
 __seclev__
 100

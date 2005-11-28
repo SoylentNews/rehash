@@ -73,6 +73,8 @@ __template__
 
 [% CASE 'journalfoot' %]
 	</div></div>
+[% CASE 'submit_must_enable_comments' %]
+	You must enable comments if you plan on allowing this journal to be used as a site submission
 
 [% END %]
 
