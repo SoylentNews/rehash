@@ -8,6 +8,7 @@ use strict;
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::Constants qw(:messages :web);
 use Slash::Display;
+use Slash::Hook;
 use Slash::Utility;
 use Slash::XML;
 use vars qw($VERSION);
@@ -553,6 +554,8 @@ sub doSaveArticle {
 		}
 	}
 
+	return (getData('submit_must_enable_comments'), 1) if $form->{submit} && $form->{journal_discuss} eq "disabled";
+
 	unless ($rkey) {
 		my $reskey = getObject('Slash::ResKey');
 		$rkey = $reskey->key('journal');
@@ -567,6 +570,7 @@ sub doSaveArticle {
 		my %update;
 		my $article = $journal_reader->get($form->{id});
 
+
 		# note: comments_on is a special case where we are
 		# only turning on comments, not saving anything else
 		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled' && !$article->{discussion}) {
@@ -575,6 +579,9 @@ sub doSaveArticle {
 				$description = $article->{description};
 				$form->{tid} = $article->{tid};
 			}
+			
+			my $commentstatus = $form->{journal_discuss};
+			
 			my $did = $slashdb->createDiscussion({
 				title	=> $description,
 				topic	=> $form->{tid},
@@ -589,17 +596,18 @@ sub doSaveArticle {
 		}
 
 		unless ($form->{comments_on}) {
-			for (qw(article tid posttype)) {
+			for (qw(article tid posttype submit)) {
 				$update{$_} = $form->{$_} if defined $form->{$_};
 			}
 			$update{description} = $description;
 		}
 
 		$journal->set($form->{id}, \%update);
+		slashHook('journal_save_success', { id => $form->{id} });
 
 	} else {
 		my $id = $journal->create($description,
-			$form->{article}, $form->{posttype}, $form->{tid});
+			$form->{article}, $form->{posttype}, $form->{tid}, $form->{submit});
 
 		unless ($id) {
 			return getData('create_failed');
@@ -615,6 +623,8 @@ sub doSaveArticle {
 			});
 			$journal->set($id, { discussion => $did });
 		}
+		
+		slashHook('journal_save_success', { id => $id });
 
 		# create messages
 		my $messages = getObject('Slash::Messages');
@@ -811,7 +821,6 @@ sub listArticle {
 	_printHead('userhead',
 		{ nickname => $nickname, uid => $form->{uid} || $user->{uid} },
 		1) or return;
-
 	if (@$list) {
 		slashDisplay('journallist', {
 			default		=> $theme,
@@ -854,12 +863,12 @@ sub removeArticle {
 	my $rkey = $reskey->key('journal');
 
 	# XXX: don't bother printing reskey error?
+	
 	if ($rkey->use) {
 		for my $id (grep { $_ = /^del_(\d+)$/ ? $1 : 0 } keys %$form) {
 			$journal->remove($id);
 		}
 	}
-
 	listArticle(@_);
 }
 
