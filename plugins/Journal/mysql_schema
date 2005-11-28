@@ -11,6 +11,8 @@ CREATE TABLE journals (
 	posttype TINYINT DEFAULT '2' NOT NULL,
 	discussion MEDIUMINT  UNSIGNED,
 	tid SMALLINT UNSIGNED NOT NULL,
+	submit ENUM ("no","yes") DEFAULT "no",
+	last_update timetamp NOT NULL,
 	PRIMARY KEY (id),
 	KEY uid_date_id (uid,date,id),
 	KEY IDandUID (id,uid),
@@ -34,3 +36,10 @@ CREATE TABLE journal_themes (
 
 #ALTER TABLE journals ADD FOREIGN KEY (tid) REFERENCES topics(tid);
 
+DROP TABLE IF EXISTS journal_transfer;
+CREATE TABLE journal_transfer (
+	id MEDIUMINT UNSIGNED NOT NULL,
+	subid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	stoid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	PRIMARY key(id)
+);
