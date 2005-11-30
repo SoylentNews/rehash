@@ -394,7 +394,8 @@ sub updateStoryFromJournal {
 
 	my $data = {};
 	$data->{title} = $src_journal->{description};
-	$data->{introtext} = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
+	my $text = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
+	($data->{introtext}, $data->{bodytext}) = $self->splitJournalTextForStory($text);
 
 	$slashdb->updateStory($stoid, $data);
 }
@@ -406,7 +407,12 @@ sub createSubmissionFromJournal {
 
 	my $journal_user = $slashdb->getUser($src_journal->{uid});
 
-	my $story = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
+	my $story = $src_journal->{article};
+	
+	$story =~ s/^$Slash::Utility::Data::WS_RE+//io;
+	$story =~ s/$Slash::Utility::Data::WS_RE+$//io;
+	
+	$story = balanceTags(strip_mode($story, $src_journal->{posttype}));
 	#perhaps need more string cleanup from submit.pl's findStory here
 
 	my $primaryskid = $constants->{journal2submit_skid} || $constants->{mainpage_skid};
@@ -444,14 +450,15 @@ sub createStoryFromJournal {
 	my $journal_user = $slashdb->getUser($src_journal->{uid});
 
 	my $text = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
-
+	my ($intro, $body) = $self->splitJournalTextForStory($text);
+	
 	my $skid = $options->{skid} || $constants->{journal2submit_skid} || $constants->{mainpage_skid};
 
 	my %story = (
 		title		=> $src_journal->{description},
 		uid		=> $journal_user->{uid},
-		introtext	=> $text,
-		bodytext	=> '',
+		introtext	=> $intro,
+		bodytext	=> $body,
 		'time'		=> $slashdb->getTime(), 
 		commentstatus	=> 'enabled',  # ?
 	#	discussion_id	=> $src_journal->{discussion}, # journal's discussion ID
@@ -459,6 +466,7 @@ sub createStoryFromJournal {
 		journal_disc	=> $src_journal->{discussion},
 		by		=> $journal_user->{nickname},
 		by_url 		=> $journal_user->{fakeemail},
+		discussion	=> $src_journal->{discussion},
 	);
 
 	$story{neverdisplay} = $options->{neverdisplay} if $options->{neverdisplay};
@@ -493,6 +501,21 @@ sub createStoryFromJournal {
 	my $sid = $slashdb->createStory(\%story);
 	my $stoid = $slashdb->getStoidFromSidOrStoid($sid);
 	$self->logJournalTransfer($src_journal->{id}, 0, $stoid);
+}
+
+sub splitJournalTextForStory {
+	my ($self, $text) = @_;
+	my ($intro, $body) = split (/<br>|<\/p>/i, $text, 2);
+
+	$intro =~ s/^$Slash::Utility::Data::WS_RE+//io;
+	$intro =~ s/$Slash::Utility::Data::WS_RE+$//io;
+	
+	$body =~ s/^$Slash::Utility::Data::WS_RE+//io;
+	$body =~ s/$Slash::Utility::Data::WS_RE+$//io;
+
+	$intro = balanceTags($intro);
+	$body = balanceTags($body);
+	return ($intro, $body);
 }
 
 sub logJournalTransfer {
