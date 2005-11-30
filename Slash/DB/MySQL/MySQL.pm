@@ -8875,29 +8875,32 @@ sub createStory {
 			$rootdir = $storyskin->{rootdir};
 		}
 		my $comment_codes = $self->getDescriptions('commentcodes_extended');
-
-		my $discussion = {
-			uid		=> $story->{uid},
-			title		=> $story->{title},
-			primaryskid	=> $primaryskid,
-			topic		=> $tids->[0],
-			url		=> "$rootdir/article.pl?sid=$story->{sid}"
-						. ($tids->[0] && $constants->{tids_in_urls}
-						  ? "&tid=$tids->[0]" : ""),
-			stoid		=> $stoid,
-			sid		=> $story->{sid},
-			#XXXSECTIONTOPICS do something here
-			commentstatus	=> $comment_codes->{$commentstatus}
-					   ? $commentstatus
-					   : $constants->{defaultcommentstatus},
-			ts		=> $story->{'time'}
-		};
-		my $id = $self->createDiscussion($discussion);
-		if (!$id) {
-			$error = "Failed to create discussion for story: " . Dumper($discussion);
-		}
-		if (!$error && !$self->setStory($stoid, { discussion => $id })) {
-			$error = "Failed to set discussion '$id' for story '$stoid'\n";
+		
+		if (!$story->{discussion}) {
+			my $discussion = {
+				uid		=> $story->{uid},
+				title		=> $story->{title},
+				primaryskid	=> $primaryskid,
+				topic		=> $tids->[0],
+				# XXXSECTIONTOPICS pudge, check this, rootdir look right to you?
+				url		=> "$rootdir/article.pl?sid=$story->{sid}"
+							. ($tids->[0] && $constants->{tids_in_urls}
+							  ? "&tid=$tids->[0]" : ""),
+				stoid		=> $stoid,
+				sid		=> $story->{sid},
+				#XXXSECTIONTOPICS do something here
+				commentstatus	=> $comment_codes->{$commentstatus}
+						   ? $commentstatus
+						   : $constants->{defaultcommentstatus},
+				ts		=> $story->{'time'}
+			};
+			my $id = $self->createDiscussion($discussion);
+			if (!$id) {
+				$error = "Failed to create discussion for story: " . Dumper($discussion);
+			}
+			if (!$error && !$self->setStory($stoid, { discussion => $id })) {
+				$error = "Failed to set discussion '$id' for story '$stoid'\n";
+			}
 		}
 	}
 
