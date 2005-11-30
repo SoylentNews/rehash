@@ -1836,6 +1836,7 @@ sub approveTag {
 			keys   %allowed;
 
 		my $tree = HTML::TreeBuilder->new; #_from_content("<$wholetag>");
+		$tree->attr_encoded(1);
 		$tree->implicit_tags(0);
 		$tree->parse("<$wholetag>");
 		$tree->eof;
