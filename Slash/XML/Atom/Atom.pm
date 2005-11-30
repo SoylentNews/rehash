@@ -161,7 +161,7 @@ sub as_atom_1_0 {
 	my($val, $output);
 
 	# XML declaration
-	$output .= qq[<?xml version="1.0" encoding="$self->{encoding}"?>\n\n];
+	$output = qq[<?xml version="1.0" encoding="$self->{encoding}"?>\n\n];
 
 	# namespaces declaration
 	$output .= qq[<feed\n xmlns="http://www.w3.org/2005/Atom"\n];

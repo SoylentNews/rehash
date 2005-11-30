@@ -465,6 +465,7 @@ The fixed description.
 
 sub rss_item_description {
 	my($self, $desc) = @_;
+	$desc ||= '';
 
 	my $constants = getCurrentStatic();
 
