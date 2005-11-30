@@ -476,7 +476,7 @@ sub linkStory {
 
 	my $story_ref = $reader->getStory($story_link->{stoid} || $story_link->{sid});
 
-	if (defined $story_link->{link} && $story_link->{link} eq '') {
+	if (!defined $story_link->{link} || $story_link->{link} eq '') {
 		$story_link->{link} = $story_ref->{title};
 	}
 	$title = $story_link->{link};
