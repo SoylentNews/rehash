@@ -1210,7 +1210,7 @@ my %mode_actions = (
 
 sub stripByMode {
 	my($str, $fmode, $no_white_fix) = @_;
-	$str ||= '';
+	$str = '' if !defined($str);
 	$fmode ||= NOHTML;
 	$no_white_fix = 1 if !defined($no_white_fix) && $fmode == LITERAL;
 	$action_data{no_white_fix} = $no_white_fix || 0;
