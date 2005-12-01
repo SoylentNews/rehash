@@ -3473,10 +3473,6 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 6, 'all', 'Slash::ResKey::Check
 # 2005-11-09
 UPDATE vars SET value = 'T_2_5_0_88' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 UPDATE vars SET description='Should we be saving incoming submissions for rss' WHERE name='rss_store';
 UPDATE vars SET name='rss_max_items_incoming', description='Max number of rss items shown in a slashbox, by default' WHERE name='max_items';
 INSERT INTO vars (name, value, description) VALUES ('rss_max_items_outgoing','10','Max number of rss items emitted in an rss/rdf/atom feed');
@@ -3487,4 +3483,11 @@ ALTER TABLE journals ADD last_update TIMESTAMP NOT NULL;
 INSERT INTO vars (name, description, value) VALUES ("journal2submit_skid", "skid to submit journal entries to, if not set they go to mainpage skid", 0);
 INSERT INTO vars (name, description, value) VALUES ("journal_allow_journal2submit", "Allow journals to be submitted as submissions?", 0);
 INSERT INTO hooks (param, class, subroutine) VALUES ('journal_save_success', 'Slash::Journal', 'promoteJournal');
+
+# 2005-11-28
+UPDATE vars SET value = 'T_2_5_0_89' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
