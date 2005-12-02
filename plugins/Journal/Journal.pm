@@ -483,7 +483,11 @@ sub createStoryFromJournal {
 	my $skin_nexus = $skin->{nexus};
  	
 	# May need to change
-	$story{topics_chosen} = { $src_journal->{tid} => 10, $skin_nexus => 20 };
+	if ($options->{topics_chosen}) {
+		$story{topics_chosen} = $options->{topics_chosen};
+	} else {
+		$story{topics_chosen} = { $src_journal->{tid} => 10, $skin_nexus => 20 };
+	}
  
  	
 	my $topiclist = $slashdb->getTopiclistFromChosen(
