@@ -35,7 +35,7 @@ $task{$me}{code} = sub {
 	$limit_extra = $limit_extra * 3 + 100;
 
 	# Normally gSE will look this far in the future for stories.
-	my $future_secs = $constants->{subscribe_future_secs};
+	my $future_secs = $constants->{subscribe_future_secs} || 0;
 	# But again for a safety margin, we want more.
 	$future_secs = $future_secs * 3 + 86400;
 

@@ -197,7 +197,8 @@ sub slashDisplay {
 
 	# we only populate $err if !$ret ... still, if $err
 	# is false, then we assume everything is OK
-	my($err, $ret, $out);
+	my($err, $ret);
+	my $out = '';
 
 	{
 		local $SIG{__WARN__} = \&tempWarn;

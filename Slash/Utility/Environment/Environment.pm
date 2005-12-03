@@ -2264,7 +2264,8 @@ No value is returned.
 
 sub writeLog {
 	return unless $ENV{GATEWAY_INTERFACE};
-	my $dat = join("\t", @_);
+	my @args = grep { defined $_ } @_;
+	my $dat = @args ? join("\t", @args) : '';
 
 	my $r = Apache->request;
 

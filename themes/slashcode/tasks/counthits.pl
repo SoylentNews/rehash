@@ -96,6 +96,7 @@ EOT
 			"discussions, stories",
 			"discussions.id IN ($disc_ids) AND discussions.sid = stories.sid");
 		for my $disc_id (keys %disc_id_count) {
+			next unless $disc_sid_lookup->{$disc_id}{sid};
 			$sid_count{$disc_sid_lookup->{$disc_id}{sid}} += $disc_id_count{$disc_id};
 		}
 	}

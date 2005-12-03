@@ -271,7 +271,7 @@ sub _gets {
 	my $table = $self->{_drop_table};
 	my $cols  = $self->{_drop_cols};
 
-	$count = 1 if $count =~ /\D/;
+	$count = 1 if $count && $count =~ /\D/;
 	my $other = "ORDER BY date ASC";
 	$other .= " LIMIT $count" if $count;
 

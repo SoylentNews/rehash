@@ -35,6 +35,7 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $form      = getCurrentForm();
 	my $user      = getCurrentUser();
+	setCurrentSkin(determineCurrentSkin());
 	my $gSkin     = getCurrentSkin();
 	my $slashdb   = getCurrentDB();
 	my $searchDB  = getObject('Slash::Search', { db_type => 'search' });

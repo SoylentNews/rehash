@@ -32,10 +32,12 @@ sub doCheck {
 	return(RESKEY_DEATH, ['no qid', {}, 'pollBooth']) unless $qid;
 
 	my $md5;
+	my $ra = $ENV{REMOTE_ADDR} || '';
 	if ($constants->{poll_fwdfor}) {
-		$md5 = md5_hex($ENV{REMOTE_ADDR} . $ENV{HTTP_X_FORWARDED_FOR});
+		my $xff = $ENV{HTTP_X_FORWARDED_FOR} || '';
+		$md5 = md5_hex("$ra$xff});
 	} else {
-		$md5 = md5_hex($ENV{REMOTE_ADDR});
+		$md5 = md5_hex($ra);
 	}
 	my $qid_quoted = $slashdb->sqlQuote($qid);
 

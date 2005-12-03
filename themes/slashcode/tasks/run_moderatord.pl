@@ -245,7 +245,7 @@ sub give_out_tokens {
 	my %update_uids = ( );
 	for (my $x = 0; $x < $num_tokens; $x++) {
 		my $uid = $eligible_uids[rand @eligible_uids];
-		next if $update_uids{$uid} >= $maxtokens_add;
+		next if ($update_uids{$uid} ||= 0) >= $maxtokens_add;
 		$update_uids{$uid}++;
 	}
 	my $n_update_uids = scalar(keys %update_uids);

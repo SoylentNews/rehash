@@ -475,10 +475,11 @@ sub displayArticle {
 	}
 
 	my $topics = $journal_reader->getTopics;
+	$date = 'initial_value_which_matches_nothing';
 	for my $article (@$articles) {
 		my($date_current) = timeCalc($article->[0], "%A %B %d, %Y");
 		if ($date ne $date_current) {
-			push @sorted_articles, $collection if ($date and (keys %$collection));
+			push @sorted_articles, $collection if $date && (keys %$collection);
 			$collection = {};
 			$date = $date_current;
 			$collection->{day} = $article->[0];
