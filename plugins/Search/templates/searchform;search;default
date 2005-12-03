@@ -109,11 +109,12 @@ Topics
 END %]</li>
 [%- i = i + 1;
     IF i == listcount.int || i == 0;
-       IF i == listcount.int && listex;
-          listext = listex = 1;
+       IF i == listcount.int && listex; # do one more line in this row
+          listex = 1;
           i = -1;
           NEXT;
        END;
+       i = 0;  # end this row
 %]</ul></td>
 <td valign="top">
 <ul>[% END; END # FOREACH %]</ul>

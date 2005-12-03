@@ -3412,8 +3412,6 @@ UPDATE css set theme="light", skin="" WHERE file="slashcode_lite.css";
 # 2005-10-26
 UPDATE vars SET value = 'T_2_5_0_86' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
-
 # You should update all your THEME and PLUGIN files to use css= instead of htdoc= for .css files that are managed through the site's css table
 INSERT INTO vars (name, value, description) VALUES ('css_use_imagedir','0','Place .css files in imagedir instead for your rootdir?  You may want to utilize this if you are using boa or another lightweight webserver to serve images.  Run symlink-tool after switching var');
 
@@ -3490,4 +3488,6 @@ UPDATE vars SET value = 'T_2_5_0_89' WHERE name = 'cvs_tag_currentcode';
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
+
+# PUDGE LAST UPDATED HERE
 
