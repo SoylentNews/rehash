@@ -156,7 +156,7 @@ sub _read_and_unlink_cchp_file {
 	my $constants = getCurrentStatic();
 	my($cc, $hp) = (undef, undef);
 	my $default_hp = join(",", ("0") x
-		($constants->{maxscore}-$constants->{minscore}+1));
+		($constants->{comment_maxscore}-$constants->{comment_minscore}+1));
 
 	# Now we extract what we need from the file we created
 	if (!open(my $cchp_fh, "<", $cchp_file)) {
