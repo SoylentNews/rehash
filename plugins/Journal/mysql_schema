@@ -12,7 +12,7 @@ CREATE TABLE journals (
 	discussion MEDIUMINT  UNSIGNED,
 	tid SMALLINT UNSIGNED NOT NULL,
 	submit ENUM ("no","yes") DEFAULT "no",
-	last_update timetamp NOT NULL,
+	last_update timestamp NOT NULL,
 	PRIMARY KEY (id),
 	KEY uid_date_id (uid,date,id),
 	KEY IDandUID (id,uid),
