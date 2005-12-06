@@ -9237,6 +9237,7 @@ sub getSlashConf {
 		submit_categories =>		[ ],
 		skins_recenttopics =>           [ ],
 		subnet_karma_post_limit_range => [ ],
+		search_ignore_skids		=> [ ],
 	);
 	my %conf_fixup_hashes = (
 		# var name			# default hash of keys/values
