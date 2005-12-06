@@ -1003,6 +1003,7 @@ INSERT INTO vars (name, value, description) VALUES ('run_ads','0','Should we be 
 INSERT INTO vars (name, value, description) VALUES ('runtask_verbosity','3','How much information runtask should write to slashd.log: 0-3 or empty string to use slashd_verbosity');
 INSERT INTO vars (name, value, description) VALUES ('sbindir','/usr/local/slash/sbin','Where are the sbin scripts kept');
 INSERT INTO vars (name, value, description) VALUES ('search_google','0','Turn on to disable local search (and invite users to use google.com)');
+INSERT INTO vars (name, value, description) VALUES ("search_ignore_skids", "", "list of skids that you want to not include in search results.  Delimit skids with |");
 INSERT INTO vars (name, value, description) VALUES ('section','index','This is the current setting for section.');
 INSERT INTO vars (name, value, description) VALUES ('send_mail','1','Turn On/Off to allow the system to send email messages.');
 INSERT INTO vars (name, value, description) VALUES ('siteadmin','admin','The admin for the site');
@@ -1055,6 +1056,7 @@ INSERT INTO vars (name, value, description) VALUES ('tokensperpoint','8','Number
 INSERT INTO vars (name, value, description) VALUES ('top10comm_days','1','Look back (n) days to display the Top 10 Comments slashbox');
 INSERT INTO vars (name, value, description) VALUES ('top10comm_num','10','Number of comments wanted for the Top 10 Comments slashbox (if not 10, you ought to rename it maybe)');
 INSERT INTO vars (name, value, description) VALUES ('top_sid','','The sid of the most recent story on the homepage');
+INSERT INTO vars (name, value, description) VALUES ("topiclist_ignore_prefix", "", "prefix of any topic keywords that should not show up on topic list or hierarchy, leave blank if you don't want any ignored");
 INSERT INTO vars (name, value, description) VALUES ('totalComments','0','Total number of comments posted');
 INSERT INTO vars (name, value, description) VALUES ('totalhits','0','Total number of hits the site has had thus far');
 INSERT INTO vars (name, value, description) VALUES ('use_dept','1','use \"dept.\" field');
