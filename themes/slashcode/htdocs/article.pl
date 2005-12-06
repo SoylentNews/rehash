@@ -27,7 +27,7 @@ sub main {
 		# through article.pl?sid=1, article.pl?sid=2, etc.
 		$sid = '';
 	}
-	
+
 	$story = $reader->getStory($sid);
 	if ($story && $story->{primaryskid} != $gSkin->{skid} && $form->{ssi} ne "yes") {
 		my $story_skin = $slashdb->getSkin($story->{primaryskid});
