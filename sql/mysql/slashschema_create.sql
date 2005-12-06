@@ -975,7 +975,7 @@ DROP TABLE IF EXISTS story_topics_chosen;
 CREATE TABLE story_topics_chosen (
 	stoid MEDIUMINT UNSIGNED NOT NULL,
 	tid SMALLINT(5) UNSIGNED NOT NULL,
-	weight FLOAT UNSIGNED DEFAULT 1 NOT NULL,
+	weight FLOAT DEFAULT 1 NOT NULL,
 	UNIQUE story_topic (stoid, tid),
 	INDEX tid_stoid (tid, stoid)
 ) TYPE=InnoDB;
@@ -1155,7 +1155,7 @@ DROP TABLE IF EXISTS topic_parents;
 CREATE TABLE topic_parents (
 	tid SMALLINT UNSIGNED NOT NULL,
 	parent_tid SMALLINT UNSIGNED NOT NULL,
-	min_weight FLOAT UNSIGNED DEFAULT 1 NOT NULL,
+	min_weight FLOAT DEFAULT 10 NOT NULL,
 	UNIQUE child_and_parent (tid, parent_tid),
 	INDEX parent_tid (parent_tid)
 ) TYPE=InnoDB;

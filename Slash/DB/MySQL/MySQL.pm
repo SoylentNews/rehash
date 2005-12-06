@@ -10663,6 +10663,11 @@ sub getTemplateByName {
 # what makes getting the list of all stories in a particular
 # nexus doable in anything like reasonable time.
 #
+# Additionally, any chosen topic that has parent links with a
+# min_weight of -1 forces the rendered weight of those parent
+# topics to 0, exactly as if every parent of that chosen topic
+# was also chosen with a weight of 0.
+#
 # XXXSECTIONTOPICS this could be optimized:  roughly speaking,
 # it's O(n**2) right now and it should be O(n).  But in
 # reality the difference is a few microseconds every time
@@ -10672,7 +10677,37 @@ sub renderTopics {
 	return { } if !$chosen_hr || ! keys %$chosen_hr;
 
 	my $tree = $self->getTopicTree();
-	my %rendered = %$chosen_hr;
+
+	# We start with a copy of the chosen hashref, which we
+	# modify in Pass One.
+	my %ch = %$chosen_hr;
+	# In Pass One, any topics chosen with a weight > 0, which
+	# have a connection to one or more parent topics via a
+	# min_weight of -1, have those parent topics added or
+	# replaced in the copy of the chosen hashref with weights
+	# of 0.  This is not recursive.
+	my %tids_to_zero = ( );
+	for my $tid (keys %ch) {
+		next if $ch{$tid} == 0 || !$tree->{$tid}{parent};
+		my $p_hr = $tree->{$tid}{parent};
+		my @parents_via_negativeone =
+			grep { $p_hr->{$_} == -1 }
+			keys %$p_hr;
+		for my $pid (@parents_via_negativeone) {
+			# This chosen topic has a connection to this
+			# parent topic with min_weight of exactly -1.
+			# So this parent topic gets zeroed.
+			$tids_to_zero{$pid} = 1;
+		}
+	}
+	for my $pid (keys %tids_to_zero) {
+		$ch{$pid} = 0;
+	}
+
+	# In Pass Two, we start by making a copy of the (possibly
+	# altered with added 0's) chosen hashref.  Then we propagate
+	# all values up to parents.
+	my %rendered = %ch;
 	my $done = 0;
 	while (!$done) {
 		# Each time through this loop, assume it's our
@@ -10684,7 +10719,7 @@ sub renderTopics {
 			for my $pid (keys %$p_hr) {
 				# Chosen weight always overrides
 				# any propagated weight.
-				next if exists $chosen_hr->{$pid};
+				next if exists $ch{$pid};
 				# If we already had this node at
 				# this weight or higher, skip.
 				next if ($rendered{$pid} || 0) >= ($rendered{$tid} || 0);
