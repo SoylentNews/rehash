@@ -10686,7 +10686,7 @@ sub renderTopics {
 				next if exists $chosen_hr->{$pid};
 				# If we already had this node at
 				# this weight or higher, skip.
-				next if $rendered{$pid} >= $rendered{$tid};
+				next if ($rendered{$pid} || 0) >= ($rendered{$tid} || 0);
 				# If the connection from the child
 				# to parent topic demands a min weight
 				# higher than this weight, skip.
@@ -11244,6 +11244,7 @@ sub getSkins {
 		$rootdir_uri->scheme('');
 		$skins_ref->{$skid}{rootdir} = $rootdir_uri->as_string;
 		$skins_ref->{$skid}{rootdir} =~ s{/+$}{};
+#if (!$skins_ref->{$skid}{rootdir}) { print STDERR scalar(localtime) . " MySQL.pm No rootdir for skid $skid hostname $skins_ref->{$skid}{hostname}\n" }
 
 		# XXXSKIN - untested; can we reuse $rootdir_uri ?
 		if ($constants->{use_https_for_absolutedir_secure}) {

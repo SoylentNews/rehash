@@ -91,6 +91,7 @@ BEGIN {
 	fullhost_to_domain
 	formatDate
 	getArmoredEmail
+	getRandomWordFromDictFile
 	createLogToken
 	grepn
 	html2text
@@ -2507,7 +2508,9 @@ sub balanceTags {
 			: ($options->{deep_su} || 0);
 	} else {
 		# deprecated
-		$max_nest_depth = $options == 1 ? $constants->{nesting_maxdepth} : $options;
+		$max_nest_depth = ($options && $options == 1)
+			? $constants->{nesting_maxdepth}
+			: ($options || 0);
 	}
 
 	my(%tags, @stack, $tag, $close, $whole, $both, @list, $nesting_level, $su_level);
@@ -3715,6 +3718,122 @@ $@
 EOT
 
 	}
+}
+
+#========================================================================
+
+=head2 getRandomWordFromDictFile (FILENAME, OPTIONS)
+
+Pulls a random word from a dictionary file on disk (e.g. /usr/dict/words)
+based on certain parameters.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item FILENAME
+
+The name of the disk file to read from.
+
+=back
+
+=item OPTIONS
+
+min_chars is the word length minimum, or 1 by default.
+
+max_chars is the word length maximum, or 99 by default.
+
+word_regex is the regex to match a word; by default this will include
+all words of all-lowercase letters (e.g. no "O'Reilly") between the
+min_chars and max_chars lengths.
+
+excl_regexes is an arrayref of regular expressions.  If any one of them
+matches a word it will not be returned.
+
+=item Return value
+
+The word found.
+
+=back
+
+=cut
+
+sub getRandomWordFromDictFile {
+	my($filename, $options) = @_;
+	my $min_chars = $options->{min_chars} || 1;
+	$min_chars = 1 if $min_chars < 1;
+	my $max_chars = $options->{max_chars} || 99;
+        my $word_regex = $options->{word_regex} || qr{^([a-z]{$min_chars,$max_chars})$};
+	my $excl_regexes = $options->{excl_regexes} || [ ];
+
+	return '' if !$filename || !-r $filename;
+        my $filesize = -s $filename;
+        return '' if !$filesize;
+        my $word = '';
+
+        # Start looking in the dictionary at a random location.
+        my $start_seek = int(rand($filesize-$max_chars));
+        my $fh;
+        if (!open($fh, "<", $filename)) {
+                return '';
+        }
+        if (!seek($fh, $start_seek, 0)) {
+                return '';
+        }
+        my $line = <$fh>;		# throw first (likely partial) line away
+        my $reseeks = 0;		# how many times have we moved the seek point?
+        my $bytes_read_total = 0;	# how much have we read in total?
+        my $bytes_read_thisseek = 0;	# how much read since last reseek?
+        LINE: while ($line = <$fh>) {
+                if (!$line) {
+                        # We just hit the end of the file.  Roll around
+                        # to the beginning.
+                        if (!seek($fh, 0, 0)) {
+                                last LINE;
+                        }
+                        ++$reseeks;
+                        next LINE;
+                }
+                $bytes_read_total += length($line);
+                $bytes_read_thisseek += length($line);
+                if ($bytes_read_thisseek >= $filesize * 0.001) {
+                        # If we've had to read through more than 0.1% of
+                        # the dictionary to find a word of the appropriate
+                        # length, we're obviously in a part of the
+                        # dictionary that doesn't have any acceptable words
+                        # (maybe a section with all-capitalized words).
+                        # Try another section.
+                        if (!seek($fh, int(rand($filesize-$max_chars)), 0)) {
+                                last LINE;
+                        }
+                        $line = <$fh>; # throw likely partial away
+                        ++$reseeks;
+                        $bytes_read_thisseek = 0;
+                }
+                if ($bytes_read_total >= $filesize) {
+                        # If we've read a total of more than the complete
+                        # file and haven't found a word, give up.
+                        last LINE;
+                }
+                chomp $line;
+                if ($line =~ $word_regex) {
+                        $word = $1;
+                        for my $r (@$excl_regexes) {
+                                if ($word =~ /$r/) {
+                                        # Skip this word.
+#print STDERR "word=$word start_seek=$start_seek SKIPPING regex=$r\n";
+                                        $word = '';
+                                        next LINE;
+                                }
+                        }
+                        last LINE;
+                }
+        }
+        close $fh;
+#print STDERR "word=$word start_seek=$start_seek bytes_read_thisseek=$bytes_read_thisseek bytes_read_total=$bytes_read_total\n";
+        return $word;
 }
 
 ########################################################

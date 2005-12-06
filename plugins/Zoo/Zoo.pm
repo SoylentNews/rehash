@@ -282,6 +282,7 @@ sub rebuildUser {
 			} elsif ($_->{type} eq 'foe') {
 				$people->{FOE()}{$_->{person}} = 1;
 			}
+			# XXX Is {perceive} usually defined? Ever defined?
 			if ($_->{perceive} eq 'fan') {
 				$people->{FAN()}{$_->{person}} = 1;
 			} elsif ($_->{perceive} eq 'freak') {

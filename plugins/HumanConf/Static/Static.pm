@@ -633,81 +633,16 @@ sub shortRandText {
 }
 
 sub shortRandText_dict {
-	my($self) = @_;
 	my $constants = getCurrentStatic();
 	my $filename = $constants->{hc_q1_usedict};
 	return "" if !$filename || !-r $filename;
-	my $filesize = -s $filename;
-	return "" if !$filesize;
-	my $min_chars = $constants->{hc_q1_numchars} - 1;
-	$min_chars = 3 if $min_chars < 3;
-	my $max_chars = $constants->{hc_q1_numchars} + 1;
-	my $word_regex = qr{^([a-z]{$min_chars,$max_chars})$};
-	my @excl_regexes = split / /, ($constants->{hc_q1_usedict_excl} || "");
-
-	my $word = "";
-
-	# Start looking in the dictionary at a random location.
-	my $start_seek = int(rand($filesize-$max_chars));
-	my $fh;
-	if (!open($fh, "<", $filename)) {
-		return "";
-	}
-	if (!seek($fh, $start_seek, 0)) {
-		return "";
-	}
-	my $line = <$fh>; # throw first (likely partial) line away
-	my $reseeks = 0; # how many times have we moved the seek point?
-	my $bytes_read_total = 0; # how much have we read in total?
-	my $bytes_read_thisseek = 0; # how much read since last reseek?
-	LINE: while ($line = <$fh>) {
-		if (!$line) {
-			# We just hit the end of the file.  Roll around
-			# to the beginning.
-			if (!seek($fh, 0, 0)) {
-				last LINE;
-			}
-			++$reseeks;
-			next LINE;
-		}
-		$bytes_read_total += length($line);
-		$bytes_read_thisseek += length($line);
-		if ($bytes_read_thisseek >= $filesize * 0.001) {
-			# If we've had to read through more than 0.1% of
-			# the dictionary to find a word of the appropriate
-			# length, we're obviously in a part of the
-			# dictionary that doesn't have any acceptable words
-			# (maybe a section with all-capitalized words).
-			# Try another section.
-			if (!seek($fh, int(rand($filesize-$max_chars)), 0)) {
-				last LINE;
-			}
-			$line = <$fh>; # throw likely partial away
-			++$reseeks;
-			$bytes_read_thisseek = 0;
-		}
-		if ($bytes_read_total >= $filesize) {
-			# If we've read a total of more than the complete
-			# file and haven't found a word, give up.
-			last LINE;
-		}
-		chomp $line;
-		if ($line =~ $word_regex) {
-			$word = $1;
-			for my $r (@excl_regexes) {
-				if ($word =~ /$r/) {
-					# Skip this word.
-#print STDERR "word=$word start_seek=$start_seek SKIPPING regex=$r\n";
-					$word = "";
-					next LINE;
-				}
-			}
-			last LINE;
-		}
-	}
-	close $fh;
-#print STDERR "word=$word start_seek=$start_seek bytes_read_thisseek=$bytes_read_thisseek bytes_read_total=$bytes_read_total\n";
-	return $word;
+	my $options = {
+		min_chars	=> $constants->{hc_q1_numchars} - 1,
+		max_chars	=> $constants->{hc_q1_numchars} + 1,
+		excl_regexes	=> [ split / /, ($constants->{hc_q1_usedict_excl} || "") ],
+	};
+	$options->{min_chars} = 3 if $options->{min_chars} < 3;
+	return getRandomWordFromDictFile($filename, $options);
 }
 
 # To prevent attackers from pulling down all the images and manually
