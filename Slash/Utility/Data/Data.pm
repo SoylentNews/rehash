@@ -649,7 +649,7 @@ sub timeCalc {
 	my $user = getCurrentUser();
 	my(@dateformats, $err);
 
-	$off_set = $user->{off_set} unless defined $off_set;
+	$off_set = $user->{off_set} || 0 if !defined $off_set;
 
 	if ($date) {
 		# massage data for YYYYMMDDHHmmSS or YYYYMMDDHHmm

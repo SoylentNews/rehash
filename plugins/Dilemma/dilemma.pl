@@ -17,7 +17,7 @@ sub main {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	my($stories, $Stories); # could this be MORE confusing please? kthx
-	if ($form->{op} eq 'userlogin' && !$user->{is_anon}
+	if ($form->{op} && $form->{op} eq 'userlogin' && !$user->{is_anon}
 			# Any login attempt, successful or not, gets
 			# redirected to the homepage, to avoid keeping
 			# the password or nickname in the query_string of
@@ -28,6 +28,7 @@ sub main {
 		redirect($refer); return;
 	}
 
+	setCurrentSkin(determineCurrentSkin());
 	my $gSkin = getCurrentSkin();
 	my $skin_name = $gSkin->{name};
 

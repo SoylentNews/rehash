@@ -8548,7 +8548,8 @@ sub getSubmissionForUser {
 		push @where, "subj LIKE '%" . $form->{filter}. "%'";
 	}
 
-	my $limit = ($form->{limit} =~ /\d+/) ? 'LIMIT ' . $form->{limit} : '';
+	my $limit = ($form->{limit} && $form->{limit} =~ /\d+/)
+		? "LIMIT $form->{limit}" : '';
 
 	my $submissions = $self->sqlSelectAllHashrefArray(
 		'submissions.*, karma',
