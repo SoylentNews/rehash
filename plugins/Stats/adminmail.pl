@@ -273,8 +273,8 @@ EOT
 	my $submissions = $stats->countSubmissionsByDay();
 	my $submissions_comments_match = $stats->countSubmissionsByCommentIPID($distinct_comment_ipids);
 	slashdLog("Submissions Stats End");
-	my $modlog_count_yest_total = $modlog_yest_hr->{1}{count} + $modlog_yest_hr->{-1}{count};
-	my $modlog_spent_yest_total = $modlog_yest_hr->{1}{spent} + $modlog_yest_hr->{-1}{spent};
+	my $modlog_count_yest_total = ($modlog_yest_hr->{1}{count} || 0) + ($modlog_yest_hr->{-1}{count} || 0);
+	my $modlog_spent_yest_total = ($modlog_yest_hr->{1}{spent} || 0) + ($modlog_yest_hr->{-1}{spent} || 0);
 	my $consensus = $constants->{m2_consensus};
 	slashdLog("Misc Moderation Stats Begin");
 	my $token_conversion_point = $stats->getTokenConversionPoint();
@@ -359,15 +359,15 @@ EOT
 		my $options = { op => $op };
 		$options->{table_suffix} = "_rss" if $op eq "rss";
 		$summary = $logdb->getSummaryStats($options);
-		my $uniq  = $summary->{cnt};
-		my $pages = $summary->{pages};
-		my $bytes = $summary->{bytes};
-		my $uids  = $summary->{uids};
+		my $uniq  = $summary->{cnt}	|| 0;
+		my $pages = $summary->{pages}	|| 0;
+		my $bytes = $summary->{bytes}	|| 0;
+		my $uids  = $summary->{uids}	|| 0;
 
 		$data{"${op}_label"} = sprintf("%8s", $op);
 		$data{"${op}_uids"} = sprintf("%8u", $uids);
 		$data{"${op}_ipids"} = sprintf("%8u", $uniq);
-		$data{"${op}_bytes"} = sprintf("%0.1f MB",$bytes/(1024*1024));
+		$data{"${op}_bytes"} = sprintf("%0.1f MB", $bytes/(1024*1024));
 		$data{"${op}_page"} = sprintf("%8u", $pages);
 		# Section is problematic in this definition, going to store
 		# the data in "all" till this is resolved. -Brian
@@ -504,9 +504,9 @@ EOT
 		$statsSave->createStatDaily( "page_from_rss", $stats_from_rss->{$skid}{cnt}, {skid => $skid});
 		$statsSave->createStatDaily( "uid_from_rss", $stats_from_rss->{$skid}{uids}, {skid => $skid});
 		$statsSave->createStatDaily( "ipid_from_rss", $stats_from_rss->{$skid}{ipids}, {skid => $skid});
-		$temp->{page_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}{cnt});
-		$temp->{uid_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}{uids});
-		$temp->{ipid_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}{ipids});
+		$temp->{page_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}{cnt} || 0);
+		$temp->{uid_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}{uids} || 0);
+		$temp->{ipid_from_rss} = sprintf("%8u", $stats_from_rss->{$skid}{ipids} || 0);
 
 		push(@{$data{skins}}, $temp);
 	}
@@ -524,7 +524,9 @@ EOT
 		foreach my $st (@$stories) {
 			my $topics = $slashdb->getStoryTopics($st->{sid}, 2);
 			foreach my $tid (keys %$topics){
-				$topic_hits{$tid."_".$topics->{$tid}} += $st->{hits};
+				next unless $tid && $topics->{$tid};
+				my $key = $tid . '_' . $topics->{$tid};
+				$topic_hits{$key} += ($st->{hits} || 0);
 			}
 		}
 		foreach my $key (keys %topic_hits){
@@ -534,7 +536,7 @@ EOT
 	}
 	
 	foreach my $day (@ah_days){
-		my $avg = $stats->getStat("avg_comments_per_story", $day, 0);
+		my $avg = $stats->getStat("avg_comments_per_story", $day, 0) || 0;
 		push @{$data{avg_comments_per_story}}, sprintf("%12.1f", $avg);
 	}
 	slashdLog("Story Comment Counts End");
@@ -731,11 +733,11 @@ EOT
 	$mod_data{used_total} = sprintf("%8u", $modlog_count_yest_total);
 	$mod_data{used_total_pool} = sprintf("%.1f", ($mod_points_pool ? $modlog_spent_yest_total*100/$mod_points_pool : 0));
 	$mod_data{used_total_comments} = sprintf("%.1f", ($comments ? $modlog_count_yest_total*100/$comments : 0));
-	$mod_data{used_minus_1} = sprintf("%8u", $modlog_yest_hr->{-1}{count});
-	$mod_data{used_minus_1_percent} = sprintf("%.1f", ($modlog_count_yest_total ? $modlog_yest_hr->{-1}{count}*100/$modlog_count_yest_total : 0) );
-	$mod_data{used_plus_1} = sprintf("%8u", $modlog_yest_hr->{1}{count});
-	$mod_data{used_plus_1_percent} = sprintf("%.1f", ($modlog_count_yest_total ? $modlog_yest_hr->{1}{count}*100/$modlog_count_yest_total : 0));
-	$mod_data{mod_points_avg_spent} = $modlog_count_yest_total ? sprintf("%12.3f", $modlog_spent_yest_total/$modlog_count_yest_total) : "(n/a)";
+	$mod_data{used_minus_1} = sprintf("%8u", $modlog_yest_hr->{-1}{count} || 0);
+	$mod_data{used_minus_1_percent} = sprintf("%.1f", ($modlog_count_yest_total ? ($modlog_yest_hr->{-1}{count}*100/$modlog_count_yest_total || 0) : 0) );
+	$mod_data{used_plus_1} = sprintf("%8u", $modlog_yest_hr->{1}{count} || 0);
+	$mod_data{used_plus_1_percent} = sprintf("%.1f", ($modlog_count_yest_total ? ($modlog_yest_hr->{1}{count}*100/$modlog_count_yest_total || 0) : 0));
+	$mod_data{mod_points_avg_spent} = $modlog_count_yest_total ? sprintf("%12.3f", $modlog_spent_yest_total/$modlog_count_yest_total || 0) : "(n/a)";
 	$mod_data{day} = $yesterday;
 	$mod_data{token_conversion_point} = sprintf("%8d", $token_conversion_point);
 	$mod_data{m2_text} = $m2_text;

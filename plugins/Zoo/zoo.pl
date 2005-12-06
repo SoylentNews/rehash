@@ -52,7 +52,7 @@ sub main {
 	if ($r = Apache->request) {
 		return if $r->header_only;
 	}
-	footer() unless $form->{content_type} =~ $constants->{feed_types};
+	footer() unless $form->{content_type} && $form->{content_type} =~ $constants->{feed_types};
 }
 
 sub people {
@@ -109,7 +109,7 @@ sub people {
 	my $editable = ($uid == $user->{uid} ? 1 : 0);
 	my $people = $zoo->getRelationships($uid, $zoo_vars->{constant});
 
-	if ($form->{content_type} =~ $constants->{feed_types}) {
+	if ($form->{content_type} && $form->{content_type} =~ $constants->{feed_types}) {
 		_rss($people, $nick, $zoo_vars->{op});
 	} else {
 		my $implied;

@@ -5550,7 +5550,7 @@ sub getNetIDPostingRestrictions {
 	my $constants = getCurrentStatic();
 	my $restrictions = { no_anon => 0, no_post => 0 };
 	if ($type eq "subnetid") {
-		my $subnet_karma_comments_needed = $constants->{subnet_comments_posts_needed};
+		my $subnet_karma_comments_needed = $constants->{subnet_comments_posts_needed} || 5;
 		my($subnet_karma, $subnet_post_cnt) = $self->getNetIDKarma("subnetid", $value);
 		my($sub_anon_max, $sub_anon_min, $sub_all_max, $sub_all_min ) = @{$constants->{subnet_karma_post_limit_range}};
 		if ($subnet_post_cnt >= $subnet_karma_comments_needed) {
@@ -8082,6 +8082,10 @@ sub getStoriesEssentials {
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $gSkin = getCurrentSkin();
+	if (!$gSkin->{skid}) {
+		# XXX Throw a warning here?  Might not be a bad idea.
+		$gSkin = $self->getSkin($constants->{mainpage_skid});
+	}
 
 	my $mcd = $self->getMCD();
 	my $min_stoid = $constants->{gse_min_stoid} || 0;

@@ -237,6 +237,7 @@ sub getAL2Counts {
 		'',
 		'GROUP BY value');
 	for my $this_type (keys %$types) {
+		next if $this_type eq 'comment';
 		$hr->{$this_type} = 0;
 		my $this_value = 1 << $types->{$this_type}{bitpos};
 		for my $value (keys %$type_count) {
@@ -1151,7 +1152,7 @@ sub countBytesByPage {
 		$where .= " AND op NOT IN ($op_not_in)";
 	}
 	
-	my $table_suffix = $options->{table_suffix};
+	my $table_suffix = $options->{table_suffix} || '';
 
 	$self->sqlSelect("SUM(bytes)", "accesslog_temp$table_suffix", $where);
 }
@@ -1223,8 +1224,8 @@ sub countDailyByPage {
 		if $options->{skid};
 	$where .= " AND static='$options->{static}'"
 		if $options->{static};
-	$where .=" AND uid = $constants->{anonymous_coward_uid} " if $options->{user_type} eq "anonymous";
-	$where .=" AND uid != $constants->{anonymous_coward_uid} " if $options->{user_type} eq "logged-in";
+	$where .=" AND uid = $constants->{anonymous_coward_uid} " if $options->{user_type} && $options->{user_type} eq "anonymous";
+	$where .=" AND uid != $constants->{anonymous_coward_uid} " if $options->{user_type} && $options->{user_type} eq "logged-in";
 
 	# The "no_op" option can take either a scalar for one op to exclude,
 	# or an arrayref of multiple ops to exclude.
@@ -1235,9 +1236,9 @@ sub countDailyByPage {
 		$where .= " AND op NOT IN ($op_not_in)";
 	}
 
-	my $table_suffix = $options->{table_suffix};
+	my $table_suffix = $options->{table_suffix} || '';
 
-	$self->sqlSelect("count(*)", "accesslog_temp$table_suffix", $where);
+	$self->sqlSelect("COUNT(*)", "accesslog_temp$table_suffix", $where);
 }
 
 ########################################################
@@ -1270,8 +1271,8 @@ sub countDailyByPageDistinctIPID {
 		if $op;
 	$where .= " AND skid='$options->{skid}' "
 		if $options->{skid};
-	$where .=" AND uid = $constants->{anonymous_coward_uid} " if $options->{user_type} eq "anonymous";
-	$where .=" AND uid != $constants->{anonymous_coward_uid} " if $options->{user_type} eq "logged-in";
+	$where .=" AND uid = $constants->{anonymous_coward_uid} " if $options->{user_type} && $options->{user_type} eq "anonymous";
+	$where .=" AND uid != $constants->{anonymous_coward_uid} " if $options->{user_type} && $options->{user_type} eq "logged-in";
 
 	my $no_op = $options->{no_op} || [ ];
 	$no_op = [ $no_op ] if $options->{no_op} && !ref($no_op);
@@ -1724,9 +1725,9 @@ sub countSfNetIssues {
 sub getRelocatedLinksSummary {
 	my($self, $options) = @_;
 	$options ||= {};
-	my $limit = "limit $options->{limit}" if $options->{limit};
-	return $self->sqlSelectAllHashrefArray("query_string, count(query_string) as cnt","accesslog_temp_errors","op='relocate-undef' AND dat = '/relocate.pl'",
-		"GROUP by query_string order by cnt desc $limit");
+	my $limit = $options->{limit} ? "LIMIT $options->{limit}" : '';
+	return $self->sqlSelectAllHashrefArray("query_string, COUNT(query_string) AS cnt","accesslog_temp_errors","op='relocate-undef' AND dat = '/relocate.pl'",
+		"GROUP BY query_string ORDER BY cnt DESC $limit");
 }
 
 ########################################################
@@ -1738,7 +1739,7 @@ sub getRelocatedLinkHitsByType {
 	foreach my $l (@$ls) {
 		my($id) = $l->{query_string} =~/id=([^&]*)/;
 		my $type = $self->sqlSelect("stats_type", "links", "id=" . $self->sqlQuote($id));
-		$summary->{$type} += $l->{cnt}; 
+		next unless $type; $summary->{$type} ||= 0; $summary->{$type} += $l->{cnt}; 
 	}
 	return $summary;
 }

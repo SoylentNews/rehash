@@ -105,7 +105,7 @@ sub _check_rss_and_palm {
 			|
 		content_type=(rss|atom)
 	)}x;
-	my $feed_type = $1 || $2;
+	my $feed_type = $1 || $2 || 'rss';
 	$feed_type = 'rss' unless $feed_type eq 'atom';
 
 	# XXX Should we also check for content_type in POST?

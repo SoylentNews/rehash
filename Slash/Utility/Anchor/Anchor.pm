@@ -633,7 +633,7 @@ sub getAd {
 	# sometimes, when this is called from shtml, the section is not
 	# in $user like we'd like it to be. This attempts to remedy this.
 	# 					--Pater
-	$user->{currentSection} = $constants->{static_section} if $user->{currentSection} eq '';
+	$user->{currentSection} = $constants->{static_section} if !defined($user->{currentSection}) || $user->{currentSection} eq '';
 
 	unless ($ENV{SCRIPT_NAME}) {
 		# When run from a slashd task (or from the command line in
