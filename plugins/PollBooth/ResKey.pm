@@ -35,7 +35,7 @@ sub doCheck {
 	my $ra = $ENV{REMOTE_ADDR} || '';
 	if ($constants->{poll_fwdfor}) {
 		my $xff = $ENV{HTTP_X_FORWARDED_FOR} || '';
-		$md5 = md5_hex("$ra$xff});
+		$md5 = md5_hex("$ra$xff");
 	} else {
 		$md5 = md5_hex($ra);
 	}
