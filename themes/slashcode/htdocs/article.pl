@@ -19,12 +19,12 @@ sub main {
 	my $story;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $sid = $form->{sid};
+	my $sid = $form->{sid} || '';
 	if ($sid =~ /^\d+$/) {
 		# Don't accept a stoid;  we need to be fed a sid to
 		# get to the right story.  This prevents crawling
 		# through article.pl?sid=1, article.pl?sid=2, etc.
-		$sid = "";
+		$sid = '';
 	}
 
 	$story = $reader->getStory($sid);
