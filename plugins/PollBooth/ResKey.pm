@@ -31,14 +31,10 @@ sub doCheck {
 
 	return(RESKEY_DEATH, ['no qid', {}, 'pollBooth']) unless $qid;
 
-	my $md5;
-	my $ra = $ENV{REMOTE_ADDR} || '';
-	if ($constants->{poll_fwdfor}) {
-		my $xff = $ENV{HTTP_X_FORWARDED_FOR} || '';
-		$md5 = md5_hex("$ra$xff");
-	} else {
-		$md5 = md5_hex($ra);
-	}
+	my $ra  = $ENV{REMOTE_ADDR} || '';
+	my $xff = $constants->{poll_fwdfor} ? ($ENV{HTTP_X_FORWARDED_FOR} || '') : '';
+	my $md5 = md5_hex($ra . $xff);
+
 	my $qid_quoted = $slashdb->sqlQuote($qid);
 
 	# Yes, qid/id/uid is a key in pollvoters.
