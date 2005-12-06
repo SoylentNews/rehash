@@ -209,7 +209,7 @@ sub _get_points {
 		score_start => constrain_score($C->{pointsorig} + $C->{tweak_orig}),
 		moderations => constrain_score($C->{points} + $C->{tweak}) - constrain_score($C->{pointsorig} + $C->{tweak_orig}),
 	};
-	my $points = $hr->{score_start};
+	my $points = $hr->{score_start} || 0;
 
 	# User can setup to give points based on size.
 #	my $len = length($C->{comment});
@@ -289,7 +289,7 @@ sub _get_points {
 			$user->{subscriber_bonus};
 	}
 
-	for my $key (grep !/^score_/, keys %$hr) { $points += $hr->{$key} }
+	for my $key (grep !/^score_/, keys %$hr) { $points += $hr->{$key} || 0 }
 	$points = $max if $points > $max;
 	$points = $min if $points < $min;
 	$hr->{score_end} = $points;
