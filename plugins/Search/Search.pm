@@ -181,6 +181,11 @@ sub findStory {
 
 	my $gSkin = getCurrentSkin();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	
+	if (@{$constants->{search_ignore_skids}}) {
+		my $skid_list = join ',', map {$reader->sqlQuote($_)} @{$constants->{search_ignore_skids}};
+		$where .= " AND primaryskid NOT IN ($skid_list) ";
+	}
 
 	my $skin = $reader->getSkin($form->{section} || $gSkin->{skid});
 	$skin ||= $constants->{mainpage_skid};
