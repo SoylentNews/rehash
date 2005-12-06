@@ -1726,7 +1726,10 @@ sub getRelocatedLinksSummary {
 	my($self, $options) = @_;
 	$options ||= {};
 	my $limit = $options->{limit} ? "LIMIT $options->{limit}" : '';
-	return $self->sqlSelectAllHashrefArray("query_string, COUNT(query_string) AS cnt","accesslog_temp_errors","op='relocate-undef' AND dat = '/relocate.pl'",
+	return $self->sqlSelectAllHashrefArray(
+		'query_string, COUNT(query_string) AS cnt',
+		'accesslog_temp_errors',
+		"op='relocate-undef' AND dat = '/relocate.pl'",
 		"GROUP BY query_string ORDER BY cnt DESC $limit");
 }
 
