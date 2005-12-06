@@ -77,6 +77,10 @@ your Slash directories). [Y] ";
 	}
 
 	$install->installPlugins(\@answers, 0, $symlink);
+
+	print "\n\nInstalled.\n\n";
+	print "Please check to see if there are any README files for your site's\n";
+	print "plugins.  If so, now's a good time to read them.\n\n";
 }
 
 sub usage {
