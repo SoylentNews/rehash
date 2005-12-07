@@ -31,7 +31,10 @@ sub main {
 	$story = $reader->getStory($sid);
 	if ($story && $story->{primaryskid} != $gSkin->{skid} && $form->{ssi} ne "yes") {
 		my $story_skin = $slashdb->getSkin($story->{primaryskid});
-		redirect("$story_skin->{rootdir}$ENV{REQUEST_URI}") if $story_skin && $story_skin->{rootdir};
+		if ($story_skin && $story_skin->{rootdir} && $story_skin->{rootdir} ne $gSkin->{rootdir}) {
+			redirect("$story_skin->{rootdir}$ENV{REQUEST_URI}");
+			return;
+		}
 	}
 
 	# Set the $future_err flag if a story would be available to be
