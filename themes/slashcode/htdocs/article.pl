@@ -192,7 +192,7 @@ sub main {
 				$called_pc = 1;
 			}
 		}
-		if (!$called_pc && $form->{ssi} eq 'yes' && $form->{cchp}) {
+		if (!$called_pc && $form->{ssi} && $form->{ssi} eq 'yes' && $form->{cchp}) {
 			# This is a real hack, we're kind of skipping down
 			# two levels of code.  But the cchp printing is an
 			# important optimization;  we avoid having to do
