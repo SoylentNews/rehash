@@ -402,9 +402,10 @@ sub updateStoryFromJournal {
 }
 
 sub createSubmissionFromJournal {
-	my($self, $src_journal) = @_;
+	my($self, $src_journal, $options) = @_;
 	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
+	$options ||= {};
 
 	my $journal_user = $slashdb->getUser($src_journal->{uid});
 
@@ -417,6 +418,7 @@ sub createSubmissionFromJournal {
 	#perhaps need more string cleanup from submit.pl's findStory here
 
 	my $primaryskid = $constants->{journal2submit_skid} || $constants->{mainpage_skid};
+	my $fakeemail = "mailto:$journal_user" if $journal_user->{fakeemail};
 
 	my $submission = {
 		email		=> $journal_user->{fakeemail},
@@ -428,9 +430,15 @@ sub createSubmissionFromJournal {
 		primaryskid 	=> $primaryskid,
 		journal_id 	=> $src_journal->{id},
 		journal_disc 	=> $src_journal->{discussion},
-		by		=> $journal_user->{nickname},
-		by_url 		=> $journal_user->{fakeemail},
+		by		=> $options->{subission_param}{by} || $journal_user->{nickname},
+		by_url 		=> $options->{submission_param}{by_url} || $journal_user->{homepage} || $journal_user->{fakeemail}
 	};
+
+	my $sub_param = $options->{submission_param} || {};
+
+	foreach (keys %$sub_param) {
+		$submission->{$_} = $sub_param->{$_} if !defined $submission->{$_};
+	}
 
 	my $subid = $slashdb->createSubmission($submission);
 	if ($subid) {
@@ -455,6 +463,10 @@ sub createStoryFromJournal {
 
 	my $skid = $options->{skid} || $constants->{journal2submit_skid} || $constants->{mainpage_skid};
 
+	my $fakeemail = "mailto:$journal_user->{fakeemail}" if $journal_user->{fakeemail};
+
+	my $story_param = $options->{story_param} || {};
+
 	my %story = (
 		title		=> $src_journal->{description},
 		uid		=> $journal_user->{uid},
@@ -464,12 +476,17 @@ sub createStoryFromJournal {
 		commentstatus	=> 'enabled',
 		journal_id 	=> $src_journal->{id},
 		journal_disc	=> $src_journal->{discussion},
-		by		=> $journal_user->{nickname},
-		by_url 		=> $journal_user->{fakeemail},
+		by		=> $options->{story_param}{by} || $journal_user->{nickname},
+		by_url 		=> $options->{story_param}{by_url} || $journal_user->{homepage} || $fakeemail,
 		discussion	=> $src_journal->{discussion},
 	);
-
+	
 	$story{neverdisplay} = $options->{neverdisplay} if $options->{neverdisplay};
+
+	foreach (keys %$story_param) {
+		$story{$_} = $story_param->{$_} if !defined $story{$_};
+	}
+
 													       
 													       
 	# XXX: we need to update, in the discussion:
