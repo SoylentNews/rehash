@@ -739,7 +739,7 @@ EOT
 	$mod_data{used_plus_1_percent} = sprintf("%.1f", ($modlog_count_yest_total ? ($modlog_yest_hr->{1}{count}*100/$modlog_count_yest_total || 0) : 0));
 	$mod_data{mod_points_avg_spent} = $modlog_count_yest_total ? sprintf("%12.3f", $modlog_spent_yest_total/$modlog_count_yest_total || 0) : "(n/a)";
 	$mod_data{day} = $yesterday;
-	$mod_data{token_conversion_point} = sprintf("%8d", $token_conversion_point);
+	$mod_data{token_conversion_point} = sprintf("%8d", $token_conversion_point || 0);
 	$mod_data{m2_text} = $m2_text;
 
 	$data{comments} = $mod_data{comments};
