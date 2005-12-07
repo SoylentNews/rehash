@@ -11303,6 +11303,7 @@ sub getSkins {
 # passed in what looks like an ID number, return that!
 sub getSkidFromName {
 	my($self, $name) = @_;
+	return 0 if !$name;
 	return $name if $name =~ /^\d+$/;
 	my $skins = $self->getSkins();
 	for my $skid (keys %$skins) {
