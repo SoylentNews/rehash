@@ -25,20 +25,27 @@ __template__
 </ul>
 
 [% BLOCK topic_children %]
-	<li>
-	[% IF user.is_admin %]
-		<a href="[% gSkin.rootdir %]/admin.pl?op=topics&amp;nexttid=[% tree.$tid.tid %]">[% IF tree.$tid.nexus; '<b>'; END %][% tree.$tid.textname %][% IF tree.$tid.nexus; '</b>'; END %]</a>
-	[% ELSE %]
-		<a href="[% gSkin.rootdir %]/search.pl?tid=[% tree.$tid.tid %]">[% IF tree.$tid.nexus; '<b>'; END %][% tree.$tid.textname %][% IF tree.$tid.nexus; '</b>'; END %]</a>
-	[% END %]
-	</li>
+	[% 
+	topic = tree.$tid;
+	match_term = "^" _ constants.topiclist_ignore_prefix IF constants.topiclist_ignore_prefix;
+	%]
 	
-	[% IF tree.$tid.children && tree.$tid.children.size > 0 %]
-		<ul>
-		[% FOREACH child_id = tree.$tid.children %]
-			[% PROCESS topic_children tree = tree tid = child_id depth = depth + 1 %]
+	[% UNLESS match_term && topic.keyword.match(match_term) %]
+		<li>
+		[% IF user.is_admin %]
+			<a href="[% gSkin.rootdir %]/admin.pl?op=topics&amp;nexttid=[% tree.$tid.tid %]">[% IF tree.$tid.nexus; '<b>'; END %][% tree.$tid.textname %][% IF tree.$tid.nexus; '</b>'; END %]</a>
+		[% ELSE %]
+			<a href="[% gSkin.rootdir %]/search.pl?tid=[% tree.$tid.tid %]">[% IF tree.$tid.nexus; '<b>'; END %][% tree.$tid.textname %][% IF tree.$tid.nexus; '</b>'; END %]</a>
 		[% END %]
-		</ul>
+		</li>
+	
+		[% IF tree.$tid.children && tree.$tid.children.size > 0 %]
+			<ul>
+			[% FOREACH child_id = tree.$tid.children %]
+				[% PROCESS topic_children tree = tree tid = child_id depth = depth + 1 %]
+			[% END %]
+			</ul>
+		[% END %]
 	[% END %]
 [% END %]
 __seclev__
