@@ -3491,6 +3491,14 @@ ALTER TABLE story_topics_chosen CHANGE COLUMN weight weight FLOAT DEFAULT 1 NOT 
 INSERT INTO vars (name, value, description) VALUES ("topiclist_ignore_prefix", "", "prefix of any topic keywords that should not show up on topic list or hierarchy, leave blank if you don't want any ignored");
 INSERT INTO vars (name, value, description) VALUES ("search_ignore_skids", "", "list of skids that you want to not include in search results.  Delimit skids with |");
 
+DROP TABLE IF EXISTS journal_transfer;
+CREATE TABLE journal_transfer (
+	id MEDIUMINT UNSIGNED NOT NULL,
+	subid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	stoid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	PRIMARY key(id)
+);
+
 # 2005-12-06
 UPDATE vars SET value = 'T_2_5_0_90' WHERE name = 'cvs_tag_currentcode';
 
