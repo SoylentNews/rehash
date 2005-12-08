@@ -29,7 +29,8 @@ sub main {
 	}
 
 	$story = $reader->getStory($sid);
-	if ($story && $story->{primaryskid} != $gSkin->{skid} && $form->{ssi} ne "yes") {
+	if ($story && $story->{primaryskid} != $gSkin->{skid}
+		&& !($form->{ssi} && $form->{ssi} eq "yes")) {
 		my $story_skin = $slashdb->getSkin($story->{primaryskid});
 		if ($story_skin && $story_skin->{rootdir} && $story_skin->{rootdir} ne $gSkin->{rootdir}) {
 			redirect("$story_skin->{rootdir}$ENV{REQUEST_URI}");

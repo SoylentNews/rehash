@@ -1465,12 +1465,13 @@ sub getDurationByStaticLocaladdr {
 sub _walk_keys {
 	my($hr) = @_;
 	my @hr_keys = keys %$hr;
-	if (!exists $hr->{$hr_keys[0]}{dur_round}) {
+	if (@hr_keys && !exists $hr->{$hr_keys[0]}{dur_round}) {
 		# We need to recurse down at least one more
 		# level.  Keep track of where we are.
 		my @results = ( );
 		for my $key (sort @hr_keys) {
-			my @sub_results = _walk_keys($hr->{$key});
+			my @sub_results = ( );
+			@sub_results = _walk_keys($hr->{$key}) if %{$hr->{$key}};
 			for my $sub_r (@sub_results) {
 				unshift @$sub_r, $key;
 			}
