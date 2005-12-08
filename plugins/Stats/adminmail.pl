@@ -389,7 +389,7 @@ EOT
 		my $uids = $logdb->countUsersByPage('', $options);
 		$data{"other_uids"} = sprintf("%8u", $uids || 0);
 		$data{"other_ipids"} = sprintf("%8u", $uniq || 0);
-		$data{"other_bytes"} = sprintf("%0.1f MB", $bytes/(1024*1024) || 0);
+		$data{"other_bytes"} = sprintf("%0.1f MB", ($bytes || 0)/(1024*1024));
 		$data{"other_page"} = sprintf("%8u", $pages || 0);
 		# Section is problematic in this definition, going to store
 		# the data in "all" till this is resolved. -Brian
@@ -703,8 +703,8 @@ EOT
 	}
 
 	$data{total} = sprintf("%8u", $daily_total || 0);
-	$data{total_bytes} = sprintf("%0.1f MB", $total_bytes/(1024*1024) || 0);
-	$data{grand_total_bytes} = sprintf("%0.1f MB", $grand_total_bytes/(1024*1024) || 0);
+	$data{total_bytes} = sprintf("%0.1f MB", ($total_bytes || 0)/(1024*1024));
+	$data{grand_total_bytes} = sprintf("%0.1f MB", ($grand_total_bytes || 0)/(1024*1024));
 	$data{total_subscriber} = sprintf("%8u", $total_subscriber);
 	$data{total_secure} = sprintf("%8u", $total_secure);
 	$data{unique} = sprintf("%8u", $unique_ips), 
