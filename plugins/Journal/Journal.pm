@@ -430,7 +430,7 @@ sub createSubmissionFromJournal {
 		primaryskid 	=> $primaryskid,
 		journal_id 	=> $src_journal->{id},
 		journal_disc 	=> $src_journal->{discussion},
-		by		=> $options->{subission_param}{by} || $journal_user->{nickname},
+		by		=> $options->{submission_param}{by}     || $journal_user->{nickname},
 		by_url 		=> $options->{submission_param}{by_url} || $journal_user->{homepage} || $journal_user->{fakeemail}
 	};
 
@@ -476,19 +476,17 @@ sub createStoryFromJournal {
 		commentstatus	=> 'enabled',
 		journal_id 	=> $src_journal->{id},
 		journal_disc	=> $src_journal->{discussion},
-		by		=> $options->{story_param}{by} || $journal_user->{nickname},
+		by		=> $options->{story_param}{by}     || $journal_user->{nickname},
 		by_url 		=> $options->{story_param}{by_url} || $journal_user->{homepage} || $fakeemail,
 		discussion	=> $src_journal->{discussion},
 	);
-	
+
 	$story{neverdisplay} = $options->{neverdisplay} if $options->{neverdisplay};
 
 	foreach (keys %$story_param) {
 		$story{$_} = $story_param->{$_} if !defined $story{$_};
 	}
 
-													       
-													       
 	# XXX: we need to update, in the discussion:
 	# stoid, sid, title, url, topic, ts (story's timestamp), type (open), uid?,
 	# flags (ok), primaryskid, commentstatus (enabled), archivable?
