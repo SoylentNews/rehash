@@ -53,9 +53,25 @@ __template__
 
 <p>
 
+[% IF !constants.submit_no_update_button %]
 <input type="submit" name="op" value="Update">
+[% END %]
 <input type="submit" name="op" value="Delete">
 <input type="submit" name="op" value="Merge">
+<script type="text/javascript">
+<!--
+	function selectall (myform) {
+		for (var i = 0; i < myform.elements.length; i++)
+			myform.elements[i].checked = true;
+	}
+	function selectnone (myform) {
+		for (var i = 0; i < myform.elements.length; i++)
+			myform.elements[i].checked = false;
+	}
+	document.write('<input type="button" value="Select All" onclick="selectall(this.form)"> ');
+	document.write('<input type="button" value="Select None" onclick="selectnone(this.form)"> ');
+//-->
+</script>
 
 <p>
 <a href="[% env.script_name %]?op=list&amp;note=[% form.note | strip_attribute %]&amp;skin=[% form.skin | strip_attribute %]&amp;toggle_bin_refresh=[% IF !refresh; "0"; ELSE; 1; END %]">[% IF !refresh;  "Enable Bin Refresh"; ELSE; "Disable Bin Refresh"; END; %]</a>
