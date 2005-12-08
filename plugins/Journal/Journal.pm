@@ -220,10 +220,16 @@ sub remove {
 	}
 	$self->sqlDelete("journals_text", "id=$id");
 
-	# XXX UNLESS IS A STORY!
 	if ($journal->{discussion}) {
 		my $slashdb = getCurrentDB();
-		$slashdb->deleteDiscussion($journal->{discussion});
+		# if has been submitted as story or submission
+		if ($journal->{submit} eq 'yes') {
+			$slashdb->setDiscussion($journal->{discussion}, {
+				commentstatus	=> 'disabled',
+			});
+		} else {
+			$slashdb->deleteDiscussion($journal->{discussion});
+		}
 	}
 
 	my $date = $self->sqlSelect('MAX(date)', 'journals', "uid=$uid");

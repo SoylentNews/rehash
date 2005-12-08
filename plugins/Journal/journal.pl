@@ -864,7 +864,8 @@ sub removeArticle {
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey = $reskey->key('journal');
 
-	# XXX: don't bother printing reskey error?
+	# don't bother printing reskey error, since it will confuse
+	# most people: we show the list regardless -- pudge
 	if ($rkey->use) {
 		for my $id (grep { $_ = /^del_(\d+)$/ ? $1 : 0 } keys %$form) {
 			$journal->remove($id);
