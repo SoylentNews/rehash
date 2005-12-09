@@ -10987,8 +10987,7 @@ sub getTopiclistFromChosen {
 		   (exists $tree->{$a}{nexus} ? 1 : 0) <=> (exists $tree->{$b}{nexus} ? 1 : 0)
 			# Next highest priority is whether this topic
 			# has an icon.  Topics with icons come first.
-			# XXX IS THIS LOGIC BACKWARDS? - Jamie 2005-11-24
-		|| ($tree->{$a}{image} ? 1 : 0) <=> ($tree->{$b}{image} ? 1 : 0)
+		|| ($tree->{$b}{image} ? 1 : 0) <=> ($tree->{$a}{image} ? 1 : 0)
 			# Next highest priority is whether this topic
 			# (at this weight) is in the preferred skid.
 		|| ($in_skid{$b} || 0) <=> ($in_skid{$a} || 0)
