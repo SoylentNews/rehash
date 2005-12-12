@@ -147,7 +147,8 @@ sub handler {
 	# want to save one bit of information there, and retrieve it
 	# later -- pudge
 	my $user_temp = getCurrentUser();
-	$user_temp->{state}{login_temp} = 'no';
+	$user_temp->{state}{login_public}        = 'no';
+	$user_temp->{state}{login_temp}          = 'no';
 	$user_temp->{state}{login_failed_reason} = 0;
 
 	if ((($op eq 'userlogin' || $form->{rlogin}) && length($form->{upasswd}) > 1)
@@ -240,6 +241,10 @@ sub handler {
 			# ... it would be nice to have a way to set this in a table
 			# or vars or somesuch, but how?  is there danger in
 			# opening it up to everything instead of closing it off?
+			# NOTE: this is only for "public" logtokens that are
+			# separate from regular login logtokens right now;
+			# it can be changed if necessary, it just happens that
+			# way, so we use it to se login_public
 			if (
 				($constants->{rss_allow_index} && $form->{content_type} =~ $constants->{feed_types} && $uri =~ m{^/index\.pl$})
 					||
@@ -249,6 +254,7 @@ sub handler {
 				($constants->{journal_rdfitemdesc_html} && $form->{content_type} =~ $constants->{feed_types} && $uri =~ m{\bjournal\b})
 			) {
 				$logtoken = $form->{logtoken};
+				$user_temp->{state}{login_public} = 'yes';
 			} else {
 				delete $form->{logtoken};
 			}
@@ -257,44 +263,47 @@ sub handler {
 		my($tmpuid, $value) = eatUserCookie($logtoken || ($cookies->{user} && $cookies->{user}->value));
 		my $cookvalue;
 		if ($tmpuid && $tmpuid > 0 && $tmpuid != $constants->{anonymous_coward_uid}) {
+			my $kind = $user_temp->{state}{login_public} eq 'yes' ? 4 : 0;
 			($uid, $cookvalue) =
-				$slashdb->getUserAuthenticate($tmpuid, $value, 0, 1);
+				$slashdb->getUserAuthenticate($tmpuid, $value, $kind, 1);
 		}
 
 		# we don't want to set a cookie etc. if user is using a $logtoken,
 		# as that is just for RSS etc.
-		if (!$logtoken && $uid && $op ne 'userclose') {
-			# set cookie every time, in case session_login
-			# value changes, or time is almost expired on
-			# saved cookie, or password changes, or ...
+		if (!$logtoken) {
+			if ($uid && $op ne 'userclose') {
+				# set cookie every time, in case session_login
+				# value changes, or time is almost expired on
+				# saved cookie, or password changes, or ...
 
-			# can't set it every time, it upsets people.
-			# we need to set it only if password or
-			# session_login changes. -- pudge
+				# can't set it every time, it upsets people.
+				# we need to set it only if password or
+				# session_login changes. -- pudge
 
-			# if existing cookie is not a logtoken cookie, make it one
-			if ($value !~ m|^[A-Za-z0-9/+]{22}$|) {
-	 			setCookie('user', bakeUserCookie($uid, $cookvalue),
-	 				$slashdb->getUser($uid, 'session_login')
-	 			);
+				# if existing cookie is not a logtoken cookie, make it one
+				if ($value !~ m|^[A-Za-z0-9/+]{22}$|) {
+	 				setCookie('user', bakeUserCookie($uid, $cookvalue),
+	 					$slashdb->getUser($uid, 'session_login')
+	 				);
 
-			# always set cookie for "temp" logins, on every request
-	 		} elsif ($user_temp->{state}{login_temp} eq 'yes') {
- 				setCookie('user', bakeUserCookie($uid, $cookvalue), 2);
-	 		}
+				# always set cookie for "temp" logins, on every request
+		 		} elsif ($user_temp->{state}{login_temp} eq 'yes') {
+ 					setCookie('user', bakeUserCookie($uid, $cookvalue), 2);
+	 			}
 
-		# blank out user cookie and make anon if user wants to log out, or
-		# uses a bad cookie
-		} elsif (!$logtoken && dbAvailable()) {
-			if ($op eq 'userclose') {
-				$slashdb->deleteLogToken($uid);
+			# blank out user cookie and make anon if user wants
+			# to log out, or uses a bad cookie
+			} elsif (dbAvailable()) {
+				if ($op eq 'userclose' && $uid) {
+					$slashdb->deleteLogToken($uid);
+				}
+
+				$uid = $constants->{anonymous_coward_uid};
+				delete $cookies->{user};
+				# if you are here, chances are your cookie is bad,
+				# so we blank it out for you.  you're welcome.
+				setCookie('user', '');
 			}
-
-			$uid = $constants->{anonymous_coward_uid};
-			delete $cookies->{user};
-			# if you are here, chances are your cookie is bad,
-			# so we blank it out for you.  you're welcome.
-			setCookie('user', '');
 		}
 
 	} elsif ($op eq 'userclose') {
@@ -374,7 +383,8 @@ sub handler {
 	if ($uri =~ /\.pl$/ || $uri =~ /\.tmpl$/) {
 		$user->{state}{_dynamic_page} = 1;
 	}
-	$user->{state}{login_temp} = $user_temp->{state}{login_temp};
+	$user->{state}{login_public}        = $user_temp->{state}{login_public};
+	$user->{state}{login_temp}          = $user_temp->{state}{login_temp};
 	$user->{state}{login_failed_reason} = $user_temp->{state}{login_failed_reason};
 	$user->{state}{ssl} = $is_ssl;
 	createCurrentUser($user);

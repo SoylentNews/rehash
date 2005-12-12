@@ -80,6 +80,7 @@ use vars qw($VERSION @EXPORT);
 	bakeUserCookie
 	eatUserCookie
 	setCookie
+	getPublicLogToken
 
 	debugHash
 	slashProf
@@ -1336,6 +1337,33 @@ sub setCookie {
 		$cookie->bake;
 	}
 }
+
+#========================================================================
+
+=head2 getPublicLogToken([UID])
+
+Just a wrapper around:
+
+	bakeUserCookie($uid, $slashdb->getLogToken($uid, 1, 2));
+
+to get a public logtoken.  Uses current user's UID if none supplied.
+
+=cut
+
+sub getPublicLogToken {
+	my($uid) = @_;
+	$uid ||= getCurrentUser('uid');
+	if ($uid) {
+		my $slashdb = getCurrentDB();
+		my $logtoken = $slashdb->getLogToken($uid, 1, 2);
+		if ($logtoken) {
+			return bakeUserCookie($uid, $logtoken);
+		}
+	}
+	return '';
+}
+
+
 
 #========================================================================
 

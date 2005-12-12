@@ -360,7 +360,6 @@ sub savePrefs {
 		$slashdb->setUser($user->{uid}, $user_save);
 		$note = getData('passchanged');
 
-		my $value  = $slashdb->getLogToken($uid, 1);
 		my $cookie = bakeUserCookie($uid, $slashdb->getLogToken($uid, 1));
 		setCookie('user', $cookie, $user_save->{session_login});
 	}
