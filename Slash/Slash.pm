@@ -243,7 +243,7 @@ sub _get_points {
 	# Adjust reasons. Do we need a reason?
 	# Are you threatening me?
 	my $reason_name = $reasons->{$C->{reason}}{name};
-	if ($user->{"reason_alter_$reason_name"}) {
+	if ($reason_name && $user->{"reason_alter_$reason_name"}) {
 		$hr->{reason_bonus} =
 			$user->{"reason_alter_$reason_name"};
 	}

@@ -40,12 +40,12 @@ sub run {
   # We temporarily override the header-sending routines to make them
   # noops.  This lets people leave these methods in their scripts.
   my $warn = $^W;
-  undef $^W if defined $^W;
+  $^W = 0;
   local *Apache::send_http_header = sub {
 	$r->content_type($_[0]) if @_;
   };
   local *Apache::send_cgi_header = sub {};
-  $^W = $warn if defined $warn;
+  $^W = $warn;
 
   $pr->SUPER::run(@_);
 }
