@@ -3502,16 +3502,16 @@ CREATE TABLE journal_transfer (
 # 2005-12-06
 UPDATE vars SET value = 'T_2_5_0_90' WHERE name = 'cvs_tag_currentcode';
 
+# Shut down your slashd and webheads before beginning the next commands.
+# You don't want any writes to these tables while this series of commands
+# executes.
 ALTER TABLE users_logtokens ADD COLUMN public ENUM("yes","no") NOT NULL DEFAULT "no" AFTER temp;
 ALTER TABLE users_logtokens DROP INDEX uid_locationid_temp;
 ALTER TABLE users_logtokens ADD UNIQUE uid_locationid_temp_public (uid, locationid, temp, public);
 ALTER TABLE users_logtokens ADD KEY (public);
-
 # fix admin accounts
-# make sure this is run immediately after the above SQL, else new logtokens might be
-# created that prevents this from completing; if that happens, manually delete each
-# offending logtoken (the newer one, probably)
 UPDATE users_logtokens, users SET public='yes' WHERE users_logtokens.uid=users.uid AND seclev > 1;
+# Now you can turn your slashd and webheads back on.
 
 # 2005-12-11
 UPDATE vars SET value = 'T_2_5_0_91' WHERE name = 'cvs_tag_currentcode';
