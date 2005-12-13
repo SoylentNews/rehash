@@ -3507,6 +3507,12 @@ ALTER TABLE users_logtokens DROP INDEX uid_locationid_temp;
 ALTER TABLE users_logtokens ADD UNIQUE uid_locationid_temp_public (uid, locationid, temp, public);
 ALTER TABLE users_logtokens ADD KEY (public);
 
+# fix admin accounts
+# make sure this is run immediately after the above SQL, else new logtokens might be
+# created that prevents this from completing; if that happens, manually delete each
+# offending logtoken (the newer one, probably)
+UPDATE users_logtokens, users SET public='yes' WHERE users_logtokens.uid=users.uid AND seclev > 1;
+
 # 2005-12-11
 UPDATE vars SET value = 'T_2_5_0_91' WHERE name = 'cvs_tag_currentcode';
 
@@ -3515,3 +3521,4 @@ UPDATE vars SET value = 'T_2_5_0_91' WHERE name = 'cvs_tag_currentcode';
 # PUDGE LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
+
