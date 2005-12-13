@@ -90,7 +90,7 @@ sub main {
 	# if section is defined, perhaps. -- pudge
 	Slash::Utility::Anchor::getSkinColors();
 
-	my $op = $form->{'op'};
+	my $op = $form->{op};
 	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED]) {
 		$op = 'default';
 	}
@@ -215,7 +215,7 @@ sub displayRSS {
 	}
 	$juser ||= $user;
 
-	if ($form->{op} eq 'friendview') {
+	if ($form->{op} && $form->{op} eq 'friendview') {
 		my $zoo   = getObject('Slash::Zoo');
 		my $uids  = $zoo->getFriendsUIDs($juser->{uid});
 		$articles = $journal_reader->getsByUids($uids, 0, $constants->{journal_default_display} * 3);
