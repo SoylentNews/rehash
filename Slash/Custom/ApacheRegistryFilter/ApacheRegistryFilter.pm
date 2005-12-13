@@ -39,13 +39,11 @@ sub run {
 
   # We temporarily override the header-sending routines to make them
   # noops.  This lets people leave these methods in their scripts.
-  my $warn = $^W;
-  $^W = 0;
+  no warnings 'redefine';
   local *Apache::send_http_header = sub {
 	$r->content_type($_[0]) if @_;
   };
   local *Apache::send_cgi_header = sub {};
-  $^W = $warn;
 
   $pr->SUPER::run(@_);
 }
