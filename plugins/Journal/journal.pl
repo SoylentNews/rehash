@@ -228,7 +228,7 @@ sub displayRSS {
 	my @items;
 	for my $article (@$articles) {
 		my($nickname, $juid);
-		if ($form->{op} eq 'friendview') {
+		if ($form->{op} && $form->{op} eq 'friendview') {
 			$nickname = $article->[8];
 			$juid     = $article->[7];
 		} else {
@@ -259,7 +259,7 @@ sub displayRSS {
 	);
 
 	my($title, $journals, $link);
-	if ($form->{op} eq 'friendview') {
+	if ($form->{op} && $form->{op} eq 'friendview') {
 		$title    = "$juser->{nickname}'s Friends'";
 		$journals = 'Journals';
 		$link     = '/journal/friends/';
