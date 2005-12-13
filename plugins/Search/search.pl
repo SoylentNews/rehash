@@ -177,10 +177,11 @@ sub commentSearch {
 		'threshold', $formats, $form->{threshold}, 1
 	);
 
+	my $topic_ref = $form->{tid} ? $slashdb->getTopic($form->{tid}) : { };
 	slashDisplay('searchform', {
 #		sections	 => 1, # _skins(),
 #		topics		 => 1, # _topics(),
-		tref		 => $slashdb->getTopic($form->{tid}),
+		tref		 => $topic_ref,
 		op		 => $form->{op},
 		'sort'		 => _sort(),
 		threshhold 	 => 1,
@@ -327,11 +328,12 @@ sub pollSearch {
 
 	my $start = $form->{start} || 0;
 	my $polls = $searchDB->findPollQuestion($form, $start, $constants->{search_default_display} + 1, $form->{sort});
+	my $topic_ref = $form->{tid} ? $slashdb->getTopic($form->{tid}) : { };
 	slashDisplay('searchform', {
 		op		=> $form->{op},
 #		topics		=> 1, # _topics(),
 #		sections	=> 1, # _skins(),
-		tref		=> $slashdb->getTopic($form->{tid}),
+		tref		=> $topic_ref,
 		'sort'		=> _sort(),
 	});
 
@@ -601,12 +603,13 @@ sub submissionSearch {
 
 	my $start = $form->{start} || 0;
 	my $entries = $searchDB->findSubmission($form, $start, $constants->{search_default_display} + 1, $form->{sort});
+	my $topic_ref = $form->{tid} ? $slashdb->getTopic($form->{tid}) : { };
 	slashDisplay('searchform', {
 		op		=> $form->{op},
 		sections	=> 1, # _skins(),
 		topics		=> 1, # _topics(),
 		submission_notes => $slashdb->getDescriptions('submission-notes'),
-		tref		=> $slashdb->getTopic($form->{tid}),
+		tref		=> $topic_ref,
 		'sort'		=> _sort(),
 	});
 
