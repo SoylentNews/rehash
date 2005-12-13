@@ -36,7 +36,7 @@ sub new {
 	$self->{imagemargin} = $constants->{hc_q1_margin} || 6;
 
 	# Set the list of possible fonts.
-	if ($constants->{hc_possible_fonts}) {
+	if ($constants->{hc_possible_fonts} && @{$constants->{hc_possible_fonts}}) {
 		@{ $self->{possible_fonts} } = @{$constants->{hc_possible_fonts}};
 	} else {
 		@{ $self->{possible_fonts} } = ( gdMediumBoldFont, gdLargeFont, gdGiantFont );
