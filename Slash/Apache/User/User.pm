@@ -244,7 +244,7 @@ sub handler {
 			# NOTE: this is only for "public" logtokens that are
 			# separate from regular login logtokens right now;
 			# it can be changed if necessary, it just happens that
-			# way, so we use it to se login_public
+			# way, so we use it to set login_public
 			if (
 				($constants->{rss_allow_index} && $form->{content_type} =~ $constants->{feed_types} && $uri =~ m{^/index\.pl$})
 					||
