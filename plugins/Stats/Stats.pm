@@ -745,8 +745,9 @@ sub countCommentsByDiscussionType {
 	if ($constants->{plugin}{PollBooth}) {
 		$return_hr->{polls} = $self->sqlSelect(
 			"COUNT(*), IF(pollquestions.discussion IS NULL, 'no', 'yes') AS ispoll",
-			"comments, discussions
-				LEFT JOIN pollquestions ON discussions.id=pollquestions.discussion",
+			"comments,
+			 discussions LEFT JOIN pollquestions
+				ON discussions.id=pollquestions.discussion",
 			"comments.date $self->{_day_between_clause}
 				AND comments.sid=discussions.id",
 			"GROUP BY ispoll HAVING ispoll='yes'"
@@ -759,8 +760,9 @@ sub countCommentsByDiscussionType {
 	if ($constants->{plugin}{Journal}) {
 		$return_hr->{journals} = $self->sqlSelect(
 			"COUNT(*), IF(journals.discussion IS NULL, 'no', 'yes') AS isjournal",
-			"comments, discussions
-				LEFT JOIN journals ON discussions.id=journals.discussion",
+			"comments,
+			 discussions LEFT JOIN journals
+				ON discussions.id=journals.discussion",
 			"comments.date $self->{_day_between_clause}
 				AND comments.sid=discussions.id",
 			"GROUP BY isjournal HAVING isjournal='yes'"
@@ -772,8 +774,9 @@ sub countCommentsByDiscussionType {
 	# Don't forget comments posted to stories.
 	$return_hr->{stories} = $self->sqlSelect(
 		"COUNT(*), IF(stories.discussion IS NULL, 'no', 'yes') AS isstory",
-		"comments, discussions
-			LEFT JOIN stories ON discussions.id=stories.discussion",
+		"comments,
+		 discussions LEFT JOIN stories
+			ON discussions.id=stories.discussion",
 		"comments.date $self->{_day_between_clause}
 			AND comments.sid=discussions.id",
 		"GROUP BY isstory HAVING isstory='yes'"
