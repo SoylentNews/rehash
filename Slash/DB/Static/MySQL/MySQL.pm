@@ -2142,8 +2142,8 @@ sub getStoriesToRefresh {
 	# don't include neverdisplay stories.
 	my $retval = $self->sqlSelectAllHashrefArray(
 		"DISTINCT stories.stoid AS stoid, sid, primaryskid, title, time",
-		"stories, story_text, story_topics_rendered
-		 LEFT JOIN story_dirty ON stories.stoid=story_dirty.stoid",
+		"story_text, story_topics_rendered,
+		 stories LEFT JOIN story_dirty ON stories.stoid=story_dirty.stoid",
 		"time < NOW()
 		 AND stories.primaryskid > 0
 		 AND stories.stoid = story_text.stoid
