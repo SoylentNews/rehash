@@ -546,7 +546,7 @@ EOT
 		no_op => $constants->{op_exclude_from_countdaily}
 	} );
 	my $grand_total_bytes = $logdb->countBytesByPage('');
-	$grand_total_bytes   += $logdb->countBytesByPage('', { table_suffix => "_rss" });
+	$grand_total_bytes += $logdb->countBytesByPage('', { table_suffix => "_rss" }) || 0;
 	slashdLog("Byte Counts End");
 
 	slashdLog("Mod Info Begin");
@@ -670,7 +670,7 @@ EOT
 	$statsSave->createStatDaily("submissions", $submissions);
 	$statsSave->createStatDaily("submissions_comments_match", $submissions_comments_match);
 	$statsSave->createStatDaily("youngest_modelig_uid", sprintf("%d", $youngest_modelig_uid));
-	$statsSave->createStatDaily("youngest_modelig_created", sprintf("%11s", $youngest_modelig_created));
+	$statsSave->createStatDaily("youngest_modelig_created", sprintf("%11s", $youngest_modelig_created || 0));
 
 	my $scores = [ $constants->{comment_minscore} .. $constants->{comment_maxscore} ];
 	my $scores_hr = $stats->getDailyScoreTotals($scores);
@@ -728,7 +728,7 @@ EOT
 	$mod_data{consensus} = sprintf("%8u", $consensus);
 	$mod_data{oldest_unm2d_days} = $oldest_unm2d_days;
 	$mod_data{youngest_modelig_uid} = sprintf("%d", $youngest_modelig_uid);
-	$mod_data{youngest_modelig_created} = sprintf("%11s", $youngest_modelig_created);
+	$mod_data{youngest_modelig_created} = sprintf("%11s", $youngest_modelig_created || 0);
 	$mod_data{mod_points_pool} = sprintf("%8u", $mod_points_pool);
 	$mod_data{used_total} = sprintf("%8u", $modlog_count_yest_total);
 	$mod_data{used_total_pool} = sprintf("%.1f", ($mod_points_pool ? $modlog_spent_yest_total*100/$mod_points_pool : 0));
@@ -1010,23 +1010,23 @@ sub getAdminModsText {
 			if $amn->{m1_up} + $amn->{m1_down} > 0;
 		my $m2_un_percent = 0;
 		$m2_un_percent = $amn->{m2_unfair}*100
-			/ ($amn->{m2_unfair} + $amn->{m2_fair})
-			if $amn->{m2_unfair} + $amn->{m2_fair} > 20;
+			/ ( ($amn->{m2_unfair} || 0) + ($amn->{m2_fair} || 0) )
+			if ($amn->{m2_unfair} || 0) + ($amn->{m2_fair} || 0) > 20;
 		my $m2_un_percent_mo = 0;
 		$m2_un_percent_mo = $amn->{m2_unfair_mo}*100
-			/ ($amn->{m2_unfair_mo} + $amn->{m2_fair_mo})
-			if $amn->{m2_unfair_mo} + $amn->{m2_fair_mo} > 20;
+			/ ( ($amn->{m2_unfair_mo} || 0) + ($amn->{m2_fair_mo} || 0) )
+			if ($amn->{m2_unfair_mo} || 0) + ($amn->{m2_fair_mo} || 0) > 20;
 		next unless $amn->{m1_up} || $amn->{m1_down}
 			|| $amn->{m2_fair} || $amn->{m2_unfair};
 		$text .= sprintf("%13.13s   %4d %4d %4d%%    %5d %5d %5.1f%% %5.1f%%\n",
 			$nickname,
-			$amn->{m1_up},
-			$amn->{m1_down},
-			$m1_up_percent,
-			$amn->{m2_fair},
-			$amn->{m2_unfair},
-			$m2_un_percent,
-			$m2_un_percent_mo
+			$amn->{m1_up}		|| 0,
+			$amn->{m1_down}		|| 0,
+			$m1_up_percent		|| 0,
+			$amn->{m2_fair}		|| 0,
+			$amn->{m2_unfair}	|| 0,
+			$m2_un_percent		|| 0,
+			$m2_un_percent_mo	|| 0
 		);
 		if ($nickname eq '~Day Total') {
 			$num_mods += $amn->{m1_up};
