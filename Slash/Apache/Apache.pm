@@ -18,7 +18,7 @@ use URI;
 
 require DynaLoader;
 require AutoLoader;
-use vars qw($REVISION $VERSION @ISA $USER_MATCH);
+use vars qw($REVISION $VERSION @ISA $USER_MATCH $DAYPASS_MATCH);
 
 @ISA		= qw(DynaLoader);
 $VERSION   	= '2.003000';  # v2.3.0
@@ -28,6 +28,7 @@ $USER_MATCH = qr{ \buser=(?!	# must have user, but NOT ...
 	(?: nobody | %[20]0 )?	# nobody or space or null or nothing ...
 	(?: \s | ; | $ )	# followed by whitespace, ;, or EOS
 )}x;
+$DAYPASS_MATCH = qr{\bdaypassconfcode=};
 
 bootstrap Slash::Apache $VERSION;
 
@@ -339,7 +340,14 @@ sub IndexHandler {
 	my $gSkin     = getCurrentSkin();
 
 	my $uri = $r->uri;
-	my $is_user = $r->header_in('Cookie') =~ $USER_MATCH;
+	my $cookie = $r->header_in('Cookie');
+	my $is_user = $cookie =~ $USER_MATCH;
+	my $has_daypass = 0;
+	if (!$is_user) {
+		if ($constants->{daypass} && $cookie =~ $DAYPASS_MATCH) {
+			$has_daypass = 1;
+		}
+	}
 
 	if ($gSkin->{rootdir}) {
 		my $path = URI->new($gSkin->{rootdir})->path;
@@ -356,7 +364,7 @@ sub IndexHandler {
 		my $basedir = $constants->{basedir};
 
 		# $USER_MATCH defined above
-		if ($dbon && $is_user) {
+		if ($dbon && ($is_user || $has_daypass)) {
 			$r->uri("/$gSkin->{index_handler}");
 			$r->filename("$basedir/$gSkin->{index_handler}");
 			return OK;
@@ -406,7 +414,7 @@ sub IndexHandler {
 			my $basedir = $constants->{basedir};
 
 			# $USER_MATCH defined above
-			if ($dbon && $is_user) {
+			if ($dbon && ($is_user || $has_daypass)) {
 				$r->args("section=$key");
 				# For any directory which can be accessed by a
 				# logged-in user in the URI form /foo or /foo/,
@@ -464,13 +472,17 @@ sub IndexHandler {
 		return OK;
 	}
 
-	# redirect to static if not a user, and
+	# redirect to static if
+	# * not a user, nor a daypass holder,
+	# and
 	# * var is on
 	# * is article.pl
 	# * no page number > 1 specified
 	# * sid specified
 	# * referrer exists AND is external to our site
-	if ($constants->{referrer_external_static_redirect} && !$is_user && $uri eq '/article.pl') {
+	if ($constants->{referrer_external_static_redirect}
+		&& !$is_user && !$has_daypass
+		&& $uri eq '/article.pl') {
 		my $referrer = $r->header_in("Referer");
 		my $referrer_domain = $constants->{referrer_domain} || $gSkin->{basedomain};
 		my $the_request = $r->the_request;
