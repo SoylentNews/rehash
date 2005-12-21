@@ -599,7 +599,7 @@ sub pollbooth {
 	}
 	
 	# If no qid (or no sitewide poll), short-circuit out.
-	return '' if $qid eq '';
+	return '' if !$qid;
 
 	my $poll = $reader->getPoll($qid);
 	return '' unless %$poll;
