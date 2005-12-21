@@ -3355,7 +3355,7 @@ sub checkDiscussionIsInFuture {
 		'discussions',
 		"id='$discussion->{id}' AND type != 'archived'
 		 AND $where_time
-		 AND ts >= NOW()"
+		 AND ts > NOW()"
 	);
 	return $count;
 }
@@ -8001,7 +8001,7 @@ sub _stories_time_clauses {
 	$future = 1 if $try_future
 		&& $constants->{subscribe}
 		&& $future_secs
-		&& (!$must_be_subscriber
+		&&	( !$must_be_subscriber
 			|| ( $user->{is_subscriber} && $user->{state}{page_plummy} )
 			|| $user->{has_daypass} );
 
@@ -8389,16 +8389,16 @@ sub getStoriesEssentials {
 #print STDERR "gSE $$ one SELECT, min_stoid=$min_stoid\n";
 
 		# Need both tables.
-		$tables = "stories, story_topics_rendered";
+		$tables = "story_topics_rendered, stories";
 
 		if (@$tid_x) {
 			# If we are excluding any topics, then add a LEFT JOIN
 			# against another copy of story_topics_rendered and
 			# allow only stories which don't fall into it.
 			my $tid_x_str = join(",", @$tid_x);
-			$tables .= " LEFT JOIN story_topics_rendered AS strx"
-				. " ON stories.stoid=strx.stoid"
-				. " AND strx.tid IN ($tid_x_str)";
+			$tables .= " LEFT JOIN story_topics_rendered AS strx
+					ON stories.stoid=strx.stoid
+					AND strx.tid IN ($tid_x_str)";
 			push @stories_where, "strx.stoid IS NULL";
 		}
 
@@ -9645,7 +9645,7 @@ sub getStoryList {
 	# If this is a "sectional" (one skin only) admin.pl storylist,
 	# then restrict ourselves to only stories matching its nexus.
 	if (!$is_mainpage) {
-		$tables .= " LEFT JOIN story_topics_rendered AS str on str.stoid = stories.stoid";
+		$tables .= " LEFT JOIN story_topics_rendered AS str ON str.stoid = stories.stoid";
 		push @where,
 			"(str.tid = $gSkin->{nexus} OR stories.primaryskid = $gSkin->{skid})";
 		$other = "GROUP BY stoid ";
@@ -9832,8 +9832,8 @@ sub getRecentComments {
 		 SUM(val) AS sum_val,
 		 IF(moderatorlog.cid IS NULL, 0, COUNT(*))
 		 	AS num_mods",
-		"comments, users, discussions, comment_text
-		 LEFT JOIN moderatorlog
+		"users, discussions, comment_text,
+		 comments LEFT JOIN moderatorlog
 		 	ON comments.cid=moderatorlog.cid
 			AND moderatorlog.active=1",
 		"comments.uid=users.uid
@@ -11247,7 +11247,9 @@ sub getSection {
 sub getSkin {
 	my($self, $skid, $options) = @_;
 	if (!$skid) {
-		errorLog("cannot getSkin for empty skid") if $ENV{GATEWAY_INTERFACE};
+		if ($ENV{GATEWAY_INTERFACE}) {
+			errorLog("cannot getSkin for empty skid='$skid'");
+		}
 		$skid = getCurrentStatic('mainpage_skid');
 	}
 	my $skins = $self->getSkins($options);
