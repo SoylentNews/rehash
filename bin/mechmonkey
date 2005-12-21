@@ -80,11 +80,12 @@ sub init {
 }
 
 sub run {
+	my $last_elapsed = undef;
 	while (time <= $stop_time) {
-		report();
+		report($last_elapsed);
 		load_images();
 		sleep_short();
-		do_random_action();
+		$last_elapsed = do_random_action();
 		back_if_error();
 	}
 }
@@ -102,16 +103,22 @@ sub sleep_long { # median 60 seconds
 }
 
 sub report {
+	my($last_elapsed) = @_;
+	my $elapsed_str = defined($last_elapsed)
+		? sprintf("%7.3f ", $last_elapsed)
+		: "      - ";
 	my $success = $mech->success();
 	return if $success && $quiet;
 	my $f = $success ? '' : 'FAILURE AT ';
-	printf "%s %9d %s%s\n",
+	printf "%s %9d %s%s%s\n",
 		scalar(localtime),
 		length($mech->content()),
-		$f, $mech->uri();
+		$elapsed_str, $f, $mech->uri();
 }
 
 sub load_images {
+
+	return unless $load_images;
 
 #use LWP::Debug;
 #use Data::Dumper;
@@ -142,7 +149,8 @@ sub load_images {
 		my $response = $entries->{$e}->response;
 #print "image length " . length($response->content()) . " for " . $response->request->url . "\n";
 		if (!$response->is_success()) {
-#warn "image load failure " . $response->status_line;
+my $line = $response->status_line; chomp $line;
+warn "image load failure '$line' for " . $response->request->url . "\n";
 			++$load_errors;
 		} else {
 			$image_bytes += length($response->content());
@@ -167,15 +175,19 @@ sub url_is_within_site {
 
 sub do_random_action {
 	my $r = rand();
-	   if ($r < 0.07) {	$mech->back()		}
-	elsif ($r < 0.10) {	sleep_medium()		}
-	elsif ($r < 0.12) {	sleep_long()		}
-	elsif ($r < 0.15) {	edit_url_up()		}
-	elsif ($r < 0.17) {	reload()		}
-	elsif ($r < 0.25) {	search()		}
-	elsif ($r < 0.30) {	go_home()		}
-	elsif ($r < 0.33) {	pick_image_link()	}
-	else              {	pick_any_link()		}
+	my $start_time = Time::HiRes::time;
+	my $slept = 0;
+	   if ($r < 0.07) {	$mech->back()			}
+	elsif ($r < 0.10) {	sleep_medium(); $slept = 1	}
+	elsif ($r < 0.12) {	sleep_long(); $slept = 1	}
+	elsif ($r < 0.15) {	edit_url_up()			}
+	elsif ($r < 0.17) {	reload()			}
+	elsif ($r < 0.35) {	search()			}
+	elsif ($r < 0.40) {	go_home()			}
+	elsif ($r < 0.43) {	pick_image_link()		}
+	else              {	pick_any_link()			}
+	if ($slept) { return undef }
+	else { return Time::HiRes::time - $start_time }
 }
 
 sub back_if_error {
@@ -252,9 +264,9 @@ sub pick_any_link {
 	my $tildes = scalar grep /$url_tilde_regex/, @links;
 	my $comments = scalar grep /$url_comment_regex/, @links;
 	my $r = rand(1);
-	if ($tildes && $r < 0.20) {
+	if ($tildes && $r < 0.30) {
 		@links = grep /$url_tilde_regex/, @links;
-	} elsif ($comments && $r < 0.40) {
+	} elsif ($comments && $r < 0.80) {
 		@links = grep /$url_comment_regex/, @links;
 	}
 
