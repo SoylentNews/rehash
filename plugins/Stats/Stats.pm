@@ -891,8 +891,9 @@ sub getAdminModsInfo {
 			for my $fairness (qw( -1 1 )) {
 				$m2_uid_val_mo_hr->{$uid}{$fairness}{nickname} =
 					$m2_uid_nickname->{$uid};
+				$m2_uid_val_mo_hr->{$uid}{$fairness}{count} ||= 0;
 				$m2_uid_val_mo_hr->{$uid}{$fairness}{count} +=
-					$m2_uid_val_hr->{$uid}{$fairness}{count};
+					($m2_uid_val_hr->{$uid}{$fairness}{count} || 0);
 			}
 		}
 	}
