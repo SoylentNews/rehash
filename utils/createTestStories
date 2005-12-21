@@ -296,20 +296,22 @@ sub make_werds {
 		} else {
 			$new_werds = $werder->sentence;
 		}
-		if ($link_prob and rand(1) < $link_prob) {
+		if ($link_prob && rand(1) < $link_prob) {
 			my @new_werds = split / /, $new_werds;
-			my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
-			my $close_a = (rand(1)<0.1?" ":"") . "</a>";
-			my $insert_start = int(rand(@new_werds-2));
-			my $insert_end = $insert_start + int(rand(4))+1;
-			$insert_end = scalar @new_werds if $insert_end > scalar @new_werds;
-			$new_werds = join(" ",
-				@new_werds[0..$insert_start-1],
-				$a_href . $new_werds[$insert_start],
-				@new_werds[$insert_start+1..$insert_end-1],
-				$new_werds[$insert_end] . $close_a,
-				@new_werds[$insert_end+1..$#new_werds]
-			);
+			if ($#new_werds > 2) {
+				my $a_href = q{<a href="} . $links[rand @links] . q{">} . (rand(1)<0.1?" ":"");
+				my $close_a = (rand(1)<0.1?" ":"") . "</a>";
+				my $insert_start = int(rand($#new_werds-2));
+				my $insert_end = $insert_start + int(rand(4))+1;
+				$insert_end = $#new_werds - 1 if $insert_end > $#new_werds - 1;
+				$new_werds = join(" ",
+					@new_werds[0..$insert_start-1],
+					$a_href . $new_werds[$insert_start],
+					@new_werds[$insert_start+1..$insert_end-1],
+					$new_werds[$insert_end] . $close_a,
+					@new_werds[$insert_end+1..$#new_werds]
+				);
+			}
 		}
 		if ($cur_werds and !$tag and rand > $cur_werds/$werds+0.3) {
 			if (rand(1) < 0.95) { $tag = "i" }
