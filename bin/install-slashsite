@@ -532,28 +532,55 @@ $include
     # and template_cache_size is 0.  Set to On/Off.
     # Default is off since most sites don't need it
     # much and startup performance, as well as
-    # memory usage, degrades when it is On.
+    # memory usage, degrades when it is On...
+    # setting template_cache_size to 100 or so is
+    # probably a lot better
     SlashCompileTemplates Off
-    
-    PerlAccessHandler  Slash::Apache::Banlist
-    PerlAccessHandler  Slash::Apache::User
-    PerlCleanupHandler Slash::Apache::Log
-    PerlCleanupHandler Slash::Apache::Log::UserLog
+ 
+    ########################
+
+    # First Apache phase:  post-read-request
 
     # if you have a frontend/backend setup and have X-Forwarded-For
     # headers (such as from mod_proxy_add_forward), use this
     # to properly populate remote_ip for formkeys etc.
     #PerlPostReadRequestHandler Slash::Apache::ProxyRemoteAddr
 
+    # Second Apache phase:  URI translation
+
     # this directive will redirect non-logged-in users to
     # index.shtml if they request the home page; turn it
     # on to help increase performance or if you are using something
     # other then index.pl for the index
     PerlTransHandler Slash::Apache::IndexHandler
-
     # this directive will enable you to display user's pages
     # with /~username
     PerlTransHandler Slash::Apache::User::userdir_handler
+
+    # Third Apache phase:  header parsing
+
+    # Fourth Apache phase:  access control
+    PerlAccessHandler  Slash::Apache::Banlist
+    PerlAccessHandler  Slash::Apache::User
+
+    # Fifth Apache phase:  authentication
+        
+    # Sixth Apache phase:  authorization
+        
+    # Seventh Apache phase:  MIME type checking
+
+    # Eighth Apache phase:  fixups
+
+    # Ninth Apache phase:  response, aka content handler:
+    # Apache::Registry and whatever else is in the slash.conf file
+
+    # Tenth Apache phase:  logging
+
+    # Eleventh Apache phase:  cleanup
+    PerlCleanupHandler Slash::Apache::Log
+    PerlCleanupHandler Slash::Apache::Log::UserLog
+
+    ########################
 
     # this can be used to preload your .pl scripts in the parent,
     # saving both startup time and memory in the child
