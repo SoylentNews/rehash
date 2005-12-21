@@ -270,22 +270,21 @@ sub getZooUsersForProcessing {
 
 sub rebuildUser {
 	my($self, $uid) = @_;
-	my $data =  $self->sqlSelectAllHashrefArray('*', 'people', "uid = $uid");
+	my $data = $self->sqlSelectAllHashrefArray('*', 'people', "uid = $uid");
 	my $people;
 
 	my @friends;
 	if ($data) {
 		for (@$data) {
-			if ($_->{type} eq 'friend') {
+			if ($_->{type} && $_->{type} eq 'friend') {
 				$people->{FRIEND()}{$_->{person}} = 1;
 				push @friends, $_->{person};
-			} elsif ($_->{type} eq 'foe') {
+			} elsif ($_->{type} && $_->{type} eq 'foe') {
 				$people->{FOE()}{$_->{person}} = 1;
 			}
-			# XXX Is {perceive} usually defined? Ever defined?
-			if ($_->{perceive} eq 'fan') {
+			if ($_->{perceive} && $_->{perceive} eq 'fan') {
 				$people->{FAN()}{$_->{person}} = 1;
-			} elsif ($_->{perceive} eq 'freak') {
+			} elsif ($_->{perceive} && $_->{perceive} eq 'freak') {
 				$people->{FREAK()}{$_->{person}} = 1;
 			}
 		}
@@ -293,7 +292,7 @@ sub rebuildUser {
 
 	my $list = join (',', @friends);
 	if (scalar(@friends) && $list) {
-		$data =  $self->sqlSelectAllHashrefArray('*', 'people', "uid IN ($list) AND type IS NOT NULL");
+		$data = $self->sqlSelectAllHashrefArray('*', 'people', "uid IN ($list) AND type IS NOT NULL");
 		for (@$data) {
 			if ($_->{type} eq 'friend') {
 				$people->{FOF()}{$_->{person}}{$_->{uid}} = 1;
