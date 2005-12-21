@@ -150,7 +150,7 @@ sub findStory {
 		$columns .= ", TRUNCATE((( " . $self->_score('title', $form->{query}, $constants->{search_method}) . "  + " .  $self->_score('introtext,bodytext', $form->{query}, $constants->{search_method}) .") / 2), 1) AS score "
 	}
 
-	my $tables = "stories, story_text LEFT JOIN story_param ON stories.stoid=story_param.stoid AND story_param.name='neverdisplay'";
+	my $tables = "story_text, stories LEFT JOIN story_param ON stories.stoid=story_param.stoid AND story_param.name='neverdisplay'";
 
 	my $other = '';
 	$other .= " HAVING score > 0 "
@@ -233,9 +233,10 @@ sub findStory {
 		}
 		my $string = join(',', @{$self->sqlQuote(\@tids)});
 		if ($constants->{topic_search_use_join}) {
-			$tables.= " LEFT JOIN story_topics_rendered ON stories.stoid = story_topics_rendered.stoid";
-# XXXSKIN - no more id in schema, just yank?
-#			$where .= " AND story_topics_rendered.id IS NOT NULL";
+			# XXX I haven't looked closely at this but at first
+			# glance I'm not sure why this is a LEFT JOIN and
+			# not an ordinary inner join. - Jamie 2005/12/16
+			$tables .= " LEFT JOIN story_topics_rendered ON stories.stoid = story_topics_rendered.stoid";
 			$where .= " AND story_topics_rendered.tid IN ($string)";
 			$other = "GROUP by stoid $other";
 		} else {
