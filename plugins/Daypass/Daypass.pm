@@ -111,6 +111,10 @@ sub getDaypass {
 	for my $hr (@$da_ar) {
 		next unless $hr->{startts} <= $time;
 		next unless $time <= $hr->{endts};
+		if ($constants->{daypass_offer_onlytologgedin}) {
+			$user ||= getCurrentUser();
+			next unless $user && !$user->{is_anon};
+		}
 		if ($hr->{aclreq}) {
 			$user ||= getCurrentUser();
 			print STDERR scalar(localtime) . " $$ cannot get user in getDaypass\n" if !$user;

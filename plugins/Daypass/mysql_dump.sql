@@ -11,6 +11,7 @@ INSERT INTO vars (name, value, description) VALUES ('daypass_offer_method1_acl',
 INSERT INTO vars (name, value, description) VALUES ('daypass_offer_method1_adpos', '31', 'If daypass_offer_method is 1, which ad position to check?');
 INSERT INTO vars (name, value, description) VALUES ('daypass_offer_method1_minduration', '10', 'Minimum time allowed before click');
 INSERT INTO vars (name, value, description) VALUES ('daypass_offer_method1_regex', '!placeholder', 'If daypass_offer_method is 1, what regex on that ad text tells us whether a daypass is available? A leading ! inverts logic (regex match means daypass not available)');
+INSERT INTO vars (name, value, description) VALUES ('daypass_offer_onlytologgedin', '0', 'If 1, offer a daypass only to logged-in users');
 INSERT INTO vars (name, value, description) VALUES ('daypass_seetmf', '0', 'Should users with daypasses be able to, like subscribers, see The Mysterious Future?');
 INSERT INTO vars (name, value, description) VALUES ('daypass_tz', 'PST', 'What timezone are daypasses considered to be in (this determines where "midnight" starts and ends the day)');
 
