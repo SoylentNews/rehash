@@ -41,9 +41,9 @@ sub new {
 		$self->sqlConnect();
 		return $self;
 	} elsif ($dsn) {
-		die "Database $dsn unsupported! (virtual user: $user)";
+		die "Database $dsn unsupported! (virtual user '$user')";
 	} else {
-		die "DBIx::Password returned *nothing* for virtual user $user DSN (is the username correct?)";
+		die "DBIx::Password has no information about the virtual user '$user'. Most likely either you mistyped it (maybe in slash.sites or your SlashVirtualUser directive?), or DBIx::Password is misconfigured somehow";
 	}
 }
 
