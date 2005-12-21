@@ -153,9 +153,12 @@ sub main {
 # Thanks for the assist here, pudge!
 sub get_content {
 	my($ref) = @_;
-	my $content;
+	return '' if !$ref || !@{$ref->{_content}};
 
-	$content .= (ref) ? get_content($_) : $_ for @{$ref->{_content}};
+	my $content = '';
+	for my $c (@{$ref->{_content}}) {
+		$content .= ref($c) ? get_content($c) : $c;
+	}
 	
 	return $content;
 }
