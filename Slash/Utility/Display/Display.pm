@@ -1225,10 +1225,11 @@ sub createMenu {
 # use lockTest to test if a story is being edited by someone else
 ########################################################
 sub getImportantWords {
-	my $s = shift;
+	my($s) = @_;
+	return ( ) if !defined($s) || $s eq '';
 	$s =~ s/[^A-Z0-9 ]//gi;
 	my @w = split m/ /, $s;
-	my @words;
+	my @words = ( );
 	foreach (@w) {
 		if (length($_) > 3 || (length($_) < 4 && uc($_) eq $_)) {
 			push @words, $_;
