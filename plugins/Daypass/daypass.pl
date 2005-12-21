@@ -13,11 +13,7 @@ use Slash::Utility;
 sub main {
 	my $gSkin = getCurrentSkin();
 	my $daypass_reader = getObject('Slash::Daypass', { db_type => 'reader' });
-use Data::Dumper;
-$Data::Dumper::Sortkeys = 1;
-print STDERR scalar(localtime) . " daypass.pl $$ dp_r: " . Dumper($daypass_reader);
 	my $dps = $daypass_reader->getDaypassesAvailable();
-print STDERR scalar(localtime) . " daypass.pl $$ dps: " . Dumper($dps);
 	if (!$dps || !@$dps) {
 		redirect($gSkin->{rootdir});
 	}
