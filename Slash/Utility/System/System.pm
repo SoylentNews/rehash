@@ -465,7 +465,7 @@ sub prog2file {
 		close $errfh if $errfh;
 		unlink $errfile if $errfile;
 	}
-	my $bytes = length $data;
+	my $bytes = $data ? length($data) : 0;
 
 	if ($stderr_text =~ /\b(ID \d+, \w+;\w+;\w+) :/) {
 		my $template = $1;
