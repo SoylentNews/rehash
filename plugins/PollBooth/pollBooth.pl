@@ -378,6 +378,7 @@ sub savepoll {
 			);
 		} elsif (!$poll->{discussion}) {
 			$discussion = $slashdb->createDiscussion({
+				kind		=> 'pollbooth',
 				title		=> $form->{question},
 				topic		=> $form->{topic},
 				approved	=> 1, # Story discussions are always approved -Brian

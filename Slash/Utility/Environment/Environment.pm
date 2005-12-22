@@ -1583,15 +1583,12 @@ print STDERR scalar(localtime) . " Env.pm $$ userHasDaypass uid=$user->{uid} cs=
 		$user->{is_admin} = 1;
 		# can edit users and do all sorts of cool stuff
 		$user->{is_super_admin} = 1 if $user->{seclev} >= 10_000 || $user->{acl}{super_admin};
-		my $sid;
-		#This cookie could go, and we could have session instance
-		#do its own thing without the cookie. -Brian
-		if ($cookies->{session}) {
-			$sid = $slashdb->getSessionInstance($uid, $cookies->{session}->value);
-		} else {
-			$sid = $slashdb->getSessionInstance($uid);
-		}
-		setCookie('session', $sid) if $sid;
+
+		# cookie no longer used, remove it if it is there -- pudge
+		setCookie('session', '') if $cookies->{session};
+		# this no longer "gets" anything, it only sets -- pudge
+		$slashdb->getSessionInstance($uid);
+
 		if ($constants->{admin_check_clearpass}
 			&& !Slash::Apache::ConnectionIsSecure()) {
 			$user->{state}{admin_clearpass_thisclick} = 1;

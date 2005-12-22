@@ -307,10 +307,6 @@ sub handler {
 		}
 
 	} elsif ($op eq 'userclose') {
-		# When did we comment out this? This means that even
-		# if an author logs out, the other authors will
-		# not know about it. Bad....
-		#$slashdb->deleteSession(); #  if $slashdb->getUser($uid, 'seclev') >= 99;
 		delete $cookies->{user};
 		setCookie('user', '');
 	}
@@ -833,8 +829,9 @@ Bender:Farewell, big blue ball of idiots!
 Bender:This guy's not making any sense.  Can I kill him?  Please?
 Bender:Hooray, we don't have to do anything!
 Bender:I only speak enough binary to ask where the bathroom is.
-Bender: nogoodlawsprotectingtheinnocent--
-Bender: Senseless death!  The folk singer's best friend!
+Bender:nogoodlawsprotectingtheinnocent--
+Bender:Senseless death!  The folk singer's best friend!
+Bender:Alright! Closure!
 Fry:There's a lot about my face you don't know.
 Fry:These new hands are great. I'm gonna break them in tonight.
 Fry:I refuse to testify on the grounds that my organs will be chopped up into a patty.
@@ -873,6 +870,7 @@ Fry:Prepare to be thought at!
 Fry:I did it!  And it's all thanks to the books at my local library.
 Fry:Existing is basically all I do!
 Fry:It's a widely-believed fact!
+Fry:My hands!  My horrible, human, hands!
 EOT
 
 1;

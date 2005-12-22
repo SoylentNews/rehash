@@ -812,11 +812,12 @@ sub showComments {
 			# ...however, the "sid" parameter here must be the string
 			# based SID from either the "stories" table or from
 			# pollquestions.
-			my $discussion  = $reader->getDiscussion($comment->{sid});
+			my $discussion = $reader->getDiscussion($comment->{sid});
+			my $kinds = $reader->getDescriptions('discussion_kinds');
 
-			if ($discussion->{url} =~ /journal/i) {
+			if ($kinds->{ $discussion->{kind} } eq 'journal') {
 				$comment->{type} = 'journal';
-			} elsif ($discussion->{url} =~ /poll/i) {
+			} elsif ($kinds->{ $discussion->{kind} } eq 'poll') {
 				$comment->{type} = 'poll';
 			} else {
 				$comment->{type} = 'story';
@@ -1139,17 +1140,16 @@ sub showInfo {
 		# ...however, the "sid" parameter here must be the string
 		# based SID from either the "stories" table or from
 		# pollquestions.
-		my($discussion) = $reader->getDiscussion($comment->{sid});
+		my $discussion = $reader->getDiscussion($comment->{sid});
+		my $kinds = $slashdb->getDescriptions('discussion_kinds');
 
-		# This is a pretty crappy way to determine what type of object
-		# the discussion is attached to. - Jamie
 		if (!$discussion || !$discussion->{url}) {
 			# A comment with no accompanying discussion;
 			# basically we pretend it doesn't exist.
 			next;
-		} elsif ($discussion->{url} =~ /journal/i) {
+		} elsif ($kinds->{ $discussion->{kind} } eq 'journal') {
 			$type = 'journal';
-		} elsif ($discussion->{url} =~ /poll/i) {
+		} elsif ($kinds->{ $discussion->{kind} } eq 'poll') {
 			$type = 'poll';
 		} else {
 			$type = 'story';

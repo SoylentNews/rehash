@@ -168,10 +168,13 @@ sub create {
 		encoding	=> $encoding,
 	);
 
-	my $absolutedir = defined &Slash::Apache::ConnectionIsSSL
-	                  && Slash::Apache::ConnectionIsSSL()
-		? $gSkin->{absolutedir_secure}
-		: $gSkin->{absolutedir};
+	my($dynamic, $absolutedir);
+	if (defined &Slash::Apache::ConnectionIsSSL) {
+		$dynamic = 1;
+		$absolutedir = Slash::Apache::ConnectionIsSSL()
+			? $gSkin->{absolutedir_secure}
+			: $gSkin->{absolutedir};
+	}
 
 	# set defaults
 	my %channel = (
@@ -229,6 +232,15 @@ sub create {
 	} else {  # 0.9
 		for (keys %channel) {
 			delete $channel{$_} unless /^(?:link|title|description)$/;
+		}
+	}
+
+	# help users get notification that this feed is specifically for them
+	if ($dynamic && getCurrentForm('logtoken')) {
+		my $user = getCurrentUser();
+		if (!$user->{is_anon}) {
+			$channel{$_} .= ": Generated for $user->{nickname} ($user->{uid})"
+				for qw(title description);
 		}
 	}
 

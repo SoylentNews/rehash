@@ -54,8 +54,8 @@ sub slashHook {
 		}
 		if (defined (&$code)) {
 			$retval = $code->($options);
-			if (!$retval) {
-				errorLog("Failed executing hook ($param) - $function");
+			if (! defined $retval) {
+				errorLog("Failed executing hook ($param) - $function: no return value");
 			}
 		} else {
 			errorLog("Failed trying to do hook ($param) - $function");

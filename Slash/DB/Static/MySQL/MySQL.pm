@@ -392,8 +392,9 @@ sub forgetStoryTextRendered {
 sub forgetUsersLogtokens {
 	my($self) = @_;
 
+	# delete logtokens if they have been expired for a month
 	return $self->sqlDelete("users_logtokens",
-		"DATE_ADD(expires, INTERVAL 1 MONTH) < NOW()");
+		"public = 'no' AND DATE_ADD(expires, INTERVAL 1 MONTH) < NOW()");
 }
 
 ########################################################

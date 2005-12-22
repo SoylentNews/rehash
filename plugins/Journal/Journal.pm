@@ -222,11 +222,19 @@ sub remove {
 
 	if ($journal->{discussion}) {
 		my $slashdb = getCurrentDB();
-		# if has been submitted as story or submission
+		# if has been submitted as story or submission, don't
+		# delete the discussion
 		if ($journal->{submit} eq 'yes') {
-			$slashdb->setDiscussion($journal->{discussion}, {
-				commentstatus	=> 'disabled',
-			});
+			my $kind = $self->getDiscussion($journal->{discussion}, 'kind');
+			my $kinds = $self->getDescriptions('discussion_kinds');
+			# set to disabled only if the journal has not been
+			# converted to a journal-story (it will get re-enabled
+			# later if it is converted to a journal-story)
+			if ($kinds->{$kind} eq 'journal') {
+				$slashdb->setDiscussion($journal->{discussion}, {
+					commentstatus	=> 'disabled',
+				});
+			}
 		} else {
 			$slashdb->deleteDiscussion($journal->{discussion});
 		}
@@ -529,8 +537,8 @@ sub splitJournalTextForStory {
 	my($intro, $body) = split(/<br>|<\/p>/i, $text, 2);
 
 	for ($intro, $body) {
-		s/^$Slash::Utility::Data::WS_RE+//io;
-		s/$Slash::Utility::Data::WS_RE+$//io;
+		s/^$Slash::Utility::Data::WS_RE+//io if defined;
+		s/$Slash::Utility::Data::WS_RE+$//io if defined;
 
 		$_ = balanceTags($_);
 	}
@@ -559,8 +567,8 @@ sub promoteJournal {
 	my $user      = getCurrentUser();
 	my $journal = getObject('Slash::Journal'); 
 
-	return unless $constants->{journal_allow_journal2submit};
-	return unless $data && $data->{id};
+	return 0 unless $constants->{journal_allow_journal2submit};
+	return 0 unless $data && $data->{id};
 	my $src_journal = $journal->get($data->{id});
 	if ($src_journal->{submit} eq "yes") {
 		my $transferred = $journal->hasJournalTransferred($data->{id});
@@ -578,6 +586,7 @@ sub promoteJournal {
 			}
 		}
 	}
+	return 1;
 }
 
 

@@ -1270,7 +1270,7 @@ sub lockTest {
 				percent		=> $pct,
 				subject		=> $_->{subject},
 				nickname	=> $slashdb->getUser($_->{uid}, 'nickname')
-				}, 1);
+			}, 1);
 		}
 	}
 	return $msg;

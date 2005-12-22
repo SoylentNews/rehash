@@ -556,7 +556,11 @@ sub doSaveArticle {
 	}
 
 	return(getData('submit_must_enable_comments'), 1)
-		if $form->{submit} && $form->{journal_discuss} eq "disabled";
+		if $form->{submit} && (
+			!$form->{journal_discuss}
+				||
+			$form->{journal_discuss} eq 'disabled'
+		);
 
 	unless ($rkey) {
 		my $reskey = getObject('Slash::ResKey');
@@ -574,7 +578,11 @@ sub doSaveArticle {
 
 		# note: comments_on is a special case where we are
 		# only turning on comments, not saving anything else
-		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled' && !$article->{discussion}) {
+		if ($constants->{journal_comments} &&
+			$form->{journal_discuss} &&
+			$form->{journal_discuss} ne 'disabled') &&
+			$article->{discussion}
+		) {
 			my $rootdir = $gSkin->{rootdir};
 			if ($form->{comments_on}) {
 				$description = $article->{description};
@@ -584,6 +592,7 @@ sub doSaveArticle {
 			my $commentstatus = $form->{journal_discuss};
 
 			my $did = $slashdb->createDiscussion({
+				kind	=> 'journal',
 				title	=> $description,
 				topic	=> $form->{tid},
 				commentstatus	=> $form->{journal_discuss},
@@ -617,6 +626,7 @@ sub doSaveArticle {
 		if ($constants->{journal_comments} && $form->{journal_discuss} ne 'disabled') {
 			my $rootdir = $gSkin->{rootdir};
 			my $did = $slashdb->createDiscussion({
+				kind	=> 'journal',
 				title	=> $description,
 				topic	=> $form->{tid},
 				commentstatus	=> $form->{journal_discuss},
@@ -755,7 +765,9 @@ sub saveArticle {
 		return 1;
 	}
 
-	displayArticle($journal, $constants, $user, $form, $journal_reader);
+	# to make sure we are not faster than replication is, pass
+	# the $journal object as the $journal_reader object
+	displayArticle($journal, $constants, $user, $form, $journal);
 }
 
 sub editArticle {

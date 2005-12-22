@@ -235,6 +235,9 @@ my %descriptions = (
 	'forums'
 		=> sub { $_[0]->sqlSelectMany('subsections.id, subsections.title', 'section_subsections, subsections', "section_subsections.subsection=subsections.id AND section_subsections.section='forums'") },
 
+	'discussion_kinds'
+		=> sub { $_[0]->sqlSelectMany('dkid, name', 'discussion_kinds') },
+
 );
 
 ########################################################
@@ -1935,65 +1938,29 @@ sub createSubmission {
 }
 
 ########################################################
-# Handles admin logins (checks the sessions table for a cookie that
-# matches).  Called during authentication
+# this is just for tracking what admins are currently looking at,
+# and when they last accessed the site
 sub getSessionInstance {
-	my($self, $uid, $session_in) = @_;
+	my($self, $uid) = @_;
 	my $admin_timeout = getCurrentStatic('admin_timeout');
-	my $session_out = '';
 
-	if ($session_in) {
-		$self->sqlDelete("sessions",
-			"NOW() > DATE_ADD(lasttime, INTERVAL $admin_timeout MINUTE)"
-		);
+	$self->sqlDelete("sessions",
+		"NOW() > DATE_ADD(lasttime, INTERVAL $admin_timeout MINUTE)"
+	);
 
-		my $session_in_q = $self->sqlQuote($session_in);
+	my($lasttitle, $last_sid, $last_subid) = $self->sqlSelect(
+		'lasttitle, last_sid, last_subid', 
+		'sessions',
+		"uid=$uid"
+	);
 
-		my($uid) = $self->sqlSelect(
-			'uid',
-			'sessions',
-			"session=$session_in_q"
-		);
-
-		if ($uid) {
-			$self->sqlDelete("sessions",
-				"uid = '$uid' AND session != $session_in_q"
-			);
-			$self->sqlUpdate('sessions',
-				{ -lasttime => 'now()' },
-				"session = $session_in_q"
-			);
-			$session_out = $session_in;
-		}
-	}
-	if (!$session_out) {
-		my($title, $last_sid, $last_subid) = $self->sqlSelect(
-			'lasttitle, last_sid, last_subid', 
-			'sessions',
-			"uid=$uid"
-		);
-		$_ ||= '' for ($title, $last_sid, $last_subid);
-
-		# Why not have sessions have UID be unique and use 
-		# sqlReplace() here? Minor quibble, just curious.
-		# - Cliff
-		# We need the ID that was inserted, and I don't think
-		# LAST_INSERT_ID() works for a REPLACE, or at least
-		# it isn't documented that way. - Jamie
-		# http://www.mysql.com/doc/en/mysql_insert_id.html
-		$self->sqlDelete("sessions", "uid=$uid");
-		$self->sqlInsert('sessions', {
-			-uid		=> $uid,
-			-logintime	=> 'NOW()',
-			-lasttime	=> 'NOW()',
-			lasttitle	=> $title,
-			last_sid	=> $last_sid,
-			last_subid	=> $last_subid
-		});
-		$session_out = $self->getLastInsertId({ table => 'sessions', prime => 'session' });
-	}
-	return $session_out;
-
+	$self->sqlReplace('sessions', {
+		-uid		=> $uid,
+		-lasttime	=> 'NOW()',
+		lasttitle	=> $lasttitle    || '',
+		last_sid	=> $last_sid     || '',
+		last_subid	=> $last_subid   || ''
+	});
 }
 
 ########################################################
@@ -2597,9 +2564,11 @@ sub getLogToken {
 	my $value = $self->_logtoken_read_memcached($uid, $temp_str, $public_str, $locationid) || '';
 #print STDERR scalar(gmtime) . " $$ getLogToken value from mcd '$value' for uid=$uid temp_str=$temp_str public_str=$public_str locationid=$locationid\n";
 	if (!$value) {
+		my $thiswhere = $where;
+		$thiswhere .= ' AND expires >= NOW()' if $public_str ne 'yes';
 		$value = $self->sqlSelect(
 			'value', 'users_logtokens',
-			$where . ' AND expires >= NOW()'
+			$thiswhere
 		) || '';
 	}
 #print STDERR scalar(gmtime) . " $$ getLogToken value '$value'\n";
@@ -2651,6 +2620,33 @@ sub setLogToken {
 		$self->_logtoken_write_memcached($uid, $temp_str, $public_str,
 			$locationid, $logtoken, $seconds);
 	}
+
+	# prune logtokens table, each user should not have too many
+	my $uid_q = $self->sqlQuote($uid);
+	my $max = getCurrentStatic('logtokens_max') || 2;
+	my $total = $self->sqlCount('users_logtokens', "uid = $uid_q");
+	if ($total > $max) {
+		my $limit = $total - $max;
+		my $logtokens = $self->sqlSelectAllHashref(
+			'lid', 'lid, uid, temp, public, locationid',
+			'users_logtokens', "uid = $uid_q",
+			"ORDER BY expires LIMIT $limit"
+		);
+
+		for my $lid (keys %$logtokens) {
+			my $lt = $logtokens->{$lid};
+			$self->sqlDelete('users_logtokens', "lid=$lid");
+			$self->_logtoken_delete_memcached(
+				$lt->{uid},
+				$lt->{temp},
+				$lt->{public},
+				$lt->{locationid}
+			);
+		}
+	}
+
+
+
 #print STDERR scalar(gmtime) . " $$ setLogToken replaced uid=$uid temp=$temp_str public=$public_str locationid=$locationid logtoken='$logtoken' rows='$rows'\n";
 	return $logtoken;
 }
@@ -3161,6 +3157,14 @@ sub setRelatedLink {
 
 ########################################################
 sub setDiscussion {
+	my($self, $id, $discussion) = @_;
+	if ($discussion->{kind}) {
+		my $kinds = $self->getDescriptions('discussion_kinds');
+		my $kind = delete $discussion->{kind};
+		my %r_kinds;
+		@r_kinds{values %$kinds} = keys %$kinds;
+		$discussion->{dkid} = $r_kinds{$kind} if $r_kinds{$kind};
+	}
 	_genericSet('discussions', 'id', '', @_);
 }
 
@@ -3370,9 +3374,9 @@ sub checkDiscussionPostable {
 
 	# This should do it. 
 	my($column_time, $where_time) = $self->_stories_time_clauses({
-		try_future =>		$constants->{subscribe_future_post},
-		must_be_subscriber =>	1,
-		column_name =>		"ts",
+		try_future		=> $constants->{subscribe_future_post},
+		must_be_subscriber	=> 1,
+		column_name		=> 'ts',
 	});
 	my $count = $self->sqlCount(
 		'discussions',
@@ -3381,9 +3385,12 @@ sub checkDiscussionPostable {
 	return 0 unless $count;
 
 	# Now, we are going to get paranoid and run the story checker against it
-	my $sid;
-	if ($sid = $self->getDiscussion($id, 'sid')) {
-		return $self->checkStoryViewable($sid);
+	my $discussion = $self->getDiscussion($id, [ qw(dkid sid) ]);
+	if ($discussion->{sid}) {
+		my $kinds = $self->getDescriptions('discussion_kinds');
+		if ($kinds->{ $discussion->{dkid} } eq 'story') {
+			return $self->checkStoryViewable($discussion->{sid});
+		}
 	}
 
 	return 1;
@@ -3528,12 +3535,6 @@ sub deleteDiscussion {
 		. ")"
 	) if @$comment_ids;
 	$self->deleteModeratorlog({ sid => $did });
-}
-
-########################################################
-sub deleteAuthor {
-	my($self, $uid) = @_;
-	$self->sqlDelete("sessions", "uid=$uid");
 }
 
 ########################################################
@@ -8810,6 +8811,14 @@ sub createDiscussion {
 	my($self, $discussion) = @_;
 	return unless $discussion->{title} && $discussion->{url};
 
+	if ($discussion->{kind}) {
+		my $kinds = $self->getDescriptions('discussion_kinds');
+		my $kind = delete $discussion->{kind};
+		my %r_kinds;
+		@r_kinds{values %$kinds} = keys %$kinds;
+		$discussion->{dkid} = $r_kinds{$kind} if $r_kinds{$kind};
+	}
+
 	$discussion->{type} ||= 'open';
 	# XXXSKIN this should be pulled from gSkin not constants
 	$discussion->{commentstatus} ||= getCurrentStatic('defaultcommentstatus');
@@ -8917,6 +8926,7 @@ sub createStory {
 		my $comment_codes = $self->getDescriptions('commentcodes_extended');
 
 		my $discussion = {
+			kind		=> 'story',
 			uid		=> $story->{uid},
 			title		=> $story->{title},
 			primaryskid	=> $primaryskid,
@@ -8935,6 +8945,7 @@ sub createStory {
 		my $id;
 		if ($story->{discussion}) {
 			$id = $story->{discussion};
+			$discussion->{kind} = 'journal-story';
 			if (!$self->setDiscussion($id, $discussion)) {
 				$error = "Failed to set discussion for story: " . Dumper($discussion);
 			}
