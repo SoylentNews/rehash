@@ -811,6 +811,8 @@ Bender:I'm not allowed to sing. Court order.
 Bender:Boy, who knew a cooler could also make a handy wang coffin?
 Bender:I'm so embarrassed. I wish everybody else was dead.
 Bender:Professor! Make a woman out of me!
+Bender:Would we have donkeys?
+Bender:Emotions are dumb and should be hated.
 Bender:An upgrade? I thought we all agreed I was perfect.
 Bender:Curse you, merciful Poseidon!
 Bender:I am a hideous triumph of form and function.
@@ -871,6 +873,8 @@ Fry:I did it!  And it's all thanks to the books at my local library.
 Fry:Existing is basically all I do!
 Fry:It's a widely-believed fact!
 Fry:My hands!  My horrible, human, hands!
+Leela:You did the best you could, I guess, and some of these gorillas are okay.
+Leela:This wangs chung.
 EOT
 
 1;
