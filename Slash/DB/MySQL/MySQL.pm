@@ -5231,7 +5231,7 @@ sub getKnownOpenProxy {
 	my($self, $ip, $ip_col) = @_;
 	return 0 unless $ip;
 	my $col = "ip";
-	$col = "ipid" if $ip_col eq "ipid";
+	$col = "ipid" if $ip_col && $ip_col eq "ipid";
 	my $ip_q = $self->sqlQuote($ip);
 	my $hours_back = getCurrentStatic('comments_portscan_cachehours') || 48;
 	my $port = $self->sqlSelect("port",

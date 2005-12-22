@@ -354,46 +354,80 @@ sub reparentComments {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
-	my $depth = $constants->{max_depth} || 7;
+	my $max_depth_allowed = $constants->{max_depth} || 7;
 
-	return if $user->{state}{noreparent} || (!$depth && !$user->{reparent});
+	return if $user->{state}{noreparent} || (!$max_depth_allowed && !$user->{reparent});
 
-	# adjust depth for root pid or cid
-	if (my $cid = $form->{cid} || $form->{pid}) {
-		while ($cid && (my($pid) = $reader->getComment($cid, 'pid'))) {
-			$depth++;
-			$cid = $pid;
+	# Adjust the max_depth_allowed for the root pid or cid.
+	# Actually I'm not sure this should be done at all.
+	# My guess is that it does the opposite of what's desired
+	# when $form->{cid|pid} is set.  And besides, max depth we
+	# display is for display, so it should be based on how much
+	# we're displaying, not on absolute depth of this thread.
+	my $root_cid_or_pid = $form->{cid} || $form->{pid} || 0;
+	if ($root_cid_or_pid) {
+		my $tmpcid = $root_cid_or_pid;
+		while ($tmpcid) {
+			my $pid = $reader->getComment($tmpcid, 'pid') || 0;
+			last unless $pid;
+			$max_depth_allowed++;
+			$tmpcid = $pid;
 		}
 	}
 
-	# You know, we do assume comments are linear -Brian
+	# The below algorithm assumes that comments are inserted into
+	# the database with cid's that increase chronologically, in order
+	# words that for any two comments where A's cid > B's cid, that
+	# A's timestamp > B's timestamp also.
+
 	for my $x (sort { $a <=> $b } keys %$comments) {
 		next if $x == 0; # exclude the fake "cid 0" comment
 
 		my $pid = $comments->{$x}{pid} || 0;
 		my $reparent = 0;
 
-		# do threshold reparenting thing
+		# First, if this comment is above the user's desired threshold
+		# (and thus will likely be shown), but its parent is below
+		# the desired threshold (and thus will not likely be shown),
+		# bounce it up the chain until we can reparent it to a comment
+		# that IS being shown.  Effectively we pretend the invisible
+		# comments between this comment and its (great-etc.) grandparent
+		# do not exist.
+		#
+		# But, if all its (great-etc.) grandparents are either invisible
+		# or chronologically precede the root comment, don't reparent it
+		# at all.
 		if ($user->{reparent} && $comments->{$x}{points} >= $user->{threshold}) {
 			my $tmppid = $pid;
-			while ($tmppid && $comments->{$tmppid}{points} < $user->{threshold}) {
-				$tmppid = $comments->{$tmppid}{pid};
+			while ($tmppid
+				&& $comments->{$tmppid} && defined($comments->{$tmppid}{points})
+				&& $comments->{$tmppid}{points} < $user->{threshold}) {
+				$tmppid = $comments->{$tmppid}{pid} || 0;
 				$reparent = 1;
 			}
 
-			if ($reparent && $tmppid >= ($form->{cid} || $form->{pid} || 0)) {
+			if ($reparent && $tmppid >= $root_cid_or_pid) {
 				$pid = $tmppid;
 			} else {
 				$reparent = 0;
 			}
 		}
 
-		if ($depth && !$reparent) { # don't reparent again!
+		# Second, if the above did not find a suitable (great)grandparent,
+		# we try a second method of collapsing to a (great)grandparent:
+		# check whether the depth of this comment is too great to show
+		# nested so deeply, and if so, ratchet it back.  Note that since
+		# we are iterating through %$comments in cid order, the parents of
+		# this comment will already have gone through this code and thus
+		# already should have their {depth}s set.  (At least that's the
+		# theory, I'm not sure that part really works.)
+		if ($max_depth_allowed && !$reparent) {
 			# set depth of this comment based on parent's depth
 			$comments->{$x}{depth} = ($pid ? ($comments->{$pid}{depth} ||= 0) : 0) + 1;
 
-			# go back each pid until we find one with depth less than $depth
-			while ($pid && $comments->{$pid}{depth} >= $depth) {
+			# go back each pid until we find one with depth less than $max_depth_allowed
+			while ($pid && defined($comments->{$pid})
+				&& ($comments->{$pid}{depth} ||= 0) >= $max_depth_allowed) {
 				$pid = $comments->{$pid}{pid};
 				$reparent = 1;
 			}
@@ -401,7 +435,7 @@ sub reparentComments {
 
 		if ($reparent) {
 			# remove child from old parent
-			if ($pid >= ($form->{cid} || $form->{pid} || 0)) {
+			if ($pid >= $root_cid_or_pid) {
 				@{$comments->{$comments->{$x}{pid}}{kids}} =
 					grep { $_ != $x }
 					@{$comments->{$comments->{$x}{pid}}{kids}}

@@ -2520,12 +2520,12 @@ sub determineCurrentSkin {
 	my $skin;
 
 	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
-		my $hostname = $r->header_in('host');
+		my $hostname = $r->header_in('host') || '';
 		$hostname =~ s/:\d+$//;
  
 		my $skins = $reader->getSkins;
 		($skin) = grep {
-				(my $tmp = lc $skins->{$_}{hostname}) =~ s/:\d+$//;
+				(my $tmp = lc $skins->{$_}{hostname} || '') =~ s/:\d+$//;
 				$tmp eq lc $hostname
 			} sort { $a <=> $b } keys %$skins;
 
@@ -2533,9 +2533,9 @@ sub determineCurrentSkin {
 		if (!$skin && $hostname !~ /^\d+\.\d+\.\d+\.\d+$/) {
 			$skin = getCurrentStatic('mainpage_skid');
 			if (!$skin) {
-				errorLog("determineCurrentSkin called but no skin found (even default) for $hostname\n");
+				errorLog("determineCurrentSkin called but no skin found (even default) for '$hostname'\n");
 			} else {
-				errorLog("determineCurrentSkin called but no skin found (so using default) for $hostname\n");
+				errorLog("determineCurrentSkin called but no skin found (so using default) for '$hostname'\n");
 			}
 		}
 	} else {

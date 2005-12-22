@@ -1794,8 +1794,10 @@ sub approveTag {
 		if ($replace{$t_lc} && $approved{ $replace{$t_lc} }) {
 			$t = $t_lc = $replace{$t_lc};
 		} else {
-			$Slash::Utility::Data::approveTag::removed->{$t_lc}++
-				if $constants->{approveTag_debug};
+			if ($constants->{approveTag_debug}) {
+				$Slash::Utility::Data::approveTag::removed->{$t_lc} ||= 0;
+				$Slash::Utility::Data::approveTag::removed->{$t_lc}++;
+			}
 			return '';
 		}
 	}
@@ -1960,8 +1962,12 @@ sub approveCharref {
 		my $entity = $1;  # case matters
 		if ($constants->{draconian_charrefs}) {
 			if (!$constants->{good_entity}{$entity}) {
-				$decimal = ord $entity2char{$entity};
-				$ok = $ansi_to_ascii{$decimal} ? 2 : 0;
+				if (defined $entity2char{$entity}) {
+					$decimal = ord $entity2char{$entity};
+					$ok = $ansi_to_ascii{$decimal} ? 2 : 0;
+				} else {
+					$ok = 0;
+				}
 			}
 		} else {
 			$ok = 0 if $constants->{bad_entity}{$entity}

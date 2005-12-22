@@ -15,7 +15,6 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
-	my $gSkin     = getCurrentSkin();
 
 	my $story;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
@@ -29,13 +28,19 @@ sub main {
 	}
 
 	$story = $reader->getStory($sid);
-	if ($story
-		&& $story->{primaryskid} && $story->{primaryskid} != $gSkin->{skid}
+	if ($story && $story->{primaryskid}
 		&& !($form->{ssi} && $form->{ssi} eq "yes")) {
-		my $story_skin = $slashdb->getSkin($story->{primaryskid});
-		if ($story_skin && $story_skin->{rootdir} && $story_skin->{rootdir} ne $gSkin->{rootdir}) {
-			redirect("$story_skin->{rootdir}$ENV{REQUEST_URI}");
-			return;
+		# Make sure the reader is viewing this story in the
+		# proper skin.
+		my $cur_skid = determineCurrentSkin();
+		if ($story->{primaryskid} != $cur_skid) {
+			my $cur_skin = $reader->getSkin($cur_skid);
+			my $story_skin = $reader->getSkin($story->{primaryskid});
+			if ($story_skin && $story_skin->{rootdir}
+				&& $story_skin->{rootdir} ne $cur_skin->{rootdir}) {
+				redirect("$story_skin->{rootdir}$ENV{REQUEST_URI}");
+				return;
+			}
 		}
 	}
 

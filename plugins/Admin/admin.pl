@@ -25,7 +25,7 @@ sub main {
 	# lc just in case
 	my $op = lc($form->{op});
 
-	my($tbtitle);
+	my $tbtitle = '';
 
 	my $ops = {
 		slashd		=> {
@@ -210,7 +210,7 @@ sub main {
 		$tbtitle = " - \"$tbtitle\"";
 		# Undef the form title value if we have SID defined, since the editor
 		# will have to get this information from the database anyways.
-		undef $form->{title} if ($form->{sid} && $form->{op} eq 'edit');
+		undef $form->{title} if $form->{sid} && $form->{op} eq 'edit';
 	}
 
 	my $db_time = $slashdb->getTime();

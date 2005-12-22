@@ -1158,7 +1158,7 @@ sub showInfo {
 		$comment->{points} += $user->{karma_bonus}
 			if $user->{karma_bonus} && $comment->{karma_bonus} eq 'yes';
 		$comment->{points} += $user->{subscriber_bonus}
-			if $user->{subscriber_bonus} && $comment->{subscriber} eq 'yes';
+			if $user->{subscriber_bonus} && $comment->{subscriber_bonus} eq 'yes';
 
 		# fix points in case they are out of bounds
 		$comment->{points} = $constants->{comment_minscore} if $comment->{points} < $constants->{comment_minscore};
@@ -2583,8 +2583,8 @@ sub saveComm {
 
 	for my $reason_name (@reasons) {
 		my $key = "reason_alter_$reason_name";
-		my $answer = $form->{$key};
-		$answer = 0 if $answer !~ /^[\-+]?\d+$/;
+		my $answer = $form->{$key} || 0;
+		$answer = 0 if !$answer || $answer !~ /^[\-+]?\d+$/;
 		$user_edits_table->{$key} = ($answer == 0) ? '' : $answer;
 	}
 
