@@ -3540,9 +3540,10 @@ ALTER TABLE discussions ADD COLUMN dkid TINYINT UNSIGNED NOT NULL DEFAULT 1 AFTE
 
 INSERT INTO discussion_kinds (dkid, name) VALUES (1, 'story');
 INSERT INTO discussion_kinds (dkid, name) VALUES (2, 'user_created');
-# only do these if you use these plugins
+# plugins/Journal (ignore if not using that plugin)
 INSERT INTO discussion_kinds (dkid, name) VALUES (NULL, 'journal');
 INSERT INTO discussion_kinds (dkid, name) VALUES (NULL, 'journal-story');
+# plugins/PollBooth (ignore if not using that plugin)
 INSERT INTO discussion_kinds (dkid, name) VALUES (NULL, 'poll');
 
 ALTER TABLE sessions DROP COLUMN logintime;
