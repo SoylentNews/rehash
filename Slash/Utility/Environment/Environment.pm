@@ -82,6 +82,8 @@ use vars qw($VERSION @EXPORT);
 	setCookie
 	getPublicLogToken
 
+	getPollVoterHash
+
 	debugHash
 	slashProf
 	slashProfInit
@@ -1340,6 +1342,22 @@ sub setCookie {
 
 #========================================================================
 
+=head2 getPollVoterHash([UID])
+
+=cut
+
+sub getPollVoterHash {
+	my $constants = getCurrentStatic();
+	my $remote_addr = $ENV{REMOTE_ADDR} || '';
+        if ($constants->{poll_fwdfor} && $ENV{HTTP_X_FORWARDED_FOR}) {
+                return md5_hex($remote_addr . $ENV{HTTP_X_FORWARDED_FOR});
+        } else {
+                return md5_hex($remote_addr);
+        }
+}
+
+#========================================================================
+
 =head2 getPublicLogToken([UID])
 
 Just a wrapper around:
@@ -1362,8 +1380,6 @@ sub getPublicLogToken {
 	}
 	return '';
 }
-
-
 
 #========================================================================
 

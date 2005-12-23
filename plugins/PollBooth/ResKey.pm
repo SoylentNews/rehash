@@ -8,7 +8,6 @@ package Slash::PollBooth::ResKey;
 use warnings;
 use strict;
 
-use Digest::MD5 'md5_hex';
 use Slash::Utility;
 use Slash::Constants ':reskey';
 
@@ -31,15 +30,12 @@ sub doCheck {
 
 	return(RESKEY_DEATH, ['no qid', {}, 'pollBooth']) unless $qid;
 
-	my $ra  = $ENV{REMOTE_ADDR} || '';
-	my $xff = $constants->{poll_fwdfor} ? ($ENV{HTTP_X_FORWARDED_FOR} || '') : '';
-	my $md5 = md5_hex($ra . $xff);
-
+	my $pollvoter_md5 = getPollVoterHash();
 	my $qid_quoted = $slashdb->sqlQuote($qid);
 
 	# Yes, qid/id/uid is a key in pollvoters.
 	my($voters) = $slashdb->sqlSelect('id', 'pollvoters',
-		"qid=$qid_quoted AND id='$md5' AND uid=$user->{uid}"
+		"qid=$qid_quoted AND id='$pollvoter_md5' AND uid=$user->{uid}"
 	);
 
 	if ($voters) {
