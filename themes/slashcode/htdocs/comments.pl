@@ -1163,7 +1163,10 @@ sub submitComment {
 		}) if !isAnon($clean_comment->{uid});
 
 		my($messages, $reply, %users);
-		if ($form->{pid} || $discussion->{url} =~ /\bjournal\b/ || $constants->{commentnew_msg}) {
+		my $kinds = $reader->getDescriptions('discussion_kinds');
+		if ($form->{pid}
+			|| $kinds->{ $discussion->{kind} } eq 'journal'
+			|| $constants->{commentnew_msg}) {
 			$messages = getObject('Slash::Messages');
 			$reply = $slashdb->getCommentReply($form->{sid}, $maxCid);
 		}
@@ -1189,7 +1192,7 @@ sub submitComment {
 		}
 
 		# reply to journal
-		if ($messages && $discussion->{url} =~ /\bjournal\b/) {
+		if ($messages && $kinds->{ $discussion->{kind} } eq 'journal') {
 			my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
 			if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
 				my $data  = {

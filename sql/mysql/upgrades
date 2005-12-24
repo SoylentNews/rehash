@@ -3533,10 +3533,8 @@ CREATE TABLE discussion_kinds (
         dkid        TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
         name        VARCHAR(30) NOT NULL DEFAULT '',
         PRIMARY KEY (dkid),
-        UNIQUE name (name),
+        UNIQUE name (name)
 ) TYPE=InnoDB;
-
-ALTER TABLE discussions ADD COLUMN dkid TINYINT UNSIGNED NOT NULL DEFAULT 1 AFTER id;
 
 INSERT INTO discussion_kinds (dkid, name) VALUES (1, 'story');
 INSERT INTO discussion_kinds (dkid, name) VALUES (2, 'user_created');
@@ -3545,6 +3543,17 @@ INSERT INTO discussion_kinds (dkid, name) VALUES (NULL, 'journal');
 INSERT INTO discussion_kinds (dkid, name) VALUES (NULL, 'journal-story');
 # plugins/PollBooth (ignore if not using that plugin)
 INSERT INTO discussion_kinds (dkid, name) VALUES (NULL, 'poll');
+
+# You may want to wrap these next lines in a transaction, and if
+# an error occurs you may want to ROLLBACK until you figure it out.
+# On Slashdot this will likely take under 10 minutes.
+# START TRANSACTION;
+ALTER TABLE discussions ADD COLUMN dkid TINYINT UNSIGNED NOT NULL DEFAULT 1 AFTER id;
+UPDATE discussions SET last_update=last_update, dkid=2;
+UPDATE discussions, skins SET last_update=last_update, dkid=1 WHERE sid != '' AND discussions.url REGEXP CONCAT('^(http:)?//', skins.hostname, '/article\\.pl\\?sid=(', sid, '|[0-9]+$)');
+UPDATE discussions, discussion_kinds, skins SET last_update=last_update, discussions.dkid=discussion_kinds.dkid WHERE discussion_kinds.name='journal' AND discussions.dkid=2 AND (discussions.url REGEXP CONCAT('^(http:)?//', skins.hostname, '/~[^/]+/journal/[0-9]+$') OR discussions.url REGEXP CONCAT('^(http:)?//', skins.hostname, '/journal\\.pl\\?op=display&id=[0-9]+&uid=', discussions.uid));
+UPDATE discussions, discussion_kinds, skins SET last_update=last_update, discussions.dkid=discussion_kinds.dkid WHERE discussion_kinds.name='poll' AND discussions.dkid=2 AND discussions.url REGEXP CONCAT('^(http:)?//', skins.hostname, '/pollBooth\\.pl\\?(qid=[0-9]+&aid=-1|op=vote&qid=[0-9]+)$');
+# COMMIT;
 
 ALTER TABLE sessions DROP COLUMN logintime;
 
