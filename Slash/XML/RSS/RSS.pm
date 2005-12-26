@@ -168,12 +168,11 @@ sub create {
 		encoding	=> $encoding,
 	);
 
-	my($dynamic, $absolutedir);
+	my $dynamic = 0;
+	my $absolutedir = $gSkin->{absolutedir};
 	if (defined &Slash::Apache::ConnectionIsSSL) {
 		$dynamic = 1;
-		$absolutedir = Slash::Apache::ConnectionIsSSL()
-			? $gSkin->{absolutedir_secure}
-			: $gSkin->{absolutedir};
+		$absolutedir = $gSkin->{absolutedir_secure} if Slash::Apache::ConnectionIsSSL();
 	}
 
 	# set defaults
