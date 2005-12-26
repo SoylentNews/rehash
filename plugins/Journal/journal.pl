@@ -578,10 +578,10 @@ sub doSaveArticle {
 
 		# note: comments_on is a special case where we are
 		# only turning on comments, not saving anything else
-		if ($constants->{journal_comments} &&
-			$form->{journal_discuss} &&
-			$form->{journal_discuss} ne 'disabled') &&
-			$article->{discussion}
+		if ($constants->{journal_comments}
+			&& $form->{journal_discuss}
+			&& $form->{journal_discuss} ne 'disabled'
+			&& $article->{discussion}
 		) {
 			my $rootdir = $gSkin->{rootdir};
 			if ($form->{comments_on}) {
