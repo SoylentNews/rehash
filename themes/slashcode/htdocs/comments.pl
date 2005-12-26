@@ -928,6 +928,7 @@ sub previewForm {
 # called manually.
 sub submitComment {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	$form->{nobonus}  = $user->{nobonus}	unless $form->{nobonus_present};
 	$form->{postanon} = $user->{postanon}	unless $form->{postanon_present};
@@ -1070,7 +1071,7 @@ sub submitComment {
 	}
 	my $posters_uid = $user->{uid};
 	if ($form->{postanon}
-		&& $slashdb->checkAllowAnonymousPosting()
+		&& $reader->checkAllowAnonymousPosting()
 		&& $user->{karma} > -1
 		&& $discussion->{commentstatus} eq 'enabled') {
 		$posters_uid = getCurrentAnonymousCoward('uid');
