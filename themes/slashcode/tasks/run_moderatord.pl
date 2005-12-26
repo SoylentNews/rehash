@@ -426,8 +426,8 @@ sub reconcile_m2 {
 			}
 			if ($statsSave) {
 				my $token_change = $use_possible
-					? $csq->{$key}{num_possible}
-					: $csq->{$key}{num_base};
+					? ($csq->{$key}{num_possible} || 0)
+					: ($csq->{$key}{num_base} || 0);
 				if ($token_change > 0) {
 					$newstats{mod_tokens_gain_m2majority} += $token_change;
 				} elsif ($token_change < 0) {
