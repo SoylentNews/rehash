@@ -1139,7 +1139,6 @@ sub showInfo {
 
 		# This is cached.
 		my $discussion = $reader->getDiscussion($comment->{sid});
-use Data::Dumper; print STDERR "discussion '$comment->{sid}': " . Dumper($discussion); #if $discussion->{url} && !$discussion->{dkid};
 		if (!$discussion || !$discussion->{dkid}) {
 			# A comment with no accompanying discussion;
 			# basically we pretend it doesn't exist.
