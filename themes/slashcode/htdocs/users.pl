@@ -815,9 +815,9 @@ sub showComments {
 			my $discussion = $reader->getDiscussion($comment->{sid});
 			my $kinds = $reader->getDescriptions('discussion_kinds');
 
-			if ($kinds->{ $discussion->{kind} } eq 'journal') {
+			if ($kinds->{ $discussion->{dkid} } eq 'journal') {
 				$comment->{type} = 'journal';
-			} elsif ($kinds->{ $discussion->{kind} } eq 'poll') {
+			} elsif ($kinds->{ $discussion->{dkid} } eq 'poll') {
 				$comment->{type} = 'poll';
 			} else {
 				$comment->{type} = 'story';
@@ -1130,26 +1130,23 @@ sub showInfo {
 	}
 
 	my $cids_seen = {};
+	my $kinds = $slashdb->getDescriptions('discussion_kinds');
 	for my $comment (@$comments) {
 		$cids_seen->{$comment->{cid}}++;
 		my $type;
 		# This works since $sid is numeric.
 		my $replies = $reader->countCommentsBySidPid($comment->{sid}, $comment->{cid});
 
-		# This is ok, since with all luck we will not be hitting the DB
-		# ...however, the "sid" parameter here must be the string
-		# based SID from either the "stories" table or from
-		# pollquestions.
+		# This is cached.
 		my $discussion = $reader->getDiscussion($comment->{sid});
-		my $kinds = $slashdb->getDescriptions('discussion_kinds');
-
-		if (!$discussion || !$discussion->{url}) {
+use Data::Dumper; print STDERR "discussion '$comment->{sid}': " . Dumper($discussion); #if $discussion->{url} && !$discussion->{dkid};
+		if (!$discussion || !$discussion->{dkid}) {
 			# A comment with no accompanying discussion;
 			# basically we pretend it doesn't exist.
 			next;
-		} elsif ($kinds->{ $discussion->{kind} } eq 'journal') {
+		} elsif ($kinds->{ $discussion->{dkid} } eq 'journal') {
 			$type = 'journal';
-		} elsif ($kinds->{ $discussion->{kind} } eq 'poll') {
+		} elsif ($kinds->{ $discussion->{dkid} } eq 'poll') {
 			$type = 'poll';
 		} else {
 			$type = 'story';
