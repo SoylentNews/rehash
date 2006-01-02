@@ -219,8 +219,15 @@ sub mailPasswd {
 		# A user coming from a srcid that's been marked as not
 		# acceptable for posting from also does not get to
 		# mail a password to anyone.
-		if ($reader->checkAL2($user->{srcids}, 'nopost')
-			|| $reader->checkAL2($user->{srcids}, 'nopostanon')
+
+		## XXX: we added uid to srcids, so now this is broken;
+		## anywhere else we need to address this?
+		my %srcids;
+		@srcids{keys %{$user->{srcids}}} = values %{$user->{srcids}};
+		delete $srcids{uid};
+
+		if ($reader->checkAL2(\%srcids, 'nopost')
+			|| $reader->checkAL2(\%srcids, 'nopostanon')
 		) {
 			push @note, getData('mail_readonly');
 			$error = 1;
