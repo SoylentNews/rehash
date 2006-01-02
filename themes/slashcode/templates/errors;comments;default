@@ -46,6 +46,11 @@ as comment posting and moderation are currently unavailable.
 CASE "already posted" %]
 You've already posted something in this discussion<br>
 
+[% # NO SUCH PARENT COMMENT
+CASE "no such parent" %]
+Apparently the comment you're replying to does not actually exist.
+Odd. If you're quite sure it should exist, please file a bug report.
+
 [% # ANONYMOUS DISALLOWED.
 CASE "anonymous disallowed" %]
 Sorry, anonymous posting has been turned off.

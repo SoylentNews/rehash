@@ -454,7 +454,13 @@ sub editComment {
 	# Get the comment we may be responding to. Remember to turn off
 	# moderation elements for this instance of the comment.
 	my $pid = $form->{pid} || 0; # this is guaranteed numeric, from filter_params
-	my $reply = $slashdb->getCommentReply($sid, $pid);
+	my $reply = $slashdb->getCommentReply($sid, $pid) || { };
+
+	# An attempt to reply to a comment that doesn't exist is an error.
+	if ($pid && !%$reply) {
+		print getError('no such parent');
+		return;
+	}
 
 	# calculate proper points value ... maybe this should be a public,
 	# and *sane*, API?  like, no need to pass reasons, users, or min/max,
@@ -466,8 +472,7 @@ sub editComment {
 		$reply, $user,
 		$constants->{comment_minscore}, $constants->{comment_maxscore},
 		$slashdb->countUsers({ max => 1 }), $slashdb->getReasons
-	);
-
+	) if %$reply;
 
 	# If anon posting is turned off, forbid it.  The "post anonymously"
 	# checkbox should not appear in such a case, but check that field
@@ -487,7 +492,7 @@ sub editComment {
 		$preview = previewForm(\$error_message) or $error_flag++;
 	}
 
-	if ($pid && !$form->{postersubj}) {
+	if (%$reply && !$form->{postersubj}) {
 		$form->{postersubj} = decode_entities($reply->{subject});
 		$form->{postersubj} =~ s/^Re://i;
 		$form->{postersubj} =~ s/\s\s/ /g;
