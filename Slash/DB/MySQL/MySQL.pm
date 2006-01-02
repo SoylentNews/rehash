@@ -710,6 +710,8 @@ sub _convertModsToComments {
 		}
 		$com_hr->{primaryskid} ||= $mainpage_skid;
 		my $rootdir = $self->getSkin($com_hr->{primaryskid})->{rootdir};
+		# XXX With discussions.kinds we can trust the URL unless it's
+		# a user-created discussion, now.
 		if ($mod_hr->{discussions_sid}) {
 			# This is a comment posted to a story discussion, so
 			# we can link straight to the story, providing even
@@ -7706,7 +7708,7 @@ sub getCommentReply {
 	) || {};
 
 	# For a comment we're replying to, there's no need to mod.
-	$reply->{no_moderation} = 1;
+	$reply->{no_moderation} = 1 if %$reply;
 
 	return $reply;
 }
