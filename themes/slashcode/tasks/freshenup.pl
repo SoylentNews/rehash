@@ -476,6 +476,7 @@ sub _read_and_unlink_cchp_file {
 	} else {
 		my $cchp = <$cchp_fh>;
 		close $cchp_fh;
+		$cchp = '' if !defined($cchp);
 		if ($cchp && (($cc, $hp) = $cchp =~
 			/count (\d+), hitparade (.+)$/m)) {
 		} else {

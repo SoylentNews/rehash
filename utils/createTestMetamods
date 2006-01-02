@@ -26,7 +26,7 @@ version() if $opts{'v'};
 $opts{'u'} ||= 'slash';
 $opts{num_closed} = $ARGV[0] || 10;
 usage('Invalid number of meta-moderations') 
-	if $opts{num_closed} !~ /^\d+$/ || $opts{num_mods} < 0;
+	if $opts{num_closed} !~ /^\d+$/ || ($opts{num_mods} && $opts{num_mods} < 0);
 
 createEnvironment($opts{u});
 setCurrentSkin(determineCurrentSkin());
