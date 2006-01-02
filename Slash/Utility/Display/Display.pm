@@ -1265,10 +1265,10 @@ sub lockTest {
 	my $msg;
 	my $locks = $slashdb->getSessions([qw|lasttitle uid|]);
 	for (values %$locks) {
-		if ($_->{uid} ne getCurrentUser('uid') && (my $pct = matchingStrings($_->{subject}, $subj))) {
+		if ($_->{uid} ne getCurrentUser('uid') && (my $pct = matchingStrings($_->{lasttitle}, $subj))) {
 			$msg .= slashDisplay('lockTest', {
 				percent		=> $pct,
-				subject		=> $_->{subject},
+				subject		=> $_->{lasttitle},
 				nickname	=> $slashdb->getUser($_->{uid}, 'nickname')
 			}, 1);
 		}
