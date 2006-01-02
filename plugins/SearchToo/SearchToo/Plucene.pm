@@ -66,8 +66,8 @@ slashProf('init search', 'findRecords setup');
 		} else { # ($terms{points_min} != $constants->{comment_maxscore}) {
 			$filter = Slash::SearchToo::Plucene::Filter->new({
 				field => '_points_',
-				from  => _get_points(delete $terms->{points_min}),
-				to    => _get_points($constants->{comment_maxscore}),
+				from  => _get_sortable_points(delete $terms->{points_min}),
+				to    => _get_sortable_points($constants->{comment_maxscore}),
 			});
 		}
 	}
@@ -134,8 +134,8 @@ sub _addRecords {
 		$document->{content} = lc join ' ', @{$document}{ @{$self->_field_list('content')} };
 		delete @{$document}{ @{$self->_field_list('content')} };
 
-		$document->{_date_}   = _get_date(delete $document->{date});
-		$document->{_points_} = _get_points(delete $document->{points});
+		$document->{_date_}   = _get_sortable_date(delete $document->{date});
+		$document->{_points_} = _get_sortable_points(delete $document->{points});
 
 		for my $key (keys %$document) {
 			next unless length $document->{$key};
@@ -258,7 +258,7 @@ slashProf('', 'deleteRecords');
 
 #################################################################
 # make it easier to sort by serializing the date
-sub _get_date {
+sub _get_sortable_date {
 	my($time, $format) = @_;
 	$format ||= '%Y-%m-%d %H:%M:%S';
 	return freeze_date(Time::Piece->strptime($time, $format));
@@ -266,7 +266,7 @@ sub _get_date {
 
 #################################################################
 # make it easier to sort by converting to alphabet
-sub _get_points {
+sub _get_sortable_points {
 	my($points) = @_;
 
 	my $constants = getCurrentStatic();
