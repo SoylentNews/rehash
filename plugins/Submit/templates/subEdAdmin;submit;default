@@ -82,7 +82,7 @@ __template__
 BLOCK sub_display -%]
 	[% this_note = sub.note || '' %]
 
-	<tr><td><nobr>
+	<tr class="ps_[% sub.primaryskid %]"><td><nobr>
 		<input type="text" name="comment_[% sub.subid | strip_attribute %]" value="[% sub.comment | strip_attribute %]" size="20">
 		[% Slash.createSelect("note_${sub.subid}", selection, this_note, 1) %]
 		[% Slash.createSelect("skid_${sub.subid}", Slash.db.getDescriptions('skins'), sub.primaryskid, 1, 0, 1) %]
@@ -93,7 +93,7 @@ BLOCK sub_display -%]
 	[% IF constants.submiss_ts %]
 		[% sub.time %]&nbsp;
 	[% END %]
-	</td><td>
+	</td><td class="sub_title">
 		<a href="[% env.script_name %]?op=viewsub&amp;table_skin=[% form.skin | strip_attribute %]&amp;table_note=[% form.note | strip_attribute %]&amp;subid=[% sub.subid | strip_attribute %]&amp;note=[% form.note | strip_attribute %][% sub.stitle | strip_attribute %][% sub.sskin | strip_attribute %]"
 		>[% sub.strs.0 %]&nbsp;</a>
 		[% IF constants.submit_show_weight %]
