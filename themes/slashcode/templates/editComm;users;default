@@ -148,36 +148,41 @@ __template__
 			</tr>
 		</table>
 
-		<p><b><a name="people_bonus_friend">P</a>e<a name="people_bonus_foe">o</a>p<a name="people_bonus_freak">l</a>e <a name="people_bonus_fan">M</a>o<a name="people_bonus_fof">d</a>i<a name="people_bonus_eof">f</a>ier</b> (assign a modifier to different people)<br>
+		<p><b>People Modifier</b> (assign a modifier to different people)<br>
 		<table>
 			<tr>
 				<td>	&nbsp; &nbsp; &nbsp;		</td>
-				<td>	Friend <img src="[% constants.imagedir %]/friend.gif" alt="friend">				</td>
+				<td>	
+				<a name="people_bonus_friend">Friend</a>
+			<img src="[% constants.imagedir %]/friend.gif" alt="friend">				</td>
 				<td>	[% people_select.friend %]	</td>
 			</tr>
 			<tr>
 				<td>	&nbsp; &nbsp; &nbsp;		</td>
-				<td>	Fan <img src="[% constants.imagedir %]/fan.gif" alt="fan">				</td>
+				<td>	<a name="people_bonus_fan">Fan</a> <img src="[% constants.imagedir %]/fan.gif" alt="fan">				</td>
 				<td>	[% people_select.fan %]		</td>
 			</tr>
 			<tr>
 				<td>	&nbsp; &nbsp; &nbsp;		</td>
-				<td>	Foe <img src="[% constants.imagedir %]/foe.gif" alt="foe">				</td>
+				<td>	<a name="people_bonus_foe">Foe</a> <img src="[% constants.imagedir %]/foe.gif" alt="foe">				</td>
 				<td>	[% people_select.foe %]		</td>
 			</tr>
 			<tr>
 				<td>	&nbsp; &nbsp; &nbsp;		</td>
-				<td>	Freak <img src="[% constants.imagedir %]/freak.gif" alt="freak">				</td>
+				<td>	
+					<a name="people_bonus_freak">Freak</a> <img src="[% constants.imagedir %]/freak.gif" alt="freak">				</td>
 				<td>	[% people_select.freak %]		</td>
 			</tr>
 			<tr>
 				<td>	&nbsp; &nbsp; &nbsp;		</td>
-				<td>	Friends of Friends <img src="[% constants.imagedir %]/fof.gif" alt="fof">				</td>
+				<td>	
+				<a name="people_bonus_fan">Friends of Friends</a> <img src="[% constants.imagedir %]/fof.gif" alt="fof">				</td>
 				<td>	[% people_select.fof %]		</td>
 			</tr>
 			<tr>
 				<td>	&nbsp; &nbsp; &nbsp;		</td>
-				<td>	Foes of Friends <img src="[% constants.imagedir %]/eof.gif" alt="eof">				</td>
+				<td>	
+				<a name="people_bonus_eof">Foes of Friends</a> <img src="[% constants.imagedir %]/eof.gif" alt="eof">				</td>
 				<td>	[% people_select.eof %]		</td>
 			</tr>
 		</table>
