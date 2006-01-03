@@ -61,7 +61,10 @@ FOREACH story = storylistref;
 		class = 'story_sec';
 	ELSIF story.in_trash == 'yes' || story.displaystatus < 0;
 		class = 'story_nd';
-	END %]
+	END;
+	
+	class = class _ " ps_" _ story.primaryskid;
+	%]
 
 	<tr class="[% class %]">
 		<td align="right">
@@ -70,7 +73,7 @@ FOREACH story = storylistref;
 		
 
 		</td>
-		<td>
+		<td class="admin_title">
 		
 		<a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
 		[% IF story.in_trash == 'yes' %]<s>[% END; story.title; IF story.in_trash == 'yes' %]</s>[% END %]&nbsp;</a>
