@@ -19,6 +19,7 @@ use vars qw(
 	$irc	$conn	$nick	$channel
 	$jnick	$jabber	$jconn	$jtime	$jid	$jserver	$jchannel	$jchanserver
 	$remarks_active	$next_remark_id	$next_handle_remarks
+	$shifts
 );
 
 $! = 0;
@@ -51,7 +52,8 @@ $task{$me}{code} = sub {
 	# If remarks are not wanted, we can check less frequently.
 	$next_handle_remarks = 0;
 	my $remark_delay = $constants->{ircslash_remarks_delay} || 5;
-	$remark_delay = 180 if $remark_delay < 180 && !$remarks_active;
+	# let me control this manually KTHX
+	#$remark_delay = 180 if $remark_delay < 180 && !$remarks_active;
 
 	while (!$task_exit_flag && !$clean_exit_flag) {
 		if ($success{irc}) {
@@ -188,7 +190,7 @@ sub ircshutdown {
 sub jabbershutdown {
 	return 0 unless getCurrentStatic('jabberslash') && $jabber;
 
-	$jabber->disconnect if $jabber->Connected;
+	$jabber->Disconnect if $jabber->Connected;
 }
 
 sub on_connect {
@@ -383,7 +385,25 @@ sub send_msg {
 		if ($services->{jabber} > 1) {
 			my $constants = getCurrentStatic();
 			$type = 'chat';
-			for my $to (split /\|/, $constants->{ircslash_jabber_users}) {
+
+			my %users = map { $_ => 1 } split /\|/, $constants->{ircslash_jabber_users};
+
+			$shifts ||= getObject('Slash::ScheduleShifts', { db_type => 'reader' });
+			if ($shifts) {
+				my $reader = getObject('Slash::DB', { db_type => 'reader' });
+				my $daddy = $shifts->getDaddy;
+				my $daddy_user = $reader->getUser($daddy->[0]{uid});
+				my $id = $daddy_user->{ircslash_jabber_id};
+				if ($id) {
+					# only add it if not already there, either alone
+					# or with a "resource"
+					unless (grep m{^\Q$id\E(?:$|/.)}, keys %users) {
+						$users{$id} = 1;
+					}
+				}
+			}
+
+			for my $to (keys %users) {
 				if ($to =~ m|(\w+)/(\w+)|) {
 					$to = "$1\@$jserver/$2";
 				} else {
@@ -535,6 +555,7 @@ sub cmd_excuse {
 	if (defined $t) {
 		$t->waitfor("/Your excuse is: /"); 
 		my $reply = $t->get;
+		$reply =~ s/^.*Your excuse is: //s;
 		send_msg($reply, { $service => 1 });
 	} else { 
 		send_msg("The server at $host (port $port) appears to be down.", { $service => 1 });
