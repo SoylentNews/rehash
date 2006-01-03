@@ -36,7 +36,7 @@ sub new {
 
 sub set {
 	my($self, $id, $values) = @_;
-	my $uid = $ENV{SLASH_USER};
+	my $uid = getCurrentUser('uid');
 	my $constants = getCurrentStatic();
 
 	return unless $self->sqlSelect('id', 'journals', "uid=$uid AND id=$id");
@@ -180,7 +180,7 @@ sub create {
 
 	$submit = $submit ? "yes" : "no";
 
-	my $uid = $ENV{SLASH_USER};
+	my $uid = getCurrentUser('uid');
 	$self->sqlInsert("journals", {
 		uid		=> $uid,
 		description	=> $description,
@@ -207,7 +207,7 @@ sub create {
 
 sub remove {
 	my($self, $id) = @_;
-	my $uid = $ENV{SLASH_USER};
+	my $uid = getCurrentUser('uid');
 
 	my $journal = $self->get($id);
 	return unless $journal->{uid} == $uid;
@@ -313,7 +313,7 @@ EOT
 
 sub themes {
 	my($self) = @_;
-	my $uid = $ENV{SLASH_USER};
+	my $uid = getCurrentUser('uid');
 	my $sql;
 	$sql .= "SELECT name from journal_themes";
 	$self->sqlConnect;

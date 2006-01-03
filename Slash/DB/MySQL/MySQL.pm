@@ -1887,7 +1887,7 @@ sub createPollVoter {
 		qid	=> $qid,
 		id	=> $pollvoter_md5,
 		-'time'	=> 'NOW()',
-		uid	=> $ENV{SLASH_USER}
+		uid	=> getCurrentUser('uid')
 	});
 
 	$self->sqlUpdate("pollquestions", {
@@ -2005,12 +2005,7 @@ sub createAccessLog {
 		$dat ||= $uri;
 	}
 
-	my $uid;
-	if ($ENV{SLASH_USER}) {
-		$uid = $ENV{SLASH_USER};
-	} else {
-		$uid = $user->{uid} || $constants->{anonymous_coward_uid};
-	}
+	my $uid = $user->{uid} || $constants->{anonymous_coward_uid};
 	my $skin_name = getCurrentSkin('name');
 	# XXXSKIN - i think these are no longer special cases ...
 	# The following two are special cases
@@ -4014,8 +4009,9 @@ sub hasVotedIn {
 	my $pollvoter_md5 = getPollVoterHash();
 	my $qid_quoted = $self->sqlQuote($qid);
 	# Yes, qid/id/uid is a key in pollvoters.
+	my $uid = getCurrentUser('uid');
 	my($voters) = $self->sqlSelect('id', 'pollvoters',
-		"qid=$qid_quoted AND id='$pollvoter_md5' AND uid=$ENV{SLASH_USER}"
+		"qid=$qid_quoted AND id='$pollvoter_md5' AND uid=$uid"
 	);
 
 	# Should be a max of one row returned.  In any case, if any
@@ -4725,7 +4721,7 @@ sub createFormkey {
 		my $rows = $self->sqlInsert('formkeys', {
 			formkey         => $formkey,
 			formname        => $formname,
-			uid             => $ENV{SLASH_USER},
+			uid             => getCurrentUser('uid'),
 			ipid            => $ipid,
 			subnetid        => $subnetid,
 			value           => 0,

@@ -873,6 +873,7 @@ Fry:I did it!  And it's all thanks to the books at my local library.
 Fry:Existing is basically all I do!
 Fry:It's a widely-believed fact!
 Fry:My hands!  My horrible, human, hands!
+Fry:How about me?  I'm human, and I've always wanted to see the future!
 Leela:You did the best you could, I guess, and some of these gorillas are okay.
 Leela:This wangs chung.
 EOT

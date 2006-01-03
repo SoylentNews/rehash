@@ -580,7 +580,7 @@ sub getWeb {
 
 sub getWebByUID {
 	my($self, $uid) = @_;
-	$uid ||= $ENV{SLASH_USER};
+	$uid ||= getCurrentUser('uid');
 
 	my $msguser = $self->getUser($uid);
 	my $msgs = $self->_get_web_by_uid($uid) or return 0;

@@ -226,7 +226,7 @@ sub _get_web_by_uid {
 	my $prime = "message_web.id=message_web_text.id AND user";
 	my $other = "ORDER BY date ASC";
 
-	my $id_db = $self->sqlQuote($uid || $ENV{SLASH_USER});
+	my $id_db = $self->sqlQuote($uid || getCurrentUser('uid'));
 	my $data = $self->sqlSelectAllHashrefArray(
 		$cols, $table, "$prime=$id_db", $other
 	);
@@ -238,7 +238,7 @@ sub _get_web_count_by_uid {
 	my $table = $self->{_web_table};
 	my $cols  = "readed";
 
-	my $uid_db = $self->sqlQuote($uid || $ENV{SLASH_USER});
+	my $uid_db = $self->sqlQuote($uid || getCurrentUser('uid'));
 	my $data = $self->sqlSelectAll(
 		$cols, $table, "user=$uid_db AND " .
 		"$self->{_web_table1}.$self->{_web_prime1} = $self->{_web_table2}.$self->{_web_prime2}",
@@ -374,7 +374,7 @@ sub _delete_web {
 	my $where2 = "$prime1=$id_db";
 
 	unless ($override) {
-		$uid ||= $ENV{SLASH_USER};
+		$uid ||= getCurrentUser('uid');
 		return 0 unless $uid;
 		my $uid_db = $self->sqlQuote($uid);
 		my $where  = $where1 . " AND user=$uid_db";

@@ -209,7 +209,7 @@ sub count {
 
 sub getFriendsWithJournals {
 	my($self) = @_;
-	my $uid = $ENV{SLASH_USER};
+	my $uid = getCurrentUser('uid');
 
 	my($friends, $journals, $ids, %data);
 	$friends = $self->sqlSelectAll(
@@ -243,7 +243,7 @@ sub getFriendsWithJournals {
 sub getFriendsForMessage {
 	my($self) = @_;
 	my $code  = MSG_CODE_JOURNAL_FRIEND;
-	my $uid   = $ENV{SLASH_USER};
+	my $uid   = getCurrentUser('uid');
 	my $cols  = "pp.uid";
 	my $table = "people AS pp, users_messages as um";
 	my $where = <<SQL;

@@ -1381,6 +1381,7 @@ sub getPublicLogToken {
 	return '';
 }
 
+
 #========================================================================
 
 =head2 prepareUser(UID, FORM, URI [, COOKIES])
