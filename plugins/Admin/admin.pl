@@ -1379,6 +1379,7 @@ sub editStory {
 	my $topic_select = Slash::Admin::PopupTree::getPopupTree($storyref->{topics_chosen});
 
 	my $authors = $slashdb->getDescriptions('authors', '', 1);
+	$authors->{$storyref->{uid}} = $slashdb->getUser($storyref->{uid}, 'nickname') if $storyref->{uid} && !defined($authors->{$storyref->{uid}});
 	my $author_select = createSelect('uid', $authors, $storyref->{uid}, 1);
 
 	$storyref->{dept} =~ s/ /-/gi;
