@@ -36,6 +36,7 @@ sub main {
 		default	=> [ $admin,  \&showShifts	],
 		daddy	=> [ $shifts, \&getDaddyList	],
 		lcr	=> [ $shifts, \&setLCR		],
+		remark	=> [ $shifts, \&createRemark	],
 	);
 
 	my $op = $form->{op};
@@ -48,18 +49,19 @@ sub main {
 		}
 	}
 
-	if ($op ne 'daddy') {
+	if ($op ne 'daddy' && $op ne 'remark') {
 		header(getData('page_title')) or return;
 	}
 
 	# dispatch of op
 	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $gSkin, $schedule);
 
-	if ($op ne 'daddy') {
+	if ($op ne 'daddy' && $op ne 'remark') {
 		# writeLog('SOME DATA');	# if appropriate
 		footer();
 	}
 }
+
 
 sub setLCR {
 	my($slashdb, $constants, $user, $form, $gSkin, $schedule) = @_;
@@ -68,6 +70,20 @@ sub setLCR {
 	my $lcr_site = $form->{site};
 
 	$slashdb->setVar("ircslash_lcr_$lcr_site", $slashdb->getTime . "|$lcr_tag");
+}
+
+
+sub createRemark {
+	my($slashdb, $constants, $user, $form, $gSkin, $schedule) = @_;
+
+	my($remark) = $form->{remark};
+	$slashdb->createRemark(
+		$constants->{anonymous_coward_uid},
+		0,
+		$remark,
+		'system'
+	);
+	1;
 }
 
 
@@ -115,6 +131,7 @@ sub getDaddyList {
 		rdfitemdesc_html	=> 1,
 	});
 }
+
 
 sub saveShifts {
 	my($slashdb, $constants, $user, $form, $gSkin, $schedule) = @_;
