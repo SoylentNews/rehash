@@ -169,20 +169,17 @@ __template__
 			</tr>
 			<tr>
 				<td>	&nbsp; &nbsp; &nbsp;		</td>
-				<td>	
-					<a name="people_bonus_freak">Freak</a> <img src="[% constants.imagedir %]/freak.gif" alt="freak">				</td>
+				<td>	<a name="people_bonus_freak">Freak</a> <img src="[% constants.imagedir %]/freak.gif" alt="freak">				</td>
 				<td>	[% people_select.freak %]		</td>
 			</tr>
 			<tr>
 				<td>	&nbsp; &nbsp; &nbsp;		</td>
-				<td>	
-				<a name="people_bonus_fan">Friends of Friends</a> <img src="[% constants.imagedir %]/fof.gif" alt="fof">				</td>
+				<td>	<a name="people_bonus_fan">Friends of Friends</a> <img src="[% constants.imagedir %]/fof.gif" alt="fof">				</td>
 				<td>	[% people_select.fof %]		</td>
 			</tr>
 			<tr>
 				<td>	&nbsp; &nbsp; &nbsp;		</td>
-				<td>	
-				<a name="people_bonus_eof">Foes of Friends</a> <img src="[% constants.imagedir %]/eof.gif" alt="eof">				</td>
+				<td>	<a name="people_bonus_eof">Foes of Friends</a> <img src="[% constants.imagedir %]/eof.gif" alt="eof">				</td>
 				<td>	[% people_select.eof %]		</td>
 			</tr>
 		</table>
