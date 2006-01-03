@@ -313,7 +313,6 @@ sub sqlTransactionCancel {
 }
 
 ########################################################
-# Bad need of rewriting....
 sub createComment {
 	my($self, $comment) = @_;
 	return -1 unless dbAvailable("write_comments");
@@ -328,6 +327,9 @@ sub createComment {
 	$comment->{sid} = $self->getStoidFromSidOrStoid($comment->{sid})
 		or return -1;
 
+	$comment->{subject} = $self->truncateStringForCharColumn($comment->{subject},
+		'comments', 'subject');
+
 	if ($comment->{pid}) {
 		# If we're being asked to parent this comment to another,
 		# verify that the other comment exists and is in this
@@ -338,15 +340,12 @@ sub createComment {
 		return -1 unless $pid_sid && $pid_sid == $comment->{sid};
 	}
 
-#	$self->{_dbh}{AutoCommit} = 0;
 	$self->sqlDo("SET AUTOCOMMIT=0");
 
 	my $cid;
 	if ($self->sqlInsert('comments', $comment)) {
 		$cid = $self->getLastInsertId();
 	} else {
-#		$self->{_dbh}->rollback;
-#		$self->{_dbh}{AutoCommit} = 1;
 		$self->sqlDo("ROLLBACK");
 		$self->sqlDo("SET AUTOCOMMIT=1");
 		errorLog("$DBI::errstr");
@@ -357,8 +356,6 @@ sub createComment {
 			cid	=> $cid,
 			comment	=>  $comment_text,
 	})) {
-#		$self->{_dbh}->rollback;
-#		$self->{_dbh}{AutoCommit} = 1;
 		$self->sqlDo("ROLLBACK");
 		$self->sqlDo("SET AUTOCOMMIT=1");
 		errorLog("$DBI::errstr");
@@ -375,16 +372,12 @@ sub createComment {
 		{ -commentcount	=> 'commentcount+1' },
 		"id=$comment->{sid}",
 	)) {
-#		$self->{_dbh}->rollback;
-#		$self->{_dbh}{AutoCommit} = 1;
 		$self->sqlDo("ROLLBACK");
 		$self->sqlDo("SET AUTOCOMMIT=1");
 		errorLog("$DBI::errstr");
 		return -1;
 	} 
 
-#	$self->{_dbh}->commit;
-#	$self->{_dbh}{AutoCommit} = 1;
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
 
@@ -1906,15 +1899,18 @@ sub createSubmission {
 
 	my $constants = getCurrentStatic();
 	my $data;
-	$data->{story} = delete $submission->{story};
-	$data->{subj} = delete $submission->{subj};
+	$data->{story} = delete $submission->{story} || '';
+	$data->{subj} = delete $submission->{subj} || '';
+	$data->{subj} = $self->truncateStringForCharColumn($data->{subj}, 'submissions', 'subj');
 	$data->{ipid} = getCurrentUser('ipid');
 	$data->{subnetid} = getCurrentUser('subnetid');
 	$data->{email} = delete $submission->{email} || '';
+	$data->{email} = $self->truncateStringForCharColumn($data->{email}, 'submissions', 'email');
 	my $emailuri = URI->new($data->{email});
 	my $emailhost = "";
 	$emailhost = $emailuri->host() if $emailuri && $emailuri->can("host");
 	$data->{emaildomain} = fullhost_to_domain($emailhost);
+	$data->{emaildomain} = $self->truncateStringForCharColumn($data->{emaildomain}, 'submissions', 'emaildomain');
 	$data->{uid} = delete $submission->{uid} || getCurrentStatic('anonymous_coward_uid'); 
 	$data->{'-time'} = delete $submission->{'time'};
 	$data->{'-time'} ||= 'NOW()';
@@ -3031,7 +3027,6 @@ sub existsEmail {
 }
 
 #################################################################
-# Replication issue. This needs to be a two-phase commit.
 # Ok, this is now a transaction. This means that if we lose the DB
 # while this is going on, we won't end up with a half created user.
 # -Brian
@@ -3046,11 +3041,10 @@ sub createUser {
 		"matchname=" . $self->sqlQuote($matchname)
 	))[0] || $self->existsEmail($email);
 
-#	$self->{_dbh}{AutoCommit} = 0;
 	$self->sqlDo("SET AUTOCOMMIT=0");
 
 	$self->sqlInsert("users", {
-		uid		=> '',
+		uid		=> undef,
 		realemail	=> $email,
 		nickname	=> $newuser,
 		matchname	=> $matchname,
@@ -3060,21 +3054,30 @@ sub createUser {
 
 	my $uid = $self->getLastInsertId({ table => 'users', prime => 'uid' });
 	unless ($uid) {
-#		$self->{_dbh}->rollback;
-#		$self->{_dbh}{AutoCommit} = 1;
 		$self->sqlDo("ROLLBACK");
 		$self->sqlDo("SET AUTOCOMMIT=1");
 	}
 	return unless $uid;
+
+	# Since TEXT/BLOB columns can't have a DEFAULT value, and since in
+	# strict mode MySQL 5.0 will no longer silently supply the empty
+	# string as a default for TEXT NOT NULL, we need to explicitly set
+	# those columns to the empty string upon creation.
 	$self->sqlInsert("users_info", {
 		uid 			=> $uid,
-		-lastaccess		=> 'now()',
-		-created_at		=> 'now()',
+		-lastaccess		=> 'NOW()',
+		-created_at		=> 'NOW()',
+		bio			=> '',
 	});
 	$self->sqlInsert("users_prefs", { uid => $uid });
 	$self->sqlInsert("users_comments", { uid => $uid });
-	$self->sqlInsert("users_index", { uid => $uid });
 	$self->sqlInsert("users_hits", { uid => $uid });
+	$self->sqlInsert("users_index", {
+		uid			=> $uid,
+		story_never_topic	=> '',
+		slashboxes		=> '',
+		story_always_topic	=> '',
+	});
 
 	# All param fields should be set here, as some code may not behave
 	# properly if the values don't exist.
@@ -3099,8 +3102,6 @@ sub createUser {
 		created_ipid		=> getCurrentUser('ipid'),
 	});
 
-#	$self->{_dbh}->commit;
-#	$self->{_dbh}{AutoCommit} = 1;
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
 
@@ -8840,36 +8841,53 @@ sub createStory {
 	my($self, $story) = @_;
 
 	my $constants = getCurrentStatic();
-#	$self->{_dbh}{AutoCommit} = 0;
 	$self->sqlDo("SET AUTOCOMMIT=0");
 
-	$story->{sid} = createSid();
+	my $error = "";
 
-	my $suid;
-	$story->{submitter}	= $story->{submitter} ?
-		$story->{submitter} : $story->{uid};
-	$story->{is_dirty}	= 1;
+	$story->{submitter} = $story->{submitter} ?  $story->{submitter} : $story->{uid};
+	$story->{is_dirty} = 1;
 
-	my $sid_ok = 0;
-	while ($sid_ok == 0) {
-		$sid_ok = $self->sqlInsert('stories',
-			{ sid => $story->{sid} },
-			{ ignore => 1 } ); # don't need error messages
-		if ($sid_ok == 0) { # returns 0E0 on collision, which == 0
-			# Keep looking...
-			$story->{sid} = createSid($story->{sid});
+	if (!defined($story->{title})) {
+		$error = "createStory needs a defined title";
+	} else {
+		# Rather than call truncateStringForCharColumn() here,
+		# we prefer to throw an error.  Unlike createComment,
+		# we would prefer that overlong subjects not be silently
+		# chopped off.  Consider the consequences of saving a
+		# story with the headline "Chris Nandor is a Freakishly
+		# Ugly Twisted Criminal, Claims National Enquirer" and
+		# later realizing it had been truncated after 50 chars.
+		my $title_len = $self->sqlGetCharColumnLength('story_text', 'title');
+		if (length($story->{title}) > $title_len) {
+			$error = "createStory title too long: " . length($story->{title}) . " > $title_len";
 		}
 	}
 
-	# If this came from a submission, update submission and grant
-	# karma to the user
-	my $stoid = $self->getLastInsertId({ table => 'stories', prime => 'stoid' });
-	$story->{stoid} = $stoid;
-	$self->grantStorySubmissionKarma($story);
+	my $stoid;
+	if (!$error) {
+		$story->{sid} = createSid();
+		my $sid_ok = 0;
+		while ($sid_ok == 0) {
+			$sid_ok = $self->sqlInsert('stories',
+				{ sid => $story->{sid} },
+				{ ignore => 1 } ); # don't need error messages
+			if ($sid_ok == 0) { # returns 0E0 on collision, which == 0
+				# Keep looking...
+				$story->{sid} = createSid($story->{sid});
+			}
+		}
+		# If this came from a submission, update submission and grant
+		# karma to the user
+		$stoid = $self->getLastInsertId({ table => 'stories', prime => 'stoid' });
+		$story->{stoid} = $stoid;
+		$self->grantStorySubmissionKarma($story);
+	}
 
-	my $error = "";
-	if (! $self->sqlInsert('story_text', { stoid => $stoid })) {
-		$error = "sqlInsert failed for story_text: " . $self->sqlError();
+	if (!$error) {
+		if (! $self->sqlInsert('story_text', { stoid => $stoid })) {
+			$error = "sqlInsert failed for story_text: " . $self->sqlError();
+		}
 	}
 
 	# Write the chosen topics into story_topics_chosen.  We do this
@@ -8889,8 +8907,8 @@ sub createStory {
 	}
 	delete $story->{topics_chosen};
 	my $commentstatus = delete $story->{commentstatus};
+
 	if (!$error) {
-		$story->{stoid} = $stoid;
 		$story->{body_length} = length($story->{bodytext});
 		$story->{word_count} = countWords($story->{introtext}) + countWords($story->{bodytext});
 		$story->{primaryskid} = $primaryskid;
@@ -8935,12 +8953,12 @@ sub createStory {
 			$id = $story->{discussion};
 			$discussion->{kind} = 'journal-story';
 			if (!$self->setDiscussion($id, $discussion)) {
-				$error = "Failed to set discussion for story: " . Dumper($discussion);
+				$error = "Failed to set discussion for story";
 			}
 		} else {
 			$id = $self->createDiscussion($discussion);
 			if (!$id) {
-				$error = "Failed to create discussion for story: " . Dumper($discussion);
+				$error = "Failed to create discussion for story";
 			}
 		}
 		if (!$error && !$self->setStory($stoid, { discussion => $id })) {
@@ -9002,8 +9020,21 @@ sub updateStory {
 
 	my $error = "";
 
-	my $stoid = $self->getStoidFromSidOrStoid($sid);
-	$error = "no stoid for sid '$sid'" unless $stoid;
+	if (!defined($data->{title})) {
+		$error = "createStory needs a defined title";
+	} else {
+		# See comment in createStory() for why we do this.
+		my $title_len = $self->sqlGetCharColumnLength('story_text', 'title');
+		if (length($data->{title}) > $title_len) {
+			$error = "createStory title too long: " . length($data->{title}) . " > $title_len";
+		}
+	}
+
+	my $stoid;
+	if (!$error) {
+		$stoid = $self->getStoidFromSidOrStoid($sid);
+		$error = "no stoid for sid '$sid'" unless $stoid;
+	}
 	my $sid_q = $self->sqlQuote($sid);
 
 #use Data::Dumper; print STDERR "MySQL.pm updateStory before setStory data: " . Dumper($data);
@@ -12742,6 +12773,58 @@ sub sqlSelectColumns {
 	$self->sqlConnect() or return undef;
 	my $rows = $self->{_dbh}->selectcol_arrayref("SHOW COLUMNS FROM $table");
 	return $rows;
+}
+
+########################################################
+sub sqlGetColumnData {
+	my($self, $table, $col) = @_;
+	return unless $table;
+
+	$self->sqlConnect() or return undef;
+	my $hr = $self->{_dbh}->selectall_hashref("SHOW COLUMNS FROM $table", 'Field');
+	if ($col) {
+		# Return only one column's data.
+		return exists($hr->{$col}) ? $hr->{$col} : undef;
+	}
+	# Return all columns' data in a big hashref.
+	return $hr;
+}
+
+########################################################
+{ # closure
+my $_textcollen_hr = { };
+sub sqlGetCharColumnLength {
+	my($self, $table, $col) = @_;
+	return undef unless $table && $col;
+	return $_textcollen_hr->{$table}{$col} if exists $_textcollen_hr->{$table}{$col};
+	$self->sqlConnect() or return undef;
+	my $hr = $self->sqlGetColumnData($table, $col);
+	return $_textcollen_hr->{$table}{$col} = undef if !$hr;
+	my $type = $hr->{Type};
+	return $_textcollen_hr->{$table}{$col} = undef unless $type && $type =~ /^(?:var)?char\((\d+)\)$/i;
+	return $_textcollen_hr->{$table}{$col} = $1;
+}
+} # end closure
+
+########################################################
+# There are a few places in our schema where site admins may prefer
+# to customize data lengths by changing them in the SQL, e.g. they
+# may want submissions.subject or comments.subject to allow for
+# more or fewer than 50 characters.  Rather than hard-code those
+# sizes, or force admins to adjust vars when they adjust the schema,
+# Slash reads the lengths of those columns' CHAR/VARCHAR types
+# directly from the database.  Note that MySQL 5.0 in one of the
+# STRICT modes throws an error on oversized data, so we prefer to
+# explicitly truncate strings rather than just trying to insert and
+# hoping it works.
+# <http://dev.mysql.com/doc/refman/5.0/en/server-sql-mode.html>
+sub truncateStringForCharColumn {
+	my($self, $str, $table, $col) = @_;
+	return $str unless $table && $col;
+	return $str if !defined($str) || $str eq '';
+	my $maxlen = $self->sqlGetCharColumnLength($table, $col);
+	return $str unless $maxlen;
+	return (length($str) <= $maxlen) ? $str : substr($str, 0, $maxlen);
 }
 
 ########################################################

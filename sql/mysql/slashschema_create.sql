@@ -566,11 +566,11 @@ CREATE TABLE misc_user_opts (
 	name varchar(32) NOT NULL,
 	optorder mediumint(5),
 	seclev mediumint UNSIGNED NOT NULL,
-	default_val text DEFAULT '' NOT NULL,
-	vals_regex text DEFAULT '',
-	short_desc text DEFAULT '',
-	long_desc text DEFAULT '',
-	opts_html text DEFAULT '',
+	default_val text NOT NULL,
+	vals_regex text,
+	short_desc text,
+	long_desc text,
+	opts_html text,
 	PRIMARY KEY (name)
 ) TYPE=InnoDB;
 
@@ -974,7 +974,7 @@ CREATE TABLE story_param (
 	param_id mediumint UNSIGNED NOT NULL auto_increment,
 	stoid MEDIUMINT UNSIGNED NOT NULL,
 	name varchar(32) DEFAULT '' NOT NULL,
-	value text DEFAULT '' NOT NULL,
+	value text NOT NULL,
 	UNIQUE story_key (stoid,name),
 	PRIMARY KEY (param_id)
 ) TYPE=InnoDB;
@@ -1063,7 +1063,7 @@ CREATE TABLE submission_param (
 	param_id mediumint UNSIGNED NOT NULL auto_increment,
 	subid mediumint UNSIGNED NOT NULL,
 	name varchar(32) DEFAULT '' NOT NULL,
-	value text DEFAULT '' NOT NULL,
+	value text NOT NULL,
 	UNIQUE submission_key (subid,name),
 	PRIMARY KEY (param_id)
 ) TYPE=InnoDB;
@@ -1154,7 +1154,7 @@ CREATE TABLE topic_param (
 	param_id mediumint UNSIGNED NOT NULL auto_increment,
 	tid SMALLINT UNSIGNED NOT NULL,
 	name varchar(32) DEFAULT '' NOT NULL,
-	value text DEFAULT '' NOT NULL,
+	value text NOT NULL,
 	UNIQUE topic_key (tid,name),
 	PRIMARY KEY (param_id)
 ) TYPE=InnoDB;
@@ -1276,13 +1276,13 @@ CREATE TABLE users_hits (
 DROP TABLE IF EXISTS users_index;
 CREATE TABLE users_index (
 	uid mediumint UNSIGNED NOT NULL,
-	story_never_topic text DEFAULT '' NOT NULL,
+	story_never_topic text NOT NULL,
 	story_never_author varchar(255) DEFAULT '' NOT NULL,
 	story_never_nexus varchar(255) DEFAULT '' NOT NULL,
-	story_always_topic text DEFAULT '' NOT NULL,
+	story_always_topic text NOT NULL,
 	story_always_author varchar(255) DEFAULT '' NOT NULL,
 	story_always_nexus varchar(255) DEFAULT '' NOT NULL,
-	slashboxes text DEFAULT '' NOT NULL,
+	slashboxes text NOT NULL,
 	maxstories tinyint UNSIGNED DEFAULT '30' NOT NULL,
 	noboxes tinyint DEFAULT '0' NOT NULL,
 	PRIMARY KEY (uid)
@@ -1297,7 +1297,7 @@ CREATE TABLE users_info (
 	uid mediumint UNSIGNED NOT NULL,
 	totalmods mediumint DEFAULT '0' NOT NULL,
 	realname varchar(50),
-	bio text,
+	bio text NOT NULL,
 	tokens mediumint DEFAULT '0' NOT NULL,
 	lastgranted datetime DEFAULT '0000-00-00 00:00' NOT NULL,
 	m2info varchar(64) DEFAULT '' NOT NULL,
@@ -1371,7 +1371,7 @@ CREATE TABLE users_param (
 	param_id mediumint UNSIGNED NOT NULL auto_increment,
 	uid mediumint UNSIGNED NOT NULL,
 	name varchar(32) DEFAULT '' NOT NULL,
-	value text DEFAULT '' NOT NULL,
+	value text NOT NULL,
 	UNIQUE uid_key (uid,name),
 	KEY (uid),
 	PRIMARY KEY (param_id)
