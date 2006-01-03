@@ -5,7 +5,7 @@ Print a label next to a form element
 
 * value = label
 * comment = comment to put next to label
-* nobreak = no BR at end or P at beginning
+* nobreak = don't wrap in a <p> </p> 
 
 __title__
 
@@ -16,9 +16,11 @@ en_US
 __name__
 formLabel
 __template__
+[% UNLESS nobreak %]<p>[% END %]
 <label [% IF class %]class="[% class %]"[% END %]>
 	[% value | strip_html %]
 </label>
+ [% IF comment %]([% comment | strip_html %])[% END %][% UNLESS nobreak %]</p>[% END; nobreak = 0 %]
 __seclev__
 10000
 __version__
