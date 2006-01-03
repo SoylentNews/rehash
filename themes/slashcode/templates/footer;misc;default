@@ -51,9 +51,11 @@ __template__
 					<li>
 						<a href="[% gSkin.rootdir %]/authors.pl">authors</a>
 					</li>
-					<li>
-						<a href="[% gSkin.rootdir %]/users.pl">preferences</a>
-					</li>
+                                        [%- IF ! user.is_anon %]
+                                        <li>
+                                                <a href="[% gSkin.rootdir %]/users.pl">preferences</a>
+                                        </li>
+                                        [%- END %]
 					<li>
 						<a href="[% PROCESS rsslink %]"><img src="[% constants.imagedir %]/rssicon.gif" width="36" height="14" alt="RSS feed"></a>
 					</li>

@@ -34,10 +34,12 @@ __template__
                                         <li>
                                                 <a href="[% gSkin.rootdir %]/authors.pl">authors</a>
                                         </li>
+                                        [%- IF ! user.is_anon %]
                                         <li>
                                                 <a href="[% gSkin.rootdir %]/users.pl">preferences</a>
                                         </li>
-                                </ul>		
+                                        [%- END %]
+                                </ul>
         </div>
 [% IF constants.panic or constants.search_google %]
         <div class="search">
