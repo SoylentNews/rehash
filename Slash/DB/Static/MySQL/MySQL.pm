@@ -1039,6 +1039,7 @@ sub getSkinInfo {
 		my $mp_tid = $constants->{mainpage_nexus_tid};
 		for my $child_tid (sort { lc $tree->{$a}{textname} cmp lc $tree->{$b}{textname} } keys %{$tree->{$tid}{child}}) {
 			next unless $tree->{$child_tid}{nexus} && $tree->{$child_tid}{skid};
+			$index{$skinname}{$child_tid} ||= [ ];
 			if ($children{$child_tid}) {
 				push @{$index{$skinname}{$child_tid}}, $children{$child_tid};
 				next;
@@ -1078,7 +1079,7 @@ sub getSkinInfo {
 			$child_data{count_sectional} = scalar(grep { $ds_hr->{$_} == 1 } @$stoids);
 
 			$children{$child_tid} = \%child_data;
-			push @{$index{$skinname}}, $children{$child_tid};
+			push @{$index{$skinname}{$child_tid}}, $children{$child_tid};
 		}
 	}
 
