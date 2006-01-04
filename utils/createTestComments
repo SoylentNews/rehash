@@ -144,7 +144,7 @@ $werder = new Silly::Werder;
 
 		my $score = 1;
 		if ($uid == $constants->{anonymous_coward_uid}
-			or $user->{karma} < $constants->{badkarma}) {
+			|| $user->{karma} < $constants->{badkarma}) {
 			$score = 0;
 		} elsif ($user->{karma} > $constants->{goodkarma}) {
 			$score = 2;
