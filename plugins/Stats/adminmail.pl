@@ -698,7 +698,7 @@ EOT
 	}
 	
 	foreach my $day (@ah_days){
-		my $avg = $stats->getStat("avg_hits_per_story", $day, 0);
+		my $avg = $stats->getStat("avg_hits_per_story", $day, 0) || 0;
 		push @{$data{avg_hits_per_story}}, sprintf("%12.1f", $avg);
 	}
 
