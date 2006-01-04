@@ -47,7 +47,7 @@ $task{$me}{code} = sub {
 		my $stock = $table->{$stock_key};
 		my($exch, $sym) = ($stock->{exchange}, $stock->{symbol});
 		my %stockfetch = $fq->fetch($exch, $sym);
-		if (!%stockfetch) {
+		if (!%stockfetch || !defined($stockfetch{$sym,"net"})) {
 			slashdLog("failed stockfetch for '$stock_key' '$exch' '$sym'")
 				if verbosity() >= 2;
 			next;
