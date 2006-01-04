@@ -688,6 +688,15 @@ sub _convertModsToComments {
 		 AND comments.sid = discussions.id"
 	);
 
+	# If there are any mods whose comments no longer exist (we're
+	# not too fussy about atomicity with these tables), ignore
+	# them.
+
+	my @orphan_mod_ids = grep {
+		!exists $comments_hr->{ $mods_hr->{$_}{cid} }
+	} keys %$mods_hr;
+	delete @$mods_hr{@orphan_mod_ids};
+
 	# Put the comment data into the mods hashref.
 
 	for my $mod_id (keys %$mods_hr) {
@@ -11730,6 +11739,7 @@ sub getUser {
 					$table_hr->{from_clause},
 					$table_hr->{where_clause},
 					$gtd->{all} ? "all" : $table_hr->{params_needed});
+				return undef if !$answer;
 			}
 
 			# Now merge the memcached and DB data.
@@ -11763,6 +11773,7 @@ sub getUser {
 			$gtd->{from_clause},
 			$gtd->{where_clause},
 			$gtd->{all} ? "all" : $gtd->{params_needed});
+		return undef if !$answer;
 
 		# If we just got all the data for the user, and
 		# memcached is active, write it into the cache.
@@ -11841,7 +11852,13 @@ sub _getUser_do_selects {
 	if ($mcddebug > 1) {
 		print STDERR scalar(gmtime) . " $$ mcd gU_ds selecthashref: '$select' '$from' '$where'\n";
 	}
-	$answer = $self->sqlSelectHashref($select, $from, $where) if $select && $from && $where;
+	if ($select && $from && $where) {
+		$answer = $self->sqlSelectHashref($select, $from, $where);
+		# If this user's data is missing from one or more of the
+		# core tables, don't go looking for it elsewhere;  the
+		# user doesn't exist.
+		return undef if !$answer;
+	}
 	if ($mcddebug > 1) {
 		print STDERR scalar(gmtime) . " $$ mcd gU_ds got answer '$select' '$from' '$where'\n";
 	}
@@ -12823,8 +12840,8 @@ sub truncateStringForCharColumn {
 	return $str unless $table && $col;
 	return $str if !defined($str) || $str eq '';
 	my $maxlen = $self->sqlGetCharColumnLength($table, $col);
-	return $str unless $maxlen;
-	return (length($str) <= $maxlen) ? $str : substr($str, 0, $maxlen);
+	return $str if !$maxlen;
+	return substr($str, 0, $maxlen);
 }
 
 ########################################################
