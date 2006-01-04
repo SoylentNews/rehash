@@ -109,8 +109,9 @@ to read the special note about Apache / mod_perl installation.
 
 B<Install MySQL.>
 
-Please refer to MySQL documentation for compilation
-and/or installation notes for any questions with this process.
+If it is already installed, doublecheck that its version is at least the
+minimum required (see L<"REQUIREMENTS">).  If you have questions about
+the installation process, please refer to MySQL documentation.
 
 Slash requires that your MySQL server run in the GMT timezome.  Find your
 global my.cnf file (probably C</etc/my.cnf> or C</etc/mysql/my.cnf>),
@@ -119,8 +120,8 @@ to it:
 
 	timezone = GMT
 
-Start MySQL (it must be running for the installation of Perl modules
-and Slash).
+Start, or restart, MySQL (it must be running for the installation of
+Perl modules and Slash).
 
 Create a database to be used by Slash.
 
@@ -135,7 +136,7 @@ drop, index and alter).
 
 B<Install perl.>
 
-perl is likely already installed on your machine; make sure its
+perl is likely already installed on your machine; doublecheck that its
 version is at least the minimum required (see L<"REQUIREMENTS">).
 
 
@@ -172,13 +173,7 @@ B<NOTE>: You may be unsuccessful with C<make test> if the perl
 modules are not yet installed. However, some Perl modules will
 not install without Apache and mod_perl installed. If you wish,
 come back and run C<make test> after installing here, and then
-installing the Perl modules, to make sure everything is OK. Also,
-as of January 2002, a C<make test> has thrown spurious errors for
-several months because of a persistent minor bug; if you see
-"Can't locate object method 'new' via package 'URI::URL'",
-read this:
-
-L<http:E<sol>E<sol>groups.google.comE<sol>groups?threadm=3B82CE4D.8BF0C1D0%40spamless.genwax.com>
+installing the Perl modules, to make sure everything is OK.
 
 B<NOTE>: If you know what you're doing, Slash will work with a DSO
 Apache. Be sure you're on the latest versions of Apache and
@@ -467,24 +462,6 @@ file will be created at F<$SLASH_PREFIX/$SITENAME/$SITENAME.conf>.
 You can put its contents unto your httpd.conf, or you can just C<Include>
 it in your httpd.conf.
 
-B<NOTE>: As of December 2004, you'll see installation errors saying that
-the table type of InnoDB doesn't support FULLTEXT indexes.  This is
-a known bug that would be too complicated to properly work around at
-the moment (sorry).  The real fix for it is coming soon.  For now, your
-best bet is to issue the following commands after installation finishes:
-
-	ALTER TABLE comments TYPE=MyISAM;
-	ALTER TABLE comment_text TYPE=MyISAM;
-	ALTER TABLE pollquestions TYPE=MyISAM;
-	ALTER TABLE story_text TYPE=MyISAM;
-	ALTER TABLE users TYPE=MyISAM;
-	ALTER TABLE comments ADD FULLTEXT subject (subject);
-	ALTER TABLE comment_text ADD FULLTEXT comment (comment);
-	ALTER TABLE pollquestions ADD FULLTEXT question (question);
-	ALTER TABLE story_text ADD FULLTEXT title (title),
-		ADD FULLTEXT intro_body (introtext, bodytext);
-	ALTER TABLE users ADD FULLTEXT nickname (nickname);
-
 B<NOTE>: Read the message printed at the end of running install_slashsite.
 Failure to pay attention here is another common reason we see for Slash
 installations not working.
@@ -494,8 +471,8 @@ installations not working.
 B<Start it up.>
 
 After installation of the site is done, and Apache has been stopped
-and started (do NOT try to restart Apache, but do a full stop and
-start), run slashd.  This should be done via the init script:
+and started (do not try to "restart" Apache, but rather do a full stop
+and start), then run slashd.  This should be done via the init script:
 
 	/etc/init.d/slash start
 
@@ -645,6 +622,18 @@ directories so boa runs at startup along with apache.
 B<These upgrade procedures are still in testing.  Please read them
 entirely before beginning.  We are not responsible for any loss of
 data or functionality.>
+
+=head2 Slash 1.0 -E<gt> Slash 2.2
+
+You've got a site running Slash 1.0, from 2001? We're so sorry to
+hear that.
+
+Please read the complete documentation of F<utils/slash1toslash2.2>.
+We believe it will convert your database from Slash 1.0 to a new Slash
+2.2 database, but it hasn't been tested in some time.  The program
+documentation (which can be read with F<perldoc>) details exactly what
+process it follows to do the conversion, so you can attempt to do it by
+hand if you prefer.
 
 =head2 Slash 2.0 -> Slash 2.2
 
@@ -884,16 +873,24 @@ template with the new template.
 =head2 Slash 2.2.6 -E<gt> Slash CVS
 
 Use the sql/mysql/upgrades file;  see L<"VERSIONS">, "CVS tags", below.
+This file is human-readable and very long. You can upgrade a 2.2.6 to
+the latest CVS by methodically applying every step in this file, but
+it is tedious and requires an engaged human brain reading the comments
+(i.e., don't "mysql slash < upgrades", that will fail miserably).
 
-=head2 Slash 1.0 -E<gt> Slash 2.2
+=head2 Slash CVS -E<gt> later Slash CVS
 
-Please read the complete documentation of F<utils/slash1toslash2.2>.
-It is a program that will convert your database from Slash 1.0
-to a new Slash 2.2 database.  The program documentation (which can
-be read with F<perldoc>) details exactly what process it follows
-to do the conversion, so you can attempt to do it by hand if you
-prefer.
+Again, use the sql/mysql/upgrades file (and the caveat just mentioned
+still applies).  Start from the CVS tag you left off at, and proceed
+to the CVS tag you upgraded to (which should be the end of the file).
+If you're not sure which tag you left off at, you might check the var
+'cvs_tag_currentcode', which will contain the right value if you last
+updated after September 2005.
 
+In general, you should stop apache and slashd, do a "make install",
+apply the upgrades file a line at a time for each Slash site, run
+"template-tool -U -u virtusename" and "symlink-tool -U -u virtusername"
+for each Slash site, and then start slashd and apache back up.
 
 
 =head1 REQUIREMENTS
