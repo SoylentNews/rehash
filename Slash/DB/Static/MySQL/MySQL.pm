@@ -1037,7 +1037,11 @@ sub getSkinInfo {
 
 		my $skinname = $skins->{ $tree->{$tid}{skid} }{name};
 		my $mp_tid = $constants->{mainpage_nexus_tid};
-		for my $child_tid (sort { lc $tree->{$a}{textname} cmp lc $tree->{$b}{textname} } keys %{$tree->{$tid}{child}}) {
+		my @children =
+			sort { lc $tree->{$a}{textname} cmp lc $tree->{$b}{textname} }
+			grep { $tree->{$tid}{child}{$_} > 0 } # poisoned children don't count
+			keys %{$tree->{$tid}{child}};
+		for my $child_tid (@children) {
 			next unless $tree->{$child_tid}{nexus} && $tree->{$child_tid}{skid};
 			$index{$skinname} ||= [ ];
 			if ($children{$child_tid}) {
