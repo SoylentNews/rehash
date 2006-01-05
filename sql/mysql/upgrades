@@ -3516,12 +3516,8 @@ UPDATE users_logtokens, users SET public='yes' WHERE users_logtokens.uid=users.u
 # 2005-12-11
 UPDATE vars SET value = 'T_2_5_0_91' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
-
 # 2005-12-19
 UPDATE vars SET value = 'T_2_5_0_92' WHERE name = 'cvs_tag_currentcode';
-
-# SLASHDOT LAST UPDATED HERE
 
 # Changes for plugins/Daypass
 INSERT INTO vars (name, value, description) VALUES ('daypass_offer_onlytologgedin', '0', 'If 1, offer a daypass only tologged-in users');
@@ -3563,3 +3559,8 @@ UPDATE vars SET value = 'T_2_5_0_93' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+ALTER TABLE remarks MODIFY COLUMN remark VARCHAR(255);
+
+# PUDGE LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
