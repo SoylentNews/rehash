@@ -1171,7 +1171,7 @@ sub submitComment {
 		my($messages, $reply, %users);
 		my $kinds = $reader->getDescriptions('discussion_kinds');
 		if ($form->{pid}
-			|| $kinds->{ $discussion->{kind} } eq 'journal'
+			|| $kinds->{ $discussion->{dkid} } eq 'journal'
 			|| $constants->{commentnew_msg}) {
 			$messages = getObject('Slash::Messages');
 			$reply = $slashdb->getCommentReply($form->{sid}, $maxCid);
@@ -1198,7 +1198,7 @@ sub submitComment {
 		}
 
 		# reply to journal
-		if ($messages && $kinds->{ $discussion->{kind} } eq 'journal') {
+		if ($messages && $kinds->{ $discussion->{dkid} } eq 'journal') {
 			my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
 			if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
 				my $data  = {
