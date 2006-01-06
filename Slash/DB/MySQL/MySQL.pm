@@ -5082,7 +5082,7 @@ sub checkMaxMailPasswords {
 	}
 
 	my $max_num = $constants->{mailpass_max_num} || 2;
-	my $user_mp_num = $user_check->{mailpass_num};
+	my $user_mp_num = $user_check->{mailpass_num} || 0;
 	if ($user_mp_num < $max_num) {
 		# It's been within the last max_hours since the user last
 		# got a password sent, but they haven't used up their
@@ -5111,8 +5111,7 @@ sub setUserMailPasswd {
 			mailpass_num		=> 1,
 		});
 	} else {
-		my $user_mp_num = $self->getUser($user_set->{uid},
-			'mailpass_num');
+		my $user_mp_num = $self->getUser($user_set->{uid}, 'mailpass_num') || 0;
 		my $data = {
 			mailpass_num		=> $user_mp_num+1,
 		};
@@ -6411,7 +6410,7 @@ sub getPoll {
 ##################################################################
 sub getSubmissionsSkins {
 	my($self, $skin) = @_;
-	my $del = getCurrentForm('del');
+	my $del = getCurrentForm('del') || 0;
 
 	my $skin_clause = $skin ? " AND skins.name = '$skin' " : '';
 
@@ -6486,7 +6485,7 @@ sub getPortalsCommon {
 	my %tmp;
 	while (my $SB = $sth->fetchrow_hashref) {
 		$self->{_boxes}{$SB->{bid}} = $SB;  # Set the Slashbox
-		next unless $SB->{ordernum} &&$SB->{ordernum} && $SB->{ordernum} > 0;  # Set the index if applicable
+		next unless $SB->{ordernum} && $SB->{ordernum} && $SB->{ordernum} > 0;  # Set the index if applicable
 		if ($SB->{all_skins}) {
 			for my $skin (keys %$skins) {
 				push @{$tmp{$skin}}, $SB->{bid};
