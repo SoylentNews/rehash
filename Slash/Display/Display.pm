@@ -184,6 +184,15 @@ sub slashDisplay {
 		# and this is the only good way to get the actual name,
 		# page, skin, we bite the bullet and do it
 		$tempdata ||= $reader->getTemplateByName($name, [qw(tpid page skin)]);
+
+		# might as well bail here if we can't find the template
+		if (!$tempdata) {
+			# restore our original values
+			$user->{currentSkin}	= $origSkin;
+			$user->{currentPage}	= $origPage;
+			return;
+		}
+
 		$TEMPNAME = "ID $tempdata->{tpid}, " .
 			"$name;$tempdata->{page};$tempdata->{skin}";
 	}
