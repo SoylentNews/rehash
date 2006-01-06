@@ -15,7 +15,7 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
-	my $op = getCurrentForm('op');
+	my $op = getCurrentForm('op') || '';
 	my $section = $slashdb->getSection($form->{section});
 
 	header(getData('header'), $section->{section}) or return;

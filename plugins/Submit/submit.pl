@@ -301,6 +301,7 @@ sub submissionEd {
 	my($def_skin, $cur_skin, $def_note, $cur_note,
 		$skins, @skins, @notes,
 		%all_skins, %all_notes, %sn);
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	$form->{del} = 0 if $user->{is_admin};
 
@@ -312,7 +313,7 @@ sub submissionEd {
 	$def_note = getData('defaultnote');
 	$cur_skin = $form->{skin} || $def_skin;
 	$cur_note = $form->{note} || $def_note;
-	$skins    = $slashdb->getSubmissionsSkins();
+	$skins    = $reader->getSubmissionsSkins();
 
 	for (@$skins) {
 		my($skin, $note, $cnt) = @$_;
@@ -325,7 +326,7 @@ sub submissionEd {
 	for my $note_str (keys %all_notes) {
 		$sn{$def_skin}{$note_str} = 0;
 		for (grep { $_ ne $def_skin } keys %sn) {
-			$sn{$def_skin}{$note_str} += $sn{$_}{$note_str};
+			$sn{$def_skin}{$note_str} += $sn{$_}{$note_str} || 0;
 		}
 	}
 
