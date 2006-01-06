@@ -1064,7 +1064,7 @@ INSERT INTO vars (name, value, description) VALUES ('tokensperpoint','8','Number
 INSERT INTO vars (name, value, description) VALUES ('top10comm_days','1','Look back (n) days to display the Top 10 Comments slashbox');
 INSERT INTO vars (name, value, description) VALUES ('top10comm_num','10','Number of comments wanted for the Top 10 Comments slashbox (if not 10, you ought to rename it maybe)');
 INSERT INTO vars (name, value, description) VALUES ('top_sid','','The sid of the most recent story on the homepage');
-INSERT INTO vars (name, value, description) VALUES ("topiclist_ignore_prefix", "", "prefix of any topic keywords that should not show up on topic list or hierarchy, leave blank if you don't want any ignored");
+INSERT INTO vars (name, value, description) VALUES ('topiclist_ignore_prefix', '', 'prefix of any topic keywords that should not show up on topic list or hierarchy, leave blank if you don\'t want any ignored');
 INSERT INTO vars (name, value, description) VALUES ('totalComments','0','Total number of comments posted');
 INSERT INTO vars (name, value, description) VALUES ('totalhits','0','Total number of hits the site has had thus far');
 INSERT INTO vars (name, value, description) VALUES ('use_dept','1','use \"dept.\" field');
