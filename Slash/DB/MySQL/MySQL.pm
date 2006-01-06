@@ -9116,10 +9116,13 @@ sub updateStory {
 sub createRemark {
 	my($self, $uid, $stoid, $remark, $type) = @_;
 	$type ||= "user";
+
+	my $remark_t = $self->truncateStringForCharColumn($remark, 'remarks', 'remark');
+
 	$self->sqlInsert('remarks', {
 		uid	=> $uid,
 		stoid	=> $stoid,
-		remark	=> $remark,
+		remark	=> $remark_t,
 		-time	=> 'NOW()',
 		type 	=> $type
 	});
@@ -10658,19 +10661,38 @@ sub getTemplateByName {
 			}
 		}
 
-		# let's refresh cache, just in case, and warn we are doing it ...
-		if (!$options->{ignore_errors}) {
-			errorLog("Failed template lookup (refreshing cache) on '$name;$page\[misc\];$skin\[default\]'" .
-				", keys: " . scalar(keys %{$self->{$table_cache_id}}) .
-				", callers: " . join(", ", @caller_info));
+		my $name_str  = sprintf(
+			'%s;%s[misc];%s[default]', $name, $page, $skin
+		);
+
+		my $error_str = sprintf(
+			q{Failed template lookup (%%s) on '%s', keys: %%s, callers: %s},
+			$name_str, join(", ", @caller_info)
+		);
+
+		if (0) { # try refresh, off by default
+			if (!$options->{ignore_errors}) {
+				errorLog(sprintf($error_str,
+					'refreshing cache',
+					scalar keys %{$self->{$table_cache_id}}
+				));
+			}
+
+
+			$self->{$table_cache_id} = getTemplateNameCache($self);
+			$id    = $self->{$table_cache_id}{$name}{$page }{  $skin  };
+			$id  ||= $self->{$table_cache_id}{$name}{$page }{'default'};
+			$id  ||= $self->{$table_cache_id}{$name}{'misc'}{  $skin  };
+			$id  ||= $self->{$table_cache_id}{$name}{'misc'}{'default'};
 		}
-		$self->{$table_cache_id} = getTemplateNameCache($self);
 
 		if (!$id && !$options->{ignore_errors}) {
-			errorLog("Failed template lookup (returning false) on '$name;$page\[misc\];$skin\[default\]'" .
-				", keys: " . scalar(keys %{$self->{$table_cache_id}}) .
-				", callers: " . join(", ", @caller_info));
+			errorLog(sprintf($error_str,
+				'returning false',
+				scalar keys %{$self->{$table_cache_id}}
+			));
 		}
+
 		return if !$id;
 	}
 
