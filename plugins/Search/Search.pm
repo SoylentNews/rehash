@@ -75,7 +75,7 @@ sub findComments {
 	my $gSkin = getCurrentSkin();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $skin = $reader->getSkin($form->{section} || $gSkin->{skid});
-	if ($skin->{skid} != $constants->{mainpage_skid}) {
+	if ($skin->{skid} && $skin->{skid} != $constants->{mainpage_skid}) {
 		$where .= " AND primaryskid = $skin->{skid}";
 	}
 

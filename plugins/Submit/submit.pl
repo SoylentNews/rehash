@@ -496,6 +496,7 @@ sub displayForm {
 	my $topic = $slashdb->getTopic($form->{tid});
 
 	my $known = "";
+	$fakeemail ||= '';
 	if ($form->{email}) {
 		$fakeemail = $form->{email};
 	} elsif ($fakeemail eq $user->{fakeemail}) {

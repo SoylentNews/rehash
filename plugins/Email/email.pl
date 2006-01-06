@@ -30,8 +30,8 @@ sub main {
 	my $gSkin       = getCurrentSkin();
 
 	# Primary fields.
-	my $sid		= $form->{sid};
-	my $email	= $form->{email};
+	my $sid		= $form->{sid} || '';
+	my $email	= $form->{email} || '';
 
 	# Use for ops where anonymous access is optional.
 	my $allow_anon =
@@ -273,8 +273,8 @@ sub removeOptoutForm {
 sub removeOptout {
 	my($slashdb, $constants, $user, $form, $gSkin, $Plugins) = @_;
 
-	my $email = decode_entities($form->{email});
-	my $rc = $Plugins->{Email}->removeFromOptoutList($form->{email});
+	my $email = decode_entities($form->{email} || '');
+	my $rc = $Plugins->{Email}->removeFromOptoutList($form->{email} || '');
 	print getData('optout_removed', { result => $rc });
 
 	removeOptoutForm(@_);

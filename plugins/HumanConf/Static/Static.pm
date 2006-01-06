@@ -341,7 +341,7 @@ sub get_font_args {
 	$self->{prefnumpixels} = $constants->{hc_q1_prefnumpixels} || 1000;
 
 	my @pf = @{ $self->{possible_fonts} };
-	my $font = @pf[rand @pf];
+	my $font = @pf[rand @pf] || '';
 	my $first_fontsize_try = 30; # default first guess
 	if ( $font =~ m{^(\w+)/(\d+)$} ) {
 		$font = $1;

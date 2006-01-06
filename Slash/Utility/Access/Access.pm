@@ -522,6 +522,12 @@ sub compressOk {
 	my($formname, $field, $content, $wsfactor) = @_;
 	$wsfactor ||= 1;
 
+	# If no content (or I suppose the single char '0') is passed in,
+	# just report that it passes the test.  Hopefully the caller is
+	# performing other checks to make sure that boundary condition
+	# is addresses.
+	return 1 if !$content;
+
 	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();

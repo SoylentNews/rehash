@@ -1347,7 +1347,7 @@ sub editStory {
 			# dispStory() -- pudge
 			$story_copy{$field} = parseSlashizedLinks($storyref->{$field});
 			my $options = $field eq 'bodytext' ? { break => 1 } : undef;
-			$story_copy{$field} = processSlashTags($storyref->{$field}, $options);
+			$story_copy{$field} = processSlashTags($storyref->{$field}, $options) || '';
 		}
 
 		# Get the related text.

@@ -99,7 +99,9 @@ sub main {
 	# routine in admin.pl to use it instead -- pudge
 	my @story_links;
 	my $tree = new HTML::TreeBuilder;
-	$tree->parse(processSlashTags(parseSlashizedLinks($story->{introtext} . $story->{bodytext})));
+	my $storytext = $story->{introtext} || '';
+	$storytext .= $story->{bodytext} if defined $story->{bodytext};
+	$tree->parse(processSlashTags(parseSlashizedLinks($storytext)));
 	$tree->eof;
 	my $links = $tree->extract_links('a');  # get "A" tags only
 
