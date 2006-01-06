@@ -254,7 +254,7 @@ sub _sendMailPasswd {
 
 	my $uid       = $user_send->{uid};
 	my $newpasswd = $slashdb->getNewPasswd($uid);
-	my $tempnick  = fixparam($user_send->{nickname});
+	my $tempnick  = $user_send->{nickname};
 	my $subject   = getData('mail_subject', { nickname => $user_send->{nickname} });
 
 	# Pull out some data passed in with the request.  Only the IP

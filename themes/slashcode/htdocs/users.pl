@@ -693,7 +693,7 @@ sub mailPasswd {
 	}
 
 	my $newpasswd = $slashdb->getNewPasswd($uid);
-	my $tempnick = fixparam($user_edit->{nickname});
+	my $tempnick = $user_edit->{nickname};
 
 	my $emailtitle = getTitle('mailPassword_email_title', {
 		nickname	=> $user_edit->{nickname}
