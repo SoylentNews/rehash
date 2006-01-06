@@ -6486,7 +6486,7 @@ sub getPortalsCommon {
 	my %tmp;
 	while (my $SB = $sth->fetchrow_hashref) {
 		$self->{_boxes}{$SB->{bid}} = $SB;  # Set the Slashbox
-		next unless $SB->{ordernum} > 0;  # Set the index if applicable
+		next unless $SB->{ordernum} &&$SB->{ordernum} && $SB->{ordernum} > 0;  # Set the index if applicable
 		if ($SB->{all_skins}) {
 			for my $skin (keys %$skins) {
 				push @{$tmp{$skin}}, $SB->{bid};
@@ -10341,9 +10341,9 @@ sub getSimilarStories {
 			my $word_weight = 0;
 			my $wr = qr{(?i:\b\Q$word\E)};
 			my $m = log(length $word);
-			$word_weight += 2.0*$m * (() = $s->{title} =~     m{$wr}g);
-			$word_weight += 1.0*$m * (() = $s->{introtext} =~ m{$wr}g);
-			$word_weight += 0.5*$m * (() = $s->{bodytext} =~  m{$wr}g);
+			$word_weight += 2.0*$m * (() = $s->{title} =~     m{$wr}g) if $s->{title};
+			$word_weight += 1.0*$m * (() = $s->{introtext} =~ m{$wr}g) if $s->{introtext};
+			$word_weight += 0.5*$m * (() = $s->{bodytext} =~  m{$wr}g) if $s->{bodytext};
 			$word_weight *= 1.5 if $text_words->{$word}{is_url};
 			$word_weight *= 2.5 if $text_words->{$word}{is_url_with_path};
 			$s->{word_hr}{$word} = $word_weight if $word_weight > 0;
