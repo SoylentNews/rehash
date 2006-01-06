@@ -397,7 +397,7 @@ sub reparentComments {
 		# But, if all its (great-etc.) grandparents are either invisible
 		# or chronologically precede the root comment, don't reparent it
 		# at all.
-		if ($user->{reparent} && $comments->{$x}{points} >= $user->{threshold}) {
+		if ($user->{reparent} && $comments->{$x}{points} >= $user->{threshold}) { # XXX either $comments->{$x}{points} or $user->{threshold} is undefined here, not sure which or why
 			my $tmppid = $pid;
 			while ($tmppid
 				&& $comments->{$tmppid} && defined($comments->{$tmppid}{points})
@@ -1730,6 +1730,7 @@ sub getData {
 	my $opts_getname = $opts; $opts_getname->{GetName} = 1;
 
 	my $name = slashDisplayName('data', $hashref, $opts_getname);
+	return undef if !$name || !$name->{tempdata} || !defined($name->{tempdata}{tpid});
 	my $var  = $cache->{getdata}{ $name->{tempdata}{tpid} } ||= { };
 
 	if (defined $var->{$value}) {
