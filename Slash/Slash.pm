@@ -143,7 +143,7 @@ sub selectComments {
 
 	# This loop mainly takes apart the array and builds 
 	# a hash with the comments in it.  Each comment is
-	# is in the index of the hash (based on its cid).
+	# in the index of the hash (based on its cid).
 	for my $C (@$thisComment) {
 		# So we save information. This will only have data if we have 
 		# happened through this cid while it was a pid for another
@@ -159,14 +159,15 @@ sub selectComments {
 		$comments->{$C->{cid}}{kids} = $tmpkids;
 		$comments->{$C->{cid}}{visiblekids} = $tmpvkids;
 
-		# The comment pushes itself onto it own kids structure 
-		# which should make it the first -Brian
+		# The comment pushes itself onto its parent's
+		# kids array.
 		push @{$comments->{$C->{pid}}{kids}}, $C->{cid};
 
 		# The next line deals with hitparade -Brian
 		#$comments->{0}{totals}[$C->{points} - $min]++;  # invert minscore
 
-		# This deals with what will appear.
+		# Increment the parent comment's count of visible kids,
+		# if this comment is indeed visible.
 		$comments->{$C->{pid}}{visiblekids}++
 			if $C->{points} >= (defined $user->{threshold} ? $user->{threshold} : $min);
 
@@ -174,6 +175,16 @@ sub selectComments {
 		# Just a point rule -Brian
 		$user->{points} = 0 if $C->{uid} == $user->{uid}; # Mod/Post Rule
 	}
+
+	# After that loop, there may be comments in the $comments hashref
+	# which have no visible parents and thus which incremented an
+	# otherwise-empty comment's visiblekids field and appended to an
+	# otherwise-empty kids arrayref.  For cleanliness' sake, eliminate
+	# those comments.  We do leave "comment 0" alone, though.
+	my @phantom_cids =
+		grep { $_ > 0 && !defined $comments->{$_}{cid} }
+		keys %$comments;
+	delete @$comments{@phantom_cids};
 
 	my $count = @$thisComment;
 
