@@ -804,6 +804,7 @@ sub showComments {
 	) if $commentcount;
 
 	if (ref($comments) eq 'ARRAY') {
+		my $kinds = $reader->getDescriptions('discussion_kinds');
 		for my $comment (@$comments) {
 			# This works since $sid is numeric.
 			$comment->{replies} = $reader->countCommentsBySidPid($comment->{sid}, $comment->{cid});
@@ -813,7 +814,6 @@ sub showComments {
 			# based SID from either the "stories" table or from
 			# pollquestions.
 			my $discussion = $reader->getDiscussion($comment->{sid});
-			my $kinds = $reader->getDescriptions('discussion_kinds');
 
 			if ($kinds->{ $discussion->{dkid} } eq 'journal') {
 				$comment->{type} = 'journal';
