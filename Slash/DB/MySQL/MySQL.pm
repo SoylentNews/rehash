@@ -11526,7 +11526,7 @@ sub setUser {
 	# What is worse, a select+update or a replace?
 	# I should look into that. (REPLACE is faster) -Brian
 	for (@param)  {
-		if ($_->[1] eq "") {
+		if (!defined($_->[1]) || $_->[1] eq "") {
 			$rows += $self->sqlDelete('users_param', 
 				"uid = $uid AND name = " . $self->sqlQuote($_->[0]));
 		} elsif ($_->[0] eq "acl") {
