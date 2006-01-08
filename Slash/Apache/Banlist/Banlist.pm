@@ -27,11 +27,9 @@ sub handler {
 	$Slash::Apache::User::request_start_time ||= Time::HiRes::time;
 
 	# Ok, this will make it so that we can reliably use Apache->request
-
 	Apache->request($r);
 
 	# Get some information about the IP this request is coming from.
-
 	my $hostip = $r->connection->remote_ip;
 	my($cur_ip, $cur_subnet) = get_srcids({ ip => $hostip },
 		{ no_md5 => 1,	return_only => [qw( ip subnet )] });
@@ -40,7 +38,6 @@ sub handler {
 #print STDERR scalar(localtime) . " hostip='$hostip' cur_ip='$cur_ip' cur_subnet='$cur_subnet' cur_srcid_ip='$cur_srcid_ip' cur_srcid_subnet='$cur_srcid_subnet'\n";
 
 	# Set up DB objects.
-
 	my $slashdb = getCurrentDB();
 	my $reader_user = $slashdb->getDB('reader');
 	my $reader = getObject('Slash::DB', { virtual_user => $reader_user });
@@ -74,30 +71,31 @@ sub handler {
 
 	# Send a special "RSS banned" page if this IP address is banned
 	# from reading RSS.
-
-	my $rsslist = $reader->getNorssList;
-	if ($is_rss && ($rsslist->{$cur_srcid_ip} || $rsslist->{$cur_srcid_subnet})) {
-		_create_banned_user($hostip);
-		return _send_rss($r, 'abuse', $cur_srcid_ip, $feed_type);
+	if ($is_rss) {
+		my $rsslist = $reader->getNorssList;
+		if ($rsslist->{$cur_srcid_ip} || $rsslist->{$cur_srcid_subnet}) {
+			_create_banned_user($hostip);
+			return _send_rss($r, 'abuse', $cur_srcid_ip, $feed_type);
+		}
 	}
 
 	# Send a special "Palm banned" page if this IP addresss is banned
 	# from reading Palm pages.
-
-	my $palmlist = $reader->getNopalmList;
-	if ($is_palm && ($palmlist->{$cur_srcid_ip} || $palmlist->{$cur_subnet})) {
-		_create_banned_user($hostip);
-		$r->custom_response(FORBIDDEN,
-			slashDisplay('bannedtext_palm',
-				{ ip => $cur_ip },
-				{ Return => 1   }
-			)
-		);
-		return FORBIDDEN;
+	if ($is_palm) {
+		my $palmlist = $reader->getNopalmList;
+		if ($palmlist->{$cur_srcid_ip} || $palmlist->{$cur_subnet}) {
+			_create_banned_user($hostip);
+			$r->custom_response(FORBIDDEN,
+				slashDisplay('bannedtext_palm',
+					{ ip => $cur_ip },
+					{ Return => 1   }
+				)
+			);
+			return FORBIDDEN;
+		}
 	}
 
 	# The IP address is not banned and can proceed.
-
 	return OK;
 }
 
