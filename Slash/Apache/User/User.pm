@@ -357,7 +357,7 @@ sub handler {
 			slashDisplay('bannedtext_uid', { uid => $uid }, { Return => 1 } )
 		);
 		# Now we need to create a user hashref for that global
-		# current user, so the "uid" field of accesslog gets written
+		# current user, so these fields of accesslog get written
 		# correctly when we log this attempted hit.  We do this
 		# dummy hashref with the bare minimum of values that we need,
 		# instead of going through prepareUser(), because this is

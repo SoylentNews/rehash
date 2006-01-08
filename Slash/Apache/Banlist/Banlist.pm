@@ -56,6 +56,7 @@ sub handler {
 #use Data::Dumper; $Data::Dumper::Sortkeys=1;
 #print STDERR "cur_srcid_ip='$cur_srcid_ip' cur_srcid_subnet='$cur_srcid_subnet' banlist: " . Dumper($banlist);
 	if ($banlist->{$cur_srcid_ip} || $banlist->{$cur_srcid_subnet}) {
+		_create_banned_user($hostip);
 		# Send a special "you are banned" page if the user is
 		# hitting RSS.
 		return _send_rss($r, 'ban', $cur_srcid_ip, $feed_type) if $is_rss;
@@ -76,6 +77,7 @@ sub handler {
 
 	my $rsslist = $reader->getNorssList;
 	if ($is_rss && ($rsslist->{$cur_srcid_ip} || $rsslist->{$cur_srcid_subnet})) {
+		_create_banned_user($hostip);
 		return _send_rss($r, 'abuse', $cur_srcid_ip, $feed_type);
 	}
 
@@ -84,6 +86,7 @@ sub handler {
 
 	my $palmlist = $reader->getNopalmList;
 	if ($is_palm && ($palmlist->{$cur_srcid_ip} || $palmlist->{$cur_subnet})) {
+		_create_banned_user($hostip);
 		$r->custom_response(FORBIDDEN,
 			slashDisplay('bannedtext_palm',
 				{ ip => $cur_ip },
@@ -97,6 +100,24 @@ sub handler {
 
 	return OK;
 }
+
+# Now we need to create a user hashref for that global
+# current user, so these fields of accesslog get written
+# correctly when we log this attempted hit.  We do this
+# dummy hashref with the bare minimum of values that we need,
+# instead of going through prepareUser(), because this is
+# much, much faster.
+sub _create_banned_user {
+	my($hostip) = @_;
+	my($ipid, $subnetid) = get_ipids($hostip);
+	my $user = {
+		uid		=> getCurrentStatic('anonymous_coward_uid'),
+		ipid		=> $ipid,
+		subnetid	=> $subnetid,
+	};
+	createCurrentUser($user);
+}
+
 
 sub _check_rss_and_palm {
 	my($r) = @_;
