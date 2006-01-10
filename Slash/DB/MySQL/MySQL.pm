@@ -11153,6 +11153,8 @@ sub getTopics {
 }
 
 ########################################################
+# this is used only for the topic editor in admin.pl;
+# for everything else, use getTopicParam()
 sub getTopicParamsForTid {
 	my($self, $tid) = @_;
 	my $tid_q = $self->sqlQuote($tid);
