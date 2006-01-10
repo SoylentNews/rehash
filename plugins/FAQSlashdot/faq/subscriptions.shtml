@@ -16,7 +16,7 @@
         <hr>
 
 <h2><a name="ss100" id="ss100">Why does Slashdot have subscriptions?</a></h2>
-        <p>Read <a href="http://slashdot.org/article.pl?sid=02/03/01/1352200&amp;mode=nocomment&amp;tid=124">CmdrTaco's story</a> to learn why Slashdot implemented a subscription system.</p>
+        <p>Read <a href="http://slashdot.org/article.pl?sid=02/03/01/1352200&amp;mode=nocomment">CmdrTaco's story</a> to learn why Slashdot implemented a subscription system.</p>
         <p><em><small>
                 Answered by: <a href="mailto:robo@slashdot.org">Robo</a><br>
                 Last Modified: 03/03/02
@@ -148,7 +148,7 @@
 <h2><a name="ss1600" id="ss1600">Besides ad-free pages, are there any advantages to being a subscriber?</a></h2>
         <p>We're adding some "plums" for subscribers, yes. Please be warned that this list is subject to change as necessary. Here's the official list:</p>
         <ul>
-                <li>You can see each story 10-20 minutes before it goes "live." (Assuming we posted it that far in advance, which usually we do.) Look for the red titlebar and a timestamp from "The Mysterious Future." More information is available in <a href="/article.pl?sid=03/03/06/1548245&amp;tid=124">this story</a>.</li>
+                <li>You can see each story 10-20 minutes before it goes "live." (Assuming we posted it that far in advance, which usually we do.) Look for the red titlebar and a timestamp from "The Mysterious Future." More information is available in <a href="/article.pl?sid=03/03/06/1548245">this story</a>.</li>
                 <li>You can get a message sent to you when people change their relationship to you (friend or foe). Go to your <a href="/my/messages">message prefs</a> page and edit the "Relationship Change" setting. Don't worry, you'll get at most one message per day, summarizing that day's changes.</li>
                 <li>When <a href="/journal.pl?op=edit">writing a journal entry</a>, your choices for comments are not just "Comments Disabled" and "Comments Enabled." You can also limit commenting to just your friends; just your friends and their friends; to exclude just your foes; or to exclude your foes and your friends' foes.</li>
                 <li>You get a "More Comments" link on <a href="/users.pl?op=userinfo">your user page</a> and on <a href="/~CmdrTaco/">other users' pages</a>. Going through comment history might be a bit DB-intensive but we trust subscribers not to abuse the privilege. (But just to be clear -- robots will be banned, regardless of whether they subscribe or not!)</li>
