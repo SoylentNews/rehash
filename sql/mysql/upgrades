@@ -3557,8 +3557,6 @@ ALTER TABLE users_info CHANGE COLUMN bio bio text NOT NULL;
 # 2006-01-03
 UPDATE vars SET value = 'T_2_5_0_93' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 ALTER TABLE remarks MODIFY COLUMN remark VARCHAR(255);
 
 # PUDGE LAST UPDATED HERE
@@ -3567,4 +3565,6 @@ ALTER TABLE remarks MODIFY COLUMN remark VARCHAR(255);
 
 # 2006-01-10
 UPDATE vars SET value = 'T_2_5_0_94' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
