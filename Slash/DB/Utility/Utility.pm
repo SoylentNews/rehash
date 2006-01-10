@@ -979,7 +979,6 @@ sub sqlDelete {
 sub sqlInsert {
 	my($self, $table, $data, $options) = @_;
 	my($names, $values);
-	# Hmmmmm... we can trust getCurrentStatic here? - Jamie
 	# What's inside /*! */ will be treated as a comment by most
 	# other SQL servers, but MySQL will parse it.  Kinda pointless
 	# since we've basically given up on ever supporting DBs other
