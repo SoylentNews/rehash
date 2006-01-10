@@ -3564,3 +3564,7 @@ ALTER TABLE remarks MODIFY COLUMN remark VARCHAR(255);
 # PUDGE LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
+
+# 2006-01-10
+UPDATE vars SET value = 'T_2_5_0_94' WHERE name = 'cvs_tag_currentcode';
+
