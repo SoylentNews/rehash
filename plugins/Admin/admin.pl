@@ -613,7 +613,6 @@ sub blockEdit {
 	if ($bid) {
 		$blockref = $slashdb->getBlock($bid, '', 1);
 	}
-	my $sectionbid = $blockref->{section};
 	my $rss_templates = $slashdb->getTemplateList('','portald');
 	my $rss_ref = { map { ($_, $_) } values %{$rss_templates} };
 
@@ -682,7 +681,6 @@ sub blockEdit {
 		retrieve_checked	=> $retrieve_checked,
 		all_skins_checked	=> $all_skins_checked,
 		blocktype_select	=> $blocktype_select,
-		sectionbid		=> $sectionbid,
 		autosubmit_select	=> $autosubmit_select,
 		rss_select		=> $rss_select,
 		rss_template_code	=> $rss_template_code,

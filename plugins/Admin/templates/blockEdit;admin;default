@@ -122,8 +122,7 @@ __template__
 		[% END %]
 		</fieldset>
 	</form>
-	<a href="[% gSkin.rootdir %]/sections.pl?section=[% sectionbid %]&amp;op=editsection">[% sectionbid %]</a>
-	( <a href="[% gSkin.rootdir %]/users.pl?op=previewbox&amp;bid=[% bid %]">preview</a> )
+	( <a href="[% gSkin.rootdir %]/users.pl?op=previewbox&amp;bid=[% bid %]">Preview</a> )
 </div>
 
 
