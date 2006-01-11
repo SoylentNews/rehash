@@ -183,7 +183,10 @@ sub findStory {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	
 	if (@{$constants->{search_ignore_skids}}) {
-		my $skid_list = join ',', map {$reader->sqlQuote($_)} @{$constants->{search_ignore_skids}};
+		my $skid_list = join ',',
+			map  { $reader->sqlQuote($_) }
+			grep { $_ != $gSkin->{skid}  } # allow searching on THIS skid
+			@{$constants->{search_ignore_skids}};
 		$where .= " AND primaryskid NOT IN ($skid_list) ";
 	}
 
