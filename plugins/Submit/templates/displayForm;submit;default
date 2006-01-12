@@ -20,16 +20,13 @@ en_US
 __name__
 displayForm
 __template__
-[%	IF fakeemail && username;
-		subtext = "<a href=\"$fakeemail\">$username</a> writes <i>\"$fixedstory\"</i>";
-	ELSIF (username == constants.anon_name) && constants.anon_name_alt;
-		subtext = "$constants.anon_name_alt writes <i>\"$fixedstory\"</i>";
-	ELSIF username;
-		subtext = "$username writes <i>\"$fixedstory\"</i>";
-	ELSE;
-		subtext = fixedstory;
-	END;
-%]
+
+[% # set the variable 'subtext'
+   submission.storyonly = 0;
+   submission.email = fakeemail;
+   submission.name = username;
+   submission.story = fixedstory;
+   PROCESS formatSub %]
 
 [% PROCESS titlebar title = "$constants.sitename Story Submissions" %]
 [% IF constants.submiss_view %]

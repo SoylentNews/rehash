@@ -17,7 +17,9 @@ en_US
 __name__
 previewForm
 __template__
-[% PROCESS formatSub %]
+[% # set the variable 'subtext'
+   PROCESS formatSub %]
+
 [% PROCESS titlebar title="Submission Preview" %]
 <div class="generalbody">
 [% IF submission.sid %]

@@ -3568,3 +3568,7 @@ UPDATE vars SET value = 'T_2_5_0_94' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# Changes for plugins/Submit (which you are almost certainly using)
+INSERT INTO vars (name, value, description) VALUES ('submissions_link_relnofollow', '0', 'Add a rel="nofollow" to the submitter\'s vanity link for all submissions?');
+UPDATE vars SET value=REPLACE(value, 'a:href_U,name,title ', 'a:href_U,name,title,rel ') WHERE name='approvedtags_attr_admin';
+
