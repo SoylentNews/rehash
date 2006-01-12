@@ -1727,7 +1727,7 @@ sub _csq_bonuses {
 	# Lampe, C. and Resnick, P. "Slash(dot) and Burn: Moderation in a
 	# Large Scale Conversation Space."  Proceedings of the Conference on
 	# Computer Human Interaction (SIGCHI).  April 2004. Vienna, Austria.
-	# ACM Press.  (Forthcoming.)
+	# ACM Press.
 	#
 	# The goal of _csq_bonuses is to reward moderators who take
 	# a little extra effort, by giving them their next set of
@@ -1760,21 +1760,23 @@ sub _csq_bonuses {
 	# conversation and 7% for late comments [fifth quintile]."
 	# Here, quintile 5 is the latest 20% of the discussion, and
 	# quintile 1 is the earliest 20%.
-	if ($mod_hr->{cid_percentile} > 80) {
-		$num *= $constants->{m2_consequences_bonus_quintile_5} || 1;
-		push @applied, 'quintile_5';
-	} elsif ($mod_hr->{cid_percentile} > 60) {
-		$num *= $constants->{m2_consequences_bonus_quintile_4} || 1;
-		push @applied, 'quintile_4';
-	} elsif ($mod_hr->{cid_percentile} > 40) {
-		$num *= $constants->{m2_consequences_bonus_quintile_3} || 1;
-		push @applied, 'quintile_3';
-	} elsif ($mod_hr->{cid_percentile} > 20) {
-		$num *= $constants->{m2_consequences_bonus_quintile_2} || 1;
-		push @applied, 'quintile_2';
-	} else {
-		$num *= $constants->{m2_consequences_bonus_quintile_1} || 1;
-		push @applied, 'quintile_1';
+	if (defined $mod_hr->{cid_percentile}) {
+		if ($mod_hr->{cid_percentile} > 80) {
+			$num *= $constants->{m2_consequences_bonus_quintile_5} || 1;
+			push @applied, 'quintile_5';
+		} elsif ($mod_hr->{cid_percentile} > 60) {
+			$num *= $constants->{m2_consequences_bonus_quintile_4} || 1;
+			push @applied, 'quintile_4';
+		} elsif ($mod_hr->{cid_percentile} > 40) {
+			$num *= $constants->{m2_consequences_bonus_quintile_3} || 1;
+			push @applied, 'quintile_3';
+		} elsif ($mod_hr->{cid_percentile} > 20) {
+			$num *= $constants->{m2_consequences_bonus_quintile_2} || 1;
+			push @applied, 'quintile_2';
+		} else {
+			$num *= $constants->{m2_consequences_bonus_quintile_1} || 1;
+			push @applied, 'quintile_1';
+		}
 	}
 
 	# If a Fair moderation was applied to a comment that was

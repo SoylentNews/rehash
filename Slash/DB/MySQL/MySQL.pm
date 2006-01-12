@@ -5805,7 +5805,7 @@ sub countSubmissionsFromUID {
 	my $constants = getCurrentStatic();
 	my $days_back = $options->{days_back} || $constants->{submission_count_days};
 	my $uid_q = $self->sqlQuote($uid);
-	my $del_clause;
+	my $del_clause = '';
 	$del_clause = " AND del = ".$self->sqlQuote($options->{del}) if defined $options->{del};
 	return $self->sqlCount("submissions",
 		"uid=$uid_q
@@ -5818,7 +5818,7 @@ sub countSubmissionsWithEmaildomain {
 	my $constants = getCurrentStatic();
 	my $days_back = $options->{days_back} || $constants->{submission_count_days};
 	my $emaildomain_q = $self->sqlQuote($emaildomain);
-	my $del_clause;
+	my $del_clause = '';
 	$del_clause = " AND del = ".$self->sqlQuote($options->{del}) if defined $options->{del};
 	return $self->sqlCount("submissions USE INDEX (time_emaildomain)",
 		"emaildomain=$emaildomain_q
@@ -10007,6 +10007,7 @@ sub getStoriesData {
 		my @answer_stoids =
 			sort { $a <=> $b }
 			map { /^\Q$mcdkey\E(\d+)$/; $1 }
+			grep { /^\Q$mcdkey\E\d+$/ }
 			keys %$answer;
 		for my $stoid (
 			grep { !exists $retval->{$_} }

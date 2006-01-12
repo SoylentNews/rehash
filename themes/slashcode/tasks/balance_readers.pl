@@ -151,7 +151,7 @@ sub check_readers {
 			# by 4.0.21 -- the Time field on some processes
 			# can be the unsigned version of a small
 			# negative number.  Call it zero.
-			$hr->{Time} = 0 if $hr->{Time} > 4_200_000_000;
+			$hr->{Time} = 0 if !$hr->{Time} || $hr->{Time} > 4_200_000_000;
 
 			# Store the record of what this process is doing.
 			$process{$vu}{$hr->{Id}} = \%{ $hr };

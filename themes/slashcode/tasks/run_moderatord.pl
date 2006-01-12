@@ -390,7 +390,7 @@ sub reconcile_m2 {
 		) if $new_m2info ne $old_m2info;
 
 		# Now update the moderator's tally of csq bonuses/penalties.
-		my $csqtc = $csq->{csq_token_change}{num};
+		my $csqtc = $csq->{csq_token_change}{num} || 0;
 		my $val = sprintf("csq_bonuses %+0.3f", $csqtc);
 		$slashdb->setUser(
 			$mod_hr->{uid},
@@ -569,6 +569,7 @@ sub add_m2info {
 	my %val = ( );
 	for my $item (@old, "$thismonth $nfair$nunfair") {
 		my($date, $more) = $item =~ /^(\w+)\s+(.+)$/;
+		next unless $date;
 		$val{$date} = [ ] if !defined($val{$date});
 		push @{$val{$date}}, $more;
 	}

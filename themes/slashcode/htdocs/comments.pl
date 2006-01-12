@@ -897,7 +897,9 @@ sub previewForm {
 	}
 
 	if ($constants->{plugin}{Subscribe}) {
-		$preview->{subscriber_bonus} = $user->{is_subscriber} && $form->{nosubscriberbonus} ne 'on'
+		$preview->{subscriber_bonus} =
+			$user->{is_subscriber}
+			&& (!$form->{nosubscriberbonus} || $form->{nosubscriberbonus} ne 'on')
 			? 1 : 0;
 	}
 
@@ -1062,7 +1064,7 @@ sub submitComment {
 			&& !$form->{nobonus};
 		$subscriber_bonus = 1 if $constants->{plugin}{Subscribe}
 			&& $user->{is_subscriber}
-			&& $form->{nosubscriberbonus} ne 'on';
+			&& (!$form->{nosubscriberbonus} || $form->{nosubscriberbonus} ne 'on');
 	}
 	# This is here to prevent posting to discussions that don't exist/are nd -Brian
 	unless ($user->{is_admin} || $form->{newdiscussion}) {

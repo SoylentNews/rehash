@@ -181,7 +181,7 @@ sub main {
 		if ($story->{discussion}) {
 			# Still not happy with this logic -Brian
 			my $discussion = $reader->getDiscussion($story->{discussion});
-			$discussion->{is_future} = $story->{is_future};
+			$discussion->{is_future} = $story->{is_future} if $discussion;
 			if ($constants->{tids_in_urls}) {
 				# This is to get tid in comments. It would be a mess to
 				# pass it directly to every comment -Brian

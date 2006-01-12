@@ -1006,8 +1006,8 @@ sub getAdminModsText {
 		my $amn = $am->{$nickname};
 		my $m1_up_percent = 0;
 		$m1_up_percent = $amn->{m1_up}*100
-			/ ($amn->{m1_up} + $amn->{m1_down})
-			if $amn->{m1_up} + $amn->{m1_down} > 0;
+			/ ( ($amn->{m1_up} || 0) + ($amn->{m1_down} || 0) )
+			if ($amn->{m1_up} || 0) + ($amn->{m1_down} || 0) > 0;
 		my $m2_un_percent = 0;
 		$m2_un_percent = $amn->{m2_unfair}*100
 			/ ( ($amn->{m2_unfair} || 0) + ($amn->{m2_fair} || 0) )

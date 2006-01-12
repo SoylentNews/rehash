@@ -326,24 +326,40 @@ EOT
 			my $low_user = $slashdb->getUser($uid);
 
 			my $last_warn = $low_user->{subscription_low_last_ts} || 0;
-			my $last_payment = $slashdb->sqlSelect("MAX(UNIX_TIMESTAMP(ts))", "subscribe_payments", "uid=$uid");
-			unless ($last_warn > $last_payment) {
-				# send message
-				my $users = $messages->checkMessageCodes(
-					MSG_CODE_SUBSCRIPTION_LOW, [$uid]	
-				);
-				my $low_val = int (( getCurrentStatic('paypal_num_pages') || 1000) / 20);
-				if (@$users) {
-					my $data = {
-						template_name 	=> 'sub_low_msg',
-						subject 	=> 'Subscription Running Low',
-						sub_low_value 	=> $low_val
-					};
-					$messages->create($users->[0], MSG_CODE_SUBSCRIPTION_LOW, $data, 0, '', 'now');
-				}
-				$slashdb->setUser($uid, { subscription_low_last_ts => time() });
-			
-			} 
+			my $last_payment = $slashdb->sqlSelect("MAX(UNIX_TIMESTAMP(ts))",
+				"subscribe_payments", "uid=$uid");
+
+			# Users who were gifted subscriptions (perhaps
+			# by admins) get the warning too.
+			$last_payment = 0 if !$last_payment; 
+
+			# Under no circumstances send this message more
+			# than once a week.
+			next if $last_warn + 86400*6.5 > time;
+
+			# Send this warning only once per payment.
+			# If the user already got this warning once
+			# since the time they last subscribed,
+			# don't send them another.  Note this can
+			# fail to send a 2nd warning if a user gets
+			# multiple gifted subscriptions, but that's
+			# not a big deal.
+			next if $last_payment < $last_warn;
+
+			# send message
+			my $users = $messages->checkMessageCodes(
+				MSG_CODE_SUBSCRIPTION_LOW, [$uid]	
+			);
+			my $low_val = int (( getCurrentStatic('paypal_num_pages') || 1000) / 20);
+			if (@$users) {
+				my $data = {
+					template_name 	=> 'sub_low_msg',
+					subject 	=> 'Subscription Running Low',
+					sub_low_value 	=> $low_val
+				};
+				$messages->create($users->[0], MSG_CODE_SUBSCRIPTION_LOW, $data, 0, '', 'now');
+			}
+			$slashdb->setUser($uid, { subscription_low_last_ts => time() });
 		}
 	
 		foreach my $uid (@$expire_sub) {
@@ -351,20 +367,30 @@ EOT
 	
 			my $last_expire = $expire_user->{subscription_expire_last_ts} || 0;
 			my $last_payment = $slashdb->sqlSelect("MAX(UNIX_TIMESTAMP(ts))", "subscribe_payments", "uid=$uid");
-			unless ($last_expire > $last_payment) {
-				# send message
-				my $users = $messages->checkMessageCodes(
-					MSG_CODE_SUBSCRIPTION_OUT, [$uid]	
-				);
-				if (@$users) {
-					my $data = {
-						template_name 	=> 'sub_out_msg',
-						subject 	=> 'Subscription Expired'
-					};
-					$messages->create($users->[0], MSG_CODE_SUBSCRIPTION_OUT, $data, 0, '', 'now');
-				}
-				$slashdb->setUser($uid, { subscription_expire_last_ts => time() });
+			# Users who were gifted subscriptions (perhaps
+			# by admins) get the message too.
+			$last_payment = 0 if !$last_payment; 
+
+			# Under no circumstances send this message more
+			# than once a week.
+			next if $last_warn + 86400*6.5 > time;
+
+			# Send this warning only once per payment.
+			# (See above.)
+			next if $last_payment < $last_expire;
+
+			# send message
+			my $users = $messages->checkMessageCodes(
+				MSG_CODE_SUBSCRIPTION_OUT, [$uid]	
+			);
+			if (@$users) {
+				my $data = {
+					template_name 	=> 'sub_out_msg',
+					subject 	=> 'Subscription Expired'
+				};
+				$messages->create($users->[0], MSG_CODE_SUBSCRIPTION_OUT, $data, 0, '', 'now');
 			}
+			$slashdb->setUser($uid, { subscription_expire_last_ts => time() });
 		}
 	}
 	slashdLog("Low Subscription and Expiration Warnings End");

@@ -382,6 +382,7 @@ sub sendShiftChangeMessage {
 
 sub getShift {
 	my($self, $when) = @_;
+	$when ||= '';
 	my $constants = getCurrentStatic();
 
 	my $tzcode   = $constants->{shift_shifts_tz};

@@ -499,10 +499,10 @@ sub displayForm {
 	$fakeemail ||= '';
 	if ($form->{email}) {
 		$fakeemail = $form->{email};
-	} elsif ($fakeemail eq $user->{fakeemail}) {
+	} elsif ($fakeemail && $user->{fakeemail} && $fakeemail eq $user->{fakeemail}) {
 		$known = "mailto";
 		# we assume this is like if form.email is passed in
-		$fakeemail = strip_attribute($user->{fakeemail});
+		$fakeemail = strip_attribute($fakeemail);
 	}
 
 	my $fixedstory = fixStory($form->{story}, { sub_type => $form->{sub_type} });

@@ -2673,7 +2673,7 @@ sub saveHome {
 	my $tree = $slashdb->getTopicTree();
 	my(@story_never_topic,  @story_never_author,  @story_never_nexus);
 	my(@story_always_topic, @story_always_author, @story_always_nexus);
-	my($story_topic_all,    $story_author_all,    $story_nexus_all);
+	my($story_topic_all,    $story_author_all,    $story_nexus_all) = (0, 0, 0);
 	# Topics are either present (value=2) or absent (value=0).  If absent,
 	# push them onto the never list.  Otherwise, do nothing.  (There's no
 	# way to have an "always" topic, at the moment.)  If the hidden
