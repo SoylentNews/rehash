@@ -373,7 +373,7 @@ EOT
 
 			# Under no circumstances send this message more
 			# than once a week.
-			next if $last_warn + 86400*6.5 > time;
+			next if $last_expire + 86400*6.5 > time;
 
 			# Send this warning only once per payment.
 			# (See above.)
