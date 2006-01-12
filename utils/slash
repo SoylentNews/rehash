@@ -62,7 +62,7 @@ start_slashd () {
 	elif [ "$OS" = "FreeBSD" ] ; then
 		TZ=GMT su $USERNAME -c "$SLASHD $VIRTUAL_USER_NAME" &
 	elif [ "$OS" = "Linux" ] ; then 
-		su - $USERNAME --shell="/bin/sh" -c "TZ=GMT $SLASHD $VIRTUAL_USER_NAME" &
+		su --shell="/bin/sh" - $USERNAME -c "TZ=GMT $SLASHD $VIRTUAL_USER_NAME" &
 	else
 		su - $USERNAME -c "TZ=GMT $SLASHD $VIRTUAL_USER_NAME" &
 	fi
