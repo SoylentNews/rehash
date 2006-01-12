@@ -12559,7 +12559,7 @@ sub _genericGets {
 		}
 		if ($get_values) {
 			my $val = join ',', @$get_values;
-			$val .= ",$table_prime" unless grep $table_prime, @$get_values;
+			$val .= ",$table_prime" if ! grep { $_ eq $table_prime } @$get_values;
 			$qlid = $self->_querylog_start('SELECT', $table);
 			$sth = $self->sqlSelectMany($val, $table);
 		}
@@ -12574,10 +12574,13 @@ sub _genericGets {
 				$qlid = $self->_querylog_start('SELECT', $table);
 				$sth = $self->sqlSelectMany($values, $table);
 			} else {
+				# "values" is a misleading name here since it
+				# must be exactly one value (column name).
+				my $values_q = $self->sqlQuote($values);
 				my $val = $self->sqlSelectAll(
 					"$table_prime, name, value",
 					$param_table,
-					"name=$values"
+					"name=$values_q"
 				);
 				for my $row (@$val) {
 					push @$params, $row;
