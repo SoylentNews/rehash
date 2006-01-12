@@ -456,7 +456,7 @@ CREATE TABLE discussion_kinds (
 	dkid        TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	name        VARCHAR(30) NOT NULL DEFAULT '',
 	PRIMARY KEY (dkid),
-	UNIQUE name (name),
+	UNIQUE name (name)
 ) TYPE=InnoDB;
 
 #
