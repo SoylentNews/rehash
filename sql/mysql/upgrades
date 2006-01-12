@@ -3561,8 +3561,6 @@ ALTER TABLE remarks MODIFY COLUMN remark VARCHAR(255);
 
 # PUDGE LAST UPDATED HERE
 
-# SLASHDOT LAST UPDATED HERE
-
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # Changes for plugins/Submit (which you are almost certainly using)
@@ -3572,4 +3570,5 @@ UPDATE vars SET value=REPLACE(value, 'a:href_U,name,title ', 'a:href_U,name,titl
 # 2006-01-11
 UPDATE vars SET value = 'T_2_5_0_94' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHDOT LAST UPDATED HERE
 
