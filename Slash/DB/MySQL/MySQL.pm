@@ -8122,7 +8122,7 @@ sub getStoriesEssentials {
 	}
 
 	my $mcd = $self->getMCD();
-	my $min_stoid = $constants->{gse_min_stoid} || 0;
+	my $min_stoid = $self->getVar('gse_min_stoid', 'value', 1) || 0;
 	my $mp_tid = $constants->{mainpage_nexus_tid};
 	my $memcached_expire = 600; # this is kinda arbitrary, yes
 
@@ -8141,6 +8141,7 @@ sub getStoriesEssentials {
 		: "";
 	my $sectioncollapse = $options->{sectioncollapse} || 0;
 	my $return_min_stoid_only = $options->{return_min_stoid_only} || 0;
+	my $tid_extras = $options->{tid_extras} || 0;
 
 	# Now set some secondary variables.
 	my $the_time = time;
@@ -8156,8 +8157,10 @@ sub getStoriesEssentials {
 	# clause.  Note that the excluded-values are calculated first, and
 	# those are passed in to the included-values because exclusion takes
 	# priority and will remove items from the latter.
+	
 	my $tid_x =   $self->_gse_canonicalize($options->{tid_exclude});
 	my $tid =     $self->_gse_canonicalize($options->{tid},		$tid_x, $mp_tid);
+
 	my $uid_x =   $self->_gse_canonicalize($options->{uid_exclude});
 	my $uid =     $self->_gse_canonicalize($options->{uid},		$uid_x);
 	my $stoid_x = $self->_gse_canonicalize($options->{stoid_exclude});
@@ -8179,7 +8182,7 @@ sub getStoriesEssentials {
 	my $mcdkey;
 	$mcdkey = "$self->{_mcd_keyprefix}:gse:$tid->[0]:$the_minute" if $mcd;
 	my $try_mcd = ($mcd
-		&& scalar(@$tid) == 1
+		&& !$tid_extras
 		&& $offset == 0
 		&& !defined($options->{limit})
 		&& !defined($options->{limit_extra})
@@ -8190,6 +8193,8 @@ sub getStoriesEssentials {
 		&& !@$uid && !@$uid_x
 		&& !@$stoid && !@$stoid_x
 	);
+
+	
 	if ($try_mcd) {
 		my $data = $mcd->get($mcdkey);
 #print STDERR "gSE $$ mcdkey '$mcdkey' data element count '" . ($data ? scalar(@$data) : "n/a") . "'\n";
@@ -9952,7 +9957,6 @@ sub _write_stories_cache {
 sub getStoriesData {
 	my($self, $stoids, $force_cache_freshen) = @_;
 	my $constants = getCurrentStatic();
-
 	# If our story cache is too old, expire it.
 	_genericCacheRefresh($self, 'stories', $constants->{story_expire});
 	my $stories_cache = $self->{_stories_cache};
@@ -10049,6 +10053,7 @@ sub getStoriesData {
 			"*",
 			"story_text",
 			$stoid_clause);
+
 		for my $append_stoid (keys %$append) {
 			for my $column (keys %{$append->{$append_stoid}}) {
 				$answer->{$append_stoid}{$column} =
@@ -10066,10 +10071,17 @@ sub getStoriesData {
 				$answer->{$append_stoid}{$name} = $value;
 			}
 		}
+		
+		$append = $self->getStoriesTopicsRenderedHash(\@stoids_needed);
+		for my $append_stoid (keys %$append) {
+			$answer->{$append_stoid}{story_topics_rendered} = $append->{$append_stoid};
+		}
 		# Put the data where we'll be returning it.
 		for my $stoid (@stoids_needed) {
 			$retval->{$stoid} = $answer->{$stoid};
 		}
+
+
 
 		# The stories not in the future should be written
 		# into both the local cache and memcached.
@@ -10975,6 +10987,22 @@ sub getStoryTopicsRendered {
 	return $answer;
 }
 
+
+sub getStoriesTopicsRenderedHash {
+	my ($self, $stoids) = @_;
+	my $stoid_list = join ',', @$stoids;
+
+	my $rows = $self->sqlSelectAll("stoid,tid", "story_topics_rendered", "stoid in($stoid_list)");
+
+	my $story_topics = {};
+	
+	foreach my $row(@$rows) {
+		$story_topics->{$row->[0]}{$row->[1]} = 1;
+	}
+
+	return $story_topics;
+
+}
 ########################################################
 # Given a story ID, and assumes the story_topics_chosen table
 # is set up correctly for it.  Renders those chosen topics
@@ -12883,6 +12911,18 @@ sub getRandomSpamArmor {
 
 	# array index automatically int'd
 	return $ret->{$armor_keys[rand($#armor_keys + 1)]};
+}
+
+########################################################
+sub getStorypickableNexusChildren {
+	my ($self, $tid, $include_tid) = @_;
+	my $constants = getCurrentStatic();
+	$tid ||= $constants->{mainpage_nexus_tid};
+	my $topic_tree = $self->getTopicTree();
+	my $nexus_tids_ar = $self->getNexusChildrenTids($constants->{mainpage_nexus_tid});
+	push @$nexus_tids_ar, $tid if $include_tid;
+	@$nexus_tids_ar = sort grep {$topic_tree->{$_}{storypickable}} @$nexus_tids_ar;
+	return $nexus_tids_ar;
 }
 
 ########################################################
