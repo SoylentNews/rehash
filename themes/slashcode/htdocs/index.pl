@@ -95,11 +95,18 @@ my $start_time = Time::HiRes::time;
 	# and story_always_nexus tids, and story_always_author uids..
 	$gse_hr->{tid} = [ $gSkin->{nexus} ];
 	if ($gSkin->{skid} == $constants->{mainpage_skid}) {
-		my $always_tid_str = join ",",
-			$user->{story_always_topic},
-			$user->{story_always_nexus};
-		push @{$gse_hr->{tid}}, split /,/, $always_tid_str
-			if $always_tid_str;
+		my $nexus_children = $reader->getStorypickableNexusChildren($constants->{mainpage_nexus_tid});
+		push @{$gse_hr->{tid}}, @$nexus_children;
+		
+		my @always_tids = split ",",
+			$user->{story_always_topic};
+
+		# Let gse know that we're asking for extra tids  beyond those expected by default
+		$gse_hr->{tid_extras} = 1 if @always_tids;
+		
+		push @{$gse_hr->{tid}}, @$nexus_children;
+		push @{$gse_hr->{tid}}, @always_tids,
+			if @always_tids;
 	}
 	# Now exclude characteristics.  One tricky thing here is that
 	# we never exclude the nexus for the current skin -- if the user
@@ -129,6 +136,10 @@ my $start_time = Time::HiRes::time;
 	} else {
 		$stories = $slashdb->getStoriesEssentials($gse_hr);
 	}
+	
+	#my $last_mainpage_view;
+	#$last_mainpage_view = $slashdb->getTime() if $gSkin->{nexus} == $constants->{mainpage_skid} && !$user->{is_anon};
+
 #use Data::Dumper;
 #print STDERR "index.pl gse_hr: " . Dumper($gse_hr);
 #print STDERR "index.pl gSE stories: " . Dumper($stories);
@@ -241,7 +252,7 @@ my $start_time = Time::HiRes::time;
 	});
 
 	footer();
-
+	#$slashdb->setUser($user->{uid}, { 'last_mainpage_view' => $last_mainpage_view }) if $last_mainpage_view;
 	writeLog($skin_name);
 
 #	{
@@ -261,6 +272,47 @@ my $start_time = Time::HiRes::time;
 #		}
 #	}
 
+}
+
+
+
+
+sub getDispModeForMainpageStory {
+	my ($story, $story_data, $mp_dispmode_nexus_hr, $sec_dispmode_nexus_hr, $always_topic_ar) = @_;
+	my $constants = getCurrentStatic();
+	my $gSkin     = getCurrentSkin();
+	my $slashdb   = getCurrentDB();
+	my $skins     = $slashdb->getSkins();
+	my $dispmode;
+
+	my $ps_nexus = $skins->{$story->{primaryskid}}->{nexus};
+
+	# XXXNEWINDEX :  Right now we do our best to handle this -- there is no user pref
+	# to select whether a user wants to see this in brief vs full mode.  For
+	# now we just return "full"  (individual non-nexus topic selection isn't used on
+	# Slashdot currently)
+	foreach (@$always_topic_ar) {
+		return "full" if $story_data->{story_topics_rendered}{$_};
+	}
+
+
+	if ($story_data->{story_topics_rendered}{$constants->{mainpage_nexus_tid}}) {
+		$dispmode = $mp_dispmode_nexus_hr->{$ps_nexus};
+		return $dispmode if $dispmode;
+		return "full";
+	}
+
+	# Sectional Story -- decide what we should do with it
+	$dispmode = $sec_dispmode_nexus_hr->{$ps_nexus};
+	return $dispmode if $dispmode;
+	
+	# preference for sectional not defined -- go with default for site
+	if ($constants->{brief_sectional_mainpage}) {
+		return "brief";
+	} else {
+		return "none";
+	}
+	
 }
 
 sub getSidFromRemark {
@@ -491,6 +543,8 @@ sub displayStories {
 	my $gSkin     = getCurrentSkin();
 	my $ls_other  = { user => $user, reader => $reader, constants => $constants };
 	my($today, $x) = ('', 0);
+
+	
 # XXXSKIN I'm turning custom numbers of maxstories off for now, so all
 # users get the same number.  This will improve query cache hit rates and 
 # right now we need all the edge we can get.  Hopefully we can get this 
@@ -499,7 +553,7 @@ sub displayStories {
 # Here, maxstories should come from the skin, and $cnt should be
 # named minstories and that should come from the skin too.
 	my $user_maxstories = getCurrentAnonymousCoward("maxstories");
-	my $cnt = int($user_maxstories / 3);
+	my $cnt = $gSkin->{artcount_min};
 	my($return, $counter);
 
 	# get some of our constant messages but do it just once instead
@@ -532,8 +586,28 @@ sub displayStories {
 	# which was actually not all that smart, but umpteen layers of caching
 	# makes it quite tolerable here in 2004 :)
 	my $story;
+	
+	my $seen_full_story = 0;
+		
+	my @story_always_topic = split (',', $user->{story_always_topic});
+	my @story_always_nexus = split (',', $user->{story_always_nexus});
+	my @story_full_brief_nexus = split (',', $user->{story_full_brief_nexus});
+	my @story_brief_always_nexus = split (',', $user->{story_brief_always_nexus});
+	my @story_full_best_nexus = split (',', $user->{story_full_best_nexus});
+	my @story_brief_best_nexus = split (',', $user->{story_brief_best_nexus});
 
-	while ($story = shift @$stories) {
+	my (%mp_dispmode_nexus, %sec_dispmode_nexus);
+
+	$mp_dispmode_nexus{$_}  = "full" foreach (@story_always_nexus, @story_full_brief_nexus, @story_full_best_nexus);
+	$mp_dispmode_nexus{$_}  = "brief" foreach (@story_brief_best_nexus, @story_brief_always_nexus);
+	$sec_dispmode_nexus{$_} = "full" foreach (@story_always_nexus);
+	$sec_dispmode_nexus{$_} = "brief" foreach (@story_full_brief_nexus, @story_brief_always_nexus);
+	$sec_dispmode_nexus{$_} = "none" foreach (@story_full_best_nexus, @story_brief_best_nexus);
+
+	my $dispmodelast;
+
+	
+	STORIES_DISPLAY: while ($story = shift @$stories) {
 		my($tmpreturn, $other, @links);
 
 		# This user may not be authorized to see future stories;  if so,
@@ -572,89 +646,129 @@ sub displayStories {
 		my @threshComments = split /,/, $story->{hitparade};  # posts in each threshold
 
 		$other->{is_future} = 1 if $story->{is_future};
-		my $storytext = displayStory($story->{sid}, '', $other, $stories_data_cache);
+		my $storytext;
 
-		$tmpreturn .= $storytext;
+		
 
-		push @links, linkStory({
-			'link'		=> $msg->{readmore},
-			sid		=> $story->{sid},
-			tid		=> $story->{tid},
-			skin		=> $story->{primaryskid},
-			class		=> 'more'
-		}, '', $ls_other);
-
-		my $link;
-
-		if ($constants->{body_bytes}) {
-			$link = "$story->{body_length} $msg->{bytes}";
+		#$other->{dispoptions}{new} = 1 if !$user->{is_anon} && $user->{last_mainpage_view} && $gSkin->{nexus} == $constants->{mainpage_skid} && $user->{last_mainpage_view} lt $story->{time};
+	
+		my $story_data = $stories_data_cache->{$story->{stoid}};
+		
+		if ($gSkin->{nexus} == $constants->{mainpage_nexus_tid}) {
+			$other->{dispmode} = getDispModeForMainpageStory($story, $story_data, \%mp_dispmode_nexus, \%sec_dispmode_nexus, \@story_always_topic); 
 		} else {
-			$link = "$story->{word_count} $msg->{words}";
+			# In a section -- always show full view
+			$other->{dispmode} = "full"
 		}
 
-		if ($story->{body_length} || $story->{commentcount}) {
+
+		next STORIES_DISPLAY if $other->{dispmode} eq "none";
+	
+		$tmpreturn .= getData("briefarticles_begin") if $other->{dispmode} eq "brief" && $dispmodelast ne "brief";
+		$tmpreturn .= getData("briefarticles_end") if $dispmodelast eq "brief" && $other->{dispmode} ne "brief";
+
+		$other->{thresh_commentcount} = $threshComments[$user->{threshold} + 1];
+
+		# XXXNEWINDEX: perhaps move this to be generated in the brief section of dispStory template instead
+		$other->{storylink} = linkStory ({
+				'link' 	=> $story->{title},
+				sid	=> $story->{sid},
+				tid	=> $story->{tid},
+				skin	=> $story->{primaryskid},
+			}, '1', $ls_other
+		);
+
+		$storytext .= displayStory($story->{sid}, '', $other, $stories_data_cache);
+		$tmpreturn .= $storytext;
+		
+		if ($other->{dispmode} eq "full") {
 			push @links, linkStory({
-				'link'		=> $link,
+				'link'		=> $msg->{readmore},
 				sid		=> $story->{sid},
 				tid		=> $story->{tid},
-				mode		=> 'nocomment',
 				skin		=> $story->{primaryskid},
-			}, '', $ls_other) if $story->{body_length};
-
-			my @commentcount_link;
-			my $thresh = $threshComments[$user->{threshold} + 1];
-
-			if ($story->{commentcount} = $threshComments[0]) {
-				if ($user->{threshold} > -1 && $story->{commentcount} ne $thresh) {
-					$commentcount_link[0] = linkStory({
-						sid		=> $story->{sid},
-						tid		=> $story->{tid},
-						threshold	=> $user->{threshold},
-						'link'		=> $thresh,
-						skin		=> $story->{primaryskid},
-					}, '', $ls_other);
-				}
-			}
-
-			$commentcount_link[1] = linkStory({
-				sid		=> $story->{sid},
-				tid		=> $story->{tid},
-				threshold	=> -1,
-				'link'		=> $story->{commentcount} || 0,
-				skin		=> $story->{primaryskid}
+				class		=> 'more'
 			}, '', $ls_other);
+			my $link;
 
-			push @commentcount_link, $thresh, ($story->{commentcount} || 0);
-			push @links, getData('comments', { cc => \@commentcount_link })
-				if $story->{commentcount} || $thresh;
-		}
-
-		if ($story->{primaryskid} != $constants->{mainpage_skid} && $gSkin->{skid} == $constants->{mainpage_skid}) {
-			my $skin = $reader->getSkin($story->{primaryskid});
-			my $url;
-
-			if ($skin->{rootdir}) {
-				$url = $skin->{rootdir} . '/';
-			} elsif ($user->{is_anon}) {
-				$url = $gSkin->{rootdir} . '/' . $story->{name} . '/';
+			if ($constants->{body_bytes}) {
+				$link = "$story->{body_length} $msg->{bytes}";
 			} else {
-				$url = $gSkin->{rootdir} . '/' . $gSkin->{index_handler} . '?section=' . $skin->{name};
+				$link = "$story->{word_count} $msg->{words}";
+			}
+	
+			if ($story->{body_length} || $story->{commentcount}) {
+				push @links, linkStory({
+					'link'		=> $link,
+					sid		=> $story->{sid},
+					tid		=> $story->{tid},
+					mode		=> 'nocomment',
+					skin		=> $story->{primaryskid},
+				}, '', $ls_other) if $story->{body_length};
+
+				my @commentcount_link;
+				my $thresh = $threshComments[$user->{threshold} + 1];
+
+				if ($story->{commentcount} = $threshComments[0]) {
+					if ($user->{threshold} > -1 && $story->{commentcount} ne $thresh) {
+						$commentcount_link[0] = linkStory({
+							sid		=> $story->{sid},
+							tid		=> $story->{tid},
+							threshold	=> $user->{threshold},
+							'link'		=> $thresh,
+							skin		=> $story->{primaryskid},
+						}, '', $ls_other);
+					}
+				}
+
+				$commentcount_link[1] = linkStory({
+					sid		=> $story->{sid},
+					tid		=> $story->{tid},
+					threshold	=> -1,
+					'link'		=> $story->{commentcount} || 0,
+					skin		=> $story->{primaryskid}
+				}, '', $ls_other);
+
+				push @commentcount_link, $thresh, ($story->{commentcount} || 0);
+				push @links, getData('comments', { cc => \@commentcount_link })
+					if $story->{commentcount} || $thresh;
 			}
 
-			push @links, [ $url, $skin->{hostname} || $skin->{title}, '', 'section'];
-		}
+			if ($story->{primaryskid} != $constants->{mainpage_skid} && $gSkin->{skid} == $constants->{mainpage_skid}) {
+				my $skin = $reader->getSkin($story->{primaryskid});
+				my $url;
 
-		if ($user->{seclev} >= 100) {
-			push @links, [ "$gSkin->{rootdir}/admin.pl?op=edit&sid=$story->{sid}", getData('edit'), '', 'edit' ];
-		}
+				if ($skin->{rootdir}) {
+					$url = $skin->{rootdir} . '/';
+				} elsif ($user->{is_anon}) {
+					$url = $gSkin->{rootdir} . '/' . $story->{name} . '/';
+				} else {
+					$url = $gSkin->{rootdir} . '/' . $gSkin->{index_handler} . '?section=' . $skin->{name};
+				}
+	
+				push @links, [ $url, $skin->{hostname} || $skin->{title}, '', 'section'];
+			}
+	
+			if ($user->{seclev} >= 100) {
+				push @links, [ "$gSkin->{rootdir}/admin.pl?op=edit&sid=$story->{sid}", getData('edit'), '', 'edit' ];
+			}
 
-		# I added sid so that you could set up replies from the front page -Brian
-		$tmpreturn .= slashDisplay('storylink', {
-			links	=> \@links,
-			sid	=> $story->{sid},
-		}, { Return => 1 });
+			# I added sid so that you could set up replies from the front page -Brian
+			$tmpreturn .= slashDisplay('storylink', {
+				links	=> \@links,
+				sid	=> $story->{sid},
+			}, { Return => 1 });
+
+		}
 
 		$return .= $tmpreturn;
+		$dispmodelast = $other->{dispmode};
+	}
+	$return .= getData("briefarticles_end") if $dispmodelast eq "brief";
+
+	# If mainpage -- filter stories leftover for getOlderStories
+	if ($gSkin->{nexus} == $constants->{mainpage_nexus_tid}) {
+		@$stories = grep { getDispModeForMainpageStory($_, $stories_data_cache->{$_->{stoid}}, \%mp_dispmode_nexus, \%sec_dispmode_nexus, \@story_always_topic) ne "none"; } @$stories; 
 	}
 
 	unless ($constants->{index_no_prev_next_day}) {
