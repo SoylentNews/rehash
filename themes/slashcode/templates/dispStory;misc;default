@@ -21,6 +21,8 @@ en_US
 __name__
 dispStory
 __template__
+[% dispmode ||= "full" %]
+[% IF dispmode == "full" %]
 <div class="article">
 [% IF magic;
 	thisskin = Slash.db.getSkin(story.primaryskid);
@@ -105,6 +107,34 @@ END %]
 [% END %]
 	</div>
 </div>
+[% ELSIF dispmode == "brief" %]
+[% IF story.is_future %]<div class="future">[% END %]
+<div class="briefarticle">
+[% IF magic;
+	thisskin = Slash.db.getSkin(story.primaryskid);
+	IF thisskin.rootdir;
+		title = "<a href=\"$thisskin.rootdir/\">";
+	ELSE;
+		IF user.is_anon;
+			title = "<a href=\"$gSkin.rootdir/$thisskin.name/\">";
+		ELSE;
+			title = "<a href=\"$gSkin.rootdir/index.pl?section=$story.primaryskid\">";
+		END;
+	END;
+	title = title _ "<b>" _ thisskin.title _ "</b></a>: " _ storylink;
+ELSE;
+	title = storylink;
+
+END %]
+	[% title %]  [% IF story.commentcount %][% UNLESS story.commentcount == thresh_commentcount %][% thresh_commentcount %] of [% END %][% story.commentcount %] comment[% IF story.commentcount > 1 %]s[% END %][% END %] 
+	[% IF user.is_admin %]<a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">(edit)</a>[% END %]
+</div>
+[% IF story.is_future %]</div>[% END %]
+[% END %]
+__seclev__
+10000
+__version__
+$Id$
 __seclev__
 10000
 __version__
