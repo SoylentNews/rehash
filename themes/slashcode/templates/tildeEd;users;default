@@ -70,9 +70,12 @@ __template__
 <table border="0" cellpadding="2" cellspacing="0">
 	<tr>
 		<th>Sections</th>
-		<th>&nbsp;All&nbsp;</th>
-		<th>Best</th>
-		<th>None</th>
+		<th>Full<br>All</th>
+		<th>Full<br>Brief</th>
+		<th>Brief<br>All</th>
+		<th>Full<br>Best Only</th>
+		<th>Brief<br>Best Only</th>
+		<th>Never</th>
 	</tr>
 [% FOREACH nexustid = nexustid_order %]
 	<tr align="center">
@@ -81,7 +84,7 @@ __template__
 			# here, but ... I'm in a hurry
 		-%]
 		<td align="left">[% nexusref.$nexustid | strip_literal %]</td>
-[% FOREACH value = [ 3 2 0 ] -%]
+[% FOREACH value = [ 5 4 3 2 1 0 ] -%]
 		<td><input type="radio" name="nexustid[% nexustid %]" value="[% value %]"
 			[%- IF story023_default.nexus.$nexustid == value; checked; END %]></td>
 [%- END %]
