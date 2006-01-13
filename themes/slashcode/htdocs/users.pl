@@ -1538,7 +1538,8 @@ sub tildeEd {
 	my %prefs = ( );
 	for my $field (qw(
 		story_never_topic	story_never_author	story_never_nexus
-		story_always_topic	story_always_author	story_always_nexus
+		story_always_topic	story_always_author	story_always_nexus	story_brief_always_nexus
+		story_full_brief_nexus	story_full_best_nexus	story_brief_best_nexus
 	)) {
 		for my $id (
 			grep /^\d+$/,
@@ -1579,22 +1580,34 @@ sub tildeEd {
 	}
 
 	# Set up $nexus_hr, @nexustid_order, and $story023_default{nexus}.
-
 	my $topic_tree = $reader->getTopicTree();
-	my $nexus_tids_ar = $reader->getNexusChildrenTids($constants->{mainpage_nexus_tid});
-	@$nexus_tids_ar = grep {$topic_tree->{$_}{storypickable}} @$nexus_tids_ar;
+	my $nexus_tids_ar = $reader->getStorypickableNexusChildren($constants->{mainpage_nexus_tid}, 1);
 	my $nexus_hr = { };
+	
 	for my $tid (@$nexus_tids_ar) {
 		$nexus_hr->{$tid} = $topic_tree->{$tid}{textname};
 	}
-	my @nexustid_order = sort { lc $nexus_hr->{$a} cmp lc $nexus_hr->{$b} } keys %$nexus_hr;
+	my @nexustid_order = sort {($b == $constants->{mainpage_nexus_tid}) <=> ($a == $constants->{mainpage_nexus_tid}) || 
+				    lc $nexus_hr->{$a} cmp lc $nexus_hr->{$b} } keys %$nexus_hr;
 	for my $tid (@nexustid_order) {
 		     if ($prefs{story_never_nexus}{$tid}) {
 			$story023_default{nexus}{$tid} = 0;
 		} elsif ($prefs{story_always_nexus}{$tid}) {
+			$story023_default{nexus}{$tid} = 5;
+		} elsif ($prefs{story_full_brief_nexus}{$tid}) {
+			$story023_default{nexus}{$tid} = 4;
+		} elsif ($prefs{story_brief_always_nexus}{$tid}) {
 			$story023_default{nexus}{$tid} = 3;
-		} else {
+		} elsif ($prefs{story_full_best_nexus}{$tid}) {
 			$story023_default{nexus}{$tid} = 2;
+		} elsif ($prefs{story_brief_best_nexus}) {
+			$story023_default{nexus}{$tid} = 1;
+		} else {
+			if ($constants->{brief_sectional_mainpage}) {
+				$story023_default{nexus}{$tid} = 4;
+			} else {
+				$story023_default{nexus}{$tid} = 2;
+			}
 		}
 	}
 
@@ -2672,8 +2685,13 @@ sub saveHome {
 	my $author_hr = $slashdb->getDescriptions('authors');
 	my $tree = $slashdb->getTopicTree();
 	my(@story_never_topic,  @story_never_author,  @story_never_nexus);
-	my(@story_always_topic, @story_always_author, @story_always_nexus);
-	my($story_topic_all,    $story_author_all,    $story_nexus_all) = (0, 0, 0);
+	
+	my(@story_always_topic, @story_always_author);
+	
+	my(@story_always_nexus, @story_full_brief_nexus, @story_brief_always_nexus, @story_full_best_nexus, @story_brief_best_nexus);
+
+	my($story_topic_all,    $story_author_all,    $story_nexus_all);
+	
 	# Topics are either present (value=2) or absent (value=0).  If absent,
 	# push them onto the never list.  Otherwise, do nothing.  (There's no
 	# way to have an "always" topic, at the moment.)  If the hidden
@@ -2698,8 +2716,13 @@ sub saveHome {
 		$story_author_all++;
 		if (!$form->{$key}) {			push @story_never_author, $aid	}
 	}
-	# Nexuses can have value 0, 2 or 3.  0 means the never list,
-	# and 3 means the always list.
+	# Nexuses can have value 0, 1, 2, 3, 4, 5.  
+	# 0 means the never list,
+	# 1 means brief view of mainpage articles only
+	# 2 means full view of mainpage articles only
+	# 3 means brief view of all content
+	# 4 means full view of mainpage content, brief view of sectional
+	# 5 means full view of all content
 	for my $tid (
 		sort { $a <=> $b }
 		map { /^nexustid(\d+)$/; $1 }
@@ -2710,36 +2733,57 @@ sub saveHome {
 		next unless $tid && $tree->{$tid} && $tree->{$tid}{nexus};
 		$story_nexus_all++;
 		   if (!$form->{$key}) {		push @story_never_nexus, $tid	}
-		elsif ($form->{$key} == 3) {		push @story_always_nexus, $tid	}
+		elsif ($form->{$key} == 5 ) {		push @story_always_nexus, $tid	}
+		elsif ($form->{$key} == 4 ) {		push @story_full_brief_nexus, $tid }
+		elsif ($form->{$key} == 3 ) {		push @story_brief_always_nexus, $tid }
+		elsif ($form->{$key} == 2 ) {		push @story_full_best_nexus, $tid }
+		elsif ($form->{$key} == 1 ) {		push @story_brief_best_nexus, $tid }
+		
+						
 	}
 #use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR scalar(localtime) . " s_n_t '@story_never_topic' s_n_a '@story_never_author' s_n_n '@story_never_nexus' s_a_n '@story_always_nexus' form: " . Dumper($form);
 	# Sanity check.
-	$#story_never_topic   = 299 if $#story_never_topic   > 299;
-	$#story_never_author  = 299 if $#story_never_author  > 299;
-	$#story_never_nexus   = 299 if $#story_never_nexus   > 299;
-	$#story_always_topic  = 299 if $#story_always_topic  > 299;
-	$#story_always_author = 299 if $#story_always_author > 299;
-	$#story_always_nexus  = 299 if $#story_always_nexus  > 299;
+	$#story_never_topic		= 299 if $#story_never_topic   > 299;
+	$#story_never_author		= 299 if $#story_never_author  > 299;
+	$#story_never_nexus 		= 299 if $#story_never_nexus   > 299;
+	$#story_always_topic		= 299 if $#story_always_topic  > 299;
+	$#story_always_author 		= 299 if $#story_always_author > 299;
+	$#story_always_nexus 		= 299 if $#story_always_nexus  > 299;
+	$#story_full_brief_nexus 	= 299 if $#story_full_brief_nexus > 299;
+	$#story_brief_always_nexus	= 299 if $#story_brief_always_nexus > 299;
+	$#story_brief_best_nexus 	= 299 if $#story_brief_best_nexus > 299;
+	$#story_full_best_nexus		= 299 if $#story_full_best_nexus > 299;
+	
 	my $story_never_topic   = join ",", @story_never_topic;
 	$story_never_topic = ($constants->{subscribe} && $user->{is_subscriber})
 		? checkList($story_never_topic, 1024)
 		: checkList($story_never_topic);
-	my $story_never_author  = checkList(join ",", @story_never_author);
-	my $story_never_nexus   = checkList(join ",", @story_never_nexus);
-	my $story_always_topic  = checkList(join ",", @story_always_topic);
+	my $story_never_author  	= checkList(join ",", @story_never_author);
+	my $story_never_nexus   	= checkList(join ",", @story_never_nexus);
+	my $story_always_topic  	= checkList(join ",", @story_always_topic);
 	$story_always_topic = ($constants->{subscribe} && $user->{is_subscriber})
 		? checkList($story_always_topic, 1024)
 		: checkList($story_always_topic);
-	my $story_always_author = checkList(join ",", @story_always_author);
-	my $story_always_nexus  = checkList(join ",", @story_always_nexus);
+	my $story_always_author 	= checkList(join ",", @story_always_author);
+
+	my $story_always_nexus  	= checkList(join ",", @story_always_nexus);
+	my $story_full_brief_nexus	= checkList(join ",", @story_full_brief_nexus);
+	my $story_brief_always_nexus    = checkList(join ",", @story_brief_always_nexus);
+	my $story_brief_best_nexus	= checkList(join ",", @story_brief_best_nexus);
+	my $story_full_best_nexus	= checkList(join ",", @story_full_best_nexus);
+	
 
 	my $user_edits_table = {
-		story_never_topic	=> $story_never_topic,
-		story_never_author	=> $story_never_author,
-		story_never_nexus	=> $story_never_nexus,
-		story_always_topic	=> $story_always_topic,
-		story_always_author	=> $story_always_author,
-		story_always_nexus	=> $story_always_nexus,
+		story_never_topic		=> $story_never_topic,
+		story_never_author		=> $story_never_author,
+		story_never_nexus		=> $story_never_nexus,
+		story_always_topic		=> $story_always_topic,
+		story_always_author		=> $story_always_author,
+		story_always_nexus		=> $story_always_nexus,
+		story_brief_always_nexus	=> $story_brief_always_nexus,
+		story_full_brief_nexus 		=> $story_full_brief_nexus,
+		story_full_best_nexus		=> $story_full_best_nexus,
+		story_brief_best_nexus		=> $story_brief_best_nexus,
 
 		slashboxes	=> checkList($slashboxes, 1024),
 
@@ -2811,6 +2855,10 @@ sub saveHome {
 				'story_always_topic' => 1,
 				'story_always_author' => 1,
 				'story_always_nexus' => 1,
+				'story_full_brief_nexus' => 1,
+				'story_brief_always_nexus' => 1,
+				'story_full_best_nexus' => 1,
+				'story_brief_best_nexus' => 1,
 				'maxstories' => 1,
 				'noboxes' => 1,
 				'light' => 1,
