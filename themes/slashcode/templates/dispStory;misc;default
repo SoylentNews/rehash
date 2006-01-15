@@ -21,7 +21,7 @@ en_US
 __name__
 dispStory
 __template__
-[% IF !dispmode; dispmods = "full"; END %]
+[% dispmode = dispmode || "full" %]
 [% IF dispmode == "full" %]
 <div class="article">
 [% IF magic;
