@@ -75,12 +75,15 @@ __template__
 
 [% CASE 'remark_thanks' %]
 	<p><b>Thanks for your remark to our editors!</b><p>
+
 [% CASE 'briefarticles_begin' %]
 	[% returnme.data_constant = 1 %] 
 	<div class="briefarticles">
+
 [% CASE 'briefarticles_end' %]
 	[% returnme.data_constant = 1 %] 
 	</div>
+
 [% END %]
 
 __seclev__

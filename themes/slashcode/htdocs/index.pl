@@ -665,8 +665,6 @@ sub displayStories {
 		$other->{is_future} = 1 if $story->{is_future};
 		my $storytext;
 
-		
-
 		#$other->{dispoptions}{new} = 1 if !$user->{is_anon} && $user->{last_mainpage_view} && $gSkin->{nexus} == $constants->{mainpage_skid} && $user->{last_mainpage_view} lt $story->{time};
 	
 		my $story_data = $stories_data_cache->{$story->{stoid}};
