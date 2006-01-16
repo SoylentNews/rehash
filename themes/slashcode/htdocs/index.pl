@@ -277,8 +277,8 @@ my $start_time = Time::HiRes::time;
 
 
 
-sub getDispModeForMainpageStory {
-	my ($story, $story_data, $mp_dispmode_nexus_hr, $sec_dispmode_nexus_hr, $always_topic_ar) = @_;
+sub getDispModeForStory {
+	my ($story, $story_data, $mp_dispmode_nexus_hr, $sec_dispmode_nexus_hr, $always_topic_ar, $dispmode_hr) = @_;
 	my $constants = getCurrentStatic();
 	my $gSkin     = getCurrentSkin();
 	my $slashdb   = getCurrentDB();
@@ -287,29 +287,41 @@ sub getDispModeForMainpageStory {
 
 	my $ps_nexus = $skins->{$story->{primaryskid}}->{nexus};
 
+	
+	if ($gSkin->{nexus} != $constants->{mainpage_nexus_tid}) {
+		$dispmode_hr->{$story->{stoid}} = "full" if $dispmode_hr;
+		return "full";
+	}
+
 	# XXXNEWINDEX :  Right now we do our best to handle this -- there is no user pref
 	# to select whether a user wants to see this in brief vs full mode.  For
 	# now we just return "full"  (individual non-nexus topic selection isn't used on
 	# Slashdot currently)
 	foreach (@$always_topic_ar) {
+		$dispmode_hr->{$story->{stoid}} = "full" if $dispmode_hr;
 		return "full" if $story_data->{story_topics_rendered}{$_};
 	}
 
 
 	if ($story_data->{story_topics_rendered}{$constants->{mainpage_nexus_tid}}) {
 		$dispmode = $mp_dispmode_nexus_hr->{$ps_nexus};
+		$dispmode_hr->{$story->{stoid}} = $dispmode if $dispmode_hr && $dispmode;
 		return $dispmode if $dispmode;
+		$dispmode_hr->{$story->{stoid}} = "full" if $dispmode_hr;
 		return "full";
 	}
 
 	# Sectional Story -- decide what we should do with it
 	$dispmode = $sec_dispmode_nexus_hr->{$ps_nexus};
+	$dispmode_hr->{$story->{stoid}} = $dispmode if $dispmode_hr && $dispmode;
 	return $dispmode if $dispmode;
 	
 	# preference for sectional not defined -- go with default for site
 	if ($constants->{brief_sectional_mainpage}) {
+		$dispmode_hr->{$story->{stoid}} = "brief" if $dispmode_hr;
 		return "brief";
 	} else {
+		$dispmode_hr->{$story->{stoid}} = "none" if $dispmode_hr;
 		return "none";
 	}
 	
@@ -605,10 +617,15 @@ sub displayStories {
 	$sec_dispmode_nexus{$_} = "none" foreach (@story_full_best_nexus, @story_brief_best_nexus);
 
 	my $dispmodelast;
+	my $story_to_dispmode_hr = {};
 
+	# Filter out any story we're planning on skipping up front
+	@$stories = grep { getDispModeForStory($_, $stories_data_cache->{$_->{stoid}}, \%mp_dispmode_nexus, \%sec_dispmode_nexus, \@story_always_topic, $story_to_dispmode_hr) ne "none" } @$stories;
 	
 	STORIES_DISPLAY: while ($story = shift @$stories) {
 		my($tmpreturn, $other, @links);
+
+		$other->{dispmode} = $story_to_dispmode_hr->{$story->{stoid}};
 
 		# This user may not be authorized to see future stories;  if so,
 		# skip them.
@@ -654,16 +671,6 @@ sub displayStories {
 	
 		my $story_data = $stories_data_cache->{$story->{stoid}};
 		
-		if ($gSkin->{nexus} == $constants->{mainpage_nexus_tid}) {
-			$other->{dispmode} = getDispModeForMainpageStory($story, $story_data, \%mp_dispmode_nexus, \%sec_dispmode_nexus, \@story_always_topic); 
-		} else {
-			# In a section -- always show full view
-			$other->{dispmode} = "full"
-		}
-
-
-		next STORIES_DISPLAY if $other->{dispmode} eq "none";
-	
 		$tmpreturn .= getData("briefarticles_begin") if $other->{dispmode} eq "brief" && $dispmodelast ne "brief";
 		$tmpreturn .= getData("briefarticles_end") if $dispmodelast eq "brief" && $other->{dispmode} ne "brief";
 
@@ -766,10 +773,6 @@ sub displayStories {
 	}
 	$return .= getData("briefarticles_end") if $dispmodelast eq "brief";
 
-	# If mainpage -- filter stories leftover for getOlderStories
-	if ($gSkin->{nexus} == $constants->{mainpage_nexus_tid}) {
-		@$stories = grep { getDispModeForMainpageStory($_, $stories_data_cache->{$_->{stoid}}, \%mp_dispmode_nexus, \%sec_dispmode_nexus, \@story_always_topic) ne "none"; } @$stories; 
-	}
 
 	unless ($constants->{index_no_prev_next_day}) {
 		my($today, $tomorrow, $yesterday, $week_ago) = getOlderDays($form->{issue});

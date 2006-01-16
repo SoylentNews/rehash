@@ -1589,6 +1589,7 @@ sub tildeEd {
 	}
 	my @nexustid_order = sort {($b == $constants->{mainpage_nexus_tid}) <=> ($a == $constants->{mainpage_nexus_tid}) || 
 				    lc $nexus_hr->{$a} cmp lc $nexus_hr->{$b} } keys %$nexus_hr;
+
 	for my $tid (@nexustid_order) {
 		     if ($prefs{story_never_nexus}{$tid}) {
 			$story023_default{nexus}{$tid} = 0;
