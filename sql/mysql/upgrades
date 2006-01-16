@@ -3559,8 +3559,6 @@ UPDATE vars SET value = 'T_2_5_0_93' WHERE name = 'cvs_tag_currentcode';
 
 ALTER TABLE remarks MODIFY COLUMN remark VARCHAR(255);
 
-# PUDGE LAST UPDATED HERE
-
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # Changes for plugins/Submit (which you are almost certainly using)
@@ -3571,6 +3569,12 @@ UPDATE vars SET value=REPLACE(value, 'a:href_U,name,title ', 'a:href_U,name,titl
 UPDATE vars SET value = 'T_2_5_0_94' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
+
+DELETE FROM sessions;
+ALTER TABLE sessions DROP INDEX uid;
+ALTER TABLE sessions ADD UNIQUE uid (uid);
+
+# PUDGE LAST UPDATED HERE
 
 ALTER TABLE users_index ADD COLUMN story_full_brief_nexus VARCHAR(255) NOT NULL DEFAULT '', ADD COLUMN story_brief_always_nexus VARCHAR(255) NOT NULL DEFAULT '', ADD COLUMN story_full_best_nexus VARCHAR(255) NOT NULL DEFAULT '', ADD COLUMN story_brief_best_nexus VARCHAR(255) NOT NULL DEFAULT "" AFTER story_always_nexus;
 
