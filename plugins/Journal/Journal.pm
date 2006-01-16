@@ -443,7 +443,7 @@ sub createSubmissionFromJournal {
 		tid		=> $src_journal->{tid},
 		primaryskid 	=> $primaryskid,
 		journal_id 	=> $src_journal->{id},
-		journal_disc 	=> $src_journal->{discussion},
+		discussion 	=> $src_journal->{discussion},
 		by		=> $options->{submission_param}{by}     || $journal_user->{nickname},
 		by_url 		=> $options->{submission_param}{by_url} || $journal_user->{homepage} || $journal_user->{fakeemail}
 	};
@@ -489,7 +489,6 @@ sub createStoryFromJournal {
 		'time'		=> $slashdb->getTime(), 
 		commentstatus	=> 'enabled',
 		journal_id 	=> $src_journal->{id},
-		journal_disc	=> $src_journal->{discussion},
 		by		=> $options->{story_param}{by}     || $journal_user->{nickname},
 		by_url 		=> $options->{story_param}{by_url} || $journal_user->{homepage} || $fakeemail,
 		discussion	=> $src_journal->{discussion},
