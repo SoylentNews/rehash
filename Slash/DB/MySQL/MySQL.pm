@@ -96,15 +96,15 @@ my %descriptions = (
 
 	'non_nexus_topics'
 		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid,textname', 'topics LEFT JOIN topic_nexus ON topic_nexus.tid=topics.tid', "topic_nexus.tid IS NULL") },
-	
+
 	'highlighted-topics-submittable'
 		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid, IF(topic_nexus.tid IS NULL, textname, CONCAT("*",textname))', 'topics LEFT JOIN topic_nexus ON topic_nexus.tid=topics.tid', "submittable='yes'") },
-	
-	
+
+
 	'non_nexus_topics-submittable'
 		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid,textname', 'topics LEFT JOIN topic_nexus ON topic_nexus.tid=topics.tid', "topic_nexus.tid IS NULL AND submittable='yes'") },
-	
-	
+
+
 	'non_nexus_topics-storypickable'
 		=> sub { $_[0]->sqlSelectMany('topics.tid AS tid,textname', 'topics LEFT JOIN topic_nexus ON topic_nexus.tid=topics.tid', "topic_nexus.tid IS NULL AND storypickable='yes'") },
 
@@ -144,19 +144,19 @@ my %descriptions = (
 
 	'skins-submittable'
 		=> sub { $_[0]->sqlSelectMany('skid,title', 'skins', "submittable='yes'") },
-		
+
 	'skins-searchable'
 		=> sub { $_[0]->sqlSelectMany('skid,title', 'skins', "searchable='yes'") },
-		
+
 	'skins-storypickable'
 		=> sub { $_[0]->sqlSelectMany('skid,title', 'skins', "storypickable='yes'") },
-	
+
 	'topics-submittable'
 		=> sub { $_[0]->sqlSelectMany('tid,textname', 'topics', "submittable='yes'") },
-		
+
 	'topics-searchable'
 		=> sub { $_[0]->sqlSelectMany('tid,textname', 'topics', "searchable='yes'") },
-		
+
 	'topics-storypickable'
 		=> sub { $_[0]->sqlSelectMany('tid,textname', 'topics', "storypickable='yes'") },
 
@@ -286,7 +286,7 @@ sub init {
 
 	$self->{_story_comm} = {};
 
-	# Do all cache elements contain '_cache_' in it, if so, we should 
+	# Do all cache elements contain '_cache_' in it, if so, we should
 	# probably perform a delete on anything matching, here.
 }
 
@@ -376,7 +376,7 @@ sub createComment {
 		$self->sqlDo("SET AUTOCOMMIT=1");
 		errorLog("$DBI::errstr");
 		return -1;
-	} 
+	}
 
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
@@ -466,11 +466,11 @@ sub createModeratorLog {
 		# If we're strictly enforcing like mods sharing one group of m2s this behavior might have to change.  If so it's likely to
 		# be var controlled.  A better solution is likely to inherit m2s when a new mod is created of a given cid-reason if we
 		# want to have the same m2s across all like m1s.  If the mod whose m2s we are inheriting from has already reached consensus
-                # we probably just want to inherit those m2s and not up the m2needed value for either mods.
+		# we probably just want to inherit those m2s and not up the m2needed value for either mods.
 
 		my $post_m2_base = $self->getBaseM2Needed($comment->{cid}, $reason);
 
-		$self->sqlUpdate("moderatorlog", { m2needed => $post_m2_base }, "cid=".$self->sqlQuote($comment->{cid})." and reason=".$self->sqlQuote($reason)." and m2status=0 and active=1" );
+		$self->sqlUpdate("moderatorlog", { m2needed => $post_m2_base }, "cid=".$self->sqlQuote($comment->{cid})." and reason=".$self->sqlQuote($reason)." and m2status=0 and active=1");
 	}
 	return $ret_val;
 }
@@ -497,7 +497,7 @@ sub getBaseM2Needed {
 
 # Pass the id if we've already created the mod for which we are inheriting mods.
 # If getting the inherited m2s before the mod is created omit passing the id
-# as a parameter. 
+# as a parameter.
 sub getInheritedM2sForMod {
 	my($self, $mod_uid, $cid, $reason, $active, $id) = @_;
 	return [] unless $active;
@@ -520,10 +520,10 @@ sub getModForM2Inherit {
 	my $id_str = $id ? " AND id!=".$self->sqlQuote($id) : "";
 
 	# Find the earliest active moderation that we can inherit m2s from
-        # which isn't the mod we are inheriting them into.  This uses the
+	# which isn't the mod we are inheriting them into.  This uses the
 	# same criteria as multiMetaMod for determining which mods we can
 	# propagate m2s to, or from in the case of inheriting
-	my ($mod) = $self->sqlSelectHashref("*","moderatorlog",
+	my($mod) = $self->sqlSelectHashref("*","moderatorlog",
 				"cid=".$self->sqlQuote($cid).
 				" AND reason=".$self->sqlQuote($reason).
 				" AND uid!=$mod_uid_q AND cuid!=$mod_uid_q".
@@ -539,12 +539,11 @@ sub applyInheritedM2s {
 
 	foreach my $m2(@$m2s){
 		my $m2_user=$self->getUser($m2->{uid});
-		my $cur_m2 = { 
-				$mod_id => 	{ is_fair => $m2->{val} == 1 ? 1 : 0 }
-			     };
+		my $cur_m2 = {
+			$mod_id => { is_fair => $m2->{val} == 1 ? 1 : 0 }
+		};
 		$self->createMetaMod($m2_user, $cur_m2, 0, { inherited => 1});
 	}
-
 }
 
 
@@ -933,14 +932,14 @@ sub getCSS {
 	my $admin = $user->{is_admin};
 	my $theme = $user->{simpledesign} ? "light" : $user->{css_theme};
 	my $constants = getCurrentStatic();
-	
+
 	my $expire_time = $constants->{css_expire} || 3600;
 	$expire_time += int(rand(60)) if $expire_time;
 	_genericCacheRefresh($self, 'css', $expire_time);
 	_genericCacheRefresh($self, 'css_pages', $expire_time);
 	_genericCacheRefresh($self, 'css_skins', $expire_time);
 	_genericCacheRefresh($self, 'css_themes', $expire_time);
-	
+
 	my $css_ref 	 	= $self->{_css_cache} ||= {};
 	my $css_pages_ref	= $self->{_css_pages_cache};
 	my $css_skins_ref	= $self->{_css_skins_cache};
@@ -952,41 +951,41 @@ sub getCSS {
 
 	my $lowbandwidth = $user->{lowbandwidth} ? "yes" : "no";
 
-	$page   = '' if !$css_pages_ref->{$page};	
-	$skin   = '' if !$css_skins_ref->{$skin};	
-	$theme  = '' if !$css_themes_ref->{$theme};	
+	$page   = '' if !$css_pages_ref->{$page};
+	$skin   = '' if !$css_skins_ref->{$skin};
+	$theme  = '' if !$css_themes_ref->{$theme};
 
 	return $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}
 		if exists $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth};
-	
+
 	my @clauses;
 
 	my $page_q = $self->sqlQuote($page);
-        my $page_in = $page ? "(page = '' or page = $page_q)" : "page = ''";
-        push @clauses, $page_in;
+	my $page_in = $page ? "(page = '' or page = $page_q)" : "page = ''";
+	push @clauses, $page_in;
 
-        my $skin_in = $skin ? "(skin = '' or skin = '$skin')" : "skin = ''";
-        push @clauses, $skin_in;
+	my $skin_in = $skin ? "(skin = '' or skin = '$skin')" : "skin = ''";
+	push @clauses, $skin_in;
 
-        push @clauses, "admin='no'" if !$admin;
-	
+	push @clauses, "admin='no'" if !$admin;
+
 	my $theme_q  = $self->sqlQuote($theme);
 	my $theme_in = $theme ? "(theme='' or theme=$theme_q)" : "theme=''";
 	push @clauses, $theme_in;
 
 	push @clauses, "lowbandwidth='$lowbandwidth'" if $lowbandwidth eq "no";
 
-        my $where = "css.ctid=css_type.ctid AND ";
+	my $where = "css.ctid=css_type.ctid AND ";
 	$where .= join ' AND ', @clauses;
 
-        my $css = $self->sqlSelectAllHashrefArray("rel,type,media,file,title,ie_cond", "css, css_type", $where, "ORDER BY css_type.ordernum, css.ordernum");
-	
+	my $css = $self->sqlSelectAllHashrefArray("rel,type,media,file,title,ie_cond", "css, css_type", $where, "ORDER BY css_type.ordernum, css.ordernum");
+
 	$css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth} = $css;
-        return $css;
+	return $css;
 }
 
 ########################################################
-# ok, I was tired of trying to mold getDescriptions into 
+# ok, I was tired of trying to mold getDescriptions into
 # taking more args.
 sub getTemplateList {
 	my($self, $skin, $page) = @_;
@@ -997,7 +996,7 @@ sub getTemplateList {
 	$where .= " AND page = '$page'" if $page;
 
 	my $qlid = $self->_querylog_start("SELECT", "templates");
-	my $sth = $self->sqlSelectMany('tpid,name', 'templates', $where); 
+	my $sth = $self->sqlSelectMany('tpid,name', 'templates', $where);
 	while (my($tpid, $name) = $sth->fetchrow) {
 		$templatelist->{$tpid} = $name;
 	}
@@ -1084,15 +1083,15 @@ sub getModeratorCommentLog {
 		 moderatorlog.active AS active,
 		 moderatorlog.m2status AS m2status,
 		 moderatorlog.id AS id,
-		 moderatorlog.points_orig AS points_orig 
+		 moderatorlog.points_orig AS points_orig
 		 $select_extra",
 		"moderatorlog, users, comments",
 		"$where_clause
-		 AND moderatorlog.cid=comments.cid 
+		 AND moderatorlog.cid=comments.cid
 		 $time_clause",
 		"ORDER BY $order_col $asc_desc $limit"
 	);
-	my(@comments, $comment,@ml_ids);
+	my(@comments, $comment, @ml_ids);
 	while ($comment = $sth->fetchrow_hashref) {
 		push @ml_ids, $comment->{id};
 		push @comments, $comment;
@@ -1130,8 +1129,8 @@ sub getMetamodCountsForModsByType {
 
 
 # Given an arrayref of moderation ids, a hashref
-# keyed by moderation ids is returned.  The moderation ids 
-# point to arrays containing info metamoderations for that 
+# keyed by moderation ids is returned.  The moderation ids
+# point to arrays containing info metamoderations for that
 # particular moderation id.
 
 sub getMetamodsForMods {
@@ -1162,13 +1161,13 @@ sub getMetamodlogForUser {
 	my $uid_q = $self->sqlQuote($uid);
 	my $limit_clause = $limit ? " LIMIT $limit" : "";
 	my $m2s = $self->sqlSelectAllHashrefArray(
-			"metamodlog.id, metamodlog.mmid, metamodlog.ts, metamodlog.val, metamodlog.active, 
-			 comments.subject, comments.cid, comments.sid,  
-			 moderatorlog.m2status, moderatorlog.reason, moderatorlog.val as modval",
-			"metamodlog, moderatorlog, comments",
-			"metamodlog.mmid = moderatorlog.id AND comments.cid = moderatorlog.cid AND metamodlog.uid = $uid_q ",
-			"GROUP BY moderatorlog.cid, moderatorlog.reason ORDER BY moderatorlog.ts desc"
-		  );
+		"metamodlog.id, metamodlog.mmid, metamodlog.ts, metamodlog.val, metamodlog.active,
+		 comments.subject, comments.cid, comments.sid,
+		 moderatorlog.m2status, moderatorlog.reason, moderatorlog.val as modval",
+		"metamodlog, moderatorlog, comments",
+		"metamodlog.mmid = moderatorlog.id AND comments.cid = moderatorlog.cid AND metamodlog.uid = $uid_q ",
+		"GROUP BY moderatorlog.cid, moderatorlog.reason ORDER BY moderatorlog.ts desc"
+	);
 	my @m2_ids;
 	foreach my $m (@$m2s) {
 		push @m2_ids, $m->{mmid};
@@ -1198,8 +1197,8 @@ sub undoModeration {
 	my($self, $uid, $sid) = @_;
 	my $constants = getCurrentStatic();
 
-	# The chances of getting here when comments are slim 
-	# since comment posting and moderation should be halted.  
+	# The chances of getting here when comments are slim
+	# since comment posting and moderation should be halted.
 	# Regardless check just in case.
 	return [] unless dbAvailable("write_comments");
 
@@ -1270,24 +1269,24 @@ sub undoModeration {
 
 ########################################################
 sub getTopicParam {
-	my ($self, $tid_wanted, $val, $force_cache_freshen) = @_;
+	my($self, $tid_wanted, $val, $force_cache_freshen) = @_;
 	my $constants = getCurrentStatic();
 	my $table_cache		= "_topicparam_cache";
 	my $table_cache_time	= "_topicparam_cache_time";
-	
+
 	return undef unless $tid_wanted;
-	
+
 	_genericCacheRefresh($self, 'topicparam', $constants->{block_expire});
-	
+
 	my $is_in_local_cache = exists $self->{$table_cache}{$tid_wanted};
 	my $use_local_cache = $is_in_local_cache && !$force_cache_freshen;
 
 	if (!$is_in_local_cache || $force_cache_freshen) {
 		my $tid_clause = "tid=".$self->sqlQuote($tid_wanted);
-		my $params = $self->sqlSelectAllKeyValue('name,value', 'topic_param', $tid_clause);	
+		my $params = $self->sqlSelectAllKeyValue('name,value', 'topic_param', $tid_clause);
 		$self->{$table_cache_time} = time() if !$self->{$table_cache_time};
 		$self->{$table_cache}{$tid_wanted} = $params;
-	} 
+	}
 	my $hr = $self->{$table_cache}{$tid_wanted};
 	my $retval;
 	if ($val && !ref $val) {
@@ -1299,7 +1298,6 @@ sub getTopicParam {
 		$retval = \%return;
 	}
 	return $retval;
-	
 }
 
 ########################################################
@@ -1356,7 +1354,7 @@ sub getTopicTree {
 		$tree_ref->{$child}{parent}{$parent} = $m_w;
 		$tree_ref->{$parent}{child}{$child} = $m_w;
 	}
-	
+
 	for my $tid (keys %$tree_ref) {
 		if (exists $tree_ref->{$tid}{child}) {
 			my $c_hr = $tree_ref->{$tid}{child};
@@ -1725,17 +1723,17 @@ sub getNexusExtras {
 	my($self, $tid, $options) = @_;
 	return [ ] unless $tid;
 	$options ||= {};
-	
+
 	my $content_type = $options->{content_type} || "story";
 	my $content_type_q = $self->sqlQuote($content_type);
-	
+
 	my $content_type_clause = "";
 	$content_type_clause = " AND content_type = $content_type_q " if $content_type ne "all";
-	
+
 	my $tid_q = $self->sqlQuote($tid);
 	my $answer = $self->sqlSelectAll(
 		'extras_textname, extras_keyword, type, content_type, required, ordering, extras_id',
-		'topic_nexus_extras', 
+		'topic_nexus_extras',
 		"tid = $tid_q $content_type_clause ",
 		"ORDER by ordering, extras_id"
 	);
@@ -1779,7 +1777,7 @@ sub getNexusExtrasForChosen {
 			$index++;
 		}
 	}
-	
+
 	return $extras;
 }
 
@@ -1799,7 +1797,7 @@ sub createNexusExtra {
 sub updateNexusExtra {
 	my($self, $extras_id, $extra) = @_;
 	return unless $extras_id && $extra;
-	
+
 	$extra->{type}          ||= "text";
 	$extra->{content_type}  ||= "story";
 	$extra->{required}      ||= "no";
@@ -1920,13 +1918,13 @@ sub createSubmission {
 	$emailhost = $emailuri->host() if $emailuri && $emailuri->can("host");
 	$data->{emaildomain} = fullhost_to_domain($emailhost);
 	$data->{emaildomain} = $self->truncateStringForCharColumn($data->{emaildomain}, 'submissions', 'emaildomain');
-	$data->{uid} = delete $submission->{uid} || getCurrentStatic('anonymous_coward_uid'); 
+	$data->{uid} = delete $submission->{uid} || getCurrentStatic('anonymous_coward_uid');
 	$data->{'-time'} = delete $submission->{'time'};
 	$data->{'-time'} ||= 'NOW()';
 	$data->{primaryskid} = delete $submission->{primaryskid} || $constants->{mainpage_skid};
 	$data->{tid} = delete $submission->{tid} || $constants->{mainpage_skid};
 	# To help cut down on duplicates generated by automated routines. For
-	# crapflooders, we will need to look into an alternate methods. 
+	# crapflooders, we will need to look into an alternate methods.
 	# Filters of some sort, maybe?
 	$data->{signature} = md5_hex($data->{story});
 
@@ -1951,7 +1949,7 @@ sub getSessionInstance {
 	);
 
 	my($lasttitle, $last_sid, $last_subid) = $self->sqlSelect(
-		'lasttitle, last_sid, last_subid', 
+		'lasttitle, last_sid, last_subid',
 		'sessions',
 		"uid=$uid"
 	);
@@ -1993,13 +1991,13 @@ sub createAccessLog {
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 	my $r = Apache->request;
-	my $bytes = $r->bytes_sent; 
+	my $bytes = $r->bytes_sent;
 
 	$user ||= {};
 	$user->{state} ||= {};
-	
+
 	return if $op eq 'css' && $constants->{accesslog_css_skip};
-	
+
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	if ($op eq 'image' && $constants->{accesslog_imageregex}) {
@@ -2409,7 +2407,8 @@ sub getBadPasswordIPsByUID {
 		 MAX(DATE_FORMAT(ts, '%Y-%m-%d %h:%i:%s')) AS maxts",
 		"badpasswords",
 		"uid=$uid_q AND ts > DATE_SUB(NOW(), INTERVAL 1 DAY)",
-		"GROUP BY ip ORDER BY c DESC");
+		"GROUP BY ip ORDER BY c DESC"
+	);
 }
 
 ########################################################
@@ -2425,7 +2424,7 @@ sub getNewPasswd {
 
 ########################################################
 # reset's a user's account forcing them to get the
-# new password via their registered mail account.  
+# new password via their registered mail account.
 sub resetUserAccount {
 	my($self, $uid) = @_;
 	my $newpasswd = changePassword();
@@ -2592,7 +2591,7 @@ sub getLogToken {
 }
 
 ########################################################
-# Make a new logtoken, save it in the DB, and return it 
+# Make a new logtoken, save it in the DB, and return it
 sub setLogToken {
 	my($self, $uid) = @_;
 
@@ -2736,7 +2735,6 @@ sub getUserEmail {
 #################################################################
 # Corrected all of the above (those messages will go away soon.
 # -Brian, Tue Jan 21 14:49:30 PST 2003
-# 
 sub getCommentsByGeneric {
 	my($self, $where_clause, $num, $min, $options) = @_;
 	$options ||= {};
@@ -2744,7 +2742,7 @@ sub getCommentsByGeneric {
 	my $limit = " LIMIT $min, $num " if $num;
 	my $force_index = "";
 	$force_index = " FORCE INDEX(uid_date) " if $options->{force_index};
-	
+
 	$where_clause = "($where_clause) AND date > DATE_SUB(NOW(), INTERVAL $options->{limit_days} DAY)"
 		if $options->{limit_days};
 	$where_clause .= " AND cid >= $options->{cid_at_or_after} " if $options->{cid_at_or_after};
@@ -2789,7 +2787,8 @@ sub getCommentsByIPIDOrSubnetID {
 	my $where = "(ipid='$id' OR subnetid='$id') ";
 	$where .= " AND cid >= $constants->{comments_forgetip_mincid} " if $constants->{comments_forgetip_mincid};
 	return $self->getCommentsByGeneric(
-	       $where, $num, $min, $options);
+		$where, $num, $min, $options
+	);
 }
 
 
@@ -3332,8 +3331,8 @@ sub checkStoryViewable {
 	my $count = $self->sqlCount(
 		"stories, story_topics_rendered",
 		"stories.stoid = '$stoid'
-		 AND stories.stoid = story_topics_rendered.stoid 
-		 AND story_topics_rendered.tid IN ($nexus_clause) 
+		 AND stories.stoid = story_topics_rendered.stoid
+		 AND story_topics_rendered.tid IN ($nexus_clause)
 		 $time_clause",
 	);
 	return $count >= 1 ? 1 : 0;
@@ -3375,7 +3374,7 @@ sub checkDiscussionPostable {
 	return 0 unless $id;
 	my $constants = getCurrentStatic();
 
-	# This should do it. 
+	# This should do it.
 	my($column_time, $where_time) = $self->_stories_time_clauses({
 		try_future		=> $constants->{subscribe_future_post},
 		must_be_subscriber	=> 1,
@@ -3465,7 +3464,7 @@ sub deleteSubmission {
 	}
 
 	for (keys %{$form}) {
-		# $form has several new internal variables that match this regexp, so 
+		# $form has several new internal variables that match this regexp, so
 		# the logic below should always check $t.
 		next unless /^(\w+)_(\d+)$/;
 		my($t, $n) = ($1, $2);
@@ -4119,7 +4118,7 @@ sub savePollQuestion {
 		}
 	}
 
-	# Go on and unset any reference to the qid in sections, if it 
+	# Go on and unset any reference to the qid in sections, if it
 	# needs to exist the next statement will correct this. -Brian
 	$self->sqlUpdate('sections', { qid => '0' }, " qid = $poll->{qid} ")
 		if $poll->{qid};
@@ -4170,7 +4169,7 @@ sub deletePoll {
 
 	my $qid_quoted = $self->sqlQuote($qid);
 	my $did = $self->sqlSelect(
-		'discussion', 
+		'discussion',
 		'pollquestions',
 		"qid=$qid_quoted"
 	);
@@ -4221,7 +4220,7 @@ sub getPollQuestionList {
 	$where .= " AND date <= NOW() " unless $admin;
 	my $limit = $other->{limit} || 20;
 
-	my $cols = 'pollquestions.qid as qid, question, date, voters, discussions.commentcount as commentcount, 
+	my $cols = 'pollquestions.qid as qid, question, date, voters, discussions.commentcount as commentcount,
 			polltype, date>now() as future,pollquestions.topic, pollquestions.primaryskid';
 	$cols .= ", stories.title as title, stories.sid as sid" if $justStories;
 
@@ -4811,7 +4810,7 @@ sub validFormkey {
 	);
 	print STDERR "ISVALID $is_valid\n" if $constants->{DEBUG};
 	return 'invalid' if !$is_valid;
- 
+
 	# If we're using the HumanConf plugin, check for its validity
 	# as well.
 	return 'ok' if $options->{no_hc};
@@ -4897,9 +4896,10 @@ sub resetFormkey {
 	$update_ref->{formname} = $formname if $formname;
 
 	# reset the formkey to 0, and reset the ts
-	my $updated = $self->sqlUpdate("formkeys", 
-		$update_ref, 
-		"formkey=" . $self->sqlQuote($formkey));
+	my $updated = $self->sqlUpdate("formkeys",
+		$update_ref,
+		"formkey=" . $self->sqlQuote($formkey)
+	);
 
 	print STDERR "RESET formkey $updated\n" if $constants->{DEBUG};
 	return $updated;
@@ -4975,7 +4975,7 @@ sub checkPostInterval {
 	my $timeframe = $constants->{formkey_timeframe};
 	$timeframe = $speedlimit if $speedlimit > $timeframe;
 	my $formkey_earliest = $time - $timeframe;
-	
+
 	my $options = {};
 	$options->{force_ipid} = 1 if $form->{postanon};
 	my $where = $self->_whereFormkey($options);
@@ -5722,7 +5722,7 @@ sub getNorssList {
 			if ($debug) {
 				print STDERR scalar(gmtime) . " gNL pid $$ set mcd key '$mcdkey' keycount " . scalar(keys %$norsslist_ref) . "\n";
 			}
-                }
+		}
 	}
 
 	if ($debug) {
@@ -5739,9 +5739,9 @@ sub getNopalmList {
 	my($self, $refresh) = @_;
 	my $constants = getCurrentStatic();
 	my $debug = $constants->{debug_db_cache};
-        my $mcd = $self->getMCD();
-        my $mcdkey = "$self->{_mcd_keyprefix}:al:nopalm" if $mcd;
-        my $nopalmlist_ref;
+	my $mcd = $self->getMCD();
+	my $mcdkey = "$self->{_mcd_keyprefix}:al:nopalm" if $mcd;
+	my $nopalmlist_ref;
 
 	# Randomize the expire time a bit;  it's not good for the DB
 	# to have every process re-ask for this at the exact same time.
@@ -5786,7 +5786,7 @@ sub getNopalmList {
 			if ($debug) {
 				print STDERR scalar(gmtime) . " gNL pid $$ set mcd key '$mcdkey' keycount " . scalar(keys %$nopalmlist_ref) . "\n";
 			}
-                }
+		}
 	}
 
 	if ($debug) {
@@ -5822,7 +5822,8 @@ sub countSubmissionsWithEmaildomain {
 	$del_clause = " AND del = ".$self->sqlQuote($options->{del}) if defined $options->{del};
 	return $self->sqlCount("submissions USE INDEX (time_emaildomain)",
 		"emaildomain=$emaildomain_q
-		 AND time >= DATE_SUB(NOW(), INTERVAL $days_back DAY) $del_clause");
+		 AND time >= DATE_SUB(NOW(), INTERVAL $days_back DAY) $del_clause"
+	);
 }
 
 ##################################################################
@@ -6130,7 +6131,7 @@ sub getAL2 {
 	for my $value (@$values) {
 		$bitvector |= $value;
 	}
-	
+
 	# Return a hashref with one field set for each bit set.
 	my $al2types = $self->getAL2Types;
 	my $retval = { };
@@ -6334,7 +6335,7 @@ sub currentAdmin {
 
 # XXXSECTIONTOPICS pulled getTopNewsstoryTopics out.  Was only referenced in
 # top topics in topics.pl which is now gone.  If we bring that back we'll
-# want to rewrite getTopNewsstoryTopics 
+# want to rewrite getTopNewsstoryTopics
 
 sub getTopPollTopics {
 	my($self, $limit) = @_;
@@ -6348,7 +6349,7 @@ sub getTopPollTopics {
 		"topics.tid AS tid, alttext, COUNT(*) AS cnt, default_image, MAX(date) AS tme",
 		'topics,pollquestions',
 		"polltype != 'nodisplay'
-		AND autopoll = 'no' 
+		AND autopoll = 'no'
 		AND date <= NOW()
 		AND topics.tid=pollquestions.topic
 		GROUP BY topics.tid
@@ -6592,7 +6593,7 @@ sub countStory {
 
 ##################################################################
 # Handles moderation
-# Moderates a specific comment. 
+# Moderates a specific comment.
 # Returns 0 or 1 for whether the comment changed
 # Returns a negative value when an error was encountered. The
 # warning the user sees is handled within the .pl file
@@ -6825,14 +6826,14 @@ sub moderateComment {
 }
 
 sub displaystatusForStories {
-	my ($self, $stoids) = (@_);
+	my($self, $stoids) = (@_);
 	my $constants = getCurrentStatic();
 	my $ds = {};
 	return {} unless $stoids and @$stoids;
 	my $stoid_list = join ',', @$stoids;
 
 	my @sections_nexuses = grep {$_ != $constants->{mainpage_nexus_tid}} $self->getNexusTids();
-	my $section_nexus_list = join ',',@sections_nexuses;
+	my $section_nexus_list = join ',', @sections_nexuses;
 
 	my $mainpage = $self->sqlSelectAllHashref(
 		'stoid',
@@ -6897,7 +6898,7 @@ sub _calc_karma_token_loss {
 			$kc *= $change;
 		}
 	}
-	if ($kc < 0 
+	if ($kc < 0
 		&& defined $constants->{comment_karma_limit}
 		&& $constants->{comment_karma_limit} ne "") {
 		my $future_karma = $comment_change_hr->{karma} + $kc;
@@ -6933,7 +6934,7 @@ sub metamodEligible {
 	# Last test, have to hit the DB for this one (but it's very quick).
 	my $maxuid = $self->countUsers({ max => 1 });
 	return 0 if $user->{uid} >
-		  $maxuid * $constants->{m2_userpercentage};
+		$maxuid * $constants->{m2_userpercentage};
 
 	# User is OK to metamod.
 	return 1;
@@ -7041,7 +7042,7 @@ sub getStoryByTime {
 	$key .= "|$time" if $key;
 
 	my $now = $self->sqlQuote( time2str('%Y-%m-%d %H:%M:00', time, 'GMT') );
-	
+
 	return $cache->{$key} if $key && defined $cache->{$key};
 
 	my $returnable = $self->sqlSelectHashref(
@@ -7066,7 +7067,7 @@ sub getStoryByTime {
 ##################################################################
 #
 sub getStorySidFromDiscussion {
-	my ($self, $discussion) = (@_);
+	my($self, $discussion) = (@_);
 	return $self->sqlSelect("sid", "stories", "discussion = ".$self->sqlQuote($discussion));
 }
 
@@ -7199,7 +7200,7 @@ sub multiMetaMod {
 sub createMetaMod {
 	my($self, $m2_user, $m2s, $multi_max, $options) = @_;
 	my $constants = getCurrentStatic();
-	$options ||= {}; 
+	$options ||= {};
 	my $rows;
 
 	# If this user has no saved mods, by definition nothing they try
@@ -7290,7 +7291,7 @@ sub createMetaMod {
 			 AND m2count < m2needed AND active=1",
 			{ assn_order => [qw( -m2count -m2status )] },
 		) unless $m2_user->{tokens} < $self->getVar("m2_mintokens", "value", 1) &&
-			 !$m2_user->{is_admin};
+			!$m2_user->{is_admin};
 
 		$rows += 0; # if no error, returns 0E0 (true!), we want a numeric answer
 
@@ -7551,8 +7552,8 @@ sub setCommentForMod {
 	});
 	$changed += 0;
 	if (!$changed && $raw_val > 0) {
-		$update->{-points}="points";
-		$update->{-tweak}="tweak$val";
+		$update->{-points} = "points";
+		$update->{-tweak}  = "tweak$val";
 		my $tweak_extra = " AND tweak$val <= 0";
 		$changed = $self->sqlUpdate("comments", $update, $where.$tweak_extra, {
 			assn_order => [ "-points", "-pointsmax" ]
@@ -7736,10 +7737,10 @@ sub getCommentsForUser {
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $other = "";
-	
+
 	my $order_dir = "";
 	$order_dir = uc($options->{order_dir}) eq "DESC" ? "DESC" : "ASC" if $options->{order_dir};
-	
+
 	$other.= "ORDER BY $options->{order_col} $order_dir" if $options->{order_col};
 	$other.= " LIMIT $options->{limit}" if $options->{limit};
 
@@ -7860,7 +7861,7 @@ sub getSubmissionsByNetID {
 				"stories, story_text",
 				"sid=$sid_q AND stories.stoid=story_text.stoid");
 			$story_ref->{displaystatus} = $self->_displaystatus($story_ref->{stoid});
-			@$sub{'story_title','story_time','displaystatus'} = @$story_ref{'title','time','displaystatus'} if $story_ref;
+			@$sub{'story_title', 'story_time', 'displaystatus'} = @$story_ref{'title', 'time', 'displaystatus'} if $story_ref;
 		}
 	}
 
@@ -7884,7 +7885,7 @@ sub getSubmissionsByUID {
 	for my $sub (@$subs) {
 		$sub->{sid} = $self->sqlSelect(
 			'value',
-			'submission_param', 
+			'submission_param',
 			"subid=" . $self->sqlQuote($sub->{subid}) . " AND name='sid'") if $sub->{del} == 2;
 		if ($sub->{sid}) {
 			my $sid_q = $self->sqlQuote($sub->{sid});
@@ -7892,7 +7893,7 @@ sub getSubmissionsByUID {
 				"stories, story_text",
 				"sid=$sid_q AND stories.stoid=story_text.stoid");
 			$story_ref->{displaystatus} = $self->_displaystatus($story_ref->{stoid});
-			@$sub{'story_title','story_time','displaystatus'} = @$story_ref{'title','time','displaystatus'} if $story_ref;
+			@$sub{'story_title', 'story_time', 'displaystatus'} = @$story_ref{'title', 'time', 'displaystatus'} if $story_ref;
 		}
 	}
 	return $subs;
@@ -7929,7 +7930,7 @@ sub countSubmissionsByNetID {
 }
 
 ########################################################
-# Needs to be more generic in the long run. 
+# Needs to be more generic in the long run.
 # Be nice if we could just pull certain elements -Brian
 sub getStoriesBySubmitter {
 	my($self, $id, $limit) = @_;
@@ -7946,7 +7947,7 @@ sub getStoriesBySubmitter {
 		"stories.stoid = story_topics_rendered.stoid
 		 AND stories.stoid = story_text.stoid
 		 AND submitter=$id_q AND time < NOW()
-		 AND story_topics_rendered.tid IN ($nexus_clause) 
+		 AND story_topics_rendered.tid IN ($nexus_clause)
 		 AND in_trash = 'no'",
 		"GROUP BY stories.stoid ORDER by time DESC $limit");
 	return $answer;
@@ -7955,17 +7956,17 @@ sub getStoriesBySubmitter {
 ########################################################
 sub countStoriesBySubmitter {
 	my($self, $id) = @_;
-	
+
 	my $id_q = $self->sqlQuote($id);
 	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
 	my $nexuses = $self->getNexusChildrenTids($mp_tid);
 	my $nexus_clause = join ',', @$nexuses, $mp_tid;
 
-	my ($count) = $self->sqlSelect('count(*)',
+	my($count) = $self->sqlSelect('count(*)',
 		'stories, story_topics_rendered',
 		"stories.stoid=story_topics_rendered.stoid',
 		 AND submitter=$id_q AND time < NOW()
-		 AND story_topics_rendered.tid IN ($nexus_clause) 
+		 AND story_topics_rendered.tid IN ($nexus_clause)
 		 AND in_trash = 'no'
 		 GROUP BY stories.stoid");
 
@@ -8157,7 +8158,7 @@ sub getStoriesEssentials {
 	# clause.  Note that the excluded-values are calculated first, and
 	# those are passed in to the included-values because exclusion takes
 	# priority and will remove items from the latter.
-	
+
 	my $tid_x =   $self->_gse_canonicalize($options->{tid_exclude});
 	my $tid =     $self->_gse_canonicalize($options->{tid},		$tid_x, $mp_tid);
 
@@ -8194,7 +8195,7 @@ sub getStoriesEssentials {
 		&& !@$stoid && !@$stoid_x
 	);
 
-	
+
 	if ($try_mcd) {
 		my $data = $mcd->get($mcdkey);
 #print STDERR "gSE $$ mcdkey '$mcdkey' data element count '" . ($data ? scalar(@$data) : "n/a") . "'\n";
@@ -8507,7 +8508,7 @@ sub getSubmissionsMerge {
 	# get submissions
 	# from deleteSubmission
 	for (keys %{$form}) {
-		# $form has several new internal variables that match this regexp, so 
+		# $form has several new internal variables that match this regexp, so
 		# the logic below should always check $t.
 		next unless /^del_(\d+)$/;
 		my $n = $1;
@@ -8618,10 +8619,10 @@ sub getSubmissionForUser {
 
 ########################################################
 sub calcTrollPoint {
-	my ($self, $type, $good_behavior) = @_;
+	my($self, $type, $good_behavior) = @_;
 	my $constants = getCurrentStatic();
 	$good_behavior ||= 0;
-	my $trollpoint =0;
+	my $trollpoint = 0;
 
 	$trollpoint = -abs($constants->{istroll_downmods_ip}) - $good_behavior if $type eq "ipid";
 	$trollpoint = -abs($constants->{istroll_downmods_subnet}) - $good_behavior if $type eq "subnetid";
@@ -8705,16 +8706,16 @@ sub getNetIDKarma {
 	my($self, $type, $id) = @_;
 	my($count, $karma);
 	if ($type eq "ipid") {
-		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)","comments","ipid='$id'");
+		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "ipid='$id'");
 		return wantarray ? ($karma, $count) : $karma;
 	} elsif ($type eq "subnetid") {
-		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)","comments","subnetid='$id'");
+		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "subnetid='$id'");
 		return wantarray ? ($karma, $count) : $karma;
 	} else {
-		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)","comments","ipid='$id'");
+		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "ipid='$id'");
 		return wantarray ? ($karma, $count) : $karma if $count;
 
-		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)","comments","subnetid='$id'");
+		($count, $karma) = $self->sqlSelect("COUNT(*),sum(karma)", "comments", "subnetid='$id'");
 		return wantarray ? ($karma, $count) : $karma;
 	}
 }
@@ -8755,7 +8756,7 @@ sub getNetIDKarma {
 #
 # The problem is that I don't want IPs staring me in the face. So we
 # MD5d em. This wasn't for "security" in the strict sense of the word.
-# It just was meant to make it inconvenient for now.  Not impossible. 
+# It just was meant to make it inconvenient for now.  Not impossible.
 # Now I don't have any IPs.  Instead we have reasonably abstracted
 # functions that should let us create a more secure system when we
 # have the time.
@@ -8801,7 +8802,7 @@ sub getIsTroll {
 	return 0 if $user->{is_anon};
 
 	# Check for modval by user ID.
-	$trollpoint = $self->calcTrollPoint("uid",$good_behavior);
+	$trollpoint = $self->calcTrollPoint("uid", $good_behavior);
 	$modval = $self->calcModval("comments.uid = $user->{uid}", $uid_hoursback);
 	return 1 if $modval <= $trollpoint;
 
@@ -8923,11 +8924,24 @@ sub createStory {
 	my $commentstatus = delete $story->{commentstatus};
 
 	if (!$error) {
+		if ($story->{subid}) {
+			if ($self->sqlSelect('id', 'journal_transfer',
+				'subid=' . $self->sqlQuote($story->{subid})
+			)) {
+				my $sub = $self->getSubmission($story->{subid});
+				if ($sub) {
+					for (qw(discussion journal_id by by_url)) {
+						$story->{$_} = $sub->{$_};
+					}
+				}
+			}
+		}
+
 		$story->{body_length} = length($story->{bodytext});
 		$story->{word_count} = countWords($story->{introtext}) + countWords($story->{bodytext});
 		$story->{primaryskid} = $primaryskid;
 		$story->{tid} = $tids->[0];
-		
+
 		if (! $self->setStory($stoid, $story)) {
 			$error = "setStory failed after creation: " . $self->sqlError();
 		}
@@ -9384,9 +9398,9 @@ sub getSlashConf {
 		}
 		my $dotchar =
 			'(?:'
-			       . '[' . join("", @chars) . ']'
-			       . '|&#(?:' . join("|", @entities) . ');'
-		       . ')';
+				. '[' . join("", @chars) . ']'
+				. '|&#(?:' . join("|", @entities) . ');'
+			. ')';
 		my $regex = '(\s+)' . "((?:<[^>]+>)*$dotchar+)" . '(\S)';
 		$conf{comment_nonstartwordchars_regex} = qr{$regex}i;
 	}
@@ -9634,7 +9648,7 @@ sub getTime {
 
 ##################################################################
 sub getTimeAgo {
-	my ($self, $time) = @_;
+	my($self, $time) = @_;
 	my $q_time = $self->sqlQuote($time);
 	my $units_given = 0;
 	my $remainder = $self->sqlSelect("UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP($q_time)");
@@ -9651,7 +9665,7 @@ sub getTimeAgo {
 	$diff->{minutes} = int($remainder / 60);
 	$remainder -= $diff->{minutes} * 60;
 	$diff->{seconds} = $remainder;
-	
+
 	return $diff;
 }
 
@@ -9741,7 +9755,7 @@ sub getStoryList {
 
 # XXXSECTIONTOPICS Stub method which needs to be filled in
 sub getPrimaryTids {
-	my ($self, $stoids);
+	my($self, $stoids);
 	return {};
 }
 
@@ -9848,7 +9862,7 @@ sub getRecentComments {
 	$primaryskid = $options->{primaryskid};
 	$max = $min if $max < $min;
 	my $startat = $options->{startat} || 0;
-	
+
 	my $num = $options->{num} || 100; # should be a var
 
 	my $max_cid = $self->getMaxCid();
@@ -9861,7 +9875,7 @@ sub getRecentComments {
 		$limit_clause = " LIMIT $startat, $num ";
 	} else {
 		$where_extra  = " AND comments.cid BETWEEN $start_cid and $end_cid ";
-		$limit_clause = " LIMIT $num"; 
+		$limit_clause = " LIMIT $num";
 	}
 	if ($primaryskid) {
 		$where_extra = " AND discussions.primaryskid = ".$self->sqlQuote($primaryskid)
@@ -10030,7 +10044,7 @@ sub getStoriesData {
 
 		my($append, $answer, $stoid_clause);
 		my @stoids_needed =
-			sort 
+			sort
 			grep { !exists $retval->{$_} }
 			@$stoids;
 		if (!@stoids_needed) {
@@ -10071,7 +10085,7 @@ sub getStoriesData {
 				$answer->{$append_stoid}{$name} = $value;
 			}
 		}
-		
+
 		$append = $self->getStoriesTopicsRenderedHash(\@stoids_needed);
 		for my $append_stoid (keys %$append) {
 			$answer->{$append_stoid}{story_topics_rendered} = $append->{$append_stoid};
@@ -10080,8 +10094,6 @@ sub getStoriesData {
 		for my $stoid (@stoids_needed) {
 			$retval->{$stoid} = $answer->{$stoid};
 		}
-
-
 
 		# The stories not in the future should be written
 		# into both the local cache and memcached.
@@ -10259,7 +10271,7 @@ sub setCommonStoryWords {
 		}
 
 		# assuming our storage limits are the same as for uncommon words
-		my $maxlen = $constants->{uncommonstorywords_maxlen} || 65000; 
+		my $maxlen = $constants->{uncommonstorywords_maxlen} || 65000;
 
 		my $common_words = substr(join(" ", keys %common_words), 0, $maxlen); if (length($common_words) == $maxlen) { $common_words =~ s/\s+\S+\Z//; }
 		$self->setVar("common_story_words", $common_words);
@@ -10592,7 +10604,7 @@ sub getTemplateListByText {
 
 	my %templatelist;
 	my $where = 'template LIKE ' . $self->sqlQuote("%${text}%");
-	my $templates =	$self->sqlSelectMany('tpid, name', 'templates', $where); 
+	my $templates =	$self->sqlSelectMany('tpid, name', 'templates', $where);
 	while (my($tpid, $name) = $templates->fetchrow) {
 		$templatelist{$tpid} = $name;
 	}
@@ -10611,17 +10623,17 @@ sub getTemplateByName {
 	my $values;
 	if ($options) {
 		my $ref = ref $options;
-		if (!$ref || $ref eq 'ARRAY') { 
+		if (!$ref || $ref eq 'ARRAY') {
 			$values = $options;
 			$options = {};
 		} elsif ($ref eq 'HASH') {
 			$values = $options->{values};
-		} else {        
+		} else {
 			$options = {};
-		}               
-	} else {                
-		$options = {};  
-	}               
+		}
+	} else {
+		$options = {};
+	}
 
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
@@ -10638,7 +10650,7 @@ sub getTemplateByName {
 		($constants->{cache_enabled} || $constants->{cache_enabled_template})
 	) {
 		$self->{$table_cache_id} = getTemplateNameCache($self);
-	}               
+	}
 
 	#Now, lets determine what we are after
 	my($page, $skin) = (@{$options}{qw(page skin)});
@@ -10733,14 +10745,14 @@ sub getTemplateByName {
 
 	if ($type) {
 		return $self->{$table_cache}{$id}{$values};
-	} else { 
+	} else {
 		if ($self->{$table_cache}{$id}) {
 			my %return = %{$self->{$table_cache}{$id}};
 			return \%return;
-		} 
+		}
 	}
 
-	return $answer; 
+	return $answer;
 }
 
 ########################################################
@@ -10987,22 +10999,22 @@ sub getStoryTopicsRendered {
 	return $answer;
 }
 
-
+########################################################
 sub getStoriesTopicsRenderedHash {
-	my ($self, $stoids) = @_;
+	my($self, $stoids) = @_;
 	my $stoid_list = join ',', @$stoids;
 
 	my $rows = $self->sqlSelectAll("stoid,tid", "story_topics_rendered", "stoid in($stoid_list)");
 
 	my $story_topics = {};
-	
+
 	foreach my $row(@$rows) {
 		$story_topics->{$row->[0]}{$row->[1]} = 1;
 	}
 
 	return $story_topics;
-
 }
+
 ########################################################
 # Given a story ID, and assumes the story_topics_chosen table
 # is set up correctly for it.  Renders those chosen topics
@@ -11024,7 +11036,7 @@ sub setStoryRenderedFromChosen {
 	$self->sqlDelete("story_topics_rendered", "stoid = $stoid");
 	if (!$info->{neverdisplay}) {
 		for my $key (sort keys %$rendered_hr) {
-			unless ($self->sqlInsert("story_topics_rendered", 
+			unless ($self->sqlInsert("story_topics_rendered",
 				{ stoid => $stoid, tid => $key }
 			)) {
 				# and we should ROLLBACK here
@@ -11227,8 +11239,8 @@ sub getStoryTopics {
 		)}
 	} if $add_names == 2;
 
-	# We use a Description for the long names. 
-	$topicdesc = $self->getDescriptions('topics') 
+	# We use a Description for the long names.
+	$topicdesc = $self->getDescriptions('topics')
 		if !$topicdesc && $add_names;
 
 	my $answer;
@@ -11255,7 +11267,7 @@ sub setStoryTopicsChosen {
 	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
 	$self->sqlDelete("story_topics_chosen", "stoid = $stoid");
 	for my $key (sort { $a <=> $b } keys %{$topic_ref}) {
-		unless ($self->sqlInsert("story_topics_chosen", 
+		unless ($self->sqlInsert("story_topics_chosen",
 			{ stoid => $stoid, tid => $key, weight => $topic_ref->{$key} }
 		)) {
 			# and we should ROLLBACK here
@@ -11558,7 +11570,7 @@ sub setUser {
 	# I should look into that. (REPLACE is faster) -Brian
 	for (@param)  {
 		if (!defined($_->[1]) || $_->[1] eq "") {
-			$rows += $self->sqlDelete('users_param', 
+			$rows += $self->sqlDelete('users_param',
 				"uid = $uid AND name = " . $self->sqlQuote($_->[0]));
 		} elsif ($_->[0] eq "acl") {
 			my(@delete, @add);
@@ -11569,7 +11581,7 @@ sub setUser {
 				} else {
 					push @delete, $key;
 				}
-			} 
+			}
 			if (@delete) {
 				my $string = join(',', @{$self->sqlQuote(\@delete)});
 				$self->sqlDelete("users_acl", "acl IN ($string) AND uid=$uid");
@@ -11581,7 +11593,7 @@ sub setUser {
 				my $string;
 				for my $acl (@add) {
 					my $qacl = $self->sqlQuote($acl);
-					$string .= qq| ($uid, $qacl),|
+					$string .= qq| ($uid, $qacl),|;
 				}
 				chop($string); # remove trailing comma
 				my $qlid = $self->_querylog_start('INSERT', 'users_acl');
@@ -12506,7 +12518,7 @@ sub _genericGet {
 			for my $key (keys %$append) {
 				$answer->{$key} = $append->{$key};
 			}
-#			$answer->{$col_table->{label}} = $self->sqlSelectColArrayref($col_table->{key}, $col_table->{table}, "$col_table->{table_index}=$id_db")  
+#			$answer->{$col_table->{label}} = $self->sqlSelectColArrayref($col_table->{key}, $col_table->{table}, "$col_table->{table_index}=$id_db")
 #				if $col_table;
 		}
 	} else {
@@ -12518,7 +12530,7 @@ sub _genericGet {
 			($answer) = $self->sqlSelect($val, $table, "$table_prime=$id_db");
 		} else {
 			$answer = $self->sqlSelectHashref('*', $table, "$table_prime=$id_db");
-#			$answer->{$col_table->{label}} = $self->sqlSelectColArrayref($col_table->{key}, $col_table->{table}, "$col_table->{table_index}=$id_db")  
+#			$answer->{$col_table->{label}} = $self->sqlSelectColArrayref($col_table->{key}, $col_table->{table}, "$col_table->{table_index}=$id_db")
 #				if $col_table;
 		}
 	}
@@ -12688,7 +12700,7 @@ sub createHook {
 sub deleteHook {
 	my($self, $id) = @_;
 
-	$self->sqlDelete('hooks', 'id =' . $self->sqlQuote($id));  
+	$self->sqlDelete('hooks', 'id =' . $self->sqlQuote($id));
 }
 
 ########################################################
@@ -12915,7 +12927,7 @@ sub getRandomSpamArmor {
 
 ########################################################
 sub getStorypickableNexusChildren {
-	my ($self, $tid, $include_tid) = @_;
+	my($self, $tid, $include_tid) = @_;
 	my $constants = getCurrentStatic();
 	$tid ||= $constants->{mainpage_nexus_tid};
 	my $topic_tree = $self->getTopicTree();
@@ -12930,7 +12942,7 @@ sub clearAccountVerifyNeededFlags {
 	my($self, $uid) = @_;
 	$self->setUser($uid, {
 		waiting_for_account_verify 	=> "",
-		account_verify_request_time 	=> "" 
+		account_verify_request_time 	=> ""
 	});
 }
 
