@@ -36,7 +36,7 @@ __template__
 
 [% admin_block %]
 
-<form action="[% env.script_name %]" method="post">
+<form action="[% env.script_name %]" method="post" name="edithome">
 <fieldset>
 <legend>Homepage settings</legend>
 [% PROCESS formkey_tag %]

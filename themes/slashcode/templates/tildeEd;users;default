@@ -67,6 +67,23 @@ __template__
 -%]
 
 <td valign="top">
+	<script type="text/javascript">
+	<!--
+	function updateNexusAllTidPrefs(el) {
+		theForm = document.forms["edithome"];
+		for(i=0; i<theForm.elements.length; i++){
+			var regex = /^nexustid\d+$/;
+			if (regex.test(theForm.elements[i].name)) {
+				if (theForm.elements[i].value == el.value) {
+					theForm.elements[i].checked = true;
+				} else {
+					theForm.elements[i].checked = false;
+				}
+			}
+		}
+	}
+	-->
+	</script>
 <table border="0" cellpadding="2" cellspacing="0">
 	<tr>
 		<th>Sections</th>
@@ -77,6 +94,16 @@ __template__
 		<th>Brief<br>Best Only</th>
 		<th>Never</th>
 	</tr>
+	<tr align="center">
+		<td align="left">
+			<b>Master</b><br>
+			(Change All)
+		</td>
+		[% FOREACH value = [ 5 4 3 2 1 0 ] -%]
+			<td><input type="radio" name="nexustid_master" value="[% value %]" onChange="updateNexusAllTidPrefs(this)">
+			</td>
+		[% END %]
+	</tr>	
 [% FOREACH nexustid = nexustid_order %]
 	<tr align="center">
 		[%-	# really should have nexusref have another field for the
