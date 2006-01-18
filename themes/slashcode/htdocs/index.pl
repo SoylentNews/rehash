@@ -674,7 +674,7 @@ sub displayStories {
 
 		$other->{thresh_commentcount} = $threshComments[$user->{threshold} + 1];
 
-		# XXXNEWINDEX: perhaps move this to be generated in the brief section of dispStory template instead
+		# XXXNEWINDEX: perhaps move this to being generated in the brief section of dispStory template instead
 		$other->{storylink} = linkStory ({
 				'link' 	=> $story->{title},
 				sid	=> $story->{sid},
@@ -782,8 +782,11 @@ sub displayStories {
 			linkrel		=> $linkrel,
 		}, { Return => 1 });
 	}
+	# limit number of stories leftover for older stories if desired
+	$#$stories = ($gSkin->{older_stories_max} - 1) if $gSkin->{older_stories_max} > 0;
 
 	return $return;
+
 }
 
 #################################################################
