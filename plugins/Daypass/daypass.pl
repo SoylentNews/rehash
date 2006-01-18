@@ -27,7 +27,7 @@ sub main {
 		$dpk = $1 || "";
 	}
 
-	my $adnum = 0;
+	my($adnum, $minduration) = (0, 0);
 
 	if ($dpk) {
 
@@ -74,6 +74,7 @@ print STDERR scalar(localtime) . " daypass.pl $$ cannot show key\n";
 			return ;
 		}
 		$adnum = $dp_hr->{adnum};
+		$minduration = $dp_hr->{minduration} || 0;
 
 	}
 
@@ -84,8 +85,9 @@ print STDERR scalar(localtime) . " daypass.pl $$ cannot show key\n";
 	header(getData('head')) or return;
 
 	slashDisplay('main', {
-		adnum	=> $adnum,
-		dpk	=> $dpk,
+		adnum		=> $adnum,
+		dpk		=> $dpk,
+		minduration	=> $minduration,
 	});
 
 	footer();
