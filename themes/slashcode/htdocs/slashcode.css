@@ -273,3 +273,8 @@ pre, code { font-size: 80%; }
 }
 
 .tb_col { background: #600;}
+
+.briefarticle { padding: 2px; background: #ccc; font-size: 80%}
+.briefarticle a { color: #000 }
+.future .briefarticle { background: #c33; }
+.briefarticles { border-top: solid 2px #933; padding-bottom: 0.5em; margin-top: 3px }
