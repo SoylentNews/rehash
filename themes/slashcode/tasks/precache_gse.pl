@@ -60,9 +60,12 @@ $task{$me}{code} = sub {
 	my $mins_ahead = $constants->{gse_precache_mins_ahead} || 2;
 	my $mp_tid = $constants->{mainpage_nexus_tid};
 	my $default_maxstories = getCurrentAnonymousCoward("maxstories");
+
+	my $tids = $slashdb->getStorypickableNexusChildren($mp_tid);
+	push @$tids, $mp_tid;
 	my @gse_1min = (
 		{ fake_secs_ahead =>  45,
-		  tid => $mp_tid		},
+		  tid => $tids		},
 #		{ fake_secs_ahead =>  45,
 #		  tid => $mp_tid,
 #		  sectioncollapse => 1		},
