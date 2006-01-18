@@ -3576,8 +3576,22 @@ ALTER TABLE sessions ADD UNIQUE uid (uid);
 
 # PUDGE LAST UPDATED HERE
 
+# Fairly major update to index selection - sectional stories are now by default shown in a brief / abbreviated mode
+# on the mainpage.  This default can be overriden by switching the "brief_sectional_mainpage" var to 0.  A user
+# will still be able to switch on brief mode in their options.  If you want to avoid this remove the options
+# by editting the tildeEd template. 
+#
+# A skins artcount_max now affects the number of stories selected, you should make sure this number is larger than the
+# number of stories you would post on your highest posting days (assuming you want to ensure the index shows all of "today's" stories
+#
+# -- vroom
+
 ALTER TABLE users_index ADD COLUMN story_full_brief_nexus VARCHAR(255) NOT NULL DEFAULT '', ADD COLUMN story_brief_always_nexus VARCHAR(255) NOT NULL DEFAULT '', ADD COLUMN story_full_best_nexus VARCHAR(255) NOT NULL DEFAULT '', ADD COLUMN story_brief_best_nexus VARCHAR(255) NOT NULL DEFAULT "" AFTER story_always_nexus;
 
 INSERT INTO vars (name, value, description) VALUES ("brief_sectional_mainpage", "1", "Show sectional stories in brief form on mainpage? 1 = yes,  0 = don't show");
 
 ALTER TABLE skins ADD COLUMN skinindex ENUM('no', 'yes') DEFAULT 'yes' NOT NULL AFTER storypickable;
+
+# Leaving this set to 0 will allow the current behavior of showing whatever leftover stories are left from the select for the main column of the index
+# Changing this value to something positive will limit the number showing up in the Older Stories Slashbox
+ALTER TABLE skins ADD COLUMN older_stories_max MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL;   
