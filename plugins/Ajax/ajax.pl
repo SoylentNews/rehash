@@ -17,9 +17,9 @@ sub main {
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
 	my $gSkin     = getCurrentSkin();
-	
+
 	my $postflag = $user->{state}{post};
-	my $op = $form->{op};	
+	my $op = $form->{op};
 	my $ops = {
 		getSectionPrefsHTML => {
 			function	=> \&getSectionPrefsHTML,
@@ -29,22 +29,24 @@ sub main {
 			function	=> \&default
 		}
 	};
-	
-	if ($ops->{$op}{post} && !$postflag) {
-		$op = "default";
+
+	# Ajax requests must be POST, by default.  If an op wants to be
+	# able to be triggered by a GET, it can override this.
+	if (!$postflag && !$ops->{$op}{post_ok}) {
+		$op = 'default';
 	}
-	
-	if ($user->{seclev} < $ops->{$op}{seclev}) {
-		$op = 'userinfo';
+
+	if (defined($ops->{$op}{seclev}) && $user->{seclev} < $ops->{$op}{seclev}) {
+		$op = 'default';
 	}
-	
+
 	$ops->{$op}{function}->($slashdb, $constants, $user, $form);
-} 
+}
 
 sub getSectionPrefsHTML {
 	my ($slashdb, $constants, $user, $form) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	
+
 	my %story023_default = (
 		author	=> { },
 		nexus	=> { },
@@ -52,7 +54,7 @@ sub getSectionPrefsHTML {
 	);
 
 	my %prefs = ( );
-	
+
 	for my $field (qw(
 		story_never_nexus 	story_always_nexus	story_brief_always_nexus
 		story_full_brief_nexus	story_full_best_nexus	story_brief_best_nexus
@@ -65,12 +67,9 @@ sub getSectionPrefsHTML {
 			$prefs{$field}{$id} = 1;
 		}
 	}
-	
-	my $r = Apache->request;
-	$r->content_type('text/plain');
-	$r->header_out('Cache-Control', 'no-cache');
-	$r->send_http_header;
-	
+
+	header_ajax({ content_type => 'text/plain' });
+
 	my $topic_tree = $reader->getTopicTree();
 	my $nexus_tids_ar = $reader->getStorypickableNexusChildren($constants->{mainpage_nexus_tid}, 1);
 	my $nexus_hr = { };
@@ -80,13 +79,15 @@ sub getSectionPrefsHTML {
 	foreach(keys %$skins) {
 		$hide_nexus->{$skins->{$_}->{nexus}} = 1 if $skins->{$_}{skinindex} eq "no";
 	}
-	
+
 	for my $tid (@$nexus_tids_ar) {
 		$nexus_hr->{$tid} = $topic_tree->{$tid}{textname} if !$hide_nexus->{$tid};
 	}
-	my @nexustid_order = sort {($b == $constants->{mainpage_nexus_tid}) <=> ($a == $constants->{mainpage_nexus_tid}) || 
-
-lc $nexus_hr->{$a} cmp lc $nexus_hr->{$b} } keys %$nexus_hr;
+	my @nexustid_order = sort {
+		($b == $constants->{mainpage_nexus_tid}) <=> ($a == $constants->{mainpage_nexus_tid})
+		||
+		lc $nexus_hr->{$a} cmp lc $nexus_hr->{$b}
+	} keys %$nexus_hr;
 
 	for my $tid (@nexustid_order) {
 		if ($prefs{story_never_nexus}{$tid}) {
@@ -106,17 +107,19 @@ lc $nexus_hr->{$a} cmp lc $nexus_hr->{$b} } keys %$nexus_hr;
 				$story023_default{nexus}{$tid} = 4;
 			} else {
 				$story023_default{nexus}{$tid} = 2;
-			}		}
+			}
+		}
 	}
 
-	print slashDisplay("sectionpref", {
-		nexusref		=> $nexus_hr,
-		nexustid_order		=> \@nexustid_order,
-		story023_default	=> \%story023_default,
-		}, 
+	print slashDisplay("sectionpref",
+		{
+			nexusref		=> $nexus_hr,
+			nexustid_order		=> \@nexustid_order,
+			story023_default	=> \%story023_default,
+		},
 		{ Return => 1 }
 	);
-	
+
 }
 
 sub default {
@@ -124,6 +127,17 @@ sub default {
 
 }
 
+sub header_ajax {
+	my($options) = @_;
+	my $ct = $options->{content_type} || 'text/plain';
+
+	my $r = Apache->request;
+	$r->content_type($ct);
+	$r->header_out('Cache-Control', 'no-cache');
+	$r->send_http_header;
+}
+
 createEnvironment();
 main();
 1;
+

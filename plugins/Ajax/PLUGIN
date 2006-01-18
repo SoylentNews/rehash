@@ -1,0 +1,4 @@
+# $Id$
+name=Ajax
+description="Ajax (Asynchronous Javascript and XML)
+htdoc=ajax.pl
