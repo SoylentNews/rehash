@@ -86,13 +86,27 @@ __template__
 	</script>
 <table border="0" cellpadding="2" cellspacing="0">
 	<tr>
-		<th>Sections</th>
-		<th>Full<br>All</th>
-		<th>Full<br>Brief</th>
-		<th>Brief<br>All</th>
-		<th>Full<br>Best Only</th>
-		<th>Brief<br>Best Only</th>
-		<th>Never</th>
+		<td valign="top">Sections</td>
+		<td valign="top">
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full All"><br>
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full All">
+		</td>
+		<td valign="top">
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full / Brief"><br>
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full / Brief"><br>
+		<td valign="top">
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief All"><br>
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief All"><br>
+		</td>
+		<td valign="top">
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full Best Only"><br>
+		</td>
+		<td valign="top">
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief Best Only"><br>
+		</td>
+		<td valign="top">
+			<img src="[% constants.imagedir %]/article_none.gif" alt="Never"><br>
+		</td>
 	</tr>
 	<tr align="center">
 		<td align="left">
