@@ -93,7 +93,7 @@ __template__
 		</td>
 		<td valign="top">
 			<img src="[% constants.imagedir %]/article_full.gif" alt="Full / Brief"><br>
-			<img src="[% constants.imagedir %]/article_full.gif" alt="Full / Brief"><br>
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Full / Brief"><br>
 		<td valign="top">
 			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief All"><br>
 			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief All"><br>
