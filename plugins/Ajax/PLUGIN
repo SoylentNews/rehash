@@ -1,5 +1,5 @@
 # $Id$
 name=Ajax
 description="Ajax (Asynchronous Javascript and XML)
-htdoc=ajax.pl
+htdoc=htdocs/ajax.pl
 template=templates/sectionpref;ajax;default

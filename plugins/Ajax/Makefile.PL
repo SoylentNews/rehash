@@ -3,6 +3,5 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'      => 'Slash::Ajax',
-    'VERSION_FROM' => 'ajax.pl', # finds $VERSION
-    'PM'        => { 'ajax.pl' => '$(INST_LIBDIR)/ajax.pl' },
+    'VERSION_FROM' => 'htdocs/ajax.pl', # finds $VERSION
 );
