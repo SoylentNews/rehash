@@ -15,7 +15,7 @@ __name__
 sectionpref
 __template__
 <form name="sectionprefs">
-<div align="right"><a href="#" onClick="window.location.reload()">close</a>
+<div align="right"><a href="#">help</a> <a href="#" onClick="window.location.reload()">close</a>
 <table border="0" cellpadding="1" cellspacing="0">
 	<tr>
 	<td></td>
