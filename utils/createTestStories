@@ -92,16 +92,20 @@ $constants = getCurrentStatic();
 		my $topics = { };
 		%$topics = map { $_ => 0 } @topics;
 
-		if (rand(1) < 0.5) {
+		if (rand(1) < 0.25) {
 			# run in the section for each topic
 			foreach (@topics) {
 				$topics->{$_} = 10;
 			}
 		} elsif (rand(1) < 0.95) {
-			my $m_tid = $topics[rand @topics];
-			# elevate to mainpage from one tid / sectional from any others
+			# Pick several topics to be mainpage-worthy.
+			my %m_tid = map { $_ => rand(1) < 0.5 ? (rand(1) < 0.3 ? 40 : 30) : 10 }
+				@topics;
+			# Need at least one.
+			$m_tid{rand(@topics)} = 30;
+			# elevate those to the mainpage
 			foreach (@topics) {
-				$topics->{$_} = $_ == $m_tid ? 30 : 10;
+				$topics->{$_} = $m_tid{$_};
 			}
 		}
 
