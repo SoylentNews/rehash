@@ -10193,6 +10193,10 @@ sub getStory {
 		for my $key (keys %$append) {
 			$answer->{$key} = $append->{$key};
 		}
+
+		$append = $self->getStoriesTopicsRenderedHash([$stoid]);
+		$answer->{story_topics_rendered} = $append->{$stoid};
+		
 		# If this is the first data we're writing into the cache,
 		# mark the time -- this data, and any other stories we
 		# write into the cache for the next n seconds, will be
