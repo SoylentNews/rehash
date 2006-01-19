@@ -208,7 +208,7 @@ sub setSectionNexusPrefs() {
 		}
 	);
 	
-	print "<a href=\"#\" onClick=\"window.location.reload()\">Close</a>";
+	print "<a href=\"#\" onClick=\"window.location.reload()\" style='color:#fff'>Close</a>";
 
 }
 
