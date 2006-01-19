@@ -128,45 +128,69 @@ sub getSectionPrefsHTML {
 
 sub setSectionNexusPrefs() {
 	my ($slashdb, $constants, $user, $form) = @_;
+	
+	my $nexus_tids_ar = $slashdb->getStorypickableNexusChildren($constants->{mainpage_nexus_tid}, 1);
 
 	header_ajax({ content_type => 'text/plain' });
+
 	my @story_always_nexus 		= split ",", $user->{story_always_nexus} || "";
 	my @story_full_brief_nexus 	= split ",", $user->{story_full_brief_nexus} || "";
 	my @story_brief_always_nexus 	= split ",", $user->{story_brief_always_nexus} || "";
 	my @story_full_best_nexus 	= split ",", $user->{story_full_best_nexus} || "";
 	my @story_brief_best_nexus 	= split ",", $user->{story_brief_best_nexus} || "";
 	my @story_never_nexus 		= split ",", $user->{story_never_nexus} || "";
+
+	my $update = {};
+
 	foreach my $key (keys %$form) {
+		print STDERR "Form: $key\n";
+		my $value = $form->{$key};
 		if ($key =~ /^nexustid(\d+)$/) {
 			my $tid = $1;
-			my $value = $form->{$key};
-			next if ($value < 0 || $value > 5);
-
-
-			# First remove tid in question from all arrays
-			@story_always_nexus 		= grep { $_ != $tid } @story_always_nexus; 
-			@story_full_brief_nexus 	= grep { $_ != $tid } @story_full_brief_nexus;
-			@story_brief_always_nexus 	= grep { $_ != $tid } @story_brief_always_nexus;
-			@story_full_best_nexus 		= grep { $_ != $tid } @story_full_best_nexus;
-			@story_brief_best_nexus 	= grep { $_ != $tid } @story_brief_best_nexus;
-			@story_never_nexus 		= grep { $_ != $tid } @story_never_nexus;
-			
-			# Then add it to the correct array
-			if ($value == 5) {
-				push @story_always_nexus, $tid;
-			} elsif ($value == 4) {
-				push @story_full_brief_nexus, $tid;
-			} elsif ($value == 3) {
-				push @story_brief_always_nexus, $tid;
-			} elsif ($value == 2) {
-				push @story_full_best_nexus, $tid;
-			} elsif ($value == 1) {
-				push @story_brief_best_nexus, $tid;
-			} elsif ($value == 0) {
-				push @story_never_nexus, $tid;
+			if ($value >= 0 && $value <= 5 && $value =~ /^\d+$/) {
+				$update->{$tid} = $value;
+			}
+		} elsif ($key eq "nexus_master") {
+			print STDERR "NEXUS MASTER \n";
+			if ($value >= 1 && $value <= 5 && $value =~ /^\d+$/) {
+				foreach my $tid (@$nexus_tids_ar) {
+					$update->{$tid} = $value;
+				}
 			}
 		}
+			
 	}
+
+	use Data::Dumper;
+	print STDERR Dumper($update);
+
+	foreach my $tid (keys %$update) {
+		my $value = $update->{$tid};
+
+		# First remove tid in question from all arrays
+		@story_always_nexus 		= grep { $_ != $tid } @story_always_nexus; 
+		@story_full_brief_nexus 	= grep { $_ != $tid } @story_full_brief_nexus;
+		@story_brief_always_nexus 	= grep { $_ != $tid } @story_brief_always_nexus;
+		@story_full_best_nexus 		= grep { $_ != $tid } @story_full_best_nexus;
+		@story_brief_best_nexus 	= grep { $_ != $tid } @story_brief_best_nexus;
+		@story_never_nexus 		= grep { $_ != $tid } @story_never_nexus;
+			
+		# Then add it to the correct array
+		if ($value == 5) {
+			push @story_always_nexus, $tid;
+		} elsif ($value == 4) {
+			push @story_full_brief_nexus, $tid;
+		} elsif ($value == 3) {
+			push @story_brief_always_nexus, $tid;
+		} elsif ($value == 2) {
+			push @story_full_best_nexus, $tid;
+		} elsif ($value == 1) {
+			push @story_brief_best_nexus, $tid;
+		} elsif ($value == 0) {
+			push @story_never_nexus, $tid;
+		}
+	}
+
 	my $story_always_nexus       	= join ",", @story_always_nexus;
 	my $story_full_brief_nexus   	= join ",", @story_full_brief_nexus;
 	my $story_brief_always_nexus 	= join ",", @story_brief_always_nexus;
