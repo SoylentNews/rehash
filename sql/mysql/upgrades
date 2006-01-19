@@ -3559,8 +3559,6 @@ UPDATE vars SET value = 'T_2_5_0_93' WHERE name = 'cvs_tag_currentcode';
 
 ALTER TABLE remarks MODIFY COLUMN remark VARCHAR(255);
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # Changes for plugins/Submit (which you are almost certainly using)
 INSERT INTO vars (name, value, description) VALUES ('submissions_link_relnofollow', '0', 'Add a rel="nofollow" to the submitter\'s vanity link for all submissions?');
 UPDATE vars SET value=REPLACE(value, 'a:href_U,name,title ', 'a:href_U,name,title,rel ') WHERE name='approvedtags_attr_admin';
@@ -3573,8 +3571,6 @@ UPDATE vars SET value = 'T_2_5_0_94' WHERE name = 'cvs_tag_currentcode';
 DELETE FROM sessions;
 ALTER TABLE sessions DROP INDEX uid;
 ALTER TABLE sessions ADD UNIQUE uid (uid);
-
-# PUDGE LAST UPDATED HERE
 
 # Fairly major update to index selection - sectional stories are now by default shown in a brief / abbreviated mode
 # on the mainpage.  This default can be overriden by switching the "brief_sectional_mainpage" var to 0.  A user
@@ -3595,3 +3591,11 @@ ALTER TABLE skins ADD COLUMN skinindex ENUM('no', 'yes') DEFAULT 'yes' NOT NULL 
 # Leaving this set to 0 will allow the current behavior of showing whatever leftover stories are left from the select for the main column of the index
 # Changing this value to something positive will limit the number showing up in the Older Stories Slashbox
 ALTER TABLE skins ADD COLUMN older_stories_max MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL;   
+
+# 2006-01-18
+UPDATE vars SET value = 'T_2_5_0_95' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# PUDGE LAST UPDATED HERE
+
