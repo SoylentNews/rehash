@@ -312,7 +312,7 @@ sub main {
 	}
 
 	if ($op eq 'userlogin' && ! $user->{is_anon}) {
-		redirect(cleanRedirectUrl($form->{returnto}));
+		redirect(cleanRedirectUrl($form->{returnto} || ''));
 		return;
 
 	# this will only redirect if it is a section-based rootdir with

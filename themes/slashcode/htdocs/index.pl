@@ -669,8 +669,12 @@ sub displayStories {
 	
 		my $story_data = $stories_data_cache->{$story->{stoid}};
 		
-		$tmpreturn .= getData("briefarticles_begin") if $other->{dispmode} eq "brief" && $dispmodelast ne "brief";
-		$tmpreturn .= getData("briefarticles_end") if $dispmodelast eq "brief" && $other->{dispmode} ne "brief";
+		$tmpreturn .= getData("briefarticles_begin")
+			if $other->{dispmode} && $other->{dispmode} eq "brief"
+				&& $dispmodelast ne "brief";
+		$tmpreturn .= getData("briefarticles_end")
+			if $dispmodelast eq "brief"
+				&& !( $other->{dispmode} && $other->{dispmode} eq "brief" );
 
 		$other->{thresh_commentcount} = $threshComments[$user->{threshold} + 1];
 
