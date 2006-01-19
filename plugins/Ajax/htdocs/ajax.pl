@@ -75,7 +75,7 @@ sub getSectionPrefsHTML {
 	header_ajax({ content_type => 'text/plain' });
 
 	my $topic_tree = $reader->getTopicTree();
-	my $nexus_tids_ar = $reader->getStorypickableNexusChildren($constants->{mainpage_nexus_tid}, 1);
+	my $nexus_tids_ar = $reader->getStorypickableNexusChildren($constants->{mainpage_nexus_tid});
 	my $nexus_hr = { };
 	my $skins = $reader->getSkins();
 
@@ -208,7 +208,7 @@ sub setSectionNexusPrefs() {
 		}
 	);
 	
-	print "Save Complete";
+	print "<a href=\"#\" onClick=\"window.location.reload()\">Close</a>";
 
 }
 

@@ -15,6 +15,7 @@ __name__
 sectionpref
 __template__
 <form name="sectionprefs">
+<div align="right"><a href="#" onClick="window.location.reload()">close</a>
 <table border="0" cellpadding="1" cellspacing="0">
 	<tr>
 	<td></td>
@@ -40,9 +41,9 @@ __template__
 		</td>
 	</tr>
 	<tr class="secpref_master">
-		<td>Change All</td>
+		<td>All Sections</td>
 		[% FOREACH value = [ 5 4 3 2 1 ] -%]
-			<td><input type="radio" name="nexus_master" value="[% value %]" onChange="javascript:masterChange(this)"></td>
+			<td align="left"><input type="radio" name="nexus_master" value="[% value %]" onChange="javascript:masterChange(this)"></td>
 		[%- END %]
 		<td></td>
 	</tr>

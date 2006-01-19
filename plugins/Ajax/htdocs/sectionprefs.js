@@ -2,6 +2,7 @@ function configSectionPopup() {
 
 var body = document.getElementsByTagName("body")[0];
 var div = document.createElement("div");
+div.id = "sectional_pref";
 div.style.position = "absolute";
 div.style.top = "225px";
 //div.style.left = "123px";
@@ -13,7 +14,7 @@ div.style.color = "#000";
 div.style.width = "auto";
 div.style.border = "solid 2px #066";
 div.padding = "5px";
-div.innerHTML = "<div id=\"sectionprefs_hdr\">Section Prefs</div><div id='sectionprefs'></div>";
+div.innerHTML = "<div id=\"sectionprefs_hdr\"><a href=\"#\" style=\"color:#fff;\" onClick=\"window.location.reload()\">Sectional Display Preferences</a></div><div id='sectionprefs'></div>";
 body.appendChild(div);
 	
 	var url = 'ajax.pl?op=getSectionPrefsHTML';
@@ -44,7 +45,7 @@ function postSectionPrefChanges(el) {
 	var h = $H(params);
 	
 	var sec_pref_msg = document.getElementById("sectionprefs_message");
-	sec_pref_msg.innerHTML = "Updating...";
+	sec_pref_msg.innerHTML = "Saving...";
 	var url = 'ajax.pl';
 	var ajax = new Ajax.Updater(
 	{success: 'sectionprefs_message'},
