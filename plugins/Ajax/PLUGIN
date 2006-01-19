@@ -2,3 +2,4 @@
 name=Ajax
 description="Ajax (Asynchronous Javascript and XML)
 htdoc=ajax.pl
+template=templates/sectionpref;ajax;default
