@@ -17,8 +17,8 @@ __template__
 <form name="sectionprefs">
 <table border="0" cellpadding="1" cellspacing="0">
 	<tr>
-		<td valign="top">Sections</td>
-		<td valign="top">
+	<td></td>
+	<td valign="top">
 			<img src="[% constants.imagedir %]/article_full.gif" alt="Full All"><br>
 			<img src="[% constants.imagedir %]/article_full.gif" alt="Full All">
 		</td>
@@ -41,9 +41,10 @@ __template__
 	</tr>
 	<tr class="secpref_master">
 		<td>Change All</td>
-		[% FOREACH value = [ 5 4 3 2 1 0 ] -%]
-			<td><input type="radio" name="nexustid[% nexustid %]" value="[% value %]" onChange="javascript:masterChange(this)"></td>
+		[% FOREACH value = [ 5 4 3 2 1 ] -%]
+			<td><input type="radio" name="nexus_master" value="[% value %]" onChange="javascript:masterChange(this)"></td>
 		[%- END %]
+		<td></td>
 	</tr>
 [% FOREACH nexustid = nexustid_order %]
 	<tr align="center" class="secpref_nexus_row">
@@ -60,7 +61,7 @@ __template__
 [%- END -%]
 </table>
 </form>
-<div id="sectionprefs_message" align="right">
+<div id="sectionprefs_message">
 </div>
 __seclev__
 500
