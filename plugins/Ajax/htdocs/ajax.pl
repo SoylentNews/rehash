@@ -23,6 +23,10 @@ sub main {
 	my $ops = {
 		getSectionPrefsHTML => {
 			function	=> \&getSectionPrefsHTML,
+			seclev		=> 1,
+		},
+		setSectionNexusPrefs => {
+			function	=> \&setSectionNexusPrefs,
 			seclev		=> 1
 		},
 		default => {
@@ -32,7 +36,7 @@ sub main {
 
 	# Ajax requests must be POST, by default.  If an op wants to be
 	# able to be triggered by a GET, it can override this.
-	if (!$postflag && !$ops->{$op}{post_ok}) {
+	if (!$postflag && !$ops->{$op}{get_ok}) {
 		$op = 'default';
 	}
 
@@ -119,6 +123,68 @@ sub getSectionPrefsHTML {
 		},
 		{ Return => 1 }
 	);
+
+}
+
+sub setSectionNexusPrefs() {
+	my ($slashdb, $constants, $user, $form) = @_;
+
+	header_ajax({ content_type => 'text/plain' });
+	my @story_always_nexus 		= split ",", $user->{story_always_nexus} || "";
+	my @story_full_brief_nexus 	= split ",", $user->{story_full_brief_nexus} || "";
+	my @story_brief_always_nexus 	= split ",", $user->{story_brief_always_nexus} || "";
+	my @story_full_best_nexus 	= split ",", $user->{story_full_best_nexus} || "";
+	my @story_brief_best_nexus 	= split ",", $user->{story_brief_best_nexus} || "";
+	my @story_never_nexus 		= split ",", $user->{story_never_nexus} || "";
+	foreach my $key (keys %$form) {
+		if ($key =~ /^nexustid(\d+)$/) {
+			my $tid = $1;
+			my $value = $form->{$key};
+			next if ($value < 0 || $value > 5);
+
+
+			# First remove tid in question from all arrays
+			@story_always_nexus 		= grep { $_ != $tid } @story_always_nexus; 
+			@story_full_brief_nexus 	= grep { $_ != $tid } @story_full_brief_nexus;
+			@story_brief_always_nexus 	= grep { $_ != $tid } @story_brief_always_nexus;
+			@story_full_best_nexus 		= grep { $_ != $tid } @story_full_best_nexus;
+			@story_brief_best_nexus 	= grep { $_ != $tid } @story_brief_best_nexus;
+			@story_never_nexus 		= grep { $_ != $tid } @story_never_nexus;
+			
+			# Then add it to the correct array
+			if ($value == 5) {
+				push @story_always_nexus, $tid;
+			} elsif ($value == 4) {
+				push @story_full_brief_nexus, $tid;
+			} elsif ($value == 3) {
+				push @story_brief_always_nexus, $tid;
+			} elsif ($value == 2) {
+				push @story_full_best_nexus, $tid;
+			} elsif ($value == 1) {
+				push @story_brief_best_nexus, $tid;
+			} elsif ($value == 0) {
+				push @story_never_nexus, $tid;
+			}
+		}
+	}
+	my $story_always_nexus       	= join ",", @story_always_nexus;
+	my $story_full_brief_nexus   	= join ",", @story_full_brief_nexus;
+	my $story_brief_always_nexus 	= join ",", @story_brief_always_nexus;
+	my $story_full_best_nexus	= join ",", @story_full_best_nexus;
+	my $story_brief_best_nexus	= join ",", @story_brief_best_nexus;
+	my $story_never_nexus       	= join ",", @story_never_nexus;
+				
+	$slashdb->setUser($user->{uid}, {
+			story_always_nexus => $story_always_nexus,
+			story_full_brief_nexus => $story_full_brief_nexus,
+			story_brief_always_nexus => $story_brief_always_nexus,
+			story_full_best_nexus	=> $story_full_best_nexus,
+			story_brief_best_nexus	=> $story_brief_best_nexus,
+			story_never_nexus	=> $story_never_nexus
+		}
+	);
+	
+	print "Save Complete";
 
 }
 
