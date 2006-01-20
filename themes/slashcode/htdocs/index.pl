@@ -616,7 +616,7 @@ sub displayStories {
 	$sec_dispmode_nexus{$_} = "brief" foreach (@story_full_brief_nexus, @story_brief_always_nexus);
 	$sec_dispmode_nexus{$_} = "none" foreach (@story_full_best_nexus, @story_brief_best_nexus);
 
-	my $dispmodelast;
+	my $dispmodelast = "';
 	my $story_to_dispmode_hr = {};
 
 	# Filter out any story we're planning on skipping up front

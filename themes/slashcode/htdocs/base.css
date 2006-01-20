@@ -671,6 +671,12 @@ input.button
 	padding: .3em;
 }
 
+.note ul li {
+	font-family: sans-serif;
+	font-size: 68.5%;
+}
+	  
+
 pre
 {
 	overflow: auto;
