@@ -4,7 +4,8 @@ function configSectionPopup() {
 	var div = document.createElement("div");
 	div.id = "sectional_pref";
 	div.style.position = "absolute";
-	div.style.top = "225px";
+	div.style.top = "242px";
+	div.style.left = "13px";
 	div.style.zIndex = "30";
 	div.style.fontSize = "80%";
 	div.style.background = "#fff";

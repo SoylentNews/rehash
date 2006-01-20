@@ -47,7 +47,7 @@ __template__
 		[% FOREACH value = [ 5 4 3 2 1 ] -%]
 			<td align="left"><input type="radio" name="nexus_master" value="[% value %]" onchange="masterChange(this)"></td>
 		[%- END %]
-		<td></td>
+		<td>&nbsp;</td>
 	</tr>
 [% FOREACH nexustid = nexustid_order %]
 	<tr align="center" class="secpref_nexus_row" style="[% IF multiple_values == 0; style_disabled; ELSE; style_enabled; END; %]">
