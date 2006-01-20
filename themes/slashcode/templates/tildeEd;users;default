@@ -113,10 +113,12 @@ __template__
 			<b>Master</b><br>
 			(Change All)
 		</td>
-		[% FOREACH value = [ 5 4 3 2 1 0 ] -%]
+		[% FOREACH value = [ 5 4 3 2 1 ] -%]
 			<td><input type="radio" name="nexustid_master" value="[% value %]" onChange="updateNexusAllTidPrefs(this)">
 			</td>
 		[% END %]
+		<td>
+		</td>
 	</tr>	
 [% FOREACH nexustid = nexustid_order %]
 	<tr align="center">
