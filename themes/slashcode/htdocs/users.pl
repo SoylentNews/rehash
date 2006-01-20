@@ -2691,7 +2691,7 @@ sub saveHome {
 	
 	my(@story_always_nexus, @story_full_brief_nexus, @story_brief_always_nexus, @story_full_best_nexus, @story_brief_best_nexus);
 
-	my($story_topic_all,    $story_author_all,    $story_nexus_all) = (0, 0, 0);
+	my($story_topic_all, $story_author_all, $story_nexus_all) = (0, 0, 0);
 	
 	# Topics are either present (value=2) or absent (value=0).  If absent,
 	# push them onto the never list.  Otherwise, do nothing.  (There's no
