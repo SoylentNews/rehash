@@ -20,7 +20,8 @@ __template__
 <div align="right"><a href="#">help</a> <a href="javascript: window.location.reload()">close</a>
 <table border="0" cellpadding="1" cellspacing="0">
 	<tr>
-		<td></td>
+		<td>&nbsp;</td>
+		<td>
 			<img src="[% constants.imagedir %]/article_none.gif" alt="Never"><br>
 		</td>
 		<td valign="top">
