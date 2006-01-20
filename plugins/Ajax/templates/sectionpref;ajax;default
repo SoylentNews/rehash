@@ -45,7 +45,7 @@ __template__
 	<tr class="secpref_master" style="[% IF multiple_values == 0; style_enabled; ELSE; style_disabled; END; %]">
 		<td>All Sections</td>
 		[% FOREACH value = [ 5 4 3 2 1 ] -%]
-			<td align="left"><input type="radio" name="nexus_master" value="[% value %]" onchange="masterChange(this)"></td>
+			<td align="left"><input type="radio" name="nexus_master" value="[% value %]" onchange="masterChange(this)" [% IF master_value != "" && master_value == value; constants.markup_checked_attribute; END; %]></td>
 		[%- END %]
 		<td>&nbsp;</td>
 	</tr>

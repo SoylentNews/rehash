@@ -119,12 +119,15 @@ sub getSectionPrefsHTML {
 		$multiple_values = 1 if $story023_default{nexus}{$tid} != $first_val;
 	}
 
+	my $master_value = !$multiple_values ? $first_val : "";
+
 	print slashDisplay("sectionpref",
 		{
 			nexusref		=> $nexus_hr,
 			nexustid_order		=> \@nexustid_order,
 			story023_default	=> \%story023_default,
 			multiple_values		=> $multiple_values,
+			master_value		=> $master_value,
 		},
 		{ Return => 1 }
 	);
