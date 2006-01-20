@@ -117,7 +117,7 @@ __template__
 			<b>All Sections</b> <noscript>Sorry, this functionality requires Javascript enabled</noscript>
 		</td>
 		[% FOREACH value = [ 5 4 3 2 1 ] -%]
-			<td><input type="radio" name="nexustid_master" value="[% value %]" onChange="updateNexusAllTidPrefs(this)">
+			<td><input type="radio" name="nexustid_master" value="[% value %]" onclick="updateNexusAllTidPrefs(this); return true;">
 			</td>
 		[% END %]
 		<td>
