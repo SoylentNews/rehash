@@ -14,6 +14,8 @@ en_US
 __name__
 sectionpref
 __template__
+[% style_enabled = "color: #000; background: #fff;" %]
+[% style_disabled = "color: #999; background: #ccc;" %]
 <form name="sectionprefs">
 <div align="right"><a href="#">help</a> <a href="#" onClick="window.location.reload()">close</a>
 <table border="0" cellpadding="1" cellspacing="0">
@@ -40,7 +42,7 @@ __template__
 			<img src="[% constants.imagedir %]/article_none.gif" alt="Never"><br>
 		</td>
 	</tr>
-	<tr class="secpref_master">
+	<tr class="secpref_master" style="[% IF multiple_values == 0; style_enabled; ELSE; style_disabled; END; %]">
 		<td>All Sections</td>
 		[% FOREACH value = [ 5 4 3 2 1 ] -%]
 			<td align="left"><input type="radio" name="nexus_master" value="[% value %]" onchange="masterChange(this)"></td>
@@ -48,7 +50,7 @@ __template__
 		<td></td>
 	</tr>
 [% FOREACH nexustid = nexustid_order %]
-	<tr align="center" class="secpref_nexus_row">
+	<tr align="center" class="secpref_nexus_row" style="[% IF multiple_values == 0; style_disabled; ELSE; style_enabled; END; %]">
 		[%-	# really should have nexusref have another field for the
 			# url of the (first) skin that uses it, and link this in
 			# here, but ... I'm in a hurry

@@ -93,6 +93,8 @@ sub getSectionPrefsHTML {
 		lc $nexus_hr->{$a} cmp lc $nexus_hr->{$b}
 	} keys %$nexus_hr;
 
+	my $first_val = "";
+	my $multiple_values = 0;
 	for my $tid (@nexustid_order) {
 		if ($prefs{story_never_nexus}{$tid}) {
 			$story023_default{nexus}{$tid} = 0;
@@ -113,6 +115,8 @@ sub getSectionPrefsHTML {
 				$story023_default{nexus}{$tid} = 2;
 			}
 		}
+		$first_val = $story023_default{nexus}{$tid} if $first_val == "";
+		$multiple_values = 1 if $story023_default{nexus}{$tid} != $first_val;
 	}
 
 	print slashDisplay("sectionpref",
@@ -120,6 +124,7 @@ sub getSectionPrefsHTML {
 			nexusref		=> $nexus_hr,
 			nexustid_order		=> \@nexustid_order,
 			story023_default	=> \%story023_default,
+			multiple_values		=> $multiple_values,
 		},
 		{ Return => 1 }
 	);
@@ -203,7 +208,6 @@ sub setSectionNexusPrefs() {
 			story_never_nexus	=> $story_never_nexus
 		}
 	);
-	
 	print getData('set_section_prefs_success_msg');
 
 }

@@ -16,7 +16,7 @@ function configSectionPopup() {
 	body.appendChild(div);
 	
 	var url = 'ajax.pl';
-	var params = 'op=getSectionPrefsHTMLS';
+	var params = 'op=getSectionPrefsHTML';
 	var ajax = new Ajax.Updater(
 		{ success: 'sectionprefs' },
 		url,
