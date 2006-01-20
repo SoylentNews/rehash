@@ -43,7 +43,7 @@ __template__
 	<tr class="secpref_master">
 		<td>All Sections</td>
 		[% FOREACH value = [ 5 4 3 2 1 ] -%]
-			<td align="left"><input type="radio" name="nexus_master" value="[% value %]" onChange="javascript:masterChange(this)"></td>
+			<td align="left"><input type="radio" name="nexus_master" value="[% value %]" onchange="masterChange(this)"></td>
 		[%- END %]
 		<td></td>
 	</tr>
@@ -56,7 +56,7 @@ __template__
 		<td align="left">[% nexusref.$nexustid | strip_literal %]</td>
 [% FOREACH value = [ 5 4 3 2 1 0 ] -%]
 		<td><input type="radio" name="nexustid[% nexustid %]" value="[% value %]"
-			[%- IF story023_default.nexus.$nexustid == value; constants.markup_checked_attribute; END %] onChange="javascript:individualChange(this)"></td>
+			[%- IF story023_default.nexus.$nexustid == value; constants.markup_checked_attribute; END %] onchange="individualChange(this)"></td>
 [%- END %]
 	</tr>
 [%- END -%]
