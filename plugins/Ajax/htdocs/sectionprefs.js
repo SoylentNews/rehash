@@ -13,7 +13,7 @@ function configSectionPopup() {
 	div.style.width = "auto";
 	div.style.border = "solid 2px #066";
 	div.padding = "5px";
-	div.innerHTML = "<div id=\"sectionprefs_hdr\"><a href=\"#\" style=\"color:#fff;\" onClick=\"window.location.reload()\">Sectional Display Preferences</a></div><div id='sectionprefs'></div>";
+	div.innerHTML = "<div id=\"sectionprefs_hdr\"><a href=\"javascript: window.location.reload()\" style=\"color:#fff;\">Sectional Display Preferences</a></div><div id='sectionprefs'></div>";
 	body.appendChild(div);
 	
 	var url = 'ajax.pl';
