@@ -16,5 +16,5 @@ __template__
 [% SWITCH value %]
 	
 [% CASE 'set_section_prefs_success_msg' %]
-	<a href="#" onClick="javascript:window.location.reload();" style="color:#fff;">Close</a>
+	<a href="#" onClick="javascript: window.location.reload();" style="color:#fff;">Close</a>
 [% END %]
