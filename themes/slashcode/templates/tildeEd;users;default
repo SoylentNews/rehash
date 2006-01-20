@@ -74,10 +74,14 @@ __template__
 		for(i=0; i<theForm.elements.length; i++){
 			var regex = /^nexustid\d+$/;
 			if (regex.test(theForm.elements[i].name)) {
-				if (theForm.elements[i].value == el.value) {
-					theForm.elements[i].checked = true;
+				if (theForm.elements[i].type == "hidden") {
+					theForm.elements[i].value = el.value;
 				} else {
-					theForm.elements[i].checked = false;
+					if (theForm.elements[i].value == el.value) {
+						theForm.elements[i].checked = true;
+					} else {
+						theForm.elements[i].checked = false;
+					}
 				}
 			}
 		}
@@ -110,8 +114,7 @@ __template__
 	</tr>
 	<tr align="center">
 		<td align="left">
-			<b>Master</b><br>
-			(Change All)
+			<b>All Sections</b>
 		</td>
 		[% FOREACH value = [ 5 4 3 2 1 ] -%]
 			<td><input type="radio" name="nexustid_master" value="[% value %]" onChange="updateNexusAllTidPrefs(this)">
@@ -120,7 +123,13 @@ __template__
 		<td>
 		</td>
 	</tr>	
+	<tr><td colspan="7">[% PROCESS horiz_rule %]</td></tr>
 [% FOREACH nexustid = nexustid_order %]
+	[% IF nexustid == constants.mainpage_nexus_tid %]
+		<tr><td colspan="7">
+		<input type="hidden" name="nexustid[% nexustid %]" value="[% story023_default.nexus.$nexustid %]">
+		</td></tr>
+	[% ELSE %]
 	<tr align="center">
 		[%-	# really should have nexusref have another field for the
 			# url of the (first) skin that uses it, and link this in
@@ -132,6 +141,7 @@ __template__
 			[%- IF story023_default.nexus.$nexustid == value; checked; END %]></td>
 [%- END %]
 	</tr>
+	[% END %]
 [% END %]
 </table>
 </td>
