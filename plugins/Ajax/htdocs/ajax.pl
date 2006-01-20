@@ -115,7 +115,7 @@ sub getSectionPrefsHTML {
 				$story023_default{nexus}{$tid} = 2;
 			}
 		}
-		$first_val = $story023_default{nexus}{$tid} if $first_val == "";
+		$first_val = $story023_default{nexus}{$tid} if $first_val eq "";
 		$multiple_values = 1 if $story023_default{nexus}{$tid} != $first_val;
 	}
 
