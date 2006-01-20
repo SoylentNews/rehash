@@ -556,7 +556,7 @@ sub doSaveArticle {
 	}
 
 	return(getData('submit_must_enable_comments'), 1)
-		if $form->{submit} && (
+		if $form->{submit} && !$form->{id} (
 			!$form->{journal_discuss}
 				||
 			$form->{journal_discuss} eq 'disabled'
@@ -575,6 +575,8 @@ sub doSaveArticle {
 	if ($form->{id}) {
 		my %update;
 		my $article = $journal_reader->get($form->{id});
+		return(getData('submit_must_enable_comments'), 1) if ($form->{submit} && !$article->{discussion} &&  (!$form->{journal_discuss} || $form->{journal_discuss} eq 'disabled'));
+									
 
 		# note: comments_on is a special case where we are
 		# only turning on comments, not saving anything else
