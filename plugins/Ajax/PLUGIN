@@ -5,3 +5,4 @@ htdoc=htdocs/ajax.pl
 htdoc=htdocs/prototype.js
 htdoc=htdocs/sectionprefs.js
 template=templates/sectionpref;ajax;default
+template=templates/data;ajax;default

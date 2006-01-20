@@ -143,7 +143,6 @@ sub setSectionNexusPrefs() {
 	my $update = {};
 
 	foreach my $key (keys %$form) {
-		print STDERR "Form: $key\n";
 		my $value = $form->{$key};
 		if ($key =~ /^nexustid(\d+)$/) {
 			my $tid = $1;
@@ -151,7 +150,6 @@ sub setSectionNexusPrefs() {
 				$update->{$tid} = $value;
 			}
 		} elsif ($key eq "nexus_master") {
-			print STDERR "NEXUS MASTER \n";
 			if ($value >= 1 && $value <= 5 && $value =~ /^\d+$/) {
 				foreach my $tid (@$nexus_tids_ar) {
 					$update->{$tid} = $value;
@@ -161,8 +159,6 @@ sub setSectionNexusPrefs() {
 			
 	}
 
-	use Data::Dumper;
-	print STDERR Dumper($update);
 
 	foreach my $tid (keys %$update) {
 		my $value = $update->{$tid};
@@ -208,7 +204,7 @@ sub setSectionNexusPrefs() {
 		}
 	);
 	
-	print "<a href=\"#\" onClick=\"window.location.reload()\" style='color:#fff'>Close</a>";
+	print getData('set_section_prefs_success_msg');
 
 }
 

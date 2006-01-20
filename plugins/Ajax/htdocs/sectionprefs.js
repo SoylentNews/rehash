@@ -1,33 +1,31 @@
 function configSectionPopup() {
 
-var body = document.getElementsByTagName("body")[0];
-var div = document.createElement("div");
-div.id = "sectional_pref";
-div.style.position = "absolute";
-div.style.top = "225px";
-//div.style.left = "123px";
-div.style.zIndex = "30";
-div.style.fontSize = "80%";
-div.style.background = "#fff";
-div.style.color = "#000";
-//div.style.height = "650px";
-div.style.width = "auto";
-div.style.border = "solid 2px #066";
-div.padding = "5px";
-div.innerHTML = "<div id=\"sectionprefs_hdr\"><a href=\"#\" style=\"color:#fff;\" onClick=\"window.location.reload()\">Sectional Display Preferences</a></div><div id='sectionprefs'></div>";
-body.appendChild(div);
+	var body = document.getElementsByTagName("body")[0];
+	var div = document.createElement("div");
+	div.id = "sectional_pref";
+	div.style.position = "absolute";
+	div.style.top = "225px";
+	div.style.zIndex = "30";
+	div.style.fontSize = "80%";
+	div.style.background = "#fff";
+	div.style.color = "#000";
+	div.style.width = "auto";
+	div.style.border = "solid 2px #066";
+	div.padding = "5px";
+	div.innerHTML = "<div id=\"sectionprefs_hdr\"><a href=\"#\" style=\"color:#fff;\" onClick=\"window.location.reload()\">Sectional Display Preferences</a></div><div id='sectionprefs'></div>";
+	body.appendChild(div);
 	
-	var url = 'ajax.pl?op=getSectionPrefsHTML';
-	var params = '';
+	var url = 'ajax.pl';
+	var params = 'op=getSectionPrefsHTMLS';
 	var ajax = new Ajax.Updater(
-	{success: 'sectionprefs'},
-	url,
-	{method: 'post', parameters: params, onFailure: reportError});
+		{ success: 'sectionprefs' },
+		url,
+		{ method: 'post', parameters: params, onFailure: reportError}
+	);
 
 }
 
 function masterChange(el) {
-
 	swapClassColors('secpref_master','secpref_nexus_row');
 	updateNexusAllTidPrefs(el);
 	postSectionPrefChanges(el);	
@@ -48,9 +46,10 @@ function postSectionPrefChanges(el) {
 	sec_pref_msg.innerHTML = "Saving...";
 	var url = 'ajax.pl';
 	var ajax = new Ajax.Updater(
-	{success: 'sectionprefs_message'},
-	url,
-	{method: 'post', parameters: h.toQueryString(), onFailure: reportError});
+		{ success: 'sectionprefs_message' },
+		url,
+		{ method: 'post', parameters: h.toQueryString(), onFailure: reportError }
+	);
 }
 
 function swapClassColors(class_name_active, class_name_deactive) {
@@ -64,6 +63,7 @@ function swapClassColors(class_name_active, class_name_deactive) {
 		}
 	}
 }
+
 function updateNexusAllTidPrefs(el) {
 	theForm = document.forms["sectionprefs"];
 	for(i=0; i<theForm.elements.length; i++){
