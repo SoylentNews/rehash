@@ -17,7 +17,6 @@ __template__
 [% style_enabled = "color: #000; background: #fff;" %]
 [% style_disabled = "color: #999; background: #ccc;" %]
 <form name="sectionprefs">
-<div align="right"><a href="#">help</a> <a href="javascript: window.location.reload()">close</a>
 <table border="0" cellpadding="1" cellspacing="0">
 	<tr>
 		<td>&nbsp;</td>
