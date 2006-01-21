@@ -1,6 +1,5 @@
-function configSectionPopup() {
-
-	var body = document.getElementsByTagName("body")[0];
+function configSectionPopup() { 
+	var body = document.getElementsByTagName("body")[0]; 
 	var div = document.createElement("div");
 	div.id = "sectional_pref";
 	div.style.position = "absolute";
@@ -13,7 +12,7 @@ function configSectionPopup() {
 	div.style.width = "auto";
 	div.style.border = "solid 2px #066";
 	div.padding = "5px";
-	div.innerHTML = "<div id=\"sectionprefs_hdr\"><a href=\"javascript: window.location.reload()\" style=\"color:#fff;\">Sectional&nbsp;Display&nbsp;Preferences</a>&nbsp;<span><a href=\"#\" style=\"color:#fff;\">?</a></span>&nbsp;<span><a href=\"javascript: window.location.reload()\" style=\"color:#fff;\">x</a></span></div><div id='sectionprefs'></div>";
+	div.innerHTML = "<div id=\"sectionprefs_hdr\"><a href=\"javascript: window.location.reload()\" style=\"color:#fff;\">Sectional&nbsp;Display&nbsp;Preferences</a>&nbsp;<span><a href=\"/faq/UI.shtml#ui500\">?</a></span>&nbsp;<span><a href=\"javascript: window.location.reload()\">X</a></span></div><div id='sectionprefs'><div id=\"sectionprefs_message\">Loading...</div>";
 	body.appendChild(div);
 	
 	var url = 'ajax.pl';
