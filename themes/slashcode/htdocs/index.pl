@@ -585,7 +585,6 @@ sub displayStories {
 #	$n_for_cache = scalar(@$stories) if $n_for_cache > scalar(@$stories);
 	my @stoids_for_cache =
 		map { $_->{stoid} }
-		grep { !$_->{is_future} }
 		@$stories;
 #	@stoids_for_cache = @stoids_for_cache[0..$n_for_cache-1]
 #		if $#stoids_for_cache > $n_for_cache;
