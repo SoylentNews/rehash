@@ -3599,3 +3599,7 @@ UPDATE vars SET value = 'T_2_5_0_95' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
 
+# 2006-01-22
+UPDATE vars SET value = 'T_2_5_0_96' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHDOT UPDATED FOR NEW INDEX DISPLAY HERE -- END OF T_2_5_0_96
