@@ -72,8 +72,8 @@ stories, and even those only abbreviated.  The break down is as follows:
 <ul>
 <li><b>Full, Full</b> - Displays every single story we post, in full  text.</li>
 <li><b>Full, Abbreviated</b> - The current default is to display the  main page articles in full text, but to abbreviate all sectional content.</li>
-<li><b>Full, None</b> - This setting most closely mimics the old  Slashdot settings, where the main page stories were included up top, but the sectional stories were relegated to the sectional indexes.</li>
 <li><b>Abbreviated, Abbreviated</b> - This setting abbreviates every  story posted to the section.</li>
+<li><b>Full, None</b> - This setting most closely mimics the old  Slashdot settings, where the main page stories were included up top, but the sectional stories were relegated to the sectional indexes.</li>
 <li><b>Abbreviated, None</b> - Abbreviate the main page content, and  hide the sectional content.</li>
 <li><b>None</b> - Completely suppress this section.  Hide it entirely  from your index.</li>
 </ul>
