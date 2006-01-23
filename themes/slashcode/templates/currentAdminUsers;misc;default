@@ -26,7 +26,7 @@ __template__
 	%]
 
 	<tr class="data_hl1"><td class="data_bgc1">
-		<a href="[% gSkin.rootdir %]/~[% id | fixparam %]/"><b>[% id %]</b></a>
+		<a href="[% gSkin.rootdir %]/~[% id | strip_paramattr %]/"><b>[% id %]</b></a>
 	</td><td>
 		[% lastsecs %]
 		[% IF lastsecs and lasttitle %]&nbsp;/&nbsp;[% lasttitle %]

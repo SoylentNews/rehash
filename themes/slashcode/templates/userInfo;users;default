@@ -61,7 +61,7 @@ __template__
 		<p>
 			Last journal entry:
 			<b>
-				<a href="[% gSkin.rootdir %]/~[% useredit.nick_plain | fixparam %]/journal/">
+				<a href="[% gSkin.rootdir %]/~[% useredit.nick_plain | strip_paramattr %]/journal/">
 					[% lastjournal.description | strip_notags %]
 				</a>
 			</b>,

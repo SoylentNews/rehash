@@ -30,10 +30,10 @@ __template__
 		</div>
 		<div class="details">
 			by
-			[% IF !is_anon %]<a href="[% constants.real_rootdir %]/~[% nickname | fixparam %]">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</a>[% END %]
+			[% IF !is_anon %]<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</a>[% END %]
 			[% IF !is_anon && subscriber_bonus == "yes"; " *"; END %]
 			[% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
-			[% IF !is_anon && fakeemail %]&lt;<a href="mailto:[% fakeemail | fixparam %]">[% fakeemail_vis | strip_literal %]</a>&gt;[% END %]
+			[% IF !is_anon && fakeemail %]&lt;<a href="mailto:[% fakeemail | strip_paramattr %]">[% fakeemail_vis | strip_literal %]</a>&gt;[% END %]
 			on [% Slash.timeCalc(time) %]
 			[% IF sid && cid %] (<a href="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</a>)[% END %]
 			<small>
@@ -48,7 +48,7 @@ __template__
 					[% END %]
 					[% IF has_journal %]
 						| Last Journal:
-						<a href="[% constants.real_rootdir %]/~[% nickname | fixparam %]/journal/">[%
+						<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/">[%
 						Slash.timeCalc(journal_last_entry_date) %]</a>
 					[% END %]
 					)

@@ -27,7 +27,7 @@ can also use the form below to select the poll qid you like to attach the story 
 				<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]">[% question.1 %]</a>
 		</td>
 		<td>
-			<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]&amp;op=edit&amp;override_sid=[% sid | fixparam %]">Attach poll to story</a>
+			<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% question.0 %]&amp;op=edit&amp;override_sid=[% sid | strip_paramattr %]">Attach poll to story</a>
 		</td>
 	</tr>
 	[% END %]

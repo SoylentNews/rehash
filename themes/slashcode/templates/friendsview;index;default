@@ -17,7 +17,7 @@ friendsview
 __template__
 <ul>
 [% FOR article = articles %]
-	<li><a href="[% gSkin.rootdir %]/~[% article.nickname | fixparam %]/journal/[% article.id %]">[% article.description %]</a> - <a href="[% gSkin.rootdir %]/~[% article.nickname | fixparam %]">[% article.nickname | strip_literal %]</a>
+	<li><a href="[% gSkin.rootdir %]/~[% article.nickname | strip_paramattr %]/journal/[% article.id %]">[% article.description %]</a> - <a href="[% gSkin.rootdir %]/~[% article.nickname | strip_paramattr %]">[% article.nickname | strip_literal %]</a>
 [% END %]
 </ul>
 __seclev__

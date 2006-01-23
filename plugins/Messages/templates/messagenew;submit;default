@@ -16,7 +16,7 @@ __template__
 <p>
 [% submission.name %] has submitted a new story,
 <b><a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% submission.subid %]&amp;title=[%
-submission.subj | fixparam %]">[% submission.subj | strip_literal %]</a></b>.
+submission.subj | strip_paramattr %]">[% submission.subj | strip_literal %]</a></b>.
 </p>
 
 [% ELSE %]

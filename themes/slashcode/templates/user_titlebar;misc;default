@@ -19,10 +19,10 @@ __template__
 
 [% IF user.uid == uid && !user.is_anon;
 	title = title || "$user.nickname (This is you!)";
-	url_nick = user.nickname | fixparam;
+	url_nick = user.nickname | strip_paramattr;
 	PROCESS titlebar title=title;
 ELSE;
-	url_nick = useredit.nickname | fixparam;
+	url_nick = useredit.nickname | strip_paramattr;
 	zi = PROCESS zoo_icons person=uid implied="";
 	title = title
 		|| "<a href=\"/~$url_nick/\">"
@@ -34,57 +34,57 @@ END %]
 [% tabs = [ ];
 IF user.uid == uid;
 	tabs = [
-		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
+		{ link = "/~$url_nick/",	label = "Info",		sel_label = "info" },
 	];
 	IF constants.plugin.Journal; tabs.push(
-		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
+		{ link = "/~$url_nick/journal/",label = "Journal",	sel_label = "journal" },
 	); END;
 	IF constants.plugin.Messages; tabs.push(
-		{ link = "/my/inbox",		label = "Messages",	sel_label = "messages" },
+		{ link = "/my/inbox/",		label = "Messages",	sel_label = "messages" },
 	); END;
 	IF constants.plugin.Zoo; tabs.push(
-		{ link = "/my/friends",		label = "Friends",	sel_label = "friends" },
+		{ link = "/my/friends/",	label = "Friends",	sel_label = "friends" },
 	); tabs.push(
-		{ link = "/my/fans",		label = "Fans",		sel_label = "fans" },
+		{ link = "/my/fans/",		label = "Fans",		sel_label = "fans" },
 	); tabs.push(
-		{ link = "/my/foes",		label = "Foes",		sel_label = "foes" },
+		{ link = "/my/foes/",		label = "Foes",		sel_label = "foes" },
 	); tabs.push(
-		{ link = "/my/freaks",		label = "Freaks",	sel_label = "freaks" },
+		{ link = "/my/freaks/",		label = "Freaks",	sel_label = "freaks" },
 	); END;
 ELSIF user.is_anon;
 	tabs = [
-		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
+		{ link = "/~$url_nick/",	label = "Info",		sel_label = "info" },
 	];
 	IF constants.plugin.Journal; tabs.push(
-		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
+		{ link = "/~$url_nick/journal/",label = "Journal",	sel_label = "journal" },
 	); END;
 	IF constants.plugin.Zoo; tabs.push(
-		{ link = "/~$url_nick/friends",	label = "Friends",	sel_label = "friends" },
+		{ link = "/~$url_nick/friends/",label = "Friends",	sel_label = "friends" },
 	); tabs.push(
-		{ link = "/~$url_nick/fans",	label = "Fans",		sel_label = "fans" },
+		{ link = "/~$url_nick/fans/",	label = "Fans",		sel_label = "fans" },
 	); tabs.push(
-		{ link = "/~$url_nick/foes",	label = "Foes",		sel_label = "foes" },
+		{ link = "/~$url_nick/foes/",	label = "Foes",		sel_label = "foes" },
 	); tabs.push(
-		{ link = "/~$url_nick/freaks",	label = "Freaks",	sel_label = "freaks" },
+		{ link = "/~$url_nick/freaks/",	label = "Freaks",	sel_label = "freaks" },
 	); END;
 ELSE;
 	tabs = [
-		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
+		{ link = "/~$url_nick/",	label = "Info",		sel_label = "info" },
 	];
 	IF constants.plugin.Zoo; tabs.push(
 		{ link = "/zoo.pl?op=check&amp;uid=$uid", label = "Relation", sel_label = "relation" },
 	); END;
 	IF constants.plugin.Journal; tabs.push(
-		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
+		{ link = "/~$url_nick/journal/",label = "Journal",	sel_label = "journal" },
 	); END;
 	IF constants.plugin.Zoo; tabs.push(
-		{ link = "/~$url_nick/friends",	label = "Friends",	sel_label = "friends" },
+		{ link = "/~$url_nick/friends/",label = "Friends",	sel_label = "friends" },
 	); tabs.push(
-		{ link = "/~$url_nick/fans",	label = "Fans",		sel_label = "fans" },
+		{ link = "/~$url_nick/fans/",	label = "Fans",		sel_label = "fans" },
 	); tabs.push(
-		{ link = "/~$url_nick/foes",	label = "Foes",		sel_label = "foes" },
+		{ link = "/~$url_nick/foes/",	label = "Foes",		sel_label = "foes" },
 	); tabs.push(
-		{ link = "/~$url_nick/freaks",	label = "Freaks",	sel_label = "freaks" },
+		{ link = "/~$url_nick/freaks/",	label = "Freaks",	sel_label = "freaks" },
 	); END;
 END %]
 <div id="usermenu">

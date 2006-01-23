@@ -16,7 +16,7 @@ __template__
 [% FOREACH journal=entries %]
 	<div class="search-results">
 		<h4>
-			<a href="[% gSkin.rootdir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]">[% journal.description %]</a>
+			<a href="[% gSkin.rootdir %]/~[% journal.nickname | strip_paramattr %]/journal/[% journal.id %]">[% journal.description %]</a>
 		</h4>
 		<div class="data">
 			On [% Slash.timeCalc(journal.date) %]
@@ -25,7 +25,7 @@ __template__
 			[% journal.article %]
 		</div>
 		<div class="author">
-			Author: <a href="[% gSkin.rootdir %]/~[% journal.nickname | fixparam %]/">[% journal.nickname | strip_literal %]</a>
+			Author: <a href="[% gSkin.rootdir %]/~[% journal.nickname | strip_paramattr %]/">[% journal.nickname | strip_literal %]</a>
 		</div>
 		[% IF journal.score %]
 		<div class="score">

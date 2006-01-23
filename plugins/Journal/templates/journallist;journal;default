@@ -38,7 +38,7 @@ __template__
 	</tr>
 [% FOREACH article = articles %]
 	<tr>
-		<td valign="top"><a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/journal/[% article.0 %]"><b>[% article.2 %]</b></a></td>
+		<td valign="top"><a href="[% gSkin.rootdir %]/~[% nickname | strip_paramattr %]/journal/[% article.0 %]"><b>[% article.2 %]</b></a></td>
 		<td valign="top"><em>[% Slash.timeCalc(article.1) %]</em></td>
 	[%- IF showform %]
 		<td valign="top"><a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% article.0 %]">[edit]</a></td>

@@ -136,20 +136,20 @@ __template__
 					</label>
 					[% IF storyref.qid %] 
 						<label class="checkbox">
-							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=edit">Related Poll</a>
+							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;qid=[% storyref.qid %]&amp;op=edit">Related Poll</a>
 						</label>
 						<label class="checkbox">
-							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=detach">Detach Related Poll</a>
+							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;qid=[% storyref.qid %]&amp;op=detach">Detach Related Poll</a>
 						</label>
 						<label class="checkbox">
-							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;op=linkstory">Link Story to Different Poll</a>
+							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;op=linkstory">Link Story to Different Poll</a>
 						</label>
 					[% ELSE %]
 						<label class="checkbox">
-							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;qid=[% storyref.qid %]&amp;op=preview&amp;question=[% storyref.title | fixparam %]&amp;polltype=story&amp;date=[% storyref.time | fixparam %]&amp;section=[% storyref.section | fixparam %]&amp;topic=[% storyref.tid | fixparam %]">Create Poll</a>
+							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;qid=[% storyref.qid %]&amp;op=preview&amp;question=[% storyref.title | strip_paramattr %]&amp;polltype=story&amp;date=[% storyref.time | strip_paramattr %]&amp;section=[% storyref.section | strip_paramattr %]&amp;topic=[% storyref.tid | strip_paramattr %]">Create Poll</a>
 						</label>
 						<label class="checkbox">
-							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | fixparam %]&amp;op=linkstory">Link Story to Existing Poll</a>
+							<a href="[% gSkin.rootdir %]/pollBooth.pl?sid=[% storyref.sid | strip_paramattr %]&amp;op=linkstory">Link Story to Existing Poll</a>
 						</label>	
 					[% END %]
 					<br>

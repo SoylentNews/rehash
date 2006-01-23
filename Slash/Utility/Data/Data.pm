@@ -2004,7 +2004,9 @@ Prepares data to be a parameter in a URL.  Such as:
 
 =item DATA
 
-The data to be escaped.
+The data to be escaped.  B<NOTE>: space characters are encoded as C<+>
+instead of C<%20>.  If you must have C<%20>, perform an C<s/\+/%20/g> on
+the result.
 
 =back
 
@@ -2018,7 +2020,8 @@ The escaped data.
 
 sub fixparam {
 	my($url) = @_;
-	$url =~ s/([^$URI::unreserved])/$URI::Escape::escapes{$1}/og;
+	$url =~ s/([^$URI::unreserved ])/$URI::Escape::escapes{$1}/og;
+	$url =~ s/ /+/g;
 	return $url;
 }
 

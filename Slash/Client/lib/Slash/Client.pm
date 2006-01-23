@@ -113,7 +113,8 @@ sub literal {
 
 sub fixparam {
 	my($str) = @_;
-	$str =~ s/([^$URI::unreserved])/$URI::Escape::escapes{$1}/og;
+	$str =~ s/([^$URI::unreserved ])/$URI::Escape::escapes{$1}/og;
+	$url =~ s/ /+/g;
 	return $str;
 }
 

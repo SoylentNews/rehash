@@ -44,7 +44,7 @@ __template__
 		<b class="totalVotes">[% voters %] total votes.</b>
 		<br>
 		[
-			<a href="[% env.script_name %]?qid=[% qid | fixparam %]">Voting Booth</a> |
+			<a href="[% env.script_name %]?qid=[% qid | strip_paramattr %]">Voting Booth</a> |
 			<a href="[% env.script_name %]">Other Polls</a> |
 			<a href="[% gSkin.rootdir %]/">Back Home</a>
 		]

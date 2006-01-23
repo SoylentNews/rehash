@@ -56,6 +56,7 @@ bg_toggle = 0;
 		   self_url = PROCESS base_url_mod;
 		   url_tail = PROCESS state_url_mod override = { show_m2s => show_m2s_op};
 		   self_url = self_url  _ url_tail;
+		   self_url = self_url | strip_attribute;
 		   extra = "<a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (show_m2s ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\"></a>";
 		%]
 		[% PROCESS titlebar width="100%" title=title max_min_button = extra %]

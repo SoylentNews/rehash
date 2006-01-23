@@ -12,11 +12,11 @@ __name__
 journalsearch
 __template__
 [% FOREACH journal=results.records %]
-	<b><a href="[% gSkin.rootdir %]/~[% journal.nickname | fixparam %]/journal/[% journal.id %]">[% journal.description %]</a></b><br>
+	<b><a href="[% gSkin.rootdir %]/~[% journal.nickname | strip_paramattr %]/journal/[% journal.id %]">[% journal.description %]</a></b><br>
 	On [% Slash.timeCalc(journal.date) %]<br>
 	[% shorten( Slash.strip_notags(journal.article) ) %]<br>
 	
-	Author: <a href="[% gSkin.rootdir %]/~[% journal.nickname | fixparam %]/">[% journal.nickname | strip_literal %]</a>
+	Author: <a href="[% gSkin.rootdir %]/~[% journal.nickname | strip_paramattr %]/">[% journal.nickname | strip_literal %]</a>
 	[% IF journal.score %]<br>
 	Score: ([% journal.score %])
 	[% END %]

@@ -42,7 +42,7 @@ by [% item.4 %]<br>
 
 <p>[% PROCESS titlebar title => 'Most Active Submitters' %]
 [% FOREACH item = activesub %]
-<b>[% item.0 %]</b> <a href="[% gSkin.rootdir %]/~[% item.1 | fixparam %]/">[% item.1 %]</a><br>
+<b>[% item.0 %]</b> <a href="[% gSkin.rootdir %]/~[% item.1 | strip_paramattr %]/">[% item.1 %]</a><br>
 [% END %]</p>
 
 <p>[% PROCESS titlebar title => 'Most Active Poll Topics' %]
@@ -55,7 +55,7 @@ by [% item.4 %]<br>
 [% FOREACH top = topcomments %]
 <b>[% top.score %]</b>
 	<a href="[% gSkin.rootdir %]/comments.pl?sid=[% top.sid %]&amp;pid=[% top.pid %]#[% top.cid %]">[% top.subj %]</a>
-	by <a href="mailto:[% top.fakeemail | fixparam %]">[% top.nickname | strip_literal %]</a> on [% top.cdate %]<br>
+	by <a href="mailto:[% top.fakeemail | strip_paramattr %]">[% top.nickname | strip_literal %]</a> on [% top.cdate %]<br>
 
 	attached to [% storylinks = Slash.linkStory({ link => top.title, section => top.section, sid => top.sid }) %]
 <a href="[% storylinks.0 %]"[% IF storylinks.2 %] TITLE="[% storylinks.2 %]"[% END %]>[% storylinks.1 %]</a>

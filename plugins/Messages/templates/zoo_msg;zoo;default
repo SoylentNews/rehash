@@ -17,10 +17,10 @@ __template__
 
 <p>
 [% IF type == 'friend' || type == 'foe' || type == 'bitch' %]
-<b><a href="[% gSkin.rootdir %]/~[% zoo_user.nickname | fixparam %]/"
+<b><a href="[% gSkin.rootdir %]/~[% zoo_user.nickname | strip_paramattr %]/"
 >[% zoo_user.nickname | strip_literal %]</a></b> ([% zoo_user.uid %]) has made you their <b>[% type %]</b>.
 [% ELSIF type == 'neutral' %]
-<b><a href="[% gSkin.rootdir %]/~[% zoo_user.nickname | fixparam %]/"
+<b><a href="[% gSkin.rootdir %]/~[% zoo_user.nickname | strip_paramattr %]/"
 >[% zoo_user.nickname | strip_literal %]</a></b> ([% zoo_user.uid %]) has ceased their relationship with you.
 [% END %]
 </p>

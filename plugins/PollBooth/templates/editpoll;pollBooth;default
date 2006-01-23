@@ -82,7 +82,7 @@ __template__
 	<input type="hidden" name="qid" value="[% qid %]">
 
 [% PROCESS formLabel value => "Story ID" comment => "if this matches a story's ID, it will appear on the story's page" %]
-        <input type="text" name="sid" value="[% question.sid %]" size="20" >[% IF question.sid %]<a href="[% gSkin.rootdir %]/article.pl?sid=[% question.sid %]">Related story</a> [% END %] [% IF question.sid && story && qid %]| <a href="[% gSkin.rootdir %]/pollBooth.pl?op=detach&amp;sid=[% question.sid | fixparam %]&amp;qid=[% qid %]">Detach Poll from Story</a>[% END %]<br>
+        <input type="text" name="sid" value="[% question.sid %]" size="20" >[% IF question.sid %]<a href="[% gSkin.rootdir %]/article.pl?sid=[% question.sid %]">Related story</a> [% END %] [% IF question.sid && story && qid %]| <a href="[% gSkin.rootdir %]/pollBooth.pl?op=detach&amp;sid=[% question.sid | strip_paramattr %]&amp;qid=[% qid %]">Detach Poll from Story</a>[% END %]<br>
 	<div class="notes">
 		Time, section, topic, and polltype will be set based on related story's settings<br>
 	[% IF story %]

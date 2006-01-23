@@ -23,7 +23,7 @@ __template__
 			<a href="[% gSkin.rootdir %]/comments.pl?cid=[% comment.cid %]&amp;sid=[% comment.did %]">[% comment.subject %]</a>
 		</h4>
 		<div class="author">
-			by <a href="mailto:[% user_email.fakeemail | fixparam %]">[% user_email.nickname | strip_literal %]</a> on [% Slash.timeCalc(comment.date) %]
+			by <a href="mailto:[% user_email.fakeemail | strip_paramattr %]">[% user_email.nickname | strip_literal %]</a> on [% Slash.timeCalc(comment.date) %]
 		</div>
 		<div class="details">
 			Attached to:  <a href="[% comment.url %]">[% comment.title %]</a> posted on [% Slash.timeCalc(comment.ts) %]

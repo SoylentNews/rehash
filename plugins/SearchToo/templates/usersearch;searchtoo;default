@@ -20,16 +20,16 @@ __template__
 			</td>
 		[% END %]
 		<td valign="TOP">
-			<a href="[% gSkin.rootdir %]/~[% thisuser.nickname | fixparam %]/">[% thisuser.nickname | strip_literal %]</a> &nbsp;
+			<a href="[% gSkin.rootdir %]/~[% thisuser.nickname | strip_paramattr %]/">[% thisuser.nickname | strip_literal %]</a> &nbsp;
 			[% IF thisuser.fakeemail %]
-				([% thisuser.uid %]) email: <a href="mailto:[% thisuser.fakeemail | fixparam %]">[% thisuser.fakeemail | strip_literal %]</a> <br>
+				([% thisuser.uid %]) email: <a href="mailto:[% thisuser.fakeemail | strip_paramattr %]">[% thisuser.fakeemail | strip_literal %]</a> <br>
 			[% ELSE %]
 				([% thisuser.uid %])<br>
 			[% END %]
 		</td>
 		[% IF thisuser.journal_last_entry_date %]
 			<td valign="TOP">
-				<a href="[% gSkin.rootdir %]/~[% thisuser.nickname | fixparam %]/journal/"><b><em> Last Journal entry [% Slash.timeCalc(thisuser.journal_last_entry_date) %]</em></a>
+				<a href="[% gSkin.rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/"><b><em> Last Journal entry [% Slash.timeCalc(thisuser.journal_last_entry_date) %]</em></a>
 			</td>
 		[% ELSE %]
 			<td valign="TOP">

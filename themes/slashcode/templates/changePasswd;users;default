@@ -25,7 +25,7 @@ __template__
 		[% admin_block %]
 		[% IF constants.offer_insecure_login_link %]
 			<div class="message">
-				You can automatically log in by clicking <a href="[% gSkin.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | fixparam %]">This Link</a> and Bookmarking the resulting page.  This is totally insecure, but very convenient.
+				You can automatically log in by clicking <a href="[% gSkin.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% useredit.logtoken | strip_paramattr %]">This Link</a> and Bookmarking the resulting page.  This is totally insecure, but very convenient.
 			</div>
 		[% END %]
 		<form action="[% env.script_name %]" method="post">

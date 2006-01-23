@@ -19,7 +19,7 @@ __template__
 	[% user_email = Slash.db.getUser(comment.uid, ['fakeemail', 'nickname']) %]
 	<b><a href="[% gSkin.rootdir %]/comments.pl?cid=[% comment.cid %]&amp;sid=[% comment.did %]">[% comment.subject %]</a></b>
 
-	by <a href="mailto:[% user_email.fakeemail | fixparam %]">[% user_email.nickname | strip_literal %]</a> on [% Slash.timeCalc(comment.date) %]<br>
+	by <a href="mailto:[% user_email.fakeemail | strip_paramattr %]">[% user_email.nickname | strip_literal %]</a> on [% Slash.timeCalc(comment.date) %]<br>
 	
 	Attached to:  <a href="[% comment.url %]">[% comment.title %]</a> posted on [% Slash.timeCalc(comment.ts) %]<br>
 	[% IF comment.score %]

@@ -23,16 +23,16 @@ __template__
 
 [% CASE 'userhead' %]
 [% IF user.lowbandwidth %]
-	<a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/journal/">Journal</a> of <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</a> ([% uid %])
+	<a href="[% gSkin.rootdir %]/~[% nickname | strip_paramattr %]/journal/">Journal</a> of <a href="[% gSkin.rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %])
 [% ELSE %]
-	<a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/journal/">Journal</a> of <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</a> ([% uid %])  [% PROCESS zoo_icons person=uid implied="" %]
+	<a href="[% gSkin.rootdir %]/~[% nickname | strip_paramattr %]/journal/">Journal</a> of <a href="[% gSkin.rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a> ([% uid %])  [% PROCESS zoo_icons person=uid implied="" %]
 [% END %]
 
 [% CASE 'friendhead' %]
 [% IF user.lowbandwidth %]
-	<a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</a>'s <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/friends/">Friends</a>
+	<a href="[% gSkin.rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a>'s <a href="[% gSkin.rootdir %]/~[% nickname | strip_paramattr %]/friends/">Friends</a>
 [% ELSE %]
-	<a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/">[% nickname | strip_literal %]</a>'s <a href="[% gSkin.rootdir %]/~[% nickname | fixparam %]/friends/">Friends</a>
+	<a href="[% gSkin.rootdir %]/~[% nickname | strip_paramattr %]/">[% nickname | strip_literal %]</a>'s <a href="[% gSkin.rootdir %]/~[% nickname | strip_paramattr %]/friends/">Friends</a>
 [% END %]
 
 [% CASE 'noedit' %]

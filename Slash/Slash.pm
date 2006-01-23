@@ -1832,7 +1832,8 @@ sub _hard_dispComment {
 	if (isAnon($comment->{uid})) {
 		$user_nick_to_display = strip_literal($comment->{nickname});
 	} else {
-		my $nick = fixparam($comment->{nickname});
+		my $nick_literal = strip_literal($comment->{nickname});
+		my $nick_param   = strip_paramattr($comment->{nickname});
 
 		my $homepage = $comment->{homepage} || '';
 		$homepage = '' if length($homepage) <= 8;
@@ -1855,14 +1856,12 @@ sub _hard_dispComment {
 			$userinfo_to_display .= " | " if $userinfo_to_display;
 			$userinfo_to_display .= sprintf('Last Journal: <a href="%s/~%s/journal/">%s</a>',
 				$constants->{real_rootdir},
-				$nick,
+				$nick_param,
 				timeCalc($comment->{journal_last_entry_date})
 			);
 		}
 		$userinfo_to_display = "<br>($userinfo_to_display)" if $userinfo_to_display;
 
-		my $nick_literal = strip_literal($comment->{nickname});
-		my $nick_param = fixparam($comment->{nickname});
 		$user_nick_to_display = qq{<a href="$constants->{real_rootdir}/~$nick_param">$nick_literal ($comment->{uid})</a>};
 		if ($constants->{plugin}{Subscribe} && $constants->{subscribe}
 			&& $comment->{subscriber_bonus} eq 'yes') {
@@ -1874,7 +1873,7 @@ sub _hard_dispComment {
 		}
 		if ($comment->{fakeemail}) {
 			my $mail_literal = strip_literal($comment->{fakeemail_vis});
-			my $mail_param = fixparam($comment->{fakeemail});
+			my $mail_param = strip_paramattr($comment->{fakeemail});
 			$user_email_to_display = qq{ &lt;<a href="mailto:$mail_param">$mail_literal</a>&gt;};
 		}
 	}
