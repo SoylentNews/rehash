@@ -297,7 +297,7 @@ sub main {
 		exit;
 	}
 
-	$ENV{TZ} = 'GMT' if $ENV{TZ} ne 'GMT';
+	$ENV{TZ} = 'GMT' if !$ENV{TZ} || $ENV{TZ} ne 'GMT';
 	slashdLogInit();
 
 	# Process task specific options, if any.
