@@ -573,7 +573,7 @@ sub forgetErrnotes {
 sub forgetRemarks {
 	my($self) = @_;
 	return $self->sqlDelete("remarks",
-		"time < DATE_SUB(NOW(), INTERVAL 365 DAY)");
+		"time < DATE_SUB(NOW(), INTERVAL 90 DAY)");
 }
 
 ########################################################
