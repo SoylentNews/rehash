@@ -87,6 +87,11 @@ ELSIF env.script_name.search('journal\.pl');
 	END;
 
 
+ELSIF env.script_name.search('messages\.pl');
+	IF !user.is_anon; tmp = BLOCK -%]
+<link rel="alternate" title="[% constants.sitename | strip_attribute %] Messages RSS" href="[% gSkin.rootdir %]/my/inbox/rss/[% Slash.getPublicLogToken() | fixparam %]" type="application/rss+xml">
+	[%- END; linkrels.push(tmp); END;
+
 
 ELSE; # default author link, where author is a nickname
 	    IF link.author; tmp = BLOCK -%]
