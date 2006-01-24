@@ -577,93 +577,101 @@ sub userdir_handler {
 		my $logged_in = $r->header_in('Cookie') =~ $USER_MATCH;
 		my $try_login = !$logged_in && $logtoken;
 
-		if ($logged_in && $op eq 'journal') {
-			my $args;
-			if ($extra && $extra =~ /^\d+$/) {
-				$args = "id=$extra&op=edit";
-			} elsif ($extra && $extra eq 'friends') {
-				$args = "op=friendview";
-			} else {
-				$args = "op=list";
+		my $found_the_op = 0;
+		if ($logged_in || $try_login) {
+			if ($op eq 'inbox') {
+				$found_the_op = 1;
+				my $args = 'op=list';
+				if ($extra =~ m{^ (rss|atom) /? $}x) {
+					$args .= '_rss';
+					$args .= "&logtoken=$logtoken" if $try_login;
+					$args .= "&content_type=$1";
+				}
+
+				$r->args($args);
+				$r->uri('/messages.pl');
+				$r->filename($constants->{basedir} . '/messages.pl');
+			} elsif ($logged_in) {
+				$found_the_op = 1;
+				if ($op eq 'journal') {
+					my $args;
+					if ($extra && $extra =~ /^\d+$/) {
+						$args = "id=$extra&op=edit";
+					} elsif ($extra && $extra eq 'friends') {
+						$args = "op=friendview";
+					} else {
+						$args = "op=list";
+					}
+					$r->args($args);
+					$r->uri('/journal.pl');
+					$r->filename($constants->{basedir} . '/journal.pl');
+
+				} elsif ($op eq 'discussions') {
+					$r->args("op=personal_index");
+					$r->uri('/comments.pl');
+					$r->filename($constants->{basedir} . '/comments.pl');
+
+
+				} elsif ($op eq 'messages') { # XXX change to be same as /inbox, move this to /my/preferences/messages
+					$r->args("op=display_prefs");
+					$r->uri('/messages.pl');
+					$r->filename($constants->{basedir} . '/messages.pl');
+
+				} elsif ($op =~ /^(?:friends|fans|freaks|foes|zoo)$/) {
+					my $args = "op=$op";
+					$extra .= '/';
+
+					if ($op eq 'friends' && $extra =~ s/^friends\///) {
+						$args =~ s/friends/fof/;
+					} elsif ($op eq 'friends' && $extra =~ s/^foes\///) {
+						$args =~ s/friends/eof/;
+					} elsif ($op eq 'zoo') {
+						$args =~ s/zoo/all/;
+					}
+
+					$r->args($args);
+					$r->uri('/zoo.pl');
+					$r->filename($constants->{basedir} . '/zoo.pl');
+
+				} elsif ($op eq 'comments') {
+					$r->args("op=editcomm");
+					$r->uri('/users.pl');
+					$r->filename($constants->{basedir} . '/users.pl');
+
+				} elsif ($op eq 'homepage') {
+					$r->args("op=edithome");
+					$r->uri('/users.pl');
+					$r->filename($constants->{basedir} . '/users.pl');
+
+				} elsif ($op eq 'password') {
+					$r->args("op=changeprefs");
+					$r->uri('/login.pl');
+					$r->filename($constants->{basedir} . '/login.pl');
+
+				} elsif ($op eq 'logout') {
+					$r->args("op=userclose");
+					$r->uri('/login.pl');
+					$r->filename($constants->{basedir} . '/login.pl');
+
+				} elsif ($op eq 'misc') {
+					$r->args("op=editmiscopts");
+					$r->uri('/users.pl');
+					$r->filename($constants->{basedir} . '/users.pl');
+
+				} elsif ($op eq 'amigos') {
+					$r->args("op=friendview");
+					$r->uri('/journal.pl');
+					$r->filename($constants->{basedir} . '/journal.pl');
+
+				} else {
+					$r->args("op=edituser");
+					$r->uri('/users.pl');
+					$r->filename($constants->{basedir} . '/users.pl');
+				}
 			}
-			$r->args($args);
-			$r->uri('/journal.pl');
-			$r->filename($constants->{basedir} . '/journal.pl');
 
-		} elsif ($logged_in && $op eq 'discussions') {
-			$r->args("op=personal_index");
-			$r->uri('/comments.pl');
-			$r->filename($constants->{basedir} . '/comments.pl');
-
-		} elsif (($logged_in || $try_login) && $op eq 'inbox') {
-			my $args = 'op=list';
-			if ($extra =~ m{^ (rss|atom) /? $}x) {
-				$args .= '_rss';
-				$args .= "&logtoken=$logtoken" if $try_login;
-				$args .= "&content_type=$1";
-			}
-
-			$r->args($args);
-			$r->uri('/messages.pl');
-			$r->filename($constants->{basedir} . '/messages.pl');
-
-		} elsif ($logged_in && $op eq 'messages') { # XXX change to be same as /inbox, move this to /my/preferences/messages
-			$r->args("op=display_prefs");
-			$r->uri('/messages.pl');
-			$r->filename($constants->{basedir} . '/messages.pl');
-
-		} elsif ($logged_in && $op =~ /^(?:friends|fans|freaks|foes|zoo)$/) {
-			my $args = "op=$op";
-			$extra .= '/';
-
-			if ($op eq 'friends' && $extra =~ s/^friends\///) {
-				$args =~ s/friends/fof/;
-			} elsif ($op eq 'friends' && $extra =~ s/^foes\///) {
-				$args =~ s/friends/eof/;
-			} elsif ($op eq 'zoo') {
-				$args =~ s/zoo/all/;
-			}
-
-			$r->args($args);
-			$r->uri('/zoo.pl');
-			$r->filename($constants->{basedir} . '/zoo.pl');
-
-		} elsif ($logged_in && $op eq 'comments') {
-			$r->args("op=editcomm");
-			$r->uri('/users.pl');
-			$r->filename($constants->{basedir} . '/users.pl');
-
-		} elsif ($logged_in && $op eq 'homepage') {
-			$r->args("op=edithome");
-			$r->uri('/users.pl');
-			$r->filename($constants->{basedir} . '/users.pl');
-
-		} elsif ($logged_in && $op eq 'password') {
-			$r->args("op=changeprefs");
-			$r->uri('/login.pl');
-			$r->filename($constants->{basedir} . '/login.pl');
-
-		} elsif ($logged_in && $op eq 'logout') {
-			$r->args("op=userclose");
-			$r->uri('/login.pl');
-			$r->filename($constants->{basedir} . '/login.pl');
-
-		} elsif ($logged_in && $op eq 'misc') {
-			$r->args("op=editmiscopts");
-			$r->uri('/users.pl');
-			$r->filename($constants->{basedir} . '/users.pl');
-
-		} elsif ($logged_in && $op eq 'amigos') {
-			$r->args("op=friendview");
-			$r->uri('/journal.pl');
-			$r->filename($constants->{basedir} . '/journal.pl');
-
-		} elsif ($logged_in) {
-			$r->args("op=edituser");
-			$r->uri('/users.pl');
-			$r->filename($constants->{basedir} . '/users.pl');
-
-		} else {
+		}
+		if (!$found_the_op) {
 			$r->uri('/login.pl');
 			$r->filename($constants->{basedir} . '/login.pl');
 		}
