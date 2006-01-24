@@ -569,10 +569,7 @@ sub userdir_handler {
 			$query = $1;
 		}
 
-		my($op, $extra, $more) = split /\//, $string, 4;
-		for ($op, $extra, $more) {
-			s/%([a-fA-F0-9]{2})/pack('C', hex($1))/ge;
-		}
+		my($op, $extra) = split /\//, $string, 2;
 
 		my $logged_in = $r->header_in('Cookie') =~ $USER_MATCH;
 		my $try_login = !$logged_in && $logtoken;
@@ -762,7 +759,7 @@ sub userdir_handler {
 				$args =~ s/zoo/all/;
 			}
 
-			if ($extra =~ m{^ (rss|atom) $}x) {
+			if ($extra =~ m{^ (rss|atom) /?$}x) {
 				$args .= "&content_type=$1";
 			}
 
