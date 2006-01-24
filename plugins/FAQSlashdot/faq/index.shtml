@@ -3,7 +3,9 @@
 <html>
 <head>
         <title>Slashdot FAQ - Index</title>
-<!-- $Id$ -->
+<!--
+$VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
+-->
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
 
