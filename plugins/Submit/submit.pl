@@ -617,12 +617,7 @@ sub saveSub {
 			subject		=> { template_name => 'messagenew_subj' },
 			submission	=> $messagesub,
 		};
-		for (@$users) {
-# XXXSKIN - no "section" restriction
-#			my $user_section = $slashdb->getUser($_, 'section');
-#			next if ($user_section && $user_section ne $messagesub->{section});
-			$messages->create($_, MSG_CODE_NEW_SUBMISSION, $data);
-		}
+		$messages->create($users, MSG_CODE_NEW_SUBMISSION, $data) if @$users;
 	}
 	
 	

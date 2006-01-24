@@ -3484,9 +3484,7 @@ sub isValid {
 				validator	=> $File,
 			};
 
-			for (@$users) {
-				$messages->create($_, MSG_CODE_HTML_INVALID, $msg);
-			}
+			$messages->create($users, MSG_CODE_HTML_INVALID, $msg) if @$users;
 		}
 
 

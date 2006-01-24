@@ -887,9 +887,7 @@ EOT
 		}, 'adminmail');
 		$data{template_page} = 'adminmail';
 		my $message_users = $messages->getMessageUsers(MSG_CODE_ADMINMAIL);
-		for (@$message_users) {
-			$messages->create($_, MSG_CODE_ADMINMAIL, \%data);
-		}
+		$messages->create($message_users, MSG_CODE_ADMINMAIL, \%data) if @$message_users;
 
 		if ($constants->{mod_stats}) {
 			$mod_data{template_name} = 'display';
@@ -898,9 +896,7 @@ EOT
 			}, 'adminmail');
 			$mod_data{template_page} = 'modmail';
 			my $mod_message_users = $messages->getMessageUsers(MSG_CODE_MODSTATS);
-			for (@$mod_message_users) {
-				$messages->create($_, MSG_CODE_MODSTATS, \%mod_data);
-			}
+			$messages->create($mod_message_users, MSG_CODE_MODSTATS, \%mod_data) if @$mod_message_users;
 		}
 	}
 

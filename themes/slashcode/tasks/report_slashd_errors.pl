@@ -32,9 +32,7 @@ $task{$me}{code} = sub {
 		$data{subject} = 'slashd Error Alert';
 		$data{template_page} = 'slashderrnote';
 		my $admins = $messages->getMessageUsers(MSG_CODE_ADMINMAIL);
-		for my $uid (@$admins) {
-			$messages->create($uid, MSG_CODE_ADMINMAIL, \%data);
-		}
+		$messages->create($admins, MSG_CODE_ADMINMAIL, \%data) if @$admins;
 	}
 
 	return $num_errors;

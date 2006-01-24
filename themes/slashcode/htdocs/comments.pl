@@ -1225,11 +1225,14 @@ sub submitComment {
 				reply		=> $reply,
 				discussion	=> $discussion,
 			};
+
+			my @users_send;
 			for my $usera (@$users) {
 				next if $users{$usera};
-				$messages->create($usera, MSG_CODE_NEW_COMMENT, $data);
+				push @users_send, $usera;
 				$users{$usera}++;
 			}
+			$messages->create(\@users_send, MSG_CODE_NEW_COMMENT, $data) if @users_send;
 		}
 
 		if ($constants->{validate_html}) {

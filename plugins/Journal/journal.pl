@@ -661,9 +661,8 @@ sub doSaveArticle {
 					nickname	=> $user->{nickname},
 				}
 			};
-			for (@$friends) {
-				$messages->create($_, MSG_CODE_JOURNAL_FRIEND, $data);
-			}
+
+			$messages->create($friends, MSG_CODE_JOURNAL_FRIEND, $data) if @$friends;
 		}
 
 		$form->{id} = $id;

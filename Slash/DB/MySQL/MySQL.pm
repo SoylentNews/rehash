@@ -3027,12 +3027,19 @@ sub createContentFilter {
 	return $filter_id;
 }
 
+#################################################################
 sub existsEmail {
 	my($self, $email) = @_;
 
 	# Returns count of users matching $email.
 	return ($self->sqlSelect('uid', 'users',
 		'realemail=' . $self->sqlQuote($email)))[0];
+}
+
+#################################################################
+sub existsUid {
+	my($self, $uid) = @_;
+	return $self->sqlSelect('uid', 'users', 'uid=' . $self->sqlQuote($uid));
 }
 
 #################################################################
