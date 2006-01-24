@@ -275,10 +275,32 @@ my $start_time = Time::HiRes::time;
 }
 
 
+sub getDispModesForStories {
+	my($stories, $stories_data_cache, $user, $modes, $story_to_dispmode_hr) = @_;
+
+	my @story_always_topic = split (',', $user->{story_always_topic});
+	my @story_always_nexus = split (',', $user->{story_always_nexus});
+	my @story_full_brief_nexus = split (',', $user->{story_full_brief_nexus});
+	my @story_brief_always_nexus = split (',', $user->{story_brief_always_nexus});
+	my @story_full_best_nexus = split (',', $user->{story_full_best_nexus});
+	my @story_brief_best_nexus = split (',', $user->{story_brief_best_nexus});
+
+	my(%mp_dispmode_nexus, %sec_dispmode_nexus);
+	$mp_dispmode_nexus{$_}  = $modes->[0] foreach (@story_always_nexus, @story_full_brief_nexus, @story_full_best_nexus);
+	$mp_dispmode_nexus{$_}  = $modes->[1] foreach (@story_brief_best_nexus, @story_brief_always_nexus);
+	$sec_dispmode_nexus{$_} = $modes->[2] foreach (@story_always_nexus);
+	$sec_dispmode_nexus{$_} = $modes->[3] foreach (@story_full_brief_nexus, @story_brief_always_nexus);
+	$sec_dispmode_nexus{$_} = $modes->[4] foreach (@story_full_best_nexus, @story_brief_best_nexus);
+
+	$story_to_dispmode_hr ||= {};
+
+	# Filter out any story we're planning on skipping up front
+	@$stories = grep { getDispModeForStory($_, $stories_data_cache->{$_->{stoid}}, \%mp_dispmode_nexus, \%sec_dispmode_nexus, \@story_always_topic, $story_to_dispmode_hr) ne "none" } @$stories;
+}
 
 
 sub getDispModeForStory {
-	my ($story, $story_data, $mp_dispmode_nexus_hr, $sec_dispmode_nexus_hr, $always_topic_ar, $dispmode_hr) = @_;
+	my($story, $story_data, $mp_dispmode_nexus_hr, $sec_dispmode_nexus_hr, $always_topic_ar, $dispmode_hr) = @_;
 	my $constants = getCurrentStatic();
 	my $gSkin     = getCurrentSkin();
 	my $slashdb   = getCurrentDB();
@@ -287,7 +309,6 @@ sub getDispModeForStory {
 
 	my $ps_nexus = $skins->{$story->{primaryskid}}->{nexus};
 
-	
 	if ($gSkin->{nexus} != $constants->{mainpage_nexus_tid}) {
 		$dispmode_hr->{$story->{stoid}} = "full" if $dispmode_hr;
 		return "full";
@@ -338,6 +359,17 @@ sub do_rss {
 	my($reader, $constants, $user, $form, $stories, $skin_name) = @_;
 	my $gSkin = getCurrentSkin();
 	my @rss_stories;
+
+	my @stoids_for_cache =
+		map { $_->{stoid} }
+		@$stories;
+	my $stories_data_cache;
+	$stories_data_cache = $reader->getStoriesData(\@stoids_for_cache)
+		if @stoids_for_cache;
+
+	getDispModesForStories($stories, $stories_data_cache, $user, [qw(full none full none none)]);
+
+
 	for (@$stories) {
 		my $story = $reader->getStory($_->{sid});
 		$story->{introtext} = parseSlashizedLinks($story->{introtext});
@@ -592,35 +624,16 @@ sub displayStories {
 	$stories_data_cache = $reader->getStoriesData(\@stoids_for_cache)
 		if @stoids_for_cache;
 
+	my $dispmodelast = "";
+	my $story_to_dispmode_hr = {};
+
+	getDispModesForStories($stories, $stories_data_cache, $user, [qw(full brief full brief none)], $story_to_dispmode_hr);
+
 	# Shift them off, so we do not display them in the Older Stuff block
 	# later (this simulates the old cursor-based method from circa 1997
 	# which was actually not all that smart, but umpteen layers of caching
 	# makes it quite tolerable here in 2004 :)
 	my $story;
-	
-	my $seen_full_story = 0;
-		
-	my @story_always_topic = split (',', $user->{story_always_topic});
-	my @story_always_nexus = split (',', $user->{story_always_nexus});
-	my @story_full_brief_nexus = split (',', $user->{story_full_brief_nexus});
-	my @story_brief_always_nexus = split (',', $user->{story_brief_always_nexus});
-	my @story_full_best_nexus = split (',', $user->{story_full_best_nexus});
-	my @story_brief_best_nexus = split (',', $user->{story_brief_best_nexus});
-
-	my (%mp_dispmode_nexus, %sec_dispmode_nexus);
-
-	$mp_dispmode_nexus{$_}  = "full" foreach (@story_always_nexus, @story_full_brief_nexus, @story_full_best_nexus);
-	$mp_dispmode_nexus{$_}  = "brief" foreach (@story_brief_best_nexus, @story_brief_always_nexus);
-	$sec_dispmode_nexus{$_} = "full" foreach (@story_always_nexus);
-	$sec_dispmode_nexus{$_} = "brief" foreach (@story_full_brief_nexus, @story_brief_always_nexus);
-	$sec_dispmode_nexus{$_} = "none" foreach (@story_full_best_nexus, @story_brief_best_nexus);
-
-	my $dispmodelast = "";
-	my $story_to_dispmode_hr = {};
-
-	# Filter out any story we're planning on skipping up front
-	@$stories = grep { getDispModeForStory($_, $stories_data_cache->{$_->{stoid}}, \%mp_dispmode_nexus, \%sec_dispmode_nexus, \@story_always_topic, $story_to_dispmode_hr) ne "none" } @$stories;
-	
 	STORIES_DISPLAY: while ($story = shift @$stories) {
 		my($tmpreturn, $other, @links);
 
