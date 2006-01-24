@@ -2958,6 +2958,17 @@ $slashdb->sqlInsert("al2", { srcid => get_srcid_sql_in($srcid) });
 
 sub get_srcid_sql_in {
 	my($srcid) = @_;
+	if ($srcid !~ /^[0-9a-f]+$/) {
+		my @caller_info = ( );
+		for (my $lvl = 1; $lvl < 99; ++$lvl) {
+			my @c = caller($lvl);
+			last unless @c;
+			next if $c[0] =~ /^Template/;
+			push @caller_info, "$c[0] line $c[2]";
+			last if scalar(@caller_info) >= 3;
+		}
+		warn "Invalid param to get_srcid_sql_in, callers: @caller_info";
+	}
 	my $slashdb = getCurrentDB();
 	my $srcid_q = $slashdb->sqlQuote($srcid);
 	my $type = get_srcid_type($srcid);
