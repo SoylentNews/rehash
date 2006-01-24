@@ -203,7 +203,7 @@ sub main {
 	$op = 'list' if $user->{seclev} < $ops->{$op}{seclev};
 	$op ||= 'list';
 
-	if (($form->{op} =~ /^preview|edit$/) && $form->{title}) {
+	if ($form->{op} && $form->{op} =~ /^preview|edit$/ && $form->{title}) {
 		# Show submission/article title on browser's titlebar.
 		$tbtitle = $form->{title};
 		$tbtitle =~ s/"/'/g;
@@ -479,7 +479,7 @@ sub templateEdit {
 		$templateedit_flag = 1;
 	}
 
-	$templateform_flag = 1 if ((! $form->{templatedelete_confirm} && $tpid) || $form->{templatenew});
+	$templateform_flag = 1 if (! $form->{templatedelete_confirm} && $tpid) || $form->{templatenew};
 
 	slashDisplay('templateEdit', {
 		tpid 			=> $tpid,
@@ -663,7 +663,7 @@ sub blockEdit {
 		}
 	}
 
-	$blockform_flag = 1 if ((! $form->{blockdelete_confirm} && $bid) || $form->{blocknew});
+	$blockform_flag = 1 if (! $form->{blockdelete_confirm} && $bid) || $form->{blocknew};
 
 	my $title = getTitle('blockEdit-title', { bid => $bid }, 1);
 	$blockref->{items} ||= $constants->{rss_max_items_incoming};
@@ -1732,7 +1732,7 @@ sub listStories {
 
 	my $storylistref = [];
 
-	if ($form->{op} eq 'delete') {
+	if ($form->{op} && $form->{op} eq 'delete') {
 		rmStory($form->{stoid} || $form->{sid});
 		titlebar('100%', getTitle('rmStory-title',
 			{ sid => $form->{stoid} || $form->{sid} } ));
