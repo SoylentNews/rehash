@@ -29,6 +29,10 @@ sub main {
 			function	=> \&setSectionNexusPrefs,
 			seclev		=> 1
 		},
+		storySignOff => {
+			function	=> \&storySignOff,
+			seclev		=> 100
+		},
 		default => {
 			function	=> \&default
 		}
@@ -213,6 +217,24 @@ sub setSectionNexusPrefs() {
 	);
 	print getData('set_section_prefs_success_msg');
 
+}
+
+sub storySignOff {
+	my ($slashdb, $constants, $user, $form) = @_;
+	return unless $user->{is_admin};
+	
+	my $stoid = $form->{stoid};
+	my $uid   = $user->{uid};
+
+	return unless $stoid =~/^\d+$/;
+
+	if ($slashdb->sqlCount("signoff", "stoid = $stoid AND uid = $uid")) {
+		print "Already Signed";
+		return;
+	}
+	
+	$slashdb->createSignoff($stoid, $uid);
+	print "Signed";
 }
 
 sub default {
