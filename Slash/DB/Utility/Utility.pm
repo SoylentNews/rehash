@@ -735,7 +735,7 @@ sub sqlSelectAllHashrefArray {
 	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->sqlSelectMany($select, $from, $where, $other);
 	return undef unless $sth;
-	my @returnable;
+	my @returnable = ( );
 	while (my $row = $sth->fetchrow_hashref) {
 		push @returnable, $row;
 	}
