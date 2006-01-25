@@ -1096,6 +1096,21 @@ sub importText {
 }
 
 ##################################################################
+sub get_signoff_box {
+	my ($stoid) = @_;
+	my $slashdb = getCurrentDB();
+	print STDERR "TESTING: signoff: $stoid\n";
+	my $signoffs = $slashdb->getSignoffsForStory($stoid);
+	print STDERR "TESTING: signoff returned: " . scalar @$signoffs ."\n";
+	my $uids = {};
+	foreach my $so(@$signoffs) {
+		$uids->{$so->{uid}}++;
+	}
+	my $uniq_uids = scalar keys %$uids;
+	return slashDisplay("signoff_box", { signoffs => $signoffs, uniq_uids => $uniq_uids }, { Return => 1 });
+}
+
+##################################################################
 sub get_slashd_box {
 	my $slashdb = getCurrentDB();
 	my $sldst = $slashdb->getSlashdStatuses();
@@ -1434,6 +1449,7 @@ sub editStory {
 	}, { Return => 1 });
 
 	my $slashdtext = get_slashd_box();
+	my $signofftext = get_signoff_box($storyref->{stoid});
 	my $attached_files;
 	if ($constants->{plugin}{Blob}) {
 		my $blobdb = getObject("Slash::Blob");
@@ -1448,6 +1464,11 @@ sub editStory {
 	# <SELECT> into this template and let the template deal with the
 	# HTML, here. Formatting these elements outside of the template
 	# just defeats the purpose!	-- Cliff 2002-08-07
+	
+	my $user_signoff = 0;
+	if ($stoid) {
+		$user_signoff = $slashdb->sqlCount("signoff", "uid=$user->{uid} AND stoid=$stoid");
+	}
 	slashDisplay('editStory', {
 		stoid			=> $stoid,
 		storyref 		=> $storyref,
@@ -1470,7 +1491,9 @@ sub editStory {
 		extras			=> $extracolumns,
 		similar_stories		=> $similar_stories,
 		attached_files		=> $attached_files,
-		shown_in_desc		=> $shown_in_desc
+		shown_in_desc		=> $shown_in_desc,
+		signofftext		=> $signofftext,
+		user_signoff		=> $user_signoff,
 	});
 }
 
@@ -1924,6 +1947,8 @@ sub updateStory {
 		editStory(@_);
 	} else {
 		titlebar('100%', getTitle('updateStory-title'));
+		my $st = $slashdb->getStory($form->{sid});
+		$slashdb->createSignoff($st->{stoid}, $user->{uid});
 		# make sure you pass it the goods
 		listStories(@_);
 	}
@@ -2232,6 +2257,8 @@ sub saveStory {
 	if ($sid) {
 		slashHook('admin_save_story_success', { story => $data });
 		titlebar('100%', getTitle('saveStory-title'));
+		my $st = $slashdb->getStory($data->{sid});
+		$slashdb->createSignoff($st->{stoid}, $user->{uid});
 
 		listStories(@_);
 	} else {
