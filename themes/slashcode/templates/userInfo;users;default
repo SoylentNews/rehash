@@ -70,6 +70,7 @@ __template__
 			[% IF lastjournal.article_shrunk %]
 				<p>
 					[% lastjournal.article_shrunk; END %]
+				</p>
 			[% ELSE %]
 				<p>
 					<i>
