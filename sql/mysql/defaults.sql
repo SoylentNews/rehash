@@ -204,9 +204,12 @@ INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_m
 INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('Australia',   1, 2, -1, 0, 9, 2, -1, 0,  2);
 INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('New Zealand', 0, 2,  1, 0, 9, 2,  3, 0,  2);
 
+
 #
-# Dumping data for table 'formkeys'
+# Dumping data for table 'globj_types'
 #
+
+INSERT INTO globj_types VALUES (NULL, 'stories');
 
 
 #

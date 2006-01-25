@@ -1631,6 +1631,7 @@ sub getNexusChildrenTids {
 			# nexuses as grandchildren that must be
 			# walked through on the next pass.
 			for my $gchild (keys %{$tree->{$child}{child}}) {
+				# XXXSECTIONTOPICS skip if min_weight < 0?
 				next unless $tree->{$gchild}{nexus};
 				$grandchildren{$gchild} = 1;
 			}
@@ -9993,7 +9994,7 @@ sub getStoidFromSid {
 	my $sid_q = $self->sqlQuote($sid);
 	my $stoid = $self->sqlSelect("stoid", "stories", "sid=$sid_q");
 	$self->{_sid_conversion_cache}{$sid} = $stoid;
-	my $exptime = 7 * 86400;
+	my $exptime = 86400;
 	$mcd->set("$mcdkey$sid", $stoid, $exptime) if $mcd;
 	return $stoid;
 }
@@ -13029,18 +13030,104 @@ sub sqlShowInnodbStatus {
 }
 
 ########################################################
-# Get a unique string for an admin session
-#sub generatesession {
-#	# crypt() may be implemented differently so as to
-#	# make the field in the db too short ... use the same
-#	# MD5 encrypt function?  is this session thing used
-#	# at all anymore?
-#	my $newsid = crypt(rand(99999), $_[0]);
-#	$newsid =~ s/[^A-Za-z0-9]//i;
-#
-#	return $newsid;
-#}
 
+# Get a global object ID (globjid), creating it if necessary.
+# Takes two arguments, the name of the main table of the object
+# (e.g. 'stories' or 'comments'), and the ID of the object in
+# that table (e.g. a stoid or a cid).
+
+sub getGlobjidCreate {
+	my($self, $name, $target_id) = @_;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $globjid = $reader->getGlobjidFromTargetIfExists($name, $target_id);
+	return $globjid if $globjid;
+	return $self->createGlobjid($name, $target_id);
+}
+
+sub getGlobjidFromTargetIfExists {
+	my($self, $name, $target_id) = @_;
+	my $globjtypes = $self->getGlobjTypes();
+	my $gtid = $globjtypes->{$name};
+	return 0 if !$gtid;
+
+	my $constants = getCurrentStatic();
+	my $table_cache		= "_globjs_cache";
+	my $table_cache_time	= "_globjs_cache_time";
+	_genericCacheRefresh($self, 'globjs', $constants->{block_expire});
+	if ($self->{$table_cache_time} && $self->{$table_cache}{$gtid}{$target_id}) {
+		return $self->{$table_cache}{$gtid}{$target_id};
+	}
+
+	my $mcd = $self->getMCD();
+	my $mcdkey = "$self->{_mcd_keyprefix}:globjid:" if $mcd;
+	if ($mcd) {
+		my $globjid = $mcd->get("$mcdkey$gtid:$target_id");
+		if ($globjid) {
+			if ($self->{$table_cache_time}) {
+				$self->{$table_cache}{$gtid}{$target_id} = $globjid;
+			}
+			return $globjid;
+		}
+	}
+	my $target_id_q = $self->sqlQuote($target_id);
+	my $globjid = $self->sqlSelect('globjid', 'globjs',
+		"gtid='$gtid' AND target_id=$target_id_q");
+	return 0 if !$globjid;
+	if ($self->{$table_cache_time}) {
+		$self->{$table_cache}{$gtid}{$target_id} = $globjid;
+	}
+	$mcd->set("$mcdkey$gtid:$target_id", $globjid, $constants->{memcached_exptime_tags}) if $mcd;
+	return $globjid;
+}
+
+sub createGlobjid {
+	my($self, $name, $target_id) = @_;
+	my $globjtypes = $self->getGlobjTypes();
+	my $gtid = $globjtypes->{$name};
+	return 0 if !$gtid;
+	my $rows = $self->sqlInsert('globjs', {
+			globjid =>	undef,
+			gtid =>		$gtid,
+			target_id =>	$target_id
+		}, { ignore => 1 });
+	if (!$rows) {
+		# Insert failed, presumably because this tag already
+		# exists.  The caller should have checked for this
+		# before attempting to create the tag, but maybe the
+		# reader that was checked didn't have this tag
+		# replicated yet.  Pull the information directly
+		# from this writer DB.
+		return $self->getGlobjidFromTargetIfExists($name, $target_id);
+	}
+	# The insert succeeded.  Return the ID that was just added.
+	return $self->getLastInsertId();
+}
+
+# Returns a hashref in which the keys are either numeric gtid's OR
+# the names of maintables, and the values are the opposite.  So if
+# the globj_types table consists of the single row (1, 'stories'),
+# then this method will return the hashref: { stories => '1',
+# '1' => 'stories' }.
+
+sub getGlobjTypes {
+	my($self) = @_;
+
+	my $constants = getCurrentStatic();
+	my $table_cache		= "_globjtypes_cache";
+	my $table_cache_time	= "_globjtypes_cache_time";
+	_genericCacheRefresh($self, 'globjtypes', $constants->{block_expire});
+	return $self->{$table_cache} if $self->{$table_cache_time};
+
+	# Cache needs to be built, so build it.
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $hr = $reader->sqlSelectAllKeyValue('gtid, maintable', 'globj_types');
+	my @gtids = keys %$hr;
+	for my $gtid (@gtids) { $hr->{$hr->{$gtid}} = $gtid }
+
+	$self->{$table_cache} = $hr;
+	$self->{$table_cache_time} = time;
+	return $hr;
+}
 
 ########################################################
 sub DESTROY {

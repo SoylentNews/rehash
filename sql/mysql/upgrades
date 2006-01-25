@@ -3617,3 +3617,20 @@ INSERT INTO vars (name, value, description) VALUES ("gse_mp_max_days_back", "0",
 INSERT INTO vars (name, value, description) VALUES ("gse_fallback_min_stoid", "0", "Set by set_gse_min_stoid to define how far back to search max when not passing an issue or offset");
 
 ALTER TABLE skins ADD COLUMN require_acl VARCHAR(32)  DEFAULT '' NOT NULL;
+
+CREATE TABLE globjs (
+	globjid		int UNSIGNED NOT NULL auto_increment,
+	gtid		smallint UNSIGNED NOT NULL,
+	target_id	int UNSIGNED NOT NULL,
+	PRIMARY KEY (globjid),
+	UNIQUE target (gtid, target_id)
+TYPE=InnoDB;
+CREATE TABLE globj_types (
+	gtid		smallint UNSIGNED NOT NULL auto_increment,
+	maintable	VARCHAR(64) NOT NULL,
+	PRIMARY KEY (gtid),
+	UNIQUE maintable (maintable)
+) TYPE=InnoDB;
+
+INSERT INTO globj_types VALUES (NULL, 'stories');
+
