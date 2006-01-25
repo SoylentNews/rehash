@@ -3590,7 +3590,7 @@ ALTER TABLE skins ADD COLUMN skinindex ENUM('no', 'yes') DEFAULT 'yes' NOT NULL 
 
 # Leaving this set to 0 will allow the current behavior of showing whatever leftover stories are left from the select for the main column of the index
 # Changing this value to something positive will limit the number showing up in the Older Stories Slashbox
-ALTER TABLE skins ADD COLUMN older_stories_max MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL;   
+ALTER TABLE skins ADD COLUMN older_stories_max MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL;  
 
 # 2006-01-18
 UPDATE vars SET value = 'T_2_5_0_95' WHERE name = 'cvs_tag_currentcode';
@@ -3603,3 +3603,17 @@ UPDATE vars SET value = 'T_2_5_0_95' WHERE name = 'cvs_tag_currentcode';
 UPDATE vars SET value = 'T_2_5_0_96' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT UPDATED FOR NEW INDEX DISPLAY HERE -- END OF T_2_5_0_96
+DROP TABLE IF EXISTS signoff;
+CREATE TABLE signoff (
+        soid 	MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	stoid		MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+  	uid 		MEDIUMINT UNSIGNED NOT NULL,
+	signoff_time	TIMESTAMP,		
+	PRIMARY KEY(soid),
+	INDEX (stoid)
+) TYPE=InnoDB;
+				
+INSERT INTO vars (name, value, description) VALUES ("gse_mp_max_days_back", "0", "Max days back to go in gSE select for mainpage in instances where we haven't passed an offset / issue -- 0 if you don't want to use this");
+INSERT INTO vars (name, value, description) VALUES ("gse_fallback_min_stoid", "0", "Set by set_gse_min_stoid to define how far back to search max when not passing an issue or offset");
+
+ALTER TABLE skins ADD COLUMN require_acl VARCHAR(32)  DEFAULT '' NOT NULL;

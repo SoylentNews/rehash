@@ -781,6 +781,16 @@ CREATE TABLE sessions (
 	PRIMARY KEY (session)
 ) TYPE=InnoDB;
 
+DROP TABLE IF EXISTS signoff;
+CREATE TABLE signoff (
+        soid 	MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	stoid		MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+  	uid 		MEDIUMINT UNSIGNED NOT NULL,
+	signoff_time	TIMESTAMP,		
+	PRIMARY KEY(soid),
+	INDEX (stoid)
+) TYPE=InnoDB;
+				
 #
 # Table structure for table 'site_info'
 #
@@ -820,6 +830,7 @@ CREATE TABLE skins (
 	max_rewrite_secs MEDIUMINT UNSIGNED DEFAULT '3600' NOT NULL,
 	last_rewrite timestamp NOT NULL,
 	ac_uid mediumint UNSIGNED DEFAULT '0' NOT NULL,
+	require_acl VARCHAR(32) DEFAULT '' NOT NULL,
 	PRIMARY KEY (skid),
 	UNIQUE name (name)
 ) TYPE=InnoDB;
