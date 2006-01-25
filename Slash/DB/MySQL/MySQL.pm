@@ -8146,6 +8146,8 @@ sub getStoriesEssentials {
 
 	my $mcd = $self->getMCD();
 	my $min_stoid = $self->getVar('gse_min_stoid', 'value', 1) || 0;
+	my $fallback_min_stoid = 0;
+	$fallback_min_stoid = $self->getVar('gse_fallback_min_stoid', 'value', 1) || 0 if $constants->{gse_mp_max_days_back};
 	my $mp_tid = $constants->{mainpage_nexus_tid};
 	my $memcached_expire = 600; # this is kinda arbitrary, yes
 
@@ -8172,6 +8174,7 @@ sub getStoriesEssentials {
 	my $lim_sum = $limit + $limit_extra + $offset;
 	my $min_stoid_margin = $gSkin->{artcount_max}
 		+ int(($gSkin->{artcount_min} + $gSkin->{artcount_max})/2);
+
 	my $limit_overly_large = $lim_sum > $min_stoid_margin * 3 + 10 ? 1 : 0;
 #print STDERR "gSE $$ min_stoid A '$min_stoid' lim_sum '$lim_sum' min_stoid_margin '$min_stoid_margin'\n";
 
@@ -8233,9 +8236,13 @@ sub getStoriesEssentials {
 	# Figure out whether min_stoid is usable.
 	# If we're not looking just at the mainpage tid, it's not (yet --
 	# maybe later we'll have multiple min_stoids).
-	$min_stoid = 0 if @$tid > 1 || $tid->[0] != $mp_tid;
+	if ($tid->[0] == $mp_tid) {
+		$min_stoid = $min_stoid if !$tid_extras;
+	} else {
+		$min_stoid = $fallback_min_stoid if !$tid_extras;
+	}
 	# If we're excluding nexuses, topics, authors, or stories, it's not.
-	$min_stoid = 0 if @$tid_x || @$uid_x || @$stoid_x;
+	$min_stoid = $fallback_min_stoid if @$tid_x || @$uid_x || @$stoid_x;
 	# If the $limit + $limit_extra + $offset is too large, it's not.
 	$min_stoid = 0 if $limit_overly_large;
 	# If we're in issue mode, and it's an issue more than 3 days old,
@@ -8245,6 +8252,10 @@ sub getStoriesEssentials {
 	# ignore the old one.
 	$min_stoid = 0 if $return_min_stoid_only;
 #print STDERR "gSE $$ min_stoid B '$min_stoid' tid '@$tid' overly '$limit_overly_large' rmso '$return_min_stoid_only'\n";
+	
+	if ($tid->[0] != $mp_tid) {
+		$min_stoid = 0;
+	} 
 
 	# Build the WHERE clauses necessary and do the first select(s),
 	# on story_topics_rendered.
@@ -9150,6 +9161,21 @@ sub updateStory {
 
 	return $sid;
 
+}
+
+########################################################
+sub createSignoff {
+	my ($self, $stoid, $uid) = @_;
+	$self->sqlInsert("signoff", { stoid => $stoid, uid => $uid });
+}
+
+sub getSignoffsForStory {
+	my ($self, $stoid) = @_;
+	return $self->sqlSelectAllHashrefArray(
+		"signoff.*, users.nickname",
+		"signoff, users",
+		"signoff.stoid=$stoid AND users.uid=signoff.uid"
+	);
 }
 
 ########################################################
