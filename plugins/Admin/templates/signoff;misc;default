@@ -1,0 +1,22 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+stoid = stoid of story signoff is for
+storylink = is this to be included in a listing of storylinks on index.pl (if so we'll put it inside a list item)
+checked = should this box be checked?
+__page__
+misc
+__lang__
+en_US
+__name__
+signoff
+__seclev__
+10000
+__template__
+[% IF constants.plugin.Ajax %]
+[% IF storylink %]<li class="signoff">[% END %]
+<input type="checkbox" name="admin_signoff" value="[% stoid %]" onclick="adminStorySignoff(this)" [% IF checked; constants.markup_checked_attribute; END %]><span id="signoff_[% stoid %]"><b>Sign</b></span>
+[% IF storylink %]</li>[% END %]
+[% END %]

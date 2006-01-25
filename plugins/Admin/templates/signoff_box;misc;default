@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+signoff_box
+__seclev__
+10000
+__template__
+
+[% signoff_title = "Signoffs" %]
+[% IF signoffs.size; 
+	signoff_title = signoff_title _ " (" _ uniq_uids;
+	IF signoffs.size != uniq_uids; 
+		signoff_title = signoff_title _ "/" _ signoffs.size;
+	END;
+	signoff_title = signoff_title _ ")";
+ END %]
+
+[% IF signoffs.size == 0; 
+	content = "<b>No Signoffs</b>";
+ELSE;
+	content = content _ "<table>";
+	FOREACH signoff = signoffs;
+		content = content _ "<tr><td>" _  signoff.nickname  _ "</td><td>" _ Slash.timeCalc(signoff.signoff_time,"%m-%d %H:%M:%S" ,0) _"</td></tr>";
+	END;
+	content = content _ "</table>";
+ END %]
+
+[% PROCESS sidebox
+	title = signoff_title
+	contents = content
+%]
