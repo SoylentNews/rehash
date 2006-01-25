@@ -29,7 +29,6 @@ __template__
 [% END -%]
 [% IF !user.is_anon && constants.plugin.Ajax %]
 <script src="[% constants.imagedir %]/prototype.js" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/sectionprefs.js" type="text/javascript"></script>
 [% END %]
 [% IF user.is_admin && constants.plugin.Ajax %]
 <script src="[% constants.imagedir %]/admin.js" type="text/javascript"></script>
