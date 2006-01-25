@@ -388,6 +388,11 @@ sub handler {
 	$user->{state}{ssl} = $is_ssl;
 	createCurrentUser($user);
 	createCurrentForm($form);
+	if ($gSkin->{require_acl} && !$user->{acl}{$gSkin->{require_acl}}) {
+		$r->err_header_out(Location =>
+	       URI->new_abs('/', $constants->{absolutedir}));
+	       return REDIRECT;
+	}
 
 	# If the user is connecting over SSL, make sure this is allowed.
 	# If allow_nonadmin_ssl is 0, then only admins are allowed in.
