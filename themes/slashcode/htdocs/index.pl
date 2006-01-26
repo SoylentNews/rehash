@@ -688,7 +688,9 @@ sub displayStories {
 			if $dispmodelast eq "brief"
 				&& !( $other->{dispmode} && $other->{dispmode} eq "brief" );
 
-		$other->{thresh_commentcount} = $user->{threshold} > -1 ?  $threshComments[$user->{threshold} + 1] : $story->{commentcount};
+		$other->{thresh_commentcount} = $user->{threshold} > -1
+			? $threshComments[$user->{threshold} + 1]
+			: $story->{commentcount};
 
 		$storytext .= displayStory($story->{sid}, '', $other, $stories_data_cache);
 		$tmpreturn .= $storytext;
