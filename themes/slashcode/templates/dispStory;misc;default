@@ -117,7 +117,7 @@ END %]
 	skin => story.primaryskid
  }, 1 );
 %]
-[% IF magic;
+[% title = ''; IF magic;
 	thisskin = Slash.db.getSkin(story.primaryskid);
 	IF thisskin.rootdir;
 		title = "<a href=\"$thisskin.rootdir/\">";
@@ -128,12 +128,11 @@ END %]
 			title = "<a href=\"$gSkin.rootdir/index.pl?section=$story.primaryskid\">";
 		END;
 	END;
-	title = title _ thisskin.title _ "</a></span>: " _ "<span class=\"storytitle\">" _ storylink;
-ELSE;
-	title = storylink;
-
-END %]
-	<span class="section">[% title %]</span>  [% IF story.commentcount %][% UNLESS story.commentcount == thresh_commentcount %][% thresh_commentcount %] of [% END %][% story.commentcount %] comment[% IF story.commentcount > 1 %]s[% END %][% END %] 
+	title = "<span class=\"section\">" _ title _ thisskin.title _ "</a></span>: ";
+END;
+	title = title _ "<span class=\"storytitle\">" _ storylink _ "</span>";
+%]
+	[% title %]  [% IF story.commentcount %][% UNLESS story.commentcount == thresh_commentcount %][% thresh_commentcount %] of [% END %][% story.commentcount %] comment[% IF story.commentcount > 1 %]s[% END %][% END %] 
 	[% IF user.is_admin %]<a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">(edit)</a>[% END %]
 </div>
 [% IF story.is_future %]</div>[% END %]
