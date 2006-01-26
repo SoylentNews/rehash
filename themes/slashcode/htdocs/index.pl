@@ -796,7 +796,10 @@ sub displayStories {
 		}, { Return => 1 });
 	}
 	# limit number of stories leftover for older stories if desired
-	$#$stories = ($gSkin->{older_stories_max} - 1) if $gSkin->{older_stories_max} > 0;
+	$#$stories = ($gSkin->{older_stories_max} - 1) if
+		($gSkin->{older_stories_max} < @$stories)
+			&&
+		($gSkin->{older_stories_max} > 0);
 
 	return $return;
 

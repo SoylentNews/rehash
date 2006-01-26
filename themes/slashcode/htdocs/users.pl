@@ -2659,7 +2659,7 @@ sub saveHome {
 		for my $key (sort grep /^showbox_/, keys %$form) {
 			my($bid) = $key =~ /^showbox_(\w+)$/;
 			next if length($bid) < 1 || length($bid) > 30 || $bid !~ /^\w+$/;
-			if (!$slashboxes{$bid}) {
+			if (! exists $slashboxes{$bid}) {
 				$slashboxes{$bid} = 999; # put it at the end
 			}
 		}
