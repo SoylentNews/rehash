@@ -1097,7 +1097,7 @@ sub importText {
 
 ##################################################################
 sub get_signoff_box {
-	my ($stoid) = @_;
+	my($stoid) = @_;
 	my $slashdb = getCurrentDB();
 	print STDERR "TESTING: signoff: $stoid\n";
 	my $signoffs = $slashdb->getSignoffsForStory($stoid);
@@ -1464,11 +1464,12 @@ sub editStory {
 	# <SELECT> into this template and let the template deal with the
 	# HTML, here. Formatting these elements outside of the template
 	# just defeats the purpose!	-- Cliff 2002-08-07
-	
+
 	my $user_signoff = 0;
 	if ($stoid) {
 		$user_signoff = $slashdb->sqlCount("signoff", "uid=$user->{uid} AND stoid=$stoid");
 	}
+
 	slashDisplay('editStory', {
 		stoid			=> $stoid,
 		storyref 		=> $storyref,

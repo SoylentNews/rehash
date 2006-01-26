@@ -8253,7 +8253,7 @@ sub getStoriesEssentials {
 	# ignore the old one.
 	$min_stoid = 0 if $return_min_stoid_only;
 #print STDERR "gSE $$ min_stoid B '$min_stoid' tid '@$tid' overly '$limit_overly_large' rmso '$return_min_stoid_only'\n";
-	
+
 	if ($tid->[0] != $mp_tid) {
 		$min_stoid = 0;
 	} 
@@ -9166,12 +9166,12 @@ sub updateStory {
 
 ########################################################
 sub createSignoff {
-	my ($self, $stoid, $uid) = @_;
+	my($self, $stoid, $uid) = @_;
 	$self->sqlInsert("signoff", { stoid => $stoid, uid => $uid });
 }
 
 sub getSignoffsForStory {
-	my ($self, $stoid) = @_;
+	my($self, $stoid) = @_;
 	return $self->sqlSelectAllHashrefArray(
 		"signoff.*, users.nickname",
 		"signoff, users",
@@ -13030,7 +13030,6 @@ sub sqlShowInnodbStatus {
 }
 
 ########################################################
-
 # Get a global object ID (globjid), creating it if necessary.
 # Takes two arguments, the name of the main table of the object
 # (e.g. 'stories' or 'comments'), and the ID of the object in

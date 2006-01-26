@@ -1540,10 +1540,11 @@ sub displayStory {
 				['nickname', 'fakeemail', 'homepage']);
 		my $topic = $reader->getTopic($story->{tid});
 		$story->{atstorytime} = "__TIME_TAG__";
-		
+
 		if ($options->{dispmode} ne "brief") {
 			$story->{introtext} = parseSlashizedLinks($story->{introtext});
-			$story->{introtext} = processSlashTags($story->{introtext});		}
+			$story->{introtext} = processSlashTags($story->{introtext});
+		}
 
 		if ($full) {
 			$story->{bodytext} = parseSlashizedLinks($story->{bodytext});

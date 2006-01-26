@@ -48,14 +48,14 @@ $task{$me}{code} = sub {
 		limit_extra		=> $limit_extra,
 		future_secs		=> $future_secs,
 	});
-	
+
 	# More safety margin.
 	$min_stoid -= 100;
 
 	# This optimization won't help us if it includes a significant
 	# fraction of the rows in the stories table -- write a zero.
 	$min_stoid = 0 if $min_stoid < 500;
-	
+
 	if ($mp_max_days_back) {
 		my $gse_fallback_min_stoid = $slashdb->sqlSelect("MIN(stoid)", "stories", "time > DATE_SUB(NOW(), INTERVAL $mp_max_days_back DAY)");
 		$slashdb->setVar("gse_fallback_min_stoid", $gse_fallback_min_stoid);

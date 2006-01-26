@@ -182,9 +182,11 @@ Incrementing token-count on [% num_updated %] users...
    pct = "n/a";
  END %]
 [% pct %]
+
 [% CASE 'briefarticles_begin' %]
 	[% returnme.data_constant = 1 %] 
 <div class="briefarticles">
+
 [% CASE 'briefarticles_end' %]
 	[% returnme.data_constant = 1 %] 
 </div>

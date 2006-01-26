@@ -220,9 +220,9 @@ sub setSectionNexusPrefs() {
 }
 
 sub storySignOff {
-	my ($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form) = @_;
 	return unless $user->{is_admin};
-	
+
 	my $stoid = $form->{stoid};
 	my $uid   = $user->{uid};
 
@@ -232,7 +232,7 @@ sub storySignOff {
 		print "Already Signed";
 		return;
 	}
-	
+
 	$slashdb->createSignoff($stoid, $uid);
 	print "Signed";
 }

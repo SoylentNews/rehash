@@ -388,9 +388,11 @@ sub handler {
 	$user->{state}{ssl} = $is_ssl;
 	createCurrentUser($user);
 	createCurrentForm($form);
+
 	if ($gSkin->{require_acl} && !$user->{acl}{$gSkin->{require_acl}}) {
 		$r->err_header_out(Location =>
-	       URI->new_abs('/', $constants->{absolutedir}));
+			URI->new_abs('/', $constants->{absolutedir})
+		);
 	       return REDIRECT;
 	}
 

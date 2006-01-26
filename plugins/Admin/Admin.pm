@@ -217,15 +217,14 @@ sub getRelated {
 }
 
 ##################################################################
-
 sub getStorySignoffs {
-	my ($self, $stoid) = @_;
-	my $stoid_q =$self->sqlQuote($stoid);
+	my($self, $stoid) = @_;
+	my $stoid_q = $self->sqlQuote($stoid);
 	return $self->sqlSelectAllHashrefArray(
-			"users.uid, users.nickname, author_story_signoff.signoff_time",
-			"author_story_signoff,users", 
-			"author_story_signoff.stoid=$stoid_q AND author_story_signoff.uid = users.uid", 
-			"ORDER BY signoff_time"
+		"users.uid, users.nickname, author_story_signoff.signoff_time",
+		"author_story_signoff,users", 
+		"author_story_signoff.stoid=$stoid_q AND author_story_signoff.uid = users.uid", 
+		"ORDER BY signoff_time"
 	);
 }
 
