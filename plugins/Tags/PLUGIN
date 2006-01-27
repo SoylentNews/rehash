@@ -1,0 +1,7 @@
+# $Id$
+name=Tags
+description="Tags"
+mysql_dump=mysql_dump.sql
+mysql_schema=mysql_schema.sql
+task=tags_update.pl
+template=templates/tagsstory;index;default

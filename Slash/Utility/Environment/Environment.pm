@@ -1620,6 +1620,21 @@ print STDERR scalar(localtime) . " Env.pm $$ userHasDaypass uid=$user->{uid} cs=
 		$user->{state}{lostprivs} = 1;
 	}
 
+	if ($constants->{plugin}{Tags}) {
+		my $read = $constants->{tags_stories_allowread} || 0;
+		$user->{tags_canread_stories} = 0;
+		$user->{tags_canread_stories} ||= 1 if $read >= 4 && !$user->{is_anon};
+		$user->{tags_canread_stories} ||= 1 if $read >= 3 &&  $user->{karma} >= 0;
+		$user->{tags_canread_stories} ||= 1 if $read >= 2 &&  $user->{is_subscriber};
+		$user->{tags_canread_stories} ||= 1 if $read >= 1 &&  $user->{is_admin};
+		my $write = $constants->{tags_stories_allowwrite} || 0;
+		$user->{tags_canwrite_stories} = 0;
+		$user->{tags_canwrite_stories} ||= 1 if $write >= 4 && !$user->{is_anon};
+		$user->{tags_canwrite_stories} ||= 1 if $write >= 3 &&  $user->{karma} >= 0;
+		$user->{tags_canwrite_stories} ||= 1 if $write >= 2 &&  $user->{is_subscriber};
+		$user->{tags_canwrite_stories} ||= 1 if $write >= 1 &&  $user->{is_admin};
+	}
+
 	return $user;
 }
 

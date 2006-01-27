@@ -242,6 +242,10 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
                 <li><strong><a href="/faq/suggestions.shtml#su1300">I need information about Slashdot for a paper I'm writing!</a></strong></li>
                 <li><strong><a href="/faq/suggestions.shtml#su1400">Can I use Slashdot icons freely on my site?</a></strong></li>
                 <li><strong><a href="/faq/suggestions.shtml#su1500">I have found a bug on Slashdot, Who do I contact?</a></strong></li>
-        </ul>
+        </ul><!-- Tags -->
+        <h2><strong><a href="/faq/tags.shtml">Tags</a></strong></h2>
+        <ul>
+                <li><strong><a href="/faq/tags.shtml#tags100">What is this crazy tags thing?</a></strong></li>
+	</ul>
 
 <!--#include virtual="/slashfoot.inc"-->
