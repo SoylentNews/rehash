@@ -1,0 +1,21 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+index
+__lang__
+en_US
+__name__
+tagsstory
+__template__
+<div><a href="">&loz;</a>
+<font color=#006666 size=-1><b>[% toptags.join(' ') %]</b></font>
+<font size=-1><i>tagging beta</i></font></div>
+
+__seclev__
+10000
+__version__
+$Id$
