@@ -1,0 +1,37 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+remarks
+__lang__
+en_US
+__name__
+display
+__template__
+
+<table class="data">
+	<tr class="data_head">
+		<th colspan="4">Remarks</th>
+	</tr>
+[% i = 1; FOREACH remark = remarks_ref; i = i == 1 ? 2 : 1 %]
+	<tr class="data_hl[% i %]"> <!-- remark.id:[% remark.rid %] -->
+		<td>[% Slash.timeCalc(remark.time) %]</td>
+		<td>[% Slash.db.getUser(remark.uid, 'nickname') || 0 %]</td>
+		<td>[% Slash.chopEntity(remark.remark, 120) %]</td>
+		<td>[% IF remark.stoid;
+			thisstory = Slash.db.getStory(remark.stoid);
+			IF thisstory %]<a href="[% gSkin.rootdir %]/admin.pl?sid=[% thisstory.sid %]&amp;op=edit"
+				>[% thisstory.title | strip_literal %]</a>[%
+			END;
+		    END -%]
+		</td>			
+	</tr>
+[% END %]
+</table>
+
+__seclev__
+10000
+__version__
+$Id$

@@ -1,0 +1,6 @@
+# $Id$
+name=Remarks
+description="Remarks"
+htdocs=remarks.pl
+template=templates/data;remarks;default
+template=templates/display;remarks;default
