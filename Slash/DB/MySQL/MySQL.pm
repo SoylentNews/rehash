@@ -8151,7 +8151,6 @@ sub getStoriesEssentials {
 	$fallback_min_stoid = $self->getVar('gse_fallback_min_stoid', 'value', 1) || 0 if $constants->{gse_mp_max_days_back};
 	print STDERR "FMS $fallback_min_stoid\n";
 	my $mp_tid = $constants->{mainpage_nexus_tid};
-	my $memcached_expire = 600; # this is kinda arbitrary, yes
 
 	# Canonicalize all arguments passed in.  First the scalars.
 	my $offset = $options->{offset} || 0;
