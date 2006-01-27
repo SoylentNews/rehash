@@ -9174,7 +9174,7 @@ sub createSignoff {
 
 sub getSignoffsForStory {
 	my($self, $stoid) = @_;
-	return [] if $!$stoid;
+	return [] if !$stoid;
 	my $stoid_q = $self->sqlQuote($stoid);
 	return $self->sqlSelectAllHashrefArray(
 		"signoff.*, users.nickname",
