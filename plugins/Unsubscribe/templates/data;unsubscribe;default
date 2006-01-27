@@ -1,0 +1,18 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+unsubscribe
+__lang__
+en_US
+__name__
+data
+__template__
+Unsubscribed [% goodcount %] users, and could not find [% badcount %] users.
+__seclev__
+500
+__version__
+$Id$
