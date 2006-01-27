@@ -15,6 +15,7 @@ __template__
 
 [% PROCESS titlebar width => "100%", title => "Unsubscribe $constants.sitename User(s)" %]
 <p></p>
+Enter a list of e-mail addresses to be unsubscribed to newsletters and headlines, one per line.
 <textarea name="emails" rows="[% user.textarea_rows || constants.textarea_rows %]" cols = "[% user.textarea_cols || constants.textarea_cols %]" wrap="VIRTUAL"></textarea>
 <p></p>
 <input type="submit" value="Unsubscribe">
