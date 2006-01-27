@@ -867,6 +867,8 @@ Bender:I only speak enough binary to ask where the bathroom is.
 Bender:nogoodlawsprotectingtheinnocent--
 Bender:Senseless death!  The folk singer's best friend!
 Bender:Alright! Closure!
+Bender:You just lost five dollars.
+Bender:That's not my gold-plated 25-pin connector.
 Fry:There's a lot about my face you don't know.
 Fry:These new hands are great. I'm gonna break them in tonight.
 Fry:I refuse to testify on the grounds that my organs will be chopped up into a patty.
@@ -907,8 +909,13 @@ Fry:Existing is basically all I do!
 Fry:It's a widely-believed fact!
 Fry:My hands!  My horrible, human, hands!
 Fry:How about me?  I'm human, and I've always wanted to see the future!
+Fry:The less fortunate get all the breaks!
+Fry:Please, Mr. Nixon! We're appealing to your sense of decency!
+Fry:There's a political debate on. Quick, change the channel!
+Leela:There's a political debate on. Quick, change the channel!
 Leela:You did the best you could, I guess, and some of these gorillas are okay.
 Leela:This wangs chung.
+Leela:He opened up relations with China. He doesn't want to hear about your ding-dong.
 EOT
 
 1;
