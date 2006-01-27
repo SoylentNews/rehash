@@ -15,7 +15,7 @@ __template__
 
 [% PROCESS titlebar width => "100%", title => "Unsubscribe $constants.sitename User(s)" %]
 
-<textarea name="emails" rows="[% user.textarea_rows || constants.textarea_rows 5]" cols = "[% user.textarea_cols || constants.textarea_cols %]" wrap="VIRTUAL"></textarea>
+<textarea name="emails" rows="[% user.textarea_rows || constants.textarea_rows %]" cols = "[% user.textarea_cols || constants.textarea_cols %]" wrap="VIRTUAL"></textarea>
 
 <input type="submit" value="Unsubscribe">
 </form>
