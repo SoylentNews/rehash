@@ -14,10 +14,11 @@ __template__
 <form action="[% env.script_name %]" method="post">
 
 [% PROCESS titlebar width => "100%", title => "Unsubscribe $constants.sitename User(s)" %]
-
+<p></p>
 <textarea name="emails" rows="[% user.textarea_rows || constants.textarea_rows %]" cols = "[% user.textarea_cols || constants.textarea_cols %]" wrap="VIRTUAL"></textarea>
-
+<p></p>
 <input type="submit" value="Unsubscribe">
+<p></p>
 </form>
 __seclev__
 1000
