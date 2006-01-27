@@ -1099,9 +1099,7 @@ sub importText {
 sub get_signoff_box {
 	my($stoid) = @_;
 	my $slashdb = getCurrentDB();
-	print STDERR "TESTING: signoff: $stoid\n";
 	my $signoffs = $slashdb->getSignoffsForStory($stoid);
-	print STDERR "TESTING: signoff returned: " . scalar @$signoffs ."\n";
 	my $uids = {};
 	foreach my $so(@$signoffs) {
 		$uids->{$so->{uid}}++;
