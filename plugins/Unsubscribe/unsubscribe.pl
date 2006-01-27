@@ -7,7 +7,7 @@
 use strict;
 use File::Path;
 use Slash 2.003;        # require Slash 2.3.x
-use Slash::Constants qw(:web);
+use Slash::Constants qw(:messages :web);
 use Slash::Display;
 use Slash::Utility;
 use Time::HiRes qw( usleep );
@@ -38,7 +38,7 @@ sub main {
                 return;
         }
 
-	header('', '' { admin => 1, adminmenu => 'config', tab_selected => 'unsubscribe' }  or return;
+	header('', '', { admin => 1, adminmenu => 'config', tab_selected => 'unsubscribe' })  or return;
 	print createMenu('unsubscribe');
 
 	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form);
