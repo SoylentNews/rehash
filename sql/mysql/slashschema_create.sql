@@ -610,7 +610,7 @@ CREATE TABLE moderatorlog (
 	subnetid char(32) DEFAULT '' NOT NULL,
 	uid mediumint UNSIGNED NOT NULL,
 	val tinyint DEFAULT '0' NOT NULL,
-	sid mediumint UNSIGNED DEFAULT '' NOT NULL,
+	sid mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	ts datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 	cid mediumint UNSIGNED NOT NULL,
 	cuid mediumint UNSIGNED NOT NULL,
