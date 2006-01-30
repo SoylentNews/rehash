@@ -9485,8 +9485,8 @@ sub getSlashConf {
 			$conf{$attrname} = {};
 			my @tags = split /\s+/, $approvedtags_attr;
 			foreach my $tag (@tags){
-				my($tagname, $attr_info) = $tag =~ /([^:]*):(.*)$/;
-				my @attrs = split ',', $attr_info;
+				my($tagname, $attr_info) = $tag =~ /([^:]*)(?:\:(.*))?$/;
+				my @attrs = split ',', ($attr_info || '');
 				my $ord = 1;
 				foreach my $attr (@attrs){
 					my($at, $extra) = split /_/, $attr;
