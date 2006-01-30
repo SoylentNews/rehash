@@ -1,0 +1,103 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <title>Slashdot FAQ - Tags</title>
+<!--#include virtual="/slashhead.inc"-->
+
+<!--
+($VERSION) = '$Id$' =~ /^\$Id: \S+ (\S+)/
+-->
+
+<table>
+<tr>
+<td><a href="suggestions.shtml">Previous section</a></td>
+
+<td><a href="index.shtml">Index</a></td>
+</tr>
+</table>
+
+<hr>
+<br><a name="tags100" id="tags100"></a>
+<h2>What is this crazy tags thing?</h2>
+<p> Slashdot is currently experimenting with tagging articles.  You are
+encouraged to use this feature to submit a handful of tags: brief labels
+that you think best describe this article.  You might choose to say that
+this is an article about 'security' and 'mozilla'.
+</p>
+
+<p>This is all very beta. Currently tagging is <b>only open to
+subscribers.</b></p>
+
+<p>We don't know exactly how this will all work, and a lot of it really
+depends on you.  If you choose to add your own tags, be aware:</p>
+
+<ul>
+<li>Your tags are <b>public</b>. Everyone will be able to see them!</li>
+<li>Keep your tags brief.</li>
+<li>We provide a few example tags for you. Use them if you like.</li>
+<li>Don't forget to click 'Tag' to save your tags.</li>
+<li>Tags must be all-lowercase, no spaces or punctuation. Numbers can  
+appear but can't be first. Smoosh them up: for "Web 2.0", tag  
+"web20". Max 64 chars.</li>
+<li>Don't use plurals.  It's "harddrive", not "harddrives", etc.</li>
+</ul>
+
+<p>We're excited about this, and see huge potential for this system.
+ From user feedback on articles, to comment moderation, the system is
+really limited only by your participation, and our database hardware! 
+</p>
+
+<p><i><font size=-1>Answered by: <a  
+href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 1/29/06</font></i>
+
+
+
+<a name="tags110" id="tags110"></a>
+<h2>Are tags objective or subjective? Can I use any tag I want?</h2>
+
+<p>Other tagging systems let users make up any tags they want, and
+punt on the issue of objective meaning. So the tag "foo" means for each
+user whatever they want it to mean, and to the system it means nothing
+at all, it's just an identifier.</p>
+
+<p>We're going to build the next generation of moderation on top of
+tags. That means we're going to poach your namespace. Some tags will
+have a substantive effect on the system right from the start (or very
+soon).  Today, our article tagger knows about tags like "dupe" or  
+"typo".
+When we roll out tagging on comments, we will teach it "troll" and
+"informative".  These tags can have a meaning in the system.
+
+<p>We expect that <em>you</em> will come up with ways of using tags
+that <em>we</em> haven't anticipated.  We plan to start with the
+<a href="com-mod.shtml#cm2500">existing ten adjectives</a>
+in our current system, but as new tags come into usage, we will
+start incorporating them into the system.
+
+<p>Of course, this can work both ways: Tags elsewhere
+are your own personal playground and nobody cares if you mess around. On
+Slashdot, abusive uses of tags could have negative consequences.   
+Precisely what that means, we don't know yet.
+</p>
+
+<p>Yes, that's pretty arbitrary. We'll spell out policy as this evolves.
+For now, the deal is: tag in good faith, and if there's abuse, we'll
+deal with it in good faith.  </p>
+
+<p><i><font size=-1>Answered by: <a  
+href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 1/29/06</font></i>
+
+<hr>
+<table>
+<tr>
+<td><a href="suggestions.shtml">Previous section</a></td>
+
+<td><a href="index.shtml">Index</a></td>
+</tr>
+</table>
+<!--#include virtual="/slashfoot.inc"-->
+</body>
+</html>
+
