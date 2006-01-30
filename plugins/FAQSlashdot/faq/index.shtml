@@ -251,6 +251,7 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
         <h2><strong><a href="/faq/tags.shtml">Tags</a></strong></h2>
         <ul>
                 <li><strong><a href="/faq/tags.shtml#tags100">What is this crazy tags thing?</a></strong></li>
+                <li><strong><a href="/faq/tags.shtml#tags110">Are tags objective or subjective? Can I use any tag I want?</a></strong></li>
 	</ul>
 
 <!--#include virtual="/slashfoot.inc"-->
