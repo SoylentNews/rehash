@@ -7,11 +7,11 @@
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
 
-        <ul class="menu">
-                 <li><a href="subscriptions.shtml">Previous section</a></li>
-                 <li><a href="tech.shtml">Next section</a></li>
-                 <li><a href="index.shtml">Index</a></li>
-        </ul>
+	<ul class="menu">
+		<li><a href="feeds.shtml">Previous section</a></li>
+		<li><a href="tech.shtml">Next section</a></li>
+		<li><a href="index.shtml">Index</a></li>
+	</ul>
         
         <hr>
 
@@ -168,12 +168,11 @@
         </small></em></p>
 
         <hr>
-        <ul class="menu">
-                
-                        <li><a href="subscriptions.shtml">Previous section</a></li>
-                        <li><a href="tech.shtml">Next section</a></li>
-                        <li><a href="index.shtml">Index</a></li>
-                </ul>
+	<ul class="menu">
+		<li><a href="feeds.shtml">Previous section</a></li>
+		<li><a href="tech.shtml">Next section</a></li>
+		<li><a href="index.shtml">Index</a></li>
+	</ul>
         
 
 <!--#include virtual="/slashfoot.inc"-->

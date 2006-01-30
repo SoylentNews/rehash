@@ -175,6 +175,11 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
                 <li><strong><a href="/faq/subscriptions.shtml#ss1400">In general, what pages count towards my subscription base?</a></strong></li>
                 <li><strong><a href="/faq/subscriptions.shtml#ss1500">How can I control how many ads I suppress daily?</a></strong></li>
                 <li><strong><a href="/faq/subscriptions.shtml#ss1600">Besides ad-free pages, are there any advantages to being a subscriber?</a></strong></li>
+        </ul><!-- Feeds -->
+        <h2><strong><a href="/faq/feeds.shtml">Feeds</a></strong></h2>
+	<ul>
+                <li><strong><a href="/faq/feeds.shtml#fe100">Where can I get Slashdot's main feed?</a></strong></li>
+                <li><strong><a href="/faq/feeds.shtml#fe200">What other feeds are available?</a></strong></li>
         </ul><!-- Slashdot Meta -->
         <h2><strong><a href="/faq/slashmeta.shtml">About Slashdot</a></strong></h2>
         <ul>
