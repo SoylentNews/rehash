@@ -3,6 +3,7 @@ default
 __description__
 * adnum = ad number to display
 * dpk = daypasskey text string
+* minduration = minimum duration in seconds, if known
 
 __title__
 
@@ -14,9 +15,16 @@ __name__
 main
 __template__
 
-<p>When done viewing our ad, you may
-<a href="[% gSkin.rootdir %]/daypass.pl?dpk=[% dpk | strip_attribute %]&amp;adnum=[% adnum | strip_attribute %]">continue</a>
-with your honorary subscription for the day.</p>
+<div id="msgcell"></div>
+<script type="text/javascript">
+var daypassURL = "[% gSkin.rootdir %]/daypass.pl?dpk=[% dpk | strip_attribute %]&amp;adnum=[% adnum | strip_attribute %]";
+var cntdwn = [% minduration || 15 %];
+function displayMessage() {
+	document.getElementById("msgcell").innerHTML = '<center><a href="'+daypassURL+'">Please enjoy your Slashdot Day Pass.</a>';
+}
+document.getElementById('msgcell').innerHTML = '<center>Watch this ad for '+cntdwn+' seconds and then enjoy your Day Pass. <br><font size="-1">(a link will appear when the ad is done)</font>';
+setTimeout("displayMessage()", cntdwn * 1000);
+</script>
 
 <p>[% Slash.getAd(adnum) %]</p>
 
