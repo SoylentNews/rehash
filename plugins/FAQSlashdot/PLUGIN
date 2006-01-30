@@ -15,6 +15,7 @@ htdoc_faq=faq/slashmeta.shtml
 htdoc_faq=faq/subscriptions.shtml
 htdoc_faq=faq/suggestions.shtml
 htdoc_faq=faq/tech.shtml
+htdoc_faq=faq/tags.shtml
 image_faq=images/faq/foe.gif
 image_faq=images/faq/friend.gif
 image_faq=images/faq/neutral.gif
