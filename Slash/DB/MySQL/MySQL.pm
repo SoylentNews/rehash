@@ -9013,8 +9013,23 @@ sub createStory {
 
 		my $id;
 		if ($story->{discussion}) {
+			# updating now for journals tips off users that this will
+			# be a story soon, esp. ts, url, title, kind ... i don't
+			# care personally, does it matter?  if so we can task some
+			# of these changes -- pudge
+
+			# XXX how does this show up in ~user ?
+
+			# XXX url links back to story, or journal?
+			# delete $discussion->{url};
+
+			# XXX what about uid?  does it matter?
+			# delete $discussion->{uid};
+
 			$id = $story->{discussion};
 			$discussion->{kind} = 'journal-story';
+			$discussion->{type} = 'open'; # should be already
+			$discussion->{archivable} = 'yes'; # for good measure
 			if (!$self->setDiscussion($id, $discussion)) {
 				$error = "Failed to set discussion for story";
 			}

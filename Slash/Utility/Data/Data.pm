@@ -115,7 +115,6 @@ BEGIN {
 	strip_notags
 	strip_plaintext
 	strip_paramattr
-	strip_paramattrmailto
 	strip_urlattr
 	submitDomainAllowed
 	timeCalc
@@ -127,6 +126,8 @@ BEGIN {
 	xmlencode_plain
 	vislenify
 );
+#	strip_paramattrmailto
+
 
 # really, these should not be used externally, but we leave them
 # here for reference as to what is in the package
@@ -1293,7 +1294,13 @@ disallows "+" for " ".
 =cut
 
 sub strip_paramattr		{ strip_attribute(fixparam($_[0]), $_[1]) }
-sub strip_paramattrmailto	{ my $h = strip_attribute(fixparam($_[0]), $_[1]); $h =~ s/\+/%20/g; $h }
+# XXX this is going the wrong way.  mailto is not special, http is!  and not
+# only that, only SOME http is.  if we come up with new functions just so
+# we can have "pretty" HTTP URLs, then obviously we don't want to rewrite
+# a ton of calls, so maybe a new *general* function is called for, but
+# certainly not specific to mailto.  maybe fixparam_full and strip_paramattr_full,
+# or something.  i dunno.  but not this. -- pudge
+#sub strip_paramattrmailto	{ my $h = strip_attribute(fixparam($_[0]), $_[1]); $h =~ s/\+/%20/g; $h }
 sub strip_urlattr		{ strip_attribute(fudgeurl($_[0]), $_[1]) }
 
 
@@ -2013,7 +2020,9 @@ Prepares data to be a parameter in a URL.  Such as:
 
 The data to be escaped.  B<NOTE>: space characters are encoded as C<+>
 instead of C<%20>.  If you must have C<%20>, perform an C<s/\+/%20/g> on
-the result.
+the result.  (Oops, reverted, because this only works reliably with
+most Slash HTTP URLs, not mailto: URLs, and maybe not all other HTTP
+URLs.)
 
 =back
 
@@ -2027,8 +2036,10 @@ The escaped data.
 
 sub fixparam {
 	my($url) = @_;
-	$url =~ s/([^$URI::unreserved ])/$URI::Escape::escapes{$1}/og;
-	$url =~ s/ /+/g;
+	$url =~ s/([^$URI::unreserved])/$URI::Escape::escapes{$1}/og;
+## doesn't work properly for all URLs
+#	$url =~ s/([^$URI::unreserved ])/$URI::Escape::escapes{$1}/og;
+#	$url =~ s/ /+/g;
 	return $url;
 }
 

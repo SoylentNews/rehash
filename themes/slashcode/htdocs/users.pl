@@ -2686,11 +2686,8 @@ sub saveHome {
 	my $author_hr = $slashdb->getDescriptions('authors');
 	my $tree = $slashdb->getTopicTree();
 	my(@story_never_topic,  @story_never_author,  @story_never_nexus);
-	
 	my(@story_always_topic, @story_always_author);
-	
 	my(@story_always_nexus, @story_full_brief_nexus, @story_brief_always_nexus, @story_full_best_nexus, @story_brief_best_nexus);
-
 	my($story_topic_all, $story_author_all, $story_nexus_all) = (0, 0, 0);
 	
 	# Topics are either present (value=2) or absent (value=0).  If absent,
