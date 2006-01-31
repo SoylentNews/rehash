@@ -22,7 +22,7 @@ __template__
 		<td valign="TOP">
 			<a href="[% gSkin.rootdir %]/~[% thisuser.nickname | strip_paramattr %]/">[% thisuser.nickname | strip_literal %]</a> &nbsp;
 			[% IF thisuser.fakeemail %]
-				([% thisuser.uid %]) email: <a href="mailto:[% thisuser.fakeemail | strip_paramattr %]">[% thisuser.fakeemail | strip_literal %]</a> <br>
+				([% thisuser.uid %]) email: <a href="mailto:[% thisuser.fakeemail | strip_paramattrnonhttp %]">[% thisuser.fakeemail | strip_literal %]</a> <br>
 			[% ELSE %]
 				([% thisuser.uid %])<br>
 			[% END %]

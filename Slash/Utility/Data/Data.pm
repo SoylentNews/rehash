@@ -115,6 +115,7 @@ BEGIN {
 	strip_notags
 	strip_plaintext
 	strip_paramattr
+	strip_paramattrnonhttp
 	strip_urlattr
 	submitDomainAllowed
 	timeCalc
@@ -126,7 +127,6 @@ BEGIN {
 	xmlencode_plain
 	vislenify
 );
-#	strip_paramattrmailto
 
 
 # really, these should not be used externally, but we leave them
@@ -1281,26 +1281,25 @@ sub strip_plaintext	{ stripByMode($_[0], PLAINTEXT,	@_[1 .. $#_]) }
 
 =head2 strip_paramattr(STRING [, NO_WHITESPACE_FIX])
 
-=head2 strip_paramattrmailto(STRING [, NO_WHITESPACE_FIX])
+=head2 strip_paramattrnonhttp(STRING [, NO_WHITESPACE_FIX])
 
 =head2 strip_urlattr(STRING [, NO_WHITESPACE_FIX])
 
 Wrappers for strip_attribute(fixparam($param), $no_whitespace_fix) and
-strip_attribute(fudgeurl($url), $no_whitespace_fix). The ...mailto
-version is for mailto URIs, in which the HTTP equivalent of the parameter
-attribute is the header: unlike the http scheme, the mailto scheme
-disallows "+" for " ".
+strip_attribute(fudgeurl($url), $no_whitespace_fix).
+
+Note that http is a bit of a special case:  its parameters can be escaped
+with "+" for " ", instead of just "%20".  So strip_paramattr should
+probably be renamed strip_paramattrhttp to best indicate that it is a
+special case.  But because the special case is also the most common case,
+with over 100 occurrences in the code, we leave it named strip_paramattr,
+and create a new function strip_paramattrnonhttp which must be used for
+URI schemes which do not behave in that way.
 
 =cut
 
 sub strip_paramattr		{ strip_attribute(fixparam($_[0]), $_[1]) }
-# XXX this is going the wrong way.  mailto is not special, http is!  and not
-# only that, only SOME http is.  if we come up with new functions just so
-# we can have "pretty" HTTP URLs, then obviously we don't want to rewrite
-# a ton of calls, so maybe a new *general* function is called for, but
-# certainly not specific to mailto.  maybe fixparam_full and strip_paramattr_full,
-# or something.  i dunno.  but not this. -- pudge
-#sub strip_paramattrmailto	{ my $h = strip_attribute(fixparam($_[0]), $_[1]); $h =~ s/\+/%20/g; $h }
+sub strip_paramattrnonhttp	{ my $h = strip_attribute(fixparam($_[0]), $_[1]); $h =~ s/\+/%20/g; $h }
 sub strip_urlattr		{ strip_attribute(fudgeurl($_[0]), $_[1]) }
 
 
@@ -2019,10 +2018,10 @@ Prepares data to be a parameter in a URL.  Such as:
 =item DATA
 
 The data to be escaped.  B<NOTE>: space characters are encoded as C<+>
-instead of C<%20>.  If you must have C<%20>, perform an C<s/\+/%20/g> on
-the result.  (Oops, reverted, because this only works reliably with
-most Slash HTTP URLs, not mailto: URLs, and maybe not all other HTTP
-URLs.)
+instead of C<%20>.  If you must have C<%20>, perform an C<s/\+/%20/g>
+on the result.  Note that this is designed for HTTP URIs, the most
+common scheme;  for other schemes, refer to the comments documenting
+strip_paramattr and strip_paramattrnonhttp.
 
 =back
 
@@ -2036,10 +2035,8 @@ The escaped data.
 
 sub fixparam {
 	my($url) = @_;
-	$url =~ s/([^$URI::unreserved])/$URI::Escape::escapes{$1}/og;
-## doesn't work properly for all URLs
-#	$url =~ s/([^$URI::unreserved ])/$URI::Escape::escapes{$1}/og;
-#	$url =~ s/ /+/g;
+	$url =~ s/([^$URI::unreserved ])/$URI::Escape::escapes{$1}/og;
+	$url =~ s/ /+/g;
 	return $url;
 }
 
