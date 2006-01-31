@@ -815,7 +815,7 @@ sub showComments {
 			# pollquestions.
 			my $discussion = $reader->getDiscussion($comment->{sid});
 
-			if ($kinds->{ $discussion->{dkid} } eq 'journal') {
+			if ($kinds->{ $discussion->{dkid} } =~ /^journal(?:-story)?$/) {
 				$comment->{type} = 'journal';
 			} elsif ($kinds->{ $discussion->{dkid} } eq 'poll') {
 				$comment->{type} = 'poll';
@@ -1143,7 +1143,7 @@ sub showInfo {
 			# A comment with no accompanying discussion;
 			# basically we pretend it doesn't exist.
 			next;
-		} elsif ($kinds->{ $discussion->{dkid} } eq 'journal') {
+		} elsif ($kinds->{ $discussion->{dkid} } =~ /^journal(?:-story)?$/) {
 			$type = 'journal';
 		} elsif ($kinds->{ $discussion->{dkid} } eq 'poll') {
 			$type = 'poll';

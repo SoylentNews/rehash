@@ -383,7 +383,7 @@ sub createComment {
 
 	my $searchtoo = getObject('Slash::SearchToo');
 	if ($searchtoo) {
-		$searchtoo->storeRecords(comments => $cid, { add => 1 });
+#		$searchtoo->storeRecords(comments => $cid, { add => 1 });
 	}
 
 	return $cid;
@@ -3375,7 +3375,6 @@ sub checkDiscussionIsInFuture {
 }
 
 ########################################################
-# Ugly yes, needed at the moment, yes
 # $id is a discussion id. -Brian
 sub checkDiscussionPostable {
 	my($self, $id) = @_;
@@ -9016,15 +9015,16 @@ sub createStory {
 			# updating now for journals tips off users that this will
 			# be a story soon, esp. ts, url, title, kind ... i don't
 			# care personally, does it matter?  if so we can task some
-			# of these changes -- pudge
+			# of these changes, if we need to make them -- pudge
 
-			# XXX how does this show up in ~user ?
+			# XXX update later in task
+			delete $discussion->{ts};
 
-			# XXX url links back to story, or journal?
-			# delete $discussion->{url};
-
-			# XXX what about uid?  does it matter?
-			# delete $discussion->{uid};
+			# XXX the discussion refers primarily to journal, not story?
+			# if not, we can update these in a task, too
+			delete $discussion->{uid};
+			delete $discussion->{url};
+			delete $discussion->{title};
 
 			$id = $story->{discussion};
 			$discussion->{kind} = 'journal-story';
