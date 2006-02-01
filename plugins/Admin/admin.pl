@@ -1235,7 +1235,11 @@ sub editStory {
 		$storyref->{dept} =~ s/[-\s]+/-/g;
 		$storyref->{dept} =~ s/^-//;
 		$storyref->{dept} =~ s/-$//;
+		my ($related_sids_hr, $related_urls_hr) = extractRelatedStoriesFromForm($form);
+		
 
+		$storyref->{related_sids_hr} = $related_sids_hr;
+		$storyref->{related_urls_hr} = $related_urls_hr;
 		my($chosen_hr) = extractChosenFromForm($form);
 		$storyref->{topics_chosen} = $chosen_hr;
 		my $rendered_hr = $slashdb->renderTopics($chosen_hr);
@@ -1283,7 +1287,22 @@ sub editStory {
 		$storyref = $slashdb->getStory($stoid, '', 1);
 		my $tmp = $user->{currentSkin} || $gSkin->{textname};
 		$user->{currentSkin} = $storyref->{skin}{name};
+		
+		my $related = $slashdb->getRelatedStoriesForStoid($storyref->{stoid});
+		my (@related_sids);
+		
+		foreach my $related (@$related) {
+			if ($related->{rel_sid}) {
+				push @related_sids, $related->{rel_sid} if $related->{rel_sid};
+			} elsif ($related->{url}) {
+				$storyref->{related_urls_hr}{$related->{url}} = $related->{title};
+			}
+		}
 
+		my %related_sids = map { $_ => $slashdb->getStory($_) } @related_sids; 
+		$storyref->{related_sids_hr} = \%related_sids;
+
+		
 		$sid = $storyref->{sid};
 		$storyref->{is_dirty} = 1;
 		$storyref->{commentstatus} = ($slashdb->getDiscussion($storyref->{discussion}, 'commentstatus') || 'disabled'); # If there is no discussion attached then just disable -Brian
@@ -1406,6 +1425,9 @@ sub editStory {
 	$autonode_check		= $constants->{markup_checked_attribute} if $form->{autonode};
 	$fastforward_check	= $constants->{markup_checked_attribute} if $form->{fastforward};
 
+	my $last_admin_text = $slashdb->getLastSessionText($user->{uid});
+	my $lasttime = $slashdb->getTime();
+	$slashdb->setUser($user->{uid}, { adminlaststorychange => $lasttime }) if $last_admin_text ne $storyref->{title};
 	$slashdb->setSession($user->{uid}, {
 		lasttitle	=> $storyref->{title},
 		last_sid	=> $sid,
@@ -1468,6 +1490,11 @@ sub editStory {
 		$user_signoff = $slashdb->sqlCount("signoff", "uid=$user->{uid} AND stoid=$stoid");
 	}
 
+	my $add_related_text;
+	foreach (keys %{$storyref->{related_urls_hr}}) {
+		$add_related_text .= "$storyref->{related_urls_hr}{$_} $_\n";
+	}
+
 	slashDisplay('editStory', {
 		stoid			=> $stoid,
 		storyref 		=> $storyref,
@@ -1493,8 +1520,42 @@ sub editStory {
 		shown_in_desc		=> $shown_in_desc,
 		signofftext		=> $signofftext,
 		user_signoff		=> $user_signoff,
+		add_related_text	=> $add_related_text,
 	});
 }
+sub extractRelatedStoriesFromForm {
+	my ($form) = @_;
+	my $slashdb = getCurrentDB();
+
+	my %related_urls;
+
+	my %related_urls_hr;
+	my $related;
+	if (ref($form->{_multi}{related_story}) eq 'ARRAY') {
+			
+		$related = $form->{_multi}{related_story};
+	} elsif ($form->{related_story}) {
+		$related = [ $form->{related_story} ];
+	}
+	if ($form->{add_related}) {
+		my @add_related = split('\n', $form->{add_related});
+		foreach (@add_related) {
+			s/^\s+|\s+$//g;
+			next if !$_;
+			if (/^\d\d\/\d\d\/\d\d\/\d+$/) {
+				push @$related, $_;
+			} else {
+				my ($title, $url) = $_ =~ /^(.*)\s+(\S+)$/;
+				$related_urls{$url} = $title;
+			}
+		}
+		
+	}
+	# should probably filter and check that they're actually sids, etc...
+	my %related_sids = map { $_ => $slashdb->getStory($_) } grep { $_ } @$related;
+	return (\%related_sids, \%related_urls);
+}
+
 
 ##################################################################
 sub extractChosenFromForm {
@@ -1763,6 +1824,8 @@ sub listStories {
 	}
 
 	my $i = $first_story || 0;
+
+	my $stoid_list = [];
 	for my $story (@$storylist) {
 		my $time_plain   = $story->{'time'};
 		$story->{'time'} = timeCalc($time_plain, '%H:%M', 0);
@@ -1772,16 +1835,27 @@ sub listStories {
 		$story->{x}	 = ++$i;
 		$story->{title}  = chopEntity($story->{title}, 50);
 		$story->{tbtitle} = fixparam($story->{title});
+		push @$stoid_list, $story->{stoid};
 	}
+
+	use Data::Dumper;
+
+	my $usersignoffs 	= $slashdb->getUserSignoffHashForStoids($user->{uid}, $stoid_list);
+	my $storysignoffcnt	= $slashdb->getSignoffCountHashForStoids($stoid_list);
+
+	my $needed_signoffs = $slashdb->getActiveAdminCount();
 
 	my %unique_tds = map { ($_->{td}, 1) } @$storylist;
 	my $ndays_represented = scalar(keys %unique_tds);
 
 	slashDisplay('listStories', {
-		storylistref	=> $storylist,
-		'x'		=> $i + $first_story,
-		left		=> $count - ($i + $first_story),
+		storylistref	  => $storylist,
+		'x'		  => $i + $first_story,
+		left		  => $count - ($i + $first_story),
 		ndays_represented => $ndays_represented,
+		user_signoffs 	  => $usersignoffs,
+		story_signoffs	  => $storysignoffcnt,
+		needed_signoffs	  => $needed_signoffs,
 	});
 }
 
@@ -1873,6 +1947,8 @@ sub updateStory {
 		unless $form->{aid};
 
 	my($chosen_hr) = extractChosenFromForm($form);
+	my ($related_sids_hr, $related_urls_hr) = extractRelatedStoriesFromForm($form);
+	my $related_sids = join ',', keys %$related_sids_hr;
 	my($topic) = $slashdb->getTopiclistFromChosen($chosen_hr);
 #use Data::Dumper; print STDERR "admin.pl updateStory chosen_hr: " . Dumper($chosen_hr) . "admin.pl updateStory form: " . Dumper($form);
 
@@ -1918,6 +1994,7 @@ sub updateStory {
 		bodytext	=> $form->{bodytext},
 		introtext	=> $form->{introtext},
 		relatedtext	=> $form->{relatedtext},
+		related_sids	=> $related_sids,
 		-rendered	=> 'NULL', # freshenup.pl will write this
 		is_dirty	=> 1
 	};
@@ -1946,8 +2023,9 @@ sub updateStory {
 		editStory(@_);
 	} else {
 		titlebar('100%', getTitle('updateStory-title'));
+		$slashdb->setRelatedStoriesForStory($form->{sid}, $related_sids_hr, $related_urls_hr);
 		my $st = $slashdb->getStory($form->{sid});
-		$slashdb->createSignoff($st->{stoid}, $user->{uid});
+		$slashdb->createSignoff($st->{stoid}, $user->{uid}, "updated");
 		# make sure you pass it the goods
 		listStories(@_);
 	}
@@ -2194,6 +2272,7 @@ sub saveStory {
 
 	my($chosen_hr) = extractChosenFromForm($form);
 	my($tids) = $slashdb->getTopiclistFromChosen($chosen_hr);
+	my ($related_sids_hr, $related_urls_hr) = extractRelatedStoriesFromForm($form);
 
 	for my $field (qw( introtext bodytext )) {
 		local $Slash::Utility::Data::approveTag::admin = 1;
@@ -2254,10 +2333,11 @@ sub saveStory {
 	my $sid = $slashdb->createStory($data);
 
 	if ($sid) {
+		$slashdb->setRelatedStoriesForStory($sid, $related_sids_hr, $related_urls_hr);
 		slashHook('admin_save_story_success', { story => $data });
 		titlebar('100%', getTitle('saveStory-title'));
 		my $st = $slashdb->getStory($data->{sid});
-		$slashdb->createSignoff($st->{stoid}, $user->{uid});
+		$slashdb->createSignoff($st->{stoid}, $user->{uid}, "saved");
 
 		listStories(@_);
 	} else {
