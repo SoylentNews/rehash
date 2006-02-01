@@ -88,8 +88,15 @@ END %]
 <a href="[% storylinks.0 | strip_attribute %]"[% IF storylinks.2 %] title="[% storylinks.2 | strip_attribute %]"[% END %]>[% storylinks.1 | strip_html %]</a>
 	[%- END;
 END %]
-</div>
+[% relatedtext = Slash.displayRelatedStories(story.stoid) %]
 
+[% IF relatedtext %]
+	<p></p>
+	[% PROCESS titlebar title="Related Stories" %]
+	[% relatedtext %]
+[% END %]
+
+</div>
 __seclev__
 1000
 __version__
