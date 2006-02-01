@@ -1,11 +1,11 @@
 __section__
 default
 __description__
-You should describe stuff here.
-__title__
 stoid = stoid of story signoff is for
 storylink = is this to be included in a listing of storylinks on index.pl (if so we'll put it inside a list item)
 checked = should this box be checked?
+__title__
+Signoff checkbox
 __page__
 misc
 __lang__
