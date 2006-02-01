@@ -736,6 +736,18 @@ CREATE TABLE querylog (
 	KEY type (type)
 ) TYPE=InnoDB;
 
+DROP TABLE related_stories IF exists;
+CREATE TABLE related_stories (
+	id mediumint(8) unsigned NOT NULL auto_increment,
+	stoid mediumint(8) unsigned default '0',
+	rel_stoid mediumint(8) unsigned default '0',
+	rel_sid varchar(16) NOT NULL default '',
+	title varchar(255) default '',
+	url varchar(255) default '',
+	PRIMARY KEY  (`id`),
+	KEY `stoid` (`stoid`)
+) TYPE=InnoDB;
+
 #
 # Table structure for table 'rss_raw'
 #
@@ -811,7 +823,8 @@ CREATE TABLE signoff (
         soid 	MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	stoid		MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
   	uid 		MEDIUMINT UNSIGNED NOT NULL,
-	signoff_time	TIMESTAMP,		
+	signoff_time	TIMESTAMP,
+	signoff_type	VARCHAR(16) DEFAULT '' NOT NULL,
 	PRIMARY KEY(soid),
 	INDEX (stoid)
 ) TYPE=InnoDB;

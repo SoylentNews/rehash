@@ -3637,3 +3637,18 @@ UPDATE vars SET value = 'T_2_5_0_97' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
 
+ALTER TABLE signoff ADD COLUMN signoff_type VARCHAR(16)  DEFAULT '' NOT NULL;
+INSERT INTO vars (name, value, description) VALUES ("signoff_notify", "0", "Add remark for bot on each signoff / update / save ?");
+INSERT INTO vars (name, value, description) VALUES ("signoff_use", "0", "Use signoff functionalilty?");
+
+DROP TABLE related_stories IF exists;
+CREATE TABLE related_stories (
+	id mediumint(8) unsigned NOT NULL auto_increment,
+	stoid mediumint(8) unsigned default '0',
+	rel_stoid mediumint(8) unsigned default '0',
+	rel_sid varchar(16) NOT NULL default '',
+	title varchar(255) default '',
+	url varchar(255) default '',
+	PRIMARY KEY  (`id`),
+	KEY `stoid` (`stoid`)
+) TYPE=InnoDB;
