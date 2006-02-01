@@ -217,6 +217,10 @@ sub previewForm {
 	$email_known = "mailto" if $sub->{email} eq $user->{fakeemail};
 	$sub->{email} = processSub($sub->{email}, $email_known);
 
+	my $last_admin_text = $slashdb->getLastSessionText($user->{uid});
+	my $lasttime = $slashdb->getTime();
+	$slashdb->setUser($user->{uid}, { adminlaststorychange => $lasttime }) if $last_admin_text ne $sub->{subj};
+
 	$slashdb->setSession(getCurrentUser('uid'), {
 		lasttitle	=> $sub->{subj},
 		last_subid	=> $form->{subid},
