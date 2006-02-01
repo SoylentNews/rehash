@@ -13236,17 +13236,23 @@ sub setRelatedStoriesForStory {
 				rel_stoid => $rel_stoid
 		});
 
+		# XXX - hold off on this for now - we don't want to link to
+		# stories before they go live.  checkStoryViewable should
+		# prevent them from showing up, but want to doublecheck that
+		# and a few other things related to reciprocal deleting of
+		# removed links
+		#       
 		# Insert reciprocal link if it doesn't already exist
-		my $rel_stoid_q = $self->sqlQuote($rel_stoid);
-		my $sid_q = $self->sqlQuote($story->{sid});
-		if (!$self->sqlCount("related_stories", "stoid = $rel_stoid_q AND rel_sid = $sid_q")) {
-			$self->sqlInsert(
-				"related_stories", {
-					stoid   => $rel_stoid,
-					rel_sid => $story->{sid},
-					rel_stoid => $stoid,
-			});
-		}
+		# my $rel_stoid_q = $self->sqlQuote($rel_stoid);
+		# my $sid_q = $self->sqlQuote($story->{sid});
+		#if (!$self->sqlCount("related_stories", "stoid = $rel_stoid_q AND rel_sid = $sid_q")) {
+		#	$self->sqlInsert(
+		#		"related_stories", {
+		#			stoid   => $rel_stoid,
+		#			rel_sid => $story->{sid},
+		#			rel_stoid => $stoid,
+		#	});
+		#}
 	}
 	
 	foreach my $rel_url (keys %$rel_url_hr) {
