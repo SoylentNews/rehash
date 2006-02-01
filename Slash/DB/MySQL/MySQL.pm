@@ -1964,6 +1964,12 @@ sub getSessionInstance {
 	});
 }
 
+sub getLastSessionText {
+	my ($self, $uid) = @_;
+	my $uid_q = $self->sqlQuote($uid);
+	return $self->sqlSelect("lasttitle", "sessions", "uid=$uid_q", "ORDER BY lasttime DESC LIMIT 1");
+}
+
 ########################################################
 sub setContentFilter {
 	my($self, $formname) = @_;
@@ -9181,9 +9187,57 @@ sub updateStory {
 }
 
 ########################################################
+
+sub hasUserSignedStory {
+	my ($self, $stoid, $uid) = @_;
+	my $stoid_q = $self->sqlQuote($stoid);
+	my $uid_q   = $self->sqlQuote($uid);
+	return $self->sqlCount("signoff", "stoid=$stoid_q AND uid=$uid_q");
+}
+
 sub createSignoff {
-	my($self, $stoid, $uid) = @_;
-	$self->sqlInsert("signoff", { stoid => $stoid, uid => $uid });
+	my($self, $stoid, $uid, $signoff_type) = @_;
+	my $constants = getCurrentStatic();
+	my $send_message = $constants->{signoff_notify};
+
+	$signoff_type ||= '';
+	$self->sqlInsert("signoff", { stoid => $stoid, uid => $uid, signoff_type => $signoff_type });
+
+	if ($send_message) {
+		my $s_user = $self->getUser($uid);
+		my $story = $self->getStory($stoid);
+		my $message = "$s_user->{nickname} $signoff_type $story->{title} $constants->{absolutedir_secure}/admin.pl?op=edit&sid=$story->{sid}";
+		$self->createRemark($uid, "", $message, "system");
+	}
+}
+
+sub getUserSignoffHashForStoids {
+	my ($self, $uid, $stoids) = @_;
+	return {} if !@$stoids;
+	my $stoid_list = join ',', @$stoids;
+	$self->sqlSelectAllHashref(
+		"stoid",
+		"stoid, COUNT(*) AS cnt",
+		"signoff",
+		"stoid in ($stoid_list) AND uid = $uid",
+		"GROUP BY stoid",
+	);
+}
+
+sub getSignoffCountHashForStoids {
+	my ($self, $stoids) = @_;
+	return {} if !@$stoids;	
+	my $stoid_list = join ',', @$stoids;
+
+	my $signoff_hash = $self->sqlSelectAllHashref(
+		"stoid", 
+		"stoid, COUNT(DISTINCT uid) AS cnt",
+		"signoff",
+		"stoid in ($stoid_list)",
+		"GROUP BY stoid"
+	);
+	
+	return $signoff_hash;
 }
 
 sub getSignoffsForStory {
@@ -9191,7 +9245,7 @@ sub getSignoffsForStory {
 	return [] if !$stoid;
 	my $stoid_q = $self->sqlQuote($stoid);
 	return $self->sqlSelectAllHashrefArray(
-		"signoff.*, users.nickname",
+		"signoff.*, users.nickname, signoff_type",
 		"signoff, users",
 		"signoff.stoid=$stoid_q AND users.uid=signoff.uid"
 	);
@@ -13144,6 +13198,65 @@ sub getGlobjTypes {
 	$self->{$table_cache} = $hr;
 	$self->{$table_cache_time} = time;
 	return $hr;
+}
+
+sub getActiveAdminCount {
+	my ($self) = @_;
+	my $admin_timeout = getCurrentStatic('admin_timeout');
+	return  $self->sqlSelect("count(distinct sessions.uid)",
+			"sessions,users_param",
+			"sessions.uid=users_param.uid and name='adminlaststorychange' and date_sub(NOW(), INTERVAL $admin_timeout MINUTE) <= value"
+	);
+}
+
+sub getRelatedStoriesForStoid {
+	my ($self, $stoid) = @_;
+	my $stoid_q = $self->sqlQuote($stoid);
+	return $self->sqlSelectAllHashrefArray(
+		"*",
+		"related_stories",
+		"stoid=$stoid_q",
+		"ORDER BY rel_sid desc"
+	);
+}
+
+sub setRelatedStoriesForStory {
+	my ($self, $sid_or_stoid, $rel_sid_hr, $rel_url_hr) = @_;
+	my $stoid = $self->getStoidFromSidOrStoid($sid_or_stoid);
+	my $stoid_q = $self->sqlQuote($stoid);
+	my $story = $self->getStory($stoid);	
+	$self->sqlDelete("related_stories", "stoid = $stoid_q");
+
+	foreach my $rel (keys %$rel_sid_hr) {
+		my $rel_stoid = $self->getStoidFromSidOrStoid($rel);
+		$self->sqlInsert(
+			"related_stories", {
+				stoid   => $stoid,
+				rel_sid => $rel,
+				rel_stoid => $rel_stoid
+		});
+
+		# Insert reciprocal link if it doesn't already exist
+		my $rel_stoid_q = $self->sqlQuote($rel_stoid);
+		my $sid_q = $self->sqlQuote($story->{sid});
+		if (!$self->sqlCount("related_stories", "stoid = $rel_stoid_q AND rel_sid = $sid_q")) {
+			$self->sqlInsert(
+				"related_stories", {
+					stoid   => $rel_stoid,
+					rel_sid => $story->{sid},
+					rel_stoid => $stoid,
+			});
+		}
+	}
+	
+	foreach my $rel_url (keys %$rel_url_hr) {
+		$self->sqlInsert(
+			"related_stories", {
+				stoid   => $stoid,
+				url     => $rel_url,
+				title	=> $rel_url_hr->{$rel_url},
+		})
+	}
 }
 
 ########################################################
