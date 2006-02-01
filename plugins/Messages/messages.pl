@@ -308,7 +308,7 @@ sub list_messages_rss {
 			},
 			title		=> $title,
 			description	=> $message->{description} || '',
-			'link'		=> root2abs() . "messages.pl?op=display&id=$message->{id}",
+			'link'		=> root2abs() . "/messages.pl?op=display&id=$message->{id}",
 		};
 	}
 
