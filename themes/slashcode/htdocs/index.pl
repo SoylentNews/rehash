@@ -686,7 +686,9 @@ sub displayStories {
 		$tmpreturn .= getData("briefarticles_end")
 			if $dispmodelast eq "brief"
 				&& !( $other->{dispmode} && $other->{dispmode} eq "brief" );
-
+		
+		$story->{commentcount} = $threshComments[0] if $story->{commentcount};
+		
 		$other->{thresh_commentcount} = $user->{threshold} > -1
 			? $threshComments[$user->{threshold} + 1]
 			: $story->{commentcount};
@@ -734,16 +736,14 @@ sub displayStories {
 				my @commentcount_link;
 				my $thresh = $threshComments[$user->{threshold} + 1];
 
-				if ($story->{commentcount} = $threshComments[0]) {
-					if ($user->{threshold} > -1 && $story->{commentcount} ne $thresh) {
-						$commentcount_link[0] = linkStory({
-							sid		=> $story->{sid},
-							tid		=> $story->{tid},
-							threshold	=> $user->{threshold},
-							'link'		=> $thresh,
-							skin		=> $story->{primaryskid},
-						}, '', $ls_other);
-					}
+				if ($user->{threshold} > -1 && $story->{commentcount} ne $thresh) {
+					$commentcount_link[0] = linkStory({
+						sid		=> $story->{sid},
+						tid		=> $story->{tid},
+						threshold	=> $user->{threshold},
+						'link'		=> $thresh,
+						skin		=> $story->{primaryskid},
+					}, '', $ls_other);
 				}
 
 				$commentcount_link[1] = linkStory({
