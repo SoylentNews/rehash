@@ -276,8 +276,8 @@ pre, code { font-size: 80%; }
 
 .briefarticle { padding: 2px; background: #ccc; font-size: 80%}
 .briefarticle a { color: #000 }
-.briefarticles .section { color: #333; }
-.briefarticles .storytitle { font-weight: bold; }
+.briefarticle .section { color: #333; }
+.briefarticle .storytitle { font-weight: bold; }
 .briefarticle .introhide { display : none }
 .briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
 .future .briefarticle { background: #c33; }
