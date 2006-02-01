@@ -1576,8 +1576,10 @@ sub displayStory {
 	return $return;
 }
 
+#========================================================================
+
 sub displayRelatedStories {
-	my ($stoid) = @_;
+	my($stoid) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();

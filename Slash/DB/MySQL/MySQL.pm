@@ -1964,8 +1964,9 @@ sub getSessionInstance {
 	});
 }
 
+########################################################
 sub getLastSessionText {
-	my ($self, $uid) = @_;
+	my($self, $uid) = @_;
 	my $uid_q = $self->sqlQuote($uid);
 	return $self->sqlSelect("lasttitle", "sessions", "uid=$uid_q", "ORDER BY lasttime DESC LIMIT 1");
 }
@@ -9189,7 +9190,7 @@ sub updateStory {
 ########################################################
 
 sub hasUserSignedStory {
-	my ($self, $stoid, $uid) = @_;
+	my($self, $stoid, $uid) = @_;
 	my $stoid_q = $self->sqlQuote($stoid);
 	my $uid_q   = $self->sqlQuote($uid);
 	return $self->sqlCount("signoff", "stoid=$stoid_q AND uid=$uid_q");
@@ -9212,7 +9213,7 @@ sub createSignoff {
 }
 
 sub getUserSignoffHashForStoids {
-	my ($self, $uid, $stoids) = @_;
+	my($self, $uid, $stoids) = @_;
 	return {} if !@$stoids;
 	my $stoid_list = join ',', @$stoids;
 	$self->sqlSelectAllHashref(
@@ -9225,7 +9226,7 @@ sub getUserSignoffHashForStoids {
 }
 
 sub getSignoffCountHashForStoids {
-	my ($self, $stoids) = @_;
+	my($self, $stoids) = @_;
 	return {} if !@$stoids;	
 	my $stoid_list = join ',', @$stoids;
 
@@ -13201,7 +13202,7 @@ sub getGlobjTypes {
 }
 
 sub getActiveAdminCount {
-	my ($self) = @_;
+	my($self) = @_;
 	my $admin_timeout = getCurrentStatic('admin_timeout');
 	return  $self->sqlSelect("count(distinct sessions.uid)",
 			"sessions,users_param",
@@ -13210,7 +13211,7 @@ sub getActiveAdminCount {
 }
 
 sub getRelatedStoriesForStoid {
-	my ($self, $stoid) = @_;
+	my($self, $stoid) = @_;
 	my $stoid_q = $self->sqlQuote($stoid);
 	return $self->sqlSelectAllHashrefArray(
 		"*",
@@ -13221,7 +13222,7 @@ sub getRelatedStoriesForStoid {
 }
 
 sub setRelatedStoriesForStory {
-	my ($self, $sid_or_stoid, $rel_sid_hr, $rel_url_hr) = @_;
+	my($self, $sid_or_stoid, $rel_sid_hr, $rel_url_hr) = @_;
 	my $stoid = $self->getStoidFromSidOrStoid($sid_or_stoid);
 	my $stoid_q = $self->sqlQuote($stoid);
 	my $story = $self->getStory($stoid);	
