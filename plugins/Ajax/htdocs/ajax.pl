@@ -233,7 +233,7 @@ sub storySignOff {
 		return;
 	}
 
-	$slashdb->createSignoff($stoid, $uid);
+	$slashdb->createSignoff($stoid, $uid, "signed");
 	print "Signed";
 }
 
