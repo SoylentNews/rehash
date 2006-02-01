@@ -55,34 +55,91 @@ __template__
 				</legend>
 				[% storycontent %]
 			</fieldset>
-			[% IF similar_stories.size > 0 %]
-				<fieldset>
-					<legend>
-						Similar Stories
-					</legend>
-					<div class="note">
-						Check words below before submitting or previewing to mark words as common and not for use in determining similar stories.
-					</div>
-					<!-- need to set this up a bit better -->
-					[% FOREACH story = similar_stories %]
+			<fieldset>
+				<legend>
+					Similar Stories
+				</legend>
+				<div class="note">
+					Check words below before submitting or previewing to mark words as common and not for use in determining similar stories.
+				</div>
+				<!-- need to set this up a bit better -->
+				<table border="0" cellpadding="3" cellspacing="0">
+				<tr>
+					<td colspan="6"><b>Similar & Related Stories</b></td>
+				</tr>
+				<tr class="data_head">
+					<td>Status</td>
+					<td>Score</td>
+					<td>Title</td>
+					<td>Date</td>
+					<td>Related</td>
+					<td>Ignore Words</td> 
+				</tr>
+				[% seen_related %]
+			
+				[% FOREACH story = similar_stories %]
+				<tr class="data_hl1">
+					<td >
 						[% IF story.displaystatus == 0;
 							"&nbsp;";
 						ELSIF story.displaystatus == 1;
 							"<i>sect</i>";
 						ELSE;
 							"<i>ND</i>";
-						END; %]
-						[% story.weight %]
-						<a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</a>
-						<em>[% Slash.timeCalc(story.time) %]</em>
+						END; %]</td>
+					<td>[% story.weight %]</td>
+					<td><a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</a></td>
+					<td>[% Slash.timeCalc(story.time) %]</td>
+					<td><input type="checkbox" name="related_story" value="[% story.sid | strip_attribute %]" [% IF storyref.related_sids_hr.${story.sid}; constants.markup_checked_attribute; END %]></td>
+					<td>
 						[% FOREACH word = story.words %]
 							[%- word -%][% UNLESS words_seen.$word %]<input type="checkbox" name="set_common_word" value="[% word %]">[%- END -%]
 							[% words_seen.$word = 1; %]
 						[% END %]
-						<br>
-					[% END %]
-				</fieldset>
-			[% END %]
+					</td>
+					[% seen_related.${story.sid} = 1 %]
+				</tr>
+				[% END %]
+				
+
+				
+		[% FOREACH rel_sid = storyref.related_sids_hr.keys %]
+			[% IF seen_related.$rel_sid; NEXT; END; %]
+			[% story = storyref.related_sids_hr.$rel_sid %]
+			<tr class="data_hl1">
+			<td>
+			<td>[% story.weight %]</td>
+			<td><a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
+			[% story.title %]</a></td>
+			<td>[% Slash.timeCalc(story.time) %]</td>
+			<td><input type="checkbox" name="related_story" value="[% story.sid | strip_attribute %]" [% IF storyref.related_sids_hr.${story.sid}; constants.markup_checked_attribute; END %]></td>
+			<td>
+				[% FOREACH word = story.words %]
+					[%- word -%][% UNLESS words_seen.$word %]<INPUT TYPE="checkbox" name="set_common_word" value="[% word %]">[%- END -%]
+					[% words_seen.$word = 1; %]
+				[% END %]
+			</td>
+			[% seen_related.${story.sid} = 1 %]
+			</tr>
+		
+		[% END %]
+		[% FOREACH rel_url = storyref.related_urls_hr.keys %]
+		<tr class="data_hl1">
+			<td colspan="2"></td>
+			<td>Offsite: <a href="[% rel_url %]">[% storyref.related_urls_hr.$rel_url %]</a></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		[% END %]
+	<tr class="data_hl1"><td colspan="2"></td><td colspan="2">Include Related Sid Or Title + URL (one per line)<br>
+	<textarea rows="2" cols="30" wrap="off" name="add_related">[% add_related_text | strip_literal %]</textarea>
+	
+	</td><td colspan="2" align="right">preview/update to save</td></tr>
+</table>
+
+		</fieldset>
+
 			<div class="adminstoryform">
 			<fieldset id="st-display">
 				<legend>
