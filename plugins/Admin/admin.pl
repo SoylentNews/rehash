@@ -1235,9 +1235,8 @@ sub editStory {
 		$storyref->{dept} =~ s/[-\s]+/-/g;
 		$storyref->{dept} =~ s/^-//;
 		$storyref->{dept} =~ s/-$//;
-		my ($related_sids_hr, $related_urls_hr) = extractRelatedStoriesFromForm($form);
-		
 
+		my($related_sids_hr, $related_urls_hr) = extractRelatedStoriesFromForm($form);
 		$storyref->{related_sids_hr} = $related_sids_hr;
 		$storyref->{related_urls_hr} = $related_urls_hr;
 		my($chosen_hr) = extractChosenFromForm($form);
@@ -1289,7 +1288,7 @@ sub editStory {
 		$user->{currentSkin} = $storyref->{skin}{name};
 		
 		my $related = $slashdb->getRelatedStoriesForStoid($storyref->{stoid});
-		my (@related_sids);
+		my(@related_sids);
 		
 		foreach my $related (@$related) {
 			if ($related->{rel_sid}) {
@@ -1302,7 +1301,6 @@ sub editStory {
 		my %related_sids = map { $_ => $slashdb->getStory($_) } @related_sids; 
 		$storyref->{related_sids_hr} = \%related_sids;
 
-		
 		$sid = $storyref->{sid};
 		$storyref->{is_dirty} = 1;
 		$storyref->{commentstatus} = ($slashdb->getDiscussion($storyref->{discussion}, 'commentstatus') || 'disabled'); # If there is no discussion attached then just disable -Brian
@@ -1523,20 +1521,23 @@ sub editStory {
 		add_related_text	=> $add_related_text,
 	});
 }
+
+
+##################################################################
 sub extractRelatedStoriesFromForm {
-	my ($form) = @_;
+	my($form) = @_;
 	my $slashdb = getCurrentDB();
 
 	my %related_urls;
 
 	my %related_urls_hr;
 	my $related;
-	if (ref($form->{_multi}{related_story}) eq 'ARRAY') {
-			
+	if (ref($form->{_multi}{related_story}) eq 'ARRAY') {		
 		$related = $form->{_multi}{related_story};
 	} elsif ($form->{related_story}) {
 		$related = [ $form->{related_story} ];
 	}
+
 	if ($form->{add_related}) {
 		my @add_related = split('\n', $form->{add_related});
 		foreach (@add_related) {
@@ -1545,15 +1546,15 @@ sub extractRelatedStoriesFromForm {
 			if (/^\d\d\/\d\d\/\d\d\/\d+$/) {
 				push @$related, $_;
 			} else {
-				my ($title, $url) = $_ =~ /^(.*)\s+(\S+)$/;
+				my($title, $url) = $_ =~ /^(.*)\s+(\S+)$/;
 				$related_urls{$url} = $title;
 			}
 		}
-		
 	}
+
 	# should probably filter and check that they're actually sids, etc...
 	my %related_sids = map { $_ => $slashdb->getStory($_) } grep { $_ } @$related;
-	return (\%related_sids, \%related_urls);
+	return(\%related_sids, \%related_urls);
 }
 
 
@@ -1838,12 +1839,10 @@ sub listStories {
 		push @$stoid_list, $story->{stoid};
 	}
 
-	use Data::Dumper;
-
 	my $usersignoffs 	= $slashdb->getUserSignoffHashForStoids($user->{uid}, $stoid_list);
 	my $storysignoffcnt	= $slashdb->getSignoffCountHashForStoids($stoid_list);
 
-	my $needed_signoffs = $slashdb->getActiveAdminCount();
+	my $needed_signoffs = $slashdb->getActiveAdminCount;
 
 	my %unique_tds = map { ($_->{td}, 1) } @$storylist;
 	my $ndays_represented = scalar(keys %unique_tds);
@@ -1947,7 +1946,7 @@ sub updateStory {
 		unless $form->{aid};
 
 	my($chosen_hr) = extractChosenFromForm($form);
-	my ($related_sids_hr, $related_urls_hr) = extractRelatedStoriesFromForm($form);
+	my($related_sids_hr, $related_urls_hr) = extractRelatedStoriesFromForm($form);
 	my $related_sids = join ',', keys %$related_sids_hr;
 	my($topic) = $slashdb->getTopiclistFromChosen($chosen_hr);
 #use Data::Dumper; print STDERR "admin.pl updateStory chosen_hr: " . Dumper($chosen_hr) . "admin.pl updateStory form: " . Dumper($form);
@@ -2272,7 +2271,7 @@ sub saveStory {
 
 	my($chosen_hr) = extractChosenFromForm($form);
 	my($tids) = $slashdb->getTopiclistFromChosen($chosen_hr);
-	my ($related_sids_hr, $related_urls_hr) = extractRelatedStoriesFromForm($form);
+	my($related_sids_hr, $related_urls_hr) = extractRelatedStoriesFromForm($form);
 
 	for my $field (qw( introtext bodytext )) {
 		local $Slash::Utility::Data::approveTag::admin = 1;

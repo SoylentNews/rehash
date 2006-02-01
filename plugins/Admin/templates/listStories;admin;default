@@ -52,6 +52,7 @@ FOREACH story = storylistref;
 	</tr>
 [%		storiestoday = 0;
 	END;
+
 	yesterday = story.td;
 	storiestoday = storiestoday + 1;
 

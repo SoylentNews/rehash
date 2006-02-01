@@ -10,8 +10,6 @@ __lang__
 en_US
 __name__
 signoff_box
-__seclev__
-10000
 __template__
 
 [% signoff_title = "Signoffs" %]
@@ -37,3 +35,7 @@ ELSE;
 	title = signoff_title
 	contents = content
 %]
+__seclev__
+10000
+__version__
+$Id$
