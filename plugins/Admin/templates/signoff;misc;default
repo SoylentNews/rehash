@@ -16,6 +16,7 @@ __seclev__
 10000
 __template__
 [% IF constants.plugin.Ajax %]
+[% checked = Slash.db.hasUserSignedStory(stoid, user.uid); %]
 [% IF storylink %]<li class="signoff">[% END %]
 <input type="checkbox" name="admin_signoff" value="[% stoid %]" onclick="adminStorySignoff(this)" [% IF checked; constants.markup_checked_attribute; END %]><span id="signoff_[% stoid %]"><b>Sign</b></span>
 [% IF storylink %]</li>[% END %]
