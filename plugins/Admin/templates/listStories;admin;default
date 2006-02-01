@@ -52,13 +52,21 @@ FOREACH story = storylistref;
 	</tr>
 [%		storiestoday = 0;
 	END;
-
 	yesterday = story.td;
 	storiestoday = storiestoday + 1;
 
-	class = 'story_main';
+	class_prefix = "";
+	IF constants.signoff_use;
+		IF !user_signoffs.${story.stoid}.cnt;
+			class_prefix = "ns_";
+		ELSIF story_signoffs.${story.stoid}.cnt < needed_signoffs;
+			class_prefix = "ss_";
+		END;
+	END;
+
+	class = class_prefix _'story_main';
 	IF story.displaystatus > 0;
-		class = 'story_sec';
+		class = class_prefix _ 'story_sec';
 	ELSIF story.in_trash == 'yes' || story.displaystatus < 0;
 		class = 'story_nd';
 	END;
