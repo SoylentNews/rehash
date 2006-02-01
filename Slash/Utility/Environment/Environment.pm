@@ -1061,7 +1061,7 @@ sub isAnon {
 	my $slashdb = getCurrentDB();
 	my $skins = $slashdb->getSkins();
 	for my $skid (keys %$skins) {
-		return 1 if $uid == $skins->{$skid}{ac_uid};
+		return 1 if $skins->{$skid}{ac_uid} && $uid == $skins->{$skid}{ac_uid};
 	}
 
 	# Nope, this UID is not anonymous.
