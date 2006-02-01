@@ -115,7 +115,7 @@ BEGIN {
 	strip_notags
 	strip_plaintext
 	strip_paramattr
-	strip_paramattrnonhttp
+	strip_paramattr_nonhttp
 	strip_urlattr
 	submitDomainAllowed
 	timeCalc
@@ -654,8 +654,8 @@ sub timeCalc {
 	$off_set = $user->{off_set} || 0 if !defined $off_set;
 
 	if ($date) {
-		# massage data for YYYYMMDDHHmmSS or YYYYMMDDHHmm
-		$date =~ s/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})?$/"$1-$2-$3 $4:$5:" . ($6 || '00')/e;
+		# massage data for YYYYMMDDHHmmSS or YYYYMMDDHHmm (with optional TZ)
+		$date =~ s/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})?( [a-zA-Z]+)?$/"$1-$2-$3 $4:$5:" . ($6 || '00') . ($7 || '')/e;
 
 		# find out the user's time based on personal offset in seconds
 		$date = str2time($date) + $off_set;
@@ -1281,7 +1281,7 @@ sub strip_plaintext	{ stripByMode($_[0], PLAINTEXT,	@_[1 .. $#_]) }
 
 =head2 strip_paramattr(STRING [, NO_WHITESPACE_FIX])
 
-=head2 strip_paramattrnonhttp(STRING [, NO_WHITESPACE_FIX])
+=head2 strip_paramattr_nonhttp(STRING [, NO_WHITESPACE_FIX])
 
 =head2 strip_urlattr(STRING [, NO_WHITESPACE_FIX])
 
@@ -1293,13 +1293,13 @@ with "+" for " ", instead of just "%20".  So strip_paramattr should
 probably be renamed strip_paramattrhttp to best indicate that it is a
 special case.  But because the special case is also the most common case,
 with over 100 occurrences in the code, we leave it named strip_paramattr,
-and create a new function strip_paramattrnonhttp which must be used for
+and create a new function strip_paramattr_nonhttp which must be used for
 URI schemes which do not behave in that way.
 
 =cut
 
 sub strip_paramattr		{ strip_attribute(fixparam($_[0]), $_[1]) }
-sub strip_paramattrnonhttp	{ my $h = strip_attribute(fixparam($_[0]), $_[1]); $h =~ s/\+/%20/g; $h }
+sub strip_paramattr_nonhttp	{ my $h = strip_attribute(fixparam($_[0]), $_[1]); $h =~ s/\+/%20/g; $h }
 sub strip_urlattr		{ strip_attribute(fudgeurl($_[0]), $_[1]) }
 
 
@@ -2021,7 +2021,7 @@ The data to be escaped.  B<NOTE>: space characters are encoded as C<+>
 instead of C<%20>.  If you must have C<%20>, perform an C<s/\+/%20/g>
 on the result.  Note that this is designed for HTTP URIs, the most
 common scheme;  for other schemes, refer to the comments documenting
-strip_paramattr and strip_paramattrnonhttp.
+strip_paramattr and strip_paramattr_nonhttp.
 
 =back
 

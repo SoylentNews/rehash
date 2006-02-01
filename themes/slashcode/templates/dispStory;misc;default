@@ -92,7 +92,7 @@ END %]
 [% ELSE %]
 	Email
 [% END %]
-<a href="mailto:[% constants.adminmail %]?subject=[DP]%20[% story.title | strip_paramattrnonhttp %]">our on-duty editor</a>.
+<a href="mailto:[% constants.adminmail %]?subject=[DP]%20[% story.title | strip_paramattr_nonhttp %]">our on-duty editor</a>.
 [% END %]
 
 [% IF full && story.bodytext %]
