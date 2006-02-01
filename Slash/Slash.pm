@@ -45,7 +45,7 @@ $VERSION   	= '2.005000';  # v2.5.0
 	getData
 	gensym
 
-	dispComment displayStory displayThread dispStory
+	dispComment displayStory displayRelatedStories displayThread dispStory
 	getOlderStories getOlderDays moderatorCommentLog printComments
 );
 
@@ -1440,7 +1440,10 @@ sub dispStory {
 		dispmode 	=> $other->{dispmode},
 		dispoptions	=> $other->{dispoptions} || {},
 		thresh_commentcount => $other->{thresh_commentcount},
+		expandable 	=> $other->{expandable},
+		getintro	=> $other->{getintro},
 	);
+
 #use Data::Dumper; print STDERR scalar(localtime) . " dispStory data: " . Dumper(\%data);
 
 	return slashDisplay($template_name, \%data, 1);
@@ -1541,7 +1544,7 @@ sub displayStory {
 		my $topic = $reader->getTopic($story->{tid});
 		$story->{atstorytime} = "__TIME_TAG__";
 
-		if (!$options->{dispmode} || $options->{dispmode} ne "brief") {
+		if (!$options->{dispmode} || $options->{dispmode} ne "brief" || $options->{getintro}) {
 			$story->{introtext} = parseSlashizedLinks($story->{introtext});
 			$story->{introtext} = processSlashTags($story->{introtext});
 		}
@@ -1570,6 +1573,30 @@ sub displayStory {
 	}
 	$return =~ s/\Q__TIME_TAG__\E/$atstorytime/ unless $options->{force_cache_freshen};
 
+	return $return;
+}
+
+sub displayRelatedStories {
+	my ($stoid) = @_;
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+	my $gSkin = getCurrentSkin();
+	my $return = "";
+
+	my $related = $reader->getRelatedStoriesForStoid($stoid);
+
+	foreach my $rel (@$related) {
+		if ($rel->{rel_sid}) {
+			my $viewable = $reader->checkStoryViewable($rel->{rel_sid});
+			next if !$viewable;
+			my $related_story = $reader->getStory($rel->{rel_sid});
+			$return .= displayStory($related_story->{stoid}, 0, { dispmode => "brief", getintro => 1, expandable => 1 });
+		} elsif ($rel->{title}) {
+			$return .= slashDisplay("url_related", { title => $rel->{title}, url => $rel->{url} }, { Return => 1 });
+		}
+	}
 	return $return;
 }
 
