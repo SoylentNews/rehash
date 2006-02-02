@@ -3317,7 +3317,8 @@ sub getUserAdmin {
 	}
 	##########
 
-	$user_edit->{author} = ($user_edit->{author} == 1) ? $constants->{markup_checked_attribute} : '';
+	$user_edit->{author} = ($user_edit->{author} && $user_edit->{author} == 1)
+		? $constants->{markup_checked_attribute} : '';
 	if (! $user->{nonuid}) {
 		my $threshcodes = $reader->getDescriptions('threshcode_values','',1);
 		$thresh_select = createSelect('defaultpoints', $threshcodes, $user_edit->{defaultpoints}, 1);
