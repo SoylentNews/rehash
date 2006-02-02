@@ -128,7 +128,7 @@ if ($opts{'s'}) {
 		if (defined $temp2 && $temp2->{page} eq $template->{page}
 			&& $temp2->{skin} eq $template->{skin}
 		) {
-			if ($template->{instructions} =~ /placeholder/) {
+			if ($template->{instructions} && $template->{instructions} =~ /placeholder/) {
 				print "\t$filename is placeholder, skipping\n"
 					if !$opts{t};
 				next;
