@@ -15,6 +15,8 @@ $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
+	my $reader = getObject("Slash::DB", { db_type => "reader" });
+
 	if (!$constants->{topic_tree_draw}) {
 		return "topic_tree_draw not set";
 	}
@@ -78,8 +80,9 @@ $task{$me}{code} = sub {
 			$color = $topic->{nexus} ? "yellow" : "white";
 		}
 		my $shape = $topic->{nexus} ? "box" : "ellipse";
+		my $count = $reader->countStoriesWithTopic($tid) || 0;
 		$g->add_node($tid,
-			label => "$topic->{textname}\n$tid",
+			label => "$topic->{textname}\n$tid\n$count",
 			fillcolor => $color,
 			style => "filled",
 			shape => $shape,

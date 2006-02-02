@@ -2415,6 +2415,13 @@ sub countM2 {
 }
 
 ########################################################
+# For tasks/topic_tree_draw.pl
+sub countStoriesWithTopic {
+	my($self, $tid) = @_;
+	return $self->sqlCount('story_topics_rendered', "tid=$tid");
+}
+
+########################################################
 # For portald
 sub createRSS {
 	my($self, $bid, $item) = @_;
