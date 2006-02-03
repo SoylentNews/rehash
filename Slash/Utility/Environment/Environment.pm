@@ -73,6 +73,7 @@ use vars qw($VERSION @EXPORT);
 	prepareUser
 	filter_params
 	loadClass
+	loadCoderef
 
 	setUserDate
 	isDST
@@ -2208,7 +2209,7 @@ sub getObject {
 		}
 
 	} else {
-		local $@ = loadClass($class);
+		loadClass($class);
 
 		if ($@) {
 			errorLog($@);
@@ -2228,14 +2229,62 @@ sub getObject {
 	}
 }
 
+{
+my %classes;
 sub loadClass {
 	my($class) = @_;
+
+	if ($classes{$class}) {
+		if ($classes{$class} eq 'NA') {
+			return 0;  # previous failure
+		}
+		return $classes{$class};  # previous success
+	}
+
 	# see if module has been loaded in already ...
 	(my $file = $class) =~ s|::|/|g;
 	# ... because i really hate eval
-	local $@;
+	undef $@;  # for good measure
 	eval "require $class" unless exists $INC{"$file.pm"};
-	return $@;
+
+	if ($@) {
+		$classes{$class} = 'NA';
+		return 0;
+	} else {
+		return $classes{$class} = 1;
+	}
+}
+}
+
+{
+my %coderefs;
+sub loadCoderef {
+	my($class, $function) = @_;
+	my $full = $class . '::' . $function;
+
+
+	if ($coderefs{$full}) {
+		if ($coderefs{$full} eq 'NA') {
+			return 0;  # previous failure
+		}
+		return $coderefs{$full};  # previous success
+	}
+
+	return 0 unless loadClass($class);
+
+	my $code;
+	{
+		no strict 'refs';
+		$code = \&{ $full };
+	}
+
+	if (defined &$code) {
+		return $coderefs{$full} = $code;
+	} else {
+		$coderefs{$full} = 'NA';
+		return 0;
+	}
+}
 }
 
 

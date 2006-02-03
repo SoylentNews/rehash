@@ -153,7 +153,7 @@ sub new {
 
 	# reskey() to set the value is called only here and from dbCreate
 	# this is the only place $form->{reskey} is looked at
-	$self->reskey($reskey || getCurrentForm('reskey'));
+	$self->reskey(defined $reskey ? $reskey : getCurrentForm('reskey'));
 
 
 	$self->_init;
@@ -277,7 +277,7 @@ sub _createAccessor {
 		my($self, $value) = @_;
 		$self->_flow($name);
 		if (defined $value) {
-			if ($name eq 'reskey') {
+			if ($name eq 'reskey' && !$self->opts->{nostate}) {
 				# Setting reskey() is special, it gets
 				# stored in the $user object as well.
 				my $user = getCurrentUser();
@@ -670,7 +670,7 @@ sub check {  # basically same for checkUse, maybe share same code
 	for my $class (@$checks) {
 		# $class implements each of
 		# create, touch, and use methods
-		local $@ = loadClass($class);  # loadClass in Environment.pm
+		loadClass($class);  # loadClass in Environment.pm
 		errorLog("Can't load $class: $@"), next if $@;
 
 		# any data the $check needs will be in $self

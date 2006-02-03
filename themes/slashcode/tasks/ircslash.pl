@@ -906,11 +906,12 @@ sub possible_check_dbs {
 
 sub handle_remarks {
 	my $slashdb = getCurrentDB();
+	my $remarks = getObject('Slash::Remarks');
 	return if $hushed;
 
 	my $constants = getCurrentStatic();
 	$next_remark_id ||= $slashdb->getVar('ircslash_nextremarkid', 'value', 1) || 1;
-	my $system_remarks_ar = $slashdb->getRemarksStarting($next_remark_id, { type => 'system' });
+	my $system_remarks_ar = $remarks->getRemarksStarting($next_remark_id, { type => 'system' });
 	
 	my $max_rid = 0;
 	for my $system_remarks_hr (@$system_remarks_ar) {
@@ -923,7 +924,7 @@ sub handle_remarks {
 		$slashdb->setVar('ircslash_nextremarkid', $next_remark_id);
 	}
 	
-	my $remarks_ar = $slashdb->getRemarksStarting($next_remark_id, { type => 'user' });
+	my $remarks_ar = $remarks->getRemarksStarting($next_remark_id, { type => 'user' });
 	return unless $remarks_ar && @$remarks_ar;
 
 	my %story = ( );
@@ -955,15 +956,15 @@ sub handle_remarks {
 			$uid_blocked{$uid} = 1;
 		}
 		# Or if a user has sent more than this many remarks in a day.
-		elsif ($slashdb->getUserRemarkCount($uid, 86400      ) > $constants->{ircslash_remarks_max_day}) {
+		elsif ($remarks->getUserRemarkCount($uid, 86400      ) > $constants->{ircslash_remarks_max_day}) {
 			$uid_blocked{$uid} = 1;
 		}
 		# Or if a user has sent more than this many remarks in a month.
-		elsif ($slashdb->getUserRemarkCount($uid, 86400 *  30) > $constants->{ircslash_remarks_max_month}) {
+		elsif ($remarks->getUserRemarkCount($uid, 86400 *  30) > $constants->{ircslash_remarks_max_month}) {
 			$uid_blocked{$uid} = 1;
 		}
 		# Or if a user has sent more than this many remarks in a year.
-		elsif ($slashdb->getUserRemarkCount($uid, 86400 * 365) > $constants->{ircslash_remarks_max_year}) {
+		elsif ($remarks->getUserRemarkCount($uid, 86400 * 365) > $constants->{ircslash_remarks_max_year}) {
 			$uid_blocked{$uid} = 1;
 		}
 	}

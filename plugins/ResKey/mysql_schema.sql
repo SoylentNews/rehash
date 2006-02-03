@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS reskeys;
 CREATE TABLE reskeys (
     rkid        INT NOT NULL AUTO_INCREMENT,
     reskey      CHAR(20) DEFAULT '' NOT NULL,	# unique resource key string
-    rkrid       TINYINT UNSIGNED NOT NULL,	# points to reskey_resources.rkrid
+    rkrid       SMALLINT UNSIGNED NOT NULL,	# points to reskey_resources.rkrid
 
     uid         MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
     srcid_ip    BIGINT UNSIGNED DEFAULT 0 NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE reskey_failures (
 
 DROP TABLE IF EXISTS reskey_resources;
 CREATE TABLE reskey_resources (
-    rkrid       TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    rkrid       SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
     name        VARCHAR(64),
     PRIMARY KEY (rkrid)
 ) TYPE=InnoDB;
@@ -46,7 +46,7 @@ CREATE TABLE reskey_resources (
 DROP TABLE IF EXISTS reskey_resource_checks;
 CREATE TABLE reskey_resource_checks (
     rkrcid      SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    rkrid       TINYINT UNSIGNED NOT NULL,
+    rkrid       SMALLINT UNSIGNED NOT NULL,
     type        ENUM('create', 'touch', 'use', 'all') NOT NULL,
     class       VARCHAR(255),
     ordernum    SMALLINT UNSIGNED DEFAULT 0,
@@ -56,7 +56,7 @@ CREATE TABLE reskey_resource_checks (
 
 DROP TABLE IF EXISTS reskey_vars;
 CREATE TABLE reskey_vars (
-    rkrid       TINYINT UNSIGNED NOT NULL,
+    rkrid       SMALLINT UNSIGNED NOT NULL,
     name        VARCHAR(48) DEFAULT '' NOT NULL,
     value       TEXT,
     description VARCHAR(255),

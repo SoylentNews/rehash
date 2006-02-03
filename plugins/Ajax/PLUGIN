@@ -1,10 +1,13 @@
 # $Id$
 name=Ajax
 description="Ajax (Asynchronous Javascript and XML)"
+mysql_dump=mysql_dump.sql
+mysql_schema=mysql_schema.sql
 htdoc=htdocs/ajax.pl
 htdoc=htdocs/images/admin.js
 htdoc=htdocs/images/common.js
 htdoc=htdocs/images/prototype.js
 htdoc=htdocs/images/sectionprefs.js
-template=templates/sectionpref;ajax;default
+template=templates/ajax_reskey_tag;misc;default
 template=templates/data;ajax;default
+template=templates/sectionpref;ajax;default

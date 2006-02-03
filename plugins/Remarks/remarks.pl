@@ -1,10 +1,12 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
 use strict;
+use warnings;
+
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::Constants qw(:web);
 use Slash::Display;
@@ -50,10 +52,7 @@ sub main {
 
 sub display {
 	my($slashdb, $constants, $user, $form, $gSkin, $remarks) = @_;
-
-	my $remarks_ref = $remarks->getRemarks;
-
-	slashDisplay('display', { remarks_ref => $remarks_ref });
+	print $remarks->displayRemarksTable({ max => 30, dodiv => 1 });
 }
 
 sub save_prefs {

@@ -1,0 +1,22 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+ajax_reskey_tag
+__template__
+[% reskey = Slash.getObject('Slash::ResKey');
+   rkey = reskey.key('ajax_base', { nostate => 1 });
+   IF rkey.create;
+   	PROCESS reskey_tag;
+   END %]
+__seclev__
+10000
+__version__
+$Id$

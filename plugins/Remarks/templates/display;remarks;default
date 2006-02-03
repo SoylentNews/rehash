@@ -11,6 +11,13 @@ __name__
 display
 __template__
 
+[% IF dodiv %]<div><input id="remarks_new" type="text"><input type="button" id="remarks_new_button" value="Create" onclick="remarks_create();"></div>
+<div id="remarks_table">[% END %]
+
+<!-- reload this div every 30 seconds -->
+<script type="text/javascript">run_timer('remarks_fetch()', 30);</script>
+
+[% PROCESS ajax_reskey_tag reskey_name => 'remarks_reskey' %]
 <table class="data">
 	<tr class="data_head">
 		<th colspan="4">Remarks</th>
@@ -30,6 +37,7 @@ __template__
 	</tr>
 [% END %]
 </table>
+[% IF dodiv %]</div>[% END %]
 
 __seclev__
 10000

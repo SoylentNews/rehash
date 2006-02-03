@@ -2,6 +2,12 @@
 # $Id$
 #
 
+### NOTE: reserved reskey IDs:
+# 1..99 main Slash
+# 100..199 Ajax
+# 200..999 future Slash use
+# 1000+ are open for others to use
+
 ### Possible reskey_vars (default is undef/false unless specified):
 # adminbypass        - 1/0 - If admin, bypass checks for duration, proxy, ACL, and user
 # 

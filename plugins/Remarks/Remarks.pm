@@ -27,6 +27,7 @@ LONG DESCRIPTION.
 use strict;
 use DBIx::Password;
 use Slash;
+use Slash::Display;
 use Slash::Utility;
 
 use base 'Slash::DB::Utility';
@@ -35,6 +36,7 @@ use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
+########################################################
 sub new {
 	my($class, $user) = @_;
 	my $self = {};
@@ -49,6 +51,7 @@ sub new {
 	return $self;
 }
 
+########################################################
 sub getRemarks {
 	my($self, $options) = @_;
 
@@ -64,6 +67,86 @@ sub getRemarks {
 	return $remarks || [];
 }
 
+########################################################
+sub createRemark {
+	my($self, $uid, $stoid, $remark, $type) = @_;
+	$type ||= 'user';
+
+	my $remark_t = $self->truncateStringForCharColumn($remark, 'remarks', 'remark');
+
+	$self->sqlInsert('remarks', {
+		uid	=> $uid,
+		stoid	=> $stoid,
+		remark	=> $remark_t,
+		-time	=> 'NOW()',
+		type 	=> $type
+	});
+}
+
+########################################################
+sub getRemarksStarting {
+	my($self, $starting, $options) = @_;
+	return [ ] unless $starting;
+
+	my $starting_q = $self->sqlQuote($starting);
+	my $type_clause = $options->{type}
+		? ' AND type=' . $self->sqlQuote($options->{type})
+		: '';
+
+	return $self->sqlSelectAllHashrefArray(
+		'rid, stoid, remarks.uid, remark, karma, remarks.type',
+		'remarks, users_info',
+		"remarks.uid=users_info.uid AND rid >= $starting_q $type_clause"
+	);
+}
+
+########################################################
+sub getUserRemarkCount {
+	my($self, $uid, $secs_back) = @_;
+	return 0 unless $uid && $secs_back;
+
+	return $self->sqlCount(
+		'remarks',
+		"uid = $uid
+		 AND time >= DATE_SUB(NOW(), INTERVAL $secs_back SECOND)"
+	);
+}
+
+
+########################################################
+sub displayRemarksTable {
+	my($self, $options) = @_;
+
+	$self           ||= getObject('Slash::Remarks');
+	$options        ||= {};
+	$options->{max} ||= 30;
+
+	my $remarks_ref = $self->getRemarks($options);
+	return slashDisplay('display', {
+		remarks_ref	=> $remarks_ref,
+		dodiv		=> $options->{dodiv}
+	}, { Page => 'remarks', Return => 1 });
+}
+
+########################################################
+sub ajaxFetch {
+	my($slashdb, $constants, $user, $form) = @_;
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('ajax_remarks', { reskey => '' });
+
+	return unless $rkey->createuse;
+
+	my $self = getObject('Slash::Remarks');	
+
+	if ($form->{op} eq 'remarks_create') {
+		$self->createRemark(
+			$user->{uid}, 0, $form->{remark}, 'user'
+		);
+	}
+
+	return $self->displayRemarksTable;
+}
 
 1;
 

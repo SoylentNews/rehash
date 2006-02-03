@@ -9208,7 +9208,8 @@ sub createSignoff {
 		my $s_user = $self->getUser($uid);
 		my $story = $self->getStory($stoid);
 		my $message = "$s_user->{nickname} $signoff_type $story->{title} $constants->{absolutedir_secure}/admin.pl?op=edit&sid=$story->{sid}";
-		$self->createRemark($uid, "", $message, "system");
+		my $remarks = getObject('Slash::Remarks');
+		$remarks->createRemark($uid, "", $message, "system");
 	}
 }
 
@@ -9250,46 +9251,6 @@ sub getSignoffsForStory {
 		"signoff, users",
 		"signoff.stoid=$stoid_q AND users.uid=signoff.uid"
 	);
-}
-
-########################################################
-sub createRemark {
-	my($self, $uid, $stoid, $remark, $type) = @_;
-	$type ||= "user";
-
-	my $remark_t = $self->truncateStringForCharColumn($remark, 'remarks', 'remark');
-
-	$self->sqlInsert('remarks', {
-		uid	=> $uid,
-		stoid	=> $stoid,
-		remark	=> $remark_t,
-		-time	=> 'NOW()',
-		type 	=> $type
-	});
-}
-
-########################################################
-sub getRemarksStarting {
-	my($self, $starting, $options) = @_;
-	return [ ] unless $starting;
-	$starting ||= 0;
-	my $type_clause;
-	$type_clause = " AND type=" . $self->sqlQuote($options->{type}) if $options->{type};
-	my $starting_q = $self->sqlQuote($starting);
-	return $self->sqlSelectAllHashrefArray(
-		"rid, stoid, remarks.uid, remark, karma, remarks.type",
-		"remarks, users_info",
-		"remarks.uid=users_info.uid AND rid >= $starting_q $type_clause");
-}
-
-########################################################
-sub getUserRemarkCount {
-	my($self, $uid, $secs_back) = @_;
-	return 0 unless $uid && $secs_back;
-	return $self->sqlCount(
-		"remarks",
-		"uid = $uid
-		 AND time >= DATE_SUB(NOW(), INTERVAL $secs_back SECOND)");
 }
 
 ########################################################

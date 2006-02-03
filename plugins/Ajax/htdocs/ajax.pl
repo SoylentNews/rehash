@@ -1,14 +1,18 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
 use strict;
+use warnings;
 
-use Slash;
+use Slash 2.003;	# require Slash 2.3.x
 use Slash::Display;
 use Slash::Utility;
+use vars qw($VERSION);
+
+($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 ##################################################################
 sub main {
@@ -18,8 +22,8 @@ sub main {
 	my $form      = getCurrentForm();
 	my $gSkin     = getCurrentSkin();
 
-	my $postflag = $user->{state}{post};
-	my $op = $form->{op};
+=pod
+
 	my $ops = {
 		getSectionPrefsHTML => {
 			function	=> \&getSectionPrefsHTML,
@@ -33,26 +37,45 @@ sub main {
 			function	=> \&storySignOff,
 			seclev		=> 100
 		},
-		default => {
-			function	=> \&default
-		}
 	};
 
-	# Ajax requests must be POST, by default.  If an op wants to be
-	# able to be triggered by a GET, it can override this.
-	if (!$postflag && !$ops->{$op}{get_ok}) {
-		$op = 'default';
-	}
+=cut
 
-	if (defined($ops->{$op}{seclev}) && $user->{seclev} < $ops->{$op}{seclev}) {
-		$op = 'default';
-	}
+	my $ops = getOps($slashdb);
+	my $op = $form->{op};
+	$op = 'default' unless $ops->{$op};
 
-	$ops->{$op}{function}->($slashdb, $constants, $user, $form);
+	$op = 'default' unless $ops->{$op}{function} || (
+		$ops->{$op}{class} && $ops->{$op}{subroutine}
+	);
+
+	$ops->{$op}{function} ||= loadCoderef($ops->{$op}{class}, $ops->{$op}{subroutine});
+	$op = 'default' unless $ops->{$op}{function};
+
+	$form->{op} = $op;  # save for others to use
+
+	my $reskey_name = $ops->{$op}{reskey_name} || 'ajax_base';
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key($reskey_name);
+
+	if ($rkey->use) {
+		my $options = {};
+		my $retval = $ops->{$op}{function}->(
+			$slashdb, $constants, $user, $form, $options
+		);
+
+		if ($retval) {
+			header_ajax($options);
+			print $retval;
+		}
+	}
+	# XXX: do anything on error?  a standard error dialog?  or fail silently?
 }
 
+##################################################################
 sub getSectionPrefsHTML {
-	my ($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
 	my %story023_default = (
@@ -75,8 +98,6 @@ sub getSectionPrefsHTML {
 			$prefs{$field}{$id} = 1;
 		}
 	}
-
-	header_ajax({ content_type => 'text/plain' });
 
 	my $topic_tree = $reader->getTopicTree();
 	my $nexus_tids_ar = $reader->getStorypickableNexusChildren($constants->{mainpage_nexus_tid});
@@ -125,7 +146,7 @@ sub getSectionPrefsHTML {
 
 	my $master_value = !$multiple_values ? $first_val : "";
 
-	print slashDisplay("sectionpref",
+	return slashDisplay("sectionpref",
 		{
 			nexusref		=> $nexus_hr,
 			nexustid_order		=> \@nexustid_order,
@@ -135,15 +156,12 @@ sub getSectionPrefsHTML {
 		},
 		{ Return => 1 }
 	);
-
 }
 
 sub setSectionNexusPrefs() {
 	my ($slashdb, $constants, $user, $form) = @_;
 	
 	my $nexus_tids_ar = $slashdb->getStorypickableNexusChildren($constants->{mainpage_nexus_tid}, 1);
-
-	header_ajax({ content_type => 'text/plain' });
 
 	my @story_always_nexus 		= split ",", $user->{story_always_nexus} || "";
 	my @story_full_brief_nexus 	= split ",", $user->{story_full_brief_nexus} || "";
@@ -215,8 +233,8 @@ sub setSectionNexusPrefs() {
 			story_never_nexus	=> $story_never_nexus
 		}
 	);
-	print getData('set_section_prefs_success_msg');
 
+	return getData('set_section_prefs_success_msg');
 }
 
 sub storySignOff {
@@ -229,19 +247,17 @@ sub storySignOff {
 	return unless $stoid =~/^\d+$/;
 
 	if ($slashdb->sqlCount("signoff", "stoid = $stoid AND uid = $uid")) {
-		print "Already Signed";
-		return;
+		return "Already Signed";
 	}
 
 	$slashdb->createSignoff($stoid, $uid, "signed");
-	print "Signed";
+	return "Signed";
 }
 
-sub default {
-	my ($slashdb, $constants, $user, $form) = @_;
+##################################################################
+sub default { }
 
-}
-
+##################################################################
 sub header_ajax {
 	my($options) = @_;
 	my $ct = $options->{content_type} || 'text/plain';
@@ -252,7 +268,24 @@ sub header_ajax {
 	$r->send_http_header;
 }
 
+##################################################################
+sub getOps {
+	my($slashdb) = @_;
+	my $ops;
+
+	# XXX: cache this
+	$ops = $slashdb->sqlSelectAllHashref(
+		'op', 'op, class, subroutine, reskey_name', 'ajax_ops'
+	);
+
+	$ops->{default} = {
+		function => \&default,		
+	};
+
+	return $ops;
+}
+
+##################################################################
 createEnvironment();
 main();
 1;
-
