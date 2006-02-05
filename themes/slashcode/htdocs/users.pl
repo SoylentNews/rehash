@@ -226,6 +226,13 @@ sub main {
 			formname	=> $formname,
 			checks		=> ['regen_formkey'],
 		},
+		showtags => {
+			function	=> \&showTags,
+			seclev		=> 1,
+			formname	=> $formname,
+			checks		=> [],
+			tab_selected	=> 'tags',
+		},
 #		userclose	=>  {
 #			function	=> \&displayForm,
 #			seclev		=> 0,
@@ -1465,6 +1472,22 @@ sub validateUser {
 	}
 
 	slashDisplay('regResult');
+}
+
+#####################################################################
+sub showTags {
+	my($hr) = @_;
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	print createMenu("users", {
+		style =>	'tabbed',
+		justify =>	'right',
+		color =>	'colored',
+		tab_selected =>	$hr->{tab_selected_1} || "",
+	});
 }
 
 #################################################################

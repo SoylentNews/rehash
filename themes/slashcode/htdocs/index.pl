@@ -699,12 +699,12 @@ sub displayStories {
 
 			if ($constants->{plugin}{Tags}) {
 				if ($user->{tags_canread_stories}) {
-					my @toptags = split / /, ($story_data->{tags_top} || '');
-					my @exmptags = split / /, $constants->{tags_stories_examples};
+					my @tags_top = split / /, ($story_data->{tags_top} || '');
+					my @tags_example = split / /, $constants->{tags_stories_examples};
 					$tmpreturn .= slashDisplay('tagsstory', {
 						story =>	$story,
-						toptags =>	\@toptags,
-						exmptags =>	\@exmptags,
+						tags_top =>	\@tags_top,
+						tags_example =>	\@tags_example,
 					}, { Return => 1 });
 				}
 			}

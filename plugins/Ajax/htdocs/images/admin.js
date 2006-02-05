@@ -13,6 +13,21 @@ function adminStorySignoff(el) {
 	
 }
 
+function adminTagsCommands(stoid) {
+	url = "ajax.pl";
+	var params = [];
+	params['op'] = 'adminTagsCommands';
+	params['stoid'] = stoid;
+	var h = $H(params);
+	var ajax = new Ajax.Updater(
+		{ success: 'toggletags-message-' + stoid },
+		url,
+		{ method: 'post', parameters: h.toQueryString() }
+	);
+	
+}
+
+
 function remarks_create() {
 	var reskey = $('remarks_reskey');
 	var remark = $('remarks_new');

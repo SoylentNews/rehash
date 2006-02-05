@@ -4,4 +4,6 @@ description="Tags"
 mysql_dump=mysql_dump.sql
 mysql_schema=mysql_schema.sql
 task=tags_update.pl
+template=templates/data;tags;default
 template=templates/tagsstory;index;default
+template=templates/usertags;users;default

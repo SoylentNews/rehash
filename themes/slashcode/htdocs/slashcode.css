@@ -280,5 +280,9 @@ pre, code { font-size: 80%; }
 .briefarticle .storytitle { font-weight: bold; }
 .briefarticle .introhide { display : none }
 .briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
+.tagsheader { padding-left: 1em; padding-top: 0.5em; font-size: 70%; }
+.tagname { padding-left: 1em; padding-top: 0.5em; font-size: 70%; color: #600; font-weight: bold; }
+.tags { padding-left: 1em; padding-top: 0.5em; font-size: 70%; }
+.tagshide { display : none }
 .future .briefarticle { background: #c33; }
 .briefarticles { border-top: solid 2px #933; padding-bottom: 0.5em; margin-top: 3px }

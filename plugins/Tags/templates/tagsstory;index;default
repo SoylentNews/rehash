@@ -1,7 +1,9 @@
 __section__
 default
 __description__
-
+story = this story's data
+tags_example = array of example clickable tags
+tags_top = array of zero or more clickable tags, the most popular on this story
 __title__
 
 __page__
@@ -11,9 +13,52 @@ en_US
 __name__
 tagsstory
 __template__
-<div><a href="">&loz;</a>
-<font color=#006666 size=-1><b>[% toptags.join(' ') %]</b></font>
-<font size=-1><i>tagging beta</i></font></div>
+
+<div id="tagbox-[% story.stoid %]">
+
+&nbsp;<a href="javascript: tagsToggleStoryDiv([% story.stoid %]);"><span class="tagsheader" id="toggletags-button-[% story.stoid %]">[+]</span></a>
+[% IF tags_top.count %]
+	[% FOR t = tags_top %]
+		<span class="tagname">
+		<a href="javascript: tagsOpenAndEnter([% story.stoid %], '[% t %]')">[% t | strip_html %]</a>
+		</span>
+		[% IF !loop.last() %], [% END %]
+	[% END %]
+[% END %]
+<font size=-1><i>(<a href="/faq/tags.shtml">tagging beta</a>)</i></font></div>
+
+<div class="tagshide" id="toggletags-body-[% story.stoid %]">
+
+[% IF tags_example.count %]
+	<div><i>Examples:</i>
+	[% FOR t = tags_example %]
+		<span class="tagname">
+		<a href="javascript: tagsOpenAndEnter([% story.stoid %], '[% t %]')">[% t | strip_html %]</a>
+		</span>
+		[% IF !loop.last() %], [% END %]
+	[% END %]
+	</div>
+[% END %]
+
+<div id="tags-user-[% story.stoid %]"></div>
+
+<div><form name="tags-[% story.stoid %]">
+<input type="text" id="newtags-[% story.stoid %]" name="newtags-[% story.stoid %]" value="[% story.usertags.join(' ') %]" size=20 maxlength=100>
+<a href="javascript: tagsCreateForStory([% story.stoid %]);">Tag</a>
+</form></div>
+
+[% IF user.is_admin %]
+<div><form name="tags_admin-[% story.stoid %]">
+<input type="text" id="tags_admin_commands-[% story.stoid %]" name="tags_admin_commands-[% story.stoid %]" value="" size=20 maxlength=100>
+<a href="javascript: adminTagsCommands([% story.stoid %]);">Admin</a>
+</form></div>
+[% END %]
+
+	<div id="toggletags-message-[% story.stoid %]"></div>
+
+	</div>
+
+</div>
 
 __seclev__
 10000
