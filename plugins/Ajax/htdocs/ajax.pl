@@ -62,6 +62,11 @@ sub main {
 	my $op = $form->{op};
 	$op = 'default' unless $ops->{$op};
 
+	# In theory this will not be necessary because all Ajax ops will
+	# be set up to use a reskey that checks for post, but until we
+	# get that coded and tested, I'll feel safer doing this.
+	return '' unless $user->{state}{post};
+
 	$op = 'default' unless $ops->{$op}{function} || (
 		$ops->{$op}{class} && $ops->{$op}{subroutine}
 	);
@@ -367,14 +372,23 @@ sub getOps {
 	my($slashdb) = @_;
 	my $ops;
 
-	# XXX: cache this
+	my $table_cache         = "_ajaxops_cache";
+	my $table_cache_time    = "_ajaxops_cache_time";
+	$self->_genericCacheRefresh('ajaxops', $constants->{block_expire});
+	if ($self->{$table_cache_time} && $self->{$table_cache}) {
+		return $self->{$table_cache};
+	}
+
 	$ops = $slashdb->sqlSelectAllHashref(
 		'op', 'op, class, subroutine, reskey_name', 'ajax_ops'
 	);
-
 	$ops->{default} = {
 		function => \&default,		
 	};
+
+	if ($self->{$table_cache_time}) {
+		$self->{$table_cache}{$name} = $ops;
+	}
 
 	return $ops;
 }
