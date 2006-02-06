@@ -8,6 +8,11 @@
 # 200..999 future Slash use
 # 1000+ are open for others to use
 
+###
+# NOTE: AnonNoPost means if you are anonymous, you cannot post, if nopost is set
+# for the AC uid.  NoPostAnon checks the nopostanon check for the given srcid;
+# NoPost checks the nopost check for the given srcid.
+
 ### Possible reskey_vars (default is undef/false unless specified):
 # adminbypass        - 1/0 - If admin, bypass checks for duration, proxy, ACL, and user
 # 

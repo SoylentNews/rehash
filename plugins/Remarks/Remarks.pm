@@ -131,12 +131,6 @@ sub displayRemarksTable {
 ########################################################
 sub ajaxFetch {
 	my($slashdb, $constants, $user, $form) = @_;
-
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key('ajax_remarks', { reskey => '' });
-
-	return unless $rkey->createuse;
-
 	my $self = getObject('Slash::Remarks');	
 
 	if ($form->{op} eq 'remarks_create') {

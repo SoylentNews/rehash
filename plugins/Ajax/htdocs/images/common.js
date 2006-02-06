@@ -9,4 +9,3 @@ function toggleIntro(id, toggleid) {
 		toggle.innerHTML = "[+]";
 	}
 }
-

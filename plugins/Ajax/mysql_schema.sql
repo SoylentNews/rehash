@@ -9,6 +9,7 @@ CREATE TABLE ajax_ops (
 	class VARCHAR(100) DEFAULT '' NOT NULL,
 	subroutine VARCHAR(100) DEFAULT '' NOT NULL,
 	reskey_name VARCHAR(64) DEFAULT '' NOT NULL,
+	reskey_type VARCHAR(64) DEFAULT '' NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE op (op)
 ) TYPE=InnoDB;

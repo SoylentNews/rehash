@@ -12,10 +12,17 @@ __name__
 ajax_reskey_tag
 __template__
 [% reskey = Slash.getObject('Slash::ResKey');
-   rkey = reskey.key('ajax_base', { nostate => 1 });
+   IF !reskey_resource;
+   	reskey_resource = 'ajax_base';
+   END;
+   rkey = reskey.key(reskey_resource, { nostate => 1 });
    IF rkey.create;
    	PROCESS reskey_tag;
-   END %]
+   END;
+
+   # don't carry over to subsequent calls
+   reskey_resource = '';
+   reskey_name = ''; %]
 __seclev__
 10000
 __version__

@@ -28,7 +28,7 @@ __template__
 
    IF this_reskey %]
 <input type="hidden" id="[% reskey_name %]" name="[% reskey_name %]" value="[% this_reskey %]">
-[% END %]
+[% reskey_name = ''; END %]
 
 __seclev__
 500

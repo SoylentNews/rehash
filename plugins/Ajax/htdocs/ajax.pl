@@ -22,50 +22,9 @@ sub main {
 	my $form      = getCurrentForm();
 	my $gSkin     = getCurrentSkin();
 
-=pod
-
-	my $postflag = $user->{state}{post};
-	my $op = $form->{op};
-	my $ops = {
-		getSectionPrefsHTML => {
-			function	=> \&getSectionPrefsHTML,
-			seclev		=> 1,
-		},
-		setSectionNexusPrefs => {
-			function	=> \&setSectionNexusPrefs,
-			seclev		=> 1
-		},
-		storySignOff => {
-			function	=> \&storySignOff,
-			seclev		=> 100
-		},
-		tagsGetUserStory => {
-			function	=> \&tagsGetUserStory,
-			seclev		=> 1,
-		},
-		tagsCreateForStory => {
-			function	=> \&tagsCreateForStory,
-			seclev		=> 1,
-		},
-		adminTagsCommands => {
-			function	=> \&adminTagsCommands,
-			seclev		=> 100,
-		},
-		default => {
-			function	=> \&default
-		}
-	};
-
-=cut
-
-	my $ops = getOps($slashdb);
+	my $ops = getOps();
 	my $op = $form->{op};
 	$op = 'default' unless $ops->{$op};
-
-	# In theory this will not be necessary because all Ajax ops will
-	# be set up to use a reskey that checks for post, but until we
-	# get that coded and tested, I'll feel safer doing this.
-	return '' unless $user->{state}{post};
 
 	$op = 'default' unless $ops->{$op}{function} || (
 		$ops->{$op}{class} && $ops->{$op}{subroutine}
@@ -77,21 +36,28 @@ sub main {
 	$form->{op} = $op;  # save for others to use
 
 	my $reskey_name = $ops->{$op}{reskey_name} || 'ajax_base';
+	$ops->{$op}{reskey_type} ||= 'use';
 
-	my $reskey = getObject('Slash::ResKey');
-	my $rkey = $reskey->key($reskey_name);
-
-	if ($rkey->use) {
-		my $options = {};
-		my $retval = $ops->{$op}{function}->(
-			$slashdb, $constants, $user, $form, $options
-		);
-
-		if ($retval) {
-			header_ajax($options);
-			print $retval;
+	if ($reskey_name ne 'NA') {
+		my $reskey = getObject('Slash::ResKey');
+		my $rkey = $reskey->key($reskey_name);
+		if ($ops->{$op}{reskey_type} eq 'createuse') {
+			return unless $rkey->createuse;
+		} else {
+			return unless $rkey->use;
 		}
 	}
+
+	my $options = {};
+	my $retval = $ops->{$op}{function}->(
+		$slashdb, $constants, $user, $form, $options
+	);
+
+	if ($retval) {
+		header_ajax($options);
+		print $retval;
+	}
+
 	# XXX: do anything on error?  a standard error dialog?  or fail silently?
 }
 
@@ -369,25 +335,60 @@ sub header_ajax {
 
 ##################################################################
 sub getOps {
-	my($slashdb) = @_;
-	my $ops;
+	my $slashdb   = getCurrentDB();
+	my $constants = getCurrentStatic();
 
 	my $table_cache         = "_ajaxops_cache";
 	my $table_cache_time    = "_ajaxops_cache_time";
-	$self->_genericCacheRefresh('ajaxops', $constants->{block_expire});
-	if ($self->{$table_cache_time} && $self->{$table_cache}) {
-		return $self->{$table_cache};
+	$slashdb->_genericCacheRefresh('ajaxops', $constants->{block_expire});
+	if ($slashdb->{$table_cache_time} && $slashdb->{$table_cache}) {
+		return $slashdb->{$table_cache};
 	}
 
-	$ops = $slashdb->sqlSelectAllHashref(
-		'op', 'op, class, subroutine, reskey_name', 'ajax_ops'
+	my $ops = $slashdb->sqlSelectAllHashref(
+		'op', 'op, class, subroutine, reskey_name, reskey_type', 'ajax_ops'
 	);
-	$ops->{default} = {
-		function => \&default,		
-	};
 
-	if ($self->{$table_cache_time}) {
-		$self->{$table_cache}{$name} = $ops;
+	my %mainops = (
+		getSectionPrefsHTML => {
+			function	=> \&getSectionPrefsHTML,
+			reskey_name	=> 'ajax_user',
+			reskey_type	=> 'createuse',
+		},
+		setSectionNexusPrefs => {
+			function	=> \&setSectionNexusPrefs,
+			reskey_name	=> 'ajax_user',
+			reskey_type	=> 'createuse',
+		},
+		storySignOff => {
+			function	=> \&storySignOff,
+			reskey_name	=> 'ajax_admin',
+			reskey_type	=> 'createuse',
+		},
+		tagsGetUserStory => {
+			function	=> \&tagsGetUserStory,
+			reskey_type	=> 'createuse',
+		},
+		tagsCreateForStory => {
+			function	=> \&tagsCreateForStory,
+			reskey_type	=> 'createuse',
+		},
+		adminTagsCommands => {
+			function	=> \&adminTagsCommands,
+			reskey_name	=> 'ajax_admin',
+			reskey_type	=> 'createuse',
+		},
+		default	=> {
+			function	=> \&default,		
+		},
+	);
+
+	for (keys %mainops) {
+		$ops->{$_} ||= $mainops{$_};
+	}
+
+	if ($slashdb->{$table_cache_time}) {
+		$slashdb->{$table_cache} = $ops;
 	}
 
 	return $ops;
