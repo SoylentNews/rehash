@@ -10,3 +10,6 @@ INSERT INTO vars (name, value, description) VALUES ('tags_stories_allowwrite', '
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_lastscanned', '0', 'The last tagid scanned to update stories');
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_examples', 'cool dupe', 'Example tags for stories');
 
+INSERT INTO reskey_resources (rkrid, name) VALUES (108, 'ajax_tags');
+INSERT INTO reskey_resource_checks (rkrcid, rkrid, type, class, ordernum) VALUES (NULL, 108, 'all', 'Slash::ResKey::Checks::User', 101);
+
