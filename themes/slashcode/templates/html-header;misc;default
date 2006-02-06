@@ -32,7 +32,6 @@ __template__
 						<script src="[% constants.imagedir %]/prototype.js"	type="text/javascript"></script>
 						<script src="[% constants.imagedir %]/common.js"	type="text/javascript"></script>
 		[% IF user.is_admin %]		<script src="[% constants.imagedir %]/admin.js"		type="text/javascript"></script>[% END %]
-		[% IF constants.plugin.Tags %]	<script src="[% constants.imagedir %]/tags.js"		type="text/javascript"></script>[% END %]
 	[% END %]
 [% END %]
 __seclev__
