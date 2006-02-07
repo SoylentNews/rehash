@@ -55,38 +55,18 @@ __template__
 				</legend>
 				[% storycontent %]
 			</fieldset>
-			<fieldset>
-				<legend>
-					Similar Stories
-				</legend>
 				<div class="note">
 					Check words below before submitting or previewing to mark words as common and not for use in determining similar stories.
 				</div>
 				<!-- need to set this up a bit better -->
-				<table border="0" cellpadding="3" cellspacing="0">
-				<tr>
-					<td colspan="6"><b>Similar & Related Stories</b></td>
-				</tr>
+				<table border="0" cellpadding="3" cellspacing="0" class="data">
 				<tr class="data_head">
-					<td>Status</td>
-					<td>Score</td>
-					<td>Title</td>
-					<td>Date</td>
-					<td>Related</td>
-					<td>Ignore Words</td> 
+					<td colspan="3"><b>Similar & Related Stories</b></td><td>Related</td><td>Ignore</td>
 				</tr>
 				[% seen_related %]
-			
+				[% dispclass = { "1" => "story_sec", "0" => "story_main" , "-1" => "story_nd" } %]	
 				[% FOREACH story = similar_stories %]
-				<tr class="data_hl1">
-					<td >
-						[% IF story.displaystatus == 0;
-							"&nbsp;";
-						ELSIF story.displaystatus == 1;
-							"<i>sect</i>";
-						ELSE;
-							"<i>ND</i>";
-						END; %]</td>
+				<tr class="[% dispclass.${story.displaystatus} %]">
 					<td>[% story.weight %]</td>
 					<td><a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</a></td>
 					<td>[% Slash.timeCalc(story.time) %]</td>
@@ -106,8 +86,14 @@ __template__
 		[% FOREACH rel_sid = storyref.related_sids_hr.keys %]
 			[% IF seen_related.$rel_sid; NEXT; END; %]
 			[% story = storyref.related_sids_hr.$rel_sid %]
-			<tr class="data_hl1">
-			<td>
+			[% dispstatus = -1;
+			   IF Slash.db.checkStoryViewable(story.stoid, constants.mainpage_nexus_tid);
+			   	dispstatus = 0;
+			   ELSIF Slash.db.checkStoryViewable(story.stoid, ""); 
+			   	dispstatus = 1;
+			   END;
+			%]
+			<tr class="[% dispclass.$dispstatus %]">
 			<td>[% story.weight %]</td>
 			<td><a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
 			[% story.title %]</a></td>
@@ -123,22 +109,23 @@ __template__
 			</tr>
 		
 		[% END %]
+		[% IF storyref.related_urls_hr.keys.size > 0 %]<tr class="data_hl1"><td colspan="5">[% PROCESS horiz_rule %]</td></tr>[% END %]
 		[% FOREACH rel_url = storyref.related_urls_hr.keys %]
 		<tr class="data_hl1">
-			<td colspan="2"></td>
+			<td colspan="1"></td>
 			<td>Offsite: <a href="[% rel_url %]">[% storyref.related_urls_hr.$rel_url %]</a></td>
 			<td></td>
 			<td></td>
 			<td></td>
 		</tr>
 		[% END %]
-	<tr class="data_hl1"><td colspan="2"></td><td colspan="2">Include Related Sid Or Title + URL (one per line)<br>
-	<textarea rows="2" cols="30" wrap="off" name="add_related">[% add_related_text | strip_literal %]</textarea>
-	
-	</td><td colspan="2" align="right">preview/update to save</td></tr>
+	<tr class="data_hl1"><td colspan="3"><textarea rows="2" cols="40" wrap="off" name="add_related">[% add_related_text | strip_literal %]</textarea></td><td colspan="2">
+	include sid or
+	title URL
+	one per line!
+	</td></tr>
 </table>
 
-		</fieldset>
 
 			<div class="adminstoryform">
 			<fieldset id="st-display">
