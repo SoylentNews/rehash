@@ -21,25 +21,25 @@ __template__
 	<tr>
 		<td>&nbsp;</td>
 		<td>
-			<img src="[% constants.imagedir %]/article_none.gif" alt="Never"><br>
+			<img src="[% constants.imagedir %]/article_none.gif" alt="Never" title="Never"><br>
 		</td>
 		<td valign="top">
-			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief Best Only"><br>
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief Best Only" title="Brief Best Only"><br>
 		</td>
 		<td valign="top">
-			<img src="[% constants.imagedir %]/article_full.gif" alt="Full Best Only"><br>
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full Best Only" title="Full Best Only"><br>
 		</td>
 		<td valign="top">
-			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief All"><br>
-			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief All"><br>
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief All" title="Brief All"><br>
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief All" title="Brief All"><br>
 		</td>
 		<td valign="top">
-			<img src="[% constants.imagedir %]/article_full.gif" alt="Full / Brief"><br>
-			<img src="[% constants.imagedir %]/article_brief.gif" alt="Full / Brief"><br>
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full / Brief" title="Full / Brief"><br>
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Full / Brief" title="Full / Brief"><br>
 		</td>
 		<td valign="top">
-			<img src="[% constants.imagedir %]/article_full.gif" alt="Full All"><br>
-			<img src="[% constants.imagedir %]/article_full.gif" alt="Full All">
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full All" title="Full All"><br>
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full All" title="Full All">
 		</td>
 		
 	</tr>
