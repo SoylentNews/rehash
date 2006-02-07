@@ -1025,11 +1025,11 @@ sub getAdminModsText {
 			$m2_un_percent_mo	|| 0
 		);
 		if ($nickname eq '~Day Total') {
-			$num_mods += $amn->{m1_up};
-			$num_mods += $amn->{m1_down};
+			$num_mods += $amn->{m1_up} || 0;
+			$num_mods += $amn->{m1_down} || 0;
 		} else {
-			$num_admin_mods += $amn->{m1_up};
-			$num_admin_mods += $amn->{m1_down};
+			$num_admin_mods += $amn->{m1_up} || 0;
+			$num_admin_mods += $amn->{m1_down} || 0;
 		}
 	}
 	$text .= sprintf("%d of %d mods (%.2f%%) were performed by admins.\n",

@@ -2518,6 +2518,7 @@ The 'approvedtags' entry in the vars table.
 
 sub balanceTags {
 	my($html, $options) = @_;
+	return '' if !defined($html) || !length($html);
 	my $orightml = $html;
 	my $constants = getCurrentStatic();
 	my $cache = getCurrentCache();

@@ -379,7 +379,7 @@ sub _delete_web {
 		my $uid_db = $self->sqlQuote($uid);
 		my $where  = $where1 . " AND user=$uid_db";
 		my($check) = $self->sqlSelect('user', $table1, $where);
-		return 0 unless $check eq $uid;
+		return 0 unless defined($check) && $check eq $uid;
 	}
 
 	$self->sqlDo("DELETE FROM $table1 WHERE $where1");
