@@ -3,8 +3,12 @@ function configSectionPopup() {
 	var div = document.createElement("div");
 	div.id = "sectional_pref";
 	div.style.position = "absolute";
-	div.style.top = "242px";
-	div.style.left = "13px";
+	
+	leftpos = Position.cumulativeOffset($('links-sections-title'))[0] + "px";
+	toppos = Position.cumulativeOffset($('links-sections-title'))[1] + "px";
+	
+	div.style.left = leftpos;
+	div.style.top = toppos;
 	div.style.zIndex = "30";
 	div.style.fontSize = "80%";
 	div.style.background = "#fff";
