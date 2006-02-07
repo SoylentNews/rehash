@@ -1527,6 +1527,7 @@ sub editStory {
 sub extractRelatedStoriesFromForm {
 	my($form) = @_;
 	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
 
 	my %related_urls;
 
@@ -1543,8 +1544,8 @@ sub extractRelatedStoriesFromForm {
 		foreach (@add_related) {
 			s/^\s+|\s+$//g;
 			next if !$_;
-			if (/^\d\d\/\d\d\/\d\d\/\d+$/) {
-				push @$related, $_;
+			if (/(?:$constants->{basedomain})?\S*(\d\d\/\d\d\/\d\d\/\d+)/) {
+				push @$related, $1;
 			} else {
 				my($title, $url) = $_ =~ /^(.*)\s+(\S+)$/;
 				$related_urls{$url} = $title;
