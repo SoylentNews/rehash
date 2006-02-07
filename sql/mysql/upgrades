@@ -3635,7 +3635,7 @@ ALTER TABLE signoff ADD COLUMN signoff_type VARCHAR(16)  DEFAULT '' NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ("signoff_notify", "0", "Add remark for bot on each signoff / update / save ?");
 INSERT INTO vars (name, value, description) VALUES ("signoff_use", "0", "Use signoff functionalilty?");
 
-DROP TABLE IF EXISTSÊrelated_stories;
+DROP TABLE IF EXISTS related_stories;
 CREATE TABLE related_stories (
         id mediumint(8) unsigned NOT NULL auto_increment,
         stoid mediumint(8) unsigned default '0',
