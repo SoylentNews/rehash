@@ -18,8 +18,8 @@ INSERT INTO reskey_resources VALUES (103, 'ajax_subscriber');
 INSERT INTO reskey_resource_checks VALUES (NULL, 100, 'all', 'Slash::ResKey::Checks::User',                101);
 INSERT INTO reskey_resource_checks VALUES (NULL, 100, 'use', 'Slash::ResKey::Checks::Post',                151);
 INSERT INTO reskey_resource_checks VALUES (NULL, 100, 'all', 'Slash::ResKey::Checks::ACL',                 201);
-INSERT INTO reskey_resource_checks VALUES (NULL, 102, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
-INSERT INTO reskey_resource_checks VALUES (NULL, 102, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+INSERT INTO reskey_resource_checks VALUES (NULL, 100, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 100, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
 INSERT INTO reskey_resource_checks VALUES (NULL, 100, 'all', 'Slash::ResKey::Checks::Duration',            601);
 
 INSERT INTO reskey_vars VALUES (100, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
