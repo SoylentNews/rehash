@@ -13186,7 +13186,17 @@ sub setRelatedStoriesForStory {
 	my($self, $sid_or_stoid, $rel_sid_hr, $rel_url_hr) = @_;
 	my $stoid = $self->getStoidFromSidOrStoid($sid_or_stoid);
 	my $stoid_q = $self->sqlQuote($stoid);
-	my $story = $self->getStory($stoid);	
+	my $story = $self->getStory($stoid);
+
+	my $prev_rel_stories = $self->getRelatedStoriesForStoid($stoid);
+
+	foreach my $prev_rel (@$prev_rel_stories) {
+		if ($prev_rel->{rel_stoid}) {
+			my $rel_stoid_q = $self->sqlQuote($prev_rel->{rel_stoid});
+			$self->sqlDelete("related_stories", "stoid=$rel_stoid_q AND rel_stoid=$stoid_q");
+		}
+	}
+	
 	$self->sqlDelete("related_stories", "stoid = $stoid_q");
 
 	foreach my $rel (keys %$rel_sid_hr) {
@@ -13198,23 +13208,18 @@ sub setRelatedStoriesForStory {
 				rel_stoid => $rel_stoid
 		});
 
-		# XXX - hold off on this for now - we don't want to link to
-		# stories before they go live.  checkStoryViewable should
-		# prevent them from showing up, but want to doublecheck that
-		# and a few other things related to reciprocal deleting of
-		# removed links
-		#       
 		# Insert reciprocal link if it doesn't already exist
-		# my $rel_stoid_q = $self->sqlQuote($rel_stoid);
-		# my $sid_q = $self->sqlQuote($story->{sid});
-		#if (!$self->sqlCount("related_stories", "stoid = $rel_stoid_q AND rel_sid = $sid_q")) {
-		#	$self->sqlInsert(
-		#		"related_stories", {
-		#			stoid   => $rel_stoid,
-		#			rel_sid => $story->{sid},
-		#			rel_stoid => $stoid,
-		#	});
-		#}
+		my $rel_stoid_q = $self->sqlQuote($rel_stoid);
+		my $sid_q = $self->sqlQuote($story->{sid});
+		if (!$self->sqlCount("related_stories", "stoid = $rel_stoid_q AND rel_sid = $sid_q")) {
+			$self->sqlInsert(
+				"related_stories", {
+					stoid   => $rel_stoid,
+					rel_sid => $story->{sid},
+					rel_stoid => $stoid,
+			});
+			$self->markStoryDirty($rel_stoid);
+		}
 	}
 	
 	foreach my $rel_url (keys %$rel_url_hr) {
