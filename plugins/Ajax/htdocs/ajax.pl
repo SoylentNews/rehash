@@ -257,7 +257,7 @@ print STDERR scalar(localtime) . " tagsGetUserStory stoid='$stoid' user-is='$use
 	my @tags = sort map { $_->{tagname} } @$tags_ar;
 use Data::Dumper; print STDERR scalar(localtime) . " tagsGetUserStory for stoid=$stoid uid=$uid tags: '@tags' tags_ar: " . Dumper($tags_ar);
 
-	print getData('tags_user', { tags => \@tags }, 'tags');
+	return getData('tags_user', { tags => \@tags }, 'tags');
 }
 
 sub tagsCreateForStory {
@@ -289,7 +289,7 @@ print STDERR scalar(localtime) . " tagsCreateForStory stoid='$stoid' user-is='$u
 				id =>		$stoid
 			});
 	}
-	print getData('tags_saved', {}, 'tags');
+	return getData('tags_saved', {}, 'tags');
 }
 
 sub adminTagsCommands {
@@ -316,7 +316,7 @@ print STDERR scalar(localtime) . " adminTagsCommands stoid='$stoid' seclev='$use
 		# do it
 	}
 
-	print getData('tags_admin_result', { results => \@results }, 'tags');
+	return getData('tags_admin_result', { results => \@results }, 'tags');
 }
 
 ##################################################################
