@@ -1,3 +1,5 @@
+// $Id$
+
 function toggleIntro(id, toggleid) {
 	var obj = $(id);
 	var toggle = $(toggleid);
@@ -47,24 +49,12 @@ function tagsShowBody(stoid) {
 		var params = [];
 		params['op'] = 'tagsGetUserStory';
 		params['stoid'] = stoid;
-		var h = $H(params);
-		var ajax = new Ajax.Updater(
-			{ success: tagsuserid },
-			url,
-			{ method: 'post', parameters: h.toQueryString(), onFailure: reportError }
-		);
+		ajax_update(params, tagsuserid);
 	}
 }
 
 function tagsOpenAndEnter(stoid, tagname) {
-	var bodyid = 'toggletags-body-' + stoid;
-	var buttonid = 'toggletags-button-' + stoid;
-        var body = $(bodyid);
-        var button = $(buttonid);
-        if (body.className == 'tagshide') {
-                body.className = "tags"
-                button.innerHTML = "[-]";
-        }
+	tagsShowBody(stoid);
 
 	var textinputid = 'newtags-' + stoid;
 	var textinput = $(textinputid);

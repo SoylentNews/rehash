@@ -1,3 +1,5 @@
+// $Id$
+
 function adminStorySignoff(el) {
 	var params = [];
 	params['op'] = 'storySignOff';
