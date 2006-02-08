@@ -3667,7 +3667,7 @@ ALTER TABLE remarks ADD INDEX priority (priority);
 # for the plugin
 UPDATE ajax_ops SET reskey_type = 'createuse' WHERE op = 'remarks_fetch';
 
-# 2006-02-07
+# 2006-02-08
 UPDATE vars SET value = 'T_2_5_0_99' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
