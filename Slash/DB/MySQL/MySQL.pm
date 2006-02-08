@@ -8155,7 +8155,6 @@ sub getStoriesEssentials {
 	my $min_stoid = $self->getVar('gse_min_stoid', 'value', 1) || 0;
 	my $fallback_min_stoid = 0;
 	$fallback_min_stoid = $self->getVar('gse_fallback_min_stoid', 'value', 1) || 0 if $constants->{gse_mp_max_days_back};
-	print STDERR "FMS $fallback_min_stoid\n";
 	my $mp_tid = $constants->{mainpage_nexus_tid};
 
 	# Canonicalize all arguments passed in.  First the scalars.
@@ -8264,7 +8263,6 @@ sub getStoriesEssentials {
 		$min_stoid = 0;
 	} 
 
-	print STDERR "Min stoid: $min_stoid\n";
 	# Build the WHERE clauses necessary and do the first select(s),
 	# on story_topics_rendered.
 	# There will always be at least one tid, since it defaults
