@@ -77,12 +77,7 @@ sub createRemark {
 	my($slashdb, $constants, $user, $form, $gSkin, $schedule) = @_;
 
 	my($remark) = $form->{remark};
-	$slashdb->createRemark(
-		$constants->{anonymous_coward_uid},
-		0,
-		$remark,
-		'system'
-	);
+	$slashdb->createRemark($remark, { type => 'system' });
 	1;
 }
 

@@ -52,7 +52,7 @@ sub main {
 
 sub display {
 	my($slashdb, $constants, $user, $form, $gSkin, $remarks) = @_;
-	print $remarks->displayRemarksTable({ max => 30, dodiv => 1 });
+	print $remarks->displayRemarksTable({ max => 30, print_whole => 1 });
 }
 
 sub save_prefs {

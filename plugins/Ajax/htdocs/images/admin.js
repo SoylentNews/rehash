@@ -2,7 +2,7 @@ function adminStorySignoff(el) {
 	var params = [];
 	params['op'] = 'storySignOff';
 	params['stoid'] = el.value;
-	ajax_submit(params, 'signoff_' + el.value);
+	ajax_update(params, 'signoff_' + el.value);
 	
 }
 
@@ -10,7 +10,7 @@ function adminTagsCommands(stoid) {
 	var params = [];
 	params['op'] = 'adminTagsCommands';
 	params['stoid'] = stoid;
-	ajax_submit(params, 'toggletags-message-' + stoid);
+	ajax_update(params, 'toggletags-message-' + stoid);
 }
 
 
@@ -26,50 +26,13 @@ function remarks_create() {
 	params['remark'] = remark.value;
 	params['reskey'] = reskey.value;
 
-	ajax_submit(params, 'remarks_table');
-
-	remark.value = '';
-
-	return false;
+	ajax_update(params, 'remarks_whole');
 }
 
-function remarks_fetch() {
-	var reskey = $('remarks_reskey');
-	if (!reskey || !reskey.value) {
-		return false;
-	}
-
+function remarks_fetch(secs) {
 	var params = [];
-	params['op']     = 'remarks_fetch';
-	params['reskey'] = reskey.value;
-
-	ajax_submit(params, 'remarks_table');
-
-	// reset timer
-	run_timer('remarks_fetch()', 30);
-
-	return false;
-}
-
-// put below in common.js? -- pudge
-
-// call this once from your HTML, then again at end of JS routine being
-// called, to have it continually refreshing
-function run_timer(func, secs) {
-	setTimeout(func, (secs * 1000));
-}
-
-
-function ajax_submit(params, div, url) {
-	var h = $H(params);
-	if (!url) {
-		url = '/ajax.pl';
-	}
-	
-	var ajax = new Ajax.Updater(
-		{ success: div },
-		url,
-		{ method: 'post', parameters: h.toQueryString() }
-	);
+	params['op'] = 'remarks_fetch';
+	// run it every 30 seconds; don't need to call again
+	ajax_periodic_update(secs, params, 'remarks_table');
 }
 

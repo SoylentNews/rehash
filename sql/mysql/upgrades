@@ -3659,5 +3659,16 @@ ALTER TABLE reskey_resource_checks CHANGE COLUMN rkrid rkrid SMALLINT UNSIGNED N
 ALTER TABLE reskey_vars CHANGE COLUMN rkrid rkrid SMALLINT UNSIGNED NOT NULL;
 ALTER TABLE reskeys CHANGE COLUMN rkrid rkrid SMALLINT UNSIGNED NOT NULL;
 
+ALTER TABLE remarks ADD COLUMN priority SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER stoid;
+ALTER TABLE remarks ADD INDEX priority (priority);
+
+# only do if you already installed Ajax plugin recently ... if you had it installed
+# from awhile ago, important: go back and install the schema, then the dump, files
+# for the plugin
+UPDATE ajax_ops SET reskey_type = 'createuse' WHERE op = 'remarks_fetch';
+
+# 2006-02-07
+UPDATE vars SET value = 'T_2_5_0_99' WHERE name = 'cvs_tag_currentcode';
+
 # PUDGE LAST UPDATED HERE
 

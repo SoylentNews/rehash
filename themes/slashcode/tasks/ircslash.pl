@@ -912,10 +912,17 @@ sub handle_remarks {
 	my $constants = getCurrentStatic();
 	$next_remark_id ||= $slashdb->getVar('ircslash_nextremarkid', 'value', 1) || 1;
 	my $system_remarks_ar = $remarks->getRemarksStarting($next_remark_id, { type => 'system' });
-	
+
+	my $sidprefix = "$constants->{absolutedir_secure}/article.pl?sid=";
+
 	my $max_rid = 0;
 	for my $system_remarks_hr (@$system_remarks_ar) {
-		send_msg($system_remarks_hr->{remark});
+		my $remark = $system_remarks_hr->{remark};
+		if ($system_remarks_hr->{stoid}) {
+			my $story = $slashdb->getStory($system_remarks_hr->{stoid});
+			$remark .= " <$sidprefix$story->{sid}>";
+		}
+		send_msg($remark);
 		$max_rid = $system_remarks_hr->{rid} if $system_remarks_hr->{rid} > $max_rid;
 	}
 
@@ -973,7 +980,6 @@ sub handle_remarks {
 	# about stories that are getting lots of remarks, so we don't
 	# hear over and over about the same story.
 	my $regex = regexSid();
-	my $sidprefix = "$constants->{absolutedir_secure}/article.pl?sid=";
 	STORY: for my $stoid (sort { $stoid_count{$a} <=> $stoid_count{$b} } %stoid_count) {
 		# Skip a story that has already been live for a while.
 		my $time_unix = $story{$stoid}{time_unix};

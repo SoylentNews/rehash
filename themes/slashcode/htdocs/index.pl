@@ -236,9 +236,11 @@ my $start_time = Time::HiRes::time;
 		my $targetsid = getSidFromRemark($remark);
 		$remark = $targetsid if $targetsid;
 		if ($story) {
-			$slashdb->createRemark($user->{uid},
-				$story->{stoid},
-				$remark);
+			my $remarks = getObject('Slash::Remarks');
+			$remarks->createRemark($remark, {
+				uid	=> $user->{uid},
+				stoid	=> $story->{stoid}
+			});
 			print getData('remark_thanks');
 		}
 	}

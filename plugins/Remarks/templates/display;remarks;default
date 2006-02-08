@@ -11,33 +11,43 @@ __name__
 display
 __template__
 
-[% IF dodiv %]<div><input id="remarks_new" type="text"><input type="button" id="remarks_new_button" value="Create" onclick="remarks_create();"></div>
-<div id="remarks_table">[% END %]
-
+[% IF print_whole %]
 <!-- reload this div every 30 seconds -->
-<script type="text/javascript">run_timer('remarks_fetch()', 30);</script>
+<script type="text/javascript">remarks_fetch(30);</script>
 
-[% PROCESS ajax_reskey_tag reskey_name => 'remarks_reskey', reskey_resource => 'ajax_admin' %]
+<div id="remarks_whole">
+[% END;
+
+   IF print_div || print_whole %]
+	<input id="remarks_new" type="text">
+	<input type="button" id="remarks_new_button" value="Say" onclick="remarks_create();">
+	[% PROCESS ajax_reskey_tag reskey_name => 'remarks_reskey', reskey_resource => 'ajax_admin' %]
+
+<div id="remarks_table">
+[% END %]
+
 <table class="data">
 	<tr class="data_head">
-		<th colspan="4">Remarks</th>
+		<th colspan="5">Remarks (Last Updated [% Slash.timeCalc(Slash.db.getTime, '%Y-%m-%d %H:%M:%S %Z', 0) %])</th>
 	</tr>
 [% i = 1; FOREACH remark = remarks_ref; i = i == 1 ? 2 : 1 %]
 	<tr class="data_hl[% i %]"> <!-- remark.id:[% remark.rid %] -->
-		<td>[% Slash.timeCalc(remark.time) %]</td>
-		<td>[% Slash.db.getUser(remark.uid, 'nickname') || 0 %]</td>
+		<td>[% Slash.timeCalc(remark.time, '%H:%M:%S', 0) %]</td>
+		<td>[% IF !Slash.isAnon(remark.uid); Slash.db.getUser(remark.uid, 'nickname'); END %]</td>
+		<td>[% remark.priority || 0 %]</td>
 		<td>[% Slash.chopEntity(remark.remark, 120) %]</td>
 		<td>[% IF remark.stoid;
 			thisstory = Slash.db.getStory(remark.stoid);
 			IF thisstory %]<a href="[% gSkin.rootdir %]/admin.pl?sid=[% thisstory.sid %]&amp;op=edit"
-				>[% thisstory.title | strip_literal %]</a>[%
+				>Edit</a>[%
 			END;
 		    END -%]
 		</td>			
 	</tr>
-[% END %]
+[% END # FOREACH %]
 </table>
-[% IF dodiv %]</div>[% END %]
+[% IF print_div || print_whole %]</div>[% END %]
+[% IF print_whole %]</div>[% END %]
 
 __seclev__
 10000

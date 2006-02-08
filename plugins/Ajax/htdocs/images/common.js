@@ -1,6 +1,6 @@
 function toggleIntro(id, toggleid) {
-	var obj = document.getElementById(id);
-	var toggle = document.getElementById(toggleid);
+	var obj = $(id);
+	var toggle = $(toggleid);
 	if (obj.className == 'introhide') {
 		obj.className = "intro"
 		toggle.innerHTML = "[-]";
@@ -12,7 +12,7 @@ function toggleIntro(id, toggleid) {
 
 function tagsToggleStoryDiv(stoid) {
 	var bodyid = 'toggletags-body-' + stoid;
-        var tagsbody = document.getElementById(bodyid);
+        var tagsbody = $(bodyid);
 	if (tagsbody.className == 'tagshide') {
 		tagsShowBody(stoid);
 	} else {
@@ -23,8 +23,8 @@ function tagsToggleStoryDiv(stoid) {
 function tagsHideBody(stoid) {
 	var tagsbodyid = 'toggletags-body-' + stoid;
 	var tagsbuttonid = 'toggletags-button-' + stoid;
-        var tagsbody = document.getElementById(tagsbodyid);
-        var tagsbutton = document.getElementById(tagsbuttonid);
+        var tagsbody = $(tagsbodyid);
+        var tagsbutton = $(tagsbuttonid);
 	tagsbody.className = "tagshide"
 	tagsbutton.innerHTML = "[+]";
 }
@@ -33,9 +33,9 @@ function tagsShowBody(stoid) {
 	var tagsbodyid = 'toggletags-body-' + stoid;
 	var tagsbuttonid = 'toggletags-button-' + stoid;
 	var tagsuserid = 'tags-user-' + stoid;
-        var tagsbody = document.getElementById(tagsbodyid);
-        var tagsbutton = document.getElementById(tagsbuttonid);
-	var tagsuser = document.getElementById(tagsuserid);
+        var tagsbody = $(tagsbodyid);
+        var tagsbutton = $(tagsbuttonid);
+	var tagsuser = $(tagsuserid);
 	tagsbody.className = "tags"
 	tagsbutton.innerHTML = "[-]";
 	if (tagsuser.innerHTML == "") {
@@ -43,7 +43,7 @@ function tagsShowBody(stoid) {
 		// filled with the tags this user has already
 		// specified for this story.
 		tagsuser.innerHTML = "Retrieving...";
-		var url = 'ajax.pl';
+		var url = '/ajax.pl';
 		var params = [];
 		params['op'] = 'tagsGetUserStory';
 		params['stoid'] = stoid;
@@ -59,15 +59,15 @@ function tagsShowBody(stoid) {
 function tagsOpenAndEnter(stoid, tagname) {
 	var bodyid = 'toggletags-body-' + stoid;
 	var buttonid = 'toggletags-button-' + stoid;
-        var body = document.getElementById(bodyid);
-        var button = document.getElementById(buttonid);
+        var body = $(bodyid);
+        var button = $(buttonid);
         if (body.className == 'tagshide') {
                 body.className = "tags"
                 button.innerHTML = "[-]";
         }
 
 	var textinputid = 'newtags-' + stoid;
-	var textinput = document.getElementById(textinputid);
+	var textinput = $(textinputid);
 	textinput.value = textinput.value + ' ' + tagname;
 }
 
@@ -77,22 +77,58 @@ function reportError(request) {
 }
 
 function tagsCreateForStory(stoid) {
-	url = "ajax.pl";
-
 	var toggletags_message_id = 'toggletags-message-' + stoid;
-	var toggletags_message_el = document.getElementById(toggletags_message_id);
+	var toggletags_message_el = $(toggletags_message_id);
 	toggletags_message_el.innnerHTML = 'Saving tags...';
 
 	var params = [];
 	params['op'] = 'tagsCreateForStory';
 	params['stoid'] = stoid;
-	var newtagsel = document.getElementById('newtags-' + stoid);
+	var newtagsel = $('newtags-' + stoid);
 	params['tags'] = newtagsel.value;
+
+	ajax_update(params, toggletags_message_id);
+}
+
+
+// helper functions
+
+function ajax_update(params, onsucc, onfail, url) {
 	var h = $H(params);
+	if (!url) {
+		url = '/ajax.pl';
+	}
 	
 	var ajax = new Ajax.Updater(
-		{ success: toggletags_message_id },
+		{
+			success: onsucc,
+			failure: onfail
+		},
 		url,
-		{ method: 'post', parameters: h.toQueryString() } );
+		{
+			method:		'post',
+			parameters:	h.toQueryString()
+		}
+	);
+}
+
+function ajax_periodic_update(secs, params, onsucc, onfail, url) {
+	var h = $H(params);
+	if (!url) {
+		url = '/ajax.pl';
+	}
+	
+	var ajax = new Ajax.PeriodicalUpdater(
+		{
+			success: onsucc,
+			failure: onfail
+		},
+		url,
+		{
+			method:		'post',
+			parameters:	h.toQueryString(),
+			frequency:	secs
+		}
+	);
 }
 

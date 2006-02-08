@@ -9205,9 +9205,13 @@ sub createSignoff {
 	if ($send_message) {
 		my $s_user = $self->getUser($uid);
 		my $story = $self->getStory($stoid);
-		my $message = "$s_user->{nickname} $signoff_type $story->{title} $constants->{absolutedir_secure}/admin.pl?op=edit&sid=$story->{sid}";
+		my $message = "$s_user->{nickname} $signoff_type $story->{title}";
 		my $remarks = getObject('Slash::Remarks');
-		$remarks->createRemark($uid, "", $message, "system");
+		$remarks->createRemark($message, {
+			uid	=> $uid,
+			stoid	=> $stoid,
+			type	=> 'system'
+		});
 	}
 }
 
