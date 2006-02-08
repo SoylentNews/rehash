@@ -578,7 +578,9 @@ sub getUpdateClauses {
 
 	my $srcid = $self->getSrcid;
 
-	my $where_base = "rkid=$reskey_obj->{rkid}";
+	my $rkrid = $self->rkrid;
+
+	my $where_base = "rkid=$reskey_obj->{rkid} AND rkrid=$rkrid";
 	$where_base .= " AND is_alive='yes'" unless $no_is_alive_check;
 	if ($$where) {
 		$$where .= " AND $where_base";
