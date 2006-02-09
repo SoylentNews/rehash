@@ -25,7 +25,7 @@ sub doCheck {
 		return RESKEY_SUCCESS;
 	}
 
-	for my $check (qw(is_admin seclev is_subscriber karma)) {
+	for my $check (qw(is_admin seclev is_subscriber karma tags_canread_stories tags_canwrite_stories)) {
 		my $value = $check_vars->{"user_${check}"};
 		if (defined $value && length $value && (!$user->{$check} || $user->{$check} < $value)) {
 			return(RESKEY_DEATH, ["$check too low", { needed => $value }]);

@@ -3650,8 +3650,6 @@ CREATE TABLE related_stories (
 # 2006-02-01
 UPDATE vars SET value = 'T_2_5_0_98' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 ALTER TABLE reskey_resources CHANGE COLUMN rkrid rkrid SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT;
@@ -3671,4 +3669,6 @@ UPDATE ajax_ops SET reskey_type = 'createuse' WHERE op = 'remarks_fetch';
 UPDATE vars SET value = 'T_2_5_0_99' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
