@@ -4776,11 +4776,11 @@ sub checkResponseTime {
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 
-	my $now =  time();
+	my $now = $self->getTime({ unix_format => 1 });
 
 	my $response_limit = $constants->{"${formname}_response_limit"} || 0;
+	return 0 if !$response_limit;
 
-	# 1 or 0
 	my($response_time) = $self->sqlSelect("$now - ts", 'formkeys',
 		'formkey = ' . $self->sqlQuote($form->{formkey}));
 
@@ -4789,7 +4789,8 @@ sub checkResponseTime {
 		print STDERR "LIMIT REACHED $response_time\n";
 	}
 
-	return ($response_time < $response_limit && $response_time > 0) ? $response_time : 0;
+	return ($response_time && $response_time > 0 && $response_time < $response_limit)
+		? $response_time : 0;
 }
 
 ########################################################
@@ -9643,14 +9644,13 @@ sub _getMCDStats_percentify {
 # right-hand side into a data template, would be a slightly-
 # prettier compromise.  I'm just saying. - Jamie
 sub autoUrl {
-	my $self = shift;
-	my $section = shift;
-	local $_ = join ' ', @_;
+	my($self, $section, @data) = @_;
+	my $data = join ' ', @data;
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
-	s/([0-9a-z])\?([0-9a-z])/$1'$2/gi if $form->{fixquotes};
-	s/\[([^\]]+)\]/linkNode($1)/ge if $form->{autonode};
+	$data =~ s/([0-9a-z])\?([0-9a-z])/$1'$2/gi if $form->{fixquotes};
+	$data =~ s/\[([^\]]+)\]/linkNode($1)/ge if $form->{autonode};
 
 	my $initials = substr $user->{nickname}, 0, 1;
 	my $more = substr $user->{nickname}, 1;
@@ -9659,16 +9659,16 @@ sub autoUrl {
 	my($now) = timeCalc(scalar localtime, '%m/%d %H:%M %Z', 0);
 
 	# Assorted Automatic Autoreplacements for Convenience
-	s|<disclaimer:(.*)>|<b><a href="/about.shtml#disclaimer">disclaimer</a>:<a href="$user->{homepage}">$user->{nickname}</a> owns shares in $1</b>|ig;
-	s|<update>|<b>Update: <date></b> by <author>|ig;
-	s|<date>|$now|g;
-	s|<author>|<b><a href="$user->{homepage}">$initials</a></b>:|ig;
+	$data =~ s|<disclaimer:(.*)>|<b><a href="/about.shtml#disclaimer">disclaimer</a>:<a href="$user->{homepage}">$user->{nickname}</a> owns shares in $1</b>|ig;
+	$data =~ s|<update>|<b>Update: <date></b> by <author>|ig;
+	$data =~ s|<date>|$now|g;
+	$data =~ s|<author>|<b><a href="$user->{homepage}">$initials</a></b>:|ig;
 
 	# Assorted ways to add files:
-	s|<import>|importText()|ex;
-	s/<image(.*?)>/importImage($section)/ex;
-	s/<attach(.*?)>/importFile($section)/ex;
-	return $_;
+	$data =~ s|<import>|importText()|ex;
+	$data =~ s/<image(.*?)>/importImage($section)/ex;
+	$data =~ s/<attach(.*?)>/importFile($section)/ex;
+	return $data;
 }
 
 #################################################################
