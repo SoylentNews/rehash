@@ -487,8 +487,8 @@ print STDERR scalar(localtime) . " ajaxCreateForStory 3 for stoid=$stoid tagname
 sub ajaxProcessAdminTags {
 	my($self, $constants, $user, $form) = @_;
 	my $commands = $form->{commands};
-print STDERR scalar(localtime) . " ajaxProcessAdminTags does nothing yet; stoid=$stoid commands='$commands'\n";
 	my $stoid = $form->{stoid};
+print STDERR scalar(localtime) . " ajaxProcessAdminTags does nothing yet; stoid=$stoid commands='$commands'\n";
 	my $tags = getObject('Slash::Tags', { db_type => 'reader' });
 	my @commands =
 		grep { $tags->adminPseudotagnameSyntaxOK($_) }
