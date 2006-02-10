@@ -409,7 +409,7 @@ print STDERR scalar(localtime) . " ajaxGetUserStory stoid='$stoid' user-is_anon=
 	my $uid = $user->{uid};
 
 	my @newtagspreload =
-		grep { $self->tagnameSyntaxOK($_) }
+		grep { $tags_reader->tagnameSyntaxOK($_) }
 		split /[\s,]+/,
 		($form->{newtagspreloadtext} || '');
 	my $newtagspreloadtext = join ' ', @newtagspreload;
