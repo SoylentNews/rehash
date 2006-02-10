@@ -1,0 +1,56 @@
+__section__
+default
+__description__
+story = this story's data
+tags_example = array of example clickable tags
+tags_top = array of zero or more clickable tags, the most popular on this story
+__title__
+
+__page__
+index
+__lang__
+en_US
+__name__
+tagsstorydivtagbox
+__template__
+
+<div id="tagbox-[% story.stoid %]">
+
+&nbsp;<a href="javascript: tagsToggleStoryDiv([% story.stoid %], '[% user.is_admin %]');"><span class="tagsheader" id="toggletags-button-[% story.stoid %]">[+]</span></a>
+[% IF tags_top.count %]
+	[% FOR t = tags_top %]
+		<span class="tagname">
+		<a href="javascript: tagsOpenAndEnter([% story.stoid %], '[% t %]', '[% user.is_admin %]')">[% t | strip_html %]</a>
+		</span>
+		[% IF !loop.last() %], [% END %]
+	[% END %]
+[% END %]
+<font size=-1><i>(<a href="/faq/tags.shtml">tagging beta</a>)</i></font>
+
+<div class="tagshide" id="toggletags-body-[% story.stoid %]">
+
+[% IF tags_example.count %]
+	<div><i>Examples:</i>
+	[% FOR t = tags_example %]
+		<span class="tagname">
+		<a href="javascript: tagsOpenAndEnter([% story.stoid %], '[% t %]', '[% user.is_admin %]')">[% t | strip_html %]</a>
+		</span>
+		[% IF !loop.last() %], [% END %]
+	[% END %]
+	</div>
+[% END %]
+
+[%# The tags-user-# div starts out empty, we only populate it if the user expands the toggletags-body-# div, because it requires a read of the user's tags and a write to generate a reskey. %]
+
+<div id="tags-user-[% story.stoid %]"></div>
+
+<div id="tags-admin-[% story.stoid %]"></div>
+
+<div id="toggletags-message-[% story.stoid %]"></div>
+
+</div>
+
+__seclev__
+10000
+__version__
+$Id$

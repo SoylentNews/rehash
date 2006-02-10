@@ -11,8 +11,8 @@ CREATE TABLE tags (
 	created_at	datetime NOT NULL,
 	PRIMARY KEY tagid (tagid),
 	KEY tagnameid (tagnameid),
-	KEY globjid (globjid),
-	KEY uid (uid),
+	KEY globjid_tagnameid (globjid, tagnameid),
+	KEY uid_globjid_tagnameid (uid, globjid, tagnameid),
 	KEY created_at (created_at)
 ) TYPE=InnoDB;
 

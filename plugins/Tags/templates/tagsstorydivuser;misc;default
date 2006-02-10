@@ -1,0 +1,27 @@
+__section__
+default
+__description__
+stoid = the story's stoid
+tags_user_str = list of user's tags, fed thru tags_user data, e.g. "Your Tags: foo, bar"
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+tagsstorydivuser
+__template__
+
+<div>[% tags_user_str %]</div>
+
+<form name="tags-[% stoid %]">
+[% PROCESS ajax_reskey_tag reskey_name => 'newtags-reskey-' _ stoid, reskey_resource => 'ajax_tags_write' %]
+<input type="text" id="newtags-[% stoid %]" name="newtags-[% stoid %]" value="" size=20 maxlength=100>
+<a href="javascript: tagsCreateForStory([% stoid %]);">Tag</a>
+</form>
+
+__seclev__
+10000
+__version__
+$Id$

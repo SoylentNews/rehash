@@ -1,0 +1,28 @@
+__section__
+default
+__description__
+story = this story's data
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+tagsstorydivadmin
+__template__
+
+[% IF user.is_admin %]
+
+<form name="tags_admin-[% story.stoid %]">
+[% PROCESS reskey something %]
+<input type="text" id="tags_admin_commands-[% story.stoid %]" name="tags_admin_commands-[% story.stoid %]" value="" size=20 maxlength=100>
+<a href="javascript: adminTagsCommands([% story.stoid %]);">Admin</a>
+</form>
+
+[% END %]
+
+__seclev__
+10000
+__version__
+$Id$

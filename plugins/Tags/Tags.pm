@@ -6,6 +6,8 @@
 package Slash::Tags;
 
 use strict;
+use Slash;
+use Slash::Display;
 use Slash::Utility;
 use Slash::DB::Utility;
 use Apache::Cookie;
@@ -52,9 +54,13 @@ sub new {
 #
 # This method takes care of creating the tagname and/or globj, if they
 # do not already exists, so that the tag may connect them.
+#
+# By default, this does not allow the same user to apply the same
+# tagname to the same global object twice.  Pass the option hashref
+# field 'dupe_ok' with a true value to ignore this check.
 
 sub createTag {
-        my($self, $hr) = @_;
+        my($self, $hr, $options) = @_;
 
         my $tag = { -created_at => 'NOW()' };
 
@@ -76,7 +82,42 @@ sub createTag {
         }
 	return 0 if !$tag->{globjid};
 
+	my $check_dupe = (!$options || !$options->{dupe_ok});
+	if ($check_dupe) {
+		# Check to make sure this user hasn't already tagged
+		# this object with this tagname.  We do this by, in
+		# a transaction, doing the insert and checking to see
+		# whether there are 1 or more rows in the table
+		# preceding the one just inserted with matching the
+		# criteria.  If so, the insert is rolled back and
+		# 0 is returned.
+		$self->sqlDo('SET AUTOCOMMIT=0');
+	}
+
         my $rows = $self->sqlInsert('tags', $tag);
+
+	if ($check_dupe) {
+		my $tagid = $self->getLastInsertId();
+		# Because of the uid_globjid_tagnameid index, this
+		# should, I believe, not even touch table data, so
+		# it should be very fast.
+		my $count = $self->sqlCount('tags',
+			"uid		= $tag->{uid}
+			 AND globjid	= $tag->{globjid}
+			 AND tagnameid	= $tag->{tagnameid}
+			 AND tagid < $tagid");
+		if ($count == 0) {
+			# This is the only tag, it's allowed.
+			$self->sqlDo('COMMIT');
+		} else {
+			# Duplicate tag, not allowed.
+			$self->sqlDo('ROLLBACK');
+			$rows = 0;
+		}
+		# Return AUTOCOMMIT to its original state in any case.
+		$self->sqlDo('SET AUTOCOMMIT=1');
+	}
+
         return $rows ? 1 : 0;
 }
 
@@ -346,12 +387,86 @@ sub tagnameSyntaxOK {
 	return (!$regex || $tagname =~ /$regex/);
 }
 
-sub adminTagnameSyntaxOK {
+sub adminPseudotagnameSyntaxOK {
 	my($self, $tagname) = @_;
-	my $constants = getCurrentStatic();
-	my $regex = $constants->{tags_tagname_regex};
-	# $regex = FIXME;
-	return (!$regex || $tagname =~ /$regex/);
+	return 0 if substr($tagname, 0, 1) !~ /^[\&\_\#]$/;
+	return $self->tagnameSyntaxOK(substr($tagname, 1));
+}
+
+sub ajaxGetUserStory {
+	my($self, $constants, $user, $form) = @_;
+	use Data::Dumper;
+	print STDERR scalar(localtime) . " ajaxGetUserStory called, form: " . Dumper($form);
+
+	my $stoid = $form->{stoid};
+	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+use Data::Dumper;
+print STDERR scalar(localtime) . " ajaxGetUserStory stoid='$stoid' user-is_anon='$user->{is_anon}' uid='$user->{uid}' tags_reader='$tags_reader' form: " . Dumper($form);
+	if (!$stoid || $stoid !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
+		print getData('error', {}, 'tags');
+		return;
+	}
+	my $uid = $user->{uid};
+
+	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid, { uid => $uid });
+	my @tags = sort map { $_->{tagname} } @$tags_ar;
+print STDERR scalar(localtime) . " tagsGetUserStory for stoid=$stoid uid=$uid tags: '@tags' tags_ar: " . Dumper($tags_ar);
+	my $tags_user_str = getData('tags_user', { tags => \@tags }, 'tags');
+
+	return slashDisplay('tagsstorydivuser', {
+		stoid =>		$stoid,
+		tags_user_str =>	$tags_user_str,
+	}, { Return => 1 });
+}
+
+sub ajaxCreateForStory {
+	my($slashdb, $constants, $user, $form) = @_;
+	my $stoid = $form->{stoid};
+	my $tags = getObject('Slash::Tags');
+print STDERR scalar(localtime) . " ajaxCreateForStory 1 stoid='$stoid' user-is='$user->{is_anon}' uid='$user->{uid}' tags='$tags'\n";
+	if (!$stoid || $stoid !~ /^\d+$/ || $user->{is_anon} || !$tags) {
+		return getData('error', {}, 'tags');
+	}
+
+	my @tagnames =
+		grep { $tags->tagnameSyntaxOK($_) }
+		split /[\s,]+/,
+		($form->{tags} || '');
+print STDERR scalar(localtime) . " ajaxCreateForStory 2 tagnames='@tagnames'\n";
+	if (!@tagnames) {
+		return getData('tags_none_given', {}, 'tags');
+	}
+
+	my $uid = $user->{uid};
+	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+	my $old_tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid, { uid => $uid });
+
+	my @saved_tagnames = ( );
+	for my $tagname (@tagnames) {
+		push @saved_tagnames, $tagname
+			if $tags->createTag({
+				uid =>          $user->{uid},
+				name =>         $tagname,
+				table =>        'stories',
+				id =>           $stoid
+			});
+	}
+print STDERR scalar(localtime) . " ajaxCreateForStory 3 old='@$old_tags_ar' saved='@saved_tagnames'\n";
+
+	my @new_tags = (sort map { $_->{tagname} } @$old_tags_ar), @saved_tagnames;
+	my $tags_user_str = getData('tags_user', { tags => \@new_tags }, 'tags');
+
+	my $retval = slashDisplay('tagsstorydivuser', {
+		stoid =>		$stoid,
+		tags_user_str =>	$tags_user_str,
+	}, { Return => 1 });
+print STDERR scalar(localtime) . " ajaxCreateForStory 3 for stoid=$stoid tagnames='@tagnames' returning: $retval\n";
+	return $retval;
+}
+
+sub ajaxProcessAdminTags {
+	my($self, $constants, $user, $form) = @_;
+	my $commands = $form->{commands};
 }
 
 #################################################################
