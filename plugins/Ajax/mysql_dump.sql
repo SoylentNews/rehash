@@ -2,11 +2,6 @@
 # $Id$
 #
 
-DELETE FROM reskey_resources WHERE rkrid >= 100;
-DELETE FROM reskey_resource_checks WHERE rkrid >= 100;
-DELETE FROM reskey_vars WHERE rkrid >= 100;
-
-
 INSERT INTO reskey_resources VALUES (100, 'ajax_base');
 INSERT INTO reskey_resources VALUES (101, 'ajax_admin');
 INSERT INTO reskey_resources VALUES (102, 'ajax_user');
