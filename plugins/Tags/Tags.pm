@@ -467,6 +467,8 @@ print STDERR scalar(localtime) . " ajaxCreateForStory 3 for stoid=$stoid tagname
 sub ajaxProcessAdminTags {
 	my($self, $constants, $user, $form) = @_;
 	my $commands = $form->{commands};
+print STDERR scalar(localtime) . " adminProcessAdminTags does nothing yet; commands='$commands'\n";
+	return '';
 }
 
 #################################################################
