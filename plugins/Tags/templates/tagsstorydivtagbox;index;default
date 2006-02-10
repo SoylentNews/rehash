@@ -13,10 +13,9 @@ en_US
 __name__
 tagsstorydivtagbox
 __template__
-
 <div id="tagbox-[% story.stoid %]">
 
-<div id="tagbox-title-[% story.stoid %]">&nbsp;<a href="javascript:tagsToggleStoryDiv([% story.stoid %], '[% user.is_admin %]');"><span class="tagsheader" id="toggletags-button-[% story.stoid %]">[+]</span></a>
+<div id="tagbox-title-[% story.stoid %]" class="titleclosed">&nbsp;<a href="javascript:tagsToggleStoryDiv([% story.stoid %], '[% user.is_admin %]');"><span class="tagsheader" id="toggletags-button-[% story.stoid %]">[+]</span></a>
 [% IF tags_top.size %]
 	[% FOR t = tags_top %]
 		<span class="tagname">
@@ -51,7 +50,6 @@ __template__
 </div>
 
 </div>
-
 __seclev__
 10000
 __version__
