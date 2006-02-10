@@ -6,6 +6,9 @@
 # recommend, you need only perform these ALTERs on the slave.
 # Replication from an InnoDB master to a MyISAM slave works.
 
+# XXX Also, see the comment re LOCK IN SHARE MODE in MySQL.pm
+# setCommentForMod().
+
 ALTER TABLE story_text		Type=MyISAM, ADD FULLTEXT title (title), ADD FULLTEXT intro_body (introtext,bodytext);
 ALTER TABLE comments		Type=MyISAM, ADD FULLTEXT subject (subject);
 ALTER TABLE comment_text	Type=MyISAM, ADD FULLTEXT (comment);
