@@ -17,7 +17,7 @@ __template__
 <div id="tagbox-[% story.stoid %]">
 
 &nbsp;<a href="javascript: tagsToggleStoryDiv([% story.stoid %], '[% user.is_admin %]');"><span class="tagsheader" id="toggletags-button-[% story.stoid %]">[+]</span></a>
-[% IF tags_top.count %]
+[% IF tags_top.size %]
 	[% FOR t = tags_top %]
 		<span class="tagname">
 		<a href="javascript: tagsOpenAndEnter([% story.stoid %], '[% t %]', '[% user.is_admin %]')">[% t | strip_html %]</a>
@@ -29,7 +29,7 @@ __template__
 
 <div class="tagshide" id="toggletags-body-[% story.stoid %]">
 
-[% IF tags_example.count %]
+[% IF tags_example.size %]
 	<div><i>Examples:</i>
 	[% FOR t = tags_example %]
 		<span class="tagname">
