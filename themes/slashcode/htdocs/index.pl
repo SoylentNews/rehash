@@ -703,7 +703,7 @@ sub displayStories {
 				if ($user->{tags_canread_stories}) {
 					my @tags_top = split / /, ($story_data->{tags_top} || '');
 					my @tags_example = split / /, $constants->{tags_stories_examples};
-					$tmpreturn .= slashDisplay('tagsstory', {
+					$tmpreturn .= slashDisplay('tagsstorydivtagbox', {
 						story =>	$story,
 						tags_top =>	\@tags_top,
 						tags_example =>	\@tags_example,
