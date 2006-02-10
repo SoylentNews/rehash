@@ -10,11 +10,14 @@ function adminStorySignoff(el) {
 
 function adminTagsCommands(stoid) {
 	var params = [];
-	params['op'] = 'adminTagsCommands';
+	params['op'] = 'tags_admin_commands';
 	params['stoid'] = stoid;
+	var tags_admin_commands_el = $('tags_admin_commands-' + stoid);
+	params['commands'] = newtagsel.value;
+	var reskeyel = $('admin_commands-reskey-' + stoid);
+	params['reskey'] = reskeyel.value;
 	ajax_update(params, 'toggletags-message-' + stoid);
 }
-
 
 function remarks_create() {
 	var reskey = $('remarks_reskey');

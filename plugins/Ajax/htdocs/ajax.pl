@@ -30,6 +30,8 @@ sub main {
 		$ops->{$op}{class} && $ops->{$op}{subroutine}
 	);
 
+#$Slash::ResKey::DEBUG = 2;
+
 	$ops->{$op}{function} ||= loadCoderef($ops->{$op}{class}, $ops->{$op}{subroutine});
 	$op = 'default' unless $ops->{$op}{function};
 
@@ -41,10 +43,11 @@ sub main {
 	if ($reskey_name ne 'NA') {
 		my $reskey = getObject('Slash::ResKey');
 		my $rkey = $reskey->key($reskey_name);
+print STDERR scalar(localtime) . " ajax.pl main no rkey for '$reskey_name'\n" if !$rkey;
 		if ($ops->{$op}{reskey_type} eq 'createuse') {
-			return unless $rkey->createuse;
+			return unless $rkey && $rkey->createuse;
 		} else {
-			return unless $rkey->use;
+			return unless $rkey && $rkey->use;
 		}
 	}
 
@@ -242,56 +245,6 @@ sub storySignOff {
 	return "Signed";
 }
 
-sub tagsGetUserStory {
-	my($slashdb, $constants, $user, $form) = @_;
-	my $stoid = $form->{stoid};
-	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-print STDERR scalar(localtime) . " tagsGetUserStory stoid='$stoid' user-is='$user->{is_anon}' uid='$user->{uid}' tags_reader='$tags_reader'\n";
-	if (!$stoid || $stoid !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
-		print getData('error', {}, 'tags');
-		return;
-	}
-	my $uid = $user->{uid};
-
-	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid, { uid => $uid });
-	my @tags = sort map { $_->{tagname} } @$tags_ar;
-use Data::Dumper; print STDERR scalar(localtime) . " tagsGetUserStory for stoid=$stoid uid=$uid tags: '@tags' tags_ar: " . Dumper($tags_ar);
-
-	return getData('tags_user', { tags => \@tags }, 'tags');
-}
-
-sub tagsCreateForStory {
-	my($slashdb, $constants, $user, $form) = @_;
-	my $stoid = $form->{stoid};
-	my $tags = getObject('Slash::Tags');
-print STDERR scalar(localtime) . " tagsCreateForStory stoid='$stoid' user-is='$user->{is_anon}' uid='$user->{uid}' tags='$tags'\n";
-	if (!$stoid || $stoid !~ /^\d+$/ || $user->{is_anon} || !$tags) {
-		print getData('error', {}, 'tags');
-		return;
-	}
-
-	my @tagnames =
-		grep { $tags->tagnameSyntaxOK($_) }
-		split /[\s,]+/,
-		($form->{tags} || '');
-	if (!@tagnames) {
-		print getData('tags_none_given', {}, 'tags');
-		return;
-	}
-
-	my @saved_tagnames = ( );
-	for my $tagname (@tagnames) {
-		push @saved_tagnames, $tagname
-			if $tags->createTag({
-				uid =>		$user->{uid},
-				name =>		$tagname,
-				table =>	'stories',
-				id =>		$stoid
-			});
-	}
-	return getData('tags_saved', {}, 'tags');
-}
-
 sub adminTagsCommands {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $stoid = $form->{stoid};
@@ -303,7 +256,7 @@ print STDERR scalar(localtime) . " adminTagsCommands stoid='$stoid' seclev='$use
 	}
 
 	my @tagnames =
-		grep { $tags->adminTagnameSyntaxOK($_) }
+		grep { $tags->adminPseudotagnameSyntaxOK($_) }
 		split /[\s,]+/,
 		($form->{tags} || '');
 	if (!@tagnames) {
@@ -365,19 +318,19 @@ sub getOps {
 			reskey_name	=> 'ajax_admin',
 			reskey_type	=> 'createuse',
 		},
-		tagsGetUserStory => {
-			function	=> \&tagsGetUserStory,
-			reskey_type	=> 'createuse',
-		},
-		tagsCreateForStory => {
-			function	=> \&tagsCreateForStory,
-			reskey_type	=> 'createuse',
-		},
-		adminTagsCommands => {
-			function	=> \&adminTagsCommands,
-			reskey_name	=> 'ajax_admin',
-			reskey_type	=> 'createuse',
-		},
+#		tagsGetUserStory => {
+#			function	=> \&tagsGetUserStory,
+#			reskey_type	=> 'createuse',
+#		},
+#		tagsCreateForStory => {
+#			function	=> \&tagsCreateForStory,
+#			reskey_type	=> 'createuse',
+#		},
+#		adminTagsCommands => {
+#			function	=> \&adminTagsCommands,
+#			reskey_name	=> 'ajax_admin',
+#			reskey_type	=> 'createuse',
+#		},
 		default	=> {
 			function	=> \&default,		
 		},

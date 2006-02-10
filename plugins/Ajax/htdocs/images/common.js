@@ -12,11 +12,11 @@ function toggleIntro(id, toggleid) {
 	}
 }
 
-function tagsToggleStoryDiv(stoid) {
+function tagsToggleStoryDiv(stoid, is_admin) {
 	var bodyid = 'toggletags-body-' + stoid;
         var tagsbody = $(bodyid);
 	if (tagsbody.className == 'tagshide') {
-		tagsShowBody(stoid);
+		tagsShowBody(stoid, is_admin);
 	} else {
 		tagsHideBody(stoid);
 	}
@@ -31,29 +31,51 @@ function tagsHideBody(stoid) {
 	tagsbutton.innerHTML = "[+]";
 }
 
-function tagsShowBody(stoid) {
-	var tagsbodyid = 'toggletags-body-' + stoid;
+function tagsShowBody(stoid, is_admin) {
+	// Toggle the button to show the click was received
 	var tagsbuttonid = 'toggletags-button-' + stoid;
-	var tagsuserid = 'tags-user-' + stoid;
-        var tagsbody = $(tagsbodyid);
         var tagsbutton = $(tagsbuttonid);
-	var tagsuser = $(tagsuserid);
-	tagsbody.className = "tags"
 	tagsbutton.innerHTML = "[-]";
+
+	// Make the body of the tagbox visible
+	var tagsbodyid = 'toggletags-body-' + stoid;
+        var tagsbody = $(tagsbodyid);
+	tagsbody.className = "tags";
+
+	// If the tags-user div hasn't been filled, fill it.
+	var tagsuserid = 'tags-user-' + stoid;
+	var tagsuser = $(tagsuserid);
 	if (tagsuser.innerHTML == "") {
 		// The tags-user-123 div is empty, and needs to be
 		// filled with the tags this user has already
-		// specified for this story.
+		// specified for this story, and a reskey to allow
+		// the user to enter more tags.
 		tagsuser.innerHTML = "Retrieving...";
 		var url = '/ajax.pl';
 		var params = [];
-		params['op'] = 'tagsGetUserStory';
+		params['op'] = 'tags_get_user_story';
 		params['stoid'] = stoid;
 		ajax_update(params, tagsuserid);
+
+		// Also fill the admin div.  Note that if the user
+		// is not an admin, this call will not actually
+		// return the necessary form (which couldn't be
+		// submitted anyway).  The is_admin parameter just
+		// saves us an ajax call to find that out, if the
+		// user is not actually an admin.
+		if (is_admin) {
+			var tagsadminid = 'tags-admin-' + stoid;
+			params = [];
+			params['op'] = 'tags_get_admin_story';
+			params['stoid'] = stoid;
+			ajax_update(params, tagsadminid);
+		}
+
 	}
 }
 
 function tagsOpenAndEnter(stoid, tagname) {
+	// This does nothing if the body is already shown.
 	tagsShowBody(stoid);
 
 	var textinputid = 'newtags-' + stoid;
@@ -69,15 +91,20 @@ function reportError(request) {
 function tagsCreateForStory(stoid) {
 	var toggletags_message_id = 'toggletags-message-' + stoid;
 	var toggletags_message_el = $(toggletags_message_id);
-	toggletags_message_el.innnerHTML = 'Saving tags...';
+	toggletags_message_el.innerHTML = 'Saving tags...';
 
 	var params = [];
-	params['op'] = 'tagsCreateForStory';
+	params['op'] = 'tags_create_for_story';
 	params['stoid'] = stoid;
 	var newtagsel = $('newtags-' + stoid);
 	params['tags'] = newtagsel.value;
+	var reskeyel = $('newtags-reskey-' + stoid);
+	params['reskey'] = reskeyel.value;
 
-	ajax_update(params, toggletags_message_id);
+	ajax_update(params, 'tags-user-' + stoid);
+
+	// XXX How to determine failure here?
+	toggletags_message_el.innerHTML = 'Tags saved.';
 }
 
 
