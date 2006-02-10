@@ -16,16 +16,16 @@ __template__
 
 <div id="tagbox-[% story.stoid %]">
 
-&nbsp;<a href="javascript: tagsToggleStoryDiv([% story.stoid %], '[% user.is_admin %]');"><span class="tagsheader" id="toggletags-button-[% story.stoid %]">[+]</span></a>
+<div id="tagbox-title-[% story.stoid %]">&nbsp;<a href="javascript:tagsToggleStoryDiv([% story.stoid %], '[% user.is_admin %]');"><span class="tagsheader" id="toggletags-button-[% story.stoid %]">[+]</span></a>
 [% IF tags_top.size %]
 	[% FOR t = tags_top %]
 		<span class="tagname">
-		<a href="javascript: tagsOpenAndEnter([% story.stoid %], '[% t %]', '[% user.is_admin %]')">[% t | strip_html %]</a>
+		<a href="javascript:tagsOpenAndEnter([% story.stoid %], '[% t %]', '[% user.is_admin %]')">[% t | strip_html %]</a>
 		</span>
 		[% IF !loop.last() %], [% END %]
 	[% END %]
 [% END %]
-<font size=-1><i>(<a href="/faq/tags.shtml">tagging beta</a>)</i></font>
+<i>(<a href="/faq/tags.shtml">tagging beta</a>)</i></div>
 
 <div class="tagshide" id="toggletags-body-[% story.stoid %]">
 
@@ -33,7 +33,7 @@ __template__
 	<div><i>Examples:</i>
 	[% FOR t = tags_example %]
 		<span class="tagname">
-		<a href="javascript: tagsOpenAndEnter([% story.stoid %], '[% t %]', '[% user.is_admin %]')">[% t | strip_html %]</a>
+		<a href="javascript:tagsOpenAndEnter([% story.stoid %], '[% t %]', '[% user.is_admin %]')">[% t | strip_html %]</a>
 		</span>
 		[% IF !loop.last() %], [% END %]
 	[% END %]

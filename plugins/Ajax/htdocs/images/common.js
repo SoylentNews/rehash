@@ -23,11 +23,24 @@ function tagsToggleStoryDiv(stoid, is_admin) {
 }
 
 function tagsHideBody(stoid) {
+	// Make the body of the tagbox vanish
 	var tagsbodyid = 'toggletags-body-' + stoid;
-	var tagsbuttonid = 'toggletags-button-' + stoid;
         var tagsbody = $(tagsbodyid);
-        var tagsbutton = $(tagsbuttonid);
 	tagsbody.className = "tagshide"
+
+	// Make the title of the tagbox change back to regular
+	var titleid = 'tagbox-title-' + stoid;
+        var title = $(titleid);
+	title.className = "";
+
+	// Make the tagbox change back to regular.
+	var tagboxid = 'tagbox-' + stoid;
+        var tagbox = $(tagboxid);
+	tagbox.className = "tags";
+
+	// Toggle the button back.
+	var tagsbuttonid = 'toggletags-button-' + stoid;
+        var tagsbutton = $(tagsbuttonid);
 	tagsbutton.innerHTML = "[+]";
 }
 
@@ -37,10 +50,20 @@ function tagsShowBody(stoid, is_admin, newtagspreloadtext) {
         var tagsbutton = $(tagsbuttonid);
 	tagsbutton.innerHTML = "[-]";
 
+	// Make the tagbox change to the slashbox class
+	var tagboxid = 'tagbox-' + stoid;
+        var tagbox = $(tagboxid);
+	tagbox.className = "block tags";
+
+	// Make the title of the tagbox change to white-on-green
+	var titleid = 'tagbox-title-' + stoid;
+        var title = $(titleid);
+	title.className = "title tags";
+
 	// Make the body of the tagbox visible
 	var tagsbodyid = 'toggletags-body-' + stoid;
         var tagsbody = $(tagsbodyid);
-	tagsbody.className = "tags";
+	tagsbody.className = "content tags";
 
 	// If the tags-user div hasn't been filled, fill it.
 	var tagsuserid = 'tags-user-' + stoid;
@@ -56,7 +79,7 @@ function tagsShowBody(stoid, is_admin, newtagspreloadtext) {
 		params['op'] = 'tags_get_user_story';
 		params['stoid'] = stoid;
 		params['newtagspreloadtext'] = newtagspreloadtext
-		ajax_update_sync(params, tagsuserid);
+		ajax_update(params, tagsuserid);
 
 		// Also fill the admin div.  Note that if the user
 		// is not an admin, this call will not actually
@@ -137,25 +160,25 @@ function ajax_update(params, onsucc, onfail, url) {
 	);
 }
 
-function ajax_update_sync(params, onsucc, onfail, url) {
-	var h = $H(params);
-	if (!url) {
-		url = '/ajax.pl';
-	}
-	
-	var ajax = new Ajax.Updater(
-		{
-			success: onsucc,
-			failure: onfail
-		},
-		url,
-		{
-			method:		'post',
-			parameters:	h.toQueryString(),
-			asynchronous:	true
-		}
-	);
-}
+// function ajax_update_sync(params, onsucc, onfail, url) {
+// 	var h = $H(params);
+// 	if (!url) {
+// 		url = '/ajax.pl';
+// 	}
+// 	
+// 	var ajax = new Ajax.Updater(
+// 		{
+// 			success: onsucc,
+// 			failure: onfail
+// 		},
+// 		url,
+// 		{
+// 			method:		'post',
+// 			parameters:	h.toQueryString(),
+// 			asynchronous:	false
+// 		}
+// 	);
+// }
 
 function ajax_periodic_update(secs, params, onsucc, onfail, url) {
 	var h = $H(params);
