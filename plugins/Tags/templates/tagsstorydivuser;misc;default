@@ -3,6 +3,7 @@ default
 __description__
 stoid = the story's stoid
 tags_user_str = list of user's tags, fed thru tags_user data, e.g. "Your Tags: foo, bar"
+newtagspreloadtext = text to preload the newtags-# field with
 __title__
 
 __page__
@@ -17,7 +18,7 @@ __template__
 
 <form name="tags-[% stoid %]">
 [% PROCESS ajax_reskey_tag reskey_name => 'newtags-reskey-' _ stoid, reskey_resource => 'ajax_tags_write' %]
-<input type="text" id="newtags-[% stoid %]" name="newtags-[% stoid %]" value="" size=60 maxlength=100>
+<input type="text" id="newtags-[% stoid %]" name="newtags-[% stoid %]" value="[% newtagspreloadtext | strip_attribute %]" size=60 maxlength=100>
 <a href="javascript: tagsCreateForStory([% stoid %]);">Tag</a>
 </form>
 

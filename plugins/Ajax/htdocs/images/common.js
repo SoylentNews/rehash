@@ -16,7 +16,7 @@ function tagsToggleStoryDiv(stoid, is_admin) {
 	var bodyid = 'toggletags-body-' + stoid;
         var tagsbody = $(bodyid);
 	if (tagsbody.className == 'tagshide') {
-		tagsShowBody(stoid, is_admin);
+		tagsShowBody(stoid, is_admin, newtagspreloadtext);
 	} else {
 		tagsHideBody(stoid);
 	}
@@ -31,7 +31,7 @@ function tagsHideBody(stoid) {
 	tagsbutton.innerHTML = "[+]";
 }
 
-function tagsShowBody(stoid, is_admin) {
+function tagsShowBody(stoid, is_admin, newtagspreloadtext) {
 	// Toggle the button to show the click was received
 	var tagsbuttonid = 'toggletags-button-' + stoid;
         var tagsbutton = $(tagsbuttonid);
@@ -55,7 +55,8 @@ function tagsShowBody(stoid, is_admin) {
 		var params = [];
 		params['op'] = 'tags_get_user_story';
 		params['stoid'] = stoid;
-		ajax_update(params, tagsuserid);
+		params['newtagspreloadtext'] = newtagspreloadtext
+		ajax_update_sync(params, tagsuserid);
 
 		// Also fill the admin div.  Note that if the user
 		// is not an admin, this call will not actually
@@ -71,16 +72,23 @@ function tagsShowBody(stoid, is_admin) {
 			ajax_update(params, tagsadminid);
 		}
 
+	} else {
+		if (newtagspreloadtext) {
+			// The box was already open but it was requested
+			// that we append some text to the user text.
+			// We can't do that by passing it in, so do it
+			// manually now.
+			var textinputid = 'newtags-' + stoid;
+			var textinput = $(textinputid);
+			textinput.value = textinput.value + ' ' + newtagspreloadtext;
+		}
 	}
 }
 
-function tagsOpenAndEnter(stoid, tagname) {
+function tagsOpenAndEnter(stoid, tagname, is_admin) {
 	// This does nothing if the body is already shown.
-	tagsShowBody(stoid);
+	tagsShowBody(stoid, is_admin, tagname);
 
-	var textinputid = 'newtags-' + stoid;
-	var textinput = $(textinputid);
-	textinput.value = textinput.value + ' ' + tagname;
 }
 
 function reportError(request) {
@@ -125,6 +133,26 @@ function ajax_update(params, onsucc, onfail, url) {
 		{
 			method:		'post',
 			parameters:	h.toQueryString()
+		}
+	);
+}
+
+function ajax_update_sync(params, onsucc, onfail, url) {
+	var h = $H(params);
+	if (!url) {
+		url = '/ajax.pl';
+	}
+	
+	var ajax = new Ajax.Updater(
+		{
+			success: onsucc,
+			failure: onfail
+		},
+		url,
+		{
+			method:		'post',
+			parameters:	h.toQueryString(),
+			asynchronous:	true
 		}
 	);
 }

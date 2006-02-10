@@ -408,6 +408,12 @@ print STDERR scalar(localtime) . " ajaxGetUserStory stoid='$stoid' user-is_anon=
 	}
 	my $uid = $user->{uid};
 
+	my @newtagspreload =
+		grep { $self->tagnameSyntaxOK($_) }
+		split /[\s,]+/,
+		($form->{newtagspreloadtext} || '');
+	my $newtagspreloadtext = join ' ', @newtagspreload;
+
 	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid, { uid => $uid });
 	my @tags = sort map { $_->{tagname} } @$tags_ar;
 print STDERR scalar(localtime) . " tagsGetUserStory for stoid=$stoid uid=$uid tags: '@tags' tags_ar: " . Dumper($tags_ar);
@@ -416,6 +422,7 @@ print STDERR scalar(localtime) . " tagsGetUserStory for stoid=$stoid uid=$uid ta
 	return slashDisplay('tagsstorydivuser', {
 		stoid =>		$stoid,
 		tags_user_str =>	$tags_user_str,
+		newtagspreloadtext =>	$newtagspreloadtext,
 	}, { Return => 1 });
 }
 
