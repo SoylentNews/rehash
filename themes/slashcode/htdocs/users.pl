@@ -1198,7 +1198,7 @@ sub showInfo {
 		}
 		push @$commentstruct, $data;
 	}
-	if (grep { !defined($_->{disc_time}) || !defined($_->{sid}) } @$commentstruct) { use Data::Dumper; print STDERR "showInfo undef in commentstruct for id=$id: " . Dumper($commentstruct) }
+#	if (grep { !defined($_->{disc_time}) || !defined($_->{sid}) } @$commentstruct) { use Data::Dumper; print STDERR "showInfo undef in commentstruct for id=$id: " . Dumper($commentstruct) }
 	# Sort so the chosen group of comments is sorted by discussion
 	@$commentstruct = sort {
 		$b->{disc_time} cmp $a->{disc_time} || $b->{sid} <=> $a->{sid}
@@ -2152,9 +2152,6 @@ sub saveUserAdmin {
 		return ;
 	}
 
-use Data::Dumper; $Data::Dumper::Sortkeys = 1;
-print STDERR "form: " . Dumper($form);
-
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $all_al2types = $reader->getAL2Types;
 	my $al2_change = { };
@@ -2182,16 +2179,14 @@ print STDERR "form: " . Dumper($form);
 	my %al2_new = ( map { ($_, 1) } @al2_new );
 	my @acl_new = grep { !$al2_new{$_} } @al2_new_submitted;
 	my %acl_new = ( map { ($_, 1) } @acl_new );
-print STDERR "al2_old: '@al2_old' al2_new: '@al2_new'\n";
-print STDERR "acl_old: '@acl_old' acl_new: '@acl_new'\n";
 
 	# Find out what changed for AL2's.
 	for my $al2 (@al2_old, @al2_new) {
-print STDERR "al2=$al2 old=$al2_old{$al2} new=$al2_new{$al2}\n";
-		next if $al2_old{$al2} == $al2_new{$al2};
+		next if defined($al2_old{$al2}) && defined($al2_new{$al2})
+			&& $al2_old{$al2} == $al2_new{$al2};
 		$al2_change->{$al2} = $al2_new{$al2} ? 1 : 0;
 	}
-print STDERR "al2_change: " . Dumper($al2_change);
+#print STDERR "al2_change for '$srcid': " . Dumper($al2_change);
 	# If there's a comment, throw that in.
 	if ($form->{al2_new_comment}) {
 		$al2_change->{comment} = $form->{al2_new_comment};
