@@ -64,30 +64,30 @@ at all, it's just an identifier.</p>
 <p>We're going to build the next generation of moderation on top of
 tags. That means we're going to poach your namespace. Some tags will
 have a substantive effect on the system right from the start (or very
-soon).  Today, our article tagger knows about tags like "dupe" or  
-"typo".
+soon). Our article tagger will know about tags like "dupe" or "typo".
 When we roll out tagging on comments, we will teach it "troll" and
-"informative".  These tags can have a meaning in the system.
+"informative". These tags can have a meaning in the system. And when
+<em>you</em> will come up with ways of using tags that <em>we</em>
+haven't anticipated, we will bring them into the system.</p>
 
-<p>We expect that <em>you</em> will come up with ways of using tags
-that <em>we</em> haven't anticipated.  We plan to start with the
-<a href="com-mod.shtml#cm2500">existing ten adjectives</a>
-in our current system, but as new tags come into usage, we will
-start incorporating them into the system.
+<p>But your tags do not belong to you, they belong to everyone.
+We reserve the right to make changes that we think are necessary.
+Since this system is totally experimental, we don't know exactly what all
+of this might mean: it could mean one day we consolidate and change all
+"canine" to "dog" tags.  It could mean we define some system tag and usurp
+another tag. This is the nature of a system in active development. Don't
+say we didn't warn you!</p>
 
-<p>Of course, this can work both ways: Tags elsewhere
-are your own personal playground and nobody cares if you mess around. On
-Slashdot, abusive uses of tags could have negative consequences.   
-Precisely what that means, we don't know yet.
-</p>
+<p>Tags elsewhere are your own personal playground and nobody cares if
+you mess around. On Slashdot, abusive uses of tags could have negative
+consequences. Precisely what that means, we don't know yet.</p>
 
 <p>Yes, that's pretty arbitrary. We'll spell out policy as this evolves.
 For now, the deal is: tag in good faith, and if there's abuse, we'll
-deal with it in good faith.  </p>
+deal with it in good faith.</p>
 
-<p><i><font size=-1>Answered by: <a  
-href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 1/29/06</font></i>
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 2/10/06</font></i>
 
 <hr>
 <table>
