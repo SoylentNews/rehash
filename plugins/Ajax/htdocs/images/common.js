@@ -16,7 +16,7 @@ function tagsToggleStoryDiv(stoid, is_admin) {
 	var bodyid = 'toggletags-body-' + stoid;
         var tagsbody = $(bodyid);
 	if (tagsbody.className == 'tagshide') {
-		tagsShowBody(stoid, is_admin, newtagspreloadtext);
+		tagsShowBody(stoid, is_admin, '');
 	} else {
 		tagsHideBody(stoid);
 	}
