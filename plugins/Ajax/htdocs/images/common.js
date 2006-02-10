@@ -58,7 +58,7 @@ function tagsShowBody(stoid, is_admin, newtagspreloadtext) {
 	// Make the title of the tagbox change to white-on-green
 	var titleid = 'tagbox-title-' + stoid;
         var title = $(titleid);
-	title.className = "title";
+	title.className = "titleopen tags";
 
 	// Make the body of the tagbox visible
 	var tagsbodyid = 'toggletags-body-' + stoid;
