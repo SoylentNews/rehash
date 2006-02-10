@@ -9,14 +9,20 @@ function adminStorySignoff(el) {
 }
 
 function adminTagsCommands(stoid) {
+	var toggletags_message_id = 'toggletags-message-' + stoid;
+	var toggletags_message_el = $(toggletags_message_id);
+	toggletags_message_el.innerHTML = 'Executing commands...';
+
 	var params = [];
 	params['op'] = 'tags_admin_commands';
 	params['stoid'] = stoid;
 	var tags_admin_commands_el = $('tags_admin_commands-' + stoid);
-	params['commands'] = newtagsel.value;
+	params['commands'] = tags_admin_commands_el.value;
 	var reskeyel = $('admin_commands-reskey-' + stoid);
 	params['reskey'] = reskeyel.value;
-	ajax_update(params, 'toggletags-message-' + stoid);
+	ajax_update(params, 'tags-admin-' + stoid);
+
+	toggletags_message_el.innerHTML = 'Commands executed.';
 }
 
 function remarks_create() {

@@ -29,7 +29,7 @@ __template__
 <div class="tagshide" id="toggletags-body-[% story.stoid %]">
 
 [% IF tags_example.size %]
-	<div><i>Examples:</i>
+	<div>Examples:
 	[% FOR t = tags_example %]
 		<span class="tagname">
 		<a href="javascript:tagsOpenAndEnter([% story.stoid %], '[% t %]', '[% user.is_admin %]')">[% t | strip_html %]</a>

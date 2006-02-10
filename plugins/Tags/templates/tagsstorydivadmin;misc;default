@@ -1,7 +1,8 @@
 __section__
 default
 __description__
-story = this story's data
+stoid = this story's id
+tags_admin_str = string emitted for admin feedback
 __title__
 
 __page__
@@ -14,11 +15,13 @@ __template__
 
 [% IF user.is_admin %]
 
-<form name="tags_admin-[% story.stoid %]">
+<form name="tags-admin-[% stoid %]">
 [% PROCESS ajax_reskey_tag reskey_name => 'admin_commands-reskey-' _ stoid, reskey_resource => 'ajax_admin' %]
-<input type="text" id="tags_admin_commands-[% story.stoid %]" name="tags_admin_commands-[% story.stoid %]" value="" size=60 maxlength=100>
-<a href="javascript:adminTagsCommands([% story.stoid %]);">Admin</a>
+<input type="text" id="tags_admin_commands-[% stoid %]" name="tags_admin_commands-[% stoid %]" value="" size=60 maxlength=100>
+<a href="javascript:adminTagsCommands([% stoid %]);">Admin</a>
 </form>
+
+<div>[% tags_admin_str %]</div>
 
 [% END %]
 
