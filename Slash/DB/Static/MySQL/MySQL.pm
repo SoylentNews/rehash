@@ -1163,6 +1163,9 @@ sub convert_tokens_to_points {
 	# increases points or tokens, it updates the oldvalue to
 	# LEAST(newvalue, maxvalue), so these adjustments should never
 	# change anything.
+	# 2006/02/12:  The lag is due to a MySQL bug in 4.1.16 that is
+	# fixed in 4.1.18.  <http://bugs.mysql.com/bug.php?id=15935>
+	# Still, we shouldn't need these.
 #	$self->sqlUpdate(
 #		"users_comments",
 #		{ points => $maxpoints },
