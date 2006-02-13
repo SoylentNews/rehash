@@ -9005,9 +9005,11 @@ sub createStory {
 			title		=> $story->{title},
 			primaryskid	=> $primaryskid,
 			topic		=> $tids->[0],
-			url		=> "$rootdir/article.pl?sid=$story->{sid}"
-						. ($tids->[0] && $constants->{tids_in_urls}
-						  ? "&tid=$tids->[0]" : ""),
+			url		=> $self->getUrlFromSid(
+						$story->{sid},
+						$story->{primaryskid},
+						$tids->[0]
+					   ),
 			stoid		=> $stoid,
 			sid		=> $story->{sid},
 			commentstatus	=> $comment_codes->{$commentstatus}
@@ -9023,14 +9025,8 @@ sub createStory {
 			# care personally, does it matter?  if so we can task some
 			# of these changes, if we need to make them -- pudge
 
-			# XXX update later in task
-			delete $discussion->{ts};
-
-			# XXX the discussion refers primarily to journal, not story?
-			# if not, we can update these in a task, too
-			delete $discussion->{uid};
-			delete $discussion->{url};
-			delete $discussion->{title};
+			# update later in task
+			delete @{$discussion}{qw(title url ts)};
 
 			$id = $story->{discussion};
 			$discussion->{kind} = 'journal-story';
@@ -9065,6 +9061,18 @@ sub createStory {
 
 	return $story->{sid};
 }
+
+sub getUrlFromSid {
+	my($self, $sid, $primaryskid, $tid) = @_;
+	my $constants = getCurrentStatic();
+
+	my $storyskin = $self->getSkin($primaryskid || $constants->{mainpage_skid});
+	my $rootdir = $storyskin->{rootdir};
+
+	return "$rootdir/article.pl?sid=$sid" .
+		($tid && $constants->{tids_in_urls} ? "&tid=$tid" : '');
+}
+
 
 sub grantStorySubmissionKarma {
 	my($self, $story) = @_;

@@ -41,5 +41,7 @@ CREATE TABLE journal_transfer (
 	id MEDIUMINT UNSIGNED NOT NULL,
 	subid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
 	stoid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
-	PRIMARY key(id)
+	updated TINYINT UNSIGNED NOT NULL DEFAULT '0',
+	PRIMARY KEY (id),
+	KEY stoid_updated (stoid, updated)
 );

@@ -552,7 +552,7 @@ sub logJournalTransfer {
 	$subid ||=0;
 	return if !$id;
 
-	$slashdb->sqlInsert("journal_transfer", { id => $id, subid => $subid, stoid => $stoid });
+	$slashdb->sqlInsert("journal_transfer", { id => $id, subid => $subid, stoid => $stoid, updated => 0 });
 }
 
 sub hasJournalTransferred {
@@ -586,6 +586,41 @@ sub promoteJournal {
 		}
 	}
 	return 1;
+}
+
+
+sub updateTransferredJournalDiscussions {
+	my($self) = @_;
+
+	my $journal_stories = $self->sqlSelectAllHashrefArray(
+		'journal_transfer.id, stories.stoid, discussion, ' .
+			'primaryskid, tid, sid, time, title',
+		'journal_transfer, stories, story_text',
+		'journal_transfer.stoid != 0 AND journal_transfer.updated = 0 AND ' .
+			'journal_transfer.stoid = stories.stoid AND ' .
+			'stories.time <= NOW() AND '.
+			'stories.stoid = story_text.stoid'
+	);
+
+	for my $journal_story (@$journal_stories) {
+		my $url	= $self->getUrlFromSid(
+			$journal_story->{sid},
+			$journal_story->{primaryskid},
+			$journal_story->{tid}
+		);
+
+		my $discussion = {
+			title		=> $journal_story->{title},
+			url		=> $url,
+			ts		=> $journal_story->{'time'}
+		};
+
+		if ($self->setDiscussion($journal_story->{discussion}, $discussion)) {
+			$self->sqlUpdate('journal_transfer', {
+				updated	=> 1,
+			}, 'id=' . $self->sqlQuote($journal_story->{id}));
+		}
+	}
 }
 
 
