@@ -24,7 +24,11 @@ sub main {
 
 	my $ops = getOps();
 	my $op = $form->{op};
-	$op = 'default' unless $ops->{$op};
+
+	if (!$ops->{$op}) {
+		errorLog("No Ajax op '$op' found");
+		$op = 'default';
+	}
 
 	$op = 'default' unless $ops->{$op}{function} || (
 		$ops->{$op}{class} && $ops->{$op}{subroutine}
