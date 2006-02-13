@@ -28,10 +28,10 @@ __template__
 [% CASE 'tags_user' %]
 	Your tags:
 	[% IF tags.size %]
-		[% FOR t = tags %]
+		[%- FOR t = tags -%]
 			<span class="tagname">[% t | strip_html %]</span>
-			[%- IF !loop.last() %], [% END %]
-		[% END %]
+			[%- IF !loop.last() %], [% END -%]
+		[%- END -%]
 	[% ELSE %]
 		<i>(none)</i>
 	[% END %]
