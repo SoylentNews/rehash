@@ -139,6 +139,25 @@ function tagsCreateForStory(stoid) {
 }
 
 
+function moveBox(div) {
+	alert(div);
+	thediv = $(div);
+	alert(thediv);
+	alert(thediv.position);
+
+
+	
+	alert("Left: " + thediv.offsetLeft);
+	alert("Top: " + thediv.offsetTop);
+	leftpos = thediv.offsetLeft + "px";
+	toppos = thediv.offseTop + "px";
+	thediv.style.position = "absolute";
+	thediv.style.left = leftpos;
+	thediv.style.top = toppos;
+
+}
+
+
 // helper functions
 
 function ajax_update(params, onsucc, onfail, url) {
