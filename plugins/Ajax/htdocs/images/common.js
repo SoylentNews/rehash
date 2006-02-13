@@ -31,7 +31,7 @@ function tagsHideBody(stoid) {
 	// Make the title of the tagbox change back to regular
 	var titleid = 'tagbox-title-' + stoid;
         var title = $(titleid);
-	title.className = "";
+	title.className = "tagtitleclosed";
 
 	// Make the tagbox change back to regular.
 	var tagboxid = 'tagbox-' + stoid;
@@ -53,17 +53,17 @@ function tagsShowBody(stoid, is_admin, newtagspreloadtext) {
 	// Make the tagbox change to the slashbox class
 	var tagboxid = 'tagbox-' + stoid;
         var tagbox = $(tagboxid);
-	tagbox.className = "block";
+	tagbox.className = "tags";
 
 	// Make the title of the tagbox change to white-on-green
 	var titleid = 'tagbox-title-' + stoid;
         var title = $(titleid);
-	title.className = "titleopen tags";
+	title.className = "tagtitleopen";
 
 	// Make the body of the tagbox visible
 	var tagsbodyid = 'toggletags-body-' + stoid;
         var tagsbody = $(tagsbodyid);
-	tagsbody.className = "content";
+	tagsbody.className = "tagbody";
 
 	// If the tags-user div hasn't been filled, fill it.
 	var tagsuserid = 'tags-user-' + stoid;

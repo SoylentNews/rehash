@@ -280,9 +280,17 @@ pre, code { font-size: 80%; }
 .briefarticle .storytitle { font-weight: bold; }
 .briefarticle .introhide { display : none }
 .briefarticle .intro { padding-left: 1em; padding-top: 0.5em;}
-.tagsheader { padding-left: 1em; padding-top: 0.5em; font-size: 70%; }
-.tagname { padding-left: 1em; padding-top: 0.5em; font-size: 70%; color: #600; font-weight: bold; }
-.tags { padding-left: 1em; padding-top: 0.5em; font-size: 70%; }
-.tagshide { display : none }
+
+/* Tags */
+
+.tags { font-size: 90%; line-height: 120%; padding-left: 0.5em; padding-top: 0.5em }
+.tagname { color: #600; font-weight: bold }
+.tagtitleopen { background: #600; color: #fff; font-size: 90% }
+.tagtitleopen a { color: #fff; text-decoration: none }
+.tagtitleclosed { background: #e5e5e5; font-size: 90% }
+.tagtitleclose a { text-decoration: none }
+.tagbody { border: 1px #ccc solid; padding: 8px }
+.tagshide { display: none }
+
 .future .briefarticle { background: #c33; }
 .briefarticles { border-top: solid 2px #933; padding-bottom: 0.5em; margin-top: 3px }

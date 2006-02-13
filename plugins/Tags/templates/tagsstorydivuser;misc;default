@@ -19,7 +19,7 @@ __template__
 <form name="tags-[% stoid %]">
 [% PROCESS ajax_reskey_tag reskey_name => 'newtags-reskey-' _ stoid, reskey_resource => 'ajax_tags_write' %]
 <input type="text" id="newtags-[% stoid %]" name="newtags-[% stoid %]" value="[% newtagspreloadtext | strip_attribute %]" size=60 maxlength=100>
-<a href="javascript: tagsCreateForStory([% stoid %]);">Tag</a>
+<a href="javascript:tagsCreateForStory([% stoid %]);">Tag</a>
 </form>
 
 __seclev__
