@@ -1,8 +1,8 @@
 // $Id$
 
-function adminStorySignoff(el) {
+function admin_signoff(el) {
 	var params = [];
-	params['op'] = 'storySignOff';
+	params['op'] = 'admin_signoff';
 	params['stoid'] = el.value;
 	ajax_update(params, 'signoff_' + el.value);
 	
@@ -36,13 +36,18 @@ function remarks_create() {
 	params['op']     = 'remarks_create';
 	params['remark'] = remark.value;
 	params['reskey'] = reskey.value;
-
+	remarks_max = $('remarks_max');
+	if (remarks_max && remarks_max.value ) {
+		params['limit'] = remarks_max.value;
+	}
 	ajax_update(params, 'remarks_whole');
 }
 
-function remarks_fetch(secs) {
+function remarks_fetch(secs, limit) {
 	var params = [];
 	params['op'] = 'remarks_fetch';
+	remarks_max = $('remarks_max');
+	params['limit'] = limit;
 	// run it every 30 seconds; don't need to call again
 	ajax_periodic_update(secs, params, 'remarks_table');
 }
