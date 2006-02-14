@@ -6,6 +6,7 @@
 
 use strict;
 use File::Spec::Functions;
+use Slash::Constants ':slashd';
 use Slash::Utility;
 
 my $me = 'journal_fix.pl';
