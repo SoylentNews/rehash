@@ -2399,13 +2399,13 @@ sub findTheTime {
 }
 
 sub displaySignoffStats {
-	my ($form, $slashdb, $user, $constants) = @_;
+	my($form, $slashdb, $user, $constants) = @_;
 	my $admin = getObject('Slash::Admin');
 
 	my %stoids_for_days;
 	my $author_info;
 	my $num_days = [7, 30, 90 ];
-	for my $days (7,30,90) {
+	for my $days (7, 30, 90) {
 		my $signoff_info = $admin->getSignoffData($days);
 		foreach (@$signoff_info) {
 			$author_info->{$_->{uid}}{nickname} = $_->{nickname};
@@ -2417,9 +2417,9 @@ sub displaySignoffStats {
 	}
 
 	slashDisplay("signoff_stats", {
-		author_info => $author_info,
-		stoids_for_days => \%stoids_for_days,
-		num_days  => $num_days
+		author_info	=> $author_info,
+		stoids_for_days	=> \%stoids_for_days,
+		num_days	=> $num_days
 	});
 
 }

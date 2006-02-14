@@ -37,7 +37,7 @@ function remarks_create() {
 	params['remark'] = remark.value;
 	params['reskey'] = reskey.value;
 	remarks_max = $('remarks_max');
-	if (remarks_max && remarks_max.value ) {
+	if (remarks_max && remarks_max.value) {
 		params['limit'] = remarks_max.value;
 	}
 	ajax_update(params, 'remarks_whole');
@@ -46,6 +46,7 @@ function remarks_create() {
 function remarks_fetch(secs, limit) {
 	var params = [];
 	params['op'] = 'remarks_fetch';
+	// this not being used? -- pudge
 	remarks_max = $('remarks_max');
 	params['limit'] = limit;
 	// run it every 30 seconds; don't need to call again

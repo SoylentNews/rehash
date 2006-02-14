@@ -145,7 +145,7 @@ sub ajaxFetch {
 			type	=> 'system',
 		});
 	}
-	
+
 	return $self->displayRemarksTable($options);
 }
 

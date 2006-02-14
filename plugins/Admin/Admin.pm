@@ -236,9 +236,7 @@ sub ajax_signoff {
 	return "Signed";
 }
 
-
 ##################################################################
-
 sub getStorySignoffs {
 	my($self, $stoid) = @_;
 	my $stoid_q = $self->sqlQuote($stoid);
@@ -291,8 +289,9 @@ sub relatedLinks {
 	return $relatedtext;
 }
 
+##################################################################
 sub getSignoffData {
-	my ($self, $days) = @_;
+	my($self, $days) = @_;
 	my $days_q = $self->sqlQuote($days);
 	my $signoff_info = $self->sqlSelectAllHashrefArray(
 		"stories.stoid, users.uid, (unix_timestamp(min(signoff_time)) - unix_timestamp(stories.time)) / 60 AS min_to_sign, users.nickname",
