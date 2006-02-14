@@ -114,4 +114,4 @@ INSERT INTO ajax_ops VALUES (NULL, 'remarks_create', 'Slash::Remarks', 'ajaxFetc
 INSERT INTO ajax_ops VALUES (NULL, 'remarks_fetch',  'Slash::Remarks', 'ajaxFetch', 'ajax_admin', 'createuse');
 
 # signoff
-INSERT INTO ajax_ops VALUES(NULL, 'storySignOff', 'Slash::Admin', 'ajax_signoff', 'ajax_admin', 'createuse');
+INSERT INTO ajax_ops VALUES(NULL, 'admin_signoff', 'Slash::Admin', 'ajax_signoff', 'ajax_admin', 'createuse');
