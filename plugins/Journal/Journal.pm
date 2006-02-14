@@ -500,12 +500,8 @@ sub createStoryFromJournal {
 		$story{$_} = $story_param->{$_} if !defined $story{$_};
 	}
 
-	# XXX: we need to update, in the discussion:
-	# stoid, sid, title, url, topic, ts (story's timestamp), type (open), uid?,
-	# flags (ok), primaryskid, commentstatus (enabled), archivable?
 	# this sets weight (front page, etc.) ... not sure which weight to use;
 	# 20/10 is for section-only, 40/30 is for mainpage
-
 
 	my $skin = $slashdb->getSkin($skid);
 	my $skin_nexus = $skin->{nexus};
@@ -619,6 +615,42 @@ sub updateTransferredJournalDiscussions {
 			$self->sqlUpdate('journal_transfer', {
 				updated	=> 1,
 			}, 'id=' . $self->sqlQuote($journal_story->{id}));
+		}
+	}
+
+	# if was made a story, then story deleted, we revert discussion data
+	# to point to journal (IF stoid = 0 AND updated = 1)
+	# ts, title, url from journal
+	# revert dkid to 'journal'
+	# blank out stoid, sid, primaryskid
+	my $revert_journals = $self->sqlSelectAllHashrefArray(
+		'journal_transfer.id, journals.discussion, journals.description, journal.date, journal.uid, nickname',
+		'journal_transfer, journals, users',
+		'journal_transfer.stoid = 0 AND journal_transfer.updated = 1 AND ' .
+			'journal_transfer.id = journals.id AND ' .
+			'user.uid = journals.uid'
+	);
+
+	my $constants = getCurrentStatic();
+	for my $revert_journal (@$revert_journals) {
+		my $url = "$constants->{rootdir}/~" .
+			fixparam($revert_journal->{nickname}) .
+			"/journal/$revert_journal->{id}";
+
+		my $discussion = {
+			title		=> $revert_journal->{description},
+			url		=> $url,
+			ts		=> $revert_journal->{date},
+			stoid		=> 0,
+			sid		=> '',
+			primaryskid	=> 0,
+			kind		=> 'journal',
+		};
+
+		if ($self->setDiscussion($revert_journal->{discussion}, $discussion)) {
+			$self->sqlUpdate('journal_transfer', {
+				updated	=> 0,
+			}, 'id=' . $self->sqlQuote($revert_journal->{id}));
 		}
 	}
 }

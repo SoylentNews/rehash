@@ -2248,7 +2248,17 @@ sub deleteStoryAll {
 		story_topics_chosen story_topics_rendered )) {
 		$rows += $self->sqlDelete($table, "stoid=$stoid");
 	}
-	$self->deleteDiscussion($discussion_id) if $discussion_id;
+
+	if ($discussion_id && $story->{journal_id}) {
+		# journal_fix.pl task will revert discussion data later
+		# (although maybe better to make this happen immediately)
+		$self->sqlUpdate('journal_transfer', {
+			stoid	=> 0,
+		}, 'id=' . $self->sqlQuote($story->{journal_id}));
+	} elsif ($discussion_id) {
+		$self->deleteDiscussion($discussion_id);
+	}
+
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
 	return $rows;

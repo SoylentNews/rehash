@@ -52,6 +52,8 @@ __template__
 							<label>Submit<input type="checkbox" name="submit" [% IF form.submit; constants.markup_checked_attribute; END %]></label>
 							[% submit_note = "<ul>";
 							   submit_note = submit_note _ "<li>Comments must be enabled</li>";
+							   submit_note = submit_note _ "<li>Discussion cannot be deleted (though journal can be)</li>";
+							   submit_note = submit_note _ "<li>If accepted, anyone will be allowed to post comments</li>";
 						 	   submit_note = submit_note _ "</ul>";
 							%]
 							[% PROCESS formNote note => "Allow journal to be submitted as a story? If you do this: $submit_note" %]

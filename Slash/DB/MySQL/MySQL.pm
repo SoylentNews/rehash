@@ -9138,7 +9138,6 @@ sub updateStory {
 
 	if (!$error) {
 		my $comment_codes = $self->getDescriptions('commentcodes_extended');
-		my $rootdir = $self->getSkin($data->{primaryskid})->{rootdir};
 		my $topiclist = $self->getTopiclistFromChosen($data->{topics_chosen});
 #use Data::Dumper; print STDERR "MySQL.pm updateStory topiclist '@$topiclist' topics_chosen: " . Dumper($data->{topics_chosen});
 		my $dis_data = {
@@ -9146,9 +9145,11 @@ sub updateStory {
 			sid		=> $sid,
 			title		=> $data->{title},
 			primaryskid	=> $data->{primaryskid},
-			url		=> "$rootdir/article.pl?sid=$sid"
-						. ($topiclist->[0] && $constants->{tids_in_urls}
-						  ? "&tid=$topiclist->[0]" : ""),
+			url		=> $self->getUrlFromSid(
+						$sid,
+						$data->{primaryskid},
+						$topiclist->[0]
+					   ),
 			ts		=> $data->{'time'},
 			topic		=> $topiclist->[0],
 			commentstatus	=> $comment_codes->{$data->{commentstatus}}
@@ -9156,8 +9157,24 @@ sub updateStory {
 						: getCurrentStatic('defaultcommentstatus'),
 		};
 
-		if (!$error && !$self->setDiscussionBySid($sid, $dis_data)) {
-			$error = "Failed to set discussion data for story\n";
+		my $story = $self->getStory($stoid);
+		# will be updated later by journal_fix.pl
+		if ($story->{journal_id}) {
+			delete @{$dis_data}{qw(title url ts)};
+		}
+
+		if (!$error) {
+			if (!$self->setDiscussionBySid($sid, $dis_data)) {
+				$error = "Failed to set discussion data for story\n";
+
+			# reset so task picks it up again if necessary;
+			# simplest way to make sure data is correct
+			# and avoid race condition with task
+			} elsif ($story->{journal_id}) {
+				$self->sqlUpdate('journal_transfer', {
+					updated	=> 0,
+				}, 'id=' . $self->sqlQuote($story->{journal_id}));
+			}
 		}
 	}
 
