@@ -73,6 +73,7 @@ sub getSectionPrefsHTML {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
+	sleep 3;
 	my %story023_default = (
 		author	=> { },
 		nexus	=> { },
@@ -232,23 +233,6 @@ sub setSectionNexusPrefs() {
 	return getData('set_section_prefs_success_msg');
 }
 
-sub storySignOff {
-	my($slashdb, $constants, $user, $form) = @_;
-	return unless $user->{is_admin};
-
-	my $stoid = $form->{stoid};
-	my $uid   = $user->{uid};
-
-	return unless $stoid =~/^\d+$/;
-
-	if ($slashdb->sqlCount("signoff", "stoid = $stoid AND uid = $uid")) {
-		return "Already Signed";
-	}
-
-	$slashdb->createSignoff($stoid, $uid, "signed");
-	return "Signed";
-}
-
 sub adminTagsCommands {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $stoid = $form->{stoid};
@@ -315,11 +299,6 @@ sub getOps {
 		setSectionNexusPrefs => {
 			function	=> \&setSectionNexusPrefs,
 			reskey_name	=> 'ajax_user',
-			reskey_type	=> 'createuse',
-		},
-		storySignOff => {
-			function	=> \&storySignOff,
-			reskey_name	=> 'ajax_admin',
 			reskey_type	=> 'createuse',
 		},
 #		tagsGetUserStory => {
