@@ -3675,3 +3675,4 @@ UPDATE vars SET value = 'T_2_5_0_99' WHERE name = 'cvs_tag_currentcode';
 ALTER TABLE journal_transfer ADD COLUMN updated TINYINT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE journal_transfer ADD KEY stoid_updated (stoid, updated);
 
+INSERT INTO ajax_ops VALUES(NULL, 'admin_signoff', 'Slash::Admin', 'ajax_signoff', 'ajax_admin', 'createuse');
