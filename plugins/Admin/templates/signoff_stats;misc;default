@@ -1,0 +1,34 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+signoff_stats
+__seclev__
+10000
+__template__
+<table class="data">
+<tr class="data_head">
+	<td></td>
+	[% FOREACH days = num_days %]
+	<td colspan="3">[% days %]</td>
+	[% END %]
+</tr>
+
+[% FOREACH author = author_info.keys %]
+	<tr class="data_hl1"><td>[% author_info.$author.nickname %]</td>
+	[% FOREACH days = num_days %]
+	<td>[% author_info.$author.$days.cnt %]</td><td>[% stoid_for_days.$days.keys.size %]</td><td></td>
+	[% END %]
+	</tr>
+[% END %]
+</table>
+__version__
+$Id$
+
