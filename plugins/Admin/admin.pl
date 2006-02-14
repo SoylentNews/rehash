@@ -189,6 +189,12 @@ sub main {
 			adminmenu	=> 'info',
 			tab_selected	=> 'mcdstats',
 		},
+		signoff_stats 		=> {
+			function	=> \&displaySignoffStats,
+			seclev		=> 500,
+			adminmenu	=> 'info',
+			tab_selected	=> 'signnoff'
+		}
 	};
 
 	# admin.pl is not for regular users
@@ -2390,6 +2396,32 @@ sub findTheTime {
 	# article.pl gets written first.
 	$time =~ s/( \d\d:\d\d):\d\d$/$1:00/;
 	return $time;
+}
+
+sub displaySignoffStats {
+	my ($form, $slashdb, $user, $constants) = @_;
+	my $admin = getObject('Slash::Admin');
+
+	my %stoids_for_days;
+	my $author_info;
+	my $num_days = [7, 30, 90 ];
+	for my $days (7,30,90) {
+		my $signoff_info = $admin->getSignoffData($days);
+		foreach (@$signoff_info) {
+			$author_info->{$_->{uid}}{nickname} = $_->{nickname};
+			$author_info->{$_->{uid}}{$days}{cnt}++;	
+			$author_info->{$_->{uid}}{$days}{tot_time} += $_->{min_to_sign};
+			$stoids_for_days{$days}{$_->{stoid}}++;
+			push @{$author_info->{$_->{uid}}{$days}{mins}}, $_->{min_to_sign};
+		}
+	}
+
+	slashDisplay("signoff_stats", {
+		author_info => $author_info,
+		stoids_for_days => \%stoids_for_days,
+		num_days  => $num_days
+	});
+
 }
 
 createEnvironment();
