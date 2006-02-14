@@ -217,6 +217,28 @@ sub getRelated {
 }
 
 ##################################################################
+sub ajax_signoff {
+	my $slashdb = getCurrentDB();
+	my $form = getCurrentForm();
+	my $user = getCurrentUser();
+	return unless $user->{is_admin};
+	
+	my $stoid = $form->{stoid};
+	my $uid   = $user->{uid};
+
+	return unless $stoid =~/^\d+$/;
+
+	if ($slashdb->sqlCount("signoff", "stoid = $stoid AND uid = $uid")) {
+		return "Already Signed";
+	}
+	
+	$slashdb->createSignoff($stoid, $uid, "signed");
+	return "Signed";
+}
+
+
+##################################################################
+
 sub getStorySignoffs {
 	my($self, $stoid) = @_;
 	my $stoid_q = $self->sqlQuote($stoid);
@@ -267,6 +289,20 @@ sub relatedLinks {
 		if $relatedtext && $relatedtext =~ /^\s*<li>/;
 
 	return $relatedtext;
+}
+
+sub getSignoffData {
+	my ($self, $days) = @_;
+	my $days_q = $self->sqlQuote($days);
+	my $signoff_info = $self->sqlSelectAllHashrefArray(
+		"stories.stoid, users.uid, (unix_timestamp(min(signoff_time)) - unix_timestamp(stories.time)) / 60 AS min_to_sign, users.nickname",
+		"stories, story_topics_rendered, signoff, users",
+		"stories.stoid = story_topics_rendered.stoid AND signoff.stoid=stories.stoid AND users.uid = signoff.uid
+	         AND stories.time <= NOW() AND stories.time > DATE_SUB(NOW(), INTERVAL $days_q DAY)",
+		"GROUP BY signoff.uid, signoff.stoid"
+	);
+	return $signoff_info;
+
 }
 
 sub DESTROY {
