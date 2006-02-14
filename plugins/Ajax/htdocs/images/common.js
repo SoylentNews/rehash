@@ -65,12 +65,12 @@ function tagsShowBody(stoid, is_admin, newtagspreloadtext) {
 	// Make the body of the tagbox visible
 	var tagsbodyid = 'toggletags-body-' + stoid;
         var tagsbody = $(tagsbodyid);
-	tagsbody.className = "tagbody";
-	
 	toppos = tagbox.offsetTop + "px";
 	tagbox.style.position = "absolute";
 	tagbox.style.top = toppos;
-
+	
+	tagsbody.className = "tagbody";
+	
 	// If the tags-user div hasn't been filled, fill it.
 	var tagsuserid = 'tags-user-' + stoid;
 	var tagsuser = $(tagsuserid);
