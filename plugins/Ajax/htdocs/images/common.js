@@ -65,6 +65,17 @@ function tagsShowBody(stoid, is_admin, newtagspreloadtext) {
         var tagsbody = $(tagsbodyid);
 	tagsbody.className = "tagbody";
 
+	// change position to absolute and set its position to its current position
+	// this should make the div a popup floating above the rest of the page, but in
+	// the same position as it was if was placed inline
+	leftpos = tagsbody.offsetLeft + "px";
+	toppos = tagsbody.offsetTop + "px";
+	tagsbody.style.position = "absolute";
+	tagsbody.style.left = leftpos;
+	tagsbody.style.top = toppos;
+	tagsbody.style.width = "100%";
+	tagsbody.style.zIndex = "30";
+
 	// If the tags-user div hasn't been filled, fill it.
 	var tagsuserid = 'tags-user-' + stoid;
 	var tagsuser = $(tagsuserid);
@@ -137,26 +148,6 @@ function tagsCreateForStory(stoid) {
 	// XXX How to determine failure here?
 	toggletags_message_el.innerHTML = 'Tags saved.';
 }
-
-
-function moveBox(div) {
-	alert(div);
-	thediv = $(div);
-	alert(thediv);
-	alert(thediv.position);
-
-
-	
-	alert("Left: " + thediv.offsetLeft);
-	alert("Top: " + thediv.offsetTop);
-	leftpos = thediv.offsetLeft + "px";
-	toppos = thediv.offseTop + "px";
-	thediv.style.position = "absolute";
-	thediv.style.left = leftpos;
-	thediv.style.top = toppos;
-
-}
-
 
 // helper functions
 
