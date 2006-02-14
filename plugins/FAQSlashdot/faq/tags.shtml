@@ -2,7 +2,8 @@
 <html>
 <head>
    <title>Slashdot FAQ - Tags</title>
-<!--#include virtual="/slashhead.inc"-->
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
 
 <!--
 ($VERSION) = '$Id$' =~ /^\$Id: \S+ (\S+)/
