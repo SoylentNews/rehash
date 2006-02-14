@@ -126,15 +126,17 @@ sub displayRemarksTable {
 		remarks_ref	=> $remarks_ref,
 		print_whole	=> $options->{print_whole},
 		print_div	=> $options->{print_div},
+		remarks_max	=> $options->{max},
 	}, { Page => 'remarks', Return => 1 });
 }
 
 ########################################################
 sub ajaxFetch {
 	my($slashdb, $constants, $user, $form) = @_;
-	my $self = getObject('Slash::Remarks');	
+	my $self = getObject('Slash::Remarks');
+	my $options = {};
 
-	my $options;
+	$options->{max} = $form->{limit} || 30;
 
 	if ($form->{op} eq 'remarks_create') {
 		$options->{print_div} = 1;
@@ -143,7 +145,7 @@ sub ajaxFetch {
 			type	=> 'system',
 		});
 	}
-
+	
 	return $self->displayRemarksTable($options);
 }
 
