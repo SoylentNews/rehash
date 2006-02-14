@@ -42,7 +42,17 @@ END %]
 [% seen_topics = {} %]
 [% PROCESS titlebar future=story.is_future %]
 	<div class="details">
-		posted by <a href="[% author.homepage %]">[% author.nickname | strip_literal %]</a> [% story.atstorytime %]
+		posted by <a href="[% author.homepage %]">[% author.nickname | strip_literal %]</a>
+		[% IF story.journal_id;
+			journal     = Slash.getObject('Slash::Journal');
+			thisjournal = journal.get(story.journal_id);
+			IF thisjournal && thisjournal.uid;
+				thisuser    = Slash.db.getUser(thisjournal.uid); %]
+		(from <a href="[% constants.rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/[% story.journal_id %]"
+			>[% thisuser.nickname | strip_literal %]'s Journal</a>) [%
+			END;
+		END %]
+		[% story.atstorytime %]
 		[% IF constants.plugin.Print %] 
 			&nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/print.pl?sid=[% story.sid %]"><img src="[% constants.imagedir %]/print.gif" height="11" width="15" alt="Printer-friendly"></a>
 		[% END %]
@@ -52,7 +62,7 @@ END %]
 		[% IF constants.use_dept && story.dept %]<strong>from the <b>[% story.dept %]</b> dept.</strong>[% END %]
 	</div>
 	<div class="body">
-					[% mypagemenu = PROCESS pagemenu; IF mypagemenu %]<br>[% mypagemenu %][% END %] 
+		[% mypagemenu = PROCESS pagemenu; IF mypagemenu %]<br>[% mypagemenu %][% END %] 
 		<div class="topic">
 			[% seen_topics.${topic.tid} = 1 %]
 			[% IF user.noicons || user.simpledesign || user.lowbandwidth %]
