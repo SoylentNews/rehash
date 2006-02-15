@@ -117,6 +117,7 @@ Set::IntSpan		- HTML validator
 
 Text::Iconv		- HTML validator
 
+Data::JavaScript::Anon	- perl2js data structures
 
 =head1 DESCRIPTION
 
