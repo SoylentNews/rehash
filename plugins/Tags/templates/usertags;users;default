@@ -14,6 +14,7 @@ en_US
 __name__
 usertags
 __template__
+[% IF user.tags_canwrite_stories && tags.size %]
 <div>Tags you've assigned to stories:</div>
 <ul class="tagslist">
 [% FOREACH tag = tags_raw;
@@ -22,6 +23,10 @@ __template__
 	[% PROCESS linkStory dynamic=1 sid=tag.story.sid text=tag.story.title %]</li>
 [% END; END %]
 </ul>
+[% ELSE %]
+<div>You have not assigned any tags,
+or tags are unavailable to you at this time.</div>
+[% END %]
 
 __seclev__
 10000
