@@ -1,6 +1,9 @@
 __section__
 default
 __description__
+tags_raw = raw (i.e. sorted only in chronological order) arrayref of user's tags.
+
+This template and its API will likely change.
 
 __title__
 
@@ -11,7 +14,14 @@ en_US
 __name__
 usertags
 __template__
-Your tags go here.
+<div>Tags you've assigned to stories:</div>
+<ul class="tagslist">
+[% FOREACH tag = tags_raw;
+   IF tag.globj_type == 'stories' %]
+	<li><span class="tagname">[% tag.tagname %]</span>
+	[% PROCESS linkStory dynamic=1 sid=tag.story.sid text=tag.story.title %]</li>
+[% END; END %]
+</ul>
 
 __seclev__
 10000

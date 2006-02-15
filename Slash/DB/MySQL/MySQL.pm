@@ -13189,6 +13189,34 @@ sub getGlobjTypes {
 	return $hr;
 }
 
+# Given a globjid, returns its globj_type and target_id.  Returns
+# undef if the object does not exist.
+# XXX should optimize to work with a list
+# XXX should memcached
+
+sub getGlobjTarget {
+	my($self, $globjid) = @_;
+	my($gtid, $target_id) = $self->sqlSelect(
+		'gtid, target_id',
+		'globjs',
+		"globjid=$globjid");
+	return undef unless $gtid;
+	my $types = $self->getGlobjTypes;
+	return undef unless $types->{$gtid};
+	return ($types->{$gtid}, $target_id);
+}
+
+sub addGlobjTargetsToHashrefArray {
+	my($self, $ar) = @_;
+	for my $hr (@$ar) {
+		next unless $hr->{globjid};
+		my($type, $target_id) = $self->getGlobjTarget($hr->{globjid});
+		next unless $type;
+		$hr->{globj_type} = $type;
+		$hr->{globj_target_id} = $target_id;
+	}
+}
+
 sub getActiveAdminCount {
 	my($self) = @_;
 	my $admin_timeout = getCurrentStatic('admin_timeout');

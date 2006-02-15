@@ -330,6 +330,11 @@ sub getAllTagsFromUser {
 		'ORDER BY tagid');
 	return [ ] unless $ar && @$ar;
 	$self->addTagnamesToHashrefArray($ar);
+	$self->addGlobjTargetsToHashrefArray($ar);
+	for my $hr (@$ar) {
+		next unless $hr->{globj_type} eq 'stories';
+		$hr->{story} = $self->getStory($hr->{globj_target_id});
+	}
 	return $ar;
 }
 

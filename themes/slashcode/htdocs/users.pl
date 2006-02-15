@@ -1488,6 +1488,16 @@ sub showTags {
 		color =>	'colored',
 		tab_selected =>	$hr->{tab_selected_1} || "",
 	});
+
+	if (!$constants->{plugin}{Tags}) {
+		print getError('bad_op', { op => $form->{op}});
+		return;
+	}
+
+	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+	my $tags_ar = $tags_reader->getAllTagsFromUser($user->{uid});
+
+	slashDisplay('usertags', { tags_raw => $tags_ar });
 }
 
 #################################################################

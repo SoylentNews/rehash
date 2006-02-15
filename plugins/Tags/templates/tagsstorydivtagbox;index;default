@@ -27,12 +27,9 @@ __template__
 
 [% IF tags_example.size %]
 	<div>Examples:
-	[% FOR t = tags_example %]
-		<span class="tagname">
-		<a href="javascript:tagsOpenAndEnter([% story.stoid %], '[% t %]', '[% user.is_admin %]')">[% t | strip_html %]</a>
-		</span>
-		[% IF !loop.last() %], [% END %]
-	[% END %]
+	[% FOR t = tags_example -%]
+		<span class="tagname"><a href="javascript:tagsOpenAndEnter([% story.stoid %], '[% t %]', '[% user.is_admin %]')">[% t | strip_html %]</a></span>[% IF !loop.last() %], [% END -%]
+	[%- END %]
 	</div>
 [% END %]
 
