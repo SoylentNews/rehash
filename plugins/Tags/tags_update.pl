@@ -104,7 +104,9 @@ sub getTop5 {
 		$a cmp $b
 	} keys %scores;
 
-print STDERR scalar(localtime) . " top tags for $stoid: " . join(" ", map { sprintf("%s=%.3f", $_, $scores{$_}) } @top ) . "\n";
+	my $minscore = $constants->{tags_stories_top_minscore} || 2;
+print STDERR scalar(localtime) . " minscore=$minscore top tags for $stoid: " . join(" ", map { sprintf("%s=%.3f", $_, $scores{$_}) } @top ) . "\n";
+	my @top = grep { $scores{$_} >= $minscore } @top;
 
 	$#top = 4 if $#top > 4;
 	return @top;

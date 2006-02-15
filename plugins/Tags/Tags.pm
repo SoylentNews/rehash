@@ -543,13 +543,13 @@ sub processAdminCommand {
 
 	my $constants = getCurrentStatic();
 	my $id = $self->getTagidCreate($tagname);
-	my $new_tag_clout = $constants->{tags_reduced_tag_clout} || 0.5;
+	my $new_tag_clout = defined($constants->{tags_reduced_tag_clout}) ? $constants->{tags_reduced_tag_clout} : 0.5;
 
 	$self->setTagname($id, { tag_clout => $new_tag_clout });
 print STDERR scalar(localtime) . " processAdminCommand set clout of tag $id to $new_tag_clout\n";
 
 	if ($type eq '#') {
-		my $new_user_clout = $constants->{tags_reduced_user_clout} || 0.5;
+		my $new_user_clout = defined($constants->{tags_reduced_user_clout}) ? $constants->{tags_reduced_user_clout} : 0.5;
 		my $uids = $self->getUidsUsingTagname($tagname);
 		for my $uid (@$uids) {
 			$self->setUser($uid, { tag_clout => $new_user_clout });
