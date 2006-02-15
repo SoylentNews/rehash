@@ -26,15 +26,7 @@ __template__
 	[% returnme.data_constant = 1 %] 
 
 [% CASE 'tags_user' %]
-	Your tags:
-	[% IF tags.size %]
-		[%- FOR t = tags -%]
-			<span class="tagname">[% t | strip_html %]</span>
-			[%- IF !loop.last() %], [% END -%]
-		[%- END -%]
-	[% ELSE %]
-		<i>(none)</i>
-	[% END %]
+	[% returnme.data_constant = 1 %] 
 
 [% CASE 'tags_admin_result' %]
 	Admin results: 

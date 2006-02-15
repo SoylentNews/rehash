@@ -41,6 +41,9 @@ $task{$me}{code} = sub {
                 return "";
         }
 
+	# Record what we're about to do.
+	$slashdb->setVar('tags_stories_lastscanned', $newmaxid);
+
 	# First pass:  find which stoid's have been touched since
 	# the last run.
 	my $stories_gtid = $slashdb->getGlobjTypes()->{stories};
@@ -60,14 +63,11 @@ $task{$me}{code} = sub {
 	my $n_stories_updated = 0;
 	for my $stoid (@$stoids) {
 		my $tags = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid);
-		my @top_5 = getTop5($tags, $userdata_cache);
+		my @top_5 = getTop5($tags, $userdata_cache, $stoid);
 		warn "no top_5 for $stoid" if !@top_5;
 		$n_stories_updated += $slashdb->setStory($stoid,
 			{ tags_top => join(" ", @top_5) });
 	}
-
-	# Record that we did this.
-	$slashdb->setVar('tags_stories_lastscanned', $newmaxid);
 
 	return "$n_stories_updated updated";
 };
@@ -75,7 +75,7 @@ $task{$me}{code} = sub {
 # Very crude info-summarization function that will change.
 
 sub getTop5 {
-	my($tags, $users) = @_;
+	my($tags, $users, $stoid) = @_;
 	
 	my %uids_unique = map { ( $_->{uid}, 1 ) } @$tags;
 	my @uids = keys %uids_unique;
@@ -93,6 +93,8 @@ sub getTop5 {
 		my $user_clout = $user->{karma} >= -3 ? log($user->{karma}+10) : 0;
 		$user_clout += 5 if $user->{seclev} > 1;
 		$user_clout *= $user->{tag_clout};
+		my $tag_clout = $tag->{tag_clout} || 1;
+		$user_clout *= $tag_clout;
 		$scores{$tagname} += $user_clout;
 	}
 
@@ -101,6 +103,8 @@ sub getTop5 {
 		||
 		$a cmp $b
 	} keys %scores;
+
+print STDERR scalar(localtime) . " top tags for $stoid: " . join(" ", map { sprintf("%s=%.3f", $_, $scores{$_}) } @top ) . "\n";
 
 	$#top = 4 if $#top > 4;
 	return @top;

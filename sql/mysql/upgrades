@@ -3676,3 +3676,7 @@ ALTER TABLE journal_transfer ADD COLUMN updated TINYINT UNSIGNED NOT NULL DEFAUL
 ALTER TABLE journal_transfer ADD KEY stoid_updated (stoid, updated);
 
 INSERT INTO ajax_ops VALUES(NULL, 'admin_signoff', 'Slash::Admin', 'ajax_signoff', 'ajax_admin', 'createuse');
+
+INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_story','600','Number of seconds a story record lives in memcached before requiring a re-read from the DB');
+UPDATE vars SET value='60' WHERE name='story_expire';
+

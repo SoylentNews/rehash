@@ -955,6 +955,7 @@ INSERT INTO vars (name, value, description) VALUES ('maxtokens','40','Token thre
 INSERT INTO vars (name, value, description) VALUES ('maxtokens_add','3','Max tokens to give any one user per pass');
 INSERT INTO vars (name, value, description) VALUES ('memcached','0','Use memcached?');
 INSERT INTO vars (name, value, description) VALUES ('memcached_debug','0','Turn on debugging for memcached?');
+INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_story','600','Number of seconds a story record lives in memcached before requiring a re-read from the DB');
 INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_user','1200','Number of seconds a user record lives in memcached before requiring a re-read from the DB (empty string=default, 0=forever)');
 INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_comtext','86400','Number of seconds comment text lives in memcached before requiring a re-read from the DB (empty string=default, 0=forever)');
 INSERT INTO vars (name, value, description) VALUES ('memcached_keyprefix','x','Unique, short (1-2 chars probably) prefix to distinguish this site from the other sites sharing memcaches');

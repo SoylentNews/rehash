@@ -363,6 +363,20 @@ sub getUidsUsingTagname {
 		"tagnameid=$id");
 }
 
+sub getExampleTagsForStory {
+	my($self, $story) = @_;
+	my $constants = getCurrentStatic();
+	my @examples = split / /, $constants->{tags_stories_examples};
+	my $chosen_ar = $self->getTopiclistForStory($story->{stoid});
+	$#$chosen_ar = 3 if $#$chosen_ar > 3;
+	my $tree = $self->getTopicTree();
+	push @examples,
+		grep { $self->tagnameSyntaxOK($_) }
+		map { $tree->{$_}{keyword} }
+		@$chosen_ar;
+	return @examples;
+}
+
 sub removeTagnameFromIndexTop {
 	my($self, $tagname) = @_;
 	my $tagid = $self->getTagidCreate($tagname);
@@ -396,38 +410,34 @@ sub adminPseudotagnameSyntaxOK {
 
 sub ajaxGetUserStory {
 	my($self, $constants, $user, $form) = @_;
-	use Data::Dumper;
-	print STDERR scalar(localtime) . " ajaxGetUserStory called, form: " . Dumper($form);
 
 	my $stoid = $form->{stoid};
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-use Data::Dumper;
-print STDERR scalar(localtime) . " ajaxGetUserStory stoid='$stoid' user-is_anon='$user->{is_anon}' uid='$user->{uid}' tags_reader='$tags_reader' form: " . Dumper($form);
+#print STDERR scalar(localtime) . " ajaxGetUserStory stoid='$stoid' user-is_anon='$user->{is_anon}' uid='$user->{uid}' tags_reader='$tags_reader' form: " . Dumper($form);
 	if (!$stoid || $stoid !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
 		return getData('error', {}, 'tags');
 	}
 	my $uid = $user->{uid};
 
-	my @newtagspreload =
+	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid, { uid => $uid });
+	my @tags = sort map { $_->{tagname} } @$tags_ar;
+#print STDERR scalar(localtime) . " ajaxGetUserStory for stoid=$stoid uid=$uid tags: '@tags' tags_ar: " . Dumper($tags_ar);
+
+	my @newtagspreload = @tags;
+	push @newtagspreload,
 		grep { $tags_reader->tagnameSyntaxOK($_) }
 		split /[\s,]+/,
 		($form->{newtagspreloadtext} || '');
 	my $newtagspreloadtext = join ' ', @newtagspreload;
 
-	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid, { uid => $uid });
-	my @tags = sort map { $_->{tagname} } @$tags_ar;
-print STDERR scalar(localtime) . " ajaxGetUserStory for stoid=$stoid uid=$uid tags: '@tags' tags_ar: " . Dumper($tags_ar);
-	my $tags_user_str = getData('tags_user', { tags => \@tags }, 'tags');
-
 	return slashDisplay('tagsstorydivuser', {
 		stoid =>		$stoid,
-		tags_user_str =>	$tags_user_str,
 		newtagspreloadtext =>	$newtagspreloadtext,
 	}, { Return => 1 });
 }
 
 sub ajaxGetAdminStory {
-	my($self, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form) = @_;
 	my $stoid = $form->{stoid};
 	if (!$stoid || $stoid !~ /^\d+$/ || !$user->{is_admin}) {
 		return getData('error', {}, 'tags');
@@ -443,7 +453,7 @@ sub ajaxCreateForStory {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $stoid = $form->{stoid};
 	my $tags = getObject('Slash::Tags');
-print STDERR scalar(localtime) . " ajaxCreateForStory 1 stoid='$stoid' user-is='$user->{is_anon}' uid='$user->{uid}' tagsobj='$tags' tags='$form->{tags}'\n";
+#print STDERR scalar(localtime) . " ajaxCreateForStory 1 stoid='$stoid' user-is='$user->{is_anon}' uid='$user->{uid}' tagsobj='$tags' tags='$form->{tags}'\n";
 	if (!$stoid || $stoid !~ /^\d+$/ || $user->{is_anon} || !$tags) {
 		return getData('error', {}, 'tags');
 	}
@@ -452,7 +462,7 @@ print STDERR scalar(localtime) . " ajaxCreateForStory 1 stoid='$stoid' user-is='
 		grep { $tags->tagnameSyntaxOK($_) }
 		split /[\s,]+/,
 		($form->{tags} || '');
-print STDERR scalar(localtime) . " ajaxCreateForStory 2 tagnames='@tagnames'\n";
+#print STDERR scalar(localtime) . " ajaxCreateForStory 2 tagnames='@tagnames'\n";
 	if (!@tagnames) {
 		# No tags given, but that's OK, output the normal data
 	}
@@ -471,40 +481,91 @@ print STDERR scalar(localtime) . " ajaxCreateForStory 2 tagnames='@tagnames'\n";
 				id =>           $stoid
 			});
 	}
-print STDERR scalar(localtime) . " ajaxCreateForStory 3 old='@$old_tags_ar' saved='@saved_tagnames'\n";
+#print STDERR scalar(localtime) . " ajaxCreateForStory 3 old='@$old_tags_ar' saved='@saved_tagnames'\n";
 
-	my @new_tags = ( (sort map { $_->{tagname} } @$old_tags_ar), @saved_tagnames );
-	my $tags_user_str = getData('tags_user', { tags => \@new_tags }, 'tags');
+	my @newtagspreload = ( (map { $_->{tagname} } @$old_tags_ar), @saved_tagnames );
+	my $newtagspreloadtext = join ' ', @newtagspreload;
 
 	my $retval = slashDisplay('tagsstorydivuser', {
 		stoid =>		$stoid,
-		tags_user_str =>	$tags_user_str,
+		newtagspreloadtext =>	$newtagspreloadtext,
 	}, { Return => 1 });
-print STDERR scalar(localtime) . " ajaxCreateForStory 4 for stoid=$stoid tagnames='@tagnames' new_tags='@new_tags' returning: $retval\n";
+#print STDERR scalar(localtime) . " ajaxCreateForStory 4 for stoid=$stoid tagnames='@tagnames' newtagspreloadtext='$newtagspreloadtext' returning: $retval\n";
 	return $retval;
 }
 
 sub ajaxProcessAdminTags {
-	my($self, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form) = @_;
 	my $commands = $form->{commands};
 	my $stoid = $form->{stoid};
-print STDERR scalar(localtime) . " ajaxProcessAdminTags does nothing yet; stoid=$stoid commands='$commands'\n";
-	my $tags = getObject('Slash::Tags', { db_type => 'reader' });
+	my $tags = getObject('Slash::Tags');
+	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	my @commands =
 		grep { $tags->adminPseudotagnameSyntaxOK($_) }
 		split /[\s,]+/,
 		($commands || '');
-	if (!$stoid || @commands) {
+print STDERR scalar(localtime) . " ajaxProcessAdminTags stoid=$stoid commands='$commands' commands='@commands' tags='$tags'\n";
+	if (!$stoid || !@commands) {
 		# Error, but we really have no way to return it...
 		# return getData('tags_none_given', {}, 'tags');
 	}
 
-	my $tags_admin_str = "Saw commands: '@commands'.";
+	my @tagnameids_affected = ( );
+	for my $c (@commands) {
+		my $tagnameid = $tags->processAdminCommand($c);
+		push @tagnameids_affected, $tagnameid if $tagnameid;
+	}
+	if (@tagnameids_affected) {
+		my $affected_str = join(',', @tagnameids_affected);
+		my $reset_lastscanned = $tags->sqlSelect(
+			'MIN(tagid)',
+			'tags',
+			"tagnameid IN ($affected_str)");
+		if ($reset_lastscanned) {
+			$tags->setVar('tags_stories_lastscanned', $reset_lastscanned-1);
+		}
+print STDERR scalar(localtime) . " ajaxProcessAdminTags reset to " . ($reset_lastscanned-1) . " for '$affected_str'\n";
+	}
+
+	my $tags_admin_str = "Performed commands: '@commands'.";
 
 	return slashDisplay('tagsstorydivadmin', {
 		stoid =>		$stoid,
 		tags_admin_str =>	$tags_admin_str,
 	}, { Return => 1 });
+}
+
+sub processAdminCommand {
+	my($self, $c) = @_;
+
+	my($type, $tagname) = $self->getTypeAndTagnameFromAdminCommand($c);
+	return 0 if !$type;
+
+	my $constants = getCurrentStatic();
+	my $id = $self->getTagidCreate($tagname);
+	my $new_tag_clout = $constants->{tags_reduced_tag_clout} || 0.5;
+
+	$self->setTagname($id, { tag_clout => $new_tag_clout });
+print STDERR scalar(localtime) . " processAdminCommand set clout of tag $id to $new_tag_clout\n";
+
+	if ($type eq '#') {
+		my $new_user_clout = $constants->{tags_reduced_user_clout} || 0.5;
+		my $uids = $self->getUidsUsingTagname($tagname);
+		for my $uid (@$uids) {
+			$self->setUser($uid, { tag_clout => $new_user_clout });
+print STDERR scalar(localtime) . " processAdminCommand set clout of uid $uid to $new_user_clout\n";
+		}
+	}
+
+	return $id;
+}
+
+sub getTypeAndTagnameFromAdminCommand {
+	my($self, $c) = @_;
+	my($type, $tagname) = $c =~ /^([_#])(.+)$/;
+print STDERR scalar(localtime) . " get c '$c' type='$type' tagname='$tagname'\n";
+	return (undef, undef) if !$type || !$self->tagnameSyntaxOK($tagname);
+	return($type, $tagname);
 }
 
 #################################################################

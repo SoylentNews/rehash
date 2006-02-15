@@ -17,7 +17,7 @@ __template__
 
 <form name="tags-admin-[% stoid %]">
 [% PROCESS ajax_reskey_tag reskey_name => 'admin_commands-reskey-' _ stoid, reskey_resource => 'ajax_admin' %]
-<input type="text" id="tags_admin_commands-[% stoid %]" name="tags_admin_commands-[% stoid %]" value="" size=60 maxlength=100>
+<input type="text" id="tags_admin_commands-[% stoid %]" name="tags_admin_commands-[% stoid %]" value="" size=50 maxlength=60>
 <a href="javascript:adminTagsCommands([% stoid %]);">Admin</a>
 </form>
 
