@@ -93,7 +93,7 @@ sub getTop5 {
 		my $user_clout = $user->{karma} >= -3 ? log($user->{karma}+10) : 0;
 		$user_clout += 5 if $user->{seclev} > 1;
 		$user_clout *= $user->{tag_clout};
-		my $tag_clout = $tag->{tag_clout} || 1;
+		my $tag_clout = defined($tag->{tag_clout}) ? $tag->{tag_clout} : 1;
 		$user_clout *= $tag_clout;
 		$scores{$tagname} += $user_clout;
 	}
