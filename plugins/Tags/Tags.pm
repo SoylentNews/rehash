@@ -465,6 +465,7 @@ sub ajaxCreateForStory {
 
 	my @tagnames =
 		grep { $tags->tagnameSyntaxOK($_) }
+		map { lc }
 		split /[\s,]+/,
 		($form->{tags} || '');
 #print STDERR scalar(localtime) . " ajaxCreateForStory 2 tagnames='@tagnames'\n";
