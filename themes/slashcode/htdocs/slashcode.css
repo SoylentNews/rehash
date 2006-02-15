@@ -283,12 +283,12 @@ pre, code { font-size: 80%; }
 
 /* Tags */
 
-.tags { z-index: 100; position: absolute; width: 100%; font-size: 90%; line-height: 115% }
+.tags { width: 100%; font-size: 90%; line-height: 115% }
 .tagname { color: #600; font-weight: bold; padding: 0 }
 .tagtitleopen { background: #600; color: #fff; font-size: 90% }
-.tagtitleopen a { color: #fff; text-decoration: none }
+.tagtitleopen a { color: #fff; text-decoration: none; font-size: 90% }
 .tagtitleclosed { background: #e5e5e5; font-size: 90% }
-.tagtitleclose a { text-decoration: none }
+.tagtitleclosed a { text-decoration: none; font-size: 90% }
 .tagbody { border: 1px #ccc solid; background: #eee; padding: 8px }
 .tagshide { display: none }
 
