@@ -47,6 +47,7 @@ $VERSION   	= '2.005000';  # v2.5.0
 
 	dispComment displayStory displayRelatedStories displayThread dispStory
 	getOlderStories getOlderDays moderatorCommentLog printComments
+	selectComments
 );
 
 
@@ -68,6 +69,14 @@ sub selectComments {
 	my($min, $max) = ($constants->{comment_minscore}, 
 			  $constants->{comment_maxscore});
 	my $num_scores = $max - $min + 1;
+
+	my $commentsort = defined $options->{commentsort}
+		? $options->{commentsort}
+		: $user->{commentsort};
+	my $threshold = defined $options->{threshold}
+		? $options->{threshold}
+		: $user->{threshold};
+
 
 	my $comments; # One bigass hashref full of comments
 	for my $x (0..$num_scores-1) {
@@ -110,7 +119,7 @@ sub selectComments {
 		# By setting pid to zero, we remove the threaded
 		# relationship between the comments. Don't ignore threads
 		# in forums, or when viewing a single comment (cid > 0)
-		$C->{pid} = 0 if $user->{commentsort} > 3
+		$C->{pid} = 0 if $commentsort > 3
 			&& $cid == 0
 			&& $user->{mode} ne 'parents'; # Ignore Threads
 
@@ -118,7 +127,7 @@ sub selectComments {
 		# precisely, it munges up other things).
 		# I'm still looking into how to get parent links and
 		# children to show up properly in flat mode. - Jamie 2002/07/30
-#		$user->{state}{noreparent} = 1 if $user->{commentsort} > 3;
+#		$user->{state}{noreparent} = 1 if $commentsort > 3;
 
 		$C->{points} = _get_points($C, $user, $min, $max, $max_uid, $reasons);
 
@@ -127,11 +136,11 @@ sub selectComments {
 	}
 
 	# If we are sorting by highest score we resort to figure in bonuses
-	if ($user->{commentsort} == 3) {
+	if ($commentsort == 3) {
 		@$thisComment = sort {
 			$b->{points} <=> $a->{points} || $a->{cid} <=> $b->{cid}
 		} @$thisComment;
-	} elsif ($user->{commentsort} == 1 || $user->{commentsort} == 5) {
+	} elsif ($commentsort == 1 || $commentsort == 5) {
 		@$thisComment = sort {
 			$b->{cid} <=> $a->{cid}
 		} @$thisComment;
@@ -169,7 +178,7 @@ sub selectComments {
 		# Increment the parent comment's count of visible kids,
 		# if this comment is indeed visible.
 		$comments->{$C->{pid}}{visiblekids}++
-			if $C->{points} >= (defined $user->{threshold} ? $user->{threshold} : $min);
+			if $C->{points} >= (defined $threshold ? $threshold : $min);
 
 		# Can't mod in a discussion that you've posted in.
 		# Just a point rule -Brian
@@ -201,14 +210,14 @@ sub selectComments {
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 
-	reparentComments($comments, $reader);
+	reparentComments($comments, $reader, $options);
 	return($comments, $count);
 }
 
 sub constrain_score {
-	my ($score) = @_;
+	my($score) = @_;
 	my $constants = getCurrentStatic();
-	my ($min, $max) = ($constants->{comment_minscore}, $constants->{comment_maxscore});
+	my($min, $max) = ($constants->{comment_minscore}, $constants->{comment_maxscore});
 	$score = $min if $score < $min;
 	$score = $max if $score > $max;
 	return $score;
@@ -360,10 +369,14 @@ sub _print_cchp {
 
 ########################################################
 sub reparentComments {
-	my($comments, $reader) = @_;
+	my($comments, $reader, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
+
+	my $threshold = defined $options->{threshold}
+		? $options->{threshold}
+		: $user->{threshold};
 
 	my $max_depth_allowed = $constants->{max_depth} || 7;
 
@@ -408,11 +421,11 @@ sub reparentComments {
 		# But, if all its (great-etc.) grandparents are either invisible
 		# or chronologically precede the root comment, don't reparent it
 		# at all.
-		if ($user->{reparent} && $comments->{$x}{points} >= $user->{threshold}) { # XXX either $comments->{$x}{points} or $user->{threshold} is undefined here, not sure which or why
+		if ($user->{reparent} && $comments->{$x}{points} >= $threshold) { # XXX either $comments->{$x}{points} or $threshold is undefined here, not sure which or why
 			my $tmppid = $pid;
 			while ($tmppid
 				&& $comments->{$tmppid} && defined($comments->{$tmppid}{points})
-				&& $comments->{$tmppid}{points} < $user->{threshold}) {
+				&& $comments->{$tmppid}{points} < $threshold) {
 				$tmppid = $comments->{$tmppid}{pid} || 0;
 				$reparent = 1;
 			}
