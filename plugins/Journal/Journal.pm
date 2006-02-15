@@ -624,7 +624,7 @@ sub updateTransferredJournalDiscussions {
 	# revert dkid to 'journal'
 	# blank out stoid, sid, primaryskid
 	my $revert_journals = $self->sqlSelectAllHashrefArray(
-		'journal_transfer.id, journals.discussion, journals.description, journal.date, journal.uid, nickname',
+		'journal_transfer.id, journals.discussion, journals.description, journals.date, journals.uid, nickname',
 		'journal_transfer, journals, users',
 		'journal_transfer.stoid = 0 AND journal_transfer.updated = 1 AND ' .
 			'journal_transfer.id = journals.id AND ' .
