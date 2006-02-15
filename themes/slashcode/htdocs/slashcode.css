@@ -283,13 +283,13 @@ pre, code { font-size: 80%; }
 
 /* Tags */
 
-.tags { font-size: 90%; line-height: 120%; padding-left: 0.5em; padding-top: 0.5em }
-.tagname { color: #600; font-weight: bold }
+.tags { z-index: 100; position: absolute; width: 100%; font-size: 90%; line-height: 115% }
+.tagname { color: #600; font-weight: bold; padding: 0 }
 .tagtitleopen { background: #600; color: #fff; font-size: 90% }
 .tagtitleopen a { color: #fff; text-decoration: none }
 .tagtitleclosed { background: #e5e5e5; font-size: 90% }
 .tagtitleclose a { text-decoration: none }
-.tagbody { border: 1px #ccc solid; padding: 8px }
+.tagbody { border: 1px #ccc solid; background: #eee; padding: 8px }
 .tagshide { display: none }
 
 .future .briefarticle { background: #c33; }
