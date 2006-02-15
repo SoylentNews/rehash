@@ -193,7 +193,7 @@ sub main {
 			function	=> \&displaySignoffStats,
 			seclev		=> 500,
 			adminmenu	=> 'info',
-			tab_selected	=> 'signnoff'
+			tab_selected	=> 'signoff'
 		}
 	};
 
