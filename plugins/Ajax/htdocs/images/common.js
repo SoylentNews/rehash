@@ -37,8 +37,6 @@ function tagsHideBody(stoid) {
 	var tagboxid = 'tagbox-' + stoid;
         var tagbox = $(tagboxid);
 	tagbox.className = "tags";
-	tagbox.style.position = "relative";
-	tagbox.style.top = "";
 
 	// Toggle the button back.
 	var tagsbuttonid = 'toggletags-button-' + stoid;
@@ -65,9 +63,6 @@ function tagsShowBody(stoid, is_admin, newtagspreloadtext) {
 	// Make the body of the tagbox visible
 	var tagsbodyid = 'toggletags-body-' + stoid;
         var tagsbody = $(tagsbodyid);
-	toppos = tagbox.offsetTop + "px";
-	tagbox.style.position = "absolute";
-	tagbox.style.top = toppos;
 	
 	tagsbody.className = "tagbody";
 	
