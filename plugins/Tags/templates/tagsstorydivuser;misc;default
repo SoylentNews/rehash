@@ -2,8 +2,6 @@ __section__
 default
 __description__
 stoid = the story's stoid
-tags_user_str = list of user's tags, fed thru tags_user data, e.g. "Your Tags: foo, bar"
-	(this input is no longer used)
 newtagspreloadtext = text to preload the newtags-# field with
 __title__
 
