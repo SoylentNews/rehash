@@ -47,7 +47,7 @@ __template__
 					[% IF has_journal %]| [% END %]
 					[% END %]
 					[% IF has_journal %]
-						| Last Journal:
+						Last Journal:
 						<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/">[%
 						Slash.timeCalc(journal_last_entry_date) %]</a>
 					[% END %]

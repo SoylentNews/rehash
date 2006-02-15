@@ -42,16 +42,19 @@ END %]
 [% seen_topics = {} %]
 [% PROCESS titlebar future=story.is_future %]
 	<div class="details">
-		posted by <a href="[% author.homepage %]">[% author.nickname | strip_literal %]</a>
 		[% IF story.journal_id;
+			# at some point, we should maybe have a link
+			# directly to the journal entry, perhaps
+			# in the storylinks?  for now, just to the journal.
 			journal     = Slash.getObject('Slash::Journal');
 			thisjournal = journal.get(story.journal_id);
 			IF thisjournal && thisjournal.uid;
 				thisuser    = Slash.db.getUser(thisjournal.uid); %]
-		(from <a href="[% constants.rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/[% story.journal_id %]"
-			>[% thisuser.nickname | strip_literal %]'s Journal</a>) [%
+		Journal written by <a href="[% constants.rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/"
+			>[% thisuser.nickname | strip_literal %] ([% thisjournal.uid %])</a> and [%
 			END;
 		END %]
+		posted by <a href="[% author.homepage %]">[% author.nickname | strip_literal %]</a>
 		[% story.atstorytime %]
 		[% IF constants.plugin.Print %] 
 			&nbsp;&nbsp;<a href="[% gSkin.rootdir -%]/print.pl?sid=[% story.sid %]"><img src="[% constants.imagedir %]/print.gif" height="11" width="15" alt="Printer-friendly"></a>
