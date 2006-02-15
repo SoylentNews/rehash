@@ -628,7 +628,7 @@ sub updateTransferredJournalDiscussions {
 		'journal_transfer, journals, users',
 		'journal_transfer.stoid = 0 AND journal_transfer.updated = 1 AND ' .
 			'journal_transfer.id = journals.id AND ' .
-			'user.uid = journals.uid'
+			'users.uid = journals.uid'
 	);
 
 	my $constants = getCurrentStatic();
