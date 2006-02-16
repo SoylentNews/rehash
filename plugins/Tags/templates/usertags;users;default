@@ -14,7 +14,7 @@ en_US
 __name__
 usertags
 __template__
-[% IF user.tags_canwrite_stories && tags.size %]
+[% IF user.tags_canwrite_stories && tags_raw.size %]
 <div>Tags you've assigned to stories:</div>
 <ul class="tagslist">
 [% FOREACH tag = tags_raw;
