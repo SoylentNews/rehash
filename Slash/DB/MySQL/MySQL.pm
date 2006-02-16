@@ -9019,7 +9019,7 @@ sub createStory {
 		};
 
 		my $id;
-		if ($story->{discussion}) {
+		if ($story->{discussion} && $story->{journal_id}) {
 			# updating now for journals tips off users that this will
 			# be a story soon, esp. ts, url, title, kind ... i don't
 			# care personally, does it matter?  if so we can task some
@@ -9032,9 +9032,17 @@ sub createStory {
 			$discussion->{kind} = 'journal-story';
 			$discussion->{type} = 'open'; # should be already
 			$discussion->{archivable} = 'yes'; # for good measure
+
 			if (!$self->setDiscussion($id, $discussion)) {
-				$error = "Failed to set discussion for story";
+				$error = "Failed to set discussion data for story\n";
+
+			} elsif ($story->{journal_id}) {
+				$self->sqlUpdate('journal_transfer', {
+					stoid	=> $stoid,
+					updated	=> 0,
+				}, 'id=' . $self->sqlQuote($story->{journal_id}));
 			}
+
 		} else {
 			$id = $self->createDiscussion($discussion);
 			if (!$id) {

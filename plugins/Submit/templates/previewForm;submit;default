@@ -20,7 +20,9 @@ __template__
 [% # set the variable 'subtext'
    PROCESS formatSub %]
 
-[% PROCESS titlebar title="Submission Preview" %]
+
+[% title = submission.journal_id ? "Journal Submission Preview" : "Submission Preview" %]
+[% PROCESS titlebar %]
 <div class="generalbody">
 [% IF submission.sid %]
 	<p><a href="[% constants.real_rootdir %]/article.pl?sid=[% submission.sid %]">Link to Story</a>
