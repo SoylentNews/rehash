@@ -573,6 +573,8 @@ sub userdir_handler {
 	) {
 		my($string, $query) = ($1, '');
 		if ($string =~ s/\?(.+)$//) {
+			# This seems to have no effect, right? since $query
+			# is redeclared in a different scope below -Jamie
 			$query = $1;
 		}
 
@@ -666,6 +668,11 @@ sub userdir_handler {
 					$r->args("op=friendview");
 					$r->uri('/journal.pl');
 					$r->filename($constants->{basedir} . '/journal.pl');
+
+				} elsif ($op eq 'tags') {
+					$r->args("op=showtags");
+					$r->uri('/users.pl');
+					$r->filename($constants->{basedir} . '/users.pl');
 
 				} else {
 					$r->args("op=edituser");
