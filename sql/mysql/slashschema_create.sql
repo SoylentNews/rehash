@@ -736,7 +736,7 @@ CREATE TABLE querylog (
 	KEY type (type)
 ) TYPE=InnoDB;
 
-DROP TABLE IF EXISTSÊrelated_stories;
+DROP TABLE IF EXISTS related_stories;
 CREATE TABLE related_stories (
 	id mediumint(8) unsigned NOT NULL auto_increment,
 	stoid mediumint(8) unsigned default '0',
