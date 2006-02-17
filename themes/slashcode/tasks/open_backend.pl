@@ -67,6 +67,16 @@ sub _do_rss {
 	$title = "$title: $skin->{title}"
 		if $skin->{skid} && $skin->{skid} != $constants->{mainpage_skid} && $skin->{title};
 
+	my $description = $constants->{slogan};
+
+	# XXX: temporary, until we can add a skin_param table
+	if ($constants->{sitename} eq 'Slashdot') {
+		if ($skin->{title} && $skin->{title} eq 'AMD') {
+			$title .= ' Sponsored Content';
+			$description = 'Special Advertising Section';
+		}
+	}
+
 	my $ext = $version == 0.9 && $type eq 'rss' ? 'rdf' : $type;
 	my $filename = "$file.$ext";
 
@@ -75,6 +85,7 @@ sub _do_rss {
 			title		=> $title,
 			'link'		=> $link,
 			selflink	=> "$link$filename",
+			description	=> $description,
 		},
 		version		=> $version,
 		textinput	=> 1,
