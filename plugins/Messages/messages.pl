@@ -206,16 +206,16 @@ sub display_prefs {
 
 	header(getData('header')) or return;
 	print createMenu('users', {
-		style =>	'tabbed',
-		justify =>	'right',
-		color =>	'colored',
-		tab_selected =>	'preferences',
+		style		=> 'tabbed',
+		justify 	=> 'right',
+		color		=> 'colored',
+		tab_selected	=> 'preferences',
 	});
 	slashDisplay('journuserboxes');
 	my $prefs_titlebar = slashDisplay('prefs_titlebar', {
-		nickname => $user->{nickname},
-		uid => $user->{uid},
-		tab_selected => 'messages'
+		nickname	=> $user->{nickname},
+		uid		=> $user->{uid},
+		tab_selected	=> 'messages'
 	}, { Return => 1 });
 	my $messages_menu =  createMenu('messages');
 	slashDisplay('display_prefs', {
@@ -271,16 +271,16 @@ sub list_messages {
 	header(getData('header')) or return;
 # Spank me, this won't be here for long (aka Pater's cleanup will remove it) -Brian
 	print createMenu('users', {
-		style =>	'tabbed',
-		justify =>	'right',
-		color =>	'colored',
-		tab_selected =>	'me',
+		style		=> 'tabbed',
+		justify		=> 'right',
+		color		=> 'colored',
+		tab_selected	=> 'me',
 	});
 	slashDisplay('journuserboxes');
 	my $user_titlebar = slashDisplay('user_titlebar', {
-		nickname => $user->{nickname},
-		uid => $user->{uid},
-		tab_selected => 'messages'
+		nickname	=> $user->{nickname},
+		uid		=> $user->{uid},
+		tab_selected	=> 'messages'
 	}, { Return => 1} );
 	my $messages_menu = createMenu('messages'); # [ Message Preferences | Inbox ]
 	slashDisplay('list_messages', {

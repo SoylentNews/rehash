@@ -15,7 +15,8 @@ __template__
 <div id="slashboxes">
         [% PROCESS userboxes %]
 </div>
-[% title = "Change password for $user.nickname ($user.uid)" %]
+[% thisnickname = user.nickname | strip_literal;
+   title = "Change password for $thisnickname ($user.uid)" %]
 <div id="users-blocks">
         [% PROCESS prefs_titlebar tab_selected='password' %]
         <div class="generalbody">

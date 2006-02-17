@@ -122,7 +122,7 @@ change your password, or just click pretty widgets to kill time.
 	<p></td></tr></table>
 
 [% CASE 'saveuser_email_msg' %]
-The user account [% nickname %] on [% constants.sitename %] had this email associated
+The user account [% nickname | strip_literal %] on [% constants.sitename %] had this email associated
 with it.  A web user from [% env.remote_addr %] has just changed it to
 [% realemail | strip_literal %].
 

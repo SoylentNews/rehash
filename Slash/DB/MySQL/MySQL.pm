@@ -8584,10 +8584,10 @@ sub setSubmissionsMerge {
 
 	my $time = timeCalc(scalar localtime, "%m/%d %H:%M %Z", 0);
 	my $subid = $self->createSubmission({
-		subj	=> "Merge: $user->{nickname} ($time)",
+		subj	=> "Merge: " . strip_literal($user->{nickname}) . " ($time)",
 		tid	=> $constants->{defaulttopic},
 		story	=> $content,
-		name	=> $user->{nickname},
+		name	=> strip_literal($user->{nickname}),
 	});
 	$self->setSubmission($subid, {
 		storyonly => 1,
@@ -9692,7 +9692,8 @@ sub autoUrl {
 	my($now) = timeCalc(scalar localtime, '%m/%d %H:%M %Z', 0);
 
 	# Assorted Automatic Autoreplacements for Convenience
-	$data =~ s|<disclaimer:(.*)>|<b><a href="/about.shtml#disclaimer">disclaimer</a>:<a href="$user->{homepage}">$user->{nickname}</a> owns shares in $1</b>|ig;
+	my $nick = strip_literal($user->{nickname});
+	$data =~ s|<disclaimer:(.*)>|<b><a href="/about.shtml#disclaimer">disclaimer</a>:<a href="$user->{homepage}">$nick</a> owns shares in $1</b>|ig;
 	$data =~ s|<update>|<b>Update: <date></b> by <author>|ig;
 	$data =~ s|<date>|$now|g;
 	$data =~ s|<author>|<b><a href="$user->{homepage}">$initials</a></b>:|ig;

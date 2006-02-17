@@ -11,7 +11,8 @@ en_US
 __name__
 display
 __template__
-[% PROCESS titlebar title => "$constants.sitename Message for $user.nickname", width => "100%" %]
+[% thisnickname = user.nickname | strip_literal;
+   PROCESS titlebar title => "$constants.sitename Message for $thisnickname", width => "100%" %]
 [% Slash.createMenu('messages') %]
 
 [% IF message && message.user.uid == user.uid %]

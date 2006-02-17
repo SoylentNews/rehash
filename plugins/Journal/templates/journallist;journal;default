@@ -22,6 +22,7 @@ __template__
 %]
 
 [%# Having a second titlebar looks wrong to me... - Jamie %]
+[%# also this nickname must be run through strip_literal if used -- pudge %]
 [%# PROCESS titlebar title => "$nickname's Journal Entries", width => "100%" %]
 
 [% IF showform %]

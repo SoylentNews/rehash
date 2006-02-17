@@ -45,7 +45,11 @@ __template__
 	User "[% nouser.nickname | strip_literal %]" ([% nouser.uid %]) has no journal entries.
 
 [% CASE 'noentries' %]
-	[% nickname ? "$nickname has" : "You have" %] not created any journal entries.
+	[% IF nickname;
+		nickname | strip_literal %] has[%
+	   ELSE %]
+	   	You have
+	[% END %] not created any journal entries.
 
 [% CASE 'nofriends' %]
 	[% returnme.data_constant = 1 %]

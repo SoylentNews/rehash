@@ -18,16 +18,16 @@ __template__
 [% uid = uid || user.uid %]
 
 [% IF user.uid == uid && !user.is_anon;
-	title = title || "$user.nickname (This is you!)";
+	thisnickname = user.nickname | strip_literal;
+	title = title || "$thisnickname (This is you!)";
 	url_nick = user.nickname | strip_paramattr;
 	PROCESS titlebar title=title;
 ELSE;
+	thisnickname = useredit.nickname | strip_literal;
 	url_nick = useredit.nickname | strip_paramattr;
 	zi = PROCESS zoo_icons person=uid implied="";
-	title = title
-		|| "<a href=\"/~$url_nick/\">"
-			_ useredit.nickname _ " ($uid)</a> "
-			_ zi;
+	title = title ||
+		"<a href=\"$gSkin.rootdir/~$url_nick/\">$thisnickname ($uid)</a> $zi";
 	PROCESS titlebar title=title;
 END %]
 

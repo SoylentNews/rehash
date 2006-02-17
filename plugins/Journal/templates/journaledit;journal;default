@@ -19,14 +19,16 @@ __template__
 					<input type="hidden" name="preview" value="active">
 					[% PROCESS reskey_tag %]
 
-					[% PROCESS formLabel value => "Subject", comment => "This is required" %]
+					[% PROCESS formLabel value => "Subject" %]
+					[% PROCESS formNote note => "This is required" %]
 					<input type="text" name="description" size="60" maxlength="60" value="[% article.description | strip_attribute %]">
 					[% PROCESS formLabel value => "Journal Topic", comment => "";
 					   def_topic = article.tid || constants.journal_default_topic;
 					   Slash.selectTopic('tid', def_topic, '', 1) %]
 
 					[% IF !article.discussion %]
-						[% PROCESS formLabel value => "Comments", comment => "Comments cannot be disabled once enabled" %]
+						[% PROCESS formLabel value => "Comments" %]
+						[% PROCESS formNote note => "Comments cannot be disabled once enabled" %]
 				 		[% jdcodename = (user.is_subscriber || user.is_admin) ? 'commentcodes_extended' : 'commentcodes';
  						   jds = Slash.db.getDescriptions(jdcodename);
  						   def_jd = form.journal_discuss.defined
@@ -36,9 +38,10 @@ __template__
  						   		: user.journal_discuss || 'disabled';
 						   Slash.createSelect("journal_discuss", jds, def_jd, 1) %]
 					[% ELSE %]
-						[% PROCESS formLabel value => "Comments", comment => "Comments are enabled" %]
+						[% PROCESS formLabel value => "Comments" %]
+						[% PROCESS formNote note => "Comments are enabled" %]
 					[% END %]
-					[% PROCESS formLabel value => "Entry", comment => "This will go down on your permanent record" %]
+					[% PROCESS formLabel value => "Entry" %]
 					<textarea wrap="virtual" name="article" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]">[% article.article | strip_literal %]</textarea>
 					<br>
 					[% format_select %]
@@ -75,7 +78,6 @@ __template__
 			<br>
 			<b>URLs</b> <code>&lt;URL:http://example.com/&gt;</code> will auto-link a URL
 		</div>
-		
 
 __seclev__
 100
