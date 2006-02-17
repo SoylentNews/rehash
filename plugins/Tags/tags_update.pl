@@ -21,7 +21,7 @@ $minutes_run = 1;
 
 $task{$me}{timespec} = "0-59/$minutes_run * * * *";
 $task{$me}{timespec_panic_1} = ''; # not that important
-$task{$me}{resource_locks} = { log_slave => 1 };
+$task{$me}{resource_locks} = { };
 $task{$me}{fork} = SLASHD_NOWAIT;
 
 $task{$me}{code} = sub {
