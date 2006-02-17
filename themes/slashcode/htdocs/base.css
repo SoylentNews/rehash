@@ -616,7 +616,7 @@ input.button
 }
 
 /* Data tables */
-.data { font-size: 75.5%; font-family: sans-serif; }
+.data { font-family: sans-serif; }
 .data_head
 {
 	color: #fff;
