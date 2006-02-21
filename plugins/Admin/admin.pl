@@ -1115,69 +1115,6 @@ sub get_signoff_box {
 }
 
 ##################################################################
-sub get_slashd_box {
-	my $slashdb = getCurrentDB();
-	my $sldst = $slashdb->getSlashdStatuses();
-	for my $task (keys %$sldst) {
-		$sldst->{$task}{last_completed_hhmm} =
-			substr($sldst->{$task}{last_completed}, 11, 5)
-			if defined($sldst->{$task}{last_completed});
-		$sldst->{$task}{next_begin_hhmm} =
-			substr($sldst->{$task}{next_begin}, 11, 5)
-			if defined($sldst->{$task}{next_begin});
-		$sldst->{$task}{summary_trunc} =
-			substr($sldst->{$task}{summary}, 0, 30)
-			if $sldst->{$task}{summary};
-	}
-	# Yes, this really is the easiest way to do this.
-	# Yes, it is quite complicated.
-	# Sorry.  - Jamie
-	my @tasks_next = reverse (
-		map {				# Build an array of
-			$sldst->{$_}
-		} grep {			# the defined elements of
-			defined($_)
-		} ( (				# the first 3 elements of
-			sort {			# a sort of
-				$sldst->{$a}{next_begin} cmp $sldst->{$b}{next_begin}
-			} grep {		# the defined elements of
-				defined($sldst->{$_}{next_begin})
-				&& !$sldst->{$_}{in_progress}
-			} keys %$sldst		# the hash keys.
-		)[0..2] )
-	);
-	my @tasks_inprogress = (
-		map {				# Build an array of
-			$sldst->{$_}
-		} sort {			# a sort of
-			$sldst->{$a}{task} cmp $sldst->{$b}{task}
-		} grep {			# the in-progress elements of
-			$sldst->{$_}{in_progress}
-		} keys %$sldst			# the hash keys.
-	);
-	my @tasks_last = reverse (
-		map {				# Build an array of
-			$sldst->{$_}
-		} grep {			# the defined elements of
-			defined($_)
-		} ( (				# the last 3 elements of
-			sort {			# a sort of
-				$sldst->{$a}{last_completed} cmp $sldst->{$b}{last_completed}
-			} grep {		# the defined elements of
-				defined($sldst->{$_}{last_completed})
-				&& !$sldst->{$_}{in_progress}
-			} keys %$sldst		# the hash keys.
-		)[-3..-1] )
-	);
-	my $text = slashDisplay('slashd_box', {
-		tasks_next              => \@tasks_next,
-		tasks_inprogress        => \@tasks_inprogress,
-		tasks_last              => \@tasks_last,
-	}, , { Return => 1 });
-	return $text;
-}
-
-##################################################################
 # Story Editing
 sub editStory {
 	my($form, $slashdb, $user, $constants, $gSkin) = @_;
@@ -1466,13 +1403,11 @@ sub editStory {
 		}
 	}
 
-	my $authortext = slashDisplay('futurestorybox', {
-		past	=> $past,
-		present	=> $storyref,
-		future	=> $future,
-	}, { Return => 1 });
 
-	my $slashdtext = get_slashd_box();
+	my $admindb = getObject('Slash::Admin');
+	my $authortext = $admindb->showStoryAdminBox($storyref);
+	my $slashdtext = $admindb->showSlashdBox();
+	
 	my $signofftext = get_signoff_box($storyref->{stoid});
 	my $attached_files;
 	if ($constants->{plugin}{Blob}) {
@@ -1545,19 +1480,26 @@ sub extractRelatedStoriesFromForm {
 		$related = [ $form->{related_story} ];
 	}
 
+	my $regexsid = regexSid();
 	if ($form->{add_related}) {
 		my @add_related = split('\n', $form->{add_related});
 		foreach (@add_related) {
 			s/^\s+|\s+$//g;
 			next if !$_;
 			# XXX should use regexSid()
-			if (/(?:$constants->{basedomain})?\S*(\d\d\/\d\d\/\d\d\/\d+)/) {
+			if (/(?:$constants->{basedomain})?\S*$regexsid/) {
 				push @$related, $1;
 			} else {
 				my($title, $url) = $_ =~ /^(.*)\s+(\S+)$/;
 				$related_urls{$url} = $title;
 			}
 		}
+	}
+
+
+	# Extract sids from urls in introtext and bodytext
+	foreach($form->{introtext}, $form->{bodytext}) {
+		push @$related, $1 while /(?:$constants->{basedomain})?\S*$regexsid/g;
 	}
 
 	# should probably filter and check that they're actually sids, etc...
