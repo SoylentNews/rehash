@@ -7104,19 +7104,24 @@ sub getStorySidFromDiscussion {
 ##################################################################
 # admin.pl only
 sub getStoryByTimeAdmin {
-	my($self, $sign, $story, $limit) = @_;
+	my($self, $sign, $story, $limit, $options) = @_;
 	my $where = "";
 	my $user = getCurrentUser();
 	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
 	$limit ||= 1;
 
+	$options ||= {};
+	$story   ||= {};
+
 	# '=' is also sometimes used for $sign; in that case,
 	# order is irrelevant -- pudge
 	my $order = $sign eq '<' ? 'DESC' : 'ASC';
 
-	$where .= " AND sid != '$story->{sid}'";
+	$where .= " AND sid != '$story->{sid}'" if !$options->{no_story};
 
 	my $time = $story->{'time'};
+	$time = $self->getTime() if !$story->{time} && $options->{no_story};
+
 	my $returnable = $self->sqlSelectAllHashrefArray(
 		'stories.stoid, title, sid, time',
 		'stories, story_text',
@@ -9286,6 +9291,16 @@ sub getSignoffsForStory {
 		"signoff.*, users.nickname, signoff_type",
 		"signoff, users",
 		"signoff.stoid=$stoid_q AND users.uid=signoff.uid"
+	);
+}
+
+sub getSignoffsInLastMinutes {
+	my ($self, $mins) = @_;
+	$mins ||= getCurrentStatic("admin_timeout");
+	return $self->sqlSelectAllHashrefArray(
+		"*",
+		"signoff",
+		"signoff_time >= DATE_SUB(NOW(), INTERVAL $mins MINUTE)"
 	);
 }
 
