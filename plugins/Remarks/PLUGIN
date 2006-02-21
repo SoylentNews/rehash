@@ -1,5 +1,6 @@
 # $Id$
-name=Console
-description="Console"
-htdocs=console.pl
-template=templates/display;console;default
+name=Remarks
+description="Remarks"
+htdocs=remarks.pl
+template=templates/data;remarks;default
+template=templates/display;remarks;default
