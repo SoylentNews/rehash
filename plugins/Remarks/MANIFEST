@@ -1,4 +1,4 @@
 Makefile.PL
 MANIFEST
-Remarks.pm
-remarks.pl
+Console.pm
+console.pl
