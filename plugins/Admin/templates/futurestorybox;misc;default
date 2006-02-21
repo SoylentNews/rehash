@@ -12,27 +12,36 @@ en_US
 __name__
 futurestorybox
 __template__
-
-<ul id="future">
+<table cellspacing="0" cellpadding="2">
 [% futuretoday = Slash.timeCalc(Slash.db.getTime, "%Y-%m-%d", 0);
    MACRO futurestorywrite(story, nohref) BLOCK;
    futuretext  = "";
    futuretime  = "";
-   futureclass = "future";
-
-   IF !story.displaystatus;
-        futureclass = "future";
-   ELSIF story.displaystatus > 0;
-	futureclass = "futureg";
-   ELSIF story.displaystatus < 0;
-	futureclass = "futurel";
+   futureclass = "story_main";
+   class_prefix = "";
+   IF constants.signoff_use;
+   	IF !user_signoffs.${story.stoid} && !user_signoffs.${story.stoid}.cnt;
+		class_prefix = "ns_";
+	ELSIF story_signoffs.${story.stoid}.cnt < needed_signoffs;
+		class_prefix = "ss_";
+	END;
    END;
+  
+   IF !story.displaystatus;
+        futureclass = "story_main";
+   ELSIF story.displaystatus > 0;
+	futureclass = "story_sec";
+   ELSIF story.displaystatus < 0;
+	futureclass = "story_nd";
+   END;
+
+   futureclass = class_prefix _ futureclass;
 
    IF nohref;
 	futuretext = story.title;
    ELSE;
 	futuretext = BLOCK -%]
-<a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</a>
+<a href="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">[% story.title %]</a>
 	[%- END;
    END;
 
@@ -43,24 +52,23 @@ __template__
    END;
 
    -%]
-	<li class="[% futureclass %]">
+	<tr class="[% futureclass %]"><td>
 		[% futuretext %] <em>[% futuretime %]</em>
-	</li>
+	</td></tr>
 [%- END %]
 
 
 [% FOREACH story = future;
 	futurestorywrite(story);
 END;
-futurestorywrite(present, 1);
+futurestorywrite(present,0);
 FOREACH story = otherpresent;
 	futurestorywrite(story);
 END;
 FOREACH story = past;
 	futurestorywrite(story);
 END %]
-</ul>
-
+</table>
 __seclev__
 10000
 __version__
