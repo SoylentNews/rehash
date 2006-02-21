@@ -53,3 +53,26 @@ function remarks_fetch(secs, limit) {
 	ajax_periodic_update(secs, params, 'remarks_table');
 }
 
+function admin_slashdbox_fetch(secs) {
+	var params = [];
+	params['op'] = 'admin_slashdbox';
+	ajax_periodic_update(secs, params, "slashdbox-content");
+}
+
+function admin_perfbox_fetch(secs) {
+	var params = [];
+	params['op'] = 'admin_perfbox';
+	ajax_periodic_update(secs, params, "performancebox-content");
+}
+
+function admin_authorbox_fetch(secs) {
+	var params = [];
+	params['op'] = 'admin_authorbox';
+	ajax_periodic_update(secs, params, "authoractivity-content");
+}
+
+function admin_storyadminbox_fetch(secs) {
+	var params = [];
+	params['op'] = 'admin_storyadminbox';
+	ajax_periodic_update(secs, params, "storyadmin-content");
+}
