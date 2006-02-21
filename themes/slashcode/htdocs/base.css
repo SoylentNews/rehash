@@ -616,12 +616,11 @@ input.button
 }
 
 /* Data tables */
-.data { font-family: sans-serif; }
+.data { font-family: sans-serif; font-size: 75.5% }
 .data_head
 {
 	color: #fff;
 	background: #600;
-	font-size: 75.5%;
 	font-family: sans-serif;
 }
 
@@ -630,7 +629,6 @@ input.button
 .data_hl1
 {
 	background: #ccc;
-	font-size: 75.5%;
 	font-family: sans-serif;
 }
 
@@ -639,7 +637,6 @@ input.button
 .data_hl2
 {
 	background: #ddd;
-	font-size: 75.5%;
 	font-family: sans-serif;
 }
 
@@ -648,7 +645,6 @@ input.button
 .data_hl3
 {
 	background: #eee;
-	font-size: 75.5%;
 	font-family: sans-serif;
 }
 
