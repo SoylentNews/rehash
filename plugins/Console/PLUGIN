@@ -1,0 +1,5 @@
+# $Id$
+name=Console
+description="Console"
+htdocs=console.pl
+template=templates/display;console;default
