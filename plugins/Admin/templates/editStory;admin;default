@@ -39,14 +39,8 @@ __template__
 			%]
 			<input type="hidden" name="relatedtext" value="[% relatedtext | strip_attribute %]">
 	
-			[% PROCESS sidebox
-				title = "Story Admin"
-				contents = authortext
-			%]
-			[% PROCESS sidebox
-				title = "Slashd Status"
-				contents = slashdtext
-			%]
+			[% authortext %]
+			[% slashdtext %]
 		</div>
 		<div id="articles">
 			<fieldset>

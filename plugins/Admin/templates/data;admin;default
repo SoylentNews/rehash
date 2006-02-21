@@ -140,7 +140,14 @@ CASE "comment_db_down" %]
 
 [% CASE "ispell_sugg" %]
 	<br><i>Suggested:</i>
-
+[% CASE 'authorbox_js' %]
+	<script type="text/javascript">admin_authorbox_fetch(30);</script>
+[% CASE 'slashdbox_js' %]
+	<script type="text/javascript">admin_slashdbox_fetch(60);</script>
+[% CASE 'perfbox_js' %]
+	<script type="text/javascript">admin_perfbox_fetch(90);</script>
+[% CASE 'storyadminbox_js' %]
+	<script type="text/javascript">admin_storyadminbox_fetch(30);</script>
 [% END %]
 __seclev__
 10000
