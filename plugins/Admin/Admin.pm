@@ -304,6 +304,237 @@ sub getSignoffData {
 
 }
 
+sub showStoryAdminBox {
+	my ($self, $storyref, $options) = @_;
+	my $user = getCurrentUser();
+	$options ||= {};
+	my $updater;
+
+	if (!$storyref) {
+		my $cur_stories = $self->getStoryByTimeAdmin("<", $storyref, 1, { no_story => 1 });
+		$storyref = $cur_stories->[0] if @$cur_stories;
+		
+	}
+	
+	my $future = $self->getStoryByTimeAdmin('>', $storyref, 3);
+	$future = [ reverse @$future ];
+	my $past = $self->getStoryByTimeAdmin('<', $storyref, 3);
+	my $current = $self->getStoryByTimeAdmin('=', $storyref, 20);
+	unshift @$past, @$current;
+
+	my $stoid_list = [];
+	push @$stoid_list, $_->{stoid} foreach @$past, @$future, @$current;
+
+	my $usersignoffs 	= $self->getUserSignoffHashForStoids($user->{uid}, $stoid_list);
+	my $storysignoffcnt	= $self->getSignoffCountHashForStoids($stoid_list);
+
+	my $authortext = slashDisplay('futurestorybox', {
+		past		  => $past,
+		present		  => $storyref,
+		future		  => $future,
+		user_signoffs 	  => $usersignoffs,
+		story_signoffs	  => $storysignoffcnt,
+	}, { Return => 1 });
+
+	return $authortext if $options->{contents_only};
+	
+	$updater = getData('storyadminbox_js', {}, "admin") if $options->{updater}; 
+	slashDisplay('sidebox', {
+		updater 	=> $updater,
+		title 		=> 'Story Admin',
+		contents	=> $authortext,
+		name 		=> 'storyadmin',
+	}, { Return => 1});
+}
+
+sub ajax_storyadminbox {
+	my $admin = getObject("Slash::Admin");
+	$admin->showStoryAdminBox("", { contents_only => 1});
+}
+
+sub showSlashdBox {
+	my ($self, $options) = @_;
+	$options ||= {};
+	my $updater;
+	my $slashdb = getCurrentDB();
+	my $sldst = $slashdb->getSlashdStatuses();
+	for my $task (keys %$sldst) {
+		$sldst->{$task}{last_completed_hhmm} =
+			substr($sldst->{$task}{last_completed}, 11, 5)
+			if defined($sldst->{$task}{last_completed});
+		$sldst->{$task}{next_begin_hhmm} =
+			substr($sldst->{$task}{next_begin}, 11, 5)
+			if defined($sldst->{$task}{next_begin});
+		$sldst->{$task}{summary_trunc} =
+			substr($sldst->{$task}{summary}, 0, 30)
+			if $sldst->{$task}{summary};
+	}
+	# Yes, this really is the easiest way to do this.
+	# Yes, it is quite complicated.
+	# Sorry.  - Jamie
+	my @tasks_next = reverse (
+		map {				# Build an array of
+			$sldst->{$_}
+		} grep {			# the defined elements of
+			defined($_)
+		} ( (				# the first 3 elements of
+			sort {			# a sort of
+				$sldst->{$a}{next_begin} cmp $sldst->{$b}{next_begin}
+			} grep {		# the defined elements of
+				defined($sldst->{$_}{next_begin})
+				&& !$sldst->{$_}{in_progress}
+			} keys %$sldst		# the hash keys.
+		)[0..2] )
+	);
+	my @tasks_inprogress = (
+		map {				# Build an array of
+			$sldst->{$_}
+		} sort {			# a sort of
+			$sldst->{$a}{task} cmp $sldst->{$b}{task}
+		} grep {			# the in-progress elements of
+			$sldst->{$_}{in_progress}
+		} keys %$sldst			# the hash keys.
+	);
+	my @tasks_last = reverse (
+		map {				# Build an array of
+			$sldst->{$_}
+		} grep {			# the defined elements of
+			defined($_)
+		} ( (				# the last 3 elements of
+			sort {			# a sort of
+				$sldst->{$a}{last_completed} cmp $sldst->{$b}{last_completed}
+			} grep {		# the defined elements of
+				defined($sldst->{$_}{last_completed})
+				&& !$sldst->{$_}{in_progress}
+			} keys %$sldst		# the hash keys.
+		)[-3..-1] )
+	);
+	my $text = slashDisplay('slashd_box', {
+		tasks_next              => \@tasks_next,
+		tasks_inprogress        => \@tasks_inprogress,
+		tasks_last              => \@tasks_last,
+	}, , { Return => 1 });
+	
+	return $text if $options->{contents_only};
+	
+	$updater = getData('slashdbox_js', {}, "admin") if $options->{updater};
+	slashDisplay('sidebox', {
+		updater 	=> $updater,
+		title 		=> 'Slashd Status',
+		contents 	=> $text,
+		name 		=> 'slashdbox',
+	}, { Return => 1} );
+}
+
+sub ajax_slashdbox {
+	my $admin = getObject("Slash::Admin");
+	$admin->showSlashdBox({ contents_only => 1});
+}
+
+sub showPerformanceBox {
+	my ($self, $options) = @_;
+	$options ||= {};
+	my $updater;
+	my $perf_box = slashDisplay('performance_box', {}, { Return => 1 });
+	return $perf_box if $options->{contents_only};
+	$updater =getData('perfbox_js', {}, "admin") if $options->{updater};
+	slashDisplay("sidebox", {
+		updater 	=> $updater,
+		name 		=> 'performancebox',
+		title 		=> 'Performance',
+		contents 	=> $perf_box
+	}, { Return => 1 });
+}
+
+sub ajax_perfbox {
+	my $admin = getObject("Slash::Admin");
+	$admin->showPerformanceBox({ contents_only => 1});
+}
+
+
+sub showAuthorActivityBox {
+	my ($self, $options) = @_;
+	$options ||= {};
+	my $updater;
+	my $daddy;
+	my $constants = getCurrentStatic();
+	my $schedule = getObject("Slash::ScheduleShifts");
+	if ($schedule) {
+		my $daddies = $schedule->getDaddy();
+		$daddy = $daddies->[0] if @$daddies;
+	}
+
+	my $cur_admin = $self->currentAdmin();
+	my $signoffs = $self->getSignoffsInLastMinutes($constants->{admin_timeout});
+
+	my @activity;
+	my $now = timeCalc($self->getTime(), "%s", 0);
+
+	foreach my $admin (@$cur_admin) {
+		my ($nickname, $time, $title, $subid, $sid, $uid) = @$admin;
+		push @activity, {
+			nickname => $nickname,
+			title	=> $title,
+			subid	=> $subid,
+			sid	=> $sid,
+			uid	=> $uid,
+			'time'	=> $time,
+			verb	=> "reviewing"
+		};
+	}
+
+	foreach my $signoff (@$signoffs) {
+		my $story = $self->getStory($signoff->{stoid});
+		my $nickname = $self->getUser($signoff->{uid}, "nickname");
+		push @activity, {
+			nickname => $nickname,
+			title	 => $story->{title},
+			subid	 => "",
+			sid	 => $story->{sid},
+			uid	 => $signoff->{uid},
+			'time'   => $signoff->{signoff_time},
+			verb	 => $signoff->{signoff_type},
+
+		}	
+
+	}
+
+	@activity = sort { $b->{time} cmp $a->{time} } @activity;
+
+	foreach my $activity(@activity) {
+		my $usertime = $now - timeCalc($activity->{time}, "%s", 0);
+		if ($usertime <= 99) {
+			$usertime .= "s";
+		} elsif ($usertime <= 3600) {
+			$usertime = int($usertime/60+0.5) . "m";
+		} else {
+			$usertime = int($usertime/3600) . "h" . int(($usertime%3600)/60+0.5) . "m";
+		}
+		$activity->{usertime} = $usertime
+	}
+
+	my $author_activity = slashDisplay("author_activity", {
+		daddy => $daddy,
+		activity => \@activity
+	}, { Return => 1});
+
+	return $author_activity if $options->{contents_only};
+
+	$updater = getData('authorbox_js', {}, "admin") if $options->{updater};
+	slashDisplay("sidebox", {
+		updater 	=> $updater,
+		name 	 	=> "authoractivity",
+		title	 	=> "Authors",
+		contents 	=> $author_activity
+	}, { Return => 1 })
+	
+}
+
+sub ajax_authorbox {
+	my $admin = getObject("Slash::Admin");
+	$admin->showAuthorActivityBox({ contents_only => 1});
+}
+
 sub DESTROY {
 	my($self) = @_;
 	$self->{_dbh}->disconnect if !$ENV{GATEWAY_INTERFACE} && $self->{_dbh};
