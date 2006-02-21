@@ -1498,7 +1498,7 @@ sub extractRelatedStoriesFromForm {
 
 
 	# Extract sids from urls in introtext and bodytext
-	foreach($form->{introtext}, $form->{bodytext}) {
+	foreach ($form->{introtext}, $form->{bodytext}) {
 		push @$related, $1 while /(?:$constants->{basedomain})?\S*$regexsid/g;
 	}
 

@@ -575,6 +575,7 @@ sub userdir_handler {
 		if ($string =~ s/\?(.+)$//) {
 			# This seems to have no effect, right? since $query
 			# is redeclared in a different scope below -Jamie
+			# This is in case something in this scope wants it -- pudge
 			$query = $1;
 		}
 

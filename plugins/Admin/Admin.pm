@@ -313,7 +313,6 @@ sub showStoryAdminBox {
 	if (!$storyref) {
 		my $cur_stories = $self->getStoryByTimeAdmin("<", $storyref, 1, { no_story => 1 });
 		$storyref = $cur_stories->[0] if @$cur_stories;
-		
 	}
 	
 	my $future = $self->getStoryByTimeAdmin('>', $storyref, 3);
