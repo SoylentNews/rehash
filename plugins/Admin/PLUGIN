@@ -20,6 +20,7 @@ image=images/open_node.png
 image=images/plus.png
 template=templates/aclEdit;admin;default
 template=templates/adminLoginForm;admin;default
+template=templates/author_activity;misc;default
 template=templates/blockEdit;admin;default
 template=templates/colorEdit;admin;default
 template=templates/data;admin;default
