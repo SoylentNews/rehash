@@ -1480,14 +1480,19 @@ sub extractRelatedStoriesFromForm {
 		$related = [ $form->{related_story} ];
 	}
 
-	my $regexsid = regexSid();
+# XXX this is broken because regexSid() matches things other than sid
+# but in theory, should use regexSid() ...
+#	my $regexsid = regexSid();
+
+	my $match = qr/(?:$constants->{basedomain})?\S*(\d\d\/\d\d\/\d\d\/\d+)/;
+
 	if ($form->{add_related}) {
 		my @add_related = split('\n', $form->{add_related});
 		foreach (@add_related) {
 			s/^\s+|\s+$//g;
 			next if !$_;
 			# XXX should use regexSid()
-			if (/(?:$constants->{basedomain})?\S*$regexsid/) {
+			if ($_ =~ $match) {
 				push @$related, $1;
 			} else {
 				my($title, $url) = $_ =~ /^(.*)\s+(\S+)$/;
@@ -1499,7 +1504,7 @@ sub extractRelatedStoriesFromForm {
 
 	# Extract sids from urls in introtext and bodytext
 	foreach ($form->{introtext}, $form->{bodytext}) {
-		push @$related, $1 while /(?:$constants->{basedomain})?\S*$regexsid/g;
+		push @$related, $1 while /$match/g;
 	}
 
 	# should probably filter and check that they're actually sids, etc...
