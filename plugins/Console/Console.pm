@@ -3,7 +3,7 @@
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
-package Slash::Console
+package Slash::Console;
 
 =head1 NAME
 
@@ -34,6 +34,7 @@ use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 use vars qw($VERSION);
 
+($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 1;
 
