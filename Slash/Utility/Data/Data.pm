@@ -164,8 +164,10 @@ sub nick2matchname {
 # If you change createSid() for your site, change regexSid() too.
 # If your site will have multiple formats of sids, you'll want this
 # to continue matching the old formats too.
+# NOTE: sid is also used for discussion ID (and maybe stoid too?),
+# such as in comments.pl, so that's what the \d{1,8} is for. -- pudge
 sub regexSid {
-	return qr{\b(\d{2}/\d{2}/\d{2}/\d{3,8})\b};
+	return qr{\b(\d{2}/\d{2}/\d{2}/\d{3,8}|\d{1,8})\b};
 }
 
 #========================================================================
