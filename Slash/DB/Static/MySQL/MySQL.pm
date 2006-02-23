@@ -2396,8 +2396,7 @@ sub refreshUncommonStoryWords {
 	$self->sqlDo("SET AUTOCOMMIT=0");
 	$self->sqlDelete("uncommonstorywords");
 	for my $word (@uncommon_words) {
-		$self->sqlInsert("uncommonstorywords", { word => $word },
-			{ delayed => 1 });
+		$self->sqlInsert("uncommonstorywords", { word => $word });
 	}
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
