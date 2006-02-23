@@ -12041,6 +12041,11 @@ sub getUser {
 			for my $col (keys %$users_hits) {
 				$answer->{$col} = $users_hits->{$col};
 			}
+			# And adjust the users_hits.lastclick value, a timestamp,
+			# to work the same in 4.1 and later as it did in 4.0.
+			# This is vital to make a Slash::Apache::Log::UserLog
+			# test work properly.
+			$answer->{lastclick} =~ s/\D+//g if $answer->{lastclick};
 #			for my $duple (@$users_param) {
 #				$answer->{$duple->[0]} = $duple->[1];
 #			}
