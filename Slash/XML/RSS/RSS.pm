@@ -388,6 +388,7 @@ sub rss_story {
 	my $reader    = getObject('Slash::DB', { db_type => 'reader' });
 
 	my $topics = $reader->getTopics;
+	my $other_creator;
 
 	$encoded_item->{title}  = $self->encode($story->{title})
 		if $story->{title};
@@ -409,6 +410,15 @@ sub rss_story {
 		if (getCurrentUser('is_admin')) {
 			$story->{introtext} .= qq[\n\n<p><a href="$edit">[ Edit ]</a></p>];
 		}
+
+		if ($story->{journal_id}) {
+			my $journal = getObject('Slash::Journal');
+			if ($journal) {
+				my $journal_uid = $journal->get($story->{journal_id}, "uid");
+				$other_creator = $reader->getUser($journal_uid, 'nickname')
+					if $journal_uid;
+			}
+		}
 	}
 
 	if ($version >= 0.91) {
@@ -421,8 +431,15 @@ sub rss_story {
 			if $story->{'time'};
 		$encoded_item->{dc}{subject} = $self->encode($topics->{$story->{tid}}{keyword})
 			if $story->{tid};
-		$encoded_item->{dc}{creator} = $self->encode($reader->getUser($story->{uid}, 'nickname'))
-			if $story->{uid};
+
+		my $creator;
+		if ($story->{uid}) {
+			$creator = $reader->getUser($story->{uid}, 'nickname');
+			$creator = "$other_creator (posted by $creator)" if $other_creator;
+		} elsif ($other_creator) {
+			$creator = $other_creator;
+		}
+		$encoded_item->{dc}{creator} = $self->encode($creator) if $creator;
 
 		$encoded_item->{slash}{comments}   = $self->encode($story->{commentcount})
 			if $story->{commentcount};
