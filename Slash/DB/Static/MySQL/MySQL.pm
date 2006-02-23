@@ -670,16 +670,24 @@ sub updateLastaccess {
 	my $splice_count = 200;
 	if ($constants->{subscribe} && !$constants->{subscribe_hits_only}) {
 		my @gmt = gmtime();
-		my $today = sprintf "%4d%02d%02d", $gmt[5] + 1900, $gmt[4] + 1, $gmt[3];
-		my $ar = $self->sqlSelectAll(
+		my $hr = $self->sqlSelectAllKeyValue(
 			"uid, lastclick",
 			"users_hits",
 			"TO_DAYS(NOW()) - TO_DAYS(lastclick) <= 1"
 		);
 		my %uids_day = ( );
-		for my $uid_ar (@$ar) {
-			my($uid, $lastclick) = @$uid_ar;
-			my $lastclick_day = substr($lastclick, 0, 8);
+		for my $uid (keys %$hr) {
+			my $lastclick = $hr->{$uid};
+			if ($lastclick =~ /^(\d{4})(\d{2})(\d{2})/) {
+				# Timestamp field users_hits.lastclick is
+				# being given to us in MySQL 4.0 format
+				# of YYYYMMDDhhmmss.  Convert it to the
+				# MySQL 4.1 and later format of
+				# YYYY-MM-DD.  See also getUser and
+				# _getUser_do_selects.
+				$lastclick = "$1-$2-$3";
+			}
+			my $lastclick_day = substr($lastclick, 0, 10);
 			$uids_day{$lastclick_day}{$uid} = 1;
 		}
 		for my $day (keys %uids_day) {
@@ -694,12 +702,12 @@ sub updateLastaccess {
 				);
 				# If there is more to do, sleep for a moment so we don't
 				# hit the DB too hard.
-				sleep 2 if @uids;
+				sleep int($splice_count/20+0.5) if @uids;
 			}
 		}
 	} else {
 		my @gmt = gmtime(time-86400);
-		my $yesterday = sprintf "%4d%02d%02d", $gmt[5] + 1900, $gmt[4] + 1, $gmt[3];
+		my $yesterday = sprintf "%4d-%02d-%02d", $gmt[5] + 1900, $gmt[4] + 1, $gmt[3];
 		my $uids_ar = $self->sqlSelectColArrayref(
 			"uid",
 			"accesslog",
@@ -718,7 +726,7 @@ sub updateLastaccess {
 			);
 			# If there is more to do, sleep for a moment so we don't
 			# hit the DB too hard.
-			Time::HiRes::sleep(0.2) if @uids;
+			sleep int($splice_count/20+0.5) if @uids;
 		}
 	}
 }
@@ -743,16 +751,24 @@ sub decayTokens {
 		"(lastaccess < DATE_SUB(NOW(), INTERVAL $days DAY) OR karma < $min_k)
 		 AND tokens > 0"
 	);
-	my $uids_in = join(",", sort @$uids_ar);
-	my $rows = 0;
-	if ($uids_in) {
-		$rows = $self->sqlUpdate(
-			"users_info",
-			{ -tokens => "GREATEST(0, tokens - $perday)" },
-			"uid IN ($uids_in) AND tokens > 0"
-		);
+	my $decayed = 0;
+	my $splice_count = 200;
+	while (@$uids_ar) {
+		my @uid_chunk = splice @$uids_ar, 0, $splice_count;
+		my $uids_in = join(",", @uid_chunk);
+		my $rows = 0;
+		if ($uids_in) {
+			$rows = $self->sqlUpdate(
+				"users_info",
+				{ -tokens => "GREATEST(0, tokens - $perday)" },
+				"uid IN ($uids_in)"
+			);
+		}
+		$decayed += $rows * $perday;
+		# If there is more to do, sleep for a moment so we don't
+		# hit the DB too hard.
+		sleep int($splice_count/20+0.5) if @$uids_ar;
 	}
-	my $decayed = $rows * $perday;
 	return $decayed;
 }
 
@@ -2272,8 +2288,12 @@ sub createAuthorCache {
 	my($self) = @_;
 	my $sql;
 	$sql  = "REPLACE INTO authors_cache ";
-	$sql .= "SELECT users.uid, nickname, GREATEST(fakeemail, ''),
-		GREATEST(homepage, ''), 0, GREATEST(bio, ''), author ";
+	$sql .= "SELECT users.uid, nickname,
+		GREATEST(IF(fakeemail IS NULL, '',	fakeemail), ''),
+		GREATEST(IF(homepage IS NULL, '',	homepage), ''),
+		0,
+		GREATEST(IF(bio IS NULL, '',		bio), ''),
+		author ";
 	$sql .= "FROM users, users_info ";
 	$sql .= "WHERE users.author=1 ";
 	$sql .= "AND users.uid=users_info.uid";
@@ -2281,9 +2301,12 @@ sub createAuthorCache {
 	$self->sqlDo($sql);
 
 	$sql  = "REPLACE INTO authors_cache ";
-	$sql .= "SELECT users.uid, nickname, GREATEST(fakeemail, ''),
-		GREATEST(homepage, ''), count(stories.uid),
-		GREATEST(bio, ''), author ";
+	$sql .= "SELECT users.uid, nickname,
+		GREATEST(IF(fakeemail IS NULL, '',	fakeemail), ''),
+		GREATEST(IF(homepage IS NULL, '',	homepage), ''),
+		COUNT(stories.uid),
+		GREATEST(IF(bio IS NULL, '',		bio), ''),
+		author ";
 	$sql .= "FROM users, stories, users_info ";
 	$sql .= "WHERE stories.uid=users.uid ";
 	$sql .= "AND users.uid=users_info.uid GROUP BY stories.uid";
@@ -2370,11 +2393,14 @@ sub refreshUncommonStoryWords {
 	@uncommon_words = split / /, $uncommon_words;
 
 	$self->sqlDo("LOCK TABLES uncommonstorywords LOW_PRIORITY WRITE");
+	$self->sqlDo("SET AUTOCOMMIT=0");
 	$self->sqlDelete("uncommonstorywords");
 	for my $word (@uncommon_words) {
 		$self->sqlInsert("uncommonstorywords", { word => $word },
 			{ delayed => 1 });
 	}
+	$self->sqlDo("COMMIT");
+	$self->sqlDo("SET AUTOCOMMIT=1");
 	$self->sqlDo("UNLOCK TABLES");
 }
 
