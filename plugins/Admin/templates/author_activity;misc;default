@@ -15,7 +15,7 @@ __seclev__
 __template__
 <table>
 [% IF daddy %]
-	<tr class="data_hl1"><td><a href="[% $gSkin.rootdir %]/shifts.pl">Daddypants:</a>: [% daddy.nickname | strip_literal %]</td></tr>
+	<tr class="data_hl1"><td><a href="[% $gSkin.rootdir %]/shifts.pl">Daddypants:</a> [% daddy.nickname | strip_literal %]</td></tr>
 [% END %]
 [% seen_uids = {}; num = 0 %]
 [% FOREACH act = activity %]
