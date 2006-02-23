@@ -15,7 +15,7 @@ __seclev__
 __template__
 <table>
 [% IF daddy %]
-	content = "<tr class='data_hl1'><td><a href=\"$gSkin.rootdir\/shifts.pl">Daddypants:</a>: $daddy.nickname</td></tr>"
+	<tr class='data_hl1'><td><a href="[% $gSkin.rootdir %]/shifts.pl">Daddypants:</a>: [% daddy.nickname | strip_literal %]</td></tr>"
 [% END %]
 [% seen_uids = {}; num = 0 %]
 [% FOREACH act = activity %]
@@ -23,9 +23,9 @@ __template__
 	[% class = num % 2 ? "data_hl1" : "data_hl2"; %]
 	<tr class="[% class %]"><td>
 	[% IF act.title %]
-		[% act.nickname %]  [% act.verb %] <a href="[% gSkin.rootdir %]/[% IF act.sid %]admin.pl?op=edit&amp;sid=[% act.sid %][% ELSIF act.subid %]submit.pl?op=viewsub&subid=[% act.subid %][% END %]">[% act.title %]</a> [% act.usertime %]
+		[% act.nickname | strip_literal %]  [% act.verb %] <a href="[% gSkin.rootdir %]/[% IF act.sid %]admin.pl?op=edit&amp;sid=[% act.sid %][% ELSIF act.subid %]submit.pl?op=viewsub&subid=[% act.subid %][% END %]">[% act.title %]</a> [% act.usertime %]
 	[% ELSE %]
-		[% act.nickname %] is in bin [% act.usertime %]
+		[% act.nickname | strip_literal %] is in bin [% act.usertime %]
 	[% END %]
 	</td></tr>
 	[% seen_uids.${act.uid} = 1 %]
