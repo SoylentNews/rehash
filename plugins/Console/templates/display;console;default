@@ -25,7 +25,8 @@ __template__
 	<script type="text/javascript">
 		function reloadBin() {
 			var iframe = $('submitiframe');
-			iframe.src = "[% constants.absolutedir_secure %]/submit.pl?op=list&amp;nowrapper=1";
+			[%# do not HTML-encode the '&', that's only for in HTML itself, and this is JavaScript -- pudge %]
+			iframe.src = "[% constants.absolutedir_secure %]/submit.pl?op=list&nowrapper=1";
 		}
 	</script>
 	<a href="javascript:reloadBin()">Reload Bin</a>
