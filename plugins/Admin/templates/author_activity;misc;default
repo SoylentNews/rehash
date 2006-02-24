@@ -10,8 +10,6 @@ __lang__
 en_US
 __name__
 author_activity
-__seclev__
-10000
 __template__
 <table>
 [% IF daddy %]
@@ -30,4 +28,7 @@ __template__
 	</td></tr>
 [% END %]
 </table>
-
+__seclev__
+10000
+__version__
+$Id$
