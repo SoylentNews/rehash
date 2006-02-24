@@ -9171,6 +9171,7 @@ sub createStory {
 
 			# update later in task
 			delete @{$discussion}{qw(title url ts)};
+			delete $discussion->{uid}; # leave it "owned" by poster
 
 			$id = $story->{discussion};
 			$discussion->{kind} = 'journal-story';
