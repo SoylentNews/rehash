@@ -623,6 +623,7 @@ sub doSaveArticle {
 
 	} else {
 		# don't allow submission if user can't submit stories
+		# this will fail silently
 		# note: this may not work properly with SOAP, but submissions
 		# not enabled with SOAP now anyway
 		if ($form->{submit}) {
