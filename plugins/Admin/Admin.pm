@@ -322,7 +322,7 @@ sub showStoryAdminBox {
 	unshift @$past, @$current;
 
 	my $stoid_list = [];
-	push @$stoid_list, $_->{stoid} foreach @$past, @$future, @$current;
+	push @$stoid_list, $_->{stoid} foreach @$past, @$future, $storyref;
 
 	my $usersignoffs 	= $self->getUserSignoffHashForStoids($user->{uid}, $stoid_list);
 	my $storysignoffcnt	= $self->getSignoffCountHashForStoids($stoid_list);
