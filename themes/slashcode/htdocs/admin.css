@@ -155,4 +155,4 @@ html>body #admin { margin: 0 auto .2em 0; }
 .user_admin { background: #ccc; }
 body .adminstoryform fieldset {background: #ccc; }
 body .adminstoryform legend { display: none;}
-#submitframe { margin-right: 15em }
+#console #remarks_table, #submitframe { margin-right: 16em }

@@ -16,7 +16,7 @@ en_US
 __name__
 currentAdminUsers
 __template__
-<table width="100%" border="0" cellpadding="2" cellspacing="0">
+<table width="100%" border="0" cellpadding="2" cellspacing="0" class="data">
 
 [% FOREACH author = ids %]
 	[% id         = author.0;
