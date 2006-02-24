@@ -259,8 +259,8 @@ __template__
 		<blockquote>
 		[% UNLESS user_edit.user_comment_sort_type.defined; user_edit.user_comment_sort_type=2; END %]
 		[% user_comment_sort_type.${user_edit.user_comment_sort_type} = constants.markup_checked_attribute -%]
-		<input type="radio" name="user_comment_sort_type" [% user_comment_sort_type.1 %] value="1"> Selected by create time descending<br>
-		<input type="radio" name="user_comment_sort_type" [% user_comment_sort_type.2 %] value="2"> Selected by create time descending, results grouped by discussion, newest discussion first.
+		<input type="radio" name="user_comment_sort_type"[% user_comment_sort_type.1 %] value="1"> Selected by create time descending<br>
+		<input type="radio" name="user_comment_sort_type"[% user_comment_sort_type.2 %] value="2"> Selected by create time descending, results grouped by discussion, newest discussion first.
 		</blockquote>
 		[% IF user.is_admin %]
 		<label>Show Moderations in User Comment Listing <input type="checkbox" name="mod_with_comm" [% s_mod_check %]></label>

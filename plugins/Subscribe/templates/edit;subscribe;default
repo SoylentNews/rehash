@@ -136,10 +136,10 @@ ends. Your day may vary.)
 	<tr>
 	<td valign="top" align="center"><input type="radio"
 		name="buypage_[% page.pagename %]"
-		value="0" [% IF !page.isbought; constants.markup_checked_attribute; END %]></td>
+		value="0"[% IF !page.isbought; constants.markup_checked_attribute; END %]></td>
 	<td valign="top" align="center"><input type="radio"
 		name="buypage_[% page.pagename %]"
-		value="1" [% IF  page.isbought; constants.markup_checked_attribute; END %]></td>
+		value="1"[% IF  page.isbought; constants.markup_checked_attribute; END %]></td>
 	<td valign="top" align="left">&nbsp;[% page.descr %]</td>
 	</tr>
 

@@ -64,7 +64,7 @@ __template__
 					<td>[% story.weight %]</td>
 					<td><a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</a></td>
 					<td>[% Slash.timeCalc(story.time) %]</td>
-					<td><input type="checkbox" name="related_story" value="[% story.sid | strip_attribute %]" [% IF storyref.related_sids_hr.${story.sid}; constants.markup_checked_attribute; END %]></td>
+					<td><input type="checkbox" name="related_story" value="[% story.sid | strip_attribute %]"[% IF storyref.related_sids_hr.${story.sid}; constants.markup_checked_attribute; END %]></td>
 					<td>
 						[% FOREACH word = story.words %]
 							[%- word -%][% UNLESS words_seen.$word %]<input type="checkbox" name="set_common_word" value="[% word %]">[%- END -%]
@@ -92,7 +92,7 @@ __template__
 			<td><a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
 			[% story.title %]</a></td>
 			<td>[% Slash.timeCalc(story.time) %]</td>
-			<td><input type="checkbox" name="related_story" value="[% story.sid | strip_attribute %]" [% IF storyref.related_sids_hr.${story.sid}; constants.markup_checked_attribute; END %]></td>
+			<td><input type="checkbox" name="related_story" value="[% story.sid | strip_attribute %]"[% IF storyref.related_sids_hr.${story.sid}; constants.markup_checked_attribute; END %]></td>
 			<td>
 				[% FOREACH word = story.words %]
 					[%- word -%][% UNLESS words_seen.$word %]<INPUT TYPE="checkbox" name="set_common_word" value="[% word %]">[%- END -%]
