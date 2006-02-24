@@ -24,12 +24,10 @@ __template__
 	<tr class="[% class %]"><td>
 	[% IF act.title %]
 		[% act.nickname | strip_literal %]  [% act.verb %] <a href="[% gSkin.rootdir %]/[% IF act.sid %]admin.pl?op=edit&amp;sid=[% act.sid %][% ELSIF act.subid %]submit.pl?op=viewsub&subid=[% act.subid %][% END %]">[% act.title %]</a> [% act.usertime %]
-	[% ELSE %]
-		[% act.nickname | strip_literal %] is in bin [% act.usertime %]
+		[% seen_uids.${act.uid} = 1 %]
+		[% num = !num %]
 	[% END %]
 	</td></tr>
-	[% seen_uids.${act.uid} = 1 %]
-	[% num = !num %]
 [% END %]
 </table>
 
