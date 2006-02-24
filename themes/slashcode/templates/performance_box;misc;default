@@ -17,7 +17,7 @@ __template__
 [% WHILE items.size > 0;
 	cur_set = items.splice(0, 3);
 	IF items.size > 0; %]
-		<li>[% cur_set.0 %] [% cur_set.1 %]s [% cur_set.2 %] [% IF items.size >= 4 %] | [% END %][% IF items.size <= 3 %]<br>[% END %]</li>
+		<li>[% cur_set.0 %] [% cur_set.1 %]s [% cur_set.2 %]</li>
 	[% ELSE %]
 		<li>[% cur_set.1 %][% IF cur_set.2%]% [% cur_set.2 %][% END %]</li>
 	[% END %]
