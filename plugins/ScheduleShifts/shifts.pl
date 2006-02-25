@@ -77,7 +77,8 @@ sub createRemark {
 	my($slashdb, $constants, $user, $form, $gSkin, $schedule) = @_;
 
 	my($remark) = $form->{remark};
-	$slashdb->createRemark($remark, { type => 'system' });
+	my $remarks = getObject('Slash::Remarks');
+	$remarks->createRemark($remark, { type => 'system' });
 	1;
 }
 
