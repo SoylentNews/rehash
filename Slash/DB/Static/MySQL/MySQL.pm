@@ -109,6 +109,11 @@ sub getBackendStories {
 		for my $key (qw( image width height )) {
 			$story->{image}{$key} = $topic_hr->{$key};
 		}
+
+		# so we can assign proper "creator" if story was posted
+		# originally as a journal
+		my $journal_id = $self->getStory($story->{stoid}, 'journal_id');
+		$story->{journal_id} = $journal_id if $journal_id;
 	}
 
 	return $returnable;
