@@ -55,6 +55,27 @@ __template__
 					<input type="submit" value="Filter Submissions">
 		</fieldset>
 	</form>
+
+<form action="[% env.script_name %]" method="post">
+<table class="data" width="100%">
+	<tr class="data_head">
+		<th colspan="4">Submissions Memory</th>
+	</tr>
+[% i = 1; FOREACH note = subnotes_ref; i = i == 1 ? 2 : 1 %]
+	<tr class="data_hl[% i %]">
+		<td>[% note.submatch %]</td>
+		<td>[% note.subnote %]</td>
+		<td>[% note.time %]</td>
+		<td>[% note.uid %]</td>
+	</tr>
+[% END # FOREACH %]A
+	<tr>
+		<td><input name="submatch" size="10"></td>
+		<td colspan="2"><input name="subnote" size="40"></td>
+		<td><input type="submit" value="Remember"></td>
+	</tr>
+</table>
+</form>
 __seclev__
 10000
 __version__
