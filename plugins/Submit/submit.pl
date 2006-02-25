@@ -359,6 +359,10 @@ sub submissionEd {
 		width		=> '100%',
 	});
 
+	$slashdb->updateSubMemory($form->{submatch}, $form->{subnote}) if $form->{submatch};
+	my($sub_memory, $subnotes_ref);
+	$sub_memory = $slashdb->getSubmissionMemory;
+
 	my($submissions);
 	$submissions = $slashdb->getSubmissionForUser;
 
@@ -373,6 +377,18 @@ sub submissionEd {
 			chopEntity($sub->{email}, 20)
 		);
 		$sub->{strs} = \@strs;
+
+		foreach my $memory (@sub_memory) {
+			my $match = $memory->{submatch};
+
+			if ($sub->{email} =~ m/$match/i ||
+			    $sub->{name}  =~ m/$match/i ||
+			    $sub->{subj}  =~ m/$match/i ||
+			    $sub->{ipid}  =~ m/$match/i ||
+			    $sub->{story} =~ m/$match/i) {
+				push @$subnotes_ref, $memory;
+			}
+		}
 
 		my $skin = $slashdb->getSkin($sub->{primaryskid});
 		$sub->{sskin}  =
@@ -399,6 +415,7 @@ sub submissionEd {
 		submissions	=> $submissions,
 		selection	=> getSubmissionSelections($constants),
 		weighted	=> \@weighted,
+		subnotes_ref    => $subnotes_ref,
 	});
 }
 
