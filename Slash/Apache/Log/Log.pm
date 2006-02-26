@@ -98,13 +98,15 @@ sub UserLog {
 	# this is an admin who just sent a password in the clear.
 	# There are other less-important things that might get updated
 	# but none of them matters enough to continue processing.
-	if ($op eq 'image' and !$user_update->{admin_clearpass}) {
+	if ($op eq 'image' && !$user_update->{admin_clearpass}) {
 #		print STDERR scalar(gmtime) . " $$ UserLog short-circuit image\n";
 		return ;
 	}
 
 	# For the below logic, note that if we're on an image hit,
 	# page_buying will be false.
+	# Err, and that doesn't matter since if we're on an image,
+	# we already returned.  So I'm not sure why I wrote that.
 	if ($constants->{subscribe}
 		&& ($user->{is_subscriber} || !$constants->{subscribe_hits_only})
 	) {
