@@ -13456,6 +13456,34 @@ sub setRelatedStoriesForStory {
 	}
 }
 
+sub updateSubMemory {
+	my($self, $submatch, $subnote) = @_;
+
+	my $user = getCurrentUser();
+
+	my $rows = $self->sqlUpdate('submissions_memory', {
+			subnote => $subnote,
+			uid => $user->{uid},
+			'time' => 'now()',
+	}, "submatch='" . $self->sqlQuote($submatch) . "'");
+
+	$self->sqlInsert('submissions_memory', {
+			submatch => $submatch,
+			subnote => $subnote,
+			uid => $user->{uid},
+			'time' => 'now()',
+	}) if !$rows;
+}
+
+sub getSubmissionMemory {
+	my($self) = @_;
+
+	return $self->sqlSelectAllHashrefArray('submatch, subnote, time, uid',
+		'submissions_notes',
+		"subnote is not null AND subnote != ''",
+		'order by time desc');
+}
+
 ########################################################
 sub DESTROY {
 	my($self) = @_;
