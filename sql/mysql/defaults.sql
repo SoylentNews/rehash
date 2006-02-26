@@ -768,7 +768,7 @@ INSERT INTO vars (name, value, description) VALUES ('cur_performance_stat_ops', 
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_lastid', '0', 'accesslogid to start searching at');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_weeks', '8', 'number of weeks back to compare current stats to');
 INSERT INTO vars (name, value, description) VALUES ('currentqid',1,'The Current Question on the homepage pollbooth');
-INSERT INTO vars (name, value, description) VALUES ('cvs_tag_currentcode','T_2_5_0_99','The current cvs tag that the code was updated to - this does not affect site behavior but may be useful for your records');
+INSERT INTO vars (name, value, description) VALUES ('cvs_tag_currentcode','T_2_5_0_100','The current cvs tag that the code was updated to - this does not affect site behavior but may be useful for your records');
 INSERT INTO vars (name, value, description) VALUES ('datadir','/usr/local/slash/www.example.com','What is the root of the install for Slash');
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_disp','0','Display dbsparklines in the currentAdminUsers box?');
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_height',40,'Pixel height of sparkline graphs');
@@ -955,6 +955,7 @@ INSERT INTO vars (name, value, description) VALUES ('maxtokens','40','Token thre
 INSERT INTO vars (name, value, description) VALUES ('maxtokens_add','3','Max tokens to give any one user per pass');
 INSERT INTO vars (name, value, description) VALUES ('memcached','0','Use memcached?');
 INSERT INTO vars (name, value, description) VALUES ('memcached_debug','0','Turn on debugging for memcached?');
+INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_story','600','Number of seconds a story record lives in memcached before requiring a re-read from the DB');
 INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_user','1200','Number of seconds a user record lives in memcached before requiring a re-read from the DB (empty string=default, 0=forever)');
 INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_comtext','86400','Number of seconds comment text lives in memcached before requiring a re-read from the DB (empty string=default, 0=forever)');
 INSERT INTO vars (name, value, description) VALUES ('memcached_keyprefix','x','Unique, short (1-2 chars probably) prefix to distinguish this site from the other sites sharing memcaches');
