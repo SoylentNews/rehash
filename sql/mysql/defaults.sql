@@ -204,9 +204,12 @@ INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_m
 INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('Australia',   1, 2, -1, 0, 9, 2, -1, 0,  2);
 INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_month, end_hour, end_wnum, end_wday, end_month) VALUES ('New Zealand', 0, 2,  1, 0, 9, 2,  3, 0,  2);
 
+
 #
-# Dumping data for table 'formkeys'
+# Dumping data for table 'globj_types'
 #
+
+INSERT INTO globj_types VALUES (NULL, 'stories');
 
 
 #
@@ -765,7 +768,7 @@ INSERT INTO vars (name, value, description) VALUES ('cur_performance_stat_ops', 
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_lastid', '0', 'accesslogid to start searching at');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_weeks', '8', 'number of weeks back to compare current stats to');
 INSERT INTO vars (name, value, description) VALUES ('currentqid',1,'The Current Question on the homepage pollbooth');
-INSERT INTO vars (name, value, description) VALUES ('cvs_tag_currentcode','T_2_5_0_96','The current cvs tag that the code was updated to - this does not affect site behavior but may be useful for your records');
+INSERT INTO vars (name, value, description) VALUES ('cvs_tag_currentcode','T_2_5_0_97','The current cvs tag that the code was updated to - this does not affect site behavior but may be useful for your records');
 INSERT INTO vars (name, value, description) VALUES ('datadir','/usr/local/slash/www.example.com','What is the root of the install for Slash');
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_disp','0','Display dbsparklines in the currentAdminUsers box?');
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_height',40,'Pixel height of sparkline graphs');
@@ -823,6 +826,8 @@ INSERT INTO vars (name, value, description) VALUES ('goodkarma','25','Users get 
 INSERT INTO vars (name, value, description) VALUES ('gse_precache_mins_ahead','2','How many minutes ahead to precache getStoriesEssentials data in the query cache and memcached?');
 INSERT INTO vars (name, value, description) VALUES ('gse_skip_count_if_no_min_stoid', '0', 'If no min_stoid is available, skip counting the s_t_r rows and go straight to the one-table select? Rule of thumb, set this to true for sites with many stories (say, over 10,000)');
 INSERT INTO vars (name, value, description) VALUES ('gse_table_join_row_cutoff', '1000', 'Number of stoids below which getStoriesEssentials performs 2 separate selects and above which it performs a JOIN');
+INSERT INTO vars (name, value, description) VALUES ("gse_mp_max_days_back", "0", "Max days back to go in gSE select for mainpage in instances where we haven't passed an offset / issue -- 0 if you don't want to use this");
+INSERT INTO vars (name, value, description) VALUES ("gse_fallback_min_stoid", "0", "Set by set_gse_min_stoid to define how far back to search max when not passing an issue or offset");
 INSERT INTO vars (name, value, description) VALUES ('http_proxy','','http://proxy.www.example.com');
 INSERT INTO vars (name, value, description) VALUES ('id_md5_vislength','5','Num chars to display for ipid/subnetid (0 for all)');
 INSERT INTO vars (name, value, description) VALUES ('ignore_uid_date_index', '1', 'Ignore uid_date index on comments where it may slow performance');
