@@ -202,7 +202,7 @@ INSTALLATION
                         ---- Unsatisfied dependencies detected during [FOO/Bar-1.23.tar.gz] -----
                             Foobar::Baz
                         Shall I follow them and prepend them to the queue
-                        of modules we are processing right now? [yes] 
+                        of modules we are processing right now? [yes]
 
                 That's normal; just hit return.
 
@@ -492,11 +492,11 @@ INSTALLATION OPTIONS
     RAM or 5 MB?
 
     Slashdot, and some other Slash sites we're hosting, are currently using
-    boa 0.94.14rc17 (<http://www.boa.org/>) for images. Boa is fast and has
-    a small footprint. It's easy to build ("./configure && make") but you
-    have to install it yourself by copying the binary and mkdir'ing a little
-    tree wherever you want it. We did roughly this. Your mileage may vary.
-    This sets up an alternate server just for images on port 8080, and sets
+    boa 0.94.14rc17 (http://www.boa.org/) for images. Boa is fast and has a
+    small footprint. It's easy to build ("./configure && make") but you have
+    to install it yourself by copying the binary and mkdir'ing a little tree
+    wherever you want it. We did roughly this. Your mileage may vary. This
+    sets up an alternate server just for images on port 8080, and sets
     Slash's imagedir var to point to it. Your apache will still serve images
     at the old URLs if anyone requests them, but nobody will, because your
     site's pages will all point to boa:
@@ -746,13 +746,15 @@ REQUIREMENTS
                 http://www.cpan.org/
 
     MySQL
-        Version 4.0.26 (4.0.12).
+        Version 4.1.18 (4.0.12).
 
                 http://www.mysql.com/
 
         MySQL 3.23.x is no longer supported, as of CVS tag T_2_5_0_33
-        (October 18, 2004). MySQL 4.1.x has been tested and we haven't found
-        any problems, but we haven't run it on a production site yet.
+        (October 18, 2004). Slashdot has been running on MySQL 4.1.x with no
+        problems, so we now recommend that, but 4.0.x works as well. We have
+        been testing 5.0.x for months but currently, no production sites run
+        it.
 
     Apache
         Version 1.3.33.
@@ -992,8 +994,8 @@ TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
             fully understand MySQL permissions, don't guess; start your
             reading here:
 
-            <http://www.mysql.com/documentation/mysql/bychapter/manual_MySQL
-            _Database_Administration.html#Privilege_system>
+            http://www.mysql.com/documentation/mysql/bychapter/manual_MySQL_
+            Database_Administration.html#Privilege_system
 
         *   mod_gzip
 

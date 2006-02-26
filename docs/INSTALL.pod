@@ -912,13 +912,15 @@ Version 5.8.6 (5.6.1).
 
 =item MySQL
 
-Version 4.0.26 (4.0.12).
+Version 4.1.18 (4.0.12).
 
 	http://www.mysql.com/
 
 MySQL 3.23.x is no longer supported, as of CVS tag T_2_5_0_33
-(October 18, 2004).  MySQL 4.1.x has been tested and we haven't found
-any problems, but we haven't run it on a production site yet.
+(October 18, 2004).  Slashdot has been running on MySQL 4.1.x
+with no problems, so we now recommend that, but 4.0.x works as
+well.  We have been testing 5.0.x for months but currently, no
+production sites run it.
 
 =item Apache
 
