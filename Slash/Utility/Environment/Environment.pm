@@ -1622,24 +1622,31 @@ print STDERR scalar(localtime) . " Env.pm $$ userHasDaypass uid=$user->{uid} cs=
 	}
 
 	if ($constants->{plugin}{Tags}) {
-		my $read = $constants->{tags_stories_allowread} || 0;
-		$user->{tags_canread_stories} = 0;
-		$user->{tags_canread_stories} = 1 if
-			!$user->{is_anon} && (
-				   $read >= 4
-				|| $read >= 3 && $user->{karma} >= 0
-				|| $read >= 2 && $user->{is_subscriber}
-				|| $read >= 1 && $user->{is_admin}
-			);
 		my $write = $constants->{tags_stories_allowwrite} || 0;
 		$user->{tags_canwrite_stories} = 0;
 		$user->{tags_canwrite_stories} = 1 if
 			!$user->{is_anon} && (
 				   $write >= 4
 				|| $write >= 3 && $user->{karma} >= 0
+					|| $write >= 2.5 && $user->{acl}{tags_stories_allowwrite}
 				|| $write >= 2 && $user->{is_subscriber}
 				|| $write >= 1 && $user->{is_admin}
 			);
+		my $read;
+		if ($write) {
+			$user->{tags_canread_stories} = 1;
+		} else {
+			$read = $constants->{tags_stories_allowread} || 0;
+			$user->{tags_canread_stories} = 0;
+			$user->{tags_canread_stories} = 1 if
+				!$user->{is_anon} && (
+					   $read >= 4
+					|| $read >= 3 && $user->{karma} >= 0
+					|| $read >= 2.5 && $user->{acl}{tags_stories_allowread}
+					|| $read >= 2 && $user->{is_subscriber}
+					|| $read >= 1 && $user->{is_admin}
+				);
+		}
 	}
 
 	return $user;

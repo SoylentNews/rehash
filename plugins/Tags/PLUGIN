@@ -7,6 +7,6 @@ requiresplugin=Ajax
 task=tags_update.pl
 template=templates/data;tags;default
 template=templates/tagsstorydivadmin;misc;default
-template=templates/tagsstorydivtagbox;index;default
+template=templates/tagsstorydivtagbox;misc;default
 template=templates/tagsstorydivuser;misc;default
 template=templates/usertags;users;default

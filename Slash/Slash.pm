@@ -1501,16 +1501,37 @@ sub displayStory {
 		$return = dispStory($story, $author, $topic, $full, $options);
 
 	}
-	my $df = ($user->{mode} eq "archive" || ($story->{is_archived} eq "yes" && $user->{is_anon}))
-		? $constants->{archive_dateformat} : "";
-	my $storytime = timeCalc($story->{'time'}, $df);
-	my $atstorytime;
-	if ($options->{is_future} && !($user->{author} || $user->{is_admin})) {
-		$atstorytime = $constants->{subscribe_future_name};
-	} else {
-		$atstorytime = $user->{aton} . " " . timeCalc($story->{'time'}, $df);
+
+	if (!$options->{force_cache_freshen}) {
+		# Only do the following if force_cache_freshen is not set:
+		# as it is by freshenup.pl when (re)building the 'rendered'
+		# cached data for a story.
+		my $df = ($user->{mode} eq "archive" || ($story->{is_archived} eq "yes" && $user->{is_anon}))
+			? $constants->{archive_dateformat} : "";
+		my $storytime = timeCalc($story->{'time'}, $df);
+		my $atstorytime;
+		if ($options->{is_future} && !($user->{author} || $user->{is_admin})) {
+			$atstorytime = $constants->{subscribe_future_name};
+		} else {
+			$atstorytime = $user->{aton} . " " . timeCalc($story->{'time'}, $df);
+		}
+		$return =~ s/\Q__TIME_TAG__\E/$atstorytime/;
+
+		if ($constants->{plugin}{Tags}
+			&& $user->{tags_canread_stories}
+			&& (!$options->{dispmode} || $options->{dispmode} ne 'brief')) {
+
+			my @tags_top = split / /, ($story->{tags_top} || '');
+			my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+			my @tags_example = $tags_reader->getExampleTagsForStory($story);
+			$return .= slashDisplay('tagsstorydivtagbox', {
+				story =>        $story,
+				tags_top =>     \@tags_top,
+				tags_example => \@tags_example,
+			}, { Return => 1 });
+
+		}
 	}
-	$return =~ s/\Q__TIME_TAG__\E/$atstorytime/ unless $options->{force_cache_freshen};
 
 	return $return;
 }

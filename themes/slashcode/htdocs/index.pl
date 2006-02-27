@@ -699,19 +699,6 @@ sub displayStories {
 		
 		if ($other->{dispmode} eq "full") {
 
-			if ($constants->{plugin}{Tags}) {
-				if ($user->{tags_canread_stories}) {
-					my @tags_top = split / /, ($story_data->{tags_top} || '');
-					my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-					my @tags_example = $tags_reader->getExampleTagsForStory($story);
-					$tmpreturn .= slashDisplay('tagsstorydivtagbox', {
-						story =>	$story,
-						tags_top =>	\@tags_top,
-						tags_example =>	\@tags_example,
-					}, { Return => 1 });
-				}
-			}
-
 			push @links, linkStory({
 				'link'		=> $msg->{readmore},
 				sid		=> $story->{sid},
