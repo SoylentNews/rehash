@@ -48,21 +48,23 @@ __template__
 </div>
 </p>
 [% IF admin_flag -%]
-	<form action="[% gSkin.rootdir %]/submit.pl" method="post">
-	<input type="hidden" name="op" value="changesubmission">
-	<input type="hidden" name="subid" value="[% subid %]">
-	<table width="99%" align="LEFT" bgcolor="[% user.colors.bg_2 %]">
-	<tr><td>
-[% IF submission.uid != constants.anonymous_coward_uid || submission.emaildomain -%]
-	<p>In the last [% constants.submission_count_days -%] days, there
-	[%- IF submission.uid != constants.anonymous_coward_uid && num_from_uid != 1
-		|| submission.uid == constants.anonymous_coward_uid && num_with_emaildomain != 1 -%]
-		have been
-	[%- ELSE -%]
-		has been
-	[%- END -%]
-	[%- IF submission.uid != constants.anonymous_coward_uid -%]
-		[%- IF num_from_uid >= 20 %]<b>[% END -%]
+		<form action="[% gSkin.rootdir %]/submit.pl" method="post"> 
+		[% IF form.nowrapper %]<input type="hidden" name="nowrapper" value="1">[% END %]
+		[% IF form.fromconsole %]<input type="hidden" name="fromconsole" value="1">[% END %]
+		<input type="hidden" name="op" value="changesubmission">
+		<input type="hidden" name="subid" value="[% subid %]">
+		<table width="99%" align="LEFT" bgcolor="[% user.colors.bg_2 %]">
+		<tr><td>
+	[% IF submission.uid != constants.anonymous_coward_uid || submission.emaildomain -%]
+		<p>In the last [% constants.submission_count_days -%] days, there
+		[%- IF submission.uid != constants.anonymous_coward_uid && num_from_uid != 1
+			|| submission.uid == constants.anonymous_coward_uid && num_with_emaildomain != 1 -%]
+			have been
+		[%- ELSE -%]
+			has been
+		[%- END -%]
+		[%- IF submission.uid != constants.anonymous_coward_uid -%]
+			[%- IF num_from_uid >= 20 %]<b>[% END -%]
 		[% num_from_uid %] submission[% IF num_from_uid != 1 %]s[% END %]
 		from [% submitter.nickname %]
 		[% IF submitter.realemail %]
@@ -116,7 +118,8 @@ __template__
 
 	<br><br><br><br>
 
-	<form action="[% gSkin.rootdir %]/admin.pl" method="post">
+	<form action="[% gSkin.rootdir %]/admin.pl" method="post" [% IF form.fromconsole %]target="_blank"[% END %]>
+		[% IF form.fromconsole %]<div class="hide">[% END %]
 		<input type="hidden" name="firstpreview" value="1">
 		<input type="hidden" name="subid" value="[% subid %]">
 		<input type="hidden" name="topic_source" value="submission">
@@ -144,6 +147,7 @@ __template__
 		<label>Intro Copy</label>
 	<textarea name="introtext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="VIRTUAL"
 >[% subtext | strip_literal %]</textarea><br>
+		[% IF form.fromconsole %]</div>[% END %]
 		<input type="submit" name="op" value="preview"><br>
 [% IF similar_stories.size > 0 %]
 	<table border="0" cellpadding="2" cellspacing="0">
