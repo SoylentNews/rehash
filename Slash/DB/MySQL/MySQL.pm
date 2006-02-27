@@ -1960,7 +1960,7 @@ sub getSessionInstance {
 		-lasttime	=> 'NOW()',
 		lasttitle	=> $lasttitle    || '',
 		last_sid	=> $last_sid     || '',
-		last_subid	=> $last_subid   || ''
+		last_subid	=> $last_subid   || '0'
 	});
 }
 
