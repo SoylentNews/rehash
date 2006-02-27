@@ -1102,19 +1102,6 @@ sub importText {
 }
 
 ##################################################################
-sub get_signoff_box {
-	my($stoid) = @_;
-	my $slashdb = getCurrentDB();
-	my $signoffs = $slashdb->getSignoffsForStory($stoid);
-	my $uids = {};
-	foreach my $so(@$signoffs) {
-		$uids->{$so->{uid}}++;
-	}
-	my $uniq_uids = scalar keys %$uids;
-	return slashDisplay("signoff_box", { signoffs => $signoffs, uniq_uids => $uniq_uids }, { Return => 1 });
-}
-
-##################################################################
 # Story Editing
 sub editStory {
 	my($form, $slashdb, $user, $constants, $gSkin) = @_;
@@ -1408,7 +1395,7 @@ sub editStory {
 	my $authortext = $admindb->showStoryAdminBox($storyref);
 	my $slashdtext = $admindb->showSlashdBox();
 	
-	my $signofftext = get_signoff_box($storyref->{stoid});
+	my $signofftext = $admindb->showSignoffBox($storyref->{stoid});
 	my $attached_files;
 	if ($constants->{plugin}{Blob}) {
 		my $blobdb = getObject("Slash::Blob");
