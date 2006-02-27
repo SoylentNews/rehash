@@ -378,7 +378,7 @@ sub submissionEd {
 		);
 		$sub->{strs} = \@strs;
 
-		foreach my $memory (@sub_memory) {
+		foreach my $memory (@$sub_memory) {
 			my $match = $memory->{submatch};
 
 			if ($sub->{email} =~ m/$match/i ||
