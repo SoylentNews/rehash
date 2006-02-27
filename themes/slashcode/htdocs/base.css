@@ -632,7 +632,6 @@ input.button
 	font-family: sans-serif;
 }
 
-.data_hl1 td { border-top: 1px solid #fff; }
 
 .data_hl2
 {
@@ -640,15 +639,11 @@ input.button
 	font-family: sans-serif;
 }
 
-.data_hl2 td { border-top: 1px solid #fff; }
-
 .data_hl3
 {
 	background: #eee;
 	font-family: sans-serif;
 }
-
-.data_hl3 td { border-top: 1px solid #fff; }
 
 /* Authors */
 #authors h2 { display: inline; }
@@ -687,3 +682,4 @@ pre
 .lt_text_col { color: #fff; }
 .right { text-align: right; }
 .sb_header { font-size: 125%; font-weight: bold; color: #600; }
+.hide { display: none }
