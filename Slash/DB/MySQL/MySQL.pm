@@ -13464,14 +13464,14 @@ sub updateSubMemory {
 	my $rows = $self->sqlUpdate('submissions_memory', {
 			subnote => $subnote,
 			uid => $user->{uid},
-			'time' => 'now()',
+			'time' => 'NOW()',
 	}, "submatch='" . $self->sqlQuote($submatch) . "'");
 
 	$self->sqlInsert('submissions_memory', {
 			submatch => $submatch,
 			subnote => $subnote,
 			uid => $user->{uid},
-			'time' => 'now()',
+			'time' => 'NOW()',
 	}) if !$rows;
 }
 
@@ -13480,8 +13480,8 @@ sub getSubmissionMemory {
 
 	return $self->sqlSelectAllHashrefArray('submatch, subnote, time, uid',
 		'submissions_notes',
-		"subnote is not null AND subnote != ''",
-		'order by time desc');
+		"subnote IS NOT NULL AND subnote != ''",
+		'ORDER BY time DESC');
 }
 
 ########################################################
