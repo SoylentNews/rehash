@@ -17,18 +17,23 @@ __template__
 <tr class="data_head">
 	<td></td>
 	[% FOREACH days = num_days %]
-	<td colspan="2">[% days %] days</td>
+	<td colspan="2">[% days %] days<br>
+	[% num_stories = stoids_for_days.$days.keys.size || 0 %]
+	[% num_stories %] stories
+	</td>
 	[% END %]
 </tr>
 
 [% FOREACH author = author_info.keys %]
 	<tr class="data_hl1"><td>[% author_info.$author.nickname %]</td>
 	[% FOREACH days = num_days %]
-	<td>[% author_info.$author.$days.cnt %] of [% stoids_for_days.$days.keys.size %] signed</td>
-	<td>Average time: 
-		[% IF author_info.$author.$days.cnt > 0 %]
-			[% avg_time = author_info.$author.$days.tot_time / author_info.$author.$days.cnt %]
-			[% avg_time.int %] minute(s)
+	[% num_stories = stoids_for_days.$days.keys.size || 0 %]
+	[% cnt = author_info.$author.$days.cnt || 0 %]
+	<td>[% cnt %] of [% num_stories %]</td>
+	<td> 
+		[% IF cnt > 0 %]
+			[% avg_time = author_info.$author.$days.tot_time / cnt %]
+			[% avg_time.int %] m
 		[% ELSE %]
 			N/A
 		[% END %]
