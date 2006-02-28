@@ -7118,16 +7118,21 @@ sub getStoryByTimeAdmin {
 	my $order = $sign eq '<' ? 'DESC' : 'ASC';
 
 	$where .= " AND sid != '$story->{sid}'" if !$options->{no_story};
+	my $timebase = $story ? $self->sqlQuote($story->{time}) : "NOW()";
+	$where .= " AND DATE_SUB($timebase, INTERVAL $options->{hours_back} HOUR) " if $options->{hours_back};
+	$where .= " AND DATE_ADD($timebase, INTERVAL $options->{hours_forward} HOUR) " if $options->{hours_forward};
 
 	my $time = $story->{'time'};
 	$time = $self->getTime() if !$story->{time} && $options->{no_story};
 
+	my $limittext = $limit ? " LIMIT $limit" : "";
+
 	my $returnable = $self->sqlSelectAllHashrefArray(
-		'stories.stoid, title, sid, time',
+		'stories.stoid, title, sid, time, primaryskid',
 		'stories, story_text',
 		"stories.stoid=story_text.stoid
 		 AND time $sign '$time' AND in_trash = 'no' $where",
-		"ORDER BY time $order LIMIT $limit"
+		"ORDER BY time $order $limittext"
 	);
 	foreach my $story (@$returnable) {
 		$story->{displaystatus} = $self->_displaystatus($story->{stoid}, { no_time_restrict => 1 });
