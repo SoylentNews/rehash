@@ -11,16 +11,7 @@ en_US
 __name__
 signoff_box
 __template__
-
-[% signoff_title = "Signoffs" %]
-[% IF signoffs.size; 
-	signoff_title = signoff_title _ " (" _ uniq_uids;
-	IF signoffs.size != uniq_uids; 
-		signoff_title = signoff_title _ "/" _ signoffs.size;
-	END;
-	signoff_title = signoff_title _ ")";
- END %]
-
+[% IF header %]<b>[% header %]</b><br>[% END %]
 [% IF signoffs.size == 0; 
 	content = "<b>No Signoffs</b>";
 ELSE;
@@ -30,11 +21,7 @@ ELSE;
 	END;
 	content = content _ "</table>";
  END %]
-
-[% PROCESS sidebox
-	title = signoff_title
-	contents = content
-%]
+[% content %]
 __seclev__
 10000
 __version__
