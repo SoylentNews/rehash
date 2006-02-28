@@ -21,7 +21,7 @@ display
 __template__
 <div id="slashboxes">
 [% UNLESS user.lowbandwidth %]
-[% PROCESS userboxes hits => story.hits  %]
+[% PROCESS userboxes hits = story.hits stoid = story.stoid; %]
 [%
 IF show_poll;
 	PROCESS sidebox
