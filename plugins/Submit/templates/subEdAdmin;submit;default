@@ -26,11 +26,16 @@ __template__
                 <td>[% subnote.time %]</td>
                 <td>[% subnote.uid %]</td>
         </tr>
-[% END # FOREACH %]A
+[% END # FOREACH %]
         <tr>
                 <td><input name="submatch" size="10"></td>
                 <td colspan="2"><input name="subnote" size="40"></td>
-                <td><input type="submit" value="Remember"></td>
+                <td>
+			[% IF form.nowrapper %]<input type="hidden" name="nowrapper" value="1">[% END %]
+			[% IF form.fromconsole %]<input type="hidden" name="fromconsole" value="1">[% END %]
+			<input type="submit" value="Remember">
+		</td>
+		
         </tr>
 </table>
 </form>
