@@ -3695,5 +3695,8 @@ UPDATE vars SET value = 'T_2_5_0_101' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
 
+# Changes for plugins/Tags
 UPDATE templates SET page='misc' WHERE name='tagsstorydivtagbox' AND page='index' AND skin='default';
+
+UPDATE users_info, users_hits SET lastaccess = lastclick WHERE users_info.uid=users_hits.uid AND lastaccess < DATE(lastclick);
 
