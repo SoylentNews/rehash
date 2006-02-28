@@ -1,7 +1,11 @@
 __section__
 default
 __description__
-You should describe stuff here.
+Sidebox is used to generate slashboxes
+* name     = name used as base for id in title and content sections
+* title    = title for header of box
+* contents = contents of box
+* updater  = optional spot for <script></script> to auto-update slashbox
 __title__
 Useless title to template
 __page__

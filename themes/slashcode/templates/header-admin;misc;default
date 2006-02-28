@@ -14,6 +14,7 @@ __template__
 [% INCLUDE linkrel %]
 </head>
 <body class="admin">
+[% UNLESS form.nowrapper %]
 <div id="adminmenu">
 	<small>
 		<b>
@@ -24,6 +25,7 @@ __template__
 	[% Slash.createMenu(adminmenu, { color => 'white' } ) %]
 </div>	
 <div class="contentsadmin">
+[% END %]
 
 __seclev__
 10000
