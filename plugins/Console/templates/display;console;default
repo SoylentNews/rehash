@@ -16,8 +16,8 @@ __template__
 <div id="slashboxes">
 	[% authorbox %]
 	[% storyadmin %]
-	[% slashdbox %]
 	[% perfbox %]
+	[% slashdbox %]
 </div>
 <div id="console">
 	[% remarks %]
@@ -32,6 +32,6 @@ __template__
 	<a href="javascript:reloadBin()">Reload Bin</a>
 	<br>
 	<div id="submitframe">
-	<iframe name="submitframe" id="submitiframe" src="[% gSkin.rootdir %]/submit.pl?op=list&amp;nowrapper=1" width="100%" height="800"></iframe>
+	<iframe name="submitframe" id="submitiframe" src="[% gSkin.rootdir %]/submit.pl?op=list&amp;nowrapper=1&amp;fromconsole=1" width="100%" height="800"></iframe>
 	</div>
 </div>
