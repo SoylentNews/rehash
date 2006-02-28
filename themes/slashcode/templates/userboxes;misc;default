@@ -15,6 +15,23 @@ en_US
 __name__
 userboxes
 __template__
+[%
+    IF user.is_admin && stoid;
+    story_info = "";
+		IF hits;
+			story_info = 'This story has been viewed ' _ hits _ ' times.<br><br>';
+		END;
+		IF constants.signoff_use;
+   			admin = Slash.getObject("Slash::Admin");
+   			IF admin;
+   				story_info = story_info _ admin.showSignoffBox(story.stoid, { contents_only => 1, use_title_for_header => 1 } );
+			END;
+		END;
+		IF story_info;
+			Slash.sidebox("Story Info", story_info, "story_info", 1);
+		END;
+	END;
+	%]
 
 [%
 
@@ -98,13 +115,6 @@ IF !useredit.is_anon;
 			PROCESS karma karma=useredit.karma admin_flag=user.is_admin;
 		END;
 
-		IF user.is_admin AND !constants.subscribe_hits_only;
-			# If we're an admin and we're looking at a user
-			# for which there might be an accurate hit count.
-			'<br>Hits: ';
-			useredit.hits;
-		END;
-
 		IF useredit.aim;
 			'<br><b>AOL IM:</b> ';
 			useredit.aim | strip_literal;
@@ -150,15 +160,9 @@ IF !useredit.is_anon;
 			Slash.parseDomainTags(useredit.bio);
                 END;
 
-		IF user.is_admin AND hits;
-			'<br><hr>';
-			'This story has been viewed ';
-			hits;
-			' times.';
-		END;
 	END;
 	Slash.sidebox(title, contents, "user-info", 1);
-
+	
 	# Second box:  info about moderation, if applicable
 	# Note this applies to the current user, not the user
 	# being examined.
