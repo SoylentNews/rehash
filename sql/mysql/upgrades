@@ -3700,3 +3700,6 @@ UPDATE templates SET page='misc' WHERE name='tagsstorydivtagbox' AND page='index
 
 UPDATE users_info, users_hits SET lastaccess = lastclick WHERE users_info.uid=users_hits.uid AND lastaccess < DATE(lastclick);
 
+# 2006-02-28
+UPDATE vars SET value = 'T_2_5_0_102' WHERE name = 'cvs_tag_currentcode';
+
