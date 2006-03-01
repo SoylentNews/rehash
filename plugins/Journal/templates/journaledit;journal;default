@@ -11,86 +11,73 @@ en_US
 __name__
 journaledit
 __template__
-[% PROCESS titlebar title = "Edit Journal Entry" %]
-<form action="[% env.script_name %]" method="post" enctype="application/x-www-form-urlencoded">
-<div>
-<input type="hidden" name="id" value="[% article.id %]">
-<input type="hidden" name="state" value="editing">
-<input type="hidden" name="preview" value="active">
-[% PROCESS reskey_tag %]
+			<form action="[% env.script_name %]" method="post" enctype="application/x-www-form-urlencoded">
+				<fieldset>
+					<legend>Edit Journal Entry</legend>
+					<input type="hidden" name="id" value="[% article.id %]">
+					<input type="hidden" name="state" value="editing">
+					<input type="hidden" name="preview" value="active">
+					[% PROCESS reskey_tag %]
 
-<table class="data" cellpadding="2" cellspacing="0">
-	<tr class="data_hl2">
-		<td>Title</td>
-		<td><input type="text" name="description" size="60" maxlength="60" value="[% article.description | strip_attribute %]"></td>
-	</tr>
+					[% PROCESS formLabel value => "Subject" %]
+					[% PROCESS formNote note => "This is required" %]
+					<input type="text" name="description" size="60" maxlength="60" value="[% article.description | strip_attribute %]">
+					[% PROCESS formLabel value => "Journal Topic", comment => "";
+					   def_topic = article.tid || constants.journal_default_topic;
+					   Slash.selectTopic('tid', def_topic, '', 1) %]
 
-	<tr class="data_hl2">
-		<td>Topic</td>
-		<td>[% def_topic = article.tid || constants.journal_default_topic;
-		       Slash.selectTopic('tid', def_topic, '', 1) %]</td>
-	</tr>
-
-	<tr class="data_hl2">
-		<td>Comments</td>
-		<td>
-		[% IF !article.discussion;
-			jdcodename = (user.is_subscriber || user.is_admin) ? 'commentcodes_extended' : 'commentcodes';
-			jds = Slash.db.getDescriptions(jdcodename);
-			def_jd = form.journal_discuss.defined
-				? form.journal_discuss
-				: article.id
-					? 'disabled'
-					: user.journal_discuss || 'disabled';
-			Slash.createSelect("journal_discuss", jds, def_jd, 1) %]
-			<div class="note">Once enabled, comments cannot be disabled.</div>
-		[% ELSE %]
-			<div class="note">Comments are enabled.</div>
-		[% END %]
-		</td>
-	</tr>
-
-	<tr class="data_hl2">
-		<td>Formatting</td>
-		<td>[% format_select %]
-		    <div class="note">(<a href="[% gSkin.rootdir %]/faq/com-mod.shtml#cm2300">What does this mean?</a>)</div>
-		</td>
-	</tr>
-
-[% IF constants.journal_allow_journal2submit %]
-	<tr class="data_hl2">
-		<td>Submit</td>
-		<td><div class="note">
-		[% IF article.id && article.submit == "yes" %]
-			This journal entry has been submitted.
-		[% ELSE %]
-			<input type="checkbox" name="submit"[% IF form.submit; constants.markup_checked_attribute; END %]>
-				Submit Journal as Slashdot Story
-				(<a href="[% gSkin.rootdir %]/faq/com-mod.shtml#cm2300">What does this mean?</a>)
-		[% END %]
-		</div></td>
-	</tr>
-[% END %]
-
-	<tr class="data_hl2">
-		<td></td>
-		<td>
-			<textarea wrap="virtual" name="article" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]">[% article.article | strip_literal %]</textarea>
-		</td>
-	</tr>
-
-	<tr class="data_hl2">
-		<td></td>
-		<td>
-			<input type="submit" name="op" value="preview" class="button">
-		[% IF form.preview || article.id %]
-			<input type="submit" name="op" value="save" class="button">
-		[% END %]
-		</td>
-	</tr>
-</table>
-</div>
-</form>
+					[% IF !article.discussion %]
+						[% PROCESS formLabel value => "Comments" %]
+						[% PROCESS formNote note => "Comments cannot be disabled once enabled" %]
+				 		[% jdcodename = (user.is_subscriber || user.is_admin) ? 'commentcodes_extended' : 'commentcodes';
+ 						   jds = Slash.db.getDescriptions(jdcodename);
+ 						   def_jd = form.journal_discuss.defined
+ 						   	? form.journal_discuss
+ 						   	: article.id
+ 		   					? 'disabled'
+ 						   		: user.journal_discuss || 'disabled';
+						   Slash.createSelect("journal_discuss", jds, def_jd, 1) %]
+					[% ELSE %]
+						[% PROCESS formLabel value => "Comments" %]
+						[% PROCESS formNote note => "Comments are enabled" %]
+					[% END %]
+					[% PROCESS formLabel value => "Entry" %]
+					<textarea wrap="virtual" name="article" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]">[% article.article | strip_literal %]</textarea>
+					<br>
+					[% format_select %]
+					<br>
+					[% IF constants.journal_allow_journal2submit %]
+						[% IF article.id && article.submit == "yes" %]
+							<div class="note">
+							This journal entry has been marked as submittable.  You can't undo this.
+							</div>
+						[% ELSE %]
+							<label>Submit<input type="checkbox" name="submit" [% IF form.submit; constants.markup_checked_attribute; END %]></label>
+							[% submit_note = "<ul>";
+							   submit_note = submit_note _ "<li>Comments must be enabled</li>";
+							   submit_note = submit_note _ "<li>Discussion cannot be deleted (though journal can be)</li>";
+							   submit_note = submit_note _ "<li>If accepted, anyone will be allowed to post comments</li>";
+						 	   submit_note = submit_note _ "</ul>";
+							%]
+							[% PROCESS formNote note => "Allow journal to be submitted as a story? If you do this: $submit_note" %]
+						[% END %]
+					<br>
+					[% END %]
+					<input type="submit" name="op" value="preview" class="button">
+				[% IF form.preview || article.id %]
+					<input type="submit" name="op" value="save" class="button">
+				[% END %]
+				</fieldset>
+			</form>
+		<div class="notes">
+			<b>Allowed HTML</b><br>
+				&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
+			[% IF constants.approvedtags.grep("ECODE").0 %]
+				(Use "ECODE" instead of "PRE" or "CODE".)
+			[% END %]
+			<br>
+			<b>URLs</b> <code>&lt;URL:http://example.com/&gt;</code> will auto-link a URL
+		</div>
 
 __seclev__
 100
