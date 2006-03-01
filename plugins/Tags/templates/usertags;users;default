@@ -1,7 +1,7 @@
 __section__
 default
 __description__
-tags_raw = raw (i.e. sorted only in chronological order) arrayref of user's tags.
+tags_grouped = grouped user tags: a hashref, each duple having a key of a tagname and a value of an arrayref of hashrefs of the tags applied with that tagname
 
 This template and its API will likely change.
 
@@ -14,15 +14,17 @@ en_US
 __name__
 usertags
 __template__
-[% IF user.tags_canwrite_stories && tags_raw.size %]
-<div>Tags you've assigned to stories:</div>
-<ul class="tagslist">
-[% FOREACH tag = tags_raw;
-   IF tag.globj_type == 'stories' %]
-	<li><span class="tagname">[% tag.tagname %]</span>
-	[% PROCESS linkStory dynamic=1 sid=tag.story.sid text=tag.story.title %]</li>
-[% END; END %]
-</ul>
+[% PROCESS titlebar title='Your Tags' %]
+[% IF user.tags_canwrite_stories && tags_grouped.keys.size %]
+<div><table border="0" cellpadding="0" cellspacing="0" width="100%" class="tagslist">
+[% FOREACH tagname = tags_grouped.keys.sort;
+	FOREACH tag = tags_grouped.$tagname %]
+		<tr>[% IF loop.first %]<td class="tagname" valign="top">[% tagname | strip_html %]</td>[% ELSE %]<td>&nbsp;</td>[% END %]
+		<td>&nbsp;</td>
+		<td valign="top">[% PROCESS linkStory dynamic=1 sid=tag.story.sid text=tag.story.title title=tag.story.title %]</td></tr>
+	[% END;
+END %]
+</table></div>
 [% ELSE %]
 <div>You have not assigned any tags,
 or tags are unavailable to you at this time.</div>

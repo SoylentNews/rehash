@@ -48,6 +48,7 @@ __template__
 					Story Preview	
 				</legend>
 				[% storycontent %]
+				[% tagbox_html %]
 			</fieldset>
 				<div class="note">
 					Check words below before submitting or previewing to mark words as common and not for use in determining similar stories.

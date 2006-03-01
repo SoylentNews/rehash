@@ -12,62 +12,62 @@ function toggleIntro(id, toggleid) {
 	}
 }
 
-function tagsToggleStoryDiv(stoid, is_admin) {
-	var bodyid = 'toggletags-body-' + stoid;
+function tagsToggleStoryDiv(sidenc, is_admin) {
+	var bodyid = 'toggletags-body-' + sidenc;
         var tagsbody = $(bodyid);
 	if (tagsbody.className == 'tagshide') {
-		tagsShowBody(stoid, is_admin, '');
+		tagsShowBody(sidenc, is_admin, '');
 	} else {
-		tagsHideBody(stoid);
+		tagsHideBody(sidenc);
 	}
 }
 
-function tagsHideBody(stoid) {
+function tagsHideBody(sidenc) {
 	// Make the body of the tagbox vanish
-	var tagsbodyid = 'toggletags-body-' + stoid;
+	var tagsbodyid = 'toggletags-body-' + sidenc;
         var tagsbody = $(tagsbodyid);
 	tagsbody.className = "tagshide"
 
 	// Make the title of the tagbox change back to regular
-	var titleid = 'tagbox-title-' + stoid;
+	var titleid = 'tagbox-title-' + sidenc;
         var title = $(titleid);
 	title.className = "tagtitleclosed";
 
 	// Make the tagbox change back to regular.
-	var tagboxid = 'tagbox-' + stoid;
+	var tagboxid = 'tagbox-' + sidenc;
         var tagbox = $(tagboxid);
 	tagbox.className = "tags";
 
 	// Toggle the button back.
-	var tagsbuttonid = 'toggletags-button-' + stoid;
+	var tagsbuttonid = 'toggletags-button-' + sidenc;
         var tagsbutton = $(tagsbuttonid);
 	tagsbutton.innerHTML = "[+]";
 }
 
-function tagsShowBody(stoid, is_admin, newtagspreloadtext) {
+function tagsShowBody(sidenc, is_admin, newtagspreloadtext) {
 	// Toggle the button to show the click was received
-	var tagsbuttonid = 'toggletags-button-' + stoid;
+	var tagsbuttonid = 'toggletags-button-' + sidenc;
         var tagsbutton = $(tagsbuttonid);
 	tagsbutton.innerHTML = "[-]";
 
 	// Make the tagbox change to the slashbox class
-	var tagboxid = 'tagbox-' + stoid;
+	var tagboxid = 'tagbox-' + sidenc;
         var tagbox = $(tagboxid);
 	tagbox.className = "tags";
 
 	// Make the title of the tagbox change to white-on-green
-	var titleid = 'tagbox-title-' + stoid;
+	var titleid = 'tagbox-title-' + sidenc;
         var title = $(titleid);
 	title.className = "tagtitleopen";
 
 	// Make the body of the tagbox visible
-	var tagsbodyid = 'toggletags-body-' + stoid;
+	var tagsbodyid = 'toggletags-body-' + sidenc;
         var tagsbody = $(tagsbodyid);
 	
 	tagsbody.className = "tagbody";
 	
 	// If the tags-user div hasn't been filled, fill it.
-	var tagsuserid = 'tags-user-' + stoid;
+	var tagsuserid = 'tags-user-' + sidenc;
 	var tagsuser = $(tagsuserid);
 	if (tagsuser.innerHTML == "") {
 		// The tags-user-123 div is empty, and needs to be
@@ -77,7 +77,7 @@ function tagsShowBody(stoid, is_admin, newtagspreloadtext) {
 		tagsuser.innerHTML = "Retrieving...";
 		var params = [];
 		params['op'] = 'tags_get_user_story';
-		params['stoid'] = stoid;
+		params['sidenc'] = sidenc;
 		params['newtagspreloadtext'] = newtagspreloadtext
 		ajax_update(params, tagsuserid);
 
@@ -88,10 +88,10 @@ function tagsShowBody(stoid, is_admin, newtagspreloadtext) {
 		// saves us an ajax call to find that out, if the
 		// user is not actually an admin.
 		if (is_admin) {
-			var tagsadminid = 'tags-admin-' + stoid;
+			var tagsadminid = 'tags-admin-' + sidenc;
 			params = [];
 			params['op'] = 'tags_get_admin_story';
-			params['stoid'] = stoid;
+			params['sidenc'] = sidenc;
 			ajax_update(params, tagsadminid);
 		}
 
@@ -101,17 +101,16 @@ function tagsShowBody(stoid, is_admin, newtagspreloadtext) {
 			// that we append some text to the user text.
 			// We can't do that by passing it in, so do it
 			// manually now.
-			var textinputid = 'newtags-' + stoid;
+			var textinputid = 'newtags-' + sidenc;
 			var textinput = $(textinputid);
 			textinput.value = textinput.value + ' ' + newtagspreloadtext;
 		}
 	}
 }
 
-function tagsOpenAndEnter(stoid, tagname, is_admin) {
+function tagsOpenAndEnter(sidenc, tagname, is_admin) {
 	// This does nothing if the body is already shown.
-	tagsShowBody(stoid, is_admin, tagname);
-
+	tagsShowBody(sidenc, is_admin, tagname);
 }
 
 function reportError(request) {
@@ -119,20 +118,20 @@ function reportError(request) {
 	alert("error");
 }
 
-function tagsCreateForStory(stoid) {
-	var toggletags_message_id = 'toggletags-message-' + stoid;
+function tagsCreateForStory(sidenc) {
+	var toggletags_message_id = 'toggletags-message-' + sidenc;
 	var toggletags_message_el = $(toggletags_message_id);
 	toggletags_message_el.innerHTML = 'Saving tags...';
 
 	var params = [];
 	params['op'] = 'tags_create_for_story';
-	params['stoid'] = stoid;
-	var newtagsel = $('newtags-' + stoid);
+	params['sidenc'] = sidenc;
+	var newtagsel = $('newtags-' + sidenc);
 	params['tags'] = newtagsel.value;
-	var reskeyel = $('newtags-reskey-' + stoid);
+	var reskeyel = $('newtags-reskey-' + sidenc);
 	params['reskey'] = reskeyel.value;
 
-	ajax_update(params, 'tags-user-' + stoid);
+	ajax_update(params, 'tags-user-' + sidenc);
 
 	// XXX How to determine failure here?
 	toggletags_message_el.innerHTML = 'Tags saved.';

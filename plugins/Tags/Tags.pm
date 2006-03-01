@@ -338,6 +338,22 @@ sub getAllTagsFromUser {
 	return $ar;
 }
 
+sub getGroupedTagsFromUser {
+	my($self, $uid) = @_;
+	my $all_ar = $self->getAllTagsFromUser($uid);
+	return { } unless $all_ar && @$all_ar;
+
+	my %grouped = ( );
+	my %tagnames = ( map { ($_->{tagname}, 1) } @$all_ar );
+	for my $tagname (sort keys %tagnames) {
+		$grouped{$tagname} ||= [ ];
+		push @{$grouped{$tagname}},
+			grep { $_->{tagname} eq $tagname }
+			@$all_ar;
+	}
+	return \%grouped;
+}
+
 sub addTagnamesToHashrefArray {
 	my($self, $ar) = @_;
 	my %tagnameids = (
@@ -416,9 +432,11 @@ sub adminPseudotagnameSyntaxOK {
 sub ajaxGetUserStory {
 	my($self, $constants, $user, $form) = @_;
 
-	my $stoid = $form->{stoid};
+	my $sidenc = $form->{sidenc};
+	my $sid = $sidenc; $sid =~ tr{:}{/};
+	my $stoid = $self->getStoidFromSid($sid);
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-#print STDERR scalar(localtime) . " ajaxGetUserStory stoid='$stoid' user-is_anon='$user->{is_anon}' uid='$user->{uid}' tags_reader='$tags_reader' form: " . Dumper($form);
+print STDERR scalar(localtime) . " ajaxGetUserStory for stoid=$stoid sidenc=$sidenc tr=$tags_reader\n";
 	if (!$stoid || $stoid !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
 		return getData('error', {}, 'tags');
 	}
@@ -436,30 +454,35 @@ sub ajaxGetUserStory {
 	my $newtagspreloadtext = join ' ', @newtagspreload;
 
 	return slashDisplay('tagsstorydivuser', {
-		stoid =>		$stoid,
+		sidenc =>		$sidenc,
 		newtagspreloadtext =>	$newtagspreloadtext,
 	}, { Return => 1 });
 }
 
 sub ajaxGetAdminStory {
 	my($slashdb, $constants, $user, $form) = @_;
-	my $stoid = $form->{stoid};
-	if (!$stoid || $stoid !~ /^\d+$/ || !$user->{is_admin}) {
+	my $sidenc = $form->{sidenc};
+	my $sid = $sidenc; $sid =~ tr{:}{/};
+	if (!$sid || $sid !~ regexSid() || !$user->{is_admin}) {
 		return getData('error', {}, 'tags');
 	}
 
 	return slashDisplay('tagsstorydivadmin', {
-		stoid =>		$stoid,
+		sidenc =>		$sidenc,
 		tags_admin_str =>	'',
 	}, { Return => 1 });
 }
 
 sub ajaxCreateForStory {
 	my($slashdb, $constants, $user, $form) = @_;
-	my $stoid = $form->{stoid};
+	my $sidenc = $form->{sidenc};
+	my $sid = $sidenc; $sid =~ tr{:}{/};
 	my $tags = getObject('Slash::Tags');
-#print STDERR scalar(localtime) . " ajaxCreateForStory 1 stoid='$stoid' user-is='$user->{is_anon}' uid='$user->{uid}' tagsobj='$tags' tags='$form->{tags}'\n";
-	if (!$stoid || $stoid !~ /^\d+$/ || $user->{is_anon} || !$tags) {
+	if (!$sid || $sid !~ regexSid() || $user->{is_anon} || !$tags) {
+		return getData('error', {}, 'tags');
+	}
+	my $stoid = $slashdb->getStoidFromSid($sid);
+	if (!$stoid) {
 		return getData('error', {}, 'tags');
 	}
 
@@ -476,6 +499,8 @@ sub ajaxCreateForStory {
 	my $uid = $user->{uid};
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	my $old_tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid, { uid => $uid });
+	my %old_tagnames = ( map { ($_->{tagname}, 1) } @$old_tags_ar );
+	@tagnames = grep { !$old_tagnames{$_} } @tagnames;
 
 	my @saved_tagnames = ( );
 	for my $tagname (@tagnames) {
@@ -487,13 +512,13 @@ sub ajaxCreateForStory {
 				id =>           $stoid
 			});
 	}
-#print STDERR scalar(localtime) . " ajaxCreateForStory 3 old='@$old_tags_ar' saved='@saved_tagnames'\n";
+print STDERR scalar(localtime) . " ajaxCreateForStory 3 old='@$old_tags_ar' saved='@saved_tagnames'\n";
 
 	my @newtagspreload = ( (map { $_->{tagname} } @$old_tags_ar), @saved_tagnames );
 	my $newtagspreloadtext = join ' ', @newtagspreload;
 
 	my $retval = slashDisplay('tagsstorydivuser', {
-		stoid =>		$stoid,
+		sidenc =>		$sidenc,
 		newtagspreloadtext =>	$newtagspreloadtext,
 	}, { Return => 1 });
 #print STDERR scalar(localtime) . " ajaxCreateForStory 4 for stoid=$stoid tagnames='@tagnames' newtagspreloadtext='$newtagspreloadtext' returning: $retval\n";
@@ -503,13 +528,15 @@ sub ajaxCreateForStory {
 sub ajaxProcessAdminTags {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $commands = $form->{commands};
-	my $stoid = $form->{stoid};
+	my $sidenc = $form->{sidenc};
+	my $sid = $sidenc; $sid =~ tr{:}{/};
 	my $tags = getObject('Slash::Tags');
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	my @commands =
 		grep { $tags->adminPseudotagnameSyntaxOK($_) }
 		split /[\s,]+/,
 		($commands || '');
+	my $stoid = $slashdb->getStoidFromSid($sid);
 print STDERR scalar(localtime) . " ajaxProcessAdminTags stoid=$stoid commands='$commands' commands='@commands' tags='$tags'\n";
 	if (!$stoid || !@commands) {
 		# Error, but we really have no way to return it...
@@ -536,7 +563,7 @@ print STDERR scalar(localtime) . " ajaxProcessAdminTags reset to " . ($reset_las
 	my $tags_admin_str = "Performed commands: '@commands'.";
 
 	return slashDisplay('tagsstorydivadmin', {
-		stoid =>		$stoid,
+		sidenc =>		$sidenc,
 		tags_admin_str =>	$tags_admin_str,
 	}, { Return => 1 });
 }

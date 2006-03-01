@@ -10210,6 +10210,7 @@ sub getStoidFromSidOrStoid {
 # will it actually put any load on the DB.
 sub getStoidFromSid {
 	my($self, $sid) = @_;
+	return undef if $sid !~ regexSid();
 	if (my $stoid = $self->{_sid_conversion_cache}{$sid}) {
 		return $stoid;
 	}

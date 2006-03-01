@@ -13,36 +13,37 @@ en_US
 __name__
 tagsstorydivtagbox
 __template__
+[% sidenc = story.sid.replace("/",":") %]
 [% IF user.tags_canread_stories %]
-<div id="tagbox-[% story.stoid %]" class="tags">
+<div id="tagbox-[% sidenc %]" class="tags">
 
-<div id="tagbox-title-[% story.stoid %]" class="tagtitleclosed">&nbsp;[% IF user.tags_canwrite_stories %]<a href="javascript:tagsToggleStoryDiv([% story.stoid %], '[% user.is_admin %]');">[% ELSIF user.is_anon %]<a href="[% gSkin.rootdir %]/login.pl">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% story.stoid %]">[+]</span></a>
+<div id="tagbox-title-[% sidenc %]" class="tagtitleclosed">&nbsp;[% IF user.tags_canwrite_stories %]<a href="javascript:tagsToggleStoryDiv('[% sidenc %]','[% user.is_admin %]');">[% ELSIF user.is_anon %]<a href="[% gSkin.rootdir %]/login.pl">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% sidenc %]">[+]</span></a>
 [% IF tags_top.size %]
 	[% FOR t = tags_top -%]
-		<span class="tagname">[% IF user.tags_canwrite_stories %]<a href="javascript:tagsOpenAndEnter([% story.stoid %], '[% t %]', '[% user.is_admin %]')">[% END %][% t | strip_html %][% IF user.tags_canwrite_stories %]</a>[% END %]</span>[% IF !loop.last() %], [% END -%]
+		<span class="tagname">[% IF user.tags_canwrite_stories %]<a href="javascript:tagsOpenAndEnter('[% sidenc %]','[% t %]','[% user.is_admin %]')">[% END %][% t | strip_html %][% IF user.tags_canwrite_stories %]</a>[% END %]</span>[% IF !loop.last() %], [% END -%]
 	[%- END %]
 [% END %]
 <i>(<a href="/faq/tags.shtml">tagging beta</a>)</i>
 </div>
 
 [% IF user.tags_canwrite_stories %]
-	<div class="tagshide" id="toggletags-body-[% story.stoid %]">
+	<div class="tagshide" id="toggletags-body-[% sidenc %]">
 
 	[% IF tags_example.size %]
 		<div>Examples:
 		[% FOR t = tags_example -%]
-			<span class="tagname"><a href="javascript:tagsOpenAndEnter([% story.stoid %], '[% t %]', '[% user.is_admin %]')">[% t | strip_html %]</a></span>[% IF !loop.last() %], [% END -%]
+			<span class="tagname"><a href="javascript:tagsOpenAndEnter('[% sidenc %]','[% t %]','[% user.is_admin %]')">[% t | strip_html %]</a></span>[% IF !loop.last() %], [% END -%]
 		[%- END %]
 		</div>
 	[% END %]
 
 	[%# The tags-user-# div starts out empty, we only populate it if the user expands the toggletags-body-# div, because it requires a read of the user's tags and a write to generate a reskey. %]
 
-	<div id="tags-user-[% story.stoid %]"></div>
+	<div id="tags-user-[% sidenc %]"></div>
 
-	[% IF user.is_admin %]<div id="tags-admin-[% story.stoid %]"></div>[% END %]
+	[% IF user.is_admin %]<div id="tags-admin-[% sidenc %]"></div>[% END %]
 
-	<div id="toggletags-message-[% story.stoid %]"></div>
+	<div id="toggletags-message-[% sidenc %]"></div>
 
 	</div>
 [% END %]

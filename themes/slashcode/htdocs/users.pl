@@ -1495,9 +1495,9 @@ sub showTags {
 	}
 
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	my $tags_ar = $tags_reader->getAllTagsFromUser($user->{uid});
+	my $tags_ar = $tags_reader->getGroupedTagsFromUser($user->{uid});
 
-	slashDisplay('usertags', { tags_raw => $tags_ar });
+	slashDisplay('usertags', { tags_grouped => $tags_ar });
 }
 
 #################################################################
