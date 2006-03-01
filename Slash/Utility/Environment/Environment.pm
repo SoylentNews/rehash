@@ -1628,7 +1628,7 @@ print STDERR scalar(localtime) . " Env.pm $$ userHasDaypass uid=$user->{uid} cs=
 			!$user->{is_anon} && (
 				   $write >= 4
 				|| $write >= 3 && $user->{karma} >= 0
-					|| $write >= 2.5 && $user->{acl}{tags_stories_allowwrite}
+				|| $write >= 2.5 && $user->{acl}{tags_stories_allowwrite}
 				|| $write >= 2 && $user->{is_subscriber}
 				|| $write >= 1 && $user->{is_admin}
 			);

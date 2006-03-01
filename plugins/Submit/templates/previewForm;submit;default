@@ -48,7 +48,7 @@ __template__
 </div>
 </p>
 [% IF admin_flag -%]
-		<form action="[% gSkin.rootdir %]/submit.pl" method="post"> 
+		<form action="[% gSkin.rootdir %]/submit.pl" method="post">
 		[% IF form.nowrapper %]<input type="hidden" name="nowrapper" value="1">[% END %]
 		[% IF form.fromconsole %]<input type="hidden" name="fromconsole" value="1">[% END %]
 		<input type="hidden" name="op" value="changesubmission">

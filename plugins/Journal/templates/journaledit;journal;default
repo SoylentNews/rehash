@@ -52,7 +52,9 @@ __template__
 
 	<tr class="data_hl2">
 		<td>Formatting</td>
-		<td>[% format_select %]</td>
+		<td>[% format_select %]
+		    <div class="note">(<a href="[% gSkin.rootdir %]/faq/com-mod.shtml#cm2300">What does this mean?</a>)</div>
+		</td>
 	</tr>
 
 [% IF constants.journal_allow_journal2submit %]
@@ -64,7 +66,7 @@ __template__
 		[% ELSE %]
 			<input type="checkbox" name="submit"[% IF form.submit; constants.markup_checked_attribute; END %]>
 				Submit Journal as Slashdot Story
-				(<a href="">What does this mean?</a>)
+				(<a href="[% gSkin.rootdir %]/faq/com-mod.shtml#cm2300">What does this mean?</a>)
 		[% END %]
 		</div></td>
 	</tr>
@@ -75,18 +77,6 @@ __template__
 		<td>
 			<textarea wrap="virtual" name="article" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]">[% article.article | strip_literal %]</textarea>
 		</td>
-	</tr>
-
-	<tr class="data_hl2">
-		<td colspan="2"><div class="notes">
-			<b>Allowed HTML</b><br>
-				&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
-			[% IF constants.approvedtags.grep("ECODE").0 %]
-				(Use "ECODE" instead of "PRE" or "CODE".)
-			[% END %]
-			<br>
-			<b>URLs</b> <code>&lt;URL:http://example.com/&gt;</code> will auto-link a URL
-		</div></td>
 	</tr>
 
 	<tr class="data_hl2">

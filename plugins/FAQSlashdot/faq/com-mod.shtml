@@ -18,17 +18,17 @@
         <ul>
                 <li>Flat mode displays all the comments in one gigantic list, without showing anything in the way of relationships between comments.</li>
                 <li style="list-style: none">
-                        <p><a href="http://images.slashdot.org/faq/screen_flat.gif"><img src="http://images.slashdot.org/faq/scaled_screen_flat.gif" alt="Flat Mode" width="245" height="198"></a><br>
+                        <p><a href="//images.slashdot.org/faq/screen_flat.gif"><img src="//images.slashdot.org/faq/scaled_screen_flat.gif" alt="Flat Mode" width="245" height="198"></a><br>
                         &nbsp;</p>
                 </li>
                 <li>Threaded shows a hierarchy of responses, with replies as links to new pages.</li>
                 <li style="list-style: none">
-                        <p><a href="http://images.slashdot.org/faq/screen_threaded.gif"><img src="http://images.slashdot.org/faq/scaled_screen_threaded.gif" alt="Threaded Mode" width="245" height="109"></a><br>
+                        <p><a href="//images.slashdot.org/faq/screen_threaded.gif"><img src="//images.slashdot.org/faq/scaled_screen_threaded.gif" alt="Threaded Mode" width="245" height="109"></a><br>
                         &nbsp;</p>
                 </li>
                 <li>Nested displays the same hierarchy of responses, but displays all of the comments. (This can be a bitch of a page to render on weaker platforms and in longer discussions.)</li>
                 <li style="list-style: none">
-                        <p><a href="http://images.slashdot.org/faq/screen_nested.gif"><img src="http://images.slashdot.org/faq/scaled_screen_nested.gif" alt="Nested Mode" width="245" height="198"></a></p>
+                        <p><a href="//images.slashdot.org/faq/screen_nested.gif"><img src="//images.slashdot.org/faq/scaled_screen_nested.gif" alt="Nested Mode" width="245" height="198"></a></p>
                 </li>
         </ul>
         <p><em><small>
@@ -401,21 +401,21 @@
         </small></em></p>
 
 <h2><a name="cm2100" id="cm2100">Why can't I search or filter archived stories?</a></h2>
-        <p>Why can't you? What are you talking about, you can! Go to the <a href="http://slashdot.org">front page</a> and scroll all the way to the bottom. There's your search button. You can search for anything you'd like in the Slashdot database, stories, comments, users, polls, and even journal entries. Filtering is a little tricky, you can filter <em>for</em> authors, topics, or sections, but not filter <em>out</em> authors, topics, or sections. Occasionally our search feature gets bogged down when many users are accessing it. In this case we recommend using <a href="http://google.com">google</a>. Google likes to cache Slashdot stories and is reasonably accurate.</p>
+        <p>Why can't you? What are you talking about, you can! Go to the <a href="//slashdot.org/">front page</a> and scroll all the way to the bottom. There's your search button. You can search for anything you'd like in the Slashdot database, stories, comments, users, polls, and even journal entries. Filtering is a little tricky, you can filter <em>for</em> authors, topics, or sections, but not filter <em>out</em> authors, topics, or sections. Occasionally our search feature gets bogged down when many users are accessing it. In this case we recommend using <a href="http://www.google.com/">Google</a>. Google likes to cache Slashdot stories and is reasonably accurate.</p>
         <p><em><small>
                 Answered by: <a href="mailto:robo@slashdot.org">Robo</a><br>
                 Last Modified: 12/17/01
         </small></em></p>
 
-<h2><a name="cm2200" id="cm2200">What is this&nbsp;<img src="http://images.slashdot.org/neutral.gif" alt=""> ?</a></h2>
+<h2><a name="cm2200" id="cm2200">What is this&nbsp;<img src="//images.slashdot.org/neutral.gif" alt=""> ?</a></h2>
         <p>In a story where a <em>user</em> posts a comment, you'll see one of seven images next to the comment defining the poster's relationship to you:</p>
-        <p>Friend&nbsp;<img src="http://images.slashdot.org/friend.gif" alt="friend"></p>
-        <p>Fan&nbsp;<img src="http://images.slashdot.org/fan.gif" alt="fan"></p>
-        <p>Neutral&nbsp;<img src="http://images.slashdot.org/neutral.gif" alt="neutral"></p>
-        <p>Foe&nbsp;<img src="http://images.slashdot.org/foe.gif" alt="foe"></p>
-        <p>Freak&nbsp;<img src="http://images.slashdot.org/freak.gif" alt="freak"></p>
-        <p>Friend of Friend&nbsp;<img src="http://images.slashdot.org/fof.gif" alt="Friend of Friend"></p>
-        <p>Enemy of Friend&nbsp;<img src="http://images.slashdot.org/eof.gif" alt="Enemy of Friend"></p>
+        <p>Friend&nbsp;<img src="//images.slashdot.org/friend.gif" alt="friend"></p>
+        <p>Fan&nbsp;<img src="//images.slashdot.org/fan.gif" alt="fan"></p>
+        <p>Neutral&nbsp;<img src="//images.slashdot.org/neutral.gif" alt="neutral"></p>
+        <p>Foe&nbsp;<img src="//images.slashdot.org/foe.gif" alt="foe"></p>
+        <p>Freak&nbsp;<img src="//images.slashdot.org/freak.gif" alt="freak"></p>
+        <p>Friend of Friend&nbsp;<img src="//images.slashdot.org/fof.gif" alt="Friend of Friend"></p>
+        <p>Enemy of Friend&nbsp;<img src="//images.slashdot.org/eof.gif" alt="Enemy of Friend"></p>
         <p>For more information about "Friends" check out <a href="friends.shtml">Friends and Journals</a></p>
         <p><em><small>
                 Updated by: <a href="mailto:robo@slashdot.org">Robo</a><br>
@@ -430,15 +430,17 @@
                 <li><strong>Extrans</strong>: Same as "Plain Old Text", except that &amp; and &lt; and &gt; are converted to entities (no HTML markup allowed).</li>
                 <li><strong>Code</strong>: Same as "Extrans", but a monospace font is used, and a best attempt is made at performing proper indentation.</li>
         </ul>
-        <p>In addition, there is an extra "tag" you can use called <tt>ECODE</tt>. This functions like the "Code" post mode, but may be inlined in "HTML Formatted" and "Plain Old Text" posts, and the entire block is indented. (Getting really fancy: if you wish to use the text <tt>&lt;/ECODE&gt;</tt> inside the <tt>ECODE</tt> tag, you may instead use <tt>&lt;ECODE END="SOMETAG"&gt;...&lt;/SOMETAG&gt;</tt> instead of <tt>&lt;ECODE&gt;...&lt;/ECODE&gt;</tt>.)</p>
-        <p>You may set your default post mode on the <a href="http://slashdot.org/users.pl?op=editcomm">Comments preferences</a> page.</p>
+        <p>To "auto-link" a URL in HTML or Plain modes, enclose it in <tt>&lt;URL:http://example.com/&gt;</tt>.</p>
+	<p>The list of approved HTML tags is: <tt>&lt;b&gt; &lt;i&gt; &lt;p&gt; &lt;br&gt; &lt;a&gt; &lt;ol&gt; &lt;ul&gt; &lt;li&gt; &lt;dl&gt; &lt;dt&gt; &lt;dd&gt; &lt;em&gt; &lt;strong&gt; &lt;tt&gt; &lt;blockquote&gt; &lt;div&gt;</tt>
+        <p>In addition, there is an extra "tag" you can use called <tt>&lt;ecode&gt;</tt>. This functions like the "Code" post mode, but may be inlined in "HTML Formatted" and "Plain Old Text" posts, and the entire block is indented. (Getting really fancy: if you wish to use the literal text <tt>&lt;/ecode&gt;</tt> inside the <tt>&lt;ecode&gt;</tt> tag, you may instead use <tt>&lt;ecode end="sometag"&gt;...&lt;/sometag&gt;</tt> instead of <tt>&lt;ecode&gt;...&lt;/ecode&gt;</tt>.)</p>
+        <p>You may set your default post mode on the <a href="//slashdot.org/users.pl?op=editcomm">Comments preferences</a> page.</p>
         <p><em><small>
                 Updated by: <a href="mailto:jamie@slashdot.org">Jamie</a><br>
                 Last Modified: 07/16/02
         </small></em></p>
 
 <h2><a name="cm2400" id="cm2400">A comment I posted shows a different score on my user page than in the comments page.</a></h2>
-        <p>Your user page displays the comments' "Natural" score. That is the base score that all users share for any given comment. This number includes things like moderations up and down, default posting bonus, and so forth. However, that same comment, when displayed in the context of a discussion, reflects the bonuses or penalties associated with any number of user preferences. These options are <a href="http://slashdot.org/users.pl?op=editcomm">all configurable</a>, and include settings like the small comment penalty, the long comment bonus, and any reason modifiers you may have defined.</p>
+        <p>Your user page displays the comments' "Natural" score. That is the base score that all users share for any given comment. This number includes things like moderations up and down, default posting bonus, and so forth. However, that same comment, when displayed in the context of a discussion, reflects the bonuses or penalties associated with any number of user preferences. These options are <a href="//slashdot.org/users.pl?op=editcomm">all configurable</a>, and include settings like the small comment penalty, the long comment bonus, and any reason modifiers you may have defined.</p>
         <p><em><small>
                 Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
                 Last Modified: 7/15/02

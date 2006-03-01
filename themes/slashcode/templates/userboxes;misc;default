@@ -31,9 +31,6 @@ __template__
 			Slash.sidebox("Story Info", story_info, "story_info", 1);
 		END;
 	END;
-	%]
-
-[%
 
 IF !useredit; useredit = user; END;
 
@@ -162,7 +159,7 @@ IF !useredit.is_anon;
 
 	END;
 	Slash.sidebox(title, contents, "user-info", 1);
-	
+
 	# Second box:  info about moderation, if applicable
 	# Note this applies to the current user, not the user
 	# being examined.

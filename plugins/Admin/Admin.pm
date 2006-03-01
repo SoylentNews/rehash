@@ -318,16 +318,14 @@ sub showStoryAdminBox {
 	}
 	
 	my $future = $self->getStoryByTimeAdmin('>', $storyref, "", { hours_forward => 3 });
-
-	if (@$future < 3 ) {
-		$future = $self->getStoryByTimeAdmin('>', $storyref, "3");
+	if (@$future < 3) {
+		$future = $self->getStoryByTimeAdmin('>', $storyref, 3);
 	}
-	
 	$future = [ reverse @$future ];
-	my $past = $self->getStoryByTimeAdmin('<', $storyref, "", { hours_back => 3 });
 
+	my $past = $self->getStoryByTimeAdmin('<', $storyref, "", { hours_back => 3 });
 	if (@$past < 3 ) {
-		$past = $self->getStoryByTimeAdmin('<', $storyref, "3");
+		$past = $self->getStoryByTimeAdmin('<', $storyref, 3);
 	}
 	
 	my $usersignoffs 	= {};
@@ -556,7 +554,7 @@ sub ajax_authorbox {
 }
 
 sub showSignoffBox {
-	my ($self, $stoid, $options) = @_;
+	my($self, $stoid, $options) = @_;
 	my $signoffs = $self->getSignoffsForStory($stoid);
 	my $uids = {};
 	my $header;

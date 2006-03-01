@@ -1427,10 +1427,10 @@ sub editStory {
 		my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 		my @tags_example = $tags_reader->getExampleTagsForStory($story);
 		$tagbox_html .= slashDisplay('tagsstorydivtagbox', {
-				story =>        $story,
-				tags_top =>     \@tags_top,
-				tags_example => \@tags_example,
-			}, { Return => 1 });
+			story =>        $story,
+			tags_top =>     \@tags_top,
+			tags_example => \@tags_example,
+		}, { Return => 1 });
 	}
 
 	slashDisplay('editStory', {
