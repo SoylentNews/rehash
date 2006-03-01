@@ -3703,3 +3703,12 @@ UPDATE vars SET value = 'T_2_5_0_102' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+DROP TABLE IF EXISTS submissions_notes;
+CREATE TABLE `submissions_notes` (
+  `noid` mediumint(8) unsigned NOT NULL auto_increment,
+  `uid` mediumint(8) unsigned NOT NULL default '0',
+  `submatch` varchar(32) NOT NULL default '',
+  `subnote` text,
+  `time` datetime default NULL,
+  PRIMARY KEY  (`noid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
