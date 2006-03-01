@@ -401,7 +401,7 @@ sub get {
 }
 
 sub updateStoryFromJournal {
-	my($self, $src_journal) = @_;
+	my($self, $src_journal, $options) = @_;
 	my $slashdb = getCurrentDB();
 
 	my $stoid = $slashdb->sqlSelect("stoid", "journal_transfer", "id=$src_journal->{id}");
@@ -412,6 +412,7 @@ sub updateStoryFromJournal {
 	my $text = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
 	($data->{introtext}, $data->{bodytext}) = $self->splitJournalTextForStory($text);
 
+	$data->{topics_chosen} = $options->{topics_chosen} if $options->{topics_chosen};
 	$slashdb->updateStory($stoid, $data);
 }
 
