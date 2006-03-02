@@ -1633,7 +1633,7 @@ print STDERR scalar(localtime) . " Env.pm $$ userHasDaypass uid=$user->{uid} cs=
 				|| $write >= 1 && $user->{is_admin}
 			);
 		my $read;
-		if ($write) {
+		if ($user->{tags_canwrite_stories}) {
 			$user->{tags_canread_stories} = 1;
 		} else {
 			$read = $constants->{tags_stories_allowread} || 0;
