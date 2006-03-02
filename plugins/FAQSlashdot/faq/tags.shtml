@@ -35,12 +35,13 @@ depends on you.  If you choose to add your own tags, be aware:</p>
 <ul>
 <li>Your tags are <b>public</b>. Everyone will be able to see them!</li>
 <li>Keep your tags brief.</li>
+<li>Tags are space-separated. Use "bigbrother", not "big brother".
 <li>We provide a few example tags for you. Use them if you like.</li>
 <li>Don't forget to click 'Tag' to save your tags.</li>
-<li>Tags must be all-lowercase, no spaces or punctuation. Numbers can  
+<li>Tags must be all-lowercase, no punctuation. Numbers can  
 appear but can't be first. Smoosh them up: for "Web 2.0", tag  
 "web20". Max 64 chars.</li>
-<li>Don't use plurals.  It's "harddrive", not "harddrives", etc.</li>
+<li>Don't use plurals.  It's "harddrive", not "harddrives".</li>
 </ul>
 
 <p>We're excited about this, and see huge potential for this system.
