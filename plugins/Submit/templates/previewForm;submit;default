@@ -117,8 +117,14 @@ __template__
 	</form>
 
 	<br><br><br><br>
-
-	<form action="[% gSkin.rootdir %]/admin.pl" method="post" [% IF form.fromconsole %]target="_blank"[% END %]>
+	<script type="text/javascript">
+		function submitAndReload() {
+			var form = document.getElementById("adminform");
+			form.submit();
+			window.location.href = "[% gSkin.absolutedir_secure %]/submit.pl?op=list&amp;fromconsole=1&amp;nowrapper=1";
+		}
+	</script>
+	<form id="adminform" action="[% gSkin.rootdir %]/admin.pl" method="post" [% IF form.fromconsole %]target="_blank" onsubmit="submitAndReload();"[% END %]>
 		[% IF form.fromconsole %]<div class="hide">[% END %]
 		<input type="hidden" name="firstpreview" value="1">
 		<input type="hidden" name="subid" value="[% subid %]">
