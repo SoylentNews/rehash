@@ -57,10 +57,18 @@ sub getRemarks {
 
 	my $max = $options->{max} || 100;
 
+	my @where;
+	if ($options->{min_priority}) {
+		push @where, 'priority >= ' . $self->sqlQuote($options->{min_priority});
+	}
+	if ($options->{string}) {
+		push @where, 'remark LIKE ' . $self->sqlQuote('%' . $options->{string} . '%');
+	}
+
 	my $remarks = $self->sqlSelectAllHashrefArray(
 		'rid, uid, stoid, time, remark, type, priority',
 		'remarks',
-		'',
+		join(' AND ', @where),
 		"ORDER BY rid DESC LIMIT $max"
 	);
 
