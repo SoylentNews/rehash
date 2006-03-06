@@ -139,6 +139,9 @@ sub createDaypasskey {
 	# How far in the future before this daypass can be confirmed?
 	# I.e. how much of the ad do we insist the user watch?
 	my $secs_ahead = $dp_hr->{minduration} || 0;
+	# Give the user a break of 1 second, to allow for clock drift
+	# or what-have-you.
+	$secs_ahead -= 1;
 
 	my $key = getAnonId(1, 20);
 	my $rows = $self->sqlInsert('daypass_keys', {
