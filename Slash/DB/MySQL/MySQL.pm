@@ -1995,6 +1995,7 @@ sub setContentFilter {
 # This creates an entry in the accesslog
 sub createAccessLog {
 	my($self, $op, $dat, $status) = @_;
+	return if !dbAvailable('write_accesslog');
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
@@ -2011,7 +2012,6 @@ sub createAccessLog {
 	if ($op eq 'image' && $constants->{accesslog_imageregex}) {
 		return if $constants->{accesslog_imageregex} eq 'NONE';
 		my $uri = $r->uri;
-#		print STDERR scalar(localtime) . " createAccessLog image url '" . ($r->uri) . "'\n";
 		return unless $uri =~ $constants->{accesslog_imageregex};
 		$dat ||= $uri;
 	}
@@ -2030,8 +2030,6 @@ sub createAccessLog {
 	if (!$ipid || !$subnetid) {
 		($ipid, $subnetid) = get_ipids($r->connection->remote_ip);
 	}
-#use Data::Dumper; $Data::Dumper::Sortkeys=1;
-#print STDERR scalar(localtime) . " createAccessLog pid=$$ op='$op' dat='$dat' status='$status' ipid='$ipid' subnetid='$subnetid' gCUi='" . getCurrentUser('ipid') . "' gCUs='" . getCurrentUser('subnetid') . "' r->c->r_i='" . ($r->connection->remote_ip) . "' srcids: " . Dumper(getCurrentUser('srcids'));
 
 	if ( $op eq 'index' && $dat =~ m|^([^/]*)| ) {
 		my $firstword = $1;
@@ -2078,8 +2076,8 @@ sub createAccessLog {
 		bytes		=> $bytes,
 		op		=> $op,
 		-ts		=> 'NOW()',
-		query_string	=> $query_string,
-		user_agent	=> $ENV{HTTP_USER_AGENT} || 'undefined',
+		query_string	=> $self->truncateStringForCharColumn($query_string, 'accesslog', 'query_string'),
+		user_agent	=> $ENV{HTTP_USER_AGENT} ? $self->truncateStringForCharColumn($ENV{HTTP_USER_AGENT}, 'accesslog', 'user_agent') : 'undefined',
 		duration	=> $duration,
 		local_addr	=> $local_addr,
 		static		=> $user->{state}{_dynamic_page} ? 'no' : 'yes',
@@ -2102,6 +2100,7 @@ sub createAccessLog {
 
 sub _writeAccessLogCache {
 	my($self) = @_;
+	return if !dbAvailable('write_accesslog');
 	return unless ref($self->{_accesslog_insert_cache})
 		&& @{$self->{_accesslog_insert_cache}};
 #	$self->{_dbh}{AutoCommit} = 0;
@@ -2119,6 +2118,7 @@ sub _writeAccessLogCache {
 # This creates an entry in the accesslog for admins -Brian
 sub createAccessLogAdmin {
 	my($self, $op, $dat, $status) = @_;
+	return if !dbAvailable('write_accesslog');
 	return if $op =~ /^images?$/;
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
@@ -2131,16 +2131,10 @@ sub createAccessLogAdmin {
 	my $gSkin = getCurrentSkin();
 	errorLog("gSkin is empty") unless $gSkin;
 	my $skid = $gSkin->{skid} || 0;
-#	# XXXSKIN - i think these are no longer special cases ...
-#	# The following two are special cases
-#	if ($op eq 'index' || $op eq 'article') {
-#		$section = ($form && $form->{section})
-#			? $form->{section}
-#			: $constants->{section};
-#	}
 	# And just what was the admin doing? -Brian
 	$op = $form->{op} if $form->{op};
 	$status ||= $r->status;
+	my $form_freeze = freeze($form);
 
 	$self->sqlInsert('accesslog_admin', {
 		host_addr	=> $r->connection->remote_ip,
@@ -2149,10 +2143,10 @@ sub createAccessLogAdmin {
 		skid		=> $skid,
 		bytes		=> $r->bytes_sent,
 		op		=> $op,
-		form		=> freeze($form),
+		form		=> $form_freeze ? $self->truncateStringForCharColumn($form_freeze, 'accesslog_admin', 'form') : '',
 		-ts		=> 'NOW()',
-		query_string	=> $ENV{QUERY_STRING} || '0',
-		user_agent	=> $ENV{HTTP_USER_AGENT} || '0',
+		query_string	=> $ENV{QUERY_STRING} ? $self->truncateStringForCharColumn($ENV{QUERY_STRING}, 'accesslog_admin', 'query_string') : '0',
+		user_agent	=> $ENV{HTTP_USER_AGENT} ? $self->truncateStringForCharColumn($ENV{HTTP_USER_AGENT}, 'accesslog_admin', 'user_agent') : 'undefined',
 		secure		=> Slash::Apache::ConnectionIsSecure(),
 		status		=> $status,
 	}, { delayed => 1 });

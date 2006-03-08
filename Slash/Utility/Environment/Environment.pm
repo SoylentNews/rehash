@@ -2485,10 +2485,21 @@ sub createLog {
 	my $logdb = getObject('Slash::DB', { virtual_user => $constants->{log_db_user} });
 
 	my($op, $new_dat) = getOpAndDatFromStatusAndURI($status, $uri, $dat);
+	my $user = getCurrentUser();
 
-	$logdb->createAccessLog(	$op, $new_dat, $status);
-	$logdb->createAccessLogAdmin(	$op, $new_dat, $status)
-		if getCurrentUser('is_admin');
+	# Always log this hit to accesslog, unless this is an admin hitting
+	# admin.pl and the log_admin var has been set to false (this will
+	# help small sites keep admin traffic out of that log, which really
+	# is of questionable value since crawlers will be just as bad, but
+	# hey, we offer site admins the option anyway).
+	unless (!$constants->{log_admin} && $user->{is_admin} && $uri =~ /admin\.pl/) {
+		$logdb->createAccessLog($op, $new_dat, $status);
+	}
+
+	# If this is an admin user, all hits go into accesslog_admin.
+	if ($user->{is_admin}) {
+		$logdb->createAccessLogAdmin($op, $new_dat, $status);
+	}
 }
 
 #========================================================================

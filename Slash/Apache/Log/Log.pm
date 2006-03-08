@@ -34,17 +34,8 @@ sub handler {
 	my $uri = $r->uri;
 	my $dat = $r->err_header_out('SLASH_LOG_DATA');
 
-	# Added this so that small sites would not have admin logins 
-	# recorded in their stats. -Brian
-
-	# so it will still log it if the admin DOES request
-	# to admin.pl?  i thought you wanted it to NOT log
-	# requests to admin.pl?  should the !~ be =~ ?
-	# or am i just not thinking clearly? -- pudge
-
-	if (!$constants->{log_admin} && $uri !~ /admin\.pl/ ) {
-		return OK if getCurrentUser('is_admin');
-	}
+	# There used to be some (broken) logic here involving the
+	# log_admin var, but that's been moved to createLog().
 
 	createLog($uri, $dat, $r->status);
 
