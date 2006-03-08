@@ -568,6 +568,16 @@ print STDERR scalar(localtime) . " ajaxProcessAdminTags reset to " . ($reset_las
 	}, { Return => 1 });
 }
 
+sub ajaxTagHistoryStory {
+	my($self, $constants, $user, $form) = @_;
+
+	my $sidenc = $form->{sidenc};
+	my $sid = $sidenc; $sid =~ tr{:}{/};
+	my $stoid = $self->getStoidFromSid($sid);
+	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+	my $tags = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid);
+	slashDisplay('taghistory', { tags => $tags }, { Return => 1 } );
+}
 sub processAdminCommand {
 	my($self, $c) = @_;
 
@@ -600,6 +610,7 @@ print STDERR scalar(localtime) . " get c '$c' type='$type' tagname='$tagname'\n"
 	return (undef, undef) if !$type || !$self->tagnameSyntaxOK($tagname);
 	return($type, $tagname);
 }
+
 
 #################################################################
 sub DESTROY {

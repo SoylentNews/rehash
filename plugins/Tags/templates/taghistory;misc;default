@@ -1,0 +1,31 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+taghistory
+__seclev__
+10000
+__template__
+<table class="data">
+[% toggle = 0 %]
+[% IF tags.size > 0 %]
+	[% FOREACH tag = tags %]
+		<tr class="data_hl[% toggle ? 2 : 1; %]">
+			[% nickname = Slash.db.getUser(tag.uid, "nickname") %]
+			<td>[% tag.tagname %]</td>
+			<td><a href="[% gSkin.rootdir %]/~[% nickname | strip_paramattr %]">[% nickname | strip_literal %]</a></td>
+			<td>[% tag.created_at %]</td>
+		</tr>
+		[% toggle = !toggle %]
+	[% END %]
+[% ELSE %]
+	<td class="data_hl1">No tags</td>
+[% END %]
+</table>
