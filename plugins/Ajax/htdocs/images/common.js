@@ -1,5 +1,82 @@
 // $Id$
 
+function createPopup(xy, titlebar, name, contents, message) {
+	var body = document.getElementsByTagName("body")[0]; 
+	var div = document.createElement("div");
+	div.id = name + "-popup";
+	div.style.position = "absolute";
+	
+	var leftpos = xy[0] + "px";
+	var toppos  = xy[1] + "px";
+	
+	div.style.left = leftpos;
+	div.style.top = toppos;
+	div.style.zIndex = "100";
+	contents = contents || "";
+	message  = message || "";
+
+	div.innerHTML = '<div id="' + name + '-title" class="popup-title">' + titlebar + '</div>' +
+                        '<div id="' + name + '-contents" class="popup-contents">' + contents + '</div>' +
+			'<div id="' + name + '-message" class="popup-message">' + message + '</div>';
+
+	body.appendChild(div);
+	div.className = "popup";
+	return div;
+}
+
+function createPopupButtons() {
+	var buttons = "";
+	if (arguments.length > 0) {
+		buttons = '<span class="buttons">';
+	}
+	for (var i=0; i<arguments.length; i++) {
+		buttons =  buttons + "<span>" + arguments[i] + "</span>";
+	}
+
+	buttons = buttons + "</span>";
+	return buttons;
+}
+
+function closePopup(id, refresh) {
+	var el = $(id);
+	if (el) {
+		el.parentNode.removeChild(el);
+	}
+	if (refresh) {
+		window.location.reload();
+	}
+}
+
+function moveByObjSize(div, addOffsetWidth, addOffsetHeight) {
+	if (addOffsetWidth) {
+		div.style.left = parseFloat(div.style.left || 0) + (addOffsetWidth * div.offsetWidth) + "px";
+	}
+	if (addOffsetHeight) {
+		div.style.top = parseFloat(div.style.top || 0) + (addOffsetHeight * div.offsetHeight) + "px";
+	}
+}
+
+function moveByXY(div, x, y) {
+	if (x) {
+		div.style.left = parseFloat(div.style.left || 0) + x + "px";
+	}
+	if (y) {
+		div.style.top = parseFloat(div.style.top || 0) + y + "px";
+	}
+}
+
+function getXYForId(id, addWidth, addHeight) {
+	var div = $(id);
+	var xy = Position.cumulativeOffset(div);
+	if (addWidth) {
+		xy[0] = xy[0] + div.offsetWidth;
+	}
+	if (addHeight) {
+		xy[1] = xy[1] + div.offsetHeight;
+	}
+	return xy;
+}
+
 function toggleIntro(id, toggleid) {
 	var obj = $(id);
 	var toggle = $(toggleid);

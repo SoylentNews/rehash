@@ -1,33 +1,17 @@
 // $Id$
 
 function configSectionPopup() { 
-	var body = document.getElementsByTagName("body")[0]; 
-	var div = document.createElement("div");
-	div.id = "sectional_pref";
-	div.style.position = "absolute";
-	
-	leftpos = Position.cumulativeOffset($('links-sections-title'))[0] + "px";
-	toppos = Position.cumulativeOffset($('links-sections-title'))[1] + "px";
-	
-	div.style.left = leftpos;
-	div.style.top = toppos;
-	div.style.zIndex = "30";
-	div.style.fontSize = "80%";
-	div.style.background = "#fff";
-	div.style.color = "#000";
-	div.style.width = "auto";
-	div.style.border = "solid 2px #066";
-	div.padding = "5px";
-	div.innerHTML = "<div id=\"sectionprefs_hdr\"><a href=\"javascript:window.location.reload()\" style=\"color:#fff;\">Sectional&nbsp;Display&nbsp;Prefs</a>&nbsp;<span><a href=\"/faq/UI.shtml#ui500\">[?]</a></span>&nbsp;<span><a href=\"javascript:window.location.reload()\">[X]</a></span></div><div id='sectionprefs'><div id=\"sectionprefs_message\">Loading...</div>";
-	body.appendChild(div);
+	var title = "<a href=\"javascript:window.location.reload()\" style=\"color:#fff;\">Sectional&nbsp;Display&nbsp;Prefs</a>&nbsp;";
+	var buttons = createPopupButtons("<a href=\"/faq/UI.shtml#ui500\">[?]</a>","<a href=\"javascript:window.location.reload()\">[X]</a>");
+	alert(buttons);
+	title = title + buttons;
+	createPopup(getXYForId('links-sections-title'), title, "sectionprefs", "", "Loading...");
 	
 	var url = 'ajax.pl';
-	var params = 'op=getSectionPrefsHTML';
-	var ajax = new Ajax.Updater(
-		{ success: 'sectionprefs' },
-		url,
-		{ method: 'post', parameters: params, onFailure: reportError}
-	);
+	var params = []; 
+	params['op'] = 'getSectionPrefsHTML';
+
+	ajax_update(params, 'sectionprefs-contents');
 
 }
 
@@ -48,14 +32,10 @@ function postSectionPrefChanges(el) {
 	params[el.name] = el.value;
 	var h = $H(params);
 	
-	var sec_pref_msg = $("sectionprefs_message");
+	var sec_pref_msg = $("sectionprefs-message");
 	sec_pref_msg.innerHTML = "Saving...";
 	var url = 'ajax.pl';
-	var ajax = new Ajax.Updater(
-		{ success: 'sectionprefs_message' },
-		url,
-		{ method: 'post', parameters: h.toQueryString(), onFailure: reportError }
-	);
+	ajax_update(params, 'sectionprefs-message'); 
 }
 
 function swapClassColors(class_name_active, class_name_deactive) {
