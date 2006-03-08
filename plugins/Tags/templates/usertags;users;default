@@ -19,9 +19,9 @@ __template__
 [% thisnickname = useredit.nickname | strip_literal;
    url_nick = useredit.nickname | strip_paramattr;
    uid = useredit.uid;
-   title = "Tags by <a href=\"$gSkin.rootdir/~$url_nick/\">$thisnickname ($uid)</a>" %]
-[% PROCESS titlebar title=title %]
-[% user_submenu %]
+   title = "Tags by <a href=\"$gSkin.rootdir/~$url_nick/\">$thisnickname ($uid)</a>";
+   PROCESS user_titlebar tab_selected='tags' %]
+
 [% IF user.tags_canread_stories && tags_grouped.keys.size %]
 <div><table border="0" cellpadding="0" cellspacing="0" width="100%" class="tagslist">
 [% FOREACH tagname = tags_grouped.keys.sort;

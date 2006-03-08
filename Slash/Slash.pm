@@ -1518,7 +1518,8 @@ sub displayStory {
 		$return =~ s/\Q__TIME_TAG__\E/$atstorytime/;
 
 		if ($constants->{plugin}{Tags}
-			&& $user->{tags_canread_stories}
+			&&  $user->{tags_canread_stories}
+			&& !$user->{tags_turnedoff}
 			&& (!$options->{dispmode} || $options->{dispmode} ne 'brief')) {
 
 			my @tags_top = split / /, ($story->{tags_top} || '');

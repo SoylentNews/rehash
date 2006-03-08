@@ -39,7 +39,7 @@ tabs.push(
 	{ link = "/my/password",		label = "Password",	sel_label = "password" },
 );
 IF constants.plugin.Tags; tabs.push(
-	{ link = "/users.pl?op=showtags",	label = "Tags",		sel_label = "tags" },
+	{ link = "/users.pl?op=edittags",	label = "Tags",		sel_label = "tags" },
 ); END;
 
 PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected; '</div>' %]

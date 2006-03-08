@@ -181,6 +181,9 @@ please contact the site administrator immediately.
 [% CASE 'savemiscopts_msg' %]
 	<p>Option(s) changed.<br>
 
+[% CASE 'savetags_msg' %]
+	<p>Tag options saved.<br>
+
 [% CASE 'no_registration_needed' %]
 	<p>Hello, [% user.nickname | strip_literal %]. Your account is currently registered with
 	the system. No re-registration is necessary at this time.<br>

@@ -59,6 +59,9 @@ __template__
 [% CASE 'editMiscOpts_title' %]
 	Miscellaneous Options
 
+[% CASE 'editTags_title' %]
+	Tag Options
+
 [% CASE 'displayForm_new_title' %]
 	I'm a New User!
 

@@ -51,6 +51,9 @@ IF user.uid == uid;
 	); tabs.push(
 		{ link = "/my/freaks/",		label = "Freaks",	sel_label = "freaks" },
 	); END;
+	IF constants.plugin.Tags; tabs.push(
+		{ link = "/my/tags/",		label = "Tags",		sel_label = "tags" },
+	); END;
 ELSIF user.is_anon;
 	tabs = [
 		{ link = "/~$url_nick/",	label = "Info",		sel_label = "info" },
@@ -66,6 +69,9 @@ ELSIF user.is_anon;
 		{ link = "/~$url_nick/foes/",	label = "Foes",		sel_label = "foes" },
 	); tabs.push(
 		{ link = "/~$url_nick/freaks/",	label = "Freaks",	sel_label = "freaks" },
+	); END;
+	IF constants.plugin.Tags; tabs.push(
+		{ link = "/~$url_nick/tags/",	label = "Tags",		sel_label = "tags" },
 	); END;
 ELSE;
 	tabs = [
@@ -85,6 +91,9 @@ ELSE;
 		{ link = "/~$url_nick/foes/",	label = "Foes",		sel_label = "foes" },
 	); tabs.push(
 		{ link = "/~$url_nick/freaks/",	label = "Freaks",	sel_label = "freaks" },
+	); END;
+	IF constants.plugin.Tags; tabs.push(
+		{ link = "/~$url_nick/tags/",	label = "Tags",		sel_label = "tags" },
 	); END;
 END %]
 <div id="usermenu">
