@@ -2432,6 +2432,7 @@ sub getOpAndDatFromStatusAndURI {
 	} elsif ($uri =~ /\.png$/) {
 		$uri = 'image';
 	} elsif ($uri =~ /\.rss$/ || $uri =~ /\.xml$/ || $uri =~ /\.rdf$/ || $ENV{QUERY_STRING} =~ /\bcontent_type=rss\b/) {
+		$dat = $uri;
 		$uri = 'rss';
 	} elsif ($uri =~ /\.pl$/) {
 		$uri =~ s|^/(.*)\.pl$|$1|;
