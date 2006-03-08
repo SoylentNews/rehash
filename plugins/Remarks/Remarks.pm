@@ -124,10 +124,12 @@ sub getUserRemarkCount {
 ########################################################
 sub displayRemarksTable {
 	my($self, $options) = @_;
-
+	my $user = getCurrentUser();
 	$self           ||= getObject('Slash::Remarks');
 	$options        ||= {};
-	$options->{max} ||= 30;
+	$options->{string} = $user->{remarks_filter} if $user->{remarks_filter};
+	$options->{min_priority} = $user->{remarks_min_priority} if $user->{min_priority};
+	$options->{max} = $user->{remarks_limit} || 10;
 
 	my $remarks_ref = $self->getRemarks($options);
 	return slashDisplay('display', {
@@ -155,6 +157,27 @@ sub ajaxFetch {
 	}
 
 	return $self->displayRemarksTable($options);
+}
+
+sub ajaxFetchConfigPanel {
+	my ($slashdb, $constants, $user, $form) = @_;
+	slashDisplay('config_remarks', {}, { Return => 1 });
+}
+
+sub ajaxConfigSave {
+	my ($slashdb, $constants, $user, $form) = @_;
+	my $data = {};
+	if (defined $form->{limit}) {
+		$data->{remarks_limit} = $form->{limit}
+	}
+	if (defined $form->{filter}) {
+		$data->{remarks_filter} = $form->{filter};
+	}
+	if (defined $form->{min_priority}) {
+		$data->{remarks_min_priority} = $form->{min_priority};
+	}
+	$slashdb->setUser($user->{uid}, $data) if keys %$data;
+	return "<a href=\"javascript:closePopup('remarksconfig-popup', 1)\">Close</a>";
 }
 
 1;

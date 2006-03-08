@@ -1,0 +1,23 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+config_remarks
+__seclev__
+10000
+__template__
+[% priority = user.remarks_min_priority || 0 %]
+[% filter   = user.remarks_filter || "" %]
+[% limit    = user.remarks_limit  || 10 %]
+Min Priority: <input type="text" id="remarks_min_priority" name="remarks_min_priority" value="[% priority %]" size="1" onkeyup="remarks_config_save()"><br>
+Filter: <input type="text" id="remarks_filter" name="remarks_filter" value="[% filter %]" size="20" onkeyup="remarks_config_save()"><br>
+Number to show: <input type="text" id="remarks_limit" name="remarks_limit" value="[% limit %]" size="2" onkeyup="remarks_config_save()"><br>
+<input id="remarks_new" type="text" size="60">
+<input type="button" id="remarks_new_button" value="Say" onclick="remarks_create();">
