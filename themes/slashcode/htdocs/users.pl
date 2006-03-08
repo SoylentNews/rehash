@@ -1524,11 +1524,9 @@ sub saveTags {
 
 	return if $user->{is_anon}; # shouldn't be, but can't hurt to check
 
-	my $edit_user = $slashdb->getUser($user->{uid});
-
-	$slashdb->setUser($edit_user->{uid}, {
+	$slashdb->setUser($user->{uid}, {
 		tags_turnedoff =>	$form->{showtags} ? '' : 1 });
-
+	my $edit_user = $slashdb->getUser($user->{uid});
 	editTags({ note => getMessage('savetags_msg') });
 }
 
