@@ -112,7 +112,7 @@ $task{$me}{code} = sub {
 	if (@errs) {
 		return "err: " . join("; ", @errs);
 	}
-	return "precached for @virtual_users";
+	return '';
 };
 
 1;
