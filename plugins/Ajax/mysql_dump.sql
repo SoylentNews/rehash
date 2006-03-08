@@ -112,6 +112,8 @@ INSERT INTO reskey_vars VALUES (105, 'user_seclev', 1, 'Minimum seclev to use re
 
 INSERT INTO ajax_ops VALUES (NULL, 'remarks_create', 'Slash::Remarks', 'ajaxFetch', 'ajax_admin', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'remarks_fetch',  'Slash::Remarks', 'ajaxFetch', 'ajax_admin', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'remarks_config', 'Slash::Remarks', 'ajaxFetchConfigPanel', 'ajax_admin', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'remarks_config_save', 'Slash::Remarks', 'ajaxConfigSave', 'ajax_admin', 'createuse');
 
 # signoff
 INSERT INTO ajax_ops VALUES(NULL, 'admin_signoff', 'Slash::Admin', 'ajax_signoff', 'ajax_admin', 'createuse');

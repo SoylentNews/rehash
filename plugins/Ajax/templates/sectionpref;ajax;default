@@ -18,7 +18,7 @@ __template__
 [% style_disabled = "color: #999; background: #ccc;" %]
 <form name="sectionprefs">
 <table border="0" cellpadding="1" cellspacing="0"">
-	<tr>
+	<tr style="[% style_enabled %]">
 		<td>&nbsp;</td>
 		<td>
 			<img src="[% constants.imagedir %]/article_none.gif" alt="Never" title="Never"><br>
@@ -65,8 +65,6 @@ __template__
 [%- END -%]
 </table>
 </form>
-<div id="sectionprefs_message">
-</div>
 __seclev__
 500
 __version__
