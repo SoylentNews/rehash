@@ -18,7 +18,7 @@ use vars qw($VERSION);
 # have my power of attorney.
 
 my $timeout = 30; # This should eventualy be a parameter that is configurable
-my $query_ref_regex = qr{(HASH|ARRAY|SCALAR|GLOB|CODE|LVALUE|IO|REF)\(0x[0-9a-f]{3,}\)}; # this too
+my $query_ref_regex = qr{(HASH|ARRAY|SCALAR|GLOB|CODE|LVALUE|IO|REF)\(0x[0-9a-f]{3,16}\)}; # this too
 
 ########################################################
 # Generic methods for libraries.
