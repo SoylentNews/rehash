@@ -1,6 +1,8 @@
 __section__
 default
 __description__
+useredit = user whose tags are being displayed
+user_submenu = html text of user submenu, if any
 tags_grouped = grouped user tags: a hashref, each duple having a key of a tagname and a value of an arrayref of hashrefs of the tags applied with that tagname
 
 This template and its API will likely change.
@@ -14,8 +16,13 @@ en_US
 __name__
 usertags
 __template__
-[% PROCESS titlebar title='Your Tags' %]
-[% IF user.tags_canwrite_stories && tags_grouped.keys.size %]
+[% thisnickname = useredit.nickname | strip_literal;
+   url_nick = useredit.nickname | strip_paramattr;
+   uid = useredit.uid;
+   title = "Tags by <a href=\"$gSkin.rootdir/~$url_nick/\">$thisnickname ($uid)</a>" %]
+[% PROCESS titlebar title=title %]
+[% user_submenu %]
+[% IF user.tags_canread_stories && tags_grouped.keys.size %]
 <div><table border="0" cellpadding="0" cellspacing="0" width="100%" class="tagslist">
 [% FOREACH tagname = tags_grouped.keys.sort;
 	FOREACH tag = tags_grouped.$tagname %]
@@ -26,8 +33,11 @@ __template__
 END %]
 </table></div>
 [% ELSE %]
-<div>You have not assigned any tags,
-or tags are unavailable to you at this time.</div>
+	[% IF !user.tags_canread_stories %]
+	<div>You are unable to read tags at this time.</div>
+	[% ELSE %]
+	<div>No tags have been assigned.</div>
+	[% END %]
 [% END %]
 
 __seclev__

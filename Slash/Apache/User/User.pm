@@ -706,7 +706,9 @@ sub userdir_handler {
 		}
 
 		my $slashdb = getCurrentDB();
-		my $uid = $slashdb->getUserUID($nick);
+		my $reader_user = $slashdb->getDB('reader');
+		my $reader = getObject('Slash::DB', { virtual_user => $reader_user });
+		my $uid = $reader->getUserUID($nick);
 		$nick = fixparam($nick);	# make safe to pass back to script
 
 		# maybe we should refactor this code a bit ...
@@ -786,6 +788,11 @@ sub userdir_handler {
 			$r->args("op=friendview&nick=$nick&uid=$uid");
 			$r->uri('/journal.pl');
 			$r->filename($constants->{basedir} . '/journal.pl');
+
+		} elsif ($op eq 'tags') {
+			$r->args("op=showtags&nick=$nick&uid=$uid");
+			$r->uri('/users.pl');
+			$r->filename($constants->{basedir} . '/users.pl');
 
 		} else {
 			$r->args("nick=$nick&uid=$uid");

@@ -1481,23 +1481,41 @@ sub showTags {
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 
-	print createMenu("users", {
-		style =>	'tabbed',
-		justify =>	'right',
-		color =>	'colored',
-		tab_selected =>	$hr->{tab_selected_1} || "",
-	});
+	my($uid, $user_edit);
+	if ($form->{uid} || $form->{nick}) {
+		$uid = $form->{uid} || $tags_reader->getUserUID($form->{nick});
+		$user_edit = $tags_reader->getUser($uid);
+	}
+	if (!$user_edit || $user_edit->{is_anon}) {
+		$uid = $user->{uid};
+		$user_edit = $user;
+	}
+	my $nickname = $user_edit->{nickname};
+
+	my $user_submenu = '';
+	if ($user_edit->{uid} == $user->{uid}) {
+		$user_submenu = createMenu("users", {
+			style =>	'tabbed',
+			justify =>	'right',
+			color =>	'colored',
+			tab_selected =>	$hr->{tab_selected_1} || "",
+		});
+	}
 
 	if (!$constants->{plugin}{Tags}) {
 		print getError('bad_op', { op => $form->{op}});
 		return;
 	}
 
-	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	my $tags_ar = $tags_reader->getGroupedTagsFromUser($user->{uid});
+	my $tags_ar = $tags_reader->getGroupedTagsFromUser($user_edit->{uid});
 
-	slashDisplay('usertags', { tags_grouped => $tags_ar });
+	slashDisplay('usertags', {
+		useredit	=> $user_edit,
+		tags_grouped	=> $tags_ar,
+		user_submenu	=> $user_submenu,
+	});
 }
 
 #################################################################
