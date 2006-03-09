@@ -616,7 +616,7 @@ input.button
 }
 
 /* Data tables */
-.data { font-family: sans-serif; font-size: 75.5% }
+.data { font-family: sans-serif; font-size: 75.5%; border-spacing: 0px; }
 .data_head
 {
 	color: #fff;
@@ -625,7 +625,8 @@ input.button
 }
 
 .data_head th { text-align: left; }
-
+.data_head a { color: #fff; }
+.data td { padding: 2px }
 .data_hl1
 {
 	background: #ccc;
@@ -683,3 +684,4 @@ pre
 .right { text-align: right; }
 .sb_header { font-size: 125%; font-weight: bold; color: #600; }
 .hide { display: none }
+.buttons { text-align: right }

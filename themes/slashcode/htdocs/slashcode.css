@@ -295,3 +295,22 @@ pre, code { font-size: 80%; }
 .future .briefarticle { background: #c33; }
 .briefarticles { border-top: solid 2px #933; padding-bottom: 0.5em; margin-top: 3px }
 .curstory { border-top: solid 2px #933; }
+.secpref_master td { border-bottom: solid 2px #066;}
+.secpref_nexus_row { color: #aaa; background: #ccc; }
+.ps_23, .ps_22 { display: none; }
+.curstory { border-top: solid 2px #066; }
+.popup { border: solid 2px #933; }
+.popup .data { font-size: 100% }
+.popup-title {text-align: left; background: #933; font-size: 100%; color: #fff; padding-right: 4em; }
+.popup-title .buttons, .title .buttons {
+	position: absolute;
+        right: 0.2em;
+}
+.popup-title .buttons span a {float: none; color: #fff; font-size: 10px; font-weight: bold; font-family: sans-serif; text-decoration: none;}
+.popup-title .buttons span { margin: -.3em 0; padding: 0 4px; height: 11px; width: 11px;}
+
+.popup-message { background: #933; color: #fff; }
+.popup-title a, .popup-message a { color: #fff }
+.popup-contents { background: #ccc; font-size: 80%; padding: 5px; }
+.popup-message  { background: #933; font-size: 100%; color: #fff; font-weight: bold; text-align: right; }
+#sectionprefs-contents { background: #fff }
