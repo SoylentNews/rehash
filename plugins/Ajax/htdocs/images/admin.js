@@ -8,19 +8,19 @@ function admin_signoff(el) {
 	
 }
 
-function adminTagsCommands(stoid) {
-	var toggletags_message_id = 'toggletags-message-' + stoid;
+function adminTagsCommands(sidenc) {
+	var toggletags_message_id = 'toggletags-message-' + sidenc;
 	var toggletags_message_el = $(toggletags_message_id);
 	toggletags_message_el.innerHTML = 'Executing commands...';
 
 	var params = [];
 	params['op'] = 'tags_admin_commands';
-	params['stoid'] = stoid;
-	var tags_admin_commands_el = $('tags_admin_commands-' + stoid);
+	params['sidenc'] = sidenc;
+	var tags_admin_commands_el = $('tags_admin_commands-' + sidenc);
 	params['commands'] = tags_admin_commands_el.value;
-	var reskeyel = $('admin_commands-reskey-' + stoid);
+	var reskeyel = $('admin_commands-reskey-' + sidenc);
 	params['reskey'] = reskeyel.value;
-	ajax_update(params, 'tags-admin-' + stoid);
+	ajax_update(params, 'tags-admin-' + sidenc);
 
 	toggletags_message_el.innerHTML = 'Commands executed.';
 }

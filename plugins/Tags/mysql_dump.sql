@@ -11,7 +11,7 @@ INSERT INTO vars (name, value, description) VALUES ('tags_stories_lastscanned', 
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_top_minscore', '2', 'Minimum score a tag must have to make it into the top tags for a story');
 INSERT INTO vars (name, value, description) VALUES ('tags_reduced_tag_clout', '0.5', 'Reduced clout of tags');
 INSERT INTO vars (name, value, description) VALUES ('tags_reduced_user_clout', '0.5', 'Reduced clout of user applied tags');
-INSERT INTO vars (name, value, description) VALUES ('tags_tagname_regex', '^[a-z][a-z0-9/]{0,63}$', 'Regex that tag names must conform to');
+INSERT INTO vars (name, value, description) VALUES ('tags_tagname_regex', '^\!?[a-z][a-z0-9/]{0,63}$', 'Regex that tag names must conform to');
 
 INSERT INTO ajax_ops VALUES (NULL, 'tags_get_user_story', 'Slash::Tags', 'ajaxGetUserStory', 'ajax_tags_write', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'tags_create_for_story', 'Slash::Tags', 'ajaxCreateForStory', 'ajax_tags_write', 'use');

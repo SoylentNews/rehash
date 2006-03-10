@@ -59,10 +59,9 @@ sub new {
 # tagname to the same global object twice.  Pass the option hashref
 # field 'dupe_ok' with a true value to ignore this check.
 
-sub createTag {
-        my($self, $hr, $options) = @_;
-
-        my $tag = { -created_at => 'NOW()' };
+sub _setuptag {
+	my($self, $hr) = @_;
+	my $tag = { -created_at => 'NOW()' };
 
         $tag->{uid} = $hr->{uid} || getCurrentUser('uid');
 
@@ -82,8 +81,34 @@ sub createTag {
         }
 	return 0 if !$tag->{globjid};
 
+	return $tag;
+}
+
+sub createTag {
+        my($self, $hr, $options) = @_;
+
+        my $tag = $self->_setuptag($hr);
+	return 0 if !$tag;
+
 	my $check_dupe = (!$options || !$options->{dupe_ok});
-	if ($check_dupe) {
+	my $check_opp = (!$options || !$options->{opposite_ok});
+	my $opp_tagnameid = 0;
+	if ($check_opp) {
+		my $opp_tagname = '';
+		if ($hr->{name}) {
+			$opp_tagname = $self->getOppositeTagname($hr->{name});
+		} else {
+			my $tagdata = $self->getTagDataFromId($tag->{tagnameid});
+			$opp_tagname = $self->getOppositeTagname($tagdata->{tagname});
+		}
+		$opp_tagnameid = $self->getTagidFromNameIfExists($opp_tagname);
+	}
+
+	$self->sqlDo('SET AUTOCOMMIT=0');
+        my $rows = $self->sqlInsert('tags', $tag);
+	my $tagid = $rows ? $self->getLastInsertId() : 0;
+
+	if ($rows && $check_dupe) {
 		# Check to make sure this user hasn't already tagged
 		# this object with this tagname.  We do this by, in
 		# a transaction, doing the insert and checking to see
@@ -91,34 +116,67 @@ sub createTag {
 		# preceding the one just inserted with matching the
 		# criteria.  If so, the insert is rolled back and
 		# 0 is returned.
-		$self->sqlDo('SET AUTOCOMMIT=0');
-	}
-
-        my $rows = $self->sqlInsert('tags', $tag);
-
-	if ($check_dupe) {
-		my $tagid = $self->getLastInsertId();
-		# Because of the uid_globjid_tagnameid index, this
-		# should, I believe, not even touch table data, so
-		# it should be very fast.
+		# Because of the uid_globjid_tagnameid_active index,
+		# this should, I believe, not even touch table data,
+		# so it should be very fast.
 		my $count = $self->sqlCount('tags',
 			"uid		= $tag->{uid}
 			 AND globjid	= $tag->{globjid}
 			 AND tagnameid	= $tag->{tagnameid}
+			 AND inactivated IS NULL
 			 AND tagid < $tagid");
 		if ($count == 0) {
 			# This is the only tag, it's allowed.
-			$self->sqlDo('COMMIT');
+			# Continue processing.
 		} else {
 			# Duplicate tag, not allowed.
 			$self->sqlDo('ROLLBACK');
 			$rows = 0;
 		}
-		# Return AUTOCOMMIT to its original state in any case.
-		$self->sqlDo('SET AUTOCOMMIT=1');
 	}
 
+	# If that has succeeded so far, then eliminate any opposites
+	# of this tag which may exist earlier in the table.
+	if ($rows && $check_opp && $opp_tagnameid) {
+		my $opp_tag = {
+			uid =>		$tag->{uid},
+			globjid =>	$tag->{globjid},
+			tagnameid =>	$opp_tagnameid
+		};
+		my $count = $self->deactivateTag($opp_tag, { tagid_prior_to => $tagid });
+		$rows = 0 if $count > 1;
+	}
+
+	# If it passed all the tests, commit it.
+	if ($rows) {
+		$self->sqlDo('COMMIT');
+	}
+
+	# Return AUTOCOMMIT to its original state in any case.
+	$self->sqlDo('SET AUTOCOMMIT=1');
+
         return $rows ? 1 : 0;
+}
+
+sub deactivateTag {
+        my($self, $hr, $options) = @_;
+	my $tag = $self->_setuptag($hr);
+	return 0 if !$tag;
+	my $prior_clause = '';
+	$prior_clause = " AND tagid < $options->{tagid_prior_to}" if $options->{tagid_prior_to};
+	my $count = $self->sqlUpdate('tags',
+		{ -inactivated => 'NOW()' },
+		"uid		= $tag->{uid}
+		 AND globjid	= $tag->{globjid}
+		 AND tagnameid	= $tag->{tagnameid}
+		 AND inactivated IS NULL
+		 $prior_clause");
+	if ($count > 1) {
+		# Logic error, there should never be more than one
+		# tag meeting those criteria.
+		warn scalar(gmtime) . " $count deactivated tags id '$tag->{tagnameid}' for uid=$tag->{uid} on $tag->{globjid}";
+	}
+	return $count;
 }
 
 # Given a tagname, create it if it does not already exist.
@@ -207,6 +265,47 @@ sub getTagidFromNameIfExists {
         return $id;
 }
 
+# Given a tagid, set (or clear) (some of) its parameters.
+# Returns 1 if anything was changed, 0 if not.
+#
+# Setting a parameter's value to either undef or the empty string
+# will delete that parameter from the params table.
+
+sub setTag {
+	my($self, $id, $params) = @_;
+	return 0 if !$id || !$params || !%$params;
+
+	my $changed = 0;
+	for my $key (sort keys %$params) {
+		next if $key =~ /^(tagid|tagname|tagnameid|globjid|uid|created|at|inactivated)$/; # don't get to override these
+		my $value = $params->{$key};
+		if (defined($value) && length($value)) {
+			$changed = 1 if $self->sqlReplace('tag_params', {
+				tagid =>	$id,
+				name =>		$key,
+				value =>	$value,
+			});
+		} else {
+			my $key_q = $self->sqlQuote($key);
+			$changed = 1 if $self->sqlDelete('tag_params',
+				"tagid = $id AND name = $key_q"
+			);
+		}
+	}
+
+	if ($changed) {
+		my $mcd = $self->getMCD();
+		my $mcdkey = "$self->{_mcd_keyprefix}:tagid:" if $mcd;
+		if ($mcd) {
+			# The "3" means "don't accept new writes
+			# to this key for 3 seconds."
+			$mcd->delete("$mcdkey$id", 3);
+		}
+	}
+
+	return $changed;
+}
+
 # Given a tagnameid, set (or clear) (some of) its parameters.
 # Returns 1 if anything was changed, 0 if not.
 #
@@ -248,7 +347,8 @@ sub setTagname {
 	return $changed;
 }
 
-# Given a tagnameid, get its name, e.g. turn '17241' into 'omglol'.
+# Given a tagnameid, get its name, e.g. turn '17241' into
+# { tagname => 'omglol' }.
 # If no such tag ID exists, return undef.
 
 sub getTagDataFromId {
@@ -307,9 +407,9 @@ sub getTagsByNameAndIdArrayref {
 	}
 
 	my $ar = $self->sqlSelectAllHashrefArray(
-		'*',
+		'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
 		'tags',
-		"globjid=$globjid$uid_where",
+		"globjid=$globjid AND inactivated IS NULL $uid_where",
 		'ORDER BY tagid');
 
 	# Now add an extra field to every element returned:  the
@@ -326,7 +426,7 @@ sub getAllTagsFromUser {
 	my $ar = $self->sqlSelectAllHashrefArray(
 		'*',
 		'tags',
-		"uid = $uid_q",
+		"uid = $uid_q AND inactivated IS NULL",
 		'ORDER BY tagid');
 	return [ ] unless $ar && @$ar;
 	$self->addTagnamesToHashrefArray($ar);
@@ -381,7 +481,24 @@ sub getUidsUsingTagname {
 	my $id = $self->getTagidFromNameIfExists($name);
 	return [ ] if !$id;
 	return $self->sqlSelectColArrayref('DISTINCT(uid)', 'tags',
-		"tagnameid=$id");
+		"tagnameid=$id AND inactivated IS NULL");
+}
+
+sub getTagnameParams {
+	my($self, $tagnameid) = @_;
+	return $self->sqlSelectAllKeyValue('name, value', 'tagname_params',
+		"tagnameid=$tagnameid");
+}
+
+sub getTagnameAdmincmds {
+	my($self, $tagnameid) = @_;
+	return [ ] if !$tagnameid;
+	return $self->sqlSelectAllHashrefArray(
+		"tagnameid, IF(globjid IS NULL, 'all', globjid) AS globjid,
+		 cmdtype, created_at,
+		 UNIX_TIMESTAMP(created_at) AS created_at_ut",
+		'tagcommand_adminlog',
+		"tagnameid=$tagnameid");
 }
 
 sub getExampleTagsForStory {
@@ -411,7 +528,7 @@ sub removeTagnameFromIndexTop {
 	# of this tagname.
 	my $min_tagid = $self->sqlSelect('MIN(tagid)', 'tags',
 		"tagnameid=$tagid");
-	$self->setVar('tags_stories_lastscanned', $min_tagid - 1) if $min_tagid;
+	$self->setLastscanned($min_tagid);
 	return 1;
 }
 
@@ -424,9 +541,10 @@ sub tagnameSyntaxOK {
 }
 
 sub adminPseudotagnameSyntaxOK {
-	my($self, $tagname) = @_;
-	return 0 if substr($tagname, 0, 1) !~ /^[\&\_\#]$/;
-	return $self->tagnameSyntaxOK(substr($tagname, 1));
+	my($self, $command) = @_;
+	my($type, $tagname) = $self->getTypeAndTagnameFromAdminCommand($command);
+	return 0 if !$type;
+	return $self->tagnameSyntaxOK($tagname);
 }
 
 sub ajaxGetUserStory {
@@ -486,25 +604,46 @@ sub ajaxCreateForStory {
 		return getData('error', {}, 'tags');
 	}
 
-	my @tagnames =
+	my %new_tagnames =
+		map { ($_, 1) }
 		grep { $tags->tagnameSyntaxOK($_) }
 		map { lc }
 		split /[\s,]+/,
 		($form->{tags} || '');
-#print STDERR scalar(localtime) . " ajaxCreateForStory 2 tagnames='@tagnames'\n";
-	if (!@tagnames) {
-		# No tags given, but that's OK, output the normal data
-	}
+	my %new_tagnames_opposites = map { $tags->getOppositeTagname($_), 1 } keys %new_tagnames;
 
 	my $uid = $user->{uid};
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	my $old_tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid, { uid => $uid });
 	my %old_tagnames = ( map { ($_->{tagname}, 1) } @$old_tags_ar );
-	@tagnames = grep { !$old_tagnames{$_} } @tagnames;
 
-	my @saved_tagnames = ( );
-	for my $tagname (@tagnames) {
-		push @saved_tagnames, $tagname
+	# Create any tag specified but only if it does not already exist
+	# and only if its opposite was not also specified (user can't
+	# tag both "funny" and "!funny" at the same time).
+	my @create_tagnames =		grep { !$old_tagnames{$_} && !$new_tagnames_opposites{$_} }
+					sort keys %new_tagnames;
+	# Deactivate any tag which existed before but either (a) is not
+	# specified now or (b) the opposite of which is specified now.
+	# (Actually, createTag() will automatically deactivate the
+	# opposite of any tag specified, but it doesn't hurt to make a
+	# pass through first.)
+	my @deactivate_tagnames = (    (grep { !$new_tagnames{$_} } sort keys %old_tagnames),
+				       (grep {  $old_tagnames{$_} } sort keys %new_tagnames_opposites) );
+
+	my @deactivated_tagnames = ( );
+	for my $tagname (@deactivate_tagnames) {
+		push @deactivated_tagnames, $tagname
+			if $tags->deactivateTag({
+				uid =>		$user->{uid},
+				name =>		$tagname,
+				table =>	'stories',
+				id =>		$stoid
+			});
+	}
+
+	my @created_tagnames = ( );
+	for my $tagname (@create_tagnames) {
+		push @created_tagnames, $tagname
 			if $tags->createTag({
 				uid =>          $user->{uid},
 				name =>         $tagname,
@@ -512,10 +651,10 @@ sub ajaxCreateForStory {
 				id =>           $stoid
 			});
 	}
-print STDERR scalar(localtime) . " ajaxCreateForStory 3 old='@$old_tags_ar' saved='@saved_tagnames'\n";
+print STDERR scalar(localtime) . " ajaxCreateForStory 3 old='@$old_tags_ar' created='@created_tagnames'\n";
 
-	my @newtagspreload = ( (map { $_->{tagname} } @$old_tags_ar), @saved_tagnames );
-	my $newtagspreloadtext = join ' ', @newtagspreload;
+	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref('stories', $stoid, { uid => $uid });
+	my $newtagspreloadtext = join ' ', sort map { $_->{tagname} } @$now_tags_ar;
 
 	my $retval = slashDisplay('tagsstorydivuser', {
 		sidenc =>		$sidenc,
@@ -537,7 +676,7 @@ sub ajaxProcessAdminTags {
 		split /[\s,]+/,
 		($commands || '');
 	my $stoid = $slashdb->getStoidFromSid($sid);
-print STDERR scalar(localtime) . " ajaxProcessAdminTags stoid=$stoid commands='$commands' commands='@commands' tags='$tags'\n";
+use Data::Dumper; print STDERR scalar(localtime) . " ajaxProcessAdminTags stoid=$stoid sid=$sid commands='$commands' commands='@commands' tags='$tags' form: " . Dumper($form);
 	if (!$stoid || !@commands) {
 		# Error, but we really have no way to return it...
 		# return getData('tags_none_given', {}, 'tags');
@@ -545,7 +684,7 @@ print STDERR scalar(localtime) . " ajaxProcessAdminTags stoid=$stoid commands='$
 
 	my @tagnameids_affected = ( );
 	for my $c (@commands) {
-		my $tagnameid = $tags->processAdminCommand($c);
+		my $tagnameid = $tags->processAdminCommand($c, $stoid);
 		push @tagnameids_affected, $tagnameid if $tagnameid;
 	}
 	if (@tagnameids_affected) {
@@ -554,9 +693,7 @@ print STDERR scalar(localtime) . " ajaxProcessAdminTags stoid=$stoid commands='$
 			'MIN(tagid)',
 			'tags',
 			"tagnameid IN ($affected_str)");
-		if ($reset_lastscanned) {
-			$tags->setVar('tags_stories_lastscanned', $reset_lastscanned-1);
-		}
+		$tags->setLastscanned($reset_lastscanned);
 print STDERR scalar(localtime) . " ajaxProcessAdminTags reset to " . ($reset_lastscanned-1) . " for '$affected_str'\n";
 	}
 
@@ -569,46 +706,138 @@ print STDERR scalar(localtime) . " ajaxProcessAdminTags reset to " . ($reset_las
 }
 
 sub ajaxTagHistoryStory {
-	my($self, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form) = @_;
 
 	my $sidenc = $form->{sidenc};
 	my $sid = $sidenc; $sid =~ tr{:}{/};
-	my $stoid = $self->getStoidFromSid($sid);
+	my $stoid = $slashdb->getStoidFromSid($sid);
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	my $tags = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid);
-	slashDisplay('taghistory', { tags => $tags }, { Return => 1 } );
+	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid);
+	slashDisplay('taghistory', { tags => $tags_ar }, { Return => 1 } );
 }
+
 sub processAdminCommand {
-	my($self, $c) = @_;
+	my($self, $c, $stoid) = @_;
 
 	my($type, $tagname) = $self->getTypeAndTagnameFromAdminCommand($c);
 	return 0 if !$type;
 
 	my $constants = getCurrentStatic();
-	my $id = $self->getTagidCreate($tagname);
-	my $new_tag_clout = defined($constants->{tags_reduced_tag_clout}) ? $constants->{tags_reduced_tag_clout} : 0.5;
+	my $tagnameid = $self->getTagidCreate($tagname);
 
-	$self->setTagname($id, { tag_clout => $new_tag_clout });
-print STDERR scalar(localtime) . " processAdminCommand set clout of tag $id to $new_tag_clout\n";
+	my $systemwide = $type =~ /^\$/ ? 1 : 0;
+	my $globjid = $systemwide ? undef : $self->getGlobjidCreate('stories', $stoid);
+	my $user_clout_reduction = 0;
+	$user_clout_reduction = $type =~ s/\#//g;
+	$user_clout_reduction /= 5;
+	$user_clout_reduction = 1 if $user_clout_reduction > 1;
+	# Eventually we need to define FLOATs for clout and multiply
+	# them together, but for now it's an overwrite.
+	my $new_user_clout = 1-$user_clout_reduction;
 
-	if ($type eq '#') {
-		my $new_user_clout = defined($constants->{tags_reduced_user_clout}) ? $constants->{tags_reduced_user_clout} : 0.5;
-		my $uids = $self->getUidsUsingTagname($tagname);
-		for my $uid (@$uids) {
-			$self->setUser($uid, { tag_clout => $new_user_clout });
-print STDERR scalar(localtime) . " processAdminCommand set clout of uid $uid to $new_user_clout\n";
+	my $new_min_tagid = 0;
+
+print STDERR "type '$type' for c '$c' new_clout '$new_user_clout' for stoid $stoid\n";
+	if ($type eq '^') {
+		# Set individual clouts to 0 for tags of this name on
+		# this story that have already been applied.  Future
+		# tags of this name on this story will apply with
+		# their full clout.
+		my $tags_ar = $self->getTagsByNameAndIdArrayref('stories', $stoid);
+		my @tags = grep { $_->{tagnameid} == $tagnameid } @$tags_ar;
+print STDERR "tags_ar '@$tags_ar' tags '@tags'\n";
+		for my $tag (@tags) {
+print STDERR "setting $tag->{tagid} to 0\n";
+			$self->setTag($tag->{tagid}, { tag_clout => 0 });
+		}
+	} else {
+		if ($systemwide) {
+			$self->setTagname($tagnameid, { tag_clout => 0 });
+			$new_min_tagid = $self->sqlSelect('MIN(tagid)', 'tags',
+				"tagnameid=$tagnameid");
+			if ($new_user_clout < 1) {
+				my $uids = $self->sqlSelectColArrayref('uid', 'tags',
+					"tagnameid=$tagnameid");
+				if (@$uids) {
+					for my $uid (@$uids) {
+						$self->setUser($uid, { tag_clout => $new_user_clout });
+					}
+					my $uids_str = join(',', @$uids);
+					my $user_min = $self->sqlSelect('MIN(tagid)', 'tags',
+						"uid IN ($uids_str)");
+					$new_min_tagid = $user_min if $user_min < $new_min_tagid;
+				}
+			}
+		} else {
+			# Just logging the command is enough to affect future tags
+			# applied to this story (that's the way we're doing it now,
+			# though I'm not really happy with this and it will
+			# probably change).
+			my $tags_ar = $self->getTagsByNameAndIdArrayref('stories', $stoid);
+			my @tags = grep { $_->{tagnameid} == $tagnameid } @$tags_ar;
+			for my $tag (@tags) {
+				$self->setTag($tag->{tagid}, { tag_clout => 0 });
+			}
+			$new_min_tagid = $self->sqlSelect('MIN(tagid)', 'tags',
+				"tagnameid=$tagnameid AND globjid=$globjid");
+			if ($new_user_clout < 1) {
+				my $uids = $self->sqlSelectColArrayref('uid', 'tags',
+					"tagnameid=$tagnameid AND globjid=$globjid");
+				if (@$uids) {
+					for my $uid (@$uids) {
+						$self->setUser($uid, { tag_clout => $new_user_clout });
+					}
+					my $uids_str = join(',', @$uids);
+					my $user_min = $self->sqlSelect('MIN(tagid)', 'tags',
+						"uid IN ($uids_str)");
+					$new_min_tagid = $user_min if $user_min < $new_min_tagid;
+				}
+			}
 		}
 	}
 
-	return $id;
+	$self->logAdminCommand($type, $tagname, $globjid);
+
+	$self->setLastscanned($new_min_tagid);
+
+	return $tagnameid;
 }
 
 sub getTypeAndTagnameFromAdminCommand {
 	my($self, $c) = @_;
-	my($type, $tagname) = $c =~ /^([_#])(.+)$/;
-print STDERR scalar(localtime) . " get c '$c' type='$type' tagname='$tagname'\n";
+	my($type, $tagname) = $c =~ /^(\^|\$?\_|\$?\#{1,5})(.+)$/;
+print STDERR scalar(gmtime) . " get c '$c' type='$type' tagname='$tagname'\n";
 	return (undef, undef) if !$type || !$self->tagnameSyntaxOK($tagname);
 	return($type, $tagname);
+}
+
+# $globjid should be the globjid specifically affected, or
+# omitted (or false) when the type indicates a system-wide
+# command.
+sub logAdminCommand {
+	my($self, $type, $tagname, $globjid) = @_;
+	my $tagnameid = $self->getTagidFromNameIfExists($tagname);
+	$self->sqlInsert('tagcommand_adminlog', {
+		cmdtype =>	$type,
+		tagnameid =>	$tagnameid,
+		globjid =>	$globjid || undef,
+		adminuid =>	getCurrentUser('uid'),
+		-created_at =>	'NOW()',
+	});
+}
+
+sub getOppositeTagname {
+	my($self, $tagname) = @_;
+	return substr($tagname, 0, 1) eq '!' ? substr($tagname, 1) : '!' . $tagname;
+}
+
+sub setLastscanned {
+	my($self, $new_val) = @_;
+	return if !$new_val;
+	my $old_val = $self->sqlSelect('value', 'vars',
+		"name='tags_stories_lastscanned'");
+	return if $new_val > $old_val;
+	$self->setVar('tags_stories_lastscanned', $new_val - 1);
 }
 
 

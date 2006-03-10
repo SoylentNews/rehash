@@ -3703,6 +3703,7 @@ UPDATE vars SET value = 'T_2_5_0_102' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# Changes for plugins/Submit (which you are almost certainly using)
 DROP TABLE IF EXISTS submissions_notes;
 CREATE TABLE `submissions_notes` (
   `noid` mediumint(8) unsigned NOT NULL auto_increment,
@@ -3713,10 +3714,14 @@ CREATE TABLE `submissions_notes` (
   PRIMARY KEY  (`noid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-
-## Changes for Ajax / Remarks plugins
+# Changes for plugins/Remarks
 INSERT INTO ajax_ops VALUES (NULL, 'remarks_config', 'Slash::Remarks', 'ajaxFetchConfigPanel', 'ajax_admin', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'remarks_config_save', 'Slash::Remarks', 'ajaxConfigSave', 'ajax_admin', 'createuse');
 
-## Changes for plugins/Tags
+# Changes for plugins/Tags
 INSERT INTO ajax_ops VALUES (NULL, 'tags_story_history', 'Slash::Tags', 'ajaxTagHistoryStory', 'ajax_admin', 'createuse');
+ALTER TABLE tags DROP INDEX uid_globjid_tagnameid;
+ALTER TABLE tags ADD COLUMN inactivated DATETIME DEFAULT NULL;
+ALTER TABLE tags ADD INDEX uid_globjid_tagnameid_inactivated (uid, globjid, tagnameid, inactivated);
+UPDATE vars SET value='^\!?[a-z][a-z0-9/]{0,62}$' WHERE name='tags_tagname_regex';
+

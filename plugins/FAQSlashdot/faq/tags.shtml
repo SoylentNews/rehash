@@ -27,7 +27,7 @@ this is an article about 'security' and 'mozilla'.
 </p>
 
 <p>This is all very beta. Currently tagging is <b>only open to
-subscribers.</b></p>
+subscribers and some users.</b></p>
 
 <p>We don't know exactly how this will all work, and a lot of it really
 depends on you.  If you choose to add your own tags, be aware:</p>
@@ -42,16 +42,18 @@ depends on you.  If you choose to add your own tags, be aware:</p>
 appear but can't be first. Smoosh them up: for "Web 2.0", tag  
 "web20". Max 64 chars.</li>
 <li>Don't use plurals.  It's "harddrive", not "harddrives".</li>
+<li>For the opposite of a tag, prefix it with "!", e.g.  "!funny"
+means unfunny.</li>
 </ul>
 
 <p>We're excited about this, and see huge potential for this system.
- From user feedback on articles, to comment moderation, the system is
+From user feedback on articles, to comment moderation, the system is
 really limited only by your participation, and our database hardware! 
 </p>
 
 <p><i><font size=-1>Answered by: <a  
 href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 1/29/06</font></i>
+<br><i><font size=-1>Last Modified: 3/08/06</font></i>
 
 
 
