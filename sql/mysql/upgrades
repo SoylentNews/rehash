@@ -3724,4 +3724,23 @@ ALTER TABLE tags DROP INDEX uid_globjid_tagnameid;
 ALTER TABLE tags ADD COLUMN inactivated DATETIME DEFAULT NULL;
 ALTER TABLE tags ADD INDEX uid_globjid_tagnameid_inactivated (uid, globjid, tagnameid, inactivated);
 UPDATE vars SET value='^\!?[a-z][a-z0-9/]{0,62}$' WHERE name='tags_tagname_regex';
+DROP TABLE IF EXISTS tag_params;
+CREATE TABLE tag_params (
+	tagid           int UNSIGNED NOT NULL,
+	name            VARCHAR(32) DEFAULT '' NOT NULL,
+	value           VARCHAR(64) DEFAULT '' NOT NULL,
+	UNIQUE tag_name (tagid, name)
+) TYPE=InnoDB;
+DROP TABLE IF EXISTS tagcommand_adminlog;
+CREATE TABLE tagcommand_adminlog (
+	id              int UNSIGNED NOT NULL AUTO_INCREMENT,
+	cmdtype         VARCHAR(6) NOT NULL,
+	tagnameid       int UNSIGNED NOT NULL,
+	globjid         int UNSIGNED DEFAULT NULL,
+	adminuid        mediumint UNSIGNED NOT NULL,
+	created_at      datetime NOT NULL,
+	PRIMARY KEY id (id),
+	KEY created_at (created_at),
+	KEY tagnameid_globjid (tagnameid, globjid)
+) TYPE=InnoDB;
 
