@@ -167,7 +167,8 @@ sub confirmDaypasskey {
 		"daypass_keys",
 		{ -key_confirmed => "NOW()" },
 		"daypasskey = $key_q
-		 AND earliest_confirmable <= NOW()");
+		 AND earliest_confirmable <= NOW()
+		 AND key_confirmed IS NULL");
 
 	my $confcode = "";
 	if ($rows > 0) {
