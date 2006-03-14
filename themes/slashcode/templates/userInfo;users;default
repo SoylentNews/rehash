@@ -112,17 +112,22 @@ __template__
 				m2_listing = m2_listing 
 				metamods = metamods 
 				the_user = useredit;
-				"<p>";
 			END %]
 
 			[% IF submissions.size > 0  %]
-			[% IF admin_flag or useredit.uid == user.uid;
-				title = "${useredit.nickname}'s Recent Submissions";
-			   ELSE;
-				title = "${useredit.nickname}'s Recently Accepted Submissions";
-			END %]
-			[% PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions %]
-		[% END %]
+				<p>
+				[% IF admin_flag or useredit.uid == user.uid;
+					title = "${useredit.nickname}'s Recent Submissions";
+				   ELSE;
+					title = "${useredit.nickname}'s Recently Accepted Submissions";
+				END %]
+				[% PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions %]
+				</p>
+			[% END %]
+			[% IF user.is_admin && tagshist && tagshist.size > 0 %]
+				[% title = "${useredit.nickname}'s Recent Tags"; %]
+				[% PROCESS usertaghistory tagshist = tagshist title = title %]
+			[% END %]
 	</div>
 </div>
 __seclev__
