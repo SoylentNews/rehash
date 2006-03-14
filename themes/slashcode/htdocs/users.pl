@@ -1296,7 +1296,7 @@ sub showInfo {
 		my $submissions = $reader->getSubmissionsByUID($uid, $sub_limit, $sub_options);
 		my $metamods;
 		$metamods = $reader->getMetamodlogForUser($uid, 30) if $admin_flag;
-	
+
 		my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 		my $tagshist = [];
 		if ($tags_reader && $user->{is_admin}) {
@@ -3465,8 +3465,6 @@ sub getUserAdmin {
 		$subnet_karma = $reader->getNetIDKarma("subnetid", $subnetid);
 		$ipid_karma = $reader->getNetIDKarma("ipid", $ipid) if $ipid;
 	}
-
-
 
 	return slashDisplay('getUserAdmin', {
 		field			=> $field,

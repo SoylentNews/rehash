@@ -3691,8 +3691,6 @@ UPDATE vars SET value = 'T_2_5_0_101' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
-# PUDGE LAST UPDATED HERE
-
 # Changes for plugins/Tags
 UPDATE templates SET page='misc' WHERE name='tagsstorydivtagbox' AND page='index' AND skin='default';
 
@@ -3703,15 +3701,17 @@ UPDATE vars SET value = 'T_2_5_0_102' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# PUDGE LAST UPDATED HERE
+
 # Changes for plugins/Submit (which you are almost certainly using)
 DROP TABLE IF EXISTS submissions_notes;
-CREATE TABLE `submissions_notes` (
-  `noid` mediumint(8) unsigned NOT NULL auto_increment,
-  `uid` mediumint(8) unsigned NOT NULL default '0',
-  `submatch` varchar(32) NOT NULL default '',
-  `subnote` text,
-  `time` datetime default NULL,
-  PRIMARY KEY  (`noid`)
+CREATE TABLE submissions_notes (
+        noid mediumint(8) unsigned NOT NULL auto_increment,
+        uid mediumint(8) unsigned NOT NULL default '0',
+        submatch varchar(32) NOT NULL default '',
+        subnote text,
+        time datetime default NULL,
+  PRIMARY KEY  (noid)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 # Changes for plugins/Remarks
@@ -3726,21 +3726,24 @@ ALTER TABLE tags ADD INDEX uid_globjid_tagnameid_inactivated (uid, globjid, tagn
 UPDATE vars SET value='^\!?[a-z][a-z0-9/]{0,62}$' WHERE name='tags_tagname_regex';
 DROP TABLE IF EXISTS tag_params;
 CREATE TABLE tag_params (
-	tagid           int UNSIGNED NOT NULL,
-	name            VARCHAR(32) DEFAULT '' NOT NULL,
-	value           VARCHAR(64) DEFAULT '' NOT NULL,
-	UNIQUE tag_name (tagid, name)
+        tagid           int UNSIGNED NOT NULL,
+        name            VARCHAR(32) DEFAULT '' NOT NULL,
+        value           VARCHAR(64) DEFAULT '' NOT NULL,
+        UNIQUE tag_name (tagid, name)
 ) TYPE=InnoDB;
 DROP TABLE IF EXISTS tagcommand_adminlog;
 CREATE TABLE tagcommand_adminlog (
-	id              int UNSIGNED NOT NULL AUTO_INCREMENT,
-	cmdtype         VARCHAR(6) NOT NULL,
-	tagnameid       int UNSIGNED NOT NULL,
-	globjid         int UNSIGNED DEFAULT NULL,
-	adminuid        mediumint UNSIGNED NOT NULL,
-	created_at      datetime NOT NULL,
-	PRIMARY KEY id (id),
-	KEY created_at (created_at),
-	KEY tagnameid_globjid (tagnameid, globjid)
+        id              int UNSIGNED NOT NULL AUTO_INCREMENT,
+        cmdtype         VARCHAR(6) NOT NULL,
+        tagnameid       int UNSIGNED NOT NULL,
+        globjid         int UNSIGNED DEFAULT NULL,
+        adminuid        mediumint UNSIGNED NOT NULL,
+        created_at      datetime NOT NULL,
+        PRIMARY KEY id (id),
+        KEY created_at (created_at),
+        KEY tagnameid_globjid (tagnameid, globjid)
 ) TYPE=InnoDB;
+
+# 2006-03-14
+UPDATE vars SET value = 'T_2_5_0_103' WHERE name = 'cvs_tag_currentcode';
 
