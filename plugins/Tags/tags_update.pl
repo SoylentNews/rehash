@@ -134,6 +134,20 @@ use Data::Dumper; print STDERR "tagids='@tagids' tag_params: " . Dumper($tag_par
 		$scores{$tagname} += $user_clout * $tag_global_clout * $tag_story_clout * $tagname_clout;
 	}
 
+	my @opposite_tagnames =
+		map { $tags_reader->getOppositeTagname($_) }
+		grep { $_ !~ /^!/ && $scores{$_} > 0 }
+		keys %scores;
+	for my $opp (@opposite_tagnames) {
+		next unless $scores{$opp};
+		# Both $opp and its opposite exist in %scores.  Subtract
+		# $opp's score from its opposite and vice versa.
+		my $orig = $tags_reader->getOppositeTagname($opp);
+		my $orig_score = $scores{$orig};
+		$scores{$orig} -= $scores{$opp};
+		$scores{$opp} -= $orig_score;
+	}
+
 	my @top = sort {
 		$scores{$b} <=> $scores{$a}
 		||
