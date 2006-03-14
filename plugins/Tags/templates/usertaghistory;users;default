@@ -1,0 +1,36 @@
+__section__
+default
+__description__
+tagshist - array of recent tags used by user
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+usertaghistory
+__template__
+[% IF tagshist.size %]
+	<p></p>
+	[% PROCESS titlebar title=title %]
+	<table class="data">
+		<tr class="data_head"><th>Tag</th><th>Object</th><th>Time</th></tr>
+		[% toggle = 0 %]
+		[% FOREACH tag=tagshist %]
+			<tr class="data_hl[% toggle ? "2" : "1" %]">
+				<td>[% tag.tagname %]</td>
+				<td>
+					[% PROCESS linkStory dynamic=1 sid=tag.story.sid text=tag.story.title title=tag.story.title %]
+						([% tag.globj_type %])
+				</td>
+				<td>[% Slash.timeCalc(tag.created_at) %]</td>
+			</tr>
+			[% toggle = !toggle %]
+		[% END %]
+	</table>	
+[% END %]
+__seclev__
+10000
+__version__
+$Id$
