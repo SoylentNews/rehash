@@ -10,4 +10,5 @@ template=templates/tagsstorydivadmin;misc;default
 template=templates/tagsstorydivtagbox;misc;default
 template=templates/tagsstorydivuser;misc;default
 template=templates/taghistory;misc;default
+template=templates/usertaghistory;users;default
 template=templates/usertags;users;default
