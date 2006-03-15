@@ -3712,7 +3712,7 @@ CREATE TABLE submissions_notes (
         subnote text,
         time datetime default NULL,
   PRIMARY KEY  (noid)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) TYPE=InnoDB;
 
 # Changes for plugins/Remarks
 INSERT INTO ajax_ops VALUES (NULL, 'remarks_config', 'Slash::Remarks', 'ajaxFetchConfigPanel', 'ajax_admin', 'createuse');
