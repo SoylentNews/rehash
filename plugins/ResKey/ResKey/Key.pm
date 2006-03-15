@@ -149,12 +149,15 @@ sub new {
 
 
 	# from filter_param
-	$reskey =~ s|[^a-zA-Z0-9_]+||g if $reskey;
+	if ($reskey) {
+		$reskey =~ s|[^a-zA-Z0-9_]+||g;
+	} elsif (!defined $reskey) {
+		$reskey = $opts->{nostate} ? '' : getCurrentForm('reskey');
+	}
 
 	# reskey() to set the value is called only here and from dbCreate
 	# this is the only place $form->{reskey} is looked at
-	$self->reskey(defined $reskey ? $reskey : getCurrentForm('reskey'));
-
+	$self->reskey($reskey);
 
 	$self->_init;
 

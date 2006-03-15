@@ -576,9 +576,9 @@ sub doSaveArticle {
 	# not enabled with SOAP now anyway
 	if ($form->{submit}) {
 		my $reskey = getObject('Slash::ResKey');
-		my $rkey = $reskey->key('submit', { nostate => 1 });
-		unless ($rkey->createuse) {
-			return($rkey->errstr, $rkey->failure);
+		my $submit_rkey = $reskey->key('submit', { nostate => 1 });
+		unless ($submit_rkey->createuse) {
+			return($submit_rkey->errstr, $submit_rkey->failure);
 		}
 	}
 
