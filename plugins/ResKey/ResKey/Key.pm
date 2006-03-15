@@ -241,7 +241,7 @@ sub AUTOLOAD {
 	if ($name =~ /^(?:noop|success|failure|death)$/) {
 		$sub = _createStatusAccessor($name, \@_);
 
-	} elsif ($name =~ /^(?:error|reskey|debug|rkrid|resname|type|code|opts)$/) {
+	} elsif ($name =~ /^(?:error|reskey|debug|rkrid|resname|origtype|type|code|opts)$/) {
 		$sub = _createAccessor($name, \@_);
 
 	} elsif ($name =~ /^(?:create|touch|use|createuse)$/) {
@@ -316,6 +316,7 @@ sub _createActionMethod {
 		my($self) = @_;
 		$self->_flow($name);
 		$self->type($name);
+		$self->origtype($name);
 
 		# first create a reskey, skipping the checks.
 		# your job to make sure any check needed for

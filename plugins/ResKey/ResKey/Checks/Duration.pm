@@ -76,8 +76,10 @@ sub doCheckUse {
 	@return = minDurationBetweenUses($self, $reskey_obj);
 	return @return if @return;
 
-	@return = minDurationBetweenCreateAndUse($self, $reskey_obj);
-	return @return if @return;
+	if ($self->origtype ne 'createuse') {
+		@return = minDurationBetweenCreateAndUse($self, $reskey_obj);
+		return @return if @return;
+	}
 
 	return RESKEY_SUCCESS;
 }
