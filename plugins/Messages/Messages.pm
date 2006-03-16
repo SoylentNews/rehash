@@ -516,8 +516,8 @@ sub quicksend {
 	my $slashdb = getCurrentDB();
 
 	return unless $tuser;
-	($code, my($type)) = $self->getDescription('messagecodes', $code);
 	$code = -1 unless defined $code;
+	($code, my($type)) = $self->getDescription('messagecodes', $code);
 
 	my %msg = (
 		id		=> 0,
@@ -993,7 +993,7 @@ return;
 
 	my $codes = $self->getDescriptions($codetype);
 
-	if ($key =~ /^\d+$/) {
+	if ($key =~ /^-?\d+$/) {
 		unless (exists $codes->{$key}) {
 			return;
 		}
