@@ -518,6 +518,7 @@ sub quicksend {
 	return unless $tuser;
 	$code = -1 unless defined $code;
 	($code, my($type)) = $self->getDescription('messagecodes', $code);
+	$code = -1 unless defined $code;
 
 	my %msg = (
 		id		=> 0,
