@@ -88,3 +88,30 @@ html > body .commentwrap table {
 #commentlisting li.comment { list-style: none; }
 .comment_footer { text-align: center; background: #ddd }
 .modsel { display: inline }
+
+.ups
+{
+margin: 0 0 0 -.3em;
+padding: 0 .3em;
+		 text-decoration: none;
+background: url("/images/comm-minus.gif") 0 .2em no-repeat;
+right: -1.4em;
+		  z-index: 2;
+cursor: pointer;
+}
+
+.dwns
+{
+margin: 0;
+padding: 0 .3em;
+		 text-decoration: none;
+background: url("/images/comm-plus.gif") 0 .2em no-repeat;
+right: -1.4em;
+		  z-index: 1;
+cursor: pointer;
+}
+
+.hide { display: none; }
+.show { display: inline; }
+
+

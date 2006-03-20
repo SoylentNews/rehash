@@ -30,7 +30,7 @@ use Slash::Display;
 use Slash::Utility::Data;
 use Slash::Utility::Environment;
 use Slash::Utility::System;
-use Slash::Constants qw(:web :people);
+use Slash::Constants qw(:web :people :messages);
 
 use base 'Exporter';
 use vars qw($VERSION @EXPORT);
@@ -740,8 +740,7 @@ sub setUserExpired {
 
 		my $reg_subj = Slash::getData('rereg_email_subject', '', '');
 
-		# Send the message (message code == -2)
-		doEmail($uid, $reg_subj, $reg_msg, -2);
+		doEmail($uid, $reg_subj, $reg_msg, MSG_CODE_REGISTRATION);
 	} else {
 		# We only need to clear these.
 		$slashdb->setUser($uid, {

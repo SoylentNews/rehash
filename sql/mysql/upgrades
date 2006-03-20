@@ -3689,8 +3689,6 @@ INSERT INTO ajax_ops VALUES(NULL, 'admin_perfbox', 'Slash::Admin', 'ajax_perfbox
 # 2006-02-22
 UPDATE vars SET value = 'T_2_5_0_101' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 # Changes for plugins/Tags
 UPDATE templates SET page='misc' WHERE name='tagsstorydivtagbox' AND page='index' AND skin='default';
 
@@ -3698,10 +3696,6 @@ UPDATE users_info, users_hits SET lastaccess = lastclick WHERE users_info.uid=us
 
 # 2006-02-28
 UPDATE vars SET value = 'T_2_5_0_102' WHERE name = 'cvs_tag_currentcode';
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# PUDGE LAST UPDATED HERE
 
 # Changes for plugins/Submit (which you are almost certainly using)
 DROP TABLE IF EXISTS submissions_notes;
@@ -3746,4 +3740,10 @@ CREATE TABLE tagcommand_adminlog (
 
 # 2006-03-14
 UPDATE vars SET value = 'T_2_5_0_103' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# PUDGE LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 

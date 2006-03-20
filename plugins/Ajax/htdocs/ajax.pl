@@ -292,11 +292,11 @@ sub getOps {
 
 	my %mainops = (
 		# this one will move soon
-		get_comments	=> {
-			function	=> \&Slash::ajaxSelectComments,
-			reskey_name	=> 'ajax_admin',
-			reskey_type	=> 'createuse',
-		},
+#		get_comments	=> {
+#			function	=> \&Slash::ajaxSelectComments,
+#			reskey_name	=> 'ajax_admin',
+#			reskey_type	=> 'createuse',
+#		},
 		getSectionPrefsHTML => {
 			function	=> \&getSectionPrefsHTML,
 			reskey_name	=> 'ajax_user',
