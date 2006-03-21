@@ -40,6 +40,7 @@ INSERT INTO reskey_resources VALUES (4, 'journal-soap');
 INSERT INTO reskey_resources VALUES (5, 'pollbooth');
 INSERT INTO reskey_resources VALUES (6, 'submit');
 INSERT INTO reskey_resources VALUES (7, 'journal-soap-get');
+INSERT IGNORE INTO reskey_resources VALUES (8, 'bookmark');
 
 
 
