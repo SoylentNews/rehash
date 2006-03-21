@@ -54,6 +54,9 @@ IF user.uid == uid;
 	IF constants.plugin.Tags; tabs.push(
 		{ link = "/my/tags/",		label = "Tags",		sel_label = "tags" },
 	); END;
+	IF constants.plugin.Bookmark; tabs.push(
+		{ link = "/my/bookmarks/",	label = "Bookmarks",	sel_label = "bookmarks" },
+	); END;
 ELSIF user.is_anon;
 	tabs = [
 		{ link = "/~$url_nick/",	label = "Info",		sel_label = "info" },
@@ -94,6 +97,9 @@ ELSE;
 	); END;
 	IF constants.plugin.Tags; tabs.push(
 		{ link = "/~$url_nick/tags/",	label = "Tags",		sel_label = "tags" },
+	); END;
+	IF constants.plugin.Bookmark; tabs.push(
+		{ link = "/~$url_nick/bookmarks/", label = "Bookmarks",	sel_label = "bookmarks" },
 	); END;
 END %]
 <div id="usermenu">

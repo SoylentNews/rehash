@@ -233,6 +233,13 @@ sub main {
 			checks		=> [],
 			tab_selected	=> 'tags',
 		},
+		showbookmarks => {
+			function	=> \&showBookmarks,
+			seclev		=> 1,
+			formname	=> $formname,
+			checks		=> [],
+			tab_selected	=> 'tags',
+		},
 		edittags => {
 			function	=> \&editTags,
 			seclev		=> 1,
@@ -1564,6 +1571,37 @@ sub showTags {
 
 	my $tags_ar = $tags_reader->getGroupedTagsFromUser($user_edit->{uid});
 	slashDisplay('usertags', {
+		useredit	=> $user_edit,
+		tags_grouped	=> $tags_ar,
+	});
+}
+
+sub showBookmarks {
+	my($hr) = @_;
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+
+	my($uid, $user_edit);
+	if ($form->{uid} || $form->{nick}) {
+		$uid = $form->{uid} || $tags_reader->getUserUID($form->{nick});
+		$user_edit = $tags_reader->getUser($uid);
+	}
+	if (!$user_edit || $user_edit->{is_anon}) {
+		$uid = $user->{uid};
+		$user_edit = $user;
+	}
+	my $nickname = $user_edit->{nickname};
+
+	if (!$constants->{plugin}{Tags}) {
+		print getError('bad_op', { op => $form->{op}});
+		return;
+	}
+
+	my $tags_ar = $tags_reader->getGroupedTagsFromUser($user_edit->{uid}, { type => "urls" });
+	slashDisplay('userbookmarks', {
 		useredit	=> $user_edit,
 		tags_grouped	=> $tags_ar,
 	});
