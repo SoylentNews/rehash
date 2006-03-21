@@ -1,0 +1,18 @@
+__section__
+default
+__description__
+Generates link for javascript bookmarklet to post bookmarks
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+bookmarklink
+__seclev__
+10000
+__template__
+<a href="javascript:location.href='[% constants.absolutedir %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">[% title || "Post to $constants.sitename" %]</a>
+__version__
+$Id$
