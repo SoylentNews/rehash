@@ -20,7 +20,7 @@ __template__
 
 [% CASE 'imgalttext' %]
 	[% returnme.data_constant = 1 %]
-	[% "random letters - if you are visually impaired, please email us at "
+	[% "verification text - if you are visually impaired, please email us at "
 		_ constants.adminmail | strip_attribute %]
 
 [% END %]
