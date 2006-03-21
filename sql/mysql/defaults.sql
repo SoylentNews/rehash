@@ -210,6 +210,7 @@ INSERT INTO dst (region, selectable, start_hour, start_wnum, start_wday, start_m
 #
 
 INSERT INTO globj_types VALUES (NULL, 'stories');
+INSERT INTO globj_types VALUES (NULL, 'urls');
 
 
 #
