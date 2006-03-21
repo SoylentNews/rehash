@@ -31,7 +31,18 @@ __template__
 [% IF moderate_form %]
 	<form action="[% gSkin.rootdir %]/comments.pl" method="post">
 [% END %]
-[% IF cid %]
+
+[% IF user.discussion2 && (user.discussion2 == "slashdot" || user.discussion2 == "uofm") %]
+	[% IF user.discussion2 == "slashdot" %]
+	<script src="[% constants.imagedir %]/comments2.js" type="text/javascript"></script>
+	[% ELSIF user.discussion2 == "uofm" %]
+	<script src="[% constants.imagedir %]/comments.js" type="text/javascript"></script>
+	[% END %]
+	<script src="[% constants.rootdir %]/comments.pl?sid=[% sid %]&op=dynamic_display" type="text/javascript"></script>
+	<div><ul id="commentlisting"></ul></div>
+
+
+[% ELSE; IF cid %]
 	<ul id="commentlisting" class="[% user.mode %]">
 	[% Slash.dispComment(comment) %]
 	<div class="comment_footer">
@@ -71,6 +82,7 @@ __template__
 	[% IF lvl %]
 	[% END %]
 	[% lcp %]
+[% END # IF user.discussion2 ... %]
 
 [% IF moderate_form %]
 	[% IF moderate_button %]

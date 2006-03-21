@@ -213,7 +213,7 @@ sub selectComments {
 	return($comments, $count);
 }
 
-sub ajaxSelectComments {
+sub jsSelectComments {
 	require Data::JavaScript::Anon;
 	my($slashdb, $constants, $user, $form, $options) = @_;
 
@@ -245,12 +245,10 @@ sub ajaxSelectComments {
 	my $anon_roots    = Data::JavaScript::Anon->anon_dump(\@roots);
 
 	return <<EOT;
-<script type="text/javascript">
 	comments = $anon_comments;
 	root_comments = $anon_roots;
 
 	renderRoots('commentlisting');
-</script>
 EOT
 }
 
@@ -1526,9 +1524,9 @@ sub displayStory {
 			my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 			my @tags_example = $tags_reader->getExampleTagsForStory($story);
 			$return .= slashDisplay('tagsstorydivtagbox', {
-				story =>        $story,
-				tags_top =>     \@tags_top,
-				tags_example => \@tags_example,
+				story		=>  $story,
+				tags_top	=> \@tags_top,
+				tags_example	=> \@tags_example,
 			}, { Return => 1 });
 
 		}

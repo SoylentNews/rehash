@@ -52,6 +52,18 @@ __template__
 <table width="100%">
 	<tr>
 		<td valign="middle">
+		[% IF user.is_admin || user.acl.discussion2_uofm || user.acl.discussion2_slashdot %]
+        	<p><b>Discussion Style</b><p>
+		<blockquote><div>
+        	<input type="radio" name="discussion2" value="none"[% constants.markup_checked_attribute IF !user_edit.discussion2 || (user_edit.discussion2 && user_edit.discussion2 != "uofm" && user_edit.discussion2 != "slashdot") %]> Normal<br>
+		[% IF user.is_admin || user.acl.discussion2_uofm %]
+        	<input type="radio" name="discussion2" value="uofm"[% constants.markup_checked_attribute IF user_edit.discussion2 == "uofm" %]> University of Michigan Testing<br>
+		[% END; IF user.is_admin || user.acl.discussion2_slashdot %]
+        	<input type="radio" name="discussion2" value="slashdot"[% constants.markup_checked_attribute IF user_edit.discussion2 == "slashdot" %]> Slashdot Testing<br>
+		[% END %]
+		</div></blockquote>
+		[% END %]
+
         	<p><b>Email Display</b>
 		(currently
 		[%- IF !user_edit.fakeemail; " not displayed";
@@ -68,12 +80,12 @@ __template__
 		IF user_edit.emaildisplay.defined;
 			emaildisplay.${user_edit.emaildisplay} = constants.markup_checked_attribute;
 		END %]
-		<blockquote>
+		<blockquote><div>
 		<input type="radio" name="emaildisplay" [% emaildisplay.0 %] value=0> Do not display an e-mail address.<br>
                 <input type="radio" name="emaildisplay" [% emaildisplay.1 %] value=1> Show your email address with random SPAM-armoring applied.<br>
 		[% PROCESS formNote note='This changes weekly' %]
                 <input type="radio" name="emaildisplay" [% emaildisplay.2 %] value=2> Show your real email address without cowering behind childish anonymity or obfuscation.
-		</blockquote>
+		</div></blockquote>
 		<label>Disable Sigs
 		<input type="checkbox" name="nosigs"[% s_check %]>
 		</label>
@@ -250,18 +262,18 @@ __template__
 [% UNLESS user_edit.domaintags.defined; user_edit.domaintags=2; END %]
 [% domaintags.${user_edit.domaintags} = constants.markup_checked_attribute -%]
 		<p><b>Display Link Domains?</b> (shows the actual domain of any link in brackets)<br>
-		<blockquote>
+		<blockquote><div>
 		<input type="radio" name="domaintags" [% domaintags.0 %] value=0> Never show link domains<br>
 		<input type="radio" name="domaintags" [% domaintags.1 %] value=1> Show the links domain only in recommended situations<br>
 		<input type="radio" name="domaintags" [% domaintags.2 %] value=2> Always show link domains
-		</blockquote>
+		</div></blockquote>
 		<label>User Page Comment Listing</label>
-		<blockquote>
+		<blockquote><div>
 		[% UNLESS user_edit.user_comment_sort_type.defined; user_edit.user_comment_sort_type=2; END %]
 		[% user_comment_sort_type.${user_edit.user_comment_sort_type} = constants.markup_checked_attribute -%]
 		<input type="radio" name="user_comment_sort_type"[% user_comment_sort_type.1 %] value="1"> Selected by create time descending<br>
 		<input type="radio" name="user_comment_sort_type"[% user_comment_sort_type.2 %] value="2"> Selected by create time descending, results grouped by discussion, newest discussion first.
-		</blockquote>
+		</div></blockquote>
 		[% IF user.is_admin %]
 		<label>Show Moderations in User Comment Listing <input type="checkbox" name="mod_with_comm" [% s_mod_check %]></label>
 		<label>Show Metamoderation in User Moderation Listing <input type="checkbox" name="m2_with_mod" [% s_m2_check %]></label>

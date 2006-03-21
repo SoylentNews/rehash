@@ -2591,7 +2591,7 @@ sub saveComm {
 	my $user_edit = $slashdb->getUser($uid);
 	my $new_fakeemail = '';		# at emaildisplay 0, don't show any email address
 	if ($form->{emaildisplay}) {
-		$new_fakeemail = getArmoredEmail($uid)	if $form->{emaildisplay} == 1;
+		$new_fakeemail = getArmoredEmail($uid)		if $form->{emaildisplay} == 1;
 		$new_fakeemail = $user_edit->{realemail}	if $form->{emaildisplay} == 2;
 	}
 
@@ -2630,6 +2630,7 @@ sub saveComm {
 	my $clbig_bonus = ($form->{clbig_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{clbig_bonus};
 
 	my $user_edits_table = {
+		discussion2		=> $form->{discussion2} || undef,
 		clsmall			=> $form->{clsmall},
 		clsmall_bonus		=> ($clsmall_bonus || undef),
 		clbig			=> $form->{clbig},
@@ -2639,7 +2640,7 @@ sub saveComm {
 		commentsort		=> $form->{commentsort},
 		commentspill		=> $form->{commentspill},
 		domaintags		=> ($form->{domaintags} != 2 ? $form->{domaintags} : undef),
-		emaildisplay		=> $form->{emaildisplay} ? $form->{emaildisplay} : undef,
+		emaildisplay		=> $form->{emaildisplay} || undef,
 		fakeemail		=> $new_fakeemail,
 		highlightthresh		=> $form->{highlightthresh},
 		maxcommentsize		=> $form->{maxcommentsize},
