@@ -423,15 +423,30 @@ sub getAllTagsFromUser {
 	$options ||= {};
 	return [ ] unless $uid;
 
+	my $bookmark = getObject("Slash::Bookmark");
+
 	my $orderby = $options->{orderby} || "tagid";
 	my $limit   = $options->{limit} ? " LIMIT $options->{limit} " : "";
 	my $orderdir = uc($options->{orderdir}) eq "DESC" ? "DESC" : "ASC";
 
+	my ($table_extra, $where_extra) = ("","");
+
+	if ($options->{type}) {
+		my $globjtypes = $self->getGlobjTypes;
+		my $id = $globjtypes->{$options->{type}};
+		if ($id) {
+			$table_extra .= ",globjs";
+			my $id_q = $self->sqlQuote($id);
+			$where_extra .= " AND globjs.globjid = tags.globjid AND globjs.gtid=$id_q ";
+		}
+	}
+
+	my $type_clause = "";
 	my $uid_q = $self->sqlQuote($uid);
 	my $ar = $self->sqlSelectAllHashrefArray(
-		'*',
-		'tags',
-		"uid = $uid_q AND inactivated IS NULL",
+		'tags.*',
+		"tags $table_extra",
+		"uid = $uid_q AND inactivated IS NULL $where_extra",
 		"ORDER BY $orderby $orderdir $limit");
 	return [ ] unless $ar && @$ar;
 	$self->addTagnamesToHashrefArray($ar);
@@ -439,17 +454,20 @@ sub getAllTagsFromUser {
 	for my $hr (@$ar) {
 		if ($hr->{globj_type} eq 'stories') {
 			$hr->{story} = $self->getStory($hr->{globj_target_id});
-		} 
-		#elsif ($hr->{globj_type} eq 'urls') {
-		#	$hr->{url} = $self->getUrl($hr->{globj_target_id});
-		#}
+		} elsif ($hr->{globj_type} eq 'urls') {
+			$hr->{url} = $self->getUrl($hr->{globj_target_id});
+			if ($bookmark) {
+				$hr->{url}{bookmark} = $bookmark->getUserBookmarkByUrlId($uid, $hr->{url}{url_id});
+			}
+		
+		}
 	}
 	return $ar;
 }
 
 sub getGroupedTagsFromUser {
-	my($self, $uid) = @_;
-	my $all_ar = $self->getAllTagsFromUser($uid);
+	my($self, $uid, $options) = @_;
+	my $all_ar = $self->getAllTagsFromUser($uid, $options);
 	return { } unless $all_ar && @$all_ar;
 
 	my %grouped = ( );
@@ -598,6 +616,58 @@ sub ajaxGetAdminStory {
 		sidenc =>		$sidenc,
 		tags_admin_str =>	'',
 	}, { Return => 1 });
+}
+
+#  XXX based off of ajaxCreateStory.  ajaxCreateStory should be updated to use this or something
+#  similar soon, and after I've had time to test -- vroom 2006/03/21
+sub setTagsForGlobj {
+	my ($self, $id, $table, $tag_string) = @_;
+	my $tags = getObject('Slash::Tags');
+	
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+	
+	my %new_tagnames =
+		map { ($_, 1) }
+		grep { $tags->tagnameSyntaxOK($_) }
+		map { lc }
+		split /[\s,]+/,
+		($tag_string || '');
+	my %new_tagnames_opposites = map { $tags->getOppositeTagname($_), 1 } keys %new_tagnames;
+	
+	my $uid = $user->{uid};
+	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+	my $old_tags_ar = $tags_reader->getTagsByNameAndIdArrayref($table, $id, { uid => $uid });
+	my %old_tagnames = ( map { ($_->{tagname}, 1) } @$old_tags_ar );
+	
+	my @create_tagnames =		grep { !$old_tagnames{$_} && !$new_tagnames_opposites{$_} }
+					sort keys %new_tagnames;
+	my @deactivate_tagnames = (    (grep { !$new_tagnames{$_} } sort keys %old_tagnames),
+				       (grep {  $old_tagnames{$_} } sort keys %new_tagnames_opposites) );
+	my @deactivated_tagnames = ( );
+	for my $tagname (@deactivate_tagnames) {
+		push @deactivated_tagnames, $tagname
+			if $tags->deactivateTag({
+				uid =>		$user->{uid},
+				name =>		$tagname,
+				table =>	$table,
+				id =>		$id
+			});
+	}
+
+	my @created_tagnames = ( );
+	for my $tagname (@create_tagnames) {
+		push @created_tagnames, $tagname
+			if $tags->createTag({
+				uid =>          $user->{uid},
+				name =>         $tagname,
+				table =>        $table,
+				id =>           $id
+			});
+	}
+	
+	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $id, { uid => $uid });
+	my $newtagspreloadtext = join ' ', sort map { $_->{tagname} } @$now_tags_ar;
 }
 
 sub ajaxCreateForStory {
