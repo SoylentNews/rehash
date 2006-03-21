@@ -11584,6 +11584,17 @@ sub getSubmission {
 	return $answer;
 }
 
+sub getUrl {
+	my $answer = _genericGet({
+		table		=> 'urls',
+		table_prime 	=> 'url_id',
+		arguments	=> \@_
+	});
+	return $answer;
+}
+
+
+
 ########################################################
 sub setSubmission {
 	_genericSet('submissions', 'subid', 'submission_param', @_);
@@ -13482,6 +13493,32 @@ sub getSubmissionMemory {
 		'submissions_notes',
 		"subnote IS NOT NULL AND subnote != ''",
 		'ORDER BY time DESC');
+}
+
+sub getUrlCreate {
+	my ($self, $data) = @_;
+	$data ||= {};
+	return 0 if !$data->{url};
+	my $id = $self->getUrlIfExists($data->{url});
+	return $id if $id;
+	return $self->createUrl($data);
+}
+
+sub createUrl {
+	my ($self, $data) = @_;
+	$data ||= {};
+	$data->{url_digest} = md5_hex($data->{url});
+	$data->{'-createtime'} = 'NOW()',
+	$self->sqlInsert("urls", $data);
+	my $id = $self->getLastInsertId();
+	return $id;
+}
+
+sub getUrlIfExists {
+	my ($self, $url) = @_;
+	my $md5 = md5_hex($url);
+	my $urlid = $self->sqlSelect("url_id", "urls", "url_digest = '$md5'");
+	return $urlid;
 }
 
 ########################################################
