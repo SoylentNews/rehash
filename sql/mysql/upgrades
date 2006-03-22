@@ -3769,3 +3769,6 @@ CREATE TABLE urls (
 INSERT INTO globj_types VALUES (NULL, 'urls');
 
 INSERT IGNORE INTO reskey_resources VALUES (8, 'bookmark');
+
+# 2006-03-21
+UPDATE vars SET value = 'T_2_5_0_104' WHERE name = 'cvs_tag_currentcode';
