@@ -13,6 +13,10 @@ bookmarklink
 __seclev__
 10000
 __template__
-<a href="javascript:location.href='[% constants.absolutedir %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">[% title || "Post to $constants.sitename" %]</a>
+[% IF user.state.ssl %]
+	<a href="javascript:location.href='[% constants.absolutedir_secure %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">[% title || "Post to $constants.sitename" %]</a>
+[% ELSE %]
+	<a href="javascript:location.href='[% constants.absolutedir %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">[% title || "Post to $constants.sitename" %]</a>
+[% END %]
 __version__
 $Id$

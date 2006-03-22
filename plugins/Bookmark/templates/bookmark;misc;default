@@ -13,7 +13,7 @@ bookmark
 __seclev__
 10000
 __template__
-[% title = form.title || "Bookmark page" %]
+[% title = "Bookmark a page" %]
 [% PROCESS titlebar %]
 <form method="post" action="bookmark.pl">
 [% PROCESS reskey_tag %]
