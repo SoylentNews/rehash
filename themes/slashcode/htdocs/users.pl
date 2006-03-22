@@ -1576,6 +1576,7 @@ sub showTags {
 	});
 }
 
+#################################################################
 sub showBookmarks {
 	my($hr) = @_;
 	my $user = getCurrentUser();

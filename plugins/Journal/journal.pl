@@ -706,6 +706,7 @@ sub doEditArticle {
 
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey = $reskey->key('journal');
+
 	if ($form->{state}) {
 		$rkey->touch;
 		return $rkey->errstr if $rkey->death;

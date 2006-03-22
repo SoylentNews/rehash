@@ -429,7 +429,7 @@ sub getAllTagsFromUser {
 	my $limit   = $options->{limit} ? " LIMIT $options->{limit} " : "";
 	my $orderdir = uc($options->{orderdir}) eq "DESC" ? "DESC" : "ASC";
 
-	my ($table_extra, $where_extra) = ("","");
+	my($table_extra, $where_extra) = ("","");
 
 	if ($options->{type}) {
 		my $globjtypes = $self->getGlobjTypes;
@@ -621,7 +621,7 @@ sub ajaxGetAdminStory {
 #  XXX based off of ajaxCreateStory.  ajaxCreateStory should be updated to use this or something
 #  similar soon, and after I've had time to test -- vroom 2006/03/21
 sub setTagsForGlobj {
-	my ($self, $id, $table, $tag_string) = @_;
+	my($self, $id, $table, $tag_string) = @_;
 	my $tags = getObject('Slash::Tags');
 	
 	my $user = getCurrentUser();

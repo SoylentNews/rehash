@@ -11584,6 +11584,7 @@ sub getSubmission {
 	return $answer;
 }
 
+########################################################
 sub getUrl {
 	my $answer = _genericGet({
 		table		=> 'urls',
@@ -11592,8 +11593,6 @@ sub getUrl {
 	});
 	return $answer;
 }
-
-
 
 ########################################################
 sub setSubmission {
