@@ -32,7 +32,7 @@ __template__
 				[% IF tag.globj_type == "stories" %]
 					[% PROCESS linkStory dynamic=1 sid=tag.story.sid text=tag.story.title title=tag.story.title %]
 				[% ELSIF tag.globj_type == "urls" %]
-					<a href="[% tag.url.url %]">[% tag.url.bookmark.title || tag.url.validtitle || tag.url.initialtitle | strip_literal %]</a>
+					<a href="[% tag.url.url %]">[% tag.url.bookmark.title || tag.url.validtitle || tag.url.initialtitle | strip_html %]</a>
 				[% END %]
 			</td>
 		</tr>
