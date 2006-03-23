@@ -796,6 +796,10 @@ sub userdir_handler {
 			$r->args("op=showtags&nick=$nick&uid=$uid");
 			$r->uri('/users.pl');
 			$r->filename($constants->{basedir} . '/users.pl');
+		} elsif ($op eq 'bookmarks') {
+			$r->args("op=showbookmarks&nick=$nick&uid=$uid");
+			$r->uri('/users.pl');
+			$r->filename($constants->{basedir} . '/users.pl');
 
 		} else {
 			$r->args("nick=$nick&uid=$uid");
