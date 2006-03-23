@@ -719,8 +719,10 @@ sub doEditArticle {
 	} else {
 		$rkey->create or return $rkey->errstr;
 		
-		$article->{article}	= $form->{article};
-		$article->{description}	= $form->{description};
+		unless ($article->{id}) {
+			$article->{article}	= $form->{article};
+			$article->{description}	= $form->{description};
+		}
 
 		$posttype = $article->{posttype};
 	}
