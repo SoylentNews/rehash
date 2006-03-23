@@ -36,7 +36,7 @@ __template__
 	[% IF user.discussion2 == "slashdot" %]
 	<script src="[% constants.imagedir %]/comments2.js" type="text/javascript"></script>
 	[% ELSIF user.discussion2 == "uofm" %]
-	<script src="[% constants.imagedir %]/comments.js" type="text/javascript"></script>
+	<script src="http://www-personal.umich.edu/~oostendo/comments.js" type="text/javascript"></script>
 	[% END %]
 	<script src="[% constants.rootdir %]/comments.pl?sid=[% sid %]&op=dynamic_display" type="text/javascript"></script>
 	<div><ul id="commentlisting"></ul></div>

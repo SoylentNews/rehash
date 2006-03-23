@@ -25,9 +25,7 @@ __template__
 <li class="comment">
 	<div class="commentTop">
 		<div class="title">
-			<h4><a name="[% cid %]"[%
-				IF user.discussion2 && (user.discussion2 == "slashdot" || user.discussion2 == "uofm")
-			%] onclick="flipLink([% cid %], 'full')"[% END %]>[% subject %]</a></h4>
+			<h4><a name="[% cid %]">[% subject %]</a></h4>
 			[% UNLESS user.noscores %] (Score:[% IF points.length; points; ELSE; "?"; END %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
 		</div>
 		<div class="details">

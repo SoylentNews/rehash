@@ -37,21 +37,21 @@ use vars qw($VERSION);
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
 sub createBookmark {
-	my ($self, $data) = @_;
+	my($self, $data) = @_;
 	$self->sqlInsert("bookmarks", $data);
 	my $id = $self->getLastInsertId();
 	return $id;
 }
 
 sub getUserBookmarkByUrlId {
-	my ($self, $uid, $url_id) = @_;
+	my($self, $uid, $url_id) = @_;
 	my $uid_q = $self->sqlQuote($uid);
 	my $url_id_q = $self->sqlQuote($url_id);
 	return $self->sqlSelectHashref("*", "bookmarks", "uid=$uid_q AND url_id=$url_id_q");
 }
 
 sub updateBookmark {
-	my ($self, $bookmark) = @_;
+	my($self, $bookmark) = @_;
 	$self->sqlUpdate("bookmarks", $bookmark, "bookmark_id = $bookmark->{bookmark_id}");
 }
 
