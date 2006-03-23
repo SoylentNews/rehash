@@ -43,9 +43,13 @@ END %]
 	<div>No bookmarks have been assigned.</div>
 [% END %]
 <p>
-Drag the following link to your bookmarks toolbar, or right-click and save the link as a bookmark.
-[% PROCESS bookmarklink title=""%]
+Want a browser button or bookmark to post your bookmarks to [% constants.sitename %]?
 </p>
+<p>
+Drag the following link to your bookmarks toolbar, or right-click and save the link as a bookmark.<br>
+[% PROCESS bookmarklink title="" %]
+</p>
+<a href="[% gSkin.rootdir %]"/faq/tags.shtml#tags300">Bookmarking FAQ</a>
 __seclev__
 10000
 __version__
