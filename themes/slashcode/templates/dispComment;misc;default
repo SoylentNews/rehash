@@ -22,10 +22,19 @@ en_US
 __name__
 dispComment
 __template__
-<li class="comment">
+<li id="[% cid %]_tree" class="comment">
+<div id="[% cid %]_comment">
 	<div class="commentTop">
 		<div class="title">
+			[% IF user.discussion2 && (user.discussion2 == "slashdot" || user.discussion2 == "uofm") %]
+			<script type="text/javascript">
+				displaymode[[% cid %]] = "full";
+				futuredisplaymode[[% cid %]] = "full";
+			</script>
+			<h4><a name="[% cid %]" onclick="setFocusComment(-[% cid %])">[% subject %]</a></h4>
+			[% ELSE %]
 			<h4><a name="[% cid %]">[% subject %]</a></h4>
+			[% END %]
 			[% UNLESS user.noscores %] (Score:[% IF points.length; points; ELSE; "?"; END %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
 		</div>
 		<div class="details">
@@ -75,7 +84,11 @@ __template__
 	[% END %]
 	</div>
 	[% PROCESS dispLinkComment %]
+</div>
 
+<ul id="[% cid %]_group">
+	<li id="[% cid %]_hiddens" class="hide"></li>
+</ul>
 
 __seclev__
 10000

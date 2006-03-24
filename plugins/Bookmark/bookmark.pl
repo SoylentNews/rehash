@@ -100,8 +100,8 @@ sub saveBookmark {
 	}
 
 	my $data = {
-			url => $fudgedurl,
-			initialtitle => $form->{title}
+		url		=> $fudgedurl,
+		initialtitle	=> $form->{title}
 	};
 
 	my $url_id = $slashdb->getUrlCreate($data);

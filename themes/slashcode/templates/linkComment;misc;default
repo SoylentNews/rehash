@@ -18,30 +18,34 @@ en_US
 __name__
 linkComment
 __template__
-[% subject = color? "$subject" : subject %]
-<a href="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;op=[% op %]&amp;threshold=[% threshold %]&amp;commentsort=[% commentsort %]&amp;mode=[% mode %][% IF startat %]&amp;startat=[% startat %][% END %][% IF user.state.tid %]&amp;tid=[% user.state.tid %][% END %][% IF comment %]&amp;cid=[% cid %][% ELSE %]&amp;pid=[% pid %][% IF cid %]#[% cid %][% END %][% END %]">[% subject %]</a>
+[% subject = color ? "$subject" : subject %]
+[% IF !subject_only && cid && user.discussion2 && (user.discussion2 == "slashdot" || user.discussion2 == "uofm") %]
+	<script type="text/javascript">
+		displaymode[[% cid %]] = "oneline";
+		futuredisplaymode[[% cid %]] = "oneline";
+	</script>
+	<a name="[% cid %]" onclick="setFocusComment(-[% cid %])">[% subject %]</a>
+[% ELSE %]
+	<a[% IF cid %] name="[% cid %]"[% END %] href="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;op=[% op %]&amp;threshold=[% threshold %]&amp;commentsort=[% commentsort %]&amp;mode=[% mode %][% IF startat %]&amp;startat=[% startat %][% END %][% IF user.state.tid %]&amp;tid=[% user.state.tid %][% END %][% IF comment %]&amp;cid=[% cid %][% ELSE %]&amp;pid=[% pid %][% IF cid %]#[% cid %][% END %][% END %]">[% subject %]</a>
+[% END %]
 
-[% IF !comment.subjectonly %]
-
-[% IF nickname %]
-	[% # XXX why admin-only link to nickname? %]
-	[% IF adminflag %]
-	by <a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=nickname&amp;userfield=[% nickname %]">[% nickname %]</a>
-
-	[% ELSE %]
-	by [% nickname %]
+[% IF !subject_only %]
+	[% IF nickname %]
+		[% # XXX why admin-only link to nickname? %]
+		[% IF adminflag %]
+			by <a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=nickname&amp;userfield=[% nickname %]">[% nickname %]</a>
+		[% ELSE %]
+			by [% nickname %]
+		[% END %]
 	[% END %]
 
-[% END %]
+	[% IF !user.noscores && points.defined %]
+		(Score:[% points %])
+	[% END %]
 
-[% IF !user.noscores && points.defined %]
-	(Score:[% points %])
-[% END %]
-
-[% IF date %]
-	[% Slash.timeCalc(time) %]
-[% END %]
-
+	[% IF date %]
+		[% Slash.timeCalc(time) %]
+	[% END %]
 [% END %]
 
 __seclev__

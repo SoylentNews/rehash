@@ -233,6 +233,9 @@ sub jsSelectComments {
 
 	my @roots = grep { !$comments->{$_}{pid} } keys %$comments;
 
+	my $extra = '';
+	$extra = "prerendered = 1;\n" if $user->{discussion2} && $user->{discussion2} eq 'slashdot';
+
 	my $comment_text = $slashdb->getCommentTextCached(
 		$comments, [ keys %$comments ],
 	);
@@ -245,10 +248,10 @@ sub jsSelectComments {
 	my $anon_roots    = Data::JavaScript::Anon->anon_dump(\@roots);
 
 	return <<EOT;
-	comments = $anon_comments;
-	root_comments = $anon_roots;
-
-	renderRoots('commentlisting');
+comments = $anon_comments;
+root_comments = $anon_roots;
+$extra
+renderRoots('commentlisting');
 EOT
 }
 

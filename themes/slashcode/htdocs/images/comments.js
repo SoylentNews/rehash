@@ -17,6 +17,7 @@ var focalcidshash = {};
 var currentdepth = 1;
 var pointsums = [];
 var viewmodevalue = { full: 3, oneline: 2, hidden: 1};
+var prerendered = 0;
 
 var remainingroots = [];
 var allroothiddens = 0;
@@ -123,7 +124,7 @@ function renderComment(cid, mode) {
 		 displaymode[cid] = 'full'; 
 		return renderCommentFull(cid);
 	} 
-	displaymode['cid'] = 'hidden';
+	displaymode[cid] = 'hidden';
 	return ""; /*this is when it's hidden*/
 }
 
@@ -131,7 +132,7 @@ function updateComment(cid, mode) {
 	var existingdiv = $(cid + '_comment');
 	if (existingdiv) {
 		existingdiv.innerHTML = renderComment(cid, mode);
-		/* if (displaymode['cid'] == 'hidden') {
+		/* if (displaymode[cid] == 'hidden') {
 			$(cid + "_tree").className = "hide";
 		} else {
 			$(cid + "_tree").className = "comment";
@@ -253,7 +254,9 @@ function renderRoots(element) {
 	renderBehaviorWidget('focus', 'focusbehaviors'); */
 	refreshDisplayModes(); 
 
-	remainingroots = root_comments.concat([]); 
+	if (!prerendered) {
+		remainingroots = root_comments.concat([]);
+	}
 	rootpe = new PeriodicalExecuter(renderRootsAsync, 1);
 }
 
@@ -413,7 +416,9 @@ function refreshDisplayModes() {
 		} else {
 			authorcids[uid].push(mykey);
 		}
-		futuredisplaymode[mykey] = decideMode(mykey);
+		if (!prerendered) {
+			futuredisplaymode[mykey] = decideMode(mykey);
+		}
 		if (futuredisplaymode[mykey] == 'full') {
 			fulls.push(mykey);
 		}

@@ -69,7 +69,7 @@ __template__
 
 		| <a href="[% gSkin.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">Search Discussion</a>
 	</div>
-	<div class="commentBoxForm">
+	<div class="commentBoxForm" id="commentControlBox">
 		<form action="[% gSkin.rootdir %]/comments.pl">
 		<fieldset>
 		<legend>Display Options</legend>
