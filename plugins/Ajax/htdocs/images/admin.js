@@ -122,3 +122,38 @@ function admin_storyadminbox_fetch(secs) {
 	params['op'] = 'admin_storyadminbox';
 	ajax_periodic_update(secs, params, "storyadmin-content");
 }
+
+function make_spelling_correction(misspelled_word, form_element) {
+
+	var selected_index = document.forms.slashstoryform.elements[misspelled_word].selectedIndex;
+	
+	if(selected_index == 0) {
+		return(0);
+	}
+
+	// Either learning a word or making a correction.
+	if(selected_index >= 1) {
+		if(selected_index == 1) {
+			;// Learn word not implemented
+		}
+		else {
+			var re = new RegExp(misspelled_word, "g");
+			var correction = document.forms.slashstoryform.elements[misspelled_word].value;
+			document.forms.slashstoryform.elements[form_element].value =
+				document.forms.slashstoryform.elements[form_element].value.replace(re, correction);
+		}
+
+		// Remove this row from the table.
+		var rowname = misspelled_word + '_correction';
+		var row = document.getElementById(rowname);
+		row.parentNode.removeChild(row);
+
+	}
+
+	// Remove the table if we're done.
+	var table = document.getElementById("spellcheck");
+	var numrows = table.getElementsByTagName("TR");
+	if(numrows.length == 1) {
+		table.parentNode.removeChild(table);
+	}	
+}
