@@ -1362,9 +1362,22 @@ sub editStory {
 		last_subid	=> '',
 	});
 
+	# Run a spellcheck on introtext, bodytext, and title if they're set.
+	my %introtext_spellcheck = get_ispell_comments($storyref->{introtext}) if($storyref->{introtext});
+	my %bodytext_spellcheck  = get_ispell_comments($storyref->{bodytext})  if($storyref->{bodytext});
+	my %title_spellcheck     = get_ispell_comments($storyref->{title})     if($storyref->{title});
+
+	# Set up our spellcheck template. Output is either a table (if errors were found) or an empty string.	
 	my $ispell_comments = {
-		introtext =>    get_ispell_comments("$storyref->{title} $storyref->{introtext}"),
-		bodytext =>     get_ispell_comments($storyref->{bodytext}),
+		introtext => (scalar keys %introtext_spellcheck)
+			? slashDisplay("spellcheck", { words => \%introtext_spellcheck, form_element => "introtext" }, { Page => "admin", Return => 1})
+			: "",
+		bodytext  => (scalar keys %bodytext_spellcheck)
+			? slashDisplay("spellcheck", { words => \%bodytext_spellcheck, form_element => "bodytext" }, { Page => "admin", Return => 1 })
+			: "",
+		title     => (scalar keys %title_spellcheck)
+			? slashDisplay("spellcheck", { words => \%title_spellcheck, form_element => "title" }, { Page => "admin", Return => 1 })
+			: "",
 	} unless $user->{no_spell};
 
 	my $future = $slashdb->getStoryByTimeAdmin('>', $storyref, 3);
@@ -1724,33 +1737,24 @@ sub get_ispell_comments {
 	my %misspelled_suggestion = ( );
 	while (defined(my $line = <$ispell_fh>)) {
 		# Grab all ispell's flagged words and put them in the hash
-		$misspelled_count{$1}++ if $line =~ /^[#?&]\s+(\S+)/;
 		# If this is a "&" line, there may be one or more suggestions
 		# separated by commas and terminated by newlines;  they may
-		# contain spaces.  Grab the first one and put it in the hash.
-		if ($line =~ /^\& (.+) \d+ \d+: ([^,\r\n]+)/) {
-			$misspelled_suggestion{$1} = $2;
-		}
+		# contain spaces.
+		$misspelled_suggestion{$1} = $2 if (($line =~ /^\& (.+) \d+ \d+: (.+)/) || ($line =~ /^\# (.+) \d+/));
 	}
 	close $ispell_fh;
 	unlink $tmptext, $tmpok;
 
-	my($non_rec, $sugg) = ('', '');
-	for my $word (sort {lc($a) cmp lc($b) or $a cmp $b} keys %misspelled_count) {
-		# if it's a repeated error, ignore it
-		next if    $misspelled_count{$word} >= 2
-			&& $misspelled_count{$word} > $n_text_words*0.002;
-		# a misspelling; report it
-		$non_rec = getData('ispell_nonrec') if !$non_rec;
-		$non_rec .= " $word,";
-		next if !$misspelled_suggestion{$word};
-		# ispell has a suggestion
-		$sugg = getData('ispell_sugg') if !$sugg;
-		$sugg .= " $misspelled_suggestion{$word},";
-	}
-	$non_rec =~ s/,$//;
-	$sugg =~ s/,$//;
-	return "$non_rec$sugg";
+	my %misspelled_words = ();
+	foreach my $mWord (keys %misspelled_suggestion) {
+		$misspelled_words{$mWord} = []; # Inititally set reference empty in case there are no suggestions.
+		foreach my $suggestion (split(/,\s?/, $misspelled_suggestion{$mWord})) {
+			push(@{$misspelled_words{$mWord}}, $suggestion);
+		}
+	}	
+	
+	return(%misspelled_words);
+	
 }
 
 ##################################################################
