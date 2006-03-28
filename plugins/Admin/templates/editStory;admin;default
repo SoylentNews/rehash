@@ -142,6 +142,7 @@ __template__
 				[% shown_in_desc %]
 				[% PROCESS formLabel value => "Title" %]
 				<input type="text" name="title" value="[% storyref.title | strip_attribute %]" size="50">
+                <div class="notes">[% ispell_comments.title %]</div>
 
 				[% IF constants.use_dept %]
 					[% PROCESS formLabel value => "Dept" %]
