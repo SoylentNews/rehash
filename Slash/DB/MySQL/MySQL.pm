@@ -13587,6 +13587,12 @@ sub createUrl {
 	return $id;
 }
 
+sub setUrl {
+	my ($self, $url_id, $data) = @_;
+	my $url_id_q = $self->sqlQuote($url_id);
+	$self->sqlUpdate("urls", $data, "url_id=$url_id_q");
+}
+
 sub getUrlIfExists {
 	my ($self, $url) = @_;
 	my $md5 = md5_hex($url);
