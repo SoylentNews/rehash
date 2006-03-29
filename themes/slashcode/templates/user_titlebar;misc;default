@@ -76,6 +76,9 @@ ELSIF user.is_anon;
 	IF constants.plugin.Tags; tabs.push(
 		{ link = "/~$url_nick/tags/",	label = "Tags",		sel_label = "tags" },
 	); END;
+	IF constants.plugin.Bookmark; tabs.push(
+		{ link = "/my/bookmarks/",	label = "Bookmarks",	sel_label = "bookmarks" },
+	); END;
 ELSE;
 	tabs = [
 		{ link = "/~$url_nick/",	label = "Info",		sel_label = "info" },
