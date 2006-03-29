@@ -36,7 +36,7 @@ __template__
 			[% displayurl | strip_literal %]
 			<input name="url" size="60" value="[% fudgedurl | strip_attribute %]" type="hidden">
 		[% ELSE %]
-			<input name="url" size="60" value="[% form.url | strip_attribute %]" type="text"> [% IF (form.url && !fudgedurl) || errors.invalidurl %]Invalid URL [% IF errors.noscheme %]no scheme (ie http://)[% END %][% END %] [% IF form.op == "save" && !form.url %](required)[% END %]
+			<input name="url" size="60" value="[% form.url | strip_attribute %]" type="text"> [% IF (form.url && !fudgedurl) || errors.invalidurl %]Invalid URL [% IF errors.noscheme %]no scheme (ie http://)[% END %][% END %] [% IF form.op == "save" && !form.url %] (required)[% END %] [% IF errors.badscheme %] Bad scheme: only [% b_schemes = constants.bookmark_allowed_schemes; b_schemes.replace('\|',' '); b_scheme %] links allowed [% END %]
 		[% END %]
 	</td>
 </tr>

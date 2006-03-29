@@ -77,6 +77,9 @@ sub saveBookmark {
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey = $reskey->key('bookmark');
 
+	my @allowed_schemes = split(/\|/,$constants->{bookmark_allowed_schemes});
+	my %allowed_schemes = map { $_ => 1 } @allowed_schemes;
+
 	my $fudgedurl = fudgeurl($form->{url});
 	my $bookmarkoptions;
 
@@ -86,11 +89,15 @@ sub saveBookmark {
 		$scheme = $uri->scheme if $uri && $uri->can("scheme");
 	}		
 	
-	$bookmarkoptions->{errors}{invalidurl}    = 1 if (!$fudgedurl && $form->{url}) || ($form->{url} && !$scheme);
+	$bookmarkoptions->{errors}{invalidurl}    = 1 if (!$fudgedurl && $form->{url}) || ($form->{url} && !$scheme) || ($scheme && !$allowed_schemes{$scheme});
 	$bookmarkoptions->{errors}{missingfields} = 1 if !$form->{url} || !$form->{title} || !$form->{tags};
 	$bookmarkoptions->{errors}{noscheme}      = 1 if ($form->{url} && !$scheme);
-	unless ($rkey->use) {
-		$bookmarkoptions->{errors}{reskey} = $rkey->errstr
+	$bookmarkoptions->{errors}{badscheme}     = 1 if ($form->{url} && $scheme && !$allowed_schemes{$scheme});
+	
+	if (!$bookmarkoptions->{errors}) {
+		unless ($rkey->use) {
+			$bookmarkoptions->{errors}{reskey} = $rkey->errstr
+		}
 	}
 
 	if ($bookmarkoptions->{errors}) {
