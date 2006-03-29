@@ -2928,12 +2928,12 @@ sub avgDynamicDurationForMinutesBack {
 }
 
 sub getUrlsNeedingFirstCheck {
-	my ($self) = @_;
+	my($self) = @_;
 	return $self->sqlSelectAllHashrefArray("*", "urls", "last_attempt is NULL", "order by url_id ASC");
 }
 
 sub getUrlsNeedingRefresh {
-	my ($self, $limit) = @_;
+	my($self, $limit) = @_;
 	$limit ||= 50;
 	return $self->sqlSelectAllHashrefArray(
 		"*", 

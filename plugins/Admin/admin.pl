@@ -1363,9 +1363,9 @@ sub editStory {
 	});
 
 	# Run a spellcheck on introtext, bodytext, and title if they're set.
-	my %introtext_spellcheck = get_ispell_comments($storyref->{introtext}) if($storyref->{introtext});
-	my %bodytext_spellcheck  = get_ispell_comments($storyref->{bodytext})  if($storyref->{bodytext});
-	my %title_spellcheck     = get_ispell_comments($storyref->{title})     if($storyref->{title});
+	my %introtext_spellcheck = get_ispell_comments($storyref->{introtext}) if $storyref->{introtext};
+	my %bodytext_spellcheck  = get_ispell_comments($storyref->{bodytext})  if $storyref->{bodytext};
+	my %title_spellcheck     = get_ispell_comments($storyref->{title})     if $storyref->{title};
 
 	# Set up our spellcheck template. Output is either a table (if errors were found) or an empty string.	
 	my $ispell_comments = {
@@ -1740,7 +1740,9 @@ sub get_ispell_comments {
 		# If this is a "&" line, there may be one or more suggestions
 		# separated by commas and terminated by newlines;  they may
 		# contain spaces.
-		$misspelled_suggestion{$1} = $2 if (($line =~ /^\& (.+) \d+ \d+: (.+)/) || ($line =~ /^\# (.+) \d+/));
+		$misspelled_suggestion{$1} = $2 if (
+			($line =~ /^\& (.+) \d+ \d+: (.+)/) || ($line =~ /^\# (.+) \d+/)
+		);
 	}
 	close $ispell_fh;
 	unlink $tmptext, $tmpok;
@@ -1754,7 +1756,6 @@ sub get_ispell_comments {
 	}	
 	
 	return(%misspelled_words);
-	
 }
 
 ##################################################################

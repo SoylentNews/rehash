@@ -1056,7 +1056,8 @@ sub listTagnamesRecent {
 		 AND created_at >= DATE_SUB(NOW(), INTERVAL $seconds SECOND)
 		 AND (tag_params.value IS NULL OR tag_params.value > 0)
 		 AND (tagname_params.value IS NULL OR tagname_params.value > 0)",
-		'ORDER BY tagnames.tagname');
+		'ORDER BY tagnames.tagname'
+	);
 }
 
 #################################################################

@@ -13471,11 +13471,11 @@ sub addGlobjEssentialsToHashrefArray {
 sub getActiveAdminCount {
 	my($self) = @_;
 	my $admin_timeout = getCurrentStatic('admin_timeout');
-	return  $self->sqlSelect("COUNT(DISTINCT sessions.uid)",
-			"sessions,users_param",
-			"sessions.uid=users_param.uid
-			 AND name='adminlaststorychange'
-			 AND DATE_SUB(NOW(), INTERVAL $admin_timeout MINUTE) <= value"
+	return $self->sqlSelect("COUNT(DISTINCT sessions.uid)",
+		"sessions,users_param",
+		"sessions.uid=users_param.uid
+		 AND name='adminlaststorychange'
+		 AND DATE_SUB(NOW(), INTERVAL $admin_timeout MINUTE) <= value"
 	);
 }
 
@@ -13509,33 +13509,30 @@ sub setRelatedStoriesForStory {
 
 	foreach my $rel (keys %$rel_sid_hr) {
 		my $rel_stoid = $self->getStoidFromSidOrStoid($rel);
-		$self->sqlInsert(
-			"related_stories", {
-				stoid   => $stoid,
-				rel_sid => $rel,
-				rel_stoid => $rel_stoid
+		$self->sqlInsert("related_stories", {
+			stoid		=> $stoid,
+			rel_sid		=> $rel,
+			rel_stoid	=> $rel_stoid
 		});
 
 		# Insert reciprocal link if it doesn't already exist
 		my $rel_stoid_q = $self->sqlQuote($rel_stoid);
 		my $sid_q = $self->sqlQuote($story->{sid});
 		if (!$self->sqlCount("related_stories", "stoid = $rel_stoid_q AND rel_sid = $sid_q")) {
-			$self->sqlInsert(
-				"related_stories", {
-					stoid   => $rel_stoid,
-					rel_sid => $story->{sid},
-					rel_stoid => $stoid,
+			$self->sqlInsert("related_stories", {
+				stoid		=> $rel_stoid,
+				rel_sid		=> $story->{sid},
+				rel_stoid	=> $stoid,
 			});
 			$self->markStoryDirty($rel_stoid);
 		}
 	}
 	
 	foreach my $rel_url (keys %$rel_url_hr) {
-		$self->sqlInsert(
-			"related_stories", {
-				stoid   => $stoid,
-				url     => $rel_url,
-				title	=> $rel_url_hr->{$rel_url},
+		$self->sqlInsert("related_stories", {
+			stoid   => $stoid,
+			url     => $rel_url,
+			title	=> $rel_url_hr->{$rel_url},
 		})
 	}
 }
@@ -13546,16 +13543,16 @@ sub updateSubMemory {
 	my $user = getCurrentUser();
 
 	my $rows = $self->sqlUpdate('submissions_memory', {
-			subnote => $subnote,
-			uid => $user->{uid},
-			'time' => 'NOW()',
+		subnote	=> $subnote,
+		uid	=> $user->{uid},
+		'time'	=> 'NOW()',
 	}, "submatch='" . $self->sqlQuote($submatch) . "'");
 
 	$self->sqlInsert('submissions_memory', {
-			submatch => $submatch,
-			subnote => $subnote,
-			uid => $user->{uid},
-			'time' => 'NOW()',
+		submatch	=> $submatch,
+		subnote		=> $subnote,
+		uid		=> $user->{uid},
+		'time'		=> 'NOW()',
 	}) if !$rows;
 }
 
@@ -13565,11 +13562,12 @@ sub getSubmissionMemory {
 	return $self->sqlSelectAllHashrefArray('submatch, subnote, time, uid',
 		'submissions_notes',
 		"subnote IS NOT NULL AND subnote != ''",
-		'ORDER BY time DESC');
+		'ORDER BY time DESC'
+	);
 }
 
 sub getUrlCreate {
-	my ($self, $data) = @_;
+	my($self, $data) = @_;
 	$data ||= {};
 	return 0 if !$data->{url};
 	my $id = $self->getUrlIfExists($data->{url});
@@ -13578,7 +13576,7 @@ sub getUrlCreate {
 }
 
 sub createUrl {
-	my ($self, $data) = @_;
+	my($self, $data) = @_;
 	$data ||= {};
 	$data->{url_digest} = md5_hex($data->{url});
 	$data->{'-createtime'} = 'NOW()',
@@ -13588,13 +13586,13 @@ sub createUrl {
 }
 
 sub setUrl {
-	my ($self, $url_id, $data) = @_;
+	my($self, $url_id, $data) = @_;
 	my $url_id_q = $self->sqlQuote($url_id);
 	$self->sqlUpdate("urls", $data, "url_id=$url_id_q");
 }
 
 sub getUrlIfExists {
-	my ($self, $url) = @_;
+	my($self, $url) = @_;
 	my $md5 = md5_hex($url);
 	my $urlid = $self->sqlSelect("url_id", "urls", "url_digest = '$md5'");
 	return $urlid;

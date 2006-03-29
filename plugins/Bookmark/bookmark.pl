@@ -148,7 +148,7 @@ sub saveBookmark {
 }
 
 sub showBookmarks {
-	my ($constants, $slashdb, $user, $form) = @_;
+	my($constants, $slashdb, $user, $form) = @_;
 	my $bookmark = getObject("Slash::Bookmark");
 
 	my $days_back = $constants->{bookmark_popular_days} || 7;
@@ -171,8 +171,8 @@ sub showBookmarks {
 	}
 	
 	slashDisplay("recentandpop", {
-		type => $type,
-		bookmarks => $bookmarks,
+		type		=> $type,
+		bookmarks	=> $bookmarks,
 	});
 }
 

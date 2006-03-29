@@ -487,7 +487,8 @@ sub linkStory {
 			$params{tids} = $story_link->{tids};
 		} else {
 			$params{tids} = $reader->getTopiclistForStory(
-				$story_link->{stoid} || $story_link->{sid} || $story_ref->{sid});
+				$story_link->{stoid} || $story_link->{sid} || $story_ref->{sid}
+			);
 		}
 	}
 
