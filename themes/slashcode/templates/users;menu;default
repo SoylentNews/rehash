@@ -14,7 +14,7 @@ en_US
 __name__
 users
 __template__
-<div id="usermenu-top">
+<div class="menuoldstyle">
 	<ul>
 	[% needbar = 0; FOR i = items %]
 	[% IF i.label %]
