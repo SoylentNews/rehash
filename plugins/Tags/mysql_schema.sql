@@ -54,7 +54,6 @@ CREATE TABLE tagcommand_adminlog (
 	KEY tagnameid_globjid (tagnameid, globjid)
 ) TYPE=InnoDB;
 
-
 #DROP TABLE IF EXISTS tag_schedule;
 #CREATE TABLE tag_schedule (
 #	tsid		int UNSIGNED NOT NULL AUTO_INCREMENT,

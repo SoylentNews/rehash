@@ -6,6 +6,7 @@
 package Slash::Tags;
 
 use strict;
+use Date::Format qw( time2str );
 use Slash;
 use Slash::Display;
 use Slash::Utility;
@@ -511,6 +512,19 @@ sub getUidsUsingTagname {
 		"tagnameid=$id AND inactivated IS NULL");
 }
 
+sub getAllObjectsTagname {
+	my($self, $name) = @_;
+	my $id = $self->getTagidFromNameIfExists($name);
+	return [ ] if !$id;
+	my $hr_ar = $self->sqlSelectAllHashrefArray(
+		'*',
+		'tags',
+		"tagnameid=$id AND inactivated IS NULL",
+		'ORDER BY tagid');
+	$self->addGlobjEssentialsToHashrefArray($hr_ar);
+	return $hr_ar;
+}
+
 sub getTagnameParams {
 	my($self, $tagnameid) = @_;
 	return $self->sqlSelectAllKeyValue('name, value', 'tagname_params',
@@ -795,6 +809,8 @@ sub ajaxTagHistoryStory {
 	slashDisplay('taghistory', { tags => $tags_ar }, { Return => 1 } );
 }
 
+{ # closure
+my @clout_reduc_map = qw(  0.05  0.10  0.30  0.80  1.00  );
 sub processAdminCommand {
 	my($self, $c, $stoid) = @_;
 
@@ -806,9 +822,8 @@ sub processAdminCommand {
 
 	my $systemwide = $type =~ /^\$/ ? 1 : 0;
 	my $globjid = $systemwide ? undef : $self->getGlobjidCreate('stories', $stoid);
-	my $user_clout_reduction = 0;
-	$user_clout_reduction = $type =~ s/\#//g;
-	$user_clout_reduction /= 5;
+	my $hashmark_count = $type =~ s/\#/\#/g;
+	my $user_clout_reduction = $clout_reduc_map[$hashmark_count];
 	$user_clout_reduction = 1 if $user_clout_reduction > 1;
 	# Eventually we need to define FLOATs for clout and multiply
 	# them together, but for now it's an overwrite.
@@ -881,6 +896,7 @@ print STDERR "setting $tag->{tagid} to 0\n";
 
 	return $tagnameid;
 }
+} # closure
 
 sub getTypeAndTagnameFromAdminCommand {
 	my($self, $c) = @_;
@@ -919,6 +935,129 @@ sub setLastscanned {
 	$self->setVar('tags_stories_lastscanned', $new_val - 1);
 }
 
+sub listTagnamesAll {
+	my($self, $options) = @_;
+	my $ar;
+	if ($options->{really_all}) {
+		$ar = $self->sqlSelectColArrayref('tagname', 'tagnames',
+			'',
+			'ORDER BY tagname');
+	} else {
+		$ar = $self->sqlSelectColArrayref('tagname',
+			"tagnames LEFT JOIN tagname_params
+				ON (tagnames.tagnameid=tagname_params.tagnameid AND tagname_params.name='tag_clout')",
+			'value IS NULL OR value > 0',
+			'ORDER BY tagname');
+	}
+	return $ar;
+}
+
+sub listTagnamesActive {
+	my($self, $seconds, $max_num) = @_;
+	my $constants = getCurrentStatic();
+	$max_num ||= 100;
+	$seconds ||= 3600 * 6;
+#print STDERR scalar(localtime) . " listTagnamesActive s=$seconds m=$max_num\n";
+	# This seems like a horrendous query, but I _think_ it will run
+	# in acceptable time, even under fairly heavy load.
+	# Round off time to the last minute.
+	my $the_time = $self->getTime({ unix_format => 1 });
+	substr($the_time, -2) = '00';
+	my $next_minute_q = $self->sqlQuote( time2str( '%Y-%m-%d %H:%M:00', $the_time + 60, 'GMT') );
+	my $ar = $self->sqlSelectAllHashrefArray(
+		"tagnames.tagname AS tagname,
+		 UNIX_TIMESTAMP($next_minute_q) - UNIX_TIMESTAMP(tags.created_at) AS secsago,
+		 karma,
+		 IF(tagname_params.value IS NULL, 1, tagname_params.value) AS tnp_clout,
+		 IF(tag_params.value     IS NULL, 1, tag_params.value)     AS tp_clout,
+		 users_info.tag_clout AS user_clout",
+		"users_info,
+		 tags LEFT JOIN tag_params
+		 	ON (tags.tagid=tag_params.tagid AND tag_params.name='tag_clout'),
+		 tagnames LEFT JOIN tagname_params
+			ON (tagnames.tagnameid=tagname_params.tagnameid AND tagname_params.name='tag_clout')",
+		"tagnames.tagnameid=tags.tagnameid
+		 AND tags.uid=users_info.uid
+		 AND inactivated IS NULL
+		 AND tags.created_at >= DATE_SUB($next_minute_q, INTERVAL $seconds SECOND)");
+	return [ ] unless $ar && @$ar;
+
+	# Sum up the clout for each tagname, and the median time it
+	# was seen within the interval in question.
+	# Very crude weighting algorithm that will change.
+	my %tagname_count = ( );
+	my %tagname_clout = ( );
+	my %tagname_sumsqrtsecsago = ( );
+	for my $hr (@$ar) {
+		my $tagname = $hr->{tagname};
+		# Tally it.
+		$tagname_count{$tagname} ||= 0;
+		$tagname_count{$tagname}++;
+		# Add to its clout.
+		my $user_clout = $hr->{user_clout} * ($hr->{karma} >= -3 ? log($hr->{karma}+10) : 0);
+		my $clout = $user_clout * $hr->{tp_clout} * $hr->{tnp_clout};
+		$tagname_clout{$tagname} ||= 0;
+		$tagname_clout{$tagname} += $clout;
+		# Adjust up its last seen time.
+		$tagname_sumsqrtsecsago{$tagname} ||= 0;
+		my $secsago = $hr->{secsago};
+		$secsago = 0 if $secsago < 0;
+		$tagname_sumsqrtsecsago{$tagname} += $secsago ** 0.5;
+	}
+	# Go by the square root of "seconds ago" so that a tag's
+	# vector length will be less likely to _increase_ when old
+	# entries drop off.
+	my $max_sqrtsecs = $seconds ** 0.5;
+	my %tagname_mediansqrtsecsago = ( );
+	for my $tagname (keys %tagname_sumsqrtsecsago) {
+		$tagname_mediansqrtsecsago{$tagname} = $tagname_sumsqrtsecsago{$tagname} / $tagname_count{$tagname};
+	}
+
+	# For now, do NOT make opposite tagnames counteract.  We'll
+	# see if we want to do that in future.
+
+	# Determine what the maximum clout is.
+	my $max_clout = 0;
+	for my $tagname (keys %tagname_clout) {
+		$max_clout = $tagname_clout{$tagname} if $tagname_clout{$tagname} > $max_clout;
+	}
+
+	# List all tags with at least a minimum clout.
+	my @tagnames = grep
+		{ $tagname_clout{$_} >= $constants->{tags_stories_top_minscore} }
+		keys %tagname_clout;
+
+	# Sort by sum of normalized clout and (opposite of) last-seen time.
+	my %tagname_sum = (
+			map
+			{ ($_, $tagname_clout{$_}/$max_clout - $tagname_mediansqrtsecsago{$_}/$max_sqrtsecs) }
+			@tagnames
+		);
+#use Data::Dumper; print STDERR Dumper(\%tagname_sum);
+	@tagnames = sort { $tagname_sum{$b} <=> $tagname_sum{$a} || $a cmp $b } @tagnames;
+
+	$#tagnames = $max_num-1 if $#tagnames >= $max_num;
+
+#print STDERR "tagnames='@tagnames'\n";
+
+	return \@tagnames;
+}
+
+sub listTagnamesRecent {
+	my($self, $seconds) = @_;
+	return $self->sqlSelectColArrayref(
+		'DISTINCT tagnames.tagname',
+		"tags LEFT JOIN tag_params
+		 	ON (tags.tagid=tag_params.tagid AND tag_params.name='tag_clout'),
+		 tagnames LEFT JOIN tagname_params
+			ON (tagnames.tagnameid=tagname_params.tagnameid AND tagname_params.name='tag_clout')",
+		"tagnames.tagnameid=tags.tagnameid
+		 AND inactivated IS NULL
+		 AND created_at >= DATE_SUB(NOW(), INTERVAL $seconds SECOND)
+		 AND (tag_params.value IS NULL OR tag_params.value > 0)
+		 AND (tagname_params.value IS NULL OR tagname_params.value > 0)",
+		'ORDER BY tagnames.tagname');
+}
 
 #################################################################
 sub DESTROY {

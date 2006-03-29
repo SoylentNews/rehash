@@ -17,6 +17,9 @@ data
 __template__
 [% SWITCH value %]
 
+[% CASE 'head' %]
+	[% constants.sitename %] Tags
+
 [% CASE 'tags_saved' %]
 	Tags saved.
 	[% returnme.data_constant = 1 %] 
@@ -35,7 +38,6 @@ __template__
 	[% ELSE %]
 		<i>(none)</i>
 	[% END %]
-	[% returnme.data_constant = 1 %] 
 
 [% CASE 'error' %]
 	Sorry, an error occurred.

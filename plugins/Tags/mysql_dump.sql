@@ -19,3 +19,7 @@ INSERT INTO ajax_ops VALUES (NULL, 'tags_get_admin_story', 'Slash::Tags', 'ajaxG
 INSERT INTO ajax_ops VALUES (NULL, 'tags_admin_commands', 'Slash::Tags', 'ajaxProcessAdminTags', 'ajax_admin', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'tags_story_history', 'Slash::Tags', 'ajaxTagHistoryStory', 'ajax_admin', 'createuse');
 
+INSERT INTO menus VALUES (NULL, 'tagszg', 'Active', 'active', '[% gSkin.rootdir %]/tags',        1, 1, 1);
+INSERT INTO menus VALUES (NULL, 'tagszg', 'Recent', 'recent', '[% gSkin.rootdir %]/tags/recent', 1, 1, 2);
+INSERT INTO menus VALUES (NULL, 'tagszg', 'All',    'all',    '[% gSkin.rootdir %]/tags/all',    1, 1, 3);
+

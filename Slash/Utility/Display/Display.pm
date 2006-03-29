@@ -475,6 +475,7 @@ sub linkStory {
 	}
 
 	my $story_ref = $reader->getStory($story_link->{stoid} || $story_link->{sid});
+	$params{sid} ||= $story_ref->{sid};
 
 	if (!defined $story_link->{link} || $story_link->{link} eq '') {
 		$story_link->{link} = $story_ref->{title};
@@ -486,7 +487,7 @@ sub linkStory {
 			$params{tids} = $story_link->{tids};
 		} else {
 			$params{tids} = $reader->getTopiclistForStory(
-				$story_link->{stoid} || $story_link->{sid});
+				$story_link->{stoid} || $story_link->{sid} || $story_ref->{sid});
 		}
 	}
 
@@ -512,7 +513,7 @@ sub linkStory {
 		# but we would need to `mv articles mainpage`, or ln -s, and it just seems better
 		# to me to keep the same URL scheme if possible
 		my $skinname = $skin->{name} eq 'mainpage' ? 'articles' : $skin->{name};
-		$url .= "/$skinname/$story_link->{sid}.shtml";
+		$url .= "/$skinname/" . ($story_link->{sid} || $story_ref->{sid}) . ".shtml";
 		# manually add the tid(s), if wanted
 		if ($constants->{tids_in_urls} && $params{tids}) {
 			$url .= '?';

@@ -8319,7 +8319,7 @@ sub getStoriesEssentials {
 	my $tid_extras = $options->{tid_extras} || 0;
 
 	# Now set some secondary variables.
-	my $the_time = time;
+	my $the_time = $self->getTime({ unix_format => 1 });
 	my $the_minute = ($the_time+$fake_secs_ahead) - ($the_time+$fake_secs_ahead) % 60;
 	my $lim_sum = $limit + $limit_extra + $offset;
 	my $min_stoid_margin = $gSkin->{artcount_max}
@@ -13388,20 +13388,94 @@ sub getGlobjTarget {
 sub addGlobjTargetsToHashrefArray {
 	my($self, $ar) = @_;
 	for my $hr (@$ar) {
-		next unless $hr->{globjid};
+		next unless $hr->{globjid}; # skip if bogus data
+		next if $hr->{globj_type};  # skip if already added
 		my($type, $target_id) = $self->getGlobjTarget($hr->{globjid});
-		next unless $type;
+		next unless $type;          # skip if bogus data
 		$hr->{globj_type} = $type;
 		$hr->{globj_target_id} = $target_id;
+	}
+}
+
+# I'm reusing the word "essentials" from the method getStoriesEssentials
+# because this is a similar idea.  We want to get a standard set of data
+# about a list of objects.  But we recognize that there is something not
+# quite trivial going on behind the scenes (in gSE, lots of options and
+# optimization; in aGETHA, conditional selects).  And that the standard
+# set of data is based on general needs and may evolve in future.
+#
+# Currently, the standard set of data which is added to each hashref is:
+# * title = Text string which best serves as the title for the object
+# * url = URL to view the object
+# * created_at = Timestamp when the object was created
+
+sub addGlobjEssentialsToHashrefArray {
+	my($self, $ar) = @_;
+
+	# Add the fields globj_type and globj_target_id to each object.
+	# If this was already done, this runs very quickly.
+	$self->addGlobjTargetsToHashrefArray($ar);
+
+	# Select all the needed information about each object and drop it
+	# into %data.
+
+	my %data = ( );
+
+	my %stoids = (
+		map { ( $_->{globj_target_id}, $_->{globjid} ) }
+		grep { $_->{globj_type} eq 'stories' }
+		@$ar
+	);
+	my @stoids = keys %stoids;
+	for my $stoid (@stoids) {
+		my $globjid = $stoids{$stoid};
+		my $story = $self->getStory($stoid);
+		my $data_ar = linkStory({ stoid => $stoid });
+		my($url, $title) = @$data_ar;
+#print STDERR "for stoid $stoid url='$url' title='$title' time='$story->{time}'\n";
+		$data{$globjid}{url} = $url;
+		$data{$globjid}{title} = $title;
+		$data{$globjid}{created_at} = $story->{time};
+	}
+
+	my %url_ids = (
+		map { ( $_->{globj_target_id}, $_->{globjid} ) }
+		grep { $_->{globj_type} eq 'urls' }
+		@$ar
+	);
+	my @url_ids = sort { $a <=> $b } keys %url_ids;
+	my $url_str = join(',', @url_ids);
+	my $url_hr = $url_str
+		? $self->sqlSelectAllHashref('url_id', 'url_id, url, createtime, initialtitle, validatedtitle',
+			'urls', "url_id IN ($url_str)")
+		: [ ];
+	for my $url_id (@url_ids) {
+		my $globjid = $url_ids{$url_id};
+		$data{$globjid}{url} = $url_hr->{$url_id}{url};
+		$data{$globjid}{title} = $url_hr->{$url_id}{validatedtitle} || $url_hr->{$url_id}{initialtitle};
+		$data{$globjid}{created_at} = $url_hr->{$url_id}{createtime};
+	}
+#use Data::Dumper; print STDERR "data: " . Dumper(\%data);
+
+	# Scan over the arrayref and insert the information from %data
+	# for each object.
+
+	for my $object (@$ar) {
+		my $globjid = $object->{globjid};
+		$object->{url} = $data{$globjid}{url};
+		$object->{title} = $data{$globjid}{title};
+		$object->{created_at} = $data{$globjid}{created_at};
 	}
 }
 
 sub getActiveAdminCount {
 	my($self) = @_;
 	my $admin_timeout = getCurrentStatic('admin_timeout');
-	return  $self->sqlSelect("count(distinct sessions.uid)",
+	return  $self->sqlSelect("COUNT(DISTINCT sessions.uid)",
 			"sessions,users_param",
-			"sessions.uid=users_param.uid and name='adminlaststorychange' and date_sub(NOW(), INTERVAL $admin_timeout MINUTE) <= value"
+			"sessions.uid=users_param.uid
+			 AND name='adminlaststorychange'
+			 AND DATE_SUB(NOW(), INTERVAL $admin_timeout MINUTE) <= value"
 	);
 }
 

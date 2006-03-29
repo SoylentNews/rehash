@@ -566,6 +566,22 @@ sub userdir_handler {
 		$uri =~ s/^\Q$path//;
 	}
 
+	# URIs like /tags and /tags/foo and /tags/foo?type=bar are special cases.
+	if ($uri =~ m[^/tags (?: /([^?]*) | /? ) (?: \?(.*) )? $]x) {
+		my($word, $query) = ($1, $2);
+		my @args = ( );
+		if ($word =~ /^(active|recent|all)$/) {
+			push @args, "type=$word";
+		} else {
+			push @args, "tagname=$word";
+		}
+		push @args, $query if defined $query;
+		$r->args(join('&', @args));
+		$r->uri('/tags.pl');
+		$r->filename($constants->{basedir} . '/tags.pl');
+		return OK;
+	}
+
 	# for self-references (/~/ and /my/)
 	if (($saveuri =~ m[^/(?:%7[eE]|~)] && $uri =~ m[^/~ (?: /(.*) | /? ) $]x)
 		# /my/ or /my can match, but not /mything
