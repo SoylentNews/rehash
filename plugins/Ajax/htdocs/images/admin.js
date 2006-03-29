@@ -2,8 +2,10 @@
 
 function admin_signoff(el) {
 	var params = [];
+	var reskeyel = $('signoff-reskey-' + el.value);
 	params['op'] = 'admin_signoff';
 	params['stoid'] = el.value;
+	params['reskey'] = reskeyel.value;
 	ajax_update(params, 'signoff_' + el.value);
 	
 }
@@ -79,10 +81,17 @@ function remarks_popup() {
 
 function remarks_config_save() {
 	var params = [];
+	var reskey = $('remarks_reskey');
 	var min_priority = $('remarks_min_priority');
 	var limit = $('remarks_limit');
 	var filter = $('remarks_filter');
 	params['op'] = 'remarks_config_save';
+	if (!reskey && !reskey.value) {
+		return false;
+	} else {
+		alert (reskey.value);
+	}
+	params['reskey'] = reskey.value;
 	if (min_priority) {
 		params['min_priority'] = min_priority.value;
 	}
