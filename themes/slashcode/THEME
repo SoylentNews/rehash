@@ -155,6 +155,7 @@ task=tasks/set_cids.pl
 task=tasks/set_gse_min_stoid.pl
 task=tasks/set_recent_topics.pl
 task=tasks/spamarmor.pl
+task=tasks/url_checker.pl
 template=templates/admin;menu;default
 template=templates/articlemoved;misc;default
 template=templates/bannedtext_ipid;misc;default

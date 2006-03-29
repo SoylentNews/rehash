@@ -235,10 +235,10 @@ sub main {
 		},
 		showbookmarks => {
 			function	=> \&showBookmarks,
-			seclev		=> 1,
+			seclev		=> 0,
 			formname	=> $formname,
 			checks		=> [],
-			tab_selected	=> 'tags',
+			tab_selected	=> 'bookmarks',
 		},
 		edittags => {
 			function	=> \&editTags,
