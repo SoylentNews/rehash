@@ -3784,3 +3784,7 @@ UPDATE ajax_ops set reskey_type="use" where op="admin_signoff";
 # For bookmarks plugin
 INSERT INTO vars (name, description, value) VALUES ('bookmark_popular_days', "Number of days back to look for popular bookmarks", 1);
 INSERT INTO vars (name, description, value) VALUES ('bookmark_allowed_schemes', "Schemes to allow for bookmarks.  Separate entries with |", "http|https");
+
+# 2006-03-29
+UPDATE vars SET value = 'T_2_5_0_106' WHERE name = 'cvs_tag_currentcode';
+
