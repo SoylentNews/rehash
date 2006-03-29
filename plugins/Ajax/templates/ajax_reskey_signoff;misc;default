@@ -12,17 +12,17 @@ __name__
 ajax_reskey_signoff
 __template__
 [% reskey = Slash.getObject('Slash::ResKey');
-   IF !reskey_resource;
-   	reskey_resource = 'ajax_admin';
+   IF !reskey_name;
+   	reskey_name = 'ajax_admin';
    END;
-   rkey = reskey.key(reskey_resource, { nostate => 1 });
+   rkey = reskey.key(reskey_name, { nostate => 1 });
    IF rkey.create;
    	PROCESS reskey_tag;
    END;
 
    # don't carry over to subsequent calls
-   reskey_resource = '';
-   reskey_name = ''; %]
+   reskey_name = '';
+   reskey_label = ''; %]
 __seclev__
 10000
 __version__

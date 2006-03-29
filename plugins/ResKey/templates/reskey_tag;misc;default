@@ -22,13 +22,13 @@ __template__
    	this_reskey = user.state.reskey;
    END;
 
-   IF !reskey_name;
-	   reskey_name = 'reskey';
+   IF !reskey_label;
+	   reskey_label = 'reskey';
    END;
 
    IF this_reskey %]
-<input type="hidden" id="[% reskey_name %]" name="[% reskey_name %]" value="[% this_reskey %]">
-[% reskey_name = ''; END %]
+<input type="hidden" id="[% reskey_label %]" name="[% reskey_label %]" value="[% this_reskey %]">
+[% reskey_label = ''; END %]
 
 __seclev__
 500

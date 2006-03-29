@@ -13,7 +13,7 @@ __name__
 tagsstorydivuser
 __template__
 
-[% PROCESS ajax_reskey_tag reskey_name => 'newtags-reskey-' _ sidenc, reskey_resource => 'ajax_tags_write' %]
+[% PROCESS ajax_reskey_tag reskey_label => 'newtags-reskey-' _ sidenc, reskey_name => 'ajax_tags_write' %]
 <input type="text" id="newtags-[% sidenc %]" name="newtags-[% sidenc %]" value="[% newtagspreloadtext | strip_attribute %]" size=50 maxlength=60>
 <input type="button" value="Tag" onclick="tagsCreateForStory('[% sidenc %]')" class="button">
 
