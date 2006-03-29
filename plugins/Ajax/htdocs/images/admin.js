@@ -133,16 +133,15 @@ function admin_storyadminbox_fetch(secs) {
 }
 
 function make_spelling_correction(misspelled_word, form_element) {
-
 	var selected_index = document.forms.slashstoryform.elements[misspelled_word].selectedIndex;
 	
-	if(selected_index == 0) {
+	if (selected_index == 0) {
 		return(0);
 	}
 
 	// Either learning a word or making a correction.
-	if(selected_index >= 1) {
-		if(selected_index == 1) {
+	if (selected_index >= 1) {
+		if (selected_index == 1) {
 			;// Learn word not implemented
 		}
 		else {
@@ -162,7 +161,7 @@ function make_spelling_correction(misspelled_word, form_element) {
 	// Remove the table if we're done.
 	var table = document.getElementById("spellcheck");
 	var numrows = table.getElementsByTagName("TR");
-	if(numrows.length == 1) {
+	if (numrows.length == 1) {
 		table.parentNode.removeChild(table);
 	}	
 }
