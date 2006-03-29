@@ -21,16 +21,17 @@ sub main {
 	my $postflag = $user->{state}{post};
 
 	my %ops = (
-		bookmark 	=> [!$user->{is_anon}, \&bookmark,     0 ],
-		save		=> [!$user->{is_anon}, \&saveBookmark, 1 ]
+		bookmark 	=> [!$user->{is_anon}, \&bookmark, 0, 1 ],
+		save		=> [!$user->{is_anon}, \&saveBookmark, 1, 1 ],
+		showbookmarks	=> [1, \&showBookmarks, 0, 0 ],
 	);
 	
-	redirect("/login.pl") if $user->{is_anon};
 
 	$ops{default} = $ops{bookmark};
 	my $op = lc($form->{op} || 'default');
 	$op = 'default' if !$ops{$op} || !$ops{$op}[ALLOWED];
 	$op = 'default' if $ops{$op}[2] && !$postflag;
+	redirect("/login.pl") if $user->{seclev} < $ops{$op}[3];
 
 	header() if $op ne "save";
 	$ops{$op}[FUNCTION]->($constants, $slashdb, $user, $form);
@@ -115,7 +116,6 @@ sub saveBookmark {
 
 	my $bookmark_id;
 	my $user_bookmark = $bookmark->getUserBookmarkByUrlId($user->{uid}, $url_id);
-
 	if ($user_bookmark) {
 		$bookmark_data->{bookmark_id} = $user_bookmark->{bookmark_id};
 		$bookmark->updateBookmark($bookmark_data);
@@ -138,6 +138,35 @@ sub saveBookmark {
 	} else {
 		redirect($form->{url});
 	}
+}
+
+sub showBookmarks {
+	my ($constants, $slashdb, $user, $form) = @_;
+	my $bookmark = getObject("Slash::Bookmark");
+
+	my $days_back = $constants->{bookmark_popular_days} || 7;
+	
+	my $bookmarks;
+	
+	my $default = "popular";
+	my $type = $default;
+
+	if ($form->{popular}) {
+		$type = "popular";
+	} elsif ($form->{recent}) {
+		$type = "recent";
+	}
+
+	if ($type eq "popular") {
+		$bookmarks = $bookmark->getPopularBookmarks($days_back);
+	} elsif ($type eq "recent") {
+		$bookmarks = $bookmark->getRecentBookmarks();
+	}
+	
+	slashDisplay("recentandpop", {
+		type => $type,
+		bookmarks => $bookmarks,
+	});
 }
 
 createEnvironment();

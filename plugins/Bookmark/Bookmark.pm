@@ -55,6 +55,24 @@ sub updateBookmark {
 	$self->sqlUpdate("bookmarks", $bookmark, "bookmark_id = $bookmark->{bookmark_id}");
 }
 
+sub getRecentBookmarks {
+	my ($self, $limit) = @_;
+	$limit ||= 50;
+
+	return $self->sqlSelectAllHashrefArray("*", "bookmarks, urls", "bookmarks.url_id = urls.url_id", "ORDER by bookmarks.createdtime DESC LIMIT $limit");
+}
+
+sub getPopularBookmarks {
+	my ($self, $days, $limit) = @_;
+	$days ||= 3;
+	$limit ||= 50;
+
+	my $time_clause = " AND bookmarks.createdtime >= DATE_SUB(NOW(), INTERVAL $days DAY)";
+	
+	return $self->sqlSelectAllHashrefArray("count(*) AS cnt, bookmarks.title, urls.*", "bookmarks, urls", "bookmarks.url_id = urls.url_id $time_clause", "GROUP BY urls.url_id ORDER by 1 DESC, bookmarks.createdtime DESC  LIMIT $limit");
+	
+}
+
 1;
 
 __END__
