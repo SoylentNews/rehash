@@ -115,3 +115,10 @@ cursor: pointer;
 .show { display: inline; }
 
 
+.comment > .hidden  { display: none   }
+.comment > .full    { display: inline }
+.comment > .oneline { display: inline }
+.comment > .oneline .details, .oneline .commentBody, .oneline .commentSub {
+	display: none;
+}
+

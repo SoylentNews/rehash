@@ -1091,6 +1091,8 @@ sub displayThread {
 	my $hidden = my $skipped = 0;
 	my $return = '';
 
+	my $discussion2 = $user->{discussion2} && $user->{discussion2} eq 'slashdot';
+
 	# FYI: 'archive' means we're to write the story to .shtml at the close
 	# of the discussion without page breaks.  'metamod' means we're doing
 	# metamoderation.
@@ -1121,26 +1123,33 @@ sub displayThread {
 		# ahead more, counting all the visible kids.	--Pater
 		$skipped += $comment->{totalvisiblekids} if ($user->{mode} eq 'flat' || $user->{mode} eq 'nested');
 		$form->{startat} ||= 0;
-		next if $skipped <= $form->{startat};
+		next if $skipped <= $form->{startat} && !$discussion2;
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
 
+		my $class = 'oneline';
 		if ($comment->{points} < $user->{threshold}) {
 			if ($user->{is_anon} || ($user->{uid} != $comment->{uid})) {
-				$hidden++;
-				next;
+				if ($discussion2) {
+					$class = 'hidden';
+				} else {
+					$hidden++;
+					next;
+				}
 			}
 		}
 
 		my $highlight = 1 if $comment->{points} >= $user->{highlightthresh};
+		$class = 'full' if $full || $highlight;
 		my $finish_list = 0;
 
-		if ($full || $highlight) {
+		if ($full || $highlight || $discussion2) {
 			if ($lvl && $indent) {
 				$return .= $const->{tablebegin} .
-					dispComment($comment) . $const->{tableend};
+					dispComment($comment, { class => $class }) .
+					$const->{tableend};
 				$cagedkids = 0;
 			} else {
-				$return .= dispComment($comment);
+				$return .= dispComment($comment, { class => $class });
 			}
 			$displayed++;
 		} else {
@@ -1165,11 +1174,11 @@ sub displayThread {
 		}
 
 		$return .= "$const->{commentend}" if $finish_list;
-		$return .= "$const->{fullcommentend}" if (($full || $highlight) && $user->{mode} ne 'flat');
+		$return .= "$const->{fullcommentend}" if (($full || $highlight || $discussion2) && $user->{mode} ne 'flat');
 
-		last if $displayed >= $user->{commentlimit};
+		last if $displayed >= $user->{commentlimit} && !$discussion2;
 	}
-	if ($hidden
+	if ($hidden && !$discussion2
 		&& ! $user->{hardthresh}
 		&& $user->{mode} ne 'archive'
 		&& $user->{mode} ne 'metamod') {
@@ -1298,6 +1307,7 @@ EOT
 		reasons		=> $reasons,
 		can_mod		=> $can_mod,
 		is_anon		=> isAnon($comment->{uid}),
+		class		=> $options->{class}
 	}, { Return => 1, Nocomm => 1 });
 }
 

@@ -23,15 +23,15 @@ __name__
 dispComment
 __template__
 <li id="[% cid %]_tree" class="comment">
-<div id="[% cid %]_comment">
+<div id="[% cid %]_comment"[% IF user.discussion2 && (user.discussion2 == "slashdot" || user.discussion2 == "uofm") %] class="[% class %]"[% END %]>
 	<div class="commentTop">
 		<div class="title">
 			[% IF user.discussion2 && (user.discussion2 == "slashdot" || user.discussion2 == "uofm") %]
 			<script type="text/javascript">
-				displaymode[[% cid %]] = "full";
-				futuredisplaymode[[% cid %]] = "full";
+				displaymode[[% cid %]] = "[% class %]";
+				futuredisplaymode[[% cid %]] = "[% class %]";
 			</script>
-			<h4><a name="[% cid %]" onclick="setFocusComment(-[% cid %])">[% subject %]</a></h4>
+			<h4><a id="comment_link_[% cid %]" name="comment_link_[% cid %]" href="javascript:setFocusComment([% class == 'full' ? '-' : ''; cid %]);">[% subject %]</a></h4>
 			[% ELSE %]
 			<h4><a name="[% cid %]">[% subject %]</a></h4>
 			[% END %]
