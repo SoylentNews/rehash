@@ -708,6 +708,11 @@ sub userdir_handler {
 		}
 
 		return OK;
+	} elsif ($uri =~ m[^/bookmarks (?: /(.*) | /? ) $]x) {
+		$r->args('op=showbookmarks');
+		$r->uri('/bookmark.pl');
+		$r->filename($constants->{basedir} . '/bookmark.pl');
+		return OK;
 	}
 
 	# assuming Apache/mod_perl is decoding the URL in ->uri before
