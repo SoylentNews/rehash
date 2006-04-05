@@ -1139,7 +1139,7 @@ sub displayThread {
 		}
 
 		my $highlight = 1 if $comment->{points} >= $user->{highlightthresh};
-		$class = 'full' if $full || $highlight;
+		$class = $highlight ? 'full' : $full ? 'oneline' : $class;
 		my $finish_list = 0;
 
 		if ($full || $highlight || $discussion2) {
@@ -1298,7 +1298,7 @@ EOT
 
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
-		$can_mod, $reasons
+		$can_mod, $reasons, $options
 	) if $constants->{comments_hardcoded};
 
 	return slashDisplay('dispComment', {
@@ -1792,7 +1792,7 @@ sub _dataCacheRefresh {
 ########################################################
 # this sucks, but it is here for now
 sub _hard_dispComment {
-	my($comment, $constants, $user, $form, $comment_shrunk, $can_mod, $reasons) = @_;
+	my($comment, $constants, $user, $form, $comment_shrunk, $can_mod, $reasons, $options) = @_;
 	my $gSkin = getCurrentSkin();
 
 	my($comment_to_display, $score_to_display,
@@ -1913,24 +1913,41 @@ sub _hard_dispComment {
 			}
 		}
 	}
-	
-	my $title = qq|<a name="$comment->{cid}">$comment->{subject}</a>|;
+
+	my $discussion2 = $user->{discussion2} && ($user->{discussion2} eq 'slashdot' || $user->{discussion2} eq 'uofm');
+	my $class = $options->{class}; 
+	my $classattr = $discussion2 ? qq[ class="$class"] : '';
+
+	my $sign = $class eq 'full' ? '-' : '';
+	my $head = $discussion2 ? <<EOT1 : <<EOT2;
+			<script type="text/javascript">
+				displaymode[$comment->{cid}] = "$class";
+				futuredisplaymode[$comment->{cid}] = "$class";
+			</script>
+			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="javascript:setFocusComment($sign$comment->{cid});">$comment->{subject}</a></h4>
+EOT1
+			<h4><a name="$comment->{cid}">$comment->{subject}</a></h4>
+EOT2
+
 	my $return = <<EOT;
-		<li class="comment">
-			<div class="commentTop">
-				<div class="title">
-					<h4>$title</h4>
-				 	$score_to_display
-				</div>
-				<div class="details">
-					by $user_nick_to_display$zoosphere_display$user_email_to_display
-					on $time_to_display$comment_link_to_display
-					<small>$userinfo_to_display $comment->{ipid_display}</small>
-				</div>
-			</div>
-			<div class="commentBody">	
-			$comment_to_display
-			</div>
+<li id="$comment->{cid}_tree" class="comment">
+<div id="$comment->{cid}_comment"$classattr>
+	<div class="commentTop">
+		<div class="title">
+$head
+		 	$score_to_display
+		</div>
+		<div class="details">
+			by $user_nick_to_display$zoosphere_display$user_email_to_display
+			on $time_to_display$comment_link_to_display
+			<small>$userinfo_to_display $comment->{ipid_display}</small>
+		</div>
+	</div>
+	<div class="commentBody">	
+		$comment_to_display
+	</div>
+
+	<div class="commentSub">
 EOT
 
 	# Do not display comment navigation and reply links if we are in
@@ -1976,6 +1993,18 @@ EOT
 		}
 
 	}
+
+	$return .= "</div></div>\n\n";
+
+	if ($discussion2) {
+		$return .= <<EOT;
+<ul id="$comment->{cid}_group">
+	<li id="$comment->{cid}_hiddens" class="hide"></li>
+</ul>
+
+EOT
+	}
+
 	return $return;
 }
 

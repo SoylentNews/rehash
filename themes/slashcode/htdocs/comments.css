@@ -118,7 +118,7 @@ cursor: pointer;
 .comment > .hidden  { display: none   }
 .comment > .full    { display: inline }
 .comment > .oneline { display: inline }
-.comment > .oneline .details, .oneline .commentBody, .oneline .commentSub {
+.comment > .oneline .details, .comment > .oneline .commentBody, .comment > .oneline .commentSub {
 	display: none;
 }
 

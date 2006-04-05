@@ -131,7 +131,16 @@ function renderComment(cid, mode) {
 function updateComment(cid, mode) {
 	var existingdiv = $(cid + '_comment');
 	if (existingdiv) {
-		existingdiv.innerHTML = renderComment(cid, mode);
+		//existingdiv.innerHTML = renderComment(cid, mode);
+		existingdiv.className = mode;
+		var existinglink = $('comment_link_' + cid);
+		if (existinglink) {
+			if (mode == 'full') {
+				existinglink.href = 'javascript:setFocusComment(-' + cid + ');';
+			} else {
+				existinglink.href = 'javascript:setFocusComment(' + cid + ');';
+			}
+		}
 		/* if (displaymode[cid] == 'hidden') {
 			$(cid + "_tree").className = "hide";
 		} else {
@@ -202,15 +211,20 @@ function updateCommentTree(cid) {
 		}	
 	}
 
+	var cid_hiddens = $(cid+"_hiddens");
+	if (! cid_hiddens) { // race condition, probably: new comment added in between rendering, and JS data structure
+		return 0;
+	}
+
 	if (displaymode[cid] == 'hidden') {
-		$(cid+"_hiddens").className = "hide";
+		cid_hiddens.className = "hide";
 		return kidhiddens + 1 ;
 
 	} else if (kidhiddens) {
-		$(cid+"_hiddens").innerHTML = kidhiddens+" comments are hidden."; 
-		$(cid+"_hiddens").className = "show";
+		cid_hiddens.innerHTML = kidhiddens+" comments are hidden."; 
+		cid_hiddens.className = "show";
 	} else {
-		$(cid+"_hiddens").className = "hide"; 
+		cid_hiddens.className = "hide";
 	} 
 	return 0;
 }
