@@ -573,6 +573,16 @@ sub showSignoffBox {
 	return slashDisplay("sidebox", { title => $title, contents => $signofftext, name => "signoff" }, { Return => 1});
 }
 
+sub ajax_learnword {
+    my($self) = @_;
+    my $form = getCurrentForm();
+
+    my $template = $self->getTemplateByName("ispellok", { page => "admin" });
+    my $template_text = $self->sqlSelect("template", "templates", "tpid = " . $template->{tpid});
+    $template_text .= $form->{'word'} . ' ';
+    $self->sqlUpdate("templates", { template => $template_text }, "tpid = " . $template->{tpid});
+}
+
 sub DESTROY {
 	my($self) = @_;
 	$self->{_dbh}->disconnect if !$ENV{GATEWAY_INTERFACE} && $self->{_dbh};
