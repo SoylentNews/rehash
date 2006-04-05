@@ -910,14 +910,17 @@ Bender:Listen up, cause I got a climactic speech.
 Bender:I choose to not understand these signs!
 Bender:Aw, this bends!
 Bender:Farewell, big blue ball of idiots!
-Bender:This guy's not making any sense.  Can I kill him?  Please?
+Bender:This guy's not making any sense. Can I kill him? Please?
 Bender:Hooray, we don't have to do anything!
 Bender:I only speak enough binary to ask where the bathroom is.
 Bender:nogoodlawsprotectingtheinnocent--
-Bender:Senseless death!  The folk singer's best friend!
+Bender:Senseless death! The folk singer's best friend!
 Bender:Alright! Closure!
 Bender:You just lost five dollars.
 Bender:That's not my gold-plated 25-pin connector.
+Bender:I only know enough binary to ask where the bathroom is.
+Bender:Why would God think in binary?
+Bender:You can't count on God for jack! He pretty much told me so himself.
 Fry:There's a lot about my face you don't know.
 Fry:These new hands are great. I'm gonna break them in tonight.
 Fry:I refuse to testify on the grounds that my organs will be chopped up into a patty.
@@ -927,6 +930,7 @@ Fry:Where's Captain Bender? Off catastrophizing some other planet?
 Fry:People said I was dumb but I proved them!
 Fry:It's like a party in my mouth and everyone's throwing up.
 Fry:I don't regret this, but I both rue and lament it.
+Fry:You'll barely regret this.
 Fry:I'm never gonna get used to the thirty-first century. Caffeinated bacon?
 Fry:They're great! They're like sex except I'm having them.
 Fry:No, no, I was just picking my nose.
@@ -949,22 +953,26 @@ Fry:I'm literally angry with rage!
 Fry:The butter in my pocket is melting!
 Fry:Stop abducting me!
 Fry:What kind of bozos would start a Bender protest group?
-Fry:I can burp the alphabet.  A, B, D ... no, wait ...
+Fry:I can burp the alphabet. A, B, D ... no, wait ...
 Fry:Why use my own legs like an idiot when I can use a Chickenwalker?
 Fry:Hooray, we don't have to do anything!
 Fry:Prepare to be thought at!
-Fry:I did it!  And it's all thanks to the books at my local library.
+Fry:I did it! And it's all thanks to the books at my local library.
 Fry:Existing is basically all I do!
 Fry:It's a widely-believed fact!
-Fry:My hands!  My horrible, human, hands!
-Fry:How about me?  I'm human, and I've always wanted to see the future!
+Fry:My hands! My horrible, human hands!
+Fry:How about me? I'm human, and I've always wanted to see the future!
 Fry:The less fortunate get all the breaks!
 Fry:Please, Mr. Nixon! We're appealing to your sense of decency!
+Fry:I'll be whatever I wanna do.
 Fry:There's a political debate on. Quick, change the channel!
 Leela:There's a political debate on. Quick, change the channel!
 Leela:You did the best you could, I guess, and some of these gorillas are okay.
 Leela:This wangs chung.
+Leela:This toads the wet sprocket.
 Leela:He opened up relations with China. He doesn't want to hear about your ding-dong.
+Leela:This is by a wide margin the least likely thing that has ever happened.
+Leela:I'm a millionaire! Suddenly I have an opinion about the capital gains tax.
 EOT
 
 1;
