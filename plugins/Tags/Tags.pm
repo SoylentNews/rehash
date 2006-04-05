@@ -862,9 +862,12 @@ print STDERR "setting $tag->{tagid} to 0\n";
 					"tagnameid=$tagnameid");
 				if (@$uids) {
 					for my $uid (@$uids) {
-						$self->setUser($uid, { tag_clout => $new_user_clout });
+						push @uids_changed, $uid
+							if $self->setUser($uid, {
+								-tag_clout => "LEAST(tag_clout, $new_user_clout)"
+							});
 					}
-					my $uids_str = join(',', @$uids);
+					my $uids_str = join(',', @uids_changed);
 					my $user_min = $self->sqlSelect('MIN(tagid)', 'tags',
 						"uid IN ($uids_str)");
 					$new_min_tagid = $user_min if $user_min < $new_min_tagid;
@@ -886,10 +889,14 @@ print STDERR "setting $tag->{tagid} to 0\n";
 				my $uids = $self->sqlSelectColArrayref('uid', 'tags',
 					"tagnameid=$tagnameid AND globjid=$globjid");
 				if (@$uids) {
+					my @uids_changed = ( );
 					for my $uid (@$uids) {
-						$self->setUser($uid, { tag_clout => $new_user_clout });
+						push @uids_changed, $uid
+							if $self->setUser($uid, {
+								-tag_clout => "LEAST(tag_clout, $new_user_clout)"
+							});
 					}
-					my $uids_str = join(',', @$uids);
+					my $uids_str = join(',', @uids_changed);
 					my $user_min = $self->sqlSelect('MIN(tagid)', 'tags',
 						"uid IN ($uids_str)");
 					$new_min_tagid = $user_min if $user_min < $new_min_tagid;
