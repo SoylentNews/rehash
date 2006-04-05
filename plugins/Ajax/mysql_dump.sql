@@ -86,7 +86,7 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 104, 'all', 'Slash::ResKey::Che
 INSERT INTO reskey_vars VALUES (104, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
 INSERT INTO reskey_vars VALUES (104, 'acl_no', 'reskey_no_ajax', 'If this ACL present, can\'t use resource');
 INSERT INTO reskey_vars VALUES (104, 'duration_max-failures', 1, 'how many failures per reskey');
-INSERT INTO reskey_vars VALUES (104, 'tags_canread_stories', 1, 'Requires user to be subscriber');
+INSERT INTO reskey_vars VALUES (104, 'tags_canread_stories', 1, 'Requires user to have permission to read tags');
 INSERT INTO reskey_vars VALUES (104, 'user_seclev', 1, 'Minimum seclev to use resource');
 
 
@@ -103,7 +103,7 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 105, 'all', 'Slash::ResKey::Che
 INSERT INTO reskey_vars VALUES (105, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
 INSERT INTO reskey_vars VALUES (105, 'acl_no', 'reskey_no_ajax', 'If this ACL present, can\'t use resource');
 INSERT INTO reskey_vars VALUES (105, 'duration_max-failures', 1, 'how many failures per reskey');
-INSERT INTO reskey_vars VALUES (105, 'tags_canwrite_stories', 1, 'Requires user to be subscriber');
+INSERT INTO reskey_vars VALUES (105, 'tags_canwrite_stories', 1, 'Requires user to have permission to write tags');
 INSERT INTO reskey_vars VALUES (105, 'user_seclev', 1, 'Minimum seclev to use resource');
 
 
