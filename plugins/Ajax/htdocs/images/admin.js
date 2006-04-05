@@ -133,7 +133,8 @@ function admin_storyadminbox_fetch(secs) {
 }
 
 function make_spelling_correction(misspelled_word, form_element) {
-	var selected_index = document.forms.slashstoryform.elements[misspelled_word].selectedIndex;
+	var selected_key   = "select_" + form_element + '_' + misspelled_word;
+	var selected_index = document.forms.slashstoryform.elements[selected_key].selectedIndex;
 	
 	if (selected_index == 0) {
 		return(0);
@@ -142,24 +143,29 @@ function make_spelling_correction(misspelled_word, form_element) {
 	// Either learning a word or making a correction.
 	if (selected_index >= 1) {
 		if (selected_index == 1) {
-			;// Learn word not implemented
+			var params = [];
+			params['op'] = 'admin_learnword';
+			params['word'] = misspelled_word;
+			ajax_update(params);
 		}
 		else {
 			var re = new RegExp(misspelled_word, "g");
-			var correction = document.forms.slashstoryform.elements[misspelled_word].value;
+			var correction = document.forms.slashstoryform.elements[selected_key].value;
 			document.forms.slashstoryform.elements[form_element].value =
 				document.forms.slashstoryform.elements[form_element].value.replace(re, correction);
+
 		}
 
 		// Remove this row from the table.
-		var rowname = misspelled_word + '_correction';
+		var rowname = misspelled_word + '_' + form_element + '_correction';
 		var row = document.getElementById(rowname);
 		row.parentNode.removeChild(row);
 
 	}
 
 	// Remove the table if we're done.
-	var table = document.getElementById("spellcheck");
+	var tablename = "spellcheck_" + form_element;
+	var table = document.getElementById(tablename);
 	var numrows = table.getElementsByTagName("TR");
 	if (numrows.length == 1) {
 		table.parentNode.removeChild(table);
