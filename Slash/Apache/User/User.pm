@@ -537,6 +537,10 @@ sub userLogin {
 }
 
 ########################################################
+# XXX May want to rename this, since it's being used for a user's
+# prefs/info pages (/my/foo) and for the global handlers too (/foo).
+# Of course renaming requires editing a .conf file (see
+# bin/install-slashsite PerlTransHandler).
 sub userdir_handler {
 	my($r) = @_;
 
