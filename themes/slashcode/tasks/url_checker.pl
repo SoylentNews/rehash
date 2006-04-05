@@ -35,8 +35,6 @@ $task{$me}{code} = sub {
 
 	URL_CHECK: for my $url (@$urls, @$refresh_urls) {
 		
-		sleep 150;
-		
 		# Don't run forever...
 		if (time > $start_time + $timeout) {
 			slashdLog("Aborting checking urls, too much elapsed time");
