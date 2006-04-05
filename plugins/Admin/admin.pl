@@ -1435,12 +1435,12 @@ sub editStory {
 	}
 
 	my $tagbox_html = '';
-	if ($constants->{plugin}{Tags}) {
+	if ($constants->{plugin}{Tags} && $storyref->{sid}) {
 		my @tags_top = split / /, ($story->{tags_top} || '');
 		my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 		my @tags_example = $tags_reader->getExampleTagsForStory($story);
 		$tagbox_html .= slashDisplay('tagsstorydivtagbox', {
-			story =>        $story,
+			story =>        $storyref,
 			tags_top =>     \@tags_top,
 			tags_example => \@tags_example,
 		}, { Return => 1 });
