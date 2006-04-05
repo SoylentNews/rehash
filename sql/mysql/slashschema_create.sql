@@ -262,6 +262,7 @@ CREATE TABLE comments (
 	cid mediumint UNSIGNED NOT NULL auto_increment,
 	pid mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	date datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
+	last_update TIMESTAMP NOT NULL,
 	ipid char(32) DEFAULT '' NOT NULL,
 	subnetid char(32) DEFAULT '' NOT NULL,
 	subject varchar(50) NOT NULL,

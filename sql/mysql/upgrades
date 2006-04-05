@@ -3788,6 +3788,9 @@ INSERT INTO vars (name, description, value) VALUES ('bookmark_allowed_schemes', 
 # 2006-03-29
 UPDATE vars SET value = 'T_2_5_0_106' WHERE name = 'cvs_tag_currentcode';
 
-INSERT INTO `reskey_resource_checks` (`rkrcid`, `rkrid`, `type`, `class`, `ordernum`) VALUES (NULL, 8,'use','Slash::ResKey::Checks::Post',151);
-INSERT INTO `reskey_resource_checks` (`rkrcid`, `rkrid`, `type`, `class`, `ordernum`) VALUES (NULL, 8,'all','Slash::ResKey::Checks::Duration',601);
-INSERT INTO `reskey_resource_checks` (`rkrcid`, `rkrid`, `type`, `class`, `ordernum`) VALUES (NULL ,8,'all','Slash::ResKey::Checks::User',101);
+ALTER TABLE comments ADD COLUMN last_modified TIMESTAMP NOT NULL AFTER date;
+UPDATE comments SET last_update = date;
+
+INSERT INTO reskey_resource_checks (rkrcid, rkrid, type, class, ordernum) VALUES (NULL, 8, 'use', 'Slash::ResKey::Checks::Post', 151);
+INSERT INTO reskey_resource_checks (rkrcid, rkrid, type, class, ordernum) VALUES (NULL, 8, 'all', 'Slash::ResKey::Checks::Duration', 601);
+INSERT INTO reskey_resource_checks (rkrcid, rkrid, type, class, ordernum) VALUES (NULL, 8, 'all', 'Slash::ResKey::Checks::User', 101);
