@@ -49,6 +49,8 @@ __template__
 
 [% ELSE %]
 
+	[% Slash.createMenu('tagszg', { style => 'oldstyle' }) %]
+
 	[% IF objects.size > 0 %]
 		<table class="data">
 		<tr class="data_head"><th><b>[% tagname | strip_literal %]</b></th></tr>

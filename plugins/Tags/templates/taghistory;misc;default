@@ -17,16 +17,16 @@ __seclev__
 10000
 __template__
 <table class="data">
-[% toggle = 0 %]
+[% toggle = 1 %]
 [% IF tags.size > 0 %]
 	[% FOREACH tag = tags %]
-		<tr class="data_hl[% toggle ? 2 : 1; %]">
+		<tr class="data_hl[% toggle %]">
 			[% nickname = Slash.db.getUser(tag.uid, "nickname") %]
 			<td>[% tag.tagname %]</td>
 			<td><a href="[% gSkin.rootdir %]/~[% nickname | strip_paramattr %]">[% nickname | strip_literal %]</a></td>
-			<td>[% tag.created_at %]</td>
+			<td>[% IF tag.inactivated %]<s>[% END %][% tag.created_at %][% IF tag.inactivated %]</s>[% END %]</td>
 		</tr>
-		[% toggle = !toggle %]
+		[% toggle = 3 - toggle %]
 	[% END %]
 [% ELSE %]
 	<td class="data_hl1">No tags</td>

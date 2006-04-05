@@ -406,11 +406,14 @@ sub getTagsByNameAndIdArrayref {
 		my $uid_q = $self->sqlQuote($options->{uid});
 		$uid_where = " AND uid=$uid_q";
 	}
+	my $inactivated_where = $options && $options->{include_inactive}
+		? ''
+		: ' AND inactivated IS NULL';
 
 	my $ar = $self->sqlSelectAllHashrefArray(
 		'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
 		'tags',
-		"globjid=$globjid AND inactivated IS NULL $uid_where",
+		"globjid=$globjid $inactivated_where $uid_where",
 		'ORDER BY tagid');
 
 	# Now add an extra field to every element returned:  the
@@ -544,8 +547,13 @@ sub getTagnameAdmincmds {
 
 sub getExampleTagsForStory {
 	my($self, $story) = @_;
+	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
-	my @examples = split / /, $constants->{tags_stories_examples};
+	my $cur_time = $slashdb->getTime();
+	my @examples = split / /,
+		($cur_time lt $story->{time})
+		? $constants->{tags_stories_examples_pre}
+		? $constants->{tags_stories_examples};
 	my $chosen_ar = $self->getTopiclistForStory($story->{stoid});
 	$#$chosen_ar = 3 if $#$chosen_ar > 3;
 	my $tree = $self->getTopicTree();
@@ -805,12 +813,12 @@ sub ajaxTagHistoryStory {
 	my $sid = $sidenc; $sid =~ tr{:}{/};
 	my $stoid = $slashdb->getStoidFromSid($sid);
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid);
+	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid, { include_inactive => 1 });
 	slashDisplay('taghistory', { tags => $tags_ar }, { Return => 1 } );
 }
 
 { # closure
-my @clout_reduc_map = qw(  0.05  0.10  0.30  0.80  1.00  );
+my @clout_reduc_map = qw(  0.15  0.50  0.90  0.99  1.00  );
 sub processAdminCommand {
 	my($self, $c, $stoid) = @_;
 

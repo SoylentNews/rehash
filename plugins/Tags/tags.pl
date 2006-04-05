@@ -19,9 +19,8 @@ sub main {
 	my $gSkin = getCurrentSkin();
 
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-
+	my $title;
 	my $tagname = $form->{tagname} || '';
-
 	my $index_hr = { tagname => $tagname };
 
 	if ($tagname eq '') {
@@ -42,15 +41,18 @@ sub main {
 			$index_hr->{tagnames} = $tags_reader->listTagnamesRecent(3600 * 6);
 		}
 
+		$title = getData('head1');
+
 	} else {
 
 		$index_hr->{objects} = $tags_reader->getAllObjectsTagname($tagname);
+
+		$title = getData('head2', { tagname => $tagname });
 
 	}
 
 #use Data::Dumper; print STDERR scalar(localtime) . " index_hr: " . Dumper($index_hr);
 
-	my $title = getData('head');
 	header({ title => $title });
 	slashDisplay('index', $index_hr);
 	footer();

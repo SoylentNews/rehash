@@ -2330,6 +2330,7 @@ sub saveUserAdmin {
 		$user_edits_table->{author} = $form->{author} ? 1 : 0 ;
 		$user_edits_table->{defaultpoints} = $form->{defaultpoints};
 		$user_edits_table->{tokens} = $form->{tokens};
+		$user_edits_table->{tag_clout} = $form->{tag_clout};
 		$user_edits_table->{m2info} = $form->{m2info};
 		$user_edits_table->{acl} = $acl_change if $acl_change;
 

@@ -17,8 +17,11 @@ data
 __template__
 [% SWITCH value %]
 
-[% CASE 'head' %]
+[% CASE 'head1' %]
 	[% constants.sitename %] Tags
+
+[% CASE 'head2' %]
+	Items Tagged With '[% tagname | strip_notags %]'
 
 [% CASE 'tags_saved' %]
 	Tags saved.
