@@ -1740,9 +1740,9 @@ sub get_ispell_comments {
 		# If this is a "&" line, there may be one or more suggestions
 		# separated by commas and terminated by newlines;  they may
 		# contain spaces.
-		$misspelled_suggestion{$1} = $2 if (
-			($line =~ /^\& (.+) \d+ \d+: (.+)/) || ($line =~ /^\# (.+) \d+/)
-		);
+		$misspelled_suggestion{$1} = ($2 || '')
+			if    $line =~ /^\& (.+) \d+ \d+: (.+)/
+			   || $line =~ /^\# (.+) \d+/;
 	}
 	close $ispell_fh;
 	unlink $tmptext, $tmpok;
