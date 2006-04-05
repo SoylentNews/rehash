@@ -103,7 +103,7 @@ sub getTop5 {
 	for my $tagnameid (@tagnameids) {
 		$tagname_admincmds->{$tagnameid} ||= $tags_reader->getTagnameAdmincmds($tagnameid);
 	}
-use Data::Dumper; print STDERR "tagname_admincmds: " . Dumper($tagname_admincmds);
+#use Data::Dumper; print STDERR "tagname_admincmds: " . Dumper($tagname_admincmds);
 
 	my %tagids_unique = map { ( $_->{tagid}, 1 ) } @$tag_ar;
 	my @tagids = sort { $a <=> $b } keys %tagids_unique;
@@ -113,7 +113,7 @@ use Data::Dumper; print STDERR "tagname_admincmds: " . Dumper($tagname_admincmds
 		'tagid, name, value',
 		'tag_params',
 		"tagid IN ($tagids_str)");
-use Data::Dumper; print STDERR "tagids='@tagids' tag_params: " . Dumper($tag_params);
+#use Data::Dumper; print STDERR "tagids='@tagids' tag_params: " . Dumper($tag_params);
 
 	my %scores = ( );
 	for my $tag (@$tag_ar) {
