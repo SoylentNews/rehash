@@ -33,7 +33,7 @@ sub main {
 	$op = 'default' if $ops{$op}[2] && !$postflag;
 	redirect("/login.pl") if $user->{seclev} < $ops{$op}[3];
 
-	header() if $op ne "save";
+	header("$constants->{sitename} Bookmarks") if $op ne "save";
 	$ops{$op}[FUNCTION]->($constants, $slashdb, $user, $form);
 	footer() if $op ne "save";
 }
