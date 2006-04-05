@@ -43,15 +43,14 @@ __template__
 		<div class="topic">
 			<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><img src="[% constants.imagedir %]/topics/[% topic.image %]" width="[% topic.width %]" height="[% topic.height %]" alt="[% topic.textname %]" title="[% topic.textname %]"></a>
 		</div>
-		[% IF submission.journal_id;
-			journal     = Slash.getObject('Slash::Journal');
-			thisjournal = journal.get(submission.journal_id);
-			IF thisjournal && thisjournal.uid;
+	[% IF submission.journal_id;
+		journal     = Slash.getObject('Slash::Journal');
+		thisjournal = journal.get(submission.journal_id);
+		IF thisjournal && thisjournal.uid;
 			thisuser    = Slash.db.getUser(thisjournal.uid); %]
-			<p>This submission comes from  <a href="[% constants.rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/">[% thisuser.nickname | strip_literal %] ([% thisjournal.uid %])'s journal</a></p>
-	[% END;
-	
-END %]
+			<p>This submission comes from <a href="[% constants.rootdir %]/~[% thisuser.nickname | strip_paramattr %]/journal/">[% thisuser.nickname | strip_literal %] ([% thisjournal.uid %])'s journal</a></p>
+		[% END;
+	END %]
 		[% subtext %]
 	</div>
 </div>
