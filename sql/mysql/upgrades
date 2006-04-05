@@ -3769,10 +3769,6 @@ INSERT IGNORE INTO reskey_resources VALUES (8, 'bookmark');
 # 2006-03-21
 UPDATE vars SET value = 'T_2_5_0_104' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# PUDGE LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # 2006-03-24
@@ -3788,7 +3784,7 @@ INSERT INTO vars (name, description, value) VALUES ('bookmark_allowed_schemes', 
 # 2006-03-29
 UPDATE vars SET value = 'T_2_5_0_106' WHERE name = 'cvs_tag_currentcode';
 
-ALTER TABLE comments ADD COLUMN last_modified TIMESTAMP NOT NULL AFTER date;
+ALTER TABLE comments ADD COLUMN last_update TIMESTAMP NOT NULL AFTER date;
 UPDATE comments SET last_update = date;
 
 INSERT INTO reskey_resource_checks (rkrcid, rkrid, type, class, ordernum) VALUES (NULL, 8, 'use', 'Slash::ResKey::Checks::Post', 151);
@@ -3807,4 +3803,8 @@ INSERT INTO ajax_ops VALUES (NULL, 'admin_learnword', 'Slash::Admin', 'admin_lea
 
 # 2006-04-05
 UPDATE vars SET value = 'T_2_5_0_107' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# PUDGE LAST UPDATED HERE
 
