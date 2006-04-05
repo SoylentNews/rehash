@@ -553,7 +553,7 @@ sub getExampleTagsForStory {
 	my @examples = split / /,
 		($cur_time lt $story->{time})
 		? $constants->{tags_stories_examples_pre}
-		? $constants->{tags_stories_examples};
+		: $constants->{tags_stories_examples};
 	my $chosen_ar = $self->getTopiclistForStory($story->{stoid});
 	$#$chosen_ar = 3 if $#$chosen_ar > 3;
 	my $tree = $self->getTopicTree();
@@ -861,6 +861,7 @@ print STDERR "setting $tag->{tagid} to 0\n";
 				my $uids = $self->sqlSelectColArrayref('uid', 'tags',
 					"tagnameid=$tagnameid");
 				if (@$uids) {
+					my @uids_changed;
 					for my $uid (@$uids) {
 						push @uids_changed, $uid
 							if $self->setUser($uid, {
