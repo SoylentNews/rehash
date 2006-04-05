@@ -61,7 +61,8 @@ sub getRecentBookmarks {
 
 	return $self->sqlSelectAllHashrefArray("*", "bookmarks, urls",
 		"bookmarks.url_id = urls.url_id",
-		"ORDER BY bookmarks.createdtime DESC LIMIT $limit");
+		"ORDER BY bookmarks.createdtime DESC LIMIT $limit"
+	);
 }
 
 sub getPopularBookmarks {
@@ -74,7 +75,8 @@ sub getPopularBookmarks {
 	return $self->sqlSelectAllHashrefArray("COUNT(*) AS cnt, bookmarks.title, urls.*",
 		"bookmarks, urls",
 		"bookmarks.url_id = urls.url_id $time_clause",
-		"GROUP BY urls.url_id ORDER BY cnt DESC, bookmarks.createdtime DESC LIMIT $limit");
+		"GROUP BY urls.url_id ORDER BY cnt DESC, bookmarks.createdtime DESC LIMIT $limit"
+	);
 	
 }
 

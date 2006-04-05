@@ -3803,4 +3803,4 @@ UPDATE vars SET name='tags_stories_examples_pre' WHERE name='tags_stories_exampl
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_examples', '', 'Example tags for stories');
 
 # Changes for plugins/Ajax
-INSERT INTO ajax_ops VALUES(NULL, 'admin_learnword', 'Slash::Admin', 'admin_learnword', 'ajax_admin', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'admin_learnword', 'Slash::Admin', 'admin_learnword', 'ajax_admin', 'createuse');

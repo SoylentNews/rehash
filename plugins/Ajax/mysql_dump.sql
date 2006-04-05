@@ -116,12 +116,12 @@ INSERT INTO ajax_ops VALUES (NULL, 'remarks_config', 'Slash::Remarks', 'ajaxFetc
 INSERT INTO ajax_ops VALUES (NULL, 'remarks_config_save', 'Slash::Remarks', 'ajaxConfigSave', 'ajax_admin', 'createuse');
 
 # signoff
-INSERT INTO ajax_ops VALUES(NULL, 'admin_signoff', 'Slash::Admin', 'ajax_signoff', 'ajax_admin', 'use');
+INSERT INTO ajax_ops VALUES (NULL, 'admin_signoff', 'Slash::Admin', 'ajax_signoff', 'ajax_admin', 'use');
 
 # slashboxes
-INSERT INTO ajax_ops VALUES(NULL, 'admin_slashdbox', 'Slash::Admin', 'ajax_slashdbox', 'ajax_admin', 'createuse');
-INSERT INTO ajax_ops VALUES(NULL, 'admin_storyadminbox', 'Slash::Admin', 'ajax_storyadminbox', 'ajax_admin', 'createuse');
-INSERT INTO ajax_ops VALUES(NULL, 'admin_authorbox', 'Slash::Admin', 'ajax_authorbox', 'ajax_admin', 'createuse');
-INSERT INTO ajax_ops VALUES(NULL, 'admin_perfbox', 'Slash::Admin', 'ajax_perfbox', 'ajax_admin', 'createuse');
-INSERT INTO ajax_ops VALUES(NULL, 'admin_learnword', 'Slash::Admin', 'admin_learnword', 'ajax_admin', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'admin_slashdbox', 'Slash::Admin', 'ajax_slashdbox', 'ajax_admin', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'admin_storyadminbox', 'Slash::Admin', 'ajax_storyadminbox', 'ajax_admin', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'admin_authorbox', 'Slash::Admin', 'ajax_authorbox', 'ajax_admin', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'admin_perfbox', 'Slash::Admin', 'ajax_perfbox', 'ajax_admin', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'admin_learnword', 'Slash::Admin', 'admin_learnword', 'ajax_admin', 'createuse');
 

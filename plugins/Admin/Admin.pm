@@ -574,13 +574,13 @@ sub showSignoffBox {
 }
 
 sub ajax_learnword {
-    my($self) = @_;
-    my $form = getCurrentForm();
+	my($self) = @_;
+	my $form = getCurrentForm();
 
-    my $template = $self->getTemplateByName("ispellok", { page => "admin" });
-    my $template_text = $self->sqlSelect("template", "templates", "tpid = " . $template->{tpid});
-    $template_text .= $form->{'word'} . ' ';
-    $self->sqlUpdate("templates", { template => $template_text }, "tpid = " . $template->{tpid});
+	my $template = $self->getTemplateByName("ispellok", { page => "admin" });
+	my $template_text = $self->sqlSelect("template", "templates", "tpid = " . $template->{tpid});
+	$template_text .= $form->{'word'} . ' ';
+	$self->sqlUpdate("templates", { template => $template_text }, "tpid = " . $template->{tpid});
 }
 
 sub DESTROY {
