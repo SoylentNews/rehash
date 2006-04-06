@@ -9,7 +9,7 @@ CREATE TABLE tags (
 	globjid		int UNSIGNED NOT NULL,
 	uid		mediumint UNSIGNED NOT NULL,
 	created_at	datetime NOT NULL,
-	inactivated	datetime DEFAULT NULL
+	inactivated	datetime DEFAULT NULL,
 	PRIMARY KEY tagid (tagid),
 	KEY tagnameid (tagnameid),
 	KEY globjid_tagnameid (globjid, tagnameid),
