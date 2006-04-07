@@ -610,7 +610,7 @@ print STDERR scalar(localtime) . " ajaxGetUserStory for stoid=$stoid sidenc=$sid
 	my $uid = $user->{uid};
 
 	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid, { uid => $uid });
-	my @tags = sort map { $_->{tagname} } @$tags_ar;
+	my @tags = sort tagnameorder map { $_->{tagname} } @$tags_ar;
 #print STDERR scalar(localtime) . " ajaxGetUserStory for stoid=$stoid uid=$uid tags: '@tags' tags_ar: " . Dumper($tags_ar);
 
 	my @newtagspreload = @tags;
@@ -953,19 +953,20 @@ sub setLastscanned {
 
 sub listTagnamesAll {
 	my($self, $options) = @_;
-	my $ar;
+	my $tagname_ar;
 	if ($options->{really_all}) {
-		$ar = $self->sqlSelectColArrayref('tagname', 'tagnames',
+		$tagname_ar = $self->sqlSelectColArrayref('tagname', 'tagnames',
 			'',
 			'ORDER BY tagname');
 	} else {
-		$ar = $self->sqlSelectColArrayref('tagname',
+		$tagname_ar = $self->sqlSelectColArrayref('tagname',
 			"tagnames LEFT JOIN tagname_params
 				ON (tagnames.tagnameid=tagname_params.tagnameid AND tagname_params.name='tag_clout')",
 			'value IS NULL OR value > 0',
 			'ORDER BY tagname');
 	}
-	return $ar;
+	@$tagname_ar = sort tagnameorder @$tagname_ar;
+	return $tagname_ar;
 }
 
 sub listTagnamesActive {
@@ -1061,19 +1062,30 @@ sub listTagnamesActive {
 
 sub listTagnamesRecent {
 	my($self, $seconds) = @_;
-	return $self->sqlSelectColArrayref(
+	my $recent_ar = $self->sqlSelectColArrayref(
 		'DISTINCT tagnames.tagname',
-		"tags LEFT JOIN tag_params
+		"users_info,
+		 tags LEFT JOIN tag_params
 		 	ON (tags.tagid=tag_params.tagid AND tag_params.name='tag_clout'),
 		 tagnames LEFT JOIN tagname_params
 			ON (tagnames.tagnameid=tagname_params.tagnameid AND tagname_params.name='tag_clout')",
 		"tagnames.tagnameid=tags.tagnameid
 		 AND inactivated IS NULL
-		 AND created_at >= DATE_SUB(NOW(), INTERVAL $seconds SECOND)
+		 AND tags.created_at >= DATE_SUB(NOW(), INTERVAL $seconds SECOND)
 		 AND (tag_params.value IS NULL OR tag_params.value > 0)
-		 AND (tagname_params.value IS NULL OR tagname_params.value > 0)",
+		 AND (tagname_params.value IS NULL OR tagname_params.value > 0)
+		 AND tags.uid=users_info.uid AND users_info.tag_clout > 0",
 		'ORDER BY tagnames.tagname'
 	);
+	@$recent_ar = sort tagnameorder @$recent_ar;
+	return $recent_ar;
+}
+
+# a sort order utility function
+sub tagnameorder {
+	my($a1, $a2) = $a =~ /(^\!)?(.*)/;
+	my($b1, $b2) = $b =~ /(^\!)?(.*)/;
+	$a2 cmp $b2 || $a1 cmp $b1;
 }
 
 #################################################################
