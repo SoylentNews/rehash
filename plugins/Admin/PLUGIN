@@ -58,3 +58,4 @@ template=templates/topic_popup_ui;admin;default
 template=templates/topic_popup_ui_topiced;admin;default
 template=templates/varEdit;admin;default
 template=templates/topicEdit;admin;default
+template=templates/spellcheck;admin;default
