@@ -45,7 +45,19 @@ sub main {
 
 	} else {
 
-		$index_hr->{objects} = $tags_reader->getAllObjectsTagname($tagname);
+		my $objects = $tags_reader->getAllObjectsTagname($tagname);
+		my %globjids = ( map { ( $_->{globjid}, 1 ) } @$objects );
+		my @objects = ( );
+		for my $globjid (keys %globjids) {
+			my @objs = (grep { $_->{globjid} == $globjid } @$objects);
+			push @objects, {
+				url	=> $objs[0]{url},
+				title	=> $objs[0]{title},
+				count	=> scalar(@objs),
+			};
+		}
+		@objects = sort { $b->{count} <=> $a->{count} || $a->{title} cmp $b->{title} } @objects;
+		$index_hr->{objects} = \@objects;
 
 		$title = getData('head2', { tagname => $tagname });
 
