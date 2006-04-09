@@ -859,7 +859,7 @@ print STDERR "setting $tag->{tagid} to 0\n";
 				"tagnameid=$tagnameid");
 			if ($new_user_clout < 1) {
 				my $uids = $self->sqlSelectColArrayref('uid', 'tags',
-					"tagnameid=$tagnameid");
+					"tagnameid=$tagnameid AND inactivated IS NOT NULL");
 				if (@$uids) {
 					my @uids_changed;
 					for my $uid (@$uids) {
@@ -888,7 +888,8 @@ print STDERR "setting $tag->{tagid} to 0\n";
 				"tagnameid=$tagnameid AND globjid=$globjid");
 			if ($new_user_clout < 1) {
 				my $uids = $self->sqlSelectColArrayref('uid', 'tags',
-					"tagnameid=$tagnameid AND globjid=$globjid");
+					"tagnameid=$tagnameid AND inactivated IS NOT NULL
+					 AND globjid=$globjid");
 				if (@$uids) {
 					my @uids_changed = ( );
 					for my $uid (@$uids) {
