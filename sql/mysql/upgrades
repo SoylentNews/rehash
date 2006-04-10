@@ -3808,3 +3808,11 @@ UPDATE vars SET value = 'T_2_5_0_107' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
 
+# Changes for plugins/Relocate which ONLY need be applied if you
+# installed it pre-June 2004.  Somehow these changes were omitted
+# from this upgrades file at that time.  If you installed it
+# after that time, you already have these changes.
+ALTER TABLE links_for_stories ADD COLUMN stoid MEDIUMINT UNSIGNED NOT NULL FIRST;
+UPDATE links_for_stories, stories SET links_for_stories.stoid=stories.stoid WHERE links_for_stories.sid=stories.sid;
+ALTER TABLE links_for_stories DROP PRIMARY KEY, DROP KEY sid, ADD PRIMARY KEY (id, stoid), ADD KEY stoid (stoid), DROP COLUMN sid;
+
