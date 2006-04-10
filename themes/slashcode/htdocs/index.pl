@@ -309,6 +309,7 @@ sub getDispModeForStory {
 	my $skins     = $slashdb->getSkins();
 	my $dispmode;
 
+	# sometimes this is uninit ...
 	my $ps_nexus = $skins->{$story->{primaryskid}}->{nexus};
 
 	if ($gSkin->{nexus} != $constants->{mainpage_nexus_tid}) {

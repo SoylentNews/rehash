@@ -3741,8 +3741,6 @@ CREATE TABLE tagcommand_adminlog (
 # 2006-03-14
 UPDATE vars SET value = 'T_2_5_0_103' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 DROP TABLE IF EXISTS urls;
 CREATE TABLE urls (
 	url_id INT(10) UNSIGNED NOT NULL auto_increment,
@@ -3768,8 +3766,6 @@ INSERT IGNORE INTO reskey_resources VALUES (8, 'bookmark');
 
 # 2006-03-21
 UPDATE vars SET value = 'T_2_5_0_104' WHERE name = 'cvs_tag_currentcode';
-
-# SLASHDOT LAST UPDATED HERE
 
 # 2006-03-24
 UPDATE vars SET value = 'T_2_5_0_105' WHERE name = 'cvs_tag_currentcode';
@@ -3808,6 +3804,8 @@ UPDATE vars SET value = 'T_2_5_0_107' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
 
+# SLASHDOT LAST UPDATED HERE
+
 # Changes for plugins/Relocate which ONLY need be applied if you
 # installed it pre-June 2004.  Somehow these changes were omitted
 # from this upgrades file at that time.  If you installed it
@@ -3815,4 +3813,3 @@ UPDATE vars SET value = 'T_2_5_0_107' WHERE name = 'cvs_tag_currentcode';
 ALTER TABLE links_for_stories ADD COLUMN stoid MEDIUMINT UNSIGNED NOT NULL FIRST;
 UPDATE links_for_stories, stories SET links_for_stories.stoid=stories.stoid WHERE links_for_stories.sid=stories.sid;
 ALTER TABLE links_for_stories DROP PRIMARY KEY, DROP KEY sid, ADD PRIMARY KEY (id, stoid), ADD KEY stoid (stoid), DROP COLUMN sid;
-

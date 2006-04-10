@@ -623,5 +623,3 @@ function isInWindow(obj) {
 	return 0;
 }
 
-
-
