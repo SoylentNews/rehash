@@ -513,6 +513,7 @@ sub add_author_quotes {
 sub userLogin {
 	my($uid_try, $passwd, $logtoken) = @_;
 	my $slashdb = getCurrentDB();
+	my($user) = getCurrentUser();
 
 	# only allow plain text passwords, unless logtoken is passed,
 	# then only allow that
@@ -526,7 +527,10 @@ sub userLogin {
 
 	if (!isAnon($uid)) {
 		setCookie('user', bakeUserCookie($uid, $cookvalue),
-			$slashdb->getUser($uid, 'session_login'));
+			$user->{state}{login_temp} eq 'yes'
+				? 2
+				: $slashdb->getUser($uid, 'session_login')
+		);
 		return($uid, $newpass);
 	} else {
 		my $gSkin = getCurrentSkin();

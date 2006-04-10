@@ -2585,7 +2585,7 @@ sub getLogToken {
 	}
 
 	# reset the temp values
-	$user->{state}{login_temp}   = $login_temp;
+	$user->{state}{login_temp}   = $login_temp unless $value;
 	$user->{state}{login_public} = $login_public;
 
 #print STDERR scalar(gmtime) . " $$ getLogToken returning, value='$value'\n";
@@ -2622,12 +2622,13 @@ sub setLogToken {
 	# prune logtokens table, each user should not have too many
 	my $uid_q = $self->sqlQuote($uid);
 	my $max = getCurrentStatic('logtokens_max') || 2;
-	my $total = $self->sqlCount('users_logtokens', "uid = $uid_q");
+	my $where = "uid = $uid_q AND temp = '$temp_str' AND public = '$public_str'";
+	my $total = $self->sqlCount('users_logtokens', $where);
 	if ($total > $max) {
 		my $limit = $total - $max;
 		my $logtokens = $self->sqlSelectAllHashref(
 			'lid', 'lid, uid, temp, public, locationid',
-			'users_logtokens', "uid = $uid_q",
+			'users_logtokens', $where,
 			"ORDER BY expires LIMIT $limit"
 		);
 		my @lids = sort { $a <=> $b } keys %$logtokens;
