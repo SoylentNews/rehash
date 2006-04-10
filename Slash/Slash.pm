@@ -1296,6 +1296,8 @@ EOT
 	$comment->{fakeemail_vis} = ellipsify($comment->{fakeemail});
 	push @{$user->{state}{cids}}, $comment->{cid};
 
+	$options->{class} ||= 'full';
+
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
 		$can_mod, $reasons, $options
