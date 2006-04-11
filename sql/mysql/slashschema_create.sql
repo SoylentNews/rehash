@@ -1260,6 +1260,7 @@ CREATE TABLE urls (
 	content_type VARCHAR(60),
 	initialtitle VARCHAR(255),
 	validatedtitle VARCHAR(255),
+	tags_top VARCHAR(255) DEFAULT '' NOT NULL,
 	PRIMARY KEY (url_id),
 	UNIQUE url_digest (url_digest)
 );
