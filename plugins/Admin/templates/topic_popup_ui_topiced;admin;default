@@ -14,9 +14,9 @@ __template__
 [% names = name; name = names.0; stpid = stid; stpid_ordered = stid_ordered %]
 <input type="hidden" value="topiced" name="topic_source">
 [% IF include_css %]
-<link rel="stylesheet" type="text/css" rev="alternate" href="[% gSkin.rootdir %]/admin-topic-popup.css">
+<link rel="stylesheet" type="text/css" rev="alternate" href="[% gSkin.rootdir %]/admin-topic-popup.css?[% constants.cvs_tag_currentcode %]">
 [%- END %]
-<script src="[% gSkin.rootdir %]/admin-topic-popup.js" type="text/javascript"></script>
+<script src="[% gSkin.rootdir %]/admin-topic-popup.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 
 <input type="hidden" value="topiced" name="[% name %]_submit_op">
 [% mykey = name _ "_saved_tree" -%]
