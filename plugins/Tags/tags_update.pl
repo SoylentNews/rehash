@@ -30,31 +30,48 @@ $task{$me}{code} = sub {
 	$tags_reader = getObject("Slash::Tags", { db_type => 'reader' });
 
 	# Find out which tag we need to start scanning from.
-	my $lastmaxid = ($slashdb->getVar('tags_stories_lastscanned', 'value', 1) || 0) + 1;
+	my $last_story_maxid = ($slashdb->getVar('tags_stories_lastscanned', 'value', 1) || 0) + 1;
+	my $last_url_maxid = ($slashdb->getVar('tags_urls_lastscanned', 'value', 1) || 0) + 1;
 	my $newmaxid = $tags_reader->sqlSelect("MAX(tagid)", "tags");
-        if ($lastmaxid > $newmaxid) {
-                slashdLog("Nothing to do, lastmaxid '$lastmaxid', newmaxid '$newmaxid'");
-		if ($lastmaxid > $newmaxid + 2) {
+
+        if ($last_story_maxid > $newmaxid || $last_url_maxid > $newmaxid) {
+                slashdLog("Nothing to do, laststorymaxid '$last_story_maxid', lasturlmaxid '$last_url_maxid' newmaxid '$newmaxid'");
+		if ($last_story_maxid > $newmaxid + 2) {
 			# Something odd is going on... this ID is off.
-			slashdErrnote("tags_stories_lastscanned '$lastmaxid' is higher than it should be '$newmaxid'");
+			slashdErrnote("tags_stories_lastscanned '$last_story_maxid' is higher than it should be '$newmaxid'");
+		}
+		if ($last_url_maxid > $newmaxid + 2) {
+			# Something odd is going on... this ID is off.
+			slashdErrnote("tags_url_lastscanned '$last_url_maxid' is higher than it should be '$newmaxid'");
 		}
                 return "";
         }
 
 	# Record what we're about to do.
 	$slashdb->setVar('tags_stories_lastscanned', $newmaxid);
+	$slashdb->setVar('tags_urls_lastscanned', $newmaxid);
 
-	# First pass:  find which stoid's have been touched since
+	# First pass:  find which stoid's and url_id's have been touched since
 	# the last run.
 	my $stories_gtid = $slashdb->getGlobjTypes()->{stories};
+	my $urls_gtid = $slashdb->getGlobjTypes()->{urls};
+	
 	my $stoids = $tags_reader->sqlSelectColArrayref(
 		'DISTINCT target_id',
 		'globjs, tags',
 		"tags.globjid = globjs.globjid
-		 AND tagid >= $lastmaxid
+		 AND tagid >= $last_story_maxid
 		 AND gtid = $stories_gtid");
-	if (!$stoids || !@$stoids) {
-		return "no new stories tagged '$lastmaxid' '$newmaxid'";
+
+	my $urlids = $tags_reader->sqlSelectColArrayref(
+		'DISTINCT target_id',
+		'globjs, tags',
+		"tags.globjid = globjs.globjid
+		 AND tagid >= $last_url_maxid
+		 AND gtid = $urls_gtid");
+
+	if ((!$stoids || !@$stoids) && !($urlids || !@$urlids)) {
+		return "no new stories or urls tagged storylast: '$last_story_maxid' urllast: '$last_url_maxid' new max'$newmaxid'";
 	}
 
 	# Second pass:  for each of those stories, tally up the "top n"
@@ -65,24 +82,34 @@ $task{$me}{code} = sub {
 	my $n_stories_updated = 0;
 	for my $stoid (@$stoids) {
 		my $tag_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid);
-		my @top_5 = getTop5($tag_ar, $stoid,
+		my @top_5 = getTop5($tag_ar, $stoid, "stories",
 			$userdata_cache, $tagname_param_cache, $tagname_cmds_cache);
 		warn "no top_5 for $stoid" if !@top_5;
 		$n_stories_updated += $slashdb->setStory($stoid,
 			{ tags_top => join(" ", @top_5) });
 	}
 
-	return "$n_stories_updated updated";
+	my $n_urls_updated = 0;
+	for my $urlid (@$urlids) {
+		my $tag_ar = $tags_reader->getTagsByNameAndIdArrayref('urls', $urlid);
+		my @top_5 = getTop5($tag_ar, $urlid, "urls",
+			$userdata_cache, $tagname_param_cache, $tagname_cmds_cache);
+		warn "no top_5 for $urlid" if !@top_5;
+		$n_urls_updated += $slashdb->setUrl($urlid, 
+			{ tags_top => join(" ", @top_5) });
+	}
+	return "$n_urls_updated urls updated $n_stories_updated stories updated";
+
 };
 
 # Very crude info-summarization function that will change.
 
 sub getTop5 {
-	my($tag_ar, $stoid, $users, $tagname_params, $tagname_admincmds) = @_;
+	my($tag_ar, $id, $type, $users, $tagname_params, $tagname_admincmds) = @_;
 
 	return ( ) unless $tag_ar && @$tag_ar;
 
-	my $globjid = $tags_reader->getGlobjidFromTargetIfExists('stories', $stoid);
+	my $globjid = $tags_reader->getGlobjidFromTargetIfExists($type, $id);
 	return ( ) unless $globjid;
 
 	my %uids_unique = map { ( $_->{uid}, 1 ) } @$tag_ar;
@@ -129,9 +156,9 @@ sub getTop5 {
 		$user_clout *= $user->{tag_clout};
 		my $tag_global_clout = defined($tag_params->{$tagid}{tag_clout})
 			? $tag_params->{$tagid}{tag_clout} : 1;
-		my $tag_story_clout = getTagStoryClout($tagname_admincmds->{$tagnameid}, $globjid, $tag);
+		my $tag_clout = getTagClout($tagname_admincmds->{$tagnameid}, $globjid, $tag);
 		my $tagname_clout = $tagname_params->{$tagnameid}{tag_clout} || 1;
-		$scores{$tagname} += $user_clout * $tag_global_clout * $tag_story_clout * $tagname_clout;
+		$scores{$tagname} += $user_clout * $tag_global_clout * $tag_clout * $tagname_clout;
 	}
 
 	my @opposite_tagnames =
@@ -155,15 +182,15 @@ sub getTop5 {
 	} keys %scores;
 
 	my $constants = getCurrentStatic();
-	my $minscore = $constants->{tags_stories_top_minscore} || 2;
-print STDERR scalar(localtime) . " minscore=$minscore top tags for $stoid: " . join(" ", map { sprintf("%s=%.3f", $_, $scores{$_}) } @top ) . "\n";
+	my $minscore = $constants->{"tags_$type\_top_minscore"} || 2;
+print STDERR scalar(localtime) . " minscore=$minscore top tags for type $type id $id: " . join(" ", map { sprintf("%s=%.3f", $_, $scores{$_}) } @top ) . "\n";
 	@top = grep { $scores{$_} >= $minscore } @top;
 
 	$#top = 4 if $#top > 4;
 	return @top;
 }
 
-sub getTagStoryClout {
+sub getTagClout {
 	my($tagname_admincmd_ar, $globjid, $tag) = @_;
 	# Walk thru the list of all admin commands applied to this
 	# tagname, on all stories, and globally.  If any of these
