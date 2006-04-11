@@ -10,6 +10,10 @@ INSERT INTO vars (name, value, description) VALUES ('tags_stories_examples_pre',
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_examples', '', 'Example tags for stories');
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_lastscanned', '0', 'The last tagid scanned to update stories');
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_top_minscore', '2', 'Minimum score a tag must have to make it into the top tags for a story');
+INSERT INTO vars (name, value, description) VALUES ('tags_urls_examples_pre', 'plus minus binspam', 'Example tags for urls');
+INSERT INTO vars (name, value, description) VALUES ('tags_urls_examples', '', 'Example tags for urls');
+INSERT INTO vars (name, value, description) VALUES ('tags_urls_lastscanned', '0', 'The last tagid scanned to update urls');
+INSERT INTO vars (name, value, description) VALUES ('tags_urls_top_minscore', '2', 'Minimum score a tag must have to make it into the top tags for a urls');
 INSERT INTO vars (name, value, description) VALUES ('tags_reduced_tag_clout', '0.5', 'Reduced clout of tags');
 INSERT INTO vars (name, value, description) VALUES ('tags_reduced_user_clout', '0.5', 'Reduced clout of user applied tags');
 INSERT INTO vars (name, value, description) VALUES ('tags_tagname_regex', '^\!?[a-z][a-z0-9/]{0,63}$', 'Regex that tag names must conform to');
