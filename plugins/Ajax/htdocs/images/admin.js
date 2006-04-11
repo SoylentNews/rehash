@@ -10,34 +10,47 @@ function admin_signoff(el) {
 	
 }
 
-function adminTagsCommands(sidenc) {
-	var toggletags_message_id = 'toggletags-message-' + sidenc;
+function adminTagsCommands(id, type) {
+	var toggletags_message_id = 'toggletags-message-' + id;
 	var toggletags_message_el = $(toggletags_message_id);
 	toggletags_message_el.innerHTML = 'Executing commands...';
 
 	var params = [];
+	type = type || "stories";
 	params['op'] = 'tags_admin_commands';
-	params['sidenc'] = sidenc;
-	var tags_admin_commands_el = $('tags_admin_commands-' + sidenc);
+	if (type == "stories") {
+		params['sidenc'] = id;
+	} else if (type == "urls") {
+		params['id'] = id;
+	}
+	params['type'] = type;
+	var tags_admin_commands_el = $('tags_admin_commands-' + id);
 	params['commands'] = tags_admin_commands_el.value;
-	var reskeyel = $('admin_commands-reskey-' + sidenc);
+	var reskeyel = $('admin_commands-reskey-' + id);
 	params['reskey'] = reskeyel.value;
-	ajax_update(params, 'tags-admin-' + sidenc);
+	ajax_update(params, 'tags-admin-' + id);
 
 	toggletags_message_el.innerHTML = 'Commands executed.';
 }
 
-function tagsStoryHistory(sidenc) {
+function tagsHistory(id, type) {
 	var params = [];
-	params['op'] = 'tags_story_history';
-	params['sidenc'] = sidenc;
-	var tagshistid = "taghist-" + sidenc;
-	var popupid    = "taghistory-" + sidenc;
+	type = type || "stories";
+	params['type'] = type;
+	if (type == "stories") {
+		params['op'] = 'tags_history';
+		params['sidenc'] = id;
+	} else if (type == "urls") {
+		params['op'] = 'tags_history';
+		params['id'] = id;
+	}
+	var tagshistid = "taghist-" + id;
+	var popupid    = "taghistory-" + id;
 	var title      = "History ";
 	var buttons    = createPopupButtons("<a href=\"#\">[?]</a></span><span><a href=\"javascript:closePopup('" + popupid + "-popup')\">[X]</a>");
 	title = title + buttons;
 	createPopup(getXYForId(tagshistid), title, popupid);
-	ajax_update(params, "taghistory-" + sidenc + "-contents");
+	ajax_update(params, "taghistory-" + id + "-contents");
 }
 
 function remarks_create() {
@@ -88,10 +101,7 @@ function remarks_config_save() {
 	params['op'] = 'remarks_config_save';
 	if (!reskey && !reskey.value) {
 		return false;
-	} else {
-		alert (reskey.value);
-	}
-	params['reskey'] = reskey.value;
+	} 
 	if (min_priority) {
 		params['min_priority'] = min_priority.value;
 	}
