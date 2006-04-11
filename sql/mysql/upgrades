@@ -3814,16 +3814,13 @@ ALTER TABLE links_for_stories ADD COLUMN stoid MEDIUMINT UNSIGNED NOT NULL FIRST
 UPDATE links_for_stories, stories SET links_for_stories.stoid=stories.stoid WHERE links_for_stories.sid=stories.sid;
 ALTER TABLE links_for_stories DROP PRIMARY KEY, DROP KEY sid, ADD PRIMARY KEY (id, stoid), ADD KEY stoid (stoid), DROP COLUMN sid;
 
-
 # Updates for plugins/Tags
 UPDATE ajax_ops SET subroutine="ajaxTagHistory" where subroutine = "ajaxTagHistoryStory";
 UPDATE ajax_ops SET op="tags_history" WHERE op="tags_story_history";
-NSERT INTO vars (name, value, description) VALUES ('tags_urls_examples_pre', 'plus minus binspam', 'Example tags for urls');
+INSERT INTO vars (name, value, description) VALUES ('tags_urls_examples_pre', 'plus minus binspam', 'Example tags for urls');
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_examples', '', 'Example tags for urls');
-INSERT INTO vars (name, value, description) VALUES ('tags_urls_lastscanned', '0', 'The last tagid scanned to update stories');
-INSERT INTO vars (name, value, description) VALUES ('tags_stories_urls_minscore', '2', 'Minimum score a tag must have to make it into the top tags for a story');
-
-
+INSERT INTO vars (name, value, description) VALUES ('tags_urls_lastscanned', '0', 'The last tagid scanned to update url');
+INSERT INTO vars (name, value, description) VALUES ('tags_urls_top_minscore', '2', 'Minimum score a tag must have to make it into the top tags for a url');
 
 ALTER TABLE urls ADD COLUMN tags_top VARCHAR(255) DEFAULT '' NOT NULL AFTER validatedtitle;
 
