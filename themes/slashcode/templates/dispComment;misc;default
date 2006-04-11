@@ -23,8 +23,8 @@ __name__
 dispComment
 __template__
 [% discussion2 = user.discussion2 && (user.discussion2 == "slashdot" || user.discussion2 == "uofm") %]
-<li id="[% cid %]_tree" class="comment">
-<div id="[% cid %]_comment"[% IF discussion2 %] class="[% class %]"[% END %]>
+<li id="tree_[% cid %]" class="comment">
+<div id="comment_[% cid %]"[% IF discussion2 %] class="[% class %]"[% END %]>
 	<div class="commentTop">
 		<div class="title">
 			[% IF discussion2 %]
@@ -90,8 +90,8 @@ __template__
 [% IF discussion2 %]
 <div id="replyto_[% cid %]"></div>
 
-<ul id="[% cid %]_group">
-	<li id="[% cid %]_hiddens" class="hide"></li>
+<ul id="group_[% cid %]">
+	<li id="hiddens_[% cid %]" class="hide"></li>
 </ul>
 [% END %]
 

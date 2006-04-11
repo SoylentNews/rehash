@@ -18,6 +18,7 @@ var currentdepth = 1;
 var pointsums = [];
 var viewmodevalue = { full: 3, oneline: 2, hidden: 1};
 var prerendered = 0;
+var user_uid = 0;
 
 var remainingroots = [];
 var allroothiddens = 0;
@@ -129,7 +130,7 @@ function renderComment(cid, mode) {
 }
 
 function updateComment(cid, mode) {
-	var existingdiv = $(cid + '_comment');
+	var existingdiv = $('comment_'+cid);
 	if (existingdiv) {
 		//existingdiv.innerHTML = renderComment(cid, mode);
 		existingdiv.className = mode;
@@ -142,9 +143,9 @@ function updateComment(cid, mode) {
 			}
 		}
 		/* if (displaymode[cid] == 'hidden') {
-			$(cid + "_tree").className = "hide";
+			$("tree_" + cid).className = "hide";
 		} else {
-			$(cid + "_tree").className = "comment";
+			$("tree_" + cid).className = "comment";
 		} */
 	}
 	displaymode[cid] = mode;
@@ -166,12 +167,12 @@ function renderCommentTree(cid) {
 	var comment = comments[cid];
 	var retval;
 	/* if (futuredisplaymode[cid] == 'hidden') {
-		retval = '<li id="'+cid+'_tree" class="hide">';
+		retval = '<li id="tree_'+cid+'" class="hide">';
 	} else { */
-		retval = '<li id="'+cid+'_tree" class="comment">';
+		retval = '<li id="tree_'+cid+'" class="comment">';
 	/* } */
-	retval = retval + divit(cid + '_comment', renderComment(cid, futuredisplaymode[cid]));
-	retval = retval + '<ul id="'+cid+'_group">';
+	retval = retval + divit('comment_'+cid, renderComment(cid, futuredisplaymode[cid]));
+	retval = retval + '<ul id="group_'+cid+'">';
 	var hiddens = 0;
 	if (comment['kids'].length) {
 		for (var kiddie = 0; kiddie < comment['kids'].length; kiddie++) {
@@ -185,12 +186,12 @@ function renderCommentTree(cid) {
 	}
 
 	if (futuredisplaymode[cid] == 'hidden') {
-		retval = retval + '<li id="'+cid+'_hiddens" class="hide"></li>';
+		retval = retval + '<li id="hiddens_'+cid+'" class="hide"></li>';
 		hiddens += 1;
 	} else if (hiddens) {
-		retval = retval + '<li id="'+cid+'_hiddens">'+hiddens+" reply beneath your current threshhold.</li>";
+		retval = retval + '<li id="hiddens_'+cid+'">'+hiddens+" reply beneath your current threshhold.</li>";
 	} else {
-		retval = retval + '<li id="'+cid+'_hiddens" class="hide"></li>';
+		retval = retval + '<li id="hiddens_'+cid+'" class="hide"></li>';
 	} 
 		
 	retval = retval + '</ul>';
@@ -211,20 +212,20 @@ function updateCommentTree(cid) {
 		}	
 	}
 
-	var cid_hiddens = $(cid+"_hiddens");
-	if (! cid_hiddens) { // race condition, probably: new comment added in between rendering, and JS data structure
+	var hiddens_cid = $("hiddens_"+cid);
+	if (! hiddens_cid) { // race condition, probably: new comment added in between rendering, and JS data structure
 		return 0;
 	}
 
 	if (displaymode[cid] == 'hidden') {
-		cid_hiddens.className = "hide";
+		hiddens_cid.className = "hide";
 		return kidhiddens + 1 ;
 
 	} else if (kidhiddens) {
-		cid_hiddens.innerHTML = kidhiddens+" comments are hidden."; 
-		cid_hiddens.className = "show";
+		hiddens_cid.innerHTML = kidhiddens+" comments are hidden."; 
+		hiddens_cid.className = "show";
 	} else {
-		cid_hiddens.className = "hide";
+		hiddens_cid.className = "hide";
 	} 
 	return 0;
 }
@@ -543,9 +544,9 @@ function setFocusComment(cid) {
 	focalcids.push(cid);	
 	focalcidshash[cid] = 1;
 	
-	var comment_y = getOffsetTop($(Math.abs(cid)+"_comment"));
+	var comment_y = getOffsetTop($("comment_"+Math.abs(cid)));
 	refreshCommentDisplays();
-	var newcomment_y = getOffsetTop($(Math.abs(cid)+"_comment"));
+	var newcomment_y = getOffsetTop($("comment_"+Math.abs(cid)));
 	if (comment_y != newcomment_y) {
 		var diff = newcomment_y - comment_y;
 		scroll(viewWindowLeft(), viewWindowTop() + diff);
