@@ -3800,8 +3800,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'admin_learnword', 'Slash::Admin', 'admin_lea
 # 2006-04-05
 UPDATE vars SET value = 'T_2_5_0_107' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # Changes for plugins/Relocate which ONLY need be applied if you
@@ -3831,3 +3829,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'tags_get_admin_url', 'Slash::Tags', 'ajaxGet
 UPDATE vars SET value = 'T_2_5_0_108' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
