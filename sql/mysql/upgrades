@@ -3826,6 +3826,7 @@ ALTER TABLE urls ADD COLUMN tags_top VARCHAR(255) DEFAULT '' NOT NULL AFTER vali
 INSERT INTO ajax_ops VALUES (NULL, 'tags_get_user_urls', 'Slash::Tags', 'ajaxGetUserUrls', 'ajax_tags_write', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'tags_create_for_url', 'Slash::Tags', 'ajaxCreateForUrl', 'ajax_tags_write', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'tags_get_admin_url', 'Slash::Tags', 'ajaxGetAdminUrl', 'ajax_admin', 'createuse');
+
 # 2006-04-11
 UPDATE vars SET value = 'T_2_5_0_108' WHERE name = 'cvs_tag_currentcode';
 
