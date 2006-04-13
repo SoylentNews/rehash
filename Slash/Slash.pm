@@ -236,12 +236,21 @@ sub jsSelectComments {
 	my $extra = '';
 	$extra = "prerendered = 1;\n" if $user->{discussion2} && $user->{discussion2} eq 'slashdot';
 
-	my $comment_text = $slashdb->getCommentTextCached(
-		$comments, [ keys %$comments ],
-	);
+	if ($form->{full}) {
+		my $comment_text = $slashdb->getCommentTextCached(
+			$comments, [ keys %$comments ],
+		);
 
-	for my $cid (keys %$comment_text) {
-		$comments->{$cid}{comment} = $comment_text->{$cid};
+		for my $cid (keys %$comment_text) {
+			$comments->{$cid}{comment} = $comment_text->{$cid};
+		}
+	} else {
+		my $comments_new;
+		my @keys = qw(pid kids);
+		for my $cid (keys %$comments) {
+			@{$comments_new->{$cid}}{@keys} = @{$comments->{$cid}}{@keys};
+		}
+		$comments = $comments_new;
 	}
 
 	my $anon_comments = Data::JavaScript::Anon->anon_dump($comments);
@@ -1923,10 +1932,7 @@ sub _hard_dispComment {
 
 	my $sign = $class eq 'full' ? '-' : '';
 	my $head = $discussion2 ? <<EOT1 : <<EOT2;
-			<script type="text/javascript">
-				displaymode[$comment->{cid}] = "$class";
-				futuredisplaymode[$comment->{cid}] = "$class";
-			</script>
+			<script type="text/javascript">displaymode[$comment->{cid}] = "$class"</script>
 			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="javascript:setFocusComment($sign$comment->{cid});">$comment->{subject}</a></h4>
 EOT1
 			<h4><a name="$comment->{cid}">$comment->{subject}</a></h4>
