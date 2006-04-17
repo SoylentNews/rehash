@@ -84,7 +84,7 @@ $task{$me}{code} = sub {
 		my $tag_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid);
 		my @top_5 = getTop5($tag_ar, $stoid, "stories",
 			$userdata_cache, $tagname_param_cache, $tagname_cmds_cache);
-		warn "no top_5 for $stoid" if !@top_5;
+#		warn "no top_5 for $stoid" if !@top_5;
 		$n_stories_updated += $slashdb->setStory($stoid,
 			{ tags_top => join(" ", @top_5) });
 	}
