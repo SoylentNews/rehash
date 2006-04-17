@@ -111,9 +111,9 @@ BLOCK sub_display -%]
 	<tr class="ps_[% sub.primaryskid %]"><td><nobr>
 		<input type="text" name="comment_[% sub.subid | strip_attribute %]" value="[% sub.comment | strip_attribute %]" size="20">
 		[% Slash.createSelect("note_${sub.subid}", selection, this_note, 1) %]
-		[% IF !form.fromconsole %]
+		[% IF form.fromconsole %]<div class="hide">[% END %]
 		[% Slash.createSelect("skid_${sub.subid}", Slash.db.getDescriptions('skins'), sub.primaryskid, 1, 0, 1) %]
-		[% END %]
+		[% IF form.fromconsole %]</div>[% END %]
 
 		[%# this is called del_ for legacy reasons, but is also use for merging %]
 		<input type="checkbox" name="del_[% sub.subid %]">
