@@ -1982,11 +1982,12 @@ EOT
 			pid	=> $comment->{original_pid},
 			subject	=> 'Parent',
 			subject_only => 1,
-		}, 1) if $comment->{original_pid};
+		}, 1) if $comment->{original_pid} && !($discussion2 &&
+			(!$form->{cid} || $form->{cid} != $comment->{cid})
+		);
 
 		push @link, "<div class=\"modsel\">".createSelect("reason_$comment->{cid}",
 			$reasons, '', 1, 1)."</div>" if $can_mod
-				&& $user->{mode} ne 'archive'
 				&& ( !$user->{state}{discussion_archived}
 					|| $constants->{comments_moddable_archived} );
 
