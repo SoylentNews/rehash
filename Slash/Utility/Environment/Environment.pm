@@ -1750,7 +1750,7 @@ Hashref of cleaned-up data.
 		url_id spider_id miner_id keyword_id
 		st_main_select stc_main_select
 		parent_topic child_topic
-		skid primaryskid
+		skid primaryskid url_id
 	),
 	# Survey
 	qw(
