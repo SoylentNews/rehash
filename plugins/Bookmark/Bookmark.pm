@@ -75,9 +75,15 @@ sub getPopularBookmarks {
 	return $self->sqlSelectAllHashrefArray("COUNT(*) AS cnt, bookmarks.title, urls.*",
 		"bookmarks, urls",
 		"bookmarks.url_id = urls.url_id $time_clause",
-		"GROUP BY urls.url_id ORDER BY cnt DESC, bookmarks.createdtime DESC LIMIT $limit"
+		"GROUP BY urls.url_id ORDER BY popularity DESC, cnt DESC, bookmarks.createdtime DESC LIMIT $limit"
+
 	);
 	
+}
+
+sub getBookmarkFeeds {
+	my ($self) = @_;
+	$self->sqlSelectAllHashrefArray("*", "bookmark_feeds");
 }
 
 1;
