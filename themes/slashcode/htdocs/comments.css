@@ -79,6 +79,9 @@ html > body .commentwrap table {
 	padding: .3em;
 }
 
+.shrunk { font-weight: bold }
+
+
 #commentlisting {
         padding: 0px;
         margin: 0px;
@@ -94,7 +97,7 @@ html > body .commentwrap table {
 margin: 0 0 0 -.3em;
 padding: 0 .3em;
 		 text-decoration: none;
-background: url("/images/comm-minus.gif") 0 .2em no-repeat;
+background: url("http://images.slashcode.com/comm-minus.gif") 0 .2em no-repeat;
 right: -1.4em;
 		  z-index: 2;
 cursor: pointer;
@@ -105,7 +108,7 @@ cursor: pointer;
 margin: 0;
 padding: 0 .3em;
 		 text-decoration: none;
-background: url("/images/comm-plus.gif") 0 .2em no-repeat;
+background: url("http://images.slashcode.com/comm-plus.gif") 0 .2em no-repeat;
 right: -1.4em;
 		  z-index: 1;
 cursor: pointer;

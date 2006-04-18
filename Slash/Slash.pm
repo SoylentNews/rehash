@@ -737,7 +737,9 @@ sub printComments {
 		? $comments->{$cidorpid}{totalvisiblekids}
 		: $cc;
 
-	my $lcp = linkCommentPages($discussion->{id}, $pid, $cid, $total);
+	my $lcp = ($user->{discussion2} &&
+		($user->{discussion2} eq 'slashdot' || $user->{discussion2} eq 'uofm')
+	) ? '' : linkCommentPages($discussion->{id}, $pid, $cid, $total);
 
 	# Figure out whether to show the moderation button.  We do, but
 	# only if at least one of the comments is moderatable.
@@ -1254,7 +1256,6 @@ sub dispComment {
 	my $maxcommentsize = $options->{maxcommentsize} || $user->{maxcommentsize};
 
 	my($comment_shrunk, %reasons);
-
 	if ($form->{mode} ne 'archive'
 		&& $comment->{len} > $maxcommentsize
 		&& $form->{cid} ne $comment->{cid})

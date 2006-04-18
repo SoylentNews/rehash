@@ -260,6 +260,13 @@ print STDERR scalar(localtime) . " adminTagsCommands stoid='$stoid' seclev='$use
 	return getData('tags_admin_result', { results => \@results }, 'tags');
 }
 
+sub readRest {
+	my($slashdb, $constants, $user, $form) = @_;
+	my $cid = $form->{cid} or return;
+	return $slashdb->getCommentText($cid);
+}
+
+
 ##################################################################
 sub default { }
 
@@ -291,12 +298,11 @@ sub getOps {
 	);
 
 	my %mainops = (
-		# this one will move soon
-#		get_comments	=> {
-#			function	=> \&Slash::ajaxSelectComments,
-#			reskey_name	=> 'ajax_admin',
-#			reskey_type	=> 'createuse',
-#		},
+		comments_read_rest	=> {
+			function	=> \&readRest,
+			reskey_name	=> 'ajax_base',
+			reskey_type	=> 'createuse',
+		},
 		getSectionPrefsHTML => {
 			function	=> \&getSectionPrefsHTML,
 			reskey_name	=> 'ajax_user',

@@ -65,20 +65,24 @@ __template__
 		</div>
 	</div>
 	<div class="commentBody">
-		[% comment %]
+		<div id="comment_body_[% cid %]">[% comment %]</div>
 		[% UNLESS user.nosigs %]
-			<div class="sig">[% sig %]</div>
+		<div class="sig">[% sig %]</div>
 		[% END %]
-		
 	[% IF comment_shrunk;
-		linkComment = Slash.linkComment({
-			sid     => sid,
-			cid     => cid,
-			pid     => cid,
-			subject => 'Read the rest of this comment...',
-			subject_only => 1
-		}, 1) %]
-		<p><b>[% linkComment %]</b></p>
+		readtext = 'Read the rest of this comment...';
+		IF discussion2;
+			linkComment = "<a href=\"javascript:readRest($cid)\">$readtext</a>";
+		ELSE;
+			linkComment = Slash.linkComment({
+				sid     => sid,
+				cid     => cid,
+				pid     => cid,
+				subject => readtext,
+				subject_only => 1
+			}, 1);
+		END %]
+		<div id="comment_shrunk_[% cid %]" class="shrunk">[% linkComment %]</div>
 	[% END %]
 	</div>
 	[% PROCESS dispLinkComment %]

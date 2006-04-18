@@ -232,3 +232,20 @@ function viewWindowBottom() {
 	return document.body.scrollTop + screen.height;
 }
 
+
+function readRest(cid) {
+	var contentdiv = $('comment_shrunk_' + cid);
+// doesn't work ... async!
+//	contentdiv.innerHTML = 'Fetching comment ...';
+
+	var params = [];
+	params['op']  = 'comments_read_rest';
+	params['cid'] = cid;
+
+	ajax_update(params, 'comment_body_' + cid);
+
+	contentdiv.innerHTML = '';
+
+	return false;
+}
+
