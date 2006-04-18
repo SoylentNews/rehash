@@ -409,7 +409,7 @@ sub getTagsByNameAndIdArrayref {
 	my $inactivated_where = $options && $options->{include_inactive}
 		? ''
 		: ' AND inactivated IS NULL';
-	
+
 	my $days_where = $options && $options->{days_back}
 		? " AND created_at >= DATE_SUB(NOW(), INTERVAL $options->{days_back} DAY)"
 		: "";

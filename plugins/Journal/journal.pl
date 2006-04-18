@@ -638,9 +638,10 @@ sub doSaveArticle {
 		unless ($id) {
 			return getData('create_failed');
 		}
+
 		if ($form->{url_id}) {
 			my $url_id = $form->{url_id};
-			my $globjid = $slashdb->getGlobjidCreate("journals", $id);
+			my $globjid = $slashdb->getGlobjidCreate('journals', $id);
 			$slashdb->addUrlForGlobj($url_id, $globjid);
 		}
 
