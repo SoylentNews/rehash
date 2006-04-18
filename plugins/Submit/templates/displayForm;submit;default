@@ -136,6 +136,9 @@ __template__
 			[% PROCESS formNote note => "HTML is fine, but double check those URLs and HTML tags!" %]
 			[% PROCESS formLabel value => "Submission format" %]
 			[% def_type = form.sub_type || 'html'; sub_types = { "html" => "HTML Formatted", "plain" => "Plain Old Text" }; Slash.createSelect('sub_type', sub_types, def_type, 1) %]
+			[% IF form.url_id %]
+				<input type="hidden" name="url_id" value="[% form.url_id | strip_attribute %]">
+			[% END %]
 			<input type="submit" name="op" value="PreviewStory" class="button">
 		[% IF savestory %]
 			<input type="submit" name="op" value="SubmitStory" class="button">

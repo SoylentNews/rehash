@@ -625,10 +625,14 @@ sub saveSub {
 		}
 	}
 
-
-
 	my $messagesub = { %$submission };
 	$messagesub->{subid} = $slashdb->createSubmission($submission);
+	
+	if ($form->{url_id}) {
+		my $url_id = $form->{url_id};
+		my $globjid = $slashdb->getGlobjidCreate("submissions", $messagesub->{subid});
+		$slashdb->addUrlForGlobj($url_id, $globjid);
+	}
 
 	my $messages = getObject('Slash::Messages');
 	if ($messages) {
