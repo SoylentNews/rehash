@@ -139,9 +139,9 @@ sub saveBookmark {
 	my $strip_url = strip_attribute($form->{url});
 
 	if ($form->{redirect} eq "journal") {
-		redirect("/journal.pl?op=edit&description=$strip_title&article=$strip_url");
+		redirect("/journal.pl?op=edit&description=$strip_title&article=$strip_url&url_id=$url_id");
 	} elsif ($form->{redirect} eq "submit") {
-		redirect("/submit.pl?subj=$strip_title&story=$strip_url");
+		redirect("/submit.pl?subj=$strip_title&story=$strip_url&url_id=$url_id");
 	} else {
 		redirect($form->{url});
 	}
