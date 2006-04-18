@@ -409,11 +409,15 @@ sub getTagsByNameAndIdArrayref {
 	my $inactivated_where = $options && $options->{include_inactive}
 		? ''
 		: ' AND inactivated IS NULL';
+	
+	my $days_where = $options && $options->{days_back}
+		? " AND created_at >= DATE_SUB(NOW(), INTERVAL $options->{days_back} DAY)"
+		: "";
 
 	my $ar = $self->sqlSelectAllHashrefArray(
 		'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
 		'tags',
-		"globjid=$globjid $inactivated_where $uid_where",
+		"globjid=$globjid $inactivated_where $uid_where $days_where",
 		'ORDER BY tagid');
 
 	# Now add an extra field to every element returned:  the
@@ -691,8 +695,9 @@ sub ajaxGetAdminUrl {
 #  XXX based off of ajaxCreateStory.  ajaxCreateStory should be updated to use this or something
 #  similar soon, and after I've had time to test -- vroom 2006/03/21
 sub setTagsForGlobj {
-	my($self, $id, $table, $tag_string) = @_;
+	my($self, $id, $table, $tag_string, $options) = @_;
 	my $tags = getObject('Slash::Tags');
+	$options ||= {};
 	
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
@@ -702,10 +707,10 @@ sub setTagsForGlobj {
 		grep { $tags->tagnameSyntaxOK($_) }
 		map { lc }
 		split /[\s,]+/,
-		($form->{tags} || '');
+		($tag_string || $form->{tags} || '');
 	my %new_tagnames_opposites = map { $tags->getOppositeTagname($_), 1 } keys %new_tagnames;
 
-	my $uid = $user->{uid};
+	my $uid = $user->{uid} || $options->{uid};
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	my $old_tags_ar = $tags_reader->getTagsByNameAndIdArrayref($table, $id, { uid => $uid });
 	my %old_tagnames = ( map { ($_->{tagname}, 1) } @$old_tags_ar );
@@ -727,7 +732,7 @@ sub setTagsForGlobj {
 	for my $tagname (@deactivate_tagnames) {
 		push @deactivated_tagnames, $tagname
 			if $tags->deactivateTag({
-				uid =>		$user->{uid},
+				uid =>		$uid,
 				name =>		$tagname,
 				table =>	$table,
 				id =>		$id
@@ -738,7 +743,7 @@ sub setTagsForGlobj {
 	for my $tagname (@create_tagnames) {
 		push @created_tagnames, $tagname
 			if $tags->createTag({
-				uid =>          $user->{uid},
+				uid =>          $uid,
 				name =>         $tagname,
 				table =>        $table,
 				id =>           $id

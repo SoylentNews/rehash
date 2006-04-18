@@ -97,6 +97,7 @@ $task{$me}{code} = sub {
 		warn "no top_5 for $urlid" if !@top_5;
 		$n_urls_updated += $slashdb->setUrl($urlid, 
 			{ tags_top => join(" ", @top_5) });
+		setPopularityForUrl($urlid);
 	}
 	return "$n_urls_updated urls updated $n_stories_updated stories updated";
 
@@ -216,6 +217,55 @@ sub getTagClout {
 		}
 	}
 	return 1;
+}
+
+sub setPopularityForUrl {
+	my($urlid, $options) = @_;
+	$options ||= {};
+		
+	my $slashdb 	= getCurrentDB();
+	my $constants 	= getCurrentStatic();
+	my $days_back 	= $constants->{bookmark_popular_days} || $options->{days_back} || 3;
+	my $tags 	= getObject("Slash::Tags");
+
+	my %tags_pos = map { $_, 1 } split(/\|/, $constants->{tags_urls_pos_tags} || "");
+	my %tags_neg = map { $_, 1 } split(/\|/, $constants->{tags_urls_neg_tags} || "");
+
+	my $tag_ar = $tags->getTagsByNameAndIdArrayref('urls', $urlid, { days_back => $days_back });
+	use Data::Dumper;
+	#slashdLog("Tag array: ".Dumper($tag_ar));
+	my $tags_by_uid = {};
+	my $url = $slashdb->getUrl($_);
+	foreach my $tag (@$tag_ar) {
+		my $tag_user = $slashdb->getUser($tag->{uid});
+		push @{$tags_by_uid->{$tag->{uid}}}, $tag->{tagname};
+	}
+	
+	my $popularity = 0;
+
+	foreach my $uid (keys %$tags_by_uid) {
+		my $user_change = 0;
+		my $tag_user = $slashdb->getUser($uid);
+		my $clout = $slashdb->getUser($uid, "tag_clout");
+		my $change = {};
+		my $user_mult = 1;
+		$user_mult *= 2 if $tag_user->{seclev} > 1;
+		
+		foreach my $tagname (@{$tags_by_uid->{$uid}}) {
+			$change->{down} = 1 if $tags_neg{$tagname};
+			$change->{up} = 1 if $tags_pos{$tagname};
+		}
+		if ($change->{up} && $change->{down}) {
+		} elsif ($change->{up}) {
+			$popularity += 1.5 * $clout * $user_mult;
+		} elsif ($change->{down}) {
+			$popularity -= $clout * $user_mult;
+		} else {
+			$popularity += $clout * $user_mult;
+		}
+	}
+	slashdLog("setting popularity to $popularity");
+	$slashdb->setUrl($urlid, { popularity => $popularity });
 }
 
 1;
