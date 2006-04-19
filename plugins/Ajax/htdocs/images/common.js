@@ -47,6 +47,21 @@ function closePopup(id, refresh) {
 	}
 }
 
+function handleEnter(ev, func, arg) {
+        if (!ev) {
+                ev = window.event;
+        }
+        var code = ev.which || ev.keyCode;
+        if (code == 13) { // return/enter
+		func(arg);
+                ev.returnValue = true;
+                return true;
+        }
+        ev.returnValue = false;
+        return false;
+}
+
+
 function moveByObjSize(div, addOffsetWidth, addOffsetHeight) {
 	if (addOffsetWidth) {
 		div.style.left = parseFloat(div.style.left || 0) + (addOffsetWidth * div.offsetWidth) + "px";

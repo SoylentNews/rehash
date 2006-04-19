@@ -15,7 +15,7 @@ INSERT INTO vars (name, value, description) VALUES ('tags_urls_examples', '', 'E
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_lastscanned', '0', 'The last tagid scanned to update urls');
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_top_minscore', '2', 'Minimum score a tag must have to make it into the top tags for a urls');
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_pos_tags', 'plus', '| separated list of tags applied which positively affect url popularity');
-INSERT INTO vars (name, value, description) VALUES ('tags_urls_neg_tags', 'minus|binspam', '| separated list of tags applied which positively affect url popularity');
+INSERT INTO vars (name, value, description) VALUES ('tags_urls_neg_tags', 'minus|binspam', '| separated list of tags applied which negatively affect url popularity');
 INSERT INTO vars (name, value, description) VALUES ('tags_reduced_tag_clout', '0.5', 'Reduced clout of tags');
 INSERT INTO vars (name, value, description) VALUES ('tags_reduced_user_clout', '0.5', 'Reduced clout of user applied tags');
 INSERT INTO vars (name, value, description) VALUES ('tags_tagname_regex', '^\!?[a-z][a-z0-9/]{0,63}$', 'Regex that tag names must conform to');
