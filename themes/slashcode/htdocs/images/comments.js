@@ -235,10 +235,16 @@ function viewWindowBottom() {
 
 function readRest(cid) {
 	var sigdiv = $('comment_sig_' + cid);
-	sigdiv.className = 'sig';
+	if (sigdiv) {
+		sigdiv.className = 'sig';
+	}
 
 	var shrunkdiv = $('comment_shrunk_' + cid);
-	shrunkdiv.innerHTML = '';
+	if (shrunkdiv)
+		shrunkdiv.innerHTML = '';
+	} else {
+		return false; // seems we shouldn't be here ...
+	}
 
 	var params = [];
 	params['op']  = 'comments_read_rest';
