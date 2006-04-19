@@ -13606,7 +13606,7 @@ sub getUrlIfExists {
 
 sub addUrlForGlobj {
 	my($self, $url_id, $globjid) = @_;
-	$self->sqlInsert("globj_urls", { url_id => $url_id, globjid => $globjid });
+	$self->sqlInsert("globj_urls", { url_id => $url_id, globjid => $globjid }, { ignore => 1 });
 }
 
 ########################################################
