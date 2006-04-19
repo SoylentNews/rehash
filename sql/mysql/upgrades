@@ -3763,6 +3763,7 @@ CREATE TABLE urls (
 INSERT INTO globj_types VALUES (NULL, 'urls');
 
 INSERT IGNORE INTO reskey_resources VALUES (8, 'bookmark');
+
 # 2006-03-21
 UPDATE vars SET value = 'T_2_5_0_104' WHERE name = 'cvs_tag_currentcode';
 
@@ -3825,8 +3826,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'tags_get_admin_url', 'Slash::Tags', 'ajaxGet
 # 2006-04-11
 UPDATE vars SET value = 'T_2_5_0_108' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
-
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
@@ -3836,11 +3835,11 @@ INSERT INTO globj_types VALUES (NULL, 'journals');
 
 DROP TABLE IF EXISTS globj_urls;
 CREATE TABLE globj_urls (
-	id INT(10) UNSIGNED NOT NULL auto_increment,
-        globjid  INT UNSIGNED NOT NULL DEFAULT 0,
-	url_id INT(10) UNSIGNED NOT NULL NOT NULL DEFAULT 0,
-	PRIMARY KEY (id),
-	UNIQUE globjid_url_id (globjid, url_id)
+    id INT(10) UNSIGNED NOT NULL auto_increment,
+    globjid  INT UNSIGNED NOT NULL DEFAULT 0,
+    url_id INT(10) UNSIGNED NOT NULL NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE globjid_url_id (globjid, url_id)
 );
 
 ALTER TABLE urls ADD COLUMN popularity float DEFAULT '0' NOT NULL;
@@ -3853,12 +3852,15 @@ INSERT INTO vars (name, value, description) VALUES ('tags_urls_neg_tags', 'minus
 UPDATE reskey_vars set value='1' where name='user_seclev' AND rkrid=8;
 DROP TABLE IF EXISTS bookmark_feeds;
 CREATE TABLE bookmark_feeds (
-	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
-	uid MEDIUMINT UNSIGNED NOT NULL,
-	feed VARCHAR(255),
-	tags VARCHAR(255),
-	PRIMARY KEY(id)
+    id MEDIUMINT UNSIGNED NOT NULL auto_increment,
+    uid MEDIUMINT UNSIGNED NOT NULL,
+    feed VARCHAR(255),
+    tags VARCHAR(255),
+    PRIMARY KEY(id)
 ) TYPE=InnoDB;
 
 # Update for ajax_ops
 UPDATE ajax_ops SET subroutine="ajax_learnword" where subroutine = "admin_learnword";
+
+# PUDGE LAST UPDATED HERE
+
