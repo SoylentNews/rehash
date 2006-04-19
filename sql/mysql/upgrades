@@ -3758,7 +3758,7 @@ CREATE TABLE urls (
 	validatedtitle VARCHAR(255),
 	PRIMARY KEY (url_id),
 	UNIQUE url_digest (url_digest)
-);
+) Type=InnoDB;
 
 INSERT INTO globj_types VALUES (NULL, 'urls');
 
@@ -3815,13 +3815,11 @@ INSERT INTO vars (name, value, description) VALUES ('tags_urls_examples_pre', 'p
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_examples', '', 'Example tags for urls');
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_lastscanned', '0', 'The last tagid scanned to update url');
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_top_minscore', '2', 'Minimum score a tag must have to make it into the top tags for a url');
-
-ALTER TABLE urls ADD COLUMN tags_top VARCHAR(255) DEFAULT '' NOT NULL AFTER validatedtitle;
-
-# Updates for plugins/Tags
 INSERT INTO ajax_ops VALUES (NULL, 'tags_get_user_urls', 'Slash::Tags', 'ajaxGetUserUrls', 'ajax_tags_write', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'tags_create_for_url', 'Slash::Tags', 'ajaxCreateForUrl', 'ajax_tags_write', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'tags_get_admin_url', 'Slash::Tags', 'ajaxGetAdminUrl', 'ajax_admin', 'createuse');
+
+ALTER TABLE urls ADD COLUMN tags_top VARCHAR(255) DEFAULT '' NOT NULL AFTER validatedtitle;
 
 # 2006-04-11
 UPDATE vars SET value = 'T_2_5_0_108' WHERE name = 'cvs_tag_currentcode';
@@ -3832,34 +3830,32 @@ UPDATE vars SET value = 'T_2_5_0_108' WHERE name = 'cvs_tag_currentcode';
 
 INSERT INTO globj_types VALUES (NULL, 'submissions');
 INSERT INTO globj_types VALUES (NULL, 'journals');
-
 DROP TABLE IF EXISTS globj_urls;
 CREATE TABLE globj_urls (
-    id INT(10) UNSIGNED NOT NULL auto_increment,
-    globjid  INT UNSIGNED NOT NULL DEFAULT 0,
-    url_id INT(10) UNSIGNED NOT NULL NOT NULL DEFAULT 0,
-    PRIMARY KEY (id),
-    UNIQUE globjid_url_id (globjid, url_id)
-);
-
-ALTER TABLE urls ADD COLUMN popularity float DEFAULT '0' NOT NULL;
+	id INT UNSIGNED NOT NULL auto_increment,
+	globjid INT UNSIGNED NOT NULL DEFAULT 0,
+	url_id INT UNSIGNED NOT NULL NOT NULL DEFAULT 0,
+	PRIMARY KEY (id),
+	UNIQUE globjid_url_id (globjid, url_id)
+) TYPE=InnoDB;
+ALTER TABLE urls TYPE=InnoDB, ADD COLUMN popularity float DEFAULT '0' NOT NULL;
 
 # updates for plugins/Tags
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_pos_tags', 'plus', '| separated list of tags applied which positively affect url popularity');
-INSERT INTO vars (name, value, description) VALUES ('tags_urls_neg_tags', 'minus|binspam', '| separated list of tags applied which positively affect url popularity');
+INSERT INTO vars (name, value, description) VALUES ('tags_urls_neg_tags', 'minus|binspam', '| separated list of tags applied which negatively affect url popularity');
 
-# updates for plugins/Bookmarks
+# updates for plugins/Bookmark
 UPDATE reskey_vars set value='1' where name='user_seclev' AND rkrid=8;
 DROP TABLE IF EXISTS bookmark_feeds;
 CREATE TABLE bookmark_feeds (
-    id MEDIUMINT UNSIGNED NOT NULL auto_increment,
-    uid MEDIUMINT UNSIGNED NOT NULL,
-    feed VARCHAR(255),
-    tags VARCHAR(255),
-    PRIMARY KEY(id)
+	id MEDIUMINT UNSIGNED NOT NULL auto_increment,
+	uid MEDIUMINT UNSIGNED NOT NULL,
+	feed VARCHAR(255),
+	tags VARCHAR(255),
+	PRIMARY KEY(id)
 ) TYPE=InnoDB;
 
-# Update for ajax_ops
+# Update for plugins/Ajax
 UPDATE ajax_ops SET subroutine="ajax_learnword" where subroutine = "admin_learnword";
 
 # PUDGE LAST UPDATED HERE
