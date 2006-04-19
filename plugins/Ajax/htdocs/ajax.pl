@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-# This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
@@ -233,33 +231,6 @@ sub setSectionNexusPrefs() {
 	return getData('set_section_prefs_success_msg');
 }
 
-sub adminTagsCommands {
-	my($slashdb, $constants, $user, $form) = @_;
-	my $stoid = $form->{stoid};
-	my $tags = getObject('Slash::Tags');
-print STDERR scalar(localtime) . " adminTagsCommands stoid='$stoid' seclev='$user->{seclev}' uid='$user->{uid}' tags='$tags'\n";
-	if (!$stoid || $stoid !~ /^\d+$/ || $user->{seclev} < 100 || !$tags) {
-		print getData('error', {}, 'tags');
-		return;
-	}
-
-	my @tagnames =
-		grep { $tags->adminPseudotagnameSyntaxOK($_) }
-		split /[\s,]+/,
-		($form->{tags} || '');
-	if (!@tagnames) {
-		print getData('tags_none_given', {}, 'tags');
-		return;
-	}
-
-	my @results = ( );
-	for my $pseudotag (@tagnames) {
-		# do it
-	}
-
-	return getData('tags_admin_result', { results => \@results }, 'tags');
-}
-
 sub readRest {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $cid = $form->{cid} or return;
@@ -319,11 +290,6 @@ sub getOps {
 #		},
 #		tagsCreateForStory => {
 #			function	=> \&tagsCreateForStory,
-#			reskey_type	=> 'createuse',
-#		},
-#		adminTagsCommands => {
-#			function	=> \&adminTagsCommands,
-#			reskey_name	=> 'ajax_admin',
 #			reskey_type	=> 'createuse',
 #		},
 		default	=> {
