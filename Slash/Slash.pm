@@ -1817,7 +1817,7 @@ sub _hard_dispComment {
 
 	$comment_to_display = qq'<div id="comment_body_$comment->{cid}">$comment->{comment}</div>';
 	my $sighide = $comment_shrunk ? ' hide' : '';
-	$comment_to_display .= qq'<div class="sig$sighide">$comment->{sig}</div>' unless $user->{nosigs};
+	$comment_to_display .= qq'<div id="comment_sig_$comment->{cid}" class="sig$sighide">$comment->{sig}</div>' if $comment->{sig} && !$user->{nosigs};
 
 	if ($comment_shrunk) {
 		my $readtext = 'Read the rest of this comment...';

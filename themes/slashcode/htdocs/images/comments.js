@@ -234,9 +234,11 @@ function viewWindowBottom() {
 
 
 function readRest(cid) {
-	var contentdiv = $('comment_shrunk_' + cid);
-// doesn't work ... async!
-//	contentdiv.innerHTML = 'Fetching comment ...';
+	var sigdiv = $('comment_sig_' + cid);
+	sigdiv.className = 'sig';
+
+	var shrunkdiv = $('comment_shrunk_' + cid);
+	shrunkdiv.innerHTML = '';
 
 	var params = [];
 	params['op']  = 'comments_read_rest';
@@ -244,7 +246,6 @@ function readRest(cid) {
 
 	ajax_update(params, 'comment_body_' + cid);
 
-	contentdiv.innerHTML = '';
 
 	return false;
 }
