@@ -240,7 +240,7 @@ function readRest(cid) {
 	}
 
 	var shrunkdiv = $('comment_shrunk_' + cid);
-	if (shrunkdiv)
+	if (shrunkdiv) {
 		shrunkdiv.innerHTML = '';
 	} else {
 		return false; // seems we shouldn't be here ...
