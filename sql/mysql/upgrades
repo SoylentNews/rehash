@@ -3860,4 +3860,5 @@ CREATE TABLE bookmark_feeds (
 	PRIMARY KEY(id)
 ) TYPE=InnoDB;
 
-
+# Update for ajax_ops
+UPDATE ajax_ops SET subroutine="ajax_learnword" where subroutine = "admin_learnword";
