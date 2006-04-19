@@ -1813,20 +1813,27 @@ sub _hard_dispComment {
 		$time_to_display, $comment_link_to_display, $userinfo_to_display)
 		= ("") x 7;
 
+	my $discussion2 = $user->{discussion2} && ($user->{discussion2} eq 'slashdot' || $user->{discussion2} eq 'uofm');
+
+	$comment_to_display = qq'<div id="comment_body_$comment->{cid}">$comment->{comment}</div>';
+	my $sighide = $comment_shrunk ? ' hide' : '';
+	$comment_to_display .= qq'<div class="sig$sighide">$comment->{sig}</div>' unless $user->{nosigs};
+
 	if ($comment_shrunk) {
-		# Guess what should be in a template? -Brian
-		my $link = linkComment({
-			sid	=> $comment->{sid},
-			cid	=> $comment->{cid},
-			pid	=> $comment->{cid},
-			subject	=> 'Read the rest of this comment...',
-			subject_only => 1,
-		}, 1);
-		$comment_to_display = "$comment->{comment}<p><b>$link</b>";
-	} elsif ($user->{nosigs}) {
-		$comment_to_display = $comment->{comment};
-	} else {
-		$comment_to_display = "$comment->{comment}<div class=\"sig\">$comment->{sig}</div>";
+		my $readtext = 'Read the rest of this comment...';
+		my $link;
+		if ($discussion2) {
+			$link = qq'<a href="javascript:readRest($comment->{cid})">$readtext</a>';
+		} else {
+			$link = linkComment({
+				sid	=> $comment->{sid},
+				cid	=> $comment->{cid},
+				pid	=> $comment->{cid},
+				subject	=> $readtext,
+				subject_only => 1,
+			}, 1);
+		}
+		$comment_to_display .= qq'<div id="comment_shrunk_$comment->{cid}" class="shrunk">$link</div>';
 	}
 
 	$time_to_display = timeCalc($comment->{date});
@@ -1927,7 +1934,6 @@ sub _hard_dispComment {
 		}
 	}
 
-	my $discussion2 = $user->{discussion2} && ($user->{discussion2} eq 'slashdot' || $user->{discussion2} eq 'uofm');
 	my $class = $options->{class}; 
 	my $classattr = $discussion2 ? qq[ class="$class"] : '';
 
