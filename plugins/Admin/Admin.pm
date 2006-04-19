@@ -578,22 +578,22 @@ sub ajax_learnword {
 	my $form = getCurrentForm();
 
 	my $template = $self->getTemplateByName("ispellok", { page => "admin" });
-    if (!$template) {
-        errorLog("Spellcheck: personal dictionary not found.");
-        return;
-    }
+	if (!$template) {
+		errorLog("Spellcheck: personal dictionary not found.");
+		return;
+	}
     
-    my $template_text = $self->sqlSelect("template", "templates", "tpid = " . $template->{tpid});
+	my $template_text = $self->sqlSelect("template", "templates", "tpid = " . $template->{tpid});
 	
-    # Somehow we were called even though the word was found in the personal dictionary. Return.
-    return if ($template_text =~ /\s$form->{'word'}\s/);
+	# Somehow we were called even though the word was found in the personal dictionary. Return.
+	return if ($template_text =~ /\s$form->{'word'}\s/);
     
-    $template_text .= $form->{'word'} . ' ';
+	$template_text .= $form->{'word'} . ' ';
 	my $rows = $self->sqlUpdate("templates", { template => $template_text }, "tpid = " . $template->{tpid});
 
-    if (!$rows) {
-        errorLog("Spellcheck: personal dictionary not updated.");
-    }
+	if (!$rows) {
+		errorLog("Spellcheck: personal dictionary not updated.");
+	}
 }
 
 sub DESTROY {
