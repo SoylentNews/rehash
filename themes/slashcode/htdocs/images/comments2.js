@@ -239,7 +239,7 @@ function getComments(sid, element) {
 	var params = [];
 	params['op'] = 'get_comments';
 	params['sid'] = sid;
-	ajax_eval(params, '', '', 'http://use.perl.org/ajax.pl');
+	ajax_update(params, '', { evalScripts: 1 }, 'http://use.perl.org/ajax.pl');
 }
 
 function randomizeBehaviors(ctype) {

@@ -79,7 +79,8 @@ html > body .commentwrap table {
 	padding: .3em;
 }
 
-.shrunk { font-weight: bold }
+.commentshrunk { font-weight: bold }
+.commentstatus { font-weight: bold }
 
 
 #commentlisting {

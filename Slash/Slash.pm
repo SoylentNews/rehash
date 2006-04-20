@@ -1833,7 +1833,7 @@ sub _hard_dispComment {
 				subject_only => 1,
 			}, 1);
 		}
-		$comment_to_display .= qq'<div id="comment_shrunk_$comment->{cid}" class="shrunk">$link</div>';
+		$comment_to_display .= qq'<div id="comment_shrunk_$comment->{cid}" class="commentshrunk">$link</div>';
 	}
 
 	$time_to_display = timeCalc($comment->{date});
@@ -1947,6 +1947,7 @@ EOT2
 
 	my $return = <<EOT;
 <li id="tree_$comment->{cid}" class="comment">
+<div id="comment_status_$comment->{cid}" class="commentstatus"></div>
 <div id="comment_$comment->{cid}"$classattr>
 	<div class="commentTop">
 		<div class="title">

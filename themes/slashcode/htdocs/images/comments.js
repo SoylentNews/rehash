@@ -164,8 +164,13 @@ function refreshCommentDisplays() {
 function setFocusComment(cid) {
 	var abscid = Math.abs(cid);
 
+	var statusdiv = $('comment_status_' + abscid);
+	statusdiv.innerHTML = 'Working ...';
+
 	refreshDisplayModes(cid); 
 	updateCommentTree(abscid);
+
+	statusdiv.innerHTML = '';
 
 	var comment_y = getOffsetTop($("comment_"+abscid));
 	var newcomment_y = getOffsetTop($("comment_"+abscid));
@@ -234,15 +239,8 @@ function viewWindowBottom() {
 
 
 function readRest(cid) {
-	var sigdiv = $('comment_sig_' + cid);
-	if (sigdiv) {
-		sigdiv.className = 'sig';
-	}
-
 	var shrunkdiv = $('comment_shrunk_' + cid);
-	if (shrunkdiv) {
-		shrunkdiv.innerHTML = '';
-	} else {
+	if (!shrunkdiv) {
 		return false; // seems we shouldn't be here ...
 	}
 
@@ -250,9 +248,21 @@ function readRest(cid) {
 	params['op']  = 'comments_read_rest';
 	params['cid'] = cid;
 
-	ajax_update(params, 'comment_body_' + cid);
+	var handlers = {
+		onLoading: function() {
+			shrunkdiv.innerHTML = 'Loading...';
+		},
+		onComplete: function() {
+			shrunkdiv.innerHTML = '';
+			var sigdiv = $('comment_sig_' + cid);
+			if (sigdiv) {
+				sigdiv.className = 'sig'; // show
+			}
+		}
+	};
+
+	ajax_update(params, 'comment_body_' + cid, handlers);
 
 
 	return false;
 }
-

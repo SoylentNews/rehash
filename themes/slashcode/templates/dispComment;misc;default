@@ -24,6 +24,7 @@ dispComment
 __template__
 [% discussion2 = user.discussion2 && (user.discussion2 == "slashdot" || user.discussion2 == "uofm") %]
 <li id="tree_[% cid %]" class="comment">
+<div id="comment_status_[% cid %]" class="commentstatus"></div>
 <div id="comment_[% cid %]"[% IF discussion2 %] class="[% class %]"[% END %]>
 	<div class="commentTop">
 		<div class="title">
@@ -82,7 +83,7 @@ __template__
 				subject_only => 1
 			}, 1);
 		END %]
-		<div id="comment_shrunk_[% cid %]" class="shrunk">[% linkComment %]</div>
+		<div id="comment_shrunk_[% cid %]" class="commentshrunk">[% linkComment %]</div>
 	[% END %]
 	</div>
 	[% PROCESS dispLinkComment %]
