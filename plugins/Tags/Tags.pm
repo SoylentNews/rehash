@@ -710,7 +710,7 @@ sub setTagsForGlobj {
 		($tag_string || $form->{tags} || '');
 	my %new_tagnames_opposites = map { $tags->getOppositeTagname($_), 1 } keys %new_tagnames;
 
-	my $uid = $user->{uid} || $options->{uid};
+	my $uid = $options->{uid} || $user->{uid};
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	my $old_tags_ar = $tags_reader->getTagsByNameAndIdArrayref($table, $id, { uid => $uid });
 	my %old_tagnames = ( map { ($_->{tagname}, 1) } @$old_tags_ar );
