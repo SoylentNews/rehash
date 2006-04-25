@@ -1079,6 +1079,7 @@ INSERT INTO vars (name, value, description) VALUES ('top_sid','','The sid of the
 INSERT INTO vars (name, value, description) VALUES ('topiclist_ignore_prefix', '', 'prefix of any topic keywords that should not show up on topic list or hierarchy, leave blank if you don\'t want any ignored');
 INSERT INTO vars (name, value, description) VALUES ('totalComments','0','Total number of comments posted');
 INSERT INTO vars (name, value, description) VALUES ('totalhits','0','Total number of hits the site has had thus far');
+INSERT INTO vars (name, value, description) VALUES ('url_checker_user_agent', '', 'user Agent to use for url checking task, empty string results in lwp user agent being used');
 INSERT INTO vars (name, value, description) VALUES ('use_dept','1','use \"dept.\" field');
 INSERT INTO vars (name, value, description) VALUES ('use_prev_next_link','1','Boolean where to use next/prev links for articles');
 INSERT INTO vars (name, value, description) VALUES ('use_prev_next_link_series','0','Boolean where to use next/prev links for articles in a series (topic)');
