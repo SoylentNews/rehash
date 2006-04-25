@@ -540,7 +540,7 @@ CREATE TABLE globj_types (
 DROP TABLE IF EXISTS globj_urls;
 CREATE TABLE globj_urls (
 	id INT(10) UNSIGNED NOT NULL auto_increment,
-        globjid  INT UNSIGNED NOT NULL DEFAULT 0,
+	globjid INT UNSIGNED NOT NULL DEFAULT 0,
 	url_id INT(10) UNSIGNED NOT NULL NOT NULL DEFAULT 0,
 	PRIMARY KEY (id),
 	UNIQUE globjid_url_id (globjid, url_id)
