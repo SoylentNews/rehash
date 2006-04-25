@@ -24,14 +24,14 @@ $task{$me}{code} = sub {
 	my $bookmarks_popular = $bookmark_reader->getPopularBookmarks();
 
 	if ($bookmarks_recent && @$bookmarks_recent) {
-		newrdf(@_, "bookmarks_recent", "Bookmarks Recent", $bookmarks_recent);
-		newrss(@_, "bookmarks_recent", "Bookmarks Recent", $bookmarks_recent);
-		newatom(@_, "bookmarks_recent", "Bookmarks Recent", $bookmarks_recent);
+		bookrdf(@_, "bookmarks_recent", "Bookmarks Recent", $bookmarks_recent);
+		bookrss(@_, "bookmarks_recent", "Bookmarks Recent", $bookmarks_recent);
+		bookatom(@_, "bookmarks_recent", "Bookmarks Recent", $bookmarks_recent);
 	}
 	if ($bookmarks_popular && @$bookmarks_popular) {
-		newrdf(@_, "bookmarks_popular", "Bookmarks Popular", $bookmarks_popular);
-		newrss(@_, "bookmarks_popular", "Bookmarks Popular", $bookmarks_popular);
-		newatom(@_, "bookmarks_popular", "Bookmarks Popular", $bookmarks_popular);
+		bookrdf(@_, "bookmarks_popular", "Bookmarks Popular", $bookmarks_popular);
+		bookrss(@_, "bookmarks_popular", "Bookmarks Popular", $bookmarks_popular);
+		bookatom(@_, "bookmarks_popular", "Bookmarks Popular", $bookmarks_popular);
 	}
 
 	return;
@@ -45,7 +45,7 @@ sub fudge {
 	return($current, $new);
 }
 
-sub _do_rss {
+sub _do_book_rss {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin,
 		$name, $subtitle, $bookmarks, $version, $type) = @_;
 
@@ -93,7 +93,7 @@ sub _do_rss {
 	save2file("$constants->{basedir}/$filename", $rss, \&fudge);
 }
 
-sub newrdf  { _do_rss(@_, '0.9') } # RSS 0.9
-sub newrss  { _do_rss(@_, '1.0') } # RSS 1.0
-sub newatom { _do_rss(@_, '1.0', 'atom') } # Atom 1.0
+sub bookrdf  { _do_book_rss(@_, '0.9') } # RSS 0.9
+sub bookss  { _do_book_rss(@_, '1.0') } # RSS 1.0
+sub bookatom { _do_book_rss(@_, '1.0', 'atom') } # Atom 1.0
 
