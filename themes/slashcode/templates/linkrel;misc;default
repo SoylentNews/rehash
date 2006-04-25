@@ -91,7 +91,13 @@ ELSIF env.script_name.search('messages\.pl');
 	IF !user.is_anon; tmp = BLOCK -%]
 <link rel="alternate" title="[% constants.sitename | strip_attribute %] Messages RSS" href="[% gSkin.rootdir %]/my/inbox/rss/[% Slash.getPublicLogToken() | fixparam %]" type="application/rss+xml">
 	[%- END; linkrels.push(tmp); END;
-
+ELSIF env.script_name.search('bookmark\.pl');
+	tmp = BLOCK -%]
+<link rel="alternate" title="[% constants.sitename | strip_attribute %] Popular Bookmarks" href="[% gSkin.rootdir %]/bookmarks_popular.rss" type="application/rss+xml">
+	[%- END; linkrels.push(tmp); 
+	tmp = BLOCK -%]
+<link rel="alternate" title="[% constants.sitename | strip_attribute %] Recent Bookmarks" href="[% gSkin.rootdir %]/bookmarks_recent.rss" type="application/rss+xml">
+	[%- END; linkrels.push(tmp);
 
 ELSE; # default author link, where author is a nickname
 	    IF link.author; tmp = BLOCK -%]
