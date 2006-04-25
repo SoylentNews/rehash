@@ -15,7 +15,7 @@ use strict;
 
 use vars qw( %task $me $task_exit_flag );
 
-$task{$me}{timespec} = '0-59/6 * * * *';
+$task{$me}{timespec} = '0-59/2 * * * *';
 $task{$me}{timespec_panic_1} = '1-59/10 * * * *';
 $task{$me}{timespec_panic_2} = '';
 $task{$me}{on_startup} = 1;
@@ -24,9 +24,10 @@ $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
 
 	my $start_time = time();
-	my $timeout = 120;
+	my $timeout = 60;
 
 	my $ua = LWP::UserAgent->new;
+	$ua->agent($constants->{url_checker_user_agent}) if $constants->{url_checker_user_agent};
 	$ua->timeout(30);
 
 	my $urls = $slashdb->getUrlsNeedingFirstCheck();
