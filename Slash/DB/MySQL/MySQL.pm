@@ -13371,7 +13371,7 @@ sub getGlobjTypes {
 
 # Given a globjid, returns its globj_type and target_id.  Returns
 # undef if the object does not exist.
-# XXX should optimize to work with a list
+# XXX should REALLY optimize to work with a list
 # XXX should memcached
 
 sub getGlobjTarget {
@@ -13406,8 +13406,11 @@ sub addGlobjTargetsToHashrefArray {
 # set of data is based on general needs and may evolve in future.
 #
 # Currently, the standard set of data which is added to each hashref is:
-# * title = Text string which best serves as the title for the object
+# * title = Text string which best serves as the title for the object.
+#           This may contain raw data entered by an admin... or by a
+#           user or an untrusted URL, so it must be stripped for output.
 # * url = URL to view the object
+#           This is guaranteed to be a valid URI.
 # * created_at = Timestamp when the object was created
 
 sub addGlobjEssentialsToHashrefArray {
