@@ -73,6 +73,9 @@ __template__
 		<form action="[% gSkin.rootdir %]/comments.pl">
 		<fieldset>
 		<legend>Display Options</legend>
+		[% IF user.discussion2 && user.discussion2 == "slashdot" %]
+		Threshold: [% Slash.selectThreshold(comments.0.totals, { onchange => 'changeThreshold(this.value)' }) %]
+		[% ELSE %]
 		<input type="hidden" name="sid" value="[% sid %]">
 		[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
 		[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
@@ -89,6 +92,7 @@ __template__
 	[% END %]
 
 		<input type="submit" name="op" value="Change" class="button">
+		[% END %]
 		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
 			<input type="submit" name="op" value="Reply" class="button">
 		[% END %]

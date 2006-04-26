@@ -3824,8 +3824,6 @@ ALTER TABLE urls ADD COLUMN tags_top VARCHAR(255) DEFAULT '' NOT NULL AFTER vali
 # 2006-04-11
 UPDATE vars SET value = 'T_2_5_0_108' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 INSERT INTO globj_types VALUES (NULL, 'submissions');
 INSERT INTO globj_types VALUES (NULL, 'journals');
 DROP TABLE IF EXISTS globj_urls;
@@ -3862,4 +3860,7 @@ UPDATE ajax_ops SET subroutine="ajax_learnword" where subroutine = "admin_learnw
 UPDATE vars SET value = 'T_2_5_0_109' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
 INSERT INTO vars (name, value, description) VALUES ('url_checker_user_agent', '', 'user Agent to use for url checking task, empty string results in lwp user agent being used');

@@ -13,7 +13,11 @@ en_US
 __name__
 displayThread
 __template__
+[% IF discussion2 %]
+	<script>kidHiddens([% cid %], [% hidden %])</script>
+[% ELSE %]
 	<li><b>[% link %] beneath your current threshold.</b></li>
+[% END %]
 
 __seclev__
 10000

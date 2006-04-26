@@ -29,18 +29,18 @@ __template__
 	<div class="commentTop">
 		<div class="title">
 			[% IF discussion2 %]
-			<script type="text/javascript">displaymode[[% cid %]] = "[% class %]"</script>
 			<h4><a id="comment_link_[% cid %]" name="comment_link_[% cid %]" href="javascript:setFocusComment([% class == 'full' ? '-' : ''; cid %]);">[% subject %]</a></h4>
 			[% ELSE %]
 			<h4><a name="[% cid %]">[% subject %]</a></h4>
-			[% END %]
-			[% UNLESS user.noscores %] (Score:[% IF points.length; points; ELSE; "?"; END %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
+			[%- END %]
+			[% UNLESS user.noscores %]<span class="score">(Score:[% IF points.length; points; ELSE; "?"; END %][% IF reason %], [% reasons.$reason.name %][% END %])</span>[% END %]
 		</div>
 		<div class="details">
 			by
 			[% IF !is_anon %]<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</a>[% END %]
 			[% IF !is_anon && subscriber_bonus == "yes"; " *"; END %]
 			[% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
+			<span class="otherdetails">
 			[% IF !is_anon && fakeemail %]&lt;<a href="mailto:[% fakeemail | strip_paramattr_nonhttp %]">[% fakeemail_vis | strip_literal %]</a>&gt;[% END %]
 			on [% Slash.timeCalc(time) %]
 			[% IF sid && cid %] (<a href="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</a>)[% END %]
@@ -63,6 +63,7 @@ __template__
 				[% END %]
 				[% ipid_display %]
 			</small>
+			</span>
 		</div>
 	</div>
 	<div class="commentBody">

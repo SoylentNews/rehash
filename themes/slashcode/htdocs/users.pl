@@ -1602,7 +1602,7 @@ sub showBookmarks {
 	}
 
 	my $tags_ar = $tags_reader->getGroupedTagsFromUser($user_edit->{uid}, { type => "urls", only_bookmarked => 1 });
-	
+
 	slashDisplay('userbookmarks', {
 		useredit	=> $user_edit,
 		tags_grouped	=> $tags_ar,

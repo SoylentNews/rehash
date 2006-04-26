@@ -101,8 +101,9 @@ __template__
 [% END %]
 
 [% IF user.discussion2 && (user.discussion2 == "uofm" || user.discussion2 == "slashdot");
-	thisfull = (user.discussion2 == "uofm") ? 1 : 0 -%]
-<script src="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;op=dynamic_display&amp;full=[% thisfull %]" type="text/javascript"></script>
+	thisfull = (user.discussion2 == "uofm") ? "&amp;thisfull=1" : '';
+	thiscid = cid ? "&amp;cid=$cid" : '' -%]
+<script src="[% constants.rootdir %]/comments.pl?sid=[% sid %][% thiscid %]&amp;op=dynamic_display[% thisfull %]" type="text/javascript"></script>
 [% END %]
 
 __seclev__

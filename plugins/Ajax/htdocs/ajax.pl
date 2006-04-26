@@ -236,13 +236,17 @@ sub setSectionNexusPrefs() {
 sub readRest {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $cid = $form->{cid} or return;
+	my $sid = $form->{sid} or return;
 
 	my $comment = $slashdb->getComment($cid) or return;
+	return unless $comment->{sid} == $sid;
+
 	my $texts   = $slashdb->getCommentTextCached(
 		{ $cid => $comment },
 		[ $cid ],
 		{ cid => $cid }
 	) or return;
+
 	return $texts->{$cid} || '';
 }
 

@@ -217,24 +217,29 @@ sub jsSelectComments {
 	require Data::JavaScript::Anon;
 	my($slashdb, $constants, $user, $form, $options) = @_;
 
+	$user->{mode} = 'thread';
+	$user->{reparent} = 0;
+
 	my $id = $form->{sid};
 	return unless $id;
 
+	my $cid = $form->{cid} || 0;
+
 	my($comments) = selectComments(
 		$slashdb->getDiscussion($id),
-		0,
+		$cid,
 		{
 			commentsort	=> 0,
-			threshold	=> -1,
+			threshold	=> -1
 		}
 	);
 
 	delete $comments->{0}; # non-comment data
 
-	my @roots = grep { !$comments->{$_}{pid} } keys %$comments;
+	my @roots = $cid ? $cid : grep { !$comments->{$_}{pid} } keys %$comments;
 
-	my $extra = '';
-	$extra = "prerendered = 1;\n" if $user->{discussion2} && $user->{discussion2} eq 'slashdot';
+	my $extra = "renderRoots('commentlisting')";
+	$extra = "" if $user->{discussion2} && $user->{discussion2} eq 'slashdot';
 
 	if ($form->{full}) {
 		my $comment_text = $slashdb->getCommentTextCached(
@@ -246,7 +251,7 @@ sub jsSelectComments {
 		}
 	} else {
 		my $comments_new;
-		my @keys = qw(pid kids);
+		my @keys = qw(pid kids points uid);
 		for my $cid (keys %$comments) {
 			@{$comments_new->{$cid}}{@keys} = @{$comments->{$cid}}{@keys};
 		}
@@ -260,8 +265,10 @@ sub jsSelectComments {
 comments = $anon_comments;
 root_comments = $anon_roots;
 user_uid = $user->{uid};
+user_threshold = $user->{threshold};
+user_highlightthresh = $user->{highlightthresh};
+discussion_id = $id;
 $extra
-renderRoots('commentlisting');
 EOT
 }
 
@@ -635,6 +642,13 @@ sub printComments {
 		print getData('no_such_sid', {}, '');
 		return 0;
 	}
+
+	if ($user->{discussion2} && $user->{discussion2} eq 'slashdot' && $user->{mode} ne 'metamod') {
+		$user->{mode} = $form->{mode} = 'thread';
+		$user->{commentsort} = 0;
+		$user->{reparent} = 0;
+	}
+
 	# Couple of rules on how to treat the discussion depending on how mode is set -Brian
 	$discussion->{type} = isDiscussionOpen($discussion);
 
@@ -1143,6 +1157,7 @@ sub displayThread {
 			if ($user->{is_anon} || ($user->{uid} != $comment->{uid})) {
 				if ($discussion2) {
 					$class = 'hidden';
+					$hidden++;
 				} else {
 					$hidden++;
 					next;
@@ -1151,7 +1166,7 @@ sub displayThread {
 		}
 
 		my $highlight = 1 if $comment->{points} >= $user->{highlightthresh};
-		$class = $highlight ? 'full' : $full ? 'oneline' : $class;
+		$class = 'full' if $highlight;
 		my $finish_list = 0;
 
 		if ($full || $highlight || $discussion2) {
@@ -1209,6 +1224,12 @@ sub displayThread {
 			{ Return => 1, Nocomm => 1 });
 		$return .= $const->{cagebigend} if $cagedkids;
 
+	} elsif ($hidden && $discussion2) {
+		$return .= slashDisplay('displayThread', {
+			discussion2	=> $discussion2,
+			pid		=> $pid,
+			hidden		=> $hidden
+		}, { Return => 1, Nocomm => 1 });
 	}
 
 	return $return;
@@ -1939,7 +1960,6 @@ sub _hard_dispComment {
 
 	my $sign = $class eq 'full' ? '-' : '';
 	my $head = $discussion2 ? <<EOT1 : <<EOT2;
-			<script type="text/javascript">displaymode[$comment->{cid}] = "$class"</script>
 			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="javascript:setFocusComment($sign$comment->{cid});">$comment->{subject}</a></h4>
 EOT1
 			<h4><a name="$comment->{cid}">$comment->{subject}</a></h4>
@@ -1952,12 +1972,14 @@ EOT2
 	<div class="commentTop">
 		<div class="title">
 $head
-		 	$score_to_display
+		 	<span class="score">$score_to_display</span>
 		</div>
 		<div class="details">
 			by $user_nick_to_display$zoosphere_display$user_email_to_display
-			on $time_to_display$comment_link_to_display
-			<small>$userinfo_to_display $comment->{ipid_display}</small>
+			<span class="otherdetails">
+				on $time_to_display$comment_link_to_display
+				<small>$userinfo_to_display $comment->{ipid_display}</small>
+			</span>
 		</div>
 	</div>
 	<div class="commentBody">	

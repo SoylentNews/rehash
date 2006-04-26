@@ -79,8 +79,7 @@ html > body .commentwrap table {
 	padding: .3em;
 }
 
-.commentshrunk { font-weight: bold }
-.commentstatus { font-weight: bold }
+.commentshrunk, .commentstatus { font-weight: bold }
 
 
 #commentlisting {
@@ -95,34 +94,71 @@ html > body .commentwrap table {
 
 .ups
 {
-margin: 0 0 0 -.3em;
-padding: 0 .3em;
-		 text-decoration: none;
-background: url("/images/comm-minus.gif") 0 .2em no-repeat;
-right: -1.4em;
-		  z-index: 2;
-cursor: pointer;
+	margin: 0 0 0 -.3em;
+	padding: 0 .3em;
+	text-decoration: none;
+	background: url("/images/comm-minus.gif") 0 .2em no-repeat;
+	right: -1.4em;
+	z-index: 2;
+	cursor: pointer;
 }
 
 .dwns
 {
-margin: 0;
-padding: 0 .3em;
-		 text-decoration: none;
-background: url("/images/comm-plus.gif") 0 .2em no-repeat;
-right: -1.4em;
-		  z-index: 1;
-cursor: pointer;
+	margin: 0;
+	padding: 0 .3em;
+	text-decoration: none;
+	background: url("/images/comm-plus.gif") 0 .2em no-repeat;
+	right: -1.4em;
+	z-index: 1;
+	cursor: pointer;
 }
 
-.hide { display: none; }
-.show { display: inline; }
+.hide { display: none   }
+.show { display: inline }
 
 
 .comment > .hidden  { display: none   }
 .comment > .full    { display: inline }
-.comment > .oneline { display: inline }
-.comment > .oneline .details, .comment > .oneline .commentBody, .comment > .oneline .commentSub {
+
+.comment > .oneline * {
+	display: inline;
+}
+
+.comment > .oneline .commentTop * {
+	vertical-align: top;
+}
+
+.comment > .oneline .commentSub, .comment > .oneline .score, .comment > .oneline .otherdetails, .comment > .oneline .sig {
 	display: none;
+}
+
+.comment > .oneline {
+	border: 1px solid #e5e5e5;
+	padding: .3em;
+	width: 75%;
+	height: 1em;
+	overflow: hidden;
+}
+
+.comment > .oneline .details {
+	font-size: 100%;
+}
+
+.comment > .oneline .commentTop .title h4 a { color: #600; }
+.comment > .oneline .commentTop {
+	color: #600;
+	background: #e5e5e5;
+	border: none;
+	padding: 0;
+}
+
+.comment > .oneline .commentBody {
+	color: #666;
+	font-size: 75%;
+	background: #e5e5e5;
+	border: none;
+	padding: 0 0 0 .5em;
+	line-height: 150%;
 }
 
