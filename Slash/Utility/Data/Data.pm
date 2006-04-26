@@ -2294,7 +2294,9 @@ sub url2html {
 
 	# we know this can break real URLs, but probably will
 	# preserve real URLs more often than it will break them
-	$text =~  s{(?<!['":=>])((?:$scheme_regex):/{0,2}[$URI::uric#]+)}{
+	# was ['":=>]
+	# should we parse the HTML instead?  problematic ...
+	$text =~  s{(?<!\S)((?:$scheme_regex):/{0,2}[$URI::uric#]+)}{
 		my $url   = fudgeurl($1);
 		my $extra = '';
 		$extra = $1 if $url =~ s/([?!;:.,']+)$//;
@@ -2302,6 +2304,7 @@ sub url2html {
 print STDERR "url2html s/// url='$url' extra='$extra'\n" if !defined($url) || !defined($extra);
 		qq[<a href="$url" rel="url2html-$$">$url</a>$extra];
 	}ogie;
+	# url2html-$$ is so we can remove the whole thing later for ecode
 
 	return $text;
 }
