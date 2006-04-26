@@ -134,7 +134,7 @@ html > body .commentwrap table {
 }
 
 .comment > .oneline {
-	border: 1px solid #e5e5e5;
+	border: 1px solid transparent;
 	padding: .3em;
 	width: 75%;
 	height: 1em;
@@ -148,7 +148,7 @@ html > body .commentwrap table {
 .comment > .oneline .commentTop .title h4 a { color: #600; }
 .comment > .oneline .commentTop {
 	color: #600;
-	background: #e5e5e5;
+	background: transparent;
 	border: none;
 	padding: 0;
 }
@@ -156,9 +156,16 @@ html > body .commentwrap table {
 .comment > .oneline .commentBody {
 	color: #666;
 	font-size: 75%;
-	background: #e5e5e5;
+	background: transparent;
 	border: none;
 	padding: 0 0 0 .5em;
 	line-height: 150%;
 }
 
+.comment > .oneline .commentBody * {
+	color: #666;
+	text-decoration: none;
+	font-style: normal;
+	font-weight: normal;
+	font-family: serif;
+}
