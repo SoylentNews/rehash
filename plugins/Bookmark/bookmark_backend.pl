@@ -94,6 +94,6 @@ sub _do_book_rss {
 }
 
 sub bookrdf  { _do_book_rss(@_, '0.9') } # RSS 0.9
-sub bookss  { _do_book_rss(@_, '1.0') } # RSS 1.0
+sub bookrss  { _do_book_rss(@_, '1.0') } # RSS 1.0
 sub bookatom { _do_book_rss(@_, '1.0', 'atom') } # Atom 1.0
 
