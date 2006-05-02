@@ -286,10 +286,18 @@ function ajax_update(params, onsucc, options, url) {
 }
 
 function ajax_periodic_update(secs, params, onsucc, options, url) {
+	var h = $H(params);
+	
+	if (!url) 
+		url = '/ajax.pl';
+		
 	if (!options)
 		options = {};
 
 	options.frequency = secs;
+	options.method = 'post';
+	options.parameters = h.toQueryString();
 
-	ajax_update(params, onsucc, options, url);
+	var ajax = new Ajax.PeriodicalUpdater({ success: onsucc }, url, options);
 }
+
