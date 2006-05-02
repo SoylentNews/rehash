@@ -3854,12 +3854,12 @@ CREATE TABLE bookmark_feeds (
 # Update for plugins/Ajax
 UPDATE ajax_ops SET subroutine="ajax_learnword" where subroutine = "admin_learnword";
 
-# PUDGE LAST UPDATED HERE
-
 # 2006-04-19
 UPDATE vars SET value = 'T_2_5_0_109' WHERE name = 'cvs_tag_currentcode';
 
 INSERT INTO vars (name, value, description) VALUES ('url_checker_user_agent', '', 'user Agent to use for url checking task, empty string results in lwp user agent being used');
+
+# PUDGE LAST UPDATED HERE
 
 # 2006-04-26
 UPDATE vars SET value = 'T_2_5_0_110' WHERE name = 'cvs_tag_currentcode';
