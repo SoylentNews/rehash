@@ -205,10 +205,11 @@ sub getRDF {
 			next unless $link;
 
 			# convert links to sections of our own site
-			# into a non-scheme-specific format
+			# into a non-scheme-specific format ...
+			# unless host begins with "rss." (this could be a separate var ...)
 			my $uri = URI->new($link);
 			if ($uri->can('authority')) {
-				$uri->scheme(undef) if $uri->authority =~ /\b$bd_regex\Z/;
+				$uri->scheme(undef) if $uri->authority =~ /\b$bd_regex\Z/ && $uri->authority !~ /^rss\./;
 			}
 
 			$item->{link} = $uri->as_string or next;
