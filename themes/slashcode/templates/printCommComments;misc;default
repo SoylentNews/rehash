@@ -84,7 +84,7 @@ __template__
 
 [% IF moderate_form %]
 	[% IF moderate_button %]
-		<p>Have you read the
+		<div>Have you read the
 		<a href="[% gSkin.rootdir %]/moderation.shtml">Moderator Guidelines</a>
 		yet?
 		<input type="hidden" name="op" value="moderate">
@@ -92,6 +92,7 @@ __template__
 		<input type="hidden" name="cid" value="[% cid %]">
 		<input type="hidden" name="pid" value="[% pid %]">
 		<input type="submit" value="moderate" class="button">
+		</div>
 		[% IF (constants.authors_unlimited && user.seclev >= constants.authors_unlimited)
 			|| user.acl.candelcomments_always %]
 			[% PROCESS formNote note='Checked comments will be deleted.' %]
@@ -101,7 +102,7 @@ __template__
 [% END %]
 
 [% IF user.discussion2 && (user.discussion2 == "uofm" || user.discussion2 == "slashdot");
-	thisfull = (user.discussion2 == "uofm") ? "&amp;thisfull=1" : '';
+	thisfull = (user.discussion2 == "uofm") ? "&amp;full=1" : '';
 	thiscid = cid ? "&amp;cid=$cid" : '' -%]
 <script src="[% constants.rootdir %]/comments.pl?sid=[% sid %][% thiscid %]&amp;op=dynamic_display[% thisfull %]" type="text/javascript"></script>
 [% END %]

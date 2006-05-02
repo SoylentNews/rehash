@@ -219,6 +219,15 @@ sub jsSelectComments {
 
 	$user->{mode} = 'thread';
 	$user->{reparent} = 0;
+	$user->{state}{max_depth} = $constants->{max_depth} + 3;
+
+	# this should get the value from $form, really, i think ... maybe?
+	my $threshold = $user->{threshold};
+	if ($ENV{HTTP_REFERER} && $ENV{HTTP_REFERER} =~ /\bthreshold=(-?\d+)\b/) {
+		$threshold = $1;
+	}
+	my $highlightthresh = $user->{highlightthresh};
+	$highlightthresh = $threshold if $highlightthresh < $threshold;
 
 	my $id = $form->{sid};
 	return unless $id;
@@ -238,7 +247,7 @@ sub jsSelectComments {
 
 	my @roots = $cid ? $cid : grep { !$comments->{$_}{pid} } keys %$comments;
 
-	my $extra = "renderRoots('commentlisting')";
+	my $extra = "\nrenderRoots('commentlisting')";
 	$extra = "" if $user->{discussion2} && $user->{discussion2} eq 'slashdot';
 
 	if ($form->{full}) {
@@ -264,11 +273,14 @@ sub jsSelectComments {
 	return <<EOT;
 comments = $anon_comments;
 root_comments = $anon_roots;
+
 user_uid = $user->{uid};
-user_threshold = $user->{threshold};
-user_highlightthresh = $user->{highlightthresh};
-discussion_id = $id;
-$extra
+user_is_anon = $user->{is_anon};
+user_threshold = $threshold;
+user_highlightthresh = $highlightthresh;
+
+discussion_id = $id;$extra
+finished_loading = 1;
 EOT
 }
 
@@ -436,7 +448,7 @@ sub reparentComments {
 		? $options->{threshold}
 		: $user->{threshold};
 
-	my $max_depth_allowed = $constants->{max_depth} || 7;
+	my $max_depth_allowed = $user->{state}{max_depth} || $constants->{max_depth} || 7;
 
 	return if $user->{state}{noreparent} || (!$max_depth_allowed && !$user->{reparent});
 
@@ -647,6 +659,7 @@ sub printComments {
 		$user->{mode} = $form->{mode} = 'thread';
 		$user->{commentsort} = 0;
 		$user->{reparent} = 0;
+		$user->{state}{max_depth} = $constants->{max_depth} + 3;
 	}
 
 	# Couple of rules on how to treat the discussion depending on how mode is set -Brian
@@ -1165,8 +1178,11 @@ sub displayThread {
 			}
 		}
 
-		my $highlight = 1 if $comment->{points} >= $user->{highlightthresh};
+		my $highlightthresh = $user->{highlightthresh};
+		$highlightthresh = $user->{threshold} if $user->{threshold} > $highlightthresh;
+		my $highlight = 1 if $comment->{points} >= $highlightthresh && $class ne 'hidden';
 		$class = 'full' if $highlight;
+
 		my $finish_list = 0;
 
 		if ($full || $highlight || $discussion2) {
@@ -1205,12 +1221,8 @@ sub displayThread {
 
 		last if $displayed >= $user->{commentlimit} && !$discussion2;
 	}
-	if ($hidden && !$discussion2
-		&& ! $user->{hardthresh}
-		&& $user->{mode} ne 'archive'
-		&& $user->{mode} ne 'metamod') {
 
-		$return .= $const->{cagebigbegin} if $cagedkids;
+	if ($hidden && ($discussion2 || (!$user->{hardthresh} && $user->{mode} ne 'archive' && $user->{mode} ne 'metamod'))) {
 		my $link = linkComment({
 			sid		=> $sid,
 			threshold	=> $constants->{comment_minscore},
@@ -1220,16 +1232,21 @@ sub displayThread {
 					   }, ''),
 			subject_only	=> 1,
 		});
-		$return .= slashDisplay('displayThread', { 'link' => $link },
-			{ Return => 1, Nocomm => 1 });
-		$return .= $const->{cagebigend} if $cagedkids;
-
-	} elsif ($hidden && $discussion2) {
-		$return .= slashDisplay('displayThread', {
-			discussion2	=> $discussion2,
-			pid		=> $pid,
-			hidden		=> $hidden
-		}, { Return => 1, Nocomm => 1 });
+		if ($discussion2) {
+			$return .= slashDisplay('displayThread', {
+				'link'		=> $link,
+				discussion2	=> $discussion2,
+				pid		=> $pid,
+				hidden		=> $hidden
+			}, { Return => 1, Nocomm => 1 });
+		} else {
+			$return .= $const->{cagebigbegin} if $cagedkids;
+			$return .= slashDisplay('displayThread',
+				{ 'link' => $link },
+				{ Return => 1, Nocomm => 1 }
+			);
+			$return .= $const->{cagebigend} if $cagedkids;
+		}
 	}
 
 	return $return;

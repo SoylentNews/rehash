@@ -136,7 +136,7 @@ html > body .commentwrap table {
 .comment > .oneline {
 	border: 1px solid transparent;
 	padding: .3em;
-	width: 75%;
+	width: 95%;
 	height: 1em;
 	overflow: hidden;
 }

@@ -73,13 +73,15 @@ __template__
 		<form action="[% gSkin.rootdir %]/comments.pl">
 		<fieldset>
 		<legend>Display Options</legend>
-		[% IF user.discussion2 && user.discussion2 == "slashdot" %]
+	[% IF user.discussion2 && user.discussion2 == "slashdot" %]
+		<input type="button" value="Better" name="ht_better" id="ht_better" onclick="changeHT(1)">
+		<input type="button" value="Worse"  name="ht_worse"  id="ht_worse"  onclick="changeHT(-1)">
+		HT: <span id="currentHT" style="background: black; color: white; padding: 0 2px 0 2px;">1</span>
+
 		Threshold: [% Slash.selectThreshold(comments.0.totals, { onchange => 'changeThreshold(this.value)' }) %]
-		[% ELSE %]
-		<input type="hidden" name="sid" value="[% sid %]">
-		[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
-		[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
-		[% IF form.startat %]<input type="hidden" name="startat" value="[% form.startat %]">[% END %]
+		<noscript>
+
+	[%- ELSE %]
 		Threshold: [%
 			Slash.selectThreshold(comments.0.totals);
 			IF user.mode != 'parents' && user.mode != 'child';
@@ -87,12 +89,20 @@ __template__
 			END;
 			Slash.selectSortcode(user.commentsort) %]
 
+	[%- END %]
+
 	[% UNLESS user.is_anon %]
 		Save: <input type="checkbox" name="savechanges" class="button">
-	[% END %]
-
+	[%- END %]
 		<input type="submit" name="op" value="Change" class="button">
-		[% END %]
+
+	[% IF user.discussion2 && user.discussion2 == "slashdot" %]
+		</noscript>
+	[%- END %]
+		<input type="hidden" name="sid" value="[% sid %]">
+		[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
+		[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
+		[% IF form.startat %]<input type="hidden" name="startat" value="[% form.startat %]">[% END %]
 		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
 			<input type="submit" name="op" value="Reply" class="button">
 		[% END %]

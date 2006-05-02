@@ -11,8 +11,13 @@ var futuredisplaymode = {};
 var prehiddendisplaymode = {};
 var defaultdisplaymode = {};
 var viewmodevalue = { full: 3, oneline: 2, hidden: 1};
-var user_uid = 0;
+
 var discussion_id = 0;
+var user_is_anon = 0;
+var user_uid = 0;
+var user_threshold = 0;
+var user_highlightthresh = 0;
+var finished_loading = 0;
 
 function updateComment(cid, mode) {
 	var existingdiv = $('comment_' + cid);
@@ -34,7 +39,7 @@ function updateCommentTree(cid, threshold) {
 	var comment = comments[cid];
 
 	if (threshold) {
-		if (comment['points'] < threshold && user_uid != comment['uid']) {
+		if (comment['points'] < threshold && (user_is_anon || user_uid != comment['uid'])) {
 			futuredisplaymode[cid] = 'hidden';
 		} else if (comment['points'] < user_highlightthresh) {
 			futuredisplaymode[cid] = 'oneline';
@@ -62,6 +67,11 @@ function kidHiddens(cid, kidhiddens) {
 	var hiddens_cid = $('hiddens_' + cid);
 	if (! hiddens_cid) // race condition, probably: new comment added in between rendering, and JS data structure
 		return 0;
+
+	// silly workaround to hide noscript LI bullet
+	var hidestring_cid = $('hidestring_' + cid);
+	if (hidestring_cid)
+		hidestring_cid.className = 'hide';
 
 	if (displaymode[cid] == 'hidden') {
 		hiddens_cid.className = 'hide';
@@ -180,6 +190,10 @@ function refreshCommentDisplays() {
 }
 
 function setFocusComment(cid) {
+	if (!finished_loading) {
+		alert('Please wait while the page finishes loading.');
+		return void(0);
+	}
 	var abscid = Math.abs(cid);
 
 // this doesn't work
@@ -201,7 +215,41 @@ function setFocusComment(cid) {
 }
 
 
+function changeHT(delta) {
+	if (!delta)
+		return void(0);
+
+	if (!finished_loading) {
+		alert('Please wait while the page finishes loading!');
+		return void(0);
+	}
+
+	user_highlightthresh += delta;
+	// limit to between -1 and 5
+	user_highlightthresh = Math.min(Math.max(user_highlightthresh, -1), 5);
+
+	// T cannot be higher than HT; this also modifies delta
+	if (user_threshold > user_highlightthresh)
+		user_threshold = user_highlightthresh;
+
+	changeThreshold(user_threshold + ''); // needs to be a string value
+}
+
 function changeThreshold(threshold, cid) {
+	if (!finished_loading) {
+		alert('Please wait while the page finishes loading.');
+		return void(0);
+	}
+
+	$('threshold').value = threshold;
+	if (user_threshold != threshold) {
+		user_highlightthresh = Math.min(Math.max(
+			(parseInt(threshold) + (user_highlightthresh - user_threshold)), -1
+		), 5);
+		user_threshold = threshold;
+	}
+$('currentHT').innerHTML = user_highlightthresh;
+
 	if (!cid) {
 		for (var root = 0; root < root_comments.length; root++) {
 			updateCommentTree(root_comments[root], threshold);
@@ -211,8 +259,6 @@ function changeThreshold(threshold, cid) {
 	}
 	return void(0);
 }
-
-var _tpNS = (document.all)?false:true;
 
 function getOffsetLeft (el) {
 	var ol = el.offsetLeft;
