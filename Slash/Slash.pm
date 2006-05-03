@@ -47,6 +47,7 @@ $VERSION   	= '2.005000';  # v2.5.0
 
 	dispComment displayStory displayRelatedStories displayThread dispStory
 	getOlderStories getOlderDays moderatorCommentLog printComments
+	jsSelectComments
 );
 
 
@@ -215,7 +216,11 @@ sub selectComments {
 
 sub jsSelectComments {
 	require Data::JavaScript::Anon;
-	my($slashdb, $constants, $user, $form, $options) = @_;
+	my($slashdb, $constants, $user, $form) = @_;
+	$slashdb   ||= getCurrentDB();
+	$constants ||= getCurrentStatic();
+	$user      ||= getCurrentUser();
+	$form      ||= getCurrentForm();
 
 	$user->{mode} = 'thread';
 	$user->{reparent} = 0;
@@ -280,7 +285,6 @@ user_threshold = $threshold;
 user_highlightthresh = $highlightthresh;
 
 discussion_id = $id;$extra
-finished_loading = 1;
 EOT
 }
 

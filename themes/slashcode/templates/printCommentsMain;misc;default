@@ -24,14 +24,14 @@ __template__
 [% IF user.acl.discussion2_slashdot || user.is_subscriber || (!constants.subscribe && !user.is_anon) %]
 <div class="commentBox" style="font-size: 150%">
 	<form method="GET" action="[% gSkin.rootdir %]/comments.pl">
+	<div>
 	<input type="hidden" name="op" value="setDiscussion2">
 	<input type="hidden" name="sid" value="[% sid %]">
 	[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
 	[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
-	<div>
-	Turn on Discussion2 Beta (JavaScript required):
 	<input type="checkbox" name="discussion2_slashdot" value="1" onchange="this.form.submit();"[% constants.markup_checked_attribute IF user.discussion2 == 'slashdot' %]>
-	<noscript><input type="submit"></noscript>
+	I am willing to help test <a href="http://slashdot.org/faq/com-mod.shtml#cm120">Slashdot's New Discussion System</a>.
+	<noscript><!-- input type="submit" --></noscript>
 	</div>
 	</form>
 </div>

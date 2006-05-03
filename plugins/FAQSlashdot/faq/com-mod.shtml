@@ -36,6 +36,29 @@
                 Last Modified: 01/02/02
         </small></em></p>
 
+
+<h2><a name="cm120" id="cm120">What is Discussion2?</a></h2>
+	<p>Currently a small population of Slashdot readers are being asked to test a revised discussion/comment system.  The initial testing group will consist of our subscribed users, and will eventually expand to more users as we become comfortable with scalability, performance, and usability issues.</p>
+	<p>The most substantial art of Discussion2 is a new JavaScript/CSS architecture that will allow users to traverse trees of discussions without reloading pages.  You can expand/contract threads.  You can change your threshold.  You can narrow or expand the quality of the comments you are seeing... and all of these things without reloading a page!</p>
+	<h3>Still Yet TODO</h3>
+	<ul>
+		<li>Backwards compatibility with non-javascript browsers</li>
+		<li>embedding reply functionality</li>
+		<li>embedding moderation functionality</li>
+		<li>live polling to reflect new comments &amp; moderation without a reload</li>
+		<li>persist user preferences from article to article</li>
+		<li>new UI for controlling preferences</li>
+	</ul>
+	<p>What we have is a pretty good start.  The old Slashdot 'Threshold' still exists, but we've coupled it with a Better/Worse button that allows you to narrow &amp; expand the forum that you are reading based on quality.  Think of threshold as 'Quantity' and think of Better/Worse as 'Quality'.  When we start deploying the new moderation system, this functionality will improve, but for now this is a nice improvement on what we have.  You can set a lower threshold, with a higher quality setting, and see a large portion of the discussion, but only the "Best" comments will be expanded into full text.  Since the whole thing is dynamic, you can do all of this quickly, efficiently, and in very few page loads.</p>
+	<p>The current plan is that this view eventually replaces the nested &amp; threaded views on Slashdot.  Once we work out the remaining quirks with javascript compatibility, users without javascript should be able to use the new forum with little or no noticable changes.  Possibly this new code will replace flat mode as well, but that's a little more up in the air.</p>
+	<p>Feel free to give us feedback on this.  You ought to know the email addresses to contact.  pudge especially is the main coder on this project, although I won't place his email address here for the spammers to eat, I bet you can guess it based on his nickname and what the domain name of this website is.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+                Last Modified: 5/3/06
+        </small></em></p>
+
+
+
 <h2><a name="cm150" id="cm150">Will you delete my comment?</a></h2>
         <p>No. We believe that discussions in Slashdot are like discussions in real life- you can't change what you say, you only can attempt to clarify by saying more. In other words, you can't delete a comment that you've posted, you only can post a reply to yourself and attempt to clarify what you've said.</p>
         <p>In short, you should think twice before you click that 'Submit' button because once you click it, we aren't going to let you Undo it.</p>

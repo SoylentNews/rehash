@@ -365,7 +365,7 @@ sub main {
 
 sub dynamicDisplay {
 	my($form, $slashdb, $user, $constants) = @_;
-	print Slash::jsSelectComments($slashdb, $constants, $user, $form);
+	print jsSelectComments($slashdb, $constants, $user, $form);
 }
 
 

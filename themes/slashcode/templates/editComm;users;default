@@ -59,7 +59,7 @@ __template__
 		[% IF user.is_admin || user.acl.discussion2_uofm %]
         	<input type="radio" name="discussion2" value="uofm"[% constants.markup_checked_attribute IF user_edit.discussion2 == "uofm" %]> University of Michigan Testing<br>
 		[% END; IF user.is_admin || user.acl.discussion2_slashdot || user.is_subscriber || !constants.subscribe %]
-        	<input type="radio" name="discussion2" value="slashdot"[% constants.markup_checked_attribute IF user_edit.discussion2 == "slashdot" %]> Discussion2 Testing<br>
+        	<input type="radio" name="discussion2" value="slashdot"[% constants.markup_checked_attribute IF user_edit.discussion2 == "slashdot" %]> Slashdot's New Discussion System Testing<br>
 		[% END %]
 		</div></blockquote>
 		[% END %]

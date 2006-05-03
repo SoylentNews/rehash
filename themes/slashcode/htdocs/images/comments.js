@@ -17,7 +17,6 @@ var user_is_anon = 0;
 var user_uid = 0;
 var user_threshold = 0;
 var user_highlightthresh = 0;
-var finished_loading = 0;
 
 function updateComment(cid, mode) {
 	var existingdiv = $('comment_' + cid);
@@ -190,10 +189,6 @@ function refreshCommentDisplays() {
 }
 
 function setFocusComment(cid) {
-	if (!finished_loading) {
-		alert('Please wait while the page finishes loading.');
-		return void(0);
-	}
 	var abscid = Math.abs(cid);
 
 // this doesn't work
@@ -219,11 +214,6 @@ function changeHT(delta) {
 	if (!delta)
 		return void(0);
 
-	if (!finished_loading) {
-		alert('Please wait while the page finishes loading!');
-		return void(0);
-	}
-
 	user_highlightthresh += delta;
 	// limit to between -1 and 5
 	user_highlightthresh = Math.min(Math.max(user_highlightthresh, -1), 5);
@@ -236,11 +226,6 @@ function changeHT(delta) {
 }
 
 function changeThreshold(threshold, cid) {
-	if (!finished_loading) {
-		alert('Please wait while the page finishes loading.');
-		return void(0);
-	}
-
 	$('threshold').value = threshold;
 	if (user_threshold != threshold) {
 		user_highlightthresh = Math.min(Math.max(

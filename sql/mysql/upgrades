@@ -3859,8 +3859,6 @@ UPDATE vars SET value = 'T_2_5_0_109' WHERE name = 'cvs_tag_currentcode';
 
 INSERT INTO vars (name, value, description) VALUES ('url_checker_user_agent', '', 'user Agent to use for url checking task, empty string results in lwp user agent being used');
 
-# PUDGE LAST UPDATED HERE
-
 # 2006-04-26
 UPDATE vars SET value = 'T_2_5_0_110' WHERE name = 'cvs_tag_currentcode';
 
@@ -3870,6 +3868,8 @@ UPDATE vars SET value = 'T_2_5_0_110' WHERE name = 'cvs_tag_currentcode';
 
 # 2006-05-02
 UPDATE vars SET value = 'T_2_5_0_111' WHERE name = 'cvs_tag_currentcode';
+
+# PUDGE LAST UPDATED HERE
 
 # Update for plugins/Tags
 CREATE TABLE tagboxes (
@@ -3893,4 +3893,3 @@ CREATE TABLE tagbox_feederlog (
 	KEY tbid_tagid (tbid, tagid),
 	KEY tbid_affectedid (tbid, affected_id)
 ) TYPE=InnoDB;
-
