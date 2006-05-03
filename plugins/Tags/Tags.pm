@@ -962,7 +962,7 @@ print STDERR "setting $tag->{tagid} to 0\n";
 				my $uids = $self->sqlSelectColArrayref('uid', 'tags',
 					"tagnameid=$tagnameid AND inactivated IS NULL");
 				if (@$uids) {
-					my @uids_changed;
+					my @uids_changed = ( );
 					for my $uid (@$uids) {
 						push @uids_changed, $uid
 							if $self->setUser($uid, {

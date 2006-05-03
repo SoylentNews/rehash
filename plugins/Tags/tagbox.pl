@@ -42,11 +42,13 @@ $task{$me}{code} = sub {
 	while (!$task_exit_flag) {
 
 		# Insert into tagbox_feederlog
+		$tagboxes = $tagboxdb->getTagboxes();
 		my $activity_feeder = update_feederlog(@_);
 		sleep 5;
 		last if $task_exit_flag;
 
 		# Run tagboxes (based on tagbox_feederlog)
+		$tagboxes = $tagboxdb->getTagboxes();
 		my $activity_run = run_tagboxes_until(@_, time() + 30);
 		sleep 5;
 		last if $task_exit_flag;
@@ -64,12 +66,6 @@ $task{$me}{code} = sub {
 
 sub update_feederlog {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
-#	my $last_tagid_into_feederlog = $slashdb->sqlSelect('value', 'vars',
-#		"name='tags_feederlog_lasttagid'");
-#	if (!defined($last_tagid_into_feederlog)) {
-#		slashdLog('no var tags_feederlog_lasttagid, please create it');
-#		return ;
-#	}
 
 	my $min_max_tagid = $tagboxes->[0]{last_tagid_logged};
 	for my $tagbox (@$tagboxes) {
@@ -89,6 +85,7 @@ sub update_feederlog {
 		$new_maxtagid = $tag_hr->{tagid}
 			if $tag_hr->{tagid} > $new_maxtagid;
 	}
+#print STDERR "min_max_tagid=$min_max_tagid new_maxtagid=$new_maxtagid count(tags_ar)=" . scalar(@$tags_ar) . "\n";
 
 	for my $tagbox (@$tagboxes) {
 		# First, extract out only the tags that are new since the
@@ -98,6 +95,7 @@ sub update_feederlog {
 			grep { $_->{tagid} > $tagbox->{last_tagid_logged} }
 			@$tags_ar
 		];
+#print STDERR "tagbox=$tagbox->{name} count(tags_this_ar)=" . scalar(@$tags_this_tagbox_ar) . "\n";
 
 		# Dispatch to run custom code for each tagbox, to split a
 		# Dumb hard-coded stand-in for the proper dispatch.
@@ -119,15 +117,13 @@ sub update_feederlog {
 
 	}
 
-#	$slashdb->setVar('tags_feederlog_lasttagid', $new_maxtagid);
-
 	return 1; # something may have been changed
 }
 
 sub insert_feederlog {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin, $tagbox, $feeder_ar) = @_;
 	for my $feeder_hr (@$feeder_ar) {
-print STDERR "addFeederInfo: tbid=$tagbox->{tbid} tagid=$feeder_hr->{tagid} affected_id=$feeder_hr->{affected_id} imp=$feeder_hr->{importance}\n";
+#print STDERR "addFeederInfo: tbid=$tagbox->{tbid} tagid=$feeder_hr->{tagid} affected_id=$feeder_hr->{affected_id} imp=$feeder_hr->{importance}\n";
 		$tagboxdb->addFeederInfo($tagbox->{tbid},
 			$feeder_hr->{tagid},
 			$feeder_hr->{affected_id},
@@ -145,7 +141,7 @@ sub run_tagboxes_until {
 
 		$activity = 1;
 		for my $affected_hr (@$affected_ar) {
-my $ad = Dumper($affected_hr); $ad =~ s/\s+/ /g; print STDERR "r_t_u affected_hr: $ad\n";
+#my $ad = Dumper($affected_hr); $ad =~ s/\s+/ /g; print STDERR "r_t_u affected_hr: $ad\n";
 			# Dumb hard-coded stand-in for the proper dispatch.
 			# XXX This will change!
 			my $tagbox = $tagboxdb->getTagboxes($affected_hr->{tbid});
@@ -175,7 +171,7 @@ sub _update_feederlog_tag_count {
 			affected_id =>	$tag_hr->{uid},
 			importance =>	1,
 		};
-print STDERR "tag_count update: tagid=$tag_hr->{tagid} aff_id=$tag_hr->{uid} imp=1\n";
+#print STDERR "tag_count update: tagid=$tag_hr->{tagid} aff_id=$tag_hr->{uid} imp=1\n";
 	}
 	return $ret_ar;
 }
@@ -185,7 +181,7 @@ sub _run_tagbox_tag_count {
 #	my $user_tags_ar = $tags->getAllTagsFromUser($affected_id);
 	my $user_tags_ar = $tagboxdb->getTagboxTags($tagbox->{tbid}, $affected_id, 0);
 	my $count = grep { !defined $_->{inactivated} } @$user_tags_ar;
-print STDERR "tag_count run: setting uid=$affected_id to count=$count (of " . scalar(@$user_tags_ar) . ")\n";
+#print STDERR "tag_count run: setting uid=$affected_id to count=$count (of " . scalar(@$user_tags_ar) . ")\n";
 	$slashdb->setUser($affected_id, { tag_count => $count });
 }
 

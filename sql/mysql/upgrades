@@ -3893,3 +3893,5 @@ CREATE TABLE tagbox_feederlog (
 	KEY tbid_tagid (tbid, tagid),
 	KEY tbid_affectedid (tbid, affected_id)
 ) TYPE=InnoDB;
+INSERT INTO tagboxes VALUES (NULL, 'tag_count', 'user', '1.0', 0, NULL);
+
