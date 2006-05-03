@@ -101,6 +101,12 @@ sub main {
 	delete $form->{newdiscussion};
 	if ($op =~ /^(?:creator_index|personal_index|user_created_index|index|create_discussion|delete_forum)/) {
 		redirect($gSkin->{rootdir} . '/journal.pl');
+		return;
+	}
+
+	if ($op eq 'setdiscussion2') {
+		setDiscussion2($form, $slashdb, $user, $constants, $gSkin);
+		return;
 	}
 
 	# This is here to save a function call, even though the
@@ -1611,6 +1617,30 @@ sub isTroll {
 
 	return $slashdb->getIsTroll($good_behavior);
 }
+
+
+##################################################################
+sub setDiscussion2 {
+	my($form, $slashdb, $user, $constants, $gSkin) = @_;
+	return if $user->{is_anon};
+	$slashdb->setUser($user->{uid}, {
+		discussion2 => $form->{discussion2_slashdot} ? 'slashdot' : ''
+	});
+
+	my $referrer = $ENV{HTTP_REFERER};
+	my $url;
+	if ($referrer && $referrer =~ m|https?://(?:[\w.]+.)?$constants->{basedomain}/|) {
+		$url = $referrer;
+	} else {
+		$url = $gSkin->{rootdir} . '/comments.pl';
+		$url .= '?sid=' . $form->{sid};
+		$url .= '&cid=' . $form->{cid} if $form->{cid};
+		$url .= '&pid=' . $form->{pid} if $form->{pid};
+	}
+
+	redirect($url);
+}
+
 
 ##################################################################
 createEnvironment();

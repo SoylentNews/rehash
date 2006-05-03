@@ -24,7 +24,7 @@ __name__
 select
 __template__
 [% IF default.ref == 'HASH'; default_hr = default; ELSE; default_hr = { $default = 1 }; END %]
-<select id="[% label %]" name="[% label %]"[% IF multiple %] MULTIPLE[% END %][% IF onchange %] onchange="[% onchange | strip_attribute %]"[% END %]>[% mylist = ordered ? ordered : numeric ? items.keys.nsort : items.keys.sort %]
+<select id="[% label %]" name="[% label %]"[% IF multiple %] MULTIPLE[% END %][% IF onchange %] onchange="[% onchange | strip_attribute %]"[% END %][% IF onclick %] onclick="[% onclick | strip_attribute %]"[% END %]>[% mylist = ordered ? ordered : numeric ? items.keys.nsort : items.keys.sort %]
 [% FOREACH item = mylist %]	[% IF default_hr.$item; selected = ' selected'; ELSE; selected = ''; END %]<option value="[% item %]"[% selected %]>[% items.$item | strip_literal %]</option>
 [% END %]</select>
 

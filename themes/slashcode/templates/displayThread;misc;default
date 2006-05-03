@@ -21,7 +21,7 @@ __template__
 	</li>
 
 [% ELSE %]
-	<li>$link</li>
+	<li>[% mystr %]</li>
 [% END %]
 
 __seclev__

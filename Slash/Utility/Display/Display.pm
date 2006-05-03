@@ -149,11 +149,11 @@ The 'select' template block.
 sub createSelect {
 	my($label, $hashref, $default, $return, $nsort, $ordered, $multiple) = @_;
 
-	my($onchange);
+	my($onchange, $onclick);
 
 	if (ref $default eq 'HASH' && @_ == 3) {
-		($default, $return, $nsort, $ordered, $multiple, $onchange) =
-			@{$default}{qw(default return nsort ordered multiple onchange)};
+		($default, $return, $nsort, $ordered, $multiple, $onchange, $onclick) =
+			@{$default}{qw(default return nsort ordered multiple onchange onclick)};
 	}
 
 	if (ref $hashref eq 'ARRAY') {
@@ -207,6 +207,7 @@ sub createSelect {
 		ordered		=> $ordered,
 		multiple	=> $multiple,
 		onchange	=> $onchange,
+		onclick		=> $onclick,
 	};
 
 	if ($return) {
