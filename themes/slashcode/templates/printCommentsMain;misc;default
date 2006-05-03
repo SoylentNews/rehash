@@ -21,6 +21,7 @@ printCommentsMain
 __template__
 <a name="acomments"></a>
 
+<div class="commentwrap">
 [% IF user.acl.discussion2_slashdot || user.is_subscriber || (!constants.subscribe && !user.is_anon) %]
 <div class="commentBox" style="font-size: 150%">
 	<form method="GET" action="[% gSkin.rootdir %]/comments.pl">
@@ -36,8 +37,6 @@ __template__
 	</form>
 </div>
 [% END %]
-
-<div class="commentwrap">
 <div class="commentBox">
 [% IF title %]
 	<a href="[% link | strip_urlattr %]">[% title %]</a>
