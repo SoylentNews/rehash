@@ -5,6 +5,7 @@ htdoc=tags.pl
 mysql_dump=mysql_dump.sql
 mysql_schema=mysql_schema.sql
 requiresplugin=Ajax
+task=tagbox.pl
 task=tags_update.pl
 template=templates/data;tags;default
 template=templates/index;tags;default

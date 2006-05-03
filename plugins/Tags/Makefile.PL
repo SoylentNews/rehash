@@ -4,5 +4,9 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'	=> 'Slash::Tags',
     'VERSION_FROM' => 'Tags.pm', # finds $VERSION
-    'PM'	=> { 'Tags.pm' => '$(INST_LIBDIR)/Tags.pm' },
+    'PM'	=>
+    	{
+		'Tags.pm' =>   '$(INST_LIBDIR)/Tags.pm',
+		'Tagbox.pm' => '$(INST_LIBDIR)/Tagbox.pm',
+    	},
 );

@@ -86,9 +86,9 @@ sub _setuptag {
 }
 
 sub createTag {
-        my($self, $hr, $options) = @_;
+	my($self, $hr, $options) = @_;
 
-        my $tag = $self->_setuptag($hr);
+	my $tag = $self->_setuptag($hr);
 	return 0 if !$tag;
 
 	my $check_dupe = (!$options || !$options->{dupe_ok});
@@ -106,7 +106,7 @@ sub createTag {
 	}
 
 	$self->sqlDo('SET AUTOCOMMIT=0');
-        my $rows = $self->sqlInsert('tags', $tag);
+	my $rows = $self->sqlInsert('tags', $tag);
 	my $tagid = $rows ? $self->getLastInsertId() : 0;
 
 	if ($rows && $check_dupe) {
@@ -156,7 +156,7 @@ sub createTag {
 	# Return AUTOCOMMIT to its original state in any case.
 	$self->sqlDo('SET AUTOCOMMIT=1');
 
-        return $rows ? 1 : 0;
+	return $rows ? $tagid : 0;
 }
 
 sub deactivateTag {
@@ -424,6 +424,50 @@ sub getTagsByNameAndIdArrayref {
 	# tagname, as well as tagnameid.
 	$self->addTagnamesToHashrefArray($ar);
 	return $ar;
+}
+
+# Given an arrayref of hashrefs representing tags, such as that
+# returned by getTagsByNameAndIdArrayref, add three fields to each
+# hashref:  tag_clout, tagname_clout, user_clout.
+
+sub addRoundedCloutsToTagArrayref {
+	my($self, $ar) = @_;
+
+	return if !$ar || !@$ar;
+
+	# Pull values from tag params named 'tag_clout'
+	my @tagids = sort { $a <=> $b } map { $_->{tagid} } @$ar;
+	my $tagids_in_str = join(',', @tagids);
+	my $tag_clout_hr = $self->sqlSelectAllKeyValue(
+		'tagid, value', 'tag_params',
+		"tagid IN ($tagids_in_str) AND name='tag_clout'");
+
+	# Pull values from tagname params named 'tag_clout'
+	my %tagnameid = map { ($_->{tagnameid}, 1) } @$ar;
+	my @tagnameids = sort { $a <=> $b } keys %tagnameid;
+	my $tagnameids_in_str = join(',', @tagnameids);
+	my $tagname_clout_hr = $self->sqlSelectAllKeyValue(
+		'tagnameid, value', 'tagname_params',
+		"tagnameid IN ($tagnameids_in_str) AND name='tag_clout'");
+
+	# Pull values from users_info.tag_clout
+	my %uid = map { ($_->{uid}, 1) } @$ar;
+	my @uids = sort { $a <=> $b } keys %uid;
+	my $uids_in_str = join(',', @uids);
+	my $uid_clout_hr = $self->sqlSelectAllKeyValue(
+		'uid, tag_clout', 'users_info',
+		"uid IN ($uids_in_str)");
+
+	for my $tag_hr (@$ar) {
+		$tag_hr->{tag_clout}     = defined($tag_clout_hr    ->{$tag_hr->{tagid}})
+				? sprintf("%.3g",  $tag_clout_hr    ->{$tag_hr->{tagid}})
+				: 1;
+		$tag_hr->{tagname_clout} = defined($tagname_clout_hr->{$tag_hr->{tagnameid}})
+				? sprintf("%.3g",  $tagname_clout_hr->{$tag_hr->{tagnameid}})
+				: 1;
+		$tag_hr->{user_clout} =
+				  sprintf("%.3g",  $uid_clout_hr    ->{$tag_hr->{uid}});
+	}
 }
 
 sub getAllTagsFromUser {
@@ -870,6 +914,7 @@ sub ajaxTagHistory {
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	my $tags_ar = [];
 	$tags_ar = $tags_reader->getTagsByNameAndIdArrayref($table, $id, { include_inactive => 1 }) if $table && $id;
+	$tags_reader->addRoundedCloutsToTagArrayref($tags_ar);
 	slashDisplay('taghistory', { tags => $tags_ar }, { Return => 1 } );
 }
 

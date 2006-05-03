@@ -1,0 +1,156 @@
+#!/usr/bin/perl -w
+# This code is a part of Slash, and is released under the GPL.
+# Copyright 1997-2005 by Open Source Technology Group. See README
+# and COPYING for more information, or see http://slashcode.com/.
+# $Id$
+
+BEGIN {
+	{
+		require Silly::Werder;
+		Silly::Werder->import;
+	}
+	die "Installation of Silly::Werder is required for this util, sorry!\n"
+		if $@;
+}
+
+use strict;
+use File::Basename;
+use Getopt::Std;
+use Slash;
+use Slash::Utility;
+use Benchmark;
+
+use vars qw( $slashdb $werder $constants $junk );
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hJu:va:', \%opts);
+usage() if $opts{'h'};
+version() if $opts{'v'};
+$junk = $opts{'J'} ? 1 : 0;
+$opts{'u'} ||= 'slash';
+$opts{num_tags} = $ARGV[0] || 10;
+usage('Invalid number of users') 
+	if $opts{num_tags} !~ /^\d+$/ || $opts{num_tags} < 0;
+
+createEnvironment($opts{u});
+setCurrentSkin(determineCurrentSkin());
+$slashdb = getCurrentDB();
+$constants = getCurrentStatic();
+$werder = new Silly::Werder;
+
+my $kmax = $constants->{maxkarma};
+my $kmin = $constants->{minkarma} + 10;
+$kmin = $constants->{minkarma} if $kmin >= $kmax;
+
+$werder->set_syllables_num(1, 3);
+srand(12345);
+my @commontags = ( );
+for (1..10) { push @commontags, [ map { $werder->get_werd } 1..10 ] }
+srand;
+
+# main program logic (in braces to offset nicely)
+{
+
+	my $tags = getObject('Slash::Tags');
+
+	my $stories = $slashdb->getStoriesEssentials({ future_secs => 0, limit => 10, limit_extra => 0,
+		sectioncollapse => (rand(1) < 0.3) ? 1 : 0 });
+	my $tagnameid = 0;
+	my $stoid = 0;
+	my $uid = 0;
+	for (1..$opts{num_tags}) {
+		$stoid = $stories->[rand(@$stories)]{stoid} if !$stoid || rand(1) > 0.2;
+		$tagnameid = _get_tagnameid($tags, $tagnameid, $stoid);
+		$uid = $tags->sqlSelect('uid', 'users_info',
+			"karma BETWEEN $kmin AND $kmax",
+			'ORDER BY RAND() LIMIT 1') if !$uid || rand(1) > 0.2;
+		my $tagid = $tags->createTag({
+			uid => $uid,
+			tagnameid => $tagnameid,
+			table => 'stories',
+			id => $stoid,
+		});
+		print "tagid=$tagid tagnameid=$tagnameid uid=$uid stoid=$stoid\n";
+	}
+}
+
+# subroutines
+
+sub _get_tagnameid {
+	my($tags, $old_tagnameid, $stoid) = @_;
+	my $retval = 0;
+	if ($old_tagnameid && rand(1) < 0.2) {
+		# same as before
+		$retval = $old_tagnameid;
+	} elsif (rand(1) < 0.6) {
+		# random existing tagname
+		$retval = $tags->sqlSelect('tagnameid', 'tagnames', '',
+			'ORDER BY RAND() LIMIT 1');
+	} elsif (rand(1) < 0.8) {
+		# pick a set of 10 commontags for this stoid.
+		# then pick 1 of those 10, odds for each one
+		# being 1/2, 1/4 ... 1/1024.
+		$stoid ||= 1; srand($stoid);
+		my $ct_ar = $commontags[rand(10)];
+		srand;
+		for my $i (0..$#$ct_ar) {
+			if (rand(1) > 0.5) {
+				$retval = $tags->createTagName($ct_ar->[$i]);
+				next;
+			}
+		}
+		$retval ||= $tags->createTagName($ct_ar->[0]);
+	}
+	while (!$retval) {
+		# Wholly new random word
+		$retval = $tags->createTagName($werder->get_werd);
+	}
+	if (rand(1) < 0.03) {
+		# Opposite of the tagname just picked
+		my $tagname = $tags->getTagDataFromId($retval)->{tagname};
+		my $opp = $tags->getOppositeTagname($tagname);
+		$retval = $tags->createTagName($opp);
+	}
+	return $retval;
+}
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] [#users]
+
+This utility creates test users for a given Slash site. This program is for
+testing purposes, only, particularly for those ambitious Slash users out there
+who want to try their hand at modifying the code.
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-a	Additional user for testing
+
+EOT
+	exit;
+}
+
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2005 by Open Source Technology Group. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__
