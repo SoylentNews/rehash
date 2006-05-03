@@ -3862,8 +3862,6 @@ INSERT INTO vars (name, value, description) VALUES ('url_checker_user_agent', ''
 # 2006-04-26
 UPDATE vars SET value = 'T_2_5_0_110' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # Update for plugins/Tags
@@ -3894,4 +3892,6 @@ INSERT INTO tagboxes VALUES (NULL, 'tag_count', 'user', '1.0', 0, NULL);
 UPDATE vars SET value = 'T_2_5_0_111' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 

@@ -1135,6 +1135,8 @@ sub displayThread {
 	my $return = '';
 
 	my $discussion2 = $user->{discussion2} && $user->{discussion2} eq 'slashdot';
+	my $highlightthresh = $user->{highlightthresh};
+	$highlightthresh = $user->{threshold} if $highlightthresh < $user->{threshold};
 
 	# FYI: 'archive' means we're to write the story to .shtml at the close
 	# of the discussion without page breaks.  'metamod' means we're doing
@@ -1182,10 +1184,10 @@ sub displayThread {
 			}
 		}
 
-		my $highlightthresh = $user->{highlightthresh};
-		$highlightthresh = $user->{threshold} if $user->{threshold} > $highlightthresh;
 		my $highlight = 1 if $comment->{points} >= $highlightthresh && $class ne 'hidden';
 		$class = 'full' if $highlight;
+
+		$user->{state}{comments}{totals}{$class}++;
 
 		my $finish_list = 0;
 

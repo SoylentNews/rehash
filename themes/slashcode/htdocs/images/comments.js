@@ -11,6 +11,7 @@ var futuredisplaymode = {};
 var prehiddendisplaymode = {};
 var defaultdisplaymode = {};
 var viewmodevalue = { full: 3, oneline: 2, hidden: 1};
+var currents = { full: 0, oneline: 0, hidden: 0 };
 
 var discussion_id = 0;
 var user_is_anon = 0;
@@ -28,7 +29,11 @@ function updateComment(cid, mode) {
 			existinglink.href = 'javascript:setFocusComment(' + plusminus + cid + ');';
 		}
 	}
+
+	currents[displaymode[cid]]--;
+	currents[mode]++;
 	displaymode[cid] = mode;
+
 	return void(0);
 }
 
@@ -178,6 +183,8 @@ function refreshCommentDisplays() {
 	for (var root = 0; root < root_comments.length; root++) {
 		roothiddens += updateCommentTree(root_comments[root]);
 	}
+	updateTotals();
+
 	if (roothiddens) {
 		$('roothiddens').innerHTML = roothiddens + ' comments are beneath your threshhold';
 		$('roothiddens').className = 'show';
@@ -197,6 +204,7 @@ function setFocusComment(cid) {
 
 	refreshDisplayModes(cid);
 	updateCommentTree(abscid);
+	updateTotals();
 
 //	statusdiv.innerHTML = '';
 
@@ -225,15 +233,33 @@ function changeHT(delta) {
 	changeThreshold(user_threshold + ''); // needs to be a string value
 }
 
+function changeT(delta) {
+	if (!delta)
+		return void(0);
+
+	var threshold = user_threshold + delta;
+	// limit to between -1 and 5
+	threshold = Math.min(Math.max(threshold, -1), 5);
+
+	// HT moves with T, but that is taken care of by changeThreshold()
+	changeThreshold(threshold + ''); // needs to be a string value
+}
+
 function changeThreshold(threshold, cid) {
-	$('threshold').value = threshold;
-	if (user_threshold != threshold) {
-		user_highlightthresh = Math.min(Math.max(
-			(parseInt(threshold) + (user_highlightthresh - user_threshold)), -1
-		), 5);
-		user_threshold = threshold;
-	}
-$('currentHT').innerHTML = user_highlightthresh;
+	var threshold_num = parseInt(threshold);
+
+	var t_delta = threshold_num + (user_highlightthresh - user_threshold);
+	user_highlightthresh = Math.min(Math.max(t_delta, -1), 5);
+	user_threshold = threshold_num;
+
+	if ($('currentHT'))
+		$('currentHT').innerHTML = user_highlightthresh;
+
+	if ($('currentT'))
+		$('currentT').innerHTML = user_threshold;
+
+	if ($('threshold'))
+		$('threshold').value = threshold;
 
 	if (!cid) {
 		for (var root = 0; root < root_comments.length; root++) {
@@ -242,6 +268,9 @@ $('currentHT').innerHTML = user_highlightthresh;
 	} else {
 		updateCommentTree(cid, threshold);
 	}
+
+	updateTotals();
+
 	return void(0);
 }
 
@@ -334,3 +363,26 @@ function readRest(cid) {
 
 	return void(0);
 }
+
+// don't want to actually use this -- pudge
+function calcTotals() {
+	var currentFull = 0;
+	var currentOneline = 0;
+
+	for (var mode in currents) {
+		if (currents[mode])
+			currents[mode] = 0;
+	}
+
+	for (var cid in comments) {
+		setDefaultDisplayMode(cid);
+		currents[displaymode[cid]]++;
+	}
+}
+
+function updateTotals() {
+	$('currentHidden' ).innerHTML = currents['hidden'];
+	$('currentFull'   ).innerHTML = currents['full'];
+	$('currentOneline').innerHTML = currents['oneline'];
+}
+

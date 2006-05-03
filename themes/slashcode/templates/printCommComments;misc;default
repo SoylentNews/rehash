@@ -109,6 +109,17 @@ __template__
 	</form>
 [% END %]
 
+[% IF user.discussion2 && user.discussion2 == "slashdot" %]
+	<script type="text/javascript">
+<!--
+		currents['hidden']  = [% user.state.comments.totals.hidden  || 0 %];
+		currents['full']    = [% user.state.comments.totals.full    || 0 %];
+		currents['oneline'] = [% user.state.comments.totals.oneline || 0 %];
+		updateTotals();
+//-->
+	</script>
+[% END %]
+
 __seclev__
 10000
 __version__

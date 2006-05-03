@@ -89,12 +89,20 @@ __template__
 		<form action="[% gSkin.rootdir %]/comments.pl">
 		<fieldset>
 		<legend>Display Options</legend>
-	[% IF user.discussion2 && user.discussion2 == "slashdot" %]
-		<input type="button" value="Better" name="ht_better" id="ht_better" onclick="changeHT(1)">
+	[% IF user.discussion2 && user.discussion2 == "slashdot";
+		highlightthresh = user.highlightthresh;
+		highlightthresh = user.threshold IF highlightthresh < user.threshold;
+		threshes = [user.highlightthresh, user.threshold] %]
 		<input type="button" value="Worse"  name="ht_worse"  id="ht_worse"  onclick="changeHT(-1)">
-		HT: <span id="currentHT" style="background: black; color: white; padding: 0 2px 0 2px;">1</span>
+		<input type="button" value="Better" name="ht_better" id="ht_better" onclick="changeHT(1)">
+		HT: <span id="currentHT" style="background: black; color: white; padding: 0 2px 0 2px; margin-right: 5em;">[% threshes.highval %]</span>
 
-		Threshold: [% Slash.selectThreshold(comments.0.totals, { onclick => 'changeThreshold(this.value)' }) %]
+		<input type="button" value="More" name="t_more" id="t_more" onclick="changeT(-1)">
+		<input type="button" value="Less" name="t_less" id="t_less" onclick="changeT(1)">
+		T: <span id="currentT" style="background: black; color: white; padding: 0 2px 0 2px; margin-right: 5em;">[% user.threshold %]</span>
+
+		[%# Threshold: Slash.selectThreshold(comments.0.totals, { onclick => 'changeThreshold(this.value)' }) %]
+
 		<noscript>
 
 	[%- ELSE %]
@@ -122,6 +130,10 @@ __template__
 		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
 			<input type="submit" name="op" value="Reply" class="button">
 		[% END %]
+
+	[% IF user.discussion2 && user.discussion2 == "slashdot" %]
+		<br>Hidden=<span id="currentHidden"></span> Displayed=<span id="currentFull"></span> Abbreviated=<span id="currentOneline"></span>
+	[% END %]
 		</fieldset>
 		</form>
 	<div class="commentBox">
