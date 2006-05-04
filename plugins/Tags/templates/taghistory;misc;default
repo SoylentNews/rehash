@@ -23,11 +23,11 @@ __template__
 		<tr class="data_hl[% toggle %]">
 			[% nickname = Slash.db.getUser(tag.uid, "nickname") %]
 			<td>[% tag.tagname %]</td>
-			<td><a href="[% gSkin.rootdir %]/~[% nickname | strip_paramattr %]">[% nickname | strip_literal %]</a></td>
-			<td>[% IF tag.inactivated %]<s>[% END %][% tag.created_at %][% IF tag.inactivated %]</s>[% END %]</td>
 			<td align=left>[% tag.tag_clout %]</td>
 			<td align=left>[% tag.tagname_clout %]</td>
+			<td><a href="[% gSkin.rootdir %]/~[% nickname | strip_paramattr %]">[% nickname | strip_literal %]</a></td>
 			<td align=left>[% tag.user_clout %]</td>
+			<td>[% IF tag.inactivated %]<s>[% END %][% tag.created_at.replace(" ","&nbsp;") %][% IF tag.inactivated %]</s>[% END %]</td>
 		</tr>
 		[% toggle = 3 - toggle %]
 	[% END %]
