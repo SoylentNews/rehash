@@ -120,7 +120,7 @@ sub markTagboxLogged {
 
 sub markTagboxRunComplete {
 	my($self, $tbid, $affected_id, $max_tagid) = @_;
-print STDERR "markTagboxRunComplete: tbid=$tbid aff_id=$affected_id max=$max_tagid\n";
+#print STDERR "markTagboxRunComplete: tbid=$tbid aff_id=$affected_id max=$max_tagid\n";
 	$self->sqlDelete('tagbox_feederlog',
 		"tbid=$tbid AND affected_id=$affected_id
 		 AND tagid <= $max_tagid");
