@@ -1998,8 +1998,9 @@ $head
 		 	<span class="score">$score_to_display</span>
 		</div>
 		<div class="details">
-			by $user_nick_to_display$zoosphere_display$user_email_to_display
+			by $user_nick_to_display$zoosphere_display
 			<span class="otherdetails">
+				$user_email_to_display
 				on $time_to_display$comment_link_to_display
 				<small>$userinfo_to_display $comment->{ipid_display}</small>
 			</span>

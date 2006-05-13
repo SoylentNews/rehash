@@ -20,7 +20,7 @@ dispLinkComment
 __template__
 [% IF user.mode != 'metamod' %]
 	[% IF user.is_admin || original_pid || !user.state.discussion_archived %]
-		[% do_parent = ( original_pid && !(discussion2 && (!form.cid || form.cid != cid)) );
+		[% do_parent = ( original_pid ); #&& !(discussion2 && (!form.cid || form.cid != cid)) );
 		   do_mod    = ( (constants.authors_unlimited && user.seclev >= constants.authors_unlimited) || user.acl.candelcomments_always ) %]
 		<div class="commentSub">
 
@@ -44,6 +44,7 @@ __template__
 			pid	=> original_pid,
 			subject	=> 'Parent',
 			subject_only => 1,
+			onclick	=> (discussion2 ? "return selectParent($original_pid)" : '')
 		}, 1) %][% END %]
 		
 		[% IF do_parent && ( can_mod || do_mod ) %] | [% END %]

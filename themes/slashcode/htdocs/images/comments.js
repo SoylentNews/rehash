@@ -83,9 +83,9 @@ function kidHiddens(cid, kidhiddens) {
 	} else if (kidhiddens) {
 		var kidstring = '<a href="javascript:changeThreshold(-1,' + cid + ')">' + kidhiddens;
 		if (kidhiddens == 1) {
-			kidstring += ' comment is hidden.</a>';
+			kidstring += ' hidden comment</a>';
 		} else {
-			kidstring += ' comments are hidden.</a>';
+			kidstring += ' hidden comments</a>';
 		}
 		hiddens_cid.innerHTML = kidstring; 
 		hiddens_cid.className = 'show';
@@ -195,25 +195,24 @@ function refreshCommentDisplays() {
 	return void(0);
 }
 
-function setFocusComment(cid) {
+function setFocusComment(cid, alone) {
 	var abscid = Math.abs(cid);
 
 // this doesn't work
 //	var statusdiv = $('comment_status_' + abscid);
 //	statusdiv.innerHTML = 'Working ...';
 
-	refreshDisplayModes(cid);
+	if (!alone)
+		refreshDisplayModes(cid);
 	updateCommentTree(abscid);
 	updateTotals();
 
 //	statusdiv.innerHTML = '';
 
-	var comment_y = getOffsetTop($('comment_' + abscid));
-	var newcomment_y = getOffsetTop($('comment_' + abscid));
-	if (comment_y != newcomment_y) {
-		var diff = newcomment_y - comment_y;
-		scroll(viewWindowLeft(), viewWindowTop() + diff);
+	if (!commentIsInWindow(abscid)) {
+		scrollTo(abscid);
 	}
+
 	return void(0);
 }
 
@@ -246,22 +245,21 @@ function changeT(delta) {
 }
 
 function changeThreshold(threshold, cid) {
-	var threshold_num = parseInt(threshold);
-
-	var t_delta = threshold_num + (user_highlightthresh - user_threshold);
-	user_highlightthresh = Math.min(Math.max(t_delta, -1), 5);
-	user_threshold = threshold_num;
-
-	if ($('currentHT'))
-		$('currentHT').innerHTML = user_highlightthresh;
-
-	if ($('currentT'))
-		$('currentT').innerHTML = user_threshold;
-
-	if ($('threshold'))
-		$('threshold').value = threshold;
-
 	if (!cid) {
+		var threshold_num = parseInt(threshold);
+		var t_delta = threshold_num + (user_highlightthresh - user_threshold);
+		user_highlightthresh = Math.min(Math.max(t_delta, -1), 5);
+		user_threshold = threshold_num;
+
+		if ($('currentHT'))
+			$('currentHT').innerHTML = user_highlightthresh;
+
+		if ($('currentT'))
+			$('currentT').innerHTML = user_threshold;
+
+		if ($('threshold'))
+			$('threshold').value = threshold;
+
 		for (var root = 0; root < root_comments.length; root++) {
 			updateCommentTree(root_comments[root], threshold);
 		}
@@ -274,12 +272,18 @@ function changeThreshold(threshold, cid) {
 	return void(0);
 }
 
+function scrollTo(cid) {
+	var comment_y = getOffsetTop($('comment_' + cid));
+	scroll(viewWindowLeft(), comment_y);
+}
+
 function getOffsetLeft (el) {
 	var ol = el.offsetLeft;
 	while ((el = el.offsetParent) != null)
 		ol += el.offsetLeft;
 	return ol;
 }
+
 function getOffsetTop (el) {
 	var ot = el.offsetTop;
 	while((el = el.offsetParent) != null)
@@ -321,18 +325,31 @@ function viewWindowTop() {
 }
 
 function viewWindowRight() {
-	return document.body.scrollLeft + screen.width; 
+	return viewWindowLeft() + window.innerWidth;
 }
 
 function viewWindowBottom() {
-	return document.body.scrollTop + screen.height;
+	return viewWindowTop() + window.innerHeight;
+}
+
+function commentIsInWindow(cid) {
+	return isInWindow($('comment_' + cid));
+}
+
+function isInWindow(obj) {
+	var y = getOffsetTop(obj);
+
+	if (y > viewWindowTop() && y < viewWindowBottom()) {
+		return 1;
+	}
+	return 0;
 }
 
 
 function replyTo(cid) {
 	var replydiv = $('replyto_' + cid);
-	replydiv.innerHTML = '<div class="generaltitle">\n	<div class="title">\n		<h3>\n			Post Comment\n			\n		</h3>\n	</div>\n</div>\n\n	<div class="generalbody">\n<!-- error message -->\n<!-- newdiscussion  form.newdiscussion  -->\n\n<!-- end error message -->\n<form action="//bourque.pudge.net:8080/comments.pl" method="post">\n    \n	<fieldset>\n	<legend>Edit Comment</legend>\n	<input type="hidden" name="sid" value="5">\n	<input type="hidden" name="pid" value="6">\n	\n<input type="hidden" name="formkey" value="uhsK8kRMWz">\n\n\n\n	\n	<p>\n<label >\n	Name\n</label>\n </p>\n		<a href="//bourque.pudge.net:8080/users.pl">pudge</a> [ <a href="//bourque.pudge.net:8080/login.pl?op=userclose">Log Out</a> ]\n	\n\n\n	<p>\n<label >\n	URL\n</label>\n </p>\n		<a href="http://homepage.mac.com/" rel="nofollow">http://homepage.mac.com/</a>\n\n\n	\n\n	<p>\n<label >\n	Subject\n</label>\n </p>\n		<input type="text" name="postersubj" value="Re:test me" size="50" maxlength="50">\n	\n	\n		<p>\n<label >\n	Comment\n</label>\n </p>\n		<textarea wrap="virtual" name="postercomment" rows="10" cols="50"></textarea>\n		<div class="note">\nUse the Preview Button! Check those URLs!\n</div>\n		<br>\n		\n\n	 \n\n\n		<input type="hidden" name="nobonus_present" value="1">\n		<input type="checkbox" name="nobonus"> No Karma Bonus\n\n		<input type="hidden" name="postanon_present" value="1">\n		<input type="checkbox" name="postanon"> Post Anonymously\n<br>\n\n\n\n\n<p>\n	\n\n<!-- start template: ID 234, select;misc;default -->\n\n<select name="posttype">\n	<option value="1">Plain Old Text</option>\n	<option value="2" selected>HTML Formatted</option>\n	<option value="3">Extrans (html tags to text)</option>\n	<option value="4">Code</option>\n</select>\n\n<!-- end template: ID 234, select;misc;default -->\n\n\n	<input type="submit" name="op" value="Preview" class="button">\n	\n	<input type="submit" name="op" value="Submit" class="button">\n	\n</p>\n\n			<div class="notes">\n				<b>Allowed HTML</b><br>\n				&lt;b&gt;			&lt;i&gt;			&lt;p&gt;			&lt;a&gt;			&lt;li&gt;			&lt;ol&gt;			&lt;ul&gt;			&lt;em&gt;			&lt;br&gt;			&lt;tt&gt;			&lt;strong&gt;			&lt;blockquote&gt;			&lt;div&gt;			&lt;ecode&gt;			&lt;dl&gt;			&lt;dt&gt;			&lt;dd&gt;			&lt;q&gt;\n				\n	\n				<br>	\n				<b>URLs</b><br>\n				<code>&lt;URL:http://example.com/&gt;</code> will auto-link a URL\n				<br>\n				<b>Important Stuff</b>\n				<ul>\n					<li>Please try to keep posts on topic.</li>\n					<li>Try to reply to other people\'s comments instead of starting new threads.</li>\n					<li>Read other people\'s messages before posting your own to avoid simply duplicating what has already been said.</li>\n					<li>Use a clear subject that describes what your message is about.</li>\n					<li>Offtopic, Inflammatory, Inappropriate, Illegal, or Offensive comments might be moderated. (You can read everything, even moderated posts, by adjusting your threshold on the User Preferences Page)</li>\n					\n				</ul>\n\n				<p>\n					Problems regarding accounts or comment posting should be sent to <a href="mailto:pudge@pobox.com">Slash Admin</a>.\n				</p>\n			</div>	\n	</fieldset>\n</form>\n	</div>\n';
-	return false;
+	replydiv.innerHTML = '';
+	return void(0);
 }
 
 
@@ -386,3 +403,16 @@ function updateTotals() {
 	$('currentOneline').innerHTML = currents['oneline'];
 }
 
+
+function selectParent(cid) {
+	var comment = comments[cid];
+	if (comment && $('comment_' + cid)) {
+		updateDisplayMode(cid, 'full', 1);
+		setFocusComment(cid, 1);
+
+		return false;
+	} else {
+		return true; // follow link
+	}
+	return false;
+}

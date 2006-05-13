@@ -116,6 +116,7 @@ __template__
 		currents['full']    = [% user.state.comments.totals.full    || 0 %];
 		currents['oneline'] = [% user.state.comments.totals.oneline || 0 %];
 		updateTotals();
+		$('commentControlBox').style.display = 'block';
 //-->
 	</script>
 [% END %]

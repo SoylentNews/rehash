@@ -19,6 +19,8 @@ en_US
 __name__
 printCommentsMain
 __template__
+[% discussion2 = user.discussion2 && user.discussion2 == "slashdot" %]
+
 <a name="acomments"></a>
 
 <div class="commentwrap">
@@ -85,11 +87,11 @@ __template__
 
 		| <a href="[% gSkin.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">Search Discussion</a>
 	</div>
-	<div class="commentBoxForm" id="commentControlBox">
+	<div class="commentBoxForm" id="commentControlBox"[% IF discussion2 %] style="display: none"[% END %]>
 		<form action="[% gSkin.rootdir %]/comments.pl">
 		<fieldset>
 		<legend>Display Options</legend>
-	[% IF user.discussion2 && user.discussion2 == "slashdot";
+	[% IF discussion2;
 		highlightthresh = user.highlightthresh;
 		highlightthresh = user.threshold IF highlightthresh < user.threshold;
 		threshes = [user.highlightthresh, user.threshold] %]
@@ -120,7 +122,7 @@ __template__
 	[%- END %]
 		<input type="submit" name="op" value="Change" class="button">
 
-	[% IF user.discussion2 && user.discussion2 == "slashdot" %]
+	[% IF discussion2 %]
 		</noscript>
 	[%- END %]
 		<input type="hidden" name="sid" value="[% sid %]">
@@ -131,7 +133,7 @@ __template__
 			<input type="submit" name="op" value="Reply" class="button">
 		[% END %]
 
-	[% IF user.discussion2 && user.discussion2 == "slashdot" %]
+	[% IF discussion2 %]
 		<br>Hidden=<span id="currentHidden"></span> Displayed=<span id="currentFull"></span> Abbreviated=<span id="currentOneline"></span>
 	[% END %]
 		</fieldset>
