@@ -979,6 +979,7 @@ Leela:This toads the wet sprocket.
 Leela:He opened up relations with China. He doesn't want to hear about your ding-dong.
 Leela:This is by a wide margin the least likely thing that has ever happened.
 Leela:I'm a millionaire! Suddenly I have an opinion about the capital gains tax.
+Leela:Do you have idiots on your planet?
 EOT
 
 1;
