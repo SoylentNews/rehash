@@ -32,14 +32,13 @@ __template__
 	<form action="[% gSkin.rootdir %]/comments.pl" method="post">
 [% END %]
 
-[% IF user.discussion2 && user.discussion2 == "uofm";
-	thisfull = (user.discussion2 == "uofm") ? "&amp;full=1" : '';
-	thiscid = cid ? "&amp;cid=$cid" : '' -%]
-	<script src="http://socialcomputingresearch.net/slashdot/js/comments.js" type="text/javascript"></script>
-	<script type="text/javascript" src="[% constants.rootdir %]/comments.pl?sid=[% sid %][% thiscid %]&amp;op=dynamic_display[% thisfull %]"></script>
-	<div><ul id="commentlisting"></ul></div>
-[% ELSE; IF user.discussion2 && user.discussion2 == "slashdot" %]
+[% discussion2 = user.discussion2 && (user.discussion2 == "slashdot" || user.discussion2 == "uofm");
+   IF discussion2 %]
+	[% IF user.discussion2 == "slashdot" %]
 	<script src="[% constants.imagedir %]/comments.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+	[%- ELSE %]
+	<script src="http://socialcomputingresearch.net/slashdot/js/comments.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+	[%- END %]
 	<script type="text/javascript">
 <!--
 [% Slash.jsSelectComments(Slash.db, constants, user, { sid => sid, cid => cid }) %]
@@ -88,7 +87,6 @@ __template__
 	[% IF lvl %]
 	[% END %]
 	[% lcp %]
-[% END # IF user.discussion2 ... %]
 
 [% IF moderate_form %]
 	[% IF moderate_button %]
@@ -109,12 +107,14 @@ __template__
 	</form>
 [% END %]
 
-[% IF user.discussion2 && user.discussion2 == "slashdot" %]
+[% IF discussion2 %]
 	<script type="text/javascript">
 <!--
 		currents['hidden']  = [% user.state.comments.totals.hidden  || 0 %];
 		currents['full']    = [% user.state.comments.totals.full    || 0 %];
 		currents['oneline'] = [% user.state.comments.totals.oneline || 0 %];
+		if (root_comment)
+			currents['full'] += 1;
 		updateTotals();
 		$('commentControlBox').style.display = 'block';
 //-->

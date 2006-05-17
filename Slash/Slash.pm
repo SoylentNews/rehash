@@ -48,6 +48,8 @@ $VERSION   	= '2.005000';  # v2.5.0
 	dispComment displayStory displayRelatedStories displayThread dispStory
 	getOlderStories getOlderDays moderatorCommentLog printComments
 	jsSelectComments
+
+	tempUofmLinkGenerate tempUofmCipherObj
 );
 
 
@@ -226,11 +228,7 @@ sub jsSelectComments {
 	$user->{reparent} = 0;
 	$user->{state}{max_depth} = $constants->{max_depth} + 3;
 
-	# this should get the value from $form, really, i think ... maybe?
 	my $threshold = $user->{threshold};
-	if ($ENV{HTTP_REFERER} && $ENV{HTTP_REFERER} =~ /\bthreshold=(-?\d+)\b/) {
-		$threshold = $1;
-	}
 	my $highlightthresh = $user->{highlightthresh};
 	$highlightthresh = $threshold if $highlightthresh < $threshold;
 
@@ -2075,6 +2073,35 @@ EOT
 	}
 
 	return $return;
+}
+
+sub tempUofmLinkGenerate {
+	require URI::Escape;
+
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+
+	my $cipher = tempUofmCipherObj();
+
+	my $encrypted = $cipher->encrypt($user->{uid} . '|' . $user->{nickname});
+	return sprintf($constants->{uofm_address}, URI::Escape::uri_escape($encrypted));
+}
+
+sub tempUofmCipherObj {
+	require Crypt::CBC;
+
+	my $constants = getCurrentStatic();
+
+	my $cipher = Crypt::CBC->new({
+		key		=> $constants->{uofm_key},
+		iv		=> $constants->{uofm_iv},
+		cipher		=> 'Blowfish',
+		regenerate_key	=> 0,
+		padding		=> 'null',
+		prepend_iv	=> 0
+	});
+
+	return $cipher;
 }
 
 1;

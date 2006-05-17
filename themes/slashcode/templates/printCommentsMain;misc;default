@@ -19,12 +19,12 @@ en_US
 __name__
 printCommentsMain
 __template__
-[% discussion2 = user.discussion2 && user.discussion2 == "slashdot" %]
+[% discussion2 = user.discussion2 && (user.discussion2 == "slashdot" || user.discussion2 == "uofm") %]
 
 <a name="acomments"></a>
 
 <div class="commentwrap">
-[% IF user.acl.discussion2_slashdot || user.is_subscriber || (!constants.subscribe && !user.is_anon) %]
+[% IF user.is_admin || user.acl.discussion2_slashdot || user.is_subscriber || (!constants.subscribe && !user.is_anon) %]
 <div class="commentBox" style="font-size: 120%">
 	<form method="GET" action="[% gSkin.rootdir %]/comments.pl">
 	<div>
@@ -34,11 +34,16 @@ __template__
 	[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
 	<input type="checkbox" name="discussion2_slashdot" value="1" onchange="this.form.submit();"[% constants.markup_checked_attribute IF user.discussion2 == 'slashdot' %]>
 	I am willing to help test <a href="http://slashdot.org/faq/com-mod.shtml#cm120">Slashdot's New Discussion System</a>.
-	<noscript><!-- input type="submit" --></noscript>
+	<noscript><input type="submit"></noscript>
 	</div>
 	</form>
 </div>
+[% END; IF user.is_admin || (user.acl.discussion2_uofm_signup && !user.is_subscriber) %]
+<div class="commentBox" style="font-size: 120%">
+Want to <a href="[% Slash.tempUofmLinkGenerate() %]">test</a> an experimental interface for comments?
+</div>
 [% END %]
+
 <div class="commentBox">
 [% IF title %]
 	<a href="[% link | strip_urlattr %]">[% title %]</a>
