@@ -54,20 +54,6 @@ CREATE TABLE tagcommand_adminlog (
 	KEY tagnameid_globjid (tagnameid, globjid)
 ) TYPE=InnoDB;
 
-#DROP TABLE IF EXISTS tag_schedule;
-#CREATE TABLE tag_schedule (
-#	tsid		int UNSIGNED NOT NULL AUTO_INCREMENT,
-#	type		ENUM('tagnameid', 'uid', 'globjid') NOT NULL,
-#	id		int UNSIGNED NOT NULL,
-#	importance	float UNSIGNED DEFAULT 1.0 NOT NULL,
-#	created_at	datetime NOT NULL,
-#	done		ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
-#	completed_at	datetime DEFAULT NULL,
-#	duration	float DEFAULT NULL,
-#	PRIMARY KEY tsid (tsid),
-#	KEY need (done, importance)
-#) TYPE=InnoDB;
-
 ALTER TABLE users_info ADD COLUMN tag_clout FLOAT UNSIGNED NOT NULL DEFAULT 1.0 AFTER created_at;
 
 CREATE TABLE tagboxes (
@@ -75,13 +61,21 @@ CREATE TABLE tagboxes (
 	name			VARCHAR(32) DEFAULT '' NOT NULL,
 	affected_type		ENUM('user', 'globj') NOT NULL,
 	weight			FLOAT UNSIGNED DEFAULT 1.0 NOT NULL,
-	last_tagid_logged	int UNSIGNED NOT NULL,
 	last_run_completed	datetime,
+	last_tagid_logged	int UNSIGNED NOT NULL,
+	last_tdid_logged	int UNSIGNED NOT NULL,
+	last_tuid_logged	int UNSIGNED NOT NULL,
 	PRIMARY KEY tbid (tbid),
 	UNIQUE name (name)
 ) TYPE=InnoDB;
 
-CREATE TABLE tagbox_feederlog (
+CREATE TABLE tagbox_userkeyregexes (
+	name			varchar(32) NOT NULL,
+	userkeyregex		varchar(255) NOT NULL,
+	UNIQUE name_regex (name, userkeyregex)
+) TYPE=InnoDB;
+
+CREATE TABLE tagboxlog_feeder (
 	tfid		int UNSIGNED NOT NULL AUTO_INCREMENT,
 	created_at	datetime NOT NULL,
 	tbid		smallint UNSIGNED NOT NULL,
@@ -91,5 +85,23 @@ CREATE TABLE tagbox_feederlog (
 	PRIMARY KEY tfid (tfid),
 	KEY tbid_tagid (tbid, tagid),
 	KEY tbid_affectedid (tbid, affected_id)
+) TYPE=InnoDB;
+
+CREATE TABLE tagboxlog_deactivated (
+	tdid		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	tagid		int UNSIGNED NOT NULL,
+	PRIMARY KEY tdid (tdid),
+	KEY tagid (tagid)
+) TYPE=InnoDB;
+
+CREATE TABLE tagboxlog_userchange (
+	tuid		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	created_at	datetime NOT NULL,
+	uid		mediumint UNSIGNED NOT NULL,
+	user_key	varchar(32) NOT NULL,
+	value_old	text,
+	value_new	text,
+	PRIMARY KEY tuid (tuid),
+	KEY uid (uid)
 ) TYPE=InnoDB;
 

@@ -3894,3 +3894,29 @@ UPDATE vars SET value = 'T_2_5_0_111' WHERE name = 'cvs_tag_currentcode';
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
+
+UPDATE tagboxes SET name='TagCountUser' WHERE name='tag_count';
+ALTER TABLE tagboxes ADD COLUMN last_tdid_logged int UNSIGNED NOT NULL, ADD COLUMN last_tuid_logged int UNSIGNED NOT NULL;
+RENAME TABLE tagbox_feederlog TO tagboxlog_feeder;
+CREATE TABLE tagbox_userkeyregexes (
+	name                    varchar(32) NOT NULL,
+	userkeyregex            varchar(255) NOT NULL,
+	UNIQUE name_regex (name, userkeyregex)
+) TYPE=InnoDB;
+CREATE TABLE tagboxlog_deactivated (
+	tdid            int UNSIGNED NOT NULL AUTO_INCREMENT,
+	tagid           int UNSIGNED NOT NULL,
+	PRIMARY KEY tdid (tdid),
+	KEY tagid (tagid)
+) TYPE=InnoDB;
+CREATE TABLE tagboxlog_userchange (
+	tuid            int UNSIGNED NOT NULL AUTO_INCREMENT,
+	created_at      datetime NOT NULL,
+	uid             mediumint UNSIGNED NOT NULL,
+	user_key        varchar(32) NOT NULL,
+	value_old       text,
+	value_new       text,
+	PRIMARY KEY tuid (tuid),
+	KEY uid (uid)
+) TYPE=InnoDB;
+

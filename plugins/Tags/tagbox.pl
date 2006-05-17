@@ -41,15 +41,15 @@ $task{$me}{code} = sub {
 
 	while (!$task_exit_flag) {
 
-		# Insert into tagbox_feederlog
+		# Insert into tagboxlog_feeder
 		$tagboxes = $tagboxdb->getTagboxes();
-		my $activity_feeder = update_feederlog(@_);
+		my $activity_feeder = update_feederlog();
 		sleep 5;
 		last if $task_exit_flag;
 
-		# Run tagboxes (based on tagbox_feederlog)
+		# Run tagboxes (based on tagboxlog_feeder)
 		$tagboxes = $tagboxdb->getTagboxes();
-		my $activity_run = run_tagboxes_until(@_, time() + 30);
+		my $activity_run = run_tagboxes_until(time() + 30);
 		sleep 5;
 		last if $task_exit_flag;
 
@@ -65,8 +65,6 @@ $task{$me}{code} = sub {
 };
 
 sub update_feederlog {
-	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
-
 	my $min_max_tagid = $tagboxes->[0]{last_tagid_logged};
 	for my $tagbox (@$tagboxes) {
 		$min_max_tagid = $tagbox->{last_tagid_logged}
@@ -97,18 +95,12 @@ sub update_feederlog {
 		];
 #print STDERR "tagbox=$tagbox->{name} count(tags_this_ar)=" . scalar(@$tags_this_tagbox_ar) . "\n";
 
-		# Dispatch to run custom code for each tagbox, to split a
-		# Dumb hard-coded stand-in for the proper dispatch.
-		# XXX This will change!
 		my $feeder_ar = [ ];
-		if ($tagbox->{name} eq 'tag_count') {
-			$feeder_ar = _update_feederlog_tag_count(@_,
-				$tagbox, $tags_this_tagbox_ar);
-		}
+		$feeder_ar = $tagbox->{object}->feed_newtags($tags_this_tagbox_ar);
 
 		# XXX optimize by consolidating here: sum importances, max tagids
 		# Insert the tagbox's data into the feederlog.
-		insert_feederlog(@_, $tagbox, $feeder_ar) if $feeder_ar;
+		insert_feederlog($tagbox, $feeder_ar) if $feeder_ar;
 
 		# Mark the tagbox as having logged up to this point.
 		# XXX The previous insert and this update should be wrapped
@@ -121,7 +113,7 @@ sub update_feederlog {
 }
 
 sub insert_feederlog {
-	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin, $tagbox, $feeder_ar) = @_;
+	my($tagbox, $feeder_ar) = @_;
 	for my $feeder_hr (@$feeder_ar) {
 #print STDERR "addFeederInfo: tbid=$tagbox->{tbid} tagid=$feeder_hr->{tagid} affected_id=$feeder_hr->{affected_id} imp=$feeder_hr->{importance}\n";
 		$tagboxdb->addFeederInfo($tagbox->{tbid},
@@ -132,7 +124,7 @@ sub insert_feederlog {
 }
 
 sub run_tagboxes_until {
-	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin, $run_until, $new_maxtagid) = @_;
+	my($run_until) = @_;
 	my $activity = 0;
 
 	while (time() < $run_until) {
@@ -141,17 +133,11 @@ sub run_tagboxes_until {
 
 		$activity = 1;
 		for my $affected_hr (@$affected_ar) {
-#my $ad = Dumper($affected_hr); $ad =~ s/\s+/ /g; print STDERR "r_t_u affected_hr: $ad\n";
-			# Dumb hard-coded stand-in for the proper dispatch.
-			# XXX This will change!
-			my $tagbox = $tagboxdb->getTagboxes($affected_hr->{tbid});
-			if ($tagbox->{name} eq 'tag_count') {
-				_run_tagbox_tag_count($virtual_user, $constants, $slashdb, $user, $info, $gSkin,
-					$tagbox,
-					$affected_hr->{affected_id});
-			}
+			my $tagbox = $tagboxdb->getTagboxes($affected_hr->{tbid}, [qw( object )]);
+#my $ad = Dumper($affected_hr); $ad =~ s/\s+/ /g; my $tb = Dumper($tagbox); $tb =~ s/\s+/ /g; print STDERR "r_t_u affected_hr: $ad tagbox: $tb\n";
+			$tagbox->{object}->run($affected_hr->{affected_id});
 			$tagboxdb->markTagboxRunComplete(
-				$tagbox->{tbid},
+				$affected_hr->{tbid},
 				$affected_hr->{affected_id},
 				$affected_hr->{max_tagid}
 			);
@@ -160,29 +146,6 @@ sub run_tagboxes_until {
 		sleep 1;
 	}
 	return $activity;
-}
-
-sub _update_feederlog_tag_count {
-	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin, $tagbox, $tags_ar) = @_;
-	my $ret_ar = [ ];
-	for my $tag_hr (@$tags_ar) {
-		push @$ret_ar, {
-			tagid =>	$tag_hr->{tagid},
-			affected_id =>	$tag_hr->{uid},
-			importance =>	1,
-		};
-#print STDERR "tag_count update: tagid=$tag_hr->{tagid} aff_id=$tag_hr->{uid} imp=1\n";
-	}
-	return $ret_ar;
-}
-
-sub _run_tagbox_tag_count {
-	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin, $tagbox, $affected_id) = @_;
-#	my $user_tags_ar = $tags->getAllTagsFromUser($affected_id);
-	my $user_tags_ar = $tagboxdb->getTagboxTags($tagbox->{tbid}, $affected_id, 0);
-	my $count = grep { !defined $_->{inactivated} } @$user_tags_ar;
-#print STDERR "tag_count run: setting uid=$affected_id to count=$count (of " . scalar(@$user_tags_ar) . ")\n";
-	$slashdb->setUser($affected_id, { tag_count => $count });
 }
 
 1;

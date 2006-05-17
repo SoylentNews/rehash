@@ -11817,7 +11817,7 @@ sub setUser {
 		if ($key) {
 			push @{$update_tables{$key}}, $_;
 		} else {
-			push @param, [$_, $hashref->{$_}];
+			push @param, [ $_, $hashref->{$_} ];
 		}
 	}
 
@@ -11829,6 +11829,20 @@ sub setUser {
 	if ($mcd) {
 		$mcd_need_delete = 1 if grep { $_ ne 'users_hits' } keys %update_tables;
 		$self->setUser_delete_memcached($uid) if $mcd_need_delete;
+	}
+
+	# We should probably START TRANSACTION here.
+
+	# If one or more tagboxes require logging of changes to some user
+	# keys, note which keys require changes and retrieve their current
+	# values.
+	my %old_values = ( );
+	my %new_values = ( );
+	if ($constants->{plugin}{Tags}) {
+		my @update_keys = sort keys %$hashref;
+		my $tagboxdb = getObject('Slash::Tagbox');
+		my @log_keys = $tagboxdb->userKeysNeedTagLog(\@update_keys);
+		%old_values = ( map { ($_, undef) } @log_keys );
 	}
 
 	my $rows = 0;
@@ -11852,18 +11866,59 @@ sub setUser {
 				}
 			}
 		}
-		$rows += $self->sqlUpdate($table, \%minihash, $where)
+		# If a tagbox needs copies of before-and-after data, first
+		# get a copy of the old data.
+		my @columns_needed = grep { exists $old_values{$_} } keys %minihash;
+		if (@columns_needed) {
+			my $old_hr = $self->sqlSelectHashref(
+				join(',', @columns_needed), $table, $where);
+			for my $k (keys %$old_hr) {
+				$old_values{$k} = $old_hr->{$k};
+			}
+		}
+		# Do the update.
+		my $this_rows = $self->sqlUpdate($table, \%minihash, $where)
 			if keys %minihash;
+		# After the update, get the new values if the update was
+		# successful.
+		if (@columns_needed) {
+			if ($this_rows) {
+				my $new_hr = $self->sqlSelectHashref(
+					join(',', @columns_needed), $table, $where);
+				for my $k (keys %$new_hr) {
+					$new_values{$k} = $new_hr->{$k};
+				}
+			} else {
+				for my $k (@columns_needed) {
+					delete $old_values{$k};
+				}
+			}
+		}
+		$rows += $this_rows;
 	}
 	# What is worse, a select+update or a replace?
 	# I should look into that. (REPLACE is faster) -Brian
-	for (@param)  {
-		if (!defined($_->[1]) || $_->[1] eq "") {
-			$rows += $self->sqlDelete('users_param',
-				"uid = $uid AND name = " . $self->sqlQuote($_->[0]));
-		} elsif ($_->[0] eq "acl") {
+	for my $param_ar (@param) {
+		my($name, $value) = @$param_ar;
+		my $name_q = $self->sqlQuote($name);
+		if (!defined($value) || $value eq "") {
+			if (exists $old_values{$name}) {
+				$old_values{$name} = $self->sqlSelect('value', 'users_param',
+					"uid = $uid AND name = $name_q");
+			}
+			my $this_rows = $self->sqlDelete('users_param',
+				"uid = $uid AND name = $name_q");
+			if (exists $old_values{$name}) {
+				if ($this_rows) {
+					$new_values{$name} = undef;
+				} else {
+					delete $old_values{$name};
+				}
+			}
+			$rows += $this_rows;
+		} elsif ($name eq "acl") {
 			my(@delete, @add);
-			my $acls = $_->[1];
+			my $acls = $value;
 			for my $key (sort keys %$acls) {
 				if ($acls->{$key}) {
 					push @add, $key;
@@ -11897,13 +11952,31 @@ sub setUser {
 # of the users_param table could _actually_ deadlock.
 # [Mon Nov 28 22:29:23 2005] [error] /journal.pl:Slash::DB::MySQL:/usr/local/lib/perl5/site_perl/5.8.6/i686-linux/Slash/DB/MySQL.pm:12600:virtuser='slashdot' -- hostinfo='[ip redacted] via TCP/IP' -- Deadlock found when trying to get lock; Try restarting transaction -- REPLACE INTO users_param (uid,value,name) VALUES(\n  '[uid redacted]',\n  '1133216962',\n  'lastlooktime')
 # [Mon Nov 28 22:29:23 2005] [error] Which was called by:Slash::DB::MySQL:/usr/local/lib/perl5/site_perl/5.8.6/i686-linux/Slash/DB/MySQL.pm:11410
-			$rows += $self->sqlReplace('users_param', {
+			$old_values{$name} = $self->sqlSelect('value', 'users_param',
+				"uid = $uid AND name = $name_q");
+			my $this_rows = 0;
+			$this_rows = $self->sqlReplace('users_param', {
 				uid	=> $uid,
-				name	=> $_->[0],
-				value	=> $_->[1],
-			}) if defined $_->[1];
+				name	=> $name,
+				value	=> $value,
+			}) if defined $value;
+			if ($this_rows) {
+				$new_values{$name} = $value;
+			} else {
+				delete $old_values{$name};
+			}
+			$rows += $this_rows;
 		}
 	}
+
+	if ($rows) {
+		my $tagboxdb = getObject('Slash::Tagbox');
+		for my $name (keys %old_values) {
+			$tagboxdb->logUserChange($uid, $name, $old_values{$name}, $new_values{$name});
+		}
+	}
+
+	# And then COMMIT here.
 
 	# And delete from memcached again after we update the DB
 	$mcd_need_delete = 1 if $rows;

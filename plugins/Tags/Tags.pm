@@ -58,7 +58,11 @@ sub new {
 #
 # By default, this does not allow the same user to apply the same
 # tagname to the same global object twice.  Pass the option hashref
-# field 'dupe_ok' with a true value to ignore this check.
+# field 'dupe_ok' with a true value to ignore this check.  Nor is it
+# allowed for the same user to tag the same object with both a tag
+# and its opposite, but 'opposite_ok' ignores that check.  At the
+# moment we can't think of a good reason why one would ever want to
+# ignore those checks but the options are there regardless.
 
 sub _setuptag {
 	my($self, $hr) = @_;
@@ -91,6 +95,10 @@ sub createTag {
 	my $tag = $self->_setuptag($hr);
 	return 0 if !$tag;
 
+	# I'm not sure why a duplicate or opposite tag would ever be "OK"
+	# in the tags table, but for now let's keep our options open in
+	# case there's some reason we'd want "raw" tag inserting ability.
+	# Maybe in the future we can eliminate these options.
 	my $check_dupe = (!$options || !$options->{dupe_ok});
 	my $check_opp = (!$options || !$options->{opposite_ok});
 	my $opp_tagnameid = 0;
@@ -165,17 +173,21 @@ sub deactivateTag {
 	return 0 if !$tag;
 	my $prior_clause = '';
 	$prior_clause = " AND tagid < $options->{tagid_prior_to}" if $options->{tagid_prior_to};
-	my $count = $self->sqlUpdate('tags',
-		{ -inactivated => 'NOW()' },
-		"uid		= $tag->{uid}
-		 AND globjid	= $tag->{globjid}
-		 AND tagnameid	= $tag->{tagnameid}
-		 AND inactivated IS NULL
-		 $prior_clause");
+	my $where_clause = "uid		= $tag->{uid}
+			 AND globjid	= $tag->{globjid}
+			 AND tagnameid	= $tag->{tagnameid}
+			 AND inactivated IS NULL
+			 $prior_clause";
+	my $previously_active_tagids = $self->sqlSelectColArrayref('tagid', 'tags', $where_clause);
+	my $count = $self->sqlUpdate('tags', { -inactivated => 'NOW()' }, $where_clause);
 	if ($count > 1) {
 		# Logic error, there should never be more than one
 		# tag meeting those criteria.
 		warn scalar(gmtime) . " $count deactivated tags id '$tag->{tagnameid}' for uid=$tag->{uid} on $tag->{globjid}";
+	}
+	if ($count && $previously_active_tagids && @$previously_active_tagids) {
+		my $tagboxdb = getObject('Slash::Tagbox');
+		$tagboxdb->logDeactivatedTags($previously_active_tagids);
 	}
 	return $count;
 }
@@ -656,7 +668,7 @@ sub ajaxGetUserStory {
 	my $sid = $sidenc; $sid =~ tr{:}{/};
 	my $stoid = $self->getStoidFromSid($sid);
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-print STDERR scalar(localtime) . " ajaxGetUserStory for stoid=$stoid sidenc=$sidenc tr=$tags_reader\n";
+#print STDERR scalar(localtime) . " ajaxGetUserStory for stoid=$stoid sidenc=$sidenc tr=$tags_reader\n";
 	if (!$stoid || $stoid !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
 		return getData('error', {}, 'tags');
 	}
@@ -684,7 +696,7 @@ sub ajaxGetUserUrls {
 
 	my $id = $form->{id};
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-print STDERR scalar(localtime) . " ajaxGetUserUrls for url_id=$id tr=$tags_reader\n";
+#print STDERR scalar(localtime) . " ajaxGetUserUrls for url_id=$id tr=$tags_reader\n";
 	if (!$id || $id !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
 		return getData('error', {}, 'tags');
 	}
@@ -793,7 +805,7 @@ sub setTagsForGlobj {
 				id =>           $id
 			});
 	}
-print STDERR scalar(localtime) . " setTagsForGlobj $table : $id  3 old='@$old_tags_ar' created='@created_tagnames'\n";
+#print STDERR scalar(localtime) . " setTagsForGlobj $table : $id  3 old='@$old_tags_ar' created='@created_tagnames'\n";
 
 	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $id, { uid => $uid });
 	my $newtagspreloadtext = join ' ', sort map { $_->{tagname} } @$now_tags_ar;
@@ -841,7 +853,7 @@ sub ajaxCreateForStory {
 
 sub ajaxProcessAdminTags {
 	my($slashdb, $constants, $user, $form) = @_;
-	print STDERR "ajaxProcessAdminTags\n";
+#print STDERR "ajaxProcessAdminTags\n";
 	my $commands = $form->{commands};
 	my $type = $form->{type} || "stories";
 	my($id, $table, $sid, $sidenc);
@@ -879,7 +891,7 @@ use Data::Dumper; print STDERR scalar(localtime) . " ajaxProcessAdminTags table=
 			'tags',
 			"tagnameid IN ($affected_str)");
 		$tags->setLastscanned($reset_lastscanned);
-print STDERR scalar(localtime) . " ajaxProcessAdminTags reset to " . ($reset_lastscanned-1) . " for '$affected_str'\n";
+#print STDERR scalar(localtime) . " ajaxProcessAdminTags reset to " . ($reset_lastscanned-1) . " for '$affected_str'\n";
 	}
 
 	my $tags_admin_str = "Performed commands: '@commands'.";
@@ -940,7 +952,7 @@ sub processAdminCommand {
 
 	my $new_min_tagid = 0;
 
-print STDERR "type '$type' for c '$c' new_clout '$new_user_clout' for table $table id $id\n";
+#print STDERR "type '$type' for c '$c' new_clout '$new_user_clout' for table $table id $id\n";
 	if ($type eq '^') {
 		# Set individual clouts to 0 for tags of this name on
 		# this story that have already been applied.  Future
@@ -948,9 +960,9 @@ print STDERR "type '$type' for c '$c' new_clout '$new_user_clout' for table $tab
 		# their full clout.
 		my $tags_ar = $self->getTagsByNameAndIdArrayref($table, $id);
 		my @tags = grep { $_->{tagnameid} == $tagnameid } @$tags_ar;
-print STDERR "tags_ar '@$tags_ar' tags '@tags'\n";
+#print STDERR "tags_ar '@$tags_ar' tags '@tags'\n";
 		for my $tag (@tags) {
-print STDERR "setting $tag->{tagid} to 0\n";
+#print STDERR "setting $tag->{tagid} to 0\n";
 			$self->setTag($tag->{tagid}, { tag_clout => 0 });
 		}
 	} else {
@@ -1019,7 +1031,7 @@ print STDERR "setting $tag->{tagid} to 0\n";
 sub getTypeAndTagnameFromAdminCommand {
 	my($self, $c) = @_;
 	my($type, $tagname) = $c =~ /^(\^|\$?\_|\$?\#{1,5})(.+)$/;
-print STDERR scalar(gmtime) . " get c '$c' type='$type' tagname='$tagname'\n";
+#print STDERR scalar(gmtime) . " get c '$c' type='$type' tagname='$tagname'\n";
 	return (undef, undef) if !$type || !$self->tagnameSyntaxOK($tagname);
 	return($type, $tagname);
 }
