@@ -106,7 +106,7 @@ html > body .commentwrap table {
 	margin: 0 0 0 -.3em;
 	padding: 0 .3em;
 	text-decoration: none;
-	background: url("http://images.slashcode.com/comm-minus.gif") 0 .2em no-repeat;
+	background: url("/images/comm-minus.gif") 0 .2em no-repeat;
 	right: -1.4em;
 	z-index: 2;
 	cursor: pointer;
@@ -117,7 +117,7 @@ html > body .commentwrap table {
 	margin: 0;
 	padding: 0 .3em;
 	text-decoration: none;
-	background: url("http://images.slashcode.com/comm-plus.gif") 0 .2em no-repeat;
+	background: url("/images/comm-plus.gif") 0 .2em no-repeat;
 	right: -1.4em;
 	z-index: 1;
 	cursor: pointer;
@@ -140,6 +140,7 @@ html > body .commentwrap table {
 }
 
 .comment > .oneline {
+	border: 1px solid #e5e5e5;
 	margin: 1em 0 0 0;
 	padding: .3em 0 0 0;
 	position: relative;
@@ -150,6 +151,7 @@ html > body .commentwrap table {
 
 /* lots of space between lines */
 .comment > .oneline .commentTop, .comment > .oneline .commentBody {
+	border: none;
 	vertical-align: 10em;
 }
 
@@ -173,4 +175,9 @@ html > body .commentwrap table {
 	color: #666;
 	text-decoration: none;
 	font: inherit;
+}
+
+/* in oneline, sometimes icons are too tall for text ... this helps a little */
+.comment > .oneline .zooicon {
+	vertical-align: sub;
 }

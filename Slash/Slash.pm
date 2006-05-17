@@ -253,7 +253,7 @@ sub jsSelectComments {
 	my @roots = $cid ? $cid : grep { !$comments->{$_}{pid} } keys %$comments;
 
 	my $extra = "\nrenderRoots('commentlisting')";
-	$extra = "" if $user->{discussion2} && $user->{discussion2} eq 'slashdot';
+	$extra = "" if $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)/;
 
 	if ($form->{full}) {
 		my $comment_text = $slashdb->getCommentTextCached(
@@ -278,6 +278,7 @@ sub jsSelectComments {
 	return <<EOT;
 comments = $anon_comments;
 root_comments = $anon_roots;
+root_comment = $cid;
 
 user_uid = $user->{uid};
 user_is_anon = $user->{is_anon};
@@ -659,7 +660,7 @@ sub printComments {
 		return 0;
 	}
 
-	if ($user->{discussion2} && $user->{discussion2} eq 'slashdot' && $user->{mode} ne 'metamod') {
+	if ($user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)/ && $user->{mode} ne 'metamod') {
 		$user->{mode} = $form->{mode} = 'thread';
 		$user->{commentsort} = 0;
 		$user->{reparent} = 0;
@@ -768,9 +769,9 @@ sub printComments {
 		? $comments->{$cidorpid}{totalvisiblekids}
 		: $cc;
 
-	my $lcp = ($user->{discussion2} &&
-		($user->{discussion2} eq 'slashdot' || $user->{discussion2} eq 'uofm')
-	) ? '' : linkCommentPages($discussion->{id}, $pid, $cid, $total);
+	my $lcp = ($user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)/)
+		? ''
+		: linkCommentPages($discussion->{id}, $pid, $cid, $total);
 
 	# Figure out whether to show the moderation button.  We do, but
 	# only if at least one of the comments is moderatable.
@@ -1134,7 +1135,7 @@ sub displayThread {
 	my $hidden = my $skipped = 0;
 	my $return = '';
 
-	my $discussion2 = $user->{discussion2} && $user->{discussion2} eq 'slashdot';
+	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)/;
 	my $highlightthresh = $user->{highlightthresh};
 	$highlightthresh = $user->{threshold} if $highlightthresh < $user->{threshold};
 
@@ -1857,7 +1858,7 @@ sub _hard_dispComment {
 		$time_to_display, $comment_link_to_display, $userinfo_to_display)
 		= ("") x 7;
 
-	my $discussion2 = $user->{discussion2} && ($user->{discussion2} eq 'slashdot' || $user->{discussion2} eq 'uofm');
+	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)/;
 
 	$comment_to_display = qq'<div id="comment_body_$comment->{cid}">$comment->{comment}</div>';
 	my $sighide = $comment_shrunk ? ' hide' : '';
@@ -1867,7 +1868,7 @@ sub _hard_dispComment {
 		my $readtext = 'Read the rest of this comment...';
 		my $link;
 		if ($discussion2) {
-			$link = qq'<a href="javascript:readRest($comment->{cid})">$readtext</a>';
+			$link = qq'<a href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return readRest($comment->{cid})">$readtext</a>';
 		} else {
 			$link = linkComment({
 				sid	=> $comment->{sid},
@@ -1983,7 +1984,7 @@ sub _hard_dispComment {
 
 	my $sign = $class eq 'full' ? '-' : '';
 	my $head = $discussion2 ? <<EOT1 : <<EOT2;
-			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="javascript:setFocusComment($sign$comment->{cid});">$comment->{subject}</a></h4>
+			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return setFocusComment($sign$comment->{cid})">$comment->{subject}</a></h4>
 EOT1
 			<h4><a name="$comment->{cid}">$comment->{subject}</a></h4>
 EOT2
@@ -2028,6 +2029,7 @@ EOT
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
 			subject_only => 1,
+			# onclick	=> ($discussion2 ? "return replyTo($comment->{cid})" : '')
 		}) unless $user->{state}{discussion_archived};
 
 		push @link, linkComment({
@@ -2036,6 +2038,7 @@ EOT
 			pid	=> $comment->{original_pid},
 			subject	=> 'Parent',
 			subject_only => 1,
+			onclick	=> ($discussion2 ? "return selectParent($comment->{original_pid})" : '')
 		}, 1) if $comment->{original_pid} && !($discussion2 &&
 			(!$form->{cid} || $form->{cid} != $comment->{cid})
 		);

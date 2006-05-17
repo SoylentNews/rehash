@@ -13,6 +13,7 @@ var defaultdisplaymode = {};
 var viewmodevalue = { full: 3, oneline: 2, hidden: 1};
 var currents = { full: 0, oneline: 0, hidden: 0 };
 
+var root_comment = 0;
 var discussion_id = 0;
 var user_is_anon = 0;
 var user_uid = 0;
@@ -26,7 +27,7 @@ function updateComment(cid, mode) {
 		var existinglink = $('comment_link_' + cid);
 		if (existinglink) {
 			var plusminus = (mode == 'full') ? '-' : ''; 
-			existinglink.href = 'javascript:setFocusComment(' + plusminus + cid + ');';
+			existinglink.onclick = function() { return setFocusComment(plusminus + cid) };
 		}
 	}
 
@@ -42,7 +43,10 @@ function updateCommentTree(cid, threshold) {
 	setDefaultDisplayMode(cid);
 	var comment = comments[cid];
 
-	if (threshold) {
+	// skip the root comment, if it exists; leave it full, but let user collapse
+	// if he chooses, and leave it that way: this comment will not move with
+	// T/HT changes
+	if (threshold && cid != root_comment) {
 		if (comment['points'] < threshold && (user_is_anon || user_uid != comment['uid'])) {
 			futuredisplaymode[cid] = 'hidden';
 		} else if (comment['points'] < user_highlightthresh) {
@@ -213,7 +217,7 @@ function setFocusComment(cid, alone) {
 		scrollTo(abscid);
 	}
 
-	return void(0);
+	return false;
 }
 
 
@@ -325,11 +329,11 @@ function viewWindowTop() {
 }
 
 function viewWindowRight() {
-	return viewWindowLeft() + window.innerWidth;
+	return viewWindowLeft() + (window.innerWidth || document.documentElement.clientWidth);
 }
 
 function viewWindowBottom() {
-	return viewWindowTop() + window.innerHeight;
+	return viewWindowTop() + (window.innerHeight || document.documentElement.clientHeight);
 }
 
 function commentIsInWindow(cid) {
@@ -348,15 +352,17 @@ function isInWindow(obj) {
 
 function replyTo(cid) {
 	var replydiv = $('replyto_' + cid);
+
 	replydiv.innerHTML = '';
-	return void(0);
+
+	return false;
 }
 
 
 function readRest(cid) {
 	var shrunkdiv = $('comment_shrunk_' + cid);
 	if (!shrunkdiv)
-		return void(0); // seems we shouldn't be here ...
+		return false; // seems we shouldn't be here ...
 
 	var params = [];
 	params['op']  = 'comments_read_rest';
@@ -378,7 +384,7 @@ function readRest(cid) {
 
 	ajax_update(params, 'comment_body_' + cid, handlers);
 
-	return void(0);
+	return false;
 }
 
 // don't want to actually use this -- pudge

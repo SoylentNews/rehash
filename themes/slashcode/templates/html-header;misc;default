@@ -27,6 +27,8 @@ __template__
 [%- FOREACH file = css -%]
 [% IF file.ie_cond %]<!--[if [% file.ie_cond %]]>[% END %]<link rel="[% file.rel %]" type="[% file.type %]" media="[% file.media %]" href="[% IF constants.css_use_imagedir; constants.imagedir; ELSE; gSkin.rootdir; END %]/[% file.file %]?[% constants.cvs_tag_currentcode %]"[% IF file.title %] title="[% file.title %]"[% END %]>[% IF file.ie_cond %]<![endif]-->[% END %]
 [% END -%]
+[%- IF constants.sitename == 'Slashdot' && user.discussion2 && user.discussion2 == "uofm" # temp hack %]
+<link rel="stylesheet" type="text/css" media="screen, projection" href="http://socialcomputingresearch.net/slashdot/slashdot/umich.css">[% END %]
 [%- IF constants.plugin.Ajax %]
 	[%- IF !user.is_anon -%]
 <script src="[% constants.imagedir %]/prototype.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>

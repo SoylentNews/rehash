@@ -25,15 +25,14 @@ __template__
 		<div class="commentSub">
 
 		[ [% IF !user.state.discussion_archived && !user.state.discussion_future_nopost %]
-			[% IF 0 && discussion2 %]
-			<a href="javascript:replyTo([% cid %]);">Reply to This</a>
-			[% ELSE %][% Slash.linkComment({
+			[% Slash.linkComment({
 				sid	=> sid,
 				pid	=> cid,
 				op	=> 'Reply',
 				subject	=> 'Reply to This',
 				subject_only => 1,
-			}) %][% END %]
+				#onclick	=> (discussion2 ? "return replyTo($cid)" : '')
+			}) %]
 		[% END %]
 
 		[% IF !(user.state.discussion_archived) && ( do_parent || can_mod || do_mod ) %] | [% END %]
