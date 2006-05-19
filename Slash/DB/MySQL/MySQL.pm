@@ -11969,10 +11969,11 @@ sub setUser {
 		}
 	}
 
-	if ($rows) {
+	if ($rows && keys(%old_values)) {
 		my $tagboxdb = getObject('Slash::Tagbox');
 		for my $name (keys %old_values) {
-			$tagboxdb->logUserChange($uid, $name, $old_values{$name}, $new_values{$name});
+			$tagboxdb->logUserChange($uid, $name,
+				$old_values{$name}, $new_values{$name});
 		}
 	}
 
