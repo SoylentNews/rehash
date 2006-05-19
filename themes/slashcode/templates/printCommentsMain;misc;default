@@ -38,7 +38,7 @@ __template__
 	</div>
 	</form>
 </div>
-[% END; IF user.is_admin || (user.acl.discussion2_uofm_signup && !user.is_subscriber) %]
+[% END; IF (user.acl.discussion2_uofm_signup && !user.acl.discussion2_uofme && (user.is_admin || !user.is_subscriber)) && constants.uofm_key && constants.uofm_iv %]
 <div class="commentBox" style="font-size: 120%">
 Want to <a href="[% Slash.tempUofmLinkGenerate() %]">test</a> an experimental interface for comments?
 </div>
@@ -92,7 +92,7 @@ Want to <a href="[% Slash.tempUofmLinkGenerate() %]">test</a> an experimental in
 
 		| <a href="[% gSkin.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">Search Discussion</a>
 	</div>
-	<div class="commentBoxForm" id="commentControlBox"[% IF discussion2 %] style="display: none"[% END %]>
+	<div class="commentBoxForm" id="commentControlBox">
 		<form action="[% gSkin.rootdir %]/comments.pl">
 		<fieldset>
 		<legend>Display Options</legend>
@@ -100,12 +100,12 @@ Want to <a href="[% Slash.tempUofmLinkGenerate() %]">test</a> an experimental in
 		highlightthresh = user.highlightthresh;
 		highlightthresh = user.threshold IF highlightthresh < user.threshold;
 		threshes = [user.highlightthresh, user.threshold] %]
-		<input type="button" value="Worse"  name="ht_worse"  id="ht_worse"  onclick="changeHT(-1)">
-		<input type="button" value="Better" name="ht_better" id="ht_better" onclick="changeHT(1)">
+		<input type="button" value="Worse"  name="ht_worse"  id="ht_worse"  onclick="changeHT(-1)" disabled>
+		<input type="button" value="Better" name="ht_better" id="ht_better" onclick="changeHT(1)" disabled>
 		HT: <span id="currentHT" style="background: black; color: white; padding: 0 2px 0 2px; margin-right: 5em;">[% threshes.highval %]</span>
 
-		<input type="button" value="More" name="t_more" id="t_more" onclick="changeT(-1)">
-		<input type="button" value="Less" name="t_less" id="t_less" onclick="changeT(1)">
+		<input type="button" value="More" name="t_more" id="t_more" onclick="changeT(-1)" disabled>
+		<input type="button" value="Less" name="t_less" id="t_less" onclick="changeT(1)" disabled>
 		T: <span id="currentT" style="background: black; color: white; padding: 0 2px 0 2px; margin-right: 5em;">[% user.threshold %]</span>
 
 		[%# Threshold: Slash.selectThreshold(comments.0.totals, { onclick => 'changeThreshold(this.value)' }) %]
@@ -139,7 +139,7 @@ Want to <a href="[% Slash.tempUofmLinkGenerate() %]">test</a> an experimental in
 		[% END %]
 
 	[% IF discussion2 %]
-		<br>Hidden=<span id="currentHidden"></span> Displayed=<span id="currentFull"></span> Abbreviated=<span id="currentOneline"></span>
+		<br>Hidden=<span id="currentHidden">0</span> Displayed=<span id="currentFull">0</span> Abbreviated=<span id="currentOneline">0</span>
 	[% END %]
 		</fieldset>
 		</form>

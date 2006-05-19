@@ -116,7 +116,7 @@ __template__
 		if (root_comment)
 			currents['full'] += 1;
 		updateTotals();
-		$('commentControlBox').style.display = 'block';
+		enableControls();
 //-->
 	</script>
 [% END %]

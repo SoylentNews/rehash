@@ -2081,16 +2081,17 @@ sub tempUofmLinkGenerate {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 
-	my $cipher = tempUofmCipherObj();
+	my $cipher = tempUofmCipherObj() or return;
 
 	my $encrypted = $cipher->encrypt($user->{uid} . '|' . $user->{nickname});
 	return sprintf($constants->{uofm_address}, URI::Escape::uri_escape($encrypted));
 }
 
 sub tempUofmCipherObj {
-	require Crypt::CBC;
-
 	my $constants = getCurrentStatic();
+	return unless $constants->{uofm_key} && $constants->{uofm_iv};
+
+	require Crypt::CBC;
 
 	my $cipher = Crypt::CBC->new({
 		key		=> $constants->{uofm_key},

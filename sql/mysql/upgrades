@@ -3889,8 +3889,6 @@ INSERT INTO tagboxes VALUES (NULL, 'tag_count', 'user', '1.0', 0, NULL);
 # 2006-05-02
 UPDATE vars SET value = 'T_2_5_0_111' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 UPDATE tagboxes SET name='TagCountUser' WHERE name='tag_count';
@@ -3922,3 +3920,5 @@ CREATE TABLE tagboxlog_userchange (
 UPDATE vars SET value = 'T_2_5_0_112' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE

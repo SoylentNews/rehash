@@ -38,7 +38,6 @@ function updateComment(cid, mode) {
 	return void(0);
 }
 
-
 function updateCommentTree(cid, threshold) {
 	setDefaultDisplayMode(cid);
 	var comment = comments[cid];
@@ -85,7 +84,7 @@ function kidHiddens(cid, kidhiddens) {
 		hiddens_cid.className = 'hide';
 		return kidhiddens + 1;
 	} else if (kidhiddens) {
-		var kidstring = '<a href="javascript:changeThreshold(-1,' + cid + ')">' + kidhiddens;
+		var kidstring = '<a href="javascript:revealKids(' + cid + ')">' + kidhiddens;
 		if (kidhiddens == 1) {
 			kidstring += ' hidden comment</a>';
 		} else {
@@ -99,7 +98,6 @@ function kidHiddens(cid, kidhiddens) {
 
 	return 0;
 }
-
 
 function faGetSetting(cid, ctype, relation, prevview, canbelower) {
 	var newview = behaviors[ctype][relation];
@@ -248,29 +246,45 @@ function changeT(delta) {
 	changeThreshold(threshold + ''); // needs to be a string value
 }
 
-function changeThreshold(threshold, cid) {
-	if (!cid) {
-		var threshold_num = parseInt(threshold);
-		var t_delta = threshold_num + (user_highlightthresh - user_threshold);
-		user_highlightthresh = Math.min(Math.max(t_delta, -1), 5);
-		user_threshold = threshold_num;
+function changeThreshold(threshold) {
+	var threshold_num = parseInt(threshold);
+	var t_delta = threshold_num + (user_highlightthresh - user_threshold);
+	user_highlightthresh = Math.min(Math.max(t_delta, -1), 5);
+	user_threshold = threshold_num;
 
-		if ($('currentHT'))
-			$('currentHT').innerHTML = user_highlightthresh;
+	if ($('currentHT'))
+		$('currentHT').innerHTML = user_highlightthresh;
 
-		if ($('currentT'))
-			$('currentT').innerHTML = user_threshold;
+	if ($('currentT'))
+		$('currentT').innerHTML = user_threshold;
 
-		if ($('threshold'))
-			$('threshold').value = threshold;
+	if ($('threshold'))
+		$('threshold').value = threshold;
 
-		for (var root = 0; root < root_comments.length; root++) {
-			updateCommentTree(root_comments[root], threshold);
-		}
-	} else {
-		updateCommentTree(cid, threshold);
+	for (var root = 0; root < root_comments.length; root++) {
+		updateCommentTree(root_comments[root], threshold);
 	}
 
+	updateTotals();
+
+	return void(0);
+}
+
+function revealKids(cid) {
+	var comment = comments[cid];
+
+	if (comment['kids'].length) {
+		for (var kiddie = 0; kiddie < comment['kids'].length; kiddie++) {
+			var kid = comment['kids'][kiddie];
+			if (displaymode[kid] == 'hidden') {
+				futuredisplaymode[kid] = 'oneline';
+				updateDisplayMode(kid, futuredisplaymode[kid], 1);
+				updateComment(kid, futuredisplaymode[kid]);
+			}
+		}
+	}
+
+	kidHiddens(cid, 0);
 	updateTotals();
 
 	return void(0);
@@ -409,6 +423,12 @@ function updateTotals() {
 	$('currentOneline').innerHTML = currents['oneline'];
 }
 
+function enableControls() {
+	var controls = ['ht_worse', 'ht_better', 't_more', 't_less'];
+	for (var i = 0; i < controls.length; i++) {
+		$(controls[i]).disabled = false;
+	}
+}
 
 function selectParent(cid) {
 	var comment = comments[cid];
