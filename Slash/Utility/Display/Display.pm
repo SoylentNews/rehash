@@ -1336,6 +1336,7 @@ sub _hard_linkComment {
 		$display .= "#$comment->{cid}" if $comment->{cid};
 	}
 
+	$display .= qq|" onclick="$comment->{onclick}| if $comment->{onclick};
 	$display .= qq|">$subject</a>|;
 	if (!$comment->{subject_only}) {
 		$display .= qq| by $comment->{nickname}|;

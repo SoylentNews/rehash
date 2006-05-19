@@ -251,7 +251,7 @@ sub jsSelectComments {
 	my @roots = $cid ? $cid : grep { !$comments->{$_}{pid} } keys %$comments;
 
 	my $extra = "\nrenderRoots('commentlisting')";
-	$extra = "" if $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)/;
+	$extra = "" if $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
 
 	if ($form->{full}) {
 		my $comment_text = $slashdb->getCommentTextCached(
@@ -658,7 +658,7 @@ sub printComments {
 		return 0;
 	}
 
-	if ($user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)/ && $user->{mode} ne 'metamod') {
+	if ($user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/ && $user->{mode} ne 'metamod') {
 		$user->{mode} = $form->{mode} = 'thread';
 		$user->{commentsort} = 0;
 		$user->{reparent} = 0;
@@ -767,7 +767,7 @@ sub printComments {
 		? $comments->{$cidorpid}{totalvisiblekids}
 		: $cc;
 
-	my $lcp = ($user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)/)
+	my $lcp = ($user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/)
 		? ''
 		: linkCommentPages($discussion->{id}, $pid, $cid, $total);
 
@@ -1133,7 +1133,7 @@ sub displayThread {
 	my $hidden = my $skipped = 0;
 	my $return = '';
 
-	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)/;
+	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
 	my $highlightthresh = $user->{highlightthresh};
 	$highlightthresh = $user->{threshold} if $highlightthresh < $user->{threshold};
 
@@ -1856,7 +1856,7 @@ sub _hard_dispComment {
 		$time_to_display, $comment_link_to_display, $userinfo_to_display)
 		= ("") x 7;
 
-	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)/;
+	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
 
 	$comment_to_display = qq'<div id="comment_body_$comment->{cid}">$comment->{comment}</div>';
 	my $sighide = $comment_shrunk ? ' hide' : '';
@@ -2037,9 +2037,9 @@ EOT
 			subject	=> 'Parent',
 			subject_only => 1,
 			onclick	=> ($discussion2 ? "return selectParent($comment->{original_pid})" : '')
-		}, 1) if $comment->{original_pid} && !($discussion2 &&
-			(!$form->{cid} || $form->{cid} != $comment->{cid})
-		);
+		}, 1) if $comment->{original_pid};# && !($discussion2 &&
+#			(!$form->{cid} || $form->{cid} != $comment->{cid})
+#		);
 
 		push @link, "<div class=\"modsel\">".createSelect("reason_$comment->{cid}",
 			$reasons, '', 1, 1)."</div>" if $can_mod
