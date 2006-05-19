@@ -63,18 +63,29 @@ srand;
 	my $stoid = 0;
 	my $uid = 0;
 	for (1..$opts{num_tags}) {
-		$stoid = $stories->[rand(@$stories)]{stoid} if !$stoid || rand(1) > 0.2;
-		$tagnameid = _get_tagnameid($tags, $tagnameid, $stoid);
-		$uid = $tags->sqlSelect('uid', 'users_info',
-			"karma BETWEEN $kmin AND $kmax",
-			'ORDER BY RAND() LIMIT 1') if !$uid || rand(1) > 0.2;
-		my $tagid = $tags->createTag({
-			uid => $uid,
-			tagnameid => $tagnameid,
-			table => 'stories',
-			id => $stoid,
-		});
-		print "tagid=$tagid tagnameid=$tagnameid uid=$uid stoid=$stoid\n";
+		if (rand(1) < 0.02) {
+			# Instead of adding a tag, deactivate an existing one.
+			my $tag = $tags->sqlSelectHashref(
+				'*', 'tags', 'inactivated IS NULL',
+				'ORDER BY RAND() LIMIT 1');
+			if ($tag) {
+				my $count = $tags->deactivateTag($tag);
+				print "tagid=$tag->{tagid} deactivated $count tagnameid=$tag->{tagnameid} uid=$tag->{uid} globjid=$tag->{globjid}\n";
+			}
+		} else {
+			$stoid = $stories->[rand(@$stories)]{stoid} if !$stoid || rand(1) > 0.2;
+			$tagnameid = _get_tagnameid($tags, $tagnameid, $stoid);
+			$uid = $tags->sqlSelect('uid', 'users_info',
+				"karma BETWEEN $kmin AND $kmax",
+				'ORDER BY RAND() LIMIT 1') if !$uid || rand(1) > 0.2;
+			my $tagid = $tags->createTag({
+				uid => $uid,
+				tagnameid => $tagnameid,
+				table => 'stories',
+				id => $stoid,
+			});
+			print "tagid=$tagid tagnameid=$tagnameid uid=$uid stoid=$stoid\n";
+		}
 	}
 }
 

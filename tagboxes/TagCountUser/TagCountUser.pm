@@ -62,7 +62,7 @@ sub new {
 
 sub feed_newtags {
 	my($self, $tags_ar) = @_;
-#print STDERR "Slash::Tagbox::TagCountUser->feed_newtags called: tags_ar='@$tags_ar'\n";
+print STDERR "Slash::Tagbox::TagCountUser->feed_newtags called: tags_ar='@$tags_ar'\n";
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
 		push @$ret_ar, {
@@ -74,20 +74,21 @@ sub feed_newtags {
 	return $ret_ar;
 }
 
-sub feed_inactivatedtags {
+sub feed_deactivatedtags {
 	my($self, $tags_ar) = @_;
+print STDERR "Slash::Tagbox::TagCountUser->feed_deactivatedtags called: tags_ar='@$tags_ar'\n";
 	return $self->feed_newtags($tags_ar);
 }
 
-sub feed_userchange {
+sub feed_userchanges {
 	my($self, $users_ar) = @_;
+print STDERR "Slash::Tagbox::TagCountUser->feed_userchanges called: users_ar='@$users_ar'\n";
 	return [ ];
 }
 
 sub run {
 	my($self, $affected_id) = @_;
 	my $tagboxdb = getObject('Slash::Tagbox');
-#print STDERR "Slash::Tagbox::TagCountUser->run, self: " . Dumper($self);
 	my $user_tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
 print STDERR "Slash::Tagbox::TagCountUser->run called for $affected_id, ar count $#$user_tags_ar\n";
 	my $count = grep { !defined $_->{inactivated} } @$user_tags_ar;

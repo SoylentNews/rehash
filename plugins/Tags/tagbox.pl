@@ -42,13 +42,11 @@ $task{$me}{code} = sub {
 	while (!$task_exit_flag) {
 
 		# Insert into tagboxlog_feeder
-		$tagboxes = $tagboxdb->getTagboxes();
 		my $activity_feeder = update_feederlog();
 		sleep 5;
 		last if $task_exit_flag;
 
 		# Run tagboxes (based on tagboxlog_feeder)
-		$tagboxes = $tagboxdb->getTagboxes();
 		my $activity_run = run_tagboxes_until(time() + 30);
 		sleep 5;
 		last if $task_exit_flag;
@@ -65,47 +63,119 @@ $task{$me}{code} = sub {
 };
 
 sub update_feederlog {
+	$tagboxes = $tagboxdb->getTagboxes();
+
+	# In preparation for doing each tagbox's processing, figure out
+	# which data we need to select from the three source tables
+	# (tags, tags_deactivated, and tags_userchange) and select the
+	# rows needed from each table.
+
 	my $min_max_tagid = $tagboxes->[0]{last_tagid_logged};
+	my $min_max_tdid = $tagboxes->[0]{last_tdid_logged};
+	my $min_max_tuid = $tagboxes->[0]{last_tuid_logged};
 	for my $tagbox (@$tagboxes) {
-		$min_max_tagid = $tagbox->{last_tagid_logged}
-			if $tagbox->{last_tagid_logged} < $min_max_tagid;
+		$min_max_tagid = $tagbox->{last_tagid_logged} if $tagbox->{last_tagid_logged} < $min_max_tagid;
+		$min_max_tuid  = $tagbox->{last_tuid_logged}  if $tagbox->{last_tuid_logged}  < $min_max_tuid;
+		$min_max_tdid  = $tagbox->{last_tdid_logged}  if $tagbox->{last_tdid_logged}  < $min_max_tdid;
 	}
-
+	# Get the user change data.
+	my $userchange_ar = $tags->sqlSelectAllHashrefArray(
+		'*', 'tags_userchange',
+		"tuid > $min_max_tuid",
+		'ORDER BY tuid');
+	# Get the deactivated tags data.
+	my $deactivated_ar = $tags->sqlSelectAllHashrefArray(
+		'*', 'tags_deactivated',
+		"tdid > $min_max_tdid",
+		'ORDER BY tdid');
+	# If there were any deactivated tags, add those to the list of
+	# tags to get.
+	my $deactivated_tagids_clause = '';
+	if ($deactivated_ar && @$deactivated_ar) {
+		$deactivated_tagids_clause = ' OR tagid IN ('
+			. join(',', map { $_->{tagid} } @$deactivated_ar)
+			. ')';
+	}
+	# Get the tags data.
 	my $tags_ar = $tags->sqlSelectAllHashrefArray(
-		'*',
-		'tags',
-		"tagid > $min_max_tagid");
-	return 0 # nothing was changed
-		if !$tags_ar || !@$tags_ar;
+		'*', 'tags',
+		"tagid > $min_max_tagid $deactivated_tagids_clause",
+		'ORDER BY tagid');
 
-	my $new_maxtagid = $min_max_tagid;
-	for my $tag_hr (@$tags_ar) {
-		$new_maxtagid = $tag_hr->{tagid}
-			if $tag_hr->{tagid} > $new_maxtagid;
-	}
-#print STDERR "min_max_tagid=$min_max_tagid new_maxtagid=$new_maxtagid count(tags_ar)=" . scalar(@$tags_ar) . "\n";
+	# If nothing changed, we're done.
+	return 0 if
+		   (!$userchange_ar  || !@$userchange_ar)
+		&& (!$deactivated_ar || !@$deactivated_ar)
+		&& (!$tags_ar        || !@$tags_ar);
+
+	# For each tagbox, we're going to do some processing for each
+	# of these three data types.  We'll first call that tagbox's
+	# feed_newtags() method for the tags it hasn't seen yet.
+	# Then we'll call feed_deactivatedtags() for the deactivated
+	# tags it hasn't seen yet.  Then feed_userchange() for the user
+	# changes it hasn't seen yet.  After each call, insert whatever
+	# data the tagbox returns into the tagboxlog_feeder table and
+	# then mark that tagbox as being logged up to that point.
 
 	for my $tagbox (@$tagboxes) {
-		# First, extract out only the tags that are new since the
-		# last time this tagbox ran (which may or may not be the
-		# same as the last time other tagboxes ran).
-		my $tags_this_tagbox_ar = [
-			grep { $_->{tagid} > $tagbox->{last_tagid_logged} }
-			@$tags_ar
-		];
-#print STDERR "tagbox=$tagbox->{name} count(tags_this_ar)=" . scalar(@$tags_this_tagbox_ar) . "\n";
 
-		my $feeder_ar = [ ];
-		$feeder_ar = $tagbox->{object}->feed_newtags($tags_this_tagbox_ar);
+		my $feeder_ar;
 
-		# XXX optimize by consolidating here: sum importances, max tagids
-		# Insert the tagbox's data into the feederlog.
-		insert_feederlog($tagbox, $feeder_ar) if $feeder_ar;
+		#### Newly created tags
+		if (@$tags_ar) {
+			my $tags_this_tagbox_ar = [
+				grep { $_->{tagid} > $tagbox->{last_tagid_logged} }
+				@$tags_ar
+			];
+			$feeder_ar = $tagbox->{object}->
+				feed_newtags($tags_this_tagbox_ar);
+			# XXX optimize by consolidating here: sum importances, max tagids
+			insert_feederlog($tagbox, $feeder_ar) if $feeder_ar;
+			# XXX The previous insert and this update should be wrapped
+			# in a transaction.
+			$tagboxdb->markTagboxLogged($tagbox->{tbid},
+				{ last_tagid_logged => $tags_ar->[-1]{tagid} });
+		}
 
-		# Mark the tagbox as having logged up to this point.
-		# XXX The previous insert and this update should be wrapped
-		# in a transaction.
-		$tagboxdb->markTagboxLogged($tagbox->{tbid}, $new_maxtagid);
+		### Newly deactivated tags
+		# (this one's a little fancy because feed_deactivatedtags
+		# wants the rows from the tags table)
+		if (@$deactivated_ar) {
+			my $deactivated_tagids_this_tagbox_hr = {
+				map { ( $_->{tagid}, 1 ) }
+				grep { $_->{tdid} > $tagbox->{last_tdid_logged} }
+				@$deactivated_ar
+			};
+			my $deactivated_tags_this_tagbox_ar = [
+				grep { exists $deactivated_tagids_this_tagbox_hr->{ $_->{tagid} } }
+				@$tags_ar
+			];
+			$feeder_ar = $tagbox->{object}->
+				feed_deactivatedtags($deactivated_tags_this_tagbox_ar);
+			# XXX optimize
+			insert_feederlog($tagbox, $feeder_ar) if $feeder_ar;
+			# XXX The previous insert and this update should be wrapped
+			# in a transaction.
+			$tagboxdb->markTagboxLogged($tagbox->{tbid},
+				{ last_tdid_logged => $deactivated_ar->[-1]{tdid} });
+		}
+
+		### New changes to users
+		if (@$userchange_ar) {
+			my $userchanges_this_tagbox_ar = [
+				# XXX grep out changes this tagbox's regex doesn't match
+				grep { $_->{tuid} > $tagbox->{last_tuid_logged} }
+				@$userchange_ar
+			];
+			$feeder_ar = $tagbox->{object}->
+				feed_userchanges($userchanges_this_tagbox_ar);
+			# XXX optimize
+			insert_feederlog($tagbox, $feeder_ar) if $feeder_ar;
+			# XXX The previous insert and this update should be wrapped
+			# in a transaction.
+			$tagboxdb->markTagboxLogged($tagbox->{tbid},
+				{ last_tuid_logged => $userchange_ar->[-1]{tuid} });
+		}
 
 	}
 
@@ -126,6 +196,7 @@ sub insert_feederlog {
 sub run_tagboxes_until {
 	my($run_until) = @_;
 	my $activity = 0;
+	$tagboxes = $tagboxdb->getTagboxes();
 
 	while (time() < $run_until) {
 		my $affected_ar = $tagboxdb->getMostImportantTagboxAffectedIDs();
