@@ -92,7 +92,10 @@ END { $dbh->disconnect if $dbh }
 chomp($hostname_f = `hostname -f`) if $^O eq 'linux';
 unless ($opts{'H'}) {
 	print "
-What is hostname of your Slash site
+Feel free to ^C this script at any time up to when you see the
+'last change' prompt.  If you do, no changes will be made.
+
+What is the hostname of your Slash site
 (e.g., www.slashdot.org)? [$hostname_f] ";
 	chomp($hostname = <STDIN>);
 	$hostname ||= $hostname_f;
@@ -209,10 +212,7 @@ if ($opts{'P'}) {
 	push @plugins, @default_plugins if @default_plugins;
 } else {
 	my %order_to_name = ( );
-	print "\nPlease select which plugins you would like ('*' marks the default and minimum).\n";
-	print "Note that some optional plugins may have additional system requirements:\n";
-	print "if you select any beyond the default, you will want to look over their\n";
-	print "$SLASH_PREFIX/plugins/*/README files.\n";
+	print "\nPlugins:\n";
 	for my $key (@all_plugins) {
 		my $c = " ";
 		if ($themes->{$theme}{plugin}{$plugins->{$key}{name}}) {
@@ -222,7 +222,12 @@ if ($opts{'P'}) {
 		$order_to_name{$plugins->{$key}{order}} = $key;
 	}
 	my $select = 'a';
-	print "Hit 'a' to select all, otherwise select comma separated numbers or 'q' to quit\n";
+	print "Please select which plugins you would like ('*' marks the default and minimum).\n";
+	print "Note that some optional plugins may have additional system requirements:\n";
+	print "if you select any beyond the default, you must look over their\n";
+	print "$SLASH_PREFIX/plugins/*/README* files.\n";
+	print "Enter 'a' to select all (which is probably a bad idea). Better, enter\n";
+	print "comma-separated numbers, or 'q' for none.\n";
 	while ($select ne 'q'){
 		chomp($select = <STDIN>);
 		if ($select =~ /^[\d ,]+$/) {
@@ -289,9 +294,9 @@ if (!$Config{d_symlink}) {
 	$symlink = $opts{'L'};
 } else {
 	print "
-Would you like to install all the files as symlinks
-to the original?  (If not, each file will be copied to
-your Slash directories). [Y] ";
+Would you like to install all the files as symlinks to the original?
+(This is recommended.  If not, each file will be copied to your
+Slash directories). [Y] ";
 	chomp(my $ans = <STDIN>);
 	$ans ||= 'Y';
 	$symlink = $ans =~ /^\s*[Yy]/;
@@ -325,6 +330,15 @@ unless ($opts{'e'}) {
 } else {
 	$email = $opts{'e'};
 }
+
+unless ($opts{'f'}) {
+	print "\nThis is your last chance to abort installation.\n";
+	print "Hit return to install or press ^C now to abort: ";
+	my $line = <STDIN>;
+	$line = ''; # avoid a warning about var only used once
+}
+
+print "\nInstalling...\n";
 
 my $trgst = '';
 
@@ -666,10 +680,14 @@ You may want to take a look at it. If you are using virtual hosting by
 hostname you may also need to add a NameVirtualHost to your httpd.conf.
 
 If you do not have your Slash site in the root of the web server (e.g.,
-"http://www.example.com/mysite/" instead of "http://mysite.example.com/"),
+"http://www.example.com/mysite/" instead of "http://www.example.com/"),
 you will need to adjust the rootdir, rdfimage, imagedir, absolutedir,
 and cookiepath variables, and you also need to change your Apache config
-appropriately.  These are all in the "vars" table of your database.
+appropriately.  If you're planning on having sections with more than two dots
+in the hostname (e.g. your mainpage will be at "http://division.company.com/"
+with a section at "http://newprojects.division.company.com/") you will
+also want to set the cookiedomain var (e.g. to ".division.company.com").
+These are all in the "vars" table of your database.
 
 To restart apache do:
 
@@ -720,6 +738,8 @@ Main options:
 	-h	Help (this message)
 	-v	Version
 	-u	Virtual user
+	-f	Skip 'last chance' prompt (force installation -- combine
+		this with the other opts below to eliminate interaction)
 
 Site options:
 	-H	Hostname
