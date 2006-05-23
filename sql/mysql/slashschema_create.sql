@@ -1257,7 +1257,7 @@ CREATE TABLE tzcodes (
 ) TYPE=InnoDB;
 
 #
-# Table structure for table 'users'
+# Table structure for table 'urls'
 #
 
 DROP TABLE IF EXISTS urls;
@@ -1276,9 +1276,14 @@ CREATE TABLE urls (
 	initialtitle VARCHAR(255),
 	validatedtitle VARCHAR(255),
 	tags_top VARCHAR(255) DEFAULT '' NOT NULL,
+	popularity float DEFAULT '0' NOT NULL,
 	PRIMARY KEY (url_id),
 	UNIQUE url_digest (url_digest)
 );
+
+#
+# Table structure for table 'users'
+#
 
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
