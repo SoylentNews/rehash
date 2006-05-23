@@ -93,7 +93,7 @@ chomp($hostname_f = `hostname -f`) if $^O eq 'linux';
 unless ($opts{'H'}) {
 	print "
 Feel free to ^C this script at any time up to when you see the
-'last change' prompt.  If you do, no changes will be made.
+'last chance to abort' prompt.  If you do, no changes will be made.
 
 What is the hostname of your Slash site
 (e.g., www.slashdot.org)? [$hostname_f] ";
