@@ -83,11 +83,13 @@ sub update_feederlog {
 		'*', 'tags_userchange',
 		"tuid > $min_max_tuid",
 		'ORDER BY tuid');
+	my $max_tuid = @$userchange_ar ? $userchange_ar->[-1]{tuid} : undef;
 	# Get the deactivated tags data.
 	my $deactivated_ar = $tags->sqlSelectAllHashrefArray(
 		'*', 'tags_deactivated',
 		"tdid > $min_max_tdid",
 		'ORDER BY tdid');
+	my $max_tdid = @$deactivated_ar ? $deactivated_ar->[-1]{tdid} : undef;
 	# If there were any deactivated tags, add those to the list of
 	# tags to get.
 	my $deactivated_tagids_clause = '';
@@ -101,6 +103,7 @@ sub update_feederlog {
 		'*', 'tags',
 		"tagid > $min_max_tagid $deactivated_tagids_clause",
 		'ORDER BY tagid');
+	my $max_tagid = @$tags_ar ? $tags_ar->[-1]{tagid} : undef;
 
 	# If nothing changed, we're done.
 	return 0 if
@@ -134,7 +137,7 @@ sub update_feederlog {
 			# XXX The previous insert and this update should be wrapped
 			# in a transaction.
 			$tagboxdb->markTagboxLogged($tagbox->{tbid},
-				{ last_tagid_logged => $tags_ar->[-1]{tagid} });
+				{ last_tagid_logged => $max_tagid });
 		}
 
 		### Newly deactivated tags
@@ -157,7 +160,7 @@ sub update_feederlog {
 			# XXX The previous insert and this update should be wrapped
 			# in a transaction.
 			$tagboxdb->markTagboxLogged($tagbox->{tbid},
-				{ last_tdid_logged => $deactivated_ar->[-1]{tdid} });
+				{ last_tdid_logged => $max_tdid });
 		}
 
 		### New changes to users
@@ -174,10 +177,14 @@ sub update_feederlog {
 			# XXX The previous insert and this update should be wrapped
 			# in a transaction.
 			$tagboxdb->markTagboxLogged($tagbox->{tbid},
-				{ last_tuid_logged => $userchange_ar->[-1]{tuid} });
+				{ last_tuid_logged => $max_tuid });
 		}
 
 	}
+
+	# Eliminate rows no longer needed.
+	$tagboxdb->sqlDelete('tags_userchange',  "tuid <= $max_tuid") if $max_tuid;
+	$tagboxdb->sqlDelete('tags_deactivated', "tdid <= $max_tdid") if $max_tdid;
 
 	return 1; # something may have been changed
 }
