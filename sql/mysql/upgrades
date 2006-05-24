@@ -3926,3 +3926,6 @@ UPDATE vars SET value = 'T_2_5_0_112' WHERE name = 'cvs_tag_currentcode';
 RENAME TABLE tagboxlog_deactivated TO tags_deactivated;
 RENAME TABLE tagboxlog_userchange TO tags_userchange;
 
+# 2006-05-24
+UPDATE vars SET value = 'T_2_5_0_113' WHERE name = 'cvs_tag_currentcode';
+
