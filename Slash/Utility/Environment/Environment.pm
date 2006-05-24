@@ -69,6 +69,7 @@ use vars qw($VERSION @EXPORT);
 	getObject
 	getAnonId
 	isAnon
+	isAdmin
 	isSubscriber
 	prepareUser
 	filter_params
@@ -1071,6 +1072,47 @@ sub isAnon {
 
 #========================================================================
 
+=head2 isAdmin(UID)
+
+Tests to see if the uid passed in is an admin.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item UID
+
+Value UID.  Can also be standard C<$user> hashref.
+
+=back
+
+=item Return value
+
+Returns true if the UID is an admin, otherwise false.
+
+=back
+
+=cut
+
+sub isAdmin {
+	my($user) = @_;
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	# $user can be real $user, or $uid
+	my $usercheck = ref $user
+		? $user
+		: $slashdb->getUser($user, [qw(seclev)]);
+
+	return $usercheck->{seclev} >= 100
+		? 1
+		: 0;
+}
+
+#========================================================================
+
 =head2 isSubscriber(USER)
 
 Tests to see if the user passed in is a subscriber.
@@ -1091,7 +1133,10 @@ If you pass a UID instead of a USER, then the function will call getUser() for y
 
 =item Return value
 
-Returns true if the USER is a subscriber, otherwise false.
+Returns true if the USER is a subscriber, otherwise false.  Also returns
+true if the C<subscribe> var is false (everyone is a subscriber if there
+are no subscriptions), so check in your caller if you need subscriptions
+turned on.
 
 =back
 
@@ -1107,7 +1152,7 @@ sub isSubscriber {
 	if ($constants->{subscribe}) {
 		if (! ref $suser) {
 			my $slashdb = getCurrentDB();
-			$suser = $slashdb->getUser($suser);
+			$suser = $slashdb->getUser($suser, [qw(hits_paidfor hits_bought)]);
 		}
 
 		$subscriber = 1 if $suser->{hits_paidfor} &&
@@ -1571,8 +1616,7 @@ sub prepareUser {
 
 	if ($constants->{subscribe}) {
 		# Decide whether the user is a subscriber.
-		$user->{is_subscriber} = 1 if $user->{hits_paidfor}
-			&& $user->{hits_bought} < $user->{hits_paidfor};
+		$user->{is_subscriber} = isSubscriber($user);
 		# Make other decisions about subscriber-related attributes
 		# of this page.  Note that we still have $r lying around,
 		# so we can save Subscribe.pm a bit of work.

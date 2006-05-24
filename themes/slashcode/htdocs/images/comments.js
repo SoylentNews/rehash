@@ -4,7 +4,8 @@ var authorcomments;
 var behaviors = {
 	'default': { ancestors: 'none', parent: 'none', children: 'none', descendants: 'none', siblings: 'none', sameauthor: 'none' }, 
 	'focus': { ancestors: 'none', parent: 'none', children: 'prehidden', descendants: 'prehidden', siblings: 'none', sameauthor: 'none' }, 
-	'collapse': { ancestors: 'none', parent: 'none', siblings: 'none', sameauthor: 'none', currentmessage: 'oneline', children: 'hidden', descendants: 'hidden'} };
+	'collapse': { ancestors: 'none', parent: 'none', siblings: 'none', sameauthor: 'none', currentmessage: 'oneline', children: 'hidden', descendants: 'hidden'}
+};
 var behaviorrange = ['none', 'full', 'oneline', 'hidden'];
 var displaymode = { 0: 1 };
 var futuredisplaymode = {};
@@ -284,7 +285,7 @@ function revealKids(cid) {
 		}
 	}
 
-	kidHiddens(cid, 0);
+	updateCommentTree(cid);
 	updateTotals();
 
 	return void(0);

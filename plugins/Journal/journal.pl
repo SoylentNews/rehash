@@ -249,11 +249,11 @@ sub displayRSS {
 	}
 
 	my $rss_html = $constants->{journal_rdfitemdesc_html} && (
-		$user->{is_admin}
+		($user->{is_admin} || isAdmin($juser))
 			||
 		($constants->{journal_rdfitemdesc_html} == 1)
 			||
-		($constants->{journal_rdfitemdesc_html} > 1 && $user->{is_subscriber})
+		($constants->{journal_rdfitemdesc_html} > 1 && ($user->{is_subscriber} || ($constants->{subscribe} && isSubscriber($juser))))
 			||
 		($constants->{journal_rdfitemdesc_html} > 2 && !$user->{is_anon})
 	);

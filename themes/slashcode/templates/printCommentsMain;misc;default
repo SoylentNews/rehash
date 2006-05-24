@@ -38,9 +38,9 @@ __template__
 	</div>
 	</form>
 </div>
-[% END; IF (user.acl.discussion2_uofm_signup && !user.acl.discussion2_uofme && (user.is_admin || !user.is_subscriber)) && constants.uofm_key && constants.uofm_iv %]
+[% END; IF (user.acl.discussion2_uofm_signup && !user.acl.discussion2_uofm && (user.is_admin || !user.is_subscriber)) && constants.uofm_key && constants.uofm_iv %]
 <div class="commentBox" style="font-size: 120%">
-Want to <a href="[% Slash.tempUofmLinkGenerate() %]">test</a> an experimental interface for comments?
+<a href="[% Slash.tempUofmLinkGenerate() %]">Want to test an experimental interface for comments?</a>
 </div>
 [% END %]
 
