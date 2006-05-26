@@ -1,3 +1,5 @@
+// $Id$
+
 var comments;
 var root_comments;
 var authorcomments;
@@ -6,11 +8,9 @@ var behaviors = {
 	'focus': { ancestors: 'none', parent: 'none', children: 'prehidden', descendants: 'prehidden', siblings: 'none', sameauthor: 'none' }, 
 	'collapse': { ancestors: 'none', parent: 'none', siblings: 'none', sameauthor: 'none', currentmessage: 'oneline', children: 'hidden', descendants: 'hidden'}
 };
-var behaviorrange = ['none', 'full', 'oneline', 'hidden'];
-var displaymode = { 0: 1 };
+var displaymode = {};
 var futuredisplaymode = {};
 var prehiddendisplaymode = {};
-var defaultdisplaymode = {};
 var viewmodevalue = { full: 3, oneline: 2, hidden: 1};
 var currents = { full: 0, oneline: 0, hidden: 0 };
 
@@ -20,17 +20,12 @@ var user_is_anon = 0;
 var user_uid = 0;
 var user_threshold = 0;
 var user_highlightthresh = 0;
+var loaded = 0;
 
 function updateComment(cid, mode) {
 	var existingdiv = $('comment_' + cid);
-	if (existingdiv) {
+	if (existingdiv)
 		existingdiv.className = mode;
-		var existinglink = $('comment_link_' + cid);
-		if (existinglink) {
-			var plusminus = (mode == 'full') ? '-' : ''; 
-			existinglink.onclick = function() { return setFocusComment(plusminus + cid) };
-		}
-	}
 
 	currents[displaymode[cid]]--;
 	currents[mode]++;
@@ -40,7 +35,6 @@ function updateComment(cid, mode) {
 }
 
 function updateCommentTree(cid, threshold) {
-	setDefaultDisplayMode(cid);
 	var comment = comments[cid];
 
 	// skip the root comment, if it exists; leave it full, but let user collapse
@@ -157,11 +151,10 @@ function setDefaultDisplayMode(cid) {
 	var defmode = comment.className;
 	if (!defmode) { return }
 
-	futuredisplaymode[cid] = prehiddendisplaymode[cid] = defaultdisplaymode[cid] = displaymode[cid] = defmode;
+	futuredisplaymode[cid] = prehiddendisplaymode[cid] = displaymode[cid] = defmode;
 }
 
 function updateDisplayMode(cid, mode, newdefault) {
-	setDefaultDisplayMode(cid);
 	futuredisplaymode[cid] = mode;
 	if (newdefault) {
 		prehiddendisplaymode[cid] = mode;
@@ -199,7 +192,12 @@ function refreshCommentDisplays() {
 }
 
 function setFocusComment(cid, alone) {
+	if (!loaded)
+		return false;
+
 	var abscid = Math.abs(cid);
+	if (viewmodevalue[displaymode[abscid]] == viewmodevalue['full'])
+		cid = '-' + abscid;
 
 // this doesn't work
 //	var statusdiv = $('comment_status_' + abscid);
@@ -272,6 +270,9 @@ function changeThreshold(threshold) {
 }
 
 function revealKids(cid) {
+	if (!loaded)
+		return false;
+
 	var comment = comments[cid];
 
 	if (comment['kids'].length) {
@@ -413,7 +414,6 @@ function calcTotals() {
 	}
 
 	for (var cid in comments) {
-		setDefaultDisplayMode(cid);
 		currents[displaymode[cid]]++;
 	}
 }
@@ -429,9 +429,14 @@ function enableControls() {
 	for (var i = 0; i < controls.length; i++) {
 		$(controls[i]).disabled = false;
 	}
+	$('commentControlBoxStatus').className = 'hide';
+	loaded = 1;
 }
 
 function selectParent(cid) {
+	if (!loaded)
+		return false;
+
 	var comment = comments[cid];
 	if (comment && $('comment_' + cid)) {
 		updateDisplayMode(cid, 'full', 1);
@@ -442,4 +447,14 @@ function selectParent(cid) {
 		return true; // follow link
 	}
 	return false;
+}
+
+function cloneObject(what) {
+	for (i in what) {
+		if (typeof what[i] == 'object') {
+			this[i] = new cloneObject(what[i]);
+		} else {
+			this[i] = what[i];
+		}
+	}
 }

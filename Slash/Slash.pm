@@ -250,9 +250,6 @@ sub jsSelectComments {
 
 	my @roots = $cid ? $cid : grep { !$comments->{$_}{pid} } keys %$comments;
 
-	my $extra = "\nrenderRoots('commentlisting')";
-	$extra = "" if $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
-
 	if ($form->{full}) {
 		my $comment_text = $slashdb->getCommentTextCached(
 			$comments, [ keys %$comments ],
@@ -275,6 +272,7 @@ sub jsSelectComments {
 
 	return <<EOT;
 comments = $anon_comments;
+
 root_comments = $anon_roots;
 root_comment = $cid;
 
@@ -283,7 +281,7 @@ user_is_anon = $user->{is_anon};
 user_threshold = $threshold;
 user_highlightthresh = $highlightthresh;
 
-discussion_id = $id;$extra
+discussion_id = $id;
 EOT
 }
 
@@ -658,7 +656,9 @@ sub printComments {
 		return 0;
 	}
 
-	if ($user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/ && $user->{mode} ne 'metamod') {
+	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
+
+	if ($discussion2 && $user->{mode} ne 'metamod') {
 		$user->{mode} = $form->{mode} = 'thread';
 		$user->{commentsort} = 0;
 		$user->{reparent} = 0;
@@ -767,7 +767,7 @@ sub printComments {
 		? $comments->{$cidorpid}{totalvisiblekids}
 		: $cc;
 
-	my $lcp = ($user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/)
+	my $lcp = $discussion2
 		? ''
 		: linkCommentPages($discussion->{id}, $pid, $cid, $total);
 
@@ -783,6 +783,12 @@ sub printComments {
 		}
 	}
 
+	my $js_comments;
+	if ($discussion2) {
+		# module should be required already ...
+		$js_comments = Data::JavaScript::Anon->anon_dump($user->{state}{comments}{status});
+	}
+
 	my $comment_html = slashDisplay('printCommComments', {
 		can_moderate	=> $can_mod_any,
 		comment		=> $comment,
@@ -795,6 +801,8 @@ sub printComments {
 		cc		=> $cc,
 		lcp		=> $lcp,
 		lvl		=> $lvl,
+		discussion2	=> $discussion2,
+		js_comments	=> $js_comments,
 	}, { Return => 1 });
 
 	# We have to get the comment text we need (later we'll search/replace
@@ -1187,6 +1195,7 @@ sub displayThread {
 		$class = 'full' if $highlight;
 
 		$user->{state}{comments}{totals}{$class}++;
+		$user->{state}{comments}{status}{$comment->{cid}} = $class;
 
 		my $finish_list = 0;
 

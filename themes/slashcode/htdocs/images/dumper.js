@@ -1,4 +1,77 @@
+// $Id$
+
 // javascript:$('commentControlBox').innerHTML = Dumper(displaymode)
+
+// ===================================================================
+// Author: Matt Kruse <matt@mattkruse.com>
+// WWW: http://www.mattkruse.com/
+//
+// NOTICE: You may use this code for any purpose, commercial or
+// private, without any further permission from the author. You may
+// remove this notice from your final code if you wish, however it is
+// appreciated by the author if at least my web site address is kept.
+//
+// You may *NOT* re-distribute this code in any way except through its
+// use. That means, you can include it in your product, or your web
+// site, or any other form where the code is actually being used. You
+// may not put the plain javascript up on your site for download or
+// include it in your javascript libraries for download. 
+// If you wish to share this code with others, please just point them
+// to the URL instead.
+// Please DO NOT link directly to my .js files from your site. Copy
+// the files to your server and use them there. Thank you.
+// ===================================================================
+
+// HISTORY
+// ------------------------------------------------------------------
+// March 18, 2004: Updated to include max depth limit, ignoring standard
+//    objects, ignoring references to itself, and following only
+//    certain object properties.
+// March 17, 2004: Created
+/* 
+DESCRIPTION: These functions let you easily and quickly view the data
+structure of javascript objects and variables
+
+COMPATABILITY: Will work in any javascript-enabled browser
+
+USAGE:
+
+// Return the output as a string, and you can do with it whatever you want
+var out = Dumper(obj);
+
+// When starting to traverse through the object, only follow certain top-
+// level properties. Ignore the others
+var out = Dumper(obj,'value','text');
+
+// Sometimes the object you are dumping has a huge number of properties, like
+// form fields. If you are only interested in certain properties of certain 
+// types of tags, you can restrict that like Below. Then if DataDumper finds
+// an object that is a tag of type "OPTION" it will only examine the properties
+// of that object that are specified.
+DumperTagProperties["OPTION"] = [ 'text','value','defaultSelected' ]
+
+// View the structure of an object in a window alert
+DumperAlert(obj);
+
+// Popup a new window and write the Dumper output to that window
+DumperPopup(obj);
+
+// Write the Dumper output to a document using document.write()
+DumperWrite(obj);
+// Optionall, give it a different document to write to
+DumperWrite(obj,documentObject);
+
+NOTES: Be Careful! Some objects hold references to their parent nodes, other
+objects, etc. Data Dumper will keep traversing these nodes as well, until you
+have a really, really huge tree built up. If the object you are passing in has
+references to other document objects, you should either:
+	1) Set the maximum depth that Data Dumper will search (set DumperMaxDepth)
+or
+	2) Pass in only certain object properties to traverse
+or
+	3) Set the object properties to traverse for each type of tag
+	
+*/ 
 var DumperIndent = 1;
 var DumperIndentText = " ";
 var DumperNewline = "\n";

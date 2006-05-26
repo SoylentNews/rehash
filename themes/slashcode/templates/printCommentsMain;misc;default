@@ -140,6 +140,7 @@ __template__
 
 	[% IF discussion2 %]
 		<br>Hidden=<span id="currentHidden">0</span> Displayed=<span id="currentFull">0</span> Abbreviated=<span id="currentOneline">0</span>
+		<div id="commentControlBoxStatus" class="hide"><b>Loading ... Please wait.</b></div>
 	[% END %]
 		</fieldset>
 		</form>

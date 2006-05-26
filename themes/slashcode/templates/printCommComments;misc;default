@@ -32,8 +32,7 @@ __template__
 	<form action="[% gSkin.rootdir %]/comments.pl" method="post">
 [% END %]
 
-[% discussion2 = user.discussion2 && (user.discussion2 == "slashdot" || user.discussion2 == "uofm");
-   IF discussion2 %]
+[% IF discussion2 %]
 	[% IF user.discussion2 == "slashdot" %]
 	<script src="[% constants.imagedir %]/comments.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 	[%- ELSE %]
@@ -110,11 +109,17 @@ __template__
 [% IF discussion2 %]
 	<script type="text/javascript">
 <!--
-		currents['hidden']  = [% user.state.comments.totals.hidden  || 0 %];
-		currents['full']    = [% user.state.comments.totals.full    || 0 %];
-		currents['oneline'] = [% user.state.comments.totals.oneline || 0 %];
+		displaymode          = [% js_comments %];
+		futuredisplaymode    = new cloneObject(displaymode);
+		prehiddendisplaymode = new cloneObject(displaymode);
+
+		currents['hidden']   = [% user.state.comments.totals.hidden  || 0 %];
+		currents['full']     = [% user.state.comments.totals.full    || 0 %];
+		currents['oneline']  = [% user.state.comments.totals.oneline || 0 %];
+		// currents_total = [% (user.state.comments.totals.hidden || 0 ) + (user.state.comments.totals.full || 0) + (user.state.comments.totals.oneline || 0)  %];
 		if (root_comment)
 			currents['full'] += 1;
+
 		updateTotals();
 		enableControls();
 //-->
