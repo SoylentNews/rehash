@@ -47,10 +47,8 @@ sub new {
 	# Note that getTagboxes() would call back to this new() function
 	# if the tagbox objects have not yet been created -- but the
 	# no_objects option prevents that.  See getTagboxes() for details.
-#print STDERR "TCU::new calling getTagboxes $tagbox_name\n";
 	my %self_hash = %{ getObject('Slash::Tagbox')->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
 	my $self = \%self_hash;
-#print STDERR "TCU::new called getTagboxes $tagbox_name, self: " . Dumper($self);
 	return undef if !$self || !keys %$self;
 
 	bless($self, $class);
@@ -62,7 +60,7 @@ sub new {
 
 sub feed_newtags {
 	my($self, $tags_ar) = @_;
-print STDERR "Slash::Tagbox::TagCountUser->feed_newtags called: tags_ar='@$tags_ar'\n";
+print STDERR "Slash::Tagbox::TagCountUser->feed_newtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) . "'\n";
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
 		push @$ret_ar, {
@@ -76,13 +74,13 @@ print STDERR "Slash::Tagbox::TagCountUser->feed_newtags called: tags_ar='@$tags_
 
 sub feed_deactivatedtags {
 	my($self, $tags_ar) = @_;
-print STDERR "Slash::Tagbox::TagCountUser->feed_deactivatedtags called: tags_ar='@$tags_ar'\n";
+print STDERR "Slash::Tagbox::TagCountUser->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'\n";
 	return $self->feed_newtags($tags_ar);
 }
 
 sub feed_userchanges {
 	my($self, $users_ar) = @_;
-print STDERR "Slash::Tagbox::TagCountUser->feed_userchanges called: users_ar='@$users_ar'\n";
+print STDERR "Slash::Tagbox::TagCountUser->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'\n";
 	return [ ];
 }
 
@@ -90,7 +88,7 @@ sub run {
 	my($self, $affected_id) = @_;
 	my $tagboxdb = getObject('Slash::Tagbox');
 	my $user_tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
-print STDERR "Slash::Tagbox::TagCountUser->run called for $affected_id, ar count $#$user_tags_ar\n";
+print STDERR "Slash::Tagbox::TagCountUser->run called for $affected_id, ar count " . scalar(@$user_tags_ar) . "\n";
 	my $count = grep { !defined $_->{inactivated} } @$user_tags_ar;
 	$self->setUser($affected_id, { tag_count => $count });
 }
