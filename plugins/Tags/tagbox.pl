@@ -43,7 +43,7 @@ $task{$me}{code} = sub {
 
 		# Insert into tagboxlog_feeder
 		my $activity_feeder = update_feederlog();
-		sleep 5;
+		sleep 2;
 		last if $task_exit_flag;
 
 		# Run tagboxes (based on tagboxlog_feeder)

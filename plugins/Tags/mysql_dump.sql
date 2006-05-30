@@ -33,5 +33,5 @@ INSERT INTO menus VALUES (NULL, 'tagszg', 'Active', 'active', '[% gSkin.rootdir 
 INSERT INTO menus VALUES (NULL, 'tagszg', 'Recent', 'recent', '[% gSkin.rootdir %]/tags/recent', 1, 1, 2);
 INSERT INTO menus VALUES (NULL, 'tagszg', 'All',    'all',    '[% gSkin.rootdir %]/tags/all',    1, 1, 3);
 
-INSERT INTO tagboxes VALUES (NULL, 'tag_count', 'user', '1.0', 0, NULL);
+#INSERT INTO tagboxes VALUES (NULL, 'tag_count', 'user', '1.0', 0, NULL);
 
