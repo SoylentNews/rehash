@@ -783,10 +783,10 @@ sub printComments {
 		}
 	}
 
-	my $js_comments;
+	my $anon_dump;
 	if ($discussion2) {
 		require Data::JavaScript::Anon;
-		$js_comments = Data::JavaScript::Anon->anon_dump($user->{state}{comments}{status});
+		$anon_dump = \&Data::JavaScript::Anon::anon_dump;
 	}
 
 	my $comment_html = slashDisplay('printCommComments', {
@@ -802,7 +802,7 @@ sub printComments {
 		lcp		=> $lcp,
 		lvl		=> $lvl,
 		discussion2	=> $discussion2,
-		js_comments	=> $js_comments,
+		anon_dump	=> $anon_dump,
 	}, { Return => 1 });
 
 	# We have to get the comment text we need (later we'll search/replace
@@ -1989,9 +1989,8 @@ sub _hard_dispComment {
 	my $class = $options->{class}; 
 	my $classattr = $discussion2 ? qq[ class="$class"] : '';
 
-	my $sign = $class eq 'full' ? '-' : '';
 	my $head = $discussion2 ? <<EOT1 : <<EOT2;
-			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return setFocusComment($sign$comment->{cid})">$comment->{subject}</a></h4>
+			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return setFocusComment($comment->{cid})">$comment->{subject}</a></h4>
 EOT1
 			<h4><a name="$comment->{cid}">$comment->{subject}</a></h4>
 EOT2
