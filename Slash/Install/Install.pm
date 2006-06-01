@@ -181,24 +181,23 @@ sub installPlugins {
 }
 
 sub installTagbox {
-    my($self, $answer, $tagboxes, $symlink) = @_;
-    $tagboxes ||= $self->{'_tagboxes'};
+        my($self, $answer, $tagboxes, $symlink) = @_;
+        $tagboxes ||= $self->{'_tagboxes'};
     
-    $self->_install($tagboxes->{$answer}, $symlink, 'tagbox');
+        $self->_install($tagboxes->{$answer}, $symlink, 'tagbox');
 }
 
 sub installTagboxes {
-    my($self, $answers, $tagboxes, $symlink) = @_;
-    $tagboxes ||= $self->{'_tagboxes'};
+        my($self, $answers, $tagboxes, $symlink) = @_;
+        $tagboxes ||= $self->{'_tagboxes'};
 
-    for my $answer (@$answers) {
-        for (keys %$tagboxes) {
-            if ($answer eq $tagboxes->{$_}{order}) {
-                $self->_install($tagboxes->{$_}, $symlink, 'tagbox');
-            }
+        for my $answer (@$answers) {
+                for (keys %$tagboxes) {
+                        if ($answer eq $tagboxes->{$_}{order}) {
+                                $self->_install($tagboxes->{$_}, $symlink, 'tagbox');
+                        }
+                }
         }
-    } 
-        
 }
 
 # Used internally by the _process_fh_into_sql method (which in
@@ -522,10 +521,10 @@ sub getThemeList {
 }
 
 sub getTagboxList {
-    my $tagbox_list = _getList(@_, 'tagboxes', 'TAGBOX');
-    setListOrder($tagbox_list);
-    setListInstallOrder($tagbox_list);
-    return $tagbox_list;
+        my $tagbox_list = _getList(@_, 'tagboxes', 'TAGBOX');
+        setListOrder($tagbox_list);
+        setListInstallOrder($tagbox_list);
+        return $tagbox_list;
 }
 
 sub getSiteTemplates {
