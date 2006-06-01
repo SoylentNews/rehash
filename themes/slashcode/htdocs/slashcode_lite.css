@@ -1,7 +1,7 @@
 a,
 div#footer a,
 div.btmnav a
-{ color: #00E !important; }
+{ color: #00E !important; text-decoration: underline !important;}
 
 #articles, #users-blocks, #polls
 {
@@ -82,7 +82,8 @@ div#links div.block div.title,
 div#slashboxes div.block div.title h4, 
 div#links div.block div.title h4,
 div#links div.title h4 a, 
-div#slashboxes div.title h4 a
+div#slashboxes div.title h4 a,
+div.commentTop div.title a
 {
 	background: #000 !important; color: #fff !important;
 }
@@ -148,9 +149,10 @@ div.article div.body {
 }
 
 
-.commentBox { background: #000; }
+div.commentTop div.title { background: #000; }
 .commentBoxForm,
 div.briefarticles div.briefarticle,
 div.briefarticles
 { background: #ddd !important;}
+
 
