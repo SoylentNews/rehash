@@ -785,7 +785,7 @@ sub printComments {
 
 	my $js_comments;
 	if ($discussion2) {
-		# module should be required already ...
+		require Data::JavaScript::Anon;
 		$js_comments = Data::JavaScript::Anon->anon_dump($user->{state}{comments}{status});
 	}
 
