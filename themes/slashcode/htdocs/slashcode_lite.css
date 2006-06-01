@@ -48,14 +48,17 @@ div.briefarticles,
 #footer div.rightcontent,
 .copyright,
 .copyright p,
-div#slashboxes div.block div.content ul li ul li,
 .btmnav,
 #message,
 #message .content,
 #message .content p,
 #ostgnavbar
 {
-	list-style: square !important; color: #000 !important; background: transparent !important; border: none; font-family: serif;
+	color: #000 !important; background: transparent !important; border: none; font-family: serif;
+}
+div#slashboxes div.block div.content ul li ul li
+{
+        list-style: square !important;
 }
 div.storylinks div ul, 
 div.article div.body, 
