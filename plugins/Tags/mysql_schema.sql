@@ -79,11 +79,15 @@ CREATE TABLE tagboxlog_feeder (
 	tfid		int UNSIGNED NOT NULL AUTO_INCREMENT,
 	created_at	datetime NOT NULL,
 	tbid		smallint UNSIGNED NOT NULL,
-	tagid		int UNSIGNED NOT NULL,
 	affected_id	int UNSIGNED NOT NULL,
 	importance	FLOAT UNSIGNED DEFAULT 1.0 NOT NULL,
+	tagid		int UNSIGNED DEFAULT NULL,
+	tdid		int UNSIGNED DEFAULT NULL,
+	tuid		int UNSIGNED DEFAULT NULL,
 	PRIMARY KEY tfid (tfid),
 	KEY tbid_tagid (tbid, tagid),
+	KEY tbid_tdid  (tbid, tdid),
+	KEY tbid_tuid  (tbid, tuid),
 	KEY tbid_affectedid (tbid, affected_id)
 ) TYPE=InnoDB;
 

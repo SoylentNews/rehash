@@ -115,7 +115,7 @@ sub update_feederlog {
 	# of these three data types.  We'll first call that tagbox's
 	# feed_newtags() method for the tags it hasn't seen yet.
 	# Then we'll call feed_deactivatedtags() for the deactivated
-	# tags it hasn't seen yet.  Then feed_userchange() for the user
+	# tags it hasn't seen yet.  Then feed_userchanges() for the user
 	# changes it hasn't seen yet.  After each call, insert whatever
 	# data the tagbox returns into the tagboxlog_feeder table and
 	# then mark that tagbox as being logged up to that point.
@@ -193,10 +193,7 @@ sub insert_feederlog {
 	my($tagbox, $feeder_ar) = @_;
 	for my $feeder_hr (@$feeder_ar) {
 #print STDERR "addFeederInfo: tbid=$tagbox->{tbid} tagid=$feeder_hr->{tagid} affected_id=$feeder_hr->{affected_id} imp=$feeder_hr->{importance}\n";
-		$tagboxdb->addFeederInfo($tagbox->{tbid},
-			$feeder_hr->{tagid},
-			$feeder_hr->{affected_id},
-			$feeder_hr->{importance});
+		$tagboxdb->addFeederInfo($tagbox->{tbid}, $feeder_hr);
 	}
 }
 
@@ -214,11 +211,7 @@ sub run_tagboxes_until {
 			my $tagbox = $tagboxdb->getTagboxes($affected_hr->{tbid}, [qw( object )]);
 #my $ad = Dumper($affected_hr); $ad =~ s/\s+/ /g; my $tb = Dumper($tagbox); $tb =~ s/\s+/ /g; print STDERR "r_t_u affected_hr: $ad tagbox: $tb\n";
 			$tagbox->{object}->run($affected_hr->{affected_id});
-			$tagboxdb->markTagboxRunComplete(
-				$affected_hr->{tbid},
-				$affected_hr->{affected_id},
-				$affected_hr->{max_tagid}
-			);
+			$tagboxdb->markTagboxRunComplete($affected_hr);
 		}
 
 		sleep 1;

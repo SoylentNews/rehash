@@ -226,10 +226,13 @@ sub getMostImportantTagboxAffectedIDs {
 		'tagboxes.tbid,
 		 affected_id,
 		 MAX(tagid) AS max_tagid,
+		 MAX(tdid)  AS max_tdid,
+		 MAX(tuid)  AS max_tuid,
 		 SUM(importance*weight) AS sum_imp_weight',
 		'tagboxes, tagboxlog_feeder',
 		'tagboxes.tbid=tagboxlog_feeder.tbid',
 		"GROUP BY tagboxes.tbid, affected_id
+		 HAVING sum_imp_weight >= 1
 		 ORDER BY sum_imp_weight DESC LIMIT $num");
 }
 
@@ -269,15 +272,12 @@ sub getTagboxTags {
 }
 
 sub addFeederInfo {
-	my($self, $tbid, $tagid, $affected_id, $importance) = @_;
-	return $self->sqlInsert('tagboxlog_feeder', {
-		-tfid =>	'NULL',
-		-created_at =>	'NOW()',
-		tbid =>		$tbid,
-		tagid =>	$tagid,
-		affected_id =>	$affected_id,
-		importance =>	$importance,
-	});
+	my($self, $tbid, $info_hr) = @_;
+	$info_hr->{-created_at} = 'NOW()';
+	$info_hr->{tbid} = $tbid;
+	die "attempt to create tagboxlog_feeder row with no non-NULL ids: " . Dumper($info_hr)
+		if !( $info_hr->{tagid} || $info_hr->{tdid} || $info_hr->{tuid} );
+	return $self->sqlInsert('tagboxlog_feeder', $info_hr);
 }
 
 sub markTagboxLogged {
@@ -286,14 +286,22 @@ sub markTagboxLogged {
 }
 
 sub markTagboxRunComplete {
-	my($self, $tbid, $affected_id, $max_tagid) = @_;
-#print STDERR "markTagboxRunComplete: tbid=$tbid aff_id=$affected_id max=$max_tagid\n";
-	$self->sqlDelete('tagboxlog_feeder',
-		"tbid=$tbid AND affected_id=$affected_id
-		 AND tagid <= $max_tagid");
+	my($self, $affected_hr) = @_;
+
+	my $delete_clause = "tbid=$affected_hr->{tbid} AND affected_id=$affected_hr->{affected_id}";
+	my @id_clauses = ( );
+	push @id_clauses, "tagid <= $affected_hr->{max_tagid}" if $affected_hr->{max_tagid};
+	push @id_clauses, "tdid  <= $affected_hr->{max_tdid}"  if $affected_hr->{max_tdid};
+	push @id_clauses, "tuid  <= $affected_hr->{max_tuid}"  if $affected_hr->{max_tuid};
+	die "markTagboxRunComplete called with no max ids: " . Dumper($affected_hr)
+		if !@id_clauses;
+	my $id_clause = join(' OR ', @id_clauses);
+	$delete_clause .= " AND ($id_clause)";
+
+	$self->sqlDelete('tagboxlog_feeder', $delete_clause);
 	$self->sqlUpdate('tagboxes',
 		{ -last_run_completed => 'NOW()' },
-		"tbid=$tbid");
+		"tbid=$affected_hr->{tbid}");
 }
 
 #################################################################
