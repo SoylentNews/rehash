@@ -109,7 +109,7 @@ __template__
 [% IF discussion2 %]
 	<script type="text/javascript">
 <!--
-		displaymode          = [% anon_dump('Data::JavaScript::Anon', user.state.comments.status) %];
+		displaymode          = [% user.state.comments.status ? anon_dump('Data::JavaScript::Anon', user.state.comments.status) : "{ $cid: 'full' }" %];
 		futuredisplaymode    = new cloneObject(displaymode);
 		prehiddendisplaymode = new cloneObject(displaymode);
 
