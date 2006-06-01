@@ -715,8 +715,7 @@ a separate module for that database.
 
 =head2 Indents and Blank Space
 
-All indents should be tabs.  Set your tab stops whatever you want them
-to be; I use 8 spaces per tabs.
+All indents should be tabs.  Set your tab stops at 8 spaces per tab.
 
 No space before a semicolon that closes a statement.
 
@@ -948,11 +947,12 @@ Put space around a complex subscript inside the brackets or braces.
 In general, use single-quotes around literals, and double-quotes
 when the text needs to be interpolated. 
 
-It is OK to omit quotes around names in braces and when using
-the => operator, but be careful not to use a name that doubles as
-a function; in that case, quote.
+It is preferred to omit quotes around names in braces and when
+using the => operator.  When using a name that a reader might
+think is a function, you may want to quote to emphasize it's not.
 
-	$what{'time'}{it}{is} = time();
+	$what{time}{it}{is} = time();	# OK
+	$what{'time'}{it}{is} = time();	# also OK
 
 When making compound statements, put the primary action first.
 
@@ -1058,6 +1058,10 @@ get/gets/set/sets/create/exists/delete
 =head1 CHANGES
 
 	$Log$
+	Revision 1.11  2006/06/01 14:35:35  jamiemccarthy
+	Make the 8-space tab rule strict;  make the unnecessary-quotes-around-
+	function-names rule lax.
+	
 	Revision 1.10  2003/07/10 16:29:02  pudge
 	Oops, should not use a broken example!
 	
