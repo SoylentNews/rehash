@@ -1,16 +1,67 @@
-a { color: #00E; }
+a,
+div#footer a,
+div.btmnav a
+{ color: #00E !important; }
 
 #articles, #users-blocks, #polls
 {
      margin: 0 15.6em 1em 0;
 }
 
-body, #frame, .generaltitle, .article, .journalgeneric, #links, #links div.title, #links h4, #links div.content, #slashboxes div.content, #links div.block, #slashboxes div.block,  #slashboxes div.title, #slashboxes h4, #slashboxes, .btmnav
+body, 
+#frame, 
+div.generaltitle, 
+div.article, 
+div.journalgeneric, 
+div#links, 
+div#links div.block div.title, 
+div#links div.block div.title h4, 
+div#links div.block div.content, 
+div#links div.block div.content ul li a,
+div#links div.block div.content ul,
+div#slashboxes div.block div.content, 
+div#links div.block, 
+div#slashboxes div.block,  
+div#slashboxes div.block div.title, 
+div#slashboxes div.block div.title h4, 
+div#slashboxes, 
+div.article div.storylinks,
+div#user-section,
+div#user-section div.content,
+div.generaltitle h3, 
+div.article h3, 
+div.journalgeneric h3,
+div.generaltitle div.title, 
+div.article div.title, 
+div.journalgeneric div.title,
+div.generalbody, 
+div.article div.details, 
+div.journalgeneric .details, 
+div.article div.body, 
+div.journalgeneric div.body,
+div#contents div.storylinks, 
+div#contents div.storylinks div ul, 
+div#contents div.storylinks div,
+div.briefarticles div.briefarticle,
+div.briefarticles,
+#footer,
+#footer div.rightcontent,
+.copyright,
+.copyright p,
+div#slashboxes div.block div.content ul li ul li,
+.btmnav,
+#message,
+#message .content,
+#message .content p,
+#ostgnavbar
 {
-	background: transparent;
+	list-style: square !important; color: #000 !important; background: transparent !important; border: none; font-family: serif;
 }
-div.storylinks div ul, .article .body, .journalgeneric .body, .article .details, .journalgeneric .details 
-
+div.storylinks div ul, 
+div.article div.body, 
+div.journalgeneric div.body, 
+div.article div.details, 
+div.journalgeneric div.details 
 {
 margin-left: 0;
 padding-left: 0;
@@ -23,59 +74,80 @@ div.storylinks { border: 0px; }
 }
 
 /* links */
-#slashboxes div.title, #links div.title
+div#slashboxes div.block div.title, 
+div#links div.block div.title,
+div#slashboxes div.block div.title h4, 
+div#links div.block div.title h4,
+div#links div.title h4 a, 
+div#slashboxes div.title h4 a
 {
-	background: #000;
+	background: #000 !important; color: #fff !important;
 }
-
-#links h4 a, #slashboxes h4 a { color: #fff; }
 
 /* General */
 
-.generaltitle div.title, .article div.title, .journalgeneric div.title
+div.generaltitle div.title, 
+div.article div.title, 
+div.journalgeneric div.title
 {
-	background: transparent;
+
 	border-bottom: 1px solid #000;
 	height: 100%;
 }
 
-.generaltitle h3, .article h3, .journalgeneric h3
+div.generaltitle div.title h3, 
+div.article div.title h3, 
+div.journalgeneric div.title h3
 {
-	background: transparent;
 	color: #000;
 	margin-left: 0;
 	padding: 0;
 }
 
-.generaltitle h3 a, .article h3 a, .generaltitle h3 a:visited, .article h3 a:visited, .journalgeneric h3 a, .journalgeneric h3 a:visited
+.generaltitle h3 a, 
+.article h3 a, 
+.generaltitle h3 a:visited, 
+.article h3 a:visited, 
+.journalgeneric h3 a, 
+.journalgeneric h3 a:visited,    
+div.article div.title span,
+div.article div.title span a
 {
-        color: #666;
+        color: #666 !important;
 }
 
-.generalbody, .article .details, .journalgeneric .details, .article div.body, .journalgeneric div.body
+div.generalbody, 
+div.article div.details, 
+div.journalgeneric .details, 
+div.article div.body, 
+div.journalgeneric div.body
 {
         border: none;
-        background: transparent; 
+
 }
 
-div.storylinks, div.storylinks div ul, div.storylinks div
+div#contents div.storylinks, 
+div#contents div.storylinks div ul, 
+div#contents div.storylinks div
 {
-        background: transparent; 
 	margin: 0 0 1em 0;
 }
 .btmnav ul li a, .btmnav ul li a:visited { color: #555;}
 
-.article div.details
+div.article div.details
 {
-	background: transparent;
 	border-top: 0px;
 	border: 0px;
 }
 
-.article div.body {
+div.article div.body {
 	border: 0px;
 }
 
 
 .commentBox { background: #000; }
-.commentBoxForm { background: #ccc;}
+.commentBoxForm,
+div.briefarticles div.briefarticle,
+div.briefarticles
+{ background: #ddd !important;}
+
