@@ -249,14 +249,14 @@ sub _process_fh_into_sql {
 sub _install {
 	my($self, $hash, $symlink, $type) = @_;
 
-    # Yes, performance wise this is questionable, if getValue() was
+	# Yes, performance wise this is questionable, if getValue() was
 	# cached.... who cares this is the install. -Brian
 	if ($self->exists('hash', $hash->{name})) {
 		print STDERR "Plugin $hash->{name} has already been installed\n";
 		return;
 	}
 
-    if ($type eq 'plugin') {
+	if ($type eq 'plugin') {
 		return if $self->exists('plugin', $hash->{name});
 
 		$self->create({
@@ -269,9 +269,9 @@ sub _install {
 			value           => $symlink ? 1 : 0,
 			description     => "$hash->{name} plugin files installed symlink?"
 		});
-    }
-    
-    if ($type eq 'theme') {
+	}
+	
+	if ($type eq 'theme') {
 		# not sure if this is what we want, but leave it
 		# in until someone complains.  really, we should
 		# have reinstall theme/plugin methods or
@@ -283,27 +283,27 @@ sub _install {
 		return if $self->exists('theme', $hash->{name});
 
 		$self->create({
-			name            => 'theme',
-			value           => $hash->{'name'},
-			description     => $hash->{'description'},
+			name		=> 'theme',
+			value		=> $hash->{'name'},
+			description	=> $hash->{'description'},
 		});
 		$self->create({
-			name            => 'theme_' . $hash->{name} . '_symlink',
-			value           => $symlink ? 1 : 0,
-			description     => "$hash->{name} theme files installed symlink?"
+			name		=> 'theme_' . $hash->{name} . '_symlink',
+			value		=> $symlink ? 1 : 0,
+			description	=> "$hash->{name} theme files installed symlink?"
 		});
 	}
 
-    if ($type eq 'tagbox') {
-        return if $self->exists('tagbox', $hash->{name});
+	if ($type eq 'tagbox') {
+		return if $self->exists('tagbox', $hash->{name});
 
-        $self->create({
-            name            => 'tagbox',
-            value           => $hash->{'name'},
-            description     => $hash->{'description'},
-        }); 
-    }
-    
+		$self->create({
+			name		=> 'tagbox',
+			value		=> $hash->{'name'},
+			description	=> $hash->{'description'},
+		}); 
+	}
+
 	my $driver = $self->getValue('db_driver');
 	my $prefix_site = $self->getValue('site_install_directory');
 
@@ -521,10 +521,10 @@ sub getThemeList {
 }
 
 sub getTagboxList {
-        my $tagbox_list = _getList(@_, 'tagboxes', 'TAGBOX');
-        setListOrder($tagbox_list);
-        setListInstallOrder($tagbox_list);
-        return $tagbox_list;
+	my $tagbox_list = _getList(@_, 'tagboxes', 'TAGBOX');
+	setListOrder($tagbox_list);
+	setListInstallOrder($tagbox_list);
+	return $tagbox_list;
 }
 
 sub getSiteTemplates {
