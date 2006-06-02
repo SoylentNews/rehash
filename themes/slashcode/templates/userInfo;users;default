@@ -50,24 +50,18 @@ __template__
 [% PROCESS user_titlebar tab_selected='info' %]
 	<div class="generalbody">
 	[% IF nickmatch_flag %]
-
-	<p>
-		This is <b>your</b> User Info page.  There are thousands more, but this one is yours.  You most likely are not so interested in yourself, and probably would be more interested in the Preferences links you see up top there, where you can customize [% constants.sitename %], change your password, or just click pretty widgets to kill time.
-	</p>
-
+		<p>
+			This is <b>your</b> User Info page.  There are thousands more, but this one is yours.  You most likely are not so interested in yourself, and probably would be more interested in the Preferences links you see up top there, where you can customize [% constants.sitename %], change your password, or just click pretty widgets to kill time.
+		</p>
 	[% END %]
-</div>
+	</div>
 	[% IF admin_flag %]
-<div class="user_admin">
-[% PROCESS titlebar title="Admin options" %]
-</div>
-<div class="generalbody">
+	[% PROCESS titlebar title="Admin options" %]
 		[% admin_block %]
-</div>
 	[% END %]
-<div class="generalbody">
+	<div class="generalbody">
 	[% IF lastjournal %]
-[% PROCESS titlebar title="Last Journal Entry" %]
+	[% PROCESS titlebar title="Last Journal Entry" %]
 			[% Slash.createMenu("journal", style => "tabbed") %]
 			<b>
 				<a href="[% gSkin.rootdir %]/~[% useredit.nick_plain | strip_paramattr %]/journal/">
@@ -89,8 +83,7 @@ __template__
 			[% END %]
 
 
-</div>
-</div>
+	</div>
 </div>
 <div id="users-lists">
 			[% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time%]
@@ -141,7 +134,7 @@ __template__
 				[% title = "${useredit.nickname}'s Recent Tags"; %]
 				[% PROCESS usertaghistory tagshist = tagshist title = title %]
 			[% END %]
-
+</div>
 
 __seclev__
 500
