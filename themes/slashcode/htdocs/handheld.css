@@ -15,7 +15,7 @@ ul li { display: inline; margin: 0 .2em; }
 {
         display: block;
         color: #000;
-        margin: 0 0 1em 0;
+        margin: 1em 0;
         padding: 0 5px;
         font-size: x-small;
 }
@@ -40,10 +40,10 @@ h3 {margin: .6em 0 0 0;}
         margin: 0;
         padding: 0;
 }
-.generaltitle, .generaltitle div.title { background: transparent; }
+.generaltitle, .generaltitle div.title { background: transparent; margin-top: .5em;}
 .generaltitle h3 a {color: #00e;}
 .generaltitle h3 {padding: 0; margin: 0; color: #000;}
-.article .topic img, #ostgnavbar, #slashboxes, #links, #topnav ul, #jump { display: none; }
+.article .topic img, #ostgnavbar, #slashboxes, #links, #topnav ul, #jump, #user-section, #topnav .search { display: none; }
 #topnav { margin: 0; padding: 0; height: 20px; }
 
 #footer { margin: 1em; }
