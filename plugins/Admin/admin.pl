@@ -1729,10 +1729,24 @@ sub get_ispell_comments {
 	$tmpok = write_to_temp_file($ok) if $ok;
 	my $tmpok_flag = "";
 	$tmpok_flag = " -p $tmpok" if $tmpok;
+	
 	if (!open($ispell_fh, "$ispell -a -B -S -W 3$tmpok_flag < $tmptext 2> /dev/null |")) {
 		errorLog("could not pipe to $ispell from $tmptext, $!");
 		return "could not pipe to $ispell from $tmptext, $!";
 	}
+
+	# DEBUG
+	my $ispell_debug = "";
+	$ispell_debug .= "is aspell: ";
+	$ispell_debug .=
+		($constants->{ispell_is_really_aspell_with_lang})
+		? "yes: " . $constants->{ispell_is_really_aspell_with_lang} . "\n"
+		: "no\n";
+	$ispell_debug .= "dict template:\n$ok";
+	$ispell_debug .= "dict flag:$tmpok_flag\n";
+	print STDERR "ISPELL DEBUG:\n$ispell_debug";
+	# DEBUG
+	
 	my %misspelled_count = ( );
 	my %misspelled_suggestion = ( );
 	while (defined(my $line = <$ispell_fh>)) {
