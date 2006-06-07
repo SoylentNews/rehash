@@ -13,6 +13,7 @@ var futuredisplaymode = {};
 var prehiddendisplaymode = {};
 var viewmodevalue = { full: 3, oneline: 2, hidden: 1};
 var currents = { full: 0, oneline: 0, hidden: 0 };
+var commentelements = {};
 
 var root_comment = 0;
 var discussion_id = 0;
@@ -22,8 +23,13 @@ var user_threshold = 0;
 var user_highlightthresh = 0;
 var loaded = 0;
 
+
+var agt = navigator.userAgent.toLowerCase();
+var is_firefox = (agt.indexOf("firefox") != -1);
+
+
 function updateComment(cid, mode) {
-	var existingdiv = $('comment_' + cid);
+	var existingdiv = fetchEl('comment_'+cid);
 	if (existingdiv)
 		existingdiv.className = mode;
 
@@ -66,12 +72,12 @@ function updateCommentTree(cid, threshold) {
 }
 
 function kidHiddens(cid, kidhiddens) {
-	var hiddens_cid = $('hiddens_' + cid);
+	var hiddens_cid = fetchEl('hiddens_' + cid);
 	if (! hiddens_cid) // race condition, probably: new comment added in between rendering, and JS data structure
 		return 0;
 
 	// silly workaround to hide noscript LI bullet
-	var hidestring_cid = $('hidestring_' + cid);
+	var hidestring_cid = fetchEl('hidestring_' + cid);
 	if (hidestring_cid)
 		hidestring_cid.className = 'hide';
 
@@ -140,18 +146,6 @@ function findAffected(type, cid, override) {
 			updateDisplayMode(desc, faGetSetting(desc, thistype, 'descendants', futuredisplaymode[desc], override));
 		}
 	}
-}
-
-function setDefaultDisplayMode(cid) {
-	if (displaymode[cid]) { return }
-
-	var comment = $('comment_' + cid);
-	if (!comment) { return }
-
-	var defmode = comment.className;
-	if (!defmode) { return }
-
-	futuredisplaymode[cid] = prehiddendisplaymode[cid] = displaymode[cid] = defmode;
 }
 
 function updateDisplayMode(cid, mode, newdefault) {
@@ -293,7 +287,7 @@ function revealKids(cid) {
 }
 
 function scrollTo(cid) {
-	var comment_y = getOffsetTop($('comment_' + cid));
+	var comment_y = getOffsetTop(fetchEl('comment_' + cid));
 	scroll(viewWindowLeft(), comment_y);
 }
 
@@ -353,7 +347,7 @@ function viewWindowBottom() {
 }
 
 function commentIsInWindow(cid) {
-	return isInWindow($('comment_' + cid));
+	return isInWindow(fetchEl('comment_' + cid));
 }
 
 function isInWindow(obj) {
@@ -367,7 +361,7 @@ function isInWindow(obj) {
 
 
 function replyTo(cid) {
-	var replydiv = $('replyto_' + cid);
+	var replydiv = fetchEl('replyto_' + cid);
 
 	replydiv.innerHTML = '';
 
@@ -376,7 +370,7 @@ function replyTo(cid) {
 
 
 function readRest(cid) {
-	var shrunkdiv = $('comment_shrunk_' + cid);
+	var shrunkdiv = fetchEl('comment_shrunk_' + cid);
 	if (!shrunkdiv)
 		return false; // seems we shouldn't be here ...
 
@@ -391,7 +385,7 @@ function readRest(cid) {
 		},
 		onComplete: function() {
 			shrunkdiv.innerHTML = '';
-			var sigdiv = $('comment_sig_' + cid);
+			var sigdiv = fetchEl('comment_sig_' + cid);
 			if (sigdiv) {
 				sigdiv.className = 'sig'; // show
 			}
@@ -438,7 +432,7 @@ function selectParent(cid) {
 		return false;
 
 	var comment = comments[cid];
-	if (comment && $('comment_' + cid)) {
+	if (comment && fetchEl('comment_' + cid)) {
 		updateDisplayMode(cid, 'full', 1);
 		setFocusComment(cid, 1);
 
@@ -457,4 +451,33 @@ function cloneObject(what) {
 			this[i] = what[i];
 		}
 	}
+}
+
+function loadAllElements(tagname) {
+	var elements = document.getElementsByTagName(tagname);
+
+	for (var i = 0; i < elements.length; i++) {
+		var e = elements[i];
+		commentelements[e.id] = e;
+	}
+
+	return;
+}
+
+function fetchEl(str) {
+	return is_firefox ? commentelements[str] : $(str);
+}
+
+function finishLoading() {
+	if (is_firefox) {
+		loadAllElements('div');
+		loadAllElements('li');
+		loadAllElements('a');
+	}
+
+	if (root_comment)
+		currents['full'] += 1;
+
+	updateTotals();
+	enableControls();
 }

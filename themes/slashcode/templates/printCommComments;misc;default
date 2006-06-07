@@ -40,6 +40,7 @@ __template__
 	[%- END %]
 	<script type="text/javascript">
 <!--
+	$('commentControlBoxStatus').className = '';
 [% Slash.jsSelectComments(Slash.db, constants, user, { sid => sid, cid => cid }) %]
 //-->
 	</script>
@@ -109,19 +110,12 @@ __template__
 [% IF discussion2 %]
 	<script type="text/javascript">
 <!--
-		displaymode          = [% user.state.comments.status ? anon_dump('Data::JavaScript::Anon', user.state.comments.status) : "{ $cid: 'full' }" %];
-		futuredisplaymode    = new cloneObject(displaymode);
-		prehiddendisplaymode = new cloneObject(displaymode);
-
 		currents['hidden']   = [% user.state.comments.totals.hidden  || 0 %];
 		currents['full']     = [% user.state.comments.totals.full    || 0 %];
 		currents['oneline']  = [% user.state.comments.totals.oneline || 0 %];
 		// currents_total = [% (user.state.comments.totals.hidden || 0 ) + (user.state.comments.totals.full || 0) + (user.state.comments.totals.oneline || 0)  %];
-		if (root_comment)
-			currents['full'] += 1;
 
-		updateTotals();
-		enableControls();
+		finishLoading();
 //-->
 	</script>
 [% END %]
