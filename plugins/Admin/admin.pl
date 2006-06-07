@@ -1735,19 +1735,6 @@ sub get_ispell_comments {
 		return "could not pipe to $ispell from $tmptext, $!";
 	}
 
-	# DEBUG
-	my $ispell_debug = "";
-	$ispell_debug .= "is aspell: ";
-	$ispell_debug .=
-		($constants->{ispell_is_really_aspell_with_lang})
-		? "yes: " . $constants->{ispell_is_really_aspell_with_lang} . "\n"
-		: "no\n";
-	$ispell_debug .= "dict template:\n$ok";
-	$ispell_debug .= "dict flag:$tmpok_flag\n";
-	print STDERR "ISPELL DEBUG:\n$ispell_debug";
-	# DEBUG
-	
-	my %misspelled_count = ( );
 	my %misspelled_suggestion = ( );
 	while (defined(my $line = <$ispell_fh>)) {
 		# Grab all ispell's flagged words and put them in the hash
