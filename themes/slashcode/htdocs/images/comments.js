@@ -41,6 +41,7 @@ function updateComment(cid, mode) {
 }
 
 function updateCommentTree(cid, threshold) {
+	setDefaultDisplayMode(cid);
 	var comment = comments[cid];
 
 	// skip the root comment, if it exists; leave it full, but let user collapse
@@ -148,7 +149,20 @@ function findAffected(type, cid, override) {
 	}
 }
 
+function setDefaultDisplayMode(cid) {
+	if (displaymode[cid]) { return }
+
+	var comment = $('comment_' + cid);
+	if (!comment) { return }
+
+	var defmode = comment.className;
+	if (!defmode) { return }
+
+	futuredisplaymode[cid] = prehiddendisplaymode[cid] = displaymode[cid] = defmode;
+}
+
 function updateDisplayMode(cid, mode, newdefault) {
+	setDefaultDisplayMode(cid);
 	futuredisplaymode[cid] = mode;
 	if (newdefault) {
 		prehiddendisplaymode[cid] = mode;
@@ -190,6 +204,7 @@ function setFocusComment(cid, alone) {
 		return false;
 
 	var abscid = Math.abs(cid);
+	setDefaultDisplayMode(abscid);
 	if (viewmodevalue[displaymode[abscid]] == viewmodevalue['full'])
 		cid = '-' + abscid;
 
@@ -408,6 +423,7 @@ function calcTotals() {
 	}
 
 	for (var cid in comments) {
+		setDefaultDisplayMode(cid);
 		currents[displaymode[cid]]++;
 	}
 }
