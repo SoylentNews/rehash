@@ -1195,7 +1195,6 @@ sub displayThread {
 		$class = 'full' if $highlight;
 
 		$user->{state}{comments}{totals}{$class}++;
-		$user->{state}{comments}{status}{$comment->{cid}} = $class;
 
 		my $finish_list = 0;
 
