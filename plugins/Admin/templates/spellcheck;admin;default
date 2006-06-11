@@ -11,8 +11,8 @@ en_US
 __name__
 spellcheck
 __template__
-<table border="0" cellpadding="6" cellspacing="0" class="data" id="spellcheck_[% form_element %]">
-	<tr class="data_head">
+<table border="0" cellpadding="6" cellspacing="0" class="data" style="background: #ccc; width: 150px;" id="spellcheck_[% form_element %]">
+	<tr class="data_head" style="background: #066;">
 		<td>Spellcheck</td>
 		<td></td>
 	</tr>
