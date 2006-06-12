@@ -20,8 +20,7 @@ my $PROGNAME = basename($0);
 
 my %opts;
 # Remember to doublecheck these match usage()!
-usage() unless getopts('hvlu:', \%opts);
-usage() if ($opts{'h'} || !keys %opts);
+usage() if $opts{'h'};
 version() if $opts{'v'};
 $opts{'u'} ||= 'slash';
 
