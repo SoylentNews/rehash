@@ -1727,8 +1727,9 @@ sub get_ispell_comments {
 	my $tmptext = write_to_temp_file($text);
 	my $tmpok = "";
 	$tmpok = write_to_temp_file($ok) if $ok;
+        rename($tmpok, lc($tmpok));
 	my $tmpok_flag = "";
-	$tmpok_flag = " -p $tmpok" if $tmpok;
+	$tmpok_flag = " -p " . lc($tmpok) if $tmpok;
 	
 	if (!open($ispell_fh, "$ispell -a -B -S -W 3$tmpok_flag < $tmptext 2> /dev/null |")) {
 		errorLog("could not pipe to $ispell from $tmptext, $!");
@@ -1750,7 +1751,8 @@ sub get_ispell_comments {
 
 	my %misspelled_words = ();
 	foreach my $mWord (keys %misspelled_suggestion) {
-		$misspelled_words{$mWord} = []; # Inititally set reference empty in case there are no suggestions.
+                # Inititally set reference empty in case there are no suggestions.
+		$misspelled_words{$mWord} = [];
 		foreach my $suggestion (split(/,\s?/, $misspelled_suggestion{$mWord})) {
 			push(@{$misspelled_words{$mWord}}, $suggestion);
 		}
