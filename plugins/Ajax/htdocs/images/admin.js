@@ -159,7 +159,9 @@ function make_spelling_correction(misspelled_word, form_element) {
 			ajax_update(params);
 		}
 		else {
-			var re = new RegExp(misspelled_word, "g");
+                        // Try to weed out HREFs and parameters
+                        var pattern = misspelled_word + "(?!(\.\\w{2,3}\?.*)?\"\>)";
+                        var re = new RegExp(pattern, "g");
 			var correction = document.forms.slashstoryform.elements[selected_key].value;
 			document.forms.slashstoryform.elements[form_element].value =
 				document.forms.slashstoryform.elements[form_element].value.replace(re, correction);
