@@ -1728,8 +1728,9 @@ sub get_ispell_comments {
 	my $tmpok = "";
 	$tmpok = write_to_temp_file($ok) if $ok;
         rename($tmpok, lc($tmpok));
+        $tmpok = lc($tmpok);
 	my $tmpok_flag = "";
-	$tmpok_flag = " -p " . lc($tmpok) if $tmpok;
+	$tmpok_flag = " -p $tmpok" if $tmpok;
 	
 	if (!open($ispell_fh, "$ispell -a -B -S -W 3$tmpok_flag < $tmptext 2> /dev/null |")) {
 		errorLog("could not pipe to $ispell from $tmptext, $!");
