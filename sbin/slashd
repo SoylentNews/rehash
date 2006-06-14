@@ -48,7 +48,21 @@ use vars qw(
 );
 
 my $virtual_user = $ARGV[0];
-createEnvironment($virtual_user);
+eval {
+	createEnvironment($virtual_user);
+};
+if ($@) {
+	if ($@ =~ /DBIx::Password has no information about the virtual user/
+		&& $virtual_user eq 'start') {
+		die <<"EOT";
+$@
+To be more specific, your error is that, per step 7 of the INSTALLATION
+section in the INSTALL file (please reread), you need to start slashd
+with '/etc/init.d/slash start', not '/usr/local/slash/sbin/slashd start'.
+EOT
+	}
+	die $@;
+}
 my $constants = getCurrentStatic();
 my $slashdb = getCurrentDB();
 my $user = getCurrentUser();
