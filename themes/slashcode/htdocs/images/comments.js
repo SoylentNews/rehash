@@ -2,6 +2,7 @@
 
 var comments;
 var root_comments;
+var root_comments_hash = {};
 var authorcomments;
 var behaviors = {
 	'default': { ancestors: 'none', parent: 'none', children: 'none', descendants: 'none', siblings: 'none', sameauthor: 'none' }, 
@@ -50,7 +51,7 @@ function updateCommentTree(cid, threshold) {
 	if (threshold && cid != root_comment) {
 		if (comment['points'] < threshold && (user_is_anon || user_uid != comment['uid'])) {
 			futuredisplaymode[cid] = 'hidden';
-		} else if (comment['points'] < user_highlightthresh) {
+		} else if (comment['points'] < (user_highlightthresh - (root_comments_hash[cid] ? 1 : 0))) {
 			futuredisplaymode[cid] = 'oneline';
 		} else {
 			futuredisplaymode[cid] = 'full';
@@ -259,6 +260,12 @@ function changeThreshold(threshold) {
 	var t_delta = threshold_num + (user_highlightthresh - user_threshold);
 	user_highlightthresh = Math.min(Math.max(t_delta, -1), 5);
 	user_threshold = threshold_num;
+
+//	var params = [];
+//	params['op'] = 'user_save_thresh_prefs';
+//	params['threshold'] = user_threshold;
+//	params['highlightthresh'] = user_highlightthresh;
+//	ajax_update(params, '', '', 'http://use.perl.org/ajax.pl');
 
 	if ($('currentHT'))
 		$('currentHT').innerHTML = user_highlightthresh;
@@ -493,6 +500,10 @@ function finishLoading() {
 
 	if (root_comment)
 		currents['full'] += 1;
+
+	for (var i = 0; i < root_comments.length; i++) {
+		root_comments_hash[ root_comments[i] ] = 1;
+	}
 
 	updateTotals();
 	enableControls();
