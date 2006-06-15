@@ -237,9 +237,9 @@ sub getMostImportantTagboxAffectedIDs {
 }
 
 sub getTagboxTags {
-	my($self, $tbid, $affected_id, $extra_levels) = @_;
+	my($self, $tbid, $affected_id, $extra_levels, $options) = @_;
 	$extra_levels ||= 0;
-	my $type = $self->getTagboxes($tbid, 'affected_type')->{affected_type};
+	my $type = $options->{type} || $self->getTagboxes($tbid, 'affected_type')->{affected_type};
 #print STDERR "getTagboxTags($tbid, $affected_id, $extra_levels), type=$type\n";
 	my $hr_ar = [ ];
 	my $colname = ($type eq 'user') ? 'uid' : 'globjid';
