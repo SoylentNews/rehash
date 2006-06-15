@@ -9575,8 +9575,8 @@ sub getSlashConf {
 	my %conf_fixup_arrays = (
 		# var name			# default array value
 		# --------			# -------------------
-						# See <http://www.iana.org/assignments/uri-schemes>
 		anonymous_coward_uids =>	[ $conf{anonymous_coward_uid} ],
+						# See <http://www.iana.org/assignments/uri-schemes>
 		approved_url_schemes =>		[qw( ftp http gopher mailto news nntp telnet wais https )],
 		approvedtags =>			[qw( b i p br a ol ul li dl dt dd em strong tt blockquote div ecode )],
 		approvedtags_break =>		[qw(     p br   ol ul li dl dt dd              blockquote div       img hr )],
