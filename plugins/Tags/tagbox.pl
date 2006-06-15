@@ -15,7 +15,7 @@ use Data::Dumper;
 
 use vars qw(
 	%task	$me	$task_exit_flag
-	$tags	$tagboxdb	$tagboxes
+	$tagsdb	$tagboxdb	$tagboxes
 );
 
 $task{$me}{timespec} = '* * * * *';
@@ -23,7 +23,7 @@ $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
 
-	$tags = getObject('Slash::Tags');
+	$tagsdb = getObject('Slash::Tags');
 	$tagboxdb = getObject('Slash::Tagbox');
 	$tagboxes = $tagboxdb->getTagboxes();
 
@@ -79,13 +79,13 @@ sub update_feederlog {
 		$min_max_tdid  = $tagbox->{last_tdid_logged}  if $tagbox->{last_tdid_logged}  < $min_max_tdid;
 	}
 	# Get the user change data.
-	my $userchange_ar = $tags->sqlSelectAllHashrefArray(
+	my $userchange_ar = $tagsdb->sqlSelectAllHashrefArray(
 		'*', 'tags_userchange',
 		"tuid > $min_max_tuid",
 		'ORDER BY tuid');
 	my $max_tuid = @$userchange_ar ? $userchange_ar->[-1]{tuid} : undef;
 	# Get the deactivated tags data.
-	my $deactivated_ar = $tags->sqlSelectAllHashrefArray(
+	my $deactivated_ar = $tagsdb->sqlSelectAllHashrefArray(
 		'*', 'tags_deactivated',
 		"tdid > $min_max_tdid",
 		'ORDER BY tdid');
@@ -99,7 +99,7 @@ sub update_feederlog {
 			. ')';
 	}
 	# Get the tags data.
-	my $tags_ar = $tags->sqlSelectAllHashrefArray(
+	my $tags_ar = $tagsdb->sqlSelectAllHashrefArray(
 		'*', 'tags',
 		"tagid > $min_max_tagid $deactivated_tagids_clause",
 		'ORDER BY tagid');
@@ -144,15 +144,25 @@ sub update_feederlog {
 		# (this one's a little fancy because feed_deactivatedtags
 		# wants the rows from the tags table)
 		if (@$deactivated_ar) {
+			# Make a list of all the tagid's deactivated since the
+			# last time this tagbox logged.
 			my $deactivated_tagids_this_tagbox_hr = {
-				map { ( $_->{tagid}, 1 ) }
+				map { ( $_->{tagid}, $_->{tdid} ) }
 				grep { $_->{tdid} > $tagbox->{last_tdid_logged} }
 				@$deactivated_ar
 			};
+			# From the main tag list, grep out only the tags that
+			# were deactivated since the last time this tagbox logged.
 			my $deactivated_tags_this_tagbox_ar = [
 				grep { exists $deactivated_tagids_this_tagbox_hr->{ $_->{tagid} } }
 				@$tags_ar
 			];
+			# Add the tdid field to each tag in that list (the tagbox's
+			# feed_deactivatedtags() method will want to pass it along
+			# to the $feeder_ar data it returns).
+			for my $tag_hr (@$deactivated_tags_this_tagbox_ar) {
+				$tag_hr->{tdid} = $deactivated_tagids_this_tagbox_hr->{ $tag_hr->{tagid} };
+			}
 			$feeder_ar = $tagbox->{object}->
 				feed_deactivatedtags($deactivated_tags_this_tagbox_ar);
 			# XXX optimize

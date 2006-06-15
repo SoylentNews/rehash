@@ -37,7 +37,8 @@ sub new {
 
 ########################################################
 
-# createTag takes a hashref with four sets of named arguments.
+# createTag's first argument is a hashref with three sets of
+# named arguments.
 # The first set is:
 #       uid             User id creating the tag
 #                       (optional, defaults to current user)
@@ -51,18 +52,21 @@ sub new {
 # or
 #       globjid         Global object ID of the object being tagged
 #
-# At present, no other named arguments are permitted.
+# At present, no other named arguments are permitted in
+# createTag's first argument.
 #
 # This method takes care of creating the tagname and/or globj, if they
 # do not already exists, so that the tag may connect them.
 #
 # By default, this does not allow the same user to apply the same
-# tagname to the same global object twice.  Pass the option hashref
-# field 'dupe_ok' with a true value to ignore this check.  Nor is it
-# allowed for the same user to tag the same object with both a tag
-# and its opposite, but 'opposite_ok' ignores that check.  At the
-# moment we can't think of a good reason why one would ever want to
-# ignore those checks but the options are there regardless.
+# tagname to the same global object twice.  createTag's second
+# argument is an option hashref.  Pass the field 'dupe_ok' with a
+# true value to ignore this check.  Nor is it allowed for the same
+# user to tag the same object with both a tag and its opposite, but
+# 'opposite_ok' ignores that check.  At the moment we can't think
+# of a good reason why one would ever want to ignore those checks
+# but the options are there regardless.  Is this good design?
+# Probably not.
 
 sub _setuptag {
 	my($self, $hr) = @_;
@@ -411,6 +415,11 @@ sub getTagDataFromId {
 sub getTagsByNameAndIdArrayref {
 	my($self, $name, $target_id, $options) = @_;
 	my $globjid = $self->getGlobjidFromTargetIfExists($name, $target_id);
+	return $self->getTagsByGlobjid($globjid, $options);
+}
+
+sub getTagsByGlobjid {
+	my($self, $globjid, $options) = @_;
 	return [ ] unless $globjid;
 
 	my $uid_where = '';
@@ -424,12 +433,16 @@ sub getTagsByNameAndIdArrayref {
 
 	my $days_where = $options && $options->{days_back}
 		? " AND created_at >= DATE_SUB(NOW(), INTERVAL $options->{days_back} DAY)"
-		: "";
+		: '';
+
+	my $tagnameid_where = $options && $options->{tagnameid}
+		? " AND tagnameid = $options->{tagnameid}"
+		: '';
 
 	my $ar = $self->sqlSelectAllHashrefArray(
 		'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
 		'tags',
-		"globjid=$globjid $inactivated_where $uid_where $days_where",
+		"globjid=$globjid $inactivated_where $uid_where $days_where $tagnameid_where",
 		'ORDER BY tagid');
 
 	# Now add an extra field to every element returned:  the
@@ -492,6 +505,7 @@ sub getAllTagsFromUser {
 	my $orderby = $options->{orderby} || "tagid";
 	my $limit   = $options->{limit} ? " LIMIT $options->{limit} " : "";
 	my $orderdir = uc($options->{orderdir}) eq "DESC" ? "DESC" : "ASC";
+	my $inact_clause = $options->{include_inactive} ? '' : ' AND inactivated IS NULL';
 
 	my($table_extra, $where_extra) = ("","");
 
@@ -515,7 +529,7 @@ sub getAllTagsFromUser {
 	my $ar = $self->sqlSelectAllHashrefArray(
 		'tags.*',
 		"tags $table_extra",
-		"tags.uid = $uid_q AND inactivated IS NULL $where_extra",
+		"tags.uid = $uid_q $inact_clause $where_extra",
 		"ORDER BY $orderby $orderdir $limit");
 	return [ ] unless $ar && @$ar;
 	$self->addTagnamesToHashrefArray($ar);
