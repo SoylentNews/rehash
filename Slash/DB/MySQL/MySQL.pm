@@ -7963,7 +7963,7 @@ sub getCommentTextCached {
 			$comment_text->{$cid} = noFollow($comment_text->{$cid});
 		}
 
-		if ($mcd && $opt->{cid} ne $cid) {
+		if ($mcd && $opt->{cid} && $opt->{cid} ne $cid) {
 			my $exptime = $constants->{memcached_exptime_comtext};
 			$exptime = 86400 if !defined($exptime);
 			my $retval = $mcd->set("$mcdkey$cid", $comment_text->{$cid}, $exptime);
@@ -13478,15 +13478,17 @@ sub addGlobjTargetsToHashrefArray {
 
 # I'm reusing the word "essentials" from the method getStoriesEssentials
 # because this is a similar idea.  We want to get a standard set of data
-# about a list of objects.  But we recognize that there is something not
-# quite trivial going on behind the scenes (in gSE, lots of options and
+# about a list of objects.  But we recognize that there is something
+# nontrivial going on behind the scenes (in gSE, lots of options and
 # optimization; in aGETHA, conditional selects).  And that the standard
-# set of data is based on general needs and may evolve in future.
+# set of data is based on general needs and may evolve in future.  And
+# that this method kind of straddles the boundary between system logic
+# and application logic.
 #
 # Currently, the standard set of data which is added to each hashref is:
 # * title = Text string which best serves as the title for the object.
 #           This may contain raw data entered by an admin... or by a
-#           user or an untrusted URL, so it must be stripped for output.
+#           user or an untrusted URL, so it MUST BE STRIPPED for output.
 # * url = URL to view the object
 #           This is guaranteed to be a valid URI.
 # * created_at = Timestamp when the object was created
