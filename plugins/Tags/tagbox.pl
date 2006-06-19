@@ -130,8 +130,10 @@ sub update_feederlog {
 				grep { $_->{tagid} > $tagbox->{last_tagid_logged} }
 				@$tags_ar
 			];
+			$feeder_ar = undef;
 			$feeder_ar = $tagbox->{object}->
-				feed_newtags($tags_this_tagbox_ar);
+				feed_newtags($tags_this_tagbox_ar)
+				if @$tags_this_tagbox_ar;
 			# XXX optimize by consolidating here: sum importances, max tagids
 			insert_feederlog($tagbox, $feeder_ar) if $feeder_ar;
 			# XXX The previous insert and this update should be wrapped
@@ -163,8 +165,10 @@ sub update_feederlog {
 			for my $tag_hr (@$deactivated_tags_this_tagbox_ar) {
 				$tag_hr->{tdid} = $deactivated_tagids_this_tagbox_hr->{ $tag_hr->{tagid} };
 			}
+			$feeder_ar = undef;
 			$feeder_ar = $tagbox->{object}->
-				feed_deactivatedtags($deactivated_tags_this_tagbox_ar);
+				feed_deactivatedtags($deactivated_tags_this_tagbox_ar)
+				if @$deactivated_tags_this_tagbox_ar;
 			# XXX optimize
 			insert_feederlog($tagbox, $feeder_ar) if $feeder_ar;
 			# XXX The previous insert and this update should be wrapped
@@ -180,8 +184,10 @@ sub update_feederlog {
 				grep { $_->{tuid} > $tagbox->{last_tuid_logged} }
 				@$userchange_ar
 			];
+			$feeder_ar = undef;
 			$feeder_ar = $tagbox->{object}->
-				feed_userchanges($userchanges_this_tagbox_ar);
+				feed_userchanges($userchanges_this_tagbox_ar)
+				if @$userchanges_this_tagbox_ar;
 			# XXX optimize
 			insert_feederlog($tagbox, $feeder_ar) if $feeder_ar;
 			# XXX The previous insert and this update should be wrapped
