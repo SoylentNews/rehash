@@ -365,7 +365,7 @@ sub setTagname {
 }
 
 # Given a tagnameid, get its name, e.g. turn '17241' into
-# { tagname => 'omglol' }.
+# { tagname => 'omglol', tag_clout => '0.5' }.
 # If no such tag ID exists, return undef.
 
 sub getTagDataFromId {
@@ -409,8 +409,19 @@ sub getTagDataFromId {
 }
 
 # Given a name and id, return the arrayref of all tags on that
-# global object.  If the option uid is passed in, the returned
-# tags will also be limited to those created by that uid.
+# global object.  Options change which tags are returned:
+#
+# uid:			only tags created by that uid
+# include_inactive:	inactivated tags will also be returned
+# days_back:		only tags created in the past n days
+# tagnameid:		only tags matching tagnameid as well as globjid
+#
+# The columns in the tags table are returned, plus two bonus
+# fields: created_at_ut, the unix timestamp of the created_at
+# column, and tagname, the text string for the tagnameid column.
+#
+# Note that tag_params are not returned:  see e.g.
+# addCloutsToTagArrayref().
 
 sub getTagsByNameAndIdArrayref {
 	my($self, $name, $target_id, $options) = @_;
@@ -453,9 +464,21 @@ sub getTagsByGlobjid {
 
 # Given an arrayref of hashrefs representing tags, such as that
 # returned by getTagsByNameAndIdArrayref, add three fields to each
-# hashref:  tag_clout, tagname_clout, user_clout.
+# hashref:  tag_clout, tagname_clout, user_clout.  Values default
+# to 1.  "Rounded" means round to 3 decimal places.
 
 sub addRoundedCloutsToTagArrayref {
+	my($self, $ar) = @_;
+	$self->addCloutsToTagArrayref($ar);
+	for my $tag_hr (@$ar) {
+		$tag_hr->{tag_clout}     = sprintf("%.3g", $tag_hr->{tag_clout});
+		$tag_hr->{tagname_clout} = sprintf("%.3g", $tag_hr->{tagname_clout});
+		$tag_hr->{user_clout}    = sprintf("%.3g", $tag_hr->{user_clout});
+		$tag_hr->{total_clout}   = sprintf("%.3g", $tag_hr->{total_clout});
+	}
+}
+
+sub addCloutsToTagArrayref {
 	my($self, $ar) = @_;
 
 	return if !$ar || !@$ar;
@@ -479,19 +502,28 @@ sub addRoundedCloutsToTagArrayref {
 	my %uid = map { ($_->{uid}, 1) } @$ar;
 	my @uids = sort { $a <=> $b } keys %uid;
 	my $uids_in_str = join(',', @uids);
-	my $uid_clout_hr = $self->sqlSelectAllKeyValue(
-		'uid, tag_clout', 'users_info',
-		"uid IN ($uids_in_str)");
+	my $uid_info_hr = $self->sqlSelectAllHashref(
+		'uid',
+		'users.uid AS uid, seclev, karma, tag_clout',
+		'users, users_info',
+		"users.uid=users_info.uid AND users.uid IN ($uids_in_str)");
+	my $uid_clout_hr = { };
+	# XXX hardcoded formula, this should be parameterized at least with vars
+	for my $uid (keys %$uid_info_hr) {
+		$uid_clout_hr->{$uid} = $uid_info_hr->{$uid}{karma} >= -3 ? log($uid_info_hr->{$uid}{karma}+10) : 0;
+		$uid_clout_hr->{$uid} += 5 if $uid_info_hr->{$uid}{seclev} > 1;
+		$uid_clout_hr->{$uid} *= $uid_info_hr->{$uid}{tag_clout};
+	}
 
 	for my $tag_hr (@$ar) {
 		$tag_hr->{tag_clout}     = defined($tag_clout_hr    ->{$tag_hr->{tagid}})
-				? sprintf("%.3g",  $tag_clout_hr    ->{$tag_hr->{tagid}})
-				: 1;
+						 ? $tag_clout_hr    ->{$tag_hr->{tagid}}
+						 : 1;
 		$tag_hr->{tagname_clout} = defined($tagname_clout_hr->{$tag_hr->{tagnameid}})
-				? sprintf("%.3g",  $tagname_clout_hr->{$tag_hr->{tagnameid}})
-				: 1;
-		$tag_hr->{user_clout} =
-				  sprintf("%.3g",  $uid_clout_hr    ->{$tag_hr->{uid}});
+						 ? $tagname_clout_hr->{$tag_hr->{tagnameid}}
+						 : 1;
+		$tag_hr->{user_clout}    =	   $uid_clout_hr    ->{$tag_hr->{uid}};
+		$tag_hr->{total_clout} = $tag_hr->{tag_clout} * $tag_hr->{tagname_clout} * $tag_hr->{user_clout};
 	}
 }
 
