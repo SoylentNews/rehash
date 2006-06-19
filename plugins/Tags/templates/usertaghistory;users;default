@@ -14,7 +14,7 @@ __template__
 [% IF tagshist.size %]
 	<p></p>
 	[% PROCESS titlebar title=title %]
-	<table class="data">
+	<table class="data" width="100%">
 		<tr class="data_head"><th>Tag</th><th>Object</th><th>Time</th></tr>
 		[% toggle = 0 %]
 		[% FOREACH tag=tagshist %]
