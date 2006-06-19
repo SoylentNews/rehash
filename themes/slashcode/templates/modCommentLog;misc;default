@@ -240,7 +240,7 @@ END;
 
 IF num_modifiers > 0 %]
 
-<table align="center" border="0" cellpadding="2" cellspacing="0" width="300">
+<table align="center" border="0" cellpadding="2" cellspacing="0" width="300" class="data" id="mod_summary">
 
 	<tr class="data_head">
 		<th align="left">Starting Score:&nbsp;&nbsp;&nbsp;</th>
