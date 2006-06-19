@@ -65,9 +65,15 @@ unless (DBIx::Password::checkVirtualUser($opts{'u'})) {
 
 	$install->installTagboxes(\@answers, 0, 1);
 
-	print "\n\nInstalled.\n\n";
-	print "Please check to see if there are any README files for your site's\n";
-	print "tagboxes.  If so, now's a good time to read them.\n\n";
+	print <<EOT;
+
+
+Installed.
+
+Please check to see if there are any README files for your site's
+tagboxes that you haven't already read.
+
+EOT
 }
 
 sub usage {
