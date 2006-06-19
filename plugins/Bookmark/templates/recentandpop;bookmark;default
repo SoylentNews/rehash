@@ -20,9 +20,11 @@ __template__
 END %]
 
 [% PROCESS titlebar title = title %]
-[ [% IF type != "recent" %]<a href="[% gSkin.rootdir %]/bookmark.pl/?op=showbookmarks&recent=1">[% END %]Recent[% IF type !="recent" %]</a>[% END %] |
-[% IF type != "popular" %]<a href="[% gSkin.rootdir %]/bookmark.pl/?op=showbookmarks&popular=1">[% END %]Popular[% IF type !="popular" %]</a>[% END %] ]<br><br>
+<ul class="menu">
+<li>[% IF type != "recent" %]<a href="[% gSkin.rootdir %]/bookmark.pl/?op=showbookmarks&recent=1">[% END %]Recent[% IF type !="recent" %]</a>[% END %]</li>
+<li>[% IF type != "popular" %]<a href="[% gSkin.rootdir %]/bookmark.pl/?op=showbookmarks&popular=1">[% END %]Popular[% IF type !="popular" %]</a>[% END %]</li>
 [% FOREACH bookmark = bookmarks %]
+</ul>
 [% thetitle = bookmark.validatedtitle || bookmark.initialtitle %]
 <a href="[% bookmark.url %]">[% thetitle | strip_html %]</a> [% IF !user.is_anon %]<span class="bookmarklinks">[&nbsp;<a href="[% gSkin.rootdir %]/bookmark.pl?url=[% bookmark.url | strip_paramattr %]&amp;tags=[% bookmark.tags_top | strip_paramattr %]&amp;title=[% thetitle | strip_paramattr %]">bookmark</a>&nbsp;|&nbsp;<a href="[% gSkin.rootdir %]/bookmark.pl?url=[% bookmark.url | strip_paramattr %]&amp;tags=[% bookmark.tags_top | strip_paramattr %]&amp;title=[% thetitle | strip_paramattr %]&amp;redirect=submit">submit</a>&nbsp;|&nbsp;<a href="[% gSkin.rootdir %]/bookmark.pl?url=[% bookmark.url | strip_paramattr %]&amp;tags=[% bookmark.tags_top | strip_paramattr %]&amp;title=[% thetitle | strip_paramattr %]&amp;redirect=journal">journal</a>&nbsp;]</span>
 
