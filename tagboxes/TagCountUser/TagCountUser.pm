@@ -60,7 +60,11 @@ sub new {
 
 sub feed_newtags {
 	my($self, $tags_ar) = @_;
-print STDERR "Slash::Tagbox::TagCountUser->feed_newtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) . "'\n";
+if (scalar(@$tags_ar) < 9) {
+print STDERR "Slash::Tagbox::TagCountUser->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'\n";
+} else {
+print STDERR "Slash::Tagbox::TagCountUser->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid} . "\n";
+}
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
 		push @$ret_ar, {
@@ -74,13 +78,21 @@ print STDERR "Slash::Tagbox::TagCountUser->feed_newtags called: tags_ar='" . joi
 
 sub feed_deactivatedtags {
 	my($self, $tags_ar) = @_;
-print STDERR "Slash::Tagbox::TagCountUser->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'\n";
+if (scalar(@$tags_ar) < 9) {
+print STDERR "Slash::Tagbox::TagCountUser->feed_deactivatedtags called for tags '" . join(' ', map { $_->{tdid} } @$tags_ar) . "'\n";
+} else {
+print STDERR "Slash::Tagbox::TagCountUser->feed_deactivatedtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tdid} . " ... " . $tags_ar->[-1]{tdid} . "\n";
+}
 	return $self->feed_newtags($tags_ar);
 }
 
 sub feed_userchanges {
 	my($self, $users_ar) = @_;
-print STDERR "Slash::Tagbox::TagCountUser->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'\n";
+if (scalar(@$users_ar) < 9) {
+print STDERR "Slash::Tagbox::TagCountUser->feed_userchanges called for changes '" . join(' ', map { $_->{tuid} } @$users_ar) . "'\n";
+} else {
+print STDERR "Slash::Tagbox::TagCountUser->feed_userchanges called for " . scalar(@$users_ar) . " changes " . $users_ar->[0]{tuid} . " ... " . $users_ar->[-1]{tuid} . "\n";
+}
 	return [ ];
 }
 
