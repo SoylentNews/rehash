@@ -54,7 +54,7 @@ __template__
 					Check words below before submitting or previewing to mark words as common and not for use in determining similar stories.
 				</div>
 				<!-- need to set this up a bit better -->
-				<table border="0" cellpadding="3" cellspacing="0" class="data">
+				<table border="0" cellpadding="3" cellspacing="0" class="data" id="simstories">
 				<tr class="data_head">
 					<td colspan="3"><b>Similar & Related Stories</b></td><td>Related</td><td>Ignore</td>
 				</tr>
