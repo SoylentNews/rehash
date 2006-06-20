@@ -31,9 +31,9 @@ __template__
 
 <a name="acomments"></a>
 [% IF discussion2 %]
-<form method="GET" action="[% gSkin.rootdir %]/comments.pl" style="display: inline;">
 <div class="loki" id="gods">
 <div class="commentwrap" title="The Fine Print: [% fineprint %]">
+<form method="GET" action="[% gSkin.rootdir %]/comments.pl" style="display: inline;">
 	<div class="generaltitle">
 	<div class="title">
 		<h3>
@@ -59,11 +59,11 @@ __template__
 	<input type="hidden" name="sid" value="[% sid %]">
 	[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
 	[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
-	[% IF form.startat %]<input type="hidden" name="startat" value="[% form.startat %]">[% END %]
 	<input type="hidden" name="op" value="setDiscussion2">
 
-
+	[% IF user.discussion2 == "slashdot" %]
 	<input type="checkbox" name="discussion2_slashdot" value="1" onchange="this.form.submit();" [% constants.markup_checked_attribute IF user.discussion2 == 'slashdot' %]> <a href="http://slashdot.org/faq/com-mod.shtml#cm120" title="I am willing to help test Slashdot's New Discussion System.">Beta</a>
+	[% END %]
 
 	 &nbsp; <span title="Close this window" onclick="document.getElementById('gods').className='loki';" class="close">x</span>
 
@@ -71,8 +71,9 @@ __template__
 		</h3>
 	</div>
 </div>
+</form>
 	<div class="commentBoxForm" id="commentControlBox">
-
+		<form action="//slashdot.org/comments.pl">
 		<fieldset>
 		<legend>Display Options</legend>
 	
@@ -96,12 +97,17 @@ __template__
 		<input type="submit" name="op" value="Change" class="button">
 		</noscript>
 
+		<input type="hidden" name="sid" value="[% sid %]">
+		[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
+		[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
+		[% IF form.startat %]<input type="hidden" name="startat" value="[% form.startat %]">[% END %]
+
 		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
 			<input type="submit" name="op" value="Reply" class="button">
 		[% END %]
 
 		</fieldset>
-		
+		</form>
 	</div>
 	</div>
 </div>
@@ -122,7 +128,7 @@ __template__
 	</div>
 	</form>
 </div>
-[% END; IF (user.acl.discussion2_uofm_signup && !user.acl.discussion2_uofm && (user.is_admin || !user.is_subscriber)) && constants.uofm_key && constants.uofm_iv %]
+[% END; IF (user.acl.discussion2_uofm_signup && !user.acl.discussion2_uofm && (user.is_admin || !user.is_subscriber)) && constants.uofm_key && constants.uofm_iv && env.http_user_agent.search('Firefox/1\.5') %]
 <div class="commentBox" style="font-size: 120%">
 <a href="[% Slash.tempUofmLinkGenerate() %]">Want to test an experimental interface for comments?</a>
 </div>

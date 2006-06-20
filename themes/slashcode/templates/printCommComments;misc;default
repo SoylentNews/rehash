@@ -47,7 +47,7 @@ __template__
 [% END %]
 
 [% IF cid %]
-	<ul id="commentlisting" class="[% user.mode %]"[% IF discussion2 %] onmouseover="document.getElementById('gods').className='thor';"[% END %]>
+	<ul id="commentlisting" class="[% user.mode %]"[% IF discussion2 %] onmouseover="floatButtons();"[% END %]>
 	[% Slash.dispComment(comment) %]
 	<div class="comment_footer">
 	[% IF previous %]
@@ -78,7 +78,7 @@ __template__
 	[% END %]
 	[% thread = Slash.displayThread(sid, pid, lvl, comments) %]
 	[% IF thread %]
-		[% UNLESS cid %]<ul id="commentlisting"[% IF discussion2 %] onmouseover="document.getElementById('gods').className='thor';"[% END %]>[% END %]
+		[% UNLESS cid %]<ul id="commentlisting"[% IF discussion2 %] onmouseover="floatButtons();"[% END %]>[% END %]
 			[% thread %]
 			<li id="roothiddens" class="hide"></li>
 		[% UNLESS cid %]</ul>[% END %]

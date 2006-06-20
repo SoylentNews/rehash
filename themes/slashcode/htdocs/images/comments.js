@@ -153,7 +153,7 @@ function findAffected(type, cid, override) {
 function setDefaultDisplayMode(cid) {
 	if (displaymode[cid]) { return }
 
-	var comment = $('comment_' + cid);
+	var comment = fetchEl('comment_' + cid);
 	if (!comment) { return }
 
 	var defmode = comment.className;
@@ -507,4 +507,8 @@ function finishLoading() {
 
 	updateTotals();
 	enableControls();
+}
+
+function floatButtons () {
+	$('gods').className='thor';
 }
