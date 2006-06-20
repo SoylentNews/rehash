@@ -8,7 +8,6 @@ package Slash::Apache::Log;
 use strict;
 use Slash::Utility;
 use Apache::Constants qw(:common);
-use File::Spec::Functions; # for clampe_stats, remove when done
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -56,15 +55,6 @@ sub UserLog {
 
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
-
-	# stats for clampe
-        if ($constants->{clampe_stats} && $ENV{SCRIPT_NAME} && $user->{currentPage} =~ /users|index/) {
-		my $form = getCurrentForm();
-                my $fname = catfile('clampe', $user->{ipid});
-		my $change = $form->{op} eq 'Change' ? 1 : 0;
-                my $comlog = "URL: $ENV{REQUEST_URI} Page: $user->{currentPage} UID: $user->{uid} IPID: $user->{ipid} Dispmode: $user->{mode} Thresh: $user->{threshold} Sort: $user->{commentsort} Changes: $change";
-                doClampeLog($fname, [$comlog]);
-        }
 
 	return if !$user || !$user->{uid} || $user->{is_anon};
 
