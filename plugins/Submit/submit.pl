@@ -265,6 +265,18 @@ sub previewForm {
 		}
 	}
 
+        foreach my $memory (@$sub_memory) {
+                my $match = $memory->{submatch};
+
+                if ($sub->{email} =~ m/$match/i ||
+                    $sub->{name}  =~ m/$match/i ||
+                    $sub->{subj}  =~ m/$match/i ||
+                    $sub->{ipid}  =~ m/$match/i ||
+                    $sub->{story} =~ m/$match/i) {
+                        push @$subnotes_ref, $memory;
+                }
+        }
+
 	slashDisplay('previewForm', {
 		submission			=> $sub,
 		submitter			=> $reader->getUser($sub->{uid}),
@@ -281,6 +293,7 @@ sub previewForm {
 		accepted_from_uid 	  	=> $accepted_from_uid,
 		accepted_from_emaildomain 	=> $accepted_from_emaildomain,
 		note_options			=> getSubmissionSelections($constants),
+		subnotes_ref			=> $subnotes_ref,
 	});
 }
 
