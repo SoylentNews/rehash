@@ -124,6 +124,7 @@ __template__
 	</table>
 	</form>
 
+	<br>
         <form action="//[% gSkin.rootdir %]/submit.pl" method="post">
         <table class="data" width="100%">
         <tr class="data_head">
