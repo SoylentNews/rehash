@@ -190,6 +190,7 @@ __template__
 		<label>Intro Copy</label>
 	<textarea name="introtext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="VIRTUAL"
 >[% subtext | strip_literal %]</textarea><br>
+		[% IF form.fromconsole %]</div>[% END %]
 		<input type="submit" name="op" value="preview"><br>
 [% IF similar_stories.size > 0 %]
 	<table border="0" cellpadding="2" cellspacing="0">
