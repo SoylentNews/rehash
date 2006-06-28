@@ -760,6 +760,8 @@ CREATE TABLE related_stories (
 	rel_sid varchar(16) NOT NULL default '',
 	title varchar(255) default '',
 	url varchar(255) default '',
+	cid mediumint(8) unsigned NOT NULL default '0',
+	ordernum smallint unsigned NOT NULL default '0',
 	PRIMARY KEY (id),
 	KEY stoid (stoid)
 ) TYPE=InnoDB;

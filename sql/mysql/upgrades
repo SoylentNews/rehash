@@ -3643,6 +3643,8 @@ CREATE TABLE related_stories (
         rel_sid varchar(16) NOT NULL default '',
         title varchar(255) default '',
         url varchar(255) default '',
+	cid mediumint(8) unsigned NOT NULl default '0',
+	ordernum smallint unsigned NOT NULLdefault '0',
         PRIMARY KEY (id),
         KEY stoid (stoid)
 ) TYPE=InnoDB;
@@ -3942,4 +3944,4 @@ UPDATE vars SET value = 'T_2_5_0_116' WHERE name = 'cvs_tag_currentcode';
 
 # 2006-06-20
 UPDATE vars SET value = 'T_2_5_0_117' WHERE name = 'cvs_tag_currentcode';
-
+ALTER TABLE related_stories ADD COLUMN cid mediumint(8) unsigned NOT NULL default '0', ADD COLUMN ordernum smallint unsigned NOT NULL default '0';
