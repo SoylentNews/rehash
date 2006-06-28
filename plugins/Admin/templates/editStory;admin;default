@@ -104,6 +104,16 @@ __template__
 			</tr>
 		
 		[% END %]
+		[% IF storyref.related_cids_hr.keys.size > 0 %]<tr class="data_hl1"><td colspan="5">[% PROCESS horiz_rule %]</td></tr>[% END %]
+		[% FOREACH cid = storyref.related_cids_hr.keys %]
+			<tr class="data_hl1">
+			<td></td>
+			<td><a href="[% gSkin.rootdir %]"/comments.pl?sid=[% storyref.related_cids_hr.$cid.sid %]&amp;cid=[% cid %]">[% storyref.related_cids_hr.$cid.subject %]</a></td>
+			<td></td>
+			<td><input type="checkbox" name="related_comment" value="[% cid | strip_attribute %]" [% constants.markup_checked_attribute %]></td>
+			<td></td>
+			</tr>
+		[% END %]
 		[% IF storyref.related_urls_hr.keys.size > 0 %]<tr class="data_hl1"><td colspan="5">[% PROCESS horiz_rule %]</td></tr>[% END %]
 		[% FOREACH rel_url = storyref.related_urls_hr.keys %]
 		<tr class="data_hl1">
@@ -114,11 +124,9 @@ __template__
 			<td></td>
 		</tr>
 		[% END %]
-	<tr class="data_hl1"><td colspan="3"><textarea rows="2" cols="40" wrap="off" name="add_related">[% add_related_text | strip_literal %]</textarea></td><td colspan="2">
-	include sid or
-	title URL
-	one per line!
-	</td></tr>
+	<tr class="data_hl1"><td colspan="5"><textarea rows="2" wrap="off" name="add_related">[% add_related_text | strip_literal %]</textarea></td>
+	</tr>
+	<tr><td colspan="5"> include sid or title URL one per line!</td></tr>
 </table>
 
 
