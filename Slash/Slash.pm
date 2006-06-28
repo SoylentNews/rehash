@@ -1623,6 +1623,12 @@ sub displayRelatedStories {
 			next if !$viewable;
 			my $related_story = $reader->getStory($rel->{rel_sid});
 			$return .= displayStory($related_story->{stoid}, 0, { dispmode => "brief", getintro => 1, expandable => 1 });
+		} elsif ($rel->{cid}) {
+			my $comment = $reader->getComment($rel->{cid});
+			my $discussion = $reader->getDiscussion($comment->{sid});
+			my $comment_user = $reader->getUser($comment->{uid});
+			my $is_anon = isAnon($comment->{uid});
+			$return .= slashDisplay("comment_related", { comment => $comment, comment_user => $comment_user, discussion => $discussion, is_anon => $is_anon }, { Return => 1});
 		} elsif ($rel->{title}) {
 			$return .= slashDisplay("url_related", { title => $rel->{title}, url => $rel->{url} }, { Return => 1 });
 		}
