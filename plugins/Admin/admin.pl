@@ -1166,9 +1166,10 @@ sub editStory {
 		$storyref->{dept} =~ s/^-//;
 		$storyref->{dept} =~ s/-$//;
 
-		my($related_sids_hr, $related_urls_hr) = extractRelatedStoriesFromForm($form);
+		my($related_sids_hr, $related_urls_hr, $related_cids_hr) = extractRelatedStoriesFromForm($form);
 		$storyref->{related_sids_hr} = $related_sids_hr;
 		$storyref->{related_urls_hr} = $related_urls_hr;
+		$storyref->{related_cids_hr} = $related_cids_hr;
 		my($chosen_hr) = extractChosenFromForm($form);
 		$storyref->{topics_chosen} = $chosen_hr;
 		my $rendered_hr = $slashdb->renderTopics($chosen_hr);
@@ -1218,18 +1219,22 @@ sub editStory {
 		$user->{currentSkin} = $storyref->{skin}{name};
 		
 		my $related = $slashdb->getRelatedStoriesForStoid($storyref->{stoid});
-		my(@related_sids);
+		my(@related_sids, @related_cids);
 		
 		foreach my $related (@$related) {
 			if ($related->{rel_sid}) {
 				push @related_sids, $related->{rel_sid} if $related->{rel_sid};
+			} elsif ($related->{cid}) {
+				push @related_cids, $related->{cid};
 			} elsif ($related->{url}) {
 				$storyref->{related_urls_hr}{$related->{url}} = $related->{title};
 			}
 		}
 
 		my %related_sids = map { $_ => $slashdb->getStory($_) } @related_sids; 
+		my %related_cids = map { $_ => $slashdb->getComment($_) } @related_cids;
 		$storyref->{related_sids_hr} = \%related_sids;
+		$storyref->{related_cids_hr} = \%related_cids;
 
 		$sid = $storyref->{sid};
 		$storyref->{is_dirty} = 1;
@@ -1430,6 +1435,9 @@ sub editStory {
 	}
 
 	my $add_related_text;
+	foreach (keys %{$storyref->{related_cids_hr}}) {
+#		$add_related_text .= "cid=$_\n";
+	}
 	foreach (keys %{$storyref->{related_urls_hr}}) {
 		$add_related_text .= "$storyref->{related_urls_hr}{$_} $_\n";
 	}
@@ -1486,11 +1494,19 @@ sub extractRelatedStoriesFromForm {
 	my %related_urls;
 
 	my %related_urls_hr;
-	my $related;
+	my %related_cids_hr;
+	
+	my($related, $related_cids);
 	if (ref($form->{_multi}{related_story}) eq 'ARRAY') {		
 		$related = $form->{_multi}{related_story};
 	} elsif ($form->{related_story}) {
 		$related = [ $form->{related_story} ];
+	}
+	
+	if (ref($form->{_multi}{related_comment}) eq 'ARRAY') {		
+		$related_cids = $form->{_multi}{related_comment};
+	} elsif ($form->{related_comment}) {
+		$related_cids = [ $form->{related_comment} ];
 	}
 
 # XXX this is broken because regexSid() matches things other than sid
@@ -1498,14 +1514,18 @@ sub extractRelatedStoriesFromForm {
 #	my $regexsid = regexSid();
 
 	my $match = qr/(?:$constants->{basedomain})?\S*(\d\d\/\d\d\/\d\d\/\d+)/;
+	my $match_cid = qr/(?:$constants->{basedomain})?\S*cid=(\d+)/;
 
 	if ($form->{add_related}) {
 		my @add_related = split('\n', $form->{add_related});
 		foreach (@add_related) {
 			s/^\s+|\s+$//g;
 			next if !$_;
-			# XXX should use regexSid()
-			if ($_ =~ $match) {
+			
+			if ($_ =~ /cid=(\d+)/) {
+				push @$related_cids, $1;
+			} elsif ($_ =~ $match) {
+				# XXX should use regexSid()
 				push @$related, $1;
 			} else {
 				my($title, $url) = $_ =~ /^(.*)\s+(\S+)$/;
@@ -1518,11 +1538,14 @@ sub extractRelatedStoriesFromForm {
 	# Extract sids from urls in introtext and bodytext
 	foreach ($form->{introtext}, $form->{bodytext}) {
 		push @$related, $1 while /$match/g;
+		push @$related_cids, $1 while /$match_cid/g;
 	}
 
 	# should probably filter and check that they're actually sids, etc...
 	my %related_sids = map { $_ => $slashdb->getStory($_) } grep { $_ } @$related;
-	return(\%related_sids, \%related_urls);
+	my %related_cids = map { $_ => $slashdb->getComment($_) } grep {$_} @$related_cids;
+	
+	return(\%related_sids, \%related_urls, \%related_cids);
 }
 
 
@@ -1910,7 +1933,7 @@ sub updateStory {
 		unless $form->{aid};
 
 	my($chosen_hr) = extractChosenFromForm($form);
-	my($related_sids_hr, $related_urls_hr) = extractRelatedStoriesFromForm($form);
+	my($related_sids_hr, $related_urls_hr, $related_cids_hr) = extractRelatedStoriesFromForm($form);
 	my $related_sids = join ',', keys %$related_sids_hr;
 	my($topic) = $slashdb->getTopiclistFromChosen($chosen_hr);
 #use Data::Dumper; print STDERR "admin.pl updateStory chosen_hr: " . Dumper($chosen_hr) . "admin.pl updateStory form: " . Dumper($form);
@@ -1986,7 +2009,7 @@ sub updateStory {
 		editStory(@_);
 	} else {
 		titlebar('100%', getTitle('updateStory-title'));
-		$slashdb->setRelatedStoriesForStory($form->{sid}, $related_sids_hr, $related_urls_hr);
+		$slashdb->setRelatedStoriesForStory($form->{sid}, $related_sids_hr, $related_urls_hr, $related_cids_hr);
 		my $st = $slashdb->getStory($form->{sid});
 		$slashdb->createSignoff($st->{stoid}, $user->{uid}, "updated");
 		# make sure you pass it the goods
