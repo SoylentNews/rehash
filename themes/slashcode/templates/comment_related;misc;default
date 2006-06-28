@@ -1,0 +1,22 @@
+__section__
+default
+__description__
+Template to display related urls
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+comment_related
+__seclev__
+10000
+__template__
+[% thisskin = Slash.db.getSkin(discussion.primaryskid); %]
+[% IF thisskin; rootdir = thisskin.rootdir ; ELSE; rootdir = constants.real_rootdir; END %]
+<div class="briefarticle briefcomment">
+	<span class="storytitle"><a href="[% rootdir %]/comments.pl?sid=[% comment.sid %]&amp;cid=[% comment.cid %]">[% comment.subject %]</a></span> by [% IF !is_anon %]<a href="[% constants.real_rootdir %]/~[% comment_user.nickname | strip_paramattr %]">[% END %][% comment_user.nickname | strip_literal%][% IF !is_anon %] ([% comment_user.uid %])</a>[% END %]
+</div>
+__version__
+$Id$
