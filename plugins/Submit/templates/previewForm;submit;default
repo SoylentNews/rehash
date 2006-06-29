@@ -61,8 +61,6 @@ __template__
 		[% IF form.fromconsole %]<input type="hidden" name="fromconsole" value="1">[% END %]
 		<input type="hidden" name="op" value="changesubmission">
 		<input type="hidden" name="subid" value="[% subid %]">
-		<table width="99%" align="LEFT" bgcolor="[% user.colors.bg_2 %]">
-		<tr><td>
 	[% IF submission.uid != constants.anonymous_coward_uid || submission.emaildomain -%]
 		<p>In the last [% constants.submission_count_days -%] days, there
 		[%- IF submission.uid != constants.anonymous_coward_uid && num_from_uid != 1
@@ -93,8 +91,7 @@ __template__
 	.</p>
 [%- END %]
 
-	</td></tr>
-	<tr><td>
+	<br>
 [% submission_state = Slash.db.getDescriptions('submission-state'); del = submission.del -%]
 [% submission_state.$del %] submission by <b>[% submission.name %]
 [%- IF submission.email %] <a href="[% submission.email %]">[% submission.email %]</a>[% END -%]
@@ -103,8 +100,7 @@ __template__
 		-%]/users.pl?op=userinfo&amp;userfield=[% ipid 
 		-%]&amp;fieldname=ipid">[% ipid_vis 
 		-%]</a><br>
-	</td></tr>
-	<tr><td>
+	<br>
 		<input type="text" name="comment_[% subid %]" value="[% submission.comment %]" size=70><br>
 	[% 
 		this_note = submission.note || '';
@@ -120,11 +116,10 @@ __template__
 	
 		<input type="submit" name="update" value="Update">
 		<input type="submit" name="del_[% subid %]" value="Delete">
-	</td></tr>
-	</table>
+	<br>
 	</form>
 
-	<br><br><br><br>
+	<br>
         <form action="//[% gSkin.rootdir %]/submit.pl" method="post">
         <table class="data" width="100%">
         <tr class="data_head">
@@ -153,7 +148,7 @@ __template__
         </table>
         </form>
 
-	<br><br><br><br>
+	<br>
 	<script type="text/javascript">
 		function submitAndReload() {
 			var form = document.getElementById("adminform");
