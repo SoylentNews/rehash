@@ -120,7 +120,7 @@ __template__
 	</form>
 
 	<br>
-        <form action="//[% gSkin.rootdir %]/submit.pl" method="post">
+        <form action="[% gSkin.rootdir %]/submit.pl" method="post">
         <table class="data" width="100%">
         <tr class="data_head">
                 <th colspan="4">Submissions Memory</th>

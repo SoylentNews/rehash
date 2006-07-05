@@ -699,7 +699,6 @@ sub displayStories {
 		$tmpreturn .= displayStory($story->{sid}, '', $other, $stories_data_cache);
 		
 		if ($other->{dispmode} eq "full") {
-			
 			my $readmore = $msg->{readmore};
 			if ($constants->{index_readmore_with_bytes}) {
 				my $readmore_data = {};
@@ -712,6 +711,7 @@ sub displayStories {
 					$readmore = getData('readmore_with_bytes', $readmore_data );
 				}
 			}
+
 			push @links, linkStory({
 				'link'		=> $readmore,
 				sid		=> $story->{sid},

@@ -73,7 +73,7 @@ __template__
 </div>
 </form>
 	<div class="commentBoxForm" id="commentControlBox">
-		<form action="//slashdot.org/comments.pl">
+		<form action="[% gSkin.rootdir %]/comments.pl">
 		<fieldset>
 		<legend>Display Options</legend>
 	
