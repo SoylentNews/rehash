@@ -839,6 +839,7 @@ INSERT INTO vars (name, value, description) VALUES ('index_gse_backup_prob','0',
 INSERT INTO vars (name, value, description) VALUES ('index_handler','index.pl','The perl servlet to call for connections to the root of the server.');
 INSERT INTO vars (name, value, description) VALUES ('index_handler_noanon','home','The shtml page to call if a user is anon and index_noanon is set');
 INSERT INTO vars (name, value, description) VALUES ('index_noanon','0','Redirect all anonymous users to index_handler_noanon instead of index.shtml. Set to 1 to activate, 0 to remove.');
+INSERT INTO vars (name, value, description) VALUES ('index_readmore_with_bytes', '0', 'Include bytes / word count in readmore link where applicable?');
 INSERT INTO vars (name, value, description) VALUES ('ircslash','0','Enable the ircslash task and connect to an IRC channel whenever slashd starts');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_channel','#ircslash','Which channel to join');
 INSERT INTO vars (name, value, description) VALUES ('ircslash_channel_password','','Password for ircslash_channel');
