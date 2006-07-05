@@ -195,6 +195,8 @@ html > body .commentwrap table {
 .loki .close {display: none;}
 .loki .options { position: absolute; right: .3em; margin: 0 0 0 10em;}
 .thor .options { position: absolute; top: .4em; right: .3em; margin: 0 0 0 10em;}
-.addinfo {opacity: 0.6; font-size: 72.3%; font-weight: normal;}
+.addinfo {opacity: 1; font-size: small; font-weight: normal;}
+
+.thor {background: #ddd; position: fixed; opacity: 1; top: 0; left: 0; z-index: 1000; border-bottom: 2px solid #aaa; width: 100%; }
 
 #commentlisting {clear: right;}
