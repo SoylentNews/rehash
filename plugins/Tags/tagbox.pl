@@ -39,12 +39,18 @@ $task{$me}{code} = sub {
 		return ;
 	}
 
+	my $max_activity_for_run = 10;
 	while (!$task_exit_flag) {
 
 		# Insert into tagboxlog_feeder
 		my $activity_feeder = update_feederlog();
 		sleep 2;
 		last if $task_exit_flag;
+
+		# If there was a great deal of feeder activity, there is
+		# likely to be more yet to do, and it may obsolete the
+		# results we'd get by calling run() right now.  
+		next if $activity_feeder > 10;
 
 		# Run tagboxes (based on tagboxlog_feeder)
 		my $activity_run = run_tagboxes_until(time() + 30);
@@ -53,7 +59,7 @@ $task{$me}{code} = sub {
 
 		# If nothing's going on, ease up more (not that it probably
 		# matters much, since if nothing's going on both of the
-		# above should be doing very fast SELECTs).
+		# above should be doing reasonably fast SELECTs).
 		sleep 20 if !$activity_feeder && !$activity_run;
 		last if $task_exit_flag;
 
@@ -228,6 +234,7 @@ sub run_tagboxes_until {
 #my $ad = Dumper($affected_hr); $ad =~ s/\s+/ /g; my $tb = Dumper($tagbox); $tb =~ s/\s+/ /g; print STDERR "r_t_u affected_hr: $ad tagbox: $tb\n";
 			$tagbox->{object}->run($affected_hr->{affected_id});
 			$tagboxdb->markTagboxRunComplete($affected_hr);
+			last if time() >= $run_until;
 		}
 
 		sleep 1;
