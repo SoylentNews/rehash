@@ -10,6 +10,7 @@ Display a story (normally called from within displayStory())
 * topic = topic data structure
 * author = author data structure
 * full = boolean to display full story (incl. bodytext)
+* dispmode = 'full' (default) or 'brief'
 * magic = boolean to put section name in story title
 
 __title__
