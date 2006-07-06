@@ -9058,7 +9058,7 @@ sub createStory {
 		# Ugly Twisted Criminal, Claims National Enquirer" and
 		# later realizing it had been truncated after 50 chars.
 		my $title_len = $self->sqlGetCharColumnLength('story_text', 'title');
-		if (length($story->{title}) > $title_len) {
+		if ($title_len && length($story->{title}) > $title_len) {
 			$error = "createStory title too long: " . length($story->{title}) . " > $title_len";
 		}
 	}
