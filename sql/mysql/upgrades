@@ -3919,6 +3919,7 @@ CREATE TABLE tagboxlog_userchange (
 # 2006-05-17
 UPDATE vars SET value = 'T_2_5_0_112' WHERE name = 'cvs_tag_currentcode';
 
+# Update for plugins/Tags
 RENAME TABLE tagboxlog_deactivated TO tags_deactivated;
 RENAME TABLE tagboxlog_userchange TO tags_userchange;
 
@@ -3951,3 +3952,15 @@ UPDATE vars SET value = 'T_2_5_0_118' WHERE name = 'cvs_tag_currentcode';
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
+
+# Update for plugins/Tags
+# You can rm the symlink at $SLASH_PREFIX/site/$SITENAME/tasks/tags_update.pl
+# here, if desired.  But it's not necessary, it won't hurt anything.  (The
+# symlink-tool script doesn't yet do this automatically when a task is
+# removed from a THEME/PLUGIN file.)
+UPDATE vars SET name='tagbox_top_minscore_stories' WHERE name='tags_stories_top_minscore';
+UPDATE vars SET name='tagbox_top_minscore_urls'    WHERE name='tags_urls_top_minscore';
+UPDATE vars SET name='tagbox_top_urls_tags_pos'    WHERE name='tags_urls_pos_tags';
+UPDATE vars SET name='tagbox_top_urls_tags_neg'    WHERE name='tags_urls_neg_tags';
+DELETE FROM vars WHERE name IN ('tags_stories_lastscanned', 'tags_urls_lastscanned');
+

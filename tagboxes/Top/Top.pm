@@ -138,58 +138,92 @@ sub run {
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	my $tagboxdb = getObject('Slash::Tagbox');
 
-	my $tag_ar = $tagsdb->getTagsByGlobjid($affected_id);
+	my($type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
+	return unless $type eq 'stories' || $type eq 'urls';
+
+	# Get the list of tags applied to this object.  If we're doing
+	# URL popularity, that's only the tags within the past few days.
+	# For stories, it's all tags.
+
+	my $options = { };
+	if ($type eq 'urls') {
+		my $days_back = $constants->{bookmark_popular_days} || 3;
+		$options->{days_back} = $days_back;
+	}
+	my $tag_ar = $tagsdb->getTagsByGlobjid($affected_id, $options);
 	$tagsdb->addCloutsToTagArrayref($tag_ar);
 print STDERR "Slash::Tagbox::Top->run called for $affected_id, " . scalar(@$tag_ar) . " tags\n";
 
-	my %uids_unique = map { ( $_->{uid}, 1 ) } @$tag_ar;
-	my @uids = keys %uids_unique;
-	# XXX should cache this - probably run() should take an arrayref of affected ids
-	my $users ||= { };
-	for my $uid (@uids) {
-		$users->{$uid} ||= $tags_reader->getUser($uid);
-	}
+	# Now set the data accordingly.  For a story, set the
+	# tags_top field to the space-separated list of the
+	# top 5 scoring tags.
 
-	my %scores = ( );
-	for my $tag (@$tag_ar) {
-		$scores{$tag->{tagname}} += $tag->{total_clout};
-	}
+	if ($type eq 'stories') {
 
-	my @opposite_tagnames =
-		map { $tags_reader->getOppositeTagname($_) }
-		grep { $_ !~ /^!/ && $scores{$_} > 0 }
-		keys %scores;
-	for my $opp (@opposite_tagnames) {
-		next unless $scores{$opp};
-		# Both $opp and its opposite exist in %scores.  Subtract
-		# $opp's score from its opposite and vice versa.
-		my $orig = $tags_reader->getOppositeTagname($opp);
-		my $orig_score = $scores{$orig};
-		$scores{$orig} -= $scores{$opp};
-		$scores{$opp} -= $orig_score;
-	}
+		# Using the total_clout calculated in addCloutsToTagArrayref(),
+		# and counting opposite tags against ordinary tags, calculate
+		# %scores, the hash of tagnames and their scores.  Note that
+		# due to the presence of opposite tags, there may be many
+		# entries in %scores with negative values.
 
-	my @top = sort {
-		$scores{$b} <=> $scores{$a}
-		||
-		$a cmp $b
-        } keys %scores;
+		my %scores = ( );
+		for my $tag (@$tag_ar) {
+			$scores{$tag->{tagname}} += $tag->{total_clout};
+		}
 
-	# Eliminate tagnames below the minimum score required, and
-	# those that didn't make it to the top 5
-	# XXX top 5 is hardcoded currently, should be a var
-	my($globj_type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
-	my $minscore = $constants->{"tagbox_top_minscore_${globj_type}"};
-	@top = grep { $scores{$_} >= $minscore } @top;
-	$#top = 4 if $#top > 4;
+		my @opposite_tagnames =
+			map { $tags_reader->getOppositeTagname($_) }
+			grep { $_ !~ /^!/ && $scores{$_} > 0 }
+			keys %scores;
+		for my $opp (@opposite_tagnames) {
+			next unless $scores{$opp};
+			# Both $opp and its opposite exist in %scores.  Subtract
+			# $opp's score from its opposite and vice versa.
+			my $orig = $tags_reader->getOppositeTagname($opp);
+			my $orig_score = $scores{$orig};
+			$scores{$orig} -= $scores{$opp};
+			$scores{$opp} -= $orig_score;
+		}
 
-	if ($globj_type eq 'stories') {
-		# XXX set tags_top_tagbox for now, to compare against tags_top
-		$self->setStory($target_id, { tags_top_tagbox => join(' ', @top) });
+		my @top = sort {
+			$scores{$b} <=> $scores{$a}
+			||
+			$a cmp $b
+		} keys %scores;
+
+		# Eliminate tagnames below the minimum score required, and
+		# those that didn't make it to the top 5
+		# XXX the "5" is hardcoded currently, should be a var
+		my $minscore = $constants->{"tagbox_top_minscore_stories"};
+		@top = grep { $scores{$_} >= $minscore } @top;
+		$#top = 4 if $#top > 4;
+
+		$self->setStory($target_id, { tags_top => join(' ', @top) });
 print STDERR "Slash::Tagbox::Top->run $affected_id with " . scalar(@$tag_ar) . " tags, setStory $target_id to '@top'\n";
-	} elsif ($globj_type eq 'urls') {
-		# XXX urls table doesn't actually have this column, nor a params table
-#		$slashdb->setUrl($target_id, { tags_top => join(' ', @top) });
+
+	} elsif ($type eq 'urls') {
+
+		# For a URL, calculate a numeric popularity score based
+		# on (most of) its tags and store that in the popularity
+		# field.
+
+		my %tags_pos = map { $_, 1 } split(/\|/, $constants->{tagbox_top_urls_tags_pos} || "");
+		my %tags_neg = map { $_, 1 } split(/\|/, $constants->{tagbox_top_urls_tags_neg} || "");
+
+		my $pop = 0;
+		for my $tag (@$tag_ar) {
+			my $tagname = $tag->{tagname};
+			my $is_pos = $tags_pos{$tagname};
+			my $is_neg = $tags_neg{$tagname};
+			my $mult = 1;
+			$mult =  1.5 if $is_pos && !$is_neg;
+			$mult = -1.0 if $is_neg && !$is_pos;
+			$mult =  0   if $is_pos &&  $is_neg;
+			$pop += $mult * $tag->{total_clout};
+		}
+
+		$self->setUrl($target_id, { popularity => $pop });
+
 	}
 
 }
