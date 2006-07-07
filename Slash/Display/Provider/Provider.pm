@@ -218,8 +218,6 @@ sub ident {
 	# env
 	} elsif ($ident->[0] eq q['env'] && @$ident == 4 && $ident->[2] =~ /^'(.+)'$/s) {
 		(my $data = $1) =~ s/'/\\'/;
-		# maybe?
-		# $data =~ s/-/_/g;
 		return qq[\$ENV{"\\U$data"}];
 	# fg/bg
 	} elsif ($ident->[0] eq q['user'] && @$ident == 6 && $ident->[2] =~ /^'(fg|bg)'$/s) {
