@@ -53,7 +53,14 @@ __template__
 [% CASE 'readmore' %]
 	[% returnme.data_constant = 1 %] 
 	<b>Read More...</b>
-
+[% CASE 'readmore_with_bytes' %]
+	[% IF bytes %]
+	<b>Read [% bytes %] More Bytes...</b>
+	[% ELSIF words %]
+	<b>Read [% words %] More Words...</b>
+	[% ELSE %]
+	<b>Read More...</b>
+	[% END %]
 [% CASE 'bytes' %]
 	[% returnme.data_constant = 1 %] 
 	bytes in body
