@@ -14,7 +14,7 @@ __template__
 <div class="generalbody">
 [% IF tref.image %]
 	<div class="topic">
-		<a href="http://[% gSkin.rootdir %]/search.pl?tid=[% tref.tid %]">
+		<a href="[% gSkin.rootdir %]/search.pl?tid=[% tref.tid %]">
 			<img src="[% constants.imagedir %]/topics/[% tref.image %]" width="[% tref.width %]" height="[% tref.height %]" alt="[% tref.alttext %]" title="[% tref.alttext %]">
 		</a>
 	</div>
