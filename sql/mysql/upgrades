@@ -3965,3 +3965,6 @@ UPDATE vars SET name='tagbox_top_urls_tags_pos'    WHERE name='tags_urls_pos_tag
 UPDATE vars SET name='tagbox_top_urls_tags_neg'    WHERE name='tags_urls_neg_tags';
 DELETE FROM vars WHERE name IN ('tags_stories_lastscanned', 'tags_urls_lastscanned');
 
+# 2006-07-11
+UPDATE vars SET value = 'T_2_5_0_119' WHERE name = 'cvs_tag_currentcode';
+
