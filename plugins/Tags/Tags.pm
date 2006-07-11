@@ -63,10 +63,12 @@ sub new {
 # argument is an option hashref.  Pass the field 'dupe_ok' with a
 # true value to ignore this check.  Nor is it allowed for the same
 # user to tag the same object with both a tag and its opposite, but
-# 'opposite_ok' ignores that check.  At the moment we can't think
-# of a good reason why one would ever want to ignore those checks
-# but the options are there regardless.  Is this good design?
-# Probably not.
+# 'opposite_ok' ignores that check.  The 'no_adminlog_check' field
+# means to not scan tagcommand_adminlog to determine whether the
+# tag should be created with an altered tag_clout param.  At the
+# moment we can't think of a good reason why one would ever want
+# to ignore those checks but the options are there regardless.  Is
+# this good design?  Probably not.
 
 sub _setuptag {
 	my($self, $hr) = @_;
@@ -105,6 +107,7 @@ sub createTag {
 	# Maybe in the future we can eliminate these options.
 	my $check_dupe = (!$options || !$options->{dupe_ok});
 	my $check_opp = (!$options || !$options->{opposite_ok});
+	my $check_aclog = (!$options || !$options->{no_adminlog_check});
 	my $opp_tagnameid = 0;
 	if ($check_opp) {
 		my $opp_tagname = '';
@@ -160,9 +163,32 @@ sub createTag {
 		$rows = 0 if $count > 1;
 	}
 
-	# If it passed all the tests, commit it.
+	# If all that was successful, add a tag_clout param if
+	# necessary.
+	if ($rows) {
+		# Find any admin commands that set clout for this tagnameid.
+		# We look for this globjid specifically, because any
+		# commands for the tagnameid generally will already have
+		# a tag_clout in tagname_params.
+		my $admincmds_ar = $self->getTagnameAdmincmds(
+			$tag->{tagnameid}, $tag->{globjid});
+		# Any admin command other than '^' means clout must be set
+		# to 0.
+		if (grep { $_->{cmdtype} ne '^' } @$admincmds_ar) {
+			my $count = $self->sqlInsert('tag_params', {
+				tagid =>	$tagid,
+				name =>		'tag_clout',
+				value =>	0,
+			});
+			$rows = 0 if $count < 1;
+		}
+	}
+
+	# If it passed all the tests, commit it.  Otherwise rollback.
 	if ($rows) {
 		$self->sqlDo('COMMIT');
+	} else {
+		$self->sqlDo('ROLLBACK');
 	}
 
 	# Return AUTOCOMMIT to its original state in any case.
@@ -646,14 +672,16 @@ sub getTagnameParams {
 }
 
 sub getTagnameAdmincmds {
-	my($self, $tagnameid) = @_;
+	my($self, $tagnameid, $globjid) = @_;
 	return [ ] if !$tagnameid;
+	my $where_clause = "tagnameid=$tagnameid";
+	$where_clause .= " AND globjid=$globjid" if $globjid;
 	return $self->sqlSelectAllHashrefArray(
 		"tagnameid, IF(globjid IS NULL, 'all', globjid) AS globjid,
 		 cmdtype, created_at,
 		 UNIX_TIMESTAMP(created_at) AS created_at_ut",
 		'tagcommand_adminlog',
-		"tagnameid=$tagnameid");
+		$where_clause);
 }
 
 sub getExampleTagsForStory {
