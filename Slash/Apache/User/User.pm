@@ -928,6 +928,8 @@ Bender:I only know enough binary to ask where the bathroom is.
 Bender:Why would God think in binary?
 Bender:You can't count on God for jack! He pretty much told me so himself.
 Bender:Stop doing the right thing, you jerk!
+Bender:Are you familiar with the old robot saying "does not compute"?
+Bender:The sparks keep me warm.
 Fry:There's a lot about my face you don't know.
 Fry:These new hands are great. I'm gonna break them in tonight.
 Fry:I refuse to testify on the grounds that my organs will be chopped up into a patty.
