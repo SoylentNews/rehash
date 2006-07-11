@@ -3958,6 +3958,7 @@ UPDATE vars SET value = 'T_2_5_0_118' WHERE name = 'cvs_tag_currentcode';
 # here, if desired.  But it's not necessary, it won't hurt anything.  (The
 # symlink-tool script doesn't yet do this automatically when a task is
 # removed from a THEME/PLUGIN file.)
+# Run `utils/tags_declout.plx VIRTUAL_USER` after running these upgrades
 UPDATE vars SET name='tagbox_top_minscore_stories' WHERE name='tags_stories_top_minscore';
 UPDATE vars SET name='tagbox_top_minscore_urls'    WHERE name='tags_urls_top_minscore';
 UPDATE vars SET name='tagbox_top_urls_tags_pos'    WHERE name='tags_urls_pos_tags';
