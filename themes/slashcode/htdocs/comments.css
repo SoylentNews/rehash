@@ -183,20 +183,16 @@ html > body .commentwrap table {
 }
 
 /* D2 Widget */
-.thor {position: fixed; opacity: 1; top: 0; left: 0; z-index: 1000; border-bottom: 2px solid #aaa; width: 100%; }
+.thor {position: fixed; opacity: 1; top: 0; left: 0; z-index: 1000; border-bottom: 2px solid #aaa; border-right: 2px solid #aaa; width: 11em; text-align: center }
 .thor .commentwrap {width: 100%; margin: 0;}
 /* .thor h3, .thor {opacity: 1 !important;} */
-.thor div.generaltitle div.title h3 {background: transparent; padding-right: 15em;}
-.loki div.commentBoxForm {padding: .3em;}
-.thor div.commentBoxForm {padding: .3em; border: 1px solid #999; border-bottom: 1px solid #eee;}
-.loki {position: relative; opacity: 1; margin: 0 0 1em 0;}
-.loki .commentwrap {margin: 0 .3em 0 0; padding: 0;}
-.thor .close {color: #fff; text-decoration: none; font-style: sans-serif; border: 1px solid #d4e5e5; border-bottom: 1px solid #015151; border-right: 1px solid #015151; padding: 0 .3em; background: #600;}
-.loki .close {display: none;}
-.loki .options { position: absolute; right: .3em; margin: 0 0 0 10em;}
-.thor .options { position: absolute; top: .4em; right: .3em; margin: 0 0 0 10em;}
-.addinfo {opacity: 1; font-size: small; font-weight: normal;}
+.thor div.generaltitle div.title h3 {background: transparent; padding-right: 15em; font-size: 95%}
 
 .thor {background: #ddd; position: fixed; opacity: 1; top: 0; left: 0; z-index: 1000; border-bottom: 2px solid #aaa; width: 100%; }
+.thor .close {position: absolute; top: .2em; right: .2em; color: #fff; text-decoration: none; font-style: sans-serif; border: 1px solid #d4e5e5; border-bottom: 1px solid #015151; border-right: 1px solid #015151; padding: 0 .3em; background: #600;}
 
+.thor .commentControlFooter { text-align: right padding: 3px; background: #600; color: #fff; } 
+.thor .commentControlFooter a {  color: #fff; text-decoration: none; }
+
+.loki {display: none;}
 #commentlisting {clear: right;}
