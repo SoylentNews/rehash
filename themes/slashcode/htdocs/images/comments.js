@@ -281,7 +281,7 @@ function changeThreshold(threshold) {
 	}
 
 	updateTotals();
-
+	setPadding();
 	return void(0);
 }
 
@@ -439,13 +439,27 @@ function updateTotals() {
 	$('currentHidden' ).innerHTML = currents['hidden'];
 	$('currentFull'   ).innerHTML = currents['full'];
 	$('currentOneline').innerHTML = currents['oneline'];
+
+}
+
+function setPadding() {
+	hidden_padding = ( user_threshold + 1 ) * 10;
+	abbr_padding = (user_highlightthresh - user_threshold) * 10; 
+	full_padding = 60 - hidden_padding - abbr_padding;
+	abbr_padding = abbr_padding / 2;
+
+	if ($('comment_hidden'))
+		$('comment_hidden').style.paddingTop = hidden_padding + "px";
+	if ($('comment_full')) {
+		$('comment_full').style.paddingBottom = full_padding + "px";
+	}
+	if ($('comment_abbr')) {
+		$('comment_abbr').style.paddingBottom = abbr_padding + "px";
+		$('comment_abbr').style.paddingTop = abbr_padding + "px";
+	}
 }
 
 function enableControls() {
-	var controls = ['ht_worse', 'ht_better', 't_more', 't_less'];
-	for (var i = 0; i < controls.length; i++) {
-		$(controls[i]).disabled = false;
-	}
 	$('commentControlBoxStatus').className = 'hide';
 	loaded = 1;
 }
@@ -506,6 +520,7 @@ function finishLoading() {
 	}
 
 	updateTotals();
+	setPadding();
 	enableControls();
 }
 
