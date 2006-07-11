@@ -113,7 +113,9 @@ __template__
 		Save: <input type="checkbox" name="savechanges" class="button">
 		[% END %]
 	[%- END %]
+		[% UNLESS discussion2 %]
 		<input type="submit" name="op" value="Change" class="button">
+		[% END %]
 
 		<input type="hidden" name="sid" value="[% sid %]">
 		[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
@@ -137,7 +139,6 @@ __template__
 			<div class="title">
 				<h3>
 				[% IF title %]
-					[% count = 3000 %]
 					<a href="[% link | strip_urlattr %]" title="Back to Article - [% title | strip_attribute %]">[% count %]&nbsp;Comment[% count == 1 ? '' : 's' %]</a>
 				[% ELSE %] 
 					[% Slash.linkComment({
@@ -147,46 +148,51 @@ __template__
 						subject_only => 1,
 				}) %]
 				[% END %]
-	 	&nbsp; <span title="Close this window" onclick="document.getElementById('gods').className='loki';" class="close">x</span>
+	 	&nbsp;<span title="Close this window" onclick="document.getElementById('gods').className='loki';" class="close">x</span>
 				</h3>
 			</div>
 		</div>
 		<div id="commentControlBoxStatus" class="hide"><b>Loading ... Please wait.</b></div>
 		<div id="comment_full" style="background: #fff;"><span id="currentFull">0</span> Full</div>
 		<div class="comment_divider" style="background:#fff;">
-			<a href="javascript:changeHT(1)"><img src="[% constants.imagedir %]/arrow_up.gif"></a>
+			<img src="[% constants.imagedir %]/arrow_up.gif" onclick="javascript:changeHT(1)">
 		</div>
 		<div class="comment_divider" style="background:#ccc;">
-			<a href="javascript:changeHT(-1)"><img src="[% constants.imagedir %]/arrow_down.gif"></a></a> 
+			<img src="[% constants.imagedir %]/arrow_down.gif" onclick="javascript:changeHT(-1)">
 		</div>
 		<div id="comment_abbr" style="background: #ccc;"><span id="currentOneline">0</span> Abbreviated</div>
 		<div class="comment_divider" style="background:#ccc;">
-			<a href="javascript:changeT(1)"><img src="[% constants.imagedir %]/arrow_up.gif"></a></a>
+			<img src="[% constants.imagedir %]/arrow_up.gif" onclick="javascript:changeT(1)">
 		</div>
 		<div class="comment_divider" style="background:#aaa;">
-			<a href="javascript:changeT(-1)"><img src="[% constants.imagedir %]/arrow_down.gif"></a></a> 
+			<img src="[% constants.imagedir %]/arrow_down.gif" onclick="javascript:changeT(-1)">
 		</div>
 		<div id="comment_hidden" style="background: #aaa;"><span id="currentHidden">0</span> Hidden</div>
 		<div class="commentControlFooter">
-		<form action="[% gSkin.rootdir %]/comments.pl" method="get">
-		[% Slash.linkComment({
-			sid	=> sid,
-			pid	=> pid,
-			subject	=> 'Top',
-			subject_only => 1,
-		}) %]
-		<input type="hidden" name="sid" value="[% sid %]">
-		[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
-		[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
-		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
-			<input type="submit" name="op" value="Reply" class="button">
+		[% IF cid || pid %]
+			[% Slash.linkComment({
+				sid	=> sid,
+				subject	=> 'Top',
+				subject_only => 1,
+			}) %]
+		[% ELSE %]
+			<a href="#topcomment">Top</a> 
 		[% END %]
-	 	&nbsp; <span title="Close this window" onclick="document.getElementById('gods').className='loki';" class="close">x</span>
-		</form>
+			|
+			[% Slash.linkComment({
+				sid => sid,
+				cid => cid,
+				op  => 'reply',
+				subject => 'Reply',
+				subject_only => 1
+				});
+			%]
+				
 		</div>
 	</div>
 	[% END %]
 </div>
+<a name="topcomment"></a>
 
 __seclev__
 10000
