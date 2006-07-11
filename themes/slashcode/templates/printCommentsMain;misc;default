@@ -30,89 +30,6 @@ __template__
 [% END %]
 
 <a name="acomments"></a>
-[% IF discussion2 %]
-<div class="loki" id="gods">
-<div class="commentwrap" title="The Fine Print: [% fineprint %]">
-<form method="GET" action="[% gSkin.rootdir %]/comments.pl" style="display: inline;">
-	<div class="generaltitle">
-	<div class="title">
-		<h3>
-[% IF count %]<b>[% count %]</b>[% IF form.startat %]of [% form.startat %]
-[% END %] [% END %]
-[% IF full %]Comment[% count == 1 ? '' : 's' %][% ELSE %] 
-[% IF title %]
-	<a href="[% link | strip_urlattr %]" title="Back to Article - [% title | strip_attribute %]">Comment[% count == 1 ? '' : 's' %]</a>
-[% ELSE %] 
-	[% Slash.linkComment({
-		sid	=> sid,
-		pid	=> pid,
-		subject	=> 'Comments',
-		subject_only => 1,
-	}) %]
-[% END %]
-[% END %]
-<small class="addinfo">([% IF lvl && user.mode == 'thread' %][% spilltext %] - Index Only |[% END %] Hidden=<span id="currentHidden">0</span> Displayed=<span id="currentFull">0</span> Abbreviated=<span id="currentOneline">0</span> <span id="commentControlBoxStatus" class="hide"><b>Loading ... Please wait.</b></span>)</small>		
-<small class="options"><a href="[% gSkin.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]" class="isearch" title="Search for items within this comment thread">Search</a> &nbsp; 
-<a href="[% gSkin.rootdir %]/my/comments" title="Make comments fit your style!">Preferences</a> &nbsp; 
-[% IF user.points; modpoints; END %]
-
-	<input type="hidden" name="sid" value="[% sid %]">
-	[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
-	[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
-	<input type="hidden" name="op" value="setDiscussion2">
-
-	[% IF user.discussion2 == "slashdot" %]
-	<input type="checkbox" name="discussion2_slashdot" value="1" onchange="this.form.submit();" [% constants.markup_checked_attribute IF user.discussion2 == 'slashdot' %]> <a href="http://slashdot.org/faq/com-mod.shtml#cm120" title="I am willing to help test Slashdot's New Discussion System.">Beta</a>
-	[% END %]
-
-	 &nbsp; <span title="Close this window" onclick="document.getElementById('gods').className='loki';" class="close">x</span>
-
-</small>	
-		</h3>
-	</div>
-</div>
-</form>
-	<div class="commentBoxForm" id="commentControlBox">
-		<form action="[% gSkin.rootdir %]/comments.pl">
-		<fieldset>
-		<legend>Display Options</legend>
-	
-		[% highlightthresh = user.highlightthresh;
-		highlightthresh = user.threshold IF highlightthresh < user.threshold;
-		threshes = [user.highlightthresh, user.threshold] %]
-		<input type="button" value="Worse"  name="ht_worse"  id="ht_worse"  onclick="changeHT(-1)" disabled>
-		<input type="button" value="Better" name="ht_better" id="ht_better" onclick="changeHT(1)" disabled>
-		HT: <span id="currentHT" style="background: black; color: white; padding: 0 2px 0 2px; margin-right: 5em;">[% threshes.highval %]</span>
-
-		<input type="button" value="More" name="t_more" id="t_more" onclick="changeT(-1)" disabled>
-		<input type="button" value="Less" name="t_less" id="t_less" onclick="changeT(1)" disabled>
-		T: <span id="currentT" style="background: black; color: white; padding: 0 2px 0 2px; margin-right: 5em;">[% user.threshold %]</span>
-
-		[%# Threshold: Slash.selectThreshold(comments.0.totals, { onclick => 'changeThreshold(this.value)' }) %]
-
-		<noscript>
-	[% UNLESS user.is_anon %]
-		Save: <input type="checkbox" name="savechanges" class="button">
-	[%- END %]
-		<input type="submit" name="op" value="Change" class="button">
-		</noscript>
-
-		<input type="hidden" name="sid" value="[% sid %]">
-		[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
-		[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
-		[% IF form.startat %]<input type="hidden" name="startat" value="[% form.startat %]">[% END %]
-
-		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
-			<input type="submit" name="op" value="Reply" class="button">
-		[% END %]
-
-		</fieldset>
-		</form>
-	</div>
-	</div>
-</div>
-</form>
-[% ELSE # discussion2 %]
 <div class="commentwrap">
 [% IF user.is_admin || user.acl.discussion2_slashdot || user.is_subscriber || (!constants.subscribe && !user.is_anon) %]
 <div class="commentBox" style="font-size: 120%">
@@ -181,16 +98,20 @@ __template__
 		<form action="[% gSkin.rootdir %]/comments.pl">
 		<fieldset>
 		<legend>Display Options</legend>
-
+		[% UNLESS discussion2 %]
+		
 		Threshold: [%
 			Slash.selectThreshold(comments.0.totals);
 			IF user.mode != 'parents' && user.mode != 'child';
 			  Slash.selectMode(user.mode);
 			END;
 			Slash.selectSortcode(user.commentsort) %]
+		[% END %]
 
 	[% UNLESS user.is_anon %]
+		[% UNLESS discussion2 %]
 		Save: <input type="checkbox" name="savechanges" class="button">
+		[% END %]
 	[%- END %]
 		<input type="submit" name="op" value="Change" class="button">
 
@@ -210,9 +131,62 @@ __template__
 		</small>
 	</div>
 	</div>
+	[% IF discussion2 %]
+		<div class="loki" id="gods">
+		<div class="generaltitle">
+			<div class="title">
+				<h3>
+				[% IF title %]
+					[% count = 3000 %]
+					<a href="[% link | strip_urlattr %]" title="Back to Article - [% title | strip_attribute %]">[% count %]&nbsp;Comment[% count == 1 ? '' : 's' %]</a>
+				[% ELSE %] 
+					[% Slash.linkComment({
+						sid	=> sid,
+						pid	=> pid,
+						subject	=> 'Comments',
+						subject_only => 1,
+				}) %]
+				[% END %]
+				</h3>
+			</div>
+		</div>
+		<div id="commentControlBoxStatus" class="hide"><b>Loading ... Please wait.</b></div>
+		<div id="comment_full" style="background: #fff;"><span id="currentFull">0</span> Full</div>
+		<div class="comment_divider" style="background:#fff;">
+			<a href="javascript:changeHT(1)"><img src="[% constants.imagedir %]/arrow_up.gif"></a>
+		</div>
+		<div class="comment_divider" style="background:#ccc;">
+			<a href="javascript:changeHT(-1)"><img src="[% constants.imagedir %]/arrow_down.gif"></a></a> 
+		</div>
+		<div id="comment_abbr" style="background: #ccc;"><span id="currentOneline">0</span> Abbreviated</div>
+		<div class="comment_divider" style="background:#ccc;">
+			<a href="javascript:changeT(1)"><img src="[% constants.imagedir %]/arrow_up.gif"></a></a>
+		</div>
+		<div class="comment_divider" style="background:#aaa;">
+			<a href="javascript:changeT(-1)"><img src="[% constants.imagedir %]/arrow_down.gif"></a></a> 
+		</div>
+		<div id="comment_hidden" style="background: #aaa;"><span id="currentHidden">0</span> Hidden</div>
+		<div class="commentControlFooter">
+		<form action="[% gSkin.rootdir %]/comments.pl" method="get">
+		[% Slash.linkComment({
+			sid	=> sid,
+			pid	=> pid,
+			subject	=> 'Top',
+			subject_only => 1,
+		}) %]
+		<input type="hidden" name="sid" value="[% sid %]">
+		[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
+		[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
+		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
+			<input type="submit" name="op" value="Reply" class="button">
+		[% END %]
+	 	&nbsp; <span title="Close this window" onclick="document.getElementById('gods').className='loki';" class="close">x</span>
+		</form>
+		</div>
+	</div>
+	[% END %]
 </div>
 
-[% END # discussion2 %]
 __seclev__
 10000
 __version__
