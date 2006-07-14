@@ -9491,6 +9491,11 @@ sub getSlashConf {
 	for my $plugin (@$plugindata) {
 		$conf{plugin}{$plugin} = 1;
 	}
+	my $tagboxdata = $self->sqlSelectColArrayref('value', 'site_info',
+		"name='tagbox'");
+	for my $tagbox (@$tagboxdata) {
+		$conf{tagbox}{$tagbox} = 1;
+	}
 
 	# This really should be a separate piece of data returned by
 	# getReasons() the same way getTopicTree() works.  It's only part
