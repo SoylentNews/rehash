@@ -40,9 +40,8 @@ sub new {
 	my $plugin = getCurrentStatic('plugin');
 	return undef if !$plugin->{Tags};
 	my($tagbox_name) = $class =~ /(\w+)$/;
-	# (this code is for once Install.pm actually installs tagboxes and getSlashConf loads this constant)
-	# my $tagbox = getCurrentStatic('tagbox');
-	# return undef if !$tagbox->{$tagbox_name};
+	my $tagbox = getCurrentStatic('tagbox');
+	return undef if !$tagbox->{$tagbox_name};
 
 	# Note that getTagboxes() would call back to this new() function
 	# if the tagbox objects have not yet been created -- but the
@@ -67,11 +66,23 @@ print STDERR "Slash::Tagbox::TagCountUser->feed_newtags called for " . scalar(@$
 }
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
-		push @$ret_ar, {
-			tagid =>	$tag_hr->{tagid},
-			affected_id =>	$tag_hr->{uid},
-			importance =>	1,
+                # affected_id and importance work the same whether this is
+		# "really" newtags or deactivatedtags.
+		my $days_old = (time - $tag_hr->{created_at_ut}) / 86400;
+		my $importance =  $days_old <  1	? 1
+				: $days_old < 14	? 1.1**-$days_old
+				: 1.1**-14;
+		my $ret_hr = {
+			affected_id =>  $tag_hr->{uid},
+			importance =>   $importance,
 		};
+		# We identify this little chunk of importance by either
+		# tagid or tdid depending on whether the source data had
+		# the tdid field (which tells us whether feed_newtags was
+		# "really" called via feed_deactivatedtags).
+		if ($tag_hr->{tdid})    { $ret_hr->{tdid}  = $tag_hr->{tdid}  }
+		else                    { $ret_hr->{tagid} = $tag_hr->{tagid} }
+		push @$ret_ar, $ret_hr;
 	}
 	return $ret_ar;
 }

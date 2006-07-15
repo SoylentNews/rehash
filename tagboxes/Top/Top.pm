@@ -40,9 +40,8 @@ sub new {
 	my $plugin = getCurrentStatic('plugin');
 	return undef if !$plugin->{Tags};
 	my($tagbox_name) = $class =~ /(\w+)$/;
-	# (this code is for once Install.pm actually installs tagboxes and getSlashConf loads this constant)
-	# my $tagbox = getCurrentStatic('tagbox');
-	# return undef if !$tagbox->{$tagbox_name};
+	my $tagbox = getCurrentStatic('tagbox');
+	return undef if !$tagbox->{$tagbox_name};
 
 	# Note that getTagboxes() would call back to this new() function
 	# if the tagbox objects have not yet been created -- but the
@@ -69,11 +68,15 @@ print STDERR "Slash::Tagbox::Top->feed_newtags called for " . scalar(@$tags_ar) 
 
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
-		# These two values are the same whether this is "really"
-		# newtags or deactivatedtags.
+		# affected_id and importance work the same whether this is
+		# "really" newtags or deactivatedtags.
+		my $days_old = (time - $tag_hr->{created_at_ut}) / 86400;
+		my $importance =  $days_old <  1	? 1
+				: $days_old < 14	? 1.1**-$days_old
+				: 1.1**-14;
 		my $ret_hr = {
 			affected_id =>	$tag_hr->{globjid},
-			importance =>	1,
+			importance =>	$importance,
 		};
 		# We identify this little chunk of importance by either
 		# tagid or tdid depending on whether the source data had
@@ -194,7 +197,7 @@ print STDERR "Slash::Tagbox::Top->run called for $affected_id, " . scalar(@$tag_
 		# Eliminate tagnames below the minimum score required, and
 		# those that didn't make it to the top 5
 		# XXX the "5" is hardcoded currently, should be a var
-		my $minscore = $constants->{"tagbox_top_minscore_stories"};
+		my $minscore = $constants->{tagbox_top_minscore_stories};
 		@top = grep { $scores{$_} >= $minscore } @top;
 		$#top = 4 if $#top > 4;
 
