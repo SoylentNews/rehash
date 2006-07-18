@@ -442,20 +442,36 @@ function updateTotals() {
 
 }
 
+
 function setPadding() {
-	hidden_padding = ( user_threshold + 1 ) * 10;
-	abbr_padding = (user_highlightthresh - user_threshold) * 10; 
-	full_padding = 60 - hidden_padding - abbr_padding;
+	var hidden_padding = ( user_threshold + 1 ) * 10;
+	var abbr_padding = (user_highlightthresh - user_threshold) * 10; 
+	var full_padding = 60 - hidden_padding - abbr_padding;
 	abbr_padding = abbr_padding / 2;
 
-	if ($('comment_hidden'))
-		$('comment_hidden').style.paddingTop = hidden_padding + "px";
+
+	if ($('comment_hidden')) {
+		if($('comment_hidden').className == "horizontal") {
+			$('comment_hidden').style.paddingLeft= hidden_padding + 5 + "px";
+		} else {
+			$('comment_hidden').style.paddingTop= hidden_padding + "px";
+		}
+	}
 	if ($('comment_full')) {
-		$('comment_full').style.paddingBottom = full_padding + "px";
+		if($('comment_full').className == "horizontal") {
+			$('comment_full').style.paddingRight = full_padding + 5 +"px";
+		} else {
+			$('comment_full').style.paddingBottom = full_padding + "px";
+		}
 	}
 	if ($('comment_abbr')) {
-		$('comment_abbr').style.paddingBottom = abbr_padding + "px";
-		$('comment_abbr').style.paddingTop = abbr_padding + "px";
+		if($('comment_abbr').className == "horizontal") {
+			$('comment_abbr').style.paddingRight = abbr_padding + 5 +"px";
+			$('comment_abbr').style.paddingLeft = abbr_padding + 5 +"px";
+		} else {
+			$('comment_abbr').style.paddingRight = abbr_padding + "px";
+			$('comment_abbr').style.paddingLeft = abbr_padding + "px";
+		}
 	}
 }
 
