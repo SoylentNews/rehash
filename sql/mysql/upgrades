@@ -3926,8 +3926,6 @@ RENAME TABLE tagboxlog_userchange TO tags_userchange;
 # 2006-05-24
 UPDATE vars SET value = 'T_2_5_0_113' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
-
 ALTER TABLE tagboxlog_feeder CHANGE COLUMN tagid tagid int UNSIGNED DEFAULT NULL AFTER importance, ADD COLUMN tdid int UNSIGNED DEFAULT NULL, ADD COLUMN tuid int UNSIGNED DEFAULT NULL, ADD KEY tbid_tdid (tbid, tdid), ADD KEY tbid_tuid (tbid, tuid);
 
 # 2006-06-01
@@ -3949,10 +3947,6 @@ INSERT INTO vars (name, value, description) VALUES ('index_readmore_with_bytes',
 # 2006-07-05
 UPDATE vars SET value = 'T_2_5_0_118' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 # Update for plugins/Tags
 # You can rm the symlink at $SLASH_PREFIX/site/$SITENAME/tasks/tags_update.pl
 # here, if desired.  But it's not necessary, it won't hurt anything.  (The
@@ -3968,4 +3962,14 @@ DELETE FROM vars WHERE name IN ('tags_stories_lastscanned', 'tags_urls_lastscann
 # 2006-07-11
 UPDATE vars SET value = 'T_2_5_0_119' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# PUDGE LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
 INSERT INTO vars (name, value, description) VALUES ('comments_control_horizontal', '0', 'Is Discussion2 control is configured horizontally?');
+
+# 2006-07-18
+UPDATE vars SET value = 'T_2_5_0_120' WHERE name = 'cvs_tag_currentcode';
+
