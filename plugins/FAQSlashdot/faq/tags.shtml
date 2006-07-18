@@ -38,11 +38,14 @@ depends on you.  If you choose to add your own tags, be aware:</p>
 <li>Tags are space-separated. Use "bigbrother", not "big brother".
 <li>We provide a few example tags for you. Use them if you like.</li>
 <li>Don't forget to click 'Tag' to save your tags.</li>
+<li>After you save, your current list of tags is put back into the
+text field for you. If you clear it and re-click Tag, your old tags
+are undone. To add more tags, just add them and re-click Tag.</li>
 <li>Tags must be all-lowercase, no punctuation. Numbers can  
 appear but can't be first. Smoosh them up: for "Web 2.0", tag  
 "web20". Max 64 chars.</li>
-<li>Don't use plurals.  It's "harddrive", not "harddrives".</li>
-<li>For the opposite of a tag, prefix it with "!", e.g.  "!funny"
+<li>Avoid plurals please: "harddrive", not "harddrives".</li>
+<li>For the <b>opposite</b> of a tag, prefix it with "!", e.g.  "!funny"
 means unfunny.</li>
 </ul>
 
@@ -68,7 +71,7 @@ at all, it's just an identifier.</p>
 <p>We're going to build the next generation of moderation on top of
 tags. That means we're going to poach your namespace. Some tags will
 have a substantive effect on the system right from the start (or very
-soon). Our article tagger will know about tags like "dupe" or "typo".
+soon). Our article tagger knows about tags like "dupe" or "typo".
 When we roll out tagging on comments, we will teach it "troll" and
 "informative". These tags can have a meaning in the system. And when
 <em>you</em> come up with ways of using tags that <em>we</em>
@@ -93,6 +96,20 @@ deal with it in good faith.</p>
 <p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
 <br><i><font size=-1>Last Modified: 2/10/06</font></i>
 
+<br><a name="tags200" id="tags200"></a>
+<h2>What tags are defined?</h2>
+
+<p>Use <b>dupe</b> only when a Slashdot story is an actual duplicate of a
+previous <b>Slashdot</b> story, offering no new information.</p>
+
+<p>(Misusing the dupe or !dupe tag, by the way, is a great way to ensure
+your user account has reduced effect on our system in the years to come.
+Using it accurately and quickly will do the opposite.)</p>
+
+<p>Use <b>typo</b> when a Slashdot story writeup has spelling or
+grammatical errors, or bad HTML like a malformed link. Do not tag
+the story with the misspelled word in question.</p>
+
 <br><a name="tags300" id="tags300"></a>
 <h2>What are Slashdot Bookmarks?</h2>
 
@@ -100,18 +117,18 @@ deal with it in good faith.</p>
 later,  to share them with  the Slashdot Community, and to submit them
 to the Slashdot Editors for consideration for posting.
 
-<P> Remember first and
+<p>Remember first and
 foremost that your bookmarks are public: whatever you bookmark will be
 available to any user of Slashdot.   You can also tag your bookmarks to
-aid you in finding them later.
-</p>
+aid you in finding them later.</p>
+
 <p>After you bookmark a URL, you will
 have the option to either Submit it directly to the Slashdot submission bin,
 or better yet, to write a Journal Entry about it.  Slashdot Journal Entries
 can now be automatically submitted to Slashdot editors for mainpage post
 consideration, so bookmarks are a great way to quickly
-submit stories.
-</p>
+submit stories.</p>
+
 <p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
 <br><i><font size=-1>Last Modified: 3/22/06</font></i>
 
@@ -131,6 +148,7 @@ HTTPS: <a href="javascript:location.href='https://slashdot.org/bookmark.pl?url='
 </p>
 <p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
 <br><i><font size=-1>Last Modified: 3/22/06</font></i>
+
 <br><a name="tags400" id="tags320"></a>
 <h2>How do I share my Bookmarks?</h2>
 
