@@ -150,7 +150,13 @@ sub jabberinit {
 	my $tls =	$constants->{jabberslash_tls}
 				|| 0;
 
-	$jabber = new Net::Jabber::Client;
+	$jabber = new Net::Jabber::Client (
+#		debuglevel	=> 2,
+#		debugfile	=> 'stdout',
+#		debugtime	=> 1,
+	);
+#	$jabber->{DEBUG}{HANDLE} = \*STDOUT;
+
 	$jabber->SetCallBacks(
 		onauth		=> \&j_on_auth,
 		message		=> \&j_on_msg,
