@@ -134,6 +134,12 @@ __template__
 	</div>
 	</div>
 	[% IF discussion2 %]
+		[% class_info = "" %]
+		[% horiz = constants.comments_control_horizontal; %]
+		[% IF horiz;
+			class_info = " class='horizontal'" %]
+			<div class="horizontal">
+		[% END %]
 		<div class="loki" id="gods">
 		<div class="generaltitle">
 			<div class="title">
@@ -153,21 +159,25 @@ __template__
 			</div>
 		</div>
 		<div id="commentControlBoxStatus" class="hide"><b>Loading ... Please wait.</b></div>
-		<div id="comment_full" style="background: #fff;"><span id="currentFull">0</span> Full</div>
-		<div class="comment_divider" style="background:#fff;">
-			<img src="[% constants.imagedir %]/arrow_up.gif" onclick="javascript:changeHT(1)">
+		<div id="bones">
+		<div id="commentControlPane">
+		<div id="comment_full" style="background: #fff;" [% class_info %]><span id="currentFull">0</span> Full</div>
+		<div class="comment_divider" style="background:#fff;" [% class_info %]>
+			<span class="com_arrow_up" onclick="javascript:changeHT(1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]left[% ELSE %]up[% END %].gif"></span>
 		</div>
+		<div class="comment_divider" style="background:#ccc;" [% class_info %]>
+			<span class="arrow_down" onclick="javascript:changeHT(-1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]right[% ELSE %]down[% END %].gif"></span>
+		</div>
+		<div id="comment_abbr" style="background: #ccc;" [% class_info %]><span id="currentOneline">0</span> Abbreviated</div>
 		<div class="comment_divider" style="background:#ccc;">
-			<img src="[% constants.imagedir %]/arrow_down.gif" onclick="javascript:changeHT(-1)">
+			<span class="arrow_up" onclick="javascript:changeT(1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]left[% ELSE %]up[% END %].gif"></span>
 		</div>
-		<div id="comment_abbr" style="background: #ccc;"><span id="currentOneline">0</span> Abbreviated</div>
-		<div class="comment_divider" style="background:#ccc;">
-			<img src="[% constants.imagedir %]/arrow_up.gif" onclick="javascript:changeT(1)">
+		<div class="comment_divider" style="background:#aaa;" [% class_info %]>
+			<span class="arrow_down" onclick="javascript:changeT(-1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]right[% ELSE %]down[% END %].gif"></span>
 		</div>
-		<div class="comment_divider" style="background:#aaa;">
-			<img src="[% constants.imagedir %]/arrow_down.gif" onclick="javascript:changeT(-1)">
+		<div id="comment_hidden" style="background: #aaa;" [% class_info %]><span id="currentHidden">0</span> Hidden</div>
 		</div>
-		<div id="comment_hidden" style="background: #aaa;"><span id="currentHidden">0</span> Hidden</div>
+		</div>
 		<div class="commentControlFooter">
 		[% IF cid || pid %]
 			[% Slash.linkComment({
@@ -190,6 +200,7 @@ __template__
 				
 		</div>
 	</div>
+		[% IF constants.comments_control_horizontal %]</div>[% END %]
 	[% END %]
 </div>
 <a name="topcomment"></a>
