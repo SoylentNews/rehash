@@ -80,6 +80,8 @@ sub createRemark {
 	my($self, $remark, $options) = @_;
 
 	my $remark_t = $self->truncateStringForCharColumn($remark, 'remarks', 'remark');
+	$remark_t =~ s/[^[:ascii:]]+//g;
+	$remark_t =~ s/[^[:print:]]+//g;
 
 	$self->sqlInsert('remarks', {
 		uid		=> $options->{uid}	|| getCurrentAnonymousCoward('uid'),
