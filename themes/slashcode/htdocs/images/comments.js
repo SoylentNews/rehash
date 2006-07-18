@@ -289,11 +289,13 @@ function revealKids(cid) {
 	if (!loaded)
 		return false;
 
+	setDefaultDisplayMode(cid);
 	var comment = comments[cid];
 
 	if (comment['kids'].length) {
 		for (var kiddie = 0; kiddie < comment['kids'].length; kiddie++) {
 			var kid = comment['kids'][kiddie];
+			setDefaultDisplayMode(kid);
 			if (displaymode[kid] == 'hidden') {
 				futuredisplaymode[kid] = 'oneline';
 				updateDisplayMode(kid, futuredisplaymode[kid], 1);
@@ -542,4 +544,39 @@ function finishLoading() {
 
 function floatButtons () {
 	$('gods').className='thor';
+}
+
+function doModerate(el) {
+	var matches = el.name.match(/_(\d+)$/);
+	var cid = matches[1];
+
+	if (!cid)
+		return true;
+
+	el.disabled = 'true';
+	var params = [];
+	params['op']  = 'comments_moderate_cid';
+	params['cid'] = cid;
+	params['sid'] = discussion_id;
+	params['reason'] = el.value;
+
+	var handlers = {
+		onComplete: json_handler
+	};
+
+	ajax_update(params, '', handlers);
+
+	return false;
+}
+
+// this should go in common.js at some point
+function json_handler(transport) {
+	var response;
+
+	try       { eval("response = " + transport.responseText) }
+	catch (e) { alert(e + "\n" + transport.responseText)     }
+
+	for (el in response.html) {
+		$(el).innerHTML = response.html[el];
+	}
 }
