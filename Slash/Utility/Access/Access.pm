@@ -795,6 +795,8 @@ sub isDiscussionOpen {
 				|| (
 					$discussion->{commentstatus} eq 'no_foe_eof'
 						&&
+					!$people->{FRIEND()}{$user->{uid}}
+						&&
 					$people->{EOF()}{$user->{uid}}
 				)
 			);
