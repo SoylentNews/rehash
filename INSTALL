@@ -3,9 +3,9 @@ NAME
 
 SYNOPSIS
     This document describes how to install Slash, versions 2.2 and
-    pre-releases of 2.3. For instructions on installation or upgrade of
-    previous versions of Slash, see the INSTALL document included with those
-    distributions.
+    pre-releases of 2.3 and 2.5. For instructions on installation or upgrade
+    of previous versions of Slash, see the INSTALL document included with
+    those distributions.
 
     These instructions have only been tested on Linux. Installation under
     BSD and other Unix OSes should work similarly, but there are problems
@@ -746,15 +746,23 @@ REQUIREMENTS
                 http://www.cpan.org/
 
     MySQL
-        Version 4.1.18 (4.0.12).
+        Version 5.0.22 (4.0.12).
 
                 http://www.mysql.com/
 
         MySQL 3.23.x is no longer supported, as of CVS tag T_2_5_0_33
-        (October 18, 2004). Slashdot has been running on MySQL 4.1.x with no
-        problems, so we now recommend that, but 4.0.x works as well. We have
-        been testing 5.0.x for months but currently, no production sites run
-        it.
+        (October 18, 2004). MySQL 4.0.x is not being actively updated by
+        MySQL AB, so we would recommend that you upgrade, though as far as
+        we know 4.0.12 still works fine. At some point in the future we will
+        switch over to some syntaxes which have been recommended for some
+        time and this will break on 4.0.x, so please upgrade to at least
+        4.1.x whenever you get a chance (you probably have until 2007 before
+        we spring this on you).
+
+        Slashdot ran on 4.1.x for a long time with no problems, so we now
+        recommend either that or 5.0.x. We have been testing on 5.0.x for
+        months, and as of this writing (July 2006), Slashdot has been
+        running on 5.0.18 and 5.0.22 for some time with no problems.
 
     Apache
         Version 1.3.33.
