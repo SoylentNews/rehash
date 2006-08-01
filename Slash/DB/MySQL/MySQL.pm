@@ -7857,6 +7857,7 @@ sub getCommentTextCached {
 
 	return {} if ! $cids_needed_ar;
 	$cids_needed_ar = [$cids_needed_ar] if ! ref $cids_needed_ar;
+	$cids_needed_ar = [ grep { $_ } @$cids_needed_ar ];
 	return {} if ! @$cids_needed_ar;
 
 	my $constants = getCurrentStatic();
