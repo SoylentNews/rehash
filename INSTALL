@@ -753,7 +753,7 @@ REQUIREMENTS
         MySQL 3.23.x is no longer supported, as of CVS tag T_2_5_0_33
         (October 18, 2004). MySQL 4.0.x is not being actively updated by
         MySQL AB, so we would recommend that you upgrade, though as far as
-        we know 4.0.12 still works fine. At some point in the future we will
+        we know it still works fine. At some point in the future we will
         switch over to some syntaxes which have been recommended for some
         time and this will break on 4.0.x, so please upgrade to at least
         4.1.x whenever you get a chance (you probably have until 2007 before
