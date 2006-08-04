@@ -140,7 +140,7 @@ __template__
                       [% IF form.nowrapper %]<input type="hidden" name="nowrapper" value="1">[% END %]
                       [% IF form.fromconsole %]<input type="hidden" name="fromconsole" value="1">[% END %]
                       <input type="hidden" name="op" value="viewsub">
-                      <input type="hidden" name="subid" value="[& subid %]">
+                      <input type="hidden" name="subid" value="[% subid %]">
                       <input type="submit" value="Remember">
               </td>
 
