@@ -13686,7 +13686,7 @@ sub updateSubMemory {
 		'time'	=> 'NOW()',
 	}, "submatch=" . $self->sqlQuote($submatch));
 
-	$self->sqlInsert('submissions_memory', {
+	$self->sqlInsert('submissions_notes', {
 		submatch	=> $submatch,
 		subnote		=> $subnote,
 		uid		=> $user->{uid},
