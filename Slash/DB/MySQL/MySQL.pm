@@ -13680,11 +13680,11 @@ sub updateSubMemory {
 
 	my $user = getCurrentUser();
 
-	my $rows = $self->sqlUpdate('submissions_memory', {
+	my $rows = $self->sqlUpdate('submissions_notes', {
 		subnote	=> $subnote,
 		uid	=> $user->{uid},
 		'time'	=> 'NOW()',
-	}, "submatch='" . $self->sqlQuote($submatch) . "'");
+	}, "submatch=" . $self->sqlQuote($submatch));
 
 	$self->sqlInsert('submissions_memory', {
 		submatch	=> $submatch,
