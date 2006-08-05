@@ -259,13 +259,14 @@ CREATE TABLE commentmodes (
 DROP TABLE IF EXISTS comments;
 CREATE TABLE comments (
 	sid mediumint UNSIGNED NOT NULL,
-	cid mediumint UNSIGNED NOT NULL auto_increment,
+	cid int UNSIGNED NOT NULL auto_increment,
 	pid mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	date datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
 	last_update TIMESTAMP NOT NULL,
 	ipid char(32) DEFAULT '' NOT NULL,
 	subnetid char(32) DEFAULT '' NOT NULL,
 	subject varchar(50) NOT NULL,
+	subject_original ENUM('no', 'yes') DEFAULT 'yes' NOT NULL,
 	uid mediumint UNSIGNED NOT NULL,
 	points tinyint DEFAULT '0' NOT NULL,
 	pointsorig tinyint DEFAULT '0' NOT NULL,
@@ -296,7 +297,7 @@ CREATE TABLE comments (
 
 DROP TABLE IF EXISTS comment_text;
 CREATE TABLE comment_text (
-	cid mediumint UNSIGNED NOT NULL,
+	cid int UNSIGNED NOT NULL,
 	comment text NOT NULL,
 	PRIMARY KEY (cid)
 ) TYPE=InnoDB;
@@ -628,14 +629,11 @@ CREATE TABLE moderatorlog (
 	val tinyint DEFAULT '0' NOT NULL,
 	sid mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	ts datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
-	cid mediumint UNSIGNED NOT NULL,
+	cid int UNSIGNED NOT NULL,
 	cuid mediumint UNSIGNED NOT NULL,
 	reason tinyint UNSIGNED DEFAULT '0',
 	active tinyint DEFAULT '1' NOT NULL,
 	spent tinyint DEFAULT '1' NOT NULL,
-	m2count mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	m2needed mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	m2status tinyint DEFAULT '0' NOT NULL,
 	points_orig tinyint DEFAULT NULL,
 	PRIMARY KEY (id),
 	KEY sid (sid,cid),
@@ -645,7 +643,6 @@ CREATE TABLE moderatorlog (
 	KEY subnetid (subnetid),
 	KEY uid (uid),
 	KEY cuid (cuid),
-	KEY m2stat_act (m2status,active),
 	KEY ts_uid_sid (ts,uid,sid)
 ) TYPE=InnoDB;
 
@@ -760,7 +757,7 @@ CREATE TABLE related_stories (
 	rel_sid varchar(16) NOT NULL default '',
 	title varchar(255) default '',
 	url varchar(255) default '',
-	cid mediumint(8) unsigned NOT NULL default '0',
+	cid int(8) unsigned NOT NULL default '0',
 	ordernum smallint unsigned NOT NULL default '0',
 	PRIMARY KEY (id),
 	KEY stoid (stoid)
