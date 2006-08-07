@@ -130,7 +130,7 @@ __template__
                 <td>[% subnote.submatch %]</td>
                 <td>[% subnote.subnote %]</td>
                 <td>[% subnote.time %]</td>
-                <td>[% subnote.uid %]</td>
+                <td>[% auname = Slash.db.getUser(subnote.uid, 'nickname'); auname %]</td>
         </tr>
 [% END # FOREACH %]
         <tr>
