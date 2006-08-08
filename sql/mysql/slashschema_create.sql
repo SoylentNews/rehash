@@ -1277,7 +1277,8 @@ CREATE TABLE urls (
 	tags_top VARCHAR(255) DEFAULT '' NOT NULL,
 	popularity float DEFAULT '0' NOT NULL,
 	PRIMARY KEY (url_id),
-	UNIQUE url_digest (url_digest)
+	UNIQUE url_digest (url_digest),
+	anon_bookmarks MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL
 );
 
 #
