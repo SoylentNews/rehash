@@ -42,7 +42,7 @@ $task{$me}{code} = sub {
 				
 				my $data = {
 					url		=> $link,
-					initialtitle	=> $title
+					initialtitle	=> strip_literal($title)
 				};
 				
 				my $url_id = $slashdb->getUrlCreate($data);
@@ -52,7 +52,7 @@ $task{$me}{code} = sub {
 				my $bookmark_data = {
 					url_id 		=> $url_id,
 					uid    		=> $feed->{uid},
-					title		=> $title,
+					title		=> strip_literal($title),
 				};
 				
 				my $user_bookmark = $bookmark->getUserBookmarkByUrlId($feed->{uid}, $url_id);
@@ -61,6 +61,11 @@ $task{$me}{code} = sub {
 					slashdLog("creating bookmark");
 					slashdLog("$url_id $link $title");
 					$bookmark_id= $bookmark->createBookmark($bookmark_data);
+					if ($constants->{plugin}{FireHose}) {
+						my $firehose = getObject("Slash::FireHose");
+						my $the_bookmark = $bookmark->getBookmark($bookmark_id);
+						$firehose->createUpdateItemFromBookmark($bookmark_id, { type => "feed", popularity => 0 });
+					}
 					
 					my $tags = getObject('Slash::Tags');
 					slashdLog("$taglist $url_id");
