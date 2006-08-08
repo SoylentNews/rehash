@@ -99,7 +99,10 @@ html > body .commentwrap table {
 .comment { margin-bottom: 0.5em }
 #commentlisting li.comment { list-style: none; }
 .comment_footer { text-align: center; background: #ddd }
-.modsel { display: inline }
+.modsel {
+	display: inline;
+	font-weight: bold;
+}
 
 .ups
 {

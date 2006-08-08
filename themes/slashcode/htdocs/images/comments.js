@@ -31,8 +31,16 @@ var is_firefox = (agt.indexOf("firefox") != -1);
 
 function updateComment(cid, mode) {
 	var existingdiv = fetchEl('comment_'+cid);
-	if (existingdiv)
+	if (existingdiv) {
+		if (comments[cid]['subject']) {
+			if (mode == 'oneline') {
+				fetchEl('comment_link_'+cid).innerHTML = 'Re:';
+			} else if (mode == 'full') {
+				fetchEl('comment_link_'+cid).innerHTML = comments[cid]['subject'];
+			}
+		}
 		existingdiv.className = mode;
+	}
 
 	currents[displaymode[cid]]--;
 	currents[mode]++;
@@ -261,12 +269,6 @@ function changeThreshold(threshold) {
 	user_highlightthresh = Math.min(Math.max(t_delta, -1), 5);
 	user_threshold = threshold_num;
 
-//	var params = [];
-//	params['op'] = 'user_save_thresh_prefs';
-//	params['threshold'] = user_threshold;
-//	params['highlightthresh'] = user_highlightthresh;
-//	ajax_update(params, '', '', 'http://use.perl.org/ajax.pl');
-
 	if ($('currentHT'))
 		$('currentHT').innerHTML = user_highlightthresh;
 
@@ -282,6 +284,13 @@ function changeThreshold(threshold) {
 
 	updateTotals();
 	setPadding();
+
+	var params = [];
+	params['op'] = 'comments_set_prefs';
+	params['threshold'] = user_threshold;
+	params['highlightthresh'] = user_highlightthresh;
+	ajax_update(params);
+
 	return void(0);
 }
 

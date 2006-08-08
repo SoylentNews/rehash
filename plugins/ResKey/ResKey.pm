@@ -94,25 +94,28 @@ sub purge_old {
 	$count += $self->sqlDelete('reskeys', "create_ts < DATE_SUB(NOW(), INTERVAL $timeframe SECOND)");
 
 
+	my $uses     = $self->sqlSelectAll('rkrid, value', 'reskey_vars', 'name="duration_uses"');
+	my $max_uses = $self->sqlSelectAll('rkrid', 'reskey_vars', 'name="duration_max-uses"');
+	my %max_uses = map { $_->[0] => 1 } @$max_uses;
+	my %rkids    = map { $_->[0] => 1 } (@$uses, @$max_uses);
+	my $rkid_str = join ', ', keys %rkids;
+
+	# then, delete all used reskeys where duration_uses and
+	# duration_max-uses are not in use
+	$count += $self->sqlDelete('reskeys', "rkrid NOT IN ($rkid_str) AND is_alive = 'no'");
+
 	# next, purge all reskeys that are used and older than duration_uses
-	my $uses = $self->sqlSelectAll('rkrid, value', 'reskey_vars', 'name="duration_uses"');
+	# (minimum time between uses) where duration_max-uses (max uses per
+	# timeframe) not defined
 	for (@$uses) {
 		my($rkrid, $seconds) = @$_;
+		next if $max_uses{$rkrid};
 		$count += $self->sqlDelete('reskeys',
 			"rkrid = $rkrid AND is_alive = 'no' AND " .
 			"submit_ts IS NOT NULL AND " .
 			"submit_ts < DATE_SUB(NOW(), INTERVAL $seconds SECOND)"
 		);
 	}
-
-
-	# then, delete all used reskeys where duration_uses and
-	# duration_max-uses are not in use
-	my $max_uses = $self->sqlSelectAll('rkrid', 'reskey_vars', 'name="duration_max-uses"');
-	my %rkids = map { $_->[0] => 1 } (@$uses, @$max_uses);
-	my $rkid_str = join ', ', keys %rkids;
-	$count += $self->sqlDelete('reskeys', "rkrid NOT IN ($rkid_str) AND is_alive = 'no'");
-
 
 	# finally, delete orphaned reskey_failures entries
 	my $rkids = $self->sqlSelectAll('rkf.rkid',

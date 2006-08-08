@@ -62,7 +62,7 @@ use vars qw($VERSION @EXPORT);
 
 #========================================================================
 
-=head2 createSelect(LABEL, DATA [, DEFAULT, RETURN, NSORT, ORDERED, MULTIPLE])
+=head2 createSelect(LABEL, DATA [, DEFAULT, RETURN, NSORT, ORDERED, MULTIPLE, ONCHANGE])
 
 Creates a drop-down list in HTML.  List is sorted by default
 alphabetically according to list values.
@@ -75,7 +75,7 @@ alphabetically according to list values.
 
 =item LABEL
 
-The name for the HTML entity.
+The name/id for the HTML entity.
 
 =item DATA
 

@@ -228,8 +228,8 @@ sub jsSelectComments {
 	$user->{reparent} = 0;
 	$user->{state}{max_depth} = $constants->{max_depth} + 3;
 
-	my $threshold = $user->{threshold};
-	my $highlightthresh = $user->{highlightthresh};
+	my $threshold = defined $user->{d2_threshold} ? $user->{d2_threshold} : $user->{threshold};
+	my $highlightthresh = defined $user->{d2_highlightthresh} ? $user->{d2_highlightthresh} : $user->{highlightthresh};
 	$highlightthresh = $threshold if $highlightthresh < $threshold;
 
 	my $id = $form->{sid};
@@ -263,7 +263,14 @@ sub jsSelectComments {
 		my @keys = qw(pid kids points uid);
 		for my $cid (keys %$comments) {
 			@{$comments_new->{$cid}}{@keys} = @{$comments->{$cid}}{@keys};
+			# we only care about it if it is not original ... we could
+			# in theory guess at what it is and just use a flag, but that
+			# could be complicated, esp. if we are several levels deep -- pudge
+			if ($comments->{$cid}{subject_original} && $comments->{$cid}{subject_original} eq 'no') {
+				$comments_new->{$cid}{subject} = $comments->{$cid}{subject};
+			}
 		}
+
 		$comments = $comments_new;
 	}
 
@@ -1134,8 +1141,11 @@ sub displayThread {
 	my $return = '';
 
 	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
-	my $highlightthresh = $user->{highlightthresh};
-	$highlightthresh = $user->{threshold} if $highlightthresh < $user->{threshold};
+	my $threshold = $discussion2 && defined $user->{d2_threshold} ? $user->{d2_threshold} : $user->{threshold};
+	my $highlightthresh = $discussion2 && defined $user->{d2_highlightthresh} ? $user->{d2_highlightthresh} : $user->{highlightthresh};
+	$highlightthresh = $threshold if $highlightthresh < $threshold;
+	# root comment should have more likelihood to be full
+	$highlightthresh-- if !$pid;
 
 	# FYI: 'archive' means we're to write the story to .shtml at the close
 	# of the discussion without page breaks.  'metamod' means we're doing
@@ -1171,7 +1181,7 @@ sub displayThread {
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
 
 		my $class = 'oneline';
-		if ($comment->{points} < $user->{threshold}) {
+		if ($comment->{points} < $threshold) {
 			if ($user->{is_anon} || ($user->{uid} != $comment->{uid})) {
 				if ($discussion2) {
 					$class = 'hidden';
@@ -1191,6 +1201,9 @@ sub displayThread {
 		my $finish_list = 0;
 
 		if ($full || $highlight || $discussion2) {
+			if ($discussion2 && $class eq 'oneline' && $comment->{subject_original} eq 'no') {
+				$comment->{subject} = 'Re:';
+			}
 			if ($lvl && $indent) {
 				$return .= $const->{tablebegin} .
 					dispComment($comment, { class => $class }) .
