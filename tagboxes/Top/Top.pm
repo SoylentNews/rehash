@@ -104,21 +104,25 @@ sub feed_userchanges {
 	my $tagsdb = getObject('Slash::Tags');
 print STDERR "Slash::Tagbox::Top->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'\n";
 
+	my %max_tuid = ( );
 	my %uid_change_sum = ( );
 	my %globj_change = ( );
 	for my $hr (@$users_ar) {
 		next unless $hr->{user_key} eq 'tag_clout';
-		$globj_change{$hr->{globjid}}{max_tuid} ||= $hr->{tuid};
-		$globj_change{$hr->{globjid}}{max_tuid} = $hr->{tuid}
-			if $globj_change{$hr->{globjid}}{max_tuid} < $hr->{tuid};
+		$max_tuid{$hr->{uid}} ||= $hr->{tuid};
+		$max_tuid{$hr->{uid}}   = $hr->{tuid}
+			if $max_tuid{$hr->{uid}} < $hr->{tuid};
 		$uid_change_sum{$hr->{uid}} ||= 0;
 		$uid_change_sum{$hr->{uid}} += abs(($hr->{value_old} || 1) - $hr->{value_new});
 	}
 	for my $uid (keys %uid_change_sum) {
 		my $tags_ar = $tagsdb->getAllTagsFromUser($uid);
 		for my $tag_hr (@$tags_ar) {
-			$globj_change{$tag_hr->{globj}}{sum} ||= 0;
-			$globj_change{$tag_hr->{globj}}{sum} += $uid_change_sum{$uid};
+			$globj_change{$tag_hr->{globjid}}{max_tuid} ||= $max_tuid{$uid};
+			$globj_change{$tag_hr->{globjid}}{max_tuid}   = $max_tuid{$uid}
+				if $globj_change{$tag_hr->{globjid}}{max_tuid} < $max_tuid{$uid};
+			$globj_change{$tag_hr->{globjid}}{sum} ||= 0;
+			$globj_change{$tag_hr->{globjid}}{sum} += $uid_change_sum{$uid};
 		}
 	}
 	my $ret_ar = [ ];
@@ -142,7 +146,8 @@ sub run {
 	my $tagboxdb = getObject('Slash::Tagbox');
 
 	my($type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
-	return unless $type eq 'stories' || $type eq 'urls';
+	if (!$type) { print STDERR "Tagbox::Top::run finds no type for '$affected_id'" } # debug assertion
+	return unless $type && ($type eq 'stories' || $type eq 'urls');
 
 	# Get the list of tags applied to this object.  If we're doing
 	# URL popularity, that's only the tags within the past few days.
