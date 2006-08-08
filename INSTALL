@@ -202,7 +202,7 @@ INSTALLATION
                         ---- Unsatisfied dependencies detected during [FOO/Bar-1.23.tar.gz] -----
                             Foobar::Baz
                         Shall I follow them and prepend them to the queue
-                        of modules we are processing right now? [yes]
+                        of modules we are processing right now? [yes] 
 
                 That's normal; just hit return.
 
@@ -314,6 +314,9 @@ INSTALLATION
             you need to fix them, but if you're down to 1 or 2 you can't
             fix, we suggest you make a note of what the failures were and
             just "force install Template".
+
+        HTML::CalendarMonth 1.18
+            Testing is broken, almost all tests fail. Just force install.
 
         If you have problems, feel free to re-run "install Bundle::Slash".
         It will safely skip anything already installed.
@@ -492,11 +495,11 @@ INSTALLATION OPTIONS
     RAM or 5 MB?
 
     Slashdot, and some other Slash sites we're hosting, are currently using
-    boa 0.94.14rc17 (http://www.boa.org/) for images. Boa is fast and has a
-    small footprint. It's easy to build ("./configure && make") but you have
-    to install it yourself by copying the binary and mkdir'ing a little tree
-    wherever you want it. We did roughly this. Your mileage may vary. This
-    sets up an alternate server just for images on port 8080, and sets
+    boa 0.94.14rc17 (<http://www.boa.org/>) for images. Boa is fast and has
+    a small footprint. It's easy to build ("./configure && make") but you
+    have to install it yourself by copying the binary and mkdir'ing a little
+    tree wherever you want it. We did roughly this. Your mileage may vary.
+    This sets up an alternate server just for images on port 8080, and sets
     Slash's imagedir var to point to it. Your apache will still serve images
     at the old URLs if anyone requests them, but nobody will, because your
     site's pages will all point to boa:
@@ -805,9 +808,14 @@ REQUIREMENTS
                 http://www.gzip.org/zlib/
                 http://sf.net/projects/expat/
 
-        On Debian Linux, try:
+        On Debian Linux, or Debian-based distributions like Ubuntu, try:
 
                 apt-get install zlib1g zlib1g-dev libexpat1 libexpat1-dev
+
+        Also on Debian, as of the current writing (July 2006), you will want
+        libperl-dev. And on Debian stable, try libmysqlclient12 (and -dev)
+        for 4.0.x and/or libmysqlclient14 (and -dev) for 4.1.x. On testing
+        or unstable, try libmysqlclient15off and libmysqlclient15-dev.
 
         The current list of required perl modules can be found in the
         Bundle/Slash.pm file. At its end we also list optional modules,
@@ -1002,8 +1010,8 @@ TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
             fully understand MySQL permissions, don't guess; start your
             reading here:
 
-            http://www.mysql.com/documentation/mysql/bychapter/manual_MySQL_
-            Database_Administration.html#Privilege_system
+            <http://www.mysql.com/documentation/mysql/bychapter/manual_MySQL
+            _Database_Administration.html#Privilege_system>
 
         *   mod_gzip
 

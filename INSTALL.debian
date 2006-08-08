@@ -1,7 +1,11 @@
 Some more info to help Debian users.  Please read the main INSTALL first.
 
-(Note, August 2003:  this file is pretty well out of date by now.
-The main INSTALL file is becoming more useful for Debian sites.)
+Note:  this file has been out of date for several years and is presented
+here only for historical interest.  Please don't rely on this file.
+After you finish reading the main INSTALL file, you may wish to grep
+it on the word 'Debian' for tips useful for installation on Debian or
+Debian-based distributions.  - Jamie McCarthy, August 2006
+
 
 Author: Bernard de Rubinat <bernard@netgames.org>
 
@@ -15,8 +19,6 @@ Some packages do not exist; install those using other methods.
 NOTES:
 
 * perl 5.6 should work fine too, in place of perl 5.005.
-* Apache and mod_perl packages might not work.  If not, install from
-  the source, as per the instructions in INSTALL.
 * Some issues arose with the installation of the apache-perl
   package. If you ALREADY are using the "apache" package, and have
   a working system, then you should probably install the 
@@ -32,10 +34,6 @@ MySQL                   mysql-server
 mod_perl                libapache-mod-perl
 perl                    perl-5.005-base
                      or perl-5.005
-Apache                  apache
-                        apache-common
-                        apache-dev
-Apache+mod_perl         apache-perl
 
 
 

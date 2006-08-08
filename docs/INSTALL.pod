@@ -370,6 +370,10 @@ may find help.  If you're getting 100 errors, you need to fix them,
 but if you're down to 1 or 2 you can't fix, we suggest you make a note
 of what the failures were and just C<force install Template>.
 
+=item B<HTML::CalendarMonth 1.18>
+
+Testing is broken, almost all tests fail.  Just force install.
+
 =back
 
 If you have problems, feel free to re-run C<install Bundle::Slash>.  It
@@ -966,17 +970,22 @@ item 4, "Install the Perl modules.")
 
 The latest version of each module is recommended.
 
-For Compress::Zlib, the zlib development library is required.
-For XML::Parser, the expat library is required.
-If they are not present on the system already, download and
-install them before installing the modules.
+For Compress::Zlib, the zlib development library is required.  For
+XML::Parser, the expat library is required.  If they are not present
+on the system already, download and install them before installing
+the modules.
 
 	http://www.gzip.org/zlib/
 	http://sf.net/projects/expat/
 
-On Debian Linux, try:
+On Debian Linux, or Debian-based distributions like Ubuntu, try:
 
 	apt-get install zlib1g zlib1g-dev libexpat1 libexpat1-dev
+
+Also on Debian, as of the current writing (July 2006), you will want
+libperl-dev.  And on Debian stable, try libmysqlclient12 (and -dev)
+for 4.0.x and/or libmysqlclient14 (and -dev) for 4.1.x.  On testing or
+unstable, try libmysqlclient15off and libmysqlclient15-dev.
 
 The current list of required perl modules can be found in the
 F<Bundle/Slash.pm> file.  At its end we also list optional modules,
