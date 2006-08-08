@@ -524,6 +524,8 @@ sub dbUse {
 			$update{-submit_ts} = 'NULL';
 			$update{is_alive}   = 'yes';
 		} else {
+			# XXX since is_alive is definitely 'no' here,
+			# why not just delete it now? -Jamie
 			# update the ts again, just to be clean
 			$update{-submit_ts} = 'NOW()';
 		}
