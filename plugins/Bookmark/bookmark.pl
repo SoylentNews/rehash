@@ -24,6 +24,7 @@ sub main {
 		bookmark 	=> [!$user->{is_anon}, \&bookmark, 0, 1 ],
 		save		=> [!$user->{is_anon}, \&saveBookmark, 1, 1 ],
 		showbookmarks	=> [1, \&showBookmarks, 0, 0 ],
+		anon_bookmark	=> [1, \&anonBookmark, 0, 0 ]
 	);
 	
 
@@ -31,7 +32,9 @@ sub main {
 	my $op = lc($form->{op} || 'default');
 	$op = 'default' if !$ops{$op} || !$ops{$op}[ALLOWED];
 	$op = 'default' if $ops{$op}[2] && !$postflag;
-	redirect("/login.pl") if $user->{seclev} < $ops{$op}[3];
+	if ($user->{seclev} < $ops{$op}[3]) {
+		$op = 'anon_bookmark';
+	}
 
 	header("$constants->{sitename} Bookmarks") if $op ne "save";
 	$ops{$op}[FUNCTION]->($constants, $slashdb, $user, $form);
@@ -109,7 +112,7 @@ sub saveBookmark {
 
 	my $data = {
 		url		=> $fudgedurl,
-		initialtitle	=> $form->{title}
+		initialtitle	=> strip_literal($form->{title})
 	};
 
 	my $url_id = $slashdb->getUrlCreate($data);
@@ -118,7 +121,7 @@ sub saveBookmark {
 	my $bookmark_data = {
 		url_id 		=> $url_id,
 		uid    		=> $user->{uid},
-		title		=> strip_attribute($form->{title}),
+		title		=> strip_literal($form->{title}),
 	};
 
 	my $bookmark_id;
@@ -174,6 +177,43 @@ sub showBookmarks {
 		type		=> $type,
 		bookmarks	=> $bookmarks,
 	});
+}
+
+sub anonBookmark {
+	my($constants, $slashdb, $user, $form) = @_;
+	my $bookmark = getObject("Slash::Bookmark");
+	my $fudgedurl = fudgeurl($form->{url});
+	my $errors;
+	if($fudgedurl) {
+		my $url_id = $slashdb->getUrlIfExists($fudgedurl);
+		if ($url_id) {
+			$slashdb->setUrl($url_id, { -anon_bookmarks => 'anon_bookmarks + 1' } );
+		} else {
+			my $data = {
+				initialtitle => strip_attribute($form->{title}),
+				url    => $fudgedurl,
+				anon_bookmarks => 1,
+			};
+			my @allowed_schemes = split(/\|/,$constants->{bookmark_allowed_schemes});
+			my %allowed_schemes = map { $_ => 1 } @allowed_schemes;
+
+
+			my $scheme;
+			if ($fudgedurl) {
+				my $uri = new URI $fudgedurl;
+				$scheme = $uri->scheme if $uri && $uri->can("scheme");
+			}		
+	
+			if ($scheme && $allowed_schemes{$scheme}) {
+				$slashdb->getUrlCreate($data);
+			}
+		}
+
+	}
+	slashDisplay('anon_bookmark', {
+		fudgedurl => $fudgedurl,
+	});
+	
 }
 
 createEnvironment();
