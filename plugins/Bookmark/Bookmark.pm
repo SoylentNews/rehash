@@ -85,6 +85,12 @@ sub getBookmarkFeeds {
 	$self->sqlSelectAllHashrefArray("*", "bookmark_feeds");
 }
 
+sub getBookmark {
+	my($self, $id) = @_;
+	my $id_q = $self->sqlQuote($id);
+	$self->sqlSelectHashref("*", "bookmarks", "bookmark_id=$id_q");
+}
+
 1;
 
 __END__
