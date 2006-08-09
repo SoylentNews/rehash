@@ -134,7 +134,7 @@ html > body .commentwrap table {
 	display: none;
 }
 
-.comment > .oneline .commentSub, .comment > .oneline .score, .comment > .oneline .otherdetails, .comment > .oneline .sig {
+.comment > .oneline .commentSub, .comment > .oneline .otherdetails, .comment > .oneline .sig {
 	display: none;
 }
 
