@@ -184,7 +184,7 @@ sub anonBookmark {
 	my $bookmark = getObject("Slash::Bookmark");
 	my $fudgedurl = fudgeurl($form->{url});
 	my $errors;
-	if($fudgedurl) {
+	if ($fudgedurl) {
 		my $url_id = $slashdb->getUrlIfExists($fudgedurl);
 		if ($url_id) {
 			$slashdb->setUrl($url_id, { -anon_bookmarks => 'anon_bookmarks + 1' } );
