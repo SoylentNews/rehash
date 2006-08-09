@@ -526,6 +526,8 @@ sub dbUse {
 		} else {
 			# XXX since is_alive is definitely 'no' here,
 			# why not just delete it now? -Jamie
+			# XXX delete what?  the reskey?  because we (might)
+			# need it for duration checks -- pudge
 			# update the ts again, just to be clean
 			$update{-submit_ts} = 'NOW()';
 		}
