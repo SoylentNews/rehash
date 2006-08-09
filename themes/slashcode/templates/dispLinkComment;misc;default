@@ -49,7 +49,7 @@ __template__
 		[% IF do_parent && ( can_mod || do_mod ) %] | [% END %]
 
 		[% IF can_mod %]
-		<div id="reasondiv_[% cid %]" class="modsel">[% Slash.createSelect("reason_$cid", reasons, '', 1, 1, 0, 0, 'return doModerate(this)')
+		<div id="reasondiv_[% cid %]" class="modsel">[% Slash.createSelect("reason_$cid", reasons, '', 1, 1) #, 0, 0, 'return doModerate(this)')
 		%]</div>[% END %]
 
 		[% IF can_mod && do_mod %] | [% END %]

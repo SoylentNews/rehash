@@ -22,6 +22,8 @@ var user_is_anon = 0;
 var user_uid = 0;
 var user_threshold = 0;
 var user_highlightthresh = 0;
+var user_threshold_orig = -9;
+var user_highlightthresh_orig = -9;
 var loaded = 0;
 
 
@@ -67,7 +69,7 @@ function updateCommentTree(cid, threshold) {
 		updateDisplayMode(cid, futuredisplaymode[cid], 1);
 	}
 
-	if (futuredisplaymode[cid] != displaymode[cid]) { 
+	if (futuredisplaymode[cid] && futuredisplaymode[cid] != displaymode[cid]) { 
 		updateComment(cid, futuredisplaymode[cid]);
 	}
 
@@ -284,14 +286,27 @@ function changeThreshold(threshold) {
 
 	updateTotals();
 	setPadding();
-
-	var params = [];
-	params['op'] = 'comments_set_prefs';
-	params['threshold'] = user_threshold;
-	params['highlightthresh'] = user_highlightthresh;
-	ajax_update(params);
+	savePrefs();
 
 	return void(0);
+}
+
+function savePrefs() {
+	if ((user_threshold_orig != user_threshold)
+		||
+	    (user_highlightthresh_orig != user_highlightthresh)
+	) {
+		var params = [];
+		params['op'] = 'comments_set_prefs';
+		params['threshold'] = user_threshold;
+		params['highlightthresh'] = user_highlightthresh;
+		ajax_update(params);
+
+		user_threshold_orig = user_threshold;
+		user_highlightthresh_orig = user_highlightthresh;
+	}
+
+	return false;
 }
 
 function revealKids(cid) {
@@ -529,7 +544,9 @@ function loadAllElements(tagname) {
 }
 
 function fetchEl(str) {
-	return is_firefox ? commentelements[str] : $(str);
+	return loaded
+		? (is_firefox ? commentelements[str] : $(str))
+		: $(str);
 }
 
 function finishLoading() {
@@ -545,6 +562,14 @@ function finishLoading() {
 	for (var i = 0; i < root_comments.length; i++) {
 		root_comments_hash[ root_comments[i] ] = 1;
 	}
+
+	if (user_threshold_orig == -9 || user_highlightthresh_orig == -9) {
+		user_threshold_orig = user_threshold;
+		user_highlightthresh_orig = user_highlightthresh;
+	}
+
+	//window.onbeforeunload = function () { savePrefs() };
+	//window.onunload = function () { savePrefs() };
 
 	updateTotals();
 	setPadding();

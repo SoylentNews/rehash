@@ -301,7 +301,7 @@ sub getOps {
 		},
 		comments_set_prefs	=> {
 			function	=> \&updateD2prefs,
-			reskey_name	=> 'ajax_base',
+			reskey_name	=> 'ajax_user',
 			reskey_type	=> 'createuse',
 		},
 		getSectionPrefsHTML => {

@@ -154,7 +154,7 @@ __template__
 						subject_only => 1,
 				}) %]
 				[% END %]
-	 	<span title="Close this window" onclick="document.getElementById('gods').className='loki';" class="close">x</span>
+		<span title="Close this window" onclick="document.getElementById('gods').className='loki';" class="close">x</span>
 				</h3>
 			</div>
 		</div>
