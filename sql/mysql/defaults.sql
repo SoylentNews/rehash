@@ -703,7 +703,6 @@ INSERT INTO vars (name, value, description) VALUES ('article_nocomment','0','Sho
 INSERT INTO vars (name, value, description) VALUES ('authors_unlimited','100','Seclev for which authors have unlimited comment-moderation and -deletion power (see also the ACLs)');
 INSERT INTO vars (name, value, description) VALUES ('backup_db_user','','The virtual user of the database that the code should use for intensive database access that may bring down the live site. If you don\'t know what this is for, you should leave it blank.');
 INSERT INTO vars (name, value, description) VALUES ('badkarma','-10','Users get penalized for posts if karma is below this value');
-INSERT INTO vars (name, value, description) VALUES ('badreasons','4','number of \"Bad\" reasons in \"reasons\", skip 0 (which is neutral)');
 INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_ip','40','Warn admin if an ip specifies password incorrectly this many times in one day');
 INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_subnet','60','Warn admin if a subnet specifies password incorrectly this many times in one day');
 INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_uid','40','Warn admin if user specifies password incorrectly this many times in one day');
@@ -1008,7 +1007,6 @@ INSERT INTO vars (name, value, description) VALUES ('rdfsubject','Technology','T
 INSERT INTO vars (name, value, description) VALUES ('rdfupdatebase','1970-01-01T00:00+00:00','The date to use as a base for the updating');
 INSERT INTO vars (name, value, description) VALUES ('rdfupdatefrequency','1','How often to update per rdfupdateperiod');
 INSERT INTO vars (name, value, description) VALUES ('rdfupdateperiod','hourly','When to update');
-INSERT INTO vars (name, value, description) VALUES ('reasons','Normal|Offtopic|Flamebait|Troll|Redundant|Insightful|Interesting|Informative|Funny|Overrated|Underrated','first is neutral, next $badreasons are bad, the last two are \"special\", the rest are good');
 INSERT INTO vars (name, value, description) VALUES ('recent_topic_img_count','5','Number of recent topics to store in the template "recentTopics"');
 INSERT INTO vars (name, value, description) VALUES ('recent_topic_txt_count','5','Number of recent topics to store in the block "recenttopics"');
 INSERT INTO vars (name, value, description) VALUES ('referrer_external_static_redirect','1','If true, redirect anon requests referred from other sites for dynamic article.pl to static .shtml. This can greatly improve chances of surviving a slashdotting');

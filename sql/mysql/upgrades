@@ -3984,4 +3984,5 @@ ALTER TABLE urls ADD COLUMN anon_bookmarks MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL
 UPDATE vars SET value = 'T_2_5_0_121' WHERE name = 'cvs_tag_currentcode';
 
 ALTER TABLE comments CHANGE COLUMN subject_original subject_orig ENUM('no', 'yes') DEFAULT 'yes' NOT NULL;
+DELETE FROM vars WHERE name IN ('reasons', 'badreasons');
 
