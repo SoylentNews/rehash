@@ -31,7 +31,7 @@ __template__
 
 <a name="acomments"></a>
 <div class="commentwrap">
-[% IF user.is_admin || user.acl.discussion2_slashdot || user.is_subscriber || (!constants.subscribe && !user.is_anon) %]
+[% IF (!user.is_anon && !user.acl.discussion2_uofm) || user.is_admin %]
 <div class="commentBox" style="font-size: 120%">
 	<form method="GET" action="[% gSkin.rootdir %]/comments.pl">
 	<div>
