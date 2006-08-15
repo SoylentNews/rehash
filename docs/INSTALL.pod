@@ -141,14 +141,20 @@ to it:
 Start, or restart, MySQL (it must be running for the installation of
 Perl modules and Slash).
 
-Create a database to be used by Slash.
+Create a database to be used by Slash.  Our default name is 'slash':
 
-Create a username/password that can access that database (by
+	CREATE DATABASE slash;
+
+Create a username/password that can access that database.  By
 default, we normally set the user to have all permissions, but that
 might not be appropriate for your site; make sure that you have
 at least privileges to select, insert, update, delete, create,
-drop, index and alter).
+drop, index and alter.  For example, if your whole site (slashd
+daemon, apache, and mysql server) will run on the same machine, and
+you wanted to use the mysql username 'slash', you might:
 
+	GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER
+	ON slash.* TO 'slash'@'localhost' IDENTIFIED BY (quoted passwd);
 
 =item 2.
 
@@ -180,8 +186,8 @@ you will need to modify the instructions here appropriately.
 First, untar apache and mod_perl.  Then, go to the mod_perl directory,
 and have mod_perl build and install apache for you:
 
-	perl Makefile.PL APACHE_SRC=/where_you_have_the_source DO_HTTPD=1 \
-		USE_APACI=1 PERL_MARK_WHERE=1 EVERYTHING=1 \
+	perl Makefile.PL APACHE_SRC=../where_you_have_apache/src \
+		DO_HTTPD=1 USE_APACI=1 PERL_MARK_WHERE=1 EVERYTHING=1 \
 		APACHE_PREFIX=/where_apache_will_be_installed
 	make
 	make test
@@ -196,6 +202,8 @@ installing the Perl modules, to make sure everything is OK.
 B<NOTE>: If you know what you're doing, Slash will work with a DSO
 Apache. Be sure you're on the latest versions of Apache and
 mod_perl and remember PERL_MARK_WHERE=1 and EVERYTHING=1.
+
+B<NOTE>: See also "Other requirements" under L<"REQUIREMENTS">.
 
 =item 4.
 
@@ -302,13 +310,18 @@ always welcome.
 
 When installing DBIx::Password, you will be asked for various
 information, the same information used to create the database
-and database user in Step 1.  You will also be asked for a
+and database user in Step 1.  First, you'll be asked for a
 B<virtual user> name, which will be the identifier for all of
 this data.  You can just use the name of your site,
 or any other alphanumeric string.  You will use this virtual
-user name in other places, so do not forget it. If you don't
-understand what you're doing here, don't fake it; this is a
-common reason we see for Slash installations failing.
+user name in other places, so do not forget it.
+
+Then you'll be asked for your DBI driver (mysql), the name of the database
+you CREATEd in Step 1, its machine (maybe 'localhost' or an IP number) and
+port, and then the mysql username and password you GRANTed privileges to.
+
+If you don't understand what you're doing here, don't fake it; this is
+a common reason we see for Slash installations failing.
 
 =item B<Documentation>
 
@@ -362,7 +375,7 @@ during this process.  Here are some tips:
 
 =item B<DBI>
 
-Don't worry about the threading warning.
+Don't worry about the threading warning.  Slash doesn't use threads.
 
 =item B<DBIx::Password>
 
@@ -373,9 +386,9 @@ See IMPORTANT NOTES above.
 You will need C<httpd> and C<apxs> in your $PATH, and even if they
 are there, you will probably see the lengthy error that starts "Apache
 cannot spawn child processes as 'root'".  This is because, ironically,
-Apache::Test's self-tests are a colossal pain to actually run.
-Personally I just C<force install Apache::Cookie> which is lame but
-solves the problem.
+Apache::Test's self-tests are a colossal pain to actually run (I take
+the option to skip them).  And personally I just C<force install
+Apache::Cookie> which is lame but solves the problem.
 
 =item B<Template>
 
@@ -385,12 +398,20 @@ tests, and installation will be halted if just 1 of these tests fails.
 Do a C<look Template> and try your best to resolve the issues.
 The F<README> includes a URL to the mailing list archives, where you
 may find help.  If you're getting 100 errors, you need to fix them,
-but if you're down to 1 or 2 you can't fix, we suggest you make a note
+but if you're down to 1 or 2 you can't fix, you might just make a note
 of what the failures were and just C<force install Template>.
 
-=item B<HTML::CalendarMonth 1.18>
+=item B<Other failures>
 
-Testing is broken, almost all tests fail.  Just force install.
+We can't predict whether bugs will appear in CPAN modules in future.
+Often the bugs are not in the software proper, but in its too-strictly
+coded test suites, which do not allow for changed but still-legitimate
+output.  When this happens, the module itself is fine but it will not
+install unless forced.  As of August 2006, we've noticed the following
+modules throw spurious errors:
+
+	HTML::CalendarMonth 1.18
+	XML::Simple 2.14
 
 =back
 
@@ -1000,6 +1021,12 @@ the modules.
 	http://www.gzip.org/zlib/
 	http://sf.net/projects/expat/
 
+The current list of required perl modules can be found in the
+F<Bundle/Slash.pm> file.  At its end we also list optional modules,
+which may be required depending on your setup.
+
+=item Other requirements
+
 On Debian Linux, or Debian-based distributions like Ubuntu, try:
 
 	apt-get install zlib1g zlib1g-dev libexpat1 libexpat1-dev
@@ -1008,10 +1035,6 @@ Also on Debian, as of the current writing (July 2006), you will want
 libperl-dev.  And on Debian stable, try libmysqlclient12 (and -dev)
 for 4.0.x and/or libmysqlclient14 (and -dev) for 4.1.x.  On testing or
 unstable, try libmysqlclient15off and libmysqlclient15-dev.
-
-The current list of required perl modules can be found in the
-F<Bundle/Slash.pm> file.  At its end we also list optional modules,
-which may be required depending on your setup.
 
 =back
 

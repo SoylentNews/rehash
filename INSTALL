@@ -59,8 +59,7 @@ SYNOPSIS
     bad idea to look over the very latest version of this INSTALL file,
     which you can find at:
 
-    <http://slashcode.cvs.sourceforge.net/*checkout*/slashcode/slash/INSTALL
-    >
+    http://slashcode.cvs.sourceforge.net/*checkout*/slashcode/slash/INSTALL
 
     The version of this file that you are currently reading is:
 
@@ -69,7 +68,7 @@ SYNOPSIS
     If there are more recent versions of this file, you can find a list of
     those changes at:
 
-    <http://slashcode.cvs.sourceforge.net/slashcode/slash/INSTALL>
+    http://slashcode.cvs.sourceforge.net/slashcode/slash/INSTALL
 
 INSTALLATION
   Installation Notes
@@ -110,13 +109,20 @@ INSTALLATION
         Start, or restart, MySQL (it must be running for the installation of
         Perl modules and Slash).
 
-        Create a database to be used by Slash.
+        Create a database to be used by Slash. Our default name is 'slash':
 
-        Create a username/password that can access that database (by
+                CREATE DATABASE slash;
+
+        Create a username/password that can access that database. By
         default, we normally set the user to have all permissions, but that
         might not be appropriate for your site; make sure that you have at
         least privileges to select, insert, update, delete, create, drop,
-        index and alter).
+        index and alter. For example, if your whole site (slashd daemon,
+        apache, and mysql server) will run on the same machine, and you
+        wanted to use the mysql username 'slash', you might:
+
+                GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER
+                ON slash.* TO 'slash'@'localhost' IDENTIFIED BY (quoted passwd);
 
     2.  Install perl.
 
@@ -143,8 +149,8 @@ INSTALLATION
         First, untar apache and mod_perl. Then, go to the mod_perl
         directory, and have mod_perl build and install apache for you:
 
-                perl Makefile.PL APACHE_SRC=/where_you_have_the_source DO_HTTPD=1 \
-                        USE_APACI=1 PERL_MARK_WHERE=1 EVERYTHING=1 \
+                perl Makefile.PL APACHE_SRC=../where_you_have_apache/src \
+                        DO_HTTPD=1 USE_APACI=1 PERL_MARK_WHERE=1 EVERYTHING=1 \
                         APACHE_PREFIX=/where_apache_will_be_installed
                 make
                 make test
@@ -159,6 +165,8 @@ INSTALLATION
         NOTE: If you know what you're doing, Slash will work with a DSO
         Apache. Be sure you're on the latest versions of Apache and mod_perl
         and remember PERL_MARK_WHERE=1 and EVERYTHING=1.
+
+        NOTE: See also "Other requirements" under "REQUIREMENTS".
 
     4.  Install the Perl modules.
 
@@ -222,7 +230,7 @@ INSTALLATION
                         ---- Unsatisfied dependencies detected during [FOO/Bar-1.23.tar.gz] -----
                             Foobar::Baz
                         Shall I follow them and prepend them to the queue
-                        of modules we are processing right now? [yes] 
+                        of modules we are processing right now? [yes]
 
                 That's normal; just hit return.
 
@@ -256,13 +264,20 @@ INSTALLATION
             DBIx::Password
                 When installing DBIx::Password, you will be asked for
                 various information, the same information used to create the
-                database and database user in Step 1. You will also be asked
+                database and database user in Step 1. First, you'll be asked
                 for a virtual user name, which will be the identifier for
                 all of this data. You can just use the name of your site, or
                 any other alphanumeric string. You will use this virtual
-                user name in other places, so do not forget it. If you don't
-                understand what you're doing here, don't fake it; this is a
-                common reason we see for Slash installations failing.
+                user name in other places, so do not forget it.
+
+                Then you'll be asked for your DBI driver (mysql), the name
+                of the database you CREATEd in Step 1, its machine (maybe
+                'localhost' or an IP number) and port, and then the mysql
+                username and password you GRANTed privileges to.
+
+                If you don't understand what you're doing here, don't fake
+                it; this is a common reason we see for Slash installations
+                failing.
 
             Documentation
                 To read the README for any module, before or after
@@ -311,7 +326,8 @@ INSTALLATION
         This will be a long process. Several modules will ask to be
         configured during this process. Here are some tips:
 
-        DBI Don't worry about the threading warning.
+        DBI Don't worry about the threading warning. Slash doesn't use
+            threads.
 
         DBIx::Password
             See IMPORTANT NOTES above.
@@ -321,8 +337,9 @@ INSTALLATION
             are there, you will probably see the lengthy error that starts
             "Apache cannot spawn child processes as 'root'". This is
             because, ironically, Apache::Test's self-tests are a colossal
-            pain to actually run. Personally I just "force install
-            Apache::Cookie" which is lame but solves the problem.
+            pain to actually run (I take the option to skip them). And
+            personally I just "force install Apache::Cookie" which is lame
+            but solves the problem.
 
         Template
             The Template Toolkit is a complex install. Try accepting all the
@@ -332,11 +349,20 @@ INSTALLATION
             the issues. The README includes a URL to the mailing list
             archives, where you may find help. If you're getting 100 errors,
             you need to fix them, but if you're down to 1 or 2 you can't
-            fix, we suggest you make a note of what the failures were and
+            fix, you might just make a note of what the failures were and
             just "force install Template".
 
-        HTML::CalendarMonth 1.18
-            Testing is broken, almost all tests fail. Just force install.
+        Other failures
+            We can't predict whether bugs will appear in CPAN modules in
+            future. Often the bugs are not in the software proper, but in
+            its too-strictly coded test suites, which do not allow for
+            changed but still-legitimate output. When this happens, the
+            module itself is fine but it will not install unless forced. As
+            of August 2006, we've noticed the following modules throw
+            spurious errors:
+
+                    HTML::CalendarMonth 1.18
+                    XML::Simple 2.14
 
         If you have problems, feel free to re-run "install Bundle::Slash".
         It will safely skip anything already installed.
@@ -515,11 +541,11 @@ INSTALLATION OPTIONS
     RAM or 5 MB?
 
     Slashdot, and some other Slash sites we're hosting, are currently using
-    boa 0.94.14rc17 (<http://www.boa.org/>) for images. Boa is fast and has
-    a small footprint. It's easy to build ("./configure && make") but you
-    have to install it yourself by copying the binary and mkdir'ing a little
-    tree wherever you want it. We did roughly this. Your mileage may vary.
-    This sets up an alternate server just for images on port 8080, and sets
+    boa 0.94.14rc17 (http://www.boa.org/) for images. Boa is fast and has a
+    small footprint. It's easy to build ("./configure && make") but you have
+    to install it yourself by copying the binary and mkdir'ing a little tree
+    wherever you want it. We did roughly this. Your mileage may vary. This
+    sets up an alternate server just for images on port 8080, and sets
     Slash's imagedir var to point to it. Your apache will still serve images
     at the old URLs if anyone requests them, but nobody will, because your
     site's pages will all point to boa:
@@ -832,6 +858,11 @@ REQUIREMENTS
                 http://www.gzip.org/zlib/
                 http://sf.net/projects/expat/
 
+        The current list of required perl modules can be found in the
+        Bundle/Slash.pm file. At its end we also list optional modules,
+        which may be required depending on your setup.
+
+    Other requirements
         On Debian Linux, or Debian-based distributions like Ubuntu, try:
 
                 apt-get install zlib1g zlib1g-dev libexpat1 libexpat1-dev
@@ -840,10 +871,6 @@ REQUIREMENTS
         libperl-dev. And on Debian stable, try libmysqlclient12 (and -dev)
         for 4.0.x and/or libmysqlclient14 (and -dev) for 4.1.x. On testing
         or unstable, try libmysqlclient15off and libmysqlclient15-dev.
-
-        The current list of required perl modules can be found in the
-        Bundle/Slash.pm file. At its end we also list optional modules,
-        which may be required depending on your setup.
 
   Hardware Requirements
     There are no specific hardware requirements.
@@ -1131,8 +1158,8 @@ TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
             fully understand MySQL permissions, don't guess; start your
             reading here:
 
-            <http://www.mysql.com/documentation/mysql/bychapter/manual_MySQL
-            _Database_Administration.html#Privilege_system>
+            http://www.mysql.com/documentation/mysql/bychapter/manual_MySQL_
+            Database_Administration.html#Privilege_system
 
         *   mod_gzip
 
@@ -1196,7 +1223,7 @@ TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
     answer. Also, Shane, aka tf23, maintains an unofficial Slash FAQ which
     you may find helpful:
 
-    <http://slash.lottadot.com/faqster.pl?op=view&fid=1#c_Troubleshooting>
+    http://slash.lottadot.com/faqster.pl?op=view&fid=1#c_Troubleshooting
 
     If you are trying to install Slash from someone else's package, maybe a
     BSD package, or an RPM that someone built, or by a Debian apt-get
