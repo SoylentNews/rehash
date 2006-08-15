@@ -1,5 +1,26 @@
 // $Id$
 
+function um_ajax(the_behaviors, the_events) {
+	var params =[];
+	params['op'] = 'um_ajax';
+	params['behaviors'] = the_behaviors;
+	params['events'] = the_events;
+	ajax_update(params, 'links-vendors-content');
+}
+
+function um_fetch_settings() {
+	var params =[];
+	params['op'] = 'um_fetch_settings';
+	ajax_update(params, 'links-vendors-content');
+}
+
+function um_set_settings(behavior) {
+	var params =[];
+	params['op'] = 'um_set_settings';
+	params['behavior'] = behavior;
+	ajax_update(params, 'links-vendors-content');
+}
+
 function admin_signoff(el) {
 	var params = [];
 	var reskeyel = $('signoff-reskey-' + el.value);
@@ -37,11 +58,10 @@ function tagsHistory(id, type) {
 	var params = [];
 	type = type || "stories";
 	params['type'] = type;
+	params['op'] = 'tags_history';
 	if (type == "stories") {
-		params['op'] = 'tags_history';
 		params['sidenc'] = id;
-	} else if (type == "urls") {
-		params['op'] = 'tags_history';
+	} else if (type == "urls" || type == "firehose") {
 		params['id'] = id;
 	}
 	var tagshistid = "taghist-" + id;
@@ -74,8 +94,6 @@ function remarks_create() {
 function remarks_fetch(secs, limit) {
 	var params = [];
 	params['op'] = 'remarks_fetch';
-	// this not being used? -- pudge
-	remarks_max = $('remarks_max');
 	params['limit'] = limit;
 	// run it every 30 seconds; don't need to call again
 	ajax_periodic_update(secs, params, 'remarks_table');
@@ -181,4 +199,37 @@ function make_spelling_correction(misspelled_word, form_element) {
 	if (numrows.length == 1) {
 		table.parentNode.removeChild(table);
 	}	
+}
+
+function firehose_reject (el) {
+	var params = [];
+	var fh = $('firehose-' + el.value);
+//	var reskeyel = $('signoff-reskey-' + el.value);
+	params['op'] = 'firehose_reject';
+	params['id'] = el.value;
+//	params['reskey'] = reskeyel.value;
+	ajax_update(params, 'reject_' + el.value);
+	if (fh) {
+		fh.className="hide";
+	}
+}
+
+function firehose_open_note(id) {
+	var nf = $('note-form-'+id);
+	var nt = $('note-text-'+id);
+	nf.className="";
+	nt.className="hide";
+}
+
+function firehose_save_note(id) {
+	var nf = $('note-form-'+id);
+	var nt = $('note-text-'+id);
+	var ni = $('note-input-'+id);
+	var params = [];
+	params['op'] = 'firehose_save_note';
+	params['note'] = ni.value;
+	params['id'] = id;
+	ajax_update(params, 'note-text-'+id);
+	nf.className = "hide";
+	nt.className = "";
 }

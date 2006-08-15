@@ -180,6 +180,9 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 			//alert('getting user urls ' + id);
 			params['op'] = 'tags_get_user_urls';
 			params['id'] = id;
+		} else if (type =="firehose") {
+			params['op'] = 'tags_get_user_firehose';
+			params['id'] = id;
 		}
 		params['newtagspreloadtext'] = newtagspreloadtext
 		ajax_update(params, tagsuserid);
@@ -199,6 +202,9 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 				params['sidenc'] = id;
 			} else if (type == "urls") {
 				params['op'] = 'tags_get_admin_url';
+				params['id'] = id;
+			} else if (type == "firehose") {
+				params['op'] = 'tags_get_admin_firehose';
 				params['id'] = id;
 			}
 			ajax_update(params, tagsadminid);
@@ -264,6 +270,63 @@ function tagsCreateForUrl(id) {
 	// XXX How to determine failure here?
 	toggletags_message_el.innerHTML = 'Tags saved.';
 }
+
+//Firehose functions begin
+function tagsCreateForFirehose(id) {
+	var toggletags_message_id = 'toggletags-message-' + id;
+	var toggletags_message_el = $(toggletags_message_id);
+	toggletags_message_el.innerHTML = 'Saving tags...';
+	
+	var params = [];
+	params['op'] = 'tags_create_for_firehose';
+	params['id'] = id;
+	var newtagsel = $('newtags-' + id);
+	params['tags'] = newtagsel.value; 
+	var reskeyel = $('newtags-reskey-' + id);
+	params['reskey'] = reskeyel.value;
+
+	ajax_update(params, 'tags-user-' + id);
+	toggletags_message_el.innerHTML = 'Tags saved.';
+}
+
+function toggle_firehose_body(id) {
+		var params = [];
+		params['op'] = 'firehose_fetch_text';
+		params['id'] = id;
+		var fhbody = $('fhbody-'+id);
+		var fh = $('firehose-'+id);
+		if (fhbody.className == "empty") {
+			ajax_update(params, 'fhbody-'+id);
+			fhbody.className = "body";
+			fh.className = "article";
+		} else if (fhbody.className == "body") {
+			fhbody.className = "hide";
+			fh.className = "briefarticle";
+		} else if (fhbody.className == "hide") {
+			fhbody.className = "body";
+			fh.className = "article";
+		}
+}
+
+function toggleFirehoseTagbox(id) {
+	var fhtb = $('fhtagbox-'+id);
+	if (fhtb.className == "hide") {
+		fhtb.className = "tagbox";
+	} else {
+		fhtb.className = "hide";
+	}
+}
+
+function firehose_up_down(id, dir) {
+	var params = [];
+	params['op'] = 'firehose_up_down';
+	params['id'] = id;
+	params['dir'] = dir;
+	var updown = $('updown-' + id);
+	updown.innerHTML = "Vote saved";
+	ajax_update(params, 'updown-'+id);
+}
+// firehose functions end
 
 // helper functions
 function ajax_update(params, onsucc, options, url) {
