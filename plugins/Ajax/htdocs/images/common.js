@@ -323,7 +323,6 @@ function firehose_up_down(id, dir) {
 	params['id'] = id;
 	params['dir'] = dir;
 	var updown = $('updown-' + id);
-	updown.innerHTML = "Vote saved";
 	ajax_update(params, 'updown-'+id);
 }
 // firehose functions end
