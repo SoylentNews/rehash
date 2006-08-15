@@ -19,6 +19,8 @@ INSERT INTO vars (name, value, description) VALUES ('tags_urls_neg_tags', 'minus
 INSERT INTO vars (name, value, description) VALUES ('tags_reduced_tag_clout', '0.5', 'Reduced clout of tags');
 INSERT INTO vars (name, value, description) VALUES ('tags_reduced_user_clout', '0.5', 'Reduced clout of user applied tags');
 INSERT INTO vars (name, value, description) VALUES ('tags_tagname_regex', '^\!?[a-z][a-z0-9/]{0,63}$', 'Regex that tag names must conform to');
+INSERT INTO vars (name, value, description) VALUES ('tags_upvote_tag', 'nod', 'Tag for upvote');
+INSERT INTO vars (name, value, description) VALUES ('tags_downvote_tag', 'nix', 'Tag for downvote');
 
 INSERT INTO ajax_ops VALUES (NULL, 'tags_get_user_story', 'Slash::Tags', 'ajaxGetUserStory', 'ajax_tags_write', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'tags_get_user_urls', 'Slash::Tags', 'ajaxGetUserUrls', 'ajax_tags_write', 'createuse');
