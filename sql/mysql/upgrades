@@ -3962,30 +3962,35 @@ DELETE FROM vars WHERE name IN ('tags_stories_lastscanned', 'tags_urls_lastscann
 # 2006-07-11
 UPDATE vars SET value = 'T_2_5_0_119' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
-
 INSERT INTO vars (name, value, description) VALUES ('comments_control_horizontal', '0', 'Is Discussion2 control is configured horizontally?');
 
 # 2006-07-18
 UPDATE vars SET value = 'T_2_5_0_120' WHERE name = 'cvs_tag_currentcode';
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
 
 ALTER TABLE related_stories CHANGE COLUMN cid cid int UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE moderatorlog CHANGE COLUMN cid cid int UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE comment_text CHANGE COLUMN cid cid int UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE comments CHANGE COLUMN cid cid int UNSIGNED NOT NULL AUTO_INCREMENT, ADD COLUMN subject_original ENUM('no', 'yes') DEFAULT 'yes' NOT NULL AFTER subject;
 
-# SLASHDOT LAST UPDATED HERE
-
 ALTER TABLE urls ADD COLUMN anon_bookmarks MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL;
 
 # 2006-08-08
 UPDATE vars SET value = 'T_2_5_0_121' WHERE name = 'cvs_tag_currentcode';
 
+# PUDGE LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
 ALTER TABLE comments CHANGE COLUMN subject_original subject_orig ENUM('no', 'yes') DEFAULT 'yes' NOT NULL;
+
+# SLASHDOT LAST UPDATED HERE
+
 DELETE FROM vars WHERE name IN ('reasons', 'badreasons');
 
 # For Tags PLUGIN
 INSERT INTO vars (name, value, description) VALUES ('tags_upvote_tag', 'nod', 'Tag for upvote');
 INSERT INTO vars (name, value, description) VALUES ('tags_downvote_tag', 'nix', 'Tag for downvote');
+
+# 2006-08-15
+UPDATE vars SET value = 'T_2_5_0_122' WHERE name = 'cvs_tag_currentcode';
+
