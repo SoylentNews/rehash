@@ -32,10 +32,16 @@ END %]
 [% IF full %]
 <div id="firehose-[% item.id %]" class="[% IF mode == "full" %]article[% ELSE %]briefarticle[% END %]">
 	[% classnum = toggle ? "1" : "2";
+
+	   the_skin_title = "";
+	   IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid != constants.mainpage_skid;
+	   	the_skin = Slash.db.getSkin(item.primaryskid);
+		the_skin_title = the_skin.title _ ": ";
+	   END;
 	   IF item.url_id;
-	   	title = "<a href=\"" _ url.url _ "\">$item.title</a> [-&gt;]";
+	   	title = "$the_skin_title<a href=\"" _ url.url _ "\">$item.title</a> [-&gt;]";
 	   ELSE;
-	   	title = item.title;
+	   	title = the_skin_title _ item.title;
 	   END;
 	   IF item.introtext;
 	   	title = "<a href='javascript:toggle_firehose_body(\"$item.id\")'>" _ title _ "</a>";
@@ -109,3 +115,5 @@ END %]
 		-->
 </div>
 [% END %]
+__version__
+$Id$

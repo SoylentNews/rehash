@@ -19,3 +19,5 @@ __template__
 <p>
 [% item.bodytext %]
 </p>
+__version__
+$Id$

@@ -29,3 +29,5 @@ param_str = ""
 <li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page %][% param_str %]">[% page + 1 %]</a></li>
 <li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page + 1%][% param_str %]">[% page + 2 %] -&gt;</a></li>
 </ul>
+__version__
+$Id$

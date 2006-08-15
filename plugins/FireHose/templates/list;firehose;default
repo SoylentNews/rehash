@@ -31,4 +31,4 @@ __template__
 [% page = page || "0" %]
 [% PROCESS paginate %]
 __version__
-$Id
+$Id$
