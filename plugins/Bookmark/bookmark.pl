@@ -135,7 +135,10 @@ sub saveBookmark {
 		if ($constants->{plugin}{FireHose}) {
 			my $firehose = getObject("Slash::FireHose");
 			my $the_bookmark = $bookmark->getBookmark($bookmark_id);
-			$firehose->createUpdateItemFromBookmark($bookmark_id, { type => "bookmark", popularity => 1 });
+			$firehose->createUpdateItemFromBookmark($bookmark_id, {
+				type		=> "bookmark",
+				popularity	=> 1
+			});
 		}
 					
 	}

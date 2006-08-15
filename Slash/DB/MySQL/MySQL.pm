@@ -1945,7 +1945,7 @@ sub createSubmission {
 
 	# The next line makes sure that we get any section_extras in the DB - Brian
 	$self->setSubmission($subid, $submission) if $subid && keys %$submission;
-	
+
 	if ($constants->{plugin}{FireHose}) {
 		my $firehose = getObject("Slash::FireHose");
 		$firehose->createItemFromSubmission($subid);
@@ -9248,9 +9248,9 @@ sub grantStorySubmissionKarma {
 	my($self, $story) = @_;
 	my $constants = getCurrentStatic();
 	if ($constants->{plugin}{FireHose}) {
-		if($story->{fhid}) {
+		if ($story->{fhid}) {
 			my $firehose = getObject("Slash::FireHose");
-			$firehose->setFireHose($story->{fhid}, { accepted => "yes"});
+			$firehose->setFireHose($story->{fhid}, { accepted => "yes" });
 		}
 	}
 	return 0 unless $story->{subid};

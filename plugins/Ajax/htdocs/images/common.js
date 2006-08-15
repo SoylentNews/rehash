@@ -180,7 +180,7 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 			//alert('getting user urls ' + id);
 			params['op'] = 'tags_get_user_urls';
 			params['id'] = id;
-		} else if (type =="firehose") {
+		} else if (type == "firehose") {
 			params['op'] = 'tags_get_user_firehose';
 			params['id'] = id;
 		}
@@ -290,22 +290,22 @@ function tagsCreateForFirehose(id) {
 }
 
 function toggle_firehose_body(id) {
-		var params = [];
-		params['op'] = 'firehose_fetch_text';
-		params['id'] = id;
-		var fhbody = $('fhbody-'+id);
-		var fh = $('firehose-'+id);
-		if (fhbody.className == "empty") {
-			ajax_update(params, 'fhbody-'+id);
-			fhbody.className = "body";
-			fh.className = "article";
-		} else if (fhbody.className == "body") {
-			fhbody.className = "hide";
-			fh.className = "briefarticle";
-		} else if (fhbody.className == "hide") {
-			fhbody.className = "body";
-			fh.className = "article";
-		}
+	var params = [];
+	params['op'] = 'firehose_fetch_text';
+	params['id'] = id;
+	var fhbody = $('fhbody-'+id);
+	var fh = $('firehose-'+id);
+	if (fhbody.className == "empty") {
+		ajax_update(params, 'fhbody-'+id);
+		fhbody.className = "body";
+		fh.className = "article";
+	} else if (fhbody.className == "body") {
+		fhbody.className = "hide";
+		fh.className = "briefarticle";
+	} else if (fhbody.className == "hide") {
+		fhbody.className = "body";
+		fh.className = "article";
+	}
 }
 
 function toggleFirehoseTagbox(id) {

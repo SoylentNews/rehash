@@ -188,7 +188,6 @@ sub create {
 	my $constants = getCurrentStatic();
 
 	$submit = $submit ? "yes" : "no";
-	
 
 	my $uid = getCurrentUser('uid');
 	$self->sqlInsert("journals", {
