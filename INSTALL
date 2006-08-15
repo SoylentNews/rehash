@@ -29,27 +29,47 @@ SYNOPSIS
     See the SourceForge.net page for patches and bug reports.
 
   Which version should I use?
-    If you are using Slash 2.2.5 or before, including all 2.1.x, 2.0.x, and
-    1.x versions, you should upgrade to the latest version in the 2.2 tree,
-    2.2.6, as soon as possible. There are security issues with previous
-    versions. You should not install previous versions.
+    First of all: if you are using Slash 2.2.5 or before, including all
+    2.1.x, 2.0.x, and 1.x versions, you should upgrade to the latest version
+    in the 2.2 tree, 2.2.6, as soon as possible. There are security issues
+    with previous versions. You should not install previous versions.
 
-    As of this writing (June 2003), our last official release (2.2.6) was
-    some time ago and many features have been added since. We have not yet
-    released 2.3.0. If you want to use more recent code, check out CVS
-    versions from cvs.slashcode.com. If you are installing a new Slash site,
-    you probably do not want to use the very latest CVS, but you probably do
-    want to use the latest "R_" tag available in CVS. See "VERSIONS", "CVS
-    tags", below, for advice on choosing and maintaining a CVS installation.
+    As of this writing (August 2006), our last official release (2.2.6) was
+    long ago, and many features have been added since. All development has
+    been in CVS. If you are installing a new Slash site, you don't want to
+    use 2.2.6. And while you probably do not want to use the very latest
+    CVS, you almost certainly do want to use the latest "R_" tag available
+    in CVS. See "VERSIONS", "CVS tags", below, for advice on choosing and
+    maintaining a CVS installation.
 
   Important Note
-    We know you want to get right into the installation, but you probably
-    want to read this whole document first. Notably, the software and
-    hardware requirements are given later on in the "REQUIREMENTS" section,
-    which you probably want to go read now, to check for potential problems.
+    We know you want to get right into the installation, but you need to
+    read this whole document first. Notably, the software and hardware
+    requirements are given in the "REQUIREMENTS" section, which you should
+    go read now, to make sure you're not wasting your time. Don't forget to
+    come back here when you're done!
 
-    Also, you will find information on upgrading a Slash site (which can be
-    tricky); uninstalling; and troubleshooting for common problems.
+    Also in this file, you will find information on upgrading a Slash site
+    (which can be tricky); uninstalling; and troubleshooting for common
+    problems.
+
+    This INSTALL file you are currently reading may not be the latest.
+    Again, you probably don't want to upgrade your whole Slash checkout to
+    the very latest CVS. But if you encounter problems, it might not be a
+    bad idea to look over the very latest version of this INSTALL file,
+    which you can find at:
+
+    <http://slashcode.cvs.sourceforge.net/*checkout*/slashcode/slash/INSTALL
+    >
+
+    The version of this file that you are currently reading is:
+
+    $Id$
+
+    If there are more recent versions of this file, you can find a list of
+    those changes at:
+
+    <http://slashcode.cvs.sourceforge.net/slashcode/slash/INSTALL>
 
 INSTALLATION
   Installation Notes
@@ -362,9 +382,9 @@ INSTALLATION
                 USER            nobody                  User to own files
                 GROUP           nobody                  Group to own files
                 CP              cp                      Name of or path to
-                                                        alternate `cp`
+                                                        alternate 'cp'
                 INSTALL         install                 Name of or path to
-                                                        alternate `install`
+                                                        alternate 'install'
 
         (USER and GROUP will also be changed later on a per-site basis, in
         step 6. while running install-slashsite.)
@@ -755,26 +775,30 @@ REQUIREMENTS
 
         MySQL 3.23.x is no longer supported, as of CVS tag T_2_5_0_33
         (October 18, 2004). MySQL 4.0.x is not being actively updated by
-        MySQL AB, so we would recommend that you upgrade, though as far as
-        we know it still works fine. At some point in the future we will
-        switch over to some syntaxes which have been recommended for some
-        time and this will break on 4.0.x, so please upgrade to at least
-        4.1.x whenever you get a chance (you probably have until 2007 before
-        we spring this on you).
+        MySQL AB except for security issues (though as far as we know it
+        still works fine), so we would recommend that you upgrade to at
+        least 4.1.x. At some point in the future we will switch over to some
+        syntaxes which have been recommended for some time which will break
+        on 4.0.x, so you'll have to upgrade to at least 4.1.x eventually
+        anyway. (You probably have until 2007 before we spring this on you.)
 
         Slashdot ran on 4.1.x for a long time with no problems, so we now
         recommend either that or 5.0.x. We have been testing on 5.0.x for
         months, and as of this writing (July 2006), Slashdot has been
-        running on 5.0.18 and 5.0.22 for some time with no problems.
+        running on 5.0.18 and 5.0.22 for some time with no problems. For
+        what it's worth, we have found the MySQL upgrade process, even
+        between major versions, to be about as painless as we could have
+        imagined.
 
     Apache
-        Version 1.3.33.
+        Version 1.3.34 (1.3.33).
 
                 http://httpd.apache.org/
 
         Since most of Apache 1.3.x's recent releases included security
-        fixes, we wouldn't recommend running an earlier version. As far as
-        we know, Slash is not compatible with Apache 2.x.
+        fixes, we wouldn't recommend running an earlier version. Slash is
+        not compatible with Apache 2.x and we have no plans to port to 2.x
+        (though we aren't excluding the possibility).
 
     mod_perl
         Version 1.29.
@@ -894,20 +918,20 @@ VERSIONS
     writing (June 2003) is 2.2.6.
 
   CVS tags
-    Our development of 2.3/2.4 has gone on exceptionally long without a
-    tarball release of 2.3.0. Most Slash hosting sites are choosing to
-    follow CVS instead of waiting, and we encourage this.
+    Our development of 2.3/2.5 has gone on exceptionally long without a
+    tarball release of either 2.3.0 or 2.5.0. Most Slash hosting sites are
+    choosing to follow CVS instead of waiting, and we encourage this.
 
-    Installation of the latest CVS (as of June 2003) is almost identical to
-    the installation of 2.2.
+    Installation of the latest CVS (as of August 2006) is almost identical
+    to the installation of 2.2.
 
     You probably do not want to use the very latest CVS, as the Slash
     developers are constantly updating it. If you wish to live on the edge,
-    try a T_2_3_0_x tag ("Testing in 2.3.0 branch" -- one or two of these
+    try a T_2_5_0_x tag ("Testing in 2.5.0 branch" -- one or two of these
     are added every week, Slashdot uses them, but they may have bugs). If
     you are content with recent code that the developers believe is likely
-    to be free of major bugs, look for a recent R_2_3_0_x cvs tag ("Release
-    candidates for 2.3.0").
+    to be free of major bugs, look for a recent R_2_5_0_x cvs tag ("Release
+    candidates for 2.5.0").
 
     To upgrade from 2.2.x to the CVS tree, you will need to follow the
     instructions in the sql/mysql/upgrades file. At the moment, these are
@@ -919,7 +943,94 @@ VERSIONS
     and each T_* tag is clearly marked.
 
 TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
-    Here are some common reasons why Slash installations fail.
+    Here are some common errors reported by other site administrators.
+
+    *   Can't locate Slash.pm in @INC...
+
+        One possibility is that you didn't actually "make install" Slash in
+        step 5, in which case you have a serious enough deficit in
+        instruction-following that you might want to start over and be more
+        careful this time.
+
+        It's also possible that the apache or slashd process issuing this
+        error doesn't have permissions to read Slash.pm, or is using a
+        different version of perl than you expect with a different set of
+        @INC directories than you expect. Try
+
+                which perl
+                head -1 /usr/local/slash/sbin/slashd
+                perl -MSlash -le 'print $INC{"Slash.pm"}'
+
+        at the command line and see if it emits the perl binaries you expect
+        and the location of Slash.pm that you expect. Check permissions and
+        see "Multiple Perls installed" below.
+
+    *   I installed Slash twice and it didn't work.
+
+        Did you uninstall before reinstalling? See "UNINSTALLING" below. If
+        you intend to reinstall with the same database and site name, steps
+        4 and 7 are not optional.
+
+    *   Can't locate MIME/Types.pm in @INC.
+
+        When you installed the Blob plugin, the script told you to check to
+        see if there were any plugin README files, right? You thought we
+        were kidding, didn't you? Go read plugins/Blob/README.
+
+    *   DBD::mysql will not install.
+
+        As of August 2006, its tests by default assume you have a running
+        mysqld on localhost, accessible to the user 'root' with no password.
+        If you don't run mysqld on the same machine as you're installing the
+        module, or if you have a password for its 'root' user (good idea),
+        almost all its tests will fail. You can either override the failures
+        with
+
+                cpan> force install DBD::mysql
+
+        or (better) run proper tests by telling it the actual mysqld host,
+        user, and password to connect to, with
+
+                cpan> look DBD::mysql
+                # perl Makefile.PL --usage
+                # perl Makefile.PL --testmycustomargs=foobar
+                # make && make test && make install
+
+    *   Can't call method "(whatever)" on an undefined value at...
+
+        Slash can't connect to your database server. (This manifests as the
+        variable $slashdb being undef. Which method happens to emit this
+        error depends on which code path first tries to use $slashdb.)
+
+        To start troubleshooting this, see "Database authentication issues"
+        below.
+
+    *   I created a new author but s/he doesn't show up in authors.pl and
+        can't post stories.
+
+        For performance reasons, Slash aggressively caches the list of which
+        users are authors. After you mark a user as an author and boost
+        their seclev (maybe to 100) in users.pl, go back to the command
+        line, run the refresh_authors.pl task by hand:
+
+                # /usr/local/slash/bin/runtask -u yourvirtuser refresh_authors
+
+        Then restart apache and slashd. That user will now be able to post
+        stories. The authors.pl listing will update some time after the
+        first story is actually posted.
+
+    *   Freshly-posted stories aren't showing up on the homepage.
+
+        Are you sure slashd is running? If a story appears on /index.pl but
+        not /index.shtml, and it's more than a few minutes old, check the
+        output of 'ps' for slashd, and check slashd.log for errors.
+
+    *   Use of uninitialized value in...
+
+        Just a harmless warning, ignore it. It helps us find errors, but you
+        don't need to worry about it.
+
+    Here are some other common reasons why Slash installations fail.
 
     *   Failure to build mod_perl with PERL_MARK_WHERE=1 EVERYTHING=1.
 
@@ -932,21 +1043,20 @@ TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
         serious firewall issues, perl module installation will usually go
         pretty smoothly. Some modules will have overactive testing code; for
         example, if your system lacks "nslookup", some of the net-related
-        modules will complain and refuse to install themselves even though
-        it isn't strictly speaking necessary. If you suspect overactive
-        testing, "force install Foo::Bar" for the offending module and then
-        try "install Bundle::Slash" again.
+        modules may complain and refuse to install themselves even though it
+        isn't strictly speaking necessary. If you're pretty sure you're a
+        victim of overactive testing, "force install Foo::Bar" for the
+        offending module and then try "install Bundle::Slash" again.
 
-        We list perl 5.6.0 as supported, but 5.6.1 is recommended. If you're
-        having CPAN installation troubles, upgrading to the latest version
-        will make life easier. Note that you'll want to recompile
+        If you're having CPAN installation troubles, upgrading to the latest
+        version will make life easier. Note that you'll want to recompile
         mod_perl/Apache after upgrading perl.
 
     *   Multiple Perls installed.
 
         If you have more than one binary file named "perl", trouble awaits.
         It's OK to have a "/usr/bin/perl5.00503" even after installing
-        5.6.1, but if your "/usr/bin/perl" is a different version from
+        5.6.1, say. But if your "/usr/bin/perl" is a different version from
         "/usr/local/bin/perl", you may be in for a world of hurt.
 
     *   httpd.conf errors.
@@ -1048,12 +1158,18 @@ TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
 
     *   Make sure you don't confuse the different types of "users":
 
-        *   Apache user -- a unix system user account, e.g. "nobody";
+        *   unix system user account -- given in httpd.conf User directive
+            and in the second field of slash.sites, defaults to 'nobody'
+            unless you changed it in Step 5;
 
-        *   DBIx::Password virtual user -- SlashVirtualUser directive;
+        *   DBIx::Password virtual user -- given in httpd.conf
+            SlashVirtualUser directive and in the first field of
+            slash.sites, you picked this in Step 4 when you installed
+            DBIx::Password;
 
-        *   MySQL user -- DBIx::Password virtual user field, points to a
-            database user.
+        *   MySQL user -- given as the DBIx::Password virtual user's
+            'username' hash value, points to the database user you picked in
+            Step 1.
 
         If slashd doesn't seem to be working, check its log and make sure it
         has permission to write its files. It is probably running as your
@@ -1066,7 +1182,10 @@ TROUBLESHOOTING COMMON INSTALLATION PROBLEMS
     If you've doublechecked all this, you're sure you followed the
     directions, and it still doesn't work, stop in IRC #slash on
     irc.slashcode.com and ask your question. Someone there may know the
-    answer.
+    answer. Also, Shane, aka tf23, maintains an unofficial Slash FAQ which
+    you may find helpful:
+
+    <http://slash.lottadot.com/faqster.pl?op=view&fid=1#c_Troubleshooting>
 
     If you are trying to install Slash from someone else's package, maybe a
     BSD package, or an RPM that someone built, or by a Debian apt-get
