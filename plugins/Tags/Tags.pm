@@ -939,6 +939,14 @@ sub ajaxProcessAdminTags {
 	} elsif ($type eq "urls") {
 		$table = "urls";
 		$id = $form->{id};
+	} elsif ($type eq "firehose") {
+		if ($constants->{plugin}{FireHose}) {
+			my $itemid = $form->{id};
+			my $firehose = getObject("Slash::FireHose");
+			my $item = $firehose->getFireHose($itemid);
+			my $tags = getObject("Slash::Tags");
+			($table, $id) = $tags->getGlobjTarget($item->{globjid});
+		}
 	}
 	
 	my $tags = getObject('Slash::Tags');
@@ -979,6 +987,11 @@ use Data::Dumper; print STDERR scalar(localtime) . " ajaxProcessAdminTags table=
 			id 		=>	$id,
 			tags_admin_str  =>	$tags_admin_str,
 		}, { Return => 1 });
+	} elsif ($type eq "firehose") {
+		return slashDisplay('tagsfirehosedivadmin', {
+			id 		=>	$id,
+			tags_admin_str  =>	$tags_admin_str,
+		}, { Return => 1 });
 	}
 }
 
@@ -993,6 +1006,12 @@ sub ajaxTagHistory {
 		$table = "stories"
 	} elsif ($form->{type} eq "urls") {
 		$table = "urls";	
+	} elsif ($form->{type} eq "firehose") {
+		my $itemid = $form->{id};
+		my $firehose = getObject("Slash::FireHose");
+		my $item = $firehose->getFireHose($itemid);
+		my $tags = getObject("Slash::Tags");
+		($table, $id) = $tags->getGlobjTarget($item->{globjid});
 	}
 	$id ||= $form->{id};
 
