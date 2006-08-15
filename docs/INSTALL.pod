@@ -630,7 +630,7 @@ all point to boa:
 
 	# In mysql client:
 	# UPDATE vars SET value='//www.mysite.com:8080/images.mysite.com' WHERE name='imagedir';
-	# UPDATE stories SET writestatus='dirty';
+	# INSERT IGNORE INTO story_dirty SELECT stoid FROM stories WHERE in_trash='no';
 
 	# Restart apache, slashd;  let slashd rewrite .shtml files both
 	# recent and archived.
@@ -1071,7 +1071,9 @@ or 2.0).
 The CVS repository is tagged with version numbers, so to get release
 1.0.3, use tag "v1_0_3_0".  The last number (in this case a zero) will
 be incremented during development ("v1_0_3_1", "v1_0_3_2", etc.) until
-the next release.
+the next release.  Non-release versions are tagged with a T_ or R_
+prefix.  We are currently developing 2.5.x, so our CVS tags are
+T_2_5_0_x and R_2_5_0_x (though there was no 2.5.0 release).
 
 =head2 Codenames
 
@@ -1089,6 +1091,18 @@ bender
 
 fry
 
+=item v2.3
+
+(never released)
+
+=item v2.4
+
+(never released)
+
+=item v2.5
+
+leela
+
 =back
 
 =head2 Security note
@@ -1097,8 +1111,8 @@ We are no longer releasing bugfixes, even for security, for the 1.0
 or 2.0 versions, and do not recommend their use.  If we become aware
 of security issues in the 2.2 tree, we will release another version.
 For this reason, if you are using any version of Slash in 2.2.x or
-earlier, we recommend you upgrade to the latest version of 2.2, which
-as of this writing (June 2003) is 2.2.6.
+earlier, we recommend you upgrade at the very least to the latest version
+of 2.2, which as of this writing (August 2006) is 2.2.6.
 
 =head2 CVS tags
 
