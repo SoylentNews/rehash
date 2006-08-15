@@ -1,0 +1,23 @@
+__section__
+default
+__description__
+id = id
+newtagspreloadtext = text to preload the newtags-# field with
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+tagsfirehosedivuser
+__template__
+
+[% PROCESS ajax_reskey_tag reskey_label => 'newtags-reskey-' _ id, reskey_name => 'ajax_tags_write' %]
+<input type="text" id="newtags-[% id %]" name="newtags-[% id %]" value="[% newtagspreloadtext | strip_attribute %]" size=50 maxlength=60 onkeyup="handleEnter(event, tagsCreateForFirehose, '[% id %]','firehose')">
+<input type="button" value="Tag" onclick="tagsCreateForFirehose('[% id %]')" class="button">
+
+__seclev__
+10000
+__version__
+$Id$

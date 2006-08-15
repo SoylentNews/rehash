@@ -1,0 +1,111 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+firehose
+__lang__
+en_US
+__name__
+dispFireHose
+__seclev__
+10000
+__template__
+[% 
+    mode = mode || "full";
+    full = 1;
+    bodywrapper = 1;
+    bodycontent = 1;
+    IF mode == "fulltitle";
+    	bodycontent = 0;
+    ELSIF mode == "bodycontent";
+	full = 0;
+	bodywrapper = 0;
+    END;
+%]
+[% IF item.url_id;
+	url = Slash.db.getUrl(item.url_id);
+END %]
+[% the_user = Slash.db.getUser(item.uid) %]
+[% IF full %]
+<div id="firehose-[% item.id %]" class="[% IF mode == "full" %]article[% ELSE %]briefarticle[% END %]">
+	[% classnum = toggle ? "1" : "2";
+	   IF item.url_id;
+	   	title = "<a href=\"" _ url.url _ "\">$item.title</a> [-&gt;]";
+	   ELSE;
+	   	title = item.title;
+	   END;
+	   IF item.introtext;
+	   	title = "<a href='javascript:toggle_firehose_body(\"$item.id\")'>" _ title _ "</a>";
+	   END;
+
+	   title = title _ " " _ '<span class="date">' _ item.createtime _ "</span> <span class='nickname'>" _ the_user.nickname _ "</span>";
+
+	   IF user.is_admin;
+	   	reject_checkbox = PROCESS reject id = item.id;
+	   	title = reject_checkbox _ " " _  item.popularity _ " " _ title;
+	   END;
+	   PROCESS titlebar;
+	%]
+[% END %]
+	[% IF bodywrapper %]
+	<div class="details">submitted by [% the_user.nickname | strip_literal %] at [% item.createtime %]</div>
+	<div class="[% IF bodycontent %]body[% ELSE %]empty[% END %]" id="fhbody-[% item.id %]">
+	[% END %]
+		[% IF item.tid %]
+		<div class="topic">
+			[% IF bodycontent %]
+			[% topic = Slash.db.getTopic(item.tid) %]
+			[% IF user.noicons || user.simpledesign || user.lowbandwidth %]
+				[ <a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">[% topic.textname %]</a> ]
+			[% ELSIF topic.image %]
+				<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">
+				<img src="[% constants.imagedir %]/topics/[% topic.image %]" width="[% topic.width %]" height="[% topic.height %]" alt="[% topic.textname %]" title="[% topic.textname %]" >
+			</a>
+			[% END %]
+			[% END %]
+		</div>
+		[% END %]
+		<div id="text-[% item.id %]" class="intro">
+			[% IF bodycontent %]
+				[% item.introtext %]
+				[% IF user.is_admin %]
+				<form id="postform-[% item.id %]" action="[% constants.real_rootdir %]/admin.pl" method="post">
+				<input type="hidden" name="firstpreview" value="1">
+				[% IF item.type == "submission" && item.srcid %]
+					<input type="hidden" name="subid" value="[% item.srcid %]">
+				[% END %]
+				<input type="hidden" name="fhid" value="[% item.id %]">
+				<input type="hidden" name="topic_source" value="submission">
+				<input type="hidden" name="submitter" value="[% item.uid %]">
+				<input type="hidden" name="title" value="[% item.title %]">
+				[% #extras %]
+				<input type="hidden" name="primaryskid" value="[% item.primaryskid %]">
+				<input type="hidden" name="tid" value="[% item.tid %]">
+				[% introtext = item.introtext %]
+				[% IF url && url.url; introtext = introtext _ "<br><a href='" _ url.url _ "'>" _ item.title _ "</a>"; END; %]
+				<input type="hidden" name="introtext" value="[% introtext | strip_attribute %]">
+				<input type="submit" name="op" value="preview"><br>
+				</form>
+				[% END %]
+
+			[% END %]
+		</div>
+	[% IF bodywrapper %]
+	</div>
+	[% END %]
+[% IF full %]
+		[% PROCESS tagsfirehosedivtagbox id = item.id tags_top = [] %]
+		<!--
+		<div class="firehosetag">
+			[<a href="">+</a>/<a href="">-<a/>] <a href="">[quickpicks]</a> <a href="">[sectionmenu]</a> <a href="">[topics]</a>&nbsp;&nbsp;&nbsp;<a href="javascript:toggleFirehoseTagbox('[%item.id %]');">[tag]</a>
+			<div class="hide" id="fhtagbox-[% item.id %]">
+				<input id="newtags-[% item.id %]" name="newtags-[% item.id %]" value="" size="50" maxlength="60" type="text">
+				<input value="Tag" onclick="tagsCreateForFirehose('[% item.id %]')" class="button" type="button">
+			</div>
+		</div>
+		-->
+</div>
+[% END %]

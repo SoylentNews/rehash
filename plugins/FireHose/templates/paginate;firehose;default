@@ -1,0 +1,31 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+firehose
+__lang__
+en_US
+__name__
+paginate
+__seclev__
+10000
+__template__
+[% 
+param_str = ""
+	state_params = ["view", "mode", "type", "primaryskid", "popularity"];
+	FOREACH param = state_params;
+		IF form.${param}.defined;
+			param_str = param_str _ "&amp;" _ param _ "=";
+			fp_val = form.${param} | fixparam;
+			param_str = param_str _ fp_val;
+		END;
+	END;
+%]
+<ul class="menu">
+[% IF page %] <li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page - 1 %][% param_str %]">&lt;- [% page %]</a></li>[% END %]
+<li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page %][% param_str %]">[% page + 1 %]</a></li>
+<li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page + 1%][% param_str %]">[% page + 2 %] -&gt;</a></li>
+</ul>

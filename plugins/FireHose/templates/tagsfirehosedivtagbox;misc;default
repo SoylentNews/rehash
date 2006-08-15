@@ -1,0 +1,57 @@
+__section__
+default
+__description__
+story = this story's data
+tags_example = array of example clickable tags
+tags_top = array of zero or more clickable tags, the most popular on this story
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+tagsfirehosedivtagbox
+__template__
+[% IF user.tags_canread_stories %]
+<div id="tagbox-[% id %]" class="tags">
+
+<div id="tagbox-title-[% id %]" class="tagtitleclosed">&nbsp;[% IF user.tags_canwrite_stories %]<a href="javascript:tagsToggleStoryDiv('[% id %]','[% user.is_admin %]','firehose');">[% ELSIF user.is_anon %]<a href="[% gSkin.rootdir %]/login.pl">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% id %]">[+]</span></a>
+<span id="updown-[% item.id %]"><a href="javascript:firehose_up_down('[% item.id %]','+')">+</a> <a href="javascript:firehose_up_down('[% item.id %]','-')">-</a></span> <i>(<a href="/faq/tags.shtml">tagging beta</a>)</i> [% IF user.is_admin %]<span id="note-form-[% item.id %]" class="hide"><input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30"> <input type="button" value="note" onclick="firehose_save_note('[% item.id %]')"></span><span id="note-text-[% item.id %]" onclick="firehose_open_note('[% item.id %]')">Note: [% item.note | strip_literal %]</span> [% item.subnote | strip_literal %] [% END %]
+[% IF tags_top.size %]
+	[% FOR t = tags_top -%]
+		<span class="tagname">[% IF user.tags_canwrite_stories %]<a href="javascript:tagsOpenAndEnter('[% id %]','[% t %]','[% user.is_admin %]','firehose')">[% END %][% t | strip_html %][% IF user.tags_canwrite_stories %]</a>[% END %]</span>[% IF !loop.last() %], [% END -%]
+	[%- END %]
+[% END %]
+<br>
+<br>
+</div>
+
+[% IF user.tags_canwrite_stories %]
+	<div class="tagshide" id="toggletags-body-[% id %]">
+
+	[% IF tags_example.size %]
+		<div>Examples:
+		[% FOR t = tags_example -%]
+			<span class="tagname"><a href="javascript:tagsOpenAndEnter('[% id %]','[% t %]','[% user.is_admin %]','firehose)">[% t | strip_html %]</a></span>[% IF !loop.last() %], [% END -%]
+		[%- END %]
+		</div>
+	[% END %]
+
+	[%# The tags-user-# div starts out empty, we only populate it if the user expands the toggletags-body-# div, because it requires a read of the user's tags and a write to generate a reskey. %]
+
+	<div id="tags-user-[% id %]"></div>
+
+	[% IF user.is_admin %]<div id="tags-admin-[% id %]"></div>[% END %]
+
+	<div id="toggletags-message-[% id %]"></div>
+
+	</div>
+[% END %]
+
+</div>
+[% END %]
+__seclev__
+10000
+__version__
+$Id$

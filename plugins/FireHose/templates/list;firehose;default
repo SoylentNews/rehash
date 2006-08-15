@@ -1,0 +1,44 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+firehose
+__lang__
+en_US
+__name__
+list
+__seclev__
+10000
+__template__
+<form action="[% gSkin.rootdir %]/firehose.pl" method="get">
+	Type: [% Slash.createSelect('type', { 'submission' => 'Submission', 'journal' => 'Journal', 'bookmark' => 'Bookmark', 'feed' => 'Feed', '' => 'All' }, form.type, 1, 0 1) %]
+	Order: [% Slash.createSelect('order', { 'createtime' => 'Time', popularity => 'Popularity' }, form.order, 1, 0 1) %]
+	Mode: [% Slash.createSelect('mode', { 'full' => 'Full', fulltitle => 'Abbreviated' }, form.mode, 1, 0 1) %]
+	[% skins = Slash.db.getDescriptions('skins');
+	   skins.0 = "All";
+	%]
+	Section: [% Slash.createSelect('primaryskid', skins, form.primaryskid, 1, 0, 1) %]
+
+	
+	<input type="submit" value="Change View">
+</form>
+<br>
+<hr>
+[% itemstext %]
+[% page = page || "0" %]
+[% PROCESS paginate %]
+
+<ul class="dropmenu">
+	<li><a href="#">[Sections]</a></li>
+	<ul>
+		<li><a href="#">Apache</a></li>
+		<li><a href="#">Books</a></li>
+		<li><a href="#">Apple</a></li>
+		<li><a href="#">Science</a></li>
+	</ul>
+
+	</ul>
+</ul>
