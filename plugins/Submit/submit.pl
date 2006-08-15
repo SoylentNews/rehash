@@ -627,6 +627,10 @@ sub saveSub {
 
 	my $messagesub = { %$submission };
 	$messagesub->{subid} = $slashdb->createSubmission($submission);
+	if ($constants->{plugin}{FireHose}) {
+		my $firehose = getObject("Slash::FireHose");
+		$firehose->createItemFromSubmission($messagesub->{subid});
+	}
 
 	if ($form->{url_id}) {
 		my $url_id = $form->{url_id};
