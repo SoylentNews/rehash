@@ -1945,6 +1945,11 @@ sub createSubmission {
 
 	# The next line makes sure that we get any section_extras in the DB - Brian
 	$self->setSubmission($subid, $submission) if $subid && keys %$submission;
+	
+	if ($constants->{plugin}{FireHose}) {
+		my $firehose = getObject("Slash::FireHose");
+		$firehose->createItemFromSubmission($subid);
+	}
 
 	return $subid;
 }
