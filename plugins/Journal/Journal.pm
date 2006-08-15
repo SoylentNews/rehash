@@ -178,7 +178,9 @@ sub create {
 	return unless $article;
 	return unless $tid;
 
+
 	$submit = $submit ? "yes" : "no";
+	
 
 	my $uid = getCurrentUser('uid');
 	$self->sqlInsert("journals", {

@@ -629,6 +629,14 @@ sub doSaveArticle {
 		}
 
 		$journal->set($form->{id}, \%update);
+		
+		if ($constants->{plugin}{FireHose}) {
+			my $journal_entry = $journal->get($form->{id});
+			if ($journal_entry->{submit} eq "yes") {
+				my $firehose = getObject("Slash::FireHose");
+				$firehose->createUpdateItemFromJournal($form->{id});
+			}
+		}
 		slashHook('journal_save_success', { id => $form->{id} });
 
 	} else {
@@ -658,6 +666,12 @@ sub doSaveArticle {
 		}
 
 		slashHook('journal_save_success', { id => $id });
+		if ($constants->{plugin}{FireHose}) {
+			if ($form->{submit}) {
+				my $firehose = getObject("Slash::FireHose");
+				$firehose->createItemFromJournal($id);
+			}
+		}
 
 		# create messages
 		my $messages = getObject('Slash::Messages');
