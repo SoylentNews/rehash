@@ -59,24 +59,23 @@ sub list {
 	} else {
 		$options->{limit} = 50;
 	}
-
-	if ($form->{page}) {
-		$options->{offset} = $form->{page} * $options->{limit};
+	my $page = $form->{page} || 0;
+	if ($page) {
+		$options->{offset} = $page * $options->{limit};
 	}
 
 	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1 };
 	my $modes = { full => 1, fulltitle => 1};
 	my $orders = { createtime => 1, popularity => 1};
 
-	my $mode = $modes->{$form->{mode}} ? $form->{mode} : "";
-	$options->{orderby} = $orders->{$form->{order}} ? $form->{order} : "";
-
+	my $mode = $modes->{$form->{mode}} ? $form->{mode} : "" if $form->{mode};
+	$options->{orderby} = $orders->{$form->{order}} ? $form->{order} : "" if $form->{order};
 	$options->{primaryskid} = $form->{primaryskid} if $form->{primaryskid};
 
 	$options->{type} = $form->{type} if $form->{type} && $types->{$form->{type}};
 
 	$options->{orderby} = "popularity" if $form->{popularity};
-	$options->{orderdir} = $form->{orderdir} eq "ASC" ? "ASC" : "DESC";
+	$options->{orderdir} = $form->{orderdir} eq "ASC" ? "ASC" : "DESC" if $form->{orderdir};
 
 	if ($user->{is_admin}) {
 		# $options->{attention_needed} = "yes";
@@ -91,7 +90,7 @@ sub list {
 		my $item =  $firehose->getFireHose($_->{id});
 		$itemstext .= $firehose->dispFireHose($item, { mode => $mode });
 	}
-	my $page = $form->{page} * 1;
+	
 	slashDisplay("list", { itemstext => $itemstext, page => $page } );
 
 }
