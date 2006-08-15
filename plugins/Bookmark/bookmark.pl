@@ -132,6 +132,12 @@ sub saveBookmark {
 	} else {
 		$bookmark_data->{"-createdtime"} = 'NOW()';
 		$bookmark_id= $bookmark->createBookmark($bookmark_data);
+		if ($constants->{plugin}{FireHose}) {
+			my $firehose = getObject("Slash::FireHose");
+			my $the_bookmark = $bookmark->getBookmark($bookmark_id);
+			$firehose->createUpdateItemFromBookmark($bookmark_id, { type => "bookmark", popularity => 1 });
+		}
+					
 	}
 
 	my $tags = getObject('Slash::Tags');
