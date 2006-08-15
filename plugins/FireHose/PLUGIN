@@ -1,0 +1,16 @@
+# $Id$
+name=FireHose
+description="FireHose"
+css=firehose.css
+htdoc=firehose.pl
+mysql_dump=mysql_dump.sql
+mysql_schema=mysql_schema.sql
+template=templates/list;firehose;default
+template=templates/view;firehose;default
+template=templates/dispFireHose;firehose;default
+#template=templates/fireHoseFormContents;misc;default
+template=templates/paginate;firehose;default
+template=templates/reject;firehose;default
+template=templates/tagsfirehosedivadmin;misc;default
+template=templates/tagsfirehosedivtagbox;misc;default
+template=templates/tagsfirehosedivuser;misc;default
