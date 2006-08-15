@@ -3986,3 +3986,6 @@ UPDATE vars SET value = 'T_2_5_0_121' WHERE name = 'cvs_tag_currentcode';
 ALTER TABLE comments CHANGE COLUMN subject_original subject_orig ENUM('no', 'yes') DEFAULT 'yes' NOT NULL;
 DELETE FROM vars WHERE name IN ('reasons', 'badreasons');
 
+# For Tags PLUGIN
+INSERT INTO vars (name, value, description) VALUES ('tags_upvote_tag', 'nod', 'Tag for upvote');
+INSERT INTO vars (name, value, description) VALUES ('tags_downvote_tag', 'nix', 'Tag for downvote');
