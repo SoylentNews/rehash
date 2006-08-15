@@ -9241,6 +9241,13 @@ sub getUrlFromSid {
 
 sub grantStorySubmissionKarma {
 	my($self, $story) = @_;
+	my $constants = getCurrentStatic();
+	if ($constants->{plugin}{FireHose}) {
+		if($story->{fhid}) {
+			my $firehose = getObject("Slash::FireHose");
+			$firehose->setFireHose($story->{fhid}, { accepted => "yes"});
+		}
+	}
 	return 0 unless $story->{subid};
 	my($submitter_uid) = $self->sqlSelect(
 		'uid', 'submissions',
