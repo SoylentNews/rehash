@@ -1,3 +1,6 @@
+#
+# $Id$
+#
 DROP TABLE IF EXISTS firehose;
 CREATE TABLE firehose (
 	id mediumint(8) unsigned NOT NULL auto_increment,
