@@ -59,7 +59,7 @@ sub createUpdateItemFromJournal {
 	if ($journal) {
 		my $globjid = $self->getGlobjidCreate("journals", $journal->{id});
 		my $globjid_q = $self->sqlQuote($globjid);
-		my ($itemid) = $self->sqlSelect("*", "firehose", "globjid=$globjid_q");
+		my($itemid) = $self->sqlSelect("*", "firehose", "globjid=$globjid_q");
 		if ($itemid) {
 			my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
 			$self->setFireHose($itemid, { introtext => $introtext, title => $journal->{description}, tid => $journal->{tid}});
@@ -264,7 +264,7 @@ sub ajaxGetUserFirehose {
 		$globjid = $item->{globjid};
 	}
 	
-	print STDERR "ajaxGetUserFirehose id: $id globjid: $globjid\n\n";
+#	print STDERR "ajaxGetUserFirehose id: $id globjid: $globjid\n\n";
 #print STDERR scalar(localtime) . " ajaxGetUserFirehose for stoid=$stoid sidenc=$sidenc tr=$tags_reader\n";
 	if (!$globjid || $globjid !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
 		return getData('error', {}, 'tags');
@@ -281,7 +281,7 @@ sub ajaxGetUserFirehose {
 		split /[\s,]+/,
 		($form->{newtagspreloadtext} || '');
 	my $newtagspreloadtext = join ' ', @newtagspreload;
-	print STDERR "ajaxGetUserFirehose $newtagspreloadtext\n\n";
+	#print STDERR "ajaxGetUserFirehose $newtagspreloadtext\n\n";
 
 	return slashDisplay('tagsfirehosedivuser', {
 		id =>		$id,
@@ -309,6 +309,9 @@ sub ajaxUpDownFirehose {
 	my $id = $form->{id};
 	return unless $id;
 
+	my $upvote   = $constants->{tags_upvote_tag} || "nod";
+	my $downvote = $constants->{tags_downvote_tag} || "nix";
+
 	my $firehose = getObject('Slash::FireHose');
 	my $tags = getObject('Slash::Tags');
 	my $item = $firehose->getFireHose($id);
@@ -316,19 +319,16 @@ sub ajaxUpDownFirehose {
 	my($dir) = $form->{dir};
 	my $tag;
 	if($dir eq "+") {
-		$tag = "nod";
+		$tag = $upvote;
 	} elsif ($dir eq "-") {
-		$tag = "nix";
+		$tag = $downvote;
 	}
 	return unless $item && $tag;
 	my($table, $itemid) = $tags->getGlobjTarget($item->{globjid});
 	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $itemid, { uid => $user->{uid}});
 	my @tags = sort tagnameorder map { $_->{tagname} } @$now_tags_ar;
-	use Data::Dumper;
-	print STDERR Dumper($now_tags_ar);
 	push @tags, $tag;
 	my $tagsstring = join ' ', @tags;
-	print STDERR "TAGSTRING: $tagsstring\n";
 	my $newtagspreloadtext = $tags->setTagsForGlobj($itemid, $table, $tagsstring);
 	return "Votes saved";
 	
@@ -352,7 +352,6 @@ sub ajaxCreateForFirehose {
 	if (!$itemid || !$table) {
 		return getData('error', {}, 'tags');
 	}
-	print STDERR "ajaxCreateForFirehose $itemid $table $tagsstring";
 	my $newtagspreloadtext = $tags->setTagsForGlobj($itemid, $table, $tagsstring);
 
 	if ($user->{is_admin}) {
@@ -377,7 +376,7 @@ sub ajaxGetFormContents {
 	my $item = $firehose->getFireHose($id);
 	return unless $item;
 	if ($item->{type} eq "submission") {
-		my ($table, $subid) = $tags->getGlobjTarget($item->{globjid});
+		my($table, $subid) = $tags->getGlobjTarget($item->{globjid});
 		$item->{subid} = $subid if $subid;
 	}
 	slashDisplay('firehoseFormContents', { item => $item }, { Return => 1});	
@@ -425,7 +424,7 @@ sub setFireHose {
 }
 
 sub dispFireHose {
-	my ($self, $item, $options) = @_;
+	my($self, $item, $options) = @_;
 	$options ||= {};
 
 	# XXX probably only temporary
