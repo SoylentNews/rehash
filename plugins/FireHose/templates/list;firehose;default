@@ -30,15 +30,5 @@ __template__
 [% itemstext %]
 [% page = page || "0" %]
 [% PROCESS paginate %]
-
-<ul class="dropmenu">
-	<li><a href="#">[Sections]</a></li>
-	<ul>
-		<li><a href="#">Apache</a></li>
-		<li><a href="#">Books</a></li>
-		<li><a href="#">Apple</a></li>
-		<li><a href="#">Science</a></li>
-	</ul>
-
-	</ul>
-</ul>
+__version__
+$Id
