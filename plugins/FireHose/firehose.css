@@ -5,4 +5,5 @@
 .briefarticle .details { display: none }
 .article .firehosetag { background: #fff; }
 .briefarticle div.tags { margin-top: 1px; } 
-#firehose div.briefarticle a span { float: none;} 
+#firehose div.briefarticle a span { float: none;}
+.score { color: #000; }

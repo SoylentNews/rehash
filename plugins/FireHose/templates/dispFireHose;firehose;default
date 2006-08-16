@@ -54,7 +54,7 @@ END %]
 
 	   IF user.is_admin;
 	   	reject_checkbox = PROCESS reject id = item.id;
-	   	title = reject_checkbox _ " " _  item.popularity _ " " _ title;
+	   	title = reject_checkbox _ "<span class='score'> " _  item.popularity _ "</span> " _ title;
 	   END;
 	   PROCESS titlebar;
 	%]
