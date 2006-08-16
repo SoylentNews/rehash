@@ -266,7 +266,7 @@ CREATE TABLE comments (
 	ipid char(32) DEFAULT '' NOT NULL,
 	subnetid char(32) DEFAULT '' NOT NULL,
 	subject varchar(50) NOT NULL,
-	subject_original ENUM('no', 'yes') DEFAULT 'yes' NOT NULL,
+	subject_orig ENUM('no', 'yes') DEFAULT 'yes' NOT NULL,
 	uid mediumint UNSIGNED NOT NULL,
 	points tinyint DEFAULT '0' NOT NULL,
 	pointsorig tinyint DEFAULT '0' NOT NULL,
