@@ -345,6 +345,7 @@ sub createComment {
 		$pid_subject =~ s/\s\s/ /g;
 		if (length $pid_subject &&
 		    $comment->{subject} =~ /^Re:\Q$pid_subject\E$/) {
+			$comment->{subject_orig} = 'no';
 		}
 	}
 
