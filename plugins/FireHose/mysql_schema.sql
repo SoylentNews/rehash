@@ -21,7 +21,7 @@ CREATE TABLE firehose (
 	note varchar(255) default '',
 	toptags varchar(255) default '',
 	PRIMARY KEY  (id)
-) ENGINE=InnoDB; 
+) TYPE=InnoDB; 
 
 DROP TABLE IF EXISTS firehose_text;
 CREATE TABLE firehose_text(
