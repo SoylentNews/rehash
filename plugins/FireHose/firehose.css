@@ -4,3 +4,5 @@
 .briefarticle .firehosetag { background: #999; }
 .briefarticle .details { display: none }
 .article .firehosetag { background: #fff; }
+.briefarticle div.tags { margin-top: 1px; } 
+#firehose div.briefarticle a span { float: none;} 

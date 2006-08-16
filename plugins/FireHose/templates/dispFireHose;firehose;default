@@ -14,7 +14,7 @@ __seclev__
 10000
 __template__
 [% 
-    mode = mode || "full";
+    mode = mode || "fulltitle";
     full = 1;
     bodywrapper = 1;
     bodycontent = 1;
@@ -43,6 +43,9 @@ END %]
 	   ELSE;
 	   	title = the_skin_title _ item.title;
 	   END;
+
+		
+
 	   IF item.introtext;
 	   	title = "<a href='javascript:toggle_firehose_body(\"$item.id\")'>" _ title _ "</a>";
 	   END;
@@ -56,7 +59,7 @@ END %]
 	   PROCESS titlebar;
 	%]
 [% END %]
-	[% IF bodywrapper %]
+	[% IF bodywrapper%]
 	<div class="details">submitted by [% the_user.nickname | strip_literal %] at [% item.createtime %]</div>
 	<div class="[% IF bodycontent %]body[% ELSE %]empty[% END %]" id="fhbody-[% item.id %]">
 	[% END %]
@@ -75,8 +78,21 @@ END %]
 		</div>
 		[% END %]
 		<div id="text-[% item.id %]" class="intro">
-			[% IF bodycontent %]
-				[% item.introtext %]
+			[% IF bodycontent;
+	   		   introtext = item.introtext;
+			IF item.type == "submission";
+				submission = Slash.db.getSubmission(item.srcid);
+				IF submission.storyonly || submission.journal_id;
+				ELSIF submission.email && submission.name;
+					IF constants.submissions_link_relnofollow; rnf = " rel=\"nofollow\""; ELSE; rnf = ""; END;
+					introtext = "<a href=\"$submission.email\"$rnf>$submission.name</a> writes <i>\"$introtext\"</i>";
+				ELSIF (submission.name == constants.anon_name) && constants.anon_name_alt;
+					introtext = "$constants.anon_name_alt writes <i>\"$introtext\"</i>";
+				ELSIF submission.name;
+					introtext = "$submission.name writes <i>\"$introtext\"</i>";
+				END;
+			END; %]
+				[% introtext %]
 				[% IF user.is_admin %]
 				<form id="postform-[% item.id %]" action="[% constants.real_rootdir %]/admin.pl" method="post">
 				<input type="hidden" name="firstpreview" value="1">
@@ -90,7 +106,6 @@ END %]
 				[% #extras %]
 				<input type="hidden" name="primaryskid" value="[% item.primaryskid %]">
 				<input type="hidden" name="tid" value="[% item.tid %]">
-				[% introtext = item.introtext %]
 				[% IF url && url.url; introtext = introtext _ "<br><a href='" _ url.url _ "'>" _ item.title _ "</a>"; END; %]
 				<input type="hidden" name="introtext" value="[% introtext | strip_attribute %]">
 				<input type="submit" name="op" value="preview"><br>
@@ -104,15 +119,6 @@ END %]
 	[% END %]
 [% IF full %]
 		[% PROCESS tagsfirehosedivtagbox id = item.id tags_top = [] %]
-		<!--
-		<div class="firehosetag">
-			[<a href="">+</a>/<a href="">-<a/>] <a href="">[quickpicks]</a> <a href="">[sectionmenu]</a> <a href="">[topics]</a>&nbsp;&nbsp;&nbsp;<a href="javascript:toggleFirehoseTagbox('[%item.id %]');">[tag]</a>
-			<div class="hide" id="fhtagbox-[% item.id %]">
-				<input id="newtags-[% item.id %]" name="newtags-[% item.id %]" value="" size="50" maxlength="60" type="text">
-				<input value="Tag" onclick="tagsCreateForFirehose('[% item.id %]')" class="button" type="button">
-			</div>
-		</div>
-		-->
 </div>
 [% END %]
 __version__

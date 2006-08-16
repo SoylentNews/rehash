@@ -17,7 +17,11 @@ __template__
 <div id="tagbox-[% id %]" class="tags">
 
 <div id="tagbox-title-[% id %]" class="tagtitleclosed">&nbsp;[% IF user.tags_canwrite_stories %]<a href="javascript:tagsToggleStoryDiv('[% id %]','[% user.is_admin %]','firehose');">[% ELSIF user.is_anon %]<a href="[% gSkin.rootdir %]/login.pl">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% id %]">[+]</span></a>
-<span id="updown-[% item.id %]"><a href="javascript:firehose_up_down('[% item.id %]','+')">+</a> <a href="javascript:firehose_up_down('[% item.id %]','-')">-</a></span> <i>(<a href="/faq/tags.shtml">tagging beta</a>)</i> [% IF user.is_admin %]<span id="note-form-[% item.id %]" class="hide"><input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30"> <input type="button" value="note" onclick="firehose_save_note('[% item.id %]')"></span><span id="note-text-[% item.id %]" onclick="firehose_open_note('[% item.id %]')">Note: [% item.note | strip_literal %]</span> [% item.subnote | strip_literal %] [% END %]
+<span id="updown-[% item.id %]"><a href="javascript:firehose_up_down('[% item.id %]','+')">+</a> <a href="javascript:firehose_up_down('[% item.id %]','-')">-</a></span> <i>([% IF user.is_admin %]
+<span id="note-form-[% item.id %]" class="hide"><input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30"> <input type="button" value="note" onclick="firehose_save_note('[% item.id %]')"></span><span id="note-text-[% item.id %]" onclick="firehose_open_note('[% item.id %]')">[% IF !item.note  %]Note[% END %][% item.note | strip_literal %]</span> [% item.subnote | strip_literal %] 
+	[% ELSE %]a href="/faq/tags.shtml">tagging beta</a>
+	[% END %])</i> 
+
 [% IF tags_top.size %]
 	[% FOR t = tags_top -%]
 		<span class="tagname">[% IF user.tags_canwrite_stories %]<a href="javascript:tagsOpenAndEnter('[% id %]','[% t %]','[% user.is_admin %]','firehose')">[% END %][% t | strip_html %][% IF user.tags_canwrite_stories %]</a>[% END %]</span>[% IF !loop.last() %], [% END -%]
