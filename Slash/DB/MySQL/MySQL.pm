@@ -7881,7 +7881,6 @@ sub getCommentTextCached {
 	my $user = getCurrentUser();
 	$opt ||= {};
 
-
 	# We have to get the comment text we need (later we'll search/replace
 	# them into the text).
 	my $comment_text = {};
@@ -7921,7 +7920,7 @@ sub getCommentTextCached {
 		}
 		my @keys_try =
 			map { "$mcdkey$_" }
-			grep { $_ != $opt->{cid} }
+			grep { !($opt->{cid} && $_ == $opt->{cid}) }
 			@$cids_needed_ar;
 		$comment_text = $mcd->get_multi(@keys_try);
 		my @old_keys = keys %$comment_text;
