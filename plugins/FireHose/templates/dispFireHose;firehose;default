@@ -108,7 +108,8 @@ END %]
 				<input type="hidden" name="tid" value="[% item.tid %]">
 				[% IF url && url.url; introtext = introtext _ "<br><a href='" _ url.url _ "'>" _ item.title _ "</a>"; END; %]
 				<input type="hidden" name="introtext" value="[% introtext | strip_attribute %]">
-				<input type="submit" name="op" value="preview"><br>
+				<input type="hidden" name="op" value="preview">
+				<input type="image" src="[% constants.imagedir %]/sic_edit.png" name="image">
 				</form>
 				[% END %]
 
@@ -118,7 +119,18 @@ END %]
 	</div>
 	[% END %]
 [% IF full %]
-		[% PROCESS tagsfirehosedivtagbox id = item.id tags_top = [] %]
+		[% tags_top = [] %]
+		[% tags_top.push(item.type) %]
+		[% IF item.primaryskid && item.primaryskid != constants.mainpage_skid; 
+			the_skin = Slash.db.getSkin(item.primaryskid);
+			tags_top.push(the_skin.name);
+		   END;
+		   IF item.tid;
+		   	the_topic = Slash.db.getTopic(item.tid);
+			tags_top.push(the_topic.keyword);
+		   END;
+		%]
+		[% PROCESS tagsfirehosedivtagbox id = item.id  %]
 </div>
 [% END %]
 __version__
