@@ -462,7 +462,12 @@ sub createSubmissionFromJournal {
 		journal_id 	=> $src_journal->{id},
 		discussion 	=> $src_journal->{discussion},
 		by		=> $options->{submission_param}{by}     || $journal_user->{nickname},
-		by_url 		=> $options->{submission_param}{by_url} || $journal_user->{homepage} || $journal_user->{fakeemail}
+			# $fakeemail can be undef, but setSubmission can't set a param to NULL
+			# (schema forbids, and setSubmission is too dumb not to try). so the
+			# empty string is a last resort. the better fix would be to fix
+			# setSubmission and/or _genericSet to handle undef values for params
+			# the way setStory does, by deleting the param row if any.
+		by_url 		=> $options->{submission_param}{by_url} || $journal_user->{homepage} || $fakeemail || '',
 	};
 
 	my $sub_param = $options->{submission_param} || {};
