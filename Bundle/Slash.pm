@@ -39,6 +39,8 @@ MIME::Base64            - why after URI if URI needs it?
 
 Bundle::LWP		- URI,HTML::Parser,MIME::Base64
 
+MIME::Types		- for Blob plugin
+
 HTML::Element           - For doing HTML-to-text
 
 Font::AFM               - ditto
