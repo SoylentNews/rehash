@@ -43,7 +43,8 @@ row_class_3 = "data_hl3";
 [% IF commentcount > 0 %]
 	[% commenttitle = ((min_comment == 0) ? "" : "$commentstruct.size of ");
 		IF type=="user";
-			 commenttitle = comment_title _"$useredit.nickname's ";
+			thisnick = useredit.nickname | strip_literal;
+			commenttitle = comment_title _ thisnick _ "'s ";
 		ELSIF type=="netid";
 			 commenttitle = comment_title _ "$netid" _ "'s ";
 		END;

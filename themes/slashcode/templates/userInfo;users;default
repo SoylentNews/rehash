@@ -86,54 +86,46 @@ __template__
 	</div>
 </div>
 <div id="users-lists">
-			[% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time%]
-			[% IF admin_flag %]
-
-        				[% thisnickname = useredit.nickname | strip_literal;
-        				   mod_options.title = "Moderations performed by $thisnickname";
-					   mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
-					   mod_options.need_m2_form = 1;
-					   mod_options.need_m2_button = 1;
-					   mod_options.meta_mod_only = 1;
-					 %]
-
-
-					[% Slash.moderatorCommentLog('uid', useredit.uid, mod_options) %]
-
-				[% IF !constants.show_mods_with_comments %]
-
-						[% mod_options.title = "Moderations performed on ${useredit.nickname}'s comments";
-						   mod_options.hr_hours_back = hr_hours_back %]
-						[% Slash.moderatorCommentLog('cuid', useredit.uid, mod_options) %]
-
-				[% END %]
-			[% END %]
-
-
+			[% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
+        		[% thisnickname = useredit.nickname | strip_literal %]
 			[% IF admin_flag;
-				m2_title = "${useredit.nickname}'s Recent M2s";
+       				mod_options.title = "Moderations performed by $thisnickname";
+				mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
+				mod_options.need_m2_form = 1;
+				mod_options.need_m2_button = 1;
+				mod_options.meta_mod_only = 1;
+
+				Slash.moderatorCommentLog('uid', useredit.uid, mod_options);
+
+				IF !constants.show_mods_with_comments;
+        				mod_options.title = "Moderations performed on $thisnickname's comments";
+					mod_options.hr_hours_back = hr_hours_back;
+
+					Slash.moderatorCommentLog('cuid', useredit.uid, mod_options);
+				END;
+
+				m2_title = "$thisnickname's Recent M2s";
 				m2_listing = form.m2_listing.defined ? form.m2_listing : user.show_m2_listing;
 				PROCESS listMetamods
-				title = m2_title 
-				m2_listing = m2_listing 
-				metamods = metamods 
-				the_user = useredit;
+					title = m2_title 
+					m2_listing = m2_listing 
+					metamods = metamods 
+					the_user = useredit;
+			END;
+
+			IF submissions.size > 0;
+				IF admin_flag or useredit.uid == user.uid;
+					title = "$thisnickname's Recent Submissions";
+				ELSE;
+					title = "$thisnickname's Recently Accepted Submissions";
+				END;
+				PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions;
+			END;
+
+			IF user.is_admin && tagshist && tagshist.size > 0;
+				title = "$thisnickname's Recent Tags";
+				PROCESS usertaghistory tagshist = tagshist title = title;
 			END %]
-
-			[% IF submissions.size > 0  %]
-
-				[% IF admin_flag or useredit.uid == user.uid;
-					title = "${useredit.nickname}'s Recent Submissions";
-				   ELSE;
-					title = "${useredit.nickname}'s Recently Accepted Submissions";
-				END %]
-				[% PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions %]
-
-			[% END %]
-			[% IF user.is_admin && tagshist && tagshist.size > 0 %]
-				[% title = "${useredit.nickname}'s Recent Tags"; %]
-				[% PROCESS usertaghistory tagshist = tagshist title = title %]
-			[% END %]
 </div>
 
 __seclev__

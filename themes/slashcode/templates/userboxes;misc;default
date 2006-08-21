@@ -63,7 +63,7 @@ IF !useredit.is_anon;
 	contents = BLOCK;
 		'<a href="'; gSkin.rootdir; '/~';
 			useredit.nickname | strip_paramattr; '/">';
-                        useredit.nickname; '</a> ';
+                        useredit.nickname | strip_literal; '</a> ';
 		IF user.uid != useredit.uid;
 			PROCESS zoo_icons person=useredit.uid implied="";
 		END;
