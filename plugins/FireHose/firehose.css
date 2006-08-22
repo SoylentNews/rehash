@@ -7,3 +7,4 @@
 .briefarticle div.tags { margin-top: 1px; } 
 #firehose div.briefarticle a span { float: none;}
 .score { color: #000; }
+.briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagstitleopen { padding-bottom: 0px;}
