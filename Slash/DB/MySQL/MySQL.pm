@@ -3466,6 +3466,7 @@ sub deleteSubmission {
 	my($self, $options, $nodelete) = @_;  # $nodelete param is obsolete
 	my $uid = getCurrentUser('uid');
 	my $form = getCurrentForm();
+	my $constants = getCurrentStatic();
 	my @subid;
 
 	$options = {} unless ref $options;
@@ -3536,7 +3537,11 @@ sub deleteSubmission {
 			}
 		}
 	}
-
+	
+	if ($constants->{plugin}{FireHose} && @subid > 0) {
+		my $firehose = getObject("Slash::FireHose");
+		$firehose->rejectItemBySubid(\@subid);
+	}
 	return @subid;
 }
 

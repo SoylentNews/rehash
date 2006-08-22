@@ -29,7 +29,7 @@ use DBIx::Password;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
-
+use Data::JavaScript::Anon;
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 use vars qw($VERSION);
@@ -127,17 +127,22 @@ sub createItemFromSubmission {
 	if ($submission) {
 		my $globjid = $self->getGlobjidCreate("submissions", $submission->{subid});
 		my $data = {
-			title => $submission->{subj},
-			globjid => $globjid,
-			uid => $submission->{uid},
-			introtext => $submission->{story},
-			popularity => 2,
-			public => "no",
-			attention_needed => "yes",
-			type => "submission",
-			primaryskid => $submission->{primaryskid},
-			tid => $submission->{tid},
-			srcid => $id
+			title 			=> $submission->{subj},
+			globjid 		=> $globjid,
+			uid 			=> $submission->{uid},
+			introtext 		=> $submission->{story},
+			popularity 		=> 2,
+			public 			=> "no",
+			attention_needed 	=> "yes",
+			type 			=> "submission",
+			primaryskid		=> $submission->{primaryskid},
+			tid 			=> $submission->{tid},
+			srcid 			=> $id,
+			ipid 			=> $submission->{ipid},
+			subnetid 		=> $submission->{subnetid},
+			email			=> $submission->{email},
+			emaildomain		=> $submission->{emaildomain},
+			name			=> $submission->{name}
 		};
 		$self->createFireHose($data);
 	}
@@ -152,6 +157,7 @@ sub getFireHoseEssentials {
 	$options->{orderdir} = $options->{orderdir} eq "ASC" ? "ASC" : "DESC";
 
 	my @where;
+	my $tables = "firehose";
 
 	if ($options->{attention_needed}) {
 		push @where, "attention_needed = " . $self->sqlQuote($options->{attention_needed});
@@ -173,6 +179,16 @@ sub getFireHoseEssentials {
 	if ($options->{primaryskid}) {
 		push @where, "primaryskid = " . $self->sqlQuote($options->{primaryskid});
 	}
+
+	if ($options->{category}) {
+		push @where, "category = " . $self->sqlQuote($options->{category});
+	}
+	
+	if ($options->{filter}) {
+		$tables .= ",firehose_text";
+		push @where, "firehose.id=firehose_text.id";
+		push @where, "firehose_text.title like '%" . $options->{filter} . "%'"; 
+	}
 	
 	my $where = (join ' AND ', @where) || "";
 	my $offset = $options->{offset};
@@ -180,7 +196,7 @@ sub getFireHoseEssentials {
 	$offset = "$offset, " if $offset;
 	my $other = "ORDER BY $options->{orderby} $options->{orderdir} LIMIT $offset $options->{limit}";
 	
-	$self->sqlSelectAllHashrefArray("*", "firehose", $where, $other);
+	$self->sqlSelectAllHashrefArray("firehose.*", $tables, $where, $other);
 }
 
 sub getFireHose {
@@ -200,14 +216,32 @@ sub getFireHose {
 sub fetchItemText {
 	my $form = getCurrentForm();
 	my $firehose = getObject("Slash::FireHose");
+	my $user = getCurrentUser();
 	my $id = $form->{id};
 	return unless $id && $firehose;
 	my $item = $firehose->getFireHose($id);
-	my $retval = slashDisplay("dispFireHose", {
+
+	my $data = {
 		item => $item,
-		mode => "bodycontent"
-	}, { Return => 1, Page => "firehose" });
+		mode => "bodycontent",
+	};
+
+	my $retval = slashDisplay("dispFireHose", $data, { Return => 1, Page => "firehose" });
 	return $retval;
+}
+
+sub rejectItemBySubid {
+	my ($self, $subid) = @_;
+	if (!ref $subid) {
+		$subid = [$subid];
+	}
+	return unless ref $subid eq "ARRAY";
+	my $str;
+	if (@$subid > 0 ) {
+		$str = join ',', map { $self->sqlQuote($_) }  @$subid;
+	
+	$self->sqlUpdate("firehose", { rejected => 'yes' }, "type='submission' AND srcid IN ($str)");
+	}
 }
 
 sub rejectItem {
@@ -330,12 +364,22 @@ sub ajaxUpDownFirehose {
 	push @tags, $tag;
 	my $tagsstring = join ' ', @tags;
 	my $newtagspreloadtext = $tags->setTagsForGlobj($itemid, $table, $tagsstring);
-	return "Votes saved";
+	my $html  = {};
+	my $value = {};
+	$html->{"updown-$id"} = "Votes Saved";
+	$value->{"newtags-$id"} = $newtagspreloadtext;
+
+
+	return Data::JavaScript::Anon->anon_dump({
+			html	=> $html,
+			value	=> $value
+				});
 	
 }
 
 sub ajaxCreateForFirehose {
-	my($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	$options->{content_type} = 'application/json';
 	my $id = $form->{id};
 	my $tags = getObject('Slash::Tags');
 	my $tagsstring = $form->{tags};
@@ -364,6 +408,7 @@ sub ajaxCreateForFirehose {
 	}, { Return => 1 });
 
 #print STDERR scalar(localtime) . " ajaxCreateForFirehose 4 for id=$id tagnames='@tagnames' newtagspreloadtext='$newtagspreloadtext' returning: $retval\n";
+
 	return $retval;
 }
 
@@ -382,22 +427,44 @@ sub ajaxGetFormContents {
 	slashDisplay('firehoseFormContents', { item => $item }, { Return => 1});	
 }
 
+sub ajaxGetAdminExtras {
+	my($slashdb, $constants, $user, $form) = @_;
+	return unless $user->{is_admin} && $form->{id};
+	my $firehose = getObject("Slash::FireHose");
+	my $item = $firehose->getFireHose($form->{id});
+	return unless $item;
+	my $subnotes_ref = $firehose->getMemoryForItem($item);
+	my $similar_stories = $firehose->getSimilarForItem($item);
+	slashDisplay("admin_extras", { 
+		subnotes_ref => $subnotes_ref, 
+		similar_stories => $similar_stories 
+	}, { Return => 1 });
+}
+
 sub setSectionTopicsFromTagstring {
 	my($self, $id, $tagstring) = @_;
-	my @tags = split(/\s+/, $tagstring);
+	my $constants = getCurrentStatic();
 
+	my @tags = split(/\s+/, $tagstring);
+	my $data = {};
+
+	my %categories = map { ($_, $_) } (qw(hold quik), (ref $constants->{submit_categories} ? @{$constants->{submit_categories}} : ()));
 
 	foreach (@tags) {
 		my $skid = $self->getSkidFromName($_);
 		my $tid = $self->getTidByKeyword($_);
 		if ($skid) {
-			$self->setFireHose($id, { primaryskid => $skid});
+			$data->{primaryskid} = $skid;
 		}
 		if ($tid) {
-			$self->setFireHose($id, { tid => $tid});
+			$data->{tid} = $tid;
 			
+		} 
+		if ($categories{lc($_)}) {
+			$data->{category} = lc($_);
 		}
 	}
+	$self->setFireHose($id, $data) if keys %$data > 0;
 
 }
 
@@ -427,13 +494,61 @@ sub dispFireHose {
 	my($self, $item, $options) = @_;
 	$options ||= {};
 
-	# XXX probably only temporary
-	if ($item->{type} eq "submission") {
-		my $submission = $self->getSubmission($item->{srcid});
-		$item->{subnote} = $submission->{comment};
-	}
 	slashDisplay('dispFireHose', { item => $item, mode => $options->{mode} }, { Return => 1 });
 }
+
+sub getMemoryForItem {
+	my ($self, $item) = @_;
+	my $user = getCurrentUser();
+	$item = $self->getFireHose($item) if $item && !ref $item;
+	return [] unless $item && $user->{is_admin};
+	my $subnotes_ref = [];
+	my $sub_memory = $self->getSubmissionMemory();
+	foreach my $memory (@$sub_memory) {
+		my $match = $memory->{submatch};
+		
+                if ($item->{email} =~ m/$match/i ||
+                    $item->{name}  =~ m/$match/i ||
+                    $item->{title}  =~ m/$match/i ||
+                    $item->{ipid}  =~ m/$match/i ||
+                    $item->{introtext} =~ m/$match/i) {
+                        push @$subnotes_ref, $memory;
+                }
+	}
+	return $subnotes_ref;
+}
+
+sub getSimilarForItem {
+	my ($self, $item) = @_;
+	my $user 	= getCurrentUser();
+	my $constants   = getCurrentStatic();
+	$item = $self->getFireHose($item) if $item && !ref $item;
+	return [] unless $item && $user->{is_admin};
+	my $num_sim = $constants->{similarstorynumshow} || 5;
+	my $reader = getObject("Slash::DB", { db_type => "reader" });
+	my $storyref = {
+		title 		=> $item->{title},
+		introtext 	=> $item->{introtext}
+	};
+	my $similar_stories = [];
+	$similar_stories = $reader->getSimilarStories($storyref, $num_sim) if $user->{is_admin};
+
+	# Truncate that data to a reasonable size for display.
+
+	if ($similar_stories && @$similar_stories) {
+		for my $sim (@$similar_stories) {
+			# Display a max of five words reported per story.
+			$#{$sim->{words}} = 4 if $#{$sim->{words}} > 4;
+			for my $word (@{$sim->{words}}) {
+				# Max of 12 chars per word.
+				$word = substr($word, 0, 12);
+			}
+			$sim->{title} = chopEntity($sim->{title}, 35);
+		}
+	}
+	return $similar_stories;
+}
+
 
 
 1;
