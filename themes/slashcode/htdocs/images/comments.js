@@ -605,14 +605,3 @@ function doModerate(el) {
 	return false;
 }
 
-// this should go in common.js at some point
-function json_handler(transport) {
-	var response;
-
-	try       { eval("response = " + transport.responseText) }
-	catch (e) { alert(e + "\n" + transport.responseText)     }
-
-	for (el in response.html) {
-		$(el).innerHTML = response.html[el];
-	}
-}
