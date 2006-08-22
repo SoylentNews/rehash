@@ -15,7 +15,7 @@ __seclev__
 __template__
 [% 
 param_str = ""
-	state_params = ["view", "mode", "type", "primaryskid", "popularity"];
+	state_params = ["mode", "type", "primaryskid", "order", "filter", "category"];
 	FOREACH param = state_params;
 		IF form.${param}.defined;
 			param_str = param_str _ "&amp;" _ param _ "=";

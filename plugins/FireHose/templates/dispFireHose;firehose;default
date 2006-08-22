@@ -81,12 +81,10 @@ END %]
 			[% IF bodycontent;
 	   		   introtext = item.introtext;
 			IF item.type == "submission";
-				submission = Slash.db.getSubmission(item.srcid);
-				IF submission.storyonly || submission.journal_id;
-				ELSIF submission.email && submission.name;
+				IF item.email && item.name;
 					IF constants.submissions_link_relnofollow; rnf = " rel=\"nofollow\""; ELSE; rnf = ""; END;
-					introtext = "<a href=\"$submission.email\"$rnf>$submission.name</a> writes <i>\"$introtext\"</i>";
-				ELSIF (submission.name == constants.anon_name) && constants.anon_name_alt;
+					introtext = "<a href=\"$item.email\"$rnf>$item.name</a> writes <i>\"$introtext\"</i>";
+				ELSIF (item.name == constants.anon_name) && constants.anon_name_alt;
 					introtext = "$constants.anon_name_alt writes <i>\"$introtext\"</i>";
 				ELSIF submission.name;
 					introtext = "$submission.name writes <i>\"$introtext\"</i>";
@@ -113,6 +111,7 @@ END %]
 				</form>
 				[% END %]
 
+		<div id="admin-extras-[% item.id %]"><a href="javascript:firehose_get_admin_extras('[% item.id %]')">Get extras</a></div>
 			[% END %]
 		</div>
 	[% IF bodywrapper %]
@@ -121,7 +120,10 @@ END %]
 [% IF full %]
 		[% tags_top = [] %]
 		[% tags_top.push(item.type) %]
-		[% IF item.primaryskid && item.primaryskid != constants.mainpage_skid; 
+		[%   IF item.category;
+		   	tags_top.push(item.category);
+		   END; 
+		   IF item.primaryskid && item.primaryskid != constants.mainpage_skid; 
 			the_skin = Slash.db.getSkin(item.primaryskid);
 			tags_top.push(the_skin.name);
 		   END;
