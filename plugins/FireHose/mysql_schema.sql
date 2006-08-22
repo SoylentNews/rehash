@@ -20,6 +20,12 @@ CREATE TABLE firehose (
 	url_id mediumint(8) unsigned NOT NULL default '0',
 	note varchar(255) default '',
 	toptags varchar(255) default '',
+	`email` varchar(255) NOT NULL default '',
+	`emaildomain` varchar(255) NOT NULL default '',
+	name varchar(50) NOT NULL,
+	`ipid` varchar(32) NOT NULL default '',
+	`subnetid` varchar(32) NOT NULL default '',
+	`category` varchar(30) NOT NULL default '',
 	PRIMARY KEY  (id)
 ) TYPE=InnoDB; 
 
