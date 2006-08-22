@@ -289,7 +289,7 @@ function tagsCreateForFirehose(id) {
 	toggletags_message_el.innerHTML = 'Tags saved.';
 }
 
-function toggle_firehose_body(id) {
+function toggle_firehose_body(id, is_admin) {
 	var params = [];
 	params['op'] = 'firehose_fetch_text';
 	params['id'] = id;
@@ -299,7 +299,11 @@ function toggle_firehose_body(id) {
 		var handlers = {
 			onComplete: function() { firehose_get_admin_extras(id)}
 		};
-		ajax_update(params, 'fhbody-'+id, handlers);
+		if (is_admin) {
+			ajax_update(params, 'fhbody-'+id, handlers);
+		} else {
+			ajax_update(params, 'fhbody-'+id);
+		}
 		fhbody.className = "body";
 		fh.className = "article";
 		firehose_get_admin_extras(id);
