@@ -296,9 +296,13 @@ function toggle_firehose_body(id) {
 	var fhbody = $('fhbody-'+id);
 	var fh = $('firehose-'+id);
 	if (fhbody.className == "empty") {
-		ajax_update(params, 'fhbody-'+id);
+		var handlers = {
+			onComplete: function() { firehose_get_admin_extras(id)}
+		};
+		ajax_update(params, 'fhbody-'+id, handlers);
 		fhbody.className = "body";
 		fh.className = "article";
+		firehose_get_admin_extras(id);
 	} else if (fhbody.className == "body") {
 		fhbody.className = "hide";
 		fh.className = "briefarticle";
@@ -319,11 +323,14 @@ function toggleFirehoseTagbox(id) {
 
 function firehose_up_down(id, dir) {
 	var params = [];
+	var handlers = {
+		onComplete: json_handler
+	};
 	params['op'] = 'firehose_up_down';
 	params['id'] = id;
 	params['dir'] = dir;
 	var updown = $('updown-' + id);
-	ajax_update(params, 'updown-'+id);
+	ajax_update(params, '', handlers);
 }
 // firehose functions end
 
@@ -361,5 +368,23 @@ function ajax_periodic_update(secs, params, onsucc, options, url) {
 	options.parameters = h.toQueryString();
 
 	var ajax = new Ajax.PeriodicalUpdater({ success: onsucc }, url, options);
+}
+
+function json_handler(transport) {
+var response;
+ 
+	try       { eval("response = " + transport.responseText) }
+		catch (e) { alert(e + "\n" + transport.responseText)     }
+ 	if (response.html) {
+		for (el in response.html) {
+			$(el).innerHTML = response.html[el];
+		}
+		
+	} 
+	if (response.value) {
+		for (el in response.value) {
+			$(el).value = response.value[el];
+		}
+	}
 }
 

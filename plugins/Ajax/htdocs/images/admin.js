@@ -233,3 +233,10 @@ function firehose_save_note(id) {
 	nf.className = "hide";
 	nt.className = "";
 }
+
+function firehose_get_admin_extras(id) {
+	var params=[];
+	params['id'] = id;
+	params['op'] = 'firehose_get_admin_extras';
+	ajax_update(params, 'admin-extras-'+id);
+}
