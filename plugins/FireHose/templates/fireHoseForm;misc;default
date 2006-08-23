@@ -1,0 +1,46 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+fireHoseForm
+__seclev__
+10000
+__template__
+[%
+introtext = item.introtext;
+IF item.type == "submission";
+	IF item.email && item.name;
+		IF constants.submissions_link_relnofollow; rnf = " rel=\"nofollow\""; ELSE; rnf = ""; END;
+		introtext = "<a href=\"$item.email\"$rnf>$item.name</a> writes <i>\"$introtext\"</i>";
+	ELSIF (item.name == constants.anon_name) && constants.anon_name_alt;
+		introtext = "$constants.anon_name_alt writes <i>\"$introtext\"</i>";
+	ELSIF submission.name;
+		introtext = "$submission.name writes <i>\"$introtext\"</i>";
+	END;
+END; 
+%]
+				[% IF user.is_admin %]
+				<input type="hidden" name="firstpreview" value="1">
+				[% IF item.type == "submission" && item.srcid %]
+					<input type="hidden" name="subid" value="[% item.srcid %]">
+				[% END %]
+				<input type="hidden" name="fhid" value="[% item.id %]">
+				<input type="hidden" name="topic_source" value="submission">
+				<input type="hidden" name="submitter" value="[% item.uid %]">
+				<input type="hidden" name="title" value="[% item.title %]">
+				[% #extras %]
+				<input type="hidden" name="primaryskid" value="[% item.primaryskid %]">
+				<input type="hidden" name="tid" value="[% item.tid %]">
+				[% IF url && url.url; introtext = introtext _ "<br><a href='" _ url.url _ "'>" _ item.title _ "</a>"; END; %]
+				<input type="hidden" name="introtext" value="[% introtext | strip_attribute %]">
+				<input type="hidden" name="op" value="preview">
+				<img src="[% constants.imagedir %]/sic_edit.png" onclick="firehose_get_and_post('[% item.id %]')">
+__version__
+$Id$
