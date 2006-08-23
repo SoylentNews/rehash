@@ -416,15 +416,10 @@ sub ajaxGetFormContents {
 	my($slashdb, $constants, $user, $form) = @_;
 	return unless $user->{is_admin} && $form->{id};
 	my $firehose = getObject("Slash::FireHose");
-	my $tags = getObject("Slash::Tags");
 	my $id = $form->{id};
 	my $item = $firehose->getFireHose($id);
 	return unless $item;
-	if ($item->{type} eq "submission") {
-		my($table, $subid) = $tags->getGlobjTarget($item->{globjid});
-		$item->{subid} = $subid if $subid;
-	}
-	slashDisplay('firehoseFormContents', { item => $item }, { Return => 1});	
+	slashDisplay('fireHoseForm', { item => $item }, { Return => 1});	
 }
 
 sub ajaxGetAdminExtras {

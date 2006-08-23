@@ -42,5 +42,6 @@ END;
 				<input type="hidden" name="introtext" value="[% introtext | strip_attribute %]">
 				<input type="hidden" name="op" value="preview">
 				<img src="[% constants.imagedir %]/sic_edit.png" onclick="firehose_get_and_post('[% item.id %]')">
+				[% END %]
 __version__
 $Id$

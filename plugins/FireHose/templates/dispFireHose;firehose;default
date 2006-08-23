@@ -95,25 +95,11 @@ END %]
 				END;
 			END; %]
 				[% introtext %]
-				[% IF user.is_admin %]
-				<form id="postform-[% item.id %]" action="[% constants.real_rootdir %]/admin.pl" method="post">
-				<input type="hidden" name="firstpreview" value="1">
-				[% IF item.type == "submission" && item.srcid %]
-					<input type="hidden" name="subid" value="[% item.srcid %]">
-				[% END %]
-				<input type="hidden" name="fhid" value="[% item.id %]">
-				<input type="hidden" name="topic_source" value="submission">
-				<input type="hidden" name="submitter" value="[% item.uid %]">
-				<input type="hidden" name="title" value="[% item.title %]">
-				[% #extras %]
-				<input type="hidden" name="primaryskid" value="[% item.primaryskid %]">
-				<input type="hidden" name="tid" value="[% item.tid %]">
-				[% IF url && url.url; introtext = introtext _ "<br><a href='" _ url.url _ "'>" _ item.title _ "</a>"; END; %]
-				<input type="hidden" name="introtext" value="[% introtext | strip_attribute %]">
-				<input type="hidden" name="op" value="preview">
-				<input type="image" src="[% constants.imagedir %]/sic_edit.png" name="image">
-				</form>
-				[% END %]
+			[% IF user.is_admin %]
+			<form id="postform-[% item.id %]" method="post" action="[% gSkin.rootdir %]/admin.pl">
+			<img src="[% constants.imagedir %]/sic_edit.png" onclick="firehose_get_and_post('[% item.id %]')">
+			</form>
+			[% END %]
 
 		<div id="admin-extras-[% item.id %]"><a href="javascript:firehose_get_admin_extras('[% item.id %]')">Get extras</a></div>
 			[% END %]
