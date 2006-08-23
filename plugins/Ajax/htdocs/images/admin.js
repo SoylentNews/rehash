@@ -240,3 +240,13 @@ function firehose_get_admin_extras(id) {
 	params['op'] = 'firehose_get_admin_extras';
 	ajax_update(params, 'admin-extras-'+id);
 }
+
+function firehose_get_and_post(id) {
+	var params=[];
+	params['id']  = id;
+	params['op'] = 'firehose_get_form';
+	var handlers = {
+		onComplete: function() { $('postform-'+id).submit();}
+	};
+	ajax_update(params, 'postform-'+id, handlers); 
+}
