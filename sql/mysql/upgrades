@@ -4006,3 +4006,4 @@ ALTER TABLE firehose ADD COLUMN email varchar(255) NOT NULL default '', ADD COLU
 
 ALTER TABLE firehose ADD COLUMN name varchar(50) NOT NULL AFTER emaildomain;
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_admin_extras', 'Slash::FireHose', 'ajaxGetAdminExtras', 'ajax_admin', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_form', 'Slash::FireHose', 'ajaxGetFormContents', 'ajax_admin', 'createuse');
