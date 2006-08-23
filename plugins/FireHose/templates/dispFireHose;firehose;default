@@ -47,7 +47,11 @@ END %]
 		
 
 	   IF item.introtext;
-	   	title = "<a href='javascript:toggle_firehose_body(\"$item.id\"), [% IF user.is_admin %]1[% ELSE %]0[% END %]'>" _ title _ "</a>";
+	   	is_admin = 0;
+		IF user.is_admin;
+			is_admin = 1;
+		END;
+	   	title = "<a href='javascript:toggle_firehose_body(\"$item.id\", $is_admin)'>" _ title _ "</a>";
 	   END;
 
 	   title = title _ " " _ '<span class="date">' _ item.createtime _ "</span> <span class='nickname'>" _ the_user.nickname _ "</span>";
