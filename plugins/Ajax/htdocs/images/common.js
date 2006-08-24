@@ -306,7 +306,6 @@ function toggle_firehose_body(id, is_admin) {
 		}
 		fhbody.className = "body";
 		fh.className = "article";
-		firehose_get_admin_extras(id);
 	} else if (fhbody.className == "body") {
 		fhbody.className = "hide";
 		fh.className = "briefarticle";
