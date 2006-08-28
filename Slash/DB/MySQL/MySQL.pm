@@ -3537,7 +3537,7 @@ sub deleteSubmission {
 			}
 		}
 	}
-	
+
 	if ($constants->{plugin}{FireHose} && @subid > 0) {
 		my $firehose = getObject("Slash::FireHose");
 		$firehose->rejectItemBySubid(\@subid);

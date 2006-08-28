@@ -30,6 +30,7 @@ use Slash;
 use Slash::Display;
 use Slash::Utility;
 use Data::JavaScript::Anon;
+
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 use vars qw($VERSION);
@@ -239,8 +240,7 @@ sub rejectItemBySubid {
 	my $str;
 	if (@$subid > 0 ) {
 		$str = join ',', map { $self->sqlQuote($_) }  @$subid;
-	
-	$self->sqlUpdate("firehose", { rejected => 'yes' }, "type='submission' AND srcid IN ($str)");
+		$self->sqlUpdate("firehose", { rejected => 'yes' }, "type='submission' AND srcid IN ($str)");
 	}
 }
 
@@ -371,9 +371,9 @@ sub ajaxUpDownFirehose {
 
 
 	return Data::JavaScript::Anon->anon_dump({
-			html	=> $html,
-			value	=> $value
-				});
+		html	=> $html,
+		value	=> $value
+	});
 	
 }
 
@@ -431,8 +431,8 @@ sub ajaxGetAdminExtras {
 	my $subnotes_ref = $firehose->getMemoryForItem($item);
 	my $similar_stories = $firehose->getSimilarForItem($item);
 	slashDisplay("admin_extras", { 
-		subnotes_ref => $subnotes_ref, 
-		similar_stories => $similar_stories 
+		subnotes_ref	=> $subnotes_ref, 
+		similar_stories	=> $similar_stories 
 	}, { Return => 1 });
 }
 
@@ -443,7 +443,12 @@ sub setSectionTopicsFromTagstring {
 	my @tags = split(/\s+/, $tagstring);
 	my $data = {};
 
-	my %categories = map { ($_, $_) } (qw(hold quik), (ref $constants->{submit_categories} ? @{$constants->{submit_categories}} : ()));
+	my %categories = map { ($_, $_) } (qw(hold quik),
+		(ref $constants->{submit_categories}
+			? @{$constants->{submit_categories}}
+			: ()
+		)
+	);
 
 	foreach (@tags) {
 		my $skid = $self->getSkidFromName($_);
@@ -493,7 +498,7 @@ sub dispFireHose {
 }
 
 sub getMemoryForItem {
-	my ($self, $item) = @_;
+	my($self, $item) = @_;
 	my $user = getCurrentUser();
 	$item = $self->getFireHose($item) if $item && !ref $item;
 	return [] unless $item && $user->{is_admin};
@@ -503,18 +508,18 @@ sub getMemoryForItem {
 		my $match = $memory->{submatch};
 		
                 if ($item->{email} =~ m/$match/i ||
-                    $item->{name}  =~ m/$match/i ||
-                    $item->{title}  =~ m/$match/i ||
-                    $item->{ipid}  =~ m/$match/i ||
-                    $item->{introtext} =~ m/$match/i) {
-                        push @$subnotes_ref, $memory;
+		    $item->{name}  =~ m/$match/i ||
+		    $item->{title}  =~ m/$match/i ||
+		    $item->{ipid}  =~ m/$match/i ||
+		    $item->{introtext} =~ m/$match/i) {
+			push @$subnotes_ref, $memory;
                 }
 	}
 	return $subnotes_ref;
 }
 
 sub getSimilarForItem {
-	my ($self, $item) = @_;
+	my($self, $item) = @_;
 	my $user 	= getCurrentUser();
 	my $constants   = getCurrentStatic();
 	$item = $self->getFireHose($item) if $item && !ref $item;

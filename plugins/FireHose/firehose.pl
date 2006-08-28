@@ -83,15 +83,15 @@ sub getAndSetOptions {
 	my $constants 	= getCurrentStatic();
 	my $form 	= getCurrentForm();
 	my $options 	= {};
-	
+
 	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1 };
 	my $modes = { full => 1, fulltitle => 1};
 	my $orders = { createtime => 1, popularity => 1};
-	
+
 	my $mode = $form->{mode} || $user->{firehose_mode};
 	$mode = $modes->{$mode} ? $mode : "fulltitle";
 	$options->{mode} = $mode;
-	
+
 	if ($mode eq "full") {
 		$options->{limit} = 25;
 	} else {

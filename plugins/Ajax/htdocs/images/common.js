@@ -297,7 +297,7 @@ function toggle_firehose_body(id, is_admin) {
 	var fh = $('firehose-'+id);
 	if (fhbody.className == "empty") {
 		var handlers = {
-			onComplete: function() { firehose_get_admin_extras(id)}
+			onComplete: function() { firehose_get_admin_extras(id) }
 		};
 		if (is_admin) {
 			ajax_update(params, 'fhbody-'+id, handlers);
@@ -374,16 +374,21 @@ function ajax_periodic_update(secs, params, onsucc, options, url) {
 }
 
 function json_handler(transport) {
-var response;
+	var response;
  
-	try       { eval("response = " + transport.responseText) }
-		catch (e) { alert(e + "\n" + transport.responseText)     }
+	try {
+		eval("response = " + transport.responseText)
+	} catch (e) {
+		alert(e + "\n" + transport.responseText)
+	}
+
  	if (response.html) {
 		for (el in response.html) {
 			$(el).innerHTML = response.html[el];
 		}
 		
 	} 
+
 	if (response.value) {
 		for (el in response.value) {
 			$(el).value = response.value[el];
