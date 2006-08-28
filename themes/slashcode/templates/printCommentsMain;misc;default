@@ -36,7 +36,7 @@ __template__
 window.onscroll = d2act;
 function d2act ()
 {
-Position.prepare(); var xy = Position.cumulativeOffset($('commentwrap')); var gd=($('d2act')); xy[1] = xy[1] - Position.deltaY; if (xy[1] < -14) {gd.style.top='4px'; gd.style.position='fixed'; gd.style.left='1em';}else{gd.style.display='inline'; gd.style.position='fixed'; gd.style.top=xy[1] + 'px'; gd.style.left='1em'; }; $('testmessage').innerHTML = xy[0] + ' ' + xy[1];
+Position.prepare(); var xy = Position.cumulativeOffset($('commentwrap')); var gd=($('d2act')); xy[1] = xy[1] - Position.deltaY; if (xy[1] < -14) {gd.style.top='4px'; gd.style.position='fixed'; gd.style.left='1em';}else{gd.style.display='inline'; gd.style.position='fixed'; gd.style.top=xy[1] + 'px'; gd.style.left='1em'; }; 
 }
 </script>
 [% END %]
