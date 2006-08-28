@@ -185,18 +185,27 @@ html > body .commentwrap table {
 	vertical-align: sub;
 }
 
-/* D2 Widget */
-.thor {position: fixed; opacity: 1; top: 0; left: 0; z-index: 1000; border-bottom: 2px solid #aaa; border-right: 2px solid #aaa; width: 11em; text-align: center; background: #ccc; }
-.horizontal .thor {position: fixed; opacity: 1; top: 0; left: 0; z-index: 1000; border-bottom: 2px solid #aaa; border-right: 2px solid #aaa; width: 100%; text-align: center }
-/* .thor h3, .thor {opacity: 1 !important;} */
-.thor div.generaltitle div.title h3 {background: transparent; padding-right: 15em; font-size: 95%}
-.thor .close {position: absolute; top: .2em; right: .2em; color: #fff; text-decoration: none; font-style: sans-serif; border: 1px solid #d4e5e5; border-bottom: 1px solid #015151; border-right: 1px solid #015151; padding: 0 .3em; background: #600;}
 
-.thor .commentControlFooter { text-align: right padding: 3px; background: #600; color: #fff; } 
-.thor .commentControlFooter a {  color: #fff; text-decoration: none; }
+/* D2 Widget */
+
+#d2act {left: 1.2em !important; opacity: 1; z-index: 1000; width: 9.3em; text-align: center; }
+.horizontal #d2act {position: fixed; opacity: 1; top: 0; left: 0; z-index: 1000; border-bottom: 2px solid #aaa; border-right: 2px solid #aaa; width: 100%; text-align: center }
+#d2act div.block {background: transparent}
+#d2act div.block div.title h4 {text-align: left;}
+#d2act .close {position: absolute; top: .2em; right: .2em; color: #ccc; text-decoration: none; font-style: sans-serif; border: 1px solid #bbb; border-bottom: 1px solid #444; border-right: 1px solid #555; padding: 0 .3em;}
+#d2act .close:hover {position: absolute; top: .2em; right: .2em; color: #eee; text-decoration: none; font-style: sans-serif; border: 1px solid #444; border-bottom: 1px solid #aaa; border-right: 1px solid #ccc; padding: 0 .3em;}
+
+#d2act .commentControlFooter {border-bottom: 1px solid #444; border-top: 1px solid #ccc; text-align: right padding: 3px; background: #666; color: #fff; } 
+#d2act .commentControlFooter a {  color: #fff; text-decoration: none; }
 .horizontal #comment_full, .horizontal #comment_abbr, .horizontal #comment_hidden, .horizontal .comment_divider { display: inline; }
-.loki { display: none; }
+.loki { display: inline; }
 .horizontal #commentControlPane {display: block; margin-left: auto; margin-right: auto; overflow: hidden; width: 38em}
+
+
+.comment_divider,
+#comment_full,
+#comment_abbr,
+#comment_hidden {opacity: 1 !important;  border-right: 1px solid #aaa;border-left: 1px solid #aaa;}
 
 .horizontal #comment_full, 
 .horizontal #comment_abbr, 
@@ -204,6 +213,8 @@ html > body .commentwrap table {
 .horizontal .comment_divider {float: left;}
 .horizontal #comment_full,
 .horizontal #comment_abbr,
-.horizontal #comment_hidden { width: 8em;}
+.horizontal #comment_hidden {width: 8em;}
 .commentControlFooter {clear: both}
 #commentlisting {clear: right;}
+
+
