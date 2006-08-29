@@ -52,8 +52,6 @@ sub list {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 	my $firehose = getObject("Slash::FireHose");
 	my $options = getAndSetOptions(); 
-	use Data::Dumper;
-	print STDERR Dumper($options);
 	my $page = $form->{page} || 0;
 	if ($page) {
 		$options->{offset} = $page * $options->{limit};
@@ -98,7 +96,7 @@ sub getAndSetOptions {
 		$options->{limit} = 50;
 	}
 
-	$options->{orderby} = defined $form->{order} ? $form->{order} : $user->{firehose_order};
+	$options->{orderby} = defined $form->{order} ? $form->{order} : $user->{firehose_orderdby};
 
 	$options->{primaryskid} = defined $form->{primaryskid} ? $form->{primaryskid} : $user->{firehose_primaryskid};
 
