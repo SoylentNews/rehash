@@ -117,7 +117,7 @@ sub createTag {
 			my $tagdata = $self->getTagDataFromId($tag->{tagnameid});
 			$opp_tagname = $self->getOppositeTagname($tagdata->{tagname});
 		}
-		$opp_tagnameid = $self->getTagidFromNameIfExists($opp_tagname);
+		$opp_tagnameid = $self->getTagnameidFromNameIfExists($opp_tagname);
 	}
 
 	$self->sqlDo('SET AUTOCOMMIT=0');
@@ -236,7 +236,7 @@ sub getTagidCreate {
 	my($self, $name) = @_;
 	return 0 if !$self->tagnameSyntaxOK($name);
 	my $reader = getObject('Slash::Tags', { db_type => 'reader' });
-	my $id = $reader->getTagidFromNameIfExists($name);
+	my $id = $reader->getTagnameidFromNameIfExists($name);
 	return $id if $id;
 	return $self->createTagName($name);
 }
@@ -265,7 +265,7 @@ sub createTagName {
                 # reader that was checked didn't have this tag
                 # replicated yet.  Pull the information directly
                 # from this writer DB.
-                return $self->getTagidFromNameIfExists($name);
+                return $self->getTagnameidFromNameIfExists($name);
         }
         # The insert succeeded.  Return the ID that was just added.
         return $self->getLastInsertId();
@@ -274,7 +274,7 @@ sub createTagName {
 # Given a tagname, get its id, e.g. turn 'omglol' into '17241'.
 # If no such tagname exists, do not create it;  return 0.
 
-sub getTagidFromNameIfExists {
+sub getTagnameidFromNameIfExists {
 	my($self, $name) = @_;
 	my $constants = getCurrentStatic();
 	return 0 if !$self->tagnameSyntaxOK($name);
@@ -646,7 +646,7 @@ sub addTagnamesToHashrefArray {
 
 sub getUidsUsingTagname {
 	my($self, $name) = @_;
-	my $id = $self->getTagidFromNameIfExists($name);
+	my $id = $self->getTagnameidFromNameIfExists($name);
 	return [ ] if !$id;
 	return $self->sqlSelectColArrayref('DISTINCT(uid)', 'tags',
 		"tagnameid=$id AND inactivated IS NULL");
@@ -654,7 +654,7 @@ sub getUidsUsingTagname {
 
 sub getAllObjectsTagname {
 	my($self, $name) = @_;
-	my $id = $self->getTagidFromNameIfExists($name);
+	my $id = $self->getTagnameidFromNameIfExists($name);
 	return [ ] if !$id;
 	my $hr_ar = $self->sqlSelectAllHashrefArray(
 		'*',
@@ -824,9 +824,10 @@ sub ajaxGetAdminUrl {
 
 #  XXX based off of ajaxCreateStory.  ajaxCreateStory should be updated to use this or something
 #  similar soon, and after I've had time to test -- vroom 2006/03/21
+
 sub setTagsForGlobj {
 	my($self, $id, $table, $tag_string, $options) = @_;
-	my $tags = getObject('Slash::Tags');
+	my $tags = getObject('Slash::Tags'); # XXX isn't this the same as $self? -Jamie
 	$options ||= {};
 	
 	my $user = getCurrentUser();
@@ -1134,7 +1135,7 @@ sub getTypeAndTagnameFromAdminCommand {
 # command.
 sub logAdminCommand {
 	my($self, $type, $tagname, $globjid) = @_;
-	my $tagnameid = $self->getTagidFromNameIfExists($tagname);
+	my $tagnameid = $self->getTagnameidFromNameIfExists($tagname);
 	$self->sqlInsert('tagcommand_adminlog', {
 		cmdtype =>	$type,
 		tagnameid =>	$tagnameid,
