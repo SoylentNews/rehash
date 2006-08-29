@@ -516,7 +516,7 @@ sub filterOk {
 
 #========================================================================
 sub compressOk {
-	# leave it here, it causes problems if use'd in the
+	# leave it here, it causes problems if used in the
 	# apache startup phase
 	require Compress::Zlib;
 	my($formname, $field, $content, $wsfactor) = @_;
@@ -525,7 +525,7 @@ sub compressOk {
 	# If no content (or I suppose the single char '0') is passed in,
 	# just report that it passes the test.  Hopefully the caller is
 	# performing other checks to make sure that boundary condition
-	# is addresses.
+	# is addressed.
 	return 1 if !$content;
 
 	my $slashdb   = getCurrentDB();
@@ -545,10 +545,10 @@ sub compressOk {
 	# larger the value the more difficult to accept a comment with lots
 	# of whitespace.  Values between 0.2 and 5 probably make sense.
 	my $slice_size = $constants->{comment_compress_slice} || 500;
-	my $nbsp_space = " " x (1 + int(11 * $wsfactor));
-	my $breaktag_space = " " x (1 + int(3 * $wsfactor));
-	my $spacerun_min = 1 + int(4 / $wsfactor);
-	my $spacerun_exp = 1 + 0.4 * $wsfactor;
+	my $nbsp_space = " " x (1 + int(1 * $wsfactor));
+	my $breaktag_space = " " x (1 + int(1 * $wsfactor));
+	my $spacerun_min = 1 + int(16 / $wsfactor);
+	my $spacerun_exp = 1 + 0.1 * $wsfactor;
 
 	my $orig_length = length($content);
 	my $slice_remainder = $orig_length % $slice_size;
