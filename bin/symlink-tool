@@ -249,7 +249,7 @@ sub handle_file {
 
 	if (!-e $symlink_file && -e $symlink_file_dot) {
 		# The symlink file is missing and in its place is a
-		# dotfile.  This site must have that file disabled,
+		# dotfile.  The site admin must have disabled that file,
 		# perhaps temporarily.  Make sure it's correct;  do
 		# what we were doing to do on the real file, on the
 		# dotfile instead.
@@ -266,9 +266,9 @@ sub handle_file {
 		# if the two are identical.
 		my $diff;
 		if ($verbose) {
-			$diff = system("diff -U3 $target_file $symlink_file");
+			$diff = system("diff $target_file $symlink_file");
 		} else {
-			$diff = system("diff -U3 $target_file $symlink_file > /dev/null");
+			$diff = system("diff $target_file $symlink_file > /dev/null");
 		}
 		if ($diff) {
 			print "File should be symlink, but is not, and differs from intended target: '$symlink_file' '$target_file'; difference needs to be resolved or symlink-tool will not touch it\n";

@@ -565,10 +565,9 @@ $include
     # this directive will redirect non-logged-in users to
     # index.shtml if they request the home page; turn it
     # on to help increase performance or if you are using something
-    # other then index.pl for the index
+    # other than index.pl for the index
     PerlTransHandler Slash::Apache::IndexHandler
-    # this directive will enable you to display user's pages
-    # with /~username
+    # this directive will display a user's pages at /~username
     PerlTransHandler Slash::Apache::User::userdir_handler
 
     # Third Apache phase:  header parsing
@@ -604,7 +603,7 @@ $include
     <Perl>
         # if you need to debug, temporarily turn this on
         # \$Apache::Registry::Debug = 4;
-        my \@pls     = qw(index comments article users journal search metamod);
+        my \@pls     = qw(index comments article users journal search);
         my \$vhost   = '$host_noport';
         my \$docroot = '$prefix_site/$sitename/htdocs';
         my \$r       = Apache::RegistryLoader->new;
@@ -676,28 +675,7 @@ if you know what you're doing, edit):
 
 	$prefix_site/$sitename/$sitename.conf
 
-You may want to take a look at it. If you are using virtual hosting by
-hostname you may also need to add a NameVirtualHost to your httpd.conf.
-
-If you do not have your Slash site in the root of the web server (e.g.,
-"http://www.example.com/mysite/" instead of "http://www.example.com/"),
-you will need to adjust the rootdir, rdfimage, imagedir, absolutedir,
-and cookiepath variables, and you also need to change your Apache config
-appropriately.  If you're planning on having sections with more than two dots
-in the hostname (e.g. your mainpage will be at "http://division.company.com/"
-with a section at "http://newprojects.division.company.com/") you will
-also want to set the cookiedomain var (e.g. to ".division.company.com").
-These are all in the "vars" table of your database.
-
-To restart apache do:
-
-	apachectl stop
-	apachectl start
-
-Have fun with your new site. You should also consider registering it:
-
-	http://slashcode.com/sites.pl
-
+Now you can continue with step 6 of the INSTALL file directions.
 
 |;
 	print $text
