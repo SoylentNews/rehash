@@ -173,7 +173,7 @@ if (xy[1] < -14) {gd.style.top='4px'; gd.style.position='fixed'; gd.style.left='
 						subject_only => 1,
 				}) %]
 				[% END %]
-		<span title="Close this window" onclick="document.getElementById('gods').style.display='none';document.getElementById('d2opt').style.display='inline';"" class="close">x</span>
+		<span title="Close this window" onclick="document.getElementById('gods').style.display='none';document.getElementById('d2opt').style.display='inline';" class="close">x</span>
 				</h4>
 			</div>
 		</div>
@@ -182,17 +182,17 @@ if (xy[1] < -14) {gd.style.top='4px'; gd.style.position='fixed'; gd.style.left='
 		<div id="commentControlPane">
 		<div id="comment_full" style="background: #fff;" [% class_info %]><span id="currentFull">0</span> Full</div>
 		<div class="comment_divider" style="background:#fff;" [% class_info %]>
-			<span class="com_arrow_up" onclick="javascript:changeHT(1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]left[% ELSE %]up[% END %].gif"></span>
+			<span class="com_arrow_up" onclick="javascript:changeHT(1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]left[% ELSE %]up[% END %].gif" alt="*"></span>
 		</div>
 		<div class="comment_divider" style="background:#ccc;" [% class_info %]>
-			<span class="arrow_down" onclick="javascript:changeHT(-1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]right[% ELSE %]down[% END %].gif"></span>
+			<span class="arrow_down" onclick="javascript:changeHT(-1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]right[% ELSE %]down[% END %].gif" alt="*"></span>
 		</div>
 		<div id="comment_abbr" style="background: #ccc;" [% class_info %]><span id="currentOneline">0</span> Abbreviated</div>
 		<div class="comment_divider" style="background:#ccc;">
-			<span class="arrow_up" onclick="javascript:changeT(1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]left[% ELSE %]up[% END %].gif"></span>
+			<span class="arrow_up" onclick="javascript:changeT(1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]left[% ELSE %]up[% END %].gif" alt="*"></span>
 		</div>
 		<div class="comment_divider" style="background:#aaa;" [% class_info %]>
-			<span class="arrow_down" onclick="javascript:changeT(-1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]right[% ELSE %]down[% END %].gif"></span>
+			<span class="arrow_down" onclick="javascript:changeT(-1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]right[% ELSE %]down[% END %].gif" alt="*"></span>
 		</div>
 		<div id="comment_hidden" style="background: #aaa;" [% class_info %]><span id="currentHidden">0</span> Hidden</div>
 		</div>
