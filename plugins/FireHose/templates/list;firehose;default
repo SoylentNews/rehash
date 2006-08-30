@@ -13,25 +13,30 @@ list
 __seclev__
 10000
 __template__
-<form action="[% gSkin.rootdir %]/firehose.pl" method="get">
-	Type: [% Slash.createSelect('type', { 'submission' => 'Submission', 'journal' => 'Journal', 'bookmark' => 'Bookmark', 'feed' => 'Feed', '' => 'All' }, options.type, 1, 0 1) %]
+[% PROCESS titlebar title="Firehose" %]
+<div class="submenu">
+	<form action="[% gSkin.rootdir %]/firehose.pl" method="get">
+		<fieldset>
+			<legend>Firehose</legend>
+			<label>Type&nbsp;[% Slash.createSelect('type', { 'submission' => 'Submission', 'journal' => 'Journal', 'bookmark' => 'Bookmark', 'feed' => 'Feed', '' => 'All' }, options.type, 1, 0 1) %]
 	[% skins = Slash.db.getDescriptions('skins');
 	   skins.0 = "All";
-	%]
-	Section: [% Slash.createSelect('primaryskid', skins, options.primaryskid, 1, 0, 1) %]
-	Category: [% Slash.createSelect('category', { '' => 'None', quik => 'Quik', hold => 'Hold', back => 'Back' }, options.category,1, 0, 1) %]
-	Filter: <input type="text" name="filter" size="20" value="[% options.filter | strip_attribute %]">
-	<br>
-	Order: [% Slash.createSelect('order', { 'createtime' => 'Time', popularity => 'Popularity' }, options.orderby, 1, 0, 1) %]
-	Mode: [% Slash.createSelect('mode', { 'full' => 'Full', fulltitle => 'Abbreviated' }, options.mode, 1, 0, 1) %]
-
-	
-	<input type="submit" value="Change View">
-</form>
-<br>
-<hr>
+	%]</label> 
+			<label>Section&nbsp;[% Slash.createSelect('primaryskid', skins, options.primaryskid, 1, 0, 1) %]</label> 
+			<label>Category&nbsp;[% Slash.createSelect('category', { '' => 'None', quik => 'Quik', hold => 'Hold', back => 'Back' }, options.category,1, 0, 1) %]</label> 
+			<label>Filter&nbsp;<input type="text" name="filter" size="20" value="[% options.filter | strip_attribute %]"></label>
+			<label>Order&nbsp;[% Slash.createSelect('order', { 'createtime' => 'Time', popularity => 'Popularity' }, options.orderby, 1, 0, 1) %]</label> 
+			<label>Mode&nbsp;[% Slash.createSelect('mode', { 'full' => 'Full', fulltitle => 'Abbreviated' }, options.mode, 1, 0, 1) %]
+</label> 
+			<input type="submit" value="Change View"> 
+		</fieldset>
+	</form>
+</div>
+<br />
+<div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
 [% PROCESS paginate %]
+</div>
 __version__
 $Id$
