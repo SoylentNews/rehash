@@ -1,13 +1,94 @@
-.briefarticle .generaltitle .title, .briefarticle .generaltitle .title h3, .briefarticle .generaltitle .title h3 a { background: #fff; color: #066; font-size: 105%; font-weight: normal; }
-.briefarticle { border-top: 1px #066 solid; }
-.briefarticle .generaltitle .title .date, .briefarticle .generaltitle .title .nickname { color: #333; font-size: 85% }
-.article .generaltitle .title .date, .article .generaltitle .title .nickname { display: none; }
-.briefarticle .firehosetag { background: #999; }
-.briefarticle .details { display: none }
 .article .firehosetag { background: #fff; }
-.briefarticle div.tags { margin-top: 1px; } 
-#firehose div.briefarticle a span { float: none;}
-.score { color: #000; }
-.briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagstitleopen { padding-bottom: 0px;}
 
+#firehose div.briefarticle a span { float: none; }
+.briefarticle { border-top: 1px solid #aaa; }
+
+.briefarticle .generaltitle .title h3 .score
+{
+	color: #fff;
+	background: url('/images/sic_fire.png') no-repeat -10px -2px;
+}
+#firehoselist .generaltitle .title h3 { padding-left: 35px !important; }
+.article .generaltitle .title h3 .score { background: url('/images/sic_fire2.png') no-repeat -15px -3px; }
+.score { padding: 5px 15px 5px 25px; }
+.briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagstitleopen { padding-bottom: 0px; }
+
+
+.briefarticle .generaltitle .title h3 a
+{
+	color: #066;
+	padding-left: 10px;
+}
+
+.briefarticle .generaltitle .title h3
+{
+	padding: 2px 0 .3em 0; 
+	font-size: 100%;
+	border-top: 1px solid #fff;
+	background: #e6e6e6 url(//images.slashdot.org/sections-bg.png) repeat-x left bottom;
+}
+
+.briefarticle .generaltitle .title .date,
+.briefarticle .generaltitle .title .nickname
+{
+	color: #555;
+	font-size: 85%;
+}
+
+.article .generaltitle .title .date,
+.article .generaltitle .title .nickname { display: none; }
+.briefarticle .firehosetag { background: #999; }
+.briefarticle .details { display: none; }
+.article .firehosetag { background: #fff; }
+
+.up
+{
+	background: url('/images/sic_vote_up.png') no-repeat;
+	padding: 0 10px 10px 10px;
+	text-indent: -7000em;
+	position: absolute;
+	top: 3px;
+	left: 10px;
+}
+
+.down
+{
+	background: url('/images/sic_vote_dwn.png') no-repeat 0px 7px;
+	padding: 0 10px 10px 10px;
+	text-indent: -7000em;
+	position: absolute;
+	top: 3px;
+	left: 30px;
+}
+
+.briefarticle div.tags { margin-top: 1px; }
+div.tags { margin-bottom: 2px !important; }
+div.tags div.tagtitleclosed,
+div.tags div.tagtitleopen { position: static !important; }
+
+.edit
+{
+	position: absolute;
+	top: 1.6em;
+	right: 30px;
+}
+
+.briefarticle .edit
+{
+	position: absolute;
+	top: 1.9em;
+	right: 28px;
+}
+
+.reject
+{
+	z-index: 1000;
+	padding: 0 10px 0 0;
+	position: absolute;
+	right: 10px;
+	top: .5em;
+	background: url('/images/sic_delete.png') no-repeat right top;
+}
+
+.reject input { visibility: hidden; }
 
