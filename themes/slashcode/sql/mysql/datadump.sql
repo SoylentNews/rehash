@@ -245,15 +245,15 @@ INSERT INTO skin_colors VALUES (3, 'bg_5', '#DDDDDD');
 # Dumping data for table 'stories'
 #
 
-INSERT INTO stories (stoid, sid, uid, dept, time, hits, primaryskid, discussion, tid, submitter, qid) VALUES (1, '00/01/25/1430236',2,'congratulations-dude','2000-01-25 20:47:46',0,1,1,1,2,2);
-INSERT INTO stories (stoid, sid, uid, dept, time, hits, primaryskid, discussion, tid, submitter, qid) VALUES (2, '00/01/25/1436215',2,'where-do-you-go-from-here','2000-01-25 21:00:00',0,1,2,1,2,NULL);
+INSERT INTO stories (stoid, sid, uid, dept, time, hits, primaryskid, discussion, tid, submitter, qid) VALUES (1, '00/01/25/1430236',2,'congratulations-dude','2000-01-25 20:47:46',0,1,1,4,2,2);
+INSERT INTO stories (stoid, sid, uid, dept, time, hits, primaryskid, discussion, tid, submitter, qid) VALUES (2, '00/01/25/1436215',2,'where-do-you-go-from-here','2000-01-25 21:00:00',0,1,2,4,2,NULL);
 
 #
 # Dumping data for table 'story_text'
 #
 
-INSERT INTO story_text (stoid, title, introtext, bodytext, relatedtext) VALUES ('1','You\'ve Installed Slash!','You should play around with the admin stuff.  Configure things to\r\nyour tastes.  You should also edit the variables (in the admin menu) to define things like your websites name and slogan.  You should also donate some money to the <A href=http://www.fsf.org>FSF</A> and <A href=http://slashdot.org>Read Slashdot</A>.\r\n','','<LI><A href=http://www.fsf.org>FSF</A></LI>\n<LI><A href=http://slashdot.org>Read Slashdot</A></LI>\n<LI><A HREF=\"//www.example.com/search.pl?tid=4\">More on Slash</A></LI>\r\n<LI><A HREF=\"//www.example.com/search.pl?author=God\">Also by God</A></LI>');
-INSERT INTO story_text (stoid, title, introtext, bodytext, relatedtext) VALUES ('2','Now What?','So it took some doing (hopefully not too much), and it looks like you\'ve got Slash installed and ready to rock.  You can now use <A href="/admin.pl">backSlash</A>, the Slash Code Administration tool, if you are logged in as the admin user you set up during installation.  And you might wanna start posting some stories too.','','<LI><A href=/admin.pl>backSlash</A></LI>\n<LI><A HREF=\"//www.example.com/search.pl?tid=4\">More on Slash</A></LI>\r\n<LI><A HREF=\"//www.example.com/search.pl?author=God\">Also by God</A></LI>');
+INSERT INTO story_text (stoid, title, introtext, bodytext, relatedtext) VALUES ('1','You\'ve Installed Slash!','You should <A href=\"/login.pl\">log in</A> and play around with the <A href=\"/admin.pl\">admin stuff</A>.  Configure things to\r\nyour tastes: edit the variables and templates (in the admin menu) to define things like your website\'s name and slogan.  You should also donate some money to the <A href=\"http://www.fsf.org/\">FSF</A> and <A href=\"http://slashdot.org/\">read Slashdot</A>.\r\n','','<LI><A href=\"http://www.fsf.org\">FSF</A></LI>\n<LI><A href=http://slashdot.org>Read Slashdot</A></LI>\n<LI><A HREF=\"//www.example.com/search.pl?tid=4\">More on Slash</A></LI>');
+INSERT INTO story_text (stoid, title, introtext, bodytext, relatedtext) VALUES ('2','Now What?','So it took some doing (hopefully not too much), and it looks like you\'ve got Slash installed and ready to rock.  You can now use <A href=\"/admin.pl\">backSlash</A>, the Slash Code Administration tool, if you are logged in as the admin user you set up during installation.  And you might wanna start posting some stories too.','','<LI><A href=\"/admin.pl\">backSlash</A></LI>\n<LI><A HREF=\"//www.example.com/search.pl?tid=4\">More on Slash</A></LI>');
 
 #
 # Dumping data for table 'story_dirty'
@@ -281,8 +281,6 @@ INSERT INTO story_topics_chosen (stoid,tid,weight) VALUES (2,4,30);
 
 INSERT INTO story_topics_rendered (stoid,tid) VALUES (1,1);
 INSERT INTO story_topics_rendered (stoid,tid) VALUES (2,1);
-INSERT INTO story_topics_rendered (stoid,tid) VALUES (1,2);
-INSERT INTO story_topics_rendered (stoid,tid) VALUES (2,2);
 INSERT INTO story_topics_rendered (stoid,tid) VALUES (1,4);
 INSERT INTO story_topics_rendered (stoid,tid) VALUES (2,4);
 
@@ -323,12 +321,12 @@ INSERT INTO topic_nexus VALUES (3, NULL);
 #
 
 INSERT INTO topic_parents VALUES (2,1,30);
-INSERT INTO topic_parents VALUES (3,1,30);
+INSERT INTO topic_parents VALUES (3,5,10);
+INSERT INTO topic_parents VALUES (4,5,10);
 INSERT INTO topic_parents VALUES (5,1,30);
 INSERT INTO topic_parents VALUES (6,1,30);
+INSERT INTO topic_parents VALUES (7,5,10);
 INSERT INTO topic_parents VALUES (8,1,30);
-INSERT INTO topic_parents VALUES (4,3,10);
-INSERT INTO topic_parents VALUES (7,3,10);
 
 #
 # Dumping data for table 'tzcodes'
@@ -363,7 +361,7 @@ INSERT INTO users_index (uid, maxstories, noboxes) VALUES (1,30,0);
 # Dumping data for table 'users_info'
 #
 
-INSERT INTO users_info (uid, totalmods, realname, bio, tokens, lastgranted, karma, maillist, totalcomments, lastmm, lastaccess, m2fair, m2unfair, m2fairvotes, m2unfairvotes, upmods, downmods, session_login) VALUES (1,0,'Anonymous Coward','',0,'0000-00-00',0,0,'0000-00-00','0000-00-00',0,0,0,0,0,0,0,0);
+INSERT INTO users_info (uid, realname, bio, tokens, lastgranted, karma, maillist, totalcomments, lastaccess) VALUES (1,'Anonymous Coward','',0,'0000-00-00',0,0,'0000-00-00','0000-00-00');
 
 #
 # Dumping data for table 'users_param'
