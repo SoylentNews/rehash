@@ -9,6 +9,10 @@ Create a link to a comment
 * comment = make link to only one comment, not whole story (i.e., include cid= in link)
 
 Also included are all the individual elements of the comment and its poster: sid, cid, pid, date, subject, uid, points, lastmod, reason, nickname, fakeemail, homepage, sig
+
+We only display links to user pages on nicknames to admins because it
+would be distracting for other users.
+
 __title__
 
 __page__
@@ -22,7 +26,6 @@ __template__
 
 [% IF !subject_only %]
 	[% IF nickname %]
-		[% # XXX why admin-only link to nickname? %]
 		[% IF adminflag %]
 			by <a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=nickname&amp;userfield=[% nickname %]">[% nickname %]</a>
 		[% ELSE %]
