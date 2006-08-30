@@ -68,7 +68,7 @@ div.tags div.tagtitleopen { position: static !important; }
 
 .edit
 {
-	position: absolute;
+	position: absolute !important;
 	top: 1.6em;
 	right: 30px;
 }
