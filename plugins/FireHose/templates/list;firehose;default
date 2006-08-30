@@ -19,7 +19,7 @@ __template__
 	   skins.0 = "All";
 	%]
 	Section: [% Slash.createSelect('primaryskid', skins, options.primaryskid, 1, 0, 1) %]
-	Category: [% Slash.createSelect('category', { '' => 'All', quik => 'Quik', hold => 'Hold', back => 'Back' }, options.category,1, 0, 1) %]
+	Category: [% Slash.createSelect('category', { '' => 'None', quik => 'Quik', hold => 'Hold', back => 'Back' }, options.category,1, 0, 1) %]
 	Filter: <input type="text" name="filter" size="20" value="[% options.filter | strip_attribute %]">
 	<br>
 	Order: [% Slash.createSelect('order', { 'createtime' => 'Time', popularity => 'Popularity' }, options.orderby, 1, 0, 1) %]
