@@ -21,9 +21,6 @@ __template__
 		<a href="[% gSkin.rootdir %]/faq.shtml">FAQ</a>
 	</li>
 	<li>
-		<a href="[% gSkin.rootdir %]/comments.pl">Discussions</a>
-	</li>
-	<li>
 		<a href="[% gSkin.rootdir %]/journal.pl">Journals</a>
 	</li>
 	<li>
