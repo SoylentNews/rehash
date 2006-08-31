@@ -21,6 +21,9 @@ __template__
 		[% IF item.emaildomain %]
 			([% accepted_from_emaildomain %] / [% num_with_emaildomain %]) from domain
 		[% END %]
+		<br>
+		<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">Original Submission</a>
+		<br>
 	[% END %]
         <form action="[% gSkin.rootdir %]/submit.pl" method="post">
         <table class="data" width="100%">
