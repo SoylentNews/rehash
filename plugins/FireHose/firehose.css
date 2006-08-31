@@ -6,10 +6,10 @@
 .briefarticle .generaltitle .title h3 .score
 {
 	color: #fff;
-	background: url('/images/sic_fire.png') no-repeat -10px -2px;
+	background: url('//images.slashdot.org/sic_fire.png') no-repeat -10px -2px;
 }
 #firehoselist .generaltitle .title h3 { padding-left: 35px !important; }
-.article .generaltitle .title h3 .score { background: url('/images/sic_fire2.png') no-repeat -15px -3px; }
+.article .generaltitle .title h3 .score { background: url('//images.slashdot.org/sic_fire2.png') no-repeat -15px -3px; }
 .score { padding: 5px 15px 5px 25px; }
 .briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagstitleopen { padding-bottom: 0px; }
 
@@ -43,7 +43,7 @@
 
 .up
 {
-	background: url('/images/sic_vote_up.png') no-repeat;
+	background: url('//images.slashdot.org/sic_vote_up.png') no-repeat;
 	padding: 0 10px 10px 10px;
 	text-indent: -7000em;
 	position: absolute;
@@ -53,7 +53,7 @@
 
 .down
 {
-	background: url('/images/sic_vote_dwn.png') no-repeat 0px 7px;
+	background: url('//images.slashdot.org/sic_vote_dwn.png') no-repeat 0px 7px;
 	padding: 0 10px 10px 10px;
 	text-indent: -7000em;
 	position: absolute;
@@ -87,7 +87,7 @@ div.tags div.tagtitleopen { position: static !important; }
 	position: absolute;
 	right: 10px;
 	top: .5em;
-	background: url('/images/sic_delete.png') no-repeat right top;
+	background: url('//images.slashdot.org/sic_delete.png') no-repeat right top;
 }
 
 .reject input { visibility: hidden; }
