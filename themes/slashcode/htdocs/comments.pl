@@ -1084,6 +1084,7 @@ sub submitComment {
 			&& $user->{is_subscriber}
 			&& (!$form->{nosubscriberbonus} || $form->{nosubscriberbonus} ne 'on');
 	}
+# XXX this should be in validateComment()
 	# This is here to prevent posting to discussions that don't exist/are nd -Brian
 	unless ($user->{is_admin} || $form->{newdiscussion}) {
 		unless ($slashdb->checkDiscussionPostable($id)) {
