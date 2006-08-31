@@ -19,6 +19,7 @@ $task{$me}{code} = sub {
 	if (my $reskey = getObject('Slash::ResKey')) {
 		my $count = $reskey->purge_old || 0;
 		slashdLog("Purged $count reskeys\n");
+		$reskey->update_salts;
 	}
 };
 
