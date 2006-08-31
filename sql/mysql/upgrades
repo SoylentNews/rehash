@@ -3997,9 +3997,8 @@ UPDATE vars SET value = 'T_2_5_0_122' WHERE name = 'cvs_tag_currentcode';
 INSERT IGNORE INTO vars (name, value, description) VALUES ('relocate_href2slash', 0, 'Automatically convert all A HREF tags to SLASH HREF tags, using relocate.pl.');
 INSERT IGNORE INTO vars (name, value, description) VALUES ('relocate_keep_count', 1, 'Keep count of click-thrus in the links_for_stories.count column');
 
-# For FireHose PLUGIN users
+# Updates for plugins/FireHose
 ALTER TABLE firehose ADD COLUMN email varchar(255) NOT NULL default '', ADD COLUMN emaildomain varchar(255) NOT NULL default '', ADD COLUMN ipid varchar(32) NOT NULL default '', ADD COLUMN subnetid varchar(32) NOT NULL default '', ADD COLUMN category varchar(30) NOT NULL default '';
-
 ALTER TABLE firehose ADD COLUMN name varchar(50) NOT NULL AFTER emaildomain;
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_admin_extras', 'Slash::FireHose', 'ajaxGetAdminExtras', 'ajax_admin', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_form', 'Slash::FireHose', 'ajaxGetFormContents', 'ajax_admin', 'createuse');
@@ -4016,3 +4015,9 @@ UPDATE vars SET value = 'T_2_5_0_124' WHERE name = 'cvs_tag_currentcode';
 
 # do runtask reskey_salt.pl immediately after running refresh
 ALTER TABLE reskey_resources ADD COLUMN static ENUM('yes', 'no') DEFAULT 'no' NOT NULL AFTER name;
+
+# Updates for plugins/Tags
+UPDATE vars SET description='Example tags for stories before they go live' WHERE name='tags_stories_examples_pre';
+DELETE FROM vars WHERE name in ('tags_reduced_tag_clout', 'tags_reduced_user_clout');
+UPDATE vars SET name=CONCAT(name, 'name') WHERE name IN ('tags_upvote_tag', 'tags_downvote_tag');
+

@@ -29,6 +29,7 @@ use DBIx::Password;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
+use Slash::Tags;
 use Data::JavaScript::Anon;
 
 use base 'Slash::DB::Utility';
@@ -345,8 +346,8 @@ sub ajaxUpDownFirehose {
 	my $id = $form->{id};
 	return unless $id;
 
-	my $upvote   = $constants->{tags_upvote_tag} || "nod";
-	my $downvote = $constants->{tags_downvote_tag} || "nix";
+	my $upvote   = $constants->{tags_upvote_tagname} || "nod";
+	my $downvote = $constants->{tags_downvote_tagname} || "nix";
 
 	my $firehose = getObject('Slash::FireHose');
 	my $tags = getObject('Slash::Tags');
@@ -354,7 +355,7 @@ sub ajaxUpDownFirehose {
 
 	my($dir) = $form->{dir};
 	my $tag;
-	if($dir eq "+") {
+	if ($dir eq "+") {
 		$tag = $upvote;
 	} elsif ($dir eq "-") {
 		$tag = $downvote;
@@ -362,7 +363,7 @@ sub ajaxUpDownFirehose {
 	return unless $item && $tag;
 	my($table, $itemid) = $tags->getGlobjTarget($item->{globjid});
 	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $itemid, { uid => $user->{uid}});
-	my @tags = sort tagnameorder map { $_->{tagname} } @$now_tags_ar;
+	my @tags = sort Slash::Tags::tagnameorder map { $_->{tagname} } @$now_tags_ar;
 	push @tags, $tag;
 	my $tagsstring = join ' ', @tags;
 	my $newtagspreloadtext = $tags->setTagsForGlobj($itemid, $table, $tagsstring);
@@ -485,11 +486,11 @@ sub setSectionTopicsFromTagstring {
 
 }
 
-sub tagnameorder {
-	my($a1, $a2) = $a =~ /(^\!)?(.*)/;
-	my($b1, $b2) = $b =~ /(^\!)?(.*)/;
-	$a2 cmp $b2 || $a1 cmp $b1;
-}
+#sub tagnameorder {
+#	my($a1, $a2) = $a =~ /(^\!)?(.*)/;
+#	my($b1, $b2) = $b =~ /(^\!)?(.*)/;
+#	$a2 cmp $b2 || $a1 cmp $b1;
+#}
 
 sub setFireHose {
 	my($self, $id, $data) = @_;
