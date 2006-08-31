@@ -1666,16 +1666,26 @@ print STDERR scalar(localtime) . " Env.pm $$ userHasDaypass uid=$user->{uid} cs=
 	}
 
 	if ($constants->{plugin}{Tags}) {
+		my $max_uid;
 		my $write = $constants->{tags_stories_allowwrite} || 0;
 		$user->{tags_canwrite_stories} = 0;
 		$user->{tags_canwrite_stories} = 1 if
 			!$user->{is_anon} && (
-				   $write >= 4
-				|| $write >= 3 && $user->{karma} >= 0
-				|| $write >= 2.5 && $user->{acl}{tags_stories_allowwrite}
+				   $write >= 2.5 && $user->{acl}{tags_stories_allowwrite}
 				|| $write >= 2 && $user->{is_subscriber}
 				|| $write >= 1 && $user->{is_admin}
 			);
+		if (!$user->{is_anon} && !$user->{tags_canwrite_stories}) {
+			$user->{tags_canwrite_stories} = 1 if
+				   $write >= 4
+				|| $write >= 3 && $user->{karma} >= 0;
+			if ($user->{tags_canwrite_stories} && $constants->{tags_userfrac_write} < 1) {
+				$max_uid = $slashdb->countUser({ max => 1 });
+				if ($user->{uid} > $max_uid*$constants->{tags_userfrac_write}) {
+					$user->{tags_canwrite_stories} = 0;
+				}
+			}
+		}
 		my $read;
 		if ($user->{tags_canwrite_stories}) {
 			$user->{tags_canread_stories} = 1;
@@ -1684,12 +1694,21 @@ print STDERR scalar(localtime) . " Env.pm $$ userHasDaypass uid=$user->{uid} cs=
 			$user->{tags_canread_stories} = 0;
 			$user->{tags_canread_stories} = 1 if
 				!$user->{is_anon} && (
-					   $read >= 4
-					|| $read >= 3 && $user->{karma} >= 0
-					|| $read >= 2.5 && $user->{acl}{tags_stories_allowread}
+					   $read >= 2.5 && $user->{acl}{tags_stories_allowread}
 					|| $read >= 2 && $user->{is_subscriber}
 					|| $read >= 1 && $user->{is_admin}
 				);
+		}
+		if (!$user->{is_anon} && !$user->{tags_canread_stories}) {
+			$user->{tags_canread_stories} = 1 if
+					   $read >= 4
+					|| $read >= 3 && $user->{karma} >= 0;
+			if ($user->{tags_canread_stories} && $constants->{tags_userfrac_read} < 1) {
+				$max_uid ||= $slashdb->countUser({ max => 1 });
+				if ($user->{uid} > $max_uid*$constants->{tags_userfrac_read}) {
+					$user->{tags_canread_stories} = 0;
+				}
+			}
 		}
 	}
 

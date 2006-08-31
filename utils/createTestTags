@@ -110,21 +110,21 @@ sub _get_tagnameid {
 		srand;
 		for my $i (0..$#$ct_ar) {
 			if (rand(1) > 0.5) {
-				$retval = $tags->createTagName($ct_ar->[$i]);
+				$retval = $tags->createTagname($ct_ar->[$i]);
 				next;
 			}
 		}
-		$retval ||= $tags->createTagName($ct_ar->[0]);
+		$retval ||= $tags->createTagname($ct_ar->[0]);
 	}
 	while (!$retval) {
 		# Wholly new random word
-		$retval = $tags->createTagName($werder->get_werd);
+		$retval = $tags->createTagname($werder->get_werd);
 	}
 	if (rand(1) < 0.03) {
 		# Opposite of the tagname just picked
 		my $tagname = $tags->getTagDataFromId($retval)->{tagname};
 		my $opp = $tags->getOppositeTagname($tagname);
-		$retval = $tags->createTagName($opp);
+		$retval = $tags->createTagname($opp);
 	}
 	return $retval;
 }
