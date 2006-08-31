@@ -101,7 +101,7 @@ sub update_salts {
 	my $timeframe = $constants->{reskey_timeframe} || 14400;
 	$self->sqlDelete('reskey_hourlysalt', "ts < DATE_SUB(NOW(), INTERVAL $timeframe SECOND)");
 
-	# create news ones, if they don't exist
+	# create new ones, if they don't exist
 	for my $i (0 .. 48) {
 		$self->sqlInsert('reskey_hourlysalt', {
 			-ts	=> "DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-%d %H:00:00'), INTERVAL $i HOUR)",
