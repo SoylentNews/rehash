@@ -28,7 +28,7 @@ __template__
 			<label>Order&nbsp;[% Slash.createSelect('order', { 'createtime' => 'Time', popularity => 'Popularity' }, options.orderby, 1, 0, 1) %]</label> 
 			<label>Mode&nbsp;[% Slash.createSelect('mode', { 'full' => 'Full', fulltitle => 'Abbreviated' }, options.mode, 1, 0, 1) %]
 </label> 
-			<input type="submit" value="Change View"> 
+			<input type="submit" value="Change View">
 		</fieldset>
 	</form>
 </div>

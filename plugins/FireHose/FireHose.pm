@@ -283,7 +283,7 @@ sub ajaxSaveNoteFirehose {
 		my $firehose = getObject("Slash::FireHose");
 		$firehose->setFireHose($id, { note => $note });
 	}
-	return "$note";
+	return $note;
 }
 
 

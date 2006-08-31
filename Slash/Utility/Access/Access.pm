@@ -516,7 +516,7 @@ sub filterOk {
 
 #========================================================================
 sub compressOk {
-	# leave it here, it causes problems if used in the
+	# leave it here, it causes problems if use'd in the
 	# apache startup phase
 	require Compress::Zlib;
 	my($formname, $field, $content, $wsfactor) = @_;

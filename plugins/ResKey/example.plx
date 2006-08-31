@@ -1,52 +1,73 @@
+#!/usr/bin/perl
+use warnings;
 use strict;
+
 use Slash::Test shift;
 
-my($reskey, $rkey, $rkey1, $rkey2, $rkey3);
+my($reskey, $rkey, $rkey1, $rkey2, $rkey3, $lkey);
 
 my $debug = 0;
 
 for (1..1) {
 	$reskey = getObject('Slash::ResKey');
-	$rkey = $reskey->key('pollbooth', {
+
+	$lkey = $reskey->key('comments-moderation-ajax', {
 		debug	=> $debug
 	});
-	handle($rkey->createuse, $rkey);
 
-	print Dumper $rkey;
+	handle($lkey, 'create');
+	handle($lkey, 'use') for 0..19;
+
+
+	$rkey = $reskey->key('pollbooth', {
+		debug	=> $debug,
+		qid	=> 1
+	});
+	handle($rkey, 'createuse');
 
 
 	$rkey1 = $reskey->key('comments', {
 		debug	=> $debug
 	});
 
-	handle($rkey1->create, $rkey1);
-	handle($rkey1->touch,  $rkey1);
+	handle($rkey1, 'create');
+	handle($rkey1, 'touch');
 
 	$rkey2 = $reskey->key('comments', {
 		debug	=> $debug,
 		reskey	=> $rkey1->reskey,
 	});
 
-	handle($rkey2->touch, $rkey2);
-
-	handle($rkey1->use, $rkey1);
+	handle($rkey2, 'touch');
 	sleep 5;
+	handle($rkey1, 'use');
 
 	$::form->{reskey} = $rkey1->reskey;
 	$rkey3 = $reskey->key('comments', {
 		debug	=> $debug,
 	});
-	handle($rkey3->use, $rkey3) or print Dumper $rkey3;
+	handle($rkey3, 'use');
 }
 
 
 sub handle {
-	my($success, $this_rkey) = @_;
+	my($this_rkey, $method) = @_;
+
+	debug_it($this_rkey);
+
+	my $success = $this_rkey->$method;
+
 	if ($success) {
 		printf "%s'd %s\n", ucfirst($this_rkey->type), $this_rkey->reskey;
+		debug_it($this_rkey);
 		return 1;
 	} else {
 		printf "Error on %s: %s\n", $this_rkey->type, $this_rkey->errstr;
-		print Dumper $this_rkey;
+		debug_it($this_rkey, 1);
 	}
+}
+
+sub debug_it {
+	my($this_rkey, $over) = @_;
+	print Dumper $this_rkey if $over || $debug > 1;
 }

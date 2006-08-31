@@ -17,7 +17,7 @@ __template__
     mode = mode || "fulltitle";
     full = 1;
     bodywrapper = 1;
-    bodycontent = 1; 
+    bodycontent = 1;
     IF mode == "fulltitle";
     	bodycontent = 0;
     ELSIF mode == "bodycontent";
