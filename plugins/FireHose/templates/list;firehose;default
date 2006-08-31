@@ -36,7 +36,7 @@ __template__
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
-[% PROCESS paginate %]
 </div>
+[% PROCESS paginate %]
 __version__
 $Id$

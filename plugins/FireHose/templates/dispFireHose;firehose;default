@@ -90,7 +90,7 @@ END %]
 					introtext = "<a href=\"$item.email\"$rnf>$item.name</a> writes <i>\"$introtext\"</i>";
 				ELSIF (item.name == constants.anon_name) && constants.anon_name_alt;
 					introtext = "$constants.anon_name_alt writes <i>\"$introtext\"</i>";
-				ELSIF submission.name;
+				ELSIF item.name;
 					introtext = "$submission.name writes <i>\"$introtext\"</i>";
 				END;
 			END; %]
