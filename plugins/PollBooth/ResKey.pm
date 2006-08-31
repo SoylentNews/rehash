@@ -30,15 +30,10 @@ sub doCheck {
 
 	return(RESKEY_DEATH, ['no qid', {}, 'pollBooth']) unless $qid;
 
-	my $pollvoter_md5 = getPollVoterHash();
-	my $qid_quoted = $slashdb->sqlQuote($qid);
-
-	# Yes, qid/id/uid is a key in pollvoters.
-	my($voters) = $slashdb->sqlSelect('id', 'pollvoters',
-		"qid=$qid_quoted AND id='$pollvoter_md5' AND uid=$user->{uid}"
-	);
-
-	if ($voters) {
+	# Pudge: I assume it's OK to use a reader DB here...? - Jamie
+	my $pollbooth_reader = getObject('Slash::PollBooth', { db_type => reader });
+	return(RESKEY_DEATH, ['no polls', {}, 'pollBooth']) unless $pollbooth_reader;
+	if ($pollbooth_reader->checkPollVoter($qid, $user->{uid})) {
 		return(RESKEY_DEATH, ['already voted', {}, 'pollBooth']);
 	}
 

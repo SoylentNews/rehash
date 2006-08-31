@@ -57,6 +57,7 @@ __template__
         [% polltype.section = "SlashBox Section Poll"; polltype.story = "Story-Related Poll"; polltype.nodisplay = "Never Display" %]
       	[% PROCESS formLabel value => "Poll Type" comment => "" %]
 	[% IF story %]
+		[%# XXX question.polltype doesn't work, shows up for me as Never Display, see editpoll() code comment - Jamie %]
 		[% polltype.${question.polltype} %] *<br>
 		<input type="hidden" name="polltype" value="[% question.polltype %]">
 	[% ELSE %]

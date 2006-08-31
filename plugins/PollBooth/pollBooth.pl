@@ -57,7 +57,7 @@ sub poll_booth {
 #################################################################
 sub default {
 	my($form, $slashdb, $constants) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $pollbooth_reader = getObject('Slash::PollBooth', { db_type => 'reader' });
 
 	if (!$form->{'qid'}) {
 		listpolls(@_);
@@ -66,10 +66,10 @@ sub default {
 	} else {
 		my $vote = vote(@_);
 		if ($constants->{poll_discussions}) {
-			my $discussion_id = $reader->getPollQuestion(
+			my $discussion_id = $pollbooth_reader->getPollQuestion(
 				$form->{'qid'}, 'discussion'
 			);
-			my $discussion = $reader->getDiscussion($discussion_id)
+			my $discussion = $pollbooth_reader->getDiscussion($discussion_id)
 				if $discussion_id;
 			if ($discussion) {
 				printComments($discussion);
@@ -81,13 +81,12 @@ sub default {
 #################################################################
 sub link_story_to_poll {
 	my($form, $slashdb, $constants) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $pollbooth_reader = getObject('Slash::PollBooth', { db_type => 'reader' });
 	my $qid  = $form->{'qid'};
 	my $sid  = $form->{'sid'};
 	my $user = getCurrentUser();
 	my $min = $form->{min} || 0;
-	my $questions = $reader->getPollQuestionList($min);
-	
+	my $questions = $pollbooth_reader->getPollQuestionList($min);
 
 	unless ($user->{'is_admin'}) {
 		default(@_);
@@ -111,12 +110,10 @@ sub link_story_to_poll {
 #################################################################
 sub detachpoll {
 	my($form, $slashdb, $constants) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $qid  = $form->{'qid'};
 	my $sid  = $form->{'sid'};
 	my $user = getCurrentUser();
 	my $warning;
-	
 
 	unless ($user->{'is_admin'}) {
 		default(@_);
@@ -149,6 +146,7 @@ sub detachpoll {
 #################################################################
 sub editpoll {
 	my($form, $slashdb, $constants) = @_;
+	my $pollbooth_db = getObject('Slash::PollBooth');
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $qid  = $form->{'qid'};
 	my $user = getCurrentUser();
@@ -221,8 +219,8 @@ sub editpoll {
                 );
             
         } elsif ($qid) {
-		$question = $slashdb->getPollQuestion($qid);
-		$question->{sid} = $slashdb->getSidForQID($qid)
+		$question = $pollbooth_db->getPollQuestion($qid);
+		$question->{sid} = $pollbooth_db->getSidForQid($qid)
 			unless $question->{autopoll} eq "yes";
 		
 		$question->{sid} = $form->{override_sid} if $form->{override_sid};
@@ -233,6 +231,7 @@ sub editpoll {
 				"sid=" . $reader->sqlQuote($question->{sid})
 			);
 			
+			# XXX I think this is broken, see editpoll template comment - Jamie
 			$story_ref->{displaystatus} = $reader->_displaystatus($story_ref->{stoid}) if $story_ref;
 
 			if ($story_ref) {
@@ -245,17 +244,17 @@ sub editpoll {
 		$question->{polltype} ||= "section";
 
 
-		$answers = $slashdb->getPollAnswers(
+		$answers = $pollbooth_db->getPollAnswers(
 			$qid, [qw( answer votes aid )]
 		);
                 $question->{polltype} ||= "section";
-		my $current_qid = $slashdb->getCurrentQidForSkid($question->{primaryskid});
+		my $current_qid = $pollbooth_db->getCurrentQidForSkid($question->{primaryskid});
 		$checked = ($current_qid == $qid) ? 1 : 0;
-		my $poll_open = $slashdb->isPollOpen($qid);
+		my $poll_open = $pollbooth_db->isPollOpen($qid);
 
 		# Just use the DB method, it's too messed up to rebuild the logic
 		# here -Brian
-		my $poll = $slashdb->getPoll($qid);
+		my $poll = $pollbooth_db->getPoll($qid);
 		my $raw_pollbooth = slashDisplay('pollbooth', {
 			qid		=> $qid,
 			voters		=> $question->{voters},
@@ -264,7 +263,7 @@ sub editpoll {
 			answers		=> $poll->{answers},
 			voters		=> $poll->{pollq}{voters},
 			sect		=> $user->{section} || $question->{section},
-                        has_activated   => $slashdb->hasPollActivated($qid)
+                        has_activated   => $pollbooth_db->hasPollActivated($qid)
 		}, 1);
 		$pollbooth = fancybox(
 			$constants->{fancyboxwidth}, 
@@ -308,6 +307,7 @@ sub savepoll {
 
 	my $user = getCurrentUser();
 	my $gSkin = getCurrentSkin();
+	my $pollbooth_db = getObject('Slash::PollBooth');
 
 	unless ($user->{'is_admin'}) {
 		default(@_);
@@ -354,7 +354,7 @@ sub savepoll {
 	#We are lazy, we just pass along $form as a $poll
 	# Correct section for sectional editor first -Brian
 	$form->{section} = $user->{section} if $user->{section};
-	my $qid = $slashdb->savePollQuestion($form);
+	my $qid = $pollbooth_db->savePollQuestion($form);
 
 	# we have a problem here.  if you attach the poll to an SID,
 	# and then unattach it, it will still be attached to that SID
@@ -368,7 +368,7 @@ sub savepoll {
 	# year.  But one thing at a time. -- jamie 2002/04/15
 
 	if ($constants->{poll_discussions}) {
-		my $poll = $slashdb->getPollQuestion($qid);
+		my $poll = $pollbooth_db->getPollQuestion($qid);
 		my $discussion;
 		if ($form->{sid}) {
 			# if sid lookup fails, then $discussion is empty,
@@ -393,7 +393,7 @@ sub savepoll {
 		}
 		# if it already has a discussion (so $discussion is not set),
 		# or discussion ID is unchanged, don't bother setting
-		$slashdb->setPollQuestion($qid, { discussion => $discussion })
+		$pollbooth_db->setPollQuestion($qid, { discussion => $discussion })
 			if $discussion && $discussion != $poll->{discussion};
 	}
 	$slashdb->setStory($form->{sid}, { qid => $qid }) if $form->{sid};
@@ -401,15 +401,16 @@ sub savepoll {
 
 #################################################################
 sub vote {
-	my($form, $slashdb) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my($form) = @_;
+	my $pollbooth_db = getObject('Slash::PollBooth');
+	my $pollbooth_reader = getObject('Slash::PollBooth', { db_type => 'reader' });
 
 	my $qid = $form->{'qid'};
 	my $aid = $form->{'aid'};
 	return unless $qid && $aid;
 
 	my(%all_aid) = map { ($_->[0], 1) }
-		@{$reader->getPollAnswers($qid, ['aid'])};
+		@{$pollbooth_reader->getPollAnswers($qid, ['aid'])};
 
 	if (! keys %all_aid) {
 		print getData('invalid');
@@ -418,10 +419,10 @@ sub vote {
 		return;
 	}
 
-	my $question = $reader->getPollQuestion($qid, ['voters', 'question']);
+	my $question = $pollbooth_reader->getPollQuestion($qid, ['voters', 'question']);
 	my $notes = getData('display');
 	if ($aid > 0) {
-		my $poll_open = $reader->isPollOpen($qid);
+		my $poll_open = $pollbooth_reader->isPollOpen($qid);
 
 		if (!$poll_open) {
 			# Voting is closed on this poll.
@@ -435,15 +436,15 @@ sub vote {
 			$notes = $rkey->errstr;
 		} elsif (exists $all_aid{$aid}) {
 			$notes = getData('success', { aid => $aid });
-			$slashdb->createPollVoter($qid, $aid);
+			$pollbooth_db->createPollVoter($qid, $aid);
 			$question->{voters}++;
 		} else {
 			$notes = getData('reject', { aid => $aid });
 		}
 	}
 
-	my $answers  = $reader->getPollAnswers($qid, ['answer', 'votes']);
-	my $maxvotes = $reader->getPollVotesMax($qid);
+	my $answers  = $pollbooth_reader->getPollAnswers($qid, ['answer', 'votes']);
+	my $maxvotes = $pollbooth_reader->getPollVotesMax($qid);
 	my @pollitems;
 	for (@$answers) {
 		my($answer, $votes) = @$_;
@@ -470,8 +471,8 @@ sub vote {
 sub deletepolls {
 	my($form) = @_;
 	if (getCurrentUser('is_admin')) {
-		my $slashdb = getCurrentDB();
-		$slashdb->deletePoll($form->{'qid'});
+		my $pollbooth_db = getObject('Slash::PollBooth');
+		$pollbooth_db->deletePoll($form->{'qid'});
 	}
 	listpolls(@_);
 }
@@ -479,10 +480,10 @@ sub deletepolls {
 #################################################################
 sub listpolls {
 	my($form, $slashdb, $constants) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $pollbooth_reader = getObject('Slash::PollBooth', { db_type => 'reader' });
 	my $min = $form->{min} || 0;
 	my $type = $form->{type};
-	my $questions = $reader->getPollQuestionList($min, { type => $type });
+	my $questions = $pollbooth_reader->getPollQuestionList($min, { type => $type });
 	my $gSkin = getCurrentSkin();
 	my $opts = ();
 	$opts->{type} = $form->{type};
@@ -493,7 +494,7 @@ sub listpolls {
 		$opts->{section} = '';
 	}
 
-	$questions = $reader->getPollQuestionList($min, $opts);
+	$questions = $pollbooth_reader->getPollQuestionList($min, $opts);
 
 	my $sitename = getCurrentStatic('sitename');
 
@@ -505,7 +506,7 @@ sub listpolls {
 		admin		=> getCurrentUser('seclev') >= 100,
 		title		=> "$sitename Polls",
 		width		=> '99%',
-                curtime         => $reader->getTime(),
+                curtime         => $pollbooth_reader->getTime(),
 		type		=> $type 
 	});
 }
