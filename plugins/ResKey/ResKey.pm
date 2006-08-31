@@ -83,6 +83,34 @@ sub key {
 }
 
 #========================================================================
+# For tasks/reskey_salt.pl
+sub update_salts {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+
+	# fill if empty!
+	if (!$constants->{reskey_static_salt}) {
+		$self->createVar(
+			'reskey_static_salt',
+			getAnonId(1, 20),
+			'sitewide salt for reskeys'
+		);
+	}
+
+	# delete old salts
+	my $timeframe = $constants->{reskey_timeframe} || 14400;
+	$self->sqlDelete('reskey_hourlysalt', "ts < DATE_SUB(NOW(), INTERVAL $timeframe SECOND)");
+
+	# create news ones, if they don't exist
+	for my $i (0 .. 48) {
+		$self->sqlInsert('reskey_hourlysalt', {
+			-ts	=> "DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-%d %H:00:00'), INTERVAL $i HOUR)",
+			salt	=> getAnonId(1, 20),
+		}, { ignore => 1 });
+	}
+}
+
+#========================================================================
 # For tasks/reskey_purge.pl
 sub purge_old {
 	my($self) = @_;

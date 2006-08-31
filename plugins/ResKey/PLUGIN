@@ -6,3 +6,4 @@ mysql_schema=mysql_schema.sql
 template=templates/data;reskey;default
 template=templates/reskey_tag;misc;default
 task=tasks/reskey_purge.pl
+task=tasks/reskey_salt.pl

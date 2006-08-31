@@ -111,6 +111,7 @@ database for that reskey.
 use warnings;
 use strict;
 
+use Digest::MD5 'md5_hex';
 use Time::HiRes;
 use Slash;
 use Slash::Constants ':reskey';
@@ -132,21 +133,9 @@ sub new {
 	my $self = bless { _opts => $opts }, $class;
 
 	$self->debug($debug);
+	$self->resource($resname);
 
-	if ($resname =~ /[a-zA-Z]/) {
-		my $resources = $self->getResources;
-		$rkrid = $resources->{name}{$resname};
-	} elsif ($resname =~ /^\d+$/) {
-		my $resources = $self->getResources;
-		$rkrid = $resname;
-		$resname = $resources->{id}{$rkrid};
-	}
-
-	return 0 unless $resname && $rkrid;
-
-	$self->resname($resname);
-	$self->rkrid($rkrid);
-
+	return 0 unless $self->resname && $self->rkrid;
 
 	# from filter_param
 	if ($reskey) {
@@ -244,7 +233,7 @@ sub AUTOLOAD {
 	if ($name =~ /^(?:noop|success|failure|death)$/) {
 		$sub = _createStatusAccessor($name, \@_);
 
-	} elsif ($name =~ /^(?:error|reskey|debug|rkrid|resname|origtype|type|code|opts)$/) {
+	} elsif ($name =~ /^(?:error|reskey|debug|rkrid|resname|origtype|type|code|opts|static)$/) {
 		$sub = _createAccessor($name, \@_);
 
 	} elsif ($name =~ /^(?:create|touch|use|createuse)$/) {
@@ -331,7 +320,7 @@ sub _createActionMethod {
 			}
 		}
 
-		if ($self->type eq 'use') {
+		if ($self->type eq 'use' && !$self->static) {
 			return 0 unless $self->fakeUse;
 		}
 
@@ -434,7 +423,6 @@ sub dbCreate {
 	my $user = getCurrentUser();
 
 	my $ok = 0;
-	my $srcid = $self->getSrcid;
 
 	# XXX We really should pull this repeat-insert-getAnonId
 	# loop into a utility function in Environment.pm.  It's
@@ -442,41 +430,48 @@ sub dbCreate {
 	# createDaypasskey except I don't think it's even worth
 	# bothering).  When we do pull it out, remember to lose
 	# the 'use Time::HiRes' :)
-	my $reskey = '';
-	my $try_num = 1;
-	my $num_tries = 10;
-	while ($try_num < $num_tries) {
-		$reskey = getAnonId(1, 20);
-		my $rows = $slashdb->sqlInsert('reskeys', {
-			reskey		=> $reskey,
-			rkrid		=> $self->rkrid,
-			uid		=> $user->{uid},
-			-srcid_ip	=> $srcid,
-			-create_ts	=> 'NOW()',
-		});
+	if ($self->static) {
+		$self->reskey($self->makeStaticKey);
+		$ok = 1;
+	} else {
+		my $reskey = '';
+		my $srcid = $self->getSrcid;
 
-		if ($rows > 0) {
-			$self->reskey($reskey);
-			$ok = 1;
-			last;
+		my $try_num = 1;
+		my $num_tries = 10;
+		while ($try_num < $num_tries) {
+			$reskey = getAnonId(1, 20);
+			my $rows = $slashdb->sqlInsert('reskeys', {
+				reskey		=> $reskey,
+				rkrid		=> $self->rkrid,
+				uid		=> $user->{uid},
+				-srcid_ip	=> $srcid,
+				-create_ts	=> 'NOW()',
+			});
+
+			if ($rows > 0) {
+				$self->reskey($reskey);
+				$ok = 1;
+				last;
+			}
+
+			# The INSERT failed because $reskey is already being
+			# used.  Presumably this would be due to a collision
+			# in the randomly-generated string, which indicates
+			# there's a problem with the RNG (since with a true
+			# RNG this would happen once every kajillion years).
+			# Keep retrying, but we're going to log this once
+			# we're done.
+			++$try_num;
+			# Pause before trying again;  in the event of a
+			# problem with the RNG, lots of places in the code
+			# are probably trying this all at once and this may
+			# make the site fail more gracefully.
+			Time::HiRes::sleep(rand($try_num));
 		}
-
-		# The INSERT failed because $reskey is already being
-		# used.  Presumably this would be due to a collision
-		# in the randomly-generated string, which indicates
-		# there's a problem with the RNG (since with a true
-		# RNG this would happen once every kajillion years).
-		# Keep retrying, but we're going to log this once
-		# we're done.
-		++$try_num;
-		# Pause before trying again;  in the event of a
-		# problem with the RNG, lots of places in the code
-		# are probably trying this all at once and this may
-		# make the site fail more gracefully.
-		Time::HiRes::sleep(rand($try_num));
-	}
-	if ($try_num > 1) {
-		errorLog("Slash::ResKey::Key->create INSERT failed $try_num times: uid=$user->{uid} rkrid=$self->{rkrid} reskey=$reskey");
+		if ($try_num > 1) {
+			errorLog("Slash::ResKey::Key->create INSERT failed $try_num times: uid=$user->{uid} rkrid=$self->{rkrid} reskey=$reskey");
+		}
 	}
 
 	if ($ok) {
@@ -495,6 +490,8 @@ sub dbCreate {
 sub dbUse {
 	my($self) = @_;
 	$self->_flow;
+	my $slashdb = getCurrentDB();
+
 	my($failed, $failure_string);
 	if (!$self->success) {
 		$failed = $self->error;
@@ -502,46 +499,52 @@ sub dbUse {
 		$self->_save_errors;
 	}
 	$self->_init;
+	my $ok = 0;
 
-	my(%update, $where, $no_is_alive_check);
-	%update = (
-		-touches	=> 'touches+1',
-		-last_ts	=> 'NOW()',
-	);
-
-	if ($failed) {
-		$update{-failures} = 'failures+1';
-	}
-
-	if ($self->type eq 'use') {
-		# use(), or to be precise fakeUse() called by the
-		# use() method created by _createActionMethod(),
-		# already set is_alive to no, assuming success.
-		$no_is_alive_check = 1;
-		if ($failed) {
-			# re-set these, as they were set by use(),
-			# assuming success
-			$update{-submit_ts} = 'NULL';
-			$update{is_alive}   = 'yes';
-		} else {
-			# XXX since is_alive is definitely 'no' here,
-			# why not just delete it now? -Jamie
-			# XXX delete what?  the reskey?  because we (might)
-			# need it for duration checks -- pudge
-			# update the ts again, just to be clean
-			$update{-submit_ts} = 'NOW()';
+	if ($self->static) {
+		if (!$failed) {
+			$ok = $self->checkStaticKey;
 		}
+	} else {
+		my(%update, $where, $no_is_alive_check);
+		%update = (
+			-touches	=> 'touches+1',
+			-last_ts	=> 'NOW()',
+		);
+
+		if ($failed) {
+			$update{-failures} = 'failures+1';
+		}
+
+		if ($self->type eq 'use') {
+			# use(), or to be precise fakeUse() called by the
+			# use() method created by _createActionMethod(),
+			# already set is_alive to no, assuming success.
+			$no_is_alive_check = 1;
+			if ($failed) {
+				# re-set these, as they were set by use(),
+				# assuming success
+				$update{-submit_ts} = 'NULL';
+				$update{is_alive}   = 'yes';
+			} else {
+				# since is_alive is definitely 'no' here,
+				# why not just delete it now? -Jamie
+				# delete what?  the reskey?  because we (might)
+				# need it for duration checks -- pudge
+				# update the ts again, just to be clean
+				$update{-submit_ts} = 'NOW()';
+			}
+		}
+
+		$self->getUpdateClauses(\%update, \$where,
+			$no_is_alive_check) or return 0;
+
+		$ok = $slashdb->sqlUpdate('reskeys', \%update, $where);
 	}
-
-	$self->getUpdateClauses(\%update, \$where,
-		$no_is_alive_check) or return 0;
-
-	my $slashdb = getCurrentDB();
-	my $rows = $slashdb->sqlUpdate('reskeys', \%update, $where);
 
 	if ($failed) {
 		$self->_restore_errors;
-	} elsif ($rows == 1) {
+	} elsif ($ok == 1) {
 		$self->success(1);
 	} else {
 		$self->death(1);
@@ -553,7 +556,7 @@ sub dbUse {
 		$self->error([$failure_string]);
 	}
 
-	if ($failure_string) {
+	if ($failure_string && !$self->static) {
 		my $reskey_obj = $self->get;
 		if ($reskey_obj) {
 			my $rkid = $reskey_obj->{rkid};
@@ -733,6 +736,31 @@ sub errstr {
 }
 
 #========================================================================
+sub resource {
+	my($self, $resname) = @_;
+
+	if ($resname) {
+		my $resource;
+		if ($resname =~ /[a-zA-Z]/) {
+			my $resources = $self->getResources;
+			$resource = $resources->{by_name}{$resname};
+		} elsif ($resname =~ /^\d+$/) {
+			my $resources = $self->getResources;
+			$resource = $resources->{by_id}{$resname};
+		}
+
+		if ($resource) {
+			$self->{_resource} = $resource;
+			$self->resname($resource->{name});
+			$self->rkrid($resource->{id});
+			$self->static($resource->{static});
+		}
+	}
+
+	return $self->{_resource} || {};
+}
+
+#========================================================================
 sub get {
 	my($self, $refresh) = @_;
 	$self->_flow;
@@ -785,10 +813,15 @@ sub getResources {
 
 	return $resources if scalar keys %$resources;
 
-	my $select = $reader->sqlSelectAll('rkrid, name', 'reskey_resources');
+	my $select = $reader->sqlSelectAll('rkrid, name, static', 'reskey_resources');
 	for (@$select) {
-		$resources->{id}  {$_->[0]} = $_->[1];
-		$resources->{name}{$_->[1]} = $_->[0];
+		my $resource = {
+			id	=> $_->[0],
+			name	=> $_->[1],
+			static	=> ($_->[2] eq 'yes' ? 1 : 0)
+		};
+		$resources->{by_id}  {$resource->{id}}   =
+		$resources->{by_name}{$resource->{name}} = $resource;
 	}
 
 	return $resources;
@@ -873,6 +906,64 @@ sub getCheckVars {
 
 	return;
 }
+
+#========================================================================
+sub makeStaticKey {
+	my($self, $id, $salt) = @_;
+
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	$salt ||= $self->getCurrentSalt;
+	$id   ||= '';
+
+	return md5_hex(
+		join($;,
+			$user->{uid},
+			$user->{srcids}{ $constants->{reskey_srcid_masksize} || 24 },
+			$self->resname,
+			$id,
+			$constants->{reskey_static_salt},
+			$salt
+		)
+	);
+}
+
+#========================================================================
+sub checkStaticKey {
+	my($self) = @_;
+
+	my $salts = $self->getCurrentSalts;
+	for my $salt (@$salts) {
+		my $test = $self->makeStaticKey($self->{id}, $salt);
+		if ($test && $self->reskey eq $test) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+#========================================================================
+sub getCurrentSalt {
+	my($self) = @_;
+	my($salts) = $self->getCurrentSalts(1);
+	return $salts->[0];
+}
+
+
+#========================================================================
+sub getCurrentSalts {
+	my($self, $num) = @_;
+
+	my $constants = getCurrentStatic();
+	my $slashdb = getCurrentDB();
+
+	$num ||= int( ($constants->{reskey_timeframe} || 14400) / 3600 );
+
+	my($salts) = $slashdb->sqlSelectColArrayref('salt', 'reskey_hourlysalt', 'ts <= NOW()', "ORDER BY ts DESC LIMIT $num");
+	return $salts;
+}
+
 
 1;
 
