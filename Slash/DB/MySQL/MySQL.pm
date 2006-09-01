@@ -332,8 +332,8 @@ sub createComment {
 		# verify that the other comment exists and is in this
 		# same discussion.
 		my $pid_sid = 0;
-		$pid_sid = $self->sqlSelect("sid", "comments",
-			"cid=" . $self->sqlQuote($comment->{pid}));
+		my $pid_q = $self->sqlQuote($comment->{pid});
+		$pid_sid = $self->sqlSelect('sid', 'comments', "cid=$pid_q");
 		return -1 unless $pid_sid && $pid_sid == $comment->{sid};
 
 		my $pid_subject = '';
@@ -365,8 +365,8 @@ sub createComment {
 	}
 
 	unless ($self->sqlInsert('comment_text', {
-			cid	=> $cid,
-			comment	=>  $comment_text,
+		cid	=> $cid,
+		comment	=> $comment_text,
 	})) {
 		$self->sqlDo("ROLLBACK");
 		$self->sqlDo("SET AUTOCOMMIT=1");
@@ -1879,38 +1879,6 @@ sub getContentFilters {
 	return $filters;
 }
 
-sub getCurrentQidForSkid {
-	my($self, $skid) = @_;
-	my $tree = $self->getTopicTree();
-	my $nexus_id = $self->getNexusFromSkid($skid);
-	my $nexus = $tree->{$nexus_id};
-	return $nexus ? $nexus->{current_qid} : 0;
-}
-
-
-########################################################
-sub createPollVoter {
-	my($self, $qid, $aid) = @_;
-	my $constants = getCurrentStatic();
-
-	my $qid_quoted = $self->sqlQuote($qid);
-	my $aid_quoted = $self->sqlQuote($aid);
-	my $pollvoter_md5 = getPollVoterHash();
-	$self->sqlInsert("pollvoters", {
-		qid	=> $qid,
-		id	=> $pollvoter_md5,
-		-'time'	=> 'NOW()',
-		uid	=> getCurrentUser('uid')
-	});
-
-	$self->sqlUpdate("pollquestions", {
-			-voters =>	'voters+1',
-		}, "qid=$qid_quoted");
-	$self->sqlUpdate("pollanswers", {
-			-votes =>	'votes+1',
-		}, "qid=$qid_quoted AND aid=$aid_quoted");
-}
-
 ########################################################
 sub createSubmission {
 	my($self, $submission) = @_;
@@ -3203,11 +3171,6 @@ sub setDiscussionBySid {
 }
 
 ########################################################
-sub setPollQuestion {
-	_genericSet('pollquestions', 'qid', '', @_);
-}
-
-########################################################
 sub setTemplate {
 	my($self, $tpid, $hash) = @_;
 	# Instructions don't get passed to the DB.
@@ -3316,11 +3279,6 @@ sub checkStoryViewable {
 	my($self, $sid, $start_tid, $options) = @_;
 	return unless $sid;
 
-	# If there is no sid in the DB, assume that it is an old poll
-	# or something that has a "fake" sid, which are always
-	# "viewable."  When we fully integrate user-created discussions
-	# and polls into the tid/nexus system, this can go away.
-	# Also at the same time, convert sid into stoid.
 	my $stoid = $self->getStoidFromSidOrStoid($sid);
 	return 0 unless $stoid;
 
@@ -4019,266 +3977,6 @@ sub getAuthorDescription {
 	);
 
 	return $authors;
-}
-
-########################################################
-# Someday we'll support closing polls, in which case this method
-# may return 0 sometimes.
-sub isPollOpen {
-	my($self, $qid) = @_;
-	return 0 unless $self->hasPollActivated($qid);
-	return 1;
-}
-
-#####################################################
-sub hasPollActivated{
-	my($self, $qid) = @_;
-	return $self->sqlCount("pollquestions", "qid='$qid' and date <= now() and polltype!='nodisplay'");
-}
-
-
-########################################################
-# Has this "user" already voted in a particular poll?  "User" here is
-# specially taken to mean a conflation of IP address (possibly thru proxy)
-# and uid, such that only one anonymous reader can post from any given
-# IP address.
-# XXXX NO LONGER USED, REPLACED BY reskeys -- pudge 2005-10-20
-sub hasVotedIn {
-	my($self, $qid) = @_;
-	my $constants = getCurrentStatic();
-
-	my $pollvoter_md5 = getPollVoterHash();
-	my $qid_quoted = $self->sqlQuote($qid);
-	# Yes, qid/id/uid is a key in pollvoters.
-	my $uid = getCurrentUser('uid');
-	my($voters) = $self->sqlSelect('id', 'pollvoters',
-		"qid=$qid_quoted AND id='$pollvoter_md5' AND uid=$uid"
-	);
-
-	# Should be a max of one row returned.  In any case, if any
-	# data is returned, this "user" has already voted.
-	return $voters ? 1 : 0;
-}
-
-########################################################
-# Yes, I hate the name of this. -Brian
-# Presumably because it also saves poll answers, and number of
-# votes cast for those answers, and optionally attaches the
-# poll to a story.  Can we think of a better name than
-# "savePollQuestion"? - Jamie
-# sub saveMuTantSpawnSatanPollCrap {
-#    -Brian
-sub savePollQuestion {
-	my($self, $poll) = @_;
-
-	# XXXSKIN should get mainpage_skid, not defaultsection
-	$poll->{section}  ||= getCurrentStatic('defaultsection');
-	$poll->{voters}   ||= "0";
-	$poll->{autopoll} ||= "no";
-	$poll->{polltype} ||= "section";
-
-	my $qid_quoted = "";
-	$qid_quoted = $self->sqlQuote($poll->{qid}) if $poll->{qid};
-
-	my $stoid;
-	$stoid = $self->getStoidFromSidOrStoid($poll->{sid}) if $poll->{sid};
-	my $sid_quoted = "";
-	$sid_quoted = $self->sqlQuote($poll->{sid}) if $poll->{sid};
-	$self->setStory_delete_memcached_by_stoid([ $stoid ]) if $stoid;
-
-	# get hash of fields to update based on the linked story
-	my $data = $self->getPollUpdateHashFromStory($poll->{sid}, {
-		topic		=> 1,
-		primaryskid	=> 1,
-		date		=> 1,
-		polltype	=> 1
-	}) if $poll->{sid};
-
-	# replace form values with those from story
-	foreach (keys %$data){
-		$poll->{$_} = $data->{$_};
-	}
-
-	if ($poll->{qid}) {
-		$self->sqlUpdate("pollquestions", {
-			question	=> $poll->{question},
-			voters		=> $poll->{voters},
-			topic		=> $poll->{topic},
-			autopoll	=> $poll->{autopoll},
-			primaryskid	=> $poll->{primaryskid},
-			date		=> $poll->{date},
-			polltype        => $poll->{polltype}
-		}, "qid	= $qid_quoted");
-		$self->sqlUpdate("stories", {
-			qid		=> $poll->{qid}
-		}, "sid = $sid_quoted") if $sid_quoted;
-	} else {
-		$self->sqlInsert("pollquestions", {
-			question	=> $poll->{question},
-			voters		=> $poll->{voters},
-			topic		=> $poll->{topic},
-			primaryskid	=> $poll->{primaryskid},
-			autopoll	=> $poll->{autopoll},
-			uid		=> getCurrentUser('uid'),
-			date		=> $poll->{date},
-			polltype        => $poll->{polltype}
-		});
-		$poll->{qid} = $self->getLastInsertId();
-		$qid_quoted = $self->sqlQuote($poll->{qid});
-		$self->sqlUpdate("stories", {
-			qid		=> $poll->{qid}
-		}, "sid = $sid_quoted") if $sid_quoted;
-	}
-	$self->setStory_delete_memcached_by_stoid([ $stoid ]) if $stoid;
-
-	# Loop through 1..8 and insert/update if defined
-	for (my $x = 1; $x < 9; $x++) {
-		if ($poll->{"aid$x"}) {
-			my $votes = $poll->{"votes$x"};
-			$votes = 0 if $votes !~ /^-?\d+$/;
-			$self->sqlReplace("pollanswers", {
-				aid	=> $x,
-				qid	=> $poll->{qid},
-				answer	=> $poll->{"aid$x"},
-				votes	=> $votes,
-			});
-
-		} else {
-			$self->sqlDo("DELETE from pollanswers
-				WHERE qid=$qid_quoted AND aid=$x");
-		}
-	}
-
-	# Go on and unset any reference to the qid in sections, if it
-	# needs to exist the next statement will correct this. -Brian
-	$self->sqlUpdate('sections', { qid => '0' }, " qid = $poll->{qid} ")
-		if $poll->{qid};
-
-	if ($poll->{qid} && $poll->{polltype} eq "section" && $poll->{date} le $self->getTime()) {
-		$self->setSection($poll->{section}, { qid => $poll->{qid} });
-	}
-
-	return $poll->{qid};
-}
-
-sub updatePollFromStory {
-	my($self, $sid, $opts) = @_;
-	my($data, $qid) = $self->getPollUpdateHashFromStory($sid, $opts);
-	if ($qid){
-		$self->sqlUpdate("pollquestions", $data, "qid=" . $self->sqlQuote($qid));
-	}
-}
-
-#XXXSECTIONTOPICS section and tid still need to be handled
-sub getPollUpdateHashFromStory {
-	my($self, $id, $opts) = @_;
-	my $stoid = $self->getStoidFromSidOrStoid($id);
-	return undef unless $stoid;
-	my $story_ref = $self->sqlSelectHashref(
-		"sid,qid,time,primaryskid,tid",
-		"stories",
-		"stoid=$stoid");
-	my $data;
-	my $viewable = $self->checkStoryViewable($stoid);
-	if ($story_ref->{qid}) {
-		$data->{date}		= $story_ref->{time} if $opts->{date};
-		$data->{polltype}	= $viewable ? "story" : "nodisplay" if $opts->{polltype};
-		$data->{topic}		= $story_ref->{tid} if $opts->{topic};
-		$data->{primaryskid}	= $story_ref->{primaryskid} if $opts->{primaryskid};
-	}
-	# return the hash of fields and values to update for the poll
-	# if asked for the array return the qid of the poll too
-	return wantarray ? ($data, $story_ref->{qid}) : $data;
-}
-
-########################################################
-# A note, this does not remove the issue of a story
-# still having a poll attached to it (orphan issue)
-sub deletePoll {
-	my($self, $qid) = @_;
-	return if !$qid;
-
-	my $qid_quoted = $self->sqlQuote($qid);
-	my $did = $self->sqlSelect(
-		'discussion',
-		'pollquestions',
-		"qid=$qid_quoted"
-	);
-
-	$self->deleteDiscussion($did) if $did;
-
-	$self->sqlDo("DELETE FROM pollanswers   WHERE qid=$qid_quoted");
-	$self->sqlDo("DELETE FROM pollquestions WHERE qid=$qid_quoted");
-	$self->sqlDo("DELETE FROM pollvoters    WHERE qid=$qid_quoted");
-}
-
-########################################################
-sub getPollQuestionList {
-	my($self, $offset, $other) = @_;
-	my($where);
-
-	my $justStories = ($other->{type} && $other->{type} eq 'story') ? 1 : 0;
-
-	$offset = 0 if $offset !~ /^\d+$/;
-	my $admin = getCurrentUser('is_admin');
-
-	# $others->{section} takes precidence over $others->{exclude_section}. Both
-	# keys are mutually exclusive and should not be used in the same call.
-	delete $other->{exclude_section} if exists $other->{section};
-	for (qw(section exclude_section)) {
-		# Usage issue. Some folks may add an "s" to the key name.
-		$other->{$_} ||= $other->{"${_}s"} if exists $other->{"${_}s"};
-		if (exists $other->{$_} && $other->{$_}) {
-			if (!ref $other->{$_}) {
-				$other->{$_} = [$other->{$_}];
-			} elsif (ref $other->{$_} eq 'HASH') {
-				my @list = sort keys %{$other->{$_}};
-				$other->{$_} = \@list;
-			}
-			# Quote the data.
-			$_ = $self->sqlQuote($_) for @{$other->{$_}};
-		}
-	}
-
-	$where .= "autopoll = 'no'";
-	$where .= " AND pollquestions.discussion  = discussions.id ";
-	$where .= sprintf ' AND pollquestions.primaryskid IN (%s)', join(',', @{$other->{section}})
-		if $other->{section};
-	$where .= sprintf ' AND pollquestions.primaryskid NOT IN (%s)', join(',', @{$other->{exclude_section}})
-		if $other->{exclude_section} && @{$other->{section}};
-	$where .= " AND pollquestions.topic = $other->{topic} " if $other->{topic};
-
-	$where .= " AND date <= NOW() " unless $admin;
-	my $limit = $other->{limit} || 20;
-
-	my $cols = 'pollquestions.qid as qid, question, date, voters, discussions.commentcount as commentcount,
-			polltype, date>now() as future,pollquestions.topic, pollquestions.primaryskid';
-	$cols .= ", stories.title as title, stories.sid as sid" if $justStories;
-
-	my $tables = 'pollquestions,discussions';
-	$tables .= ',stories' if $justStories;
-
-	$where .= ' AND pollquestions.qid = stories.qid' if $justStories;
-
-	my $questions = $self->sqlSelectAll(
-		$cols,
-		$tables,
-		$where,
-		"ORDER BY date DESC LIMIT $offset, $limit"
-	);
-
-	return $questions;
-}
-
-########################################################
-sub getPollAnswers {
-	my($self, $qid, $val) = @_;
-	my $qid_quoted = $self->sqlQuote($qid);
-	my $values = join ',', @$val;
-	my $answers = $self->sqlSelectAll($values, 'pollanswers',
-		"qid=$qid_quoted", 'ORDER BY aid');
-
-	return $answers;
 }
 
 ########################################################
@@ -6378,81 +6076,6 @@ sub currentAdmin {
 	);
 
 	return $aids;
-}
-
-# XXXSECTIONTOPICS pulled getTopNewsstoryTopics out.  Was only referenced in
-# top topics in topics.pl which is now gone.  If we bring that back we'll
-# want to rewrite getTopNewsstoryTopics
-
-sub getTopPollTopics {
-	my($self, $limit) = @_;
-	my $all = 1 if !$limit;
-
-	$limit =~ s/\D+//g;
-	$limit = 10 if !$limit || $limit == 1;
-	my $sect_clause;
-	my $other  = $all ? '' : "LIMIT $limit";
-	my $topics = $self->sqlSelectAllHashrefArray(
-		"topics.tid AS tid, alttext, COUNT(*) AS cnt, default_image, MAX(date) AS tme",
-		'topics,pollquestions',
-		"polltype != 'nodisplay'
-		AND autopoll = 'no'
-		AND date <= NOW()
-		AND topics.tid=pollquestions.topic
-		GROUP BY topics.tid
-		ORDER BY tme DESC
-		$other"
-	);
-
-	# fix names
-	for (@$topics) {
-		$_->{count}  = delete $_->{cnt};
-		$_->{'time'} = delete $_->{tme};
-	}
-	return $topics;
-}
-
-
-##################################################################
-# Get poll
-# Until today, this has returned an arrayref of arrays, each
-# subarray having 5 values (question, answer, aid, votes, qid).
-# Since sid can no longer point to more than one poll, there
-# can now be only one question, so there's no point in repeating
-# it;  the return format is now a hashref.  Only one place in the
-# core code calls this (Slash::Utility::Display::pollbooth) and
-# only one template (pollbooth;misc;default) uses its values;
-# both have been updated of course.  - Jamie 2002/04/03
-sub getPoll {
-	my($self, $qid) = @_;
-	my $qid_quoted = $self->sqlQuote($qid);
-	# First select info about the question...
-	my $pollq = $self->sqlSelectHashref(
-		"*", "pollquestions",
-		"qid=$qid_quoted");
-	# Then select all the answers.
-	my $answers_hr = $self->sqlSelectAllHashref(
-		"aid",
-		"aid, answer, votes",
-		"pollanswers",
-		"qid=$qid_quoted"
-	);
-	# Do the sort in perl, it's faster than asking the DB to do
-	# an ORDER BY.
-	my @answers = ( );
-	for my $aid (sort
-		{ $answers_hr->{$a}{aid} <=> $answers_hr->{$b}{aid} }
-		keys %$answers_hr) {
-		push @answers, {
-			answer =>	$answers_hr->{$aid}{answer},
-			aid =>		$answers_hr->{$aid}{aid},
-			votes =>	$answers_hr->{$aid}{votes},
-		};
-	}
-	return {
-		pollq =>	$pollq,
-		answers =>	\@answers
-	};
 }
 
 ##################################################################
@@ -9382,12 +9005,14 @@ sub updateStory {
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
 
-	$self->updatePollFromStory($sid, {
-		date		=> 1,
-		topic		=> 1,
-		section		=> 1,
-		polltype	=> 1
-	});
+	if (my $pollbooth_db = getObject('Slash::PollBooth')) {
+		$pollbooth_db->updatePollFromStory($sid, {
+			date		=> 1,
+			topic		=> 1,
+			section		=> 1,
+			polltype	=> 1
+		});
+	}
 
 	return $sid;
 
@@ -10065,24 +9690,6 @@ sub getStoryList {
 sub getPrimaryTids {
 	my($self, $stoids);
 	return {};
-}
-
-##################################################################
-# This will screw with an autopoll -Brian
-sub getSidForQID {
-	my($self, $qid) = @_;
-	return $self->sqlSelect("sid", "stories",
-				"qid=" . $self->sqlQuote($qid),
-				"ORDER BY time DESC");
-}
-
-##################################################################
-sub getPollVotesMax {
-	my($self, $qid) = @_;
-	my $qid_quoted = $self->sqlQuote($qid);
-	my($answer) = $self->sqlSelect("MAX(votes)", "pollanswers",
-		"qid=$qid_quoted");
-	return $answer;
 }
 
 ########################################################
@@ -10801,16 +10408,6 @@ sub getComment {
 	my $answer = _genericGet({
 		table		=> 'comments',
 		table_prime	=> 'cid',
-		arguments	=> \@_,
-	});
-	return $answer;
-}
-
-########################################################
-sub getPollQuestion {
-	my $answer = _genericGet({
-		table		=> 'pollquestions',
-		table_prime	=> 'qid',
 		arguments	=> \@_,
 	});
 	return $answer;
