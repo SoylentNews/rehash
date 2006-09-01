@@ -618,10 +618,11 @@ The 'pollbooth' template block.
 
 sub pollbooth {
 	my($qid, $no_table, $center) = @_;
+	my $constants = getCurrentStatic();
+	return '' if !$constants->{plugin}{PollBooth};
 	my $pollbooth_reader = getObject('Slash::PollBooth', { db_type => 'reader' });
 	return '' if !$pollbooth_reader;
 
-	my $constants = getCurrentStatic();
 	my $gSkin = getCurrentSkin();
 	# This special qid means to use the current (sitewide) poll.
 	if ($qid eq "_currentqid") {
