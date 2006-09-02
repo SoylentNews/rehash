@@ -2991,6 +2991,7 @@ The parsed HTML.
 
 sub parseSlashizedLinks {
 	my($html, $options) = @_;
+	$html = '' if !defined($html);
 	$options = '' if !defined($options);
 	$html =~ s{
 		<a[ ]href="__SLASHLINK__"
