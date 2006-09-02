@@ -239,7 +239,7 @@ sub list {
 		name	 		=> $stats_name,
 		name_pre 		=> $stats_name_pre,
 		separate_name_select 	=> $sep_name_select 
-	}) unless $form->{type} eq 'graphs';
+	}) unless $form->{type} && $form->{type} eq 'graphs';
 
 	slashDisplay('list', {
 		stats_data	=> $stats_data,
