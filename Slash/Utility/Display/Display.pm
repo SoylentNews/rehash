@@ -1094,10 +1094,7 @@ sub linkComment {
 		%$comment, # defaults
 		adminflag	=> $adminflag,
 		date		=> $date,
-			# $comment->{threshold}? Hmm. I'm not sure what it
-			# means for a comment to have a threshold. If it's 0,
-			# does the following line do the right thing? - Jamie
-		threshold	=> $comment->{threshold} || $user->{threshold},
+		threshold	=> defined($form->{threshold}) ? $form->{threshold} : $user->{threshold},
 		commentsort	=> $user->{commentsort},
 		mode		=> $user->{mode},
 		comment		=> $printcomment,
@@ -1238,7 +1235,7 @@ sub createMenu {
 			page            => 'menu',
 			ignore_errors   => 1
 		});
-		$menu = "users" unless $nm->{page} eq "menu";
+		$menu = "users" unless $nm->{page} && $nm->{page} eq "menu";
 		if (@$items) {
 			$menu_text .= slashDisplay($menu,
 				{ items =>	$items,
@@ -1319,13 +1316,7 @@ sub _hard_linkComment {
 
 	my $display = qq|<a href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}|;
 	$display .= "&amp;op=$comment->{op}" if $comment->{op};
-# $comment->{threshold}? Hmm. I'm not sure what it
-# means for a comment to have a threshold. If it's 0,
-# does the following line do the right thing? - Jamie
-# You know, I think this is a bug that comes up every so often. But in
-# theory when you go to the comment link "threshhold" should follow
-# with you. -Brian
-	$display .= "&amp;threshold=" . ($comment->{threshold} || $user->{threshold});
+	$display .= "&amp;threshold=" . (defined($form->{threshold}) ? $form->{threshold} : $user->{threshold});
 	$display .= "&amp;commentsort=$user->{commentsort}";
 	$display .= "&amp;tid=$user->{state}{tid}"
 		if $constants->{tids_in_urls} && $user->{state}{tid};
