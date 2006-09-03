@@ -952,6 +952,11 @@ sub getCurrentSalt {
 
 
 #========================================================================
+# XXX This needs to be optimized to (a) use the reader DB instead
+# of the writer and (b) cache the current values in memcached.
+# Preferably, all possibly-valid hourly salts (all with ts <= NOW)
+# should be in one memcached object;  when set, that object should
+# be set to expire at xx:59:59.
 sub getCurrentSalts {
 	my($self, $num) = @_;
 
