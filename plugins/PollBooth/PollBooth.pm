@@ -106,7 +106,7 @@ sub checkPollVoter {
 	my($self, $qid, $uid) = @_;
 	my $qid_q = $self->sqlQuote($qid);
 	my $pollvoter_md5 = getPollVoterHash();
-	return $slashdb->sqlSelect(
+	return $self->sqlSelect(
 		'id',
 		'pollvoters',
 		"qid=$qid_q AND id='$pollvoter_md5' AND uid=$uid"

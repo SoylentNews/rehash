@@ -721,6 +721,7 @@ sub getMetamodsForUserRaw {
 		}
 	}
 	if ($getmods_loops > 4) {
+		use Data::Dumper;
 		print STDERR "GETMODS looped the max number of times,"
 			. " returning '@ids' for uid '$uid'"
 			. " num_needed '$num_needed' num_oldzone_needed '$num_oldzone_needed' num_normal_needed '$num_normal_needed'"

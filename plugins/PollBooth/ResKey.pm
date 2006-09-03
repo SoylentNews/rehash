@@ -31,7 +31,7 @@ sub doCheck {
 	return(RESKEY_DEATH, ['no qid', {}, 'pollBooth']) unless $qid;
 
 	# Pudge: I assume it's OK to use a reader DB here...? - Jamie
-	my $pollbooth_reader = getObject('Slash::PollBooth', { db_type => reader });
+	my $pollbooth_reader = getObject('Slash::PollBooth', { db_type => 'reader' });
 	return(RESKEY_DEATH, ['no polls', {}, 'pollBooth']) unless $pollbooth_reader;
 	if ($pollbooth_reader->checkPollVoter($qid, $user->{uid})) {
 		return(RESKEY_DEATH, ['already voted', {}, 'pollBooth']);
