@@ -1880,7 +1880,7 @@ sub _hard_dispComment {
 	my($comment_to_display, $score_to_display,
 		$user_nick_to_display, $zoosphere_display, $user_email_to_display,
 		$time_to_display, $comment_link_to_display, $userinfo_to_display)
-		= ("") x 7;
+		= ("") x 8;
 
 	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
 
