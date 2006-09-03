@@ -1077,6 +1077,7 @@ The 'linkComment' template block.
 sub linkComment {
 	my($comment, $printcomment, $date) = @_;
 	my $constants = getCurrentStatic();
+	my $form = getCurrentForm();
 	return _hard_linkComment(@_) if $constants->{comments_hardcoded};
 
 	my $user = getCurrentUser();
@@ -1310,6 +1311,7 @@ sub _hard_linkComment {
 	my($comment, $printcomment, $date) = @_;
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
+	my $form = getCurrentForm();
 	my $gSkin = getCurrentSkin();
 
 	my $subject = $comment->{subject};

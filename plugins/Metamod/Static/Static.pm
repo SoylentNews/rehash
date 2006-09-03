@@ -20,8 +20,7 @@ sub new {
 	my $self = {};
 
 	my $constants = getCurrentStatic();
-	my $plugins = $slashdb->getDescriptions('plugins');
-	return unless $plugins->{Metamod} && $constants->{m2};
+	return unless $constants->{plugin}{Metamod} && $constants->{m2};
 
 	bless($self, $class);
 	$self->{virtual_user} = $user;

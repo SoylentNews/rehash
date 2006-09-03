@@ -6,6 +6,7 @@
 
 use strict;
 use Slash::Utility;
+use Slash::Constants qw( :messages :slashd );
 
 use vars qw( %task $me $task_exit_flag );
 
@@ -32,8 +33,8 @@ $task{$me}{code} = sub {
 };
 
 sub reconcile_m2 {
-
 	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
 	my $metamod_db = getObject('Slash::Metamod::Static');
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $metamod_reader = getObject('Slash::Metamod::Static', { db_type => 'reader' });
@@ -406,6 +407,8 @@ sub reconcile_stats {
 ############################################################
 
 sub mark_m2_oldzone {
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
 
 	my $reasons = $slashdb->getReasons();
 	my $m2able_reasons = join(",",
@@ -424,7 +427,7 @@ sub mark_m2_oldzone {
 	}
 	$prev_oldzone = "undef" if !defined($prev_oldzone);
 
-	set_new_m2_oldzone($virtual_user, $constants, $slashdb, $user);
+	set_new_m2_oldzone();
 
 	my $new_oldzone = $slashdb->getVar('m2_oldzone', 'value', 1);
 	my $new_oldzone_count = 0;
@@ -438,6 +441,8 @@ sub mark_m2_oldzone {
 }
 
 sub set_new_m2_oldzone {
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
 
 	my $reasons = $slashdb->getReasons();
 	my $m2able_reasons = join(",",
@@ -500,6 +505,8 @@ sub set_new_m2_oldzone {
 ############################################################
 
 sub adjust_m2_freq {
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
 
 	# Decide how far back we're going to look for the
 	# "roughly weekly" factor.  Earlier, this maxxed out at
@@ -559,7 +566,8 @@ sub adjust_m2_freq {
 }
 
 sub delete_old_mod_rows {
-	$slashdb->deleteOldModRows({ sleep_between => 30 });
+	my $metamod_db = getObject('Slash::Metamod::Static');
+	$metamod_db->deleteOldM2Rows({ sleep_between => 30 });
 }
 
 1;
