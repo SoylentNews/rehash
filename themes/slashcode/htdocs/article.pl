@@ -16,6 +16,15 @@ sub main {
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
 
+	# XXX If this is being called from freshenup to write an .shtml file
+	# for a story being archived, or for one older than say 30 days,
+	# and if a var shows the AC needs a datecode different from normal
+	# for such calls, set $user->{dfid} to a new special value that
+	# includes the year, call setCurrentDate($user), then re-call
+	# the last two lines from createEnvironment() after prepareUser():
+	# createCurrentUser($user);
+	# createCurrentAnonymousCoward($user);
+
 	my $story;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
@@ -165,8 +174,16 @@ sub main {
 		$story->{time} = $constants->{subscribe_future_name}
 			if $story->{is_future} && !($user->{is_admin} || $user->{author});
 
-		my $pollbooth = pollbooth($story->{qid}, 1)
-			if $story->{qid} and ($slashdb->hasPollActivated($story->{qid}) or $user->{is_admin}) ;
+		my $pollbooth = '';
+		if ($story->{qid}) {
+			if (my $pollbooth_db = getObject('Slash::PollBooth')) {
+				if (	   $user->{is_admin}
+					|| $pollbooth_db->hasPollActivated($story->{qid})
+				) {
+					$pollbooth = pollbooth($story->{qid}, 1);
+				}
+			}
+		}
 		slashDisplay('display', {
 			poll			=> $pollbooth,
 			section			=> $SECT,
