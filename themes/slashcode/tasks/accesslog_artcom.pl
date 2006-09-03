@@ -26,7 +26,7 @@ $task{$me}{code} = sub {
 
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 
-	if (! $constants->{allow_moderation}) {
+	if (! $constants->{m1}) {
 		slashdLog("$me - moderation inactive") if verbosity() >= 2;
 		return ;
 	}

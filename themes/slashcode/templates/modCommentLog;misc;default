@@ -51,24 +51,26 @@ bg_toggle = 0;
 		<input type="hidden" name="meta_mod_only" value="1">
 	[% END %]
 	[% total_cols = 6 %]	
-	[% IF title %]
-		[% show_m2s_op = show_m2s ? 0 : 1;
-		   self_url = PROCESS base_url_mod;
-		   url_tail = PROCESS state_url_mod override = { show_m2s => show_m2s_op};
-		   self_url = self_url  _ url_tail;
-		   self_url = self_url | strip_attribute;
-		   extra = "<a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (show_m2s ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\"></a>";
-		%]
-		[% PROCESS titlebar width="100%" title=title max_min_button = extra %]
-	[% END %]
+	[% IF title;
+		extra = "";
+		IF constants.m2;
+			show_m2s_op = show_m2s ? 0 : 1;
+			self_url = PROCESS base_url_mod;
+			url_tail = PROCESS state_url_mod override = { show_m2s => show_m2s_op};
+			self_url = self_url  _ url_tail;
+			self_url = self_url | strip_attribute;
+			extra = "<a href='" _ self_url _ "'><img src=\"" _  constants.imagedir _ (show_m2s ? "/contract.gif" : "/expand.gif") _ "\"  alt=\"\" width=\"14\" height=\"14\"></a>";
+		END;
+		PROCESS titlebar width="100%" title=title max_min_button = extra;
+	END %]
 	<table align="center" border="0" cellpadding="2" cellspacing="0" width="100%" class="data">
 	<tr class="data_head">
         	<th align=left>Datestamp</th>
 		<th align=right>Was</th>
 		<th align=right>Now</th>
 		<th align=right>Val</th>
-		<th align=left>Reason  <span class="admin_data_label">/ Metamod</span></th>
-		<th align=right> M2</th>
+		<th align=left>Reason [% IF constants.m2 %] <span class="admin_data_label">/ Metamod</span>[% END %]</th>
+		<th align=right>[% IF constants.m2 %] M2[% END %]</th>
 		[% IF mod_to_from == "from"; total_cols = total_cols + 2; %]
 			[% IF skip_ip_disp == 1 and both_mods; total_cols = total_cols - 1; ELSE %]
 			<th align=left>IPID </th>
@@ -79,13 +81,13 @@ bg_toggle = 0;
 			[% IF both_mods and skip_ip_disp ==2; total_cols = total_cols - 1; ELSE  %]
 			<th align=left>IPID </th>
 			[% END %]
-			<th align=left>Moderatee <span class="admin_data_label">/ Metamoderator</span></th>
+			<th align=left>Moderatee [% IF constants.m2 %]<span class="admin_data_label">/ Metamoderator</span>[% END %]</th>
 		[% END %]
 	</tr>
 		[% hr_shown = 0; 
 		   mod_index = 0; %]
 		[% FOREACH moderation = mods %]
-		[% IF type == "cid" and constants.show_m2s_with_mods and show_m2s and constants.m2_multicount; 
+		[% IF constants.m2 && type == "cid" && constants.show_m2s_with_mods && show_m2s && constants.m2_multicount; 
 			prev_index = mod_index - 1;
 			next_index = mod_index + 1;
 			IF prev_index >= 0; prev_mod = mods.${prev_index}; END;
@@ -118,7 +120,7 @@ bg_toggle = 0;
 		</td>
 		<td align="right"> <b>[% IF !suppress_mod_head %][% IF moderation.val > 0; "+"; END; moderation.val %][% END %]</b> </td>
 		<td>[% IF !suppress_mod_head %][% PROCESS reason_or_m2_select moderation=moderation reasons=reasons mod_admin=mod_admin %][% END %]</td>
-		[% IF !reasons.${moderation.reason}.m2able || !moderation.active;
+		[% IF !constants.m2 || !reasons.${moderation.reason}.m2able || !moderation.active;
 			m2fair_str = "-";
 			m2unfair_str = "-";
 		ELSE;
@@ -130,7 +132,7 @@ bg_toggle = 0;
 		   	END; 
 			
 		END %]
-		<td align="right">[% IF !suppress_mod_head; m2fair_str _ " " _ m2unfair_str; END %] </td>
+		<td align="right">[% IF constants.m2 && !suppress_mod_head; m2fair_str _ " " _ m2unfair_str; END %] </td>
 
 [% IF !both_mods || skip_ip_disp!=1 %]	
 	<td> &nbsp; [% PROCESS link_ipid ipid=moderation.ipid ipid_vis=moderation.ipid_vis %]</td>
@@ -144,7 +146,7 @@ bg_toggle = 0;
 [% END %]
 	</tr>
 		[% mod_index = mod_index + 1; %]
-		[% IF moderation.active %]
+		[% IF constants.m2 && moderation.active %]
 			[%  a_sum = a_sum + moderation.val; IF moderation.val > 0; a_up = a_up+1; END; IF moderation.val < 0; a_down = a_down + 1; END; 
 			a_count = a_count+1; a_m2_count = a_m2_count + moderation.m2fair + moderation.m2unfair;
 			a_m2_unfair_votes=a_m2_unfair_votes + moderation.m2unfair;
@@ -152,7 +154,7 @@ bg_toggle = 0;
 				IF moderation.m2fair > moderation.m2unfair;  a_m2_up = a_m2_up + 1; END;
 				IF moderation.m2unfair > moderation.m2fair;  a_m2_down = a_m2_down + 1; END;
 				IF (moderation.m2unfair == 0) and (moderation.m2fair>0 ); unanimous=unanimous + 1; END;
-				END;
+			END;
  %]
 			[% IF moderation.m2fair >= moderation.m2unfair; a_m2_offside = a_m2_offside + moderation.m2unfair; ELSE; a_m2_offside = a_m2_offside + moderation.m2fair; END %]
 			[% IF constants.show_m2s_with_mods %]
@@ -176,20 +178,23 @@ bg_toggle = 0;
 
 		[% END %]
 	
-		[% sum = sum + moderation.val; IF moderation.val > 0; up = up+1; END; IF moderation.val < 0; down = down + 1; END; count = count+1; 
-		IF moderation.m2unfair > moderation.m2fair; m2_down = m2_down + 1; END; m2_count= m2_count + moderation.m2fair + moderation.m2unfair; %]
+		[% sum = sum + moderation.val; IF moderation.val > 0; up = up+1; END; IF moderation.val < 0; down = down + 1; END; count = count+1;
 
-		[% IF moderation.m2fair >= moderation.m2unfair; m2_offside = m2_offside + moderation.m2unfair; ELSE; m2_offside = m2_offside + moderation.m2fair; END %]
+		IF constants.m2;
+			IF moderation.m2unfair > moderation.m2fair; m2_down = m2_down + 1; END; m2_count= m2_count + moderation.m2fair + moderation.m2unfair;
+			IF moderation.m2fair >= moderation.m2unfair; m2_offside = m2_offside + moderation.m2unfair; ELSE; m2_offside = m2_offside + moderation.m2fair; END;
+		END %]
+
 		[% END %]
 	[% IF count %]
 	<tr class="data_hl2"><td colspan="[% total_cols %]">[% PROCESS horiz_rule %]</td></tr>
-	<tr class="data_hl2"><td colspan="2"><b>Total: [% a_count %] </b></td><td></td><td align="right"><b>[% a_down %]</b></td><td><b>[% Slash.getData('percentage', { sum=>a_down, count => a_count},"misc") %] Down</b></td><td align="right"><b>[% a_m2_unfair_votes %]</b></td><td><b>Unfair ([% Slash.getData('percentage', { sum=> a_m2_unfair_votes, count => a_m2_count },"misc") %])</b></td> 
+	<tr class="data_hl2"><td colspan="2"><b>Total: [% a_count %] </b></td><td></td><td align="right"><b>[% a_down %]</b></td><td><b>[% Slash.getData('percentage', { sum=>a_down, count => a_count},"misc") %] Down</b></td><td align="right">[% IF constants.m2 %]<b>[% a_m2_unfair_votes %]</b>[% END %]</td><td>[% IF constants.m2 %]<b>Unfair ([% Slash.getData('percentage', { sum=> a_m2_unfair_votes, count => a_m2_count },"misc") %])</b>[% END %]</td> 
 	[% IF both_mods and skip_ip_disp==1 %]<td></td>[% END %]
-	<td><b>[% unanimous %] Unanimous [% a_m2_up %] Fair [% a_m2_down %] Unfair [% unresolved %] Unresolved</b></td>
+	<td>[% IF constants.m2 %]<b>[% unanimous %] Unanimous [% a_m2_up %] Fair [% a_m2_down %] Unfair [% unresolved %] Unresolved</b>[% END %]</td>
 </tr>
 	[% END %]
 [% IF type=="uid" %]
-	<tr class="data_hl2"><td colspan="2"><b>Lifetime Spent: [% this_user.totalmods %]</b></td><td></td><td align="right"></td><td><b>[% Slash.getData('percentage', { sum = this_user.downmods, count=> this_user.downmods + this_user.upmods },"misc") %] Down</b></td><td></td><td><b>[% this_user.m2unfair %] Unfair [% IF this_user.m2unfairpercent %]([% this_user.m2unfairpercent %])[% END %]</b></td>
+	<tr class="data_hl2"><td colspan="2"><b>Lifetime Spent: [% this_user.totalmods %]</b></td><td></td><td align="right"></td><td><b>[% Slash.getData('percentage', { sum = this_user.downmods, count=> this_user.downmods + this_user.upmods },"misc") %] Down</b></td><td></td><td>[% IF constants.m2 %]<b>[% this_user.m2unfair %] Unfair [% IF this_user.m2unfairpercent %]([% this_user.m2unfairpercent %])[% END %]</b>[% END %]</td>
 	[% IF both_mods and skip_ip_disp==1 %]<td></td>[% END %]
 	<td><b>[% this_user.stirred %] Stirred</b></td>
 </tr>
@@ -316,7 +321,7 @@ END %]
 END %]
 
 [% BLOCK reason_or_m2_select %]
-	[% IF user.is_admin and moderation.active and moderation.m2status==0 and reasons.${moderation.reason}.m2able; 
+	[% IF constants.m2 and user.is_admin and moderation.active and moderation.m2status==0 and reasons.${moderation.reason}.m2able; 
 		h = { ""  => reasons.${moderation.reason}.name,
 		      "+" => reasons.${moderation.reason}.name _ " Fair",
 		      "-" => reasons.${moderation.reason}.name _ " Unfair"

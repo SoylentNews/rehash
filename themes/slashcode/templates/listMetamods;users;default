@@ -10,7 +10,7 @@ __name__
 listMetamods
 __template__
 
-[% IF metamods.size > 0 %]
+[% IF constants.m2 && metamods.size > 0 %]
 	[%
 		bg_toggle = 0;
 		total_m2s = 0;

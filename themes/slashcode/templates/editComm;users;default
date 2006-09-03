@@ -274,8 +274,10 @@ __template__
 		</div></blockquote>
 		[% IF user.is_admin %]
 		<label>Show Moderations in User Comment Listing <input type="checkbox" name="mod_with_comm" [% s_mod_check %]></label>
-		<label>Show Metamoderation in User Moderation Listing <input type="checkbox" name="m2_with_mod" [% s_m2_check %]></label>
-		<label>Show Metamoderation in Comment Moderation Listing <input type="checkbox" name="m2_with_mod_on_comm" [% s_m2c_check %]></label>
+			[% IF constants.m2 %]
+				<label>Show Metamoderation in User Moderation Listing <input type="checkbox" name="m2_with_mod" [% s_m2_check %]></label>
+				<label>Show Metamoderation in Comment Moderation Listing <input type="checkbox" name="m2_with_mod_on_comm" [% s_m2c_check %]></label>
+			[% END %]
 		[% END %]
 		</td>
 	</tr>

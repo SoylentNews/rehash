@@ -20,54 +20,20 @@ sub main {
 
 	header(getData('header'), $section->{section}) or return;
 
-	if (!$constants->{allow_moderation}) {
+	if (!$constants->{m1}) {
 		print getData('no_moderation');
 	} elsif (!$slashdb->metamodEligible($user)) {
 		print getData('not-eligible');
 	} elsif ($op eq 'MetaModerate') {
-		metaModerate();
+		my $metamod_db = getObject('Slash::Metamod');
+		$metamod_db->metaModerate();
+		print getData('thanks');
 	} else {
 		displayTheComments();
 	}
 
 	writeLog($op);
 	footer();
-}
-
-#################################################################
-sub metaModerate {
-	my($id) = @_;
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-
-	# The user is only allowed to metamod the mods they were given.
-	my @mods_saved = $slashdb->getModsSaved();
-	my %mods_saved = map { ( $_, 1 ) } @mods_saved;
-
-	# %m2s is the data structure we'll be building.
-	my %m2s = ( );
-
-	for my $key (keys %{$form}) {
-		# Metamod form data can only be a '+' or a '-'.
-		next unless $form->{$key} =~ /^[+-]$/;
-		# We're only looking for the metamod inputs.
-		next unless $key =~ /^mm(\d+)$/;
-		my $mmid = $1;
-		# Only the user's given mods can be used.
-		next unless $mods_saved{$mmid};
-		# This one's valid.  Store its data in %m2s.
-		$m2s{$mmid}{is_fair} = ($form->{$key} eq '+') ? 1 : 0;
-	}
-
-	# The createMetaMod() method does all the heavy lifting here.
-	# Re m2_multicount:  if this var is set, then our vote for
-	# reason r on cid c applies potentially to *all* mods of
-	# reason r on cid c.
-	$slashdb->createMetaMod($user, \%m2s, $constants->{m2_multicount});
-
-	print getData('thanks');
 }
 
 #################################################################
@@ -82,9 +48,21 @@ sub displayTheComments {
 		$user, $constants->{m2_comments}
 	);
 
-	# We set this to prevent the "Reply" and "Parent" links from
-	# showing up. If the metamoderator needs context, they can use
-	# the CID link.
+	# dispTheComments calls Slash::dispComment, which uses the dispComment
+	# template, which processes the dispLinkComment template, which is
+	# skipped when $user->{mode} eq 'metamod'.  I'd rather see that done
+	# by setting a specific $user->{state} field and checking for it in
+	# the dispComment template to avoid processing dispLinkComment.  The
+	# point of skipping dispLinkComment is that comments displayed for
+	# metamod don't need "Reply" and "Parent" links, on the theory that
+	# they are just distracting.
+	#
+	# The dispComment template also calls Slash::Utility::Display::
+	# linkComment, which passes $user->{mode} to the linkComment
+	# template, which puts it into the comments.pl &mode= param of the
+	# comments it links to.  But comments.pl doesn't know what to do
+	# with a mode=metamod.
+
 	$user->{mode} = 'metamod';
 
 	slashDisplay('dispTheComments', {

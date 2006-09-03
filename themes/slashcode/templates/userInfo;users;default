@@ -90,10 +90,12 @@ __template__
         		[% thisnickname = useredit.nickname | strip_literal %]
 			[% IF admin_flag;
        				mod_options.title = "Moderations performed by $thisnickname";
-				mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
-				mod_options.need_m2_form = 1;
-				mod_options.need_m2_button = 1;
-				mod_options.meta_mod_only = 1;
+				IF constants.m2;
+					mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
+					mod_options.need_m2_form = 1;
+					mod_options.need_m2_button = 1;
+					mod_options.meta_mod_only = 1;
+				END;
 
 				Slash.moderatorCommentLog('uid', useredit.uid, mod_options);
 
@@ -104,6 +106,7 @@ __template__
 					Slash.moderatorCommentLog('cuid', useredit.uid, mod_options);
 				END;
 
+				IF constants.m2;
 				m2_title = "$thisnickname's Recent M2s";
 				m2_listing = form.m2_listing.defined ? form.m2_listing : user.show_m2_listing;
 				PROCESS listMetamods
@@ -111,6 +114,7 @@ __template__
 					m2_listing = m2_listing 
 					metamods = metamods 
 					the_user = useredit;
+				END;
 			END;
 
 			IF submissions.size > 0;

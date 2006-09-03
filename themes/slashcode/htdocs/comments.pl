@@ -422,7 +422,7 @@ sub displayComments {
 		});
 	}
 
-	if (defined($form->{show_m2s}) && $user->{is_admin}) {
+	if ($constants->{m2} && defined($form->{show_m2s}) && $user->{is_admin}) {
 		$slashdb->setUser($user->{uid},
 			{ m2_with_comm_mod => $form->{show_m2s} });
 	}
@@ -806,14 +806,14 @@ sub validateComment {
 		}
 	}
 
-	if ($constants->{allow_moderation}
+	if (	    $constants->{m1}
 		&& !$user->{is_anon}
 		&& !$form->{postanon}
 		&& !$form->{gotmodwarning}
 		&& !( $constants->{authors_unlimited}
 			&& $user->{seclev} >= $constants->{authors_unlimited} )
 		&& !$user->{acl}{modpoints_always}
-		&& $slashdb->countUserModsInDiscussion($user->{uid}, $form->{sid}) > 0
+		&&  $slashdb->countUserModsInDiscussion($user->{uid}, $form->{sid}) > 0
 	) {
 		$$error_message = getError("moderations to be lost");
 		$form_success = 0;
@@ -1158,7 +1158,7 @@ sub submitComment {
 				header('Comments', $discussion->{section}) or return;
 			}
 			slashDisplay('comment_submit', {
-				metamod_elig => scalar $slashdb->metamodEligible($user),
+				metamod_elig => metamod_elig($user),
 			});
 		}
 
@@ -1367,7 +1367,7 @@ sub moderate {
 		return;
 	}
 	
-	if (! $constants->{allow_moderation}) {
+	if (!$constants->{m1}) {
 		print getData('no_moderation');
 		return;
 	}
@@ -1391,10 +1391,7 @@ sub moderate {
 
 	if ($skip_moderation) {
 		print $message;
-		if ($user->{is_admin}) {
-			$meta_mods_performed = metaModerate();		
-		}
-		print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
+		print metamod_if_necessary();
 		return;
 	} else {
 		slashDisplay('mod_header');
@@ -1428,18 +1425,14 @@ sub moderate {
 		$slashdb->setDiscussionDelCount($sid, $total_deleted);
 		$was_touched = 1 if $total_deleted;
 		
-		if ($user->{is_admin}) {
-			$meta_mods_performed = metaModerate();		
-		}
-		print getData("metamods_performed", { num => $meta_mods_performed }) if $meta_mods_performed;
-
+		print metamod_if_necessary();
+  
 		slashDisplay('mod_footer', {
-			metamod_elig => scalar $slashdb->metamodEligible($user),
+			metamod_elig => metamod_elig($user),
 		});
 
 		if ($hasPosted && !$total_deleted) {
 			print getError('already posted');
-	
 		} elsif ($user->{seclev} && $total_deleted) {
 			slashDisplay('del_message', {
 				total_deleted	=> $total_deleted,
@@ -1464,45 +1457,32 @@ sub moderate {
 	}
 }
 
-sub metaModerate {
-	my($id) = @_;
-	my $slashdb = getCurrentDB();
+sub metamod_elig {
+	my($user) = @_;
+	my $constants = getCurrentStatic();
+	if ($constants->{m2}) {
+		my $metamod_db = getObject('Slash::Metamod');
+		return $metamod_db->metamodEligible($user);
+	}
+	return 0;
+}
+
+sub metamod_if_necessary {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-	
-	# for now at least no one should be hitting this unless they're an admin
-	return 0 unless $user->{is_admin};
-
-	# The user is only allowed to metamod the mods they were given.
-	my @mods_saved = $slashdb->getModsSaved();
-	my %mods_saved = map { ( $_, 1 ) } @mods_saved;
-
-	# %m2s is the data structure we'll be building.
-	my %m2s = ( );
-
-	for my $key (keys %{$form}) {
-		# Metamod form data can only be a '+' or a '-'.
-		next unless $form->{$key} =~ /^[+-]$/;
-		# We're only looking for the metamod inputs.
-		next unless $key =~ /^mm(\d+)$/;
-		my $mmid = $1;
-		# Only the user's given mods can be used, unless they're an admin.
-		next unless $mods_saved{$mmid} || $user->{is_admin};
-		# This one's valid.  Store its data in %m2s.
-		$m2s{$mmid}{is_fair} = ($form->{$key} eq '+') ? 1 : 0;
+	my $retstr = '';
+	if ($constants->{m2} && $user->{is_admin}) {
+		my $metamod_db = getObject('Slash::Metamod');
+		my $n_perf = 0;
+		if ($n_perf = $metamod_db->metaModerate()) {
+			$retstr = getData('metamods_performed', { num => $n_perf });
+		}
 	}
-
-	# The createMetaMod() method does all the heavy lifting here.
-	# Re m2_multicount:  if this var is set, then our vote for
-	# reason r on cid c applies potentially to *all* mods of
-	# reason r on cid c.
-	$slashdb->createMetaMod($user, \%m2s, $constants->{m2_multicount});
-	return scalar keys %m2s;
+	return $retstr;
 }
 
 ##################################################################
-# Given an SID & A CID this will delete a comment, and all its replies
+# Given a sid and cid, this will delete a comment, and all its replies
 sub deleteThread {
 	my($sid, $cid, $level, $comments_deleted) = @_;
 	my $slashdb = getCurrentDB();
@@ -1563,7 +1543,7 @@ sub undoModeration {
 	#	   to contribute to a discussion after you moderate)
 	#	3) The user has the "always modpoints" ACL
 	#	4) The user has a sufficient seclev
-	return if !$constants->{allow_moderation}
+	return if !$constants->{m1}
 		|| $user->{is_anon}
 		|| $user->{acl}{modpoints_always}
 		|| $constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited};

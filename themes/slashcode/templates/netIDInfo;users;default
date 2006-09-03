@@ -37,10 +37,12 @@ __template__
 [% IF fieldname == 'ipid' || fieldname == 'subnetid' %]
 	[% mod_options.hr_hours_back = hr_hours_back;
 	   mod_options.title="Moderations performed by $netid_vis";
-	   mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
-	   mod_options.need_m2_form = 1;
-	   mod_options.need_m2_button = 1;
-	   mod_options.meta_mod_only = 1;
+	   IF constants.m2;
+		   mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
+		   mod_options.need_m2_form = 1;
+		   mod_options.need_m2_button = 1;
+		   mod_options.meta_mod_only = 1;
+	   END;
 	 %]
 	<p>
 	[% Slash.moderatorCommentLog("b$fieldname", netid, mod_options) %]
@@ -50,7 +52,7 @@ __template__
 		[% Slash.moderatorCommentLog(fieldname, netid, mod_options) %] 
 	[% END %]
 [% END %]
-<br><b>
+<br>
 [% IF subcount > 0 %]
 [% title = "$netid_vis's " _ ((subcount>submissions.size) ? "Latest " : "") _ "Submissions"; %]
 [% PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions %]

@@ -245,8 +245,13 @@ my $start_time = Time::HiRes::time;
 		}
 	}
 
+	my $metamod_elig = 0;
+	if ($constants->{m2}) {
+		my $metamod_reader = getObject('Slash::Metamod', { db_type => 'reader' });
+		$metamod_elig = $metamod_reader->metamodEligible($user);
+	}
 	slashDisplay('index', {
-		metamod_elig	=> scalar $reader->metamodEligible($user),
+		metamod_elig	=> $metamod_elig,
 		future_plug	=> $future_plug,
 		daypass_plug_text => $daypass_plug_text,
 		stories		=> $Stories,

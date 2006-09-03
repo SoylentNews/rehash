@@ -49,7 +49,7 @@ $task{$me}{code} = sub {
 		{ nocache => 1 }, { day => $yesterday, overwrite => $overwrite });
 
 	my $stats = getObject('Slash::Stats', { db_type => 'reader' });
-	my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	
 	
 	# 1.5 hours
@@ -206,42 +206,49 @@ EOT
 		($modlogs_incl_inactive_yest - $modlogs_yest)
 		? ($modlogs_incl_inactive_yest - $modlogs_yest)*100 / $modlogs_incl_inactive_yest
 		: 0;
-
 	slashdLog("countModeratorLog End");
-	slashdLog("countMetamodLog Begin");
-	my $metamodlogs = $stats->countMetamodLog({
-		active_only	=> 1,
-	});
-	my $unm2dmods = $stats->countUnmetamoddedMods({
-		active_only	=> 1,
-	});
-	my $metamodlogs_yest_fair = $stats->countMetamodLog({
-		active_only	=> 1,
-		oneday_only	=> 1,
-		val		=> 1,
-	});
-	my $metamodlogs_yest_unfair = $stats->countMetamodLog({
-		active_only	=> 1,
-		oneday_only	=> 1,
-		val		=> -1,
-	});
-	my $metamodlogs_yest_total = $metamodlogs_yest_fair + $metamodlogs_yest_unfair;
-	my $metamodlogs_incl_inactive = $stats->countMetamodLog();
-	my $metamodlogs_incl_inactive_yest = $stats->countMetamodLog({
-		oneday_only     => 1,
-	});
-	my $metamodlog_inactive_percent =
-		($metamodlogs_incl_inactive - $metamodlogs)
-		? ($metamodlogs_incl_inactive - $metamodlogs)*100 / $metamodlogs_incl_inactive
-		: 0;
-	my $metamodlog_inactive_percent_yest =
-		($metamodlogs_incl_inactive_yest - $metamodlogs_yest_total)
-		? ($metamodlogs_incl_inactive_yest - $metamodlogs_yest_total)*100 / $metamodlogs_incl_inactive_yest
-		: 0;
-	slashdLog("countMetamodLog End");
 
-	my $oldest_unm2d = $stats->getOldestUnm2dMod();
-	my $oldest_unm2d_days = sprintf("%10.1f", $oldest_unm2d ? (time-$oldest_unm2d)/86400 : -1);
+	my($metamodlogs, $unm2dmods,
+		$metamodlogs_yest_fair, $metamodlogs_yest_unfair, $metamodlogs_yest_total,
+		$metamodlogs_incl_inactive, $metamodlogs_incl_inactive_yest,
+		$metamodlog_inactive_percent, $metamodlog_inactive_percent_yest,
+		$oldest_unm2d, $oldest_unm2d_days);
+	if ($constants->{m2}) {
+		slashdLog("countMetamodLog Begin");
+		$metamodlogs = $stats->countMetamodLog({
+			active_only	=> 1,
+		});
+		$unm2dmods = $stats->countUnmetamoddedMods({
+			active_only	=> 1,
+		});
+		$metamodlogs_yest_fair = $stats->countMetamodLog({
+			active_only	=> 1,
+			oneday_only	=> 1,
+			val		=> 1,
+		});
+		$metamodlogs_yest_unfair = $stats->countMetamodLog({
+			active_only	=> 1,
+			oneday_only	=> 1,
+			val		=> -1,
+		});
+		$metamodlogs_yest_total = $metamodlogs_yest_fair + $metamodlogs_yest_unfair;
+		$metamodlogs_incl_inactive = $stats->countMetamodLog();
+		$metamodlogs_incl_inactive_yest = $stats->countMetamodLog({
+			oneday_only     => 1,
+		});
+		$metamodlog_inactive_percent =
+			($metamodlogs_incl_inactive - $metamodlogs)
+			? ($metamodlogs_incl_inactive - $metamodlogs)*100 / $metamodlogs_incl_inactive
+			: 0;
+		$metamodlog_inactive_percent_yest =
+			($metamodlogs_incl_inactive_yest - $metamodlogs_yest_total)
+			? ($metamodlogs_incl_inactive_yest - $metamodlogs_yest_total)*100 / $metamodlogs_incl_inactive_yest
+			: 0;
+		slashdLog("countMetamodLog End");
+		$oldest_unm2d = $stats->getOldestUnm2dMod();
+		$oldest_unm2d_days = sprintf("%10.1f", $oldest_unm2d ? (time-$oldest_unm2d)/86400 : -1);
+	}
+
 	my $youngest_modelig_uid = $stats->getYoungestEligibleModerator();
 	my $youngest_modelig_created = $stats->getUser($youngest_modelig_uid,
 		'created_at');
@@ -279,11 +286,14 @@ EOT
 	slashdLog("Misc Moderation Stats Begin");
 	my $token_conversion_point = $stats->getTokenConversionPoint();
 
-	my $oldest_to_show = int($oldest_unm2d_days) + 7;
-	$oldest_to_show = 21 if $oldest_to_show < 21;
-	my $m2_text = getM2Text($stats->getModM2Ratios(), {
-		oldest => $oldest_to_show
-	});
+	my $m2_text = '';
+	if ($constants->{m2}) {
+		my $oldest_to_show = int($oldest_unm2d_days) + 7;
+		$oldest_to_show = 21 if $oldest_to_show < 21;
+		$m2_text = getM2Text($stats->getModM2Ratios(), {
+			oldest => $oldest_to_show
+		});
+	}
 	slashdLog("Misc Moderation Stats End");
 
 	slashdLog("Problem Modders Begin");
@@ -306,7 +316,7 @@ EOT
 	# I'm pulling the value out with "+0" because that returns us an
 	# exact integer instead of scientific notation which rounds off.
 	# Another one of those SQL oddities! - Jamie 2003/08/12
-	my $sdTotalHits = $backupdb->sqlSelect("value+0", "vars", "name='totalhits'");
+	my $sdTotalHits = $reader->sqlSelect("value+0", "vars", "name='totalhits'");
 	my $daily_total = $logdb->countDailyByPage('', {
 		no_op => $constants->{op_exclude_from_countdaily},
 	});
@@ -635,37 +645,39 @@ EOT
 	$statsSave->createStatDaily("consensus", $consensus);
 	$statsSave->createStatDaily("modlogs", $modlogs);
 	$statsSave->createStatDaily("modlog_inactive_percent", $modlog_inactive_percent);
-	$statsSave->createStatDaily("metamodlogs", $metamodlogs);
-	$statsSave->createStatDaily("xmodlog", $modlogs_needmeta ? $metamodlogs/$modlogs_needmeta : 0);
-	$statsSave->createStatDaily("metamodlog_inactive_percent", $metamodlog_inactive_percent);
 	$statsSave->createStatDaily("modlog_yest", $modlogs_yest);
 	$statsSave->createStatDaily("modlog_inactive_percent_yest", $modlog_inactive_percent_yest);
-	for my $m2c_hr (@$unm2dmods) {
-		$statsSave->createStatDaily("modlog_m2count_$m2c_hr->{m2count}", $m2c_hr->{cnt});
-	}
-	$statsSave->createStatDaily("metamodlog_yest", $metamodlogs_yest_total);
-	$statsSave->createStatDaily("xmodlog_yest", $modlogs_needmeta_yest ? $metamodlogs_yest_total/$modlogs_needmeta_yest : 0);
-	$statsSave->createStatDaily("metamodlog_inactive_percent_yest", $metamodlog_inactive_percent_yest);
 	$statsSave->createStatDaily("mod_used_total_pool", ($mod_points_pool ? $modlog_spent_yest_total*100/$mod_points_pool : 0));
 	$statsSave->createStatDaily("mod_used_total_comments", ($comments ? $modlog_count_yest_total*100/$comments : 0));
 	$statsSave->createStatDaily("mod_points_pool", $mod_points_pool);
 	$statsSave->createStatDaily("mod_tokens_pool_pos", $mod_tokens_pool_pos);
 	$statsSave->createStatDaily("mod_tokens_pool_neg", $mod_tokens_pool_neg);
-	$statsSave->createStatDaily("mod_points_needmeta", $modlogs_needmeta_yest);
 	$statsSave->createStatDaily("mod_points_lost_spent", $modlog_spent_yest_total);
 	$statsSave->createStatDaily("mod_points_lost_spent_plus_1", $modlog_yest_hr->{+1}{spent});
 	$statsSave->createStatDaily("mod_points_lost_spent_minus_1", $modlog_yest_hr->{-1}{spent});
 	$statsSave->createStatDaily("mod_points_lost_spent_plus_1_percent", ($modlog_count_yest_total ? $modlog_yest_hr->{1}{count}*100/$modlog_count_yest_total : 0));
 	$statsSave->createStatDaily("mod_points_lost_spent_minus_1_percent", ($modlog_count_yest_total ? $modlog_yest_hr->{-1}{count}*100/$modlog_count_yest_total : 0));
 	$statsSave->createStatDaily("mod_points_avg_spent", $modlog_count_yest_total ? sprintf("%12.3f", $modlog_spent_yest_total/$modlog_count_yest_total) : "(n/a)");
-	$statsSave->createStatDaily("m2_freq", $constants->{m2_freq} || 86400);
-	$statsSave->createStatDaily("m2_consensus", $constants->{m2_consensus} || 0);
-	$statsSave->createStatDaily("m2_mintokens", $slashdb->getVar("m2_mintokens", "value", 1) || 0);
-	$statsSave->createStatDaily("m2_points_lost_spent", $metamodlogs_yest_total);
-	$statsSave->createStatDaily("m2_points_lost_spent_fair", $metamodlogs_yest_fair);
-	$statsSave->createStatDaily("m2_points_lost_spent_unfair", $metamodlogs_yest_unfair);
-	$statsSave->createStatDaily("oldest_unm2d", $oldest_unm2d);
-	$statsSave->createStatDaily("oldest_unm2d_days", $oldest_unm2d_days);
+	if ($constants->{m2}) {
+		$statsSave->createStatDaily("metamodlogs", $metamodlogs);
+		$statsSave->createStatDaily("xmodlog", $modlogs_needmeta ? $metamodlogs/$modlogs_needmeta : 0);
+		$statsSave->createStatDaily("metamodlog_inactive_percent", $metamodlog_inactive_percent);
+		for my $m2c_hr (@$unm2dmods) {
+			$statsSave->createStatDaily("modlog_m2count_$m2c_hr->{m2count}", $m2c_hr->{cnt});
+		}
+		$statsSave->createStatDaily("metamodlog_yest", $metamodlogs_yest_total);
+		$statsSave->createStatDaily("xmodlog_yest", $modlogs_needmeta_yest ? $metamodlogs_yest_total/$modlogs_needmeta_yest : 0);
+		$statsSave->createStatDaily("metamodlog_inactive_percent_yest", $metamodlog_inactive_percent_yest);
+		$statsSave->createStatDaily("mod_points_needmeta", $modlogs_needmeta_yest);
+		$statsSave->createStatDaily("m2_freq", $constants->{m2_freq} || 86400);
+		$statsSave->createStatDaily("m2_consensus", $constants->{m2_consensus} || 0);
+		$statsSave->createStatDaily("m2_mintokens", $slashdb->getVar("m2_mintokens", "value", 1) || 0);
+		$statsSave->createStatDaily("m2_points_lost_spent", $metamodlogs_yest_total);
+		$statsSave->createStatDaily("m2_points_lost_spent_fair", $metamodlogs_yest_fair);
+		$statsSave->createStatDaily("m2_points_lost_spent_unfair", $metamodlogs_yest_unfair);
+		$statsSave->createStatDaily("oldest_unm2d", $oldest_unm2d);
+		$statsSave->createStatDaily("oldest_unm2d_days", $oldest_unm2d_days);
+	}
 	$statsSave->createStatDaily("mod_token_conversion_point", $token_conversion_point);
 	$statsSave->createStatDaily("submissions", $submissions);
 	$statsSave->createStatDaily("submissions_comments_match", $submissions_comments_match);
@@ -683,7 +695,9 @@ EOT
 		# Each stat writes one row into stats_daily for each admin who
 		# modded anything, which is a lot of rows, but we want all the
 		# data.
-		for my $stat (qw( m1_up m1_down m2_fair m2_unfair )) {
+		my @stat_types = qw( m1_up m1_down );
+		push @stat_types, qw( m2_fair m2_unfair ) if $constants->{m2};
+		for my $stat (@stat_types) {
 			my $suffix = $uid
 				? "_admin_$uid"
 				: "_total";
@@ -719,14 +733,16 @@ EOT
 	$mod_data{modlog_inactive_percent} = sprintf("%.1f", $modlog_inactive_percent);
 	$mod_data{modlog_yest} = sprintf("%8u", $modlogs_yest);
 	$mod_data{modlog_inactive_percent_yest} = sprintf("%.1f", $modlog_inactive_percent_yest);
-	$mod_data{metamodlog} = sprintf("%8u", $metamodlogs);
-	$mod_data{metamodlog_inactive_percent} = sprintf("%.1f", $metamodlog_inactive_percent);
-	$mod_data{metamodlog_yest} = sprintf("%8u", $metamodlogs_yest_total);
-	$mod_data{metamodlog_inactive_percent_yest} = sprintf("%.1f", $metamodlog_inactive_percent_yest);
-	$mod_data{xmodlog} = sprintf("%.1fx", ($modlogs_needmeta ? $metamodlogs/$modlogs_needmeta : 0));
-	$mod_data{xmodlog_yest} = sprintf("%.1fx", ($modlogs_needmeta_yest ? $metamodlogs_yest_total/$modlogs_needmeta_yest : 0));
-	$mod_data{consensus} = sprintf("%8u", $consensus);
-	$mod_data{oldest_unm2d_days} = $oldest_unm2d_days;
+	if ($constants->{m2}) {
+		$mod_data{metamodlog} = sprintf("%8u", $metamodlogs);
+		$mod_data{metamodlog_inactive_percent} = sprintf("%.1f", $metamodlog_inactive_percent);
+		$mod_data{metamodlog_yest} = sprintf("%8u", $metamodlogs_yest_total);
+		$mod_data{metamodlog_inactive_percent_yest} = sprintf("%.1f", $metamodlog_inactive_percent_yest);
+		$mod_data{xmodlog} = sprintf("%.1fx", ($modlogs_needmeta ? $metamodlogs/$modlogs_needmeta : 0));
+		$mod_data{xmodlog_yest} = sprintf("%.1fx", ($modlogs_needmeta_yest ? $metamodlogs_yest_total/$modlogs_needmeta_yest : 0));
+		$mod_data{consensus} = sprintf("%8u", $consensus);
+		$mod_data{oldest_unm2d_days} = $oldest_unm2d_days;
+	}
 	$mod_data{youngest_modelig_uid} = sprintf("%d", $youngest_modelig_uid);
 	$mod_data{youngest_modelig_created} = sprintf("%11s", $youngest_modelig_created || 0);
 	$mod_data{mod_points_pool} = sprintf("%8u", $mod_points_pool);
@@ -765,9 +781,9 @@ EOT
 	my %nick = ( );
 	for my $sid (@top_articles) {
 		my $hitcount = $articles->{$sid};
- 		my $story = $backupdb->getStory($sid, [qw( title uid )]);
+ 		my $story = $reader->getStory($sid, [qw( title uid )]);
 		next unless $story->{title} && $story->{uid};
-		$nick{$story->{uid}} ||= $backupdb->getUser($story->{uid}, 'nickname')
+		$nick{$story->{uid}} ||= $reader->getUser($story->{uid}, 'nickname')
 			|| $story->{uid};
 
 		push @lazy, sprintf( "%6d %-16s %-10s %-30s",

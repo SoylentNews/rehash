@@ -583,23 +583,6 @@ CREATE TABLE menus (
 ) TYPE=InnoDB;
 
 #
-# Table structure for table 'metamodlog'
-#
-
-DROP TABLE IF EXISTS metamodlog;
-CREATE TABLE metamodlog (
-	id int UNSIGNED NOT NULL AUTO_INCREMENT,
-	mmid int UNSIGNED DEFAULT '0' NOT NULL,
-	uid mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	val tinyint  DEFAULT '0' NOT NULL,
-	ts datetime,
-	active tinyint DEFAULT '1' NOT NULL,
-	INDEX byuser (uid),
-	INDEX mmid (mmid),
-	PRIMARY KEY (id)
-) TYPE=InnoDB;
-
-#
 # Table structure for table 'misc_user_opts'
 #
 
@@ -1398,27 +1381,10 @@ CREATE TABLE users_info (
 	bio text NOT NULL,
 	tokens mediumint DEFAULT '0' NOT NULL,
 	lastgranted datetime DEFAULT '1970-01-01 00:00' NOT NULL,
-	m2info varchar(64) DEFAULT '' NOT NULL,
 	karma mediumint DEFAULT '0' NOT NULL,
 	maillist tinyint DEFAULT '0' NOT NULL,
 	totalcomments mediumint UNSIGNED DEFAULT '0',
-	lastmm datetime DEFAULT '1970-01-01 00:00' NOT NULL,
-	mods_saved varchar(120) DEFAULT '' NOT NULL,
 	lastaccess date DEFAULT '1970-01-01' NOT NULL,
-	m2fair mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	up_fair mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	down_fair mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	m2unfair mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	up_unfair mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	down_unfair mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	m2fairvotes mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	m2voted_up_fair mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	m2voted_down_fair mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	m2unfairvotes mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	m2voted_up_unfair mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	m2voted_down_unfair mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	m2voted_lonedissent mediumint UNSIGNED DEFAULT '0' NOT NULL,
-	m2voted_majority mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	upmods mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	downmods mediumint UNSIGNED DEFAULT '0' NOT NULL,
 	stirred mediumint UNSIGNED DEFAULT '0' NOT NULL,
@@ -1507,7 +1473,6 @@ CREATE TABLE vars (
 #ALTER TABLE backup_blocks ADD FOREIGN KEY (bid) REFERENCES blocks(bid);
 #ALTER TABLE comment_text ADD FOREIGN KEY (cid) REFERENCES comments(cid);
 #ALTER TABLE discussions ADD FOREIGN KEY (topic) REFERENCES topics(tid);
-#ALTER TABLE metamodlog ADD FOREIGN KEY (mmid) REFERENCES moderatorlog(id);
 # This doesn't work, since discussion may be 0.
 #ALTER TABLE pollquestions ADD FOREIGN KEY (discussion) REFERENCES discussions(id);
 # This doesn't work, since in the install pollquestions is populated before users, alphabetically
@@ -1540,7 +1505,6 @@ CREATE TABLE vars (
 #ALTER TABLE discussions ADD FOREIGN KEY (stoid) REFERENCES stories(stoid);
 #ALTER TABLE discussions ADD FOREIGN KEY (uid) REFERENCES users(uid);
 #ALTER TABLE formkeys ADD FOREIGN KEY (uid) REFERENCES users(uid);
-#ALTER TABLE metamodlog ADD FOREIGN KEY (uid) REFERENCES users(uid);
 #ALTER TABLE pollanswers ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);
 #ALTER TABLE pollvoters ADD FOREIGN KEY (uid) REFERENCES users(uid);
 #ALTER TABLE pollvoters ADD FOREIGN KEY (qid) REFERENCES pollquestions(qid);

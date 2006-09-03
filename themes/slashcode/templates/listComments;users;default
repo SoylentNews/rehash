@@ -205,9 +205,9 @@ row_class_3 = "data_hl3";
 							"<td></td>"; 
 						END; 
 						'<td align="right"> Total Moderations: ' _ a_count _ '</td>';
-				 	  	'<td align="left">';%][% unanimous %] Unanimous [% a_m2_up %] Fair [% a_m2_down %] Unfair [% unresolved %] Unresolved</td>
+				 	  	'<td align="left">'; IF constants.m2 %][% unanimous %] Unanimous [% a_m2_up %] Fair [% a_m2_down %] Unfair [% unresolved %] Unresolved[% ELSE; '&nbsp;'; END %]</td>
 						[%-
-						'<td align="left" colspan="3">' %][% a_m2_unfair_votes %] Unfair ([% Slash.getData('percentage', { sum=> a_m2_unfair_votes, count => a_m2_count}, "misc") %])</td> [%
+						'<td align="left" colspan="3">'; IF constants.m2 %][% a_m2_unfair_votes %] Unfair ([% Slash.getData('percentage', { sum=> a_m2_unfair_votes, count => a_m2_count}, "misc") %])[% ELSE; '&nbsp;'; END %]</td> [%
 						'<td></td>';
 				      		'<td align="left">';%] [% Slash.getData('percentage',{ sum=>a_down, count => a_count},"misc") %] Downmods</a> </td>[%
 						'</tr>';
@@ -271,7 +271,7 @@ END %]
 [% END %]
 
 [% BLOCK make_m2_string; 
-	IF !reasons.${moderation.reason}.m2able || !moderation.active;
+	IF !constants.m2 || !reasons.${moderation.reason}.m2able || !moderation.active;
 		m2fair_str = "-";
 		m2unfair_str = "-";
 	ELSE;

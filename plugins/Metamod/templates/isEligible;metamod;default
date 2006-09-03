@@ -6,8 +6,13 @@ is currently eligible to metamoderate. If a user is not eligible, this
 template will return a message describing why, if a user is eligible,
 this template returns "Eligible".
 
+This template is not currently in use, and has fallen out of sync with
+Slash::Metamod::metamodEligible() so should not be used until its bugs
+are fixed.
+
 * user_count = number of users in system
 * last = hashref of last metamoderation for current user
+
 __title__
 
 __page__
@@ -23,7 +28,7 @@ You are not logged in.
 You haven't been a [% constants.sitename %] user long enough.
 [% ELSIF user.karma < 0 %]
 Your karma is insufficient for this task.
-[% ELSIF last.lastmm == '0' %]
+[% ELSIF last.lastm2 == '0' %]
 You have recently meta moderated.
 [% ELSE %]
 Eligible

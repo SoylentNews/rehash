@@ -70,7 +70,12 @@ __template__
 		[% Slash.linkComment(next, 1) %]&gt;&gt;
 	[% END %]
 	</div>
-	[% Slash.moderatorCommentLog('cid', cid, { show_m2s => (form.show_m2s.defined ? form.show_m2s : user.m2_with_comm_mod), need_m2_form => !moderate_form, need_m2_button => 1, title=>" " }); %]
+	[% Slash.moderatorCommentLog('cid', cid, {
+		show_m2s =>	  constants.m2 ? (form.show_m2s.defined ? form.show_m2s : user.m2_with_comm_mod) : 0,
+		need_m2_form =>	  constants.m2 ? !moderate_form : 0,
+		need_m2_button => constants.m2,
+		title => " " });
+	%]
 [% END %]
 
 	[% lcp %]

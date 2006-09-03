@@ -570,7 +570,7 @@ sub _can_mod {
 	return 0 if !$comment;
 	return 0 if
 		    $user->{is_anon}
-		|| !$constants->{allow_moderation}
+		|| !$constants->{m1}
 		||  $comment->{no_moderation};
 	
 	# More easy tests.  If any of these is true, the user has
@@ -960,17 +960,22 @@ sub moderatorCommentLog {
 	my $cur_uid;
 	$cur_uid = $value if $type eq "uid" || $type eq "cuid";
 
-	my $mod_ids = [keys %$seen_mods];
 	my $mods_to_m2s;
-	if ($constants->{show_m2s_with_mods} && $options->{show_m2s}) {
-		$mods_to_m2s = $slashdb->getMetamodsForMods($mod_ids, $constants->{m2_limit_with_mods});
+	if ($constants->{m2}) {
+		my $mod_ids = [keys %$seen_mods];
+		if ($constants->{show_m2s_with_mods} && $options->{show_m2s}) {
+			my $metamod_db = getObject('Slash::Metamod');
+			$mods_to_m2s = $metamod_db->getMetamodsForMods($mod_ids, $constants->{m2_limit_with_mods});
+		}
 	}
-	
+
 	# Do the work to determine which moderations share the same m2s
-	if ($type eq "cid"
+	if (	   $constants->{m2}
+		&& $type eq 'cid'
 		&& $constants->{show_m2s_with_mods}
 		&& $constants->{m2_multicount}
-		&& $options->{show_m2s}){
+		&& $options->{show_m2s}
+	){
 		foreach my $m (@$mods){
 			my $key = '';
 			foreach my $m2 (@{$mods_to_m2s->{$m->{id}}}) {
@@ -1004,14 +1009,16 @@ sub moderatorCommentLog {
 		skip_ip_disp    => $skip_ip_disp,
 		this_user	=> $this_user,
 		title		=> $title,
-		mods_to_m2s	=> $mods_to_m2s,
-		show_m2s	=> $options->{show_m2s},
 		cur_uid		=> $cur_uid,
 		value		=> $value,
-		need_m2_form	=> $options->{need_m2_form},
-		need_m2_button	=> $options->{need_m2_button},
-		meta_mod_only	=> $options->{meta_mod_only},
 	};
+	if ($constants->{m2}) {
+		$data->{mods_to_m2s} = $mods_to_m2s;
+		$data->{show_m2s} = $options->{show_m2s};
+		$data->{need_m2_form} = $options->{need_m2_form};
+		$data->{need_m2_button} = $options->{need_m2_button};
+		$data->{meta_mod_only} = $options->{meta_mod_only};
+	}
 	slashDisplay('modCommentLog', $data, { Return => 1, Nocomm => 1 });
 }
 

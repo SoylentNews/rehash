@@ -3989,7 +3989,6 @@ DELETE FROM vars WHERE name IN ('reasons', 'badreasons');
 INSERT INTO vars (name, value, description) VALUES ('tags_upvote_tag', 'nod', 'Tag for upvote');
 INSERT INTO vars (name, value, description) VALUES ('tags_downvote_tag', 'nix', 'Tag for downvote');
 
-
 # 2006-08-15
 UPDATE vars SET value = 'T_2_5_0_122' WHERE name = 'cvs_tag_currentcode';
 
@@ -4030,4 +4029,17 @@ UPDATE vars SET description='Who is allowed to see existing tags on stories (inc
 UPDATE vars SET description='Who is allowed to tag stories? 0=nobody 1=admins 2=subscribers 2.5=tags_stories_allowwrite ACL 3=non-neg. karma 4=all logged in (3,4: up to tags_userfrac_write)' WHERE name='tags_stories_allowwrite';
 INSERT INTO vars (name, value, description) VALUES ('tags_userfrac_read', '1', 'Fraction (0.0-1.0) of user UIDs which are allowed to read tags, if tags_*_allow* is set that way');
 INSERT INTO vars (name, value, description) VALUES ('tags_userfrac_write', '0.95', 'Fraction (0.0-1.0) of user UIDs which are allowed to tag, if tags_*_allow* is set that way');
+
+# FYI:  Since you're upgrading from a previous version of Slash, you
+# already have the Metamod plugin's SQL changes applied (columns in
+# users_info, vars, etc.).  This adds the row to your site_info table that
+# offically means Metamod is installed, but actually doing the install
+# would be redundant.  Only SQL changes that are new with this version
+# appear below.
+# So:  all sites upgrading should apply these changes.  If your site
+# won't be using metamoderation, set the 'm2' var to '0'.
+INSERT INTO vars (name, value, description) VALUES ('m2', '1', 'Allows use of the metamoderation system');
+INSERT INTO site_info (name, value, description) VALUES ('plugin', 'Metamod', 'Metamoderation');
+UPDATE vars SET name='m1' WHERE name='allow_moderation';
+UPDATE vars SET description='Number of comments for meta-moderation - if more than about 15, doublecheck that users_info.m2_mods_saved is large enough' WHERE name='m2_comments';
 

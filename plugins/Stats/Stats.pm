@@ -83,9 +83,8 @@ sub new {
 			}
 		}
 
-		# Why not just truncate? If we did we would never pick up schema changes -Brian
-		# Create "accesslog_temp" and "accesslog_temp_errors" from the
-		# schema of "accesslog".
+		# Recreating these tables each night ensures they adapt
+		# to schema changes on the original accesslog.
 
 		# First, drop them (if they exist).
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp");
@@ -93,9 +92,9 @@ sub new {
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_subscriber");
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_other");
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_rss");
+
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_host_addr");
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_build_unique_uid");
-
 		$self->sqlDo("CREATE TABLE accesslog_temp_host_addr (host_addr char(32) UNIQUE NOT NULL, anon ENUM('no','yes') NOT NULL DEFAULT 'yes', PRIMARY KEY (host_addr, anon)) TYPE = InnoDB");
 		$self->sqlDo("CREATE TABLE accesslog_build_unique_uid ( uid MEDIUMINT UNSIGNED NOT NULL, PRIMARY KEY (uid)) TYPE = InnoDB");
 
@@ -127,6 +126,7 @@ sub new {
 		my $maxid = $self->sqlSelectNumericKeyAssumingMonotonic(
 			'accesslog', 'max', 'id',
 			"ts $self->{_day_max_clause}");
+		$maxid ||= $minid+1;
 		return undef unless $self->_do_insert_select(
 			"accesslog_temp",
 			"*",
@@ -142,6 +142,8 @@ sub new {
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX skid_op (skid,op)");
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX op_uid_skid (op, uid, skid)");
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX referer (referer(4))");
+		# XXX there should be a way to check whether the source accesslog table
+		# already had this index, and if so, to leave it off.
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX ts (ts)");
 		$self->sqlDo("ALTER TABLE accesslog_temp_errors ADD INDEX ts (ts)");
 		$self->sqlDo("ALTER TABLE accesslog_temp_subscriber ADD INDEX ts (ts)");
@@ -814,6 +816,7 @@ sub getCommentsByDistinctUIDPosters {
 ########################################################
 sub getAdminModsInfo {
 	my($self) = @_;
+	my $constants = getCurrentStatic();
 
 	# First get the list of admins.
 	my $admin_uids_ar = $self->sqlSelectColArrayref(
@@ -824,7 +827,7 @@ sub getAdminModsInfo {
 		"users",
 		"uid IN ($admin_uids_str)");
 
-	# First get the count of upmods and downmods performed by each admin.
+	# Get the count of upmods and downmods performed by each admin.
 	my $m1_uid_val_hr = $self->sqlSelectAllHashref(
 		[qw( uid val )],
 		"uid, val, COUNT(*) AS count",
@@ -839,8 +842,49 @@ sub getAdminModsInfo {
 		}
 	}
 
+	# For comparison, get the same stats for all users on the site and
+	# add them in as a phony admin user that sorts itself alphabetically
+	# last.  Hack, hack.
+	my($total_nick, $total_uid) = ("~Day Total", 0);
+	my $m1_val_hr = $self->sqlSelectAllHashref(
+		"val",
+		"val, COUNT(*) AS count",
+		"moderatorlog",
+		"ts $self->{_day_between_clause}",
+		"GROUP BY val"
+	);
+	$m1_uid_val_hr->{$total_uid} = {
+		uid =>	$total_uid,
+		  1 =>	{ nickname => $total_nick, count => $m1_val_hr-> {1}{count} },
+		 -1 =>	{ nickname => $total_nick, count => $m1_val_hr->{-1}{count} },
+	};
+
+	# Build a hashref with one key for each admin user, and subkeys
+	# that give data we will want for stats.
+	my $hr = { };
+	my @m1_keys = sort keys %$m1_uid_val_hr;
+	for my $uid (@m1_keys) {
+		my $nickname = $m1_uid_val_hr->{$uid} {1}{nickname}
+			|| $m1_uid_val_hr->{$uid}{-1}{nickname}
+			|| "";
+		next unless $nickname;
+		my $nup   = $m1_uid_val_hr->{$uid} {1}{count} || 0;
+		my $ndown = $m1_uid_val_hr->{$uid}{-1}{count} || 0;
+		# Add the m1 data for this admin.
+		$hr->{$nickname}{uid} = $uid;
+		$hr->{$nickname}{m1_up} = $nup;
+		$hr->{$nickname}{m1_down} = $ndown;
+	}
+
+	# If metamod is not enabled on this site, we're done:  just
+	# return the moderation data.
+	if (!$constants->{m2}) {
+		return $hr;
+	}
+
 	# Now get a count of fair/unfair counts for each admin.
-	my $m2_uid_val_hr = $self->sqlSelectAllHashref(
+	my $m2_uid_val_hr = { };
+	$m2_uid_val_hr = $self->sqlSelectAllHashref(
 		[qw( uid val )],
 		"moderatorlog.uid AS uid, metamodlog.val AS val, COUNT(*) AS count",
 		"moderatorlog, metamodlog",
@@ -901,19 +945,6 @@ sub getAdminModsInfo {
 	# For comparison, get the same stats for all users on the site and
 	# add them in as a phony admin user that sorts itself alphabetically
 	# last.  Hack, hack.
-	my($total_nick, $total_uid) = ("~Day Total", 0);
-	my $m1_val_hr = $self->sqlSelectAllHashref(
-		"val",
-		"val, COUNT(*) AS count",
-		"moderatorlog",
-		"ts $self->{_day_between_clause}",
-		"GROUP BY val"
-	);
-	$m1_uid_val_hr->{$total_uid} = {
-		uid =>	$total_uid,
-		  1 =>	{ nickname => $total_nick, count => $m1_val_hr-> {1}{count} },
-		 -1 =>	{ nickname => $total_nick, count => $m1_val_hr->{-1}{count} },
-	};
 	my $m2_val_hr = $self->sqlSelectAllHashref(
 		"val",
 		"val, COUNT(*) AS count",
@@ -927,35 +958,9 @@ sub getAdminModsInfo {
 		 -1 =>	{ nickname => $total_nick, count => $m2_val_hr->{-1}{count} },
 	};
 
-	# Build a hashref with one key for each admin user, and subkeys
-	# that give data we will want for stats.
-	my($nup, $ndown, $nfair, $nunfair, $percent);
-	my @m1_keys = sort keys %$m1_uid_val_hr;
 	my @m2_keys = sort keys %$m2_uid_val_hr;
 	my %all_keys = map { $_ => 1 } @m1_keys, @m2_keys;
 	my @all_keys = sort keys %all_keys;
-	my $hr = { };
-	for my $uid (@m1_keys) {
-		my $nickname = $m1_uid_val_hr->{$uid} {1}{nickname}
-			|| $m1_uid_val_hr->{$uid}{-1}{nickname}
-			|| "";
-		next unless $nickname;
-		$nup   = $m1_uid_val_hr->{$uid} {1}{count} || 0;
-		$ndown = $m1_uid_val_hr->{$uid}{-1}{count} || 0;
-		$percent = ($nup+$ndown > 0)
-			? $nup*100/($nup+$ndown)
-			: 0;
-		# Add the m1 data for this admin.
-		$hr->{$nickname}{uid} = $uid;
-		$hr->{$nickname}{m1_up} = $nup;
-		$hr->{$nickname}{m1_down} = $ndown;
-		# If this admin had m1 activity today but no m2 activity,
-		# blank out that field.
-		if (!exists($m2_uid_val_hr->{$uid})) {
-			# $hr->{$nickname}{m2_fair} = 0;
-			# $hr->{$nickname}{m2_unfair} = 0;
-		}
-	}
 	for my $uid (@all_keys) {
 		my $nickname =
 			   $m2_uid_val_hr->{$uid} {1}{nickname}
@@ -964,19 +969,13 @@ sub getAdminModsInfo {
 			|| $m2_uid_val_mo_hr->{$uid}{-1}{nickname}
 			|| "";
 		next unless $nickname;
-		$nfair   = $m2_uid_val_hr->{$uid} {1}{count} || 0;
-		$nunfair = $m2_uid_val_hr->{$uid}{-1}{count} || 0;
-		$percent = ($nfair+$nunfair > 0)
-			? $nunfair*100/($nfair+$nunfair)
-			: 0;
+		my $nfair   = $m2_uid_val_hr->{$uid} {1}{count} || 0;
+		my $nunfair = $m2_uid_val_hr->{$uid}{-1}{count} || 0;
 		# Add the m2 data for this admin.
 		$hr->{$nickname}{uid} = $uid;
 		# Also calculate overall-month percentage.
 		my $nfair_mo   = $m2_uid_val_mo_hr->{$uid} {1}{count} || 0;
 		my $nunfair_mo = $m2_uid_val_mo_hr->{$uid}{-1}{count} || 0;
-		$percent = ($nfair_mo+$nunfair_mo > 0)
-			? $nunfair_mo*100/($nfair_mo+$nunfair_mo)
-			: 0;
 		# Set another few data points.
 		$hr->{$nickname}{m2_fair} = $nfair;
 		$hr->{$nickname}{m2_unfair} = $nunfair;
