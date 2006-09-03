@@ -13,7 +13,7 @@ use Slash::Constants qw(:messages);
 use Slash::DB;
 use Slash::Utility;
 use Slash::Constants ':slashd';
-use Data::Dumper;
+#use Data::Dumper;
 
 use vars qw( %task $me );
 
