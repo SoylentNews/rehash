@@ -25,18 +25,27 @@ __template__
 			<label>Section&nbsp;[% Slash.createSelect('primaryskid', skins, options.primaryskid, 1, 0, 1) %]</label> 
 			<label>Category&nbsp;[% Slash.createSelect('category', { '' => 'None', quik => 'Quik', hold => 'Hold', back => 'Back' }, options.category,1, 0, 1) %]</label> 
 			<label>Filter&nbsp;<input type="text" name="filter" size="20" value="[% options.filter | strip_attribute %]"></label>
-			<label>Order&nbsp;[% Slash.createSelect('order', { 'createtime' => 'Time', popularity => 'Popularity' }, options.orderby, 1, 0, 1) %]</label> 
+			<label>Order&nbsp;[% Slash.createSelect('order', { 'createtimedesc' => 'Time Desc', popularitydesc => 'Popularity Desc', 'createtimeasc' => 'Time Asc', 'popularityasc' => 'Popularity Asc' }, options.order, 1, 0, 1) %]</label> 
 			<label>Mode&nbsp;[% Slash.createSelect('mode', { 'full' => 'Full', fulltitle => 'Abbreviated' }, options.mode, 1, 0, 1) %]
 </label> 
 			<input type="submit" value="Change View">
 		</fieldset>
 	</form>
 </div>
-<br />
+<br>
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
 </div>
 [% PROCESS paginate %]
+[% IF refresh_options && refresh_options.maxtime %]
+<script type="text/javascript">
+	var maxtime = '[% refresh_options.maxtime %]';
+	var insert_new_at = '[% refresh_options.insert_new_at %]';
+	setTimeout("firehose_fetch_new()", 10000);
+	setTimeout("firehose_check_removed()",40000);
+</script>
+[% END %]
+
 __version__
 $Id$
