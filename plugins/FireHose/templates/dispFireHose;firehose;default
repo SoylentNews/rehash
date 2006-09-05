@@ -38,20 +38,17 @@ END %]
 	   	the_skin = Slash.db.getSkin(item.primaryskid);
 		the_skin_title = the_skin.title _ ": ";
 	   END;
-	   IF item.url_id;
-	   	title = "$the_skin_title<a href=\"" _ url.url _ "\">$item.title</a> [-&gt;]";
-	   ELSE;
-	   	title = the_skin_title _ item.title;
-	   END;
+	   title = the_skin_title _ item.title;
 
 		
 
-	   IF item.introtext;
-	   	is_admin = 0;
-		IF user.is_admin;
-			is_admin = 1;
-		END;
-	   	title = "<a href='javascript:toggle_firehose_body(\"$item.id\", $is_admin)'>" _ title _ "</a>";
+	  is_admin = 0;
+	   IF user.is_admin;
+		is_admin = 1;
+   	   END;
+	  title = "<a href='javascript:toggle_firehose_body(\"$item.id\", $is_admin)'>" _ title _ "</a>";
+	   IF item.url_id;
+		  title = title _ "<a href=\"" _ url.url _ "\">[-&gt;]</a>";
 	   END;
 
 	   title = title _ " " _ '<span class="date">' _ item.createtime _ "</span> <span class='nickname'>" _ the_user.nickname _ "</span>";
@@ -84,7 +81,9 @@ END %]
 		<div id="text-[% item.id %]" class="intro">
 			[% IF bodycontent;
 	   		   introtext = item.introtext;
-			IF item.type == "submission";
+			   IF item.url_id && url.url;
+				   introtext = introtext _ "<a href='" _ url.url _ "'>" _ url.initialtitle _ "</a>";
+			   END;
 				IF item.email && item.name;
 					IF constants.submissions_link_relnofollow; rnf = " rel=\"nofollow\""; ELSE; rnf = ""; END;
 					introtext = "<a href=\"$item.email\"$rnf>$item.name</a> writes <i>\"$introtext\"</i>";
@@ -92,8 +91,10 @@ END %]
 					introtext = "$constants.anon_name_alt writes <i>\"$introtext\"</i>";
 				ELSIF item.name;
 					introtext = "$item.name writes <i>\"$introtext\"</i>";
+				ELSE;
+					introtext =  the_user.nickname  _ " writes <i>\"$introtext\"</i>";
 				END;
-			END; %]
+		 %]
 				[% introtext %]
 
 
