@@ -373,14 +373,19 @@ function ajax_periodic_update(secs, params, onsucc, options, url) {
 	var ajax = new Ajax.PeriodicalUpdater({ success: onsucc }, url, options);
 }
 
-function json_handler(transport) {
+function eval_response(transport) {
 	var response;
- 
 	try {
 		eval("response = " + transport.responseText)
 	} catch (e) {
 		alert(e + "\n" + transport.responseText)
 	}
+	return response;
+}
+
+function json_handler(transport) {
+	var response = eval_response(transport);
+	 
 
  	if (response.html) {
 		for (el in response.html) {
@@ -396,3 +401,75 @@ function json_handler(transport) {
 	}
 }
 
+function firehose_new_handler(transport) {
+	var response = eval_response(transport);
+	var processed = 0;
+	if (response.added) {
+		for (el in response.added) {
+			var fh = 'firehose-' + el;
+			processed = processed + 1;
+			if ($(fh)) {
+			} else {
+				if (insert_new_at == "bottom") {
+					new Insertion.Bottom('firehoselist', response.added[el]);
+				} else {
+					new Insertion.Top('firehoselist', response.added[el]);
+				}
+			}
+		}
+	}
+	if (response.maxtime) {
+		if (processed > 0 ) { maxtime = response.maxtime }
+	}
+	setTimeout("firehose_fetch_new()", "10000");
+}
+
+function firehose_check_removed_handler(transport) {
+	var response = eval_response(transport);
+ 
+	if (response.removed) {
+		for (el in response.removed) {
+			var fh_id = 'firehose-' + el;
+			var fh = $(fh_id);
+			fh.className="hide";
+			fh.parentNode.removeChild(fh);
+		}
+	}
+	setTimeout("firehose_check_removed()", "10000");
+}
+
+function firehose_get_item_idstring() {
+	var fhl = $('firehoselist');
+	var children = fhl.childNodes;
+	var str = "";
+	var id;
+	for (var i = 0; i < children.length; i++) {
+		if (children[i].id) {
+			id = children[i].id;
+			id = id.replace(/\D+/g, "");
+			str = str + id + ",";
+		}
+	}
+	return str;
+}
+
+function firehose_check_removed() {
+	var params = [];
+	var handlers = {
+		onComplete: firehose_check_removed_handler
+	};
+	params['op'] = 'firehose_check_removed';
+	params['ids'] = firehose_get_item_idstring();
+	ajax_update(params, '', handlers);
+
+}
+
+function firehose_fetch_new() {
+	var params = [];
+	var handlers = {
+		onComplete: firehose_new_handler
+	};
+	params['op'] = 'firehose_fetch_new';
+	params['maxtime'] = maxtime;
+	ajax_update(params, '', handlers);
+}
