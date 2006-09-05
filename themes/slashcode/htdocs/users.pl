@@ -1170,6 +1170,7 @@ sub showInfo {
 
 		# This is cached.
 		my $discussion = $reader->getDiscussion($comment->{sid});
+#use Data::Dumper; if ($discussion && !$discussion->{dkid}) { print STDERR scalar(gmtime) . " users.pl discussion but no dkid: " . Dumper($discussion) }
 		if (!$discussion || !$discussion->{dkid}) {
 			# A comment with no accompanying discussion;
 			# basically we pretend it doesn't exist.
@@ -1525,11 +1526,11 @@ sub editTags {
 		tab_selected =>	$hr->{tab_selected_1} || "",
 	});
 
-	my $edit_user = $slashdb->getUser($user->{uid});
+	my $user_edit = $slashdb->getUser($user->{uid});
 	my $title = getTitle('editTags_title');
 
 	slashDisplay('editTags', {
-		user_edit	=> $user,
+		user_edit	=> $user_edit,
 		title		=> $title,
 		note		=> $note,
 	});
@@ -1546,7 +1547,6 @@ sub saveTags {
 
 	$slashdb->setUser($user->{uid}, {
 		tags_turnedoff =>	$form->{showtags} ? '' : 1 });
-	my $edit_user = $slashdb->getUser($user->{uid});
 	editTags({ note => getMessage('savetags_msg') });
 }
 
