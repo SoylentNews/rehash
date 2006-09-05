@@ -157,7 +157,8 @@ sub getFireHoseEssentials {
 	$options ||= {};
 	$options->{limit} ||= 50;
 	$options->{orderby} ||= "createtime";
-	$options->{orderdir} = $options->{orderdir} eq "ASC" ? "ASC" : ($user->{is_admin} && $options->{orderby} eq "createtime" ? "ASC" :"DESC");
+	$options->{orderdir} = uc($options->{orderdir}) eq "ASC" ? "ASC" : "DESC";
+	#($user->{is_admin} && $options->{orderby} eq "createtime" ? "ASC" :"DESC");
 
 	my @where;
 	my $tables = "firehose";
@@ -193,12 +194,23 @@ sub getFireHoseEssentials {
 		push @where, "firehose.id=firehose_text.id";
 		push @where, "firehose_text.title like '%" . $options->{filter} . "%'"; 
 	}
-	
+
+	if ($options->{createtime_gte}) {
+		push @where, "createtime >= " . $self->sqlQuote($options->{createtime_gte}); 
+	}
+
+	if ($options->{ids}) {
+		my $id_str = join ",", @{$options->{ids}};
+		push @where, "id IN ($id_str)";
+	}
+
+	my $limit_str = "";
 	my $where = (join ' AND ', @where) || "";
 	my $offset = $options->{offset};
 	$offset = "" if $offset !~ /^\d+$/;
 	$offset = "$offset, " if $offset;
-	my $other = "ORDER BY $options->{orderby} $options->{orderdir} LIMIT $offset $options->{limit}";
+	$limit_str = "LIMIT $offset $options->{limit}" unless $options->{nolimit};
+	my $other = "ORDER BY $options->{orderby} $options->{orderdir} $limit_str";
 	
 	$self->sqlSelectAllHashrefArray("firehose.*", $tables, $where, $other);
 }
@@ -284,7 +296,7 @@ sub ajaxSaveNoteFirehose {
 		my $firehose = getObject("Slash::FireHose");
 		$firehose->setFireHose($id, { note => $note });
 	}
-	return $note;
+	return $note || "Note";
 }
 
 
@@ -340,9 +352,58 @@ sub ajaxGetAdminFirehose {
 	}, { Return => 1 });
 }
 
+sub ajaxFireHoseFetchNew {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	$options->{content_type} = 'application/json';
+	my $firehose = getObject("Slash::FireHose");
+	my $maxtime = $form->{maxtime};
+	my $added = {};
+	
+	my $opts = $firehose->getAndSetOptions({ no_set => 1});
+	$opts->{limit} = 10;
+	$opts->{orderby} = 'createtime';
+	$opts->{orderdir} = 'ASC';
+	$opts->{createtime_gte} = $maxtime;
+
+	my $items = $firehose->getFireHoseEssentials($opts);
+
+
+	foreach my $i (@$items ) {
+		$maxtime = $i->{createtime} if $i->{createtime} gt $maxtime;
+		my $item = $firehose->getFireHose($i->{id});
+		$added->{$i->{id}} = slashDisplay("dispFireHose", { item => $item }, { Return => 1, Page => "firehose" });
+	}
+	
+	return Data::JavaScript::Anon->anon_dump({
+		added => $added,
+		maxtime => $maxtime
+	});
+}
+
+sub ajaxFireHoseCheckRemoved {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	$options->{content_type} = 'application/json';
+	my $firehose = getObject("Slash::FireHose");
+	my $id_str = $form->{ids};
+	my @ids = grep {/^\d+$/} split (/,/, $id_str);
+	my %ids = map { $_ => 1 } @ids;
+	
+	my $opts = $firehose->getAndSetOptions({ no_set => 1});
+	$opts->{nolimit} = 1;
+	$opts->{ids} = \@ids;
+	my $items = $firehose->getFireHoseEssentials($opts);
+	foreach (@$items) {
+		delete $ids{$_->{id}};
+	}
+	return Data::JavaScript::Anon->anon_dump({
+		removed => \%ids
+	});
+
+}
 
 sub ajaxUpDownFirehose {
-	my($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	$options->{content_type} = 'application/json';
 	my $id = $form->{id};
 	return unless $id;
 
@@ -565,6 +626,65 @@ sub getSimilarForItem {
 		}
 	}
 	return $similar_stories;
+}
+
+
+sub getAndSetOptions {
+	my ($self, $opts) = @_;
+	my $user 	= getCurrentUser();
+	my $constants 	= getCurrentStatic();
+	my $form 	= getCurrentForm();
+	$opts 	        ||= {};
+	my $options 	= {};
+
+	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1 };
+	my $modes = { full => 1, fulltitle => 1};
+	my $orders = { createtimeasc => 1, popularityasc => 1, createtimedesc => 1, popularitydesc => 1};
+
+	my $mode = $form->{mode} || $user->{firehose_mode};
+	$mode = $modes->{$mode} ? $mode : "fulltitle";
+	$options->{mode} = $mode;
+
+	if ($mode eq "full") {
+		$options->{limit} = 25;
+	} else {
+		$options->{limit} = 50;
+	}
+
+	if ($form->{order} && $orders->{$form->{order}}) {
+		($options->{orderby}, $options->{orderdir}) = $form->{order} =~/^(\w+)(desc|asc)$/;
+	} else {
+		$options->{orderby}  = $user->{firehose_orderby} || "createtime";
+		$options->{orderdir} = $user->{firehose_orderdir} || "desc";
+	}
+	$options->{order} = $options->{orderby} . $options->{orderdir};
+
+	$options->{primaryskid} = defined $form->{primaryskid} ? $form->{primaryskid} : $user->{firehose_primaryskid};
+
+	$options->{type} = defined $form->{type} ? $form->{type} : $user->{firehose_type};
+
+	$options->{category} = defined $form->{category} ? $form->{category} : $user->{firehose_category};
+
+	$options->{filter} = defined $form->{filter} ? $form->{filter} : $user->{firehose_filter};
+
+	if (!$user->{is_anon} && !$opts->{no_set}) {
+		my $data_change = {};
+		foreach (keys %$options) {
+			$data_change->{"firehose_$_"} = $options->{$_} if !defined $user->{"firehose_$_"} || $user->{"firehose_$_"} ne $options->{$_};
+		}
+		$self->setUser($user->{uid}, $data_change ) if keys %$data_change > 0;
+		
+	}
+	
+	if ($user->{is_admin}) {
+		# $options->{attention_needed} = "yes";
+		 $options->{accepted} = "no";
+		 $options->{rejected} = "no";
+	} else  {
+		$options->{public} = "yes";
+	}
+
+	return $options;
 }
 
 
