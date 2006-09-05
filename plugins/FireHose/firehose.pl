@@ -51,74 +51,39 @@ sub main {
 sub list {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 	my $firehose = getObject("Slash::FireHose");
-	my $options = getAndSetOptions(); 
+	my $options = $firehose->getAndSetOptions(); 
 	my $page = $form->{page} || 0;
 	if ($page) {
 		$options->{offset} = $page * $options->{limit};
 	}
 
-	if ($user->{is_admin}) {
-		# $options->{attention_needed} = "yes";
-		 $options->{accepted} = "no";
-		 $options->{rejected} = "no";
-	} else  {
-		$options->{public} = "yes";
-	}
 	my $items = $firehose->getFireHoseEssentials($options);
 	my $itemstext;
+	my $maxtime = $firehose->getTime();
+	
 	foreach (@$items) {
+		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime;
 		my $item =  $firehose->getFireHose($_->{id});
 		$itemstext .= $firehose->dispFireHose($item, { mode => $options->{mode} });
 	}
-	
-	slashDisplay("list", { itemstext => $itemstext, page => $page, options => $options } );
-
-}
-
-sub getAndSetOptions {
-	my $user 	= getCurrentUser();
-	my $slashdb	= getCurrentDB();
-	my $constants 	= getCurrentStatic();
-	my $form 	= getCurrentForm();
-	my $options 	= {};
-
-	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1 };
-	my $modes = { full => 1, fulltitle => 1};
-	my $orders = { createtime => 1, popularity => 1};
-
-	my $mode = $form->{mode} || $user->{firehose_mode};
-	$mode = $modes->{$mode} ? $mode : "fulltitle";
-	$options->{mode} = $mode;
-
-	if ($mode eq "full") {
-		$options->{limit} = 25;
-	} else {
-		$options->{limit} = 50;
-	}
-
-	$options->{orderby} = defined $form->{order} ? $form->{order} : $user->{firehose_orderdby};
-
-	$options->{primaryskid} = defined $form->{primaryskid} ? $form->{primaryskid} : $user->{firehose_primaryskid};
-
-	$options->{type} = defined $form->{type} ? $form->{type} : $user->{firehose_type};
-
-	$options->{category} = defined $form->{category} ? $form->{category} : $user->{firehose_category};
-
-	$options->{filter} = defined $form->{filter} ? $form->{filter} : $user->{firehose_filter};
-
-	if (!$user->{is_anon}) {
-		my $data_change = {};
-		foreach (keys %$options) {
-			$data_change->{"firehose_$_"} = $options->{$_} if !defined $user->{"firehose_$_"} || $user->{"firehose_$_"} ne $options->{$_};
+	my $refresh_options;
+	if ($options->{orderby} eq "createtime") {
+		$refresh_options->{maxtime} = $maxtime;
+		if (uc($options->{orderdir}) eq "ASC") {
+			$refresh_options->{insert_new_at} = "bottom";
+		} else {
+			$refresh_options->{insert_new_at} = "top";
 		}
-		$slashdb->setUser($user->{uid}, $data_change ) if keys %$data_change > 0;
-		
-	}
+	} 
 
+	slashDisplay("list", {
+		itemstext => $itemstext, 
+		page => $page, 
+		options => $options,
+		refresh_options => $refresh_options
+	});
 
-	return $options;
 }
-
 
 sub view {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;
