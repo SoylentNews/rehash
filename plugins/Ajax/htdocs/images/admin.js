@@ -211,12 +211,15 @@ function firehose_reject (el) {
 	ajax_update(params, 'reject_' + el.value);
 	if (fh) {
 		fh.className="hide";
+		fh.parentNode.removeChild(fh);
 	}
 }
 
 function firehose_open_note(id) {
 	var nf = $('note-form-'+id);
 	var nt = $('note-text-'+id);
+	var ni = $('note-input-'+id);
+	ni.focus();
 	nf.className="";
 	nt.className="hide";
 }

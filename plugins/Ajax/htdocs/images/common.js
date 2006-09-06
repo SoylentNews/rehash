@@ -421,7 +421,7 @@ function firehose_new_handler(transport) {
 	if (response.maxtime) {
 		if (processed > 0 ) { maxtime = response.maxtime }
 	}
-	setTimeout("firehose_fetch_new()", "10000");
+	setTimeout("firehose_fetch_new()", "30000");
 }
 
 function firehose_check_removed_handler(transport) {
@@ -435,7 +435,7 @@ function firehose_check_removed_handler(transport) {
 			fh.parentNode.removeChild(fh);
 		}
 	}
-	setTimeout("firehose_check_removed()", "10000");
+	setTimeout("firehose_check_removed()", "30000");
 }
 
 function firehose_get_item_idstring() {
