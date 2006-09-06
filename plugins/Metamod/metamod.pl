@@ -22,14 +22,16 @@ sub main {
 
 	if (!$constants->{m1}) {
 		print getData('no_moderation');
-	} elsif (!$slashdb->metamodEligible($user)) {
-		print getData('not-eligible');
-	} elsif ($op eq 'MetaModerate') {
-		my $metamod_db = getObject('Slash::Metamod');
-		$metamod_db->metaModerate();
-		print getData('thanks');
 	} else {
-		displayTheComments();
+		my $metamod_db = getObject('Slash::Metamod');
+		if (!$metamod_db->metamodEligible($user)) {
+			print getData('not-eligible');
+		} elsif ($op eq 'MetaModerate') {
+			$metamod_db->metaModerate();
+			print getData('thanks');
+		} else {
+			displayTheComments();
+		}
 	}
 
 	writeLog($op);
