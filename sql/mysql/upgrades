@@ -4005,8 +4005,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_form', 'Slash::FireHose', 'ajax
 # 2006-08-28
 UPDATE vars SET value = 'T_2_5_0_123' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # 2006-08-30
 UPDATE vars SET value = 'T_2_5_0_124' WHERE name = 'cvs_tag_currentcode';
 
@@ -4053,3 +4051,4 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_check_removed', 'Slash::FireHose', 
 # 2006-09-06
 UPDATE vars SET value = 'T_2_5_0_125' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
