@@ -219,8 +219,8 @@ function firehose_open_note(id) {
 	var nf = $('note-form-'+id);
 	var nt = $('note-text-'+id);
 	var ni = $('note-input-'+id);
-	ni.focus();
 	nf.className="";
+	ni.focus();
 	nt.className="hide";
 }
 
