@@ -16,3 +16,4 @@ template=templates/reject;firehose;default
 template=templates/tagsfirehosedivadmin;misc;default
 template=templates/tagsfirehosedivtagbox;misc;default
 template=templates/tagsfirehosedivuser;misc;default
+template=templates/formatHoseIntro;misc;default

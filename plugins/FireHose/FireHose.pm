@@ -483,7 +483,9 @@ sub ajaxGetFormContents {
 	my $id = $form->{id};
 	my $item = $firehose->getFireHose($id);
 	return unless $item;
-	slashDisplay('fireHoseForm', { item => $item }, { Return => 1});	
+	my $url;
+	$url = $slashdb->getUrl($item->{url_id}) if $item->{url_id};
+	slashDisplay('fireHoseForm', { item => $item, url => $url }, { Return => 1});	
 }
 
 sub ajaxGetAdminExtras {
