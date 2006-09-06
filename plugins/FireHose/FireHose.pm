@@ -524,7 +524,7 @@ sub setSectionTopicsFromTagstring {
 
 	my %categories = map { ($_, $_) } (qw(hold quik),
 		(ref $constants->{submit_categories}
-			? @{$constants->{submit_categories}}
+			? map {lc($_)} @{$constants->{submit_categories}}
 			: ()
 		)
 	);
