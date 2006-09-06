@@ -44,9 +44,10 @@ sub displayTheComments {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $metamod_db = getObject('Slash::Metamod');
 
 	my $reasons = $slashdb->getReasons();
-	my $comments = $slashdb->getMetamodsForUser(
+	my $comments = $metamod_db->getMetamodsForUser(
 		$user, $constants->{m2_comments}
 	);
 
