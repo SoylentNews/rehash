@@ -4048,3 +4048,8 @@ ALTER TABLE users_info CHANGE COLUMN mods_saved m2_mods_saved varchar(120) NOT N
 # Updates for plugins/FireHose
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_fetch_new', 'Slash::FireHose', 'ajaxFireHoseFetchNew', 'ajax_user', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_check_removed', 'Slash::FireHose', 'ajaxFireHoseCheckRemoved', 'ajax_user', 'createuse');
+
+
+# 2006-09-06
+UPDATE vars SET value = 'T_2_5_0_125' WHERE name = 'cvs_tag_currentcode';
+
