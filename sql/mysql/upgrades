@@ -4008,8 +4008,6 @@ UPDATE vars SET value = 'T_2_5_0_123' WHERE name = 'cvs_tag_currentcode';
 # 2006-08-30
 UPDATE vars SET value = 'T_2_5_0_124' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 # do runtask reskey_purge.pl immediately after running refresh
 ALTER TABLE reskey_resources ADD COLUMN static ENUM('yes', 'no') DEFAULT 'no' NOT NULL AFTER name;
 DROP TABLE IF EXISTS reskey_hourlysalt;
@@ -4052,3 +4050,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_check_removed', 'Slash::FireHose', 
 UPDATE vars SET value = 'T_2_5_0_125' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
