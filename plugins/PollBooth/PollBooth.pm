@@ -33,11 +33,11 @@ sub new {
 }
 
 sub setPollQuestion {
-	_genericSet('pollquestions', 'qid', '', @_);
+	Slash::DB::MySQL::_genericSet('pollquestions', 'qid', '', @_);
 }
 
 sub getPollQuestion {
-	my $answer = _genericGet({
+	my $answer = Slash::DB::MySQL::_genericGet({
 		table           => 'pollquestions',
 		table_prime     => 'qid',
 		arguments       => \@_,
@@ -46,13 +46,13 @@ sub getPollQuestion {
 }
 
 sub createAutoPollFromStory {
-	my ($options) = @_;
-	my $slashdb = getCurrentDB();
+	my($options) = @_;
+	my $metamod_db = getObject('Slash::Metamod');
 	my $story = $options->{story};
-	my $qid = $slashdb->sqlSelect('qid', 'auto_poll', "primaryskid = '$story->{primaryskid}'");
+	my $qid = $metamod_db->sqlSelect('qid', 'auto_poll', "primaryskid = '$story->{primaryskid}'");
 	if ($qid) {
-		my $question = $slashdb->getPollQuestion($qid, 'question');
-		my $answers = $slashdb->getPollAnswers($qid, [ qw| answer | ]);
+		my $question = $metamod_db->getPollQuestion($qid, 'question');
+		my $answers = $metamod_db->getPollAnswers($qid, [ qw| answer | ]);
 		my $newpoll = {
 			primaryskid => $story->{primaryskid},
 			topic => $story->{tid},
@@ -65,8 +65,8 @@ sub createAutoPollFromStory {
 			$newpoll->{'aid' . $x} = $_->[0];
 			$x++;
 		}
-		my $qid = $slashdb->savePollQuestion($newpoll);
-		$slashdb->setStory($story->{sid}, { qid => $qid, writestatus => 'dirty' });
+		my $qid = $metamod_db->savePollQuestion($newpoll);
+		$metamod_db->setStory($story->{sid}, { qid => $qid, writestatus => 'dirty' });
 	}
 
 	return 1;
