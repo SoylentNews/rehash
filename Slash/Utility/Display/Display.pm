@@ -1075,7 +1075,7 @@ The 'linkComment' template block.
 =cut
 
 sub linkComment {
-	my($comment, $printcomment, $date) = @_;
+	my($linkdata, $printcomment, $date) = @_;
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	return _hard_linkComment(@_) if $constants->{comments_hardcoded};
@@ -1086,16 +1086,16 @@ sub linkComment {
 	# don't inherit these ...
 	for (qw(sid cid pid date subject comment uid points lastmod
 		reason nickname fakeemail homepage sig)) {
-		$comment->{$_} = undef unless exists $comment->{$_};
+		$linkdata->{$_} = undef unless exists $linkdata->{$_};
 	}
 
-	$comment->{pid} = $comment->{original_pid} || $comment->{pid};
+	$linkdata->{pid} = $linkdata->{original_pid} || $linkdata->{pid};
 
 	slashDisplay('linkComment', {
-		%$comment, # defaults
+		%$linkdata, # defaults
 		adminflag	=> $adminflag,
 		date		=> $date,
-		threshold	=> defined($form->{threshold}) ? $form->{threshold} : $user->{threshold},
+		threshold	=> defined($linkdata->{threshold}) ? $linkdata->{threshold} : $user->{threshold},
 		commentsort	=> $user->{commentsort},
 		mode		=> $user->{mode},
 		comment		=> $printcomment,
@@ -1308,37 +1308,37 @@ sub lockTest {
 ########################################################
 # this sucks, but it is here for now
 sub _hard_linkComment {
-	my($comment, $printcomment, $date) = @_;
+	my($linkdata, $printcomment, $date) = @_;
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 	my $gSkin = getCurrentSkin();
 
-	my $subject = $comment->{subject};
+	my $subject = $linkdata->{subject};
 
-	my $display = qq|<a href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}|;
-	$display .= "&amp;op=$comment->{op}" if $comment->{op};
-	$display .= "&amp;threshold=" . (defined($form->{threshold}) ? $form->{threshold} : $user->{threshold});
+	my $display = qq|<a href="$gSkin->{rootdir}/comments.pl?sid=$linkdata->{sid}|;
+	$display .= "&amp;op=$linkdata->{op}" if $linkdata->{op};
+	$display .= "&amp;threshold=" . (defined($linkdata->{threshold}) ? $linkdata->{threshold} : $user->{threshold});
 	$display .= "&amp;commentsort=$user->{commentsort}";
 	$display .= "&amp;tid=$user->{state}{tid}"
 		if $constants->{tids_in_urls} && $user->{state}{tid};
 	$display .= "&amp;mode=$user->{mode}";
-	$display .= "&amp;startat=$comment->{startat}" if $comment->{startat};
+	$display .= "&amp;startat=$linkdata->{startat}" if $linkdata->{startat};
 
 	if ($printcomment) {
-		$display .= "&amp;cid=$comment->{cid}";
+		$display .= "&amp;cid=$linkdata->{cid}";
 	} else {
-		$display .= "&amp;pid=" . ($comment->{original_pid} || $comment->{pid});
-		$display .= "#$comment->{cid}" if $comment->{cid};
+		$display .= "&amp;pid=" . ($linkdata->{original_pid} || $linkdata->{pid});
+		$display .= "#$linkdata->{cid}" if $linkdata->{cid};
 	}
 
-	$display .= qq|" onclick="$comment->{onclick}| if $comment->{onclick};
+	$display .= qq|" onclick="$linkdata->{onclick}| if $linkdata->{onclick};
 	$display .= qq|">$subject</a>|;
-	if (!$comment->{subject_only}) {
-		$display .= qq| by $comment->{nickname}|;
-		$display .= qq| (Score:$comment->{points})|
-			if !$user->{noscores} && $comment->{points};
-		$display .= " " . timeCalc($comment->{date}) 
+	if (!$linkdata->{subject_only}) {
+		$display .= qq| by $linkdata->{nickname}|;
+		$display .= qq| (Score:$linkdata->{points})|
+			if !$user->{noscores} && $linkdata->{points};
+		$display .= " " . timeCalc($linkdata->{date}) 
 			if $date;
 	}
 	$display .= "\n";
