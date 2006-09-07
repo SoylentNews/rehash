@@ -159,6 +159,7 @@ sub getFireHoseEssentials {
 	$options->{orderby} ||= "createtime";
 	$options->{orderdir} = uc($options->{orderdir}) eq "ASC" ? "ASC" : "DESC";
 	#($user->{is_admin} && $options->{orderby} eq "createtime" ? "ASC" :"DESC");
+	
 
 	my @where;
 	my $tables = "firehose";
@@ -200,7 +201,8 @@ sub getFireHoseEssentials {
 	}
 
 	if ($options->{ids}) {
-		my $id_str = join ",", @{$options->{ids}};
+		return [] if @{$options->{ids}} < 1;
+		my $id_str = join ",", map { $self->sqlQuote($_) } @{$options->{ids}};
 		push @where, "id IN ($id_str)";
 	}
 
@@ -559,9 +561,10 @@ sub setFireHose {
 	my($self, $id, $data) = @_;
 	return unless $id;
 	my $id_q = $self->sqlQuote($id);
-	
+
 	my $text_updated = 0;
 	my $text_data = {};
+
 
 	$text_data->{title} = delete $data->{title} if defined $data->{title};
 	$text_data->{introtext} = delete $data->{introtext} if defined $data->{introtext};
