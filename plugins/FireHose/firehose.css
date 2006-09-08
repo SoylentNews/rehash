@@ -61,10 +61,11 @@
 	left: 30px;
 }
 
-.briefarticle div.tags { margin-top: 1px; }
+.briefarticle div.tags {  padding: 0 !important; margin-top: -1px !important; }
 div.tags { margin-bottom: 2px !important; }
 div.tags div.tagtitleclosed,
-div.tags div.tagtitleopen { position: static !important; }
+div.tags div.tagtitleopen { position: static !important; margin-top: 2px !important;}
+div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a { padding-top: 0px !important; font-size: 98%; color: #777}
 
 .edit
 {
