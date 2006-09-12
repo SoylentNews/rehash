@@ -2058,7 +2058,7 @@ EOT2
 	<div class="commentTop">
 		<div class="title">
 $head
-		 	<span class="score">$score_to_display</span>
+		 	<span id="comment_score_$comment->{cid}" class="score">$score_to_display</span>
 		</div>
 		<div class="details">
 			by $user_nick_to_display$zoosphere_display
@@ -2105,8 +2105,12 @@ EOT
 #			(!$form->{cid} || $form->{cid} != $comment->{cid})
 #		);
 
-		push @link, "<div class=\"modsel\">".createSelect("reason_$comment->{cid}",
-			$reasons, '', 1, 1)."</div>" if $can_mod
+		push @link, "<div class=\"modsel\">" .
+			createSelect("reason_$comment->{cid}", $reasons, {
+				'return'	=> 1,
+				nsort		=> 1, 
+				onchange	=> 'return doModerate(this)'
+			}) . "</div>" if $can_mod
 				&& ( !$user->{state}{discussion_archived}
 					|| $constants->{comments_moddable_archived} );
 
