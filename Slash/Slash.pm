@@ -2105,7 +2105,7 @@ EOT
 #			(!$form->{cid} || $form->{cid} != $comment->{cid})
 #		);
 
-		push @link, "<div class=\"modsel\">" .
+		push @link, qq'<div id="reasondiv_$comment->{cid}" class="modsel">' .
 			createSelect("reason_$comment->{cid}", $reasons, {
 				'return'	=> 1,
 				nsort		=> 1, 
