@@ -6825,7 +6825,7 @@ sub getCommentTextCached {
 	# maxcommentsize is the default.
 	my $mcd = $self->getMCD();
 	$mcd = undef if
-		   $opt->{mode} eq 'archive'
+		   $opt->{mode} && $opt->{mode} eq 'archive'
 		|| $user->{domaintags} != 2
 		|| $user->{maxcommentsize} != $constants->{default_maxcommentsize};
 
@@ -6879,10 +6879,10 @@ sub getCommentTextCached {
 	}
 
 	for my $cid (keys %$more_comment_text) {
-		if ($opt->{mode} ne 'archive'
+		if (	   !($opt->{mode} && $opt->{mode} eq 'archive')
+			&& !($opt->{cid}  && $opt->{cid}  eq $cid)
 			&& $comments->{$cid}{len} > $user->{maxcommentsize}
-			&& $opt->{cid} ne $cid)
-		{
+		) {
 			# We remove the domain tags so that strip_html will not
 			# consider </a blah> to be a non-approved tag.  We'll
 			# add them back at the last step.  In-between, we chop
