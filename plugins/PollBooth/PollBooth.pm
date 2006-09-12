@@ -47,12 +47,12 @@ sub getPollQuestion {
 
 sub createAutoPollFromStory {
 	my($options) = @_;
-	my $metamod_db = getObject('Slash::Metamod');
+	my $pollbooth_db = getObject('Slash::PollBooth');
 	my $story = $options->{story};
-	my $qid = $metamod_db->sqlSelect('qid', 'auto_poll', "primaryskid = '$story->{primaryskid}'");
+	my $qid = $pollbooth_db->sqlSelect('qid', 'auto_poll', "primaryskid = '$story->{primaryskid}'");
 	if ($qid) {
-		my $question = $metamod_db->getPollQuestion($qid, 'question');
-		my $answers = $metamod_db->getPollAnswers($qid, [ qw| answer | ]);
+		my $question = $pollbooth_db->getPollQuestion($qid, 'question');
+		my $answers = $pollbooth_db->getPollAnswers($qid, [ qw| answer | ]);
 		my $newpoll = {
 			primaryskid => $story->{primaryskid},
 			topic => $story->{tid},
@@ -65,8 +65,8 @@ sub createAutoPollFromStory {
 			$newpoll->{'aid' . $x} = $_->[0];
 			$x++;
 		}
-		my $qid = $metamod_db->savePollQuestion($newpoll);
-		$metamod_db->setStory($story->{sid}, { qid => $qid, writestatus => 'dirty' });
+		my $qid = $pollbooth_db->savePollQuestion($newpoll);
+		$pollbooth_db->setStory($story->{sid}, { qid => $qid, writestatus => 'dirty' });
 	}
 
 	return 1;
