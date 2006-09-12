@@ -128,6 +128,10 @@ Boolean: do <SELECT MULTIPLE...> instead of <SELECT...>
 
 Value for the C<onchange=""> attribute.
 
+=item ONCLICK
+
+Value for the C<onclick=""> attribute.
+
 =back
 
 =item Return value
@@ -155,6 +159,7 @@ sub createSelect {
 		($default, $return, $nsort, $ordered, $multiple, $onchange, $onclick) =
 			@{$default}{qw(default return nsort ordered multiple onchange onclick)};
 	}
+	$default = '' unless defined $default;
 
 	if (ref $hashref eq 'ARRAY') {
 ### Pudge: see above. -Jamie

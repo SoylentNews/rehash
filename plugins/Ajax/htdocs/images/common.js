@@ -393,7 +393,6 @@ function eval_response(transport) {
 
 function json_handler(transport) {
 	var response = eval_response(transport);
-	 
 
  	if (response.html) {
 		for (el in response.html) {

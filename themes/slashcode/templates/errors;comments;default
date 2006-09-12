@@ -44,7 +44,7 @@ as comment posting and moderation are currently unavailable.
 
 [% # ALREADY POSTED.
 CASE "already posted" %]
-You've already posted something in this discussion<br>
+You've already posted something in this discussion.
 
 [% # NO SUCH PARENT COMMENT
 CASE "no such parent" %]
@@ -239,6 +239,13 @@ CASE "no sid" %]
 You did not specify a discussion ID. If you clicked on a link internal
 to [% constants.sitename %], this is a bug. If not, someone sent you
 to a silly invalid URL.
+
+[% CASE 'no_moderation' %]
+The moderation system is currently down.
+
+[% CASE 'archive_error' %]
+This discussion has been archived; no further changes can be made.
+
 
 [% CASE %]
 An unexpected error has occurred.<br><b>[% value %]</b><br>

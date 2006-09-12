@@ -292,6 +292,45 @@ discussion_id = $id;
 EOT
 }
 
+sub _moderateCheck {
+	my($form, $slashdb, $user, $constants, $discussion) = @_;
+
+	# all of these can be removed in favor of reskeys, later
+	if (!dbAvailable('write_comments')) {
+		return { msg => _comments_getError('comment_db_down') };
+	}
+	
+	if (!$constants->{m1}) {
+		return { msg => _comments_getError('no_moderation') };
+	}
+
+	if ($discussion->{type} eq 'archived' &&
+	   !$constants->{comments_moddable_archived} &&
+	   !$form->{meta_mod_only}) {
+		return { msg => _comments_getError('archive_error') };
+	}
+
+	my $return = {};
+	$return->{count} = $slashdb->countCommentsBySidUID($form->{sid}, $user->{uid})
+		unless (   $constants->{authors_unlimited}
+			&& $user->{seclev} >= $constants->{authors_unlimited}
+		)	|| $user->{acl}{modpoints_always};
+	if ($return->{count}) {
+		$return->{msg} = _comments_getError('already posted');
+	}
+
+	return $return;
+}
+
+# this really should have been getData all along
+sub _comments_getError {
+	my($value, $hashref, $nocomm) = @_;
+	$hashref ||= {};
+	$hashref->{value} = $value;
+	return slashDisplay('errors', $hashref,
+		{ Return => 1, Nocomm => $nocomm, Page => 'comments' });
+}
+
 sub constrain_score {
 	my($score) = @_;
 	my $constants = getCurrentStatic();

@@ -42,6 +42,11 @@ __template__
 <!--
 	$('commentControlBoxStatus').className = '';
 [% Slash.jsSelectComments(Slash.db, constants, user, { sid => sid, cid => cid }) %]
+[% IF moderate_form;
+	reskey = Slash.getObject('Slash::ResKey');
+	rkey = reskey.key('comments-moderation-ajax', { nostate => 1 });
+	IF rkey.create;
+-%]comments_moderate_reskey = '[% rkey.reskey %]';[% END; END %]
 //-->
 	</script>
 [% END %]

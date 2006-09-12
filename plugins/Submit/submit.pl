@@ -527,6 +527,9 @@ sub displayForm {
 	}
 
 	my $fixedstory = fixStory($form->{story}, { sub_type => $form->{sub_type} });
+	# don't let preview screen be used to pump up pagerank, if anyone
+	# would waste their time doing so -- pudge
+	$fixedstory = noFollow($fixedstory);
 
 	slashDisplay('displayForm', {
 		fixedstory	=> $fixedstory,

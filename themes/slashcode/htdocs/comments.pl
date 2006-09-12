@@ -502,7 +502,7 @@ sub editComment {
 	}
 
 	if ($discussion->{type} eq 'archived') {
-		print getData('archive_error');
+		print getError('archive_error');
 		return;
 	}
 
@@ -969,7 +969,7 @@ sub submitComment {
 
 	if ($discussion->{type} eq 'archived') {
 		header('Comments', $discussion->{section}) or return;
-		print getData('archive_error');
+		print getError('archive_error');
 		return;
 	}
 
@@ -1353,93 +1353,69 @@ sub _send_comment_msg {
 sub moderate {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
 
-	my $sid = $form->{sid};
-	my $was_touched = 0;
-
-	my $meta_mods_performed = 0;
-
-	my $skip_moderation = $form->{meta_mod_only} || 0;
-
-	my $message = "";
-	
-	if (!dbAvailable("write_comments")) {
-		print getError("comment_db_down");
-		return;
-	}
-	
-	if (!$constants->{m1}) {
-		print getData('no_moderation');
+	my $moderate_check = &Slash::_moderateCheck;
+	if (!$moderate_check->{count}) {
+		print $moderate_check->{msg} if $moderate_check->{msg};
 		return;
 	}
 
-	if ($discussion->{type} eq 'archived'
-		&& !$constants->{comments_moddable_archived}) {
-		$message .= getData('archive_error');
+	if ($form->{meta_mod_only}) {
+		print metamod_if_necessary();
+		return;
 	}
 
-
-	my $total_deleted = 0;
-	my $hasPosted;
+	my $hasPosted = $moderate_check->{count};
 
 	titlebar("100%", getData('moderating'));
+	slashDisplay('mod_header');
 
-	$hasPosted = $slashdb->countCommentsBySidUID($sid, $user->{uid})
-		unless ($constants->{authors_unlimited}
-				&& $user->{seclev} >= $constants->{authors_unlimited})
-			|| $user->{acl}{modpoints_always};
+	my $sid = $form->{sid};
+	my $was_touched = 0;
+	my $meta_mods_performed = 0;
+	my $total_deleted = 0;
 
-
-	if ($skip_moderation) {
-		print $message;
-		print metamod_if_necessary();
-		return;
-	} else {
-		slashDisplay('mod_header');
-
-		# Handle Deletions, Points & Reparenting
-		# It would be nice to sort these by current score of the comments
-		# ascending, maybe also by val ascending, or some way to try to
-		# get the single-point-spends first and then to only do the
-		# multiple-point-spends if the user still has points.
-		my $can_del = ($constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited})
-			|| $user->{acl}{candelcomments_always};
-		for my $key (sort keys %{$form}) {
-			if ($can_del && $key =~ /^del_(\d+)$/) {
-				$total_deleted += deleteThread($sid, $1);
-			} elsif (!$hasPosted && $key =~ /^reason_(\d+)$/) {
-				my $cid = $1;
-				my $ret_val = $slashdb->moderateComment($sid, $cid, $form->{$key});
-				# If an error was returned, tell the user what
-				# went wrong.
-				if ($ret_val < 0) {
-					if ($ret_val == -1) {
-						print getError('no points');
-					} elsif ($ret_val == -2){
-						print getError('not enough points');
-					}
-				} else {
-					$was_touched += $ret_val;
+	# Handle Deletions, Points & Reparenting
+	# It would be nice to sort these by current score of the comments
+	# ascending, maybe also by val ascending, or some way to try to
+	# get the single-point-spends first and then to only do the
+	# multiple-point-spends if the user still has points.
+	my $can_del = ($constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited})
+		|| $user->{acl}{candelcomments_always};
+	for my $key (sort keys %{$form}) {
+		if ($can_del && $key =~ /^del_(\d+)$/) {
+			$total_deleted += deleteThread($sid, $1);
+		} elsif (!$hasPosted && $key =~ /^reason_(\d+)$/) {
+			my $cid = $1;
+			my $ret_val = $slashdb->moderateComment($sid, $cid, $form->{$key});
+			# If an error was returned, tell the user what
+			# went wrong.
+			if ($ret_val < 0) {
+				if ($ret_val == -1) {
+					print getError('no points');
+				} elsif ($ret_val == -2){
+					print getError('not enough points');
 				}
+			} else {
+				$was_touched += $ret_val;
 			}
 		}
-		$slashdb->setDiscussionDelCount($sid, $total_deleted);
-		$was_touched = 1 if $total_deleted;
-		
-		print metamod_if_necessary();
-  
-		slashDisplay('mod_footer', {
-			metamod_elig => metamod_elig($user),
+	}
+	$slashdb->setDiscussionDelCount($sid, $total_deleted);
+	$was_touched = 1 if $total_deleted;
+
+	print metamod_if_necessary();
+
+	slashDisplay('mod_footer', {
+		metamod_elig => metamod_elig($user),
+	});
+
+	if ($hasPosted && !$total_deleted) {
+		print $moderate_check->{msg};
+	} elsif ($user->{seclev} && $total_deleted) {
+		slashDisplay('del_message', {
+			total_deleted	=> $total_deleted,
+			comment_count	=> $slashdb->countCommentsBySid($sid),
 		});
-
-		if ($hasPosted && !$total_deleted) {
-			print getError('already posted');
-		} elsif ($user->{seclev} && $total_deleted) {
-			slashDisplay('del_message', {
-				total_deleted	=> $total_deleted,
-				comment_count	=> $slashdb->countCommentsBySid($sid),
-			});
-		}
-
 	}
 
 	printComments($discussion, $form->{pid}, $form->{cid},
