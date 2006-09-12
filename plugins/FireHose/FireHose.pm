@@ -199,6 +199,9 @@ sub getFireHoseEssentials {
 	if ($options->{createtime_gte}) {
 		push @where, "createtime >= " . $self->sqlQuote($options->{createtime_gte}); 
 	}
+	if ($options->{last_update_gte}) {
+		push @where, "last_update >= " . $self->sqlQuote($options->{last_update_gte}); 
+	}
 
 	if ($options->{ids}) {
 		return [] if @{$options->{ids}} < 1;
@@ -420,6 +423,36 @@ sub ajaxFireHoseCheckRemoved {
 
 }
 
+sub ajaxFireHoseGetUpdates {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	$options->{content_type} = 'application/json';
+	my $firehose = getObject("Slash::FireHose");
+	my $id_str = $form->{ids};
+	my $update_time = $form->{updatetime};
+	my @ids = grep {/^\d+$/} split (/,/, $id_str);
+	my %ids = map { $_ => 1 } @ids;
+	
+	my $opts = $firehose->getAndSetOptions({ no_set => 1});
+	$opts->{limit} = 25;
+	$opts->{orderby} = 'last_update';
+	$opts->{orderdir} = 'ASC';
+	$opts->{last_update_gte} = $update_time;
+	my $items = $firehose->getFireHoseEssentials($opts);
+
+	my $update_new = {};
+	foreach (@$items) {
+		if(!$ids{$_->{id}}) {
+			my $item = $firehose->getFireHose($_->{id});
+			$update_new->{$_->{id}} = slashDisplay("dispFireHose", { item => $item }, { Return => 1, Page => "firehose" });
+			$update_time = $_->{createtime} if $_->{createtime} gt $update_time;
+		}
+	}
+	return Data::JavaScript::Anon->anon_dump({
+		update_new => $update_new,
+		update_time => $update_time
+	});
+}
+
 sub ajaxUpDownFirehose {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	$options->{content_type} = 'application/json';
@@ -573,6 +606,15 @@ sub setFireHose {
 	return unless $id && $data;
 	my $id_q = $self->sqlQuote($id);
 
+	if (!exists($data->{last_update}) && !exists($data->{-last_update})) {
+		my @non_trivial = grep {!/^(popularity|toptags)$/} keys %$data;
+		if (@non_trivial > 0) {
+			$data->{-last_update} = 'NOW()'	
+		} else {
+			$data->{-last_update} = 'last_update';
+		}
+	}
+	
 	# Admin notes used to be stored in firehose.note;  that column is
 	# now gone and that data goes in globj_adminnote.  The note is
 	# stored on the object that the firehose points to.
@@ -586,7 +628,6 @@ sub setFireHose {
 
 	return if !keys %$data;
 
-#	my $text_updated = 0;
 	my $text_data = {};
 
 	$text_data->{title} = delete $data->{title} if defined $data->{title};
