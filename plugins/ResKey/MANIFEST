@@ -8,6 +8,7 @@ ResKey/Checks/AL2/NoPost.pm
 ResKey/Checks/AL2/NoPostAnon.pm
 ResKey/Checks/AL2.pm
 ResKey/Checks/Duration.pm
+ResKey/Checks/Moderate.pm
 ResKey/Checks/Post.pm
 ResKey/Checks/ProxyScan.pm
 ResKey/Checks/User.pm
