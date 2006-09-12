@@ -18,7 +18,6 @@ CREATE TABLE firehose (
 	tid smallint(6) default '0',
 	srcid mediumint(8) unsigned NOT NULL default '0',
 	url_id mediumint(8) unsigned NOT NULL default '0',
-	note varchar(255) default '',
 	toptags varchar(255) default '',
 	email varchar(255) NOT NULL default '',
 	emaildomain varchar(255) NOT NULL default '',

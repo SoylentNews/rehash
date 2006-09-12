@@ -523,6 +523,17 @@ CREATE TABLE globjs (
 ) TYPE=InnoDB;
 
 #
+# Table structure for table 'globj_adminnotes'
+#
+
+DROP TABLE IF EXISTS globj_adminnotes;
+CREATE TABLE globj_adminnotes (
+	globjid		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	adminnote	varchar(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (globjid)
+) TYPE=InnoDB;
+
+#
 # Table structure for table 'globj_types'
 #
 
@@ -546,8 +557,6 @@ CREATE TABLE globj_urls (
 	PRIMARY KEY (id),
 	UNIQUE globjid_url_id (globjid, url_id)
 ) TYPE=InnoDB;
-
-
 
 #
 # Table structure for table 'hooks'

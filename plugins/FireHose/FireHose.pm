@@ -214,7 +214,16 @@ sub getFireHoseEssentials {
 	$limit_str = "LIMIT $offset $options->{limit}" unless $options->{nolimit};
 	my $other = "ORDER BY $options->{orderby} $options->{orderdir} $limit_str";
 	
-	$self->sqlSelectAllHashrefArray("firehose.*", $tables, $where, $other);
+	my $hr_ar = $self->sqlSelectAllHashrefArray("firehose.*", $tables, $where, $other);
+
+	# Add globj admin notes to the firehouse hashrefs.
+	my $globjids = [ map { $_->{globjid} } @$hr_ar ];
+	my $note_hr = $self->getGlobjAdminnotes($globjids);
+	for my $hr (@$hr_ar) {
+		$hr->{note} = $note_hr->{ $hr->{globjid} } || '';
+	}
+
+	return $hr_ar;
 }
 
 sub getFireHose {
@@ -227,7 +236,12 @@ sub getFireHose {
 	for my $key (keys %$append) {
 		$answer->{$key} = $append->{$key};
 	}
-	
+
+	# globj adminnotes are never the empty string, they are undef
+	# instead.  Firehose notes are/were designed to never be undef,
+	# the empty string instead.
+	$answer->{note} = $self->getGlobjAdminnote($answer->{globjid}) || '';
+
 	return $answer;
 }
 
@@ -290,6 +304,9 @@ sub rejectItem {
 	
 }
 
+# XXX tvroom: since ajax_ops.class should be 'Slash::FireHose' for this op,
+# shouldn't $self already be set to a Slash::FireHose object?  Unless I'm
+# missing something that should make the getObject() redundant.
 sub ajaxSaveNoteFirehose {
 	my($self, $constants, $user, $form) = @_;
 	my $id = $form->{id};
@@ -551,20 +568,26 @@ sub setSectionTopicsFromTagstring {
 
 }
 
-#sub tagnameorder {
-#	my($a1, $a2) = $a =~ /(^\!)?(.*)/;
-#	my($b1, $b2) = $b =~ /(^\!)?(.*)/;
-#	$a2 cmp $b2 || $a1 cmp $b1;
-#}
-
 sub setFireHose {
 	my($self, $id, $data) = @_;
-	return unless $id;
+	return unless $id && $data;
 	my $id_q = $self->sqlQuote($id);
 
-	my $text_updated = 0;
-	my $text_data = {};
+	# Admin notes used to be stored in firehose.note;  that column is
+	# now gone and that data goes in globj_adminnote.  The note is
+	# stored on the object that the firehose points to.
+	if (exists $data->{note}) {
+		my $note = delete $data->{note};
+		# XXX once getFireHose does caching, use that instead of an sqlSelect
+		my $globjid = $self->sqlSelect('globjid', 'firehose', "id=$id_q");
+		warn "no globjid for firehose '$id'" if !$globjid;
+		$self->setGlobjAdminnote($globjid, $note);
+	}
 
+	return if !keys %$data;
+
+#	my $text_updated = 0;
+	my $text_data = {};
 
 	$text_data->{title} = delete $data->{title} if defined $data->{title};
 	$text_data->{introtext} = delete $data->{introtext} if defined $data->{introtext};

@@ -4063,3 +4063,14 @@ INSERT INTO reskey_vars VALUES (9, 'adminbypass', 1, 'If admin, bypass checks fo
 INSERT INTO reskey_vars VALUES (9, 'acl_no', 'reskey_no_comments-moderation-ajax', 'If this ACL present, can\'t use resource');
 INSERT INTO reskey_vars VALUES (9, 'user_seclev', 1, 'Minimum seclev to use resource');
 
+DROP TABLE IF EXISTS globj_adminnotes;
+CREATE TABLE globj_adminnotes (
+	globjid		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	adminnote	varchar(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (globjid)
+) TYPE=InnoDB;
+
+# Updates for plugins/FireHose
+# perl -MSlash::Test=virtusername -le '$hr = $slashdb->sqlSelectAllKeyValue("globjid, note", "firehose", "LENGTH(note) > 0"); for my $k (keys %$hr) { $slashdb->setGlobjAdminnote($k, $hr->{$k}) }'
+ALTER TABLE firehose DROP COLUMN note;
+

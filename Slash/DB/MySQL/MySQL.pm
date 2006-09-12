@@ -12397,6 +12397,48 @@ sub getGlobjTarget {
 	return ($types->{$gtid}, $target_id);
 }
 
+# Returns the string associated with a single globj's admin note.
+# XXX should memcached
+
+sub getGlobjAdminnote {
+	my($self, $globjid) = @_;
+	return undef if !$globjid;
+	my $globjid_q = $self->sqlQuote($globjid);
+	return $self->sqlSelect('adminnote',
+		'globj_adminnotes',
+		"globjid=$globjid_q");
+}
+
+# Returns a hashref for multiple globjs' admin notes:  key is the
+# globjid, value is the string of the note.
+
+sub getGlobjAdminnotes {
+	my($self, $globjid_ar) = @_;
+	return { } if !$globjid_ar || !@$globjid_ar;
+	my $in_clause = join(',', map { $self->sqlQuote($_) } @$globjid_ar);
+	return $self->sqlSelectAllKeyValue(
+		'globjid, adminnote',
+		'globj_adminnotes',
+		"globjid IN ($in_clause)");
+}
+
+# Sets the admin note associated with a single globj.  If undef
+# or the empty string are passed in for the note, the row is
+# removed from the table (and undef will be returned if the
+# note is later requested).
+
+sub setGlobjAdminnote {
+	my($self, $globjid, $note) = @_;
+	return 0 if !$globjid;
+	if (defined($note) && length($note)) {
+		return $self->sqlReplace(
+			'globj_adminnotes',
+			{ globjid => $globjid, adminnote => $note });
+	}
+	my $globjid_q = $self->sqlQuote($globjid);
+	return $self->sqlDelete('globj_adminnotes', "globjid = $globjid_q");
+}
+
 sub addGlobjTargetsToHashrefArray {
 	my($self, $ar) = @_;
 	for my $hr (@$ar) {
