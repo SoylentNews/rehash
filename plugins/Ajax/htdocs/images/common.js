@@ -185,7 +185,6 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 			params['op'] = 'tags_get_user_urls';
 			params['id'] = id;
 		} else if (type == "firehose") {
-
 			params['op'] = 'tags_get_user_firehose';
 			params['id'] = id;
 		}
@@ -406,14 +405,16 @@ function json_handler(transport) {
 
  	if (response.html) {
 		for (el in response.html) {
-			$(el).innerHTML = response.html[el];
+			if ($(el))
+				$(el).innerHTML = response.html[el];
 		}
 		
 	} 
 
 	if (response.value) {
 		for (el in response.value) {
-			$(el).value = response.value[el];
+			if ($(el))
+				$(el).value = response.value[el];
 		}
 	}
 }
@@ -553,17 +554,17 @@ function getSecsSinceLastFirehoseAction() {
 }
 
 function firehose_play() {
-   play = 1;
-   var pause = $('pause');
-   var play_div = $('play');
-   play_div.className = "hide";
-   pause.className = "";
+	play = 1;
+	var pause = $('pause');
+	var play_div = $('play');
+	play_div.className = "hide";
+	pause.className = "";
 }
 
 function firehose_pause() {
-   play = 0;
-   var pause = $('pause');
-   var play_div = $('play');
-   pause.className = "hide";
-   play_div.className = "";
+	play = 0;
+	var pause = $('pause');
+	var play_div = $('play');
+	pause.className = "hide";
+	play_div.className = "";
 }
