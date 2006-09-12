@@ -140,6 +140,10 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 
 	type = type || "stories";
 
+	if (type == "firehose") {
+		setFirehoseAction();
+	}
+
 	//alert("Tags show body / Type: " + type );
 	
 	// Toggle the button to show the click was received
@@ -181,6 +185,7 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 			params['op'] = 'tags_get_user_urls';
 			params['id'] = id;
 		} else if (type == "firehose") {
+
 			params['op'] = 'tags_get_user_firehose';
 			params['id'] = id;
 		}
@@ -299,6 +304,7 @@ function tagsCreateForFirehose(id) {
 
 function toggle_firehose_body(id, is_admin) {
 	var params = [];
+	setFirehoseAction();
 	params['op'] = 'firehose_fetch_text';
 	params['id'] = id;
 	var fhbody = $('fhbody-'+id);
@@ -314,12 +320,15 @@ function toggle_firehose_body(id, is_admin) {
 		}
 		fhbody.className = "body";
 		fh.className = "article";
+		tagsShowBody(id, is_admin, '', "firehose");
 	} else if (fhbody.className == "body") {
 		fhbody.className = "hide";
 		fh.className = "briefarticle";
+		tagsHideBody(id);
 	} else if (fhbody.className == "hide") {
 		fhbody.className = "body";
 		fh.className = "article";
+		tagsShowBody(id, is_admin, '', "firehose");
 	}
 }
 
@@ -333,6 +342,7 @@ function toggleFirehoseTagbox(id) {
 }
 
 function firehose_up_down(id, dir) {
+	setFirehoseAction();
 	var params = [];
 	var handlers = {
 		onComplete: json_handler
@@ -445,6 +455,31 @@ function firehose_check_removed_handler(transport) {
 	setTimeout("firehose_check_removed()", "30000");
 }
 
+function firehose_get_updates_handler(transport) {
+	var response = eval_response(transport);
+	var processed = 0;
+	if (response.update_new) {
+		for (el in response.update_new) {
+			var fh = 'firehose-' + el;
+			processed = processed + 1;
+			if ($(fh)) {
+			} else {
+				if (insert_new_at == "bottom") {
+					new Insertion.Bottom('firehoselist', response.update_new[el]);
+				} else {
+					new Insertion.Top('firehoselist', response.update_new[el]);
+				}
+			}
+		}
+	}
+	if (processed) {
+		if (response.update_time) {
+			update_time = response.update_time;
+		}
+	}
+	setTimeout("firehose_get_updates()", "30000");
+}
+
 function firehose_get_item_idstring() {
 	var fhl = $('firehoselist');
 	var children = fhl.childNodes;
@@ -460,7 +495,26 @@ function firehose_get_item_idstring() {
 	return str;
 }
 
+function firehose_get_updates() {
+	if (play == 0) {
+		setTimeout("firehose_get_updates()", 2000);
+		return;
+	}
+	var params = [];
+	var handlers = {
+		onComplete: firehose_get_updates_handler
+	};
+	params['op'] = 'firehose_get_updates';
+	params['ids'] = firehose_get_item_idstring();
+	ajax_update(params, '', handlers);
+	
+}
+
 function firehose_check_removed() {
+	if (play == 0) {
+		setTimeout("firehose_check_removed()", 2000);
+		return;
+	}
 	var params = [];
 	var handlers = {
 		onComplete: firehose_check_removed_handler
@@ -472,6 +526,10 @@ function firehose_check_removed() {
 }
 
 function firehose_fetch_new() {
+	if (play == 0) {
+		setTimeout("firehose_fetch_new()", 2000);
+		return;
+	}
 	var params = [];
 	var handlers = {
 		onComplete: firehose_new_handler
@@ -479,4 +537,33 @@ function firehose_fetch_new() {
 	params['op'] = 'firehose_fetch_new';
 	params['maxtime'] = maxtime;
 	ajax_update(params, '', handlers);
+}
+
+function setFirehoseAction() {
+	var thedate = new Date();
+	var newtime = thedate.getTime();
+	firehose_action_time = newtime;
+}
+
+function getSecsSinceLastFirehoseAction() {
+	var thedate = new Date();
+	var newtime = thedate.getTime();
+	var diff = (newtime - firehose_action_time) / 1000;
+	return diff;
+}
+
+function firehose_play() {
+   play = 1;
+   var pause = $('pause');
+   var play_div = $('play');
+   play_div.className = "hide";
+   pause.className = "";
+}
+
+function firehose_pause() {
+   play = 0;
+   var pause = $('pause');
+   var play_div = $('play');
+   pause.className = "hide";
+   play_div.className = "";
 }
