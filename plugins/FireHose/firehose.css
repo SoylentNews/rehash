@@ -92,4 +92,6 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a { padding-top: 0px !i
 }
 
 .reject input { visibility: hidden; }
+#play a { color: #066; background: #fff;}
+#pause a { color: #066; background: #fff;}
 

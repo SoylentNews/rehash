@@ -25,6 +25,7 @@ CREATE TABLE firehose (
 	ipid varchar(32) NOT NULL default '',
 	subnetid varchar(32) NOT NULL default '',
 	category varchar(30) NOT NULL default '',
+	last_update TIMESTAMP,
 	PRIMARY KEY  (id)
 ) TYPE=InnoDB; 
 
