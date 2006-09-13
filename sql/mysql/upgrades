@@ -4049,8 +4049,6 @@ UPDATE vars SET value = 'T_2_5_0_125' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
-# PUDGE LAST UPDATED HERE
-
 INSERT INTO reskey_resources VALUES (9, 'comments-moderation-ajax', 'yes');
 INSERT INTO reskey_resource_checks VALUES (NULL, 9, 'all', 'Slash::ResKey::Checks::User',                101);
 INSERT INTO reskey_resource_checks VALUES (NULL, 9, 'use', 'Slash::ResKey::Checks::Post',                151);
@@ -4076,3 +4074,9 @@ ALTER TABLE firehose DROP COLUMN note;
 ALTER TABLE firehose ADD last_update timestamp;
 UPDATE firehose set last_update = createtime;
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_updates', 'Slash::FireHose', 'ajaxFireHoseGetUpdates', 'ajax_user', 'createuse');
+
+# PUDGE LAST UPDATED HERE
+
+# 2006-09-12
+UPDATE vars SET value = 'T_2_5_0_126' WHERE name = 'cvs_tag_currentcode';
+
