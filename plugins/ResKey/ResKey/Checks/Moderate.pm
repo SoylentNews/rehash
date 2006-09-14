@@ -77,7 +77,7 @@ sub doCheck {
 		   !$constants->{comments_moddable_archived}
 		&&  $discussion->{type} eq 'archived';
 
-	my $mid = $self->getModeratorLogID($comment->{cid}, $user->{uid});
+	my $mid = $reader->getModeratorLogID($comment->{cid}, $user->{uid});
 	return(RESKEY_FAILURE, ['user already modded comment']) if $mid;
 
 	# Last test; this one involves a bit of calculation to set

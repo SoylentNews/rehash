@@ -1348,13 +1348,11 @@ sub _send_comment_msg {
 
 
 ##################################################################
-# Handles moderation
-# gotta be a way to simplify this -Brian
 sub moderate {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
 
 	my $moderate_check = &Slash::_moderateCheck;
-	if (!$moderate_check->{count}) {
+	if ($moderate_check->{count} || $moderate_check->{msg}) {
 		print $moderate_check->{msg} if $moderate_check->{msg};
 		return;
 	}
