@@ -18,16 +18,16 @@ __template__
 	<form action="[% gSkin.rootdir %]/firehose.pl" method="get">
 		<fieldset>
 			<legend>Firehose</legend>
-			<label>Type&nbsp;[% Slash.createSelect('type', { 'submission' => 'Submission', 'journal' => 'Journal', 'bookmark' => 'Bookmark', 'feed' => 'Feed', '' => 'All' }, options.type, 1, 0 1) %]
-	[% skins = Slash.db.getDescriptions('skins');
-	   skins.0 = "All";
-	%]</label> 
-			<label>Section&nbsp;[% Slash.createSelect('primaryskid', skins, options.primaryskid, 1, 0, 1) %]</label> 
-			<label>Category&nbsp;[% Slash.createSelect('category', { '' => 'None', quik => 'Quik', hold => 'Hold', back => 'Back' }, options.category,1, 0, 1) %]</label> 
-			<label>Filter&nbsp;<input type="text" name="filter" size="20" value="[% options.filter | strip_attribute %]"></label>
+			<label>Filter<input type="text" name="fhfilter" value="[% options.firehose_fhfilter | strip_attribute %]" size="60"></label>
 			<br><label>Order&nbsp;[% Slash.createSelect('order', { 'createtimedesc' => 'Time Desc', popularitydesc => 'Popularity Desc', 'createtimeasc' => 'Time Asc', 'popularityasc' => 'Popularity Asc' }, options.order, 1, 0, 1) %]</label> 
 			<label>Mode&nbsp;[% Slash.createSelect('mode', { 'full' => 'Full', fulltitle => 'Abbreviated' }, options.mode, 1, 0, 1) %]
 </label> 
+			[% IF user.is_admin %]
+			User mode?
+			<input type="hidden" name="setusermode" value="1">
+			<input type="checkbox" value="1" name="firehose_usermode" onchange="this.form.submit()" [% constants.markup_checked_attribute IF options.firehose_usermode %]>  
+			[% END %]
+
 			<input type="submit" value="Change View">
 		</fieldset>
 	</form>
@@ -36,10 +36,12 @@ __template__
 	<span id="pause"><a href="javascript:firehose_pause()">Pause ||</a></span>
 </div>
 <br>
+--
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
 </div>
+---
 [% PROCESS paginate %]
 <script type="text/javascript">
 	var firehose_action_time = 0;
