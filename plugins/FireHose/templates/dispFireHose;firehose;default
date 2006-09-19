@@ -29,6 +29,18 @@ __template__
     IF nodivwrapper;
         divwrapper = 0;
     END;
+    adminmode = 0;
+    IF user.is_admin;
+    	adminmode = 1;
+        IF options.firehose_usermode.defined;
+		IF options.firehose_usermode;
+			adminmode = 0;
+		END;
+	ELSIF user.firehose_usermode;
+		adminmode = 0;
+	END;
+    END;
+    adminmode;
 %]
 [% IF item.url_id;
 	url = Slash.db.getUrl(item.url_id);
@@ -38,37 +50,15 @@ END %]
 [% IF divwrapper %]
 <div id="firehose-[% item.id %]" class="[% IF mode == "full" %]article[% ELSE %]briefarticle[% END %]">
 [% END %]
-	[% classnum = toggle ? "1" : "2";
-
-	   the_skin_title = "";
-	   IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid != constants.mainpage_skid;
-	   	the_skin = Slash.db.getSkin(item.primaryskid);
-		the_skin_title = the_skin.title _ ": ";
-	   END;
-	   title = the_skin_title _ item.title;
-
-		
-
-	  is_admin = 0;
-	   IF user.is_admin;
-		is_admin = 1;
-   	   END;
-	  title = "<a href='javascript:toggle_firehose_body(\"$item.id\", $is_admin)'>" _ title _ "</a>";
-	   IF item.url_id;
-		  title = title _ "<a href=\"" _ url.url _ "\">[-&gt;]</a>";
-	   END;
-
-	   title = title _ " " _ '<span class="date">' _ item.createtime _ "</span> <span class='nickname'>" _ the_user.nickname _ "</span>";
-
-	   IF user.is_admin;
-	   	reject_checkbox = PROCESS reject id = item.id;
-	   	title = reject_checkbox _ "<span class='score'> " _  item.popularity _ "</span> " _ title;
-	   END;
-	   PROCESS titlebar;
-	%]
+	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode %]
+	[% PROCESS titlebar h3id="title-" _ item.id id="" %]
 [% END %]
 	[% IF bodywrapper%]
-	<div class="details">submitted by [% the_user.nickname | strip_literal %] at [% item.createtime %]</div>
+	<div class="details" id="details-[% item.id %]">
+	[%- IF adminmode && item.type == "submission" %]<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">[% END -%]
+	submitted 
+	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
+	by [% the_user.nickname | strip_literal %] at [% item.createtime %]</div>
 	<div class="[% IF bodycontent %]body[% ELSE %]empty[% END %]" id="fhbody-[% item.id %]">
 	[% END %]
 		[% IF item.tid %]
@@ -93,34 +83,21 @@ END %]
 			%]
 			[% introtext %]
 
-
+		[% IF adminmode %]
 		<div id="admin-extras-[% item.id %]"><a href="javascript:firehose_get_admin_extras('[% item.id %]')">Get extras</a></div>
 			[% END %]
 		</div>
+		[% END %]
 	[% IF bodywrapper %]
 	</div>
 	[% END %]
-			[% IF user.is_admin %]
+			[% IF adminmode %]
 			<form id="postform-[% item.id %]" method="post" action="[% gSkin.rootdir %]/admin.pl" class="edit">
 			<a href="javascript:firehose_get_and_post('[% item.id %]')" title="Preview the editable version of this">Edit Preview</a>
 			</form>
 			[% END %]
 [% IF full %]
-		[% tags_top = [] %]
-		[% tags_top.push(item.type) %]
-		[%   IF item.category;
-		   	tags_top.push(item.category);
-		   END; 
-		   IF item.primaryskid && item.primaryskid != constants.mainpage_skid; 
-			the_skin = Slash.db.getSkin(item.primaryskid);
-			tags_top.push(the_skin.name);
-		   END;
-		   IF item.tid;
-		   	the_topic = Slash.db.getTopic(item.tid);
-			tags_top.push(the_topic.keyword);
-		   END;
-		%]
-		[% PROCESS tagsfirehosedivtagbox id = item.id  %]
+		[% PROCESS tagsfirehosedivtagbox id = item.id  tags_top = tags_top %]
 [% IF divwrapper %]
 </div>
 [% END %]
