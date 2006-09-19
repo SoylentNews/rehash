@@ -36,12 +36,10 @@ __template__
 	<span id="pause"><a href="javascript:firehose_pause()">Pause ||</a></span>
 </div>
 <br>
---
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
 </div>
----
 [% PROCESS paginate %]
 <script type="text/javascript">
 	var firehose_action_time = 0;
