@@ -402,7 +402,10 @@ function eval_response(transport) {
 
 function json_handler(transport) {
 	var response = eval_response(transport);
+	json_update(response);
+}
 
+function json_update(response) {
  	if (response.html) {
 		for (el in response.html) {
 			if ($(el))
@@ -472,6 +475,10 @@ function firehose_get_updates_handler(transport) {
 				}
 			}
 		}
+	}
+	if (response.html) {
+		json_update(response);
+		processd = processed + 1;
 	}
 	if (processed) {
 		if (response.update_time) {
