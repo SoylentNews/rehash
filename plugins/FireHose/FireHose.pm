@@ -255,10 +255,12 @@ sub fetchItemText {
 	my $id = $form->{id};
 	return unless $id && $firehose;
 	my $item = $firehose->getFireHose($id);
+	my $tags_top = $firehose->getFireHoseTagsTop($item);
 
 	my $data = {
 		item => $item,
 		mode => "bodycontent",
+		tags_top => $tags_top,
 	};
 
 	my $retval = slashDisplay("dispFireHose", $data, { Return => 1, Page => "firehose" });
@@ -307,11 +309,8 @@ sub rejectItem {
 	
 }
 
-# XXX tvroom: since ajax_ops.class should be 'Slash::FireHose' for this op,
-# shouldn't $self already be set to a Slash::FireHose object?  Unless I'm
-# missing something that should make the getObject() redundant.
 sub ajaxSaveNoteFirehose {
-	my($self, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form) = @_;
 	my $id = $form->{id};
 	my $note = $form->{note};
 	if ($note && $id) {
@@ -323,7 +322,7 @@ sub ajaxSaveNoteFirehose {
 
 
 sub ajaxGetUserFirehose {
-	my($self, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form) = @_;
 	my $id = $form->{id};
 	my $globjid;
 	
@@ -393,8 +392,10 @@ sub ajaxFireHoseFetchNew {
 	foreach my $i (@$items ) {
 		$maxtime = $i->{createtime} if $i->{createtime} gt $maxtime;
 		my $item = $firehose->getFireHose($i->{id});
-		$added->{$i->{id}} = slashDisplay("dispFireHose", { item => $item }, { Return => 1, Page => "firehose" });
+		my $tags_top = $firehose->getFireHoseTagsTop($item);
+		$added->{$i->{id}} = slashDisplay("dispFireHose", { item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" });
 	}
+	
 	
 	return Data::JavaScript::Anon->anon_dump({
 		added => $added,
@@ -440,17 +441,26 @@ sub ajaxFireHoseGetUpdates {
 	my $items = $firehose->getFireHoseEssentials($opts);
 
 	my $update_new = {};
+	my $html = {};
 	foreach (@$items) {
+		my $item = $firehose->getFireHose($_->{id});
+		my $tags_top = $firehose->getFireHoseTagsTop($item);
 		if(!$ids{$_->{id}}) {
-			my $item = $firehose->getFireHose($_->{id});
-			$update_new->{$_->{id}} = slashDisplay("dispFireHose", { item => $item }, { Return => 1, Page => "firehose" });
+			$update_new->{$_->{id}} = slashDisplay("dispFireHose", { item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" });
 			$update_time = $_->{createtime} if $_->{createtime} gt $update_time;
+		} else {
+			my $url 	= $slashdb->getUrl($item->{url_id});
+			my $the_user  	= $slashdb->getUser($item->{uid});
+			$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { item => $item, showtitle => 1, url => $url, the_user=> $the_user }, { Return => 1 });
+			$html->{"tags-top-$_->{id}"} = slashDisplay("firehose_tags_top", { tags_top => $tags_top, id => $_->{id} }, { Return => 1 });
 		}
 	}
-	return Data::JavaScript::Anon->anon_dump({
+	my $data = {
 		update_new => $update_new,
 		update_time => $update_time
-	});
+	};
+	$data->{html} = $html if keys %$html;
+	return Data::JavaScript::Anon->anon_dump($data);
 }
 
 sub ajaxUpDownFirehose {
@@ -642,7 +652,7 @@ sub dispFireHose {
 	my($self, $item, $options) = @_;
 	$options ||= {};
 
-	slashDisplay('dispFireHose', { item => $item, mode => $options->{mode} }, { Return => 1 });
+	slashDisplay('dispFireHose', { item => $item, mode => $options->{mode} , tags_top => $options->{tags_top}, options => $options->{options} }, { Return => 1 });
 }
 
 sub getMemoryForItem {
@@ -713,6 +723,10 @@ sub getAndSetOptions {
 	my $mode = $form->{mode} || $user->{firehose_mode};
 	$mode = $modes->{$mode} ? $mode : "fulltitle";
 	$options->{mode} = $mode;
+	
+	if ($user->{is_admin} && $form->{setusermode}) {
+		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "" });
+	}
 
 	if ($mode eq "full") {
 		$options->{limit} = 25;
@@ -728,13 +742,53 @@ sub getAndSetOptions {
 	}
 	$options->{order} = $options->{orderby} . $options->{orderdir};
 
-	$options->{primaryskid} = defined $form->{primaryskid} ? $form->{primaryskid} : $user->{firehose_primaryskid};
+	#$options->{primaryskid} = defined $form->{primaryskid} ? $form->{primaryskid} : $user->{firehose_primaryskid};
+	#$options->{type} = defined $form->{type} ? $form->{type} : $user->{firehose_type};
+	#$options->{category} = defined $form->{category} ? $form->{category} : $user->{firehose_category};
+	#$options->{filter} = defined $form->{filter} ? $form->{filter} : $user->{firehose_filter};
+	
+	my $fhfilter;
 
-	$options->{type} = defined $form->{type} ? $form->{type} : $user->{firehose_type};
 
-	$options->{category} = defined $form->{category} ? $form->{category} : $user->{firehose_category};
+	if(defined $form->{fhfilter}) {
+		$fhfilter = $form->{fhfilter};
+		$options->{firehose_fhfilter} = $fhfilter;
+	} else {
+		$fhfilter = $options->{firehose_fhfilter};
+	}
 
-	$options->{filter} = defined $form->{filter} ? $form->{filter} : $user->{firehose_filter};
+	$fhfilter =~ s/^\s+|\s+$//g;
+	my @fh_ops = split(/\s+/, $fhfilter);
+
+	my $skins = $self->getSkins();
+	my %skin_names = map { $skins->{$_}{name} => $_ } keys %$skins;
+	
+	my %categories = map { ($_, $_) } (qw(hold quik),
+		(ref $constants->{submit_categories}
+			? map {lc($_)} @{$constants->{submit_categories}}
+			: ()
+		)
+	);
+	my $fh_options = {};
+	foreach (@fh_ops) {
+		if ($types->{$_} && !defined $fh_options->{type}) {
+			$fh_options->{type} = $_;
+		} elsif ($user->{is_admin} && $categories{$_} && !defined $fh_options->{category}) {
+			$fh_options->{category} = $_;
+		} elsif ($skin_names{$_} && !defined $fh_options->{primaryskid}) {
+			$fh_options->{primaryskid} = $skin_names{$_};
+		} elsif ($user->{is_admin} && $_ eq "rejected") { 
+			$fh_options->{rejected} = "yes";
+		} elsif ($user->{is_admin} && $_ eq "accepted") {
+			$fh_options->{accepted} = "yes";
+		} elsif (!defined $fh_options->{filter}) {
+			# XXX Filter this
+			$fh_options->{filter} = $_;
+		}
+	}
+	foreach (keys %$fh_options) {
+		$options->{$_} = $fh_options->{$_};
+	}
 
 	if (!$user->{is_anon} && !$opts->{no_set}) {
 		my $data_change = {};
@@ -747,13 +801,33 @@ sub getAndSetOptions {
 	
 	if ($user->{is_admin}) {
 		# $options->{attention_needed} = "yes";
-		 $options->{accepted} = "no";
-		 $options->{rejected} = "no";
+		 $options->{accepted} = "no" if !$options->{accepted};
+		 $options->{rejected} = "no" if !$options->{rejected};
 	} else  {
 		$options->{public} = "yes";
 	}
+	if ($user->{is_admin} && $form->{setusermode}) {
+		$options->{firehose_usermode} = $form->{firehose_usermode} ? 1 : "";
+	}
 
 	return $options;
+}
+
+sub getFireHoseTagsTop {
+	my ($self, $item) = @_;
+	my $constants = getCurrentStatic();
+	my $tags_top = [];
+	push @$tags_top, ($item->{type});
+	push @$tags_top, ($item->{category} || "none");
+	if ($item->{primaryskid} && $item->{primaryskid} != $constants->{mainpage_skid}) {
+		my $the_skin = $self->getSkin($item->{primaryskid});
+		push @$tags_top, $the_skin->{name};
+	}
+	if ($item->{tid}) {
+		my $the_topic = $self->getTopic($item->{tid});
+		push @$tags_top, $the_topic->{keyword};
+	}
+	return $tags_top;
 }
 
 
