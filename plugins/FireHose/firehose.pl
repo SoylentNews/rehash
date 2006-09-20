@@ -32,7 +32,8 @@ sub main {
 	my %ops = (
 		list		=> [1,  \&list ],
 		view		=> [1, 	\&view ],
-		default		=> [1,	\&list]
+		default		=> [1,	\&list],
+		setusermode	=> [1,	\&setUserMode ],
 	);
 
 	my $op = $form->{op};
@@ -51,7 +52,7 @@ sub main {
 sub list {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 	my $firehose = getObject("Slash::FireHose");
-	my $options = $firehose->getAndSetOptions(); 
+	my $options = $firehose->getAndSetOptions();
 	my $page = $form->{page} || 0;
 	if ($page) {
 		$options->{offset} = $page * $options->{limit};
@@ -64,7 +65,8 @@ sub list {
 	foreach (@$items) {
 		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime;
 		my $item =  $firehose->getFireHose($_->{id});
-		$itemstext .= $firehose->dispFireHose($item, { mode => $options->{mode} });
+		my $tags_top = $firehose->getFireHoseTagsTop($item);
+		$itemstext .= $firehose->dispFireHose($item, { mode => $options->{mode} , tags_top => $tags_top, options => $options });
 	}
 	my $refresh_options;
 	if ($options->{orderby} eq "createtime") {
@@ -91,6 +93,7 @@ sub view {
 	my $item = $firehose->getFireHose($form->{id});
 	slashDisplay("view", { item => $item } );
 }
+
 
 
 createEnvironment();
