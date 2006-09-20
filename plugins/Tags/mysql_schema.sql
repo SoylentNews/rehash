@@ -10,6 +10,7 @@ CREATE TABLE tags (
 	uid		mediumint UNSIGNED NOT NULL,
 	created_at	datetime NOT NULL,
 	inactivated	datetime DEFAULT NULL,
+	private		enum('yes', 'no') NOT NULL DEFAULT 'no',
 	PRIMARY KEY tagid (tagid),
 	KEY tagnameid (tagnameid),
 	KEY globjid_tagnameid (globjid, tagnameid),

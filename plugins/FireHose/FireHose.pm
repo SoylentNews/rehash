@@ -469,32 +469,33 @@ sub ajaxUpDownFirehose {
 	my $id = $form->{id};
 	return unless $id;
 
-	my $upvote   = $constants->{tags_upvote_tagname} || "nod";
-	my $downvote = $constants->{tags_downvote_tagname} || "nix";
-
 	my $firehose = getObject('Slash::FireHose');
 	my $tags = getObject('Slash::Tags');
 	my $item = $firehose->getFireHose($id);
+	return if !$item;
 
 	my($dir) = $form->{dir};
+	my $upvote   = $constants->{tags_upvote_tagname}   || 'nod';
+	my $downvote = $constants->{tags_downvote_tagname} || 'nix';
 	my $tag;
 	if ($dir eq "+") {
 		$tag = $upvote;
 	} elsif ($dir eq "-") {
 		$tag = $downvote;
 	}
-	return unless $item && $tag;
+	return if !$tag;
+
 	my($table, $itemid) = $tags->getGlobjTarget($item->{globjid});
 	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $itemid, { uid => $user->{uid}});
 	my @tags = sort Slash::Tags::tagnameorder map { $_->{tagname} } @$now_tags_ar;
 	push @tags, $tag;
 	my $tagsstring = join ' ', @tags;
+	# XXX Tim, I need you to look this over. - Jamie 2006/09/19
 	my $newtagspreloadtext = $tags->setTagsForGlobj($itemid, $table, $tagsstring);
 	my $html  = {};
 	my $value = {};
 	$html->{"updown-$id"} = "Votes Saved";
 	$value->{"newtags-$id"} = $newtagspreloadtext;
-
 
 	return Data::JavaScript::Anon->anon_dump({
 		html	=> $html,

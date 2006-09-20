@@ -37,8 +37,8 @@ sub new {
 
 ########################################################
 
-# createTag's first argument is a hashref with three sets of
-# named arguments.
+# createTag's first argument is a hashref with four sets of
+# named arguments, one of which is optional.
 # The first set is:
 #       uid             User id creating the tag
 #                       (optional, defaults to current user)
@@ -51,6 +51,8 @@ sub new {
 #       id              ID of the object in that table (e.g. a stoid)
 # or
 #       globjid         Global object ID of the object being tagged
+# The fourth is optional and defaults to false:
+# 	private		If true, the created tag is private.
 #
 # At present, no other named arguments are permitted in
 # createTag's first argument.
@@ -69,6 +71,14 @@ sub new {
 # moment we can't think of a good reason why one would ever want
 # to ignore those checks but the options are there regardless.  Is
 # this good design?  Probably not.
+#
+# Note that there is no way to switch a tag from being public to being
+# private except by deactivating and recreating it;  this is by design.
+# (And at present there's no way to switch a tag from private to
+# public, either -- that's by laziness.)
+# Note incidentally both private and public tags will deactivate their
+# opposites, whether the opposites are private or public;  the
+# consequences of this may or may not be obvious I suppose.
 
 sub _setuptag {
 	my($self, $hr) = @_;
@@ -92,6 +102,8 @@ sub _setuptag {
         }
 	return 0 if !$tag->{globjid};
 
+	$tag->{private} = $tag->{private} ? 'yes' : 'no';
+
 	return $tag;
 }
 
@@ -114,7 +126,7 @@ sub createTag {
 		if ($hr->{name}) {
 			$opp_tagname = $self->getOppositeTagname($hr->{name});
 		} else {
-			my $tagdata = $self->getTagDataFromId($tag->{tagnameid});
+			my $tagdata = $self->getTagnameDataFromId($tag->{tagnameid});
 			$opp_tagname = $self->getOppositeTagname($tagdata->{tagname});
 		}
 		$opp_tagnameid = $self->getTagnameidFromNameIfExists($opp_tagname);
@@ -132,7 +144,7 @@ sub createTag {
 		# preceding the one just inserted with matching the
 		# criteria.  If so, the insert is rolled back and
 		# 0 is returned.
-		# Because of the uid_globjid_tagnameid_active index,
+		# Because of the uid_globjid_tagnameid_inactivated index,
 		# this should, I believe, not even touch table data,
 		# so it should be very fast.
 		my $count = $self->sqlCount('tags',
@@ -320,7 +332,7 @@ sub setTag {
 
 	my $changed = 0;
 	for my $key (sort keys %$params) {
-		next if $key =~ /^(tagid|tagname|tagnameid|globjid|uid|created|at|inactivated)$/; # don't get to override these
+		next if $key =~ /^(tagid|tagname|tagnameid|globjid|uid|created_at|inactivated|private)$/; # don't get to override existing fields
 		my $value = $params->{$key};
 		if (defined($value) && length($value)) {
 			$changed = 1 if $self->sqlReplace('tag_params', {
@@ -361,7 +373,7 @@ sub setTagname {
 
 	my $changed = 0;
 	for my $key (sort keys %$params) {
-		next if $key =~ /^tagname(id)?$/; # don't get to override these
+		next if $key =~ /^tagname(id)?$/; # don't get to override existing fields
 		my $value = $params->{$key};
 		if (defined($value) && length($value)) {
 			$changed = 1 if $self->sqlReplace('tagname_params', {
@@ -390,11 +402,12 @@ sub setTagname {
 	return $changed;
 }
 
-# Given a tagnameid, get its name, e.g. turn '17241' into
+# Given a tagnameid, get its name and any param data that may exist for
+# that tagname, e.g. turn '17241' into
 # { tagname => 'omglol', tag_clout => '0.5' }.
-# If no such tag ID exists, return undef.
+# If no such tagname ID exists, return undef.
 
-sub getTagDataFromId {
+sub getTagnameDataFromId {
 	my($self, $id) = @_;
 	my $constants = getCurrentStatic();
 
@@ -434,11 +447,16 @@ sub getTagDataFromId {
         return $data;
 }
 
+# getTagsByGlobjid is the main method, getTagsByNameAndIdArrayref
+# is a convenience interface to it.
+#
 # Given a name and id, return the arrayref of all tags on that
 # global object.  Options change which tags are returned:
 #
 # uid:			only tags created by that uid
 # include_inactive:	inactivated tags will also be returned
+# include_private:	private tags will also be returned
+# XXX (should we have only_inactive and only_private options? I can't see a need right now)
 # days_back:		only tags created in the past n days
 # tagnameid:		only tags matching tagnameid as well as globjid
 #
@@ -447,7 +465,9 @@ sub getTagDataFromId {
 # column, and tagname, the text string for the tagnameid column.
 #
 # Note that tag_params are not returned:  see e.g.
-# addCloutsToTagArrayref().
+# addCloutsToTagArrayref().  At the moment (Sept. 2006) we are not doing
+# anything with tag_params except clouts so we're getting a performance
+# advantage by basically ignoring them.  Eventually this should change.
 
 sub getTagsByNameAndIdArrayref {
 	my($self, $name, $target_id, $options) = @_;
@@ -467,6 +487,9 @@ sub getTagsByGlobjid {
 	my $inactivated_where = $options && $options->{include_inactive}
 		? ''
 		: ' AND inactivated IS NULL';
+	my $private_where = $options && $options->{include_private}
+		? ''
+		: " AND private='no'";
 
 	my $days_where = $options && $options->{days_back}
 		? " AND created_at >= DATE_SUB(NOW(), INTERVAL $options->{days_back} DAY)"
@@ -479,12 +502,12 @@ sub getTagsByGlobjid {
 	my $ar = $self->sqlSelectAllHashrefArray(
 		'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
 		'tags',
-		"globjid=$globjid $inactivated_where $uid_where $days_where $tagnameid_where",
+		"globjid=$globjid
+		 $inactivated_where $private_where $uid_where $days_where $tagnameid_where",
 		'ORDER BY tagid');
 
-	# Now add an extra field to every element returned:  the
-	# tagname, as well as tagnameid.
-	$self->addTagnamesToHashrefArray($ar);
+	$self->dataConversionForHashrefArray($ar);
+	$self->addTagnameDataToHashrefArray($ar);
 	return $ar;
 }
 
@@ -563,7 +586,8 @@ sub getAllTagsFromUser {
 	my $orderby = $options->{orderby} || "tagid";
 	my $limit   = $options->{limit} ? " LIMIT $options->{limit} " : "";
 	my $orderdir = uc($options->{orderdir}) eq "DESC" ? "DESC" : "ASC";
-	my $inact_clause = $options->{include_inactive} ? '' : ' AND inactivated IS NULL';
+	my $inact_clause =   $options->{include_inactive} ? '' : ' AND inactivated IS NULL';
+	my $private_clause = $options->{include_private}  ? '' : " AND private='no'";
 
 	my($table_extra, $where_extra) = ("","");
 
@@ -587,10 +611,12 @@ sub getAllTagsFromUser {
 	my $ar = $self->sqlSelectAllHashrefArray(
 		'tags.*',
 		"tags $table_extra",
-		"tags.uid = $uid_q $inact_clause $where_extra",
+		"tags.uid = $uid_q
+		 $inact_clause $private_clause $where_extra",
 		"ORDER BY $orderby $orderdir $limit");
 	return [ ] unless $ar && @$ar;
-	$self->addTagnamesToHashrefArray($ar);
+	$self->dataConversionForHashrefArray($ar);
+	$self->addTagnameDataToHashrefArray($ar);
 	$self->addGlobjTargetsToHashrefArray($ar);
 	for my $hr (@$ar) {
 		if ($hr->{globj_type} eq 'stories') {
@@ -622,30 +648,49 @@ sub getGroupedTagsFromUser {
 	return \%grouped;
 }
 
-sub addTagnamesToHashrefArray {
+# The 'private' field is stored in SQL as 'no','yes' and used
+# internally as '0','1'.  This method converts an arrayref of
+# hashrefs from the SQL to the internal format.  If we end up
+# having other similar conversions being necessary, they will
+# be put here as well.
+
+sub dataConversionForHashrefArray {
+	my($self, $ar) = @_;
+	for my $hr (@$ar) {
+		$hr->{private} = $hr->{private} eq 'no' ? 0 : 1;
+	}
+}
+
+# This takes an arrayref of hashrefs, and in each hashref, looks up the
+# tagname and any other params corresponding to the tagnameid field and
+# adds it/them to fields.  If the field already exists in the hashref
+# it will not be overwritten.
+
+sub addTagnameDataToHashrefArray {
 	my($self, $ar) = @_;
 	my %tagnameids = (
 		map { ( $_->{tagnameid}, 1 ) }
 		@$ar
 	);
 	# XXX This could/should be done more efficiently;  we need a
-	# getTagDataFromIds method to do this in bulk and take
+	# getTagnameDataFromIds method to do this in bulk and take
 	# advantage of get_multi and put all the sqlSelects together.
 	my %tagdata = (
-		map { ( $_, $self->getTagDataFromId($_) ) }
+		map { ( $_, $self->getTagnameDataFromId($_) ) }
 		keys %tagnameids
 	);
 	for my $hr (@$ar) {
 		my $id = $hr->{tagnameid};
 		my $d = $tagdata{$id};
 		for my $key (keys %$d) {
+			next if exists $hr->{$key};
 			$hr->{$key} = $d->{$key};
 		}
 	}
 }
 
 sub getUidsUsingTagname {
-	my($self, $name) = @_;
+	my($self, $name, $options) = @_; # XXX private
 	my $id = $self->getTagnameidFromNameIfExists($name);
 	return [ ] if !$id;
 	return $self->sqlSelectColArrayref('DISTINCT(uid)', 'tags',
@@ -653,7 +698,7 @@ sub getUidsUsingTagname {
 }
 
 sub getAllObjectsTagname {
-	my($self, $name) = @_;
+	my($self, $name, $options) = @_; # XXX private
 	my $id = $self->getTagnameidFromNameIfExists($name);
 	return [ ] if !$id;
 	my $hr_ar = $self->sqlSelectAllHashrefArray(
@@ -664,6 +709,8 @@ sub getAllObjectsTagname {
 	$self->addGlobjEssentialsToHashrefArray($hr_ar);
 	return $hr_ar;
 }
+
+# XXX memcached here would be good
 
 sub getTagnameParams {
 	my($self, $tagnameid) = @_;
@@ -694,7 +741,7 @@ sub getExampleTagsForStory {
 		? $constants->{tags_stories_examples_pre}
 		: $constants->{tags_stories_examples};
 	my $chosen_ar = $self->getTopiclistForStory($story->{stoid});
-	$#$chosen_ar = 3 if $#$chosen_ar > 3;
+	$#$chosen_ar = 3 if $#$chosen_ar > 3; # XXX should be a var
 	my $tree = $self->getTopicTree();
 	push @examples,
 		grep { $self->tagnameSyntaxOK($_) }
@@ -714,6 +761,7 @@ sub removeTagnameFromIndexTop {
 	# The tagname wasn't on the noshow_index list and now it is.
 	# Force tags_update.pl to rebuild starting from the first use
 	# of this tagname.
+	# XXX this part isn't gonna work since tagboxes
 	my $min_tagid = $self->sqlSelect('MIN(tagid)', 'tags',
 		"tagnameid=$tagid");
 	$self->setLastscanned($min_tagid);
@@ -748,7 +796,7 @@ sub ajaxGetUserStory {
 	}
 	my $uid = $user->{uid};
 
-	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid, { uid => $uid });
+	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('stories', $stoid, { uid => $uid }); # XXX allow private since this is to show specifically to this user
 	my @tags = sort tagnameorder map { $_->{tagname} } @$tags_ar;
 #print STDERR scalar(localtime) . " ajaxGetUserStory for stoid=$stoid uid=$uid tags: '@tags' tags_ar: " . Dumper($tags_ar);
 
@@ -776,7 +824,7 @@ sub ajaxGetUserUrls {
 	}
 	my $uid = $user->{uid};
 
-	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('urls', $id, { uid => $uid });
+	my $tags_ar = $tags_reader->getTagsByNameAndIdArrayref('urls', $id, { uid => $uid }); # XXX allow private since this is to show specifically to this user
 	my @tags = sort map { $_->{tagname} } @$tags_ar;
 #print STDERR scalar(localtime) . " ajaxGetUserStory for stoid=$stoid uid=$uid tags: '@tags' tags_ar: " . Dumper($tags_ar);
 
@@ -822,8 +870,9 @@ sub ajaxGetAdminUrl {
 	}, { Return => 1 });
 }
 
-#  XXX based off of ajaxCreateStory.  ajaxCreateStory should be updated to use this or something
-#  similar soon, and after I've had time to test -- vroom 2006/03/21
+# XXX based off of ajaxCreateStory.  ajaxCreateStory should be updated to use this or something
+# similar soon, and after I've had time to test -- vroom 2006/03/21
+# XXX Tim, I need you to look this over. - Jamie 2006/09/19
 
 sub setTagsForGlobj {
 	my($self, $id, $table, $tag_string, $options) = @_;
@@ -851,6 +900,9 @@ sub setTagsForGlobj {
 	# tag both "funny" and "!funny" at the same time).
 	my @create_tagnames =		grep { !$old_tagnames{$_} && !$new_tagnames_opposites{$_} }
 					sort keys %new_tagnames;
+
+	# XXX well it hurts a little, it's redundant code to maintain.
+	# I'd suggest deleting the code from here to the next XXX. - Jamie 2006/09/19
 	# Deactivate any tag which existed before but either (a) is not
 	# specified now or (b) the opposite of which is specified now.
 	# (Actually, createTag() will automatically deactivate the
@@ -858,7 +910,6 @@ sub setTagsForGlobj {
 	# pass through first.)
 	my @deactivate_tagnames = (    (grep { !$new_tagnames{$_} } sort keys %old_tagnames),
 				       (grep {  $old_tagnames{$_} } sort keys %new_tagnames_opposites) );
-
 	my @deactivated_tagnames = ( );
 	for my $tagname (@deactivate_tagnames) {
 		push @deactivated_tagnames, $tagname
@@ -869,20 +920,23 @@ sub setTagsForGlobj {
 				id =>		$id
 			});
 	}
+	# XXX
 
 	my @created_tagnames = ( );
 	for my $tagname (@create_tagnames) {
 		push @created_tagnames, $tagname
 			if $tags->createTag({
-				uid =>          $uid,
-				name =>         $tagname,
-				table =>        $table,
-				id =>           $id
+				uid =>		$uid,
+				name =>		$tagname,
+				table =>	$table,
+				id =>		$id,
+				# XXX private => $foo would go here
 			});
 	}
 #print STDERR scalar(localtime) . " setTagsForGlobj $table : $id  3 old='@$old_tags_ar' created='@created_tagnames'\n";
 
-	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $id, { uid => $uid });
+	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $id,
+		{ uid => $uid, include_private => 1 });
 	my $newtagspreloadtext = join ' ', sort map { $_->{tagname} } @$now_tags_ar;
 
 }
@@ -973,6 +1027,7 @@ use Data::Dumper; print STDERR scalar(localtime) . " ajaxProcessAdminTags table=
 			'MIN(tagid)',
 			'tags',
 			"tagnameid IN ($affected_str)");
+		# XXX this part isn't gonna work since tagboxes
 		$tags->setLastscanned($reset_lastscanned);
 #print STDERR scalar(localtime) . " ajaxProcessAdminTags reset to " . ($reset_lastscanned-1) . " for '$affected_str'\n";
 	}
@@ -1019,7 +1074,10 @@ sub ajaxTagHistory {
 	
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	my $tags_ar = [];
-	$tags_ar = $tags_reader->getTagsByNameAndIdArrayref($table, $id, { include_inactive => 1 }) if $table && $id;
+	if ($table && $id) {
+		$tags_ar = $tags_reader->getTagsByNameAndIdArrayref($table, $id,
+			{ include_inactive => 1, include_private => 1 });
+	}
 	$tags_reader->addRoundedCloutsToTagArrayref($tags_ar);
 	slashDisplay('taghistory', { tags => $tags_ar }, { Return => 1 } );
 }
@@ -1084,9 +1142,8 @@ sub processAdminCommand {
 		} else {
 			# Just logging the command is enough to affect future tags
 			# applied to this story (that's the way we're doing it now,
-			# though I'm not really happy with this and it will
-			# probably change).
-			my $tags_ar = $self->getTagsByNameAndIdArrayref($table, $id);
+			# though I'm not ecstatic about it and it may change).
+			my $tags_ar = $self->getTagsByNameAndIdArrayref($table, $id, { include_private => 1 });
 			my @tags = grep { $_->{tagnameid} == $tagnameid } @$tags_ar;
 			for my $tag (@tags) {
 				$self->setTag($tag->{tagid}, { tag_clout => 0 });
@@ -1116,6 +1173,7 @@ sub processAdminCommand {
 
 	$self->logAdminCommand($type, $tagname, $globjid);
 
+	# XXX this part isn't gonna work since tagboxes
 	$self->setLastscanned($new_min_tagid);
 
 	return $tagnameid;
@@ -1150,6 +1208,8 @@ sub getOppositeTagname {
 	return substr($tagname, 0, 1) eq '!' ? substr($tagname, 1) : '!' . $tagname;
 }
 
+# XXX this method isn't gonna work since tagboxes
+
 sub setLastscanned {
 	my($self, $new_val) = @_;
 	return if !$new_val;
@@ -1178,17 +1238,19 @@ sub listTagnamesAll {
 }
 
 sub listTagnamesActive {
-	my($self, $seconds, $max_num) = @_;
+	my($self, $options) = @_;
 	my $constants = getCurrentStatic();
-	$max_num ||= 100;
-	$seconds ||= 3600 * 6;
-#print STDERR scalar(localtime) . " listTagnamesActive s=$seconds m=$max_num\n";
+	my $max_num =         $options->{max_num}         || 100;
+	my $seconds =         $options->{seconds}         || (3600*6);
+	my $include_private = $options->{include_private} || 0;
+
 	# This seems like a horrendous query, but I _think_ it will run
 	# in acceptable time, even under fairly heavy load.
 	# Round off time to the last minute.
 	my $the_time = $self->getTime({ unix_format => 1 });
 	substr($the_time, -2) = '00';
 	my $next_minute_q = $self->sqlQuote( time2str( '%Y-%m-%d %H:%M:00', $the_time + 60, 'GMT') );
+	my $private_clause = $include_private ? '' : " AND private='no'";
 	my $ar = $self->sqlSelectAllHashrefArray(
 		"tagnames.tagname AS tagname,
 		 UNIX_TIMESTAMP($next_minute_q) - UNIX_TIMESTAMP(tags.created_at) AS secsago,
@@ -1203,7 +1265,7 @@ sub listTagnamesActive {
 			ON (tagnames.tagnameid=tagname_params.tagnameid AND tagname_params.name='tag_clout')",
 		"tagnames.tagnameid=tags.tagnameid
 		 AND tags.uid=users_info.uid
-		 AND inactivated IS NULL
+		 AND inactivated IS NULL $private_clause
 		 AND tags.created_at >= DATE_SUB($next_minute_q, INTERVAL $seconds SECOND)");
 	return [ ] unless $ar && @$ar;
 
@@ -1269,7 +1331,11 @@ sub listTagnamesActive {
 }
 
 sub listTagnamesRecent {
-	my($self, $seconds) = @_;
+	my($self, $options) = @_;
+	my $constants = getCurrentStatic();
+	my $seconds =         $options->{seconds}         || (3600*6);
+	my $include_private = $options->{include_private} || 0;
+	my $private_clause = $include_private ? '' : " AND private='no'";
 	my $recent_ar = $self->sqlSelectColArrayref(
 		'DISTINCT tagnames.tagname',
 		"users_info,
@@ -1278,7 +1344,7 @@ sub listTagnamesRecent {
 		 tagnames LEFT JOIN tagname_params
 			ON (tagnames.tagnameid=tagname_params.tagnameid AND tagname_params.name='tag_clout')",
 		"tagnames.tagnameid=tags.tagnameid
-		 AND inactivated IS NULL
+		 AND inactivated IS NULL $private_clause
 		 AND tags.created_at >= DATE_SUB(NOW(), INTERVAL $seconds SECOND)
 		 AND (tag_params.value IS NULL OR tag_params.value > 0)
 		 AND (tagname_params.value IS NULL OR tagname_params.value > 0)

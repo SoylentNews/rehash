@@ -59,7 +59,7 @@ sub init {
 }
 
 sub run {
-	my $stoids = $slashdb->sqlSelectColArrayref("stoid", "stories", q{time > DATE_SUB(NOW(), INTERVAL 1 YEAR) AND in_trash="no"}, "ORDER BY stoid DESC LIMIT 700");
+	my $stoids = $slashdb->sqlSelectColArrayref("stoid", "stories", q{time > DATE_SUB(NOW(), INTERVAL 1 YEAR) AND in_trash="no"}, "ORDER BY stoid DESC LIMIT 20");
 	my $uids = $slashdb->sqlSelectColArrayref('uid', 'users', 'seclev > 0', 'ORDER BY RAND() LIMIT 100');
 	my @words = ( ); srand(12345); for (1..1000) { push @words, getRandomWordFromDictFile("/etc/dictionaries-common/words", {min_chars => 3}) }
 	srand;

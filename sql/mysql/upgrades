@@ -4079,3 +4079,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_updates', 'Slash::FireHose', 'a
 # 2006-09-12
 UPDATE vars SET value = 'T_2_5_0_126' WHERE name = 'cvs_tag_currentcode';
 
+# Updates for plugins/Tags
+ALTER TABLE tags ADD COLUMN private enum('yes', 'no') NOT NULL DEFAULT 'no';
+

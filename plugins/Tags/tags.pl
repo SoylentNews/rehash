@@ -36,9 +36,9 @@ sub main {
 		if ($type eq 'all') {
 			$index_hr->{tagnames} = $tags_reader->listTagnamesAll();
 		} elsif ($type eq 'active') {
-			$index_hr->{tagnames} = $tags_reader->listTagnamesActive(3600 * 6, 100);
+			$index_hr->{tagnames} = $tags_reader->listTagnamesActive();
 		} else { # recent
-			$index_hr->{tagnames} = $tags_reader->listTagnamesRecent(3600 * 6);
+			$index_hr->{tagnames} = $tags_reader->listTagnamesRecent();
 		}
 
 		$title = getData('head1');
