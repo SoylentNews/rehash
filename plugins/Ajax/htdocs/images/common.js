@@ -478,7 +478,7 @@ function firehose_get_updates_handler(transport) {
 	}
 	if (response.html) {
 		json_update(response);
-		processd = processed + 1;
+		processed = processed + 1;
 	}
 	if (processed) {
 		if (response.update_time) {

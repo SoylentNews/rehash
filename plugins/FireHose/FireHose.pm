@@ -751,7 +751,7 @@ sub getAndSetOptions {
 	my $fhfilter;
 
 
-	if(defined $form->{fhfilter}) {
+	if (defined $form->{fhfilter}) {
 		$fhfilter = $form->{fhfilter};
 		$options->{firehose_fhfilter} = $fhfilter;
 	} else {
@@ -815,7 +815,7 @@ sub getAndSetOptions {
 }
 
 sub getFireHoseTagsTop {
-	my ($self, $item) = @_;
+	my($self, $item) = @_;
 	my $constants = getCurrentStatic();
 	my $tags_top = [];
 	push @$tags_top, ($item->{type});

@@ -98,6 +98,9 @@ __template__
 [% CASE 'no comment' %]
 	Unknown error.
 
+[% CASE 'no points' %]
+	No points left.
+
 [% CASE 'user not allowed' %]
 	User not allowed to moderate.
 

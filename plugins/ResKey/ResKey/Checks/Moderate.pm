@@ -64,9 +64,11 @@ sub doCheck {
 	# OK, the user is an ordinary user, so see if they have mod
 	# points and do some other fairly ordinary tests to try to
 	# rule out whether they can mod.
+	return(RESKEY_FAILURE, ['no points']) if
+		    $user->{points} <= 0;
+
 	return(RESKEY_FAILURE, ['not allowed']) if
-		    $user->{points} <= 0
-		|| !$user->{willing}
+		   !$user->{willing}
 		||  $comment->{uid} == $user->{uid}
 		||  $comment->{lastmod} == $user->{uid}
 		||  $comment->{ipid} eq $user->{ipid};

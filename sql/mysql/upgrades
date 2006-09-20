@@ -4045,10 +4045,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_check_removed', 'Slash::FireHose', 
 # 2006-09-06
 UPDATE vars SET value = 'T_2_5_0_125' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 INSERT INTO reskey_resources VALUES (9, 'comments-moderation-ajax', 'yes');
 INSERT INTO reskey_resource_checks VALUES (NULL, 9, 'all', 'Slash::ResKey::Checks::User',                101);
 INSERT INTO reskey_resource_checks VALUES (NULL, 9, 'use', 'Slash::ResKey::Checks::Post',                151);
@@ -4078,6 +4074,10 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_updates', 'Slash::FireHose', 'a
 
 # 2006-09-12
 UPDATE vars SET value = 'T_2_5_0_126' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # Updates for plugins/Tags
 ALTER TABLE tags ADD COLUMN private enum('yes', 'no') NOT NULL DEFAULT 'no';
