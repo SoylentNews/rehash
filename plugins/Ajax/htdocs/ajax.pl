@@ -88,7 +88,6 @@ sub getSectionPrefsHTML {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	sleep 3;
 	my %story023_default = (
 		author	=> { },
 		nexus	=> { },
