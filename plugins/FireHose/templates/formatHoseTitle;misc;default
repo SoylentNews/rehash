@@ -1,0 +1,35 @@
+__section__
+default
+__description__
+the_user = user hash for author
+url = url for associated url if applicable
+item = firehose item
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+formatHoseTitle
+__seclev__
+10000
+__template__
+[%
+the_skin_title = "";
+IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid != constants.mainpage_skid;
+	the_skin = Slash.db.getSkin(item.primaryskid);
+	the_skin_title = the_skin.title _ ": ";
+END;
+title = the_skin_title _ item.title;
+title = "<a href='javascript:toggle_firehose_body(\"$item.id\", $adminmode)'>" _ title _ "</a>";
+IF item.url_id;
+	title = title _ "<a href=\"" _ url.url _ "\">[-&gt;]</a>";
+END;
+title = title _ " " _ '<span class="date">' _ item.createtime _ "</span> <span class='nickname'>" _ the_user.nickname _ "</span>";
+IF adminmode;
+	reject_checkbox = PROCESS reject id = item.id;
+	title = reject_checkbox _ "<span class='score'> " _  item.popularity _ "</span> " _ title;
+END;
+	%]
+[% IF showtitle; title; END; %]
