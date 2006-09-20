@@ -4082,3 +4082,6 @@ UPDATE vars SET value = 'T_2_5_0_126' WHERE name = 'cvs_tag_currentcode';
 # Updates for plugins/Tags
 ALTER TABLE tags ADD COLUMN private enum('yes', 'no') NOT NULL DEFAULT 'no';
 
+# 2006-09-19
+UPDATE vars SET value = 'T_2_5_0_127' WHERE name = 'cvs_tag_currentcode';
+
