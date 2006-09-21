@@ -18,7 +18,7 @@ __template__
 	<form action="[% gSkin.rootdir %]/firehose.pl" method="get">
 		<fieldset>
 			<legend>Firehose</legend>
-			<label>Filter<input type="text" name="fhfilter" value="[% options.firehose_fhfilter | strip_attribute %]" size="60"></label>
+			<label>Filter<input type="text" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="60"></label>
 			<br><label>Order&nbsp;[% Slash.createSelect('order', { 'createtimedesc' => 'Time Desc', popularitydesc => 'Popularity Desc', 'createtimeasc' => 'Time Asc', 'popularityasc' => 'Popularity Asc' }, options.order, 1, 0, 1) %]</label> 
 			<label>Mode&nbsp;[% Slash.createSelect('mode', { 'full' => 'Full', fulltitle => 'Abbreviated' }, options.mode, 1, 0, 1) %]
 </label> 
@@ -36,10 +36,12 @@ __template__
 	<span id="pause"><a href="javascript:firehose_pause()">Pause ||</a></span>
 </div>
 <br>
+-----
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
 </div>
+-----
 [% PROCESS paginate %]
 <script type="text/javascript">
 	var firehose_action_time = 0;

@@ -79,20 +79,18 @@ END %]
 	   		   introtext = item.introtext;
 			   # set introtext with extra data we want
 			   PROCESS formatHoseIntro;
-			%]
+			END %]
 			[% introtext %]
-
-		[% IF adminmode %]
-		<div id="admin-extras-[% item.id %]"><a href="javascript:firehose_get_admin_extras('[% item.id %]')">Get extras</a></div>
-			[% END %]
 		</div>
+		[% IF adminmode && bodycontent%]
+		<div id="admin-extras-[% item.id %]"><a href="javascript:firehose_get_admin_extras('[% item.id %]')">Get extras</a></div>
 		[% END %]
 	[% IF bodywrapper %]
 	</div>
 	[% END %]
-			[% IF adminmode %]
-			<form id="postform-[% item.id %]" method="post" action="[% gSkin.rootdir %]/admin.pl" class="edit">
-			<a href="javascript:firehose_get_and_post('[% item.id %]')" title="Preview the editable version of this">Edit Preview</a>
+			[% IF adminmode && bodycontent %]
+			<form id="postform-[% item.id %]" method="post" action="[% gSkin.rootdir %]/admin.pl" class="edit"><div>
+			<a href="javascript:firehose_get_and_post('[% item.id %]')" title="Preview the editable version of this">Edit Preview</a></div>
 			</form>
 			[% END %]
 [% IF full %]
