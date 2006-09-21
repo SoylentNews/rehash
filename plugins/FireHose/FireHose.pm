@@ -333,7 +333,6 @@ sub ajaxGetUserFirehose {
 	if ($item) {
 		$globjid = $item->{globjid};
 	}
-	
 #	print STDERR "ajaxGetUserFirehose id: $id globjid: $globjid\n\n";
 #print STDERR scalar(localtime) . " ajaxGetUserFirehose for stoid=$stoid sidenc=$sidenc tr=$tags_reader\n";
 	if (!$globjid || $globjid !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
@@ -753,9 +752,10 @@ sub getAndSetOptions {
 
 	if (defined $form->{fhfilter}) {
 		$fhfilter = $form->{fhfilter};
-		$options->{firehose_fhfilter} = $fhfilter;
+		$options->{fhfilter} = $fhfilter;
 	} else {
-		$fhfilter = $options->{firehose_fhfilter};
+		$fhfilter = $user->{firehose_fhfilter};
+		$options->{fhfilter} = $fhfilter;
 	}
 
 	$fhfilter =~ s/^\s+|\s+$//g;
