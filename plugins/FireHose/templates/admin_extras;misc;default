@@ -51,6 +51,7 @@ __template__
 
         </tr>
 </table>
+</form>
 [% IF similar_stories.size > 0 %]
 	<table border="0" cellpadding="2" cellspacing="0">
 		<tr><td colspan="5" align="CENTER"><b>Similar Stories --</b> check words below before submitting or previewing to mark words as common and not for use in determining similar stories</td></tr>
