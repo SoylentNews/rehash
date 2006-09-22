@@ -36,7 +36,6 @@ __template__
 	<span id="pause"><a href="javascript:firehose_pause()">Pause ||</a></span>
 </div>
 <br>
------
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
