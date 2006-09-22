@@ -1448,7 +1448,7 @@ sub metamod_if_necessary {
 	if ($constants->{m2} && $user->{is_admin}) {
 		my $metamod_db = getObject('Slash::Metamod');
 		my $n_perf = 0;
-		if ($n_perf = $metamod_db->metaModerate()) {
+		if ($n_perf = $metamod_db->metaModerate($user->{is_admin})) {
 			$retstr = getData('metamods_performed', { num => $n_perf });
 		}
 	}

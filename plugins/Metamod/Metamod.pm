@@ -42,7 +42,7 @@ sub new {
 # no real other way to do it, I'm putting it here anyway.
 
 sub metaModerate {
-	my($self) = @_;
+	my($self, $is_admin) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
@@ -61,7 +61,7 @@ sub metaModerate {
 		next unless $key =~ /^mm(\d+)$/;
 		my $mmid = $1;
 		# Only the user's given mods can be used.
-		next unless $m2_mods_saved{$mmid};
+		next unless $m2_mods_saved{$mmid} || $is_admin;
 		# This one's valid.  Store its data in %m2s.
 		$m2s{$mmid}{is_fair} = ($form->{$key} eq '+') ? 1 : 0;
 	}

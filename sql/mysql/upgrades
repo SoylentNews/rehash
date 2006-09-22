@@ -4075,8 +4075,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_updates', 'Slash::FireHose', 'a
 # 2006-09-12
 UPDATE vars SET value = 'T_2_5_0_126' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # Updates for plugins/Tags
@@ -4084,4 +4082,6 @@ ALTER TABLE tags ADD COLUMN private enum('yes', 'no') NOT NULL DEFAULT 'no';
 
 # 2006-09-19
 UPDATE vars SET value = 'T_2_5_0_127' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
