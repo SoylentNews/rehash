@@ -57,7 +57,7 @@ END %]
 	[%- IF adminmode && item.type == "submission" %]<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">[% END -%]
 	submitted 
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
-	by [% the_user.nickname | strip_literal %] ([% item.name %] <a href="[% submission.email %]">[% submission.email %]</a>) at [% item.createtime %]
+	by [% the_user.nickname | strip_literal %] ([% item.name %] <a href="[% item.email %]">[% item.email %]</a>) at [% item.createtime %]
 	[% IF adminmode %]
 	[%  Slash.vislenify(item); %]
 	<a href="[% gSkin.rootdir -%]/users.pl?op=userinfo&amp;userfield=[% item.ipid -%]&amp;fieldname=ipid">[% item.ipid_vis -%]</a>
