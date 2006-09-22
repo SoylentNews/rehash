@@ -40,7 +40,6 @@ __template__
 [% itemstext %]
 [% page = page || "0" %]
 </div>
------
 [% PROCESS paginate %]
 <script type="text/javascript">
 	var firehose_action_time = 0;
