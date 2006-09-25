@@ -1,15 +1,15 @@
 /*                                                                                                                                                      
-Copyright (c) 2006, Yahoo! Inc. All rights reserved.                                                                                                    
-Code licensed under the BSD License:                                                                                                                    
-http://developer.yahoo.net/yui/license.txt                                                                                                              
-version: 0.11.0                                                                                                                                         
+Copyright (c) 2006, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.net/yui/license.txt
+version: 0.11.3
 */ 
 
 /**
  * The Yahoo global namespace
  * @constructor
  */
-var YAHOO = window.YAHOO || {};
+window.YAHOO = window.YAHOO || {};
 
 /**
  * Returns the namespace specified and creates it if it doesn't exist
@@ -19,6 +19,13 @@ var YAHOO = window.YAHOO || {};
  *
  * Either of the above would create YAHOO.property, then
  * YAHOO.property.package
+ *
+ * Be careful when naming packages. Reserved words may work in some browsers
+ * and not others. For instance, the following will fail in Safari:
+ *
+ * YAHOO.namespace("really.long.nested.namespace");
+ *
+ * This fails because "long" is a future reserved word in ECMAScript
  *
  * @param  {String} ns The name of the namespace
  * @return {Object}    A reference to the namespace object
@@ -64,8 +71,8 @@ YAHOO.log = function(sMsg, sCategory, sSource) {
  * Utility to set up the prototype, constructor and superclass properties to
  * support an inheritance strategy that can chain constructors and methods.
  *
- * @param {Function} subclass   the object to modify
- * @param {Function} superclass the object to inherit
+ * @param {function} subclass   the object to modify
+ * @param {function} superclass the object to inherit
  */
 YAHOO.extend = function(subclass, superclass) {
     var f = function() {};
