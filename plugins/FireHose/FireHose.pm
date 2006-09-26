@@ -551,7 +551,8 @@ sub ajaxGetFormContents {
 }
 
 sub ajaxGetAdminExtras {
-	my($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	$options->{content_type} = 'application/json';
 	return unless $user->{is_admin} && $form->{id};
 	my $firehose = getObject("Slash::FireHose");
 	my $item = $firehose->getFireHose($form->{id});
@@ -568,15 +569,33 @@ sub ajaxGetAdminExtras {
 		$accepted_from_emaildomain = $slashdb->countSubmissionsWithEmaildomain($item->{emaildomain}, { del => 2 });
 		$num_with_emaildomain = $slashdb->countSubmissionsWithEmaildomain($item->{emaildomain});
 	}
-	slashDisplay("admin_extras", { 
+
+	my $the_user = $slashdb->getUser($item->{uid});
+
+	my $byline = getData("byline", {
 		item				=> $item,
-		subnotes_ref			=> $subnotes_ref, 
-		similar_stories			=> $similar_stories,
+		the_user			=> $the_user,
+		adminmode			=> 1,
+		extras 				=> 1,
+		hidediv				=> 1,
 		num_from_uid    		=> $num_from_uid,
 		accepted_from_uid 		=> $accepted_from_uid,
 		num_with_emaildomain 		=> $num_with_emaildomain,
 		accepted_from_emaildomain 	=> $accepted_from_emaildomain
+	}, "firehose");
+
+	my $admin_extras = slashDisplay("admin_extras", { 
+		item				=> $item,
+		subnotes_ref			=> $subnotes_ref, 
+		similar_stories			=> $similar_stories,
 	}, { Return => 1 });
+	
+	return Data::JavaScript::Anon->anon_dump({
+		html => {
+			"details-$item->{id}" 		=> $byline,
+			"admin-extras-$item->{id}" 	=> $admin_extras
+		}
+	});
 }
 
 sub setSectionTopicsFromTagstring {
@@ -816,10 +835,11 @@ sub getAndSetOptions {
 
 sub getFireHoseTagsTop {
 	my($self, $item) = @_;
-	my $constants = getCurrentStatic();
-	my $tags_top = [];
+	my $user 	= getCurrentUser();
+	my $constants 	= getCurrentStatic();
+	my $tags_top	 = [];
 	push @$tags_top, ($item->{type});
-	push @$tags_top, ($item->{category} || "none");
+	push @$tags_top, ($item->{category} || "none") if $user->{is_admin} && !$user->{firehose_usermode};
 	if ($item->{primaryskid} && $item->{primaryskid} != $constants->{mainpage_skid}) {
 		my $the_skin = $self->getSkin($item->{primaryskid});
 		push @$tags_top, $the_skin->{name};
