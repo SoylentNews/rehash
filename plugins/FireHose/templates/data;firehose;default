@@ -1,0 +1,44 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+firehose
+__lang__
+en_US
+__name__
+data
+__seclev__
+10000
+__template__
+[% SWITCH value %]
+[% CASE 'byline' %]
+	[% IF !hidediv %]
+	<div class="details" id="details-[% item.id %]">
+	[% END %]
+	[%- IF adminmode && item.type == "submission" %]<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">[% END -%]
+	submitted 
+	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
+	by [% the_user.nickname | strip_literal %]
+	[% IF extras %]
+		([% accepted_from_uid %]/[% num_from_uid %]) 
+	[% END %]
+	([% item.name %] <a href="[% item.email %]">[% item.email %]</a> 
+	[% IF extras %]
+		([% accepted_from_emaildomain %]/[% num_with_emaildomain %]) 
+	[% END %]
+	) at [% item.createtime %]
+	[% IF adminmode %]
+		[%  Slash.vislenify(item); %]
+		<a href="[% gSkin.rootdir -%]/users.pl?op=userinfo&amp;userfield=[% item.ipid -%]&amp;fieldname=ipid">[% item.ipid_vis -%]</a>
+
+	[% END %]
+	[% IF !hidediv %]
+	</div>
+	[% END %]
+[% END %]
+
+__version__
+$Id$
