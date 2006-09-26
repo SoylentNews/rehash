@@ -52,17 +52,10 @@ END %]
 	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode %]
 	[% PROCESS titlebar h3id="title-" _ item.id id="" %]
 [% END %]
-	[% IF bodywrapper%]
-	<div class="details" id="details-[% item.id %]">
-	[%- IF adminmode && item.type == "submission" %]<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">[% END -%]
-	submitted
-	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
-	by [% IF the_user.email %]<a href="[% the_user.email %]">[% END %][% the_user.nickname | strip_literal %][% IF the_user.email %]</a>[% END %] [% IF item.name %]([% item.name %] [% IF item.email %]<a href="[% item.email %]">[% item.email %]</a>[% END %])[% END %] at [% item.createtime %]
-	[% IF adminmode %]
-	[%  Slash.vislenify(item); %]
-	<a href="[% gSkin.rootdir -%]/users.pl?op=userinfo&amp;userfield=[% item.ipid -%]&amp;fieldname=ipid">[% item.ipid_vis -%]</a>
-	[% END %]
-	</div>
+	[% IF bodywrapper;
+		Slash.getData('byline', { adminmode => adminmode, item => item, the_user => the_user }, 'firehose');
+	%]
+
 	<div class="[% IF bodycontent %]body[% ELSE %]empty[% END %]" id="fhbody-[% item.id %]">
 	[% END %]
 		[% IF item.tid %]

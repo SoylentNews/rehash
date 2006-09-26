@@ -9,6 +9,7 @@ requiresplugin=Tags
 template=templates/list;firehose;default
 template=templates/view;firehose;default
 template=templates/admin_extras;misc;default
+template=templates/data;firehose;default
 template=templates/dispFireHose;firehose;default
 template=templates/fireHoseForm;misc;default
 template=templates/firehose_tags_top;misc;default
