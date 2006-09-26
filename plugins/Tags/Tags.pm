@@ -590,6 +590,7 @@ sub getAllTagsFromUser {
 	my $private_clause = $options->{include_private}  ? '' : " AND private='no'";
 
 	my($table_extra, $where_extra) = ("","");
+	my $uid_q = $self->sqlQuote($uid);
 
 	if ($options->{type}) {
 		my $globjtypes = $self->getGlobjTypes;
@@ -602,12 +603,11 @@ sub getAllTagsFromUser {
 
 		if ($options->{type} eq "urls" and $options->{only_bookmarked}) {
 			$table_extra .= ", bookmarks",
-			$where_extra .= " AND bookmarks.url_id = globjs.target_id";
+			$where_extra .= " AND bookmarks.url_id = globjs.target_id AND bookmarks.uid = $uid_q";
 		}
 	}
 
 	my $type_clause = "";
-	my $uid_q = $self->sqlQuote($uid);
 	my $ar = $self->sqlSelectAllHashrefArray(
 		'tags.*',
 		"tags $table_extra",
