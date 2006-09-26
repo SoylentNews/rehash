@@ -241,7 +241,10 @@ function firehose_get_admin_extras(id) {
 	var params=[];
 	params['id'] = id;
 	params['op'] = 'firehose_get_admin_extras';
-	ajax_update(params, 'admin-extras-'+id);
+	var handlers = {
+		onComplete: json_handler
+	};
+	ajax_update(params, '', handlers);
 }
 
 function firehose_get_and_post(id) {
