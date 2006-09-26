@@ -1,28 +1,56 @@
 .article .firehosetag { background: #fff; }
+.submenu {position: relative;}
+.article, #firehose
+{
+	background: url(//images.slashdot.org/storylinks-bg.png) repeat-x left bottom;
+	margin-bottom: 1em;
+}
 
+.end, ul.menu
+{
+	margin: 0;
+	padding: .75em 12em .75em .6em;
+	background: url(//images.slashdot.org/storylinks-right.png) no-repeat right bottom !important;
+}
 #firehose div.briefarticle a span { float: none; }
 .briefarticle { border-top: 1px solid #aaa; }
+#firehoselist .usermode .generaltitle .title h3 { padding-left: 60px !important; }
+
+#firehoselist {overflow: auto; _overflow: normal; height: 600px; _height: auto;}
 
 .briefarticle .generaltitle .title h3 .score
 {
-	color: #fff;
-	background: url('//images.slashdot.org/sic_fire.png') no-repeat -10px -2px;
+	border: 1px solid #ccc;
+	border-top: none;
+	border-bottom: none;
+        background-color: #999;
+        background-image: url('/images/sic_shadow.png');
+	_background-image: none;
 }
-#firehoselist .generaltitle .title h3 { padding-left: 35px !important; }
-.article .generaltitle .title h3 .score { background: url('//images.slashdot.org/sic_fire2.png') no-repeat -15px -3px; }
-.score { padding: 5px 15px 5px 25px; }
-.briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagstitleopen { padding-bottom: 0px; }
 
-
-.briefarticle .generaltitle .title h3 a
+.article .generaltitle .title h3 .score
 {
-	color: #066;
-	padding-left: 10px;
+        padding: .4em;
+        border: 1px solid #055;
+        border-top: none;
+        border-bottom: none;
+        background-color: #044;
+        background-image: url('/images/sic_shadow.png');
+	_background-image: none;
+}
+.score { padding: .5em .4em .6em .4em; }
+.briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagstitleopen { padding-bottom: 0px; }
+.briefarticle .generaltitle .title h3 a { color: #066; }
+
+.article .generaltitle .title h3
+{
+	padding-left: 60px !important;
+	padding-right: 50px;
 }
 
 .briefarticle .generaltitle .title h3
 {
-	padding: 2px 0 .3em 0; 
+	padding: 2px 50px .3em 60px;
 	font-size: 100%;
 	border-top: 1px solid #fff;
 	background: #e6e6e6 url(//images.slashdot.org/sections-bg.png) repeat-x left bottom;
@@ -36,7 +64,7 @@
 }
 
 .article .generaltitle .title .date,
-.article .generaltitle .title .nickname { display: none; }
+.article .generaltitle .title .nickname, .briefarticle .end { display: none; }
 .briefarticle .firehosetag { background: #999; }
 .briefarticle .details { display: none; }
 .article .firehosetag { background: #fff; }
@@ -49,6 +77,8 @@
 	position: absolute;
 	top: 3px;
 	left: 10px;
+        _top: -2.3em;
+        _left: -20px;
 }
 
 .down
@@ -59,13 +89,37 @@
 	position: absolute;
 	top: 3px;
 	left: 30px;
+	_top: -2.3em;
+	_left: -20px;
 }
 
-.briefarticle div.tags {  padding: 0 !important; margin-top: -1px !important; }
-div.tags { margin-bottom: 2px !important; }
+.up, .down { text-decoration: none; _position: relative !important;}
+
+.briefarticle div.tags
+{
+	padding: 0 !important;
+	margin-top: -1px !important;
+}
+
+div.tags
+{
+	padding: 0;
+	margin-bottom: 2px !important;
+}
+
 div.tags div.tagtitleclosed,
-div.tags div.tagtitleopen { position: static !important; margin-top: 2px !important;}
-div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a { padding-top: 0px !important; font-size: 98%; color: #777}
+div.tags div.tagtitleopen
+{
+	position: static !important;
+	margin: 2px 0 0 0 !important;
+}
+
+div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
+{
+	padding-top: 0px !important;
+	font-size: 98%;
+	color: #777;
+}
 
 .edit
 {
@@ -92,6 +146,105 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a { padding-top: 0px !i
 }
 
 .reject input { visibility: hidden; }
-#play a { color: #066; background: #fff;}
-#pause a { color: #066; background: #fff;}
+
+#play a
+{
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+	padding: 5px 0 5px 25px;
+	background: url('/images/sic_controls.png') no-repeat 0px 0px;
+	_background: url('/images/sic_controls.gif') no-repeat;
+	position: relative;
+}
+
+#pause a
+{
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+	padding: 6px 0 4px 25px;
+	background: url('/images/sic_controls.png') no-repeat 0px -200px;
+        _background: url('/images/sic_controls.gif') no-repeat 0px -200px;
+        position: relative;
+}
+
+#time_asc a
+{
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+	padding: 6px 0 4px 25px;
+	background: url('/images/sic_controls.png') no-repeat 0px -400px;
+        _background: url('/images/sic_controls.gif') no-repeat 0px -400px;
+        position: relative;
+}
+
+#time_desc a
+{
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+	padding: 6px 0 4px 25px;
+	background: url('/images/sic_controls.png') no-repeat 0px -600px;
+        _background: url('/images/sic_controls.gif') no-repeat 0px -600px;
+        position: relative;
+}
+
+#pop_asc a
+{
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+	padding: 6px 0 4px 25px;
+	background: url('/images/sic_controls.png') no-repeat 0px -400px;
+        _background: url('/images/sic_controls.gif') no-repeat 0px -400px;
+        position: relative;
+}
+
+#pop_desc a
+{
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+	padding: 6px 0 4px 25px;
+	background: url('/images/sic_controls.png') no-repeat 0px -600px;
+        _background: url('/images/sic_controls.gif') no-repeat 0px -400px;
+        position: relative;
+}
+
+#full a
+{
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+	padding: 6px 0 4px 25px;
+	background: url('/images/sic_controls.png') no-repeat 0px -800px;
+        _background: url('/images/sic_controls.gif') no-repeat 0px -800px;
+        position: relative;
+}
+
+#abbrev a
+{
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+	padding: 6px 0 4px 25px;
+	background: url('/images/sic_controls.png') no-repeat 0px -1000px;
+        _background: url('/images/sic_controls.gif') no-repeat 0px -1000px;
+        position: relative;
+}
+
+/* Popularity */
+.pop0 { background: #000; }
+.pop1 { background: #300; color: #fff;}
+.pop2 { background: #600; color: #fff;}
+.pop3 { background: #900; color: #fff;}
+.pop4 { background: #a30000; color: #fff;}
+.pop5 { background: #c00000; color: #fff }
+.pop6 { background: #dc7070; color: #400000;}
+.pop7 { background: #359494; color: #400000;}
+.pop8 { background: #fff; color: #000;}
+
+
 

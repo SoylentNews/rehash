@@ -32,8 +32,8 @@ __template__
 		</fieldset>
 	</form>
 
-	<span id="play"><a href="javascript:firehose_play()">Play |&gt;</a></span>
-	<span id="pause"><a href="javascript:firehose_pause()">Pause ||</a></span>
+	<span id="play"><a href="javascript:firehose_play()">Play</a></span>
+	<span id="pause"><a href="javascript:firehose_pause()">Pause</a></span>
 </div>
 <br>
 <div id="firehoselist">

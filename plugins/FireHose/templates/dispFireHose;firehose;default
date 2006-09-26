@@ -47,7 +47,7 @@ END %]
 [% the_user = Slash.db.getUser(item.uid) %]
 [% IF full %]
 [% IF divwrapper %]
-<div id="firehose-[% item.id %]" class="[% IF mode == "full" %]article[% ELSE %]briefarticle[% END %]">
+<div id="firehose-[% item.id %]" class="[% IF mode == "full" %]article[% ELSE %]briefarticle[% END %][% IF adminmode == 0 %] usermode[% END %]">
 [% END %]
 	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode %]
 	[% PROCESS titlebar h3id="title-" _ item.id id="" %]
@@ -55,14 +55,12 @@ END %]
 	[% IF bodywrapper%]
 	<div class="details" id="details-[% item.id %]">
 	[%- IF adminmode && item.type == "submission" %]<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">[% END -%]
-	submitted 
+	submitted
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
-	by [% the_user.nickname | strip_literal %] ([% item.name %] <a href="[% item.email %]">[% item.email %]</a>) at [% item.createtime %]
+	by [% IF the_user.email %]<a href="[% the_user.email %]">[% END %][% the_user.nickname | strip_literal %][% IF the_user.email %]</a>[% END %] [% IF item.name %]([% item.name %] [% IF item.email %]<a href="[% item.email %]">[% item.email %]</a>[% END %])[% END %] at [% item.createtime %]
 	[% IF adminmode %]
 	[%  Slash.vislenify(item); %]
 	<a href="[% gSkin.rootdir -%]/users.pl?op=userinfo&amp;userfield=[% item.ipid -%]&amp;fieldname=ipid">[% item.ipid_vis -%]</a>
-							        
-
 	[% END %]
 	</div>
 	<div class="[% IF bodycontent %]body[% ELSE %]empty[% END %]" id="fhbody-[% item.id %]">
@@ -89,9 +87,9 @@ END %]
 			END %]
 			[% introtext %]
 		</div>
-		[% IF adminmode && bodycontent%]
-		<div id="admin-extras-[% item.id %]"><a href="javascript:firehose_get_admin_extras('[% item.id %]')">Get extras</a></div>
-		[% END %]
+[% IF adminmode && bodycontent%]
+	<div id="admin-extras-[% item.id %]"><a href="javascript:firehose_get_admin_extras('[% item.id %]')">Get extras</a></div>
+[% END %]
 	[% IF bodywrapper %]
 	</div>
 	[% END %]
@@ -103,6 +101,9 @@ END %]
 [% IF full %]
 		[% PROCESS tagsfirehosedivtagbox id = item.id  tags_top = tags_top %]
 [% IF divwrapper %]
+
+<div class="end"></div>
+
 </div>
 [% END %]
 [% END %]

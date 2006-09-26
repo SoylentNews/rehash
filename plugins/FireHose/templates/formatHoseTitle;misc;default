@@ -29,7 +29,7 @@ END;
 title = title _ " " _ '<span class="date">' _ item.createtime _ "</span> <span class='nickname'>" _ the_user.nickname _ "</span>";
 IF adminmode;
 	reject_checkbox = PROCESS reject id = item.id;
-	title = reject_checkbox _ "<span class='score'> " _  item.popularity _ "</span> " _ title;
+	title = reject_checkbox _ "<span class='score pop" _  item.popularity _ "'> " _  item.popularity _ "</span> " _ title;
 END;
 	%]
 [% IF showtitle; title; END; %]
