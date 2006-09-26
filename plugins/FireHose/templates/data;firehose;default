@@ -19,17 +19,17 @@ __template__
 	<div class="details" id="details-[% item.id %]">
 	[% END %]
 	[%- IF adminmode && item.type == "submission" %]<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">[% END -%]
-	submitted 
+	submitted
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
 	by [% the_user.nickname | strip_literal %]
 	[% IF extras %]
 		([% accepted_from_uid %]/[% num_from_uid %]) 
 	[% END %]
-	([% item.name %] <a href="[% item.email %]">[% item.email %]</a> 
+	[% item.name %] <a href="[% item.email %]">[% item.email %]</a> 
 	[% IF extras %]
 		([% accepted_from_emaildomain %]/[% num_with_emaildomain %]) 
 	[% END %]
-	) at [% item.createtime %]
+	 at [% item.createtime %]
 	[% IF adminmode %]
 		[%  Slash.vislenify(item); %]
 		<a href="[% gSkin.rootdir -%]/users.pl?op=userinfo&amp;userfield=[% item.ipid -%]&amp;fieldname=ipid">[% item.ipid_vis -%]</a>
