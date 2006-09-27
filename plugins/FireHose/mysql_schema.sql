@@ -10,6 +10,7 @@ CREATE TABLE firehose (
 	createtime datetime NOT NULL default '0000-00-00 00:00:00',
 	title varchar(80) NOT NULL default '',
 	popularity float NOT NULL default '0',
+	activity float NOT NULL default '0',
 	accepted enum('no','yes') default 'no',
 	rejected enum('no','yes') default 'no',
 	public enum('no','yes') default 'no',
@@ -26,7 +27,8 @@ CREATE TABLE firehose (
 	subnetid varchar(32) NOT NULL default '',
 	category varchar(30) NOT NULL default '',
 	last_update TIMESTAMP,
-	PRIMARY KEY  (id)
+	PRIMARY KEY (id),
+	UNIQUE globjid (globjid)
 ) TYPE=InnoDB; 
 
 DROP TABLE IF EXISTS firehose_text;

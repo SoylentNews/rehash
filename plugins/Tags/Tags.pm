@@ -495,9 +495,11 @@ sub getTagsByGlobjid {
 		? " AND created_at >= DATE_SUB(NOW(), INTERVAL $options->{days_back} DAY)"
 		: '';
 
-	my $tagnameid_where = $options && $options->{tagnameid}
-		? " AND tagnameid = $options->{tagnameid}"
-		: '';
+	my $tagnameid_where = '';
+	if ($options->{tagnameid}) {
+		my $tagnameid_q = $self->sqlQuote($options->{tagnameid});
+		$tagnameid_where = " AND tagnameid = $tagnameid_q";
+	}
 
 	my $ar = $self->sqlSelectAllHashrefArray(
 		'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
@@ -1083,7 +1085,7 @@ sub ajaxTagHistory {
 }
 
 { # closure
-my @clout_reduc_map = qw(  0.15  0.50  0.90  0.99  1.00  );
+my @clout_reduc_map = qw(  0.15  0.50  0.90  0.99  1.00  ); # should be a var
 sub processAdminCommand {
 	my($self, $c, $id, $table) = @_;
 
