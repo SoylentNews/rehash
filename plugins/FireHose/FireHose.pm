@@ -136,7 +136,7 @@ sub createItemFromSubmission {
 			uid 			=> $submission->{uid},
 			introtext 		=> $submission->{story},
 			popularity 		=> 2,
-			public 			=> "no",
+			public 			=> "yes",
 			attention_needed 	=> "yes",
 			type 			=> "submission",
 			primaryskid		=> $submission->{primaryskid},
@@ -211,6 +211,12 @@ sub getFireHoseEssentials {
 		push @where, "id IN ($id_str)";
 	}
 
+	if (defined $options->{daysback}) {
+		push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $options->{daysback} DAY)"
+	}
+
+	
+
 	my $limit_str = "";
 	my $where = (join ' AND ', @where) || "";
 	my $offset = $options->{offset};
@@ -218,7 +224,6 @@ sub getFireHoseEssentials {
 	$offset = "$offset, " if $offset;
 	$limit_str = "LIMIT $offset $options->{limit}" unless $options->{nolimit};
 	my $other = "ORDER BY $options->{orderby} $options->{orderdir} $limit_str";
-	
 	my $hr_ar = $self->sqlSelectAllHashrefArray("firehose.*", $tables, $where, $other);
 
 	# Add globj admin notes to the firehouse hashrefs.
@@ -822,16 +827,28 @@ sub getAndSetOptions {
 		$self->setUser($user->{uid}, $data_change ) if keys %$data_change > 0;
 		
 	}
+
+
+	if ($user->{is_admin} && $form->{setusermode}) {
+		$options->{firehose_usermode} = $form->{firehose_usermode} ? 1 : "";
+	}
+
+	my $adminmode = 0;
+	$adminmode = 1 if $user->{is_admin};
+	if(defined $options->{firehose_usermode}) {
+		$adminmode = 0 if $options->{firehose_usermode};
+	} else {
+		$adminmode = 0 if $user->{firehose_usermode};
+	}
+
 	
-	if ($user->{is_admin}) {
+	if ($adminmode) {
 		# $options->{attention_needed} = "yes";
 		 $options->{accepted} = "no" if !$options->{accepted};
 		 $options->{rejected} = "no" if !$options->{rejected};
 	} else  {
 		$options->{public} = "yes";
-	}
-	if ($user->{is_admin} && $form->{setusermode}) {
-		$options->{firehose_usermode} = $form->{firehose_usermode} ? 1 : "";
+		$options->{daysback} = 1;
 	}
 
 	return $options;
