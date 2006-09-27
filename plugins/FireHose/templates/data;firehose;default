@@ -22,11 +22,11 @@ __template__
 	submitted
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
 	by [% the_user.nickname | strip_literal %]
-	[% IF extras %]
+	[% IF extras && num_from_uid != '0' %]
 		([% accepted_from_uid %]/[% num_from_uid %]) 
 	[% END %]
 	[% item.name %] <a href="[% item.email %]">[% item.email %]</a> 
-	[% IF extras %]
+	[% IF extras && num_with_emaildomain != '0' %]
 		([% accepted_from_emaildomain %]/[% num_with_emaildomain %]) 
 	[% END %]
 	 at [% item.createtime %]

@@ -1,6 +1,39 @@
-.article .firehosetag { background: #fff; }
+/* listing options */
+
+.options
+{
+	width: 140px;
+	position: absolute;
+	top: -30px !important;
+	right: .5em;
+}
+
+.options span
+{
+	position: relative;
+	width: 20px;
+	margin: 0 0 0 30px !important;
+}
+
 .submenu { position: relative; }
 
+
+
+/* general layout */
+
+#firehoselist
+{
+	overflow: auto;
+	_overflow: normal;
+	height: 600px;
+	_height: auto;
+	padding: 1em 1em 0 0;
+}
+
+
+
+/* full article */
+.article .firehosetag { background: #fff; }
 .article, #firehose
 {
 	background: url(//images.slashdot.org/storylinks-bg.png) repeat-x left bottom;
@@ -14,26 +47,6 @@
 	background: url(//images.slashdot.org/storylinks-right.png) no-repeat right bottom !important;
 }
 
-#firehose div.briefarticle a span { float: none; }
-.briefarticle { border-top: 1px solid #aaa; }
-#firehoselist .usermode .generaltitle .title h3 { padding-left: 60px !important; }
-
-#firehoselist
-{
-	overflow: auto;
-	_overflow: normal;
-	height: 600px;
-	_height: auto;
-}
-
-.briefarticle .generaltitle .title h3 .score
-{
-	border: 1px solid #ccc;
-	border-top: none;
-	border-bottom: none;
-	background-image: url('/images/sic_shadow.png');
-	_background-image: none;
-}
 
 .article .generaltitle .title h3 .score
 {
@@ -46,15 +59,33 @@
 	color: #fff;
 }
 
-.score { padding: .5em .4em .6em .4em; }
-.briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagstitleopen { padding-bottom: 0px; }
-.briefarticle .generaltitle .title h3 a { color: #066; }
 
 .article .generaltitle .title h3
 {
 	padding-left: 60px !important;
 	padding-right: 50px;
 }
+
+.article .generaltitle .title .date,
+.article .generaltitle .title .nickname { display: none; }
+.article .firehosetag { background: #fff; }
+
+/* abbreviated article */
+
+.briefarticle .generaltitle .title h3 .score
+{
+	border: 1px solid #ccc;
+	border-top: none;
+	border-bottom: none;
+	background-image: url('/images/sic_shadow.png');
+	_background-image: none;
+}
+
+#firehose div.briefarticle a span { float: none; }
+.briefarticle { border-top: 1px solid #aaa; }
+#firehoselist .usermode .generaltitle .title h3 { padding-left: 60px !important; }
+
+.briefarticle .generaltitle .title h3 a { color: #066; }
 
 .briefarticle .generaltitle .title h3
 {
@@ -71,11 +102,43 @@
 	font-size: 85%;
 }
 
-.article .generaltitle .title .date,
-.article .generaltitle .title .nickname, .briefarticle .end { display: none; }
 .briefarticle .firehosetag { background: #999; }
-.briefarticle .details { display: none; }
-.article .firehosetag { background: #fff; }
+.briefarticle .details, .briefarticle .end { display: none; }
+
+
+/* tags */
+
+.briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagstitleopen { padding-bottom: 0px; }
+
+
+.briefarticle div.tags
+{
+	padding: 0 !important;
+	margin-top: -1px !important;
+}
+
+div.tags
+{
+	padding: 0;
+	margin-bottom: 2px !important;
+}
+
+div.tags div.tagtitleclosed,
+div.tags div.tagtitleopen
+{
+	position: static !important;
+	margin: 2px 0 0 0 !important;
+}
+
+div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
+{
+	padding-top: 0px !important;
+	font-size: 98%;
+	color: #777;
+}
+
+
+/* Icons */
 
 .up
 {
@@ -109,32 +172,6 @@
 	_position: relative !important;
 }
 
-.briefarticle div.tags
-{
-	padding: 0 !important;
-	margin-top: -1px !important;
-}
-
-div.tags
-{
-	padding: 0;
-	margin-bottom: 2px !important;
-}
-
-div.tags div.tagtitleclosed,
-div.tags div.tagtitleopen
-{
-	position: static !important;
-	margin: 2px 0 0 0 !important;
-}
-
-div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
-{
-	padding-top: 0px !important;
-	font-size: 98%;
-	color: #777;
-}
-
 .edit
 {
 	position: absolute !important;
@@ -156,6 +193,19 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	right: 28px;
 }
 
+.external { padding: 0 20px 0 5px; }
+
+.external a
+{
+	z-index: 1000;
+	width: 10px;
+	padding: 5px;
+	background: url('/images/sic_icons.png') no-repeat 0px -799px;
+	_background: url('/images/sic_icons.gif') no-repeat 0px -600px;
+	text-indent: -7000em;
+	position: absolute;
+}
+
 .reject
 {
 	z-index: 1000;
@@ -174,10 +224,12 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	color: #fff;
 	text-decoration: none;
 	font-weight: bold;
-	padding: 5px 0 5px 25px;
-	background: url('/images/sic_controls.png') no-repeat 0px 0px;
+	padding: 6px 0 4px 25px;
+	background: url('/images/sic_controls.png') no-repeat 0px 1px;
 	_background: url('/images/sic_controls.gif') no-repeat;
-	position: relative;
+	text-indent: -7000em;
+	position: absolute;
+	top: 0;
 }
 
 #pause a
@@ -188,7 +240,9 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	padding: 6px 0 4px 25px;
 	background: url('/images/sic_controls.png') no-repeat 0px -200px;
 	_background: url('/images/sic_controls.gif') no-repeat 0px -200px;
-	position: relative;
+	text-indent: -7000em;
+	position: absolute;
+	top: 0;
 }
 
 #desc a
@@ -199,7 +253,9 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	padding: 6px 0 4px 25px;
 	background: url('/images/sic_controls.png') no-repeat 0px -400px;
 	_background: url('/images/sic_controls.gif') no-repeat 0px -400px;
-	position: relative;
+	text-indent: -7000em;
+	position: absolute;
+	top: 0;
 }
 
 #asc a
@@ -210,7 +266,9 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	padding: 6px 0 4px 25px;
 	background: url('/images/sic_controls.png') no-repeat 0px -600px;
 	_background: url('/images/sic_controls.gif') no-repeat 0px -600px;
-	position: relative;
+	text-indent: -7000em;
+	position: absolute;
+	top: 0;
 }
 
 #full a
@@ -221,7 +279,9 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	padding: 6px 0 4px 25px;
 	background: url('/images/sic_controls.png') no-repeat 0px -800px;
 	_background: url('/images/sic_controls.gif') no-repeat 0px -800px;
-	position: relative;
+	text-indent: -7000em;
+	position: absolute;
+	top: 0;
 }
 
 #abbrev a
@@ -232,7 +292,9 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	padding: 6px 0 4px 25px;
 	background: url('/images/sic_controls.png') no-repeat 0px -1000px;
 	_background: url('/images/sic_controls.gif') no-repeat 0px -1000px;
-	position: relative;
+	text-indent: -7000em;
+	position: absolute;
+	top: 0;
 }
 
 #time a
@@ -243,7 +305,9 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	padding: 6px 0 4px 25px;
 	background: url('/images/sic_controls.png') no-repeat 0px -1200px;
 	_background: url('/images/sic_controls.gif') no-repeat 0px -1200px;
-	position: relative;
+	text-indent: -7000em;
+	position: absolute;
+	top: 0;
 }
 
 #popularity a
@@ -254,10 +318,16 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	padding: 6px 0 4px 25px;
 	background: url('/images/sic_controls.png') no-repeat 0px -1400px;
 	_background: url('/images/sic_controls.gif') no-repeat 0px -1400px;
-	position: relative;
+	text-indent: -7000em;
+	position: absolute;
+	top: 0;
 }
 
 /* Popularity */
+
+.score { padding: .5em .4em .6em .4em; }
+
+
 .pop0 { background: #000; }
 
 .pop1
@@ -307,5 +377,4 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	background: #fff;
 	color: #000;
 }
-
 
