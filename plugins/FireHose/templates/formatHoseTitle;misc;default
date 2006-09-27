@@ -24,7 +24,7 @@ END;
 title = the_skin_title _ item.title;
 title = "<a href='javascript:toggle_firehose_body(\"$item.id\", $adminmode)'>" _ title _ "</a>";
 IF item.url_id;
-        title = title _ "<span class=\"external\"><a href=\"" _ url.url _ "\" title=\"External link - " _ url.url _ "\">[-&gt;]</a></span>";
+        title = title _ "<span class=\"external\"><a href=\"" _ url.url _ "\" title=\"External link - " _ url.url _ "\" target=\"_blank\">[-&gt;]</a></span>";
 END;
 title = title _ " " _ '<span class="date">' _ item.createtime _ "</span> <span class='nickname'>" _ the_user.nickname _ "</span>";
 IF adminmode;

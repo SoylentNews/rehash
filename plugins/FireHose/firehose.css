@@ -79,6 +79,7 @@
 .briefarticle .details { display: none; }
 .article .firehosetag { background: #fff; }
 
+.article .vote {color: #cee}
 .vote {position: absolute; top: 2px; left: 0; width: 5em; text-align: center;}
 .up
 {
