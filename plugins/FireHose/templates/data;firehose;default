@@ -21,11 +21,18 @@ __template__
 	[%- IF adminmode && item.type == "submission" %]<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">[% END -%]
 	submitted
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
-	by [% the_user.nickname | strip_literal %]
+	by [% IF adminmode; %]
+		[% the_user.nickname | strip_literal %]
+		(<a href="[% gSkin.rootdir %]/users.pl?uid=[% the_user.uid %]">[% the_user.uid %]</a>)
+	[% END %]
 	[% IF extras && num_from_uid != '0' %]
 		([% accepted_from_uid %]/[% num_from_uid %]) 
 	[% END %]
-	[% item.name %] <a href="[% item.email %]">[% item.email %]</a> 
+	[% IF adminmode %]
+		([% item.name %])<a href="[% item.email | strip_attribute %]">[% item.email | strip_literal %]</a>
+	[% ELSE %]
+		[% IF item.email %]<a href="[% item.email | strip_attribute %]">[% END %][% item.name | strip_literal %][% IF item.email %]</a>[% END %]
+	[% END %]
 	[% IF extras && num_with_emaildomain != '0' %]
 		([% accepted_from_emaildomain %]/[% num_with_emaildomain %]) 
 	[% END %]

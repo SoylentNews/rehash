@@ -26,10 +26,16 @@ title = "<a href='javascript:toggle_firehose_body(\"$item.id\", $adminmode)'>" _
 IF item.url_id;
         title = title _ "<span class=\"external\"><a href=\"" _ url.url _ "\" title=\"External link - " _ url.url _ "\" target=\"_blank\">[-&gt;]</a></span>";
 END;
-title = title _ " " _ '<span class="date">' _ item.createtime _ "</span> <span class='nickname'>" _ the_user.nickname _ "</span>";
+title = title _ " " _ '<span class="date">' _ item.createtime _ "</span> <span class='nickname'>" _ item.name _ "</span>";
 IF adminmode;
 	reject_checkbox = PROCESS reject id = item.id;
-	title = reject_checkbox _ "<span class='score pop" _  item.popularity _ "'> " _  item.popularity _ "</span> " _ title;
+
+	pop_val = item.popularity / 3;
+	pop_val = pop_val > 8 ? 8 : pop_val;
+	pop_val = pop_val < 0 ? 0 : pop_val;;
+	pop_val = pop_val.int;
+	pop_disp = item.popularity.int
+	title = reject_checkbox _ "<span class='score pop" _  pop_val _ "'> " _  pop_disp _ "</span> " _ title;
 END;
 	%]
 [% IF showtitle; title; END; %]

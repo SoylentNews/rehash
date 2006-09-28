@@ -76,7 +76,7 @@ END %]
 			[% IF bodycontent;
 	   		   introtext = item.introtext;
 			   # set introtext with extra data we want
-			   PROCESS formatHoseIntro;
+			   IF introtext; PROCESS formatHoseIntro; END;
 			END %]
 			[% introtext %]
 		</div>
