@@ -2,12 +2,12 @@
 # $Id$
 #
 
-INSERT INTO reskey_resources VALUES (100, 'ajax_base');
-INSERT INTO reskey_resources VALUES (101, 'ajax_admin');
-INSERT INTO reskey_resources VALUES (102, 'ajax_user');
-INSERT INTO reskey_resources VALUES (103, 'ajax_subscriber');
-INSERT INTO reskey_resources VALUES (104, 'ajax_tags_read');
-INSERT INTO reskey_resources VALUES (105, 'ajax_tags_write');
+INSERT INTO reskey_resources VALUES (100, 'ajax_base', 'no');
+INSERT INTO reskey_resources VALUES (101, 'ajax_admin', 'no');
+INSERT INTO reskey_resources VALUES (102, 'ajax_user', 'no');
+INSERT INTO reskey_resources VALUES (103, 'ajax_subscriber', 'no');
+INSERT INTO reskey_resources VALUES (104, 'ajax_tags_read', 'no');
+INSERT INTO reskey_resources VALUES (105, 'ajax_tags_write', 'no');
 
 
 ##### ajax_base
