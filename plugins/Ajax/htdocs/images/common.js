@@ -240,6 +240,18 @@ function tagsOpenAndEnter(id, tagname, is_admin, type) {
 	tagsShowBody(id, is_admin, tagname, type);
 }
 
+function attachCompleter( obj, id, is_admin, type, tagDomain ) {
+  var callbackParams = new Object();
+  callbackParams._id = id;
+  callbackParams._is_admin = is_admin;
+  callbackParams._type = type;
+  
+  if ( !YAHOO.slashdot.gCompleterWidget )
+    YAHOO.slashdot.gCompleterWidget = new YAHOO.slashdot.AutoCompleteWidget();
+
+  YAHOO.slashdot.gCompleterWidget.attach(obj, callbackParams, tagDomain);
+}
+
 function reportError(request) {
 	// replace with something else
 	alert("error");
