@@ -296,7 +296,7 @@ sub rejectItem {
 	return unless $id && $firehose;
 	my $item = $firehose->getFireHose($id);
 	if ($item) {
-		$firehose->sqlUpdate("firehose", { rejected => "yes" }, "id=$id_q");
+		$firehose->setFireHose($id, { rejected => "yes" });
 		if ($item->{type} eq "submission") {
 			if ($item->{srcid}) {
 				my $n_q = $firehose->sqlQuote($item->{srcid});
@@ -767,7 +767,7 @@ sub getAndSetOptions {
 		}
 		
 	} else {
-		$options->{orderby} = $user->{firehose_orderyby} || "createtime";
+		$options->{orderby} = $user->{firehose_orderby} || "createtime";
 	}
 	
 	if ($form->{orderdir}) {
@@ -856,7 +856,6 @@ sub getAndSetOptions {
 		$options->{public} = "yes";
 		$options->{daysback} = 1;
 	}
-
 	return $options;
 }
 
