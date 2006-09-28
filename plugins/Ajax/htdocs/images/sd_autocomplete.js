@@ -2,7 +2,7 @@ YAHOO.namespace("slashdot");
 
 YAHOO.slashdot.gCompleterWidget = null;
 
-YAHOO.slashdot.actionTags = ["none", "quick", "hold", "back"];
+YAHOO.slashdot.actionTags = ["none", "quik", "hold", "back"];
 YAHOO.slashdot.sectionTags = [ "apache",
 "apple",
 "askslashdot",
