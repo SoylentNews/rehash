@@ -4,6 +4,9 @@
 
 INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_tags', '3600', 'Seconds to cache tag data in memcached');
 INSERT INTO vars (name, value, description) VALUES ('tags_cache_expire', '180', 'Local data cache expiration for tags');
+INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_minc', '4', 'Minimum value of c (count) for tagnames returned by listTagnamesByPrefix');
+INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_mins', '3', 'Minimum value of s (clout sum) for tagnames returned by listTagnamesByPrefix');
+INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_num', '10', 'Number of tagnames returned by listTagnamesByPrefix');
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_allowread', '0', 'Who is allowed to see existing tags on stories (incl. search on them)? 0=nobody 1=admins 2=subscribers 2.5=tags_stories_allowread ACL 3=non-neg. karma 4=all logged in (3,4: up to tags_userfrac_read)');
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_allowwrite', '0', 'Who is allowed to tag stories? 0=nobody 1=admins 2=subscribers 2.5=tags_stories_allowwrite ACL 3=non-neg. karma 4=all logged in (3,4: up to tags_userfrac_write)');
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_examples_pre', 'dupe typo', 'Example tags for stories before they go live');
@@ -30,6 +33,7 @@ INSERT INTO ajax_ops VALUES (NULL, 'tags_get_admin_story', 'Slash::Tags', 'ajaxG
 INSERT INTO ajax_ops VALUES (NULL, 'tags_get_admin_url', 'Slash::Tags', 'ajaxGetAdminUrl', 'ajax_admin', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'tags_admin_commands', 'Slash::Tags', 'ajaxProcessAdminTags', 'ajax_admin', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'tags_history', 'Slash::Tags', 'ajaxTagHistory', 'ajax_admin', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'tags_list_tagnames', 'Slash::Tags', 'ajaxListTagnames', 'ajax_tags_read', 'createuse');
 
 INSERT INTO menus VALUES (NULL, 'tagszg', 'Active', 'active', '[% gSkin.rootdir %]/tags',        1, 1, 1);
 INSERT INTO menus VALUES (NULL, 'tagszg', 'Recent', 'recent', '[% gSkin.rootdir %]/tags/recent', 1, 1, 2);

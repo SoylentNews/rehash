@@ -1084,6 +1084,14 @@ sub ajaxTagHistory {
 	slashDisplay('taghistory', { tags => $tags_ar }, { Return => 1 } );
 }
 
+sub ajaxListTagnames {
+	my($slashdb, $constants, $user, $form) = @_;
+	my $prefix = '';
+	$prefix = lc($1) if $form->{prefix} =~ /([A-Za-z]+)/;
+	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+	return $tags_reader->listTagnamesByPrefix($prefix);
+}
+
 { # closure
 my @clout_reduc_map = qw(  0.15  0.50  0.90  0.99  1.00  ); # should be a var
 sub processAdminCommand {
@@ -1362,6 +1370,49 @@ sub tagnameorder {
 	my($a1, $a2) = $a =~ /(^\!)?(.*)/;
 	my($b1, $b2) = $b =~ /(^\!)?(.*)/;
 	$a2 cmp $b2 || $a1 cmp $b1;
+}
+
+sub listTagnamesByPrefix {
+	my($self, $prefix_str, $options) = @_;
+	my $constants = getCurrentStatic();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $like_str = $self->sqlQuote("$prefix_str%");
+	my $minc = $self->sqlQuote($options->{minc} || $constants->{tags_prefixlist_minc} ||  4);
+	my $mins = $self->sqlQuote($options->{mins} || $constants->{tags_prefixlist_mins} ||  3);
+	my $num  = $options->{num}  || $constants->{tags_prefixlist_num};
+	$num = 10 if !$num || $num !~ /^(\d+)$/ || $num < 1;
+
+	my $mcd = undef;
+	$mcd = $self->getMCD() unless $options;
+	my $mcdkey = "$self->{_mcd_keyprefix}:tag_pref:";
+	if ($mcd) {
+		my $ret_str = $mcd->get("$mcdkey$prefix_str");
+		return $ret_str if $ret_str;
+	}
+
+	my $ar = $reader->sqlSelectAllHashrefArray(
+		'tagname,
+		 COUNT(DISTINCT tags.uid) AS c,
+		 SUM(tag_clout * IF(value IS NULL, 1, value)) AS s,
+		 COUNT(DISTINCT tags.uid) + SUM(tag_clout * IF(value IS NULL, 1, value)) AS sc',
+		'tags, users_info, tagnames
+		 LEFT JOIN tagname_params USING (tagnameid)',
+		"tagnames.tagnameid=tags.tagnameid
+		 AND tags.uid=users_info.uid
+		 AND tagname LIKE $like_str",
+		"GROUP BY tagname
+		 HAVING c >= $minc AND s >= $mins
+		 ORDER BY sc DESC
+		 LIMIT $num");
+	my $ret_str = '';
+	for my $hr (@$ar) {
+		$ret_str .= sprintf "%s\t%d\n", $hr->{tagname}, $hr->{sc};
+	}
+	if ($mcd) {
+		my $mcdexp = $constants->{tags_cache_expire} || 180;
+		$mcd->set("$mcdkey$prefix_str", $ret_str, $mcdexp)
+	}
+	return $ret_str;
 }
 
 #################################################################

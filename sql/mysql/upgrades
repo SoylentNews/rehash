@@ -4088,3 +4088,9 @@ UPDATE vars SET value = 'T_2_5_0_127' WHERE name = 'cvs_tag_currentcode';
 # Updates for plugins/FireHose
 ALTER TABLE firehose ADD COLUMN activity FLOAT NOT NULL DEFAULT '0' AFTER popularity, ADD UNIQUE globjid (globjid);
 
+# Updates for plugins/Tags
+INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_minc', '4', 'Minimum value of c (count) for tagnames returned by listTagnamesByPrefix');
+INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_mins', '3', 'Minimum value of s (clout sum) for tagnames returned by listTagnamesByPrefix');
+INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_num', '10', 'Number of tagnames returned by listTagnamesByPrefix');
+INSERT INTO ajax_ops VALUES (NULL, 'tags_list_tagnames', 'Slash::Tags', 'ajaxListTagnames', 'ajax_tags_read', 'createuse');
+
