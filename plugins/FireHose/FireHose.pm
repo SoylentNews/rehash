@@ -854,7 +854,7 @@ sub getAndSetOptions {
 
 	my $adminmode = 0;
 	$adminmode = 1 if $user->{is_admin};
-	if(defined $options->{firehose_usermode}) {
+	if (defined $options->{firehose_usermode}) {
 		$adminmode = 0 if $options->{firehose_usermode};
 	} else {
 		$adminmode = 0 if $user->{firehose_usermode};

@@ -241,15 +241,15 @@ function tagsOpenAndEnter(id, tagname, is_admin, type) {
 }
 
 function attachCompleter( obj, id, is_admin, type, tagDomain ) {
-  var callbackParams = new Object();
-  callbackParams._id = id;
-  callbackParams._is_admin = is_admin;
-  callbackParams._type = type;
+	var callbackParams = new Object();
+	callbackParams._id = id;
+	callbackParams._is_admin = is_admin;
+	callbackParams._type = type;
   
-  if ( !YAHOO.slashdot.gCompleterWidget )
-    YAHOO.slashdot.gCompleterWidget = new YAHOO.slashdot.AutoCompleteWidget();
+	if ( !YAHOO.slashdot.gCompleterWidget )
+		YAHOO.slashdot.gCompleterWidget = new YAHOO.slashdot.AutoCompleteWidget();
 
-  YAHOO.slashdot.gCompleterWidget.attach(obj, callbackParams, tagDomain);
+	YAHOO.slashdot.gCompleterWidget.attach(obj, callbackParams, tagDomain);
 }
 
 function reportError(request) {
@@ -323,14 +323,14 @@ function toggle_firehose_body(id, is_admin) {
 	if (fhbody.className == "empty") {
 		var handlers = {
 			onComplete: function() { 
-			firehose_get_admin_extras(id); 
+				firehose_get_admin_extras(id); 
 			}
 		};
 		if (is_admin) {
 			ajax_update(params, 'fhbody-'+id, handlers);
 		} else {
 			ajax_update(params, 'fhbody-'+id);
-	}
+		}
 		fhbody.className = "body";
 		fh.className = "article";
 		if (is_admin)
