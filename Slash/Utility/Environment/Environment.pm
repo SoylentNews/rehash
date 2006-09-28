@@ -1680,7 +1680,7 @@ print STDERR scalar(localtime) . " Env.pm $$ userHasDaypass uid=$user->{uid} cs=
 				   $write >= 4
 				|| $write >= 3 && $user->{karma} >= 0;
 			if ($user->{tags_canwrite_stories} && $constants->{tags_userfrac_write} < 1) {
-				$max_uid = $slashdb->countUser({ max => 1 });
+				$max_uid = $slashdb->countUsers({ max => 1 });
 				if ($user->{uid} > $max_uid*$constants->{tags_userfrac_write}) {
 					$user->{tags_canwrite_stories} = 0;
 				}
@@ -1704,7 +1704,7 @@ print STDERR scalar(localtime) . " Env.pm $$ userHasDaypass uid=$user->{uid} cs=
 					   $read >= 4
 					|| $read >= 3 && $user->{karma} >= 0;
 			if ($user->{tags_canread_stories} && $constants->{tags_userfrac_read} < 1) {
-				$max_uid ||= $slashdb->countUser({ max => 1 });
+				$max_uid ||= $slashdb->countUsers({ max => 1 });
 				if ($user->{uid} > $max_uid*$constants->{tags_userfrac_read}) {
 					$user->{tags_canread_stories} = 0;
 				}
