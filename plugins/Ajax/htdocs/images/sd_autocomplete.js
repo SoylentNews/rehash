@@ -3,8 +3,30 @@ YAHOO.namespace("slashdot");
 YAHOO.slashdot.gCompleterWidget = null;
 
 YAHOO.slashdot.actionTags = ["none", "quick", "hold", "back"];
-YAHOO.slashdot.sectionTags = ["Main", "Apple", "AskSlashdot", "Backslash", "Books", "Developers", "Games", "Hardware", "Interviews",
-                   "IT", "Linux", "Politics", "Science", "YRO"];
+YAHOO.slashdot.sectionTags = [ "apache",
+"apple",
+"askslashdot",
+"awards",
+"backslash",
+"books",
+"bsd",
+"developers",
+"features",
+"games",
+"hardware",
+"interviews",
+"it",
+"linux",
+"mainpage",
+"politics",
+"polls",
+"radio",
+"science",
+"search",
+"tacohell",
+"vendors",
+"vendor_amd",
+"yro" ];
 
     var actionsDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.actionTags);
     var sectionsDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.sectionTags);
