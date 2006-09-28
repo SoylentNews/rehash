@@ -32,7 +32,7 @@ __template__
 	[% IF tags_example.size %]
 		<div>Examples:
 		[% FOR t = tags_example -%]
-			<span class="tagname"><a onClick="attachCompleter(this,'[% id %]','[% user.is_admin %]','firehose)">[% t | strip_html %]</a></span>[% IF !loop.last() %], [% END -%]
+			<span class="tagname"><a onClick="attachCompleter(this,'[% id %]','[% user.is_admin %]','firehose', 1)">[% t | strip_html %]</a></span>[% IF !loop.last() %], [% END -%]
 		[%- END %]
 		</div>
 	[% END %]
