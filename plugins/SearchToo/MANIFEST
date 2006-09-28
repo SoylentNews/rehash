@@ -2,10 +2,15 @@ MANIFEST
 Makefile.PL
 PLUGIN
 SearchToo/Classic.pm
+SearchToo/Indexer.pm
+SearchToo/Kinosearch.pm
 SearchToo/Makefile.PL
+SearchToo/Plucene.pm
 SearchToo.pm
 dump
+schema.sql
 searchtoo.pl
+search_index.pl
 templates/commentsearch;searchtoo;default
 templates/data;searchtoo;default
 templates/journalsearch;searchtoo;default

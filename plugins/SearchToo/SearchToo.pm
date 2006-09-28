@@ -23,7 +23,7 @@ sub new {
 	my $self = getObject($api_class, $user, @args);
 
 	if (!$self) {
-		warn "Could not get $api_class";
+		warn "Could not get $api_class: $@";
 		$self = {};
 		bless($self, $class);
 		$self->{virtual_user} = $user;
@@ -106,16 +106,19 @@ sub _fudge_data {
 
 	my %processed;
 
-	if ($data->{topic}) {
-		my @topics = ref $data->{topic}
-			? @{$data->{topic}}
-			: $data->{topic};
+	my $topic = $data->{tids} || $data->{tid} || $data->{topic};
+	if ($topic) {
+		my @topics = ref $topic
+			? @$topic
+			: $topic;
 		$processed{topic} = \@topics;
 	} else {
 		$processed{topic} = [];
 	}
 
-	if ($data->{section}) {
+	if ($data->{primaryskid}) {
+		$processed{section} = $data->{primaryskid};
+	} elsif ($data->{section}) {
 		# make sure we pass a skid
 		if ($data->{section} =~ /^\d+$/) {
 			$processed{section} = $data->{section};
@@ -125,6 +128,11 @@ sub _fudge_data {
 			my $skid = $reader->getSkidFromName($data->{section});
 			$processed{section} = $skid if $skid;
 		}
+	}
+
+	if ($data->{date}) {
+		my $format = '%Y%m%d%H%M%S';
+		$processed{date} = timeCalc($data->{date}, '%Y%m%d%H%M%S');
 	}
 
 	return \%processed;

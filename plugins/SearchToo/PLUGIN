@@ -2,6 +2,8 @@
 name=SearchToo
 htdoc=searchtoo.pl
 mysql_dump=dump
+mysql_schema=schema.sql
+task=search_index.pl
 description="SearchToo is the frontend search API for Slash"
 requiresplugin=Search
 template=templates/commentsearch;searchtoo;default
