@@ -865,14 +865,18 @@ sub getFireHoseTagsTop {
 	my $constants 	= getCurrentStatic();
 	my $tags_top	 = [];
 	push @$tags_top, ($item->{type});
-	push @$tags_top, ($item->{category} || "none") if $user->{is_admin} && !$user->{firehose_usermode};
+	if ($user->{is_admin} && !$user->{firehose_usermode}) {
+		my $cat = $item->{category} || "none";
+		$cat .= ":1";
+		push @$tags_top, $cat;
+	}
 	if ($item->{primaryskid} && $item->{primaryskid} != $constants->{mainpage_skid}) {
 		my $the_skin = $self->getSkin($item->{primaryskid});
-		push @$tags_top, $the_skin->{name};
+		push @$tags_top, "$the_skin->{name}:2";
 	}
 	if ($item->{tid}) {
 		my $the_topic = $self->getTopic($item->{tid});
-		push @$tags_top, $the_topic->{keyword};
+		push @$tags_top, "$the_topic->{keyword}:3";
 	}
 	return $tags_top;
 }
