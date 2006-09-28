@@ -15,6 +15,6 @@ __seclev__
 __template__
 [% IF tags_top.size %]
 	[% FOR t = tags_top -%]
-		<span class="tagname">[% IF user.tags_canwrite_stories %]<a href="javascript:tagsOpenAndEnter('[% id %]','[% t %]','[% user.is_admin %]','firehose')">[% END %][% t | strip_html %][% IF user.tags_canwrite_stories %]</a>[% END %]</span>[% IF !loop.last() %], [% END -%]
+		<span class="tagname">[% IF user.tags_canwrite_stories %]<a onClick="attachCompleter(this, '[% id %]','[% user.is_admin %]','firehose', 1)">[% END %][% t | strip_html %][% IF user.tags_canwrite_stories %]</a>[% END %]</span>[% IF !loop.last() %], [% END -%]
 	[%- END %]
 [% END %]
