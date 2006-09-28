@@ -218,7 +218,7 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 				params['op'] = 'tags_get_admin_firehose';
 				params['id'] = id;
 			}
-			//ajax_update(params, tagsadminid);
+			ajax_update(params, tagsadminid);
 		}
 
 	} else {
