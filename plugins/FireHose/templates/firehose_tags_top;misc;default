@@ -14,7 +14,9 @@ __seclev__
 10000
 __template__
 [% IF tags_top.size %]
-	[% FOR t = tags_top -%]
-		<span class="tagname">[% IF user.tags_canwrite_stories %]<a onClick="attachCompleter(this, '[% id %]','[% user.is_admin %]','firehose', 1)">[% END %][% t | strip_html %][% IF user.tags_canwrite_stories %]</a>[% END %]</span>[% IF !loop.last() %], [% END -%]
+	[% FOR t = tags_top;
+		parts = t.split(":");
+		parts.1 = parts.1 || "0"; %]
+		<span class="tagname">[% IF user.tags_canwrite_stories %]<a onClick="attachCompleter(this, '[% id %]','[% user.is_admin %]','firehose', [% parts.1 %])">[% END %][% parts.0 | strip_html %][% IF user.tags_canwrite_stories %]</a>[% END %]</span>[% IF !loop.last() %], [% END -%]
 	[%- END %]
 [% END %]
