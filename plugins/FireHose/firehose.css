@@ -174,8 +174,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	position: absolute;
 	right: 10px;
 	top: .5em;
-	background: url(//images.slashdot.org/sic_icons.png') no-repeat 0px -602px;
-	_background: url(//images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
+	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -602px;
+	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
 }
 
 .reject input { visibility: hidden; }
@@ -186,8 +186,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url(//images.slashdot.org/sic_controls.png') no-repeat 0px 1px;
-	_background: url(//images.slashdot.org/sic_controls.gif') no-repeat;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px 1px;
+	_background: url'(//images.slashdot.org/sic_controls.gif') no-repeat;
 	text-indent: -7000em; 
 	position: absolute;
 	top: 0;
@@ -199,8 +199,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url(//images.slashdot.org/sic_controls.png') no-repeat 0px -200px;
-	_background: url(//images.slashdot.org/sic_controls.gif') no-repeat 0px -200px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -200px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -200px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -212,8 +212,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url(//images.slashdot.org/sic_controls.png') no-repeat 0px -400px;
-	_background: url(//images.slashdot.org/sic_controls.gif') no-repeat 0px -400px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -400px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -400px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -225,8 +225,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url(//images.slashdot.org/sic_controls.png') no-repeat 0px -600px;
-	_background: url(//images.slashdot.org/sic_controls.gif') no-repeat 0px -600px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -600px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -600px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -238,8 +238,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url(//images.slashdot.org/sic_controls.png') no-repeat 0px -800px;
-	_background: url(//images.slashdot.org/sic_controls.gif') no-repeat 0px -800px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -800px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -800px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -251,8 +251,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url(//images.slashdot.org/sic_controls.png') no-repeat 0px -1000px;
-	_background: url(//images.slashdot.org/sic_controls.gif') no-repeat 0px -1000px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -1000px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -1000px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -264,8 +264,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url(//images.slashdot.org/sic_controls.png') no-repeat 0px -1200px;
-	_background: url(//images.slashdot.org/sic_controls.gif') no-repeat 0px -1200px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -1200px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -1200px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -277,8 +277,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url(//images.slashdot.org/sic_controls.png') no-repeat 0px -1400px;
-	_background: url(//images.slashdot.org/sic_controls.gif') no-repeat 0px -1400px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -1400px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -1400px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
