@@ -392,6 +392,10 @@ sub getOldestUnm2dMod {
 }
 
 ########################################################
+# This is lame because of course Slash can have more than one
+# backup DB, and the virtual users for those DBs are listed
+# in the 'dbs' table not in $constants->{backup_db_user}.
+# This should be updated...  XXX
 # Note, we have to use $slashdb here instead of $self.
 sub getSlaveDBLagCount {
 	my($self) = @_;
