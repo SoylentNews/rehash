@@ -10,7 +10,7 @@ use Slash::Constants ':slashd';
 
 use vars qw( %task $me );
 
-$task{$me}{timespec} = '2-59/5 * * *';
+$task{$me}{timespec} = '2-59/5 * * * *';
 $task{$me}{timespec_panic_1} = ''; # if panic, this can wait
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
