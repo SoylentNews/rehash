@@ -164,7 +164,7 @@ sub run {
 	my $affected_id_q = $self->sqlQuote($affected_id);
 	my $fhid = $self->sqlSelect('id', 'firehose', "globjid = $affected_id_q");
 	my $firehose_db = getObject('Slash::FireHose');
-	warn "Slash::Tagbox::FHPopularity->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || $firehose_db;
+	warn "Slash::Tagbox::FHPopularity->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
 print STDERR "Slash::Tagbox::FHPopularity->run setting $fhid ($affected_id) to $popularity\n";
 	$firehose_db->setFireHose($fhid, { popularity => $popularity });
 }
