@@ -12460,6 +12460,14 @@ sub addGlobjTargetsToHashrefArray {
 # that this method kind of straddles the boundary between system logic
 # and application logic.
 #
+# Generally speaking, for each new globj type added to the globj_types
+# table, a new _addGlobjEssentials_foo call will have to appear here.
+#
+# Data returned is of course not guaranteed to be data which the current
+# user is allowed to view.  E.g. a list of stories should be grepped
+# on checkStoryViewable(), and submissions probably eliminated entirely,
+# before shown to a nonadmin user.
+#
 # Currently, the standard set of data which is added to each hashref is:
 # * title = Text string which best serves as the title for the object.
 #           This may contain raw data entered by an admin... or by a
@@ -12480,40 +12488,11 @@ sub addGlobjEssentialsToHashrefArray {
 
 	my %data = ( );
 
-	my %stoids = (
-		map { ( $_->{globj_target_id}, $_->{globjid} ) }
-		grep { $_->{globj_type} eq 'stories' }
-		@$ar
-	);
-	my @stoids = keys %stoids;
-	for my $stoid (@stoids) {
-		my $globjid = $stoids{$stoid};
-		my $story = $self->getStory($stoid);
-		my $data_ar = linkStory({ stoid => $stoid });
-		my($url, $title) = @$data_ar;
-#print STDERR "for stoid $stoid url='$url' title='$title' time='$story->{time}'\n";
-		$data{$globjid}{url} = $url;
-		$data{$globjid}{title} = $title;
-		$data{$globjid}{created_at} = $story->{time};
-	}
+	$self->_addGlobjEssentials_stories($ar, \%data);
+	$self->_addGlobjEssentials_urls($ar, \%data);
+	$self->_addGlobjEssentials_submissions($ar, \%data);
+	$self->_addGlobjEssentials_journals($ar, \%data);
 
-	my %url_ids = (
-		map { ( $_->{globj_target_id}, $_->{globjid} ) }
-		grep { $_->{globj_type} eq 'urls' }
-		@$ar
-	);
-	my @url_ids = sort { $a <=> $b } keys %url_ids;
-	my $url_str = join(',', @url_ids);
-	my $url_hr = $url_str
-		? $self->sqlSelectAllHashref('url_id', 'url_id, url, createtime, initialtitle, validatedtitle',
-			'urls', "url_id IN ($url_str)")
-		: [ ];
-	for my $url_id (@url_ids) {
-		my $globjid = $url_ids{$url_id};
-		$data{$globjid}{url} = $url_hr->{$url_id}{url};
-		$data{$globjid}{title} = $url_hr->{$url_id}{validatedtitle} || $url_hr->{$url_id}{initialtitle};
-		$data{$globjid}{created_at} = $url_hr->{$url_id}{createtime};
-	}
 #use Data::Dumper; print STDERR "data: " . Dumper(\%data);
 
 	# Scan over the arrayref and insert the information from %data
@@ -12524,6 +12503,94 @@ sub addGlobjEssentialsToHashrefArray {
 		$object->{url} = $data{$globjid}{url};
 		$object->{title} = $data{$globjid}{title};
 		$object->{created_at} = $data{$globjid}{created_at};
+	}
+}
+
+sub _addGlobjEssentials_getids {
+	my($ar, $type) = @_;
+	my %ids = (
+		map { ( $_->{globj_target_id}, $_->{globjid} ) }
+		grep { $_->{globj_type} eq $type }
+		@$ar
+	);
+	return \%ids;
+}
+
+sub _addGlobjEssentials_stories {
+	my($self, $ar, $data_hr) = @_;
+	my $stoids_hr = _addGlobjEssentials_getids($ar, 'stories');
+	my @stoids = keys %$stoids_hr;
+	for my $stoid (@stoids) {
+		my $globjid = $stoids_hr->{$stoid};
+		my $story = $self->getStory($stoid);
+		my $data_ar = linkStory({ stoid => $stoid });
+		my($url, $title) = @$data_ar;
+#print STDERR "for stoid $stoid url='$url' title='$title' time='$story->{time}'\n";
+		$data_hr->{$globjid}{url} = $url;
+		$data_hr->{$globjid}{title} = $title;
+		$data_hr->{$globjid}{created_at} = $story->{time};
+	}
+}
+
+sub _addGlobjEssentials_urls {
+	my($self, $ar, $data_hr) = @_;
+	my $urls_hr = _addGlobjEssentials_getids($ar, 'urls');
+	my @url_ids = sort { $a <=> $b } keys %$urls_hr;
+	my $id_str = join(',', @url_ids);
+	my $urldata_hr = $id_str
+		? $self->sqlSelectAllHashref('url_id',
+			'url_id, url, createtime, initialtitle, validatedtitle',
+			'urls',
+			"url_id IN ($id_str)")
+		: { };
+	for my $url_id (@url_ids) {
+		my $globjid = $urls_hr->{$url_id};
+		$data_hr->{$globjid}{url} = $urldata_hr->{$url_id}{url};
+		$data_hr->{$globjid}{title} = $urldata_hr->{$url_id}{validatedtitle}
+			|| $urldata_hr->{$url_id}{initialtitle};
+		$data_hr->{$globjid}{created_at} = $urldata_hr->{$url_id}{createtime};
+	}
+}
+
+sub _addGlobjEssentials_submissions {
+	my($self, $ar, $data_hr) = @_;
+	my $skins = $self->getSkins();
+	my $submissions_hr = _addGlobjEssentials_getids($ar, 'submissions');
+	my @subids = sort { $a <=> $b } keys %$submissions_hr;
+	my $subid_str = join(',', @subids);
+	my $submissiondata_hr = $subid_str
+		? $self->sqlSelectAllHashref('subid',
+			'subid, subj, time, primaryskid',
+			'submissions',
+			"subid IN ($subid_str)")
+		: { };
+	for my $subid (@subids) {
+		my $globjid = $submissions_hr->{$subid};
+		my $skin = $skins->{ $submissiondata_hr->{primaryskid} };
+		$data_hr->{$globjid}{url} = "$skin->{rootdir}/submit.pl?op=viewsub&subid=$subid";
+		$data_hr->{$globjid}{title} = $submissiondata_hr->{subj};
+		$data_hr->{$globjid}{created_at} = $submissiondata_hr->{time};
+	}
+}
+
+sub _addGlobjEssentials_journals {
+	my($self, $ar, $data_hr) = @_;
+	my $constants = getCurrentStatic();
+	my $journals_hr = _addGlobjEssentials_getids($ar, 'journals');
+	my @journal_ids = sort { $a <=> $b } keys %$journals_hr;
+	my $id_str = join(',', @journal_ids);
+	my $journaldata_hr = $id_str
+		? $self->sqlSelectAllHashref('id',
+			'id, journals.uid, date, description, nickname',
+			'journals, users',
+			"id IN ($id_str) AND journals.uid=users.uid")
+		: { };
+	for my $id (@journal_ids) {
+		my $globjid = $journals_hr->{$id};
+		my $fixnick = $journaldata_hr->{nickname};
+		$data_hr->{$globjid}{url} = "$constants->{rootdir}/~$fixnick/journal/$id";
+		$data_hr->{$globjid}{title} = $journaldata_hr->{subj};
+		$data_hr->{$globjid}{created_at} = $journaldata_hr->{time};
 	}
 }
 
