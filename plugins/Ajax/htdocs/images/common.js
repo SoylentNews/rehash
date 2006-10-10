@@ -301,7 +301,7 @@ function setOneTopTagForFirehose(id, newtag) {
   params['op'] = 'firehose_update_one_tag';
   params['id'] = id;
   params['tags'] = newtag;
-  params['reskey'] = reskeyel.value;
+  // params['reskey'] = reskeyel.value;
   ajax_update(params, '');
 }
 
