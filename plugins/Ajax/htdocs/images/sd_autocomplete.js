@@ -213,31 +213,60 @@ YAHOO.slashdot.AutoCompleteWidget = function()
     this._spareInput = document.getElementById("ac-select-input");
 
     this._sourceEl = null;
-    this._tagField = null;
+    this._denyNextAttachTo = null;
+
+    YAHOO.util.Event.addListener(document.body, "click", this._onClick, this, true);
   }
 
-YAHOO.slashdot.AutoCompleteWidget.prototype.sourceIsEditableText = function()
-  {
-    return this._sourceEl && ((this._sourceEl.type == "text") || (this._sourceEl.type == "textarea"));
-  }
-
-YAHOO.slashdot.AutoCompleteWidget.prototype.sourceIsStaticText = function()
+YAHOO.slashdot.AutoCompleteWidget.prototype._needsSpareInput = function()
   {
     return this._sourceEl && (this._sourceEl.type != "text") && (this._sourceEl.type != "textarea");
   }
 
-YAHOO.slashdot.AutoCompleteWidget.prototype._show = function()
+YAHOO.slashdot.AutoCompleteWidget.prototype._newCompleter = function( tagDomain )
   {
+    var c = null;
+    if ( this._needsSpareInput() )
+      {
+        c = new YAHOO.widget.AutoComplete("ac-select-input", "ac-choices", YAHOO.slashdot.dataSources[tagDomain]);
+        c.minQueryLength = 0;
+        c.queryDelay = 0;
+        c.typeAhead = true;
+        c.autoHighlight = false;
+        c.maxResultsDisplayed = 25;
+      }
+    else
+      {
+        c = new YAHOO.widget.AutoComplete(this._sourceEl, "ac-choices", YAHOO.slashdot.dataSources[tagDomain]);
+        c.minQueryLength = 1;
+        c.queryDelay = 0.3;
+        c.typeAhead = true;
+        c.queryMatchSubset = true;
+        c.delimChar = " ";
+      }
+    return c;
+  }
+
+YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParams, tagDomain )
+  {
+    this._sourceEl = obj;
+    this._callbackParams = callbackParams;
+    this._completer = this._newCompleter(tagDomain);
+
     if ( this._sourceEl && YAHOO.util.Dom.hasClass(this._widget, "hidden") )
       {
         YAHOO.util.Dom.removeClass(this._widget, "hidden");
         YAHOO.util.Dom.addClass(this._sourceEl, "ac-source");
 
-        if ( this.sourceIsStaticText() )
+        if ( this._needsSpareInput() )
           {
             YAHOO.util.Dom.removeClass(this._spareInput, "hidden");
             this._spareInput.value = "";
             this._spareInput.focus();
+
+            this._completer.itemSelectEvent.subscribe(this._onItemSelectEvent, this);
+            this._completer.textboxBlurEvent.subscribe(this._onTextboxBlurEvent, this);
+            YAHOO.util.Event.addListener(this._spareInput, "keyup", this._onTextboxKeyUp, this, true);
           }
         else
           YAHOO.util.Dom.addClass(this._spareInput, "hidden");
@@ -253,7 +282,21 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._hide = function()
     YAHOO.util.Dom.addClass(this._widget, "hidden");
     YAHOO.util.Dom.addClass(this._spareInput, "hidden");
     if ( this._sourceEl )
-      YAHOO.util.Dom.removeClass(this._sourceEl, "ac-source");
+      {
+        YAHOO.util.Dom.removeClass(this._sourceEl, "ac-source");
+        if ( this._needsSpareInput() )
+          {
+            this._completer.itemSelectEvent.unsubscribe(this._onItemSelectEvent, this);
+            this._completer.textboxBlurEvent.unsubscribe(this._onTextboxBlurEvent, this);
+            YAHOO.util.Event.removeListener(this._spareInput, "keyup", this._onTextboxKeyUp, this, true);
+          }
+
+        this._sourceEl = null;
+        this._callbackParams = null;
+        this._completer = null;
+      }
+
+    this._denyNextAttachTo = null;
   }
 
 YAHOO.slashdot.AutoCompleteWidget.prototype.attach = function( obj, callbackParams, tagDomain )
@@ -262,63 +305,55 @@ YAHOO.slashdot.AutoCompleteWidget.prototype.attach = function( obj, callbackPara
     if ( typeof obj == "string" )
       newSourceEl = document.getElementById(obj);
 
-    if ( this._sourceEl != newSourceEl )
-      {
-        this._hide();
-        this._sourceEl = newSourceEl;
-        this.callbackParams = callbackParams;
+      // act like a menu: if we click on the same trigger while visible, hide
+    var denyThisAttach = this._denyNextAttachTo == newSourceEl;
+    this._denyNextAttachTo = null;
+    if ( denyThisAttach )
+      return;
 
-        var completer = null;
-        
-        if ( this.sourceIsStaticText() )
-          {
-            completer = new YAHOO.widget.AutoComplete("ac-select-input", "ac-choices", YAHOO.slashdot.dataSources[tagDomain]);
-            completer.minQueryLength = 0;
-            completer.typeAhead = true;
-            completer.queryDelay = 0;
-            completer.autoHighlight = false;
-            completer.maxResultsDisplayed = 25;
-          }
-        else
-          {
-            completer = new YAHOO.widget.AutoComplete(obj, "ac-choices", YAHOO.slashdot.dataSources[tagDomain]);
-            completer.minQueryLength = 1;
-            completer.queryDelay = 0.3;
-            completer.typeAhead = true;
-            completer.queryMatchSubset = true;
-            completer.delimChar = " ";
-          }
-        this.completer = completer;
-      }
-
-    if ( this._sourceEl )
+    if ( newSourceEl )
       {
-        this._show();
-        if ( this.sourceIsStaticText() )
-          {
-            this.completer.itemSelectEvent.subscribe(this._onItemSelectEvent, this);
-            this.completer.textboxBlurEvent.subscribe(this._onTextboxBlurEvent, this);
-          }
+        this._show(newSourceEl, callbackParams, tagDomain);
         if ( tagDomain != 0 )
-          this.completer._sendQuery("");
+          this._completer._sendQuery("");
       }
+  }
+
+YAHOO.slashdot.AutoCompleteWidget.prototype._onClick = function( e, me )
+  {
+      // if the user re-clicked the item to which I'm attached, then they mean to hide me
+      //  I'm going to hide automatically, because a click outside the text will blur, and that makes me go away
+      //  but I need to remember _not_ to let the current click re-show me
+    var reclicked = me._sourceEl && YAHOO.util.Event.getTarget(e, true) == me._sourceEl;
+    me._denyNextAttachTo = reclicked ? me._sourceEl : null;
   }
 
 YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type, args, me )
   {
-    me._hide();
     var tagname = args[2];
     if ( tagname && me._sourceEl )
       {
         me._sourceEl.innerHTML = tagname;
         YAHOO.util.Dom.addClass(me._sourceEl, "not-yet-saved");
       }
-    tagsOpenAndEnter(me.callbackParams._id, tagname, me.callbackParams._is_admin, me.callbackParams._type);
-    me.completer.itemSelectEvent.unsubscribe(me._onItemSelectEvent, me);
-    me.completer.textboxBlurEvent.unsubscribe(me._onTextboxBlurEvent, me);
+    var p = me._callbackParams;
+    me._hide();
+    tagsOpenAndEnter(p._id, tagname, p._is_admin, p._type);
   }
 
 YAHOO.slashdot.AutoCompleteWidget.prototype._onTextboxBlurEvent = function( type, args, me )
   {
-    me._hide()
+    var o = me._denyNextAttachTo;
+    me._hide();
+    me._denyNextAttachTo = o;
+  }
+
+YAHOO.slashdot.AutoCompleteWidget.prototype._onTextboxKeyUp = function( e, me )
+  {
+    switch ( e.keyCode )
+      {
+        case 27: // esc
+        // any other keys?...
+          me._hide();
+      }
   }
