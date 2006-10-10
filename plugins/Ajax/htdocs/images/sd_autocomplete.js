@@ -251,6 +251,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParam
   {
     this._sourceEl = obj;
     this._callbackParams = callbackParams;
+    this._callbackParams._tagDomain = tagDomain;
     this._completer = this._newCompleter(tagDomain);
 
     if ( this._sourceEl && YAHOO.util.Dom.hasClass(this._widget, "hidden") )
@@ -334,11 +335,24 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type,
     if ( tagname && me._sourceEl )
       {
         me._sourceEl.innerHTML = tagname;
-        YAHOO.util.Dom.addClass(me._sourceEl, "not-yet-saved");
+        // YAHOO.util.Dom.addClass(me._sourceEl, "not-yet-saved");
       }
     var p = me._callbackParams;
     me._hide();
-    tagsOpenAndEnter(p._id, tagname, p._is_admin, p._type);
+
+      // really need to move this into a separate function...
+      //  at least when there is more than just p._type=='firehose'
+    switch ( p._tagDomain )
+      {
+        case 1: // action
+        case 2: // section
+        case 3: // topic
+          setOneTopTagForFirehose(p._id, tagname);
+          break;
+
+        default:
+          tagsOpenAndEnter(p._id, tagname, p._is_admin, p._type);
+      }
   }
 
 YAHOO.slashdot.AutoCompleteWidget.prototype._onTextboxBlurEvent = function( type, args, me )

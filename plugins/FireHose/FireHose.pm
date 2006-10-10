@@ -321,6 +321,15 @@ sub rejectItem {
 	
 }
 
+sub ajaxSaveOneTopTagFirehose {
+  my($slashdb, $constants, $user, $form, $options) = @_;
+	my $id = $form->{id};
+	my $tagsstring = $form->{tags};
+	if ($user->{is_admin}) {
+		$firehose->setSectionTopicsFromTagstring($id, $tagsstring);
+	}
+}
+
 sub ajaxSaveNoteFirehose {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $id = $form->{id};
