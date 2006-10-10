@@ -185,7 +185,7 @@ sub run {
 	my $firehose_db = getObject('Slash::FireHose');
 	warn "Slash::Tagbox::FHEditorPop->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
 print STDERR "Slash::Tagbox::FHEditorPop->run setting $fhid ($affected_id) to $popularity\n";
-	$firehose_db->setFireHose($fhid, { popularity => $popularity });
+	$firehose_db->setFireHose($fhid, { editorpop => $popularity });
 }
 
 1;
