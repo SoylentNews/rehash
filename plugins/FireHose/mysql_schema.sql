@@ -10,6 +10,7 @@ CREATE TABLE firehose (
 	createtime datetime NOT NULL default '0000-00-00 00:00:00',
 	title varchar(80) NOT NULL default '',
 	popularity float NOT NULL default '0',
+	editorpop float NOT NULL default '0',
 	activity float NOT NULL default '0',
 	accepted enum('no','yes') default 'no',
 	rejected enum('no','yes') default 'no',
