@@ -1089,6 +1089,7 @@ sub send_mod_msg {
 
 		my $data  = {
 			template_name	=> $type,
+			template_page	=> 'comments',
 			subject		=> {
 				template_name => $type . '_subj'
 			},
