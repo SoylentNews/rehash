@@ -2272,6 +2272,9 @@ YAHOO.widget.DS_XHR.prototype.ERROR_DATAXHR = "XHR response failed";
  */
 YAHOO.widget.DS_XHR.prototype.connTimeout = 0;
 
+// scc: changed for slashdot --- must submit back to YAHOO for integration
+YAHOO.widget.DS_XHR.prototype.queryMethod = "GET";
+
 
 /**
  * Absolute or relative URI to script that returns query results. For instance,
@@ -2400,7 +2403,7 @@ for(var foo in oResp) {
         YAHOO.util.Connect.abort(this._oConn);
     }
     
-    oSelf._oConn = YAHOO.util.Connect.asyncRequest("GET", sUri, oCallback, null);
+    oSelf._oConn = YAHOO.util.Connect.asyncRequest(oSelf.queryMethod, sUri, oCallback, null);
 };
 
 /**
