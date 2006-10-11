@@ -322,10 +322,11 @@ sub rejectItem {
 }
 
 sub ajaxSaveOneTopTagFirehose {
-  my($slashdb, $constants, $user, $form, $options) = @_;
+	my($slashdb, $constants, $user, $form, $options) = @_;
 	my $id = $form->{id};
 	my $tagsstring = $form->{tags};
 	if ($user->{is_admin}) {
+		my $firehose = getObject("Slash::FireHose");
 		$firehose->setSectionTopicsFromTagstring($id, $tagsstring);
 	}
 }
@@ -713,13 +714,13 @@ sub getMemoryForItem {
 	foreach my $memory (@$sub_memory) {
 		my $match = $memory->{submatch};
 		
-                if ($item->{email} =~ m/$match/i ||
+		if ($item->{email} =~ m/$match/i ||
 		    $item->{name}  =~ m/$match/i ||
 		    $item->{title}  =~ m/$match/i ||
 		    $item->{ipid}  =~ m/$match/i ||
 		    $item->{introtext} =~ m/$match/i) {
 			push @$subnotes_ref, $memory;
-                }
+		}
 	}
 	return $subnotes_ref;
 }
