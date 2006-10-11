@@ -40,7 +40,7 @@ use vars qw($VERSION);
 
 sub createFireHose {
 	my($self, $data) = @_;
-	$data->{-createtime} ||= "NOW()";
+	$data->{-createtime} = "NOW()" if !$data->{createtime} && !$data->{-createtime};
 
 	my $text_data = {};
 	$text_data->{title} = delete $data->{title};
@@ -75,6 +75,8 @@ sub createUpdateItemFromJournal {
 		}
 	}
 }
+
+
 
 sub createItemFromJournal {
 	my($self, $id) = @_;
@@ -111,7 +113,7 @@ sub createUpdateItemFromBookmark {
 	my $activity   = defined $options->{activity}   ? $options->{activity}   : 1;
 
 	if ($count) {
-		$self->sqlUpdate("firehose", { -popularity => "popularity + 1" }, "globjid=$url_globjid");
+		# $self->sqlUpdate("firehose", { -popularity => "popularity + 1" }, "globjid=$url_globjid");
 	} else {
 		my $type = $options->{type} || "bookmark";
 		my $data = {
@@ -125,6 +127,7 @@ sub createUpdateItemFromBookmark {
 			type		=> $type,
 			srcid		=> $id
 		};
+		$data->{introtext} = $options->{introtext} if $options->{introtext};
 		$self->createFireHose($data)
 	}
 
@@ -158,6 +161,54 @@ sub createItemFromSubmission {
 
 }
 
+sub updateItemFromStory {
+	my($self, $id) = @_;
+	my $constant = getCurrentStatic();
+	my $story = $self->getStory($id);
+	if ($story) {
+		my $globjid = $self->getGlobjidCreate("stories", $story->{stoid});
+		my $id = $self->getFireHoseIdFromGlobjid($globjid);
+		if ($id) {
+			my $public = $story->{neverdisplay} ? "no" : "yes";
+			my $data = {
+				title 		=> $story->{title},
+				uid		=> $story->{uid},
+				createtime	=> $story->{time},
+				introtext	=> $story->{introtext},
+				bodytext	=> $story->{bodytext},
+				primaryskid	=> $story->{primaryskid},
+				tid 		=> $story->{tid},
+				public		=> $public
+			};
+			$self->setFireHose($id, $data);
+		}
+	}
+}
+
+sub createItemFromStory {
+	my($self, $id) = @_;
+	my $story = $self->getStory($id);
+	if ($story) {
+		my $globjid = $self->getGlobjidCreate("stories", $story->{stoid});
+		my $public = $story->{neverdisplay} ? "no" : "yes";
+		my $data = {
+			title 		=> $story->{title},
+			globjid 	=> $globjid,
+			uid		=> $story->{uid},
+			createtime	=> $story->{time},
+			introtext	=> $story->{introtext},
+			bodytext	=> $story->{bodytext},
+			popularity	=> 10,
+			primaryskid	=> $story->{primaryskid},
+			tid 		=> $story->{tid},
+			srcid		=> $id,
+			type 		=> "story",
+			public		=> $public
+		};
+		$self->createFireHose($data);
+	}
+}
+
 sub getFireHoseEssentials {
 	my($self, $options) = @_;
 	my $user = getCurrentUser();
@@ -168,8 +219,13 @@ sub getFireHoseEssentials {
 	#($user->{is_admin} && $options->{orderby} eq "createtime" ? "ASC" :"DESC");
 	
 
+
 	my @where;
 	my $tables = "firehose";
+
+	if ($options->{createtime_no_future}) {
+		push @where, "createtime <= NOW()";
+	}
 
 	if ($options->{attention_needed}) {
 		push @where, "attention_needed = " . $self->sqlQuote($options->{attention_needed});
@@ -213,7 +269,7 @@ sub getFireHoseEssentials {
 	if ($options->{ids}) {
 		return [] if @{$options->{ids}} < 1;
 		my $id_str = join ",", map { $self->sqlQuote($_) } @{$options->{ids}};
-		push @where, "id IN ($id_str)";
+		push @where, "firehose.id IN ($id_str)";
 	}
 
 	if (defined $options->{daysback}) {
@@ -258,6 +314,12 @@ sub getFireHose {
 	$answer->{note} = $self->getGlobjAdminnote($answer->{globjid}) || '';
 
 	return $answer;
+}
+
+sub getFireHoseIdFromGlobjid {
+	my($self, $globjid) = @_;
+	my $globjid_q = $self->sqlQuote($globjid);
+	return $self->sqlSelect("id", "firehose", "globjid=$globjid_q");
 }
 
 sub fetchItemText {
@@ -322,7 +384,9 @@ sub rejectItem {
 }
 
 sub ajaxSaveOneTopTagFirehose {
+  my($slashdb, $constants, $user, $form, $options) = @_;
 	my($slashdb, $constants, $user, $form, $options) = @_;
+  	my $firehose = getObject("Slash::FireHose");
 	my $id = $form->{id};
 	my $tagsstring = $form->{tags};
 	if ($user->{is_admin}) {
@@ -399,7 +463,7 @@ sub ajaxFireHoseFetchNew {
 	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
 	my $maxtime = $form->{maxtime};
-	my $added = {};
+	my $added = [];
 	
 	my $opts = $firehose->getAndSetOptions({ no_set => 1});
 	$opts->{limit} = 10;
@@ -414,7 +478,7 @@ sub ajaxFireHoseFetchNew {
 		$maxtime = $i->{createtime} if $i->{createtime} gt $maxtime;
 		my $item = $firehose->getFireHose($i->{id});
 		my $tags_top = $firehose->getFireHoseTagsTop($item);
-		$added->{$i->{id}} = slashDisplay("dispFireHose", { item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" });
+		push @$added, [$i->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" })];
 	}
 	
 	
@@ -445,6 +509,50 @@ sub ajaxFireHoseCheckRemoved {
 
 }
 
+sub ajaxFireHoseGetUpdatesPop {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	$options->{content_type} = 'application/json';
+	my $firehose = getObject("Slash::FireHose");
+	my $id_str = $form->{ids};
+	my $update_time = $form->{updatetime};
+	my @ids = grep {/^\d+$/} split (/,/, $id_str);
+	my %ids = map { $_ => 1 } @ids;
+	my $opts = $firehose->getAndSetOptions({ no_set => 1});
+	my $items = $firehose->getFireHoseEssentials($opts);
+	my $html = {};
+	my $update_new = [];
+
+	my $adminmode = $user->{is_admin};
+	$adminmode = 0 if $user->{is_admin} && $user->{firehose_usermode};
+
+	foreach (@$items) {
+		my $item = $firehose->getFireHose($_->{id});
+		my $tags_top = $firehose->getFireHoseTagsTop($item);
+		if ($ids{$_->{id}}) {
+			if ($item->{last_update} ge $update_time) {
+				my $url 	= $slashdb->getUrl($item->{url_id});
+				my $the_user  	= $slashdb->getUser($item->{uid});
+				$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user=> $the_user }, { Return => 1 });
+				$html->{"tags-top-$_->{id}"} = slashDisplay("firehose_tags_top", { tags_top => $tags_top, id => $_->{id} }, { Return => 1 });
+				# updated
+			}
+		} else {
+			# new
+			push @$update_new, [$_->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" })];
+			$update_time = $_->{last_update} if $_->{last_update} gt $update_time;
+		}
+		delete $ids{$_->{id}};
+	}
+	return Data::JavaScript::Anon->anon_dump({
+		removed => \%ids,
+		html => $html,
+		update_new => $update_new,
+		update_time => $update_time,
+		removed => \%ids
+	});
+	
+}
+
 sub ajaxFireHoseGetUpdates {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	$options->{content_type} = 'application/json';
@@ -454,6 +562,9 @@ sub ajaxFireHoseGetUpdates {
 	my @ids = grep {/^\d+$/} split (/,/, $id_str);
 	my %ids = map { $_ => 1 } @ids;
 	
+	my $adminmode = $user->{is_admin};
+	$adminmode = 0 if $user->{is_admin} && $user->{firehose_usermode};
+	
 	my $opts = $firehose->getAndSetOptions({ no_set => 1});
 	$opts->{limit} = 25;
 	$opts->{orderby} = 'last_update';
@@ -461,19 +572,20 @@ sub ajaxFireHoseGetUpdates {
 	$opts->{last_update_gte} = $update_time;
 	my $items = $firehose->getFireHoseEssentials($opts);
 
-	my $update_new = {};
+	my $update_new = [];
 	my $html = {};
 	foreach (@$items) {
 		my $item = $firehose->getFireHose($_->{id});
 		my $tags_top = $firehose->getFireHoseTagsTop($item);
 		if(!$ids{$_->{id}}) {
-			$update_new->{$_->{id}} = slashDisplay("dispFireHose", { item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" });
-			$update_time = $_->{createtime} if $_->{createtime} gt $update_time;
+			push @$update_new, [$_->{id}, slashDisplay("dispFireHose", { item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" })];
+			$update_time = $_->{last_update} if $_->{last_update} gt $update_time;
 		} else {
 			my $url 	= $slashdb->getUrl($item->{url_id});
 			my $the_user  	= $slashdb->getUser($item->{uid});
-			$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { item => $item, showtitle => 1, url => $url, the_user=> $the_user }, { Return => 1 });
+			$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user=> $the_user }, { Return => 1 });
 			$html->{"tags-top-$_->{id}"} = slashDisplay("firehose_tags_top", { tags_top => $tags_top, id => $_->{id} }, { Return => 1 });
+			$update_time = $_->{last_update} if $_->{last_update} gt $update_time;
 		}
 	}
 	my $data = {
@@ -585,11 +697,15 @@ sub ajaxGetAdminExtras {
 	my $accepted_from_uid = 0;
 	my $num_with_emaildomain = 0;
 	my $accepted_from_emaildomain = 0;
+	my $num_with_ipid = 0;
+	my $accepted_from_ipid = 0;
 	if ($item->{type} eq "submission") {
 		$accepted_from_uid = $slashdb->countSubmissionsFromUID($item->{uid}, { del => 2 });
 		$num_from_uid = $slashdb->countSubmissionsFromUID($item->{uid});
 		$accepted_from_emaildomain = $slashdb->countSubmissionsWithEmaildomain($item->{emaildomain}, { del => 2 });
 		$num_with_emaildomain = $slashdb->countSubmissionsWithEmaildomain($item->{emaildomain});
+		$num_with_ipid = $slashdb->countSubmissionsFromIPID($item->{ipid});
+		$accepted_from_ipid = $slashdb->countSubmissionsFromIPID($item->{ipid}, { del => 2});
 	}
 
 	my $the_user = $slashdb->getUser($item->{uid});
@@ -603,7 +719,9 @@ sub ajaxGetAdminExtras {
 		num_from_uid    		=> $num_from_uid,
 		accepted_from_uid 		=> $accepted_from_uid,
 		num_with_emaildomain 		=> $num_with_emaildomain,
-		accepted_from_emaildomain 	=> $accepted_from_emaildomain
+		accepted_from_emaildomain 	=> $accepted_from_emaildomain,
+		accepted_from_ipid		=> $accepted_from_ipid,
+		num_with_ipid			=> $num_with_ipid,
 	}, "firehose");
 
 	my $admin_extras = slashDisplay("admin_extras", { 
@@ -765,7 +883,7 @@ sub getAndSetOptions {
 	$opts 	        ||= {};
 	my $options 	= {};
 
-	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1 };
+	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1 };
 	my $modes = { full => 1, fulltitle => 1};
 
 	my $mode = $form->{mode} || $user->{firehose_mode};
@@ -878,6 +996,7 @@ sub getAndSetOptions {
 	} else  {
 		$options->{public} = "yes";
 		$options->{daysback} = 1;
+		$options->{createtime_no_future} = 1; 
 	}
 	return $options;
 }
@@ -903,6 +1022,7 @@ sub getFireHoseTagsTop {
 	}
 	return $tags_top;
 }
+
 
 
 
