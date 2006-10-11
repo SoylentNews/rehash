@@ -421,7 +421,7 @@ function eval_response(transport) {
 	try {
 		eval("response = " + transport.responseText)
 	} catch (e) {
-		alert(e + "\n" + transport.responseText)
+		//alert(e + "\n" + transport.responseText)
 	}
 	return response;
 }
