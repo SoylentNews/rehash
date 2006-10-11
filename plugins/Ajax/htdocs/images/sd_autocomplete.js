@@ -202,7 +202,12 @@ YAHOO.slashdot.topicTags = ["keyword",
     var actionsDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.actionTags);
     var sectionsDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.sectionTags);
     var topicsDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.topicTags);
-    var tagsDS = topicsDS; // until we get a query
+
+    var tagsDS = new YAHOO.widget.DS_XHR("./ajax.pl", ["\n", "\t"]);
+    tagsDS.responseType = tagsDS.TYPE_FLAT;
+    tagsDS.scriptQueryParam = "prefix";
+    tagsDS.scriptQueryAppend = "op=tags_list_tagnames";
+    tagsDS.queryMethod = "POST";
 
 YAHOO.slashdot.dataSources = [tagsDS, actionsDS, sectionsDS, topicsDS];
 
@@ -216,6 +221,7 @@ YAHOO.slashdot.AutoCompleteWidget = function()
     this._denyNextAttachTo = null;
 
     YAHOO.util.Event.addListener(document.body, "click", this._onClick, this, true);
+    // add body/window blur to detect changing windows?
   }
 
 YAHOO.slashdot.AutoCompleteWidget.prototype._needsSpareInput = function()
