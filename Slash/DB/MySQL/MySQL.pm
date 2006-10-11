@@ -3566,6 +3566,8 @@ sub deleteStory {
 ########################################################
 sub setStory {
 	my($self, $id, $change_hr, $options) = @_;
+	my $constants = getCurrentStatic();
+	my @fh_update_fields;
 
 	my $param_table = 'story_param';
 	my $cache = _genericGetCacheName($self, [qw( stories story_text )]);
@@ -3621,6 +3623,8 @@ sub setStory {
 	if (!exists($change_hr->{last_update})
 		&& !exists($change_hr->{-last_update})) {
 		my @non_cchp = grep !/^(commentcount|hitparade|hits)$/, keys %$change_hr;
+		@fh_update_fields = grep /^(title|uid|time|intreotext|bodytext|primaryskid|tid|neverdisplay)$/, keys %$change_hr;
+		
 		if (@non_cchp > 0) {
 			$change_hr->{-last_update} = 'NOW()';
 		} else {
@@ -3799,6 +3803,11 @@ print STDERR scalar(gmtime) . " stoid '$stoid' lu '$lu' options_lu '$options->{l
 	# to make sure nothing incorrect was set while we were
 	# in the middle of updating the DB.
 	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
+
+	if ($constants->{plugin}{FireHose} && @fh_update_fields > 0) {
+		my $firehose = getObject("Slash::FireHose");
+		$firehose->updateItemFromStory($stoid);
+	}
 
 	return $success;
 }
@@ -5020,6 +5029,19 @@ sub countSubmissionsFromUID {
 	$del_clause = " AND del = ".$self->sqlQuote($options->{del}) if defined $options->{del};
 	return $self->sqlCount("submissions",
 		"uid=$uid_q
+		 AND time >= DATE_SUB(NOW(), INTERVAL $days_back DAY) $del_clause");
+}
+
+sub countSubmissionsFromIPID {
+	my($self, $ipid, $options) = @_;
+	return 0 if !$ipid;
+	my $constants = getCurrentStatic();
+	my $days_back = $options->{days_back} || $constants->{submission_count_days};
+	my $ipid_q = $self->sqlQuote($ipid);
+	my $del_clause = '';
+	$del_clause = " AND del = ".$self->sqlQuote($options->{del}) if defined $options->{del};
+	return $self->sqlCount("submissions",
+		"ipid=$ipid_q
 		 AND time >= DATE_SUB(NOW(), INTERVAL $days_back DAY) $del_clause");
 }
 
@@ -8159,6 +8181,11 @@ sub createStory {
 	$self->sqlDo("COMMIT");
 	$self->sqlDo("SET AUTOCOMMIT=1");
 
+	if ($constants->{plugin}{FireHose}) {
+		my $firehose = getObject("Slash::FireHose");
+		$firehose->createItemFromStory($stoid);
+	}
+
 	return $story->{sid};
 }
 
@@ -8178,10 +8205,15 @@ sub grantStorySubmissionKarma {
 	my($self, $story) = @_;
 	my $constants = getCurrentStatic();
 	if ($constants->{plugin}{FireHose}) {
+		my $fhid;
+		my $firehose = getObject("Slash::FireHose");
 		if ($story->{fhid}) {
-			my $firehose = getObject("Slash::FireHose");
-			$firehose->setFireHose($story->{fhid}, { accepted => "yes" });
+			$fhid = $story->{fhid};
+		} elsif ($story->{subid}) {
+			my $subid_q = $self->sqlQuote($story->{subid});
+			($fhid) = $self->sqlSelect('id', 'firehose', "type='submission' and srcid=$subid_q");
 		}
+		$firehose->setFireHose($fhid, { accepted => "yes" }) if $fhid;
 	}
 	return 0 unless $story->{subid};
 	my($submitter_uid) = $self->sqlSelect(
@@ -8556,6 +8588,7 @@ sub getSlashConf {
 		charrefs_good_entity =>		[qw( amp lt gt euro pound yen rsquo lsquo rdquo ldquo ndash mdash )],
 		charrefs_good_numeric =>	[ ],
 		cur_performance_stat_ops =>	[ ],
+		firehose_story_ignore_skids	=> [ ],
 		fixhrefs =>			[ ],
 		hc_possible_fonts =>		[ ],
 		lonetags =>			[ ],
