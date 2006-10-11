@@ -207,7 +207,79 @@ YAHOO.slashdot.topicTags = ["keyword",
     tagsDS.responseType = tagsDS.TYPE_FLAT;
     tagsDS.scriptQueryParam = "prefix";
     tagsDS.scriptQueryAppend = "op=tags_list_tagnames";
-    tagsDS.queryMethod = "POST";
+
+tagsDS.doQuery = function(oCallbackFn, sQuery, oParent) {
+    var isXML = (this.responseType == this.TYPE_XML);
+    
+    var sPostData = /* this.scriptURI+"?"+ */ this.scriptQueryParam+"="+sQuery;
+    if(this.scriptQueryAppend.length > 0) {
+        sPostData += "&" + this.scriptQueryAppend;
+    }
+
+    var oResponse = null;
+    
+    var oSelf = this;
+    /**
+     * Sets up ajax request callback
+     *
+     * @param {object} oReq          HTTPXMLRequest object
+     * @private
+     */
+    var responseSuccess = function(oResp) {
+        // Response ID does not match last made request ID.
+        if(!oSelf._oConn || (oResp.tId != oSelf._oConn.tId)) {
+            oSelf.dataErrorEvent.fire(oSelf, oParent, sQuery, oSelf.ERROR_DATANULL);
+            return;
+        }
+//DEBUG
+for(var foo in oResp) {
+}
+        if(!isXML) {
+            oResp = oResp.responseText;
+        }
+        else { 
+            oResp = oResp.responseXML;
+        }
+        if(oResp === null) {
+            oSelf.dataErrorEvent.fire(oSelf, oParent, sQuery, oSelf.ERROR_DATANULL);
+            return;
+        }
+
+        var aResults = oSelf.parseResponse(sQuery, oResp, oParent);
+        var resultObj = {};
+        resultObj.query = decodeURIComponent(sQuery);
+        resultObj.results = aResults;
+        if(aResults === null) {
+            oSelf.dataErrorEvent.fire(oSelf, oParent, sQuery, oSelf.ERROR_DATAPARSE);
+            return;
+        }
+        else {
+            oSelf.getResultsEvent.fire(oSelf, oParent, sQuery, aResults);
+            oSelf._addCacheElem(resultObj);
+            oCallbackFn(sQuery, aResults, oParent);
+        }
+    };
+
+    var responseFailure = function(oResp) {
+        oSelf.dataErrorEvent.fire(oSelf, oParent, sQuery, oSelf.ERROR_DATAXHR);
+        return;
+    };
+    
+    var oCallback = {
+        success:responseSuccess,
+        failure:responseFailure
+    };
+    
+    if(!isNaN(this.connTimeout) && this.connTimeout > 0) {
+        oCallback.timeout = this.connTimeout;
+    }
+    
+    if(this._oConn) {
+        YAHOO.util.Connect.abort(this._oConn);
+    }
+    
+    oSelf._oConn = YAHOO.util.Connect.asyncRequest('POST', this.scriptURI, oCallback, sPostData);
+};
 
 YAHOO.slashdot.dataSources = [tagsDS, actionsDS, sectionsDS, topicsDS];
 
@@ -348,16 +420,11 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type,
 
       // really need to move this into a separate function...
       //  at least when there is more than just p._type=='firehose'
-    switch ( p._tagDomain )
+    if ( p._type == "firehose" && p._tagDomain != 0 )
       {
-        case 1: // action
-        case 2: // section
-        case 3: // topic
-          setOneTopTagForFirehose(p._id, tagname);
-          break;
-
-        default:
-          tagsOpenAndEnter(p._id, tagname, p._is_admin, p._type);
+        setOneTopTagForFirehose(p._id, tagname);
+        // if the user tags field is visible, then I should also enter this tag into that field
+        // tagsOpenAndEnter(p._id, tagname, p._is_admin, p._type);
       }
   }
 
