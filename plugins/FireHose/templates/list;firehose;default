@@ -36,10 +36,10 @@ __template__
 		</fieldset>
 	</form>
 <div class="options">
-[% IF options.orderby == "createtime" || !options.orderby %]
+	
 	<span id="play"><a href="javascript:firehose_play()" title="Currently playing">Play</a></span>
 	<span id="pause"><a href="javascript:firehose_pause()" title="Currently paused">Pause</a></span>
-	[% END %]
+
 	[% IF options.orderby == "popularity" %]
 	<span id="popularity"><a href="[% gSkin.rootdir %]/firehose.pl?orderby=createtime" title="Toggle sort popularity/time - Currently popularity">Popularity</a></span>
 	[% ELSE %]
@@ -58,6 +58,7 @@ __template__
 	[% END %]
 </div>
 </div>
+<div id="message_area">[% IF options.orderby == "popularity" && form.page %] Sorry automatic updates only occur on the first page of results when sorted by popularity currently [% END %]</div>
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
@@ -66,18 +67,25 @@ __template__
 <script type="text/javascript">
 	var firehose_action_time = 0;
 	var play = 0;
+	var is_timed_out = 0;
+	var updateIntervalType = [% IF user.is_admin %]1[% ELSE %]2[% END %];
+	var inactivity_timeout = [% IF user.is_admin %]3600[% ELSE %]2400[% END %];
 	setFirehoseAction();
-	[% IF options.orderby == "createtime" || !options.orderby %]
 	firehose_pause();
-	[% END %]
+	var update_time = '[% refresh_options.maxtime %]';
 [% IF refresh_options && refresh_options.maxtime %]
 	var maxtime = '[% refresh_options.maxtime %]';
-	var update_time = '[% refresh_options.maxtime %]';
 	var insert_new_at = '[% refresh_options.insert_new_at %]';
 	firehose_play();
-	setTimeout("firehose_fetch_new()", 10000);
-	setTimeout("firehose_check_removed()", 40000);
-	setTimeout("firehose_get_updates()", 40000);
+	[% IF options.orderby == "createtime" || !options.orderby %]
+		setTimeout("firehose_fetch_new()", 10000);
+		setTimeout("firehose_check_removed()", 40000);
+		setTimeout("firehose_get_updates()", 40000);
+	[% ELSIF options.orderby == "popularity" %]
+		[% IF !form.page %]
+		setTimeout("firehose_get_updates_pop()", 40000);
+		[% END %]
+	[% END %]
 [% END %]
 </script>
 
