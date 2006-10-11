@@ -52,20 +52,21 @@ sub main {
 sub list {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 	my $firehose = getObject("Slash::FireHose");
+	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $options = $firehose->getAndSetOptions();
 	my $page = $form->{page} || 0;
 	if ($page) {
 		$options->{offset} = $page * $options->{limit};
 	}
 
-	my $items = $firehose->getFireHoseEssentials($options);
+	my $items = $firehose_reader->getFireHoseEssentials($options);
 	my $itemstext;
 	my $maxtime = $firehose->getTime();
 	
 	foreach (@$items) {
 		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime;
-		my $item =  $firehose->getFireHose($_->{id});
-		my $tags_top = $firehose->getFireHoseTagsTop($item);
+		my $item =  $firehose_reader->getFireHose($_->{id});
+		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
 		$itemstext .= $firehose->dispFireHose($item, { mode => $options->{mode} , tags_top => $tags_top, options => $options });
 	}
 	my $refresh_options;

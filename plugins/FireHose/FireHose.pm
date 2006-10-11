@@ -392,11 +392,21 @@ sub rejectItem {
 sub ajaxSaveOneTopTagFirehose {
 	my($slashdb, $constants, $user, $form, $options) = @_;
   	my $firehose = getObject("Slash::FireHose");
+	my $tags = getObject("Slash::Tags");
 	my $id = $form->{id};
-	my $tagsstring = $form->{tags};
+	my $tag = $form->{tags};
 	if ($user->{is_admin}) {
 		my $firehose = getObject("Slash::FireHose");
-		$firehose->setSectionTopicsFromTagstring($id, $tagsstring);
+		my $item = $firehose->getFireHose($id);
+		if ($item) {
+			$firehose->setSectionTopicsFromTagstring($id, $tag);
+			my($table, $itemid) = $tags->getGlobjTarget($item->{globjid});
+			my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $itemid, { uid => $user->{uid}});
+			my @tags = sort Slash::Tags::tagnameorder map { $_->{tagname} } @$now_tags_ar;
+			push @tags, $tag;
+			my $tagsstring = join ' ', @tags;
+			my $newtagspreloadtext = $tags->setTagsForGlobj($itemid, $table, $tagsstring);
+		}
 	}
 }
 
@@ -467,6 +477,7 @@ sub ajaxFireHoseFetchNew {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
+	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $maxtime = $form->{maxtime};
 	my $added = [];
 	
@@ -476,13 +487,13 @@ sub ajaxFireHoseFetchNew {
 	$opts->{orderdir} = 'ASC';
 	$opts->{createtime_gte} = $maxtime;
 
-	my $items = $firehose->getFireHoseEssentials($opts);
+	my $items = $firehose_reader->getFireHoseEssentials($opts);
 
 
 	foreach my $i (@$items ) {
 		$maxtime = $i->{createtime} if $i->{createtime} gt $maxtime;
-		my $item = $firehose->getFireHose($i->{id});
-		my $tags_top = $firehose->getFireHoseTagsTop($item);
+		my $item = $firehose_reader->getFireHose($i->{id});
+		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
 		push @$added, [$i->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" })];
 	}
 	
@@ -497,6 +508,7 @@ sub ajaxFireHoseCheckRemoved {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
+	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $id_str = $form->{ids};
 	my @ids = grep {/^\d+$/} split (/,/, $id_str);
 	my %ids = map { $_ => 1 } @ids;
@@ -504,7 +516,7 @@ sub ajaxFireHoseCheckRemoved {
 	my $opts = $firehose->getAndSetOptions({ no_set => 1});
 	$opts->{nolimit} = 1;
 	$opts->{ids} = \@ids;
-	my $items = $firehose->getFireHoseEssentials($opts);
+	my $items = $firehose_reader->getFireHoseEssentials($opts);
 	foreach (@$items) {
 		delete $ids{$_->{id}};
 	}
@@ -518,12 +530,13 @@ sub ajaxFireHoseGetUpdatesPop {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
+	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $id_str = $form->{ids};
 	my $update_time = $form->{updatetime};
 	my @ids = grep {/^\d+$/} split (/,/, $id_str);
 	my %ids = map { $_ => 1 } @ids;
 	my $opts = $firehose->getAndSetOptions({ no_set => 1});
-	my $items = $firehose->getFireHoseEssentials($opts);
+	my $items = $firehose_reader->getFireHoseEssentials($opts);
 	my $html = {};
 	my $update_new = [];
 
@@ -531,8 +544,8 @@ sub ajaxFireHoseGetUpdatesPop {
 	$adminmode = 0 if $user->{is_admin} && $user->{firehose_usermode};
 
 	foreach (@$items) {
-		my $item = $firehose->getFireHose($_->{id});
-		my $tags_top = $firehose->getFireHoseTagsTop($item);
+		my $item = $firehose_reader->getFireHose($_->{id});
+		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
 		if ($ids{$_->{id}}) {
 			if ($item->{last_update} ge $update_time) {
 				my $url 	= $slashdb->getUrl($item->{url_id});
@@ -562,6 +575,7 @@ sub ajaxFireHoseGetUpdates {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
+	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $id_str = $form->{ids};
 	my $update_time = $form->{updatetime};
 	my @ids = grep {/^\d+$/} split (/,/, $id_str);
@@ -575,13 +589,13 @@ sub ajaxFireHoseGetUpdates {
 	$opts->{orderby} = 'last_update';
 	$opts->{orderdir} = 'ASC';
 	$opts->{last_update_gte} = $update_time;
-	my $items = $firehose->getFireHoseEssentials($opts);
+	my $items = $firehose_reader->getFireHoseEssentials($opts);
 
 	my $update_new = [];
 	my $html = {};
 	foreach (@$items) {
-		my $item = $firehose->getFireHose($_->{id});
-		my $tags_top = $firehose->getFireHoseTagsTop($item);
+		my $item = $firehose_reader->getFireHose($_->{id});
+		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
 		if(!$ids{$_->{id}}) {
 			push @$update_new, [$_->{id}, slashDisplay("dispFireHose", { item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" })];
 			$update_time = $_->{last_update} if $_->{last_update} gt $update_time;
