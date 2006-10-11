@@ -24,7 +24,7 @@ sub main {
 	my $form      = getCurrentForm();
 	my $gSkin     = getCurrentSkin();
 
-	if (! $user->{is_admin}) {
+	unless ($user->{is_admin} || $user->{is_subscriber} || $user->{acl}{firehose}) {
 		redirect("$gSkin->{rootdir}/");
 		return;
 	}
@@ -69,7 +69,7 @@ sub list {
 		$itemstext .= $firehose->dispFireHose($item, { mode => $options->{mode} , tags_top => $tags_top, options => $options });
 	}
 	my $refresh_options;
-	if ($options->{orderby} eq "createtime") {
+	if ($options->{orderby} eq "createtime" || $options->{orderby} eq "popularity") {
 		$refresh_options->{maxtime} = $maxtime;
 		if (uc($options->{orderdir}) eq "ASC") {
 			$refresh_options->{insert_new_at} = "bottom";

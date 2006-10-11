@@ -42,6 +42,9 @@ __template__
 		<a href="[% gSkin.rootdir -%]/users.pl?op=userinfo&amp;userfield=[% item.ipid -%]&amp;fieldname=ipid">[% item.ipid_vis -%]</a>
 
 	[% END %]
+	[% IF extras && adminmode && num_with_ipid != '0' %]
+		([% accepted_from_ipid %]/[% num_with_ipid %])
+	[% END %]
 	[% IF !hidediv %]
 	</div>
 	[% END %]

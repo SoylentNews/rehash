@@ -30,7 +30,7 @@ title = title _ " " _ '<span class="date">' _ item.createtime _ "</span> <span c
 IF adminmode;
 	reject_checkbox = PROCESS reject id = item.id;
 
-	pop_val = item.popularity / 3;
+	pop_val = item.popularity / 5;
 	pop_val = pop_val > 8 ? 8 : pop_val;
 	pop_val = pop_val < 0 ? 0 : pop_val;;
 	pop_val = pop_val.int;
