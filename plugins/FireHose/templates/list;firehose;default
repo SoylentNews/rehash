@@ -76,7 +76,9 @@ __template__
 [% IF refresh_options && refresh_options.maxtime %]
 	var maxtime = '[% refresh_options.maxtime %]';
 	var insert_new_at = '[% refresh_options.insert_new_at %]';
+	[% UNLESS options.orderby == "popularity" && form.page %]
 	firehose_play();
+	[% END %]
 	[% IF options.orderby == "createtime" || !options.orderby %]
 		setTimeout("firehose_fetch_new()", 10000);
 		setTimeout("firehose_check_removed()", 40000);
