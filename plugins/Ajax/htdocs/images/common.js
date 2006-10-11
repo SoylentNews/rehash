@@ -452,15 +452,16 @@ function firehose_new_handler(transport) {
 	var response = eval_response(transport);
 	var processed = 0;
 	if (response.added) {
-		for (el in response.added) {
-			var fh = 'firehose-' + el;
+		for (i = 0; i < response.added.length; i++) {
+			var el = response.added[i]
+			var fh = 'firehose-' + el[0];
 			processed = processed + 1;
 			if ($(fh)) {
 			} else {
 				if (insert_new_at == "bottom") {
-					new Insertion.Bottom('firehoselist', response.added[el]);
+					new Insertion.Bottom('firehoselist', el[1]);
 				} else {
-					new Insertion.Top('firehoselist', response.added[el]);
+					new Insertion.Top('firehoselist', el[1]);
 				}
 			}
 		}
@@ -468,7 +469,8 @@ function firehose_new_handler(transport) {
 	if (response.maxtime) {
 		if (processed > 0 ) { maxtime = response.maxtime }
 	}
-	setTimeout("firehose_fetch_new()", "30000");
+	var interval = getFirehoseUpdateInterval();
+	setTimeout("firehose_fetch_new()", interval);
 }
 
 function firehose_check_removed_handler(transport) {
@@ -482,22 +484,24 @@ function firehose_check_removed_handler(transport) {
 			fh.parentNode.removeChild(fh);
 		}
 	}
-	setTimeout("firehose_check_removed()", "30000");
+	var interval = getFirehoseUpdateInterval();
+	setTimeout("firehose_check_removed()", interval);
 }
 
 function firehose_get_updates_handler(transport) {
 	var response = eval_response(transport);
 	var processed = 0;
 	if (response.update_new) {
-		for (el in response.update_new) {
-			var fh = 'firehose-' + el;
+		for (i = 0; i < response.update_new.length; i++) {
+			var el = response.update_new[i]
+			var fh = 'firehose-' + el[0];
 			processed = processed + 1;
 			if ($(fh)) {
 			} else {
 				if (insert_new_at == "bottom") {
-					new Insertion.Bottom('firehoselist', response.update_new[el]);
+					new Insertion.Bottom('firehoselist', el[1]);
 				} else {
-					new Insertion.Top('firehoselist', response.update_new[el]);
+					new Insertion.Top('firehoselist', el[1]);
 				}
 			}
 		}
@@ -511,7 +515,47 @@ function firehose_get_updates_handler(transport) {
 			update_time = response.update_time;
 		}
 	}
-	setTimeout("firehose_get_updates()", "30000");
+	var interval = getFirehoseUpdateInterval();
+	setTimeout("firehose_get_updates()", interval);
+}
+
+function firehose_get_updates_pop_handler(transport) {
+	var response = eval_response(transport);
+	var processed = 0;
+	if (response.update_new) {
+		for (i = 0; i < response.update_new.length; i++) {
+			var el = response.update_new[i]
+			var fh = 'firehose-' + el[0];
+			processed = processed + 1;
+			if ($(fh)) {
+			} else {
+				if (insert_new_at == "bottom") {
+					new Insertion.Bottom('firehoselist', el[1]);
+				} else {
+					new Insertion.Top('firehoselist', el[1]);
+				}
+			}
+		}
+	}
+	if (response.html) {
+		json_update(response);
+		processed = processed + 1;
+	}
+	if (response.removed) {
+		for (el in response.removed) {
+			var fh_id = 'firehose-' + el;
+			var fh = $(fh_id);
+			fh.className="hide";
+			fh.parentNode.removeChild(fh);
+		}
+	}
+	if (processed) {
+		if (response.update_time) {
+			update_time = response.update_time;
+		}
+	}
+	var interval = getFirehoseUpdateInterval();
+	setTimeout("firehose_get_updates_pop()", interval);
 }
 
 function firehose_get_item_idstring() {
@@ -530,6 +574,7 @@ function firehose_get_item_idstring() {
 }
 
 function firehose_get_updates() {
+	run_before_update();
 	if (play == 0) {
 		setTimeout("firehose_get_updates()", 2000);
 		return;
@@ -545,7 +590,26 @@ function firehose_get_updates() {
 	
 }
 
+function firehose_get_updates_pop() {
+	run_before_update();
+	if (play == 0) {
+		setTimeout("firehose_get_updates_pop()", 2000);
+		return;
+	}
+	var params = [];
+	var handlers = {
+		onComplete: firehose_get_updates_pop_handler
+	};
+	params['op'] = 'firehose_get_updates_pop';
+	params['ids'] = firehose_get_item_idstring();
+	params['updatetime'] = update_time;
+	ajax_update(params, '', handlers);
+}
+
+
+
 function firehose_check_removed() {
+	run_before_update();
 	if (play == 0) {
 		setTimeout("firehose_check_removed()", 2000);
 		return;
@@ -561,6 +625,7 @@ function firehose_check_removed() {
 }
 
 function firehose_fetch_new() {
+	run_before_update();
 	if (play == 0) {
 		setTimeout("firehose_fetch_new()", 2000);
 		return;
@@ -578,6 +643,10 @@ function setFirehoseAction() {
 	var thedate = new Date();
 	var newtime = thedate.getTime();
 	firehose_action_time = newtime;
+	if (is_timed_out) {
+		is_timed_out = 0;
+		firehose_play();
+	}
 }
 
 function getSecsSinceLastFirehoseAction() {
@@ -587,12 +656,35 @@ function getSecsSinceLastFirehoseAction() {
 	return diff;
 }
 
+function getFirehoseUpdateInterval() {
+	var interval = 60000;
+	if (updateIntervalType == 1) {
+		interval = 30000;
+	}
+	return interval;
+}
+
+function run_before_update() {
+	var secs = getSecsSinceLastFirehoseAction();
+	if (secs > inactivity_timeout) {
+		is_timed_out = 1;
+		if ($('message_area'))
+			$('message_area').innerHTML = "Automatic updates have been disabled due to inactivity";
+		firehose_pause();
+	}
+}
+
 function firehose_play() {
 	play = 1;
+	is_timed_out = 0;
+	setFirehoseAction();
+	if ($('message_area'))
+		$('message_area').innerHTML = "";
 	var pause = $('pause');
 	var play_div = $('play');
 	play_div.className = "hide";
 	pause.className = "";
+
 }
 
 function firehose_pause() {
