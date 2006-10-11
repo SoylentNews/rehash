@@ -8,6 +8,7 @@ htdoc=htdocs/images/admin.js
 htdoc=htdocs/images/yui/yahoo.js
 htdoc=htdocs/images/yui/dom.js
 htdoc=htdocs/images/yui/event.js
+htdoc=htdocs/images/yui/connection.js
 htdoc=htdocs/images/yui/autocomplete.js
 htdoc=htdocs/images/sd_autocomplete.js
 htdoc=htdocs/images/common.js
