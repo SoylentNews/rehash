@@ -163,13 +163,15 @@ sub createItemFromSubmission {
 
 sub updateItemFromStory {
 	my($self, $id) = @_;
-	my $constant = getCurrentStatic();
+	my $constants = getCurrentStatic();
+	my %ignore_skids = map {$_ => 1 } @{$constants->{firehose_story_ignored_skids}};
 	my $story = $self->getStory($id);
 	if ($story) {
 		my $globjid = $self->getGlobjidCreate("stories", $story->{stoid});
 		my $id = $self->getFireHoseIdFromGlobjid($globjid);
 		if ($id) {
-			my $public = $story->{neverdisplay} ? "no" : "yes";
+			# If a story is getting its primary skid to an ignored value set its firehose entry to non-public
+			my $public = ($story->{neverdisplay} || $ignore_skids{$story->{primaryskid}}) ? "no" : "yes";
 			my $data = {
 				title 		=> $story->{title},
 				uid		=> $story->{uid},
@@ -187,8 +189,11 @@ sub updateItemFromStory {
 
 sub createItemFromStory {
 	my($self, $id) = @_;
+	my $constants = getCurrentStatic();
+	# If a story is created with an ignored primary skid it'll never be created as a firehose entry currently
+	my %ignore_skids = map {$_ => 1 } @{$constants->{firehose_story_ignored_skids}};
 	my $story = $self->getStory($id);
-	if ($story) {
+	if ($story && !$ignore_skids{$story->{primaryskid}}) {
 		my $globjid = $self->getGlobjidCreate("stories", $story->{stoid});
 		my $public = $story->{neverdisplay} ? "no" : "yes";
 		my $data = {
@@ -384,7 +389,6 @@ sub rejectItem {
 }
 
 sub ajaxSaveOneTopTagFirehose {
-  my($slashdb, $constants, $user, $form, $options) = @_;
 	my($slashdb, $constants, $user, $form, $options) = @_;
   	my $firehose = getObject("Slash::FireHose");
 	my $id = $form->{id};
