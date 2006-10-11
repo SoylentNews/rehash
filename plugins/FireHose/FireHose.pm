@@ -154,7 +154,8 @@ sub createItemFromSubmission {
 			subnetid 		=> $submission->{subnetid},
 			email			=> $submission->{email},
 			emaildomain		=> $submission->{emaildomain},
-			name			=> $submission->{name}
+			name			=> $submission->{name},
+			accepted		=> "yes",
 		};
 		$self->createFireHose($data);
 	}
