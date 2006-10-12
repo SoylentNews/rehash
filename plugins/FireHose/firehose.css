@@ -1,71 +1,56 @@
 .article .firehosetag { background: #fff; }
-.submenu { position: relative; }
-.options {width: 140px; position: absolute; top:-30px !important; right: .5em;}
+.firemenu { position: relative; }
+.options {width: 140px; position: absolute; top:0px !important; right: .5em;}
 .options span {position: relative; width: 20px; margin: 0 0 0 30px !important;}
-.article, #firehose
-{
-	background: url(//images.slashdot.org/storylinks-bg.png) repeat-x left bottom;
-	margin-bottom: 1em;
-}
-
-.end, ul.menu
+ul.menu
 {
 	margin: 0;
 	padding: .75em 12em .75em .6em;
 	background: url(//images.slashdot.org/storylinks-right.png) no-repeat right bottom !important;
 }
-
+.storylinks
+{
+	color: #999;
+	margin: -1em 0 0 0 !important;
+	padding: 0 !important;
+}
+.storylinks li.more
+{
+	margin-left: -1.8em !important;
+}
+#firehose div.briefarticle .storylinks {display: none;}
 #firehose div.briefarticle a span { float: none; }
-.briefarticle { border-top: 1px solid #aaa; }
-#firehoselist .usermode .generaltitle .title h3 { padding-left: 60px !important; }
+#firehoselist .usermode .generaltitle .title h3 { padding-left: 65px !important; }
 
 #firehoselist
 {
-	overflow: auto;
-	_overflow: normal;
-	height: auto;
-	_height: auto;
-	padding: 1em 1em 0 0;
+	padding: 1em 0 0 0;
 }
 
-.briefarticle .generaltitle .title h3 .score
-{
-	border: 1px solid #ccc;
-	border-top: none;
-	border-bottom: none;
-	background-image: url('//images.slashdot.org/sic_shadow.png');
-	_background-image: none;
-}
 
-.article .generaltitle .title h3 .score
-{
-	padding: .4em;
-	border: 1px solid #055;
-	border-top: none;
-	border-bottom: none;
-	background-image: url('//images.slashdot.org/sic_shadow.png');
-	_background-image: none;
-	color: #fff;
-}
-
-.score { padding: .5em .4em .6em .4em; }
+.soda { padding: .7em 10px 0 6px; color: #999; left: 0; top: 0; font-size: 90%; position: absolute; font-weight: normal;}
+.briefarticle .soda {top: 1px;}
+.article .soda {padding: 1.1em 10px 0 6px; font-size: 70%;}
 .briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagstitleopen { padding-bottom: 0px; }
 .briefarticle .generaltitle .title h3 a { color: #066; }
 
 .article .generaltitle .title h3
 {
-	padding-left: 60px !important;
+	padding-left: 65px !important;
 	padding-right: 50px;
 }
 
 .briefarticle .generaltitle .title h3
 {
-	padding: 2px 50px .4em 60px;
+	padding: 2px 50px .4em 65px;
 	font-size: 100%;
 	border-top: 1px solid #fff;
-	background: #e6e6e6 url(//images.slashdot.org/sections-bg.png) repeat-x left bottom;
+	background: url(/images/gen-slc.gif) no-repeat left top;
 }
-
+.briefarticle .generaltitle .title 
+{
+background: #e6e6e6 url(//images.slashdot.org/sections-bg.png) repeat-x left bottom;
+}
 .briefarticle .generaltitle .title .date,
 .briefarticle .generaltitle .title .nickname
 {
@@ -78,38 +63,30 @@
 .briefarticle .firehosetag { background: #999; }
 .briefarticle .details { display: none; }
 .article .firehosetag { background: #fff; }
-
 .article .vote {color: #cee}
-.vote {position: absolute; top: 2px; left: 0; width: 5em; text-align: center;}
 .up
 {
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -1px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -1px;
-	padding: 0 10px 10px 10px;
-	text-indent: -7000em;
-	position: absolute;
-	left: 10px;
-	_top: -2.3em;
-	_left: -20px;
+	background: url('/images/sic_icons.png') no-repeat 0px -1px;
+        _background: url('/images/sic_icons.gif') no-repeat 0px -1px;
+	left: 0px;
 }
 
 .down
 {
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -195px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -195px;
-	padding: 0 10px 10px 10px;
-	text-indent: -7000em;
-	position: absolute;
-	left: 30px;
-	_top: -2.3em;
-	_left: -20px;
+	background: url('/images/sic_icons.png') no-repeat 0px -195px;
+        _background: url('/images/sic_icons.gif') no-repeat 0px -195px;
+        left: 20px;
 }
 
 .up, .down
 {
-	text-decoration: none;
-	_position: relative !important;
+        text-decoration: none;
+        padding: 10px;
+        text-indent: -7000em;
+        position: absolute;
+        width: 16px;
 }
+.vote {position: absolute; top: 4px; left: 18px; _left: -45px; width: 50px; text-align: center; font-size: 80%}
 
 .briefarticle div.tags
 {
@@ -146,8 +123,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 
 .edit a
 {
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 27px -398px !important;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 27px -398px;
+	background: url('/images/sic_icons.png') no-repeat 27px -398px !important;
+	_background: url('/images/sic_icons.gif') no-repeat 1px -398px !important;
 	width: 20px;
 }
 
@@ -163,8 +140,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	z-index: 1000;
 	width: 10px;
 	padding: 5px;
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -799px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
+	background: url('/images/sic_icons.png') no-repeat 0px -799px;
+	_background: url('/images/sic_icons.gif') no-repeat 0px -600px;
 	text-indent: -7000em; position: absolute;
 }
 .reject
@@ -174,8 +151,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	position: absolute;
 	right: 10px;
 	top: .5em;
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -602px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
+	background: url('/images/sic_icons.png') no-repeat 0px -602px;
+	_background: url('/images/sic_icons.gif') no-repeat 0px -600px;
 }
 
 .reject input { visibility: hidden; }
@@ -186,8 +163,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px 1px;
-	_background: url'(//images.slashdot.org/sic_controls.gif') no-repeat;
+	background: url('/images/sic_controls.png') no-repeat 0px 1px;
+	_background: url('/images/sic_controls.gif') no-repeat;
 	text-indent: -7000em; 
 	position: absolute;
 	top: 0;
@@ -199,8 +176,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -200px;
-	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -200px;
+	background: url('/images/sic_controls.png') no-repeat 0px -200px;
+	_background: url('/images/sic_controls.gif') no-repeat 0px -200px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -212,8 +189,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -400px;
-	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -400px;
+	background: url('/images/sic_controls.png') no-repeat 0px -400px;
+	_background: url('/images/sic_controls.gif') no-repeat 0px -400px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -225,8 +202,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -600px;
-	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -600px;
+	background: url('/images/sic_controls.png') no-repeat 0px -600px;
+	_background: url('/images/sic_controls.gif') no-repeat 0px -600px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -238,8 +215,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -800px;
-	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -800px;
+	background: url('/images/sic_controls.png') no-repeat 0px -800px;
+	_background: url('/images/sic_controls.gif') no-repeat 0px -800px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -251,8 +228,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -1000px;
-	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -1000px;
+	background: url('/images/sic_controls.png') no-repeat 0px -1000px;
+	_background: url('/images/sic_controls.gif') no-repeat 0px -1000px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -264,8 +241,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -1200px;
-	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -1200px;
+	background: url('/images/sic_controls.png') no-repeat 0px -1200px;
+	_background: url('/images/sic_controls.gif') no-repeat 0px -1200px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -277,63 +254,21 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -1400px;
-	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -1400px;
+	background: url('/images/sic_controls.png') no-repeat 0px -1400px;
+	_background: url('/images/sic_controls.gif') no-repeat 0px -1400px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
 }
-
-/* Popularity */
-.pop0 { background: #000; }
-
-.pop1
-{
-	background: #300;
-	color: #fff;
-}
-
-.pop2
-{
-	background: #600;
-	color: #fff;
-}
-
-.pop3
-{
-	background: #900;
-	color: #fff;
-}
-
-.pop4
-{
-	background: #a30000;
-	color: #fff;
-}
-
-.pop5
-{
-	background: #c00000;
-	color: #fff;
-}
-
-.pop6
-{
-	background: #dc7070;
-	color: #400000;
-}
-
-.pop7
-{
-	background: #dcc0c0;
-	color: #400000;
-}
-
-.pop8
-{
-	background: #fff;
-	color: #000;
-}
+.pop0 { background: url('/images/pop0.png') no-repeat 0px 0px; }
+.pop1 { background: url('/images/pop8.png') no-repeat 0px 0px; }
+.pop2 { background: url('/images/pop7.png') no-repeat 0px 0px; }
+.pop3 { background: url('/images/pop6.png') no-repeat 0px 0px; }
+.pop4 { background: url('/images/pop5.png') no-repeat 0px 0px; }
+.pop5 { background: url('/images/pop4.png') no-repeat 0px 0px; }
+.pop6 { background: url('/images/pop3.png') no-repeat 0px 0px; }
+.pop7 { background: url('/images/pop2.png') no-repeat 0px 0px; }
+.pop8 { background: url('/images/pop1.png') no-repeat 0px 0px; }
 
 
 /* rules for the autocomplete machinery */
