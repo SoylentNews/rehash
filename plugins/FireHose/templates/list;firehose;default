@@ -13,6 +13,7 @@ list
 __seclev__
 10000
 __template__
+<div class="firemenu">
 [% PROCESS titlebar title="Firehose Beta" %]
 <div id="ac-select-widget" class="hidden">
   <input type="text" id="ac-select-input" />
@@ -55,6 +56,7 @@ __template__
 	[% ELSE %]
 	<span id="full"><a href="[% gSkin.rootdir %]/firehose.pl?mode=fulltitle" title="Toggle display abbreviated/full - Currently full">Full</a></span>
 	[% END %]
+</div>
 </div>
 </div>
 <div id="message_area">[% IF options.orderby == "popularity" && form.page %] Sorry automatic updates only occur on the first page of results when sorted by popularity currently [% END %]</div>

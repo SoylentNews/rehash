@@ -47,7 +47,7 @@ END %]
 [% the_user = Slash.db.getUser(item.uid) %]
 [% IF full %]
 [% IF divwrapper %]
-<div id="firehose-[% item.id %]" class="[% IF mode == "full" %]article[% ELSE %]briefarticle[% END %][% IF adminmode == 0 %] usermode[% END %]">
+<div id="firehose-[% item.id %]" class="[% IF mode == "full" %]article[% ELSE %]briefarticle[% END %][% IF adminmode == 1 %] adminmode[% ELSE %] usermode[% END %]">
 [% END %]
 	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode %]
 	[% PROCESS titlebar h3id="title-" _ item.id id="" %]
@@ -94,9 +94,13 @@ END %]
 [% IF full %]
 		[% PROCESS tagsfirehosedivtagbox id = item.id  tags_top = tags_top %]
 [% IF divwrapper %]
-
-<div class="end"></div>
-
+<div class="storylinks">
+	<div>
+		<ul>
+			<li class="more">Coming soon - Read More...</li>
+		</ul>
+	</div>
+</div>
 </div>
 [% END %]
 [% END %]
