@@ -109,7 +109,7 @@ sub _setuptag {
 
 sub createTag {
 	my($self, $hr, $options) = @_;
-	
+
 	my $tag = $self->_setuptag($hr);
 	return 0 if !$tag;
 
@@ -629,7 +629,6 @@ sub getAllTagsFromUser {
 			if ($bookmark) {
 				$hr->{url}{bookmark} = $bookmark->getUserBookmarkByUrlId($uid, $hr->{url}{url_id});
 			}
-		
 		} elsif ($hr->{globj_type} eq 'journals') {
 			$hr->{journal} = $journal->get($hr->{globj_target_id});
 		} elsif ($hr->{globj_type} eq 'submissions') {

@@ -36,7 +36,6 @@ __template__
 		</fieldset>
 	</form>
 <div class="options">
-	
 	<span id="play"><a href="javascript:firehose_play()" title="Currently playing">Play</a></span>
 	<span id="pause"><a href="javascript:firehose_pause()" title="Currently paused">Pause</a></span>
 

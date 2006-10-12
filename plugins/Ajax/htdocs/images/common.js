@@ -297,12 +297,12 @@ function tagsCreateForUrl(id) {
 
 //Firehose functions begin
 function setOneTopTagForFirehose(id, newtag) {
-  var params = [];
-  params['op'] = 'firehose_update_one_tag';
-  params['id'] = id;
-  params['tags'] = newtag;
-  // params['reskey'] = reskeyel.value;
-  ajax_update(params, '');
+	var params = [];
+	params['op'] = 'firehose_update_one_tag';
+	params['id'] = id;
+	params['tags'] = newtag;
+	// params['reskey'] = reskeyel.value;
+	ajax_update(params, '');
 }
 
 function tagsCreateForFirehose(id) {

@@ -8588,7 +8588,7 @@ sub getSlashConf {
 		charrefs_good_entity =>		[qw( amp lt gt euro pound yen rsquo lsquo rdquo ldquo ndash mdash )],
 		charrefs_good_numeric =>	[ ],
 		cur_performance_stat_ops =>	[ ],
-		firehose_story_ignore_skids	=> [ ],
+		firehose_story_ignore_skids =>	[ ],
 		fixhrefs =>			[ ],
 		hc_possible_fonts =>		[ ],
 		lonetags =>			[ ],
@@ -8601,7 +8601,7 @@ sub getSlashConf {
 		submit_categories =>		[ ],
 		skins_recenttopics =>           [ ],
 		subnet_karma_post_limit_range => [ ],
-		search_ignore_skids		=> [ ],
+		search_ignore_skids =>		[ ],
 	);
 	my %conf_fixup_hashes = (
 		# var name			# default hash of keys/values
