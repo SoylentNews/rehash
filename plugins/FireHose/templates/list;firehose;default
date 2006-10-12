@@ -22,7 +22,7 @@ __template__
 	<form action="[% gSkin.rootdir %]/firehose.pl" method="get">
 		<fieldset>
 			<legend>Firehose</legend>
-			<label><input type="text" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="40" onClick="attachCompleter(this,'[% id %]','[% user.is_admin %]','firehose-filter', 0)"></label>
+			<label><input type="text" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="40" onfocus="attachCompleter(this,'[% id %]','[% user.is_admin %]','firehose-filter', 0)"></label>
 			<!-- <br><label>Order&nbsp;[% Slash.createSelect('order', { 'createtimedesc' => 'Time Desc', popularitydesc => 'Popularity Desc', 'createtimeasc' => 'Time Asc', 'popularityasc' => 'Popularity Asc' }, options.order, 1, 0, 1) %]</label> 
 			<label>Mode&nbsp;[% Slash.createSelect('mode', { 'full' => 'Full', fulltitle => 'Abbreviated' }, options.mode, 1, 0, 1) %]
 </label> -->
