@@ -45,7 +45,7 @@ ul.menu
 	padding: 2px 50px .4em 65px;
 	font-size: 100%;
 	border-top: 1px solid #fff;
-	background: url(/images/gen-slc.gif) no-repeat left top;
+	background: url(//images.slashdot.org/gen-slc.gif) no-repeat left top;
 }
 .briefarticle .generaltitle .title 
 {
@@ -66,15 +66,15 @@ background: #e6e6e6 url(//images.slashdot.org/sections-bg.png) repeat-x left bot
 .article .vote {color: #cee}
 .up
 {
-	background: url('/images/sic_icons.png') no-repeat 0px -1px;
-        _background: url('/images/sic_icons.gif') no-repeat 0px -1px;
+	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -1px;
+        _background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -1px;
 	left: 0px;
 }
 
 .down
 {
-	background: url('/images/sic_icons.png') no-repeat 0px -195px;
-        _background: url('/images/sic_icons.gif') no-repeat 0px -195px;
+	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -195px;
+        _background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -195px;
         left: 20px;
 }
 
@@ -123,8 +123,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 
 .edit a
 {
-	background: url('/images/sic_icons.png') no-repeat 27px -398px !important;
-	_background: url('/images/sic_icons.gif') no-repeat 1px -398px !important;
+	background: url('//images.slashdot.org/sic_icons.png') no-repeat 27px -398px !important;
+	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 1px -398px !important;
 	width: 20px;
 }
 
@@ -140,8 +140,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	z-index: 1000;
 	width: 10px;
 	padding: 5px;
-	background: url('/images/sic_icons.png') no-repeat 0px -799px;
-	_background: url('/images/sic_icons.gif') no-repeat 0px -600px;
+	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -799px;
+	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
 	text-indent: -7000em; position: absolute;
 }
 .reject
@@ -151,8 +151,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	position: absolute;
 	right: 10px;
 	top: .5em;
-	background: url('/images/sic_icons.png') no-repeat 0px -602px;
-	_background: url('/images/sic_icons.gif') no-repeat 0px -600px;
+	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -602px;
+	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
 }
 
 .reject input { visibility: hidden; }
@@ -163,8 +163,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('/images/sic_controls.png') no-repeat 0px 1px;
-	_background: url('/images/sic_controls.gif') no-repeat;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px 1px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
 	text-indent: -7000em; 
 	position: absolute;
 	top: 0;
@@ -176,8 +176,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('/images/sic_controls.png') no-repeat 0px -200px;
-	_background: url('/images/sic_controls.gif') no-repeat 0px -200px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -200px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -200px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -189,8 +189,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('/images/sic_controls.png') no-repeat 0px -400px;
-	_background: url('/images/sic_controls.gif') no-repeat 0px -400px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -400px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -400px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -202,8 +202,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('/images/sic_controls.png') no-repeat 0px -600px;
-	_background: url('/images/sic_controls.gif') no-repeat 0px -600px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -600px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -600px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -215,8 +215,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('/images/sic_controls.png') no-repeat 0px -800px;
-	_background: url('/images/sic_controls.gif') no-repeat 0px -800px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -800px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -800px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -228,8 +228,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('/images/sic_controls.png') no-repeat 0px -1000px;
-	_background: url('/images/sic_controls.gif') no-repeat 0px -1000px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -1000px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -1000px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -241,8 +241,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('/images/sic_controls.png') no-repeat 0px -1200px;
-	_background: url('/images/sic_controls.gif') no-repeat 0px -1200px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -1200px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -1200px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -254,21 +254,21 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	text-decoration: none;
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
-	background: url('/images/sic_controls.png') no-repeat 0px -1400px;
-	_background: url('/images/sic_controls.gif') no-repeat 0px -1400px;
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat 0px -1400px;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat 0px -1400px;
         text-indent: -7000em;
         position: absolute;
         top: 0;
 }
-.pop0 { background: url('/images/pop0.png') no-repeat 0px 0px; }
-.pop1 { background: url('/images/pop8.png') no-repeat 0px 0px; }
-.pop2 { background: url('/images/pop7.png') no-repeat 0px 0px; }
-.pop3 { background: url('/images/pop6.png') no-repeat 0px 0px; }
-.pop4 { background: url('/images/pop5.png') no-repeat 0px 0px; }
-.pop5 { background: url('/images/pop4.png') no-repeat 0px 0px; }
-.pop6 { background: url('/images/pop3.png') no-repeat 0px 0px; }
-.pop7 { background: url('/images/pop2.png') no-repeat 0px 0px; }
-.pop8 { background: url('/images/pop1.png') no-repeat 0px 0px; }
+.pop0 { background: url('//images.slashdot.org/pop0.png') no-repeat 0px 0px; }
+.pop1 { background: url('//images.slashdot.org/pop8.png') no-repeat 0px 0px; }
+.pop2 { background: url('//images.slashdot.org/pop7.png') no-repeat 0px 0px; }
+.pop3 { background: url('//images.slashdot.org/pop6.png') no-repeat 0px 0px; }
+.pop4 { background: url('//images.slashdot.org/pop5.png') no-repeat 0px 0px; }
+.pop5 { background: url('//images.slashdot.org/pop4.png') no-repeat 0px 0px; }
+.pop6 { background: url('//images.slashdot.org/pop3.png') no-repeat 0px 0px; }
+.pop7 { background: url('//images.slashdot.org/pop2.png') no-repeat 0px 0px; }
+.pop8 { background: url('//images.slashdot.org/pop1.png') no-repeat 0px 0px; }
 
 
 /* rules for the autocomplete machinery */
