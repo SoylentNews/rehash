@@ -155,7 +155,6 @@ sub createItemFromSubmission {
 			email			=> $submission->{email},
 			emaildomain		=> $submission->{emaildomain},
 			name			=> $submission->{name},
-			accepted		=> "yes",
 		};
 		$self->createFireHose($data);
 	}
@@ -209,7 +208,8 @@ sub createItemFromStory {
 			tid 		=> $story->{tid},
 			srcid		=> $id,
 			type 		=> "story",
-			public		=> $public
+			public		=> $public,
+			accepted		=> "yes",
 		};
 		$self->createFireHose($data);
 	}
