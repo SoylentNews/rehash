@@ -22,22 +22,26 @@ require Slash::SearchToo::Classic;
 # fields that will be combined into the content field,
 # for indexing and tokenization; first field is main one to excerpt
 our %content = (
-	comments	=> [qw(comment subject)],
-	stories		=> [qw(introtext bodytext title)],
-	firehose	=> [qw(introtext bodytext title)],
+#	comments	=> [qw(comment subject)],
+#	stories		=> [qw(introtext bodytext title)],
+	firehose	=> [qw(introtext bodytext title section topics name)],
 );
 
 # additional fields that will be indexed and tokenized
 our %text = (
-	comments	=> [ qw(tids) ],
-	stories		=> [ qw(tids) ],
-	firehose	=> [ qw(tids primaryskid type category date) ],
+#	comments	=> [ qw(tids) ],
+#	stories		=> [ qw(tids) ],
+	firehose	=> [ qw(note) ],
 );
 
+# will be indexed, not tokenized
 our %primary = (
-	comments	=> 'cid',
+#	comments	=> 'cid',
 	firehose	=> 'id',
 );
+
+# other fields included will be indexed, but NOT tokenized
+# firehose: tids primaryskid type category date popularity activity editorpop
 
 # turn into hashes
 for my $hash (\%text, \%content) {
@@ -80,7 +84,7 @@ sub findRecords {
 	my($self, $type, $query, $opts) = @_;
 
 	# let Classic handle for now
-	return Slash::SearchToo::Classic::findRecords(@_) unless $self->_handled($type);
+	return Slash::SearchToo::Classic::findRecords(@_) unless $self->handled($type);
 
 slashProfInit();
 slashProf('findRecords setup');
@@ -93,7 +97,7 @@ slashProf('findRecords setup');
 
 	### set up common query terms
 	my $terms = {
-		query	=> $query->{query},
+		query	=> delete $query->{query},
 	};
 
 
@@ -120,12 +124,14 @@ slashProf('findRecords setup');
 			sid		=> $query->{sid},
 			points_min	=> $query->{points_min},
 		);
+	} else {
+		%$terms = (%$terms, %$query);
 	}
 
 slashProf('_findRecords', 'findRecords setup');
 	$self->_findRecords($results, $records, $sopts, $terms, $opts);
 slashProf('getRecords', '_findRecords');
-	$self->getRecords($type => $records);
+	$self->getRecords($type => $records, { alldata => 1 });
 slashProf('prepResults', 'getRecords');
 	$self->prepResults($results, $records, $sopts);
 slashProf('', 'getRecords');
@@ -141,7 +147,7 @@ slashProfEnd();
 sub addRecords {
 	my($self, $type, $data, $opts) = @_;
 
-	return unless $self->_handled($type);
+	return unless $self->handled($type);
 
 slashProfInit();
 slashProf('addRecords setup');
@@ -184,9 +190,16 @@ slashProf('prepare records', 'addRecords setup');
 
 				type			=> $record->{type},
 				category		=> $record->{category},
+				note			=> $record->{note},
+				popularity		=> $record->{popularity},
+				activity		=> $record->{activity},
+				editorpop		=> $record->{editorpop},
 
 				primaryskid		=> $processed->{section},
 				tids			=> join(' ', @{$processed->{topic}}),
+				section			=> $processed->{section_name},
+				topics			=> join(' ', @{$processed->{topic_names}}),
+				name			=> $processed->{uid_name},
 			);
 		}
 
@@ -217,7 +230,7 @@ slashProfEnd();
 sub prepRecord {
 	my($self, $type, $data, $opts) = @_;
 
-	return unless $self->_handled($type);
+	return unless $self->handled($type);
 
 	# default to writer
 	my $db = $opts->{db} || getCurrentDB();
@@ -249,7 +262,7 @@ sub prepRecord {
 sub getRecords {
 	my($self, $type, $data, $opts) = @_;
 
-	return unless $self->_handled($type);
+	return unless $self->handled($type);
 
 	# default to ... search?  reader?
 	my $db = $opts->{db} || getObject('Slash::DB', { type => 'reader' });
@@ -277,16 +290,27 @@ sub getRecords {
 			}
 		}
 	} elsif ($type eq 'firehose') {
-		my $firehose = getObject('Slash::FireHose') or return;
-		for my $datum (@$data) {
-			my $item = $firehose->getFireHose($datum->{id});
-			@{$datum}{qw(
-				introtext bodytext title category
-				primaryskid tid type date
-			)} = @{$item}{qw(
-				introtext bodytext title category
-				primaryskid tid type createtime
-			)};
+		my $firehose = getObject('Slash::FireHose', { db_type => 'reader' }) or return;
+		my $items = $firehose->getFireHoseEssentials({
+			ids		=> [ map { $_->{id} } @$data ],
+			fetch_text	=> 1
+		});
+
+		for my $item (@$items) {
+			my($datum) = grep { $_->{id} == $item->{id} } @$data;
+			if ($opts->{alldata}) {
+				@{$datum}{keys %$item} = values %$item;
+			} else {
+				@{$datum}{qw(
+					introtext bodytext title category note
+					globjid uid primaryskid tid type date
+					popularity activity editorpop
+				)} = @{$item}{qw(
+					introtext bodytext title category note
+					globjid uid primaryskid tid type createtime
+					popularity activity editorpop
+				)};
+			}
 		}
 	}
 }
@@ -295,7 +319,7 @@ sub getRecords {
 sub storeRecords {
 	my($self, $type, $data, $opts) = @_;
 
-	return unless $self->_handled($type);
+	return unless $self->handled($type);
 
 	my $slashdb = getCurrentDB();
 
@@ -331,7 +355,7 @@ sub getStoredRecords {
 
 	my $return = {};
 	for my $record (@$records) {
-		if ($self->_handled($record->{type})) {
+		if ($self->handled($record->{type})) {
 			push @{$return->{ $record->{type} }}, $record;
 		}
 	}
@@ -473,7 +497,7 @@ sub _primary {
 }
 
 #################################################################
-sub _handled {
+sub handled {
 	my($self, $type) = @_;
 	$type = $self->_type($type);
 	return $type =~ $self->{_handled};

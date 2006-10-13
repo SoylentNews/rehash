@@ -14,6 +14,7 @@ use KinoSearch::Analysis::PolyAnalyzer;
 use KinoSearch::Analysis::Tokenizer;
 use KinoSearch::Index::IndexReader;
 use KinoSearch::InvIndexer;
+use KinoSearch::Search::QueryFilter;
 use KinoSearch::Searcher;
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
@@ -51,14 +52,11 @@ slashProf('init search');
 #	$querystring =~ s/\b(?!AND NOT|AND|OR)(\w+)\b/\L$1/g;
 	# no field specifiers
 	$querystring =~ s/://g;
+	# collapse spaces
+	$querystring =~ s/\s+/ /g;
+	# for now, no non-alphas, until we are sure they cannot be used against us ...
+	$querystring =~ s/[^\w -]+//g;
 
-
-#	$sopts->{max}++;  # until we get matches/num_hits working
-#	my $searcher_opts = {
-#		-num_results	=> $sopts->{max},
-#		-offset		=> $sopts->{start},
-#		-excerpt_field	=> $self->_field_list('content')->[0]
-#	};
 
 #	if ($sopts->{'sort'} == 1) {
 #		$searcher_opts->{-sort_by} = 'timestamp';
@@ -66,27 +64,41 @@ slashProf('init search');
 #		$searcher_opts->{-sort_by} = 'relevance';
 #	}
 
-#	my $searcher = $self->_searcher(undef, undef, $searcher_opts) or return $results;
 	my $preader  = $self->_reader or return $results;
 	my $searcher = $self->_searcher or return $results;
 
+	my $content_fields = $self->_field_list('content');
+	if ($self->_type eq 'firehose') {
+		push @$content_fields, 'note' if getCurrentUser('is_admin');
+	}
 
-# 	my $query_parser = KinoSearch::QueryParser::QueryParser->new(
-# 		analyzer	=> $self->{_analyzers}{content},
-# 		fields		=> $self->_field_list('content'),
-# 	);
-# 
-# 	my $hits = $searcher->search(query => $query_parser->parse($querystring));
+	my $query_parser = KinoSearch::QueryParser::QueryParser->new(
+		analyzer	=> $self->{_analyzers}{content},
+		fields		=> $content_fields,
+		default_boolop	=> 'AND',
+	);
+	my $query = $query_parser->parse($querystring);
 
-	my $query = KinoSearch::Search::BooleanQuery->new;
+	my($filter, @filters);
+	for my $t (keys %$terms) {
+		next if $t eq 'query';
+		next if	!$terms->{$t} || !length($terms->{$t});
 
-	for my $field (@{$self->_field_list('content')}) {
-		my $query_parser = KinoSearch::QueryParser::QueryParser->new(
-			analyzer      => $self->{_analyzers}{content},
-			default_field => $field,
+		push @filters, KinoSearch::Search::TermQuery->new(
+			term => KinoSearch::Index::Term->new($t => $terms->{$t})
 		);
-		$query->add_clause(query => $query_parser->parse($querystring));
-        }
+	}
+
+	if (@filters) {
+		my $fquery = KinoSearch::Search::BooleanQuery->new;
+		for my $f (@filters) {
+			$fquery->add_clause(query => $f, occur => 'MUST');
+		}
+		$filter = KinoSearch::Search::QueryFilter->new(
+			query => $fquery
+		);
+	}
+
 
 #	if (length $terms->{points_min}) { # ???
 #		# no need to bother with adding this to the query, since it's all comments
@@ -97,18 +109,8 @@ slashProf('init search');
 #		}
 #	}
 
-#	for my $key (keys %$terms) {
-#		next if $key eq 'query' || ! length($terms->{$key});
-#
-#		$searcher->add_query(
-#			-string    => $terms->{$key},
-#			-required  => 1,
-#			-fields    => $key,
-#		);
-#	}
-
 slashProf('search', 'init search');
-	my $hits = $searcher->search(query => $query);
+	my $hits = $searcher->search(query => $query, filter => $filter);
 
 	$hits->seek($sopts->{start}, $sopts->{max});
 
@@ -151,10 +153,13 @@ sub _addRecords {
 			name    	=> $field,
 			analyzer	=> $analyzer,
 			analyzed	=> $analyzer ? 1 : 0,
-			indexed		=> $is_content || $is_text || $is_primary,
+			# no reason to be here at all if we won't index!
+			indexed		=> 1,
 			#compressed	=> 0, # ???
-			### ??? only store the main content field, for excerpting
-			#stored  	=> $is_primary ? 1 : 0,
+			# store only the ID so we can use it to look up other
+			# data we need from the DB later
+			stored  	=> $is_primary ? 1 : 0,
+			vectorized	=> 0,
 		);
 	}
 
@@ -177,7 +182,7 @@ sub _addRecords {
 
 	# only optimize if requested (as usual), and changes were made
 	$writer->finish(
-		optimize	=> $opts->{optimize} && $count
+		optimize => $opts->{optimize} && $count
 	);
 
 	$self->close_writer;
@@ -186,11 +191,10 @@ sub _addRecords {
 }
 
 #################################################################
-# Plucene-specific helper methods
 sub isIndexed {
 	my($self, $type, $id, $opts) = @_;
 
-	return unless $self->_handled($type);
+	return unless $self->handled($type);
 
 	my $searcher = $self->_searcher or return;
 
@@ -200,23 +204,17 @@ sub isIndexed {
 	my $hits = $searcher->search(query => $query);
 
 	return $hits->total_hits || 0;
-
-#	my $preader = ($opts->{_reader} || $self->_reader) or return;
-#	my $found = $preader->doc_is_indexed($id);
-#	$preader->close unless $opts->{_reader};
-
-#	return $found || 0;
 }
 
 #################################################################
 sub deleteRecords {
 	my($self, $type, $ids, $opts) = @_;
 
-	return unless $self->_handled($type);
-
-slashProf('deleteRecords');
+	return unless $self->handled($type);
 
 	my $writer = $self->_writer or return;
+
+slashProf('deleteRecords');
 
 	$ids = [ $ids ] unless ref $ids;
 
@@ -231,9 +229,9 @@ slashProf('deleteRecords');
 		}
 	}
 
-#	# only optimize if requested (as usual), and changes were made
+	# only optimize if requested (as usual), and changes were made
 	$writer->finish(
-		optimize	=> $opts->{optimize} && $count
+		optimize => $opts->{optimize} && $count
 	);
 
 	$self->close_writer;

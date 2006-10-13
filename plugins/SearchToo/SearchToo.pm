@@ -104,6 +104,7 @@ sub prepResults {
 sub _fudge_data {
 	my($self, $data) = @_;
 
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my %processed;
 
 	my $topic = $data->{tids} || $data->{tid} || $data->{topic};
@@ -112,9 +113,20 @@ sub _fudge_data {
 			? @$topic
 			: $topic;
 		$processed{topic} = \@topics;
+
+		my @topic_names;
+		for my $tid (@topics) {
+			next if $tid =~ /\D/;
+			my $name = $reader->getTopic($tid, 'keyword');
+			push @topic_names, $name if $name;
+		}
+		$processed{topic_names} = \@topic_names;
+
 	} else {
 		$processed{topic} = [];
+		$processed{topic_names} = [];
 	}
+
 
 	if ($data->{primaryskid}) {
 		$processed{section} = $data->{primaryskid};
@@ -123,12 +135,22 @@ sub _fudge_data {
 		if ($data->{section} =~ /^\d+$/) {
 			$processed{section} = $data->{section};
 		} else {
-			my $reader = getObject('Slash::DB', { db_type => 'reader' });
+			$processed{section_name} = $data->{section};
 			# get section name, for most compatibility with this API
 			my $skid = $reader->getSkidFromName($data->{section});
 			$processed{section} = $skid if $skid;
 		}
 	}
+
+	if ($processed{section}) {
+		$processed{section_name} ||= $reader->getSkin($processed{section})->{name};
+	}
+
+
+	if ($data->{uid}) {
+		$processed{uid_name} = $reader->getUser($data->{uid}, 'nickname');
+	}
+
 
 	if ($data->{date}) {
 		my $format = '%Y%m%d%H%M%S';

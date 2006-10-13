@@ -12,8 +12,6 @@ __lang__
 en_US
 __name__
 formatHoseTitle
-__seclev__
-10000
 __template__
 [%
 the_skin_title = "";
@@ -46,3 +44,7 @@ ELSE;
 END;
 	%]
 [% IF showtitle; title; END; %]
+__seclev__
+10000
+__version__
+$Id$
