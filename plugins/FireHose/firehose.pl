@@ -66,7 +66,7 @@ sub list {
 	if ($searchtoo && $searchtoo->handled('firehose')) {
 		$results = $searchtoo->findRecords(firehose => {
 			# filters go here
-			query		=> $options->{filter},
+			query		=> $options->{fhfilter},
 		}, {
 			# sort options go here
 			records_max	=> $options->{limit},
