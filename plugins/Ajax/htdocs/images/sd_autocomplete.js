@@ -226,8 +226,20 @@ YAHOO.slashdot.AutoCompleteWidget = function()
     // add body/window blur to detect changing windows?
   }
 
+YAHOO.slashdot.AutoCompleteWidget.prototype._textField = function()
+  {
+    if ( ! this._sourceEl )
+      return null;
+
+    if ( this._sourceEl.type=='text' || this._sourceEl.type=='textarea' )
+      return this._sourceEl;
+
+    return this._spareInput;
+  }
+
 YAHOO.slashdot.AutoCompleteWidget.prototype._needsSpareInput = function()
   {
+    // return this._textField() == this._spareInput;
     return this._sourceEl && (this._sourceEl.type != "text") && (this._sourceEl.type != "textarea");
   }
 
@@ -275,10 +287,11 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParam
 
             this._completer.itemSelectEvent.subscribe(this._onItemSelectEvent, this);
             this._completer.textboxBlurEvent.subscribe(this._onTextboxBlurEvent, this);
-            YAHOO.util.Event.addListener(this._spareInput, "keyup", this._onTextboxKeyUp, this, true);
           }
         else
           YAHOO.util.Dom.addClass(this._spareInput, "hidden");
+
+        YAHOO.util.Event.addListener(this._textField(), "keyup", this._onTextboxKeyUp, this, true);
 
         var pos = YAHOO.util.Dom.getXY(this._sourceEl);
         pos[1] += this._sourceEl.offsetHeight;
@@ -293,11 +306,12 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._hide = function()
     if ( this._sourceEl )
       {
         YAHOO.util.Dom.removeClass(this._sourceEl, "ac-source");
+
+        YAHOO.util.Event.removeListener(this._textField(), "keyup", this._onTextboxKeyUp, this, true);
         if ( this._needsSpareInput() )
           {
             this._completer.itemSelectEvent.unsubscribe(this._onItemSelectEvent, this);
             this._completer.textboxBlurEvent.unsubscribe(this._onTextboxBlurEvent, this);
-            YAHOO.util.Event.removeListener(this._spareInput, "keyup", this._onTextboxKeyUp, this, true);
           }
 
         this._sourceEl = null;
