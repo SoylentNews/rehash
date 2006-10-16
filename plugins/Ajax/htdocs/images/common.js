@@ -1,3 +1,4 @@
+// _*_ Mode: JavaScript; tab-width: 8; indent-tabs-mode: true _*_
 // $Id$
 
 function createPopup(xy, titlebar, name, contents, message) {
@@ -250,6 +251,7 @@ function attachCompleter( obj, id, is_admin, type, tagDomain ) {
 		YAHOO.slashdot.gCompleterWidget = new YAHOO.slashdot.AutoCompleteWidget();
 
 	YAHOO.slashdot.gCompleterWidget.attach(obj, callbackParams, tagDomain);
+	return false;
 }
 
 function reportError(request) {
