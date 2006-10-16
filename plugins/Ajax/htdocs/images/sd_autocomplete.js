@@ -352,9 +352,18 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type,
       //  at least when there is more than just p._type=='firehose'
     if ( p._type == "firehose" && p._tagDomain != 0 )
       {
+          // save the new tag immediately
         setOneTopTagForFirehose(p._id, tagname);
-        // if the user tags field is visible, then I should also enter this tag into that field
-        // tagsOpenAndEnter(p._id, tagname, p._is_admin, p._type);
+
+          // and if the user tags field exists, add it there (but don't show or hide the field)
+        var tagField = document.getElementById('tags-user-' + p._id);
+        if ( tagField )
+          {
+	    var s = tagField.value.slice(-1);
+            if ( s.length && s != " " )
+              tagField.value += " ";
+            tagField.value += tagname;
+          }
       }
   }
 
