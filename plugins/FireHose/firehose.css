@@ -282,6 +282,7 @@ a.ac-source
 {
   display: block;
   position: absolute;
+  z-index: 9050;
   width: 120px;
   background-color: lightgray;
 }
