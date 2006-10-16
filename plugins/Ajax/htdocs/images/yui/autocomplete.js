@@ -2272,9 +2272,14 @@ YAHOO.widget.DS_XHR.prototype.ERROR_DATAXHR = "XHR response failed";
  */
 YAHOO.widget.DS_XHR.prototype.connTimeout = 0;
 
-// scc: changed for slashdot --- must submit back to YAHOO for integration
-YAHOO.widget.DS_XHR.prototype.queryMethod = "GET";
 
+/**
+ * Select between "GET" and "POST" as required by your server-side code.
+ * Default: "GET".
+ *
+ * @type string
+ */
+YAHOO.widget.DS_XHR.prototype.queryMethod = "GET";
 
 /**
  * Absolute or relative URI to script that returns query results. For instance,
@@ -2337,10 +2342,19 @@ YAHOO.widget.DS_XHR.prototype.responseStripAfter = "\n<!--";
  */
 YAHOO.widget.DS_XHR.prototype.doQuery = function(oCallbackFn, sQuery, oParent) {
     var isXML = (this.responseType == this.TYPE_XML);
-    var sUri = this.scriptURI+"?"+this.scriptQueryParam+"="+sQuery;
+    var sCompleteQuery = this.scriptQueryParam + "=" + sQuery;
     if(this.scriptQueryAppend.length > 0) {
-        sUri += "&" + this.scriptQueryAppend;
+        sCompleteQuery += "&" + this.scriptQueryAppend;
     }
+    var sQueryData = null;
+    var sUri = this.scriptURI;
+    if(this.queryMethod == "GET") {
+      sUri += "?" + sCompleteQuery;
+    }
+    else {
+      sQueryData = sCompleteQuery;
+    }
+
     var oResponse = null;
     
     var oSelf = this;
@@ -2403,7 +2417,7 @@ for(var foo in oResp) {
         YAHOO.util.Connect.abort(this._oConn);
     }
     
-    oSelf._oConn = YAHOO.util.Connect.asyncRequest(oSelf.queryMethod, sUri, oCallback, null);
+    oSelf._oConn = YAHOO.util.Connect.asyncRequest(this.queryMethod, sUri, oCallback, sQueryData);
 };
 
 /**
