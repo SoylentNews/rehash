@@ -36,7 +36,7 @@ $task{$me}{code} = sub {
 					$item->{$_} = xmldecode($item->{$_});
 				}
 				
-				my $title = $item->{title};
+				my $title = strip_notags($item->{title});
 				my $link = fudgeurl($item->{link});
 				my $text = strip_mode($item->{description}, HTML);
 				slashdLog($item->{description});
@@ -44,7 +44,7 @@ $task{$me}{code} = sub {
 				
 				my $data = {
 					url		=> $link,
-					initialtitle	=> strip_literal($title)
+					initialtitle	=> $title,
 				};
 				
 				my $url_id = $slashdb->getUrlCreate($data);
@@ -54,7 +54,7 @@ $task{$me}{code} = sub {
 				my $bookmark_data = {
 					url_id 		=> $url_id,
 					uid    		=> $feed->{uid},
-					title		=> strip_literal($title),
+					title		=> $title,
 				};
 				
 				my $user_bookmark = $bookmark->getUserBookmarkByUrlId($feed->{uid}, $url_id);
