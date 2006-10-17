@@ -112,7 +112,7 @@ sub saveBookmark {
 
 	my $data = {
 		url		=> $fudgedurl,
-		initialtitle	=> strip_literal($form->{title})
+		initialtitle	=> strip_notags($form->{title})
 	};
 
 	my $url_id = $slashdb->getUrlCreate($data);
@@ -121,7 +121,7 @@ sub saveBookmark {
 	my $bookmark_data = {
 		url_id 		=> $url_id,
 		uid    		=> $user->{uid},
-		title		=> strip_literal($form->{title}),
+		title		=> strip_notags($form->{title}),
 	};
 
 	my $bookmark_id;
@@ -199,7 +199,7 @@ sub anonBookmark {
 			$slashdb->setUrl($url_id, { -anon_bookmarks => 'anon_bookmarks + 1' } );
 		} else {
 			my $data = {
-				initialtitle => strip_attribute($form->{title}),
+				initialtitle => strip_notags($form->{title}),
 				url    => $fudgedurl,
 				anon_bookmarks => 1,
 			};
