@@ -108,8 +108,15 @@ sub list {
 sub view {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 	my $firehose = getObject("Slash::FireHose");
-	my $item = $firehose->getFireHose($form->{id});
-	slashDisplay("view", { item => $item } );
+	my $firehose_reader = getObject("Slash::FireHose", { db_type => 'reader' });
+	my $options = $firehose->getAndSetOptions();
+	my $item = $firehose_reader->getFireHose($form->{id});
+	if ($item && $item->{id} && ($item->{public} eq "yes" || $user->{is_admin}) ) {
+		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
+		print $firehose_reader->dispFireHose($item, { mode => "full", tags_top => $tags_top, options => $options });
+	} else {
+		print getData('notavailable');
+	}
 }
 
 

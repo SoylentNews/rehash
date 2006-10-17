@@ -48,6 +48,8 @@ __template__
 	[% IF !hidediv %]
 	</div>
 	[% END %]
+[% CASE 'notavailable' %]
+	The item you're trying to view either does not exist, or is not viewable to you.
 [% END %]
 
 __version__

@@ -489,10 +489,11 @@ sub ajaxFireHoseFetchNew {
 	$opts->{createtime_gte} = $maxtime;
 
 	my $items = $firehose_reader->getFireHoseEssentials($opts);
+	my $now = $firehose_reader->getTime();
 
 
 	foreach my $i (@$items) {
-		$maxtime = $i->{createtime} if $i->{createtime} gt $maxtime;
+		$maxtime = $i->{createtime} if $i->{createtime} gt $maxtime && $i->{createtime} le $now;
 		my $item = $firehose_reader->getFireHose($i->{id});
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
 		push @$added, [$i->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" })];

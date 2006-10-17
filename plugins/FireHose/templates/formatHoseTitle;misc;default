@@ -20,7 +20,7 @@ IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid 
 	the_skin_title = the_skin.title _ ": ";
 END;
 title = the_skin_title _ item.title;
-title = "<a href='javascript:toggle_firehose_body(\"$item.id\", $adminmode)'>" _ title _ "</a>";
+title = "<a onclick='javascript:toggle_firehose_body(\"$item.id\", $adminmode); return false' href='$gSkin.rootdir/firehose.pl?op=view&amp;id=$item.id'>" _ title _ "</a>";
 IF item.url_id;
         title = title _ "<span class=\"external\"><a href=\"" _ url.url _ "\" title=\"External link - " _ url.url _ "\" target=\"_blank\">[-&gt;]</a></span>";
 END;
