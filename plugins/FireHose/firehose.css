@@ -272,6 +272,8 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 
 
 /* rules for the autocomplete machinery */
+.tagname a { text-decoration: underline; cursor: pointer; }
+
 a.ac-source
 {
   color: white;
