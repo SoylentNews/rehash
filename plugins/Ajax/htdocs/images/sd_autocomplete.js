@@ -206,6 +206,7 @@ YAHOO.slashdot.topicTags = ["keyword",
     var topicsDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.topicTags);
 
     var tagsDS = new YAHOO.widget.DS_XHR("./ajax.pl", ["\n", "\t"]);
+    tagsDS.maxCacheEntries = 0; // turn off local cacheing, because Jamie says the query is fast
     tagsDS.responseType = tagsDS.TYPE_FLAT;
     tagsDS.scriptQueryParam = "prefix";
     tagsDS.scriptQueryAppend = "op=tags_list_tagnames";
@@ -250,20 +251,20 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._newCompleter = function( tagDomain 
       {
         c = new YAHOO.widget.AutoComplete("ac-select-input", "ac-choices", YAHOO.slashdot.dataSources[tagDomain]);
         c.minQueryLength = 0;
-        c.queryDelay = 0;
-        c.typeAhead = true;
-        c.autoHighlight = false;
-        c.maxResultsDisplayed = 25;
+
+          // hack? -- override YUI's private member function so that for top tags auto-complete, right arrow means select
+        c._jumpSelection = function() { if ( this._oCurItem ) this._selectItem(this._oCurItem); };
       }
     else
       {
         c = new YAHOO.widget.AutoComplete(this._sourceEl, "ac-choices", YAHOO.slashdot.dataSources[tagDomain]);
-        c.minQueryLength = 1;
-        c.queryDelay = 0.3;
-        c.typeAhead = true;
-        c.queryMatchSubset = true;
         c.delimChar = " ";
       }
+    c.typeAhead = true;
+    c.allowBrowserAutocomplete = false;
+    c.maxResultsDisplayed = 25;
+    c.queryDelay = 0.25;
+
     return c;
   }
 
