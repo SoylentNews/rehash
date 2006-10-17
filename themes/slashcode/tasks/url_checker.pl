@@ -59,7 +59,7 @@ $task{$me}{code} = sub {
 			my $validatedtitle = $hp->header('Title');
 			if (defined $validatedtitle) {
 				#slashdLog("vt $validatedtitle");	
-				$url_update->{validatedtitle} = strip_literal($validatedtitle);
+				$url_update->{validatedtitle} = strip_notags($validatedtitle);
 				$url_update->{"-last_success"} = "NOW()";
 				$url_update->{is_success} = 1;
 				$url_update->{"-believed_fresh_until"} = "DATE_ADD(NOW(), INTERVAL 2 DAY)";
