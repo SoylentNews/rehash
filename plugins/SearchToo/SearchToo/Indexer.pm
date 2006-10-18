@@ -194,6 +194,9 @@ slashProf('prepare records', 'addRecords setup');
 				popularity		=> $record->{popularity},
 				activity		=> $record->{activity},
 				editorpop		=> $record->{editorpop},
+				accepted		=> $record->{accepted},
+				rejected		=> $record->{rejected},
+				public			=> $record->{public},
 
 				primaryskid		=> $processed->{section},
 				tids			=> join(' ', @{$processed->{topic}}),
@@ -291,9 +294,10 @@ sub getRecords {
 		}
 	} elsif ($type eq 'firehose') {
 		my $firehose = getObject('Slash::FireHose', { db_type => 'reader' }) or return;
-		my $items = $firehose->getFireHoseEssentials({
+		my($items) = $firehose->getFireHoseEssentials({
 			ids		=> [ map { $_->{id} } @$data ],
-			fetch_text	=> 1
+			fetch_text	=> 1,
+			no_search	=> 1
 		});
 
 		for my $item (@$items) {
@@ -305,10 +309,12 @@ sub getRecords {
 					introtext bodytext title category note
 					globjid uid primaryskid tid type date
 					popularity activity editorpop
+					accepted rejected public
 				)} = @{$item}{qw(
 					introtext bodytext title category note
 					globjid uid primaryskid tid type createtime
 					popularity activity editorpop
+					accepted rejected public
 				)};
 			}
 		}

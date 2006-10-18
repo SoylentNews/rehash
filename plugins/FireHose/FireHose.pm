@@ -34,7 +34,9 @@ use Data::JavaScript::Anon;
 
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
-use vars qw($VERSION);
+use vars qw($VERSION $searchtootest);
+
+$searchtootest = 1;
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -209,7 +211,7 @@ sub createItemFromStory {
 			srcid		=> $id,
 			type 		=> "story",
 			public		=> $public,
-			accepted		=> "yes",
+			accepted	=> "yes",
 		};
 		$self->createFireHose($data);
 	}
@@ -217,9 +219,40 @@ sub createItemFromStory {
 
 sub getFireHoseEssentials {
 	my($self, $options) = @_;
+
 	my $user = getCurrentUser();
+
 	$options ||= {};
 	$options->{limit} ||= 50;
+
+	if (!$options->{no_search} && $Slash::FireHose::searchtootest) {
+		my $searchtoo = getObject('Slash::SearchToo');
+		if ($searchtoo && $searchtoo->handled('firehose')) {
+			my(%opts, %query);
+			$query{query}		= $options->{qfilter}		if defined $options->{qfilter};
+			$query{category}	= $options->{category} || ''	if $options->{category} || $user->{is_admin};
+			if ($options->{ids}) {
+				if (ref($options->{ids}) eq 'ARRAY' && @{$options->{ids}} < 1) {
+					return([], {});
+				}
+				$query{id}		= $options->{ids}		if $options->{ids};
+			}
+
+			# attention_needed not indexed right now
+			for (qw(attention_needed public accepted rejected type primaryskid)) {
+				$query{$_}	= $options->{$_}		if $options->{$_};
+			}
+
+			# still need sorting and filtering by date
+			$opts{records_max}	= $options->{limit};
+			$opts{records_start}	= $options->{offset}		if $options->{offset};
+
+			my $results = $searchtoo->findRecords(firehose => \%query, \%opts);
+			my $items = $results->{records};
+			return($items, $results);
+		}
+	}
+
 	$options->{orderby} ||= "createtime";
 	$options->{orderdir} = uc($options->{orderdir}) eq "ASC" ? "ASC" : "DESC";
 	#($user->{is_admin} && $options->{orderby} eq "createtime" ? "ASC" :"DESC");
@@ -304,7 +337,7 @@ sub getFireHoseEssentials {
 		$hr->{note} = $note_hr->{ $hr->{globjid} } || '';
 	}
 
-	return $hr_ar;
+	return($hr_ar, {}); # {} is optional results information (see SearchToo)
 }
 
 sub getFireHose {
@@ -476,21 +509,21 @@ sub ajaxGetAdminFirehose {
 
 sub ajaxFireHoseFetchNew {
 	my($slashdb, $constants, $user, $form, $options) = @_;
+
 	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $maxtime = $form->{maxtime};
 	my $added = [];
 
-	my $opts = $firehose->getAndSetOptions({ no_set => 1});
+	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
 	$opts->{limit} = 10;
 	$opts->{orderby} = 'createtime';
 	$opts->{orderdir} = 'ASC';
 	$opts->{createtime_gte} = $maxtime;
 
-	my $items = $firehose_reader->getFireHoseEssentials($opts);
+	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
 	my $now = $firehose_reader->getTime();
-
 
 	foreach my $i (@$items) {
 		$maxtime = $i->{createtime} if $i->{createtime} gt $maxtime && $i->{createtime} le $now;
@@ -507,6 +540,7 @@ sub ajaxFireHoseFetchNew {
 
 sub ajaxFireHoseCheckRemoved {
 	my($slashdb, $constants, $user, $form, $options) = @_;
+
 	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
@@ -514,10 +548,12 @@ sub ajaxFireHoseCheckRemoved {
 	my @ids = grep {/^\d+$/} split (/,/, $id_str);
 	my %ids = map { $_ => 1 } @ids;
 
-	my $opts = $firehose->getAndSetOptions({ no_set => 1});
+	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
 	$opts->{nolimit} = 1;
 	$opts->{ids} = \@ids;
-	my $items = $firehose_reader->getFireHoseEssentials($opts);
+
+	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
+
 	foreach (@$items) {
 		delete $ids{$_->{id}};
 	}
@@ -535,7 +571,7 @@ sub ajaxFireHoseGetUpdatesPop {
 	my $update_time = $form->{updatetime};
 	my @ids = grep {/^\d+$/} split (/,/, $id_str);
 	my %ids = map { $_ => 1 } @ids;
-	my $opts = $firehose->getAndSetOptions({ no_set => 1});
+	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
 	my $items = $firehose_reader->getFireHoseEssentials($opts);
 	my $html = {};
 	my $update_new = [];
@@ -562,11 +598,11 @@ sub ajaxFireHoseGetUpdatesPop {
 		delete $ids{$_->{id}};
 	}
 	return Data::JavaScript::Anon->anon_dump({
-		removed => \%ids,
-		html => $html,
-		update_new => $update_new,
-		update_time => $update_time,
-		removed => \%ids
+		removed		=> \%ids,
+		html		=> $html,
+		update_new	=> $update_new,
+		update_time	=> $update_time,
+		removed		=> \%ids
 	});
 }
 
@@ -583,12 +619,13 @@ sub ajaxFireHoseGetUpdates {
 	my $adminmode = $user->{is_admin};
 	$adminmode = 0 if $user->{is_admin} && $user->{firehose_usermode};
 
-	my $opts = $firehose->getAndSetOptions({ no_set => 1});
+	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
 	$opts->{limit} = 25;
 	$opts->{orderby} = 'last_update';
 	$opts->{orderdir} = 'ASC';
 	$opts->{last_update_gte} = $update_time;
-	my $items = $firehose_reader->getFireHoseEssentials($opts);
+
+	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
 
 	my $update_new = [];
 	my $html = {};
@@ -601,7 +638,7 @@ sub ajaxFireHoseGetUpdates {
 		} else {
 			my $url 	= $slashdb->getUrl($item->{url_id});
 			my $the_user  	= $slashdb->getUser($item->{uid});
-			$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user }, { Return => 1 });
+			$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user }, { Page => 'firehose', Return => 1 });
 			$html->{"tags-top-$_->{id}"} = slashDisplay("firehose_tags_top", { tags_top => $tags_top, id => $_->{id} }, { Return => 1 });
 			$update_time = $_->{last_update} if $_->{last_update} gt $update_time;
 		}
@@ -973,11 +1010,16 @@ sub getAndSetOptions {
 			$fh_options->{rejected} = "yes";
 		} elsif ($user->{is_admin} && $_ eq "accepted") {
 			$fh_options->{accepted} = "yes";
-		} elsif (!defined $fh_options->{filter}) {
-			# XXX Filter this
-			$fh_options->{filter} = $_;
+		} else {
+			if (!defined $fh_options->{filter}) {
+				# XXX Filter this
+				$fh_options->{filter} = $_;
+			}
+			# Don't filter this
+			$fh_options->{qfilter} .= $_ . ' ';
 		}
 	}
+
 	foreach (keys %$fh_options) {
 		$options->{$_} = $fh_options->{$_};
 	}
@@ -1012,6 +1054,7 @@ sub getAndSetOptions {
 		$options->{daysback} = 1;
 		$options->{createtime_no_future} = 1;
 	}
+
 	return $options;
 }
 

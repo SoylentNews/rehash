@@ -59,23 +59,7 @@ sub list {
 		$options->{offset} = $page * $options->{limit};
 	}
 
-	my($items, $results);
-	# XXX: for testing!
-	my $searchtootest = 0;
-	my $searchtoo = $searchtootest && getObject('Slash::SearchToo');
-	if ($searchtoo && $searchtoo->handled('firehose')) {
-		$results = $searchtoo->findRecords(firehose => {
-			# filters go here
-			query		=> $options->{fhfilter},
-		}, {
-			# sort options go here
-			records_max	=> $options->{limit},
-			records_start	=> $options->{offset},
-		});
-		$items = $results->{records};
-	} else {
-		$items = $firehose_reader->getFireHoseEssentials($options);
-	}
+	my($items, $results) = $firehose_reader->getFireHoseEssentials($options);
 
 	my $itemstext;
 	my $maxtime = $firehose->getTime();
@@ -97,10 +81,10 @@ sub list {
 	} 
 
 	slashDisplay("list", {
-		itemstext => $itemstext, 
-		page => $page, 
-		options => $options,
-		refresh_options => $refresh_options
+		itemstext	=> $itemstext, 
+		page		=> $page, 
+		options		=> $options,
+		refresh_options	=> $refresh_options
 	});
 
 }

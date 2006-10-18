@@ -67,36 +67,55 @@ slashProf('init search');
 	my $preader  = $self->_reader or return $results;
 	my $searcher = $self->_searcher or return $results;
 
-	my $content_fields = $self->_field_list('content');
-	if ($self->_type eq 'firehose') {
-		push @$content_fields, 'note' if getCurrentUser('is_admin');
+	my($query, $fquery, $filter, @filters);
+	if ($querystring =~ /\S/) {
+		my $content_fields = $self->_field_list('content');
+		if ($self->_type eq 'firehose') {
+			push @$content_fields, 'note' if getCurrentUser('is_admin');
+		}
+
+		my $query_parser = KinoSearch::QueryParser::QueryParser->new(
+			analyzer	=> $self->{_analyzers}{content},
+			fields		=> $content_fields,
+			default_boolop	=> 'AND',
+		);
+		$query = $query_parser->parse($querystring);
 	}
 
-	my $query_parser = KinoSearch::QueryParser::QueryParser->new(
-		analyzer	=> $self->{_analyzers}{content},
-		fields		=> $content_fields,
-		default_boolop	=> 'AND',
-	);
-	my $query = $query_parser->parse($querystring);
-
-	my($filter, @filters);
 	for my $t (keys %$terms) {
 		next if $t eq 'query';
 		next if	!$terms->{$t} || !length($terms->{$t});
 
-		push @filters, KinoSearch::Search::TermQuery->new(
-			term => KinoSearch::Index::Term->new($t => $terms->{$t})
-		);
+		# OR by default, for now anyway ... chances are this won't
+		# ever need to be an AND
+		if (ref($terms->{$t}) eq 'ARRAY') {
+			my $list = KinoSearch::Search::BooleanQuery->new;
+			for my $sub (@{$terms->{$t}}) {
+				my $tmp = KinoSearch::Search::TermQuery->new(
+					term => KinoSearch::Index::Term->new($t => $sub)
+				);
+				$list->add_clause(query => $tmp, occur => 'SHOULD');
+			}
+			push @filters, $list;
+		} else {
+			push @filters, KinoSearch::Search::TermQuery->new(
+				term => KinoSearch::Index::Term->new($t => $terms->{$t})
+			);
+		}
 	}
 
 	if (@filters) {
-		my $fquery = KinoSearch::Search::BooleanQuery->new;
+		$fquery = KinoSearch::Search::BooleanQuery->new;
 		for my $f (@filters) {
 			$fquery->add_clause(query => $f, occur => 'MUST');
 		}
-		$filter = KinoSearch::Search::QueryFilter->new(
-			query => $fquery
-		);
+		# if there is no query, make the filters the query
+		# XXX we sure we want these to be filters at all?
+		if ($query) {
+			$filter = KinoSearch::Search::QueryFilter->new(
+				query => $fquery
+			);
+		}
 	}
 
 
@@ -110,7 +129,7 @@ slashProf('init search');
 #	}
 
 slashProf('search', 'init search');
-	my $hits = $searcher->search(query => $query, filter => $filter);
+	my $hits = $searcher->search(query => $query || $fquery, filter => $filter);
 
 	$hits->seek($sopts->{start}, $sopts->{max});
 
@@ -247,24 +266,19 @@ sub _searcher {
 	$type = $self->_type($type);
 	$dir = $self->_dir($type, $dir);
 
-	return $self->{_searcher}{$type}{$dir} if $self->{_searcher}{$type}{$dir};
+	if ($self->{_searcher}{$type}{$dir}) {
+		if ($self->{_searcher}{$type}{$dir}{'time'} >= time() - 90) {
+			return $self->{_searcher}{$type}{$dir}{dir};
+		}
+	}
 
 	$self->_analyzers;
 
-	return $self->{_searcher}{$type}{$dir} = KinoSearch::Searcher->new(
+	$self->{_searcher}{$type}{$dir}{'time'} = time();
+	return $self->{_searcher}{$type}{$dir}{dir} = KinoSearch::Searcher->new(
 		invindex		=> $self->_kdir($dir),
 		analyzer		=> $self->{_analyzers}{content},
 	);
-
-#		-stoplist		=> {},
-#		-kindex			=> $preader,
-#		-any_or_all		=> 'all',
-#		-sort_by		=> 'relevance', # relevance, timestamp
-#		-allow_boolean		=> 0,
-#		-allow_phrases		=> 0,
-##		-max_terms		=> 6, # ???
-#		-excerpt_length		=> $constants->{search_text_length},
-
 }
 
 #################################################################
@@ -273,12 +287,17 @@ sub _reader {
 	$type = $self->_type($type);
 	$dir = $self->_dir($type, $dir);
 
-	return $self->{_reader}{$type}{$dir} if $self->{_reader}{$type}{$dir};
+	if ($self->{_reader}{$type}{$dir}) {
+		if ($self->{_reader}{$type}{$dir}{'time'} >= time() - 90) {
+			return $self->{_reader}{$type}{$dir}{dir};
+		}
+	}
 
 	my $kdir = $self->_kdir($dir);
 	return undef unless -e $kdir;
 
-	return $self->{_reader}{$type}{$dir} = KinoSearch::Index::IndexReader->new(
+	$self->{_reader}{$type}{$dir}{'time'} = time();
+	return $self->{_reader}{$type}{$dir}{dir} = KinoSearch::Index::IndexReader->new(
 		invindex		=> $kdir,
 	);
 }
@@ -289,13 +308,14 @@ sub _writer {
 	$type = $self->_type($type);
 	$dir = $self->_dir($type, $dir);
 
-	return $self->{_writer}{$type}{$dir} if $self->{_writer}{$type}{$dir};
-
 	mkpath($dir, 0, 0775) unless -e $dir;
 
 	$self->_analyzers;
 
 	my $kdir = $self->_kdir($dir);
+	# we never plan on caching the writer ... we only store it here just
+	# in case we want to access it through another method call to $self,
+	# which we probably shouldn't do
 	return $self->{_writer}{$type}{$dir} = KinoSearch::InvIndexer->new(
 		invindex		=> $kdir,
 		create			=> -e $kdir ? 0 : 1,
@@ -327,7 +347,7 @@ sub close_searcher {
 	$type = $self->_type($type);
 	$dir = $self->_dir($type, $dir);
 
-	my $searcher = delete $self->{_searcher}{$type}{$dir} or return;
+	delete $self->{_searcher}{$type}{$dir};
 }
 
 #################################################################
@@ -336,7 +356,7 @@ sub close_reader {
 	$type = $self->_type($type);
 	$dir = $self->_dir($type, $dir);
 
-	my $preader = delete $self->{_reader}{$type}{$dir} or return;
+	delete $self->{_reader}{$type}{$dir};
 }
 
 #################################################################
@@ -345,7 +365,7 @@ sub close_writer {
 	$type = $self->_type($type);
 	$dir = $self->_dir($type, $dir);
 
-	my $writer = delete $self->{_writer}{$type}{$dir} or return;
+	delete $self->{_writer}{$type}{$dir};
 }
 
 1;
