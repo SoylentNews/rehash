@@ -4125,3 +4125,7 @@ UPDATE vars SET value = 'T_2_5_0_129' WHERE name = 'cvs_tag_currentcode';
 INSERT search_index_dump SELECT NULL, id, 'firehose', 'changed' FROM firehose;
 
 # PUDGE LAST UPDATED HERE
+
+# 2006-10-17
+UPDATE vars SET value = 'T_2_5_0_130' WHERE name = 'cvs_tag_currentcode';
+
