@@ -199,9 +199,9 @@ sub anonBookmark {
 			$slashdb->setUrl($url_id, { -anon_bookmarks => 'anon_bookmarks + 1' } );
 		} else {
 			my $data = {
-				initialtitle => strip_notags($form->{title}),
-				url    => $fudgedurl,
-				anon_bookmarks => 1,
+				initialtitle	=> strip_notags($form->{title}),
+				url		=> $fudgedurl,
+				anon_bookmarks	=> 1,
 			};
 			my @allowed_schemes = split(/\|/,$constants->{bookmark_allowed_schemes});
 			my %allowed_schemes = map { $_ => 1 } @allowed_schemes;
