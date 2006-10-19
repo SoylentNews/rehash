@@ -143,7 +143,10 @@ sub _fudge_data {
 	}
 
 	if ($processed{section}) {
-		$processed{section_name} ||= $reader->getSkin($processed{section})->{name};
+		my $skin = $reader->getSkin($processed{section});
+		if ($skin) {
+			$processed{section_name} ||= $skin->{name};
+		}
 	}
 
 

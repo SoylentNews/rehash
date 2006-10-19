@@ -229,8 +229,8 @@ sub getFireHoseEssentials {
 		my $searchtoo = getObject('Slash::SearchToo');
 		if ($searchtoo && $searchtoo->handled('firehose')) {
 			my(%opts, %query);
-			$query{query}		= $options->{qfilter}		if defined $options->{qfilter};
-			$query{category}	= $options->{category} || ''	if $options->{category} || $user->{is_admin};
+			$query{query}		= $options->{qfilter}			if defined $options->{qfilter};
+			$query{category}	= $options->{category} || 'none'	if $options->{category} || $user->{is_admin};
 			if ($options->{ids}) {
 				if (ref($options->{ids}) eq 'ARRAY' && @{$options->{ids}} < 1) {
 					return([], {});
@@ -244,7 +244,7 @@ sub getFireHoseEssentials {
 			}
 
 			# still need sorting and filtering by date
-			$opts{records_max}	= $options->{limit};
+			$opts{records_max}	= $options->{limit}		unless $options->{nolimit};
 			$opts{records_start}	= $options->{offset}		if $options->{offset};
 
 			my $results = $searchtoo->findRecords(firehose => \%query, \%opts);

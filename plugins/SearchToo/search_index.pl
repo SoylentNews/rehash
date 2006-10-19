@@ -18,7 +18,7 @@ $task{$me}{code} = sub {
 
 	my $searchtoo = getObject('Slash::SearchToo');
 
-	slashdLog("Backing up index");
+#	slashdLog("Backing up index");
 #	$searchtoo->copyBackup;
 #	$searchtoo->backup(1);
 
@@ -71,7 +71,8 @@ $task{$me}{code} = sub {
 #	$searchtoo->backup(0);
 #	$searchtoo->moveLive;
 
-	slashdLog("Moved new index live");
+#	slashdLog("Moved new index live");
+	slashdLog("Finished");
 };
 
 1;

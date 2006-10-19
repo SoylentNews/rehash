@@ -106,7 +106,9 @@ slashProf('findRecords setup');
 	$sopts->{total}   = 0;
 	$sopts->{matches} = 0;
 	$sopts->{start}   = $opts->{records_start} || 0;
-	$sopts->{max}     = $opts->{records_max}   || $constants->{search_default_display};
+	$sopts->{max}     = defined $opts->{records_max} && length $opts->{records_max}
+		? $opts->{records_max}
+		: $constants->{search_default_display};
 
 	# sort can be an arrayref, but stick with one for now
 	## no way to sort by date yet
@@ -189,7 +191,7 @@ slashProf('prepare records', 'addRecords setup');
 				title			=> $record->{title},
 
 				type			=> $record->{type},
-				category		=> $record->{category},
+				category		=> $record->{category} || 'none',
 				note			=> $record->{note},
 				popularity		=> $record->{popularity},
 				activity		=> $record->{activity},
@@ -297,7 +299,8 @@ sub getRecords {
 		my($items) = $firehose->getFireHoseEssentials({
 			ids		=> [ map { $_->{id} } @$data ],
 			fetch_text	=> 1,
-			no_search	=> 1
+			no_search	=> 1,
+			nolimit		=> 1
 		});
 
 		for my $item (@$items) {
