@@ -4119,12 +4119,13 @@ UPDATE vars SET value = 'T_2_5_0_129' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
-# restart SearchToo firehose index from beginning
-# may also want to do this for good measure, first:
-#   rm -rf /usr/local/slash/site/*/search_index/kinosearch/*
-INSERT search_index_dump SELECT NULL, id, 'firehose', 'changed' FROM firehose;
-
 # PUDGE LAST UPDATED HERE
+
+## for SearchToo/FireHose, first turn off slashd, then run:
+#   rm -rf /usr/local/slash/site/*/search_index/kinosearch/*
+# then run:
+INSERT search_index_dump SELECT NULL, id, 'firehose', 'changed' FROM firehose;
+UPDATE INTO vars (name, value, description) VALUES ('search_too_index_num', '0', 'Current live search directory (0 or 1)');
 
 # 2006-10-17
 UPDATE vars SET value = 'T_2_5_0_130' WHERE name = 'cvs_tag_currentcode';

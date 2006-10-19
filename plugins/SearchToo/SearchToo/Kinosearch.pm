@@ -267,7 +267,7 @@ sub _searcher {
 	$dir = $self->_dir($type, $dir);
 
 	if ($self->{_searcher}{$type}{$dir}) {
-		if ($self->{_searcher}{$type}{$dir}{'time'} >= time() - 90) {
+		if ($self->{_searcher}{$type}{$dir}{'time'} >= time() - 60) {
 			return $self->{_searcher}{$type}{$dir}{dir};
 		}
 	}
@@ -288,7 +288,7 @@ sub _reader {
 	$dir = $self->_dir($type, $dir);
 
 	if ($self->{_reader}{$type}{$dir}) {
-		if ($self->{_reader}{$type}{$dir}{'time'} >= time() - 90) {
+		if ($self->{_reader}{$type}{$dir}{'time'} >= time() - 60) {
 			return $self->{_reader}{$type}{$dir}{dir};
 		}
 	}
