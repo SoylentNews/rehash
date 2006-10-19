@@ -358,7 +358,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onClick = function( e, me )
 YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type, args, me )
   {
     var tagname = args[2];
-    if ( tagname && me._sourceEl )
+    if ( tagname && me._needsSpareInput() )
       {
         me._sourceEl.innerHTML = tagname;
         // YAHOO.util.Dom.addClass(me._sourceEl, "not-yet-saved");
