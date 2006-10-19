@@ -229,10 +229,7 @@ YAHOO.slashdot.AutoCompleteWidget = function()
 
 YAHOO.slashdot.AutoCompleteWidget.prototype._textField = function()
   {
-    if ( ! this._sourceEl )
-      return null;
-
-    if ( this._sourceEl.type=='text' || this._sourceEl.type=='textarea' )
+    if ( this._sourceEl==null || this._sourceEl.type=='text' || this._sourceEl.type=='textarea' )
       return this._sourceEl;
 
     return this._spareInput;
@@ -250,7 +247,6 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._newCompleter = function( tagDomain 
     if ( this._needsSpareInput() )
       {
         c = new YAHOO.widget.AutoComplete("ac-select-input", "ac-choices", YAHOO.slashdot.dataSources[tagDomain]);
-        c.minQueryLength = 0;
 
           // hack? -- override YUI's private member function so that for top tags auto-complete, right arrow means select
         c._jumpSelection = function() { if ( this._oCurItem ) this._selectItem(this._oCurItem); };
@@ -261,9 +257,9 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._newCompleter = function( tagDomain 
         c.delimChar = " ";
       }
     c.typeAhead = true;
+    c.forceSelection = false;
     c.allowBrowserAutocomplete = false;
     c.maxResultsDisplayed = 25;
-    c.queryDelay = 0.25;
 
     return c;
   }
@@ -293,9 +289,6 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._hide = function()
 
 YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParams, tagDomain )
   {
-    if ( ! YAHOO.util.Dom.hasClass(this._widget, "hidden") )
-      this._hide();
-
     this._sourceEl = obj;
 
     if ( this._sourceEl )
@@ -343,7 +336,13 @@ YAHOO.slashdot.AutoCompleteWidget.prototype.attach = function( obj, callbackPara
       {
         this._show(newSourceEl, callbackParams, tagDomain);
         if ( tagDomain != 0 )
-          this._completer._sendQuery("");
+          {
+            var temp = this._completer.minQueryLength;
+            this._completer.minQueryLength = 0;
+            this._completer._sendQuery("");
+            this._completer.minQueryLength = temp;
+          }
+          
       }
   }
 
@@ -375,7 +374,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type,
         setOneTopTagForFirehose(p._id, tagname);
 
           // and if the user tags field exists, add it there (but don't show or hide the field)
-        var tagField = document.getElementById('tags-user-' + p._id);
+        var tagField = document.getElementById('newtags-' + p._id);
         if ( tagField )
           {
 	    var s = tagField.value.slice(-1);
