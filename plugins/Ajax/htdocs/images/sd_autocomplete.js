@@ -206,7 +206,8 @@ YAHOO.slashdot.topicTags = ["keyword",
     var topicsDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.topicTags);
 
     var tagsDS = new YAHOO.widget.DS_XHR("./ajax.pl", ["\n", "\t"]);
-    tagsDS.maxCacheEntries = 0; // turn off local cacheing, because Jamie says the query is fast
+    // tagsDS.maxCacheEntries = 0; // turn off local cacheing, because Jamie says the query is fast
+    tagsDS.queryMatchSubset = false;
     tagsDS.responseType = tagsDS.TYPE_FLAT;
     tagsDS.scriptQueryParam = "prefix";
     tagsDS.scriptQueryAppend = "op=tags_list_tagnames";
@@ -264,29 +265,6 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._newCompleter = function( tagDomain 
     return c;
   }
 
-YAHOO.slashdot.AutoCompleteWidget.prototype._hide = function()
-  {
-    YAHOO.util.Dom.addClass(this._widget, "hidden");
-    YAHOO.util.Dom.addClass(this._spareInput, "hidden");
-    if ( this._sourceEl )
-      {
-        YAHOO.util.Dom.removeClass(this._sourceEl, "ac-source");
-
-        YAHOO.util.Event.removeListener(this._textField(), "keyup", this._onTextboxKeyUp, this, true);
-        if ( this._needsSpareInput() )
-          {
-            this._completer.itemSelectEvent.unsubscribe(this._onItemSelectEvent, this);
-            this._completer.textboxBlurEvent.unsubscribe(this._onTextboxBlurEvent, this);
-          }
-
-        this._sourceEl = null;
-        this._callbackParams = null;
-        this._completer = null;
-      }
-
-    this._denyNextAttachTo = null;
-  }
-
 YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParams, tagDomain )
   {
     this._sourceEl = obj;
@@ -318,6 +296,29 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParam
         pos[1] += this._sourceEl.offsetHeight;
         YAHOO.util.Dom.setXY(this._widget, pos);
       }
+  }
+
+YAHOO.slashdot.AutoCompleteWidget.prototype._hide = function()
+  {
+    YAHOO.util.Dom.addClass(this._widget, "hidden");
+    YAHOO.util.Dom.addClass(this._spareInput, "hidden");
+    if ( this._sourceEl )
+      {
+        YAHOO.util.Dom.removeClass(this._sourceEl, "ac-source");
+
+        YAHOO.util.Event.removeListener(this._textField(), "keyup", this._onTextboxKeyUp, this, true);
+        if ( this._needsSpareInput() )
+          {
+            this._completer.itemSelectEvent.unsubscribe(this._onItemSelectEvent, this);
+            this._completer.textboxBlurEvent.unsubscribe(this._onTextboxBlurEvent, this);
+          }
+
+        this._sourceEl = null;
+        this._callbackParams = null;
+        this._completer = null;
+      }
+
+    this._denyNextAttachTo = null;
   }
 
 YAHOO.slashdot.AutoCompleteWidget.prototype.attach = function( obj, callbackParams, tagDomain )
