@@ -319,7 +319,7 @@ sub rec_sanity_check {
 # sorts before '0605 21' (a mod from May 2006 M2'd 2-1 fair)
 # and the older 
 
-sub _add_m2info {
+sub add_m2info {
 	my($old, $nfair, $nunfair) = @_;
 
 	my @lt = localtime;
