@@ -433,7 +433,7 @@ sub urlFromSite {
 	}
 
 	my @site_domain = split m/\./, $gSkin->{basedomain};
-	my $site_domain = join '.', @site_domain[-2, -1];
+	my $site_domain = @site_domain >= 2 ? join '.', @site_domain[-2, -1] : '';
 	$site_domain =~ s/:.+$//;	# strip port, if available
 
 	my @host = split m/\./, ($clean->can('host') ? $clean->host : '');
