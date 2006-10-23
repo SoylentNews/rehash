@@ -393,7 +393,10 @@ sub rejectItemBySubid {
 	my $str;
 	if (@$subid > 0) {
 		$str = join ',', map { $self->sqlQuote($_) }  @$subid;
-		$self->sqlUpdate("firehose", { rejected => 'yes' }, "type='submission' AND srcid IN ($str)");
+		my $ids = $self->sqlSelectColArrayref("id", "firehose", "type='submission' AND srcid IN ($str)");
+		foreach (@$ids) {
+			$self->setFireHose($_, { rejected => 'yes' });
+		}
 	}
 }
 
