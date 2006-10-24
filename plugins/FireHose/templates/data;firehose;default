@@ -19,7 +19,19 @@ __template__
 	<div class="details" id="details-[% item.id %]">
 	[% END %]
 	[%- IF adminmode && item.type == "submission" %]<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">[% END -%]
-	submitted
+	[% IF item.type == "submission" %]
+		submitted
+	[% ELSIF item.type == "journal" %]
+		journal
+	[% ELSIF item.type == "story" %]
+		Posted
+	[% ELSIF item.type == "bookmark" %]
+		bookmark
+	[% ELSIF item.type == "feed" %]
+		from feed
+	[% ELSE %]
+		submitted
+	[% END %]
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
 	by [% IF adminmode; %]
 		[% the_user.nickname | strip_literal %]
@@ -36,7 +48,7 @@ __template__
 	[% IF extras && num_with_emaildomain != '0' %]
 		([% accepted_from_emaildomain %]/[% num_with_emaildomain %]) 
 	[% END %]
-	 at [% item.createtime %]
+	 [% user.aton %] [% Slash.timeCalc(item.createtime) %]
 	[% IF adminmode %]
 		[%  Slash.vislenify(item); %]
 		<a href="[% gSkin.rootdir -%]/users.pl?op=userinfo&amp;userfield=[% item.ipid -%]&amp;fieldname=ipid">[% item.ipid_vis -%]</a>

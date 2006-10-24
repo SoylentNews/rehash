@@ -97,7 +97,23 @@ END %]
 <div class="storylinks">
 	<div>
 		<ul>
-			<li class="more">Coming soon - Read More...</li>
+			<li class="more">
+			[% IF item.type == "story" %]
+				[% story = Slash.db.getStory(item.srcid) %]
+				[% the_skin = Slash.db.getSkin(item.primaryskid) %]
+				[% Slash.linkStory({
+					'link' 	=> 	"Read more",
+					sid	=>	story.sid,
+					tid	=> 	story.tid,
+					skin	=>	story.primaryskid
+				   }, 1);
+				 %]
+			[% ELSIF item.type == "journal" %]
+				<a href="[% gSkin.rootdir %]/~[% the_user.nickname %]/journal/[% item.srcid %]/">Read More</a>
+			[% ELSE %]
+				Coming soon - Read More & Discuss...
+			[% END %]
+			</li>
 		</ul>
 	</div>
 </div>

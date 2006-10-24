@@ -14,18 +14,19 @@ __seclev__
 10000
 __template__
 [%
-IF item.url_id && url.url;
-	introtext = introtext _ "<a href='" _ url.url _ "'>" _ url.initialtitle _ "</a>";
-END;
-IF item.email && item.name;
-	IF constants.submissions_link_relnofollow; rnf = " rel=\"nofollow\""; ELSE; rnf = ""; END;
-	introtext = "<a href=\"$item.email\"$rnf>$item.name</a> writes <i>\"$introtext\"</i>";
-ELSIF (item.name == constants.anon_name) && constants.anon_name_alt;
-	introtext = "$constants.anon_name_alt writes <i>\"$introtext\"</i>";
-ELSIF item.name;
-	introtext = "$item.name writes <i>\"$introtext\"</i>";
-ELSE;
-	introtext =  the_user.nickname  _ " writes <i>\"$introtext\"</i>";
+IF item.type == "submission";
+
+	IF item.email && item.name;
+		IF constants.submissions_link_relnofollow; rnf = " rel=\"nofollow\""; ELSE; rnf = ""; END;
+		introtext = "<a href=\"$item.email\"$rnf>$item.name</a> writes <i>\"$introtext\"</i>";
+	ELSIF (item.name == constants.anon_name) && constants.anon_name_alt;
+		introtext = "$constants.anon_name_alt writes <i>\"$introtext\"</i>";
+	ELSIF item.name;
+		introtext = "$item.name writes <i>\"$introtext\"</i>";
+	ELSE;
+		introtext =  the_user.nickname  _ " writes <i>\"$introtext\"</i>";
+	END;
+
 END;
 
 %]
