@@ -24,6 +24,7 @@ CREATE TABLE firehose (
 	email varchar(255) NOT NULL default '',
 	emaildomain varchar(255) NOT NULL default '',
 	name varchar(50) NOT NULL,
+	dept VARCHAR(100) NOT NULL DEFAULT '',
 	ipid varchar(32) NOT NULL default '',
 	subnetid varchar(32) NOT NULL default '',
 	category varchar(30) NOT NULL default '',
