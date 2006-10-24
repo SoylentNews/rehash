@@ -527,6 +527,7 @@ function firehose_get_updates() {
 	params['op'] = 'firehose_get_updates';
 	params['ids'] = firehose_get_item_idstring();
 	params['updatetime'] = update_time;
+	params['page'] = page;
 	ajax_update(params, '', handlers);
 }
 
