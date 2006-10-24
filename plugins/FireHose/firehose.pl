@@ -54,10 +54,6 @@ sub list {
 	my $firehose = getObject("Slash::FireHose");
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $options = $firehose->getAndSetOptions();
-	my $page = $form->{page} || 0;
-	if ($page) {
-		$options->{offset} = $page * $options->{limit};
-	}
 
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($options);
 
@@ -83,7 +79,7 @@ sub list {
 
 	slashDisplay("list", {
 		itemstext	=> $itemstext, 
-		page		=> $page, 
+		page		=> $options->{page}, 
 		options		=> $options,
 		refresh_options	=> $refresh_options
 	});
