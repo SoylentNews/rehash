@@ -59,8 +59,8 @@ __template__
 </div>
 </div>
 </div>
-<div id="message_area">[% IF options.orderby == "popularity" && form.page %] Sorry automatic updates only occur on the first page of results when sorted by popularity currently [% END %]</div>
-Last Update Time: <span id="local_last_update_time"></span>
+<div id="message_area"></div>
+Last Update Time: <span id="local_last_update_time">[% Slash.timeCalc(Slash.db.getTime, "%m-%d %H:%M:%s") %]</span>
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
@@ -79,9 +79,7 @@ Last Update Time: <span id="local_last_update_time"></span>
 [% IF refresh_options && refresh_options.maxtime %]
 	var maxtime = '[% refresh_options.maxtime %]';
 	var insert_new_at = '[% refresh_options.insert_new_at %]';
-	[% UNLESS options.orderby == "popularity" && form.page %]
 	firehose_play();
-	[% END %]
 	setTimeout("firehose_get_updates()", 60000);
 [% END %]
 </script>

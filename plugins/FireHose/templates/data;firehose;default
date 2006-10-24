@@ -19,18 +19,19 @@ __template__
 	<div class="details" id="details-[% item.id %]">
 	[% END %]
 	[%- IF adminmode && item.type == "submission" %]<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">[% END -%]
+	<b>
 	[% IF item.type == "submission" %]
-		submitted
+		Submitted
 	[% ELSIF item.type == "journal" %]
-		journal
+		Journal
 	[% ELSIF item.type == "story" %]
 		Posted
 	[% ELSIF item.type == "bookmark" %]
-		bookmark
+		Bookmark
 	[% ELSIF item.type == "feed" %]
-		from feed
+		From feed
 	[% ELSE %]
-		submitted
+		Submitted
 	[% END %]
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
 	by [% IF adminmode; %]
@@ -40,15 +41,21 @@ __template__
 	[% IF extras && num_from_uid != '0' %]
 		([% accepted_from_uid %]/[% num_from_uid %]) 
 	[% END %]
-	[% IF adminmode %]
+	[% IF adminmode && ( item.name || item.email )%]
 		([% item.name %])<a href="[% item.email | strip_attribute %]">[% item.email | strip_literal %]</a>
 	[% ELSE %]
-		[% IF item.email %]<a href="[% item.email | strip_attribute %]">[% END %][% item.name | strip_literal %][% IF item.email %]</a>[% END %]
+		[% IF item.type == "submission" %]
+			[% IF item.email %]<a href="[% item.email | strip_attribute %]">[% END %][% item.name | strip_literal %][% IF item.email %]</a>[% END %]
+		[% ELSIF item.type == "story" %]
+			[% IF the_user.homepage %]<a href="[% the_user.homepage %]">[% END %][% the_user.nickname %][% IF the_user.homepage %]</a>[% END %]
+		[% ELSE %]
+			[% the_user.nickname | strip_literal %]
+		[% END %]
 	[% END %]
 	[% IF extras && num_with_emaildomain != '0' %]
 		([% accepted_from_emaildomain %]/[% num_with_emaildomain %]) 
 	[% END %]
-	 [% user.aton %] [% Slash.timeCalc(item.createtime) %]
+
 	[% IF adminmode %]
 		[%  Slash.vislenify(item); %]
 		<a href="[% gSkin.rootdir -%]/users.pl?op=userinfo&amp;userfield=[% item.ipid -%]&amp;fieldname=ipid">[% item.ipid_vis -%]</a>
@@ -57,6 +64,8 @@ __template__
 	[% IF extras && adminmode && num_with_ipid != '0' %]
 		([% accepted_from_ipid %]/[% num_with_ipid %])
 	[% END %]
+	 [% user.aton %] [% Slash.timeCalc(item.createtime) %]</b><br>
+	  [% IF constants.use_dept && item.dept %]<strong>from the <b>[% item.dept %]</b> dept.</strong>[% END %]
 	[% IF !hidediv %]
 	</div>
 	[% END %]
