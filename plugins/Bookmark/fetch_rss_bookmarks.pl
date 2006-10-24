@@ -66,7 +66,7 @@ $task{$me}{code} = sub {
 					if ($constants->{plugin}{FireHose}) {
 						my $firehose = getObject("Slash::FireHose");
 						my $the_bookmark = $bookmark->getBookmark($bookmark_id);
-						$firehose->createUpdateItemFromBookmark($bookmark_id, { type => "feed", popularity => 0, introtext => $text });
+						$firehose->createUpdateItemFromBookmark($bookmark_id, { type => "feed", introtext => $text });
 					}
 					
 					my $tags = getObject('Slash::Tags');

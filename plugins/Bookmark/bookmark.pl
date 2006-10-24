@@ -137,7 +137,6 @@ sub saveBookmark {
 			my $the_bookmark = $bookmark->getBookmark($bookmark_id);
 			$firehose->createUpdateItemFromBookmark($bookmark_id, {
 				type		=> "bookmark",
-				popularity	=> 1
 			});
 		}
 					
