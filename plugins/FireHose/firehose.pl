@@ -63,9 +63,10 @@ sub list {
 
 	my $itemstext;
 	my $maxtime = $firehose->getTime();
+	my $now = $slashdb->getTime();
 	
 	foreach (@$items) {
-		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime;
+		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime && $_->{createtime} lt $now;
 		my $item =  $firehose_reader->getFireHose($_->{id});
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
 		$itemstext .= $firehose->dispFireHose($item, { mode => $options->{mode} , tags_top => $tags_top, options => $options });
