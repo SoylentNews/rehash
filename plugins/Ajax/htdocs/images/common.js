@@ -450,45 +450,6 @@ function json_update(response) {
 	}
 }
 
-function firehose_new_handler(transport) {
-	var response = eval_response(transport);
-	var processed = 0;
-	if (response.added) {
-		for (i = 0; i < response.added.length; i++) {
-			var el = response.added[i]
-			var fh = 'firehose-' + el[0];
-			processed = processed + 1;
-			if ($(fh)) {
-			} else {
-				if (insert_new_at == "bottom") {
-					new Insertion.Bottom('firehoselist', el[1]);
-				} else {
-					new Insertion.Top('firehoselist', el[1]);
-				}
-			}
-		}
-	}
-	if (response.maxtime) {
-		if (processed > 0 ) { maxtime = response.maxtime }
-	}
-	var interval = getFirehoseUpdateInterval();
-	setTimeout("firehose_fetch_new()", interval);
-}
-
-function firehose_check_removed_handler(transport) {
-	var response = eval_response(transport);
- 
-	if (response.removed) {
-		for (el in response.removed) {
-			var fh_id = 'firehose-' + el;
-			var fh = $(fh_id);
-			fh.className="hide";
-			fh.parentNode.removeChild(fh);
-		}
-	}
-	var interval = getFirehoseUpdateInterval();
-	setTimeout("firehose_check_removed()", interval);
-}
 
 function firehose_get_updates_handler(transport) {
 	var response = eval_response(transport);
@@ -512,37 +473,6 @@ function firehose_get_updates_handler(transport) {
 		json_update(response);
 		processed = processed + 1;
 	}
-	if (processed) {
-		if (response.update_time) {
-			update_time = response.update_time;
-		}
-	}
-	var interval = getFirehoseUpdateInterval();
-	setTimeout("firehose_get_updates()", interval);
-}
-
-function firehose_get_updates_pop_handler(transport) {
-	var response = eval_response(transport);
-	var processed = 0;
-	if (response.update_new) {
-		for (i = 0; i < response.update_new.length; i++) {
-			var el = response.update_new[i]
-			var fh = 'firehose-' + el[0];
-			processed = processed + 1;
-			if ($(fh)) {
-			} else {
-				if (insert_new_at == "bottom") {
-					new Insertion.Bottom('firehoselist', el[1]);
-				} else {
-					new Insertion.Top('firehoselist', el[1]);
-				}
-			}
-		}
-	}
-	if (response.html) {
-		json_update(response);
-		processed = processed + 1;
-	}
 	if (response.removed) {
 		for (el in response.removed) {
 			var fh_id = 'firehose-' + el;
@@ -551,13 +481,22 @@ function firehose_get_updates_pop_handler(transport) {
 			fh.parentNode.removeChild(fh);
 		}
 	}
+	if (response.ordered) {
+		var fhlist = $('firehoselist');
+		if (fhlist) {
+			for (i = 0; i < response.ordered.length; i++) {
+				var fhel = $('firehose-' + response.ordered[i]);
+				fhlist.appendChild(fhel);
+			}
+		}
+	}
 	if (processed) {
 		if (response.update_time) {
 			update_time = response.update_time;
 		}
 	}
 	var interval = getFirehoseUpdateInterval();
-	setTimeout("firehose_get_updates_pop()", interval);
+	setTimeout("firehose_get_updates()", interval);
 }
 
 function firehose_get_item_idstring() {
@@ -589,57 +528,8 @@ function firehose_get_updates() {
 	params['ids'] = firehose_get_item_idstring();
 	params['updatetime'] = update_time;
 	ajax_update(params, '', handlers);
-	
 }
 
-function firehose_get_updates_pop() {
-	run_before_update();
-	if (play == 0) {
-		setTimeout("firehose_get_updates_pop()", 2000);
-		return;
-	}
-	var params = [];
-	var handlers = {
-		onComplete: firehose_get_updates_pop_handler
-	};
-	params['op'] = 'firehose_get_updates_pop';
-	params['ids'] = firehose_get_item_idstring();
-	params['updatetime'] = update_time;
-	ajax_update(params, '', handlers);
-}
-
-
-
-function firehose_check_removed() {
-	run_before_update();
-	if (play == 0) {
-		setTimeout("firehose_check_removed()", 2000);
-		return;
-	}
-	var params = [];
-	var handlers = {
-		onComplete: firehose_check_removed_handler
-	};
-	params['op'] = 'firehose_check_removed';
-	params['ids'] = firehose_get_item_idstring();
-	ajax_update(params, '', handlers);
-
-}
-
-function firehose_fetch_new() {
-	run_before_update();
-	if (play == 0) {
-		setTimeout("firehose_fetch_new()", 2000);
-		return;
-	}
-	var params = [];
-	var handlers = {
-		onComplete: firehose_new_handler
-	};
-	params['op'] = 'firehose_fetch_new';
-	params['maxtime'] = maxtime;
-	ajax_update(params, '', handlers);
-}
 
 function setFirehoseAction() {
 	var thedate = new Date();
