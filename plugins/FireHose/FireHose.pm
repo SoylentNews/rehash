@@ -36,7 +36,7 @@ use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 use vars qw($VERSION $searchtootest);
 
-$searchtootest = 1;
+$searchtootest = 0;
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -184,7 +184,8 @@ sub updateItemFromStory {
 				bodytext	=> $story->{bodytext},
 				primaryskid	=> $story->{primaryskid},
 				tid 		=> $story->{tid},
-				public		=> $public
+				public		=> $public,
+				dept		=> $story->{dept}
 			};
 			$self->setFireHose($id, $data);
 		}
@@ -220,6 +221,7 @@ sub createItemFromStory {
 			type 		=> "story",
 			public		=> $public,
 			accepted	=> "yes",
+			dept		=> $story->{dept}
 		};
 		$self->createFireHose($data);
 	}
@@ -440,18 +442,16 @@ sub ajaxSaveOneTopTagFirehose {
 	my $tags = getObject("Slash::Tags");
 	my $id = $form->{id};
 	my $tag = $form->{tags};
-	if ($user->{is_admin}) {
-		my $firehose = getObject("Slash::FireHose");
-		my $item = $firehose->getFireHose($id);
-		if ($item) {
-			$firehose->setSectionTopicsFromTagstring($id, $tag);
-			my($table, $itemid) = $tags->getGlobjTarget($item->{globjid});
-			my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $itemid, { uid => $user->{uid}});
-			my @tags = sort Slash::Tags::tagnameorder map { $_->{tagname} } @$now_tags_ar;
-			push @tags, $tag;
-			my $tagsstring = join ' ', @tags;
-			my $newtagspreloadtext = $tags->setTagsForGlobj($itemid, $table, $tagsstring);
-		}
+	my $firehose = getObject("Slash::FireHose");
+	my $item = $firehose->getFireHose($id);
+	if ($item) {
+		$firehose->setSectionTopicsFromTagstring($id, $tag);
+		my($table, $itemid) = $tags->getGlobjTarget($item->{globjid});
+		my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $itemid, { uid => $user->{uid}});
+		my @tags = sort Slash::Tags::tagnameorder map { $_->{tagname} } @$now_tags_ar;
+		push @tags, $tag;
+		my $tagsstring = join ' ', @tags;
+		my $newtagspreloadtext = $tags->setTagsForGlobj($itemid, $table, $tagsstring);
 	}
 }
 
@@ -868,6 +868,11 @@ sub getAndSetOptions {
 		$options->{limit} = 25;
 	} else {
 		$options->{limit} = 50;
+	}
+	my $page = $form->{page} || 0;
+	$options->{page} = $page;
+	if ($page) {
+		$options->{offset} = $page * $options->{limit};
 	}
 
 	if ($form->{orderby}) {
