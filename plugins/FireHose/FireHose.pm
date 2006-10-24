@@ -95,7 +95,7 @@ sub createItemFromJournal {
 			public 			=> "yes",
 			introtext 		=> $introtext,
 			type 			=> "journal",
-			popularity		=> 2,
+			popularity		=> $self->getMinPopularityForColorLevel(5),
 			tid			=> $journal->{tid},
 			srcid			=> $id
 		};
@@ -111,13 +111,15 @@ sub createUpdateItemFromBookmark {
 	my $bookmark = $bookmark_db->getBookmark($id);
 	my $url_globjid = $self->getGlobjidCreate("urls", $bookmark->{url_id});
 	my($count) = $self->sqlCount("firehose", "globjid=$url_globjid");
-	my $popularity = defined $options->{popularity} ? $options->{popularity} : 1;
+	my $popularity = defined $options->{popularity} ? $options->{popularity} : $self->getMinPopularityForColorLevel(7);
 	my $activity   = defined $options->{activity}   ? $options->{activity}   : 1;
 
 	if ($count) {
 		# $self->sqlUpdate("firehose", { -popularity => "popularity + 1" }, "globjid=$url_globjid");
 	} else {
 		my $type = $options->{type} || "bookmark";
+		
+
 		my $data = {
 			globjid 	=> $url_globjid,
 			title 		=> $bookmark->{title},
@@ -145,7 +147,7 @@ sub createItemFromSubmission {
 			globjid 		=> $globjid,
 			uid 			=> $submission->{uid},
 			introtext 		=> $submission->{story},
-			popularity 		=> 2,
+			popularity 		=> $self->getMinPopularityForColorLevel(5),
 			public 			=> "yes",
 			attention_needed 	=> "yes",
 			type 			=> "submission",
@@ -195,6 +197,12 @@ sub createItemFromStory {
 	# If a story is created with an ignored primary skid it'll never be created as a firehose entry currently
 	my %ignore_skids = map {$_ => 1 } @{$constants->{firehose_story_ignored_skids}};
 	my $story = $self->getStory($id);
+
+	my $popularity = $self->getMinPopularityForColorLevel(2);
+	if ($story->{story_topics_rendered}{$constants->{mainpage_nexus_tid}}) {
+		$popularity = $self->getMinPopularityForColorLevel(1);
+	}
+
 	if ($story && !$ignore_skids{$story->{primaryskid}}) {
 		my $globjid = $self->getGlobjidCreate("stories", $story->{stoid});
 		my $public = $story->{neverdisplay} ? "no" : "yes";
@@ -205,7 +213,7 @@ sub createItemFromStory {
 			createtime	=> $story->{time},
 			introtext	=> $story->{introtext},
 			bodytext	=> $story->{bodytext},
-			popularity	=> 10,
+			popularity	=> $popularity,
 			primaryskid	=> $story->{primaryskid},
 			tid 		=> $story->{tid},
 			srcid		=> $id,
@@ -510,62 +518,9 @@ sub ajaxGetAdminFirehose {
 	}, { Return => 1 });
 }
 
-sub ajaxFireHoseFetchNew {
-	my($slashdb, $constants, $user, $form, $options) = @_;
 
-	$options->{content_type} = 'application/json';
-	my $firehose = getObject("Slash::FireHose");
-	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
-	my $maxtime = $form->{maxtime};
-	my $added = [];
 
-	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
-	$opts->{limit} = 10;
-	$opts->{orderby} = 'createtime';
-	$opts->{orderdir} = 'ASC';
-	$opts->{createtime_gte} = $maxtime;
-
-	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
-	my $now = $firehose_reader->getTime();
-
-	foreach my $i (@$items) {
-		$maxtime = $i->{createtime} if $i->{createtime} gt $maxtime && $i->{createtime} le $now;
-		my $item = $firehose_reader->getFireHose($i->{id});
-		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
-		push @$added, [$i->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" })];
-	}
-
-	return Data::JavaScript::Anon->anon_dump({
-		added => $added,
-		maxtime => $maxtime
-	});
-}
-
-sub ajaxFireHoseCheckRemoved {
-	my($slashdb, $constants, $user, $form, $options) = @_;
-
-	$options->{content_type} = 'application/json';
-	my $firehose = getObject("Slash::FireHose");
-	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
-	my $id_str = $form->{ids};
-	my @ids = grep {/^\d+$/} split (/,/, $id_str);
-	my %ids = map { $_ => 1 } @ids;
-
-	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
-	$opts->{nolimit} = 1;
-	$opts->{ids} = \@ids;
-
-	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
-
-	foreach (@$items) {
-		delete $ids{$_->{id}};
-	}
-	return Data::JavaScript::Anon->anon_dump({
-		removed => \%ids
-	});
-}
-
-sub ajaxFireHoseGetUpdatesPop {
+sub ajaxFireHoseGetUpdates {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
@@ -575,13 +530,14 @@ sub ajaxFireHoseGetUpdatesPop {
 	my @ids = grep {/^\d+$/} split (/,/, $id_str);
 	my %ids = map { $_ => 1 } @ids;
 	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
-	my $items = $firehose_reader->getFireHoseEssentials($opts);
+	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
 	my $html = {};
 	my $update_new = [];
 
 	my $adminmode = $user->{is_admin};
 	$adminmode = 0 if $user->{is_admin} && $user->{firehose_usermode};
-
+	my $ordered = [];
+	my $now = $slashdb->getTime();
 	foreach (@$items) {
 		my $item = $firehose_reader->getFireHose($_->{id});
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
@@ -596,62 +552,20 @@ sub ajaxFireHoseGetUpdatesPop {
 		} else {
 			# new
 			push @$update_new, [$_->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" })];
-			$update_time = $_->{last_update} if $_->{last_update} gt $update_time;
+			$update_time = $_->{last_update} if $_->{last_update} gt $update_time && $_->{last_update} lt $now;
 		}
+		push @$ordered, $item->{id};
 		delete $ids{$_->{id}};
 	}
+	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%m-%d %H:%M:%S");
 	return Data::JavaScript::Anon->anon_dump({
 		removed		=> \%ids,
 		html		=> $html,
 		update_new	=> $update_new,
 		update_time	=> $update_time,
-		removed		=> \%ids
+		removed		=> \%ids,
+		ordered		=> $ordered
 	});
-}
-
-sub ajaxFireHoseGetUpdates {
-	my($slashdb, $constants, $user, $form, $options) = @_;
-	$options->{content_type} = 'application/json';
-	my $firehose = getObject("Slash::FireHose");
-	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
-	my $id_str = $form->{ids};
-	my $update_time = $form->{updatetime};
-	my @ids = grep {/^\d+$/} split (/,/, $id_str);
-	my %ids = map { $_ => 1 } @ids;
-
-	my $adminmode = $user->{is_admin};
-	$adminmode = 0 if $user->{is_admin} && $user->{firehose_usermode};
-
-	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
-	$opts->{limit} = 25;
-	$opts->{orderby} = 'last_update';
-	$opts->{orderdir} = 'ASC';
-	$opts->{last_update_gte} = $update_time;
-
-	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
-
-	my $update_new = [];
-	my $html = {};
-	foreach (@$items) {
-		my $item = $firehose_reader->getFireHose($_->{id});
-		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
-		if (!$ids{$_->{id}}) {
-			push @$update_new, [$_->{id}, slashDisplay("dispFireHose", { item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" })];
-			$update_time = $_->{last_update} if $_->{last_update} gt $update_time;
-		} else {
-			my $url 	= $slashdb->getUrl($item->{url_id});
-			my $the_user  	= $slashdb->getUser($item->{uid});
-			$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user }, { Page => 'firehose', Return => 1 });
-			$html->{"tags-top-$_->{id}"} = slashDisplay("firehose_tags_top", { tags_top => $tags_top, id => $_->{id} }, { Return => 1 });
-			$update_time = $_->{last_update} if $_->{last_update} gt $update_time;
-		}
-	}
-	my $data = {
-		update_new => $update_new,
-		update_time => $update_time
-	};
-	$data->{html} = $html if keys %$html;
-	return Data::JavaScript::Anon->anon_dump($data);
 }
 
 sub ajaxUpDownFirehose {
@@ -832,7 +746,7 @@ sub setFireHose {
 	my $id_q = $self->sqlQuote($id);
 
 	if (!exists($data->{last_update}) && !exists($data->{-last_update})) {
-		my @non_trivial = grep {!/^(popularity|activity|toptags)$/} keys %$data;
+		my @non_trivial = grep {!/^(activity|toptags)$/} keys %$data;
 		if (@non_trivial > 0) {
 			$data->{-last_update} = 'NOW()';
 		} else {
@@ -1050,8 +964,8 @@ sub getAndSetOptions {
 
 	if ($adminmode) {
 		# $options->{attention_needed} = "yes";
-		$options->{accepted} = "no" if !$options->{accepted};
-		$options->{rejected} = "no" if !$options->{rejected};
+		#$options->{accepted} = "no" if !$options->{accepted};
+		#$options->{rejected} = "no" if !$options->{rejected};
 	} else  {
 		$options->{public} = "yes";
 		$options->{daysback} = 1;
@@ -1083,6 +997,25 @@ sub getFireHoseTagsTop {
 	return $tags_top;
 }
 
+sub getMinPopularityForColorLevel {
+	my ($self, $level) = @_;
+	my $slashdb = getCurrentDB();
+	my $levels = $slashdb->getVar('firehose_slice_points', 'value', 1);
+	my @levels = split(/\|/, $levels);
+	return $levels[$level - 1 ];
+}
+
+sub getPopLevelForPopularity {
+	my ($self, $pop) = @_;
+	my $slashdb = getCurrentDB();
+	my $levels = $slashdb->getVar('firehose_slice_points', 'value', 1);
+	my @levels = split(/\|/, $levels);
+	my $i = 0;
+	for ($i=0; $i< $#levels; $i++) {
+		return $i+1 if $pop >= $levels[$i];
+	}
+	return $i + 1;
+}
 
 1;
 
