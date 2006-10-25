@@ -971,8 +971,8 @@ sub getAndSetOptions {
 
 	if ($adminmode) {
 		# $options->{attention_needed} = "yes";
-		#$options->{accepted} = "no" if !$options->{accepted};
-		#$options->{rejected} = "no" if !$options->{rejected};
+		$options->{accepted} = "no" if !$options->{accepted};
+		$options->{rejected} = "no" if !$options->{rejected};
 	} else  {
 		$options->{public} = "yes";
 		$options->{daysback} = 1;
