@@ -305,6 +305,8 @@ sub getFireHoseEssentials {
 		$tables .= ",firehose_text";
 		push @where, "firehose.id=firehose_text.id";
 
+		# sanitize $options->{filter};
+		$options->{filter} =~ s/[^a-zA-Z0-9_]+//g;
 		if ($options->{filter}) {
 			push @where, "firehose_text.title like '%" . $options->{filter} . "%'";
 		}
@@ -934,8 +936,8 @@ sub getAndSetOptions {
 			$fh_options->{accepted} = "yes";
 		} else {
 			if (!defined $fh_options->{filter}) {
-				# XXX Filter this
 				$fh_options->{filter} = $_;
+				$fh_options->{filter} =~ s/[^a-zA-Z0-9_]+//g;
 			}
 			# Don't filter this
 			$fh_options->{qfilter} .= $_ . ' ';
