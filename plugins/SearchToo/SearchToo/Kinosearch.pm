@@ -64,8 +64,7 @@ slashProf('init search');
 #		$searcher_opts->{-sort_by} = 'relevance';
 #	}
 
-	my $preader  = $self->_reader or return $results;
-	my $searcher = $self->_searcher or return $results;
+	$self->_analyzers;
 
 	my($query, $fquery, $filter, @filters);
 	if ($querystring =~ /\S/) {
@@ -129,9 +128,9 @@ slashProf('init search');
 #	}
 
 slashProf('search', 'init search');
-	my $hits = $searcher->search(query => $query || $fquery, filter => $filter);
+	my $hits = $self->search(query => $query || $fquery, filter => $filter);
 
-	$sopts->{total}   = $preader->num_docs;
+	$sopts->{total}   = $self->num_docs;
 	$sopts->{matches} = $hits->total_hits;
 
 	$hits->seek($sopts->{start}, $sopts->{max} || $sopts->{matches});
@@ -215,12 +214,10 @@ sub isIndexed {
 
 	return unless $self->handled($type);
 
-	my $searcher = $self->_searcher or return;
-
 	my $query = KinoSearch::Search::TermQuery->new(
 		term => KinoSearch::Index::Term->new($self->_primary => $id)
 	);
-	my $hits = $searcher->search(query => $query);
+	my $hits = $self->search(query => $query);
 
 	return $hits->total_hits || 0;
 }
@@ -230,12 +227,13 @@ sub deleteRecords {
 	my($self, $type, $ids, $opts) = @_;
 
 	return unless $self->handled($type);
+	return unless defined $ids;
 
 	my $writer = $self->_writer or return;
 
 slashProf('deleteRecords');
 
-	$ids = [ $ids ] unless ref $ids;
+	$ids = [ $ids ] unless ref $ids eq 'ARRAY';
 
 	my $count = 0;
 	for my $id (@$ids) {
@@ -366,6 +364,50 @@ sub close_writer {
 	$dir = $self->_dir($type, $dir);
 
 	delete $self->{_writer}{$type}{$dir};
+}
+
+#################################################################
+sub search {
+	my($self, @args) = @_;
+
+	my $c = 0;
+	while (++$c < 5) {
+		my $hits;
+		undef $@;
+		eval {
+			my $searcher = $self->_searcher;
+			$hits = $searcher->search(@args);
+		};
+		if (!$@ && $hits) {
+			return $hits;
+		}
+		errorLog("$$: kinosearcher failed (attempt $c).  Trying again ... : $@");
+		$self->close_searcher;
+		sleep 1;
+	}
+	errorLog("$$: kinosearcher failed.  Sorry.");
+}
+
+#################################################################
+sub num_docs {
+	my($self) = @_;
+
+	my $c = 0;
+	while (++$c < 5) {
+		my $num;
+		undef $@;
+		eval {
+			my $preader  = $self->_reader;
+			$num = $preader->num_docs;
+		};
+		if (!$@ && defined $num) {
+			return $num;
+		}
+		errorLog("$$: kinoreader failed (attempt $c).  Trying again ... : $@");
+		$self->close_reader;
+		sleep 1;
+	}
+	errorLog("$$: kinoreader failed.  Sorry.");
 }
 
 1;
