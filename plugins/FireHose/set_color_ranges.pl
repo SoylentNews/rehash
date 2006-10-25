@@ -4,9 +4,6 @@
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
-# For now this just gathers data.  The actual reweighting will come
-# later. - Jamie 2004/11/10
-
 use strict;
 
 use Time::HiRes;
