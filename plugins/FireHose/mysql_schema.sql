@@ -30,7 +30,9 @@ CREATE TABLE firehose (
 	category varchar(30) NOT NULL default '',
 	last_update TIMESTAMP,
 	PRIMARY KEY (id),
-	UNIQUE globjid (globjid)
+	UNIQUE globjid (globjid),
+	KEY createtime (createtime),
+	KEY popularity (popularity)
 ) TYPE=InnoDB; 
 
 DROP TABLE IF EXISTS firehose_text;
