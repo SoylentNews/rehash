@@ -150,6 +150,7 @@ sub addRecords {
 	my($self, $type, $data, $opts) = @_;
 
 	return unless $self->handled($type);
+	return unless $data;
 
 slashProfInit();
 slashProf('addRecords setup');
@@ -222,7 +223,7 @@ slashProf('prepare records', 'addRecords setup');
 
 slashProf('add docs', 'prepare records');
 
-	my $count = $self->_addRecords($type, \@documents, $opts);
+	my $count = $self->_addRecords($type, \@documents, $opts) if @documents;
 
 slashProf('', 'add docs');
 
