@@ -4141,3 +4141,7 @@ ALTER TABLE firehose ADD COLUMN dept VARCHAR(100) DEFAULT '' NOT NULL after name
 
 # for Tags Plugin
 INSERT INTO vars (name, value, description) VALUES ('tags_admin_private_tags', '', 'List of tags separated by | that are private for admins');
+
+# for FireHose plugin
+ALTER TABLE firehose ADD INDEX createtime (createtime);
+ALTER TABLE firehose ADD INDEX popularity (popularity);
