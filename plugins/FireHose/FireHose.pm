@@ -235,6 +235,7 @@ sub getFireHoseEssentials {
 	$options ||= {};
 	$options->{limit} ||= 50;
 
+	my($items, $results, $doublecheck) = ([], {}, 0);
 	if (!$options->{no_search} && $Slash::FireHose::searchtootest) {
 		my $searchtoo = getObject('Slash::SearchToo');
 		if ($searchtoo && $searchtoo->handled('firehose')) {
@@ -257,9 +258,13 @@ sub getFireHoseEssentials {
 			$opts{records_max}	= $options->{limit}		unless $options->{nolimit};
 			$opts{records_start}	= $options->{offset}		if $options->{offset};
 
-			my $results = $searchtoo->findRecords(firehose => \%query, \%opts);
-			my $items = $results->{records};
-			return($items, $results);
+			$results = $searchtoo->findRecords(firehose => \%query, \%opts);
+			$items = $results->{records};
+
+			return($items, $results) if ! @$items;
+
+			$options->{ids} = [ map { $_->{id} } @$items ];
+			$doublecheck = 1;
 		}
 	}
 
@@ -271,24 +276,27 @@ sub getFireHoseEssentials {
 	my $tables = "firehose";
 	my $columns = "firehose.*";
 
-	if ($options->{createtime_no_future}) {
+	if ($options->{createtime_no_future} && !$doublecheck) {
 		push @where, "createtime <= NOW()";
 	}
 
-	if ($options->{attention_needed}) {
+	if ($options->{attention_needed} && !$doublecheck) {
 		push @where, "attention_needed = " . $self->sqlQuote($options->{attention_needed});
 	}
-	if ($options->{public}) {
+
+	if ($options->{public} && !$doublecheck) {
 		push @where, "public = " . $self->sqlQuote($options->{public});
 	}
+
 	if ($options->{accepted}) {
 		push @where, "accepted = " . $self->sqlQuote($options->{accepted});
 	}
+
 	if ($options->{rejected}) {
 		push @where, "rejected = " . $self->sqlQuote($options->{rejected});
 	}
 
-	if ($options->{type}) {
+	if ($options->{type} && !$doublecheck) {
 		push @where, "type = " . $self->sqlQuote($options->{type});
 	}
 
@@ -301,7 +309,7 @@ sub getFireHoseEssentials {
 		push @where, "category = " . $self->sqlQuote($options->{category});
 	}
 
-	if ($options->{filter} || $options->{fetch_text}) {
+	if (($options->{filter} || $options->{fetch_text}) && !$doublecheck) {
 		$tables .= ",firehose_text";
 		push @where, "firehose.id=firehose_text.id";
 
@@ -316,20 +324,20 @@ sub getFireHoseEssentials {
 		}
 	}
 
-	if ($options->{createtime_gte}) {
+	if ($options->{createtime_gte} && !$doublecheck) {
 		push @where, "createtime >= " . $self->sqlQuote($options->{createtime_gte});
 	}
-	if ($options->{last_update_gte}) {
+	if ($options->{last_update_gte} && !$doublecheck) {
 		push @where, "last_update >= " . $self->sqlQuote($options->{last_update_gte});
 	}
 
 	if ($options->{ids}) {
-		return [] if @{$options->{ids}} < 1;
+		return($items, $results) if @{$options->{ids}} < 1;
 		my $id_str = join ",", map { $self->sqlQuote($_) } @{$options->{ids}};
 		push @where, "firehose.id IN ($id_str)";
 	}
 
-	if (defined $options->{daysback}) {
+	if (defined $options->{daysback} && !$doublecheck) {
 		push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $options->{daysback} DAY)"
 	}
 
@@ -340,16 +348,29 @@ sub getFireHoseEssentials {
 	$offset = "$offset, " if $offset;
 	$limit_str = "LIMIT $offset $options->{limit}" unless $options->{nolimit};
 	my $other = "ORDER BY $options->{orderby} $options->{orderdir} $limit_str";
+	$other = '' if $doublecheck;
 	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
 
+	# make sure these items (from SearchToo) still match -- pudge
+	if ($doublecheck) {
+		my %hrs = map { ( $_->{id}, 1 ) } @$hr_ar;
+		my @tmp_items;
+		for my $item (@$items) {
+			push @tmp_items, $item if $hrs{$item->{id}};
+		}
+		$items = \@tmp_items;
+
 	# Add globj admin notes to the firehouse hashrefs.
-	my $globjids = [ map { $_->{globjid} } @$hr_ar ];
-	my $note_hr = $self->getGlobjAdminnotes($globjids);
-	for my $hr (@$hr_ar) {
-		$hr->{note} = $note_hr->{ $hr->{globjid} } || '';
+	} else {
+		my $globjids = [ map { $_->{globjid} } @$hr_ar ];
+		my $note_hr = $self->getGlobjAdminnotes($globjids);
+		for my $hr (@$hr_ar) {
+			$hr->{note} = $note_hr->{ $hr->{globjid} } || '';
+		}
 	}
 
-	return($hr_ar, {}); # {} is optional results information (see SearchToo)
+	$items = $hr_ar;
+	return($items, $results);
 }
 
 sub getFireHose {
@@ -1005,7 +1026,7 @@ sub getFireHoseTagsTop {
 }
 
 sub getMinPopularityForColorLevel {
-	my ($self, $level) = @_;
+	my($self, $level) = @_;
 	my $slashdb = getCurrentDB();
 	my $levels = $slashdb->getVar('firehose_slice_points', 'value', 1);
 	my @levels = split(/\|/, $levels);
@@ -1013,7 +1034,7 @@ sub getMinPopularityForColorLevel {
 }
 
 sub getPopLevelForPopularity {
-	my ($self, $pop) = @_;
+	my($self, $pop) = @_;
 	my $slashdb = getCurrentDB();
 	my $levels = $slashdb->getVar('firehose_slice_points', 'value', 1);
 	my @levels = split(/\|/, $levels);
