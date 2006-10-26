@@ -18,11 +18,8 @@ If you're on Debian, install these packages:
 	libjpeg62 libjpeg62-dev
 	libgd2-xpm libgd2-xpm-dev libgd-tools
 
-As of this writing (July 2003), only Debian testing and unstable have
-the packages specifically named "libgd2-xpm" and "-dev".  On Debian
-stable, they're called libgd2 and libgd2-dev but they're only version
-2.0.1 -- the latest versions of GD.pm require 2.0.12, so that's a
-problem, you'll probably have to install libgd from source.
+As of this writing (October 2006), all branches of Debian have all
+the above packages, except stable which is missing libgd-tools.
 
 Debian offers a prebuilt package of GD.pm, which you're welcome to
 try;  as of now, they're libgd-gd2-perl and libgd-text-perl in Debian
