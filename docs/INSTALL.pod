@@ -164,7 +164,7 @@ server, and you wanted to use the mysql username 'slash', you might:
 	INDEX, ALTER ON slash.* TO 'slash'@'localhost' IDENTIFIED BY
 	(quoted password);
 
-Create_tmp_table_priv?
+(XXX is Create_temp_table_priv required? don't think so)
 
 In this case, 'slash' would also be the name of your MySQL user as
 described in L<"Types of Users"> below.  You'll have to give your MySQL
@@ -431,11 +431,10 @@ We can't predict whether bugs will appear in CPAN modules in future.
 Often the bugs are not in the software proper, but in its too-strictly
 coded test suites, which don't allow for changed but still-legitimate
 output.  When this happens, the module itself is fine but it will not
-install unless forced.  As of August 2006, we've noticed the following
-modules throw spurious errors, requiring a C<force install>:
+install unless forced.  As of October 2006, we've noticed the following
+module throw spurious errors, requiring a C<force install>:
 
 	HTML::CalendarMonth 1.18
-	XML::Simple 2.14
 
 =back
 
@@ -458,7 +457,7 @@ plugins/Stats/README.
 
 B<Install Slash.>
 
-Unpack the distribution and go to the new directory that
+Unpack the distribution, go to the new directory that
 creates, and type:
 
 	make
@@ -1136,9 +1135,10 @@ libraries can be installed with:
 	apt-get install zlib1g zlib1g-dev libexpat1 libexpat1-dev
 
 Also on Debian, as of the current writing (July 2006), you will want
-libperl-dev.  And on Debian stable, try libmysqlclient12 (and -dev)
-for 4.0.x and/or libmysqlclient14 (and -dev) for 4.1.x.  On testing or
-unstable, try libmysqlclient15off and libmysqlclient15-dev.
+libperl-dev.  DBD::mysql requires mysql_config and mysql.h;  on Debian
+stable, try libmysqlclient12 (and -dev) for 4.0.x and/or libmysqlclient14
+(and -dev) for 4.1.x.  On testing or unstable, try libmysqlclient15off
+and libmysqlclient15-dev.
 
 =back
 
@@ -1328,11 +1328,13 @@ reinstalling Bundle::Slash (and see "Old Version of Bundle::Slash" above).
 
 DBD::mysql will not install.
 
-As of August 2006, its tests by default assume you have a running mysqld
-on localhost, accessible to the user 'root' with no password.  If you
-don't run mysqld on the same machine as you're installing the module,
-or if you have a password for its 'root' user (good idea), almost all
-its tests will fail.  You can either override the failures with
+As of October 2006, its tests by default assume you have a running mysqld
+on localhost, with a database named 'test', accessible to the user
+'root' with no password.  If you don't have a database named 'test',
+create one with C<CREATE DATABASE test;>.  If you don't run mysqld
+on the same machine as you're installing the module, or if you have a
+password for its 'root' user (good idea), almost all its tests will fail.
+You can either override the failures with
 
 	cpan> force install DBD::mysql
 
