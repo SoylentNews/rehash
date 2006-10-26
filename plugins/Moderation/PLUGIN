@@ -5,4 +5,3 @@ mysql_dump=mysql_dump.sql
 mysql_schema=mysql_schema.sql
 requiresplugin=Ajax
 task=process_moderation.pl
-htdoc=moderate.pl

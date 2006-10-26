@@ -27,7 +27,7 @@ sub new {
 	return unless $plugin->{Moderation};
 
 	my $constants = getCurrentStatic();
-	return undef unless $constants->{m1};
+	return undef unless $constants->{m1} && $constants->{m1_pluginname} eq 'Moderation';
 
 	bless($self, $class);
 	$self->{virtual_user} = $user;
@@ -1270,6 +1270,581 @@ sub getModderModdeeSummary {
 			"GROUP BY uid, cuid");
 
 	return $mods;
+}
+
+########################################################
+# For process_moderatord.pl
+# Pass in option "sleep_between" of a few seconds, maybe up to a
+# minute, if for some reason the deletion still makes slave
+# replication lag... (but it shouldn't, anymore) - 2005/01/06
+sub deleteOldModRows {
+	my($self, $options) = @_;
+
+	my $reader = getObject('Slash::DB', { db_type => "reader" });
+	my $constants = getCurrentStatic();
+	my $max_rows = $constants->{mod_delete_maxrows} || 1000;
+	my $archive_delay_mod =
+		   $constants->{archive_delay_mod}
+		|| $constants->{archive_delay}
+		|| 14;
+	my $sleep_between = $options->{sleep_between} || 0;
+
+	# Find the minimum ID in these tables that should remain, then
+	# delete everything before it.  We do it this way to keep the
+	# slave DBs tied up on the replication of the deletion query as
+	# little as possible.  Turning off foreign key checking here is
+	# just pretty lame, I know...
+
+	$self->sqlDo("SET FOREIGN_KEY_CHECKS=0");
+
+	# First delete from the bottom up for the moderatorlog.
+
+	my $junk_bottom = $reader->sqlSelect('MIN(id)', 'moderatorlog');
+	my $need_bottom = $reader->sqlSelectNumericKeyAssumingMonotonic(
+		'moderatorlog', 'min', 'id',
+		"ts >= DATE_SUB(NOW(), INTERVAL $archive_delay_mod DAY)");
+	while ($need_bottom && $junk_bottom < $need_bottom) {
+		$junk_bottom += $max_rows;
+		$junk_bottom = $need_bottom if $need_bottom < $junk_bottom;
+		$self->sqlDelete('moderatorlog', "id < $junk_bottom");
+		sleep $sleep_between
+			if $sleep_between;
+	}
+
+	$self->sqlDo("SET FOREIGN_KEY_CHECKS=1");
+	return 0;
+}
+
+########################################################
+# For process_moderatord.pl
+# Slightly new logic.  Now users can accumulate tokens beyond the
+# "trade-in" limit and the token_retention var is obviated.
+# Any user with more than $tokentrade tokens is forced to cash
+# them in for points, but they get to keep any excess tokens.
+# And on 2002/10/23, even newer logic:  the number of desired
+# conversions is passed in and the top that-many token holders
+# get points.
+sub convert_tokens_to_points {
+	my($self, $n_wanted) = @_;
+
+	my $reader = getObject("Slash::DB", { db_type => 'reader' });
+
+	my $constants = getCurrentStatic();
+	my %granted = ( );
+
+	return unless $n_wanted;
+
+	# Sanity check.
+	my $n_users = $reader->countUsers();
+	$n_wanted = int($n_users/10) if $n_wanted > int($n_users)/10;
+
+	my $maxtokens = $constants->{maxtokens} || 60;
+	my $tokperpt = $constants->{tokensperpoint} || 8;
+	my $maxpoints = $constants->{maxpoints} || 5;
+	my $pointtrade = $maxpoints;
+	my $tokentrade = $pointtrade * $tokperpt;
+	$tokentrade = $maxtokens if $tokentrade > $maxtokens; # sanity check
+	my $half_tokentrade = int($tokentrade/2); # another sanity check
+
+	my $uids = $reader->sqlSelectColArrayref(
+		"uid",
+		"users_info",
+		"tokens >= $half_tokentrade",
+		"ORDER BY tokens DESC, RAND() LIMIT $n_wanted",
+	);
+
+	# Locking tables is no longer required since we're doing the
+	# update all at once on just one table and since we're using
+	# + and - instead of using absolute values. - Jamie 2002/08/08
+
+	for my $uid (@$uids) {
+		next unless $uid;
+		my $rows = $self->setUser($uid, {
+			-lastgranted    => 'NOW()',
+			-tokens         => "GREATEST(0, tokens - $tokentrade)",
+			-points         => "LEAST(points + $pointtrade, $maxpoints)",
+		});
+		$granted{$uid} = 1 if $rows;
+	}
+
+	# We used to do some fancy footwork with a cursor and locking
+	# tables.  The only difference between that code and this is that
+	# it only limited points to maxpoints for users with karma >= 0
+	# and seclev < 100.  These aren't meaningful limitations, so these
+	# updates should work as well.  - Jamie 2002/08/08
+	# Actually I don't think these are needed at all. - Jamie 2003/09/09
+	#
+	# 2006/02/09:  I still don't think they're needed, and they are
+	# causing lags in replication...
+	#   Searching rows for update:
+	#   The thread is doing a first phase to find all matching
+	#   rows before updating them. This has to be done if the UPDATE
+	#   is changing the index that is used to find the involved rows.
+	# ...so I'm removing these.  I believe wherever the existing code
+	# increases points or tokens, it updates the oldvalue to
+	# LEAST(newvalue, maxvalue), so these adjustments should never
+	# change anything.
+	# 2006/02/12:  The lag is due to a MySQL bug in 4.1.16 that is
+	# fixed in 4.1.18.  <http://bugs.mysql.com/bug.php?id=15935>
+	# Still, we shouldn't need these.
+#       $self->sqlUpdate(
+#               "users_comments",
+#               { points => $maxpoints },
+#               "points > $maxpoints"
+#       );
+#       $self->sqlUpdate(
+#               "users_info",
+#               { tokens => $maxtokens },
+#               "tokens > $maxtokens"
+#       );
+
+	return \%granted;
+}
+
+########################################################
+# For process_moderatord
+sub stirPool {
+	my($self) = @_;
+
+	# Old var "stir" still works, its value is in days.
+	# But "mod_stir_hours" is preferred.
+	my $constants = getCurrentStatic();
+	my $stir_hours = $constants->{mod_stir_hours}
+		|| $constants->{stir} * 24
+		|| 96;
+	my $tokens_per_pt = $constants->{mod_stir_token_cost} || 0;
+	
+	# This isn't atomic.  But it doesn't need to be.  We could lock the
+	# tables during this operation, but all that happens if we don't
+	# is that a user might use up a mod point that we were about to stir,
+	# and it gets counted twice, later, in stats.  No big whup.
+	
+	my $stir_ar = $self->sqlSelectAllHashrefArray(
+		"users_info.uid AS uid, points",
+		"users_info, users_comments",
+		"users_info.uid = users_comments.uid
+		 AND points > 0
+		 AND DATE_SUB(NOW(), INTERVAL $stir_hours HOUR) > lastgranted"
+	);
+	
+	my $n_stirred = 0;
+	for my $user_hr (@$stir_ar) {
+		my $uid = $user_hr->{uid}; 
+		my $pts = $user_hr->{points};
+		my $tokens_pt_chg = $tokens_per_pt * $pts;
+
+		my $change = { };
+		$change->{points} = 0; 
+		$change->{-lastgranted} = "NOW()";
+		$change->{-stirred} = "stirred + $pts";
+		# In taking tokens away, this subtraction itself will not
+		# cause the value to go negative.
+		$change->{-tokens} = "LEAST(tokens, GREATEST(tokens - $tokens_pt_chg, 0))"
+			if $tokens_pt_chg;
+		$self->setUser($uid, $change);
+
+		$n_stirred += $pts;
+	}
+
+	return $n_stirred;
+} 
+
+########################################################
+# For process_moderatord.pl
+# 
+# New as of 2002/09/05:  returns ordered first by hitcount, and
+# second randomly, so when give_out_tokens() chops off the list
+# halfway through the minimum number of clicks, the survivors
+# are determined at random and not by (probably) uid order.
+# 
+# New as of 2002/09/11:  limit look-back distance to 48 hours,
+# to make the effects of click-grouping more predictable, and
+# not being erased all at once with accesslog expiration.
+# 
+# New as of 2003/01/30:  fetchEligibleModerators() has been
+# split into fetchEligibleModerators_accesslog and
+# fetchEligibleModerators_users.  The first pulls down the data
+# we need from accesslog, which may be a different DBIx virtual
+# user (different database).  The second uses that data to pull
+# down the rest of the data we need from the users tables.
+# Also, the var mod_elig_hoursback is no longer needed.
+# Note that fetchEligibleModerators_accesslog can return a
+# *very* large hashref.
+# 
+# New as of 2004/02/04:  fetchEligibleModerators_accesslog has
+# been split into ~_insertnew, ~_deleteold, and ~_read.  They
+# all are methods for the logslavedb, which may or may not be
+# the same as the main slashdb.
+
+sub fetchEligibleModerators_accesslog_insertnew {
+	my($self, $lastmaxid, $newmaxid, $youngest_uid) = @_;
+	return if $lastmaxid > $newmaxid;
+	my $ac_uid = getCurrentStatic('anonymous_coward_uid');
+	$self->sqlDo("INSERT INTO accesslog_artcom (uid, ts, c)"
+		. " SELECT uid, FROM_UNIXTIME(FLOOR(AVG(UNIX_TIMESTAMP(ts)))) AS ts, COUNT(*) AS c"
+		. " FROM accesslog"
+		. " WHERE id BETWEEN $lastmaxid AND $newmaxid"
+			. " AND (op='article' OR op='comments')"
+		. " AND uid != $ac_uid AND uid <= $youngest_uid"
+		. " GROUP BY uid");
+}
+
+sub fetchEligibleModerators_accesslog_deleteold {
+	my($self) = @_; 
+	my $constants = getCurrentStatic();
+	my $hoursback = $constants->{accesslog_hoursback} || 60;
+	$self->sqlDelete("accesslog_artcom",
+		"ts < DATE_SUB(NOW(), INTERVAL $hoursback HOUR)");
+}
+
+sub fetchEligibleModerators_accesslog_read {
+	my($self) = @_; 
+	my $constants = getCurrentStatic();
+	my $hitcount = defined($constants->{m1_eligible_hitcount})
+		? $constants->{m1_eligible_hitcount} : 3;
+	return $self->sqlSelectAllHashref(
+		"uid",
+		"uid, SUM(c) AS c",
+		"accesslog_artcom",
+		"",
+		"GROUP BY uid HAVING c >= $hitcount");
+}
+
+# This is a method for the main slashdb, which may or may not be
+# the same as the logslavedb.
+
+sub fetchEligibleModerators_users {
+	my($self, $count_hr) = @_;
+	my $constants = getCurrentStatic();
+	my $youngest_uid = $self->getYoungestEligibleModerator();
+	my $minkarma = $constants->{mod_elig_minkarma} || 0;
+	
+	my @uids =
+		sort { $a <=> $b } # don't know if this helps MySQL but it can't hurt... much
+		grep { $_ <= $youngest_uid }
+		keys %$count_hr;
+	my @uids_start = @uids;
+	
+	# What is a good splice_count?  Well I was seeing entries show
+	# up in the *.slow log for a size of 5000, so smaller is good.
+	my $splice_count = 2000;
+	while (@uids) {
+		my @uid_chunk = splice @uids, 0, $splice_count;
+		my $uid_list = join(",", @uid_chunk);
+		my $uids_disallowed = $self->sqlSelectColArrayref(
+			"users_info.uid AS uid",
+			"users_info, users_prefs",
+			"(karma < $minkarma OR willing != 1)
+			 AND users_info.uid = users_prefs.uid
+			 AND users_info.uid IN ($uid_list)"
+		);
+		for my $uid (@$uids_disallowed) {
+			delete $count_hr->{$uid};
+		}
+		# If there is more to do, sleep for a moment so we don't
+		# hit the DB too hard.
+		sleep 1 if @uids;
+	}
+
+	my $return_ar = [
+		map { [ $count_hr->{$_}{uid}, $count_hr->{$_}{c} ] }
+		sort { $count_hr->{$a}{c} <=> $count_hr->{$b}{c}
+			|| int(rand(3))-1 }
+		grep { defined $count_hr->{$_} }
+		@uids_start
+	];
+	return $return_ar;
+}
+
+########################################################
+# For process_moderatord.pl
+# Quick overview:  This method takes a list of uids who are eligible
+# to be moderators and returns that same list, with the "worst"
+# users made statistically less likely to be on it, and the "best"
+# users more likely to remain on the list and appear more than once.
+# Longer explanation:
+# This method takes a list of uids who are eligible to be moderators
+# (i.e., eligible to receive tokens which may end up giving them mod
+# points).  It also takes several numeric values, positive numbers
+# that are almost certainly slightly greater than 1 (e.g. 1.3 or so).
+# For each uid, several values are calculated:  the total number of
+# times the user has been M2'd "fair," the ratio of fair-to-unfair M2s,
+# and the ratio of spent-to-stirred modpoints.  Multiple lists of
+# the uids are made, from "worst" to "best," the "worst" user in each
+# case having the probability of being eligible for tokens (remaining
+# on the list) reduced and the "best" with that probability increased
+# (appearing two or more times on the list).
+# The list of which factors to use and the numeric values of those
+# factors is in $wtf_hr ("what to factor");  its currently-defined
+# keys are factor_ratio, factor_total and factor_stirred.
+sub factorEligibleModerators {
+	my($self, $orig_uids, $wtf, $info_hr) = @_;
+	return $orig_uids if !$orig_uids || !@$orig_uids || scalar(@$orig_uids) < 10;
+	
+	$wtf->{upfairratio} ||= 0;      $wtf->{upfairratio} = 0         if $wtf->{upfairratio} == 1;
+	$wtf->{downfairratio} ||= 0;    $wtf->{downfairratio} = 0       if $wtf->{downfairratio} == 1;
+	$wtf->{fairtotal} ||= 0;        $wtf->{fairtotal} = 0           if $wtf->{fairtotal} == 1;
+	$wtf->{stirratio} ||= 0;        $wtf->{stirratio} = 0           if $wtf->{stirratio} == 1;
+	
+	return $orig_uids if !$wtf->{fairratio} || !$wtf->{fairtotal} || !$wtf->{stirratio};
+	
+	my $start_time = Time::HiRes::time;
+	
+	my @return_uids = ( );
+	
+	my $uids_in = join(",", @$orig_uids);
+	my $u_hr = $self->sqlSelectAllHashref(
+		"uid",
+		"uid, up_fair, down_fair, up_unfair, down_unfair, totalmods, stirred",
+		"users_info",
+		"uid IN ($uids_in)",
+	);
+	
+	# Assign ratio values that will be used in the sorts in a moment.
+	# We precalculate these because they're used in several places.
+	# Note that we only calculate the *ratio* if there are a decent
+	# number of votes, otherwise we leave it undef.
+	for my $uid (keys %$u_hr) {
+		# Upmod fairness ratio.
+		my $ratio = undef;
+		my $denom = $u_hr->{$uid}{up_fair} + $u_hr->{$uid}{up_unfair};
+		if ($denom >= 5) {
+			$ratio = $u_hr->{$uid}{up_fair} / $denom;
+		}
+		$u_hr->{$uid}{upfairratio} = $ratio;
+		# Downmod fairness ratio.
+		$ratio = undef;
+		$denom = $u_hr->{$uid}{down_fair} + $u_hr->{$uid}{down_unfair};
+		if ($denom >= 5) {
+			$ratio = $u_hr->{$uid}{down_fair} / $denom;
+		}
+		$u_hr->{$uid}{downfairratio} = $ratio;
+		# Spent-to-stirred ratio.
+		$ratio = undef;
+		$denom = $u_hr->{$uid}{totalmods} + $u_hr->{$uid}{stirred};
+		if ($denom >= 10) {
+			$ratio = $u_hr->{$uid}{totalmods} / $denom;
+		}               
+		$u_hr->{$uid}{stirredratio} = $ratio;
+	}
+	
+	# Get some stats into the $u_hr hashref that will make some
+	# code later on easier.  Sum the total number of fair votes,
+	# so up_fair+down_fair = total_fair.  And sum the fair
+	# ratios too, to give a very general idea of total fairness.
+	for my $uid (%$u_hr) {
+		$u_hr->{$uid}{total_fair} =
+			  ($u_hr->{$uid}{up_fair} || 0)
+			+ ($u_hr->{$uid}{down_fair} || 0);
+		$u_hr->{$uid}{totalfairratio} = $u_hr->{$uid}{upfairratio}
+			if defined($u_hr->{$uid}{upfairratio});
+		if (defined($u_hr->{$uid}{downfairratio})) {
+			$u_hr->{$uid}{totalfairratio} =
+				($u_hr->{$uid}{totalfairratio} || 0)
+				+ $u_hr->{$uid}{downfairratio};
+		}
+	}
+
+	if ($wtf->{fairtotal}) {
+		# Assign a token likeliness factor based on the absolute
+		# number of "fair" M2s assigned to each user's moderations.
+		# Sort by total m2fair first (that's the point of this
+		# code).  If there's a tie in that, the secondary sort is
+		# by ratio, and tertiary is random.
+		my @new_uids = sort {
+				$u_hr->{$a}{total_fair} <=> $u_hr->{$b}{total_fair}
+				||
+				( defined($u_hr->{$a}{totalfairratio})
+					&& defined($u_hr->{$b}{totalfairratio})
+				  ? $u_hr->{$a}{totalfairratio} <=> $u_hr->{$b}{totalfairratio}
+				  : 0 )
+				||
+				int(rand(1)*2)*2-1
+			} @$orig_uids;
+		# Assign the factors in the hashref according to this
+		# sort order.  Those that sort first get the lowest value,
+		# the approximate middle gets 1, the last get highest.
+		_set_factor($u_hr, $wtf->{fairtotal}, 'factor_m2total',
+			\@new_uids);
+	}
+
+		# Assign a token likeliness factor based on the ratio of
+		# "fair" to "unfair" M2s assigned to each user's
+		# moderations.  In order not to be "prejudiced" against
+		# users with no M2 history, those users get no change in
+		# their factor (i.e. 1) by simply being left out of the
+		# list.  Sort by ratio first (that's the point of this
+		# code);  if there's a tie in ratio, the secondary sort
+		# order is total m2fair, and tertiary is random.
+		# Do this separately by first up fairness ratio, then
+		# down fairness ratio.
+
+	if ($wtf->{upfairratio}) {
+		my @new_uids = sort {
+				$u_hr->{$a}{upfairratio} <=> $u_hr->{$b}{upfairratio}
+				||
+				$u_hr->{$a}{total_fair} <=> $u_hr->{$b}{total_fair}
+				||
+				int(rand(1)*2)*2-1
+			} grep { defined($u_hr->{$_}{upfairratio}) }
+			@$orig_uids;
+		# Assign the factors in the hashref according to this
+		# sort order.  Those that sort first get the lowest value,
+		# the approximate middle gets 1, the last get highest.
+		_set_factor($u_hr, $wtf->{upfairratio}, 'factor_upfairratio',
+			\@new_uids);
+	}       
+		
+	if ($wtf->{downfairratio}) {
+		my @new_uids = sort {
+				$u_hr->{$a}{downfairratio} <=> $u_hr->{$b}{downfairratio}
+				||
+				$u_hr->{$a}{total_fair} <=> $u_hr->{$b}{total_fair}
+				||      
+				int(rand(1)*2)*2-1
+			} grep { defined($u_hr->{$_}{downfairratio}) }
+			@$orig_uids;
+		# Assign the factors in the hashref according to this
+		# sort order.  Those that sort first get the lowest value,
+		# the approximate middle gets 1, the last get highest.
+		_set_factor($u_hr, $wtf->{downfairratio}, 'factor_downfairratio',
+			\@new_uids);
+	}       
+			
+	if ($wtf->{stirratio}) {
+		# Assign a token likeliness factor based on the ratio of
+		# stirred to spent mod points.  In order not to be
+		# "prejudiced" against users with little or no mod history,
+		# those users get no change in their factor (i.e. 1) by
+		# simply being left out of the list.  Sort by ratio first
+		# (that's the point of this code); if there's a tie in
+		# ratio, the secondary sort order is total spent, and
+		# tertiary is random.
+		my @new_uids = sort {
+				$u_hr->{$a}{stirredratio} <=> $u_hr->{$b}{stirredratio}
+				||
+				$u_hr->{$a}{totalmods} <=> $u_hr->{$b}{totalmods}
+				||
+				int(rand(1)*2)*2-1
+			} grep { defined($u_hr->{$_}{stirredratio}) }
+			@$orig_uids;
+		# Assign the factors in the hashref according to this
+		# sort order.  Those that sort first get the lowest value,
+		# the approximate middle gets 1, the last get highest.
+		_set_factor($u_hr, $wtf->{stirratio}, 'factor_stirredratio',
+			\@new_uids);
+	}
+
+	# If the caller wanted to keep stats, prep some stats.
+	if ($info_hr) {
+		$info_hr->{factor_lowest} = 1;
+		$info_hr->{factor_highest} = 1;
+	}
+
+	# Now modify the list of uids.  Each uid in the list has the product
+	# of its factors calculated.  If the product is exactly 1, that uid
+	# is left alone.  If less than 1, there is a chance the uid will be
+	# deleted from the list.  If more than 1, there is a chance it will
+	# be doubled up in the list (or more than doubled for large factors).
+	for my $uid (@$orig_uids) {
+		my $factor = 1;
+		for my $field (qw(
+			factor_m2total
+			factor_upfairratio factor_downfairratio
+			factor_stirredratio
+		)) {
+			$factor *= $u_hr->{$uid}{$field}
+				if defined($u_hr->{$uid}{$field});
+		}
+		# If the caller wanted to keep stats, send some stats.
+		$info_hr->{factor_lowest} = $factor
+			if $info_hr && $info_hr->{factor_lowest}
+				&& $factor < $info_hr->{factor_lowest};
+		$info_hr->{factor_highest} = $factor
+			if $info_hr && $info_hr->{factor_highest}
+				&& $factor > $info_hr->{factor_highest};
+		# If the factor is, say, 1.3, then the count of this uid is
+		# at least 1, and there is a 0.3 chance that it goes to 2.
+		my $count = roundrand($factor);
+		push @return_uids, ($uid) x $count;
+	}
+
+	return \@return_uids;
+}
+
+# This specialized utility function takes a list of uids and assigns
+# values into the hashrefs that are their values in %$u_hr.  The
+# @$uidlist determines the order that the values will be assigned.
+# The first uid gets the value 1/$factor (and since $factor should
+# be >1, this value will be <1).  The middle uid in @$uidlist will
+# get the value approximately 1, and the last uid will get the value
+# $factor.  After these assignments are made, any uid keys in %$u_hr
+# *not* in @$uidlist will be given the value 1.  The 2nd-level hash
+# key that these values are assigned to is $u_hr->{$uid}{$field}.
+sub _set_factor {
+	my($u_hr, $factor, $field, $uidlist) = @_;
+	my $halfway = int($#$uidlist/2);
+	return if $halfway <= 1;
+
+	if ($factor != 1) {
+		for my $i (0 .. $halfway) {
+	
+			# We'll use this first as a numerator, then as 
+			# a denominator.
+			my $between_1_and_factor = 1 + ($factor-1)*($i/$halfway);
+		
+			# Set the lower uid, which ranges from 1/$factor to
+			# $factor/$factor.
+			my $uid = $uidlist->[$i];
+			$u_hr->{$uid}{$field} = $between_1_and_factor/$factor;
+		
+			# Set its counterpart the higher uid, which ranges from
+			# $factor/$factor to $factor/1 (but we build this list
+			# backwards, from $#uidlist down to $halfway-ish, so we
+			# start at $factor/1 and come down to $factor/$factor).
+			my $j = $#$uidlist-$i;
+			$uid = $uidlist->[$j];
+			$u_hr->{$uid}{$field} = $factor/$between_1_and_factor;
+		
+		}       
+	}                       
+		
+	# uids which didn't get a value assigned just get "1".
+	for my $uid (keys %$u_hr) {
+		$u_hr->{$uid}{$field} = 1 if !defined($u_hr->{$uid}{$field});
+	}
+}
+
+########################################################
+# For run_moderatord.pl
+sub updateTokens {
+	my($self, $uid_hr, $options) = @_;
+	my $constants = getCurrentStatic();
+	my $maxtokens = $constants->{maxtokens} || 60;
+	my $splice_count = $options->{splice_count} || 200;
+	my $sleep_time = defined($options->{sleep_time}) ? $options->{sleep_time} : 0.5;
+
+	my %adds = ( map { ($_, 1) } grep /^\d+$/, values %$uid_hr );
+	for my $add (sort { $a <=> $b } keys %adds) {
+		my @uids = sort { $a <=> $b }
+			grep { $uid_hr->{$_} == $add }
+			keys %$uid_hr;
+		# At this points, @uids is the list of uids that need
+		# to have $add tokens added.  Group them into slices
+		# and bulk-add.  This is much more efficient than
+		# calling setUser individually.
+		while (@uids) {
+			my @uid_chunk = splice @uids, 0, $splice_count;
+			my $uids_in = join(",", @uid_chunk);
+			$self->sqlUpdate("users_info",
+				{ -tokens => "LEAST(tokens+$add, $maxtokens)" },
+				"uid IN ($uids_in)");
+			$self->setUser_delete_memcached(\@uid_chunk);
+			# If there is more to do, sleep for a moment so we don't
+			# hit the DB too hard.
+			Time::HiRes::sleep($sleep_time) if @uids && $sleep_time;
+		}
+	}
 }
 
 1;
