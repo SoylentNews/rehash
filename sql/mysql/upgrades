@@ -4128,8 +4128,6 @@ UPDATE vars SET value = 'T_2_5_0_130' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
-# PUDGE LAST UPDATED HERE
-
 # for FireHose plugin
 DELETE FROM ajax_ops where op in ('firehose_get_updates_pop','firehose_check_removed','firehose_fetch_new');
 INSERT INTO vars (name, value, description) VALUES ('firehose_color_slices', '30|30|0.2|0.2|0.2|0.2|0.2', 'Number or percent of remaining stories at each color level separated by | 30|0.5|0.5 would mean 30 stories at the level of highest popularity and 50% at each of remainining stories at the next 2 levels');
@@ -4143,9 +4141,6 @@ INSERT INTO vars (name, value, description) VALUES ('tags_admin_private_tags', '
 ALTER TABLE firehose ADD INDEX createtime (createtime);
 ALTER TABLE firehose ADD INDEX popularity (popularity);
 
-# 2006-10-25
-UPDATE vars SET value = 'T_2_5_0_131' WHERE name = 'cvs_tag_currentcode';
-
 # FYI:  Since you're upgrading from a previous version of Slash, you
 # already have the Moderation plugin's SQL changes applied.  This adds the
 # row to your site_info table that offically means Moderation is installed,
@@ -4158,3 +4153,7 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('m1', '1', 'Allows us
 INSERT INTO site_info (name, value, description) VALUES ('plugin', 'Moderation', 'Moderation (Classic)');
 INSERT INTO vars (name, value, description) VALUES ('m1_pluginname', 'Moderation', 'Which moderation plugin to use');
 
+# 2006-10-25
+UPDATE vars SET value = 'T_2_5_0_131' WHERE name = 'cvs_tag_currentcode';
+
+# PUDGE LAST UPDATED HERE
