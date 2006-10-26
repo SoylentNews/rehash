@@ -448,6 +448,14 @@ function json_update(response) {
 				$(el).value = response.value[el];
 		}
 	}
+ 	
+	if (response.html_append) {
+		for (el in response.html_append) {
+			if ($(el))
+				$(el).innerHTML = $(el).innerHTML + response.html_append[el];
+		}
+	}
+		
 }
 
 
@@ -496,7 +504,7 @@ function firehose_get_updates_handler(transport) {
 		}
 	}
 	var interval = getFirehoseUpdateInterval();
-	setTimeout("firehose_get_updates()", interval);
+	setTimeout("firehose_get_updates(" + is_timed_out +")", interval);
 }
 
 function firehose_get_item_idstring() {
@@ -514,7 +522,10 @@ function firehose_get_item_idstring() {
 	return str;
 }
 
-function firehose_get_updates() {
+function firehose_get_updates(require_timeout) {
+	if (require_timeout && !is_timed_out) {
+		return;
+	}
 	run_before_update();
 	if (play == 0) {
 		setTimeout("firehose_get_updates()", 2000);
@@ -539,6 +550,7 @@ function setFirehoseAction() {
 	if (is_timed_out) {
 		is_timed_out = 0;
 		firehose_play();
+		firehose_get_updates();
 	}
 }
 
@@ -550,10 +562,15 @@ function getSecsSinceLastFirehoseAction() {
 }
 
 function getFirehoseUpdateInterval() {
-	var interval = 60000;
+	var interval = 45000;
 	if (updateIntervalType == 1) {
 		interval = 30000;
 	}
+	interval = interval + (5 * interval * getSecsSinceLastFirehoseAction() / inactivity_timeout);
+	if (getSecsSinceLastFirehoseAction() > inactivity_timeout) {
+		interval = 3600000;
+	}
+
 	return interval;
 }
 
@@ -562,14 +579,13 @@ function run_before_update() {
 	if (secs > inactivity_timeout) {
 		is_timed_out = 1;
 		if ($('message_area'))
-			$('message_area').innerHTML = "Automatic updates have been disabled due to inactivity";
-		firehose_pause();
+			$('message_area').innerHTML = "Automatic updates have been slowed due to inactivity";
+		//firehose_pause();
 	}
 }
 
 function firehose_play() {
 	play = 1;
-	is_timed_out = 0;
 	setFirehoseAction();
 	if ($('message_area'))
 		$('message_area').innerHTML = "";
