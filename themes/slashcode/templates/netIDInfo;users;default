@@ -45,7 +45,8 @@ __template__
 	   END;
 	 %]
 	<p>
-	[% moddb = Slash.getObject("Slash::" _ constants.m1_pluginname);
+	[% m1_classname = "Slash::" _ constants.m1_pluginname;
+	   moddb = Slash.getObject(m1_classname);
 	   IF moddb; moddb.dispModCommentLog("b$fieldname", netid, mod_options); END %]
 	[% IF !constants.m1_admin_show_mods_with_comments %]
 		<p>

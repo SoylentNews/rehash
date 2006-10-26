@@ -97,7 +97,8 @@ __template__
 					mod_options.meta_mod_only = 1;
 				END;
 
-				moddb = Slash.getObject("Slash::" _ constants.m1_pluginname);
+				m1_classname = "Slash::" _ constants.m1_pluginname;
+				moddb = Slash.getObject(m1_classname);
 				IF moddb; moddb.dispModCommentLog('uid', useredit.uid, mod_options); END;
 
 				IF !constants.m1_admin_show_mods_with_comments;
