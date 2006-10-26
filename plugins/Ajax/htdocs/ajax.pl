@@ -274,77 +274,6 @@ sub updateD2prefs {
 	$slashdb->setUser($user->{uid}, \%save);
 }
 
-#sub moderateCid {
-#	my($slashdb, $constants, $user, $form, $options) = @_;
-#	my $cid = $form->{cid} or return;
-#	my $sid = $form->{sid} or return;
-#	my $reason = $form->{reason} or return;
-#
-#	my $score  = "comment_score_$cid";
-#	my $select = "reasondiv_$cid";
-#
-#	my $html = {};
-#	my $error;
-#
-#	my $discussion = $slashdb->getDiscussion($sid);
-#	my $moderate_check = &Slash::_moderateCheck($form, $slashdb, $user, $constants, $discussion);
-#
-#	if ($moderate_check->{msg}) {
-#		$html->{$select} = $moderate_check->{msg};
-#	} elsif ($moderate_check->{count}) {
-#		$html->{$select} = $moderate_check->{msg};
-#	} else {
-#		# XXX this should be in templates -- pudge
-#		my $ret_val = $slashdb->moderateComment($sid, $cid, $reason, { no_display => 1 });
-#		if ($ret_val > 0) {
-#			my $comment = $slashdb->getComment($cid) or return;
-#			my $reasons = $slashdb->getReasons or return;
-#			my $points = Slash::_get_points(
-#				$comment, $user,
-#				$constants->{comment_minscore}, $constants->{comment_maxscore},
-#				$slashdb->countUsers({ max => 1 }), $slashdb->getReasons
-#			);
-#
-#			$html->{$score}  = "(Score:$points";
-#			$html->{$score} .= ", $reasons->{$comment->{reason}}{name}"
-#				if $comment->{reason} && $reasons->{$comment->{reason}};
-#			$html->{$score} .= ")";
-#
-#			my $ptstr = $user->{points} == 1 ? 'point' : 'points';
-#			$html->{$select} = "Moderated '$reasons->{$reason}{name}.'  $user->{points} $ptstr left.";
-#			$slashdb->setStory($sid, { writestatus => 'dirty' });
-#
-#		} elsif (!$ret_val) {
-#			$html->{$select} = "Error: No moderation performed.";
-#
-#		} elsif ($ret_val == -1) {
-#			$html->{$select} = "Error: No moderation points left.";
-#
-#		} elsif ($ret_val == -2) {
-#			$html->{$select} = "Error: $user->{points} moderation points left.";
-#		}
-#	}
-#
-#	$options->{content_type} = 'application/json';
-#	return Data::JavaScript::Anon->anon_dump({
-#		html	=> $html,
-#		error	=> $error,
-#	});
-#}
-
-=pod
-
-#db down
-#allow moderation
-archived
-#-1 == no points
-#-2 == not enough points
-#already posted
-#$slashdb->setStory($discussion->{sid}, { writestatus => 'dirty' });
-
-
-=cut
-
 
 ##################################################################
 sub default { }
@@ -387,10 +316,6 @@ sub getOps {
 			reskey_name	=> 'ajax_user',
 			reskey_type	=> 'createuse',
 		},
-#		comments_moderate_cid	=> {
-#			function	=> \&moderateCid,
-#			reskey_name	=> 'comments-moderation-ajax',
-#		},
 		getSectionPrefsHTML => {
 			function	=> \&getSectionPrefsHTML,
 			reskey_name	=> 'ajax_user',
