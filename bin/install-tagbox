@@ -71,7 +71,8 @@ unless (DBIx::Password::checkVirtualUser($opts{'u'})) {
 Installed.
 
 Please check to see if there are any README files for your site's
-tagboxes that you haven't already read.
+tagboxes that you haven't already read.  You'll want to restart
+slashd now.
 
 EOT
 }
