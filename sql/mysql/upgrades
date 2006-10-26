@@ -4126,8 +4126,6 @@ UPDATE vars SET value = 'T_2_5_0_130' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # for FireHose plugin
 DELETE FROM ajax_ops where op in ('firehose_get_updates_pop','firehose_check_removed','firehose_fetch_new');
 INSERT INTO vars (name, value, description) VALUES ('firehose_color_slices', '30|30|0.2|0.2|0.2|0.2|0.2', 'Number or percent of remaining stories at each color level separated by | 30|0.5|0.5 would mean 30 stories at the level of highest popularity and 50% at each of remainining stories at the next 2 levels');
@@ -4153,7 +4151,12 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('m1', '1', 'Allows us
 INSERT INTO site_info (name, value, description) VALUES ('plugin', 'Moderation', 'Moderation (Classic)');
 INSERT INTO vars (name, value, description) VALUES ('m1_pluginname', 'Moderation', 'Which moderation plugin to use');
 
+INSERT IGNORE INTO ajax_ops VALUES (NULL, 'comments_moderate_cid', 'Slash::Moderation', 'ajaxModerateCid', 'comments-moderation-ajax', 'use');
+
 # 2006-10-25
 UPDATE vars SET value = 'T_2_5_0_131' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
