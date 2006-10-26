@@ -573,6 +573,8 @@ function firehose_play() {
 	setFirehoseAction();
 	if ($('message_area'))
 		$('message_area').innerHTML = "";
+	if ($('pauseorplay'))
+		$('pauseorplay').innerHTML = "Updating";
 	var pause = $('pause');
 	var play_div = $('play');
 	play_div.className = "hide";
@@ -586,4 +588,6 @@ function firehose_pause() {
 	var play_div = $('play');
 	pause.className = "hide";
 	play_div.className = "";
+	if ($('pauseorplay'))
+		$('pauseorplay').innerHTML = "Paused";
 }
