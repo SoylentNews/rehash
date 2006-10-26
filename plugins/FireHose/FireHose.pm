@@ -675,7 +675,8 @@ sub ajaxGetFormContents {
 	return unless $item;
 	my $url;
 	$url = $slashdb->getUrl($item->{url_id}) if $item->{url_id};
-	slashDisplay('fireHoseForm', { item => $item, url => $url }, { Return => 1});
+	my $the_user = $slashdb->getUser($item->{uid});
+	slashDisplay('fireHoseForm', { item => $item, url => $url, the_user => $the_user }, { Return => 1});
 }
 
 sub ajaxGetAdminExtras {

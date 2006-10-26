@@ -33,12 +33,14 @@ __template__
 			User mode?
 			<input type="hidden" name="setusermode" value="1">
 			<input type="checkbox" value="1" name="firehose_usermode" onchange="this.form.submit()" [% constants.markup_checked_attribute IF options.firehose_usermode %]>  
+<br>Last Update Time: <span id="local_last_update_time">[% Slash.timeCalc(Slash.db.getTime(), "%m-%d %H:%M:%S") %]</span> Currently <span id="pauseorplay"></span>
+<div id="message_area"></div>
 			[% END %]
 		</fieldset>
 	</form>
 <div class="options">
-	<span id="play"><a href="javascript:firehose_play()" title="Currently playing">Play</a></span>
-	<span id="pause"><a href="javascript:firehose_pause()" title="Currently paused">Pause</a></span>
+	<span id="play"><a href="javascript:firehose_play()" title="Currently paused">Play</a></span>
+	<span id="pause"><a href="javascript:firehose_pause()" title="Currently playing">Pause</a></span>
 
 	[% IF options.orderby == "popularity" %]
 	<span id="popularity"><a href="[% gSkin.rootdir %]/firehose.pl?orderby=createtime" title="Toggle sort popularity/time - Currently popularity">Popularity</a></span>
@@ -59,8 +61,6 @@ __template__
 </div>
 </div>
 </div>
-<div id="message_area"></div>
-Last Update Time: <span id="local_last_update_time">[% Slash.timeCalc(Slash.db.getTime, "%m-%d %H:%M:%s") %]</span>
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]

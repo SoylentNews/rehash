@@ -24,7 +24,9 @@ IF item.type == "submission";
 	ELSIF item.name;
 		introtext = "$item.name writes <i>\"$introtext\"</i>";
 	ELSE;
-		introtext =  the_user.nickname  _ " writes <i>\"$introtext\"</i>";
+		nick = the_user.nickname;
+		IF item.uid == constants.anonymous_coward_uid && constants.anon_name_alt; nick = constants.anon_name_alt; END;
+		introtext =  nick _ " writes <i>\"$introtext\"</i>";
 	END;
 
 END;
