@@ -152,7 +152,7 @@ my(%comments, %comment_data);
 				$reason);
 			my $user = { uid => $uid };
 			setRandomIPID($user);
-			$slashdb->createModeratorLog(
+			$moddb->createModeratorLog(
 				$comment,
 				$user,
 				$modval,
