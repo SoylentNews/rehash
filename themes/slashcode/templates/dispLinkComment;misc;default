@@ -4,11 +4,6 @@ __description__
 Display a comment link string (reply, parent, etc.), included by
 dispComment
 
-It's silly to do the complex check over and over to see whether the user
-can delete comments.  This is done in several templates but this one's
-the worst.  We should have a _can_del in Slash.pm and pass a can_del in
-to this template in a field, just like can_mod.
-
 __title__
 
 __page__
@@ -21,10 +16,12 @@ __template__
 [% IF user.mode != 'metamod' %]
 	[% IF user.is_admin || original_pid || !user.state.discussion_archived %]
 		[% do_parent = ( original_pid ); #&& !(discussion2 && (!form.cid || form.cid != cid)) );
-		   do_mod    = ( (constants.authors_unlimited && user.seclev >= constants.authors_unlimited) || user.acl.candelcomments_always ) %]
+		   can_del   = ( (constants.authors_unlimited && user.seclev >= constants.authors_unlimited) || user.acl.candelcomments_always ) %]
 		<div class="commentSub">
 
-		[ [% IF !user.state.discussion_archived && !user.state.discussion_future_nopost %]
+		[
+		
+		[% IF !user.state.discussion_archived && !user.state.discussion_future_nopost %]
 			[% Slash.linkComment({
 				sid	=> sid,
 				pid	=> cid,
@@ -35,7 +32,7 @@ __template__
 			}) %]
 		[% END %]
 
-		[% IF !(user.state.discussion_archived) && ( do_parent || can_mod || do_mod ) %] | [% END %]
+		[% IF !(user.state.discussion_archived) && ( do_parent || can_mod || can_del ) %] | [% END %]
 
 		[% IF do_parent %][% Slash.linkComment({
 			sid	=> sid,
@@ -46,7 +43,7 @@ __template__
 			onclick	=> (discussion2 ? "return selectParent($original_pid)" : '')
 		}, 1) %][% END %]
 		
-		[% IF do_parent && ( can_mod || do_mod ) %] | [% END %]
+		[% IF do_parent && ( can_mod || can_del ) %] | [% END %]
 
 		[% IF can_mod %]
 		<div id="reasondiv_[% cid %]" class="modsel">[% Slash.createSelect("reason_$cid", reasons, {
@@ -55,13 +52,14 @@ __template__
 			onchange	=> 'return doModerate(this)'
 		}) %]</div>[% END %]
 
-		[% IF can_mod && do_mod %] | [% END %]
+		[% IF can_mod && can_del %] | [% END %]
 
-		[% IF (constants.authors_unlimited && user.seclev >= constants.authors_unlimited)
-			|| user.acl.candelcomments_always %]
+		[% IF can_del %]
 		<input type="checkbox" name="del_[% cid %]">
 		[% END %]
+
 		]
+
 		</div>
 	[% END %]
 

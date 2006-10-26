@@ -26,6 +26,9 @@ __template__
 	[% returnme.data_constant = 1 %] 
 	Meta Moderation
 
+[% CASE 'metamods_performed' %]
+        <p>[% num %] MetaModeration(s) Completed.
+
 [% CASE 'no_moderation' %]
 	[% returnme.data_constant = 1 %] 
 	<p>The moderation system for [% constants.sitename %] is currently down.</p>

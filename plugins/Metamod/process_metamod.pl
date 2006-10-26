@@ -33,14 +33,14 @@ $task{$me}{code} = sub {
 };
 
 sub reconcile_m2 {
-	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 	my $metamod_db = getObject('Slash::Metamod::Static');
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $metamod_reader = getObject('Slash::Metamod::Static', { db_type => 'reader' });
 
 	my $consensus = $constants->{m2_consensus};
-	my $reasons = $slashdb->getReasons();
+	my $reasons = $moddb->getReasons();
 	my $sql;
 
 	# %m2_results is a hash whose keys are uids.  Its values are
@@ -101,7 +101,7 @@ sub reconcile_m2 {
 			? $csq->{m1_tokens}{sql_possible}
 			: $csq->{m1_tokens}{sql_base};
 		if ($sql) {
-			$slashdb->setUser(
+			$moddb->setUser(
 				$mod_hr->{uid},
 				{ -tokens => $sql },
 				{ and_where => $csq->{m1_tokens}{sql_and_where} }
@@ -124,16 +124,16 @@ sub reconcile_m2 {
 			? $csq->{m1_karma}{sql_possible}
 			: $csq->{m1_karma}{sql_base};
 		my $m1_karma_changed = 0;
-		$m1_karma_changed = $slashdb->setUser(
+		$m1_karma_changed = $moddb->setUser(
 			$mod_hr->{uid},
 			{ -karma => $sql },
 			{ and_where => $csq->{m1_karma}{sql_and_where} }
 		) if $sql;
 
 		# Now update the moderator's m2info.
-		my $old_m2info = $slashdb->getUser($mod_hr->{uid}, 'm2info');
+		my $old_m2info = $moddb->getUser($mod_hr->{uid}, 'm2info');
 		my $new_m2info = add_m2info($old_m2info, $nfair, $nunfair);
-		$slashdb->setUser(
+		$moddb->setUser(
 			$mod_hr->{uid},
 			{ m2info => $new_m2info }
 		) if $new_m2info ne $old_m2info;
@@ -141,7 +141,7 @@ sub reconcile_m2 {
 		# Now update the moderator's tally of csq bonuses/penalties.
 		my $csqtc = $csq->{csq_token_change}{num} || 0;
 		my $val = sprintf("csq_bonuses %+0.3f", $csqtc);
-		$slashdb->setUser(
+		$moddb->setUser(
 			$mod_hr->{uid},
 			{ -csq_bonuses => $val },
 		) if $csqtc;
@@ -160,17 +160,17 @@ sub reconcile_m2 {
 				? $csq->{$key}{sql_possible}
 				: $csq->{$key}{sql_base};
 			if ($sql) {
-				$slashdb->setUser(
+				$moddb->setUser(
 					$m2->{uid},
 					{ -tokens => $sql },
 					{ and_where => $csq->{$key}{sql_and_where} }
 				);
 			}
 			if ($m2->{val} == $winner_val) {
-				$slashdb->setUser($m2->{uid},
+				$moddb->setUser($m2->{uid},
 					{ -m2voted_majority     => "m2voted_majority + 1" });
 			} elsif ($m2->{val} == $lonedissent_val) {
-				$slashdb->setUser($m2->{uid},
+				$moddb->setUser($m2->{uid},
 					{ -m2voted_lonedissent  => "m2voted_lonedissent + 1" });
 			}
 			if ($statsSave) {
@@ -197,12 +197,12 @@ sub reconcile_m2 {
 			# Only send message if the moderation was deemed unfair
 			if ($winner_val < 0) {
 				# Get discussion metadata without caching it.
-				my $discuss = $slashdb->getDiscussion(
+				my $discuss = $moddb->getDiscussion(
 					$mod_hr->{sid}
 				);
 
 				# Get info on the comment.
-				my $comment_subj = ($slashdb->getComments(
+				my $comment_subj = ($moddb->getComments(
 					$mod_hr->{sid}, $mod_hr->{cid}
 				))[2];
 				my $comment_url = "/comments.pl?sid=$mod_hr->{sid}&cid=$mod_hr->{cid}";
@@ -222,7 +222,7 @@ sub reconcile_m2 {
 		}
 
 		# This mod has been reconciled.
-		$slashdb->sqlUpdate("moderatorlog", {
+		$moddb->sqlUpdate("moderatorlog", {
 			-m2status => 2,
 		}, "id=$mod_hr->{id}");
 
@@ -350,10 +350,10 @@ sub reconcile_stats {
 		$reason, $nfair, $nunfair) = @_;
 	return unless $statsSave;
 
-	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 	my $consensus = $constants->{m2_consensus};
-	my $reasons = $slashdb->getReasons();
+	my $reasons = $moddb->getReasons();
 	my @reasons_m2able =
 		sort map { $reasons->{$_}{name} }
 		grep { $reasons->{$_}{m2able} }
@@ -372,7 +372,7 @@ sub reconcile_stats {
 	if (!$stats_created) {
 		# Test... has this first item has been created
 		# already today?
-		$stats_created = 1 if $slashdb->sqlSelect(
+		$stats_created = 1 if $moddb->sqlSelect(
 			"id",
 			"stats_daily",
 			"day='$today'
@@ -406,11 +406,61 @@ sub reconcile_stats {
 
 ############################################################
 
-sub mark_m2_oldzone {
+sub update_modlog_ids {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => "reader" });
+	my $days_back = $constants->{archive_delay_mod} || 30;
+	$days_back = 30 if $days_back > 30;
+	my $days_back_cushion = int($days_back/10);
+	$days_back_cushion = $constants->{m2_min_daysbackcushion} || 2
+		if $days_back_cushion < ($constants->{m2_min_daysbackcushion} || 2);
+	$days_back -= $days_back_cushion;
 
-	my $reasons = $slashdb->getReasons();
+	my $reasons = $mod_reader->getReasons();
+	my $m2able_reasons = join(",",
+	       sort grep { $reasons->{$_}{m2able} }
+	       keys %$reasons);
+	return if !$m2able_reasons;
+
+	# XXX I'm considering adding a 'WHERE m2status=0' clause to the
+	# MIN/MAX selects below.  This might help choose mods more
+	# smoothly and make failure (as archive_delay_mod is approached)
+	# less dramatic too.  On the other hand it might screw things
+	# up, making older mods at N-1 M2's never make it to N.  I've
+	# run tests on changes like this before and there's almost no
+	# way to predict accurately what it will do on a live site
+	# without doing it... -Jamie 2002/11/16
+
+	my $m2status_clause = $constants->{m2} ? ' AND m2status=0' : '';
+	my($min_old) = $mod_reader->sqlSelect("MIN(id)", "moderatorlog",
+		"active=1 AND reason IN ($m2able_reasons) $m2status_clause");
+	my($max_old) = $mod_reader->sqlSelect("MAX(id)", "moderatorlog",
+		"ts < DATE_SUB(NOW(), INTERVAL $days_back DAY)
+		 AND active=1 AND reason IN ($m2able_reasons) $m2status_clause");
+	$min_old = 0 if !$min_old;
+	$max_old = $min_old if !$max_old;
+	my($min_new) = $mod_reader->sqlSelect("MIN(id)", "moderatorlog",
+		"ts >= DATE_SUB(NOW(), INTERVAL $days_back_cushion DAY)
+		 AND active=1 AND reason IN ($m2able_reasons) $m2status_clause");
+	my($max_new) = $mod_reader->sqlSelect("MAX(id)", "moderatorlog",
+		"active=1 AND reason IN ($m2able_reasons) $m2status_clause");
+	$min_new = 0 if !$min_new;
+	$max_new = $min_new if !$max_new;
+
+	$slashdb->setVar("m2_modlogid_min_old", $min_old);
+	$slashdb->setVar("m2_modlogid_max_old", $max_old);
+	$slashdb->setVar("m2_modlogid_min_new", $min_new);
+	$slashdb->setVar("m2_modlogid_max_new", $max_new);
+}
+
+############################################################
+
+sub mark_m2_oldzone {
+	my $constants = getCurrentStatic();
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+
+	my $reasons = $moddb->getReasons();
 	my $m2able_reasons = join(",",
 	       sort grep { $reasons->{$_}{m2able} }
 	       keys %$reasons);
@@ -419,20 +469,20 @@ sub mark_m2_oldzone {
 		$count_oldzone_clause = "active=1 AND m2status=0 AND reason IN ($m2able_reasons)";
 	}
 
-	my $prev_oldzone = $slashdb->getVar('m2_oldzone', 'value', 1);
+	my $prev_oldzone = $moddb->getVar('m2_oldzone', 'value', 1);
 	my $prev_oldzone_count = 0;
 	if ($prev_oldzone && $count_oldzone_clause) {
-		$prev_oldzone_count = $slashdb->sqlCount("moderatorlog",
+		$prev_oldzone_count = $moddb->sqlCount("moderatorlog",
 			"id <= $prev_oldzone AND $count_oldzone_clause");
 	}
 	$prev_oldzone = "undef" if !defined($prev_oldzone);
 
 	set_new_m2_oldzone();
 
-	my $new_oldzone = $slashdb->getVar('m2_oldzone', 'value', 1);
+	my $new_oldzone = $moddb->getVar('m2_oldzone', 'value', 1);
 	my $new_oldzone_count = 0;
 	if ($new_oldzone && $count_oldzone_clause) {
-		$new_oldzone_count = $slashdb->sqlCount("moderatorlog",
+		$new_oldzone_count = $moddb->sqlCount("moderatorlog",
 			"id <= $new_oldzone AND $count_oldzone_clause");
 	}
 	$new_oldzone = "undef" if !defined($new_oldzone);
@@ -441,10 +491,10 @@ sub mark_m2_oldzone {
 }
 
 sub set_new_m2_oldzone {
-	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 
-	my $reasons = $slashdb->getReasons();
+	my $reasons = $moddb->getReasons();
 	my $m2able_reasons = join(",",
 	       sort grep { $reasons->{$_}{m2able} }
 	       keys %$reasons);
@@ -457,15 +507,15 @@ sub set_new_m2_oldzone {
 		|| int($archive_delay_mod * 0.9);
 
 	my $need_m2_clause = "active=1 AND m2status=0 AND reason IN ($m2able_reasons)";
-	my $m2_oldest_id = $slashdb->sqlSelect("MIN(id)",
+	my $m2_oldest_id = $moddb->sqlSelect("MIN(id)",
 		"moderatorlog", $need_m2_clause);
 	if (!$m2_oldest_id) {
 		# If there's nothing to M2, we're good.
-		$slashdb->setVar('m2_oldzone', 0);
+		$moddb->setVar('m2_oldzone', 0);
 		return ;
 	}
 
-	my $oldest_time_days = $slashdb->sqlSelect(
+	my $oldest_time_days = $moddb->sqlSelect(
 		"( UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(ts) ) / 86400",
 		"moderatorlog",
 		"id=$m2_oldest_id");
@@ -473,7 +523,7 @@ sub set_new_m2_oldzone {
 		# If the oldest unM2'd mod is younger than
 		# the limit set in the m2_oldest_wanted var,
 		# we're good.
-		$slashdb->setVar('m2_oldzone', 0);
+		$moddb->setVar('m2_oldzone', 0);
 		return ;
 	}
 
@@ -485,27 +535,27 @@ sub set_new_m2_oldzone {
 	# worry about running out past the "oldzone" before the
 	# next run of run_moderatord.
 	my $percentile = $constants->{m2_oldest_zone_percentile} || 2;
-	my $modlog_size = $slashdb->sqlCount("moderatorlog", $need_m2_clause);
+	my $modlog_size = $moddb->sqlCount("moderatorlog", $need_m2_clause);
 	my $oldzone_size = int($modlog_size * $percentile / 100 + 0.5);
 	if (!$oldzone_size) {
 		# We probably shouldn't get here except on a site which
 		# has _very_ little moderation... but if we do, then
 		# we're good.
-		$slashdb->setVar('m2_oldzone', 0);
+		$moddb->setVar('m2_oldzone', 0);
 		return ;
 	}
-	my $oldzone_id = $slashdb->sqlSelect(
+	my $oldzone_id = $moddb->sqlSelect(
 		"id",
 		"moderatorlog",
 		"$need_m2_clause",
 		"ORDER BY id LIMIT $oldzone_size, 1");
-	$slashdb->setVar('m2_oldzone', $oldzone_id);
+	$moddb->setVar('m2_oldzone', $oldzone_id);
 }
 
 ############################################################
 
 sub adjust_m2_freq {
-	my $slashdb = getCurrentDB();
+	my $metamod_db = getObject('Slash::Metamod');
 	my $constants = getCurrentStatic();
 
 	# Decide how far back we're going to look for the
@@ -517,19 +567,19 @@ sub adjust_m2_freq {
 	$t = 3 if $t < 3;
 	$t = 7 if $t > 7;
 
-	my $avg_consensus_t = $slashdb->sqlSelect("AVG(m2needed)", "moderatorlog",
+	my $avg_consensus_t = $metamod_db->sqlSelect("AVG(m2needed)", "moderatorlog",
 		"active=1 AND ts > DATE_SUB(NOW(), INTERVAL $t DAY)");
-	my $avg_consensus_day = $slashdb->sqlSelect("AVG(m2needed)", "moderatorlog",
+	my $avg_consensus_day = $metamod_db->sqlSelect("AVG(m2needed)", "moderatorlog",
 		"active=1 AND ts > DATE_SUB(NOW(), INTERVAL  1 DAY)");
 
-	my $m2count_t = $slashdb->sqlCount("metamodlog",
+	my $m2count_t = $metamod_db->sqlCount("metamodlog",
 		"active=1 AND ts > DATE_SUB(NOW(), INTERVAL $t day)");
-	my $m1count_t = $slashdb->sqlCount("moderatorlog",
+	my $m1count_t = $metamod_db->sqlCount("moderatorlog",
 		"active=1 AND ts > DATE_SUB(NOW(), INTERVAL $t day)");
 
-	my $m2count_day = $slashdb->sqlCount("metamodlog",
+	my $m2count_day = $metamod_db->sqlCount("metamodlog",
 		"active=1 AND ts > DATE_SUB(NOW(), INTERVAL  1 day)");
-	my $m1count_day = $slashdb->sqlCount("moderatorlog",
+	my $m1count_day = $metamod_db->sqlCount("moderatorlog",
 		"active=1 AND ts > DATE_SUB(NOW(), INTERVAL  1 day)");
 
 	# If this site gets very little moderation/metamoderation,
@@ -554,7 +604,7 @@ sub adjust_m2_freq {
 	$z = ($z-1)*$dampen + 1;
 	slashdLog(sprintf("m2_freq: adjusted  z: %0.6f\n", $z));
 
-	my $cur_m2_freq = $slashdb->getVar('m2_freq', 'value', 1) || 86400;
+	my $cur_m2_freq = $metamod_db->getVar('m2_freq', 'value', 1) || 86400;
 	my $new_m2_freq = int($cur_m2_freq * $z ** (1/24) + 0.5);
 
 	$new_m2_freq = $constants->{m2_freq_min}
@@ -562,7 +612,7 @@ sub adjust_m2_freq {
 	$new_m2_freq = $constants->{m2_freq_max}
 		if defined $constants->{m2_freq_max} && $new_m2_freq > $constants->{m2_freq_max};
 	slashdLog("adjusting m2_freq from $cur_m2_freq to $new_m2_freq");
-	$slashdb->setVar('m2_freq', $new_m2_freq);
+	$metamod_db->setVar('m2_freq', $new_m2_freq);
 }
 
 sub delete_old_m2_rows {

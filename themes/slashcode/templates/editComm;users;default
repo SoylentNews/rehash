@@ -122,6 +122,8 @@ __template__
 		    not just loop over the reasons already existing,
 		    like it did before?
 		 %]
+
+[% IF constants.m1 %]
 		<p><b><a name="reason_bonus">Reason Modifier</a></b> (assign a modifier to different moderation reasons)<br>
 		<table>
 			<tr>
@@ -157,6 +159,7 @@ __template__
 				<td>	[% reason_select.Redundant %]	</td>
 			</tr>
 		</table>
+[% END %]
 
 		<p><b>People Modifier</b> (assign a modifier to different people)<br>
 		<table>

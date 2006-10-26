@@ -9,7 +9,7 @@ comments if they're provided and the user is an admin
 * commentstruct - array of comments to display
 * commentcount  - total commentcount
 * cids_to_mods   - hashref keyed by cid containing arrays of moderations done to that cid
-* reasons       - hashref from $slashdb->getReasons()
+* reasons       - hashref from $moddb->getReasons()
 * type	        - type of listing we're seeing options are user or netid
 * title	        - title to be displayed
 * useredit	- hash for user we're editing if we're in user mode
@@ -88,7 +88,7 @@ row_class_3 = "data_hl3";
 		[% IF type=="netid"; total_cols = total_cols + 1; %]<th>User</th>[% END %]
 		<th>Subject[% IF admin_flag %]<span class="admin_data_label"> / Moderator</span>[% END %]</th>
 		<th>Datestamp</th>
-		<th>[% IF admin_flag and constants.show_mods_with_comments %]<span class="admin_data_label">M2</span>[% END %]</th>
+		<th>[% IF admin_flag and constants.m1_admin_show_mods_with_comments %]<span class="admin_data_label">M2</span>[% END %]</th>
 		<th>Replies</th>
 		<th>[% IF admin_flag %]<span class="admin_data_label">CK</span>[% END %]</th>
 		<th>[% IF admin_flag %]<span class="admin_data_label">IPID</span>[% END %]</th>
@@ -147,7 +147,7 @@ row_class_3 = "data_hl3";
 		'<td valign="top"><nobr>&nbsp;'; %][% PROCESS make_reason_mod_select text = score _ reasontext reasons = reasons comment=comment admin_flag=admin_flag %][% '</nobr></td>';
 		"</tr>\n";
 		%]
-		[% IF admin_flag and constants.show_mods_with_comments %]
+		[% IF admin_flag and constants.m1_admin_show_mods_with_comments %]
 			[%- FOREACH m = cids_to_mods.${comment.cid}; total_mods_shown = total_mods_shown+1; %]
 				[%- IF m.active;
 					a_count=a_count+1;
@@ -197,7 +197,7 @@ row_class_3 = "data_hl3";
 					END; %]
 					[%
 
-					IF admin_flag and constants.show_mods_with_comments and total_mods_shown>0; %]
+					IF admin_flag and constants.m1_admin_show_mods_with_comments and total_mods_shown>0; %]
 						<tr class="[% row_class_1 %]><td colspan="[% total_cols %]">[% PROCESS horiz_rule %]</td></tr>
 						[%
 						'<tr class="' _ row_class_3 _ '">';

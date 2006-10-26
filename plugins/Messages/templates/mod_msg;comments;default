@@ -1,7 +1,7 @@
 __section__
 default
 __description__
-* reasons = hashref from $slashdb->getReasons()
+* reasons = hashref from $moddb->getReasons()
 * moderation = hashref describing moderation
 
 __title__

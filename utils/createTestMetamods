@@ -12,7 +12,7 @@ use Slash::Utility;
 use Benchmark;
 use Data::Dumper;
 
-use vars qw( $slashdb $constants $metamod_db );
+use vars qw( $slashdb $constants $moddb $metamod_db );
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
@@ -36,7 +36,8 @@ $metamod_db = getObject('Slash::Metamod');
 if (!$constants->{m2}) {
 	usage('Metamoderation has been disabled with the "m2" var');
 }
-my $reasons = $slashdb->getReasons();
+$moddb = getObject("Slash::$constants->{m1_pluginname}");
+my $reasons = $moddb->getReasons();
 
 # Insure we don't exceed the maximum number of moderations that can be made.
 {

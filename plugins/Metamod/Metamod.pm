@@ -85,6 +85,7 @@ sub metaModerate {
 sub createMetaMod {
 	my($self, $m2_user, $m2s, $multi_max, $options) = @_;
 	my $constants = getCurrentStatic();
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 	$options ||= {};
 	my $rows;
 
@@ -153,7 +154,7 @@ sub createMetaMod {
 	my($voted_up_fair, $voted_down_fair, $voted_up_unfair, $voted_down_unfair)
 		= (0, 0, 0, 0);
 	for my $mmid (keys %$m2s) {
-		my $mod_uid = $self->getModeratorLog($mmid, 'uid');
+		my $mod_uid = $moddb->getModeratorLog($mmid, 'uid');
 		my $is_fair = $m2s->{$mmid}{is_fair};
 
 		# Increment the m2count on the moderation in question.  If
@@ -235,6 +236,93 @@ sub createMetaMod {
 	}, "uid=$m2_user->{uid}") if $voted;
 	$self->setUser_delete_memcached($m2_user->{uid});
 }
+
+# Input: $m2_user and %$m2s are the same as for setMetaMod, below.
+# $max is the max number of mods that an M2 vote can count on.
+# Return: modified %$m2s in place.
+sub multiMetaMod {
+	my($self, $m2_user, $m2s, $max) = @_;
+	return if !$max;
+
+	my $constants = getCurrentStatic();
+	my @orig_mmids = keys %$m2s;
+	return if !@orig_mmids;
+	my $orig_mmid_in = join(",", @orig_mmids);
+	my $uid_q = $self->sqlQuote($m2_user->{uid});
+	my $reasons = $self->getReasons();
+	my $m2able_reasons = join(",",
+		sort grep { $reasons->{$_}{m2able} }
+		keys %$reasons);
+	return if !$m2able_reasons;
+	my $max_limit = $max * scalar(@orig_mmids) * 2;
+
+	# $id_to_cr is the cid-reason hashref.  From it we'll make
+	# an SQL clause that matches any moderations whose cid and
+	# reason both match any of the moderations passed in.
+	my $id_to_cr = $self->sqlSelectAllHashref(
+		"id",
+		"id, cid, reason",
+		"moderatorlog",
+		"id IN ($orig_mmid_in)
+		 AND active=1 AND m2status=0"
+	);
+	return if !%$id_to_cr;
+	my @cr_clauses = ( );
+	for my $mmid (keys %$id_to_cr) {
+		push @cr_clauses, "(cid=$id_to_cr->{$mmid}{cid}"
+			. " AND reason=$id_to_cr->{$mmid}{reason})";
+	}
+	my $cr_clause = join(" OR ", @cr_clauses);
+	my $user_limit_clause = "";
+	$user_limit_clause =  " AND uid != $uid_q AND cuid != $uid_q " unless $m2_user->{seclev} >= 100;
+	# Get a list of other mods which duplicate one or more of the
+	# ones we're modding, but aren't in fact the ones we're modding.
+	my $others = $self->sqlSelectAllHashrefArray(
+		"id, cid, reason",
+		"moderatorlog",
+		"($cr_clause)".
+		$user_limit_clause.
+		" AND m2status=0
+		 AND reason IN ($m2able_reasons)
+		 AND active=1
+		 AND id NOT IN ($orig_mmid_in)",
+		"ORDER BY RAND() LIMIT $max_limit"
+	);
+	# If there are none, we're done.
+	return if !$others or !@$others;
+
+	# To decide which of those other mods we can use, we need to
+	# limit how many we use for each cid-reason pair.  That means
+	# setting up a hashref whose keys are cid-reason pairs, and
+	# counting until we hit a limit.  This is so that, in the odd
+	# situation where a cid has been moderated a zillion times
+	# with one reason, people who metamod one of those zillion
+	# moderations will not have undue power (nor undue
+	# consequences applied to themselves).
+
+	# Set up the counting hashref, and the hashref to correlate
+	# cid-reason back to orig mmid.
+	my $cr_count = { };
+	my $cr_to_id = { };
+	for my $mmid (keys %$m2s) {
+		my $cid = $id_to_cr->{$mmid}{cid};
+		my $reason = $id_to_cr->{$mmid}{reason};
+		$cr_count->{"$cid-$reason"} = 0;
+		$cr_to_id->{"$cid-$reason"} = $mmid;
+	}
+	for my $other_hr (@$others) {
+		my $new_mmid = $other_hr->{id};
+		my $cid = $other_hr->{cid};
+		my $reason = $other_hr->{reason};
+		next if $cr_count->{"$cid-$reason"}++ >= $max;
+		my $old_mmid = $cr_to_id->{"$cid-$reason"};
+		# And here, we add another M2 with the same is_fair
+		# value as the old one -- this is the whole purpose
+		# for this method.
+		my %old = %{$m2s->{$old_mmid}};
+		$m2s->{$new_mmid} = \%old;
+	} 
+}       
 
 ########################################################
 

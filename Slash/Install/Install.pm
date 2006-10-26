@@ -395,7 +395,7 @@ sub _install {
 		$statement =~ s/;\s*$//;
 		my $rows = $self->sqlDo($statement);
 		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
-			print "=== ($type $hash->{name}) Failed on :$statement:\n";
+			print "=== ($type $hash->{name}) Failed on: $statement:\n";
 		}
 	}
 	@sql = ();
@@ -405,12 +405,14 @@ sub _install {
 	# added by a plugin.
 
 	if ($hash->{plugin}) {
-		for (sort {
-			$hash->{plugin}{$a}{installorder} <=> $hash->{plugin}{$b}{installorder}
-			||
-			$a cmp $b
-		} keys %{$hash->{plugin}}) {
-			$self->installPlugin($_, 0, $symlink);
+		my @k = sort {
+				$hash->{plugin}{$a}{installorder} <=> $hash->{plugin}{$b}{installorder}
+				||
+				$a cmp $b
+			}
+			keys %{$hash->{plugin}};
+		for my $plugin_name (@k) {
+			$self->installPlugin($plugin_name, 0, $symlink);
 		}
 	}
 
@@ -432,7 +434,7 @@ sub _install {
 		$statement =~ s/;\s*$//;
 		my $rows = $self->sqlDo($statement);
 		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
-			print "=== ($type $hash->{name}) Failed on :$statement:\n";
+			print "=== ($type $hash->{name}) Failed on: $statement:\n";
 		}
 	}
 	@sql = ();
@@ -497,7 +499,7 @@ sub _install {
 		next unless $_;
 		s/;$//;
 		unless ($self->sqlDo($_)) {
-			print "=== ($type $hash->{name}) Failed on :$_:\n";
+			print "=== ($type $hash->{name}) Failed on: $_:\n";
 		}
 	}
 	@sql = ();

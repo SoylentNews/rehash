@@ -21,7 +21,8 @@ __template__
 		   mod_options.meta_mod_only = 1;
 	   END
 	%]
-	[% Slash.moderatorCommentLog("global", "", mod_options) %] 
+	[% moddb = Slash.getObject("Slash::" _ constants.m1_pluginname);
+	   IF moddb; moddb.dispModCommentLog("global", "", mod_options); END %] 
 
 __seclev__
 500

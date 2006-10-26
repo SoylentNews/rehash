@@ -1087,6 +1087,7 @@ sub send_mod_msg {
 			$discussion->{realurl} = "/comments.pl?sid=$discussion->{id}";
 		}
 
+		my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
 		my $data  = {
 			template_name	=> $type,
 			template_page	=> 'comments',
@@ -1099,7 +1100,7 @@ sub send_mod_msg {
 				value	=> $val,
 				reason	=> $reason,
 			},
-			reasons		=> $slashdb->getReasons(),
+			reasons		=> $mod_reader->getReasons(),
 		};
 		$self->create($users->[0],
 			MSG_CODE_COMMENT_MODERATE, $data, 0, '', 'collective'

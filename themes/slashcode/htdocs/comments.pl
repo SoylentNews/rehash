@@ -53,7 +53,7 @@ sub main {
 			seclev			=> 1,
 			post			=> 1,
 			formname		=> 'moderate',
-			checks			=> ['generate_formkey'],	
+			checks			=> ['generate_formkey'],        
 		},
 		reply			=> {
 			function		=> \&editComment,
@@ -486,10 +486,11 @@ sub editComment {
 	# but that might be dangerous, since $reply/$comment is a little
 	# bit specific -- pudge
 	# Yeah, this API needs to be... saner. Agreed. - Jamie
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
 	$reply->{points} = Slash::_get_points(
 		$reply, $user,
 		$constants->{comment_minscore}, $constants->{comment_maxscore},
-		$slashdb->countUsers({ max => 1 }), $slashdb->getReasons
+		$slashdb->countUsers({ max => 1 }), $mod_reader->getReasons
 	) if %$reply;
 
 	# If anon posting is turned off, forbid it.  The "post anonymously"
@@ -551,6 +552,7 @@ sub validateComment {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	
 	my $form_success = 1;
@@ -813,7 +815,8 @@ sub validateComment {
 		&& !( $constants->{authors_unlimited}
 			&& $user->{seclev} >= $constants->{authors_unlimited} )
 		&& !$user->{acl}{modpoints_always}
-		&&  $slashdb->countUserModsInDiscussion($user->{uid}, $form->{sid}) > 0
+		&&  $moddb
+		&&  $moddb->countUserModsInDiscussion($user->{uid}, $form->{sid}) > 0
 	) {
 		$$error_message = getError("moderations to be lost");
 		$form_success = 0;
@@ -961,7 +964,7 @@ sub submitComment {
 						unless $form->{nosubscriberbonus_present};
 
 	my $header_emitted = 0;
-	my $id = $form->{sid};
+	my $sid = $form->{sid};
 	my $label = getData('label');
 
 	# Couple of rules on how to treat the discussion depending on how mode is set -Brian
@@ -1022,8 +1025,8 @@ sub submitComment {
 	if ($form->{newdiscussion}) {
 		header('Comments', $discussion->{section}) or return;
 		$header_emitted = 1;
-		$id = _createDiscussion($form, $slashdb, $user, $constants);
-		return 1 unless $id;
+		$sid = _createDiscussion($form, $slashdb, $user, $constants);
+		return 1 unless $sid;
 	}
 
 #print STDERR scalar(localtime) . " $$ D header_emitted=$header_emitted\n";
@@ -1087,7 +1090,7 @@ sub submitComment {
 # XXX this should be in validateComment()
 	# This is here to prevent posting to discussions that don't exist/are nd -Brian
 	unless ($user->{is_admin} || $form->{newdiscussion}) {
-		unless ($slashdb->checkDiscussionPostable($id)) {
+		unless ($slashdb->checkDiscussionPostable($sid)) {
 			if (!$header_emitted) {
 				header('Comments', $discussion->{section}) or return;
 			}
@@ -1108,7 +1111,7 @@ sub submitComment {
 	my $clean_comment = {
 		subject		=> $tempSubject,
 		comment		=> $tempComment,
-		sid		=> $id , 
+		sid		=> $sid, 
 		pid		=> $form->{pid},
 		ipid		=> $user->{ipid},
 		subnetid	=> $user->{subnetid},
@@ -1143,169 +1146,167 @@ sub submitComment {
 		return(0);
 
 	} elsif (!$maxCid) {
-		# What vars should be accessible here?
-		#	- $maxCid?
-		# What are the odds on this happening? Hmmm if it is we should
-		# increase the size of int we used for cid.
+		# This site has more than 2**32 comments.  Wow.
 		if (!$header_emitted) {
 			header('Comments', $discussion->{section}) or return;
 		}
 		print getError('maxcid exceeded');
 		return(0);
-	} else {
-		if (!$form->{newdiscussion} && $do_emit_html) {
-			if (!$header_emitted) {
-				header('Comments', $discussion->{section}) or return;
-			}
-			slashDisplay('comment_submit', {
-				metamod_elig => metamod_elig($user),
-			});
-		}
+	}
 
-		my $saved_comment = $slashdb->getComment($maxCid);
+	if (!$form->{newdiscussion} && $do_emit_html) {
+		slashDisplay('comment_submit', {
+			metamod_elig => metamod_elig($user),
+		});
+	}
 
-		slashHook('comment_save_success', { comment => $saved_comment });
-		
-		undoModeration($id);
-		if (!$form->{newdiscussion} && $do_emit_html) {
-			printComments($discussion, $maxCid, $maxCid,
-				{ force_read_from_master => 1, just_submitted => 1 }
-			);
-		}
+	my $saved_comment = $slashdb->getComment($maxCid);
 
-		my $tc = $slashdb->getVar('totalComments', 'value', 1);
-		$slashdb->setVar('totalComments', ++$tc);
+	slashHook('comment_save_success', { comment => $saved_comment });
 
-		# This is for stories. If a sid is only a number
-		# then it belongs to discussions, if it has characters
-		# in it then it belongs to stories and we should
-		# update to help with stories/hitparade.
-		# -Brian
-		if ($discussion->{sid}) {
-			$slashdb->setStory($discussion->{sid}, { writestatus => 'dirty' });
-		}
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+	if ($moddb) {
+		my $text = $moddb->checkDiscussionForUndoModeration($sid);
+		print $text if $text;
+	}
 
-		$slashdb->setUser($clean_comment->{uid}, {
-			-totalcomments => 'totalcomments+1',
-		}) if !isAnon($clean_comment->{uid});
+	if (!$form->{newdiscussion} && $do_emit_html) {
+		printComments($discussion, $maxCid, $maxCid,
+			{ force_read_from_master => 1, just_submitted => 1 }
+		);
+	}
 
-		my($messages, $reply, %users);
-		my $kinds = $reader->getDescriptions('discussion_kinds');
-		if ($form->{pid}
-			|| $kinds->{ $discussion->{dkid} } =~ /^journal/
-			|| $constants->{commentnew_msg}) {
-			$messages = getObject('Slash::Messages');
-			$reply = $slashdb->getCommentReply($form->{sid}, $maxCid);
-		}
+	my $tc = $slashdb->getVar('totalComments', 'value', 1);
+	$slashdb->setVar('totalComments', ++$tc);
 
-		$clean_comment->{pointsorig} = $clean_comment->{points};
+	# This is for stories. If a sid is only a number
+	# then it belongs to discussions, if it has characters
+	# in it then it belongs to stories and we should
+	# update to help with stories/hitparade.
+	# -Brian
+	if ($discussion->{sid}) {
+		$slashdb->setStory($discussion->{sid}, { writestatus => 'dirty' });
+	}
 
-		# reply to comment
-		if ($messages && $form->{pid}) {
-			my $parent = $slashdb->getCommentReply($id, $form->{pid});
-			my $users  = $messages->checkMessageCodes(MSG_CODE_COMMENT_REPLY, [$parent->{uid}]);
-			if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
-				my $data  = {
-					template_name	=> 'reply_msg',
-					subject		=> { template_name => 'reply_msg_subj' },
-					reply		=> $reply,
-					parent		=> $parent,
-					discussion	=> $discussion,
-				};
+	$slashdb->setUser($clean_comment->{uid}, {
+		-totalcomments => 'totalcomments+1',
+	}) if !isAnon($clean_comment->{uid});
 
-				$messages->create($users->[0], MSG_CODE_COMMENT_REPLY, $data);
-				$users{$users->[0]}++;
-			}
-		}
+	my($messages, $reply, %users);
+	my $kinds = $reader->getDescriptions('discussion_kinds');
+	if ($form->{pid}
+		|| $kinds->{ $discussion->{dkid} } =~ /^journal/
+		|| $constants->{commentnew_msg}) {
+		$messages = getObject('Slash::Messages');
+		$reply = $slashdb->getCommentReply($form->{sid}, $maxCid);
+	}
 
-		# reply to journal
-		if ($messages && $kinds->{ $discussion->{dkid} } =~ /^journal/) {
-			my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
-			if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
-				my $data  = {
-					template_name	=> 'journrep',
-					subject		=> { template_name => 'journrep_subj' },
-					reply		=> $reply,
-					discussion	=> $discussion,
-				};
+	$clean_comment->{pointsorig} = $clean_comment->{points};
 
-				$messages->create($users->[0], MSG_CODE_JOURNAL_REPLY, $data);
-				$users{$users->[0]}++;
-			}
-		}
-
-		# comment posted
-		if ($messages && $constants->{commentnew_msg}) {
-			my $users = $messages->getMessageUsers(MSG_CODE_NEW_COMMENT);
-
+	# reply to comment
+	if ($messages && $form->{pid}) {
+		my $parent = $slashdb->getCommentReply($sid, $form->{pid});
+		my $users  = $messages->checkMessageCodes(MSG_CODE_COMMENT_REPLY, [$parent->{uid}]);
+		if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
 			my $data  = {
-				template_name	=> 'commnew',
-				subject		=> { template_name => 'commnew_subj' },
+				template_name	=> 'reply_msg',
+				subject		=> { template_name => 'reply_msg_subj' },
+				reply		=> $reply,
+				parent		=> $parent,
+				discussion	=> $discussion,
+			};
+
+			$messages->create($users->[0], MSG_CODE_COMMENT_REPLY, $data);
+			$users{$users->[0]}++;
+		}
+	}
+
+	# reply to journal
+	if ($messages && $kinds->{ $discussion->{dkid} } =~ /^journal/) {
+		my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
+		if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
+			my $data  = {
+				template_name	=> 'journrep',
+				subject		=> { template_name => 'journrep_subj' },
 				reply		=> $reply,
 				discussion	=> $discussion,
 			};
 
-			my @users_send;
-			for my $usera (@$users) {
-				next if $users{$usera};
-				push @users_send, $usera;
-				$users{$usera}++;
-			}
-			$messages->create(\@users_send, MSG_CODE_NEW_COMMENT, $data) if @users_send;
+			$messages->create($users->[0], MSG_CODE_JOURNAL_REPLY, $data);
+			$users{$users->[0]}++;
 		}
+	}
 
-		if ($constants->{validate_html}) {
-			my $validator = getObject('Slash::Validator');
-			my $test = parseDomainTags($tempComment);
-			$validator->isValid($test, {
-				data_type	=> 'comment',
-				data_id		=> $maxCid,
-				message		=> 1
-			}) if $validator;
+	# comment posted
+	if ($messages && $constants->{commentnew_msg}) {
+		my $users = $messages->getMessageUsers(MSG_CODE_NEW_COMMENT);
+
+		my $data  = {
+			template_name	=> 'commnew',
+			subject		=> { template_name => 'commnew_subj' },
+			reply		=> $reply,
+			discussion	=> $discussion,
+		};
+
+		my @users_send;
+		for my $usera (@$users) {
+			next if $users{$usera};
+			push @users_send, $usera;
+			$users{$usera}++;
 		}
+		$messages->create(\@users_send, MSG_CODE_NEW_COMMENT, $data) if @users_send;
+	}
 
+	if ($constants->{validate_html}) {
+		my $validator = getObject('Slash::Validator');
+		my $test = parseDomainTags($tempComment);
+		$validator->isValid($test, {
+			data_type	=> 'comment',
+			data_id		=> $maxCid,
+			message		=> 1
+		}) if $validator;
+	}
 
-		# If discussion created
-		if ($form->{newdiscussion}) {
-			if (!$header_emitted) {
-				header('Comments', $discussion->{section}) or return;
-			}
-			if ($user->{seclev} >= $constants->{discussion_create_seclev}) {
-				slashDisplay('newdiscussion', { 
-					error 		=> $error_message, 
-					'label'		=> $label,
-					id 		=> $id,
-				});
-			} else {
-				slashDisplay('newdiscussion', {
-					error => getError('seclevtoolow'),
-				});
-			}
-			undef $form->{postersubj};
-			undef $form->{postercomment};
-			if ($form->{indextype} eq 'udiscuss') {
-				commentIndexUserCreated(@_, $error_message);
-			} elsif ($form->{indextype} eq 'personal') {
-				commentIndexPersonal(@_, $error_message);
-			} elsif ($form->{indextype} eq 'creator') {
-				commentIndexCreator(@_, $error_message);
-			} else {
-				commentIndex(@_,$error_message);
-			}
+	# If discussion created
+	if ($form->{newdiscussion}) {
+		if (!$header_emitted) {
+			header('Comments', $discussion->{section}) or return;
 		}
-
-		# OK -- if we make it all the way here, and there were
-		# no errors so no header has been emitted, and we were
-		# asked to redirect to a new URL, NOW we can finally
-		# do it.
-		if ($redirect_to) {
-#print STDERR scalar(localtime) . " $$ H redirecting to '$redirect_to'\n";
-			redirect($redirect_to);
+		if ($user->{seclev} >= $constants->{discussion_create_seclev}) {
+			slashDisplay('newdiscussion', { 
+				error 		=> $error_message, 
+				'label'		=> $label,
+				id 		=> $sid,
+			});
 		} else {
+			slashDisplay('newdiscussion', {
+				error => getError('seclevtoolow'),
+			});
+		}
+		undef $form->{postersubj};
+		undef $form->{postercomment};
+		if ($form->{indextype} eq 'udiscuss') {
+			commentIndexUserCreated(@_, $error_message);
+		} elsif ($form->{indextype} eq 'personal') {
+			commentIndexPersonal(@_, $error_message);
+		} elsif ($form->{indextype} eq 'creator') {
+			commentIndexCreator(@_, $error_message);
+		} else {
+			commentIndex(@_,$error_message);
+		}
+	}
+
+	# OK -- if we make it all the way here, and there were
+	# no errors so no header has been emitted, and we were
+	# asked to redirect to a new URL, NOW we can finally
+	# do it.
+	if ($redirect_to) {
+#print STDERR scalar(localtime) . " $$ H redirecting to '$redirect_to'\n";
+		redirect($redirect_to);
+	} else {
 #print STDERR scalar(localtime) . " $$ H not redirecting, emitted=$header_emitted\n";
-			if (!$header_emitted) {
-				header('Comments', $discussion->{section}) or return;
-			}
+		if (!$header_emitted) {
+			header('Comments', $discussion->{section}) or return;
 		}
 	}
 
@@ -1335,9 +1336,10 @@ sub _send_comment_msg {
 			? $constants->{message_threshold}
 			: undef;
 
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
 	my $newpts = Slash::_get_points($C, $otheruser,
 		$constants->{comment_minscore}, $constants->{comment_maxscore},
-		$reader->countUsers({ max => 1 }), $reader->getReasons,
+		$reader->countUsers({ max => 1 }), $mod_reader->getReasons,
 	);
 
 	# only if reply pts meets message threshold
@@ -1346,12 +1348,12 @@ sub _send_comment_msg {
 	return 1;
 }
 
-
 ##################################################################
 sub moderate {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 
-	my $moderate_check = &Slash::_moderateCheck;
+	my $moderate_check = $moddb->moderateCheck($form, $user, $constants, $discussion);
 	if (!$moderate_check->{count} && $moderate_check->{msg}) {
 		print $moderate_check->{msg} if $moderate_check->{msg};
 		return;
@@ -1384,7 +1386,7 @@ sub moderate {
 			$total_deleted += deleteThread($sid, $1);
 		} elsif (!$hasPosted && $key =~ /^reason_(\d+)$/) {
 			my $cid = $1;
-			my $ret_val = $slashdb->moderateComment($sid, $cid, $form->{$key});
+			my $ret_val = $moddb->moderateComment($sid, $cid, $form->{$key});
 			# If an error was returned, tell the user what
 			# went wrong.
 			if ($ret_val < 0) {
@@ -1411,8 +1413,8 @@ sub moderate {
 		print $moderate_check->{msg};
 	} elsif ($user->{seclev} && $total_deleted) {
 		slashDisplay('del_message', {
-			total_deleted	=> $total_deleted,
-			comment_count	=> $slashdb->countCommentsBySid($sid),
+			total_deleted   => $total_deleted,
+			comment_count   => $slashdb->countCommentsBySid($sid),
 		});
 	}
 
@@ -1500,50 +1502,6 @@ sub deleteThread {
 	}
 	return $count;
 }
-
-
-##################################################################
-# If you moderate, and then post, all your moderation is undone.
-sub undoModeration {
-	my($sid) = @_;
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $user = getCurrentUser();
-
-	# We abandon this operation, thus allowing mods to remain while
-	# the post goes forward, if:
-	#	1) Moderation is off
-	#	2) The user is anonymous (posting anon is the only way
-	#	   to contribute to a discussion after you moderate)
-	#	3) The user has the "always modpoints" ACL
-	#	4) The user has a sufficient seclev
-	return if !$constants->{m1}
-		|| $user->{is_anon}
-		|| $user->{acl}{modpoints_always}
-		|| $constants->{authors_unlimited} && $user->{seclev} >= $constants->{authors_unlimited};
-
-	if ($sid !~ /^\d+$/) {
-		$sid = $slashdb->getDiscussionBySid($sid, 'header');
-	}
-	my $removed = $slashdb->undoModeration($user->{uid}, $sid);
-
-	for my $mod (@$removed) {
-		$mod->{val} =~ s/^(\d)/+$1/;  # put "+" in front if necessary
-		my $messages = getObject('Slash::Messages');
-		$messages->send_mod_msg({
-			type	=> 'unmod_msg',
-			sid	=> $sid,
-			cid	=> $mod->{cid},
-			val	=> $mod->{val},
-			reason	=> $mod->{reason}
-		});
-	}	
-
-	slashDisplay('undo_mod', {
-		removed	=> $removed,
-	});
-}
-
 
 ##################################################################
 # Troll Detection: checks to see if this IP or UID has been

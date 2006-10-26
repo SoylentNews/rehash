@@ -70,9 +70,11 @@ sub geturl {
 ################################################################################
 
 sub getTop10Comments {
+	my $constants = getCurrentStatic();
 	my $A =	$backupdb->getTop10Comments;
 
-	my $reasons = $slashdb->getReasons;
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+	my $reasons = $moddb->getReasons;
 
 	my $block = '<ul>';
 	foreach (@$A) {

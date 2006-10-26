@@ -30,24 +30,12 @@ __template__
 	Submitted Comment
 
 [% CASE 'no_discreate_msg' %]
-	[% returnme.data_constant = 1 %] 
 	You either aren't <a href="[% gSkin.rootdir %]/users.pl">logged in</a>
 	or don't have sufficient privileges to submit a [% label %].
-
-[% CASE 'metamoderate_message' %]
-	[% returnme.data_constant = 1 %]
-	MetaModeration completed.
-
-[% CASE 'metamods_performed' %]
-	<p>[% num %] MetaModeration(s) Completed.
 
 [% CASE 'moderating' %]
 	[% returnme.data_constant = 1 %]
 	Moderating...
-
-[% CASE 'metamoderating' %]
-	[% returnme.data_constant = 1 %]
-	MetaModerating...
 
 [% CASE 'deletecid' %]
 	Delete [% form.cid || strip_nohtml %]

@@ -6,13 +6,14 @@
 # XXX right now we have checks for moderation in many places.
 # we must consolidate as much as possible. -- pudge
 # * Slash::ResKey::Checks::Moderate::doCheck()
-# * Slash::DB::MySQL::moderateComment()
+# * Slash::Moderation...?
+# * Slash::Moderation::moderateComment()
 # * Slash::_moderateCheck()
 # * Slash::_can_mod()
 
 # Also:
 # * comments.pl::moderate()
-# * ajax.pl::moderateCid()
+# * Slash::Moderation::ajaxModerateCid()
 
 package Slash::ResKey::Checks::Moderate;
 
@@ -35,13 +36,15 @@ sub doCheck {
 
 	return(RESKEY_FAILURE, ['no comment']) if !$form->{cid} || !$form->{sid};
 
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $comment = $reader->getComment($form->{cid});
-	my $discussion = $reader->getDiscussion($form->{sid});
-
 	return(RESKEY_FAILURE, ['no moderation']) unless $constants->{m1};
 
 	return(RESKEY_FAILURE, ['no db']) unless dbAvailable("write_comments");
+
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+	return(RESKEY_FAILURE, ['no moderation']) unless $mod_reader;
+
+	my $comment = $mod_reader->getComment($form->{cid});
+	my $discussion = $mod_reader->getDiscussion($form->{sid});
 
 	# Do some easy and high-priority initial tests.  If any of
 	# these is true, this comment is not moderatable, and these
@@ -79,13 +82,12 @@ sub doCheck {
 		   !$constants->{comments_moddable_archived}
 		&&  $discussion->{type} eq 'archived';
 
-	my $mid = $reader->getModeratorLogID($comment->{cid}, $user->{uid});
+	my $mid = $mod_reader->getModeratorLogID($comment->{cid}, $user->{uid});
 	return(RESKEY_FAILURE, ['user already modded comment']) if $mid;
 
 	# Last test; this one involves a bit of calculation to set
 	# time_unixepoch in the comment structure itself, which is
-	# why we saved it for last.  timeCalc() is not the world's
-	# fastest function.
+	# why we saved it for last.  timeCalc() may chew a bit of CPU.
 	$comment->{time_unixepoch} ||= timeCalc($comment->{date}, '%s', 0);
 	my $hours = $constants->{comments_moddable_hours}
 		|| 24 * $constants->{archive_delay};

@@ -855,6 +855,7 @@ sub showComments {
 		}
 	}
 
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
 	slashDisplay('userCom', {
 		nick			=> $nickname,
 		useredit		=> $user_edit,
@@ -862,7 +863,7 @@ sub showComments {
 		commentstruct		=> $comments,
 		commentcount		=> $commentcount,
 		min_comment		=> $min_comment,
-		reasons			=> $reader->getReasons(),
+		reasons			=> $mod_reader->getReasons(),
 		karma_flag		=> 0,
 		admin_flag		=> $user->{is_admin},
 	});
@@ -1257,6 +1258,7 @@ sub showInfo {
         my $ipid_hoursback = $constants->{istroll_ipid_hours} || 72;
 	my $uid_hoursback = $constants->{istroll_uid_hours} || 72;
 
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
 	if ($requested_user->{nonuid}) {
 		slashDisplay('netIDInfo', {
 			title			=> $title,
@@ -1269,7 +1271,7 @@ sub showInfo {
 			admin_block		=> $admin_block,
 			netid			=> $netid,
 			netid_vis		=> $netid_vis,
-			reasons			=> $reader->getReasons(),
+			reasons			=> $mod_reader->getReasons(),
 			subcount		=> $subcount,
 			submissions		=> $submissions,
 			hr_hours_back		=> $ipid_hoursback,
@@ -1330,7 +1332,7 @@ sub showInfo {
 			karma_flag		=> $karma_flag,
 			admin_block		=> $admin_block,
 			admin_flag 		=> $admin_flag,
-			reasons			=> $reader->getReasons(),
+			reasons			=> $mod_reader->getReasons(),
 			lastjournal		=> $lastjournal,
 			hr_hours_back		=> $ipid_hoursback,
 			cids_to_mods		=> $cids_to_mods,
@@ -2090,25 +2092,26 @@ sub editComm {
 		$fieldkey = 'uid';
 	}
 
-	my @reasons = ( );
-	my $reasons = $slashdb->getReasons();
-	for my $id (sort { $a <=> $b } keys %$reasons) {
-		push @reasons, $reasons->{$id}{name};
-	}
-
-	my %reason_select;
-
 	my $hi = $constants->{comment_maxscore} - $constants->{comment_minscore};
 	my $lo = -$hi;
 	my @range = map { $_ > 0 ? "+$_" : $_ } ($lo .. $hi);
 
-	# Reason modifiers
-	for my $reason_name (@reasons) {
-		my $key = "reason_alter_$reason_name";
-		$reason_select{$reason_name} = createSelect(
-			$key, \@range, 
-			$user_edit->{$key} || 0, 1, 1
-		);
+	my @reasons = ( );
+	my %reason_select = ( );
+	if ($constants->{m1}) {
+		my $mod_reader = getObject('Slash::Moderation', { db_type => 'reader' });
+		my $reasons = $mod_reader->getReasons();
+		for my $id (sort { $a <=> $b } keys %$reasons) {
+			push @reasons, $reasons->{$id}{name};
+		}
+		# Reason modifiers
+		for my $reason_name (@reasons) {
+			my $key = "reason_alter_$reason_name";
+			$reason_select{$reason_name} = createSelect(
+				$key, \@range, 
+				$user_edit->{$key} || 0, 1, 1
+			);
+		}
 	}
 
 	# Zoo relation modifiers
@@ -2730,8 +2733,9 @@ sub saveComm {
 		mode            => 'thread'
 	};
 
+	my $mod_reader = getObject('Slash::Moderation', { db_type => 'reader' });
 	my @reasons = ( );
-	my $reasons = $slashdb->getReasons();
+	my $reasons = $mod_reader->getReasons();
 	for my $id (sort { $a <=> $b } keys %$reasons) {
 		push @reasons, $reasons->{$id}{name};
 	}

@@ -56,7 +56,7 @@ sub main {
 				count	=> scalar(@objs),
 			};
 		}
-		@objects = sort { $b->{count} <=> $a->{count} || $a->{title} cmp $b->{title} } @objects;
+		@objects = sort { $b->{count} <=> $a->{count} || ($a->{title}||'') cmp ($b->{title}||'') } @objects;
 		$index_hr->{objects} = \@objects;
 
 		$title = getData('head2', { tagname => $tagname });

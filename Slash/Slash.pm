@@ -46,7 +46,7 @@ $VERSION   	= '2.005000';  # v2.5.0
 	gensym
 
 	dispComment displayStory displayRelatedStories displayThread dispStory
-	getOlderStories getOlderDays moderatorCommentLog printComments
+	getOlderStories getOlderDays printComments
 	jsSelectComments
 
 	tempUofmLinkGenerate tempUofmCipherObj
@@ -66,6 +66,7 @@ sub selectComments {
 	my $slashdb = getCurrentDB();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my($min, $max) = ($constants->{comment_minscore}, 
@@ -113,8 +114,13 @@ sub selectComments {
 		return ( {}, 0 );
 	}
 
+	my $reasons = undef;
+	if ($mod_reader) {
+		$reasons = $mod_reader->getReasons();
+	}
+
 	my $max_uid = $reader->countUsers({ max => 1 });
-	my $reasons = $reader->getReasons();
+
 	# We first loop through the comments and assign bonuses and
 	# and such.
 	for my $C (@$thisComment) {
@@ -122,7 +128,7 @@ sub selectComments {
 		# relationship between the comments. Don't ignore threads
 		# in forums, or when viewing a single comment (cid > 0)
 		$C->{pid} = 0 if $commentsort > 3
-			&& $cid == 0
+			&& !$cid
 			&& $user->{mode} ne 'parents'; # Ignore Threads
 
 		# I think instead we want something like this... (not this
@@ -292,36 +298,6 @@ discussion_id = $id;
 EOT
 }
 
-sub _moderateCheck {
-	my($form, $slashdb, $user, $constants, $discussion) = @_;
-
-	# all of these can be removed in favor of reskeys, later
-	if (!dbAvailable('write_comments')) {
-		return { msg => _comments_getError('comment_db_down') };
-	}
-	
-	if (!$constants->{m1}) {
-		return { msg => _comments_getError('no_moderation') };
-	}
-
-	if ($discussion->{type} eq 'archived' &&
-	   !$constants->{comments_moddable_archived} &&
-	   !$form->{meta_mod_only}) {
-		return { msg => _comments_getError('archive_error') };
-	}
-
-	my $return = {};
-	$return->{count} = $slashdb->countCommentsBySidUID($form->{sid}, $user->{uid})
-		unless (   $constants->{authors_unlimited}
-			&& $user->{seclev} >= $constants->{authors_unlimited}
-		)	|| $user->{acl}{modpoints_always};
-	if ($return->{count}) {
-		$return->{msg} = _comments_getError('already posted');
-	}
-
-	return $return;
-}
-
 # this really should have been getData all along
 sub _comments_getError {
 	my($value, $hashref, $nocomm) = @_;
@@ -379,10 +355,14 @@ sub _get_points {
 
 	# Adjust reasons. Do we need a reason?
 	# Are you threatening me?
-	my $reason_name = $reasons->{$C->{reason}}{name};
-	if ($reason_name && $user->{"reason_alter_$reason_name"}) {
-		$hr->{reason_bonus} =
-			$user->{"reason_alter_$reason_name"};
+	if ($reasons) {
+		my $reason_name = $reasons->{$C->{reason}}{name};
+		if ($reason_name && $user->{"reason_alter_$reason_name"}) {
+			$hr->{reason_bonus} =
+				$user->{"reason_alter_$reason_name"};
+		}
+	} else {
+		$hr->{reason_bonus} = 0;
 	}
 
 	# Keep your friends close but your enemies closer.
@@ -827,6 +807,8 @@ sub printComments {
 		$anon_dump = \&Data::JavaScript::Anon::anon_dump;
 	}
 
+#use Data::Dumper; print STDERR "printCommComments, comment: " . Dumper($comment) . "comments: " . Dumper($comments) . "discussion2: " . Dumper($discussion2);
+
 	my $comment_html = slashDisplay('printCommComments', {
 		can_moderate	=> $can_mod_any,
 		comment		=> $comment,
@@ -855,279 +837,6 @@ sub printComments {
 	$comment_html =~ s|<SLASH type="COMMENT-TEXT">(\d+)</SLASH>|$comment_text->{$1}|g;
 
 	print $comment_html;
-}
-
-#========================================================================
-
-=head2 moderatorCommentLog(TYPE, ID)
-
-Prints a table detailing the history of moderation of a particular
-comment and/or the reasons why a comment is scored like it is.
-(The template name is modCommentLog and this shows info about not
-just moderation but modifiers;  this function should probably be
-renamed the same.)
-
-=over 4
-
-=item Parameters
-
-=over 4
-
-=item TYPE
-
-String describing type of the ID data:  cid, uid, cuid, ipid, subnetid,
-bipid or bsubnetid.
-
-=item ID
-
-Cid or IPID.
-
-=back
-
-=item Return value
-
-The HTML.
-
-=item Dependencies
-
-The 'modCommentLog' template block.
-
-=back
-
-=cut
-
-sub moderatorCommentLog {
-	my($type, $value, $options) = @_;
-	$options ||= {};
-	my $title = $options->{title};
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $user = getCurrentUser();
-
-	# If the user doesn't want even to see the numeric score of
-	# a comment, they certainly don't want to see all this detail.
-	return "" if $user->{noscores};
-
-	my $seclev = $user->{seclev};
-	my $mod_admin = $seclev >= $constants->{modviewseclev} ? 1 : 0;
-
-	my $asc_desc = $type eq 'cid' ? 'ASC' : 'DESC';
-	my $limit = $type eq 'cid' ? 0 : 100;
-	my $both_mods = (($type =~ /ipid/) || ($type =~ /subnetid/) || ($type =~ /global/)) ? 1 : 0;
-	my $skip_ip_disp = 0;
-	if ($type =~ /^b(ip|subnet)id$/) {
-		$skip_ip_disp = 1;
-	} elsif ($type =~ /^(ip|subnet)id$/) {
-		$skip_ip_disp = 2;
-	}
-	my $gmcl_opts = {};
-	$gmcl_opts->{hours_back} = $options->{hours_back} if $options->{hours_back};
-	$gmcl_opts->{order_col} = "reason" if $type eq "cid";
-
-	my $mods = $slashdb->getModeratorCommentLog($asc_desc, $limit,
-		$type, $value, $gmcl_opts);
-
-	my $timestamp_hr = exists $options->{hr_hours_back}
-		? $slashdb->getTime({ add_secs => -3600 * $options->{hr_hours_back} })
-		: "";
-
-	if (!$mod_admin) {
-		# Eliminate inactive moderations from the list.
-		$mods = [ grep { $_->{active} } @$mods ];
-	}
-
-	my($reasons, @return, @reasonHist);
-	my $reasonTotal = 0;
-	$reasons = $slashdb->getReasons();
-
-	# Note: Before 2001/01/27 or so, the only things being displayed
-	# in this template were moderations, and if there were none,
-	# we could short-circuit here if @$mods was empty.  But now,
-	# the template handles that decision.
-	my $seen_mods = {};
-	for my $mod (@$mods) {
-		$seen_mods->{$mod->{id}}++;
-		vislenify($mod); # add $mod->{ipid_vis}
-		#$mod->{ts} = substr($mod->{ts}, 5, -3);
-		$mod->{nickname2} = $slashdb->getUser($mod->{uid2},
-			'nickname') if $both_mods; # need to get 2nd nick
-		next unless $mod->{active};
-		$reasonHist[$mod->{reason}]++;
-		$reasonTotal++;
-	}
-
-	my $listed_reason = 0;
-	if ($type eq 'cid') {
-		my $val_q = $slashdb->sqlQuote($value);
-		$listed_reason = $slashdb->sqlSelect("reason", "comments", "cid=$val_q");
-	}
-	my @reasonsTop = _getTopModReasons($reasonTotal, $listed_reason, \@reasonHist);
-
-	my $show_cid    = ($type eq 'cid') ? 0 : 1;
-	my $show_modder = $mod_admin ? 1 : 0;
-	my $mod_to_from = ($type eq 'uid') ? 'to' : 'from';
-
-	my $modifier_hr = { };
-	my $reason = 0;
-	if ($type eq 'cid') {
-		my $cid_q = $slashdb->sqlQuote($value);
-		my($min, $max) = ($constants->{comment_minscore}, 
-				  $constants->{comment_maxscore});
-		my $max_uid = $slashdb->countUsers({ max => 1 });
-
-		my $select = "cid, uid, karma_bonus, reason, points, pointsorig, tweak, tweak_orig";
-		if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
-			$select .= ", subscriber_bonus";
-		}
-		my $comment = $slashdb->sqlSelectHashref(
-			$select,
-			"comments",
-			"cid=$cid_q");
-		$comment->{comment} = $slashdb->sqlSelect(
-			"comment",
-			"comment_text",
-			"cid=$cid_q");
-		$reason = $comment->{reason};
-
-		my $user = getCurrentUser();
-		my $points;
-		($points, $modifier_hr) = _get_points($comment, $user, $min, $max, $max_uid, $reasons);
-	}
-
-	my $this_user;
-	$this_user = $slashdb->getUser($value) if $type eq "uid";
-	my $cur_uid;
-	$cur_uid = $value if $type eq "uid" || $type eq "cuid";
-
-	my $mods_to_m2s;
-	if ($constants->{m2}) {
-		my $mod_ids = [keys %$seen_mods];
-		if ($constants->{show_m2s_with_mods} && $options->{show_m2s}) {
-			my $metamod_db = getObject('Slash::Metamod');
-			$mods_to_m2s = $metamod_db->getMetamodsForMods($mod_ids, $constants->{m2_limit_with_mods});
-		}
-	}
-
-	# Do the work to determine which moderations share the same m2s
-	if (	   $constants->{m2}
-		&& $type eq 'cid'
-		&& $constants->{show_m2s_with_mods}
-		&& $constants->{m2_multicount}
-		&& $options->{show_m2s}
-	){
-		foreach my $m (@$mods){
-			my $key = '';
-			foreach my $m2 (@{$mods_to_m2s->{$m->{id}}}) {
-				$key .= "$m2->{uid} $m2->{val},";
-			}
-			$m->{m2_identity} = $key;
-		}
-		@$mods = sort {
-			$a->{reason} <=> $b->{reason}
-				||
-			$b->{active} <=> $a->{active}
-				||
-			$a->{m2_identity} cmp $b->{m2_identity}
-		} @$mods;
-	}
-	my $data = {
-		type		=> $type,
-		mod_admin	=> $mod_admin, 
-		mods		=> $mods,
-		reasonTotal	=> $reasonTotal,
-		reasonHist	=> \@reasonHist,
-		reasonsTop	=> \@reasonsTop,
-		reasons		=> $reasons,
-		reason		=> $reason,
-		modifier_hr	=> $modifier_hr,
-		show_cid	=> $show_cid,
-		show_modder	=> $show_modder,
-		mod_to_from	=> $mod_to_from,
-		both_mods	=> $both_mods,
-		timestamp_hr	=> $timestamp_hr,
-		skip_ip_disp    => $skip_ip_disp,
-		this_user	=> $this_user,
-		title		=> $title,
-		cur_uid		=> $cur_uid,
-		value		=> $value,
-	};
-	if ($constants->{m2}) {
-		$data->{mods_to_m2s} = $mods_to_m2s;
-		$data->{show_m2s} = $options->{show_m2s};
-		$data->{need_m2_form} = $options->{need_m2_form};
-		$data->{need_m2_button} = $options->{need_m2_button};
-		$data->{meta_mod_only} = $options->{meta_mod_only};
-	}
-	slashDisplay('modCommentLog', $data, { Return => 1, Nocomm => 1 });
-}
-
-# Takes a reason histogram, a list of counts of each reason mod.
-# So $reasonHist[1] is the number of Offtopic moderations (at
-# least if Offtopic is still reason 1).  Returns a list of hashrefs,
-# the top 3 mods performed and their percentages, rounded to the
-# nearest 10%, sorted largest to smallest.
-sub _getTopModReasons{
-	my($reasonTotal, $listed_reason, $reasonHist_ar) = @_;
-	return ( ) unless $reasonTotal;
-	my $top_needed = 3;
-	my @reasonsTop = ( );
-
-	# Algorithm by MJD in Perl Quiz of the Week #7
-	# http://perl.plover.com/qotw/r/solution/007
-	my @p = map { $_*10/$reasonTotal } @$reasonHist_ar;
-	my @r = map { int($_+0.5) } @p;
-	my @e = map { $p[$_] - $r[$_] } (0..$#r);
-	my $total_error = 0;
-	for (@e) { $total_error += $_ }
-	# Round total_error to int, to avoid float rounding error
-	my $sign = $total_error < 0 ? -1 : 1;
-	$total_error *= $sign;
-	$total_error = int($total_error+0.5);
-	if ($total_error) {
-		for (0..$#r) {
-			next unless $e[$_] * $sign > 0;
-			$r[$_] += $sign;
-			$total_error--;
-			last if $total_error <= 0;
-		}
-	}
-
-	# This part I added, so if it breaks, don't blame MJD :) JRM
-	my %reasonRound = map { ($_, $r[$_]*10) } (0..$#r);
-	my @rr_keys = sort { $a <=> $b } keys %reasonRound;
-	my $min = (sort { $b <=> $a } values %reasonRound)[$top_needed-1];
-	for my $key (0..$#r) {
-		$reasonRound{$key} = 0 if $reasonRound{$key} < $min;
-	}
-	my $have = 0;
-	for my $key (0..$#r) {
-		++$have if $reasonRound{$key} > $min;
-	}
-	for my $key (0..$#r) {
-		if ($reasonRound{$key} == $min) {
-			if ($have >= $top_needed) {
-				$reasonRound{$key} = 0;
-			} else {
-				++$have;
-			}
-		}
-	}
-	for my $reason (1..$#r) {
-		next unless $reasonRound{$reason};
-		push @reasonsTop, {
-			reason => $reason,
-			percent => $reasonRound{$reason},
-		};
-	}
-	@reasonsTop = sort {
-		($b->{reason} == $listed_reason) <=> ($a->{reason} == $listed_reason)
-		||
-		$b->{percent} <=> $a->{percent}
-		||
-		$a->{reason} <=> $b->{reason}
-	} @reasonsTop;
-
-	return @reasonsTop;
 }
 
 #========================================================================
@@ -1352,12 +1061,13 @@ sub dispComment {
 	my($comment, $options) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $gSkin = getCurrentSkin();
 	my $maxcommentsize = $options->{maxcommentsize} || $user->{maxcommentsize};
 
-	my($comment_shrunk, %reasons);
+	my $comment_shrunk;
 	if ($form->{mode} ne 'archive'
 		&& $comment->{len} > $maxcommentsize
 		&& $form->{cid} ne $comment->{cid})
@@ -1378,7 +1088,10 @@ sub dispComment {
 		}
 	}
 
-	my $reasons = $reader->getReasons();
+	my $reasons = undef;
+	if ($mod_reader) {
+		$reasons = $mod_reader->getReasons();
+	}
 
 	my $can_mod = _can_mod($comment);
 
@@ -1410,6 +1123,8 @@ EOT
 	push @{$user->{state}{cids}}, $comment->{cid};
 
 	$options->{class} ||= 'full';
+
+#use Data::Dumper; print STDERR "dispComment hard='$constants->{comments_hardcoded}' can_mod='$can_mod' comment: " . Dumper($comment) . "reasons: " . Dumper($reasons);
 
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
@@ -1948,7 +1663,7 @@ sub _hard_dispComment {
 	unless ($user->{noscores}) {
 		$score_to_display .= "(Score:";
 		$score_to_display .= length($comment->{points}) ? $comment->{points} : "?";
-		if ($comment->{reason}) {
+		if ($reasons && $comment->{reason}) {
 			$score_to_display .= ", $reasons->{$comment->{reason}}{name}";
 		}
 		$score_to_display .= ")";
@@ -2104,6 +1819,8 @@ EOT
 		}, 1) if $comment->{original_pid};# && !($discussion2 &&
 #			(!$form->{cid} || $form->{cid} != $comment->{cid})
 #		);
+
+#use Data::Dumper; print STDERR "_hard_dispComment createSelect can_mod='$can_mod' disc_arch='$user->{state}{discussion_archived}' modd_arch='$constants->{comments_moddable_archived}' cid='$comment->{cid}' reasons: " . Dumper($reasons);
 
 		push @link, qq'<div id="reasondiv_$comment->{cid}" class="modsel">' .
 			createSelect("reason_$comment->{cid}", $reasons, {

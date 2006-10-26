@@ -434,59 +434,6 @@ sub getModPointsNeeded {
 	return $pn->{$to} || 1;
 }
 
-########################################################
-# At the time of creating a moderation, the caller can influence
-# whether this moderation needs more or fewer M2 votes to reach
-# consensus.  Passing in 0 for the 'm2needed' option means to use
-# the default.  Passing in a positive or negative value means to
-# add that to the default.  Fractional values are fine; the result
-# will always be rounded to an odd number.
-sub createModeratorLog {
-	my($self, $comment, $user, $val, $reason, $active, $points_spent,
-		$options) = @_;
-	my $constants = getCurrentStatic();
-	$active = 1 unless defined $active;
-	$points_spent = 1 unless defined $points_spent;
-	my $uid = $user->{uid};
-	my $cid = $comment->{cid};
-
-	my $metamod_db;
-	$metamod_db = getObject('Slash::Metamod') if $constants->{m2};
-
-	my $mod_hr = {
-		uid	=> $uid,
-		ipid	=> $user->{ipid} || '',
-		subnetid => $user->{subnetid} || '',
-		val	=> $val,
-		sid	=> $comment->{sid},
-		cid	=> $cid,
-		cuid	=> $comment->{uid},
-		reason  => $reason,
-		-ts	=> 'NOW()',
-		active 	=> $active,
-		spent	=> $points_spent,
-		points_orig => $comment->{points},
-	};
-	if ($active && $constants->{m2}) {
-		$mod_hr->{m2needed} = $metamod_db->getM2Needed($uid, $cid, $reason,
-			$options->{m2needed} || 0);
-	}
-
-	my $ret_val = $self->sqlInsert('moderatorlog', $mod_hr);
-	if ($constants->{m2}) {
-		my $mod_id = $self->getLastInsertId();
-		$metamod_db->adjustForNewMod($uid, $cid, $reason, $active, $mod_id);
-	}
-	return $ret_val;
-}
-
-sub getReasons {
-	my($self) = @_;
-	# Return a copy of the cache, just in case anyone munges it up.
-	my $reasons = {( %{getCurrentStatic('reasons')} )};
-	return $reasons;
-}
-
 sub getCSSValuesHashForCol {
 	my($self, $col) = @_;
 	my $values = $self->sqlSelectColArrayref($col, 'css', '', '', { distinct => 1 });
@@ -573,191 +520,6 @@ sub getTemplateList {
 	$self->_querylog_finish($qlid);
 
 	return $templatelist;
-}
-
-########################################################
-sub countUserModsInDiscussion {
-	my($self, $uid, $disc_id) = @_;
-	my $uid_q = $self->sqlQuote($uid);
-	my $disc_id_q = $self->sqlQuote($disc_id);
-	return $self->sqlCount(
-		"moderatorlog",
-		"uid=$uid_q AND active=1 AND sid=$disc_id_q");
-}
-
-########################################################
-sub getModeratorCommentLog {
-	my($self, $asc_desc, $limit, $t, $value, $options) = @_;
-	my $constants = getCurrentStatic();
-	# $t tells us what type of data $value is, and what type of
-	# information we're looking to retrieve
-	$options ||= {};
-	$asc_desc ||= 'ASC';
-	$asc_desc = uc $asc_desc;
-	$asc_desc = 'ASC' if $asc_desc ne 'DESC';
-	my $order_col = $options->{order_col} || "ts";
-
-	if ($limit and $limit =~ /^(\d+)$/) {
-		$limit = "LIMIT $1";
-	} else {
-		$limit = "";
-	}
-
-	my $cidlist;
-	if ($t eq "cidin") {
-		if (ref $value eq "ARRAY" and @$value) {
-			$cidlist = join(',', @$value);
-		} elsif (!ref $value and $value) {
-			$cidlist = $value;
-		} else {
-			return [];
-		}
-	}
-
-	my $select_extra = (($t =~ /ipid/) || ($t =~ /subnetid/) || ($t =~ /global/))
-		? ", comments.uid AS uid2, comments.ipid AS ipid2"
-		: "";
-	if ($constants->{m2}) {
-		$select_extra .= ', moderatorlog.m2status AS m2status';
-	}
-
-	my $vq = $self->sqlQuote($value);
-	my $where_clause = "";
-	my $ipid_table = "moderatorlog";
-	   if ($t eq 'uid')       { $where_clause = "comments.uid=users.uid AND     moderatorlog.uid=$vq";
-				    $ipid_table = "comments"							    }
-	elsif ($t eq 'cid')       { $where_clause = "moderatorlog.uid=users.uid AND moderatorlog.cid=$vq"	    }
-	elsif ($t eq 'cuid')      { $where_clause = "moderatorlog.uid=users.uid AND moderatorlog.cuid=$vq"	    }
-	elsif ($t eq 'cidin')     { $where_clause = "moderatorlog.uid=users.uid AND moderatorlog.cid IN ($cidlist)" }
-	elsif ($t eq 'subnetid')  { $where_clause = "moderatorlog.uid=users.uid AND comments.subnetid=$vq"	    }
-	elsif ($t eq 'ipid')      { $where_clause = "moderatorlog.uid=users.uid AND comments.ipid=$vq"		    }
-	elsif ($t eq 'bsubnetid') { $where_clause = "moderatorlog.uid=users.uid AND moderatorlog.subnetid=$vq"	    }
-	elsif ($t eq 'bipid')     { $where_clause = "moderatorlog.uid=users.uid AND moderatorlog.ipid=$vq"	    }
-	elsif ($t eq 'global')    { $where_clause = "moderatorlog.uid=users.uid"				    }
-	return [ ] unless $where_clause;
-
-	my $time_clause = "";
-	$time_clause = " AND ts > DATE_SUB(NOW(), INTERVAL $options->{hours_back} HOUR)" if $options->{hours_back};
-
-	my $qlid = $self->_querylog_start("SELECT", "moderatorlog, users, comments");
-	my $sth = $self->sqlSelectMany(
-		"comments.sid AS sid,
-		 comments.cid AS cid,
-		 comments.pid AS pid,
-		 comments.points AS score,
-		 comments.karma AS karma,
-		 comments.tweak AS tweak,
-		 comments.tweak_orig AS tweak_orig,
-		 users.uid AS uid,
-		 users.nickname AS nickname,
-		 $ipid_table.ipid AS ipid,
-		 moderatorlog.val AS val,
-		 moderatorlog.reason AS reason,
-		 moderatorlog.ts AS ts,
-		 moderatorlog.active AS active,
-		 moderatorlog.id AS id,
-		 moderatorlog.points_orig AS points_orig
-		 $select_extra",
-		"moderatorlog, users, comments",
-		"$where_clause
-		 AND moderatorlog.cid=comments.cid
-		 $time_clause",
-		"ORDER BY $order_col $asc_desc $limit"
-	);
-	my(@comments, $comment, @ml_ids);
-	# XXX can simplify this now, don't need to do fetchrow_hashref, can use utility method
-	while ($comment = $sth->fetchrow_hashref) {
-		push @comments, $comment;
-	}
-	$self->_querylog_finish($qlid);
-	if ($constants->{m2}) {
-		my $metamod_db = getObject('Slash::Metamod');
-		$metamod_db->addFairUnfairCounts(\@comments, 'id');
-	}
-	return \@comments;
-}
-
-########################################################
-sub getModeratorLogID {
-	my($self, $cid, $uid) = @_;
-	my($mid) = $self->sqlSelect("id", "moderatorlog",
-		"uid=$uid AND cid=$cid");
-	return $mid;
-}
-
-########################################################
-sub undoModeration {
-	my($self, $uid, $sid) = @_;
-	my $constants = getCurrentStatic();
-
-	# The chances of getting here when comments are slim
-	# since comment posting and moderation should be halted.
-	# Regardless check just in case.
-	return [] unless dbAvailable("write_comments");
-
-	# querylog isn't going to work for this sqlSelectMany, since
-	# we do multiple other queries while the cursor runs over the
-	# rows it returns.  So don't bother doing the _querylog_start.
-
-	# SID here really refers to discussions.id, NOT stories.sid
-	my $cursor = $self->sqlSelectMany("cid,val,active,cuid,reason",
-			"moderatorlog",
-			"moderatorlog.uid=$uid AND moderatorlog.sid=$sid"
-	);
-
-	my $min_score = $constants->{comment_minscore};
-	my $max_score = $constants->{comment_maxscore};
-	my $min_karma = $constants->{minkarma};
-	my $max_karma = $constants->{maxkarma};
-
-	my @removed;
-	while (my($cid, $val, $active, $cuid, $reason) = $cursor->fetchrow){
-
-		# If moderation wasn't actually performed, we skip ahead one.
-		next if ! $active;
-
-		# We undo moderation even for inactive records (but silently for
-		# inactive ones...).  Leave them in the table but inactive, so
-		# they are still eligible to be metamodded.
-		$self->sqlUpdate("moderatorlog",
-			{ active => 0 },
-			"cid=$cid AND uid=$uid"
-		);
-
-		# Restore modded user's karma, again within the proper boundaries.
-		my $adjust = -$val;
-		$adjust =~ s/^([^+-])/+$1/;
-		my $adjust_abs = abs($adjust);
-		$self->sqlUpdate(
-			"users_info",
-			{ -karma =>	$adjust > 0
-					? "LEAST($max_karma, karma $adjust)"
-					: "GREATEST($min_karma, karma $adjust)" },
-			"uid=$cuid"
-		) unless isAnon($cuid);
-
-		# Adjust the comment score up or down, but don't push it
-		# beyond the maximum or minimum.  Also recalculate its reason.
-		# Its pointsmax logically can't change.
-		my $points = $adjust > 0
-			? "LEAST($max_score, points $adjust)"
-			: "GREATEST($min_score, points $adjust)";
-		my $new_reason = $self->getCommentMostCommonReason($cid)
-			|| 0; # no active moderations? reset reason to empty
-		my $comm_update = {
-			-points =>	$points,
-			reason =>	$new_reason,
-		};
-		$self->sqlUpdate("comments", $comm_update, "cid=$cid");
-
-		push @removed, {
-			cid	=> $cid,
-			reason	=> $reason,
-			val	=> $val,
-		};
-	}
-
-	return \@removed;
 }
 
 ########################################################
@@ -2703,41 +2465,26 @@ sub deleteComment {
 	for my $table (@comment_tables) {
 		$total_rows += $self->sqlDelete($table, "cid=$cid");
 	}
-	$self->deleteModeratorlog({ cid => $cid });
+	my $constants = getCurrentStatic();
+	if ($constants->{m1}) {
+		my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+		if ($moddb) {
+			$moddb->deleteModeratorlog({ cid => $cid });
+		}
+	}
 	if ($total_rows != scalar(@comment_tables)) {
-		# Here is the thing, an orphaned comment with no text blob
-		# would fuck up the comment count.
-		# Bad juju, no cookie -Brian
+		# XXX This should be wrapped in a transaction
+		# instead of just throwing an error that may never
+		# be seen.  However it gets tricky because some sites
+		# may still have comment_text as a MyISAM table for
+		# the FULLTEXT search index, and transactions don't
+		# work across table types.  SearchToo may alleviate
+		# this problem soon. - Jamie 2006/10
 		errorLog("deleteComment cid $cid from $discussion_id,"
 			. " only $total_rows deletions");
 		return 0;
 	}
 	return 1;
-}
-
-########################################################
-sub deleteModeratorlog {
-	my($self, $opts) = @_;
-	my $where;
-
-	if ($opts->{cid}) {
-		$where = 'cid=' . $self->sqlQuote($opts->{cid});
-	} elsif ($opts->{sid}) {
-		$where = 'sid=' . $self->sqlQuote($opts->{sid});
-	} else {
-		return;
-	}
-
-	my $mmids = $self->sqlSelectColArrayref(
-		'id', 'moderatorlog', $where
-	);
-	return unless @$mmids;
-
-	my $mmid_in = join ',', @$mmids;
-	# Delete from metamodlog first since (if built correctly) that
-	# table has a FOREIGN KEY constraint pointing to moderatorlog.
-	$self->sqlDelete('metamodlog', "mmid IN ($mmid_in)");
-	$self->sqlDelete('moderatorlog', $where);
 }
 
 ########################################################
@@ -3006,7 +2753,13 @@ sub deleteDiscussion {
 		. join(",", map { $_->[0] } @$comment_ids)
 		. ")"
 	) if @$comment_ids;
-	$self->deleteModeratorlog({ sid => $did });
+	my $constants = getCurrentStatic();
+	if ($constants->{m1}) {
+		my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+		if ($moddb) {
+			$moddb->deleteModeratorlog({ sid => $did });
+		}
+	}
 }
 
 ########################################################
@@ -5763,241 +5516,6 @@ sub countStory {
 	return $value;
 }
 
-
-##################################################################
-# Handles moderation
-# Moderates a specific comment.
-# Returns 0 or 1 for whether the comment changed
-# Returns a negative value when an error was encountered. The
-# warning the user sees is handled within the .pl file
-#
-# Currently defined error types:
-# -1 - No points
-# -2 - Not enough points
-#
-##################################################################
-
-sub moderateComment {
-	my($self, $sid, $cid, $reason, $options) = @_;
-	return 0 unless dbAvailable("write_comments");
-	return 0 unless $reason;
-	$options ||= {};
-
-	my $constants = getCurrentStatic();
-	my $user = getCurrentUser();
-
-	my $comment_changed = 0;
-	my $superAuthor = $options->{is_superauthor}
-		|| ( $constants->{authors_unlimited}
-			&& $user->{seclev} >= $constants->{authors_unlimited} );
-
-	if ($user->{points} < 1 && !$superAuthor) {
-		return -1;
-	}
-
-	my $comment = $self->getComment($cid);
-
-	$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0);
-
-	# The user should not have been been presented with the menu
-	# to moderate if any of the following tests trigger, but,
-	# an unscrupulous user could have faked their submission with
-	# or without us presenting them the menu options.  So do the
-	# tests again.  XXX  These tests are basically copy-and-pasted
-	# from Slash.pm _can_mod, which should be rectified. -Jamie
-	# use reskeys instead ... -Pudge
-	# One or more reskey checks will need to invoke can_mod or some
-	# subset of it. -Jamie
-	unless ($superAuthor) {
-		# Do not allow moderation of any comments with the same UID as the
-		# current user (duh!).
-		return 0 if $user->{uid} == $comment->{uid};
-		# Do not allow moderation of any comments (anonymous or otherwise)
-		# with the same IP as the current user.
-		return 0 if $user->{ipid} eq $comment->{ipid};
-		# If the var forbids it, do not allow moderation of any comments
-		# with the same *subnet* as the current user.
-		return 0 if $constants->{mod_same_subnet_forbid}
-			and $user->{subnetid} eq $comment->{subnetid};
-		# Do not allow moderation of comments that are too old.
-		return 0 unless $comment->{time_unixepoch} >= time() - 3600*
-			($constants->{comments_moddable_hours}
-				|| 24*$constants->{archive_delay});
-	}
-
-	# Start putting together the data we'll need to display to
-	# the user.
-	my $reasons = $self->getReasons();
-	my $dispArgs = {
-		cid	=> $cid,
-		sid	=> $sid,
-		subject => $comment->{subject},
-		reason	=> $reason,
-		points	=> $user->{points},
-		reasons	=> $reasons,
-	};
-
-	unless ($superAuthor) {
-		my $mid = $self->getModeratorLogID($cid, $user->{uid});
-		if ($mid) {
-			$dispArgs->{type} = 'already moderated';
-			Slash::slashDisplay('moderation', $dispArgs)
-				unless $options->{no_display};
-			return 0;
-		}
-	}
-
-	# Add moderation value to display arguments.
-	my $val = $reasons->{$reason}{val};
-	my $raw_val = $val;
-	$val = "+1" if $val == 1;
-	$dispArgs->{val} = $val;
-
-	my $scorecheck = $comment->{points} + $val;
-	my $active = 1;
-	# If the resulting score is out of comment score range, no further
-	# actions need be performed.
-	# Should we return here and go no further?
-	if (	$scorecheck < $constants->{comment_minscore} ||
-		($scorecheck > $constants->{comment_maxscore} && $val + $comment->{tweak} > 0 ))
-	{
-		# We should still log the attempt for M2, but marked as
-		# 'inactive' so we don't mistakenly undo it. Mods get modded
-		# even if the action didn't "really" happen.
-		#
-		$active = 0;
-		$dispArgs->{type} = 'score limit';
-	}
-
-	# Find out how many mod points this will really cost us.  As of
-	# Oct. 2002, it might be more than 1.
-	my $pointsneeded = $self->getModPointsNeeded(
-		$comment->{points},
-		$scorecheck,
-		$reason);
-
-	# If more than 1 mod point needed, we might not have enough,
-	# so this might still fail.
-	if ($pointsneeded > $user->{points} && !$superAuthor) {
-		return -2;
-	}
-
-	# Write the proper records to the moderatorlog.
-	$self->createModeratorLog($comment, $user, $val, $reason, $active,
-		$pointsneeded);
-
-	if ($active) {
-
-		# If we are here, then the user either has mod points, or
-		# is an admin (and 'author_unlimited' is set).  So point
-		# checks should be unnecessary here.
-
-		# First, update values for the moderator.
-		my $changes = { };
-		$changes->{-points} = "GREATEST(points-$pointsneeded, 0)";
-		my $tcost = $constants->{mod_unm2able_token_cost} || 0;
-		$tcost = 0 if $reasons->{$reason}{m2able};
-		$changes->{-tokens} = "tokens - $tcost" if $tcost;
-		$changes->{-totalmods} = "totalmods + 1";
-		$self->setUser($user->{uid}, $changes);
-		$user->{points} -= $pointsneeded;
-		$user->{points} = 0 if $user->{points} < 0;
-
-		# Update stats.
-		if ($tcost and my $statsSave = getObject('Slash::Stats::Writer')) {
-			$statsSave->addStatDaily("mod_tokens_lost_unm2able", $tcost);
-		}
-
-		# Apply our changes to the comment.  That last argument
-		# is tricky;  we're passing in true for $need_point_change
-		# only if the comment was posted non-anonymously.  (If it
-		# was posted anonymously, we don't need to know the
-		# details of how its point score changed thanks to this
-		# mod, because it won't affect anyone's karma.)
-		my $poster_was_anon = isAnon($comment->{uid});
-		my $karma_change = $reasons->{$reason}{karma};
-		$karma_change = 0 if $poster_was_anon;
-
-		my $comment_change_hr =
-			$self->setCommentForMod($cid, $val, $reason,
-				$comment->{reason});
-		if (!defined($comment_change_hr)) {
-			# This shouldn't happen;  the only way we believe it
-			# could is if $val is 0, the comment is already at
-			# min or max score, the user's already modded this
-			# comment, or some other reason making this mod invalid.
-			# This is really just here as a safety check.
-			$dispArgs->{type} = 'logic error';
-			Slash::slashDisplay('moderation', $dispArgs)
-				unless $options->{no_display};
-			return 0;
-		}
-
-		# Finally, adjust the appropriate values for the user who
-		# posted the comment.
-		my $token_change = 0;
-		if ($karma_change) {
-			# If this was a downmod, it may cost the poster
-			# something other than exactly 1 karma.
-			if ($karma_change < 0) {
-				($karma_change, $token_change) =
-					$self->_calc_karma_token_loss(
-						$karma_change, $comment_change_hr)
-			}
-		}
-		if ($karma_change) {
-			my $cu_changes = { };
-			if ($val < 0) {
-				$cu_changes->{-downmods} = "downmods + 1";
-			} elsif ($val > 0) {
-				$cu_changes->{-upmods} = "upmods + 1";
-			}
-			if ($karma_change < 0) {
-				$cu_changes->{-karma} = "GREATEST("
-					. "$constants->{minkarma}, karma + $karma_change)";
-				$cu_changes->{-tokens} = "tokens + $token_change";
-			} elsif ($karma_change > 0) {
-				$cu_changes->{-karma} = "LEAST("
-					. "$constants->{maxkarma}, karma + $karma_change)";
-			}
-
-			# Make the changes to the poster user.
-			$self->setUser($comment->{uid}, $cu_changes);
-
-			# Update stats.
-			if ($karma_change < 0 and my $statsSave = getObject('Slash::Stats::Writer')) {
-				$statsSave->addStatDaily("mod_tokens_lost_downmod",
-					$token_change);
-			}
-
-		}
-
-		# We know things actually changed, so update points for
-		# display and send a message if appropriate.
-		$dispArgs->{points} = $user->{points};
-		$dispArgs->{type} = 'moderated';
-		if (($comment->{points} + $comment->{tweak} + $raw_val) >= $constants->{comment_minscore} &&
-		    ($comment->{points} + $comment->{tweak}) >= $constants->{comment_minscore}) {
-
-			my $messages = getObject("Slash::Messages");
-			$messages->send_mod_msg({
-				type	=> 'mod_msg',
-				sid	=> $sid,
-				cid	=> $cid,
-				val	=> $val,
-				reason	=> $reason,
-				comment	=> $comment
-			}) unless $options->{no_message};
-		}
-	}
-
-	# Now display the template with the moderation results.
-	Slash::slashDisplay('moderation', $dispArgs)
-		unless $options->{no_display};
-
-	return 1;
-}
-
 sub displaystatusForStories {
 	my($self, $stoids) = (@_);
 	my $constants = getCurrentStatic();
@@ -6256,94 +5774,6 @@ sub getStoryByTimeAdmin {
 }
 
 ########################################################
-# Input: $m2_user and %$m2s are the same as for setMetaMod, below.
-# $max is the max number of mods that an M2 vote can count on.
-# Return: modified %$m2s in place.
-sub multiMetaMod {
-	my($self, $m2_user, $m2s, $max) = @_;
-	return if !$max;
-
-	my $constants = getCurrentStatic();
-	my @orig_mmids = keys %$m2s;
-	return if !@orig_mmids;
-	my $orig_mmid_in = join(",", @orig_mmids);
-	my $uid_q = $self->sqlQuote($m2_user->{uid});
-	my $reasons = $self->getReasons();
-	my $m2able_reasons = join(",",
-		sort grep { $reasons->{$_}{m2able} }
-		keys %$reasons);
-	return if !$m2able_reasons;
-	my $max_limit = $max * scalar(@orig_mmids) * 2;
-
-	# $id_to_cr is the cid-reason hashref.  From it we'll make
-	# an SQL clause that matches any moderations whose cid and
-	# reason both match any of the moderations passed in.
-	my $id_to_cr = $self->sqlSelectAllHashref(
-		"id",
-		"id, cid, reason",
-		"moderatorlog",
-		"id IN ($orig_mmid_in)
-		 AND active=1 AND m2status=0"
-	);
-	return if !%$id_to_cr;
-	my @cr_clauses = ( );
-	for my $mmid (keys %$id_to_cr) {
-		push @cr_clauses, "(cid=$id_to_cr->{$mmid}{cid}"
-			. " AND reason=$id_to_cr->{$mmid}{reason})";
-	}
-	my $cr_clause = join(" OR ", @cr_clauses);
-	my $user_limit_clause = "";
-	$user_limit_clause =  " AND uid != $uid_q AND cuid != $uid_q " unless $m2_user->{seclev} >= 100;
-	# Get a list of other mods which duplicate one or more of the
-	# ones we're modding, but aren't in fact the ones we're modding.
-	my $others = $self->sqlSelectAllHashrefArray(
-		"id, cid, reason",
-		"moderatorlog",
-		"($cr_clause)".
-		$user_limit_clause.
-		" AND m2status=0
-		 AND reason IN ($m2able_reasons)
-		 AND active=1
-		 AND id NOT IN ($orig_mmid_in)",
-		"ORDER BY RAND() LIMIT $max_limit"
-	);
-	# If there are none, we're done.
-	return if !$others or !@$others;
-
-	# To decide which of those other mods we can use, we need to
-	# limit how many we use for each cid-reason pair.  That means
-	# setting up a hashref whose keys are cid-reason pairs, and
-	# counting until we hit a limit.  This is so that, in the odd
-	# situation where a cid has been moderated a zillion times
-	# with one reason, people who metamod one of those zillion
-	# moderations will not have undue power (nor undue
-	# consequences applied to themselves).
-
-	# Set up the counting hashref, and the hashref to correlate
-	# cid-reason back to orig mmid.
-	my $cr_count = { };
-	my $cr_to_id = { };
-	for my $mmid (keys %$m2s) {
-		my $cid = $id_to_cr->{$mmid}{cid};
-		my $reason = $id_to_cr->{$mmid}{reason};
-		$cr_count->{"$cid-$reason"} = 0;
-		$cr_to_id->{"$cid-$reason"} = $mmid;
-	}
-	for my $other_hr (@$others) {
-		my $new_mmid = $other_hr->{id};
-		my $cid = $other_hr->{cid};
-		my $reason = $other_hr->{reason};
-		next if $cr_count->{"$cid-$reason"}++ >= $max;
-		my $old_mmid = $cr_to_id->{"$cid-$reason"};
-		# And here, we add another M2 with the same is_fair
-		# value as the old one -- this is the whole purpose
-		# for this method.
-		my %old = %{$m2s->{$old_mmid}};
-		$m2s->{$new_mmid} = \%old;
-	}
-}
-
-########################################################
 sub countUsers {
 	my($self, $options) = @_;
 	my $count = undef;
@@ -6417,275 +5847,6 @@ sub deleteVar {
 
 	$self->sqlDo("DELETE from vars WHERE name=" .
 		$self->sqlQuote($name));
-}
-
-########################################################
-# This is a little better. Most of the business logic
-# has been removed and now resides at the theme level.
-#	- Cliff 7/3/01
-# It used to return a boolean indicating whether the
-# comment was changed.  Now it returns either undef
-# (if the comment did not change) or a true value (if
-# it did).  If $need_point_change is true, it will
-# query the DB to obtain the comment scores before and
-# after the change and return that data in a hashref.
-# If not, it will just return 1.
-sub setCommentForMod {
-	my($self, $cid, $val, $newreason, $oldreason) = @_;
-	my $raw_val = $val;
-	$val += 0;
-	return undef if !$val;
-	$val = "+$val" if $val > 0;
-
-	my $user = getCurrentUser();
-	my $constants = getCurrentStatic();
-	my $clear_ctp = 0;
-
-	my $allreasons_hr = $self->sqlSelectAllHashref(
-		"reason",
-		"reason, COUNT(*) AS c",
-		"moderatorlog",
-		"cid=$cid AND active=1",
-		"GROUP BY reason"
-	);
-	my $averagereason = $self->getCommentMostCommonReason($cid,
-		$allreasons_hr,
-		$newreason, $oldreason);
-
-	# Changes we're going to make to this comment.  Note
-	# that the pointsmax GREATEST() gets called after
-	# points is assigned, thanks to assn_order.
-	my $update = {
-		-points =>	"points$val",
-		-pointsmax =>	"GREATEST(pointsmax, points)",
-		reason =>	$averagereason,
-		lastmod =>	$user->{uid},
-	};
-
-	# If more than n downmods, a comment loses its karma bonus.
-	my $reasons = $self->getReasons;
-	my $num_downmods = 0;
-	for my $reason (keys %$allreasons_hr) {
-		$num_downmods += $allreasons_hr->{$reason}{c}
-			if $reasons->{$reason}{val} < 0;
-	}
-	if ($num_downmods > $constants->{mod_karma_bonus_max_downmods}) {
-		$update->{karma_bonus} = "no";
-		# If we remove a karma_bonus, we must invalidate the
-		# comment_text (because the noFollow changes).  Sadly
-		# at this point we don't know (due to performance
-		# requirements and atomicity) whether we are actually
-		# changing the value of this column, but we have to
-		# invalidate the cache anyway.
-		$clear_ctp = 1;
-	}
-
-	# Make sure we apply this change to the right comment :)
-	my $where = "cid=$cid ";
-	my $points_extra_where = "";
-	if ($val < 0) {
-		$points_extra_where .= " AND points > $constants->{comment_minscore}";
-	} else {
-		$points_extra_where .= " AND points < $constants->{comment_maxscore}";
-	}
-	$where .= " AND lastmod <> $user->{uid}"
-		unless $constants->{authors_unlimited}
-			&& $user->{seclev} >= $constants->{authors_unlimited};
-
-	# We do a two-query transaction here:  one select to get
-	# the old points value, then the update as part of the
-	# same transaction;  that way, we know, based on whether
-	# the update succeeded, what the final points value is.
-	# If this weren't a transaction, another moderation
-	# could happen between the two queries and give us the
-	# wrong answer.  On the other hand, if the caller didn't
-	# want the point change, we don't need to get any of
-	# that data.
-	# We have to select cid here because LOCK IN SHARE MODE
-	# only works when an indexed column is returned.
-	# Of course, this isn't actually going to work at all
-	# (unless you keep your main DB all-InnoDB and put the
-	# MyISAM FULLTEXT indexes onto a slave search-only DB)
-	# since the comments table is MyISAM.  Eventually, though,
-	# we'll pull the indexed blobs out and into comments_text
-	# and make the comments table InnoDB and this will work.
-	# Oh well.  Meanwhile, the worst thing that will happen is
-	# a few wrong points logged here and there.
-	# XXX Hey, comments table is InnoDB now.  That comment
-	# above needs to be revised, and it might be time to look
-	# over the code too.
-
-#	$self->{_dbh}{AutoCommit} = 0;
-	$self->sqlDo("SET AUTOCOMMIT=0");
-
-	my $hr = { };
-	($hr->{cid}, $hr->{points_before}, $hr->{points_orig}, $hr->{points_max}, $hr->{karma}) =
-		$self->sqlSelect("cid, points, pointsorig, pointsmax, karma",
-			"comments", "cid=$cid", "LOCK IN SHARE MODE");
-	$hr->{points_change} = $val;
-	$hr->{points_after} = $hr->{points_before} + $val;
-
-	my $karma_val;
-	my $karma_change = $reasons->{$newreason}{karma};
-	if (!$constants->{mod_down_karmacoststyle}) {
-		$karma_val = $karma_change;
-	} elsif ($val < 0) {
-		$karma_val = ($hr->{points_before} + $karma_change) - $hr->{points_max};
-	} else {
-		$karma_val = $karma_change;
-	}
-
-	if ($karma_val < 0
-		&& defined($constants->{comment_karma_limit})
-		&& $constants->{comment_karma_limit} ne "") {
-		my $future_karma = $hr->{karma} + $karma_val;
-		if ($future_karma < $constants->{comment_karma_limit}) {
-			$karma_val = $constants->{comment_karma_limit} - $hr->{karma};
-		}
-		$karma_val = 0 if $karma_val > 0; # just to make sure
-	}
-
-	if ($karma_val) {
-		my $karma_abs_val = abs($karma_val);
-		$update->{-karma}     = sprintf("karma%+d", $karma_val);
-		$update->{-karma_abs} = sprintf("karma_abs%+d", $karma_abs_val);
-	}
-
-	my $changed = $self->sqlUpdate("comments", $update, $where.$points_extra_where, {
-		assn_order => [ "-points", "-pointsmax" ]
-	});
-	$changed += 0;
-	if (!$changed && $raw_val > 0) {
-		$update->{-points} = "points";
-		$update->{-tweak}  = "tweak$val";
-		my $tweak_extra = " AND tweak$val <= 0";
-		$changed = $self->sqlUpdate("comments", $update, $where.$tweak_extra, {
-			assn_order => [ "-points", "-pointsmax" ]
-		});
-	}
-	$changed += 0;
-	if (!$changed) {
-		# If the row in the comments table didn't change, then
-		# the karma_bonus didn't change, so we know there is
-		# no need to clear the comment text cache.
-		$clear_ctp = 0;
-	}
-
-#	$self->{_dbh}->commit;
-#	$self->{_dbh}{AutoCommit} = 1;
-	$self->sqlDo("COMMIT");
-	$self->sqlDo("SET AUTOCOMMIT=1");
-
-	if ($clear_ctp and my $mcd = $self->getMCD()) {
-		my $mcdkey = "$self->{_mcd_keyprefix}:ctp:";
-		$mcd->delete("$mcdkey$cid", 3);
-	}
-
-	return $changed ? $hr : undef;
-}
-
-########################################################
-# This gets the mathematical mode, in other words the most common,
-# of the moderations done to a comment.  If no mods, return undef.
-# If a comment's net moderation is down, choose only one of the
-# negative mods, and the opposite for up.  Tiebreakers break ties,
-# first tiebreaker found wins.  "cid" is a key in moderatorlog
-# so this is not a table scan.
-sub getCommentMostCommonReason {
-	my($self, $cid, $allreasons_hr, $new_reason, @tiebreaker_reasons) = @_;
-	$new_reason = 0 if !$new_reason;
-	unshift @tiebreaker_reasons, $new_reason if $new_reason;
-
-	my $reasons = $self->getReasons();
-	my $listable_reasons = join(",",
-		sort grep { $reasons->{$_}{listable} }
-		keys %$reasons);
-	return undef if !$listable_reasons;
-
-	# Build the hashref of reason counts for this comment, for all
-	# listable reasons.  If allreasoncounts_hr was passed in, this
-	# is easy (just grep out the nonlistable ones).  If not, we have
-	# to do a DB query.
-	my $hr = { };
-	if ($allreasons_hr) {
-		for my $reason (%$allreasons_hr) {
-			$hr->{$reason} = $allreasons_hr->{$reason}
-				if $reasons->{$reason}{listable};
-		}
-	} else {
-		$hr = $self->sqlSelectAllHashref(
-			"reason",
-			"reason, COUNT(*) AS c",
-			"moderatorlog",
-			"cid=$cid AND active=1
-			 AND reason IN ($listable_reasons)",
-			"GROUP BY reason"
-		);
-	}
-
-	# If no mods that are listable, return undef.
-	return undef if !keys %$hr;
-
-	# We need to know if the comment has been moderated net up,
-	# net down, or to a net tie, and if not a tie, restrict
-	# ourselves to choosing only reasons from that direction.
-	# Note this isn't atomic with the actual application of, or
-	# undoing of, the moderation in question.  Oh well!  If two
-	# mods are applied at almost exactly the same time, there's
-	# a one in a billion chance the comment will end up with a
-	# wrong (but still plausible) reason field.  I'm not going
-	# to worry too much about it.
-	# Also, I'm doing this here, with a separate for loop to
-	# screen out unacceptable reasons, instead of putting this
-	# "if" into the same for loop above, because it may save a
-	# query (if a comment is modded entirely with Under/Over).
-	my($points, $pointsorig) = $self->sqlSelect(
-		"points, pointsorig", "comments", "cid=$cid");
-	if ($new_reason) {
-		# This mod hasn't been taken into account in the
-		# DB yet, but it's about to be applied.
-		$points += $reasons->{$new_reason}{val};
-	}
-	my $needval = $points - $pointsorig;
-	if ($needval) {
-		   if ($needval >  1) { $needval =  1 }
-		elsif ($needval < -1) { $needval = -1 }
-		my $new_hr = { };
-		for my $reason (keys %$hr) {
-			$new_hr->{$reason} = $hr->{$reason}
-				if $reasons->{$hr->{$reason}{reason}}{val} == $needval;
-		}
-		$hr = $new_hr;
-	}
-
-	# If no mods that are listable, return undef.
-	return undef if !keys %$hr;
-
-	# Sort first by popularity and secondarily by reason.
-	# "reason" is a numeric field, so we sort $a<=>$b numerically.
-	my @sorted_keys = sort {
-		$hr->{$a}{c} <=> $hr->{$b}{c}
-		||
-		$a <=> $b
-	} keys %$hr;
-	my $top_count = $hr->{$sorted_keys[-1]}{c};
-	@sorted_keys = grep { $hr->{$_}{c} == $top_count } @sorted_keys;
-	# Now sorted_keys are only the top values, one or more of them,
-	# any of which could be the winning reason.
-	if (scalar(@sorted_keys) == 1) {
-		# A clear winner.  Return it.
-		return $sorted_keys[0];
-	}
-	# No clear winner. Are any of our tiebreakers contenders?
-	my %sorted_hash = ( map { $_ => 1 } @sorted_keys );
-	for my $reason (@tiebreaker_reasons) {
-		# Yes, return the first tiebreaker we find.
-		return $reason if $sorted_hash{$reason};
-	}
-	# Nope, we don't have a good way to resolve the tie. Pick whatever
-	# comes first in the reason list (reasons are all numeric and
-	# sorted_keys is already sorted, making this easy).
-	return $sorted_keys[0];
 }
 
 ########################################################
@@ -8488,9 +7649,11 @@ sub getSlashConf {
 	# This really should be a separate piece of data returned by
 	# getReasons() the same way getTopicTree() works.  It's only part
 	# of $constants for historical, er, reasons.
-	$conf{reasons} = $self->sqlSelectAllHashref(
-		"id", "*", "modreasons"
-	);
+	if ($conf{m1}) {
+		$conf{reasons} = $self->sqlSelectAllHashref(
+			"id", "*", "modreasons"
+		);
+	}
 
 	$conf{rootdir}		||= "//$conf{basedomain}";
 	$conf{real_rootdir}	||= $conf{rootdir};  # for when rootdir changes
@@ -9091,12 +8254,6 @@ sub getSlashdStatuses {
 sub getMaxCid {
 	my($self) = @_;
 	return $self->sqlSelect("MAX(cid)", "comments");
-}
-
-##################################################################
-sub getMaxModeratorlogId {
-	my($self) = @_;
-	return $self->sqlSelect("MAX(id)", "moderatorlog");
 }
 
 ##################################################################
@@ -10728,15 +9885,6 @@ sub getNexusFromSkid {
 	my($self, $skid) = @_;
 	my $skin = $self->getSkin($skid);
 	return ($skin && $skin->{nexus}) ? $skin->{nexus} : 0;
-}
-
-########################################################
-sub getModeratorLog {
-	my $answer = _genericGet({
-		table		=> 'moderatorlog',
-		arguments	=> \@_,
-	});
-	return $answer;
 }
 
 ########################################################

@@ -44,9 +44,10 @@ sub displayTheComments {
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 	my $metamod_db = getObject('Slash::Metamod');
 
-	my $reasons = $slashdb->getReasons();
+	my $reasons = $moddb->getReasons();
 	my $comments = $metamod_db->getMetamodsForUser(
 		$user, $constants->{m2_comments}
 	);
@@ -77,4 +78,6 @@ sub displayTheComments {
 #################################################################
 createEnvironment();
 main();
+
+1;
 

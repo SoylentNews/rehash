@@ -15,7 +15,7 @@ Display user's info
 * admin_flag = boolean for whether to display admin stuff
 	(no real need for this, could just use user.is_admin)
 * fieldkey = the field key used to decide what we're looking at
-* reasons = hashref from $slashdb->getReasons()
+* reasons = hashref from $moddb->getReasons()
 * lastjournal = last journal posted
 * hr_hours_back = number of hours back to show a <hr> for
 * cids_to_mods = hashref keyed by cid containing arrays of moderations done to that cid
@@ -97,13 +97,14 @@ __template__
 					mod_options.meta_mod_only = 1;
 				END;
 
-				Slash.moderatorCommentLog('uid', useredit.uid, mod_options);
+				moddb = Slash.getObject("Slash::" _ constants.m1_pluginname);
+				IF moddb; moddb.dispModCommentLog('uid', useredit.uid, mod_options); END;
 
-				IF !constants.show_mods_with_comments;
+				IF !constants.m1_admin_show_mods_with_comments;
         				mod_options.title = "Moderations performed on $thisnickname's comments";
 					mod_options.hr_hours_back = hr_hours_back;
 
-					Slash.moderatorCommentLog('cuid', useredit.uid, mod_options);
+					IF moddb; moddb.dispModCommentLog('cuid', useredit.uid, mod_options); END;
 				END;
 
 				IF constants.m2;

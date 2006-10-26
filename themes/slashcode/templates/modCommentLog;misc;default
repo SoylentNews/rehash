@@ -203,7 +203,7 @@ bg_toggle = 0;
 	[% IF need_m2_button %]
 		<tr class="data_hl1"><td colspan="[% total_cols %]" align="right">
 		<input type="hidden" name="op" value="moderate">
-		<input type="submit" name="submit" value="MetaModerate">
+		<input type="submit" name="submit" value="MetaModerate"> [%# XXX really? %]
 		</td></tr>
 	[% END %]
 [% END %]

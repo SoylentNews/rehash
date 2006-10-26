@@ -142,7 +142,8 @@ my(%comments, %comment_data);
 			my $comment = $slashdb->getComment($cid);
 
 			my($modval, $reason, $active);
-			my $reasons = $slashdb->getReasons();
+			my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+			my $reasons = $moddb->getReasons();
 			$reason = (keys %$reasons)[rand(scalar(keys %$reasons)-1) + 1];
 			$modval = $reasons->{$reason}{val};
 			my $pointsneeded = $slashdb->getModPointsNeeded(

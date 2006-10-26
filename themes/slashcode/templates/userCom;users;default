@@ -11,7 +11,7 @@ Display user's info
 * nickmatch_flag = current user is same as viewed user
 * karma_flag = boolean for display karma
 * admin_flag = boolean for whether to display admin stuff
-* reasons = hashref from $slashdb->getReasons()
+* reasons = hashref from $moddb->getReasons()
 
 __title__
 

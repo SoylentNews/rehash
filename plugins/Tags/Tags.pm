@@ -1097,7 +1097,9 @@ sub ajaxListTagnames {
 	my $prefix = '';
 	$prefix = lc($1) if $form->{prefix} =~ /([A-Za-z]+)/;
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	return $tags_reader->listTagnamesByPrefix($prefix);
+	my $retval = $tags_reader->listTagnamesByPrefix($prefix);
+print STDERR scalar(localtime) . " ajaxListTagnames uid=$user->{uid} prefix='$prefix' retval: $retval";
+	return $retval;
 }
 
 { # closure
@@ -1402,7 +1404,7 @@ sub listTagnamesByPrefix {
 		'tagname,
 		 COUNT(DISTINCT tags.uid) AS c,
 		 SUM(tag_clout * IF(value IS NULL, 1, value)) AS s,
-		 COUNT(DISTINCT tags.uid) + SUM(tag_clout * IF(value IS NULL, 1, value)) AS sc',
+		 COUNT(DISTINCT tags.uid)/3 + SUM(tag_clout * IF(value IS NULL, 1, value)) AS sc',
 		'tags, users_info, tagnames
 		 LEFT JOIN tagname_params USING (tagnameid)',
 		"tagnames.tagnameid=tags.tagnameid
@@ -1410,7 +1412,7 @@ sub listTagnamesByPrefix {
 		 AND tagname LIKE $like_str",
 		"GROUP BY tagname
 		 HAVING c >= $minc AND s >= $mins
-		 ORDER BY sc DESC
+		 ORDER BY sc DESC, tagname ASC
 		 LIMIT $num");
 	my $ret_str = '';
 	for my $hr (@$ar) {

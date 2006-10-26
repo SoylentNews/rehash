@@ -226,32 +226,6 @@ INSERT INTO globj_types VALUES (NULL, 'journals');
 
 
 #
-# Dumping data for table 'metamodlog'
-#
-
-
-#
-# Dumping data for table 'moderatorlog'
-#
-
-
-#
-# Dumping data for table 'modreasons'
-#
-INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 0, 'Normal',        0, 0,  0,  0, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 1, 'Offtopic',      1, 1, -1, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 2, 'Flamebait',     1, 1, -1, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 3, 'Troll',         1, 1, -1, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 4, 'Redundant',     1, 1, -1, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 5, 'Insightful',    1, 1,  1,  1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 6, 'Interesting',   1, 1,  1,  1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 7, 'Informative',   1, 1,  1,  1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 8, 'Funny',         1, 1,  1,  1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES ( 9, 'Overrated',     0, 0, -1, -1, 0.5);
-INSERT INTO modreasons (id, name, m2able, listable, val, karma, fairfrac) VALUES (10, 'Underrated',    0, 0,  1,  1, 0.5);
-
-
-#
 # Dumping data for table 'pollanswers'
 #
 
@@ -887,15 +861,6 @@ INSERT INTO vars (name, value, description) VALUES ('log_db_user','','The virtua
 INSERT INTO vars (name, value, description) VALUES ('logdir','/usr/local/slash/www.example.com/logs','Where should the logs be found?');
 INSERT INTO vars (name, value, description) VALUES ('login_speed_limit', '20', 'How fast a user can create users, etc.');
 INSERT INTO vars (name, value, description) VALUES ('login_temp_minutes', '10', 'Minutes before a temporary login expires');
-INSERT INTO vars (name, value, description) VALUES ('m1','1','Allows use of the moderation system');
-INSERT INTO vars (name, value, description) VALUES ('m1_eligible_hitcount','3','Number of hits on comments.pl before user can be considered eligible for moderation');
-INSERT INTO vars (name, value, description) VALUES ('m1_eligible_percentage','0.8','Percentage of users eligible to moderate');
-INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_end', '0.8888', 'Ending percentage into the pool of eligible moderators (used by moderatord)');
-INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_upfairratio', '1.3', 'Factor of upmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)');
-INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_downfairratio', '1.3', 'Factor of downmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)');
-INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_fairtotal', '1.3', 'Factor of fairness total in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)');
-INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_factor_stirratio', '1.3', 'Factor of stirred-points ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)');
-INSERT INTO vars (name, value, description) VALUES ('m1_pointgrant_start', '0.167', 'Starting percentage into the pool of eligible moderators (used by moderatord)');
 INSERT INTO vars (name, value, description) VALUES ('mailfrom','admin@example.com','All mail addressed from the site looks like it is coming from here');
 INSERT INTO vars (name, value, description) VALUES ('mailpass_max_hours','48','Mailing a password only allowed mailpass_max_num times per account per this many hours');
 INSERT INTO vars (name, value, description) VALUES ('mailpass_max_num','2','Mailing a password only allowed this many times per account per mainpass_max_hours hours');

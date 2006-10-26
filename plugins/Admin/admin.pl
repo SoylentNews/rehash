@@ -2045,6 +2045,12 @@ sub displaySlashd {
 sub moderate {
 	my($form, $slashdb, $user, $constants) = @_;
 
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+	if (!$moddb) {
+		print getData('unknown_moderation_warning');
+		return ;
+	}
+
 	my $was_touched = {};
 	my($sid, $cid);
 
@@ -2057,7 +2063,7 @@ sub moderate {
 		if ($key =~ /^reason_(\d+)_(\d+)$/) {
 			($sid, $cid) = ($1, $2);
 			next if $form->{$key} eq "";
-			my $ret_val = $slashdb->moderateComment($sid, $cid, $form->{$key});			
+			my $ret_val = $moddb->moderateComment($sid, $cid, $form->{$key});			
 			# No points and not enough points shouldn't show up since the user
 			# is an admin but check just in case 
 			if ($ret_val < 0) {

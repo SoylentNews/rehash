@@ -45,11 +45,13 @@ __template__
 	   END;
 	 %]
 	<p>
-	[% Slash.moderatorCommentLog("b$fieldname", netid, mod_options) %]
-	[% IF !constants.show_mods_with_comments %]
+	[% moddb = Slash.getObject("Slash::" _ constants.m1_pluginname);
+	   IF moddb; moddb.dispModCommentLog("b$fieldname", netid, mod_options); END %]
+	[% IF !constants.m1_admin_show_mods_with_comments %]
 		<p>
 		[% mod_options.title="Moderations performed on $netid_vis's comment" %]
-		[% Slash.moderatorCommentLog(fieldname, netid, mod_options) %] 
+		[% moddb = Slash.getObject("Slash::" _ constants.m1_pluginname);
+		   IF moddb; moddb.dispModCommentLog(fieldname, netid, mod_options); END %]
 	[% END %]
 [% END %]
 <br>
