@@ -31,7 +31,7 @@ $task{$me}{code} = sub {
 		return ;
 	}
 
-	my $log_db = getObject('Slash::DB', { db_type => "log_slave" });
+	my $modlog_slave = getObject("Slash::$constants->{m1_pluginname}", { db_type => "log_slave" });
 
 	my $maxrows = $constants->{moderatord_maxrows} || 50000;
 	my $lastmaxid = $slashdb->getVar('moderatord_lastmaxid', 'value', 1);
@@ -50,12 +50,12 @@ $task{$me}{code} = sub {
 		}
 		$lastmaxid = 0;
 	}
-	my $newmaxid = $log_db->sqlSelect("MAX(id)", "accesslog") || $lastmaxid;
+	my $newmaxid = $modlog_slave->sqlSelect("MAX(id)", "accesslog") || $lastmaxid;
 	$lastmaxid = $newmaxid - $maxrows if $lastmaxid < $newmaxid - $maxrows;
 	my $youngest_eligible_uid = $slashdb->getYoungestEligibleModerator();
-	$log_db->fetchEligibleModerators_accesslog_insertnew($lastmaxid+1, $newmaxid,
+	$modlog_slave->fetchEligibleModerators_accesslog_insertnew($lastmaxid+1, $newmaxid,
 		$youngest_eligible_uid);
-	$log_db->fetchEligibleModerators_accesslog_deleteold();
+	$modlog_slave->fetchEligibleModerators_accesslog_deleteold();
 	$slashdb->setVar('moderatord_lastmaxid', $newmaxid);
 
 	return ;
