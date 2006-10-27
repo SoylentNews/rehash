@@ -580,7 +580,7 @@ sub ajaxFireHoseGetUpdates {
 		push @$ordered, $item->{id};
 		delete $ids{$_->{id}};
 	}
-	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%m-%d %H:%M:%S");
+	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	return Data::JavaScript::Anon->anon_dump({
 		removed		=> \%ids,
 		html		=> $html,
