@@ -50,7 +50,7 @@ sub main {
 		my $reskey = getObject('Slash::ResKey');
 		my $rkey = $reskey->key($reskey_name);
 		if (!$rkey) {
-			print STDERR scalar(localtime) . " ajax.pl main no rkey for '$reskey_name'\n";
+			print STDERR scalar(localtime) . " ajax.pl main no rkey for op='$op' name='$reskey_name'\n";
 			return;
 		}
 		if ($ops->{$op}{reskey_type} eq 'createuse') {
