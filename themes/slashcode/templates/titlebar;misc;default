@@ -8,6 +8,8 @@ Prints the bar above each story, containing the actual title of the story.
 * future = boolean: whether story is in the future
 	(currently not used)
 * max_min_button = html for maximize / minimize buttons
+* id = id for generaltitle
+* h3id = id for h3
 
 __title__
 
@@ -22,9 +24,9 @@ __template__
 [% IF future %]
 <div class="future">
 [% END %]
-<div class="generaltitle">
+<div class="generaltitle" [% IF id %]id="[% id %]"[% END %]>
 	<div class="title">
-		<h3>
+		<h3 [% IF h3id %]id="[% h3id %]"[% END %]>
 			[% title %]
 			[% IF max_min_button %]
 			<span class="max_min_button">[% max_min_button %]</span>
