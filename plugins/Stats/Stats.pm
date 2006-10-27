@@ -310,6 +310,11 @@ sub getAdminsClearpass {
 sub countModeratorLog {
 	my($self, $options) = @_;
 
+	my $constants = getCurrentStatic();
+	return 0 unless $constants->{m1};
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+	return 0 unless $mod_reader;
+
 	my @clauses = ( );
 
 	my $day = $self->{_day};
@@ -320,20 +325,25 @@ sub countModeratorLog {
 	push @clauses, "active=1" if $options->{active_only};
 
 	if ($options->{m2able_only}) {
-		my $reasons = $self->getReasons();
+		my $reasons = $mod_reader->getReasons();
 		my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
 		my $reasons_m2able = join(",", @reasons_m2able);
 		push @clauses, "reason IN ($reasons_m2able)" if $reasons_m2able;
 	}
 
 	my $where = join(" AND ", @clauses) || "";
-	my $count = $self->sqlCount("moderatorlog", $where);
+	my $count = $mod_reader->sqlCount("moderatorlog", $where);
 	return $count;
 }
 
 ########################################################
 sub countMetamodLog {
 	my($self, $options) = @_;
+
+	my $constants = getCurrentStatic();
+	return 0 unless $constants->{m2};
+	my $metamod_reader = getObject('Slash::Metamod', { db_type => 'reader' });
+	return 0 unless $metamod_reader;
 
 	my @clauses = ( );
 
@@ -349,7 +359,7 @@ sub countMetamodLog {
 	}
 
 	my $where = join(" AND ", @clauses) || "";
-	my $count = $self->sqlCount("metamodlog", $where);
+	my $count = $metamod_reader->sqlCount("metamodlog", $where);
 	return $count;
 }
 
@@ -376,14 +386,18 @@ sub countUnmetamoddedMods {
 ########################################################
 sub getOldestUnm2dMod {
 	my($self) = @_;
-	my $reasons = $self->getReasons();
+	my $constants = getCurrentStatic();
+	return 0 unless $constants->{m1};
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+	return 0 unless $mod_reader;
+	my $reasons = $mod_reader->getReasons();
 	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
 	my $reasons_m2able = join(",", @reasons_m2able);
 	my @clauses = ("active=1", "m2status=0");
 	push @clauses, "reason IN ($reasons_m2able)" if $reasons_m2able;
 	my $where = join(" AND ", @clauses) || "";
 
-	my($oldest) = $self->sqlSelect(
+	my($oldest) = $mod_reader->sqlSelect(
 		"UNIX_TIMESTAMP(MIN(ts))",
 		"moderatorlog",
 		$where
@@ -495,14 +509,18 @@ sub getModM2Ratios {
 	# are "X" for fully-M2'd mods, "_" for un-m2able mods, and
 	# for mods which have been partially M2'd, the digit showing
 	# the number of M2's applied to them so far.
-	my $reasons = $self->getReasons();
+	my $constants = getCurrentStatic();
+	return 0 unless $constants->{m1};
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+	return 0 unless $mod_reader;
+	my $reasons = $mod_reader->getReasons();
 	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
 	my $reasons_m2able = join(",", @reasons_m2able);
 	my $m2able_char_clause = $reasons_m2able
 		? "IF(reason IN ($reasons_m2able), m2count, '_')"
 		: "'X'";
 
-	my $hr = $self->sqlSelectAllHashref(
+	my $hr = $mod_reader->sqlSelectAllHashref(
 		[qw( day val )],
 		"SUBSTRING(ts, 1, 10) AS day,
 		 IF(m2status=0,
