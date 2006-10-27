@@ -249,7 +249,9 @@ sub multiMetaMod {
 	return if !@orig_mmids;
 	my $orig_mmid_in = join(",", @orig_mmids);
 	my $uid_q = $self->sqlQuote($m2_user->{uid});
-	my $reasons = $self->getReasons();
+
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+	my $reasons = $mod_reader->getReasons();
 	my $m2able_reasons = join(",",
 		sort grep { $reasons->{$_}{m2able} }
 		keys %$reasons);
@@ -422,7 +424,9 @@ sub getInheritedM2sForMod {
 sub getModForM2Inherit {
 	my($self, $mod_uid, $cid, $reason, $id) = @_;
 	my $mod_uid_q = $self->sqlQuote($mod_uid);
-	my $reasons = $self->getReasons();
+	my $constants = getCurrentStatic();
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+	my $reasons = $mod_reader->getReasons();
 	my $m2able_reasons = join(",",
 		sort grep { $reasons->{$_}{m2able} }
 		keys %$reasons);
@@ -674,7 +678,8 @@ sub getMetamodsForUserRaw {
 	my $constants = getCurrentStatic();
 	my $m2_wait_hours = $constants->{m2_wait_hours} || 12;
 
-	my $reasons = $self->getReasons();
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+	my $reasons = $mod_reader->getReasons();
 	my $m2able_reasons = join(",",
 		sort grep { $reasons->{$_}{m2able} }
 		keys %$reasons);
