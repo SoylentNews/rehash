@@ -1233,8 +1233,8 @@ sub showInfo {
 
 	my $cid_list = [ keys %$cids_seen ];
 	my $cids_to_mods = {};
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
 	if ($constants->{m1} && $admin_flag && $constants->{show_mods_with_comments}) {
-		my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
 		my $comment_mods = $mod_reader->getModeratorCommentLog("DESC",
 			$constants->{mod_limit_with_comments}, "cidin", $cid_list);
 	
@@ -1259,7 +1259,6 @@ sub showInfo {
         my $ipid_hoursback = $constants->{istroll_ipid_hours} || 72;
 	my $uid_hoursback = $constants->{istroll_uid_hours} || 72;
 
-	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
 	if ($requested_user->{nonuid}) {
 		slashDisplay('netIDInfo', {
 			title			=> $title,
