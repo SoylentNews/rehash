@@ -25,19 +25,15 @@ IF item.url_id;
         title = title _ "<span class=\"external\"><a href=\"" _ url.url _ "\" title=\"External link - " _ url.url _ "\" target=\"_blank\">[-&gt;]</a></span>";
 END;
 title = title _ " " _ '<span class="date">' _ Slash.timeCalc(item.createtime, "%Y-%m-%d %H:%M") _  "</span> <span class='nickname'>" _ item.name _ "</span>";
+	
+firehose = Slash.getObject("Slash::FireHose");
+pop_val = firehose.getPopLevelForPopularity(item.popularity);
+pop_disp = item.popularity.int
 
 IF adminmode;
         reject_checkbox = PROCESS reject id = item.id;
-	firehose = Slash.getObject("Slash::FireHose");
-	pop_val = firehose.getPopLevelForPopularity(item.popularity)
-        pop_disp = item.popularity.int
         title = reject_checkbox _ "<span class='soda pop" _  pop_val _ "'> " _  pop_disp _ "</span> " _ title;
 ELSE;
-        pop_val = item.popularity / 3;
-        pop_val = pop_val > 8 ? 8 : pop_val;
-        pop_val = pop_val < 0 ? 0 : pop_val;;
-        pop_val = pop_val.int;
-        pop_disp = item.popularity.int
         title = "<span class='soda pop" _  pop_val _ "'> &nbsp; </span> " _ title;
 END;
 	%]
