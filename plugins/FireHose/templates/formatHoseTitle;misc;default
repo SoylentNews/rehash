@@ -28,7 +28,7 @@ title = title _ " " _ '<span class="date">' _ Slash.timeCalc(item.createtime, "%
 	
 firehose = Slash.getObject("Slash::FireHose");
 pop_val = firehose.getPopLevelForPopularity(item.popularity);
-pop_disp = item.popularity.int
+pop_disp = item.popularity.int;
 
 IF adminmode;
         reject_checkbox = PROCESS reject id = item.id;
