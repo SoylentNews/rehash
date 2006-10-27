@@ -555,7 +555,11 @@ sub getReverseMods {
 	my $limit =    12  ;	$limit = $options->{limit} if defined $options->{limit};
 	my $min_tokens = -50; # fudge factor: only users who are likely to mod soon
 
-	my $reasons = $self->getReasons();
+	my $constants = getCurrentStatic();
+	return [ ] unless $constants->{m1};
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+	return [ ] unless $mod_reader;
+	my $reasons = $mod_reader->getReasons();
 	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
 	my $reasons_m2able = join(",", @reasons_m2able);
 	my $m2able_score_clause = $reasons_m2able
