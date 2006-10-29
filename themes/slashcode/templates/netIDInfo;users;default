@@ -51,8 +51,7 @@ __template__
 	[% IF !constants.m1_admin_show_mods_with_comments %]
 		<p>
 		[% mod_options.title="Moderations performed on $netid_vis's comment" %]
-		[% moddb = Slash.getObject("Slash::" _ constants.m1_pluginname);
-		   IF moddb; moddb.dispModCommentLog(fieldname, netid, mod_options); END %]
+		[% IF moddb; moddb.dispModCommentLog(fieldname, netid, mod_options); END %]
 	[% END %]
 [% END %]
 <br>
