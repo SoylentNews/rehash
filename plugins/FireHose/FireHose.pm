@@ -435,6 +435,8 @@ sub rejectItemBySubid {
 
 sub rejectItem {
 	my $form = getCurrentForm();
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
 	my $firehose = getObject("Slash::FireHose");
 	my $tags = getObject("Slash::Tags");
 	my $id = $form->{id};
@@ -443,6 +445,16 @@ sub rejectItem {
 	my $item = $firehose->getFireHose($id);
 	if ($item) {
 		$firehose->setFireHose($id, { rejected => "yes" });
+		if ($item->{globjid}) {
+			my $downvote = $constants->{tags_downvote_tagname} || 'nix';
+			$tags->createTag({
+				uid	=>	$user->{uid},
+				name	=> 	$downvote,
+				globjid	=>	$item->{globjid},
+				private	=> 	1
+			});
+		}
+		
 		if ($item->{type} eq "submission") {
 			if ($item->{srcid}) {
 				my $n_q = $firehose->sqlQuote($item->{srcid});
