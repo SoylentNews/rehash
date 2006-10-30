@@ -2335,7 +2335,12 @@ sub saveUserAdmin {
 	if ($user->{is_admin} && ($user_editfield_flag eq 'uid' ||
 		$user_editfield_flag eq 'nickname')) {
 
-		$user_edits_table->{seclev} = $form->{seclev};
+		# This admin user cannot assign a seclev higher than he/she
+		# already has.
+		my $seclev = $form->{seclev};
+		$seclev = $user->{seclev} if $seclev > $user->{seclev};
+		$user_edits_table->{seclev} = $seclev;
+
 		$user_edits_table->{section} = $form->{section};
 		$user_edits_table->{author} = $form->{author} ? 1 : 0 ;
 		$user_edits_table->{defaultpoints} = $form->{defaultpoints};
