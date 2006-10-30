@@ -2370,7 +2370,7 @@ sub saveUserAdmin {
 	}
 
 	if (!$user_edit->{nonuid}) {
-		if ($form->{expired} eq 'on') {
+		if ($form->{expired} && $form->{expired} eq 'on') {
 #			$slashdb->setExpired($user_edit->{uid});
 
 		} else {
