@@ -22,7 +22,7 @@ $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
 	my @slices = split(/\|/,$constants->{firehose_color_slices});
-	my $pops = $slashdb->sqlSelectColArrayref("popularity", "firehose", "createtime > DATE_SUB(NOW(),INTERVAL 1 DAY)", "order by popularity desc");
+	my $pops = $slashdb->sqlSelectColArrayref("popularity", "firehose", "createtime > DATE_SUB(NOW(),INTERVAL 1 DAY) and popularity > 0", "order by popularity desc");
 
 	my $total = scalar(@$pops);
 
@@ -38,10 +38,18 @@ $task{$me}{code} = sub {
 
 	my $slice_point = 0;
 	my @slice_points;
+
 	foreach (@slices) {
 		$slice_point += $_;
 		push @slice_points, $pops->[int($slice_point - 1)];
 	}
+	
+	my $last = 0;
+	
+	# ensure there's at least a gap of 3 between each slice point
+	@slice_points = reverse map { $_ = $last + 3 if $_ < ($last + 3); $last = $_; $_ } reverse @slice_points;
+
+
 	my $slice_point_str = join '|', @slice_points;
 	$slashdb->setVar("firehose_slice_points", $slice_point_str);
 	slashdLog("set slice points to: $slice_point_str");
