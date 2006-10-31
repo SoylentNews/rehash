@@ -81,25 +81,25 @@ sub new {
 # consequences of this may or may not be obvious I suppose.
 
 sub _setuptag {
-	my($self, $hr) = @_;
+	my($self, $hr, $options) = @_;
 	my $tag = { -created_at => 'NOW()' };
 
-        $tag->{uid} = $hr->{uid} || getCurrentUser('uid');
+	$tag->{uid} = $hr->{uid} || getCurrentUser('uid');
 
-        if ($hr->{tagnameid}) {
-                $tag->{tagnameid} = $hr->{tagnameid};
-        } else {
-                # Need to determine tagnameid from name.  We
-                # create the new tag name if necessary.
-                $tag->{tagnameid} = $self->getTagnameidCreate($hr->{name});
-        }
-        return 0 if !$tag->{tagnameid};
+	if ($hr->{tagnameid}) {
+		$tag->{tagnameid} = $hr->{tagnameid};
+	} else {
+		# Need to determine tagnameid from name.  We
+		# create the new tag name if necessary.
+		$tag->{tagnameid} = $self->getTagnameidCreate($hr->{name});
+	}
+	return 0 if !$options->{tagname_not_required} && !$tag->{tagnameid};
 
-        if ($hr->{globjid}) {
-                $tag->{globjid} = $hr->{globjid};
-        } else {
+	if ($hr->{globjid}) {
+		$tag->{globjid} = $hr->{globjid};
+	} else {
 		$tag->{globjid} = $self->getGlobjidCreate($hr->{table}, $hr->{id});
-        }
+	}
 	return 0 if !$tag->{globjid};
 
 	$tag->{private} = $hr->{private} ? 'yes' : 'no';
@@ -210,16 +210,16 @@ sub createTag {
 }
 
 sub deactivateTag {
-        my($self, $hr, $options) = @_;
-	my $tag = $self->_setuptag($hr);
+	my($self, $hr, $options) = @_;
+	my $tag = $self->_setuptag($hr, { tagname_not_required => 1 });
 	return 0 if !$tag;
 	my $prior_clause = '';
 	$prior_clause = " AND tagid < $options->{tagid_prior_to}" if $options->{tagid_prior_to};
 	my $where_clause = "uid		= $tag->{uid}
 			 AND globjid	= $tag->{globjid}
-			 AND tagnameid	= $tag->{tagnameid}
 			 AND inactivated IS NULL
 			 $prior_clause";
+	$where_clause .= " AND tagnameid = $tag->{tagnameid}" if $tag->{tagnameid};
 	my $previously_active_tagids = $self->sqlSelectColArrayref('tagid', 'tags', $where_clause);
 	my $count = $self->sqlUpdate('tags', { -inactivated => 'NOW()' }, $where_clause);
 	if ($count > 1) {
@@ -264,23 +264,23 @@ sub getTagnameidCreate {
 # getTagnameidCreate.
 
 sub createTagname {
-        my($self, $name) = @_;
+	my($self, $name) = @_;
 	return 0 if !$self->tagnameSyntaxOK($name);
-        my $rows = $self->sqlInsert('tagnames', {
-                        tagnameid =>	undef,
-                        tagname =>	$name,
-                }, { ignore => 1 });
-        if (!$rows) {
-                # Insert failed, presumably because this tag already
-                # exists.  The caller should have checked for this
-                # before attempting to create the tag, but maybe the
-                # reader that was checked didn't have this tag
-                # replicated yet.  Pull the information directly
-                # from this writer DB.
-                return $self->getTagnameidFromNameIfExists($name);
-        }
-        # The insert succeeded.  Return the ID that was just added.
-        return $self->getLastInsertId();
+	my $rows = $self->sqlInsert('tagnames', {
+			tagnameid =>	undef,
+			tagname =>	$name,
+		}, { ignore => 1 });
+	if (!$rows) {
+		# Insert failed, presumably because this tag already
+		# exists.  The caller should have checked for this
+		# before attempting to create the tag, but maybe the
+		# reader that was checked didn't have this tag
+		# replicated yet.  Pull the information directly
+		# from this writer DB.
+		return $self->getTagnameidFromNameIfExists($name);
+	}
+	# The insert succeeded.  Return the ID that was just added.
+	return $self->getLastInsertId();
 }
 
 # Given a tagname, get its id, e.g. turn 'omglol' into '17241'.
@@ -316,8 +316,8 @@ sub getTagnameidFromNameIfExists {
 	if ($self->{$table_cache_time}) {
 		$self->{$table_cache}{$name} = $id;
 	}
-        $mcd->set("$mcdkey$name", $id, $constants->{memcached_exptime_tags}) if $mcd;
-        return $id;
+	$mcd->set("$mcdkey$name", $id, $constants->{memcached_exptime_tags}) if $mcd;
+	return $id;
 }
 
 # Given a tagid, set (or clear) (some of) its parameters.
@@ -418,24 +418,24 @@ sub getTagnameDataFromId {
 		return $self->{$table_cache}{$id};
 	}
 
-        my $mcd = $self->getMCD();
-        my $mcdkey = "$self->{_mcd_keyprefix}:tagdata:" if $mcd;
-        if ($mcd) {
-                my $data = $mcd->get("$mcdkey$id");
+	my $mcd = $self->getMCD();
+	my $mcdkey = "$self->{_mcd_keyprefix}:tagdata:" if $mcd;
+	if ($mcd) {
+		my $data = $mcd->get("$mcdkey$id");
 		if ($data) {
 			if ($self->{$table_cache_time}) {
 				$self->{$table_cache}{$id} = $data;
 			}
 			return $data;
 		}
-        }
-        my $id_q = $self->sqlQuote($id);
+	}
+	my $id_q = $self->sqlQuote($id);
 	my $data = { };
-        $data->{tagname} = $self->sqlSelect('tagname', 'tagnames',
-                "tagnameid=$id_q");
-        return undef if !$data->{tagname};
+	$data->{tagname} = $self->sqlSelect('tagname', 'tagnames',
+		"tagnameid=$id_q");
+	return undef if !$data->{tagname};
 	my $params = $self->sqlSelectAllKeyValue('name, value', 'tagname_params',
-                "tagnameid=$id_q");
+		"tagnameid=$id_q");
 	for my $key (keys %$params) {
 		next if $key =~ /^tagname(id)?$/; # don't get to override these
 		$data->{$key} = $params->{$key};
@@ -443,8 +443,8 @@ sub getTagnameDataFromId {
 	if ($self->{$table_cache_time}) {
 		$self->{$table_cache}{$id} = $data;
 	}
-        $mcd->set("$mcdkey$id", $data, $constants->{memcached_exptime_tags}) if $mcd;
-        return $data;
+	$mcd->set("$mcdkey$id", $data, $constants->{memcached_exptime_tags}) if $mcd;
+	return $data;
 }
 
 # getTagsByGlobjid is the main method, getTagsByNameAndIdArrayref
