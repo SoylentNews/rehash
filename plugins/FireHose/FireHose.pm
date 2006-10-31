@@ -913,7 +913,11 @@ sub getAndSetOptions {
 
 	if ($form->{orderby}) {
 		if ($form->{orderby} eq "popularity") {
-			$options->{orderby} = "popularity";
+			if ($user->{is_admin} && !$user->{firehose_usermode}) {
+				$options->{orderby} = "editorpop";
+			} else {
+				$options->{orderby} = "popularity";
+			}
 		} else {
 			$options->{orderby} = "createtime";
 		}
