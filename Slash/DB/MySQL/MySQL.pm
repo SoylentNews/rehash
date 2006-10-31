@@ -11673,6 +11673,7 @@ sub addGlobjEssentialsToHashrefArray {
 	$self->_addGlobjEssentials_urls($ar, \%data);
 	$self->_addGlobjEssentials_submissions($ar, \%data);
 	$self->_addGlobjEssentials_journals($ar, \%data);
+	$self->_addGlobjEssentials_comments($ar, \%data);
 
 #use Data::Dumper; print STDERR "data: " . Dumper(\%data);
 
@@ -11681,6 +11682,7 @@ sub addGlobjEssentialsToHashrefArray {
 
 	for my $object (@$ar) {
 		my $globjid = $object->{globjid};
+		next unless exists $data{$globjid};
 		$object->{url} = $data{$globjid}{url};
 		$object->{title} = $data{$globjid}{title};
 		$object->{created_at} = $data{$globjid}{created_at};
@@ -11774,6 +11776,11 @@ sub _addGlobjEssentials_journals {
 		$data_hr->{$globjid}{title} = $journaldata_hr->{subj};
 		$data_hr->{$globjid}{created_at} = $journaldata_hr->{time};
 	}
+}
+
+sub _addGlobjEssentials_comments {
+	my($self, $ar, $data_hr) = @_;
+	# not implemented yet (no need, yet, since all tags on comments are private)
 }
 
 sub getActiveAdminCount {
