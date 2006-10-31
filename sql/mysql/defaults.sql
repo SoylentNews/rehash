@@ -213,6 +213,7 @@ INSERT INTO globj_types VALUES (NULL, 'stories');
 INSERT INTO globj_types VALUES (NULL, 'urls');
 INSERT INTO globj_types VALUES (NULL, 'submissions');
 INSERT INTO globj_types VALUES (NULL, 'journals');
+INSERT INTO globj_types VALUES (NULL, 'comments');
 
 
 #
