@@ -14,7 +14,7 @@ __seclev__
 10000
 __template__
 [% PROCESS formatHoseIntro introtext = item.introtext; %]
-				[% IF user.is_admin %]
+				[% IF user.is_admin && !user.firehose_usermode %]
 				<input type="hidden" name="firstpreview" value="1">
 				[% IF item.type == "submission" && item.srcid %]
 					<input type="hidden" name="subid" value="[% item.srcid %]">

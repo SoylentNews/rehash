@@ -32,13 +32,13 @@ hose@cmdrtaco.net and be forgiving of beta code!
 	<form action="[% gSkin.rootdir %]/firehose.pl" method="get">
 		<fieldset>
 			<legend>Firehose</legend>
-			<label><input type="text" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="40" autocomplete="off" onfocus="attachCompleter(this,'[% id %]','[% user.is_admin %]','firehose-filter', 0)"></label>
+			<label><input type="text" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="40" autocomplete="off" onfocus="attachCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose-filter', 0)"></label>
 			<!-- <br><label>Order&nbsp;[% Slash.createSelect('order', { 'createtimedesc' => 'Time Desc', popularitydesc => 'Popularity Desc', 'createtimeasc' => 'Time Asc', 'popularityasc' => 'Popularity Asc' }, options.order, 1, 0, 1) %]</label> 
 			<label>Mode&nbsp;[% Slash.createSelect('mode', { 'full' => 'Full', fulltitle => 'Abbreviated' }, options.mode, 1, 0, 1) %]
 </label> -->
 
 			<input type="submit" value="Filter">
-			[% IF user.is_admin %]
+			[% IF user.is_admin && !user.firehose_usermode %]
 			User mode?
 			<input type="hidden" name="setusermode" value="1">
 			<input type="checkbox" value="1" name="firehose_usermode" onchange="this.form.submit()" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]>  
@@ -79,8 +79,8 @@ hose@cmdrtaco.net and be forgiving of beta code!
 	var play = 0;
 	var is_timed_out = 0;
 	var page = '[% page %]';
-	var updateIntervalType = [% IF user.is_admin %]1[% ELSE %]2[% END %];
-	var inactivity_timeout = [% IF user.is_admin %]10800[% ELSE %]3600[% END %];
+	var updateIntervalType = [% IF user.is_admin && !user.firehose_usermode %]1[% ELSE %]2[% END %];
+	var inactivity_timeout = [% IF user.is_admin && !user.firehose_usermode %]10800[% ELSE %]3600[% END %];
 	setFirehoseAction();
 	firehose_pause();
 	var update_time = '[% refresh_options.maxtime %]';
