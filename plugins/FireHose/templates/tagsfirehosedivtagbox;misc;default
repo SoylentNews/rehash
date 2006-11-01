@@ -16,12 +16,13 @@ __template__
 [% IF user.tags_canread_stories %]
 <div id="tagbox-[% id %]" class="tags">
 	<div id="tagbox-title-[% id %]" class="tagtitleclosed">&nbsp;[% IF user.tags_canwrite_stories %]<a href="javascript:tagsToggleStoryDiv('[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose');">[% ELSIF user.is_anon %]<a href="[% gSkin.rootdir %]/login.pl">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% id %]">[+]</span></a>
-<span id="updown-[% item.id %]" class="vote"><a href="javascript:firehose_up_down('[% item.id %]','+')" class="up" title="Vote this item up">+</a> <a href="javascript:firehose_up_down('[% item.id %]','-')" class="down" title="Vote this item down">-</a></span> <i>([% IF user.is_admin && !user.firehose_usermode -%]<span id="note-form-[% item.id %]" class="hide"><input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30" onkeyup="handleEnter(event, firehose_save_note, '[% id %]')"> <input type="button" value="note" onclick="firehose_save_note('[% item.id %]')"></span><a id="note-text-[% item.id %]" onclick="firehose_open_note('[% item.id %]')">[% IF !item.note  %]Note[% END %][% item.note | strip_literal %]</a>
-	[%- ELSE -%]<a href="/faq/tags.shtml">tagging beta</a>
-	[%- END -%])</i> 
+<span id="updown-[% item.id %]" class="vote"><a href="javascript:firehose_up_down('[% item.id %]','+')" class="up" title="Vote this item up">+</a> <a href="javascript:firehose_up_down('[% item.id %]','-')" class="down" title="Vote this item down">-</a></span>  
 <span id="tags-top-[% id %]">
 [% PROCESS firehose_tags_top id = id tags_top = tags_top %]
 </span>
+<i>([% IF user.is_admin && !user.firehose_usermode -%]<span id="note-form-[% item.id %]" class="hide"><input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30" onkeyup="handleEnter(event, firehose_save_note, '[% id %]')"> <input type="button" value="note" onclick="firehose_save_note('[% item.id %]')"></span><a id="note-text-[% item.id %]" onclick="firehose_open_note('[% item.id %]')">[% IF !item.note  %]Note[% END %][% item.note | strip_literal %]</a>
+	[%- ELSE -%]<a href="/faq/tags.shtml">tagging beta</a>
+	[%- END -%])</i>
 <br>
 <br>
 </div>
