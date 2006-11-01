@@ -144,8 +144,12 @@ my(%comments, %comment_data);
 			my($modval, $reason, $active);
 			my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 			my $reasons = $moddb->getReasons();
-			$reason = (keys %$reasons)[rand(scalar(keys %$reasons)-1) + 1];
-			$modval = $reasons->{$reason}{val};
+			my $modval = 0;
+			while ($modval == 0) {
+				# Need a moderation that actually bumps a score up or down.
+				$reason = (keys %$reasons)[rand(scalar(keys %$reasons)-1) + 1];
+				$modval = $reasons->{$reason}{val};
+			}
 			my $pointsneeded = $slashdb->getModPointsNeeded(
 				$comment_data{$did}{$cid}{points},
 				$comment_data{$did}{$cid}{points} + $reasons->{$reason}{val},
