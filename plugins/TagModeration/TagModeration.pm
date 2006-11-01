@@ -1206,7 +1206,7 @@ sub createModeratorLog {
 			name =>		$reason_name,
 			private =>	1,
 		});
-print STDERR "TagModeration::createModeratorLog ret_val=$ret_val reason_name='$reason_name' created='$created'\n";
+#print STDERR "TagModeration::createModeratorLog ret_val=$ret_val reason_name='$reason_name' created='$created'\n";
 	}
 	return $ret_val;
 }
