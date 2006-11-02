@@ -8,6 +8,9 @@ INSERT INTO reskey_resources VALUES (102, 'ajax_user', 'no');
 INSERT INTO reskey_resources VALUES (103, 'ajax_subscriber', 'no');
 INSERT INTO reskey_resources VALUES (104, 'ajax_tags_read', 'no');
 INSERT INTO reskey_resources VALUES (105, 'ajax_tags_write', 'no');
+INSERT INTO reskey_resources VALUES (106, 'ajax_base_static', 'yes');
+INSERT INTO reskey_resources VALUES (107, 'ajax_admin_static', 'yes');
+INSERT INTO reskey_resources VALUES (108, 'ajax_user_static', 'yes');
 
 
 ##### ajax_base
@@ -107,6 +110,43 @@ INSERT INTO reskey_vars VALUES (105, 'tags_canwrite_stories', 1, 'Requires user 
 INSERT INTO reskey_vars VALUES (105, 'user_seclev', 1, 'Minimum seclev to use resource');
 
 
+##### ajax_base_static
+
+INSERT INTO reskey_resource_checks VALUES (NULL, 106, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 106, 'use', 'Slash::ResKey::Checks::Post',                151);
+INSERT INTO reskey_resource_checks VALUES (NULL, 106, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 106, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 106, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+
+INSERT INTO reskey_vars VALUES (106, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (106, 'acl_no', 'reskey_no_ajax', 'If this ACL present, can\'t use resource');
+
+
+##### ajax_admin_static
+
+INSERT INTO reskey_resource_checks VALUES (NULL, 107, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 107, 'use', 'Slash::ResKey::Checks::Post',                151);
+INSERT INTO reskey_resource_checks VALUES (NULL, 107, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+
+INSERT INTO reskey_vars VALUES (107, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (107, 'acl_no', 'reskey_no_ajax', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (107, 'user_is_admin', 1, 'Requires user to be admin');
+INSERT INTO reskey_vars VALUES (107, 'user_seclev', 100, 'Minimum seclev to use resource');
+
+
+##### ajax_user_static
+
+INSERT INTO reskey_resource_checks VALUES (NULL, 108, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 108, 'use', 'Slash::ResKey::Checks::Post',                151);
+INSERT INTO reskey_resource_checks VALUES (NULL, 108, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 108, 'all', 'Slash::ResKey::Checks::AL2::AnonNoPost',     301);
+INSERT INTO reskey_resource_checks VALUES (NULL, 108, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 108, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+
+INSERT INTO reskey_vars VALUES (108, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (108, 'acl_no', 'reskey_no_ajax', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (108, 'user_seclev', 1, 'Minimum seclev to use resource');
+
 
 ##### remarks
 
@@ -124,4 +164,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'admin_storyadminbox', 'Slash::Admin', 'ajax_
 INSERT INTO ajax_ops VALUES (NULL, 'admin_authorbox', 'Slash::Admin', 'ajax_authorbox', 'ajax_admin', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'admin_perfbox', 'Slash::Admin', 'ajax_perfbox', 'ajax_admin', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'admin_learnword', 'Slash::Admin', 'admin_learnword', 'ajax_admin', 'createuse');
+
+
 
