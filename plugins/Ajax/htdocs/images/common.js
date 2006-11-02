@@ -262,6 +262,7 @@ function reportError(request) {
 function createTag(tag, id, type) {
 	var params = [];
 	params['op'] = 'tags_create_tag';
+	params['reskey'] = ajax_user_static;
 	params['name'] = tag;
 	params['id'] = id;
 	params['type'] = type;
