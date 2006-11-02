@@ -361,12 +361,13 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onClick = function( e, me )
 YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type, args, me )
   {
     var tagname = args[2];
-    if ( tagname && me._needsSpareInput() )
+    var p = me._callbackParams;
+
+	// only change the 'menu' title when that title is a tag you are replacing
+    if ( tagname && me._needsSpareInput() && p._tagDomain != 4 )
       {
         me._sourceEl.innerHTML = tagname;
-        // YAHOO.util.Dom.addClass(me._sourceEl, "not-yet-saved");
       }
-    var p = me._callbackParams;
     me._hide();
 
       // really need to move this into a separate function...
