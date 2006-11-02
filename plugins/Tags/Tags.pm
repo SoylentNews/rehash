@@ -209,6 +209,12 @@ sub createTag {
 	return $rows ? $tagid : 0;
 }
 
+sub ajaxCreateTag {
+	my($slashdb, $constants, $user, $form) = @_;
+	my $tags = getObject('Slash::Tags');
+        $tags->createTag($form);
+}
+
 sub deactivateTag {
 	my($self, $hr, $options) = @_;
 	my $tag = $self->_setuptag($hr, { tagname_not_required => 1 });
@@ -743,9 +749,7 @@ sub getExampleTagsForStory {
 	my $constants = getCurrentStatic();
 	my $cur_time = $slashdb->getTime();
 	my @examples = split / /,
-		($cur_time lt $story->{time})
-		? $constants->{tags_stories_examples_pre}
-		: $constants->{tags_stories_examples};
+		       $constants->{tags_stories_examples};
 	my $chosen_ar = $self->getTopiclistForStory($story->{stoid});
 	$#$chosen_ar = 3 if $#$chosen_ar > 3; # XXX should be a var
 	my $tree = $self->getTopicTree();
