@@ -20,6 +20,7 @@ __template__
 <span id="tags-top-[% id %]">
 [% PROCESS firehose_tags_top id = id tags_top = tags_top %]
 </span>
+	[% IF user.tags_canwrite_stories %]<span class="tagname"><a onClick="attachCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose', 4)">feedback</a></span>[% END %]
 <i>([% IF user.is_admin && !user.firehose_usermode -%]<span id="note-form-[% item.id %]" class="hide"><input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30" onkeyup="handleEnter(event, firehose_save_note, '[% id %]')"> <input type="button" value="note" onclick="firehose_save_note('[% item.id %]')"></span><a id="note-text-[% item.id %]" onclick="firehose_open_note('[% item.id %]')">[% IF !item.note  %]Note[% END %][% item.note | strip_literal %]</a>
 	[%- ELSE -%]<a href="/faq/tags.shtml">tagging beta</a>
 	[%- END -%])</i>
