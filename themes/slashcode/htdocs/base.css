@@ -685,3 +685,65 @@ pre
 .sb_header { font-size: 125%; font-weight: bold; color: #600; }
 .hide { display: none }
 .buttons { text-align: right }
+
+
+/* rules for the autocomplete machinery */
+
+a.ac-source
+{
+  color: white;
+  background-color: darkgray;
+}
+
+#ac-select-widget
+{
+  display: block;
+  position: absolute;
+  z-index: 9050;
+  width: 120px;
+  background-color: lightgray;
+}
+#ac-select-widget.hidden, #ac-select-input.hidden { display: none; }
+
+#ac-select-widget input
+{
+  border: 2px solid lightgray;
+  width: 122px;
+  margin: 0;
+  padding: 0;
+}
+
+#ac-choices { width: 100%; }
+
+#ac-choices .yui-ac-content
+{
+  width: 100%;
+  background: #fff;
+  overflow: hidden;
+  z-index: 9050;
+  border: 1px solid darkgray;
+}
+
+#ac-choices ul
+{
+  display: block;
+  list-style: none;
+  margin: 0;
+  padding: 4px 0 0 0;
+  width: 100%;
+  font-family: sans-serif;
+}
+
+#ac-choices li
+{
+  display: block;
+  margin: 0;
+  padding: 0 4px 0 4px;
+  cursor: default;
+  white-space: nowrap;
+}
+
+#ac-choices li.yui-ac-highlight { background: #ff0; }
+
+
+
