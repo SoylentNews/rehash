@@ -259,12 +259,12 @@ function reportError(request) {
 	alert("error");
 }
 
-function createTag(tag, id, table) {
+function createTag(tag, id, type) {
 	var params = [];
 	params['op'] = 'tags_create_tag';
 	params['name'] = tag;
 	params['id'] = id;
-	params['table'] = table;
+	params['type'] = type;
 	ajax_update(params, '');
 }
 
