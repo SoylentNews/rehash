@@ -4199,3 +4199,6 @@ INSERT INTO reskey_vars VALUES (108, 'user_seclev', 1, 'Minimum seclev to use re
 
 INSERT INTO ajax_ops VALUES (NULL, 'tags_create_tag', 'Slash::Tags', 'ajaxCreateTag', 'ajax_user_static', 'use');
 
+# 2006-11-02
+UPDATE vars SET value = 'T_2_5_0_132' WHERE name = 'cvs_tag_currentcode';
+
