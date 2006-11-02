@@ -16,12 +16,6 @@ __template__
 <div class="firemenu">
 [% theupdatetime = Slash.timeCalc(Slash.db.getTime(), "%H:%M"); %]
 [% IF !user.is_admin || (user.is_admin && user.firehose_usermode ) %]
-Firehose is a collaberative system designed to allow users to assist
-the Slashdot editors in the story selection process.  Try tagging and
-voting on the entries below.  The hose can contain submissions, RSS
-Feeds, bookmarks, and journal entries.   Please send your feedback to
-hose@cmdrtaco.net and be forgiving of beta code!
-<p>
 [% END %]
 [% PROCESS titlebar title="Firehose Beta <span style='font-size:60%'>(Last Refreshed <span id='local_last_update_time'>$theupdatetime</span> Currently <span id='pauseorplay'></span>)</span>" %]
 <script type="text/javascript">
@@ -41,7 +35,7 @@ hose@cmdrtaco.net and be forgiving of beta code!
 </label> -->
 
 			<input type="submit" value="Filter">
-			[% IF user.is_admin && !user.firehose_usermode %]
+			[% IF user.is_admin %]
 			User mode?
 			<input type="hidden" name="setusermode" value="1">
 			<input type="checkbox" value="1" name="firehose_usermode" onchange="this.form.submit()" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]>  
@@ -72,6 +66,13 @@ hose@cmdrtaco.net and be forgiving of beta code!
 </div>
 </div>
 </div>
+<p>
+Firehose is a collaberative system designed to allow users to assist
+the Slashdot editors in the story selection process.  Try tagging and
+voting on the entries below.  The hose can contain submissions, RSS
+Feeds, bookmarks, and journal entries.   Please send your feedback to
+hose@cmdrtaco.net and be forgiving of beta code!
+</p>
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
