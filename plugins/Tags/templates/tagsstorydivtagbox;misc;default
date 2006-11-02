@@ -22,8 +22,8 @@ __template__
 	[% FOR t = tags_top -%]
 		<span class="tagname">[% IF user.tags_canwrite_stories %]<a href="javascript:tagsOpenAndEnter('[% sidenc %]','[% t %]','[% user.is_admin %]')">[% END %][% t | strip_html %][% IF user.tags_canwrite_stories %]</a>[% END %]</span>[% IF !loop.last() %], [% END -%]
 	[%- END %]
-[% END %]
-[% IF user.tags_canwrite_stories && story.is_future %]<span class="tagname"><a onClick="attachCompleter(this, '[% sidenc %]','[% user.is_admin %]','stories', 4)">feedback</a></span>[% END %]
+[%- END %]
+[%- IF user.tags_canwrite_stories && story.is_future %], <span class="tagname"><a onClick="attachCompleter(this, '[% sidenc %]','[% user.is_admin %]','stories', 4)">feedback</a></span>[% END %]
 <i>(<a href="/faq/tags.shtml">tagging beta</a>)</i>
 </div>
 

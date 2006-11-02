@@ -16,7 +16,7 @@ __template__
 		parts = t.split(":"); %]
 		<span class="tagname">[% IF user.tags_canwrite_stories && parts.1.defined %]<a onClick="attachCompleter(this, '[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose', [% parts.1 %])">[% END %][% parts.0 | strip_html %][% IF user.tags_canwrite_stories && parts.1.defined %]</a>[% END %]</span>[% IF !loop.last() %], [% END -%]
 	[%- END %]
-[% END %]
+[%- END %]
 __seclev__
 10000
 __version__
