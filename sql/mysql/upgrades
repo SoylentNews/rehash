@@ -4166,3 +4166,5 @@ INSERT INTO globj_types VALUES (NULL, 'comments');
 # for FireHose plugin
 ALTER TABLE firehose ADD INDEX editorpop (editorpop);
 
+# 2006-11-02
+INSERT INTO ajax_ops VALUES (NULL, 'tags_create_tag', 'Slash::Tags', 'ajaxCreateTag', 'ajax_user', 'createuse');
