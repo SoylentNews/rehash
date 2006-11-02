@@ -4,6 +4,7 @@ YAHOO.namespace("slashdot");
 
 YAHOO.slashdot.gCompleterWidget = null;
 
+YAHOO.slashdot.feedbackTags = ["dupe", "typo", "error"];
 YAHOO.slashdot.actionTags = ["none", "quik", "hold", "back"];
 YAHOO.slashdot.sectionTags = [ "apache",
 "apple",
@@ -201,6 +202,7 @@ YAHOO.slashdot.topicTags = ["keyword",
 "vendor_amd_ostg",
 "backslash" ];
 
+    var feedbackDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.feedbackTags);
     var actionsDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.actionTags);
     var sectionsDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.sectionTags);
     var topicsDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.topicTags);
@@ -213,7 +215,7 @@ YAHOO.slashdot.topicTags = ["keyword",
     tagsDS.scriptQueryAppend = "op=tags_list_tagnames";
     tagsDS.queryMethod = "POST";
 
-YAHOO.slashdot.dataSources = [tagsDS, actionsDS, sectionsDS, topicsDS];
+YAHOO.slashdot.dataSources = [tagsDS, actionsDS, sectionsDS, topicsDS, feedbackDS];
 
 
 YAHOO.slashdot.AutoCompleteWidget = function()
@@ -369,10 +371,10 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type,
 
       // really need to move this into a separate function...
       //  at least when there is more than just p._type=='firehose'
-    if ( p._type == "firehose" && p._tagDomain != 0 )
+    if ( p._tagDomain != 0 )
       {
           // save the new tag immediately
-        setOneTopTagForFirehose(p._id, tagname);
+	createTag(tagname, p._id, p._type);
 
           // and if the user tags field exists, add it there (but don't show or hide the field)
         var tagField = document.getElementById('newtags-' + p._id);
