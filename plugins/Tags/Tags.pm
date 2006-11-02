@@ -212,6 +212,7 @@ sub createTag {
 sub ajaxCreateTag {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $tags = getObject('Slash::Tags');
+	return if !$tags;
 
 	my $hr = { uid =>	$user->{uid},
 	 	   name =>	$form->{name} };
@@ -219,13 +220,14 @@ sub ajaxCreateTag {
 	if ( $form->{type} eq 'firehose' ) {
 		my $firehose = getObject("Slash::FireHose");
 		my $item = $firehose->getFireHose($form->{id});
-		$hr['globjid'] = $item->{globjid};
+		$hr->{globjid} = $item->{globjid};
 	} else {
-		$hr['id'] = $form->{id};
-		$hr['table'] = $form->{type};
+		$hr->{id} = $form->{id};
+		$hr->{table} = $form->{type};
 	}
 
         $tags->createTag($hr);
+	return 0;
 }
 
 sub deactivateTag {
