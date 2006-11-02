@@ -259,6 +259,15 @@ function reportError(request) {
 	alert("error");
 }
 
+function createTag(tag, id, table) {
+	var params = [];
+	params['op'] = 'tags_create_tag';
+	params['name'] = tag;
+	params['id'] = id;
+	params['table'] = table;
+	ajax_update(params, '');
+}
+
 function tagsCreateForStory(id) {
 	var toggletags_message_id = 'toggletags-message-' + id;
 	var toggletags_message_el = $(toggletags_message_id);
