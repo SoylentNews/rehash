@@ -688,6 +688,7 @@ pre
 
 
 /* rules for the autocomplete machinery */
+.tagname a { text-decoration: underline; cursor: pointer; }
 
 a.ac-source
 {
