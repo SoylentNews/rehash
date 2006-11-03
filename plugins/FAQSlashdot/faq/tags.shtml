@@ -26,27 +26,30 @@ that you think best describe this article.  You might choose to say that
 this is an article about 'security' and 'mozilla'.
 </p>
 
-<p>This is all very beta. Currently tagging is <b>only open to
-subscribers and some users.</b></p>
+<p>This is all very beta. Currently, tagging is open to our users whose
+accounts are more than about six months old. If your account is more
+recent, you can still get tag access by
+<a href="/subscribe.pl">becoming a Slashdot subscriber</a>.</p>
 
 <p>We don't know exactly how this will all work, and a lot of it really
 depends on you.  If you choose to add your own tags, be aware:</p>
 
 <ul>
 <li>Your tags are <b>public</b>. Everyone will be able to see them!</li>
-<li>Keep your tags brief.</li>
 <li>Tags are space-separated. Use "bigbrother", not "big brother".
+<li>For the <b>opposite</b> of a tag, prefix it with "!", e.g.  "!funny"
+means "not funny."</li>
+<li>Keep your tags brief.</li>
 <li>We provide a few example tags for you. Use them if you like.</li>
 <li>Don't forget to click 'Tag' to save your tags.</li>
 <li>After you save, your current list of tags is put back into the
 text field for you. If you clear it and re-click Tag, your old tags
-are undone. To add more tags, just add them and re-click Tag.</li>
+are undone. To add more tags, just add them to your list and
+re-click Tag.</li>
 <li>Tags must be all-lowercase, no punctuation. Numbers can  
 appear but can't be first. Smoosh them up: for "Web 2.0", tag  
 "web20". Max 64 chars.</li>
-<li>Avoid plurals please: "harddrive", not "harddrives".</li>
-<li>For the <b>opposite</b> of a tag, prefix it with "!", e.g.  "!funny"
-means unfunny.</li>
+<li>Avoid plurals when possible: "harddrive", not "harddrives".</li>
 </ul>
 
 <p>We're excited about this, and see huge potential for this system.
@@ -56,7 +59,7 @@ really limited only by your participation, and our database hardware!
 
 <p><i><font size=-1>Answered by: <a  
 href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 3/08/06</font></i>
+<br><i><font size=-1>Last Modified: 11/02/06</font></i>
 
 
 
@@ -96,6 +99,7 @@ deal with it in good faith.</p>
 <p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
 <br><i><font size=-1>Last Modified: 2/10/06</font></i>
 
+
 <br><a name="tags200" id="tags200"></a>
 <h2>What tags are defined?</h2>
 
@@ -109,6 +113,13 @@ Using it accurately and quickly will do the opposite.)</p>
 <p>Use <b>typo</b> when a Slashdot story writeup has spelling or
 grammatical errors, or bad HTML like a malformed link. Do not tag
 the story with the misspelled word in question.</p>
+
+<p>These tags will alert us to problems immediately (but they won't show
+up on the top tags list).</p>
+
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 11/02/06</font></i>
+
 
 <br><a name="tags300" id="tags300"></a>
 <h2>What are Slashdot Bookmarks?</h2>
@@ -139,17 +150,44 @@ submit stories.</p>
 <p>You can bookmark a site by directly going to <a
 href="/bookmark.pl">the bookmarks page</a>,
 or alternatively, you can use the following lump of javascript as a
-browser button, and save it dynamically from your browser toolbar:
-<p>
-All you need to do is drag one of the following links to your bookmark toolbar, or right-click and save the link as a bookmark.  Subscribers using SSL will want to use
-the HTTPS version of this link.<p>
-HTTP: <a href="javascript:location.href='http://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">Post to Slashdot</a> (general users)<br>
-HTTPS: <a href="javascript:location.href='https://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">Post to Slashdot</a> (for subscribers using SSL)<br>
-</p>
-<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 3/22/06</font></i>
+browser button, and save it dynamically from your browser toolbar:</p>
 
-<br><a name="tags400" id="tags320"></a>
+<p>All you need to do is drag one of the following links to your
+bookmark toolbar, or right-click and save the link as a bookmark.
+Subscribers using SSL will want to use the HTTPS version of this link.</p>
+
+<p>HTTP: <a href="javascript:location.href='http://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">Post to Slashdot</a> (general users)
+<br>
+HTTPS: <a href="javascript:location.href='https://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">Post to Slashdot</a> (for subscribers using SSL)
+</p>
+
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 03/22/06</font></i>
+
+
+<br><a name="tags320" id="tags320"></a>
+<h2>How do I encourage my readers to bookmark at Slashdot?</h2>
+
+<p>In case your site's webpages aren't already cluttered enough with
+"Digg It" and "Add to Del.icio.us" links, you can add a link that
+automatically submits your page to Slashdot. If enough readers
+click, your page will be brought to our editors' attention -- it's
+like a cheap, fast
+<a href="/submit.pl">submit.pl</a>.</p>
+
+<p>You can use the above HTTP link format. We recommend using our
+icon and the text "Slashdot It" as the anchor. Here's one block of
+HTML you can include in any page:</p>
+
+<blockquote><p><pre>&lt;!-- start Slashdot It link --&gt;
+&lt;a href="javascript:location.href='http://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)"&gt;&lt;img src="http://images.slashdot.org/favicon.ico" alt="Slashdot" border="0" height="16" width="16"&gt;&lt;/a&gt; &amp;nbsp; &lt;a href="javascript:location.href='http://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)"&gt;Slashdot It!&lt;/a&gt; 
+&lt;!-- end Slashdot It link --&gt;</pre></blockquote>
+
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 11/02/06</font></i>
+
+
+<br><a name="tags400" id="tags400"></a>
 <h2>How do I share my Bookmarks?</h2>
 
 <p>Your bookmarks are available to you at <a
@@ -159,6 +197,39 @@ bookmarks from their homepages.  To read mine, you would use
 </p>
 <p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
 <br><i><font size=-1>Last Modified: 3/22/06</font></i>
+
+
+<br><a name="tags410" id="tags410"></a>
+<h2>How can I see what Slashdotters are tagging?</h2>
+
+<p>At <a href="/tags">http://slashdot.org/tags</a>
+you can see some of the most popular tags. Each tag shows something
+about readers' thoughts on stories and bookmarks. Categorizational
+tags often work like a mini-search
+(<a href="/tags/web20">web20</a>,
+<a href="/tags/google">google</a>,
+<a href="/tags/diebold">diebold</a>,
+<a href="/tags/xbox">xbox</a>),
+and commentary tags give a glimpse into Slashdotters' opinions
+(<a href="/tags/itsatrap">itsatrap</a>,
+<a href="/tags/fud">fud</a>,
+<a href="/tags/snakeoil">snakeoil</a>,
+<a href="/tags/cool">cool</a>,
+and the Jeopardy-style answers
+<a href="/tags/yes">yes</a> and <a href="/tags/no">no</a>).</p>
+
+<p>You can see your own tags by visiting
+<a href="/my/tags">/my/tags</a>,
+or any user's tags at
+<a href="/~CmdrTaco/tags">/~CmdrTaco/tags</a>.
+
+<p>We'll be doing the usual improvements -- RSS feeds, tag clouds,
+nicer formatting -- a little while down the road.</p>
+
+<p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
+<br><i><font size=-1>Last Modified: 11/02/06</font></i>
+
+
 <hr>
 <table>
 <tr>
