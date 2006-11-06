@@ -13,8 +13,19 @@ firehose_tags_top
 __template__
 [% IF tags_top.size %]
 	[% FOR t = tags_top;
-		parts = t.split(":"); %]
-		<span class="tagname">[% IF user.tags_canwrite_stories && parts.1.defined %]<a onClick="attachCompleter(this, '[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose', [% parts.1 %])">[% END %][% parts.0 | strip_html %][% IF user.tags_canwrite_stories && parts.1.defined %]</a>[% END %]</span>[% IF !loop.last() %], [% END -%]
+		parts = t.split(":");
+		is_menu = user.tags_canwrite_stories && parts.1.defined && parts.1;
+		is_link =  !is_menu && !parts.1; %]
+		<span class="tagname">
+			[%- IF is_menu -%]
+				<span class="tagmenu"><a onClick="attachCompleter(this, '[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose', [% parts.1 %])">
+			[%- ELSIF is_link -%]
+				<a href="/tags/[% parts.0 | strip_html %]">
+			[%- END -%]
+				[%- parts.0 | strip_html -%]
+			[%- IF is_menu || is_link %]</a>[% END -%]
+			[%- IF is_menu %]</span>[% END -%]
+		</span>[% IF !loop.last() %], [% END -%]
 	[%- END %]
 [%- END %]
 __seclev__
