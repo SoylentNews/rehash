@@ -37,7 +37,7 @@ sub moderatordLog {
 
 sub give_out_points {
 	my $constants = getCurrentStatic();
-	my $moddb = getCurrentDB('Slash::Moderation');
+	my $moddb = getObject('Slash::Moderation');
 
 	moderatordLog(getData('moderatord_log_header'));
 
@@ -106,7 +106,7 @@ sub get_num_new_comments {
 sub give_out_tokens {
 	my($comments) = @_;
 	my $constants = getCurrentStatic();
-	my $moddb = getCurrentDB('Slash::Moderation');
+	my $moddb = getObject('Slash::Moderation');
 	my $mod_reader = getObject('Slash::Moderation', { db_type => 'reader' });
 	my $log_reader = getObject('Slash::DB', { db_type => 'log_slave' });
 	my $statsSave = getObject('Slash::Stats::Writer', '');
