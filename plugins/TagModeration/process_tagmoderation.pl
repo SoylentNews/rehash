@@ -108,7 +108,7 @@ sub give_out_tokens {
 	my $constants = getCurrentStatic();
 	my $tagmoddb = getObject('Slash::TagModeration');
 	my $mod_reader = getObject('Slash::TagModeration', { db_type => 'reader' });
-	my $log_reader = getObject('Slash::DB', { db_type => 'log_slave' });
+	my $log_reader = getObject('Slash::TagModeration', { db_type => 'log_slave' });
 	my $statsSave = getObject('Slash::Stats::Writer', '');
 
 	my $needed = 0;
