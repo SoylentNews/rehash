@@ -1,0 +1,24 @@
+__section__
+default
+__description__
+Global Javascript and HTML needed exactly once on any page that uses our autocomplete machinery.
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+autocomplete
+__template__
+<script type="text/javascript">
+[% reskey = Slash.getObject('Slash::ResKey'); rkey = reskey.key('ajax_user_static', { nostate => 1 }); IF rkey.create; -%]var ajax_user_static = '[% rkey.reskey %]';[% END %]
+</script>
+<div id="ac-select-widget" class="hidden">
+  <input type="text" id="ac-select-input" />
+  <div class="completer-container" id="ac-choices"></div>
+</div>
+__seclev__
+10000
+__version__
+$Id$
