@@ -20,7 +20,7 @@ __template__
 <div id="tagbox-title-[% sidenc %]" class="tagtitleclosed">&nbsp;[% IF user.tags_canwrite_stories %]<a href="javascript:tagsToggleStoryDiv('[% sidenc %]','[% user.is_admin %]');">[% ELSIF user.is_anon %]<a href="[% gSkin.rootdir %]/login.pl">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% sidenc %]">[+]</span></a>
 [% IF tags_top.size %]
 	[% FOR t = tags_top -%]
-		<span class="tagname">[% IF user.tags_canwrite_stories %]<a href="javascript:tagsOpenAndEnter('[% sidenc %]','[% t %]','[% user.is_admin %]')">[% END %][% t | strip_html %][% IF user.tags_canwrite_stories %]</a>[% END %]</span>[% IF !loop.last() || story.is_future %], [% END -%]
+		<span class="tagname"><a href="/tags/[% t | strip_html %]">[% t | strip_html %]</a></span>[% IF !loop.last() || story.is_future %], [% END -%]
 	[%- END %]
 [%- END %]
 [%- IF user.tags_canwrite_stories && story.is_future %]<span class="tagmenu"><a onClick="attachCompleter(this, '[% sidenc %]','[% user.is_admin %]','stories', 4)">feedback</a></span>[% END %]
