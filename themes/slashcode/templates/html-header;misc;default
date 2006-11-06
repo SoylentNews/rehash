@@ -44,9 +44,6 @@ __template__
 	[% END %]
 	[% END %]
 [% END %]
-<script type="text/javascript">
-[% reskey = Slash.getObject('Slash::ResKey'); rkey = reskey.key('ajax_user_static', { nostate => 1 }); IF rkey.create; -%]var ajax_user_static = '[% rkey.reskey %]';[% END %]
-</script>
 __seclev__
 10000
 __version__

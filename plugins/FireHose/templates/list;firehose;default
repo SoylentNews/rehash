@@ -16,13 +16,7 @@ __template__
 <div class="firemenu">
 [% theupdatetime = Slash.timeCalc(Slash.db.getTime(), "%H:%M"); %]
 [% PROCESS titlebar title="Firehose Beta <span style='font-size:60%'>(Last Refreshed <span id='local_last_update_time'>$theupdatetime</span> Currently <span id='pauseorplay'></span>)</span>" %]
-<script type="text/javascript">
-[% reskey = Slash.getObject('Slash::ResKey'); key = reskey.key('ajax_user_static', { nostate => 1 }); IF rkey.create; -%]ajax_user_static = '[% rkey.reskey %]';[% END %]
-</script>
-<div id="ac-select-widget" class="hidden">
-  <input type="text" id="ac-select-input" />
-  <div class="completer-container" id="ac-choices"></div>
-</div>
+[% PROCESS autocomplete %]
 <div class="submenu">
 	<form action="[% gSkin.rootdir %]/firehose.pl" method="get">
 		<fieldset>
