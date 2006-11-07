@@ -252,8 +252,6 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._newCompleter = function( tagDomain 
       {
         c = new YAHOO.widget.AutoComplete("ac-select-input", "ac-choices", YAHOO.slashdot.dataSources[tagDomain]);
 
-        c.minQueryLength = 3;
-
           // hack? -- override YUI's private member function so that for top tags auto-complete, right arrow means select
         c._jumpSelection = function() { if ( this._oCurItem ) this._selectItem(this._oCurItem); };
       }
@@ -261,6 +259,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._newCompleter = function( tagDomain 
       {
         c = new YAHOO.widget.AutoComplete(this._sourceEl, "ac-choices", YAHOO.slashdot.dataSources[tagDomain]);
         c.delimChar = " ";
+        c.minQueryLength = 3;
       }
     c.typeAhead = true;
     c.forceSelection = false;
