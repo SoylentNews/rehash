@@ -4202,6 +4202,11 @@ UPDATE vars SET value = 'T_2_5_0_132' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+# For FireHose plugin
+ALTER TABLE firehose ADD COLUMN discussion mediumint UNSIGNED NOT NULL DEFAULT '0' AFTER globjid;
+UPDATE firehose, stories SET firehose.discussion = stories.discussion WHERE firehose.type="story" AND firehose.srcid=stories.stoid;
+UPDATE firehose, journals SET firehose.discussion = journals.discussion WHERE firehose.type="journal" AND firehose.srcid=journals.id;
+
 # for Tags plugin
 INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_priority', 'submission', 'Tagnames to give priority to on autocomplete');
 INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_priority_score', '999', 'Fake score to give any tagnames from tags_autocomplete_priority which may match a prefix');
