@@ -1113,12 +1113,30 @@ sub ajaxTagHistory {
 
 sub ajaxListTagnames {
 	my($slashdb, $constants, $user, $form) = @_;
+	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	my $prefix = '';
 	$prefix = lc($1) if $form->{prefix} =~ /([A-Za-z]+)/;
-	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	my $retval = $tags_reader->listTagnamesByPrefix($prefix);
-print STDERR scalar(localtime) . " ajaxListTagnames uid=$user->{uid} prefix='$prefix' retval: $retval";
-	return $retval;
+	my $len = length($prefix);
+
+	my $tnhr = $tags_reader->listTagnamesByPrefix($prefix);
+
+	my @priority =
+		grep { substr($_, 0, $len) eq $prefix }
+		split / /,
+		$constants->{tags_autocomplete_priority};
+	for my $priname (@priority) {
+		# Don't reduce a tagname's value if it already exceeds the
+		# hardcoded score value.
+		next if $tnhr->{$priname} && $tnhr->{$priname} > $constants->{tags_autocomplete_priority_score};
+		$tnhr->{$priname} = $constants->{tags_autocomplete_priority_score};
+	}
+
+	my $ret_str = '';
+	for my $tagname (sort { $tnhr->{$b} <=> $tnhr->{$a} } keys %$tnhr) {
+		$ret_str .= sprintf("%s\t%d\n", $tagname, $tnhr->{$tagname});
+	}
+#print STDERR scalar(localtime) . " ajaxListTagnames uid=$user->{uid} prefix='$prefix' ret_str: $ret_str";
+	return $ret_str;
 }
 
 { # closure
@@ -1413,7 +1431,7 @@ sub listTagnamesByPrefix {
 
 	my $mcd = undef;
 	$mcd = $self->getMCD() unless $options;
-	my $mcdkey = "$self->{_mcd_keyprefix}:tag_pref:";
+	my $mcdkey = "$self->{_mcd_keyprefix}:tag_prefx:";
 	if ($mcd) {
 		my $ret_str = $mcd->get("$mcdkey$prefix_str");
 		return $ret_str if $ret_str;
@@ -1433,15 +1451,15 @@ sub listTagnamesByPrefix {
 		 HAVING c >= $minc AND s >= $mins
 		 ORDER BY sc DESC, tagname ASC
 		 LIMIT $num");
-	my $ret_str = '';
+	my $ret_hr = { };
 	for my $hr (@$ar) {
-		$ret_str .= sprintf "%s\t%d\n", $hr->{tagname}, $hr->{sc};
+		$ret_hr->{ $hr->{tagname} } = $hr->{sc};
 	}
 	if ($mcd) {
 		my $mcdexp = $constants->{tags_cache_expire} || 180;
-		$mcd->set("$mcdkey$prefix_str", $ret_str, $mcdexp)
+		$mcd->set("$mcdkey$prefix_str", $ret_hr, $mcdexp)
 	}
-	return $ret_str;
+	return $ret_hr;
 }
 
 sub getPrivateTagnames {
