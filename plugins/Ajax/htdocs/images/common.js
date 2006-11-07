@@ -242,6 +242,10 @@ function tagsOpenAndEnter(id, tagname, is_admin, type) {
 }
 
 function attachCompleter( obj, id, is_admin, type, tagDomain ) {
+	var disable = YAHOO.util.Dom.getStyle(obj, '-slashdot-disable-tag-completer');
+	if ( disable == "true" )
+		return false;
+
 	var callbackParams = new Object();
 	callbackParams._id = id;
 	callbackParams._is_admin = is_admin;
