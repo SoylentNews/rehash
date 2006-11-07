@@ -2499,6 +2499,17 @@ sub getOpAndDatFromStatusAndURI {
 		$uri = 'rss';
 	} elsif ($uri =~ /\.pl$/) {
 		$uri =~ s|^/(.*)\.pl$|$1|;
+		if ($uri eq "ajax") {
+			my $form = getCurrentForm();
+			if ($form && $form->{op}) {
+				my $reader = getObject('Slash::DB', { db_type => 'reader' });
+				my $class = $reader->getClassForAjaxOp($form->{op});
+				$class =~s/^Slash:://g;
+				$class =~s/::/_/g;
+				$class =~ tr/A-Z/a-z/;
+				$uri = "ajax_$class" if $class;
+			}
+		}
 	# This is for me, I am getting tired of patching my local copy -Brian
 	} elsif ($uri =~ /\.tar\.gz$/) {
 		$uri =~ s|^/(.*)\.tar\.gz$|$1|;
@@ -2529,7 +2540,7 @@ sub getOpAndDatFromStatusAndURI {
 	# basis.  --vroom 2004/01/27
 	} elsif ($uri =~ m|^/([^/]*)/([^/]*/)+$|) {
 		$uri = $1;
-	}
+	} 
 	($uri, $dat);
 }
 
