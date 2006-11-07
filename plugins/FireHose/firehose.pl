@@ -54,6 +54,8 @@ sub list {
 	my $firehose = getObject("Slash::FireHose");
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $options = $firehose->getAndSetOptions();
+	use Data::Dumper;
+	print STDERR Dumper($options);
 
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($options);
 
@@ -67,6 +69,7 @@ sub list {
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
 		$itemstext .= $firehose->dispFireHose($item, { mode => $options->{mode} , tags_top => $tags_top, options => $options });
 	}
+	print STDERR "FHITEMS " . scalar @$items . "\n";
 	my $refresh_options;
 	if ($options->{orderby} eq "createtime" || $options->{orderby} eq "popularity") {
 		$refresh_options->{maxtime} = $maxtime;

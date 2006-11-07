@@ -43,6 +43,7 @@ $searchtootest = 0;
 sub createFireHose {
 	my($self, $data) = @_;
 	$data->{-createtime} = "NOW()" if !$data->{createtime} && !$data->{-createtime};
+	$data->{discussion} ||= 0 if defined $data->{discussion};
 
 	my $text_data = {};
 	$text_data->{title} = delete $data->{title};
@@ -71,7 +72,7 @@ sub createUpdateItemFromJournal {
 		my($itemid) = $self->sqlSelect("*", "firehose", "globjid=$globjid_q");
 		if ($itemid) {
 			my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
-			$self->setFireHose($itemid, { introtext => $introtext, title => $journal->{description}, tid => $journal->{tid}});
+			$self->setFireHose($itemid, { introtext => $introtext, title => $journal->{description}, tid => $journal->{tid}, discussion => $journal->{discussion}});
 		} else {
 			$self->createItemFromJournal($id);
 		}
@@ -97,7 +98,8 @@ sub createItemFromJournal {
 			type 			=> "journal",
 			popularity		=> $self->getMinPopularityForColorLevel(5),
 			tid			=> $journal->{tid},
-			srcid			=> $id
+			srcid			=> $id,
+			discussion		=> $journal->{discussion}
 		};
 		$self->createFireHose($data);
 	}
@@ -185,7 +187,8 @@ sub updateItemFromStory {
 				primaryskid	=> $story->{primaryskid},
 				tid 		=> $story->{tid},
 				public		=> $public,
-				dept		=> $story->{dept}
+				dept		=> $story->{dept},
+				discussion	=> $story->{discussion},
 			};
 			$self->setFireHose($id, $data);
 		}
@@ -197,7 +200,7 @@ sub createItemFromStory {
 	my $constants = getCurrentStatic();
 	# If a story is created with an ignored primary skid it'll never be created as a firehose entry currently
 	my %ignore_skids = map {$_ => 1 } @{$constants->{firehose_story_ignored_skids}};
-	my $story = $self->getStory($id);
+	my $story = $self->getStory($id, '', 1);
 
 	my $popularity = $self->getMinPopularityForColorLevel(2);
 	if ($story->{story_topics_rendered}{$constants->{mainpage_nexus_tid}}) {
@@ -221,10 +224,16 @@ sub createItemFromStory {
 			type 		=> "story",
 			public		=> $public,
 			accepted	=> "yes",
-			dept		=> $story->{dept}
+			dept		=> $story->{dept},
+			discussion	=> $story->{discussion},
 		};
 		$self->createFireHose($data);
 	}
+}
+
+sub getFireHoseCount {
+	my($self) = @_;
+	return $self->sqlCount("firehose", "category='' AND accepted='no' AND rejected='no'");
 }
 
 sub getFireHoseEssentials {
