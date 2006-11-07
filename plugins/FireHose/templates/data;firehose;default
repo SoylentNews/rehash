@@ -18,8 +18,8 @@ __template__
 	[% IF !hidediv %]
 	<div class="details" id="details-[% item.id %]">
 	[% END %]
-	[%- IF adminmode && item.type == "submission" %]<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">[% END -%]
 	<b>
+	[%- IF adminmode && item.type == "submission" %]<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">[% END -%]
 	[% IF item.type == "submission" %]
 		Submitted
 	[% ELSIF item.type == "journal" %]

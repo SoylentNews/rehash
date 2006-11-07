@@ -30,6 +30,9 @@ IF item.type == "submission";
 	END;
 
 END;
+IF item.url_id && url.url;
+	introtext = introtext _ "<a href='" _ url.url _ "'>" _ url.initialtitle _ "</a>";
+END;
 
 %]
 

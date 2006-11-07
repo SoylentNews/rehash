@@ -115,6 +115,12 @@ END %]
 				Coming soon - Read More & Discuss...
 			[% END %]
 			</li>
+			[% IF item.discussion;
+			   disc = Slash.db.getDiscussion(item.discussion); %]
+			<li>
+				<a href="[% gSkin.rootdir %]/comments.pl?sid=[% item.discussion %]">[% disc.commentcount %]</a> comment[% IF disc.commentcount == 1 %]s[% END %]
+			</li>
+			[% END %]
 		</ul>
 	</div>
 </div>
