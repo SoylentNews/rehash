@@ -11976,6 +11976,12 @@ sub addUrlForGlobj {
 	$self->sqlInsert("globj_urls", { url_id => $url_id, globjid => $globjid }, { ignore => 1 });
 }
 
+sub getClassForAjaxOp {
+	my ($self, $op) = @_;
+	my $op_q = $self->sqlQuote($op);
+	return $self->sqlSelect("class", "ajax_ops", "op=$op_q");
+}
+
 ########################################################
 sub DESTROY {
 	my($self) = @_;
