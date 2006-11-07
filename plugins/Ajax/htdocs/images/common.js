@@ -1,6 +1,9 @@
 // _*_ Mode: JavaScript; tab-width: 8; indent-tabs-mode: true _*_
 // $Id$
 
+var fh_play = 0;
+var fh_is_timed_out = 0;
+
 function createPopup(xy, titlebar, name, contents, message) {
 	var body = document.getElementsByTagName("body")[0]; 
 	var div = document.createElement("div");
@@ -510,6 +513,7 @@ function firehose_get_updates_handler(transport) {
 				var fhel = $('firehose-' + response.ordered[i]);
 				fhlist.appendChild(fhel);
 			}
+			document.title = "FireHose (" + response.ordered.length + ")";
 		}
 	}
 	if (processed) {
@@ -518,7 +522,7 @@ function firehose_get_updates_handler(transport) {
 		}
 	}
 	var interval = getFirehoseUpdateInterval();
-	setTimeout("firehose_get_updates(" + is_timed_out +")", interval);
+	setTimeout("firehose_get_updates(" + fh_is_timed_out +")", interval);
 }
 
 function firehose_get_item_idstring() {
@@ -537,11 +541,11 @@ function firehose_get_item_idstring() {
 }
 
 function firehose_get_updates(require_timeout) {
-	if (require_timeout && !is_timed_out) {
+	if (require_timeout && !fh_is_timed_out) {
 		return;
 	}
 	run_before_update();
-	if (play == 0) {
+	if (fh_play == 0) {
 		setTimeout("firehose_get_updates()", 2000);
 		return;
 	}
@@ -561,8 +565,8 @@ function setFirehoseAction() {
 	var thedate = new Date();
 	var newtime = thedate.getTime();
 	firehose_action_time = newtime;
-	if (is_timed_out) {
-		is_timed_out = 0;
+	if (fh_is_timed_out) {
+		fh_is_timed_out = 0;
 		firehose_play();
 		firehose_get_updates();
 	}
@@ -591,7 +595,7 @@ function getFirehoseUpdateInterval() {
 function run_before_update() {
 	var secs = getSecsSinceLastFirehoseAction();
 	if (secs > inactivity_timeout) {
-		is_timed_out = 1;
+		fh_is_timed_out = 1;
 		if ($('message_area'))
 			$('message_area').innerHTML = "Automatic updates have been slowed due to inactivity";
 		//firehose_pause();
@@ -599,7 +603,7 @@ function run_before_update() {
 }
 
 function firehose_play() {
-	play = 1;
+	fh_play = 1;
 	setFirehoseAction();
 	if ($('message_area'))
 		$('message_area').innerHTML = "";
