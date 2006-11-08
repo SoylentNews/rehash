@@ -1123,12 +1123,12 @@ sub ajaxListTagnames {
 	my @priority =
 		grep { substr($_, 0, $len) eq $prefix }
 		split / /,
-		$constants->{tags_autocomplete_priority};
+		$constants->{tags_prefixlist_priority};
 	for my $priname (@priority) {
 		# Don't reduce a tagname's value if it already exceeds the
 		# hardcoded score value.
-		next if $tnhr->{$priname} && $tnhr->{$priname} > $constants->{tags_autocomplete_priority_score};
-		$tnhr->{$priname} = $constants->{tags_autocomplete_priority_score};
+		next if $tnhr->{$priname} && $tnhr->{$priname} > $constants->{tags_prefixlist_priority_score};
+		$tnhr->{$priname} = $constants->{tags_prefixlist_priority_score};
 	}
 
 	my $ret_str = '';
