@@ -11977,7 +11977,7 @@ sub addUrlForGlobj {
 }
 
 sub getClassForAjaxOp {
-	my ($self, $op) = @_;
+	my($self, $op) = @_;
 	my $op_q = $self->sqlQuote($op);
 	return $self->sqlSelect("class", "ajax_ops", "op=$op_q");
 }
