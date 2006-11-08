@@ -2494,7 +2494,7 @@ sub getOpAndDatFromStatusAndURI {
 		$uri = 'image';
 	} elsif ($uri =~ /\.png$/) {
 		$uri = 'image';
-	} elsif ($uri =~ /\.rss$/ || $uri =~ /\.xml$/ || $uri =~ /\.rdf$/ || $ENV{QUERY_STRING} =~ /\bcontent_type=rss\b/) {
+	} elsif ($uri =~ /\.(?:rss|xml|rdf|atom)$/ || $ENV{QUERY_STRING} =~ /\bcontent_type=(?:rss|xml|rdf|atom)\b/) {
 		$dat = $uri;
 		$uri = 'rss';
 	} elsif ($uri =~ /\.pl$/) {
@@ -2540,7 +2540,7 @@ sub getOpAndDatFromStatusAndURI {
 	# basis.  --vroom 2004/01/27
 	} elsif ($uri =~ m|^/([^/]*)/([^/]*/)+$|) {
 		$uri = $1;
-	} 
+	}
 	($uri, $dat);
 }
 
