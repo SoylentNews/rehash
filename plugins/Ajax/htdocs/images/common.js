@@ -617,7 +617,7 @@ function firehose_play() {
 }
 
 function firehose_pause() {
-	play = 0;
+	fh_play = 0;
 	var pause = $('pause');
 	var play_div = $('play');
 	pause.className = "hide";
