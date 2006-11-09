@@ -71,7 +71,7 @@ sub list {
 	}
 	print STDERR "FHITEMS " . scalar @$items . "\n";
 	my $refresh_options;
-	if ($options->{orderby} eq "createtime" || $options->{orderby} eq "popularity") {
+	if ($options->{orderby} eq "createtime" || $options->{orderby} eq "popularity" || $options->{orderby} eq "editorpop") {
 		$refresh_options->{maxtime} = $maxtime;
 		if (uc($options->{orderdir}) eq "ASC") {
 			$refresh_options->{insert_new_at} = "bottom";

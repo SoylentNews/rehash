@@ -233,7 +233,7 @@ sub createItemFromStory {
 
 sub getFireHoseCount {
 	my($self) = @_;
-	return $self->sqlCount("firehose", "category='' AND accepted='no' AND rejected='no'");
+	return $self->sqlCount("firehose", "type='submission' AND category='' AND accepted='no' AND rejected='no'");
 }
 
 sub getFireHoseEssentials {
