@@ -3855,7 +3855,7 @@ sub resetFormkey {
 
 	my $update_ref = {
 		-value          => 0,
-		-idcount        => 'idcount-1',
+		-idcount        => 'GREATEST(0, idcount-1)',
 # Since the beginning, ts has been updated here whenever a formkey needs to
 # be reset.  As far as I can tell, this serves no purpose except to reset
 # the 20-second clock before a comment can be posted after a failed attempt
@@ -3869,10 +3869,8 @@ sub resetFormkey {
 	$update_ref->{formname} = $formname if $formname;
 
 	# reset the formkey to 0, and reset the ts
-	my $updated = $self->sqlUpdate("formkeys",
-		$update_ref,
-		"formkey=" . $self->sqlQuote($formkey)
-	);
+	my $formkey_q = $self->sqlQuote($formkey);
+	my $updated = $self->sqlUpdate("formkeys", $update_ref, "formkey=$formkey_q");
 
 	print STDERR "RESET formkey $updated\n" if $constants->{DEBUG};
 	return $updated;
