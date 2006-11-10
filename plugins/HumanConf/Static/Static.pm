@@ -172,10 +172,8 @@ sub deleteOldFromPool {
 		# Delete the rows of the ones whose files we deleted.
 		if (@row_ids_to_delete) {
 			my $hcpids_list = join(",", @row_ids_to_delete);
-			my $new_delrows = $self->sqlDelete(
-				"humanconf_pool",
-				"hcpid IN ($hcpids_list)"
-			);
+			my $new_delrows = $self->sqlDelete('humanconf_pool', "hcpid IN ($hcpids_list)");
+			$self->sqlDelete('humanconf', "hcpid IN ($hcpids_list)");
 			$successfully_deleted += $new_delrows;
 			$remaining_to_delete -= $new_delrows;
 			$delrows += $new_delrows;
