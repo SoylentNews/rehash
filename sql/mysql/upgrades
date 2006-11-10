@@ -4214,3 +4214,13 @@ INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_priority_sc
 # 2006-11-08
 UPDATE vars SET value = 'T_2_5_0_133' WHERE name = 'cvs_tag_currentcode';
 
+ALTER TABLE comments MODIFY COLUMN pid int unsigned not null default '0';
+ALTER TABLE formkeys MODIFY COLUMN idcount int unsigned not null default '0';
+
+# for HumanConf plugin
+ALTER TABLE humanconf MODIFY COLUMN hcid int unsigned not null auto_increment, MODIFY COLUMN hcpid int unsigned not null;
+ALTER TABLE humanconf_pool MODIFY COLUMN hcpid int unsigned not null auto_increment;
+
+# for Zoo plugin
+ALTER TABLE people MODIFY COLUMN id int unsigned not null auto_increment;
+

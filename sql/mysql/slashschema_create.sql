@@ -260,7 +260,7 @@ DROP TABLE IF EXISTS comments;
 CREATE TABLE comments (
 	sid mediumint UNSIGNED NOT NULL,
 	cid int UNSIGNED NOT NULL auto_increment,
-	pid mediumint UNSIGNED DEFAULT '0' NOT NULL,
+	pid int UNSIGNED DEFAULT '0' NOT NULL,
 	date datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
 	last_update TIMESTAMP NOT NULL,
 	ipid char(32) DEFAULT '' NOT NULL,
@@ -489,7 +489,7 @@ CREATE TABLE formkeys (
 	formkey varchar(20) DEFAULT '' NOT NULL,
 	formname varchar(32) DEFAULT '' NOT NULL,
 	id varchar(30) DEFAULT '' NOT NULL,
-	idcount mediumint UNSIGNED DEFAULT 0 NOT NULL,
+	idcount int UNSIGNED DEFAULT 0 NOT NULL,
 	uid mediumint UNSIGNED NOT NULL,
 	ipid	char(32) DEFAULT '' NOT NULL,
 	subnetid	char(32) DEFAULT '' NOT NULL,

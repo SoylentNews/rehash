@@ -102,9 +102,13 @@ sub _set {
 #	$self->delete($uid, $person, $current_standing->{type})
 #		if ($current_standing && $current_standing->{type});
 
+	# Make sure $person actually exists.
+	return unless $self->sqlSelect('uid', 'users', "uid=$person");
+
 	# First we do the main person
 	# We insert to make sure a position exists for this relationship and then we update.
 	# If I ever removed freak/fan from the table this could be done as a replace.
+	# XXX This should be a transaction.
 	$self->sqlInsert('people', { uid => $uid,  person => $person }, { ignore => 1});
 	$self->sqlUpdate('people', { type => $type }, "uid = $uid AND person = $person");
 	my $people = $self->rebuildUser($uid);
@@ -117,6 +121,7 @@ sub _set {
 	my $s_const = $type eq 'foe' ? FREAK : FAN;
 	$self->sqlInsert('people', { uid => $person,  person => $uid }, { ignore => 1});
 	$self->sqlUpdate('people', { perceive => $s_type }, "uid = $person AND person = $uid");
+	# XXX transaction should end here I think
 
 	# Mark other users as dirty (needing to be changed) as 
 	# appropriate, but do it a few at a time with a short
