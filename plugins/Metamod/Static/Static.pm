@@ -79,8 +79,10 @@ sub getModResolutionSummaryForUser {
 	my $limit_str = "";
 	$limit_str = "LIMIT $limit" if $limit;
 	my($fair, $unfair, $fairvotes, $unfairvotes) = (0,0,0,0);
-	
-	my $reasons = $self->getReasons();
+
+	my $constants = getCurrentStatic();
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+	my $reasons = $moddb->getReasons();
 	my @reasons_m2able = grep { $reasons->{$_}{m2able} } keys %$reasons;
 	my $reasons_m2able = join(",", @reasons_m2able);
 	
