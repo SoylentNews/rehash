@@ -1377,12 +1377,9 @@ sub listTagnamesActive {
 			{ ($_, $tagname_clout{$_}/$max_clout - $tagname_mediansqrtsecsago{$_}/$max_sqrtsecs) }
 			@tagnames
 		);
-#use Data::Dumper; print STDERR Dumper(\%tagname_sum);
 	@tagnames = sort { $tagname_sum{$b} <=> $tagname_sum{$a} || $a cmp $b } @tagnames;
 
 	$#tagnames = $max_num-1 if $#tagnames >= $max_num;
-
-#print STDERR "tagnames='@tagnames'\n";
 
 	return \@tagnames;
 }
