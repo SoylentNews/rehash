@@ -1503,19 +1503,18 @@ sub createRSS {
 	$item->{'link'} =~ /^(.*)$/;
 	my $link = $1;
 
-	$self->sqlInsert('rss_raw', {
-# 		link_signature		=> md5_hex($item->{'link'}),
-# 		title_signature		=> md5_hex($item->{'title'}),
-# 		description_signature	=> md5_hex($item->{'description'}),
+	my $data_hr = {
 		link_signature		=> md5_hex($link),
 		title_signature		=> md5_hex($title),
 		description_signature	=> md5_hex($description),
 		'link'			=> $item->{'link'},
 		title			=> $item->{'title'},
 		description		=> $item->{'description'},
-		-created		=> 'now()',
-		bid => $bid,
-	}, { ignore => 1});
+		-created		=> 'NOW()',
+		bid			=> $bid,
+	};
+use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "createRSS $bid: " . Dumper($data_hr);
+	$self->sqlInsert('rss_raw', $data_hr }, { ignore => 1 });
 }
 
 sub getRSSNotProcessed {
