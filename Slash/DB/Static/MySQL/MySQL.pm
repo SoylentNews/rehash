@@ -1514,7 +1514,7 @@ sub createRSS {
 		bid			=> $bid,
 	};
 use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "createRSS $bid: " . Dumper($data_hr);
-	$self->sqlInsert('rss_raw', $data_hr }, { ignore => 1 });
+	$self->sqlInsert('rss_raw', $data_hr, { ignore => 1 });
 }
 
 sub getRSSNotProcessed {
