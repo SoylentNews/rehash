@@ -61,10 +61,8 @@ sub set {
 	$self->sqlUpdate('journals_text', \%j2, "id=$id") if $j2{article};
 	if ($constants->{plugin}{FireHose}) {
 		my $journal_item = $self->get($id);
-		if ($journal_item->{submit} eq "yes") {
-			my $firehose = getObject("Slash::FireHose");
-			$firehose->createUpdateItemFromJournal($id);
-		}
+		my $firehose = getObject("Slash::FireHose");
+		$firehose->createUpdateItemFromJournal($id);
 	}
 }
 
@@ -211,10 +209,8 @@ sub create {
 	my $slashdb = getCurrentDB();
 	$slashdb->setUser($uid, { journal_last_entry_date => $date });
 	if ($constants->{plugin}{FireHose}) {
-		if ($submit eq "yes") {
-			my $firehose = getObject("Slash::FireHose");
-			$firehose->createItemFromJournal($id);
-		}
+		my $firehose = getObject("Slash::FireHose");
+		$firehose->createItemFromJournal($id);
 	}
 
 
