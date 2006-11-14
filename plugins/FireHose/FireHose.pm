@@ -42,6 +42,9 @@ $searchtootest = 0;
 
 sub createFireHose {
 	my($self, $data) = @_;
+	if (defined $data->{discussion} && !$data->{discussion}) {
+		$data->{discussion} = 0;
+	}
 	$data->{-createtime} = "NOW()" if !$data->{createtime} && !$data->{-createtime};
 	$data->{discussion} ||= 0 if defined $data->{discussion};
 
@@ -79,6 +82,19 @@ sub createUpdateItemFromJournal {
 	}
 }
 
+sub getFireHoseColors {
+	my ($self) = @_;
+	my $constants = getCurrentStatic();
+	my $color_str = $constants->{firehose_color_labels};
+	my @colors = split(/\|/, $color_str);
+	my $colors = {};
+	my $i=1;
+	foreach (@colors) {
+		$colors->{$_} = $i++;
+	}
+	return $colors;
+}
+
 
 
 sub createItemFromJournal {
@@ -88,6 +104,7 @@ sub createItemFromJournal {
 	my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
 	if ($journal) {
 		my $globjid = $self->getGlobjidCreate("journals", $journal->{id});
+		my $popularity = $journal->{submit} eq "yes" ?  $self->getMinPopularityForColorLevel(5) :  $self->getMinPopularityForColorLevel(7);
 		my $data = {
 			title 			=> $journal->{description},
 			globjid 		=> $globjid,
@@ -96,7 +113,7 @@ sub createItemFromJournal {
 			public 			=> "yes",
 			introtext 		=> $introtext,
 			type 			=> "journal",
-			popularity		=> $self->getMinPopularityForColorLevel(5),
+			popularity		=> $popularity,
 			tid			=> $journal->{tid},
 			srcid			=> $id,
 			discussion		=> $journal->{discussion}
@@ -240,6 +257,7 @@ sub getFireHoseEssentials {
 	my($self, $options) = @_;
 
 	my $user = getCurrentUser();
+	my $colors = $self->getFireHoseColors();
 
 	$options ||= {};
 	$options->{limit} ||= 50;
@@ -348,6 +366,14 @@ sub getFireHoseEssentials {
 
 	if (defined $options->{daysback} && !$doublecheck) {
 		push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $options->{daysback} DAY)"
+	}
+
+	if ($options->{color}) {
+		if ($colors->{$options->{color}}) {
+			my $pop = $self->getMinPopularityForColorLevel($colors->{$options->{color}});
+			my $pop_q = $self->sqlQuote($pop);
+			push @where, "popularity >= $pop_q";
+		}
 	}
 
 	my $limit_str = "";
@@ -576,7 +602,7 @@ sub ajaxFireHoseGetUpdates {
 	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
 	my $html = {};
-	my $update_new = [];
+	my $updates = [];
 
 	my $adminmode = $user->{is_admin};
 	$adminmode = 0 if $user->{is_admin} && $user->{firehose_usermode};
@@ -595,21 +621,25 @@ sub ajaxFireHoseGetUpdates {
 			}
 		} else {
 			# new
-			push @$update_new, [$_->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" })];
 			$update_time = $_->{last_update} if $_->{last_update} gt $update_time && $_->{last_update} lt $now;
+			push @$updates, ["add", $_->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" })];
 		}
 		push @$ordered, $item->{id};
 		delete $ids{$_->{id}};
 	}
+
+	foreach (keys %ids) {
+		push @$updates, ["remove", $_, ""];
+	}
+	
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	return Data::JavaScript::Anon->anon_dump({
-		removed		=> \%ids,
 		html		=> $html,
-		update_new	=> $update_new,
+		updates		=> $updates,
 		update_time	=> $update_time,
-		removed		=> \%ids,
 		ordered		=> $ordered
 	});
+
 }
 
 sub ajaxUpDownFirehose {
@@ -834,7 +864,7 @@ sub dispFireHose {
 	my($self, $item, $options) = @_;
 	$options ||= {};
 
-	slashDisplay('dispFireHose', { item => $item, mode => $options->{mode} , tags_top => $options->{tags_top}, options => $options->{options} }, { Return => 1 });
+	slashDisplay('dispFireHose', { item => $item, mode => $options->{mode} , tags_top => $options->{tags_top}, options => $options->{options} }, { Page => "firehose",  Return => 1 });
 }
 
 sub getMemoryForItem {
@@ -905,6 +935,8 @@ sub getAndSetOptions {
 	$mode = $modes->{$mode} ? $mode : "fulltitle";
 	$options->{mode} = $mode;
 
+	my $colors = $self->getFireHoseColors();
+
 	if ($user->{is_admin} && $form->{setusermode}) {
 		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "" });
 	}
@@ -971,7 +1003,7 @@ sub getAndSetOptions {
 	);
 	my $fh_options = {};
 	foreach (@fh_ops) {
-		if ($types->{$_} && !defined $fh_options->{type}) {
+		if (1 && $types->{$_} && !defined $fh_options->{type}) {
 			$fh_options->{type} = $_;
 		} elsif ($user->{is_admin} && $categories{$_} && !defined $fh_options->{category}) {
 			$fh_options->{category} = $_;
@@ -981,6 +1013,8 @@ sub getAndSetOptions {
 			$fh_options->{rejected} = "yes";
 		} elsif ($user->{is_admin} && $_ eq "accepted") {
 			$fh_options->{accepted} = "yes";
+		} elsif ($colors->{$_}) {
+			$fh_options->{color} = $_;
 		} else {
 			if (!defined $fh_options->{filter}) {
 				$fh_options->{filter} = $_;
@@ -1025,7 +1059,6 @@ sub getAndSetOptions {
 		$options->{daysback} = 1;
 		$options->{createtime_no_future} = 1;
 	}
-
 	return $options;
 }
 
@@ -1069,6 +1102,40 @@ sub getPopLevelForPopularity {
 		return $i+1 if $pop >= $levels[$i];
 	}
 	return $i + 1;
+}
+
+sub listView {
+	my ($self) = @_;
+	my $slashdb = getCurrentDB();
+	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
+	my $options = $self->getAndSetOptions();
+
+	my($items, $results) = $firehose_reader->getFireHoseEssentials($options);
+
+	my $itemstext;
+	my $maxtime = $slashdb->getTime();
+	my $now = $slashdb->getTime();
+	
+	foreach (@$items) {
+		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime && $_->{createtime} lt $now;
+		my $item =  $firehose_reader->getFireHose($_->{id});
+		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
+		$itemstext .= $self->dispFireHose($item, { mode => $options->{mode} , tags_top => $tags_top, options => $options });
+	}
+	my $refresh_options;
+	$refresh_options->{maxtime} = $maxtime;
+	if (uc($options->{orderdir}) eq "ASC") {
+		$refresh_options->{insert_new_at} = "bottom";
+	} else {
+		$refresh_options->{insert_new_at} = "top";
+	}
+	slashDisplay("list", {
+		itemstext	=> $itemstext, 
+		page		=> $options->{page}, 
+		options		=> $options,
+		refresh_options	=> $refresh_options
+	}, { Page => "firehose", Return => 1});
+
 }
 
 1;
