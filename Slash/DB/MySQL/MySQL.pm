@@ -4553,6 +4553,7 @@ sub getSubnetFromIPIDBasedOnComments {
 sub getNetIDPostingRestrictions {
 	my($self, $type, $value) = @_;
 	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
 	my $restrictions = { no_anon => 0, no_post => 0 };
 	if ($type eq "subnetid") {
 		my $subnet_karma_comments_needed = $constants->{subnet_comments_posts_needed} || 5;
@@ -4567,6 +4568,12 @@ sub getNetIDPostingRestrictions {
 			}
 		}
 	}
+	if($constants->{comment_karma_disable_and_log}) {
+		$user->{state}{commentkarma_no_post} = 1 if $restrictions->{no_post};
+		$user->{state}{commentkarma_no_anon} = 1 if $restrictions->{no_anon};
+		$restrictions = { no_anon => 0, no_post => 0 };
+	}
+	
 	return $restrictions;
 }
 
