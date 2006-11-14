@@ -34,7 +34,7 @@ __template__
 		Submitted
 	[% END %]
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
-	by [% IF adminmode; %]
+	by [% IF adminmode && item.type != "story" %]
 		[% the_user.nickname | strip_literal %]
 		(<a href="[% gSkin.rootdir %]/users.pl?uid=[% the_user.uid %]">[% the_user.uid %]</a>)
 	[% END %]
