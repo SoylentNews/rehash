@@ -36,6 +36,21 @@ use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
+
+sub ajaxConsoleUpdate {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	$options->{content_type} = 'application/json';
+	my $html = {};
+	my $admindb 	= getObject('Slash::Admin');
+	$html->{'storyadmin-content'}	= $admindb->showStoryAdminBox("", { contents_only => 1});
+	$html->{'slashdbox-content'}	= $admindb->showSlashdBox({ contents_only => 1});
+	$html->{'performancebox-content'}	= $admindb->showPerformanceBox({ contents_only => 1});
+	$html->{'authoractivity-content'}	= $admindb->showAuthorActivityBox({ contents_only => 1});
+	return Data::JavaScript::Anon->anon_dump({
+		html	=> 	$html
+	});
+}
+
 1;
 
 __END__

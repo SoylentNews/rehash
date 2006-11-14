@@ -53,10 +53,15 @@ sub display {
 	my $remarkstext = $remarks->displayRemarksTable({ max => 10, print_whole => 1 });
 
 	my $admindb 	= getObject('Slash::Admin');
-	my $storyadmin 	= $admindb->showStoryAdminBox("", { updater => 1 });
-	my $slashdbox 	= $admindb->showSlashdBox({ updater => 1});
-	my $perfbox	= $admindb->showPerformanceBox({ updater => 1});
-	my $authorbox	= $admindb->showAuthorActivityBox({updater => 1});
+	my $storyadmin 	= $admindb->showStoryAdminBox("");
+	my $slashdbox 	= $admindb->showSlashdBox();
+	my $perfbox	= $admindb->showPerformanceBox();
+	my $authorbox	= $admindb->showAuthorActivityBox();
+	my $firehosebox = "";
+	if ($constants->{plugin}{FireHose}) {
+		my $firehose = getObject("Slash::FireHose");
+		$firehosebox = $firehose->listView();
+	}
 
 
 	slashDisplay('display', {
@@ -64,7 +69,8 @@ sub display {
 		storyadmin 	=> $storyadmin,
 		slashdbox 	=> $slashdbox,
 		perfbox		=> $perfbox,
-		authorbox	=> $authorbox
+		authorbox	=> $authorbox,
+		firehosebox	=> $firehosebox
 	});
 
 }

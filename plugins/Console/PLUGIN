@@ -2,4 +2,5 @@
 name=Console
 description="Console"
 htdocs=console.pl
+mysql_dump=mysql_dump.sql
 template=templates/display;console;default
