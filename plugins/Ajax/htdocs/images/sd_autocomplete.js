@@ -279,8 +279,12 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParam
         this._callbackParams._tagDomain = tagDomain;
         this._completer = this._newCompleter(tagDomain);
 
-        YAHOO.util.Dom.removeClass(this._widget, "hidden");
+        var pos = YAHOO.util.Dom.getXY(this._sourceEl);
+        pos[1] += this._sourceEl.offsetHeight;
+        YAHOO.util.Dom.setXY(this._widget, pos);
+
         YAHOO.util.Dom.addClass(this._sourceEl, "ac-source");
+        YAHOO.util.Dom.removeClass(this._widget, "hidden");
 
         if ( this._needsSpareInput() )
           {
@@ -295,10 +299,6 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParam
           YAHOO.util.Dom.addClass(this._spareInput, "hidden");
 
         YAHOO.util.Event.addListener(this._textField(), "keyup", this._onTextboxKeyUp, this, true);
-
-        var pos = YAHOO.util.Dom.getXY(this._sourceEl);
-        pos[1] += this._sourceEl.offsetHeight;
-        YAHOO.util.Dom.setXY(this._widget, pos);
       }
   }
 
