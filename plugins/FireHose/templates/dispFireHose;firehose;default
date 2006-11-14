@@ -13,7 +13,6 @@ dispFireHose
 __seclev__
 10000
 __template__
-[% PROCESS autocomplete %]
 [% 
     mode = mode || "fulltitle";
     divwrapper = 1;
