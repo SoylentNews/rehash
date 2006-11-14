@@ -52,41 +52,7 @@ sub main {
 sub list {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 	my $firehose = getObject("Slash::FireHose");
-	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
-	my $options = $firehose->getAndSetOptions();
-	use Data::Dumper;
-	print STDERR Dumper($options);
-
-	my($items, $results) = $firehose_reader->getFireHoseEssentials($options);
-
-	my $itemstext;
-	my $maxtime = $firehose->getTime();
-	my $now = $slashdb->getTime();
-	
-	foreach (@$items) {
-		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime && $_->{createtime} lt $now;
-		my $item =  $firehose_reader->getFireHose($_->{id});
-		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
-		$itemstext .= $firehose->dispFireHose($item, { mode => $options->{mode} , tags_top => $tags_top, options => $options });
-	}
-	print STDERR "FHITEMS " . scalar @$items . "\n";
-	my $refresh_options;
-	if ($options->{orderby} eq "createtime" || $options->{orderby} eq "popularity" || $options->{orderby} eq "editorpop") {
-		$refresh_options->{maxtime} = $maxtime;
-		if (uc($options->{orderdir}) eq "ASC") {
-			$refresh_options->{insert_new_at} = "bottom";
-		} else {
-			$refresh_options->{insert_new_at} = "top";
-		}
-	} 
-
-	slashDisplay("list", {
-		itemstext	=> $itemstext, 
-		page		=> $options->{page}, 
-		options		=> $options,
-		refresh_options	=> $refresh_options
-	});
-
+	print $firehose->listView();
 }
 
 sub view {
@@ -97,7 +63,10 @@ sub view {
 	my $item = $firehose_reader->getFireHose($form->{id});
 	if ($item && $item->{id} && ($item->{public} eq "yes" || $user->{is_admin}) ) {
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
-		print $firehose_reader->dispFireHose($item, { mode => "full", tags_top => $tags_top, options => $options });
+		my $firehosetext = $firehose_reader->dispFireHose($item, { mode => "full", tags_top => $tags_top, options => $options });
+		slashDisplay("view", {
+			firehosetext => $firehosetext
+		});
 	} else {
 		print getData('notavailable');
 	}
