@@ -1115,8 +1115,9 @@ sub ajaxListTagnames {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	my $prefix = '';
-	$prefix = lc($1) if $form->{prefix} =~ /([A-Za-z]+)/;
+	$prefix = lc($1) if $form->{prefix} =~ /([A-Za-z0-9]{1,20})/;
 	my $len = length($prefix);
+	my $notize = $form->{prefix} =~ /^!/ ? '!' : '';
 
 	my $tnhr = $tags_reader->listTagnamesByPrefix($prefix);
 
@@ -1133,7 +1134,7 @@ sub ajaxListTagnames {
 
 	my $ret_str = '';
 	for my $tagname (sort { $tnhr->{$b} <=> $tnhr->{$a} } keys %$tnhr) {
-		$ret_str .= sprintf("%s\t%d\n", $tagname, $tnhr->{$tagname});
+		$ret_str .= sprintf("%s%s\t%d\n", $notize, $tagname, $tnhr->{$tagname});
 	}
 #print STDERR scalar(localtime) . " ajaxListTagnames uid=$user->{uid} prefix='$prefix' ret_str: $ret_str";
 	return $ret_str;
