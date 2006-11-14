@@ -3376,7 +3376,7 @@ sub setStory {
 	if (!exists($change_hr->{last_update})
 		&& !exists($change_hr->{-last_update})) {
 		my @non_cchp = grep !/^(commentcount|hitparade|hits)$/, keys %$change_hr;
-		@fh_update_fields = grep /^(title|uid|time|intreotext|bodytext|primaryskid|tid|neverdisplay)$/, keys %$change_hr;
+		@fh_update_fields = grep /^(title|uid|time|introtext|bodytext|primaryskid|tid|neverdisplay)$/, keys %$change_hr;
 		
 		if (@non_cchp > 0) {
 			$change_hr->{-last_update} = 'NOW()';
