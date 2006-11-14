@@ -160,6 +160,26 @@ function admin_storyadminbox_fetch(secs) {
 	ajax_periodic_update(secs, params, "storyadmin-content");
 }
 
+function console_update(use_fh_interval, require_fh_timeout) {
+	use_fh_interval = use_fh_interval || 0;
+
+	if (require_fh_timeout && !fh_is_timed_out) {
+		return;
+	}
+
+	var params = [];
+	params['op'] = 'console_update'
+	var handlers = {
+		onComplete: json_handler
+	};
+	ajax_update(params, '', handlers);
+	var interval = 30000;
+	if(use_fh_interval) {
+		interval = getFirehoseUpdateInterval(); 
+	}
+	setTimeout("console_update(" + use_fh_interval + "," + fh_is_timed_out +")", interval);
+}
+
 function make_spelling_correction(misspelled_word, form_element) {
 	var selected_key   = "select_" + form_element + '_' + misspelled_word;
 	var selected_index = document.forms.slashstoryform.elements[selected_key].selectedIndex;
@@ -204,14 +224,22 @@ function make_spelling_correction(misspelled_word, form_element) {
 function firehose_reject (el) {
 	var params = [];
 	var fh = $('firehose-' + el.value);
-//	var reskeyel = $('signoff-reskey-' + el.value);
 	params['op'] = 'firehose_reject';
 	params['id'] = el.value;
-//	params['reskey'] = reskeyel.value;
+	params['reskey'] = ajax_admin_static;
 	ajax_update(params, 'reject_' + el.value);
 	if (fh) {
-		fh.className="hide";
-		fh.parentNode.removeChild(fh);
+		var attributes = { 
+			 height: { to: 0 },
+			 opacity: { to: 0},
+		};
+		var myAnim = new YAHOO.util.Anim(fh, attributes); 
+		myAnim.duration = 0.5;
+		myAnim.onComplete.subscribe(function() {
+		    var el = this.getEl();
+		        el.parentNode.removeChild(el);
+		});
+		myAnim.animate(); 
 	}
 }
 

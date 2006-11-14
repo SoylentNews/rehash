@@ -3,6 +3,9 @@
 
 var fh_play = 0;
 var fh_is_timed_out = 0;
+var console_updating = 0;
+var firehose_updates = Array(0);
+var firehose_ordered = Array(0);
 
 function createPopup(xy, titlebar, name, contents, message) {
 	var body = document.getElementsByTagName("body")[0]; 
@@ -393,6 +396,7 @@ function firehose_up_down(id, dir) {
 	};
 	params['op'] = 'firehose_up_down';
 	params['id'] = id;
+	params['reskey'] = ajax_user_static;
 	params['dir'] = dir;
 	var updown = $('updown-' + id);
 	ajax_update(params, '', handlers);
@@ -476,53 +480,94 @@ function json_update(response) {
 }
 
 
-function firehose_get_updates_handler(transport) {
-	var response = eval_response(transport);
-	var processed = 0;
-	if (response.update_new) {
-		for (i = 0; i < response.update_new.length; i++) {
-			var el = response.update_new[i]
-			var fh = 'firehose-' + el[0];
-			processed = processed + 1;
-			if ($(fh)) {
+function firehose_handle_update() {
+	if (firehose_updates.length > 0) {
+		var el = firehose_updates.pop();
+		var fh = 'firehose-' + el[1];
+		if(el[0] == "add") {
+			if (insert_new_at == "bottom") {
+				new Insertion.Bottom('firehoselist', el[2]);
 			} else {
-				if (insert_new_at == "bottom") {
-					new Insertion.Bottom('firehoselist', el[1]);
-				} else {
-					new Insertion.Top('firehoselist', el[1]);
-				}
+				new Insertion.Top('firehoselist', el[2]);
+			}
+		
+			var toheight = 50;
+			if (fh_view_mode == "full") {
+				toheight = 200;
+			}
+
+			var attributes = { 
+				 opacity: { from: 0, to: 1 },
+				 height: { from: 0, to: toheight  },
+			};
+			var myAnim = new YAHOO.util.Anim(fh, attributes); 
+			myAnim.duration = 0.7;
+			myAnim.onComplete.subscribe(function() {
+				$(fh).style.height = "";
+			});
+			myAnim.animate();
+		} else if (el[0] == "remove") {
+			var fh_node = $(fh);
+			if (fh_is_admin && fh_view_mode == "fulltitle" && fh_node.className == "article" ) {
+				// Don't delete admin looking at this in expanded view
+			} else {
+				var attributes = { 
+					 height: { to: 0 },
+					 opacity: { to: 0}
+				};
+				var myAnim = new YAHOO.util.Anim(fh, attributes); 
+				myAnim.duration = 1;
+				myAnim.onComplete.subscribe(function() {
+					var elem = this.getEl();
+					elem.parentNode.removeChild(elem);
+				});
+				myAnim.animate(); 
+			}
+		}
+		setTimeout("firehose_handle_update()", 800);
+	} else {
+		firehose_reorder();
+		firehose_get_next_updates();
+	}
+}
+
+function firehose_reorder() {
+	if (firehose_ordered) {
+		var fhlist = $('firehoselist');
+		if (fhlist) {
+			for (i = 0; i < firehose_ordered.length; i++) {
+				var fhel = $('firehose-' + firehose_ordered[i]);
+				fhlist.appendChild(fhel);
+			}
+			if (console_updating) {
+				document.title = "Console (" + firehose_ordered.length + ")";
+			} else {
+				document.title = "FireHose (" + firehose_ordered.length + ")";
 			}
 		}
 	}
+
+}
+
+function firehose_get_next_updates() {
+	var interval = getFirehoseUpdateInterval();
+	setTimeout("firehose_get_updates(" + fh_is_timed_out +")", interval);
+}
+
+
+function firehose_get_updates_handler(transport) {
+	var response = eval_response(transport);
+	var processed = 0;
+	firehose_ordered = response.ordered;
 	if (response.html) {
 		json_update(response);
 		processed = processed + 1;
 	}
-	if (response.removed) {
-		for (el in response.removed) {
-			var fh_id = 'firehose-' + el;
-			var fh = $(fh_id);
-			fh.className="hide";
-			fh.parentNode.removeChild(fh);
-		}
+	if (response.updates) {
+		firehose_updates = response.updates;
+		processed = processed + 1;
+		firehose_handle_update();
 	}
-	if (response.ordered) {
-		var fhlist = $('firehoselist');
-		if (fhlist) {
-			for (i = 0; i < response.ordered.length; i++) {
-				var fhel = $('firehose-' + response.ordered[i]);
-				fhlist.appendChild(fhel);
-			}
-			document.title = "FireHose (" + response.ordered.length + ")";
-		}
-	}
-	if (processed) {
-		if (response.update_time) {
-			update_time = response.update_time;
-		}
-	}
-	var interval = getFirehoseUpdateInterval();
-	setTimeout("firehose_get_updates(" + fh_is_timed_out +")", interval);
 }
 
 function firehose_get_item_idstring() {
@@ -569,6 +614,9 @@ function setFirehoseAction() {
 		fh_is_timed_out = 0;
 		firehose_play();
 		firehose_get_updates();
+		if (console_updating) {
+			console_update(1, 0)
+		}
 	}
 }
 
