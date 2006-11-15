@@ -14,6 +14,7 @@ package Slash::DB::Static::MySQL;
 use strict;
 use Slash::Utility;
 use Digest::MD5 'md5_hex';
+use Encode 'encode_utf8';
 use Time::HiRes;
 use URI ();
 use vars qw($VERSION);
@@ -1490,30 +1491,25 @@ sub countStoriesWithTopic {
 # For portald
 sub createRSS {
 	my($self, $bid, $item) = @_;
-	# this will go away once we require Digest::MD5 2.17 or greater
-	# Hey pudge, CPAN is up to Digest::MD5 2.25 or so, think we can
-	# make this go away now? - Jamie 2003/07/24
-	# Oh probably, if someone wants to test it and all, i can
-	# add it to Slash::Bundle etc.  i'll put it on my TODO
-	# and DO it when i can. -- pudge
+#use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "createRSS $bid item: " . Dumper($item);
 	$item->{title} =~ /^(.*)$/;
-	my $title = $1;
+	my $title_md5 = md5_hex(encode_utf8($1));
 	$item->{description} =~ /^(.*)$/;
-	my $description = $1;
+	my $description_md5 = md5_hex(encode_utf8($1));
 	$item->{'link'} =~ /^(.*)$/;
-	my $link = $1;
+	my $link_md5 = md5_hex(encode_utf8($1));
 
 	my $data_hr = {
-		link_signature		=> md5_hex($link),
-		title_signature		=> md5_hex($title),
-		description_signature	=> md5_hex($description),
+		link_signature		=> $link_md5,
+		title_signature		=> $title_md5,
+		description_signature	=> $description_md5,
 		'link'			=> $item->{'link'},
 		title			=> $item->{'title'},
 		description		=> $item->{'description'},
 		-created		=> 'NOW()',
 		bid			=> $bid,
 	};
-use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "createRSS $bid: " . Dumper($data_hr);
+#use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "createRSS $bid data: " . Dumper($data_hr);
 	$self->sqlInsert('rss_raw', $data_hr, { ignore => 1 });
 }
 
