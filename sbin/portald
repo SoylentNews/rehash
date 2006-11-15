@@ -149,6 +149,7 @@ sub getRDF {
 	#gets an RDF file, and formats it as a Slash block
 
 	my($bid, $url, $other) = @_;
+	$other ||= '';
 	my $rss = new XML::RSS;
 	my $template_name = $slashdb->getBlock($bid, 'rss_template');
 	my $items ||= $slashdb->getBlock($bid, 'items');
@@ -193,7 +194,7 @@ sub getRDF {
 		portaldLog("$bid did not parse properly:$err");
 		return;
 	} else {
-		my $str;
+		my $str = '';
 		my $i = 0;
 		my $bd_regex = qr{\Q$gSkin->{basedomain}};
 		for my $item (@{$rss->{items}}) {
