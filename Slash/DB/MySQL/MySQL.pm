@@ -11756,9 +11756,9 @@ sub _addGlobjEssentials_submissions {
 		my $globjid = $submissions_hr->{$subid};
 		my $skin = $skins->{ $submissiondata_hr->{$subid}{primaryskid} };
 		$data_hr->{$globjid}{url} = "$skin->{rootdir}/submit.pl?op=viewsub&subid=$subid";
-		$data_hr->{$globjid}{title} = $submissiondata_hr->{subj};
-		$data_hr->{$globjid}{created_at} = $submissiondata_hr->{time};
-#use Data::Dumper; print STDERR Dumper "submission subid=$subid globjid=$globjid. skin, submission_hr, data_hr: " . Dumper($skin) . Dumper($submissions_hr->{$subid}) . Dumper($data_hr->{$globjid});
+		$data_hr->{$globjid}{title} = $submissiondata_hr->{$subid}{subj};
+		$data_hr->{$globjid}{created_at} = $submissiondata_hr->{$subid}{time};
+#use Data::Dumper; print STDERR "submission subid=$subid globjid=$globjid. skin, submissiondata, data_hr: " . Dumper($skin) . Dumper($submissiondata_hr->{$subid}) . Dumper($data_hr->{$globjid});
 	}
 }
 
