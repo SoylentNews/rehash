@@ -4200,8 +4200,6 @@ UPDATE vars SET value = 'T_2_5_0_132' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
-# SLASHDOT LAST UPDATED HERE
-
 # For FireHose plugin
 ALTER TABLE firehose ADD COLUMN discussion mediumint UNSIGNED NOT NULL DEFAULT '0' AFTER globjid;
 UPDATE firehose, stories SET firehose.discussion = stories.discussion WHERE firehose.type="story" AND firehose.srcid=stories.stoid;
@@ -4215,7 +4213,6 @@ INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_priority_sc
 UPDATE vars SET value = 'T_2_5_0_133' WHERE name = 'cvs_tag_currentcode';
 
 ALTER TABLE comments MODIFY COLUMN pid int unsigned not null default '0';
-ALTER TABLE formkeys MODIFY COLUMN idcount int unsigned not null default '0';
 
 # for HumanConf plugin
 ALTER TABLE humanconf MODIFY COLUMN hcid int unsigned not null auto_increment, MODIFY COLUMN hcpid int unsigned not null;
@@ -4223,6 +4220,12 @@ ALTER TABLE humanconf_pool MODIFY COLUMN hcpid int unsigned not null auto_increm
 UPDATE humanconf LEFT JOIN humanconf_pool USING (hcpid) SET tries_left = 9999 WHERE humanconf_pool.hcpid IS NULL;
 DELETE FROM humanconf WHERE tries_left = 9999;
 
+# SLASHDOT LAST UPDATED HERE
+
+UPDATE formkeys SET idcount=0 WHERE idcount > 10000000;
+
 # for Zoo plugin
 ALTER TABLE people MODIFY COLUMN id int unsigned not null auto_increment;
+
+INSERT INTO globj_types VALUES (NULL, 'discussions');
 
