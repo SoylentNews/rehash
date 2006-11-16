@@ -1634,8 +1634,9 @@ sub _hard_dispComment {
 
 	my($comment_to_display, $score_to_display,
 		$user_nick_to_display, $zoosphere_display, $user_email_to_display,
-		$time_to_display, $comment_link_to_display, $userinfo_to_display)
-		= ("") x 8;
+		$time_to_display, $comment_link_to_display, $userinfo_to_display,
+		$comment_links)
+		= ("") x 9;
 
 	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
 
@@ -1668,6 +1669,18 @@ sub _hard_dispComment {
 			$score_to_display .= ", $reasons->{$comment->{reason}}{name}";
 		}
 		$score_to_display .= ")";
+	}
+
+	if ($user->{is_admin}) {
+		$comment_links = <<EOT;
+			<span class="comment_links" style="font-size: smaller">[
+				<a href="javascript:setFocusComment($comment->{cid},0,1)">One</a>
+				<a href="javascript:setFocusComment($comment->{cid},0,2)">Two</a>
+				<a href="javascript:setFocusComment($comment->{cid},0,3)">Three</a>
+				<a href="javascript:selectParent($comment->{cid},1)">Bar</a>
+				<a href="javascript:null()">Help</a>
+			]</span>
+EOT
 	}
 
 	if ($comment->{sid} && $comment->{cid}) {
@@ -1775,6 +1788,7 @@ EOT2
 		<div class="title">
 $head
 		 	<span id="comment_score_$comment->{cid}" class="score">$score_to_display</span>
+$comment_links
 		</div>
 		<div class="details">
 			by $user_nick_to_display$zoosphere_display
