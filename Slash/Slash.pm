@@ -1682,7 +1682,6 @@ sub _hard_dispComment {
 				<a href="#" onclick="return setFocusComment($comment->{cid},0,2)">Two</a>
 				<a href="#" onclick="return setFocusComment($comment->{cid},0,3)">Three</a>
 				<a href="#" onclick="return setFocusComment($comment->{cid},0,4)">Four</a>
-				<a href="#" onclick="return setFocusComment($comment->{cid},0,5)">Five</a>
 			]</span>
 EOT
 	}
@@ -1791,8 +1790,8 @@ EOT2
 	<div class="commentTop">
 		<div class="title">
 $head
-		 	<span id="comment_score_$comment->{cid}" class="score">$score_to_display</span>
 $comment_links
+		 	<span id="comment_score_$comment->{cid}" class="score">$score_to_display</span>
 		</div>
 		<div class="details">
 			by $user_nick_to_display$zoosphere_display

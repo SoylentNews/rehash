@@ -40,7 +40,6 @@ __template__
 				<a href="#" onclick="return setFocusComment([% cid %],0,2)">Two</a>
 				<a href="#" onclick="return setFocusComment([% cid %],0,3)">Three</a>
 				<a href="#" onclick="return setFocusComment([% cid %],0,4)">Four</a>
-				<a href="#" onclick="return setFocusComment([% cid %],0,5)">Five</a>
 			]</span>[% END %]
 		</div>
 		<div class="details">
