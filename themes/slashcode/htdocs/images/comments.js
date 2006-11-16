@@ -25,6 +25,8 @@ var user_highlightthresh = 0;
 var user_threshold_orig = -9;
 var user_highlightthresh_orig = -9;
 var loaded = 0;
+var shift_down = 0;
+var alt_down = 0;
 
 
 var agt = navigator.userAgent.toLowerCase();
@@ -51,32 +53,51 @@ function updateComment(cid, mode) {
 	return void(0);
 }
 
-function updateCommentTree(cid, threshold) {
+function updateCommentTree(cid, threshold, subexpand) {
 	setDefaultDisplayMode(cid);
 	var comment = comments[cid];
 
 	// skip the root comment, if it exists; leave it full, but let user collapse
 	// if he chooses, and leave it that way: this comment will not move with
 	// T/HT changes
-	if (threshold && cid != root_comment) {
-		if (comment['points'] < threshold && (user_is_anon || user_uid != comment['uid'])) {
-			futuredisplaymode[cid] = 'hidden';
-		} else if (comment['points'] < (user_highlightthresh - (root_comments_hash[cid] ? 1 : 0))) {
-			futuredisplaymode[cid] = 'oneline';
+	if ((subexpand || threshold) && cid != root_comment) {
+		if (subexpand && subexpand == 1) {
+			if (prehiddendisplaymode[cid] == 'oneline' || prehiddendisplaymode[cid] == 'full')
+				futuredisplaymode[cid] = 'full';
+			else
+				futuredisplaymode[cid] = 'hidden';
 		} else {
-			futuredisplaymode[cid] = 'full';
+			if (comment['points'] < threshold && (user_is_anon || user_uid != comment['uid']))
+				futuredisplaymode[cid] = 'hidden';
+			else if (comment['points'] < (user_highlightthresh - (root_comments_hash[cid] ? 1 : 0)))
+				futuredisplaymode[cid] = 'oneline';
+			else
+				futuredisplaymode[cid] = 'full';
 		}
+
 		updateDisplayMode(cid, futuredisplaymode[cid], 1);
 	}
 
-	if (futuredisplaymode[cid] && futuredisplaymode[cid] != displaymode[cid]) { 
+	if (subexpand && subexpand == 2) {
+		updateComment(cid, 'hidden');
+		prehiddendisplaymode[cid] = futuredisplaymode[cid];
+	} else if (futuredisplaymode[cid] && futuredisplaymode[cid] != displaymode[cid]) {
 		updateComment(cid, futuredisplaymode[cid]);
 	}
 
 	var kidhiddens = 0;
 	if (comment['kids'].length) {
+		if (!subexpand) {
+			if (shift_down && !alt_down && futuredisplaymode[cid] == 'full') {
+				subexpand = 1;
+			} else if (shift_down && !alt_down && futuredisplaymode[cid] == 'oneline') {
+				subexpand = 2;
+				threshold = user_threshold;
+			}
+		}
+
 		for (var kiddie = 0; kiddie < comment['kids'].length; kiddie++) {
-			kidhiddens += updateCommentTree(comment['kids'][kiddie], threshold);
+			kidhiddens += updateCommentTree(comment['kids'][kiddie], threshold, subexpand);
 		}
 	}
 
@@ -210,23 +231,49 @@ function refreshCommentDisplays() {
 	return void(0);
 }
 
-function setFocusComment(cid, alone) {
+function setFocusComment(cid, alone, mods) {
 	if (!loaded)
 		return false;
 
 	var abscid = Math.abs(cid);
 	setDefaultDisplayMode(abscid);
-	if (viewmodevalue[displaymode[abscid]] == viewmodevalue['full'])
+	if ((alone && alone == 2) || (!alone && viewmodevalue[displaymode[abscid]] == viewmodevalue['full']))
 		cid = '-' + abscid;
 
 // this doesn't work
 //	var statusdiv = $('comment_status_' + abscid);
 //	statusdiv.innerHTML = 'Working ...';
 
-	if (!alone)
+	doModifiers();
+	if (!user_is_admin) // XXX: for now, admins-only, for testing
+		mods = 1;
+
+	if (!alone && mods) {
+		if (mods == 1) {
+			shift_down = 0;
+			alt_down   = 0;
+		} else if (mods == 2) {
+			shift_down = 1;
+			alt_down   = 0;
+		} else if (mods == 3) {
+			shift_down = 1;
+			alt_down   = 1;
+		}
+	}
+
+	if (shift_down && alt_down)
+		alone = 1;
+
+	if (alone && alone == 1) {
+		var thismode = abscid == cid ? 'full' : 'oneline';
+		updateDisplayMode(abscid, thismode, 1);
+	} else {
 		refreshDisplayModes(cid);
+	}
 	updateCommentTree(abscid);
 	updateTotals();
+
+	resetModifiers();
 
 //	statusdiv.innerHTML = '';
 
@@ -508,14 +555,29 @@ function enableControls() {
 	loaded = 1;
 }
 
-function selectParent(cid) {
+function selectParent(cid, collapse) {
 	if (!loaded)
 		return false;
 
 	var comment = comments[cid];
 	if (comment && fetchEl('comment_' + cid)) {
-		updateDisplayMode(cid, 'full', 1);
-		setFocusComment(cid, 1);
+		var was_hidden = 0;
+		if (displaymode[cid] == 'hidden')
+			was_hidden = 1;
+
+		setFocusComment(cid, (collapse ? 2 : 1));
+
+		// update textual hidden counts
+		if (was_hidden) {
+			var parent = comments[cid]['pid'];
+			if (parent) {
+				while (comments[parent]['pid']) {
+					parent = comments[parent]['pid'];
+				}
+
+				updateCommentTree(parent);
+			}
+		}
 
 		return false;
 	} else {
@@ -580,6 +642,31 @@ function finishLoading() {
 
 function floatButtons () {
 	$('gods').className='thor';
+}
+
+function resetModifiers () {
+	shift_down = 0;
+	alt_down   = 0;
+}
+
+function doModifiers () {
+	var ev = window.event;
+	shift_down = 0;
+	alt_down   = 0;
+
+	if (ev) {
+		if (ev.modifiers) {
+			if (e.modifiers & Event.SHIFT_MASK)
+				shift_down = 1;
+			if (e.modifiers & Event.ALT_MASK)
+				alt_down = 1;
+		} else {
+			if (ev.shiftKey)
+				shift_down = 1;
+			if (ev.altKey)
+				alt_down = 1;
+		}
+	}
 }
 
 function doModerate(el) {

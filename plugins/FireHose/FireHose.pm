@@ -83,7 +83,7 @@ sub createUpdateItemFromJournal {
 }
 
 sub getFireHoseColors {
-	my ($self) = @_;
+	my($self) = @_;
 	my $constants = getCurrentStatic();
 	my $color_str = $constants->{firehose_color_labels};
 	my @colors = split(/\|/, $color_str);
@@ -639,7 +639,6 @@ sub ajaxFireHoseGetUpdates {
 		update_time	=> $update_time,
 		ordered		=> $ordered
 	});
-
 }
 
 sub ajaxUpDownFirehose {

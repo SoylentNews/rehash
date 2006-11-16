@@ -10,8 +10,6 @@ __lang__
 en_US
 __name__
 display
-__seclev__
-10000
 __template__
 <div id="slashboxes">
 	[% authorbox %]
@@ -43,6 +41,9 @@ __template__
 	<script type="text/javascript">
 		console_updating = 1;
 		console_update([% IF constants.plugin.FireHose %]1[% ELSE %]0[% END %]);
-		
 	</script>
 </div>
+__seclev__
+10000
+__version__
+$Id$

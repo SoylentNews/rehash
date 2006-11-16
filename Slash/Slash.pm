@@ -291,6 +291,7 @@ root_comment = $cid;
 
 user_uid = $user->{uid};
 user_is_anon = $user->{is_anon};
+user_is_admin = $user->{is_admin};
 user_threshold = $threshold;
 user_highlightthresh = $highlightthresh;
 

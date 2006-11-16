@@ -1127,7 +1127,7 @@ sub submitComment {
 	}
 
 	my $maxCid = $slashdb->createComment($clean_comment);
-	if($constants->{comment_karma_disable_and_log}) {
+	if ($constants->{comment_karma_disable_and_log}) {
 		my $post_str = "";
 		$post_str .= "NO_ANON " if $user->{state}{commentkarma_no_anon};
 		$post_str .= "NO_POST " if $user->{state}{commentkarma_no_post};

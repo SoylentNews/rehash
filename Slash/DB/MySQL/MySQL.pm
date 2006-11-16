@@ -4555,6 +4555,7 @@ sub getNetIDPostingRestrictions {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $restrictions = { no_anon => 0, no_post => 0 };
+
 	if ($type eq "subnetid") {
 		my $subnet_karma_comments_needed = $constants->{subnet_comments_posts_needed} || 5;
 		my($subnet_karma, $subnet_post_cnt) = $self->getNetIDKarma("subnetid", $value);
@@ -4568,7 +4569,8 @@ sub getNetIDPostingRestrictions {
 			}
 		}
 	}
-	if($constants->{comment_karma_disable_and_log}) {
+
+	if ($constants->{comment_karma_disable_and_log}) {
 		$user->{state}{commentkarma_no_post} = 1 if $restrictions->{no_post};
 		$user->{state}{commentkarma_no_anon} = 1 if $restrictions->{no_anon};
 		$restrictions = { no_anon => 0, no_post => 0 };

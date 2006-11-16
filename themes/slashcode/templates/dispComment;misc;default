@@ -34,6 +34,13 @@ __template__
 			<h4><a name="[% cid %]">[% subject %]</a></h4>
 			[%- END %]
 			[% UNLESS user.noscores %]<span id="comment_score_[% cid %]" class="score">(Score:[% IF points.length; points; ELSE; "?"; END %][% IF reasons && reason %], [% reasons.$reason.name %][% END %])</span>[% END %]
+			[% IF user.is_admin %]<span class="comment_links" style="font-size: smaller">[
+				<a href="javascript:setFocusComment([% cid %],0,1)">One</a>
+				<a href="javascript:setFocusComment([% cid %],0,2)">Two</a>
+				<a href="javascript:setFocusComment([% cid %],0,3)">Three</a>
+				<a href="javascript:selectParent([% cid %],1)">Bar</a>
+				<a href="javascript:null()">Help</a>
+			]</span>[% END %]
 		</div>
 		<div class="details">
 			by
