@@ -498,7 +498,7 @@ function firehose_handle_update() {
 
 			var attributes = { 
 				 opacity: { from: 0, to: 1 },
-				 height: { from: 0, to: toheight  },
+				 height: { from: 0, to: toheight }
 			};
 			var myAnim = new YAHOO.util.Anim(fh, attributes); 
 			myAnim.duration = 0.7;

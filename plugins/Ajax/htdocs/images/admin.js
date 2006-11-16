@@ -231,7 +231,7 @@ function firehose_reject (el) {
 	if (fh) {
 		var attributes = { 
 			 height: { to: 0 },
-			 opacity: { to: 0},
+			 opacity: { to: 0 }
 		};
 		var myAnim = new YAHOO.util.Anim(fh, attributes); 
 		myAnim.duration = 0.5;
