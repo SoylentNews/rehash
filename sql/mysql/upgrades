@@ -4210,8 +4210,6 @@ UPDATE vars SET value = 'T_2_5_0_133' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
-# SLASHDOT LAST UPDATED HERE
-
 ALTER TABLE comments MODIFY COLUMN pid int unsigned not null default '0';
 
 # for HumanConf plugin
