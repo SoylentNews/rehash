@@ -1677,11 +1677,12 @@ sub _hard_dispComment {
 	if ($user->{is_admin}) {
 		$comment_links = <<EOT;
 			<span class="comment_links" style="font-size: smaller">[
+				Experimental threading:
 				<a href="#" onclick="return setFocusComment($comment->{cid},0,1)">One</a>
 				<a href="#" onclick="return setFocusComment($comment->{cid},0,2)">Two</a>
 				<a href="#" onclick="return setFocusComment($comment->{cid},0,3)">Three</a>
-				<a href="#" onclick="return selectParent($comment->{cid},1)">Bar</a>
-				<a href="#" onclick="return false">Help</a>
+				<a href="#" onclick="return setFocusComment($comment->{cid},0,4)">Four</a>
+				<a href="#" onclick="return setFocusComment($comment->{cid},0,5)">Five</a>
 			]</span>
 EOT
 	}
