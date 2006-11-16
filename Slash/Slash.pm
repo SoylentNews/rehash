@@ -1674,11 +1674,11 @@ sub _hard_dispComment {
 	if ($user->{is_admin}) {
 		$comment_links = <<EOT;
 			<span class="comment_links" style="font-size: smaller">[
-				<a href="javascript:setFocusComment($comment->{cid},0,1)">One</a>
-				<a href="javascript:setFocusComment($comment->{cid},0,2)">Two</a>
-				<a href="javascript:setFocusComment($comment->{cid},0,3)">Three</a>
-				<a href="javascript:selectParent($comment->{cid},1)">Bar</a>
-				<a href="javascript:null()">Help</a>
+				<a href="#" onclick="return setFocusComment($comment->{cid},0,1)">One</a>
+				<a href="#" onclick="return setFocusComment($comment->{cid},0,2)">Two</a>
+				<a href="#" onclick="return setFocusComment($comment->{cid},0,3)">Three</a>
+				<a href="#" onclick="return selectParent($comment->{cid},1)">Bar</a>
+				<a href="#" onclick="return false">Help</a>
 			]</span>
 EOT
 	}
