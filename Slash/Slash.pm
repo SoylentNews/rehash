@@ -283,6 +283,9 @@ sub jsSelectComments {
 	my $anon_comments = Data::JavaScript::Anon->anon_dump($comments);
 	my $anon_roots    = Data::JavaScript::Anon->anon_dump(\@roots);
 
+	$user->{is_anon}  ||= 0;
+	$user->{is_admin} ||= 0;
+
 	return <<EOT;
 comments = $anon_comments;
 
