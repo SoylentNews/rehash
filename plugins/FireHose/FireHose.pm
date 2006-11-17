@@ -42,9 +42,7 @@ $searchtootest = 0;
 
 sub createFireHose {
 	my($self, $data) = @_;
-	if (defined $data->{discussion} && !$data->{discussion}) {
-		$data->{discussion} = 0;
-	}
+	$data->{discussion} = 0 if !defined $data->{discussion} || !$data->{discussion};
 	$data->{-createtime} = "NOW()" if !$data->{createtime} && !$data->{-createtime};
 	$data->{discussion} ||= 0 if defined $data->{discussion};
 
@@ -523,6 +521,12 @@ sub ajaxSaveOneTopTagFirehose {
 		my $tagsstring = join ' ', @tags;
 		my $newtagspreloadtext = $tags->setTagsForGlobj($itemid, $table, $tagsstring);
 	}
+}
+
+sub ajaxFireHoseSetOptions {
+	my($slashdb, $constants, $user, $form) = @_;
+	my $firehose = getObject("Slash::FireHose");
+	$firehose->getAndSetOptions();
 }
 
 sub ajaxSaveNoteFirehose {
