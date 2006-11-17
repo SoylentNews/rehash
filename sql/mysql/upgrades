@@ -4240,9 +4240,9 @@ INSERT INTO vars (name, value, description) VALUES ('firehose_color_labels', 're
 INSERT INTO ajax_ops VALUES (NULL, 'console_update', 'Slash::Console', 'ajaxConsoleUpdate', 'ajax_admin', 'createuse');
 INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum, ie_cond) VALUES ('stylesheet','text/css','screen, projection','firehose.css','','','console','no','',2,0, '');
 
-# SLASHDOT LAST UPDATED HERE
-
 # for Tags plugin
 INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_tags_brief', '300', 'Seconds to cache tag data that only needs brief caching, in memcached');
 INSERT INTO vars (name, value, description) VALUES ('tags_list_mintc', '4', 'Minimum value of total_clout for tagged items shown at /tags/foo');
+
+# SLASHDOT LAST UPDATED HERE
 
