@@ -4201,7 +4201,6 @@ ALTER TABLE firehose ADD COLUMN discussion mediumint UNSIGNED NOT NULL DEFAULT '
 UPDATE firehose, stories SET firehose.discussion = stories.discussion WHERE firehose.type="story" AND firehose.srcid=stories.stoid;
 UPDATE firehose, journals SET firehose.discussion = journals.discussion WHERE firehose.type="journal" AND firehose.srcid=journals.id;
 
-# for Tags plugin
 INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_priority', 'back bookmark feed hold journal none quik submission story', 'Tagnames to give priority to on autocomplete');
 INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_priority_score', '999', 'Fake score to give any tagnames from tags_autocomplete_priority which may match a prefix');
 
@@ -4237,9 +4236,13 @@ UPDATE ajax_ops SET reskey_name="ajax_user_static", reskey_type="use" WHERE op="
 UPDATE ajax_ops SET reskey_name="ajax_admin_static", reskey_type="use" WHERE op="firehose_reject";
 INSERT INTO vars (name, value, description) VALUES ('firehose_color_labels', 'red|orange|yellow|green|blue|purple|violet', 'Firehose color labels');
 
-For Console PLUGIN
+# for Console plugin
 INSERT INTO ajax_ops VALUES (NULL, 'console_update', 'Slash::Console', 'ajaxConsoleUpdate', 'ajax_admin', 'createuse');
 INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum, ie_cond) VALUES ('stylesheet','text/css','screen, projection','firehose.css','','','console','no','',2,0, '');
 
-
 # SLASHDOT LAST UPDATED HERE
+
+# for Tags plugin
+INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_tags_brief', '300', 'Seconds to cache tag data that only needs brief caching, in memcached');
+INSERT INTO vars (name, value, description) VALUES ('tags_list_mintc', '4', 'Minimum value of total_clout for tagged items shown at /tags/foo');
+

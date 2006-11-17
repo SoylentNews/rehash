@@ -21,6 +21,7 @@ sub main {
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	my $title;
 	my $tagname = $form->{tagname} || '';
+	$tagname = '' if !$tags_reader->tagnameSyntaxOK($tagname);
 	my $index_hr = { tagname => $tagname };
 
 	if ($tagname eq '') {
@@ -45,18 +46,44 @@ sub main {
 
 	} else {
 
-		my $objects = $tags_reader->getAllObjectsTagname($tagname);
-		my %globjids = ( map { ( $_->{globjid}, 1 ) } @$objects );
 		my @objects = ( );
-		for my $globjid (keys %globjids) {
-			my @objs = (grep { $_->{globjid} == $globjid } @$objects);
-			push @objects, {
-				url	=> $objs[0]{url},
-				title	=> $objs[0]{title},
-				count	=> scalar(@objs),
-			};
+
+		my $mcd = undef;
+		my $mcdkey = undef;
+		my $value = undef;
+		$mcd = $tags_reader->getMCD();
+		if ($mcd) {
+			$mcdkey = "$tags_reader->{_mcd_keyprefix}:taotnl:";
+			$value = $mcd->get("$mcdkey$tagname");
 		}
-		@objects = sort { $b->{count} <=> $a->{count} || ($a->{title}||'') cmp ($b->{title}||'') } @objects;
+
+		if ($value) {
+			@objects = @$value;
+#print STDERR "tags.pl got '$mcdkey$tagname' as " . scalar(@objects) . " objects\n";
+		} else {
+			my $objects = $tags_reader->getAllObjectsTagname($tagname);
+			my %globjids = ( map { ( $_->{globjid}, 1 ) } @$objects );
+			my $mintc = defined($constants->{tags_list_mintc}) ? $constants->{tags_list_mintc} : 4;
+			for my $globjid (keys %globjids) {
+				my @objs = grep { $_->{globjid} == $globjid } @$objects;
+				my $sum_tc = 0;
+				for my $obj (@objs) {
+					$sum_tc += $obj->{total_clout};
+				}
+				push @objects, {
+					url	=> $objs[0]{url},
+					title	=> $objs[0]{title},
+					count	=> $sum_tc,
+				} if $sum_tc >= $mintc;
+			}
+			@objects = sort { $b->{count} <=> $a->{count} || ($a->{title}||'') cmp ($b->{title}||'') } @objects;
+			if ($mcd) {
+				my $constants = getCurrentStatic();
+				my $secs = $constants->{memcached_exptime_tags_brief} || 300;
+				$mcd->set("$mcdkey$tagname", \@objects, $secs);
+#print STDERR "tags.pl set '$mcdkey$tagname' to " . scalar(@objects) . " objects\n";
+			}
+		}
 		$index_hr->{objects} = \@objects;
 
 		$title = getData('head2', { tagname => $tagname });
