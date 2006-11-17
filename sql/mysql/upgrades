@@ -4235,6 +4235,7 @@ UPDATE vars SET value = 'T_2_5_0_134' WHERE name = 'cvs_tag_currentcode';
 # for FireHose plugin
 UPDATE ajax_ops SET reskey_name="ajax_user_static", reskey_type="use" WHERE op="firehose_up_down";
 UPDATE ajax_ops SET reskey_name="ajax_admin_static", reskey_type="use" WHERE op="firehose_reject";
+INSERT INTO vars (name, value, description) VALUES ('firehose_color_labels', 'red|orange|yellow|green|blue|purple|violet', 'Firehose color labels');
 
 For Console PLUGIN
 INSERT INTO ajax_ops VALUES (NULL, 'console_update', 'Slash::Console', 'ajaxConsoleUpdate', 'ajax_admin', 'createuse');
