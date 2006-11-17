@@ -31,7 +31,7 @@ IF item.type == "submission";
 
 END;
 IF item.url_id && url.url;
-	IF introtext; introtext = introtext _ "<br>";
+	IF introtext; introtext = introtext _ "<br>"; END;
 	IF item.type == "bookmark";
 		introtext = introtext _ "<a href='" _ url.url _ "'>" _ Slash.strip_literal(url.url) _ "</a>";
 	ELSE;
