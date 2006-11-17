@@ -215,16 +215,22 @@ sub ajaxCreateTag {
 	return if !$tags;
 
 	my $hr = { uid =>	$user->{uid},
-	 	   name =>	$form->{name} };
+	 	   name =>	lc($form->{name}) };
 
 	if ( $form->{type} eq 'firehose' ) {
 		my $firehose = getObject("Slash::FireHose");
 		my $item = $firehose->getFireHose($form->{id});
+		if ($user->{is_admin}) {
+			$firehose->setSectionTopicsFromTagstring($form->{id}, $form->{name});
+		}
 		$hr->{globjid} = $item->{globjid};
 	} else {
 		$hr->{id} = $form->{id};
 		$hr->{table} = $form->{type};
 	}
+
+	my $priv_tagnames = $tags->getPrivateTagnames();
+	$hr->{private} = 1 if $priv_tagnames->{lc($form->{name})};
 
         $tags->createTag($hr);
 	return 0;
@@ -1469,7 +1475,7 @@ sub getPrivateTagnames {
 	push @private_tags, ($constants->{tags_upvote_tagname} || "nod");
 	push @private_tags, ($constants->{tags_downvote_tagname} || "nix");
 	if ($user->{is_admin}) {
-		push @private_tags, "quik", "hold";
+		push @private_tags, "quik", "hold", split(/\|/, $constants->{tags_admin_private_tags});
 		if($constants->{submit_categories} && @{$constants->{submit_categories}}) {
 			push @private_tags, @{$constants->{submit_categories}};
 		}
