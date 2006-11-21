@@ -280,12 +280,14 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParam
         this._callbackParams._tagDomain = tagDomain;
         this._completer = this._newCompleter(tagDomain);
 
+	  // widget must be visible to move
+        YAHOO.util.Dom.removeClass(this._widget, "hidden");
+	  // move widget to be near the 'source'
         var pos = YAHOO.util.Dom.getXY(this._sourceEl);
         pos[1] += this._sourceEl.offsetHeight;
         YAHOO.util.Dom.setXY(this._widget, pos);
 
         YAHOO.util.Dom.addClass(this._sourceEl, "ac-source");
-        YAHOO.util.Dom.removeClass(this._widget, "hidden");
 
         if ( this._needsSpareInput() )
           {
