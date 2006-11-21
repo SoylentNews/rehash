@@ -266,6 +266,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._newCompleter = function( tagDomain 
     c.forceSelection = false;
     c.allowBrowserAutocomplete = false;
     c.maxResultsDisplayed = 25;
+    c.animVert = false;
 
     return c;
   }
