@@ -14,11 +14,11 @@ __name__
 signoff
 __template__
 [% IF constants.plugin.Ajax && constants.signoff_use %]
-[% checked = Slash.db.hasUserSignedStory(stoid, user.uid); %]
+[% signed = Slash.db.hasUserSignedStory(stoid, user.uid); %]
 [% IF storylink %]
 <li class="signoff">[% END %]
 [% PROCESS ajax_reskey_signoff reskey_label => 'signoff-reskey-' _ stoid, reskey_name => 'ajax_admin' %]
-<input type="checkbox" name="adminsignoff" value="[% stoid %]" onclick="admin_signoff(this);"[% IF checked; constants.markup_checked_attribute; END %]><span id="signoff_[% stoid %]"><b>Sign</b></span>
+<span id="signoff_[% stoid %]" onclick="admin_signoff([% stoid %])">[% UNLESS signed %]unsigned[% END %]</span>
 [% IF storylink %]</li>[% END %]
 [% END %]
 __seclev__
