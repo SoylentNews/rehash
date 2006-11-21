@@ -3,6 +3,8 @@
 
 var fh_play = 0;
 var fh_is_timed_out = 0;
+var fh_is_updating = 0;
+var fh_update_timerids = Array(0);
 var console_updating = 0;
 var firehose_updates = Array(0);
 var firehose_ordered = Array(0);
@@ -388,6 +390,93 @@ function toggleFirehoseTagbox(id) {
 	}
 }
 
+function firehose_set_options(name, value) {
+	var pairs = [
+		// name		value		curid		newid		newvalue 	title 
+		["orderby", 	"createtime", 	"popularity",	"time",		"popularity"	],
+		["orderby", 	"popularity", 	"time",		"popularity",	"createtime"	],
+		["orderdir", 	"ASC", 		"asc",		"desc",		"DESC"],
+		["orderdir", 	"DESC", 	"desc",		"asc",		"ASC"],
+		["mode", 	"full", 	"abbrev",	"full",		"fulltitle"],
+		["mode", 	"fulltitle", 	"full",		"abbrev",	"full"],
+	];
+	var params = [];
+	params['op'] = 'firehose_set_options';
+	params['reskey'] = ajax_user_static;
+	theForm = document.forms["firehoseform"];
+	if (name == "firehose_usermode") {
+		if (value ==  true) {
+			value = 1;
+			alert("true1");
+		}
+		if (value == false) {
+			value = 0;
+			alert("false1");
+		}
+		params['setusermode'] = 1;
+		params[name] = value;
+	}
+	if (name == "fhfilter") {
+		for (i=0; i< theForm.elements.length; i++) {
+			if (theForm.elements[i].name == "fhfilter") {
+				params['fhfilter'] = theForm.elements[i].value;
+			}
+		}
+	}
+	for (i=0; i< pairs.length; i++) {
+		var el = pairs[i];
+		if (name == el[0] && value == el[1]) {
+			params[name] = value;
+			if ($(el[2])) {
+				$(el[2]).id = el[3];
+				if($(el[3])) {
+					var namenew = el[0];
+					var valuenew = el[4];
+					$(el[3]).firstChild.onclick = function() { firehose_set_options(namenew, valuenew); return false;}
+				}
+			}
+		}
+	}
+	if (name == "orderby" || name == "mode" || name == "firehose_usermode") {
+		// blur out then remove items
+		if (name == "mode") {
+			fh_view_mode = value;
+		}
+		if ($('firehoselist')) {
+			// set page
+			page = 0;
+			var attributes = { 
+				 opacity: { from: 1, to: 0 },
+			};
+			var myAnim = new YAHOO.util.Anim("firehoselist", attributes); 
+			myAnim.duration = 1;
+			myAnim.onComplete.subscribe(function() {
+				$('firehoselist').style.opacity = "1";
+			});
+			myAnim.animate();
+			// remove elements
+			setTimeout("firehose_remove_all_items()", 600);
+		}
+	}
+
+	var handlers = { 
+		onComplete: firehose_get_updates 
+	};	
+	ajax_update(params, '', handlers);
+}
+
+function firehose_remove_all_items() {
+	var fhl = $('firehoselist');
+	var children = fhl.childNodes;
+	for (var i = children.length -1 ; i >= 0; i--) {
+		var el = children[i];
+		if (el.id) {
+			el.parentNode.removeChild(el);
+		}
+	}
+}
+
+
 function firehose_up_down(id, dir) {
 	setFirehoseAction();
 	var params = [];
@@ -481,9 +570,12 @@ function json_update(response) {
 
 
 function firehose_handle_update() {
+
+	
 	if (firehose_updates.length > 0) {
 		var el = firehose_updates.pop();
 		var fh = 'firehose-' + el[1];
+		var wait_interval = 800;
 		if(el[0] == "add") {
 			if (insert_new_at == "bottom") {
 				new Insertion.Bottom('firehoselist', el[2]);
@@ -503,7 +595,9 @@ function firehose_handle_update() {
 			var myAnim = new YAHOO.util.Anim(fh, attributes); 
 			myAnim.duration = 0.7;
 			myAnim.onComplete.subscribe(function() {
+				if ($(fh)) {
 				$(fh).style.height = "";
+				}
 			});
 			myAnim.animate();
 		} else if (el[0] == "remove") {
@@ -516,7 +610,8 @@ function firehose_handle_update() {
 					 opacity: { to: 0}
 				};
 				var myAnim = new YAHOO.util.Anim(fh, attributes); 
-				myAnim.duration = 1;
+				myAnim.duration = 0.4;
+				wait_interval = 500;
 				myAnim.onComplete.subscribe(function() {
 					var elem = this.getEl();
 					elem.parentNode.removeChild(elem);
@@ -524,7 +619,7 @@ function firehose_handle_update() {
 				myAnim.animate(); 
 			}
 		}
-		setTimeout("firehose_handle_update()", 800);
+		setTimeout("firehose_handle_update()", wait_interval);
 	} else {
 		firehose_reorder();
 		firehose_get_next_updates();
@@ -537,7 +632,9 @@ function firehose_reorder() {
 		if (fhlist) {
 			for (i = 0; i < firehose_ordered.length; i++) {
 				var fhel = $('firehose-' + firehose_ordered[i]);
-				fhlist.appendChild(fhel);
+				if(fhlist && fhel) {
+					fhlist.appendChild(fhel);
+				}
 			}
 			if (console_updating) {
 				document.title = "Console (" + firehose_ordered.length + ")";
@@ -551,7 +648,9 @@ function firehose_reorder() {
 
 function firehose_get_next_updates() {
 	var interval = getFirehoseUpdateInterval();
-	setTimeout("firehose_get_updates(" + fh_is_timed_out +")", interval);
+	//alert("fh_get_next_updates");
+	fh_is_updating = 0;
+	firehose_add_update_timerid(setTimeout("firehose_get_updates()", interval));
 }
 
 
@@ -585,15 +684,19 @@ function firehose_get_item_idstring() {
 	return str;
 }
 
-function firehose_get_updates(require_timeout) {
-	if (require_timeout && !fh_is_timed_out) {
-		return;
-	}
+
+function firehose_get_updates() {
 	run_before_update();
-	if (fh_play == 0) {
-		setTimeout("firehose_get_updates()", 2000);
+	if (fh_play == 0 || fh_is_updating == 1) {
+		firehose_add_update_timerid(setTimeout("firehose_get_updates()", 7000));
+		//alert("wait loop: " + fh_is_updating);
 		return;
 	}
+	if (fh_update_timerids.length > 0) {
+		var id = 0;
+		while(id = fh_update_timerids.pop()) { clearTimeout(id) };
+	}
+	fh_is_updating = 1
 	var params = [];
 	var handlers = {
 		onComplete: firehose_get_updates_handler
@@ -672,4 +775,8 @@ function firehose_pause() {
 	play_div.className = "";
 	if ($('pauseorplay'))
 		$('pauseorplay').innerHTML = "Paused";
+}
+
+function firehose_add_update_timerid(timerid) {
+	fh_update_timerids.push(timerid);		
 }

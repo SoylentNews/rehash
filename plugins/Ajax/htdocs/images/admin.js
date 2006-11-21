@@ -21,13 +21,13 @@ function um_set_settings(behavior) {
 	ajax_update(params, 'links-vendors-content');
 }
 
-function admin_signoff(el) {
+function admin_signoff(stoid) {
 	var params = [];
-	var reskeyel = $('signoff-reskey-' + el.value);
+	var reskeyel = $('signoff-reskey-' + stoid);
 	params['op'] = 'admin_signoff';
-	params['stoid'] = el.value;
+	params['stoid'] = stoid;
 	params['reskey'] = reskeyel.value;
-	ajax_update(params, 'signoff_' + el.value);
+	ajax_update(params, 'signoff_' + stoid);
 	
 }
 
