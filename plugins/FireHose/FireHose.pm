@@ -238,7 +238,6 @@ sub createItemFromStory {
 			srcid		=> $id,
 			type 		=> "story",
 			public		=> $public,
-			accepted	=> "yes",
 			dept		=> $story->{dept},
 			discussion	=> $story->{discussion},
 		};
@@ -371,6 +370,17 @@ sub getFireHoseEssentials {
 			my $pop = $self->getMinPopularityForColorLevel($colors->{$options->{color}});
 			my $pop_q = $self->sqlQuote($pop);
 			push @where, "popularity >= $pop_q";
+		}
+	}
+	if ($user->{is_admin}) {
+		my $signoff_label = "sign" . $user->{uid} . "ed";
+
+		if ($options->{unsigned}) {
+			push @where, "signoffs NOT LIKE \"\%$signoff_label\%\"";
+		}
+
+		if ($options->{signed}) {
+			push @where, "signoffs LIKE \"\%$signoff_label\%\"";
 		}
 	}
 
@@ -635,13 +645,15 @@ sub ajaxFireHoseGetUpdates {
 	foreach (keys %ids) {
 		push @$updates, ["remove", $_, ""];
 	}
-	
+
+	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1}, { Return => 1, Page => "firehose"});
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
+	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
 	return Data::JavaScript::Anon->anon_dump({
 		html		=> $html,
 		updates		=> $updates,
 		update_time	=> $update_time,
-		ordered		=> $ordered
+		ordered		=> $ordered,
 	});
 }
 
@@ -1018,6 +1030,10 @@ sub getAndSetOptions {
 			$fh_options->{accepted} = "yes";
 		} elsif ($colors->{$_}) {
 			$fh_options->{color} = $_;
+		} elsif ($user->{is_admin} && $_ eq "signed") {
+			$fh_options->{signed} = 1;
+		} elsif ($user->{is_admin} && $_ eq "unsigned") {
+			$fh_options->{unsigned} = 1;
 		} else {
 			if (!defined $fh_options->{filter}) {
 				$fh_options->{filter} = $_;
