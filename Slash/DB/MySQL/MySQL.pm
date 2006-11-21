@@ -7537,6 +7537,22 @@ sub createSignoff {
 	$signoff_type ||= '';
 	$self->sqlInsert("signoff", { stoid => $stoid, uid => $uid, signoff_type => $signoff_type });
 
+	if ($constants->{plugin}{FireHose}) {
+		my $firehose = getObject("Slash::FireHose");
+		my $stoid_q = $self->sqlQuote($stoid);
+		my ($id) = $self->sqlSelect("id", "firehose", "type='story' and srcid=$stoid_q");
+		if ($id) {
+			my $signoff_label = "sign".$uid."ed";
+			my $item = $firehose->getFireHose($id);
+			if ($item->{signoffs} !~ /$signoff_label/) {
+				print STDERR "setting firehose $signoff_label\n";
+				$firehose->setFireHose($id, {
+					-signoffs => "CONCAT(signoffs, ' $signoff_label')"
+				});
+			}
+		}
+	}
+
 	if ($send_message) {
 		my $s_user = $self->getUser($uid);
 		my $story = $self->getStory($stoid);
