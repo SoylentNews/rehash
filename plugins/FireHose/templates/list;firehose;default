@@ -15,25 +15,22 @@ __seclev__
 __template__
 <div class="firemenu">
 [% theupdatetime = Slash.timeCalc(Slash.db.getTime(), "%H:%M"); %]
-[% PROCESS titlebar title="Firehose Beta <span style='font-size:60%'>(Last Refreshed <span id='local_last_update_time'>$theupdatetime</span> Currently <span id='pauseorplay'></span>)</span>" %]
+[% PROCESS titlebar title="Firehose Beta <span style='font-size:60%'>(Last Refreshed <span id='local_last_update_time'>$theupdatetime</span><span id='gmt_update_time'></span>Currently <span id='pauseorplay'></span>)</span>" %]
 [% PROCESS autocomplete %]
 <script type="text/javascript">
 [% reskey = Slash.getObject('Slash::ResKey'); rkey = reskey.key('ajax_admin_static', { nostate => 1 }); IF rkey.create; -%]var ajax_admin_static = '[% rkey.reskey %]';[% END %]
 </script>
 <div class="submenu">
-	<form action="[% gSkin.rootdir %]/firehose.pl" method="get">
+	<form action="[% gSkin.rootdir %]/firehose.pl" method="get" name="firehoseform">
 		<fieldset>
 			<legend>Firehose</legend>
 			<label><input type="text" class="slashdot-tag-completer" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="40" autocomplete="off" onfocus="attachCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose-filter', 0)"></label>
-			<!-- <br><label>Order&nbsp;[% Slash.createSelect('order', { 'createtimedesc' => 'Time Desc', popularitydesc => 'Popularity Desc', 'createtimeasc' => 'Time Asc', 'popularityasc' => 'Popularity Asc' }, options.order, 1, 0, 1) %]</label> 
-			<label>Mode&nbsp;[% Slash.createSelect('mode', { 'full' => 'Full', fulltitle => 'Abbreviated' }, options.mode, 1, 0, 1) %]
-</label> -->
 
-			<input type="submit" value="Filter">
+			<input type="submit" value="Filter" onclick="firehose_set_options('fhfilter'); return false;">
 			[% IF user.is_admin %]
 			User mode?
 			<input type="hidden" name="setusermode" value="1">
-			<input type="checkbox" value="1" name="firehose_usermode" onchange="this.form.submit()" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]>  
+			<input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]>  
 <div id="message_area"></div>
 			[% END %]
 		</fieldset>
@@ -43,20 +40,20 @@ __template__
 	<span id="pause"><a href="javascript:firehose_pause()" title="Currently playing">Pause</a></span>
 
 	[% IF options.orderby == "popularity" || options.orderby == "editorpop" %]
-	<span id="popularity"><a href="[% gSkin.rootdir %]/firehose.pl?orderby=createtime" title="Toggle sort popularity/time - Currently popularity">Popularity</a></span>
+	<span id="popularity"><a href="[% gSkin.rootdir %]/firehose.pl?orderby=createtime" title="Toggle sort popularity/time - Currently popularity" onclick="firehose_set_options('orderby','createtime'); return false;">Popularity</a></span>
 	[% ELSE %]
-	<span id="time"><a href="[% gSkin.rootdir %]/firehose.pl?orderby=popularity" title="Toggle sort popularity/time - Currently Time">Time</a></span>
+	<span id="time"><a href="[% gSkin.rootdir %]/firehose.pl?orderby=popularity" title="Toggle sort popularity/time - Currently Time" onclick="firehose_set_options('orderby','popularity'); return false;">Time</a></span>
 	[% END %]
 	[% IF options.orderdir == "ASC" %]
-	<span id="desc"><a href="[% gSkin.rootdir %]/firehose.pl?orderdir=DESC" title="Toggle sort ascending/descending - Currently ascending">Ascending</a></span>
+	<span id="desc"><a href="[% gSkin.rootdir %]/firehose.pl?orderdir=DESC" title="Toggle sort ascending/descending - Currently ascending" onclick="firehose_set_options('orderdir', 'DESC'); return false">Ascending</a></span>
 	[% ELSE %]
-	<span id="asc"><a href="[% gSkin.rootdir %]/firehose.pl?orderdir=ASC" title="Toggle sort ascending/descending - Currently descending">Descending</a></span>
+	<span id="asc"><a href="[% gSkin.rootdir %]/firehose.pl?orderdir=ASC" title="Toggle sort ascending/descending - Currently descending" onclick="firehose_set_options('orderdir', 'ASC'); return false">Descending</a></span>
 	[% END %]
 
 	[% IF options.mode == "fulltitle" || !options.mode %]
-	<span id="abbrev"><a href="[% gSkin.rootdir %]/firehose.pl?mode=full" title="Toggle display abbreviated/full - Currently abbreviated">Abbreviated</a></span>
+	<span id="abbrev"><a href="[% gSkin.rootdir %]/firehose.pl?mode=full" title="Toggle display abbreviated/full - Currently abbreviated" onclick="firehose_set_options('mode','full'); return false;">Abbreviated</a></span>
 	[% ELSE %]
-	<span id="full"><a href="[% gSkin.rootdir %]/firehose.pl?mode=fulltitle" title="Toggle display abbreviated/full - Currently full">Full</a></span>
+	<span id="full"><a href="[% gSkin.rootdir %]/firehose.pl?mode=fulltitle" title="Toggle display abbreviated/full - Currently full" onclick="firehose_set_options('mode','fulltitle'); return false">Full</a></span>
 	[% END %]
 </div>
 </div>
@@ -89,7 +86,7 @@ hose@cmdrtaco.net and be forgiving of beta code!
 	var maxtime = '[% refresh_options.maxtime %]';
 	var insert_new_at = '[% refresh_options.insert_new_at %]';
 	firehose_play();
-	setTimeout("firehose_get_updates()", 15000);
+	firehose_add_update_timerid(setTimeout("firehose_get_updates()", 3000));
 [% END %]
 </script>
 
