@@ -30,6 +30,7 @@ CREATE TABLE firehose (
 	subnetid varchar(32) NOT NULL default '',
 	category varchar(30) NOT NULL default '',
 	last_update TIMESTAMP,
+	signoffs VARCHAR(255) NOT NULL DEFAULT '',
 	PRIMARY KEY (id),
 	UNIQUE globjid (globjid),
 	KEY createtime (createtime),
