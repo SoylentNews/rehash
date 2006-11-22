@@ -4224,9 +4224,6 @@ ALTER TABLE people MODIFY COLUMN id int unsigned not null auto_increment;
 
 INSERT INTO globj_types VALUES (NULL, 'discussions');
 
-# 2006-11-15
-UPDATE vars SET value = 'T_2_5_0_134' WHERE name = 'cvs_tag_currentcode';
-
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # for FireHose plugin
@@ -4243,3 +4240,7 @@ INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_tags_brie
 INSERT INTO vars (name, value, description) VALUES ('tags_list_mintc', '4', 'Minimum value of total_clout for tagged items shown at /tags/foo');
 
 # SLASHDOT LAST UPDATED HERE
+
+# 2006-11-21
+UPDATE vars SET value = 'T_2_5_0_135' WHERE name = 'cvs_tag_currentcode';
+
