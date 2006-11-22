@@ -7541,7 +7541,7 @@ sub createSignoff {
 		my $firehose = getObject("Slash::FireHose");
 		my $stoid_q = $self->sqlQuote($stoid);
 		my ($id) = $self->sqlSelect("id", "firehose", "type='story' and srcid=$stoid_q");
-		if ($id) {
+		if($id) {
 			my $signoff_label = "sign".$uid."ed";
 			my $item = $firehose->getFireHose($id);
 			if ($item->{signoffs} !~ /$signoff_label/) {
@@ -7757,8 +7757,8 @@ sub getSlashConf {
 		anonymous_coward_uids =>	[ $conf{anonymous_coward_uid} ],
 						# See <http://www.iana.org/assignments/uri-schemes>
 		approved_url_schemes =>		[qw( ftp http gopher mailto news nntp telnet wais https )],
-		approvedtags =>			[qw( b i p br a ol ul li dl dt dd em strong tt blockquote div ecode )],
-		approvedtags_break =>		[qw(     p br   ol ul li dl dt dd              blockquote div       img hr )],
+		approvedtags =>			[qw( b i p br a ol ul li dl dt dd em strong tt blockquote div ecode quote)],
+		approvedtags_break =>		[qw(     p br   ol ul li dl dt dd              blockquote div             img hr )],
 		# all known tags, plus table, pre, and slash; this can be overridden
 		# in vars, but since we make this all known tags by default ...
 		# easier to just keep it in here

@@ -4215,8 +4215,6 @@ ALTER TABLE humanconf_pool MODIFY COLUMN hcpid int unsigned not null auto_increm
 UPDATE humanconf LEFT JOIN humanconf_pool USING (hcpid) SET tries_left = 9999 WHERE humanconf_pool.hcpid IS NULL;
 DELETE FROM humanconf WHERE tries_left = 9999;
 
-# SLASHDOT LAST UPDATED HERE
-
 UPDATE formkeys SET idcount=0 WHERE idcount > 10000000;
 
 # for Zoo plugin
@@ -4245,4 +4243,3 @@ INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_tags_brie
 INSERT INTO vars (name, value, description) VALUES ('tags_list_mintc', '4', 'Minimum value of total_clout for tagged items shown at /tags/foo');
 
 # SLASHDOT LAST UPDATED HERE
-

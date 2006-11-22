@@ -18,6 +18,7 @@ var commentelements = {};
 
 var root_comment = 0;
 var discussion_id = 0;
+var user_is_admin = 0;
 var user_is_anon = 0;
 var user_uid = 0;
 var user_threshold = 0;
@@ -245,8 +246,8 @@ function setFocusComment(cid, alone, mods) {
 //	statusdiv.innerHTML = 'Working ...';
 
 //	doModifiers();
-	if (!user_is_admin) // XXX: for now, admins-only, for testing
-		mods = 1;
+//	if (!user_is_admin) // XXX: for now, admins-only, for testing
+//		mods = 1;
 
 	if (!alone && mods) {
 		if (mods == 1 || ((mods == 3) && (abscid == cid)) || ((mods == 4) && (abscid != cid))) {

@@ -134,7 +134,8 @@ BEGIN {
 # @EXPORT_OK = qw(
 # 	approveTag
 # 	breakHtml
-# 	processCustomTags
+# 	processCustomTagsPre
+#	processCustomTagsPost
 # 	stripByMode
 # );
 
@@ -1081,8 +1082,10 @@ my %actions = (
 	breakHtml_ifwhitefix => sub {
 			${$_[0]} = breakHtml(${$_[0]})
 				unless $action_data{no_white_fix};	},
-	processCustomTags => sub {
-			${$_[0]} = processCustomTags(${$_[0]});		},
+	processCustomTagsPre => sub {
+			${$_[0]} = processCustomTagsPre(${$_[0]});	},
+	processCustomTagsPost => sub {
+			${$_[0]} = processCustomTagsPost(${$_[0]});	},
 	approveTags => sub {
 			${$_[0]} =~ s/<(.*?)>/approveTag($1)/sge;	},
 	url2html => sub {
@@ -1155,7 +1158,6 @@ my %mode_actions = (
 			encode_html_amp
 			encode_html_ltgt
 			breakHtml_ifwhitefix
-			processCustomTags
 			remove_trailing_lts
 			approveTags
 			space_between_tags
@@ -1171,9 +1173,10 @@ my %mode_actions = (
 			newline_to_local
 			trailing_whitespace
 			encode_high_bits
-			processCustomTags
+			processCustomTagsPre
 			remove_trailing_lts
 			approveTags
+			processCustomTagsPost
 			space_between_tags
 			encode_html_ltgt_stray
 			encode_html_amp_ifnotent
@@ -1185,9 +1188,10 @@ my %mode_actions = (
 			newline_to_local
 			trailing_whitespace
 			encode_high_bits
-			processCustomTags
+			processCustomTagsPre
 			remove_trailing_lts
 			approveTags
+			processCustomTagsPost
 			space_between_tags
 			encode_html_ltgt_stray
 			encode_html_amp_ifnotent
@@ -1377,10 +1381,12 @@ sub stripBadHtml {
 
 #========================================================================
 
-=head2 processCustomTags(STRING)
+=head2 processCustomTagsPre(STRING)
 
-Private function.  It does processing of special custom tags
-(so far, just ECODE).
+=head2 processCustomTagsPost(STRING)
+
+Private function.  It does processing of special custom tags (in Pre, ECODE;
+in Post, QUOTE).
 
 =over 4
 
@@ -1400,14 +1406,14 @@ Processed string.
 
 =item Dependencies
 
-It is meant to be used before C<stripBadHtml> is called, only
-from regular posting modes, HTML and PLAINTEXT.
+Pre is meant to be used before C<approveTag> is called; Post after.
+Both are called only from regular posting modes, HTML and PLAINTEXT.
 
 =back
 
 =cut
 
-sub processCustomTags {
+sub processCustomTagsPre {
 	my($str) = @_;
 	my $constants = getCurrentStatic();
 
@@ -1458,6 +1464,22 @@ sub processCustomTags {
 				pos($str) = $pos + length($newstr);
 			}
 		}
+	}
+	return $str;
+}
+
+sub processCustomTagsPostat {
+	my($str) = @_;
+	my $constants = getCurrentStatic();
+
+	# QUOTE must be in approvedtags
+	if (grep /^quote$/i, @{$constants->{approvedtags}}) {
+		my $quote   = 'quote';
+		my $open    = qr[\n* <\s* $quote \s*> \n*]xsio;
+		my $close   = qr[\n* <\s* /$quote \s*> \n*]xsio;
+
+		$str =~ s/$open/<div class="quote">/g;
+		$str =~ s/$close/<\/div>/g;
 	}
 
 	return $str;
@@ -2467,7 +2489,7 @@ The 'approvedtags' entry in the vars table.
 	# change the code for them.  in theory we could generalize it more,
 	# using vars for all this, but that is a low priority.
 	my %known_tags	= map { ( lc, 1 ) } qw(
-		b i p br a ol ul li dl dt dd em strong tt blockquote div ecode
+		b i p br a ol ul li dl dt dd em strong tt blockquote div ecode quote
 		img hr big small sub sup span
 		q dfn code samp kbd var cite address ins del
 		h1 h2 h3 h4 h5 h6
@@ -2475,13 +2497,13 @@ The 'approvedtags' entry in the vars table.
 	# NB: ECODE is excluded because it is handled elsewhere.
 
 	# tags that are indented, so we can make sure indentation level is not too great
-	my %is_nesting  = map { ( lc, 1 ) } qw(ol ul dl blockquote);
+	my %is_nesting  = map { ( lc, 1 ) } qw(ol ul dl blockquote quote);
 
 	# or sub-super level
 	my %is_suscript = map { ( lc, 1 ) } qw(sub sup);
 
 	# block elements cannot be inside certain other elements; this defines which are which
-	my %is_block    = map { ( lc, 1 ) } qw(p ol ul li dl dt dd blockquote div hr address h1 h2 h3 h4 h5 h6);
+	my %is_block    = map { ( lc, 1 ) } qw(p ol ul li dl dt dd blockquote quote div hr address h1 h2 h3 h4 h5 h6);
 	my %no_block    = map { ( lc, 1 ) } qw(b i strong em tt q dfn code samp kbd var cite address ins del big small span p sub sup a h1 h2 h3 h4 h5 h6);
 
 	# when a style tag is cut off prematurely because of a newly introduced block

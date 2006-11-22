@@ -570,8 +570,6 @@ function json_update(response) {
 
 
 function firehose_handle_update() {
-
-	
 	if (firehose_updates.length > 0) {
 		var el = firehose_updates.pop();
 		var fh = 'firehose-' + el[1];
@@ -596,7 +594,7 @@ function firehose_handle_update() {
 			myAnim.duration = 0.7;
 			myAnim.onComplete.subscribe(function() {
 				if ($(fh)) {
-				$(fh).style.height = "";
+					$(fh).style.height = "";
 				}
 			});
 			myAnim.animate();
@@ -632,7 +630,7 @@ function firehose_reorder() {
 		if (fhlist) {
 			for (i = 0; i < firehose_ordered.length; i++) {
 				var fhel = $('firehose-' + firehose_ordered[i]);
-				if(fhlist && fhel) {
+				if (fhlist && fhel) {
 					fhlist.appendChild(fhel);
 				}
 			}

@@ -1674,7 +1674,7 @@ sub _hard_dispComment {
 		$score_to_display .= ")";
 	}
 
-	if ($user->{is_admin}) {
+	if ($discussion2) {
 		$comment_links = <<EOT;
 			<span class="comment_links" style="font-size: smaller">[
 				Experimental threading:
