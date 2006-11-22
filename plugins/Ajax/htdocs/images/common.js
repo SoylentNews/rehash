@@ -446,7 +446,7 @@ function firehose_set_options(name, value) {
 			// set page
 			page = 0;
 			var attributes = { 
-				 opacity: { from: 1, to: 0 },
+				 opacity: { from: 1, to: 0 }
 			};
 			var myAnim = new YAHOO.util.Anim("firehoselist", attributes); 
 			myAnim.duration = 1;

@@ -1468,7 +1468,7 @@ sub processCustomTagsPre {
 	return $str;
 }
 
-sub processCustomTagsPostat {
+sub processCustomTagsPost {
 	my($str) = @_;
 	my $constants = getCurrentStatic();
 
