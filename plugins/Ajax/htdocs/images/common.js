@@ -407,11 +407,9 @@ function firehose_set_options(name, value) {
 	if (name == "firehose_usermode") {
 		if (value ==  true) {
 			value = 1;
-			alert("true1");
 		}
 		if (value == false) {
 			value = 0;
-			alert("false1");
 		}
 		params['setusermode'] = 1;
 		params[name] = value;
