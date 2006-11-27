@@ -32,7 +32,7 @@ pop_disp = item.popularity.int;
 
 IF adminmode;
 	reject_checkbox = "";
-        IF item.type != "story; reject_checkbox = PROCESS reject_firehose id = item.id; END;
+        IF item.type != "story"; reject_checkbox = PROCESS reject_firehose id = item.id; END;
         title = reject_checkbox _ "<span class='soda pop" _  pop_val _ "'> " _  pop_disp _ "</span> " _ title;
 ELSE;
         title = "<span class='soda pop" _  pop_val _ "'> &nbsp; </span> " _ title;
