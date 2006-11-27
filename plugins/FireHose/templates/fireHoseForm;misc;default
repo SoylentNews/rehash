@@ -15,20 +15,27 @@ __seclev__
 __template__
 [% PROCESS formatHoseIntro introtext = item.introtext; %]
 				[% IF user.is_admin && !user.firehose_usermode %]
-				<input type="hidden" name="firstpreview" value="1">
-				[% IF item.type == "submission" && item.srcid %]
-					<input type="hidden" name="subid" value="[% item.srcid %]">
-				[% END %]
-				<input type="hidden" name="fhid" value="[% item.id %]">
-				<input type="hidden" name="topic_source" value="submission">
-				<input type="hidden" name="submitter" value="[% item.uid %]">
-				<input type="hidden" name="title" value="[% item.title %]">
-				[% #extras %]
-				<input type="hidden" name="primaryskid" value="[% item.primaryskid %]">
-				<input type="hidden" name="tid" value="[% item.tid %]">
-				<input type="hidden" name="introtext" value="[% introtext | strip_attribute %]">
-				<input type="hidden" name="op" value="preview">
-				<img src="[% constants.imagedir %]/sic_edit.png" onclick="firehose_get_and_post('[% item.id %]')">
+				[% IF item.type == "story" %]
+					<input type="hidden" name="op" value="edit">
+					[% story = Slash.db.getStory(item.srcid) %]
+					<input type="hidden" name="sid" value="[% story.sid | strip_attribute %]">
+
+				[% ELSE %]
+					<input type="hidden" name="firstpreview" value="1">
+					[% IF item.type == "submission" && item.srcid %]
+						<input type="hidden" name="subid" value="[% item.srcid %]">
+					[% END %]
+						<input type="hidden" name="fhid" value="[% item.id %]">
+						<input type="hidden" name="topic_source" value="submission">
+						<input type="hidden" name="submitter" value="[% item.uid %]">
+						<input type="hidden" name="title" value="[% item.title %]">
+						[% #extras %]
+						<input type="hidden" name="primaryskid" value="[% item.primaryskid %]">
+						<input type="hidden" name="tid" value="[% item.tid %]">
+						<input type="hidden" name="introtext" value="[% introtext | strip_attribute %]">
+						<input type="hidden" name="op" value="preview">
+						<img src="[% constants.imagedir %]/sic_edit.png" onclick="firehose_get_and_post('[% item.id %]')">
+					[% END %]
 				[% END %]
 __version__
 $Id$
