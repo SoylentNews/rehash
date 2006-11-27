@@ -630,7 +630,7 @@ sub ajaxFireHoseGetUpdates {
 				my $url 	= $slashdb->getUrl($item->{url_id});
 				my $the_user  	= $slashdb->getUser($item->{uid});
 				$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user }, { Return => 1 });
-				$html->{"tags-top-$_->{id}"} = slashDisplay("firehose_tags_top", { tags_top => $tags_top, id => $_->{id} }, { Return => 1 });
+				$html->{"tags-top-$_->{id}"} = slashDisplay("firehose_tags_top", { tags_top => $tags_top, id => $_->{id}, item => $item }, { Return => 1 });
 				# updated
 			}
 		} else {
