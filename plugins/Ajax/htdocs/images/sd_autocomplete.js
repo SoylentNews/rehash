@@ -262,7 +262,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._newCompleter = function( tagDomain 
         c.delimChar = " ";
         c.minQueryLength = 3;
       }
-    c.typeAhead = true;
+    c.typeAhead = false;
     c.forceSelection = false;
     c.allowBrowserAutocomplete = false;
     c.maxResultsDisplayed = 25;
