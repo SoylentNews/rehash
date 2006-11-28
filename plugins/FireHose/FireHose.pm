@@ -102,7 +102,7 @@ sub createItemFromJournal {
 	my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
 	if ($journal) {
 		my $globjid = $self->getGlobjidCreate("journals", $journal->{id});
-		my $popularity = $journal->{submit} eq "yes" ?  $self->getMinPopularityForColorLevel(5) :  $self->getMinPopularityForColorLevel(7);
+		my $popularity = $journal->{submit} eq "yes" ?  $self->getMinPopularityForColorLevel(6) :  $self->getMinPopularityForColorLevel(7);
 		my $data = {
 			title 			=> $journal->{description},
 			globjid 		=> $globjid,
@@ -127,14 +127,14 @@ sub createUpdateItemFromBookmark {
 	my $bookmark_db = getObject("Slash::Bookmark");
 	my $bookmark = $bookmark_db->getBookmark($id);
 	my $url_globjid = $self->getGlobjidCreate("urls", $bookmark->{url_id});
+	my $type = $options->{type} || "bookmark";
 	my($count) = $self->sqlCount("firehose", "globjid=$url_globjid");
-	my $popularity = defined $options->{popularity} ? $options->{popularity} : $self->getMinPopularityForColorLevel(7);
+	my $popularity = defined $options->{popularity} ? $options->{popularity} : $type eq "feed" ? $self->getMinPopularityForColorLevel(6) : $self->getMinPopularityForColorLevel(7);
 	my $activity   = defined $options->{activity}   ? $options->{activity}   : 1;
 
 	if ($count) {
 		# $self->sqlUpdate("firehose", { -popularity => "popularity + 1" }, "globjid=$url_globjid");
 	} else {
-		my $type = $options->{type} || "bookmark";
 		
 
 		my $data = {

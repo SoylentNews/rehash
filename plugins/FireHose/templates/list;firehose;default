@@ -17,9 +17,11 @@ __template__
 [% theupdatetime = Slash.timeCalc(Slash.db.getTime(), "%H:%M"); %]
 [% PROCESS titlebar title="Firehose Beta <span style='font-size:60%'>(Last Refreshed <span id='local_last_update_time'>$theupdatetime</span><span id='gmt_update_time'></span>Currently <span id='pauseorplay'></span>)</span>" %]
 [% PROCESS autocomplete %]
+[% IF user.is_admin %]
 <script type="text/javascript">
 [% reskey = Slash.getObject('Slash::ResKey'); rkey = reskey.key('ajax_admin_static', { nostate => 1 }); IF rkey.create; -%]var ajax_admin_static = '[% rkey.reskey %]';[% END %]
 </script>
+[% END %]
 <div class="submenu">
 	<form action="[% gSkin.rootdir %]/firehose.pl" method="get" name="firehoseform">
 		<fieldset>

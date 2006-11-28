@@ -14,9 +14,11 @@ __seclev__
 10000
 __template__
 [% PROCESS autocomplete %]
+[% IF user.is_admin %]
 <script type="text/javascript">
 [% reskey = Slash.getObject('Slash::ResKey'); rkey = reskey.key('ajax_admin_static', { nostate => 1 }); IF rkey.create; -%]var ajax_admin_static = '[% rkey.reskey %]';[% END %]
 </script>
+[% END %]
 [% firehosetext %]
 __version__
 $Id$
