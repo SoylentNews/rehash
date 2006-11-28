@@ -7,6 +7,7 @@ var fh_is_updating = 0;
 var fh_update_timerids = Array(0);
 var console_updating = 0;
 var firehose_updates = Array(0);
+var firehose_updates_size = 0;
 var firehose_ordered = Array(0);
 
 function createPopup(xy, titlebar, name, contents, message) {
@@ -590,6 +591,17 @@ function firehose_handle_update() {
 			};
 			var myAnim = new YAHOO.util.Anim(fh, attributes); 
 			myAnim.duration = 0.7;
+
+			if (firehose_updates_size > 10) {
+				myAnim.duration = myAnim.duration / 2;
+				wait_interval = wait_interval / 2;
+			}
+			if (firehose_updates_size > 20) {
+				myAnim.duration = myAnim.duration / 2;
+				wait_interval = wait_interval / 2;
+
+			}
+
 			myAnim.onComplete.subscribe(function() {
 				if ($(fh)) {
 					$(fh).style.height = "";
@@ -608,6 +620,16 @@ function firehose_handle_update() {
 				var myAnim = new YAHOO.util.Anim(fh, attributes); 
 				myAnim.duration = 0.4;
 				wait_interval = 500;
+				
+				if (firehose_updates_size > 10) {
+					myAnim.duration = myAnim.duration / 2;
+					wait_interval = wait_interval / 2;
+				}
+				if (firehose_updates_size > 20) {
+					myAnim.duration = myAnim.duration / 2;
+					wait_interval = wait_interval / 2;
+				}
+
 				myAnim.onComplete.subscribe(function() {
 					var elem = this.getEl();
 					elem.parentNode.removeChild(elem);
@@ -660,6 +682,7 @@ function firehose_get_updates_handler(transport) {
 	}
 	if (response.updates) {
 		firehose_updates = response.updates;
+		firehose_updates.size = firehose_updates.length;
 		processed = processed + 1;
 		firehose_handle_update();
 	}
