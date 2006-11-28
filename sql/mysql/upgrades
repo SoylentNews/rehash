@@ -4252,3 +4252,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_set_options', 'Slash::FireHose', 'a
 
 # 2006-11-21
 UPDATE vars SET value = 'T_2_5_0_135' WHERE name = 'cvs_tag_currentcode';
+
+
+UPDATES vars SET VALUE='red|orange|yellow|green|blue|indigo|violet' where name='firehose_color_labels';
