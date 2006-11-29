@@ -36,13 +36,19 @@ var is_firefox = (agt.indexOf("firefox") != -1);
 
 
 function updateComment(cid, mode) {
-	var existingdiv = fetchEl('comment_'+cid);
+	var existingdiv = fetchEl('comment_' + cid);
 	if (existingdiv) {
-		if (comments[cid]['subject']) {
-			if (mode == 'oneline') {
-				fetchEl('comment_link_'+cid).innerHTML = 'Re:';
-			} else if (mode == 'full') {
-				fetchEl('comment_link_'+cid).innerHTML = comments[cid]['subject'];
+		// subject is there only if it is a "reply"
+		// check pid to make sure parent is there at all ... check visibility too?
+		if (comments[cid]['subject'] && comments[cid]['pid']) {
+			var thisdiv = fetchEl('comment_' + comments[cid]['pid']);
+			if (thisdiv) {
+				setDefaultDisplayMode(comments[cid]['pid']);
+				if (mode == 'full' || (mode == 'oneline' && displaymode[comments[cid]['pid']] == 'hidden')) {
+					fetchEl('comment_link_' + cid).innerHTML = comments[cid]['subject'];
+				} else if (mode == 'oneline') {
+					fetchEl('comment_link_' + cid).innerHTML = 'Re:';
+				}
 			}
 		}
 		existingdiv.className = mode;

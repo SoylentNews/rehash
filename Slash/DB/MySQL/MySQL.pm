@@ -6081,8 +6081,15 @@ sub getCommentTextCached {
 			$more_comment_text->{$cid} =~ s{</a[^>]+>}{</a>}gi;
 			my $text = chopEntity($more_comment_text->{$cid},
 				$user->{maxcommentsize});
+
+			# the comments have already gone through approveTag
+			# and strip_html to remove disallowed user content,
+			# but we might have added disallowed user content
+			# after the fact, so we want to make sure it is kept
+			# here -- pudge
+			local $Slash::Utility::Data::approveTag::admin = 1;
 			$text = strip_html($text);
-			$text = balanceTags($text);
+			$text = balanceTags($text, { admin => 1 });
 			$more_comment_text->{$cid} = addDomainTags($text);
 		}
 

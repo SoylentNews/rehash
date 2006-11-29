@@ -4227,8 +4227,6 @@ INSERT INTO globj_types VALUES (NULL, 'discussions');
 # 2006-11-15
 UPDATE vars SET value = 'T_2_5_0_134' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # for FireHose plugin
 UPDATE ajax_ops SET reskey_name="ajax_user_static", reskey_type="use" WHERE op="firehose_up_down";
 UPDATE ajax_ops SET reskey_name="ajax_admin_static", reskey_type="use" WHERE op="firehose_reject";
@@ -4242,9 +4240,7 @@ INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, 
 INSERT INTO vars (name, value, description) VALUES ('memcached_exptime_tags_brief', '300', 'Seconds to cache tag data that only needs brief caching, in memcached');
 INSERT INTO vars (name, value, description) VALUES ('tags_list_mintc', '4', 'Minimum value of total_clout for tagged items shown at /tags/foo');
 
-# SLASHDOT LAST UPDATED HERE
-
-UPDATE vars SET value=CONCAT(value,'|QUOTE') WHERE name='approvedtags';
+UPDATE vars SET value=CONCAT(value,'|quote') WHERE name='approvedtags';
 
 # For FireHose plugin
 ALTER TABLE firehose ADD COLUMN signoffs VARCHAR(255) DEFAULT '' NOT NULL;
@@ -4253,8 +4249,11 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_set_options', 'Slash::FireHose', 'a
 # 2006-11-21
 UPDATE vars SET value = 'T_2_5_0_135' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
 # For FireHose plugin
 UPDATE vars SET VALUE='red|orange|yellow|green|blue|indigo|violet' WHERE name='firehose_color_labels';
 
 INSERT INTO vars (name, value, description) VALUES ('db_auto_increment_increment','1','If your master DB uses auto_increment_increment, i.e. multiple master replication, echo its value into this var');
-

@@ -1651,7 +1651,7 @@ sub _hard_dispComment {
 		my $readtext = 'Read the rest of this comment...';
 		my $link;
 		if ($discussion2) {
-			$link = qq'<a href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return readRest($comment->{cid})">$readtext</a>';
+			$link = qq'<a class="readrest" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return readRest($comment->{cid})">$readtext</a>';
 		} else {
 			$link = linkComment({
 				sid	=> $comment->{sid},
@@ -1674,7 +1674,7 @@ sub _hard_dispComment {
 		$score_to_display .= ")";
 	}
 
-	if ($discussion2) {
+	if (0 && $discussion2) {
 		$comment_links = <<EOT;
 			<span class="comment_links" style="font-size: smaller">[
 				Experimental threading:
