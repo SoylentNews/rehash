@@ -146,9 +146,8 @@ sub run {
 
 	} elsif ($type eq 'urls') {
 		my $bookmark_count = $self->sqlCount('bookmarks', "url_id=$target_id_q");
-
 		my $pop_level = 7;
-		$pop_level = 6 if ($self->sqlCount("firehose", "type='feed' and url_id=$target_id");
+		$pop_level = 6 if $self->sqlCount("firehose", "type='feed' AND url_id=$target_id");
 		$popularity = $firehose->getMinPopularityForColorLevel($pop_level) + $bookmark_count;
 	} elsif ($type eq "stories") {
 		my $story = $self->getStory($target_id);
