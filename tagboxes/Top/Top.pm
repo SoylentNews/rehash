@@ -162,49 +162,59 @@ sub run {
 	$tagsdb->addCloutsToTagArrayref($tag_ar);
 print STDERR "Slash::Tagbox::Top->run called for $affected_id, " . scalar(@$tag_ar) . " tags\n";
 
+	# Generate the space-separated list of the top 5 scoring tags.
+
 	# Now set the data accordingly.  For a story, set the
-	# tags_top field to the space-separated list of the
-	# top 5 scoring tags.
+	# tags_top field to that list.
+
+	# Using the total_clout calculated in addCloutsToTagArrayref(),
+	# and counting opposite tags against ordinary tags, calculate
+	# %scores, the hash of tagnames and their scores.  Note that
+	# due to the presence of opposite tags, there may be many
+	# entries in %scores with negative values.
+
+	my %scores = ( );
+	for my $tag (@$tag_ar) {
+		$scores{$tag->{tagname}} += $tag->{total_clout};
+	}
+
+	my @opposite_tagnames =
+		map { $tags_reader->getOppositeTagname($_) }
+		grep { $_ !~ /^!/ && $scores{$_} > 0 }
+		keys %scores;
+	for my $opp (@opposite_tagnames) {
+		next unless $scores{$opp};
+		# Both $opp and its opposite exist in %scores.  Subtract
+		# $opp's score from its opposite and vice versa.
+		my $orig = $tags_reader->getOppositeTagname($opp);
+		my $orig_score = $scores{$orig};
+		$scores{$orig} -= $scores{$opp};
+		$scores{$opp} -= $orig_score;
+	}
+
+	my @top = sort {
+		$scores{$b} <=> $scores{$a}
+		||
+		$a cmp $b
+	} keys %scores;
+
+	# Eliminate tagnames below the minimum score required, and
+	# those that didn't make it to the top 5
+	# XXX the "5" is hardcoded currently, should be a var
+	my $minscore = $constants->{tagbox_top_minscore_stories};
+	@top = grep { $scores{$_} >= $minscore } @top;
+	$#top = 4 if $#top > 4;
+
+	my $plugin = getCurrentStatic('plugin');
+	if ($plugin->{FireHose}) {
+		my $firehose = getObject('Slash::FireHose');
+		my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
+		if ($fhid) {
+			$firehose->setFireHose($fhid, { toptags => join(' ', @top) });
+		}
+	}
 
 	if ($type eq 'stories') {
-
-		# Using the total_clout calculated in addCloutsToTagArrayref(),
-		# and counting opposite tags against ordinary tags, calculate
-		# %scores, the hash of tagnames and their scores.  Note that
-		# due to the presence of opposite tags, there may be many
-		# entries in %scores with negative values.
-
-		my %scores = ( );
-		for my $tag (@$tag_ar) {
-			$scores{$tag->{tagname}} += $tag->{total_clout};
-		}
-
-		my @opposite_tagnames =
-			map { $tags_reader->getOppositeTagname($_) }
-			grep { $_ !~ /^!/ && $scores{$_} > 0 }
-			keys %scores;
-		for my $opp (@opposite_tagnames) {
-			next unless $scores{$opp};
-			# Both $opp and its opposite exist in %scores.  Subtract
-			# $opp's score from its opposite and vice versa.
-			my $orig = $tags_reader->getOppositeTagname($opp);
-			my $orig_score = $scores{$orig};
-			$scores{$orig} -= $scores{$opp};
-			$scores{$opp} -= $orig_score;
-		}
-
-		my @top = sort {
-			$scores{$b} <=> $scores{$a}
-			||
-			$a cmp $b
-		} keys %scores;
-
-		# Eliminate tagnames below the minimum score required, and
-		# those that didn't make it to the top 5
-		# XXX the "5" is hardcoded currently, should be a var
-		my $minscore = $constants->{tagbox_top_minscore_stories};
-		@top = grep { $scores{$_} >= $minscore } @top;
-		$#top = 4 if $#top > 4;
 
 		$self->setStory($target_id, { tags_top => join(' ', @top) });
 print STDERR "Slash::Tagbox::Top->run $affected_id with " . scalar(@$tag_ar) . " tags, setStory $target_id to '@top'\n";
@@ -214,6 +224,8 @@ print STDERR "Slash::Tagbox::Top->run $affected_id with " . scalar(@$tag_ar) . "
 		# For a URL, calculate a numeric popularity score based
 		# on (most of) its tags and store that in the popularity
 		# field.
+		#
+		# (I think this code is obsolete...? - Jamie 2006/11/29)
 
 		my %tags_pos = map { $_, 1 } split(/\|/, $constants->{tagbox_top_urls_tags_pos} || "");
 		my %tags_neg = map { $_, 1 } split(/\|/, $constants->{tagbox_top_urls_tags_neg} || "");
