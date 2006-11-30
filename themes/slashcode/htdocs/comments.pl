@@ -480,10 +480,10 @@ sub editComment {
 		print getError('no such parent');
 		return;
 	} elsif ($pid) {
-		$pid_reply = $reply->{comment};
+		$pid_reply = $reply->{comment} = parseDomainTags($reply->{comment}, 0, 1, 1);
 		# XXX: maybe move this elsewhere, like Slash::Utility::Data
 		# this converts back to <quote>
-		while ($pid_reply =~ m|(<div class="quote">)(.+)$|sig) {
+		while ($pid_reply =~ m|(<p><div class="quote">)(.+)$|sig) {
 			my($found, $rest) = ($1, $2);
 			my $pos = pos($pid_reply) - (length($found) + length($rest));
 			substr($pid_reply, $pos, length($found)) = '<quote>';
@@ -493,7 +493,8 @@ sub editComment {
 			while ($pid_reply =~ m|(<(/?)div.*?>)|sig) {
 				my($found, $end) = ($1, $2);
 				if ($end && !$c) {
-					my $len = length($found);
+					# + 4 is for the </p>
+					my $len = length($found) + 4;
 					substr($pid_reply, pos($pid_reply) - $len, $len) = '</quote>';
 					pos($pid_reply) = 0;
 					last;
@@ -507,6 +508,8 @@ sub editComment {
 		$pid_reply =~ s|\\|\\\\|g;
 		$pid_reply =~ s|'|\\'|g;
 		$pid_reply =~ s|([\r\n])|\\$1|g;
+		$pid_reply =~ s{<nobr> <wbr></nobr>(\s*)} {$1 || ' '}gie;
+
 		#my $nick = strip_literal($reply->{nickname});
 		#$pid_reply = "<div>$nick ($reply->{uid}) wrote: <quote>$pid_reply</quote></div>";
 		$pid_reply = "<quote>$pid_reply</quote>";

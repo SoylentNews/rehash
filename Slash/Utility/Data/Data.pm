@@ -1459,7 +1459,7 @@ sub processCustomTagsPre {
 				# -- pudge
 				$codestr =~ s{<a href="[^"]+" rel="url2html-$$">(.+?)</a>}{$1}g;
 				my $code = strip_code($codestr);
-				my $newstr = "<blockquote>$code</blockquote>";
+				my $newstr = "<p><blockquote>$code</blockquote></p>";
 				substr($str, $pos, $len) = $newstr;
 				pos($str) = $pos + length($newstr);
 			}
@@ -1478,8 +1478,8 @@ sub processCustomTagsPost {
 		my $open    = qr[\n* <\s* $quote \s*> \n*]xsio;
 		my $close   = qr[\n* <\s* /$quote \s*> \n*]xsio;
 
-		$str =~ s/$open/<div class="quote">/g;
-		$str =~ s/$close/<\/div>/g;
+		$str =~ s/$open/<p><div class="quote">/g;
+		$str =~ s/$close/<\/div><\/p>/g;
 	}
 
 	return $str;
