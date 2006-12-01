@@ -455,7 +455,8 @@
         </ul>
         <p>To "auto-link" a URL in HTML or Plain modes, enclose it in <tt>&lt;URL:http://example.com/&gt;</tt>.</p>
 	<p>The list of approved HTML tags is: <tt>&lt;b&gt; &lt;i&gt; &lt;p&gt; &lt;br&gt; &lt;a&gt; &lt;ol&gt; &lt;ul&gt; &lt;li&gt; &lt;dl&gt; &lt;dt&gt; &lt;dd&gt; &lt;em&gt; &lt;strong&gt; &lt;tt&gt; &lt;blockquote&gt; &lt;div&gt;</tt>
-        <p>In addition, there is an extra "tag" you can use called <tt>&lt;ecode&gt;</tt>. This functions like the "Code" post mode, but may be inlined in "HTML Formatted" and "Plain Old Text" posts, and the entire block is indented. (Getting really fancy: if you wish to use the literal text <tt>&lt;/ecode&gt;</tt> inside the <tt>&lt;ecode&gt;</tt> tag, you may instead use <tt>&lt;ecode end="sometag"&gt;...&lt;/sometag&gt;</tt> instead of <tt>&lt;ecode&gt;...&lt;/ecode&gt;</tt>.)</p>
+        <p>In addition, there are two extra Slash-specific "tags" you can use.  One is called <tt>&lt;ecode&gt;</tt>. This functions like the "Code" post mode, but may be inlined in "HTML Formatted" and "Plain Old Text" posts, and the entire block is indented. (Getting really fancy: if you wish to use the literal text <tt>&lt;/ecode&gt;</tt> inside the <tt>&lt;ecode&gt;</tt> tag, you may instead use <tt>&lt;ecode end="sometag"&gt;...&lt;/sometag&gt;</tt> instead of <tt>&lt;ecode&gt;...&lt;/ecode&gt;</tt>.)</p>
+	<p>The other is <tt>&lt;quote&gt;</tt>.  It is used for quoting another comment.</p>
         <p>You may set your default post mode on the <a href="//slashdot.org/users.pl?op=editcomm">Comments preferences</a> page.</p>
         <p><em><small>
                 Updated by: <a href="mailto:jamie@slashdot.org">Jamie</a><br>
