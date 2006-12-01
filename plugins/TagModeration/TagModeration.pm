@@ -890,17 +890,17 @@ sub moderateCheck {
 
 	# all of these can be removed in favor of reskeys, later
 	if (!dbAvailable('write_comments')) {
-		return { msg => _comments_getError('comment_db_down') };
+		return { msg => Slash::_comments_getError('comment_db_down') };
 	}
 
 	if (!$constants->{m1}) {
-		return { msg => _comments_getError('no_moderation') };
+		return { msg => Slash::_comments_getError('no_moderation') };
 	}
 
 	if ($discussion->{type} eq 'archived' &&
 	   !$constants->{comments_moddable_archived} &&
 	   !$form->{meta_mod_only}) {
-		return { msg => _comments_getError('archive_error') };
+		return { msg => Slash::_comments_getError('archive_error') };
 	}
 
 	my $return = {};
@@ -909,7 +909,7 @@ sub moderateCheck {
 			&& $user->{seclev} >= $constants->{authors_unlimited}
 		)       || $user->{acl}{modpoints_always};
 	if ($return->{count}) {
-		$return->{msg} = _comments_getError('already posted');
+		$return->{msg} = Slash::_comments_getError('already posted');
 	}
 
 	return $return;
