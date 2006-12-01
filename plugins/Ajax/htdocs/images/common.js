@@ -682,7 +682,7 @@ function firehose_get_updates_handler(transport) {
 	}
 	if (response.updates) {
 		firehose_updates = response.updates;
-		firehose_updates.size = firehose_updates.length;
+		firehose_updates_size = firehose_updates.length;
 		processed = processed + 1;
 		firehose_handle_update();
 	}
