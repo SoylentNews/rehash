@@ -6078,10 +6078,8 @@ sub getCommentTextCached {
 			# add them back at the last step.  In-between, we chop
 			# the comment down to size, then massage it to make sure
 			# we still have good HTML after the chop.
-			$more_comment_text->{$cid} =~ s{</a[^>]+>}{</a>}gi;
-			$more_comment_text->{$cid} =~ s{<(a[^>]+) title="[^"]*">}{<$1>}gi;
-			my $text = chopEntity($more_comment_text->{$cid},
-				$user->{maxcommentsize});
+			my $text = parseDomainTags($more_comment_text->{$cid}, 0, 1, 1);
+			$text = chopEntity($text, $user->{maxcommentsize});
 
 			# the comments have already gone through approveTag
 			# and strip_html to remove disallowed user content,
