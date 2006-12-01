@@ -267,9 +267,10 @@ sub deactivateTag {
 #
 # This method assumes that the tag may already exist, and
 # thus the first action it tries is looking up that tag.
-# If the caller knows that the tag does not exist or is
-# highly unlikely to exist, this method will be less
-# efficient than createTagname.
+# This is usually what you want.  In rare cases, the caller
+# may know that the tagname does not exist or is highly
+# unlikely to exist, in which case this method will be
+# less efficient than createTagname.
 
 sub getTagnameidCreate {
 	my($self, $name) = @_;
@@ -585,6 +586,8 @@ sub addCloutsToTagArrayref {
 		'users.uid AS uid, seclev, karma, tag_clout',
 		'users, users_info',
 		"users.uid=users_info.uid AND users.uid IN ($uids_in_str)");
+#print STDERR "uids_in_str='$uids_in_str'\n";
+
 	my $uid_clout_hr = { };
 	# XXX hardcoded formula, this should be parameterized at least with vars
 	for my $uid (keys %$uid_info_hr) {
@@ -601,6 +604,7 @@ sub addCloutsToTagArrayref {
 						 ? $tagname_clout_hr->{$tag_hr->{tagnameid}}
 						 : 1;
 		$tag_hr->{user_clout}    =	   $uid_clout_hr    ->{$tag_hr->{uid}};
+#print STDERR "uc='$tag_hr->{user_clout}' for uid '$tag_hr->{uid}' for " . Dumper($tag_hr) if !defined $tag_hr->{user_clout};
 		$tag_hr->{total_clout} = $tag_hr->{tag_clout} * $tag_hr->{tagname_clout} * $tag_hr->{user_clout};
 	}
 }
