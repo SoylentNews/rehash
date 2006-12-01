@@ -6079,6 +6079,7 @@ sub getCommentTextCached {
 			# the comment down to size, then massage it to make sure
 			# we still have good HTML after the chop.
 			$more_comment_text->{$cid} =~ s{</a[^>]+>}{</a>}gi;
+			$more_comment_text->{$cid} =~ s{<(a[^>]+) title="[^"]*">}{<$1>}gi;
 			my $text = chopEntity($more_comment_text->{$cid},
 				$user->{maxcommentsize});
 
