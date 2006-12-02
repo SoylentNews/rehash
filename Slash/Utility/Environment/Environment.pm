@@ -3138,7 +3138,7 @@ sub get_srcid_sql_in {
 	if ($type eq 'uid') {
 		return $srcid_q;
 	}
-	return "CONV($srcid_q, 16, 10)";
+	return "CAST(CONV($srcid_q, 16, 10) AS UNSIGNED)";
 }
 
 #========================================================================
