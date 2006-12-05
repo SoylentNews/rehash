@@ -260,6 +260,14 @@ $task{$me}{code} = sub {
 		# tell it where it will be.
 		my($cchp_file, $cchp_param) = _make_cchp_file();
 
+		# update a story's audio version, if using cepstral audio.
+		if ($constants->{cepstral_audio} {
+			# fork a new script to render the audio, and
+			# it will update the story_param table with the correct
+			# pointers to the file
+			system("audio-gen.pl $virtual_user $stoid &");
+		}
+
 		# Now call prog2file().
 		$args = "$vu ssi=yes sid='$sid'$cchp_param";
 		my $filename;
