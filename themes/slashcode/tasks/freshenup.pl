@@ -261,7 +261,7 @@ $task{$me}{code} = sub {
 		my($cchp_file, $cchp_param) = _make_cchp_file();
 
 		# update a story's audio version, if using cepstral audio.
-		if ($constants->{cepstral_audio} {
+		if ($constants->{cepstral_audio}) {
 			# fork a new script to render the audio, and
 			# it will update the story_param table with the correct
 			# pointers to the file
