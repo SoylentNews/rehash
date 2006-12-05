@@ -212,7 +212,7 @@ YAHOO.slashdot.topicTags = ["keyword",
     var tagsDS = new YAHOO.widget.DS_XHR("./ajax.pl", ["\n", "\t"]);
     // tagsDS.maxCacheEntries = 0; // turn off local cacheing, because Jamie says the query is fast
     tagsDS.queryMatchSubset = false;
-    tagsDS.responseType = tagsDS.TYPE_FLAT;
+    tagsDS.responseType = YAHOO.widget.DS_XHR.TYPE_FLAT;
     tagsDS.scriptQueryParam = "prefix";
     tagsDS.scriptQueryAppend = "op=tags_list_tagnames";
     tagsDS.queryMethod = "POST";
