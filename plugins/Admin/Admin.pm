@@ -489,13 +489,14 @@ sub showAuthorActivityBox {
 	my $now = timeCalc($self->getTime(), "%s", 0);
 
 	foreach my $admin (@$cur_admin) {
-		my ($nickname, $time, $title, $subid, $sid, $uid) = @$admin;
+		my ($nickname, $time, $title, $subid, $sid, $uid, $fhid) = @$admin;
 		push @activity, {
 			nickname => $nickname,
 			title	=> $title,
 			subid	=> $subid,
 			sid	=> $sid,
 			uid	=> $uid,
+			fhid	=> $fhid,
 			'time'	=> $time,
 			verb	=> "reviewing"
 		};

@@ -1366,6 +1366,7 @@ sub editStory {
 		lasttitle	=> $storyref->{title},
 		last_sid	=> $sid,
 		last_subid	=> '',
+		last_fhid	=> '',
 	});
 
 	# Run a spellcheck on introtext, bodytext, and title if they're set.
