@@ -43,7 +43,10 @@ __template__
 
 	<div id="tags-user-[% id %]"></div>
 
-	[% IF user.is_admin && !user.firehose_usermode %]<div id="tags-admin-[% id %]"></div>[% END %]
+	[% IF user.is_admin && !user.firehose_usermode %]
+	<div id="tags-admin-[% id %]"></div>
+	<div id="admin-extras-[% item.id %]"><a href="javascript:firehose_get_admin_extras('[% item.id %]')">Get extras</a></div>
+	[% END %]
 
 	<div id="toggletags-message-[% id %]"></div>
 

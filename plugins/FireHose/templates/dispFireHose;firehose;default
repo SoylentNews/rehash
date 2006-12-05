@@ -80,9 +80,6 @@ END %]
 			END %]
 			[% introtext %]
 		</div>
-[% IF adminmode && bodycontent%]
-	<div id="admin-extras-[% item.id %]"><a href="javascript:firehose_get_admin_extras('[% item.id %]')">Get extras</a></div>
-[% END %]
 	[% IF bodywrapper %]
 	</div>
 	[% END %]
