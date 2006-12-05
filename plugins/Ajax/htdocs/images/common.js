@@ -275,7 +275,7 @@ function reportError(request) {
 function createTag(tag, id, type) {
 	var params = [];
 	params['op'] = 'tags_create_tag';
-	params['reskey'] = ajax_user_static;
+	params['reskey'] = reskey_static;
 	params['name'] = tag;
 	params['id'] = id;
 	params['type'] = type;
@@ -403,7 +403,7 @@ function firehose_set_options(name, value) {
 	];
 	var params = [];
 	params['op'] = 'firehose_set_options';
-	params['reskey'] = ajax_user_static;
+	params['reskey'] = reskey_static;
 	theForm = document.forms["firehoseform"];
 	if (name == "firehose_usermode") {
 		if (value ==  true) {
@@ -484,7 +484,7 @@ function firehose_up_down(id, dir) {
 	};
 	params['op'] = 'firehose_up_down';
 	params['id'] = id;
-	params['reskey'] = ajax_user_static;
+	params['reskey'] = reskey_static;
 	params['dir'] = dir;
 	var updown = $('updown-' + id);
 	ajax_update(params, '', handlers);

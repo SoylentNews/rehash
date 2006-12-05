@@ -691,7 +691,7 @@ function doModerate(el) {
 	params['sid'] = discussion_id;
 	params['msgdiv'] = 'reasondiv_' + cid;
 	params['reason'] = el.value;
-	params['reskey'] = comments_moderate_reskey;
+	params['reskey'] = reskey_static;
 
 	var handlers = {
 		onComplete: json_handler

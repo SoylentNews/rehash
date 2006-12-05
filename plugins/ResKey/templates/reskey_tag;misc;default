@@ -13,7 +13,6 @@ en_US
 __name__
 reskey_tag
 __template__
-
 [% this_reskey = '';
    # use the rkey object if it is there, or the form otherwise
    IF rkey;
@@ -28,8 +27,10 @@ __template__
 
    IF this_reskey %]
 <input type="hidden" id="[% reskey_label %]" name="[% reskey_label %]" value="[% this_reskey %]">
-[% reskey_label = ''; END %]
+[% END;
 
+   # don't carry over to subsequent calls
+   reskey_label = ''; %]
 __seclev__
 500
 __version__

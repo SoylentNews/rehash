@@ -914,14 +914,18 @@ sub makeStaticKey {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	$salt ||= $self->getCurrentSalt;
-	$id   ||= '';
+	$id   ||= $self->{id} || '';
 
 	return md5_hex(
 		join($;,
 			$user->{uid},
 			$user->{srcids}{ $constants->{reskey_srcid_masksize} || 24 },
-			$self->resname,
-			$id,
+			# these change so often, i don't think there's a real point
+			# to fixing it to a specific resource (resname) or id,
+			# and making it more general makes it a little simpler to use
+			# -- pudge
+			#$self->resname,
+			#$id,
 			$constants->{reskey_static_salt},
 			$salt
 		)

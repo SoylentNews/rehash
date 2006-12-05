@@ -226,7 +226,7 @@ function firehose_reject (el) {
 	var fh = $('firehose-' + el.value);
 	params['op'] = 'firehose_reject';
 	params['id'] = el.value;
-	params['reskey'] = ajax_admin_static;
+	params['reskey'] = reskey_static;
 	ajax_update(params, 'reject_' + el.value);
 	if (fh) {
 		var attributes = { 
