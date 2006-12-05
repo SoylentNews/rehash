@@ -265,7 +265,7 @@ $task{$me}{code} = sub {
 			# fork a new script to render the audio, and
 			# it will update the story_param table with the correct
 			# pointers to the file
-			system("audio-gen.pl $virtual_user $stoid &");
+			system("$constants->{datadir}/sbin/audio-gen.pl $virtual_user $stoid &");
 		}
 
 		# Now call prog2file().
