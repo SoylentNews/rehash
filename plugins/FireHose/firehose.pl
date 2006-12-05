@@ -62,6 +62,9 @@ sub view {
 	my $options = $firehose->getAndSetOptions();
 	my $item = $firehose_reader->getFireHose($form->{id});
 	if ($item && $item->{id} && ($item->{public} eq "yes" || $user->{is_admin}) ) {
+		if ($user->{is_admin}) {
+			$firehose->setFireHoseSession($item->{id});
+		}
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
 		my $firehosetext = $firehose_reader->dispFireHose($item, { mode => "full", tags_top => $tags_top, options => $options });
 		slashDisplay("view", {
