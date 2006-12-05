@@ -186,7 +186,7 @@ sub updateItemFromStory {
 	my($self, $id) = @_;
 	my $constants = getCurrentStatic();
 	my %ignore_skids = map {$_ => 1 } @{$constants->{firehose_story_ignored_skids}};
-	my $story = $self->getStory($id);
+	my $story = $self->getStory($id, "", 1);
 	if ($story) {
 		my $globjid = $self->getGlobjidCreate("stories", $story->{stoid});
 		my $id = $self->getFireHoseIdFromGlobjid($globjid);
@@ -197,8 +197,8 @@ sub updateItemFromStory {
 				title 		=> $story->{title},
 				uid		=> $story->{uid},
 				createtime	=> $story->{time},
-				introtext	=> $story->{introtext},
-				bodytext	=> $story->{bodytext},
+				introtext	=> parseSlashizedLinks($story->{introtext}),
+				bodytext	=> parseSlashizedLinks($story->{bodytext}),
 				primaryskid	=> $story->{primaryskid},
 				tid 		=> $story->{tid},
 				public		=> $public,
@@ -230,8 +230,8 @@ sub createItemFromStory {
 			globjid 	=> $globjid,
 			uid		=> $story->{uid},
 			createtime	=> $story->{time},
-			introtext	=> $story->{introtext},
-			bodytext	=> $story->{bodytext},
+			introtext	=> parseSlashizedLinks($story->{introtext}),
+			bodytext	=> parseSlashizedLinks($story->{bodytext}),
 			popularity	=> $popularity,
 			primaryskid	=> $story->{primaryskid},
 			tid 		=> $story->{tid},
@@ -247,7 +247,13 @@ sub createItemFromStory {
 
 sub getFireHoseCount {
 	my($self) = @_;
-	return $self->sqlCount("firehose", "type='submission' AND category='' AND accepted='no' AND rejected='no'");
+	my $pop = $self->getMinPopularityForColorLevel(6);
+	my $user = getCurrentUser();
+	my $pop_q = $self->sqlQuote($pop);
+	my $signoff_label = "sign$user->{uid}\ed";
+
+	#XXXFH - add time limit later?
+	return $self->sqlCount("firehose", "popularity >= $pop_q and signoffs not like '%$signoff_label%'");
 }
 
 sub getFireHoseEssentials {
@@ -450,6 +456,9 @@ sub fetchItemText {
 	my $item = $firehose->getFireHose($id);
 	my $tags_top = $firehose->getFireHoseTagsTop($item);
 
+	if ($user->{is_admin}) {
+		$firehose->setFireHoseSession($item->{id});
+	}
 	my $data = {
 		item => $item,
 		mode => "bodycontent",
@@ -631,6 +640,9 @@ sub ajaxFireHoseGetUpdates {
 				my $the_user  	= $slashdb->getUser($item->{uid});
 				$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user }, { Return => 1 });
 				$html->{"tags-top-$_->{id}"} = slashDisplay("firehose_tags_top", { tags_top => $tags_top, id => $_->{id}, item => $item }, { Return => 1 });
+				my $introtext = $item->{introtext};
+				slashDisplay("formatHoseIntro", { introtext => $introtext }, { Return => 1 });
+				$html->{"text-$_->{id}"} = $introtext;
 				# updated
 			}
 		} else {
@@ -646,7 +658,7 @@ sub ajaxFireHoseGetUpdates {
 		push @$updates, ["remove", $_, ""];
 	}
 
-	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1}, { Return => 1, Page => "firehose"});
+	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1, page => $form->{page} }, { Return => 1, Page => "firehose"});
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
@@ -925,6 +937,10 @@ sub getSimilarForItem {
 		title 		=> $item->{title},
 		introtext 	=> $item->{introtext}
 	};
+	if ($item->{type} eq "story") {
+		my $story = $self->getStory($item->{srcid});
+		$storyref->{sid} = $story->{sid} if $story && $story->{sid};
+	}
 	my $similar_stories = [];
 	$similar_stories = $reader->getSimilarStories($storyref, $num_sim) if $user->{is_admin};
 
@@ -1036,7 +1052,7 @@ sub getAndSetOptions {
 			$fh_options->{primaryskid} = $skin_names{$_};
 		} elsif ($user->{is_admin} && $_ eq "rejected") {
 			$fh_options->{rejected} = "yes";
-		} elsif ($user->{is_admin} && $_ eq "accepted") {
+		} elsif ($_ eq "accepted") {
 			$fh_options->{accepted} = "yes";
 		} elsif ($colors->{$_}) {
 			$fh_options->{color} = $_;
@@ -1084,6 +1100,7 @@ sub getAndSetOptions {
 		$options->{accepted} = "no" if !$options->{accepted};
 		$options->{rejected} = "no" if !$options->{rejected};
 	} else  {
+		$options->{accepted} = "no" if !$options->{accepted};
 		$options->{public} = "yes";
 		$options->{daysback} = 1;
 		$options->{createtime_no_future} = 1;
@@ -1097,11 +1114,15 @@ sub getFireHoseTagsTop {
 	my $constants 	= getCurrentStatic();
 	my $tags_top	 = [];
 	push @$tags_top, ($item->{type});
-	if ($user->{is_admin} && !$user->{firehose_usermode}) {
-		my $cat = $item->{category} || "none";
-		$cat .= ":1";
-		push @$tags_top, $cat;
+	
+	if ($item->{type} ne "story") {
+		if ($user->{is_admin} && !$user->{firehose_usermode}) {
+			my $cat = $item->{category} || "none";
+			$cat .= ":1";
+			push @$tags_top, $cat;
+		}
 	}
+
 	if ($item->{primaryskid} && $item->{primaryskid} != $constants->{mainpage_skid}) {
 		my $the_skin = $self->getSkin($item->{primaryskid});
 		push @$tags_top, "$the_skin->{name}:2";
@@ -1110,6 +1131,10 @@ sub getFireHoseTagsTop {
 		my $the_topic = $self->getTopic($item->{tid});
 		push @$tags_top, "$the_topic->{keyword}:3";
 	}
+	my %seen_tags = map { $_ => 1 } @$tags_top;
+	
+	push @$tags_top, map { "$_:0" } grep {!$seen_tags{$_}} split (/\s+/, $item->{toptags});
+
 	return $tags_top;
 }
 
@@ -1165,6 +1190,25 @@ sub listView {
 		refresh_options	=> $refresh_options
 	}, { Page => "firehose", Return => 1});
 
+}
+
+sub setFireHoseSession {
+	my ($self, $id) = @_;
+	my $user = getCurrentUser();
+	my $item = $self->getFireHose($id);
+	my $data = {};
+	$data->{lasttitle} = $item->{title};
+	if ($item->{type} eq "story") {
+		my $story = $self->getStory($item->{srcid});
+		$data->{last_sid} = $story->{sid} if $story && $story->{sid};
+	} 
+
+	if (!$data->{last_sid}) {
+		$data->{last_fhid} = $item->{id};
+	}
+	$data->{last_subid} ||= '';
+	$data->{last_sid} ||= '';
+	$self->setSession($user->{uid}, $data);
 }
 
 1;
