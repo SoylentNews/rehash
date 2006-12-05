@@ -776,6 +776,7 @@ CREATE TABLE sessions (
 	lasttitle varchar(50),
 	last_subid mediumint UNSIGNED,
 	last_sid varchar(16),
+	last_fhid mediumint UNSIGNED,
 	UNIQUE (uid),
 	PRIMARY KEY (session)
 ) TYPE=InnoDB;
