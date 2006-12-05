@@ -42,7 +42,7 @@ __template__
 </form>
 [% IF similar_stories.size > 0 %]
 	<table border="0" cellpadding="2" cellspacing="0">
-		<tr><td colspan="5" align="CENTER"><b>Similar Stories --</b> check words below before submitting or previewing to mark words as common and not for use in determining similar stories</td></tr>
+		<tr class="data_head"><td><b>Similar Stories</b></td></tr>
 		[% FOREACH story = similar_stories %]
 			<tr>
 			<td valign="TOP">[% IF story.displaystatus == 0;
