@@ -21,13 +21,16 @@ function um_set_settings(behavior) {
 	ajax_update(params, 'links-vendors-content');
 }
 
-function admin_signoff(stoid) {
+function admin_signoff(stoid, type, id) {
 	var params = [];
 	var reskeyel = $('signoff-reskey-' + stoid);
 	params['op'] = 'admin_signoff';
 	params['stoid'] = stoid;
 	params['reskey'] = reskeyel.value;
 	ajax_update(params, 'signoff_' + stoid);
+	if (type == "firehose") {
+		firehose_collapse_entry(id);
+	}
 	
 }
 

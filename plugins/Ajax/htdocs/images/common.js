@@ -5,6 +5,7 @@ var fh_play = 0;
 var fh_is_timed_out = 0;
 var fh_is_updating = 0;
 var fh_update_timerids = Array(0);
+var fh_is_admin = 0;
 var console_updating = 0;
 var firehose_updates = Array(0);
 var firehose_updates_size = 0;
@@ -152,6 +153,9 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 
 	if (type == "firehose") {
 		setFirehoseAction();
+		if (fh_is_admin) {
+			firehose_get_admin_extras(id);
+		}
 	}
 
 	//alert("Tags show body / Type: " + type );
@@ -491,6 +495,9 @@ function firehose_up_down(id, dir) {
 	params['dir'] = dir;
 	var updown = $('updown-' + id);
 	ajax_update(params, '', handlers);
+	if (dir == "-" && fh_is_admin) {
+		firehose_collapse_entry(id);
+	}
 }
 // firehose functions end
 
@@ -801,4 +808,15 @@ function firehose_pause() {
 
 function firehose_add_update_timerid(timerid) {
 	fh_update_timerids.push(timerid);		
+}
+
+function firehose_collapse_entry(id) {
+	var fhbody = $('fhbody-'+id);
+	var fh = $('firehose-'+id);
+	if (fhbody.className == "body") {
+		fhbody.className = "hide";
+		fh.className = "briefarticle";
+	}	
+	tagsHideBody(id)
+
 }
