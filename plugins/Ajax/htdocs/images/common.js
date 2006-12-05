@@ -251,6 +251,9 @@ function tagsOpenAndEnter(id, tagname, is_admin, type) {
 }
 
 function attachCompleter( obj, id, is_admin, type, tagDomain ) {
+	if ( YAHOO.util.Dom.isSafari ) 
+		return false;
+
 	var disable = YAHOO.util.Dom.getStyle(obj, '-slashdot-disable-tag-completer');
 	if ( disable == "true" )
 		return false;
