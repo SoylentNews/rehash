@@ -422,6 +422,37 @@ sub getFireHoseEssentials {
 	return($items, $results);
 }
 
+sub getUserFireHoseVotesForGlobjs {
+	my ($self, $uid, $globjs) = @_;
+	my $constants = getCurrentUser();
+
+	return {} if !$globjs;
+	$globjs = [$globjs] if !ref $globjs;
+	return {} if @$globjs < 1;
+	my $uid_q = $self->sqlQuote($uid);
+	my $glob_str = join ",", map { $self->sqlQuote($_) } @$globjs;
+	
+	my $upvote   = $constants->{tags_upvote_tagname}   || 'nod';
+	my $downvote = $constants->{tags_downvote_tagname} || 'nix';
+
+	my $tags = getObject("Slash::Tags", { db_type => "reader" });
+	my $upid = $tags->getTagnameidCreate($upvote);
+	my $dnid = $tags->getTagnameidCreate($downvote);
+
+	my $results = $self->sqlSelectAllKeyValue(
+		"globjid,tagnameid",
+		"tags", 
+		"globjid in ($glob_str) and inactivated is NULL AND uid = $uid_q AND tagnameid IN ($upid,$dnid)"
+	);
+
+	foreach (keys %$results) {
+		$results->{$_} = "up" if $results->{$_} == $upid;
+		$results->{$_} = "down" if $results->{$_} == $dnid;
+	}
+	
+	return $results;
+}
+
 sub getFireHose {
 	my($self, $id) = @_;
 	# XXX cache this eventually
@@ -624,6 +655,12 @@ sub ajaxFireHoseGetUpdates {
 	my %ids = map { $_ => 1 } @ids;
 	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
+	my $globjs = [];	
+	foreach (@$items) {
+		push @$globjs, $_->{globjid} if $_->{globjid} 
+	}
+
+	my $votes = $firehose->getUserFireHoseVotesForGlobjs($user->{uid}, $globjs);
 	my $html = {};
 	my $updates = [];
 
@@ -631,6 +668,8 @@ sub ajaxFireHoseGetUpdates {
 	$adminmode = 0 if $user->{is_admin} && $user->{firehose_usermode};
 	my $ordered = [];
 	my $now = $slashdb->getTime();
+
+
 	foreach (@$items) {
 		my $item = $firehose_reader->getFireHose($_->{id});
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
@@ -648,7 +687,7 @@ sub ajaxFireHoseGetUpdates {
 		} else {
 			# new
 			$update_time = $_->{last_update} if $_->{last_update} gt $update_time && $_->{last_update} lt $now;
-			push @$updates, ["add", $_->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top }, { Return => 1, Page => "firehose" })];
+			push @$updates, ["add", $_->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top, vote => $votes->{$item->{globjid}} }, { Return => 1, Page => "firehose" })];
 		}
 		push @$ordered, $item->{id};
 		delete $ids{$_->{id}};
@@ -901,7 +940,7 @@ sub dispFireHose {
 	my($self, $item, $options) = @_;
 	$options ||= {};
 
-	slashDisplay('dispFireHose', { item => $item, mode => $options->{mode} , tags_top => $options->{tags_top}, options => $options->{options} }, { Page => "firehose",  Return => 1 });
+	slashDisplay('dispFireHose', { item => $item, mode => $options->{mode} , tags_top => $options->{tags_top}, options => $options->{options}, vote => $options->{vote} }, { Page => "firehose",  Return => 1 });
 }
 
 sub getMemoryForItem {
@@ -1161,10 +1200,18 @@ sub getPopLevelForPopularity {
 sub listView {
 	my ($self) = @_;
 	my $slashdb = getCurrentDB();
+	my $user = getCurrentUser();
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $options = $self->getAndSetOptions();
 
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($options);
+	my $globjs;
+
+	foreach (@$items) {
+		push @$globjs, $_->{globjid} if $_->{globjid} 
+	}
+
+	my $votes = $self->getUserFireHoseVotesForGlobjs($user->{uid}, $globjs);
 
 	my $itemstext;
 	my $maxtime = $slashdb->getTime();
@@ -1174,7 +1221,7 @@ sub listView {
 		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime && $_->{createtime} lt $now;
 		my $item =  $firehose_reader->getFireHose($_->{id});
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
-		$itemstext .= $self->dispFireHose($item, { mode => $options->{mode} , tags_top => $tags_top, options => $options });
+		$itemstext .= $self->dispFireHose($item, { mode => $options->{mode} , tags_top => $tags_top, options => $options, vote=> $votes->{$item->{globjid}} });
 	}
 	my $refresh_options;
 	$refresh_options->{maxtime} = $maxtime;
@@ -1187,7 +1234,8 @@ sub listView {
 		itemstext	=> $itemstext, 
 		page		=> $options->{page}, 
 		options		=> $options,
-		refresh_options	=> $refresh_options
+		refresh_options	=> $refresh_options,
+		votes		=> $votes
 	}, { Page => "firehose", Return => 1});
 
 }

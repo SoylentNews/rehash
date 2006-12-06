@@ -89,7 +89,7 @@ END %]
 			</form>
 			[% END %]
 [% IF full %]
-		[% PROCESS tagsfirehosedivtagbox id = item.id  tags_top = tags_top %]
+		[% PROCESS tagsfirehosedivtagbox id = item.id  tags_top = tags_top vote = vote %]
 [% IF divwrapper %]
 <div class="storylinks">
 	<div>
