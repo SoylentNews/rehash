@@ -292,6 +292,22 @@ CREATE TABLE comments (
 ) TYPE=InnoDB;
 
 #
+# Table structure for table 'comment_log'
+#
+
+DROP TABLE IF EXISTS comment_log;
+
+CREATE TABLE comment_log (
+	id int UNSIGNED NOT NULL auto_increment,
+	cid int UNSIGNED NOT NULL,
+	logtext varchar(255) DEFAULT '' NOT NULL,
+	ts datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
+	INDEX ts (ts),
+	PRIMARY KEY (id)
+) TYPE=InnoDB;
+
+
+#
 # Table structure for table 'comment_text'
 #
 
