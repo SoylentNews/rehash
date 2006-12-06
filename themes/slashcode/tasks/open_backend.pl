@@ -93,7 +93,8 @@ sub _do_rss {
 		items		=> [ map { { story => $_ } } @$stories ],
 	}, 1);
 
-	save2file("$constants->{basedir}/$filename", $rss, \&fudge);
+	save2file("$constants->{basedir}/$filename", $rss, \&fudge)
+		unless $constants->{rss_no_public_static};
 	save2file("$constants->{basedir}/privaterss/$filename", $rss, \&fudge)
 		if -d "$constants->{basedir}/privaterss/";
 }
