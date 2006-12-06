@@ -778,11 +778,10 @@ function d2act () {
 	var xy = Position.cumulativeOffset($('commentwrap'));
 	var gd = $('d2act'); 
 	if (gd) {
-		if ($('d2out').className == 'horizontal') {
+		xy[1] = xy[1] - Position.deltaY;
+		if ($('d2out').className == 'horizontal')
 			xy[1] = xy[1] - gd.offsetHeight;
-		} else {
-			xy[1] = xy[1] - Position.deltaY;
-		}
+
 		if (xy[1] < -14) {
 			gd.style.top      = '4px';
 			gd.style.position = 'fixed';
