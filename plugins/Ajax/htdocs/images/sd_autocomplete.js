@@ -25,43 +25,41 @@ YAHOO.slashdot.DS_JSArray.prototype.doQuery = function(oCallbackFn, sQuery, oPar
     var aResults = []; // container for results
     var bMatchFound = false;
     var bMatchContains = this.queryMatchContains;
-    if(sQuery) {
-        if(!this.queryMatchCase) {
-            sQuery = sQuery.toLowerCase();
+
+    if(sQuery && !this.queryMatchCase) {
+        sQuery = sQuery.toLowerCase();
+    }
+
+    // Loop through each element of the array...
+    // which can be a string or an array of strings
+    for(var i = aData.length-1; i >= 0; i--) {
+        var aDataset = [];
+
+        if(aData[i]) {
+            if(aData[i].constructor == String) {
+                aDataset[0] = aData[i];
+            }
+            else if(aData[i].constructor == Array) {
+                aDataset = aData[i];
+            }
         }
 
-        // Loop through each element of the array...
-        // which can be a string or an array of strings
-        for(var i = aData.length-1; i >= 0; i--) {
-            var aDataset = [];
-
-            if(aData[i]) {
-                if(aData[i].constructor == String) {
-                    aDataset[0] = aData[i];
-                }
-                else if(aData[i].constructor == Array) {
-                    aDataset = aData[i];
-                }
-            }
-
-            if(aDataset[0] && (aDataset[0].constructor == String)) {
-                var sKeyIndex = (this.queryMatchCase) ?
+        if(aDataset[0] && (aDataset[0].constructor == String)) {
+            var sKeyIndex = 0;
+            if (sQuery) {
+              sKeyIndex = (this.queryMatchCase) ?
                 encodeURIComponent(aDataset[0]).indexOf(sQuery):
                 encodeURIComponent(aDataset[0]).toLowerCase().indexOf(sQuery);
+            }
 
-                // A STARTSWITH match is when the query is found at the beginning of the key string...
-                if((!bMatchContains && (sKeyIndex === 0)) ||
-                // A CONTAINS match is when the query is found anywhere within the key string...
-                (bMatchContains && (sKeyIndex > -1))) {
-                    // Stash a match into aResults[].
-                    aResults.unshift(aDataset);
-                }
+            // A STARTSWITH match is when the query is found at the beginning of the key string...
+            if((!bMatchContains && (sKeyIndex === 0)) ||
+            // A CONTAINS match is when the query is found anywhere within the key string...
+            (bMatchContains && (sKeyIndex > -1))) {
+                // Stash a match into aResults[].
+                aResults.unshift(aDataset);
             }
         }
-    }
-    else {
-      // !sQuery
-      aResults = aData.slice();
     }
 
     this.getResultsEvent.fire(this, oParent, sQuery, aResults);
