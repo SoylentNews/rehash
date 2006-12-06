@@ -16,10 +16,6 @@ __template__
 		reskey_name = 'ajax_base';
 	END;
 
-	IF !reskey_tag_js;
-		reskey_tag_js => 1;
-	END;
-
 	IF !reskey_label;
 		reskey_label = 'reskey';
 	END;
@@ -34,9 +30,9 @@ __template__
 	var [% reskey_label %] = '[% rkey.reskey %]';
 [%-			IF reskey_tag_js == 2 %]
 </script>[% END;
+		ELSE;
+			PROCESS reskey_tag;
 		END;
-	ELSE;
-		PROCESS reskey_tag;
 	END;
 
 	# don't carry over to subsequent calls
