@@ -1171,8 +1171,8 @@ sub submitComment {
 		$post_str .= "NO_POST " if $user->{state}{commentkarma_no_post};
 		if ($posters_uid == $constants->{anonymous_coward_uid} && $user->{state}{commentkarma_no_anon}) {
 			$slashdb->createCommentLog({
-				cid => $maxCid,
-				logtext => "COMMENTKARMA ANON: $post_str"
+				cid	=> $maxCid,
+				logtext	=> "COMMENTKARMA ANON: $post_str"
 			});
 		} elsif ($posters_uid != $constants->{anonymous_coward_uid} && $user->{state}{commentkarma_no_post}) {
 			$slashdb->createCommentLog({

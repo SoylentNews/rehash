@@ -1172,7 +1172,6 @@ sub createSubmission {
 sub getSessionInstance {
 	my($self, $uid) = @_;
 
-
 	my $admin_timeout = getCurrentStatic('admin_timeout');
 
 	$self->sqlDelete("sessions",

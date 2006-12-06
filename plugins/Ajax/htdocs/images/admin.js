@@ -31,7 +31,6 @@ function admin_signoff(stoid, type, id) {
 	if (type == "firehose") {
 		firehose_collapse_entry(id);
 	}
-	
 }
 
 function adminTagsCommands(id, type) {

@@ -769,6 +769,7 @@ sub colorEdit {
 	});
 }
 
+##################################################################
 sub commentLog {
 	my($form, $slashdb, $user, $constants) = @_;
 	my $commentlog = $slashdb->getRecentCommentLog();
