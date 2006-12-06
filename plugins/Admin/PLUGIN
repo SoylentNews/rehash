@@ -23,6 +23,7 @@ template=templates/adminLoginForm;admin;default
 template=templates/author_activity;misc;default
 template=templates/blockEdit;admin;default
 template=templates/colorEdit;admin;default
+template=templates/commentlog;admin;default
 template=templates/data;admin;default
 template=templates/editbuttons;admin;default
 template=templates/editFilter;admin;default

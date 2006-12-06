@@ -87,6 +87,12 @@ sub main {
 			adminmenu	=> 'config',
 			tab_selected	=> 'colors',
 		},
+		commentlog	=> {
+			function	=> \&commentLog,
+			seclev		=> 100,
+			adminmenu	=> 'security',
+			tab_selected	=> 'commentlog'
+		},
 		listfilters 	=> {
 			function 	=> \&listFilters, # listfilters
 			seclev		=> 100,
@@ -761,6 +767,12 @@ sub colorEdit {
 		colors			=> \@colors,
 		color_select		=> $color_select,
 	});
+}
+
+sub commentLog {
+	my($form, $slashdb, $user, $constants) = @_;
+	my $commentlog = $slashdb->getRecentCommentLog();
+	slashDisplay("commentlog", { commentlog => $commentlog });
 }
 
 ##################################################################
