@@ -1170,9 +1170,15 @@ sub submitComment {
 		$post_str .= "NO_ANON " if $user->{state}{commentkarma_no_anon};
 		$post_str .= "NO_POST " if $user->{state}{commentkarma_no_post};
 		if ($posters_uid == $constants->{anonymous_coward_uid} && $user->{state}{commentkarma_no_anon}) {
-			print STDERR "COMMENTKARMA ANON: $post_str $constants->{real_rootdir}/comments.pl?sid=$clean_comment->{sid}&amp;cid=$maxCid\n";
+			$slashdb->createCommentLog({
+				cid => $maxCid,
+				logtext => "COMMENTKARMA ANON: $post_str"
+			});
 		} elsif ($posters_uid != $constants->{anonymous_coward_uid} && $user->{state}{commentkarma_no_post}) {
-			print STDERR "COMMENTKARMA USER: $post_str $constants->{real_rootdir}/comments.pl?sid=$clean_comment->{sid}&amp;cid=$maxCid\n";
+			$slashdb->createCommentLog({
+				cid	=> $maxCid,
+				logtext	=> "COMMENTKARMA USER: $post_str"
+			});
 		}
 	}
 
