@@ -270,6 +270,9 @@ sub updateD2prefs {
 	for my $pref (qw(threshold highlightthresh)) {
 		$save{"d2_$pref"} = $form->{$pref} if defined $form->{$pref};
 	}
+	for my $pref (qw(comments_control)) {
+		$save{$pref} = $form->{$pref} if defined $form->{$pref};
+	}
 
 	$slashdb->setUser($user->{uid}, \%save);
 }
@@ -313,7 +316,7 @@ sub getOps {
 		},
 		comments_set_prefs	=> {
 			function	=> \&updateD2prefs,
-			reskey_name	=> 'ajax_user',
+			reskey_name	=> 'ajax_user_static',
 			reskey_type	=> 'createuse',
 		},
 		getSectionPrefsHTML => {

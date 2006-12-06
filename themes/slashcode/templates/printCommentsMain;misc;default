@@ -19,6 +19,12 @@ en_US
 __name__
 printCommentsMain
 __template__
+[% horiz = 0;
+   IF user.comments_control;
+   	horiz = 1 IF user.comments_control == 'horizontal';
+   ELSE;
+   	horiz = 1 IF constants.comments_control_horizontal;
+   END %]
 [% discussion2 = user.discussion2 && (user.discussion2 == "slashdot" || user.discussion2 == "uofm") %]
 [% spilltext = "Spill at <b>${user.commentspill}</b>!";
    fineprint = 'The following comments are owned by whoever posted them.  We are not responsible for them in any way.';
@@ -30,23 +36,6 @@ __template__
 [% END %]
 
 <a name="acomments"></a>
-[% IF user.discussion2 == "slashdot" &&((!user.is_anon && !user.acl.discussion2_uofm) || user.is_admin) %]
-<script type="text/javascript">
-
-function d2act ()
-{
-Position.prepare(); var xy = Position.cumulativeOffset($('commentwrap')); var gd=($('d2act')); 
-if (gd) {
-xy[1] = xy[1] - Position.deltaY; 
-[% IF constants.comments_control_horizontal %]
-	xy[1] = xy[1] - gd.offsetHeight;
-[% END %]
-if (xy[1] < -14) {gd.style.top='4px'; gd.style.position='fixed'; gd.style.left='1em';}else{gd.style.display='inline'; gd.style.position='fixed'; gd.style.top=xy[1] + 'px'; gd.style.left='1em'; }; 
-}
-}
-window.onscroll = d2act;
-</script>
-[% END %]
 <div class="commentwrap" id="commentwrap">
 [% IF (!user.is_anon && !user.acl.discussion2_uofm) || user.is_admin %]
 <div class="commentBox" style="font-size: 120%">
@@ -82,7 +71,7 @@ window.onscroll = d2act;
 
 
 [% IF discussion2 %]
-<span id="d2opt" class="hide">| <a href="" onclick="document.getElementById('d2opt').style.display='none'; document.getElementById('gods').style.display='block'; return false;" title="Adjust display of comments based on score">Display Options</a></span>
+<span id="d2opt" class="hide">| <a href="" onclick="return toggleDisplayOptions();" title="Adjust display of comments based on score">Display Options</a></span>
 [% END %]
 
 	|
@@ -155,13 +144,9 @@ window.onscroll = d2act;
 	</div>
 	</div>
 	[% IF discussion2 %]
-		[% class_info = "" %]
-		[% horiz = constants.comments_control_horizontal; %]
-		[% IF horiz;
-			class_info = " class='horizontal'" %]
-			<div class="horizontal">
-		[% END %]
-		<div id="d2act">
+		[% class_info = horiz ? " class='horizontal'" : "" %]
+		<div id="d2out"[% class_info %]>
+		<div id="d2act" class="hide">
 		<div class="loki" id="gods">
 		<div class="block">
 			<div class="title">
@@ -176,29 +161,29 @@ window.onscroll = d2act;
 						subject_only => 1,
 				}) %]
 				[% END %]
-		<span title="Close this window" onclick="document.getElementById('gods').style.display='none';document.getElementById('d2opt').style.display='inline';" class="close">x</span>
+		<span title="Close this window" onclick="toggleDisplayOptions()" class="close">x</span>
 				</h4>
 			</div>
 		</div>
 		<div id="commentControlBoxStatus" class="hide"><b>Loading ... Please wait.</b></div>
 		<div id="bones">
-		<div id="commentControlPane">
-		<div id="comment_full" style="background: #fff;" [% class_info %]><span id="currentFull">0</span> Full</div>
-		<div class="comment_divider" style="background:#fff;" [% class_info %]>
-			<span class="com_arrow_up" onclick="javascript:changeHT(1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]left[% ELSE %]up[% END %].gif" alt="*"></span>
-		</div>
-		<div class="comment_divider" style="background:#ccc;" [% class_info %]>
-			<span class="arrow_down" onclick="javascript:changeHT(-1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]right[% ELSE %]down[% END %].gif" alt="*"></span>
-		</div>
-		<div id="comment_abbr" style="background: #ccc;" [% class_info %]><span id="currentOneline">0</span> Abbreviated</div>
-		<div class="comment_divider" style="background:#ccc;">
-			<span class="arrow_up" onclick="javascript:changeT(1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]left[% ELSE %]up[% END %].gif" alt="*"></span>
-		</div>
-		<div class="comment_divider" style="background:#aaa;" [% class_info %]>
-			<span class="arrow_down" onclick="javascript:changeT(-1)"><img src="[% constants.imagedir %]/arrow_[% IF horiz %]right[% ELSE %]down[% END %].gif" alt="*"></span>
-		</div>
-		<div id="comment_hidden" style="background: #aaa;" [% class_info %]><span id="currentHidden">0</span> Hidden</div>
-		</div>
+			<div id="commentControlPane">
+				<div id="comment_full" style="background: #fff;"[% class_info %]><span id="currentFull">0</span> Full</div>
+				<div id="comment_divider1" class="comment_divider" style="background:#fff;"[% class_info %]>
+					<span class="com_arrow_up" onclick="javascript:changeHT(1)"><img id="com_arrow_up1" src="[% constants.imagedir %]/arrow_[% IF horiz %]left[% ELSE %]up[% END %].gif" alt="*"></span>
+				</div>
+				<div id="comment_divider2" class="comment_divider" style="background:#ccc;"[% class_info %]>
+					<span class="arrow_down" onclick="javascript:changeHT(-1)"><img id="com_arrow_down1" src="[% constants.imagedir %]/arrow_[% IF horiz %]right[% ELSE %]down[% END %].gif" alt="*"></span>
+				</div>
+				<div id="comment_abbr" style="background: #ccc;"[% class_info %]><span id="currentOneline">0</span> Abbreviated</div>
+				<div id="comment_divider3" class="comment_divider" style="background:#ccc;"[% class_info %]>
+					<span class="arrow_up" onclick="javascript:changeT(1)"><img id="com_arrow_up2" src="[% constants.imagedir %]/arrow_[% IF horiz %]left[% ELSE %]up[% END %].gif" alt="*"></span>
+				</div>
+				<div id="comment_divider4" class="comment_divider" style="background:#aaa;"[% class_info %]>
+					<span class="arrow_down" onclick="javascript:changeT(-1)"><img id="com_arrow_down2" src="[% constants.imagedir %]/arrow_[% IF horiz %]right[% ELSE %]down[% END %].gif" alt="*"></span>
+				</div>
+				<div id="comment_hidden" style="background: #aaa;"[% class_info %]><span id="currentHidden">0</span> Hidden</div>
+			</div>
 		</div>
 		<div class="commentControlFooter">
 		[% IF cid || pid %]
@@ -223,7 +208,7 @@ window.onscroll = d2act;
 		</div>
 	</div>
 </div>
-		[% IF constants.comments_control_horizontal %]</div>[% END %]
+		</div>
 	[% END %]
 </div>
 <a name="topcomment"></a>

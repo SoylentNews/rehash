@@ -40,6 +40,7 @@ __template__
 	[%- END %]
 	<script type="text/javascript">
 <!--
+	window.onscroll = d2act;
 	$('commentControlBoxStatus').className = '';
 [% Slash.jsSelectComments(Slash.db, constants, user, { sid => sid, cid => cid }) %]
 //-->
