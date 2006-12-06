@@ -3,6 +3,72 @@
 
 YAHOO.namespace("slashdot");
 
+YAHOO.slashdot.DS_JSArray = function(aData, oConfigs)
+  {
+    if ( typeof oConfigs == "object" )
+      for ( var sConfig in oConfigs )
+        this[sConfig] = oConfigs[sConfig];
+
+    if ( !aData || (aData.constructor != Array) )
+      return
+
+    this.data = aData;
+    this._init();
+  }
+
+YAHOO.slashdot.DS_JSArray.prototype = new YAHOO.widget.DataSource();
+
+YAHOO.slashdot.DS_JSArray.prototype.data = null;
+
+YAHOO.slashdot.DS_JSArray.prototype.doQuery = function(oCallbackFn, sQuery, oParent) {
+    var aData = this.data; // the array
+    var aResults = []; // container for results
+    var bMatchFound = false;
+    var bMatchContains = this.queryMatchContains;
+    if(sQuery) {
+        if(!this.queryMatchCase) {
+            sQuery = sQuery.toLowerCase();
+        }
+
+        // Loop through each element of the array...
+        // which can be a string or an array of strings
+        for(var i = aData.length-1; i >= 0; i--) {
+            var aDataset = [];
+
+            if(aData[i]) {
+                if(aData[i].constructor == String) {
+                    aDataset[0] = aData[i];
+                }
+                else if(aData[i].constructor == Array) {
+                    aDataset = aData[i];
+                }
+            }
+
+            if(aDataset[0] && (aDataset[0].constructor == String)) {
+                var sKeyIndex = (this.queryMatchCase) ?
+                encodeURIComponent(aDataset[0]).indexOf(sQuery):
+                encodeURIComponent(aDataset[0]).toLowerCase().indexOf(sQuery);
+
+                // A STARTSWITH match is when the query is found at the beginning of the key string...
+                if((!bMatchContains && (sKeyIndex === 0)) ||
+                // A CONTAINS match is when the query is found anywhere within the key string...
+                (bMatchContains && (sKeyIndex > -1))) {
+                    // Stash a match into aResults[].
+                    aResults.unshift(aDataset);
+                }
+            }
+        }
+    }
+    else {
+      // !sQuery
+      aResults = aData.slice();
+    }
+
+    this.getResultsEvent.fire(this, oParent, sQuery, aResults);
+    oCallbackFn(sQuery, aResults, oParent);
+};
+
+
 YAHOO.slashdot.gCompleterWidget = null;
 
 YAHOO.slashdot.feedbackTags = ["dupe", "typo", "error"];
@@ -204,10 +270,10 @@ YAHOO.slashdot.topicTags = ["keyword",
 "vendor_amd_ostg",
 "backslash" ];
 
-    var feedbackDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.feedbackTags);
-    var actionsDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.actionTags);
-    var sectionsDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.sectionTags);
-    var topicsDS = new YAHOO.widget.DS_JSArray(YAHOO.slashdot.topicTags);
+    var feedbackDS = new YAHOO.slashdot.DS_JSArray(YAHOO.slashdot.feedbackTags);
+    var actionsDS = new YAHOO.slashdot.DS_JSArray(YAHOO.slashdot.actionTags);
+    var sectionsDS = new YAHOO.slashdot.DS_JSArray(YAHOO.slashdot.sectionTags);
+    var topicsDS = new YAHOO.slashdot.DS_JSArray(YAHOO.slashdot.topicTags);
 
     var tagsDS = new YAHOO.widget.DS_XHR("./ajax.pl", ["\n", "\t"]);
     // tagsDS.maxCacheEntries = 0; // turn off local cacheing, because Jamie says the query is fast
@@ -252,6 +318,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._newCompleter = function( tagDomain 
     if ( this._needsSpareInput() )
       {
         c = new YAHOO.widget.AutoComplete("ac-select-input", "ac-choices", YAHOO.slashdot.dataSources[tagDomain]);
+        c.minQueryLength = 0;
 
           // hack? -- override YUI's private member function so that for top tags auto-complete, right arrow means select
         c._jumpSelection = function() { if ( this._oCurItem ) this._selectItem(this._oCurItem); };
@@ -345,12 +412,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype.attach = function( obj, callbackPara
       {
         this._show(newSourceEl, callbackParams, tagDomain);
         if ( tagDomain != 0 )
-          {
-            var temp = this._completer.minQueryLength;
-            this._completer.minQueryLength = 0;
-            this._completer._sendQuery("");
-            this._completer.minQueryLength = temp;
-          }
+          this._completer.sendQuery("");
           
       }
   }
