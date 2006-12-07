@@ -1179,7 +1179,7 @@ sub editStory {
 		$storyref->{dept} =~ s/^-//;
 		$storyref->{dept} =~ s/-$//;
 
-		my($related_sids_hr, $related_urls_hr, $related_cids_hr) = extractRelatedStoriesFromForm($form);
+		my($related_sids_hr, $related_urls_hr, $related_cids_hr) = extractRelatedStoriesFromForm($form, $storyref->{sid});
 		$storyref->{related_sids_hr} = $related_sids_hr;
 		$storyref->{related_urls_hr} = $related_urls_hr;
 		$storyref->{related_cids_hr} = $related_cids_hr;
@@ -1503,7 +1503,8 @@ sub editStory {
 
 ##################################################################
 sub extractRelatedStoriesFromForm {
-	my($form) = @_;
+	my($form, $cur_sid) = @_;
+	$cur_sid ||= '';
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 
@@ -1558,9 +1559,9 @@ sub extractRelatedStoriesFromForm {
 	}
 
 	# should probably filter and check that they're actually sids, etc...
-	my %related_sids = map { $_ => $slashdb->getStory($_) } grep { $_ } @$related;
-	my %related_cids = map { $_ => $slashdb->getComment($_) } grep {$_} @$related_cids;
-	
+	my %related_cids = map { $_ => $slashdb->getComment($_) } grep { $_ }			@$related_cids;
+	my %related_sids = map { $_ => $slashdb->getStory($_)   } grep { $_ && $_ ne $cur_sid }	@$related;
+
 	return(\%related_sids, \%related_urls, \%related_cids);
 }
 
@@ -1945,11 +1946,11 @@ sub updateStory {
 
 	$form->{dept} =~ s/ /-/g;
 
-	$form->{aid} = $slashdb->getStory($form->{sid}, 'aid', 1)
-		unless $form->{aid};
+	my $story = $slashdb->getStory($form->{sid}, '', 1);
+	$form->{aid} = $story->{aid} unless $form->{aid};
 
 	my($chosen_hr) = extractChosenFromForm($form);
-	my($related_sids_hr, $related_urls_hr, $related_cids_hr) = extractRelatedStoriesFromForm($form);
+	my($related_sids_hr, $related_urls_hr, $related_cids_hr) = extractRelatedStoriesFromForm($form, $story->{sid});
 	my $related_sids = join ',', keys %$related_sids_hr;
 	my($topic) = $slashdb->getTopiclistFromChosen($chosen_hr);
 #use Data::Dumper; print STDERR "admin.pl updateStory chosen_hr: " . Dumper($chosen_hr) . "admin.pl updateStory form: " . Dumper($form);
