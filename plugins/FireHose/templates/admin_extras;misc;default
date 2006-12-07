@@ -41,7 +41,7 @@ __template__
 </table>
 </form>
 [% IF similar_stories.size > 0 %]
-	<table border="0" cellpadding="2" cellspacing="0">
+	<table border="0" cellpadding="2" cellspacing="0" class="data">
 		<tr class="data_head"><td><b>Similar Stories</b></td></tr>
 		[% FOREACH story = similar_stories %]
 			<tr>

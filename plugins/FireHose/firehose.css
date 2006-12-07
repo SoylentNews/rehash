@@ -269,3 +269,5 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 .pop6 { background: url('//images.slashdot.org/pop6.png') no-repeat 0px 0px; }
 .pop7 { background: url('//images.slashdot.org/pop7.png') no-repeat 0px 0px; }
 .pop8 { background: url('//images.slashdot.org/pop8.png') no-repeat 0px 0px; }
+
+input {width: auto !important; margin: 0 0 0 .5em !important; }
