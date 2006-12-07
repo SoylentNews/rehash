@@ -420,6 +420,17 @@ sub createComment {
 	return $cid;
 }
 
+sub createCommentLog {
+	my ($self, $data) = @_;
+	$data->{'-ts'} = "NOW()";
+	$self->sqlInsert("comment_log", $data);
+}
+
+sub getRecentCommentLog {
+	my ($self, $options) = @_;
+	$self->sqlSelectAllHashrefArray("*", "comment_log, comments", "comment_log.cid=comments.cid", "ORDER BY ts DESC LIMIT 100"); 
+}
+
 ########################################################
 # Right now, $from and $reason don't matter, but they
 # might someday.
