@@ -253,7 +253,7 @@ sub getFireHoseCount {
 	my $signoff_label = "sign$user->{uid}\ed";
 
 	#XXXFH - add time limit later?
-	return $self->sqlCount("firehose", "popularity >= $pop_q and signoffs not like '%$signoff_label%'");
+	return $self->sqlCount("firehose", "editorpop >= $pop_q and rejected='no' and accepted='no' and story!='type'");
 }
 
 sub getFireHoseEssentials {
@@ -375,7 +375,11 @@ sub getFireHoseEssentials {
 		if ($colors->{$options->{color}}) {
 			my $pop = $self->getMinPopularityForColorLevel($colors->{$options->{color}});
 			my $pop_q = $self->sqlQuote($pop);
-			push @where, "popularity >= $pop_q";
+			if ($user->{is_admin} && !$user->{firehose_usermode}) {
+				push @where, "editorpop >= $pop_q";
+			} else {
+				push @where, "popularity >= $pop_q";
+			}
 		}
 	}
 	if ($user->{is_admin}) {
@@ -388,6 +392,11 @@ sub getFireHoseEssentials {
 		if ($options->{signed}) {
 			push @where, "signoffs LIKE \"\%$signoff_label\%\"";
 		}
+	}
+
+	if ($options->{uid}) {
+		my $uid_q = $self->sqlQuote($options->{uid});
+		push @where, "uid=$uid_q";
 	}
 
 	my $limit_str = "";
@@ -1070,7 +1079,7 @@ sub getAndSetOptions {
 	}
 
 	$fhfilter =~ s/^\s+|\s+$//g;
-	my @fh_ops = split(/\s+/, $fhfilter);
+	my @fh_ops = map { lc($_) } split(/\s+/, $fhfilter);
 
 	my $skins = $self->getSkins();
 	my %skin_names = map { $skins->{$_}{name} => $_ } keys %$skins;
@@ -1081,6 +1090,9 @@ sub getAndSetOptions {
 			: ()
 		)
 	);
+
+	my $authors = $self->getAuthors();
+	my %author_names = map { lc($authors->{$_}{nickname}) => $_ } keys %$authors;
 	my $fh_options = {};
 	foreach (@fh_ops) {
 		if (1 && $types->{$_} && !defined $fh_options->{type}) {
@@ -1099,6 +1111,8 @@ sub getAndSetOptions {
 			$fh_options->{signed} = 1;
 		} elsif ($user->{is_admin} && $_ eq "unsigned") {
 			$fh_options->{unsigned} = 1;
+		} elsif ($author_names{lc($_)}) {
+			$fh_options->{uid} = $author_names{lc($_)}
 		} else {
 			if (!defined $fh_options->{filter}) {
 				$fh_options->{filter} = $_;
