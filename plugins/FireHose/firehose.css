@@ -61,7 +61,7 @@ background: #e6e6e6 url(//images.slashdot.org/sections-bg.png) repeat-x left bot
 .article .generaltitle .title .date,
 .article .generaltitle .title .nickname, .briefarticle .end { display: none; }
 .briefarticle .firehosetag { background: #999; }
-.briefarticle .details { display: none; }
+.briefarticle .details, .briefarticle .intro { display: none; }
 .article .firehosetag { background: #fff; }
 .article .vote {color: #cee}
 .up
