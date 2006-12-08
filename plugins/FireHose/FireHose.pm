@@ -112,6 +112,7 @@ sub createItemFromJournal {
 			introtext 		=> $introtext,
 			type 			=> "journal",
 			popularity		=> $popularity,
+			editorpop		=> $popularity,
 			tid			=> $journal->{tid},
 			srcid			=> $id,
 			discussion		=> $journal->{discussion}
@@ -143,6 +144,7 @@ sub createUpdateItemFromBookmark {
 			url_id 		=> $bookmark->{url_id},
 			uid 		=> $bookmark->{uid},
 			popularity 	=> $popularity,
+			editorpop	=> $popularity,
 			activity 	=> $activity,
 			public 		=> "yes",
 			type		=> $type,
@@ -165,6 +167,7 @@ sub createItemFromSubmission {
 			uid 			=> $submission->{uid},
 			introtext 		=> $submission->{story},
 			popularity 		=> $self->getMinPopularityForColorLevel(5),
+			editorpop 		=> $self->getMinPopularityForColorLevel(5),
 			public 			=> "yes",
 			attention_needed 	=> "yes",
 			type 			=> "submission",
@@ -233,6 +236,7 @@ sub createItemFromStory {
 			introtext	=> parseSlashizedLinks($story->{introtext}),
 			bodytext	=> parseSlashizedLinks($story->{bodytext}),
 			popularity	=> $popularity,
+			editorpop	=> $popularity,
 			primaryskid	=> $story->{primaryskid},
 			tid 		=> $story->{tid},
 			srcid		=> $id,
@@ -253,7 +257,7 @@ sub getFireHoseCount {
 	my $signoff_label = "sign$user->{uid}\ed";
 
 	#XXXFH - add time limit later?
-	return $self->sqlCount("firehose", "editorpop >= $pop_q and rejected='no' and accepted='no' and story!='type'");
+	return $self->sqlCount("firehose", "editorpop >= $pop_q and rejected='no' and accepted='no' and type!='story'");
 }
 
 sub getFireHoseEssentials {
@@ -586,6 +590,7 @@ sub ajaxFireHoseSetOptions {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $firehose = getObject("Slash::FireHose");
 	$firehose->getAndSetOptions();
+	return "";
 }
 
 sub ajaxSaveNoteFirehose {
