@@ -556,7 +556,7 @@ sub doSaveArticle {
 	}
 
 	return(getData('submit_must_enable_comments'), 1)
-		if $form->{submit} && !$form->{id} && (
+		if ($form->{promotetype} eq "publicize" || $form->{promotetype} eq "publish") && !$form->{id} && (
 			!$form->{journal_discuss}
 				||
 			$form->{journal_discuss} eq 'disabled'
@@ -587,7 +587,7 @@ sub doSaveArticle {
 		my %update;
 		my $article = $journal_reader->get($form->{id});
 		return(getData('submit_must_enable_comments'), 1) if (
-			$form->{submit} && !$article->{discussion} && (
+			($form->{promotetype} eq "publicize" || $form->{promotetype} eq "publish")  && !$article->{discussion} && (
 				!$form->{journal_discuss} || $form->{journal_discuss} eq 'disabled'
 			)
 		);
@@ -622,7 +622,7 @@ sub doSaveArticle {
 		}
 
 		unless ($form->{comments_on}) {
-			for (qw(article tid posttype submit)) {
+			for (qw(article tid posttype submit promotetype)) {
 				$update{$_} = $form->{$_} if defined $form->{$_};
 			}
 			$update{description} = $description;
@@ -634,7 +634,7 @@ sub doSaveArticle {
 
 	} else {
 		my $id = $journal->create($description,
-			$form->{article}, $form->{posttype}, $form->{tid}, $form->{submit});
+			$form->{article}, $form->{posttype}, $form->{tid}, $form->{promotetype});
 
 		unless ($id) {
 			return getData('create_failed');
