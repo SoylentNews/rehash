@@ -13,6 +13,9 @@ fireHoseForm
 __seclev__
 10000
 __template__
+[% IF needformwrap %]
+	<form id="postform-[% item.id %]" method="post" action="[% gSkin.rootdir %]/admin.pl" class="edit">
+[% END %]
 [% PROCESS formatHoseIntro introtext = item.introtext; %]
 				[% IF user.is_admin && !user.firehose_usermode %]
 				[% IF item.type == "story" %]
@@ -37,5 +40,13 @@ __template__
 						<img src="[% constants.imagedir %]/sic_edit.png" onclick="firehose_get_and_post('[% item.id %]')">
 					[% END %]
 				[% END %]
+[% IF needformwrap %]
+	</form>
+[% END %]
+[% IF needjssubmit %]
+<script type="text/javascript">
+	$('postform-'+[% item.id %]).submit();
+</script>
+[% END %]
 __version__
 $Id$

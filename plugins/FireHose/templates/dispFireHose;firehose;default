@@ -84,8 +84,8 @@ END %]
 	</div>
 	[% END %]
 			[% IF adminmode && bodycontent %]
-			<form id="postform-[% item.id %]" method="post" action="[% gSkin.rootdir %]/admin.pl" class="edit"><div>
-			<a href="javascript:firehose_get_and_post('[% item.id %]')" title="Preview the editable version of this">Edit Preview</a></div>
+			<form id="postform-[% item.id %]" method="post" action="[% gSkin.rootdir %]/admin.pl" class="edit">
+			<div><a href="[% gSkin.rootdir %]/firehose.pl?op=edit&amp;id=[% item.id %]" title="Preview the editable version of this">Edit Preview</a></div>
 			</form>
 			[% END %]
 [% IF full %]
