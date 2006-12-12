@@ -150,7 +150,7 @@ sub run {
 		my $journal = getObject("Slash::Journal");
 		my $j = $journal->get($target_id);
 		$popularity = $firehose->getMinPopularityForColorLevel(6);
-		$popularity = $firehose->getMinPopularityForColorLevel(5) if $j->{submit} eq "yes";
+		$popularity = $firehose->getMinPopularityForColorLevel(5) if $j->{promotetype} eq "publicize";
 
 	} elsif ($type eq 'urls') {
 		my $bookmark_count = $self->sqlCount('bookmarks', "url_id=$target_id_q");
