@@ -11,7 +11,7 @@ CREATE TABLE journals (
 	posttype TINYINT DEFAULT '2' NOT NULL,
 	discussion MEDIUMINT  UNSIGNED,
 	tid SMALLINT UNSIGNED NOT NULL,
-	submit ENUM ("no","yes") DEFAULT "no",
+	promotetype ENUM ("publicize","publish", "post") NOT NULL DEFAULT "publish",
 	last_update timestamp NOT NULL,
 	PRIMARY KEY (id),
 	KEY uid_date_id (uid,date,id),
