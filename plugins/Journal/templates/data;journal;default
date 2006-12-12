@@ -79,8 +79,8 @@ __template__
 	</div></div>
 
 [% CASE 'submit_must_enable_comments' %]
-	You must enable comments if you plan on allowing this journal to be
-	used as a site submission.
+	You must enable comments for all users if you've marked your submission
+	as "publicize" or "publish"
 
 [% END %]
 
