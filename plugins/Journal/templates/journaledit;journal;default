@@ -47,20 +47,15 @@ __template__
 					[% format_select %]
 					<br>
 					[% IF constants.journal_allow_journal2submit %]
-						[% IF article.id && article.submit == "yes" %]
-							<div class="note">
-							This journal entry has been marked as submittable.  You can't undo this.
-							</div>
-						[% ELSE %]
-							<label>Submit<input type="checkbox" name="submit" [% IF form.submit; constants.markup_checked_attribute; END %]></label>
-							[% submit_note = "<ul>";
-							   submit_note = submit_note _ "<li>Comments must be enabled</li>";
-							   submit_note = submit_note _ "<li>Discussion cannot be deleted (though journal can be)</li>";
-							   submit_note = submit_note _ "<li>If accepted, anyone will be allowed to post comments</li>";
-						 	   submit_note = submit_note _ "</ul>";
-							%]
-							[% PROCESS formNote note => "Allow journal to be submitted as a story? If you do this: $submit_note" %]
-						[% END %]
+							[% sel_promotetype = form.promotetype || article.promotetype || "publish" %]
+							<b>Publicize</b> <input type="radio" name="promotetype" value="publicize" [% IF sel_promotetype == "publicize"; constants.markup_checked_attribute; END; %]> Submit this as a story for this site. (Discussion must be enabled for all users)<br>
+							[% IF article.promotetype != "publicize" %]
+							<b>Publish</b> <input type="radio" name="promotetype" value="publish" [% IF sel_promotetype == "publish"; constants.markup_checked_attribute; END; %]> May be of interest to more readers on the site, probably not a story for the frontpage though.  (Discussion must be enabled for all users)<br>
+							[% END %]
+							[% IF article.promotetype != "publish" && article.promotetype != "publicize" %]
+							<b>Post</b> <input type="radio" name="promotetype" value="post" [% IF sel_promotetype == "post"; constants.markup_checked_attribute; END; %]> Probably only of interest to myself and my friends<br>
+							[% END %]
+							
 					<br>
 					[% END %]
 					[% IF form.url_id %]
