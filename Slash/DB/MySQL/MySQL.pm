@@ -7264,7 +7264,23 @@ sub createStory {
 	my $commentstatus = delete $story->{commentstatus};
 
 	if (!$error) {
-		if ($story->{subid}) {
+		if ($story->{fhid} && $constants->{plugin}{FireHose}) {
+			my $firehose = getObject("Slash::FireHose");
+			my $item = $firehose->getFireHose($story->{fhid});
+			if ($item && $item->{type} eq "journal") {
+				$story->{discussion} = $item->{discussion};
+				$story->{journal_id} = $item->{srcid};
+
+				if ($story->{journal_id}) {
+					if (!$self->sqlCount("journal_transfer", "id = ".$self->sqlQuote($story->{journal_id}))) {
+						$self->sqlInsert("journal_transfer", {
+							id => $story->{journal_id}
+						});
+					}
+				}
+			}
+
+		} elsif ($story->{subid}) {
 			if ($self->sqlSelect('id', 'journal_transfer',
 				'subid=' . $self->sqlQuote($story->{subid})
 			)) {
