@@ -47,15 +47,22 @@ __template__
 					[% format_select %]
 					<br>
 					[% IF constants.journal_allow_journal2submit %]
+							[% submit_note = "<ul>";
+							   submit_note = submit_note _ "<li>Comments must be enabled</li>";
+							   submit_note = submit_note _ "<li>Discussion cannot be deleted (though journal can be)</li>";
+							   submit_note = submit_note _ "<li>Anyone will be allowed to post comments</li>";
+						 	   submit_note = submit_note _ "</ul>";
+							%]
 							[% sel_promotetype = form.promotetype || article.promotetype || "publish" %]
-							<b>Publicize</b> <input type="radio" name="promotetype" value="publicize" [% IF sel_promotetype == "publicize"; constants.markup_checked_attribute; END; %]> Submit this as a story for this site. (Discussion must be enabled for all users)<br>
+							<input type="radio" name="promotetype" value="publicize" [% IF sel_promotetype == "publicize"; constants.markup_checked_attribute; END; %]> <b>Publicize</b>: Submit this as a story for this site.<br>
 							[% IF article.promotetype != "publicize" %]
-							<b>Publish</b> <input type="radio" name="promotetype" value="publish" [% IF sel_promotetype == "publish"; constants.markup_checked_attribute; END; %]> May be of interest to more readers on the site, probably not a story for the frontpage though.  (Discussion must be enabled for all users)<br>
+							<input type="radio" name="promotetype" value="publish" [% IF sel_promotetype == "publish"; constants.markup_checked_attribute; END; %]> <b>Publish</b>: Share this with other site useres<br>
 							[% END %]
 							[% IF article.promotetype != "publish" && article.promotetype != "publicize" %]
-							<b>Post</b> <input type="radio" name="promotetype" value="post" [% IF sel_promotetype == "post"; constants.markup_checked_attribute; END; %]> Probably only of interest to myself and my friends<br>
+							<input type="radio" name="promotetype" value="post" [% IF sel_promotetype == "post"; constants.markup_checked_attribute; END; %]> <b>Post</b>: Pay no attention to my musings<br>
 							[% END %]
 							
+							[% PROCESS formNote note => "Publicize or Publish this Journal? If you do this: $submit_note" %]
 					<br>
 					[% END %]
 					[% IF form.url_id %]
