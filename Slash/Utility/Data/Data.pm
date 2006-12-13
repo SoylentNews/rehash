@@ -146,9 +146,11 @@ sub nickFix {
 	return '' if !$nick;
 	my $constants = getCurrentStatic();
 	my $nc = $constants->{nick_chars} || join('', 'a' .. 'z');
+	my $nr = $constants->{nick_regex} || '^[a-z]$';
 	$nick =~ s/\s+/ /g;
 	$nick =~ s/[^$nc]+//g;
 	$nick = substr($nick, 0, $constants->{nick_maxlen});
+	return '' if $nick !~ $nr;
 	return $nick;
 }
 

@@ -4288,3 +4288,6 @@ UPDATE journals SET promotetype="post" WHERE submit="no";
 UPDATE journals SET promotetype="publish" WHERE submit="yes";
 ALTER TABLE journals DROP COLUMN submit; 
 INSERT INTO vars (name, value, description) VALUES ('journal_create_submission','0','Do you want setting the publicize flag to create a submission in addition to a journal?');
+
+INSERT INTO vars (name, value, description) VALUES ('nick_regex', '^[a-zA-Z_][ a-zA-Z0-9$_.+!*\'(),-]{0,19}$', 'Regex (case-sensitive) allowed for user nicknames');
+

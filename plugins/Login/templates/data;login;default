@@ -29,34 +29,47 @@ __template__
 	[% END %]
 
 [% CASE 'mailpasswdhead' %]
+	[% returnme.data_constant = 1 %]
 	Mail Password
 
 [% CASE 'newuserformhead' %]
+	[% returnme.data_constant = 1 %]
 	Create Account
 
 [% CASE 'newuserhead' %]
+	[% returnme.data_constant = 1 %]
 	Account Created
 
 [% CASE 'prefshead' %]
+	[% returnme.data_constant = 1 %]
 	Change Login Preferences
 
 [% CASE 'passnomatch' %]
+	[% returnme.data_constant = 1 %]
 	Passwords don't match.
 
 [% CASE 'passtooshort' %]
+	[% returnme.data_constant = 1 %]
 	Password too short.
 
 [% CASE 'passtoolong' %]
+	[% returnme.data_constant = 1 %]
 	Password too long.
 
 [% CASE 'oldpassbad' %]
+	[% returnme.data_constant = 1 %]
 	Current password is incorrect.
 
 [% CASE 'notchanged' %]
+	[% returnme.data_constant = 1 %]
 	Preferences not changed.
 
 [% CASE 'passchanged' %]
+	[% returnme.data_constant = 1 %]
 	Preferences changed.
+
+[% CASE 'nick_invalid' %]
+	The user name "[% form.newusernick | strip_literal %]" is not valid.
 
 [% CASE 'email_invalid' %]
 	The email address "[% (form.realemail || form.email) | strip_literal %]" is
@@ -64,6 +77,7 @@ __template__
 	formatted email address.
 
 [% CASE 'email_do_not_match' %]
+	[% returnme.data_constant = 1 %]
 	The email addresses you've entered do not match.  Please re-enter
 	your email address information again.
 
@@ -99,6 +113,7 @@ __template__
 
 
 [% CASE 'mail_nonickname' %]
+	[% returnme.data_constant = 1 %]
 	User was not found.  No password was mailed.
 
 [% CASE 'mail_readonly' %]
