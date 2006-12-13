@@ -76,17 +76,13 @@ sub newUser {
 	my @note;
 	my $error = 0;
 
-	# check if new nick is OK
+	# check if new nick is OK and if user exists
+	my $matchname = nick2matchname($newnick);
 	my $newnick = nickFix($form->{newusernick});
 	if (!$newnick) {
 		push @note, getData('nick_invalid');
 		$error = 1;
-	}
-
-	# check if user exists
-	my $matchname = nick2matchname($newnick);
-
-	if (!$form->{email} || !emailValid($form->{email})) {
+	} elsif (!$form->{email} || !emailValid($form->{email})) {
 		push @note, getData('email_invalid');
 		$error = 1;
 	} elsif ($form->{email} ne $form->{email2}) {
