@@ -102,7 +102,9 @@ sub createItemFromJournal {
 	my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
 	if ($journal) {
 		my $globjid = $self->getGlobjidCreate("journals", $journal->{id});
-		my $popularity = $journal->{submit} eq "yes" ?  $self->getMinPopularityForColorLevel(6) :  $self->getMinPopularityForColorLevel(7);
+		my $popularity = $journal->{submit} eq "yes"
+			? $self->getMinPopularityForColorLevel(6)
+			: $self->getMinPopularityForColorLevel(7);
 		my $data = {
 			title 			=> $journal->{description},
 			globjid 		=> $globjid,
@@ -130,8 +132,12 @@ sub createUpdateItemFromBookmark {
 	my $url_globjid = $self->getGlobjidCreate("urls", $bookmark->{url_id});
 	my $type = $options->{type} || "bookmark";
 	my($count) = $self->sqlCount("firehose", "globjid=$url_globjid");
-	my $popularity = defined $options->{popularity} ? $options->{popularity} : $type eq "feed" ? $self->getMinPopularityForColorLevel(6) : $self->getMinPopularityForColorLevel(7);
-	my $activity   = defined $options->{activity}   ? $options->{activity}   : 1;
+	my $popularity = defined $options->{popularity}
+		? $options->{popularity}
+		: $type eq "feed"
+			? $self->getMinPopularityForColorLevel(6)
+			: $self->getMinPopularityForColorLevel(7);
+	my $activity   = defined $options->{activity} ? $options->{activity} : 1;
 
 	if ($count) {
 		# $self->sqlUpdate("firehose", { -popularity => "popularity + 1" }, "globjid=$url_globjid");
@@ -161,13 +167,14 @@ sub createItemFromSubmission {
 	my $submission = $self->getSubmission($id);
 	if ($submission) {
 		my $globjid = $self->getGlobjidCreate("submissions", $submission->{subid});
+		my $minpop = $self->getMinPopularityForColorLevel(5);
 		my $data = {
 			title 			=> $submission->{subj},
 			globjid 		=> $globjid,
 			uid 			=> $submission->{uid},
 			introtext 		=> $submission->{story},
-			popularity 		=> $self->getMinPopularityForColorLevel(5),
-			editorpop 		=> $self->getMinPopularityForColorLevel(5),
+			popularity 		=> $minpop,
+			editorpop 		=> $minpop,
 			public 			=> "yes",
 			attention_needed 	=> "yes",
 			type 			=> "submission",
@@ -436,7 +443,7 @@ sub getFireHoseEssentials {
 }
 
 sub getUserFireHoseVotesForGlobjs {
-	my ($self, $uid, $globjs) = @_;
+	my($self, $uid, $globjs) = @_;
 	my $constants = getCurrentUser();
 
 	return {} if !$globjs;
@@ -954,7 +961,13 @@ sub dispFireHose {
 	my($self, $item, $options) = @_;
 	$options ||= {};
 
-	slashDisplay('dispFireHose', { item => $item, mode => $options->{mode} , tags_top => $options->{tags_top}, options => $options->{options}, vote => $options->{vote} }, { Page => "firehose",  Return => 1 });
+	slashDisplay('dispFireHose', {
+		item		=> $item,
+		mode		=> $options->{mode},
+		tags_top	=> $options->{tags_top},
+		options		=> $options->{options},
+		vote		=> $options->{vote}
+	}, { Page => "firehose",  Return => 1 });
 }
 
 sub getMemoryForItem {
@@ -1240,7 +1253,12 @@ sub listView {
 		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime && $_->{createtime} lt $now;
 		my $item =  $firehose_reader->getFireHose($_->{id});
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
-		$itemstext .= $self->dispFireHose($item, { mode => $options->{mode} , tags_top => $tags_top, options => $options, vote=> $votes->{$item->{globjid}} });
+		$itemstext .= $self->dispFireHose($item, {
+			mode		=> $options->{mode},
+			tags_top	=> $tags_top,
+			options		=> $options,
+			vote		=> $votes->{$item->{globjid}}
+		});
 	}
 	my $refresh_options;
 	$refresh_options->{maxtime} = $maxtime;

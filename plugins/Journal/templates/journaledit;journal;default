@@ -54,9 +54,9 @@ __template__
 						 	   submit_note = submit_note _ "</ul>";
 							%]
 							[% sel_promotetype = form.promotetype || article.promotetype || "publish" %]
-							<input type="radio" name="promotetype" value="publicize" [% IF sel_promotetype == "publicize"; constants.markup_checked_attribute; END; %]> <b>Publicize</b>: Submit this as a story for this site.<br>
+							<input type="radio" name="promotetype" value="publicize" [% IF sel_promotetype == "publicize"; constants.markup_checked_attribute; END; %]> <b>Publicize</b>: Submit this as a story for [% constants.sitename %]<br>
 							[% IF article.promotetype != "publicize" %]
-							<input type="radio" name="promotetype" value="publish" [% IF sel_promotetype == "publish"; constants.markup_checked_attribute; END; %]> <b>Publish</b>: Share this with other site useres<br>
+							<input type="radio" name="promotetype" value="publish" [% IF sel_promotetype == "publish"; constants.markup_checked_attribute; END; %]> <b>Publish</b>: Share this with other [% constants.sitename %] users<br>
 							[% END %]
 							[% IF article.promotetype != "publish" && article.promotetype != "publicize" %]
 							<input type="radio" name="promotetype" value="post" [% IF sel_promotetype == "post"; constants.markup_checked_attribute; END; %]> <b>Post</b>: Pay no attention to my musings<br>

@@ -16,21 +16,19 @@
         <hr>
 
 <h2><a name="fe100">Where can I get Slashdot's main feed?</a></h2>
-	<p>The sundication feed for the Slashdot front page is available from <a href="http://rss.slashdot.org/Slashdot/slashdot">http://rss.slashdot.org/Slashdot/slashdot</a> in RSS 0.9, RSS 1.0 and Atom 1.0 formats. Please do not request feeds more than once every 30 minutes.</p>
-	
+	<p>The syndication feed for the Slashdot front page is available in <a href="http://rss.slashdot.org/Slashdot/slashdot">RSS 0.9</a>, <a href="http://rss.slashdot.org/Slashdot/slashdot/to">RSS 1.0</a>, and <a href="http://rss.slashdot.org/Slashdot/slashdotatom">Atom 1.0</a> formats.  Please do not request feeds more than once every 30 minutes.</p>
 	<p><em><small>
 		Answered by: <a href="mailto:pudge@slashdot.org">pudge</a><br>
-		Last Modified: 12/06/06
+		Last Modified: 12/12/06
 	</small></em></p>
 
 <h2><a name="fe200">What other feeds are available?</a></h2>
                 <p>On most pages, if there is feed content available, it will be noted in the &lt;HEAD&gt; of the page.</p>
+                <p>Wherever you see <tt>rss</tt> below, you can also substitute with <tt>atom</tt> to get an Atom 1.0 feed, such as <tt>content_type=atom</tt> and <tt>journal/atom</tt>, or append <tt>atom</tt> to the end of the <tt>rss.slashdot.org</tt> URLs, like <tt>slashdotGamesatom</tt> (although some feeds, like Zoo and some search results, need some more work for Atom).</p>
                 <p>Where you see <tt><b>$username</b></tt> below, substitute the URI-encoded username of the user in question (such as <tt>Clifton+Wood</tt>).</p>
                 <p>Where you see <tt><b>$logtoken</b></tt>, you must include a token so the server knows you are you, in lieu of a cookie, as most newsreaders can't handle cookies well (you can find it in the &lt;HEAD&gt; of the page, if you are a logged in, and a subscriber).  <b>NOTE</b>: your logtoken is subject to change when you log out or change your login preferences.  See <a href="/faq/accounts.shtml#ac1200">the Accounts FAQ</a> for more information.</p>
 
                 <ul>
-			<p>
-			
 			<li>Append the section name to the index link for individual section feeds.  For example:
 				<ul>
 					<li><a href="http://rss.slashdot.org/Slashdot/slashdotGames">http://rss.slashdot.org/Slashdot/slashdotGames</a></li>
@@ -45,31 +43,22 @@
 					<li><a href="http://rss.slashdot.org/Slashdot/slashdotInterviews">http://rss.slashdot.org/Slashdot/slashdotInterviews</a></li>
 					<li><a href="http://rss.slashdot.org/Slashdot/slashdotDevelopers">http://rss.slashdot.org/Slashdot/slashdotDevelopers</a></li>
 				</ul>
-				<br />
-			<ul>
+			</li>
 			<li><tt>http://slashdot.org/index.pl?content_type=rss&amp;logtoken=<b>$logtoken</b></tt>
 						<ul><li>(this special subscriber version will respect your user homepage prefs; including
 						which stories appear from which sections; to get only a specific section, replace the
 						hostname, such as "apple.slashdot.org")</li></ul>
 					</li>
-			</ul>
-			</ul></li>
-			</p>
-			
-			<p>
+
 			<li>Journals (add "<tt>/<b>$logtoken</b></tt>" if you are a subscriber, to get full HTML in the feed)<ul>
 					<li><tt>http://slashdot.org/~<b>$username</b>/journal/rss</tt></li>
 					<li><tt>http://slashdot.org/~<b>$username</b>/journal/friends/rss</tt></li>
 			</ul></li>
-			</p>
-			
-			<p>
+
 			<li>Messages<ul>
 					<li><tt>http://slashdot.org/my/inbox/rss/<b>$logtoken</b></tt></li>
 			</ul></li>
-			</p>
-			
-			<p>
+
 			<li>Zoo<ul>
 					<li><tt>http://slashdot.org/~<b>$username</b>/friends/rss</tt></li>
 					<li><tt>http://slashdot.org/~<b>$username</b>/foes/rss</tt></li>
@@ -79,18 +68,15 @@
 					<li><tt>http://slashdot.org/~<b>$username</b>/friends/friends/rss</tt></li>
 					<li><tt>http://slashdot.org/~<b>$username</b>/friends/foes/rss</tt></li>
 			</ul></li>
-			</p>
-			
-			<p>
+
 			<li>Search Results<ul>
 					<li>Merely add <tt>&amp;content_type=rss</tt> to the query string</li>
 			</ul></li>
                 </ul>
-            </p>
 
 	<p><em><small>
 		Answered by: <a href="mailto:pudge@slashdot.org">pudge</a><br>
-		Last Modified: 12/06/06
+		Last Modified: 12/12/06
 	</small></em></p>
 
 

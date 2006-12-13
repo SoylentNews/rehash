@@ -556,11 +556,9 @@ sub doSaveArticle {
 	}
 
 	return(getData('submit_must_enable_comments'), 1)
-		if ($form->{promotetype} eq "publicize" || $form->{promotetype} eq "publish") && !$form->{id} && (
-			!$form->{journal_discuss}
-				||
-			$form->{journal_discuss} eq 'disabled'
-		);
+		if !$form->{id} &&
+		   ($form->{promotetype} eq "publicize" || $form->{promotetype} eq "publish") &&
+		   (!$form->{journal_discuss} || $form->{journal_discuss} eq 'disabled');
 
 	unless ($rkey) {
 		my $reskey = getObject('Slash::ResKey');
@@ -586,11 +584,10 @@ sub doSaveArticle {
 	if ($form->{id}) {
 		my %update;
 		my $article = $journal_reader->get($form->{id});
-		return(getData('submit_must_enable_comments'), 1) if (
-			($form->{promotetype} eq "publicize" || $form->{promotetype} eq "publish")  && !$article->{discussion} && (
-				!$form->{journal_discuss} || $form->{journal_discuss} eq 'disabled'
-			)
-		);
+		return(getData('submit_must_enable_comments'), 1)
+			if !$article->{discussion} &&
+			   ($form->{promotetype} eq "publicize" || $form->{promotetype} eq "publish") &&
+			   (!$form->{journal_discuss} || $form->{journal_discuss} eq 'disabled');
 
 		# note: comments_on is a special case where we are
 		# only turning on comments, not saving anything else

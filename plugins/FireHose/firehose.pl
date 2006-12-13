@@ -33,7 +33,7 @@ sub main {
 		list		=> [1,  \&list, 1 ],
 		view		=> [1, 	\&view, 1 ],
 		default		=> [1,	\&list, 1 ],
-		edit		=> [1,	\&edit, 100 ]		
+		edit		=> [1,	\&edit, 100 ]
 	);
 
 	my $op = $form->{op};

@@ -421,14 +421,16 @@ sub createComment {
 }
 
 sub createCommentLog {
-	my ($self, $data) = @_;
+	my($self, $data) = @_;
 	$data->{'-ts'} = "NOW()";
 	$self->sqlInsert("comment_log", $data);
 }
 
 sub getRecentCommentLog {
-	my ($self, $options) = @_;
-	$self->sqlSelectAllHashrefArray("*", "comment_log, comments", "comment_log.cid=comments.cid", "ORDER BY ts DESC LIMIT 100"); 
+	my($self, $options) = @_;
+	$self->sqlSelectAllHashrefArray("*", "comment_log, comments",
+		"comment_log.cid=comments.cid", "ORDER BY ts DESC LIMIT 100"
+	); 
 }
 
 ########################################################

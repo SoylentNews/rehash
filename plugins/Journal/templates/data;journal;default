@@ -80,7 +80,7 @@ __template__
 
 [% CASE 'submit_must_enable_comments' %]
 	You must enable comments for all users if you've marked your submission
-	as "publicize" or "publish"
+	as "publicize" or "publish."
 
 [% END %]
 
