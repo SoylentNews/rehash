@@ -4291,3 +4291,6 @@ INSERT INTO vars (name, value, description) VALUES ('journal_create_submission',
 
 INSERT INTO vars (name, value, description) VALUES ('nick_regex', '^[a-zA-Z_][ a-zA-Z0-9$_.+!*\'(),-]{0,19}$', 'Regex (case-sensitive) allowed for user nicknames');
 
+# 2006-12-13
+UPDATE vars SET value = 'T_2_5_0_138' WHERE name = 'cvs_tag_currentcode';
+
