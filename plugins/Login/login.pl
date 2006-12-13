@@ -77,8 +77,8 @@ sub newUser {
 	my $error = 0;
 
 	# check if new nick is OK and if user exists
-	my $matchname = nick2matchname($newnick);
 	my $newnick = nickFix($form->{newusernick});
+	my $matchname = nick2matchname($newnick);
 	if (!$newnick) {
 		push @note, getData('nick_invalid');
 		$error = 1;
