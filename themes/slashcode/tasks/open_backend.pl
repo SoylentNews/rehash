@@ -11,6 +11,8 @@ use Slash::Constants ':slashd';
 
 use vars qw( %task $me );
 
+my %redirects;
+
 $task{$me}{timespec} = '0-59/10 * * * *';
 $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{fork} = SLASHD_NOWAIT;
@@ -80,6 +82,33 @@ sub _do_rss {
 	my $ext = $version == 0.9 && $type eq 'rss' ? 'rdf' : $type;
 	my $filename = "$file.$ext";
 
+	if (-d "$constants->{basedir}/privaterss/") {
+		my $rss = xmlDisplay($type, {
+			channel		=> {
+				title		=> $title,
+				'link'		=> $link,
+				selflink	=> "$link$filename",
+				description	=> $description,
+			},
+			version		=> $version,
+			textinput	=> 1,
+			image		=> 1,
+			items		=> [ map { { story => $_ } } @$stories ],
+		}, 1);
+		save2file("$constants->{basedir}/privaterss/$filename", $rss, \&fudge);
+	}
+
+	my @items = map { { story => $_ } } @$stories;
+	if ($constants->{rss_no_public_static}) {
+		my $newurl = $redirects{$filename};
+		unshift @items, {
+			introtext	=> sprintf('This URL is no longer valid.  Please update your bookmarks to the new URL: %s', $newurl),
+			title		=> 'Please Update Your Bookmarks',
+			'link'		=> $newurl,
+			'time'		=> '2006-12-13 00:00:00',
+		};
+	}
+
 	my $rss = xmlDisplay($type, {
 		channel		=> {
 			title		=> $title,
@@ -90,13 +119,10 @@ sub _do_rss {
 		version		=> $version,
 		textinput	=> 1,
 		image		=> 1,
-		items		=> [ map { { story => $_ } } @$stories ],
+		items		=> \@items,
 	}, 1);
 
-	save2file("$constants->{basedir}/$filename", $rss, \&fudge)
-		unless $constants->{rss_no_public_static};
-	save2file("$constants->{basedir}/privaterss/$filename", $rss, \&fudge)
-		if -d "$constants->{basedir}/privaterss/";
+	save2file("$constants->{basedir}/$filename", $rss, \&fudge);
 }
 
 sub newrdf  { _do_rss(@_, '0.9') } # RSS 0.9
@@ -137,6 +163,74 @@ EOT
 	my $file = sitename2filename($name);
 	save2file("$constants->{basedir}/$file.xml", $x, \&fudge);
 }
+
+%redirects = (
+	'apache.rss'        => 'http://rss.slashdot.org/Slashdot/slashdotApache',
+	'apple.rss'         => 'http://rss.slashdot.org/Slashdot/slashdotApple',
+	'askslashdot.rss'   => 'http://rss.slashdot.org/Slashdot/slashdotAskSlashdot',
+	'awards.rss'        => 'http://rss.slashdot.org/Slashdot/slashdotThe2000Beanies',
+	'books.rss'         => 'http://rss.slashdot.org/Slashdot/slashdotBookReviews',
+	'bsd.rss'           => 'http://rss.slashdot.org/Slashdot/slashdotBsd',
+	'developers.rss'    => 'http://rss.slashdot.org/Slashdot/slashdotDevelopers',
+	'features.rss'      => 'http://rss.slashdot.org/Slashdot/slashdotFeatures',
+	'games.rss'         => 'http://rss.slashdot.org/Slashdot/slashdotGames',
+	'hardware.rss'      => 'http://rss.slashdot.org/Slashdot/slashdotHardware',
+	'index.rss'         => 'http://rss.slashdot.org/Slashdot/slashdot',
+	'interviews.rss'    => 'http://rss.slashdot.org/Slashdot/slashdotInterviews',
+	'it.rss'            => 'http://rss.slashdot.org/Slashdot/slashdotIt',
+	'linux.rss'         => 'http://rss.slashdot.org/Slashdot/slashdotLinux',
+	'politics.rss'      => 'http://rss.slashdot.org/Slashdot/slashdotPolitics',
+	'radio.rss'         => 'http://rss.slashdot.org/Slashdot/slashdotGeeksInSpace',
+	'science.rss'       => 'http://rss.slashdot.org/Slashdot/slashdotScience',
+	'search.rss'        => 'http://rss.slashdot.org/Slashdot/slashdotSearch',
+	'slashdot.rss'      => 'http://rss.slashdot.org/Slashdot/slashdot',
+	'tacohell.rss'      => 'http://rss.slashdot.org/Slashdot/slashdotTacoHell',
+	'yro.rss'           => 'http://rss.slashdot.org/Slashdot/slashdotYourRightsOnline',
+
+	'apache.rdf'        => 'http://rss.slashdot.org/Slashdot/slashdotApache/to',
+	'apple.rdf'         => 'http://rss.slashdot.org/Slashdot/slashdotApple/to',
+	'askslashdot.rdf'   => 'http://rss.slashdot.org/Slashdot/slashdotAskSlashdot/to',
+	'awards.rdf'        => 'http://rss.slashdot.org/Slashdot/slashdotThe2000Beanies/to',
+	'books.rdf'         => 'http://rss.slashdot.org/Slashdot/slashdotBookReviews/to',
+	'bsd.rdf'           => 'http://rss.slashdot.org/Slashdot/slashdotBsd/to',
+	'developers.rdf'    => 'http://rss.slashdot.org/Slashdot/slashdotDevelopers/to',
+	'features.rdf'      => 'http://rss.slashdot.org/Slashdot/slashdotFeatures/to',
+	'games.rdf'         => 'http://rss.slashdot.org/Slashdot/slashdotGames/to',
+	'hardware.rdf'      => 'http://rss.slashdot.org/Slashdot/slashdotHardware/to',
+	'index.rdf'         => 'http://rss.slashdot.org/Slashdot/slashdot/to',
+	'interviews.rdf'    => 'http://rss.slashdot.org/Slashdot/slashdotInterviews/to',
+	'it.rdf'            => 'http://rss.slashdot.org/Slashdot/slashdotIt/to',
+	'linux.rdf'         => 'http://rss.slashdot.org/Slashdot/slashdotLinux/to',
+	'politics.rdf'      => 'http://rss.slashdot.org/Slashdot/slashdotPolitics/to',
+	'radio.rdf'         => 'http://rss.slashdot.org/Slashdot/slashdotGeeksInSpace/to',
+	'science.rdf'       => 'http://rss.slashdot.org/Slashdot/slashdotScience/to',
+	'search.rdf'        => 'http://rss.slashdot.org/Slashdot/slashdotSearch/to',
+	'slashdot.rdf'      => 'http://rss.slashdot.org/Slashdot/slashdot/to',
+	'tacohell.rdf'      => 'http://rss.slashdot.org/Slashdot/slashdotTacoHell/to',
+	'yro.rdf'           => 'http://rss.slashdot.org/Slashdot/slashdotYourRightsOnline/to',
+
+	'apache.atom'       => 'http://rss.slashdot.org/Slashdot/slashdotApacheatom',
+	'apple.atom'        => 'http://rss.slashdot.org/Slashdot/slashdotAppleatom',
+	'askslashdot.atom'  => 'http://rss.slashdot.org/Slashdot/slashdotAskslashdotatom',
+	'awards.atom'       => 'http://rss.slashdot.org/Slashdot/slashdotAwardsatom',
+	'books.atom'        => 'http://rss.slashdot.org/Slashdot/slashdotBooksatom',
+	'bsd.atom'          => 'http://rss.slashdot.org/Slashdot/slashdotBsdatom',
+	'developers.atom'   => 'http://rss.slashdot.org/Slashdot/slashdotDevelopersatom',
+	'features.atom'     => 'http://rss.slashdot.org/Slashdot/slashdotFeaturesatom',
+	'games.atom'        => 'http://rss.slashdot.org/Slashdot/slashdotGamesatom',
+	'hardware.atom'     => 'http://rss.slashdot.org/Slashdot/slashdotHardwareatom',
+	'index.atom'        => 'http://rss.slashdot.org/Slashdot/slashdotatom',
+	'interviews.atom'   => 'http://rss.slashdot.org/Slashdot/slashdotInterviewsatom',
+	'it.atom'           => 'http://rss.slashdot.org/Slashdot/slashdotItatom',
+	'linux.atom'        => 'http://rss.slashdot.org/Slashdot/slashdotLinuxatom',
+	'politics.atom'     => 'http://rss.slashdot.org/Slashdot/slashdotPoliticsatom',
+	'radio.atom'        => 'http://rss.slashdot.org/Slashdot/slashdotRadioatom',
+	'science.atom'      => 'http://rss.slashdot.org/Slashdot/slashdotScienceatom',
+	'search.atom'       => 'http://rss.slashdot.org/Slashdot/slashdotSearchatom',
+	'slashdot.atom'     => 'http://rss.slashdot.org/Slashdot/slashdotatom',
+	'tacohell.atom'     => 'http://rss.slashdot.org/Slashdot/slashdotTacohellatom',
+	'yro.atom'          => 'http://rss.slashdot.org/Slashdot/slashdotYroatom',
+);
 
 1;
 

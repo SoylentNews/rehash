@@ -214,11 +214,15 @@ sub create {
 			$channel{syn}{$_} = delete $channel{$_};
 		}
 
-		my($item) = @{$param->{items}};
-		$rss->add_module(
-			prefix  => 'slash',
-			uri     => 'http://purl.org/rss/1.0/modules/slash/',
-		) if $item->{story};
+		for (@{$param->{items}}) {
+			if ($_->{story}) {
+				$rss->add_module(
+					prefix  => 'slash',
+					uri     => 'http://purl.org/rss/1.0/modules/slash/',
+				);
+				last;
+			}
+		}
 
 	} elsif ($version >= 0.91) {
 		# fix mappings for 0.91
