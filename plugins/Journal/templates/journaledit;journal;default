@@ -53,9 +53,13 @@ __template__
 							   submit_note = submit_note _ "<li>Anyone will be allowed to post comments</li>";
 						 	   submit_note = submit_note _ "</ul>";
 							%]
-							[% sel_promotetype = form.promotetype || article.promotetype || "publish" %]
-							<input type="radio" name="promotetype" value="publicize" [% IF sel_promotetype == "publicize"; constants.markup_checked_attribute; END; %]> <b>Publicize</b>: Submit this as a story for [% constants.sitename %]<br>
-							[% IF article.promotetype != "publicize" %]
+							[% IF constants.plugin.FireHose;
+								sel_promotetype = form.promotetype || article.promotetype || "publish";
+							   ELSE;
+								sel_promotetype = form.promotetype || article.promotetype || "publicize";
+							   END %]
+							<input type="radio" name="promotetype" value="publicize" [% IF sel_promotetype == "publicize"; constants.markup_checked_attribute; END; %]> <b>Publicize</b>: Submit this story to be posted to the [% constants.sitename %] front page<br>
+							[% IF constants.plugin.FireHose && article.promotetype != "publicize" %]
 							<input type="radio" name="promotetype" value="publish" [% IF sel_promotetype == "publish"; constants.markup_checked_attribute; END; %]> <b>Publish</b>: Share this with other [% constants.sitename %] users<br>
 							[% END %]
 							[% IF article.promotetype != "publish" && article.promotetype != "publicize" %]

@@ -299,7 +299,7 @@ sub findJournalEntry {
 	my $query = $self->sqlQuote($form->{query});
 	my $columns;
 	$columns .= "users.nickname as nickname, journals.description as description, ";
-	$columns .= "journals.id as id, date, users.uid as uid, article";
+	$columns .= "journals.id as id, date, users.uid as uid, article, posttype, tid";
 	$columns .= ", TRUNCATE((( " . $self->_score('description', $form->{query}, $constants->{search_method}) . " + " .  $self->_score('article', $form->{query}, $constants->{search_method}) .") / 2), 1) as score "
 		if $form->{query};
 	my $tables = "journals, journals_text, users";

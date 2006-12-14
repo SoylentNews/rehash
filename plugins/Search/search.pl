@@ -569,6 +569,7 @@ sub journalSearch {
 sub journalSearchRSS {
 	my($form, $constants, $slashdb, $searchDB, $gSkin) = @_;
 
+	my $user = getCurrentUser();
 	my $start = $form->{start} || 0;
 	my $entries = $searchDB->findJournalEntry($form, $start, 15, $form->{sort});
 
@@ -576,13 +577,26 @@ sub journalSearchRSS {
 	for my $entry (@$entries) {
 		my $time = timeCalc($entry->{date});
 		push @items, {
-			title	=> "$entry->{description} ($time)",
-			time	=> $entry->{date},
-			creator	=> $entry->{nickname},
-			'link'	=> ($gSkin->{absolutedir} . '/~' . fixparam($entry->{nickname}) . '/journal/' . $entry->{id}),
-			description	=> $constants->{article},
+			story		=> {
+				'time'		=> $entry->{date},
+				uid		=> $entry->{uid},
+				tid		=> $entry->{tid},
+			},
+			title		=> "$entry->{description} ($time)",
+			'link'		=> ($gSkin->{absolutedir} . '/~' . fixparam($entry->{nickname}) . '/journal/' . $entry->{id}),
+			description	=> balanceTags(strip_mode($entry->{article}, $entry->{posttype}), { deep_nesting => 1 }),
 		};
 	}
+
+	my $rss_html = $constants->{journal_rdfitemdesc_html} && (
+		$user->{is_admin}
+			||
+		($constants->{journal_rdfitemdesc_html} == 1)
+			||
+		($constants->{journal_rdfitemdesc_html} > 1 && ($user->{is_subscriber}))
+			||
+		($constants->{journal_rdfitemdesc_html} > 2 && !$user->{is_anon})
+	);
 
 	xmlDisplay($form->{content_type} => {
 		channel => {
@@ -592,8 +606,8 @@ sub journalSearchRSS {
 		},
 		image	=> 1,
 		items	=> \@items,
-		rdfitemdesc		=> $constants->{search_rdfitemdesc},
-		rdfitemdesc_html	=> $constants->{search_rdfitemdesc_html},
+		rdfitemdesc		=> $constants->{journal_rdfitemdesc},
+		rdfitemdesc_html	=> $rss_html,
 	});
 }
 
