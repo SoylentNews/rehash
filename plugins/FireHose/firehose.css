@@ -20,6 +20,18 @@ ul.menu
 }
 #firehose div.briefarticle .storylinks {display: none;}
 #firehose div.briefarticle a span { float: none; }
+
+#firehose div.briefarticle div.future .title { background: #700 }
+#firehose div.briefarticle div.story .title { background: #066 }
+#firehose div.briefarticle div.future .title a, #firehose div.briefarticle div.future .title .date, 
+#firehose div.briefarticle div.story .title a, #firehose div.briefarticle div.story .title .date
+{ color: #fff }
+
+
+#firehose div.article div.firehose .title { background: #666 url("//images.slashdot.org/slc.gif") top left no-repeat }
+#firehose div.article div.firehose .title h3 { background: transparent }
+#firehose div.article div.firehose .title a { color: #fff }
+
 #firehoselist .usermode .generaltitle .title h3 { padding-left: 65px !important; }
 
 #firehoselist
