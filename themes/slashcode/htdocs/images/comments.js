@@ -473,6 +473,13 @@ function ajaxFetchComments(cids) {
 			var response = eval_response(transport);
 			json_update(response);
 			updateHiddens(cids);
+			for (var i = 0; i < cids.length; i++) {
+				// this is needed for Firefox
+				// better way to do automatically?
+				loadNamedElement('comment_link_' + cids[i]);
+				loadNamedElement('comment_shrunk_' + cids[i]);
+				loadNamedElement('comment_sig_' + cids[i]);
+			}
 			boxStatus(0);
 		}
 	};
@@ -491,8 +498,15 @@ function ajaxFetchComments(cids) {
 			}
 		}
 		for (var i = 0; i < remove.length; i++) {
-			noshow_comments.splice(remove[i], 1);
+			noshow_comments.splice(remove[i], 1, 0);
 		}
+
+		// remove zeroes added above
+		for (var i = (noshow_comments.length-1); i >= 0; i--) {
+			if (noshow_comments[i] == 0)
+				noshow_comments.splice(i, 1);
+		}
+
 	} else {
 		noshow_comments = [];
 	}
@@ -596,6 +610,11 @@ function loadAllElements(tagname) {
 		commentelements[e.id] = e;
 	}
 
+	return;
+}
+
+function loadNamedElement(name) {
+	commentelements[name] = $(name);
 	return;
 }
 
