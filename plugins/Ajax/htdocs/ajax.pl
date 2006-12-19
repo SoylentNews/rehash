@@ -247,6 +247,9 @@ sub setSectionNexusPrefs() {
 	return getData('set_section_prefs_success_msg');
 }
 
+###################
+# comments
+
 sub readRest {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $cid = $form->{cid} or return;
@@ -264,6 +267,50 @@ sub readRest {
 	return $texts->{$cid} || '';
 }
 
+sub fetchComments {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+
+	my $cids = [ grep /^\d+$/, split /,/, $form->{cids} ];
+	my $id   = $form->{discussion_id} || 0;
+	my $cid  = $form->{cid} || 0; # root id
+
+	# XXX error?
+	return unless @$cids && $id;
+
+	my($comments) = Slash::selectComments(
+		$slashdb->getDiscussion($id),
+		$cid,
+		{
+			commentsort	=> 0,
+			threshold	=> -1
+		}
+	);
+
+	# XXX error?
+	return unless $comments && keys %$comments;
+
+	my $comment_text = $slashdb->getCommentTextCached(
+		$comments, $cids,
+	);
+
+	for my $cid (keys %$comment_text) {
+		$comments->{$cid}{comment} = $comment_text->{$cid};
+	}
+
+	my %html;
+	for my $cid (@$cids) {
+		$html{'comment_' . $cid} = Slash::dispComment($comments->{$cid}, {
+			class		=> 'oneline',
+			noshow_show	=> 1
+		});
+	}
+
+	$options->{content_type} = 'application/json';
+	return Data::JavaScript::Anon->anon_dump({
+		html	=> \%html
+	});
+}
+
 sub updateD2prefs {
 	my($slashdb, $constants, $user, $form) = @_;
 	my %save;
@@ -276,6 +323,9 @@ sub updateD2prefs {
 
 	$slashdb->setUser($user->{uid}, \%save);
 }
+
+# comments
+###################
 
 
 ##################################################################
@@ -312,6 +362,11 @@ sub getOps {
 		comments_read_rest	=> {
 			function	=> \&readRest,
 			reskey_name	=> 'ajax_base',
+			reskey_type	=> 'createuse',
+		},
+		comments_fetch		=> {
+			function	=> \&fetchComments,
+			reskey_name	=> 'ajax_user_static',
 			reskey_type	=> 'createuse',
 		},
 		comments_set_prefs	=> {

@@ -16,9 +16,11 @@ __template__
 [% mystr = "<b>$link beneath your current threshold.</b>" %]
 [% IF discussion2 %]
 	<li id="hidestring_[% pid %]"><noscript>[% mystr %]</noscript></li>
+<!-- 
 	<li class="hide">
 		<script type="text/javascript">kidHiddens([% pid %], [% hidden %])</script>
 	</li>
+ -->
 
 [% ELSE %]
 	<li>[% mystr %]</li>

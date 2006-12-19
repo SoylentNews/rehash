@@ -165,7 +165,6 @@ __template__
 				</h4>
 			</div>
 		</div>
-		<div id="commentControlBoxStatus" class="hide"><b>Loading ... Please wait.</b></div>
 		<div id="bones">
 			<div id="commentControlPane">
 				<div id="comment_full" style="background: #fff;"[% class_info %]><span id="currentFull">0</span> Full</div>
@@ -206,6 +205,7 @@ __template__
 			%]
 				
 		</div>
+		<div id="commentControlBoxStatus" class="hide"><b>Loading ... Please wait.</b></div>
 	</div>
 </div>
 		</div>

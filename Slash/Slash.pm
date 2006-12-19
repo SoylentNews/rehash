@@ -963,13 +963,23 @@ sub displayThread {
 			if ($discussion2 && $class eq 'oneline' && $comment->{subject_orig} eq 'no') {
 				$comment->{subject} = 'Re:';
 			}
+
+			my $noshow = 0;
+			if ($discussion2 && $user->{acl}{d2testing}) {
+				if ($class eq 'hidden') {
+					$noshow = 1;
+					$user->{state}{comments}{noshow} ||= [];
+					push @{$user->{state}{comments}{noshow}}, $cid;
+				}
+			}
+
 			if ($lvl && $indent) {
 				$return .= $const->{tablebegin} .
-					dispComment($comment, { class => $class }) .
+					dispComment($comment, { class => $class, noshow => $noshow }) .
 					$const->{tableend};
 				$cagedkids = 0;
 			} else {
-				$return .= dispComment($comment, { class => $class });
+				$return .= dispComment($comment, { class => $class, noshow => $noshow });
 			}
 			$displayed++;
 		} else {
@@ -1010,6 +1020,7 @@ sub displayThread {
 			subject_only	=> 1,
 		});
 		if ($discussion2) {
+			push @{$user->{state}{comments}{hiddens}}, $pid;
 			$return .= slashDisplay('displayThread', {
 				'link'		=> $link,
 				discussion2	=> $discussion2,
@@ -1141,7 +1152,7 @@ EOT
 		reasons		=> $reasons,
 		can_mod		=> $can_mod,
 		is_anon		=> isAnon($comment->{uid}),
-		class		=> $options->{class}
+		options		=> $options
 	}, { Return => 1, Nocomm => 1 });
 }
 

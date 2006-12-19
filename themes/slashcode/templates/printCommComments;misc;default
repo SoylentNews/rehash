@@ -41,7 +41,7 @@ __template__
 	<script type="text/javascript">
 <!--
 	window.onscroll = d2act;
-	$('commentControlBoxStatus').className = '';
+	boxStatus(1);
 [% Slash.jsSelectComments(Slash.db, constants, user, { sid => sid, cid => cid }) %]
 //-->
 	</script>
@@ -126,8 +126,12 @@ __template__
 		currents['full']     = [% user.state.comments.totals.full    || 0 %];
 		currents['oneline']  = [% user.state.comments.totals.oneline || 0 %];
 		// currents_total = [% (user.state.comments.totals.hidden || 0 ) + (user.state.comments.totals.full || 0) + (user.state.comments.totals.oneline || 0)  %];
-		[% IF user.discussion2 == "slashdot" %]d2act();[% END %]
-		finishLoading();
+
+		noshow_comments      = [[% user.state.comments.noshow.join(',') %]];
+		init_hiddens         = [[% user.state.comments.hiddens.join(',') %]];
+
+		[% IF user.discussion2 == "slashdot" %]d2act();
+		[% END -%]finishLoading();
 //-->
 	</script>
 [% END %]

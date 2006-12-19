@@ -4278,10 +4278,6 @@ CREATE TABLE comment_log (
 # 2006-12-05
 UPDATE vars SET value = 'T_2_5_0_137' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 # For Journal PLUGIN
 ALTER TABLE journals ADD promotetype ENUM ("publicize", "publish", "post") NOT NULL DEFAULT "publish";
 UPDATE journals SET promotetype="post" WHERE submit="no";
@@ -4293,4 +4289,8 @@ INSERT INTO vars (name, value, description) VALUES ('nick_regex', '^[a-zA-Z_][ a
 
 # 2006-12-13
 UPDATE vars SET value = 'T_2_5_0_138' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
