@@ -42,6 +42,7 @@ $searchtootest = 0;
 
 sub createFireHose {
 	my($self, $data) = @_;
+	$data->{dept} ||= "";
 	$data->{discussion} = 0 if !defined $data->{discussion} || !$data->{discussion};
 	$data->{-createtime} = "NOW()" if !$data->{createtime} && !$data->{-createtime};
 	$data->{discussion} ||= 0 if defined $data->{discussion};
@@ -102,9 +103,9 @@ sub createItemFromJournal {
 	my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
 	if ($journal) {
 		my $globjid = $self->getGlobjidCreate("journals", $journal->{id});
-		my $popularity = $journal->{submit} eq "yes"
-			? $self->getMinPopularityForColorLevel(6)
-			: $self->getMinPopularityForColorLevel(7);
+		my $popularity = $journal->{promotetype} eq "publicize" 
+			?  $self->getMidPopularityForColorLevel(5) 
+			:  $self->getMidPopularityForColorLevel(6);
 		my $data = {
 			title 			=> $journal->{description},
 			globjid 		=> $globjid,
@@ -132,12 +133,12 @@ sub createUpdateItemFromBookmark {
 	my $url_globjid = $self->getGlobjidCreate("urls", $bookmark->{url_id});
 	my $type = $options->{type} || "bookmark";
 	my($count) = $self->sqlCount("firehose", "globjid=$url_globjid");
-	my $popularity = defined $options->{popularity}
-		? $options->{popularity}
-		: $type eq "feed"
-			? $self->getMinPopularityForColorLevel(6)
-			: $self->getMinPopularityForColorLevel(7);
-	my $activity   = defined $options->{activity} ? $options->{activity} : 1;
+	my $popularity = defined $options->{popularity} 
+		? $options->{popularity} 
+		: $type eq "feed" 
+			? $self->getMidPopularityForColorLevel(6) 
+			: $self->getMidPopularityForColorLevel(7);
+	my $activity   = defined $options->{activity}   ? $options->{activity}   : 1;
 
 	if ($count) {
 		# $self->sqlUpdate("firehose", { -popularity => "popularity + 1" }, "globjid=$url_globjid");
@@ -167,14 +168,14 @@ sub createItemFromSubmission {
 	my $submission = $self->getSubmission($id);
 	if ($submission) {
 		my $globjid = $self->getGlobjidCreate("submissions", $submission->{subid});
-		my $minpop = $self->getMinPopularityForColorLevel(5);
+		my $midpop = $self->getMinPopularityForColorLevel(5);
 		my $data = {
 			title 			=> $submission->{subj},
 			globjid 		=> $globjid,
 			uid 			=> $submission->{uid},
 			introtext 		=> $submission->{story},
-			popularity 		=> $minpop,
-			editorpop 		=> $minpop,
+			popularity 		=> $midpop,
+			editorpop 		=> $midpop,
 			public 			=> "yes",
 			attention_needed 	=> "yes",
 			type 			=> "submission",
@@ -227,9 +228,9 @@ sub createItemFromStory {
 	my %ignore_skids = map {$_ => 1 } @{$constants->{firehose_story_ignored_skids}};
 	my $story = $self->getStory($id, '', 1);
 
-	my $popularity = $self->getMinPopularityForColorLevel(2);
+	my $popularity = $self->getMidPopularityForColorLevel(2);
 	if ($story->{story_topics_rendered}{$constants->{mainpage_nexus_tid}}) {
-		$popularity = $self->getMinPopularityForColorLevel(1);
+		$popularity = $self->getMidPopularityForColorLevel(1);
 	}
 
 	if ($story && !$ignore_skids{$story->{primaryskid}}) {
@@ -258,7 +259,7 @@ sub createItemFromStory {
 
 sub getFireHoseCount {
 	my($self) = @_;
-	my $pop = $self->getMinPopularityForColorLevel(6);
+	my $pop = $self->getMidPopularityForColorLevel(6);
 	my $user = getCurrentUser();
 	my $pop_q = $self->sqlQuote($pop);
 	my $signoff_label = "sign$user->{uid}\ed";
@@ -271,6 +272,7 @@ sub getFireHoseEssentials {
 	my($self, $options) = @_;
 
 	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
 	my $colors = $self->getFireHoseColors();
 
 	$options ||= {};
@@ -319,6 +321,11 @@ sub getFireHoseEssentials {
 
 	if ($options->{createtime_no_future} && !$doublecheck) {
 		push @where, "createtime <= NOW()";
+	}
+
+	if ($options->{createtime_subscriber_future}) {
+		my $future_secs = $constants->{subscribe_future_secs};
+		push @where, "createtime <= DATE_ADD(NOW() INTERVAL $future_secs SECOND)";
 	}
 
 	if ($options->{attention_needed} && !$doublecheck) {
@@ -384,7 +391,7 @@ sub getFireHoseEssentials {
 
 	if ($options->{color}) {
 		if ($colors->{$options->{color}}) {
-			my $pop = $self->getMinPopularityForColorLevel($colors->{$options->{color}});
+			my $pop = $self->getMidPopularityForColorLevel($colors->{$options->{color}});
 			my $pop_q = $self->sqlQuote($pop);
 			if ($user->{is_admin} && !$user->{firehose_usermode}) {
 				push @where, "editorpop >= $pop_q";
@@ -676,6 +683,7 @@ sub ajaxFireHoseGetUpdates {
 	my %ids = map { $_ => 1 } @ids;
 	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
+	my $future = {};
 	my $globjs = [];	
 	foreach (@$items) {
 		push @$globjs, $_->{globjid} if $_->{globjid} 
@@ -694,6 +702,7 @@ sub ajaxFireHoseGetUpdates {
 	foreach (@$items) {
 		my $item = $firehose_reader->getFireHose($_->{id});
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
+		$future->{$_->{id}} = 1 if $item->{createtime} gt $now;
 		if ($ids{$_->{id}}) {
 			if ($item->{last_update} ge $update_time) {
 				my $url 	= $slashdb->getUrl($item->{url_id});
@@ -726,6 +735,7 @@ sub ajaxFireHoseGetUpdates {
 		updates		=> $updates,
 		update_time	=> $update_time,
 		ordered		=> $ordered,
+		future		=> $future,
 	});
 	my $reskey_dump = "";
 	my $reskey = getObject("Slash::ResKey");
@@ -1166,15 +1176,19 @@ sub getAndSetOptions {
 		$adminmode = 0 if $user->{firehose_usermode};
 	}
 
+	$options->{public} = "yes";
 	if ($adminmode) {
 		# $options->{attention_needed} = "yes";
 		$options->{accepted} = "no" if !$options->{accepted};
 		$options->{rejected} = "no" if !$options->{rejected};
 	} else  {
 		$options->{accepted} = "no" if !$options->{accepted};
-		$options->{public} = "yes";
 		$options->{daysback} = 1;
-		$options->{createtime_no_future} = 1;
+		if ($user->{is_subscriber}) {
+			$options->{createtime_subscriber_future} = 1;
+		} else {
+			$options->{createtime_no_future} = 1;
+		}
 	}
 	return $options;
 }
@@ -1216,6 +1230,17 @@ sub getMinPopularityForColorLevel {
 	my @levels = split(/\|/, $levels);
 	return $levels[$level - 1 ];
 }
+
+sub getMidPopularityForColorLevel {
+	my($self, $level) = @_;
+	my $slashdb = getCurrentDB();
+	my $levels = $slashdb->getVar('firehose_slice_points', 'value', 1);
+	my @levels = split(/\|/, $levels);
+	my $min = $levels[$level - 1 ];
+	my $max = defined $levels[$level] ? $levels[$level] : $levels[$level - 1] + 5;
+	return (($min + $max) / 2);
+}
+
 
 sub getPopLevelForPopularity {
 	my($self, $pop) = @_;
