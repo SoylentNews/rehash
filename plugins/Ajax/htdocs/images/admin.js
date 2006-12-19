@@ -33,6 +33,17 @@ function admin_signoff(stoid, type, id) {
 	}
 }
 
+function admin_neverdisplay(stoid) {
+	var params = [];
+	params['op'] = 'admin_neverdisplay';
+	params['reskey'] = reskey_static;
+	params['stoid'] = stoid;
+	if (confirm("Set story to neverdisplay?")) {
+		ajax_update(params, 'nvd-' + stoid);
+	}
+	
+}
+
 function adminTagsCommands(id, type) {
 	var toggletags_message_id = 'toggletags-message-' + id;
 	var toggletags_message_el = $(toggletags_message_id);

@@ -12,6 +12,7 @@ var firehose_updates_size = 0;
 var firehose_ordered = Array(0);
 var firehose_before = Array(0);
 var firehose_after = Array(0);
+var firehose_future;
 
 function createPopup(xy, titlebar, name, contents, message) {
 	var body = document.getElementsByTagName("body")[0]; 
@@ -669,6 +670,15 @@ function firehose_reorder() {
 				if (fhlist && fhel) {
 					fhlist.appendChild(fhel);
 				}
+				if ( firehose_future[firehose_ordered[i]] ) {
+					if($("ttype-" + firehose_ordered[i])) {
+						$("ttype-" + firehose_ordered[i]).className = "future";	
+					}
+				} else {
+					if($("ttype-" + firehose_ordered[i]) && $("ttype-" + firehose_ordered[i]).className == "future") {
+						$("ttype-" + firehose_ordered[i]).className = "story";	
+					}
+				}
 			}
 			if (console_updating) {
 				document.title = "Console (" + firehose_ordered.length + ")";
@@ -689,9 +699,11 @@ function firehose_get_next_updates() {
 
 
 function firehose_get_updates_handler(transport) {
+	$('busy').className = "hide";
 	var response = eval_response(transport);
 	var processed = 0;
 	firehose_ordered = response.ordered;
+	firehose_future = response.future;
 	firehose_before = Array(0);
 	firehose_after = Array(0);
 	for (i = 0; i < firehose_ordered.length; i++) {
@@ -733,7 +745,7 @@ function firehose_get_item_idstring() {
 function firehose_get_updates() {
 	run_before_update();
 	if (fh_play == 0 || fh_is_updating == 1) {
-		firehose_add_update_timerid(setTimeout("firehose_get_updates()", 7000));
+		firehose_add_update_timerid(setTimeout("firehose_get_updates()", 2000));
 		//alert("wait loop: " + fh_is_updating);
 		return;
 	}
@@ -750,6 +762,7 @@ function firehose_get_updates() {
 	params['ids'] = firehose_get_item_idstring();
 	params['updatetime'] = update_time;
 	params['page'] = page;
+	$('busy').className = "";
 	ajax_update(params, '', handlers);
 }
 
