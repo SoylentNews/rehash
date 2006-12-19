@@ -236,6 +236,22 @@ sub ajax_signoff {
 	return "Signed";
 }
 
+sub ajax_neverdisplay {
+	my $slashdb = getCurrentDB();
+	my $form = getCurrentForm();
+	my $user = getCurrentUser();
+	return unless $user->{is_admin};
+	
+	my $stoid = $form->{stoid};
+	my $uid   = $user->{uid};
+	
+	return unless $stoid =~/^\d+$/;
+
+	$slashdb->setStory($stoid, { neverdisplay => 1 });
+	return "neverdisplay";
+
+}
+
 ##################################################################
 sub getStorySignoffs {
 	my($self, $stoid) = @_;
