@@ -16,7 +16,7 @@ __template__
 [% IF storylink %]
 <li class="neverdisplay">[% END %]
 [% PROCESS ajax_reskey_signoff reskey_label => 'signoff-reskey-' _ stoid, reskey_name => 'ajax_admin' %]
-<span id="nvd-[% stoid %]" onclick="admin_neverdisplay('[% stoid %]')">[% UNLESS story.neverdisplay %]display[% END %]</span>
+<span id="nvd-[% stoid %]" onclick="admin_neverdisplay('[% stoid %]'[% IF fhid %], 'firehose'[% END %])">[% UNLESS story.neverdisplay %]display[% END %]</span>
 [% IF storylink %]</li>[% END %]
 [% END %]
 __seclev__
