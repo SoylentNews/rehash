@@ -849,3 +849,27 @@ function firehose_collapse_entry(id) {
 	tagsHideBody(id)
 
 }
+
+function firehose_remove_entry(id) {
+	var fh = $('firehose-' + id);
+	if (fh) {
+		var attributes = { 
+			 height: { to: 0 },
+			 opacity: { to: 0 }
+		};
+		var myAnim = new YAHOO.util.Anim(fh, attributes); 
+		myAnim.duration = 0.5;
+		myAnim.onComplete.subscribe(function() {
+		    var el = this.getEl();
+		        el.parentNode.removeChild(el);
+		});
+		myAnim.animate();
+	}
+}
+
+function firehose_open_note(id) {
+
+	
+
+
+}
