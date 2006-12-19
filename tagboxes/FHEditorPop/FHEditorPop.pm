@@ -145,26 +145,26 @@ sub run {
 	my($type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
 	my $target_id_q = $self->sqlQuote($target_id);
 	if ($type eq "submissions") {
-		$popularity = $firehose->getMinPopularityForColorLevel(5);
+		$popularity = $firehose->getMidPopularityForColorLevel(5);
 	} elsif ($type eq "journals") {
 		my $journal = getObject("Slash::Journal");
 		my $j = $journal->get($target_id);
-		$popularity = $firehose->getMinPopularityForColorLevel(6);
-		$popularity = $firehose->getMinPopularityForColorLevel(5) if $j->{promotetype} eq "publicize";
+		$popularity = $firehose->getMidPopularityForColorLevel(6);
+		$popularity = $firehose->getMidPopularityForColorLevel(5) if $j->{promotetype} eq "publicize";
 
 	} elsif ($type eq 'urls') {
 		my $bookmark_count = $self->sqlCount('bookmarks', "url_id=$target_id_q");
 		my $pop_level = 7;
 		$pop_level = 6 if $self->sqlCount("firehose", "type='feed' AND url_id=$target_id");
-		$popularity = $firehose->getMinPopularityForColorLevel($pop_level) + $bookmark_count;
+		$popularity = $firehose->getMidPopularityForColorLevel($pop_level) + $bookmark_count;
 	} elsif ($type eq "stories") {
 		my $story = $self->getStory($target_id);
 		if($story->{story_topics_rendered}{$constants->{mainpage_nexus_tid}}) {
 			# Mainpage
-			$popularity = $firehose->getMinPopularityForColorLevel(1);
+			$popularity = $firehose->getMidPopularityForColorLevel(1);
 		} else {
 			# Sectional
-			$popularity = $firehose->getMinPopularityForColorLevel(2);
+			$popularity = $firehose->getMidPopularityForColorLevel(2);
 		}
 	}
 	# There's also 'feed' which doesn't get extra points (starts at 1).
