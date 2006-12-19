@@ -19,6 +19,12 @@ __template__
     full = 1;
     bodywrapper = 1;
     bodycontent = 1;
+    future = 0;
+    IF item.type == "story";
+    	story = Slash.db.getStory(item.srcid);
+	future = story.is_future;
+    END;
+
     IF mode == "fulltitle";
     	bodycontent = 0;
     ELSIF mode == "bodycontent";
@@ -50,7 +56,8 @@ END %]
 <div id="firehose-[% item.id %]" class="[% IF mode == "full" %]article[% ELSE %]briefarticle[% END %][% IF adminmode == 1 %] adminmode[% ELSE %] usermode[% END %]">
 [% END %]
 	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode %]
-	[% PROCESS titlebar h3id="title-" _ item.id id="" %]
+	[% title_type = item.type == "story" ? "story" : "firehose" %]
+	[% PROCESS titlebar h3id="title-" _ item.id id="" future = future title_type = title_type title_type_id = "ttype-" _ item.id %]
 [% END %]
 	[% IF bodywrapper;
 		Slash.getData('byline', { adminmode => adminmode, item => item, the_user => the_user }, 'firehose');
@@ -96,7 +103,6 @@ END %]
 		<ul>
 			<li class="more">
 			[% IF item.type == "story" %]
-				[% story = Slash.db.getStory(item.srcid) %]
 				[% the_skin = Slash.db.getSkin(item.primaryskid) %]
 				[% Slash.linkStory({
 					'link' 	=> 	"Read more",

@@ -14,7 +14,7 @@ __seclev__
 10000
 __template__
 [%
-IF item.type == "submission";
+IF item.type == "submission" || item.type == "submission";
 
 	IF item.email && item.name;
 		IF constants.submissions_link_relnofollow; rnf = " rel=\"nofollow\""; ELSE; rnf = ""; END;
@@ -37,6 +37,10 @@ IF item.url_id && url.url;
 	ELSE;
 		introtext = introtext _ "<a href='" _ url.url _ "'>" _ url.initialtitle _ "</a>";
 	END;
+END;
+
+IF !forform && item.type != "story";
+	introtext = Slash.noFollow(introtext);
 END;
 
 %]
