@@ -7269,6 +7269,7 @@ sub createStory {
 		if ($story->{fhid} && $constants->{plugin}{FireHose}) {
 			my $firehose = getObject("Slash::FireHose");
 			my $item = $firehose->getFireHose($story->{fhid});
+			$firehose->setFireHose($story->{fhid}, { stoid => $stoid });
 			if ($item && $item->{type} eq "journal") {
 				$story->{discussion} = $item->{discussion};
 				$story->{journal_id} = $item->{srcid};
