@@ -712,6 +712,7 @@ sub ajaxFireHoseGetUpdates {
 				my $introtext = $item->{introtext};
 				slashDisplay("formatHoseIntro", { introtext => $introtext }, { Return => 1 });
 				$html->{"text-$_->{id}"} = $introtext;
+				$html->{"fhtime-$_->{id}"} = timeCalc($item->{createtime});
 				# updated
 			}
 		} else {
