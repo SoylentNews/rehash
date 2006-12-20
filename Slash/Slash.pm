@@ -255,6 +255,19 @@ sub jsSelectComments {
 	delete $comments->{0}; # non-comment data
 
 	my @roots = $cid ? $cid : grep { !$comments->{$_}{pid} } keys %$comments;
+	my %roots_hash = ( map { $_ => 1 } @roots );
+	my %thresh_totals;
+	# init
+	for my $i (-1..5) {
+		# T cannot be higher than HT
+		for my $j ($i..5) {
+			# 1: hidden, 2: oneline, 3: full
+			for my $m (1..3) {
+				$thresh_totals{$i}{$j}{$m} ||= 0;
+			}
+		}
+	}
+
 
 	if ($form->{full}) {
 		my $comment_text = $slashdb->getCommentTextCached(
@@ -269,12 +282,41 @@ sub jsSelectComments {
 		my @keys = qw(pid kids points uid);
 		for my $cid (keys %$comments) {
 			@{$comments_new->{$cid}}{@keys} = @{$comments->{$cid}}{@keys};
+
 			# we only care about it if it is not original ... we could
 			# in theory guess at what it is and just use a flag, but that
 			# could be complicated, esp. if we are several levels deep -- pudge
 			if ($comments->{$cid}{subject_orig} && $comments->{$cid}{subject_orig} eq 'no') {
 				$comments_new->{$cid}{subject} = $comments->{$cid}{subject};
 			}
+
+			#################################################
+			# save counts of comments at each threshold value
+			my $T  = $comments->{$cid}{points};
+			my $HT = $T;
+			if (!$user->{is_anon} && $user->{uid} == $comments->{$cid}{uid}) {
+				$T = 5;
+			}
+			if ($roots_hash{$cid}) {
+				$HT++;
+			}
+
+			for my $i (-1..$T) {
+				for my $j ($i..$HT) {
+					$thresh_totals{$i}{$j}{3}++;
+				}
+				for my $j (($HT+1)..5) {
+					next if $i > $j;  # T cannot be higher than HT
+					$thresh_totals{$i}{$j}{2}++;
+				}
+			}
+
+			for my $i (($T+1)..5) {
+				for my $j ($i..5) {
+					$thresh_totals{$i}{$j}{1}++;
+				}
+			}
+			#################################################
 		}
 
 		$comments = $comments_new;
@@ -282,6 +324,9 @@ sub jsSelectComments {
 
 	my $anon_comments = Data::JavaScript::Anon->anon_dump($comments);
 	my $anon_roots    = Data::JavaScript::Anon->anon_dump(\@roots);
+	my $anon_rootsh   = Data::JavaScript::Anon->anon_dump(\%roots_hash);
+	my $anon_thresh   = Data::JavaScript::Anon->anon_dump(\%thresh_totals);
+	s/\s+//g for ($anon_thresh, $anon_roots, $anon_rootsh);
 
 	$user->{is_anon}  ||= 0;
 	$user->{is_admin} ||= 0;
@@ -289,8 +334,11 @@ sub jsSelectComments {
 	return <<EOT;
 comments = $anon_comments;
 
-root_comments = $anon_roots;
+thresh_totals = $anon_thresh;
+
 root_comment = $cid;
+root_comments = $anon_roots;
+root_comments_hash = $anon_rootsh;
 
 user_uid = $user->{uid};
 user_is_anon = $user->{is_anon};

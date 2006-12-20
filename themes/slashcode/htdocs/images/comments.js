@@ -18,6 +18,7 @@ var prehiddendisplaymode = {};
 var viewmodevalue = { full: 3, oneline: 2, hidden: 1};
 var currents = { full: 0, oneline: 0, hidden: 0 };
 var commentelements = {};
+var thresh_totals = {};
 
 var boxStatusQueue = [];
 var comment_body_reply = [];
@@ -45,19 +46,7 @@ function updateComment(cid, mode) {
 		if (!cl) { // be more selective?
 			fetch_comments.push(cid);
 		} else {
-			// subject is there only if it is a "reply"
-			// check pid to make sure parent is there at all ... check visibility too?
-			if (comments[cid]['subject'] && comments[cid]['pid']) {
-				var thisdiv = fetchEl('comment_' + comments[cid]['pid']);
-				if (thisdiv) {
-					setDefaultDisplayMode(comments[cid]['pid']);
-					if (mode == 'full' || (mode == 'oneline' && displaymode[comments[cid]['pid']] == 'hidden')) {
-						cl.innerHTML = comments[cid]['subject'];
-					} else if (mode == 'oneline') {
-						cl.innerHTML = 'Re:';
-					}
-				}
-			}
+			setShortSubject(cid, mode, cl);
 		}
 		existingdiv.className = mode;
 	}
@@ -83,12 +72,7 @@ function updateCommentTree(cid, threshold, subexpand) {
 			else
 				futuredisplaymode[cid] = 'hidden';
 		} else {
-			if (comment['points'] < threshold && (user_is_anon || user_uid != comment['uid']))
-				futuredisplaymode[cid] = 'hidden';
-			else if (comment['points'] < (user_highlightthresh - (root_comments_hash[cid] ? 1 : 0)))
-				futuredisplaymode[cid] = 'oneline';
-			else
-				futuredisplaymode[cid] = 'full';
+			futuredisplaymode[cid] = determineMode(cid, threshold, user_highlightthresh);
 		}
 
 		updateDisplayMode(cid, futuredisplaymode[cid], 1);
@@ -326,6 +310,27 @@ function selectParent(cid, collapse) {
 	return false;
 }
 
+function setShortSubject(cid, mode, cl) {
+	if (!cl)
+		cl = fetchEl('comment_link_' + cid);
+
+	// subject is there only if it is a "reply"
+	// check pid to make sure parent is there at all ... check visibility too?
+	if (comments[cid]['subject'] && comments[cid]['pid']) {
+		var thisdiv = fetchEl('comment_' + comments[cid]['pid']);
+		if (thisdiv) {
+			setDefaultDisplayMode(comments[cid]['pid']);
+			if (!mode)
+				mode = displaymode[cid];
+			if (mode == 'full' || (mode == 'oneline' && displaymode[comments[cid]['pid']] == 'hidden')) {
+				cl.innerHTML = comments[cid]['subject'];
+			} else if (mode == 'oneline') {
+				cl.innerHTML = 'Re:';
+			}
+		}
+	}
+}
+
 
 /* thread utility functions */
 function refreshDisplayModes(cid) {
@@ -425,6 +430,43 @@ function calcTotals() {
 	}
 }
 
+function calcSliderTotals(thresh, hthresh) {
+	// we are precalculating, so this code should never be used!
+	// here for testing -- pudge
+/*	if (!thresh_totals[thresh] || !thresh_totals[thresh][hthresh]) {
+		if (!thresh_totals[thresh])
+			thresh_totals[thresh]  = {};
+		thresh_totals[thresh][hthresh] = {};
+		thresh_totals[thresh][hthresh][ viewmodevalue['hidden']]  = 0;
+		thresh_totals[thresh][hthresh][ viewmodevalue['oneline']] = 0;
+		thresh_totals[thresh][hthresh][ viewmodevalue['full']]    = 0;
+
+		for (var cid in comments) {
+			var mode = determineMode(cid, thresh, hthresh);
+			thresh_totals[thresh][hthresh][ viewmodevalue[mode] ]++;
+		}
+	}
+*/
+
+	return(
+		thresh_totals[thresh][hthresh][viewmodevalue['hidden']],
+		thresh_totals[thresh][hthresh][viewmodevalue['oneline']],
+		thresh_totals[thresh][hthresh][viewmodevalue['full']]
+	);
+}
+
+function determineMode(cid, thresh, hthresh) {
+	if (!hthresh)
+		hthresh = user_highlightthresh;
+
+	if (comments[cid]['points'] < thresh && (user_is_anon || user_uid != comments[cid]['uid']))
+		return 'hidden';
+	else if (comments[cid]['points'] < (hthresh - (root_comments_hash[cid] ? 1 : 0)))
+		return 'oneline';
+	else
+		return 'full';
+}
+
 function finishCommentUpdates() {
 	for (var cid in update_comments) {
 		updateComment(cid, update_comments[cid]);
@@ -479,6 +521,7 @@ function ajaxFetchComments(cids) {
 				loadNamedElement('comment_link_' + cids[i]);
 				loadNamedElement('comment_shrunk_' + cids[i]);
 				loadNamedElement('comment_sig_' + cids[i]);
+				setShortSubject(cids[i]);
 			}
 			boxStatus(0);
 		}
@@ -842,7 +885,6 @@ function updateTotals() {
 	$('currentHidden' ).innerHTML = currents['hidden'];
 	$('currentFull'   ).innerHTML = currents['full'];
 	$('currentOneline').innerHTML = currents['oneline'];
-
 }
 
 function scrollTo(cid) {
