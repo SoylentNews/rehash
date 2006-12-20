@@ -437,7 +437,7 @@ function calcTotals() {
 	}
 }
 
-function calcSliderTotals(thresh, hthresh) {
+function getSliderTotals(thresh, hthresh) {
 	// we are precalculating, so this code should never be used!
 	// here for testing -- pudge
 /*	if (!thresh_totals[thresh] || !thresh_totals[thresh][hthresh]) {
