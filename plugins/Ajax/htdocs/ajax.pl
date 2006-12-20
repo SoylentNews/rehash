@@ -274,6 +274,8 @@ sub fetchComments {
 	my $id   = $form->{discussion_id} || 0;
 	my $cid  = $form->{cid} || 0; # root id
 
+	$user->{state}{ajax_accesslog_op} = "ajax_comments_fetch";
+
 	# XXX error?
 	return unless @$cids && $id;
 
