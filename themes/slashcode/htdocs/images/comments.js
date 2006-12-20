@@ -159,6 +159,13 @@ function setFocusComment(cid, alone, mods) {
 	return false;
 }
 
+function changeTHT(t_delta, ht_delta) {
+	if (!t_delta && !ht_delta)
+		return void(0);
+
+	user_threshold       += t_delta;
+	changeHT(ht_delta);
+}
 
 function changeHT(delta) {
 	if (!delta)
