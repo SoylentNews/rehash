@@ -44,8 +44,6 @@ function admin_neverdisplay(stoid, type, fhid) {
 			firehose_remove_entry(fhid);
 		}
 	}
-
-	
 }
 
 function adminTagsCommands(id, type) {

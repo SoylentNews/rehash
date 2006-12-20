@@ -104,8 +104,8 @@ sub createItemFromJournal {
 	if ($journal) {
 		my $globjid = $self->getGlobjidCreate("journals", $journal->{id});
 		my $popularity = $journal->{promotetype} eq "publicize" 
-			?  $self->getMidPopularityForColorLevel(5) 
-			:  $self->getMidPopularityForColorLevel(6);
+			? $self->getMidPopularityForColorLevel(5) 
+			: $self->getMidPopularityForColorLevel(6);
 		my $data = {
 			title 			=> $journal->{description},
 			globjid 		=> $globjid,
@@ -133,12 +133,12 @@ sub createUpdateItemFromBookmark {
 	my $url_globjid = $self->getGlobjidCreate("urls", $bookmark->{url_id});
 	my $type = $options->{type} || "bookmark";
 	my($count) = $self->sqlCount("firehose", "globjid=$url_globjid");
-	my $popularity = defined $options->{popularity} 
-		? $options->{popularity} 
-		: $type eq "feed" 
-			? $self->getMidPopularityForColorLevel(6) 
+	my $popularity = defined $options->{popularity}
+		? $options->{popularity}
+		: $type eq "feed"
+			? $self->getMidPopularityForColorLevel(6)
 			: $self->getMidPopularityForColorLevel(7);
-	my $activity   = defined $options->{activity}   ? $options->{activity}   : 1;
+	my $activity   = defined $options->{activity} ? $options->{activity} : 1;
 
 	if ($count) {
 		# $self->sqlUpdate("firehose", { -popularity => "popularity + 1" }, "globjid=$url_globjid");
@@ -1237,7 +1237,6 @@ sub getMidPopularityForColorLevel {
 	my $max = defined $levels[$level] ? $levels[$level] : $levels[$level - 1] + 5;
 	return (($min + $max) / 2);
 }
-
 
 sub getPopLevelForPopularity {
 	my($self, $pop) = @_;

@@ -13,7 +13,7 @@ data
 __seclev__
 10000
 __template__
-[% rnf = "rel='nofollow'" %]
+[% rnf = ' rel="nofollow"' %]
 [% SWITCH value %]
 
 [% CASE 'byline' %]
@@ -44,12 +44,12 @@ __template__
 		([% accepted_from_uid %]/[% num_from_uid %]) 
 	[% END %]
 	[% IF adminmode && ( item.name || item.email ) %]
-		([% item.name %])<a href="[% item.email | strip_attribute %]" [% rnf %]>[% item.email | strip_literal %]</a>
+		([% item.name %])<a href="[% item.email | strip_attribute %]"[% rnf %]>[% item.email | strip_literal %]</a>
 	[% ELSE %]
 		[% IF item.type == "submission" %]
-			[% IF item.email %]<a href="[% item.email | strip_attribute %]" [% rnf %]>[% END %][% item.name | strip_literal %][% IF item.email %]</a>[% END %]
+			[% IF item.email %]<a href="[% item.email | strip_attribute %]"[% rnf %]>[% END %][% item.name | strip_literal %][% IF item.email %]</a>[% END %]
 		[% ELSIF item.type == "story" %]
-			[% IF the_user.homepage %]<a href="[% the_user.homepage %]" [% rnf %]>[% END %][% the_user.nickname %][% IF the_user.homepage %]</a>[% END %]
+			[% IF the_user.homepage %]<a href="[% the_user.homepage %]"[% rnf %]>[% END %][% the_user.nickname %][% IF the_user.homepage %]</a>[% END %]
 		[% ELSE %]
 			[% the_user.nickname | strip_literal %]
 		[% END %]

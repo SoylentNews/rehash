@@ -671,11 +671,11 @@ function firehose_reorder() {
 					fhlist.appendChild(fhel);
 				}
 				if ( firehose_future[firehose_ordered[i]] ) {
-					if($("ttype-" + firehose_ordered[i])) {
+					if ($("ttype-" + firehose_ordered[i])) {
 						$("ttype-" + firehose_ordered[i]).className = "future";	
 					}
 				} else {
-					if($("ttype-" + firehose_ordered[i]) && $("ttype-" + firehose_ordered[i]).className == "future") {
+					if ($("ttype-" + firehose_ordered[i]) && $("ttype-" + firehose_ordered[i]).className == "future") {
 						$("ttype-" + firehose_ordered[i]).className = "story";	
 					}
 				}
