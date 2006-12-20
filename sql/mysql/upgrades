@@ -4294,3 +4294,8 @@ UPDATE vars SET value = 'T_2_5_0_138' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+#For plugins FireHose
+ALTER TABLE firehose DROP COLUMN title;
+ALTER TABLE firehose ADD COLUMN stoid MEDIUMINT UNSIGNED DEFAULT '0';
+
+INSERT INTO ajax_ops VALUES (NULL, 'admin_neverdisplay', 'Slash::Admin', 'ajax_neverdisplay', 'ajax_admin_static', 'use');
