@@ -223,6 +223,7 @@ sub selectComments {
 }
 
 sub jsSelectComments {
+	# version 0.9 is broken; 0.6 and 1.00 seem to work -- pudge 2006-12-19
 	require Data::JavaScript::Anon;
 	my($slashdb, $constants, $user, $form) = @_;
 	$slashdb   ||= getCurrentDB();
