@@ -165,6 +165,20 @@ __template__
 				</h4>
 			</div>
 		</div>
+<script type="text/javascript">
+gCommentControlWidget = null;
+
+YAHOO.slashdot.ThresholdApp = function() {
+  return {
+    init: function() {
+      gCommentControlWidget = new YAHOO.slashdot.ThresholdWidget();
+      gCommentControlWidget.setTHT(user_threshold, user_highlightthresh);
+    }
+  };
+}();
+
+YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
+</script>
 		<div id="bones">
       <div id="ccw">
         <div id="ccw-upper-end-zone"></div>
