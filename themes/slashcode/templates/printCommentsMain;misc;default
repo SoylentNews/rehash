@@ -24,7 +24,7 @@ __template__
    	horiz = 1 IF user.comments_control == 'horizontal';
    ELSE;
    	horiz = 1 IF constants.comments_control_horizontal;
-   END %]
+   END; horiz = 0 # XXX temp fix!! %]
 [% discussion2 = user.discussion2 && (user.discussion2 == "slashdot" || user.discussion2 == "uofm") %]
 [% spilltext = "Spill at <b>${user.commentspill}</b>!";
    fineprint = 'The following comments are owned by whoever posted them.  We are not responsible for them in any way.';
