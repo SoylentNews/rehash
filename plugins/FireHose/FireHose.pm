@@ -740,11 +740,7 @@ sub ajaxFireHoseGetUpdates {
 	my $reskey_dump = "";
 	my $reskey = getObject("Slash::ResKey");
 	my $user_rkey = $reskey->key('ajax_user_static', { no_state => 1 });
-	my $admin_rkey = $reskey->key('ajax_admin_static', { no_state => 1 });
-	$reskey_dump .= "ajax_user_static = '" . $user_rkey->reskey() . "';\n" if $user_rkey->create();
-	if ($user->{is_admin}) {
-		$reskey_dump .= "ajax_admin_static = '" . $admin_rkey->reskey() . "';\n" if $admin_rkey->create();
-	}
+	$reskey_dump .= "reskey_static = '" . $user_rkey->reskey() . "';\n" if $user_rkey->create();
 	return "$data_dump\n$reskey_dump";
 
 }
