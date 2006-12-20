@@ -13,7 +13,7 @@ data
 __seclev__
 10000
 __template__
-[% rnf = "rel='nofollow' %]
+[% rnf = "rel='nofollow'" %]
 [% SWITCH value %]
 
 [% CASE 'byline' %]
