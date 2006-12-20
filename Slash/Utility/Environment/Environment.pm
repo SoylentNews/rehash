@@ -2502,12 +2502,17 @@ sub getOpAndDatFromStatusAndURI {
 		if ($uri eq "ajax") {
 			my $form = getCurrentForm();
 			if ($form && $form->{op}) {
-				my $reader = getObject('Slash::DB', { db_type => 'reader' });
-				my $class = $reader->getClassForAjaxOp($form->{op});
-				$class =~s/^Slash:://g;
-				$class =~s/::/_/g;
-				$class =~ tr/A-Z/a-z/;
-				$uri = "ajax_$class" if $class;
+				my $user = getCurrentUser;
+				if ($user->{state}{ajax_accesslog_op}) {
+					$uri = $user->{state}{ajax_accesslog_op};
+				} else {
+					my $reader = getObject('Slash::DB', { db_type => 'reader' });
+					my $class = $reader->getClassForAjaxOp($form->{op});
+					$class =~s/^Slash:://g;
+					$class =~s/::/_/g;
+					$class =~ tr/A-Z/a-z/;
+					$uri = "ajax_$class" if $class;
+				}
 			}
 		}
 	# This is for me, I am getting tired of patching my local copy -Brian
