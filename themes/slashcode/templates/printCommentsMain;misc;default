@@ -166,23 +166,40 @@ __template__
 			</div>
 		</div>
 		<div id="bones">
-			<div id="commentControlPane">
-				<div id="comment_full" style="background: #fff;"[% class_info %]><span id="currentFull">0</span> Full</div>
-				<div id="comment_divider1" class="comment_divider" style="background:#fff;"[% class_info %]>
-					<span class="com_arrow_up" onclick="javascript:changeHT(1)"><img id="com_arrow_up1" src="[% constants.imagedir %]/arrow_[% IF horiz %]left[% ELSE %]up[% END %].gif" alt="*"></span>
-				</div>
-				<div id="comment_divider2" class="comment_divider" style="background:#ccc;"[% class_info %]>
-					<span class="arrow_down" onclick="javascript:changeHT(-1)"><img id="com_arrow_down1" src="[% constants.imagedir %]/arrow_[% IF horiz %]right[% ELSE %]down[% END %].gif" alt="*"></span>
-				</div>
-				<div id="comment_abbr" style="background: #ccc;"[% class_info %]><span id="currentOneline">0</span> Abbreviated</div>
-				<div id="comment_divider3" class="comment_divider" style="background:#ccc;"[% class_info %]>
-					<span class="arrow_up" onclick="javascript:changeT(1)"><img id="com_arrow_up2" src="[% constants.imagedir %]/arrow_[% IF horiz %]left[% ELSE %]up[% END %].gif" alt="*"></span>
-				</div>
-				<div id="comment_divider4" class="comment_divider" style="background:#aaa;"[% class_info %]>
-					<span class="arrow_down" onclick="javascript:changeT(-1)"><img id="com_arrow_down2" src="[% constants.imagedir %]/arrow_[% IF horiz %]right[% ELSE %]down[% END %].gif" alt="*"></span>
-				</div>
-				<div id="comment_hidden" style="background: #aaa;"[% class_info %]><span id="currentHidden">0</span> Hidden</div>
-			</div>
+      <div id="ccw">
+        <div id="ccw-upper-end-zone"></div>
+
+        <div id="ccw-body">
+          <div id="ccw-panel-container">
+            <div id="ccw-full-panel" class="ccw-panel">
+              <div id="ccw-full-count-pos" class="ccw-count-pos">
+                <span id="ccw-full-count-text" class="ccw-count-text"><span id="currentFull"></span> Full</span>
+              </div>
+            </div>
+            <div id="ccw-abbr-panel" class="ccw-panel">
+              <div id="ccw-abbr-count-pos" class="ccw-count-pos">
+                <span id="ccw-abbr-count-text" class="ccw-count-text"><span id="currentOneline"></span> Abbreviated</span>
+              </div>
+            </div>
+            <div id="ccw-hide-panel" class="ccw-panel">
+              <div id="ccw-hide-count-pos" class="ccw-count-pos">
+                <span id="ccw-hide-count-text" class="ccw-count-text"><span id="currentHidden"></span> Hidden</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="ccw-control">
+            <div id="ccw-hide-bar-pos">
+              <div id="ccw-hide-bar"><div id="ccw-hide-bar-tab" class="ccw-bar-tab"></div></div>
+            </div>
+            <div id="ccw-abbr-bar-pos">
+              <div id="ccw-abbr-bar"><div id="ccw-abbr-bar-tab" class="ccw-bar-tab"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="ccw-lower-end-zone"></div>
+      </div>
 		</div>
 		<div class="commentControlFooter">
 		[% IF cid || pid %]
