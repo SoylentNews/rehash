@@ -1065,13 +1065,13 @@ YAHOO.slashdot.ThresholdWidget.prototype._requestCounts = function() {
 	return getSliderTotals(this.displayedTs[HIDE_BAR], this.displayedTs[ABBR_BAR]);
 }
 
-YAHOO.slashdot.ThresholdWidget.prototype._onDragBar = function( whichBar ) {
-	YAHOO.util.Dom.addClass("ccw-control", "ccw-active");
+YAHOO.slashdot.ThresholdWidget.prototype._onBarStartDrag = function( whichBar ) {
+	YAHOO.util.Dom.addClass(this._getEl("ccw-control"), "ccw-active");
 	this.preDragTs = this.displayedTs.slice();
 }
 
-YAHOO.slashdot.ThresholdWidget.prototype._onEndDragBar = function( whichBar ) {
-	YAHOO.util.Dom.removeClass("ccw-control", "ccw-active");
+YAHOO.slashdot.ThresholdWidget.prototype._onBarEndDrag = function( whichBar ) {
+	YAHOO.util.Dom.removeClass(this._getEl("ccw-control"), "ccw-active");
 
 	var deltas = this.displayedTs.slice();
 	for ( var i=0; i<deltas.length; ++i )
@@ -1147,8 +1147,8 @@ YAHOO.slashdot.ThresholdBar.prototype.fixConstraints = function() {
 	this.setYConstraint(spaceAboveAndBelow[0], spaceAboveAndBelow[1], SCALE_BAND_HEIGHT);
 }
 
-YAHOO.slashdot.ThresholdBar.prototype.onMouseDown = function( e ) {
-	this.parentWidget._onDragBar(this.whichBar);
+YAHOO.slashdot.ThresholdBar.prototype.startDrag = function( x, y ) {
+	this.parentWidget._onBarStartDrag(this.whichBar);
 	this.draggingTs = this.parentWidget.displayedTs.slice();
 	this.fixConstraints();
 }
@@ -1161,6 +1161,6 @@ YAHOO.slashdot.ThresholdBar.prototype.onDrag = function( e ) {
 	}
 }
 
-YAHOO.slashdot.ThresholdBar.prototype.onMouseUp = function( e ) {
-	this.parentWidget._onEndDragBar(this.whichBar);
+YAHOO.slashdot.ThresholdBar.prototype.endDrag = function( e ) {
+	this.parentWidget._onBarEndDrag(this.whichBar);
 }
