@@ -464,7 +464,7 @@ function getSliderTotals(thresh, hthresh) {
 	}
 */
 
-	return[
+	return [
 		thresh_totals[thresh][hthresh][viewmodevalue['hidden']],
 		thresh_totals[thresh][hthresh][viewmodevalue['oneline']],
 		thresh_totals[thresh][hthresh][viewmodevalue['full']]
