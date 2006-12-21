@@ -245,6 +245,10 @@ html > body .commentwrap table {
 	height: 1px;
 }
 
+.ccw-panel-border-left, .ccw-panel-border-right { height: 100%; width: 1px; top: 0; }
+.ccw-panel-border-left { left: 0; }
+.ccw-panel-border-right { right: 0; }
+
 #ccw-centering-rail, #ccw-abbr-bar-pos, #ccw-hide-bar-pos { width: 2px; }
 #ccw-centering-rail { margin: 0 auto; }
 
@@ -280,6 +284,7 @@ div.ccw-panel {
 	position: relative;
 }
 
+.ccw-panel-border-left, .ccw-panel-border-right,
 #ccw-panel-container, #ccw-control,
 #ccw-abbr-bar-pos, #ccw-hide-bar-pos,
 #ccw-abbr-bar, #ccw-hide-bar,
@@ -295,10 +300,7 @@ div.ccw-panel {
 
 	/* Borders and Fills */
 
-#ccw {
-	border-left: 1px solid #AAAAAA;
-	border-right: 1px solid #AAAAAA;
-}
+.ccw-panel-border-left, .ccw-panel-border-right { background-color: #AAAAAA; }
 
 #ccw-abbr-bar, #ccw-hide-bar, .ccw-bar-tab { border: 1px solid black; }
 

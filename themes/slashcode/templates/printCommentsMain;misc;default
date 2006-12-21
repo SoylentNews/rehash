@@ -181,19 +181,26 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 </script>
 		<div id="bones">
       <div id="ccw">
-        <div id="ccw-upper-end-zone"></div>
+        <div id="ccw-upper-end-zone">
+          <div class="ccw-panel-border-left"></div>
+          <div class="ccw-panel-border-right"></div>
+        </div>
 
         <div id="ccw-body">
           <div id="ccw-panel-container">
             <div id="ccw-full-panel" class="ccw-panel">
+              <div class="ccw-panel-border-left"></div>
               <div id="ccw-full-count-pos" class="ccw-count-pos">
                 <span id="ccw-full-count-text" class="ccw-count-text"><span id="currentFull"></span> Full</span>
               </div>
+              <div class="ccw-panel-border-right"></div>
             </div>
             <div id="ccw-abbr-panel" class="ccw-panel">
+              <div class="ccw-panel-border-left"></div>
               <div id="ccw-abbr-count-pos" class="ccw-count-pos">
                 <span id="ccw-abbr-count-text" class="ccw-count-text"><span id="currentOneline"></span> Abbreviated</span>
               </div>
+              <div class="ccw-panel-border-right"></div>
             </div>
             <div id="ccw-hide-panel" class="ccw-panel">
               <div id="ccw-hide-count-pos" class="ccw-count-pos">
