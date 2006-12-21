@@ -297,7 +297,7 @@ div.ccw-panel {
 
 #ccw-abbr-bar, #ccw-hide-bar, .ccw-bar-tab { border: 1px solid black; }
 
-#ccw-panel-container                  { background-color: white; }
+#ccw-body                             { background-color: white; }
 #ccw-full-panel, #ccw-upper-end-zone  { background-color: white; }
 #ccw-abbr-panel                       { background-color: #CCCCCC; }
 #ccw-hide-panel, #ccw-lower-end-zone  { background-color: #AAAAAA; }
@@ -323,9 +323,9 @@ div.ccw-panel {
 	text-align: center;
 }
 
-#ccw-full-count-text { top: -17px; }
-#ccw-abbr-count-text { top: -5px; }
-#ccw-hide-count-text { top: 8px; }
+#ccw-full-count-text { top: -20px; }
+#ccw-abbr-count-text { top: -9px; }
+#ccw-hide-count-text { top: 4px; }
 
 
 #ccw-total-count-text {
