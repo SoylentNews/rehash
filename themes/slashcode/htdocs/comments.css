@@ -297,6 +297,7 @@ div.ccw-panel {
 
 #ccw-abbr-bar, #ccw-hide-bar, .ccw-bar-tab { border: 1px solid black; }
 
+#ccw-panel-container                  { background-color: white; }
 #ccw-full-panel, #ccw-upper-end-zone  { background-color: white; }
 #ccw-abbr-panel                       { background-color: #CCCCCC; }
 #ccw-hide-panel, #ccw-lower-end-zone  { background-color: #AAAAAA; }
