@@ -235,7 +235,8 @@ html > body .commentwrap table {
 }
 
 #ccw-body,
-#ccw-panel-container, #ccw-control {
+#ccw-panel-container, #ccw-control,
+#ccw-centering-rail {
 	height: 140px;
 }
 
@@ -244,31 +245,35 @@ html > body .commentwrap table {
 	height: 1px;
 }
 
+#ccw-centering-rail, #ccw-abbr-bar-pos, #ccw-hide-bar-pos { width: 2px; }
+#ccw-centering-rail { margin: 0 auto; }
+
+#ccw,
 #ccw-upper-end-zone, #ccw-body, #ccw-lower-end-zone,
 #ccw-panel-container, #ccw-control,
 div.ccw-panel,
-#ccw-abbr-bar-pos, #ccw-hide-bar-pos, div.ccw-count-pos {
-	width: 120px;
+div.ccw-count-pos {
+	width: 9.3em;
 }
 
 #ccw-abbr-bar, #ccw-hide-bar {
 	height: 4px;
-	width: 124px;
-	left: -3px; /* adjustment to center in control */
+	width: 9.8em;
+	left: -4.9em;
 }
 
 #ccw-abbr-bar       { top: -5px; }
 
 .ccw-bar-tab {
 	height: 8px;
-	width: 50px;
-	left: 38px; /* adjustment to center in bar */
+	width: 3em;
+	left: 3.5em;
 }
 
 #ccw-abbr-bar-tab   { top: -9px; }
 #ccw-hide-bar-tab   { top: 4px; }
 
-#ccw,
+#ccw, #ccw-centering-rail,
 #ccw-upper-end-zone, #ccw-body, #ccw-lower-end-zone,
 div.ccw-panel {
 	display: block;
@@ -327,11 +332,6 @@ div.ccw-panel {
 #ccw-abbr-count-text { top: -9px; }
 #ccw-hide-count-text { top: 4px; }
 
-
-#ccw-total-count-text {
-	position: relative;
-	left: 10px;
-}
 
 #ccw-abbr-bar-tab { border-bottom: none; }
 #ccw-hide-bar-tab { border-top: none; }
