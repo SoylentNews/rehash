@@ -464,11 +464,11 @@ function getSliderTotals(thresh, hthresh) {
 	}
 */
 
-	return(
+	return[
 		thresh_totals[thresh][hthresh][viewmodevalue['hidden']],
 		thresh_totals[thresh][hthresh][viewmodevalue['oneline']],
 		thresh_totals[thresh][hthresh][viewmodevalue['full']]
-	);
+	];
 }
 
 function determineMode(cid, thresh, hthresh) {
@@ -1026,9 +1026,18 @@ YAHOO.slashdot.ThresholdWidget = function() {
 	var hideBar = initBar("hide", HIDE_BAR, this);
 
 	this.dragBars = [ abbrBar, hideBar ];
+
+	this.getEl_cache = new Object();
 }
 
 YAHOO.slashdot.ThresholdWidget.prototype = new Object();
+
+YAHOO.slashdot.ThresholdWidget.prototype._getEl = function( id ) {
+	var el = this.getEl_cache[id];
+	if ( el === undefined )
+		el = this.getEl_cache[id] = YAHOO.util.Dom.get(id);
+	return el;
+}
 
 YAHOO.slashdot.ThresholdWidget.prototype.setTHT = function( T, HT ) {
 	function pin( min, x, max ) { return Math.min(Math.max(x, min), max); }
@@ -1046,9 +1055,9 @@ YAHOO.slashdot.ThresholdWidget.prototype.setCounts = function( counts ) {
 	if ( counts === undefined )
 		counts = this._requestCounts();
 
-	YAHOO.util.Dom.get("currentHidden").innerHTML = counts[0];
-	YAHOO.util.Dom.get("currentOneline").innerHTML = counts[1];
-	YAHOO.util.Dom.get("currentFull").innerHTML = counts[2];
+	this._getEl("currentHidden").innerHTML = counts[0];
+	this._getEl("currentOneline").innerHTML = counts[1];
+	this._getEl("currentFull").innerHTML = counts[2];
 }
 
 
@@ -1072,11 +1081,13 @@ YAHOO.slashdot.ThresholdWidget.prototype._onEndDragBar = function( whichBar ) {
 }
 
 YAHOO.slashdot.ThresholdWidget.prototype._setTs = function( newTs, draggingBar ) {
+	var cache = this;
+
 	function fixPanel( id, newHeight ) {
-		var textPos = YAHOO.util.Dom.get("ccw-"+id+"-count-pos");
+		var textPos = cache._getEl("ccw-"+id+"-count-pos");
 		textPos.style.display = (newHeight>0) ? "block" : "none";
-		textPos.style.top = newHeight / 2;
-		YAHOO.util.Dom.get("ccw-"+id+"-panel").style.height = newHeight;
+		textPos.style.top = (newHeight / 2) + "px";
+		cache._getEl("ccw-"+id+"-panel").style.height = newHeight + "px";
 	}
 
 	if ( draggingBar !== undefined ) {
@@ -1113,7 +1124,7 @@ YAHOO.slashdot.ThresholdBar.prototype.posToT = function() {
 	if ( el.style.display != "block" )
 		return null;
 
-	var widgetTop = YAHOO.util.Dom.getY("ccw-control");
+	var widgetTop = YAHOO.util.Dom.getY(this.parentWidget._getEl("ccw-control"));
 	var barPos = YAHOO.util.Dom.getY(el);
 
 	return this.parentWidget.displayRange[0] - ((barPos - widgetTop) / SCALE_BAND_HEIGHT);
