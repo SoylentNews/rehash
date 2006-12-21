@@ -1013,7 +1013,7 @@ YAHOO.slashdot.ThresholdWidget = function() {
 
 		var el = YAHOO.util.Dom.get(id+"-pos");
 
-		var dd = new YAHOO.slashdot.ThresholdBar(el);
+		var dd = new YAHOO.slashdot.ThresholdBar(el, "ccw", {scroll:false});
 		dd.setOuterHandleElId(id+"-tab");
 		dd.setHandleElId(id);
 		dd.whichBar = whichBar;
