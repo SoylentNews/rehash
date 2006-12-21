@@ -203,11 +203,13 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
           </div>
 
           <div id="ccw-control">
-            <div id="ccw-hide-bar-pos">
-              <div id="ccw-hide-bar"><div id="ccw-hide-bar-tab" class="ccw-bar-tab"></div></div>
-            </div>
-            <div id="ccw-abbr-bar-pos">
-              <div id="ccw-abbr-bar"><div id="ccw-abbr-bar-tab" class="ccw-bar-tab"></div></div>
+            <div id="ccw-centering-rail">
+              <div id="ccw-hide-bar-pos">
+                <div id="ccw-hide-bar"><div id="ccw-hide-bar-tab" class="ccw-bar-tab"></div></div>
+              </div>
+              <div id="ccw-abbr-bar-pos">
+                <div id="ccw-abbr-bar"><div id="ccw-abbr-bar-tab" class="ccw-bar-tab"></div></div>
+              </div>
             </div>
           </div>
         </div>
