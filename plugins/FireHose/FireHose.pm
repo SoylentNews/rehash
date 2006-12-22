@@ -391,7 +391,7 @@ sub getFireHoseEssentials {
 
 	if ($options->{color}) {
 		if ($colors->{$options->{color}}) {
-			my $pop = $self->getMidPopularityForColorLevel($colors->{$options->{color}});
+			my $pop = $self->getMinPopularityForColorLevel($colors->{$options->{color}});
 			my $pop_q = $self->sqlQuote($pop);
 			if ($user->{is_admin} && !$user->{firehose_usermode}) {
 				push @where, "editorpop >= $pop_q";
@@ -1234,7 +1234,9 @@ sub getMidPopularityForColorLevel {
 	my $levels = $slashdb->getVar('firehose_slice_points', 'value', 1);
 	my @levels = split(/\|/, $levels);
 	my $min = $levels[$level - 1 ];
-	my $max = defined $levels[$level] ? $levels[$level] : $levels[$level - 1] + 5;
+
+	my $maxindex = $level - 2;
+	my $max = $maxindex >= 0 && defined $levels[$maxindex] ? $levels[$maxindex] : $levels[$level - 1] + 5;
 	return (($min + $max) / 2);
 }
 
