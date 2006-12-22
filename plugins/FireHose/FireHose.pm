@@ -325,7 +325,7 @@ sub getFireHoseEssentials {
 
 	if ($options->{createtime_subscriber_future}) {
 		my $future_secs = $constants->{subscribe_future_secs};
-		push @where, "createtime <= DATE_ADD(NOW() INTERVAL $future_secs SECOND)";
+		push @where, "createtime <= DATE_ADD(NOW(), INTERVAL $future_secs SECOND)";
 	}
 
 	if ($options->{attention_needed} && !$doublecheck) {
