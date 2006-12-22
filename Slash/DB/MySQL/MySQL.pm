@@ -359,7 +359,6 @@ sub createComment {
 		$pid_subject = $self->sqlSelect("subject", "comments",
 			"cid=" . $self->sqlQuote($comment->{pid}));
 		# see comments.pl:editComment()
-		$pid_subject = decode_entities($pid_subject);
 		$pid_subject =~ s/^Re://i;
 		$pid_subject =~ s/\s\s/ /g;
 		if (length $pid_subject &&
