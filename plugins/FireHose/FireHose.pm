@@ -82,10 +82,11 @@ sub createUpdateItemFromJournal {
 }
 
 sub getFireHoseColors {
-	my($self) = @_;
+	my($self, $array) = @_;
 	my $constants = getCurrentStatic();
 	my $color_str = $constants->{firehose_color_labels};
 	my @colors = split(/\|/, $color_str);
+	return \@colors if $array;
 	my $colors = {};
 	my $i=1;
 	foreach (@colors) {
@@ -98,6 +99,7 @@ sub getFireHoseColors {
 
 sub createItemFromJournal {
 	my($self, $id) = @_;
+	my $user = getCurrentUser();
 	my $journal_db = getObject("Slash::Journal");
 	my $journal = $journal_db->get($id);
 	my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
@@ -106,6 +108,7 @@ sub createItemFromJournal {
 		my $popularity = $journal->{promotetype} eq "publicize" 
 			? $self->getMidPopularityForColorLevel(5) 
 			: $self->getMidPopularityForColorLevel(6);
+		my $type = $user->{acl}{vendor} ? "vendor" : "journal";
 		my $data = {
 			title 			=> $journal->{description},
 			globjid 		=> $globjid,
@@ -113,12 +116,12 @@ sub createItemFromJournal {
 			attention_needed 	=> "yes",
 			public 			=> "yes",
 			introtext 		=> $introtext,
-			type 			=> "journal",
 			popularity		=> $popularity,
 			editorpop		=> $popularity,
 			tid			=> $journal->{tid},
 			srcid			=> $id,
-			discussion		=> $journal->{discussion}
+			discussion		=> $journal->{discussion},
+			type			=> $type
 		};
 		$self->createFireHose($data);
 	}
@@ -681,6 +684,7 @@ sub ajaxFireHoseGetUpdates {
 	my $update_time = $form->{updatetime};
 	my @ids = grep {/^\d+$/} split (/,/, $id_str);
 	my %ids = map { $_ => 1 } @ids;
+	my %ids_orig = %ids;
 	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
 	my $future = {};
@@ -724,6 +728,24 @@ sub ajaxFireHoseGetUpdates {
 		delete $ids{$_->{id}};
 	}
 
+	my $prev;
+	my $next_to_old = {};
+	my $i = 0;
+	my $pos;
+	foreach (@$ordered) {
+		$next_to_old->{$prev} = 1 if $prev && $ids_orig{$_};
+		$next_to_old->{$_} = 1 if $ids_orig{$prev};
+		$prev = $_;
+		$pos->{$_} = $i;
+		$i++;
+		
+	}
+
+	@$updates  = sort {
+		$next_to_old->{$a} <=> $next_to_old->{$b} ||
+		$pos->{$a} <=> $pos->{$b};
+	} @$updates;
+
 	foreach (keys %ids) {
 		push @$updates, ["remove", $_, ""];
 	}
@@ -731,6 +753,8 @@ sub ajaxFireHoseGetUpdates {
 	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1, page => $form->{page} }, { Return => 1, Page => "firehose"});
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
+	
+		
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
 		html		=> $html,
 		updates		=> $updates,
@@ -1050,6 +1074,12 @@ sub getAndSetOptions {
 	$options->{mode} = $mode;
 
 	my $colors = $self->getFireHoseColors();
+	
+	if ($form->{color} && $colors->{$form->{color}}) {
+		$options->{color} = $form->{color};
+	}
+	$options->{color} ||= $user->{firehose_color};
+
 
 	if ($user->{is_admin} && $form->{setusermode}) {
 		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "" });
@@ -1102,7 +1132,7 @@ sub getAndSetOptions {
 		$fhfilter = $user->{firehose_fhfilter};
 		$options->{fhfilter} = $fhfilter;
 	}
-
+	
 	$fhfilter =~ s/^\s+|\s+$//g;
 	my @fh_ops = map { lc($_) } split(/\s+/, $fhfilter);
 
@@ -1130,8 +1160,6 @@ sub getAndSetOptions {
 			$fh_options->{rejected} = "yes";
 		} elsif ($_ eq "accepted") {
 			$fh_options->{accepted} = "yes";
-		} elsif ($colors->{$_}) {
-			$fh_options->{color} = $_;
 		} elsif ($user->{is_admin} && $_ eq "signed") {
 			$fh_options->{signed} = 1;
 		} elsif ($user->{is_admin} && $_ eq "unsigned") {
@@ -1146,6 +1174,10 @@ sub getAndSetOptions {
 			# Don't filter this
 			$fh_options->{qfilter} .= $_ . ' ';
 		}
+	}
+	
+	if ($form->{color} && $colors->{$form->{color}}) {
+		$fh_options->{color} = $form->{color};
 	}
 
 	foreach (keys %$fh_options) {
@@ -1195,7 +1227,15 @@ sub getFireHoseTagsTop {
 	my $user 	= getCurrentUser();
 	my $constants 	= getCurrentStatic();
 	my $tags_top	 = [];
-	push @$tags_top, ($item->{type});
+	if ($user->{is_admin}) {
+		if ($item->{type} eq "story") {
+			push @$tags_top, "$item->{type}:5";
+		} else {
+			push @$tags_top, "$item->{type}:6";
+		}
+	} else {
+		push @$tags_top, ($item->{type});
+	}
 	
 	if ($item->{type} ne "story") {
 		if ($user->{is_admin} && !$user->{firehose_usermode}) {
@@ -1271,6 +1311,8 @@ sub listView {
 	my $itemstext;
 	my $maxtime = $slashdb->getTime();
 	my $now = $slashdb->getTime();
+	my $colors = $self->getFireHoseColors(1);
+	my $colors_hash = $self->getFireHoseColors();
 	
 	foreach (@$items) {
 		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime && $_->{createtime} lt $now;
@@ -1280,7 +1322,7 @@ sub listView {
 			mode		=> $options->{mode},
 			tags_top	=> $tags_top,
 			options		=> $options,
-			vote		=> $votes->{$item->{globjid}}
+			vote		=> $votes->{$item->{globjid}},
 		});
 	}
 	my $refresh_options;
@@ -1295,7 +1337,9 @@ sub listView {
 		page		=> $options->{page}, 
 		options		=> $options,
 		refresh_options	=> $refresh_options,
-		votes		=> $votes
+		votes		=> $votes,
+		colors		=> $colors,
+		colors_hash	=> $colors_hash
 	}, { Page => "firehose", Return => 1});
 
 }
