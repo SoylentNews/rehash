@@ -268,10 +268,22 @@ YAHOO.slashdot.topicTags = ["keyword",
 "vendor_amd_ostg",
 "backslash" ];
 
+YAHOO.slashdot.fhitemOpts = [
+"hold",
+"back",
+"quik"
+];
+
+YAHOO.slashdot.storyOpts = [
+"neverdisplay"
+];
+
     var feedbackDS = new YAHOO.slashdot.DS_JSArray(YAHOO.slashdot.feedbackTags);
     var actionsDS = new YAHOO.slashdot.DS_JSArray(YAHOO.slashdot.actionTags);
     var sectionsDS = new YAHOO.slashdot.DS_JSArray(YAHOO.slashdot.sectionTags);
     var topicsDS = new YAHOO.slashdot.DS_JSArray(YAHOO.slashdot.topicTags);
+    var fhitemDS = new YAHOO.slashdot.DS_JSArray(YAHOO.slashdot.fhitemOpts);
+    var storyDS = new YAHOO.slashdot.DS_JSArray(YAHOO.slashdot.storyOpts);
 
     var tagsDS = new YAHOO.widget.DS_XHR("./ajax.pl", ["\n", "\t"]);
     // tagsDS.maxCacheEntries = 0; // turn off local cacheing, because Jamie says the query is fast
@@ -281,7 +293,7 @@ YAHOO.slashdot.topicTags = ["keyword",
     tagsDS.scriptQueryAppend = "op=tags_list_tagnames";
     tagsDS.queryMethod = "POST";
 
-YAHOO.slashdot.dataSources = [tagsDS, actionsDS, sectionsDS, topicsDS, feedbackDS];
+YAHOO.slashdot.dataSources = [tagsDS, actionsDS, sectionsDS, topicsDS, feedbackDS, storyDS, fhitemDS];
 
 
 YAHOO.slashdot.AutoCompleteWidget = function()
@@ -430,7 +442,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type,
     var p = me._callbackParams;
 
 	// only change the 'menu' title when that title is a tag you are replacing
-    if ( tagname && me._needsSpareInput() && p._tagDomain != 4 )
+    if ( tagname && me._needsSpareInput() && (p._tagDomain < 4  && p.TagDomain > 6) )
       {
         me._sourceEl.innerHTML = tagname;
       }
@@ -438,7 +450,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type,
 
       // really need to move this into a separate function...
       //  at least when there is more than just p._type=='firehose'
-    if ( p._tagDomain != 0 )
+    if ( p._tagDomain != 0 && p._tagDomain != 5 )
       {
           // save the new tag immediately
 	createTag(tagname, p._id, p._type);
@@ -452,6 +464,12 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type,
               tagField.value += " ";
             tagField.value += tagname;
           }
+      }
+
+      if (p._tagDomain == 5) {
+      	if(tagname == "neverdisplay") {
+		admin_neverdisplay("", "firehose", p._id);
+	}
       }
   }
 

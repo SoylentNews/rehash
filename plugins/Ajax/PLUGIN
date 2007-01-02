@@ -12,6 +12,7 @@ htdoc=htdocs/images/yui/connection.js
 htdoc=htdocs/images/yui/dragdrop.js
 htdoc=htdocs/images/yui/animation.js
 htdoc=htdocs/images/yui/autocomplete.js
+htdoc=htdocs/images/yui/slider.js
 htdoc=htdocs/images/sd_autocomplete.js
 htdoc=htdocs/images/common.js
 htdoc=htdocs/images/prototype.js

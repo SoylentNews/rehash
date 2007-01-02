@@ -38,6 +38,7 @@ function admin_neverdisplay(stoid, type, fhid) {
 	params['op'] = 'admin_neverdisplay';
 	params['reskey'] = reskey_static;
 	params['stoid'] = stoid;
+	params['fhid'] = fhid;
 	if (confirm("Set story to neverdisplay?")) {
 		ajax_update(params, 'nvd-' + stoid);
 		if (type == "firehose") {

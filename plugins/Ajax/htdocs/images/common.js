@@ -468,6 +468,10 @@ function firehose_set_options(name, value) {
 		}
 	}
 
+	if (name == "color") { 
+		params[name] = [value];
+	}
+
 	var handlers = { 
 		onComplete: firehose_get_updates 
 	};	
