@@ -77,7 +77,7 @@ hose@cmdrtaco.net and be forgiving of beta code!
 <script type="text/javascript">
 	var firehose_action_time = 0;
 	var fh_color = '[% options.color || user.firehose_color || "indigo" %]';
-	var fh_colors = [
+	fh_colors = [
 		[%- FOREACH color=colors -%]
 			"[%- color -%]",
 		[% END %]
@@ -100,23 +100,9 @@ hose@cmdrtaco.net and be forgiving of beta code!
 	firehose_play();
 	firehose_add_update_timerid(setTimeout("firehose_get_updates()", 3000));
 
-var colorslider; 
-var fh_ticksize = 30;
-function sliderInit() {
-	colorslider = YAHOO.widget.Slider.getHorizSlider("colorsliderbg", "colorsliderthumb", 0, 180, fh_ticksize);
-	colorslider.setValue(fh_ticksize * fh_colors_hash[fh_color] , 1);
-         colorslider.subscribe("slideEnd", displayNewValue);
-}	
+fh_ticksize = 30;
+firehose_slider_init();
 
-
-
-sliderInit();
-
-function displayNewValue(offsetFromStart) {
-      var newVal = colorslider.getValue();
-	var color = fh_colors[ newVal / fh_ticksize ];
-	firehose_set_options("color", color);
- }
 
 
 [% END %]
