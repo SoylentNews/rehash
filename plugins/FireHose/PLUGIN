@@ -21,3 +21,5 @@ template=templates/reject_firehose;misc;default
 template=templates/tagsfirehosedivadmin;misc;default
 template=templates/tagsfirehosedivtagbox;misc;default
 template=templates/tagsfirehosedivuser;misc;default
+image=images/colorscale.gif
+image=images/sliderthumb.gif

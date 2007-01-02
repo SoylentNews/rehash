@@ -27,7 +27,11 @@ __template__
 			[% IF user.is_admin %]
 			User mode?
 			<input type="hidden" name="setusermode" value="1">
-			<input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]>  
+			<input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]> 
+<div id="colorsliderbg">
+	<div id="colorsliderthumb"><img src="[% constants.imagedir %]/slidethumb.gif"></div>
+
+</div>
 <div id="message_area">
 </div>
 			[% END %]
@@ -72,6 +76,16 @@ hose@cmdrtaco.net and be forgiving of beta code!
 [% PROCESS paginate %]
 <script type="text/javascript">
 	var firehose_action_time = 0;
+	var fh_color = '[% options.color || user.firehose_color || "indigo" %]';
+	var fh_colors = [
+		[%- FOREACH color=colors -%]
+			"[%- color -%]",
+		[% END %]
+	];
+	var fh_colors_hash = new Array(0);
+	for (var i=0; i< fh_colors.length; i++) {
+		fh_colors_hash[fh_colors[i]] = i;
+	}
 	var fh_view_mode = '[% options.mode %]';
 	var page = '[% page %]';
 	fh_is_admin = [% IF user.is_admin && !user.firehose_usermode %]1[% ELSE %]0[% END %];
@@ -85,6 +99,26 @@ hose@cmdrtaco.net and be forgiving of beta code!
 	var insert_new_at = '[% refresh_options.insert_new_at %]';
 	firehose_play();
 	firehose_add_update_timerid(setTimeout("firehose_get_updates()", 3000));
+
+var colorslider; 
+var fh_ticksize = 30;
+function sliderInit() {
+	colorslider = YAHOO.widget.Slider.getHorizSlider("colorsliderbg", "colorsliderthumb", 0, 180, fh_ticksize);
+	colorslider.setValue(fh_ticksize * fh_colors_hash[fh_color] , 1);
+         colorslider.subscribe("slideEnd", displayNewValue);
+}	
+
+
+
+sliderInit();
+
+function displayNewValue(offsetFromStart) {
+      var newVal = colorslider.getValue();
+	var color = fh_colors[ newVal / fh_ticksize ];
+	firehose_set_options("color", color);
+ }
+
+
 [% END %]
 </script>
 

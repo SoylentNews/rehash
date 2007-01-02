@@ -282,4 +282,6 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 .pop7 { background: url('//images.slashdot.org/pop7.png') no-repeat 0px 0px; }
 .pop8 { background: url('//images.slashdot.org/pop8.png') no-repeat 0px 0px; }
 
+#colorsliderbg { background: url('/images/colorscale.gif') no-repeat 0px }
+
 input {width: auto !important; margin: 0 0 0 .5em !important; }
