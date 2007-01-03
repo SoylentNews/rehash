@@ -244,6 +244,13 @@ sub ajax_neverdisplay {
 	
 	my $stoid = $form->{stoid};
 	my $uid   = $user->{uid};
+	my $fhid = $form->{fhid};
+
+	if ($fhid && !$stoid) {
+		my $firehose = getObject("Slash::FireHose");
+		my $item = $firehose->getFireHose($fhid);
+		$stoid = $item->{srcid} if $item && $item->{type} eq "story";
+	}
 	
 	return unless $stoid =~/^\d+$/;
 
