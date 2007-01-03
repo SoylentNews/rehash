@@ -1030,7 +1030,7 @@ sub displayThread {
 			}
 
 			my $noshow = 0;
-			if ($discussion2 && $user->{acl}{d2testing}) {
+			if ($discussion2) { # && $user->{acl}{d2testing}) {
 				if ($class eq 'hidden') {
 					$noshow = 1;
 					$user->{state}{comments}{noshow} ||= [];

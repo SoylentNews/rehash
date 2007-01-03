@@ -543,7 +543,7 @@ sub displayArticle {
 sub doSaveArticle {
 	my($journal, $constants, $user, $form, $journal_reader, $gSkin, $rkey) = @_;
 
-	$form->{promotetype} ||= 'post';
+	$form->{promotetype} ||= 'publish';
 
 	$form->{description} =~ s/[\r\n].*$//s;  # strip anything after newline
 	my $description = strip_notags($form->{description});
