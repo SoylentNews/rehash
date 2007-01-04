@@ -985,6 +985,20 @@ function partitionedRange( range, partitions ) {
 	return [].concat(range[0], partitions, range[1]);
 }
 
+function pinToRange( range, partitions ) {
+	var result = partitions.slice();
+	var hi = range[0], lo = range[1];
+
+	function pin( x ) {
+		return hi = Math.min(Math.max(x, lo), hi);
+	}
+
+	for ( var i=0; i<partitions.length; ++i )
+		result[i] = pin(partitions[i]);
+
+	return result;
+}
+
 function boundsToSizes( bounds, scaleFactor ) {
 	if ( scaleFactor === undefined )
 		scaleFactor = 1;
@@ -995,7 +1009,8 @@ function boundsToSizes( bounds, scaleFactor ) {
 	return sizes;
 }
 
-SCALE_BAND_HEIGHT = 20;
+Y_UNITS_IN_PIXELS = 20;
+X_UNITS_IN_EM = 4;
 
 ABBR_BAR = 0;
 HIDE_BAR = 1;
@@ -1007,6 +1022,14 @@ YAHOO.slashdot.ThresholdWidget = function() {
 	this.PANEL_KINDS = [ "full", "abbr", "hide" ];
 	this.displayRange = [6, -1];
 	this.constraintRange = [5, -1];
+	this.getEl_cache = new Object();
+
+	this.orientations = new Object();
+	this.orientations["Y"] = { axis: "Y", posAttr: "top", sizeAttr: "height", getPos: YAHOO.util.Dom.getY, units: "px", scale: Y_UNITS_IN_PIXELS };
+	this.orientations["X"] = { axis: "X", posAttr: "left", sizeAttr: "width", getPos: YAHOO.util.Dom.getX, units: "em", scale: X_UNITS_IN_EM };
+	this.orientations["X"].other = this.orientations["Y"];
+	this.orientations["Y"].other = this.orientations["X"];
+	this.orient = this.orientations["Y"];
 
 	function initBar( id, whichBar, parentWidget ) {
 		id = "ccw-"+id+"-bar";
@@ -1026,8 +1049,6 @@ YAHOO.slashdot.ThresholdWidget = function() {
 	var hideBar = initBar("hide", HIDE_BAR, this);
 
 	this.dragBars = [ abbrBar, hideBar ];
-
-	this.getEl_cache = new Object();
 }
 
 YAHOO.slashdot.ThresholdWidget.prototype = new Object();
@@ -1040,10 +1061,7 @@ YAHOO.slashdot.ThresholdWidget.prototype._getEl = function( id ) {
 }
 
 YAHOO.slashdot.ThresholdWidget.prototype.setTHT = function( T, HT ) {
-	function pin( min, x, max ) { return Math.min(Math.max(x, min), max); }
-	HT = pin(-1, HT, 5);
-	T = pin(-1, T, HT);
-	this._setTs([HT, T]);
+	this._setTs(pinToRange(this.constraintRange, [HT, T]));
 }
 
 YAHOO.slashdot.ThresholdWidget.prototype.getTHT = function() {
@@ -1080,15 +1098,38 @@ YAHOO.slashdot.ThresholdWidget.prototype._onBarEndDrag = function( whichBar ) {
 	changeTHT(deltas[HIDE_BAR], deltas[ABBR_BAR]);
 }
 
-YAHOO.slashdot.ThresholdWidget.prototype._setTs = function( newTs, draggingBar ) {
-	var cache = this;
-
-	function fixPanel( id, newHeight ) {
-		var textPos = cache._getEl("ccw-"+id+"-count-pos");
-		textPos.style.display = (newHeight>0) ? "block" : "none";
-		textPos.style.top = (newHeight / 2) + "px";
-		cache._getEl("ccw-"+id+"-panel").style.height = newHeight + "px";
+YAHOO.slashdot.ThresholdWidget.prototype.setOrientation = function( newAxis ) {
+	if ( newAxis != this.orient.axis ) {
+		this.orient = this.orientations[newAxis];
+		this._setTs();
 	}
+}
+
+YAHOO.slashdot.ThresholdWidget.prototype._emToPixels = function() {
+	return (YAHOO.util.Dom.getX("ccw-control") - YAHOO.util.Dom.getX("ccw")) / 2;
+}
+
+YAHOO.slashdot.ThresholdWidget.prototype._setTs = function( newTs, draggingBar ) {
+	var w = this;
+	var o = w.orient;
+	var offset = 0;
+
+	function fixPanel( id, newSize ) {
+		var textPos = w._getEl("ccw-"+id+"-count-pos").style;
+		textPos.display = (newSize>0) ? "block" : "none";
+		textPos.top = (o.axis == "Y") ? (newSize/2)+o.units : "1em";
+
+		var panel = w._getEl("ccw-"+id+"-panel").style;
+		panel[ o.posAttr ] = offset + o.units;
+		panel[ o.other.posAttr ] = 0;
+		panel[ o.sizeAttr ] = newSize + o.units;
+		panel[ o.other.sizeAttr ] = "100%";
+
+		offset += newSize;
+	}
+
+	if ( newTs === undefined )
+		newTs = this.displayedTs;
 
 	if ( draggingBar !== undefined ) {
 		var pin = draggingBar==ABBR_BAR ? Math.min : Math.max;
@@ -1101,9 +1142,9 @@ YAHOO.slashdot.ThresholdWidget.prototype._setTs = function( newTs, draggingBar )
 		if ( i != draggingBar )
 			this.dragBars[i].setPosFromT(newTs[i]);
 
-	var heights = boundsToSizes(partitionedRange(this.displayRange, newTs), SCALE_BAND_HEIGHT);
+	var sizes = boundsToSizes(partitionedRange(this.displayRange, newTs), o.scale);
 	for ( var i=0; i<this.PANEL_KINDS.length; ++i )
-		fixPanel(this.PANEL_KINDS[i], heights[i]);
+		fixPanel(this.PANEL_KINDS[i], sizes[i]);
 
 	this.setCounts(this._requestCounts());
     	return newTs;
@@ -1124,32 +1165,48 @@ YAHOO.slashdot.ThresholdBar.prototype.posToT = function() {
 	if ( el.style.display != "block" )
 		return null;
 
-	var widgetTop = YAHOO.util.Dom.getY(this.parentWidget._getEl("ccw-control"));
-	var barPos = YAHOO.util.Dom.getY(el);
+	var w = this.parentWidget;
+	var o = w.orient;
+	var widgetStart = o.getPos(w._getEl("ccw-control"));
+	var barPos = o.getPos(el);
 
-	return this.parentWidget.displayRange[0] - ((barPos - widgetTop) / SCALE_BAND_HEIGHT);
+	var scale = o.scale;
+	if ( o.units == "em" )
+		scale *= w._emToPixels();
+	return w.displayRange[0] - Math.round((barPos - widgetStart) / scale);
 }
 
 YAHOO.slashdot.ThresholdBar.prototype.setPosFromT = function( x ) {
 	if ( this.posToT() != x ) {
-		var el = this.getEl();
-		el.style.top = ((this.parentWidget.displayRange[0]-x) * SCALE_BAND_HEIGHT) + "px";
-		el.style.display = "block";
+		var w = this.parentWidget;
+		var o = w.orient;
+		var elStyle = this.getEl().style;
+		elStyle[ o.posAttr ] = ((w.displayRange[0]-x) * o.scale) + o.units;
+		elStyle[ o.other.posAttr ] = 0;
+		elStyle.display = "block";
 	}
 }
 
 YAHOO.slashdot.ThresholdBar.prototype.fixConstraints = function() {
+	var w = this.parentWidget;
+	var o = w.orient;
+
+	var scale = o.scale;
+	if ( o.units == "em" )
+		scale *= w._emToPixels();
+
 	this.resetConstraints();
-	this.setXConstraint(0, 0);
+	this[ "set" + o.other.axis + "Constraint" ](0, 0);
 
 	var thisT = this.draggingTs[this.whichBar];
-	var spaceAboveAndBelow = boundsToSizes(partitionedRange(this.parentWidget.constraintRange, [thisT]), SCALE_BAND_HEIGHT);
-	this.setYConstraint(spaceAboveAndBelow[0], spaceAboveAndBelow[1], SCALE_BAND_HEIGHT);
+	var availableSpace = boundsToSizes(partitionedRange(w.constraintRange, [thisT]), scale);
+	this[ "set" + o.axis + "Constraint" ](availableSpace[0], availableSpace[1], scale);
 }
 
 YAHOO.slashdot.ThresholdBar.prototype.startDrag = function( x, y ) {
-	this.parentWidget._onBarStartDrag(this.whichBar);
-	this.draggingTs = this.parentWidget.displayedTs.slice();
+	var w = this.parentWidget;
+	w._onBarStartDrag(this.whichBar);
+	this.draggingTs = w.displayedTs.slice();
 	this.fixConstraints();
 }
 
