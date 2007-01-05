@@ -285,3 +285,5 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 #colorsliderbg { background: url('//images.slashdot.org/colorscale.gif') no-repeat 0px }
 
 input {width: auto !important; margin: 0 0 0 .5em !important; }
+#colorsliderbg { display: inline; padding-right: 180px; }
+#colorsliderthumb { display: inline }
