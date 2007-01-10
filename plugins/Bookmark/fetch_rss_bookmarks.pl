@@ -39,7 +39,6 @@ $task{$me}{code} = sub {
 				my $title = strip_notags($item->{title});
 				my $link = fudgeurl($item->{link});
 				my $text = strip_mode($item->{description}, HTML);
-				slashdLog($item->{description});
 				my $taglist = $feed->{tags};
 				
 				my $data = {
@@ -60,8 +59,9 @@ $task{$me}{code} = sub {
 				my $user_bookmark = $bookmark->getUserBookmarkByUrlId($feed->{uid}, $url_id);
 				if (!$user_bookmark) {
 					$bookmark_data->{"-createdtime"} = 'NOW()';
-					slashdLog("creating bookmark");
+					slashdLog("creating feed bookmark $url_id");
 					slashdLog("$url_id $link $title");
+					slashdLog("after creating bookmark");
 					$bookmark_id= $bookmark->createBookmark($bookmark_data);
 					if ($constants->{plugin}{FireHose}) {
 						my $firehose = getObject("Slash::FireHose");
