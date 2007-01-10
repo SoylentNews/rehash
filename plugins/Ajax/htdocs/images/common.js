@@ -875,7 +875,7 @@ function firehose_remove_entry(id) {
 }
 
 function firehose_slider_init() {
-	fh_colorslider = YAHOO.widget.Slider.getHorizSlider("colorsliderbg", "colorsliderthumb", 0, 180, fh_ticksize);
+	fh_colorslider = YAHOO.widget.Slider.getHorizSlider("colorsliderbg", "colorsliderthumb", 0, 210, fh_ticksize);
 	fh_colorslider.setValue(fh_ticksize * fh_colors_hash[fh_color] , 1);
         fh_colorslider.subscribe("slideEnd", firehose_slider_end);
 }	
@@ -886,3 +886,13 @@ function firehose_slider_end(offsetFromStart) {
 	firehose_set_options("color", color);
 }
 
+function vendorStoryPopup(id) {
+	var title = "Top Story";
+	var buttons = createPopupButtons("<a href=\"javascript:closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
+	title = title + buttons;
+	createPopup(getXYForId('vendorStoryLink-' + id, 0, 1), title, "vendorStory-" + id, "Loading...");
+	var params = [];
+	params['op'] = 'getTopVendorStory';
+	params['skid'] = id;
+	ajax_update(params, "vendorStory-" + id + "-contents");
+}
