@@ -4306,3 +4306,7 @@ UPDATE vars SET value = 'T_2_5_0_139' WHERE name = 'cvs_tag_currentcode';
 # 2007-01-04
 UPDATE vars SET value = 'T_2_5_0_140' WHERE name = 'cvs_tag_currentcode';
 
+ALTER TABLE firehose CHANGE type type  ENUM("submission","journal","bookmark","feed", "story", "vendor") default 'submission';
+
+UPDATE vars SET value=CONCAT(value, "|-99999") WHERE name="firehose_slice_points";
+UPDATE vars SET value=CONCAT(value, "|black") WHERE name="firehose_color_labels";
