@@ -43,6 +43,9 @@ $task{$me}{code} = sub {
 		$slice_point += $_;
 		push @slice_points, $pops->[int($slice_point - 1)];
 	}
+
+	# Add large negative number for everything that falls below lowest thresh
+	push @slice_points, "-99999";
 	
 	my $last = 0;
 	
