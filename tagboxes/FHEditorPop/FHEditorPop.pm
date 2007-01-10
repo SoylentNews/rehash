@@ -76,6 +76,9 @@ print STDERR "Slash::Tagbox::FHEditorPop->feed_newtags called for " . scalar(@$t
 	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
 	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
 	my $admins = $self->getAdmins();
+	for my $uid (keys %$admins) {
+		$admins->{$uid}{seclev} = $tagsdb->getUser($uid, 'seclev');
+	}
 
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
