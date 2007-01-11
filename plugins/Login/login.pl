@@ -331,7 +331,7 @@ sub savePrefs {
 			$error = 1;
 		}
 
-		if ($form->{pass1} && length $form->{pass1} >= 20) {
+		if ($form->{pass1} && length $form->{pass1} > 20) {
 			push @note, getData('passtoolong');
 			$error = 1;
 		}
