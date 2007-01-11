@@ -213,17 +213,9 @@ html > body .commentwrap table {
 #commentlisting {clear: right;}
 #commentControlBoxStatus {border-bottom: 1px solid #444; border-top: 1px solid #ccc; text-align: center; padding: 3px; background: #666; color: #fff; }
 
-.horizontal #d2act {background: #fff; left: 0 !important; opacity: 1; top: 0; z-index: 1000; border: none; border-right: 2px solid #aaa; width: 100%; text-align: center}
+.horizontal #d2act {background: #fff; left: 0 !important; opacity: 1; top: 0; z-index: 1000; border: none; border-right: 2px solid #aaa; width: 29em; text-align: center}
 .horizontal #d2act div.block div.title h4 {background: #cc; !important}
-.horizontal #comment_full, .horizontal #comment_abbr, .horizontal #comment_hidden, .horizontal .comment_divider { display: inline; }
-.horizontal #commentControlPane {display: block; margin-left: auto; margin-right: auto; overflow: hidden; width: 38em}
-.horizontal #comment_full,
-.horizontal #comment_abbr,
-.horizontal #comment_hidden,
-.horizontal .comment_divider {border: none; padding: 0; margin: 0; height: 1.5em; float: left;}
-.horizontal #comment_full,
-.horizontal #comment_abbr,
-.horizontal #comment_hidden {width: 8em;}
+.horizontal #d2act .commentControlFooter { display: none; }
 
 /* new draggable guts for the D2 Widget */
 

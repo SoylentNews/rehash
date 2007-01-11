@@ -223,7 +223,6 @@ function changeThreshold(threshold) {
 	}
 	finishCommentUpdates();
 
-	setPadding();
 	savePrefs();
 
 	return void(0);
@@ -765,7 +764,6 @@ function boxStatus(bool) {
 
 function enableControls() {
 	boxStatus(0);
-	setPadding();
 	d2act();
 	$('d2act').className = '';
 	loaded = 1;
@@ -818,17 +816,7 @@ function toggleDisplayOptions() {
 
 		d2out.className = '';
 		gCommentControlWidget.setOrientation('Y');
-		$('comment_full').className = '';
-		$('comment_abbr').className = '';
-		$('comment_hidden').className = '';
-		$('comment_divider1').className = '';
-		$('comment_divider2').className = '';
-		$('comment_divider3').className = '';
-		$('comment_divider4').className = '';
-		$('com_arrow_up2').src   = $('com_arrow_up1').src   = $('com_arrow_up1').src.replace(/left/, 'up');
-		$('com_arrow_down2').src = $('com_arrow_down1').src = $('com_arrow_down1').src.replace(/right/, 'down');
 
-		setPadding();
 		params['comments_control'] = '';
 
 	} else { // vertical
@@ -836,17 +824,7 @@ function toggleDisplayOptions() {
 
 		d2out.className = 'horizontal';
 		gCommentControlWidget.setOrientation('X');
-		$('comment_full').className = 'horizontal';
-		$('comment_abbr').className = 'horizontal';
-		$('comment_hidden').className = 'horizontal';
-		$('comment_divider1').className = 'comment_divider horizontal';
-		$('comment_divider2').className = 'comment_divider horizontal';
-		$('comment_divider3').className = 'comment_divider horizontal';
-		$('comment_divider4').className = 'comment_divider horizontal';
-		$('com_arrow_up2').src   = $('com_arrow_up1').src   = $('com_arrow_up1').src.replace(/up/, 'left');
-		$('com_arrow_down2').src = $('com_arrow_down1').src = $('com_arrow_down1').src.replace(/down/, 'right');
 
-		setPadding();
 		d2act();
 		gods.style.display  = 'block';
 
@@ -860,44 +838,6 @@ function toggleDisplayOptions() {
 	return false;
 }
 
-function setPadding() {
-	var hidden_padding = ( user_threshold + 1 ) * 10;
-	var abbr_padding = (user_highlightthresh - user_threshold) * 10; 
-	var full_padding = 60 - hidden_padding - abbr_padding;
-	abbr_padding = abbr_padding / 2;
-
-	var com_hide = $('comment_hidden');
-	var com_full = $('comment_full');
-	var com_abbr = $('comment_abbr');
-
-	if (com_hide) {
-		if (com_hide.className == 'horizontal') {
-			com_hide.style.paddingLeft = hidden_padding + 5 + 'px';
-			com_hide.style.paddingTop  = 0;
-		} else {
-			com_hide.style.paddingTop  = hidden_padding + 'px';
-			com_hide.style.paddingLeft = 0;
-		}
-	}
-	if (com_full) {
-		if (com_full.className == 'horizontal') {
-			com_full.style.paddingRight  = full_padding + 5 + 'px';
-			com_full.style.paddingBottom = 0;
-		} else {
-			com_full.style.paddingBottom = full_padding + 'px';
-			com_full.style.paddingRight  = 0;
-		}
-	}
-	if (com_abbr) {
-		if (com_abbr.className == 'horizontal') {
-			com_abbr.style.paddingRight = abbr_padding + 5 + 'px';
-			com_abbr.style.paddingLeft  = abbr_padding + 5 + 'px';
-		} else {
-			com_abbr.style.paddingRight = abbr_padding + 'px';
-			com_abbr.style.paddingLeft  = abbr_padding + 'px';
-		}
-	}
-}
 
 function updateTotals() {
 	$('currentHidden' ).innerHTML = currents['hidden'];
