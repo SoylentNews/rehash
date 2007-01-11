@@ -291,8 +291,18 @@ sub fetchComments {
 	# XXX error?
 	return unless $comments && keys %$comments;
 
+	my %pieces = split /[,;]/, $form->{pieces};
+	my(@hidden_cids, @pieces_cids);
+	for my $cid (@$cids) {
+		if ($pieces{$cid}) {
+			push @pieces_cids, $cid;
+		} else {
+			push @hidden_cids, $cid;
+		}
+	}
+
 	my $comment_text = $slashdb->getCommentTextCached(
-		$comments, $cids,
+		$comments, \@hidden_cids,
 	);
 
 	for my $cid (keys %$comment_text) {
@@ -300,11 +310,18 @@ sub fetchComments {
 	}
 
 	my %html;
-	for my $cid (@$cids) {
+	for my $cid (@hidden_cids) {
 		$html{'comment_' . $cid} = Slash::dispComment($comments->{$cid}, {
 			class		=> 'oneline',
 			noshow_show	=> 1
 		});
+	}
+	for my $cid (@pieces_cids) {
+		@html{'comment_otherdetails_' . $cid, 'comment_sub_' . $cid} =
+			Slash::dispComment($comments->{$cid}, {
+				class		=> 'full',
+				show_pieces	=> 1
+			});
 	}
 
 	$options->{content_type} = 'application/json';

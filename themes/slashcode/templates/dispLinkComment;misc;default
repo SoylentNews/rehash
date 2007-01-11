@@ -17,7 +17,7 @@ __template__
 	[% IF user.is_admin || original_pid || !user.state.discussion_archived %]
 		[% do_parent = ( original_pid ); #&& !(discussion2 && (!form.cid || form.cid != cid)) );
 		   can_del   = ( (constants.authors_unlimited && user.seclev >= constants.authors_unlimited) || user.acl.candelcomments_always ) %]
-		<div class="commentSub">
+		[% IF !options.show_pieces %]<div class="commentSub" id="comment_sub_[% cid %]">[% END; IF !options.pieces %]
 
 		[
 		
@@ -60,8 +60,8 @@ __template__
 
 		]
 
-		</div>
-	[% END %]
+		[% END; IF !options.show_pieces %]</div>
+	[% END; END %]
 
 [% END %]
 

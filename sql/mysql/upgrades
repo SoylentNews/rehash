@@ -4220,8 +4220,6 @@ UPDATE formkeys SET idcount=0 WHERE idcount > 10000000;
 # for Zoo plugin
 ALTER TABLE people MODIFY COLUMN id int unsigned not null auto_increment;
 
-# PUDGE LAST UPDATED HERE
-
 INSERT INTO globj_types VALUES (NULL, 'discussions');
 
 # 2006-11-15
@@ -4299,14 +4297,23 @@ INSERT INTO ajax_ops VALUES (NULL, 'admin_neverdisplay', 'Slash::Admin', 'ajax_n
 # 2006-12-21
 UPDATE vars SET value = 'T_2_5_0_139' WHERE name = 'cvs_tag_currentcode';
 
+# 2007-01-04
+UPDATE vars SET value = 'T_2_5_0_140' WHERE name = 'cvs_tag_currentcode';
+
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
-
-# 2007-01-04
-UPDATE vars SET value = 'T_2_5_0_140' WHERE name = 'cvs_tag_currentcode';
 
 ALTER TABLE firehose CHANGE type type  ENUM("submission","journal","bookmark","feed", "story", "vendor") default 'submission';
 
 UPDATE vars SET value=CONCAT(value, "|-99999") WHERE name="firehose_slice_points";
 UPDATE vars SET value=CONCAT(value, "|black") WHERE name="firehose_color_labels";
+
+# clear user pref
+DELETE FROM users_param WHERE name = 'comments_control';
+
+# 2007-01-11
+UPDATE vars SET value = 'T_2_5_0_141' WHERE name = 'cvs_tag_currentcode';
+
+# PUDGE LAST UPDATED HERE
+

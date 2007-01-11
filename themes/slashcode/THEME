@@ -195,6 +195,7 @@ template=templates/deleted_cids;comments;default
 template=templates/discreate;comments;default
 template=templates/discuss_list;comments;default
 template=templates/dispComment;misc;default
+template=templates/dispCommentDetails;misc;default
 template=templates/dispFeature;misc;default
 template=templates/dispLinkComment;misc;default
 template=templates/dispStory;misc;default

@@ -128,6 +128,7 @@ __template__
 		// currents_total = [% (user.state.comments.totals.hidden || 0 ) + (user.state.comments.totals.full || 0) + (user.state.comments.totals.oneline || 0)  %];
 
 		noshow_comments      = [[% user.state.comments.noshow.join(',') %]];
+		pieces_comments      = [[% user.state.comments.pieces.join(',') %]];
 		init_hiddens         = [[% user.state.comments.hiddens.join(',') %]];
 
 		[% IF user.discussion2 == "slashdot" %]d2act();

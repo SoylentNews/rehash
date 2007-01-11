@@ -3,8 +3,10 @@
 var comments;
 var root_comments;
 var noshow_comments;
+var pieces_comments;
 var init_hiddens = [];
 var fetch_comments = [];
+var fetch_comments_pieces = {};
 var update_comments = {};
 var root_comments_hash = {};
 var behaviors = {
@@ -42,12 +44,23 @@ var is_firefox = (agt.indexOf("firefox") != -1);
 function updateComment(cid, mode) {
 	var existingdiv = fetchEl('comment_' + cid);
 	if (existingdiv && mode != displaymode[cid]) {
-		var cl = fetchEl('comment_link_' + cid);
-		if (!cl) { // be more selective?
-			fetch_comments.push(cid);
-		} else {
-			setShortSubject(cid, mode, cl);
+		var doshort = 0;
+		if (viewmodevalue[mode] >= viewmodevalue[displaymode[cid]]) {
+			var cl = fetchEl('comment_link_' + cid);
+			if (!cl) {
+				fetch_comments.push(cid);
+				doshort = 1;
+			} else if (viewmodevalue[mode] >= viewmodevalue['full']) {
+				var cd = fetchEl('comment_otherdetails_' + cid);
+				if (!cd.innerHTML) {
+					fetch_comments.push(cid);
+					fetch_comments_pieces[cid] = 1;
+					doshort = 1;
+				}
+			}
 		}
+		if (doshort)
+			setShortSubject(cid, mode, cl);
 		existingdiv.className = mode;
 	}
 
@@ -331,7 +344,7 @@ function setShortSubject(cid, mode, cl) {
 
 	// subject is there only if it is a "reply"
 	// check pid to make sure parent is there at all ... check visibility too?
-	if (comments[cid]['subject'] && comments[cid]['pid']) {
+	if (cl && cl.innerHTML && comments[cid]['subject'] && comments[cid]['pid']) {
 		var thisdiv = fetchEl('comment_' + comments[cid]['pid']);
 		if (thisdiv) {
 			setDefaultDisplayMode(comments[cid]['pid']);
@@ -492,6 +505,7 @@ function finishCommentUpdates() {
 	updateTotals();
 	update_comments = {};
 	fetch_comments = [];
+	fetch_comments_pieces = {};
 }
 
 // not currently used
@@ -514,6 +528,14 @@ function refreshCommentDisplays() {
 
 
 /* misc. functions */
+function toHash(thisobject) {
+	return thisobject.map(function (pair) {
+		return pair.map(encodeURIComponent).join(',');
+	}).join(';');
+}
+
+//function getCommentSub(cid, 
+
 function ajaxFetchComments(cids) {
 	if (cids && !cids.length)
 		return;
@@ -524,6 +546,10 @@ function ajaxFetchComments(cids) {
 	params['cid']           = root_comment;
 	params['discussion_id'] = discussion_id;
 	params['reskey']        = reskey_static;
+
+	var pieces = $H(cids ? fetch_comments_pieces : pieces_comments);
+	params['pieces'] = toHash(pieces);
+//alert(params['pieces']);
 
 	var handlers = {
 		onComplete: function (transport) {
@@ -536,6 +562,8 @@ function ajaxFetchComments(cids) {
 				loadNamedElement('comment_link_' + cids[i]);
 				loadNamedElement('comment_shrunk_' + cids[i]);
 				loadNamedElement('comment_sig_' + cids[i]);
+				loadNamedElement('comment_otherdetails_' + cids[i]);
+				loadNamedElement('comment_sub_' + cids[i]);
 				setShortSubject(cids[i]);
 			}
 			boxStatus(0);
@@ -546,6 +574,10 @@ function ajaxFetchComments(cids) {
 	ajax_update(params, '', handlers);
 
 	if (cids) {
+		for (var cid in fetch_comments_pieces) {
+			pieces_comments[cid] = 0;
+		}
+
 		var remove = [];
 		for (var i = 0; i < cids.length; i++) {
 			// no Array.indexOf in Safari etc.
@@ -567,6 +599,7 @@ function ajaxFetchComments(cids) {
 
 	} else {
 		noshow_comments = [];
+		pieces_comments = [];
 	}
 
 	return false;
@@ -847,7 +880,7 @@ function updateTotals() {
 
 function scrollWindowTo(cid) {
 	var comment_y = getOffsetTop(fetchEl('comment_' + cid));
-	if ($('comment_hidden').className == 'horizontal')
+	if ($('d2out').className == 'horizontal')
 		comment_y -= 60;
 	scroll(viewWindowLeft(), comment_y);
 }

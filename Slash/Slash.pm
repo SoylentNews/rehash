@@ -242,11 +242,11 @@ sub jsSelectComments {
 	my $id = $form->{sid};
 	return unless $id;
 
-	my $cid = $form->{cid} || 0;
+	my $pid = $form->{cid} || 0;
 
 	my($comments) = selectComments(
 		$slashdb->getDiscussion($id),
-		$cid,
+		$pid,
 		{
 			commentsort	=> 0,
 			threshold	=> -1
@@ -254,11 +254,11 @@ sub jsSelectComments {
 	);
 
 	delete $comments->{0}; # non-comment data
-	if ($cid && exists $comments->{$cid}) {
-		$comments = _get_thread($comments, $cid);
+	if ($pid && exists $comments->{$pid}) {
+		$comments = _get_thread($comments, $pid);
 	}
 
-	my @roots = $cid ? $cid : grep { !$comments->{$_}{pid} } keys %$comments;
+	my @roots = $pid ? $pid : grep { !$comments->{$_}{pid} } keys %$comments;
 	my %roots_hash = ( map { $_ => 1 } @roots );
 	my %thresh_totals;
 	# init
@@ -301,7 +301,9 @@ sub jsSelectComments {
 			if (!$user->{is_anon} && $user->{uid} == $comments->{$cid}{uid}) {
 				$T = 5;
 			}
-			if ($roots_hash{$cid}) {
+			if ($cid == $pid) {
+				$HT += 6; # THE root comment is always full
+			} elsif ($roots_hash{$cid}) {
 				$HT++;
 			}
 
@@ -340,7 +342,7 @@ comments = $anon_comments;
 
 thresh_totals = $anon_thresh;
 
-root_comment = $cid;
+root_comment = $pid;
 root_comments = $anon_roots;
 root_comments_hash = $anon_rootsh;
 
@@ -1029,22 +1031,26 @@ sub displayThread {
 				$comment->{subject} = 'Re:';
 			}
 
-			my $noshow = 0;
+			my($noshow, $pieces) = (0, 0);
 			if ($discussion2) { # && $user->{acl}{d2testing}) {
 				if ($class eq 'hidden') {
 					$noshow = 1;
 					$user->{state}{comments}{noshow} ||= [];
 					push @{$user->{state}{comments}{noshow}}, $cid;
+				} elsif ($class eq 'oneline') {
+					$pieces = 1;
+					$user->{state}{comments}{pieces} ||= [];
+					push @{$user->{state}{comments}{pieces}}, $cid;
 				}
 			}
 
 			if ($lvl && $indent) {
 				$return .= $const->{tablebegin} .
-					dispComment($comment, { class => $class, noshow => $noshow }) .
+					dispComment($comment, { class => $class, noshow => $noshow, pieces => $pieces }) .
 					$const->{tableend};
 				$cagedkids = 0;
 			} else {
-				$return .= dispComment($comment, { class => $class, noshow => $noshow });
+				$return .= dispComment($comment, { class => $class, noshow => $noshow, pieces => $pieces });
 			}
 			$displayed++;
 		} else {
@@ -1206,10 +1212,35 @@ EOT
 
 #use Data::Dumper; print STDERR "dispComment hard='$constants->{comments_hardcoded}' can_mod='$can_mod' comment: " . Dumper($comment) . "reasons: " . Dumper($reasons);
 
+	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
+
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
-		$can_mod, $reasons, $options
+		$can_mod, $reasons, $options, $discussion2
 	) if $constants->{comments_hardcoded};
+
+	if ($options->{show_pieces}) {
+		my @return;
+		push @return, slashDisplay('dispCommentDetails', {
+			%$comment,
+			comment_shrunk	=> $comment_shrunk,
+			reasons		=> $reasons,
+			can_mod		=> $can_mod,
+			is_anon		=> isAnon($comment->{uid}),
+			discussion2	=> $discussion2,
+			options		=> $options
+		}, { Return => 1, Nocomm => 1 });
+		push @return, slashDisplay('dispLinkComment', {
+			%$comment,
+			comment_shrunk	=> $comment_shrunk,
+			reasons		=> $reasons,
+			can_mod		=> $can_mod,
+			is_anon		=> isAnon($comment->{uid}),
+			discussion2	=> $discussion2,
+			options		=> $options
+		}, { Return => 1, Nocomm => 1 });
+		return @return;
+	}
 
 	return slashDisplay('dispComment', {
 		%$comment,
@@ -1217,6 +1248,7 @@ EOT
 		reasons		=> $reasons,
 		can_mod		=> $can_mod,
 		is_anon		=> isAnon($comment->{uid}),
+		discussion2	=> $discussion2,
 		options		=> $options
 	}, { Return => 1, Nocomm => 1 });
 }
@@ -1708,7 +1740,7 @@ sub _dataCacheRefresh {
 ########################################################
 # this sucks, but it is here for now
 sub _hard_dispComment {
-	my($comment, $constants, $user, $form, $comment_shrunk, $can_mod, $reasons, $options) = @_;
+	my($comment, $constants, $user, $form, $comment_shrunk, $can_mod, $reasons, $options, $discussion2) = @_;
 	my $gSkin = getCurrentSkin();
 
 	my($comment_to_display, $score_to_display,
@@ -1716,8 +1748,6 @@ sub _hard_dispComment {
 		$time_to_display, $comment_link_to_display, $userinfo_to_display,
 		$comment_links)
 		= ("") x 9;
-
-	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
 
 	$comment_to_display = qq'<div id="comment_body_$comment->{cid}">$comment->{comment}</div>';
 	my $sighide = $comment_shrunk ? ' hide' : '';
@@ -1817,6 +1847,71 @@ EOT
 		}
 	}
 
+	my $otherdetails = $options->{pieces} ? '' : <<EOT;
+		$user_email_to_display
+		on $time_to_display$comment_link_to_display
+		<small>$userinfo_to_display $comment->{ipid_display}</small>
+EOT
+
+	# Do not display comment navigation and reply links if we are in
+	# archive mode or if we are in metamod. Nicknames are always equal to
+	# '-' in metamod. This logic is extremely old and could probably be
+	# better formulated.
+	my $commentsub = '';
+	if (!$options->{noshow} && !$options->{pieces}
+		&& $user->{mode} ne 'archive'
+		&& $user->{mode} ne 'metamod'
+		&& $comment->{nickname} ne "-") { # this last test probably useless
+		my @link = ( );
+
+		push @link, linkComment({
+			sid	=> $comment->{sid},
+			pid	=> $comment->{cid},
+			op	=> 'Reply',
+			subject	=> 'Reply to This',
+			subject_only => 1,
+			# onclick	=> ($discussion2 ? "return replyTo($comment->{cid})" : '')
+		}) unless $user->{state}{discussion_archived};
+
+		push @link, linkComment({
+			sid	=> $comment->{sid},
+			cid	=> $comment->{original_pid},
+			pid	=> $comment->{original_pid},
+			subject	=> 'Parent',
+			subject_only => 1,
+			onclick	=> ($discussion2 ? "return selectParent($comment->{original_pid})" : '')
+		}, 1) if $comment->{original_pid};# && !($discussion2 &&
+#			(!$form->{cid} || $form->{cid} != $comment->{cid})
+#		);
+
+#use Data::Dumper; print STDERR "_hard_dispComment createSelect can_mod='$can_mod' disc_arch='$user->{state}{discussion_archived}' modd_arch='$constants->{comments_moddable_archived}' cid='$comment->{cid}' reasons: " . Dumper($reasons);
+
+		push @link, qq'<div id="reasondiv_$comment->{cid}" class="modsel">' .
+			createSelect("reason_$comment->{cid}", $reasons, {
+				'return'	=> 1,
+				nsort		=> 1, 
+				onchange	=> 'return doModerate(this)'
+			}) . "</div>" if $can_mod
+				&& ( !$user->{state}{discussion_archived}
+					|| $constants->{comments_moddable_archived} );
+
+		push @link, qq|<input type="checkbox" name="del_$comment->{cid}">|
+			if $user->{is_admin};
+
+		my $link = join(" | ", @link);
+
+		if (@link) {
+			$commentsub = "[ $link ]";
+		}
+
+	}
+
+	### short-circuit
+	if ($options->{show_pieces}) {
+		return($otherdetails, $commentsub);
+	}
+
+
 	$zoosphere_display = " ";
 	unless ($user->{is_anon} || isAnon($comment->{uid}) || $comment->{uid} == $user->{uid}) {
 		my $person = $comment->{uid};
@@ -1875,73 +1970,16 @@ $comment_links
 		</div>
 		<div class="details">
 			by $user_nick_to_display$zoosphere_display
-			<span class="otherdetails">
-				$user_email_to_display
-				on $time_to_display$comment_link_to_display
-				<small>$userinfo_to_display $comment->{ipid_display}</small>
-			</span>
+			<span class="otherdetails" id="comment_otherdetails_$comment->{cid}">$otherdetails</span>
 		</div>
 	</div>
 	<div class="commentBody">	
 		$comment_to_display
 	</div>
 
-	<div class="commentSub">
+	<div class="commentSub" id="comment_sub_$comment->{cid}">
+$commentsub
 EOT
-
-	# Do not display comment navigation and reply links if we are in
-	# archive mode or if we are in metamod. Nicknames are always equal to
-	# '-' in metamod. This logic is extremely old and could probably be
-	# better formulated.
-	if (!$options->{noshow}
-		&& $user->{mode} ne 'archive'
-		&& $user->{mode} ne 'metamod'
-		&& $comment->{nickname} ne "-") { # this last test probably useless
-		my @link = ( );
-
-		push @link, linkComment({
-			sid	=> $comment->{sid},
-			pid	=> $comment->{cid},
-			op	=> 'Reply',
-			subject	=> 'Reply to This',
-			subject_only => 1,
-			# onclick	=> ($discussion2 ? "return replyTo($comment->{cid})" : '')
-		}) unless $user->{state}{discussion_archived};
-
-		push @link, linkComment({
-			sid	=> $comment->{sid},
-			cid	=> $comment->{original_pid},
-			pid	=> $comment->{original_pid},
-			subject	=> 'Parent',
-			subject_only => 1,
-			onclick	=> ($discussion2 ? "return selectParent($comment->{original_pid})" : '')
-		}, 1) if $comment->{original_pid};# && !($discussion2 &&
-#			(!$form->{cid} || $form->{cid} != $comment->{cid})
-#		);
-
-#use Data::Dumper; print STDERR "_hard_dispComment createSelect can_mod='$can_mod' disc_arch='$user->{state}{discussion_archived}' modd_arch='$constants->{comments_moddable_archived}' cid='$comment->{cid}' reasons: " . Dumper($reasons);
-
-		push @link, qq'<div id="reasondiv_$comment->{cid}" class="modsel">' .
-			createSelect("reason_$comment->{cid}", $reasons, {
-				'return'	=> 1,
-				nsort		=> 1, 
-				onchange	=> 'return doModerate(this)'
-			}) . "</div>" if $can_mod
-				&& ( !$user->{state}{discussion_archived}
-					|| $constants->{comments_moddable_archived} );
-
-		push @link, qq|<input type="checkbox" name="del_$comment->{cid}">|
-			if $user->{is_admin};
-
-		my $link = join(" | ", @link);
-
-		if (@link) {
-			$return .= <<EOT;
-					[ $link ]
-EOT
-		}
-
-	}
 
 	$return .= "</div>\n" if !$options->{noshow};
 	$return .= "</div>\n\n" if !$options->{noshow_show};

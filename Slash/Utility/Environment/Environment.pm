@@ -1631,7 +1631,7 @@ sub prepareUser {
 		# If the user is not a subscriber, they may still be
 		# _effectively_ a subscriber if they have a daypass.
 		my $daypass_db = getObject('Slash::Daypass', { db_type => 'reader' });
-		if ($daypass_db->userHasDaypass($user)) {
+		if ($daypass_db && $daypass_db->userHasDaypass($user)) {
 #			$user->{is_subscriber} = 1;
 			$user->{has_daypass} = 1;
 			$user->{state}{page_plummy} = 1;
