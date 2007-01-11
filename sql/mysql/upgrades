@@ -4304,13 +4304,16 @@ UPDATE vars SET value = 'T_2_5_0_140' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+# Updates for plugins/FireHose
 ALTER TABLE firehose CHANGE type type  ENUM("submission","journal","bookmark","feed", "story", "vendor") default 'submission';
-
 UPDATE vars SET value=CONCAT(value, "|-99999") WHERE name="firehose_slice_points";
 UPDATE vars SET value=CONCAT(value, "|black") WHERE name="firehose_color_labels";
 
 # clear user pref
 DELETE FROM users_param WHERE name = 'comments_control';
+
+# Updates for plugins/Tags
+INSERT INTO vars (name, value, description) VALUES ('tags_admin_autoaddstorytopics', '1', 'Auto-add tags for story topic keywords?');
 
 # 2007-01-11
 UPDATE vars SET value = 'T_2_5_0_141' WHERE name = 'cvs_tag_currentcode';
