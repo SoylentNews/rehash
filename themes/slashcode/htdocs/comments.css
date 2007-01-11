@@ -217,6 +217,9 @@ html > body .commentwrap table {
 .horizontal #d2act div.block div.title h4 {background: #cc; !important}
 .horizontal #d2act .commentControlFooter { display: none; }
 
+.ccw-header-links { display: none; }
+.horizontal .ccw-header-links { display: block; position: relative; right: 1em; }
+
 /* new draggable guts for the D2 Widget */
 
 	/* Overall Size and Position */

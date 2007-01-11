@@ -161,6 +161,26 @@ __template__
 						subject_only => 1,
 				}) %]
 				[% END %]
+		<div class="ccw-header-links">
+		[% IF cid || pid %]
+			[% Slash.linkComment({
+				sid	=> sid,
+				subject	=> 'Top',
+				subject_only => 1,
+			}) %]
+		[% ELSE %]
+			<a href="#topcomment">Top</a> 
+		[% END %]
+			|
+			[% Slash.linkComment({
+				sid => sid,
+				cid => cid,
+				op  => 'reply',
+				subject => 'Reply',
+				subject_only => 1
+				});
+			%]
+		</div>
 		<span title="Close this window" onclick="toggleDisplayOptions()" class="close">x</span>
 				</h4>
 			</div>
