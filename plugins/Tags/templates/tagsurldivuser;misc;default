@@ -17,11 +17,11 @@ __template__
 [% PROCESS ajax_reskey_tag reskey_label => 'newtags-reskey-' _ id, reskey_name => 'ajax_tags_write' %]
 <input type="text" id="newtags-[% id %]" name="newtags-[% id %]" value="[% newtagspreloadtext | strip_attribute %]" size=50 maxlength=60>
 <input type="button" value="Tag" onclick="tagsCreateForUrl('[% id %]')" class="button">
+
 [% IF firstnottag_orig %]
-<div type="data">Note: opposite-tags are formed with a "!" prefix.
-To indicate the opposite of "[% firstnottag_orig | strip_notags %]",
-try "![% firstnottag_orig | strip_notags %]". Feel free to edit
-your tag(s) in place, and re-click Tag.</div>
+<div type="data">If you disagree with <b>[% firstnottag_orig | strip_notags %]</b>,
+please use <b>![% firstnottag_orig | strip_notags %]</b> instead. You can edit
+this text field in place and click 'Tag' right now.</div>
 [% END %]
 
 __seclev__

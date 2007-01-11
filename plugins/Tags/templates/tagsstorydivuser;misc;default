@@ -19,10 +19,9 @@ __template__
 <input type="button" value="Tag" onclick="tagsCreateForStory('[% sidenc %]')" class="button">
 
 [% IF firstnottag_orig %]
-<div type="data">Note: opposite-tags are formed with a "!" prefix. 
-To indicate the opposite of "[% firstnottag_orig | strip_notags %]",
-try "![% firstnottag_orig | strip_notags %]". Feel free to edit
-your tag(s) in place, and re-click Tag.</div>
+<div type="data">If you disagree with <b>[% firstnottag_orig | strip_notags %]</b>,
+please use <b>![% firstnottag_orig | strip_notags %]</b> instead. You can edit
+this text field in place and click 'Tag' right now.</div>
 [% END %]
 
 __seclev__
