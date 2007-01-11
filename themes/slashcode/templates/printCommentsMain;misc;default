@@ -181,47 +181,48 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 </script>
 		<div id="bones">
       <div id="ccw">
-        <div id="ccw-upper-end-zone">
-          <div class="ccw-panel-border-left"></div>
-          <div class="ccw-panel-border-right"></div>
+        <div id="ccw-upper-end-zone" class="ccw-end-zone">
+    			<div class="ccw-panel-border-left"></div>
+    			<div class="ccw-panel-border-right"></div>
         </div>
 
-        <div id="ccw-body">
-          <div id="ccw-panel-container">
+        <div id="ccw-body" class="ccw-core">
+          <div id="ccw-one-em-wide"></div>
+          <div id="ccw-panel-container" class="ccw-core">
             <div id="ccw-full-panel" class="ccw-panel">
-              <div class="ccw-panel-border-left"></div>
-              <div id="ccw-full-count-pos" class="ccw-count-pos">
-                <span id="ccw-full-count-text" class="ccw-count-text"><span id="currentFull"></span> Full</span>
+    					<div class="ccw-panel-border-left"></div>
+              <div id="ccw-full-count-pos" class="ccw-core-pos ccw-count-pos">
+                <span id="ccw-full-count-text" class="ccw-count-text"><span id="currentFull"></span><spad id="ccw-full-phrase"> Full</span></span>
               </div>
-              <div class="ccw-panel-border-right"></div>
+    					<div class="ccw-panel-border-right"></div>
             </div>
             <div id="ccw-abbr-panel" class="ccw-panel">
-              <div class="ccw-panel-border-left"></div>
-              <div id="ccw-abbr-count-pos" class="ccw-count-pos">
-                <span id="ccw-abbr-count-text" class="ccw-count-text"><span id="currentOneline"></span> Abbreviated</span>
+    					<div class="ccw-panel-border-left"></div>
+              <div id="ccw-abbr-count-pos" class="ccw-core-pos ccw-count-pos">
+                <span id="ccw-abbr-count-text" class="ccw-count-text"><span id="currentOneline"></span><spad id="ccw-abbr-phrase"> Abbreviated</span></span>
               </div>
-              <div class="ccw-panel-border-right"></div>
+    					<div class="ccw-panel-border-right"></div>
             </div>
             <div id="ccw-hide-panel" class="ccw-panel">
-              <div id="ccw-hide-count-pos" class="ccw-count-pos">
-                <span id="ccw-hide-count-text" class="ccw-count-text"><span id="currentHidden"></span> Hidden</span>
+              <div id="ccw-hide-count-pos" class="ccw-core-pos ccw-count-pos">
+                <span id="ccw-hide-count-text" class="ccw-count-text"><span id="currentHidden"></span><spad id="ccw-hide-phrase"> Hidden</span></span>
               </div>
             </div>
           </div>
 
-          <div id="ccw-control">
-            <div id="ccw-centering-rail">
-              <div id="ccw-hide-bar-pos">
-                <div id="ccw-hide-bar"><div id="ccw-hide-bar-tab" class="ccw-bar-tab"></div></div>
-              </div>
-              <div id="ccw-abbr-bar-pos">
-                <div id="ccw-abbr-bar"><div id="ccw-abbr-bar-tab" class="ccw-bar-tab"></div></div>
-              </div>
-            </div>
+          <div id="ccw-control" class="ccw-core">
+    				<div id="ccw-centering-rail" class="ccw-core">
+    	        <div id="ccw-hide-bar-pos" class="ccw-core-pos">
+    	          <div id="ccw-hide-bar" class="ccw-bar"><div id="ccw-hide-bar-tab" class="ccw-bar-tab"></div></div>
+    	        </div>
+    	        <div id="ccw-abbr-bar-pos" class="ccw-core-pos">
+    	          <div id="ccw-abbr-bar" class="ccw-bar"><div id="ccw-abbr-bar-tab" class="ccw-bar-tab"></div></div>
+    	        </div>
+    				</div>
           </div>
         </div>
 
-        <div id="ccw-lower-end-zone"></div>
+        <div id="ccw-lower-end-zone" class="ccw-end-zone"></div>
       </div>
 		</div>
 		<div class="commentControlFooter">
