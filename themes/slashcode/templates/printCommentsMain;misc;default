@@ -191,9 +191,8 @@ gCommentControlWidget = null;
 YAHOO.slashdot.ThresholdApp = function() {
   return {
     init: function() {
-      gCommentControlWidget = new YAHOO.slashdot.ThresholdWidget();
+      gCommentControlWidget = new YAHOO.slashdot.ThresholdWidget([% "'X'" IF horiz %]);
       gCommentControlWidget.setTHT(user_threshold, user_highlightthresh);
-[% IF horiz %]      gCommentControlWidget.setOrientation('X');[% END -%]
     }
   };
 }();
