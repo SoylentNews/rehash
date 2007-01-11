@@ -1022,11 +1022,10 @@ sub ajaxCreateForUrl {
 #	}
 
 	my $retval = slashDisplay('tagsurldivuser', {
-		id =>			$id,
-		newtagspreloadtext =>	$newtagspreloadtext,
-		firstnottag_orig =>	$firstnottag_orig,
-	}, { Return => 1}
-	);
+		id			=> $id,
+		newtagspreloadtext	=> $newtagspreloadtext,
+		firstnottag_orig	=> $firstnottag_orig,
+	}, { Return => 1 });
 #print STDERR scalar(localtime) . " ajaxCreateForUrl ntplt='$newtagspreloadtext' retval='$retval'\n";
 	return $retval;
 }
@@ -1060,9 +1059,9 @@ sub ajaxCreateForStory {
 	}
 
 	my $retval = slashDisplay('tagsstorydivuser', {
-		sidenc =>		$sidenc,
-		newtagspreloadtext =>	$newtagspreloadtext,
-		firstnottag_orig =>	$firstnottag_orig,
+		sidenc			=> $sidenc,
+		newtagspreloadtext	=> $newtagspreloadtext,
+		firstnottag_orig	=> $firstnottag_orig,
 	}, { Return => 1 });
 #print STDERR scalar(localtime) . " ajaxCreateForStory 4 for stoid=$stoid newtagspreloadtext='$newtagspreloadtext' returning: $retval\n";
 	return $retval;
