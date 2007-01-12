@@ -722,6 +722,7 @@ function fetchEl(str) {
 
 function finishLoading() {
 	if (is_firefox) {
+		loadAllElements('span');
 		loadAllElements('div');
 		loadAllElements('li');
 		loadAllElements('a');
