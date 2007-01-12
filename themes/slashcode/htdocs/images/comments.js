@@ -80,10 +80,11 @@ function updateCommentTree(cid, threshold, subexpand) {
 	// T/HT changes
 	if ((subexpand || threshold) && cid != root_comment) {
 		if (subexpand && subexpand == 1) {
-			if (prehiddendisplaymode[cid] == 'oneline' || prehiddendisplaymode[cid] == 'full')
+			if (prehiddendisplaymode[cid] == 'oneline' || prehiddendisplaymode[cid] == 'full') {
 				futuredisplaymode[cid] = 'full';
-			else
+			} else {
 				futuredisplaymode[cid] = 'hidden';
+			}
 		} else {
 			futuredisplaymode[cid] = determineMode(cid, threshold, user_highlightthresh);
 		}
@@ -96,8 +97,9 @@ function updateCommentTree(cid, threshold, subexpand) {
 //		prehiddendisplaymode[cid] = futuredisplaymode[cid];
 //	} else if (futuredisplaymode[cid] && futuredisplaymode[cid] != displaymode[cid]) {
 		//updateComment(cid, futuredisplaymode[cid]);
-		if (displaymode[cid] != futuredisplaymode[cid])
+		if (displaymode[cid] != futuredisplaymode[cid]) {
 			update_comments[cid] = futuredisplaymode[cid];
+		}
 //	}
 
 	var kidhiddens = 0;
@@ -393,11 +395,13 @@ function faGetSetting(cid, ctype, relation, prevview, canbelower) {
 	if (newview == 'none') {
 		return prevview;
 	} else if (newview == 'prehidden') {
+		setDefaultDisplayMode(cid);
 		return prehiddendisplaymode[cid];
 	}
 
-	if ((viewmodevalue[newview] > viewmodevalue[prevview]) || canbelower)
+	if ((viewmodevalue[newview] > viewmodevalue[prevview]) || canbelower) {
 		return newview;
+	}
 
 	return prevview; 
 }
@@ -435,11 +439,12 @@ function setDefaultDisplayMode(cid) {
 }
 
 function updateDisplayMode(cid, mode, newdefault) {
+	if (!mode) { return }
+
 	setDefaultDisplayMode(cid);
 	futuredisplaymode[cid] = mode;
-	if (newdefault) {
+	if (newdefault)
 		prehiddendisplaymode[cid] = mode;
-	}
 }
 
 // don't want to actually use this -- pudge
