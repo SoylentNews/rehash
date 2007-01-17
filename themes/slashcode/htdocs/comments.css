@@ -223,50 +223,50 @@ html > body .commentwrap table {
 /* new draggable guts for the D2 Widget */
 
 	/* Overall Size and Position */
-#ccw-one-em-wide { display: block; position: absolute; height: 1px; width: 1em; }
+.ccw-panel-border { display: block; position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
 
-#ccw, #ccw-centering-rail, .ccw-end-zone,
+#ccw, #ccw-centering-rail,
 #ccw-body {
 	display: block;
 	position: relative;
 }
 
-.ccw-panel-border-left, .ccw-panel-border-right,
 #ccw-panel-container,
 div.ccw-panel, #ccw-control,
 #ccw-abbr-bar-pos, #ccw-hide-bar-pos,
 #ccw-abbr-bar, #ccw-hide-bar,
 .ccw-count-pos, .ccw-count-text,
 .ccw-bar-tab,
-.horizontal .ccw-end-zone, .horizontal #ccw-body,
+.horizontal #ccw-body,
 .horizontal div.ccw-panel {
 	display: block;
 	position: absolute;
 }
 
-.ccw-core-pos { height: 1px; }
+.horizontal #ccw-body { width: 100%; }
+.vertical #ccw-panel-container, .vertical #ccw-control { top: 16px; bottom: 16px; }
+.horizontal #ccw-panel-container, .horizontal #ccw-control { left: 0.5em; right: 0.5em; }
 
-.ccw-panel-border-left, .ccw-panel-border-right { height: 100%; width: 1px; }
-.ccw-panel-border-right { right: 0; }
-.horizontal .ccw-panel-border-left { display: none; }
-.horizontal #ccw-upper-end-zone .ccw-panel-border-left { display: block; }
-.horizontal .ccw-panel-border-right { height: 1px; width: 100%; bottom: 0; }
+.ccw-core-pos { height: 1px; }
+.horizontal .ccw-core-pos { width: 1px; }
+
 
 #ccw-centering-rail, #ccw-abbr-bar-pos, #ccw-hide-bar-pos { width: 2px; }
 #ccw-centering-rail { margin: 0 auto; }
+.horizontal #ccw-centering-rail { width: 100%; }
 
 .horizontal #ccw-centering-rail,
 .horizontal #ccw-abbr-bar-pos,
-.horizontal #ccw-hide-bar-pos { top: 1em; height: 2px; width: 100%; }
+.horizontal #ccw-hide-bar-pos { top: 1em; height: 2px; }
+.ccw-panel { clip: auto; overflow: hidden; }
 
 
 .ccw-core, .ccw-panel, .ccw-count-pos { height: 140px; width: 9.3em; }
-.horizontal .ccw-core, .horizontal .ccw-panel, .horizontal .ccw-count-pos { height: 2em; width: 28em; }
+.vertical .ccw-panel { height: auto; }
+.horizontal .ccw-core, .horizontal .ccw-panel, .horizontal .ccw-count-pos { height: 2em; width: auto; }
 .horizontal #ccw-panel-container, .horizontal #ccw-control { left: 0.5em; }
-.ccw-end-zone { height: 16px; width: 9.3em; }
-.horizontal .ccw-end-zone { height: 2em; width: 0.5em; }
 #ccw { height: 172px; width: 9.3em; }
-.horizontal #ccw { height: 2em; width: 29em; }
+.horizontal #ccw { height: 2em; width: 100%; }
 
 .ccw-bar { height: 4px; width: 9.8em; left: -4.9em; }
 .horizontal .ccw-bar { width: 4px; height: 2.4em; top: -1.3em; left: 0; }
@@ -280,25 +280,29 @@ div.ccw-panel, #ccw-control,
 .horizontal #ccw-abbr-bar-tab { top: 0.5em; left: -5px; }
 .horizontal #ccw-hide-bar-tab { top: 0.5em; left: 4px; }
 
-
-.horizontal #ccw-lower-end-zone { right: 0; }
-
-.horizontal #ccw-upper-end-zone .ccw-panel-border-right,
-.horizontal #ccw-upper-end-zone .ccw-panel-border-left { z-index: 2; }
 #ccw-body { z-index: 1; }
+
+.vertical #ccw-full-panel { top: -16px; }
+.vertical #ccw-hide-panel { bottom: -16px; }
+.horizontal #ccw-full-panel { left: -0.5em; }
+.horizontal #ccw-hide-panel { right: -0.5em; }
+
+.vertical .ccw-panel-border { border-width: 0 1px; }
+.horizontal .ccw-panel-border { border-width: 0 0 1px 0; }
+.horizontal #ccw-full-panel .ccw-panel-border { border-width: 0 0 1px 1px; }
 
 
 
 	/* Borders and Fills */
 
-.ccw-panel-border-left, .ccw-panel-border-right { background-color: #AAAAAA; }
 
 #ccw-abbr-bar, #ccw-hide-bar, .ccw-bar-tab { border: 1px solid black; }
 
-#ccw-body                             { background-color: white; }
-#ccw-full-panel, #ccw-upper-end-zone  { background-color: white; }
+/* #ccw-body                          { background-color: white; } */
+#ccw-full-panel                       { background-color: white; }
 #ccw-abbr-panel                       { background-color: #CCCCCC; }
-#ccw-hide-panel, #ccw-lower-end-zone  { background-color: #AAAAAA; }
+#ccw-hide-panel                       { background-color: #AAAAAA; }
+.ccw-panel-border                     { border: solid #AAAAAA; }
 
 #ccw-abbr-bar, #ccw-abbr-bar-tab      { background-color: white; }
 #ccw-hide-bar, #ccw-hide-bar-tab      { background-color: #666666; }
@@ -322,9 +326,9 @@ div.ccw-panel, #ccw-control,
 
 .ccw-count-text { width: 100%; text-align: center; }
 
-#ccw-full-count-text { top: -20px; }
-#ccw-abbr-count-text { top: -9px; }
-#ccw-hide-count-text { top: 4px; }
+/* .vertical #ccw-full-count-text { top: -20px; } */
+.vertical #ccw-abbr-count-text { top: -9px; }
+.vertical #ccw-hide-count-text { top: 4px; }
 
 .horizontal #ccw-full-count-text { top: 0.5em; left: -0.3em; }
 .horizontal #ccw-abbr-count-text { top: 0.5em; }
@@ -335,4 +339,3 @@ div.ccw-panel, #ccw-control,
 #ccw-hide-bar-tab { border-top-width: 0; }
 .horizontal #ccw-abbr-bar-tab { border-bottom-width: 1px; border-right: none; }
 .horizontal #ccw-hide-bar-tab { border-top-width: 1px; border-left: none; }
-
