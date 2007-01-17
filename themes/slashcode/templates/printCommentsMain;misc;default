@@ -144,7 +144,7 @@ __template__
 	</div>
 	</div>
 	[% IF discussion2 %]
-		[% class_info = horiz ? ' class="horizontal"' : "" %]
+		[% class_info = horiz ? ' class="horizontal"' : ' class="vertical"' %]
 		<div id="d2out"[% class_info %]>
 		<div id="d2act" class="hide">
 		<div class="loki" id="gods">

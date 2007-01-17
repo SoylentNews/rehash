@@ -853,7 +853,7 @@ function toggleDisplayOptions() {
 		gods.style.display  = 'none';
 		d2opt.style.display = 'inline';
 
-		d2out.className = '';
+		d2out.className = 'vertical';
 		gCommentControlWidget.setOrientation('Y');
 
 		params['comments_control'] = '';
