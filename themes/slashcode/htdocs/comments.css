@@ -326,7 +326,7 @@ div.ccw-panel, #ccw-control,
 
 .ccw-count-text { width: 100%; text-align: center; }
 
-/* .vertical #ccw-full-count-text { top: -20px; } */
+.vertical #ccw-full-count-text { top: -4px; }
 .vertical #ccw-abbr-count-text { top: -9px; }
 .vertical #ccw-hide-count-text { top: 4px; }
 
