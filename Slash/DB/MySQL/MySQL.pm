@@ -11528,9 +11528,14 @@ sub sqlShowInnodbStatus {
 # that table (e.g. a stoid or a cid).
 
 sub getGlobjidCreate {
-	my($self, $name, $target_id) = @_;
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $globjid = $reader->getGlobjidFromTargetIfExists($name, $target_id);
+	my($self, $name, $target_id, $options) = @_;
+	my $db;
+	if ($options && $options->{reader_ok}) {
+		$db = getObject('Slash::DB', { db_type => 'reader' });
+	} else {
+		$db = getCurrentDB();
+	}
+	my $globjid = $db->getGlobjidFromTargetIfExists($name, $target_id);
 	return $globjid if $globjid;
 	return $self->createGlobjid($name, $target_id);
 }
