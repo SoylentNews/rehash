@@ -180,9 +180,9 @@ function changeTHT(t_delta, ht_delta) {
 
 	user_threshold       += t_delta;
 	user_highlightthresh += ht_delta;
-	// limit to between -1 and 5
-	user_threshold       = Math.min(Math.max(user_threshold,       -1), 5);
-	user_highlightthresh = Math.min(Math.max(user_highlightthresh, -1), 5);
+	// limit to between -1 and 6
+	user_threshold       = Math.min(Math.max(user_threshold,       -1), 6);
+	user_highlightthresh = Math.min(Math.max(user_highlightthresh, -1), 6);
 
 	// T cannot be higher than HT; this also modifies delta
 	if (user_threshold > user_highlightthresh)
@@ -196,8 +196,8 @@ function changeHT(delta) {
 		return void(0);
 
 	user_highlightthresh += delta;
-	// limit to between -1 and 5
-	user_highlightthresh = Math.min(Math.max(user_highlightthresh, -1), 5);
+	// limit to between -1 and 6
+	user_highlightthresh = Math.min(Math.max(user_highlightthresh, -1), 6);
 
 	// T cannot be higher than HT; this also modifies delta
 	if (user_threshold > user_highlightthresh)
@@ -211,8 +211,8 @@ function changeT(delta) {
 		return void(0);
 
 	var threshold = user_threshold + delta;
-	// limit to between -1 and 5
-	threshold = Math.min(Math.max(threshold, -1), 5);
+	// limit to between -1 and 6
+	threshold = Math.min(Math.max(threshold, -1), 6);
 
 	// HT moves with T, but that is taken care of by changeThreshold()
 	changeThreshold(threshold + ''); // needs to be a string value
@@ -221,7 +221,7 @@ function changeT(delta) {
 function changeThreshold(threshold) {
 	var threshold_num = parseInt(threshold);
 	var t_delta = threshold_num + (user_highlightthresh - user_threshold);
-	user_highlightthresh = Math.min(Math.max(t_delta, -1), 5);
+	user_highlightthresh = Math.min(Math.max(t_delta, -1), 6);
 	user_threshold = threshold_num;
 
 	if ($('currentHT'))
@@ -306,6 +306,7 @@ function updateHiddens(cids) {
 		return;
 
 	var seen = {};
+	// something wrong here, not always working -- pudge 2007-01-16
 	OUTER: for (var i = 0; i < cids.length; i++) {
 		var cid = cids[i];
 		while (cid && comments[cid] && comments[cid]['pid']) {
@@ -492,7 +493,7 @@ function determineMode(cid, thresh, hthresh) {
 	if (!hthresh)
 		hthresh = user_highlightthresh;
 
-	if (comments[cid]['points'] < thresh && (user_is_anon || user_uid != comments[cid]['uid']))
+	if (thresh >= 6 || (comments[cid]['points'] < thresh && (user_is_anon || user_uid != comments[cid]['uid'])))
 		return 'hidden';
 	else if (comments[cid]['points'] < (hthresh - (root_comments_hash[cid] ? 1 : 0)))
 		return 'oneline';
@@ -984,19 +985,19 @@ function boundsToDimensions( bounds, scaleFactor ) {
 	if ( scaleFactor === undefined )
 		scaleFactor = 1;
 
-  var sizes = new Array(bounds.length-1);
+	var sizes = new Array(bounds.length-1);
 	for ( var i=0; i<sizes.length; ++i )
 		sizes[i] = { size: Math.abs(bounds[i+1]-bounds[i]) * scaleFactor };
 
-  var left = 0;
-  var right = 0;
+	var left = 0;
+	var right = 0;
 
-  for( var L=0, R=sizes.length-1; R>=0; ++L, --R ) {
-    sizes[L].start = left; left += sizes[L].size;
-    sizes[R].stop = right; right += sizes[R].size;
-  }
+	for ( var L=0, R=sizes.length-1; R>=0; ++L, --R ) {
+		sizes[L].start = left; left += sizes[L].size;
+		sizes[R].stop = right; right += sizes[R].size;
+	}
 
-  return sizes;
+	return sizes;
 }
 
 Y_UNITS_IN_PIXELS = 20;
@@ -1019,7 +1020,7 @@ YAHOO.slashdot.ThresholdWidget = function( initialOrientation ) {
 	this.orientations["X"].other = this.orientations["Y"];
 	this.orientations["Y"].other = this.orientations["X"];
 
-  if ( initialOrientation === undefined )
+	if ( initialOrientation === undefined )
 		initialOrientation = "Y";
 	this.orient = this.orientations[initialOrientation];
 
@@ -1093,21 +1094,21 @@ YAHOO.slashdot.ThresholdWidget.prototype._onBarEndDrag = function( whichBar ) {
 YAHOO.slashdot.ThresholdWidget.prototype.setOrientation = function( newAxis ) {
 	if ( newAxis != this.orient.axis ) {
 		var o = this.orient = this.orientations[newAxis];
-    for ( var i=0; i<this.PANEL_KINDS.length; ++i ) {
-      var prefix = "ccw-"+this.PANEL_KINDS[i];
-		  var panel = this._getEl(prefix+"-panel").style;
-		  if ( i != 0 ) panel[ o.other.startPos ] = 0;
-		  if ( i != this.PANEL_KINDS.length-1 ) panel[ o.other.endPos ] = 0;
+		for ( var i=0; i<this.PANEL_KINDS.length; ++i ) {
+			var prefix = "ccw-"+this.PANEL_KINDS[i];
+			var panel = this._getEl(prefix+"-panel").style;
+			if ( i != 0 ) panel[ o.other.startPos ] = 0;
+			if ( i != this.PANEL_KINDS.length-1 ) panel[ o.other.endPos ] = 0;
 
-      this._getEl(prefix+"-phrase").style.display = "inline";
-      this._getEl(prefix+"-count-pos").style.top = 0;
-    }
+			this._getEl(prefix+"-phrase").style.display = "inline";
+			this._getEl(prefix+"-count-pos").style.top = 0;
+		}
 		this._setTs();
 	}
 }
 
 YAHOO.slashdot.ThresholdWidget.prototype._scaleToPixels = function() {
-  return this._getEl("ccw-control").scrollWidth / 100.0;
+	return this._getEl("ccw-control").scrollWidth / 100.0;
 }
 
 YAHOO.slashdot.ThresholdWidget.prototype._setTs = function( newTs, draggingBar ) {
@@ -1115,21 +1116,21 @@ YAHOO.slashdot.ThresholdWidget.prototype._setTs = function( newTs, draggingBar )
 	var o = w.orient;
 
 	function fixPanel( id, newDims ) {
-	  var prefix = "ccw-"+id;
-	  var countText = w._getEl(prefix+"-count-text").style;
-	  if ( newDims.size == 0 )
-	    countText.display = "none";
-	  else {
-	    countText.display = "block";
-      if ( o.axis == "Y" )
-        w._getEl(prefix+"-count-pos").style.top = (newDims.size/2) + o.units;
-      else
-        w._getEl(prefix+"-phrase").style.display = (newDims.size>o.scale) ? "inline" : "none";
-	  }
+		var prefix = "ccw-"+id;
+		var countText = w._getEl(prefix+"-count-text").style;
+		if ( newDims.size == 0 )
+			countText.display = "none";
+		else {
+			countText.display = "block";
+			if ( o.axis == "Y" )
+				w._getEl(prefix+"-count-pos").style.top = (newDims.size/2) + o.units;
+			else
+				w._getEl(prefix+"-phrase").style.display = (newDims.size>o.scale) ? "inline" : "none";
+		}
 
 		var panel = w._getEl(prefix+"-panel").style;
 		if ( newDims.start !== undefined ) panel[ o.startPos ] = newDims.start + o.units;
-    if ( newDims.stop !== undefined ) panel[ o.endPos ] = newDims.stop + o.units;
+		if ( newDims.stop !== undefined ) panel[ o.endPos ] = newDims.stop + o.units;
 	}
 
 	if ( newTs === undefined )
