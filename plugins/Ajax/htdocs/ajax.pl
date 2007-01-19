@@ -279,8 +279,13 @@ sub fetchComments {
 	# XXX error?
 	return unless @$cids && $id;
 
+	my $discussion = $slashdb->getDiscussion($id);
+	if ($discussion->{type} eq 'archived') {
+		$user->{state}{discussion_archived} = 1;
+	}
+
 	my($comments) = Slash::selectComments(
-		$slashdb->getDiscussion($id),
+		$discussion,
 		$cid,
 		{
 			commentsort	=> 0,
