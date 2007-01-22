@@ -16,6 +16,8 @@ var firehose_future;
 var fh_colorslider; 
 var fh_ticksize;
 var fh_colors = Array(0);
+var vendor_popup_timerids = Array(0);
+var vendor_popup_id = 0;
 
 function createPopup(xy, titlebar, name, contents, message) {
 	var body = document.getElementsByTagName("body")[0]; 
@@ -509,6 +511,19 @@ function firehose_up_down(id, dir) {
 		firehose_collapse_entry(id);
 	}
 }
+
+function firehose_remove_tab(tabid) {
+	setFirehoseAction();
+	var params = [];
+	var handlers = {
+		onComplete: firehose_get_updates
+	};
+	params['op'] = 'firehose_remove_tab';
+	params['tabid'] = tabid;
+	params['reskey'] = reskey_static;
+	ajax_update(params, '', handlers);
+
+}
 // firehose functions end
 
 // helper functions
@@ -886,7 +901,12 @@ function firehose_slider_end(offsetFromStart) {
 	firehose_set_options("color", color);
 }
 
-function vendorStoryPopup(id) {
+function pausePopVendorStory(id) {
+	vendor_popup_id=id;
+	vendor_popup_timerids[id] = setTimeout("vendorStoryPopup()", 500);
+}
+function vendorStoryPopup() {
+	id = vendor_popup_id;
 	var title = "Top Story";
 	var buttons = createPopupButtons("<a href=\"javascript:closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
 	title = title + buttons;
@@ -895,4 +915,31 @@ function vendorStoryPopup(id) {
 	params['op'] = 'getTopVendorStory';
 	params['skid'] = id;
 	ajax_update(params, "vendorStory-" + id + "-contents");
+}
+
+function closeVendorStoryPopup(id) {
+	clearTimeout(vendor_popup_timerids[id]);
+	closePopup("vendorStory-" + id + "-popup");
+}
+
+function firehose_open_tab(id) {
+	var tf = $('tab-form-'+id);
+	var tt = $('tab-text-'+id);
+	var ti = $('tab-input-'+id);
+	tf.className="";
+	ti.focus();
+	tt.className="hide";
+}
+
+function firehose_save_tab(id) {
+	var tf = $('tab-form-'+id);
+	var tt = $('tab-text-'+id);
+	var ti = $('tab-input-'+id);
+	var params = [];
+	params['op'] = 'firehose_save_tab';
+	params['tab'] = ni.value;
+	params['id'] = id;
+	ajax_update(params, 'tab-text-'+id);
+	tf.className = "hide";
+	tt.className = "";
 }

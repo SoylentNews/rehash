@@ -166,3 +166,6 @@ INSERT INTO ajax_ops VALUES (NULL, 'admin_perfbox', 'Slash::Admin', 'ajax_perfbo
 INSERT INTO ajax_ops VALUES (NULL, 'admin_learnword', 'Slash::Admin', 'admin_learnword', 'ajax_admin', 'createuse');
 
 INSERT INTO ajax_ops VALUES (NULL, 'admin_neverdisplay', 'Slash::Admin', 'ajax_neverdisplay', 'ajax_admin_static', 'use');
+
+INSERT INTO ajax_ops VALUES (NULL, 'admin_neverdisplay', 'Slash::Admin', 'ajax_neverdisplay', 'ajax_admin_static', 'use');
+INSERT INTO ajax_ops VALUES (NULL, 'getTopVendorStory', 'Slash::SlashdotJournal', 'ajaxShowVendorStory', 'ajax_user', 'createuse');
