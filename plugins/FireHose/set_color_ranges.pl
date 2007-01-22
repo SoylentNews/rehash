@@ -47,7 +47,7 @@ $task{$me}{code} = sub {
 	# Add large negative number for everything that falls below lowest thresh
 	push @slice_points, "-99999";
 	
-	my $last = 0;
+	my $last = -100000;
 	
 	# ensure there's at least a gap of 3 between each slice point
 	@slice_points = reverse map { $_ = $last + 3 if $_ < ($last + 3); $last = $_; $_ } reverse @slice_points;

@@ -45,3 +45,17 @@ CREATE TABLE firehose_text(
 	bodytext text,
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS firehose_tab;
+CREATE TABLE firehose_tab(
+	tabid mediumint(8) unsigned NOT NULL auto_increment,
+	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	tabname VARCHAR(16) NOT NULL DEFAULT 'unnamed',
+	filter VARCHAR(255) NOT NULL DEFAULT '',
+	orderby ENUM("popularity","createtime", "editorpop", "activity") DEFAULT "createtime",
+	orderdir ENUM("ASC", "DESC") DEFAULT "DESC",
+	color VARCHAR(16) NOT NULL DEFAULT '',
+	mode ENUM("full", "fulltitle") DEFAULT "fulltitle",
+	PRIMARY KEY (tabid),
+	UNIQUE uid_tabname(uid,tabname)
+) TYPE=InnoDB;

@@ -603,6 +603,17 @@ sub ajaxSaveOneTopTagFirehose {
 	}
 }
 
+sub ajaxRemoveUserTab {
+	my($slashdb, $constants, $user, $form) = @_;
+	return if $user->{is_anon};
+	if ($form->{tabid}) {
+		my $tabid_q = $slashdb->sqlQuote($form->{tabid});
+		my $uid_q   = $slashdb->sqlQuote($user->{uid});
+		$slashdb->sqlDelete("firehose_tab", "tabid=$tabid_q AND uid=$uid_q");
+	}
+	return 1;
+}
+
 sub ajaxFireHoseSetOptions {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $firehose = getObject("Slash::FireHose");
@@ -752,6 +763,10 @@ sub ajaxFireHoseGetUpdates {
 	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1, page => $form->{page} }, { Return => 1, Page => "firehose"});
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
+
+	if($form->{orderby} || $form->{mode} || $form->{orderdir} || $form->{firehose_set_options} || $form->{fhfilter}) {
+		$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs} }, { Return => 1});
+	}
 
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
 		html		=> $html,
@@ -1064,6 +1079,8 @@ sub getAndSetOptions {
 	$opts 	        ||= {};
 	my $options 	= {};
 
+
+
 	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1 };
 	my $modes = { full => 1, fulltitle => 1};
 
@@ -1078,21 +1095,8 @@ sub getAndSetOptions {
 	}
 	$options->{color} ||= $user->{firehose_color};
 
-	if ($user->{is_admin} && $form->{setusermode}) {
-		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "" });
-	}
 
-	if ($mode eq "full") {
-		$options->{limit} = 25;
-	} else {
-		$options->{limit} = 50;
-	}
-	my $page = $form->{page} || 0;
-	$options->{page} = $page;
-	if ($page) {
-		$options->{offset} = $page * $options->{limit};
-	}
-
+	
 	if ($form->{orderby}) {
 		if ($form->{orderby} eq "popularity") {
 			if ($user->{is_admin} && !$user->{firehose_usermode}) {
@@ -1129,6 +1133,95 @@ sub getAndSetOptions {
 		$fhfilter = $user->{firehose_fhfilter};
 		$options->{fhfilter} = $fhfilter;
 	}
+	
+	# XXX
+	my $user_tabs = $self->getUserTabs();
+	my $system_tabs = $self->getSystemDefaultTabs();
+	my @tab_fields = qw(tabname filter mode color orderdir orderby);
+	if (!$user_tabs || @$user_tabs < 1 ) {
+		foreach my $tab (@$system_tabs) {
+			my $data = {};
+			foreach (@tab_fields) {
+				$data->{$_} = $tab->{$_};
+			}
+			$self->createUserTab($user->{uid}, $data); 
+		}
+		$user_tabs = $self->getUserTabs();
+	}
+	
+	print STDERR "Mode: $mode, Color = $options->{color}, ORDERDIR = $options->{orderdir}, ORDERBY = $options->{orderby}, Filter: $fhfilter\n";
+
+	my $tab_compare = { mode => "mode", orderdir => "orderdir", color => "color", orderby => "orderby", filter => "fhfilter" };
+
+	my $tab_match = 0;
+	foreach my $tab (@$user_tabs) {
+		my $equal = 1;
+		foreach (keys %$tab_compare) {
+			$options->{$tab_compare->{$_}} ||= "";
+			if ($tab->{$_} ne $options->{$tab_compare->{$_}}) {
+				$equal = 0;
+				print STDERR "$tab->{tabname} -> $_ doesn't match\n";
+			}
+		}
+		if ($equal) {
+			print STDERR "Tab match $tab->{tabname}\n";
+			$tab_match = 1;
+			$tab->{active} = 1;
+		}
+	}
+
+	if (!$tab_match) {
+		my $data = {};
+		foreach (keys %$tab_compare) {
+			$data->{$_} = $options->{$tab_compare->{$_}} || '';
+		}
+		$self->createOrReplaceUserTab($user->{uid}, "unnamed", $data);
+		$user_tabs = $self->getUserTabs();
+		foreach (@$user_tabs) {
+			$_->{active} = 1 if $_->{tabname} eq "unnamed" 
+		}
+	}
+
+	if (defined $form->{tab}) {
+		my $tabnames_hr = {};
+		foreach (@$user_tabs) {
+			$tabnames_hr->{$_->{tabname}} = $_;
+		}
+		if ($tabnames_hr->{$form->{tab}}) {
+			my $curtab = $tabnames_hr->{$form->{tab}};
+			$mode = $options->{mode} = $curtab->{mode};
+			$options->{orderby} = $curtab->{orderby};
+			$options->{orderdir} = $curtab->{orderdir};
+			$options->{color} = $curtab->{color};
+			$fhfilter = $options->{fhfilter} = $curtab->{filter};
+		}
+	}
+
+
+	
+	if ($mode eq "full") {
+		if($user->{is_admin}) {
+			$options->{limit} = 25;
+		} else {
+			$options->{limit} = 20;
+		}
+	} else {
+		if($user->{is_admin}) {
+			$options->{limit} = 50;
+		} else {
+			$options->{limit} = 40;
+		}
+	}
+	if ($user->{is_admin} && $form->{setusermode}) {
+		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "" });
+	}
+
+	my $page = $form->{page} || 0;
+	$options->{page} = $page;
+	if ($page) {
+		$options->{offset} = $page * $options->{limit};
+	}
+
 
 	$fhfilter =~ s/^\s+|\s+$//g;
 	my @fh_ops = map { lc($_) } split(/\s+/, $fhfilter);
@@ -1188,7 +1281,8 @@ sub getAndSetOptions {
 		}
 		$self->setUser($user->{uid}, $data_change) if keys %$data_change > 0;
 	}
-
+	
+	$options->{tabs} = $user_tabs;
 
 	if ($user->{is_admin} && $form->{setusermode}) {
 		$options->{firehose_usermode} = $form->{firehose_usermode} ? 1 : "";
@@ -1336,7 +1430,8 @@ sub listView {
 		refresh_options	=> $refresh_options,
 		votes		=> $votes,
 		colors		=> $colors,
-		colors_hash	=> $colors_hash
+		colors_hash	=> $colors_hash,
+		tabs		=> $options->{tabs}
 	}, { Page => "firehose", Return => 1});
 
 }
@@ -1359,6 +1454,34 @@ sub setFireHoseSession {
 	$data->{last_sid} ||= '';
 	$self->setSession($user->{uid}, $data);
 }
+
+sub getUserTabs {
+	my($self) = @_;
+	my $user = getCurrentUser();
+	my $uid_q = $self->sqlQuote($user->{uid});
+	return $self->sqlSelectAllHashrefArray("*", "firehose_tab", "uid=$uid_q")
+}
+
+sub getSystemDefaultTabs {
+	my($self) = @_;
+	return $self->sqlSelectAllHashrefArray("*", "firehose_tab", "uid='0'")
+}
+
+sub createUserTab {
+	my($self, $uid, $data) = @_;
+	$data->{uid} = $uid;
+	$self->sqlInsert("firehose_tab", $data);
+}
+
+sub createOrReplaceUserTab {
+	my ($self, $uid, $name, $data) = @_;
+	return if !$uid;
+	$data ||= {};
+	$data->{uid} = $uid;
+	$data->{tabname} = $name;
+	$self->sqlReplace("firehose_tab", $data);
+}
+
 
 1;
 

@@ -14,6 +14,7 @@ template=templates/data;firehose;default
 template=templates/dispFireHose;firehose;default
 template=templates/fireHoseForm;misc;default
 template=templates/firehose_tags_top;misc;default
+template=templates/firehose_tabs;misc;default
 template=templates/formatHoseIntro;misc;default
 template=templates/formatHoseTitle;misc;default
 template=templates/paginate;firehose;default

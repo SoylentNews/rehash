@@ -287,3 +287,6 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 input {width: auto !important; margin: 0 0 0 .5em !important; }
 #colorsliderbg { display: inline; padding-right: 210px; }
 #colorsliderthumb { display: inline }
+
+#fhtablist li { background: #fff; font-size: 130% }
+#fhtablist li.active { background: #ccc; font-weight: bold; }
