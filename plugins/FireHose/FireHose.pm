@@ -604,21 +604,34 @@ sub ajaxSaveOneTopTagFirehose {
 }
 
 sub ajaxRemoveUserTab {
-	my($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	$options->{content_type} = 'application/json';
 	return if $user->{is_anon};
 	if ($form->{tabid}) {
 		my $tabid_q = $slashdb->sqlQuote($form->{tabid});
 		my $uid_q   = $slashdb->sqlQuote($user->{uid});
 		$slashdb->sqlDelete("firehose_tab", "tabid=$tabid_q AND uid=$uid_q");
 	}
-	return 1;
+	my $firehose = getObject("Slash::FireHose");
+	my $opts = $firehose->getAndSetOptions();
+	my $html = {};
+	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs} }, { Return => 1});
+	return Data::JavaScript::Anon->anon_dump({
+		html	=> $html
+	});
 }
 
 sub ajaxFireHoseSetOptions {
-	my($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
-	$firehose->getAndSetOptions();
-	return "";
+	my $opts = $firehose->getAndSetOptions();
+	my $html = {};
+	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs} }, { Return => 1});
+	return Data::JavaScript::Anon->anon_dump({
+		html	=> $html
+	});
+
 }
 
 sub ajaxSaveNoteFirehose {
@@ -630,6 +643,53 @@ sub ajaxSaveNoteFirehose {
 		$firehose->setFireHose($id, { note => $note });
 	}
 	return $note || "Note";
+}
+
+sub ajaxSaveFirehoseTab {
+	my($slashdb, $constants, $user, $form) = @_;
+	return if $user->{is_anon};
+	my $firehose = getObject("Slash::FireHose");
+
+	my $max_named_tabs = $constants->{firehose_max_tabs} || 10;
+
+	my $tabid = $form->{tabid};
+	my $tabname = $form->{tabname};
+	my $message = "";
+
+	my $user_tabs = $firehose->getUserTabs();
+	my %other_tabnames = map { lc($_->{tabname}) => $_->{tabid} } grep { $_->{tabid} != $tabid } @$user_tabs;
+	my $original_name = "";
+	foreach (@$user_tabs) {
+		$original_name = $_->{tabname} if $tabid == $_->{tabid};
+	}
+	if ($tabname && $tabid) {
+		if (length($tabname) == 0 || length($tabname) > 16) {
+			$message .= "You specified a tabname that was either too long or too short\n";
+		} elsif ($tabname =~/^untitled$/) {
+			$message .= "Can't rename a tab to untitled, that name is reserved<br>";
+		} elsif ($tabname =~ /[^A-Za-z0-9_-]/) {
+			$message .= "You attempted to use unallowed characters in your tab name, stick to alpha numerics<br>";
+		} elsif ($original_name eq "untitled" && @$user_tabs >= $max_named_tabs) {
+			$message .= "You have too many named tabs, you need to delete one before you can save another";
+		} else {
+		my $uid_q = $slashdb->sqlQuote($user->{uid});
+		my $tabid_q = $slashdb->sqlQuote($tabid);
+		my $tabname_q = $slashdb->sqlQuote($tabname);
+		
+		$slashdb->sqlDelete("firehose_tab", "uid=$uid_q and tabname=$tabname_q and tabid!=$tabid_q");
+		$slashdb->sqlUpdate( "firehose_tab", { tabname => $tabname }, "tabid=$tabid_q");
+		}
+
+	}
+	my $opts = $firehose->getAndSetOptions();
+	my $html = {};
+	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs} }, { Return => 1});
+	$html->{message_area} = $message;
+	return Data::JavaScript::Anon->anon_dump({
+		html		=> $html
+	});
+
+	
 }
 
 
@@ -764,9 +824,6 @@ sub ajaxFireHoseGetUpdates {
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
 
-	if($form->{orderby} || $form->{mode} || $form->{orderdir} || $form->{firehose_set_options} || $form->{fhfilter}) {
-		$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs} }, { Return => 1});
-	}
 
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
 		html		=> $html,
@@ -1149,7 +1206,7 @@ sub getAndSetOptions {
 		$user_tabs = $self->getUserTabs();
 	}
 	
-	print STDERR "Mode: $mode, Color = $options->{color}, ORDERDIR = $options->{orderdir}, ORDERBY = $options->{orderby}, Filter: $fhfilter\n";
+#	print STDERR "Mode: $mode, Color = $options->{color}, ORDERDIR = $options->{orderdir}, ORDERBY = $options->{orderby}, Filter: $fhfilter\n";
 
 	my $tab_compare = { mode => "mode", orderdir => "orderdir", color => "color", orderby => "orderby", filter => "fhfilter" };
 
@@ -1160,11 +1217,11 @@ sub getAndSetOptions {
 			$options->{$tab_compare->{$_}} ||= "";
 			if ($tab->{$_} ne $options->{$tab_compare->{$_}}) {
 				$equal = 0;
-				print STDERR "$tab->{tabname} -> $_ doesn't match\n";
+				#print STDERR "$tab->{tabname} -> $_ doesn't match\n";
 			}
 		}
 		if ($equal) {
-			print STDERR "Tab match $tab->{tabname}\n";
+			# print STDERR "Tab match $tab->{tabname}\n";
 			$tab_match = 1;
 			$tab->{active} = 1;
 		}
@@ -1175,10 +1232,10 @@ sub getAndSetOptions {
 		foreach (keys %$tab_compare) {
 			$data->{$_} = $options->{$tab_compare->{$_}} || '';
 		}
-		$self->createOrReplaceUserTab($user->{uid}, "unnamed", $data);
+		$self->createOrReplaceUserTab($user->{uid}, "untitled", $data);
 		$user_tabs = $self->getUserTabs();
 		foreach (@$user_tabs) {
-			$_->{active} = 1 if $_->{tabname} eq "unnamed" 
+			$_->{active} = 1 if $_->{tabname} eq "untitled" 
 		}
 	}
 
