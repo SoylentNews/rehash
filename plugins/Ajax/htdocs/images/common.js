@@ -19,11 +19,14 @@ var fh_colors = Array(0);
 var vendor_popup_timerids = Array(0);
 var vendor_popup_id = 0;
 
-function createPopup(xy, titlebar, name, contents, message) {
+function createPopup(xy, titlebar, name, contents, message, onmouseout) {
 	var body = document.getElementsByTagName("body")[0]; 
 	var div = document.createElement("div");
 	div.id = name + "-popup";
 	div.style.position = "absolute";
+	if (onmouseout) {
+		div.onmouseout = onmouseout;
+	}
 	
 	var leftpos = xy[0] + "px";
 	var toppos  = xy[1] + "px";
@@ -117,9 +120,11 @@ function toggleIntro(id, toggleid) {
 	if (obj.className == 'introhide') {
 		obj.className = "intro"
 		toggle.innerHTML = "[-]";
+		toggle.className = "expanded";
 	} else {
 		obj.className = "introhide"
 		toggle.innerHTML = "[+]";
+		toggle.className = "condensed";
 	}
 }
 
@@ -903,24 +908,28 @@ function firehose_slider_end(offsetFromStart) {
 
 function pausePopVendorStory(id) {
 	vendor_popup_id=id;
+	closePopup('vendorStory-23-popup');
+	closePopup('vendorStory-26-popup');
 	vendor_popup_timerids[id] = setTimeout("vendorStoryPopup()", 500);
 }
 function vendorStoryPopup() {
 	id = vendor_popup_id;
-	var title = "Top Story";
+	var title = "Opinion Center - Intel";
 	var buttons = createPopupButtons("<a href=\"javascript:closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
 	title = title + buttons;
-	createPopup(getXYForId('vendorStoryLink-' + id, 0, 1), title, "vendorStory-" + id, "Loading...");
+	var closepopup = function () {
+		clearTimeout(vendor_popup_timerids[23]);
+		clearTimeout(vendor_popup_timerids[26]);
+		closePopup("vendorStory-23-popup");
+		closePopup("vendorStory-26-popup");
+	};
+	createPopup(getXYForId('sponsorlinks', 0, 0), title, "vendorStory-" + id, "Loading", "", closepopup );
 	var params = [];
 	params['op'] = 'getTopVendorStory';
 	params['skid'] = id;
 	ajax_update(params, "vendorStory-" + id + "-contents");
 }
 
-function closeVendorStoryPopup(id) {
-	clearTimeout(vendor_popup_timerids[id]);
-	closePopup("vendorStory-" + id + "-popup");
-}
 
 function firehose_open_tab(id) {
 	var tf = $('tab-form-'+id);
@@ -943,3 +952,4 @@ function firehose_save_tab(id) {
 	tf.className = "hide";
 	tt.className = "";
 }
+
