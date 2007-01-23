@@ -4323,3 +4323,40 @@ UPDATE vars SET value = 'T_2_5_0_141' WHERE name = 'cvs_tag_currentcode';
 # 2007-01-18
 UPDATE vars SET value = 'T_2_5_0_142' WHERE name = 'cvs_tag_currentcode';
 
+# 2007-01-25
+UPDATE vars SET value = 'T_2_5_0_143' WHERE name = 'cvs_tag_currentcode';
+
+# new table and values for plugins/Messages
+DROP TABLE IF EXISTS message_deliverymodes;
+CREATE TABLE message_deliverymodes (
+        `code`    SMALLINT default '0' NOT NULL,
+        `name`    VARCHAR(32) default '' NOT NULL,
+        `bitvalue` MEDIUMINT unsigned default '0' NOT NULL,
+        PRIMARY KEY (`code`)
+) TYPE=InnoDB;
+
+INSERT INTO message_deliverymodes VALUES (-1, 'No Messages', 0);
+INSERT INTO message_deliverymodes VALUES (0, 'E-mail', 1);
+INSERT INTO message_deliverymodes VALUES (1, 'Web', 2);
+
+# Updates for plugins/Messages
+ALTER TABLE message_codes ADD COLUMN delivery_bvalue INT UNSIGNED DEFAULT '0' NOT NULL;
+UPDATE message_codes SET delivery_bvalue = 0 WHERE code = -2;
+UPDATE message_codes SET delivery_bvalue = 0 WHERE code = -1;
+UPDATE message_codes SET delivery_bvalue = 1 WHERE code = 0;
+UPDATE message_codes SET delivery_bvalue = 1 WHERE code = 1;
+UPDATE message_codes SET delivery_bvalue = 3 WHERE code = 2;
+UPDATE message_codes SET delivery_bvalue = 3 WHERE code = 3;
+UPDATE message_codes SET delivery_bvalue = 3 WHERE code = 4;
+UPDATE message_codes SET delivery_bvalue = 3 WHERE code = 5;
+UPDATE message_codes SET delivery_bvalue = 1 WHERE code = 6;
+UPDATE message_codes SET delivery_bvalue = 3 WHERE code = 7;
+UPDATE message_codes SET delivery_bvalue = 0 WHERE code = 8;
+UPDATE message_codes SET delivery_bvalue = 1 WHERE code = 10;
+UPDATE message_codes SET delivery_bvalue = 1 WHERE code = 11;
+UPDATE message_codes SET delivery_bvalue = 3 WHERE code = 12;
+UPDATE message_codes SET delivery_bvalue = 2 WHERE code = 13;
+UPDATE message_codes SET delivery_bvalue = 1 WHERE code = 14;
+UPDATE message_codes SET delivery_bvalue = 3 WHERE code = 15;
+UPDATE message_codes SET delivery_bvalue = 3 WHERE code = 16;
+UPDATE message_codes SET delivery_bvalue = 3 WHERE code = 18;
