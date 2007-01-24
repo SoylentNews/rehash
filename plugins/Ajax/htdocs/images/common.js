@@ -911,19 +911,20 @@ function firehose_slider_end(offsetFromStart) {
 
 function pausePopVendorStory(id) {
 	vendor_popup_id=id;
-	closePopup('vendorStory-23-popup');
 	closePopup('vendorStory-26-popup');
 	vendor_popup_timerids[id] = setTimeout("vendorStoryPopup()", 500);
 }
+
+function clearVendorPopupTimers() {
+	clearTimeout(vendor_popup_timerids[26]);
+}
+
 function vendorStoryPopup() {
 	id = vendor_popup_id;
 	var title = "Opinion Center - Intel";
 	var buttons = createPopupButtons("<a href=\"javascript:closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
 	title = title + buttons;
 	var closepopup = function () {
-		clearTimeout(vendor_popup_timerids[23]);
-		clearTimeout(vendor_popup_timerids[26]);
-		closePopup("vendorStory-23-popup");
 		closePopup("vendorStory-26-popup");
 	};
 	createPopup(getXYForId('sponsorlinks', 0, 0), title, "vendorStory-" + id, "Loading", "", closepopup );
