@@ -1194,9 +1194,9 @@ sub getAndSetOptions {
 	
 	# XXX
 	my $user_tabs = $self->getUserTabs();
-	my $system_tabs = $self->getSystemDefaultTabs();
 	my @tab_fields = qw(tabname filter mode color orderdir orderby);
-	if (!$user_tabs || @$user_tabs < 1 ) {
+	if ((!$user_tabs || @$user_tabs < 1 ) && !$user->{last_fhtab_set}) {
+		my $system_tabs = $self->getSystemDefaultTabs();
 		foreach my $tab (@$system_tabs) {
 			my $data = {};
 			foreach (@tab_fields) {
