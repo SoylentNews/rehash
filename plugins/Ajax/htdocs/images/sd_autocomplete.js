@@ -478,10 +478,6 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type,
 		admin_neverdisplay("", "firehose", p._id);
 	}
       }
-
-      if(p._tagDomain == 7) {
-	 //firehose_save_tab(p._id);
-      }
   }
 
 YAHOO.slashdot.AutoCompleteWidget.prototype._onTextboxBlurEvent = function( type, args, me )
