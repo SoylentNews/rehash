@@ -78,10 +78,10 @@ CREATE TABLE users_messages (
 
 DROP TABLE IF EXISTS message_deliverymodes;
 CREATE TABLE message_deliverymodes (
-	`code`    SMALLINT NOT NULL default '0',
-  	`name`    VARCHAR(32) NOT NULL default '',
-  	`bitvalue` MEDIUMINT unsigned NOT NULL default '0',
-  	PRIMARY KEY (`code`)
+	code     SMALLINT NOT NULL default '0',
+  	name     VARCHAR(32) NOT NULL default '',
+  	bitvalue MEDIUMINT unsigned NOT NULL default '0',
+  	PRIMARY KEY (code)
 ) TYPE=InnoDB;
 
 # Commented out because target table is necessarily MyISAM,

@@ -955,7 +955,6 @@ function firehose_save_tab(id) {
 	params['op'] = 'firehose_save_tab';
 	params['tabname'] = ti.value;
 
-
 	params['tabid'] = id;
 	ajax_update(params, '',  handlers);
 	tf.className = "hide";

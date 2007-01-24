@@ -4314,8 +4314,6 @@ INSERT INTO vars (name, value, description) VALUES ('tags_admin_autoaddstorytopi
 # 2007-01-11
 UPDATE vars SET value = 'T_2_5_0_141' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
-
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
@@ -4329,10 +4327,10 @@ UPDATE vars SET value = 'T_2_5_0_143' WHERE name = 'cvs_tag_currentcode';
 # new table and values for plugins/Messages
 DROP TABLE IF EXISTS message_deliverymodes;
 CREATE TABLE message_deliverymodes (
-        `code`    SMALLINT default '0' NOT NULL,
-        `name`    VARCHAR(32) default '' NOT NULL,
-        `bitvalue` MEDIUMINT unsigned default '0' NOT NULL,
-        PRIMARY KEY (`code`)
+        code     SMALLINT default '0' NOT NULL,
+        name     VARCHAR(32) default '' NOT NULL,
+        bitvalue MEDIUMINT unsigned default '0' NOT NULL,
+        PRIMARY KEY (code)
 ) TYPE=InnoDB;
 
 INSERT INTO message_deliverymodes VALUES (-1, 'No Messages', 0);
@@ -4376,11 +4374,13 @@ CREATE TABLE firehose_tab(
 	orderdir ENUM("ASC", "DESC") DEFAULT "DESC",
 	color VARCHAR(16) NOT NULL DEFAULT '',
 	mode ENUM("full", "fulltitle") DEFAULT "fulltitle",
-	PRIMARY KEY  (`tabid`),
-	UNIQUE KEY `uid_tabname` (`uid`,`tabname`)
+	PRIMARY KEY  (tabid),
+	UNIQUE KEY uid_tabname (uid,tabname)
+) TYPE=InnoDB;
 
-) Type=InnoDB;
+INSERT INTO firehose_tab VALUES (1,0,'FireHose','','createtime','DESC','indigo','fulltitle');
+INSERT INTO firehose_tab VALUES (2,0,'Slashdot','story','createtime','DESC','black','full');
+INSERT INTO firehose_tab VALUES (3,0,'Journals','journal','createtime','DESC','blue','full');
 
-INSERT INTO `firehose_tab` VALUES (1,0,'FireHose','','createtime','DESC','indigo','fulltitle');
-INSERT INTO `firehose_tab` VALUES (2,0,'Slashdot','story','createtime','DESC','black','full');
-INSERT INTO `firehose_tab` VALUES (3,0,'Journals','journal','createtime','DESC','blue','full');
+# PUDGE LAST UPDATED HERE
+

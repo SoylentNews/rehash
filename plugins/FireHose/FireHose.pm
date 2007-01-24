@@ -631,7 +631,6 @@ sub ajaxFireHoseSetOptions {
 	return Data::JavaScript::Anon->anon_dump({
 		html	=> $html
 	});
-
 }
 
 sub ajaxSaveNoteFirehose {
@@ -672,25 +671,23 @@ sub ajaxSaveFirehoseTab {
 		} elsif ($original_name eq "untitled" && @$user_tabs >= $max_named_tabs) {
 			$message .= "You have too many named tabs, you need to delete one before you can save another";
 		} else {
-		my $uid_q = $slashdb->sqlQuote($user->{uid});
-		my $tabid_q = $slashdb->sqlQuote($tabid);
-		my $tabname_q = $slashdb->sqlQuote($tabname);
+			my $uid_q = $slashdb->sqlQuote($user->{uid});
+			my $tabid_q = $slashdb->sqlQuote($tabid);
+			my $tabname_q = $slashdb->sqlQuote($tabname);
 		
-		$slashdb->sqlDelete("firehose_tab", "uid=$uid_q and tabname=$tabname_q and tabid!=$tabid_q");
-		$slashdb->sqlUpdate( "firehose_tab", { tabname => $tabname }, "tabid=$tabid_q");
-		$slashdb->setUser($user->{uid}, { last_fhtab_set => $slashdb->getTime() });
+			$slashdb->sqlDelete("firehose_tab", "uid=$uid_q and tabname=$tabname_q and tabid!=$tabid_q");
+			$slashdb->sqlUpdate( "firehose_tab", { tabname => $tabname }, "tabid=$tabid_q");
+			$slashdb->setUser($user->{uid}, { last_fhtab_set => $slashdb->getTime() });
 		}
-
 	}
+
 	my $opts = $firehose->getAndSetOptions();
 	my $html = {};
 	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs} }, { Return => 1});
 	$html->{message_area} = $message;
 	return Data::JavaScript::Anon->anon_dump({
-		html		=> $html
+		html	=> $html
 	});
-
-	
 }
 
 
@@ -824,7 +821,6 @@ sub ajaxFireHoseGetUpdates {
 	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1, page => $form->{page} }, { Return => 1, Page => "firehose"});
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
-
 
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
 		html		=> $html,
@@ -1137,8 +1133,6 @@ sub getAndSetOptions {
 	$opts 	        ||= {};
 	my $options 	= {};
 
-
-
 	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1 };
 	my $modes = { full => 1, fulltitle => 1};
 
@@ -1153,8 +1147,6 @@ sub getAndSetOptions {
 	}
 	$options->{color} ||= $user->{firehose_color};
 
-
-	
 	if ($form->{orderby}) {
 		if ($form->{orderby} eq "popularity") {
 			if ($user->{is_admin} && !$user->{firehose_usermode}) {
@@ -1258,13 +1250,13 @@ sub getAndSetOptions {
 
 	
 	if ($mode eq "full") {
-		if($user->{is_admin}) {
+		if ($user->{is_admin}) {
 			$options->{limit} = 25;
 		} else {
 			$options->{limit} = 20;
 		}
 	} else {
-		if($user->{is_admin}) {
+		if ($user->{is_admin}) {
 			$options->{limit} = 50;
 		} else {
 			$options->{limit} = 40;
@@ -1339,7 +1331,7 @@ sub getAndSetOptions {
 		}
 		$self->setUser($user->{uid}, $data_change) if keys %$data_change > 0;
 	}
-	
+
 	$options->{tabs} = $user_tabs;
 
 	if ($user->{is_admin} && $form->{setusermode}) {
@@ -1524,7 +1516,6 @@ sub getUserTabs {
 			$a->{tabname} cmp $b->{tabname} 
 	} @$tabs;
 	return $tabs;
-
 }
 
 sub getSystemDefaultTabs {
@@ -1539,7 +1530,7 @@ sub createUserTab {
 }
 
 sub createOrReplaceUserTab {
-	my ($self, $uid, $name, $data) = @_;
+	my($self, $uid, $name, $data) = @_;
 	return if !$uid;
 	$data ||= {};
 	$data->{uid} = $uid;
