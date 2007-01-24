@@ -288,5 +288,6 @@ input {width: auto !important; margin: 0 0 0 .5em !important; }
 #colorsliderbg { display: inline; padding-right: 210px; }
 #colorsliderthumb { display: inline }
 
-#fhtablist li { background: #fff; font-size: 130% }
-#fhtablist li.active { background: #ccc; font-weight: bold; }
+#fhtablist li { font-size: 130% }
+#fhtablist li, #fhtablist a { color: #fff }
+#fhtablist li.active { font-weight: bold; }

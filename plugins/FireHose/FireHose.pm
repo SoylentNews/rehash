@@ -678,6 +678,7 @@ sub ajaxSaveFirehoseTab {
 		
 		$slashdb->sqlDelete("firehose_tab", "uid=$uid_q and tabname=$tabname_q and tabid!=$tabid_q");
 		$slashdb->sqlUpdate( "firehose_tab", { tabname => $tabname }, "tabid=$tabid_q");
+		$slashdb->setUser($user->{uid}, { last_fhtab_set => $slashdb->getTime() });
 		}
 
 	}
@@ -1516,7 +1517,14 @@ sub getUserTabs {
 	my($self) = @_;
 	my $user = getCurrentUser();
 	my $uid_q = $self->sqlQuote($user->{uid});
-	return $self->sqlSelectAllHashrefArray("*", "firehose_tab", "uid=$uid_q")
+	my $tabs = $self->sqlSelectAllHashrefArray("*", "firehose_tab", "uid=$uid_q", "order by tabname asc");
+	@$tabs = sort { 
+			$b->{tabname} eq "untitled" ? -1 : 
+				$a->{tabname} eq "untitled" ? 1 : 0	||
+			$a->{tabname} cmp $b->{tabname} 
+	} @$tabs;
+	return $tabs;
+
 }
 
 sub getSystemDefaultTabs {
@@ -1537,6 +1545,14 @@ sub createOrReplaceUserTab {
 	$data->{uid} = $uid;
 	$data->{tabname} = $name;
 	$self->sqlReplace("firehose_tab", $data);
+}
+
+sub ajaxFirehoseListTabs {
+	my($slashdb, $constants, $user, $form) = @_;
+	my $firehose = getObject("Slash::FireHose");
+	my $tabs = $firehose->getUserTabs();
+	@$tabs = map { $_->{tabname}} grep { $_->{tabname} ne "untitled" } @$tabs;
+	return join "\t", @$tabs;
 }
 
 
