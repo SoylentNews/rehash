@@ -292,8 +292,15 @@ YAHOO.slashdot.storyOpts = [
     tagsDS.scriptQueryParam = "prefix";
     tagsDS.scriptQueryAppend = "op=tags_list_tagnames";
     tagsDS.queryMethod = "POST";
-
-YAHOO.slashdot.dataSources = [tagsDS, actionsDS, sectionsDS, topicsDS, feedbackDS, storyDS, fhitemDS];
+    
+    var fhtabsDS = new YAHOO.widget.DS_XHR("./ajax.pl", ["\n", "\t"]);
+    fhtabsDS.queryMatchSubset = false;
+    fhtabsDS.responseType = YAHOO.widget.DS_XHR.TYPE_FLAT;
+    fhtabsDS.scriptQueryParam = "prefix";
+    fhtabsDS.scriptQueryAppend = "op=firehose_list_tabs";
+    fhtabsDS.queryMethod = "POST";
+    
+YAHOO.slashdot.dataSources = [tagsDS, actionsDS, sectionsDS, topicsDS, feedbackDS, storyDS, fhitemDS, fhtabsDS ];
 
 
 YAHOO.slashdot.AutoCompleteWidget = function()
@@ -450,7 +457,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type,
 
       // really need to move this into a separate function...
       //  at least when there is more than just p._type=='firehose'
-    if ( p._tagDomain != 0 && p._tagDomain != 5 )
+    if ( p._tagDomain != 0 && p._tagDomain != 5 && p._tagDomain !=7)
       {
           // save the new tag immediately
 	createTag(tagname, p._id, p._type);
@@ -470,6 +477,10 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type,
       	if(tagname == "neverdisplay") {
 		admin_neverdisplay("", "firehose", p._id);
 	}
+      }
+
+      if(p._tagDomain == 7) {
+	 //firehose_save_tab(p._id);
       }
   }
 
