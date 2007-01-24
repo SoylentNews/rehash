@@ -100,6 +100,7 @@ BEGIN {
 	nick2matchname
 	noFollow
 	regexSid
+	revertQuote
 	root2abs
 	roundrand
 	set_rootdir
@@ -1484,8 +1485,49 @@ sub processCustomTagsPost {
 		$str =~ s/$close/<\/div><\/p>/g;
 	}
 
+	# just fix the whitespace for blockquote to something that looks
+	# universally good
+	if (grep /^blockquote$/i, @{$constants->{approvedtags}}) {
+		my $quote   = 'blockquote';
+		my $open    = qr[\n* <\s* $quote \s*> \n*]xsio;
+		my $close   = qr[\n* <\s* /$quote \s*> \n*]xsio;
+
+		$str =~ s/$open/<p><$quote>/g;
+		$str =~ s/$close/<\/$quote><\/p>/g;
+	}
+
 	return $str;
 }
+
+# revert div class="quote" back to <quote>, handles nesting
+sub revertQuote {
+	my($str) = @_;
+	while ($str =~ m|((<p>)?<div class="quote">)(.+)$|sig) {
+		my($found, $p, $rest) = ($1, $2, $3);
+		my $pos = pos($str) - (length($found) + length($rest));
+		substr($str, $pos, length($found)) = '<quote>';
+		pos($str) = $pos + length('<quote>');
+
+		my $c = 0;
+		while ($str =~ m|(<(/?)div.*?>(</p>)?)|sig) {
+			my($found, $end, $p2) = ($1, $2, $3);
+			if ($end && !$c) {
+				my $len = length($found);
+				# + 4 is for the </p>
+				my $pl = $p && $p2 ? 4 : 0;
+				substr($str, pos($str) - $len, $len + $pl) = '</quote>';
+				pos($str) = 0;
+				last;
+			} elsif ($end) {
+				$c--;
+			} else {
+				$c++;
+			}
+		}
+	}
+	return($str);
+}
+
 
 #========================================================================
 

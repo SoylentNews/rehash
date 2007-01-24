@@ -695,7 +695,21 @@ function replyTo(cid) {
 }
 
 function quoteReply(pid) {
-	$('postercomment').value = comment_body_reply[pid] + "\n\n" + $('postercomment').value;
+	var this_reply = comment_body_reply[pid];
+
+	// tailor whitespace to postmode
+	if ($('posttype').value != 2) {
+		this_reply.replace(/<br>/g, "\n");
+	} else {
+		this_reply.replace(/<br>/g, "<br>\n");
+		this_reply.replace(/<p>/g, "\n\n<p>");
+		this_reply.replace(/<\/p>/g, "</p>\n\n");
+	}
+	// <quote> parse code takes care of whitespace
+	this_reply.replace(/<quote>/g, "\n\n<quote>");
+	this_reply.replace(/<\/quote>/g, "</quote>\n\n");
+
+	$('postercomment').value = this_reply + "\n\n" + $('postercomment').value;
 }
 
 /* utility functions */
