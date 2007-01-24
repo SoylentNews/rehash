@@ -4360,3 +4360,24 @@ UPDATE message_codes SET delivery_bvalue = 1 WHERE code = 14;
 UPDATE message_codes SET delivery_bvalue = 3 WHERE code = 15;
 UPDATE message_codes SET delivery_bvalue = 3 WHERE code = 16;
 UPDATE message_codes SET delivery_bvalue = 3 WHERE code = 18;
+
+# Updates for plugins/FireHose
+INSERT INTO ajax_ops VALUES (NULL, 'firehose_save_tab', 'Slash::FireHose', 'ajaxSaveFirehoseTab', 'ajax_user_static', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'firehose_remove_tab', 'Slash::FireHose', 'ajaxRemoveUserTab', 'ajax_user_static', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'firehose_list_tabs', 'Slash::FireHose', 'ajaxFirehoseListTabs', 'ajax_user_static', 'createuse');
+
+DROP TABLE IF EXISTS firehose_tab;
+CREATE TABLE firehose_tab(
+	tabid mediumint(8) unsigned NOT NULL auto_increment,
+	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	tabname VARCHAR(16) NOT NULL DEFAULT 'unnamed',
+	filter VARCHAR(255) NOT NULL DEFAULT '',
+	orderby ENUM("popularity","createtime", "editorpop", "activity") DEFAULT "createtime",
+	orderdir ENUM("ASC", "DESC") DEFAULT "DESC",
+	color VARCHAR(16) NOT NULL DEFAULT '',
+	mode ENUM("full", "fulltitle") DEFAULT "fulltitle"
+);
+
+INSERT INTO `firehose_tab` VALUES (1,0,'FireHose','','createtime','DESC','indigo','fulltitle');
+INSERT INTO `firehose_tab` VALUES (2,0,'Slashdot','story','createtime','DESC','black','full');
+INSERT INTO `firehose_tab` VALUES (3,0,'Journals','journal','createtime','DESC','blue','full');
