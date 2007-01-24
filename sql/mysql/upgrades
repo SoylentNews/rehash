@@ -4375,8 +4375,11 @@ CREATE TABLE firehose_tab(
 	orderby ENUM("popularity","createtime", "editorpop", "activity") DEFAULT "createtime",
 	orderdir ENUM("ASC", "DESC") DEFAULT "DESC",
 	color VARCHAR(16) NOT NULL DEFAULT '',
-	mode ENUM("full", "fulltitle") DEFAULT "fulltitle"
-);
+	mode ENUM("full", "fulltitle") DEFAULT "fulltitle",
+	PRIMARY KEY  (`tabid`),
+	UNIQUE KEY `uid_tabname` (`uid`,`tabname`)
+
+) Type=InnoDB;
 
 INSERT INTO `firehose_tab` VALUES (1,0,'FireHose','','createtime','DESC','indigo','fulltitle');
 INSERT INTO `firehose_tab` VALUES (2,0,'Slashdot','story','createtime','DESC','black','full');
