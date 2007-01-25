@@ -4321,9 +4321,6 @@ UPDATE vars SET value = 'T_2_5_0_141' WHERE name = 'cvs_tag_currentcode';
 # 2007-01-18
 UPDATE vars SET value = 'T_2_5_0_142' WHERE name = 'cvs_tag_currentcode';
 
-# 2007-01-25
-UPDATE vars SET value = 'T_2_5_0_143' WHERE name = 'cvs_tag_currentcode';
-
 # new table and values for plugins/Messages
 DROP TABLE IF EXISTS message_deliverymodes;
 CREATE TABLE message_deliverymodes (
@@ -4383,4 +4380,7 @@ INSERT INTO firehose_tab VALUES (2,0,'Slashdot','story','createtime','DESC','bla
 INSERT INTO firehose_tab VALUES (3,0,'Journals','journal','createtime','DESC','blue','full');
 
 # PUDGE LAST UPDATED HERE
+
+# 2007-01-24
+UPDATE vars SET value = 'T_2_5_0_143' WHERE name = 'cvs_tag_currentcode';
 
