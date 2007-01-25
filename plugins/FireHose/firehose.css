@@ -8,6 +8,21 @@ ul.menu
 	padding: .75em 12em .75em .6em;
 	background: url(//images.slashdot.org/storylinks-right.png) no-repeat right bottom !important;
 }
+ul.menu#fhtablist {font-size: 90%; background: transparent !important}
+ul.menu#fhtablist li.active {
+	background: #444;
+	border: 1px solid #666;
+	border-bottom: 1px solid #777;
+	border-left: 1px solid #777;
+	margin: 0 -.3em 0 0 !important;
+	padding: .3em 1.5em .3em 0 !important;
+position: relative;
+}
+ul.menu#fhtablist li.active a {color: #aaa; text-decoration: none}
+ul.menu#fhtablist li.active:before {content: ""}
+
+#fhtabdel {font-size: 85%; font-weight: normal;  position: absolute; top: .1em; right: 0;}
+
 .storylinks
 {
 	color: #999;
