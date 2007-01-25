@@ -223,6 +223,7 @@ sub getRDF {
 			$item->{counter} = $i + 1;
 			$str .= slashDisplay($template_name, {
 				item	=> $item,
+				bid 	=> $bid
 			}, {
 				Nocomm	=> 1,
 				Return	=> 1,
