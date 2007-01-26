@@ -24,10 +24,7 @@ function createPopup(xy, titlebar, name, contents, message, onmouseout) {
 	var div = document.createElement("div");
 	div.id = name + "-popup";
 	div.style.position = "absolute";
-	if (onmouseout) {
-		div.onmouseout = onmouseout;
-	}
-	
+
 	var leftpos = xy[0] + "px";
 	var toppos  = xy[1] + "px";
 	
@@ -37,7 +34,7 @@ function createPopup(xy, titlebar, name, contents, message, onmouseout) {
 	contents = contents || "";
 	message  = message || "";
 
-	div.innerHTML = '<div id="' + name + '-title" class="popup-title">' + titlebar + '</div>' +
+	div.innerHTML = '<iframe></iframe><div id="' + name + '-title" class="popup-title">' + titlebar + '</div>' +
                         '<div id="' + name + '-contents" class="popup-contents">' + contents + '</div>' +
 			'<div id="' + name + '-message" class="popup-message">' + message + '</div>';
 
