@@ -297,11 +297,12 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 .pop7 { background: url('//images.slashdot.org/pop7.png') no-repeat 0px 0px; }
 .pop8 { background: url('//images.slashdot.org/pop0.png') no-repeat 0px 0px; }
 
-#colorsliderbg { background: url('//images.slashdot.org/colorscale.gif') no-repeat 0px }
+#colorsliderbg { background: url('/images/colorscale.png') no-repeat 0px 0px }
 
 input {width: auto !important; margin: 0 0 0 .5em !important; }
-#colorsliderbg { display: inline; padding-right: 210px; }
+#colorsliderbg { display: inline; padding: 2px 210px 3px 0; }
 #colorsliderthumb { display: inline }
+#colorsliderthumb img {margin: 0 0 -5px 0}
 
 #fhtablist li { font-size: 130% }
 #fhtablist li, #fhtablist a { color: #fff }
