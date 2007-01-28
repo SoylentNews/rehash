@@ -199,7 +199,7 @@ sub createItemFromSubmission {
 sub updateItemFromStory {
 	my($self, $id) = @_;
 	my $constants = getCurrentStatic();
-	my %ignore_skids = map {$_ => 1 } @{$constants->{firehose_story_ignored_skids}};
+	my %ignore_skids = map {$_ => 1 } @{$constants->{firehose_story_ignore_skids}};
 	my $story = $self->getStory($id, "", 1);
 	if ($story) {
 		my $globjid = $self->getGlobjidCreate("stories", $story->{stoid});
@@ -228,7 +228,7 @@ sub createItemFromStory {
 	my($self, $id) = @_;
 	my $constants = getCurrentStatic();
 	# If a story is created with an ignored primary skid it'll never be created as a firehose entry currently
-	my %ignore_skids = map {$_ => 1 } @{$constants->{firehose_story_ignored_skids}};
+	my %ignore_skids = map {$_ => 1 } @{$constants->{firehose_story_ignore_skids}};
 	my $story = $self->getStory($id, '', 1);
 
 	my $popularity = $self->getMidPopularityForColorLevel(2);
