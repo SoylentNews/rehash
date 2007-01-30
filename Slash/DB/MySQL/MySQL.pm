@@ -3403,6 +3403,7 @@ sub setStory {
 	# but also topics_rendered, primaryskid and tid.
 
 	my $chosen_hr = delete $change_hr->{topics_chosen};
+
 	if ($chosen_hr && keys %$chosen_hr) {
 		$self->setStoryTopicsChosen($stoid, $chosen_hr);
 		my $info_hr = { };
@@ -9258,7 +9259,6 @@ sub getTemplateByName {
 sub renderTopics {
 	my($self, $chosen_hr) = @_;
 	return { } if !$chosen_hr || ! keys %$chosen_hr;
-
 	my $tree = $self->getTopicTree();
 
 	# We start with a copy of the chosen hashref, which we
@@ -9309,7 +9309,7 @@ sub renderTopics {
 				# If the connection from the child
 				# to parent topic demands a min weight
 				# higher than this weight, skip.
-				next if $rendered{$tid} < $p_hr->{$pid};
+				next if $rendered{$tid} < $p_hr->{$pid} || $p_hr->{$pid} < 0;
 				# OK this is new, propagate up.
 				$rendered{$pid} = $rendered{$tid};
 				# We made a change; we're not done.
