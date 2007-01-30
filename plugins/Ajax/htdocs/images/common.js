@@ -895,7 +895,7 @@ function firehose_remove_entry(id) {
 }
 
 function firehose_slider_init() {
-	fh_colorslider = YAHOO.widget.Slider.getHorizSlider("colorsliderbg", "colorsliderthumb", 0, 210, fh_ticksize);
+	fh_colorslider = YAHOO.widget.Slider.getHorizSlider("colorsliderbg", "colorsliderthumb", 0, 105, fh_ticksize);
 	fh_colorslider.setValue(fh_ticksize * fh_colors_hash[fh_color] , 1);
         fh_colorslider.subscribe("slideEnd", firehose_slider_end);
 }	
