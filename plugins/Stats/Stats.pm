@@ -2035,6 +2035,57 @@ sub _do_insert_select {
 	return $self;
 }
 
+sub getTagnameidForTagnames {
+	my($self, $tags) = @_;
+	$tags ||= [];
+	my $tagobj = getObject("Slash::Tags");
+	return [] unless @$tags > 0;
+	my @tagnameids;
+	foreach (@$tags) {
+		push @tagnameids, $tagobj->getTagnameidFromNameIfExists($_);
+	}
+	return \@tagnameids;
+}
+
+sub getTagCountForDay {
+	my($self, $day, $tags, $distinct_uids) = @_;
+	$tags ||= [];
+	my @tag_ids;
+	my @where;
+	if(@$tags >= 1) {
+		my $tagnameids = $self->getTagnameidForTagnames($tags);
+		push @where, 'tagnameid in ('. (join ',', @$tagnameids) . ')';
+	}
+	push @where, "created_at between '$day 00:00:00' AND '$day 23:59:59'";
+	my $where = join ' AND ', @where;
+	if ($distinct_uids) {
+		return $self->sqlSelect("COUNT(DISTINCT uid)", "tags", $where);
+	} else {
+		return $self->sqlCount("tags", $where);
+	}
+}
+
+sub numFireHoseObjectsForDay {
+	my($self, $day) = @_;
+	return $self->sqlCount("firehose", "createtime between '$day 00:00:00' AND '$day 23:59:59'");
+}
+
+sub numFireHoseObjectsForDayByType {
+	my($self, $day) = @_;
+	return $self->sqlSelectAllHashrefArray("COUNT(*) as cnt, type", "firehose", "createtime between '$day 00:00:00' AND '$day 23:59:59'", "group by type");
+}
+
+sub numTagsForDayByType {
+	my($self, $day) = @_;
+	return $self->sqlSelectAllHashrefArray(
+		"COUNT(*) as cnt, maintable as type", 
+		"tags, globjs, globj_types", 
+		"created_at BETWEEN '$day 00:00:00' AND '$day 23:59:59' AND tags.globjid=globjs.globjid AND globjs.gtid=globj_types.gtid", 
+		"GROUP by maintable"
+	);
+
+}
+
 ########################################################
 sub DESTROY {
 	my($self) = @_;
