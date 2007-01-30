@@ -918,7 +918,7 @@ function clearVendorPopupTimers() {
 
 function vendorStoryPopup() {
 	id = vendor_popup_id;
-	var title = "Opinion Center - Intel";
+	var title = "Intel's Opinion Center";
 	var buttons = createPopupButtons("<a href=\"javascript:closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
 	title = title + buttons;
 	var closepopup = function () {
