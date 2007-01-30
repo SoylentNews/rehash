@@ -801,18 +801,7 @@ EOT
 	$data{tailslash} = $logdb->getTailslash();
 
 	slashdLog("Random Stats Begin");
-	$data{backup_lag} = "";
-	for my $slave_name (qw( backup search )) {
-		my $virtuser = $constants->{"${slave_name}_db_user"};
-		next unless $virtuser;
-		my $bytes = $stats->getSlaveDBLagCount($virtuser);
-		if ($bytes > ($constants->{db_slave_lag_ignore} || 10000000)) {
-			$data{backup_lag} .= "\n" . getData('db lagged', {
-				slave_name =>	$slave_name,
-				bytes =>	$bytes,
-			}, 'adminmail') . "\n";
-		}
-	}
+	$data{backup_lag} = ""; # old, no longer used
 
 	$data{sfnet} = { };
 	my $gids = $constants->{stats_sfnet_groupids};
