@@ -101,7 +101,7 @@ hose@cmdrtaco.net and be forgiving of beta code!
 	firehose_play();
 	firehose_add_update_timerid(setTimeout("firehose_get_updates()", 3000));
 
-fh_ticksize = 30;
+fh_ticksize = 15;
 firehose_slider_init();
 
 
