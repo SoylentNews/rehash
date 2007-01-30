@@ -1166,6 +1166,7 @@ sub editStory {
 	# that determination.  Now that we have $newarticle, should
 	# we be using that instead? - Jamie
 	# if that tells us, then sure - pudge
+	
 	if ($form->{title}) {
 
 		my $storyskin = $gSkin;
@@ -1185,6 +1186,7 @@ sub editStory {
 		$storyref->{related_cids_hr} = $related_cids_hr;
 		my($chosen_hr) = extractChosenFromForm($form);
 		$storyref->{topics_chosen} = $chosen_hr;
+
 		my $rendered_hr = $slashdb->renderTopics($chosen_hr);
 		$storyref->{topics_rendered} = $rendered_hr;
 		$storyref->{primaryskid} = $slashdb->getPrimarySkidFromRendered($rendered_hr);
@@ -1435,7 +1437,6 @@ sub editStory {
 		my $files = $blobdb->getFilesForStory($sid);
 		$attached_files = slashDisplay('attached_files', { files => $files }, { Return => 1});
 	}
-
 	my $shown_in_desc = getDescForTopicsRendered($storyref->{topics_rendered},
 		$storyref->{primaryskid},
 		$display_check ? 1 : 0);
@@ -2025,9 +2026,18 @@ sub updateStory {
 		titlebar('100%', getTitle('story_update_failed'));
 		editStory(@_);
 	} else {
-		titlebar('100%', getTitle('updateStory-title'));
-		$slashdb->setRelatedStoriesForStory($form->{sid}, $related_sids_hr, $related_urls_hr, $related_cids_hr);
 		my $st = $slashdb->getStory($form->{sid});
+		my %warn_skids = map {$_ => 1 } split('\|', $constants->{admin_warn_primaryskid});
+		my $data = {};
+		if ($warn_skids{$st->{primaryskid}}) {
+			$data->{warn_skid} = $st->{primaryskid};
+			if ($constants->{plugin}{Remarks}) {
+				my $remarks = getObject("Slash::Remarks");
+				$remarks->createRemark("WARNING: $st->{sid} has a primaryskid of $st->{primaryskid}", { type => 'system' });
+			}
+		}
+		titlebar('100%', getTitle('updateStory-title', $data));
+		$slashdb->setRelatedStoriesForStory($form->{sid}, $related_sids_hr, $related_urls_hr, $related_cids_hr);
 		$slashdb->createSignoff($st->{stoid}, $user->{uid}, "updated");
 		# make sure you pass it the goods
 		listStories(@_);
@@ -2345,9 +2355,18 @@ sub saveStory {
 	if ($sid) {
 		$slashdb->setRelatedStoriesForStory($sid, $related_sids_hr, $related_urls_hr);
 		slashHook('admin_save_story_success', { story => $data });
-		titlebar('100%', getTitle('saveStory-title'));
 		my $st = $slashdb->getStory($data->{sid});
 		my $stoid = $st->{stoid};
+		my %warn_skids = map {$_ => 1 } split('\|', $constants->{admin_warn_primaryskid});
+		my $data = {};
+		if ($warn_skids{$st->{primaryskid}}) {
+			$data->{warn_skid} = $st->{primaryskid};
+			if ($constants->{plugin}{Remarks}) {
+				my $remarks = getObject("Slash::Remarks");
+				$remarks->createRemark("WARNING: $st->{sid} has a primaryskid of $st->{primaryskid}", { type => 'system' });
+			}
+		}
+		titlebar('100%', getTitle('saveStory-title', $data) );
 		$slashdb->createSignoff($stoid, $user->{uid}, "saved");
 		if ($constants->{tags_admin_autoaddstorytopics} && $constants->{plugin}{Tags}) {
 			my $tree = $slashdb->getTopicTree();
