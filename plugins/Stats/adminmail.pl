@@ -845,6 +845,8 @@ EOT
 	}
 	
 	my $subscribe = getObject('Slash::Subscribe');
+	my $firehose = getObject('Slash::FireHose');
+	my $tags = getObject('Slash::Tags');
 	
 	if($subscribe){
 		my $rswh =   $stats->getSubscribersWithRecentHits();
@@ -854,7 +856,58 @@ EOT
 			$sub_report .= sprintf("%6d %s\n", $sub->{cnt}, ($slashdb->getUser($sub->{uid}, 'nickname') || $sub->{uid})); 
 	 	}
 		$data{crawling_subscribers} = $sub_report if $sub_report; 
-	}	
+	}
+
+	if ($firehose) {
+		my $fh_report;
+		my $fh_nods_nix = $stats->getTagCountForDay($yesterday, ["nod", "nix" ]);
+		$statsSave->createStatDaily("firehose_nod_nix", $fh_nods_nix);
+		$fh_report .= "Firehose total nods & nixes: $fh_nods_nix\n";
+
+		my $fh_nod = $stats->getTagCountForDay($yesterday, ["nod"]);
+		$statsSave->createStatDaily("firehose_nod", $fh_nod);
+		$fh_report .= "Firehose total nods: $fh_nod\n";
+		
+		my $fh_nix = $stats->getTagCountForDay($yesterday, ["nix"]);
+		$statsSave->createStatDaily("firehose_nix", $fh_nix);
+		$fh_report .= "Firehose total nixes: $fh_nix\n";
+		
+		# fh_active_users
+		my $fh_active_users = $stats->getTagCountForDay($yesterday, ["nod", "nix" ], 1);
+		$statsSave->createStatDaily("firehose_active_users", $fh_active_users);
+		$fh_report .= "Firehose active users: $fh_active_users\n";
+
+		# fh_objects
+		my $fh_objects = $stats->numFireHoseObjectsForDay($yesterday);
+		$statsSave->createStatDaily("firehose_objects", $fh_objects);
+		$fh_report .= "Firehose objects created: $fh_objects\n";
+
+		# fh_by_type
+		my $fh_objects_type = $stats->numFireHoseObjectsForDayByType($yesterday);
+		foreach (@$fh_objects_type) {
+			$statsSave->createStatDaily("firehose_objects_$_->{type}", "$_->{cnt}");
+			$fh_report .= "Firehose objects $_->{type}: $_->{cnt}\n";
+		}
+		$data{firehose_report} = $fh_report;
+	}
+
+	if ($tags) {
+		my $tags_report;
+		my $tags_users = $stats->getTagCountForDay($yesterday, [], 1);
+		$statsSave->createStatDaily("tags_users", $tags_users);
+		$tags_report .= "Tags active users: $tags_users\n";
+
+		my $tags_count = $stats->getTagCountForDay($yesterday, [], 0);
+		$statsSave->createStatDaily("tags_count", $tags_count);
+		$tags_report .= "Tags Count: $tags_count\n";
+	
+		my $tags_by_type = $stats->numTagsForDayByType($yesterday);
+		foreach(@$tags_by_type) {
+			$statsSave->createStatDaily("tags_count_$_->{type}", $_->{cnt});
+			$tags_report .= "Tags Count $_->{type}: $_->{cnt}\n";
+		}
+		$data{tags_report} = $tags_report;
+	}
 
 	my $email = slashDisplay('display', \%data, {
 		Return => 1, Page => 'adminmail', Nocomm => 1
