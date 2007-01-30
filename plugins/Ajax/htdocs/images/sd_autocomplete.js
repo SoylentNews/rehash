@@ -302,7 +302,6 @@ YAHOO.slashdot.storyOpts = [
 
 YAHOO.slashdot.dataSources = [tagsDS, actionsDS, sectionsDS, topicsDS, feedbackDS, storyDS, fhitemDS, fhtabsDS ];
 
-
 YAHOO.slashdot.AutoCompleteWidget = function()
   {
     this._widget = document.getElementById("ac-select-widget");
@@ -364,6 +363,11 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParam
         this._callbackParams = callbackParams;
         this._callbackParams._tagDomain = tagDomain;
         this._completer = this._newCompleter(tagDomain);
+        
+        if ( typeof callbackParams.yui == "object" )
+          for ( var field in callbackParams.yui )
+            this._completer[field] = callbackParams.yui[field];
+          
 
 	  // widget must be visible to move
         YAHOO.util.Dom.removeClass(this._widget, "hidden");
@@ -427,10 +431,10 @@ YAHOO.slashdot.AutoCompleteWidget.prototype.attach = function( obj, callbackPara
 
     if ( newSourceEl )
       {
+        callbackParams._sourceEl = newSourceEl;
         this._show(newSourceEl, callbackParams, tagDomain);
-        if ( tagDomain != 0 )
+        if ( callbackParams.queryOnAttach )
           this._completer.sendQuery("");
-          
       }
   }
 
@@ -447,37 +451,9 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type,
   {
     var tagname = args[2];
     var p = me._callbackParams;
-
-	// only change the 'menu' title when that title is a tag you are replacing
-    if ( tagname && me._needsSpareInput() && (p._tagDomain < 4  && p.TagDomain > 6) )
-      {
-        me._sourceEl.innerHTML = tagname;
-      }
+    if ( p.action0 !== undefined ) p.action0(tagname, p);
     me._hide();
-
-      // really need to move this into a separate function...
-      //  at least when there is more than just p._type=='firehose'
-    if ( p._tagDomain != 0 && p._tagDomain != 5 && p._tagDomain !=7 )
-      {
-          // save the new tag immediately
-	createTag(tagname, p._id, p._type);
-
-          // and if the user tags field exists, add it there (but don't show or hide the field)
-        var tagField = document.getElementById('newtags-' + p._id);
-        if ( tagField )
-          {
-	    var s = tagField.value.slice(-1);
-            if ( s.length && s != " " )
-              tagField.value += " ";
-            tagField.value += tagname;
-          }
-      }
-
-      if (p._tagDomain == 5) {
-      	if(tagname == "neverdisplay") {
-		admin_neverdisplay("", "firehose", p._id);
-	}
-      }
+    if ( p.action1 !== undefined ) p.action1(tagname, p);
   }
 
 YAHOO.slashdot.AutoCompleteWidget.prototype._onTextboxBlurEvent = function( type, args, me )

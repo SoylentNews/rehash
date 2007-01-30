@@ -264,7 +264,28 @@ function tagsOpenAndEnter(id, tagname, is_admin, type) {
 	tagsShowBody(id, is_admin, tagname, type);
 }
 
-function attachCompleter( obj, id, is_admin, type, tagDomain ) {
+function completer_renameMenu( s, params ) {
+  if ( s )
+    params._sourceEl.innerHTML = s;
+}
+
+function completer_setTag( s, params ) {
+  createTag(s, params._id, params._type);
+  var tagField = document.getElementById('newtags-'+params._id);
+  if ( tagField ) {
+    var s = tagField.value.slice(-1);
+    if ( s.length && s != " " )
+      tagField.value += " ";
+    tagField.value += s;
+  }
+}
+
+function completer_handleNeverDisplay( s, params ) {
+  if ( s == "neverdisplay" )
+    admin_neverdisplay("", "firehose", params._id);
+}
+
+function attachCompleter( obj, id, is_admin, type, tagDomain, customize ) {
 	if ( YAHOO.util.Dom.isSafari ) 
 		return false;
 
@@ -272,15 +293,18 @@ function attachCompleter( obj, id, is_admin, type, tagDomain ) {
 	if ( disable == "true" )
 		return false;
 
-	var callbackParams = new Object();
-	callbackParams._id = id;
-	callbackParams._is_admin = is_admin;
-	callbackParams._type = type;
+  if ( customize === undefined )
+    customize = new Object();
+	customize._id = id;
+	customize._is_admin = is_admin;
+	customize._type = type;
+	if ( tagDomain != 0 && customize.queryOnAttach === undefined )
+	  customize.queryOnAttach = true;
   
 	if ( !YAHOO.slashdot.gCompleterWidget )
 		YAHOO.slashdot.gCompleterWidget = new YAHOO.slashdot.AutoCompleteWidget();
 
-	YAHOO.slashdot.gCompleterWidget.attach(obj, callbackParams, tagDomain);
+	YAHOO.slashdot.gCompleterWidget.attach(obj, customize, tagDomain);
 	return false;
 }
 
