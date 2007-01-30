@@ -406,50 +406,6 @@ sub getOldestUnm2dMod {
 }
 
 ########################################################
-# This is lame because of course Slash can have more than one
-# backup DB, and the virtual users for those DBs are listed
-# in the 'dbs' table not in $constants->{backup_db_user}.
-# This should be updated...  XXX
-# Note, we have to use $slashdb here instead of $self.
-sub getSlaveDBLagCount {
-	my($self) = @_;
-	my $constants = getCurrentStatic();
-	my $slashdb = getCurrentDB();
-	my $bdu = $constants->{backup_db_user};
-	# If there *is* no backup DB, it's not lagged.
-	return 0 if !$bdu || $bdu eq getCurrentVirtualUser();
-
-	my $backupdb = getObject('Slash::DB', $bdu);
-	# If there is supposed to be a backup DB but we can't contact it,
-	# return a large number that is sufficiently noticeable that it
-	# should alert people that something is wrong.
-	return 2**30 if !$backupdb;
-
-	# Get the actual lag count.  Assume that each file is 2**30
-	# (a billion) bytes (should this be a var?).  Yes, the same
-	# data is called "File" vs. "Log_File", "Position" vs. "Pos",
-	# depending on whether it's on the master or slave side.
-	# And on the slave side, for MySQL 4.x, I *think* I want
-	# Master_Log_File and Read_Master_Log_Pos but other possible
-	# candidates are Relay_Master_Log_File and Exec_master_log_pos
-	# respectively.
-	my $master = ($slashdb->sqlShowMasterStatus())->[0];
-	my $slave  = ($backupdb->sqlShowSlaveStatus())->[0];
-	my $master_filename = $master->{File};
-	my $slave_filename  = $slave ->{Log_File} || $slave->{Master_Log_File};
-	my($master_file_num) = $master_filename =~ /\.(\d+)$/;
-	my($slave_file_num)  = $slave_filename  =~ /\.(\d+)$/;
-	my $master_pos = $master->{Position};
-	my $slave_pos  = $slave->{Pos} || $slave->{Read_Master_Log_Pos};
-
-	my $count = 2**30 * ($master_file_num - $slave_file_num)
-		+ $master_pos - $slave_pos;
-	$count = 0 if $count < 0;
-	$count = 2**30 if $count > 2**30;
-	return $count;
-}
-
-########################################################
 sub getRepeatMods {
 	my($self, $options) = @_;
 	my $constants = getCurrentStatic();
