@@ -383,12 +383,12 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParam
             YAHOO.util.Dom.removeClass(this._spareInput, "hidden");
             this._spareInput.value = "";
             this._spareInput.focus();
-
-            this._completer.itemSelectEvent.subscribe(this._onItemSelectEvent, this);
-            this._completer.textboxBlurEvent.subscribe(this._onTextboxBlurEvent, this);
           }
         else
           YAHOO.util.Dom.addClass(this._spareInput, "hidden");
+
+        this._completer.itemSelectEvent.subscribe(this._onItemSelectEvent, this);
+        this._completer.textboxBlurEvent.subscribe(this._onTextboxBlurEvent, this);
 
         YAHOO.util.Event.addListener(this._textField(), "keyup", this._onTextboxKeyUp, this, true);
       }
@@ -403,11 +403,8 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._hide = function()
         YAHOO.util.Dom.removeClass(this._sourceEl, "ac-source");
 
         YAHOO.util.Event.removeListener(this._textField(), "keyup", this._onTextboxKeyUp, this, true);
-        if ( this._needsSpareInput() )
-          {
-            this._completer.itemSelectEvent.unsubscribe(this._onItemSelectEvent, this);
-            this._completer.textboxBlurEvent.unsubscribe(this._onTextboxBlurEvent, this);
-          }
+        this._completer.itemSelectEvent.unsubscribe(this._onItemSelectEvent, this);
+        this._completer.textboxBlurEvent.unsubscribe(this._onTextboxBlurEvent, this);
 
         this._sourceEl = null;
         this._callbackParams = null;
