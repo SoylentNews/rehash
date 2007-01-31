@@ -25,7 +25,7 @@ __template__
 [% IF !options.noshow_show %]
 <li id="tree_[% cid %]" class="comment">
 <div id="comment_status_[% cid %]" class="commentstatus"></div>
-<div id="comment_[% cid %]"[% IF discussion2 %] class="[% options.class %]"[% END %]>
+<div id="comment_[% cid %]"[% IF discussion2 %] class="[% class %]"[% END %]>
 [% END; IF !options.noshow %]
 	<div class="commentTop">
 		<div class="title">

@@ -1228,8 +1228,10 @@ sub stripByMode {
 	$action_data{no_white_fix} = $no_white_fix || 0;
 
 	my @actions = @{$mode_actions{$fmode}};
+#my $c = 0; print STDERR "stripByMode:start:$c:[{ $str }]\n";
 	for my $action (@actions) {
 		$actions{$action}->(\$str, $fmode);
+#$c++; print STDERR "stripByMode:$action:$c:[{ $str }]\n";
 	}
 	return $str;
 }
@@ -1478,7 +1480,7 @@ sub processCustomTagsPost {
 	# QUOTE must be in approvedtags
 	if (grep /^quote$/i, @{$constants->{approvedtags}}) {
 		my $quote   = 'quote';
-		my $open    = qr[\n* <\s* $quote \s*> \n*]xsio;
+		my $open    = qr[\n* <\s*  $quote \s*> \n*]xsio;
 		my $close   = qr[\n* <\s* /$quote \s*> \n*]xsio;
 
 		$str =~ s/$open/<p><div class="quote">/g;
@@ -1489,11 +1491,10 @@ sub processCustomTagsPost {
 	# universally good
 	if (grep /^blockquote$/i, @{$constants->{approvedtags}}) {
 		my $quote   = 'blockquote';
-		my $open    = qr[\n* <\s* $quote \s*> \n*]xsio;
-		my $close   = qr[\n* <\s* /$quote \s*> \n*]xsio;
+		my $open    = qr[\s* <\s*  $quote \s*> \n*]xsio;
+		my $close   = qr[\s* <\s* /$quote \s*> \n*]xsio;
 
-		$str =~ s/$open/<p><$quote>/g;
-		$str =~ s/$close/<\/$quote><\/p>/g;
+		$str =~ s/(?<!<p>)$open/<p><$quote>/g;
 	}
 
 	return $str;

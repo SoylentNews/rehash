@@ -261,7 +261,7 @@ sub readRest {
 	my $texts   = $slashdb->getCommentTextCached(
 		{ $cid => $comment },
 		[ $cid ],
-		{ cid => $cid }
+		{ full => 1 }
 	) or return;
 
 	return $texts->{$cid} || '';
@@ -297,17 +297,22 @@ sub fetchComments {
 	return unless $comments && keys %$comments;
 
 	my %pieces = split /[,;]/, $form->{pieces};
-	my(@hidden_cids, @pieces_cids);
+	my %abbrev = split /[,;]/, $form->{abbreviated};
+	my(@hidden_cids, @pieces_cids, @abbrev_cids);
 	for my $cid (@$cids) {
 		if ($pieces{$cid}) {
 			push @pieces_cids, $cid;
+			if ($abbrev{$cid}) {
+				push @abbrev_cids, $cid;
+			}
 		} else {
 			push @hidden_cids, $cid;
 		}
 	}
+#use Data::Dumper; print STDERR Dumper \@hidden_cids, \@pieces_cids, \@abbrev_cids, \%pieces, \%abbrev, $form;
 
 	my $comment_text = $slashdb->getCommentTextCached(
-		$comments, \@hidden_cids,
+		$comments, [@hidden_cids, @abbrev_cids], { full => 1 },
 	);
 
 	for my $cid (keys %$comment_text) {
@@ -329,9 +334,16 @@ sub fetchComments {
 			});
 	}
 
+	my %html_append_substr;
+	for my $cid (@abbrev_cids) {
+		#@html{'comment_body_' . $cid} = $comments->{$cid}{comment};
+		@html_append_substr{'comment_body_' . $cid} = [$abbrev{$cid}, substr($comments->{$cid}{comment}, $abbrev{$cid})];
+	}
+
 	$options->{content_type} = 'application/json';
 	return Data::JavaScript::Anon->anon_dump({
-		html	=> \%html
+		html			=> \%html,
+		html_append_substr	=> \%html_append_substr
 	});
 }
 

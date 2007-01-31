@@ -625,14 +625,23 @@ function json_update(response) {
 				$(el).value = response.value[el];
 		}
 	}
- 	
+
 	if (response.html_append) {
 		for (el in response.html_append) {
 			if ($(el))
 				$(el).innerHTML = $(el).innerHTML + response.html_append[el];
 		}
 	}
-		
+
+	if (response.html_append_substr) {
+		for (el in response.html_append_substr) {
+			if ($(el)) {
+				$(el).innerHTML = $(el).innerHTML.substr(
+					0, response.html_append_substr[el][0]
+				) + response.html_append_substr[el][1];
+			}
+		}
+	}		
 }
 
 

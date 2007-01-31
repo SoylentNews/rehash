@@ -6016,6 +6016,11 @@ sub getCommentTextCached {
 	my $user = getCurrentUser();
 	$opt ||= {};
 
+	my $possible_chop  = !$opt->{full} && !($opt->{mode} && $opt->{mode} eq 'archive');
+	my $abbreviate_ok  = $opt->{discussion2} && $possible_chop;
+	my $abbreviate_len = 256;
+	my $max_len = $user->{maxcommentsize};
+
 	# We have to get the comment text we need (later we'll search/replace
 	# them into the text).
 	my $comment_text = {};
@@ -6035,12 +6040,14 @@ sub getCommentTextCached {
 		|| $user->{maxcommentsize} != $constants->{default_maxcommentsize};
 
 	# loop here, pull what cids we can
-	my($mcd_debug, $mcdkey, $mcdkeylen);
+	my($mcd_debug, $mcdkey, $mcdkey_abbrev, $mcdkeylen);
 	if ($mcd) {
 		# MemCached key prefix "ctp" means "comment_text, parsed".
+		# "a" means "abbreviated" (keep same len as mcdkey)
 		# Prepend our site key prefix to try to avoid collisions
 		# with other sites that may be using the same servers.
-		$mcdkey = "$self->{_mcd_keyprefix}:ctp:";
+		$mcdkey_abbrev = "$self->{_mcd_keyprefix}:cta:";
+		$mcdkey        = "$self->{_mcd_keyprefix}:ctp:";
 		$mcdkeylen = length($mcdkey);
 		if ($constants->{memcached_debug}) {
 			$mcd_debug = { start_time => Time::HiRes::time };
@@ -6054,17 +6061,29 @@ sub getCommentTextCached {
 			print STDERR scalar(gmtime) . " getCommentTextCached memcached mcdkey '$mcdkey'\n";
 		}
 		my @keys_try =
-			map { "$mcdkey$_" }
+			map {
+				$abbreviate_ok && $comments->{$_}{class} eq 'oneline'
+					? "$mcdkey_abbrev$_"
+					: "$mcdkey$_"
+			}
 			grep { !($opt->{cid} && $_ == $opt->{cid}) }
 			@$cids_needed_ar;
 		$comment_text = $mcd->get_multi(@keys_try);
 		my @old_keys = keys %$comment_text;
+
 		if ($mcd && $constants->{memcached_debug} && $constants->{memcached_debug} > 1) {
 			print STDERR scalar(gmtime) . " getCommentTextCached memcached got keys '@old_keys' tried for '@keys_try'\n"
 		}
 		$mcd_debug->{hits} = scalar @old_keys if $mcd_debug;
 		for my $old_key (@old_keys) {
 			my $new_key = substr($old_key, $mcdkeylen);
+
+			# strip out offset for abbrev
+			if (substr($old_key, 0, $mcdkeylen) eq $mcdkey_abbrev) {
+				$comment_text->{$old_key} =~ s/^(-?\d+:)//;
+				$comments->{$new_key}{abbreviated} = $1;
+			}
+
 			$comment_text->{$new_key} = delete $comment_text->{$old_key};
 		}
 		@$cids_needed_ar = grep { !exists $comment_text->{$_} } @$cids_needed_ar;
@@ -6084,9 +6103,9 @@ sub getCommentTextCached {
 	}
 
 	for my $cid (keys %$more_comment_text) {
-		if (	   !($opt->{mode} && $opt->{mode} eq 'archive')
+		if (	   $possible_chop
 			&& !($opt->{cid}  && $opt->{cid}  eq $cid)
-			&& $comments->{$cid}{len} > $user->{maxcommentsize}
+			&& $comments->{$cid}{len} > $max_len
 		) {
 			# We remove the domain tags so that strip_html will not
 			# consider </a blah> to be a non-approved tag.  We'll
@@ -6094,7 +6113,52 @@ sub getCommentTextCached {
 			# the comment down to size, then massage it to make sure
 			# we still have good HTML after the chop.
 			my $text = parseDomainTags($more_comment_text->{$cid}, 0, 1, 1);
-			$text = chopEntity($text, $user->{maxcommentsize});
+			my $this_len = $max_len;
+			my $abbreviate = $opt->{discussion2} && $comments->{$cid}{class} eq 'oneline';
+			if ($abbreviate) {
+				#my $max_len = 
+				$this_len = $abbreviate_len;
+				my $str = $text;
+				# based on revertQuote() ... we replace the unused
+				# content with <<LEN>> and then we know how much we
+				# removed
+				while ($str =~ m|((<p>)?<div class="quote">)(.+)$|sig) {
+					my($found, $p, $rest) = ($1, $2, $3);
+					my $pos = pos($str) - (length($found) + length($rest));
+					pos($str) = $pos + length($found);
+
+					my $c = 0;
+					while ($str =~ m|(<(/?)div.*?>(</p>)?)|sig) {
+						my($found, $end, $p2) = ($1, $2, $3);
+						if ($end && !$c) {
+							my $len = length($found);
+							my $thislen = pos($str)-$pos;
+							substr($str, $pos, $thislen) = "<<$thislen>>";
+							pos($str) = 0;
+							last;
+						} elsif ($end) {
+							$c--;
+						} else {
+							$c++;
+						}
+					}
+				}
+
+				$str =~ s/(?<!<)(<[^<>]+>)/'<<'.length($1).'>>'/ge;
+
+				my $plen = $this_len = 0;
+				while ($str =~ /([^<>]|<<(\d+)>>)/g) {
+					my $len1 = length $1;
+					if ($2) {
+						$this_len += $2;
+					} else {
+						$this_len += $len1;
+						$plen += $len1;
+					}
+					last if $plen >= $max_len;
+				}
+			}
+			$text = chopEntity($text, $this_len);
 
 			# the comments have already gone through approveTag
 			# and strip_html to remove disallowed user content,
@@ -6104,7 +6168,26 @@ sub getCommentTextCached {
 			local $Slash::Utility::Data::approveTag::admin = 1;
 			$text = strip_html($text);
 			$text = balanceTags($text, { admin => 1 });
-			$more_comment_text->{$cid} = addDomainTags($text);
+			$text = addDomainTags($text);
+
+			if ($abbreviate) {
+				# normalize whitespace between tags
+				my $text_a = $more_comment_text->{$cid};
+				my $text_b = $text;
+				s/> </></g for ($text_a, $text_b);
+				# -1: no change, 0+: the offset at which they are different
+				$comments->{$cid}{abbreviated} = $text_a ne $text_b ? 0 : -1;
+				if (!$comments->{$cid}{abbreviated}) {
+					for my $i (0 .. length($more_comment_text->{$cid})) {
+						if (substr($more_comment_text->{$cid}, $i, 1) ne substr($text, $i, 1)) {
+							$comments->{$cid}{abbreviated} = $i;
+							last;
+						}
+					}
+				}
+			}
+
+			$more_comment_text->{$cid} = $text;
 		}
 
 		# Now write the new data into our hashref and write it out to
@@ -6124,7 +6207,11 @@ sub getCommentTextCached {
 		if ($mcd && $opt->{cid} && $opt->{cid} ne $cid) {
 			my $exptime = $constants->{memcached_exptime_comtext};
 			$exptime = 86400 if !defined($exptime);
-			my $retval = $mcd->set("$mcdkey$cid", $comment_text->{$cid}, $exptime);
+			my $append = '';
+			if (defined $comments->{$cid}{abbreviated}) {
+				$append = $comments->{$cid}{abbreviated} . ':';
+			}
+			my $retval = $mcd->set("$mcdkey$cid", $append . $comment_text->{$cid}, $exptime);
 			if ($mcd && $constants->{memcached_debug} && $constants->{memcached_debug} > 1) {
 				my $exp_at = $exptime ? scalar(gmtime(time + $exptime)) : "never";
 				print STDERR scalar(gmtime) . " getCommentTextCached memcached writing '$mcdkey$cid' length " . length($comment_text->{$cid}) . " retval=$retval expire: $exp_at\n";

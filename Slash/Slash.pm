@@ -882,7 +882,7 @@ sub printComments {
 		$anon_dump = \&Data::JavaScript::Anon::anon_dump;
 	}
 
-#use Data::Dumper; print STDERR "printCommComments, comment: " . Dumper($comment) . "comments: " . Dumper($comments) . "discussion2: " . Dumper($discussion2);
+#use Data::Dumper; $Data::Dumper::Sortkeys = 1; print STDERR "printCommComments, comment: " . Dumper($comment) . "comments: " . Dumper($comments->{34}) . "discussion2: " . Dumper($discussion2);
 
 	my $comment_html = slashDisplay('printCommComments', {
 		can_moderate	=> $can_mod_any,
@@ -904,12 +904,27 @@ sub printComments {
 	# them into the text).
 	my $comment_text = $slashdb->getCommentTextCached(
 		$comments, $user->{state}{cids},
-		{ mode => $form->{mode}, cid => $form->{cid} }
+		{ mode => $form->{mode}, cid => $form->{cid}, discussion2 => $discussion2 }
 	);
 
 	# OK we have all the comment data in our hashref, so the search/replace
 	# on the nearly-fully-rendered page will work now.
 	$comment_html =~ s|<SLASH type="COMMENT-TEXT">(\d+)</SLASH>|$comment_text->{$1}|g;
+
+	# for abbreviated comments, remove some stuff
+	if ($discussion2) {
+		my @abbrev     = grep { defined($comments->{$_}{abbreviated}) && $comments->{$_}{abbreviated} != -1 } keys %$comments;
+		my @not_abbrev = grep { defined($comments->{$_}{abbreviated}) && $comments->{$_}{abbreviated} == -1 } keys %$comments;
+		for my $cid (@abbrev, @not_abbrev) {
+			$comment_html =~ s|<div id="comment_shrunk_$cid" class="commentshrunk">.+?</div>||;
+			$comment_html =~ s|<div id="comment_sig_$cid" class="sig hide">|<div id="comment_sig_$cid" class="sig">|;
+		}
+
+		if (@abbrev) {
+			my $abbrev_comments = join ',', map { "$_:$comments->{$_}{abbreviated}" } @abbrev;
+			$comment_html =~ s|abbrev_comments      = {};|abbrev_comments      = {$abbrev_comments};|;
+		}
+	}
 
 	print $comment_html;
 }
@@ -1025,6 +1040,7 @@ sub displayThread {
 
 		my $highlight = 1 if $comment->{points} >= $highlightthresh && $class ne 'hidden';
 		$class = 'full' if $highlight;
+		$comment->{class} = $class;
 
 		$user->{state}{comments}{totals}{$class}++;
 
@@ -1050,11 +1066,11 @@ sub displayThread {
 
 			if ($lvl && $indent) {
 				$return .= $const->{tablebegin} .
-					dispComment($comment, { class => $class, noshow => $noshow, pieces => $pieces }) .
+					dispComment($comment, { noshow => $noshow, pieces => $pieces }) .
 					$const->{tableend};
 				$cagedkids = 0;
 			} else {
-				$return .= dispComment($comment, { class => $class, noshow => $noshow, pieces => $pieces });
+				$return .= dispComment($comment, { noshow => $noshow, pieces => $pieces });
 			}
 			$displayed++;
 		} else {
@@ -1158,7 +1174,9 @@ sub dispComment {
 	my $maxcommentsize = $options->{maxcommentsize} || $user->{maxcommentsize};
 
 	my $comment_shrunk;
+
 	if ($form->{mode} ne 'archive'
+		&& !defined($comment->{abbreviated})
 		&& $comment->{len} > $maxcommentsize
 		&& $form->{cid} ne $comment->{cid})
 	{
@@ -1212,7 +1230,7 @@ EOT
 	$comment->{fakeemail_vis} = ellipsify($comment->{fakeemail});
 	push @{$user->{state}{cids}}, $comment->{cid};
 
-	$options->{class} ||= 'full';
+	$comment->{class} ||= 'full';
 
 #use Data::Dumper; print STDERR "dispComment hard='$constants->{comments_hardcoded}' can_mod='$can_mod' comment: " . Dumper($comment) . "reasons: " . Dumper($reasons);
 
@@ -1949,7 +1967,7 @@ EOT
 		}
 	}
 
-	my $class = $options->{class}; 
+	my $class = $comment->{class}; 
 	my $classattr = $discussion2 ? qq[ class="$class"] : '';
 
 	my $head = $discussion2 ? <<EOT1 : <<EOT2;

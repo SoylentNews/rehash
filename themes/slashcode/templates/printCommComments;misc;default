@@ -127,6 +127,7 @@ __template__
 		currents['oneline']  = [% user.state.comments.totals.oneline || 0 %];
 		// currents_total = [% (user.state.comments.totals.hidden || 0 ) + (user.state.comments.totals.full || 0) + (user.state.comments.totals.oneline || 0)  %];
 
+		abbrev_comments      = {};
 		noshow_comments      = [[% user.state.comments.noshow.join(',') %]];
 		pieces_comments      = [[% user.state.comments.pieces.join(',') %]];
 		init_hiddens         = [[% user.state.comments.hiddens.join(',') %]];

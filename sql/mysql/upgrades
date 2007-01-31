@@ -4314,10 +4314,6 @@ INSERT INTO vars (name, value, description) VALUES ('tags_admin_autoaddstorytopi
 # 2007-01-11
 UPDATE vars SET value = 'T_2_5_0_141' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 # 2007-01-18
 UPDATE vars SET value = 'T_2_5_0_142' WHERE name = 'cvs_tag_currentcode';
 
@@ -4383,5 +4379,9 @@ INSERT INTO firehose_tab VALUES (3,0,'Journals','journal','createtime','DESC','b
 
 # 2007-01-24
 UPDATE vars SET value = 'T_2_5_0_143' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('admin_warn_primaryskid', '', 'Warn admin if a story is saved with the following primaryskids (skids delimited by |)');

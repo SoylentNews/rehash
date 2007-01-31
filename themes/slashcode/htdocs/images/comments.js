@@ -4,6 +4,7 @@ var comments;
 var root_comments;
 var noshow_comments;
 var pieces_comments;
+var abbrev_comments = {};
 var init_hiddens = [];
 var fetch_comments = [];
 var fetch_comments_pieces = {};
@@ -532,15 +533,12 @@ function refreshCommentDisplays() {
 	return void(0);
 }
 
-
 /* misc. functions */
 function toHash(thisobject) {
 	return thisobject.map(function (pair) {
 		return pair.map(encodeURIComponent).join(',');
 	}).join(';');
 }
-
-//function getCommentSub(cid, 
 
 function ajaxFetchComments(cids) {
 	if (cids && !cids.length)
@@ -553,9 +551,16 @@ function ajaxFetchComments(cids) {
 	params['discussion_id'] = discussion_id;
 	params['reskey']        = reskey_static;
 
-	var pieces = $H(cids ? fetch_comments_pieces : pieces_comments);
-	params['pieces'] = toHash(pieces);
-//alert(params['pieces']);
+	var abbrev = {};
+	for (var i = 0; i < cids.length; i++) {
+		if (abbrev_comments[cids[i]] >= 0)
+			abbrev[cids[i]] = abbrev_comments[cids[i]];
+	}
+	params['abbreviated'] = $H(abbrev);
+	params['abbreviated'] = toHash(params['abbreviated']);
+
+	params['pieces'] = $H(cids ? fetch_comments_pieces : pieces_comments);
+	params['pieces'] = toHash(params['pieces']);
 
 	var handlers = {
 		onComplete: function (transport) {
