@@ -25,6 +25,10 @@ function createPopup(xy, titlebar, name, contents, message, onmouseout) {
 	div.id = name + "-popup";
 	div.style.position = "absolute";
 
+	if (onmouseout) {
+		div.onmouseout = onmouseout;
+	}
+
 	var leftpos = xy[0] + "px";
 	var toppos  = xy[1] + "px";
 	
@@ -945,8 +949,12 @@ function vendorStoryPopup() {
 	var title = "<a href='//intel.vendors.slashdot.org' onclick=\"javascript:urchinTracker('/vendor_intel-popup/intel_popup_title');\">Intel's Opinion Center</a>";
 	var buttons = createPopupButtons("<a href=\"javascript:closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
 	title = title + buttons;
-	var closepopup = function () {
+	var closepopup = function (e) {
+	if (!e) var e = window.event;
+	var relTarg = e.relatedTarget || e.toElement;
+	if (relTarg && relTarg.id == "vendorStory-26-popup") {
 		closePopup("vendorStory-26-popup");
+	}
 	};
 	createPopup(getXYForId('sponsorlinks', 0, 0), title, "vendorStory-" + id, "Loading", "", closepopup );
 	var params = [];
