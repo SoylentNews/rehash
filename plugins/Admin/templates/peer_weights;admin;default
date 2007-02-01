@@ -1,0 +1,36 @@
+__description__
+peer weight viewing for admins
+
+uids = arrayref of uids in order of decreasing weight
+ord = ordinal position of each uid
+weight = hashref, uid to weight
+nickname = hashref, uid to nickname
+
+__title__
+Peer weights
+__section__
+default
+__page__
+admin
+__lang__
+en_US
+__name__
+peer_weights
+__seclev__
+10000
+__template__
+<table class="data">
+
+[% FOREACH uid = uids %]
+	<tr class="data_hl1">
+<td>[% ord.$uid %].</td>
+<td><a href="/~[% nickname.$uid | strip_paramattr %]">[% nickname.$uid | strip_nohtml %]</a></td>
+<td>[% weight.$uid %]</td>
+	</tr>
+[% END %]
+
+</table>
+
+__version__
+$Id$
+
