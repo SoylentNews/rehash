@@ -653,6 +653,7 @@ sub ajaxSaveFirehoseTab {
 
 	my $tabid = $form->{tabid};
 	my $tabname = $form->{tabname};
+	$tabname =~ s/^\s+|\s+$//g;
 	my $message = "";
 
 	my $user_tabs = $firehose->getUserTabs();
