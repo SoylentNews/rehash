@@ -337,7 +337,7 @@ sub fetchComments {
 	my %html_append_substr;
 	for my $cid (@abbrev_cids) {
 		#@html{'comment_body_' . $cid} = $comments->{$cid}{comment};
-		@html_append_substr{'comment_body_' . $cid} = [$abbrev{$cid}, substr($comments->{$cid}{comment}, $abbrev{$cid})];
+		@html_append_substr{'comment_body_' . $cid} = substr($comments->{$cid}{comment}, $abbrev{$cid});
 	}
 
 	$options->{content_type} = 'application/json';

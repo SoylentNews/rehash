@@ -636,9 +636,14 @@ function json_update(response) {
 	if (response.html_append_substr) {
 		for (el in response.html_append_substr) {
 			if ($(el)) {
-				$(el).innerHTML = $(el).innerHTML.substr(
-					0, response.html_append_substr[el][0]
-				) + response.html_append_substr[el][1];
+				var this_html = $(el).innerHTML;
+				var i = $(el).innerHTML.search(/<span class="substr"> <\/span>[\s\S]*$/i);
+				if (i == -1) {
+					$(el).innerHTML += response.html_append_substr[el];
+				} else {
+					$(el).innerHTML = $(el).innerHTML.substr(0, i) +
+						response.html_append_substr[el];
+				}
 			}
 		}
 	}		

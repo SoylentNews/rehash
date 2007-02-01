@@ -1196,7 +1196,7 @@ sub editStory {
 		$extracolumns = $slashdb->getNexusExtrasForChosen($chosen_hr);
 
 		for my $field (qw( introtext bodytext )) {
-			local $Slash::Utility::Data::approveTag::admin = 1;
+			local $Slash::Utility::Data::approveTag::admin = 2;
 			$storyref->{$field} = $slashdb->autoUrl($form->{section}, $storyref->{$field});
 			$storyref->{$field} = cleanSlashTags($storyref->{$field});
 			$storyref->{$field} = strip_html($storyref->{$field});
@@ -1959,7 +1959,7 @@ sub updateStory {
 	my $time = findTheTime();
 
 	for my $field (qw( introtext bodytext )) {
-		local $Slash::Utility::Data::approveTag::admin = 1;
+		local $Slash::Utility::Data::approveTag::admin = 2;
 		$form->{$field} = cleanSlashTags($form->{$field});
 		$form->{$field} = strip_html($form->{$field});
 		$form->{$field} = slashizeLinks($form->{$field});
@@ -1974,7 +1974,7 @@ sub updateStory {
 
 	my $story_text = "$form->{title} $form->{introtext} $form->{bodytext}";
 	{
-		local $Slash::Utility::Data::approveTag::admin = 1;
+		local $Slash::Utility::Data::approveTag::admin = 2;
 		$story_text = parseSlashizedLinks($story_text);
 		$story_text = processSlashTags($story_text);
 	}
@@ -2294,7 +2294,7 @@ sub saveStory {
 	my($related_sids_hr, $related_urls_hr) = extractRelatedStoriesFromForm($form);
 
 	for my $field (qw( introtext bodytext )) {
-		local $Slash::Utility::Data::approveTag::admin = 1;
+		local $Slash::Utility::Data::approveTag::admin = 2;
 		$form->{$field} = cleanSlashTags($form->{$field});
 		$form->{$field} = strip_html($form->{$field});
 		$form->{$field} = slashizeLinks($form->{$field});
@@ -2303,7 +2303,7 @@ sub saveStory {
 
 	my $story_text = "$form->{title} $form->{introtext} $form->{bodytext}";
 	{
-		local $Slash::Utility::Data::approveTag::admin = 1;
+		local $Slash::Utility::Data::approveTag::admin = 2;
 		$story_text = parseSlashizedLinks($story_text);
 		$story_text = processSlashTags($story_text);
 	}

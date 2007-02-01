@@ -6103,22 +6103,23 @@ sub getCommentTextCached {
 	}
 
 	for my $cid (keys %$more_comment_text) {
+		my $abbreviate = $abbreviate_ok && $comments->{$cid}{class} eq 'oneline';
+		my $original_text = $more_comment_text->{$cid};
 		if (	   $possible_chop
 			&& !($opt->{cid}  && $opt->{cid}  eq $cid)
-			&& $comments->{$cid}{len} > $max_len
+			&& $comments->{$cid}{len} > (
+				$abbreviate ? $abbreviate_len : $max_len
+			)
 		) {
 			# We remove the domain tags so that strip_html will not
 			# consider </a blah> to be a non-approved tag.  We'll
 			# add them back at the last step.  In-between, we chop
 			# the comment down to size, then massage it to make sure
 			# we still have good HTML after the chop.
-			my $text = parseDomainTags($more_comment_text->{$cid}, 0, 1, 1);
+			my $abbrev_text = parseDomainTags($more_comment_text->{$cid}, 0, 1, 1);
 			my $this_len = $max_len;
-			my $abbreviate = $opt->{discussion2} && $comments->{$cid}{class} eq 'oneline';
 			if ($abbreviate) {
-				#my $max_len = 
-				$this_len = $abbreviate_len;
-				my $str = $text;
+				my $str = $abbrev_text;
 				# based on revertQuote() ... we replace the unused
 				# content with <<LEN>> and then we know how much we
 				# removed
@@ -6155,10 +6156,10 @@ sub getCommentTextCached {
 						$this_len += $len1;
 						$plen += $len1;
 					}
-					last if $plen >= $max_len;
+					last if $plen >= $abbreviate_len;
 				}
 			}
-			$text = chopEntity($text, $this_len);
+			$abbrev_text = chopEntity($abbrev_text, $this_len);
 
 			# the comments have already gone through approveTag
 			# and strip_html to remove disallowed user content,
@@ -6166,28 +6167,11 @@ sub getCommentTextCached {
 			# after the fact, so we want to make sure it is kept
 			# here -- pudge
 			local $Slash::Utility::Data::approveTag::admin = 1;
-			$text = strip_html($text);
-			$text = balanceTags($text, { admin => 1 });
-			$text = addDomainTags($text);
+			$abbrev_text = strip_html($abbrev_text);
+			$abbrev_text = balanceTags($abbrev_text, { admin => 1 });
+			$abbrev_text = addDomainTags($abbrev_text);
 
-			if ($abbreviate) {
-				# normalize whitespace between tags
-				my $text_a = $more_comment_text->{$cid};
-				my $text_b = $text;
-				s/> </></g for ($text_a, $text_b);
-				# -1: no change, 0+: the offset at which they are different
-				$comments->{$cid}{abbreviated} = $text_a ne $text_b ? 0 : -1;
-				if (!$comments->{$cid}{abbreviated}) {
-					for my $i (0 .. length($more_comment_text->{$cid})) {
-						if (substr($more_comment_text->{$cid}, $i, 1) ne substr($text, $i, 1)) {
-							$comments->{$cid}{abbreviated} = $i;
-							last;
-						}
-					}
-				}
-			}
-
-			$more_comment_text->{$cid} = $text;
+			$more_comment_text->{$cid} = $abbrev_text;
 		}
 
 		# Now write the new data into our hashref and write it out to
@@ -6202,6 +6186,54 @@ sub getCommentTextCached {
 		my $karma_bonus = $comments->{$cid}{karma_bonus};
 		if (!$karma_bonus || $karma_bonus eq 'no') {
 			$comment_text->{$cid} = noFollow($comment_text->{$cid});
+		}
+
+		if ($abbreviate) {
+			my $text_a = $original_text;
+			my $text_b = $comment_text->{$cid};
+			# normalize whitespace between tags
+			s/> </></g for ($text_a, $text_b);
+			# -1: no change, 0+: the offset at which they are different
+			$comments->{$cid}{abbreviated} = $text_a ne $text_b ? 0 : -1;
+
+			if (!$comments->{$cid}{abbreviated}) {
+				$text_a = $original_text;
+				$text_b = $comment_text->{$cid};
+
+				my $len_b = length($text_b);
+				if (substr($text_a, 0, $len_b) eq $text_b) {
+					$comments->{$cid}{abbreviated} = $len_b;
+				} else {
+					($text_a, $text_b) = ($text_b, $text_a) if length($text_a) < length($text_b);
+
+					my $ent_in = my $tag_in = 0;
+					for my $i (0 .. length($text_a)) {
+						my $c = substr($text_a, $i, 1);
+						my $d = substr($text_b, $i, 1);
+
+						if ($c ne $d) {
+							$comments->{$cid}{abbreviated} = $tag_in || $ent_in || $i;
+							last;
+						} else {
+							if ($c eq '<') {
+								$tag_in = $i;
+							} elsif ($tag_in) {
+								$tag_in = 0 if $c eq '>';
+							} elsif (!$tag_in) {
+								if ($c eq '&') {
+									$ent_in = $i;
+								} elsif ($ent_in) {
+									$ent_in = 0 if $c eq ';';
+								}
+							}
+						}
+					}
+
+					if ($comments->{$cid}{abbreviated} < length($comment_text->{$cid})) {
+						substr($comment_text->{$cid}, $comments->{$cid}{abbreviated}, 0) = '<span class="substr"> </span>';
+					}
+				}
+			}
 		}
 
 		if ($mcd && $opt->{cid} && $opt->{cid} ne $cid) {
