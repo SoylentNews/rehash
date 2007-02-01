@@ -300,16 +300,15 @@ sub fetchComments {
 	my %abbrev = split /[,;]/, $form->{abbreviated};
 	my(@hidden_cids, @pieces_cids, @abbrev_cids);
 	for my $cid (@$cids) {
-		if ($pieces{$cid}) {
+		if (exists $pieces{$cid}) {
 			push @pieces_cids, $cid;
-			if ($abbrev{$cid}) {
+			if (exists $abbrev{$cid}) {
 				push @abbrev_cids, $cid;
 			}
 		} else {
 			push @hidden_cids, $cid;
 		}
 	}
-#use Data::Dumper; print STDERR Dumper \@hidden_cids, \@pieces_cids, \@abbrev_cids, \%pieces, \%abbrev, $form;
 
 	my $comment_text = $slashdb->getCommentTextCached(
 		$comments, [@hidden_cids, @abbrev_cids], { full => 1 },
@@ -339,6 +338,7 @@ sub fetchComments {
 		#@html{'comment_body_' . $cid} = $comments->{$cid}{comment};
 		@html_append_substr{'comment_body_' . $cid} = substr($comments->{$cid}{comment}, $abbrev{$cid});
 	}
+#use Data::Dumper; print STDERR Dumper \@hidden_cids, \@pieces_cids, \@abbrev_cids, \%pieces, \%abbrev, \%html, \%html_append_substr, $form;
 
 	$options->{content_type} = 'application/json';
 	return Data::JavaScript::Anon->anon_dump({

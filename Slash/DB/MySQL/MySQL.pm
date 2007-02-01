@@ -6063,8 +6063,8 @@ sub getCommentTextCached {
 		my @keys_try =
 			map {
 				$abbreviate_ok && $comments->{$_}{class} eq 'oneline'
-					? "$mcdkey_abbrev$_"
-					: "$mcdkey$_"
+					? $mcdkey_abbrev . $_
+					: $mcdkey . $_
 			}
 			grep { !($opt->{cid} && $_ == $opt->{cid}) }
 			@$cids_needed_ar;
@@ -6080,8 +6080,9 @@ sub getCommentTextCached {
 
 			# strip out offset for abbrev
 			if (substr($old_key, 0, $mcdkeylen) eq $mcdkey_abbrev) {
-				$comment_text->{$old_key} =~ s/^(-?\d+:)//;
-				$comments->{$new_key}{abbreviated} = $1;
+				if ($comment_text->{$old_key} =~ s/^(-?\d+)://) {
+					$comments->{$new_key}{abbreviated} = $1;
+				}
 			}
 
 			$comment_text->{$new_key} = delete $comment_text->{$old_key};
@@ -6106,7 +6107,7 @@ sub getCommentTextCached {
 		my $abbreviate = $abbreviate_ok && $comments->{$cid}{class} eq 'oneline';
 		my $original_text = $more_comment_text->{$cid};
 		if (	   $possible_chop
-			&& !($opt->{cid}  && $opt->{cid}  eq $cid)
+			&& !($opt->{cid}  && $opt->{cid} eq $cid)
 			&& $comments->{$cid}{len} > (
 				$abbreviate ? $abbreviate_len : $max_len
 			)
@@ -6191,6 +6192,12 @@ sub getCommentTextCached {
 		if ($abbreviate) {
 			my $text_a = $original_text;
 			my $text_b = $comment_text->{$cid};
+
+			$text_a = parseDomainTags($text_a, $comments->{$cid}{fakeemail});
+			if (!$karma_bonus || $karma_bonus eq 'no') {
+				$text_a = noFollow($text_a);
+			}
+
 			# normalize whitespace between tags
 			s/> </></g for ($text_a, $text_b);
 			# -1: no change, 0+: the offset at which they are different
@@ -6206,24 +6213,27 @@ sub getCommentTextCached {
 				} else {
 					($text_a, $text_b) = ($text_b, $text_a) if length($text_a) < length($text_b);
 
-					my $ent_in = my $tag_in = 0;
+					my $ent_in = my $tag_in = -1;
 					for my $i (0 .. length($text_a)) {
 						my $c = substr($text_a, $i, 1);
 						my $d = substr($text_b, $i, 1);
 
 						if ($c ne $d) {
-							$comments->{$cid}{abbreviated} = $tag_in || $ent_in || $i;
+							$comments->{$cid}{abbreviated} =
+								$tag_in >= 0 ? $tag_in :
+								$ent_in >= 0 ? $ent_in :
+								$i;
 							last;
 						} else {
 							if ($c eq '<') {
 								$tag_in = $i;
 							} elsif ($tag_in) {
-								$tag_in = 0 if $c eq '>';
+								$tag_in = -1 if $c eq '>';
 							} elsif (!$tag_in) {
 								if ($c eq '&') {
 									$ent_in = $i;
 								} elsif ($ent_in) {
-									$ent_in = 0 if $c eq ';';
+									$ent_in = -1 if $c eq ';';
 								}
 							}
 						}
@@ -6236,14 +6246,16 @@ sub getCommentTextCached {
 			}
 		}
 
-		if ($mcd && $opt->{cid} && $opt->{cid} ne $cid) {
+		if ($mcd && !($opt->{cid} && $opt->{cid} == $cid)) {
 			my $exptime = $constants->{memcached_exptime_comtext};
 			$exptime = 86400 if !defined($exptime);
 			my $append = '';
+			my $mcdkey_cid = $mcdkey . $cid;
 			if (defined $comments->{$cid}{abbreviated}) {
 				$append = $comments->{$cid}{abbreviated} . ':';
+				$mcdkey_cid = $mcdkey_abbrev . $cid;
 			}
-			my $retval = $mcd->set("$mcdkey$cid", $append . $comment_text->{$cid}, $exptime);
+			my $retval = $mcd->set($mcdkey_cid, $append . $comment_text->{$cid}, $exptime);
 			if ($mcd && $constants->{memcached_debug} && $constants->{memcached_debug} > 1) {
 				my $exp_at = $exptime ? scalar(gmtime(time + $exptime)) : "never";
 				print STDERR scalar(gmtime) . " getCommentTextCached memcached writing '$mcdkey$cid' length " . length($comment_text->{$cid}) . " retval=$retval expire: $exp_at\n";
