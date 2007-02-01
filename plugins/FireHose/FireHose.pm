@@ -1506,10 +1506,16 @@ sub setFireHoseSession {
 }
 
 sub getUserTabs {
-	my($self) = @_;
+	my($self, $options) = @_;
+	$options ||= {};
 	my $user = getCurrentUser();
 	my $uid_q = $self->sqlQuote($user->{uid});
-	my $tabs = $self->sqlSelectAllHashrefArray("*", "firehose_tab", "uid=$uid_q", "order by tabname asc");
+	my @where;
+	push @where, "uid=$uid_q";
+	push @where, "tabname like '$options->{prefix}%'";
+	my $where = join ' AND ', @where;
+
+	my $tabs = $self->sqlSelectAllHashrefArray("*", "firehose_tab", $where, "order by tabname asc");
 	@$tabs = sort { 
 			$b->{tabname} eq "untitled" ? -1 : 
 				$a->{tabname} eq "untitled" ? 1 : 0	||
@@ -1541,9 +1547,9 @@ sub createOrReplaceUserTab {
 sub ajaxFirehoseListTabs {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $firehose = getObject("Slash::FireHose");
-	my $tabs = $firehose->getUserTabs();
+	my $tabs = $firehose->getUserTabs({ prefix => $form->{prefix}});
 	@$tabs = map { $_->{tabname}} grep { $_->{tabname} ne "untitled" } @$tabs;
-	return join "\t", @$tabs;
+	return join "\n", @$tabs;
 }
 
 

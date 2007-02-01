@@ -300,7 +300,7 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 #colorsliderbg { background: url('//images.slashdot.org/colorscale.png') no-repeat 0px -3px }
 
 input {width: auto !important; margin: 0 0 0 .5em !important; }
-#colorsliderbg { display: inline; padding: 4px 92px 3px 0; }
+#colorsliderbg { display: inline; padding: 4px 108px 3px 0; }
 #colorsliderthumb { display: inline }
 #colorsliderthumb img {margin: 0 0 -5px 0px}
 
