@@ -716,7 +716,7 @@ function quoteReply(pid) {
 	this_reply = this_reply.replace(/^\n+/g, "");
 	this_reply = this_reply.replace(/<\/quote>\n*/g, "</quote>\n\n");
 
-	$('postercomment').value = this_reply + "\n\n" + $('postercomment').value;
+	$('postercomment').value = this_reply + $('postercomment').value;
 }
 
 /* utility functions */
