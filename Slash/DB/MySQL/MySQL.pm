@@ -6227,9 +6227,9 @@ sub getCommentTextCached {
 						} else {
 							if ($c eq '<') {
 								$tag_in = $i;
-							} elsif ($tag_in) {
+							} elsif ($tag_in >= 0) {
 								$tag_in = -1 if $c eq '>';
-							} elsif (!$tag_in) {
+							} elsif ($tag_in < 0) {
 								if ($c eq '&') {
 									$ent_in = $i;
 								} elsif ($ent_in) {
