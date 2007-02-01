@@ -2500,6 +2500,7 @@ sub displayPeerWeights {
 				'users_param',
 				q{name='tagpeerval'},
 				"ORDER BY val DESC, uid LIMIT $i0, 1");
+			next unless $uid;
 			$weight_hr->{$uid} = sprintf("%0.4f", $val);
 			$ord_hr->{$uid} = $i0;
 			push @uids, $uid;
