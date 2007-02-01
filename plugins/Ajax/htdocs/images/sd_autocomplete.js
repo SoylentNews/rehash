@@ -450,6 +450,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type,
     var p = me._callbackParams;
     if ( p.action0 !== undefined ) p.action0(tagname, p);
     me._hide();
+
     if ( p.action1 !== undefined ) p.action1(tagname, p);
   }
 
