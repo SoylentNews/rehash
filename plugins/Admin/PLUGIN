@@ -37,6 +37,7 @@ template=templates/mcd_stats;admin;default
 template=templates/messages;admin;default
 template=templates/neverdisplay;misc;default
 template=templates/otherLinks;admin;default
+template=templates/peer_weights;admin;default
 template=templates/recent;admin;default
 template=templates/recent_requests;admin;default
 template=templates/recent_mods;admin;default

@@ -200,6 +200,12 @@ sub main {
 			seclev		=> 500,
 			adminmenu	=> 'info',
 			tab_selected	=> 'signoff'
+		},
+		peerweights 		=> {
+			function	=> \&displayPeerWeights,
+			seclev		=> 500,
+			adminmenu	=> 'info',
+			tab_selected	=> 'pw'
 		}
 	};
 
@@ -2459,6 +2465,58 @@ sub displaySignoffStats {
 		author_info	=> $author_info,
 		stoids_for_days	=> \%stoids_for_days,
 		num_days	=> $num_days
+	});
+
+}
+
+sub displayPeerWeights {
+	my($form, $slashdb, $user, $constants) = @_;
+
+	my $count = $slashdb->sqlCount('users_param', q{name='tagpeerval' AND value != '0'});
+
+	my $weight_hr = $slashdb->sqlSelectAllKeyValue(
+		'uid, value+0 AS val',
+		'users_param',
+		q{name='tagpeerval'},
+		'ORDER BY val DESC LIMIT 40');
+	my $i = 1;
+	my $ord_hr = { };
+	my @uids = sort
+		{ $weight_hr->{$b} <=> $weight_hr->{$a} || $a cmp $b }
+		keys %$weight_hr;
+	for my $uid (@uids) {
+		$weight_hr->{$uid} = sprintf("%0.4f", $weight_hr->{$uid});
+		$ord_hr->{$uid} = $i++;
+	}
+
+	if ($count > 200) {
+		$i = 40;
+		my $inc = ($count-40) / 40;
+		for (1..40) {
+			$i += $inc;
+			my $i0 = int($i);
+			my($uid, $val) = $slashdb->sqlSelect(
+				'uid, value+0 AS val',
+				'users_param',
+				q{name='tagpeerval'},
+				"ORDER BY val DESC, uid LIMIT $i0, 1");
+			$weight_hr->{$uid} = sprintf("%0.4f", $val);
+			$ord_hr->{$uid} = $i0;
+			push @uids, $uid;
+		}
+	}
+
+	my $uid_str = join(',', @uids);
+	my $nickname_hr = $slashdb->sqlSelectAllKeyValue(
+		'uid, nickname',
+		'users',
+		"uid IN ($uid_str)");
+
+	slashDisplay("peer_weights", {
+		uids		=> \@uids,
+		ord		=> $ord_hr,
+		weight		=> $weight_hr,
+		nickname	=> $nickname_hr,
 	});
 
 }

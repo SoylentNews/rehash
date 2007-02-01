@@ -110,3 +110,11 @@ CREATE TABLE tags_userchange (
 	KEY uid (uid)
 ) TYPE=InnoDB;
 
+CREATE TABLE tags_peerweight (
+	uid		mediumint UNSIGNED NOT NULL DEFAULT '0',
+	gen		smallint UNSIGNED NOT NULL DEFAULT '0',
+	weight		float NOT NULL DEFAULT '0',
+	PRIMARY KEY (uid),
+	KEY gen_uid (gen, uid)
+) TYPE=InnoDB;
+
