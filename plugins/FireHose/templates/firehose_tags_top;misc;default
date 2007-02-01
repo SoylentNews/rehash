@@ -16,7 +16,7 @@ __template__
 		parts = t.split(":");
 		is_menu = user.tags_canwrite_stories && parts.1.defined && parts.1;
 		is_link =  !is_menu && parts.1.defined && !parts.1; 
-		action1 = ", action1:completer_setTag"
+		action1 = ", action1:completer_setTag";
 		IF parts.1 == 5; action1 = ", action1:completer_handleNeverDisplay"; END;
 		%]
 		<span class="tagname">[%- IF is_menu -%]<span class="tagmenu"><a onClick="attachCompleter(this, '[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose', [% parts.1 %], {action0:completer_renameMenu[% action1 %]})">[%- ELSIF is_link -%]<a href="/tags/[% parts.0 | strip_html %]">[%- END -%][%- parts.0 | strip_html -%][%- IF is_menu || is_link %]</a>[% END -%][%- IF is_menu %]</span>[% END -%]</span>[% IF !loop.last() %], 
