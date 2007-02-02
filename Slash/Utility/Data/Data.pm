@@ -1567,7 +1567,8 @@ The text.
 
 sub breakHtml {
 	my($text, $mwl) = @_;
-	return $text if $Slash::Utility::Data::approveTag::admin > 1;
+	return $text if $Slash::Utility::Data::approveTag::admin
+		     && $Slash::Utility::Data::approveTag::admin > 1;
 
 	my $constants = getCurrentStatic();
 	$mwl = $mwl || $constants->{breakhtml_wordlength} || 50;
