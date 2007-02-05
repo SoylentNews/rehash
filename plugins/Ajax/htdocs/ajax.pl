@@ -261,7 +261,7 @@ sub readRest {
 	my $texts   = $slashdb->getCommentTextCached(
 		{ $cid => $comment },
 		[ $cid ],
-		{ full => 1 }
+		{ cid => $cid, full => 1 }
 	) or return;
 
 	return $texts->{$cid} || '';
