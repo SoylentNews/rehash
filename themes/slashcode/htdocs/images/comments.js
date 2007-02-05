@@ -844,7 +844,7 @@ function d2act () {
 			xy[1] = xy[1] - gd.offsetHeight;
 
 		if (xy[1] < -14) {
-			gd.style.top      = '4px';
+			gd.style.top      = '0px';
 			gd.style.position = 'fixed';
 			gd.style.left     = '1em';
 		} else {
