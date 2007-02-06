@@ -135,6 +135,11 @@ INSTALLATION
         Perl is likely already installed on your machine; doublecheck that
         its version is at least the minimum required (see "REQUIREMENTS").
 
+        Also, check the "Libraries" (or "Debian libraries") section under
+        "REQUIREMENTS", below. You may need to install dev packages for not
+        only perl but mysql and expat as well and now's a good time to take
+        care of that.
+
     3.  Install Apache and mod_perl.
 
         You MUST install mod_perl and Apache as directed here. OK, that is
@@ -174,6 +179,13 @@ INSTALLATION
         and remember PERL_MARK_WHERE=1 and EVERYTHING=1.
 
         NOTE: See also "Other requirements" under "REQUIREMENTS".
+
+        Ubuntu NOTE: In mid-2006 Ubuntu 6.x switched sh to point to dash
+        instead of bash, which apparently breaks the above step (because
+        dash's 'echo -E' isn't compliant enough for apache's 'configure').
+        We're looking into it, but for now apparently (temporarily) linking
+        /bin/sh to /bin/bash during this step is a workaround.
+        "dash-as-bin-sh" in https://launchpad.net/ubuntu/+spec
 
     4.  Install the perl modules.
 
