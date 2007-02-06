@@ -486,7 +486,7 @@ sub editComment {
 		# prep for JavaScript
 		$pid_reply =~ s|\\|\\\\|g;
 		$pid_reply =~ s|'|\\'|g;
-		$pid_reply =~ s|([\r\n])|\\$1|g;
+		$pid_reply =~ s|([\r\n])|\$1|g;
 
 		$pid_reply =~ s{<nobr> <wbr></nobr>(\s*)} {$1 || ' '}gie;
 		#my $nick = strip_literal($reply->{nickname});
