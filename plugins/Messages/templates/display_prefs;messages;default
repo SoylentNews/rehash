@@ -36,34 +36,24 @@ __template__
 		From this page you can configure various messages that [% constants.sitename %] can optionally send to you.  The primary options are [% deliverymodes.$modenone %] (Disabled), [% deliverymodes.$modemail %], and [% deliverymodes.$modeweb %].  Not all options are available for all message types.  [% deliverymodes.$modeweb %] messages <b>will be deleted</b> after <b>[% constants.message_web_expire || 31 %] days</b>.
 	<form action="[% env.script_name %]" method="post">
 		<fieldset>
-			<legend>Message Preferences</legend>	
-[% messages = Slash.getObject('Slash::Messages');
-   FOR code = messagecodes.sort;
-      moderef = { $modenone => deliverymodes.$modenone };
+			<legend>Message Preferences</legend>
 
-      # this is not so bad, it is cached, but could be improved perhaps
-      mcode = messages.getMessageCode(code);
-
-      UNLESS messages.checkMessageUser(code, userm);
-         NEXT;
-      END;
-
-      IF mcode.modes.length;
-         modes = mcode.modes.split(",");
-      ELSE;
-         modes = deliverymodes.keys;
-      END;
-
-      FOR mode = modes;
-         moderef.$mode = deliverymodes.$mode;
-      END;
-%]
-			<label>
-				[% messagecodes.$code %]
-				[% UNLESS prefs.${code}.defined; prefs.$code = modenone; END;
-				Slash.createSelect("deliverymodes_$code", moderef, prefs.$code, 1, 1) %]
-				[%- END %]
-			</label>
+	[%
+	messages = Slash.getObject('Slash::Messages');
+	FOREACH type = bvmessagecodes.keys.sort;
+		code = bvmessagecodes.$type.code;
+		UNLESS messages.checkMessageUser(code, userm);
+			NEXT;
+		END
+	%]
+		<label>
+		[% type %] <select name="deliverymodes_[% code %]">
+		[% FOREACH valid_code = bvmessagecodes.$type.valid_bvdeliverymodes.sort %]
+			<option value="[% valid_code %]"[% IF prefs.${code} == valid_code %] selected[% END %]>[% bvdeliverymodes.$valid_code.name %]</option>
+		[% END %]
+		</select>
+		</label>
+	[% END %]
                         <p>
                                 You may select a message threshold for when messages for comments (replies to journal entries, replies to comments) are sent to you.
                         </p>
