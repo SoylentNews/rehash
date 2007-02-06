@@ -193,8 +193,26 @@ sub display_prefs {
 	my($messages, $constants, $user, $form, $note) = @_;
 	my $slashdb = getCurrentDB();
 
-	my $deliverymodes = $messages->getDescriptions('deliverymodes');
-	my $messagecodes  = $messages->getDescriptions('messagecodes');
+	my $deliverymodes   = $messages->getDescriptions('deliverymodes');
+	my $messagecodes    = $messages->getDescriptions('messagecodes');
+	my $bvdeliverymodes = $messages->getDescriptions('bvdeliverymodes');
+	my $bvmessagecodes  = $messages->getDescriptions('bvmessagecodes');
+	
+	foreach my $bvmessagecode (keys %$bvmessagecodes) {
+		$bvmessagecodes->{$bvmessagecode}->{'valid_bvdeliverymodes'} = [];
+		foreach my $bvdeliverymode (keys %$bvdeliverymodes) {
+			# skip if we have no valid delivery modes (i.e. off)
+			if (!$bvmessagecodes->{$bvmessagecode}->{'delivery_bvalue'}) {
+				delete $bvmessagecodes->{$bvmessagecode};
+				last;
+			}
+			# build our list of valid delivery modes
+			if (($bvdeliverymodes->{$bvdeliverymode}->{'bitvalue'} & $bvmessagecodes->{$bvmessagecode}->{'delivery_bvalue'}) ||
+			    ($bvdeliverymodes->{$bvdeliverymode}->{'bitvalue'} == 0)) {
+				push(@{$bvmessagecodes->{$bvmessagecode}->{'valid_bvdeliverymodes'}}, $bvdeliverymodes->{$bvdeliverymode}->{'code'});
+			}
+		}
+	}
 
 	my $uid = $user->{uid};
 	if ($user->{seclev} >= 1000 && $form->{uid}) {
@@ -225,7 +243,9 @@ sub display_prefs {
 		messagecodes	=> $messagecodes,
 		deliverymodes	=> $deliverymodes,
 		prefs_titlebar	=> $prefs_titlebar,
-		messages_menu	=> $messages_menu
+		messages_menu	=> $messages_menu,
+		bvmessagecodes  => $bvmessagecodes,
+		bvdeliverymodes => $bvdeliverymodes
 	});
 	footer();
 }
