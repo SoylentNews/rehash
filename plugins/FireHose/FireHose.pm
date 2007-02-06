@@ -485,6 +485,14 @@ sub getUserFireHoseVotesForGlobjs {
 
 sub getFireHose {
 	my($self, $id) = @_;
+
+	my $mcd = $self->getMCD();
+	my $mcdkey = "$self->{_mcd_keyprefix}:firehose";
+	if ($mcd) {
+		my $item = $mcd->get("$mcdkey:$id");
+		return if $item;
+	}
+
 	# XXX cache this eventually
 	my $id_q = $self->sqlQuote($id);
 	my $answer = $self->sqlSelectHashref("*", "firehose", "id=$id_q");
@@ -498,6 +506,10 @@ sub getFireHose {
 	# instead.  Firehose notes are/were designed to never be undef,
 	# the empty string instead.
 	$answer->{note} = $self->getGlobjAdminnote($answer->{globjid}) || '';
+	
+	if ($mcd) {
+		my $item = $mcd->set("$mcdkey:$id", $answer);
+	}
 
 	return $answer;
 }
@@ -754,7 +766,7 @@ sub ajaxFireHoseGetUpdates {
 	my $update_time = $form->{updatetime};
 	my @ids = grep {/^\d+$/} split (/,/, $id_str);
 	my %ids = map { $_ => 1 } @ids;
-	my %ids_orig = %ids;
+	my %ids_orig = ( %ids ) ;
 	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
 	my $future = {};
@@ -771,6 +783,7 @@ sub ajaxFireHoseGetUpdates {
 	$adminmode = 0 if $user->{is_admin} && $user->{firehose_usermode};
 	my $ordered = [];
 	my $now = $slashdb->getTime();
+	my $added = {};
 
 
 	foreach (@$items) {
@@ -793,6 +806,7 @@ sub ajaxFireHoseGetUpdates {
 			# new
 			$update_time = $_->{last_update} if $_->{last_update} gt $update_time && $_->{last_update} lt $now;
 			push @$updates, ["add", $_->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top, vote => $votes->{$item->{globjid}} }, { Return => 1, Page => "firehose" })];
+			$added->{$_->{id}}++;
 		}
 		push @$ordered, $item->{id};
 		delete $ids{$_->{id}};
@@ -802,17 +816,26 @@ sub ajaxFireHoseGetUpdates {
 	my $next_to_old = {};
 	my $i = 0;
 	my $pos;
+
 	foreach (@$ordered) {
-		$next_to_old->{$prev} = 1 if $prev && $ids_orig{$_};
-		$next_to_old->{$_} = 1 if $ids_orig{$prev};
+		$next_to_old->{$prev} = $_ if $prev && $ids_orig{$_} && $added->{$prev};
+		$next_to_old->{$_} = $prev if $ids_orig{$prev} && $added->{$_};
 		$prev = $_;
 		$pos->{$_} = $i;
 		$i++;
 	}
 
+	my $target_pos = 100;
+	if (scalar (keys %$next_to_old) == 1) {
+		my ($key) = keys %$next_to_old;
+		$target_pos = $pos->{$key};
+		print STDERR "Target pos: $target_pos\n";
+		
+	}
+	
 	@$updates  = sort {
-		$next_to_old->{$a} <=> $next_to_old->{$b} ||
-		$pos->{$a} <=> $pos->{$b};
+		$next_to_old->{$a->[1]} <=> $next_to_old->{$b->[1]} ||
+		abs($pos->{$b->[1]} - $target_pos) <=> abs($pos->{$a->[1]} - $target_pos);
 	} @$updates;
 
 	foreach (keys %ids) {
@@ -1015,6 +1038,9 @@ sub setFireHose {
 	my($self, $id, $data) = @_;
 	return unless $id && $data;
 	my $id_q = $self->sqlQuote($id);
+	
+	my $mcd = $self->getMCD();
+	my $mcdkey = "$self->{_mcd_keyprefix}:firehose";
 
 	if (!exists($data->{last_update}) && !exists($data->{-last_update})) {
 		my @non_trivial = grep {!/^(activity|toptags)$/} keys %$data;
@@ -1046,6 +1072,10 @@ sub setFireHose {
 
 	$self->sqlUpdate('firehose', $data, "id=$id_q");
 	$self->sqlUpdate('firehose_text', $text_data, "id=$id_q") if keys %$text_data;
+	
+	if ($mcd) {
+		 $mcd->delete("$mcdkey:$id", 3);
+	}
 
 	my $searchtoo = getObject('Slash::SearchToo');
 	if ($searchtoo) {
@@ -1254,13 +1284,13 @@ sub getAndSetOptions {
 		if ($user->{is_admin}) {
 			$options->{limit} = 25;
 		} else {
-			$options->{limit} = 20;
+			$options->{limit} = 15;
 		}
 	} else {
 		if ($user->{is_admin}) {
 			$options->{limit} = 50;
 		} else {
-			$options->{limit} = 40;
+			$options->{limit} = 30;
 		}
 	}
 	if ($user->{is_admin} && $form->{setusermode}) {
@@ -1379,14 +1409,6 @@ sub getFireHoseTagsTop {
 		push @$tags_top, ($item->{type});
 	}
 	
-	if ($item->{type} ne "story") {
-		if ($user->{is_admin} && !$user->{firehose_usermode}) {
-			my $cat = $item->{category} || "none";
-			$cat .= ":1";
-			push @$tags_top, $cat;
-		}
-	}
-
 	if ($item->{primaryskid} && $item->{primaryskid} != $constants->{mainpage_skid}) {
 		my $the_skin = $self->getSkin($item->{primaryskid});
 		push @$tags_top, "$the_skin->{name}:2";
