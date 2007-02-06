@@ -13,6 +13,15 @@ list
 __seclev__
 10000
 __template__
+[% IF user.currentPage == "firehose" %]
+<div id="message">
+	<div class="content">
+		<p>
+		[% PROCESS rand_mesg %]
+		</p>
+	</div>
+</div>
+[% END %]
 <div id="messagearea"></div>
 <div class="firemenu">
 [% theupdatetime = Slash.timeCalc(Slash.db.getTime(), "%H:%M"); %]

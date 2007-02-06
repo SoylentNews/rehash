@@ -425,7 +425,7 @@ sub getFireHoseEssentials {
 	my $offset = defined $options->{offset} ? $options->{offset} : '';
 	$offset = "" if $offset !~ /^\d+$/;
 	$offset = "$offset, " if $offset;
-	$limit_str = "LIMIT $offset, $options->{limit}" unless $options->{nolimit};
+	$limit_str = "LIMIT $offset $options->{limit}" unless $options->{nolimit};
 	my $other = "ORDER BY $options->{orderby} $options->{orderdir} $limit_str";
 	$other = '' if $doublecheck;
 	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
