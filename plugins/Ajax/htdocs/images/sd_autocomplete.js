@@ -271,7 +271,9 @@ YAHOO.slashdot.topicTags = ["keyword",
 YAHOO.slashdot.fhitemOpts = [
 "hold",
 "back",
-"quik"
+"quik",
+"typo",
+"dupe"
 ];
 
 YAHOO.slashdot.storyOpts = [
