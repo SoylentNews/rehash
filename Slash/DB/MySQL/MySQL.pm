@@ -6107,7 +6107,7 @@ sub getCommentTextCached {
 		my $abbreviate = $abbreviate_ok && $comments->{$cid}{class} eq 'oneline';
 		my $original_text = $more_comment_text->{$cid};
 		if (	   $possible_chop
-			&& !($opt->{cid}  && $opt->{cid} eq $cid)
+			&& !($opt->{cid} && $opt->{cid} eq $cid)
 			&& $comments->{$cid}{len} > (
 				$abbreviate ? $abbreviate_len : $max_len
 			)
