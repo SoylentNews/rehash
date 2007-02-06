@@ -195,8 +195,21 @@ Possible Subscriber Comment Crawlers
 
 Count  Nickname
 [% crawling_subscribers %]
-
 [% END %]
+
+[% IF firehose_report %]
+FireHose Report
+------------------------------------
+[% firehose_report %]
+[% END %]
+
+[% IF tags_report %]
+Tags Report
+------------------------------------
+[% tags_report %]
+[% END %]
+
+
 __seclev__
 100
 __version__
