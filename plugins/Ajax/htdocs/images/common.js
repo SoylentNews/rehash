@@ -467,6 +467,7 @@ function firehose_set_options(name, value) {
 			}
 		}
 	}
+	if (name != "color") {
 	for (i=0; i< pairs.length; i++) {
 		var el = pairs[i];
 		if (name == el[0] && value == el[1]) {
@@ -501,6 +502,7 @@ function firehose_set_options(name, value) {
 			// remove elements
 			setTimeout("firehose_remove_all_items()", 600);
 		}
+	}
 	}
 
 	if (name == "color") { 
