@@ -996,6 +996,13 @@ sub showInfo {
 			$id ||= $1;
 			$requested_user->{ipid} = md5_hex($1);
 
+		} elsif ($id =~ /^(.*@.*\..*?)$/) {
+			# check for email addy, but make it by uid
+			$fieldkey = 'uid';
+			$id = $uid = $reader->getUserEmail($id);
+			$requested_user = $reader->getUser($uid);
+			$nick = $requested_user->{nickname};
+
 		} else {  # go by nickname, but make it by uid
 			$fieldkey = 'uid';
 			$id = $uid = $reader->getUserUID($id);
