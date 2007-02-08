@@ -39,7 +39,6 @@ use vars qw($VERSION $searchtootest);
 $searchtootest = 0;
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-
 sub createFireHose {
 	my($self, $data) = @_;
 	$data->{dept} ||= "";
@@ -490,7 +489,7 @@ sub getFireHose {
 	my $mcdkey = "$self->{_mcd_keyprefix}:firehose";
 	if ($mcd) {
 		my $item = $mcd->get("$mcdkey:$id");
-		return if $item;
+		return $item if $item;
 	}
 
 	# XXX cache this eventually
