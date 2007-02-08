@@ -4,4 +4,5 @@ description="Console"
 htdocs=console.pl
 mysql_dump=mysql_dump.sql
 requiresplugin=Ajax
+requiresplugin=Remarks
 template=templates/display;console;default
