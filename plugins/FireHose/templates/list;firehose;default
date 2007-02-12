@@ -14,7 +14,11 @@ __seclev__
 10000
 __template__
 <div id="slashboxes">
-[% PROCESS userboxes %]
+[% UNLESS user.noboxes %]
+  [% IF slashboxes;
+    slashboxes %]
+  [% END %]
+[% END %]
 </div>
 [% IF user.currentPage == "firehose" %]
 <div id="message">

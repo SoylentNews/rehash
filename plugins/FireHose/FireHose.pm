@@ -29,6 +29,7 @@ use DBIx::Password;
 use Slash;
 use Slash::Display;
 use Slash::Utility;
+use Slash::Slashboxes;
 use Slash::Tags;
 use Data::JavaScript::Anon;
 
@@ -1488,6 +1489,7 @@ sub listView {
 			vote		=> $votes->{$item->{globjid}},
 		});
 	}
+	my $Slashboxes = displaySlashboxes();
 	my $refresh_options;
 	$refresh_options->{maxtime} = $maxtime;
 	if (uc($options->{orderdir}) eq "ASC") {
@@ -1503,7 +1505,8 @@ sub listView {
 		votes		=> $votes,
 		colors		=> $colors,
 		colors_hash	=> $colors_hash,
-		tabs		=> $options->{tabs}
+		tabs		=> $options->{tabs},
+		slashboxes => $Slashboxes
 	}, { Page => "firehose", Return => 1});
 
 }
