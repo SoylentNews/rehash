@@ -13,6 +13,7 @@ list
 __seclev__
 10000
 __template__
+[% IF env.script_name == "/firehose.pl" %]
 <div id="slashboxes">
 [% UNLESS user.noboxes %]
   [% IF slashboxes;
@@ -20,7 +21,6 @@ __template__
   [% END %]
 [% END %]
 </div>
-[% IF user.currentPage == "firehose" %]
 <div id="message">
 	<div class="content">
 		<p>

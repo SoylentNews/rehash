@@ -55,6 +55,7 @@ ul.menu#fhtablist li.active:before {content: ""}
 }
 
 #firehoselist, #firehose #message, .firemenu { margin-right: 18.5em; }
+body.admin #firehoselist, body.admin #firehose #message, body.admin .firemenu { margin-right: inherit; }
 
 
 .soda { padding: .7em 10px 0 6px; color: #999; left: 0; top: 0; font-size: 90%; position: absolute; font-weight: normal;}
