@@ -323,6 +323,11 @@ div.ccw-panel, #ccw-control,
 	/* specifics */
 
 .horizontal .ccw-count-pos { width: 100%; }
+.h-inline { display: none; }
+.horizontal .h-inline { display: inline; }
+.horizontal .titlecount:before { content: " ("; }
+.horizontal .titlecount:after { content: ")"; }
+.horizontal .titlecount { text-decoration: none; }
 
 .ccw-count-text { width: 100%; text-align: center; }
 
