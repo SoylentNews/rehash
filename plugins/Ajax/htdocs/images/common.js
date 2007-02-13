@@ -482,7 +482,7 @@ function firehose_set_options(name, value) {
 			}
 		}
 	}
-	if (name == "mode" || name == "firehose_usermode") {
+	if (name == "mode" || name == "firehose_usermode" || name == "tab") {
 		// blur out then remove items
 		if (name == "mode") {
 			fh_view_mode = value;
@@ -505,14 +505,14 @@ function firehose_set_options(name, value) {
 	}
 	}
 
-	if (name == "color") { 
+	if (name == "color" || name == "tab" || name == "pause" ) { 
 		params[name] = [value];
 	}
 
 	var handlers = {
 		onComplete: function(transport) { 
-			firehose_get_updates();
 			json_handler(transport);
+			firehose_get_updates();
 		}
 	};
 	ajax_update(params, '', handlers);
@@ -608,11 +608,20 @@ function eval_response(transport) {
 }
 
 function json_handler(transport) {
+
 	var response = eval_response(transport);
 	json_update(response);
 }
 
 function json_update(response) {
+	if (response.eval_first) {
+		try {
+			eval(response.eval_first)
+		} catch (e) {
+
+		}
+	}
+
  	if (response.html) {
 		for (el in response.html) {
 			if ($(el))
@@ -649,6 +658,14 @@ function json_update(response) {
 			}
 		}
 	}		
+	
+	if (response.eval_last) {
+		try {
+			eval(response.eval_last)
+		} catch (e) {
+
+		}
+	}
 }
 
 
@@ -720,7 +737,9 @@ function firehose_handle_update() {
 
 				myAnim.onComplete.subscribe(function() {
 					var elem = this.getEl();
-					elem.parentNode.removeChild(elem);
+					if (elem && elem.parentNode) {
+						elem.parentNode.removeChild(elem);
+					}
 				});
 				myAnim.animate(); 
 			}
@@ -885,6 +904,7 @@ function run_before_update() {
 function firehose_play() {
 	fh_play = 1;
 	setFirehoseAction();
+	firehose_set_options('pause', '0');
 	if ($('message_area'))
 		$('message_area').innerHTML = "";
 	if ($('pauseorplay'))
@@ -892,16 +912,16 @@ function firehose_play() {
 	var pause = $('pause');
 	var play_div = $('play');
 	play_div.className = "hide";
-	pause.className = "";
-
+	pause.className = "show";
 }
 
 function firehose_pause() {
 	fh_play = 0;
+	firehose_set_options('pause', '1');
 	var pause = $('pause');
 	var play_div = $('play');
 	pause.className = "hide";
-	play_div.className = "";
+	play_div.className = "show";
 	if ($('pauseorplay'))
 		$('pauseorplay').innerHTML = "Paused";
 }
@@ -943,6 +963,10 @@ function firehose_slider_init() {
 	fh_colorslider.setValue(fh_ticksize * fh_colors_hash[fh_color] , 1);
         fh_colorslider.subscribe("slideEnd", firehose_slider_end);
 }	
+
+function firehose_slider_set_color(color) {
+	fh_colorslider.setValue(fh_ticksize * fh_colors_hash[color] , 1);
+}
 
 function firehose_slider_end(offsetFromStart) {
 	var newVal = fh_colorslider.getValue();
