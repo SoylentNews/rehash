@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/local/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
@@ -895,13 +895,13 @@ sub possible_check_dbs {
 				chomp $response;
 				my @responses = split /\n/, $response;
 				my $prefix = getIRCData('dbalert_prefix');
-				if ($prefix && $prefix =~ /\S/) {
-					send_msg($prefix);
-				}
-				for my $r (@responses) {
-					sleep 1;
-					send_msg($r);
-				}
+#				if ($prefix && $prefix =~ /\S/) {
+#					send_msg($prefix);
+#				}
+#				for my $r (@responses) {
+#					sleep 1;
+#					send_msg($r);
+#				}
 			}
 		}
 	}
