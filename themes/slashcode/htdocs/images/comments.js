@@ -840,19 +840,20 @@ function d2act () {
 	var gd = $('d2act'); 
 	if (gd) {
 		xy[1] = xy[1] - Position.deltaY;
-		if ($('d2out').className == 'horizontal')
+		var mode = $('d2out').className;
+		if (mode != 'vertical')
 			xy[1] = xy[1] - gd.offsetHeight;
 
-		if (xy[1] < -14) {
+    if (mode=='horizontal rooted' || xy[1]>=-14) {
+			gd.style.display  = 'inline';
+			gd.style.position = 'absolute';
+			gd.style.top      = '0px';
+			gd.className      = 'rooted';
+		} else {
 			gd.style.top      = '0px';
 			gd.style.position = 'fixed';
-			gd.style.left     = '1em';
-		} else {
-			gd.style.display  = 'inline';
-			gd.style.position = 'fixed';
-			gd.style.top      = xy[1] + 'px';
-			gd.style.left     = '1em';
-		} 
+			gd.className = '';
+		}
 	}
 }
 
@@ -862,36 +863,30 @@ function toggleDisplayOptions() {
 	var d2out = $('d2out');
 
 	// update user prefs
+	var newMode = '';
+
+  var isHidden = gods.style.display == 'none';
+  gods.style.display = 'none';
+
+  // none -> ( vertical -> horizontal -> rooted )
+  if ( d2out.className == 'vertical' ) { // vertical->horizontal
+    newMode = d2out.className = 'horizontal';
+    gCommentControlWidget.setOrientation('X');
+  } else if ( d2out.className == 'horizontal' ) { // horizontal->rooted
+    newMode = 'rooted';
+    d2out.className = 'horizontal rooted';
+  } else { // (rooted, none)->vertical
+    newMode = d2out.className = 'vertical';
+    d2opt.style.display = 'inline'; // why?
+    gCommentControlWidget.setOrientation('Y');
+  }
+
+  d2act();
+  gods.style.display = 'block';
+
+
 	var params = [];
-
-	if (gods.style.display == 'none') {
-		d2act();
-		d2opt.style.display = 'none';
-		gods.style.display  = 'block';
-
-		params['comments_control'] = 'vertical';
-
-	} else if (d2out.className == 'horizontal') {
-		gods.style.display  = 'none';
-		d2opt.style.display = 'inline';
-
-		d2out.className = 'vertical';
-		gCommentControlWidget.setOrientation('Y');
-
-		params['comments_control'] = '';
-
-	} else { // vertical
-		gods.style.display  = 'none';
-
-		d2out.className = 'horizontal';
-		gCommentControlWidget.setOrientation('X');
-
-		d2act();
-		gods.style.display  = 'block';
-
-		params['comments_control'] = 'horizontal';
-	}
-
+  params['comments_control'] = newMode;
 	params['op'] = 'comments_set_prefs';
 	params['reskey'] = reskey_static;
 	ajax_update(params);
