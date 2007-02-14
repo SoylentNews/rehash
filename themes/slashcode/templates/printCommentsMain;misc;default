@@ -151,7 +151,7 @@ __template__
 			<div class="title">
 				<h4>
 				[% IF title %]
-					<span class="h-inline">[% title %]</span> <a href="[% link | strip_urlattr %]" title="Back to Article - [% title | strip_attribute %]"><span class="titlecount">[% count %]&nbsp;Comment[% count == 1 ? '' : 's' %]</span></a>
+					<span class="h-inline"><a href="[% link | strip_urlattr %]" title="Back to Article - [% title | strip_attribute %]">[% title %]</a></span> <span class="titlecount"><a href="[% link | strip_urlattr %]#topcomment" title="Back to Top Comment - [% title | strip_attribute %]">[% count %]&nbsp;Comment[% count == 1 ? '' : 's' %]</a></span>
 				[% ELSE %] 
 					[% Slash.linkComment({
 						sid	=> sid,
