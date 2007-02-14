@@ -266,6 +266,7 @@ div.ccw-panel, #ccw-control,
 
 .ccw-core, .ccw-panel, .ccw-count-pos { height: 140px; width: 9.3em; }
 .vertical .ccw-panel { height: auto; }
+.vertical .ccw-count-pos { height: 1px; }
 .horizontal .ccw-core, .horizontal .ccw-panel, .horizontal .ccw-count-pos { height: 2em; width: auto; }
 .horizontal #ccw-panel-container, .horizontal #ccw-control { left: 0.5em; }
 #ccw { height: 172px; width: 9.3em; }
