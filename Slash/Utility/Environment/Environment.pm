@@ -1827,6 +1827,7 @@ Hashref of cleaned-up data.
 	my %alphas = map {($_ => 1)} qw(
 		fieldname formkey commentstatus filter
 		hcanswer mode op section thisname type reskey
+		comments_control
 	),
 	# Survey
 	qw(

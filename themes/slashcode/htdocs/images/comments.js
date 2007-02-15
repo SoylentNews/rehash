@@ -843,7 +843,7 @@ function d2act () {
 		if (mode != 'vertical')
 			xy[1] = xy[1] - gd.offsetHeight;
 
-    if (mode=='horizontal rooted' || xy[1]>=-14) {
+		if (mode=='horizontal rooted' || xy[1]>=-14) {
 			gd.style.display  = 'inline';
 			gd.style.position = 'absolute';
 			gd.style.top      = '0px';
@@ -863,27 +863,27 @@ function toggleDisplayOptions() {
 	// update user prefs
 	var newMode = '';
 
-  var isHidden = gods.style.display == 'none';
-  gods.style.display = 'none';
+	var isHidden = gods.style.display == 'none';
+	gods.style.display = 'none';
 
-  // none -> ( vertical -> horizontal -> rooted )
-  if ( d2out.className == 'vertical' ) { // vertical->horizontal
-    newMode = d2out.className = 'horizontal';
-    gCommentControlWidget.setOrientation('X');
-  } else if ( d2out.className == 'horizontal' ) { // horizontal->rooted
-    newMode = 'rooted';
-    d2out.className = 'horizontal rooted';
-  } else { // (rooted, none)->vertical
-    newMode = d2out.className = 'vertical';
-    gCommentControlWidget.setOrientation('Y');
-  }
+	// none -> ( vertical -> horizontal -> rooted )
+	if ( d2out.className == 'vertical' ) { // vertical->horizontal
+		newMode = d2out.className = 'horizontal';
+		gCommentControlWidget.setOrientation('X');
+	} else if ( d2out.className == 'horizontal' ) { // horizontal->rooted
+		newMode = 'rooted';
+		d2out.className = 'horizontal rooted';
+	} else { // (rooted, none)->vertical
+		newMode = d2out.className = 'vertical';
+		gCommentControlWidget.setOrientation('Y');
+	}
 
-  d2act();
-  gods.style.display = 'block';
+	d2act();
+	gods.style.display = 'block';
 
 
 	var params = [];
-  params['comments_control'] = newMode;
+	params['comments_control'] = newMode;
 	params['op'] = 'comments_set_prefs';
 	params['reskey'] = reskey_static;
 	ajax_update(params);
