@@ -24,9 +24,6 @@ __template__
 
 /* style for the box that contains the tree */
 .hpts-inner {
-[%- IF scrollbars %]
-   overflow:         scroll;
-[%- END %]
    width:            [% width %]px;
 [%- IF height %]
    height:           [% height %]px;

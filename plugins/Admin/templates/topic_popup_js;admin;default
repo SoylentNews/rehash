@@ -423,7 +423,8 @@ function [% name %]_show(type) {
 			}
 		}
 	}
-
+        var objx  = document.getElementById(name + "-inner");
+	objx.style.overflow: "scroll";
 	var obj  = document.getElementById(name + "-outer");
 	var obj2 = document.getElementById("[% name %]-display");
 	var ot   = obj2.offsetTop;
@@ -507,7 +508,8 @@ function [% name %]_close(type) {
 	/* hide window */
 	var obj = document.getElementById(name + "-outer");
 	obj.style.visibility = "hidden";
-
+        var objx  = document.getElementById(name + "-inner");
+        objx.style.overflow = "none";
 	/* clear selection */
 	if (type == [% name %]_selected_type && [% name %]_selected_id != -1) {
 		[% name %]_toggle_select([% name %]_selected_id, 0, type);
