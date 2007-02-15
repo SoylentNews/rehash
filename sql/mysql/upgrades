@@ -4380,8 +4380,6 @@ INSERT INTO firehose_tab VALUES (3,0,'Journals','journal','createtime','DESC','b
 # 2007-01-24
 UPDATE vars SET value = 'T_2_5_0_143' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 INSERT INTO vars (name, value, description) VALUES ('admin_warn_primaryskid', '', 'Warn admin if a story is saved with the following primaryskids (skids delimited by |)');
 
 # 2007-01-30
@@ -4389,8 +4387,6 @@ UPDATE vars SET value = 'T_2_5_0_144' WHERE name = 'cvs_tag_currentcode';
 
 # 2007-02-01
 UPDATE vars SET value = 'T_2_5_0_145' WHERE name = 'cvs_tag_currentcode';
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
 
 CREATE TABLE tags_peerweight (
 	uid		mediumint UNSIGNED NOT NULL DEFAULT '0',
@@ -4403,3 +4399,6 @@ CREATE TABLE tags_peerweight (
 # 2007-02-06
 UPDATE vars SET value = 'T_2_5_0_146' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
