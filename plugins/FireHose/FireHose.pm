@@ -303,6 +303,8 @@ sub getFireHoseEssentials {
 			# still need sorting and filtering by date
 			$opts{records_max}	= $options->{limit}		unless $options->{nolimit};
 			$opts{records_start}	= $options->{offset}		if $options->{offset};
+			$opts{sort}		= $options->{orderby}  || 'createtime';
+			$opts{sortdir}		= $options->{orderdir} || 'DESC';
 
 			$results = $searchtoo->findRecords(firehose => \%query, \%opts);
 			$items = $results->{records};
@@ -377,9 +379,9 @@ sub getFireHoseEssentials {
 		$tables .= ",firehose_text";
 		push @where, "firehose.id=firehose_text.id";
 
-		# sanitize $options->{filter};
-		$options->{filter} =~ s/[^a-zA-Z0-9_]+//g;
 		if ($options->{filter}) {
+			# sanitize $options->{filter};
+			$options->{filter} =~ s/[^a-zA-Z0-9_]+//g;
 			push @where, "firehose_text.title like '%" . $options->{filter} . "%'";
 		}
 
@@ -437,7 +439,7 @@ sub getFireHoseEssentials {
 	my $where = (join ' AND ', @where) || "";
 	my $offset = defined $options->{offset} ? $options->{offset} : '';
 	$offset = "" if $offset !~ /^\d+$/;
-	$offset = "$offset, " if $offset;
+	$offset = "$offset, " if length $offset;
 	$limit_str = "LIMIT $offset $options->{limit}" unless $options->{nolimit};
 	my $other = "";
 	$other .= " GROUP BY firehose.id " if $options->{tagged_by_uid};
@@ -548,9 +550,9 @@ sub fetchItemText {
 		$firehose->setFireHoseSession($item->{id});
 	}
 	my $data = {
-		item => $item,
-		mode => "bodycontent",
-		tags_top => $tags_top,
+		item		=> $item,
+		mode		=> "bodycontent",
+		tags_top	=> $tags_top,
 	};
 
 	my $retval = slashDisplay("dispFireHose", $data, { Return => 1, Page => "firehose" });
@@ -666,9 +668,9 @@ sub ajaxFireHoseSetOptions {
 	}
 
 	return Data::JavaScript::Anon->anon_dump({
-		html	=> $html,
-		value  => $values,
-		eval_last => $eval_last
+		html		=> $html,
+		value		=> $values,
+		eval_last	=> $eval_last
 	});
 }
 
@@ -1555,9 +1557,8 @@ sub listView {
 		colors		=> $colors,
 		colors_hash	=> $colors_hash,
 		tabs		=> $options->{tabs},
-		slashboxes => $Slashboxes
+		slashboxes	=> $Slashboxes
 	}, { Page => "firehose", Return => 1});
-
 }
 
 sub setFireHoseSession {
