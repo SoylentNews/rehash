@@ -59,11 +59,12 @@ __template__
 </div>
 [% IF !user.is_admin || (user.is_admin && user.firehose_usermode ) %]
 <p>
-Firehose is a collaborative system designed to allow users to assist
-the Slashdot editors in the story selection process.  Try tagging and
-voting on the entries below.  The hose can contain submissions, RSS
-Feeds, bookmarks, and journal entries.   Please send your feedback to
-hose@cmdrtaco.net and be forgiving of beta code!
+The Slashdot Firehose is a collaborative system designed to allow
+users to assist our editors in the story selection process. Try
+tagging and voting on the entries below, and by using the 'feedback'
+menu by each entry. The hose can contain submissions, RSS Feeds,
+bookmarks, journal entries and Slashdot stories. Please send your
+feedback to hose@cmdrtaco.net but be forgiving of beta code!
 </p>
 [% END %]
 <div id="firehoselist">
