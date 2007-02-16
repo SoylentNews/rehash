@@ -424,8 +424,10 @@ function [% name %]_show(type) {
 		}
 	}
         var objx  = document.getElementById(name + "-inner");
-	objx.style.overflow = "scroll";
-	objx.style.display = "block";
+	if (objx) {
+		objx.style.overflow = "scroll";
+		objx.style.display = "block";
+	}
 	var obj  = document.getElementById(name + "-outer");
 	var obj2 = document.getElementById("[% name %]-display");
 	var ot   = obj2.offsetTop;
