@@ -16,8 +16,8 @@ __template__
 [% IF !nowrapper %]
 <div id="fhoptions" class="options">
 [% END %]
-	<span id="play"><a href="javascript:firehose_play()" title="Currently paused">Play</a></span>
-	<span id="pause"><a href="javascript:firehose_pause()" title="Currently playing">Pause</a></span>
+	<span id="play"[% IF !user.firehose_paused %] class="hide"[% END %]><a href="javascript:firehose_play()" title="Currently paused">Play</a></span>
+	<span id="pause" [% IF user.firehose_paused %] class="hide"[% END %]><a href="javascript:firehose_pause()" title="Currently playing">Pause</a></span>
 
 	[% IF options.orderby == "popularity" || options.orderby == "editorpop" %]
 	<span id="popularity"><a href="[% gSkin.rootdir %]/firehose.pl?orderby=createtime" title="Toggle sort popularity/time - Currently popularity" onclick="firehose_set_options('orderby','createtime'); return false;">Popularity</a></span>
