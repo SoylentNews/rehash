@@ -197,7 +197,7 @@ html > body .commentwrap table {
 
 /* D2 Widget */
 
-#d2act {position: relative; opacity: 1; z-index: 1000; width: 9.3em; text-align: center; }
+#d2act {display: inline; position: relative; opacity: 1; z-index: 1000; width: 9.3em; text-align: center; }
 .vertical #d2act {position: relative; left: 1.2em !important}
 .vertical #d2act.rooted {left:-10.6em !important}
 #d2act div.block {background: #ccc;}

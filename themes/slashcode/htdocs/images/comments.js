@@ -834,25 +834,36 @@ function floatButtons () {
 }
 
 function d2act () {
-	Position.prepare();
-	var xy = Position.cumulativeOffset($('commentwrap'));
 	var gd = $('d2act'); 
 	if (gd) {
-		xy[1] = xy[1] - Position.deltaY;
-		var mode = $('d2out').className;
-		if (mode != 'vertical')
-			xy[1] = xy[1] - gd.offsetHeight;
+    var targetTop = YAHOO.util.Dom.getY('commentwrap');
+    var vOffset = 0;
+    if ( typeof window.pageYOffset == 'number' )
+      vOffset = window.pageYOffset;
+    else if ( document.body && document.body.scrollTop )
+      vOffset = document.body.scrollTop;
+    else if ( document.documentElement && document.documentElement.scrollTop )
+      vOffset = document.documentElement.scrollTop;
+  
+    var oldpos = gd.style.position;
 
-		if (mode=='horizontal rooted' || xy[1]>=-14) {
-			gd.style.display  = 'inline';
+		var mode = $('d2out').className;
+		if (mode=='horizontal rooted' || targetTop>vOffset) {
 			gd.style.position = 'absolute';
-			gd.style.top      = '0px';
 			gd.className      = 'rooted';
-		} else {
 			gd.style.top      = '0px';
+		} else {
 			gd.style.position = 'fixed';
-			gd.className = '';
+			gd.className      = '';
+			gd.style.top      = '0px';
 		}
+
+    // for Safari and maybe others, force redraw on change
+    if ( oldpos != gd.style.position ) {
+      gd.style.display = 'none';
+      setTimeout("$('d2act').style.display = 'inline'", 1);
+      // gd.style.display = 'inline';
+    }
 	}
 }
 
