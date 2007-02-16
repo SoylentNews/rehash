@@ -826,7 +826,7 @@ sub ajaxFireHoseGetUpdates {
 				$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user }, { Return => 1 });
 				$html->{"tags-top-$_->{id}"} = slashDisplay("firehose_tags_top", { tags_top => $tags_top, id => $_->{id}, item => $item }, { Return => 1 });
 				my $introtext = $item->{introtext};
-				slashDisplay("formatHoseIntro", { introtext => $introtext }, { Return => 1 });
+				slashDisplay("formatHoseIntro", { introtext => $introtext, url => $url, $item => $item }, { Return => 1 });
 				$html->{"text-$_->{id}"} = $introtext;
 				$html->{"fhtime-$_->{id}"} = timeCalc($item->{createtime});
 				# updated
@@ -1193,7 +1193,7 @@ sub getAndSetOptions {
 	$opts 	        ||= {};
 	my $options 	= {};
 
-	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1 };
+	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1 };
 	my $modes = { full => 1, fulltitle => 1};
 
 	my $mode = $form->{mode} || $user->{firehose_mode};
@@ -1338,7 +1338,7 @@ sub getAndSetOptions {
 
 
 	$fhfilter =~ s/^\s+|\s+$//g;
-	my $fh_ops = splitOpsFromString($fhfilter);
+	my $fh_ops = $self->splitOpsFromString($fhfilter);
 	
 
 	my $skins = $self->getSkins();
@@ -1388,6 +1388,7 @@ sub getAndSetOptions {
 				$uid ||= $user->{uid};
 			}
 			$fh_options->{tagged_by_uid} = $uid;
+			$fh_options->{ignore_nix} = 1;
 		} else {
 			if (!defined $fh_options->{filter}) {
 				$fh_options->{filter} = $_;
@@ -1649,6 +1650,7 @@ sub splitOpsFromString {
 			push @fh_ops, $_;
 		}
 	}
+	return \@fh_ops;
 }
 
 
