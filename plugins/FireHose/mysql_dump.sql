@@ -24,3 +24,4 @@ INSERT INTO vars (name, value, description) VALUES ('firehose_color_labels', 're
 INSERT INTO firehose_tab VALUES (1,0,'FireHose','','createtime','DESC','indigo','fulltitle');
 INSERT INTO firehose_tab VALUES (2,0,'Slashdot','story','createtime','DESC','black','full');
 INSERT INTO firehose_tab VALUES (3,0,'Journals','journal','createtime','DESC','blue','full');
+INSERT INTO firehose_tab VALUES (4,0,'User','user:','createtime','DESC','black','full');

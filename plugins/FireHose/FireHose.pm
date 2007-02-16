@@ -1250,18 +1250,26 @@ sub getAndSetOptions {
 	
 	# XXX
 	my $user_tabs = $self->getUserTabs();
+	my %user_tab_names = map { $_->{tabname} => 1 } @$user_tabs;
+	my %firehose_tabs_given = map { $_ => 1 }split (/\|/, $user->{firehose_tabs_given});
 	my @tab_fields = qw(tabname filter mode color orderdir orderby);
-	if ((!$user_tabs || @$user_tabs < 1 ) && !$user->{last_fhtab_set}) {
-		my $system_tabs = $self->getSystemDefaultTabs();
-		foreach my $tab (@$system_tabs) {
-			my $data = {};
-			foreach (@tab_fields) {
-				$data->{$_} = $tab->{$_};
-			}
-			$self->createUserTab($user->{uid}, $data); 
+	my $tabs_given = "";
+
+	my $system_tabs = $self->getSystemDefaultTabs();
+	foreach my $tab (@$system_tabs) {
+		my $data = {};
+		foreach (@tab_fields) {
+			$data->{$_} = $tab->{$_};
 		}
-		$user_tabs = $self->getUserTabs();
+		if (!$user_tab_names{$tab->{tabname}} && !$firehose_tabs_given{$tab->{tabname}}) {
+			$self->createUserTab($user->{uid}, $data); 
+			$tabs_given .= $tab->{tabname} ."|";
+			$self->setUser($user->{uid}, { firehose_tabs_given => $tabs_given });
+		}
 	}
+	$user_tabs = $self->getUserTabs();
+
+
 	
 	my $tab_compare = { mode => "mode", orderdir => "orderdir", color => "color", orderby => "orderby", filter => "fhfilter" };
 
@@ -1379,14 +1387,13 @@ sub getAndSetOptions {
 			}
 			$fh_options->{uid} = $uid;
 		} elsif (/^user:/) {
-			print STDERR "User $_\n";
 			my $nick = $_;
 			$nick =~ s/user://g;
 			my $uid;
 			if ($nick) {
 				$uid = $self->getUserUID($nick);
-				$uid ||= $user->{uid};
 			}
+			$uid ||= $user->{uid};
 			$fh_options->{tagged_by_uid} = $uid;
 			$fh_options->{ignore_nix} = 1;
 		} else {
@@ -1595,6 +1602,8 @@ sub getUserTabs {
 	@$tabs = sort { 
 			$b->{tabname} eq "untitled" ? -1 : 
 				$a->{tabname} eq "untitled" ? 1 : 0	||
+			$b->{tabname} eq "User" ? -1 : 
+				$a->{tabname} eq "User" ? 1 : 0	||
 			$a->{tabname} cmp $b->{tabname} 
 	} @$tabs;
 	return $tabs;
