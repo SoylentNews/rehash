@@ -1260,6 +1260,9 @@ sub getAndSetOptions {
 		my $data = {};
 		foreach (@tab_fields) {
 			$data->{$_} = $tab->{$_};
+			foreach my $field (qw(uid nickname)) {
+				$data->{$_} =~ s/{$field}/$user->{$field}/g;
+			}
 		}
 		if (!$user_tab_names{$tab->{tabname}} && !$firehose_tabs_given{$tab->{tabname}}) {
 			$self->createUserTab($user->{uid}, $data); 
