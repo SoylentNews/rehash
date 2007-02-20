@@ -512,7 +512,7 @@ function firehose_set_options(name, value) {
 	var handlers = {
 		onComplete: function(transport) { 
 			json_handler(transport);
-			firehose_get_updates();
+			firehose_get_updates({ oneupdate: 1});
 		}
 	};
 	ajax_update(params, '', handlers);
@@ -831,9 +831,10 @@ function firehose_get_item_idstring() {
 }
 
 
-function firehose_get_updates() {
+function firehose_get_updates(options) {
+	options = options || {};
 	run_before_update();
-	if (fh_play == 0 || fh_is_updating == 1) {
+	if ((fh_play == 0 && !options.oneupdate) || fh_is_updating == 1) {
 		firehose_add_update_timerid(setTimeout("firehose_get_updates()", 2000));
 		//alert("wait loop: " + fh_is_updating);
 		return;
@@ -909,6 +910,7 @@ function firehose_play() {
 	if ($('pauseorplay'))
 		$('pauseorplay').innerHTML = "Updating";
 	var pause = $('pause');
+	
 	var play_div = $('play');
 	play_div.className = "hide";
 	pause.className = "show";
@@ -916,13 +918,13 @@ function firehose_play() {
 
 function firehose_pause() {
 	fh_play = 0;
-	firehose_set_options('pause', '1');
 	var pause = $('pause');
 	var play_div = $('play');
 	pause.className = "hide";
 	play_div.className = "show";
 	if ($('pauseorplay'))
 		$('pauseorplay').innerHTML = "Paused";
+	firehose_set_options('pause', '1');
 }
 
 function firehose_add_update_timerid(timerid) {
