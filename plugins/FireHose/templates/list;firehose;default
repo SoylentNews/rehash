@@ -90,15 +90,16 @@ feedback to hose@cmdrtaco.net but be forgiving of beta code!
 	var updateIntervalType = [% IF user.is_admin && !user.firehose_usermode %]1[% ELSE %]2[% END %];
 	var inactivity_timeout = [% IF user.is_admin && !user.firehose_usermode %]10800[% ELSE %]3600[% END %];
 	setFirehoseAction();
-	firehose_pause();
 	var update_time = '[% refresh_options.maxtime %]';
 [% IF refresh_options && refresh_options.maxtime %]
 	var maxtime = '[% refresh_options.maxtime %]';
 	var insert_new_at = '[% refresh_options.insert_new_at %]';
-	[% IF !user.firehose_paused %]
-	firehose_play();
+	[% IF user.firehose_paused || !user.firehose_paused.defined %]
+		firehose_pause();
+	[% ELSE %]
+		firehose_play();
 	[% END %]
-	firehose_add_update_timerid(setTimeout("firehose_get_updates()", 3000));
+	//firehose_add_update_timerid(setTimeout("firehose_get_updates()", 3000));
 
 fh_ticksize = 15;
 firehose_slider_init();
