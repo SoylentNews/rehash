@@ -25,6 +25,7 @@ param_str = ""
 	END;
 %]
 [% IF !contentsonly %]
+<div class="paginate">
 <ul class="menu" id="fh-paginate">
 [% END %]
 [% IF page %] <li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page - 1 %][% param_str %]">&lt;- [% page %]</a></li>[% END %]
@@ -32,6 +33,7 @@ param_str = ""
 <li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page + 1%][% param_str %]">[% page + 2 %] -&gt;</a></li>
 [% IF !contentsonly %]
 </ul>
+</div>
 [% END %]
 __version__
 $Id$
