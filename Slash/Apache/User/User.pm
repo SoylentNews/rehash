@@ -704,8 +704,7 @@ sub userdir_handler {
 					$r->uri('/users.pl');
 					$r->filename($constants->{basedir} . '/users.pl');
 				} elsif ($op eq 'firehose') {
-					my $nickname = $user->{nickname};
-					my $filter = fixparam("\"user:$nickname\"");
+					my $filter = fixparam("user:");
 					$r->args("fhfilter=$filter");
 					$r->uri('firehose.pl');
 					$r->filename($constants->{basedir} . '/firehose.pl')
