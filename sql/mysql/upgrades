@@ -4401,10 +4401,10 @@ UPDATE vars SET value = 'T_2_5_0_146' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # 2007-02-14
 UPDATE vars SET value = 'T_2_5_0_147' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
 # For plugins/FireHose
 INSERT INTO firehose_tab VALUES (4,0,'User','"user:{nickname}"','createtime','DESC','black','full');
