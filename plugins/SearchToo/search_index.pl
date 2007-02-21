@@ -29,7 +29,11 @@ $task{$me}{code} = sub {
 		my $records_type = $records->{$type};
 
 		my(@iids_d, @delete, @iids_a, @add);
-		for my $i (0 .. $#{$records_type}) {
+		slashdLog(sprintf( "Starting %d '$type' records", scalar @$records_type ));
+
+		my $max = $#{$records_type};
+		$max = 999 if $max > 999;
+		for my $i (0 .. $max) {
 			if ($records_type->[$i]{status} eq 'deleted') {
 				push @delete, $records_type->[$i]{id};
 				push @iids_d, $records_type->[$i]{iid};
@@ -42,12 +46,20 @@ $task{$me}{code} = sub {
 			}
 		}
 
+		slashdLog(sprintf( "Fetching %d '$type' records", scalar @add ));
 		$searchtoo->getRecords($type => \@add);
 
+		my($deleted, $added) = (0, 0);
+
 		slashdLog(sprintf( "Deleting %d '$type' records", scalar @delete ));
-		my $deleted = $searchtoo->deleteRecords($type => \@delete) || 0;
+		if (@delete) {
+			$deleted = $searchtoo->deleteRecords($type => \@delete) || 0;
+		}
+
 		slashdLog(sprintf( "Indexing %d '$type' records", scalar @add ));
-		my $added = $searchtoo->addRecords($type => \@add) || 0;
+		if (@add) {
+			$added = $searchtoo->addRecords($type => \@add) || 0;
+		}
 
 		if (@iids_a && @iids_a != $added) {
 			slashdLog(sprintf(
@@ -70,6 +82,8 @@ $task{$me}{code} = sub {
 
 #	$searchtoo->backup(0);
 #	$searchtoo->moveLive;
+
+	$searchtoo->finish;
 
 #	slashdLog("Moved new index live");
 	slashdLog("Finished");

@@ -24,14 +24,14 @@ require Slash::SearchToo::Classic;
 our %content = (
 #	comments	=> [qw(comment subject)],
 #	stories		=> [qw(introtext bodytext title)],
-	firehose	=> [qw(introtext bodytext title section topics name)],
+	firehose	=> [qw(introtext bodytext title section topics name toptags)],
 );
 
 # additional fields that will be indexed and tokenized
 our %text = (
 #	comments	=> [ qw(tids) ],
 #	stories		=> [ qw(tids) ],
-	firehose	=> [ qw(note) ],
+	firehose	=> [ qw(note dayssince1970) ],
 );
 
 # will be indexed, not tokenized
@@ -112,10 +112,14 @@ slashProf('findRecords setup');
 
 	# sort can be an arrayref, but stick with one for now
 	## no way to sort by date yet
+	# 0: none, 1: date, 2: relevance, 3: handle by caller
 	$sopts->{sort} = ref $opts->{sort} ? $opts->{sort}[0] : $opts->{sort};
-	$sopts->{sort} = ($opts->{sort} eq 'date'	|| $opts->{sort} eq 1) ? 1 :
-			($opts->{sort} eq 'relevance'	|| $opts->{sort} eq 2) ? 2 :
-			0;
+	$sopts->{sort} = ($opts->{sort} && $opts->{sort} eq 'date'	|| $opts->{sort} eq 1) ? 1 :
+			 ($opts->{sort} && $opts->{sort} eq 'relevance'	|| $opts->{sort} eq 2) ? 2 :
+			 ($opts->{sort} && $opts->{sort} eq 'caller'	|| $opts->{sort} eq 3) ? 3 :
+			 $opts->{sort} || 0;
+	# 1: asc, 0: none specified, -1: desc
+	$sopts->{sortdir} = $opts->{sortdir} || 0;
 
 	### dispatch to different queries
 	if ($type eq 'comments') {
@@ -133,7 +137,14 @@ slashProf('findRecords setup');
 slashProf('_findRecords', 'findRecords setup');
 	$self->_findRecords($results, $records, $sopts, $terms, $opts);
 slashProf('getRecords', '_findRecords');
-	$self->getRecords($type => $records, { alldata => 1 });
+	$self->getRecords($type => $records, {
+		alldata		=> 1,
+		sort		=> $sopts->{sort},
+		sortdir		=> $sopts->{sortdir},
+		limit		=> $sopts->{max} || $sopts->{matches},
+		offset		=> $sopts->{start},
+		carryover	=> $opts->{carryover}
+	});
 slashProf('prepResults', 'getRecords');
 	$self->prepResults($results, $records, $sopts);
 slashProf('', 'getRecords');
@@ -186,6 +197,7 @@ slashProf('prepare records', 'addRecords setup');
 				id			=> $record->{id},
 
 				date			=> $processed->{date},
+				dayssince1970		=> $processed->{dayssince1970},
 
 				introtext		=> $record->{introtext},
 				bodytext		=> $record->{bodytext},
@@ -200,6 +212,7 @@ slashProf('prepare records', 'addRecords setup');
 				accepted		=> $record->{accepted},
 				rejected		=> $record->{rejected},
 				public			=> $record->{public},
+				toptags			=> $record->{toptags},
 
 				primaryskid		=> $processed->{section},
 				tids			=> join(' ', @{$processed->{topic}}),
@@ -296,16 +309,24 @@ sub getRecords {
 			}
 		}
 	} elsif ($type eq 'firehose') {
+		my @newdata;
+		my $fh_sort = $opts->{sort};
+
 		my $firehose = getObject('Slash::FireHose', { db_type => 'reader' }) or return;
 		my($items) = $firehose->getFireHoseEssentials({
 			ids		=> [ map { $_->{id} } @$data ],
 			fetch_text	=> 1,
 			no_search	=> 1,
-			nolimit		=> 1
+			nolimit		=> !$fh_sort,
+			carryover	=> $opts->{carryover},
+			limit		=> $opts->{limit},
+			offset		=> $opts->{offset}
 		});
 
+		my %data_h = map { $_->{id} => $_ } @$data;
+
 		for my $item (@$items) {
-			my($datum) = grep { $_->{id} == $item->{id} } @$data;
+			my($datum) = $data_h{ $item->{id} };
 			if ($opts->{alldata}) {
 				@{$datum}{keys %$item} = values %$item;
 			} else {
@@ -313,14 +334,20 @@ sub getRecords {
 					introtext bodytext title category note
 					globjid uid primaryskid tid type date
 					popularity activity editorpop
-					accepted rejected public
+					accepted rejected public toptags
 				)} = @{$item}{qw(
 					introtext bodytext title category note
 					globjid uid primaryskid tid type createtime
 					popularity activity editorpop
-					accepted rejected public
+					accepted rejected public toptags
 				)};
 			}
+			# inherit sort order from FireHose, which
+			# defaults to date ordering
+			push @newdata, $datum if $fh_sort;
+		}
+		if ($fh_sort) {
+			@{$data} = @newdata;
 		}
 	}
 }

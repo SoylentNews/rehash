@@ -158,6 +158,7 @@ sub _fudge_data {
 	if ($data->{date}) {
 		my $format = '%Y%m%d%H%M%S';
 		$processed{date} = timeCalc($data->{date}, '%Y%m%d%H%M%S');
+		$processed{dayssince1970} = int(timeCalc($data->{date}, '%s') / 86400);
 	}
 
 	return \%processed;

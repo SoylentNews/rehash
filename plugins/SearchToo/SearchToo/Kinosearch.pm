@@ -48,6 +48,8 @@ slashProf('init search');
 	# escape special chars
 	# none, allow all special chars
 #	$querystring =~ s/([&^|!{}[\]:\\])~*?/\\$1/g; # allowed: ()"+-
+	# normalize ops to upper case
+	$querystring =~ s/\b(AND NOT|AND|OR)\b/\U$1/gi;
 	# normalize to lower case ???
 #	$querystring =~ s/\b(?!AND NOT|AND|OR)(\w+)\b/\L$1/g;
 	# no field specifiers
@@ -58,9 +60,9 @@ slashProf('init search');
 	$querystring =~ s/[^\w -]+//g;
 
 
-#	if ($sopts->{'sort'} == 1) {
+#	if ($sopts->{'sort'} eq 1) {
 #		$searcher_opts->{-sort_by} = 'timestamp';
-#	} elsif ($sopts->{'sort'} == 2) {
+#	} elsif ($sopts->{'sort'} eq 2) {
 #		$searcher_opts->{-sort_by} = 'relevance';
 #	}
 
@@ -103,6 +105,24 @@ slashProf('init search');
 		}
 	}
 
+	if ($opts->{daystart} || $opts->{dayduration}) {
+		$opts->{daystart}    ||= 0;
+		$opts->{dayduration} ||= 7;
+		my $today = int(time() / 86400);
+		my $start_day = $today - $opts->{daystart};
+		my $end_day   = $start_day - $opts->{dayduration};
+		my @days = ($end_day .. $start_day);
+
+		my $list = KinoSearch::Search::BooleanQuery->new;
+		for my $day (@days) {
+			my $tmp = KinoSearch::Search::TermQuery->new(
+				term => KinoSearch::Index::Term->new(dayssince1970 => $day)
+			);
+			$list->add_clause(query => $tmp, occur => 'SHOULD');
+		}
+		push @filters, $list;
+	}
+
 	if (@filters) {
 		$fquery = KinoSearch::Search::BooleanQuery->new;
 		for my $f (@filters) {
@@ -116,7 +136,7 @@ slashProf('init search');
 			);
 		}
 	}
-
+#use Data::Dumper;print Dumper $query, $fquery, $filter;
 
 #	if (length $terms->{points_min}) { # ???
 #		# no need to bother with adding this to the query, since it's all comments
@@ -133,7 +153,12 @@ slashProf('search', 'init search');
 	$sopts->{total}   = $self->num_docs;
 	$sopts->{matches} = $hits->total_hits;
 
-	$hits->seek($sopts->{start}, $sopts->{max} || $sopts->{matches});
+	# 0 and 2 both mean to sort by relevance, the only kind we can do;
+	# any other value, get all results and send them back to MySQL for
+	# sorting
+	if ($sopts->{'sort'} == 0 || $sopts->{'sort'} == 2) { 
+		$hits->seek($sopts->{start}, $sopts->{max} || $sopts->{matches});
+	}
 
 slashProf('fetch results', 'search');
  	while (my $hit = $hits->fetch_hit_hashref) {
@@ -364,6 +389,14 @@ sub close_writer {
 	$dir = $self->_dir($type, $dir);
 
 	delete $self->{_writer}{$type}{$dir};
+}
+
+#################################################################
+sub finish {
+	my($self) = @_;
+	$self->close_searcher;
+	$self->close_writer;
+	$self->close_reader;
 }
 
 #################################################################
