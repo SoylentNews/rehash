@@ -703,7 +703,12 @@ sub userdir_handler {
 					$r->args("op=showbookmarks");
 					$r->uri('/users.pl');
 					$r->filename($constants->{basedir} . '/users.pl');
-
+				} elsif ($op eq 'firehose') {
+					my $nickname = $user->{nickname};
+					my $filter = fixparam("\"user:$nickname\"");
+					$r->args("fhfilter=$filter");
+					$r->uri('firehose.pl');
+					$r->filename($constants->{basedir} . '/firehose.pl')
 				} else {
 					$r->args("op=edituser");
 					$r->uri('/users.pl');
@@ -744,6 +749,7 @@ sub userdir_handler {
 		my $reader_user = $slashdb->getDB('reader');
 		my $reader = getObject('Slash::DB', { virtual_user => $reader_user });
 		my $uid = $reader->getUserUID($nick);
+		my $nick_orig = $nick;
 		$nick = fixparam($nick);	# make safe to pass back to script
 
 		# maybe we should refactor this code a bit ...
@@ -833,6 +839,12 @@ sub userdir_handler {
 			$r->args("op=showbookmarks&nick=$nick&uid=$uid");
 			$r->uri('/users.pl');
 			$r->filename($constants->{basedir} . '/users.pl');
+		
+		} elsif ($op eq 'firehose') {
+			my $filter = fixparam("\"user:$nick_orig\"");
+			$r->args("fhfilter=$filter");
+			$r->uri('/firehose.pl');
+			$r->filename($constants->{basedir} . '/firehose.pl');
 
 		} else {
 			$r->args("nick=$nick&uid=$uid");
