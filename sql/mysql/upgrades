@@ -4375,8 +4375,6 @@ INSERT INTO firehose_tab VALUES (1,0,'FireHose','','createtime','DESC','indigo',
 INSERT INTO firehose_tab VALUES (2,0,'Slashdot','story','createtime','DESC','black','full');
 INSERT INTO firehose_tab VALUES (3,0,'Journals','journal','createtime','DESC','blue','full');
 
-# PUDGE LAST UPDATED HERE
-
 # 2007-01-24
 UPDATE vars SET value = 'T_2_5_0_143' WHERE name = 'cvs_tag_currentcode';
 
@@ -4406,9 +4404,6 @@ UPDATE vars SET value = 'T_2_5_0_147' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
-# 2007-02-14
-UPDATE vars SET value = 'T_2_5_0_147' WHERE name = 'cvs_tag_currentcode';
-
 # For plugins/FireHose
 INSERT INTO firehose_tab VALUES (4,0,'User','"user:{nickname}"','createtime','DESC','black','full');
 CREATE TABLE firehose_ogaspt (
@@ -4431,3 +4426,16 @@ CREATE TABLE tagnames_similar (
 ) TYPE=InnoDB;
 
 
+# For plugins/FireHose and plugins/SearchToo
+INSERT INTO vars (name, value, description) VALUES ('firehose_searchtoo', '0', 'Use SearchToo for FireHose searching');
+############################################################################
+#### DO NOT DO THIS UNTIL AFTER SLASHD HAS BEEN RESTARTED WITH NEW CODE ####
+############################################################################
+# better to DELETE existing search index first, before doing this:
+#   rm -rf search_index/kinosearch/firehose_*
+INSERT search_index_dump SELECT NULL, id, 'firehose', 'new' FROM firehose;
+
+# PUDGE LAST UPDATED HERE
+
+# 2007-02-21
+UPDATE vars SET value = 'T_2_5_0_148' WHERE name = 'cvs_tag_currentcode';

@@ -703,11 +703,13 @@ sub userdir_handler {
 					$r->args("op=showbookmarks");
 					$r->uri('/users.pl');
 					$r->filename($constants->{basedir} . '/users.pl');
+
 				} elsif ($op eq 'firehose') {
 					my $filter = fixparam("user:");
 					$r->args("fhfilter=$filter");
 					$r->uri('firehose.pl');
 					$r->filename($constants->{basedir} . '/firehose.pl')
+
 				} else {
 					$r->args("op=edituser");
 					$r->uri('/users.pl');

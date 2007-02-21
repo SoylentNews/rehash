@@ -35,9 +35,7 @@ use Data::JavaScript::Anon;
 
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
-use vars qw($VERSION $searchtootest);
-
-$searchtootest = 0;
+use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 sub createFireHose {
@@ -282,7 +280,7 @@ sub getFireHoseEssentials {
 	$options->{limit} ||= 50;
 
 	my($items, $results, $doublecheck) = ([], {}, 0);
-	if (!$options->{no_search} && $Slash::FireHose::searchtootest) {
+	if (!$options->{no_search} && $constants->{firehose_searchtoo}) {
 		my $searchtoo = getObject('Slash::SearchToo');
 		if ($searchtoo && $searchtoo->handled('firehose')) {
 			my(%opts, %query);
