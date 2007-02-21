@@ -836,16 +836,16 @@ function floatButtons () {
 function d2act () {
 	var gd = $('d2act'); 
 	if (gd) {
-    var targetTop = YAHOO.util.Dom.getY('commentwrap');
-    var vOffset = 0;
-    if ( typeof window.pageYOffset == 'number' )
-      vOffset = window.pageYOffset;
-    else if ( document.body && document.body.scrollTop )
-      vOffset = document.body.scrollTop;
-    else if ( document.documentElement && document.documentElement.scrollTop )
-      vOffset = document.documentElement.scrollTop;
+		var targetTop = YAHOO.util.Dom.getY('commentwrap');
+		var vOffset = 0;
+		if ( typeof window.pageYOffset == 'number' )
+			vOffset = window.pageYOffset;
+		else if ( document.body && document.body.scrollTop )
+			vOffset = document.body.scrollTop;
+		else if ( document.documentElement && document.documentElement.scrollTop )
+			vOffset = document.documentElement.scrollTop;
   
-    var oldpos = gd.style.position;
+		var oldpos = gd.style.position;
 
 		var mode = $('d2out').className;
 		if (mode=='horizontal rooted' || targetTop>vOffset) {
@@ -858,12 +858,12 @@ function d2act () {
 			gd.style.top      = '0px';
 		}
 
-    // for Safari and maybe others, force redraw on change
-    if ( oldpos != gd.style.position ) {
-      gd.style.display = 'none';
-      setTimeout("$('d2act').style.display = 'inline'", 1);
-      // gd.style.display = 'inline';
-    }
+		// for Safari and maybe others, force redraw on change
+		if ( oldpos != gd.style.position ) {
+			gd.style.display = 'none';
+			setTimeout("$('d2act').style.display = 'inline'", 1);
+			// gd.style.display = 'inline';
+		}
 	}
 }
 
