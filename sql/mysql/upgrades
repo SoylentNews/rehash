@@ -4406,5 +4406,28 @@ UPDATE vars SET value = 'T_2_5_0_147' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# 2007-02-14
+UPDATE vars SET value = 'T_2_5_0_147' WHERE name = 'cvs_tag_currentcode';
+
 # For plugins/FireHose
 INSERT INTO firehose_tab VALUES (4,0,'User','"user:{nickname}"','createtime','DESC','black','full');
+CREATE TABLE firehose_ogaspt (
+	globjid		int(10) unsigned NOT NULL default '0',
+	pubtime		datetime NOT NULL default '0000-00-00 00:00:00',
+	PRIMARY KEY	(globjid)
+) TYPE=InnoDB;
+
+# For plugins/Tags
+INSERT INTO vars (name, value, description) VALUES ('tags_usecloutfield', '', 'Use a users_param field for clout? Leave empty to use users_info.tag_clout times some simple multipliers');
+INSERT INTO vars (name, value, description) VALUES ('tags_usecloutfield_mult', '1.0', 'Multiply the users_param field by this');
+CREATE TABLE tagnames_similar (
+	tsid            int UNSIGNED NOT NULL AUTO_INCREMENT,
+	type            smallint UNSIGNED NOT NULL DEFAULT '0',
+	src_tnid        int UNSIGNED NOT NULL DEFAULT '0',
+	dest_tnid       int UNSIGNED NOT NULL DEFAULT '0',
+	simil           float NOT NULL DEFAULT '0',
+	PRIMARY KEY (tsid),
+	UNIQUE type_src_dest (type, src_tnid, dest_tnid)
+) TYPE=InnoDB;
+
+

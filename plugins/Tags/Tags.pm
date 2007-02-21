@@ -561,6 +561,7 @@ sub addCloutsToTagArrayref {
 	my($self, $ar) = @_;
 
 	return if !$ar || !@$ar;
+	my $constants = getCurrentStatic();
 
 	# Pull values from tag params named 'tag_clout'
 	my @tagids = sort { $a <=> $b } map { $_->{tagid} } @$ar;
@@ -581,19 +582,36 @@ sub addCloutsToTagArrayref {
 	my %uid = map { ($_->{uid}, 1) } @$ar;
 	my @uids = sort { $a <=> $b } keys %uid;
 	my $uids_in_str = join(',', @uids);
-	my $uid_info_hr = $self->sqlSelectAllHashref(
-		'uid',
-		'users.uid AS uid, seclev, karma, tag_clout',
-		'users, users_info',
-		"users.uid=users_info.uid AND users.uid IN ($uids_in_str)");
+	my $uid_info_hr;
+	my $clout_field = $constants->{tags_usecloutfield} || '';
+	if ($clout_field) {
+		$uid_info_hr = $self->sqlSelectAllHashref(
+			'uid',
+			'users.uid AS uid, seclev, karma, tag_clout, users_param.value AS paramclout',
+			"users,
+			 users_info LEFT JOIN users_param
+				ON (users_info.uid=users_param.uid AND users_param.name='$clout_field')",
+			"users.uid=users_info.uid AND users.uid IN ($uids_in_str)");
+	} else {
+		$uid_info_hr = $self->sqlSelectAllHashref(
+			'uid',
+			'users.uid AS uid, seclev, karma, tag_clout',
+			'users, users_info',
+			"users.uid=users_info.uid AND users.uid IN ($uids_in_str)");
+	}
 #print STDERR "uids_in_str='$uids_in_str'\n";
 
 	my $uid_clout_hr = { };
-	# XXX hardcoded formula, this should be parameterized at least with vars
 	for my $uid (keys %$uid_info_hr) {
-		$uid_clout_hr->{$uid} = $uid_info_hr->{$uid}{karma} >= -3 ? log($uid_info_hr->{$uid}{karma}+10) : 0;
-		$uid_clout_hr->{$uid} += 5 if $uid_info_hr->{$uid}{seclev} > 1;
-		$uid_clout_hr->{$uid} *= $uid_info_hr->{$uid}{tag_clout};
+		if (defined $uid_info_hr->{$uid}{paramclout}) {
+			$uid_clout_hr->{$uid} = $uid_info_hr->{$uid}{paramclout}
+				* $constants->{tags_usecloutfield_mult};
+		} else {
+			# XXX hardcoded formula, this should be parameterized at least with vars
+			$uid_clout_hr->{$uid} = $uid_info_hr->{$uid}{karma} >= -3 ? log($uid_info_hr->{$uid}{karma}+10) : 0;
+			$uid_clout_hr->{$uid} += 5 if $uid_info_hr->{$uid}{seclev} > 1;
+			$uid_clout_hr->{$uid} *= $uid_info_hr->{$uid}{tag_clout};
+		}
 	}
 
 	for my $tag_hr (@$ar) {

@@ -118,3 +118,13 @@ CREATE TABLE tags_peerweight (
 	KEY gen_uid (gen, uid)
 ) TYPE=InnoDB;
 
+CREATE TABLE tagnames_similar (
+	tsid		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	type		smallint UNSIGNED NOT NULL DEFAULT '0',
+	src_tnid	int UNSIGNED NOT NULL DEFAULT '0',
+	dest_tnid	int UNSIGNED NOT NULL DEFAULT '0',
+	simil		float NOT NULL DEFAULT '0',
+	PRIMARY KEY (tsid),
+	UNIQUE type_src_dest (type, src_tnid, dest_tnid)
+) TYPE=InnoDB;
+
