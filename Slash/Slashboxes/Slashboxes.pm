@@ -109,7 +109,7 @@ sub displaySlashboxes {
 			if ($articles && @$articles) {
 				$return .= portalsidebox(
 					getData('friends_journal_head'),
-					slashDisplay('friendsview', { articles => $articles}, { Return => 1 }),
+					slashDisplay('friendsview', { articles => $articles }, { Return => 1, Page => 'index' }),
 					$bid,
 					"$gSkin->{rootdir}/my/journal/friends",
 					$getblocks
