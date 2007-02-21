@@ -512,7 +512,7 @@ function firehose_set_options(name, value) {
 	var handlers = {
 		onComplete: function(transport) { 
 			json_handler(transport);
-			firehose_get_updates({ oneupdate: 1});
+			firehose_get_updates({ oneupdate: 1 });
 		}
 	};
 	ajax_update(params, '', handlers);
