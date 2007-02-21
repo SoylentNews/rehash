@@ -62,11 +62,11 @@ sub new {
 sub feed_newtags {
 	my($self, $tags_ar) = @_;
 	my $constants = getCurrentStatic();
-if (scalar(@$tags_ar) < 9) {
-print STDERR "Slash::Tagbox::CommentScoreReason->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'\n";
-} else {
-print STDERR "Slash::Tagbox::CommentScoreReason->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid} . "\n";
-}
+	if (scalar(@$tags_ar) < 9) {
+		tagboxLog("CommentScoreReason->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
+	} else {
+		tagboxLog("CommentScoreReason->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
+	}
 	my $tagsdb = getObject('Slash::Tags');
 
 	# Only tags on comments matter to this tagbox.
@@ -97,15 +97,15 @@ print STDERR "Slash::Tagbox::CommentScoreReason->feed_newtags called for " . sca
 	}
 	return [ ] if !@$ret_ar;
 
-print STDERR "Slash::Tagbox::CommentScoreReason->feed_newtags returning " . scalar(@$ret_ar) . "\n";
+	tagboxLog("CommentScoreReason->feed_newtags returning " . scalar(@$ret_ar));
 	return $ret_ar;
 }
 
 sub feed_deactivatedtags {
 	my($self, $tags_ar) = @_;
-print STDERR "Slash::Tagbox::CommentScoreReason->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'\n";
+	tagboxLog("CommentScoreReason->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
 	my $ret_ar = $self->feed_newtags($tags_ar);
-print STDERR "Slash::Tagbox::CommentScoreReason->feed_deactivatedtags returning " . scalar(@$ret_ar) . "\n";
+	tagboxLog("CommentScoreReason->feed_deactivatedtags returning " . scalar(@$ret_ar));
 	return $ret_ar;
 }
 
@@ -167,7 +167,7 @@ sub run {
 	my $new_score = $points_orig + $mod_score_sum;
 	my $new_karma_bonus = ($karma_bonus eq 'yes' && $keep_karma_bonus) ? 1 : 0;
 
-#print STDERR "Slash::Tagbox::CommentScoreReason->run setting cid $cid to score: $new_score, $reasons->{$current_reason_mode}{name} kb '$karma_bonus'->'$new_karma_bonus'\n";
+#tagboxLog("CommentScoreReason->run setting cid $cid to score: $new_score, $reasons->{$current_reason_mode}{name} kb '$karma_bonus'->'$new_karma_bonus'");
 
 	$self->sqlUpdate('comments', {
 			f1 =>	$new_score,

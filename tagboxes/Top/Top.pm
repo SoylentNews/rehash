@@ -60,11 +60,11 @@ sub new {
 sub feed_newtags {
 	my($self, $tags_ar) = @_;
 	my $constants = getCurrentStatic();
-if (scalar(@$tags_ar) < 4) {
-print STDERR "Slash::Tagbox::Top->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'\n";
-} else {
-print STDERR "Slash::Tagbox::Top->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid} . "\n";
-}
+	if (scalar(@$tags_ar) < 4) {
+		tagboxLog("Top->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
+	} else {
+		tagboxLog("Top->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
+	}
 
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
@@ -92,9 +92,9 @@ print STDERR "Slash::Tagbox::Top->feed_newtags called for " . scalar(@$tags_ar) 
 
 sub feed_deactivatedtags {
 	my($self, $tags_ar) = @_;
-print STDERR "Slash::Tagbox::Top->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'\n";
+	tagboxLog("Top->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
 	my $ret_ar = $self->feed_newtags($tags_ar);
-print STDERR "Slash::Tagbox::Top->feed_deactivatedtags returning " . scalar(@$ret_ar) . "\n";
+	tagboxLog("Top->feed_deactivatedtags returning " . scalar(@$ret_ar));
 	return $ret_ar;
 }
 
@@ -102,7 +102,7 @@ sub feed_userchanges {
 	my($self, $users_ar) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
-print STDERR "Slash::Tagbox::Top->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'\n";
+	tagboxLog("Top->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'");
 
 	my %max_tuid = ( );
 	my %uid_change_sum = ( );
@@ -134,7 +134,7 @@ print STDERR "Slash::Tagbox::Top->feed_userchanges called: users_ar='" . join(' 
 		};
 	}
 
-print STDERR "Slash::Tagbox::Top->feed_userchanges returning " . scalar(@$ret_ar) . "\n";
+	tagboxLog("Top->feed_userchanges returning " . scalar(@$ret_ar));
 	return $ret_ar;
 }
 
@@ -146,7 +146,7 @@ sub run {
 	my $tagboxdb = getObject('Slash::Tagbox');
 
 	my($type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
-	if (!$type) { print STDERR "Tagbox::Top::run finds no type for '$affected_id'" } # debug assertion
+	if (!$type) { warn "Tagbox::Top::run finds no type for '$affected_id'" } # debug assertion, can prob remove
 	return unless $type && ($type eq 'stories' || $type eq 'urls');
 
 	# Get the list of tags applied to this object.  If we're doing
@@ -160,7 +160,7 @@ sub run {
 	}
 	my $tag_ar = $tagsdb->getTagsByGlobjid($affected_id, $options);
 	$tagsdb->addCloutsToTagArrayref($tag_ar);
-print STDERR "Slash::Tagbox::Top->run called for $affected_id, " . scalar(@$tag_ar) . " tags\n";
+	tagboxLog("Top->run called for $affected_id, " . scalar(@$tag_ar) . " tags");
 
 	# Generate the space-separated list of the top 5 scoring tags.
 
@@ -217,7 +217,7 @@ print STDERR "Slash::Tagbox::Top->run called for $affected_id, " . scalar(@$tag_
 	if ($type eq 'stories') {
 
 		$self->setStory($target_id, { tags_top => join(' ', @top) });
-print STDERR "Slash::Tagbox::Top->run $affected_id with " . scalar(@$tag_ar) . " tags, setStory $target_id to '@top'\n";
+		tagboxLog("Top->run $affected_id with " . scalar(@$tag_ar) . " tags, setStory $target_id to '@top'");
 
 	} elsif ($type eq 'urls') {
 
@@ -243,6 +243,7 @@ print STDERR "Slash::Tagbox::Top->run $affected_id with " . scalar(@$tag_ar) . "
 		}
 
 		$self->setUrl($target_id, { popularity => $pop });
+		tagboxLog("Top->run $affected_id with " . scalar(@$tag_ar) . " tags, setUrl $target_id to pop=$pop");
 
 	}
 

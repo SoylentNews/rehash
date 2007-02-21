@@ -64,11 +64,11 @@ sub new {
 sub feed_newtags {
 	my($self, $tags_ar) = @_;
 	my $constants = getCurrentStatic();
-if (scalar(@$tags_ar) < 9) {
-print STDERR "Slash::Tagbox::FHEditorPop->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'\n";
-} else {
-print STDERR "Slash::Tagbox::FHEditorPop->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid} . "\n";
-}
+	if (scalar(@$tags_ar) < 9) {
+		tagboxLog("FHEditorPop->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
+	} else {
+		tagboxLog("FHEditorPop->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
+	}
 	my $tagsdb = getObject('Slash::Tags');
 
 	# The algorithm of the importance of tags to this tagbox is simple.
@@ -112,22 +112,22 @@ print STDERR "Slash::Tagbox::FHEditorPop->feed_newtags called for " . scalar(@$t
 	my %fh_globjs = ( map { $_, 1 } @$fh_globjs_ar );
 	$ret_ar = [ grep { $fh_globjs{ $_->{affected_id} } } @$ret_ar ];
 
-print STDERR "Slash::Tagbox::FHEditorPop->feed_newtags returning " . scalar(@$ret_ar) . "\n";
+	tagboxLog("FHEditorPop->feed_newtags returning " . scalar(@$ret_ar));
 	return $ret_ar;
 }
 
 sub feed_deactivatedtags {
 	my($self, $tags_ar) = @_;
-print STDERR "Slash::Tagbox::FHEditorPop->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'\n";
+	tagboxLog("FHEditorPop->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
 	my $ret_ar = $self->feed_newtags($tags_ar);
-print STDERR "Slash::Tagbox::FHEditorPop->feed_deactivatedtags returning " . scalar(@$ret_ar) . "\n";
+	tagboxLog("FHEditorPop->feed_deactivatedtags returning " . scalar(@$ret_ar));
 	return $ret_ar;
 }
 
 sub feed_userchanges {
 	my($self, $users_ar) = @_;
 	my $constants = getCurrentStatic();
-print STDERR "Slash::Tagbox::FHEditorPop->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'\n";
+	tagboxLog("FHEditorPop->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'");
 
 	# XXX need to fill this in, and check FirstMover feed_userchanges too
 
@@ -195,7 +195,7 @@ sub run {
 	my $fhid = $self->sqlSelect('id', 'firehose', "globjid = $affected_id_q");
 	my $firehose_db = getObject('Slash::FireHose');
 	warn "Slash::Tagbox::FHEditorPop->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
-print STDERR "Slash::Tagbox::FHEditorPop->run setting $fhid ($affected_id) to $popularity\n";
+	tagboxLog("FHEditorPop->run setting $fhid ($affected_id) to $popularity");
 	$firehose_db->setFireHose($fhid, { editorpop => $popularity });
 }
 

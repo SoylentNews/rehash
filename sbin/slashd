@@ -91,6 +91,13 @@ sub slashdLog {
 	doLog('slashd', \@args);
 }
 
+# Tagboxes get the option to log to a separate file.
+
+sub tagboxLog {
+	my(@args) = @_;
+	doLog('tagboxd', \@args);
+}
+
 # A command to log an error to a DB table.  This is only for messages
 # that are important enough that the admins should see them (maybe in
 # the admin.pl backend, but definitely in email at the end of the day).

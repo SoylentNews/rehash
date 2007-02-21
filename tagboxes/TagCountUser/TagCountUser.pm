@@ -59,11 +59,11 @@ sub new {
 
 sub feed_newtags {
 	my($self, $tags_ar) = @_;
-if (scalar(@$tags_ar) < 9) {
-print STDERR "Slash::Tagbox::TagCountUser->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'\n";
-} else {
-print STDERR "Slash::Tagbox::TagCountUser->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid} . "\n";
-}
+	if (scalar(@$tags_ar) < 9) {
+		tagboxLog("TagCountUser->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
+	} else {
+		tagboxLog("TagCountUser->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
+	}
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
                 # affected_id and importance work the same whether this is
@@ -89,21 +89,21 @@ print STDERR "Slash::Tagbox::TagCountUser->feed_newtags called for " . scalar(@$
 
 sub feed_deactivatedtags {
 	my($self, $tags_ar) = @_;
-if (scalar(@$tags_ar) < 9) {
-print STDERR "Slash::Tagbox::TagCountUser->feed_deactivatedtags called for tags '" . join(' ', map { $_->{tdid} } @$tags_ar) . "'\n";
-} else {
-print STDERR "Slash::Tagbox::TagCountUser->feed_deactivatedtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tdid} . " ... " . $tags_ar->[-1]{tdid} . "\n";
-}
+	if (scalar(@$tags_ar) < 9) {
+		tagboxLog("TagCountUser->feed_deactivatedtags called for tags '" . join(' ', map { $_->{tdid} } @$tags_ar) . "'");
+	} else {
+			tagboxLog("TagCountUser->feed_deactivatedtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tdid} . " ... " . $tags_ar->[-1]{tdid});
+	}
 	return $self->feed_newtags($tags_ar);
 }
 
 sub feed_userchanges {
 	my($self, $users_ar) = @_;
-if (scalar(@$users_ar) < 9) {
-print STDERR "Slash::Tagbox::TagCountUser->feed_userchanges called for changes '" . join(' ', map { $_->{tuid} } @$users_ar) . "'\n";
-} else {
-print STDERR "Slash::Tagbox::TagCountUser->feed_userchanges called for " . scalar(@$users_ar) . " changes " . $users_ar->[0]{tuid} . " ... " . $users_ar->[-1]{tuid} . "\n";
-}
+	if (scalar(@$users_ar) < 9) {
+		tagboxLog("TagCountUser->feed_userchanges called for changes '" . join(' ', map { $_->{tuid} } @$users_ar) . "'");
+	} else {
+		tagboxLog("TagCountUser->feed_userchanges called for " . scalar(@$users_ar) . " changes " . $users_ar->[0]{tuid} . " ... " . $users_ar->[-1]{tuid});
+	}
 	return [ ];
 }
 
@@ -111,7 +111,7 @@ sub run {
 	my($self, $affected_id) = @_;
 	my $tagboxdb = getObject('Slash::Tagbox');
 	my $user_tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
-print STDERR "Slash::Tagbox::TagCountUser->run called for $affected_id, ar count " . scalar(@$user_tags_ar) . "\n";
+	tagboxLog("TagCountUser->run called for $affected_id, ar count " . scalar(@$user_tags_ar));
 	my $count = grep { !defined $_->{inactivated} } @$user_tags_ar;
 	$self->setUser($affected_id, { tag_count => $count });
 }
