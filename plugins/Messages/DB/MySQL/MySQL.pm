@@ -41,7 +41,7 @@ my %descriptions = (
 	'bvdeliverymodes'
 		=> sub { $_[0]->sqlSelectAllHashref('code', 'code,name,bitvalue', 'message_deliverymodes') },
 	'bvmessagecodes'
-		=> sub { $_[0]->sqlSelectAllHashref('code', 'code,type,delivery_bvalue', 'message_codes', "code >= 0") },
+		=> sub { $_[0]->sqlSelectAllHashref('type', 'code,type,delivery_bvalue', 'message_codes', "code >= 0") },
 );
 
 sub getDescriptions {
