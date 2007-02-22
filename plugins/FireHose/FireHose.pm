@@ -280,7 +280,7 @@ sub getFireHoseEssentials {
 	$options->{limit} ||= 50;
 
 	my($items, $results, $doublecheck) = ([], {}, 0);
-	if (!$options->{no_search} && $constants->{firehose_searchtoo}) {
+	if (!$options->{no_search} && $constants->{firehose_searchtoo}) { # && $options->{qfilter}) {
 		my $searchtoo = getObject('Slash::SearchToo');
 		if ($searchtoo && $searchtoo->handled('firehose')) {
 			my(%opts, %query);
@@ -309,8 +309,11 @@ sub getFireHoseEssentials {
 			};
 
 #use Data::Dumper; print STDERR Dumper \%query, \%opts;
+#print STDERR "[[ 0 ]]\n";
 			$results = $searchtoo->findRecords(firehose => \%query, \%opts);
-			$items = $results->{records};
+			$items = delete $results->{records};
+#printf STDERR "[[ 4 : %d : %d : %d ]]\n\n", $results->{records_matches}, $results->{records_returned}, scalar @$items;
+#print STDERR Dumper $results;
 
 			return($items, $results) if ! @$items;
 
