@@ -1230,7 +1230,7 @@ sub processAdminCommand {
 	my $systemwide = $type =~ /^\$/ ? 1 : 0;
 	my $globjid = $systemwide ? undef : $self->getGlobjidCreate($table, $id);
 	my $hashmark_count = $type =~ s/\#/\#/g;
-	my $user_clout_reduction = $clout_reduc_map[$hashmark_count];
+	my $user_clout_reduction = $clout_reduc_map[$hashmark_count-1];
 	$user_clout_reduction = 1 if $user_clout_reduction > 1;
 	# Eventually we need to define FLOATs for clout and multiply
 	# them together, but for now it's an overwrite.
