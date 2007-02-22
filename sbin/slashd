@@ -95,7 +95,7 @@ sub slashdLog {
 
 sub tagboxLog {
 	my(@args) = @_;
-	doLog('tagboxd', \@args);
+	doLog('tagbox', \@args);
 }
 
 # A command to log an error to a DB table.  This is only for messages

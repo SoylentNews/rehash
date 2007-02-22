@@ -38,6 +38,7 @@ $task{$me}{code} = sub {
 		sleep 5 while !$task_exit_flag;
 		return ;
 	}
+	tagboxLog('tagbox.pl starting');
 
 	my $max_activity_for_run = 10;
 	while (!$task_exit_flag) {
@@ -50,7 +51,10 @@ $task{$me}{code} = sub {
 		# If there was a great deal of feeder activity, there is
 		# likely to be more yet to do, and it may obsolete the
 		# results we'd get by calling run() right now.  
-		next if $activity_feeder > 10;
+		if ($activity_feeder > 10) {
+			tagboxLog("tagbox.pl re-updating feederlog, activity $activity_feeder");
+			next;
+		}
 
 		# Run tagboxes (based on tagboxlog_feeder)
 		my $activity_run = run_tagboxes_until(time() + 30);
@@ -60,7 +64,10 @@ $task{$me}{code} = sub {
 		# If nothing's going on, ease up more (not that it probably
 		# matters much, since if nothing's going on both of the
 		# above should be doing reasonably fast SELECTs).
-		sleep 20 if !$activity_feeder && !$activity_run;
+		if (!$activity_feeder && !$activity_run) {
+			tagboxLog('tagbox.pl sleeping 20');
+			sleep 20;
+		}
 		last if $task_exit_flag;
 
 	}

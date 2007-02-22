@@ -61,9 +61,9 @@ sub feed_newtags {
 	my($self, $tags_ar) = @_;
 	my $constants = getCurrentStatic();
 	if (scalar(@$tags_ar) < 4) {
-		tagboxLog("Top->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
+		main::tagboxLog("Top->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
 	} else {
-		tagboxLog("Top->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
+		main::tagboxLog("Top->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
 	}
 
 	my $ret_ar = [ ];
@@ -92,9 +92,9 @@ sub feed_newtags {
 
 sub feed_deactivatedtags {
 	my($self, $tags_ar) = @_;
-	tagboxLog("Top->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
+	main::tagboxLog("Top->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
 	my $ret_ar = $self->feed_newtags($tags_ar);
-	tagboxLog("Top->feed_deactivatedtags returning " . scalar(@$ret_ar));
+	main::tagboxLog("Top->feed_deactivatedtags returning " . scalar(@$ret_ar));
 	return $ret_ar;
 }
 
@@ -102,7 +102,7 @@ sub feed_userchanges {
 	my($self, $users_ar) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
-	tagboxLog("Top->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'");
+	main::tagboxLog("Top->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'");
 
 	my %max_tuid = ( );
 	my %uid_change_sum = ( );
@@ -134,7 +134,7 @@ sub feed_userchanges {
 		};
 	}
 
-	tagboxLog("Top->feed_userchanges returning " . scalar(@$ret_ar));
+	main::tagboxLog("Top->feed_userchanges returning " . scalar(@$ret_ar));
 	return $ret_ar;
 }
 
@@ -160,7 +160,7 @@ sub run {
 	}
 	my $tag_ar = $tagsdb->getTagsByGlobjid($affected_id, $options);
 	$tagsdb->addCloutsToTagArrayref($tag_ar);
-	tagboxLog("Top->run called for $affected_id, " . scalar(@$tag_ar) . " tags");
+	main::tagboxLog("Top->run called for $affected_id, " . scalar(@$tag_ar) . " tags");
 
 	# Generate the space-separated list of the top 5 scoring tags.
 
@@ -217,7 +217,7 @@ sub run {
 	if ($type eq 'stories') {
 
 		$self->setStory($target_id, { tags_top => join(' ', @top) });
-		tagboxLog("Top->run $affected_id with " . scalar(@$tag_ar) . " tags, setStory $target_id to '@top'");
+		main::tagboxLog("Top->run $affected_id with " . scalar(@$tag_ar) . " tags, setStory $target_id to '@top'");
 
 	} elsif ($type eq 'urls') {
 
@@ -243,7 +243,7 @@ sub run {
 		}
 
 		$self->setUrl($target_id, { popularity => $pop });
-		tagboxLog("Top->run $affected_id with " . scalar(@$tag_ar) . " tags, setUrl $target_id to pop=$pop");
+		main::tagboxLog("Top->run $affected_id with " . scalar(@$tag_ar) . " tags, setUrl $target_id to pop=$pop");
 
 	}
 
