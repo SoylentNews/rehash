@@ -19,8 +19,9 @@ IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid 
 	the_skin = Slash.db.getSkin(item.primaryskid);
 	the_skin_title = '<a href="?fhfilter=' _ the_skin.name _ '" title="Filter to '_ the_skin.title _'">' _ the_skin.title _ "</a>: ";
 END;
-title = the_skin_title _ item.title;
+title = item.title;
 title = "<a onclick='javascript:toggle_firehose_body(\"$item.id\", $adminmode); return false' href='$gSkin.rootdir/firehose.pl?op=view&amp;id=$item.id'>" _ title _ "</a>";
+title = the_skin_title _ title;
 IF item.url_id;
         title = title _ "<span class=\"external\"><a href=\"" _ url.url _ "\" title=\"External link - " _ url.url _ "\" target=\"_blank\">[-&gt;]</a></span>";
 END;
