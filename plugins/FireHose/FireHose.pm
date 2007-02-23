@@ -1285,6 +1285,7 @@ sub getAndSetOptions {
 				if(length $data->{$_} > 16) {
 					$data->{$_} = substr($data->{$_}, 0, 16);
 				}
+				$data->{$_} = "User" if length($data->{$_}) == 0;
 			}
 			foreach my $field (qw(uid nickname)) {
 				$data->{$_} =~ s/{$field}/$user->{$field}/g;
