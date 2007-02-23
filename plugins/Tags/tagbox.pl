@@ -72,7 +72,9 @@ $task{$me}{code} = sub {
 
 	}
 
-	return sprintf("exiting after %d seconds", time - $start_time);
+	my $msg = sprintf("exiting after %d seconds", time - $start_time);
+	tagboxLog("tagbox.pl $msg");
+	return $msg;
 };
 
 sub update_feederlog {
