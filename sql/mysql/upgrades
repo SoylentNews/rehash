@@ -4440,6 +4440,3 @@ INSERT search_index_dump SELECT NULL, id, 'firehose', 'new' FROM firehose;
 
 # 2007-02-21
 UPDATE vars SET value = 'T_2_5_0_148' WHERE name = 'cvs_tag_currentcode';
-
-tags_usecloutfield_default
-
