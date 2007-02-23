@@ -14,6 +14,35 @@ __seclev__
 10000
 __template__
 [% IF env.script_name == "/firehose.pl" %]
+<script type="text/javascript">
+  YAHOO.slashdot.App = function()
+    {
+      return {
+          init: function()
+            {
+              var slashboxes_container = document.getElementById('slashboxes');
+              var block_titles = YAHOO.util.Dom.getElementsByClassName('title', 'div', slashboxes_container);
+
+              for ( i=0; i<block_titles.length; ++i)
+                {
+                  var inner_title = block_titles[i];
+                  var sb = inner_title.parentNode;
+                  // var inner_title = YAHOO.util.Dom.getElementsByClassName('title', 'div', sb)[0];
+                  
+                  if ( ! sb.id )
+                    sb.id = inner_title.id + "-container";
+
+                  var dd = new YAHOO.slashdot.SlashBox(sb.id, "slashboxes");
+                  dd.setHandleElId(inner_title.id);
+                  dd.setXConstraint(0,0);
+                }
+              // var t0 = new YAHOO.util.DDTarget("slashboxes", "slashboxes");
+            }
+        };
+    } ();
+
+  YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.App.init);
+</script>
 <div id="slashboxes">
 [% UNLESS user.noboxes %]
   [% IF slashboxes;
