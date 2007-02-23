@@ -1,5 +1,7 @@
 YAHOO.namespace("slashdot");
 
+function dragSlashbox( obj ) { }
+
 YAHOO.slashdot.SlashBox = function( id, sGroup, config )
   {
     if ( id )
@@ -98,7 +100,7 @@ YAHOO.slashdot.SlashBox.prototype.onDragOut = function(e, id)
 YAHOO.slashdot.SlashBox.prototype.onDragDrop = function(e, id)
   {
     var wrapper = document.getElementById('slashboxes');
-    var titles = YAHOO.util.Dom.getElementsByClassName('title', 'div', slashboxes_container);
+    var titles = YAHOO.util.Dom.getElementsByClassName('title', 'div', wrapper);
     var sep = "";
     var all = "";
     for ( i=0; i<block_titles.length; ++i)
