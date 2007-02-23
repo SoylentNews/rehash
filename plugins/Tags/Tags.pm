@@ -610,7 +610,7 @@ sub addCloutsToTagArrayref {
 			if (length $constants->{tags_usecloutfield_default}) {
 				# There's a default clout for users who don't have
 				# the param field in question.  Use it.
-				$uid_clout_hr->{$uid} = $constants->{tags_usecloutfield_default};
+				$uid_clout_hr->{$uid} = $constants->{tags_usecloutfield_default}+0;
 			} else {
 				# There's no default value.  Use the old formula.
 				# (XXX These hardcoded numbers really should be
