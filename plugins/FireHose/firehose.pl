@@ -38,8 +38,11 @@ sub main {
 
 	my $op = $form->{op};
 	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED] || $user->{seclev} < $ops{$op}[2] ) {
-		redirect("$gSkin->{rootdir}/");
-		return;
+		$op = 'default';
+		if ($user->{seclev} < 1) {
+			redirect("$gSkin->{rootdir}/");
+			return;
+		}
 	}
 
 	header('FireHose', '' ) or return;
