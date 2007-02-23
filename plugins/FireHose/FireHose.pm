@@ -1278,6 +1278,14 @@ sub getAndSetOptions {
 		my $data = {};
 		foreach (@tab_fields) {
 			$data->{$_} = $tab->{$_};
+			
+			if ($tab->{$_} eq "User" && $_ eq "tabname") {
+				$data->{$_} = $user->{nickname};
+				$data->{$_} =~ s/[^A-Za-z0-9_-]//g;
+				if(length $data->{$_} > 16) {
+					$data->{$_} = substr($data->{$_}, 0, 16);
+				}
+			}
 			foreach my $field (qw(uid nickname)) {
 				$data->{$_} =~ s/{$field}/$user->{$field}/g;
 			}
