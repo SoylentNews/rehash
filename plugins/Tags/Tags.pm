@@ -607,10 +607,20 @@ sub addCloutsToTagArrayref {
 			$uid_clout_hr->{$uid} = $uid_info_hr->{$uid}{paramclout}
 				* $constants->{tags_usecloutfield_mult};
 		} else {
-			# XXX hardcoded formula, this should be parameterized at least with vars
-			$uid_clout_hr->{$uid} = $uid_info_hr->{$uid}{karma} >= -3 ? log($uid_info_hr->{$uid}{karma}+10) : 0;
-			$uid_clout_hr->{$uid} += 5 if $uid_info_hr->{$uid}{seclev} > 1;
-			$uid_clout_hr->{$uid} *= $uid_info_hr->{$uid}{tag_clout};
+			if (length $constants->{tags_usecloutfield_default}) {
+				# There's a default clout for users who don't have
+				# the param field in question.  Use it.
+				$uid_clout_hr->{$uid} = $constants->{tags_usecloutfield_default};
+			} else {
+				# There's no default value.  Use the old formula.
+				# (XXX These hardcoded numbers really should be
+				# parameterized, but I'm not sure how long
+				# this formula is going to stick around...)
+				$uid_clout_hr->{$uid} = $uid_info_hr->{$uid}{karma} >= -3
+					? log($uid_info_hr->{$uid}{karma}+10) : 0;
+				$uid_clout_hr->{$uid} += 5 if $uid_info_hr->{$uid}{seclev} > 1;
+				$uid_clout_hr->{$uid} *= $uid_info_hr->{$uid}{tag_clout};
+			}
 		}
 	}
 

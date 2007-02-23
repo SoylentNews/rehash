@@ -4424,6 +4424,7 @@ CREATE TABLE tagnames_similar (
 	PRIMARY KEY (tsid),
 	UNIQUE type_src_dest (type, src_tnid, dest_tnid)
 ) TYPE=InnoDB;
+INSERT INTO vars (name, value, description) VALUES ('tags_usecloutfield_default', '', 'If empty string, then users with no tags_usecloutfield param use the old formula based on karma. If number, then those users use this number. If tags_usecloutfield not defined, leave this the empty string.');
 
 
 # For plugins/FireHose and plugins/SearchToo
@@ -4439,3 +4440,6 @@ INSERT search_index_dump SELECT NULL, id, 'firehose', 'new' FROM firehose;
 
 # 2007-02-21
 UPDATE vars SET value = 'T_2_5_0_148' WHERE name = 'cvs_tag_currentcode';
+
+tags_usecloutfield_default
+
