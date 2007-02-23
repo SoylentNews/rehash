@@ -132,7 +132,7 @@ ul.menu#fhtablist li.active:before { content: ""; }
 
 #firehose div.article div.firehose .title h3
 {
-	margin-top: .25em;
+	margin-top: .3em;
 	background: transparent;
 }
 
@@ -255,6 +255,7 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	font-size: 90%;
 	position: absolute;
 	font-weight: normal;
+        cursor: pointer;
 }
 
 .article .soda
