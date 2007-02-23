@@ -29,14 +29,17 @@ title = title _ " " _ '<span class="date">' _ Slash.timeCalc(item.createtime, "%
 	
 firehose = Slash.getObject("Slash::FireHose");
 pop_val = firehose.getPopLevelForPopularity(item.popularity);
+pop_val_offset = pop_val - 1;
 pop_disp = item.popularity.int;
+colors = firehose.getFireHoseColors(1);
+color = colors.$pop_val_offset;
 
 IF adminmode;
 	reject_checkbox = "";
         IF item.type != "story"; reject_checkbox = PROCESS reject_firehose id = item.id; END;
-        title = reject_checkbox _ "<span class='soda pop" _  pop_val _ "'> " _  pop_disp _ "</span> " _ title;
+        title = reject_checkbox _ "<span class='soda pop" _  pop_val _ "' title='Filter Firehose to entries rated " _ color _ " or better' onclick='firehose_slider_set_color(\"" _ color _ "\")'> " _  pop_disp _ "</span> " _ title;
 ELSE;
-        title = "<span class='soda pop" _  pop_val _ "'> &nbsp; </span> " _ title;
+        title = "<span class='soda pop" _  pop_val _ "' title='Filter to " _ color _"' onclick='firehose_slider_set_color(\"" _ color _ "\")'> &nbsp; </span> " _ title;
 END;
 	%]
 [% IF showtitle; title; END; %]
