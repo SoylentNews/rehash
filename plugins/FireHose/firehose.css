@@ -1,22 +1,6 @@
 /* Options */
 .firemenu { position: relative; }
 .firemenu h3 { margin-right: 120px; }
-
-.options
-{
-	width: 140px;
-	position: absolute;
-	top: 0px !important;
-	right: .5em;
-}
-
-.options span
-{
-	position: relative;
-	width: 20px;
-	margin: 0 0 0 30px !important;
-}
-
 #colorsliderbg { background: url('//images.slashdot.org/colorscale.png') no-repeat 0px -3px; }
 
 input
@@ -34,10 +18,32 @@ input
 #colorsliderthumb { display: inline; }
 #colorsliderthumb img { margin: 0 0 -5px 0px; }
 #fhtablist li { font-size: 130%; }
-#fhtablist li, #fhtablist a { color: #fff; padding:0; margin: 0; }
+
+#fhtablist li, #fhtablist a
+{
+	color: #fff;
+	padding: 0;
+	margin: 0;
+}
+
 #fhtablist li.active { font-weight: bold; }
-#fhtablist a {padding: 0 .3em;}
-#fhtablist {margin: 0;}
+#fhtablist a { padding: 0 .3em; }
+#fhtablist { margin: 0; }
+
+.options
+{
+	width: 140px;
+	position: absolute;
+	top: 0px !important;
+	right: .5em;
+}
+
+.options span
+{
+	position: relative;
+	width: 20px;
+	margin: 0 0 0 30px !important;
+}
 
 .options a
 {
@@ -46,10 +52,10 @@ input
 	font-weight: bold;
 	padding: 6px 0 4px 25px;
 	background: url('//images.slashdot.org/sic_controls.png') no-repeat;
-	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
 	text-indent: -7000em;
 	position: absolute;
 	top: 0;
+	width: 20px !important;
 }
 
 #play a { background-position: 0px 1px; }
@@ -108,7 +114,7 @@ ul.menu#fhtablist li.active:before { content: ""; }
 	background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x;
 }
 
-.paginate ul.menu { background: url('/images/slcb.png') right bottom no-repeat; }
+.paginate ul.menu { background: url('//images.slashdot.org/slcb.png') right bottom no-repeat; }
 .paginate a { color: #fff !important; }
 
 /* Articles */
@@ -123,12 +129,18 @@ ul.menu#fhtablist li.active:before { content: ""; }
 
 .storylinks li.more { margin-left: -1.8em !important; }
 #firehose div.article div.firehose .title { background: #666 url('//images.slashdot.org/slc.gif') top left no-repeat; }
-#firehose div.article div.firehose .title h3 { background: transparent; }
+
+#firehose div.article div.firehose .title h3
+{
+	margin-top: .25em;
+	background: transparent;
+}
+
 #firehose div.article div.firehose .title a { color: #fff; }
-#firehoselist .usermode .generaltitle .title h3 { padding-left: 70px !important; }
 #firehoselist { padding: 1em 0 0 0; }
 #firehoselist, #firehose #message, .firemenu { margin-right: 18.5em; }
 .admin #firehoselist, .admin #firehose #message, .admin .firemenu { margin-right: 0; }
+
 .article .generaltitle .title h3
 {
 	padding-left: 80px !important;
@@ -138,7 +150,7 @@ ul.menu#fhtablist li.active:before { content: ""; }
 .article .generaltitle .title .date,
 .article .generaltitle .title .nickname { display: none; }
 .article .firehosetag { background: #fff; }
-.article div.tags div.tagtitleopen {margin-top: 2.3em !important;}
+.article div.tags div.tagtitleopen { margin-top: 2.3em !important; }
 
 /* Voting */
 .article .vote { color: #cee; }
@@ -146,14 +158,12 @@ ul.menu#fhtablist li.active:before { content: ""; }
 .up
 {
 	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -1px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -1px;
 	left: 8px;
 }
 
 .down
 {
 	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -195px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -195px;
 	left: 26px;
 }
 
@@ -174,7 +184,8 @@ ul.menu#fhtablist li.active:before { content: ""; }
 	text-align: center;
 	font-size: 80%;
 }
-.article .vote {top: .6em}
+
+.article .vote { top: .6em; }
 
 /* Tagging */
 div.tags
@@ -208,7 +219,6 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 .edit a
 {
 	background: url('//images.slashdot.org/sic_icons.png') no-repeat 27px -398px !important;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 1px -398px !important;
 	width: 20px;
 }
 
@@ -217,10 +227,9 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 .external a
 {
 	z-index: 1000;
-	width: 10px;
+	width: 16px;
 	padding: 5px;
 	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -799px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
 	text-indent: -7000em;
 	position: absolute;
 }
@@ -233,7 +242,6 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	right: 5px;
 	top: .5em;
 	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -602px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
 }
 
 .reject input { visibility: hidden; }
@@ -276,12 +284,12 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 .briefarticle .soda
 {
 	top: 1px;
-	padding-bottom: .6em;
+	padding-bottom: .8em;
 }
 
 .briefarticle div.tags, .briefarticle div.tags div.tagtitleopen, .briefarticle div.tags div.tagtitleclosed
 {
-	margin-top: -1.25em !important;
+	margin-top: -1.4em !important;
 	margin-left: 70px;
 }
 
@@ -294,14 +302,14 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	padding-top: 2px;
 	padding-right: 50px;
 	padding-left: 80px;
-	padding-bottom: 1em !important;
+	padding-bottom: 1.2em !important;
 	font-size: 100%;
 	border-top: 1px solid #fff;
 	background: url('//images.slashdot.org/gen-slc.gif') no-repeat left top;
 }
 
 .briefarticle .generaltitle .title { background: #e6e6e6 url('//images.slashdot.org/sections-bg.png') repeat-x left bottom; }
-.briefarticle .generaltitle .title h3 a {color: #066;}
+.briefarticle .generaltitle .title h3 a { color: #066; }
 
 .briefarticle .generaltitle .title .date,
 .briefarticle .generaltitle .title .nickname
@@ -321,7 +329,7 @@ div.tags div.tagtitleclosed, div.tags div.tagtitleclosed a
 	right: 28px;
 }
 
-.briefarticle div.tags div.tagtitleclosed { margin-bottom: -1.6em !important; }
+.briefarticle div.tags div.tagtitleclosed { margin-bottom: -1.5em !important; }
 
 div.tags table
 {
@@ -342,6 +350,3 @@ div.tags table.data td
 	padding: .1em .5em;
 	line-height: 120%;
 }
-
-
-
