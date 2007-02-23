@@ -19,6 +19,7 @@ template=templates/firehose_options;misc;default
 template=templates/formatHoseIntro;misc;default
 template=templates/formatHoseTitle;misc;default
 template=templates/paginate;firehose;default
+template=templates/portalmap;firehose;default
 template=templates/reject_firehose;misc;default
 template=templates/tagsfirehosedivadmin;misc;default
 template=templates/tagsfirehosedivtagbox;misc;default
