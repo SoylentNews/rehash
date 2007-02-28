@@ -15,6 +15,9 @@ __template__
 	[% authorbox %]
 	[% storyadmin %]
 	[% perfbox %]
+	Firehose usage\n
+	[% Slash.sidebox("Firehose Usage", Slash.db.getBlock("firehose_usage", "block"), "firehose_usage", 1) %]
+	Firehose usage\n
 	[% slashdbox %]
 </div>
 <div id="console">
@@ -27,6 +30,7 @@ __template__
 			iframe.src = "[% constants.absolutedir_secure %]/submit.pl?op=list&nowrapper=1";
 		}
 	</script>
+	UCP: [% user.currentPage %]
 	<div id="submitframe">
 	[% IF firehosebox %]
 		<div id="firehose">
