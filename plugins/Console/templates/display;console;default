@@ -30,7 +30,6 @@ __template__
 			iframe.src = "[% constants.absolutedir_secure %]/submit.pl?op=list&nowrapper=1";
 		}
 	</script>
-	UCP: [% user.currentPage %]
 	<div id="submitframe">
 	[% IF firehosebox %]
 		<div id="firehose">
