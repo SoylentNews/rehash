@@ -419,6 +419,8 @@ sub getFireHoseEssentials {
 		push @where, "firehose.id IN ($id_str)";
 	}
 
+
+	# XXX Update to support timezones eventually
 	if ($options->{startdate}) {
 		push @where, "createtime >= '$options->{startdate} 00:00:00'";
 		if ($options->{duration}) {
@@ -682,6 +684,7 @@ sub ajaxFireHoseSetOptions {
 	my $html = {};
 	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs} }, { Return => 1});
 	$html->{fhoptions} = slashDisplay("firehose_options", { nowrapper => 1, options => $opts }, { Return => 1});
+	$html->{fh_advprefs} = slashDisplay("adv_pref_firehose", { nowrapper => 1, options => $opts }, { Return => 1});
 
 	my $values = {};
 	$values->{'firehose-filter'} = $opts->{fhfilter};

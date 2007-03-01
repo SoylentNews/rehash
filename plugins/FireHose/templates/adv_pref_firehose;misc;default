@@ -13,7 +13,9 @@ adv_pref_firehose
 __seclev__
 10000
 __template__
+[% IF !nowrapper %]
 <div id="fh_advprefs" class="hide">
+[% END %]
 <table>
 <tr>
 <td>
@@ -22,8 +24,8 @@ __template__
 <tr>
 <td>
 Automatic Updates: </td>
-<td><span class="advpref" id="advplay"></span>On</td><td><input type="radio" name="pause" value="0" onclick="firehose_set_options('pause','0')" [% IF options.firehose_paused; constants.markup_checked_attribute; END %]></td>
-<td><span class="advpref" id="advpause"></span> Off</td><td><input type="radio" name="pause" value="1" onclick="firehose_set_options('pause','1')" [% IF !options.firehose_paused; constants.markup_checked_attribute; END %]></td>
+<td><span class="advpref" id="advplay"></span>On</td><td><input type="radio" name="pause" value="0" onclick="firehose_set_options('pause','0')" [% IF options.firehose_pause; constants.markup_checked_attribute; END %]></td>
+<td><span class="advpref" id="advpause"></span> Off</td><td><input type="radio" name="pause" value="1" onclick="firehose_set_options('pause','1')" [% IF !options.firehose_pause; constants.markup_checked_attribute; END %]></td>
 </tr>
 
 <tr>
@@ -45,10 +47,20 @@ Automatic Updates: </td>
 
 </td>
 <tr><td>
-<input type="button" value="Reset to Defaults">
+<form method="post">
+<input type="hidden" name="fhfilter" value="">
+<input type="hidden" name="color" value="indigo">
+<input type="hidden" name="orderby" value="createtime">
+<input type="hidden" name="orderdir" value="DESC">
+<input type="hidden" name="mode" value="fulltitle">
+<input type="hidden" name="pause" value="1">
+<input type="submit" value="Reset to Defaults">
+</form>
 </td>
 </tr>
 </table>
+[% IF !nowrapper %]
 </div>
+[% END %]
 __version__
 $Id$
