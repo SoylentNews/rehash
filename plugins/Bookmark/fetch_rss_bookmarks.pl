@@ -13,7 +13,7 @@ use LWP::UserAgent;
 
 use vars qw( %task $me );
 
-$task{$me}{timespec} = '12 * * * *';
+$task{$me}{timespec} = '12,32,52 * * * *';
 $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
@@ -23,15 +23,19 @@ $task{$me}{code} = sub {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $bookmark_reader = getObject('Slash::Bookmark', { db_type => 'reader' });
 
-	my $feeds = $bookmark_reader->getBookmarkFeeds();
+	my $feeds = $bookmark_reader->getBookmarkFeeds({ rand_order => 1});
+	my $max_adds_per_run = 10;
+	my $adds = 0;
 
 	foreach my $feed (@$feeds) {
+		last if $adds >= $max_adds_per_run;
 		my $content = geturl($feed->{feed});
 		eval { $rss->parse($content); };
 		if ($@) {
 			slashdLog("error parsing feed from $feed->{feed}");
 		} else {
 			for my $item (@{$rss->{items}}) {
+				last if $adds >= $max_adds_per_run;
 				for (keys %{$item}) {
 					$item->{$_} = xmldecode($item->{$_});
 				}
@@ -72,6 +76,8 @@ $task{$me}{code} = sub {
 					my $tags = getObject('Slash::Tags');
 					slashdLog("$taglist $url_id");
 					$tags->setTagsForGlobj($url_id, "urls", $taglist, { uid => $feed->{uid}});
+					$adds++;
+					sleep 10;
 				}
 			}
 		}
