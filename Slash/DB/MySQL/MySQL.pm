@@ -8,6 +8,7 @@ use strict;
 use Socket;
 use Digest::MD5 'md5_hex';
 use Time::HiRes;
+use Time::Local;
 use Date::Format qw(time2str);
 use Data::Dumper;
 use Slash::Utility;
@@ -8302,6 +8303,19 @@ sub getDay {
 	$days_back ||= 0;
 	my $day = timeCalc(scalar(localtime(time-86400*$days_back)), '%Y%m%d'); # epoch time, %Q
 	return $day;
+}
+
+sub getDayFromDay {
+	my($self, $day, $days_back) = @_;
+	$day =~ s/-//g;
+	my ($y, $m, $d) = $day =~ /(\d{4})(\d{2})(\d{2})/;
+	my $return_day;
+	if ($y) {
+		$return_day = timeCalc(scalar localtime(timelocal(0, 0, 0, $d, $m - 1, $y - 1900) - 86400 * $days_back), "%Y%m%d");
+	} else {
+		$return_day = $self->getDay(0) if !$y;
+	}
+	return $return_day;
 }
 
 ##################################################################

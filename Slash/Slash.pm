@@ -46,7 +46,7 @@ $VERSION   	= '2.005000';  # v2.5.0
 	gensym
 
 	dispComment displayStory displayRelatedStories displayThread dispStory
-	getOlderStories getOlderDays printComments
+	getOlderStories getOlderDays getOlderDaysFromDay printComments
 	jsSelectComments
 
 	tempUofmLinkGenerate tempUofmCipherObj
@@ -1658,6 +1658,48 @@ sub getOlderDays {
 		$week_ago  = $reader->getDay(8);
 	}
 	return($today, $tomorrow, $yesterday, $week_ago);
+}
+
+sub getOlderDaysFromDay {
+	my ($day, $start, $end, $options) = @_;
+	my $slashdb = getCurrentDB();
+	$day ||= $slashdb->getDay(0);
+	$start ||= 0;
+	$end ||= 0;
+	$options ||= {};
+	my $days = [];
+
+	my $today = $slashdb->getDay(0);
+	my $yesterday = $slashdb->getDay(1);
+	my $weekago = $slashdb->getDay(7);
+	
+	for ($start..$end) {
+		my $the_day =  $slashdb->getDayFromDay($day, $_);
+		push @$days, $the_day if $the_day < $today;
+	}
+	if ($today > $days->[0]) {
+		unshift @$days, "$today";
+	}
+
+	my ($ty, $tm, $td) = $today =~ /(\d{4})(\d{2})(\d{2})/;
+	my $ret_array = [];
+	foreach (@$days) {
+		my $label;
+		my ($y, $m, $d) = $_ =~ /(\d{4})(\d{2})(\d{2})/;
+		if ($_ eq $today) {
+			$label = "Today";
+		} elsif ($_ eq $yesterday) {
+			$label = "Yesterday";
+		} elsif ($_ <= $today && $_ >= $weekago) {
+			$label = timeCalc($_, "%A", 0);
+		} elsif ($ty == $y) {
+			$label = timeCalc($_, "%B %e", 0);
+		} else {
+			$label = timeCalc($_, "%b. %e, %Y", 0);
+		}
+		push @$ret_array, [ $_, $label ];
+	}
+	return $ret_array;
 }
 
 #========================================================================
