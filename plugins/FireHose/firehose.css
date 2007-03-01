@@ -108,7 +108,7 @@ ul.menu#fhtablist li.active:before { content: ""; }
 	background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x;
 }
 
-.paginate ul.menu { background: url('/images/corner_w_br.png') right bottom no-repeat; }
+.paginate ul.menu { background: url('//images.slashdot.org/corner_w_br.png') right bottom no-repeat; }
 .paginate a { color: #fff !important; }
 
 /* Articles */
@@ -122,9 +122,7 @@ ul.menu#fhtablist li.active:before { content: ""; }
 }
 
 .storylinks li.more { margin-left: -1.8em !important; }
-#firehose div.article div.firehose .title { background: #666 url('//images.slashdot.org/slc.gif') top left no-repeat; }
 #firehose div.article div.firehose .title h3 { background: transparent; }
-#firehose div.article div.firehose .title a { color: #fff; }
 #firehoselist { padding: 1em 0 0 0; }
 #firehoselist, #firehose #message, .firemenu { margin-right: 18.5em; }
 .admin #firehoselist, .admin #firehose #message, .admin .firemenu { margin-right: 0; }
@@ -156,8 +154,7 @@ ul.menu#fhtablist li.active:before { content: ""; }
 	text-indent: -7000em;
 	position: absolute;
 }
-.usermode.briefarticle .vote,
-.usermode.article .vote {left: 10px !important}
+
 .vote
 {
 	position: absolute;
@@ -167,16 +164,15 @@ ul.menu#fhtablist li.active:before { content: ""; }
 	text-align: center;
 	font-size: 80%;
 }
+
 .article .vote {color: #cee; }
 
 /* Tagging */
-#firehose .briefarticle div.tags {margin: 0 !important; padding: 0 !important;}
-div.tags div.tagtitleclosed { background: transparent !important; position: absolute !important; overflow: hidden; right: 60px; top: .5em; font-size: 95%;}
-.usermode div.tags div.tagtitleclosed {right: 10px;}
+.briefarticle div.tags {margin: 0 !important; padding: 0 !important;}
+div.tags div.tagtitleclosed {z-index: 0; background: transparent !important; position: absolute !important; height: 1em; line-height: 140% !important; overflow: hidden; width: 20%; right: 60px; top: .5em; font-size: 95%;}
 div.tags div.tagtitleclosed input:first-child {width: 30% !important;}
 div.tags div.tagtitleclosed input {font-size: 80%;}
-.whitewash div.tagtitleclosed , .whitewash div.tagtitleclosed a {color: #fff !important}
-.whitewash div.tagtitleclosed span.tagsheader {background: url('/images/arrow_w_closed.png') no-repeat !important;}
+div.tags div.tagtitleclosed a, div.tags div.tagtitleclosed {color: #555;}
 div.tags table
 {
         background: transparent;
@@ -269,33 +265,29 @@ div.tags table.data td
 .pop8 { background: url('//images.slashdot.org/pop0.png') no-repeat 0px 0px; }
 
 /* Collapsed */
-#firehose div.briefarticle .storylinks { display: none; }
+div.briefarticle .storylinks { display: none; }
 #firehose div.briefarticle a span { float: none; }
-#firehose div.briefarticle div.future .title { background: #700; }
-#firehose div.briefarticle div.story .title { background: #066; }
-#firehose div.briefarticle div.future .title a, 
-#firehose div.briefarticle div.story .title a { color: #fff; }
-#firehose div.briefarticle div.future .title .date, #firehose div.briefarticle div.story .title .date { color: #fff; opacity: 0.5; }
-#firehose .briefarticle {position: relative !important}
+.briefarticle {position: relative !important}
 .adminmode .briefarticle .generaltitle .title h3 {padding-left: 80px !important;}
 .briefarticle .generaltitle .title h3
 {
 	padding-top: .5em;
-	padding-right: 30%;
+	padding-right: 35%;
 	padding-left: 70px;
 	font-size: 100%;
 	border-top: 1px solid #fff;
 	background: url('//images.slashdot.org/gen-slc.gif') no-repeat left top;
 }
-.article .generaltitle .title h3 {padding-left: 70px;}
-.briefarticle .generaltitle .title { background: #e6e6e6 url('//images.slashdot.org/sections-bg.png') repeat-x left bottom; }
-.briefarticle .generaltitle .title h3 a { color: #066; }
+.article .generaltitle .title h3 {padding-left: 70px; background: transparent}
+.briefarticle .generaltitle .title, .article .generaltitle .title { background: #e6e6e6 url('//images.slashdot.org/sections-bg.png') repeat-x left bottom; }
+.briefarticle .generaltitle .title h3 a, .article .generaltitle .title h3 a { color: #066; }
 
 .briefarticle .generaltitle .title .date,
 .briefarticle .generaltitle .title .nickname
 {
 	color: #666;
 	font-size: 85%;
+	white-space: nowrap;
 }
 
 .briefarticle .end { display: none; }
@@ -309,4 +301,11 @@ div.tags table.data td
 	right: 28px;
 }
 
+.whitewash div.tags div.tagtitleclosed span i, .whitewash div.tags div.tagtitleclosed span i a, .whitewash div.tags div.tagtitleclosed span, .whitewash div.tags div.tagtitleclosed span a {color: #fff !important}
+.whitewash div.tagtitleclosed span.tagsheader {background: url('//images.slashdot.org/arrow_w_closed.png') no-repeat !important;}
+.briefarticle .future .title a, .article .future .title a,
+.briefarticle .story .title a, .article .story .title a, .article .story .title h3 a , .briefarticle .story .title h3 a {color: #fff !important}
+.briefarticle .story .title, .article .story .title  { background: #066 !important; }
+.briefarticle .future .title, .article .future .title  { background: #700 !important; }
+.briefarticle div.future .title .date, #firehose div.briefarticle div.story .title .date { color: #fff; opacity: 0.5; }
 
