@@ -45,7 +45,7 @@ input
 	margin: 0 0 0 30px !important;
 }
 
-.options a
+.options a 
 {
 	color: #fff;
 	text-decoration: none;
@@ -57,15 +57,23 @@ input
 	top: 0;
 	width: 20px !important;
 }
+	
+.advpref {
+ background: url('//images.slashdot.org/sic_controls.png') no-repeat;
+_background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
+ padding-bottom: 25px;
+ padding-left: 15px;
+ padding-right: 15px;
+}
 
-#play a { background-position: 0px 1px; }
-#pause a { background-position: 0px -200px; }
-#desc a { background-position: 0px -400px; }
-#asc a { background-position: 0px -600px; }
-#full a { background-position: 0px -800px; }
-#abbrev a { background-position: 0px -1000px; }
-#time a { background-position: 0px -1200px; }
-#popularity a { background-position: 0px -1400px; }
+#play a, #advplay { background-position: 0px 1px; }
+#pause a, #advpause { background-position: 0px -200px; }
+#desc a, #advdesc { background-position: 0px -400px; }
+#asc a, #advasc { background-position: 0px -600px; }
+#full a, #advfull { background-position: 0px -800px; }
+#abbrev a, #advabbrev { background-position: 0px -1000px; }
+#time a, #advtime { background-position: 0px -1200px; }
+#popularity a, #advpop { background-position: 0px -1400px; }
 .article .firehosetag { background: #fff; }
 
 ul.menu
