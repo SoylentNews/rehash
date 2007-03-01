@@ -38,11 +38,12 @@ param_str = ""
 [% END %]
 [% IF days.size > 0 %]
 	[% FOREACH cur_day = days; %]
-		<li><a href="?startdate=[% cur_day.0 %]">[% cur_day.1 %]</a></li>
+		[% is_base_day = cur_day.0 == day %]
+		<li>[% IF is_base_day; "["; END %]<a href="?startdate=[% cur_day.0 %]">[% IF is_base_day %]<b>[% END %][% cur_day.1 %][% IF is_base_day %]</b>[% END %]</a></li>
 		[% IF cur_day.0 == day %]
 			[% IF page %] <li><a href="?page=[% page - 1 %]&amp;startdate=[ cur_day.0 %]">&lt;- [% page %]</a></li>[% END %]
 			<li><a href="?page=[% page %][% param_str %]&amp;startdate=[% cur_day.0 %]">[% page + 1 %]</a></li>
-			<li><a href="[?page=[% page + 1%][% param_str %]&amp;startdate=[% cur_day.0 %]">[% page + 2 %] -&gt;</a></li>
+			<li><a href="[?page=[% page + 1%][% param_str %]&amp;startdate=[% cur_day.0 %]">[% page + 2 %] -&gt;</a>[% IF is_base_day; "]"; END %]</li>
 		[% END %]
 	[% END %]
 [% ELSE %]
