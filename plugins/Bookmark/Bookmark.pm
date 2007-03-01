@@ -85,7 +85,7 @@ sub getBookmarkFeeds {
 	$options ||= {};
 	my $other = "";
 	$other = "ORDER BY RAND() DESC" if $options->{rand_order};
-	$self->sqlSelectAllHashrefArray("*", "bookmark_feeds");
+	$self->sqlSelectAllHashrefArray("*,RAND()", "bookmark_feeds", "", $other);
 }
 
 sub getBookmark {

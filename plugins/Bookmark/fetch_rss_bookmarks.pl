@@ -28,6 +28,7 @@ $task{$me}{code} = sub {
 	my $adds = 0;
 
 	foreach my $feed (@$feeds) {
+		slashdLog("Feed: $feed->{feed}");
 		last if $adds >= $max_adds_per_run;
 		my $content = geturl($feed->{feed});
 		eval { $rss->parse($content); };
