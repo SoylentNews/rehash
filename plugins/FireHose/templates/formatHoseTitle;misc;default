@@ -15,7 +15,7 @@ formatHoseTitle
 __template__
 [%
 the_skin_title = "";
-IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid != constants.mainpage_skid;
+IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid != constants.mainpage_skid && item.type == "story";
 	the_skin = Slash.db.getSkin(item.primaryskid);
 	the_skin_title = '<a href="?fhfilter=' _ the_skin.name _ '" title="Filter to '_ the_skin.title _'">' _ the_skin.title _ "</a>: ";
 END;
