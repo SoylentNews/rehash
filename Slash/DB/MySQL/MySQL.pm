@@ -12177,6 +12177,35 @@ sub getClassForAjaxOp {
 	return $self->sqlSelect("class", "ajax_ops", "op=$op_q");
 }
 
+sub insertMediaFile {
+	my ($self, $stoid, $name);
+	return $self->sqlInsert("stories_media", { stoid => $stoid, name => $name }, { ignore => 1 });
+}
+
+sub updateMediaFile {
+	my ($self, $name, $data);
+	$self->sqlUpdate("stories_media", $data, "name=$name");
+}
+
+sub getMediaFiles {
+	my ($self, $stoid);
+
+	return $self->sqlSelectAllHashrefArray('smid, name',
+                'stories_media',
+                "stoid=$stoid"
+        );
+}
+
+sub getMediaFile {
+	my ($self, $data);
+
+	if ($data ~= /\d+/) {
+		return $self->sqlSelect("width, height, location", "stories_media", "smid=$data");
+	} else {
+		return $self->sqlSelect("width, height, location", "stories_media", "name=$data");
+	}
+}
+
 ########################################################
 sub DESTROY {
 	my($self) = @_;
