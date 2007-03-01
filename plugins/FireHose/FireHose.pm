@@ -419,8 +419,13 @@ sub getFireHoseEssentials {
 		push @where, "firehose.id IN ($id_str)";
 	}
 
-	if (defined $options->{daysback} && !$doublecheck) {
-		push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $options->{daysback} DAY)"
+	if ($options->{startdate}) {
+		push @where, "createtime >= '$options->{startdate} 00:00:00'";
+		if ($options->{duration}) {
+			push @where, "createtime <= DATE_ADD('$options->{startdate} 00:00:00', INTERVAL $options->{duration} DAY)";
+		}
+	} elsif (defined $options->{duration} && !$doublecheck) {
+		push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $options->{duration} DAY)";
 	}
 
 	if ($options->{color}) {
@@ -889,7 +894,8 @@ sub ajaxFireHoseGetUpdates {
 		push @$updates, ["remove", $_, ""];
 	}
 
-	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1, page => $form->{page} }, { Return => 1, Page => "firehose"});
+
+	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1, page => $form->{page}, options => $opts }, { Return => 1, Page => "firehose"});
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
 
@@ -939,7 +945,9 @@ sub ajaxUpDownFirehose {
 	my $newtagspreloadtext = $tags->setTagsForGlobj($itemid, $table, $tagsstring);
 	my $html  = {};
 	my $value = {};
-	$html->{"updown-$id"} = "Votes Saved";
+
+	my $votetype = $dir eq "+" ? "Up" : $dir eq "-" ? "Down" : "";
+	$html->{"updown-$id"} = "Voted $votetype";
 	$value->{"newtags-$id"} = $newtagspreloadtext;
 
 	return Data::JavaScript::Anon->anon_dump({
@@ -1217,10 +1225,23 @@ sub getAndSetOptions {
 	my $mode = $form->{mode} || $user->{firehose_mode};
 	$mode = $modes->{$mode} ? $mode : "fulltitle";
 	$options->{mode} = $mode;
+	$options->{pause} = $user->{firehose_paused};
 
 	if (defined $form->{pause}) {
 		$self->setUser($user->{uid}, { firehose_paused => $form->{pause} ? 1 : 0 });
+		$options->{pause} = $form->{pause} ? 1 : 0;
 	}
+
+	if (defined $form->{startdate}) {
+		if ($form->{startdate} =~ /^\d{8}$/) {
+			my ($y, $m, $d) = $form->{startdate} =~ /(\d{4})(\d{2})(\d{2})/;
+			if ($y) {
+				$options->{startdate} = "$y-$m-$d";
+			}
+		}
+	}
+	$options->{startdate} = "" if !$options->{startdate};
+	
 
 	my $colors = $self->getFireHoseColors();
 
@@ -1473,13 +1494,14 @@ sub getAndSetOptions {
 		$options->{rejected} = "no" if !$options->{rejected};
 	} else  {
 		$options->{accepted} = "no" if !$options->{accepted};
-		$options->{daysback} = 1;
+		$options->{duration} = 1;
 		if ($user->{is_subscriber}) {
 			$options->{createtime_subscriber_future} = 1;
 		} else {
 			$options->{createtime_no_future} = 1;
 		}
 	}
+	
 	return $options;
 }
 
