@@ -12213,7 +12213,7 @@ sub getMediaFiles {
 sub getMediaFile {
 	my ($self, $data);
 
-	if ($data ~= /\d+/) {
+	if ($data =~ /\d+/) {
 		return $self->sqlSelect("width, height, location", "stories_media", "smid=$data");
 	} else {
 		return $self->sqlSelect("width, height, location", "stories_media", "name=$data");
