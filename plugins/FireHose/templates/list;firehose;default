@@ -67,7 +67,7 @@ __template__
 <div id="message_area">
 </div>
 	[% PROCESS firehose_tabs tabs = options.tabs %]
-	<div align="right"><a href="#" onclick="firehose_toggle_advpref()">Prefs</a></div>
+	<div align="right"><a href="#" id="fh_adv_pref_toggle" onclick="firehose_toggle_advpref(); return false">Prefs</a></div>
 	[% PROCESS adv_pref_firehose options = options %]
 	<form action="[% gSkin.rootdir %]/firehose.pl" method="get" name="firehoseform">
 		<fieldset>
