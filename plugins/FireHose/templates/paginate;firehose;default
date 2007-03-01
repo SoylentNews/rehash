@@ -13,6 +13,14 @@ paginate
 __seclev__
 10000
 __template__
+[% IF options.orderby == "createtime";
+	day = options.startdate;
+	day = day.replace('-','');
+	day = day || Slash.db.getDay(0);
+	days = Slash.getOlderDaysFromDay(day, -1, 3);
+END %]
+
+
 [% 
 param_str = ""
 	state_params = ["mode", "type", "primaryskid", "order", "filter", "category"];
@@ -28,9 +36,20 @@ param_str = ""
 <div class="paginate">
 <ul class="menu" id="fh-paginate">
 [% END %]
-[% IF page %] <li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page - 1 %][% param_str %]">&lt;- [% page %]</a></li>[% END %]
-<li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page %][% param_str %]">[% page + 1 %]</a></li>
-<li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page + 1%][% param_str %]">[% page + 2 %] -&gt;</a></li>
+[% IF days.size > 0 %]
+	[% FOREACH cur_day = days; %]
+		<li><a href="?startdate=[% cur_day.0 %]">[% cur_day.1 %]</a></li>
+		[% IF cur_day.0 == day %]
+			[% IF page %] <li><a href="?page=[% page - 1 %]&amp;startdate=[ cur_day.0 %]">&lt;- [% page %]</a></li>[% END %]
+			<li><a href="?page=[% page %][% param_str %]&amp;startdate=[% cur_day.0 %]">[% page + 1 %]</a></li>
+			<li><a href="[?page=[% page + 1%][% param_str %]&amp;startdate=[% cur_day.0 %]">[% page + 2 %] -&gt;</a></li>
+		[% END %]
+	[% END %]
+[% ELSE %]
+	[% IF page %] <li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page - 1 %][% param_str %]">&lt;- [% page %]</a></li>[% END %]
+	<li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page %][% param_str %]">[% page + 1 %]</a></li>
+	<li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page + 1%][% param_str %]">[% page + 2 %] -&gt;</a></li>
+[% END %]
 [% IF !contentsonly %]
 </ul>
 </div>
