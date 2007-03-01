@@ -12,12 +12,15 @@ var firehose_updates_size = 0;
 var firehose_ordered = Array(0);
 var firehose_before = Array(0);
 var firehose_after = Array(0);
+var firehose_startdate = '';
+var firehose_removed_first = '0';
 var firehose_future;
 var fh_colorslider; 
 var fh_ticksize;
 var fh_colors = Array(0);
 var vendor_popup_timerids = Array(0);
 var vendor_popup_id = 0;
+var fh_slider_init_set = 0;
 
 function createPopup(xy, titlebar, name, contents, message, onmouseout) {
 	var body = document.getElementsByTagName("body")[0]; 
@@ -113,6 +116,16 @@ function getXYForId(id, addWidth, addHeight) {
 		xy[1] = xy[1] + div.offsetHeight;
 	}
 	return xy;
+}
+
+function firehose_toggle_advpref() {
+	var obj = $('fh_advprefs');
+	if (obj.className == 'hide') {
+		obj.className = "";
+	} else {
+		obj.className = "hide";
+	}
+
 }
 
 function toggleIntro(id, toggleid) {
@@ -705,6 +718,10 @@ function firehose_handle_update() {
 				wait_interval = wait_interval / 2;
 
 			}
+			if (firehose_updates_size > 30) {
+				myAnim.duration = myAnim.duration / 1.5;
+				wait_interval = wait_interval / 2;
+			}
 
 			myAnim.onComplete.subscribe(function() {
 				if ($(fh)) {
@@ -726,14 +743,14 @@ function firehose_handle_update() {
 				wait_interval = 500;
 				
 				if (firehose_updates_size > 10) {
-					myAnim.duration = myAnim.duration / 2;
-					wait_interval = wait_interval / 2;
+					myAnim.duration = myAnim.duration * 2;
+					if (!firehose_removed_first) {
+						wait_interval = wait_interval * 2;
+					} else {
+						wait_interval = 20;
+					}
 				}
-				if (firehose_updates_size > 20) {
-					myAnim.duration = myAnim.duration / 2;
-					wait_interval = wait_interval / 2;
-				}
-
+				firehose_removed_first = 1;
 				myAnim.onComplete.subscribe(function() {
 					var elem = this.getEl();
 					if (elem && elem.parentNode) {
@@ -810,6 +827,7 @@ function firehose_get_updates_handler(transport) {
 	if (response.updates) {
 		firehose_updates = response.updates;
 		firehose_updates_size = firehose_updates.length;
+		firehose_removed_first = 0;
 		processed = processed + 1;
 		firehose_handle_update();
 	}
@@ -851,6 +869,7 @@ function firehose_get_updates(options) {
 	params['op'] = 'firehose_get_updates';
 	params['ids'] = firehose_get_item_idstring();
 	params['updatetime'] = update_time;
+	params['startdate'] = firehose_startdate;
 	params['page'] = page;
 	$('busy').className = "";
 	ajax_update(params, '', handlers);
@@ -972,7 +991,11 @@ function firehose_slider_set_color(color) {
 function firehose_slider_end(offsetFromStart) {
 	var newVal = fh_colorslider.getValue();
 	var color = fh_colors[ newVal / fh_ticksize ];
-	firehose_set_options("color", color);
+	$('fh_slider_img').title = "Firehose filtered to " + color;
+	if(fh_slider_init_set) {
+	 	firehose_set_options("color", color)
+	}
+	fh_slider_init_set = 1;
 }
 
 function pausePopVendorStory(id) {
