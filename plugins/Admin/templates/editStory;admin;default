@@ -238,6 +238,22 @@ __template__
 				[% PROCESS editbuttons %]
 
 				<label>
+					Upload an image/audio file for this story
+				</label>
+				<input type="file" name="media_file">
+
+				[% IF story_media_ref %]
+					<label>
+						Media Files associated with this story
+					</label>
+					<table border="0" class="data">
+					[% FOREACH mfile = story_media_ref %]
+					<tr><td>mfile.smid</td><td>mfile.name</td></tr>
+					[% END %]
+					</table>
+				[% END %]
+
+				<label>
 					Upload a file for bodytext
 				</label>
 				<input type="file" name="bodytext_file">
