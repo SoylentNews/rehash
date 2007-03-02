@@ -23,7 +23,7 @@ $task{$me}{code} = sub {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $bookmark_reader = getObject('Slash::Bookmark', { db_type => 'reader' });
 
-	my $feeds = $bookmark_reader->getBookmarkFeeds({ rand_order => 1});
+	my $feeds = $bookmark_reader->getBookmarkFeeds({ rand_order => 1 });
 	my $max_adds_per_run = 10;
 	my $adds = 0;
 

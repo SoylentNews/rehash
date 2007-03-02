@@ -652,13 +652,13 @@ sub _getList {
 			)s?$/x) {
 				$hash{$dir}{$1}{$val} = 1;
 			} elsif ($key =~ /^(
-			  glob
+				glob
 			)s?$/x) {
-			  my($globkey, $globdest) = split(/:/, $val, 2);
-			  $globkey = lc $globkey;
-			  $hash{$dir}{$1}{$globkey} = $globdest;
+				my($globkey, $globdest) = split(/:/, $val, 2);
+				$globkey = lc $globkey;
+				$hash{$dir}{$1}{$globkey} = $globdest;
 			} elsif (exists $hash{$dir}{'glob'}{$key}) {
-			  push @{$hash{$dir}{$key}}, $val;
+				push @{$hash{$dir}{$key}}, $val;
 			} else {
 				$hash{$dir}{$key} = $val;
 			}

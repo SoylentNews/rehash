@@ -70,17 +70,17 @@ my $plugin_list = $install->_getList(
 ############################################################
 # Handle globbing and minifying, do this first so results can be linked
 for my $glob (keys %{$theme_hr->{'glob'}}) {
-  my $destpath = canonpath(catfile($theme_hr->{dir}, $theme_hr->{'glob'}{$glob}));
-  my $filelist = "";
-  for my $file (@{$theme_hr->{$glob}}) {
-    $filelist .= canonpath(catfile($theme_hr->{dir}, $file)) . " ";
-  }
-  system("cat $filelist > $destpath");
-  my ($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
-  if ($suffix eq '.js') {
-    # please god, help me... can't seem to formulate a way to do this in-process... I must be an idiot
-    system("cat $destpath | perl -MJavaScript::Minifier -e 'my \$f=new JavaScript::Minifier; \$f->minify(*STDIN, *STDOUT);' > ${path}${name}-minified.js");
-  }
+	my $destpath = canonpath(catfile($theme_hr->{dir}, $theme_hr->{'glob'}{$glob}));
+	my $filelist = "";
+	for my $file (@{$theme_hr->{$glob}}) {
+		$filelist .= canonpath(catfile($theme_hr->{dir}, $file)) . " ";
+	}
+	system("cat $filelist > $destpath");
+	my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
+	if ($suffix eq '.js') {
+		# please god, help me... can't seem to formulate a way to do this in-process... I must be an idiot
+		system("cat $destpath | perl -MJavaScript::Minifier -e 'my \$f=new JavaScript::Minifier; \$f->minify(*STDIN, *STDOUT);' > ${path}${name}-minified.js");
+	}
 }
 
 
