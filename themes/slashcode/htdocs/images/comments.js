@@ -570,11 +570,13 @@ function ajaxFetchComments(cids) {
 			for (var i = 0; i < cids.length; i++) {
 				// this is needed for Firefox
 				// better way to do automatically?
-				loadNamedElement('comment_link_' + cids[i]);
-				loadNamedElement('comment_shrunk_' + cids[i]);
-				loadNamedElement('comment_sig_' + cids[i]);
-				loadNamedElement('comment_otherdetails_' + cids[i]);
-				loadNamedElement('comment_sub_' + cids[i]);
+				if (is_firefox) {
+					loadNamedElement('comment_link_' + cids[i]);
+					loadNamedElement('comment_shrunk_' + cids[i]);
+					loadNamedElement('comment_sig_' + cids[i]);
+					loadNamedElement('comment_otherdetails_' + cids[i]);
+					loadNamedElement('comment_sub_' + cids[i]);
+				}
 				setShortSubject(cids[i]);
 			}
 			boxStatus(0);
@@ -646,10 +648,6 @@ function readRest(cid) {
 	params['sid'] = discussion_id;
 
 	var handlers = {
-// these sometimes go out of order ... ?
-//		onLoading: function() {
-//			shrunkdiv.innerHTML = 'Loading...';
-//		},
 		onComplete: function() {
 			shrunkdiv.innerHTML = '';
 			var sigdiv = fetchEl('comment_sig_' + cid);
@@ -737,6 +735,14 @@ function loadNamedElement(name) {
 }
 
 function fetchEl(str) {
+/* 	if (!loaded || !is_firefox) { */
+/* 		return $(str); */
+/*  */
+/* 	if (commentelements[str]) { */
+/* 		commentelements[str] = loadNamedElement(str); */
+/* 		return commentelements[str]; */
+/* 	} */
+
 	return loaded
 		? (is_firefox ? commentelements[str] : $(str))
 		: $(str);
