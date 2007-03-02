@@ -166,8 +166,10 @@ __template__
 				[% END %]
 		<div class="ccw-header-links">
     [% IF !user.is_anon %]
-        <a href="[% gSkin.rootdir %]/my/comments">Prefs</a> |
+        <a href="[% gSkin.rootdir %]/my/comments">Prefs</a>
     [% END %]
+		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
+		  [% IF !user.is_anon %] | [% END %]
 			[% Slash.linkComment({
 				sid => sid,
 				cid => cid,
@@ -176,6 +178,7 @@ __template__
 				subject_only => 1
 				});
 			%]
+    [% END $]
 		</div>
 		<span title="Toggle window location" onclick="toggleDisplayOptions()" class="close">/</span>
 				</h4>
@@ -233,8 +236,10 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 		</div>
 		<div class="commentControlFooter">
     [% IF !user.is_anon %]
-        <a href="[% gSkin.rootdir %]/my/comments">Prefs</a> |
+        <a href="[% gSkin.rootdir %]/my/comments">Prefs</a>
     [% END %]
+		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
+		  [% IF !user.is_anon %] | [% END %]
 			[% Slash.linkComment({
 				sid => sid,
 				cid => cid,
@@ -243,7 +248,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 				subject_only => 1
 				});
 			%]
-				
+		[% END %]
 		</div>
 		<div id="commentControlBoxStatus" class="hide"><b>Loading ... Please wait.</b></div>
 	</div>
