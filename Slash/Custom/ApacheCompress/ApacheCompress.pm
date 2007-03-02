@@ -17,8 +17,10 @@ use base 'Apache::Compress';
 use vars qw($VERSION);
 
 use Compress::Zlib 1.0;
+use Date::Format;
+use Date::Parse;
 use Apache::File;
-use Apache::Constants qw(:common);
+use Apache::Constants qw(:common :http);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
@@ -47,6 +49,19 @@ sub handler {
   } else {
     my $filename = $r->filename;
     return NOT_FOUND unless -e $filename;
+    my @stat = stat(_);
+    my $time = $stat[9];
+
+    if ($r->header_in('If-Modified-Since')) {
+    	my $ltime = str2time($r->header_in('If-Modified-Since'));
+    	if ($ltime >= $time) {
+    		$r->status(HTTP_NOT_MODIFIED);
+    		$r->send_http_header;
+    		return OK;
+    	}
+    }
+
+    $r->header_out('Last-Modified' => time2str("%a, %d %h %Y %X %Z", $time));
     $fh = Apache::File->new($filename);
   }
   unless ($fh) {
