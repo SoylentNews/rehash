@@ -302,12 +302,10 @@ function completer_handleNeverDisplay( s, params ) {
 }
 
 function attachCompleter( obj, id, is_admin, type, tagDomain, customize ) {
-	if ( YAHOO.util.Dom.isSafari ) 
-		return false;
-
-	var disable = YAHOO.util.Dom.getStyle(obj, '-slashdot-disable-tag-completer');
-	if ( disable == "true" )
-		return false;
+  var vendor = navigator.vendor.toLowerCase();
+  if ( vendor.indexOf("apple") != -1
+       || vendor.indexOf("kde") != -1 )
+    return false;
 
   if ( customize === undefined )
     customize = new Object();
