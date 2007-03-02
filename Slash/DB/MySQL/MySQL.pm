@@ -8308,10 +8308,14 @@ sub getDay {
 sub getDayFromDay {
 	my($self, $day, $days_back) = @_;
 	$day =~ s/-//g;
-	my ($y, $m, $d) = $day =~ /(\d{4})(\d{2})(\d{2})/;
+	my($y, $m, $d) = $day =~ /(\d{4})(\d{2})(\d{2})/;
 	my $return_day;
 	if ($y) {
-		$return_day = timeCalc(scalar localtime(timelocal(0, 0, 0, $d, $m - 1, $y - 1900) - 86400 * $days_back), "%Y%m%d");
+		$return_day = timeCalc(
+			scalar localtime(
+				timelocal(0, 0, 0, $d, $m - 1, $y - 1900) - 86400 * $days_back
+			), "%Y%m%d"
+		);
 	} else {
 		$return_day = $self->getDay(0) if !$y;
 	}
@@ -12192,18 +12196,17 @@ sub getClassForAjaxOp {
 }
 
 sub insertMediaFile {
-	my ($self, $stoid, $name);
+	my($self, $stoid, $name) = @_;
 	return $self->sqlInsert("stories_media", { stoid => $stoid, name => $name }, { ignore => 1 });
 }
 
 sub updateMediaFile {
-	my ($self, $name, $data);
+	my($self, $name, $data) = @_;
 	$self->sqlUpdate("stories_media", $data, "name=$name");
 }
 
 sub getMediaFiles {
-	my ($self, $stoid);
-
+	my($self, $stoid) = @_;
 	return $self->sqlSelectAllHashrefArray('smid, name',
                 'stories_media',
                 "stoid=$stoid"
@@ -12211,7 +12214,7 @@ sub getMediaFiles {
 }
 
 sub getMediaFile {
-	my ($self, $data);
+	my($self, $data) = @_;
 
 	if ($data =~ /\d+/) {
 		return $self->sqlSelect("width, height, location", "stories_media", "smid=$data");
