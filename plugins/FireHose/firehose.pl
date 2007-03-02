@@ -24,7 +24,7 @@ sub main {
 	my $form      = getCurrentForm();
 	my $gSkin     = getCurrentSkin();
 
-	unless ($user->{is_admin} || $user->{is_subscriber} || $user->{acl}{firehose}) {
+	if ($user->{is_anon}) {
 		redirect("$gSkin->{rootdir}/");
 		return;
 	}
