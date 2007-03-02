@@ -20,6 +20,7 @@ use Slash::Utility;
 use Slash::DB;
 use Slash::Install;
 use Getopt::Std;
+# use JavaScript::Minifier qw( jsmin ); # uncomment and add version when Minifier is known to work
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
@@ -78,8 +79,14 @@ for my $glob (keys %{$theme_hr->{'glob'}}) {
 	system("cat $filelist > $destpath");
 	my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
 	if ($suffix eq '.js') {
-		# please god, help me... can't seem to formulate a way to do this in-process... I must be an idiot
+		# JavaScript::Minifier is broken, use it this way until it's fixed:
 		system("cat $destpath | perl -MJavaScript::Minifier -e 'my \$f=new JavaScript::Minifier; \$f->minify(*STDIN, *STDOUT);' > ${path}${name}-minified.js");
+		
+		# ...then upgrade to this:
+		# my ($min_src, $min_dest);
+		# open $min_src, '<', $destpath;
+		# open $min_dest, '>', "${path}${name}-minified.js";
+		# jsmin($min_src, $min_dest);
 	}
 }
 
