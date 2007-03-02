@@ -125,7 +125,6 @@ function firehose_toggle_advpref() {
 	} else {
 		obj.className = "hide";
 	}
-
 }
 
 function toggleIntro(id, toggleid) {
@@ -789,7 +788,7 @@ function firehose_reorder() {
 			if (console_updating) {
 				document.title = "Console (" + firehose_ordered.length + ")";
 			} else {
-				document.title = "FireHose (" + firehose_ordered.length + ")";
+				document.title = "Firehose (" + firehose_ordered.length + ")";
 			}
 		}
 	}

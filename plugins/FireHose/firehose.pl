@@ -45,7 +45,7 @@ sub main {
 		}
 	}
 
-	header('FireHose', '' ) or return;
+	header('Firehose', '') or return;
 
 	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $gSkin);
 

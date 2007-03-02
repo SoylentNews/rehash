@@ -198,7 +198,7 @@ Count  Nickname
 [% END %]
 
 [% IF firehose_report %]
-FireHose Report
+Firehose Report
 ------------------------------------
 [% firehose_report %]
 [% END %]
