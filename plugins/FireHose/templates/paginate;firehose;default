@@ -43,7 +43,7 @@ param_str = ""
 		[% IF cur_day.0 == day %]
 			[% IF page %] <li><a href="?page=[% page - 1 %]&amp;startdate=[ cur_day.0 %]">&lt;- [% page %]</a></li>[% END %]
 			<li><a href="?page=[% page %][% param_str %]&amp;startdate=[% cur_day.0 %]">[% page + 1 %]</a></li>
-			<li><a href="[?page=[% page + 1%][% param_str %]&amp;startdate=[% cur_day.0 %]">[% page + 2 %] -&gt;</a>[% IF is_base_day; "]"; END %]</li>
+			<li><a href="?page=[% page + 1%][% param_str %]&amp;startdate=[% cur_day.0 %]">[% page + 2 %] -&gt;</a>[% IF is_base_day; "]"; END %]</li>
 		[% END %]
 	[% END %]
 [% ELSE %]
