@@ -4397,12 +4397,8 @@ CREATE TABLE tags_peerweight (
 # 2007-02-06
 UPDATE vars SET value = 'T_2_5_0_146' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 # 2007-02-14
 UPDATE vars SET value = 'T_2_5_0_147' WHERE name = 'cvs_tag_currentcode';
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
 
 # For plugins/FireHose
 INSERT INTO firehose_tab VALUES (NULL,0,'User','"user:{nickname}"','createtime','DESC','black','full');
@@ -4440,3 +4436,13 @@ INSERT search_index_dump SELECT NULL, id, 'firehose', 'new' FROM firehose;
 
 # 2007-02-21
 UPDATE vars SET value = 'T_2_5_0_148' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
+UPDATE firehose_tab SET tabname = 'Firehose' WHERE tabname = 'FireHose';
+
+# 2007-03-01
+UPDATE vars SET value = 'T_2_5_0_149' WHERE name = 'cvs_tag_currentcode';
+
