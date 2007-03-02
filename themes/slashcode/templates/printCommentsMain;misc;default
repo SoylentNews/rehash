@@ -178,7 +178,7 @@ __template__
 				subject_only => 1
 				});
 			%]
-    [% END $]
+    [% END %]
 		</div>
 		<span title="Toggle window location" onclick="toggleDisplayOptions()" class="close">/</span>
 				</h4>
