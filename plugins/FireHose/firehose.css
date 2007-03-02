@@ -108,6 +108,8 @@ ul.menu#fhtablist li.active:before { content: ""; }
 	background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x;
 }
 
+.admin .paginate { margin-right: 0; }
+
 .paginate ul.menu { background: url('//images.slashdot.org/corner_w_br.png') right bottom no-repeat; }
 .paginate a { color: #fff !important; }
 
