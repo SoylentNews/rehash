@@ -153,7 +153,7 @@ install: slash plugins tagboxes
 	# Now all the themes
 	$(CP) -r themes/* $(SLASH_PREFIX)/themes
 	
-	# Insure we use the proper Perl interpreter and prefix in all scripts that 
+	# Ensure we use the proper Perl interpreter and prefix in all scripts that 
 	# we install. Note the use of Perl as opposed to dirname(1) and basename(1)
 	# which may or may not exist on any given system.
 	(replacewith=$(REPLACEWITH); \
