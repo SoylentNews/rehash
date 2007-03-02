@@ -419,9 +419,8 @@ sub getFireHoseEssentials {
 		push @where, "firehose.id IN ($id_str)";
 	}
 
-
 	# XXX Update to support timezones eventually
-	if ($options->{startdate}) {
+	if ($options->{startdate} && !$doublecheck) {
 		push @where, "createtime >= '$options->{startdate} 00:00:00'";
 		if ($options->{duration}) {
 			push @where, "createtime <= DATE_ADD('$options->{startdate} 00:00:00', INTERVAL $options->{duration} DAY)";
@@ -1453,7 +1452,7 @@ sub getAndSetOptions {
 		} else {
 			if (!defined $fh_options->{filter}) {
 				$fh_options->{filter} = $_;
-				$fh_options->{filter} =~ s/[^a-zA-Z0-9_]+//g;
+				$fh_options->{filter} =~ s/[^a-zA-Z0-9_-]+//g;
 			}
 			# Don't filter this
 			$fh_options->{qfilter} .= $_ . ' ';
