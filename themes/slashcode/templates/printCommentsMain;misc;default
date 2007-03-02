@@ -42,6 +42,9 @@ __template__
 <div class="commentBox" style="font-size: 120%">
 	<form method="GET" action="[% gSkin.rootdir %]/comments.pl">
 	<div>
+[% IF title %]
+<span class="escape-link"><a href="[% link | strip_urlattr %]" title="Back to Article - [% title | strip_attribute %]">[% title %]</a></span>
+[% END %]
 	<input type="hidden" name="op" value="setDiscussion2">
 	<input type="hidden" name="sid" value="[% sid %]">
 	[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
