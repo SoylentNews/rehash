@@ -1252,7 +1252,7 @@ sub createAccessLog {
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	if ($op eq 'image' && $constants->{accesslog_imageregex}) {
+	if ($op =~ /^(?:image|css|js)$/ && $constants->{accesslog_imageregex}) {
 		return if $constants->{accesslog_imageregex} eq 'NONE';
 		my $uri = $r->uri;
 		return unless $uri =~ $constants->{accesslog_imageregex};

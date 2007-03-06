@@ -2525,6 +2525,8 @@ sub getOpAndDatFromStatusAndURI {
 		$uri =~ s|^/(.*)\.dmg$|$1|;
 	} elsif ($uri =~ /\.css$/) {
 		$uri = 'css';
+	} elsif ($uri =~ /\.js$/) {
+		$uri = 'js';
 	} elsif ($uri =~ /\.shtml$/) {
 		$uri =~ s|^/(.*)\.shtml$|$1|;
 		$dat = $uri if $uri =~ $page;	
