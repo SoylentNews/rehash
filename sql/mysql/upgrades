@@ -4457,3 +4457,6 @@ CREATE TABLE badge_ids (
 INSERT INTO badge_ids (badge_text, badge_url, badge_icon) values ('Slashdot', '//slashdot.org/', 'badge_slashdot.gif');
 INSERT INTO badge_ids (badge_text, badge_url, badge_icon) values ('OSTG', 'http://www.ostg.com/', 'badge_ostg.gif');
 INSERT INTO badge_ids (badge_text, badge_url, badge_icon) values ('Intel', '//intel.vendors.slashdot.org/', 'badge_intel.gif');
+
+# comments ALTER. Adding badge_id
+ALTER TABLE comments ADD COLUMN badge_id tinyint UNSIGNED DEFAULT '0' NOT NULL;
