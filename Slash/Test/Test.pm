@@ -164,7 +164,7 @@ sub slashTest {
 	my($VirtualUser, $noerr) = @_;
 
 	die 'No virtual user' unless defined $VirtualUser and $VirtualUser ne '';
-	push @ARGV, 'virtual_user=' . $VirtualUser;
+	unshift @ARGV, 'virtual_user=' . $VirtualUser;
 	eval { createEnvironment() };
 	die $@ if $@ && !$noerr;
 
