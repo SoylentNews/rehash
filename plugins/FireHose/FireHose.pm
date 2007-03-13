@@ -848,7 +848,7 @@ sub ajaxFireHoseGetUpdates {
 			if ($item->{last_update} ge $update_time) {
 				my $url 	= $slashdb->getUrl($item->{url_id});
 				my $the_user  	= $slashdb->getUser($item->{uid});
-				$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user }, { Return => 1 });
+				$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user, options => $opts }, { Return => 1 });
 				$html->{"tags-top-$_->{id}"} = slashDisplay("firehose_tags_top", { tags_top => $tags_top, id => $_->{id}, item => $item }, { Return => 1 });
 				my $introtext = $item->{introtext};
 				slashDisplay("formatHoseIntro", { introtext => $introtext, url => $url, $item => $item }, { Return => 1 });
@@ -859,7 +859,7 @@ sub ajaxFireHoseGetUpdates {
 		} else {
 			# new
 			$update_time = $_->{last_update} if $_->{last_update} gt $update_time && $_->{last_update} lt $now;
-			push @$updates, ["add", $_->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top, vote => $votes->{$item->{globjid}} }, { Return => 1, Page => "firehose" })];
+			push @$updates, ["add", $_->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top, vote => $votes->{$item->{globjid}}, options => $opts }, { Return => 1, Page => "firehose" })];
 			$added->{$_->{id}}++;
 		}
 		push @$ordered, $item->{id};
@@ -1391,6 +1391,18 @@ sub getAndSetOptions {
 		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "" });
 	}
 
+	if ($form->{setfield}) {
+		foreach (qw(nodates nobylines)) {
+			if ($form->{defined}) {
+				$options->{$_} = $form->{$_} ? 1 : 0;
+			} else {
+				$options->{$_} = $user->{"firehose_$_"};
+			}
+		}
+	}
+	$options->{nodates}   = defined $form->{nodates} ? $form->{nodates}   : $user->{firehose_nodates};
+	$options->{nobylines} = defined $form->{nobylines} ? $form->{nobylines} : $user->{firehose_nobylines};
+
 	my $page = $form->{page} || 0;
 	$options->{page} = $page;
 	if ($page) {
@@ -1503,7 +1515,6 @@ sub getAndSetOptions {
 			$options->{createtime_no_future} = 1;
 		}
 	}
-	
 	return $options;
 }
 
