@@ -55,7 +55,7 @@ END %]
 [% IF divwrapper %]
 <div id="firehose-[% item.id %]" class="[% IF mode == "full" %]article[% ELSE %]briefarticle[% END %][% IF adminmode == 1 %] adminmode[% ELSE %] usermode[% END %]">
 [% END %]
-	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode %]
+	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode options = options %]
 	[% title_type = item.type == "story" ? "story" : "firehose" %]
 	[% PROCESS titlebar h3id="title-" _ item.id id="" future = future title_type = title_type title_type_id = "ttype-" _ item.id %]
 [% END %]
