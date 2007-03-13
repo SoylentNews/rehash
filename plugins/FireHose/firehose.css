@@ -329,9 +329,10 @@ div.tags table.data td
 	position: absolute;
 	font-weight: normal;
 	color: #555 !important;
+	cursor: pointer;
 }
-
-.future .soda, .story .soda { color: #7fb2b2 !important; }
+.future .soda { color: #FFBFC2 !important; }
+.story .soda { color: #7fb2b2 !important; }
 .pop0 { background: url('//images.slashdot.org/pop8.png') no-repeat 0px 0px; }
 .pop1 { background: url('//images.slashdot.org/pop1.png') no-repeat 0px 0px; }
 .pop2 { background: url('//images.slashdot.org/pop2.png') no-repeat 0px 0px; }
