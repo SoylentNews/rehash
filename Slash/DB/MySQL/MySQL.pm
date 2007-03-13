@@ -330,7 +330,13 @@ sub sqlTransactionCancel {
 }
 
 
-
+########################################################
+sub getBadgeDescriptions {
+	my($self) = @_;
+	return $self->{_badge_cache} ||= $self->sqlSelectAllHashref(
+		'badge_id', 'badge_id,badge_icon,badge_text,badge_url', 'badge_ids'
+	);
+}
 
 ########################################################
 sub createComment {
@@ -370,6 +376,12 @@ sub createComment {
 
 	$comment->{subject} = $self->truncateStringForCharColumn($comment->{subject},
 		'comments', 'subject');
+
+	$comment->{badge_id} = 0;
+	my $user_comm = $self->getUser($comment->{uid});
+	$comment->{badge_id} = $user_comm->{acl}{employee} && $user_comm->{badge_id}
+		? $user_comm->{badge_id}
+		: 0;
 
 	$self->sqlDo("SET AUTOCOMMIT=0");
 
@@ -5939,7 +5951,7 @@ sub getCommentsForUser {
 		. "pid, pid AS original_pid, sid, lastmod, reason, "
 		. "journal_last_entry_date, ipid, subnetid, "
 		. "karma_bonus, "
-		. "len, CONCAT('<SLASH type=\"COMMENT-TEXT\">', cid ,'</SLASH>') as comment";
+		. "len, badge_id, CONCAT('<SLASH type=\"COMMENT-TEXT\">', cid ,'</SLASH>') as comment";
 	if ($constants->{plugin}{Subscribe} && $constants->{subscribe}) {
 		$select .= ", subscriber_bonus";
 	}

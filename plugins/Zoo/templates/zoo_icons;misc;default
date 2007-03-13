@@ -16,7 +16,16 @@ en_US
 __name__
 zoo_icons
 __template__
-[% IF user.uid != person && person && !user.is_anon %]
+[% user_person = Slash.db.getUser(person);
+   IF person && !implied && user_person.acl.employee && user_person.badge_id;
+      badges = Slash.db.getBadgeDescriptions;
+      badge = badges.${user_person.badge_id};
+      IF (badge) %]
+	<span class="badgeicon"><a href="[% badge.badge_url | strip_urlattr %]"><img src="[% constants.imagedir %]/[% badge.badge_icon | strip_urlattr %]" alt="[% badge.badge_title | strip_attribute %]" title="[% badge.badge_title | strip_attribute %]"></a></span>
+      [% END;
+   END %]
+
+[% IF person && user.uid != person && !user.is_anon %]
 	[% IF !user.people.${Slash.FRIEND}.$person && !user.people.${Slash.FOE}.$person && !user.people.${Slash.FAN}.$person && !user.people.${Slash.FREAK}.$person && !user.people.${Slash.FOF}.$person && !user.people.${Slash.EOF}.$person %]
 		<span class="zooicon"><a href="[% gSkin.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]&amp;type=friend"><img src="[% constants.imagedir %]/neutral.gif" alt="Neutral" title="Neutral"></a></span>
 	[% ELSE %]

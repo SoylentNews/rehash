@@ -1977,6 +1977,16 @@ EOT
 
 
 	$zoosphere_display = " ";
+	if ($comment->{badge_id}) {
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		my $badges = $reader->getBadgeDescriptions;
+		if (my $badge = $badges->{ $comment->{badge_id} }) {
+			my $badge_url   = strip_urlattr($badge->{badge_url});
+			my $badge_icon  = strip_paramattr($badge->{badge_icon});
+			my $badge_title = strip_attribute($badge->{badge_title});
+			$zoosphere_display .= qq|<span class="badgeicon"><a href="$badge_url"><img src="$constants->{imagedir}/$badge_icon" alt="$badge_title" title="$badge_title"></a></span>|;
+		}
+	}
 	unless ($user->{is_anon} || isAnon($comment->{uid}) || $comment->{uid} == $user->{uid}) {
 		my $person = $comment->{uid};
 		if (!$user->{people}{FRIEND()}{$person} && !$user->{people}{FOE()}{$person} && !$user->{people}{FAN()}{$person} && !$user->{people}{FREAK()}{$person} && !$user->{people}{FOF()}{$person} && !$user->{people}{EOF()}{$person}) {

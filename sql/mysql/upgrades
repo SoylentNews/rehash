@@ -4439,28 +4439,10 @@ UPDATE vars SET value = 'T_2_5_0_148' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
-# SLASHDOT LAST UPDATED HERE
-
 UPDATE firehose_tab SET tabname = 'Firehose' WHERE tabname = 'FireHose';
 
 # 2007-03-01
 UPDATE vars SET value = 'T_2_5_0_149' WHERE name = 'cvs_tag_currentcode';
-
-# For badges
-CREATE TABLE badge_ids (
-        badge_id        tinyint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        badge_text      varchar(32) NOT NULL DEFAULT '',
-        badge_url       varchar(255) NOT NULL DEFAULT '',
-        badge_icon      varchar(32) NOT NULL DEFAULT ''
-) TYPE=InnoDB;
-INSERT INTO badge_ids (badge_text, badge_url, badge_icon) values ('Slashdot', '//slashdot.org/', 'badge_slashdot.gif');
-INSERT INTO badge_ids (badge_text, badge_url, badge_icon) values ('OSTG', 'http://www.ostg.com/', 'badge_ostg.gif');
-INSERT INTO badge_ids (badge_text, badge_url, badge_icon) values ('Intel', '//intel.vendors.slashdot.org/', 'badge_intel.gif');
-
-# If you have a large and busy site, you may wish to stop slashd and
-# webheads.  This transaction may take a minute or so and will block a
-# variety of user actions.
-ALTER TABLE comments ADD COLUMN badge_id tinyint UNSIGNED DEFAULT '0' NOT NULL;
 
 # If you have a large and busy site, you may wish to stop slashd and
 # webheads.  This transaction may take a minute or so and will block a
@@ -4473,4 +4455,26 @@ RENAME TABLE users_param TO users_param3;
 RENAME TABLE users_param2 TO users_param;
 COMMIT;
 DROP TABLE IF EXISTS users_param3;
+
+# If you have a large and busy site, you may wish to stop slashd and
+# webheads.  This transaction may take a minute or so and will block a
+# variety of user actions.
+ALTER TABLE comments ADD COLUMN badge_id tinyint UNSIGNED DEFAULT '0' NOT NULL;
+
+# SLASHDOT LAST UPDATED HERE
+
+# For badges
+CREATE TABLE badge_ids (
+        badge_id        tinyint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        badge_text      varchar(32) NOT NULL DEFAULT '',
+        badge_url       varchar(255) NOT NULL DEFAULT '',
+        badge_icon      varchar(32) NOT NULL DEFAULT ''
+) TYPE=InnoDB;
+
+INSERT INTO badge_ids (badge_id, badge_text, badge_url, badge_icon) values (1, 'Slashdot', '//slashdot.org/', 'badge_slashdot.png');
+INSERT INTO badge_ids (badge_id, badge_text, badge_url, badge_icon) values (2, 'OSTG', 'http://www.ostg.com/', 'badge_ostg.png');
+INSERT INTO badge_ids (badge_id, badge_text, badge_url, badge_icon) values (3, 'Intel', '//intel.vendors.slashdot.org/', 'badge_intel.png');
+
+# 2007-03-13
+UPDATE vars SET value = 'T_2_5_0_150' WHERE name = 'cvs_tag_currentcode';
 

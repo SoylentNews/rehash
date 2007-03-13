@@ -64,9 +64,7 @@ IF !useredit.is_anon;
 		'<a href="'; gSkin.rootdir; '/~';
 			useredit.nickname | strip_paramattr; '/">';
                         useredit.nickname | strip_literal; '</a> ';
-		IF user.uid != useredit.uid;
-			PROCESS zoo_icons person=useredit.uid implied="";
-		END;
+		PROCESS zoo_icons person=useredit.uid implied="";
 		IF user.uid == useredit.uid OR user.is_admin;
 			# Looking at ourselves; show our real name and email info.
 			'<br>'; IF useredit.realname; useredit.realname | strip_literal; ELSE; '(no real name given)'; END;
