@@ -27,6 +27,7 @@ __template__
 	{ link = "$gSkin.rootdir/admin.pl?op=mcd_stats",	label = "Memcached",		sel_label = "mcdstats" },
 	{ link = "$gSkin.rootdir/admin.pl?op=recent",	label = "Security",		sel_label = "security" },
 	{ link = "$gSkin.rootdir/admin.pl?op=topics",	label = "Config",		sel_label = "config" },
+	{ link = "$gSkin.rootdir/admin.pl?op=peerweights",	label = "PeerWeights",		sel_label = "peerweights" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page lightfontcolor=lightfontcolor || ""; %]
 

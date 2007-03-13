@@ -26,6 +26,7 @@ __template__
         { link = "$gSkin.rootdir/admin.pl?op=topics",   label = "Config",               sel_label = "topics" },
         { link = "$gSkin.rootdir/stats.pl",                     label = "Info",                 sel_label = "stats" },
         { link = "$gSkin.rootdir/admin.pl?op=recent",   label = "Security",             sel_label = "recent" },
+	{ link = "$gSkin.rootdir/admin.pl?op=peerweights",	label = "PeerWeights",	sel_label = "peerweights" },
 ];
 PROCESS tabbedmenu tabs=tabs color=color selected=page; lightfontcolor=lightfontcolor || "" %]
 
