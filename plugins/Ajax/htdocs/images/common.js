@@ -470,6 +470,28 @@ function firehose_set_options(name, value) {
 		params['setusermode'] = 1;
 		params[name] = value;
 	}
+
+	if (name == "nodates" || name == "nobylines") {
+		value = value == true ? 1 : 0;
+		params[name] = value;
+		params['setfield'] = 1;
+		var classname;
+		if (name == "nodates") {
+			classname = "date";
+		} else if (name == "nobylines") {
+			classname = "nickname";
+		}
+
+		var els = document.getElementsByClassName(classname, $('firehoselist'));
+		var classval = classname;
+		if (value) {
+			classval = classval + " hide";
+		}
+		for (i = 0; i< els.length; i++) {
+			els[i].className = classval;
+		}
+	}
+
 	if (name == "fhfilter") {
 		for (i=0; i< theForm.elements.length; i++) {
 			if (theForm.elements[i].name == "fhfilter") {
