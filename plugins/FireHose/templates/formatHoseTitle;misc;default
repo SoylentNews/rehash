@@ -4,6 +4,7 @@ __description__
 the_user = user hash for author
 url = url for associated url if applicable
 item = firehose item
+options = options
 __title__
 Useless title to template
 __page__
@@ -25,7 +26,15 @@ title = the_skin_title _ title;
 IF item.url_id;
         title = title _ "<span class=\"external\"><a href=\"" _ url.url _ "\" title=\"External link - " _ url.url _ "\" target=\"_blank\">[-&gt;]</a></span>";
 END;
-title = title _ " " _ '<span class="date">' _ Slash.timeCalc(item.createtime, "%Y-%m-%d %H:%M") _  "</span> <span class='nickname'>" _ item.name _ "</span>";
+title = title _ " " _ '<span class="date';
+IF options.nodates; 
+	title = title _ " hide"; 
+END;
+title = title _ '">' _ Slash.timeCalc(item.createtime, "%Y-%m-%d %H:%M") _  "</span> <span class='nickname";
+IF options.nobylines; 
+	title = title _ " hide"; 
+END;
+title = title _ "'>" _ item.name _ "</span>";
 	
 firehose = Slash.getObject("Slash::FireHose");
 pop_val = firehose.getPopLevelForPopularity(item.popularity);
