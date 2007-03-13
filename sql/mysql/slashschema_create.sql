@@ -280,6 +280,7 @@ CREATE TABLE comments (
 	karma_abs smallint UNSIGNED DEFAULT '0' NOT NULL,
 	tweak_orig TINYINT NOT NULL DEFAULT 0,
 	tweak TINYINT NOT NULL DEFAULT 0,
+        badge_id tinyint NOT NULL DEFAULT 0,
 	PRIMARY KEY (cid),
 	KEY display (sid,points,uid),
 	KEY byname (uid,points),
