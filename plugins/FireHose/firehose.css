@@ -1,7 +1,14 @@
 /* Options */
 .firemenu { position: relative; }
 .firemenu h3 { margin-right: 120px; }
-.firemenu h3 img {margin: .1em 0 0 .2em !important; padding: 0; position: absolute;}
+
+.firemenu h3 img
+{
+	margin: .1em 0 0 .2em !important;
+	padding: 0;
+	position: absolute;
+}
+
 .options
 {
 	width: 140px;
@@ -24,7 +31,9 @@ input
 	width: auto !important;
 	margin: 0 0 0 .5em !important;
 }
+
 #fh_adv_pref_toggle { color: #fff; }
+
 #colorsliderbg
 {
 	display: inline;
@@ -34,10 +43,17 @@ input
 #colorsliderthumb { display: inline; }
 #colorsliderthumb img { margin: 0 0 -5px 0px; }
 #fhtablist li { font-size: 130%; }
-#fhtablist li, #fhtablist a { color: #fff; padding:0; margin: 0; }
+
+#fhtablist li, #fhtablist a
+{
+	color: #fff;
+	padding: 0;
+	margin: 0;
+}
+
 #fhtablist li.active { font-weight: bold; }
-#fhtablist a {padding: 0 .3em;}
-#fhtablist {margin: 0;}
+#fhtablist a { padding: 0 .3em; }
+#fhtablist { margin: 0; }
 
 .options a
 {
@@ -102,6 +118,7 @@ ul.menu#fhtablist li.active:before { content: ""; }
 	right: 0;
 }
 
+/* Pagination */
 .paginate
 {
 	margin-right: 18.5em;
@@ -109,7 +126,6 @@ ul.menu#fhtablist li.active:before { content: ""; }
 }
 
 .admin .paginate { margin-right: 0; }
-
 .paginate ul.menu { background: url('//images.slashdot.org/corner_w_br.png') right bottom no-repeat; }
 .paginate a { color: #fff !important; }
 
@@ -124,17 +140,64 @@ ul.menu#fhtablist li.active:before { content: ""; }
 }
 
 .storylinks li.more { margin-left: -1.8em !important; }
-#firehose div.article div.firehose .title h3 { background: transparent; }
 #firehoselist { padding: 1em 0 0 0; }
 #firehoselist, #firehose #message, .firemenu { margin-right: 18.5em; }
 .admin #firehoselist, .admin #firehose #message, .admin .firemenu { margin-right: 0; }
-
 .article .generaltitle .title .date,
 .article .generaltitle .title .nickname { display: none; }
 .article .firehosetag { background: #fff; }
+.article .generaltitle .title h3 { background: transparent; }
+
+/* Brief Articles */
+div.briefarticle .storylinks { display: none; }
+#firehose div.briefarticle a span { float: none; }
+.briefarticle { position: relative !important; }
+.adminmode .briefarticle .generaltitle .title h3 { padding-left: 80px !important; }
+
+.briefarticle .generaltitle .title h3, .article .generaltitle .title h3
+{
+	padding-top: .5em;
+	padding-right: 35%;
+	padding-left: 70px;
+	font-size: 100%;
+	border-top: 1px solid #fff;
+}
+
+.briefarticle .generaltitle .title h3 { background: url('//images.slashdot.org/gen-slc.gif') no-repeat left top; }
+.briefarticle .generaltitle .title, .article .generaltitle .title { background: #e6e6e6 url('//images.slashdot.org/sections-bg.png') repeat-x left bottom; }
+.briefarticle .generaltitle .title h3 a, .article .generaltitle .title h3 a { color: #066; }
+
+.briefarticle .generaltitle .title .date,
+.briefarticle .generaltitle .title .nickname
+{
+	color: #666;
+	font-size: 85%;
+	white-space: nowrap;
+}
+
+.briefarticle .end { display: none; }
+.briefarticle .firehosetag { background: #999; }
+.briefarticle .details, .briefarticle .intro { display: none; }
+
+.briefarticle .edit
+{
+	position: absolute;
+	top: 1.9em;
+	right: 28px;
+}
+
+.briefarticle .future .title a, .article .future .title a,
+.briefarticle .story .title a, .article .story .title a, .article .story .title h3 a , .briefarticle .story .title h3 a { color: #fff !important; }
+.briefarticle .story .title, .article .story .title { background: #066 !important; }
+.briefarticle .future .title, .article .future .title { background: #700 !important; }
+
+.briefarticle div.future .title .date, #firehose div.briefarticle div.story .title .date
+{
+	color: #fff;
+	opacity: 0.5;
+}
 
 /* Voting */
-
 .up
 {
 	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -1px;
@@ -167,34 +230,53 @@ ul.menu#fhtablist li.active:before { content: ""; }
 	font-size: 80%;
 }
 
-.article .vote {color: #cee; }
-
 /* Tagging */
-.briefarticle div.tags {margin: 0 !important; padding: 0 !important;}
-div.tags div.tagtitleclosed {z-index: 0; background: transparent !important; position: absolute !important; height: 1em; line-height: 140% !important; overflow: hidden; width: 20%; right: 60px; top: .5em; font-size: 95%;}
-div.tags div.tagtitleclosed input:first-child {width: 30% !important;}
-div.tags div.tagtitleclosed input {font-size: 80%;}
-div.tags div.tagtitleclosed a, div.tags div.tagtitleclosed {color: #555;}
+.briefarticle div.tags
+{
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+div.tags div.tagtitleclosed
+{
+	z-index: 0;
+	background: transparent !important;
+	position: absolute !important;
+	height: 1em;
+	line-height: 140% !important;
+	overflow: hidden;
+	width: 20%;
+	right: 60px;
+	top: .5em;
+	font-size: 95%;
+}
+
+div.tags div.tagtitleclosed input:first-child { width: 30% !important; }
+div.tags div.tagtitleclosed input { font-size: 80%; }
+div.tags div.tagtitleclosed a, div.tags div.tagtitleclosed { color: #555; }
+
 div.tags table
 {
-        background: transparent;
-        margin-top: .3em;
+	background: transparent;
+	margin-top: .3em;
 }
 
 div.tags table th
 {
-        border-top: 1px solid #aaa;
-        border-left: 1px solid #aaa;
-        border-right: 1px solid #fff;
-        padding-top: .5em !important;
+	border-top: 1px solid #aaa;
+	border-left: 1px solid #aaa;
+	border-right: 1px solid #fff;
+	padding-top: .5em !important;
 }
 
 div.tags table.data td
 {
-        padding: .1em .5em;
-        line-height: 120%;
+	padding: .1em .5em;
+	line-height: 120%;
 }
 
+.whitewash div.tags div.tagtitleclosed span i, .whitewash div.tags div.tagtitleclosed span i a, .whitewash div.tags div.tagtitleclosed span, .whitewash div.tags div.tagtitleclosed span a { color: #fff !important; }
+.whitewash div.tagtitleclosed span.tagsheader { background: url('//images.slashdot.org/arrow_w_closed.png') no-repeat !important; }
 
 /* Icons and imagery for articles */
 .edit
@@ -240,22 +322,16 @@ div.tags table.data td
 
 .soda
 {
-	padding: .5em 7px .65em 7px;
-	color: #999;
+	padding: .5em 7px .60em 7px;
 	left: 0;
 	top: 1px;
 	font-size: 90%;
 	position: absolute;
 	font-weight: normal;
+	color: #555 !important;
 }
 
-.article .soda
-{
-	padding-bottom: .5em;
-	top: 0;
-	font-size: 70%;
-}
-
+.future .soda, .story .soda { color: #7fb2b2 !important; }
 .pop0 { background: url('//images.slashdot.org/pop8.png') no-repeat 0px 0px; }
 .pop1 { background: url('//images.slashdot.org/pop1.png') no-repeat 0px 0px; }
 .pop2 { background: url('//images.slashdot.org/pop2.png') no-repeat 0px 0px; }
@@ -265,49 +341,3 @@ div.tags table.data td
 .pop6 { background: url('//images.slashdot.org/pop6.png') no-repeat 0px 0px; }
 .pop7 { background: url('//images.slashdot.org/pop7.png') no-repeat 0px 0px; }
 .pop8 { background: url('//images.slashdot.org/pop0.png') no-repeat 0px 0px; }
-
-/* Collapsed */
-div.briefarticle .storylinks { display: none; }
-#firehose div.briefarticle a span { float: none; }
-.briefarticle {position: relative !important}
-.adminmode .briefarticle .generaltitle .title h3 {padding-left: 80px !important;}
-.briefarticle .generaltitle .title h3
-{
-	padding-top: .5em;
-	padding-right: 35%;
-	padding-left: 70px;
-	font-size: 100%;
-	border-top: 1px solid #fff;
-	background: url('//images.slashdot.org/gen-slc.gif') no-repeat left top;
-}
-.article .generaltitle .title h3 {padding-left: 70px; background: transparent}
-.briefarticle .generaltitle .title, .article .generaltitle .title { background: #e6e6e6 url('//images.slashdot.org/sections-bg.png') repeat-x left bottom; }
-.briefarticle .generaltitle .title h3 a, .article .generaltitle .title h3 a { color: #066; }
-
-.briefarticle .generaltitle .title .date,
-.briefarticle .generaltitle .title .nickname
-{
-	color: #666;
-	font-size: 85%;
-	white-space: nowrap;
-}
-
-.briefarticle .end { display: none; }
-.briefarticle .firehosetag { background: #999; }
-.briefarticle .details, .briefarticle .intro { display: none; }
-
-.briefarticle .edit
-{
-	position: absolute;
-	top: 1.9em;
-	right: 28px;
-}
-
-.whitewash div.tags div.tagtitleclosed span i, .whitewash div.tags div.tagtitleclosed span i a, .whitewash div.tags div.tagtitleclosed span, .whitewash div.tags div.tagtitleclosed span a {color: #fff !important}
-.whitewash div.tagtitleclosed span.tagsheader {background: url('//images.slashdot.org/arrow_w_closed.png') no-repeat !important;}
-.briefarticle .future .title a, .article .future .title a,
-.briefarticle .story .title a, .article .story .title a, .article .story .title h3 a , .briefarticle .story .title h3 a {color: #fff !important}
-.briefarticle .story .title, .article .story .title  { background: #066 !important; }
-.briefarticle .future .title, .article .future .title  { background: #700 !important; }
-.briefarticle div.future .title .date, #firehose div.briefarticle div.story .title .date { color: #fff; opacity: 0.5; }
-
