@@ -17,7 +17,7 @@ __template__
 [% UNLESS nodiv %]<ul class="menu" id="fhtablist">[% END %]
 	[% FOREACH tab = tabs %]
 		<li id="fhtab-[% tab.tabid %]"[% IF tab.active %] class="active"[% END %]>
-		[% IF tab.active %]<span id="tab-form-[% tab.tabid %]" class="hide"><input type="text" onfocus="attachCompleter(this, '[% tab.tabid %]', '[% user.is_admin && !user.firehose_usermode %]','firehosetab', 7, { yui:{minQueryLength:0, autoHighlight:false },  } )" id="tab-input-[% tab.tabid %]" size="12" value="[% tab.tabname | strip_literal %]" onkeyup="handleEnter(event, firehose_save_tab, '[% tab.tabid %]')"></span>[% END %]
+		[% IF tab.active %]<span id="tab-form-[% tab.tabid %]" class="hide"><input type="text" onfocus="attachCompleter(this, '[% tab.tabid %]', '[% user.is_admin && !user.firehose_usermode %]','firehosetab', 7, { yui:{minQueryLength:0, autoHighlight:false }, action1:completer_save_tab } )" id="tab-input-[% tab.tabid %]" size="12" value="[% tab.tabname | strip_literal %]"></span>[% END %]
 		<a href="[% IF tab.active %]#[% ELSE %]?tab=[% tab.tabname | strip_attribute %][% END %]" id="tab-text-[% tab.tabid %]" onClick="[% IF tab.active %]firehose_open_tab('[% tab.tabid %]');[% ELSE %]firehose_set_options('tab','[% tab.tabname %]');[% END %] return false;">[% tab.tabname | strip_literal %] [% IF tab.active %]<img border="0" src="[% constants.imagedir %]/sic_edit.png">[% END %]</a> [% IF tab.active && tab.tabname != "untitled" %]<span id="fhtabdel"><a href="#" onclick="firehose_remove_tab([% tab.tabid %])">[X]</a></span>[% END %]</li>
 	[% END %]
 [% UNLESS nodiv %]</ul>[% END %]
