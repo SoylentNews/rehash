@@ -203,6 +203,7 @@ template=templates/display;article;default
 template=templates/display;slashderrnote;default
 template=templates/displayForm;users;default
 template=templates/displayThread;misc;default
+template=templates/d2prefs;misc;default
 template=templates/editComm;users;default
 template=templates/editHome;users;default
 template=templates/editKey;users;default
