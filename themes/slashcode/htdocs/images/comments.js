@@ -993,6 +993,18 @@ function isInWindow(obj) {
 
 /* code for the draggable threshold widget */
 
+function showPrefs( category ) {
+  var panel = document.getElementById("d2prefs");
+  panel.className = category;
+  panel.style.display = "block";
+}
+
+function hidePrefs() {
+  var panel = document.getElementById("d2prefs");
+  panel.className = "";
+  panel.style.display = "none";
+}
+
 function partitionedRange( range, partitions ) {
 	return [].concat(range[0], partitions, range[1]);
 }
