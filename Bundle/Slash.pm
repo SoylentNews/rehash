@@ -121,6 +121,8 @@ Text::Iconv		- HTML validator
 
 Data::JavaScript::Anon	- perl2js data structures
 
+JavaScript::Minifier 0.02
+
 =head1 DESCRIPTION
 
 mod_perl must be installed by hand, because of the special configuration
