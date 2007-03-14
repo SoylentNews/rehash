@@ -301,6 +301,10 @@ function completer_handleNeverDisplay( s, params ) {
     admin_neverdisplay("", "firehose", params._id);
 }
 
+function completer_save_tab(s, params) {
+	firehose_save_tab(params._id);
+}
+
 function attachCompleter( obj, id, is_admin, type, tagDomain, customize ) {
   var vendor = navigator.vendor.toLowerCase();
   if ( vendor.indexOf("apple") != -1
