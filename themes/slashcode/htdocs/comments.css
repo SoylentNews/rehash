@@ -197,6 +197,15 @@ html > body .commentwrap table {
 
 /* D2 Widget */
 
+#d2prefs { background-color: lightgray; padding: 1em; width: 20em; border: 1px solid black; display: none; position: absolute; z-index: 1 }
+#d2prefs  .pref-group { margin-top: 1.5em; }
+#d2prefs  .pref-group-comment { font-size: smaller; margin: 0.5em 1em; }
+#d2prefs  .pref-group h1 { font-size: 110%; }
+#d2prefs  .reading-prefs, #d2prefs  .writing-prefs { display: none; }
+#d2prefs.reading .reading-prefs, #d2prefs.writing .writing-prefs { display: block; }
+
+#d2prefs-closebox { display: block; position: absolute; right: 4px; top: 4px; height: 12px; width: 12px; border: 1px solid darkgray; }
+
 #d2act {display: none; position: relative; opacity: 1; z-index: 1000; width: 9.3em; text-align: center; }
 .vertical #d2act {position: relative; left: 1.2em !important}
 .vertical #d2act.rooted {left:-10.6em !important}
