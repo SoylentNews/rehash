@@ -36,6 +36,10 @@ __template__
 	point[% user.points == 1 ? '' : 's' %] &nbsp; 
 [% END %]
 
+[% IF user.is_admin && user.d2prefs_debug %]
+[% IF (!user.is_anon); PROCESS d2prefs; END %]
+[% END %]
+
 <a name="acomments"></a>
 <div class="commentwrap" id="commentwrap">
 [% IF (!user.is_anon && !user.acl.discussion2_uofm) || user.is_admin %]
@@ -165,7 +169,9 @@ __template__
 				}) %]
 				[% END %]
 		<div class="ccw-header-links">
-    [% IF !user.is_anon %]
+    [% IF user.is_admin && user.d2prefs_debug %]
+        <a href="javascript:showPrefs('reading')">Prefs</a>
+    [% ELSIF !user.is_anon %]
         <a href="[% gSkin.rootdir %]/my/comments">Prefs</a>
     [% END %]
 		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
@@ -235,7 +241,9 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
       </div>
 		</div>
 		<div class="commentControlFooter">
-    [% IF !user.is_anon %]
+    [% IF user.is_admin && user.d2prefs_debug %]
+        <a href="javascript:showPrefs('reading')">Prefs</a>
+    [% ELSIF !user.is_anon %]
         <a href="[% gSkin.rootdir %]/my/comments">Prefs</a>
     [% END %]
 		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
