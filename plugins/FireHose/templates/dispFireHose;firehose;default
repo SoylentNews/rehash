@@ -103,7 +103,7 @@ END %]
 <div class="storylinks">
 	<div>
 		<ul>
-			<li class="more">
+			<li class="more"><b>
 			[% IF item.type == "story" %]
 				[% the_skin = Slash.db.getSkin(item.primaryskid) %]
 				[% Slash.linkStory({
@@ -118,10 +118,11 @@ END %]
 			[% ELSE %]
 				Coming soon - Read More & Discuss...
 			[% END %]
+				</b>
 			</li>
 			[% IF item.discussion;
 			   disc = Slash.db.getDiscussion(item.discussion); %]
-			<li>
+			<li class="comments">
 				<a href="[% gSkin.rootdir %]/comments.pl?sid=[% item.discussion %]">[% disc.commentcount %]</a> comment[% IF disc.commentcount != 1 %]s[% END %]
 			</li>
 			[% END %]
