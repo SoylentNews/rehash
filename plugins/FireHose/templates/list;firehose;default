@@ -41,7 +41,7 @@ __template__
         };
     } ();
 
-  YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.App.init);
+  YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.App.firehose_calendar_init);
 </script>
 <div id="slashboxes">
 [% UNLESS user.noboxes %]
@@ -105,6 +105,8 @@ feedback to hose@cmdrtaco.net but be forgiving of beta code!
 [% PROCESS paginate options = options %]
 <script type="text/javascript">
 	firehose_startdate = '[% options.startdate.replace('-','') %]';
+	firehose_duration = '[% options.duration %]';
+
 	var firehose_action_time = 0;
 	var fh_color = '[% options.color || user.firehose_color || "indigo" %]';
 	fh_colors = [
@@ -132,6 +134,7 @@ feedback to hose@cmdrtaco.net but be forgiving of beta code!
 
 fh_ticksize = 15;
 firehose_slider_init();
+firehose_calendar_init();
 
 
 
