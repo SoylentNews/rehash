@@ -3,6 +3,10 @@ name=Ajax
 description="Ajax (Asynchronous Javascript and XML)"
 mysql_dump=mysql_dump.sql
 mysql_schema=mysql_schema.sql
+# ...until we make getCSS and symlink-tool smarter about css vs. images
+glob=calendarcss:htdocs/calendar.css
+calendarcss=htdocs/images/yui/calendar.css
+css=htdocs/calendar.css
 image=htdocs/images/yui/callt.gif
 image=htdocs/images/yui/calrt.gif
 image=htdocs/images/yui/calx.gif
