@@ -13,6 +13,7 @@ var firehose_ordered = Array(0);
 var firehose_before = Array(0);
 var firehose_after = Array(0);
 var firehose_startdate = '';
+var firehose_duratiton = '';
 var firehose_removed_first = '0';
 var firehose_future;
 var fh_colorslider; 
@@ -21,6 +22,7 @@ var fh_colors = Array(0);
 var vendor_popup_timerids = Array(0);
 var vendor_popup_id = 0;
 var fh_slider_init_set = 0;
+var fh_calendar;
 
 function createPopup(xy, titlebar, name, contents, message, onmouseout) {
 	var body = document.getElementsByTagName("body")[0]; 
@@ -541,7 +543,7 @@ function firehose_set_options(name, value) {
 	}
 	}
 
-	if (name == "color" || name == "tab" || name == "pause" ) { 
+	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" ) { 
 		params[name] = [value];
 	}
 
@@ -999,6 +1001,31 @@ function firehose_remove_entry(id) {
 		});
 		myAnim.animate();
 	}
+}
+
+var firehose_cal_select_handler = function(type,args,obj) { 
+	var selected = args[0];
+	
+	// getSelectedDates() could be used instead perhaps	
+	var theDate = selected[0];
+	for (i=1; i<=2; i++) {
+		if (theDate[i] < 10) {
+			theDate[i] = "0" + theDate[i];
+		}
+	}
+	var dateStr = theDate[0] + theDate[1] + theDate[2];
+	firehose_startdate = dateStr;
+
+	// startdate needs be in format 20070102
+	firehose_set_options('startdate', dateStr);
+}; 
+
+
+function firehose_calendar_init() {
+	fh_calendar = new YAHOO.widget.Calendar("cal", "fhcalendar");
+	fh_calendar.render();
+	fh_calendar.selectEvent.subscribe(firehose_cal_select_handler, fh_calendar, true);
+	YAHOO.util.Event.addListener(window, "load", firehose_calendar_init);
 }
 
 function firehose_slider_init() {
