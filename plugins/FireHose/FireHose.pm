@@ -420,13 +420,18 @@ sub getFireHoseEssentials {
 	}
 
 	# XXX Update to support timezones eventually
+	my $dur_q = $self->sqlQuote($options->{duration});
+	my $st_q  = $self->sqlQuote("$options->{startdate} 00:000:00");
+
 	if ($options->{startdate} && !$doublecheck) {
-		push @where, "createtime >= '$options->{startdate} 00:00:00'";
-		if ($options->{duration}) {
-			push @where, "createtime <= DATE_ADD('$options->{startdate} 00:00:00', INTERVAL $options->{duration} DAY)";
+		push @where, "createtime >= $st_q";
+		
+
+		if ($options->{duration} && $options->{duration} >= 0 ) {
+			push @where, "createtime <= DATE_ADD($st_q, INTERVAL $dur_q DAY)";
 		}
-	} elsif (defined $options->{duration} && !$doublecheck) {
-		push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $options->{duration} DAY)";
+	} elsif (defined $options->{duration} && $options->{duration} >= 0 && !$doublecheck) {
+		push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $dur_q DAY)";
 	}
 
 	if ($options->{color}) {
@@ -459,6 +464,7 @@ sub getFireHoseEssentials {
 
 	my $limit_str = "";
 	my $where = (join ' AND ', @where) || "";
+
 	my $offset = defined $options->{offset} ? $options->{offset} : '';
 	$offset = '' if $offset !~ /^\d+$/;
 	$offset = "$offset, " if length $offset;
@@ -683,7 +689,8 @@ sub ajaxFireHoseSetOptions {
 	my $html = {};
 	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs} }, { Return => 1});
 	$html->{fhoptions} = slashDisplay("firehose_options", { nowrapper => 1, options => $opts }, { Return => 1});
-	$html->{fh_advprefs} = slashDisplay("adv_pref_firehose", { nowrapper => 1, options => $opts }, { Return => 1});
+	#XXX Fix this
+	#$html->{fh_advprefs} = slashDisplay("adv_pref_firehose", { nowrapper => 1, options => $opts }, { Return => 1});
 
 	my $values = {};
 	$values->{'firehose-filter'} = $opts->{fhfilter};
@@ -1228,6 +1235,7 @@ sub getAndSetOptions {
 	$mode = $modes->{$mode} ? $mode : "fulltitle";
 	$options->{mode} = $mode;
 	$options->{pause} = $user->{firehose_paused};
+	$options->{duration} = defined $form->{duration} ? $form->{duration} : $user->{firehose_duration};
 
 	if (defined $form->{pause}) {
 		$self->setUser($user->{uid}, { firehose_paused => $form->{pause} ? 1 : 0 });
@@ -1506,9 +1514,10 @@ sub getAndSetOptions {
 		# $options->{attention_needed} = "yes";
 		$options->{accepted} = "no" if !$options->{accepted};
 		$options->{rejected} = "no" if !$options->{rejected};
+		$options->{duration} ||= -1;
 	} else  {
 		$options->{accepted} = "no" if !$options->{accepted};
-		$options->{duration} = 1;
+		$options->{duration} ||= 1;
 		if ($user->{is_subscriber}) {
 			$options->{createtime_subscriber_future} = 1;
 		} else {
