@@ -20,7 +20,7 @@ use Slash::Utility;
 use Slash::DB;
 use Slash::Install;
 use Getopt::Std;
-# use JavaScript::Minifier qw( jsmin ); # uncomment and add version when Minifier is known to work
+use JavaScript::Minifier 0.02, qw( jsmin );
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
@@ -70,24 +70,26 @@ my $plugin_list = $install->_getList(
 
 ############################################################
 # Handle globbing and minifying, do this first so results can be linked
-for my $glob (keys %{$theme_hr->{'glob'}}) {
-	my $destpath = canonpath(catfile($theme_hr->{dir}, $theme_hr->{'glob'}{$glob}));
-	my $filelist = "";
-	for my $file (@{$theme_hr->{$glob}}) {
-		$filelist .= canonpath(catfile($theme_hr->{dir}, $file)) . " ";
-	}
-	system("cat $filelist > $destpath");
-	my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
-	if ($suffix eq '.js') {
-		# JavaScript::Minifier is broken, use it this way until it's fixed:
-		system("cat $destpath | perl -MJavaScript::Minifier -e 'my \$f=new JavaScript::Minifier; \$f->minify(*STDIN, *STDOUT);' > ${path}${name}-minified.js");
-		
-		# ...then upgrade to this:
-		# my ($min_src, $min_dest);
-		# open $min_src, '<', $destpath;
-		# open $min_dest, '>', "${path}${name}-minified.js";
-		# jsmin($min_src, $min_dest);
-	}
+for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
+  for my $glob (keys %{$theme_or_plugin->{'glob'}}) {
+    my $destpath = canonpath(catfile($theme_or_plugin->{dir}, $theme_or_plugin->{'glob'}{$glob}));
+    my $filelist = "";
+    for my $file (@{$theme_or_plugin->{$glob}}) {
+      $filelist .= canonpath(catfile($theme_or_plugin->{dir}, $file)) . " ";
+    }
+    system("cat $filelist > $destpath");
+    my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
+    if ($suffix eq '.js') {
+      my ($min_src, $min_dest);
+      open $min_src, '<', $destpath;
+      open $min_dest, '>', "${path}${name}-minified.js";
+      jsmin($min_src, $min_dest);
+    }
+# ...and when we decide to allow CSSTidy:
+#     elsif ($suffix eq '.css') {
+#     system("csstidy $destpath --silent --template=high ${path}${name}-tidied.css");
+#   }
+  }
 }
 
 
