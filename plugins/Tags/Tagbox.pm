@@ -243,10 +243,17 @@ sub getTagboxTags {
 #print STDERR "getTagboxTags($tbid, $affected_id, $extra_levels), type=$type\n";
 	my $hr_ar = [ ];
 	my $colname = ($type eq 'user') ? 'uid' : 'globjid';
+	my $max_time_clause = '';
+	if ($options->{max_time_noquote}) {
+		$max_time_clause = " AND created_at <= $options->{max_time_noquote}";
+	} elsif ($options->{max_time}) {
+		my $mtq = $self->sqlQuote($options->{max_time});
+		$max_time_clause = " AND created_at <= $mtq";
+	}
 	$hr_ar = $self->sqlSelectAllHashrefArray(
 		'*',
 		'tags',
-		"$colname=$affected_id",
+		"$colname=$affected_id $max_time_clause",
 		'ORDER BY tagid');
 
 	# If extra_levels were requested, fetch them.  
@@ -260,7 +267,7 @@ sub getTagboxTags {
 		$hr_ar = $self->sqlSelectAllHashrefArray(
 			'*',
 			'tags',
-			"$new_colname IN ($new_ids)",
+			"$new_colname IN ($new_ids) $max_time_clause",
 			'ORDER BY tagid');
 #print STDERR "new_colname=$new_colname new_ids=" . scalar(keys %new_ids) . " (" . substr($new_ids, 0, 20) . ") hr_ar=" . scalar(@$hr_ar) . "\n";
 		$old_colname = $new_colname;

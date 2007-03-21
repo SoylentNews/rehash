@@ -124,7 +124,7 @@ sub feed_userchanges {
 }
 
 sub run {
-	my($self, $affected_id) = @_;
+	my($self, $affected_id, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
@@ -163,7 +163,7 @@ sub run {
 	# Add up nods and nixes.
 	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
 	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
-	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
+	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0, $options);
 	$tagsdb->addCloutsToTagArrayref($tags_ar);
 	for my $tag_hr (@$tags_ar) {
 		my $sign = 0;
@@ -178,6 +178,9 @@ sub run {
 	my $fhid = $self->sqlSelect('id', 'firehose', "globjid = $affected_id_q");
 	my $firehose_db = getObject('Slash::FireHose');
 	warn "Slash::Tagbox::FHPopularity->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
+	if ($options->{return_only}) {
+		return $popularity;
+	}
 	main::tagboxLog("FHPopularity->run setting $fhid ($affected_id) to $popularity");
 	$firehose_db->setFireHose($fhid, { popularity => $popularity });
 }
