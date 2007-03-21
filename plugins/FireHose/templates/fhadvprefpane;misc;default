@@ -17,8 +17,8 @@ __template__
 <tr>
 <td valign="top">
 Automatic Updates: </td>
-<td><span class="advpref" id="advplay"></span>On</td><td><input type="radio" name="pause" value="0" onclick="firehose_set_options('pause','0')" [% IF options.firehose_pause; constants.markup_checked_attribute; END %]></td>
-<td><span class="advpref" id="advpause"></span> Off</td><td><input type="radio" name="pause" value="1" onclick="firehose_set_options('pause','1')" [% IF !options.firehose_pause; constants.markup_checked_attribute; END %]></td>
+<td><span class="advpref" id="advplay"></span>On</td><td><input type="radio" name="pause" value="0" onclick="firehose_set_options('pause','0')" [% IF !options.pause; constants.markup_checked_attribute; END %]></td>
+<td><span class="advpref" id="advpause"></span> Off</td><td><input type="radio" name="pause" value="1" onclick="firehose_set_options('pause','1')" [% IF options.pause; constants.markup_checked_attribute; END %]></td>
 </tr>
 
 <tr>

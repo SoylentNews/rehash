@@ -16,41 +16,25 @@ __template__
 [% IF !nowrapper %]
 <div id="fh_advprefs" class="hide">
 [% END %]
-<table>
+<table cellpadding="3">
 <tr>
-<td>
-<table>
+<td valign="top" id="fhadvprefpane">
 
-<tr>
-<td>
-Automatic Updates: </td>
-<td><span class="advpref" id="advplay"></span>On</td><td><input type="radio" name="pause" value="0" onclick="firehose_set_options('pause','0')" [% IF options.firehose_pause; constants.markup_checked_attribute; END %]></td>
-<td><span class="advpref" id="advpause"></span> Off</td><td><input type="radio" name="pause" value="1" onclick="firehose_set_options('pause','1')" [% IF !options.firehose_pause; constants.markup_checked_attribute; END %]></td>
-</tr>
+[% PROCESS fhadvprefpane options = options %]
 
-<tr>
-<td>Order by </td>
-<td><span class="advpref" id="advpop"></span>Popularity</td><td><input type="radio" name="orderby" value="popularity"   onclick="firehose_set_options('orderby','popularity')"[% IF options.orderby == "popularity" || options.orderby == "editorpop"; constants.markup_checked_attribute; END %]></td>
-<td><span class="advpref" id="advtime"></span> Time</td><td><input type="radio" name="orderby" value="createtime"   onclick="firehose_set_options('orderby','createtime')" [% IF options.orderby == "createtime"; constants.markup_checked_attribute; END %]></td>
-</tr>
-<tr>
-<td>Order direction:</td>
-<td><span class="advpref" id="advasc"></span>Descending</td><td><input type="radio" name="orderdir" value="DESC" onclick="firehose_set_options('orderdir','DESC')"[% IF options.orderdir == "DESC"; constants.markup_checked_attribute; END %]></td>
-<td><span class="advpref" id="advdesc"></span>Ascending</td><td><input type="radio" name="orderdir" value="ASC"  onclick="firehose_set_options('orderdir','ASC')" [% IF options.orderdir == "ASC"; constants.markup_checked_attribute; END %]></td>
-</tr>
-<tr>
-<td>Article View</td>
-<td><span class="advpref" id="advfull"></span>Full Article</td><td><input type="radio" name="mode" value="full"  onclick="firehose_set_options('mode','full')" [% IF options.mode == "full"; constants.markup_checked_attribute; END %]></td>
-<td><span class="advpref" id="advabbrev"></span>Headlines Only</td><td> <input type="radio" name="mode" value="fulltitle"  onclick="firehose_set_options('mode','fulltitle')" [% IF options.mode == "fulltitle" || !options.mode; constants.markup_checked_attribute; END %]></td>
-</tr>
-<tr>
-<td>Hide dates</td><td><input type="checkbox" name="nodates" onchange="firehose_set_options('nodates', this.checked)" [% IF options.nodates; constants.markup_checked_attribute; END %]></td>
-<td>Hide bylines</td><td><input type="checkbox" name="nobylines" onchange="firehose_set_options('nobylines', this.checked)" [% IF options.nobylines; constants.markup_checked_attribute; END %]></td>
-</tr>
-</table>
 
 </td>
-<tr><td>
+<td valign="top" id="fhdatepane">
+	<b>Duration:</b><br>
+	Day <input type="radio" name="duration" value="1" onclick="firehose_set_options('duration','1')" [% IF options.duration == 1; constants.markup_checked_attribute; END %]>
+	Week <input type="radio" name="duration" value="7" onclick="firehose_set_options('duration','7')" [% IF options.duration == 7; constants.markup_checked_attribute; END %]>
+	Month<input type="radio" name="duration" value="31" onclick="firehose_set_options('duration','31')" [% IF options.duration == 31; constants.markup_checked_attribute; END %]>
+	All time<input type="radio" name="duration" value="-1" onclick="firehose_set_options('duration','-1')" [% IF options.duration == -1; constants.markup_checked_attribute; END %]>
+	<br>Select Start Date:<br>
+	<div id="fhcalendar"></div>
+</td>
+</tr>
+<tr><td colspan=2">
 <form method="post">
 <input type="hidden" name="fhfilter" value="">
 <input type="hidden" name="color" value="indigo">
@@ -58,17 +42,10 @@ Automatic Updates: </td>
 <input type="hidden" name="orderdir" value="DESC">
 <input type="hidden" name="mode" value="fulltitle">
 <input type="hidden" name="pause" value="1">
+<input type="hidden" name="duration" value="1">
 <input type="submit" value="Reset to Defaults">
 </form>
-</td>
-<td valign="top">
-	<b>Duration:</b><br>
-	A day <input type="radio" name="duration" value="1" onclick="firehose_set_options('duration','1')" [% IF options.duration == 1; constants.markup_checked_attribute; END %]>
-	A week <input type="radio" name="duration" value="7" onclick="firehose_set_options('duration','7')" [% IF options.duration == 7; constants.markup_checked_attribute; END %]>
-	A month<input type="radio" name="duration" value="31" onclick="firehose_set_options('duration','31')" [% IF options.duration == 31; constants.markup_checked_attribute; END %]>
-	All time<input type="radio" name="duration" value="-1" onclick="firehose_set_options('duration','-1')" [% IF options.duration == -1; constants.markup_checked_attribute; END %]>
-	<div id="fhcalendar" align="top"></div>
-</td>
+</td></tr>
 </tr>
 </table>
 [% IF !nowrapper %]
