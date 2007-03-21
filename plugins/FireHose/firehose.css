@@ -18,6 +18,7 @@
 }
 
 .options span
+/*, span.advpref */
 {
 	position: relative;
 	width: 20px;
@@ -56,6 +57,7 @@ input
 #fhtablist { margin: 0; }
 
 .options a
+/*, .advpref */
 {
 	color: #fff;
 	text-decoration: none;
@@ -68,14 +70,16 @@ input
 	top: 0;
 }
 
-#play a { background-position: 0px 1px; }
-#pause a { background-position: 0px -200px; }
-#desc a { background-position: 0px -400px; }
-#asc a { background-position: 0px -600px; }
-#full a { background-position: 0px -800px; }
-#abbrev a { background-position: 0px -1000px; }
-#time a { background-position: 0px -1200px; }
-#popularity a { background-position: 0px -1400px; }
+#advplay, #advpause, #advdesc { padding-left: 20px, padding-top: 10px, padding-bottom: 10px }
+
+#play a, #advplay { background-position: 0px 1px; }
+#pause a, #advpause { background-position: 0px -200px; }
+#desc a, #advdesc { background-position: 0px -400px; }
+#asc a, #advasc { background-position: 0px -600px; }
+#full a, #advfull { background-position: 0px -800px; }
+#abbrev a, #advabbrev { background-position: 0px -1000px; }
+#time a, #advtime  { background-position: 0px -1200px; }
+#popularity a, #advpopularity { background-position: 0px -1400px; }
 .article .firehosetag { background: #fff; }
 
 ul.menu
@@ -342,3 +346,5 @@ div.tags table.data td
 .pop6 { background: url('//images.slashdot.org/pop6.png') no-repeat 0px 0px; }
 .pop7 { background: url('//images.slashdot.org/pop7.png') no-repeat 0px 0px; }
 .pop8 { background: url('//images.slashdot.org/pop0.png') no-repeat 0px 0px; }
+#fhdatepane { padding-left: 8px }
+.calhead { color: #000 }

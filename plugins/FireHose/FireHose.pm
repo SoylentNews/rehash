@@ -423,14 +423,14 @@ sub getFireHoseEssentials {
 	my $dur_q = $self->sqlQuote($options->{duration});
 	my $st_q  = $self->sqlQuote("$options->{startdate} 00:000:00");
 
-	if ($options->{startdate} && !$doublecheck) {
+	if ($options->{startdate}) {
 		push @where, "createtime >= $st_q";
 		
 
 		if ($options->{duration} && $options->{duration} >= 0 ) {
 			push @where, "createtime <= DATE_ADD($st_q, INTERVAL $dur_q DAY)";
 		}
-	} elsif (defined $options->{duration} && $options->{duration} >= 0 && !$doublecheck) {
+	} elsif (defined $options->{duration} && $options->{duration} >= 0) {
 		push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $dur_q DAY)";
 	}
 
@@ -689,8 +689,7 @@ sub ajaxFireHoseSetOptions {
 	my $html = {};
 	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs} }, { Return => 1});
 	$html->{fhoptions} = slashDisplay("firehose_options", { nowrapper => 1, options => $opts }, { Return => 1});
-	#XXX Fix this
-	#$html->{fh_advprefs} = slashDisplay("adv_pref_firehose", { nowrapper => 1, options => $opts }, { Return => 1});
+	$html->{fhadvprefpane} = slashDisplay("fhadvprefpane", { options => $opts }, { Return => 1});
 
 	my $values = {};
 	$values->{'firehose-filter'} = $opts->{fhfilter};
