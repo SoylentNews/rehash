@@ -994,15 +994,15 @@ function isInWindow(obj) {
 /* code for the draggable threshold widget */
 
 function showPrefs( category ) {
-  var panel = document.getElementById("d2prefs");
-  panel.className = category;
-  panel.style.display = "block";
+	var panel = document.getElementById("d2prefs");
+	panel.className = category;
+	panel.style.display = "block";
 }
 
 function hidePrefs() {
-  var panel = document.getElementById("d2prefs");
-  panel.className = "";
-  panel.style.display = "none";
+	var panel = document.getElementById("d2prefs");
+	panel.className = "";
+	panel.style.display = "none";
 }
 
 function partitionedRange( range, partitions ) {

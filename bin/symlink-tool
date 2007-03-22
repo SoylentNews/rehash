@@ -71,25 +71,28 @@ my $plugin_list = $install->_getList(
 ############################################################
 # Handle globbing and minifying, do this first so results can be linked
 for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
-  for my $glob (keys %{$theme_or_plugin->{'glob'}}) {
-    my $destpath = canonpath(catfile($theme_or_plugin->{dir}, $theme_or_plugin->{'glob'}{$glob}));
-    my $filelist = "";
-    for my $file (@{$theme_or_plugin->{$glob}}) {
-      $filelist .= canonpath(catfile($theme_or_plugin->{dir}, $file)) . " ";
-    }
-    system("cat $filelist > $destpath");
-    my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
-    if ($suffix eq '.js') {
-      my ($min_src, $min_dest);
-      open $min_src, '<', $destpath;
-      open $min_dest, '>', "${path}${name}-minified.js";
-      jsmin($min_src, $min_dest);
-    }
+	for my $glob (keys %{$theme_or_plugin->{'glob'}}) {
+		my $destpath = canonpath(
+			catfile($theme_or_plugin->{dir},
+			$theme_or_plugin->{'glob'}{$glob})
+		);
+		my $filelist = "";
+		for my $file (@{$theme_or_plugin->{$glob}}) {
+			$filelist .= canonpath(catfile($theme_or_plugin->{dir}, $file)) . " ";
+		}
+		system("cat $filelist > $destpath");
+		my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
+		if ($suffix eq '.js') {
+			my($min_src, $min_dest);
+			open $min_src, '<', $destpath;
+			open $min_dest, '>', "${path}${name}-minified.js";
+			jsmin($min_src, $min_dest);
+		}
 # ...and when we decide to allow CSSTidy:
-#     elsif ($suffix eq '.css') {
-#     system("csstidy $destpath --silent --template=high ${path}${name}-tidied.css");
-#   }
-  }
+#		elsif ($suffix eq '.css') {
+#			system("csstidy $destpath --silent --template=high ${path}${name}-tidied.css");
+#		}
+	}
 }
 
 
