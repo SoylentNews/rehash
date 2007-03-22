@@ -4432,12 +4432,8 @@ INSERT INTO vars (name, value, description) VALUES ('firehose_searchtoo', '0', '
 #   rm -rf search_index/kinosearch/firehose_*
 INSERT search_index_dump SELECT NULL, id, 'firehose', 'new' FROM firehose;
 
-# PUDGE LAST UPDATED HERE
-
 # 2007-02-21
 UPDATE vars SET value = 'T_2_5_0_148' WHERE name = 'cvs_tag_currentcode';
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
 
 UPDATE firehose_tab SET tabname = 'Firehose' WHERE tabname = 'FireHose';
 
@@ -4461,8 +4457,6 @@ DROP TABLE IF EXISTS users_param3;
 # variety of user actions.
 ALTER TABLE comments ADD COLUMN badge_id tinyint UNSIGNED DEFAULT '0' NOT NULL;
 
-# SLASHDOT LAST UPDATED HERE
-
 # For badges
 CREATE TABLE badge_ids (
         badge_id        tinyint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -4478,6 +4472,12 @@ INSERT INTO badge_ids (badge_id, badge_text, badge_url, badge_icon) values (3, '
 # 2007-03-13
 UPDATE vars SET value = 'T_2_5_0_150' WHERE name = 'cvs_tag_currentcode';
 
+# PUDGE LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
 INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum, ie_cond) VALUES ('stylesheet','text/css','screen, projection','calendar.css','','','firehose','no','',2,0, '');
 INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum, ie_cond) VALUES ('stylesheet','text/css','screen, projection','calendar.css','','','console','no','',2,0, '');
 
@@ -4486,3 +4486,7 @@ INSERT INTO message_deliverymodes VALUES (2, 'IM', 4);
 
 # New Messages preference (initially set to inactive)
 INSERT INTO message_codes VALUES (19, 'System Messages', 100, 0, 0, 'now', '', 0);
+
+# 2007-03-21
+UPDATE vars SET value = 'T_2_5_0_151' WHERE name = 'cvs_tag_currentcode';
+
