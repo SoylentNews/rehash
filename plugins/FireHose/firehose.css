@@ -70,6 +70,14 @@ input
 	top: 0;
 }
 
+span.advpref {
+	background: url('//images.slashdot.org/sic_controls.png') no-repeat;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
+	text-indent: -7000em;
+	position: relative;
+	padding-right: 20px;
+}
+
 #advplay, #advpause, #advdesc { padding-left: 20px, padding-top: 10px, padding-bottom: 10px }
 
 #play a, #advplay { background-position: 0px 1px; }
