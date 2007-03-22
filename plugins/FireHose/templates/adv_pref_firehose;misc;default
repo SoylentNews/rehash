@@ -34,7 +34,7 @@ __template__
 	<div id="fhcalendar"></div>
 </td>
 </tr>
-<tr><td colspan=2">
+<tr><td colspan="2">
 <form method="post">
 <input type="hidden" name="fhfilter" value="">
 <input type="hidden" name="color" value="indigo">
@@ -45,7 +45,7 @@ __template__
 <input type="hidden" name="duration" value="1">
 <input type="submit" value="Reset to Defaults">
 </form>
-</td></tr>
+</td>
 </tr>
 </table>
 [% IF !nowrapper %]
