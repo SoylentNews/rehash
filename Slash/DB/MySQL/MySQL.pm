@@ -11996,10 +11996,10 @@ sub _addGlobjEssentials_journals {
 		: { };
 	for my $id (@journal_ids) {
 		my $globjid = $journals_hr->{$id};
-		my $fixnick = $journaldata_hr->{nickname};
+		my $fixnick = $journaldata_hr->{$id}{nickname};
 		$data_hr->{$globjid}{url} = "$constants->{rootdir}/~$fixnick/journal/$id";
-		$data_hr->{$globjid}{title} = $journaldata_hr->{subj};
-		$data_hr->{$globjid}{created_at} = $journaldata_hr->{time};
+		$data_hr->{$globjid}{title} = $journaldata_hr->{$id}{description};
+		$data_hr->{$globjid}{created_at} = $journaldata_hr->{$id}{date};
 	}
 }
 
