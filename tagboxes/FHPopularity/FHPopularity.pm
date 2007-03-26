@@ -136,29 +136,28 @@ sub run {
 	# Some target types gain popularity.
 	my($type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
 	my $target_id_q = $self->sqlQuote($target_id);
+
+	my($color_level, $extra_pop) = (0, 0);
 	if ($type eq "submissions") {
-		$popularity = $firehose->getMidPopularityForColorLevel(5);
+		$color_level = 5;
 	} elsif ($type eq "journals") {
 		my $journal = getObject("Slash::Journal");
 		my $j = $journal->get($target_id);
-		$popularity = $firehose->getMidPopularityForColorLevel(6);
-		$popularity = $firehose->getMidPopularityForColorLevel(5) if $j->{promotetype} eq "publicize";
-
+		$color_level = $j->{promotetype} && $j->{promotetype} eq 'publicize'
+			? 5  # requested to be publicized
+			: 6; # not requested
 	} elsif ($type eq 'urls') {
-		my $bookmark_count = $self->sqlCount('bookmarks', "url_id=$target_id_q");
-		my $pop_level = 7;
-		$pop_level = 6 if $self->sqlCount("firehose", "type='feed' AND url_id=$target_id");
-		$popularity = $firehose->getMidPopularityForColorLevel($pop_level) + $bookmark_count;
+		$extra_pop = $self->sqlCount('bookmarks', "url_id=$target_id_q") || 0;
+		$color_level = $self->sqlCount("firehose", "type='feed' AND url_id=$target_id")
+			? 6  # feed
+			: 7; # nonfeed
 	} elsif ($type eq "stories") {
 		my $story = $self->getStory($target_id);
-		if($story->{story_topics_rendered}{$constants->{mainpage_nexus_tid}}) {
-			# Mainpage
-			$popularity = $firehose->getMidPopularityForColorLevel(1);
-		} else {
-			# Sectional
-			$popularity = $firehose->getMidPopularityForColorLevel(2);
-		}
+		$color_level = $story->{story_topics_rendered}{$constants->{mainpage_nexus_tid}}
+			? 1  # mainpage
+			: 2; # sectional
 	}
+	$popularity = $firehose->getMidPopularityForColorLevel($color_level) + $extra_pop;
 
 	# Add up nods and nixes.
 	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
