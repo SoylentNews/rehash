@@ -421,7 +421,7 @@ sub getFireHoseEssentials {
 
 	# XXX Update to support timezones eventually
 	my $dur_q = $self->sqlQuote($options->{duration});
-	my $st_q  = $self->sqlQuote("$options->{startdate} 00:000:00");
+	my $st_q  = $self->sqlQuote(timeCalc($options->{startdate},"%Y-%m-%d %T"));
 
 	if ($options->{startdate}) {
 		push @where, "createtime >= $st_q";
@@ -469,6 +469,7 @@ sub getFireHoseEssentials {
 	$offset = '' if $offset !~ /^\d+$/;
 	$offset = "$offset, " if length $offset;
 	$limit_str = "LIMIT $offset $options->{limit}" unless $options->{nolimit};
+
 
 	my $other = '';
 	$other .= " GROUP BY firehose.id " if $options->{tagged_by_uid};
@@ -824,7 +825,7 @@ sub ajaxFireHoseGetUpdates {
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $id_str = $form->{ids};
 	my $update_time = $form->{updatetime};
-	my @ids = grep {/^\d+$/} split (/,/, $id_str);
+	my @ids = grep {/^(\d+|day-\d+)$/} split (/,/, $id_str);
 	my %ids = map { $_ => 1 } @ids;
 	my %ids_orig = ( %ids ) ;
 	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
@@ -833,6 +834,11 @@ sub ajaxFireHoseGetUpdates {
 	my $globjs = [];	
 	foreach (@$items) {
 		push @$globjs, $_->{globjid} if $_->{globjid} 
+	}
+	
+
+	if ($opts->{orderby} eq "createtime") {
+		$items = $firehose->addDayBreaks($items, $user->{off_set});
 	}
 
 	my $votes = $firehose->getUserFireHoseVotesForGlobjs($user->{uid}, $globjs);
@@ -845,30 +851,41 @@ sub ajaxFireHoseGetUpdates {
 	my $now = $slashdb->getTime();
 	my $added = {};
 
+	my $last_day;
 
 	foreach (@$items) {
-		my $item = $firehose_reader->getFireHose($_->{id});
+		my $item = {};
+		if (!$_->{day}) {
+			$item = $firehose_reader->getFireHose($_->{id});
+			$last_day = timeCalc($item->{createtime}, "%Y%m%d");
+		}
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
 		$future->{$_->{id}} = 1 if $item->{createtime} gt $now;
 		if ($ids{$_->{id}}) {
 			if ($item->{last_update} ge $update_time) {
-				my $url 	= $slashdb->getUrl($item->{url_id});
-				my $the_user  	= $slashdb->getUser($item->{uid});
-				$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user, options => $opts }, { Return => 1 });
-				$html->{"tags-top-$_->{id}"} = slashDisplay("firehose_tags_top", { tags_top => $tags_top, id => $_->{id}, item => $item }, { Return => 1 });
-				my $introtext = $item->{introtext};
-				slashDisplay("formatHoseIntro", { introtext => $introtext, url => $url, $item => $item }, { Return => 1 });
-				$html->{"text-$_->{id}"} = $introtext;
-				$html->{"fhtime-$_->{id}"} = timeCalc($item->{createtime});
-				# updated
+				if (!$item->{day}) {
+					my $url 	= $slashdb->getUrl($item->{url_id});
+					my $the_user  	= $slashdb->getUser($item->{uid});
+					$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user, options => $opts }, { Return => 1 });
+					$html->{"tags-top-$_->{id}"} = slashDisplay("firehose_tags_top", { tags_top => $tags_top, id => $_->{id}, item => $item }, { Return => 1 });
+					my $introtext = $item->{introtext};
+					slashDisplay("formatHoseIntro", { introtext => $introtext, url => $url, $item => $item }, { Return => 1 });
+					$html->{"text-$_->{id}"} = $introtext;
+					$html->{"fhtime-$_->{id}"} = timeCalc($item->{createtime});
+					# updated
+				}
 			}
 		} else {
 			# new
 			$update_time = $_->{last_update} if $_->{last_update} gt $update_time && $_->{last_update} lt $now;
-			push @$updates, ["add", $_->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top, vote => $votes->{$item->{globjid}}, options => $opts }, { Return => 1, Page => "firehose" })];
+			if ($_->{day}) {
+				push @$updates, ["add", $_->{id}, slashDisplay("daybreak", { options => $opts, cur_day => $_->{day}, last_day => $_->{last_day}, id => "firehose-day-$_->{day}" }, { Return => 1, Page => "firehose" }) ];
+			} else {
+				push @$updates, ["add", $_->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top, vote => $votes->{$item->{globjid}}, options => $opts }, { Return => 1, Page => "firehose" })];
+			}
 			$added->{$_->{id}}++;
 		}
-		push @$ordered, $item->{id};
+		push @$ordered, $_->{id};
 		delete $ids{$_->{id}};
 	}
 
@@ -889,7 +906,6 @@ sub ajaxFireHoseGetUpdates {
 	if (scalar (keys %$next_to_old) == 1) {
 		my ($key) = keys %$next_to_old;
 		$target_pos = $pos->{$key};
-		print STDERR "Target pos: $target_pos\n";
 		
 	}
 	
@@ -903,7 +919,7 @@ sub ajaxFireHoseGetUpdates {
 	}
 
 
-	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1, page => $form->{page}, options => $opts }, { Return => 1, Page => "firehose"});
+	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1, day => $last_day , page => $form->{page}, options => $opts, ulid => "fh-paginate", divid => "fh-pag-div" }, { Return => 1, Page => "firehose"});
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
 
@@ -1250,6 +1266,16 @@ sub getAndSetOptions {
 		}
 	}
 	$options->{startdate} = "" if !$options->{startdate};
+	if ($form->{issue}) {
+		if ($form->{issue} =~ /^\d{8}$/) {
+			my ($y, $m, $d) = $form->{issue} =~ /(\d{4})(\d{2})(\d{2})/;
+			$options->{startdate} = "$y-$m-$d";
+			$options->{issue} = $form->{issue};
+
+		} else {
+			$form->{issue} = "";
+		}
+	}
 	
 
 	my $colors = $self->getFireHoseColors();
@@ -1523,6 +1549,11 @@ sub getAndSetOptions {
 			$options->{createtime_no_future} = 1;
 		}
 	}
+
+	if ($options->{issue}) {
+		$options->{duration} = 1;
+	}
+
 	return $options;
 }
 
@@ -1602,6 +1633,10 @@ sub listView {
 		push @$globjs, $_->{globjid} if $_->{globjid} 
 	}
 
+	if ($options->{orderby} eq "createtime") {
+		$items = $self->addDayBreaks($items, $user->{off_set});
+	}
+
 	my $votes = $self->getUserFireHoseVotesForGlobjs($user->{uid}, $globjs);
 
 	my $itemstext;
@@ -1609,17 +1644,27 @@ sub listView {
 	my $now = $slashdb->getTime();
 	my $colors = $self->getFireHoseColors(1);
 	my $colors_hash = $self->getFireHoseColors();
-	
+
+	my $i=0;
+	my $last_day = 0;
 	foreach (@$items) {
 		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime && $_->{createtime} lt $now;
 		my $item =  $firehose_reader->getFireHose($_->{id});
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
-		$itemstext .= $self->dispFireHose($item, {
-			mode		=> $options->{mode},
-			tags_top	=> $tags_top,
-			options		=> $options,
-			vote		=> $votes->{$item->{globjid}},
-		});
+		if ($_->{day}) {
+			my $day = $_->{day};
+			$day =~ s/ \d{2}:\d{2}:\d{2}$//;
+			$itemstext .= slashDisplay("daybreak", { options => $options, cur_day => $day, last_day => $_->{last_day}, id => "firehose-day-$day" }, { Return => 1, Page => "firehose" });
+		} else {
+			$last_day = timeCalc($item->{createtime}, "%Y%m%d");
+			$itemstext .= $self->dispFireHose($item, {
+				mode		=> $options->{mode},
+				tags_top	=> $tags_top,
+				options		=> $options,
+				vote		=> $votes->{$item->{globjid}},
+			});
+		}
+		$i++;
 	}
 	my $Slashboxes = displaySlashboxes();
 	my $refresh_options;
@@ -1638,7 +1683,8 @@ sub listView {
 		colors		=> $colors,
 		colors_hash	=> $colors_hash,
 		tabs		=> $options->{tabs},
-		slashboxes	=> $Slashboxes
+		slashboxes	=> $Slashboxes,
+		last_day	=> $last_day
 	}, { Page => "firehose", Return => 1});
 }
 
@@ -1733,6 +1779,26 @@ sub splitOpsFromString {
 		}
 	}
 	return \@fh_ops;
+}
+
+sub addDayBreaks {
+	my ($self, $items, $offset) = @_;
+	my @retitems;
+	my $last_day = "00000000";
+	my $days_processed = 0;
+	foreach (@$items) {
+		my $cur_day = $_->{createtime};
+		$cur_day =  timeCalc($cur_day, "%Y%m%d %T", $offset);
+		$cur_day =~ s/ \d\d:\d\d:\d\d$//g;
+		if ($cur_day ne $last_day && $days_processed >= 3) {
+			push @retitems, { id => "day-$cur_day", day => $cur_day, last_day => $last_day };
+		}
+		push @retitems, $_;
+		$last_day = $cur_day;
+		$days_processed++;
+	}
+
+	return \@retitems;
 }
 
 
