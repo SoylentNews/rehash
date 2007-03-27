@@ -1674,10 +1674,12 @@ sub getOlderDaysFromDay {
 	my $weekago = $slashdb->getDay(7);
 	
 	for ($start..$end) {
-		my $the_day = $slashdb->getDayFromDay($day, $_);
-		push @$days, $the_day if $the_day < $today;
+		my $the_day = $slashdb->getDayFromDay($day, $_, $options);
+		if (($the_day < $today) || $options->{show_future_days}) {
+			push @$days, $the_day; 
+		}
 	}
-	if ($today > $days->[0]) {
+	if ($today > $days->[0] && !$options->{skip_add_today}) {
 		unshift @$days, "$today";
 	}
 

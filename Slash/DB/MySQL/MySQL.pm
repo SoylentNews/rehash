@@ -8327,7 +8327,7 @@ sub getDayFromDay {
 			scalar localtime(
 				timelocal(0, 0, 0, $d, $m - 1, $y - 1900) - 86400 * $days_back
 			), "%Y%m%d"
-		);
+		, 0);
 	} else {
 		$return_day = $self->getDay(0) if !$y;
 	}
