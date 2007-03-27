@@ -21,4 +21,4 @@ __template__
 	<a href="?issue=[% cur_day %]">[% cur_days.0.1 %]</a><br>
 </div>
 __version__
-$Id
+$Id:
