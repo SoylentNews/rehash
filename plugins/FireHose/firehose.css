@@ -133,9 +133,10 @@ ul.menu#fhtablist li.active:before { content: ""; }
 /* Pagination */
 .paginate
 {
-	margin-right: 18.5em;
 	background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x;
+	margin-right: 18.5em;
 }
+
 
 .admin .paginate { margin-right: 0; }
 .paginate ul.menu { background: url('//images.slashdot.org/corner_w_br.png') right bottom no-repeat; }
@@ -356,3 +357,5 @@ div.tags table.data td
 .pop8 { background: url('//images.slashdot.org/pop0.png') no-repeat 0px 0px; }
 #fhdatepane { padding-left: 8px }
 .calhead { color: #000 }
+.daybreak { background: #666; }
+.daybreak a { color: #fff; }
