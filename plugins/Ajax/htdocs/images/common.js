@@ -13,6 +13,7 @@ var firehose_ordered = Array(0);
 var firehose_before = Array(0);
 var firehose_after = Array(0);
 var firehose_startdate = '';
+var firehose_issue = '';
 var firehose_duratiton = '';
 var firehose_removed_first = '0';
 var firehose_future;
@@ -756,7 +757,7 @@ function firehose_handle_update() {
 			myAnim.animate();
 		} else if (el[0] == "remove") {
 			var fh_node = $(fh);
-			if (fh_is_admin && fh_view_mode == "fulltitle" && fh_node.className == "article" ) {
+			if (fh_is_admin && fh_view_mode == "fulltitle" && fh_node && fh_node.className == "article" ) {
 				// Don't delete admin looking at this in expanded view
 			} else {
 				var attributes = { 
@@ -796,7 +797,11 @@ function firehose_reorder() {
 	if (firehose_ordered) {
 		var fhlist = $('firehoselist');
 		if (fhlist) {
+			var item_count = 0;
 			for (i = 0; i < firehose_ordered.length; i++) {
+				if (/^\d+$/.test(firehose_ordered[i])) {
+					item_count++;
+				}
 				var fhel = $('firehose-' + firehose_ordered[i]);
 				if (fhlist && fhel) {
 					fhlist.appendChild(fhel);
@@ -812,9 +817,9 @@ function firehose_reorder() {
 				}
 			}
 			if (console_updating) {
-				document.title = "Console (" + firehose_ordered.length + ")";
+				document.title = "Console (" + item_count + ")";
 			} else {
-				document.title = "Firehose (" + firehose_ordered.length + ")";
+				document.title = "Firehose (" + item_count + ")";
 			}
 		}
 	}
@@ -866,7 +871,8 @@ function firehose_get_item_idstring() {
 	for (var i = 0; i < children.length; i++) {
 		if (children[i].id) {
 			id = children[i].id;
-			id = id.replace(/\D+/g, "");
+			id = id.replace(/^firehose-/g, "");
+			id = id.replace(/^\s+|\s+$/g, "");
 			str = str + id + ",";
 		}
 	}
@@ -895,6 +901,7 @@ function firehose_get_updates(options) {
 	params['ids'] = firehose_get_item_idstring();
 	params['updatetime'] = update_time;
 	params['startdate'] = firehose_startdate;
+	params['issue'] = firehose_issue;
 	params['page'] = page;
 	$('busy').className = "";
 	ajax_update(params, '', handlers);
