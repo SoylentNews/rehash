@@ -683,10 +683,14 @@ sub validateComment {
 	}
 
 	if (isTroll()) {
-		$$error_message = getError('troll message', {
-			unencoded_ip => $ENV{REMOTE_ADDR}      
-		});
-		return;
+		if ($constants->{comment_is_troll_disable_and_log}) {
+			$user->{state}{is_troll} = 1;
+		} else {
+			$$error_message = getError('troll message', {
+				unencoded_ip => $ENV{REMOTE_ADDR}      
+			});
+			return;
+		}
 	}
 
 	if ($user->{is_anon} || $form->{postanon}) {
@@ -1158,6 +1162,12 @@ sub submitComment {
 				logtext	=> "COMMENTKARMA USER: $post_str"
 			});
 		}
+	}
+	if ($constants->{comment_is_troll_disable_and_log}) {
+			$slashdb->createCommentLog({
+				cid	=> $maxCid,
+				logtext	=> "ISTROLL"
+			});
 	}
 
 #print STDERR scalar(localtime) . " $$ G maxCid=$maxCid\n";
