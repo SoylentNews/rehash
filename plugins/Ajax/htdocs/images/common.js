@@ -309,10 +309,12 @@ function completer_save_tab(s, params) {
 }
 
 function attachCompleter( obj, id, is_admin, type, tagDomain, customize ) {
-  var vendor = navigator.vendor.toLowerCase();
-  if ( vendor.indexOf("apple") != -1
-       || vendor.indexOf("kde") != -1 )
-    return false;
+  if ( navigator.vendor !== undefined ) {
+    var vendor = navigator.vendor.toLowerCase();
+    if ( vendor.indexOf("apple") != -1
+         || vendor.indexOf("kde") != -1 )
+      return false;
+  }
 
   if ( customize === undefined )
     customize = new Object();
