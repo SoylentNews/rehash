@@ -41,9 +41,9 @@ param_str = ""
 		[% is_base_day = cur_day.0 == day %]
 		<li>[% IF is_base_day && !nopages; "["; END %]<a href="?issue=[% cur_day.0 %]">[% IF is_base_day %]<b>[% END %][% cur_day.1 %][% IF is_base_day %]</b>[% END %]</a></li>
 		[% IF cur_day.0 == day && !nopages %]
-			[% IF page %] <li><a href="?page=[% page - 1 %]&amp;issuee=[% cur_day.0 %]">&lt;- [% page %]</a></li>[% END %]
-			<li><a href="?page=[% page %][% param_str %]&amp;issuee=[% cur_day.0 %]">[% page + 1 %]</a></li>
-			<li><a href="?page=[% page + 1%][% param_str %]&amp;issuedate=[% cur_day.0 %]">[% page + 2 %] -&gt;</a>[% IF is_base_day; "]"; END %]</li>
+			[% IF page %] <li><a href="?page=[% page - 1 %]&amp;issue=[% cur_day.0 %]">&lt;- [% page %]</a></li>[% END %]
+			<li><a href="?page=[% page %][% param_str %]&amp;issue=[% cur_day.0 %]">[% page + 1 %]</a></li>
+			<li><a href="?page=[% page + 1%][% param_str %]&amp;issue=[% cur_day.0 %]">[% page + 2 %] -&gt;</a>[% IF is_base_day; "]"; END %]</li>
 		[% END %]
 	[% END %]
 [% ELSE %]
