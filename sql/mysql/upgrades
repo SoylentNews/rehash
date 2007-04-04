@@ -4486,14 +4486,14 @@ INSERT INTO message_codes VALUES (19, 'System Messages', 100, 0, 0, 'now', '', 0
 # 2007-03-21
 UPDATE vars SET value = 'T_2_5_0_151' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 INSERT INTO vars (name, value, description) VALUES ("comment_is_troll_disable_and_log", "0", "Disable and log isTroll check for comments");
 
 # 2007-03-28
 UPDATE vars SET value = 'T_2_5_0_152' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # For plugins/FireHose
 ALTER TABLE firehose CHANGE COLUMN globjid globjid INT UNSIGNED NOT NULL DEFAULT '0';
