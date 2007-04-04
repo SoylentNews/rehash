@@ -531,6 +531,17 @@ sub getUserFireHoseVotesForGlobjs {
 	return $results;
 }
 
+sub getFireHoseByTypeSrcid {
+	my ($self, $type, $id) = @_;
+	my $type_q = $self->sqlQuote($type);
+	my $id_q   = $self->sqlQuote($id);
+	my $item = {};
+	my $fid = $self->sqlSelect("id", "firehose", "srcid=$id_q and type=$type_q");
+	print STDERR "Fid: $fid\n";
+	$item = $self->getFireHose($fid) if $fid;
+	return $item;
+}
+
 sub getFireHose {
 	my($self, $id) = @_;
 
@@ -830,6 +841,7 @@ sub ajaxFireHoseGetUpdates {
 	my %ids_orig = ( %ids ) ;
 	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
+	my $num_items = scalar @$items;
 	my $future = {};
 	my $globjs = [];	
 	foreach (@$items) {
@@ -919,7 +931,7 @@ sub ajaxFireHoseGetUpdates {
 	}
 
 
-	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1, day => $last_day , page => $form->{page}, options => $opts, ulid => "fh-paginate", divid => "fh-pag-div" }, { Return => 1, Page => "firehose"});
+	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1, day => $last_day , page => $form->{page}, options => $opts, ulid => "fh-paginate", divid => "fh-pag-div", num_items => $num_items }, { Return => 1, Page => "firehose"});
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
 
@@ -1627,6 +1639,9 @@ sub listView {
 	my $options = $self->getAndSetOptions();
 
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($options);
+
+	my $itemnum = scalar @$items;
+
 	my $globjs;
 
 	foreach (@$items) {
@@ -1656,7 +1671,7 @@ sub listView {
 			$day =~ s/ \d{2}:\d{2}:\d{2}$//;
 			$itemstext .= slashDisplay("daybreak", { options => $options, cur_day => $day, last_day => $_->{last_day}, id => "firehose-day-$day" }, { Return => 1, Page => "firehose" });
 		} else {
-			$last_day = timeCalc($item->{createtime}, "%Y%m%d");
+	$last_day = timeCalc($item->{createtime}, "%Y%m%d");
 			$itemstext .= $self->dispFireHose($item, {
 				mode		=> $options->{mode},
 				tags_top	=> $tags_top,
@@ -1676,6 +1691,7 @@ sub listView {
 	}
 	slashDisplay("list", {
 		itemstext	=> $itemstext, 
+		itemnum		=> $itemnum,
 		page		=> $options->{page}, 
 		options		=> $options,
 		refresh_options	=> $refresh_options,
