@@ -25,18 +25,32 @@ and their status within the system:</p>
 
 [% IF submissions.size > 0 %]<ul>[% END %]
 [% summary = { };  %]
-[% cur_time = Slash.db.getTime() %] 
+[% cur_time = Slash.db.getTime() %]
+[% secs_back = -86400 * 2 %]
+[% cutoff_time = Slash.timeCalc(Slash.db.getTime(), "%Y-%m-%d %T", secs_back) %]
 [% FOREACH submission = submissions %]
 	[%	time    = submission.time
 		subj    = submission.subj
 		section = skins.${submission.primaryskid}.title
 		topic   = topics.${submission.tid}.textname
-		del     = submission.del
+			del     = submission.del
 	%]
 
 	<li>[% time %] [% subj %] ([% section %],[% topic %])
 	[% story_viewable = submission.del == 2 and submission.sid and submission.story_time.lt(cur_time) and submission.displaystatus!=-1 %]
-	[% SWITCH submission.del;
+	[% 
+	   submission_del = submission.del;
+	   IF constants.plugin.FireHose && submission_del == 0;
+	   	firehose = Slash.getObject("Slash::FireHose");
+		item = firehose.getFireHoseByTypeSrcid("submission", submission.subid);
+		IF item && item.id;
+			pop_level = firehose.getPopLevelForPopularity(item.popularity);
+			IF time.lt(cutoff_time) && pop_level >= 6;
+				submission_del = 1;
+			END;
+		END;
+	   END;
+	   SWITCH submission_del;
 		CASE 0; 
 			status="pending";
 		CASE 1;
