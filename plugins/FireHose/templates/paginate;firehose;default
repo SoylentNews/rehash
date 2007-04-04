@@ -42,15 +42,23 @@ param_str = ""
 		<li>[% IF is_base_day && !nopages; "["; END %]<a href="?issue=[% cur_day.0 %]">[% IF is_base_day %]<b>[% END %][% cur_day.1 %][% IF is_base_day %]</b>[% END %]</a></li>
 		[% IF cur_day.0 == day && !nopages %]
 			[% IF page %] <li><a href="?page=[% page - 1 %]&amp;issue=[% cur_day.0 %]">&lt;- [% page %]</a></li>[% END %]
+			[% IF page || options.limit == num_items %]
 			<li><a href="?page=[% page %][% param_str %]&amp;issue=[% cur_day.0 %]">[% page + 1 %]</a></li>
+			[% END %]
+			[% IF num_items == options.limit %]
 			<li><a href="?page=[% page + 1%][% param_str %]&amp;issue=[% cur_day.0 %]">[% page + 2 %] -&gt;</a>[% IF is_base_day; "]"; END %]</li>
+			[% END %]
 		[% END %]
 	[% END %]
 [% ELSE %]
 	[% UNLESS nopages %]
 		[% IF page %] <li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page - 1 %][% param_str %]">&lt;- [% page %]</a></li>[% END %]
-		<li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page %][% param_str %]">[% page + 1 %]</a></li>
-		<li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page + 1%][% param_str %]">[% page + 2 %] -&gt;</a></li>
+		[% IF page || options.limit == num_items %]
+			<li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page %][% param_str %]">[% page + 1 %]</a></li>
+		[% END %]
+		[% IF num_items == options.limit %]
+			<li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page + 1%][% param_str %]">[% page + 2 %] -&gt;</a></li>
+		[% END %]
 	[% END %]
 [% END %]
 [% IF !contentsonly %]

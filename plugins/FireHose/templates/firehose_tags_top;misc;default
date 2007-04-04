@@ -28,6 +28,10 @@ __template__
 		[% tags_seen.${parts.0} = 1 %]
 	[%- END %]
 	[% IF item.type == "story" %][% IF user.is_admin %][% PROCESS signoff stoid=item.srcid fhid = item.id %][% END %][% END %]
+	[% IF item.type == "feed" && user.is_admin %]
+		[% feed_user = Slash.db.getUser(item.uid, "nickname"); %]
+		[% feed_user | strip_literal %]
+	[% END %]
 [%- END %]
 __seclev__
 10000

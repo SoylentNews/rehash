@@ -15,6 +15,7 @@ __name__
 formatHoseTitle
 __template__
 [%
+adminmode ||= "0";
 the_skin_title = "";
 IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid != constants.mainpage_skid && item.type == "story";
 	the_skin = Slash.db.getSkin(item.primaryskid);
@@ -42,13 +43,19 @@ pop_val_offset = pop_val - 1;
 pop_disp = item.popularity.int;
 colors = firehose.getFireHoseColors(1);
 color = colors.$pop_val_offset;
-
+pop_str = "";
 IF adminmode;
 	reject_checkbox = "";
+	IF !form.skippop;
+		pop_str = "<span class='soda pop" _  pop_val _ "' title='Filter Firehose to entries rated " _ color _ " or better' onclick='firehose_slider_set_color(\"" _ color _ "\")'> " _ pop_disp _ "</span> " ;
+	END;
         IF item.type != "story"; reject_checkbox = PROCESS reject_firehose id = item.id; END;
-        title = reject_checkbox _ "<span class='soda pop" _  pop_val _ "' title='Filter Firehose to entries rated " _ color _ " or better' onclick='firehose_slider_set_color(\"" _ color _ "\")'> " _  pop_disp _ "</span> " _ title;
+        title = reject_checkbox _ pop_str _ title;
 ELSE;
-        title = "<span class='soda pop" _  pop_val _ "' title='Filter Firehose to entries rated " _ color _" or better' onclick='firehose_slider_set_color(\"" _ color _ "\")'> &nbsp; </span> " _ title;
+	IF !form.skippop;
+		pop_str = "<span class='soda pop" _  pop_val _ "' title='Filter Firehose to entries rated " _ color _" or better' onclick='firehose_slider_set_color(\"" _ color _ "\")'> &nbsp; </span> ";
+	END;
+        title = pop_str _ title;
 END;
 	%]
 [% IF showtitle; title; END; %]

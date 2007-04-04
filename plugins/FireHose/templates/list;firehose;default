@@ -59,6 +59,7 @@ __template__
 </div>
 [% END %]
 <div id="messagearea"></div>
+[% IF !form.skipmenu %]
 <div class="firemenu">
 [% theupdatetime = Slash.timeCalc(Slash.db.getTime(), "%H:%M"); %]
 [% PROCESS titlebar title="Firehose Beta <span style='font-size:60%'>(Last Refreshed <span id='local_last_update_time'>$theupdatetime</span><span id='gmt_update_time'></span> Currently <span id='pauseorplay'>Paused</span>)</span><span id='busy' class='hide'><img src='$constants.imagedir" _ "/spinner.gif'></span>" %]
@@ -66,8 +67,15 @@ __template__
 <div class="submenu">
 <div id="message_area">
 </div>
+	[% rss_options = { "fhfilter" => "filter", "orderdir" => "orderdir", "orderby" => "orderby", color => "color", "duration" => "duration" } %]
+	[% rss_param_str = "" %]
+	[% FOREACH param = rss_options.keys;
+		rss_param_str = rss_param_str _ "&amp;=" _ param;
+		rss_param_str = rss_param_str _ "=" _ Slash.strip_attribute(options.${rss_options.$param});
+		
+	END %]
 	[% PROCESS firehose_tabs tabs = options.tabs %]
-	<div class="advpref"><a href="#" id="fh_adv_pref_toggle" onclick="firehose_toggle_advpref(); return false">Prefs</a></div>
+	<div class="advpref"><a href="#" id="fh_adv_pref_toggle" onclick="firehose_toggle_advpref(); return false">Prefs</a> <a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]">RSS</a></div>
 	[% PROCESS adv_pref_firehose options = options %]
 	<form action="[% gSkin.rootdir %]/firehose.pl" method="get" name="firehoseform">
 		<fieldset>
@@ -98,11 +106,12 @@ bookmarks, journal entries and Slashdot stories. Please send your
 feedback to hose@cmdrtaco.net but be forgiving of beta code!
 </p>
 [% END %]
+[% END %]
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
 </div>
-[% PROCESS paginate options = options ulid = "fh-paginate" divid = "fh-pag-div" day = last_day %]
+[% PROCESS paginate options = options ulid = "fh-paginate" divid = "fh-pag-div" day = last_day num_items = itemnum %]
 <script type="text/javascript">
 	firehose_startdate = '[% options.startdate.replace('-','') %]';
 	firehose_issue = '[% options.issue %]';
