@@ -250,6 +250,8 @@ sub handler {
 					||
 				($constants->{plugin}{ScheduleShifts} && $uri =~ m{^/shifts\.pl$})
 					||
+				($constants->{plugin}{FireHose} && $uri =~ m{^/firehose\.pl$})
+					||
 				# hmmm ... journal.pl no work, because can be called as /journal/
 				($constants->{journal_rdfitemdesc_html}
 					&& $form->{content_type} =~ $constants->{feed_types}
