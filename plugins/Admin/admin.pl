@@ -2492,26 +2492,41 @@ sub displaySignoffStats {
 sub displayPeerWeights {
 	my($form, $slashdb, $user, $constants) = @_;
 
-	my $count = $slashdb->sqlCount('users_param', q{name='tagpeerval' AND value != '0'});
+	my $countA = $slashdb->sqlCount('users_param', q{name='tagpeerval' AND value != '0'});
+	my $countB = $slashdb->sqlCount('users_param', q{name='tagpeerval2' AND value != '0'});
 
-	my $weight_hr = $slashdb->sqlSelectAllKeyValue(
+	my $weightA_hr = $slashdb->sqlSelectAllKeyValue(
 		'uid, value+0 AS val',
 		'users_param',
 		q{name='tagpeerval'},
 		'ORDER BY val DESC LIMIT 40');
+	my $weightB_hr = $slashdb->sqlSelectAllKeyValue(
+		'uid, value+0 AS val',
+		'users_param',
+		q{name='tagpeerval2'},
+		'ORDER BY val DESC LIMIT 40');
+	my $ordA_hr = { };
+	my $ordB_hr = { };
+	my @uidsA = sort
+		{ $weightA_hr->{$b} <=> $weightA_hr->{$a} || $a cmp $b }
+		keys %$weightA_hr;
+	my @uidsB = sort
+		{ $weightB_hr->{$b} <=> $weightB_hr->{$a} || $a cmp $b }
+		keys %$weightB_hr;
 	my $i = 1;
-	my $ord_hr = { };
-	my @uids = sort
-		{ $weight_hr->{$b} <=> $weight_hr->{$a} || $a cmp $b }
-		keys %$weight_hr;
-	for my $uid (@uids) {
-		$weight_hr->{$uid} = sprintf("%0.4f", $weight_hr->{$uid});
-		$ord_hr->{$uid} = $i++;
+	for my $uid (@uidsA) {
+		$weightA_hr->{$uid} = sprintf("%0.4f", $weightA_hr->{$uid});
+		$ordA_hr->{$uid} = $i++;
+	}
+	$i = 1;
+	for my $uid (@uidsB) {
+		$weightB_hr->{$uid} = sprintf("%0.4f", $weightB_hr->{$uid});
+		$ordB_hr->{$uid} = $i++;
 	}
 
-	if ($count > 200) {
+	if ($countA > 200) {
 		$i = 40;
-		my $inc = ($count-40) / 40;
+		my $inc = ($countA-40) / 40;
 		for (1..40) {
 			$i += $inc;
 			my $i0 = int($i);
@@ -2521,22 +2536,51 @@ sub displayPeerWeights {
 				q{name='tagpeerval'},
 				"ORDER BY val DESC, uid LIMIT $i0, 1");
 			next unless $uid;
-			$weight_hr->{$uid} = sprintf("%0.4f", $val);
-			$ord_hr->{$uid} = $i0;
-			push @uids, $uid;
+			$weightA_hr->{$uid} = sprintf("%0.4f", $val);
+			$ordA_hr->{$uid} = $i0;
+			push @uidsA, $uid;
 		}
 	}
 
-	my $uid_str = join(',', @uids);
+	if ($countB > 200) {
+		$i = 40;
+		my $inc = ($countB-40) / 40;
+		for (1..40) {
+			$i += $inc;
+			my $i0 = int($i);
+			my($uid, $val) = $slashdb->sqlSelect(
+				'uid, value+0 AS val',
+				'users_param',
+				q{name='tagpeerval2'},
+				"ORDER BY val DESC, uid LIMIT $i0, 1");
+			next unless $uid;
+			$weightB_hr->{$uid} = sprintf("%0.4f", $val);
+			$ordB_hr->{$uid} = $i0;
+			push @uidsB, $uid;
+		}
+	}
+
+	my $uid_str = join(',', @uidsA, @uidsB);
 	my $nickname_hr = $slashdb->sqlSelectAllKeyValue(
 		'uid, nickname',
 		'users',
 		"uid IN ($uid_str)");
 
+#use Data::Dumper;
+#print STDERR "uidsA: " . Dumper(\@uidsA);
+#print STDERR "ordA: " . Dumper($ordA_hr);
+#print STDERR "weightA: " . Dumper($weightA_hr);
+#print STDERR "uidsB: " . Dumper(\@uidsB);
+#print STDERR "ordB: " . Dumper($ordB_hr);
+#print STDERR "weightB: " . Dumper($weightB_hr);
+#print STDERR "nickname: " . Dumper($nickname_hr);
 	slashDisplay("peer_weights", {
-		uids		=> \@uids,
-		ord		=> $ord_hr,
-		weight		=> $weight_hr,
+		uidsA		=> \@uidsA,
+		ordA		=> $ordA_hr,
+		weightA		=> $weightA_hr,
+		uidsB		=> \@uidsB,
+		ordB		=> $ordB_hr,
+		weightB		=> $weightB_hr,
 		nickname	=> $nickname_hr,
 	});
 
