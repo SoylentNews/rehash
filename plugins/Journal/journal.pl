@@ -596,7 +596,7 @@ sub doSaveArticle {
 		if ($constants->{journal_comments}
 			&& $form->{journal_discuss}
 			&& $form->{journal_discuss} ne 'disabled'
-			&& $article->{discussion}
+			&& !$article->{discussion}
 		) {
 			my $rootdir = $gSkin->{rootdir};
 			if ($form->{comments_on}) {
