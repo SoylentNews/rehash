@@ -27,10 +27,10 @@ __template__
 [% toggle = 1 %]
 [% IF tags.size > 0 %]
 	<tr class="data_hl0"><td colspan="6">
-		nod: [% summary.up_count %] [% summary.up_pop %]
+		[% constants.tags_upvote_tagname %]: [% summary.up_count %] [% summary.up_pop %]
 		(ed: [% summary.up_count_ed %])</td></tr>
 	<tr class="data_hl0"><td colspan="6">
-		nix: [% summary.down_count %] [% summary.down_pop %]
+		[% constants.tags_downvote_tagname %]: [% summary.down_count %] [% summary.down_pop %]
 		(ed: [% summary.down_count_ed %])</td></tr>
 	[% FOREACH tag = tags %]
 		<tr class="data_hl[% toggle %]">
