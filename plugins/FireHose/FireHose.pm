@@ -532,7 +532,7 @@ sub getUserFireHoseVotesForGlobjs {
 }
 
 sub getFireHoseByTypeSrcid {
-	my ($self, $type, $id) = @_;
+	my($self, $type, $id) = @_;
 	my $type_q = $self->sqlQuote($type);
 	my $id_q   = $self->sqlQuote($id);
 	my $item = {};

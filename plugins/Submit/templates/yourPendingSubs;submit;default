@@ -33,7 +33,7 @@ and their status within the system:</p>
 		subj    = submission.subj
 		section = skins.${submission.primaryskid}.title
 		topic   = topics.${submission.tid}.textname
-			del     = submission.del
+		del     = submission.del
 	%]
 
 	<li>[% time %] [% subj %] ([% section %],[% topic %])
