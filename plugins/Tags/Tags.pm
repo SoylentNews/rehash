@@ -1168,6 +1168,7 @@ use Data::Dumper; print STDERR scalar(localtime) . " ajaxProcessAdminTags table=
 
 sub ajaxTagHistory {
 	my($slashdb, $constants, $user, $form) = @_;
+	my $globjid;
 	my $id;
 	my $table;
 	if ($form->{type} eq "stories") {
@@ -1181,20 +1182,49 @@ sub ajaxTagHistory {
 		my $itemid = $form->{id};
 		my $firehose = getObject("Slash::FireHose");
 		my $item = $firehose->getFireHose($itemid);
+		$globjid = $item->{globjid};
 		my $tags = getObject("Slash::Tags");
-		($table, $id) = $tags->getGlobjTarget($item->{globjid});
+		($table, $id) = $tags->getGlobjTarget($globjid);
 	}
 	$id ||= $form->{id};
-
 	
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+	$globjid ||= $tags_reader->getGlobjidFromTargetIfExists($table, $id);
 	my $tags_ar = [];
 	if ($table && $id) {
 		$tags_ar = $tags_reader->getTagsByNameAndIdArrayref($table, $id,
 			{ include_inactive => 1, include_private => 1 });
 	}
 	$tags_reader->addRoundedCloutsToTagArrayref($tags_ar);
-	slashDisplay('taghistory', { tags => $tags_ar }, { Return => 1 } );
+
+	my $summ = { };
+	# XXX right now hard-code the tag summary to FHPopularity tagbox.
+	# If we start using another tagbox, we'll have to change this too.
+	my $tagboxdb = getObject('Slash::Tagbox');
+	if (@$tags_ar && $globjid && $tagboxdb) {
+		my $fhp = getObject('Slash::Tagbox::FHPopularity');
+		if ($fhp) {
+			my $authors = $slashdb->getAuthors();
+			my $starting_score =
+				$fhp->run($globjid, { return_only => 1, starting_only => 1 });
+			$summ->{up_pop}   = sprintf("%+0.2f",
+				$fhp->run($globjid, { return_only => 1, upvote_only => 1 })
+				- $starting_score );
+			$summ->{down_pop} = sprintf("%0.2f",
+				$fhp->run($globjid, { return_only => 1, downvote_only => 1 })
+				- $starting_score );
+			my $upvoteid   = $tags_reader->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
+			my $downvoteid = $tags_reader->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
+			$summ->{up_count}      = scalar grep { $_->{tagnameid} == $upvoteid   } @$tags_ar;
+			$summ->{down_count}    = scalar grep { $_->{tagnameid} == $downvoteid } @$tags_ar;
+			$summ->{up_count_ed}   = scalar grep { $_->{tagnameid} == $upvoteid
+							    && $authors->{ $_->{uid} }      }  @$tags_ar;
+			$summ->{down_count_ed} = scalar grep { $_->{tagnameid} == $downvoteid
+							    && $authors->{ $_->{uid} }      }  @$tags_ar;
+		}
+	}
+
+	slashDisplay('taghistory', { tags => $tags_ar, summary => $summ }, { Return => 1 } );
 }
 
 sub ajaxListTagnames {

@@ -4,6 +4,13 @@ __description__
 Show complete tag history of an object for admins
 
 * tags = arrayref of hashrefs of tagname, uid, created_at
+* summary = hashref of up/downvote summary info, fields are:
+	up_count	count of upvote tags
+	up_count_ed	count of editors' upvote tags
+	up_pop		FHPopularity total of upvote tags
+	down_count	count of downvote tags
+	down_count_ed	count of editors' downvote tags
+	down_pop	FHPopularity total of downvote tags
 
 __title__
 
@@ -19,6 +26,12 @@ __template__
 <table class="data">
 [% toggle = 1 %]
 [% IF tags.size > 0 %]
+	<tr class="data_hl0"><td colspan="6">
+		nod: [% summary.up_count %] [% summary.up_pop %]
+		(ed: [% summary.up_count_ed %])</td></tr>
+	<tr class="data_hl0"><td colspan="6">
+		nix: [% summary.down_count %] [% summary.down_pop %]
+		(ed: [% summary.down_count_ed %])</td></tr>
 	[% FOREACH tag = tags %]
 		<tr class="data_hl[% toggle %]">
 			[% nickname = Slash.db.getUser(tag.uid, "nickname") %]
