@@ -165,9 +165,10 @@ sub run {
 	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0, $options);
 	$tagsdb->addCloutsToTagArrayref($tags_ar);
 	for my $tag_hr (@$tags_ar) {
+		next if $options->{starting_only};
 		my $sign = 0;
-		$sign =  1 if $tag_hr->{tagnameid} == $upvoteid;
-		$sign = -1 if $tag_hr->{tagnameid} == $downvoteid;
+		$sign =  1 if $tag_hr->{tagnameid} == $upvoteid   && !$options->{downvote_only};
+		$sign = -1 if $tag_hr->{tagnameid} == $downvoteid && !$options->{upvote_only};
 		next unless $sign;
 		$popularity += $tag_hr->{total_clout} * $sign;
 	}
