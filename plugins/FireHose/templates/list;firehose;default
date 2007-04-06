@@ -75,7 +75,7 @@ __template__
 		
 	END %]
 	[% PROCESS firehose_tabs tabs = options.tabs %]
-	<div class="advpref"><a href="#" id="fh_adv_pref_toggle" onclick="firehose_toggle_advpref(); return false">Prefs</a> <a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]">RSS</a></div>
+	<div class="advpref"><a href="#" id="fh_adv_pref_toggle" onclick="firehose_toggle_advpref(); return false">Prefs</a> <a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]" style="color:#fff;">RSS</a></div>
 	[% PROCESS adv_pref_firehose options = options %]
 	<form action="[% gSkin.rootdir %]/firehose.pl" method="get" name="firehoseform">
 		<fieldset>

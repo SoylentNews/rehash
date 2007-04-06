@@ -15,7 +15,7 @@ __name__
 formatHoseTitle
 __template__
 [%
-adminmode ||= "0";
+adminmode = adminmode || "0";
 the_skin_title = "";
 IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid != constants.mainpage_skid && item.type == "story";
 	the_skin = Slash.db.getSkin(item.primaryskid);
