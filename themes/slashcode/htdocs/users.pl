@@ -1323,7 +1323,7 @@ sub showInfo {
 		my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 		my $tagshist = [];
 		if ($tags_reader && $user->{is_admin}) {
-			$tagshist = $tags_reader->getAllTagsFromUser($requested_user->{uid}, { orderby => 'created_at', orderdir => 'DESC', limit => 20 });
+			$tagshist = $tags_reader->getAllTagsFromUser($requested_user->{uid}, { orderby => 'created_at', orderdir => 'DESC', limit => 30, include_private => 1 });
 		}
 
 		slashDisplay('userInfo', {
