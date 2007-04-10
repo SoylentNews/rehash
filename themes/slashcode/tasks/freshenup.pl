@@ -406,6 +406,11 @@ $task{$me}{code} = sub {
 				verbosity =>	verbosity(),
 				handle_err =>	0
 		});
+
+		if ($constants->{plugin}{FireHose}) {
+			gen_firehose_static($virtual_user, "index_firehose.shtml", $gSkin->{name}, "", { skipmenu => 1, skippop => 1, fhfilter=> "story", duration => "-1", mode => 'full'  }); 
+			gen_firehose_static($virtual_user, "firehose.shtml", $gSkin->{name}, "", { skipmenu => 1, duration => "-1", mode => 'blue',  }); 
+		}
 		$slashdb->markSkinClean($mp_skid);
 		delete $dirty_skins{$mp_skid};
 		$skins_logmsg = "rewrote static skin pages for $skins->{$mp_skid}{name}";
@@ -414,7 +419,6 @@ $task{$me}{code} = sub {
 	############################################################
 	# rewrite .shtml files for other skins' indexes
 	############################################################
-
 	if ($do_all) {
 		for my $key (sort { $a <=> $b } keys %dirty_skins) {
 			next unless $key;
@@ -433,6 +437,11 @@ $task{$me}{code} = sub {
 					verbosity =>	verbosity(),
 					handle_err =>	0
 			});
+			if ($constants->{plugin}{FireHose}) {
+				gen_firehose_static($virtual_user, "index_firehose.shtml", $skin->{name}, $skinname, { skipmenu => 1, skippop => 1, fhfilter=> "'story $skin->{name}'", duration => "-1", mode => 'full' }); 
+				gen_firehose_static($virtual_user, "firehose.shtml", $gSkin->{name}, "", { skipmenu => 1,  duration => "-1", mode => 'blue',  }); 
+			}
+
 			$slashdb->markSkinClean($key);
 			$skins_logmsg ||= "rewrote static skin pages for";
 			$skins_logmsg .= " $skins->{$key}{name}";
@@ -498,6 +507,30 @@ sub _read_and_unlink_cchp_file {
 	}
 	unlink $cchp_file;
 	return($cc, $hp);
+}
+
+sub gen_firehose_static {
+	my ($vu, $filename, $section, $skinname, $opts) = @_;
+	my $constants = getCurrentStatic();
+	my $fargs = "virtual_user=$vu ssi=yes section='$section'";
+	my $basedir = $constants->{basedir};
+	$skinname .= "/" if $skinname;
+
+	foreach (keys %$opts) {
+		$fargs .= " $_=$opts->{$_}";
+	}
+	$fargs .= " $_=$constants->{firehose_anonval}" if $constants->{firehose_anonval};
+	slashdLog("$vu $filename $section $fargs");
+	$filename ||= "firehose.shtml";
+
+	prog2file(
+		"$basedir/firehose.pl",
+		"$basedir/$skinname/$filename", {
+			args => $fargs,
+			verbosity => verbosity(),
+			handle_err => 0
+
+	});
 }
 
 1;
