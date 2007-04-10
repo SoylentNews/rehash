@@ -123,6 +123,8 @@ Data::JavaScript::Anon	- perl2js data structures
 
 JavaScript::Minifier 0.02
 
+Net::OSCAR              - Needed by the IM bot
+
 =head1 DESCRIPTION
 
 mod_perl must be installed by hand, because of the special configuration
