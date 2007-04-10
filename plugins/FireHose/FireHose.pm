@@ -1359,7 +1359,7 @@ sub getAndSetOptions {
 				$data->{$_} =~ s/{$field}/$user->{$field}/g;
 			}
 		}
-		if (!$user_tab_names{$tab->{tabname}} && !$firehose_tabs_given{$tab->{tabname}}) {
+		if (!$user_tab_names{$tab->{tabname}} && !$firehose_tabs_given{$tab->{tabname}} && !$user->{is_anon}) {
 			$self->createUserTab($user->{uid}, $data); 
 			$tabs_given .= $tab->{tabname} ."|";
 			$self->setUser($user->{uid}, { firehose_tabs_given => $tabs_given });

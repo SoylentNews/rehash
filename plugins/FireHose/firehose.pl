@@ -24,17 +24,14 @@ sub main {
 	my $form      = getCurrentForm();
 	my $gSkin     = getCurrentSkin();
 
-	if ($user->{is_anon}) {
-		redirect("$gSkin->{rootdir}/");
-		return;
-	}
+	my $anonval = $constants->{firehose_anonval} || "";
 
 	my %ops = (
-		list		=> [1,  \&list, 1 ],
-		view		=> [1, 	\&view, 1 ],
-		default		=> [1,	\&list, 1 ],
-		edit		=> [1,	\&edit, 100 ],
-		rss		=> [1,  \&rss, 1]
+		list		=> [1,  \&list, 0, $anonval],
+		view		=> [1, 	\&view, 1,  ""],
+		default		=> [1,	\&list, 0,  $anonval],
+		edit		=> [1,	\&edit, 100,  ""],
+		rss		=> [1,  \&rss, 1, ""]
 	);
 
 	# XXX Need to define who has access to this
@@ -48,7 +45,7 @@ sub main {
 
 	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED] || $user->{seclev} < $ops{$op}[2] ) {
 		$op = 'default';
-		if ($user->{seclev} < 1) {
+		if ($user->{seclev} < 1 && $ops{$op}[3] && $ops{$op}[3] ne $form->{anonval}) {
 			redirect("$gSkin->{rootdir}/");
 			return;
 		}

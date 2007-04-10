@@ -21,6 +21,7 @@ INSERT INTO vars (name, value, description) VALUES ('firehose_story_ignore_skids
 INSERT INTO vars (name, value, description) VALUES ('firehose_color_slices', '30|30|0.2|0.2|0.2|0.2|0.2|0.0', 'Number or percent of remaining stories at each color level separated by | 30|0.5|0.5 would mean 30 stories at the level of highest popularity and 50% at each of remainining stories at the next 2 levels');
 INSERT INTO vars (name, value, description) VALUES ('firehose_slice_points', '20|15|12|7|5|3|1', 'Minimum popularity value to reach a particular color level');
 INSERT INTO vars (name, value, description) VALUES ('firehose_color_labels', 'red|orange|yellow|green|blue|purple|violet', 'Firehose color labels');
+INSERT INTO vars (name, value, description) VALUES ('firehose_anonval_param', '', 'String needed to be passed in anonval form param to validate requests, set to a string to enforce this validation');
 
 INSERT INTO firehose_tab VALUES (1,0,'Firehose','','createtime','DESC','indigo','fulltitle');
 INSERT INTO firehose_tab VALUES (2,0,'Slashdot','story','createtime','DESC','black','full');
