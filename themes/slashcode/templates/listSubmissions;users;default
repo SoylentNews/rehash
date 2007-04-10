@@ -40,6 +40,9 @@ cur_time = Slash.db.getTime();
 			<th>Datestamp</th>
 			<th>[% IF admin_flag %]<span class="admin_data_label">State</span>[% END %]</th>
 		</tr>
+	
+		[% secs_back = -86400 * 2 %]
+		[% cutoff_time = Slash.timeCalc(Slash.db.getTime(), "%Y-%m-%d %T", secs_back ) %]
 		[% FOREACH sub = submissions %]
 		[% story_viewable = sub.del == 2 and sub.sid and sub.story_time.lt(cur_time) and sub.displaystatus!=-1 %]
 		[% link_sid = sub.del == 2 and sub.sid and story_viewable %]
@@ -59,7 +62,19 @@ cur_time = Slash.db.getTime();
 			<td>[% IF admin_link_ipid %][% PROCESS link_ipid ipid = sub.ipid ipid_vis=Slash.vislenify(ipid); %][% END %]</td>
 			<td>[% Slash.timeCalc(sub.time) %]</td>
 			<td>[% IF admin_flag || user.uid == sub.uid %]
-				[% SWITCH sub.del %]
+				[% sub_del = sub.del;
+	   			IF constants.plugin.FireHose && sub_del == 0;
+			   	   	firehose = Slash.getObject("Slash::FireHose");
+					item = firehose.getFireHoseByTypeSrcid("submission", sub.subid);
+					IF item && item.id;
+						pop_level = firehose.getPopLevelForPopularity(item.popularity);
+						IF sub.time.lt(cutoff_time) && pop_level >= 6;
+							sub_del = 1;
+						END;
+					END;
+	   			END;
+				%]
+				[% SWITCH sub_del %]
 					[%- CASE 0 -%]
 						Pending
 					[%- CASE 1 -%]
