@@ -2,7 +2,7 @@
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id: im_messages.pl
+# $Id$
 
 use strict;
 
@@ -26,12 +26,10 @@ my $online_ready = 25;
 
 	$SIG{INT} = $SIG{TERM} = sub { ++$exit_flag; };
 
-	# Find all message_codes that are IM candidates.
 	my $in;
 	map { $in .= "'$_',"; } getMessageCodesByType("IM");
 	chop($in);
 	
-	# Find the System Message code. Exclusive to forwarding Jabber messages.
 	my $sysmessage_code = getMessageCodeByName("System Messages");
 	
 	# Username/password retrieval here
@@ -50,7 +48,7 @@ my $online_ready = 25;
 		++$delay if ($delay < $online_ready);
 		$online = 1 if ($delay == $online_ready);
 	
-		# remove once the conncetion code is enabled
+		# remove once the connection code is enabled
 		sleep(40);
 		
 		my $messages = $slashdb->sqlSelectAllHashref(
