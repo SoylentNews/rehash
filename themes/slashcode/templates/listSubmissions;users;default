@@ -42,7 +42,7 @@ cur_time = Slash.db.getTime();
 		</tr>
 	
 		[% secs_back = -86400 * 2 %]
-		[% cutoff_time = Slash.timeCalc(Slash.db.getTime(), "%Y-%m-%d %T", secs_back ) %]
+		[% cutoff_time = Slash.timeCalc(Slash.db.getTime(), "%Y-%m-%d %T", secs_back) %]
 		[% FOREACH sub = submissions %]
 		[% story_viewable = sub.del == 2 and sub.sid and sub.story_time.lt(cur_time) and sub.displaystatus!=-1 %]
 		[% link_sid = sub.del == 2 and sub.sid and story_viewable %]
