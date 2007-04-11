@@ -4491,8 +4491,6 @@ INSERT INTO vars (name, value, description) VALUES ("comment_is_troll_disable_an
 # 2007-03-28
 UPDATE vars SET value = 'T_2_5_0_152' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 # For plugins/FireHose
 ALTER TABLE firehose CHANGE COLUMN globjid globjid INT UNSIGNED NOT NULL DEFAULT '0';
 
@@ -4500,6 +4498,8 @@ ALTER TABLE firehose CHANGE COLUMN globjid globjid INT UNSIGNED NOT NULL DEFAULT
 UPDATE vars SET value = 'T_2_5_0_153' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # For plugins/FireHose
 INSERT INTO vars (name, value, description) VALUES ('firehose_anonval_param', '', 'String needed to be passed in anonval form param to validate requests, set to a string to enforce this validation');
@@ -4523,4 +4523,7 @@ CREATE TABLE tags_dayofweek (
         proportion      float NOT NULL DEFAULT '0',
 	PRIMARY KEY (day)
 ) TYPE=InnoDB;
+
+# 2007-04-11
+UPDATE vars SET value = 'T_2_5_0_154' WHERE name = 'cvs_tag_currentcode';
 
