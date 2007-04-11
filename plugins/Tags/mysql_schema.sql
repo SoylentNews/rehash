@@ -128,3 +128,22 @@ CREATE TABLE tagnames_similar (
 	UNIQUE type_src_dest (type, src_tnid, dest_tnid)
 ) TYPE=InnoDB;
 
+CREATE TABLE tags_udc (
+	hourtime	datetime NOT NULL,
+	udc		float NOT NULL DEFAULT '0',
+	PRIMARY KEY (hourtime)
+) TYPE=InnoDB;
+
+CREATE TABLE tags_hourofday (
+	hour		tinyint UNSIGNED NOT NULL DEFAULT '0',
+	proportion	float NOT NULL DEFAULT '0',
+	PRIMARY KEY (hour)
+) TYPE=InnoDB;
+
+CREATE TABLE tags_dayofweek (
+	day		tinyint UNSIGNED NOT NULL DEFAULT '0',
+	proportion	float NOT NULL DEFAULT '0',
+	PRIMARY KEY (day)
+) TYPE=InnoDB;
+
+

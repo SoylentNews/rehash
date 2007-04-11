@@ -4505,3 +4505,22 @@ UPDATE vars SET value = 'T_2_5_0_153' WHERE name = 'cvs_tag_currentcode';
 INSERT INTO vars (name, value, description) VALUES ('firehose_anonval_param', '', 'String needed to be passed in anonval form param to validate requests, set to a string to enforce this validation');
 
 # Need a CPAN install of Net::OSCAR
+
+# For plugins/Tags
+INSERT INTO vars (name, value, description) VALUES ('tags_udc_daysback', '182', 'Days back to crunch numbers for tags_udc related tables, should be a multiple of 7');
+CREATE TABLE tags_udc (
+	hourtime        datetime NOT NULL,
+	udc             float NOT NULL DEFAULT '0',
+	PRIMARY KEY (hourtime)
+) TYPE=InnoDB;
+CREATE TABLE tags_hourofday (
+	hour            tinyint UNSIGNED NOT NULL DEFAULT '0',
+	proportion      float NOT NULL DEFAULT '0',
+	PRIMARY KEY (hour)
+) TYPE=InnoDB;
+CREATE TABLE tags_dayofweek (
+	day             tinyint UNSIGNED NOT NULL DEFAULT '0',
+        proportion      float NOT NULL DEFAULT '0',
+	PRIMARY KEY (day)
+) TYPE=InnoDB;
+

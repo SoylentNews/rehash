@@ -19,6 +19,7 @@ INSERT INTO vars (name, value, description) VALUES ('tags_stories_examples_pre',
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_examples', '', 'Example tags for stories');
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_lastscanned', '0', 'The last tagid scanned to update stories');
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_top_minscore', '2', 'Minimum score a tag must have to make it into the top tags for a story');
+INSERT INTO vars (name, value, description) VALUES ('tags_udc_daysback', '182', 'Days back to crunch numbers for tags_udc related tables, should be a multiple of 7');
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_examples_pre', 'plus minus binspam', 'Example tags for urls');
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_examples', '', 'Example tags for urls');
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_lastscanned', '0', 'The last tagid scanned to update urls');
