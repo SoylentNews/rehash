@@ -519,7 +519,7 @@ sub gen_firehose_static {
 	foreach (keys %$opts) {
 		$fargs .= " $_=$opts->{$_}";
 	}
-	$fargs .= " $_=$constants->{firehose_anonval}" if $constants->{firehose_anonval};
+	$fargs .= " $_=$constants->{firehose_anonval_param}" if $constants->{firehose_anonval_param};
 	slashdLog("$vu $filename $section $fargs");
 	$filename ||= "firehose.shtml";
 
