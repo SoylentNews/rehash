@@ -4524,6 +4524,9 @@ CREATE TABLE tags_dayofweek (
 	PRIMARY KEY (day)
 ) TYPE=InnoDB;
 
-# 2007-04-11
+# For plugins/FireHose
+ALTER TABLE firehose ADD COLUMN body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL, ADD COLUMN word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL;
+
+# 2007-04-12
 UPDATE vars SET value = 'T_2_5_0_154' WHERE name = 'cvs_tag_currentcode';
 
