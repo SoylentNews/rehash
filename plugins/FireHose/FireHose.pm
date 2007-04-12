@@ -44,6 +44,8 @@ sub createFireHose {
 	$data->{discussion} = 0 if !defined $data->{discussion} || !$data->{discussion};
 	$data->{-createtime} = "NOW()" if !$data->{createtime} && !$data->{-createtime};
 	$data->{discussion} ||= 0 if defined $data->{discussion};
+	$data->{body_length} = length($data->{bodytext});
+	$data->{word_count} = countWords($data->{introtext}) + countWords($data->{bodytext});
 
 	my $text_data = {};
 	$text_data->{title} = delete $data->{title};
@@ -72,7 +74,14 @@ sub createUpdateItemFromJournal {
 		my($itemid) = $self->sqlSelect("*", "firehose", "globjid=$globjid_q");
 		if ($itemid) {
 			my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
-			$self->setFireHose($itemid, { introtext => $introtext, title => $journal->{description}, tid => $journal->{tid}, discussion => $journal->{discussion}});
+			$self->setFireHose($itemid, { 
+				introtext => $introtext, 
+				title => $journal->{description}, 
+				tid => $journal->{tid}, 
+				discussion => $journal->{discussion}, 
+				word_count => countWords($introtext) 
+			});
+
 		} else {
 			$self->createItemFromJournal($id);
 		}
@@ -216,6 +225,9 @@ sub updateItemFromStory {
 				public		=> $public,
 				dept		=> $story->{dept},
 				discussion	=> $story->{discussion},
+				body_length	=> $story->{body_length},
+				word_count	=> $story->{word_count},
+				
 			};
 			$self->setFireHose($id, $data);
 		}

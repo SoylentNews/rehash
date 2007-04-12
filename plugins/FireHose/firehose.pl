@@ -24,7 +24,7 @@ sub main {
 	my $form      = getCurrentForm();
 	my $gSkin     = getCurrentSkin();
 
-	my $anonval = $constants->{firehose_anonval} || "";
+	my $anonval = $constants->{firehose_anonval_param} || "";
 
 	my %ops = (
 		list		=> [1,  \&list, 0, $anonval],

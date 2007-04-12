@@ -31,6 +31,8 @@ CREATE TABLE firehose (
 	last_update TIMESTAMP,
 	signoffs VARCHAR(255) NOT NULL DEFAULT '',
 	stoid MEDIUMINT UNSIGNED DEFAULT '0',
+	body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
+	word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE globjid (globjid),
 	KEY createtime (createtime),
