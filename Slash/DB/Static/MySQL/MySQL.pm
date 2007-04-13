@@ -118,7 +118,7 @@ sub getBackendStories {
 		my $journal_id = $self->getStory($story->{stoid}, 'journal_id');
 		$story->{journal_id} = $journal_id if $journal_id;
 
-		$story->{introtext} .= "<p><a href=\"$constants->{rootdir}/article.pl?sid=$story->{sid}\&from=rss\">Read more of this story</a> at Slashdot.org.</p>";
+		$story->{introtext} .= "<p><a href=\"$constants->{rootdir}/article.pl?sid=$story->{sid}\&from=rss\">Read more of this story</a> at $constants->{sitename}.</p>";
 	}
 
 	return $returnable;
