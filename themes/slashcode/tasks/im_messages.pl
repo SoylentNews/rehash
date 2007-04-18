@@ -10,6 +10,7 @@ use Slash;
 use Slash::Constants ':slashd';
 use Slash::Utility;
 use Net::OSCAR ':standard';
+use Digest::MD5;
 
 use vars qw(%task $me);
 
@@ -19,10 +20,8 @@ $task{$me}{on_startup} = 1;
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 
-my($virtual_user, $constants, $slashdb, $user) = @_;
-my ($pid, $oscar, $exit_flag, $delay, $online);
-my $online_ready = 25;
-
+my ($virtual_user, $constants, $slashdb, $user) = @_;
+my ($exit_flag, $online);
 
 	$SIG{INT} = $SIG{TERM} = sub { ++$exit_flag; };
 
@@ -31,41 +30,33 @@ my $online_ready = 25;
 	chop($in);
 	
 	my $sysmessage_code = getMessageCodeByName("System Messages");
-	
-	# Username/password retrieval here
-	#$oscar = Net::OSCAR->new();
-	#$oscar->signon();
-	#$oscar->timeout(10);
 
-	$exit_flag  = 0;
-	$delay  = 0;
-	$online = 0;
-	until($exit_flag) {
-		#$oscar->do_one_loop();
-		# This is a kludge to prevent do_one_loop() from tripping over itself.
-		# One would think sleep() should work. do_one_loop() is probabably
-		# implemented with alarm()
-		++$delay if ($delay < $online_ready);
-		$online = 1 if ($delay == $online_ready);
+	my $im_mode = getMessageDeliveryByName("IM");
 	
-		# remove once the connection code is enabled
-		sleep(40);
+	my $screenname = $slashdb->sqlSelect("value", "vars", "name = 'im_screenname'");
+	
+	my $oscar = Net::OSCAR->new();
+	$oscar->set_callback_auth_challenge(\&auth_challenge);
+	$oscar->set_callback_signon_done(sub { ++$online; });
+	$oscar->signon(screenname => $screenname, password => undef);
+	$oscar->timeout(30);
+
+	until ($exit_flag) {
+		$oscar->do_one_loop();
 		
-		my $messages = $slashdb->sqlSelectAllHashref(
-			"id",
-			"id, user, code, date, message",
-			"message_drop",
-			"code IN($in)"
-		);
+		# Wait until we're fully online (signon_done() is called).
+		next unless $online;
+	
+		# Pull out all IM compatible messages	
+		my $messages =
+			$slashdb->sqlSelectAllHashref("id", "id, user, code, message", "message_drop", "code IN($in)");
+
 		foreach my $id (keys %$messages) {
 			my $im_names;
 			# If it's System Message, pull out admins. Exclusive to forwarding Jabber messages.
 			if ($messages->{$id}->{"code"} eq $sysmessage_code->{"code"}) {
-				$im_names = $slashdb->sqlSelectColArrayref(
-					"uid",
-					"users",
-					"seclev >= '" . $sysmessage_code->{"seclev"} . "'"
-				);
+				$im_names =
+					$slashdb->sqlSelectColArrayref("uid", "users", "seclev >= '" . $sysmessage_code->{"seclev"} . "'");
 			}
 			else {
 				# Single user
@@ -73,29 +64,33 @@ my $online_ready = 25;
 			}
 
 			foreach my $name (@$im_names) {
+				# Skip this person if they don't want IM messages for this code.
+				next if ($im_mode != getUserMessageDeliveryPref($name, $messages->{$id}->{"code"}));
+				
 				# Look up IM nick for this uid
-				my $im_name = $slashdb->sqlSelect(
-					"value",
-					"users_param",
-					"uid = '" . $name . "' and name = 'aim'"
-				);
+				my $im_name =
+					$slashdb->sqlSelect("value", "users_param", "uid = '" . $name . "' and name = 'aim'");
 				push(@{$messages->{$id}->{"im_name"}}, $im_name) if $im_name;
 			}
 			
 			foreach my $name (@{$messages->{$id}->{"im_name"}}) {
-				print "sending $name " . $messages->{$id}->{"message"} . "\n";
 				#$oscar->send_im($name, $messages->{$id}->{"message"});
+				sleep(1);
 			}
 			
-			#$slashdb->sqlDelete("message_drop", "id = " . $messages->{$id}->{"id"});
+			#$slashdb->sqlDelete("message_drop", "id = " . $messages->{$id}->{"id"}) if @{$messages->{$id}->{"im_name"}};
+
+			delete $messages->{$id};
 		}
 	}
 
+	$oscar->signoff();
+	
 	return;
 
 };
 
-# Modularize me at some point
+
 sub getMessageCodesByType {
 
 my ($type) = @_;
@@ -103,12 +98,8 @@ my @message_codes = ();
 
 	my $slashdb = getCurrentDB();
 	my $code = $slashdb->sqlSelect("bitvalue", "message_deliverymodes", "name = '$type'");
-	my $delivery_codes = $slashdb->sqlSelectAllHashref(
-		"code",
-		"code, delivery_bvalue",
-		"message_codes",
-		"delivery_bvalue >= $code"
-	);
+	my $delivery_codes =
+		$slashdb->sqlSelectAllHashref("code", "code, delivery_bvalue", "message_codes", "delivery_bvalue >= $code");
 	foreach my $delivery_code (keys %$delivery_codes) {
 		push(@message_codes, $delivery_codes->{$delivery_code}->{"code"})
 			if ($delivery_codes->{$delivery_code}->{"delivery_bvalue"} & $code);
@@ -119,14 +110,53 @@ my @message_codes = ();
 }
 
 
-# Modularize me at some point
 sub getMessageCodeByName {
 
 my ($name) = @_;
 
 	my $slashdb = getCurrentDB();
 	my $code = $slashdb->sqlSelectHashref("code, seclev", "message_codes", "type = '$name'");
+
 	return($code);
+
+}
+
+
+sub getMessageDeliveryByName {
+
+my ($name) = @_;
+
+	my $slashdb = getCurrentDB();
+	my $code = $slashdb->sqlSelect("code", "message_deliverymodes", "name = '$name'");
+
+	return($code);
+
+}
+
+
+sub getUserMessageDeliveryPref {
+
+my ($uid, $code) = @_;
+
+	my $slashdb = getCurrentDB();
+	my $pref = $slashdb->sqlSelect("mode", "users_messages", "uid = '$uid' and code = '$code'");
+
+	return($pref);
+
+}
+
+
+sub auth_challenge {
+
+my ($oscar, $challenge, $hash) = @_;
+
+	my $slashdb = getCurrentDB();
+	my $password = $slashdb->sqlSelect("value", "vars", "name = 'im_password'");
+	my $md5 = Digest::MD5->new;
+	$md5->add($challenge);
+	$md5->add($password);
+	$md5->add($hash);
+	$oscar->auth_response($md5->digest, 1);
 
 }
 
