@@ -393,12 +393,13 @@ sub rss_story {
 
 	my $topics = $reader->getTopics;
 	my $other_creator;
+	my $action;
 
 	$encoded_item->{title}  = $self->encode($story->{title})
 		if $story->{title};
 	if ($story->{sid}) {
 		my $edit = "admin.pl?op=edit&sid=$story->{sid}";
-		my $action = "article.pl?sid=$story->{sid}\&from=rss";
+		$action = "article.pl?sid=$story->{sid}\&from=rss";
 		if ($story->{primaryskid}) {
 			my $dir = url2abs(
 				$reader->getSkin($story->{primaryskid})->{rootdir},
@@ -413,8 +414,6 @@ sub rss_story {
 			$action = "$channel->{'link'}$action";
 		}
 		$_ = $self->encode($_, 'link') for ($encoded_item->{'link'}, $edit);
-
-		$story->{introtext} .= "<p><a href=\"$action\">Read more of this story</a> at $constants->{sitename}.</p>";
 
 		if (getCurrentUser('is_admin')) {
 			$story->{introtext} .= qq[\n\n<p><a href="$edit">[ Edit ]</a></p>];
@@ -432,7 +431,12 @@ sub rss_story {
 
 	if ($version >= 0.91) {
 		my $desc = $self->rss_item_description($item->{description} || $story->{introtext});
-		$encoded_item->{description} = $desc if $desc;
+		if ($desc) {
+			$encoded_item->{description} = $desc;
+			$encoded_item->{description} .= "<p><a href=\"$action\">Read more of this story</a> at $constants->{sitename}.</p>" if $action;
+			# add poll if any
+			$encoded_item->{description} .= pollbooth($story->{qid}) if $story->{qid};
+		}
 	}
 
 	if ($version >= 1.0) {
