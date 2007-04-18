@@ -60,7 +60,7 @@ sub display {
 	my $firehosebox = "";
 	if ($constants->{plugin}{FireHose}) {
 		my $firehose = getObject("Slash::FireHose");
-		$firehosebox = $firehose->listView();
+		$firehosebox = $firehose->listView({ fh_page => 'console.pl'});
 	}
 
 
