@@ -622,7 +622,7 @@ The 'pollbooth' template block.
 # attention
 
 sub pollbooth {
-	my($qid, $no_table, $center) = @_;
+	my($qid, $no_table, $center, $fromrss) = @_;
 	my $constants = getCurrentStatic();
 	return '' if !$constants->{plugin}{PollBooth};
 	my $pollbooth_reader = getObject('Slash::PollBooth', { db_type => 'reader' });
@@ -652,6 +652,7 @@ sub pollbooth {
 		poll_open	=> $poll_open,
 		voters		=> $poll->{pollq}{voters},
 		comments	=> $n_comments,
+		fromrss		=> $fromrss,
 	}, 1);
 }
 
