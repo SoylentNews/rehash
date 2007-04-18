@@ -398,6 +398,7 @@ sub rss_story {
 		if $story->{title};
 	if ($story->{sid}) {
 		my $edit = "admin.pl?op=edit&sid=$story->{sid}";
+		my $action = "article.pl?sid=$story->{sid}\&from=rss";
 		if ($story->{primaryskid}) {
 			my $dir = url2abs(
 				$reader->getSkin($story->{primaryskid})->{rootdir},
@@ -405,11 +406,15 @@ sub rss_story {
 			);
 			$encoded_item->{'link'} = _tag_link("$dir/article.pl?sid=$story->{sid}");
 			$edit = "$dir/$edit";
+			$action = "$dir/$action";
 		} else {
 			$encoded_item->{'link'} = _tag_link("$channel->{'link'}article.pl?sid=$story->{sid}");
 			$edit = "$channel->{'link'}$edit";
+			$action = "$channel->{'link'}$action";
 		}
 		$_ = $self->encode($_, 'link') for ($encoded_item->{'link'}, $edit);
+
+		$story->{introtext} .= "<p><a href=\"$action\">Read more of this story</a> at $constants->{sitename}.</p>";
 
 		if (getCurrentUser('is_admin')) {
 			$story->{introtext} .= qq[\n\n<p><a href="$edit">[ Edit ]</a></p>];
