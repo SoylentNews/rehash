@@ -21,7 +21,8 @@ __template__
 END %]
 
 
-[% 
+[%
+fh_page = fh_page || "firehose.pl";
 param_str = ""
 	state_params = ["mode", "type", "primaryskid", "order", "filter", "category"];
 	FOREACH param = state_params;
@@ -39,14 +40,14 @@ param_str = ""
 [% IF days.size > 0 %]
 	[% FOREACH cur_day = days; %]
 		[% is_base_day = cur_day.0 == day %]
-		<li>[% IF is_base_day && !nopages; "["; END %]<a href="?issue=[% cur_day.0 %]">[% IF is_base_day %]<b>[% END %][% cur_day.1 %][% IF is_base_day %]</b>[% END %]</a></li>
+		<li>[% IF is_base_day && !nopages; "["; END %]<a href="[% gSkin.rootdir %]/[% fh_page %]?issue=[% cur_day.0 %]">[% IF is_base_day %]<b>[% END %][% cur_day.1 %][% IF is_base_day %]</b>[% END %]</a></li>
 		[% IF cur_day.0 == day && !nopages %]
-			[% IF page %] <li><a href="?page=[% page - 1 %]&amp;issue=[% cur_day.0 %]">&lt;- [% page %]</a></li>[% END %]
+			[% IF page %] <li><a href=[% gSkin.rootdir %]/[% fh_page %]?page=[% page - 1 %]&amp;issue=[% cur_day.0 %]">&lt;- [% page %]</a></li>[% END %]
 			[% IF page || options.limit == num_items %]
-			<li><a href="?page=[% page %][% param_str %]&amp;issue=[% cur_day.0 %]">[% page + 1 %]</a></li>
+			<li><a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page %][% param_str %]&amp;issue=[% cur_day.0 %]">[% page + 1 %]</a></li>
 			[% END %]
 			[% IF num_items == options.limit %]
-			<li><a href="?page=[% page + 1%][% param_str %]&amp;issue=[% cur_day.0 %]">[% page + 2 %] -&gt;</a>[% IF is_base_day; "]"; END %]</li>
+			<li><a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page + 1%][% param_str %]&amp;issue=[% cur_day.0 %]">[% page + 2 %] -&gt;</a>[% IF is_base_day; "]"; END %]</li>
 			[% END %]
 		[% END %]
 	[% END %]
