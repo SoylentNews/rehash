@@ -435,7 +435,7 @@ sub rss_story {
 			$encoded_item->{description} = $desc;
 			$encoded_item->{description} .= "<p><a href=\"$action\">Read more of this story</a> at $constants->{sitename}.</p>" if $action;
 			# add poll if any
-			$encoded_item->{description} .= pollbooth($story->{qid}) if $story->{qid};
+			$encoded_item->{description} .= pollbooth($story->{qid},1, 0, 1) if $story->{qid};
 		}
 	}
 
