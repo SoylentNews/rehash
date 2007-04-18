@@ -416,6 +416,7 @@ function toggle_firehose_body(id, is_admin) {
 	var params = [];
 	setFirehoseAction();
 	params['op'] = 'firehose_fetch_text';
+	params['reskey'] = reskey_static;
 	params['id'] = id;
 	var fhbody = $('fhbody-'+id);
 	var fh = $('firehose-'+id);
