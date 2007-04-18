@@ -23,6 +23,20 @@
                 Last Modified: 6/19/00
         </small></em></p>
 
+<h2><a name="ed101" id="ed101">How do I add a "Slashdot It" link to my own page?</a></h2>
+        <p>You can add a small javascript link to your site to allow readers to automatically submit a story a story to Slashdot for story consideration.  This link will work for both logged in Slashdot users and anonymous submittors, however, only logged in Slashdot users will have the option to write their own summary of your story.</p>
+        <p>The following html can be pasted directly into your page to add the "Slashdot It" link to your page.
+        	<xmp><!-- Start Slashdot It link -->
+<a href="javascript:location.href='http://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">
+<img src="http://images.slashdot.org/favicon.gif" alt="Slashdot" border="0" height="16" width="16"></a> &nbsp; 
+<a href="javascript:location.href='http://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">Slashdot It!</a> 
+<!-- End Slashdot It link --></xmp></p>
+				<p>For security or control reasons many people will wish to serve the small Slashdot icon on their own image servers.  If you wish to do this you may download it at <a href="http://image.slashdot.org/favicon.gif">http://image.slashdot.org/favicon.gif</a> and need only replace "http://image.slashdot.org/favicon.gif" in the above text with a link to your own image location.</p>
+        <p><em><small>
+                Answered by: <a href="mailto:scuttlemonkey@slashdot.org">Scuttlemonkey</a><br>
+                Last Modified: 4/18/07
+        </small></em></p>
+
 <h2><a name="ed102" id="ed102">Where do I submit corrections or update s to previous stories?</a></h2>
         <p>The best way to submit followups is just as if you were submitting any other news item to Slashdot: please use the web submission form (rather than email). However, if your story ties closely to a specific story that's already run (for instance, if you have an update about a situation which has changed since the last time it was mentioned on Slashdot), please include a link to the previous story to which you're referring, rather than merely alluding to it.</p>
         <p><em><small>
