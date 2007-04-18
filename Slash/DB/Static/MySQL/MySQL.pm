@@ -86,7 +86,7 @@ sub getBackendStories {
 	my $topic = $options->{topic} || getCurrentStatic('mainpage_nexus_tid');
 
 	my $select = "stories.stoid AS stoid, sid, title, stories.tid AS tid, primaryskid, time,
-		dept, stories.uid AS uid, commentcount, hitparade, introtext, bodytext";
+		dept, stories.uid AS uid, commentcount, hitparade, introtext, bodytext, stories.qid as qid";
 
 	my $from = "stories, story_text, story_topics_rendered";
 
