@@ -164,6 +164,7 @@ ul.menu#fhtablist li.active:before { content: ""; }
 /* Brief Articles */
 div.briefarticle .storylinks { display: none; }
 #firehose div.briefarticle a span { float: none; }
+#firehose div.briefarticle .topic { display: none }
 .briefarticle { position: relative !important; }
 .adminmode .briefarticle .generaltitle .title h3 { padding-left: 80px !important; }
 
@@ -358,4 +359,5 @@ div.tags table.data td
 #fhdatepane { padding-left: 8px }
 .calhead { color: #000 }
 .daybreak { background: #666; }
-.daybreak a { color: #fff; }
+.daybreak a, #fhlogin a { color: #fff; }
+

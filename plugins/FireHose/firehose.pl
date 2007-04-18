@@ -34,10 +34,10 @@ sub main {
 		rss		=> [1,  \&rss, 1, ""]
 	);
 
-	# XXX Need to define who has access to this
-	my $rss = $form->{op} eq "rss" && $form->{content_type} && $form->{content_type} =~ $constants->{feed_types};
+	my $op = $form->{op} || "";
+	
+	my $rss = $op eq "rss" && $form->{content_type} && $form->{content_type} =~ $constants->{feed_types};
 
-	my $op = $form->{op};
 	
 	if ($form->{logtoken} && !$rss) {
 		redirect($ENV{SCRIPT_NAME});
@@ -46,7 +46,7 @@ sub main {
 	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED] || $user->{seclev} < $ops{$op}[2] ) {
 		$op = 'default';
 		if ($user->{seclev} < 1 && $ops{$op}[3] && $ops{$op}[3] ne $form->{anonval}) {
-			redirect("$gSkin->{rootdir}/");
+			redirect("$gSkin->{rootdir}/login.pl");
 			return;
 		}
 	}

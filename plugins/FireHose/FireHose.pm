@@ -593,11 +593,21 @@ sub getFireHoseIdFromGlobjid {
 
 sub fetchItemText {
 	my $form = getCurrentForm();
-	my $firehose = getObject("Slash::FireHose");
 	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	my $firehose = getObject("Slash::FireHose");
 	my $id = $form->{id};
 	return unless $id && $firehose;
 	my $item = $firehose->getFireHose($id);
+	my $add_secs = 0;
+	if ($user->{is_subscriber} && $constants->{subscribe_future_secs}) {
+		$add_secs = $constants->{subscribe_future_secs};
+	}
+	my $cutoff_time = $firehose->getTime({ add_secs => $add_secs });
+
+	return if $item->{public} eq "no" && !$user->{is_admin};
+	return if $item->{createtime} ge $cutoff_time && !$user->{is_admin};
+
 	my $tags_top = $firehose->getFireHoseTagsTop($item);
 
 	if ($user->{is_admin}) {
@@ -855,7 +865,9 @@ sub ajaxFireHoseGetUpdates {
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($opts);
 	my $num_items = scalar @$items;
 	my $future = {};
-	my $globjs = [];	
+	my $globjs = [];
+	my $base_page = $form->{fh_pageval} && $form->{fh_pageval} == 1 ? "console.pl" : "firehose.pl";
+
 	foreach (@$items) {
 		push @$globjs, $_->{globjid} if $_->{globjid} 
 	}
@@ -876,8 +888,16 @@ sub ajaxFireHoseGetUpdates {
 	my $added = {};
 
 	my $last_day;
+	my $mode = $opts->{mode};
+	my $curmode = $opts->{mode};
+	my $mixed_abbrev_pop = $firehose->getMinPopularityForColorLevel(1);
 
 	foreach (@$items) {
+		if ($mode eq "mixed") {
+			$curmode = "full";
+			$curmode = "fulltitle" if $_->{popularity} < $mixed_abbrev_pop;
+
+		}
 		my $item = {};
 		if (!$_->{day}) {
 			$item = $firehose_reader->getFireHose($_->{id});
@@ -903,9 +923,9 @@ sub ajaxFireHoseGetUpdates {
 			# new
 			$update_time = $_->{last_update} if $_->{last_update} gt $update_time && $_->{last_update} lt $now;
 			if ($_->{day}) {
-				push @$updates, ["add", $_->{id}, slashDisplay("daybreak", { options => $opts, cur_day => $_->{day}, last_day => $_->{last_day}, id => "firehose-day-$_->{day}" }, { Return => 1, Page => "firehose" }) ];
+				push @$updates, ["add", $_->{id}, slashDisplay("daybreak", { options => $opts, cur_day => $_->{day}, last_day => $_->{last_day}, id => "firehose-day-$_->{day}", fh_page => $base_page }, { Return => 1, Page => "firehose" }) ];
 			} else {
-				push @$updates, ["add", $_->{id}, slashDisplay("dispFireHose", { mode => $opts->{mode}, item => $item, tags_top => $tags_top, vote => $votes->{$item->{globjid}}, options => $opts }, { Return => 1, Page => "firehose" })];
+				push @$updates, ["add", $_->{id}, slashDisplay("dispFireHose", { mode => $curmode, item => $item, tags_top => $tags_top, vote => $votes->{$item->{globjid}}, options => $opts }, { Return => 1, Page => "firehose" })];
 			}
 			$added->{$_->{id}}++;
 		}
@@ -943,7 +963,7 @@ sub ajaxFireHoseGetUpdates {
 	}
 
 
-	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1, day => $last_day , page => $form->{page}, options => $opts, ulid => "fh-paginate", divid => "fh-pag-div", num_items => $num_items }, { Return => 1, Page => "firehose"});
+	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1, day => $last_day , page => $form->{page}, options => $opts, ulid => "fh-paginate", divid => "fh-pag-div", num_items => $num_items, fh_page => $base_page }, { Return => 1, Page => "firehose"});
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
 
@@ -1198,7 +1218,8 @@ sub dispFireHose {
 		mode		=> $options->{mode},
 		tags_top	=> $options->{tags_top},
 		options		=> $options->{options},
-		vote		=> $options->{vote}
+		vote		=> $options->{vote},
+		bodycontent	=> $options->{bodycontent}
 	}, { Page => "firehose",  Return => 1 });
 }
 
@@ -1268,7 +1289,7 @@ sub getAndSetOptions {
 	my $options 	= {};
 
 	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1 };
-	my $modes = { full => 1, fulltitle => 1};
+	my $modes = { full => 1, fulltitle => 1, mixed => 1};
 
 	my $mode = $form->{mode} || $user->{firehose_mode};
 	$mode = $modes->{$mode} ? $mode : "fulltitle";
@@ -1644,11 +1665,13 @@ sub getPopLevelForPopularity {
 }
 
 sub listView {
-	my ($self) = @_;
+	my ($self, $lv_opts) = @_;
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $options = $self->getAndSetOptions();
+	$lv_opts ||= {};
+	my $base_page = $lv_opts->{fh_page} || "firehose.pl";
 
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($options);
 
@@ -1674,21 +1697,32 @@ sub listView {
 
 	my $i=0;
 	my $last_day = 0;
+
+	my $mode = $options->{mode};
+	my $curmode = $options->{mode};
+	my $mixed_abbrev_pop = $self->getMinPopularityForColorLevel(1);
+	
 	foreach (@$items) {
+		if ($mode eq "mixed") {
+			$curmode = "full";
+			$curmode = "fulltitle" if $_->{popularity} < $mixed_abbrev_pop;
+
+		}
 		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime && $_->{createtime} lt $now;
 		my $item =  $firehose_reader->getFireHose($_->{id});
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
 		if ($_->{day}) {
 			my $day = $_->{day};
 			$day =~ s/ \d{2}:\d{2}:\d{2}$//;
-			$itemstext .= slashDisplay("daybreak", { options => $options, cur_day => $day, last_day => $_->{last_day}, id => "firehose-day-$day" }, { Return => 1, Page => "firehose" });
+			$itemstext .= slashDisplay("daybreak", { options => $options, cur_day => $day, last_day => $_->{last_day}, id => "firehose-day-$day", fh_page => $base_page }, { Return => 1, Page => "firehose" });
 		} else {
 	$last_day = timeCalc($item->{createtime}, "%Y%m%d");
 			$itemstext .= $self->dispFireHose($item, {
-				mode		=> $options->{mode},
+				mode		=> $curmode,
 				tags_top	=> $tags_top,
 				options		=> $options,
 				vote		=> $votes->{$item->{globjid}},
+				bodycontent	=> $user->{is_anon} || $curmode == "full"
 			});
 		}
 		$i++;
@@ -1712,7 +1746,8 @@ sub listView {
 		colors_hash	=> $colors_hash,
 		tabs		=> $options->{tabs},
 		slashboxes	=> $Slashboxes,
-		last_day	=> $last_day
+		last_day	=> $last_day,
+		fh_page		=> $base_page
 	}, { Page => "firehose", Return => 1});
 }
 
