@@ -17,9 +17,16 @@ __template__
 [%
 adminmode = adminmode || "0";
 the_skin_title = "";
+
+fh_page = fh_page || "firehose.pl";
+
 IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid != constants.mainpage_skid && item.type == "story";
 	the_skin = Slash.db.getSkin(item.primaryskid);
-	the_skin_title = '<a href="?fhfilter=' _ the_skin.name _ '" title="Filter to '_ the_skin.title _'">' _ the_skin.title _ "</a>: ";
+	IF user.is_anon;
+		the_skin_title = '<a href="' _ the_skin.rootdir _ '/' _ the_skin.name _ '/firehose.shtml" title="Filter to '_ the_skin.title _'">' _ the_skin.title _ "</a>: ";
+	ELSE;
+		the_skin_title = '<a href="' _ gSkin.rootdir _ "/" _ fh_page _ '?fhfilter=' _ the_skin.name _ '" title="Filter to '_ the_skin.title _'">' _ the_skin.title _ "</a>: ";
+	END;
 END;
 title = item.title;
 title = "<a onclick='javascript:toggle_firehose_body(\"$item.id\", $adminmode); return false' href='$gSkin.rootdir/firehose.pl?op=view&amp;id=$item.id'>" _ title _ "</a>";
@@ -44,6 +51,9 @@ pop_disp = item.popularity.int;
 colors = firehose.getFireHoseColors(1);
 color = colors.$pop_val_offset;
 pop_str = "";
+
+
+
 IF adminmode;
 	reject_checkbox = "";
 	IF !form.skippop;
@@ -53,7 +63,11 @@ IF adminmode;
         title = reject_checkbox _ pop_str _ title;
 ELSE;
 	IF !form.skippop;
-		pop_str = "<span class='soda pop" _  pop_val _ "' title='Filter Firehose to entries rated " _ color _" or better' onclick='firehose_slider_set_color(\"" _ color _ "\")'> &nbsp; </span> ";
+		pop_str = "<span class='soda pop" _  pop_val _ "'";
+		IF !user.is_anon;
+			pop_str = pop_str _ " title='Filter Firehose to entries rated " _ color _" or better' onclick='firehose_slider_set_color(\"" _ color _ "\")'";
+		END;
+		pop_str = pop_str _ "> &nbsp; </span> ";
 	END;
         title = pop_str _ title;
 END;

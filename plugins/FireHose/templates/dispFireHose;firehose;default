@@ -26,7 +26,9 @@ __template__
     END;
 
     IF mode == "fulltitle";
-    	bodycontent = 0;
+    	IF !bodycontent;
+	    	bodycontent = 0;
+	END;
     ELSIF mode == "bodycontent";
         divwrapper = 0;
 	full = 0;
@@ -63,7 +65,7 @@ END %]
 		Slash.getData('byline', { adminmode => adminmode, item => item, the_user => the_user }, 'firehose');
 	%]
 
-	<div class="[% IF bodycontent %]body[% ELSE %]empty[% END %]" id="fhbody-[% item.id %]"  [% IF !topic.image %]style="min-height: 100% !important; "[% END %]>
+	<div class="[% IF bodycontent && mode == "fulltitle" %]hide[% ELSIF bodycontent %]body[% ELSE %]empty[% END %]" id="fhbody-[% item.id %]"  [% IF !topic.image %]style="min-height: 100% !important; "[% END %]>
 	[% END %]
 		[% IF item.tid %]
 		<div class="topic">

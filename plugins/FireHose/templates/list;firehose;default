@@ -13,7 +13,7 @@ list
 __seclev__
 10000
 __template__
-[% IF env.script_name == "/firehose.pl" %]
+[% IF env.script_name == "/firehose.pl" || form.ssi %]
 <script type="text/javascript">
   YAHOO.slashdot.App = function()
     {
@@ -62,7 +62,12 @@ __template__
 [% IF !form.skipmenu %]
 <div class="firemenu">
 [% theupdatetime = Slash.timeCalc(Slash.db.getTime(), "%H:%M"); %]
-[% PROCESS titlebar title="Firehose Beta <span style='font-size:60%'>(Last Refreshed <span id='local_last_update_time'>$theupdatetime</span><span id='gmt_update_time'></span> Currently <span id='pauseorplay'>Paused</span>)</span><span id='busy' class='hide'><img src='$constants.imagedir" _ "/spinner.gif'></span>" %]
+[% refresh_text = "";
+   IF !user.is_anon;
+   	refresh_text = "<span style='font-size:60%'>(Last Refreshed <span id='local_last_update_time'>$theupdatetime</span><span id='gmt_update_time'></span> Currently <span id='pauseorplay'>Paused</span>)</span><span id='busy' class='hide'><img src='$constants.imagedir" _ "/spinner.gif'></span>";
+   END;
+%]
+[% PROCESS titlebar title="Firehose Beta $refresh_text" %]
 [% PROCESS autocomplete %]
 <div class="submenu">
 <div id="message_area">
@@ -74,9 +79,16 @@ __template__
 		rss_param_str = rss_param_str _ "=" _ Slash.strip_attribute(options.${rss_options.$param});
 		
 	END %]
-	[% PROCESS firehose_tabs tabs = options.tabs %]
-	<div class="advpref"><a href="#" id="fh_adv_pref_toggle" onclick="firehose_toggle_advpref(); return false">Prefs</a> <a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]" style="color:#fff;">RSS</a></div>
-	[% PROCESS adv_pref_firehose options = options %]
+	[% IF !user.is_anon %]
+		[% PROCESS firehose_tabs tabs = options.tabs %]
+		<div class="advpref"><a href="#" id="fh_adv_pref_toggle" onclick="firehose_toggle_advpref(); return false">Prefs</a> <a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]" style="color:#fff;">RSS</a></div>
+		[% PROCESS adv_pref_firehose options = options %]
+	[% END %]
+	[% IF user.is_anon %]
+		<div id="fhlogin">
+		[% PROCESS userlogin %]
+		</div>
+	[% ELSE %]
 	<form action="[% gSkin.rootdir %]/firehose.pl" method="get" name="firehoseform">
 		<fieldset>
 			<legend>Firehose</legend>
@@ -93,7 +105,10 @@ __template__
 			[% END %]
 		</fieldset>
 	</form>
+	[% END %]
+[% IF !user.is_anon %]
 [% PROCESS firehose_options %]
+[% END %]
 </div>
 </div>
 [% IF !user.is_admin || (user.is_admin && user.firehose_usermode ) %]
@@ -111,11 +126,14 @@ feedback to hose@cmdrtaco.net but be forgiving of beta code!
 [% itemstext %]
 [% page = page || "0" %]
 </div>
-[% PROCESS paginate options = options ulid = "fh-paginate" divid = "fh-pag-div" day = last_day num_items = itemnum %]
+[% PROCESS paginate options = options ulid = "fh-paginate" divid = "fh-pag-div" day = last_day num_items = itemnum fh_page = fh_page %]
 <script type="text/javascript">
 	firehose_startdate = '[% options.startdate.replace('-','') %]';
 	firehose_issue = '[% options.issue %]';
 	firehose_duration = '[% options.duration %]';
+	[% IF fh_page == "console.pl" %]
+		fh_pageval = 1;
+	[% END %]
 
 	var firehose_action_time = 0;
 	var fh_color = '[% options.color || user.firehose_color || "indigo" %]';
