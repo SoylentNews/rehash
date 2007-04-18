@@ -19,6 +19,7 @@ var firehose_removed_first = '0';
 var firehose_future;
 var fh_colorslider; 
 var fh_ticksize;
+var fh_pageval = 0;
 var fh_colors = Array(0);
 var vendor_popup_timerids = Array(0);
 var vendor_popup_id = 0;
@@ -905,6 +906,7 @@ function firehose_get_updates(options) {
 	params['startdate'] = firehose_startdate;
 	params['issue'] = firehose_issue;
 	params['page'] = page;
+	params['fh_pageval'] = fh_pageval;
 	$('busy').className = "";
 	ajax_update(params, '', handlers);
 }
