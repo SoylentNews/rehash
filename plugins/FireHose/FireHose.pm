@@ -291,6 +291,10 @@ sub getFireHoseEssentials {
 	$options ||= {};
 	$options->{limit} ||= 50;
 
+	my $pop;
+	$pop = $self->getMinPopularityForColorLevel($colors->{$options->{color}})
+		if $options->{color} && $colors->{$options->{color}};
+
 	my($items, $results, $doublecheck) = ([], {}, 0);
 	# for now, only bother to try searchtoo if there is a qfilter value to search on
 	if (!$options->{no_search} && $constants->{firehose_searchtoo} && $options->{qfilter}) {
@@ -321,12 +325,8 @@ sub getFireHoseEssentials {
 				map { ($_ => $options->{$_}) } qw(tagged_by_uid orderdir orderby ignore_nix)
 			};
 
-#use Data::Dumper; print STDERR Dumper \%query, \%opts;
-#print STDERR "[[ 0 ]]\n";
 			$results = $searchtoo->findRecords(firehose => \%query, \%opts);
 			$items = delete $results->{records};
-#printf STDERR "[[ 4 : %d : %d : %d ]]\n\n", $results->{records_matches}, $results->{records_returned}, scalar @$items;
-#print STDERR Dumper $results;
 
 			return($items, $results) if ! @$items;
 
@@ -382,11 +382,11 @@ sub getFireHoseEssentials {
 		push @where, "public = " . $self->sqlQuote($options->{public});
 	}
 
-	if ($options->{accepted}) {
+	if ($options->{accepted}) { # check this again, just in case, as it is time-sensitive
 		push @where, "accepted = " . $self->sqlQuote($options->{accepted});
 	}
 
-	if ($options->{rejected}) {
+	if ($options->{rejected}) { # check this again, just in case, as it is time-sensitive
 		push @where, "rejected = " . $self->sqlQuote($options->{rejected});
 	}
 
@@ -398,7 +398,7 @@ sub getFireHoseEssentials {
 		push @where, "primaryskid = " . $self->sqlQuote($options->{primaryskid});
 	}
 
-	if (defined $options->{category} || $user->{is_admin}) {
+	if (defined $options->{category} || $user->{is_admin}) { # check this again, just in case, as it is time-sensitive
 		$options->{category} ||= '';
 		push @where, "category = " . $self->sqlQuote($options->{category});
 	}
@@ -446,15 +446,12 @@ sub getFireHoseEssentials {
 		push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $dur_q DAY)";
 	}
 
-	if ($options->{color}) {
-		if ($colors->{$options->{color}}) {
-			my $pop = $self->getMinPopularityForColorLevel($colors->{$options->{color}});
-			my $pop_q = $self->sqlQuote($pop);
-			if ($user->{is_admin} && !$user->{firehose_usermode}) {
-				push @where, "editorpop >= $pop_q";
-			} else {
-				push @where, "popularity >= $pop_q";
-			}
+	if ($pop) {
+		my $pop_q = $self->sqlQuote($pop);
+		if ($user->{is_admin} && !$user->{firehose_usermode}) {
+			push @where, "editorpop >= $pop_q";
+		} else {
+			push @where, "popularity >= $pop_q";
 		}
 	}
 	if ($user->{is_admin}) {
@@ -462,9 +459,7 @@ sub getFireHoseEssentials {
 
 		if ($options->{unsigned}) {
 			push @where, "signoffs NOT LIKE \"\%$signoff_label\%\"";
-		}
-
-		if ($options->{signed}) {
+		} elsif ($options->{signed}) {
 			push @where, "signoffs LIKE \"\%$signoff_label\%\"";
 		}
 	}
