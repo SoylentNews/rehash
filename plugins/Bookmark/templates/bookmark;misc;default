@@ -58,5 +58,6 @@ __template__
 </tr>
 </table>
 </form>
+[% PROCESS bookmarktext %]
 __version__
 $Id$

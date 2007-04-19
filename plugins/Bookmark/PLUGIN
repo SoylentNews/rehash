@@ -10,5 +10,7 @@ task=fetch_rss_bookmarks.pl
 template=templates/anon_bookmark;bookmark;default
 template=templates/bookmark;misc;default
 template=templates/bookmarklink;misc;default
+template=templates/bookmarktext;misc;default
 template=templates/recentandpop;bookmark;default
 template=templates/userbookmarks;users;default
+

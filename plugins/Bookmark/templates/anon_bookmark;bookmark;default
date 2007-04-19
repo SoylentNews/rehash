@@ -28,6 +28,7 @@ it's not a lot to go on!  After you log in, you will be able to write
 a journal entry or submit full story submission to our editors for
 posting.
 </p>
+[% PROCESS bookmarktext %]
 [% ELSE %]
 <form method="post" action="bookmark.pl">
 <table class="data" width="100%">
@@ -44,6 +45,7 @@ posting.
 </tr>
 </table>
 </form>
+[% PROCESS bookmarktext %]
 [% END %]
 <hr>
 [% PROCESS userlogin %]

@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+Text to plug Bookmark it links on your site 
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+bookmarktext
+__seclev__
+10000
+__template__
+<br>
+	 <p>You can also add a small javascript link to your site to allow
+	 readers to automatically submit a story a story to [% constants.sitename %] for story
+	 consideration.  This link will work for both logged in  users
+	 and anonymous submittors, however, only logged in [% constants.sitename %] users will
+	 have the option to write their own summary of your story.</p>
+	        <p>The following html can be pasted directly into your page to
+		add the "[% constants.sitename %] It" link to your page.</p>
+<br>
+<p>		               
+<xmp><!-- Start [% constants.sitename %] It link -->
+<a href="javascript:location.href='[% constants.absolutedir %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">
+<img src="[% constants.absolutedir %]/favicon.ico" alt="[% constants.sitename %]" border="0" height="16" width="16"></a> &nbsp;
+<a href="javascript:location.href='[% constants.absolutedir %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">[% constants.sitename %] It!
+<!-- End [% constants.sitename %] It link -->
+</xmp></p>
+<br>
+             <p>For security or control reasons many people will wish to serve
+	      the small [% constants.sitename %] icon on their own image servers.  If you wish to do
+	      this you may download it at <a href="[% constants.absolutedir %]/favicon.gif">[% constants.absolutedir %]/favicon.gif</a>
+	      and need only replace "[% constants.absolutedir %]/favicon.gif" in the above text with a link to your own image location.</p>	
+		</p>
+
+
