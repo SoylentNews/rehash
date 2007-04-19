@@ -251,7 +251,7 @@ sub getTagboxTags {
 		$max_time_clause = " AND created_at <= $mtq";
 	}
 	$hr_ar = $self->sqlSelectAllHashrefArray(
-		'*',
+		'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
 		'tags',
 		"$colname=$affected_id $max_time_clause",
 		'ORDER BY tagid');
@@ -265,7 +265,7 @@ sub getTagboxTags {
 		my $new_ids = join(',', sort { $a <=> $b } keys %new_ids);
 #print STDERR "hr_ar=" . scalar(@$hr_ar) . " with $colname=$affected_id\n";
 		$hr_ar = $self->sqlSelectAllHashrefArray(
-			'*',
+			'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
 			'tags',
 			"$new_colname IN ($new_ids) $max_time_clause",
 			'ORDER BY tagid');
