@@ -9,36 +9,44 @@
 	position: absolute;
 }
 
+
 .options
 {
-	width: 140px;
-	position: absolute;
-	top: 0px !important;
-	right: .5em;
+        width: 140px;
+        position: absolute;
+        line-height: 100% !important;
+        top: 0 !important;
+        right: 0;
 }
 
 .options span
 /*, span.advpref */
 {
-	position: relative;
-	width: 20px;
-	margin: 0 0 0 30px !important;
+        position: relative;
+        width: 20px;
+        margin: 0 0 0 1px !important;
+        top: .3em;
 }
+
+#play, #pause { left: 0  }
+#desc, #asc { left: 30px  }
+#full, #abbrev { left: 60px  }
+#time, #popularity {left: 90px }
 
 #colorsliderbg { background: url('//images.slashdot.org/colorscale.png') no-repeat 0px -3px; }
 
 input
 {
-	width: auto !important;
-	margin: 0 0 0 .5em !important;
+        width: auto !important;
+        margin: 0 0 0 .5em !important;
 }
 
 #fh_adv_pref_toggle { color: #fff; }
 
 #colorsliderbg
 {
-	display: inline;
-	padding: 4px 108px 3px 0;
+        display: inline;
+        padding: 4px 108px 3px 0;
 }
 
 #colorsliderthumb { display: inline; }
@@ -47,9 +55,9 @@ input
 
 #fhtablist li, #fhtablist a
 {
-	color: #fff;
-	padding: 0;
-	margin: 0;
+        color: #fff;
+        padding: 0;
+        margin: 0;
 }
 
 #fhtablist li.active { font-weight: bold; }
@@ -57,27 +65,33 @@ input
 #fhtablist { margin: 0; }
 
 .options a
-/*, .advpref */
 {
-	color: #fff;
-	text-decoration: none;
-	font-weight: bold;
-	padding: 6px 0 4px 25px;
-	background: url('//images.slashdot.org/sic_controls.png') no-repeat;
-	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
-	text-indent: -7000em;
-	position: absolute;
-	top: 0;
+        color: #fff;
+        text-decoration: none;
+        font-weight: bold;
+        padding: 6px 0 4px 25px;
+        background: url('//images.slashdot.org/sic_controls.png') no-repeat;
+        _background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
+        text-indent: -7000em;
+        position: absolute;
+        top: 0;
 }
-
+.advpref
+{
+        position: absolute;
+        top: 3.5em;
+        right: 1em;
+}
+.advpref a {margin-right: 1em}
+/*
 span.advpref {
-	background: url('//images.slashdot.org/sic_controls.png') no-repeat;
-	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
-	text-indent: -7000em;
-	position: relative;
-	padding-right: 20px;
+        background: url('//images.slashdot.org/sic_controls.png') no-repeat;
+        _background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
+        text-indent: -7000em;
+        position: relative;
+        padding-right: 20px;
 }
-
+*/
 #advplay, #advpause, #advdesc { padding-left: 20px, padding-top: 10px, padding-bottom: 10px }
 
 #play a, #advplay { background-position: 0px 1px; }
@@ -251,7 +265,7 @@ div.briefarticle .storylinks { display: none; }
 	padding: 0 !important;
 }
 
-div.tags div.tagtitleclosed
+.briefarticle div.tags div.tagtitleclosed
 {
 	z-index: 0;
 	background: transparent !important;
@@ -265,9 +279,9 @@ div.tags div.tagtitleclosed
 	font-size: 95%;
 }
 
-div.tags div.tagtitleclosed input:first-child { width: 30% !important; }
-div.tags div.tagtitleclosed input { font-size: 80%; }
-div.tags div.tagtitleclosed a, div.tags div.tagtitleclosed { color: #555; }
+.briefarticle div.tags div.tagtitleclosed input:first-child { width: 30% !important; }
+.briefarticle div.tags div.tagtitleclosed input { font-size: 80%; }
+.briefarticle div.tags div.tagtitleclosed a, div.tags div.tagtitleclosed { color: #555; }
 
 div.tags table
 {
