@@ -303,8 +303,8 @@ div.tags table.data td
 	line-height: 120%;
 }
 
-.whitewash div.tags div.tagtitleclosed span i, .whitewash div.tags div.tagtitleclosed span i a, .whitewash div.tags div.tagtitleclosed span, .whitewash div.tags div.tagtitleclosed span a { color: #fff !important; }
-.whitewash div.tagtitleclosed span.tagsheader { background: url('//images.slashdot.org/arrow_w_closed.png') no-repeat !important; }
+.briefarticle .whitewash div.tags div.tagtitleclosed span i, .briefarticle .whitewash div.tags div.tagtitleclosed span i a, .briefarticle .whitewash div.tags div.tagtitleclosed span, .briefarticle .whitewash div.tags div.tagtitleclosed span a { color: #fff !important; }
+.briefarticle .whitewash div.tagtitleclosed span.tagsheader { background: url('//images.slashdot.org/arrow_w_closed.png') no-repeat !important; }
 
 /* Icons and imagery for articles */
 .edit
