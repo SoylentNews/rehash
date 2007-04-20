@@ -2,6 +2,9 @@ __section__
 default
 __description__
 date line with pop-up calendar
+  id = id you want assigned to the outer html element
+  start_mode = one of 'day', 'week', 'since', 'all'
+  init = name of the js function you want called after the date widget has been constructed
 __title__
 Date Widget
 __page__
@@ -25,7 +28,7 @@ __template__
 <div id="[% id %]-calendar-pane" class="calendar-pane"></div>
 </div>
 <script type="text/javascript">
-  YAHOO.util.Event.addListener(window, "load", function(){ attachDateWidgetTo("[% id %]", "[% start_mode %]"); });
+  YAHOO.util.Event.addListener(window, "load", function(){ attachDateWidgetTo("[% id %]", "[% start_mode %]" [% IF init; %], undefined, [% init; END %]); });
 </script>
 __seclev__
 10000
