@@ -66,14 +66,14 @@ __template__
 				<b>[% question | strip_literal %]</b>
 
 			[% FOREACH ans = answers %]
-				<br><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]">[% ans.answer | strip_literal %]
+				<br><input type="radio" name="aid" value="[% ans.aid | strip_attribute %]">[% IF fromrss %]<a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=[% ans.aid %]&amp;from=rss">[% END %][% ans.answer | strip_literal %][% IF fromrss %]</a>[% END %]
 			[% END %]
 
 				<br><input type="submit" value="Vote">
 				[% IF env.gateway_interface; PROCESS reskey_tag; END %]
 				[ <a href="[% gSkin.rootdir %]/pollBooth.pl?qid=[% qid %]&amp;aid=-1[% IF fromrss %]&amp;from=rss[% END %]"><b>Results</b></a> |
 				<a href="[% gSkin.rootdir %]/pollBooth.pl[% IF fromrss %]?from=rss[% END %]"><b>Polls</b></a> ] <br>
-				Comments:<b>[% comments %]</b> | Votes:<b>[% voters %]</b>
+				[% IF !fromrss %]Comments:<b>[% comments %]</b> | Votes:<b>[% voters %]</b>[% END %]
 			</fieldset>
 		</form>
 	[% END %]
