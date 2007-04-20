@@ -25,13 +25,7 @@ __template__
 
 </td>
 <td valign="top" id="fhdatepane">
-	<b>Duration:</b><br>
-	Day <input type="radio" name="duration" value="1" onclick="firehose_set_options('duration','1')" [% IF options.duration == 1; constants.markup_checked_attribute; END %]>
-	Week <input type="radio" name="duration" value="7" onclick="firehose_set_options('duration','7')" [% IF options.duration == 7; constants.markup_checked_attribute; END %]>
-	Month<input type="radio" name="duration" value="31" onclick="firehose_set_options('duration','31')" [% IF options.duration == 31; constants.markup_checked_attribute; END %]>
-	All time<input type="radio" name="duration" value="-1" onclick="firehose_set_options('duration','-1')" [% IF options.duration == -1; constants.markup_checked_attribute; END %]>
-	<br>Select Start Date:<br>
-	<div id="fhcalendar"></div>
+  [% PROCESS datewidget id='fhcalendar' init='firehose_calendar_init' %]
 </td>
 </tr>
 <tr><td colspan="2">
