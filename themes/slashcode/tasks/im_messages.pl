@@ -12,28 +12,34 @@ use Slash::Utility;
 use Net::OSCAR ':standard';
 use Digest::MD5;
 
-use vars qw(%task $me);
+use vars qw(%task $me $task_exit_flag);
 
+# Not sure why this would be needed.
 $! = 0;
+
 $task{$me}{timespec} = '* * * * *';
-$task{$me}{on_startup} = 1;
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 
-my ($virtual_user, $constants, $slashdb, $user) = @_;
-my ($exit_flag, $online);
+	my ($virtual_user, $constants, $slashdb, $user) = @_;
+	my $online = 0;
 
-	$SIG{INT} = $SIG{TERM} = sub { ++$exit_flag; };
-
-	my $in;
-	map { $in .= "'$_',"; } getMessageCodesByType("IM");
-	chop($in);
+	my $screenname = $constants->{im_screenname} || '';
 	
+	if (!length($screenname)) {
+		# No screen name is defined so there's no point to
+		# trying to connect.  But don't quit, since the task
+		# will just restart.  Sleep until parent slashd quits.
+		slashdLog("No im_screenname, so this task would not be useful -- sleeping permanently");
+		sleep 5 while !$task_exit_flag;
+		return ;
+	}
+
+	my $code_in_str = join ',', map { "'$_'" } getMessageCodesByType('IM');
+
 	my $sysmessage_code = getMessageCodeByName("System Messages");
 
 	my $im_mode = getMessageDeliveryByName("IM");
-	
-	my $screenname = $slashdb->sqlSelect("value", "vars", "name = 'im_screenname'");
 	
 	my $oscar = Net::OSCAR->new();
 	$oscar->set_callback_auth_challenge(\&auth_challenge);
@@ -41,15 +47,24 @@ my ($exit_flag, $online);
 	$oscar->signon(screenname => $screenname, password => undef);
 	$oscar->timeout(30);
 
-	until ($exit_flag) {
+	until ($task_exit_flag) {
 		$oscar->do_one_loop();
 		
 		# Wait until we're fully online (signon_done() is called).
-		next unless $online;
+		if (!$online) {
+			# I'm guessing we should sleep here, and also
+			# count the number of times thru this main loop
+			# and keep track of whether $online has ever
+			# been true: if we're here for the 100th time
+			# without having ever been online, the task
+			# should probably stop trying.
+			next;
+		}
 	
 		# Pull out all IM compatible messages	
 		my $messages =
-			$slashdb->sqlSelectAllHashref("id", "id, user, code, message", "message_drop", "code IN($in)");
+			$slashdb->sqlSelectAllHashref("id", "id, user, code, message", "message_drop",
+				"code IN ($code_in_str)");
 
 		foreach my $id (keys %$messages) {
 			my $im_names;
@@ -151,7 +166,7 @@ sub auth_challenge {
 my ($oscar, $challenge, $hash) = @_;
 
 	my $slashdb = getCurrentDB();
-	my $password = $slashdb->sqlSelect("value", "vars", "name = 'im_password'");
+	my $password = getCurrentStatic('im_password');
 	my $md5 = Digest::MD5->new;
 	$md5->add($challenge);
 	$md5->add($password);
