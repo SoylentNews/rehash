@@ -416,7 +416,6 @@ function toggle_firehose_body(id, is_admin) {
 	var params = [];
 	setFirehoseAction();
 	params['op'] = 'firehose_fetch_text';
-	params['reskey'] = reskey_static;
 	params['id'] = id;
 	var fhbody = $('fhbody-'+id);
 	var fh = $('firehose-'+id);
@@ -426,6 +425,7 @@ function toggle_firehose_body(id, is_admin) {
 				firehose_get_admin_extras(id); 
 			}
 		};
+		params['reskey'] = reskey_static;
 		if (is_admin) {
 			ajax_update(params, 'fhbody-'+id, handlers);
 		} else {
