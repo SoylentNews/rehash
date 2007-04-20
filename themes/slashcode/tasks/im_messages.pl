@@ -47,17 +47,20 @@ $task{$me}{code} = sub {
 	$oscar->signon(screenname => $screenname, password => undef);
 	$oscar->timeout(30);
 
+	my $retry_counter = 0;
 	until ($task_exit_flag) {
 		$oscar->do_one_loop();
 		
-		# Wait until we're fully online (signon_done() is called).
 		if (!$online) {
-			# I'm guessing we should sleep here, and also
-			# count the number of times thru this main loop
-			# and keep track of whether $online has ever
-			# been true: if we're here for the 100th time
-			# without having ever been online, the task
-			# should probably stop trying.
+			# Wait until we're fully online (signon_done() is called).
+			# Try to connect once per second for 20 iterations. It's
+			# probably safe to assume there's a network problem if we
+			# connect by then, so exit until we're restarted.
+			if ($retry_counter++ == 20) {
+				slashdLog("Exceeded 20 connect retries. Exiting.");
+				exit;
+			}
+			sleep(1);
 			next;
 		}
 	
@@ -165,7 +168,6 @@ sub auth_challenge {
 
 my ($oscar, $challenge, $hash) = @_;
 
-	my $slashdb = getCurrentDB();
 	my $password = getCurrentStatic('im_password');
 	my $md5 = Digest::MD5->new;
 	$md5->add($challenge);
