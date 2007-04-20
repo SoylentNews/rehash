@@ -54,7 +54,7 @@ function weekOf( date ) {
 var gOpenCalendarPane = null;
 
 
-YAHOO.slashdot.DateWidget = function( id, mode, date ) {
+YAHOO.slashdot.DateWidget = function( id, mode, date, initCallback ) {
   if ( date === undefined )
     date = new Date;
 
@@ -84,12 +84,16 @@ YAHOO.slashdot.DateWidget = function( id, mode, date ) {
   root._widget = this;
   root.setDate = function(d) { widget.setDate(d); }
   root.getDateRange = function() { return widget.getDateRange(); }
+  root.selectEvent = new YAHOO.util.CustomEvent("select");
 
   this.setDate(date);
+
+  if ( initCallback !== undefined )
+    initCallback(root);
 }
 
-function attachDateWidgetTo( id, date ) {
-  return new YAHOO.slashdot.DateWidget(id, date);
+function attachDateWidgetTo( id, mode, date, initCallback ) {
+  return new YAHOO.slashdot.DateWidget(id, mode, date, initCallback);
 }
 
 YAHOO.slashdot.DateWidget.prototype.setDate = function( date ) {
@@ -107,7 +111,8 @@ YAHOO.slashdot.DateWidget.prototype.getDate = function() {
 }
 
 YAHOO.slashdot.DateWidget.prototype.getDateRange = function() {
-  var range = new Object;
+  var range = { duration: -1 };
+
   var start = null;
   if ( this._mode == "since" )
     start = this._date;
@@ -120,7 +125,7 @@ YAHOO.slashdot.DateWidget.prototype.getDateRange = function() {
   }
 
   if ( start !== null )
-    range.start = datesToKinoSelector(start);
+    range.startdate = datesToKinoSelector(start);
 
   return range;
 }
@@ -165,6 +170,7 @@ YAHOO.slashdot.DateWidget.prototype.handleDateTabClick = function() {
 
 YAHOO.slashdot.DateWidget.prototype.handleCalendarSelect = function( type, args, obj ) {
   this._setDateFromSelection(this._calendar._toDate(args[0][0]));
+  this._element.selectEvent.fire(this.getDateRange());
 }
 
 YAHOO.slashdot.DateWidget.prototype.handleRangePopupSelect = function( obj ) {
@@ -177,6 +183,7 @@ YAHOO.slashdot.DateWidget.prototype.handleRangePopupSelect = function( obj ) {
     this._mode = newMode;
     if ( oldMode == "week" || newMode == "week" )
       this.updateWeekHighlight();
+    this._element.selectEvent.fire(this.getDateRange());
   }
 }
 
