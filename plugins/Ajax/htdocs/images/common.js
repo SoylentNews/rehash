@@ -1017,27 +1017,14 @@ function firehose_remove_entry(id) {
 
 var firehose_cal_select_handler = function(type,args,obj) { 
 	var selected = args[0];
-	
-	// getSelectedDates() could be used instead perhaps	
-	var theDate = selected[0];
-	for (i=1; i<=2; i++) {
-		if (theDate[i] < 10) {
-			theDate[i] = "0" + theDate[i];
-		}
-	}
-	var dateStr = theDate[0] + theDate[1] + theDate[2];
-	firehose_startdate = dateStr;
-
-	// startdate needs be in format 20070102
-	firehose_set_options('startdate', dateStr);
+  firehose_set_options('startdate', selected.startdate);
+  firehose_set_options('duration', selected.duration);
 }; 
 
 
-function firehose_calendar_init() {
-	fh_calendar = new YAHOO.widget.Calendar("cal", "fhcalendar");
-	fh_calendar.render();
+function firehose_calendar_init( widget ) {
+	fh_calendar = widget;
 	fh_calendar.selectEvent.subscribe(firehose_cal_select_handler, fh_calendar, true);
-	YAHOO.util.Event.addListener(window, "load", firehose_calendar_init);
 }
 
 function firehose_slider_init() {
