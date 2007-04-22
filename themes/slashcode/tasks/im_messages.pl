@@ -58,7 +58,7 @@ $task{$me}{code} = sub {
 			# connect by then, so exit until we're restarted.
 			if ($retry_counter++ == 20) {
 				slashdLog("Exceeded 20 connect retries. Exiting.");
-				exit;
+				last;
 			}
 			sleep(1);
 			next;
@@ -102,7 +102,7 @@ $task{$me}{code} = sub {
 		}
 	}
 
-	$oscar->signoff();
+	$oscar->signoff() if $online;
 	
 	return;
 
