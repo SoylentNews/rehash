@@ -34,15 +34,14 @@ $task{$me}{code} = sub {
 		return;
 	}
 
-	
 	my $code_in_str = join ',', map { "'$_'" } getMessageCodesByType('IM');
-	
 	my $im_mode = getMessageDeliveryByName("IM");
 	
 	# Pull out admins for system messages
-	my $sysmessage_code = getMessageCodeByName("System Messages");
-	my $admin_users =
-                $slashdb->sqlSelectColArrayref("uid", "users", "seclev >= '" . $sysmessage_code->{"seclev"} . "'");
+	my $messages_obj = getObject("Slash::Messages");
+	my $sysmessage_code = $messages_obj->getDescription("messagecodes", "System Messages");
+	my $sysmessage_ops = $messages_obj->getMessageCode($sysmessage_code);
+	my $admin_users = $slashdb->sqlSelectColArrayref("uid", "users", "seclev >= " . $sysmessage_ops->{"seclev"});
 
 	my $online = 0;	
 	my $oscar = Net::OSCAR->new();
@@ -89,10 +88,11 @@ $task{$me}{code} = sub {
 			foreach my $id (sort keys %{$messages{$message_type}}) {
 				if ($message_type eq "remarks") {
 					foreach my $admin_user (@$admin_users) {
-						next if(getUserMessageDeliveryPref($admin_user, $sysmessage_code->{'code'}) != $im_mode);
+						next if(getUserMessageDeliveryPref($admin_user, $sysmessage_code) != $im_mode);
 
-						my $nick = getImNick($admin_user);
+						my $nick = $slashdb->getUser($admin_user, 'aim');
 						next if !$nick;
+						
 						$oscar->send_im($nick, $messages{$message_type}->{$id}->{'remark'});
 						sleep(2);
 						
@@ -104,11 +104,11 @@ $task{$me}{code} = sub {
 						$messages{$message_type}->{$id}->{'user'},
 						$messages{$message_type}->{$id}->{'code'}) != $im_mode);
 
-					my $nick = getImNick($messages{$message_type}->{$id}->{'user'});
+					my $nick = $slashdb->getUser($messages{$message_type}->{$id}->{'user'}, 'aim');
 					next if !$nick;
 
 					#$oscar->send_im($nick, $messages{$message_type}->{$id}->{'message'});
-					#sleep(2);
+					sleep(2);
 					
 					#$slashdb->sqlDelete("message_drop", "id = " . $messages{$message_type}->{$id}->{'id'});
 				}
@@ -125,11 +125,12 @@ $task{$me}{code} = sub {
 
 sub getMessageCodesByType {
 
-my $type = shift;
-my @message_codes = ();
+	my ($type) = @_;
+	my @message_codes = ();
 
 	my $slashdb = getCurrentDB();
-	my $code = $slashdb->sqlSelect("bitvalue", "message_deliverymodes", "name = '$type'");
+	my $type_q = $slashdb->sqlQuote($type);
+	my $code = $slashdb->sqlSelect("bitvalue", "message_deliverymodes", "name = $type_q");
 	my $delivery_codes =
 		$slashdb->sqlSelectAllHashref("code", "code, delivery_bvalue", "message_codes", "delivery_bvalue >= $code");
 	foreach my $delivery_code (keys %$delivery_codes) {
@@ -142,24 +143,13 @@ my @message_codes = ();
 }
 
 
-sub getMessageCodeByName {
-
-my $name = shift;
-
-	my $slashdb = getCurrentDB();
-	my $code = $slashdb->sqlSelectHashref("code, seclev", "message_codes", "type = '$name'");
-
-	return($code);
-
-}
-
-
 sub getMessageDeliveryByName {
 
-my $name = shift;
+	my ($name) = @_;
 
 	my $slashdb = getCurrentDB();
-	my $code = $slashdb->sqlSelect("code", "message_deliverymodes", "name = '$name'");
+	my $name_q = $slashdb->sqlQuote($name);
+	my $code = $slashdb->sqlSelect("code", "message_deliverymodes", "name = $name_q");
 
 	return($code);
 
@@ -168,30 +158,18 @@ my $name = shift;
 
 sub getUserMessageDeliveryPref {
 
-my ($uid, $code) = @_;
+	my ($uid, $code) = @_;
 
 	my $slashdb = getCurrentDB();
-	my $pref = $slashdb->sqlSelect("mode", "users_messages", "uid = '$uid' and code = '$code'");
+	my $pref = $slashdb->sqlSelect("mode", "users_messages", "uid = $uid and code = $code");
 
 	return($pref);
 
 }
 
-sub getImNick {
-
-my $uid = shift;
-
-	my $slashdb = getCurrentDB();
-	my $nick = $slashdb->sqlSelect("value", "users_param", "uid = '" . $uid . "' and name = 'aim'");
-
-	return($nick);
-
-}
-
-
 sub auth_challenge {
 
-my ($oscar, $challenge, $hash) = @_;
+	my ($oscar, $challenge, $hash) = @_;
 
 	my $md5 = Digest::MD5->new;
 	$md5->add($challenge);
@@ -204,7 +182,7 @@ my ($oscar, $challenge, $hash) = @_;
 
 sub error {
 
-my($oscar, $connection, $errno, $error, $fatal) = @_;
+	my($oscar, $connection, $errno, $error, $fatal) = @_;
 
 	slashdLog("Received error '$error'");
 	$task_exit_flag = 1 if $fatal;
