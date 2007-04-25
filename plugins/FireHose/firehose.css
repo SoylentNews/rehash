@@ -373,6 +373,35 @@ div.tags table.data td
 .daybreak a, #fhlogin a { color: #fff; }
 
 /* Date Widget */
+
+.calendar-pane {
+background:#FFFFFF none repeat scroll 0%;
+border:2px solid #333333;
+position:absolute;
+z-index:1000;
+}
+.calendar-pane td {color: #555; font-size: 90%;width: 1.8em; padding: 0 0 0 .2em !important; margin: 0; height: 1em; background:#E6E6E6 url(//images.slashdot.org/sections-bg.png) repeat-x left bottom;  border-bottom: 1px solid #aaa; border-left: 1px solid #aaa;}
+.calendar-pane td a {color: #066 !important; padding: .3em .5em .3em .1em; margin: 0;}
+.calendar-pane th { color: #fff; font-size: 90%;background: #555; border-bottom: 1px solid #aaa;}
+.calendar-pane td.today, .calheader {background:#666666 url(//images.slashdot.org/block-title-bg.png) repeat-x scroll 0%;}
+.calendar-pane td.today, .calendar-pane td.selected {font-weight: bold}
+.calendar-pane td.today a, .calendar-pane td.selected a {color: #fff !important; text-decoration: none}
+.calendar-pane td.selected, .calendar-pane td.today.selected {background: #066; font-weight: bold}
+.calheader {color: #333}
+.calheader a {padding:1px 4px 0pt; background-repeat: no-repeat;}
+.calendar-pane td.oom {background: #999}
+
+span.date-tab {
+background:transparent url(/images/sic_icons.png) no-repeat scroll 0px -995px;
+cursor:pointer;
+padding:7px 0pt 7px 25px;
+position:relative;
+color: #fff;
+position: relative; cursor: pointer; }
+
+span.date-tab.active div.tab-button { background: #066; }
+.date-widget.all span.date-tab { display: none; }
+/*
 .date-tab-bar {
   position: relative;
   padding-left: 0.2em;
@@ -405,3 +434,4 @@ span.date-tab.active div.tab-button { background-color: lightblue; }
 .calendar-pane { position: absolute; z-index: 5; }
 
 .active { background-color: #333; color: #fff; font-weight: bold }
+*/
