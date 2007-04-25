@@ -21,6 +21,9 @@ $task{$me}{timespec} = '18 * * * *';
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
+
+	return 'task is no longer used';
+
 	my @slices = split(/\|/,$constants->{firehose_color_slices});
 	my $pops = $slashdb->sqlSelectColArrayref("popularity", "firehose", "createtime > DATE_SUB(NOW(),INTERVAL 1 DAY) and popularity > 0", "order by popularity desc");
 

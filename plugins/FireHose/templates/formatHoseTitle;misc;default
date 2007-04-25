@@ -45,9 +45,9 @@ END;
 title = title _ "'>" _ item.name _ "</span>";
 	
 firehose = Slash.getObject("Slash::FireHose");
-pop_val = firehose.getPopLevelForPopularity(item.popularity);
+pop_val = firehose.getPopLevelForPopularity(item.userpop);
 pop_val_offset = pop_val - 1;
-pop_disp = item.popularity.int;
+pop_disp = item.userpop.int;
 colors = firehose.getFireHoseColors(1);
 color = colors.$pop_val_offset;
 pop_str = "";

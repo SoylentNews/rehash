@@ -71,6 +71,9 @@ sub createUpdateItemFromJournal {
 	if ($journal) {
 		my $globjid = $self->getGlobjidCreate("journals", $journal->{id});
 		my $globjid_q = $self->sqlQuote($globjid);
+		# XXX does this next line depend on the primary key being the
+		# first column returned by "SELECT *"? If I read that right,
+		# that's non-intuitive; we should select id by name instead. -Jamie
 		my($itemid) = $self->sqlSelect("*", "firehose", "globjid=$globjid_q");
 		if ($itemid) {
 			my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
@@ -113,8 +116,8 @@ sub createItemFromJournal {
 	if ($journal) {
 		my $globjid = $self->getGlobjidCreate("journals", $journal->{id});
 		my $popularity = $journal->{promotetype} eq "publicize" 
-			? $self->getMidPopularityForColorLevel(5) 
-			: $self->getMidPopularityForColorLevel(6);
+			? $self->getEntryPopularityForColorLevel(5) 
+			: $self->getEntryPopularityForColorLevel(6);
 		my $type = $user->{acl}{vendor} ? "vendor" : "journal";
 		my $data = {
 			title 			=> $journal->{description},
@@ -124,6 +127,7 @@ sub createItemFromJournal {
 			public 			=> "yes",
 			introtext 		=> $introtext,
 			popularity		=> $popularity,
+			popularity2		=> $popularity,
 			editorpop		=> $popularity,
 			tid			=> $journal->{tid},
 			srcid			=> $id,
@@ -146,8 +150,8 @@ sub createUpdateItemFromBookmark {
 	my $popularity = defined $options->{popularity}
 		? $options->{popularity}
 		: $type eq "feed"
-			? $self->getMidPopularityForColorLevel(6)
-			: $self->getMidPopularityForColorLevel(7);
+			? $self->getEntryPopularityForColorLevel(6)
+			: $self->getEntryPopularityForColorLevel(7);
 	my $activity   = defined $options->{activity} ? $options->{activity} : 1;
 
 	if ($count) {
@@ -161,6 +165,7 @@ sub createUpdateItemFromBookmark {
 			url_id 		=> $bookmark->{url_id},
 			uid 		=> $bookmark->{uid},
 			popularity 	=> $popularity,
+			popularity2 	=> $popularity,
 			editorpop	=> $popularity,
 			activity 	=> $activity,
 			public 		=> "yes",
@@ -178,13 +183,14 @@ sub createItemFromSubmission {
 	my $submission = $self->getSubmission($id);
 	if ($submission) {
 		my $globjid = $self->getGlobjidCreate("submissions", $submission->{subid});
-		my $midpop = $self->getMinPopularityForColorLevel(5);
+		my $midpop = $self->getEntryPopularityForColorLevel(5);
 		my $data = {
 			title 			=> $submission->{subj},
 			globjid 		=> $globjid,
 			uid 			=> $submission->{uid},
 			introtext 		=> $submission->{story},
 			popularity 		=> $midpop,
+			popularity2 		=> $midpop,
 			editorpop 		=> $midpop,
 			public 			=> "yes",
 			attention_needed 	=> "yes",
@@ -241,9 +247,9 @@ sub createItemFromStory {
 	my %ignore_skids = map {$_ => 1 } @{$constants->{firehose_story_ignore_skids}};
 	my $story = $self->getStory($id, '', 1);
 
-	my $popularity = $self->getMidPopularityForColorLevel(2);
+	my $popularity = $self->getEntryPopularityForColorLevel(2);
 	if ($story->{story_topics_rendered}{$constants->{mainpage_nexus_tid}}) {
-		$popularity = $self->getMidPopularityForColorLevel(1);
+		$popularity = $self->getEntryPopularityForColorLevel(1);
 	}
 
 	if ($story && !$ignore_skids{$story->{primaryskid}}) {
@@ -257,6 +263,7 @@ sub createItemFromStory {
 			introtext	=> parseSlashizedLinks($story->{introtext}),
 			bodytext	=> parseSlashizedLinks($story->{bodytext}),
 			popularity	=> $popularity,
+			popularity2	=> $popularity,
 			editorpop	=> $popularity,
 			primaryskid	=> $story->{primaryskid},
 			tid 		=> $story->{tid},
@@ -272,7 +279,7 @@ sub createItemFromStory {
 
 sub getFireHoseCount {
 	my($self) = @_;
-	my $pop = $self->getMidPopularityForColorLevel(6);
+	my $pop = $self->getEntryPopularityForColorLevel(6);
 	my $user = getCurrentUser();
 	my $pop_q = $self->sqlQuote($pop);
 	my $signoff_label = "sign$user->{uid}\ed";
@@ -348,6 +355,8 @@ sub getFireHoseEssentials {
 	$options->{orderdir} = uc($options->{orderdir}) eq "ASC" ? "ASC" : "DESC";
 	#($user->{is_admin} && $options->{orderby} eq "createtime" ? "ASC" :"DESC");
 
+	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
+
 	my @where;
 	my $tables = "firehose";
 	if ($options->{tagged_by_uid}) {
@@ -363,7 +372,7 @@ sub getFireHoseEssentials {
 			push @where, "tags.tagnameid != $nix_id";
 		}
 	}
-	my $columns = "firehose.*";
+	my $columns = "firehose.*, firehose.$popularitycol AS userpop";
 
 	if ($options->{createtime_no_future} && !$doublecheck) {
 		push @where, "createtime <= NOW()";
@@ -410,7 +419,7 @@ sub getFireHoseEssentials {
 		if ($options->{filter}) {
 			# sanitize $options->{filter};
 			$options->{filter} =~ s/[^a-zA-Z0-9_]+//g;
-			push @where, "firehose_text.title like '%" . $options->{filter} . "%'";
+			push @where, "firehose_text.title LIKE '%" . $options->{filter} . "%'";
 		}
 
 		if ($options->{fetch_text}) {
@@ -451,7 +460,7 @@ sub getFireHoseEssentials {
 		if ($user->{is_admin} && !$user->{firehose_usermode}) {
 			push @where, "editorpop >= $pop_q";
 		} else {
-			push @where, "popularity >= $pop_q";
+			push @where, "$popularitycol >= $pop_q";
 		}
 	}
 	if ($user->{is_admin}) {
@@ -560,8 +569,10 @@ sub getFireHose {
 	}
 
 	# XXX cache this eventually
+	my $constants = getCurrentStatic();
+	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
 	my $id_q = $self->sqlQuote($id);
-	my $answer = $self->sqlSelectHashref("*", "firehose", "id=$id_q");
+	my $answer = $self->sqlSelectHashref("*, firehose.$popularitycol AS userpop", "firehose", "id=$id_q");
 	my $append = $self->sqlSelectHashref("*", "firehose_text", "id=$id_q");
 
 	for my $key (keys %$append) {
@@ -886,11 +897,12 @@ sub ajaxFireHoseGetUpdates {
 	my $mode = $opts->{mode};
 	my $curmode = $opts->{mode};
 	my $mixed_abbrev_pop = $firehose->getMinPopularityForColorLevel(1);
+	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
 
 	foreach (@$items) {
 		if ($mode eq "mixed") {
 			$curmode = "full";
-			$curmode = "fulltitle" if $_->{popularity} < $mixed_abbrev_pop;
+			$curmode = "fulltitle" if $_->{$popularitycol} < $mixed_abbrev_pop;
 
 		}
 		my $item = {};
@@ -1325,12 +1337,13 @@ sub getAndSetOptions {
 	}
 	$options->{color} ||= $user->{firehose_color};
 
+	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
 	if ($form->{orderby}) {
 		if ($form->{orderby} eq "popularity") {
 			if ($user->{is_admin} && !$user->{firehose_usermode}) {
 				$options->{orderby} = "editorpop";
 			} else {
-				$options->{orderby} = "popularity";
+				$options->{orderby} = $popularitycol;
 			}
 		} else {
 			$options->{orderby} = "createtime";
@@ -1629,34 +1642,38 @@ sub getFireHoseTagsTop {
 
 sub getMinPopularityForColorLevel {
 	my($self, $level) = @_;
-	my $slashdb = getCurrentDB();
-	my $levels = $slashdb->getVar('firehose_slice_points', 'value', 1);
-	my @levels = split(/\|/, $levels);
-	return $levels[$level - 1 ];
+	my $constants = getCurrentStatic();
+	my $slicepoints = $constants->{firehose_slice_points};
+	my @levels = split / /, $slicepoints;
+	my $entry_min = $levels[$level-1];
+	my($entry, $min) = split /,/, $entry_min;
+	return $min;
 }
 
-sub getMidPopularityForColorLevel {
+sub getEntryPopularityForColorLevel {
 	my($self, $level) = @_;
-	my $slashdb = getCurrentDB();
-	my $levels = $slashdb->getVar('firehose_slice_points', 'value', 1);
-	my @levels = split(/\|/, $levels);
-	my $min = $levels[$level - 1 ];
-
-	my $maxindex = $level - 2;
-	my $max = $maxindex >= 0 && defined $levels[$maxindex] ? $levels[$maxindex] : $levels[$level - 1] + 5;
-	return (($min + $max) / 2);
+	my $constants = getCurrentStatic();
+	my $slicepoints = $constants->{firehose_slice_points};
+	my @levels = split / /, $slicepoints;
+	my $entry_min = $levels[$level-1];
+	my($entry, $min) = split /,/, $entry_min;
+	return $entry;
 }
 
 sub getPopLevelForPopularity {
 	my($self, $pop) = @_;
-	my $slashdb = getCurrentDB();
-	my $levels = $slashdb->getVar('firehose_slice_points', 'value', 1);
-	my @levels = split(/\|/, $levels);
-	my $i = 0;
-	for ($i=0; $i< $#levels; $i++) {
-		return $i+1 if $pop >= $levels[$i];
+	my $constants = getCurrentStatic();
+	my $slicepoints = $constants->{firehose_slice_points};
+	my @levels = split / /, $slicepoints;
+	for my $i (0..$#levels) {
+		my $entry_min = $levels[$i];
+		my($entry, $min) = split /,/, $entry_min;
+		return $i+1 if $pop >= $min;
 	}
-	return $i + 1;
+	# This should not happen, since the min value for the last slice
+	# is supposed to be very large negative.  If a score goes below
+	# it, though, return the next slice number.
+	return $#levels + 1;
 }
 
 sub listView {
@@ -1696,11 +1713,13 @@ sub listView {
 	my $mode = $options->{mode};
 	my $curmode = $options->{mode};
 	my $mixed_abbrev_pop = $self->getMinPopularityForColorLevel(1);
+	my $constants = getCurrentStatic();
+	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
 	
 	foreach (@$items) {
 		if ($mode eq "mixed") {
 			$curmode = "full";
-			$curmode = "fulltitle" if $_->{popularity} < $mixed_abbrev_pop;
+			$curmode = "fulltitle" if $_->{$popularitycol} < $mixed_abbrev_pop;
 
 		}
 		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime && $_->{createtime} lt $now;

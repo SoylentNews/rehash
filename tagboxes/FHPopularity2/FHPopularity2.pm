@@ -157,7 +157,7 @@ sub run {
 			? 1  # mainpage
 			: 2; # sectional
 	}
-	$popularity = $firehose->getMidPopularityForColorLevel($color_level) + $extra_pop;
+	$popularity = $firehose->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 
 	# Add up nods and nixes.
 	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
@@ -192,7 +192,7 @@ print STDERR "extra_pop for $tag_hr->{tagid}: $extra_pop * $udc_mult\n";
 
 sub get_udc_mult {
 	my($time, $cache) = @_;
-	my $prevhour = ($time/3600)*3600 - 1;
+	my $prevhour = int($time/3600-1)*3600;
 	my $curhour = $prevhour+3600;
 	my $nexthour = $prevhour+3600;
 	my $tagsdb = getObject('Slash::Tags');

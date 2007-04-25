@@ -6,7 +6,6 @@ htdoc=firehose.pl
 mysql_dump=mysql_dump.sql
 mysql_schema=mysql_schema.sql
 requiresplugin=Tags
-task=set_color_ranges.pl
 template=templates/adv_pref_firehose;misc;default
 template=templates/list;firehose;default
 template=templates/view;firehose;default

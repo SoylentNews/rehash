@@ -157,7 +157,7 @@ sub run {
 			? 1  # mainpage
 			: 2; # sectional
 	}
-	$popularity = $firehose->getMidPopularityForColorLevel($color_level) + $extra_pop;
+	$popularity = $firehose->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 
 	# Add up nods and nixes.
 	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
