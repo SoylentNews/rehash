@@ -372,8 +372,8 @@ div.tags table.data td
 .daybreak { background-color: #666; }
 .daybreak a, #fhlogin a { color: #fff; }
 
-/* Date Widget */
 
+/* Date Widget */
 .calendar-pane {
 background:#FFFFFF none repeat scroll 0%;
 border:2px solid #333333;
@@ -383,16 +383,19 @@ z-index:1000;
 .calendar-pane td {color: #555; font-size: 90%;width: 1.8em; padding: 0 0 0 .2em !important; margin: 0; height: 1em; background:#E6E6E6 url(//images.slashdot.org/sections-bg.png) repeat-x left bottom;  border-bottom: 1px solid #aaa; border-left: 1px solid #aaa;}
 .calendar-pane td a {color: #066 !important; padding: .3em .5em .3em .1em; margin: 0;}
 .calendar-pane th { color: #fff; font-size: 90%;background: #555; border-bottom: 1px solid #aaa;}
-.calendar-pane td.today, .calheader {background:#666666 url(//images.slashdot.org/block-title-bg.png) repeat-x scroll 0%;}
+.calendar-pane td.today {background:#666 url(//images.slashdot.org/block-title-bg.png) repeat-x scroll 0%;}
 .calendar-pane td.today, .calendar-pane td.selected {font-weight: bold}
 .calendar-pane td.today a, .calendar-pane td.selected a {color: #fff !important; text-decoration: none}
 .calendar-pane td.selected, .calendar-pane td.today.selected {background: #066; font-weight: bold}
-.calheader {color: #333}
+.calheader {color: #fff; background:#004444 url(//images.slashdot.org/article-title-bg.png) repeat-x scroll left top;}
 .calheader a {padding:1px 4px 0pt; background-repeat: no-repeat;}
+.calheader .calnavright {background-image: url(/images/arrows.png) !important}
+.calheader .calnavleft {background-image: url(/images/arrows.png) !important; background-position: 0 -200px}
 .calendar-pane td.oom {background: #999}
 
 span.date-tab {
-background:transparent url(/images/sic_icons.png) no-repeat scroll 0px -995px;
+background:transparent url(/images/sic_icons.png) no-repeat scroll 0px -995px; 
+/* close icon background:transparent url(//images.slashdot.org/sic_close.png) no-repeat; */
 cursor:pointer;
 padding:7px 0pt 7px 25px;
 position:relative;
@@ -401,6 +404,8 @@ position: relative; cursor: pointer; }
 
 span.date-tab.active div.tab-button { background: #066; }
 .date-widget.all span.date-tab { display: none; }
+
+
 /*
 .date-tab-bar {
   position: relative;
