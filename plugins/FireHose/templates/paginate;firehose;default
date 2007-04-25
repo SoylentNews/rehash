@@ -13,26 +13,24 @@ paginate
 __seclev__
 10000
 __template__
+[% days = []; %]
+[% fh_page = fh_page || "firehose.pl" %]
 [% IF options.orderby == "createtime";
 	day = day || options.startdate;
 	day = day.replace('-','');
 	day = day || Slash.db.getDay(0);
-	days = Slash.getOlderDaysFromDay(day, -1, 3);
+	IF options.startdate;
+		IF options.duration == 1;
+			days = Slash.getOlderDaysFromDay(day, -1, 3);
+		ELSIF options.duration == 7;
+			days = Slash.getOlderDaysFromDay(day, -1, 1, { mode => "week"});
+		ELSIF options.duration == -1;
+			days = [ [ day, "All time"]  ];
+		END;
+	END;
 END %]
 
 
-[%
-fh_page = fh_page || "firehose.pl";
-param_str = ""
-	state_params = ["mode", "type", "primaryskid", "order", "filter", "category"];
-	FOREACH param = state_params;
-		IF form.${param}.defined;
-			param_str = param_str _ "&amp;" _ param _ "=";
-			fp_val = form.${param} | fixparam;
-			param_str = param_str _ fp_val;
-		END;
-	END;
-%]
 [% IF !contentsonly %]
 <div class="paginate" [% IF divid %]id="[% divid %]"[% END %]>
 <ul class="menu" [% IF ulid %]id="[% ulid %]"[% END %]>
@@ -40,26 +38,35 @@ param_str = ""
 [% IF days.size > 0 %]
 	[% FOREACH cur_day = days; %]
 		[% is_base_day = cur_day.0 == day %]
-		<li>[% IF is_base_day && !nopages; "["; END %]<a href="[% gSkin.rootdir %]/[% fh_page %]?issue=[% cur_day.0 %]">[% IF is_base_day %]<b>[% END %][% cur_day.1 %][% IF is_base_day %]</b>[% END %]</a></li>
-		[% IF cur_day.0 == day && !nopages %]
-			[% IF page %] <li><a href=[% gSkin.rootdir %]/[% fh_page %]?page=[% page - 1 %]&amp;issue=[% cur_day.0 %]">&lt;- [% page %]</a></li>[% END %]
-			[% IF page || options.limit == num_items %]
-			<li><a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page %][% param_str %]&amp;issue=[% cur_day.0 %]">[% page + 1 %]</a></li>
+		[% class_str="" %]
+		[% IF is_base_day; class_str = " class='active'"; END %]
+		<li[% class_str %]>
+			<a href="[% gSkin.rootdir %]/[% fh_page %]?startdate=[% cur_day.0 %]">[% cur_day.1 %]</a> 
+			[% IF is_base_day %]
+					[% PROCESS datewidget id='fh_pag_calendar' init='firehose_calendar_init' %]
+				[% PROCESS firehose_pages page = page start_day = options.startdate num_items = num_items fh_page = fh_page options=options %]
 			[% END %]
-			[% IF num_items == options.limit %]
-			<li><a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page + 1%][% param_str %]&amp;issue=[% cur_day.0 %]">[% page + 2 %] -&gt;</a>[% IF is_base_day; "]"; END %]</li>
-			[% END %]
-		[% END %]
+		</li>
 	[% END %]
 [% ELSE %]
+	[% time_label = "";
+	   IF options.duration == -1;
+	   	time_label = "All time: ";
+	   ELSIF options.duratiton == 7;
+	   	time_label = "Last week";
+	   ELSIF options.duration == 1;
+	        time_label = "Last day";
+	   ELSE;
+	   	time_label = "Last " _ options.duration _ " days:";
+	   END;
+	%]
 	[% UNLESS nopages %]
-		[% IF page %] <li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page - 1 %][% param_str %]">&lt;- [% page %]</a></li>[% END %]
-		[% IF page || options.limit == num_items %]
-			<li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page %][% param_str %]">[% page + 1 %]</a></li>
-		[% END %]
-		[% IF num_items == options.limit %]
-			<li><a href="[% gSkin.rootdir %]/firehose.pl?page=[% page + 1%][% param_str %]">[% page + 2 %] -&gt;</a></li>
-		[% END %]
+		<li class="active">
+		[% time_label %]
+		[%  PROCESS datewidget id='fh_pag_calendar' init='firehose_calendar_init' %]
+		[% PROCESS firehose_pages page = page start_day = options.startdate num_items = num_items fh_page = fh_page options=options %]
+		</li>
+
 	[% END %]
 [% END %]
 [% IF !contentsonly %]
