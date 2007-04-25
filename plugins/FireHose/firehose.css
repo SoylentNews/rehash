@@ -404,4 +404,4 @@ span.date-tab.active div.tab-button { background-color: lightblue; }
 .date-widget.all span.date-tab { display: none; }
 .calendar-pane { position: absolute; z-index: 5; }
 
-
+.active { background-color: #333; color: #fff; font-weight: bold }
