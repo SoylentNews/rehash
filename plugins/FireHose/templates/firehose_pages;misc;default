@@ -1,0 +1,20 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+firehose_pages
+__seclev__
+10000
+__template__
+[% IF page %] <a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page - 1 %][% param_str %]">&lt;- [% page %]</a>[% END %]
+[% IF page || num_items == options.limit %]<a class="active" href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page %][% param_str %]"><b>[[% page + 1 %]]</b></a>[% END %]
+[% IF num_items == options.limit %]
+	<a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page + 1%][% param_str %]">[% page + 2 %] -&gt;</a>
+[% END %]

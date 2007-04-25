@@ -16,6 +16,7 @@ template=templates/daybreak;firehose;default
 template=templates/dispFireHose;firehose;default
 template=templates/fhadvprefpane;misc;default
 template=templates/fireHoseForm;misc;default
+template=templates/firehose_pages;misc;default
 template=templates/firehose_tags_top;misc;default
 template=templates/firehose_tabs;misc;default
 template=templates/firehose_options;misc;default
