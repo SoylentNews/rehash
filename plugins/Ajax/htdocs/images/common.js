@@ -130,6 +130,11 @@ function firehose_toggle_advpref() {
 	}
 }
 
+function firehose_open_prefs() {
+	var obj = $('fh_advprefs');
+	obj.className = "";
+}
+
 function toggleIntro(id, toggleid) {
 	var obj = $(id);
 	var toggle = $(toggleid);
@@ -552,7 +557,7 @@ function firehose_set_options(name, value) {
 		if (name == "startdate") {
 			firehose_startdate = value;
 		}
-		if (name == "duration" {
+		if (name == "duration")  {
 			firehose_duration = value;
 		}
 	}
