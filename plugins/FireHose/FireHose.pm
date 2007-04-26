@@ -428,13 +428,6 @@ sub getFireHoseEssentials {
 		}
 	}
 
-	if ($options->{createtime_gte} && !$doublecheck) {
-		push @where, "createtime >= " . $self->sqlQuote($options->{createtime_gte});
-	}
-	if ($options->{last_update_gte} && !$doublecheck) {
-		push @where, "last_update >= " . $self->sqlQuote($options->{last_update_gte});
-	}
-
 	if ($options->{ids}) {
 		return($items, $results) if @{$options->{ids}} < 1;
 		my $id_str = join ",", map { $self->sqlQuote($_) } @{$options->{ids}};
@@ -1684,7 +1677,7 @@ sub getPopLevelForPopularity {
 }
 
 sub listView {
-	my ($self, $lv_opts) = @_;
+	my($self, $lv_opts) = @_;
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
