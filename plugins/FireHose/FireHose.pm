@@ -32,6 +32,7 @@ use Slash::Utility;
 use Slash::Slashboxes;
 use Slash::Tags;
 use Data::JavaScript::Anon;
+use Date::Calc qw(Days_in_Month Add_Delta_YMD);
 
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
@@ -1302,12 +1303,18 @@ sub getAndSetOptions {
 	$mode = $modes->{$mode} ? $mode : "fulltitle";
 	$options->{mode} = $mode;
 	$options->{pause} = $user->{firehose_paused};
-	$options->{duration} = defined $form->{duration} ? $form->{duration} : $user->{firehose_duration};
 
 	if (defined $form->{pause}) {
 		$self->setUser($user->{uid}, { firehose_paused => $form->{pause} ? 1 : 0 });
 		$options->{pause} = $form->{pause} ? 1 : 0;
 	}
+
+	if (defined $form->{duration}) {
+		if ($form->{duration} =~ /-?\d+$/) {
+			$options->{duration} = $form->{duration};
+		}
+	}
+	$options->{duration} = "7" if !$options->{duration};
 
 	if (defined $form->{startdate}) {
 		if ($form->{startdate} =~ /^\d{8}$/) {
@@ -1876,6 +1883,39 @@ sub addDayBreaks {
 	}
 
 	return \@retitems;
+}
+
+sub getOlderMonthsFromDay {
+	my($self, $day, $start, $end) = @_;
+	$day =~ s/-//g;
+	$day ||= $self->getDay(0);
+	my $cur_day = $self->getDay(0);
+
+	my($y, $m, $d) = $day =~/(\d{4})(\d{2})(\d{2})/;
+	my($cy, $cm, $cd) = $cur_day =~/(\d{4})(\d{2})(\d{2})/;
+
+	$d = "01";
+
+	my $days = [];
+
+	for ($start..$end) {
+		my ($ny, $nm, $nd) = Add_Delta_YMD($y, $m, $d, 0, $_, 0);
+		$nm = "0$nm" if $nm < 10;
+		$nd = "0$nd" if $nd < 10;
+		my $the_day = "$ny$nm$nd";
+		if ($the_day le $cur_day || $_ == 0) {
+			my $label = "";
+			if ($ny == $cy) {
+				$label = timeCalc($the_day, "%B", 0);
+			} else {
+				$label = timeCalc($the_day, "%B %Y", 0);
+			}
+			my $num_days = Days_in_Month($ny, $nm);
+			my $active = $_ == 0;
+			push @$days, [ $the_day, $label, $num_days, $active ];
+		}
+	}
+	return $days;
 }
 
 
