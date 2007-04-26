@@ -24,7 +24,6 @@ var fh_colors = Array(0);
 var vendor_popup_timerids = Array(0);
 var vendor_popup_id = 0;
 var fh_slider_init_set = 0;
-var fh_calendar;
 
 function createPopup(xy, titlebar, name, contents, message, onmouseout) {
 	var body = document.getElementsByTagName("body")[0]; 
@@ -1023,8 +1022,7 @@ var firehose_cal_select_handler = function(type,args,obj) {
 
 
 function firehose_calendar_init( widget ) {
-	fh_calendar = widget;
-	fh_calendar.selectEvent.subscribe(firehose_cal_select_handler, fh_calendar, true);
+	widget.selectEvent.subscribe(firehose_cal_select_handler, widget, true);
 }
 
 function firehose_slider_init() {
