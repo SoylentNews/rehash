@@ -2,9 +2,11 @@ __section__
 default
 __description__
 date line with pop-up calendar
-  id = id you want assigned to the outer html element
-  start_mode = one of 'day', 'week', 'since', 'all'
-  init = name of the js function you want called after the date widget has been constructed
+  id          = id you want assigned to the outer html element
+  start_mode  = (optional) one of 'latest', 'day', 'since', 'all'
+  date        = (optional) a string to be interprested by js Date(), initial selected day in the calendar
+  init        = (optional) name of the js function you want called after the date widget has been constructed
+  master      = (optional) id of an existing date widget which this widget must mirror, mutually exclusive to (start_mode, date)
 __title__
 Date Widget
 __page__
@@ -18,17 +20,17 @@ __template__
 <div id="[% id %]" class="date-widget [% start_mode %]">
 <div class="date-tab-bar">
   <select class="date-span-popup" onChange="this._widget.handleRangePopupSelect(this)">
+    <option value="latest" [% IF start_mode=="latest" %]selected[% END %]>latest content</option>
     <option value="day" [% IF start_mode=="day" %]selected[% END %]>day of</option>
-    <option value="week" [% IF start_mode=="week" %]selected[% END %]>week of</option>
     <option value="since" [% IF start_mode=="since" %]selected[% END %]>since</option>
-    <option value="all" [% IF start_mode=="all" %]selected[% END %]>all time</option>
+    <option value="all" [% IF start_mode=="all" %]selected[% END %]>search archives</option>
   </select>
   <span class="day date-tab" onClick="this._widget.handleDateTabClick()"><span class="tab-label"></span><div class="tab-button"></div></span>
 </div>
 <div id="[% id %]-calendar-pane" class="calendar-pane"></div>
 </div>
 <script type="text/javascript">
-  YAHOO.util.Event.addListener(window, "load", function(){ attachDateWidgetTo("[% id %]", "[% start_mode %]" [% IF init; %], undefined, [% init; END %]); });
+  YAHOO.util.Event.addListener(window, "load", function(){ attachDateWidgetTo({id:"[% id %]", mode:"[% start_mode %]" [% IF date; %], date:new Date("[% date %]"); [% END %][% IF init; %], init:[% init; END %]}); });
 </script>
 __seclev__
 10000

@@ -5,7 +5,7 @@ YAHOO.namespace("slashdot");
 
 function _datesToSelector( selectorFormat, dates ) {
   function format( d ) {
-    return selectorFormat(d.getFullYear(), d.getMonth()+1, d.getDate());
+    return selectorFormat(d.getFullYear(), d.getMonth()+1, d.getDate(), d.getDay());
   }
 
   var s = format(dates[0]);
@@ -24,7 +24,30 @@ function _bundleDates( date1, date2 ) {
 }
 
 function datesToHumanReadable( date1, date2 ) {
+  var day_name = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+  function day_ordinal( d ) {
+    switch ( d ) {
+      case 1: case 21: case 31: return d+"st";
+      case 2: case 22:          return d+"nd";
+      case 3: case 23:          return d+"rd";
+      default:                  return d+"th";
+    }
+  }
+
+
   var month_name = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  function minimalHumanReadable( y, m, d, wd ) {
+    var now = new Date();
+    if ( now.getFullYear() == y ) {
+      if ( now.getMonth()+1 == m ) {
+      }
+    }
+  }
+
+  
+
   return _datesToSelector(function(y,m,d){return ""+d+" "+month_name[m-1]+" "+y;}, _bundleDates(date1, date2));
 }
 
@@ -54,14 +77,17 @@ function weekOf( date ) {
 var gOpenCalendarPane = null;
 
 
-YAHOO.slashdot.DateWidget = function( id, mode, date, initCallback ) {
-  if ( date === undefined )
-    date = new Date;
+YAHOO.slashdot.DateWidget = function( params ) { // id, mode, date, initCallback
+  if ( params.master !== undefined ) {
+    var master = document.getElementById(params.master)._widget;
+    params.mode = master._mode;
+    params.date = master.getDate();
+    // also need to listen to master events
+  }
 
-  this._date = date;
-  this._mode = mode;
+  this._mode = (params.mode !== undefined) ? params.mode : "latest";
 
-  var root = document.getElementById(id);
+  var root = document.getElementById(params.id);
   var find1st = function(name, kind) {
     return YAHOO.util.Dom.getElementsByClassName(name, kind, root)[0];
   }
@@ -75,39 +101,55 @@ YAHOO.slashdot.DateWidget = function( id, mode, date, initCallback ) {
   this._calendarPane = find1st('calendar-pane', 'div');
   this.toggleCalendarPane(false);
 
-  var popup = find1st('date-span-popup', 'select');
-    popup._widget = this;
+  this._popup = find1st('date-span-popup', 'select');
+    this._popup._widget = this;
 
-  this._calendar = new YAHOO.widget.Calendar(id+'-calendar-table', this._calendarPane.id, {maxdate:datesToYUISelector(new Date())});
+  this._calendar = new YAHOO.widget.Calendar(params.id+'-calendar-table', this._calendarPane.id, {maxdate:datesToYUISelector(new Date())});
   this._calendar.selectEvent.subscribe(this.handleCalendarSelect, this, true);
 
   root._widget = this;
-  root.setDate = function(d) { widget.setDate(d); }
+  root.setDate = function(d, m) { widget.setDate(d, m); }
   root.getDateRange = function() { return widget.getDateRange(); }
   root.selectEvent = new YAHOO.util.CustomEvent("select");
 
-  this.setDate(date);
+  this.setDate(params.date);
 
-  if ( initCallback !== undefined )
-    initCallback(root);
+  if ( params.init !== undefined )
+    params.init(root);
 }
 
-function attachDateWidgetTo( id, mode, date, initCallback ) {
-  return new YAHOO.slashdot.DateWidget(id, mode, date, initCallback);
+function attachDateWidgetTo( params ) {
+  return new YAHOO.slashdot.DateWidget(params);
 }
 
-YAHOO.slashdot.DateWidget.prototype.setDate = function( date ) {
+YAHOO.slashdot.DateWidget.prototype.setMode = function( newMode ) {
+  var oldMode = this._mode;
+  var modeChanged = (newMode !== undefined) && (newMode != oldMode);
+  if ( modeChanged ) {
+    if ( newMode == "all" )
+      this.toggleCalendarPane(false);
+    YAHOO.util.Dom.replaceClass(this._element, oldMode, newMode);
+    this._mode = newMode;
+    this._popup.value = newMode;
+  }
+  return modeChanged;
+}
+
+YAHOO.slashdot.DateWidget.prototype.setDate = function( date, mode ) {
+  if ( mode !== undefined )
+    this.setMode(mode);
+  if ( date === undefined )
+    date = new Date();
   this._calendar.select(date);
+  this._calendar.render();
 }
 
 YAHOO.slashdot.DateWidget.prototype._setDateFromSelection = function( date ) {
-  this._date = date;
   this._label.innerHTML = datesToHumanReadable(date);
-  this.updateWeekHighlight();
 }
 
 YAHOO.slashdot.DateWidget.prototype.getDate = function() {
-  return this._date;
+  return this._calendar.getSelectedDates()[0];
 }
 
 YAHOO.slashdot.DateWidget.prototype.getDateRange = function() {
@@ -115,12 +157,11 @@ YAHOO.slashdot.DateWidget.prototype.getDateRange = function() {
 
   var start = null;
   if ( this._mode == "since" )
-    start = this._date;
+    start = this.getDate();
   else if ( this._mode == "day" ) {
-    start = this._date;
+    start = this.getDate();
     range.duration = 1;
-  } else if ( this._mode == "week" ) {
-    start = weekOf(this._date)[0];
+  } else if ( this._mode == "latest" ) {
     range.duration = 7;
   }
 
@@ -128,31 +169,6 @@ YAHOO.slashdot.DateWidget.prototype.getDateRange = function() {
     range.startdate = datesToKinoSelector(start);
 
   return range;
-}
-
-YAHOO.slashdot.DateWidget.prototype.updateWeekHighlight = function( date ) {
-  var C = this._calendar;
-  var rendered = false;
-  // if ( weekSelected ) {
-    C.resetRenderers();
-    C.clearAllBodyCellStyles("highlight1");
-    C.render();
-    rendered = true;
-  //  weekSelected = false;
-  //}
-
-  if ( this._mode == "week" ) {
-    if ( date === undefined )
-      date = this.getDate();
-  
-    C.addRenderer(datesToYUISelector(weekOf(date)), C.renderCellStyleHighlight1);
-    C.render();
-    rendered = true;
-    //weekSelected = true;
-  }
-
-  if ( !rendered )
-    C.render();
 }
 
 YAHOO.slashdot.DateWidget.prototype.toggleCalendarPane = function( show ) {
@@ -174,16 +190,7 @@ YAHOO.slashdot.DateWidget.prototype.handleCalendarSelect = function( type, args,
 }
 
 YAHOO.slashdot.DateWidget.prototype.handleRangePopupSelect = function( obj ) {
-  var oldMode = this._mode;
-  var newMode = obj.value;
-  if ( newMode != oldMode ) {
-    if ( newMode == "all" )
-      this.toggleCalendarPane(false);
-    YAHOO.util.Dom.replaceClass(this._element, oldMode, newMode);
-    this._mode = newMode;
-    if ( oldMode == "week" || newMode == "week" )
-      this.updateWeekHighlight();
+  if ( this.setMode(obj.value) )
     this._element.selectEvent.fire(this.getDateRange());
-  }
 }
 
