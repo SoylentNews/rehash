@@ -549,6 +549,12 @@ function firehose_set_options(name, value) {
 
 	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" ) { 
 		params[name] = [value];
+		if (name == "startdate") {
+			firehose_startdate = value;
+		}
+		if (name == "duration" {
+			firehose_duration = value;
+		}
 	}
 
 	var handlers = {
@@ -904,6 +910,7 @@ function firehose_get_updates(options) {
 	params['ids'] = firehose_get_item_idstring();
 	params['updatetime'] = update_time;
 	params['startdate'] = firehose_startdate;
+	params['duration'] = firehose_duration;
 	params['issue'] = firehose_issue;
 	params['page'] = page;
 	params['fh_pageval'] = fh_pageval;
