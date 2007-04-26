@@ -385,7 +385,7 @@ z-index:1000;
 .calheader .calnavright {background-image: url(/images/arrows.png) !important}
 .calheader .calnavleft {background-image: url(/images/arrows.png) !important; background-position: 0 -200px}
 .calendar-pane td.oom {background: #999}
-.calendar {background:transparent url(/images/sic_icons.png) no-repeat scroll 0px -995px; padding-left: 20px;}
+.calendar {background:transparent url(/images/sic_icons.png) no-repeat scroll 0px -995px; padding-left: 20px; padding-top: 8px; padding-bottom: 8px }
 span.date-tab {
 background:transparent url(/images/sic_icons.png) no-repeat scroll 0px -995px; 
 /* close icon background:transparent url(//images.slashdot.org/sic_close.png) no-repeat; */
@@ -407,3 +407,4 @@ ul.menu .date-tab-bar {padding-right: 1em; }
 ul.menu .date-span-popup {font-size: 90%}
 ul.menu .edit, .rssicon {margin-top: 2px;}
 
+#fh_change_range { font-size: 80% }

@@ -40,6 +40,7 @@ __template__
 	 startdate;
      END;
   %]
+  <a name="prefscal"></a>
   [% PROCESS datewidget id='fhcalendar' init='firehose_calendar_init' date=startdate start_mode = start_mode %]
 </td>
 </tr>

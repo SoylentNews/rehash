@@ -25,7 +25,7 @@ __template__
 [% IF options.duration == 7 && !options.startdate %]
 	<li class="active">
 		Recent Content
-		[% PROCESS datewidget id='fh_pag_calendar' init='firehose_calendar_init' %]
+		[% PROCESS datelaunch %]
 		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
 	</li>
 	[%
@@ -48,7 +48,7 @@ __template__
 		IF day == cur_day.0; %]
 			<li class="active">
 				<a href="[% gSkin.rootdir %]/[% fh_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
-				[%  PROCESS datewidget id='fh_pag_calendar' init='firehose_calendar_init' %]
+				[% PROCESS datelaunch %]
 				[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
 			</li>
 		[% ELSE %]
@@ -66,7 +66,7 @@ ELSIF options.startdate && options.duration >= 28 && options.duration <= 31;
 		%]
 		<li class="active">
 			<a href="[% gSkin.rootdir %]/[% fh_page %]?startdate=[% cur_day.0 %]&amp;duration=[% cur_day.2 %]">[% cur_day.1 | strip_literal %]</a>
-			[%  PROCESS datewidget id='fh_pag_calendar' init='firehose_calendar_init' %]
+			[% PROCESS datelaunch %]
 			[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
 		</li>
 		[% ELSE %]
@@ -79,7 +79,7 @@ ELSIF options.startdate && options.duration >= 28 && options.duration <= 31;
 %]
 [% ELSIF options.duration == -1 && !options.startdate %]
 	 <li class="active">Search Archives
-		[%  PROCESS datewidget id='fh_pag_calendar' init='firehose_calendar_init' %]
+		[% PROCESS datelaunch %]
 		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
 	</li>
 [% ELSE %]
@@ -97,7 +97,7 @@ ELSIF options.startdate && options.duration >= 28 && options.duration <= 31;
 	[% UNLESS nopages %]
 		<li class="active">
 		[% time_label %]
-		[%  PROCESS datewidget id='fh_pag_calendar' init='firehose_calendar_init' %]
+		[% PROCESS datelaunch %]
 		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
 		</li>
 
