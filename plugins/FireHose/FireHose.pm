@@ -63,6 +63,7 @@ sub createFireHose {
 
 	$self->sqlInsert("firehose_text", $text_data);
 
+	return $text_data->{id};
 }
 
 sub createUpdateItemFromJournal {
@@ -116,9 +117,9 @@ sub createItemFromJournal {
 	my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
 	if ($journal) {
 		my $globjid = $self->getGlobjidCreate("journals", $journal->{id});
-		my $popularity = $journal->{promotetype} eq "publicize" 
-			? $self->getEntryPopularityForColorLevel(5) 
-			: $self->getEntryPopularityForColorLevel(6);
+		my $publicize = $journal->{promotetype} eq 'publicize';
+		my $color_lvl = $publicize ? 5 : 6;
+		my $popularity = $self->getEntryPopularityForColorLevel($color_lvl);
 		my $type = $user->{acl}{vendor} ? "vendor" : "journal";
 		my $data = {
 			title 			=> $journal->{description},
@@ -136,6 +137,16 @@ sub createItemFromJournal {
 			type			=> $type
 		};
 		$self->createFireHose($data);
+		if ($publicize) {
+			my $constants = getCurrentStatic();
+			my $tags = getObject('Slash::Tags');
+			$tags->createTag({
+				uid		=> $journal->{uid},
+				name		=> $constants->{tags_upvote_tagname},
+				globjid		=> $globjid,
+				private		=> 1,
+			});
+		}
 	}
 
 }
@@ -158,7 +169,6 @@ sub createUpdateItemFromBookmark {
 	if ($count) {
 		# $self->sqlUpdate("firehose", { -popularity => "popularity + 1" }, "globjid=$url_globjid");
 	} else {
-		
 
 		my $data = {
 			globjid 	=> $url_globjid,
@@ -177,6 +187,14 @@ sub createUpdateItemFromBookmark {
 		$self->createFireHose($data)
 	}
 
+	my $constants = getCurrentStatic();
+	my $tags = getObject('Slash::Tags');
+	$tags->createTag({
+		uid			=> $bookmark->{uid},
+		name			=> $constants->{tags_upvote_tagname},
+		globjid			=> $url_globjid,
+		private			=> 1,
+	});
 }
 
 sub createItemFromSubmission {
@@ -206,6 +224,14 @@ sub createItemFromSubmission {
 			name			=> $submission->{name},
 		};
 		$self->createFireHose($data);
+		my $constants = getCurrentStatic();
+		my $tags = getObject('Slash::Tags');
+		$tags->createTag({
+			uid			=> $submission->{uid},
+			name			=> $constants->{tags_upvote_tagname},
+			globjid			=> $globjid,
+			private			=> 1,
+		});
 	}
 
 }
