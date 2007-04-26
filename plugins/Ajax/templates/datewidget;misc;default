@@ -16,7 +16,7 @@ en_US
 __name__
 datewidget
 __template__
-[% IF !start_mode; start_mode = "day"; END %]
+[% IF !start_mode; start_mode = "now"; END %]
 <div id="[% id %]" class="date-widget [% start_mode %]">
 <div class="date-tab-bar">
   <select class="date-span-popup" onChange="this._widget.handleRangePopupSelect(this)">
@@ -29,7 +29,7 @@ __template__
 <div id="[% id %]-calendar-pane" class="calendar-pane"></div>
 </div>
 <script type="text/javascript">
-  YAHOO.util.Event.addListener(window, "load", function(){ attachDateWidgetTo({id:"[% id %]", mode:"[% start_mode %]" [% IF date; %], date:new Date("[% date %]"); [% END %][% IF init; %], init:[% init; END %]}); });
+  YAHOO.util.Event.addListener(window, "load", function(){ attachDateWidgetTo({id:"[% id %]", mode:"[% start_mode %]" [% IF date; %], date:new Date("[% date %]")[% END %][% IF init; %], init:[% init; END %]}); });
 </script>
 __seclev__
 10000
