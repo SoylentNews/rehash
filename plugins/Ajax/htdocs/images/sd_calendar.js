@@ -85,7 +85,7 @@ YAHOO.slashdot.DateWidget = function( params ) { // id, mode, date, initCallback
     // also need to listen to master events
   }
 
-  this._mode = (params.mode !== undefined) ? params.mode : "latest";
+  this._mode = (params.mode !== undefined) ? params.mode : "now";
 
   var root = document.getElementById(params.id);
   var find1st = function(name, kind) {
@@ -156,12 +156,10 @@ YAHOO.slashdot.DateWidget.prototype.getDateRange = function() {
   var range = { duration: -1 };
 
   var start = null;
-  if ( this._mode == "since" )
-    start = this.getDate();
-  else if ( this._mode == "day" ) {
+  if ( this._mode == "day" ) {
     start = this.getDate();
     range.duration = 1;
-  } else if ( this._mode == "latest" ) {
+  } else if ( this._mode == "now" ) {
     range.duration = 7;
   }
 
