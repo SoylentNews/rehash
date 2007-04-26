@@ -15,39 +15,73 @@ __seclev__
 __template__
 [% days = []; %]
 [% fh_page = fh_page || "firehose.pl" %]
-[% IF options.orderby == "createtime";
-	day = day || options.startdate;
-	day = day.replace('-','');
-	day = day || Slash.db.getDay(0);
-	IF options.startdate;
-		IF options.duration == 1;
-			days = Slash.getOlderDaysFromDay(day, -1, 3);
-		ELSIF options.duration == 7;
-			days = Slash.getOlderDaysFromDay(day, -1, 1, { mode => "week"});
-		ELSIF options.duration == -1;
-			days = [ [ day, "All time"]  ];
-		END;
-	END;
-END %]
 
 
 [% IF !contentsonly %]
 <div class="paginate" [% IF divid %]id="[% divid %]"[% END %]>
 <ul class="menu" [% IF ulid %]id="[% ulid %]"[% END %]>
 [% END %]
-[% IF days.size > 0 %]
-	[% FOREACH cur_day = days; %]
-		[% is_base_day = cur_day.0 == day %]
-		[% class_str="" %]
-		[% IF is_base_day; class_str = " class='active'"; END %]
-		<li[% class_str %]>
-			<a href="[% gSkin.rootdir %]/[% fh_page %]?startdate=[% cur_day.0 %]">[% cur_day.1 %]</a> 
-			[% IF is_base_day %]
-					[% PROCESS datewidget id='fh_pag_calendar' init='firehose_calendar_init' %]
-				[% PROCESS firehose_pages page = page start_day = options.startdate num_items = num_items fh_page = fh_page options=options %]
-			[% END %]
+
+[% IF options.duration == 7 && !options.startdate %]
+	<li class="active">
+		Recent Content
+		[% PROCESS datewidget id='fh_pag_calendar' init='firehose_calendar_init' %]
+		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
+	</li>
+	[%
+		day = Slash.db.getDay(0);
+		days = Slash.getOlderDaysFromDay(day, 0, 3, { "show_future_days" => 1});
+		FOREACH cur_day = days;
+		%]
+		<li>
+			<a href="[% gSkin.rootdir %]/[% fh_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
 		</li>
-	[% END %]
+		[%
+		END;
+	%]
+[% ELSIF options.startdate && options.duration == 1;
+	day = day || options.startdate;
+	day = day.replace('-','');
+	day = day || Slash.db.getDay(0);
+	days = Slash.getOlderDaysFromDay(day, -1, 3);
+	FOREACH cur_day = days;
+		IF day == cur_day.0; %]
+			<li class="active">
+				<a href="[% gSkin.rootdir %]/[% fh_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
+				[%  PROCESS datewidget id='fh_pag_calendar' init='firehose_calendar_init' %]
+				[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
+			</li>
+		[% ELSE %]
+			<li>
+				<a href="[% gSkin.rootdir %]/[% fh_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
+			</li>
+		[% END %]
+		
+[%	END;
+ELSIF options.startdate && options.duration >= 28 && options.duration <= 31;
+	firehose = Slash.getObject("Slash::FireHose");
+	days = firehose.getOlderMonthsFromDay(options.startdate,-2, 2);
+	FOREACH cur_day = days;
+		IF cur_day.3 == 1;
+		%]
+		<li class="active">
+			<a href="[% gSkin.rootdir %]/[% fh_page %]?startdate=[% cur_day.0 %]&amp;duration=[% cur_day.2 %]">[% cur_day.1 | strip_literal %]</a>
+			[%  PROCESS datewidget id='fh_pag_calendar' init='firehose_calendar_init' %]
+			[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
+		</li>
+		[% ELSE %]
+		<li>
+			<a href="[% gSkin.rootdir %]/[% fh_page %]?startdate=[% cur_day.0 %]&amp;duration=[% cur_day.2 %]">[% cur_day.1 | strip_literal %]</a>
+		</li>
+		[%
+		END;
+	END;
+%]
+[% ELSIF options.duration == -1 && !options.startdate %]
+	 <li class="active">Search Archives
+		[%  PROCESS datewidget id='fh_pag_calendar' init='firehose_calendar_init' %]
+		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
+	</li>
 [% ELSE %]
 	[% time_label = "";
 	   IF options.duration == -1;
@@ -64,7 +98,7 @@ END %]
 		<li class="active">
 		[% time_label %]
 		[%  PROCESS datewidget id='fh_pag_calendar' init='firehose_calendar_init' %]
-		[% PROCESS firehose_pages page = page start_day = options.startdate num_items = num_items fh_page = fh_page options=options %]
+		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
 		</li>
 
 	[% END %]

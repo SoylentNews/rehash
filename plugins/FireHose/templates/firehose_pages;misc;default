@@ -13,8 +13,15 @@ firehose_pages
 __seclev__
 10000
 __template__
+[% 
+	start_day = options.startdate.replace('/-/');
+	duration = options.duration
+	param_str = "&amp;startdate=$start_day&amp;duration=$duration" 
+%]
+<span class="firehose_paginate">
 [% IF page %] <a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page - 1 %][% param_str %]">&lt;- [% page %]</a>[% END %]
-[% IF page || num_items == options.limit %]<a class="active" href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page %][% param_str %]"><b>[[% page + 1 %]]</b></a>[% END %]
+[% IF page || num_items == options.limit %]<a class="fh_cur_page" href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page %][% param_str %]"><b>[[% page + 1 %]]</b></a>[% END %]
 [% IF num_items == options.limit %]
 	<a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page + 1%][% param_str %]">[% page + 2 %] -&gt;</a>
 [% END %]
+</span>
