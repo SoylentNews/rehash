@@ -4521,20 +4521,15 @@ CREATE TABLE tags_dayofweek (
 	PRIMARY KEY (day)
 ) TYPE=InnoDB;
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # For plugins/FireHose
 ALTER TABLE firehose ADD COLUMN body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL, ADD COLUMN word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL;
 
 # 2007-04-12
 UPDATE vars SET value = 'T_2_5_0_154' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 # For the IM bot. These values should be manually set.
 INSERT INTO vars (name, value, description) VALUES ('im_screenname', '', 'IM message bot screen name');
 INSERT INTO vars (name, value, description) VALUES ('im_password', '', 'IM message bot password, in clear text. This is encrypted upon connecting.');
-
 
 #For plugins/FireHose
 UPDATE ajax_ops SET reskey_name="ajax_user_static" WHERE op="firehose_fetch_text";
@@ -4542,6 +4537,10 @@ ALTER TABLE firehose ADD COLUMN popularity2 float NOT NULL default '0' AFTER pop
 
 # 2007-04-18
 UPDATE vars SET value = 'T_2_5_0_155' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # For plugins/FireHose
 INSERT INTO vars (name, value, description) VALUES ('firehose_userpop_col', 'popularity', 'Column name in firehose table storing popularity as seen by users');

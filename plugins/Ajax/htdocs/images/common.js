@@ -1023,8 +1023,8 @@ function firehose_remove_entry(id) {
 
 var firehose_cal_select_handler = function(type,args,obj) { 
 	var selected = args[0];
-  firehose_set_options('startdate', selected.startdate);
-  firehose_set_options('duration', selected.duration);
+	firehose_set_options('startdate', selected.startdate);
+	firehose_set_options('duration', selected.duration);
 }; 
 
 

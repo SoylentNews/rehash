@@ -10,8 +10,6 @@ __lang__
 en_US
 __name__
 firehose_pages
-__seclev__
-10000
 __template__
 [% 
 	start_day = options.startdate.replace('/-/');
@@ -25,3 +23,7 @@ __template__
 	<a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page + 1%][% param_str %]">[% page + 2 %] -&gt;</a>
 [% END %]
 </span>
+__seclev__
+10000
+__version__
+$Id$
