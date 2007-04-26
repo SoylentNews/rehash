@@ -173,7 +173,7 @@ sub run {
 		next unless $sign;
 		my $extra_pop = $tag_hr->{total_clout} * $sign;
 		my $udc_mult = get_udc_mult($tag_hr->{created_at_ut}, $udc_cache);
-print STDERR "extra_pop for $tag_hr->{tagid}: $extra_pop * $udc_mult\n";
+main::tagboxLog(sprintf("extra_pop for %d: %.6f * %.6f"), $tag_hr->{tagid}, $extra_pop, $udc_mult);
 		$extra_pop *= $udc_mult;
 		$popularity += $extra_pop;
 	}
@@ -190,8 +190,20 @@ print STDERR "extra_pop for $tag_hr->{tagid}: $extra_pop * $udc_mult\n";
 	$firehose_db->setFireHose($fhid, { popularity2 => $popularity });
 }
 
+{ # closure
+my $udc_mult_cache = { };
 sub get_udc_mult {
 	my($time, $cache) = @_;
+
+	# Round off time to the nearest 10 second interval, for caching.
+	$time = int($time/10+0.5)*10;
+	if (defined($udc_mult_cache->{$time})) {
+		main::tagboxLog(sprintf("get_udc_mult %0.3f time %d cached",
+			$udc_mult_cache->{$time}, $time));
+		return $udc_mult_cache->{$time};
+	}
+
+	my $constants = getCurrentStatic();
 	my $prevhour = int($time/3600-1)*3600;
 	my $curhour = $prevhour+3600;
 	my $nexthour = $prevhour+3600;
@@ -213,14 +225,20 @@ sub get_udc_mult {
 	if ($udc == 0) {
 		# This shouldn't happen on a site with any reasonable amount of
 		# up and down voting.  If it does, punt.
-print STDERR "get_udc_mult prev $prevhour $cache->{$prevhour} cur $curhour $cache->{$curhour} next $nexthour $cache->{$nexthour}\n";
-print STDERR "get_udc_mult punting time $time thru $thru_frac p $prevweight c $curweight n $nextweight\n";
+		main::tagboxLog(sprintf("get_udc_mult punting prev %d %.6f cur %d %.6f next %d %.6f time %d thru %.6f prevw %.6f curw %.6f nextw %.6f",
+			$prevhour, $cache->{$prevhour}, $curhour, $cache->{$curhour}, $nexthour,  $cache->{$nexthour},
+			$time, $thru_frac, $prevweight, $curweight, $nextweight));
 		$udc = 1000;
 	}
 	my $udc_mult = 1000/$udc;
-printf STDERR "get_udc_mult %0.3f: time %d p %.3f c %.3f n %.3f th %.3f pw %.3f cw %.3f nw %.3f udc %.3f\n", $udc_mult, $time, $prevudc, $curudc, $nextudc, $thru_frac, $prevweight, $curweight, $nextweight, $udc;
+	my $max_mult = $constants->{tagbox_fhpopularity_maxudcmult} || 5;
+	$udc_mult = $max_mult if $udc_mult > $max_mult;
+	main::tagboxLog(sprintf("get_udc_mult %0.3f time %d p %.3f c %.3f n %.3f th %.3f pw %.3f cw %.3f nw %.3f udc %.3f\n",
+		$udc_mult, $time, $prevudc, $curudc, $nextudc, $thru_frac, $prevweight, $curweight, $nextweight, $udc));
+	$udc_mult_cache->{$time} = $udc_mult;
 	return $udc_mult;
 }
+} # end closure
 
 1;
 

@@ -4547,3 +4547,6 @@ UPDATE vars SET value = 'T_2_5_0_155' WHERE name = 'cvs_tag_currentcode';
 INSERT INTO vars (name, value, description) VALUES ('firehose_userpop_col', 'popularity', 'Column name in firehose table storing popularity as seen by users');
 REPLACE INTO vars (name, value, description) VALUES ('firehose_slice_points', '290,240 220,200 185,175 155,138 102,93 30,25 0,-999999', 'Seven pairs of numbers: the entry score and minimum score for each color slice (last min should be large negative)');
 
+# Update for tagboxes/FHPopularity and/or tagboxes/FHPopularity2
+INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity_maxudcmult', '5', 'Maximum multiplier for an up/down tag based on the tags_udc table');
+

@@ -135,7 +135,7 @@ sub feed_userchanges {
 }
 
 sub run {
-	my($self, $affected_id) = @_;
+	my($self, $affected_id, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
@@ -147,47 +147,51 @@ sub run {
 	# Some target types gain popularity.
 	my($type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
 	my $target_id_q = $self->sqlQuote($target_id);
+
+	my($color_level, $extra_pop) = (0, 0);
 	if ($type eq "submissions") {
-		$popularity = $firehose->getEntryPopularityForColorLevel(5);
+		$color_level = 5;
 	} elsif ($type eq "journals") {
 		my $journal = getObject("Slash::Journal");
 		my $j = $journal->get($target_id);
-		$popularity = $firehose->getEntryPopularityForColorLevel(6);
-		$popularity = $firehose->getEntryPopularityForColorLevel(5) if $j->{promotetype} eq "publicize";
-
+		$color_level = $j->{promotetype} && $j->{promotetype} eq 'publicize'
+			? 5  # requested to be publicized
+			: 6; # not requested
 	} elsif ($type eq 'urls') {
-		my $bookmark_count = $self->sqlCount('bookmarks', "url_id=$target_id_q");
-		my $pop_level = 7;
-		$pop_level = 6 if $self->sqlCount("firehose", "type='feed' AND url_id=$target_id");
-		$popularity = $firehose->getEntryPopularityForColorLevel($pop_level) + $bookmark_count;
+		$extra_pop = $self->sqlCount('bookmarks', "url_id=$target_id_q") || 0;
+		$color_level = $self->sqlCount("firehose", "type='feed' AND url_id=$target_id")
+			? 6  # feed
+			: 7; # nonfeed
 	} elsif ($type eq "stories") {
 		my $story = $self->getStory($target_id);
-		if($story->{story_topics_rendered}{$constants->{mainpage_nexus_tid}}) {
-			# Mainpage
-			$popularity = $firehose->getEntryPopularityForColorLevel(1);
-		} else {
-			# Sectional
-			$popularity = $firehose->getEntryPopularityForColorLevel(2);
-		}
+		$color_level = $story->{story_topics_rendered}{$constants->{mainpage_nexus_tid}}
+			? 1  # mainpage
+			: 2; # sectional
 	}
-	# There's also 'feed' which doesn't get extra points (starts at 1).
+	$popularity = $firehose->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 
 	# Add up nods and nixes.
 	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
 	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
 	my $admins = $self->getAdmins();
-	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
+	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0, $options);
 	$tagsdb->addCloutsToTagArrayref($tags_ar);
+	my $udc_cache = { };
 	for my $tag_hr (@$tags_ar) {
+		next if $options->{starting_only};
 		my $sign = 0;
-		$sign =  1 if $tag_hr->{tagnameid} == $upvoteid;
-		$sign = -1 if $tag_hr->{tagnameid} == $downvoteid;
+		$sign =  1 if $tag_hr->{tagnameid} == $upvoteid   && !$options->{downvote_only};
+		$sign = -1 if $tag_hr->{tagnameid} == $downvoteid && !$options->{upvote_only};
 		next unless $sign;
 		my $seclev = exists $admins->{ $tag_hr->{uid} }
 			? $admins->{ $tag_hr->{uid} }{seclev}
 			: 1;
 		my $editor_mult = $seclev >= 100 ? ($constants->{tagbox_fheditorpop_edmult} || 10) : 1;
-		$popularity += $tag_hr->{total_clout} * $editor_mult * $sign;
+		my $extra_pop = $tag_hr->{total_clout} * $editor_mult * $sign;
+		my $udc_mult = get_udc_mult($tag_hr->{created_at_ut}, $udc_cache);
+main::tagboxLog(sprintf("extra_pop for %d: %.6f * %.6f"), $tag_hr->{tagid}, $extra_pop, $udc_mult);
+		$extra_pop *= $udc_mult;
+		$popularity += $extra_pop;
 	}
 
 	# Set the corresponding firehose row to have this popularity.
@@ -195,9 +199,62 @@ sub run {
 	my $fhid = $self->sqlSelect('id', 'firehose', "globjid = $affected_id_q");
 	my $firehose_db = getObject('Slash::FireHose');
 	warn "Slash::Tagbox::FHEditorPop->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
+	if ($options->{return_only}) {
+		return $popularity;
+	}
 	main::tagboxLog("FHEditorPop->run setting $fhid ($affected_id) to $popularity");
 	$firehose_db->setFireHose($fhid, { editorpop => $popularity });
 }
+
+{ # closure
+my $udc_mult_cache = { };
+sub get_udc_mult {
+	my($time, $cache) = @_;
+
+	# Round off time to the nearest 10 second interval, for caching.
+	$time = int($time/10+0.5)*10;
+	if (defined($udc_mult_cache->{$time})) {
+		main::tagboxLog(sprintf("get_udc_mult %0.3f time %d cached",
+			$udc_mult_cache->{$time}, $time));
+		return $udc_mult_cache->{$time};
+	}
+
+	my $constants = getCurrentStatic();
+	my $prevhour = int($time/3600-1)*3600;
+	my $curhour = $prevhour+3600;
+	my $nexthour = $prevhour+3600;
+	my $tagsdb = getObject('Slash::Tags');
+	$cache->{$prevhour} = $tagsdb->sqlSelect('udc', 'tags_udc', "hourtime=FROM_UNIXTIME($prevhour)")
+		if !defined $cache->{$prevhour};
+	$cache->{$curhour}  = $tagsdb->sqlSelect('udc', 'tags_udc', "hourtime=FROM_UNIXTIME($curhour)")
+		if !defined $cache->{$curhour};
+	$cache->{$nexthour} = $tagsdb->sqlSelect('udc', 'tags_udc', "hourtime=FROM_UNIXTIME($nexthour)")
+		if !defined $cache->{$nexthour};
+	my $prevudc = $cache->{$prevhour};
+	my $curudc  = $cache->{$curhour};
+	my $nextudc = $cache->{$nexthour};
+	my $thru_frac = ($time-$prevhour)/3600;
+	my $prevweight = ($thru_frac > 0.5) ? 0 : 0.5-$thru_frac;
+	my $nextweight = ($thru_frac < 0.5) ? 0 : $thru_frac-0.5;
+	my $curweight = 1-($prevweight+$nextweight);
+	my $udc = $prevudc*$prevweight + $curudc*$curweight + $nextudc*$nextweight;
+	if ($udc == 0) {
+		# This shouldn't happen on a site with any reasonable amount of
+		# up and down voting.  If it does, punt.
+		main::tagboxLog(sprintf("get_udc_mult punting prev %d %.6f cur %d %.6f next %d %.6f time %d thru %.6f prevw %.6f curw %.6f nextw %.6f",
+			$prevhour, $cache->{$prevhour}, $curhour, $cache->{$curhour}, $nexthour,  $cache->{$nexthour},
+			$time, $thru_frac, $prevweight, $curweight, $nextweight));
+		$udc = 1000;
+	}
+	my $udc_mult = 1000/$udc;
+	my $max_mult = $constants->{tagbox_fhpopularity_maxudcmult} || 5;
+	$udc_mult = $max_mult if $udc_mult > $max_mult;
+	main::tagboxLog(sprintf("get_udc_mult %0.3f time %d p %.3f c %.3f n %.3f th %.3f pw %.3f cw %.3f nw %.3f udc %.3f\n",
+		$udc_mult, $time, $prevudc, $curudc, $nextudc, $thru_frac, $prevweight, $curweight, $nextweight, $udc));
+	$udc_mult_cache->{$time} = $udc_mult;
+	return $udc_mult;
+}
+} # end closure
 
 1;
 
