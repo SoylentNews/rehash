@@ -382,12 +382,12 @@ z-index:1000;
 .calendar-pane td.selected, .calendar-pane td.today.selected {background: #066; font-weight: bold}
 .calheader {color: #fff; background:#004444 url(//images.slashdot.org/article-title-bg.png) repeat-x scroll left top;}
 .calheader a {padding:1px 4px 0pt; background-repeat: no-repeat;}
-.calheader .calnavright {background-image: url(/images/arrows.png) !important}
-.calheader .calnavleft {background-image: url(/images/arrows.png) !important; background-position: 0 -200px}
+.calheader .calnavright {background-image: url(//images.slashdot.org/arrows.png) !important}
+.calheader .calnavleft {background-image: url(//images.slashdot.org/arrows.png) !important; background-position: 0 -200px}
 .calendar-pane td.oom {background: #999}
-.calendar {background:transparent url(/images/sic_icons.png) no-repeat scroll 0px -995px; padding-left: 20px; padding-top: 8px; padding-bottom: 8px }
+.calendar {background:transparent url(//images.slashdot.org/sic_icons.png) no-repeat scroll 0px -995px; padding-left: 20px; padding-top: 8px; padding-bottom: 8px }
 span.date-tab {
-background:transparent url(/images/sic_icons.png) no-repeat scroll 0px -995px; 
+background:transparent url(//images.slashdot.org/sic_icons.png) no-repeat scroll 0px -995px; 
 /* close icon background:transparent url(//images.slashdot.org/sic_close.png) no-repeat; */
 cursor:pointer;
 padding:7px 0pt 7px 25px;
