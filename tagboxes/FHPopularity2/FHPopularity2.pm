@@ -173,7 +173,7 @@ sub run {
 		next unless $sign;
 		my $extra_pop = $tag_hr->{total_clout} * $sign;
 		my $udc_mult = get_udc_mult($tag_hr->{created_at_ut}, $udc_cache);
-main::tagboxLog(sprintf("extra_pop for %d: %.6f * %.6f"), $tag_hr->{tagid}, $extra_pop, $udc_mult);
+main::tagboxLog(sprintf("extra_pop for %d: %.6f * %.6f", $tag_hr->{tagid}, $extra_pop, $udc_mult));
 		$extra_pop *= $udc_mult;
 		$popularity += $extra_pop;
 	}
@@ -186,7 +186,7 @@ main::tagboxLog(sprintf("extra_pop for %d: %.6f * %.6f"), $tag_hr->{tagid}, $ext
 	if ($options->{return_only}) {
 		return $popularity;
 	}
-	main::tagboxLog("FHPopularity2->run setting $fhid ($affected_id) to $popularity");
+	main::tagboxLog(sprintf("FHPopularity2->run setting %d (%d) to %.6f", $fhid, $affected_id, $popularity));
 	$firehose_db->setFireHose($fhid, { popularity2 => $popularity });
 }
 
