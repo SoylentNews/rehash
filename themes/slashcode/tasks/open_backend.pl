@@ -9,15 +9,15 @@ use Slash;
 use Slash::XML;
 use Slash::Constants ':slashd';
 
-use vars qw( %task $me );
-
-my %redirects;
+use vars qw( %task $me %redirects );
 
 $task{$me}{timespec} = '0-59/10 * * * *';
 $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
+
+	load_redirects();
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $max_items = $constants->{rss_max_items_outgoing} || 10;
@@ -100,7 +100,7 @@ sub _do_rss {
 
 	my @items = map { { story => $_ } } @$stories;
 	if ($constants->{rss_no_public_static}) {
-		my $newurl = $redirects{$filename};
+		my $newurl = $redirects{$filename} || "(none for $filename)";
 		unshift @items, {
 			introtext	=> sprintf('This URL is no longer valid.  Please update your bookmarks to the new URL: %s', $newurl),
 			title		=> 'Please Update Your Bookmarks',
@@ -164,6 +164,7 @@ EOT
 	save2file("$constants->{basedir}/$file.xml", $x, \&fudge);
 }
 
+sub load_redirects {
 %redirects = (
 	'apache.rss'        => 'http://rss.slashdot.org/Slashdot/slashdotApache',
 	'apple.rss'         => 'http://rss.slashdot.org/Slashdot/slashdotApple',
@@ -231,6 +232,7 @@ EOT
 	'tacohell.atom'     => 'http://rss.slashdot.org/Slashdot/slashdotTacohellatom',
 	'yro.atom'          => 'http://rss.slashdot.org/Slashdot/slashdotYroatom',
 );
+}
 
 1;
 
