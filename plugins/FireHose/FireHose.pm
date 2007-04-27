@@ -462,7 +462,7 @@ sub getFireHoseEssentials {
 
 	# XXX Update to support timezones eventually
 	my $dur_q = $self->sqlQuote($options->{duration});
-	my $st_q  = $self->sqlQuote(timeCalc($options->{startdate},"%Y-%m-%d %T"));
+	my $st_q  = $self->sqlQuote(timeCalc($options->{startdate},"%Y-%m-%d %T", -$user->{off_set}));
 
 	if ($options->{startdate}) {
 		push @where, "createtime >= $st_q";
