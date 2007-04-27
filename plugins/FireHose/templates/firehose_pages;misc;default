@@ -12,7 +12,7 @@ __name__
 firehose_pages
 __template__
 [% 
-	start_day = options.startdate.replace('/-/');
+	start_day = options.startdate.replace('-');
 	duration = options.duration
 	param_str = "&amp;startdate=$start_day&amp;duration=$duration" 
 %]
