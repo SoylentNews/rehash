@@ -4538,8 +4538,6 @@ ALTER TABLE firehose ADD COLUMN popularity2 float NOT NULL default '0' AFTER pop
 # 2007-04-18
 UPDATE vars SET value = 'T_2_5_0_155' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # For plugins/FireHose
@@ -4551,4 +4549,6 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity_
 
 # 2007-04-26
 UPDATE vars SET value = 'T_2_5_0_156' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
