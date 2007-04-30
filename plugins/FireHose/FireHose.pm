@@ -990,7 +990,15 @@ sub ajaxFireHoseGetUpdates {
 	}
 
 
-	$html->{"fh-paginate"} = slashDisplay("paginate", { contentsonly => 1, day => $last_day , page => $form->{page}, options => $opts, ulid => "fh-paginate", divid => "fh-pag-div", num_items => $num_items, fh_page => $base_page }, { Return => 1, Page => "firehose"});
+	my $html2split = slashDisplay("paginate", { contentsonly => 1, day => $last_day , page => $form->{page}, options => $opts, ulid => "fh-paginate", divid => "fh-pag-div", num_items => $num_items, fh_page => $base_page, split_refresh => 1 }, { Return => 1, Page => "firehose"});
+
+	my ($beforewidget, $afterwidget) = split('<!-- split -->', $html2split);
+
+	$html->{beforewidget} = $beforewidget;
+	$html->{afterwidget} = $afterwidget;
+	
+	$html->{firehose_pages} = slashDisplay("firehose_pages", { page => $form->{page}, num_items => $num_items, fh_page => $base_page, options => $opts, contentsonly => 1}, { Return => 1});
+
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
 

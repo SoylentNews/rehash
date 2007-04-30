@@ -19,69 +19,94 @@ __template__
 
 [% IF !contentsonly %]
 <div class="paginate" [% IF divid %]id="[% divid %]"[% END %]>
-<ul class="menu" [% IF ulid %]id="[% ulid %]"[% END %]>
+<div class="menu" [% IF ulid %]id="[% ulid %]"[% END %]>
 [% END %]
 
 [% IF options.duration == 7 && !options.startdate %]
-	<li class="active">
-		Recent Content
-		[% PROCESS datelaunch %]
-		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
-	</li>
-	[%
-		day = Slash.db.getDay(0);
-		days = Slash.getOlderDaysFromDay(day, 0, 3, { "show_future_days" => 1});
+	[% day = Slash.db.getDay(0) %]
+	[% IF !split_refresh %]<span id="beforewidget">[% END %]
+	<span class="inactive">
+		<a href="[% gSkin.rootdir %]/[% fh_page %]">Today</a>
+	</span>
+	[% IF !split_refresh %]</span>[% END %]
+	[% IF split_refresh %]<!-- split -->[% END %]
+	[% IF !split_refresh %]
+	<span class="active">
+		[% PROCESS datewidget id='fhcalendar_pag' init='firehose_calendar_init' start_mode = "latest" %]
+		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options contentsonly = 0 %]
+	</span>
+	[% END %]
+	[% days = Slash.getOlderDaysFromDay(day, 1, 3, { "show_future_days" => 1}); %]
+		[% IF !split_refresh %]<span id="afterwidget">[% END %]
+		[%
 		FOREACH cur_day = days;
 		%]
-		<li>
+		<span class="inactive">
 			<a href="[% gSkin.rootdir %]/[% fh_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
-		</li>
-		[%
-		END;
-	%]
+		</span>
+		[% END %]
+		[% IF !split_refresh %]</span>[% END %]
 [% ELSIF options.startdate && options.duration == 1;
 	day = day || options.startdate;
 	day = day.replace('-','');
 	day = day || Slash.db.getDay(0);
-	days = Slash.getOlderDaysFromDay(day, -1, 3);
-	FOREACH cur_day = days;
+	days = Slash.getOlderDaysFromDay(day, -1, 3); %]
+	[% IF !split_refresh %]<span class="beforewidget">[% END %]
+	[% FOREACH cur_day = days;
 		IF day == cur_day.0; %]
-			<li class="active">
-				<a href="[% gSkin.rootdir %]/[% fh_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
-				[% PROCESS datelaunch %]
+			[% IF !split_refresh %]</span>[% END %]
+			[% IF !split_refresh %]
+			<span class="active">
+				[% PROCESS datewidget id='fhcalendar_pag' init='firehose_calendar_init' start_mode = "day" %]
 				[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
-			</li>
+			</span>
+			[% END %]
+			[% IF split_refresh %]<!-- split -->[% END %]
+			[% IF !split_refresh %]<span class="afterwidget">[% END %]
 		[% ELSE %]
-			<li>
+			<span>
 				<a href="[% gSkin.rootdir %]/[% fh_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
-			</li>
+			</span>
 		[% END %]
 		
-[%	END;
-ELSIF options.startdate && options.duration >= 28 && options.duration <= 31;
+[%	END %]
+[% IF !split_refresh %]</span>[% END %]
+[% ELSIF options.startdate && options.duration >= 28 && options.duration <= 31;
 	firehose = Slash.getObject("Slash::FireHose");
 	days = firehose.getOlderMonthsFromDay(options.startdate,-2, 2);
 	FOREACH cur_day = days;
 		IF cur_day.3 == 1;
 		%]
-		<li class="active">
+		<span class="active">
 			<a href="[% gSkin.rootdir %]/[% fh_page %]?startdate=[% cur_day.0 %]&amp;duration=[% cur_day.2 %]">[% cur_day.1 | strip_literal %]</a>
 			[% PROCESS datelaunch %]
 			[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
-		</li>
+		</span>
 		[% ELSE %]
-		<li>
+		<span>
 			<a href="[% gSkin.rootdir %]/[% fh_page %]?startdate=[% cur_day.0 %]&amp;duration=[% cur_day.2 %]">[% cur_day.1 | strip_literal %]</a>
-		</li>
+		</span>
 		[%
 		END;
 	END;
 %]
 [% ELSIF options.duration == -1 && !options.startdate %]
-	 <li class="active">Search Archives
-		[% PROCESS datelaunch %]
+	[% IF !split_refresh %]<span class="beforewidget">[% END %]
+	<span class="inactive">
+		<a href="[% gSkin.rootdir %]/[% fh_page %]">Today</a>
+	</span>
+	[% IF !split_refresh %]
+	</span>
+	 <span class="active">
+		[% PROCESS datewidget id='fhcalendar_pag' init='firehose_calendar_init' start_mode = "all" %]
 		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
-	</li>
+	</span>
+	[% END %]
+	[% IF split_refresh %]<!-- split -->[% END %]
+	[% IF !split_refresh %]
+	<span class="afterwidget">
+	</span>
+	[% END %]
 [% ELSE %]
 	[% time_label = "";
 	   IF options.duration == -1;
@@ -95,16 +120,16 @@ ELSIF options.startdate && options.duration >= 28 && options.duration <= 31;
 	   END;
 	%]
 	[% UNLESS nopages %]
-		<li class="active">
+		<span class="active">
 		[% time_label %]
 		[% PROCESS datelaunch %]
 		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
-		</li>
+		</span>
 
 	[% END %]
 [% END %]
 [% IF !contentsonly %]
-</ul>
+</div>
 </div>
 [% END %]
 __version__
