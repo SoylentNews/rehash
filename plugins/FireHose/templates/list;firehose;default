@@ -102,7 +102,6 @@ __template__
 
      IF options.startdate;
      	 startdate = options.startdate.substr(5, 2) _ '/' _ options.startdate.substr(8,2) _ '/' _ options.startdate.substr(0, 4);
-	 startdate;
      END;
   %]
   			[% PROCESS datewidget id='fhcalendar' init='firehose_calendar_init' date=startdate start_mode = start_mode %]
