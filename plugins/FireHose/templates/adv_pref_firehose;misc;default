@@ -25,23 +25,12 @@ __template__
 
 </td>
 <td valign="top" id="fhdatepane">
-  [% startdate = "";
-     start_mode = "";
-     IF options.duration == 7 && !options.startdate;
-     	start_mode = "latest";
-     ELSIF options.duration == 1 && options.startdate;
-         start_mode = "day";
-     ELSIF options.duration == -1 && !options.startdate;
-         start_mode = "all";
-     END;
-
-     IF options.startdate;
-     	 startdate = options.startdate.substr(5, 2) _ '/' _ options.startdate.substr(8,2) _ '/' _ options.startdate.substr(0, 4);
-	 startdate;
-     END;
-  %]
+	[% IF user.is_admin %]
+	User mode?
+	<input type="hidden" name="setusermode" value="1">
+	<input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]> 
+	[% END %]
   <a name="prefscal"></a>
-  [% PROCESS datewidget id='fhcalendar' init='firehose_calendar_init' date=startdate start_mode = start_mode %]
 </td>
 </tr>
 <tr><td colspan="2">
