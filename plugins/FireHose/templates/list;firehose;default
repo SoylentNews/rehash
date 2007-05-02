@@ -84,7 +84,7 @@ __template__
 	<form action="[% gSkin.rootdir %]/firehose.pl" method="get" name="firehoseform">
 		<fieldset>
 			<legend>Firehose</legend>
-			<label><input type="text" class="slashdot-tag-completer" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="30" autocomplete="off" onfocus="attachCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose-filter', 0)" id="firehose-filter"></label>
+			<label><input type="text" class="slashdot-tag-completer" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="24" autocomplete="off" onfocus="attachCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose-filter', 0)" id="firehose-filter"></label>
 <div id="colorsliderbg">
 	<div id="colorsliderthumb"><img src="[% constants.imagedir %]/slidethumb.png" alt="Filter firehose to" id="fh_slider_img" title="Filter firehose to"></div>
 </div>
