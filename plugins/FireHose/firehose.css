@@ -116,7 +116,7 @@ ul.menu#fhtablist
 	background: transparent !important;
 }
 
-ul.menu#fhtablist li.active, .paginate li.active
+ul.menu#fhtablist li.active
 {
 	background: #444;
 	border: 1px solid #666;
@@ -126,16 +126,27 @@ ul.menu#fhtablist li.active, .paginate li.active
 	padding: .3em 0 .3em 0 !important;
 	position: relative;
 }
+.paginate .active
+{
+        background: #444; 
+        border: 1px solid #666;
+        border-bottom: 1px solid #777;
+        border-left: 1px solid #777;
+        padding: .3em !important;
+	margin: 0 .3em;
+}
+.paginate .inactive {padding: .6em !important;}
 
-ul.menu#fhtablist li.active a, .paginate li.active a
+ul.menu#fhtablist li.active a, .paginate .active a
 {
 	color: #aaa;
 	text-decoration: none;
 }
 
-ul.menu#fhtablist li.active:before, .paginate li.active:before { content: ""; }
-
-
+ul.menu#fhtablist li.active:before, .paginate .active:before { content: ""; }
+#beforewidget, .paginate span.active {float: left}
+.day.date-tab.active {float: none}
+#beforewidget span, #afterwidget span {line-height:270% !important}
 
 /* Pagination */
 .daybreak,
@@ -143,7 +154,9 @@ ul.menu#fhtablist li.active:before, .paginate li.active:before { content: ""; }
 .paginate { margin-right: 18.5em; }
 
 .admin .paginate { margin-right: 0; }
-.paginate ul.menu { background: url('//images.slashdot.org/corner_w_br.png') right bottom no-repeat; }
+.paginate .menu { background: url('//images.slashdot.org/corner_w_br.png') right bottom no-repeat; 
+height:2.9em;
+padding-top:0.4em;}
 
 
 /* Articles */
@@ -402,9 +415,11 @@ ul.menu a img {margin: 0 -8px -4px 4px}
 #fhtabdel {background:transparent url(//images.slashdot.org/sic_close.png) no-repeat; position: relative; margin: 0 0 0 5px;padding: 2px 24px 10px 2px}
 #fhtabdel a {position: absolute; text-indent: -7000em; width: 10px}
 
-ul.menu #fh_pag_calendar, ul.menu .date-tab-bar, ul.menu .tab-button  {display: inline}
-ul.menu .date-tab-bar {padding-right: 1em; }
-ul.menu .date-span-popup {font-size: 90%}
-ul.menu .edit, .rssicon {margin-top: 2px;}
+.menu #fh_pag_calendar, .menu .date-tab-bar, .menu .tab-button  {display: inline}
+.menu .date-tab-bar {padding-right: 1em; }
+.menu .date-span-popup {font-size: 90%}
+.menu .edit, .rssicon {margin-top: 2px;}
+
+#fh_change_range { font-size: 80% }
 
 #fh_change_range { font-size: 80% }
