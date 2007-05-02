@@ -170,7 +170,6 @@ task=tasks/set_gse_min_stoid.pl
 task=tasks/set_recent_topics.pl
 task=tasks/spamarmor.pl
 task=tasks/url_checker.pl
-task=tasks/im_messages.pl
 template=templates/admin;menu;default
 template=templates/articlemoved;misc;default
 template=templates/autocomplete;misc;default
