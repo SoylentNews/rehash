@@ -1035,7 +1035,7 @@ var firehose_cal_select_handler = function(type,args,obj) {
 
 
 function firehose_calendar_init( widget ) {
-	widget.selectEvent.subscribe(firehose_cal_select_handler, widget, true);
+	widget.changeEvent.subscribe(firehose_cal_select_handler, widget, true);
 }
 
 function firehose_slider_init() {

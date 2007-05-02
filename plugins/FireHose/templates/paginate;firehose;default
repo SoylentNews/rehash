@@ -32,7 +32,7 @@ __template__
 	[% IF split_refresh %]<!-- split -->[% END %]
 	[% IF !split_refresh %]
 	<span class="active">
-		[% PROCESS datewidget id='fhcalendar_pag' init='firehose_calendar_init' start_mode = "latest" %]
+		[% PROCESS datewidget id='fhcalendar_pag' peer = 'fhcalendar' init='firehose_calendar_init' %]
 		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options contentsonly = 0 %]
 	</span>
 	[% END %]
@@ -57,7 +57,7 @@ __template__
 			[% IF !split_refresh %]</span>[% END %]
 			[% IF !split_refresh %]
 			<span class="active">
-				[% PROCESS datewidget id='fhcalendar_pag' init='firehose_calendar_init' start_mode = "day" %]
+				[% PROCESS datewidget id='fhcalendar_pag' peer = 'fhcalendar' init='firehose_calendar_init' %]
 				[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
 			</span>
 			[% END %]
@@ -98,7 +98,7 @@ __template__
 	[% IF !split_refresh %]
 	</span>
 	 <span class="active">
-		[% PROCESS datewidget id='fhcalendar_pag' init='firehose_calendar_init' start_mode = "all" %]
+		[% PROCESS datewidget id='fhcalendar_pag' peer = 'fhcalendar' init='firehose_calendar_init' %]
 		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
 	</span>
 	[% END %]

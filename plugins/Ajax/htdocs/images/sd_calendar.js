@@ -64,6 +64,8 @@ function datesToKinoSelector( date1, date2 ) {
   return _datesToSelector(formatter, _bundleDates(date1, date2));
 }
 
+// Kino format to YUI format: "20070428".replace(/(....)(..)(..)/, "$2/$3/$1")
+
 function weekOf( date ) {
   var dayStart = new Date(datesToYUISelector(date));
   var dayCount = Math.round(dayStart.getTime() / 86400000);
@@ -77,12 +79,18 @@ function weekOf( date ) {
 var gOpenCalendarPane = null;
 
 
-YAHOO.slashdot.DateWidget = function( params ) { // id, mode, date, initCallback
-  if ( params.master !== undefined ) {
-    var master = document.getElementById(params.master)._widget;
-    params.mode = master._mode;
-    params.date = master.getDate();
-    // also need to listen to master events
+YAHOO.slashdot.DateWidget = function( params ) {
+  this.init(params);
+}
+
+YAHOO.slashdot.DateWidget.prototype.init = function( params ) { // id, mode, date, initCallback
+  var peer = null;
+  if ( params.peer !== undefined ) {
+    peer = document.getElementById(params.peer);
+    params.mode = peer._widget._mode;
+    params.date = peer._widget.getDate();
+
+    this.subscribeToPeer(peer);
   }
 
   this._mode = (params.mode !== undefined) ? params.mode : "now";
@@ -110,9 +118,14 @@ YAHOO.slashdot.DateWidget = function( params ) { // id, mode, date, initCallback
   root._widget = this;
   root.setDate = function(d, m) { widget.setDate(d, m); }
   root.getDateRange = function() { return widget.getDateRange(); }
-  root.selectEvent = new YAHOO.util.CustomEvent("select");
+  root.changeEvent = new YAHOO.util.CustomEvent("change");
+
+  this._muteEvents = 0;
 
   this.setDate(params.date);
+
+  if ( peer )
+    peer._widget.subscribeToPeer(this._element);
 
   if ( params.init !== undefined )
     params.init(root);
@@ -120,6 +133,23 @@ YAHOO.slashdot.DateWidget = function( params ) { // id, mode, date, initCallback
 
 function attachDateWidgetTo( params ) {
   return new YAHOO.slashdot.DateWidget(params);
+}
+
+YAHOO.slashdot.DateWidget.prototype.muteEvents = function() {
+  ++this._muteEvents;
+}
+
+YAHOO.slashdot.DateWidget.prototype.unmuteEvents = function() {
+  --this._muteEvents;
+}
+
+YAHOO.slashdot.DateWidget.prototype._reportChanged = function() {
+  if ( ! this._muteEvents )
+    this._element.changeEvent.fire(this.getDateRange(), this._mode, this.getDate());
+}
+
+YAHOO.slashdot.DateWidget.prototype.subscribeToPeer = function( peer ) {
+  peer.changeEvent.subscribe(this.handlePeerChange, this, true);
 }
 
 YAHOO.slashdot.DateWidget.prototype.setMode = function( newMode ) {
@@ -132,20 +162,39 @@ YAHOO.slashdot.DateWidget.prototype.setMode = function( newMode ) {
     this._mode = newMode;
     this._popup.value = newMode;
   }
+
+  if ( modeChanged )
+    this._reportChanged();
+
   return modeChanged;
 }
 
 YAHOO.slashdot.DateWidget.prototype.setDate = function( date, mode ) {
-  if ( mode !== undefined )
-    this.setMode(mode);
-  if ( date === undefined )
-    date = new Date();
-  this._calendar.select(date);
-  this._calendar.render();
+  this.muteEvents();
+    var modeChanged = false;
+    if ( mode !== undefined )
+      modeChanged = this.setMode(mode);
+  
+    if ( date === undefined )
+      date = new Date();
+    this._calendar.select(date);
+    this._calendar.render();
+    var dateChanged = this._setDateFromSelection(date);
+  this.unmuteEvents();
+
+  if ( dateChanged || modeChanged )
+    this._reportChanged();
 }
 
 YAHOO.slashdot.DateWidget.prototype._setDateFromSelection = function( date ) {
-  this._label.innerHTML = datesToHumanReadable(date);
+  var oldLabel = this._label.innerHTML;
+  var newLabel = datesToHumanReadable(date);
+  var labelChanged = oldLabel != newLabel;
+  if ( labelChanged ) {
+    this._label.innerHTML = newLabel;
+    this._reportChanged();
+  }
+  return labelChanged;
 }
 
 YAHOO.slashdot.DateWidget.prototype.getDate = function() {
@@ -184,11 +233,16 @@ YAHOO.slashdot.DateWidget.prototype.handleDateTabClick = function() {
 
 YAHOO.slashdot.DateWidget.prototype.handleCalendarSelect = function( type, args, obj ) {
   this._setDateFromSelection(this._calendar._toDate(args[0][0]));
-  this._element.selectEvent.fire(this.getDateRange());
+  this.toggleCalendarPane(false);
 }
 
 YAHOO.slashdot.DateWidget.prototype.handleRangePopupSelect = function( obj ) {
-  if ( this.setMode(obj.value) )
-    this._element.selectEvent.fire(this.getDateRange());
+  this.setMode(obj.value);
+}
+
+YAHOO.slashdot.DateWidget.prototype.handlePeerChange = function( type, args, obj ) {
+  this.muteEvents();
+    this.setDate(args[2], args[1]);
+  this.unmuteEvents();
 }
 

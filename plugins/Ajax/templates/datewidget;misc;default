@@ -6,7 +6,7 @@ date line with pop-up calendar
   start_mode  = (optional) one of 'now', 'day', or 'all'
   date        = (optional) a string to be interprested by js Date(), initial selected day in the calendar
   init        = (optional) name of the js function you want called after the date widget has been constructed
-  master      = (optional) id of an existing date widget which this widget must mirror, mutually exclusive to (start_mode, date)
+  peer        = (optional) id of an existing date widget which this widget must mirror, mutually exclusive to (start_mode, date)
 __title__
 Date Widget
 __page__
@@ -29,7 +29,7 @@ __template__
 <div id="[% id %]-calendar-pane" class="calendar-pane"></div>
 </div>
 <script type="text/javascript">
-  YAHOO.util.Event.addListener(window, "load", function(){ attachDateWidgetTo({id:"[% id %]", mode:"[% start_mode %]" [% IF date; %], date:new Date("[% date %]")[% END %][% IF init; %], init:[% init; END %]}); });
+  YAHOO.util.Event.addListener(window, "load", function(){ attachDateWidgetTo({id:"[% id %]", [% IF peer; %]peer:"[% peer %]"[% ELSE %]mode:"[% start_mode %]"[% IF date; %], date:new Date("[% date %]")[% END %][% END %][% IF init; %], init:[% init; END %]}); });
 </script>
 __seclev__
 10000
