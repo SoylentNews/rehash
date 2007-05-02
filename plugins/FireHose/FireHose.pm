@@ -137,7 +137,7 @@ sub createItemFromJournal {
 			type			=> $type
 		};
 		$self->createFireHose($data);
-		if ($publicize) {
+		if ($publicize && !isAnon($journal->{uid})) {
 			my $constants = getCurrentStatic();
 			my $tags = getObject('Slash::Tags');
 			$tags->createTag({
@@ -187,14 +187,16 @@ sub createUpdateItemFromBookmark {
 		$self->createFireHose($data)
 	}
 
-	my $constants = getCurrentStatic();
-	my $tags = getObject('Slash::Tags');
-	$tags->createTag({
-		uid			=> $bookmark->{uid},
-		name			=> $constants->{tags_upvote_tagname},
-		globjid			=> $url_globjid,
-		private			=> 1,
-	});
+	if (!isAnon($bookmark->{uid})) {
+		my $constants = getCurrentStatic();
+		my $tags = getObject('Slash::Tags');
+		$tags->createTag({
+			uid			=> $bookmark->{uid},
+			name			=> $constants->{tags_upvote_tagname},
+			globjid			=> $url_globjid,
+			private			=> 1,
+		});
+	}
 }
 
 sub createItemFromSubmission {
@@ -224,14 +226,16 @@ sub createItemFromSubmission {
 			name			=> $submission->{name},
 		};
 		$self->createFireHose($data);
-		my $constants = getCurrentStatic();
-		my $tags = getObject('Slash::Tags');
-		$tags->createTag({
-			uid			=> $submission->{uid},
-			name			=> $constants->{tags_upvote_tagname},
-			globjid			=> $globjid,
-			private			=> 1,
-		});
+		if (!isAnon($submission->{uid})) {
+			my $constants = getCurrentStatic();
+			my $tags = getObject('Slash::Tags');
+			$tags->createTag({
+				uid			=> $submission->{uid},
+				name			=> $constants->{tags_upvote_tagname},
+				globjid			=> $globjid,
+				private			=> 1,
+			});
+		}
 	}
 
 }
@@ -677,7 +681,7 @@ sub rejectItem {
 	my $item = $firehose->getFireHose($id);
 	if ($item) {
 		$firehose->setFireHose($id, { rejected => "yes" });
-		if ($item->{globjid}) {
+		if ($item->{globjid} && !isAnon($user->{uid})) {
 			my $downvote = $constants->{tags_downvote_tagname} || 'nix';
 			$tags->createTag({
 				uid	=>	$user->{uid},
@@ -690,7 +694,7 @@ sub rejectItem {
 		if ($item->{type} eq "submission") {
 			if ($item->{srcid}) {
 				my $n_q = $firehose->sqlQuote($item->{srcid});
-				my $uid = getCurrentUser('uid');
+				my $uid = $user->{uid};
 				my $rows = $firehose->sqlUpdate('submissions',
 					{ del => 1 }, "subid=$n_q AND del=0"
 				);
