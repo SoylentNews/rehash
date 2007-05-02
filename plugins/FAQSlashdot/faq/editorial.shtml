@@ -24,7 +24,7 @@
         </small></em></p>
 
 <h2><a name="ed101" id="ed101">How do I add a "Slashdot It" link to my own page?</a></h2>
-        <p>You can add a small javascript link to your site to allow readers to automatically submit a story a story to Slashdot for story consideration.  This link will work for both logged in Slashdot users and anonymous submittors, however, only logged in Slashdot users will have the option to write their own summary of your story.</p>
+        <p>You can add a small javascript link to your site to allow readers to automatically submit a story to Slashdot for story consideration.  This link will work for both logged in Slashdot users and anonymous submittors, however, only logged in Slashdot users will have the option to write their own summary of your story.</p>
         <p>The following html can be pasted directly into your page to add the "Slashdot It" link to your page.
         	<xmp><!-- Start Slashdot It link -->
 <a href="javascript:location.href='http://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">
