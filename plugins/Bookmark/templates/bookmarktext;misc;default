@@ -15,7 +15,7 @@ __seclev__
 __template__
 <br>
 	 <p>You can also add a small javascript link to your site to allow
-	 readers to automatically submit a story a story to [% constants.sitename %] for story
+	 readers to automatically submit a story to [% constants.sitename %] for story
 	 consideration.  This link will work for both logged in  users
 	 and anonymous submittors, however, only logged in [% constants.sitename %] users will
 	 have the option to write their own summary of your story.</p>
