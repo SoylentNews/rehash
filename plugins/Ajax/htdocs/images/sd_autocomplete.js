@@ -456,11 +456,20 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onClick = function( e, me )
 YAHOO.slashdot.AutoCompleteWidget.prototype._onItemSelectEvent = function( type, args, me )
   {
     var tagname = args[2];
-    var p = me._callbackParams;
-    if ( p.action0 !== undefined ) p.action0(tagname, p);
-    me._hide();
+    if ( tagname !== undefined && tagname !== null ) {
+      if ( typeof tagname != 'string' )
+        tagname = tagname[0];
 
-    if ( p.action1 !== undefined ) p.action1(tagname, p);
+      var p = me._callbackParams;
+      if ( p.action0 !== undefined )
+        p.action0(tagname, p);
+      me._hide();
+      if ( p.action1 !== undefined )
+        p.action1(tagname, p);
+
+    } else {
+      me._hide();
+    }
   }
 
 YAHOO.slashdot.AutoCompleteWidget.prototype._onTextboxBlurEvent = function( type, args, me )
@@ -472,7 +481,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onTextboxBlurEvent = function( type
 
 YAHOO.slashdot.AutoCompleteWidget.prototype._onTextboxKeyUp = function( e, me )
   {
-    if ( me._callbackParams.delayAutoHighlight )
+    if ( me._callbackParams && me._callbackParams.delayAutoHighlight )
       {
         me._callbackParams.delayAutoHighlight = false;
         me._completer.autoHighlight = true;
