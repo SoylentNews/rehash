@@ -17,9 +17,8 @@ use vars qw(%task $me $task_exit_flag $password);
 $task{$me}{timespec} = '* * * * *';
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
+	my($virtual_user, $constants, $slashdb, $user) = @_;
 
-	my ($virtual_user, $constants, $slashdb, $user) = @_;
-	
 	my $screenname = $constants->{im_screenname} || '';
 	if (!length($screenname)) {
 		slashdLog("No im_screenname, so this task would not be useful -- sleeping permanently");
@@ -41,15 +40,15 @@ $task{$me}{code} = sub {
 	my $sysmessage_code = $messages_obj->getDescription("messagecodes", "System Messages");
 	my $sysmessage_ops = $messages_obj->getMessageCode($sysmessage_code);
 	my $admins = $slashdb->getAdmins();
-	
-	my $online = 0;	
+
+	my $online = 0;
 	my $oscar = Net::OSCAR->new();
 	$oscar->set_callback_auth_challenge(\&auth_challenge);
 	$oscar->set_callback_signon_done(sub { ++$online; });
 	$oscar->set_callback_error(\&error);
 	$oscar->signon(screenname => $screenname, password => undef);
 	$oscar->timeout(35);
-	
+
 	my $retry_counter = 0;
 	my $max_remark_id = 0;
 	my $start_time = time();
@@ -89,44 +88,43 @@ $task{$me}{code} = sub {
 			foreach my $id (sort keys %{$messages{$message_type}}) {
 				if ($message_type eq "remarks") {
 					foreach my $admin (keys %$admins) {
-						next if(getUserMessageDeliveryPref($admins->{$admin}->{'uid'}, $sysmessage_code) != $im_mode);
+						next if getUserMessageDeliveryPref(
+							$admins->{$admin}{'uid'},
+							$sysmessage_code) != $im_mode;
 
-						my $nick = $slashdb->getUser($admins->{$admin}->{'uid'}, 'aim');
+						my $nick = $slashdb->getUser($admins->{$admin}{'uid'}, 'aim');
 						next if !$nick;
-						
-						$oscar->send_im($nick, $messages{$message_type}->{$id}->{'remark'});
+
+						$oscar->send_im($nick, $messages{$message_type}->{$id}{'remark'});
 						sleep(2);
-						
 					}
 				}
 
 				if ($message_type eq "message_drop") {
-					next if(getUserMessageDeliveryPref(
-						$messages{$message_type}->{$id}->{'user'},
-						$messages{$message_type}->{$id}->{'code'}) != $im_mode);
+					next if getUserMessageDeliveryPref(
+						$messages{$message_type}->{$id}{'user'},
+						$messages{$message_type}->{$id}{'code'}) != $im_mode;
 
-					my $nick = $slashdb->getUser($messages{$message_type}->{$id}->{'user'}, 'aim');
+					my $nick = $slashdb->getUser($messages{$message_type}->{$id}{'user'}, 'aim');
 					next if !$nick;
 
-					#$oscar->send_im($nick, $messages{$message_type}->{$id}->{'message'});
+					#$oscar->send_im($nick, $messages{$message_type}->{$id}{'message'});
 					sleep(2);
-					
-					#$slashdb->sqlDelete("message_drop", "id = " . $messages{$message_type}->{$id}->{'id'});
+
+					#$slashdb->sqlDelete("message_drop", "id = " . $messages{$message_type}->{$id}{'id'});
 				}
 			}
 		}
 	}
 
 	$oscar->signoff();
-	
-	return;
 
+	return;
 };
 
 
 sub getMessageCodesByType {
-
-	my ($type) = @_;
+	my($type) = @_;
 	my @message_codes = ();
 
 	my $slashdb = getCurrentDB();
@@ -135,59 +133,50 @@ sub getMessageCodesByType {
 	my $delivery_codes =
 		$slashdb->sqlSelectAllHashref("code", "code, delivery_bvalue", "message_codes", "delivery_bvalue >= $code");
 	foreach my $delivery_code (keys %$delivery_codes) {
-		push(@message_codes, $delivery_codes->{$delivery_code}->{"code"})
-			if ($delivery_codes->{$delivery_code}->{"delivery_bvalue"} & $code);
+		push(@message_codes, $delivery_codes->{$delivery_code}{"code"})
+			if ($delivery_codes->{$delivery_code}{"delivery_bvalue"} & $code);
 	}
 
 	return(@message_codes);
-
 }
 
 
 sub getMessageDeliveryByName {
-
-	my ($name) = @_;
+	my($name) = @_;
 
 	my $slashdb = getCurrentDB();
 	my $name_q = $slashdb->sqlQuote($name);
 	my $code = $slashdb->sqlSelect("code", "message_deliverymodes", "name = $name_q");
 
 	return($code);
-
 }
 
 
 sub getUserMessageDeliveryPref {
-
-	my ($uid, $code) = @_;
+	my($uid, $code) = @_;
 
 	my $slashdb = getCurrentDB();
 	my $pref = $slashdb->sqlSelect("mode", "users_messages", "uid = $uid and code = $code");
 
 	return($pref || 0);
-	
 }
 
 sub auth_challenge {
-
-	my ($oscar, $challenge, $hash) = @_;
+	my($oscar, $challenge, $hash) = @_;
 
 	my $md5 = Digest::MD5->new;
 	$md5->add($challenge);
 	$md5->add($password);
 	$md5->add($hash);
 	$oscar->auth_response($md5->digest, 1);
-
 }
 
 
 sub error {
-
 	my($oscar, $connection, $errno, $error, $fatal) = @_;
 
 	slashdLog("Received error '$error'");
 	$task_exit_flag = 1 if $fatal;
-
 }
 
 1;
