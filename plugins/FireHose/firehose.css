@@ -425,3 +425,4 @@ ul.menu a img {margin: 0 -8px -4px 4px}
 #fh_change_range { font-size: 80% }
 .firemenu .date-tab-bar {float: right; margin: -2em 1em 0 40em; padding-bottom: .5em}
 .firemenu #fhcalendar-calendar-pane {right: 1em}
+#fhcalendar_pag {float: left !important}
