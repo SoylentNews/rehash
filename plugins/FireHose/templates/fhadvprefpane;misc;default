@@ -13,11 +13,7 @@ fhadvprefpane
 __seclev__
 10000
 __template__
-<table>
-<tr>
-	<td>Click to toggle option</td>
-	<td></td>
-</tr>
+<table width="100%">
 <tr>
 	<td>
 		[% paused = 0;
@@ -34,6 +30,26 @@ __template__
 		[% END %]
 	</td>
 	<td>Toggles between a paused or dynamically updating Firehose</td>
+	<td rowspan="4">
+<input type="checkbox" name="nodates" onchange="firehose_set_options('nodates', !this.checked)" [% IF !options.nodates; constants.markup_checked_attribute; END %]> Show Dates<br>
+<input type="checkbox" name="nobylines" onchange="firehose_set_options('nobylines', !this.checked)" [% IF !options.nobylines; constants.markup_checked_attribute; END %]> Show Bylines <br>
+	[% IF user.is_admin %]
+	<input type="hidden" name="setusermode" value="1">
+	<input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]> User Mode
+	[% END %]
+	<div align="right">
+<form method="post">
+<input type="hidden" name="fhfilter" value="">
+<input type="hidden" name="color" value="indigo">
+<input type="hidden" name="orderby" value="createtime">
+<input type="hidden" name="orderdir" value="DESC">
+<input type="hidden" name="mode" value="fulltitle">
+<input type="hidden" name="pause" value="1">
+<input type="hidden" name="duration" value="7">
+<input type="submit" value="Reset to Defaults">
+</form>
+</div>
+	</td>
 </tr>
 <tr>
 	<td>
@@ -66,17 +82,7 @@ __template__
 	<td>Choose if you want your Firehose ordered by date
 	or popularity</td>
 </tr>
-<tr>
-<td colspan="2">Show dates <input type="checkbox" name="nodates" onchange="firehose_set_options('nodates', !this.checked)" [% IF !options.nodates; constants.markup_checked_attribute; END %]>
-Show bylines<input type="checkbox" name="nobylines" onchange="firehose_set_options('nobylines', !this.checked)" [% IF !options.nobylines; constants.markup_checked_attribute; END %]>
-	[% IF user.is_admin %]
-	User mode
-	<input type="hidden" name="setusermode" value="1">
-	<input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]> 
-	[% END %]
 
-</td>
-</tr>
 </table>
 __version__
 $Id$

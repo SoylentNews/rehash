@@ -24,18 +24,6 @@ __template__
 
 
 </td>
-<tr><td align="right">
-<form method="post">
-<input type="hidden" name="fhfilter" value="">
-<input type="hidden" name="color" value="indigo">
-<input type="hidden" name="orderby" value="createtime">
-<input type="hidden" name="orderdir" value="DESC">
-<input type="hidden" name="mode" value="fulltitle">
-<input type="hidden" name="pause" value="1">
-<input type="hidden" name="duration" value="7">
-<input type="submit" value="Reset to Defaults">
-</form>
-</td>
 </tr>
 </table>
 [% IF !nowrapper %]

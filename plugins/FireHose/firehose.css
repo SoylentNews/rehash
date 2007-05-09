@@ -85,10 +85,11 @@ input
 
 
 #fhadvprefpane span { 
-	padding-left: 20px; width: 80px; 
+	padding-left: 30px; width: 90px; 
 	display: block;
         background: url('//images.slashdot.org/sic_controls.png') no-repeat;
 	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
+	cursor: pointer;
 }
 
 #fhadvprefpane a { color: white}
