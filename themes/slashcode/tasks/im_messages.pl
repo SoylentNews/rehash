@@ -40,7 +40,8 @@ $task{$me}{code} = sub {
 	my $sysmessage_code = $messages_obj->getDescription("messagecodes", "System Messages");
 	my $sysmessage_ops = $messages_obj->getMessageCode($sysmessage_code);
 	my $admins = $slashdb->getAdmins();
-
+	my $sidprefix = "$constants->{absolutedir_secure}/article.pl?sid=";
+	
 	my $online = 0;
 	my $oscar = Net::OSCAR->new();
 	$oscar->set_callback_auth_challenge(\&auth_challenge);
@@ -56,10 +57,10 @@ $task{$me}{code} = sub {
 		$oscar->do_one_loop();
 
 		# Wait until we're fully online (signon_done() is called).
-		# Try to connect once per second for 15 iterations.
+		# Try to connect once per second for 25 iterations.
 		if (!$online) {
-			if ($retry_counter++ == 15) {
-				slashdLog("Exceeded 15 connect retries. -- exiting.");
+			if ($retry_counter++ == 25) {
+				slashdLog("Exceeded 25 connect retries. -- exiting.");
 				return;
 			}
 			sleep(1);
@@ -76,7 +77,7 @@ $task{$me}{code} = sub {
 		# Pull out remarks and record the last remark seen (if this feature is active).
 		if ($code_in_str =~ /$sysmessage_code/) {
 			$messages{'remarks'} = $slashdb->sqlSelectAllHashref(
-				"rid", "rid, remark", "remarks",
+				"rid", "rid, stoid, remark", "remarks",
 				"(type = 'system') and
 				(UNIX_TIMESTAMP(time) >= $start_time) and
 				(rid > $max_remark_id)");
@@ -95,6 +96,11 @@ $task{$me}{code} = sub {
 						my $nick = $slashdb->getUser($admins->{$admin}{'uid'}, 'aim');
 						next if !$nick;
 
+						if ($messages{$message_type}->{$id}{'stoid'}) {
+							my $story = $slashdb->getStory($messages{$message_type}->{$id}{'stoid'});
+							$messages{$message_type}->{$id}{'remark'} .= " $sidprefix$story->{sid}";
+						}
+							
 						$oscar->send_im($nick, $messages{$message_type}->{$id}{'remark'});
 						sleep(2);
 					}
