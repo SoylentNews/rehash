@@ -62,6 +62,12 @@ input
 .paginate li.active, #fhtablist li.active { font-weight: bold; }
 .paginate a, #fhtablist a { padding: 0 .3em; }
 .paginate, #fhtablist { margin: 0; }
+#firehose_pages a { color: #bbb; border: 1px solid #444; background: #444; padding: 3px !important; }
+#firehose_pages a:hover { color: #ccc; border: 1px solid #666; background: #555;}
+#firehose_pages a.fh_cur_page { margin: 0; color: #fff !important; border: 1px solid #555; background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x;}
+#firehose_pages a b {color: #888; font-size: 130%; font-family: georgia; sans-serif}
+#fhcalendar_pag {float: left !important;}
+
 
 .options a
 {
@@ -425,8 +431,6 @@ ul.menu a img {margin: 0 -8px -4px 4px}
 #fh_change_range { font-size: 80% }
 .firemenu .date-tab-bar {float: right; margin: -2em 1em 0 40em; padding-bottom: .5em}
 .firemenu #fhcalendar-calendar-pane {right: 1em}
-
-#fhcalendar_pag {float: left !important}
 
 #login_cover {
 	background-color: #666;
