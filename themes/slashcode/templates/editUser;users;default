@@ -73,7 +73,8 @@ __template__
 				<input type="text" name="playing" value="[% useredit.playing | strip_attribute %]" size="40">
 			[%- END - %]
 			[% PROCESS formLabel value => 'AIM' %]
-			<input type="text" name="aim" value="[% useredit.aim | strip_attribute %]" size="40">
+			<input type="text" name="aim" value="[% useredit.aim | strip_attribute %]" size="40"><br>
+			<div class="notes">Do not make this AIM nick public <input type="checkbox" name="aimdisplay" value="1"[% IF useredit.aimdisplay %] checked="checked" [% END %]></div>
 			[% PROCESS formLabel value => 'ICQ UIN' %]
 			<input type="text" name="icq" value="[% useredit.icq | strip_attribute %]" size="40">
 			[% PROCESS formLabel value => 'Yahoo! ID' %]
