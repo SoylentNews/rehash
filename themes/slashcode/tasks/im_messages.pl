@@ -41,7 +41,7 @@ $task{$me}{code} = sub {
 	my $sysmessage_ops = $messages_obj->getMessageCode($sysmessage_code);
 	my $admins = $slashdb->getAdmins();
 	my $sidprefix = "$constants->{absolutedir_secure}/article.pl?sid=";
-	
+
 	my $online = 0;
 	my $oscar = Net::OSCAR->new();
 	$oscar->set_callback_auth_challenge(\&auth_challenge);
@@ -100,7 +100,7 @@ $task{$me}{code} = sub {
 							my $story = $slashdb->getStory($messages{$message_type}->{$id}{'stoid'});
 							$messages{$message_type}->{$id}{'remark'} .= " $sidprefix$story->{sid}";
 						}
-							
+
 						$oscar->send_im($nick, $messages{$message_type}->{$id}{'remark'});
 						sleep(2);
 					}
