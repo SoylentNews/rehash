@@ -16,6 +16,7 @@ __template__
 [% INCLUDE linkrel %]
 </head>
 <body>
+<div id="top_parent"></div>
 [% IF user.is_admin %]
 	<div id="adminmenu">
         	<small>

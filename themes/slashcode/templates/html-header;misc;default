@@ -28,30 +28,29 @@ __template__
 [% IF file.ie_cond %]<!--[if [% file.ie_cond %]]>[% END %]<link rel="[% file.rel %]" type="[% file.type %]" media="[% file.media %]" href="[% IF constants.css_use_imagedir; constants.imagedir; ELSE; constants.rootdir; END %]/[% file.file %]?[% constants.cvs_tag_currentcode %]"[% IF file.title %] title="[% file.title %]"[% END %]>[% IF file.ie_cond %]<![endif]-->[% END %]
 [% END -%]
 [%- IF constants.plugin.Ajax %]
-	[%- IF !user.is_anon -%]
-<script src="[% constants.imagedir %]/prototype.js?[% constants.cvs_tag_currentcode %]"         type="text/javascript"></script>
-<script src="[% constants.imagedir %]/yui/yahoo.js?[% constants.cvs_tag_currentcode %]"         type="text/javascript"></script>
-<script src="[% constants.imagedir %]/yui/dom.js?[% constants.cvs_tag_currentcode %]"           type="text/javascript"></script>
-<script src="[% constants.imagedir %]/yui/event.js?[% constants.cvs_tag_currentcode %]"         type="text/javascript"></script>
-<script src="[% constants.imagedir %]/yui/dragdrop.js?[% constants.cvs_tag_currentcode %]"      type="text/javascript"></script>
+<script src="[% constants.imagedir %]/prototype.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/yahoo.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/dom.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/event.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/dragdrop.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/animation.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [%- IF user.currentPage == "firehose" || user.currentPage == "console" -%]
 <script src="[% constants.imagedir %]/yui/slider.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [%- END -%]
-<script src="[% constants.imagedir %]/yui/connection.js?[% constants.cvs_tag_currentcode %]"    type="text/javascript"></script>
-<script src="[% constants.imagedir %]/yui/autocomplete.js?[% constants.cvs_tag_currentcode %]"  type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/connection.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/calendar.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/sd_autocomplete.js?[% constants.cvs_tag_currentcode %]"   type="text/javascript"></script>
-<script src="[% constants.imagedir %]/sd_calendar.js?[% constants.cvs_tag_currentcode %]"   type="text/javascript"></script>
+<script src="[% constants.imagedir %]/sd_autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/sd_calendar.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [%- IF user.currentPage == "firehose" -%]
 <script src="[% constants.imagedir %]/slashbox.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [%- END -%]
-<script src="[% constants.imagedir %]/common.js?[% constants.cvs_tag_currentcode %]"            type="text/javascript"></script>
+<script src="[% constants.imagedir %]/common.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 	[%- IF user.is_admin %]
-<script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]"             type="text/javascript"></script>
+<script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 	[% END %]
 [% PROCESS ajax_reskey_tag reskey_label => 'reskey_static', reskey_name => 'ajax_user_static', reskey_tag_js => 2 %]
-	[% END %]
-[% END %]
+[% END # constants.plugin.Ajax %]
 __seclev__
 10000
 __version__

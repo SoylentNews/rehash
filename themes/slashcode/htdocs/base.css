@@ -16,6 +16,10 @@ sup
 	padding: 0;
 }
 
+#top_parent {
+	border: 1px solid transparent;
+}
+
 a { color: #600; }
 a:visited { color: #000; }
 a:hover { text-decoration: none; }
