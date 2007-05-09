@@ -16,7 +16,7 @@ __template__
 [% IF !nowrapper %]
 <div id="fh_advprefs" class="hide">
 [% END %]
-<table cellpadding="3">
+<table cellpadding="3" width="100%">
 <tr>
 <td valign="top" id="fhadvprefpane">
 
@@ -24,16 +24,7 @@ __template__
 
 
 </td>
-<td valign="top" id="fhdatepane">
-	[% IF user.is_admin %]
-	User mode?
-	<input type="hidden" name="setusermode" value="1">
-	<input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]> 
-	[% END %]
-  <a name="prefscal"></a>
-</td>
-</tr>
-<tr><td colspan="2">
+<tr><td align="right">
 <form method="post">
 <input type="hidden" name="fhfilter" value="">
 <input type="hidden" name="color" value="indigo">
@@ -41,7 +32,7 @@ __template__
 <input type="hidden" name="orderdir" value="DESC">
 <input type="hidden" name="mode" value="fulltitle">
 <input type="hidden" name="pause" value="1">
-<input type="hidden" name="duration" value="1">
+<input type="hidden" name="duration" value="7">
 <input type="submit" value="Reset to Defaults">
 </form>
 </td>

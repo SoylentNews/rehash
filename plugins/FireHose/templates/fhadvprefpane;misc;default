@@ -15,31 +15,69 @@ __seclev__
 __template__
 <table>
 <tr>
-<td valign="top">
-Automatic Updates: </td>
-<td><span class="advpref" id="advplay"></span>On</td><td><input type="radio" name="pause" value="0" onclick="firehose_set_options('pause','0')" [% IF !options.pause; constants.markup_checked_attribute; END %]></td>
-<td><span class="advpref" id="advpause"></span> Off</td><td><input type="radio" name="pause" value="1" onclick="firehose_set_options('pause','1')" [% IF options.pause; constants.markup_checked_attribute; END %]></td>
+	<td>Click to toggle option</td>
+	<td></td>
 </tr>
+<tr>
+	<td>
+		[% paused = 0;
+	   	IF form.pause.defined;
+			paused = form.pause;
+		ELSE;
+			paused = user.firehose_paused;
+		END;
+		%]
+		[% IF paused %]
+			<span id="advplay" onclick="firehose_play()"><a href="#">Paused</a></span>
+		[% ELSE %]
+			<span id="advpause" onclick="firehose_pause()"><a href="#">Updating</a></span>
+		[% END %]
+	</td>
+	<td>Toggles between a paused or dynamically updating Firehose</td>
+</tr>
+<tr>
+	<td>
+		[% IF options.mode == "fulltitle" || !options.mode %]
+			<span id="advabbrev" onclick="firehose_set_options('mode','full')"><a href="#">Headlines</a></span>
+		[% ELSE %]
+			<span id="advfull"  onclick="firehose_set_options('mode','fulltitle')"><a href="#">Full Article</a></span>
+		[% END %]
+	</td>
+	<td>Display stories in a brief or verbose format</td>
+</tr>
+<tr>
+	<td>
+		[% IF options.orderdir == "ASC" %]
+			<span id="advdesc"  onclick="firehose_set_options('orderdir','DESC')"><a href="#">Ascending</a></span>
+		[% ELSE %]
+			<span id="advasc" onclick="firehose_set_options('orderdir','ASC')"><a href="#">Descending</a></span>
+		[% END %]
+	</td>
+	<td>Forwards or Backwards.  You be the call!</td>
+</tr>
+<tr>
+	<td>
+		[% IF options.orderby == "popularity" || options.orderby == "editorpop" %]
+			<span id="advpopularity" onclick="firehose_set_options('orderby','createtime')"><a href="#">Popularity</a></span>
+		[% ELSE  %]
+			<span id="advtime" onclick="firehose_set_options('orderby','popularity')"><a href="#">Time</a></span>
+		[% END %]
+	</td>
+	<td>Choose if you want your Firehose ordered by date
+	or popularity</td>
+</tr>
+<tr>
+<td colspan="2">Show dates <input type="checkbox" name="nodates" onchange="firehose_set_options('nodates', !this.checked)" [% IF !options.nodates; constants.markup_checked_attribute; END %]>
+Show bylines<input type="checkbox" name="nobylines" onchange="firehose_set_options('nobylines', !this.checked)" [% IF !options.nobylines; constants.markup_checked_attribute; END %]>
+	[% IF user.is_admin %]
+	User mode
+	<input type="hidden" name="setusermode" value="1">
+	<input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]> 
+	[% END %]
 
-<tr>
-<td>Order by </td>
-<td><span class="advpref" id="advpop"></span>Popularity</td><td><input type="radio" name="orderby" value="popularity"   onclick="firehose_set_options('orderby','popularity')"[% IF options.orderby == "popularity" || options.orderby == "editorpop"; constants.markup_checked_attribute; END %]></td>
-<td><span class="advpref" id="advtime"></span> Time</td><td><input type="radio" name="orderby" value="createtime"   onclick="firehose_set_options('orderby','createtime')" [% IF options.orderby == "createtime"; constants.markup_checked_attribute; END %]></td>
-</tr>
-<tr>
-<td>Order direction:</td>
-<td><span class="advpref" id="advasc"></span>Descending</td><td><input type="radio" name="orderdir" value="DESC" onclick="firehose_set_options('orderdir','DESC')"[% IF options.orderdir == "DESC"; constants.markup_checked_attribute; END %]></td>
-<td><span class="advpref" id="advdesc"></span>Ascending</td><td><input type="radio" name="orderdir" value="ASC"  onclick="firehose_set_options('orderdir','ASC')" [% IF options.orderdir == "ASC"; constants.markup_checked_attribute; END %]></td>
-</tr>
-<tr>
-<td>Article View</td>
-<td><span class="advpref" id="advfull"></span>Full Article</td><td><input type="radio" name="mode" value="full"  onclick="firehose_set_options('mode','full')" [% IF options.mode == "full"; constants.markup_checked_attribute; END %]></td>
-<td><span class="advpref" id="advabbrev"></span>Headlines Only</td><td> <input type="radio" name="mode" value="fulltitle"  onclick="firehose_set_options('mode','fulltitle')" [% IF options.mode == "fulltitle" || !options.mode; constants.markup_checked_attribute; END %]></td>
-</tr>
-<tr>
-<td>Hide dates</td><td><input type="checkbox" name="nodates" onchange="firehose_set_options('nodates', this.checked)" [% IF options.nodates; constants.markup_checked_attribute; END %]></td>
-<td>Hide bylines</td><td><input type="checkbox" name="nobylines" onchange="firehose_set_options('nobylines', this.checked)" [% IF options.nobylines; constants.markup_checked_attribute; END %]></td>
+</td>
 </tr>
 </table>
 __version__
 $Id$
+
