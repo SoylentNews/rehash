@@ -37,7 +37,7 @@ __template__
 	|
 
 [% IF user.is_anon %]
-		<a href="[% gSkin.rootdir %]/users.pl">Log in/Create an Account</a>
+		<a href="[% gSkin.rootdir %]/users.pl">Log In/Create an Account</a>
 [% ELSE %]
 		<a href="[% gSkin.rootdir %]/users.pl?op=editcomm">Preferences</a>
 [% END %]

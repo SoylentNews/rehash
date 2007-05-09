@@ -41,7 +41,7 @@ __template__
 		<form action="[% env.script_name %]" method="get">
 			<fieldset>
 				<legend>
-					Login
+					Log In
 				</legend>
 				<input type="hidden" name="op" value="userlogin">
 				<label>

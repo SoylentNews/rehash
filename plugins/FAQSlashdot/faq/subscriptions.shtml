@@ -102,7 +102,7 @@
                 <li>You may have exceeded the daily amount of ads you've set to suppress. See <a href="subscriptions.shtml#ss1500">How can I control how many ads I suppress daily?</a></li>
                 <li>Check the <a href="http://slashdot.org/subscribe.pl">subscriptions</a> page and make sure that you have "No Ads" turned on where you don't want ads to show up.</li>
                 <li>Slashdot pages that are <em>static</em>, like the faq, always serve ads.</li>
-                <li>If you're looking at a subsection of Slashdot like <a href="http://apple.slashdot.org">apple.slashdot.org</a>, make sure that you login. If you want subsections of slashdot to remember you, you'll have to initially login to one of the subsections.</li>
+                <li>If you're looking at a subsection of Slashdot like <a href="http://apple.slashdot.org">apple.slashdot.org</a>, make sure that you log in. If you want subsections of slashdot to remember you, you'll have to initially log in to one of the subsections.</li>
                 <li>We could be experiencing technical difficulties and we've turned on a static front page.</li>
         </ul>
         <p><strong>If you are a subscriber and saw an ad, it will not count against your subscription.</strong> If you are <em>sure</em> that pages on which you are seeing ads are incrementing your "used up" count on <a href="/subscribe.pl">subscribe.pl</a>, that's a serious bug -- please <a href="http://sourceforge.net/tracker/?func=add&amp;group_id=4421&amp;atid=104421">let us know</a> immediately (Category: Other, Group: Slashdot).</p>

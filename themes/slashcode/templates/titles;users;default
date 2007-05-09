@@ -69,10 +69,10 @@ __template__
 	Duplicate Account!
 
 [% CASE 'displayForm_title' %]
-	Log in
+	Log In
 
 [% CASE 'mailPasswdForm_title' %]
-	Mail password
+	Mail Password
 
 [% CASE 'newUserForm_title' %]
 	Create Account
