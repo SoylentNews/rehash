@@ -16,8 +16,8 @@ __template__
     <div id="d2-prefs-closebox" onClick="hidePrefs();">x</div>
     <div class="pref-group reading-prefs">
       <h1>Discussion Style</h1>
-      <input type="radio" name="discussion-style" value="classic"> Classic</input><br/>
-      <input type="radio" name="discussion-style" value="UM"> University of Michigan (Testing)</input><br/>
+      <input type="radio" name="discussion-style" value="classic"> Classic</input><br>
+      <input type="radio" name="discussion-style" value="UM"> University of Michigan (Testing)</input><br>
       <input type="radio" name="discussion-style" value="d2" checked> Slashdot's New Discussion System (Testing)</input>
     </div>
     <div class="pref-group writing-prefs">
@@ -25,8 +25,8 @@ __template__
       <div class="pref-group-comment">
         (currently: <tt>name AT host DOT tld</tt>)
       </div>
-      <input type="radio" name="email-display" value="none"> Do not display an email address</input><br/>
-      <input type="radio" name="email-display" value="armored" checked> Show your emaila address with random SPAM-armoring applied.</input><br/>
+      <input type="radio" name="email-display" value="none"> Do not display an email address</input><br>
+      <input type="radio" name="email-display" value="armored" checked> Show your emaila address with random SPAM-armoring applied.</input><br>
       <div class="pref-group-comment">
         This changes weekly.
       </div>
@@ -34,7 +34,7 @@ __template__
     </div>
     <div class="pref-group reading-prefs">
       <div class="pref">
-        <input type="checkbox" name="disable-sigs" value="disable-sigs"> Disable Sigs</input><br/>
+        <input type="checkbox" name="disable-sigs" value="disable-sigs"> Disable Sigs</input><br>
       </div>
       <div class="pref-group-comment">
         Strip sig quotes from comments.
@@ -42,12 +42,12 @@ __template__
     </div>
     <div class="pref-group writing-prefs">
       <div class="pref">
-        <input type="checkbox" name="disable-spellchecker" value="disable-spellchecker"> Disable Spellchecker</input><br/>
+        <input type="checkbox" name="disable-spellchecker" value="disable-spellchecker"> Disable Spellchecker</input><br>
       </div>
     </div>
     <div class="pref-group reading-prefs">
       <div class="pref">
-        <input type="checkbox" name="hard-thresholds" value="hard-thresholds"> Hard Thresholds</input><br/>
+        <input type="checkbox" name="hard-thresholds" value="hard-thresholds"> Hard Thresholds</input><br>
       </div>
       <div class="pref-group-comment">
         Hides 'X replies below current threshold' message from threads.
@@ -55,7 +55,7 @@ __template__
     </div>
     <div class="pref-group reading-prefs">
       <div class="pref">
-        <input type="checkbox" name="hide-scores" value="hide-scores"> Do Not Display Scores</input><br/>
+        <input type="checkbox" name="hide-scores" value="hide-scores"> Do Not Display Scores</input><br>
       </div>
       <div class="pref-group-comment">
         Hides score.  They still <em>apply</em>, you just don't see them.
@@ -74,7 +74,7 @@ __template__
     </div>
     <div class="pref-group reading-prefs">
       <div class="pref">
-        <input type="checkbox" name="show-link-domains" value="show-link-domains"> Show Link Domains</input><br/>
+        <input type="checkbox" name="show-link-domains" value="show-link-domains"> Show Link Domains</input><br>
       </div>
     </div>
   </form>
