@@ -38,7 +38,7 @@ __template__
 	<input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]> User Mode
 	[% END %]
 	<div align="right">
-<form method="post">
+<form method="POST" action="[% env.script_name %]"><div>
 <input type="hidden" name="fhfilter" value="">
 <input type="hidden" name="color" value="indigo">
 <input type="hidden" name="orderby" value="createtime">
@@ -47,7 +47,7 @@ __template__
 <input type="hidden" name="pause" value="1">
 <input type="hidden" name="duration" value="7">
 <input type="submit" value="Reset to Defaults">
-</form>
+</div></form>
 </div>
 	</td>
 </tr>
@@ -86,4 +86,3 @@ __template__
 </table>
 __version__
 $Id$
-

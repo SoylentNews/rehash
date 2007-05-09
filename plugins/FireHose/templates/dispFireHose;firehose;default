@@ -118,7 +118,7 @@ END %]
 			[% ELSIF item.type == "journal" %]
 				<a href="[% gSkin.rootdir %]/~[% the_user.nickname %]/journal/[% item.srcid %]/">Read More</a>
 			[% ELSE %]
-				Coming soon - Read More & Discuss...
+				Coming soon - Read More &amp; Discuss...
 			[% END %]
 				</b>
 			</li>

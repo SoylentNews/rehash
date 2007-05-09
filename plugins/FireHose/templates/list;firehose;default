@@ -57,12 +57,35 @@ __template__
 </div>
 [% END %]
 <div id="messagearea"></div>
-[% IF !form.skipmenu %]
+[% login_block = BLOCK %]
+<div id="login_cover" style="display:none" onclick="hide_login_box()"></div>
+<div id="login_box" style="display:none">
+[% PROCESS titlebar
+	title => "Please Log In to Continue" _
+		'<a href="javascript:hide_login_box()"><img id="login_box_close" src="' _
+		gSkin.imagedir _ '/images/sic_close.png"></a>'
+
+%]
+<div id="login_box_content">
+[% PROCESS userlogin
+	return_url = gSkin.rootdir _ '/firehose.pl?section=' _ form.section _
+		     '&color=' _ form.color _
+		     '&mode=' _ form.mode _
+		     '&duration=' _ form.duration _
+		     '&no_saved=1'
+%]
+</div></div>
+<script type="text/javascript">logged_in = 0</script>
+[% END # login_block %]
+
+[% IF form.skipmenu %]
+[% login_block %]
+[% ELSE %]
 <div class="firemenu">
 [% theupdatetime = Slash.timeCalc(Slash.db.getTime(), "%H:%M"); %]
 [% refresh_text = "";
    IF !user.is_anon;
-   	refresh_text = "<span style='font-size:60%'>(Last Refreshed <span id='local_last_update_time'>$theupdatetime</span><span id='gmt_update_time'></span> Currently <span id='pauseorplay'>Paused</span>)</span><span id='busy' class='hide'><img src='$constants.imagedir" _ "/spinner.gif'></span>";
+   	refresh_text = '<span style="font-size:60%">(Last Refreshed <span id="local_last_update_time">' _ theupdatetime _ '</span><span id="gmt_update_time"></span> Currently <span id="pauseorplay">Paused</span>)</span><span id="busy" class="hide"><img src="' _ constants.imagedir _ '/spinner.gif" alt="*"></span>';
    END;
 %]
 [% PROCESS titlebar title="Firehose Beta $refresh_text" %]
@@ -77,9 +100,7 @@ __template__
 		[% PROCESS adv_pref_firehose options = options %]
 	[% END %]
 	[% IF user.is_anon %]
-		<div id="fhlogin">
-		[% PROCESS userlogin %]
-		</div>
+		[% login_block %]
 	[% ELSE %]
 	<form action="[% gSkin.rootdir %]/firehose.pl" method="get" name="firehoseform">
 		<fieldset>
@@ -123,7 +144,7 @@ bookmarks, journal entries and Slashdot stories. Please send your
 feedback to hose@cmdrtaco.net but be forgiving of beta code!
 </p>
 [% END %]
-[% END %]
+[% END # form.skipmenu %]
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]

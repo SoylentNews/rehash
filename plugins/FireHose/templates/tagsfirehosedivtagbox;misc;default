@@ -16,9 +16,9 @@ __template__
 [% IF user.tags_canread_stories %]
 <div id="tagbox-[% id %]" class="tags">
 [% IF !form.skipvote %]
-<span id="updown-[% item.id %]" class="vote">[% IF vote %]Voted[% ELSE %]<a href="[% IF user.is_anon %][% gSkin.rootdir %]/login.pl[% ELSE %]javascript:firehose_up_down('[% item.id %]','+')[% END %]" class="up" title="Vote this item up">+</a> <a href="[% IF user.is_anon %][% gSkin.rootdir %]/login.pl[% ELSE %]javascript:firehose_up_down('[% item.id %]','-')[% END %]" class="down" title="Vote this item down">-</a>[% END %]</span>  
+<span id="updown-[% item.id %]" class="vote">[% IF vote %]Voted[% ELSE %]<a href="javascript:firehose_up_down('[% item.id %]','+')" class="up" title="Vote this item up">+</a> <a href="javascript:firehose_up_down('[% item.id %]','-')" class="down" title="Vote this item down">-</a>[% END %]</span>  
 [% END %]
-	<div id="tagbox-title-[% id %]" class="tagtitleclosed">&nbsp;[% IF user.tags_canwrite_stories %]<a href="javascript:tagsToggleStoryDiv('[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose');">[% ELSIF user.is_anon %]<a href="[% gSkin.rootdir %]/login.pl">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% id %]">[+]</span></a>
+	<div id="tagbox-title-[% id %]" class="tagtitleclosed">&nbsp;[% IF user.tags_canwrite_stories %]<a href="javascript:tagsToggleStoryDiv('[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose');">[% ELSIF user.is_anon %]<a href="javascript:show_login_box()">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% id %]">[+]</span></a>
 <span id="tags-top-[% id %]">
 [% PROCESS firehose_tags_top id = id tags_top = tags_top -%]
 </span>

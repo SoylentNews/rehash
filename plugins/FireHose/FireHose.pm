@@ -1331,18 +1331,22 @@ sub getAndSetOptions {
 	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1 };
 	my $modes = { full => 1, fulltitle => 1, mixed => 1};
 
+	my $no_saved = $form->{no_saved};
+	$opts->{no_set} ||= $no_saved;
+
 	my $mode = $form->{mode} || $user->{firehose_mode};
 	$mode = $modes->{$mode} ? $mode : "fulltitle";
 	$options->{mode} = $mode;
 	$options->{pause} = $user->{firehose_paused};
+	$form->{pause} = 1 if $no_saved;
 
 	if (defined $form->{pause}) {
-		$self->setUser($user->{uid}, { firehose_paused => $form->{pause} ? 1 : 0 });
-		$options->{pause} = $form->{pause} ? 1 : 0;
+		$options->{pause} = $user->{firehose_paused} = $form->{pause} ? 1 : 0;
+		$self->setUser($user->{uid}, { firehose_paused => $options->{pause} });
 	}
 
 	if (defined $form->{duration}) {
-		if ($form->{duration} =~ /-?\d+$/) {
+		if ($form->{duration} =~ /^-?\d+$/) {
 			$options->{duration} = $form->{duration};
 		}
 	}
@@ -1389,7 +1393,8 @@ sub getAndSetOptions {
 		}
 
 	} else {
-		$options->{orderby} = $user->{firehose_orderby} || "createtime";
+		$options->{orderby} = $user->{firehose_orderby} unless $no_saved;
+		$options->{orderby} ||= 'createtime';
 	}
 
 	if ($form->{orderdir}) {
@@ -1400,7 +1405,8 @@ sub getAndSetOptions {
 		}
 
 	} else {
-		$options->{orderdir} = $user->{firehose_orderdir} || "DESC";
+		$options->{orderdir} = $user->{firehose_orderdir} unless $no_saved;
+		$options->{orderdir} ||= 'DESC';
 	}
 
 	my $fhfilter;
@@ -1410,7 +1416,7 @@ sub getAndSetOptions {
 		$fhfilter = $form->{fhfilter};
 		$options->{fhfilter} = $fhfilter;
 	} else {
-		$fhfilter = $user->{firehose_fhfilter};
+		$fhfilter = $user->{firehose_fhfilter} unless $no_saved;
 		$options->{fhfilter} = $fhfilter;
 	}
 	
@@ -1518,14 +1524,14 @@ sub getAndSetOptions {
 
 	if ($form->{setfield}) {
 		foreach (qw(nodates nobylines)) {
-			if ($form->{defined}) {
+			if ($form->{defined($_)}) {
 				$options->{$_} = $form->{$_} ? 1 : 0;
 			} else {
 				$options->{$_} = $user->{"firehose_$_"};
 			}
 		}
 	}
-	$options->{nodates}   = defined $form->{nodates} ? $form->{nodates}   : $user->{firehose_nodates};
+	$options->{nodates}   = defined $form->{nodates}   ? $form->{nodates}   : $user->{firehose_nodates};
 	$options->{nobylines} = defined $form->{nobylines} ? $form->{nobylines} : $user->{firehose_nobylines};
 
 	my $page = $form->{page} || 0;
@@ -1623,7 +1629,7 @@ sub getAndSetOptions {
 	if (defined $options->{firehose_usermode}) {
 		$adminmode = 0 if $options->{firehose_usermode};
 	} else {
-		$adminmode = 0 if $user->{firehose_usermode};
+		$adminmode = 0 if $user->{firehose_usermode} || $no_saved;
 	}
 
 	$options->{public} = "yes";

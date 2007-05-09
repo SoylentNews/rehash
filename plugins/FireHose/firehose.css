@@ -425,4 +425,47 @@ ul.menu a img {margin: 0 -8px -4px 4px}
 #fh_change_range { font-size: 80% }
 .firemenu .date-tab-bar {float: right; margin: -2em 1em 0 40em; padding-bottom: .5em}
 .firemenu #fhcalendar-calendar-pane {right: 1em}
+
 #fhcalendar_pag {float: left !important}
+
+#login_cover {
+	background-color: #666;
+	height: 100%;
+	left: 0px;
+	opacity: 0.75;
+	position: absolute;
+	top: 0px;
+	width: 100%;
+	z-index: 5;
+}
+
+#login_box {
+	position: absolute;
+	margin-left: 20%;
+	margin-right: 20%;
+	top: 100px;
+	width: 60%;
+	z-index: 10;
+}
+
+#login_box #login_box_close {
+	text-align: right;
+	position: absolute;
+	right: 0;
+}
+
+#login_box #login_box_content legend {
+	display: none;
+}
+
+#login_box #login_box_content fieldset {
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+#login_box #login_box_content {
+	background-color: white;
+	padding: 10px;
+}
+

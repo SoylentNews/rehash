@@ -584,6 +584,8 @@ function firehose_remove_all_items() {
 
 
 function firehose_up_down(id, dir) {
+	if (!check_logged_in()) return;
+
 	setFirehoseAction();
 	var params = [];
 	var handlers = {
@@ -1045,6 +1047,8 @@ function firehose_slider_init() {
 }	
 
 function firehose_slider_set_color(color) {
+	if (!check_logged_in()) return;
+
 	fh_colorslider.setValue(fh_ticksize * fh_colors_hash[color] , 1);
 }
 
@@ -1146,3 +1150,64 @@ function firehose_save_tab(id) {
 	tt.className = "";
 }
 
+
+var logged_in   = 1;
+var login_cover = 0;
+var login_box   = 0;
+var login_inst  = 0;
+
+function init_login_divs() {
+	login_cover = document.getElementById('login_cover');
+	login_box   = document.getElementById('login_box');
+}
+
+function install_login() {
+	if (login_inst)
+		return;
+
+	if (!login_cover || !login_box)
+		init_login_divs();
+
+	if (!login_cover || !login_box)
+		return;
+
+	login_cover.parentNode.removeChild(login_cover);
+	login_box.parentNode.removeChild(login_box);
+
+	var top_parent = document.getElementById('top_parent');
+	top_parent.parentNode.insertBefore(login_cover, top_parent);
+	top_parent.parentNode.insertBefore(login_box, top_parent);
+	login_inst = 1;
+}
+
+function show_login_box() {
+	if (!login_inst)
+		install_login();
+
+	if (login_cover && login_box) {
+		login_cover.style.display = '';
+		login_box.style.display = '';
+	}
+
+	return;
+}
+
+function hide_login_box() {
+	if (!login_inst)
+		install_login();
+
+	if (login_cover && login_box) {
+		login_box.style.display = 'none';
+		login_cover.style.display = 'none';
+	}
+
+	return;
+}
+
+function check_logged_in() {
+	if (!logged_in) {
+		show_login_box();
+		return 0;
+	}
+	return 1;
+}
