@@ -20,7 +20,6 @@
 }
 
 .options span
-/*, span.advpref */
 {
         position: relative;
         width: 20px;
@@ -83,25 +82,25 @@ input
         right: 1em;
 }
 .advpref a {margin-right: 1em}
-/*
-span.advpref {
-        background: url('//images.slashdot.org/sic_controls.png') no-repeat;
-        _background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
-        text-indent: -7000em;
-        position: relative;
-        padding-right: 20px;
-}
-*/
-#advplay, #advpause, #advdesc { padding-left: 20px, padding-top: 10px, padding-bottom: 10px }
 
-#play a, #advplay { background-position: 0px 1px; }
-#pause a, #advpause { background-position: 0px -200px; }
-#desc a, #advdesc { background-position: 0px -400px; }
-#asc a, #advasc { background-position: 0px -600px; }
-#full a, #advfull { background-position: 0px -800px; }
-#abbrev a, #advabbrev { background-position: 0px -1000px; }
-#time a, #advtime  { background-position: 0px -1200px; }
-#popularity a, #advpopularity { background-position: 0px -1400px; }
+
+#fhadvprefpane span { 
+	padding-left: 20px; width: 80px; 
+	display: block;
+        background: url('//images.slashdot.org/sic_controls.png') no-repeat;
+	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
+}
+
+#fhadvprefpane a { color: white}
+
+#play a, #fhadvprefpane #advplay { background-position: 0px 1px; }
+#pause a, #fhadvprefpane #advpause { background-position: 0px -200px; }
+#desc a, #fhadvprefpane #advdesc { background-position: 0px -400px; }
+#asc a, #fhadvprefpane #advasc { background-position: 0px -600px; }
+#full a, #fhadvprefpane #advfull { background-position: 0px -800px; }
+#abbrev a, #fhadvprefpane #advabbrev { background-position: 0px -1000px; }
+#time a, #fhadvprefpane #advtime  { background-position: 0px -1200px; }
+#popularity a, #fhadvprefpane #advpopularity { background-position: 0px -1400px; }
 .article .firehosetag { background: #fff; }
 
 ul.menu

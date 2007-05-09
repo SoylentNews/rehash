@@ -45,6 +45,7 @@ sub createFireHose {
 	$data->{discussion} = 0 if !defined $data->{discussion} || !$data->{discussion};
 	$data->{-createtime} = "NOW()" if !$data->{createtime} && !$data->{-createtime};
 	$data->{discussion} ||= 0 if defined $data->{discussion};
+	$data->{popularity} ||= 0;
 	$data->{body_length} = length($data->{bodytext});
 	$data->{word_count} = countWords($data->{introtext}) + countWords($data->{bodytext});
 
