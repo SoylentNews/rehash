@@ -72,6 +72,9 @@ __template__
 		     '&color=' _ form.color _
 		     '&mode=' _ form.mode _
 		     '&duration=' _ form.duration _
+		     '&fhfilter=' _ form.fhfilter _
+		     '&skipmenu=' _ form.skipmenu _
+		     '&skippop=' _ form.skippop _
 		     '&no_saved=1'
 %]
 </div></div>

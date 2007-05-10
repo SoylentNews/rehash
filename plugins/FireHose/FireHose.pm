@@ -1626,10 +1626,12 @@ sub getAndSetOptions {
 
 	my $adminmode = 0;
 	$adminmode = 1 if $user->{is_admin};
-	if (defined $options->{firehose_usermode}) {
+	if ($no_saved) {
+		$adminmode = 0;
+	} elsif (defined $options->{firehose_usermode}) {
 		$adminmode = 0 if $options->{firehose_usermode};
 	} else {
-		$adminmode = 0 if $user->{firehose_usermode} || $no_saved;
+		$adminmode = 0 if $user->{firehose_usermode};
 	}
 
 	$options->{public} = "yes";
@@ -1641,7 +1643,7 @@ sub getAndSetOptions {
 	} else  {
 		$options->{accepted} = "no" if !$options->{accepted};
 		$options->{duration} ||= 1;
-		if ($user->{is_subscriber}) {
+		if ($user->{is_subscriber} && !$no_saved) {
 			$options->{createtime_subscriber_future} = 1;
 		} else {
 			$options->{createtime_no_future} = 1;
