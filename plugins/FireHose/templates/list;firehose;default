@@ -67,12 +67,13 @@ __template__
 
 %]
 <div id="login_box_content">
-[% PROCESS userlogin
+[% this_fhfilter = form.fhfilter | fixparam;
+   PROCESS userlogin
 	return_url = gSkin.rootdir _ '/firehose.pl?section=' _ form.section _
 		     '&color=' _ form.color _
 		     '&mode=' _ form.mode _
 		     '&duration=' _ form.duration _
-		     '&fhfilter=' _ form.fhfilter _
+		     '&fhfilter=' _ this_fhfilter _
 		     '&skipmenu=' _ form.skipmenu _
 		     '&skippop=' _ form.skippop _
 		     '&no_saved=1'
