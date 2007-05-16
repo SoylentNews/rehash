@@ -105,7 +105,7 @@ YAHOO.slashdot.DateWidget.prototype.init = function( params ) { // id, mode, dat
   this._element = root;
   this._dateTab = find1st('date-tab', 'span');
     this._dateTab._widget = this;
-  this._label = find1st('tab-label', 'span');
+  this._label = find1st('day-label', 'option');
   this._calendarPane = find1st('calendar-pane', 'div');
   this.toggleCalendarPane(false);
 
@@ -171,30 +171,44 @@ YAHOO.slashdot.DateWidget.prototype.setMode = function( newMode ) {
 
 YAHOO.slashdot.DateWidget.prototype.setDate = function( date, mode ) {
   this.muteEvents();
-    var modeChanged = false;
-    if ( mode !== undefined )
-      modeChanged = this.setMode(mode);
-  
     if ( date === undefined )
       date = new Date();
     this._calendar.select(date);
     this._calendar.render();
     var dateChanged = this._setDateFromSelection(date);
+
+    var modeChanged = false;
+    if ( mode !== undefined )
+      modeChanged = this.setMode(mode);
   this.unmuteEvents();
 
   if ( dateChanged || modeChanged )
     this._reportChanged();
 }
 
-YAHOO.slashdot.DateWidget.prototype._setDateFromSelection = function( date ) {
+YAHOO.slashdot.DateWidget.prototype._setDateFromSelection = function( date, allowModeChange ) {
   var oldLabel = this._label.innerHTML;
-  var newLabel = datesToHumanReadable(date);
+  var newLabel = "Day of " + datesToHumanReadable(date);
   var labelChanged = oldLabel != newLabel;
-  if ( labelChanged ) {
+  if ( labelChanged )
     this._label.innerHTML = newLabel;
-    this._reportChanged();
+
+  var modeChanged = false;
+  if ( allowModeChange==true ) {
+    var today = new Date();
+    var newMode = ( date.getFullYear() == today.getFullYear()
+                 && date.getMonth()    == today.getMonth()
+                 && date.getDate()     == today.getDate() ) ? "now" : "day";
+
+    this.muteEvents();
+    modeChanged = this.setMode(newMode);
+    this.unmuteEvents();
   }
-  return labelChanged;
+
+  if ( labelChanged || modeChanged )
+    this._reportChanged();
+
+  return labelChanged || modeChanged;
 }
 
 YAHOO.slashdot.DateWidget.prototype.getDate = function() {
@@ -232,7 +246,7 @@ YAHOO.slashdot.DateWidget.prototype.handleDateTabClick = function() {
 }
 
 YAHOO.slashdot.DateWidget.prototype.handleCalendarSelect = function( type, args, obj ) {
-  this._setDateFromSelection(this._calendar._toDate(args[0][0]));
+  this._setDateFromSelection(this._calendar._toDate(args[0][0]), true);
   this.toggleCalendarPane(false);
 }
 

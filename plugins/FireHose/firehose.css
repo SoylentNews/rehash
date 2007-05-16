@@ -415,7 +415,7 @@ color: #fff;
 position: relative; cursor: pointer; }
 
 span.date-tab.active div.tab-button { background: #066; }
-.date-widget.all span.date-tab, .date-widget.now span.date-tab { display: none; }
+#.date-widget.all span.date-tab, .date-widget.now span.date-tab { display: none; }
 
 ul.menu a img {margin: 0 -8px -4px 4px}
 #fhtabdel {background:transparent url(//images.slashdot.org/sic_close.png) no-repeat; position: relative; margin: 0 0 0 5px;padding: 2px 24px 10px 2px}
@@ -821,7 +821,7 @@ color: #fff;
 position: relative; cursor: pointer; }
 
 span.date-tab.active div.tab-button { background: #066; }
-.date-widget.all span.date-tab, .date-widget.now span.date-tab { display: none; }
+#.date-widget.all span.date-tab, .date-widget.now span.date-tab { display: none; }
 
 ul.menu a img {margin: 0 -8px -4px 4px}
 #fhtabdel {background:transparent url(//images.slashdot.org/sic_close.png) no-repeat; position: relative; margin: 0 0 0 5px;padding: 2px 24px 10px 2px}
