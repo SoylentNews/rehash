@@ -587,8 +587,9 @@ sub getFireHose {
 	my($self, $id) = @_;
 
 	my $mcd = $self->getMCD();
-	my $mcdkey = "$self->{_mcd_keyprefix}:firehose";
+	my $mcdkey;
 	if ($mcd) {
+		$mcdkey = "$self->{_mcd_keyprefix}:firehose";
 		my $item = $mcd->get("$mcdkey:$id");
 		return $item if $item;
 	}
@@ -1203,7 +1204,10 @@ sub setFireHose {
 	my $id_q = $self->sqlQuote($id);
 	
 	my $mcd = $self->getMCD();
-	my $mcdkey = "$self->{_mcd_keyprefix}:firehose";
+	my $mcdkey;
+	if ($mcd) {
+		$mcdkey = "$self->{_mcd_keyprefix}:firehose";
+	}
 
 	if (!exists($data->{last_update}) && !exists($data->{-last_update})) {
 		my @non_trivial = grep {!/^(activity|toptags)$/} keys %$data;
