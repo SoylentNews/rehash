@@ -4552,8 +4552,6 @@ UPDATE message_codes SET delivery_bvalue = 4 WHERE type = 'System Messages';
 # 2007-05-02
 UPDATE vars SET value = 'T_2_5_0_157' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 # 2007-05-09
 UPDATE vars SET value = 'T_2_5_0_158' WHERE name = 'cvs_tag_currentcode';
 
@@ -4561,3 +4559,4 @@ UPDATE vars SET value = 'T_2_5_0_158' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
 
+# SLASHDOT LAST UPDATED HERE
