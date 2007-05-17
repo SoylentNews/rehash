@@ -57,16 +57,7 @@ __template__
 </div>
 [% END %]
 <div id="messagearea"></div>
-[% login_block = BLOCK %]
-<div id="login_cover" style="display:none" onclick="hide_login_box()"></div>
-<div id="login_box" style="display:none">
-[% PROCESS titlebar
-	title => "Please Log In to Continue" _
-		'<a href="javascript:hide_login_box()"><img id="login_box_close" src="' _
-		gSkin.imagedir _ '/images/sic_close.png"></a>'
-
-%]
-<div id="login_box_content">
+[% login_inner_block = BLOCK %]
 [% this_fhfilter = form.fhfilter | fixparam;
    PROCESS userlogin
 	return_url = gSkin.rootdir _ '/firehose.pl?section=' _ form.section _
@@ -76,8 +67,17 @@ __template__
 		     '&fhfilter=' _ this_fhfilter _
 		     '&skipmenu=' _ form.skipmenu _
 		     '&skippop=' _ form.skippop _
-		     '&no_saved=1'
+		     '&no_saved=1';
+END; login_block = BLOCK %]
+<div id="login_cover" style="display:none" onclick="hide_login_box()"></div>
+<div id="login_box" style="display:none">
+[% PROCESS titlebar
+	title => "Please Log In to Continue" _
+		'<a href="javascript:hide_login_box()"><img id="login_box_close" src="' _
+		gSkin.imagedir _ '/images/sic_close.png"></a>'
 %]
+<div id="login_box_content">
+[% login_inner_block %]
 </div></div>
 <script type="text/javascript">logged_in = 0</script>
 [% END # login_block %]
@@ -105,6 +105,9 @@ __template__
 	[% END %]
 	[% IF user.is_anon %]
 		[% login_block %]
+		<div id="fhlogin">
+		[% login_inner_block %]
+		</div>
 	[% ELSE %]
 	<form action="[% gSkin.rootdir %]/firehose.pl" method="get" name="firehoseform">
 		<fieldset>
