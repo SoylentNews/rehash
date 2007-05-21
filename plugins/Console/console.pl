@@ -35,7 +35,7 @@ sub main {
 	);
 
 	my $op = $form->{op};
-	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED]) {
+	if (!$op || !exists $ops{$op}) {
 		$op = 'default';
 	}
 
