@@ -1515,6 +1515,13 @@ sub getAndSetOptions {
 		} else {
 			$options->{limit} = 15;
 		}
+	} elsif ($mode eq "mixed") {
+		if ($user->{is_admin}) {
+			$options->{limit} = 40;
+		} else {
+			$options->{limit} = 20;
+		}
+		
 	} else {
 		if ($user->{is_admin}) {
 			$options->{limit} = 50;

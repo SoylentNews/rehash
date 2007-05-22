@@ -108,8 +108,15 @@ END %]
 			<li class="more"><b>
 			[% IF item.type == "story" %]
 				[% the_skin = Slash.db.getSkin(item.primaryskid) %]
-				[% Slash.linkStory({
-					'link' 	=> 	"Read more",
+				[% 
+				readmore_link = "Read more";
+				
+				IF item.body_length;
+					readmore_link = "Read $item.body_length more bytes...";
+				END;
+
+				Slash.linkStory({
+					'link' 	=> 	readmore_link,
 					sid	=>	story.sid,
 					tid	=> 	story.tid,
 					skin	=>	story.primaryskid
