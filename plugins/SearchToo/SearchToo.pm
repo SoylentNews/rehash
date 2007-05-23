@@ -94,6 +94,12 @@ sub prepResults {
 	$results->{records_matches}  = $sopts->{matches};
 	$results->{records_max}      = $sopts->{max};
 	$results->{records_start}    = $sopts->{start};
+	if ($sopts->{matches}) {
+		$results->{records_page}  = int($sopts->{start}/$sopts->{max}) + 1;
+		$results->{records_pages} = int($sopts->{matches}/$sopts->{max}) + 1;
+	} else {
+		$results->{records_page}  = $results->{records_page} = 0;
+	}
 
 	return $results;
 }

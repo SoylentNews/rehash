@@ -1,7 +1,5 @@
 package Slash::SearchToo::Kinosearch;
 
-# STILL IN PROGRESS NOT READY FOR USE
-
 use strict;
 use File::Path;
 use File::Spec::Functions;

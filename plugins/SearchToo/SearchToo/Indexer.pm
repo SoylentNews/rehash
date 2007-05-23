@@ -40,9 +40,6 @@ our %primary = (
 	firehose	=> 'id',
 );
 
-# other fields included will be indexed, but NOT tokenized
-# firehose: tids primaryskid type category date popularity activity editorpop
-
 # turn into hashes
 for my $hash (\%text, \%content) {
 	for my $type (keys %$hash) {
@@ -59,7 +56,7 @@ sub new {
 	return unless $plugin->{'SearchToo'};
 
 	my $handled;
-	{ no strict;
+	{ no strict 'refs';
 		$handled = ${$class . '::handled'};
 	}
 
