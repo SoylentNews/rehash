@@ -460,8 +460,8 @@ sub displayForm {
 
 	my %keys_to_check = ( story => 1, subj => 1 );
 	if ($error_message && $error_message ne '') {
-		titlebar('100%', getData('filtererror', { err_message => $error_message}));
-		print getData('filtererror', { err_message => $error_message });
+		titlebar('100%', "Error");
+		print $error_message;
 	} else {
 		my $message = "";
 		for (keys %$form) {
@@ -553,22 +553,14 @@ sub saveSub {
 
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey = $reskey->key('submit');
-	unless ($rkey->use) {
-		my $error_message = $rkey->errstr;
-		if ($rkey->death) {
-			print $error_message;
-		} else {
-			displayForm($form->{name}, $form->{email}, $form->{skin}, '', '', $error_message);
-		}
-		return 0;
-	}		
+	my $url_id;
 
 	$form->{name} ||= '';
 
 	if (length($form->{subj}) < 2) {
 		titlebar('100%', getData('error'));
 		my $error_message = getData('badsubject');
-		displayForm($form->{name}, $form->{email}, $form->{skin}, '', '', $error_message);
+		displayForm($form->{name}, $form->{email}, $form->{skin}, '', $error_message);
 		return(0);
 	}
 
@@ -578,7 +570,7 @@ sub saveSub {
 		next unless $keys_to_check{$_};
 		# run through filters
 		if (! filterOk('submissions', $_, $form->{$_}, \$message)) {
-			displayForm($form->{name}, $form->{email}, $form->{skin}, '', '', $message);
+			displayForm($form->{name}, $form->{email}, $form->{skin}, '', $message);
 			return(0);
 		}
 		# run through compress test
@@ -588,6 +580,51 @@ sub saveSub {
 			return(0);
 		}
 	}
+
+	if ($form->{url}) {
+		# validate url formatting
+
+		my @allowed_schemes = split(/\|/,$constants->{bookmark_allowed_schemes});
+		my %allowed_schemes = map { $_ => 1 } @allowed_schemes;
+		my $fudgedurl = fudgeurl($form->{url});
+
+
+		my $scheme;
+		if ($fudgedurl) {
+			my $uri = new URI $fudgedurl;
+			$scheme = $uri->scheme if $uri && $uri->can("scheme");
+
+		}		
+	
+		if ((!$fudgedurl && $form->{url}) || ($form->{url} && !$scheme) || ($scheme && !$allowed_schemes{$scheme})) {
+			displayForm($form->{name}, $form->{email}, $form->{skin}, '', "Invalid url format");
+			return(0);
+		} else {
+			my $url_data = {
+				url		=> $fudgedurl,
+				initialtitle	=> strip_notags($form->{subj})
+			};
+
+			$url_id = $slashdb->getUrlCreate($url_data);
+			my $url_id_q = $slashdb->sqlQuote($url_id);
+			if ($slashdb->sqlCount("firehose", "url_id = $url_id_q")) {
+				displayForm($form->{name}, $form->{email}, $form->{skin}, '', "Url already submitted");
+				return(0);
+			}
+
+
+		}
+	}
+	
+	unless ($rkey->use) {
+		my $error_message = $rkey->errstr;
+		if ($rkey->death) {
+			print $error_message;
+		} else {
+			displayForm($form->{name}, $form->{email}, $form->{skin}, '', $error_message);
+		}
+		return 0;
+	}		
 
 	$form->{story} = fixStory($form->{story}, { sub_type => $form->{sub_type} });
 
@@ -604,6 +641,8 @@ sub saveSub {
 		tid		=> $form->{tid},
 		primaryskid	=> $form->{primaryskid}
 	};
+	$submission->{url_id} = $url_id if $url_id;
+
 	my @topics = ();
 	my $nexus = $slashdb->getNexusFromSkid($form->{primaryskid} || $constants->{mainpage_skid});
 
@@ -631,8 +670,7 @@ sub saveSub {
 	my $messagesub = { %$submission };
 	$messagesub->{subid} = $slashdb->createSubmission($submission);
 
-	if ($form->{url_id}) {
-		my $url_id = $form->{url_id};
+	if ($url_id) {
 		my $globjid = $slashdb->getGlobjidCreate("submissions", $messagesub->{subid});
 		$slashdb->addUrlForGlobj($url_id, $globjid);
 	}

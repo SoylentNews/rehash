@@ -84,6 +84,11 @@ __template__
 			[% PROCESS formLabel value => "Your Email or Homepage" "Where Users Can Contact You" %]
 			<input type="text" name="email" value="[% fakeemail %]" size="50" maxlength="50">
 			[% PROCESS formNote note => "Where users can contact you" %]
+			[% IF constants.plugin.FireHose %]
+				[% PROCESS formLabel value => "Url"  %]
+				<input type="text" name="url" value="[% form.url | strip_attribute %]" size="50">
+				[% PROCESS formNote note => "Main url of submission (optional but if provided must be unique) " %]
+			[% END %]
 			[% PROCESS formLabel value => "Subject"  %]
 			<input type="text" name="subj" value="[% form.subj %]" size="50" maxlength="50">
 			[% PROCESS formNote note => "Be descriptive and concise! For best results, put the most important words first."%]
