@@ -26,25 +26,33 @@ sub main {
 
 	my $ops = getOps();
 	my $op = $form->{op};
+	print STDERR "AJAX1 $op\n";
 
 	if (!$ops->{$op}) {
 		errorLog("No Ajax op '$op' found");
 		$op = 'default';
 	}
+	
+	print STDERR "AJAX2 $op\n";
 
 	$op = 'default' unless $ops->{$op}{function} || (
 		$ops->{$op}{class} && $ops->{$op}{subroutine}
 	);
+	print STDERR "AJAX3 $op\n";
 
 #$Slash::ResKey::DEBUG = 2;
 
 	$ops->{$op}{function} ||= loadCoderef($ops->{$op}{class}, $ops->{$op}{subroutine});
 	$op = 'default' unless $ops->{$op}{function};
+	
+	print STDERR "AJAX4 $op\n";
 
 	$form->{op} = $op;  # save for others to use
 
 	my $reskey_name = $ops->{$op}{reskey_name} || 'ajax_base';
 	$ops->{$op}{reskey_type} ||= 'use';
+	
+	print STDERR "AJAX5 $op\n";
 
 	if ($reskey_name ne 'NA') {
 		my $reskey = getObject('Slash::ResKey');
@@ -69,6 +77,7 @@ sub main {
 			return;
 		}
 	}
+	print STDERR "AJAX6 $op\n";
 
 	my $options = {};
 	my $retval = $ops->{$op}{function}->(
