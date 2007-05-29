@@ -99,7 +99,7 @@ END %]
 			[% END %]
 [% IF full %]
 		[% IF (future || item.type=="story") %]<div class="whitewash">[% END %]
-		[% PROCESS tagsfirehosedivtagbox id = item.id  tags_top = tags_top vote = vote %]
+		[% PROCESS tagsfirehosedivtagbox id = item.id  tags_top = tags_top vote = vote options = options %]
 		[% IF (future || item.type=="story") %]</div>[% END %]
 [% IF divwrapper %]
 <div class="storylinks">

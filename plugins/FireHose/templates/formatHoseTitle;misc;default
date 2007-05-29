@@ -56,7 +56,7 @@ pop_str = "";
 
 IF adminmode;
 	reject_checkbox = "";
-	IF !form.skippop;
+	IF !form.skippop && !options.nocolors;
 		editorpop_disp = item.editorpop.int;
 		IF editorpop_disp == pop_disp;
 			editorpop_disp = '';
@@ -68,7 +68,7 @@ IF adminmode;
         IF item.type != "story"; reject_checkbox = PROCESS reject_firehose id = item.id; END;
         title = reject_checkbox _ pop_str _ title;
 ELSE;
-	IF !form.skippop;
+	IF !form.skippop && !options.nocolors;
 		pop_str = '<span class="soda pop' _  pop_val _ '"';
 		pop_str = pop_str _ ' title="Filter Firehose to entries rated ' _ color _ ' or better" onclick="firehose_slider_set_color(\'' _ color _ '\')"';
 		pop_str = pop_str _ '> &nbsp; </span> ';
