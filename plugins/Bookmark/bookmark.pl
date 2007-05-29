@@ -152,7 +152,7 @@ sub saveBookmark {
 	if ($form->{redirect} eq "journal") {
 		redirect("/journal.pl?op=edit&description=$strip_title&article=$strip_url&url_id=$url_id");
 	} elsif ($form->{redirect} eq "submit") {
-		redirect("/submit.pl?subj=$strip_title&story=$strip_url&url_id=$url_id");
+		redirect("/submit.pl?subj=$strip_title&story=$strip_url&url_id=$url_id&url=strip_url");
 	} else {
 		redirect($form->{url});
 	}
