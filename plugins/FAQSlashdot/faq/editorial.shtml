@@ -31,7 +31,7 @@
 <img src="http://images.slashdot.org/favicon.gif" alt="Slashdot" border="0" height="16" width="16"></a> &nbsp; 
 <a href="javascript:location.href='http://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">Slashdot It!</a> 
 <!-- End Slashdot It link --></xmp></p>
-				<p>For security or control reasons many people will wish to serve the small Slashdot icon on their own image servers.  If you wish to do this you may download it at <a href="http://image.slashdot.org/favicon.gif">http://image.slashdot.org/favicon.gif</a> and need only replace "http://image.slashdot.org/favicon.gif" in the above text with a link to your own image location.</p>
+				<p>For security or control reasons many people will wish to serve the small Slashdot icon on their own image servers.  If you wish to do this you may download it at <a href="http://images.slashdot.org/favicon.gif">http://image.slashdot.org/favicon.gif</a> and need only replace "http://image.slashdot.org/favicon.gif" in the above text with a link to your own image location.</p>
         <p><em><small>
                 Answered by: <a href="mailto:scuttlemonkey@slashdot.org">Scuttlemonkey</a><br>
                 Last Modified: 4/18/07
