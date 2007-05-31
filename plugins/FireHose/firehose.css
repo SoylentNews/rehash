@@ -201,6 +201,8 @@ div.briefarticle .storylinks { display: none; }
 }
 
 .briefarticle .generaltitle .title h3 { background: url('//images.slashdot.org/gen-slc.gif') no-repeat left top; }
+.briefarticle .future .generaltitle .title h3, .article .future .generaltitle .title h3 { background: #900 url('//images.slashdot.org/article-title-bg-bsd.png') repeat-x left bottom; }
+.briefarticle .story .generaltitle .title h3, .article .story .generaltitle .title h3  { background: #066 url('//images.slashdot.org/article-title-bg.png') repeat-x left bottom; }
 .briefarticle .generaltitle .title, .article .generaltitle .title { background: #e6e6e6 url('//images.slashdot.org/sections-bg.png') repeat-x left bottom; }
 .briefarticle .generaltitle .title h3 a, .article .generaltitle .title h3 a { color: #066; }
 
@@ -225,8 +227,6 @@ div.briefarticle .storylinks { display: none; }
 
 .briefarticle .future .title a, .article .future .title a,
 .briefarticle .story .title a, .article .story .title a, .article .story .title h3 a , .briefarticle .story .title h3 a { color: #fff !important; }
-.briefarticle .story .title, .article .story .title { background: #066 !important; }
-.briefarticle .future .title, .article .future .title { background: #700 !important; }
 
 .briefarticle div.future .title .date, #firehose div.briefarticle div.story .title .date
 {
