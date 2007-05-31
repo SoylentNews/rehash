@@ -390,7 +390,7 @@ div.tags table.data td
 background:#FFFFFF none repeat scroll 0%;
 border:2px solid #333333;
 position:absolute;
-z-index:1000;
+z-index:10000;
 }
 .calendar-pane td {color: #555; font-size: 90%;width: 1.8em; padding: 0 0 0 .2em !important; margin: 0; height: 1em; background:#E6E6E6 url(//images.slashdot.org/sections-bg.png) repeat-x left bottom;  border-bottom: 1px solid #aaa; border-left: 1px solid #aaa;}
 .calendar-pane td a {color: #066 !important; padding: .3em .5em .3em .1em; margin: 0;}
@@ -697,6 +697,7 @@ div.briefarticle .storylinks { display: none; }
 .briefarticle div.tags div.tagtitleclosed input:first-child { width: 30% !important; }
 .briefarticle div.tags div.tagtitleclosed input { font-size: 80%; }
 .briefarticle div.tags div.tagtitleclosed a, div.tags div.tagtitleclosed { color: #555; }
+.briefarticle .story div.tags div.tagtitleclosed a, .briefarticle .future div.tags div.tagtitleclosed a { color: #fff; }
 
 div.tags table
 {
