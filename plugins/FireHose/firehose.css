@@ -262,11 +262,12 @@ div.briefarticle .storylinks { display: none; }
 {
 	position: absolute;
 	top: .5em;
-	left: 22px;
 	width: 50px;
 	text-align: center;
 	font-size: 80%;
 }
+.adminmode .vote {left: 22px;}
+.usermode .vote {left: 10px;}
 
 /* Tagging */
 .briefarticle div.tags
