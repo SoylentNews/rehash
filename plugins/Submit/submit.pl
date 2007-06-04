@@ -582,37 +582,26 @@ sub saveSub {
 	}
 
 	if ($form->{url}) {
-		# validate url formatting
-
-		my @allowed_schemes = split(/\|/,$constants->{bookmark_allowed_schemes});
-		my %allowed_schemes = map { $_ => 1 } @allowed_schemes;
-		my $fudgedurl = fudgeurl($form->{url});
-
-
-		my $scheme;
-		if ($fudgedurl) {
-			my $uri = new URI $fudgedurl;
-			$scheme = $uri->scheme if $uri && $uri->can("scheme");
-
-		}		
 	
-		if ((!$fudgedurl && $form->{url}) || ($form->{url} && !$scheme) || ($scheme && !$allowed_schemes{$scheme})) {
-			displayForm($form->{name}, $form->{email}, $form->{skin}, '', "Invalid url format");
+		if (!$slashdb->validUrl($form->{url})) {
+			displayForm($form->{name}, $form->{email}, $form->{skin}, '', getData("invalidurl"));
 			return(0);
 		} else {
 			my $url_data = {
-				url		=> $fudgedurl,
+				url		=> fudgeurl($form->{url}),
 				initialtitle	=> strip_notags($form->{subj})
 			};
 
 			$url_id = $slashdb->getUrlCreate($url_data);
 			my $url_id_q = $slashdb->sqlQuote($url_id);
-			if ($slashdb->sqlCount("firehose", "url_id = $url_id_q")) {
-				displayForm($form->{name}, $form->{email}, $form->{skin}, '', "Url already submitted");
-				return(0);
+			if ($constants->{plugin}{FireHose}) {
+				my $firehose = getObject("Slash::FireHose");
+				if (!$firehose->allowSubmitForUrl($url_id)) {
+					my $submitted_items = $firehose->getFireHoseItemsByUrl($url_id);
+					displayForm($form->{name}, $form->{email}, $form->{skin}, '', getData("duplicateurl", { submitted_items => $submitted_items } ));
+					return(0);
+				}
 			}
-
-
 		}
 	}
 	
