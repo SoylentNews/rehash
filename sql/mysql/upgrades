@@ -4570,3 +4570,9 @@ UPDATE vars SET value = 'T_2_5_0_160' WHERE name = 'cvs_tag_currentcode';
 # 2007-05-30
 UPDATE vars SET value = 'T_2_5_0_161' WHERE name = 'cvs_tag_currentcode';
 
+# For plugins/ResKey 
+INSERT INTO reskey_resources VALUES (200, 'badge_vote_static', 'yes');
+INSERT INTO reskey_resource_checks VALUES (NULL, 200, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 200, 'use', 'Slash::ResKey::Checks::Post',                151);
+INSERT INTO reskey_vars VALUES (200, 'user_seclev', 1, 'Minimum seclev to use resource');
+
