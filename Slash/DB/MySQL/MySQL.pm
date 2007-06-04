@@ -12182,6 +12182,26 @@ sub getSubmissionMemory {
 	);
 }
 
+
+# check whether url is correctly formatted and has a scheme that is allowed for bookmarks and submissions
+sub validUrl {
+	my($self, $url) = @_;
+	my $constants = getCurrentStatic();
+	my $fudgedurl = fudgeurl($url);
+	
+	my @allowed_schemes = split(/\|/, $constants->{bookmark_allowed_schemes} || "http|https");
+	my %allowed_schemes = map { $_ => 1 } @allowed_schemes;
+
+	my $scheme;
+	
+	if ($fudgedurl) {
+		my $uri = new URI $fudgedurl;
+		$scheme = $uri->scheme if $uri && $uri->can("scheme");
+	}		
+	return ($fudgedurl && $scheme && $allowed_schemes{$scheme});
+	
+}
+
 sub getUrlCreate {
 	my($self, $data) = @_;
 	$data ||= {};
