@@ -9,6 +9,7 @@
 #
 use Slash::Constants ':slashd';
 use LWP::UserAgent;
+use Encode 'encode_utf8';
 use HTML::HeadParser;
 
 use strict;
@@ -53,9 +54,11 @@ $task{$me}{code} = sub {
 		#slashdLog("getting $url->{url}");	
 		if ($response->is_success) {
 			#slashdLog("success on $url->{url}");	
+#{ local $content = '';
+#local $SIG{__WARN__} = sub { my $c = $content || ''; $c =~ s/\s+/ /g; print STDERR scalar(gmtime) . " url_checker warn on parse for content: $c\n"; };
 			my $content =  $response->content;
 			my $hp = HTML::HeadParser->new;
-			$hp->parse($content);
+			$hp->parse(encode_utf8($content));
 			my $validatedtitle = $hp->header('Title');
 			if (defined $validatedtitle) {
 				#slashdLog("vt $validatedtitle");	
@@ -64,6 +67,7 @@ $task{$me}{code} = sub {
 				$url_update->{is_success} = 1;
 				$url_update->{"-believed_fresh_until"} = "DATE_ADD(NOW(), INTERVAL 2 DAY)";
 			}
+#}
 		} else {
 			#slashdLog("failure on $url->{url}");	
 			$url_update->{is_success} = 0;
