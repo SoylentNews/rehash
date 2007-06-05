@@ -364,7 +364,7 @@ sub getFireHoseEssentials {
 
 			# just a few options to carry over
 			$opts{carryover} = {
-				map { ($_ => $options->{$_}) } qw(tagged_by_uid orderdir orderby ignore_nix)
+				map { ($_ => $options->{$_}) } qw(tagged_by_uid orderdir orderby ignore_nix tagged_positive tagged_negative tagged_non_negative unsigned signed)
 			};
 
 			$results = $searchtoo->findRecords(firehose => \%query, \%opts);
@@ -386,138 +386,158 @@ sub getFireHoseEssentials {
 
 #use Data::Dumper; print STDERR Dumper $options;
 
-	$options->{orderby} ||= "createtime";
-	$options->{orderdir} = uc($options->{orderdir}) eq "ASC" ? "ASC" : "DESC";
-	#($user->{is_admin} && $options->{orderby} eq "createtime" ? "ASC" :"DESC");
+	$options->{orderby} ||= 'createtime';
+	$options->{orderdir} = uc($options->{orderdir}) eq 'ASC' ? 'ASC' : 'DESC';
+	#($user->{is_admin} && $options->{orderby} eq 'createtime' ? 'ASC' :'DESC');
 
 	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
 
 	my @where;
-	my $tables = "firehose";
-	if ($options->{tagged_by_uid}) {
+	my $tables = 'firehose';
+	if ($options->{tagged_by_uid} && (!$doublecheck || $options->{ignore_nix})) {
 		my $tag_by_uid_q = $self->sqlQuote($options->{tagged_by_uid});
-		$tables .= ", tags";
-		push @where, "tags.globjid=firehose.globjid";
+		$tables .= ', tags';
+		push @where, 'tags.globjid=firehose.globjid';
 		push @where, "tags.uid = $tag_by_uid_q";
 
 		if ($options->{ignore_nix}) {
 			my $downlabel = $constants->{tags_downvote_tagname} || 'nix';
-			my $tags = getObject("Slash::Tags");
+			my $tags = getObject('Slash::Tags');
 			my $nix_id = $tags->getTagnameidFromNameIfExists($downlabel);
 			push @where, "tags.tagnameid != $nix_id";
+		} elsif ($options->{tagged_positive} || $options->{tagged_negative} || $options->{tagged_non_negative}) {
+			my $labels;
+			my $not = '';
+			if ($options->{tagged_positive}) {
+				$labels = $constants->{tags_positive_tagnames} || 'nod';
+			} else { # tagged_non_negative || tagged_negative
+				$labels = $constants->{tags_negative_tagnames} || 'nix';
+				$not = 'NOT' if $options->{tagged_non_negative};
+			}
+
+			my $tags = getObject('Slash::Tags');
+			my $ids = join ',', grep $_, map {
+				s/\s+//g;
+				$tags->getTagnameidFromNameIfExists($_)
+			} split /,/, $labels;
+			push @where, "tags.tagnameid $not IN ($ids)";
 		}
 	}
 	my $columns = "firehose.*, firehose.$popularitycol AS userpop";
 
-	if ($options->{createtime_no_future} && !$doublecheck) {
-		push @where, "createtime <= NOW()";
+	if (!$doublecheck) {
+		if ($options->{createtime_no_future}) {
+			push @where, 'createtime <= NOW()';
+		}
+
+		if ($options->{createtime_subscriber_future}) {
+			my $future_secs = $constants->{subscribe_future_secs};
+			push @where, "createtime <= DATE_ADD(NOW(), INTERVAL $future_secs SECOND)";
+		}
+
+		if ($options->{public}) {
+			push @where, 'public = ' . $self->sqlQuote($options->{public});
+		}
+
+		if ($options->{type}) {
+			push @where, 'type = ' . $self->sqlQuote($options->{type});
+		}
+
+		if (($options->{filter} || $options->{fetch_text}) && !$doublecheck) {
+			$tables .= ',firehose_text';
+			push @where, 'firehose.id = firehose_text.id';
+
+			if ($options->{filter}) {
+				# sanitize $options->{filter};
+				$options->{filter} =~ s/[^a-zA-Z0-9_]+//g;
+				push @where, "firehose_text.title LIKE '%$options->{filter}%'";
+			}
+
+			if ($options->{fetch_text}) {
+				$columns .= ',firehose_text.*';
+			}
+		}
+
+		my $dur_q = $self->sqlQuote($options->{duration});
+		my $st_q  = $self->sqlQuote(timeCalc($options->{startdate}, '%Y-%m-%d %T', -$user->{off_set}));
+
+		if ($options->{startdate}) {
+			push @where, "createtime >= $st_q";
+
+			if ($options->{duration} && $options->{duration} >= 0 ) {
+				push @where, "createtime <= DATE_ADD($st_q, INTERVAL $dur_q DAY)";
+			}
+		} elsif (defined $options->{duration} && $options->{duration} >= 0) {
+			push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $dur_q DAY)";
+		}
+
+		if ($pop) {
+			my $pop_q = $self->sqlQuote($pop);
+			if ($user->{is_admin} && !$user->{firehose_usermode}) {
+				push @where, "editorpop >= $pop_q";
+			} else {
+				push @where, "$popularitycol >= $pop_q";
+			}
+		}
+		if ($user->{is_admin}) {
+			my $signoff_label = 'sign' . $user->{uid} . 'ed';
+
+			if ($options->{unsigned}) {
+				push @where, "signoffs NOT LIKE '%$signoff_label%'";
+			} elsif ($options->{signed}) {
+				push @where, "signoffs LIKE '%$signoff_label%'";
+			}
+		}
+
+		if ($options->{uid}) {
+			my $uid_q = $self->sqlQuote($options->{uid});
+			push @where, "uid = $uid_q";
+		}
 	}
 
-	if ($options->{createtime_subscriber_future}) {
-		my $future_secs = $constants->{subscribe_future_secs};
-		push @where, "createtime <= DATE_ADD(NOW(), INTERVAL $future_secs SECOND)";
+	# check these again, just in case, as they are more time-sensitive
+	# and don't take much effort to check
+	if ($options->{attention_needed}) {
+		push @where, 'attention_needed = ' . $self->sqlQuote($options->{attention_needed});
 	}
 
-	if ($options->{attention_needed} && !$doublecheck) {
-		push @where, "attention_needed = " . $self->sqlQuote($options->{attention_needed});
+	if ($options->{accepted}) {
+		push @where, 'accepted = ' . $self->sqlQuote($options->{accepted});
 	}
 
-	if ($options->{public} && !$doublecheck) {
-		push @where, "public = " . $self->sqlQuote($options->{public});
-	}
-
-	if ($options->{accepted}) { # check this again, just in case, as it is time-sensitive
-		push @where, "accepted = " . $self->sqlQuote($options->{accepted});
-	}
-
-	if ($options->{rejected}) { # check this again, just in case, as it is time-sensitive
-		push @where, "rejected = " . $self->sqlQuote($options->{rejected});
-	}
-
-	if ($options->{type} && !$doublecheck) {
-		push @where, "type = " . $self->sqlQuote($options->{type});
+	if ($options->{rejected}) {
+		push @where, 'rejected = ' . $self->sqlQuote($options->{rejected});
 	}
 
 	if ($options->{primaryskid}) {
-		push @where, "primaryskid = " . $self->sqlQuote($options->{primaryskid});
+		push @where, 'primaryskid = ' . $self->sqlQuote($options->{primaryskid});
 	}
 
-	if (defined $options->{category} || $user->{is_admin}) { # check this again, just in case, as it is time-sensitive
+	if (defined $options->{category} || $user->{is_admin}) {
 		$options->{category} ||= '';
-		push @where, "category = " . $self->sqlQuote($options->{category});
-	}
-
-	if (($options->{filter} || $options->{fetch_text}) && !$doublecheck) {
-		$tables .= ",firehose_text";
-		push @where, "firehose.id=firehose_text.id";
-
-		if ($options->{filter}) {
-			# sanitize $options->{filter};
-			$options->{filter} =~ s/[^a-zA-Z0-9_]+//g;
-			push @where, "firehose_text.title LIKE '%" . $options->{filter} . "%'";
-		}
-
-		if ($options->{fetch_text}) {
-			$columns .= ",firehose_text.*";
-		}
+		push @where, 'category = ' . $self->sqlQuote($options->{category});
 	}
 
 	if ($options->{ids}) {
 		return($items, $results) if @{$options->{ids}} < 1;
-		my $id_str = join ",", map { $self->sqlQuote($_) } @{$options->{ids}};
+		my $id_str = join ',', map { $self->sqlQuote($_) } @{$options->{ids}};
 		push @where, "firehose.id IN ($id_str)";
 	}
 
-	# XXX Update to support timezones eventually
-	my $dur_q = $self->sqlQuote($options->{duration});
-	my $st_q  = $self->sqlQuote(timeCalc($options->{startdate},"%Y-%m-%d %T", -$user->{off_set}));
-
-	if ($options->{startdate}) {
-		push @where, "createtime >= $st_q";
-		
-
-		if ($options->{duration} && $options->{duration} >= 0 ) {
-			push @where, "createtime <= DATE_ADD($st_q, INTERVAL $dur_q DAY)";
-		}
-	} elsif (defined $options->{duration} && $options->{duration} >= 0) {
-		push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $dur_q DAY)";
-	}
-
-	if ($pop) {
-		my $pop_q = $self->sqlQuote($pop);
-		if ($user->{is_admin} && !$user->{firehose_usermode}) {
-			push @where, "editorpop >= $pop_q";
-		} else {
-			push @where, "$popularitycol >= $pop_q";
-		}
-	}
-	if ($user->{is_admin}) {
-		my $signoff_label = "sign" . $user->{uid} . "ed";
-
-		if ($options->{unsigned}) {
-			push @where, "signoffs NOT LIKE \"\%$signoff_label\%\"";
-		} elsif ($options->{signed}) {
-			push @where, "signoffs LIKE \"\%$signoff_label\%\"";
-		}
-	}
-
-	if ($options->{uid}) {
-		my $uid_q = $self->sqlQuote($options->{uid});
-		push @where, "uid=$uid_q";
-	}
-
-	my $limit_str = "";
-	my $where = (join ' AND ', @where) || "";
-
-	my $offset = defined $options->{offset} ? $options->{offset} : '';
-	$offset = '' if $offset !~ /^\d+$/;
-	$offset = "$offset, " if length $offset;
-	$limit_str = "LIMIT $offset $options->{limit}" unless $options->{nolimit};
-
+	my $limit_str = '';
+	my $where = (join ' AND ', @where) || '';
 
 	my $other = '';
-	$other .= " GROUP BY firehose.id " if $options->{tagged_by_uid};
-	$other .= "ORDER BY $options->{orderby} $options->{orderdir} $limit_str"; # unless $doublecheck;
+	$other = 'GROUP BY firehose.id' if $options->{tagged_by_uid};
+
+	if (1 || !$doublecheck) { # do always for now
+		my $offset = defined $options->{offset} ? $options->{offset} : '';
+		$offset = '' if $offset !~ /^\d+$/;
+		$offset = "$offset, " if length $offset;
+		$limit_str = "LIMIT $offset $options->{limit}" unless $options->{nolimit};
+		$other .= " ORDER BY $options->{orderby} $options->{orderdir} $limit_str";
+	}
+
 
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
 	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
@@ -538,9 +558,10 @@ sub getFireHoseEssentials {
 		for my $hr (@$hr_ar) {
 			$hr->{note} = $note_hr->{ $hr->{globjid} } || '';
 		}
+
+		$items = $hr_ar;
 	}
 
-	$items = $hr_ar;
 	return($items, $results);
 }
 
@@ -649,9 +670,7 @@ sub allowSubmitForUrl {
 	} else {
 		my $uid_q;
 		return !$self->sqlCount("firehose", "url_id=$url_id_q and uid != $uid_q");
-
 	}
-	
 }
 
 sub getPrimaryFireHoseItemByUrl {
@@ -662,13 +681,13 @@ sub getPrimaryFireHoseItemByUrl {
 		my $url_id_q = $self->sqlQuote($url_id);
 		my $count = $self->sqlCount("firehose", "url_id=$url_id_q");
 		if ($count > 0) {
-			my ($uid, $id) = $self->sqlSelect("uid,id", "firehose", "url_id = $url_id_q", "order by id asc");
+			my($uid, $id) = $self->sqlSelect("uid,id", "firehose", "url_id = $url_id_q", "order by id asc");
 			if ($uid == $constants->{anon_coward_uid}) {
 				$ret_val = $id;
 			} else {
 				# Logged in, give precedence to most recent submission
 				my $uid_q = $self->sqlQuote($uid);
-				my ($submitted_id) = $self->sqlSelect("id", "firehose", "url_id = $url_id_q AND uid=$uid_q", "order by id desc");
+				my($submitted_id) = $self->sqlSelect("id", "firehose", "url_id = $url_id_q AND uid=$uid_q", "order by id desc");
 				$ret_val = $submitted_id ? $submitted_id : $id;
 			}
 		}
@@ -1077,7 +1096,7 @@ sub ajaxFireHoseGetUpdates {
 }
 
 sub firehose_vote {
-	my ($self, $id, $uid, $dir) = @_;
+	my($self, $id, $uid, $dir) = @_;
 
 	my $tag; 
 	my $constants = getCurrentStatic();
@@ -2043,7 +2062,6 @@ sub getFireHoseItemsByUrl {
 	my $url_id_q = $self->sqlQuote($url_id);
 	return $self->sqlSelectAllHashrefArray("*", "firehose, firehose_text", "firehose.id=firehose_text.id AND url_id = $url_id_q");
 }
-
 
 1;
 

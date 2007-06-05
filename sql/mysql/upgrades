@@ -4563,12 +4563,15 @@ UPDATE vars SET value = 'T_2_5_0_159' WHERE name = 'cvs_tag_currentcode';
 # 2007-05-23
 UPDATE vars SET value = 'T_2_5_0_160' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
+# 2007-05-30
+UPDATE vars SET value = 'T_2_5_0_161' WHERE name = 'cvs_tag_currentcode';
 
 # 2007-05-30
 UPDATE vars SET value = 'T_2_5_0_161' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # For plugins/ResKey 
 INSERT INTO reskey_resources VALUES (200, 'badge_vote_static', 'yes');
@@ -4578,3 +4581,10 @@ INSERT INTO reskey_vars VALUES (200, 'user_seclev', 1, 'Minimum seclev to use re
 
 # This will turn on the IM option for Comment Replies
 UPDATE message_codes SET delivery_bvalue = 7 WHERE code = 4;
+
+# for Tags and FireHose
+INSERT INTO vars (name, value, description) VALUES ('tags_negative_tagnames', 'nix,dupe,whocares', 'Negative tags (comma separated)');
+
+# 2007-06-05
+UPDATE vars SET value = 'T_2_5_0_162' WHERE name = 'cvs_tag_currentcode';
+

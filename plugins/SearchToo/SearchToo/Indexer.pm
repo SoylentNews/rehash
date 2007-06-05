@@ -420,6 +420,14 @@ sub deleteStoredRecords {
 # * make backup -> live
 # rinse, lather, repeat
 sub moveLive {
+	my($self) = @_;
+
+	# fix permissions ... KS makes it 0600 by default
+	my $dir = $self->_dir;
+	find(sub {
+		chmod 0644, $File::Find::name if -f $File::Find::name;
+	}, $dir);
+
 	my $slashdb = getCurrentDB();
 	my $num = $slashdb->getVar('search_too_index_num', 'value', 1) || 0;
 
@@ -540,7 +548,7 @@ sub handled {
 #################################################################
 sub _type {
 	my($self, $type) = @_;
-	$self->{_type} = $type if defined $type;
+	$self->{_type} = lc $type if defined $type;
 	return $self->{_type};
 }
 
@@ -559,8 +567,11 @@ sub _dir {
 
 	$dir ||= catdir(getCurrentStatic('datadir'), 'search_index');
 
+	my $class = $self->_class;
 	if (!$type) {
-		return catdir($dir, $self->_class);
+		return $dir =~ /\Q$class\E$/
+			? $dir
+			: catdir($dir, $class);
 	}
 
 	my $slashdb = getCurrentDB();
@@ -569,7 +580,10 @@ sub _dir {
 		$num = $num == 1 ? 0 : 1;
 	}
 
-	return catdir($dir, $self->_class, $self->_type($type) . "_$num");
+	my $foodir = catdir($class, $self->_type($type) . "_$num");
+	return $dir =~ /\Q$foodir\E$/
+		? $dir
+		: catdir($dir, $foodir);
 }
 
 #################################################################
