@@ -81,7 +81,7 @@ sub saveBookmark {
 	my $rkey = $reskey->key('bookmark');
 	my $bookmarkoptions;
 
-	$bookmarkoptions->{errors}{invalidurl}    = !$slashdb->validUrl($form->{url});
+	$bookmarkoptions->{errors}{invalidurl}    = !validUrl($form->{url});
 	$bookmarkoptions->{errors}{missingfields} = 1 if !$form->{url} || !$form->{title} || !$form->{tags};
 	
 	if (!$bookmarkoptions->{errors}) {
