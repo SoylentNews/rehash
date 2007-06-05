@@ -126,6 +126,7 @@ BEGIN {
 	xmldecode
 	xmlencode
 	xmlencode_plain
+	validUrl
 	vislenify
 );
 
@@ -4316,6 +4317,25 @@ sub createStoryTopicData {
 	}
 
 	return \%tid_ref;
+}
+
+# check whether url is correctly formatted and has a scheme that is allowed for bookmarks and submissions
+sub validUrl {
+	my($url) = @_;
+	my $constants = getCurrentStatic();
+	my $fudgedurl = fudgeurl($url);
+	
+	my @allowed_schemes = split(/\|/, $constants->{bookmark_allowed_schemes} || "http|https");
+	my %allowed_schemes = map { $_ => 1 } @allowed_schemes;
+
+	my $scheme;
+	
+	if ($fudgedurl) {
+		my $uri = new URI $fudgedurl;
+		$scheme = $uri->scheme if $uri && $uri->can("scheme");
+	}		
+	return ($fudgedurl && $scheme && $allowed_schemes{$scheme});
+	
 }
 
 
