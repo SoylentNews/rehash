@@ -79,6 +79,7 @@ __template__
 [% CASE 'badsubject' %]
 	[% returnme.data_constant = 1 %]
 	Please enter a reasonable subject.
+
 [% CASE 'invalidurl' %]
 	[% returnme.data_constant = 1 %]
 	<div class="message error">

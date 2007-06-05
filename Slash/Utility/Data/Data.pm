@@ -4335,7 +4335,6 @@ sub validUrl {
 		$scheme = $uri->scheme if $uri && $uri->can("scheme");
 	}		
 	return ($fudgedurl && $scheme && $allowed_schemes{$scheme});
-	
 }
 
 
