@@ -71,7 +71,7 @@ __template__
 			<span id="advasc" onclick="firehose_set_options('orderdir','ASC')"><a href="#">Descending</a></span>
 		[% END %]
 	</td>
-	<td>Forwards or Backwards.  You be the call!</td>
+	<td>Forwards or Backwards.  You make the call!</td>
 </tr>
 <tr>
 	<td>
