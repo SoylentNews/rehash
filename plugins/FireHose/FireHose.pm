@@ -657,13 +657,20 @@ sub allowSubmitForUrl {
 sub getPrimaryFireHoseItemByUrl {
 	my($self, $url_id) = @_;
 	my $ret_val = 0;
+	my $constants = getCurrentUser();
 	if ($url_id) {
 		my $url_id_q = $self->sqlQuote($url_id);
 		my $count = $self->sqlCount("firehose", "url_id=$url_id_q");
 		if ($count > 0) {
 			my ($uid, $id) = $self->sqlSelect("uid,id", "firehose", "url_id = $url_id_q", "order by id asc");
-			$ret_val = $id;
-			# XXX add more complex logic
+			if ($uid == $constants->{anon_coward_uid}) {
+				$ret_val = $id;
+			} else {
+				# Logged in, give precedence to most recent submission
+				my $uid_q = $self->sqlQuote($uid);
+				my ($submitted_id) = $self->sqlSelect("id", "firehose", "url_id = $url_id_q AND uid=$uid_q", "order by id desc");
+				$ret_val = $submitted_id ? $submitted_id : $id;
+			}
 		}
 	}
 	return $ret_val;
@@ -1663,6 +1670,7 @@ sub getAndSetOptions {
 			}
 			$uid ||= $user->{uid};
 			$fh_options->{tagged_by_uid} = $uid;
+			$fh_options->{tagged_non_negative} = 1;
 			$fh_options->{ignore_nix} = 1;
 		} else {
 			if (!defined $fh_options->{filter}) {
