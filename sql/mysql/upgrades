@@ -4576,3 +4576,5 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 200, 'all', 'Slash::ResKey::Che
 INSERT INTO reskey_resource_checks VALUES (NULL, 200, 'use', 'Slash::ResKey::Checks::Post',                151);
 INSERT INTO reskey_vars VALUES (200, 'user_seclev', 1, 'Minimum seclev to use resource');
 
+# This will turn on the IM option for Comment Replies
+UPDATE message_codes SET delivery_bvalue = 7 WHERE code = 4;
