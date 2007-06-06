@@ -425,7 +425,7 @@ sub getFireHoseEssentials {
 
 			if ($not) {
 				$filter_globjids = $self->sqlSelectAllHashref(
-					'globjid', 'globjid', 'tags',
+					'globjid', 'DISTINCT globjid', 'tags',
 					"uid = $tag_by_uid_q AND tagnameid IN ($ids)"
 				);
 			}
