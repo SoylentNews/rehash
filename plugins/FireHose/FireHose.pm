@@ -425,7 +425,7 @@ sub getFireHoseEssentials {
 
 			if ($not) {
 				$filter_globjids = $self->sqlSelectAllHashref(
-					'globjid', 'DISIINCT globjid', 'tags',
+					'globjid', 'globjid', 'tags',
 					"uid = $tag_by_uid_q AND tagnameid IN ($ids)"
 				);
 			}
@@ -554,7 +554,7 @@ sub getFireHoseEssentials {
 		for my $i (0 .. $#{$hr_ar}) {
 			my $el = $hr_ar->[$i] or last;
 			if (exists($filter_globjids->{ $el->{globjid} })) {
-				splice(@$hr_ar, $i, 0);
+				splice(@$hr_ar, $i, 1);
 				$i--;
 			}
 		}
