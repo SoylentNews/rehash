@@ -394,6 +394,7 @@ sub getFireHoseEssentials {
 
 	my @where;
 	my $tables = 'firehose';
+	my $filter_globjids;
 	if ($options->{tagged_by_uid} && (!$doublecheck || $options->{ignore_nix})) {
 		my $tag_by_uid_q = $self->sqlQuote($options->{tagged_by_uid});
 		$tables .= ', tags';
@@ -421,6 +422,13 @@ sub getFireHoseEssentials {
 				$tags->getTagnameidFromNameIfExists($_)
 			} split /,/, $labels;
 			push @where, "tags.tagnameid $not IN ($ids)";
+
+			if ($not) {
+				$filter_globjids = $self->sqlSelectAllHashref(
+					'globjid', 'DISIINCT globjid', 'tags',
+					"uid = $tag_by_uid_q AND tagnameid IN ($ids)"
+				);
+			}
 		}
 	}
 	my $columns = "firehose.*, firehose.$popularitycol AS userpop";
@@ -541,6 +549,16 @@ sub getFireHoseEssentials {
 
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
 	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
+
+	if (keys %$filter_globjids) {
+		for my $i (0 .. $#{$hr_ar}) {
+			my $el = $hr_ar->[$i] or last;
+			if (exists($filter_globjids->{ $el->{globjid} })) {
+				splice(@$hr_ar, $i, 0);
+				$i--;
+			}
+		}
+	}
 
 	# make sure these items (from SearchToo) still match -- pudge
 	if ($doublecheck) {
@@ -1690,7 +1708,7 @@ sub getAndSetOptions {
 			$uid ||= $user->{uid};
 			$fh_options->{tagged_by_uid} = $uid;
 			$fh_options->{tagged_non_negative} = 1;
-			$fh_options->{ignore_nix} = 1;
+#			$fh_options->{ignore_nix} = 1;
 		} else {
 			if (!defined $fh_options->{filter}) {
 				$fh_options->{filter} = $_;
