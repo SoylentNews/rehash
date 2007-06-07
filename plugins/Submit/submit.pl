@@ -583,7 +583,7 @@ sub saveSub {
 
 	if ($form->{url}) {
 	
-		if (!$slashdb->validUrl($form->{url})) {
+		if (!validUrl($form->{url})) {
 			displayForm($form->{name}, $form->{email}, $form->{skin}, '', getData("invalidurl"));
 			return(0);
 		} else {
