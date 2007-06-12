@@ -80,7 +80,11 @@ __template__
 	[% END %]
 [% CASE 'noitems' %]
 	<div class="message error">
+		[% IF user.state.firehose_page == "user" %]
+			This user's Firehose page contains no [% IF form.page %]additional [% END %] entries;
+		[% ELSE %]
 		Sorry no items returned.  You may want to try expanding your color range or date range.
+		[% END %]
 	</div>
 [% CASE 'notavailable' %]
 	The item you're trying to view either does not exist, or is not viewable to you.
