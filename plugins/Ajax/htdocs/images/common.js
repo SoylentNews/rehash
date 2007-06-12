@@ -983,8 +983,12 @@ function firehose_play() {
 	var pause = $('pause');
 	
 	var play_div = $('play');
-	play_div.className = "hide";
-	pause.className = "show";
+	if (play_div) {
+		play_div.className = "hide";
+	}
+	if (pause) {
+		pause.className = "show";
+	}
 }
 
 function firehose_pause() {
