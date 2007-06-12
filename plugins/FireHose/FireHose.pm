@@ -988,8 +988,15 @@ sub ajaxFireHoseGetUpdates {
 	my $num_items = scalar @$items;
 	my $future = {};
 	my $globjs = [];
-	my $base_page = $form->{fh_pageval} && $form->{fh_pageval} == 1 ? "console.pl" : "firehose.pl";
-
+	my $base_page = "firehose.pl";
+	if ($form->{fh_pageval}) {
+		if ($form->{fh_pageval} == 1) {
+			$base_page = "console.pl";
+		} elsif ($form->{fh_pageval} == 2) {
+			$base_page = "users.pl";
+		}
+	}
+	
 	foreach (@$items) {
 		push @$globjs, $_->{globjid} if $_->{globjid} 
 	}
@@ -1097,6 +1104,7 @@ sub ajaxFireHoseGetUpdates {
 
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
+	$html->{itemsreturned} = $num_items == 0 ?  getData("noitems", {}, 'firehose') : "";
 
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
 		html		=> $html,
@@ -1452,7 +1460,9 @@ sub getAndSetOptions {
 
 	if (defined $form->{pause}) {
 		$options->{pause} = $user->{firehose_paused} = $form->{pause} ? 1 : 0;
-		$self->setUser($user->{uid}, { firehose_paused => $options->{pause} });
+		if (!$user->{state}{firehose_page} eq "user") {
+			$self->setUser($user->{uid}, { firehose_paused => $options->{pause} });
+		}
 	}
 
 	if (defined $form->{duration}) {
@@ -1533,9 +1543,9 @@ sub getAndSetOptions {
 	# XXX
 	my $user_tabs = $self->getUserTabs();
 	my %user_tab_names = map { $_->{tabname} => 1 } @$user_tabs;
-	my %firehose_tabs_given = map { $_ => 1 }split (/\|/, $user->{firehose_tabs_given});
+	my %firehose_tabs_given = map { $_ => 1 } split (/\|/, $user->{firehose_tabs_given});
 	my @tab_fields = qw(tabname filter mode color orderdir orderby);
-	my $tabs_given = "";
+	my $tabs_given = $user->{firehose_tabs_given};
 
 	my $system_tabs = $self->getSystemDefaultTabs();
 	foreach my $tab (@$system_tabs) {
@@ -1565,7 +1575,10 @@ sub getAndSetOptions {
 
 
 	
-	my $tab_compare = { mode => "mode", orderdir => "orderdir", color => "color", orderby => "orderby", filter => "fhfilter" };
+	my $tab_compare = { 
+		color 		=> "color", 
+		filter 		=> "fhfilter" 
+	};
 
 	my $tab_match = 0;
 	foreach my $tab (@$user_tabs) {
@@ -1603,9 +1616,6 @@ sub getAndSetOptions {
 		}
 		if ($tabnames_hr->{$form->{tab}}) {
 			my $curtab = $tabnames_hr->{$form->{tab}};
-			$mode = $options->{mode} = $curtab->{mode};
-			$options->{orderby} = $curtab->{orderby};
-			$options->{orderdir} = $curtab->{orderdir};
 			$options->{color} = $curtab->{color};
 			$fhfilter = $options->{fhfilter} = $curtab->{filter};
 
@@ -1730,6 +1740,7 @@ sub getAndSetOptions {
 	if (!$user->{is_anon} && !$opts->{no_set}) {
 		my $data_change = {};
 		foreach (keys %$options) {
+			next if $user->{state}{firehose_page} eq "user" && ($_ eq "nothumbs" || $_ eq "nocolors" || $_ eq "pause");
 			$data_change->{"firehose_$_"} = $options->{$_} if !defined $user->{"firehose_$_"} || $user->{"firehose_$_"} ne $options->{$_};
 		}
 		$self->setUser($user->{uid}, $data_change) if keys %$data_change > 0;
@@ -1842,11 +1853,11 @@ sub getPopLevelForPopularity {
 
 sub listView {
 	my($self, $lv_opts) = @_;
+	$lv_opts ||= {};
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
-	my $options = $self->getAndSetOptions();
-	$lv_opts ||= {};
+	my $options = $lv_opts->{options} || $self->getAndSetOptions();
 	my $base_page = $lv_opts->{fh_page} || "firehose.pl";
 
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($options);
