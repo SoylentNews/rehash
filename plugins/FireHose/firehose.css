@@ -158,6 +158,8 @@ ul.menu#fhtablist li.active:before, .paginate .active:before { content: ""; }
 .daybreak,
 .paginate { background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x; }
 .paginate { margin-right: 18.5em; }
+#users .paginate { margin-right: 0em; }
+
 
 .admin .paginate { margin-right: 0; }
 .paginate .menu { background: url('//images.slashdot.org/corner_w_br.png') right bottom no-repeat; 
@@ -179,6 +181,7 @@ padding-top:0.4em;}
 .storylinks li.comments { margin-right: 1em !important; }
 #firehoselist { padding: 1em 0 0 0; }
 #firehoselist, #firehose #message, .firemenu { margin-right: 18.5em; }
+#users #firehoselist, #users #firehose #message, #users .firemenu { margin-right: 0em; }
 .admin #firehoselist, .admin #firehose #message, .admin .firemenu { margin-right: 0; }
 .article .generaltitle .title .date,
 .article .generaltitle .title .nickname { display: none; }
@@ -566,6 +569,7 @@ ul.menu#fhtablist li.active:before, .paginate .active:before { content: ""; }
 .daybreak,
 .paginate { background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x; }
 .paginate { margin-right: 18.5em; }
+#useers .paginate { margin-right: 0em; }
 
 .admin .paginate { margin-right: 0; }
 .paginate .menu { background: url('//images.slashdot.org/corner_w_br.png') right bottom no-repeat; 
@@ -586,6 +590,7 @@ padding-top:0.4em;}
 .storylinks li.more { margin-left: -1.8em !important; }
 #firehoselist { padding: 1em 0 0 0; }
 #firehoselist, #firehose #message, .firemenu { margin-right: 18.5em; }
+#users #firehoselist, #users #firehose #message, #users .firemenu { margin-right: 0em; }
 .admin #firehoselist, .admin #firehose #message, .admin .firemenu { margin-right: 0; }
 .article .generaltitle .title .date,
 .article .generaltitle .title .nickname { display: none; }
