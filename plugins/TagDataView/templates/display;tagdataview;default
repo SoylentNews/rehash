@@ -1,0 +1,79 @@
+__section__
+default
+__description__
+remarks - HTML text to prepend to the page
+tag_count - hashref 
+cur_hour - current time, rounded back to the previous hour boundary
+__title__
+Main page for tagdataview.pl
+__page__
+tagdataview
+__lang__
+en_US
+__name__
+display
+__template__
+<div id="tagdataviewdisplay">
+	[% remarks %]
+
+	<p><table cellspacing=3>
+	<tr> <td></td>		<th align="right">last hour</th><th>fh%</th><th>&nbsp;</th>	<th align="right">last day</th><th>fh%</th><th>&nbsp;</th>	<th align="right">last week</th><th>fh%</th> </tr>
+	<tr> <td>tags</td>	<td align="right">[% tag_count.tags.hour %]</td><td align="right">[% tag_count.tags.hour_fh_perc %]</td><td>&nbsp;</td>
+				<td align="right">[% tag_count.tags.day  %]</td><td align="right">[% tag_count.tags.day_fh_perc %]</td><td>&nbsp;</td>
+				<td align="right">[% tag_count.tags.week %]</td><td align="right">[% tag_count.tags.week_fh_perc %]</td> </tr>
+	<tr> <td>votes</td>	<td align="right">[% tag_count.votes.hour %]</td><td align="right">[% tag_count.votes.hour_fh_perc %]</td><td>&nbsp;</td>
+				<td align="right">[% tag_count.votes.day  %]</td><td align="right">[% tag_count.votes.day_fh_perc %]</td><td>&nbsp;</td>
+				<td align="right">[% tag_count.votes.week %]</td><td align="right">[% tag_count.votes.week_fh_perc %]</td> </tr>
+	<tr> <td>objects</td>	<td align="right">[% tag_count.objects.hour %]</td><td align="right">[% tag_count.objects.hour_fh_perc %]</td><td>&nbsp;</td>
+				<td align="right">[% tag_count.objects.day  %]</td><td align="right">[% tag_count.objects.day_fh_perc %]</td><td>&nbsp;</td>
+				<td align="right">[% tag_count.objects.week %]</td><td align="right">[% tag_count.objects.week_fh_perc %]</td> </tr>
+	<tr> <td>users</td>	<td align="right">[% tag_count.users.hour %]</td><td align="right">[% tag_count.users.hour_fh_perc %]</td><td>&nbsp;</td>
+				<td align="right">[% tag_count.users.day  %]</td><td align="right">[% tag_count.users.day_fh_perc %]</td><td>&nbsp;</td>
+				<td align="right">[% tag_count.users.week %]</td><td align="right">[% tag_count.users.week_fh_perc %]</td> </tr>
+
+	<tr><th>most<br>nonneg<br>tags</th>
+	<td colspan=2>
+[% FOR globj IN nonneg.hour %]
+[% globj.c %] <a href="[% globj.url %]">[% Slash.ellipsify(globj.title, 30) %]</a><br>
+[% END %]
+	</td> <td>&nbsp;</td>
+	<td colspan=2>
+[% FOR globj IN nonneg.day %]
+[% globj.c %] <a href="[% globj.url %]">[% Slash.ellipsify(globj.title, 30) %]</a><br>
+[% END %]
+	</td> <td>&nbsp;</td>
+	<td colspan=2>
+[% FOR globj IN nonneg.week %]
+[% globj.c %] <a href="[% globj.url %]">[% Slash.ellipsify(globj.title, 30) %]</a><br>
+[% END %]
+	</td>
+	</tr>
+	</table></p>
+
+	<p><table cellspacing=3>
+
+	[% cur_hour_minus_1day = cur_hour - 86400 %]
+	<tr><th colspan=2>Last 24 Hours</th></tr>
+	<tr><th>First Hour</th><th>First 12 Hours</th></tr>
+	<tr><td><img src="/tagdataview.pl?op=fhpopgraph&amp;start_time=[% cur_hour_minus_1day %]&amp;duration=3600&amp;y_ceil=360&amp;width=200&amp;height=300" width=200 height=300 border=0 alt="Last 24 Hours, First Hour"></td>
+	<td><img src="/tagdataview.pl?op=fhpopgraph&amp;start_time=[% cur_hour_minus_1day %]&amp;y_ceil=360&amp;width=640&amp;height=300" width=640 height=300 border=0 alt="Last 24 Hours, First 12 Hours"></td></tr>
+
+	[% cur_hour_minus_7day = cur_hour - 86400 * 7 %]
+	<tr><th colspan=2>Last 7 Days</th></tr>
+	<tr><th>First Hour</th><th>First 12 Hours</th></tr>
+	<tr><td><img src="/tagdataview.pl?op=fhpopgraph&amp;start_time=[% cur_hour_minus_7day %]&amp;duration=3600&amp;y_ceil=360&amp;width=200&amp;height=300" width=200 height=300 border=0 alt="Last 7 Days, First Hour"></td>
+	<td><img src="/tagdataview.pl?op=fhpopgraph&amp;start_time=[% cur_hour_minus_7day %]&amp;y_ceil=360&amp;width=640&amp;height=300" width=640 height=300 border=0 alt="Last 7 Days, First 12 Hours"></td></tr>
+
+	[% cur_hour_minus_30day = cur_hour - 86400 * 30 %]
+	<tr><th colspan=2>Last 30 Days</th></tr>
+	<tr><th>First Hour</th><th>First 12 Hours</th></tr>
+	<tr><td><img src="/tagdataview.pl?op=fhpopgraph&amp;start_time=[% cur_hour_minus_30day %]&amp;duration=3600&amp;y_ceil=360&amp;width=200&amp;height=300" width=200 height=300 border=0 alt="Last 30 Days, First Hour"></td>
+	<td><img src="/tagdataview.pl?op=fhpopgraph&amp;start_time=[% cur_hour_minus_30day %]&amp;y_ceil=360&amp;width=640&amp;height=300" width=640 height=300 border=0 alt="Last 30 Days, First 12 Hours"></td></tr>
+
+	</table></p>
+
+</div>
+__seclev__
+10000
+__version__
+$Id$

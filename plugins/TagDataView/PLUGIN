@@ -1,0 +1,9 @@
+# $Id$
+name=TagDataView
+description="Tag-related stats data for admins"
+htdoc=tagdataview.pl
+task=fh_pophistory.pl
+mysql_schema=mysql_schema.sql
+requiresplugin=FireHose
+requiresplugin=Tags
+template=templates/display;tagdataview;default
