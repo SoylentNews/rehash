@@ -143,6 +143,27 @@ sub fhpopgraph {
 	my $duration = $form->{duration} || 12 * 3600;
 	$duration =~ /^(\d+)$/; $duration = $1;
 
+	my $form_y_ceil = 0;
+	$form_y_ceil = $1 if $form->{y_ceil} && $form->{y_ceil} =~ /^(\d+)$/;
+
+	my $width = $form->{width} || 600;	$width =~ /^(\d+)$/;  $width = $1;
+	my $height = $form->{height} || 480;	$height =~ /^(\d+)$/; $height = $1;
+
+	emit_image_header('image/png');
+
+	my $mcd = $slashdb->getMCD();
+	my $mcdkey = undef;
+	if ($mcd) {
+		my $params = join "_",
+			$start_time, $end_time, $duration, $form_y_ceil, $width, $height;
+		$mcdkey = "$slashdb->{_mcd_keyprefix}:tdvfhpg:$params";
+		my $value = $mcd->get($mcdkey);
+		if ($value) {
+			print $value;
+			return;
+		}
+	}
+
 	my $y_max = 0;
 
 	my $userpop_col = $constants->{firehose_userpop_col};
@@ -222,11 +243,8 @@ sub fhpopgraph {
 	}
 
 	my $n_items = scalar keys %$g_hr;
-	my $width = $form->{width} || 600;	$width =~ /^(\d+)$/;  $width = $1;
-	my $height = $form->{height} || 480;	$height =~ /^(\d+)$/; $height = $1;
 	my $graph = GD::Graph::lines->new($width, $height);
-	my $y_ceil = (int($y_max/40)+1) * 40;
-	$y_ceil = $1 if $form->{y_ceil} && $form->{y_ceil} =~ /^(\d+)$/;
+	my $y_ceil = $form_y_ceil || (int($y_max/40)+1) * 40;
 	$graph->set(
 		x_label =>		'Hours after creation',
 		y_label =>		$userpop_col,
@@ -245,9 +263,11 @@ sub fhpopgraph {
 #print STDERR "colors: " . Dumper(\@colors);
 #print STDERR "data: " . Dumper(\@data);
 	my $gd = $graph->plot(\@data) or warn $graph->error;
-
-	emit_image_header('image/png');
-	print $gd->png if $gd;
+	my $png = $gd ? $gd->png : undef;
+	print $png if $png;
+	if ($png && $mcd) {
+		$mcd->set($mcdkey, $png, 3600);
+	}
 
 }
 
