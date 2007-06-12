@@ -843,12 +843,12 @@ EOT
 		}
 		$statsSave->createStatDaily("relocate_all", $total);
 	}
-	
-	my $subscribe = getObject('Slash::Subscribe');
-	my $firehose = getObject('Slash::FireHose');
-	my $tags = getObject('Slash::Tags');
-	
-	if($subscribe){
+
+	my $subscribe = getObject('Slash::Subscribe') if $constants->{plugin}{Subscribe};
+	my $firehose = getObject('Slash::FireHose') if $constants->{plugin}{FireHose};
+	my $tags = getObject('Slash::Tags') if $constants->{plugin}{Tags};
+
+	if ($subscribe) {
 		my $rswh =   $stats->getSubscribersWithRecentHits();
 		my $sub_cr = $logdb->getSubscriberCrawlers($rswh);
 		my $sub_report;
