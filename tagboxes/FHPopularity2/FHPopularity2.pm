@@ -164,6 +164,17 @@ sub run {
 	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
 	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0, $options);
 	$tagsdb->addCloutsToTagArrayref($tags_ar);
+
+	# Admins may get reduced downvote clout.
+	if ($constants->{firehose_admindownclout} && $constants->{firehose_admindownclout} != 1) {
+		my $admins = $tagsdb->getAdmins();
+		for my $tag_hr (@$tags_ar) {
+			$tag_hr->{total_clout} *= $constants->{firehose_admindownclout}
+				if    $tag_hr->{tagnameid} == $downvoteid
+				   && $admins->{ $tag_hr->{uid} };
+		}
+	}
+
 	my $udc_cache = { };
 	for my $tag_hr (@$tags_ar) {
 		next if $options->{starting_only};
