@@ -136,10 +136,11 @@ These constants are used for web programs, for the op hashes.
 
 	ALLOWED
 	FUNCTION
+	MINSECLEV
 
 =cut
 
-# 0 1
+# 0 1 2
 
 =head2 reskey
 
