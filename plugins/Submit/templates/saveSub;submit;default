@@ -28,6 +28,8 @@ __template__
 
 	<p>Thanks for the submission.</p>
 
+	[% PROCESS bookmarktext %]
+
 __seclev__
 10000
 __version__
