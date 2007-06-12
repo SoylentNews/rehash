@@ -82,7 +82,7 @@ END; login_block = BLOCK %]
 <script type="text/javascript">logged_in = 0</script>
 [% END # login_block %]
 
-[% IF form.skipmenu %]
+[% IF form.skipmenu || options.skipmenu %]
 [% login_block %]
 [% ELSE %]
 <div class="firemenu">
@@ -156,6 +156,9 @@ feedback to hose@cmdrtaco.net but be forgiving of beta code!
 [% itemstext %]
 [% page = page || "0" %]
 </div>
+<span id="itemsreturned">
+	[% IF itemnum == 0; Slash.getData('noitems', {}, 'firehose'); END %]
+</span>
 [% PROCESS paginate options = options ulid = "fh-paginate" divid = "fh-pag-div" num_items = itemnum fh_page = fh_page %]
 <script type="text/javascript">
 	firehose_startdate = '[% options.startdate.replace('-','') %]';
@@ -163,6 +166,8 @@ feedback to hose@cmdrtaco.net but be forgiving of beta code!
 	firehose_duration = '[% options.duration %]';
 	[% IF fh_page == "console.pl" %]
 		fh_pageval = 1;
+	[% ELSIF fh_page == "users.pl" %]
+		fh_pageval = 2;
 	[% END %]
 
 	var firehose_action_time = 0;
