@@ -708,9 +708,9 @@ sub userdir_handler {
 
 				} elsif ($op eq 'firehose') {
 					my $filter = fixparam("user:");
-					$r->args("fhfilter=$filter");
-					$r->uri('firehose.pl');
-					$r->filename($constants->{basedir} . '/firehose.pl')
+					$r->args("op=userfirehose");
+					$r->uri('users.pl');
+					$r->filename($constants->{basedir} . '/users.pl')
 
 				} else {
 					$r->args("op=edituser");
@@ -747,6 +747,7 @@ sub userdir_handler {
 		for ($nick, $op, $extra, $more) {
 			s/%([a-fA-F0-9]{2})/pack('C', hex($1))/ge;
 		}
+
 
 		my $slashdb = getCurrentDB();
 		my $reader_user = $slashdb->getDB('reader');
@@ -845,9 +846,9 @@ sub userdir_handler {
 		
 		} elsif ($op eq 'firehose') {
 			my $filter = fixparam("\"user:$nick_orig\"");
-			$r->args("fhfilter=$filter");
-			$r->uri('/firehose.pl');
-			$r->filename($constants->{basedir} . '/firehose.pl');
+			$r->args("op=userfirehose&uid=$uid");
+			$r->uri('/users.pl');
+			$r->filename($constants->{basedir} . '/users.pl');
 
 		} else {
 			$r->args("nick=$nick&uid=$uid");
