@@ -4587,3 +4587,7 @@ INSERT INTO vars (name, value, description) VALUES ('tags_negative_tagnames', 'n
 UPDATE vars SET value = 'T_2_5_0_162' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# These will turn on the IM option for Journal Entry By Friend and Journal Reply
+UPDATE message_codes SET delivery_bvalue = 7 WHERE code = 5;
+UPDATE message_codes SET delivery_bvalue = 7 WHERE code = 7;
