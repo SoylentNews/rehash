@@ -32,5 +32,3 @@ INSERT INTO firehose_tab VALUES (1,0,'Firehose','','createtime','DESC','indigo',
 INSERT INTO firehose_tab VALUES (2,0,'Slashdot','story','createtime','DESC','black','full');
 INSERT INTO firehose_tab VALUES (3,0,'Journals','journal','createtime','DESC','blue','full');
 INSERT INTO firehose_tab VALUES (4,0,'User','"user:{nickname}"','createtime','DESC','black','full');
-
-

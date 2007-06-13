@@ -67,7 +67,6 @@ sub main {
 			tab_selected_1	=> 'me',
 			tab_selected_2	=> 'info',
 		},
-		
 		userfirehose 	=> {
 			function	=> \&showFireHose,
 			seclev		=> 0,
@@ -76,7 +75,6 @@ sub main {
 			tab_selected_1	=> 'me',
 			tab_selected_2	=> 'firehose'
 		},
-
 		usersubmissions	=>  {
 			function	=> \&showSubmissions,
 			#I made this change, not all sites are going to care. -Brian

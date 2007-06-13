@@ -13,17 +13,18 @@ firehose_pages
 __template__
 [% 
 	start_day = options.startdate.replace('-');
-	duration = options.duration
-	param_str = "&amp;startdate=$start_day&amp;duration=$duration" 
+	duration = options.duration;
+	param_str = "&amp;startdate=$start_day&amp;duration=$duration";
+
+	page_extras = "";
+	IF fh_page == "users.pl";
+		extra_uid = user.state.firehose_user_uid;
+		page_extras = "&amp;op=userfirehose&amp;uid=$extra_uid";
+	END;
 %]
-[% page_extras = "" %]
-[% IF fh_page == "users.pl";
-	extra_uid = user.state.firehose_user_uid;
-	page_extras = "&amp;op=userfirehose&amp;uid=$extra_uid";
-END %]
 [% IF !contentsonly %]<span class="firehose_paginate" id="firehose_pages">[% END %]
 [% IF page %] <a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page - 1 %][% param_str %][% page_extras %]"><b>&lsaquo;</b> [% page %]</a>[% END %]
-[% IF page || num_items == options.limit %]<a class="fh_cur_page" href="[% gSkin.rootdir %]/[% fh_page %][% page_extras %]?page=[% page %][% param_str %]"><strong>[% page + 1 %]</strong></a>[% END %]
+[% IF page || num_items == options.limit %]<a class="fh_cur_page" href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page %][% param_str %][% page_extras %]"><strong>[% page + 1 %]</strong></a>[% END %]
 [% IF num_items == options.limit %]
 	<a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page + 1%][% param_str %][% page_extras %]">[% page + 2 %] <b>&rsaquo;</b></a>
 [% END %]
