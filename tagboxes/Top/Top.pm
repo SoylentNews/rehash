@@ -200,22 +200,35 @@ sub run {
 
 	# Eliminate tagnames below the minimum score required, and
 	# those that didn't make it to the top 5
-	# XXX the "5" is hardcoded currently, should be a var
-	my $minscore = $constants->{tagbox_top_minscore_stories};
-	@top = grep { $scores{$_} >= $minscore } @top;
-	$#top = 4 if $#top > 4;
+	# XXX the "4" below (aka "top 5") is hardcoded currently, should be a var
+	my $minscore1 = $constants->{tagbox_top_minscore_urls};
+	my $minscore2 = $constants->{tagbox_top_minscore_stories};
 
 	my $plugin = getCurrentStatic('plugin');
 	if ($plugin->{FireHose}) {
 		my $firehose = getObject('Slash::FireHose');
 		my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
 		if ($fhid) {
+			my @top = grep { $scores{$_} >= $minscore1 }
+				sort {
+					$scores{$b} <=> $scores{$a}
+					||
+					$a cmp $b
+				} keys %scores;
+			$#top = 4 if $#top > 4;
 			$firehose->setFireHose($fhid, { toptags => join(' ', @top) });
 		}
 	}
 
 	if ($type eq 'stories') {
 
+		my @top = grep { $scores{$_} >= $minscore2 }
+			sort {
+				$scores{$b} <=> $scores{$a}
+				||
+				$a cmp $b
+			} keys %scores;
+		$#top = 4 if $#top > 4;
 		$self->setStory($target_id, { tags_top => join(' ', @top) });
 		main::tagboxLog("Top->run $affected_id with " . scalar(@$tag_ar) . " tags, setStory $target_id to '@top'");
 
