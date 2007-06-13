@@ -281,6 +281,7 @@ INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','fri
 INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','friends_fof_only','Just Friends and their Friends');
 INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','no_foe','No Foes');
 INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','no_foe_eof','No Foes and No Friend\'s Foes');
+INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','logged_in','Only Logged-In Users');
 INSERT INTO string_param (type, code, name) VALUES ('cookie_location','none','Everywhere');
 INSERT INTO string_param (type, code, name) VALUES ('cookie_location','classbid','My Subnet');
 INSERT INTO string_param (type, code, name) VALUES ('cookie_location','ipid','My IP Address');

@@ -801,6 +801,11 @@ sub isDiscussionOpen {
 				)
 			);
 		}
+	} elsif ($discussion->{commentstatus} eq 'logged_in') {
+		# user just has to be logged in, but A.C. posting still allowed
+		if ($user->{is_anon}) {
+			$discussion->{type} = 'archived';
+		}
 	}
 
 	$discussion->{user_nopost} = 1 if $discussion->{type} eq 'archived';

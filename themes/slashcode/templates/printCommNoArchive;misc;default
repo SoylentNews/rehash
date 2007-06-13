@@ -38,6 +38,9 @@ This discussion was created by <a href="[% gSkin.rootdir %]/~[% d_nickname | str
 		[% ELSIF discussion.commentstatus == 'no_foe_eof' %]
 			[% type = "no Foes and no Friends' foes" %]
 			[% snark = "They and their friends think you suck." %]
+		[% ELSIF discussion.commentstatus == 'logged_in' %]
+			[% type = "logged-in users only" %]
+			[% snark = "Log in and try again!" %]
 		[% END %]
 
 		[% IF discussion.user_nopost %]
@@ -46,7 +49,8 @@ This discussion was created by <a href="[% gSkin.rootdir %]/~[% d_nickname | str
 			[% IF discussion.commentstatus == 'friends_only'
 			|| discussion.commentstatus == 'friends_fof_only'
 			|| discussion.commentstatus == 'no_foe'
-			|| discussion.commentstatus == 'no_foe_eof' %]
+			|| discussion.commentstatus == 'no_foe_eof'
+			|| discussion.commentstatus == 'logged_in' %]
 				[% msg %] [% type %], but now has been archived.
 			[% ELSE %]
 				This discussion has been archived.
