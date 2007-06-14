@@ -4600,3 +4600,6 @@ INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, 
 # For plugins/FireHose
 INSERT INTO vars (name, value, description) VALUES ('firehose_admindownclout', '0.5', 'Admin clout for downvotes can be reduced by specifying a number between 0 and 1');
 
+# 2007-06-13
+UPDATE vars SET value = 'T_2_5_0_163' WHERE name = 'cvs_tag_currentcode';
+
