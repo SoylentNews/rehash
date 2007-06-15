@@ -315,6 +315,7 @@ template=templates/undo_mod;comments;default
 template=templates/url_related;misc;default
 template=templates/userboxes;misc;default
 template=templates/userCom;users;default
+template=templates/userFireHose;users;default
 template=templates/userInfo;users;default
 template=templates/userSub;users;default
 template=templates/user_titlebar;misc;default
