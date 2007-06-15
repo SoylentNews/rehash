@@ -1,0 +1,51 @@
+__section__
+default
+__description__
+Display user's info
+
+* title = passed to titlebar
+* useredit = hashref of info of the user being viewed
+* points = available moderation points
+* commentstruct = arrayref of comments
+* nickmatch_flag = current user is same as viewed user
+* mod_flag = is moderator
+	(no need for this anymore)
+* karma_flag = boolean for display karma
+* admin_block = admin stuff
+* admin_flag = boolean for whether to display admin stuff
+	(no real need for this, could just use user.is_admin)
+* fieldkey = the field key used to decide what we're looking at
+* reasons = hashref from $moddb->getReasons()
+* lastjournal = last journal posted
+* hr_hours_back = number of hours back to show a <hr> for
+* cids_to_mods = hashref keyed by cid containing arrays of moderations done to that cid
+* comment_time = number of days back we are limiting the comments shown to.  If 0 or undefined we're showing comments sequentially w/o time limits
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+userFireHose
+__template__
+[% orig_title = title %]
+[% uid = uid || user.uid %]
+<div id="slashboxes">
+[% PROCESS userboxes %]
+</div>
+[% title = orig_title %]
+<div id="users-blocks">
+
+[% PROCESS user_titlebar tab_selected='firehose' uid = uid useredit = useredit %]
+	<div class="generalbody">
+	[% firehosebox %]
+	</div>
+</div>
+</div>
+
+__seclev__
+500
+__version__
+$Id$
