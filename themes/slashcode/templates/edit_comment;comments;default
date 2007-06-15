@@ -166,7 +166,7 @@ IF !user.is_anon && user.is_subscriber %]
 		<input type="hidden" name="nosubscriberbonus_present" value="1">
 		<input type="checkbox" name="nosubscriberbonus"[% IF form.nosubscriberbonus; constants.markup_checked_attribute ; END %]> No Subscriber Bonus
 [% do_br = 1; END;
-IF constants.allow_anonymous && user.karma > -1 && !user.is_anon && discussion.commentstatus == 'enabled'  %]
+IF constants.allow_anonymous && user.karma > -1 && !user.is_anon && (discussion.commentstatus == 'enabled' || discussion.commentstatus == 'logged_in')  %]
 		<input type="hidden" name="postanon_present" value="1">
 		<input type="checkbox" name="postanon"[% IF form.postanon; constants.markup_checked_attribute ; END %]> Post Anonymously
 [% do_br = 1; END;

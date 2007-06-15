@@ -4584,10 +4584,6 @@ INSERT INTO vars (name, value, description) VALUES ('tags_negative_tagnames', 'n
 # 2007-06-05
 UPDATE vars SET value = 'T_2_5_0_162' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 INSERT INTO string_param (type, code, name) VALUES ('commentcodes_extended','logged_in','Only Logged-In Users');
 ALTER TABLE discussions MODIFY COLUMN commentstatus enum('disabled','enabled','friends_only','friends_fof_only','no_foe','no_foe_eof','logged_in') DEFAULT 'enabled' NOT NULL;
 
@@ -4602,4 +4598,8 @@ INSERT INTO vars (name, value, description) VALUES ('firehose_admindownclout', '
 
 # 2007-06-13
 UPDATE vars SET value = 'T_2_5_0_163' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 

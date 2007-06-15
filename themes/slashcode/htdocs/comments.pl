@@ -1122,7 +1122,9 @@ sub submitComment {
 	if ($form->{postanon}
 		&& $reader->checkAllowAnonymousPosting()
 		&& $user->{karma} > -1
-		&& $discussion->{commentstatus} eq 'enabled') {
+		&& ($discussion->{commentstatus} eq 'enabled'
+			||
+		    $discussion->{commentstatus} eq 'logged_in')) {
 		$posters_uid = getCurrentAnonymousCoward('uid');
 	}
 
