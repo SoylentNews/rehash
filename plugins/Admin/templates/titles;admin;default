@@ -52,7 +52,6 @@ Filter# [% form.filter_id %] saved.
 
 [% CASE 'updateStory-title' %]
 Article [% form.sid %] Saved
-}[% warn_skid %]|
 [% IF warn_skid; the_skin = Slash.db.getSkin(warn_skid); "<b>Warning Story saved to $warn_skid - $the_skin.name</b>"; END; %]
 
 [% CASE 'saveStory-title' %]
