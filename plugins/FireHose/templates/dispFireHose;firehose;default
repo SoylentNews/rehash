@@ -16,6 +16,7 @@ __template__
 [% 
     mode = mode || "fulltitle";
     divwrapper = 1;
+    storylinkwrapper = 1;
     full = 1;
     bodywrapper = 1;
     bodycontent = 1;
@@ -36,6 +37,9 @@ __template__
     END;
     IF nodivwrapper;
         divwrapper = 0;
+    END;
+    IF nostorylinkwrapper;
+        storylinkwrapper = 0;
     END;
     adminmode = 0;
     IF user.is_admin;
@@ -101,7 +105,7 @@ END %]
 		[% IF (future || item.type=="story") %]<div class="whitewash">[% END %]
 		[% PROCESS tagsfirehosedivtagbox id = item.id  tags_top = tags_top vote = vote options = options %]
 		[% IF (future || item.type=="story") %]</div>[% END %]
-[% IF divwrapper %]
+[% IF divwrapper; IF storylinkwrapper %]
 <div class="storylinks">
 	<div>
 		<ul>
@@ -124,8 +128,8 @@ END %]
 				 %]
 			[% ELSIF item.type == "journal" %]
 				<a href="[% gSkin.rootdir %]/~[% the_user.nickname %]/journal/[% item.srcid %]/">Read More</a>
-			[% ELSE %]
-				Coming soon - Read More &amp; Discuss...
+			[% ELSIF item.type == "submission" %]
+				<a href="[% gSkin.rootdir %]/firehose.pl?op=view&id=[% item.id %]">Read More &amp; Discuss</a>
 			[% END %]
 				</b>
 			</li>
@@ -138,6 +142,7 @@ END %]
 		</ul>
 	</div>
 </div>
+[% END %]
 </div>
 [% END %]
 [% END %]

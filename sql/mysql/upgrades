@@ -4558,8 +4558,6 @@ UPDATE vars SET value = 'T_2_5_0_158' WHERE name = 'cvs_tag_currentcode';
 # 2007-05-17
 UPDATE vars SET value = 'T_2_5_0_159' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
-
 # 2007-05-23
 UPDATE vars SET value = 'T_2_5_0_160' WHERE name = 'cvs_tag_currentcode';
 
@@ -4603,6 +4601,8 @@ UPDATE vars SET value = 'T_2_5_0_163' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+# PUDGE LAST UPDATED HERE
+
 # Turn on New Story Posted message option (for admin testing).
 INSERT INTO message_codes VALUES (20, 'New Story Posted', 100, 0, 0, 'now', '', 4);
 
@@ -4610,6 +4610,7 @@ INSERT INTO message_codes VALUES (20, 'New Story Posted', 100, 0, 0, 'now', '', 
 ALTER TABLE bookmark_feeds ADD feedname VARCHAR(32) AFTER feed;
 
 # For plugins/FireHose
+INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum, ie_cond) VALUES ('stylesheet','text/css','screen, projection','comments.css','','','firehose','no','',2,0, '');
 ALTER TABLE firehose ADD srcname VARCHAR(32) NOT NULL DEFAULT '';
 INSERT INTO vars (name, value, description) VALUES ('firehose_adminudcclout', '0.5', 'Admin clout for udc purposes (number between 0 and 1, probably');
 

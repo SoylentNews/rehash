@@ -24,7 +24,7 @@ __template__
 	[% ELSE %]
 		[%- d_nickname = Slash.db.getUser(discussion.uid, 'nickname') -%]
 		[%- msg = BLOCK -%]
-This discussion was created by <a href="[% gSkin.rootdir %]/~[% d_nickname | strip_paramattr %]/">[% d_nickname %] ([% discussion.uid %])</a> as
+This discussion was created[% IF discussion.uid %] by <a href="[% gSkin.rootdir %]/~[% d_nickname | strip_paramattr %]/">[% d_nickname %] ([% discussion.uid %])</a>[% END %] as
 		[%- END -%]
 		[% IF discussion.commentstatus == 'friends_only' %]
 			[% type = "Friends only" %]

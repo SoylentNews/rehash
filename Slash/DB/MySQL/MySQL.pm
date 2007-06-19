@@ -1185,7 +1185,24 @@ sub createSubmission {
 
 	if ($constants->{plugin}{FireHose}) {
 		my $firehose = getObject("Slash::FireHose");
-		$firehose->createItemFromSubmission($subid);
+		my $firehose_id = $firehose->createItemFromSubmission($subid);
+
+		if ($firehose_id) {
+			my $discussion_id = $self->createDiscussion({
+				uid		=> 0,
+				kind		=> 'submission',
+				title		=> $data->{subj},
+				topic		=> $data->{tid},
+				primaryskid 	=> $data->{primaryskid},
+				commentstatus	=> 'logged_in',
+				url		=> "$constants->{rootdir}/firehose.pl?op=view&id=$firehose_id"
+			});
+			if ($discussion_id) {
+				$firehose->setFireHose($firehose_id, {
+					discussion	=> $discussion_id,
+				});
+			}
+		}
 	}
 
 	return $subid;
@@ -7340,7 +7357,8 @@ sub createDiscussion {
 	$discussion->{sid} ||= '';
 	$discussion->{stoid} ||= 0;
 	$discussion->{ts} ||= $self->getTime();
-	$discussion->{uid} ||= getCurrentUser('uid');
+	$discussion->{uid} = getCurrentUser('uid')
+		unless defined $discussion->{uid} && length $discussion->{uid};
 	# commentcount and flags set to defaults
 
 	if ($discussion->{section}) {

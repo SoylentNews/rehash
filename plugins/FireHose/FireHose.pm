@@ -48,7 +48,7 @@ sub createFireHose {
 	$data->{popularity} ||= 0;
 	$data->{popularity2} ||= 0;
 	$data->{editorpop} ||= 0;
-	$data->{body_length} = length($data->{bodytext});
+	$data->{body_length} = $data->{bodytext} ? length($data->{bodytext}) : 0;
 	$data->{word_count} = countWords($data->{introtext}) + countWords($data->{bodytext});
 
 	my $text_data = {};
@@ -235,7 +235,7 @@ sub createItemFromSubmission {
 			name			=> $submission->{name},
 		};
 		$data->{url_id} = $submission->{url_id} if $submission->{url_id};
-		$self->createFireHose($data);
+		my $firehose_id = $self->createFireHose($data);
 		if (!isAnon($submission->{uid})) {
 			my $constants = getCurrentStatic();
 			my $tags = getObject('Slash::Tags');
@@ -246,6 +246,7 @@ sub createItemFromSubmission {
 				private			=> 1,
 			});
 		}
+		return $firehose_id;
 	}
 
 }
@@ -982,7 +983,7 @@ sub ajaxGetAdminFirehose {
 sub ajaxFireHoseGetUpdates {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 
-	my $update_data => { removals => 0, items => 0 };
+	my $update_data = { removals => 0, items => 0 };
 
 	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
@@ -1317,7 +1318,7 @@ sub setSectionTopicsFromTagstring {
 		if ($tid) {
 			$data->{tid} = $tid;
 		}
-		my ($prefix, $cat) = $_ =~ /(!)?(.*)$/;
+		my($prefix, $cat) = $_ =~ /(!)?(.*)$/;
 		$cat = lc($cat);
 		if ($categories{$cat}) {
 			if ($prefix eq "!") {
@@ -1396,7 +1397,8 @@ sub dispFireHose {
 		tags_top		=> $options->{tags_top},
 		options			=> $options->{options},
 		vote			=> $options->{vote},
-		bodycontent_include	=> $options->{bodycontent_include}
+		bodycontent_include	=> $options->{bodycontent_include},
+		nostorylinkwrapper	=> $options->{nostorylinkwrapper}
 	}, { Page => "firehose",  Return => 1 });
 }
 
