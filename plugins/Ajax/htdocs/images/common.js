@@ -17,6 +17,7 @@ var firehose_issue = '';
 var firehose_duratiton = '';
 var firehose_removed_first = '0';
 var firehose_future;
+var firehose_removals;
 var fh_colorslider; 
 var fh_ticksize;
 var fh_pageval = 0;
@@ -486,7 +487,7 @@ function firehose_set_options(name, value) {
 		params[name] = value;
 	}
 
-	if (name == "nodates" || name == "nobylines" || name == "nothumbs" || name == "nocolors") {
+	if (name == "nodates" || name == "nobylines" || name == "nothumbs" || name == "nocolors" || name == "mixedmode" ) {
 		value = value == true ? 1 : 0;
 		params[name] = value;
 		params['setfield'] = 1;
@@ -531,7 +532,7 @@ function firehose_set_options(name, value) {
 			}
 		}
 	}
-	if (name == "mode" || name == "firehose_usermode" || name == "tab") {
+	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode") {
 		// blur out then remove items
 		if (name == "mode") {
 			fh_view_mode = value;
@@ -791,17 +792,26 @@ function firehose_handle_update() {
 					if (!firehose_removed_first) {
 						wait_interval = wait_interval * 2;
 					} else {
-						wait_interval = 20;
+						wait_interval = 50;
 					}
+					console.log("Wait interval" + wait_interval);
 				}
 				firehose_removed_first = 1;
-				myAnim.onComplete.subscribe(function() {
-					var elem = this.getEl();
+				if (firehose_removals < 10 ) {
+					myAnim.onComplete.subscribe(function() {
+						var elem = this.getEl();
+						if (elem && elem.parentNode) {
+							elem.parentNode.removeChild(elem);
+						}
+					});
+					myAnim.animate(); 
+				} else {
+					var elem = $(fh);
+					wait_interval = 25;
 					if (elem && elem.parentNode) {
 						elem.parentNode.removeChild(elem);
 					}
-				});
-				myAnim.animate(); 
+				}
 			}
 		}
 		setTimeout("firehose_handle_update()", wait_interval);
@@ -856,6 +866,7 @@ function firehose_get_updates_handler(transport) {
 	$('busy').className = "hide";
 	var response = eval_response(transport);
 	var processed = 0;
+	firehose_removals = response.update_data.removals;
 	firehose_ordered = response.ordered;
 	firehose_future = response.future;
 	firehose_before = Array(0);
