@@ -88,6 +88,12 @@ sub getBookmarkFeeds {
 	$self->sqlSelectAllHashrefArray("*,RAND()", "bookmark_feeds", "", $other);
 }
 
+sub getBookmarkFeedByUid {
+	my($self, $uid) = @_;
+	my $uid_q = $self->sqlQuote($uid);
+	$self->sqlSelectHashref("*", "bookmark_feeds", "uid=$uid_q");
+}
+
 sub getBookmark {
 	my($self, $id) = @_;
 	my $id_q = $self->sqlQuote($id);
