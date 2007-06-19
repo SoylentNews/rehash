@@ -120,16 +120,9 @@ sub createTag {
 	my $check_dupe = (!$options || !$options->{dupe_ok});
 	my $check_opp = (!$options || !$options->{opposite_ok});
 	my $check_aclog = (!$options || !$options->{no_adminlog_check});
-	my $opp_tagnameid = 0;
+	my $opp_tagnameids = [ ];
 	if ($check_opp) {
-		my $opp_tagname = '';
-		if ($hr->{name}) {
-			$opp_tagname = $self->getOppositeTagname($hr->{name});
-		} else {
-			my $tagdata = $self->getTagnameDataFromId($tag->{tagnameid});
-			$opp_tagname = $self->getOppositeTagname($tagdata->{tagname});
-		}
-		$opp_tagnameid = $self->getTagnameidFromNameIfExists($opp_tagname);
+		$opp_tagnameids = $self->getOppositeTagnameids($tag->{tagnameid});
 	}
 
 	$self->sqlDo('SET AUTOCOMMIT=0');
@@ -164,15 +157,17 @@ sub createTag {
 	}
 
 	# If that has succeeded so far, then eliminate any opposites
-	# of this tag which may exist earlier in the table.
-	if ($rows && $check_opp && $opp_tagnameid) {
-		my $opp_tag = {
-			uid =>		$tag->{uid},
-			globjid =>	$tag->{globjid},
-			tagnameid =>	$opp_tagnameid
-		};
-		my $count = $self->deactivateTag($opp_tag, { tagid_prior_to => $tagid });
-		$rows = 0 if $count > 1;
+	# of this tag which may have already been created.
+	if ($rows && $check_opp && @$opp_tagnameids) {
+		for my $opp_tagnameid (@$opp_tagnameids) {
+			my $opp_tag = {
+				uid =>		$tag->{uid},
+				globjid =>	$tag->{globjid},
+				tagnameid =>	$opp_tagnameid
+			};
+			my $count = $self->deactivateTag($opp_tag, { tagid_prior_to => $tagid });
+			$rows = 0 if $count > 1; # values > 1 indicate a logic error
+		}
 	}
 
 	# If all that was successful, add a tag_clout param if
@@ -973,39 +968,14 @@ sub setTagsForGlobj {
 		map { lc }
 		split /[\s,]+/,
 		($tag_string || $form->{tags} || '');
-	my %new_tagnames_opposites = map { $tags->getOppositeTagname($_), 1 } keys %new_tagnames;
 
 	my $uid = $options->{uid} || $user->{uid};
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	my $old_tags_ar = $tags_reader->getTagsByNameAndIdArrayref($table, $id, { uid => $uid });
 	my %old_tagnames = ( map { ($_->{tagname}, 1) } @$old_tags_ar );
 
-	# Create any tag specified but only if it does not already exist
-	# and only if its opposite was not also specified (user can't
-	# tag both "funny" and "!funny" at the same time).
-	my @create_tagnames =		grep { !$old_tagnames{$_} && !$new_tagnames_opposites{$_} }
-					sort keys %new_tagnames;
-
-	# XXX well it hurts a little, it's redundant code to maintain.
-	# I'd suggest deleting the code from here to the next XXX. - Jamie 2006/09/19
-	# Deactivate any tag which existed before but either (a) is not
-	# specified now or (b) the opposite of which is specified now.
-	# (Actually, createTag() will automatically deactivate the
-	# opposite of any tag specified, but it doesn't hurt to make a
-	# pass through first.)
-	my @deactivate_tagnames = (    (grep { !$new_tagnames{$_} } sort keys %old_tagnames),
-				       (grep {  $old_tagnames{$_} } sort keys %new_tagnames_opposites) );
-	my @deactivated_tagnames = ( );
-	for my $tagname (@deactivate_tagnames) {
-		push @deactivated_tagnames, $tagname
-			if $tags->deactivateTag({
-				uid =>		$uid,
-				name =>		$tagname,
-				table =>	$table,
-				id =>		$id
-			});
-	}
-	# XXX
+	# Create any tag specified but only if it does not already exist.
+	my @create_tagnames = grep { !$old_tagnames{$_} } sort keys %new_tagnames;
 
 	my @created_tagnames = ( );
 	for my $tagname (@create_tagnames) {
@@ -1377,9 +1347,61 @@ sub logAdminCommand {
 	});
 }
 
+# This returns just the single tagname that is the opposite of
+# another tagname, formed by prepending a "!" or removing an
+# existing "!".  This is not guaranteed to be the only opposite
+# of the given tagname.
+
 sub getOppositeTagname {
 	my($self, $tagname) = @_;
 	return substr($tagname, 0, 1) eq '!' ? substr($tagname, 1) : '!' . $tagname;
+}
+
+# This returns an arrayref of tagnameids that are all the
+# opposite of a given tagname or tagnameid (either works as
+# input).  Or, an arrayref of tagname/tagnameids can be given
+# as input and the returned arrayref will be tagnameids that
+# are all the opposites of at least one of the inputs.
+
+sub getOppositeTagnameids {
+	my($self, $data) = @_;
+
+	my @tagnameids = ( );
+	$data = [ $data ] if !ref($data);
+	my %tagnameid = ( );
+	for my $d (@$data) {
+		next unless $d;
+		if ($d =~ /^\d+$/) {
+			$tagnameid{$d} = 1;
+		} else {
+			my $id = $self->getTagnameidFromNameIfExists($d);
+			$tagnameid{$id} = 1 if $id;
+		}
+	}
+	@tagnameids = keys %tagnameid;
+	return [ ] if !@tagnameids;
+
+	# Two ways to have an opposite of a tagname.  One is to prepend
+	# an "!" or remove an existing prepended "!";  we convert IDs to
+	# names and back to do this.  The other is to have an entry in
+	# the tagnames_similar table with type=0 and simil=-1.
+	# XXX Should probably recursively chase down type=0/simil=1
+	# entries as being the same, and opposites-of-opposites etc.
+	# Leave that for another day though.
+	# Type one:
+	my @tagnames =		map { $self->getTagnameDataFromId($_)->{tagname} }	@tagnameids;
+	my @opp_tagnames =	map { $self->getOppositeTagname($_) }			@tagnames;
+	my @opp_tagnameids_1 =	map { $self->getTagnameidCreate($_) }			@opp_tagnames;
+	# Type two:
+	my $src_tnids_str = join(',', @tagnameids);
+	my $opp_tagnameids_2_ar = $self->sqlSelectColArrayref(
+		'DISTINCT dest_tnid', 'tagnames_similar',
+		"type=0 AND simil=-1 AND src_tnid IN ($src_tnids_str)");
+	# Join them:
+	my %opp_tagnameids = ( map { ($_, 1) } @opp_tagnameids_1, @$opp_tagnameids_2_ar );
+	my @opp_tagnameids = sort { $a <=> $b } keys %opp_tagnameids;
+
+	return \@opp_tagnameids;
 }
 
 # XXX this method isn't gonna work since tagboxes
