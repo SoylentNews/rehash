@@ -4611,3 +4611,5 @@ ALTER TABLE bookmark_feeds ADD feedname VARCHAR(32) AFTER feed;
 
 # For plugins/FireHose
 ALTER TABLE firehose ADD srcname VARCHAR(32) NOT NULL DEFAULT '';
+INSERT INTO vars (name, value, description) VALUES ('firehose_adminudcclout', '0.5', 'Admin clout for udc purposes (number between 0 and 1, probably');
+
