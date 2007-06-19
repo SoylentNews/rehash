@@ -1320,7 +1320,7 @@ sub setSectionTopicsFromTagstring {
 		my ($prefix, $cat) = $_ =~ /(!)?(.*)$/;
 		$cat = lc($cat);
 		if ($categories{$cat}) {
-			if ($prefix == "!") {
+			if ($prefix eq "!") {
 				$data->{category} = "";
 			} else {
 				$data->{category} = $cat;
