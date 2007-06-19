@@ -306,8 +306,8 @@ sub _csq_bonuses {
 		return if $num_orig > $num;
 	}
 
-printf STDERR "%s m2_consequences change from '%d' to '%.2f' because '%s' id %d cid %d uid %d\n",
-scalar(localtime), $num_orig, $num, join(" ", @applied), $mod_hr->{id}, $mod_hr->{cid}, $mod_hr->{uid};
+#printf STDERR "%s m2_consequences change from '%d' to '%.2f' because '%s' id %d cid %d uid %d\n",
+#scalar(localtime), $num_orig, $num, join(" ", @applied), $mod_hr->{id}, $mod_hr->{cid}, $mod_hr->{uid};
 
 	$retval->{csq_token_change}{num} ||= 0;
 	$retval->{csq_token_change}{num} += $num - $num_orig;
