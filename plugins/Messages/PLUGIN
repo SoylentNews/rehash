@@ -38,3 +38,4 @@ template=templates/unmod_msg;comments;default
 template=templates/unmod_msg_subj;comments;default
 template=templates/zoo_msg;zoo;default
 template=templates/zoo_msg_subj;zoo;default
+template=templates/storynew;messages;default
