@@ -33,6 +33,7 @@ CREATE TABLE firehose (
 	stoid MEDIUMINT UNSIGNED DEFAULT '0',
 	body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
+	srcname VARCHAR(32) NOT NULL DEFAULT '',
 	PRIMARY KEY (id),
 	UNIQUE globjid (globjid),
 	KEY createtime (createtime),

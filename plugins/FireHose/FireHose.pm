@@ -187,6 +187,12 @@ sub createUpdateItemFromBookmark {
 			srcid		=> $id
 		};
 		$data->{introtext} = $options->{introtext} if $options->{introtext};
+		if ($type eq "feed") {
+			my $feed = $bookmark_db->getBookmarkFeedByUid($bookmark->{uid});	
+			if ($feed && $feed->{feedname}) {
+				$data->{srcname} = $feed->{feedname};	
+			}
+		}
 		$self->createFireHose($data)
 	}
 
@@ -975,6 +981,9 @@ sub ajaxGetAdminFirehose {
 
 sub ajaxFireHoseGetUpdates {
 	my($slashdb, $constants, $user, $form, $options) = @_;
+
+	my $update_data => { removals => 0, items => 0 };
+
 	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
@@ -997,6 +1006,8 @@ sub ajaxFireHoseGetUpdates {
 		}
 	}
 	
+	$update_data->{items} = scalar @$items;
+
 	foreach (@$items) {
 		push @$globjs, $_->{globjid} if $_->{globjid} 
 	}
@@ -1090,6 +1101,7 @@ sub ajaxFireHoseGetUpdates {
 
 	foreach (keys %ids) {
 		push @$updates, ["remove", $_, ""];
+		$update_data->{removals}++;
 	}
 
 
@@ -1110,6 +1122,7 @@ sub ajaxFireHoseGetUpdates {
 		html		=> $html,
 		updates		=> $updates,
 		update_time	=> $update_time,
+		update_data	=> $update_data,
 		ordered		=> $ordered,
 		future		=> $future,
 	});
@@ -1304,8 +1317,14 @@ sub setSectionTopicsFromTagstring {
 		if ($tid) {
 			$data->{tid} = $tid;
 		}
-		if ($categories{lc($_)}) {
-			$data->{category} = lc($_);
+		my ($prefix, $cat) = $_ =~ /(!)?(.*)$/;
+		$cat = lc($cat);
+		if ($categories{$cat}) {
+			if ($prefix == "!") {
+				$data->{category} = "";
+			} else {
+				$data->{category} = $cat;
+			}
 		}
 	}
 	$self->setFireHose($id, $data) if keys %$data > 0;
@@ -1452,6 +1471,13 @@ sub getAndSetOptions {
 	my $no_saved = $form->{no_saved};
 	$opts->{no_set} ||= $no_saved;
 
+	if (defined $form->{mixedmode} && $form->{setfield}) {
+		if ($form->{mixedmode}) {
+			$form->{mode} = "mixed";
+		} else {
+			$form->{mode} = "fulltitle";
+		}
+	}
 	my $mode = $form->{mode} || $user->{firehose_mode};
 	$mode = $modes->{$mode} ? $mode : "fulltitle";
 	$options->{mode} = $mode;

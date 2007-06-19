@@ -35,6 +35,7 @@ __template__
 <input type="checkbox" name="nobylines" onchange="firehose_set_options('nobylines', !this.checked)" [% IF !options.nobylines; constants.markup_checked_attribute; END %]> Show Bylines <br>
 <input type="checkbox" name="nothumbs" onchange="firehose_set_options('nothumbs', !this.checked)" [% IF !options.nothumbs; constants.markup_checked_attribute; END %]> Show Thumbs <br>
 <input type="checkbox" name="nocolors" onchange="firehose_set_options('nocolors', !this.checked)" [% IF !options.nocolors; constants.markup_checked_attribute; END %]> Show Color Swatches<br>
+<input type="checkbox" name="mode" onchange="firehose_set_options('mixedmode', this.checked)" [% IF options.mode == "mixed"; constants.markup_checked_attribute; END %]> Show only most highly rated as expanded<br>
 	[% IF user.is_admin %]
 	<input type="hidden" name="setusermode" value="1">
 	<input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]> User Mode
