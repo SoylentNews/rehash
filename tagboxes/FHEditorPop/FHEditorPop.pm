@@ -189,7 +189,7 @@ sub run {
 		my $editor_mult = $seclev >= 100 ? ($constants->{tagbox_fheditorpop_edmult} || 10) : 1;
 		my $extra_pop = $tag_hr->{total_clout} * $editor_mult * $sign;
 		my $udc_mult = get_udc_mult($tag_hr->{created_at_ut}, $udc_cache);
-main::tagboxLog(sprintf("extra_pop for %d: %.6f * %.6f", $tag_hr->{tagid}, $extra_pop, $udc_mult));
+#main::tagboxLog(sprintf("extra_pop for %d: %.6f * %.6f", $tag_hr->{tagid}, $extra_pop, $udc_mult));
 		$extra_pop *= $udc_mult;
 		$popularity += $extra_pop;
 	}
@@ -214,8 +214,8 @@ sub get_udc_mult {
 	# Round off time to the nearest 10 second interval, for caching.
 	$time = int($time/10+0.5)*10;
 	if (defined($udc_mult_cache->{$time})) {
-		main::tagboxLog(sprintf("get_udc_mult %0.3f time %d cached",
-			$udc_mult_cache->{$time}, $time));
+#		main::tagboxLog(sprintf("get_udc_mult %0.3f time %d cached",
+#			$udc_mult_cache->{$time}, $time));
 		return $udc_mult_cache->{$time};
 	}
 
