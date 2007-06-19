@@ -4603,3 +4603,5 @@ UPDATE vars SET value = 'T_2_5_0_163' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+# Turn on New Story Posted message option (for admin testing).
+INSERT INTO message_codes VALUES (20, 'New Story Posted', 100, 0, 0, 'now', '', 4);
