@@ -408,7 +408,7 @@ sub main {
 	# needs to do some stuff before it calls header(), so for
 	# those three, don't bother.
 	my $header;
-	if ($op !~ /^(userinfo|display|saveuseradmin|admin)$/) {
+	if ($op !~ /^(userinfo|display|saveuseradmin|admin|userfirehose$)/) {
 		my $data = {
 			adminmenu => $ops->{$op}{adminmenu} || 'admin',
 			tab_selected => $ops->{$op}{tab_selected},
@@ -894,6 +894,7 @@ sub showFireHose {
 	$user->{state}{firehose_user_uid} = $uid;
 
 	my $firehose = getObject("Slash::FireHose");
+	header(getMessage('userfirehose_header', { useredit => $user_edit })) or return;
 	print createMenu("users", {
 		style		=> 'tabbed',
 		justify		=> 'right',
@@ -905,8 +906,6 @@ sub showFireHose {
 	$form->{color} = "black";
 	$form->{orderby} = "createtime";
 	$form->{orderdidr} = "DESC";
-	$form->{nocolors} = 1;
-	$form->{nothumbs} = 1;
 	$form->{skipmenu} = 1;
 	$form->{duration} = -1;
 	$form->{fhfilter} = "\"user:$user_edit->{nickname}\"";
