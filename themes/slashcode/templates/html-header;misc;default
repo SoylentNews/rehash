@@ -34,21 +34,21 @@ __template__
 <script src="[% constants.imagedir %]/yui/event.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/dragdrop.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/animation.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[%- IF user.currentPage == "firehose" || user.currentPage == "console" -%]
+[% IF user.currentPage == "firehose" || user.currentPage == "console" -%]
 <script src="[% constants.imagedir %]/yui/slider.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[%- END -%]
+[% END -%]
 <script src="[% constants.imagedir %]/yui/connection.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/calendar.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/sd_autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/sd_calendar.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[%- IF user.currentPage == "firehose" -%]
+[% IF user.currentPage == "firehose" -%]
 <script src="[% constants.imagedir %]/slashbox.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-[%- END -%]
+[% END -%]
 <script src="[% constants.imagedir %]/common.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-	[%- IF user.is_admin %]
+[% IF user.is_admin -%]
 <script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-	[% END %]
+[% END %]
 [% PROCESS ajax_reskey_tag reskey_label => 'reskey_static', reskey_name => 'ajax_user_static', reskey_tag_js => 2 %]
 [% END # constants.plugin.Ajax %]
 __seclev__

@@ -35,8 +35,10 @@ __template__
 	[%- ELSE -%]
 	[% useredit.md5id_vis %] - [% constants.sitename %] md5ID
 	[%- END -%]
+
 [% CASE 'userfirehose_header' %]
 	[% useredit.nickname | strip_notags %]'s Firehose 
+
 [% CASE 'userclose' %]
 	you are now logged out.
 

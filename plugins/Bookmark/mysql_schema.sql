@@ -15,6 +15,6 @@ CREATE TABLE bookmark_feeds (
 	uid MEDIUMINT UNSIGNED NOT NULL,
 	feed VARCHAR(255),
 	tags VARCHAR(255),
-	feedname VARCHAR(64)
+	feedname VARCHAR(64),
 	PRIMARY KEY(id)
 ) TYPE=InnoDB;
