@@ -22,13 +22,46 @@ __template__
 		page_extras = "&amp;op=userfirehose&amp;uid=$extra_uid";
 	END;
 %]
-[% IF !contentsonly %]<span class="firehose_paginate" id="firehose_pages">[% END %]
-[% IF page %] <a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page - 1 %][% param_str %][% page_extras %]"><b>&lsaquo;</b> [% page %]</a>[% END %]
-[% IF page || num_items == options.limit %]<a class="fh_cur_page" href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page %][% param_str %][% page_extras %]"><strong>[% page + 1 %]</strong></a>[% END %]
-[% IF num_items == options.limit %]
-	<a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% page + 1%][% param_str %][% page_extras %]">[% page + 2 %] <b>&rsaquo;</b></a>
-[% END %]
-[% IF !contentsonly %]</span>[% END %]
+[% IF !contentsonly %]<span class="firehose_paginate" id="firehose_pages">[% END;
+
+   IF ( (search_results.records_page > 0) || page || (num_items == options.limit) );
+     page_cur = search_results.records_page;
+     page_max = search_results.records_pages;
+     IF (!page_cur);
+        page_cur = page + 1;
+        page_max = (num_items == options.limit) ? (page_cur + 1) : page_cur;
+     END;
+
+     num_page_display = constants.firehose_num_page_display || 10;
+     start_page_num = 1;
+     end_page_num = page_max;
+
+     IF (end_page_num > (num_page_display + 1) );
+       start_page_num = page_cur - (num_page_display / 2);
+       start_page_num = start_page_num.int;
+       IF start_page_num < 1;
+         start_page_num = 1;
+       END;
+
+       end_page_num = start_page_num + num_page_display - 1;
+       IF end_page_num > page_max;
+         start_page_num = start_page_num - (end_page_num - page_max);
+         end_page_num = page_max;
+         IF start_page_num < 1;
+           start_page_num = 1;
+         END;
+       END;
+     END;
+     FOR i_page IN [ start_page_num .. end_page_num ] %]
+<a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% (i_page - 1) %][% param_str %][% page_extras %]">[%
+       IF i_page == start_page_num %]<b>&lsaquo;</b> [% END;
+       IF i_page == page_cur %]<strong>[% i_page %]</strong>[%
+         ELSE; i_page; END;
+       IF i_page == end_page_num %] <b>&rsaquo;</b>[% END %]</a>
+[%   END;
+   END;
+
+   IF !contentsonly %]</span>[% END %]
 __seclev__
 10000
 __version__
