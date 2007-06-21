@@ -64,12 +64,6 @@ __template__
 	<tr><td><img src="/tagdataview.pl?op=fhpopgraph&amp;start_time=[% cur_hour_minus_7day %]&amp;duration=3600&amp;y_ceil=360&amp;width=200&amp;height=300" width=200 height=300 border=0 alt="Last 7 Days, First Hour"></td>
 	<td><img src="/tagdataview.pl?op=fhpopgraph&amp;start_time=[% cur_hour_minus_7day %]&amp;y_ceil=360&amp;width=640&amp;height=300" width=640 height=300 border=0 alt="Last 7 Days, First 12 Hours"></td></tr>
 
-	[% cur_hour_minus_30day = cur_hour - 86400 * 30 %]
-	<tr><th colspan=2>Last 30 Days</th></tr>
-	<tr><th>First Hour</th><th>First 12 Hours</th></tr>
-	<tr><td><img src="/tagdataview.pl?op=fhpopgraph&amp;start_time=[% cur_hour_minus_30day %]&amp;duration=3600&amp;y_ceil=360&amp;width=200&amp;height=300" width=200 height=300 border=0 alt="Last 30 Days, First Hour"></td>
-	<td><img src="/tagdataview.pl?op=fhpopgraph&amp;start_time=[% cur_hour_minus_30day %]&amp;y_ceil=360&amp;width=640&amp;height=300" width=640 height=300 border=0 alt="Last 30 Days, First 12 Hours"></td></tr>
-
 	</table></p>
 
 </div>
