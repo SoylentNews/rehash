@@ -454,10 +454,6 @@ sub getFireHoseEssentials {
 			push @where, 'public = ' . $self->sqlQuote($options->{public});
 		}
 
-		if ($options->{type}) {
-			push @where, 'type = ' . $self->sqlQuote($options->{type});
-		}
-
 		if (($options->{filter} || $options->{fetch_text}) && !$doublecheck) {
 			$tables .= ',firehose_text';
 			push @where, 'firehose.id = firehose_text.id';
@@ -504,10 +500,28 @@ sub getFireHoseEssentials {
 			}
 		}
 
-		if ($options->{uid}) {
-			my $uid_q = $self->sqlQuote($options->{uid});
-			push @where, "uid = $uid_q";
+		foreach my $prefix ("","not_") {
+			foreach my $base qw(primaryskid uid type) {
+				if ($options->{"$prefix$base"}) {
+					my $not = $prefix eq "not_" ? 1 : 0;
+					my $cur_opt = $options->{"$prefix$base"};
+					$cur_opt = [$cur_opt] if !ref $cur_opt;
+					my $notlab;
+					if (@$cur_opt == 1) {
+					     $notlab = $not ? "!" : "";
+					     my $quoted_opt = $self->sqlQuote($cur_opt->[0]);
+					     push @where, "$base $notlab=$quoted_opt";
+					} elsif (@$cur_opt > 1) {
+					     $notlab = $not ? "NOT" : "";
+
+					     my $quote_string = join ',', map {$self->sqlQuote($_)} @$cur_opt;
+					     push @where, "$base $notlab IN  ($quote_string)";
+					}
+
+				}
+			}
 		}
+
 	}
 
 	# check these again, just in case, as they are more time-sensitive
@@ -522,10 +536,6 @@ sub getFireHoseEssentials {
 
 	if ($options->{rejected}) {
 		push @where, 'rejected = ' . $self->sqlQuote($options->{rejected});
-	}
-
-	if ($options->{primaryskid}) {
-		push @where, 'primaryskid = ' . $self->sqlQuote($options->{primaryskid});
 	}
 
 	if (defined $options->{category} || $user->{is_admin}) {
@@ -545,6 +555,8 @@ sub getFireHoseEssentials {
 	my $other = '';
 	$other = 'GROUP BY firehose.id' if $options->{tagged_by_uid};
 
+	my $count_other = $other;
+
 	if (1 || !$doublecheck) { # do always for now
 		my $offset = defined $options->{offset} ? $options->{offset} : '';
 		$offset = '' if $offset !~ /^\d+$/;
@@ -556,6 +568,7 @@ sub getFireHoseEssentials {
 
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
 	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
+	my $count = $self->sqlSelect("count(*)", $tables, $where, $count_other);
 
 	if (keys %$filter_globjids) {
 		for my $i (0 .. $#{$hr_ar}) {
@@ -587,7 +600,7 @@ sub getFireHoseEssentials {
 		$items = $hr_ar;
 	}
 
-	return($items, $results);
+	return($items, $results, $count);
 }
 
 sub getUserFireHoseVotesForGlobjs {
@@ -1134,7 +1147,7 @@ sub ajaxFireHoseGetUpdates {
 
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
-	$html->{itemsreturned} = $num_items == 0 ?  getData("noitems", {}, 'firehose') : "";
+	$html->{itemsreturned} = $num_items == 0 ?  getData("noitems", { options => $opts }, 'firehose') : "";
 
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
 		html		=> $html,
@@ -1729,13 +1742,21 @@ sub getAndSetOptions {
 	my $authors = $self->getAuthors();
 	my %author_names = map { lc($authors->{$_}{nickname}) => $_ } keys %$authors;
 	my $fh_options = {};
+
+
+
 	foreach (@$fh_ops) {
+		my $not = "";
+		if (/^-/) {
+			$not = "not_";
+			$_ =~ s/^-//g;
+		}
 		if ($types->{$_} && !defined $fh_options->{type}) {
-			$fh_options->{type} = $_;
+			push @{$fh_options->{$not."type"}}, $_;
 		} elsif ($user->{is_admin} && $categories{$_} && !defined $fh_options->{category}) {
 			$fh_options->{category} = $_;
 		} elsif ($skin_names{$_} && !defined $fh_options->{primaryskid}) {
-			$fh_options->{primaryskid} = $skin_names{$_};
+				push @{$fh_options->{$not."primaryskid"}}, $skin_names{$_};
 		} elsif ($user->{is_admin} && $_ eq "rejected") {
 			$fh_options->{rejected} = "yes";
 		} elsif ($_ eq "accepted") {
@@ -1744,15 +1765,14 @@ sub getAndSetOptions {
 			$fh_options->{signed} = 1;
 		} elsif ($user->{is_admin} && $_ eq "unsigned") {
 			$fh_options->{unsigned} = 1;
-		} elsif (/^author:/) {
-			my $nick = $_;
+		} elsif (/^author:(.*)$/) {
 			my $uid;
-			$nick =~ s/author://g;
+			my $nick = $1;
 			if ($nick) {
 				$uid = $self->getUserUID($nick);
 				$uid ||= $user->{uid};
 			}
-			$fh_options->{uid} = $uid;
+			push @{$fh_options->{$not."uid"}}, $uid;
 		} elsif (/^user:/) {
 			my $nick = $_;
 			$nick =~ s/user://g;
@@ -1777,6 +1797,7 @@ sub getAndSetOptions {
 	if ($form->{color} && $colors->{$form->{color}}) {
 		$fh_options->{color} = $form->{color};
 	}
+	
 
 	foreach (keys %$fh_options) {
 		$options->{$_} = $fh_options->{$_};
@@ -1784,8 +1805,13 @@ sub getAndSetOptions {
 
 	if (!$user->{is_anon} && !$opts->{no_set}) {
 		my $data_change = {};
+		my @skip_options_save = qw(uid not_uid type not_type primaryskid not_primaryskid);
+		if ($user->{state}{firehose_page} eq "user") {
+			push @skip_options_save, "nothumbs", "nocolors", "pause", "mode", "orderdir", "orderby";
+		}
+		my %skip_options = map { $_ => 1 } @skip_options_save;
 		foreach (keys %$options) {
-			next if $user->{state}{firehose_page} eq "user" && ($_ eq "nothumbs" || $_ eq "nocolors" || $_ eq "pause");
+			next if $skip_options{$_};
 			$data_change->{"firehose_$_"} = $options->{$_} if !defined $user->{"firehose_$_"} || $user->{"firehose_$_"} ne $options->{$_};
 		}
 		$self->setUser($user->{uid}, $data_change) if keys %$data_change > 0;
