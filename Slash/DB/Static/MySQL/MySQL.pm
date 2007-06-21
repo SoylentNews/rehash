@@ -184,8 +184,8 @@ sub updateArchivedDiscussions {
 	my $days_to_archive = getCurrentStatic('archive_delay');
 	return 0 if !$days_to_archive;
 
-	# Close discussions.
-	return $self->sqlUpdate(
+	# Close old discussions
+	my $count = $self->sqlUpdate(
 		"discussions",
 		{ type => 'archived' },
 		"TO_DAYS(NOW()) - TO_DAYS(ts) > $days_to_archive
@@ -193,6 +193,21 @@ sub updateArchivedDiscussions {
 		 AND flags != 'delete'
 		 AND archivable = 'yes'"
 	);
+
+	# Close expired submission discussions
+	$count += $self->sqlUpdate(
+		"firehose, discussions",
+		{ 'firehose.type' => 'archived' },
+		"firehose.type = 'submission'
+		 AND firehose.accepted = 'yes'
+		 AND firehose.discussion IS NOT NULL
+		 AND discussions.id = firehose.discussion
+		 AND discussions.type = 'open'
+		 AND discussions.flags != 'delete'
+		 AND discussions.archivable = 'yes'"
+	);
+
+	return $count;
 }
 
 
