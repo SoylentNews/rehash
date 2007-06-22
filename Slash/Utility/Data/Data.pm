@@ -2276,7 +2276,11 @@ sub fudgeurl {
 			# then make sure the host and port are legit, and
 			# zap the port if it's the default port.
 			my $host = $uri->host;
-			$host =~ tr/A-Za-z0-9.-//cd; # per RFC 1035
+			# Re the below line, see RFC 1035 and maybe 2396.
+			# Underscore is not recommended and Slash has
+			# disallowed it for some time, but allowing it
+			# is really the right thing to do.
+			$host =~ tr/A-Za-z0-9._-//cd;
 			$uri->host($host);
 			if ($uri->can('authority') && $uri->authority) {
 				# We don't allow anything in the authority except
