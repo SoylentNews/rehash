@@ -794,7 +794,6 @@ function firehose_handle_update() {
 					} else {
 						wait_interval = 50;
 					}
-					console.log("Wait interval" + wait_interval);
 				}
 				firehose_removed_first = 1;
 				if (firehose_removals < 10 ) {
