@@ -92,7 +92,7 @@ END; login_block = BLOCK %]
    	refresh_text = '<span style="font-size:60%">(Last Refreshed <span id="local_last_update_time">' _ theupdatetime _ '</span><span id="gmt_update_time"></span> Currently <span id="pauseorplay">Paused</span>)</span><span id="busy" class="hide"><img src="' _ constants.imagedir _ '/spinner.gif" alt="*"></span>';
    END;
 %]
-[% PROCESS titlebar title="Firehose Beta $refresh_text" %]
+[% PROCESS titlebar title="$constants.sitename Firehose Beta $refresh_text" %]
 [% PROCESS autocomplete %]
 <div class="submenu">
 <div id="message_area">
@@ -157,7 +157,7 @@ feedback to hose@cmdrtaco.net but be forgiving of beta code!
 [% page = page || "0" %]
 </div>
 <span id="itemsreturned">
-	[% IF itemnum == 0; Slash.getData('noitems', {}, 'firehose'); END %]
+	[% IF itemnum == 0; Slash.getData('noitems', { options => options }, 'firehose'); END %]
 </span>
 [% PROCESS paginate options = options ulid = "fh-paginate" divid = "fh-pag-div" num_items = itemnum fh_page = fh_page %]
 <script type="text/javascript">
