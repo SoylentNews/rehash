@@ -33,6 +33,7 @@ use Slash::Slashboxes;
 use Slash::Tags;
 use Data::JavaScript::Anon;
 use Date::Calc qw(Days_in_Month Add_Delta_YMD);
+use POSIX qw(ceil);
 
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
@@ -569,6 +570,10 @@ sub getFireHoseEssentials {
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
 	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
 	my $count = $self->sqlSelect("count(*)", $tables, $where, $count_other);
+	my $page_size = $options->{limit} || 1;
+	$results->{records_pages} = ceil($count / $page_size);
+	$results->{records_page}  = (int($options->{offset} / $options->{limit}) + 1) || 1;
+
 
 	if (keys %$filter_globjids) {
 		for my $i (0 .. $#{$hr_ar}) {
@@ -1649,9 +1654,20 @@ sub getAndSetOptions {
 			}
 		}
 		if ($equal) {
-			# print STDERR "Tab match $tab->{tabname}\n";
 			$tab_match = 1;
 			$tab->{active} = 1;
+			
+			# Tab match if new option is being set update tab
+			if ($form->{orderdir} || $form->{orderby} || $form->{mode}) {
+				
+				my $data = {};
+				$data->{orderdir} = $options->{orderdir};
+				$data->{orderby}  = $options->{orderby};
+				$data->{mode}  	  = $options->{mode};
+				$data->{filter}	  = $options->{fhfilter};
+				$data->{color}	  = $options->{color};
+				$self->createOrReplaceUserTab($user->{uid}, $tab->{tabname}, $data);
+			}
 		}
 	}
 
@@ -1676,6 +1692,9 @@ sub getAndSetOptions {
 			my $curtab = $tabnames_hr->{$form->{tab}};
 			$options->{color} = $curtab->{color};
 			$fhfilter = $options->{fhfilter} = $curtab->{filter};
+			$options->{mode} = $curtab->{mode};
+			$options->{orderby} = $curtab->{orderby};
+			$options->{orderdir} = $curtab->{orderdir};
 
 			$_->{active} = $_->{tabname} eq $form->{tab} ? 1 : 0  foreach @$user_tabs;
 		}
