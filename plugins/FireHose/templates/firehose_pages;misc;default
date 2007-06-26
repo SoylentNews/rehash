@@ -22,6 +22,7 @@ __template__
 		page_extras = "&amp;op=userfirehose&amp;uid=$extra_uid";
 	END;
 %]
+
 [% IF !contentsonly %]<span class="firehose_paginate" id="firehose_pages">[% END;
 
    IF ( (search_results.records_page > 0) || page || (num_items == options.limit) );
@@ -53,7 +54,7 @@ __template__
        END;
      END;
      FOR i_page IN [ start_page_num .. end_page_num ] %]
-<a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% (i_page - 1) %][% param_str %][% page_extras %]">[%
+<a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% (i_page - 1) %][% param_str %][% page_extras %]" [% IF i_page == page_cur %]class="fh_cur_page"[% END %]>[%
        IF i_page == start_page_num %]<b>&lsaquo;</b> [% END;
        IF i_page == page_cur %]<strong>[% i_page %]</strong>[%
          ELSE; i_page; END;

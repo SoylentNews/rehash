@@ -79,13 +79,20 @@ __template__
 	</div>
 	[% END %]
 [% CASE 'noitems' %]
-	<div class="message error">
+	[% fh = Slash.getObject("Slash::FireHose") 
+	   fh_array = fh.getFireHoseColors(1);
+	   fh_hash  = fh.getFireHoseColors();
+	   fh_num   = fh_hash.${options.color};
+	   new_color   = fh_array.$fh_num;
+	%]
+		<b>
 		[% IF user.state.firehose_page == "user" %]
 			This user's Firehose page contains no [% IF form.page %]additional [% END %]entries;
 		[% ELSE %]
-			Sorry no items returned.  You may want to try expanding your color range or date range.
+			No matches were found.  You may want to try [% IF new_color %]<a href="?color=[% new_color | strip_paramattr %]">[% END %]lowering your color threshold[% IF new_color %] to [% new_color %][% END %][% IF new_color %]</a>[% END %]  or [% IF options.duration != -1 %]<a href="?startdate=&amp;duration=-1">[% END %]expanding your time window[% IF options.duration != -1 %]</a>[% END %]
 		[% END %]
-	</div>
+		</b>
+		<br><br>
 [% CASE 'notavailable' %]
 	The item you're trying to view either does not exist, or is not viewable to you.
 [% END %]
