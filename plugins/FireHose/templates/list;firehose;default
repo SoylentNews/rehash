@@ -43,7 +43,7 @@ __template__
 </script>
 <div id="slashboxes">
 [% UNLESS user.noboxes %]
-  [% IF slashboxes;
+  [% IF slashboxes && !form.smalldevices;
     slashboxes %]
   [% END %]
 [% END %]
