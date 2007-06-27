@@ -722,7 +722,6 @@ CREATE TABLE related_stories (
 	cid int(8) unsigned NOT NULL default '0',
 	ordernum smallint unsigned NOT NULL default '0',
 	fhid mediumint(8) unsigned NOT NULL default '0',
-	upgrades                                                                                       
 	PRIMARY KEY (id),
 	KEY stoid (stoid)
 ) TYPE=InnoDB;
