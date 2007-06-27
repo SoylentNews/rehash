@@ -196,8 +196,10 @@ sub header {
 	if ($options->{admin} && $user->{is_admin}) {
 		$user->{state}{adminheader} = 1;
 		$display = slashDisplay('header-admin', $data, { Return => $options->{Return}, Page => $options->{Page} });
+#use Data::Dumper; print STDERR "header('$data' '$skin_name') A display=$display options: " . Dumper($options);
 	} else {
 		$display = slashDisplay('header', $data, { Return => $options->{Return}, Page => $options->{Page} });
+#use Data::Dumper; print STDERR "header('$data' '$skin_name') B display=$display options: " . Dumper($options);
 	}
 
 	# I bet someday we end up with an SSI bug from this -Brian
