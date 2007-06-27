@@ -105,7 +105,8 @@ sub populate_tags_udc {
 		? $constants->{firehose_adminudcclout} : 1;
 	for my $tag_hr (@$tags_ar) {
 		my $modifier = 1.0;
-		$modifier = $admin_mod if $admins->{ $tag_hr->{uid} }{seclev} >= 100;
+		$modifier = $admin_mod if $admins->{ $tag_hr->{uid} }
+			&& $admins->{ $tag_hr->{uid} }{seclev} >= 100;
 		$cloutsum += $tag_hr->{total_clout} * $modifier;
 	}
 
@@ -147,7 +148,7 @@ sub project_tags_udc {
 		my $this_hour_ratio = $proportion_hourofday->{$this_hourofday}*24;
 		my $this_day_ratio  = $proportion_dayofweek->{$this_dayofweek}*7;
 		$period_ratio->{$h} = $this_hour_ratio * $this_day_ratio;
-print STDERR "period ratio for $this_hour_ut ($cur_hour - $h): $period_ratio->{$h} (day $this_dayofweek hour $this_hourofday hour_ratio $this_hour_ratio day_ratio $this_day_ratio)\n";
+#print STDERR "period ratio for $this_hour_ut ($cur_hour - $h): $period_ratio->{$h} (day $this_dayofweek hour $this_hourofday hour_ratio $this_hour_ratio day_ratio $this_day_ratio)\n";
 	}
 	# the formula is:
 	# predictedudc =
@@ -159,7 +160,7 @@ print STDERR "period ratio for $this_hour_ut ($cur_hour - $h): $period_ratio->{$
 		$proj_sum += $hour_weight->{$h} * $cloutsum_hourback->{$h} / $period_ratio->{$h};
 	}
 	$proj_sum *= $period_ratio->{$hoursback} / $hour_weight_sum;
-print STDERR "sum for $hoursback: $proj_sum\n";
+#print STDERR "sum for $hoursback: $proj_sum\n";
 
 	$slashdb->sqlReplace('tags_udc',
 		{ -hourtime => "FROM_UNIXTIME($hour)", udc => $proj_sum });
