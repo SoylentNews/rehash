@@ -572,7 +572,7 @@ sub getFireHoseEssentials {
 	my $count = $self->sqlSelect("count(*)", $tables, $where, $count_other);
 	my $page_size = $options->{limit} || 1;
 	$results->{records_pages} ||= ceil($count / $page_size);
-	$results->{records_page}  ||= (int($options->{offset} / $options->{limit}) + 1) || 1;
+	$results->{records_page}  ||= (int(($options->{offset} || 0) / $options->{limit}) + 1) || 1;
 
 
 	if (keys %$filter_globjids) {
