@@ -25,7 +25,8 @@ $task{$me}{code} = sub {
 	slashdLog("Fetching records to index");
 	my $records = $searchtoo->getStoredRecords;
 
-	for my $type (keys %$records) {
+	my %seen;
+	for my $type (sort { $a->{iid} <=> $b->{iid} } keys %$records) {
 		my $records_type = $records->{$type};
 
 		my(@iids_d, @delete, @iids_a, @add, @change, %add);
@@ -38,6 +39,7 @@ $task{$me}{code} = sub {
 				push @delete, $records_type->[$i]{id};
 				push @iids_d, $records_type->[$i]{iid};
 			} else {
+				next if $seen{$records_type->[$i]{id}};
 				if ($records_type->[$i]{status} eq 'new') {
 					$add{$records_type->[$i]{id}} = 1;
 				}
@@ -46,6 +48,7 @@ $task{$me}{code} = sub {
 					status	=> $records_type->[$i]{status}
 				};
 				push @iids_a, $records_type->[$i]{iid};
+				$seen{$records_type->[$i]{id}}++;
 			}
 		}
 
