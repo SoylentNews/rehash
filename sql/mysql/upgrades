@@ -4619,6 +4619,7 @@ UPDATE vars SET value = 'T_2_5_0_164' WHERE name = 'cvs_tag_currentcode';
 # SLASHDOT LAST UPDATED HERE
 
 ALTER TABLE related_stories ADD COLUMN fhid mediumint(8) unsigned NOT NULL default '0';
+UPDATE message_codes SET seclev = 1 WHERE code = 20;
 
 # 2007-06-26
 UPDATE vars SET value = 'T_2_5_0_165' WHERE name = 'cvs_tag_currentcode';
