@@ -48,7 +48,7 @@ $task{$me}{code} = sub {
 	$oscar->set_callback_signon_done(sub { ++$online; });
 	$oscar->set_callback_error(\&error);
 	$oscar->signon(screenname => $screenname, password => undef);
-	$oscar->timeout(35);
+	$oscar->timeout(40);
 
 	my $retry_counter = 0;
 	my $max_remark_id = 0;
@@ -68,11 +68,17 @@ $task{$me}{code} = sub {
 		}
 
 		my %messages;
-		# Pull out all IM compatible messages < 10 minutes old.
+		# Pull out all IM compatible messages < 10 minutes old. Cache the message text.
 		$messages{'message_drop'} = $slashdb->sqlSelectAllHashref(
-			"id", "id, user, code, message", "message_drop",
+			"id", "id, user, code", "message_drop",
 			"(code IN ($code_in_str)) and
 			(UNIX_TIMESTAMP(date) > (UNIX_TIMESTAMP(now()) - 600))");
+		
+		foreach my $id (sort keys %{$messages{'message_drop'}}) {
+			my $message = $messages_obj->get($messages{'message_drop'}->{$id}{'id'});
+			$messages{'message_drop'}->{$id}{'message'} = $message->{'message'};
+			$slashdb->sqlDelete("message_drop", "id = " . $messages{'message_drop'}->{$id}{'id'});
+		}
 		
 		# Pull out remarks and record the last remark seen (if this feature is active).
 		if ($code_in_str =~ /$sysmessage_code/) {
@@ -87,6 +93,7 @@ $task{$me}{code} = sub {
 		
 		foreach my $message_type (keys %messages) {
 			foreach my $id (sort keys %{$messages{$message_type}}) {
+				# Admin
 				if ($message_type eq "remarks") {
 					if ($messages{$message_type}->{$id}{'stoid'}) {
 						my $story = $slashdb->getStory($messages{$message_type}->{$id}{'stoid'});
@@ -106,6 +113,7 @@ $task{$me}{code} = sub {
 					}
 				}
 
+				# User
 				if ($message_type eq "message_drop") {
 					next if getUserMessageDeliveryPref(
 						$messages{$message_type}->{$id}{'user'},
@@ -114,12 +122,8 @@ $task{$me}{code} = sub {
 					my $nick = $slashdb->getUser($messages{$message_type}->{$id}{'user'}, 'aim');
 					next if !$nick;
 
-					my $message = $messages_obj->get($messages{$message_type}->{$id}{'id'});
-					
-					$oscar->send_im($nick, $message->{'message'});
+					$oscar->send_im($nick, $messages{'message_drop'}->{$id}{'message'});
 					sleep(4);
-
-					$slashdb->sqlDelete("message_drop", "id = " . $messages{$message_type}->{$id}{'id'});
 				}
 			}
 		}
