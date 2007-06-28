@@ -239,10 +239,10 @@ sub get_udc_mult {
 		main::tagboxLog(sprintf("get_udc_mult punting prev %d %.6f cur %d %.6f next %d %.6f time %d thru %.6f prevw %.6f curw %.6f nextw %.6f",
 			$prevhour, $cache->{$prevhour}, $curhour, $cache->{$curhour}, $nexthour,  $cache->{$nexthour},
 			$time, $thru_frac, $prevweight, $curweight, $nextweight));
-		$udc = 1000;
+		$udc = $constants->{tagbox_fhpopularity2_udcbasis};
 	}
-	my $udc_mult = 1000/$udc;
-	my $max_mult = $constants->{tagbox_fhpopularity_maxudcmult} || 5;
+	my $udc_mult = $constants->{tagbox_fhpopularity2_udcbasis}/$udc;
+	my $max_mult = $constants->{tagbox_fhpopularity2_maxudcmult} || 5;
 	$udc_mult = $max_mult if $udc_mult > $max_mult;
 	main::tagboxLog(sprintf("get_udc_mult %0.3f time %d p %.3f c %.3f n %.3f th %.3f pw %.3f cw %.3f nw %.3f udc %.3f\n",
 		$udc_mult, $time, $prevudc, $curudc, $nextudc, $thru_frac, $prevweight, $curweight, $nextweight, $udc));
