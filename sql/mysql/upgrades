@@ -4614,10 +4614,6 @@ INSERT INTO vars (name, value, description) VALUES ('firehose_adminudcclout', '0
 # 2007-06-19
 UPDATE vars SET value = 'T_2_5_0_164' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 ALTER TABLE related_stories ADD COLUMN fhid mediumint(8) unsigned NOT NULL default '0';
 
 # For plugins/Messages
@@ -4631,3 +4627,6 @@ UPDATE vars SET name='tagbox_fhpopularity2_maxudcmult' WHERE name='tagbox_fhpopu
 # 2007-06-26
 UPDATE vars SET value = 'T_2_5_0_165' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
