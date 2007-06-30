@@ -41,9 +41,11 @@ __template__
         };
     } ();
 </script>
+[% ua = env.HTTP_USER_AGENT %]
+
 <div id="slashboxes">
 [% UNLESS user.noboxes %]
-  [% IF slashboxes && !(form.smalldevices || env.user_agent.match('iPhone'));
+  [% IF slashboxes && !(form.smalldevices || ua.match('iPhone'));
     slashboxes %]
   [% END %]
 [% END %]
