@@ -45,7 +45,7 @@ __template__
 
 <div id="slashboxes">
 [% UNLESS user.noboxes %]
-  [% IF slashboxes && !(form.smalldevices || ua.match('iPhone'));
+  [% IF slashboxes && !(form.smalldevices || ua.match('iPhone|Windows CE; Smartphone;'));
     slashboxes %]
   [% END %]
 [% END %]
