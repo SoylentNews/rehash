@@ -1153,6 +1153,12 @@ sub ajaxTagHistory {
 		my $itemid = $form->{id};
 		my $firehose = getObject("Slash::FireHose");
 		my $item = $firehose->getFireHose($itemid);
+		if (!$item || !$item->{globjid}) {
+			use Data::Dumper;
+			my($i_d, $f_d) = (Dumper($item), Dumper($form));
+			$i_d =~ s/\s+/ /g; $f_d =~ s/\s+/ /g;
+			warn "ajaxTagHistory blank item or globjid: $i_d $f_d";
+		}
 		$globjid = $item->{globjid};
 		my $tags = getObject("Slash::Tags");
 		($table, $id) = $tags->getGlobjTarget($globjid);
