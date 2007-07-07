@@ -10,6 +10,7 @@ CREATE TABLE firehose (
 	type ENUM("submission","journal","bookmark","feed", "story") default 'submission',
 	createtime datetime NOT NULL default '0000-00-00 00:00:00',
 	popularity float NOT NULL default '0',
+	popularity2 float NOT NULL default '0',
 	editorpop float NOT NULL default '0',
 	activity float NOT NULL default '0',
 	accepted enum('no','yes') default 'no',
@@ -37,7 +38,8 @@ CREATE TABLE firehose (
 	PRIMARY KEY (id),
 	UNIQUE globjid (globjid),
 	KEY createtime (createtime),
-	KEY popularity (popularity)
+	KEY popularity (popularity),
+	KEY popularity2 (popularity2)
 ) TYPE=InnoDB; 
 
 DROP TABLE IF EXISTS firehose_text;
