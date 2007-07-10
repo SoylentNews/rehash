@@ -1519,13 +1519,13 @@ sub getYoogliSimilarForItem {
         $ua->timeout($constants->{yoogli_oai_result_count} + 1);
         my $req = new HTTP::Request GET => $query;
         my $res = $ua->request($req);
-        if($res->is_success) {
+        if ($res->is_success) {
                 my $content = XMLin($res->content);
 
                 my $sid_regex = regexSid();
                 foreach my $metadata (@{$content->{'GetRecord'}{'record'}}) {
                         my $key = $metadata->{'header'}{'identifier'};
-                        my ($sid) = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:identifier'} =~ $sid_regex;
+                        my($sid) = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:identifier'} =~ $sid_regex;
                         $yoogli_similar_stories->{$key}{'date'}  = $reader->getStory($sid, 'time');
                         $yoogli_similar_stories->{$key}{'url'}   = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:identifier'};
                         $yoogli_similar_stories->{$key}{'title'} = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:title'};
@@ -1533,7 +1533,6 @@ sub getYoogliSimilarForItem {
          }
 
          return $yoogli_similar_stories;
-
 }
 
 sub getAndSetOptions {
