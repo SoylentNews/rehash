@@ -49,7 +49,7 @@ __template__
 		<div id="reasondiv_[% cid %]" class="modsel">[% Slash.createSelect("reason_$cid", reasons, {
 			'return'	=> 1,
 			nsort		=> 1, 
-			onchange	=> 'return doModerate(this)'
+			onchange	=> (discussion2 ? 'return doModerate(this)' : '')
 		}) %]</div>[% END %]
 
 		[% IF can_mod && can_del %] | [% END %]
