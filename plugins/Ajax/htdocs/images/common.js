@@ -555,13 +555,30 @@ function firehose_set_options(name, value) {
 	}
 	}
 
-	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" ) { 
-		params[name] = [value];
+	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" || name == "issue" || name == "numentries") { 
+		params[name] = value;
 		if (name == "startdate") {
 			firehose_startdate = value;
 		}
 		if (name == "duration")  {
 			firehose_duration = value;
+		}
+		if (name == "issue") {
+			firehose_issue = value;
+			firehose_startdate = value;
+			duration = 1;
+			page = 0;
+			var issuedate = firehose_issue.substr(5,2) + "/" + firehose_issue.substr(8,2) + "/" + firehose_issue.substr(10,2);
+
+			if ($('fhcalendar')) {
+				$('fhcalendar')._widget.setDate(issuedate, "day");
+			}
+			if ($('fhcalendar_pag')) {
+				$('fhcalendar_pag')._widget.setDate(issuedate, "day");
+			}
+		}
+		if (name == "numentries") {
+			page = 0;
 		}
 	}
 
@@ -600,6 +617,14 @@ function firehose_up_down(id, dir) {
 	params['dir'] = dir;
 	var updown = $('updown-' + id);
 	ajax_update(params, '', handlers);
+	if (updown) {
+		if (dir == "+") {
+			updown.className = "votedup";	
+		} else if (dir == "-") {
+			updown.className = "voteddown";	
+		}
+	}
+
 	if (dir == "-" && fh_is_admin) {
 		firehose_collapse_entry(id);
 	}
