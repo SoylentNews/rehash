@@ -52,7 +52,7 @@ sub main {
 	}
 
 	if ($op ne "rss") {
-		header('Firehose', '') or return;
+		header("$constants->{sitename} - Firehose", '') or return;
 	}
 
 	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $gSkin);
