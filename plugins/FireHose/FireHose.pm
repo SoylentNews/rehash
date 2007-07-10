@@ -1224,7 +1224,7 @@ sub ajaxUpDownFirehose {
 	my $value = {};
 
 	my $votetype = $form->{dir} eq "+" ? "Up" : $form->{dir} eq "-" ? "Down" : "";
-	$html->{"updown-$id"} = "Voted $votetype";
+	#$html->{"updown-$id"} = "Voted $votetype";
 	$value->{"newtags-$id"} = $newtagspreloadtext;
 
 	return Data::JavaScript::Anon->anon_dump({
@@ -1761,6 +1761,13 @@ sub getAndSetOptions {
 			$options->{limit} = 50;
 		} else {
 			$options->{limit} = 30;
+		}
+	}
+
+	if ($constants->{smalldevices_ua_regex}) {
+		my $smalldev_re = qr($constants->{smalldevices_ua_regex});
+		if ($ENV{HTTP_USER_AGENT} =~ $smalldev_re) {
+			$options->{limit} = 15;
 		}
 	}
 	if ($user->{is_admin} && $form->{setusermode}) {
