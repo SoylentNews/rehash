@@ -142,6 +142,12 @@ sub main {
 
 	my $keys = join '|', keys %$ops;
 	writeLog($form->{query}) if $form->{op} =~ /^(?:$keys)$/;
+
+	my $plugins = $reader->getDescriptions('plugins');
+	if ($form->{query} && $plugins->{Tags}) {
+		my $tagsdb = getObject('Slash::Tags');
+		$tagsdb->logSearch($form->{query});
+	}
 }
 
 #################################################################

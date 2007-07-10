@@ -1623,6 +1623,22 @@ sub getPrivateTagnames {
 	return \%private_tagnames;
 }
 
+sub logSearch {
+	my($self, $query, $options) = @_;
+	$query =~ s/[^A-Z0-9'. :\/_]/ /gi; # see Search.pm _cleanQuery()
+	my @poss_tagnames = split / /, $query;
+	my $uid = $options->{uid} || getCurrentUser('uid');
+	for my $tagname (@poss_tagnames) {
+		my $tagnameid = $self->getTagnameidFromNameIfExists($tagname);
+		next unless $tagnameid;
+		$self->sqlInsert('tags_searched', {
+			tagnameid =>	$tagnameid,
+			-searched_at =>	'NOW()',
+			uid =>		$uid,
+		}, { delayed => 1 });
+	}
+}
+
 #################################################################
 sub DESTROY {
 	my($self) = @_;

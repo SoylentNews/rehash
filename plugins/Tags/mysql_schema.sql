@@ -146,4 +146,13 @@ CREATE TABLE tags_dayofweek (
 	PRIMARY KEY (day)
 ) TYPE=InnoDB;
 
+CREATE TABLE tags_searched (
+	tseid		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	tagnameid	int UNSIGNED NOT NULL,
+	searched_at	datetime NOT NULL,
+	uid		mediumint UNSIGNED DEFAULT NULL,
+	PRIMARY KEY (tseid),
+	KEY (tagnameid),
+	KEY (searched_at)
+) TYPE=InnoDB;
 
