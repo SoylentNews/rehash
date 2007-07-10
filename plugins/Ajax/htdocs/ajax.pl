@@ -25,34 +25,34 @@ sub main {
 	my $gSkin     = getCurrentSkin();
 
 	my $ops = getOps();
-	my $op = $form->{op};
-	print STDERR "AJAX1 $op\n";
+	my $op = $form->{op} || '';
+#	print STDERR "AJAX1 $$: $user->{uid}, $op\n";
 
 	if (!$ops->{$op}) {
 		errorLog("No Ajax op '$op' found");
 		$op = 'default';
 	}
 	
-	print STDERR "AJAX2 $op\n";
+#	print STDERR "AJAX2 $$: $user->{uid}, $op\n";
 
 	$op = 'default' unless $ops->{$op}{function} || (
 		$ops->{$op}{class} && $ops->{$op}{subroutine}
 	);
-	print STDERR "AJAX3 $op\n";
+#	print STDERR "AJAX3 $$: $user->{uid}, $op\n";
 
 #$Slash::ResKey::DEBUG = 2;
 
 	$ops->{$op}{function} ||= loadCoderef($ops->{$op}{class}, $ops->{$op}{subroutine});
 	$op = 'default' unless $ops->{$op}{function};
 	
-	print STDERR "AJAX4 $op\n";
+#	print STDERR "AJAX4 $$: $user->{uid}, $op\n";
 
 	$form->{op} = $op;  # save for others to use
 
 	my $reskey_name = $ops->{$op}{reskey_name} || 'ajax_base';
 	$ops->{$op}{reskey_type} ||= 'use';
 	
-	print STDERR "AJAX5 $op\n";
+#	print STDERR "AJAX5 $$: $user->{uid}, $op\n";
 
 	if ($reskey_name ne 'NA') {
 		my $reskey = getObject('Slash::ResKey');
@@ -74,10 +74,11 @@ sub main {
 					html	=> { $msgdiv => $rkey->errstr },
 				});
 			}
+			print STDERR "AJAXE $$: $user->{uid}, $op, ", $rkey->errstr, "\n";
 			return;
 		}
 	}
-	print STDERR "AJAX6 $op\n";
+#	print STDERR "AJAX6 $$: $user->{uid}, $op\n";
 
 	my $options = {};
 	my $retval = $ops->{$op}{function}->(
@@ -270,7 +271,7 @@ sub readRest {
 	my $texts   = $slashdb->getCommentTextCached(
 		{ $cid => $comment },
 		[ $cid ],
-		{ cid => $cid, full => 1 }
+		{ full => 1 }
 	) or return;
 
 	return $texts->{$cid} || '';
@@ -306,7 +307,7 @@ sub fetchComments {
 	return unless $comments && keys %$comments;
 
 	my %pieces = split /[,;]/, $form->{pieces};
-	my %abbrev = split /[,;]/, $form->{abbreviated};
+	my %abbrev = split /[,;]/, $form->{abbreviated} || '';
 	my(@hidden_cids, @pieces_cids, @abbrev_cids);
 	for my $cid (@$cids) {
 		if (exists $pieces{$cid}) {

@@ -6074,14 +6074,16 @@ sub getCommentTextCached {
 		|| $user->{maxcommentsize} != $constants->{default_maxcommentsize};
 
 	# loop here, pull what cids we can
-	my($mcd_debug, $mcdkey, $mcdkey_abbrev, $mcdkeylen);
+	my($mcd_debug, $mcdkey, $mcdkey_abbrev, $mcdkey_full, $mcdkeylen);
 	if ($mcd) {
 		# MemCached key prefix "ctp" means "comment_text, parsed".
+		# "f" is same thing but *full* comment, not chopped.
 		# "a" means "abbreviated" (keep same len as mcdkey)
 		# Prepend our site key prefix to try to avoid collisions
 		# with other sites that may be using the same servers.
 		$mcdkey_abbrev = "$self->{_mcd_keyprefix}:cta:";
 		$mcdkey        = "$self->{_mcd_keyprefix}:ctp:";
+		$mcdkey_full   = "$self->{_mcd_keyprefix}:ctf:";
 		$mcdkeylen = length($mcdkey);
 		if ($constants->{memcached_debug}) {
 			$mcd_debug = { start_time => Time::HiRes::time };
@@ -6096,11 +6098,12 @@ sub getCommentTextCached {
 		}
 		my @keys_try =
 			map {
-				$abbreviate_ok && $comments->{$_}{class} eq 'oneline'
+				$abbreviate_ok && $comments->{$_}{class} eq 'oneline' && !($opt->{cid} && $_ == $opt->{cid})
 					? $mcdkey_abbrev . $_
-					: $mcdkey . $_
+					: $possible_chop && !($opt->{cid} && $_ == $opt->{cid})
+						? $mcdkey . $_
+						: $mcdkey_full . $_
 			}
-			grep { !($opt->{cid} && $_ == $opt->{cid}) }
 			@$cids_needed_ar;
 		$comment_text = $mcd->get_multi(@keys_try);
 		my @old_keys = keys %$comment_text;
@@ -6303,7 +6306,7 @@ sub getCommentTextCached {
 			}
 		}
 
-		if ($mcd && !($opt->{cid} && $opt->{cid} == $cid)) {
+		if ($mcd) {
 			my $exptime = $constants->{memcached_exptime_comtext};
 			$exptime = 86400 if !defined($exptime);
 			my $append = '';
@@ -6311,6 +6314,8 @@ sub getCommentTextCached {
 			if (defined $comments->{$cid}{abbreviated}) {
 				$append = $comments->{$cid}{abbreviated} . ':';
 				$mcdkey_cid = $mcdkey_abbrev . $cid;
+			} elsif (!$possible_chop) {
+				$mcdkey_cid = $mcdkey_full . $cid;
 			}
 			my $retval = $mcd->set($mcdkey_cid, $append . $comment_text->{$cid}, $exptime);
 			if ($mcd && $constants->{memcached_debug} && $constants->{memcached_debug} > 1) {

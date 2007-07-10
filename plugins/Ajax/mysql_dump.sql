@@ -25,7 +25,6 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 100, 'all', 'Slash::ResKey::Che
 INSERT INTO reskey_vars VALUES (100, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
 INSERT INTO reskey_vars VALUES (100, 'acl_no', 'reskey_no_ajax', 'If this ACL present, can\'t use resource');
 INSERT INTO reskey_vars VALUES (100, 'duration_max-failures', 1, 'how many failures per reskey');
-INSERT INTO reskey_vars VALUES (100, 'duration_uses', 10, 'min duration (in seconds) between uses');
 
 
 ##### ajax_admin

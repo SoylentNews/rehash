@@ -4597,8 +4597,6 @@ INSERT INTO vars (name, value, description) VALUES ('firehose_admindownclout', '
 # 2007-06-13
 UPDATE vars SET value = 'T_2_5_0_163' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
-
 # Turn on New Story Posted message option (for admin testing).
 INSERT INTO message_codes VALUES (20, 'New Story Posted', 100, 0, 0, 'now', '', 4);
 
@@ -4631,6 +4629,11 @@ UPDATE vars SET value = 'T_2_5_0_165' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+# PUDGE LAST UPDATED HERE
+
+
+DELETE FROM reskey_vars WHERE rkrid = 100 AND name = 'duration_uses';
+
 CREATE TABLE tags_searched (
 	tseid           int UNSIGNED NOT NULL AUTO_INCREMENT,
 	tagnameid       int UNSIGNED NOT NULL,
@@ -4645,5 +4648,4 @@ CREATE TABLE tags_searched (
 INSERT INTO vars (name, value, description) VALUES ('yoogli_oai_search', '', 'Use Yoogli OAI search');
 INSERT INTO vars (name, value, description) VALUES ('yoogli_oai_query_base', '', 'URL of the Yoogli OAI gateway');
 INSERT INTO vars (name, value, description) VALUES ('yoogli_oai_result_count', '', 'Number of requested OAI results');
-
 
