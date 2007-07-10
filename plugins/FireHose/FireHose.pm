@@ -664,7 +664,9 @@ sub getFireHose {
 	my $constants = getCurrentStatic();
 	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
 	my $id_q = $self->sqlQuote($id);
-	my $answer = $self->sqlSelectHashref("*, firehose.$popularitycol AS userpop", "firehose", "id=$id_q");
+	my $answer = $self->sqlSelectHashref(
+		"*, firehose.$popularitycol AS userpop, UNIX_TIMESTAMP(firehose.createtime) AS createtime_ut",
+		"firehose", "id=$id_q");
 	my $append = $self->sqlSelectHashref("*", "firehose_text", "id=$id_q");
 
 	for my $key (keys %$append) {
