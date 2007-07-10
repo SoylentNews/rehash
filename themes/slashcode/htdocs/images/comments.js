@@ -41,7 +41,9 @@ var alt_down = 0;
 var agt = navigator.userAgent.toLowerCase();
 var is_firefox = (agt.indexOf("firefox") != -1);
 
+/********************/
 /* thread functions */
+/********************/
 function updateComment(cid, mode) {
 	var existingdiv = fetchEl('comment_' + cid);
 	if (existingdiv && mode != displaymode[cid]) {
@@ -245,7 +247,9 @@ function changeThreshold(threshold) {
 }
 
 
+/*******************************/
 /* thread kid/hidden functions */
+/*******************************/
 function kidHiddens(cid, kidhiddens) {
 	var hiddens_cid = fetchEl('hiddens_' + cid);
 	if (! hiddens_cid) // race condition, probably: new comment added in between rendering, and JS data structure
@@ -364,7 +368,9 @@ function setShortSubject(cid, mode, cl) {
 }
 
 
+/****************************/
 /* thread utility functions */
+/****************************/
 function refreshDisplayModes(cid) {
 	if (cid > 0) {
 		updateDisplayMode(cid, 'full', 1);
@@ -533,7 +539,9 @@ function refreshCommentDisplays() {
 	return void(0);
 }
 
+/*******************/
 /* misc. functions */
+/*******************/
 function toHash(thisobject) {
 	return thisobject.map(function (pair) {
 		return pair.map(encodeURIComponent).join(',');
@@ -717,7 +725,9 @@ function quoteReply(pid) {
 	$('postercomment').value = this_reply + $('postercomment').value;
 }
 
+/*********************/
 /* utility functions */
+/*********************/
 function loadAllElements(tagname) {
 	var elements = document.getElementsByTagName(tagname);
 
@@ -790,7 +800,9 @@ function cloneObject(what) {
 }
 
 
+/****************/
 /* UI functions */
+/****************/
 function resetModifiers () {
 	shift_down = 0;
 	alt_down   = 0;
