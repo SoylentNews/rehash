@@ -33,7 +33,7 @@ __template__
 				[% note %]
 			</div>
 		[% END %]
-		From this page you can configure various messages that [% constants.sitename %] can optionally send to you.  The primary options are [% deliverymodes.$modenone %] (Disabled), [% deliverymodes.$modemail %], and [% deliverymodes.$modeweb %].  Not all options are available for all message types.  [% deliverymodes.$modeweb %] messages <b>will be deleted</b> after <b>[% constants.message_web_expire || 31 %] days</b>.
+		From this page you can configure various messages that [% constants.sitename %] can optionally send to you.  The primary options are [% deliverymodes.$modenone %] (Disabled), [% deliverymodes.$modemail %], [% deliverymodes.$modeweb %], and IM.  Not all options are available for all message types.  [% deliverymodes.$modeweb %] messages <b>will be deleted</b> after <b>[% constants.message_web_expire || 31 %] days</b>. If you plan on receiving IM messages, please add [% constants.im_screenname %] to your friends list.
 	<form action="[% env.script_name %]" method="post">
 		<fieldset>
 			<legend>Message Preferences</legend>
