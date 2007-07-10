@@ -4641,3 +4641,9 @@ CREATE TABLE tags_searched (
 	KEY (searched_at)
 ) TYPE=InnoDB;
 
+# For plugins/Firehose
+INSERT INTO vars (name, value, description) VALUES ('yoogli_oai_search', '', 'Use Yoogli OAI search');
+INSERT INTO vars (name, value, description) VALUES ('yoogli_oai_query_base', '', 'URL of the Yoogli OAI gateway');
+INSERT INTO vars (name, value, description) VALUES ('yoogli_oai_result_count', '', 'Number of requested OAI results');
+
+
