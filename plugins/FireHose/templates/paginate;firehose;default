@@ -49,7 +49,7 @@ __template__
 		FOREACH cur_day = days;
 		%]
 		<span class="inactive">
-			<a href="[% gSkin.rootdir %]/[% day_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
+			<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
 		</span>
 		[% END %]
 		[% IF !split_refresh %]</span>[% END %]
@@ -75,7 +75,7 @@ __template__
 			[% IF !split_refresh %]<span id="afterwidget">[% END %]
 		[% ELSE %]
 			<span>
-				<a href="[% gSkin.rootdir %]/[% day_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
+				<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
 			</span>
 		[% END %]
 		

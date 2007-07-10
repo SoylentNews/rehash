@@ -116,7 +116,7 @@ END %]
 				readmore_link = "Read more";
 				
 				IF item.body_length;
-					readmore_link = "Read $item.body_length more bytes...";
+					readmore_link = "Read $item.body_length More Bytes...";
 				END;
 
 				Slash.linkStory({

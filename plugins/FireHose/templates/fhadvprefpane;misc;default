@@ -36,7 +36,14 @@ __template__
 <input type="checkbox" name="nothumbs" onchange="firehose_set_options('nothumbs', !this.checked)" [% IF !options.nothumbs; constants.markup_checked_attribute; END %]> Thumbs <br>
 <input type="checkbox" name="nocolors" onchange="firehose_set_options('nocolors', !this.checked)" [% IF !options.nocolors; constants.markup_checked_attribute; END %]> Color Swatches<br>
 <input type="checkbox" name="mode" onchange="firehose_set_options('mixedmode', this.checked)" [% IF options.mode == "mixed"; constants.markup_checked_attribute; END %]> Expand Top Rated<br>
-	[% IF user.is_admin %]
+[% 
+
+select_options = { '0' => 'Decide For Me', '10' => 'Small', '20' => 'Large'};
+IF user.is_admin || user.is_subscriber;
+	select_options.50 = 'Huge';
+END;
+Slash.createSelect('numentries', select_options, { 'default' => options.numentries, 'return' => '1', 'onchange' => 'firehose_set_options(\'numentries\',this.options[this.selectedIndex].value)'}) %] Page Size<br>
+[% IF user.is_admin %]
 	<input type="hidden" name="setusermode" value="1">
 	<input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]> User Mode
 	[% END %]

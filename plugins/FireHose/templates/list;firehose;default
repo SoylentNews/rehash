@@ -45,7 +45,7 @@ __template__
 
 <div id="slashboxes">
 [% UNLESS user.noboxes %]
-  [% IF slashboxes && !(form.smalldevices || ua.match('iPhone|Windows CE; Smartphone;'));
+  [% IF slashboxes && !(form.smalldevices || (constants.smalldevices_ua_regex && ua.match(constants.smalldevices_ua_regex)));
     slashboxes %]
   [% END %]
 [% END %]
@@ -85,16 +85,16 @@ END; login_block = BLOCK %]
 [% END # login_block %]
 
 [% IF form.skipmenu || options.skipmenu %]
-[% login_block %]
+	[% IF user.is_anon; login_block; END %]
 [% ELSE %]
 <div class="firemenu">
 [% theupdatetime = Slash.timeCalc(Slash.db.getTime(), "%H:%M"); %]
 [% refresh_text = "";
    IF !user.is_anon;
-   	refresh_text = '<span style="font-size:60%">(Last Refreshed <span id="local_last_update_time">' _ theupdatetime _ '</span><span id="gmt_update_time"></span> Currently <span id="pauseorplay">Paused</span>)</span><span id="busy" class="hide"><img src="' _ constants.imagedir _ '/spinner.gif" alt="*"></span>';
+   	refresh_text = '<span style="font-size:60%">(Updated <span id="local_last_update_time">' _ theupdatetime _ '</span><span id="gmt_update_time"></span> Currently <span id="pauseorplay">Paused</span>)</span><span id="busy" class="hide"><img src="' _ constants.imagedir _ '/spinner.gif" alt="*"></span>';
    END;
 %]
-[% PROCESS titlebar title="$constants.sitename Firehose Beta $refresh_text" %]
+[% PROCESS titlebar title="$constants.sitename Firehose $refresh_text" %]
 [% PROCESS autocomplete %]
 <div class="submenu">
 <div id="message_area">
