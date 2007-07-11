@@ -151,7 +151,9 @@ sub create {
 
 	my $rss = Slash::XML::RSS->create({%$param, nocreate => 1});
 
-	return as_atom_1_0($rss);
+	my $atom = {%$rss};
+	bless $atom, __PACKAGE__;
+	return as_atom_1_0($atom);
 }
 
 # copied from as_rss_1_0 in XML::RSS ... kinda ugly, but oh well
