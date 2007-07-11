@@ -642,6 +642,80 @@ function firehose_remove_tab(tabid) {
 	ajax_update(params, '', handlers);
 
 }
+
+var nodmenu = null;
+var nixmenu = null;
+
+function get_nod_menu() {
+  if ( !nodmenu )
+    nodmenu = document.getElementById('nodmenu');
+  return nodmenu;
+}
+
+function get_nix_menu() {
+  if ( !nixmenu )
+    nixmenu = document.getElementById('nixmenu');
+  return nixmenu;
+}
+
+
+var g_elem_for_pending_showmenu = null;
+var g_menu_for_pending_showmenu = null;
+var g_pending_showmenu = null;
+var g_pending_hidemenu = null;
+
+function hide_nod_menu() {
+  get_nod_menu().style.display = 'none';
+}
+
+function hide_nix_menu() {
+  get_nix_menu().style.display = 'none';
+}
+
+function hide_nodnix_menu( delay ) {
+  if ( delay == undefined || !delay ) {
+    hide_nod_menu();
+    hide_nix_menu();
+  } else {
+    g_pending_hidemenu = setTimeout("hide_nodnix_menu()", delay);
+  }
+}
+
+function dont_hide_nodnix_menu() {
+  clearTimeout(g_pending_hidemenu);
+  g_pending_hidemenu = null;
+}
+
+
+
+function show_nodnix_menu(elem, menu, delay) {
+  if ( delay == undefined || !delay ) {
+    var pos = YAHOO.util.Dom.getXY(elem);
+    menu.style.display = 'block';
+    YAHOO.util.Dom.setXY(menu, pos);
+  } else {
+    g_elem_for_pending_showmenu = elem;
+    g_menu_for_pending_showmenu = menu;
+    g_pending_showmenu = setTimeout("show_nodnix_menu(g_elem_for_pending_showmenu, g_menu_for_pending_showmenu)", delay);
+  }
+}
+
+function dont_show_nodnix_menu() {
+  clearTimeout(g_pending_showmenu);
+  g_pending_showmenu = null;
+}
+
+function show_nod_menu(elem, delay) {
+  hide_nix_menu();
+  show_nodnix_menu(elem, get_nod_menu(), delay);
+}
+
+function show_nix_menu(elem, delay) {
+  hide_nod_menu();
+  show_nodnix_menu(elem, get_nix_menu(), delay);
+}
+
+
 // firehose functions end
 
 // helper functions
