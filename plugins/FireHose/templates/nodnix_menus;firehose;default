@@ -1,0 +1,38 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+firehose
+__lang__
+en_US
+__name__
+nodnix_menus
+__seclev__
+10000
+__template__
+<div id="nodmenu">
+  <div class="menu" onmouseover="dont_hide_nodnix_menu()" onmouseout="hide_nodnix_menu(750)" onmousedown="hide_nodnix_menu()">
+    <ul>
+      <li>interesting</li>
+      <li>funny</li>
+      <li>insightful</li>
+    </ul>
+  </div>
+</div>
+<div id="nixmenu">
+  <div class="menu" onmouseover="dont_hide_nodnix_menu()" onmouseout="hide_nodnix_menu(750)" onmousedown="hide_nodnix_menu()">
+    <ul>
+      <li>binspam</li>
+      <li>dupe</li>
+      <li>notthebest</li>
+      <li>offtopic</li>
+      <li>stupid</li>
+      <li>slownewsday</li>
+    </ul>
+  </div>
+</div>
+__version__
+$Id$
