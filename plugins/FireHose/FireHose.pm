@@ -1770,6 +1770,7 @@ sub getAndSetOptions {
 			$options->{limit} = 15;
 		}
 	}
+
 	if ($user->{is_admin} && $form->{setusermode}) {
 		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "" });
 	}

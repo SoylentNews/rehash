@@ -241,41 +241,41 @@ div.briefarticle .storylinks { display: none; }
 /* Voting */
 #nodmenu, #nixmenu { display: none; }
 #nodmenu, #nixmenu {
-  position: absolute;
-  z-index: 1000;
+	position: absolute;
+	z-index: 1000;
 }
 
 #nodmenu .menu,
 #nixmenu .menu {
-  display: block;
-  position: absolute;
-  color: black;
-  background-color: white;
-  border: 1px solid black;
-  font-size: 88%;
-  font-weight: bold;
+	display: block;
+	position: absolute;
+	color: black;
+	background-color: white;
+	border: 1px solid black;
+	font-size: 88%;
+	font-weight: bold;
 }
 
 #nodmenu .menu {
-  right: 0.2em;
-  top: -2em;
+	right: 0.2em;
+	top: -2em;
 }
 
 #nixmenu .menu {
-  left: 2.1em;
-  top: -2em;
+	left: 2.1em;
+	top: -2em;
 }
 
 #nodmenu ul, #nixmenu ul {
-  list-style-type: none;
+	list-style-type: none;
 }
 
 #nodmenu li, #nixmenu li {
-  padding: 1px 4px;
+	padding: 1px 4px;
 }
 
 #nodmenu li:hover, #nixmenu li:hover {
-  background-color: lightgray;
+	background-color: lightgray;
 }
 
 .up

@@ -39,7 +39,7 @@ __template__
 [% IF user.is_admin %]
 	<input type="hidden" name="setusermode" value="1">
 	<input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]> User Mode
-	[% END %]
+[% END %]
 	<div align="right">
 <form method="POST" action="[% env.script_name %]"><div>
 <input type="hidden" name="fhfilter" value="">
