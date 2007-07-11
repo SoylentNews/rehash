@@ -91,6 +91,7 @@ sub getPopupTree {
 	my @tids =	map  { $_->[0] }
 			sort { $a->[1] cmp $b->[1] }
 			map  { [ $_, lc $tree->{$_}{textname} ] }
+			grep { $_ }
 			keys %$tree;
 
 	# Set up %topics except for parents and children
