@@ -146,11 +146,12 @@ END; login_block = BLOCK %]
 [% IF !user.is_admin || (user.is_admin && user.firehose_usermode ) %]
 <p>
 The Slashdot Firehose is a collaborative system designed to allow
-users to assist our editors in the story selection process. Try
-tagging and voting on the entries below, and by using the 'feedback'
-menu by each entry. The hose can contain submissions, RSS Feeds,
-bookmarks, journal entries and Slashdot stories. Please send your
-feedback to hose@cmdrtaco.net but be forgiving of beta code!
+users to assist our editors in the story selection process.  The hose
+contains submissions, RSS Feeds, journals and Slashdot stories, each
+color-coded along the color spectrum to indicate popularity.  Red is
+hot, violet is not.   Try tagging and voting on the entries below, and
+by using the 'feedback' menus.  Please send comments to hose at
+cmdrtaco dot net but be forgiving of beta code!
 </p>
 [% END %]
 [% END # form.skipmenu %]
