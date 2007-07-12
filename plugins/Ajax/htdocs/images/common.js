@@ -617,13 +617,14 @@ function firehose_up_down(id, dir) {
 	params['dir'] = dir;
 	var updown = $('updown-' + id);
 	ajax_update(params, '', handlers);
+	/*
 	if (updown) {
 		if (dir == "+") {
 			updown.className = "votedup";	
 		} else if (dir == "-") {
 			updown.className = "voteddown";	
 		}
-	}
+	}*/
 
 	if (dir == "-" && fh_is_admin) {
 		firehose_collapse_entry(id);
