@@ -211,18 +211,18 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
             <div id="ccw-full-panel" class="ccw-panel">
               <div class="ccw-panel-border"></div>
               <div id="ccw-full-count-pos" class="ccw-core-pos ccw-count-pos">
-                <span id="ccw-full-count-text" class="ccw-count-text"><span id="currentFull"></span><spad id="ccw-full-phrase"> Full</span></span>
+                <span id="ccw-full-count-text" class="ccw-count-text"><span id="currentFull"></span><span id="ccw-full-phrase"> Full</span></span>
               </div>
             </div>
             <div id="ccw-abbr-panel" class="ccw-panel">
               <div class="ccw-panel-border"></div>
               <div id="ccw-abbr-count-pos" class="ccw-core-pos ccw-count-pos">
-                <span id="ccw-abbr-count-text" class="ccw-count-text"><span id="currentOneline"></span><spad id="ccw-abbr-phrase"> Abbreviated</span></span>
+                <span id="ccw-abbr-count-text" class="ccw-count-text"><span id="currentOneline"></span><span id="ccw-abbr-phrase"> Abbreviated</span></span>
               </div>
             </div>
             <div id="ccw-hide-panel" class="ccw-panel">
               <div id="ccw-hide-count-pos" class="ccw-core-pos ccw-count-pos">
-                <span id="ccw-hide-count-text" class="ccw-count-text"><span id="currentHidden"></span><spad id="ccw-hide-phrase"> Hidden</span></span>
+                <span id="ccw-hide-count-text" class="ccw-count-text"><span id="currentHidden"></span><span id="ccw-hide-phrase"> Hidden</span></span>
               </div>
             </div>
           </div>
