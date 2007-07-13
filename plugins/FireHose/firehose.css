@@ -1,3 +1,7 @@
+/* Reset */
+#firehoselist .title, #firehoselist h3, #firehoselist .generaltitle { background: transparent !important; }
+
+
 /* Options */
 .firemenu { position: relative; }
 .firemenu h3 { margin-right: 120px; }
@@ -32,7 +36,7 @@
 #full, #abbrev { left: 60px  }
 #time, #popularity {left: 90px }
 
-#colorsliderbg { background: url('//images.slashdot.org/colorscale.png') no-repeat 0px -3px; }
+#colorsliderbg { background: url('http://images.slashdot.org/colorscale.png') no-repeat 0px -3px; }
 
 input
 {
@@ -60,11 +64,11 @@ input
 }
 
 .paginate li.active, #fhtablist li.active { font-weight: bold; }
-.paginate a, #fhtablist a { padding: 0 .3em; }
-.paginate, #fhtablist { margin: 0; }
+#fhtablist li.active a img { margin-left: .3em}
+#fhtablist li.active a { padding: 0 }
 #firehose_pages a { color: #bbb; border: 1px solid #444; background: #444; padding: 3px !important; }
 #firehose_pages a:hover { color: #ccc; border: 1px solid #666; background: #555;}
-#firehose_pages a.fh_cur_page { margin: 0; color: #fff !important; border: 1px solid #555; background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x;}
+#firehose_pages a.fh_cur_page { margin: 0; color: #fff !important; border: 1px solid #555; background: #666 url('http://images.slashdot.org/block-title-bg.png') repeat-x;}
 #firehose_pages a b {color: #888; font-size: 130%; font-family: georgia; sans-serif}
 #fhcalendar_pag {float: left !important;}
 
@@ -75,8 +79,8 @@ input
         text-decoration: none;
         font-weight: bold;
         padding: 6px 0 4px 25px;
-        background: url('//images.slashdot.org/sic_controls.png') no-repeat;
-        _background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
+        background: url('http://images.slashdot.org/sic_controls.png') no-repeat;
+        _background: url('http://images.slashdot.org/sic_controls.gif') no-repeat;
         text-indent: -7000em;
         position: absolute;
         top: 0;
@@ -93,8 +97,8 @@ input
 #fhadvprefpane span { 
 	padding-left: 30px; width: 90px; 
 	display: block;
-        background: url('//images.slashdot.org/sic_controls.png') no-repeat;
-	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
+        background: url('http://images.slashdot.org/sic_controls.png') no-repeat;
+	_background: url('http://images.slashdot.org/sic_controls.gif') no-repeat;
 	cursor: pointer;
 }
 
@@ -129,7 +133,7 @@ ul.menu#fhtablist li.active
 	border-bottom: 1px solid #777;
 	border-left: 1px solid #777;
 	margin: 0 -.3em 0 0 !important;
-	padding: .3em 0 .3em 0 !important;
+	padding: .3em !important;
 	position: relative;
 }
 .paginate .active
@@ -151,18 +155,18 @@ ul.menu#fhtablist li.active a, .paginate .active a
 
 ul.menu#fhtablist li.active:before, .paginate .active:before { content: ""; }
 #beforewidget, .paginate span.active {float: left}
-.day.date-tab.active {float: none}
+.day.date-tab.active {background: transparent url(http://images.slashdot.org/sic_close.png) no-repeat scroll 0px 3px; float: none; border: none; padding-left: 20px !important}
 #beforewidget span, #afterwidget span {line-height:270% !important}
+.paginate .calendar-pane {margin: 0;} 
 
 /* Pagination */
 .daybreak,
-.paginate { background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x; }
+.paginate { background: #666 url('http://images.slashdot.org/block-title-bg.png') repeat-x; }
 .paginate { margin-right: 18.5em; }
 #users .paginate { margin-right: 0em; }
 
-
 .admin .paginate { margin-right: 0; }
-.paginate .menu { background: url('//images.slashdot.org/corner_w_br.png') right bottom no-repeat; 
+.paginate .menu { background: url('http://images.slashdot.org/corner_w_br.png') right bottom no-repeat; 
 height:2.9em;
 padding-top:0.4em;}
 
@@ -178,7 +182,7 @@ padding-top:0.4em;}
 }
 
 .storylinks li.more { margin-left: -1.8em !important; }
-.storylinks li.comments { margin-right: 1em !important; }
+.storylinks li.comments {border-left: 1px solid #ccc; padding-left: 1em !important}
 #firehoselist { padding: 1em 0 0 0; }
 #firehoselist, #firehose #message, .firemenu { margin-right: 18.5em; }
 #users #firehoselist, #users #firehose #message, #users .firemenu { margin-right: 0em; }
@@ -186,29 +190,14 @@ padding-top:0.4em;}
 .article .generaltitle .title .date,
 .article .generaltitle .title .nickname { display: none; }
 .article .firehosetag { background: #fff; }
-.article .generaltitle .title h3 { background: transparent; }
+.title, .generaltitle h3 { background: transparent; }
 
 /* Brief Articles */
 div.briefarticle .storylinks { display: none; }
 #firehose div.briefarticle a span { float: none; }
 #firehose div.briefarticle .topic { display: none }
 .briefarticle { position: relative !important; }
-.adminmode .briefarticle .generaltitle .title h3 { padding-left: 80px !important; }
-
-.briefarticle .generaltitle .title h3, .article .generaltitle .title h3
-{
-	padding-top: .5em;
-	padding-right: 35%;
-	padding-left: 70px;
-	font-size: 100%;
-	border-top: 1px solid #fff;
-}
-
-.briefarticle .generaltitle .title h3 { background: url('//images.slashdot.org/gen-slc.gif') no-repeat left top; }
-.briefarticle .future .generaltitle .title h3, .article .future .generaltitle .title h3 { background: #900 url('//images.slashdot.org/article-title-bg-bsd.png') repeat-x left bottom; }
-.briefarticle .story .generaltitle .title h3, .article .story .generaltitle .title h3  { background: #066 url('//images.slashdot.org/article-title-bg.png') repeat-x left bottom; }
-.briefarticle .generaltitle .title, .article .generaltitle .title { background: #e6e6e6 url('//images.slashdot.org/sections-bg.png') repeat-x left bottom; }
-.briefarticle .generaltitle .title h3 a, .article .generaltitle .title h3 a { color: #066; }
+.briefarticle h3 a, .article h3 a { color: #066; }
 
 .briefarticle .generaltitle .title .date,
 .briefarticle .generaltitle .title .nickname
@@ -216,100 +205,12 @@ div.briefarticle .storylinks { display: none; }
 	color: #666;
 	font-size: 85%;
 	white-space: nowrap;
+	margin-left: .5em;
 }
 
 .briefarticle .end { display: none; }
 .briefarticle .firehosetag { background: #999; }
 .briefarticle .details, .briefarticle .intro { display: none; }
-
-.briefarticle .edit
-{
-	position: absolute;
-	top: 1.9em;
-	right: 28px;
-}
-
-.briefarticle .future .title a, .article .future .title a,
-.briefarticle .story .title a, .article .story .title a, .article .story .title h3 a , .briefarticle .story .title h3 a { color: #fff !important; }
-
-.briefarticle div.future .title .date, #firehose div.briefarticle div.story .title .date
-{
-	color: #fff;
-	opacity: 0.5;
-}
-
-/* Voting */
-#nodmenu, #nixmenu { display: none; }
-#nodmenu, #nixmenu {
-	position: absolute;
-	z-index: 1000;
-}
-
-#nodmenu .menu,
-#nixmenu .menu {
-	display: block;
-	position: absolute;
-	color: black;
-	background-color: white;
-	border: 1px solid black;
-	font-size: 88%;
-	font-weight: bold;
-}
-
-#nodmenu .menu {
-	right: 0.2em;
-	top: -2em;
-}
-
-#nixmenu .menu {
-	left: 2.1em;
-	top: -2em;
-}
-
-#nodmenu ul, #nixmenu ul {
-	list-style-type: none;
-}
-
-#nodmenu li, #nixmenu li {
-	padding: 1px 4px;
-}
-
-#nodmenu li:hover, #nixmenu li:hover {
-	background-color: lightgray;
-}
-
-.up
-{
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -1px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -1px;
-	left: 8px;
-}
-
-.down
-{
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -195px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -195px;
-	left: 26px;
-}
-
-.up, .down
-{
-	text-decoration: none;
-	padding: 10px;
-	text-indent: -7000em;
-	position: absolute;
-}
-
-.vote
-{
-	position: absolute;
-	top: .5em;
-	width: 50px;
-	text-align: center;
-	font-size: 80%;
-}
-.adminmode .vote {left: 22px;}
-.usermode .vote {left: 10px;}
 
 /* Tagging */
 .briefarticle div.tags
@@ -326,422 +227,14 @@ div.briefarticle .storylinks { display: none; }
 	height: 1em;
 	line-height: 140% !important;
 	overflow: hidden;
-	width: 20%;
+	width: 9em;
 	right: 60px;
-	top: .5em;
-	font-size: 95%;
+	top: 0;
+	font-size: 92%;
 }
 
 .briefarticle div.tags div.tagtitleclosed input:first-child { width: 30% !important; }
-.briefarticle div.tags div.tagtitleclosed input { font-size: 80%; }
-.briefarticle div.tags div.tagtitleclosed a, div.tags div.tagtitleclosed { color: #555; }
-
-div.tags table
-{
-	background: transparent;
-	margin-top: .3em;
-}
-
-div.tags table th
-{
-	border-top: 1px solid #aaa;
-	border-left: 1px solid #aaa;
-	border-right: 1px solid #fff;
-	padding-top: .5em !important;
-}
-
-div.tags table.data td
-{
-	padding: .1em .5em;
-	line-height: 120%;
-}
-
-.briefarticle .whitewash div.tags div.tagtitleclosed span i, .briefarticle .whitewash div.tags div.tagtitleclosed span i a, .briefarticle .whitewash div.tags div.tagtitleclosed span, .briefarticle .whitewash div.tags div.tagtitleclosed span a { color: #fff !important; }
-.briefarticle .whitewash div.tagtitleclosed span.tagsheader { background: url('//images.slashdot.org/arrow_w_closed.png') no-repeat !important; }
-
-/* Icons and imagery for articles */
-.edit
-{
-	position: absolute !important;
-	top: 1.6em;
-	right: 30px;
-}
-
-.edit a
-{
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 27px -398px !important;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 1px -398px !important;
-	width: 20px;
-}
-
-.external { padding: 0 20px 0 5px; }
-
-.external a
-{
-	z-index: 1000;
-	width: 10px;
-	padding: 5px;
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -799px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
-	text-indent: -7000em;
-	position: absolute;
-}
-
-.reject
-{
-	z-index: 1000;
-	padding: 5px;
-	width: 10px;
-	position: absolute;
-	right: 5px;
-	top: .5em;
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -602px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
-}
-
-.reject input { visibility: hidden; }
-
-.soda
-{
-	padding: .5em 7px .60em 7px;
-	left: 0;
-	top: 1px;
-	font-size: 90%;
-	position: absolute;
-	font-weight: normal;
-	color: #555 !important;
-	cursor: pointer;
-}
-.future .soda { color: #FFBFC2 !important; }
-.story .soda { color: #7fb2b2 !important; }
-.pop0 { background: url('//images.slashdot.org/pop8.png') no-repeat 0px 0px; }
-.pop1 { background: url('//images.slashdot.org/pop1.png') no-repeat 0px 0px; }
-.pop2 { background: url('//images.slashdot.org/pop2.png') no-repeat 0px 0px; }
-.pop3 { background: url('//images.slashdot.org/pop3.png') no-repeat 0px 0px; }
-.pop4 { background: url('//images.slashdot.org/pop4.png') no-repeat 0px 0px; }
-.pop5 { background: url('//images.slashdot.org/pop5.png') no-repeat 0px 0px; }
-.pop6 { background: url('//images.slashdot.org/pop6.png') no-repeat 0px 0px; }
-.pop7 { background: url('//images.slashdot.org/pop7.png') no-repeat 0px 0px; }
-.pop8 { background: url('//images.slashdot.org/pop0.png') no-repeat 0px 0px; }
-#fhdatepane { padding-left: 8px }
-.calhead { color: #000 }
-.daybreak { background-color: #666; }
-.daybreak a, #fhlogin a { color: #fff; }
-
-
-/* Date Widget */
-.calendar-pane {
-background:#FFFFFF none repeat scroll 0%;
-border:2px solid #333333;
-position:absolute;
-z-index:10000;
-}
-.calendar-pane td {color: #555; font-size: 90%;width: 1.8em; padding: 0 0 0 .2em !important; margin: 0; height: 1em; background:#E6E6E6 url(//images.slashdot.org/sections-bg.png) repeat-x left bottom;  border-bottom: 1px solid #aaa; border-left: 1px solid #aaa;}
-.calendar-pane td a {color: #066 !important; padding: .3em .5em .3em .1em; margin: 0;}
-.calendar-pane th { color: #fff; font-size: 90%;background: #555; border-bottom: 1px solid #aaa;}
-.calendar-pane td.today {background:#666 url(//images.slashdot.org/block-title-bg.png) repeat-x scroll 0%;}
-.calendar-pane td.today, .calendar-pane td.selected {font-weight: bold}
-.calendar-pane td.today a, .calendar-pane td.selected a {color: #fff !important; text-decoration: none}
-.calendar-pane td.selected, .calendar-pane td.today.selected {background: #066; font-weight: bold}
-.calheader {color: #fff; background:#004444 url(//images.slashdot.org/article-title-bg.png) repeat-x scroll left top;}
-.calheader a {padding:1px 4px 0pt; background-repeat: no-repeat;}
-.calheader .calnavright {background-image: url(//images.slashdot.org/arrows.png) !important}
-.calheader .calnavleft {background-image: url(//images.slashdot.org/arrows.png) !important; background-position: 0 -200px}
-.calendar-pane td.oom {background: #999}
-.calendar {background:transparent url(//images.slashdot.org/sic_icons.png) no-repeat scroll 0px -995px; padding-left: 20px; padding-top: 8px; padding-bottom: 8px }
-span.date-tab {
-background:transparent url(//images.slashdot.org/sic_icons.png) no-repeat scroll 0px -995px; 
-/* close icon background:transparent url(//images.slashdot.org/sic_close.png) no-repeat; */
-cursor:pointer;
-padding:7px 0pt 7px 25px;
-position:relative;
-color: #fff;
-position: relative; cursor: pointer; }
-
-span.date-tab.active div.tab-button { background: #066; }
-#.date-widget.all span.date-tab, .date-widget.now span.date-tab { display: none; }
-
-ul.menu a img {margin: 0 -8px -4px 4px}
-#fhtabdel {background:transparent url(//images.slashdot.org/sic_close.png) no-repeat; position: relative; margin: 0 0 0 5px;padding: 2px 16px 10px 2px}
-#fhtabdel a {position: absolute; text-indent: -7000em; width: 10px}
-
-.menu #fh_pag_calendar, .menu .date-tab-bar, .menu .tab-button  {display: inline}
-.menu .date-tab-bar {padding-right: 1em; }
-.menu .date-span-popup {font-size: 90%}
-.menu .edit, .rssicon {margin-top: 2px;}
-
-#fh_change_range { font-size: 80% }
-
-#fh_change_range { font-size: 80% }
-.firemenu .date-tab-bar {float: right; margin: -2em 1em 0 40em; padding-bottom: .5em}
-.firemenu #fhcalendar-calendar-pane {right: 1em}
-}
-
-#play, #pause { left: 0  }
-#desc, #asc { left: 30px  }
-#full, #abbrev { left: 60px  }
-#time, #popularity {left: 90px }
-
-#colorsliderbg { background: url('//images.slashdot.org/colorscale.png') no-repeat 0px -3px; }
-
-input
-{
-        width: auto !important;
-        margin: 0 0 0 .5em !important;
-}
-
-#fh_adv_pref_toggle { color: #fff; }
-
-#colorsliderbg
-{
-        display: inline;
-        padding: 4px 108px 3px 0;
-}
-
-#colorsliderthumb { display: inline; }
-#colorsliderthumb img { margin: 0 0 -5px 0px; }
-#fhtablist li { font-size: 130%; }
-
-.paginate li, .paginate a, #fhtablist li, #fhtablist a
-{
-        color: #fff;
-        padding: 0;
-        margin: 0;
-}
-
-.paginate li.active, #fhtablist li.active { font-weight: bold; }
-.paginate a, #fhtablist a { padding: 0 .3em; }
-.paginate, #fhtablist { margin: 0; }
-#firehose_pages a { color: #bbb; border: 1px solid #444; background: #444; padding: 3px !important; }
-#firehose_pages a:hover { color: #ccc; border: 1px solid #666; background: #555;}
-#firehose_pages a.fh_cur_page { margin: 0; color: #fff !important; border: 1px solid #555; background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x;}
-#firehose_pages a b {color: #888; font-size: 130%; font-family: georgia; sans-serif}
-#fhcalendar_pag {float: left !important;}
-
-
-.options a
-{
-        color: #fff;
-        text-decoration: none;
-        font-weight: bold;
-        padding: 6px 0 4px 25px;
-        background: url('//images.slashdot.org/sic_controls.png') no-repeat;
-        _background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
-        text-indent: -7000em;
-        position: absolute;
-        top: 0;
-}
-.advpref
-{
-        position: absolute;
-        top: 3.5em;
-        right: 1em;
-}
-.advpref a {margin-right: 1em}
-
-
-#fhadvprefpane span { 
-	padding-left: 30px; width: 90px; 
-	display: block;
-        background: url('//images.slashdot.org/sic_controls.png') no-repeat;
-	_background: url('//images.slashdot.org/sic_controls.gif') no-repeat;
-	cursor: pointer;
-}
-
-#fhadvprefpane a { color: white}
-
-#play a, #fhadvprefpane #advplay { background-position: 0px 1px; }
-#pause a, #fhadvprefpane #advpause { background-position: 0px -200px; }
-#desc a, #fhadvprefpane #advdesc { background-position: 0px -400px; }
-#asc a, #fhadvprefpane #advasc { background-position: 0px -600px; }
-#full a, #fhadvprefpane #advfull { background-position: 0px -800px; }
-#abbrev a, #fhadvprefpane #advabbrev { background-position: 0px -1000px; }
-#time a, #fhadvprefpane #advtime  { background-position: 0px -1200px; }
-#popularity a, #fhadvprefpane #advpopularity { background-position: 0px -1400px; }
-.article .firehosetag { background: #fff; }
-
-ul.menu
-{
-	margin: 0;
-	padding: .75em 12em .75em .6em;
-}
-
-ul.menu#fhtablist
-{
-	font-size: 90%;
-	background: transparent !important;
-}
-
-ul.menu#fhtablist li.active
-{
-	background: #444;
-	border: 1px solid #666;
-	border-bottom: 1px solid #777;
-	border-left: 1px solid #777;
-	margin: 0 -.3em 0 0 !important;
-	padding: .3em .5em .3em 0 !important;
-	position: relative;
-}
-.paginate .active
-{
-        background: #444; 
-        border: 1px solid #666;
-        border-bottom: 1px solid #777;
-        border-left: 1px solid #777;
-        padding: .3em !important;
-	margin: 0 .3em;
-}
-.paginate .inactive {padding: .6em !important;}
-
-ul.menu#fhtablist li.active a, .paginate .active a
-{
-	color: #aaa;
-	text-decoration: none;
-}
-
-ul.menu#fhtablist li.active:before, .paginate .active:before { content: ""; }
-#beforewidget, .paginate span.active {float: left}
-.day.date-tab.active {float: none}
-#beforewidget span, #afterwidget span {line-height:270% !important}
-
-/* Pagination */
-.daybreak,
-.paginate { background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x; }
-.paginate { margin-right: 18.5em; }
-#useers .paginate { margin-right: 0em; }
-
-.admin .paginate { margin-right: 0; }
-.paginate .menu { background: url('//images.slashdot.org/corner_w_br.png') right bottom no-repeat; 
-height:2.9em;
-padding-top:0.4em;}
-
-
-/* Articles */
-.imgspace { min-height: 100% !important; }
-
-.storylinks
-{
-	color: #999;
-	margin: -1em 0 0 0 !important;
-	padding: 0 !important;
-}
-
-.storylinks li.more { margin-left: -1.8em !important; }
-#firehoselist { padding: 1em 0 0 0; }
-#firehoselist, #firehose #message, .firemenu { margin-right: 18.5em; }
-#users #firehoselist, #users #firehose #message, #users .firemenu { margin-right: 0em; }
-.admin #firehoselist, .admin #firehose #message, .admin .firemenu { margin-right: 0; }
-.article .generaltitle .title .date,
-.article .generaltitle .title .nickname { display: none; }
-.article .firehosetag { background: #fff; }
-.article .generaltitle .title h3 { background: transparent; }
-
-/* Brief Articles */
-div.briefarticle .storylinks { display: none; }
-#firehose div.briefarticle a span { float: none; }
-#firehose div.briefarticle .topic { display: none }
-.briefarticle { position: relative !important; }
-.adminmode .briefarticle .generaltitle .title h3 { padding-left: 80px !important; }
-
-.briefarticle .generaltitle .title h3, .article .generaltitle .title h3
-{
-	padding-top: .5em;
-	padding-right: 35%;
-	padding-left: 70px;
-	font-size: 100%;
-	border-top: 1px solid #fff;
-}
-
-.briefarticle .generaltitle .title h3 { background: url('//images.slashdot.org/gen-slc.gif') no-repeat left top; }
-.briefarticle .generaltitle .title, .article .generaltitle .title { background: #e6e6e6 url('//images.slashdot.org/sections-bg.png') repeat-x left bottom; }
-.briefarticle .generaltitle .title h3 a, .article .generaltitle .title h3 a { color: #066; }
-
-.briefarticle .generaltitle .title .date,
-.briefarticle .generaltitle .title .nickname
-{
-	color: #666;
-	font-size: 85%;
-	white-space: nowrap;
-}
-
-.briefarticle .end { display: none; }
-.briefarticle .firehosetag { background: #999; }
-.briefarticle .details, .briefarticle .intro { display: none; }
-
-.briefarticle .edit
-{
-	position: absolute;
-	top: 1.9em;
-	right: 28px;
-}
-
-.briefarticle .future .title a, .article .future .title a,
-.briefarticle .story .title a, .article .story .title a, .article .story .title h3 a , .briefarticle .story .title h3 a { color: #fff !important; }
-.briefarticle .story .title, .article .story .title { background: #066 !important; }
-.briefarticle .future .title, .article .future .title { background: #700 !important; }
-
-.briefarticle div.future .title .date, #firehose div.briefarticle div.story .title .date
-{
-	color: #fff;
-	opacity: 0.5;
-}
-
-/* Voting */
-.up
-{
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -1px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -1px;
-	left: 8px;
-}
-
-.down
-{
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -195px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -195px;
-	left: 26px;
-}
-
-.up, .down
-{
-	text-decoration: none;
-	padding: 10px;
-	text-indent: -7000em;
-	position: absolute;
-}
-
-.vote
-{
-	position: absolute;
-	top: .5em;
-	left: 22px;
-	width: 50px;
-	text-align: center;
-	font-size: 80%;
-}
-
-/* Tagging */
-.briefarticle div.tags
-{
-	margin: 0 !important;
-	padding: 0 !important;
-}
-
-.briefarticle div.tags div.tagtitleclosed
-{
-	z-index: 0;
-	background: transparent !important;
-	position: absolute !important;
-	height: 1em;
-	line-height: 140% !important;
-	overflow: hidden;
-	width: 20%;
-	right: 60px;
-	top: .5em;
-	font-size: 95%;
-}
-
-.briefarticle div.tags div.tagtitleclosed input:first-child { width: 30% !important; }
-.briefarticle div.tags div.tagtitleclosed input { font-size: 80%; }
+.briefarticle div.tags input { font-size: 85%; }
 .briefarticle div.tags div.tagtitleclosed a, div.tags div.tagtitleclosed { color: #555; }
 
 div.tags table
@@ -765,35 +258,36 @@ div.tags table.data td
 }
 
 .briefarticle .whitewash div.tags div.tagtitleclosed i, .briefarticle .whitewash div.tags div.tagtitleclosed span i a, .briefarticle .whitewash div.tags div.tagtitleclosed span, .briefarticle .whitewash div.tags div.tagtitleclosed a { color: #fff !important; }
-.briefarticle .whitewash div.tagtitleclosed span.tagsheader { background: url('//images.slashdot.org/arrow_w_closed.png') no-repeat !important; }
+.briefarticle .whitewash div.tagtitleclosed span.tagsheader { background: url('http://images.slashdot.org/arrow_w_closed.png') no-repeat !important; }
+.article div.tagtitleclosed span span {color: #055; width: auto; text-decoration: underline}
 
 /* Icons and imagery for articles */
 .edit
 {
 	position: absolute !important;
-	top: 1.6em;
-	right: 30px;
+	top: 17px;
+	right: 25px;
 }
-
+.briefarticle .edit {top: 21px; right: 21px; }
 .edit a
 {
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 27px -398px !important;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 1px -398px !important;
+	background: url('http://images.slashdot.org/sic_icons.png') no-repeat 27px -398px !important;
+	_background: url('http://images.slashdot.org/sic_icons.gif') no-repeat 1px -398px !important;
 	width: 20px;
 }
 
-.external { padding: 0 20px 0 5px; }
-
-.external a
+.external { padding: 0 20px 0 5px; display: inline; }
+#firehoselist h3 .external a
 {
 	z-index: 1000;
 	width: 10px;
 	padding: 5px;
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -799px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
+	background: url('http://images.slashdot.org/sic_icons.png') no-repeat 0px -799px;
+	_background: url('http://images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
 	text-indent: -7000em;
-	position: absolute;
+	position: absolute !important;
 }
+
 
 .reject
 {
@@ -802,38 +296,20 @@ div.tags table.data td
 	width: 10px;
 	position: absolute;
 	right: 5px;
-	top: .5em;
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 0px -602px;
-	_background: url('//images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
+	top: 5px;
+	background: url('http://images.slashdot.org/sic_icons.png') no-repeat 0px -602px;
+	_background: url('http://images.slashdot.org/sic_icons.gif') no-repeat 0px -600px;
 }
 
 .reject input { visibility: hidden; }
 
-.soda
-{
-	padding: .5em 7px .60em 7px;
-	left: 0;
-	top: 1px;
-	font-size: 90%;
-	position: absolute;
-	font-weight: normal;
-	color: #555 !important;
-	cursor: pointer;
-}
+
 .future .soda { color: #FFBFC2 !important; }
 .story .soda { color: #7fb2b2 !important; }
-.pop0 { background: url('//images.slashdot.org/pop8.png') no-repeat 0px 0px; }
-.pop1 { background: url('//images.slashdot.org/pop1.png') no-repeat 0px 0px; }
-.pop2 { background: url('//images.slashdot.org/pop2.png') no-repeat 0px 0px; }
-.pop3 { background: url('//images.slashdot.org/pop3.png') no-repeat 0px 0px; }
-.pop4 { background: url('//images.slashdot.org/pop4.png') no-repeat 0px 0px; }
-.pop5 { background: url('//images.slashdot.org/pop5.png') no-repeat 0px 0px; }
-.pop6 { background: url('//images.slashdot.org/pop6.png') no-repeat 0px 0px; }
-.pop7 { background: url('//images.slashdot.org/pop7.png') no-repeat 0px 0px; }
-.pop8 { background: url('//images.slashdot.org/pop0.png') no-repeat 0px 0px; }
+
 #fhdatepane { padding-left: 8px }
 .calhead { color: #000 }
-.daybreak { background-color: #666; }
+.daybreak { background-color: #666; border-bottom: 1px solid #fff}
 .daybreak a, #fhlogin a { color: #fff; }
 
 
@@ -843,46 +319,45 @@ background:#FFFFFF none repeat scroll 0%;
 border:2px solid #333333;
 position:absolute;
 z-index:1000;
+margin: 2em 0;
 }
-.calendar-pane td {color: #555; font-size: 90%;width: 1.8em; padding: 0 0 0 .2em !important; margin: 0; height: 1em; background:#E6E6E6 url(//images.slashdot.org/sections-bg.png) repeat-x left bottom;  border-bottom: 1px solid #aaa; border-left: 1px solid #aaa;}
+.calendar-pane td {color: #555; font-size: 90%;width: 1.8em; padding: 0 0 0 .2em !important; margin: 0; height: 1em; background:#E6E6E6 url(http://images.slashdot.org/sections-bg.png) repeat-x left bottom;  border-bottom: 1px solid #aaa; border-left: 1px solid #aaa;}
 .calendar-pane td a {color: #066 !important; padding: .3em .5em .3em .1em; margin: 0;}
 .calendar-pane th { color: #fff; font-size: 90%;background: #555; border-bottom: 1px solid #aaa;}
-.calendar-pane td.today {background:#666 url(//images.slashdot.org/block-title-bg.png) repeat-x scroll 0%;}
+.calendar-pane td.today {background:#666 url(http://images.slashdot.org/block-title-bg.png) repeat-x scroll 0%;}
 .calendar-pane td.today, .calendar-pane td.selected {font-weight: bold}
 .calendar-pane td.today a, .calendar-pane td.selected a {color: #fff !important; text-decoration: none}
 .calendar-pane td.selected, .calendar-pane td.today.selected {background: #066; font-weight: bold}
-.calheader {color: #fff; background:#004444 url(//images.slashdot.org/article-title-bg.png) repeat-x scroll left top;}
+.calheader {color: #fff; background:#004444 url(http://images.slashdot.org/article-title-bg.png) repeat-x scroll left top;}
 .calheader a {padding:1px 4px 0pt; background-repeat: no-repeat;}
-.calheader .calnavright {background-image: url(//images.slashdot.org/arrows.png) !important}
-.calheader .calnavleft {background-image: url(//images.slashdot.org/arrows.png) !important; background-position: 0 -200px}
+.calheader .calnavright {background-image: url(http://images.slashdot.org/arrows.png) !important}
+.calheader .calnavleft {background-image: url(http://images.slashdot.org/arrows.png) !important; background-position: 0 -200px}
 .calendar-pane td.oom {background: #999}
-.calendar {background:transparent url(//images.slashdot.org/sic_icons.png) no-repeat scroll 0px -995px; padding-left: 20px; padding-top: 8px; padding-bottom: 8px }
-span.date-tab {
-background:transparent url(//images.slashdot.org/sic_icons.png) no-repeat scroll 0px -995px; 
-/* close icon background:transparent url(//images.slashdot.org/sic_close.png) no-repeat; */
-cursor:pointer;
-padding:7px 0pt 7px 25px;
-position:relative;
-color: #fff;
-position: relative; cursor: pointer; }
+.calendar {background:transparent url(http://images.slashdot.org/sic_icons.png) no-repeat scroll 0px -995px; padding-left: 20px; padding-top: 8px; padding-bottom: 8px }
+span.date-tab { background:transparent url(http://images.slashdot.org/sic_icons.png) no-repeat scroll 0px -995px; padding:7px 0pt 7px 25px; color: #fff; position: relative; cursor: pointer; }
 
 span.date-tab.active div.tab-button { background: #066; }
 #.date-widget.all span.date-tab, .date-widget.now span.date-tab { display: none; }
 
-ul.menu a img {margin: 0 -8px -4px 4px}
-#fhtabdel {background:transparent url(//images.slashdot.org/sic_close.png) no-repeat; position: relative; margin: 0 0 0 5px;padding: 2px 24px 10px 2px}
+ul.menu a img {margin: 0 0 -4px 0}
+#fhtabdel {background:transparent url(http://images.slashdot.org/sic_close.png) no-repeat; position: relative; padding: 2px 16px 10px 2px}
 #fhtabdel a {position: absolute; text-indent: -7000em; width: 10px}
 
 .menu #fh_pag_calendar, .menu .date-tab-bar, .menu .tab-button  {display: inline}
 .menu .date-tab-bar {padding-right: 1em; }
 .menu .date-span-popup {font-size: 90%}
-.menu .edit, .rssicon {margin-top: 2px;}
+.menu .edit, .rssicon {margin-top: 2px; margin-left: -4px;}
 
 #fh_change_range { font-size: 80% }
 
 #fh_change_range { font-size: 80% }
-.firemenu .date-tab-bar {float: right; margin: -2em 1em 0 40em; padding-bottom: .5em}
+.firemenu .date-tab-bar {float: right; width: 16em; padding-bottom: .5em}
 .firemenu #fhcalendar-calendar-pane {right: 1em}
+
+
+/* article bottom */
+div.storylinks ul li.comments {position: relative; width: auto; text-align: left; margin: 0; padding: 0;}
+
 
 /* login pop */
 
@@ -890,7 +365,7 @@ ul.menu a img {margin: 0 -8px -4px 4px}
         background-color: #222;
         height: 100%;
         opacity: 0.75;
-        position: fixed;
+        positi0on: fixed;
         width: 100%;
         z-index: 5;
 }
@@ -927,3 +402,107 @@ ul.menu a img {margin: 0 -8px -4px 4px}
         padding: 0 2em 2em 2em;    
         border-top: 1px solid #033;
 }
+/*.pop0 { background-color: #cde; }
+.pop1 { background-color: #c00; }
+.pop2 { background-color: #f93; }
+.pop3 { background-color: #ff6; }
+.pop4 { background-color: #0c3; }
+.pop5 { background-color: #06f; }
+.pop6 { background-color: #609; }
+.pop7 { background-color: #306; }
+.pop8 { background-color: #000; }*/
+
+.pop0 { background-image: url('/images/pop0.png'); }
+.pop1 { background-image: url('/images/pop1.png'); }
+.pop2 { background-image: url('/images/pop2.png'); }
+.pop3 { background-image: url('/images/pop3.png'); }
+.pop4 { background-image: url('/images/pop4.png'); }
+.pop5 { background-image: url('/images/pop5.png'); }
+.pop6 { background-image: url('/images/pop6.png'); }
+.pop7 { background-image: url('/images/pop7.png'); }
+.pop8 { background-image: url('/images/pop8.png'); }
+
+.briefarticle .pop0 span { background-image: url('/images/pop0b.png'); }
+.briefarticle .pop1 span  { background-image: url('/images/pop1b.png'); }
+.briefarticle .pop2 span  { background-image: url('/images/pop2b.png'); }
+.briefarticle .pop3 span  { background-image: url('/images/pop3b.png'); }
+.briefarticle .pop4 span  { background-image: url('/images/pop4b.png'); }
+.briefarticle .pop5 span  { background-image: url('/images/pop5b.png'); }
+.briefarticle .pop6 span  { background-image: url('/images/pop6b.png'); }
+.briefarticle .pop7 span  { background-image: url('/images/pop7b.png'); }
+.briefarticle .pop8 span  { background-image: url('/images/pop8b.png'); }
+
+.vote, .votedup, .voteddown, .vote a, .votedup a, .voteddown a, .soda {cursor: pointer;}
+.vote, .votedup, .voteddown, .vote a, .votedup a, .voteddown a, .soda, .soda span, .tagtitleclosed {position: absolute !important;}
+.vote, .votedup, .voteddown, .soda, .soda span, #firehoselist .generaltitle, #firehoselist .generaltitle .title, #nixmenu, #nodmenu {background-repeat: no-repeat !important;}
+.vote, .votedup, .voteddown, .soda span, .firehose, .story, .future { background-position: bottom left !important;}
+.firehose, .story, .future {background-repeat: repeat-x;}
+.generaltitle, .title {overflow: hidden;}
+
+.vote, .votedup,  .voteddown  {top: 1px; left: 8px; z-index: 7; background-image: url('/images/unvote.png'); text-indent: -7000em; height: 25px; width: 44px;}
+.vote a, .votedup a, .voteddown a {padding: 0;  height: 18px;  z-index: 8; width: 18px; border: none; text-indent: -7000em; margin: 0;}
+.votedup {background-image: url('/images/upvote.png'); background-position: -5px -4px;}
+.voteddown {background-image: url('/images/downvote.png'); background-position: -24px -4px;}
+
+.article div.tags .tagtitleclosed {
+background:transparent none repeat scroll 0%;
+bottom:-6px;
+margin-left:15em;
+margin-right:1em;
+position:absolute !important;
+right:0pt;
+width:auto;
+}
+.up { left: 5px; top: 3px;}
+.down { left: 24px; top: 3px;}
+.soda {text-indent: -7000em; top: 0; left: 0; z-index: 4; height: 100%; width: 13px; min-height: 24px; overflow: hidden; }
+.soda span {height: 10px; width: 12px; padding: 14px; bottom: 0; left: 0;}
+.article .soda {border-bottom: 1px solid #fff}
+
+.briefarticle, .article {position: relative;}
+.briefarticle .tags {top: 0; left: 0; width: 100%;}
+
+.firehose, .story, .future {background-image: url('/images/dark_fade_lg.png'); }
+
+.story  {color: #fff; background-color: #066;}
+.future {color: #fff; background-color: #900; }
+.firehose {background-color: #ddd; }
+
+.story .date, .future .date {color: #fff !important;}
+.date, a.skin {opacity:0.6;}
+#firehoselist .generaltitle { min-height: 25px; position: relative; background-image: url('/images/fh_btr_s.png') !important; background-position: top right !important;}
+#firehoselist .briefarticle .generaltitle .title { background-image: url('/images/fh_br_s.png') !important; background-position: bottom right !important;}
+.briefarticle .story a {color: #fff;}
+.briefarticle h3 a {#555}
+.generaltitle a {text-decoration: none}
+
+/*.tagshide { position: absolute !important; z-index: 1; display: block !important; padding: 10px; height: 10px; width: 10px; top: 0; left: 0; background: url('/images/fh_btl_s.png') top left no-repeat !important;} */
+.tagshide div {display: none}
+#firehoselist h3 a {z-index: 4 !important; position: relative !important;}
+#firehoselist .firehose h3 a {color: #066}
+#firehoselist .briefarticle h3,
+#firehoselist .article h3 
+{font-size: 95%; margin: 0 10em 0 0; padding: .25em 3em 0 58px; min-height: 22px; display: block}
+#firehoselist .article h3 {margin: 0; padding: .25em 50px 0 58px;}
+#firehoselist .briefarticle.usermode h3, #firehoselist .article.usermode h3 {padding: .25em 3em 0 1.5em !important;}
+#firehoselist {position: relative}
+
+/* nodmenu */
+#nodmenu, #nixmenu {display: none; height: 170px; z-index: 100000; position: absolute !important; font-size: 11px}
+#nodmenu .menu, #nixmenu .menu {top: -35px; height: 170px; z-index: 1000000; width: 150px; position: absolute !important; font-size: 11px}
+#nodmenu .menu {left: -150px !important;  background-image: url('/images/popup_nod.png');}
+#nixmenu .menu {left: 15px !important; text-align: right; background-image: url('/images/popup_nix.png');}
+
+#nodmenu li, #nixmenu li {list-style: none; margin: 2px 9px 1px 45px; color: #ddd; padding: 0 5px}
+#nodmenu li {margin: 2px 45px 1px 9px;}
+#nodmenu li:hover, #nixmenu li:hover, #nodmenu li.selected, #nixmenu li.selected  {background: #333; color: #fff;}
+
+
+.adminmode.briefarticle div.tags div.tagtitleclosed:hover {border: 1px solid #aaa; width: auto !important; height: auto; padding-right: 1em; background-color: #ddd !important; z-index: 1000}
+.adminmode.briefarticle .whitewash div.tags div.tagtitleclosed:hover {border: 1px solid #555; width: auto !important; height: auto; padding-right: 1em; background-color: #aaa !important; z-index: 1000}
+#firehoselist .article .title, #firehoselist .article h3, #firehoselist .article .generaltitle {border: none !important}
+#firehoselist .article .generaltitle, #firehoselist .article .title, #firehoselist .article h3 {line-height: 170% !important;}
+#firehoselist .briefarticle .generaltitle, #firehoselist .briefarticle .title, #firehoselist .briefarticle h3 {line-height: 160% !important;}
+#firehoselist .generaltitle, #firehoselist .title, #firehoselist h3 {line-height: 160% !important;}
+
+
