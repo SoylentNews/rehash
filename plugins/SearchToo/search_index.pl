@@ -18,9 +18,14 @@ $task{$me}{code} = sub {
 
 	my $searchtoo = getObject('Slash::SearchToo');
 
+	my $backup_start_time = time;
 	slashdLog("Backing up index");
 	$searchtoo->copyBackup;
 	$searchtoo->backup(1);
+	my $backup_duration = time - $backup_start_time;
+	if ($backup_duration > 30) {
+		slashdErrnote("backup process took $backup_duration seconds; file cleanup may be required");
+	}
 
 	slashdLog("Fetching records to index");
 	my $records = $searchtoo->getStoredRecords;
