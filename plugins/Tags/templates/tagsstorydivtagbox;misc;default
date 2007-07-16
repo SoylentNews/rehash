@@ -44,7 +44,7 @@ __template__
 
 	[% IF user.is_admin %]<div id="tags-admin-[% sidenc %]"></div>[% END %]
 
-	<div id="toggletags-message-[% sidenc %]"></div>
+	<div id="toggletags-message-[% sidenc %]" class="message"></div>
 
 	</div>
 [% END %]
