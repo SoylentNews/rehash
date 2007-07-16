@@ -18,7 +18,7 @@ __template__
 [% IF storylink %]
 <li class="signoff">[% END %]
 [% PROCESS ajax_reskey_signoff reskey_label => 'signoff-reskey-' _ stoid, reskey_name => 'ajax_admin' %]
-<span id="signoff_[% stoid %]" onclick="admin_signoff([% stoid %][% IF fhid; ",'firehose',"; fhid; END %])">[% UNLESS signed %]unsigned[% END %]</span>
+, <span id="signoff_[% stoid %]" onclick="admin_signoff([% stoid %][% IF fhid; ",'firehose',"; fhid; END %])">[% UNLESS signed %]unsigned[% END %]</span>
 [% IF storylink %]</li>[% END %]
 [% END %]
 __seclev__
