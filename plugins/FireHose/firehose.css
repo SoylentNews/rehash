@@ -38,13 +38,7 @@
 
 #colorsliderbg { background: url('http://images.slashdot.org/colorscale.png') no-repeat 0px -3px; }
 
-input
-{
-        width: auto !important;
-        margin: 0 0 0 .5em !important;
-}
-
-#fh_adv_pref_toggle { color: #fff; }
+#fh_adv_pref_toggle { background:transparent url(/images/sic_icons.png) no-repeat scroll 0px -1195px; padding:7px 0pt 7px 25px; color: #fff; position: relative; cursor: pointer;}
 
 #colorsliderbg
 {
@@ -218,24 +212,10 @@ div.briefarticle .storylinks { display: none; }
 	margin: 0 !important;
 	padding: 0 !important;
 }
-
-.briefarticle div.tags div.tagtitleclosed
-{
-	z-index: 0;
-	background: transparent !important;
-	position: absolute !important;
-	height: 1em;
-	line-height: 140% !important;
-	overflow: hidden;
-	width: 9em;
-	right: 60px;
-	top: 0;
-	font-size: 92%;
-}
-
+.briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagtitleopen {display: none}
 .briefarticle div.tags div.tagtitleclosed input:first-child { width: 30% !important; }
 .briefarticle div.tags input { font-size: 85%; }
-.briefarticle div.tags div.tagtitleclosed a, div.tags div.tagtitleclosed { color: #555; }
+div.tags div.tagtitleclosed a, div.tags div.tagtitleclosed, div.tags div.tagtitleopen a, div.tags div.tagtitleopen { color: #055 !important;}
 
 div.tags table
 {
@@ -257,9 +237,24 @@ div.tags table.data td
 	line-height: 120%;
 }
 
-.briefarticle .whitewash div.tags div.tagtitleclosed i, .briefarticle .whitewash div.tags div.tagtitleclosed span i a, .briefarticle .whitewash div.tags div.tagtitleclosed span, .briefarticle .whitewash div.tags div.tagtitleclosed a { color: #fff !important; }
-.briefarticle .whitewash div.tagtitleclosed span.tagsheader { background: url('http://images.slashdot.org/arrow_w_closed.png') no-repeat !important; }
+div.tags div.tagtitleclosed, div.tags div.tagtitleopen  {
+background:transparent none repeat scroll 0% !important;
+bottom:-6px;
+margin-left:15em;
+margin-right:1em;
+position:absolute !important;
+right:1em;
+width:auto;
+}
+div.tags div.tagtitleopen {right: 20em;}
+
+div.tags div.tagbody {text-align: right; border: none !important; padding: 0 !important; width: 19em; position: absolute; bottom: 0; right: 1em; background: transparent !important;}
+div.tags div.tagbody input {width: 12em !important; position: absolute; bottom: .2em; right: 5em;}
+div.tags div.tagbody input.button {width: 4em !important;  position: absolute; bottom: .2em; right: 0;}
+div.tags div.tagbody div {display: inline}
 .article div.tagtitleclosed span span {color: #055; width: auto; text-decoration: underline}
+
+div.tags div.tagtitleopen span.tagsheader { background:transparent url(//images.slashdot.org/login-arrow-expanded.gif) no-repeat scroll 0pt 50% !important; }
 
 /* Icons and imagery for articles */
 .edit
@@ -288,8 +283,8 @@ div.tags table.data td
 	position: absolute !important;
 }
 
-
-.reject
+.briefarticle .reject {display: none;}
+.article .reject
 {
 	z-index: 1000;
 	padding: 5px;
@@ -433,7 +428,7 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .briefarticle .pop8 span  { background-image: url('/images/pop8b.png'); }
 
 .vote, .votedup, .voteddown, .vote a, .votedup a, .voteddown a, .soda {cursor: pointer;}
-.vote, .votedup, .voteddown, .vote a, .votedup a, .voteddown a, .soda, .soda span, .tagtitleclosed {position: absolute !important;}
+.vote, .votedup, .voteddown, .vote a, .votedup a, .voteddown a, .soda, .soda span {position: absolute !important;}
 .vote, .votedup, .voteddown, .soda, .soda span, #firehoselist .generaltitle, #firehoselist .generaltitle .title, #nixmenu, #nodmenu {background-repeat: no-repeat !important;}
 .vote, .votedup, .voteddown, .soda span, .firehose, .story, .future { background-position: bottom left !important;}
 .firehose, .story, .future {background-repeat: repeat-x;}
@@ -444,15 +439,6 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .votedup {background-image: url('/images/upvote.png'); background-position: -5px -4px;}
 .voteddown {background-image: url('/images/downvote.png'); background-position: -24px -4px;}
 
-.article div.tags .tagtitleclosed {
-background:transparent none repeat scroll 0%;
-bottom:-6px;
-margin-left:15em;
-margin-right:1em;
-position:absolute !important;
-right:0pt;
-width:auto;
-}
 .up { left: 5px; top: 3px;}
 .down { left: 24px; top: 3px;}
 .soda {text-indent: -7000em; top: 0; left: 0; z-index: 4; height: 100%; width: 13px; min-height: 24px; overflow: hidden; }
@@ -484,7 +470,7 @@ width:auto;
 #firehoselist .article h3 
 {font-size: 95%; margin: 0 10em 0 0; padding: .25em 3em 0 58px; min-height: 22px; display: block}
 #firehoselist .article h3 {margin: 0; padding: .25em 50px 0 58px;}
-#firehoselist .briefarticle.usermode h3, #firehoselist .article.usermode h3 {padding: .25em 3em 0 1.5em !important;}
+/*#firehoselist .briefarticle.usermode h3, #firehoselist .article.usermode h3 {padding: .25em 3em 0 1.5em !important;} */
 #firehoselist {position: relative}
 
 /* nodmenu */
@@ -504,5 +490,6 @@ width:auto;
 #firehoselist .article .generaltitle, #firehoselist .article .title, #firehoselist .article h3 {line-height: 170% !important;}
 #firehoselist .briefarticle .generaltitle, #firehoselist .briefarticle .title, #firehoselist .briefarticle h3 {line-height: 160% !important;}
 #firehoselist .generaltitle, #firehoselist .title, #firehoselist h3 {line-height: 160% !important;}
+
 
 
