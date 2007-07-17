@@ -1071,7 +1071,7 @@ sub ajaxProcessAdminTags {
 #print STDERR "ajaxProcessAdminTags\n";
 	my $commands = $form->{commands};
 	my $type = $form->{type} || "stories";
-	my($id, $table, $sid, $sidenc);
+	my($id, $table, $sid, $sidenc, $itemid);
 	if ($type eq "stories") {
 		$sidenc = $form->{sidenc};
 		$sid = $sidenc; $sid =~ tr{:}{/};
@@ -1082,7 +1082,7 @@ sub ajaxProcessAdminTags {
 		$id = $form->{id};
 	} elsif ($type eq "firehose") {
 		if ($constants->{plugin}{FireHose}) {
-			my $itemid = $form->{id};
+			$itemid = $form->{id};
 			my $firehose = getObject("Slash::FireHose");
 			my $item = $firehose->getFireHose($itemid);
 			my $tags = getObject("Slash::Tags");
@@ -1131,7 +1131,7 @@ use Data::Dumper; print STDERR scalar(localtime) . " ajaxProcessAdminTags table=
 		}, { Return => 1 });
 	} elsif ($type eq "firehose") {
 		return slashDisplay('tagsfirehosedivadmin', {
-			id 		=>	$id,
+			id 		=>	$itemid,
 			tags_admin_str  =>	$tags_admin_str,
 		}, { Return => 1 });
 	}
