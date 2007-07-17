@@ -113,7 +113,7 @@ END %]
 			[% IF item.type == "story" %]
 				[% the_skin = Slash.db.getSkin(item.primaryskid) %]
 				[% 
-				readmore_link = "Read more";
+				readmore_link = "Read More";
 				
 				IF item.body_length;
 					readmore_link = "Read $item.body_length More Bytes...";
