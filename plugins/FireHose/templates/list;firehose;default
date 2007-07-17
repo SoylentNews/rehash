@@ -96,6 +96,7 @@ END; login_block = BLOCK %]
 %]
 [% PROCESS titlebar title="$constants.sitename Firehose $refresh_text" %]
 [% PROCESS autocomplete %]
+[% PROCESS nodnix_menus %]
 <div class="submenu">
 <div id="message_area">
 </div>
