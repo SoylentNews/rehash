@@ -65,8 +65,8 @@ $task{$me}{code} = sub {
 		# matters much, since if nothing's going on both of the
 		# above should be doing reasonably fast SELECTs).
 		if (!$activity_feeder && !$activity_run) {
-			tagboxLog('tagbox.pl sleeping 20');
-			sleep 20;
+			tagboxLog('tagbox.pl sleeping 10');
+			sleep 10;
 		}
 		last if $task_exit_flag;
 
