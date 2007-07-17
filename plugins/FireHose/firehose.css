@@ -246,15 +246,24 @@ position:absolute !important;
 right:1em;
 width:auto;
 }
-div.tags div.tagtitleopen {right: 20em;}
+div.tags div.tagtitleopen {right: 18em;}
 
 div.tags div.tagbody {text-align: right; border: none !important; padding: 0 !important; width: 19em; position: absolute; bottom: 0; right: 1em; background: transparent !important;}
-div.tags div.tagbody input {width: 12em !important; position: absolute; bottom: .2em; right: 5em;}
-div.tags div.tagbody input.button {width: 4em !important;  position: absolute; bottom: .2em; right: 0;}
+div.tags div.tagbody div.taguser input {width: 12em !important; position: absolute; bottom: .5em; right: 5em;}
+div.tags div.tagbody div.taguser input.button {width: 4em !important; position: absolute; bottom: .5em; right: 0;}
+div.tags div.tagbody input {font-size: 95% !important;}
+
 div.tags div.tagbody div {display: inline}
-.article div.tagtitleclosed span span {color: #055; width: auto; text-decoration: underline}
+.article div.tagtitleclosed span span, .article div.tagtitleopen span span {color: #055; width: auto; text-decoration: underline}
 
 div.tags div.tagtitleopen span.tagsheader { background:transparent url('//images.slashdot.org/login-arrow-expanded.gif') no-repeat scroll 0pt 50% !important; }
+
+div.tags  div.tagbody .message {
+font-size:92%;
+position:absolute;
+top:-2em;
+left: 2em;
+}
 
 /* Icons and imagery for articles */
 .edit
@@ -490,6 +499,7 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 #firehoselist .article .generaltitle, #firehoselist .article .title, #firehoselist .article h3 {line-height: 170% !important;}
 #firehoselist .briefarticle .generaltitle, #firehoselist .briefarticle .title, #firehoselist .briefarticle h3 {line-height: 160% !important;}
 #firehoselist .generaltitle, #firehoselist .title, #firehoselist h3 {line-height: 160% !important;}
+
 
 
 
