@@ -1507,7 +1507,6 @@ sub getYoogliSimilarForItem {
 
         my $user = getCurrentUser();
         my $constants = getCurrentStatic();
-        my $reader = getObject("Slash::DB", { db_type => "reader" });
         return 0 unless $user->{is_admin} && $constants->{yoogli_oai_query_base} && $constants->{yoogli_oai_result_count};
         
         my $query = $constants->{yoogli_oai_query_base} .= '?verb=GetRecord&metadataPrefix=oai_dc&rescount=';
@@ -1516,19 +1515,23 @@ sub getYoogliSimilarForItem {
 
         my $ua = new LWP::UserAgent;
         # Timeout is set to the number of responses we're expecting +1 for wiggle room.
-        $ua->timeout($constants->{yoogli_oai_result_count} + 1);
+        $ua->timeout($constants->{yoogli_oai_result_count} + 2);
         my $req = new HTTP::Request GET => $query;
         my $res = $ua->request($req);
         if ($res->is_success) {
-                my $content = XMLin($res->content);
-
-                my $sid_regex = regexSid();
-                foreach my $metadata (@{$content->{'GetRecord'}{'record'}}) {
-                        my $key = $metadata->{'header'}{'identifier'};
-                        my($sid) = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:identifier'} =~ $sid_regex;
-                        $yoogli_similar_stories->{$key}{'date'}  = $reader->getStory($sid, 'time');
-                        $yoogli_similar_stories->{$key}{'url'}   = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:identifier'};
-                        $yoogli_similar_stories->{$key}{'title'} = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:title'};
+                my $xml = new XML::Simple;
+                my $content = eval { $xml->XMLin($res->content) };
+                unless ($@) {
+                        my $reader = getObject("Slash::DB", { db_type => "reader" });
+                        my $sid_regex = regexSid();
+                        foreach my $metadata (@{$content->{'GetRecord'}{'record'}}) {
+                                my $key = $metadata->{'header'}{'identifier'};
+                                my($sid) = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:identifier'} =~ $sid_regex;
+                                $yoogli_similar_stories->{$key}{'date'}  = $reader->getStory($sid, 'time');
+                                $yoogli_similar_stories->{$key}{'url'}   = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:identifier'};
+                                $yoogli_similar_stories->{$key}{'title'} = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:title'};
+                                $yoogli_similar_stories->{$key}{'relevance'} = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:relevance'};
+                        }
                 }
          }
 
