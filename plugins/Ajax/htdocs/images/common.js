@@ -487,7 +487,7 @@ function firehose_set_options(name, value) {
 		params[name] = value;
 	}
 
-	if (name == "nodates" || name == "nobylines" || name == "nothumbs" || name == "nocolors" || name == "mixedmode" ) {
+	if (name == "nodates" || name == "nobylines" || name == "nothumbs" || name == "nocolors" || name == "mixedmode") {
 		value = value == true ? 1 : 0;
 		params[name] = value;
 		params['setfield'] = 1;
@@ -555,7 +555,7 @@ function firehose_set_options(name, value) {
 	}
 	}
 
-	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" || name == "issue" || name == "numentries") { 
+	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" || name == "issue" || name == "pagesize") { 
 		params[name] = value;
 		if (name == "startdate") {
 			firehose_startdate = value;
@@ -577,7 +577,7 @@ function firehose_set_options(name, value) {
 				$('fhcalendar_pag')._widget.setDate(issuedate, "day");
 			}
 		}
-		if (name == "numentries") {
+		if (name == "pagesize") {
 			page = 0;
 		}
 	}
@@ -617,14 +617,13 @@ function firehose_up_down(id, dir) {
 	params['dir'] = dir;
 	var updown = $('updown-' + id);
 	ajax_update(params, '', handlers);
-	/*
 	if (updown) {
 		if (dir == "+") {
 			updown.className = "votedup";	
 		} else if (dir == "-") {
 			updown.className = "voteddown";	
 		}
-	}*/
+	}
 
 	if (dir == "-" && fh_is_admin) {
 		firehose_collapse_entry(id);

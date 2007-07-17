@@ -48,9 +48,12 @@ function admin_neverdisplay(stoid, type, fhid) {
 }
 
 function adminTagsCommands(id, type) {
+	alert(id + " " + type);
 	var toggletags_message_id = 'toggletags-message-' + id;
 	var toggletags_message_el = $(toggletags_message_id);
-	toggletags_message_el.innerHTML = 'Executing commands...';
+	if (toggletags_message_el) {
+		toggletags_message_el.innerHTML = 'Executing commands...';
+	}
 
 	var params = [];
 	type = type || "stories";
@@ -58,6 +61,8 @@ function adminTagsCommands(id, type) {
 	if (type == "stories") {
 		params['sidenc'] = id;
 	} else if (type == "urls") {
+		params['id'] = id;
+	} else if (type == "firehose") {
 		params['id'] = id;
 	}
 	params['type'] = type;
@@ -283,6 +288,7 @@ function firehose_get_and_post(id) {
 	var params=[];
 	params['id']  = id;
 	params['op'] = 'firehose_get_form';
+	firehose_collapse_entry(id);
 	var handlers = {
 		onComplete: function() { $('postform-'+id).submit();}
 	};
