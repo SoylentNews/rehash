@@ -1451,33 +1451,33 @@ sub editStory {
 		}
 	}
 
-        my $yoogli_similar_stories = {};
-        if ($constants->{yoogli_oai_search}) {
-                my $query = $constants->{yoogli_oai_query_base} .= '?verb=GetRecord&metadataPrefix=oai_dc&rescount=';
-                $query .= $constants->{yoogli_oai_result_count} . '&identifier=' . URI::URL->new($storyref->{introtext});
+	my $yoogli_similar_stories = {};
+	if ($constants->{yoogli_oai_search}) {
+		my $query = $constants->{yoogli_oai_query_base} .= '?verb=GetRecord&metadataPrefix=oai_dc&rescount=';
+		$query .= $constants->{yoogli_oai_result_count} . '&identifier=' . URI::URL->new($storyref->{introtext});
 
-                my $ua = new LWP::UserAgent;
-                $ua->timeout($constants->{yoogli_oai_result_count} + 2);
-                my $req = new HTTP::Request GET => $query;
-                my $res = $ua->request($req);
-                if($res->is_success) {
-                        my $xml = new XML::Simple;
-                        my $content = eval { $xml->XMLin($res->content) };
-                        unless ($@) {
-                                my $sid_regex = regexSid();
-                                foreach my $metadata (@{$content->{'GetRecord'}{'record'}}) {
-                                        my $key = $metadata->{'header'}{'identifier'};
-                                        my ($sid) = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:identifier'} =~ $sid_regex;
-                                        $yoogli_similar_stories->{$key}{'date'}  = $reader->getStory($sid, 'time');
-                                        $yoogli_similar_stories->{$key}{'url'}   = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:identifier'};
-                                        $yoogli_similar_stories->{$key}{'title'} = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:title'};
-                                        $yoogli_similar_stories->{$key}{'relevance'} = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:relevance'};
-                                        $yoogli_similar_stories->{$key}{'sid'} = $sid;
-                                }
-                        }
-                }
-        }
-        
+		my $ua = new LWP::UserAgent;
+		$ua->timeout($constants->{yoogli_oai_result_count} + 2);
+		my $req = new HTTP::Request GET => $query;
+		my $res = $ua->request($req);
+		if ($res->is_success) {
+			my $xml = new XML::Simple;
+			my $content = eval { $xml->XMLin($res->content) };
+			unless ($@) {
+				my $sid_regex = regexSid();
+				foreach my $metadata (@{$content->{'GetRecord'}{'record'}}) {
+					my $key = $metadata->{'header'}{'identifier'};
+					my($sid) = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:identifier'} =~ $sid_regex;
+					$yoogli_similar_stories->{$key}{'date'}  = $reader->getStory($sid, 'time');
+					$yoogli_similar_stories->{$key}{'url'}   = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:identifier'};
+					$yoogli_similar_stories->{$key}{'title'} = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:title'};
+					$yoogli_similar_stories->{$key}{'relevance'} = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:relevance'};
+					$yoogli_similar_stories->{$key}{'sid'} = $sid;
+				}
+			}
+		}
+	}
+
 	my $admindb = getObject('Slash::Admin');
 	my $authortext = $admindb->showStoryAdminBox($storyref);
 	my $slashdtext = $admindb->showSlashdBox();
@@ -1550,7 +1550,7 @@ sub editStory {
 		signofftext		=> $signofftext,
 		user_signoff		=> $user_signoff,
 		add_related_text	=> $add_related_text,
-                yoogli_similar_stories  => $yoogli_similar_stories,
+		yoogli_similar_stories  => $yoogli_similar_stories,
 	});
 }
 
