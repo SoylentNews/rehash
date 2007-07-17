@@ -59,7 +59,6 @@ __template__
         	<input type="radio" name="discussion2" value="uofm"[% constants.markup_checked_attribute IF user_edit.discussion2 == "uofm" %]> University of Michigan Testing<br>
 		[% END %]
         	<input type="radio" name="discussion2" value="slashdot"[% constants.markup_checked_attribute IF user_edit.discussion2 == "slashdot" %]> Slashdot's New Discussion System Testing<br>
-		[% END %]
 		</div></blockquote>
 
         	<p><b>Email Display</b>

@@ -265,6 +265,8 @@ sub readRest {
 	my $cid = $form->{cid} or return;
 	my $sid = $form->{sid} or return;
 
+	$user->{state}{ajax_accesslog_op} = 'comments_read_rest';
+
 	my $comment = $slashdb->getComment($cid) or return;
 	return unless $comment->{sid} == $sid;
 
@@ -280,19 +282,23 @@ sub readRest {
 sub fetchComments {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 
-	my $cids = [ grep /^\d+$/, split /,/, $form->{cids} ];
-	my $id   = $form->{discussion_id} || 0;
-	my $cid  = $form->{cid} || 0; # root id
+	my $cids    = [ grep /^\d+$/, split /,/, ($form->{cids} || '') ];
+	my $id      = $form->{discussion_id} || 0;
+	my $cid     = $form->{cid} || 0; # root id
+	my $max_cid = $form->{max_cid};
 
 	$user->{state}{ajax_accesslog_op} = "ajax_comments_fetch";
-
+#use Data::Dumper; print STDERR Dumper [ $cids, $id, $cid, $max_cid ];
 	# XXX error?
-	return unless @$cids && $id;
+	return unless $id && ($max_cid || @$cids);
 
 	my $discussion = $slashdb->getDiscussion($id);
 	if ($discussion->{type} eq 'archived') {
 		$user->{state}{discussion_archived} = 1;
 	}
+	$user->{mode} = 'thread';
+	$user->{reparent} = 0;
+	$user->{state}{max_depth} = $constants->{max_depth} + 3;
 
 	my($comments) = Slash::selectComments(
 		$discussion,
@@ -305,6 +311,37 @@ sub fetchComments {
 
 	# XXX error?
 	return unless $comments && keys %$comments;
+
+	my %data;
+	if ($max_cid) {
+		$cids = [ sort { $a <=> $b } map { $_->[0] }
+			@{$slashdb->sqlSelectAll(
+				'cid', 'comments',
+				'sid = ' . $slashdb->sqlQuote($id) . ' AND ' .
+				'cid > ' . $slashdb->sqlQuote($max_cid)
+			)}
+		];
+
+		if (@$cids) {
+			my @cid_data = map {{
+				uid    => $comments->{$_}{uid},
+				pid    => $comments->{$_}{pid},
+				points => $comments->{$_}{points},
+				kids   => []
+			}} @$cids;
+
+			$data{new_cids_order} = $cids;
+			$data{new_cids_data}  = \@cid_data;
+
+			my %cid_map = map { ($_ => 1) } @$cids;
+			$data{new_thresh_totals} = commentCountThreshold(
+				{ map { ($_ => $comments->{$_}) } grep { $cid_map{$_} } keys %$comments },
+				0,
+				{ map { ($_ => 1) } grep { !$comments->{$_}{pid} } @$cids }
+			);
+		}
+#use Data::Dumper; print STDERR Dumper \$comments, \%data;
+	}
 
 	my %pieces = split /[,;]/, $form->{pieces};
 	my %abbrev = split /[,;]/, $form->{abbreviated} || '';
@@ -348,12 +385,14 @@ sub fetchComments {
 		#@html{'comment_body_' . $cid} = $comments->{$cid}{comment};
 		@html_append_substr{'comment_body_' . $cid} = substr($comments->{$cid}{comment}, $abbrev{$cid});
 	}
-#use Data::Dumper; print STDERR Dumper \@hidden_cids, \@pieces_cids, \@abbrev_cids, \%pieces, \%abbrev, \%html, \%html_append_substr, $form;
+
+#use Data::Dumper; print STDERR Dumper \@hidden_cids, \@pieces_cids, \@abbrev_cids, \%pieces, \%abbrev, \%html, \%html_append_substr, $form, \%data;
 
 	$options->{content_type} = 'application/json';
 	return Data::JavaScript::Anon->anon_dump({
-		html			=> \%html,
-		html_append_substr	=> \%html_append_substr
+		update_data        => \%data,
+		html               => \%html,
+		html_append_substr => \%html_append_substr
 	});
 }
 

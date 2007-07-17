@@ -47,7 +47,7 @@ $VERSION   	= '2.005000';  # v2.5.0
 
 	dispComment displayStory displayRelatedStories displayThread dispStory
 	getOlderStories getOlderDays getOlderDaysFromDay printComments
-	jsSelectComments
+	jsSelectComments commentCountThreshold
 
 	tempUofmLinkGenerate tempUofmCipherObj
 );
@@ -264,18 +264,7 @@ sub jsSelectComments {
 
 	my @roots = $pid ? $pid : grep { !$comments->{$_}{pid} } keys %$comments;
 	my %roots_hash = ( map { $_ => 1 } @roots );
-	my %thresh_totals;
-	# init
-	for my $i (-1..6) {
-		# T cannot be higher than HT
-		for my $j ($i..6) {
-			# 1: hidden, 2: oneline, 3: full
-			for my $m (1..3) {
-				$thresh_totals{$i}{$j}{$m} ||= 0;
-			}
-		}
-	}
-
+	my $thresh_totals;
 
 	if ($form->{full}) {
 		my $comment_text = $slashdb->getCommentTextCached(
@@ -297,45 +286,18 @@ sub jsSelectComments {
 			if ($comments->{$cid}{subject_orig} && $comments->{$cid}{subject_orig} eq 'no') {
 				$comments_new->{$cid}{subject} = $comments->{$cid}{subject};
 			}
-
-			#################################################
-			# save counts of comments at each threshold value
-			my $T  = $comments->{$cid}{points};
-			my $HT = $T;
-			if (!$user->{is_anon} && $user->{uid} == $comments->{$cid}{uid}) {
-				$T = 5;
-			}
-			if ($cid == $pid) {
-				$HT += 7; # THE root comment is always full
-			} elsif ($roots_hash{$cid}) {
-				$HT++;
-			}
-
-			for my $i (-1..$T) {
-				for my $j ($i..$HT) {
-					$thresh_totals{$i}{$j}{3}++;
-				}
-				for my $j (($HT+1)..6) {
-					next if $i > $j;  # T cannot be higher than HT
-					$thresh_totals{$i}{$j}{2}++;
-				}
-			}
-
-			for my $i (($T+1)..6) {
-				for my $j ($i..6) {
-					$thresh_totals{$i}{$j}{1}++;
-				}
-			}
-			#################################################
+			$thresh_totals = commentCountThreshold($comments, $pid, \%roots_hash);
 		}
 
 		$comments = $comments_new;
 	}
 
+	my($max_cid) = sort { $b <=> $a } keys %$comments;
+
 	my $anon_comments = Data::JavaScript::Anon->anon_dump($comments);
 	my $anon_roots    = Data::JavaScript::Anon->anon_dump(\@roots);
 	my $anon_rootsh   = Data::JavaScript::Anon->anon_dump(\%roots_hash);
-	my $anon_thresh   = Data::JavaScript::Anon->anon_dump(\%thresh_totals);
+	my $anon_thresh   = Data::JavaScript::Anon->anon_dump($thresh_totals);
 	s/\s+//g for ($anon_thresh, $anon_roots, $anon_rootsh);
 
 	$user->{is_anon}  ||= 0;
@@ -349,6 +311,7 @@ thresh_totals = $anon_thresh;
 root_comment = $pid;
 root_comments = $anon_roots;
 root_comments_hash = $anon_rootsh;
+max_cid = $max_cid;
 
 user_uid = $user->{uid};
 user_is_anon = $user->{is_anon};
@@ -358,6 +321,56 @@ user_highlightthresh = $highlightthresh;
 
 discussion_id = $id;
 EOT
+}
+
+# save counts of comments at each threshold value
+sub commentCountThreshold {
+	my($comments, $pid, $roots_hash) = @_;
+	my $user = getCurrentUser();
+	$pid ||= 0;
+	$roots_hash ||= {};
+
+	my %thresh_totals;
+	# init
+	for my $i (-1..6) {
+		# T cannot be higher than HT
+		for my $j ($i..6) {
+			# 1: hidden, 2: oneline, 3: full
+			for my $m (1..3) {
+				$thresh_totals{$i}{$j}{$m} ||= 0;
+			}
+		}
+	}
+
+	for my $cid (keys %$comments) {
+		my $T  = $comments->{$cid}{points};
+		my $HT = $T;
+		if (!$user->{is_anon} && $user->{uid} == $comments->{$cid}{uid}) {
+			$T = 5;
+		}
+		if ($cid == $pid) {
+			$HT += 7; # THE root comment is always full
+		} elsif ($roots_hash->{$cid}) {
+			$HT++;
+		}
+
+		for my $i (-1..$T) {
+			for my $j ($i..$HT) {
+				$thresh_totals{$i}{$j}{3}++;
+			}
+			for my $j (($HT+1)..6) {
+				next if $i > $j;  # T cannot be higher than HT
+				$thresh_totals{$i}{$j}{2}++;
+			}
+		}
+
+		for my $i (($T+1)..6) {
+			for my $j ($i..6) {
+				$thresh_totals{$i}{$j}{1}++;
+			}
+		}
+	}
+	return \%thresh_totals;
 }
 
 sub _get_thread {

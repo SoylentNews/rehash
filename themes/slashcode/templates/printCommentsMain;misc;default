@@ -159,7 +159,7 @@ __template__
 				<h4>
 				[% IF title %]
 					<span class="h-inline"><a href="[% link | strip_urlattr %]" title="Back to Article - [% title | strip_attribute %]">[% title %]</a></span>
-					<span class="titlecount"><a href="[% link | strip_urlattr %]#topcomment" title="Back to Top Comment - [% title | strip_attribute %]">[% count %]&nbsp;Comment[% count == 1 ? '' : 's' %]</a></span>
+					<span class="titlecount"><a href="[% link | strip_urlattr %]#topcomment" title="Back to Top Comment - [% title | strip_attribute %]"><span id="titlecountnum">[% count %]</span>&nbsp;Comment[% count == 1 ? '' : 's' %]</a></span>
 				[% ELSE %] 
 					[% Slash.linkComment({
 						sid	=> sid,
@@ -168,8 +168,10 @@ __template__
 						subject_only => 1,
 				}) %]
 				[% END %]
-		<div class="ccw-header-links">
-    [% IF user.is_admin && user.d2prefs_debug %]
+		<span class="ccw-header-links">
+    [% IF discussion2 %]
+        <a onclick="return ajaxFetchComments(0,1)">Update</a> | 
+    [% END; IF user.is_admin && user.d2prefs_debug %]
         <a href="javascript:showPrefs('reading')">Prefs</a>
     [% ELSIF !user.is_anon %]
         <a href="[% gSkin.rootdir %]/my/comments">Prefs</a>
@@ -185,7 +187,7 @@ __template__
 				});
 			%]
     [% END %]
-		</div>
+		</span>
 		<span title="Toggle window location" onclick="toggleDisplayOptions()" class="close">/</span>
 				</h4>
 			</div>

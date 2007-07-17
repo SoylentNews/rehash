@@ -37,6 +37,7 @@ var user_highlightthresh_orig = -9;
 var loaded = 0;
 var shift_down = 0;
 var alt_down = 0;
+var max_cid = 0;
 
 var agt = navigator.userAgent.toLowerCase();
 var is_firefox = (agt.indexOf("firefox") != -1);
@@ -367,6 +368,45 @@ function setShortSubject(cid, mode, cl) {
 	}
 }
 
+// XXX this CANNOT be called without then adjusting the fetchEl stuff for
+// Firefox (see ajaxFetchComments) ... we may make that into a separate
+// call later, as it has to be properly called AFTER addComment calls are
+// all done -- pudge
+function addComment(cid, comment) {
+	if (!loaded || !cid || !comment)
+		return false;
+
+	var html = dummyComment(cid);
+	var pid = comment['pid'];
+
+	comments[cid] = comment;
+
+	if (pid) {
+		var tree = $('tree_' + pid);
+		if (tree) {
+			setDefaultDisplayMode(pid);
+			var parent = comments[pid];
+			parent['kids'].push(cid);
+
+			// XXX: not QUITE right, but works for now ...
+			// ideally this would stick in a previous </ul>
+			// rather than adding a new one -- pudge
+			tree.innerHTML = tree.innerHTML + '<ul>' + html + '</ul>';
+		}
+
+	} else {
+		var commlist = $('commentlisting');
+		if (commlist) {
+			root_comments.push(cid);
+			root_comments_hash[cid] = 1;
+
+			commlist.innerHTML = commlist.innerHTML.replace(/(<li id="roothiddens" class="hide".*?>)/i, html + "$1");
+		}
+	}
+
+	return true;
+}
+
 
 /****************************/
 /* thread utility functions */
@@ -510,6 +550,7 @@ function determineMode(cid, thresh, hthresh) {
 
 function finishCommentUpdates() {
 	for (var cid in update_comments) {
+		setDefaultDisplayMode(cid);
 		updateComment(cid, update_comments[cid]);
 	}
 
@@ -548,16 +589,24 @@ function toHash(thisobject) {
 	}).join(';');
 }
 
-function ajaxFetchComments(cids) {
+function ajaxFetchComments(cids, get_max_cid) {
 	if (cids && !cids.length)
 		return;
 
 	var params = [];
-	params['op']            = 'comments_fetch';
-	params['cids']          = (cids || noshow_comments);
-	params['cid']           = root_comment;
-	params['discussion_id'] = discussion_id;
-	params['reskey']        = reskey_static;
+	params['op']              = 'comments_fetch';
+	if (cids) {
+		params['cids']    = cids;
+	} else {
+		cids              = [];
+		if (get_max_cid)
+			params['max_cid'] = max_cid;
+		else
+			params['cids']    = noshow_comments;
+	}
+	params['cid']             = root_comment;
+	params['discussion_id']   = discussion_id;
+	params['reskey']          = reskey_static;
 
 	var abbrev = {};
 	for (var i = 0; i < cids.length; i++) {
@@ -573,8 +622,51 @@ function ajaxFetchComments(cids) {
 	var handlers = {
 		onComplete: function (transport) {
 			var response = eval_response(transport);
+
+			var update = response.update_data;
+			if (update && update.new_cids_order) {
+				var root;
+				var pids = {};
+				for (var i = 0; i < update.new_cids_order.length; i++) {
+					var this_cid = update.new_cids_order[i];
+					if (i == (update.new_cids_order.length-1) && this_cid) {
+						max_cid = this_cid;
+					}
+					cids.push(this_cid);
+					addComment(this_cid, update.new_cids_data[i]);
+					if (!comments[this_cid]['pid']) {
+						root = 1;
+					} else {
+						pids[comments[this_cid]['pid']] = 1;
+					}
+				}
+
+				// for some reason the modification done in addComment
+				// invalidates the linkage fetchEl() uses to get
+				// an element, so we need to refetch them
+				if (is_firefox) {
+					// this is the worst ... not sure what else to do
+					if (root) {
+						var commlist = fetchEl('commentlisting');
+						loadAllElements('span', commlist);
+						loadAllElements('div', commlist);
+						loadAllElements('li', commlist);
+						loadAllElements('a', commlist);
+					} else {
+						for (var pid in pids) {
+							var tree = fetchEl('tree_' + pid);
+							loadAllElements('span', commlist);
+							loadAllElements('div', commlist);
+							loadAllElements('li', commlist);
+							loadAllElements('a', commlist);
+						}
+					}
+				}
+			}
+
 			json_update(response);
 			updateHiddens(cids);
+
 			for (var i = 0; i < cids.length; i++) {
 				// this is needed for Firefox
 				// better way to do automatically?
@@ -587,6 +679,30 @@ function ajaxFetchComments(cids) {
 				}
 				setShortSubject(cids[i]);
 			}
+
+			if (update && update.new_cids_order) {
+				for (var i = 0; i < update.new_cids_order.length; i++) {
+					var this_cid = update.new_cids_order[i];
+					updateDisplayMode(this_cid, 'full', 1);
+					updateComment(this_cid, 'full');
+				}
+				if (!commentIsInWindow(update.new_cids_order[0])) {
+					scrollWindowTo(update.new_cids_order[0]);
+				}
+			}
+
+			if (update && update.new_thresh_totals) {
+				for (var thresh in update.new_thresh_totals) {
+					for (var hthresh in update.new_thresh_totals[thresh]) {
+						for (var mode in update.new_thresh_totals[thresh][hthresh]) {
+							thresh_totals[thresh][hthresh][mode] += update.new_thresh_totals[thresh][hthresh][mode];
+						}
+					}
+				}
+				$('titlecountnum').innerHTML = thresh_totals[6][6][1]; // total
+				updateTotals();
+			}
+
 			boxStatus(0);
 		}
 	};
@@ -728,8 +844,10 @@ function quoteReply(pid) {
 /*********************/
 /* utility functions */
 /*********************/
-function loadAllElements(tagname) {
-	var elements = document.getElementsByTagName(tagname);
+function loadAllElements(tagname, parent) {
+	if (!parent)
+		parent = document;
+	var elements = parent.getElementsByTagName(tagname);
 
 	for (var i = 0; i < elements.length; i++) {
 		var e = elements[i];
@@ -745,14 +863,6 @@ function loadNamedElement(name) {
 }
 
 function fetchEl(str) {
-/* 	if (!loaded || !is_firefox) { */
-/* 		return $(str); */
-/*  */
-/* 	if (commentelements[str]) { */
-/* 		commentelements[str] = loadNamedElement(str); */
-/* 		return commentelements[str]; */
-/* 	} */
-
 	return loaded
 		? (is_firefox ? commentelements[str] : $(str))
 		: $(str);
@@ -935,6 +1045,8 @@ function scrollWindowTo(cid) {
 }
 
 function getOffsetLeft (el) {
+	if (!el)
+		return false;
 	var ol = el.offsetLeft;
 	while ((el = el.offsetParent) != null)
 		ol += el.offsetLeft;
@@ -942,6 +1054,8 @@ function getOffsetLeft (el) {
 }
 
 function getOffsetTop (el) {
+	if (!el)
+		return false;
 	var ot = el.offsetTop;
 	while((el = el.offsetParent) != null)
 		ot += el.offsetTop;
@@ -1300,3 +1414,25 @@ YAHOO.slashdot.ThresholdBar.prototype.alignElWithMouse = function( el, iPageX, i
 	this.cachePosition(oCoord.x, oCoord.y);
 	this.autoScroll(oCoord.x, oCoord.y, el.offsetHeight, el.offsetWidth);
 }
+
+
+
+
+
+
+function dummyComment(cid) {
+	var html = '<li id="tree_--CID--" class="comment">\
+<div id="comment_status_--CID--" class="commentstatus"></div>\
+<div id="comment_--CID--" class="hidden">\
+</div>\
+\
+<div id="replyto_--CID--"></div>\
+\
+<ul id="group_--CID--">\
+	<li id="hiddens_--CID--" class="hide"></li>\
+</ul>\
+</li>';
+
+	return(html.replace(/\-\-CID\-\-/g, cid));
+}
+
