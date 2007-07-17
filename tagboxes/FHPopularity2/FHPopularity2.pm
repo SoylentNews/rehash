@@ -128,7 +128,11 @@ sub run {
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
-	my $firehose = getObject('Slash::FireHose');
+	my $firehose_db = getObject('Slash::FireHose');
+	my $affected_id_q = $self->sqlQuote($affected_id);
+	my $fhid = $self->sqlSelect('id', 'firehose', "globjid = $affected_id_q");
+	warn "Slash::Tagbox::FHPopularity2->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
+	my $fhitem = $firehose_db->getFireHose($fhid);
 
 	# All firehose entries start out with popularity 1.
 	my $popularity = 1;
@@ -157,7 +161,7 @@ sub run {
 			? 1  # mainpage
 			: 2; # sectional
 	}
-	$popularity = $firehose->getEntryPopularityForColorLevel($color_level) + $extra_pop;
+	$popularity = $self->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 
 	# Add up nods and nixes.
 	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
@@ -175,6 +179,18 @@ sub run {
 		}
 	}
 
+	# Early in a globj's lifetime, upvotes count for more, and
+	# downvotes for less.
+	my($up_mult, $down_mult) = (1, 1);
+	my $age = time - $fhitem->{createtime_ut};
+	if ($age < $constants->{tagbox_fhpopularity2_gracetime}) {
+		$up_mult = 1+(
+			  ($constants->{tagbox_fhpopularity2_gracemult} - 1)
+			* ($constants->{tagbox_fhpopularity2_gracetime} - $age)
+		);
+		$down_mult = 1/$up_mult;
+	}
+
 	my $udc_cache = { };
 	for my $tag_hr (@$tags_ar) {
 		next if $options->{starting_only};
@@ -182,18 +198,15 @@ sub run {
 		$sign =  1 if $tag_hr->{tagnameid} == $upvoteid   && !$options->{downvote_only};
 		$sign = -1 if $tag_hr->{tagnameid} == $downvoteid && !$options->{upvote_only};
 		next unless $sign;
-		my $extra_pop = $tag_hr->{total_clout} * $sign;
+		my $grace_mult = ($sign == 1) ? $up_mult : $down_mult;
+		my $extra_pop = $tag_hr->{total_clout} * $sign * $grace_mult;
 		my $udc_mult = get_udc_mult($tag_hr->{created_at_ut}, $udc_cache);
-#main::tagboxLog(sprintf("extra_pop for %d: %.6f * %.6f", $tag_hr->{tagid}, $extra_pop, $udc_mult));
+#main::tagboxLog(sprintf("extra_pop for %d: %.6f * %.6f * %.6f", $tag_hr->{tagid}, $extra_pop, $udc_mult, $grace_mult));
 		$extra_pop *= $udc_mult;
 		$popularity += $extra_pop;
 	}
 
 	# Set the corresponding firehose row to have this popularity.
-	my $affected_id_q = $self->sqlQuote($affected_id);
-	my $fhid = $self->sqlSelect('id', 'firehose', "globjid = $affected_id_q");
-	my $firehose_db = getObject('Slash::FireHose');
-	warn "Slash::Tagbox::FHPopularity2->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
 	if ($options->{return_only}) {
 		return $popularity;
 	}
@@ -244,8 +257,8 @@ sub get_udc_mult {
 	my $udc_mult = $constants->{tagbox_fhpopularity2_udcbasis}/$udc;
 	my $max_mult = $constants->{tagbox_fhpopularity2_maxudcmult} || 5;
 	$udc_mult = $max_mult if $udc_mult > $max_mult;
-	main::tagboxLog(sprintf("get_udc_mult %0.3f time %d p %.3f c %.3f n %.3f th %.3f pw %.3f cw %.3f nw %.3f udc %.3f\n",
-		$udc_mult, $time, $prevudc, $curudc, $nextudc, $thru_frac, $prevweight, $curweight, $nextweight, $udc));
+#	main::tagboxLog(sprintf("get_udc_mult %0.3f time %d p %.3f c %.3f n %.3f th %.3f pw %.3f cw %.3f nw %.3f udc %.3f\n",
+#		$udc_mult, $time, $prevudc, $curudc, $nextudc, $thru_frac, $prevweight, $curweight, $nextweight, $udc));
 	$udc_mult_cache->{$time} = $udc_mult;
 	return $udc_mult;
 }
