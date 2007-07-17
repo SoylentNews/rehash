@@ -78,9 +78,17 @@ __template__
 					[% seen_related.${story.sid} = 1 %]
 				</tr>
 				[% END %]
-				
+			        [% FOREACH story = yoogli_similar_stories.keys.sort %]
+                                <tr class="story_main">
+                                        <td>Y=[% yoogli_similar_stories.$story.relevance.substr(0, 3) %]</td>
+                                        <td><a href="[% yoogli_similar_stories.$story.url %]">[% yoogli_similar_stories.$story.title.substr(0, 20) %]...</a></td>
+                                        <td>[% Slash.timeCalc(yoogli_similar_stories.$story.date) %]</td>
+                                        <td><input type="checkbox" name="related_story" value="[% yoogli_similar_stories.$story.sid | strip_attribute %]"[% IF storyref.related_sids_hr.${yoogli_similar_stories.$story.sid}; constants.markup_checked_attribute; END %]></td>
+                                        <td>&nbsp;</td>
+                                        [% seen_related.${yoogli_similar_stories.$story.sid} = 1 %]
+                                </tr>
+                                [% END %]	
 
-				
 		[% FOREACH rel_sid = storyref.related_sids_hr.keys %]
 			[% IF seen_related.$rel_sid; NEXT; END; %]
 			[% story = storyref.related_sids_hr.$rel_sid %]
