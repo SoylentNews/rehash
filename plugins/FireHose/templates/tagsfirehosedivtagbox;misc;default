@@ -16,22 +16,23 @@ __template__
 [% IF user.tags_canread_stories %]
 <div id="tagbox-[% id %]" class="tags">
 [% IF !form.skipvote && !options.nothumbs %]
-<span id="updown-[% item.id %]" class="vote">[% IF vote %]Voted[% ELSE %]<a href="javascript:firehose_up_down('[% item.id %]','+')" class="up" title="Vote this item up">+</a> <a href="javascript:firehose_up_down('[% item.id %]','-')" class="down" title="Vote this item down">-</a>[% END %]</span>  
+	<span id="updown-[% item.id %]" class="vote">[% IF vote %]Voted[% ELSE %]<a href="javascript:firehose_up_down('[% item.id %]','+')" class="up" title="Vote this item up">+</a> <a href="javascript:firehose_up_down('[% item.id %]','-')" class="down" title="Vote this item down">-</a>[% END %]</span>  
 [% END %]
-	<div id="tagbox-title-[% id %]" class="tagtitleclosed">&nbsp;[% IF user.tags_canwrite_stories %]<a href="javascript:tagsToggleStoryDiv('[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose');">[% ELSIF user.is_anon %]<a href="javascript:show_login_box()">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% id %]">[+]</span></a>
-<span id="tags-top-[% id %]">
-[% PROCESS firehose_tags_top id = id tags_top = tags_top -%]
-</span>
-	[%- IF user.tags_canwrite_stories && (user.firehose_usermode || !user.is_admin) %], <span class="tagmenu"><a onClick="attachCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose', 4, {action1:completer_setTag})">feedback</a></span>[% END %]
-[% IF user.is_admin && !user.firehose_usermode -%]<i>(<span id="note-form-[% item.id %]" class="hide"><input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30" onkeyup="handleEnter(event, firehose_save_note, '[% id %]')"> <input type="button" value="note" onclick="firehose_save_note('[% item.id %]')"></span><a id="note-text-[% item.id %]" onclick="firehose_open_note('[% item.id %]')">[% IF !item.note  %]Note[% END %][% item.note | strip_literal %]</a>)</i>
-	[%- END -%]
-<br>
-<br>
-</div>
+	<div id="tagbox-title-[% id %]" class="tagtitleclosed">
+		&nbsp;[% IF user.tags_canwrite_stories %]<a href="javascript:tagsToggleStoryDiv('[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose');">[% ELSIF user.is_anon %]<a href="javascript:show_login_box()">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% id %]">[+]</span></a>
+		<span id="tags-top-[% id %]">
+			[% PROCESS firehose_tags_top id = id tags_top = tags_top -%]
+		</span>
+		[%- IF user.tags_canwrite_stories && (user.firehose_usermode || !user.is_admin) %]
+			<span class="tagname"><span class="tagmenu">, <a onClick="attachCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose', 4, {action1:completer_setTag})">feedback</a></span></span>
+		[% END %]
+		[% IF user.is_admin && !user.firehose_usermode -%]
+			<i>(<span id="note-form-[% item.id %]" class="hide"><input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30" onkeyup="handleEnter(event, firehose_save_note, '[% id %]')"> <input type="button" value="note" onclick="firehose_save_note('[% item.id %]')"></span><a id="note-text-[% item.id %]" onclick="firehose_open_note('[% item.id %]')">[% IF !item.note  %]Note[% END %][% item.note | strip_literal %]</a>)</i>
+		[%- END -%]
+	</div>
 
 [% IF user.tags_canwrite_stories %]
 	<div class="tagshide" id="toggletags-body-[% id %]">
-
 	[% IF tags_example.size %]
 		<div>Examples:
 		[% FOR t = tags_example -%]
@@ -39,21 +40,15 @@ __template__
 		[%- END %]
 		</div>
 	[% END %]
-
 	[%# The tags-user-# div starts out empty, we only populate it if the user expands the toggletags-body-# div, because it requires a read of the user's tags and a write to generate a reskey. %]
-
-	<div id="tags-user-[% id %]"></div>
-
+		<div id="tags-user-[% id %]" class="taguser"></div>
 	[% IF user.is_admin && !user.firehose_usermode %]
-	<div id="tags-admin-[% id %]"></div>
-	<div id="admin-extras-[% item.id %]"><a href="javascript:firehose_get_admin_extras('[% item.id %]')">Get extras</a></div>
+		<div id="tags-admin-[% id %]" class="tagadmin"></div>
+		<div id="admin-extras-[% item.id %]" class="tagadminextra"><a href="javascript:firehose_get_admin_extras('[% item.id %]')">Get extras</a></div>
 	[% END %]
-
-	<div id="toggletags-message-[% id %]"></div>
-
+		<div id="toggletags-message-[% id %]" class="message"></div>
 	</div>
 [% END %]
-
 </div>
 [% END %]
 __seclev__
