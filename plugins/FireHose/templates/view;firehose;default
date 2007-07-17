@@ -14,6 +14,7 @@ __seclev__
 10000
 __template__
 [% PROCESS autocomplete %]
+[% PROCESS nodnix_menus %]
 [% firehosetext %]
 __version__
 $Id$
