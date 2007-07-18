@@ -545,10 +545,10 @@ sub addRoundedCloutsToTagArrayref {
 	my($self, $ar, $options) = @_;
 	$self->addCloutsToTagArrayref($ar, $options);
 	for my $tag_hr (@$ar) {
-		$tag_hr->{tag_clout}     = sprintf("%.3g", $tag_hr->{tag_clout});
-		$tag_hr->{tagname_clout} = sprintf("%.3g", $tag_hr->{tagname_clout});
-		$tag_hr->{user_clout}    = sprintf("%.3g", $tag_hr->{user_clout});
-		$tag_hr->{total_clout}   = sprintf("%.3g", $tag_hr->{total_clout});
+		$tag_hr->{tag_clout}     = sprintf("%.3f", $tag_hr->{tag_clout});
+		$tag_hr->{tagname_clout} = sprintf("%.3f", $tag_hr->{tagname_clout});
+		$tag_hr->{user_clout}    = sprintf("%.3f", $tag_hr->{user_clout});
+		$tag_hr->{total_clout}   = sprintf("%.3f", $tag_hr->{total_clout});
 	}
 }
 
