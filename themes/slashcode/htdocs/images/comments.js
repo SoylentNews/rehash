@@ -738,8 +738,6 @@ function ajaxFetchComments(cids, get_max_cid) {
 		noshow_comments = [];
 		pieces_comments = [];
 	}
-
-	return false;
 }
 
 function savePrefs() {
