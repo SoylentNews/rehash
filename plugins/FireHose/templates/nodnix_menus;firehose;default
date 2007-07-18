@@ -16,21 +16,21 @@ __template__
 <div id="nodmenu">
   <div class="menu" onmouseover="dont_hide_nodnix_menu()" onmouseout="hide_nodnix_menu(750)" onmousedown="hide_nodnix_menu()">
     <ul>
-      <li title="Tag this item 'interesting', voting it up" onmousedown="nodnix_tag('interesting')">interesting</li>
-      <li title="Tag this item 'funny', voting it up" onmousedown="nodnix_tag('funny')">funny</li>
-      <li title="Tag this item 'insightful', voting it up" onmousedown="nodnix_tag('insightful')">insightful</li>
+      <li title="Tag this item 'interesting', voting it up" onmousedown="nodnix_tag('interesting', '+')">interesting</li>
+      <li title="Tag this item 'funny', voting it up" onmousedown="nodnix_tag('funny', '+')">funny</li>
+      <li title="Tag this item 'insightful', voting it up" onmousedown="nodnix_tag('insightful', '+')">insightful</li>
     </ul>
   </div>
 </div>
 <div id="nixmenu">
   <div class="menu" onmouseover="dont_hide_nodnix_menu()" onmouseout="hide_nodnix_menu(750)" onmousedown="hide_nodnix_menu()">
     <ul>
-      <li title="Tag this item 'binspam', voting it down" onmousedown="nodnix_tag('binspam')">binspam</li>
-      <li title="Tag this item 'dupe', voting it down" onmousedown="nodnix_tag('dupe')">dupe</li>
-      <li title="Tag this item 'notthebest', voting it down" onmousedown="nodnix_tag('notthebest')">notthebest</li>
-      <li title="Tag this item 'offtopic', voting it down" onmousedown="nodnix_tag('offtopic')">offtopic</li>
-      <li title="Tag this item 'stupid', voting it down" onmousedown="nodnix_tag('stupid')">stupid</li>
-      <li title="Tag this item 'slownewsday', voting it down" onmousedown="nodnix_tag('slownewsday')">slownewsday</li>
+      <li title="Tag this item 'binspam', voting it down" onmousedown="nodnix_tag('binspam', '-')">binspam</li>
+      <li title="Tag this item 'dupe', voting it down" onmousedown="nodnix_tag('dupe', '-')">dupe</li>
+      <li title="Tag this item 'notthebest', voting it down" onmousedown="nodnix_tag('notthebest', '-')">notthebest</li>
+      <li title="Tag this item 'offtopic', voting it down" onmousedown="nodnix_tag('offtopic', '-')">offtopic</li>
+      <li title="Tag this item 'stupid', voting it down" onmousedown="nodnix_tag('stupid', '-')">stupid</li>
+      <li title="Tag this item 'slownewsday', voting it down" onmousedown="nodnix_tag('slownewsday', '-')">slownewsday</li>
     </ul>
   </div>
 </div>
