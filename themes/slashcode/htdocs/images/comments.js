@@ -685,9 +685,11 @@ function ajaxFetchComments(cids, get_max_cid) {
 					updateDisplayMode(this_cid, 'full', 1);
 					updateComment(this_cid, 'full');
 				}
-				if (!commentIsInWindow(update.new_cids_order[0])) {
-					scrollWindowTo(update.new_cids_order[0]);
-				}
+				// later we may need to find a known point and scroll
+				// to it, but for now we don't want to do this -- pudge
+				//if (!commentIsInWindow(update.new_cids_order[0])) {
+				//	scrollWindowTo(update.new_cids_order[0]);
+				//}
 			}
 
 			if (update && update.new_thresh_totals) {

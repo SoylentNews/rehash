@@ -243,7 +243,9 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
       </div>
 		</div>
 		<div class="commentControlFooter">
-    [% IF user.is_admin && user.d2prefs_debug %]
+    [% IF discussion2 && !cid %]
+        <a href="javascript:ajaxFetchComments(0,1)">Update</a> | 
+    [% END; IF user.is_admin && user.d2prefs_debug %]
         <a href="javascript:showPrefs('reading')">Prefs</a>
     [% ELSIF !user.is_anon %]
         <a href="[% gSkin.rootdir %]/my/comments">Prefs</a>
