@@ -239,7 +239,7 @@ div.tags table.data td
 
 div.tags div.tagtitleclosed, div.tags div.tagtitleopen  {
 background:transparent none repeat scroll 0% !important;
-bottom:-6px;
+bottom:6px;
 margin-left:15em;
 margin-right:1em;
 position:absolute !important;
@@ -483,15 +483,15 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 #firehoselist {position: relative}
 
 /* nodmenu */
-#nodmenu, #nixmenu {display: none; height: 170px; z-index: 100000; position: absolute !important; font-size: 11px}
-#nodmenu .menu, #nixmenu .menu {top: -35px; height: 170px; z-index: 1000000; width: 150px; position: absolute !important; font-size: 11px}
-#nodmenu .menu {left: -150px !important;  background-image: url('//images.slashdot.org/popup_nod.png');}
-#nixmenu .menu {left: 15px !important; text-align: right; background-image: url('//images.slashdot.org/popup_nix.png');}
+#nodmenu, #nixmenu {display: none; width: 200px; z-index: 100000; position: absolute !important; font-size: 11px}
+#nodmenu .menu, #nixmenu .menu {top: -35px; width: 150px; height: 15em; z-index: 1000000 !important; position: absolute !important; font-size: 11px}
+#nodmenu .menu {left: -150px !important;  background: url('/images/popup_nod.png') no-repeat;}
+#nixmenu .menu {left: 15px !important; text-align: right; background: url('/images/popup_nix.png') no-repeat;}
 
-#nodmenu li, #nixmenu li {list-style: none; margin: 2px 9px 1px 45px; color: #ddd; padding: 0 5px}
-#nodmenu li {margin: 2px 45px 1px 9px;}
-#nodmenu li:hover, #nixmenu li:hover, #nodmenu li.selected, #nixmenu li.selected  {background: #333; color: #fff;}
-
+#nodmenu li, #nixmenu li {list-style: none; color: #ddd; padding: 1px 4px}
+#nodmenu ul {margin: 0 43px 0 0; background: #222; opacity: .9; border: 1px solid #111;}
+#nixmenu ul {margin: 0 0 0 43px; background: #222; opacity: .9; border: 1px solid #111;}
+#nodmenu li:hover, #nixmenu li:hover, #nodmenu li.selected, #nixmenu li.selected  {background: #000; color: #fff;}
 
 .adminmode.briefarticle div.tags div.tagtitleclosed:hover {border: 1px solid #aaa; width: auto !important; height: auto; padding-right: 1em; background-color: #ddd !important; z-index: 1000}
 .adminmode.briefarticle .whitewash div.tags div.tagtitleclosed:hover {border: 1px solid #555; width: auto !important; height: auto; padding-right: 1em; background-color: #aaa !important; z-index: 1000}
@@ -501,5 +501,8 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 #firehoselist .generaltitle, #firehoselist .title, #firehoselist h3 {line-height: 160% !important;}
 
 
+.tagadmin input, .tagadminextra input {width: auto !important;}
+.tagadmin {width: 40em;  padding: 2px; position: absolute; bottom: -3.5em; right: 0; background: #222; opacity: .9; border: 1px solid #111; z-index: 100000}
+.tagadminextra {width: 40em; padding: 2px; position: absolute; bottom: -10em; right: 0; background: #222; opacity: .9; border: 1px solid #111; z-index: 100000}
 
 
