@@ -424,6 +424,7 @@ function toggle_firehose_body(id, is_admin) {
 	params['id'] = id;
 	var fhbody = $('fhbody-'+id);
 	var fh = $('firehose-'+id);
+	var usertype = fh_is_admin ? " adminmode" : " usermode";
 	if (fhbody.className == "empty") {
 		var handlers = {
 			onComplete: function() { 
@@ -437,19 +438,19 @@ function toggle_firehose_body(id, is_admin) {
 			ajax_update(params, 'fhbody-'+id);
 		}
 		fhbody.className = "body";
-		fh.className = "article";
+		fh.className = "article" + usertype;
 		if (is_admin)
 			tagsShowBody(id, is_admin, '', "firehose");
 	} else if (fhbody.className == "body") {
 		fhbody.className = "hide";
-		fh.className = "briefarticle";
-		if (is_admin)
-			tagsHideBody(id);
+		fh.className = "briefarticle" + usertype;
+		/*if (is_admin)
+			tagsHideBody(id);*/
 	} else if (fhbody.className == "hide") {
 		fhbody.className = "body";
-		fh.className = "article";
-		if (is_admin)
-			tagsShowBody(id, is_admin, '', "firehose");
+		fh.className = "article" + usertype;
+		/*if (is_admin)
+			tagsShowBody(id, is_admin, '', "firehose"); */
 	}
 }
 
