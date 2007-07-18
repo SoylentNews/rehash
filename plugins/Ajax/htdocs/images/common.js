@@ -672,7 +672,7 @@ var g_nodnix_item_id = null;
 function nodnix_tag( tag, up_down ) {
 	createTag(tag, g_nodnix_item_id, "firehose");
 	if ( up_down !== undefined )
-	  firehose_up_down(g_nodnix_item_id, up_down);
+		firehose_up_down(g_nodnix_item_id, up_down);
 }
 
 function hide_nod_menu() {
