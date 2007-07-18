@@ -212,14 +212,8 @@ div.briefarticle .storylinks { display: none; }
 	margin: 0 !important;
 	padding: 0 !important;
 }
-.briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagtitleopen, .briefarticle div.tagbody  {display: none}
-.briefarticle div.tags div.tagtitleclosed input:first-child { width: 30% !important; }
-.briefarticle div.tags input { font-size: 85%; }
+.briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagtitleopen, .briefarticle .tagbody {display: none}
 div.tags div.tagtitleclosed a, div.tags div.tagtitleclosed, div.tags div.tagtitleopen a, div.tags div.tagtitleopen { color: #055 !important;}
-
-.tagadmin input, .tagadminextra input {width: auto !important;}
-.tagadmin {width: 40em;  padding: 2px; position: absolute; bottom: -3.5em; right: 0; background: #222; opacity: .9; border: 1px solid #111; z-index: 100000}
-.tagadminextra {width: 40em; padding: 2px; position: absolute; bottom: -10em; right: 0; background: #222; opacity: .9; border: 1px solid #111; z-index: 100000}
 
 div.tags table
 {
@@ -250,14 +244,14 @@ position:absolute !important;
 right:1em;
 width:auto;
 }
-div.tags div.tagtitleopen {right: 18em;}
 
-div.tags div.tagbody {text-align: right; border: none !important; padding: 0 !important; width: 19em; position: absolute; bottom: 0; right: 1em; background: transparent !important;}
+div.tags div.tagtitleopen {right: 18em;}
+div.tags div.tagbody {}
+div.tags div.tagbody div.taguser  {text-align: right; border: none !important; padding: 0 !important; width: 19em; position: absolute; bottom: 0; right: 1em; background: transparent !important;}
 div.tags div.tagbody div.taguser input {width: 12em !important; position: absolute; bottom: .5em; right: 5em;}
 div.tags div.tagbody div.taguser input.button {width: 4em !important; position: absolute; bottom: .5em; right: 0;}
 div.tags div.tagbody input {font-size: 95% !important;}
 
-div.tags div.tagbody div {display: inline}
 .article div.tagtitleclosed span span, .article div.tagtitleopen span span {color: #055; width: auto; text-decoration: underline}
 
 div.tags div.tagtitleopen span.tagsheader { background:transparent url('//images.slashdot.org/login-arrow-expanded.gif') no-repeat scroll 0pt 50% !important; }
@@ -265,8 +259,8 @@ div.tags div.tagtitleopen span.tagsheader { background:transparent url('//images
 div.tags  div.tagbody .message {
 font-size:92%;
 position:absolute;
-top:-2em;
-left: 2em;
+bottom: -1em;
+right: 0;
 }
 
 /* Icons and imagery for articles */
