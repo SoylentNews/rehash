@@ -169,8 +169,8 @@ __template__
 				}) %]
 				[% END %]
 		<span class="ccw-header-links">
-    [% IF discussion2 %]
-        <a onclick="return ajaxFetchComments(0,1)">Update</a> | 
+    [% IF discussion2 && !cid %]
+        <a href="javascript:ajaxFetchComments(0,1)">Update</a> | 
     [% END; IF user.is_admin && user.d2prefs_debug %]
         <a href="javascript:showPrefs('reading')">Prefs</a>
     [% ELSIF !user.is_anon %]

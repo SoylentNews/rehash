@@ -100,6 +100,10 @@ __template__
 	[% END %]
 	[% lcp %]
 
+[% IF discussion2 && !cid %]
+<div class="prev-next"><a href="javascript:ajaxFetchComments(0,1)">Update</a></div>
+[% END %]
+
 [% IF moderate_form %]
 	[% IF moderate_button %]
 		<div>Have you read the
