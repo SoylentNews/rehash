@@ -665,7 +665,6 @@ function ajaxFetchComments(cids, get_max_cid) {
 			}
 
 			json_update(response);
-			updateHiddens(cids);
 
 			for (var i = 0; i < cids.length; i++) {
 				// this is needed for Firefox
@@ -703,6 +702,7 @@ function ajaxFetchComments(cids, get_max_cid) {
 				updateTotals();
 			}
 
+			updateHiddens(cids);
 			boxStatus(0);
 		}
 	};
