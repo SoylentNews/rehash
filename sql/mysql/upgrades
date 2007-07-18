@@ -4656,3 +4656,6 @@ UPDATE vars SET value = 'T_2_5_0_166' WHERE name = 'cvs_tag_currentcode';
 INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity2_gracetime', '1200', 'Number of initial seconds of a firehose item life let it float higher in the hose');
 INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity2_gracemult', '3', 'Multiplier factor for a firehose item during the grace period');
 
+# 2007-07-17
+UPDATE vars SET value = 'T_2_5_0_167' WHERE name = 'cvs_tag_currentcode';
+
