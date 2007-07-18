@@ -48,7 +48,6 @@ function admin_neverdisplay(stoid, type, fhid) {
 }
 
 function adminTagsCommands(id, type) {
-	alert(id + " " + type);
 	var toggletags_message_id = 'toggletags-message-' + id;
 	var toggletags_message_el = $(toggletags_message_id);
 	if (toggletags_message_el) {

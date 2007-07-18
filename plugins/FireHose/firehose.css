@@ -369,7 +369,7 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
         background-color: #222;
         height: 100%;
         opacity: 0.75;
-        positi0on: fixed;
+        position: fixed;
         width: 100%;
         z-index: 5;
 }
