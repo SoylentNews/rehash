@@ -18,9 +18,9 @@ __template__
 [% IF !form.skipvote && !options.nothumbs %]
 	<span id="updown-[% item.id %]" class="vote[% IF vote == "-" %]ddown[% ELSIF vote =="+"%]dup[% END %]">
 	  <a href="javascript:firehose_up_down('[% item.id %]','+')" class="up" title="Vote this item up"
-	     onMouseDown="show_nod_menu(this, '[% item.id %]')" onMouseOver="show_nod_menu(this, '[% item.id %]', 1200, 5200)" onMouseOut="dont_show_nodnix_menu()">+</a>
+	     [% IF !user.is_anon %]onMouseDown="show_nod_menu(this, '[% item.id %]')" onMouseOver="show_nod_menu(this, '[% item.id %]', 1200, 5200)" onMouseOut="dont_show_nodnix_menu()"[% END %]>+</a>
 	  <a href="javascript:firehose_up_down('[% item.id %]','-')" class="down" title="Vote this item down"
-	     onMouseDown="show_nix_menu(this, '[% item.id %]')" onMouseOver="show_nix_menu(this, '[% item.id %]', 1200, 5200)" onMouseOut="dont_show_nodnix_menu()">-</a>
+	     [% IF !user.is_anon %]onMouseDown="show_nix_menu(this, '[% item.id %]')" onMouseOver="show_nix_menu(this, '[% item.id %]', 1200, 5200)" onMouseOut="dont_show_nodnix_menu()"[% END %]>-</a>
 	</span>  
 [% END %]
 	<div id="tagbox-title-[% id %]" class="tagtitleclosed">
