@@ -131,7 +131,7 @@ END %]
 			[% ELSIF item.type == "submission" %]
 				<a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% item.id %]">Read More &amp; Discuss</a>
 			[% ELSE %]
-				%nbsp;
+				&nbsp;
 			[% END %]
 				</b>
 			</li>
