@@ -212,10 +212,14 @@ div.briefarticle .storylinks { display: none; }
 	margin: 0 !important;
 	padding: 0 !important;
 }
-.briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagtitleopen {display: none}
+.briefarticle div.tags div.tagtitleclosed, .briefarticle div.tags div.tagtitleopen, .briefarticle div.tagbody  {display: none}
 .briefarticle div.tags div.tagtitleclosed input:first-child { width: 30% !important; }
 .briefarticle div.tags input { font-size: 85%; }
 div.tags div.tagtitleclosed a, div.tags div.tagtitleclosed, div.tags div.tagtitleopen a, div.tags div.tagtitleopen { color: #055 !important;}
+
+.tagadmin input, .tagadminextra input {width: auto !important;}
+.tagadmin {width: 40em;  padding: 2px; position: absolute; bottom: -3.5em; right: 0; background: #222; opacity: .9; border: 1px solid #111; z-index: 100000}
+.tagadminextra {width: 40em; padding: 2px; position: absolute; bottom: -10em; right: 0; background: #222; opacity: .9; border: 1px solid #111; z-index: 100000}
 
 div.tags table
 {
@@ -493,16 +497,9 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 #nixmenu ul {margin: 0 0 0 43px; background: #222; opacity: .9; border: 1px solid #111;}
 #nodmenu li:hover, #nixmenu li:hover, #nodmenu li.selected, #nixmenu li.selected  {background: #000; color: #fff;}
 
-.adminmode.briefarticle div.tags div.tagtitleclosed:hover {border: 1px solid #aaa; width: auto !important; height: auto; padding-right: 1em; background-color: #ddd !important; z-index: 1000}
-.adminmode.briefarticle .whitewash div.tags div.tagtitleclosed:hover {border: 1px solid #555; width: auto !important; height: auto; padding-right: 1em; background-color: #aaa !important; z-index: 1000}
 #firehoselist .article .title, #firehoselist .article h3, #firehoselist .article .generaltitle {border: none !important}
 #firehoselist .article .generaltitle, #firehoselist .article .title, #firehoselist .article h3 {line-height: 170% !important;}
 #firehoselist .briefarticle .generaltitle, #firehoselist .briefarticle .title, #firehoselist .briefarticle h3 {line-height: 160% !important;}
 #firehoselist .generaltitle, #firehoselist .title, #firehoselist h3 {line-height: 160% !important;}
-
-
-.tagadmin input, .tagadminextra input {width: auto !important;}
-.tagadmin {width: 40em;  padding: 2px; position: absolute; bottom: -3.5em; right: 0; background: #222; opacity: .9; border: 1px solid #111; z-index: 100000}
-.tagadminextra {width: 40em; padding: 2px; position: absolute; bottom: -10em; right: 0; background: #222; opacity: .9; border: 1px solid #111; z-index: 100000}
 
 
