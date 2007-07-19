@@ -134,9 +134,6 @@ sub run {
 	warn "Slash::Tagbox::FHPopularity2->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
 	my $fhitem = $firehose_db->getFireHose($fhid);
 
-	# All firehose entries start out with popularity 1.
-	my $popularity = 1;
-
 	# Some target types gain popularity.
 	my($type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
 	my $target_id_q = $self->sqlQuote($target_id);
@@ -161,7 +158,8 @@ sub run {
 			? 1  # mainpage
 			: 2; # sectional
 	}
-	$popularity = $self->getEntryPopularityForColorLevel($color_level) + $extra_pop;
+
+	my $popularity = $self->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 
 	# Add up nods and nixes.
 	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
