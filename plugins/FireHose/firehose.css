@@ -1,6 +1,5 @@
 /* Reset */
-#firehoselist .title, #firehoselist h3, #firehoselist .generaltitle { background: transparent !important; }
-
+.article .title, .article h3, .article .generaltitle, .briefarticle .title, .briefarticle h3, .briefarticle .generaltitle { background: transparent !important; }
 
 /* Options */
 .firemenu { position: relative; }
@@ -184,7 +183,6 @@ padding-top:0.4em;}
 .article .generaltitle .title .date,
 .article .generaltitle .title .nickname { display: none; }
 .article .firehosetag { background: #fff; }
-.title, .generaltitle h3 { background: transparent; }
 
 /* Brief Articles */
 div.briefarticle .storylinks { display: none; }
@@ -247,13 +245,11 @@ width:auto;
 }
 
 div.tags div.tagtitleopen {right: 18em;}
-div.tags div.tagbody {}
+.usermode div.tags div.tagbody div.tagextra, .usermode div.tags div.tagbody div.tagadmin {display:none !important;}
 div.tags div.tagbody div.taguser  {text-align: right; border: none !important; padding: 0 !important; width: 19em; position: absolute; bottom: 0; right: 1em; background: transparent !important;}
 div.tags div.tagbody div.taguser input {width: 12em !important; position: absolute; bottom: .5em; right: 5em;}
 div.tags div.tagbody div.taguser input.button {width: 4em !important; position: absolute; bottom: .5em; right: 0;}
-div.tags div.tagbody div.tagadminextras input.button {width: auto}
-div.tags div.tagbody input {font-size: 95% !important;}
-
+div.tags i input, div.tags div.tagbody input {font-size: 95% !important;}
 .article div.tagtitleclosed span span, .article div.tagtitleopen span span {color: #055; width: auto; text-decoration: underline}
 
 div.tags div.tagtitleopen span.tagsheader { background:transparent url('//images.slashdot.org/login-arrow-expanded.gif') no-repeat scroll 0pt 50% !important; }
@@ -281,7 +277,7 @@ right: 0;
 }
 
 .external { padding: 0 20px 0 5px; display: inline; }
-#firehoselist h3 .external a
+#firehose h3 .external a
 {
 	z-index: 1000;
 	width: 10px;
@@ -374,7 +370,7 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
         z-index: 5;
 }
 
-#login_box .generaltitle .title h3 {background: none; }
+#login_box .generaltitle .title h3 {background: transparent; }
 #login_box .generaltitle .title {margin: 0;border: none;}
 #login_box {
         position: fixed;
@@ -438,7 +434,7 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 
 .vote, .votedup, .voteddown, .vote a, .votedup a, .voteddown a, .soda {cursor: pointer;}
 .vote, .votedup, .voteddown, .vote a, .votedup a, .voteddown a, .soda, .soda span {position: absolute !important;}
-.vote, .votedup, .voteddown, .soda, .soda span, #firehoselist .generaltitle, #firehoselist .generaltitle .title, #nixmenu, #nodmenu {background-repeat: no-repeat !important;}
+.vote, .votedup, .voteddown, .soda, .soda span, .article .generaltitle, .briefarticle .generaltitle, .article .generaltitle .title, .briefarticle .generaltitle .title,  #nixmenu, #nodmenu {background-repeat: no-repeat !important;}
 .vote, .votedup, .voteddown, .soda span, .firehose, .story, .future { background-position: bottom left !important;}
 .firehose, .story, .future {background-repeat: repeat-x;}
 .generaltitle, .title {overflow: hidden;}
@@ -465,21 +461,18 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 
 .story .date, .future .date {color: #fff !important;}
 .date, a.skin {opacity:0.6;}
-#firehoselist .generaltitle { min-height: 25px; position: relative; background-image: url('//images.slashdot.org/fh_btr_s.png') !important; background-position: top right !important;}
-#firehoselist .briefarticle .generaltitle .title { background-image: url('//images.slashdot.org/fh_br_s.png') !important; background-position: bottom right !important;}
+.article .generaltitle, .briefarticle .generaltitle { min-height: 25px; position: relative; background-image: url('//images.slashdot.org/fh_btr_s.png') !important; background-position: top right !important;}
+.briefarticle .generaltitle .title { background-image: url('//images.slashdot.org/fh_br_s.png') !important; background-position: bottom right !important;}
 .briefarticle .story a {color: #fff;}
 .briefarticle h3 a {#555}
 .generaltitle a {text-decoration: none}
 
-/*.tagshide { position: absolute !important; z-index: 1; display: block !important; padding: 10px; height: 10px; width: 10px; top: 0; left: 0; background: url('//images.slashdot.org/fh_btl_s.png') top left no-repeat !important;} */
 .tagshide div {display: none}
-#firehoselist h3 a {z-index: 4 !important; position: relative !important;}
-#firehoselist .firehose h3 a {color: #066}
-#firehoselist .briefarticle h3,
-#firehoselist .article h3 
-{font-size: 95%; margin: 0 10em 0 0; padding: .25em 3em 0 58px; min-height: 22px; display: block}
-#firehoselist .article h3 {margin: 0; padding: .25em 50px 0 58px;}
-/*#firehoselist .briefarticle.usermode h3, #firehoselist .article.usermode h3 {padding: .25em 3em 0 1.5em !important;} */
+.generaltitle h3 a {z-index: 4 !important; position: relative !important;}
+.firehose .generaltitle h3 a {color: #066 !important}
+.briefarticle h3, .article h3 {font-size: 95% !important; margin: 0 10em 0 0 !important; padding: .25em 3em 0 58px !important; min-height: 22px !important; display: block !important}
+.article h3 {margin: 0; padding: .25em 50px 0 58px;}
+/*.briefarticle.usermode h3, .article.usermode h3 {padding: .25em 3em 0 1.5em !important;} */
 #firehoselist {position: relative}
 
 /* nodmenu */
@@ -493,9 +486,10 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 #nixmenu ul {margin: 0 0 0 43px; background: #222; opacity: .9; border: 1px solid #111;}
 #nodmenu li:hover, #nixmenu li:hover, #nodmenu li.selected, #nixmenu li.selected  {background: #000; color: #fff;}
 
-#firehoselist .article .title, #firehoselist .article h3, #firehoselist .article .generaltitle {border: none !important}
-#firehoselist .article .generaltitle, #firehoselist .article .title, #firehoselist .article h3 {line-height: 170% !important;}
-#firehoselist .briefarticle .generaltitle, #firehoselist .briefarticle .title, #firehoselist .briefarticle h3 {line-height: 160% !important;}
-#firehoselist .generaltitle, #firehoselist .title, #firehoselist h3 {line-height: 160% !important;}
+.article .title, .article h3, .article .generaltitle {border: none !important}
+.article .generaltitle, #firehoselist .article .title, .article h3 {line-height: 170% !important;}
+.briefarticle .generaltitle, .briefarticle .title, .briefarticle h3 {line-height: 160% !important;}
+.generaltitle, .title, .generaltitle h3 {line-height: 160% !important;}
+
 
 
