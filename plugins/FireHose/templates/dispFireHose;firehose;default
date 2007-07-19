@@ -128,10 +128,10 @@ END %]
 				 %]
 			[% ELSIF item.type == "journal" %]
 				<a href="[% gSkin.rootdir %]/~[% the_user.nickname %]/journal/[% item.srcid %]/">Read More</a>
-			[% ELSIF item.type == "submission" %]
-				<a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% item.id %]">Read More &amp; Discuss</a>
+			[% ELSIF item.discussion %]
+				<a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% item.id %]">Read Mores</a>
 			[% ELSE %]
-				&nbsp;
+				No Discussion
 			[% END %]
 				</b>
 			</li>
