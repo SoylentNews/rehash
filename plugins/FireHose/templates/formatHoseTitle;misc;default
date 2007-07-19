@@ -29,7 +29,7 @@ IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid 
 ELSIF item.type == "feed" && item.srcname;
 		srcname_filter = '"user:' _ the_user.nickname _ '"';
 		srcname_filter = Slash.strip_paramattr(srcname_filter);
-		the_skin_title = '<a href="' _ gSkin.rootdir _ "/" _ fh_page _ '?fhfilter=' _ srcname_filter _ '" title="Filter to '_ item.srcname _'">' _ item.srcname _ "</a>: ";
+		the_skin_title = '<a href="' _ gSkin.rootdir _ "/" _ fh_page _ '?fhfilter=' _ srcname_filter _ '" title="Filter to '_ item.srcname _'"  class="skin">' _ item.srcname _ ":</a> ";
 END;
 title = item.title;
 title = "<a onclick=\"toggle_firehose_body('$item.id', $adminmode); return false\" href=\"$gSkin.rootdir/firehose.pl?op=view&amp;id=$item.id\">$title</a>";
