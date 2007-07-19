@@ -131,7 +131,7 @@ END %]
 			[% ELSIF item.discussion %]
 				<a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% item.id %]">Read Mores</a>
 			[% ELSE %]
-				No Discussion
+				Nothing More
 			[% END %]
 				</b>
 			</li>
