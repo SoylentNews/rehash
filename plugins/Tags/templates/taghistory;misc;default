@@ -5,6 +5,7 @@ Show complete tag history of an object for admins
 
 * tags = arrayref of hashrefs of tagname, uid, created_at
 * summary = hashref of up/downvote summary info, fields are:
+	n_viewed	number of users who viewed it
 	up_count	count of upvote tags
 	up_count_ed	count of editors' upvote tags
 	up_pop		FHPopularity total of upvote tags
@@ -26,6 +27,7 @@ __template__
 <table class="data">
 [% toggle = 1 %]
 [% IF tags.size > 0 %]
+	<tr class="data_hl0"><td colspan="6">Viewed by [% summary.n_viewed %]</td></tr>
 	<tr class="data_hl0"><td colspan="6">
 		[% constants.tags_upvote_tagname %]: [% summary.up_count %] [% summary.up_pop %]
 		(ed: [% summary.up_count_ed %])</td></tr>

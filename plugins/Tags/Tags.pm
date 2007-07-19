@@ -1177,9 +1177,16 @@ sub ajaxTagHistory {
 		$tags_ar = $tags_reader->getTagsByNameAndIdArrayref($table, $id,
 			{ include_inactive => 1, include_private => 1 });
 	}
-	$tags_reader->addRoundedCloutsToTagArrayref($tags_ar, { cloutfield => 'tagpeerval' });
 
 	my $summ = { };
+
+	# Don't list 'viewed' tags, just count them.
+	my $viewed_tagname = $constants->{tags_viewed_tagname} || 'viewed';
+	$summ->{n_viewed} = scalar grep { $_->{tagname} eq $viewed_tagname } @$tags_ar;
+	$tags_ar = [ grep { $_->{tagname} ne $viewed_tagname } @$tags_ar ];
+
+	$tags_reader->addRoundedCloutsToTagArrayref($tags_ar, { cloutfield => 'tagpeerval' });
+
 	# XXX right now hard-code the tag summary to FHPopularity tagbox.
 	# If we start using another tagbox, we'll have to change this too.
 	my $tagboxdb = getObject('Slash::Tagbox');
