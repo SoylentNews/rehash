@@ -96,6 +96,12 @@ sub view {
 		if ($discussion) {
 			printComments( $firehose_reader->getDiscussion($discussion) );
 		}
+
+		my $plugins = $slashdb->getDescriptions('plugins');
+		if (!$user->{is_anon} && $plugins->{Tags}) {
+			my $tagsdb = getObject('Slash::Tags');
+			$tagsdb->markViewed($user->{uid}, $item->{globjid});
+		}
 	} else {
 		print getData('notavailable');
 	}

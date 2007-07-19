@@ -241,6 +241,13 @@ sub main {
 		print $message;
 	}
 
+	my $plugins = $slashdb->getDescriptions('plugins');
+	if (!$user->{is_anon} && $plugins->{Tags}) {
+		my $tagsdb = getObject('Slash::Tags');
+		$tagsdb->markViewed($user->{uid},
+			$reader->getGlobjidCreate('stories', $story->{stoid}));
+	}
+
 	footer();
 	if ($story) {
 		writeLog($story->{sid} || $sid);
