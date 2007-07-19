@@ -234,6 +234,7 @@ div.tags table.data td
 	padding: .1em .5em;
 	line-height: 120%;
 }
+div.tags table.data td input {width: auto !important;}
 
 div.tags div.tagtitleclosed, div.tags div.tagtitleopen  {
 background:transparent none repeat scroll 0% !important;
@@ -250,6 +251,7 @@ div.tags div.tagbody {}
 div.tags div.tagbody div.taguser  {text-align: right; border: none !important; padding: 0 !important; width: 19em; position: absolute; bottom: 0; right: 1em; background: transparent !important;}
 div.tags div.tagbody div.taguser input {width: 12em !important; position: absolute; bottom: .5em; right: 5em;}
 div.tags div.tagbody div.taguser input.button {width: 4em !important; position: absolute; bottom: .5em; right: 0;}
+div.tags div.tagbody div.tagadminextras input.button {width: auto}
 div.tags div.tagbody input {font-size: 95% !important;}
 
 .article div.tagtitleclosed span span, .article div.tagtitleopen span span {color: #055; width: auto; text-decoration: underline}
@@ -483,8 +485,8 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 /* nodmenu */
 #nodmenu, #nixmenu {display: none; width: 200px; z-index: 100000; position: absolute !important; font-size: 11px}
 #nodmenu .menu, #nixmenu .menu {top: -35px; width: 150px; height: 15em; z-index: 1000000 !important; position: absolute !important; font-size: 11px}
-#nodmenu .menu {left: -150px !important;  background: url('/images/popup_nod.png') no-repeat;}
-#nixmenu .menu {left: 15px !important; text-align: right; background: url('/images/popup_nix.png') no-repeat;}
+#nodmenu .menu {left: -150px !important;  background: url('//images.slashdot.org/popup_nod.png') no-repeat;}
+#nixmenu .menu {left: 15px !important; text-align: right; background: url('//images.slashdot.org/popup_nix.png') no-repeat;}
 
 #nodmenu li, #nixmenu li {list-style: none; color: #ddd; padding: 1px 4px}
 #nodmenu ul {margin: 0 43px 0 0; background: #222; opacity: .9; border: 1px solid #111;}
