@@ -459,8 +459,10 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .future {color: #fff; background-color: #900; }
 .firehose {background-color: #ddd; }
 
-.story .date, .future .date {color: #fff !important;}
-.date, a.skin {opacity:0.6;}
+.story .date, .story a.skin {color: #699 !important;}
+.future .date, .future a.skin {color: #c99 !important;}
+.firehose .date, .firehose a.skin {color: #777 !important;}
+
 .article .generaltitle, .briefarticle .generaltitle { min-height: 25px; position: relative; background-image: url('//images.slashdot.org/fh_btr_s.png') !important; background-position: top right !important;}
 .briefarticle .generaltitle .title { background-image: url('//images.slashdot.org/fh_br_s.png') !important; background-position: bottom right !important;}
 .briefarticle .story a {color: #fff;}
