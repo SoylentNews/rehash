@@ -7490,7 +7490,7 @@ sub createStory {
 			}
 		}
 
-		$story->{body_length} = length($story->{bodytext});
+		$story->{body_length} = defined($story->{bodytext}) ? length($story->{bodytext}) : 0;
 		$story->{word_count} = countWords($story->{introtext}) + countWords($story->{bodytext});
 		$story->{primaryskid} = $primaryskid;
 		$story->{tid} = $tids->[0];
