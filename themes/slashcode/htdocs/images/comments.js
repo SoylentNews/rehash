@@ -228,19 +228,10 @@ function changeThreshold(threshold) {
 	user_highlightthresh = Math.min(Math.max(t_delta, -1), 6);
 	user_threshold = threshold_num;
 
-	if ($('currentHT'))
-		$('currentHT').innerHTML = user_highlightthresh;
-
-	if ($('currentT'))
-		$('currentT').innerHTML = user_threshold;
-
-	if ($('threshold'))
-		$('threshold').value = threshold;
-
 	for (var root = 0; root < root_comments.length; root++) {
 		updateCommentTree(root_comments[root], threshold);
 	}
-	finishCommentUpdates();
+	finishCommentUpdates(1);
 
 	savePrefs();
 
@@ -372,11 +363,11 @@ function setShortSubject(cid, mode, cl) {
 // Firefox (see ajaxFetchComments) ... we may make that into a separate
 // call later, as it has to be properly called AFTER addComment calls are
 // all done -- pudge
-function addComment(cid, comment) {
+function addComment(cid, comment, html) {
 	if (!loaded || !cid || !comment)
 		return false;
 
-	var html = dummyComment(cid);
+	html = html || dummyComment(cid);
 	var pid = comment['pid'];
 
 	comments[cid] = comment;
@@ -537,6 +528,8 @@ function getSliderTotals(thresh, hthresh) {
 }
 
 function determineMode(cid, thresh, hthresh) {
+	if (!thresh)
+		thresh  = user_threshold;
 	if (!hthresh)
 		hthresh = user_highlightthresh;
 
@@ -548,13 +541,13 @@ function determineMode(cid, thresh, hthresh) {
 		return 'full';
 }
 
-function finishCommentUpdates() {
+function finishCommentUpdates(thresh) {
 	for (var cid in update_comments) {
 		setDefaultDisplayMode(cid);
 		updateComment(cid, update_comments[cid]);
 	}
 
-	ajaxFetchComments(fetch_comments);
+	ajaxFetchComments(fetch_comments, 0, thresh);
 
 	updateTotals();
 	update_comments = {};
@@ -589,9 +582,11 @@ function toHash(thisobject) {
 	}).join(';');
 }
 
-function ajaxFetchComments(cids, get_max_cid) {
+function ajaxFetchComments(cids, get_max_cid, thresh) {
 	if (cids && !cids.length)
 		return;
+	if (get_max_cid)
+		thresh = 1;
 
 	var params = [];
 	params['op']              = 'comments_fetch';
@@ -604,6 +599,11 @@ function ajaxFetchComments(cids, get_max_cid) {
 		else
 			params['cids']    = noshow_comments;
 	}
+	if (thresh) {
+		params['threshold']       = user_threshold;
+		params['highlightthresh'] = user_highlightthresh;
+	}
+
 	params['cid']             = root_comment;
 	params['discussion_id']   = discussion_id;
 	params['reskey']          = reskey_static;
@@ -682,8 +682,10 @@ function ajaxFetchComments(cids, get_max_cid) {
 			if (update && update.new_cids_order) {
 				for (var i = 0; i < update.new_cids_order.length; i++) {
 					var this_cid = update.new_cids_order[i];
-					updateDisplayMode(this_cid, 'full', 1);
-					updateComment(this_cid, 'full');
+					var mode = determineMode(this_cid);
+					updateDisplayMode(this_cid, mode, 1);
+					currents[displaymode[this_cid]]++;
+					updateComment(this_cid, mode);
 				}
 				// later we may need to find a known point and scroll
 				// to it, but for now we don't want to do this -- pudge

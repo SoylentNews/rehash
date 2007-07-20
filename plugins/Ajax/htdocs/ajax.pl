@@ -74,7 +74,10 @@ sub main {
 					html	=> { $msgdiv => $rkey->errstr },
 				});
 			}
-			print STDERR "AJAXE $$: $user->{uid}, $op, ", $rkey->errstr, "\n";
+			printf STDERR "AJAXE %d: UID:%d, op:%s: %s (%s:%s:%s:%s:%s:%s:%s)\n",
+				$$, $user->{uid}, $op, $rkey->errstr, $rkey->reskey,
+				$rkey->type, $rkey->resname, $rkey->rkrid, $rkey->code, $rkey->static,
+				$user->{srcids}{ 24 };
 			return;
 		}
 	}
@@ -314,11 +317,12 @@ sub fetchComments {
 
 	my %data;
 	if ($max_cid) {
-		$cids = [ sort { $a <=> $b } map { $_->[0] }
+		$cids = [ map { $_->[0] }
 			@{$slashdb->sqlSelectAll(
 				'cid', 'comments',
 				'sid = ' . $slashdb->sqlQuote($id) . ' AND ' .
-				'cid > ' . $slashdb->sqlQuote($max_cid)
+				'cid > ' . $slashdb->sqlQuote($max_cid),
+				'ORDER BY date ASC'
 			)}
 		];
 
@@ -330,7 +334,7 @@ sub fetchComments {
 				kids   => []
 			}} @$cids;
 
-			$data{new_cids_order} = $cids;
+			$data{new_cids_order} = [ @$cids ];
 			$data{new_cids_data}  = \@cid_data;
 
 			my %cid_map = map { ($_ => 1) } @$cids;
@@ -343,16 +347,46 @@ sub fetchComments {
 #use Data::Dumper; print STDERR Dumper \$comments, \%data;
 	}
 
-	my %pieces = split /[,;]/, $form->{pieces};
+	# pieces_cids are comments that were oneline and need the extra display stuff for full
+	# abbrev_cids are comments that were oneline/abbreviated and need to be non-abbrev
+	# hidden_cids are comments that were hidden (noshow) and need to be displayed (full or oneline)
+
+	my %pieces = split /[,;]/, $form->{pieces}      || '';
 	my %abbrev = split /[,;]/, $form->{abbreviated} || '';
-	my(@hidden_cids, @pieces_cids, @abbrev_cids);
+	my(@hidden_cids, @pieces_cids, @abbrev_cids, %get_pieces_cids, %keep_hidden);
+	my(%html, %html_append_substr);
+
+	# prune out hiddens we don't need, if threshold is sent (which means
+	# we are not asking for a specific targetted comment(s) to highlight,
+	# but just adjusting for a threshold or getting new comments
+	if ($form->{threshold} && $form->{highlightthresh}) {
+		for (my $i = 0; $i < @$cids; $i++) {
+			my $class = 'oneline';
+			my $cid = $cids->[$i];
+			my $comment = $comments->{$cid};
+			if ($comment->{points} < $form->{threshold}) {
+				if ($user->{is_anon} || ($user->{uid} != $comment->{uid})) {
+					$class = 'hidden';
+					$keep_hidden{$cid} = 1;
+				}
+			}
+			$class = 'full' if $comment->{points} >= $form->{highlightthresh}
+				&& $class ne 'hidden';
+			$comment->{class} = $class;
+
+			if ($class eq 'oneline') {
+				$get_pieces_cids{$cid} = 1;
+			}
+		}
+	}
+
 	for my $cid (@$cids) {
 		if (exists $pieces{$cid}) {
 			push @pieces_cids, $cid;
 			if (exists $abbrev{$cid}) {
 				push @abbrev_cids, $cid;
 			}
-		} else {
+		} elsif (!$keep_hidden{$cid}) {
 			push @hidden_cids, $cid;
 		}
 	}
@@ -365,28 +399,29 @@ sub fetchComments {
 		$comments->{$cid}{comment} = $comment_text->{$cid};
 	}
 
-	my %html;
+	# for dispComment
+	$form->{mode} = 'archive';
+
 	for my $cid (@hidden_cids) {
 		$html{'comment_' . $cid} = Slash::dispComment($comments->{$cid}, {
-			class		=> 'oneline',
-			noshow_show	=> 1
+			noshow_show => 1,
+			pieces      => $get_pieces_cids{$cid}
 		});
 	}
+
 	for my $cid (@pieces_cids) {
 		@html{'comment_otherdetails_' . $cid, 'comment_sub_' . $cid} =
 			Slash::dispComment($comments->{$cid}, {
-				class		=> 'full',
-				show_pieces	=> 1
+				show_pieces => 1
 			});
 	}
 
-	my %html_append_substr;
 	for my $cid (@abbrev_cids) {
-		#@html{'comment_body_' . $cid} = $comments->{$cid}{comment};
 		@html_append_substr{'comment_body_' . $cid} = substr($comments->{$cid}{comment}, $abbrev{$cid});
 	}
 
-#use Data::Dumper; print STDERR Dumper \@hidden_cids, \@pieces_cids, \@abbrev_cids, \%pieces, \%abbrev, \%html, \%html_append_substr, $form, \%data;
+# XXX update noshow_comments, pieces_comments -- pudge
+#use Data::Dumper; print STDERR Dumper \@hidden_cids, \@pieces_cids, \@abbrev_cids, \%get_pieces_cids, \%keep_hidden, \%pieces, \%abbrev, \%html, \%html_append_substr, $form, \%data;
 
 	$options->{content_type} = 'application/json';
 	return Data::JavaScript::Anon->anon_dump({
