@@ -298,7 +298,7 @@ sub jsSelectComments {
 	my $anon_comments = Data::JavaScript::Anon->anon_dump($comments);
 	my $anon_roots    = Data::JavaScript::Anon->anon_dump(\@roots);
 	my $anon_rootsh   = Data::JavaScript::Anon->anon_dump(\%roots_hash);
-	my $anon_thresh   = Data::JavaScript::Anon->anon_dump($thresh_totals);
+	my $anon_thresh   = Data::JavaScript::Anon->anon_dump($thresh_totals || {});
 	s/\s+//g for ($anon_thresh, $anon_roots, $anon_rootsh);
 
 	$user->{is_anon}  ||= 0;
