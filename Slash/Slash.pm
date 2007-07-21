@@ -286,13 +286,14 @@ sub jsSelectComments {
 			if ($comments->{$cid}{subject_orig} && $comments->{$cid}{subject_orig} eq 'no') {
 				$comments_new->{$cid}{subject} = $comments->{$cid}{subject};
 			}
-			$thresh_totals = commentCountThreshold($comments, $pid, \%roots_hash);
 		}
 
+		$thresh_totals = commentCountThreshold($comments, $pid, \%roots_hash);
 		$comments = $comments_new;
 	}
 
 	my($max_cid) = sort { $b <=> $a } keys %$comments;
+	$max_cid ||= 0;
 
 	my $anon_comments = Data::JavaScript::Anon->anon_dump($comments);
 	my $anon_roots    = Data::JavaScript::Anon->anon_dump(\@roots);
