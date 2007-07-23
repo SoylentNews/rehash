@@ -472,6 +472,7 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .tagshide div {display: none}
 .generaltitle h3 a {z-index: 4 !important; position: relative !important;}
 .firehose .generaltitle h3 a {color: #066 !important}
+.firehose h3 a.skin {color: #777 !important;}
 .briefarticle h3, .article h3 {font-size: 95% !important; padding: .25em 50px 0 58px !important; min-height: 22px !important; display: block !important}
 /*.briefarticle.usermode h3, .article.usermode h3 {padding: .25em 3em 0 1.5em !important;} */
 #firehoselist {position: relative}
