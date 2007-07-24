@@ -75,8 +75,8 @@ END; login_block = BLOCK %]
 <div id="login_box" style="display:none">
 [% PROCESS titlebar
 	title => "Please Log In to Continue" _
-		'<a href="javascript:hide_login_box()"><img id="login_box_close" src="' _
-		gSkin.imagedir _ '/images/sic_close.png"></a>'
+		'<a href="javascript:hide_login_box()" class="close" title="Close this box"><img id="login_box_close" src="' _
+		gSkin.imagedir _ '/images/sic_close.png" alt="Close"></a>'
 %]
 <div id="login_box_content">
 [% login_inner_block %]

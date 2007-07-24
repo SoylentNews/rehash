@@ -189,7 +189,7 @@ div.briefarticle .storylinks { display: none; }
 #firehose div.briefarticle a span { float: none; }
 #firehose div.briefarticle .topic { display: none }
 .briefarticle { position: relative !important; }
-.briefarticle h3 a, .article h3 a { color: #066; }
+.briefarticle h3 a, .article h3 a { color: #055; }
 
 .briefarticle .generaltitle .title .date,
 .briefarticle .generaltitle .title .nickname
@@ -349,8 +349,6 @@ ul.menu a img {margin: 0 0 -4px 0}
 .menu .edit, .rssicon {margin-top: 2px; margin-left: -4px;}
 
 #fh_change_range { font-size: 80% }
-
-#fh_change_range { font-size: 80% }
 .firemenu .date-tab-bar {float: right; width: 16em; padding-bottom: .5em}
 .firemenu #fhcalendar-calendar-pane {right: 1em}
 
@@ -358,50 +356,16 @@ ul.menu a img {margin: 0 0 -4px 0}
 /* article bottom */
 div.storylinks ul li.comments {position: relative; width: auto; text-align: left; margin: 0; padding: 0;}
 
-
 /* login pop */
-
-#login_cover {
-        background-color: #222;
-        height: 100%;
-        opacity: 0.75;
-        position: fixed;
-        width: 100%;
-        z-index: 5;
-}
-
-#login_box .generaltitle .title h3 {background: transparent; }
+#login_cover {background-color: #222; height: 100%; opacity: 0.75;position: fixed;width: 100%;z-index: 1000000;}
+#login_box .generaltitle .title h3 {background: transparent; margin: 0; padding: .1em .3em 0 .3em;}
 #login_box .generaltitle .title {margin: 0;border: none;}
-#login_box {
-        position: fixed;
-        margin: 20%;
-        width: 60%;
-        z-index: 10;
-        border: 3px solid #033;
-}
+#login_box {position: fixed;margin: 25%;width: 50%;z-index: 1000001;border: 4px solid #222;}
+#login_box h3 a {position: absolute !important;right: .3em;top: .3em}
+#login_box #login_box_content legend {display: none;}
+#login_box #login_box_content fieldset {margin: 0;padding: 0;border: none;}
+#login_box #login_box_content {background-color: #fff;padding: 0 2em 2em 2em; border-top: 1px solid #222;}
 
-#login_box #login_box_close {
-        text-align: right;
-        position: absolute;
-        right: .3em;
-	top: .4em;
-}
-
-#login_box #login_box_content legend {
-        display: none;
-}
-
-#login_box #login_box_content fieldset {
-        margin: 0;
-        padding: 0;
-        border: none;
-}
-
-#login_box #login_box_content {
-        background-color: white;
-        padding: 0 2em 2em 2em;    
-        border-top: 1px solid #033;
-}
 /*.pop0 { background-color: #cde; }
 .pop1 { background-color: #c00; }
 .pop2 { background-color: #f93; }
