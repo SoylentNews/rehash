@@ -74,7 +74,7 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 	for my $glob (keys %{$theme_or_plugin->{'glob'}}) {
 		my $destpath = canonpath(
 			catfile($theme_or_plugin->{dir},
-			$theme_or_plugin->{'glob'}{$glob})
+				$theme_or_plugin->{'glob'}{$glob})
 		);
 		my $filelist = "";
 		for my $file (@{$theme_or_plugin->{$glob}}) {
