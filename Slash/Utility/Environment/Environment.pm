@@ -1419,7 +1419,9 @@ sub getPublicLogToken {
 	$uid ||= getCurrentUser('uid');
 	if ($uid) {
 		my $slashdb = getCurrentDB();
-		my $logtoken = $slashdb->getLogToken($uid, 1, 2);
+		# Don't bump a public logtoken's expiration time if we're
+		# just getting its value to emit.
+		my $logtoken = $slashdb->getLogToken($uid, 1, 2, 0);
 		if ($logtoken) {
 			return bakeUserCookie($uid, $logtoken);
 		}
@@ -1528,7 +1530,10 @@ sub prepareUser {
 	} else {
 		$user = $reader->getUser($uid);
 		$user->{is_anon} = 0;
-		$user->{logtoken} = bakeUserCookie($uid, $slashdb->getLogToken($uid));
+		# If this was a public logtoken, we do want to bump its
+		# expiration time out, because it was used to authenticate.
+		$user->{logtoken} = bakeUserCookie($uid,
+			$slashdb->getLogToken($uid, 0, 0, 1));
 	}
 #print STDERR scalar(localtime) . " $$ prepareUser user->uid=$user->{uid} is_anon=$user->{is_anon}\n";
 

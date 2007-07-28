@@ -1804,7 +1804,7 @@ sub _logtoken_delete_memcached {
 
 # yes, $special should probably not be a numeral .... -- pudge
 sub getLogToken {
-	my($self, $uid, $new, $special) = @_;
+	my($self, $uid, $new, $special, $bump_public) = @_;
 
 	my $user = getCurrentUser();
 	my $uid_q = $self->sqlQuote($uid);
@@ -1847,11 +1847,18 @@ sub getLogToken {
 	}
 #print STDERR scalar(gmtime) . " $$ getLogToken value '$value'\n";
 
-	# bump expiration for temp logins
+	# always bump expiration for temp logins
 	if ($value && $temp_str eq 'yes') {
 		my $minutes = getCurrentStatic('login_temp_minutes') || 10;
 		$self->updateLogTokenExpires($uid, $temp_str, $public_str, $locationid, $value, $minutes*60);
-#print STDERR scalar(gmtime) . " $$ getLogToken called updateLogTokenExpires\n";
+#print STDERR scalar(gmtime) . " $$ getLogToken called updateLogTokenExpires for temp, uid=$uid value=$value\n";
+	}
+
+	# bump expiration for public (aka RSS) logins if the caller requested it
+	if ($value && $public_str eq 'yes' && $bump_public) {
+		my $days = getCurrentStatic('login_nontemp_days') || 365;
+		$self->updateLogTokenExpires($uid, $temp_str, $public_str, $locationid, $value, $days*86400);
+#print STDERR scalar(gmtime) . " $$ getLogToken called updateLogTokenExpires for public, uid=$uid value=$value\n";
 	}
 
 	# if $new, then create a new value if none exists
@@ -1876,7 +1883,9 @@ sub setLogToken {
 	my $logtoken = createLogToken();
 	my($locationid, $temp_str, $public_str) = $self->_getLogTokenCookieLocation($uid);
 
-	my($interval, $seconds) = ('1 YEAR', 365 * 86400);
+	my $constants = getCurrentStatic();
+	my $nontemp_days = $constants->{login_nontemp_days} || 365;
+	my($interval, $seconds) = ("$nontemp_days DAY", $nontemp_days * 86400);
 	if ($temp_str eq 'yes') {
 		my $minutes = getCurrentStatic('login_temp_minutes') || 1;
 		($interval, $seconds) = ("$minutes MINUTE", $minutes * 60);

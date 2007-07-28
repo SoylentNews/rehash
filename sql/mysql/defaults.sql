@@ -863,6 +863,7 @@ INSERT INTO vars (name, value, description) VALUES ('lenient_formkeys','0','0 - 
 INSERT INTO vars (name, value, description) VALUES ('log_admin','1','This turns on/off entries to the accesslog. If you are a small site and want a true number for your stats turn this off.');
 INSERT INTO vars (name, value, description) VALUES ('log_db_user','','The virtual user of the database that the code should write accesslog to. If you don\'t know what this is for, you should leave it blank.');
 INSERT INTO vars (name, value, description) VALUES ('logdir','/usr/local/slash/www.example.com/logs','Where should the logs be found?');
+INSERT INTO vars (name, value, description) VALUES ('login_nontemp_days', '365', 'Days before a nontemp login expires');
 INSERT INTO vars (name, value, description) VALUES ('login_speed_limit', '20', 'How fast a user can create users, etc.');
 INSERT INTO vars (name, value, description) VALUES ('login_temp_minutes', '10', 'Minutes before a temporary login expires');
 INSERT INTO vars (name, value, description) VALUES ('mailfrom','admin@example.com','All mail addressed from the site looks like it is coming from here');

@@ -4661,3 +4661,5 @@ INSERT INTO vars (name, value, description) VALUES ('tags_viewed_tagname', 'view
 
 # SLASHDOT LAST UPDATED HERE
 
+INSERT INTO vars (name, value, description) VALUES ('login_nontemp_days', '365', 'Days before a nontemp login expires');
+
