@@ -215,6 +215,7 @@ template=templates/end_tab;misc;default
 template=templates/errors;comments;default
 template=templates/errors;users;default
 template=templates/fancybox;misc;default
+template=templates/firehose_related;misc;default
 template=templates/footer-admin;misc;default
 template=templates/footer;misc;default
 template=templates/formLabel;misc;default

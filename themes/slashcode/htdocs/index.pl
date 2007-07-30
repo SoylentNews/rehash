@@ -29,7 +29,7 @@ my $start_time = Time::HiRes::time;
 	) {
 		my $refer = $form->{returnto} || $ENV{SCRIPT_NAME};
 		redirect($refer); return;
-	}
+		}
 
 	my($stories, $Stories); # could this be MORE confusing please? kthx
 
