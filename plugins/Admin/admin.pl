@@ -1206,7 +1206,7 @@ sub editStory {
 		$storyref->{dept} =~ s/^-//;
 		$storyref->{dept} =~ s/-$//;
 
-		my($related_sids_hr, $related_urls_hr, $related_cids_hr) = extractRelatedStoriesFromForm($form, $storyref->{sid});
+		my($related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr) = extractRelatedStoriesFromForm($form, $storyref->{sid});
 		$storyref->{related_sids_hr} = $related_sids_hr;
 		$storyref->{related_urls_hr} = $related_urls_hr;
 		$storyref->{related_cids_hr} = $related_cids_hr;
@@ -1615,8 +1615,17 @@ sub extractRelatedStoriesFromForm {
 	# should probably filter and check that they're actually sids, etc...
 	my %related_cids = map { $_ => $slashdb->getComment($_) } grep { $_ }			@$related_cids;
 	my %related_sids = map { $_ => $slashdb->getStory($_)   } grep { $_ && $_ ne $cur_sid }	@$related;
+	my %related_firehose;
+	if ($constants->{plugin}{FireHose} && $constants->{firehose_add_related}) {
+		my $firehose = getObject("Slash::FireHose");
+		my $story = $slashdb->getStory($cur_sid);
+		my $fhid = $story && $story->{fhid} ? $story->{fhid} : $form->{fhid};
+		if ($fhid) {
+			%related_firehose = ( $fhid => $firehose->getFireHose($fhid) );
+		}
 
-	return(\%related_sids, \%related_urls, \%related_cids);
+	}
+	return(\%related_sids, \%related_urls, \%related_cids, \%related_firehose);
 }
 
 
@@ -2004,7 +2013,7 @@ sub updateStory {
 	$form->{aid} = $story->{aid} unless $form->{aid};
 
 	my($chosen_hr) = extractChosenFromForm($form);
-	my($related_sids_hr, $related_urls_hr, $related_cids_hr) = extractRelatedStoriesFromForm($form, $story->{sid});
+	my($related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr) = extractRelatedStoriesFromForm($form, $story->{sid});
 	my $related_sids = join ',', keys %$related_sids_hr;
 	my($topic) = $slashdb->getTopiclistFromChosen($chosen_hr);
 #use Data::Dumper; print STDERR "admin.pl updateStory chosen_hr: " . Dumper($chosen_hr) . "admin.pl updateStory form: " . Dumper($form);
@@ -2090,7 +2099,9 @@ sub updateStory {
 			}
 		}
 		titlebar('100%', getTitle('updateStory-title', $data));
-		$slashdb->setRelatedStoriesForStory($form->{sid}, $related_sids_hr, $related_urls_hr, $related_cids_hr);
+
+
+		$slashdb->setRelatedStoriesForStory($form->{sid}, $related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr);
 		$slashdb->createSignoff($st->{stoid}, $user->{uid}, "updated");
 		# make sure you pass it the goods
 		listStories(@_);
@@ -2344,7 +2355,7 @@ sub saveStory {
 
 	my($chosen_hr) = extractChosenFromForm($form);
 	my($tids) = $slashdb->getTopiclistFromChosen($chosen_hr);
-	my($related_sids_hr, $related_urls_hr) = extractRelatedStoriesFromForm($form);
+	my($related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr) = extractRelatedStoriesFromForm($form);
 
 	for my $field (qw( introtext bodytext )) {
 		local $Slash::Utility::Data::approveTag::admin = 2;
@@ -2406,7 +2417,8 @@ sub saveStory {
 	my $sid = $slashdb->createStory($data);
 
 	if ($sid) {
-		$slashdb->setRelatedStoriesForStory($sid, $related_sids_hr, $related_urls_hr);
+
+		$slashdb->setRelatedStoriesForStory($sid, $related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr);
 		slashHook('admin_save_story_success', { story => $data });
 		my $st = $slashdb->getStory($data->{sid});
 		my $stoid = $st->{stoid};
