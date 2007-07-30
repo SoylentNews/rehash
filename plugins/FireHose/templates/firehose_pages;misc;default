@@ -34,6 +34,7 @@ __template__
      END;
 
      num_page_display = constants.firehose_num_page_display || 10;
+     IF options.smalldevices; num_page_display = 6; END;
      start_page_num = 1;
      end_page_num = page_max;
 
