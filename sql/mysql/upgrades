@@ -4663,3 +4663,7 @@ INSERT INTO vars (name, value, description) VALUES ('tags_viewed_tagname', 'view
 
 INSERT INTO vars (name, value, description) VALUES ('login_nontemp_days', '365', 'Days before a nontemp login expires');
 
+INSERT INTO vars (name, value, description) VALUES ('firehose_add_related', '0', 'Automatically add link to firehose discussion as related to linked story');
+
+INSERT INTO discussion_kinds (dkid, name) VALUES (6, 'submission');
+INSERT INTO discussion_kinds (dkid, name) VALUES (7, 'feed');

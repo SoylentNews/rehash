@@ -189,7 +189,11 @@ INSERT INTO dateformats (id, format, description) VALUES (17,'%Y.%m.%d %k:%M','1
 
 INSERT INTO discussion_kinds (dkid, name) VALUES (1, 'story');
 INSERT INTO discussion_kinds (dkid, name) VALUES (2, 'user_created');
-
+INSERT INTO discussion_kinds (dkid, name) VALUES (3, 'journal');
+INSERT INTO discussion_kinds (dkid, name) VALUES (4, 'journal-story');
+INSERT INTO discussion_kinds (dkid, name) VALUES (5, 'poll');
+INSERT INTO discussion_kinds (dkid, name) VALUES (6, 'submission');
+INSERT INTO discussion_kinds (dkid, name) VALUES (7, 'feed');
 
 #
 # Dumping data for table 'dst'
