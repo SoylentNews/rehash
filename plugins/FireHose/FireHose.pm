@@ -161,6 +161,7 @@ sub createItemFromJournal {
 sub createUpdateItemFromBookmark {
 	my($self, $id, $options) = @_;
 	$options ||= {};
+	my $constants = getCurrentStatic();
 	my $bookmark_db = getObject("Slash::Bookmark");
 	my $bookmark = $bookmark_db->getBookmark($id);
 	my $url_globjid = $self->getGlobjidCreate("urls", $bookmark->{url_id});
@@ -197,18 +198,33 @@ sub createUpdateItemFromBookmark {
 				$data->{srcname} = $feed->{feedname};	
 			}
 		}
-		$self->createFireHose($data)
-	}
+		my $firehose_id = $self->createFireHose($data);
+		if ($firehose_id && $type eq "feed") {
+			my $discussion_id = $self->createDiscussion({
+				uid		=> 0,
+				kind		=> 'feed',
+				title		=> $data->{title},
+				commentstatus	=> 'logged_in',
+				url		=> "$constants->{rootdir}/firehose.pl?op=view&id=$firehose_id"
+			});
+			if ($discussion_id) {
+				$self->setFireHose($firehose_id, {
+					discussion	=> $discussion_id,
+				});
+			}
+			
+		}		
 
-	if (!isAnon($bookmark->{uid})) {
-		my $constants = getCurrentStatic();
-		my $tags = getObject('Slash::Tags');
-		$tags->createTag({
-			uid			=> $bookmark->{uid},
-			name			=> $constants->{tags_upvote_tagname},
-			globjid			=> $url_globjid,
-			private			=> 1,
-		});
+		if (!isAnon($bookmark->{uid})) {
+			my $constants = getCurrentStatic();
+			my $tags = getObject('Slash::Tags');
+			$tags->createTag({
+				uid			=> $bookmark->{uid},
+				name			=> $constants->{tags_upvote_tagname},
+				globjid			=> $url_globjid,
+				private			=> 1,
+			});
+		}
 	}
 }
 
@@ -873,7 +889,7 @@ sub ajaxFireHoseSetOptions {
 	my $firehose = getObject("Slash::FireHose");
 	my $opts = $firehose->getAndSetOptions();
 	my $html = {};
-	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs} }, { Return => 1});
+	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts }, { Return => 1});
 	$html->{fhoptions} = slashDisplay("firehose_options", { nowrapper => 1, options => $opts }, { Return => 1});
 	$html->{fhadvprefpane} = slashDisplay("fhadvprefpane", { options => $opts }, { Return => 1});
 
@@ -942,7 +958,7 @@ sub ajaxSaveFirehoseTab {
 
 	my $opts = $firehose->getAndSetOptions();
 	my $html = {};
-	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs} }, { Return => 1});
+	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts }, { Return => 1});
 	$html->{message_area} = $message;
 	return Data::JavaScript::Anon->anon_dump({
 		html	=> $html
@@ -1753,7 +1769,7 @@ sub getAndSetOptions {
 	
 	if ($mode eq "full") {
 		if ($user->{is_admin}) {
-			$options->{limit} = $pagesize eq "large" ? 25 : 15;
+			$options->{limit} = $pagesize eq "large" ? 50 : 25;
 		} else {
 			$options->{limit} = $pagesize eq "large" ? 25 : 15;
 		}
@@ -1774,6 +1790,7 @@ sub getAndSetOptions {
 	if ($constants->{smalldevices_ua_regex}) {
 		my $smalldev_re = qr($constants->{smalldevices_ua_regex});
 		if ($ENV{HTTP_USER_AGENT} =~ $smalldev_re) {
+			$options->{smalldevices} = 1;
 			if ($mode eq "full") {
 				$options->{limit} = $pagesize eq "large" ? 15 : 10;
 			} else {
@@ -1867,9 +1884,11 @@ sub getAndSetOptions {
 			if (!defined $fh_options->{filter}) {
 				$fh_options->{filter} = $_;
 				$fh_options->{filter} =~ s/[^a-zA-Z0-9_-]+//g;
+				$fh_options->{filter} = "-" . $fh_options->{filter} if $not;
 			}
 			# Don't filter this
 			$fh_options->{qfilter} .= $_ . ' ';
+			$fh_options->{qfilter} = '-' . $fh_options->{qfilter} if $not;
 		}
 	}
 
@@ -1884,9 +1903,9 @@ sub getAndSetOptions {
 
 	if (!$user->{is_anon} && !$opts->{no_set}) {
 		my $data_change = {};
-		my @skip_options_save = qw(uid not_uid type not_type primaryskid not_primaryskid);
+		my @skip_options_save = qw(uid not_uid type not_type primaryskid not_primaryskid smalldevices);
 		if ($user->{state}{firehose_page} eq "user") {
-			push @skip_options_save, "nothumbs", "nocolors", "pause", "mode", "orderdir", "orderby", "fhfilter";
+			push @skip_options_save, "nothumbs", "nocolors", "pause", "mode", "orderdir", "orderby", "fhfilter", "color";
 		}
 		my %skip_options = map { $_ => 1 } @skip_options_save;
 		foreach (keys %$options) {
