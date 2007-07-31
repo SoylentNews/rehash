@@ -106,17 +106,15 @@ END; login_block = BLOCK %]
 		</div>
 		[% PROCESS adv_pref_firehose options = options %]
 	[% END %]
-	[% IF user.is_anon %]
-		[% login_block %]
-		<div id="fhlogin">
-		[% login_inner_block %]
-		</div>
-	[% ELSE %]
-	<form action="[% gSkin.rootdir %]/firehose.pl" method="get" name="firehoseform">
-		<fieldset>
-			<legend>Firehose</legend>
+        [% IF user.is_anon %]
+                [% login_block %]
+<div class="subdue" onclick="javascript:show_login_box(); return false">
+        [% END %]
+        <form action="[% gSkin.rootdir %]/firehose.pl" method="get" name="firehoseform">
+                <fieldset>
+                        <legend>Firehose</legend>
   [% startdate = "";
-     start_mode = ""; 
+     start_mode = "";
      IF options.duration == 7 && !options.startdate;
         start_mode = "latest";
      ELSIF options.duration == 1 && options.startdate;
@@ -132,12 +130,15 @@ END; login_block = BLOCK %]
                         [% PROCESS datewidget id='fhcalendar' init='firehose_calendar_init' date=startdate start_mode = start_mode %]
 <label><input type="text" class="slashdot-tag-completer" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="24" autocomplete="off" onfocus="attachCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose-filter', 0)" id="firehose-filter"></label>
 <div id="colorsliderbg">
-	<div id="colorsliderthumb"><img src="[% constants.imagedir %]/slidethumb.png" alt="Filter firehose to" id="fh_slider_img" title="Filter firehose to"></div>
+        <div id="colorsliderthumb"><img src="[% constants.imagedir %]/slidethumb.png" alt="Filter firehose to" id="fh_slider_img" title="Filter firehose to"></div>
 </div>
-			<input type="submit" value="Filter" onclick="firehose_set_options('fhfilter'); return false;">
-		</fieldset>
-	</form>
-	[% END %]
+                        <input type="submit" value="Filter" onclick="firehose_set_options('fhfilter'); return false;">
+                </fieldset>
+        </form>
+
+[% IF user.is_anon %]
+</div>
+[% END %]
 [% IF !user.is_anon %]
 [% PROCESS firehose_options %]
 [% END %]

@@ -458,4 +458,5 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .generaltitle, .title, .generaltitle h3 {line-height: 160% !important;}
 
 
-
+.subdue {background: #555; opacity: .6; position: relative; z-index: 10000}
+.admin .contentsadmin ul.menu {margin: 0}
