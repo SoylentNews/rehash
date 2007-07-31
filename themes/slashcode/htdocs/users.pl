@@ -2628,6 +2628,7 @@ sub saveUser {
 		aimdisplay	=> $form->{aimdisplay},
 		icq		=> $form->{icq},
 		playing		=> $form->{playing},
+                mobile_text_address => $form->{mobile_text_address},
 	};
 
 	for (keys %extr) {
