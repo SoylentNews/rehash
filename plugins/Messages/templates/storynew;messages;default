@@ -11,8 +11,18 @@ en_US
 __name__
 storynew
 __template__
-
+[%
+messages = Slash.getObject('Slash::Messages');
+mobile_code = messages.getMessageDeliveryByName("Mobile");
+code = msg.code;
+pref = msg.user.prefs.$code;
+%]
+[% IF pref != mobile_code %]
 [% title %]: [% constants.absolutedir_secure %]/article.pl?sid=[% sid %] 
+[% ELSE %]
+[% story = Slash.db.getStory(sid) %]
+[% title %]: [% constants.absolutedir_secure %]/palm/[% story.primaryskid %]/[% sid %]_1.shtml
+[% END %]
 
 __seclev__
 500
