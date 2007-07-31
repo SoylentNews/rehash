@@ -159,13 +159,26 @@ sub run {
 			: 2; # sectional
 	}
 
-	my $popularity = $self->getEntryPopularityForColorLevel($color_level) + $extra_pop;
+	my $popularity = $firehose_db->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 
-	# Add up nods and nixes.
-	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
-	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
+	if ($options->{starting_only}) {
+		return $popularity if $options->{return_only};
+		main::tagboxLog(sprintf("FHPopularity2->run setting %d (%d) to %.6f STARTING_ONLY",
+			$fhid, $affected_id, $popularity));
+		return $firehose_db->setFireHose($fhid, { popularity2 => $popularity });
+	}
+
 	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0, $options);
 	$tagsdb->addCloutsToTagArrayref($tags_ar);
+
+	# Add up nods and nixes.
+
+	# Some basic facts first.
+	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
+	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
+	my $n_votes = scalar
+		grep { $_->{tagnameid} == $upvoteid || $_->{tagnameid} == $downvoteid }
+		@$tags_ar;
 
 	# Admins may get reduced downvote clout.
 	if ($constants->{firehose_admindownclout} && $constants->{firehose_admindownclout} != 1) {
@@ -177,21 +190,24 @@ sub run {
 		}
 	}
 
-	# Early in a globj's lifetime, upvotes count for more, and
-	# downvotes for less.
+	# Early in a globj's lifetime, if there have been few votes,
+	# upvotes count for more, and downvotes for less.
 	my($up_mult, $down_mult) = (1, 1);
 	my $age = time - $fhitem->{createtime_ut};
-	if ($age < $constants->{tagbox_fhpopularity2_gracetime}) {
+	if ($n_votes <= $constants->{tagbox_fhpopularity2_gracevotes}
+		&& $age < $constants->{tagbox_fhpopularity2_gracetime}) {
+		$age = 0 if $age < 0;
 		$up_mult = 1+(
 			  ($constants->{tagbox_fhpopularity2_gracemult} - 1)
 			* ($constants->{tagbox_fhpopularity2_gracetime} - $age)
+			/  $constants->{tagbox_fhpopularity2_gracetime}
 		);
 		$down_mult = 1/$up_mult;
 	}
 
+	# The main loop to calculate popularity.
 	my $udc_cache = { };
 	for my $tag_hr (@$tags_ar) {
-		next if $options->{starting_only};
 		my $sign = 0;
 		$sign =  1 if $tag_hr->{tagnameid} == $upvoteid   && !$options->{downvote_only};
 		$sign = -1 if $tag_hr->{tagnameid} == $downvoteid && !$options->{upvote_only};
@@ -208,7 +224,8 @@ sub run {
 	if ($options->{return_only}) {
 		return $popularity;
 	}
-	main::tagboxLog(sprintf("FHPopularity2->run setting %d (%d) to %.6f", $fhid, $affected_id, $popularity));
+	main::tagboxLog(sprintf("FHPopularity2->run setting %d (%d) to %.6f",
+		$fhid, $affected_id, $popularity));
 	$firehose_db->setFireHose($fhid, { popularity2 => $popularity });
 }
 

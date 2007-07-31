@@ -787,6 +787,13 @@ sub fetchItemText {
 		tags_top	=> $tags_top,
 	};
 
+	my $slashdb = getCurrentDB();
+	my $plugins = $slashdb->getDescriptions('plugins');
+	if (!$user->{is_anon} && $plugins->{Tags}) {
+		my $tagsdb = getObject('Slash::Tags');
+		$tagsdb->markViewed($user->{uid}, $item->{globjid});
+	}
+
 	my $retval = slashDisplay("dispFireHose", $data, { Return => 1, Page => "firehose" });
 	return $retval;
 }

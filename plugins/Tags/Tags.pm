@@ -981,7 +981,19 @@ sub setTagsForGlobj {
 	my %old_tagnames = ( map { ($_->{tagname}, 1) } @$old_tags_ar );
 
 	# Create any tag specified but only if it does not already exist.
-	my @create_tagnames = grep { !$old_tagnames{$_} } sort keys %new_tagnames;
+	my @create_tagnamess	= grep { !$old_tagnames{$_} } sort keys %new_tagnames;
+
+	# Deactivate any tags previously specified that were deleted from
+	# the tagbox.
+	my @deactivate_tagnames	= grep { !$new_tagnames{$_} } sort keys %old_tagnames
+	for my $tagname (@deactivate_tagnames) {
+		$tags->deactivateTag({
+			uid =>		$uid,
+			name =>		$tagname,
+			table =>	$table,
+			id =>		$id
+		});
+	}
 
 	my @created_tagnames = ( );
 	for my $tagname (@create_tagnames) {
@@ -1468,11 +1480,10 @@ sub listTagnamesActive {
 	my $private_clause = $include_private ? '' : " AND private='no'";
 	my $ar = $self->sqlSelectAllHashrefArray(
 		"tagnames.tagname AS tagname,
-		 UNIX_TIMESTAMP($next_minute_q) - UNIX_TIMESTAMP(tags.created_at) AS secsago,
-		 karma,
-		 IF(tagname_params.value IS NULL, 1, tagname_params.value) AS tnp_clout,
-		 IF(tag_params.value     IS NULL, 1, tag_params.value)     AS tp_clout,
-		 users_info.tag_clout AS user_clout",
+		 tags.tagid AS tagid,
+		 tags.tagnameid AS tagnameid,
+		 users_info.uid AS uid,
+		 UNIX_TIMESTAMP($next_minute_q) - UNIX_TIMESTAMP(tags.created_at) AS secsago",
 		"users_info,
 		 tags LEFT JOIN tag_params
 		 	ON (tags.tagid=tag_params.tagid AND tag_params.name='tag_clout'),
@@ -1481,12 +1492,15 @@ sub listTagnamesActive {
 		"tagnames.tagnameid=tags.tagnameid
 		 AND tags.uid=users_info.uid
 		 AND inactivated IS NULL $private_clause
-		 AND tags.created_at >= DATE_SUB($next_minute_q, INTERVAL $seconds SECOND)");
+		 AND tags.created_at >= DATE_SUB($next_minute_q, INTERVAL $seconds SECOND)
+		 AND users_info.tag_clout > 0
+		 AND IF(tag_params.value     IS NULL, 1, tag_params.value)     > 0
+		 AND IF(tagname_params.value IS NULL, 1, tagname_params.value) > 0");
 	return [ ] unless $ar && @$ar;
+	$ar = $self->addCloutsToTagArrayref($ar);
 
 	# Sum up the clout for each tagname, and the median time it
 	# was seen within the interval in question.
-	# Very crude weighting algorithm that will change.
 	my %tagname_count = ( );
 	my %tagname_clout = ( );
 	my %tagname_sumsqrtsecsago = ( );
@@ -1496,10 +1510,8 @@ sub listTagnamesActive {
 		$tagname_count{$tagname} ||= 0;
 		$tagname_count{$tagname}++;
 		# Add to its clout.
-		my $user_clout = $hr->{user_clout} * ($hr->{karma} >= -3 ? log($hr->{karma}+10) : 0);
-		my $clout = $user_clout * $hr->{tp_clout} * $hr->{tnp_clout};
 		$tagname_clout{$tagname} ||= 0;
-		$tagname_clout{$tagname} += $clout;
+		$tagname_clout{$tagname} += $hr->{total_clout};
 		# Adjust up its last seen time.
 		$tagname_sumsqrtsecsago{$tagname} ||= 0;
 		my $secsago = $hr->{secsago};
@@ -1653,13 +1665,12 @@ sub logSearch {
 
 sub markViewed {
 	my($self, $uid, $globjid) = @_;
-	my $constants = getCurrentStatic();
-        $self->createTag({
+	return 0 if isAnon($uid) || !$globjid;
+	$self->sqlInsert('globjs_viewed', {
                 uid =>		$uid,
-                name =>		$constants->{tags_viewed_tagname} || 'viewed',
                 globjid =>	$globjid,
-                private =>	1,
-        });
+		-viewed_at =>	'NOW()',
+	}, { ignore => 1, delayed => 1 });
 }
 
 #################################################################

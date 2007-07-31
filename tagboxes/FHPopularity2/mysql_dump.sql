@@ -6,4 +6,5 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity2
 INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity2_udcbasis', '1000', 'Basis for tags_udc vote clout weighting');
 INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity2_gracetime', '1200', 'Number of initial seconds of a firehose item life let it float higher in the hose');
 INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity2_gracemult', '3', 'Multiplier factor for a firehose item during the grace period');
+INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity2_gracevotes', '4', 'Max number of votes for which the grace period will apply');
 

@@ -156,3 +156,13 @@ CREATE TABLE tags_searched (
 	KEY (searched_at)
 ) TYPE=InnoDB;
 
+CREATE TABLE globjs_viewed (
+	gvid		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	globjid		int UNSIGNED NOT NULL,
+	uid		mediumint UNSIGNED NOT NULL,
+	viewed_at	datetime NOT NULL,
+	PRIMARY KEY (gvid),
+	UNIQUE globjid_uid (globjid, uid)
+) TYPE=InnoDB;
+
+
