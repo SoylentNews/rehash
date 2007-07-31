@@ -67,9 +67,9 @@ __template__
                 [% FOREACH story = yoogli_similar_stories.keys.sort %]
                         <tr>
                         <td>&nbsp;</td>
-                        <td>Y=[% yoogli_similar_stories.$story.relevance.substr(0, 3) %]</td>
+                        <td>Y=[% yoogli_similar_stories.$story.relevance.substr(0, 4) %]</td>
                         <td valign="TOP"><a href="[% yoogli_similar_stories.$story.url %]" title="[% yoogli_similar_stories.$story.title %]">
-                        [% yoogli_similar_stories.$story.title.substr(0, 20) %]...</a></td>
+                        [% yoogli_similar_stories.$story.title.substr(0, 35) %]...</a></td>
                         <td valign="TOP">[% Slash.timeCalc(yoogli_similar_stories.$story.date) %]</td>
                         <td>&nbsp;</td>
                         </tr>
