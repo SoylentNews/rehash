@@ -149,6 +149,7 @@ ul.menu#fhtablist li.active a, .paginate .active a
 ul.menu#fhtablist li.active:before, .paginate .active:before { content: ""; }
 #beforewidget, .paginate span.active {float: left}
 .day.date-tab.active {background: transparent url('//images.slashdot.org/sic_close.png') no-repeat scroll 0px 3px; float: none; border: none; padding-left: 20px !important}
+#fh-paginate .day.date-tab.active {padding-left: 14px !important}
 #beforewidget span, #afterwidget span {line-height:270% !important}
 .paginate .calendar-pane {margin: 0;} 
 
@@ -344,7 +345,6 @@ ul.menu a img {margin: 0 0 -4px 0}
 #fhtabdel a {position: absolute; text-indent: -7000em; width: 10px}
 
 .menu #fh_pag_calendar, .menu .date-tab-bar, .menu .tab-button  {display: inline}
-.menu .date-tab-bar {padding-right: 1em; }
 .menu .date-span-popup {font-size: 90%}
 .menu .edit, .rssicon {margin-top: 2px; margin-left: -4px;}
 
