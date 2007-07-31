@@ -20,7 +20,7 @@ use Slash;
 use Slash::Utility;
 use Benchmark;
 
-use vars qw( $slashdb $werder $constants $junk );
+use vars qw( $slashdb $werder $constants $junk $tagsdb );
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
@@ -46,7 +46,7 @@ my $kmax = $constants->{maxkarma};
 my $kmin = $constants->{minkarma} + 10;
 $kmin = $constants->{minkarma} if $kmin >= $kmax;
 
-my $tagsdb = getObject('Slash::Tags') || die "cannot instantiate Slash::Tags";
+$tagsdb = getObject('Slash::Tags') || die "cannot instantiate Slash::Tags";
 my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
 my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
 
@@ -60,8 +60,6 @@ srand;
 
 # main program logic (in braces to offset nicely)
 {
-
-	my $tags = getObject('Slash::Tags');
 
 	my $stories = $slashdb->getStoriesEssentials({ future_secs => 0, limit => 10, limit_extra => 0,
 		sectioncollapse => (rand(1) < 0.3) ? 1 : 0 });
@@ -77,20 +75,20 @@ srand;
 	for (1..$opts{num_tags}) {
 		if (rand(1) < 0.02) {
 			# Instead of adding a tag, deactivate an existing one.
-			my $tag = $tags->sqlSelectHashref(
+			my $tag = $tagsdb->sqlSelectHashref(
 				'*', 'tags', 'inactivated IS NULL',
 				'ORDER BY RAND() LIMIT 1');
 			if ($tag) {
-				my $count = $tags->deactivateTag($tag);
+				my $count = $tagsdb->deactivateTag($tag);
 				print "tagid=$tag->{tagid} deactivated $count tagnameid=$tag->{tagnameid} uid=$tag->{uid} globjid=$tag->{globjid}\n";
 			}
 		} elsif (rand(1) < 0.4) {
 			# Tag a story
 			$stoid = $stories->[rand(@$stories)]{stoid} if !$stoid || rand(1) > 0.2;
-			$uid = _get_uid($tags, $stoid);
+			$uid = _get_uid($tagsdb, $stoid);
 
-			$tagnameid = _get_tagnameid($tags, $tagnameid, $stoid, $uid);
-			my $tagid = $tags->createTag({
+			$tagnameid = _get_tagnameid($tagsdb, $tagnameid, $stoid, $uid);
+			my $tagid = $tagsdb->createTag({
 				uid => $uid,
 				tagnameid => $tagnameid,
 				table => 'stories',
@@ -101,11 +99,11 @@ srand;
 			# Tag a firehose item
 			$globjid = $firehose_items->[rand(@$firehose_items)]{globjid}
 				if !$globjid || rand(1) > 0.2;
-			$uid = $tags->sqlSelect('uid', 'users_info',
+			$uid = $tagsdb->sqlSelect('uid', 'users_info',
 				"karma BETWEEN $kmin AND $kmax",
 				'ORDER BY RAND() LIMIT 1') if !$uid || rand(1) > 0.2;
-			$tagnameid = _get_tagnameid($tags, $tagnameid, $globjid, $uid);
-			my $tagid = $tags->createTag({
+			$tagnameid = _get_tagnameid($tagsdb, $tagnameid, $globjid, $uid);
+			my $tagid = $tagsdb->createTag({
 				uid => $uid,
 				tagnameid => $tagnameid,
 				globjid => $globjid,
@@ -118,12 +116,12 @@ srand;
 # subroutines
 
 sub _get_uid {
-	my($tags, $taggedid) = @_;
+	my($tagsdb, $taggedid) = @_;
 	my $uid = 0;
 	while (!$uid) {
 		if (rand(1) < 0.6) {
 			# random user who has tagged before
-			$uid = $tags->sqlSelect('uid', 'tags', '',
+			$uid = $tagsdb->sqlSelect('uid', 'tags', '',
 				'ORDER BY RAND() LIMIT 1');
 		} elsif (rand(1) < 0.95) {
 			# pick a set of 10 common uids for this taggedid.
@@ -147,36 +145,40 @@ sub _get_uid {
 }
 
 {
-my $alluids;
+my $alluids = undef;
 sub _get_random_uid {
-	my $tags = getObject('Slash::Tags');
 	my $uid = 0;
-	if (!$alluids) {
-		my $mon = substr($tags->sqlSelect('DATE(NOW())'), 0, 7) . '-01 00:00:00';
-		$alluids = $tags->sqlSelectColArrayref('uid', 'users_info',
-			"created_at < '$mon'");
+	if (!$alluids || !@$alluids) {
+		my $mon = substr($tagsdb->sqlSelect('DATE(NOW())'), 0, 7) . '-01 00:00:00';
+		$alluids = $tagsdb->sqlSelectColArrayref('uid', 'users_info',
+			"created_at < '$mon' AND karma BETWEEN $kmin AND $kmax");
+		$alluids = [ grep { !isAnon($_) } @$alluids ];
 	}
-	return 0 if !@$alluids;
-	while (!$uid) {
-		$uid = $alluids->[rand @$alluids];
-		$uid = $tags->sqlSelect('uid', 'users_info',
-			"uid=$uid AND karma BETWEEN $kmin AND $kmax");
-		$uid = 0 if isAnon($uid);
+	if (!$alluids || !@$alluids) {
+		$alluids = $tagsdb->sqlSelectColArrayref('uid', 'users_info',
+			"karma BETWEEN $kmin AND $kmax");
+		$alluids = [ grep { !isAnon($_) } @$alluids ];
 	}
+	return 0 if !$alluids || !@$alluids;
+	$uid = $alluids->[rand @$alluids];
 	return $uid;
 }
 }
 
 sub _get_tagnameid {
-	my($tags, $old_tagnameid, $taggedid, $uid) = @_;
+	my($tagsdb, $old_tagnameid, $taggedid, $uid) = @_;
 	my $retval = 0;
 	if ($old_tagnameid && rand(1) < 0.2) {
 		# same as before
 		$retval = $old_tagnameid;
 	} elsif (rand(1) < 0.4) {
-		# random existing tagname
-		$retval = $tags->sqlSelect('tagnameid', 'tagnames', '',
-			'ORDER BY RAND() LIMIT 1');
+		# skip this if there aren't many tagnames yet
+		my $n_tagnames = $tagsdb->sqlCount('tagnames');
+		if ($n_tagnames >= 100) {
+			# random existing tagname
+			$retval = $tagsdb->sqlSelect('tagnameid', 'tagnames', '',
+				'ORDER BY RAND() LIMIT 1');
+		}
 	} elsif (rand(1) < 0.7) {
 		# up or down vote
 		my $bias = 0;
@@ -193,21 +195,21 @@ sub _get_tagnameid {
 		srand;
 		for my $i (0..$#$ct_ar) {
 			if (rand(1) > 0.5) {
-				$retval = $tags->createTagname($ct_ar->[$i]);
+				$retval = $tagsdb->createTagname($ct_ar->[$i]);
 				last;
 			}
 		}
-		$retval ||= $tags->createTagname($ct_ar->[0]);
+		$retval ||= $tagsdb->createTagname($ct_ar->[0]);
 	}
 	while (!$retval) {
 		# Wholly new random word
-		$retval = $tags->createTagname($werder->get_werd);
+		$retval = $tagsdb->createTagname($werder->get_werd);
 	}
 	if (rand(1) < 0.03) {
 		# Opposite of the tagname just picked
-		my $tagname = $tags->getTagnameDataFromId($retval)->{tagname};
-		my $opp = $tags->getOppositeTagname($tagname);
-		$retval = $tags->createTagname($opp);
+		my $tagname = $tagsdb->getTagnameDataFromId($retval)->{tagname};
+		my $opp = $tagsdb->getOppositeTagname($tagname);
+		$retval = $tagsdb->createTagname($opp);
 	}
 	return $retval;
 }
