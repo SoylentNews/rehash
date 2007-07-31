@@ -367,6 +367,7 @@ sub getMode {
 	my($self, $msg) = @_;
 	my $code = $msg->{code};
 	my $mode = $msg->{user}{prefs}{$code};
+        $mode = MSG_MODE_EMAIL if $msg->{user}{prefs}{$code} == $self->getMessageDeliveryByName("Mobile");
 
 	my $coderef = $self->getMessageCode($code) or return MSG_MODE_NOCODE;
 
@@ -455,8 +456,14 @@ sub send {
 			return 0;
 		}
 
-		$addr    = $msg->{altto} || $msg->{user}{realemail};
-		unless (emailValid($addr)) {
+                # Email and Mobile messages are both Email modes, but use different recipients.
+                if ($msg->{user}{prefs}{$msg->{code}} == $self->getMessageDeliveryByName("Mobile")) {
+                        $addr = $msg->{user}{mobile_text_address};
+                } else {
+                        $addr = $msg->{altto} || $msg->{user}{realemail};
+                }
+		
+                unless (emailValid($addr)) {
 			messagedLog(getData("send mail error", {
 				addr	=> $addr,
 				uid	=> $msg->{user}{uid},
@@ -1106,6 +1113,17 @@ sub send_mod_msg {
 			MSG_CODE_COMMENT_MODERATE, $data, 0, '', 'collective'
 		);
 	}
+}
+
+sub getMessageDeliveryByName {
+        my($self, $name) = @_;
+
+        my $slashdb = getCurrentDB();
+        my $name_q = $slashdb->sqlQuote($name);
+        my $code = $slashdb->sqlSelect("code", "message_deliverymodes", "name = $name_q");
+
+        return($code);
+
 }
 
 1;
