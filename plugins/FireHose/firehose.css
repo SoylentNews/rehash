@@ -37,7 +37,7 @@
 
 #colorsliderbg { background: url('//images.slashdot.org/colorscale.png') no-repeat 0px -3px; }
 
-#fh_adv_pref_toggle { background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat scroll 0px -1195px; padding:7px 0pt 7px 25px; color: #fff; position: relative; cursor: pointer;}
+#fh_adv_pref_toggle { background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat scroll 0px -1195px; padding:7px 0pt 7px 20px; color: #fff; position: relative; cursor: pointer;}
 
 #colorsliderbg
 {
@@ -81,8 +81,8 @@
 .advpref
 {
         position: absolute;
-        top: 3.5em;
-        right: 1em;
+        top: 4em;
+        right: 0;
 }
 .advpref a {margin-right: 1em}
 
