@@ -11,7 +11,14 @@ en_US
 __name__
 msg_email
 __template__
-[% sponsor = PROCESS emailsponsor; IF sponsor -%]
+[%
+messages = Slash.getObject('Slash::Messages');
+mobile_code = messages.getMessageDeliveryByName("Mobile");
+code = msg.code;
+pref = msg.user.prefs.$code;
+%]
+
+[% sponsor = PROCESS emailsponsor; IF sponsor && pref != mobile_code -%]
 ======================================================================
 [% sponsor %]
 ======================================================================
@@ -20,6 +27,7 @@ __template__
 [%- END -%]
 [% msg.message %]
 
+[% IF pref != mobile_code %]
 ======================================================================
 
 You have received this message because you subscribed to it
@@ -30,6 +38,7 @@ or change your preferences, please go to your user page.
 	[% absolutedir %]/my/messages
 
 You can log in and change your preferences from there.
+[% END %]
 
 __seclev__
 500
