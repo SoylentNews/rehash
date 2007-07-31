@@ -437,8 +437,12 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .generaltitle h3 a {z-index: 4 !important; position: relative !important;}
 .firehose .generaltitle h3 a {color: #066 !important}
 .firehose h3 a.skin {color: #777 !important;}
-.briefarticle h3, .article h3 {font-size: 95% !important; padding: .25em 50px 0 58px !important; min-height: 22px !important; display: block !important; background: transparent url(//images.slashdot.org/fh_btl_s.png) no-repeat scroll left top !important;}
+.briefarticle h3, .article h3 {font-size: 95% !important; padding: .25em 50px 0 58px !important; min-height: 22px !important; display: block !important;}
 .briefarticle h3 {padding-right: .3em !important}
+.briefarticle .novote h3 {padding: .25em .3em  0 1em !important; margin: 0 !important}
+.article .novote h3 {padding: .25em 50px 0 1em !important}
+.nocolors { background: transparent url(//images.slashdot.org/fh_btl_s.png) no-repeat scroll left top !important;}
+.briefarticle .nocolors h3 { background: transparent url(//images.slashdot.org/fh_bl_s.png) no-repeat scroll left bottom !important;}
 #firehoselist {position: relative}
 
 /* nodmenu */
