@@ -43,7 +43,6 @@ __template__
 	[% firehosebox %]
 	</div>
 </div>
-</div>
 
 __seclev__
 500
