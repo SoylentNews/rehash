@@ -985,7 +985,7 @@ sub setTagsForGlobj {
 
 	# Deactivate any tags previously specified that were deleted from
 	# the tagbox.
-	my @deactivate_tagnames	= grep { !$new_tagnames{$_} } sort keys %old_tagnames
+	my @deactivate_tagnames	= grep { !$new_tagnames{$_} } sort keys %old_tagnames;
 	for my $tagname (@deactivate_tagnames) {
 		$tags->deactivateTag({
 			uid =>		$uid,
@@ -996,7 +996,7 @@ sub setTagsForGlobj {
 	}
 
 	my @created_tagnames = ( );
-	for my $tagname (@create_tagnames) {
+	for my $tagname (@created_tagnames) {
 		my $private = 0;
 		$private = 1 if $priv_tagnames->{$tagname};
 		push @created_tagnames, $tagname
