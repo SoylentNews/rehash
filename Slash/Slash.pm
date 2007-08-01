@@ -1052,7 +1052,7 @@ sub displayThread {
 			}
 		}
 
-		my $highlight = 1 if $comment->{points} >= $highlightthresh && $class ne 'hidden';
+		my $highlight = ($comment->{points} >= $highlightthresh && $class ne 'hidden') ? 1 : 0;
 		$class = 'full' if $highlight;
 		$comment->{class} = $class;
 
