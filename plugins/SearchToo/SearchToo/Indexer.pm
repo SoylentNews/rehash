@@ -343,6 +343,7 @@ sub getRecords {
 			# defaults to date ordering
 			push @newdata, $datum if $fh_sort;
 		}
+
 		if ($fh_sort) {
 			@{$data} = @newdata;
 		}
@@ -509,6 +510,15 @@ sub copyBackup {
 				}
 			}
 		}, $live);
+
+		# cleanup for KS (do to backup ... live is still active,
+		# which means we copy files we don't need, but that's fine
+		while (my $f = readdir(catdir($back, 'invindex'))) {
+			next if $f =~ /^\./;
+			if (-f $f && -s _ == 0 && -M _ > 1) {
+				unlink catfile($back, 'invindex', $f);
+			}
+		}
 	}
 }
 
@@ -580,6 +590,7 @@ sub _dir {
 		$num = $num == 1 ? 0 : 1;
 	}
 
+	# sanity check
 	my $foodir = catdir($class, $self->_type($type) . "_$num");
 	return $dir =~ /\Q$foodir\E$/
 		? $dir
