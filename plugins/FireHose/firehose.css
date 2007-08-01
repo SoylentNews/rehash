@@ -4,7 +4,7 @@
 /* Options */
 .firemenu { position: relative; }
 .firemenu h3 { margin-right: 120px; }
-
+.submenu {position: relative}
 .firemenu h3 img
 {
 	margin: .1em 0 0 .2em !important;
@@ -18,8 +18,8 @@
         width: 140px;
         position: absolute;
         line-height: 100% !important;
-        top: 0 !important;
-        right: 0;
+        top: -2.75em !important;
+        right: -1.2em;
 }
 
 .options span
@@ -27,7 +27,6 @@
         position: relative;
         width: 20px;
         margin: 0 0 0 1px !important;
-        top: .3em;
 }
 
 #play, #pause { left: 0  }
@@ -37,7 +36,7 @@
 
 #colorsliderbg { background: url('//images.slashdot.org/colorscale.png') no-repeat 0px -3px; }
 
-#fh_adv_pref_toggle { background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat scroll 0px -1195px; padding:7px 0pt 7px 20px; color: #fff; position: relative; cursor: pointer;}
+#fh_adv_pref_toggle { background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat scroll 0px -1195px; padding: 11px 20px 11px 0; color: #fff; position: absolute; top: 0; right: 0; cursor: pointer;}
 
 #colorsliderbg
 {
@@ -77,12 +76,6 @@
         text-indent: -7000em;
         position: absolute;
         top: 0;
-}
-.advpref
-{
-        position: absolute;
-        top: 4em;
-        right: 0;
 }
 .advpref a {margin-right: 1em}
 
@@ -148,8 +141,6 @@ ul.menu#fhtablist li.active a, .paginate .active a
 
 ul.menu#fhtablist li.active:before, .paginate .active:before { content: ""; }
 #beforewidget, .paginate span.active {float: left}
-.day.date-tab.active {background: transparent url('//images.slashdot.org/sic_close.png') no-repeat scroll 0px 3px; float: none; border: none; padding-left: 20px !important}
-#fh-paginate .day.date-tab.active {padding-left: 14px !important}
 #beforewidget span, #afterwidget span {line-height:270% !important}
 .paginate .calendar-pane {margin: 0;} 
 
@@ -269,7 +260,6 @@ right: 0;
 	top: 17px;
 	right: 25px;
 }
-.briefarticle .edit {top: 21px; right: 21px; }
 .edit a
 {
 	background: url('//images.slashdot.org/sic_icons.png') no-repeat 27px -398px !important;
@@ -289,7 +279,7 @@ right: 0;
 	position: absolute !important;
 }
 
-.briefarticle .reject {display: none;}
+.briefarticle .reject, .briefarticle .edit {display: none;}
 .article .reject
 {
 	z-index: 1000;
@@ -334,11 +324,17 @@ margin: 2em 0;
 .calheader .calnavright {background-image: url('//images.slashdot.org/arrows.png') !important}
 .calheader .calnavleft {background-image: url('//images.slashdot.org/arrows.png') !important; background-position: 0 -200px}
 .calendar-pane td.oom {background: #999}
-.calendar {background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat scroll 0px -995px; padding-left: 20px; padding-top: 8px; padding-bottom: 8px }
-span.date-tab { background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat scroll 0px -995px; padding:7px 0pt 7px 25px; color: #fff; position: relative; cursor: pointer; }
+span.date-tab { background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat scroll 0px -995px; color: #fff; padding: 20px 0 0 20px; position: absolute; top: -6px; right: 6px; cursor: pointer;} 
+.firemenu span.date-tab { padding: 20px 0 0 20px; top: 0; right: 0;}
+.day.date-tab.active {background: transparent url('//images.slashdot.org/sic_close.png') no-repeat scroll 0px 3px; float: none; border: none; padding: 10px 21px 10px 0 !important;}
+#fh-paginate .day.date-tab.active {padding: 10px 17px 10px 0 !important}
 
 span.date-tab.active div.tab-button { background: #066; }
 #.date-widget.all span.date-tab, .date-widget.now span.date-tab { display: none; }
+.firemenu #fhcalendar-calendar-pane {right: 1em}
+#fh_change_range { font-size: 80% }
+.firemenu .date-tab-bar {float: right; padding: 0 15px .5em 0; margin-right: .6em}
+.date-tab-bar {position: relative; padding-right: 25px;}
 
 ul.menu a img {margin: 0 0 -4px 0}
 #fhtabdel {background:transparent url('//images.slashdot.org/sic_close.png') no-repeat; position: relative; padding: 2px 16px 10px 2px}
@@ -347,11 +343,6 @@ ul.menu a img {margin: 0 0 -4px 0}
 .menu #fh_pag_calendar, .menu .date-tab-bar, .menu .tab-button  {display: inline}
 .menu .date-span-popup {font-size: 90%}
 .menu .edit, .rssicon {margin-top: 2px; margin-left: -4px;}
-
-#fh_change_range { font-size: 80% }
-.firemenu .date-tab-bar {float: right; width: 16em; padding-bottom: .5em}
-.firemenu #fhcalendar-calendar-pane {right: 1em}
-
 
 /* article bottom */
 div.storylinks ul li.comments {position: relative; width: auto; text-align: left; margin: 0; padding: 0;}
@@ -441,8 +432,8 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .briefarticle h3 {padding-right: .3em !important}
 .briefarticle .novote h3 {padding: .25em .3em  0 1em !important; margin: 0 !important}
 .article .novote h3 {padding: .25em 50px 0 1em !important}
-.nocolors { background: transparent url(//images.slashdot.org/fh_btl_s.png) no-repeat scroll left top !important;}
-.briefarticle .nocolors h3 { background: transparent url(//images.slashdot.org/fh_bl_s.png) no-repeat scroll left bottom !important;}
+.nocolors { background: transparent url('//images.slashdot.org/fh_btl_s.png') no-repeat scroll left top !important;}
+.briefarticle .nocolors h3 { background: transparent url('//images.slashdot.org/fh_bl_s.png') no-repeat scroll left bottom !important;}
 #firehoselist {position: relative}
 
 /* nodmenu */
@@ -461,6 +452,6 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .briefarticle .generaltitle, .briefarticle .title, .briefarticle h3 {line-height: 160% !important;}
 .generaltitle, .title, .generaltitle h3 {line-height: 160% !important;}
 
-
 .subdue {background: #555; opacity: .6; position: relative; z-index: 10000}
 .admin .contentsadmin ul.menu {margin: 0}
+
