@@ -4682,3 +4682,6 @@ SELECT @v := tagnameid FROM vars, tagnames WHERE vars.name='tags_viewed_tagname'
 INSERT IGNORE INTO globjs_viewed SELECT NULL, globjid, uid, created_at FROM tags WHERE tagnameid=@v AND private='yes' ORDER BY tagid;
 DELETE FROM tags WHERE tagnameid=@v AND private='yes';
 
+# 2007-07-31
+UPDATE vars SET value = 'T_2_5_0_168' WHERE name = 'cvs_tag_currentcode';
+
