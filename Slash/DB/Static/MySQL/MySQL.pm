@@ -222,8 +222,8 @@ sub getArchiveList {
 	return 0 unless $days_to_archive;
 
 	my $mp_tid = getCurrentStatic('mainpage_nexus_tid');
-	my $nexuses = $self->getNexusTids();
-	my $nexus_clause = join ',', @$nexuses, $mp_tid;
+	my @nexuses = $self->getNexusTids();
+	my $nexus_clause = join ',', @nexuses, $mp_tid;
 	
 	# Close associated story so that final archival .shtml is written
 	# to disk. This is accomplished by the archive.pl task.
