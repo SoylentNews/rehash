@@ -513,11 +513,16 @@ sub copyBackup {
 
 		# cleanup for KS (do to backup ... live is still active,
 		# which means we copy files we don't need, but that's fine
-		while (my $f = readdir(catdir($back, 'invindex'))) {
-			next if $f =~ /^\./;
-			if (-f $f && -s _ == 0 && -M _ > 1) {
-				unlink catfile($back, 'invindex', $f);
+		if (opendir my $dh, catdir($back, 'invindex')) {
+			while (my $f = readdir($dh)) {
+				next if $f =~ /^\./;
+				my $file = catfile($back, 'invindex', $f);
+				if (-f $file && -s _ == 0 && -M _ > 1) {
+					unlink $file;
+				}
 			}
+		} else {
+			warn "Can't open $back/invindex/: $!\n";
 		}
 	}
 }
