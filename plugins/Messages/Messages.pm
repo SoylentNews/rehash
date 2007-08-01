@@ -1123,7 +1123,6 @@ sub getMessageDeliveryByName {
         my $code = $slashdb->sqlSelect("code", "message_deliverymodes", "name = $name_q");
 
         return($code);
-
 }
 
 1;

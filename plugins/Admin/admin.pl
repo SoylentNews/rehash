@@ -2100,7 +2100,6 @@ sub updateStory {
 		}
 		titlebar('100%', getTitle('updateStory-title', $data));
 
-
 		$slashdb->setRelatedStoriesForStory($form->{sid}, $related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr);
 		$slashdb->createSignoff($st->{stoid}, $user->{uid}, "updated");
 		# make sure you pass it the goods
@@ -2417,7 +2416,6 @@ sub saveStory {
 	my $sid = $slashdb->createStory($data);
 
 	if ($sid) {
-
 		$slashdb->setRelatedStoriesForStory($sid, $related_sids_hr, $related_urls_hr, $related_cids_hr, $related_firehose_hr);
 		slashHook('admin_save_story_success', { story => $data });
 		my $st = $slashdb->getStory($data->{sid});

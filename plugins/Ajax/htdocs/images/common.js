@@ -29,7 +29,6 @@ var fh_slider_init_set = 0;
 // eventually add site specific constants like this to a separate .js
 var sitename = "Slashdot";
 
-
 function createPopup(xy, titlebar, name, contents, message, onmouseout) {
 	var body = document.getElementsByTagName("body")[0]; 
 	var div = document.createElement("div");

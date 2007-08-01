@@ -58,7 +58,7 @@ __template__
 	day = day || options.startdate;
 	day = day.replace('-','');
 	day = day || Slash.db.getDay(0);
-	max_days_ahead = options.smalldevices ? 2 : 3
+	max_days_ahead = options.smalldevices ? 2 : 3;
 	days = Slash.getOlderDaysFromDay(day, -1, max_days_ahead); %]
 	[% IF !split_refresh %]<span id="beforewidget">[% END %]
 	[% FOREACH cur_day = days;
