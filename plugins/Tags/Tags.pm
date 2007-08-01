@@ -232,7 +232,7 @@ sub ajaxCreateTag {
 	my $priv_tagnames = $tags->getPrivateTagnames();
 	$hr->{private} = 1 if $priv_tagnames->{lc($form->{name})};
 
-        $tags->createTag($hr);
+	$tags->createTag($hr);
 	return 0;
 }
 
@@ -823,7 +823,7 @@ sub getExampleTagsForStory {
 	my $constants = getCurrentStatic();
 	my $cur_time = $slashdb->getTime();
 	my @examples = split / /,
-		       $constants->{tags_stories_examples};
+		$constants->{tags_stories_examples};
 	my $chosen_ar = $self->getTopiclistForStory($story->{stoid});
 	$#$chosen_ar = 3 if $#$chosen_ar > 3; # XXX should be a var
 	my $tree = $self->getTopicTree();
@@ -1667,9 +1667,9 @@ sub markViewed {
 	my($self, $uid, $globjid) = @_;
 	return 0 if isAnon($uid) || !$globjid;
 	$self->sqlInsert('globjs_viewed', {
-                uid =>		$uid,
-                globjid =>	$globjid,
-		-viewed_at =>	'NOW()',
+		uid        => $uid,
+		globjid    => $globjid,
+		-viewed_at => 'NOW()',
 	}, { ignore => 1, delayed => 1 });
 }
 
