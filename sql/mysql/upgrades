@@ -4671,7 +4671,7 @@ INSERT INTO discussion_kinds (dkid, name) VALUES (7, 'feed');
 
 # For plugins/Messages
 UPDATE message_deliverymodes SET name = 'AIM' WHERE code = 2;
-INSERT INTO message_deliverymodes (code, name, bitvalue) VALUES (3, Mobile, 8);
+INSERT INTO message_deliverymodes (code, name, bitvalue) VALUES (3, 'Mobile', 8);
 UPDATE message_codes SET delivery_bvalue = 12 WHERE type = 'New Story Posted';
 
 # For tagboxes/FHPopularity2
