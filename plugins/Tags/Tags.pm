@@ -1497,7 +1497,7 @@ sub listTagnamesActive {
 		 AND IF(tag_params.value     IS NULL, 1, tag_params.value)     > 0
 		 AND IF(tagname_params.value IS NULL, 1, tagname_params.value) > 0");
 	return [ ] unless $ar && @$ar;
-	$ar = $self->addCloutsToTagArrayref($ar);
+	$self->addCloutsToTagArrayref($ar);
 
 	# Sum up the clout for each tagname, and the median time it
 	# was seen within the interval in question.
