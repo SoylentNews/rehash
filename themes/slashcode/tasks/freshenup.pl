@@ -409,7 +409,7 @@ $task{$me}{code} = sub {
 
 		if ($constants->{plugin}{FireHose}) {
 			gen_firehose_static($virtual_user, "index_firehose.shtml", $gSkin->{name}, "", {  skipmenu => 1, skippop => 1, fhfilter=> "story", duration => "7", mode => 'mixed', color => "black"  }); 
-			gen_firehose_static($virtual_user, "firehose.shtml", $gSkin->{name}, "", { duration => "7", mode => 'fulltitle', color => "blue"  }); 
+			gen_firehose_static($virtual_user, "firehose.shtml", $gSkin->{name}, "", { duration => "7", mode => 'mixed', color => "blue", nodates => '1'  }); 
 		}
 		$slashdb->markSkinClean($mp_skid);
 		delete $dirty_skins{$mp_skid};
@@ -439,7 +439,7 @@ $task{$me}{code} = sub {
 			});
 			if ($constants->{plugin}{FireHose}) {
 				gen_firehose_static($virtual_user, "index_firehose.shtml", $skin->{name}, $skinname, { skipmenu => 1, skippop => 1, fhfilter=> "'story $skin->{name}'", duration => "7", mode => 'mixed', color => "black"  }); 
-				gen_firehose_static($virtual_user, "firehose.shtml", $skin->{name}, $skinname, { duration => "7", mode => 'fulltitle', color => "blue", fhfilter => "'$skin->{name}'" }); 
+				gen_firehose_static($virtual_user, "firehose.shtml", $skin->{name}, $skinname, { duration => "7", mode => 'mixed', color => "blue", nodates => '1', fhfilter => "'$skin->{name}'" }); 
 			}
 
 			$slashdb->markSkinClean($key);
