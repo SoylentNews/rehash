@@ -203,7 +203,7 @@ sub createUpdateItemFromBookmark {
 			my $discussion_id = $self->createDiscussion({
 				uid		=> 0,
 				kind		=> 'feed',
-				title		=> $data->{title},
+				title		=> $bookmark->{title},
 				commentstatus	=> 'logged_in',
 				url		=> "$constants->{rootdir}/firehose.pl?op=view&id=$firehose_id"
 			});

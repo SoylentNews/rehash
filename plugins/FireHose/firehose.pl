@@ -28,7 +28,7 @@ sub main {
 
 	my %ops = (
 		list		=> [1,  \&list, 0, $anonval],
-		view		=> [1, 	\&view, 1,  ""],
+		view		=> [1, 	\&view, 0,  ""],
 		default		=> [1,	\&list, 0,  $anonval],
 		edit		=> [1,	\&edit, 100,  ""],
 		rss		=> [1,  \&rss, 1, ""]
