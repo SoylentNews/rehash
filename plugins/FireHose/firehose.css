@@ -130,6 +130,7 @@ ul.menu#fhtablist li.active
         border-left: 1px solid #777;
         padding: .3em !important;
 	margin: 0 .3em;
+	white-space: nowrap;
 }
 .paginate .inactive {padding: .6em !important;}
 
