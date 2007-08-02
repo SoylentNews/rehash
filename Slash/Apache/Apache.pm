@@ -402,6 +402,11 @@ sub IndexHandler {
 			return DECLINED;
 		}
 
+		if ($key eq 'firehose') {
+			$r->uri($is_user ? '/firehose.pl' : '/firehose.shtml');
+			return OK;
+		}
+
 		my $slashdb = getCurrentDB();
 		my $new_skin = $slashdb->getSkin($key);
 		my $new_skid = $new_skin->{skid} || $constants->{mainpage_skid};
