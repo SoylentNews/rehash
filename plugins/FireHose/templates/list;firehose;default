@@ -102,8 +102,7 @@ END; login_block = BLOCK %]
 </div>
 	[% IF !user.is_anon %]
 		[% PROCESS firehose_tabs tabs = options.tabs options = options %]
-		<div class="advpref" align="right"><a href="#" id="fh_adv_pref_toggle" onclick="firehose_toggle_advpref(); return false">Prefs</a> 
-		</div>
+                <div class="advpref" align="right"><a href="#" id="fh_adv_pref_toggle" onclick="firehose_toggle_advpref(); return false" title="Firehose preferences"></a></div>
 		[% PROCESS adv_pref_firehose options = options %]
 	[% END %]
         [% IF user.is_anon %]
@@ -145,7 +144,7 @@ END; login_block = BLOCK %]
 </div>
 </div>
 [% IF !user.is_admin || (user.is_admin && user.firehose_usermode ) %]
-<p>
+<p style="padding: 1em 1em 0 1em">
 The Slashdot Firehose is a collaborative system designed to allow
 users to assist our editors in the story selection process.  The hose
 contains submissions, RSS Feeds, journals and Slashdot stories, each
