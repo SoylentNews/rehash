@@ -1,0 +1,20 @@
+__section__
+default
+__description__
+Template to display related urls
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+firehose_related
+__seclev__
+10000
+__template__
+<div class="briefarticle brieffirehose">
+	<span class="storytitle"><a href="[% rootdir %]/firehose.pl?id=[% fh_item.id %]&amp;op=view">Firehose:[% fh_item.title %]</a></span> by [% IF !is_anon %]<a href="[% constants.real_rootdir %]/~[% fh_user.nickname | strip_paramattr %]">[% END %][% fh_user.nickname | strip_literal%][% IF !is_anon %] ([% fh_user.uid %])</a>[% END %]
+</div>
+__version__
+$Id$
