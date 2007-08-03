@@ -429,7 +429,7 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .generaltitle h3 a {z-index: 4 !important; position: relative !important;}
 .firehose .generaltitle h3 a {color: #066 !important}
 .firehose h3 a.skin {color: #777 !important;}
-.briefarticle h3, .article h3 {font-size: 95% !important; padding: .25em 50px 0 58px !important; min-height: 22px !important; display: block !important;}
+.briefarticle h3, .article h3 {font-size: 100% !important; padding: .25em 50px 0 58px !important; min-height: 22px !important; display: block !important;}
 .briefarticle h3 {padding-right: .3em !important}
 .briefarticle .novote h3 {padding: .25em .3em  0 1em !important; margin: 0 !important}
 .article .novote h3 {padding: .25em 50px 0 1em !important}
@@ -453,6 +453,6 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .briefarticle .generaltitle, .briefarticle .title, .briefarticle h3 {line-height: 160% !important;}
 .generaltitle, .title, .generaltitle h3 {line-height: 160% !important;}
 
-.subdue {background: #555; opacity: .6; position: relative; z-index: 10000}
+.subdue {background: #000; opacity: .5; position: relative; z-index: 10000}
 .admin .contentsadmin ul.menu {margin: 0}
 
