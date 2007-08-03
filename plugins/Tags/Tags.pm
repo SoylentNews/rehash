@@ -977,11 +977,12 @@ sub setTagsForGlobj {
 
 	my $uid = $options->{uid} || $user->{uid};
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+	# Don't include private tags in the list of old tags that we may delete.
 	my $old_tags_ar = $tags_reader->getTagsByNameAndIdArrayref($table, $id, { uid => $uid });
 	my %old_tagnames = ( map { ($_->{tagname}, 1) } @$old_tags_ar );
 
 	# Create any tag specified but only if it does not already exist.
-	my @create_tagnamess	= grep { !$old_tagnames{$_} } sort keys %new_tagnames;
+	my @create_tagnames	= grep { !$old_tagnames{$_} } sort keys %new_tagnames;
 
 	# Deactivate any tags previously specified that were deleted from
 	# the tagbox.
@@ -996,7 +997,7 @@ sub setTagsForGlobj {
 	}
 
 	my @created_tagnames = ( );
-	for my $tagname (@created_tagnames) {
+	for my $tagname (@create_tagnames) {
 		my $private = 0;
 		$private = 1 if $priv_tagnames->{$tagname};
 		push @created_tagnames, $tagname
@@ -1008,12 +1009,11 @@ sub setTagsForGlobj {
 				private =>	$private
 			});
 	}
-#print STDERR scalar(localtime) . " setTagsForGlobj $table : $id  3 old='@$old_tags_ar' created='@created_tagnames'\n";
 
 	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $id,
-		{ uid => $uid, include_private => 1 });
+		{ uid => $uid }); # don't list private tags
 	my $newtagspreloadtext = join ' ', sort map { $_->{tagname} } @$now_tags_ar;
-
+	return $newtagspreloadtext;
 }
 
 sub ajaxCreateForUrl {
