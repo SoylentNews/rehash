@@ -64,3 +64,5 @@ h3 {margin: .6em 0 0 0;}
 
 #footer .copyright { margin: 1em 0; }
 a, a:visited, .btmnav ul li a, .btmnav ul li a:visited { color: #00e; }
+
+.ccw-upzone, .ccw-downzone { display: block; position: absolute; }
