@@ -232,10 +232,18 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
           <div id="ccw-control" class="ccw-core">
             <div id="ccw-centering-rail" class="ccw-core">
               <div id="ccw-hide-bar-pos" class="ccw-core-pos">
-                <div id="ccw-hide-bar" class="ccw-bar"><div id="ccw-hide-bar-tab" class="ccw-bar-tab"></div></div>
+                <div id="ccw-hide-bar" class="ccw-bar">
+                  <div id="ccw-hide-bar-tab" class="ccw-bar-tab"></div>
+                  <div id="ccw-hide-bar-upzone" class="ccw-upzone" onclick="gCommentControlWidget.stepTHT(HIDE_BAR, +1)"></div>
+                  <div id="ccw-hide-bar-downzone" class="ccw-downzone" onclick="gCommentControlWidget.stepTHT(HIDE_BAR, -1)"></div>
+                </div>
               </div>
               <div id="ccw-abbr-bar-pos" class="ccw-core-pos">
-                <div id="ccw-abbr-bar" class="ccw-bar"><div id="ccw-abbr-bar-tab" class="ccw-bar-tab"></div></div>
+                <div id="ccw-abbr-bar" class="ccw-bar">
+                  <div id="ccw-abbr-bar-tab" class="ccw-bar-tab"></div>
+                  <div id="ccw-abbr-bar-upzone" class="ccw-upzone" onclick="gCommentControlWidget.stepTHT(ABBR_BAR, +1)"></div>
+                  <div id="ccw-abbr-bar-downzone" class="ccw-downzone" onclick="gCommentControlWidget.stepTHT(ABBR_BAR, -1)"></div>
+                </div>
               </div>
             </div>
           </div>
