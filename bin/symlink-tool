@@ -69,7 +69,7 @@ my $plugin_list = $install->_getList(
 );
 
 ############################################################
-# Handle globbing and minifying, do this first so results can be linked
+# Handle globbing and minifying/tidying, do this first so results can be linked
 for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 	for my $glob (keys %{$theme_or_plugin->{'glob'}}) {
 		my $destpath = canonpath(
@@ -80,18 +80,31 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 		for my $file (@{$theme_or_plugin->{$glob}}) {
 			$filelist .= canonpath(catfile($theme_or_plugin->{dir}, $file)) . " ";
 		}
+
 		system("cat $filelist > $destpath");
 		my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
+
+    # you can glob any kinds of files you like, even mixing them...
+    # ...but if the globbed destination claims to be JavaScript, I'll also make a `minified' version
+    # (JavaScript::Minifier is a requirement in the Slash bundle)
 		if ($suffix eq '.js') {
 			my($min_src, $min_dest);
 			open $min_src, '<', $destpath;
 			open $min_dest, '>', "${path}${name}-minified.js";
 			jsmin($min_src, $min_dest);
 		}
-# ...and when we decide to allow CSSTidy:
-#		elsif ($suffix eq '.css') {
-#			system("csstidy $destpath --silent --template=high ${path}${name}-tidied.css");
-#		}
+
+    # ...similarly for CSS, I'll also make a `csstidied' version
+    # (CSSTidy is _not_ a requirement in the Slash bundle, so we have to check)
+ 		elsif ($suffix eq '.css') {
+ 		  my $tidiedpath = "${path}${name}-tidied.css";
+ 		  # create a `tidied' version of css globs if csstidy is available,
+ 		  #   else the tidied version is just a link to the original concatenation
+ 		  # consider: allow custom install dir for csstidy? a la sbindir, datadir, hc_fontpath, et al
+ 			if ( system("csstidy $destpath --silent --template=high $tidiedpath") != 0 ) {
+ 			  link("$destpath", "$tidiedpath");
+ 			}
+ 		}
 	}
 }
 
