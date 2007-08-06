@@ -15,7 +15,7 @@ __seclev__
 __template__
 [% IF env.script_name == "/firehose.pl" || form.ssi %]
 <script type="text/javascript">
-  YAHOO.slashdot.App = function()
+  YAHOO.slashdot.SlashBoxApp = function()
     {
       return {
           init: function()
@@ -40,6 +40,8 @@ __template__
             }
         };
     } ();
+
+YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
 </script>
 [% ua = env.HTTP_USER_AGENT %]
 
