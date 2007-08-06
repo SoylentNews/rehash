@@ -6741,7 +6741,8 @@ sub getStoriesEssentials {
 	# Nope, memcached is not going to help us.  Keep going.
 
 	# Now, if sectioncollapse is set, expand the tid to include all of
-	# its nexus children.
+	# its nexus children.  (Note that $tid may have included duplicate
+	# values;  after this function call, it no longer will.)
 	$tid = $self->_gse_sectioncollapse($tid, $tid_x) if $sectioncollapse;
 
 	# Figure out whether min_stoid is usable.
@@ -7027,7 +7028,10 @@ sub _gse_canonicalize {
 sub _gse_sectioncollapse {
 	my($self, $opt_ar, $tid_x_ar) = @_;
 	my %nexuses = map { ($_, 1) } @$opt_ar;
-	for my $tid (@$opt_ar) {
+	for my $tid (keys %nexuses) {
+		# XXX Should optimize this by writing a version of
+		# getNexusChildrenTids() which takes multiple inputs
+		# and chases them all down together.
 		for my $new (@{ $self->getNexusChildrenTids($tid) }) {
 			$nexuses{$new} = 1;
 		}

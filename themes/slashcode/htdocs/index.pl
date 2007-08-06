@@ -108,6 +108,9 @@ my $start_time = Time::HiRes::time;
 		push @{$gse_hr->{tid}}, @$nexus_children;
 		push @{$gse_hr->{tid}}, @always_tids,
 			if @always_tids;
+		# Eliminate duplicates and sort.
+		my %tids = ( map { ($_, 1) } @{$gse_hr->{tid}} );
+		$gse_hr->{tid} = [ sort { $a <=> $b } keys %tids ];
 	}
 	# Now exclude characteristics.  One tricky thing here is that
 	# we never exclude the nexus for the current skin -- if the user
@@ -132,12 +135,34 @@ my $start_time = Time::HiRes::time;
 #	$gse_hr->{limit} = $user_maxstories if $user_maxstories;
 
 	$gse_hr->{issue} = $issue if $issue;
-	if (rand(1) < $constants->{index_gse_backup_prob}) {
-		$stories = $reader->getStoriesEssentials($gse_hr);
-	} else {
-		$stories = $slashdb->getStoriesEssentials($gse_hr);
+	my $gse_db = rand(1) < $constants->{index_gse_backup_prob} ? $reader : $slashdb;
+	$stories = $gse_db->getStoriesEssentials($gse_hr);
+
+	# Workaround for a bug in saving/updating.  Sometimes a story
+	# will be saved with neverdisplay=1 but with an incorrect
+	# story_topics_rendered row that places it in a nexus as well.
+	# Until we figure out why, there's additional logic here to
+	# make sure we screen out neverdisplay stories. -Jamie 2007-08-06
+	my $stoid_in_str = join(',', map { $_->{stoid} } @$stories);
+	my $nd_hr = { };
+	if ($stoid_in_str) {
+		my $nd_hr = $gse_db->sqlSelectAllKeyValue('stoid, value',
+			'story_param',
+			qq{stoid IN ($stoid_in_str) AND name='neverdisplay' AND value != 0});
+		if (keys %$nd_hr) {
+			for my $story_hr (@$stories) {
+				$story_hr->{neverdisplay} = 1 if $nd_hr->{ $story_hr->{stoid} };
+			}
+		}
 	}
-	
+	if (grep { $_->{neverdisplay} } @$stories) {
+		require Data::Dumper; $Data::Dumper::Sortkeys = 1;
+		my @nd_ids = map { $_->{stoid} } grep { $_->{neverdisplay} } @$stories;
+		my $gse_str = Data::Dumper::Dumper($gse_hr); $gse_str =~ s/\s+/ /g;
+		print STDERR scalar(gmtime) . " index.pl ND story '@nd_ids' returned by gSE called with params: '$gse_str'\n";
+		$stories = [ grep { !$_->{neverdisplay} } @$stories ];
+	}
+
 	#my $last_mainpage_view;
 	#$last_mainpage_view = $slashdb->getTime() if $gSkin->{nexus} == $constants->{mainpage_skid} && !$user->{is_anon};
 
