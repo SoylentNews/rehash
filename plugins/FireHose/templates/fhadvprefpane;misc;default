@@ -35,7 +35,7 @@ __template__
 <input type="checkbox" name="nobylines" onchange="firehose_set_options('nobylines', !this.checked)" [% IF !options.nobylines; constants.markup_checked_attribute; END %]> Bylines <br>
 <input type="checkbox" name="nothumbs" onchange="firehose_set_options('nothumbs', !this.checked)" [% IF !options.nothumbs; constants.markup_checked_attribute; END %]> Thumbs <br>
 <input type="checkbox" name="nocolors" onchange="firehose_set_options('nocolors', !this.checked)" [% IF !options.nocolors; constants.markup_checked_attribute; END %]> Color Swatches<br>
-<input type="checkbox" name="mode" onchange="firehose_set_options('mixedmode', this.checked)" [% IF options.mode == "mixed"; constants.markup_checked_attribute; END %]> Expand Top Rated<br>
+<input type="checkbox" name="mode" onchange="firehose_set_options('mixedmode', this.checked)" [% IF options.mixedmode; constants.markup_checked_attribute; END %]> Expand Top Rated<br>
 [% default = options.pagesize || "small" %]
 Page size: [% Slash.createSelect('pagesize', { 'small' => 'Small', 'large' => 'Large'}, { default => default, onchange => "firehose_set_options('pagesize',this.options[this.selectedIndex].value)", return => 1} ) %]<br>
 [% IF user.is_admin %]
@@ -78,7 +78,7 @@ Page size: [% Slash.createSelect('pagesize', { 'small' => 'Small', 'large' => 'L
 </tr>
 <tr>
 	<td>
-		[% IF options.orderby == "popularity" || options.orderby == "editorpop" %]
+		[% IF options.orderby == "popularity" || options.orderby == "editorpop" || options.orderby == "popularity2" %]
 			<span id="advpopularity" onclick="firehose_set_options('orderby','createtime')"><a href="#">Popularity</a></span>
 		[% ELSE  %]
 			<span id="advtime" onclick="firehose_set_options('orderby','popularity')"><a href="#">Time</a></span>
