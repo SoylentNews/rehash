@@ -1081,7 +1081,7 @@ sub ajaxFireHoseGetUpdates {
 	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
 
 	foreach (@$items) {
-		if ($mode eq "mixed") {
+		if ($opts->{mixedmode}) {
 			$curmode = "full";
 			$curmode = "fulltitle" if $_->{$popularitycol} < $mixed_abbrev_pop;
 
@@ -1570,20 +1570,19 @@ sub getAndSetOptions {
 	my $options 	= {};
 
 	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1 };
-	my $modes = { full => 1, fulltitle => 1, mixed => 1};
+	my $modes = { full => 1, fulltitle => 1};
 	my $pagesizes = { "small" => 1, "large" => 1 };
 
 	my $no_saved = $form->{no_saved};
 	$opts->{no_set} ||= $no_saved;
 
 	if (defined $form->{mixedmode} && $form->{setfield}) {
-		if ($form->{mixedmode}) {
-			$form->{mode} = "mixed";
-		} else {
-			$form->{mode} = "fulltitle";
-		}
+		$options->{mixedmode} = $form->{mixedmode} ? 1 : 0;
+	} else {
+		$options->{mixedmode} = $user->{firehose_mixedmode};
 	}
 	my $mode = $form->{mode} || $user->{firehose_mode};
+	$mode = "fulltitle" if $mode eq "mixed";
 
 	my $pagesize = $pagesizes->{$form->{pagesize}} ? $form->{pagesize} : $user->{firehose_pagesize} || "small";
 	$options->{pagesize} = $pagesize;
@@ -1777,12 +1776,6 @@ sub getAndSetOptions {
 	if ($mode eq "full") {
 		if ($user->{is_admin}) {
 			$options->{limit} = $pagesize eq "large" ? 50 : 25;
-		} else {
-			$options->{limit} = $pagesize eq "large" ? 25 : 15;
-		}
-	} elsif ($mode eq "mixed") {
-		if ($user->{is_admin}) {
-			$options->{limit} = $pagesize eq "large" ? 25 : 15;
 		} else {
 			$options->{limit} = $pagesize eq "large" ? 25 : 15;
 		}
@@ -2068,7 +2061,7 @@ sub listView {
 	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
 	
 	foreach (@$items) {
-		if ($mode eq "mixed") {
+		if ($options->{mixedmode}) {
 			$curmode = "full";
 			$curmode = "fulltitle" if $_->{$popularitycol} < $mixed_abbrev_pop;
 

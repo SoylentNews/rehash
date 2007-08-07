@@ -55,7 +55,7 @@ __template__
 			<td align="RIGHT" valign="TOP">[% story.weight %]</td>
 			<td valign="TOP"><a href="[% gSkin.rootdir %]/article.pl?sid=[% story.sid %]">
 			[% story.title %]</a></td>
-			<td valign="TOP">[% Slash.timeCalc(story.time) %]</td>
+			<td valign="TOP">[% Slash.timeCalc(story.time, "%Y-%m-%d") %]</td>
 			<td valign="TOP">
 			[% FOREACH word = story.words %]
 				[%- word -%][% UNLESS words_seen.$word %]<input type="checkbox" name="set_common_word" value="[% word %]">[%- END -%]
@@ -70,7 +70,7 @@ __template__
                         <td>Y=[% yoogli_similar_stories.$story.relevance.substr(0, 4) %]</td>
                         <td valign="TOP"><a href="[% yoogli_similar_stories.$story.url %]" title="[% yoogli_similar_stories.$story.title %]">
                         [% yoogli_similar_stories.$story.title.substr(0, 35) %]...</a></td>
-                        <td valign="TOP">[% Slash.timeCalc(yoogli_similar_stories.$story.date) %]</td>
+                        <td valign="TOP">[% Slash.timeCalc(yoogli_similar_stories.$story.date, "%Y-%m-%d") %]</td>
                         <td>&nbsp;</td>
                         </tr>
                 [% END %]

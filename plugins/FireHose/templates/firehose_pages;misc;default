@@ -34,7 +34,7 @@ __template__
      END;
 
      num_page_display = constants.firehose_num_page_display || 10;
-     IF options.smalldevices; num_page_display = 6; END;
+     IF options.smalldevices; num_page_display = 4; END;
      start_page_num = 1;
      end_page_num = page_max;
 
@@ -54,6 +54,8 @@ __template__
          END;
        END;
      END;
+
+     IF search_results.records_pages.defined && search_results.records_pages > 1;
      FOR i_page IN [ start_page_num .. end_page_num ] %]
 <a href="[% gSkin.rootdir %]/[% fh_page %]?page=[% (i_page - 1) %][% param_str %][% page_extras %]" [% IF i_page == page_cur %]class="fh_cur_page"[% END %]>[%
        IF i_page == start_page_num %]<b>&lsaquo;</b> [% END;
@@ -61,6 +63,8 @@ __template__
          ELSE; i_page; END;
        IF i_page == end_page_num %] <b>&rsaquo;</b>[% END %]</a>
 [%   END;
+     END;
+
    END;
 
    IF !contentsonly %]</span>[% END %]

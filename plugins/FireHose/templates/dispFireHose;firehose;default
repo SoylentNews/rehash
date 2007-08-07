@@ -138,7 +138,9 @@ END %]
 			[% IF item.discussion;
 			   disc = Slash.db.getDiscussion(item.discussion); %]
 			<li class="comments">
-				<a href="[% gSkin.rootdir %]/comments.pl?sid=[% item.discussion %]">[% disc.commentcount %]</a> comment[% IF disc.commentcount != 1 %]s[% END %]
+				[% skin = gSkin %]
+				[% IF item.type == "story"; skin = Slash.db.getSkin(item.primaryskid); END %]
+				<a href="[% skin.rootdir %]/comments.pl?sid=[% item.discussion %]">[% disc.commentcount %]</a> comment[% IF disc.commentcount != 1 %]s[% END %]
 			</li>
 			[% END %]
 		</ul>
