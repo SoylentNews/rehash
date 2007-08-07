@@ -12111,7 +12111,8 @@ sub getRelatedStoriesForStoid {
 }
 
 sub setRelatedStoriesForStory {
-	my($self, $sid_or_stoid, $rel_sid_hr, $rel_url_hr, $rel_cid_hr) = @_;
+	my($self, $sid_or_stoid, $rel_sid_hr, $rel_url_hr, $rel_cid_hr, $rel_fh_hr) = @_;
+	my $constants = getCurrentStatic();
 	my $stoid = $self->getStoidFromSidOrStoid($sid_or_stoid);
 	my $stoid_q = $self->sqlQuote($stoid);
 	my $story = $self->getStory($stoid);
@@ -12191,6 +12192,18 @@ sub setRelatedStoriesForStory {
 			ordernum => $i,
 		});
 		$i++;
+	}
+
+	if($constants->{firehose_add_related}) {
+		foreach my $rel_fh (keys %$rel_fh_hr) {
+			$self->sqlInsert("related_stories", {
+				stoid 		=> $stoid,
+				fhid 		=> $rel_fh,
+				title		=> "Firehose: $rel_fh_hr->{$rel_fh}->{title}",
+				ordernum 	=> $i
+			});
+			$i++;
+		}
 	}
 	
 	foreach my $rel_url (keys %$rel_url_hr) {
