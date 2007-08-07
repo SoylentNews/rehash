@@ -1545,6 +1545,12 @@ sub displayRelatedStories {
 			next if !$viewable;
 			my $related_story = $reader->getStory($rel->{rel_sid});
 			$return .= displayStory($related_story->{stoid}, 0, { dispmode => "brief", getintro => 1, expandable => 1 });
+		} elsif ($rel->{fhid}) {
+			my $firehose = getObject("Slash::FireHose");
+			my $fh_item = $firehose->getFireHose($rel->{fhid});
+			my $fh_user = $reader->getUser($fh_item->{uid});
+			my $is_anon = isAnon($fh_item->{uid});
+			$return .= slashDisplay("firehose_related", { fh_item => $fh_item, fh_user => $fh_user, is_anon => $is_anon }, { Return => 1});
 		} elsif ($rel->{cid}) {
 			my $comment = $reader->getComment($rel->{cid});
 			my $discussion = $reader->getDiscussion($comment->{sid});
@@ -1717,6 +1723,7 @@ sub getOlderDaysFromDay {
 	}
 	return $ret_array;
 }
+
 
 #========================================================================
 
