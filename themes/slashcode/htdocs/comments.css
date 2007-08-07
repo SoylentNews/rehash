@@ -295,7 +295,7 @@ div.ccw-panel, #ccw-control,
 .horizontal #ccw-abbr-bar-tab { top: 0.5em; left: -5px; }
 .horizontal #ccw-hide-bar-tab { top: 0.5em; left: 4px; }
 
-.ccw-upzone, .ccw-downzone { display: block; position: absolute; height: 12px; width: 100%; }
+.ccw-upzone, .ccw-downzone { display: none; height: 12px; width: 100%; }
 .horizontal .ccw-upzone, .horizontal .ccw-downzone { width: 12px; height: 100%; }
 .ccw-upzone { top: -12px; }
 .ccw-downzone { top: 4px; }
