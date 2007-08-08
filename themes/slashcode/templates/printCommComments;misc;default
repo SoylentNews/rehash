@@ -89,9 +89,9 @@ __template__
 	[% IF lvl %]
 	[% END %]
 	[% thread = Slash.displayThread(sid, pid, lvl, comments) %]
-	[% IF thread %]
+	[% IF thread || discussion2 %]
 		[% UNLESS cid %]<ul id="commentlisting">[% END %]
-			[% thread %]
+			[% thread || '' %]
 			<li id="roothiddens" class="hide"></li>
 		[% UNLESS cid %]</ul>[% END %]
 	[% END %]
