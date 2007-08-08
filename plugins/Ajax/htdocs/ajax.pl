@@ -293,7 +293,7 @@ sub fetchComments {
 	$user->{state}{ajax_accesslog_op} = "ajax_comments_fetch";
 #use Data::Dumper; print STDERR Dumper [ $cids, $id, $cid, $max_cid ];
 	# XXX error?
-	return unless $id && ($max_cid || @$cids);
+	return unless $id && (defined($max_cid) || @$cids);
 
 	my $discussion = $slashdb->getDiscussion($id);
 	if ($discussion->{type} eq 'archived') {
@@ -316,7 +316,7 @@ sub fetchComments {
 	return unless $comments && keys %$comments;
 
 	my %data;
-	if ($max_cid) {
+	if (defined($max_cid)) {
 		$cids = [ map { $_->[0] }
 			@{$slashdb->sqlSelectAll(
 				'cid', 'comments',
