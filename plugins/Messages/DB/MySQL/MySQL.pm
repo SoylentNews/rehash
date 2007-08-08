@@ -452,6 +452,12 @@ sub _getMailingUsers {
 		sectioncollapse
 		daily_mail_special seclev
 	)];
+	# XXX While normally I'm all in favor of using object-specific
+	# get and set methods, here getUser() may be the wrong approach.
+	# We may have tens of thousands of users in @$users and it will
+	# be a significant optimization of resources both for slashd and
+	# for the database to grab just the above fields all at once.
+	# -Jamie 2007-08-08
 	$users     = { map { $_ => $self->getUser($_, $fields) } @$users };
 	return $users;
 }
