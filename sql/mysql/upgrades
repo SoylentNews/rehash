@@ -4697,3 +4697,7 @@ UPDATE vars SET value = 'T_2_5_0_168' WHERE name = 'cvs_tag_currentcode';
 
 # For plugins/Messages
 UPDATE message_codes SET delivery_bvalue = 15 WHERE type = 'Comment Reply';
+
+# 2007-08-08
+UPDATE vars SET value = 'T_2_5_0_169' WHERE name = 'cvs_tag_currentcode';
+
