@@ -384,7 +384,13 @@ sub getFireHoseEssentials {
 				$query{$_}	= $options->{$_}		if $options->{$_};
 			}
 
-			# still need sorting and filtering by date
+			if ($options->{startdate}) {
+				$opts{daystart} = $options->{startdate};
+			}
+			if ($options->{duration} && $options->{duration} >= 0) {
+				$opts{dayduration} = $options->{duration};
+			}
+
 			$opts{records_max}	= $options->{limit}		unless $options->{nolimit};
 			$opts{records_start}	= $options->{offset}		if $options->{offset};
 			$opts{sort}		= 3;  # sorting handled by caller
@@ -1570,7 +1576,7 @@ sub getAndSetOptions {
 	my $options 	= {};
 
 	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1 };
-	my $modes = { full => 1, fulltitle => 1};
+	my $modes = { full => 1, fulltitle => 1 };
 	my $pagesizes = { "small" => 1, "large" => 1 };
 
 	my $no_saved = $form->{no_saved};

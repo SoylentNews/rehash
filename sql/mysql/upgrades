@@ -4646,8 +4646,6 @@ INSERT INTO vars (name, value, description) VALUES ('smalldevices_ua_regex', 'iP
 # 2007-07-11
 UPDATE vars SET value = 'T_2_5_0_166' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
-
 # For tagboxes/FHPopularity2
 INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity2_gracetime', '1200', 'Number of initial seconds of a firehose item life let it float higher in the hose');
 INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity2_gracemult', '3', 'Multiplier factor for a firehose item during the grace period');
@@ -4655,11 +4653,7 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity2
 # 2007-07-17
 UPDATE vars SET value = 'T_2_5_0_167' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 INSERT INTO vars (name, value, description) VALUES ('tags_viewed_tagname', 'viewed', 'Tagname to assign to stories and other items a user has viewed');
-
-# SLASHDOT LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('login_nontemp_days', '365', 'Days before a nontemp login expires');
 
@@ -4677,23 +4671,29 @@ UPDATE message_codes SET delivery_bvalue = 12 WHERE type = 'New Story Posted';
 # For tagboxes/FHPopularity2
 INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity2_gracevotes', '4', 'Max number of votes for which the grace period will apply');
 
+# For plugins/Tags
+CREATE TABLE globjs_viewed (
+    gvid        int UNSIGNED NOT NULL AUTO_INCREMENT,
+    globjid     int UNSIGNED NOT NULL,
+    uid         mediumint UNSIGNED NOT NULL,
+    viewed_at   datetime NOT NULL,
+    PRIMARY KEY (gvid),
+    UNIQUE globjid_uid (globjid, uid)
+) TYPE=InnoDB;
+
 # For plugins/FireHose
 SELECT @v := tagnameid FROM vars, tagnames WHERE vars.name='tags_viewed_tagname' AND tagnames.tagname=IF(value, value, 'viewed');
 INSERT IGNORE INTO globjs_viewed SELECT NULL, globjid, uid, created_at FROM tags WHERE tagnameid=@v AND private='yes' ORDER BY tagid;
 DELETE FROM tags WHERE tagnameid=@v AND private='yes';
 
-# For plugins/Tags
-CREATE TABLE globjs_viewed (
-	gvid		int UNSIGNED NOT NULL AUTO_INCREMENT,
-	globjid		int UNSIGNED NOT NULL,
-	uid		mediumint UNSIGNED NOT NULL,
-	viewed_at	datetime NOT NULL,
-	PRIMARY KEY (gvid),
-	UNIQUE globjid_uid (globjid, uid)
-) TYPE=InnoDB;
-
 # 2007-07-31
 UPDATE vars SET value = 'T_2_5_0_168' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
+# PUDGE LAST UPDATED HERE
 
 # For plugins/Messages
 UPDATE message_codes SET delivery_bvalue = 15 WHERE type = 'Comment Reply';

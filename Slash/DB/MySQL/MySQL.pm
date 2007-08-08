@@ -12194,7 +12194,7 @@ sub setRelatedStoriesForStory {
 		$i++;
 	}
 
-	if($constants->{firehose_add_related}) {
+	if ($constants->{firehose_add_related}) {
 		foreach my $rel_fh (keys %$rel_fh_hr) {
 			$self->sqlInsert("related_stories", {
 				stoid 		=> $stoid,

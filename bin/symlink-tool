@@ -84,9 +84,9 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 		system("cat $filelist > $destpath");
 		my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
 
-    # you can glob any kinds of files you like, even mixing them...
-    # ...but if the globbed destination claims to be JavaScript, I'll also make a `minified' version
-    # (JavaScript::Minifier is a requirement in the Slash bundle)
+		# you can glob any kinds of files you like, even mixing them...
+		# ...but if the globbed destination claims to be JavaScript, I'll also make a `minified' version
+		# (JavaScript::Minifier is a requirement in the Slash bundle)
 		if ($suffix eq '.js') {
 			my($min_src, $min_dest);
 			open $min_src, '<', $destpath;
@@ -94,8 +94,8 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 			jsmin($min_src, $min_dest);
 		}
 
-    # ...similarly for CSS, I'll also make a `csstidied' version
-    # (CSSTidy is _not_ a requirement in the Slash bundle, so we have to check)
+		# ...similarly for CSS, I'll also make a `csstidied' version
+		# (CSSTidy is _not_ a requirement in the Slash bundle, so we have to check)
  		elsif ($suffix eq '.css') {
  		  my $tidiedpath = "${path}${name}-tidied.css";
  		  # create a `tidied' version of css globs if csstidy is available,

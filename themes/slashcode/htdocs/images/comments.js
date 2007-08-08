@@ -1232,9 +1232,9 @@ YAHOO.slashdot.ThresholdWidget.prototype.getTHT = function() {
 }
 
 YAHOO.slashdot.ThresholdWidget.prototype.stepTHT = function( threshold, step ) {
-  var ts = this.displayedTs.slice();
-  ts[threshold] += step;
-  this._setTs(pinToRange(this.constraintRange, ts));
+	var ts = this.displayedTs.slice();
+	ts[threshold] += step;
+	this._setTs(pinToRange(this.constraintRange, ts));
 }
 
 YAHOO.slashdot.ThresholdWidget.prototype.setCounts = function( counts ) {
