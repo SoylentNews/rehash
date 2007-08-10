@@ -178,7 +178,9 @@ padding-top:0.4em;}
 .article .firehosetag { background: #fff; }
 
 /* Brief Articles */
-div.briefarticle .storylinks { display: none; }
+.briefarticle .storylinks ul li { display: none; }
+.briefarticle .storylinks div, .briefarticle .storylinks ul {background: transparent}
+.briefarticle .storylinks {margin: -1.5em 0 0 0 !important}
 #firehose div.briefarticle a span { float: none; }
 #firehose div.briefarticle .topic { display: none }
 .briefarticle { position: relative !important; }
@@ -456,3 +458,7 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .subdue {background: #000; opacity: .3; position: relative; z-index: 10000}
 .admin .contentsadmin ul.menu {margin: 0}
 
+.briefarticle .storylinks .comments {position: absolute !important; top: .5em !important; right: 1em !important; display: block; border: none; font-size: 75%;}
+.briefarticle .storylinks .comments a {text-decoration: none; text-align: center; background:transparent url('/images/sic_icons.png') no-repeat scroll 0px -1393px; padding: 10px 7px 9px 7px;}
+.briefarticle .storylinks .comments a:hover {background:transparent url('/images/sic_icons.png') no-repeat scroll 0px -1491px;}
+.briefarticle .storylinks .comments.nocomment, .briefarticle .storylinks .comments span  {display: none}
