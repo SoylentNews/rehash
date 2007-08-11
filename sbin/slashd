@@ -45,9 +45,16 @@ use vars qw(
 	$event_ar
 	$cron
 	$task_exit_flag
+	$PROGNAME $virtual_user
 );
 
-my $virtual_user = $ARGV[0];
+$virtual_user = $ARGV[0];
+
+# Rename the binary in the process list, to make identification
+# with `ps` easier (see also do_child below).
+$PROGNAME = basename($0);
+$0 = "$PROGNAME $virtual_user";
+
 eval {
 	createEnvironment($virtual_user);
 };
@@ -963,6 +970,11 @@ sub do_child {
 	# at its earliest appropriate opportunity.  It's up to the task code
 	# to check this var and behave accordingly, though.
 	$SIG{USR1} = sub { $task_exit_flag = 1 };
+
+	# Change the name of the child process in the process list to be
+	# simply "slashd virtuser taskname".  This makes identification of
+	# the children in `ps` much easier.
+	$0 = "$PROGNAME $virtual_user $basename_nopl";
 
 	setUserDBs($user);
 
