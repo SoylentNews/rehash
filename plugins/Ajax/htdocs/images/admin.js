@@ -200,6 +200,14 @@ function console_update(use_fh_interval, require_fh_timeout) {
 	setTimeout("console_update(" + use_fh_interval + "," + fh_is_timed_out +")", interval);
 }
 
+function firehose_usage() {
+	var params = [];
+	params['op'] = 'firehose_usage'
+	var interval = 300000;
+	ajax_update(params, 'firehose_usage-content');
+	setTimeout("firehose_usage()", interval);
+}
+
 function make_spelling_correction(misspelled_word, form_element) {
 	var selected_key   = "select_" + form_element + '_' + misspelled_word;
 	var selected_index = document.forms.slashstoryform.elements[selected_key].selectedIndex;
