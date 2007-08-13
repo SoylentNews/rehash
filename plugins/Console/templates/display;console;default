@@ -42,6 +42,9 @@ __template__
 	<script type="text/javascript">
 		console_updating = 1;
 		console_update([% IF constants.plugin.FireHose %]1[% ELSE %]0[% END %]);
+		[% IF constants.plugin.FireHose %]
+		firehose_usage();
+		[% END %]
 	</script>
 </div>
 __seclev__
