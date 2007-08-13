@@ -1,0 +1,24 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+firehose_usage
+__seclev__
+10000
+__template__
+<table>
+<tr><td></td><td>1 hr</td><td>1 day</td></tr>
+<tr><td>users</td><td>[% fh_users_hour %]</td><td>[% fh_users_day %]</td></tr>
+<tr><td>nods</td><td>[% nod_cnt_hour %]</td><td>[% nod_cnt %] </td></tr>
+<tr><td>nixes</td><td>[% nix_cnt_hour %]</td><td>[% nix_cnt %]</td></tr>
+<tr><td>tags</td><td>[% tag_cnt_hour %]  </td><td>[% tag_cnt %]</td></tr>
+<tr><td>objects</td><td>[% globjid_cnt_hour %]</td><td>[% globjid_cnt %]</td></tr>
+</table>
+
