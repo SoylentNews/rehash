@@ -825,13 +825,21 @@ sub rejectItem {
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $firehose = getObject("Slash::FireHose");
-	my $tags = getObject("Slash::Tags");
 	my $id = $form->{id};
 	my $id_q = $firehose->sqlQuote($id);
 	return unless $id && $firehose;
-	my $item = $firehose->getFireHose($id);
+	$firehose->reject($id);
+}
+
+sub reject {
+	my ($self, $id) = @_;
+	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
+	my $tags = getObject("Slash::Tags");
+	my $item = $self->getFireHose($id);
+	return unless $id && $user->{is_admin};
 	if ($item) {
-		$firehose->setFireHose($id, { rejected => "yes" });
+		$self->setFireHose($id, { rejected => "yes" });
 		if ($item->{globjid} && !isAnon($user->{uid})) {
 			my $downvote = $constants->{tags_downvote_tagname} || 'nix';
 			$tags->createTag({
@@ -844,19 +852,20 @@ sub rejectItem {
 		
 		if ($item->{type} eq "submission") {
 			if ($item->{srcid}) {
-				my $n_q = $firehose->sqlQuote($item->{srcid});
+				my $n_q = $self->sqlQuote($item->{srcid});
 				my $uid = $user->{uid};
-				my $rows = $firehose->sqlUpdate('submissions',
+				my $rows = $self->sqlUpdate('submissions',
 					{ del => 1 }, "subid=$n_q AND del=0"
 				);
 				if ($rows) {
-					$firehose->setUser($uid,
+					$self->setUser($uid,
 						{ -deletedsubmissions => 'deletedsubmissions+1' }
 					);
 				}
 			}
 		}
 	}
+	
 }
 
 sub ajaxSaveOneTopTagFirehose {
@@ -2266,6 +2275,37 @@ sub getFireHoseItemsByUrl {
 	my($self, $url_id) = @_;
 	my $url_id_q = $self->sqlQuote($url_id);
 	return $self->sqlSelectAllHashrefArray("*", "firehose, firehose_text", "firehose.id=firehose_text.id AND url_id = $url_id_q");
+}
+
+sub ajaxFireHoseUsage {
+	my($slashdb, $constants, $user, $form) = @_;
+
+	print STDERR "ajaxFHUsage\n";
+
+	my $tags = getObject('Slash::Tags');
+	my $downlabel = $constants->{tags_downvote_tagname} || 'nix';
+	my $down_id = $tags->getTagnameidFromNameIfExists($downlabel);
+	
+	my $uplabel = $constants->{tags_downvote_tagname} || 'nod';
+	my $up_id = $tags->getTagnameidFromNameIfExists($uplabel);
+	my $data = {};
+
+
+	$data->{fh_users} = $slashdb->sqlSelect("count(distinct uid)", "tags", "tagnameid in($up_id, $down_id)");
+	my $d_clause = " and created_at > date_sub(now(), interval 1 day)";
+	my $h_clause = " and created_at > date_sub(now(), interval 1 hour)";
+	$data->{fh_users_day} = $slashdb->sqlSelect("count(distinct uid)", "tags", "tagnameid in($up_id, $down_id) $d_clause");
+	$data->{fh_users_hour} = $slashdb->sqlSelect("count(distinct uid)", "tags", "tagnameid in($up_id, $down_id) $h_clause");
+	$data->{tag_cnt} = $slashdb->sqlSelect("count(*)", "tags,users,firehose", "firehose.globjid=tags.globjid AND tags.uid=users.uid AND users.seclev = 1 $d_clause");
+	$data->{tag_cnt_hour} = $slashdb->sqlSelect("count(*)", "tags,users,firehose", "firehose.globjid=tags.globjid AND tags.uid=users.uid AND users.seclev = 1 $h_clause");
+	$data->{nod_cnt} = $slashdb->sqlSelect("count(*)", "tags,users", "tags.uid=users.uid AND users.seclev = 1 AND tagnameid in($up_id) $d_clause");
+	$data->{nod_cnt_hour} = $slashdb->sqlSelect("count(*)", "tags,users", "tags.uid=users.uid AND users.seclev = 1 AND tagnameid in($up_id) $h_clause");
+	$data->{nix_cnt} = $slashdb->sqlSelect("count(*)", "tags,users", "tags.uid=users.uid AND users.seclev = 1 AND tagnameid in($down_id) $d_clause");
+	$data->{nix_cnt_hour} = $slashdb->sqlSelect("count(*)", "tags,users", "tags.uid=users.uid AND users.seclev = 1 AND tagnameid in($down_id) $h_clause");
+
+	$data->{globjid_cnt} = $slashdb->sqlSelect("count(distinct globjid)", "tags,users", "tags.uid=users.uid AND users.seclev = 1 AND tagnameid in($up_id, $down_id) $d_clause");
+	$data->{globjid_cnt_hour} = $slashdb->sqlSelect("count(distinct globjid)", "tags,users", "tags.uid=users.uid AND users.seclev = 1 AND tagnameid in($up_id, $down_id) $h_clause");
+	slashDisplay("firehose_usage", $data, { Return => 1 });
 }
 
 1;

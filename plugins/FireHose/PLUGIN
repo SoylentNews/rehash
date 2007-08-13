@@ -19,6 +19,7 @@ template=templates/fireHoseForm;misc;default
 template=templates/firehose_pages;misc;default
 template=templates/firehose_tags_top;misc;default
 template=templates/firehose_tabs;misc;default
+template=templates/firehose_usage;misc;default
 template=templates/firehose_options;misc;default
 template=templates/formatHoseIntro;misc;default
 template=templates/formatHoseTitle;misc;default

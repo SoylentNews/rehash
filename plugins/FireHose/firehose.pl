@@ -27,9 +27,9 @@ sub main {
 	my $anonval = $constants->{firehose_anonval_param} || "";
 
 	my %ops = (
-		list		=> [1,  \&list, 0, $anonval],
+		list		=> [1,  \&list, 1, $anonval, { issue => 1, page => 1}],
 		view		=> [1, 	\&view, 0,  ""],
-		default		=> [1,	\&list, 0,  $anonval],
+		default		=> [1,	\&list, 1,  $anonval, { issue => 1, page => 1}],
 		edit		=> [1,	\&edit, 100,  ""],
 		rss		=> [1,  \&rss, 1, ""]
 	);
@@ -45,8 +45,18 @@ sub main {
 
 	if (!$op || !exists $ops{$op} || !$ops{$op}[ALLOWED] || $user->{seclev} < $ops{$op}[MINSECLEV] ) {
 		$op = 'default';
+		my $redirect = 0;
 		if ($user->{seclev} < 1 && $ops{$op}[3] && $ops{$op}[3] ne $form->{anonval}) {
-			redirect("$gSkin->{rootdir}/login.pl");
+			$redirect = 1;
+		}
+		if ($ops{$op}[4] && ref($ops{$op}[4]) eq "HASH") {
+			$redirect = 0;
+			foreach (keys %$form) {
+				$redirect = 1 if !$ops{$op}[4]{$_}; 
+			}
+		}
+		if ($redirect) {
+			redirect("$gSkin->{rootdir}/firehose.shtml");
 			return;
 		}
 	}
