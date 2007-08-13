@@ -2280,8 +2280,6 @@ sub getFireHoseItemsByUrl {
 sub ajaxFireHoseUsage {
 	my($slashdb, $constants, $user, $form) = @_;
 
-	print STDERR "ajaxFHUsage\n";
-
 	my $tags = getObject('Slash::Tags');
 	my $downlabel = $constants->{tags_downvote_tagname} || 'nix';
 	my $down_id = $tags->getTagnameidFromNameIfExists($downlabel);
