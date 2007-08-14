@@ -1466,12 +1466,13 @@ sub editStory {
 			unless ($@) {
 				my $sid_regex = regexSid();
 				foreach my $metadata (@{$content->{'GetRecord'}{'record'}}) {
+                                        next if $metadata->{'metadata'}{'title'} eq $storyref->{title};
 					my $key = $metadata->{'header'}{'identifier'};
-					my($sid) = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:identifier'} =~ $sid_regex;
+					my($sid) = $metadata->{'metadata'}{'identifier'} =~ $sid_regex;
 					$yoogli_similar_stories->{$key}{'date'}  = $reader->getStory($sid, 'time');
-					$yoogli_similar_stories->{$key}{'url'}   = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:identifier'};
-					$yoogli_similar_stories->{$key}{'title'} = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:title'};
-					$yoogli_similar_stories->{$key}{'relevance'} = $metadata->{'metadata'}{'oai_dc:dc'}{'dc:relevance'};
+					$yoogli_similar_stories->{$key}{'url'}   = $metadata->{'metadata'}{'identifier'};
+					$yoogli_similar_stories->{$key}{'title'} = $metadata->{'metadata'}{'title'};
+					$yoogli_similar_stories->{$key}{'relevance'} = $metadata->{'metadata'}{'relevance'};
 					$yoogli_similar_stories->{$key}{'sid'} = $sid;
 				}
 			}
