@@ -167,3 +167,16 @@ INSERT INTO ajax_ops VALUES (NULL, 'admin_learnword', 'Slash::Admin', 'admin_lea
 
 INSERT INTO ajax_ops VALUES (NULL, 'admin_neverdisplay', 'Slash::Admin', 'ajax_neverdisplay', 'ajax_admin_static', 'use');
 INSERT INTO ajax_ops VALUES (NULL, 'getTopVendorStory', 'Slash::SlashdotJournal', 'ajaxShowVendorStory', 'ajax_user', 'createuse');
+
+
+
+##### d2 stuff
+INSERT INTO code_param VALUES (NULL, 'd2_comment_q', 0, 'All');
+INSERT INTO code_param VALUES (NULL, 'd2_comment_q', 1, 'Tiny');
+INSERT INTO code_param VALUES (NULL, 'd2_comment_q', 5, 'Medium');
+INSERT INTO code_param VALUES (NULL, 'd2_comment_q', 9, 'Large');
+
+INSERT INTO code_param VALUES (NULL, 'd2_comment_limits', 1, 5);
+INSERT INTO code_param VALUES (NULL, 'd2_comment_limits', 5, 25);
+INSERT INTO code_param VALUES (NULL, 'd2_comment_limits', 9, 50);
+

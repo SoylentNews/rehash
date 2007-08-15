@@ -4,12 +4,15 @@ var comments;
 var root_comments;
 var noshow_comments;
 var pieces_comments;
+var placeholder_comments = [];
+var placeholder_no_update = {};
 var abbrev_comments = {};
 var init_hiddens = [];
 var fetch_comments = [];
 var fetch_comments_pieces = {};
 var update_comments = {};
 var root_comments_hash = {};
+var more_comments_num;
 var behaviors = {
 	'default': { ancestors: 'none', parent: 'none', children: 'none', descendants: 'none', siblings: 'none', sameauthor: 'none' }, 
 	'focus': { ancestors: 'none', parent: 'none', children: 'prehidden', descendants: 'prehidden', siblings: 'none', sameauthor: 'none' }, 
@@ -38,6 +41,7 @@ var loaded = 0;
 var shift_down = 0;
 var alt_down = 0;
 var max_cid = 0;
+var d2_seen = '';
 
 var agt = navigator.userAgent.toLowerCase();
 var is_firefox = (agt.indexOf("firefox") != -1);
@@ -47,6 +51,7 @@ var is_firefox = (agt.indexOf("firefox") != -1);
 /********************/
 function updateComment(cid, mode) {
 	var existingdiv = fetchEl('comment_' + cid);
+	var placeholder = 0;
 	if (existingdiv && mode != displaymode[cid]) {
 		var doshort = 0;
 		if (viewmodevalue[mode] >= viewmodevalue[displaymode[cid]]) {
@@ -54,6 +59,8 @@ function updateComment(cid, mode) {
 			if (!cl) {
 				fetch_comments.push(cid);
 				doshort = 1;
+				if (comments[cid]['points'] == -2) // -2 is special case for placeholder-hiddens
+					placeholder = 1;
 			} else if (viewmodevalue[mode] >= viewmodevalue['full']) {
 				var cd = fetchEl('comment_otherdetails_' + cid);
 				if (!cd.innerHTML) {
@@ -68,7 +75,10 @@ function updateComment(cid, mode) {
 		existingdiv.className = mode;
 	}
 
-	currents[displaymode[cid]]--;
+	if (placeholder)
+		placeholder_comments.push(cid);
+	else
+		currents[displaymode[cid]]--;
 	currents[mode]++;
 	displaymode[cid] = mode;
 
@@ -255,7 +265,10 @@ function kidHiddens(cid, kidhiddens) {
 	// may not be changed yet, that's OK
 	if (futuredisplaymode[cid] == 'hidden') {
 		hiddens_cid.className = 'hide';
-		return kidhiddens + 1;
+		if (comments[cid]['points'] == -2) // -2 is special case for placeholder-hiddens
+			return kidhiddens;
+		else
+			return kidhiddens + 1;
 	} else if (kidhiddens) {
 		var kidstring = '<a href="javascript:revealKids(' + cid + ')">' + kidhiddens;
 		if (kidhiddens == 1) {
@@ -267,7 +280,7 @@ function kidHiddens(cid, kidhiddens) {
 		hiddens_cid.className = 'show';
 	} else {
 		hiddens_cid.className = 'hide';
-	} 
+	}
 
 	return 0;
 }
@@ -283,6 +296,10 @@ function revealKids(cid) {
 		for (var kiddie = 0; kiddie < comment['kids'].length; kiddie++) {
 			var kid = comment['kids'][kiddie];
 			setDefaultDisplayMode(kid);
+			if (comments[kid]['points'] == -2) { // -2 is special case for placeholder-hiddens
+				revealKids(kid);
+				continue;
+			}
 			if (displaymode[kid] == 'hidden') {
 				futuredisplaymode[kid] = 'oneline';
 				updateDisplayMode(kid, futuredisplaymode[kid], 1);
@@ -367,10 +384,45 @@ function addComment(cid, comment, html) {
 	if (!loaded || !cid || !comment)
 		return false;
 
-	html = html || dummyComment(cid);
+
+	if (comments[cid]) {
+		var tmpkids = comments[cid]['kids'];
+		for (var i = 0; i < comment['kids'].length; i++) {
+			tmpkids.push(comment['kids'][i]);
+		}
+		comments[cid] = comment;
+		comments[cid]['kids'] = tmpkids;
+	} else {
+		comments[cid] = comment;
+	}
 	var pid = comment['pid'];
 
-	comments[cid] = comment;
+	if ($('tree_' + cid)) {
+		if (pid) {
+			var parent = comments[pid];
+			var seen = 0;
+			for (var i = 0; i < parent['kids'].length; i++) {
+				if (parent['kids'][i] == cid)
+					seen = 1;
+			}
+			if (!seen)
+				parent['kids'].push(cid);
+		} else {
+			var seen = 0;
+			for (var i = 0; i < root_comments.length; i++) {
+				if (root_comments[i] == cid)
+					seen = 1;
+			}
+			if (!seen) {
+				root_comments.push(cid);
+				root_comments_hash[cid] = 1;
+			}
+		}
+
+		return true;
+	}
+
+	html = html || dummyComment(cid);
 
 	if (pid) {
 		var tree = $('tree_' + pid);
@@ -553,6 +605,8 @@ function finishCommentUpdates(thresh) {
 	update_comments = {};
 	fetch_comments = [];
 	fetch_comments_pieces = {};
+	placeholder_comments = [];
+	placeholder_no_update = {};
 }
 
 // not currently used
@@ -582,10 +636,11 @@ function toHash(thisobject) {
 	}).join(';');
 }
 
-function ajaxFetchComments(cids, get_max_cid, thresh) {
+function ajaxFetchComments(cids, option, thresh) {
 	if (cids && !cids.length)
 		return;
-	if (get_max_cid)
+
+	if (option)
 		thresh = 1;
 
 	var params = [];
@@ -594,7 +649,9 @@ function ajaxFetchComments(cids, get_max_cid, thresh) {
 		params['cids']    = cids;
 	} else {
 		cids              = [];
-		if (get_max_cid)
+		if (option && d2_seen)
+			params['d2_seen']  = d2_seen;
+		else if (option)
 			params['max_cid'] = max_cid;
 		else
 			params['cids']    = noshow_comments;
@@ -618,6 +675,11 @@ function ajaxFetchComments(cids, get_max_cid, thresh) {
 
 	params['pieces'] = $H(cids ? fetch_comments_pieces : pieces_comments);
 	params['pieces'] = toHash(params['pieces']);
+
+	if (placeholder_comments.length) {
+		params['placeholders'] = placeholder_comments;
+		params['d2_seen_ex']   = d2_seen;
+	}
 
 	var handlers = {
 		onComplete: function (transport) {
@@ -682,6 +744,8 @@ function ajaxFetchComments(cids, get_max_cid, thresh) {
 			if (update && update.new_cids_order) {
 				for (var i = 0; i < update.new_cids_order.length; i++) {
 					var this_cid = update.new_cids_order[i];
+					if (placeholder_no_update[this_cid])
+						continue;
 					var mode = determineMode(this_cid);
 					updateDisplayMode(this_cid, mode, 1);
 					currents[displaymode[this_cid]]++;
@@ -895,6 +959,8 @@ function finishLoading() {
 	//window.onbeforeunload = function () { savePrefs() };
 	//window.onunload = function () { savePrefs() };
 
+	if (more_comments_num)
+		updateMoreNum(more_comments_num);
 	updateTotals();
 	enableControls();
 
@@ -1038,6 +1104,23 @@ function updateTotals() {
 	$('currentFull'   ).innerHTML = currents['full'];
 	$('currentOneline').innerHTML = currents['oneline'];
 }
+
+function updateMoreNum(num) { // should be an integer, or empty string
+	if (num == 0)
+		num = '';
+
+	var a = $('more_comments_num_a');
+	var b = $('more_comments_num_b');
+	var c = $('more_comments_num_c');
+
+	if (a)
+		a.innerHTML = num;
+	if (b)
+		b.innerHTML = num;
+	if (c)
+		c.innerHTML = num;
+}
+
 
 function scrollWindowTo(cid) {
 	var comment_y = getOffsetTop(fetchEl('comment_' + cid));

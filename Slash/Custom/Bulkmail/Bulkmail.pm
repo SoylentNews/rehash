@@ -1283,6 +1283,8 @@ sub send_message_data {
 	# of what other ramifications that may have, so I am just shutting
 	# off the warning around this call.  See also `perldoc perllexwarn`.
 	# - Jamie 2007-08-07
+	# we really should fix it to NOT print UTF, but ASCII; this is a problem
+	# in our code that converts HTML entities to characters -- pudge
 	{
 		no warnings 'utf8';
 		print $bulk $$message;

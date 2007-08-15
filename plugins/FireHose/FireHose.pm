@@ -865,7 +865,6 @@ sub reject {
 			}
 		}
 	}
-	
 }
 
 sub ajaxSaveOneTopTagFirehose {

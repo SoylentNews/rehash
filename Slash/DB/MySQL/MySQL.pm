@@ -239,6 +239,15 @@ my %descriptions = (
 	'discussion_kinds'
 		=> sub { $_[0]->sqlSelectMany('dkid, name', 'discussion_kinds') },
 
+	'd2_comment_q'
+		=> sub { $_[0]->sqlSelectMany('code, name', 'code_param', "type='d2_comment_q'") },
+
+	'd2_comment_limits'
+		=> sub { $_[0]->sqlSelectMany('code, name', 'code_param', "type='d2_comment_limits'") },
+
+	'd2_comment_order'
+		=> sub { $_[0]->sqlSelectMany('code, name', 'code_param', "type='d2_comment_order'") },
+
 );
 
 ########################################################

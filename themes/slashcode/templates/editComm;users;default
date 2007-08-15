@@ -61,6 +61,15 @@ __template__
         	<input type="radio" name="discussion2" value="slashdot"[% constants.markup_checked_attribute IF user_edit.discussion2 == "slashdot" %]> Slashdot's New Discussion System Testing<br>
 		</div></blockquote>
 
+		[% IF user_edit.discussion2 && user_edit.discussion2 == "slashdot" %]
+		<blockquote><div>
+		How Many Comments
+		[% comment_q = Slash.db.getDescriptions('d2_comment_q');
+		   comment_q_def = user_edit.d2_comment_q || 0;
+		   Slash.createSelect('d2_comment_q', comment_q, comment_q_def, 1) %]
+		</div></blockquote>
+		[% END %]
+
         	<p><b>Email Display</b>
 		(currently
 		[%- IF !user_edit.fakeemail; " not displayed";

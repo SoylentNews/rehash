@@ -285,15 +285,18 @@ sub readRest {
 sub fetchComments {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 
-	my $cids    = [ grep /^\d+$/, split /,/, ($form->{cids} || '') ];
-	my $id      = $form->{discussion_id} || 0;
-	my $cid     = $form->{cid} || 0; # root id
-	my $max_cid = $form->{max_cid};
+	my $cids         = [ grep /^\d+$/, split /,/, ($form->{cids} || '') ];
+	my $id           = $form->{discussion_id} || 0;
+	my $cid          = $form->{cid} || 0; # root id
+	my $max_cid      = $form->{max_cid};
+	my $d2_seen      = $form->{d2_seen};
+	my $placeholders = $form->{placeholders};
+	my @placeholders;
 
 	$user->{state}{ajax_accesslog_op} = "ajax_comments_fetch";
 #use Data::Dumper; print STDERR Dumper [ $cids, $id, $cid, $max_cid ];
 	# XXX error?
-	return unless $id && (defined($max_cid) || @$cids);
+	return unless $id && ($max_cid || @$cids || $d2_seen);
 
 	my $discussion = $slashdb->getDiscussion($id);
 	if ($discussion->{type} eq 'archived') {
@@ -303,45 +306,83 @@ sub fetchComments {
 	$user->{reparent} = 0;
 	$user->{state}{max_depth} = $constants->{max_depth} + 3;
 
+	my %select_options = (
+		commentsort  => 0,
+		threshold    => -1,
+		no_d2        => 1
+	);
+
+	my %seen;
+	if ($d2_seen || $form->{d2_seen_ex}) {
+		my $lastcid = 0;
+		for my $cid (split /,/, $d2_seen || $form->{d2_seen_ex}) {
+			$cid = $lastcid ? $lastcid + $cid : $cid;
+			$seen{$cid} = 1;
+			$lastcid = $cid;
+		}
+		if ($d2_seen) {
+			$select_options{existing} = \%seen if keys %seen;
+			delete $select_options{no_d2};
+		}
+	}
+
 	my($comments) = Slash::selectComments(
 		$discussion,
 		$cid,
-		{
-			commentsort	=> 0,
-			threshold	=> -1
-		}
+		\%select_options,
 	);
 
 	# XXX error?
 	return unless $comments && keys %$comments;
 
-	my %data;
-	if (defined($max_cid)) {
-		$cids = [ map { $_->[0] }
-			@{$slashdb->sqlSelectAll(
-				'cid', 'comments',
-				'sid = ' . $slashdb->sqlQuote($id) . ' AND ' .
-				'cid > ' . $slashdb->sqlQuote($max_cid),
-				'ORDER BY date ASC'
-			)}
-		];
+	my $d2_seen_0 = $comments->{0}{d2_seen} || '';
+	delete $comments->{0}; # non-comment data
 
-		if (@$cids) {
+	my %data;
+	if ($max_cid || $d2_seen || $placeholders) {
+		my $special_cids;
+		if ($max_cid) {
+			$special_cids = $cids = [ map { $_->[0] }
+				@{$slashdb->sqlSelectAll(
+					'cid', 'comments',
+					'sid = ' . $slashdb->sqlQuote($id) . ' AND ' .
+					'cid > ' . $slashdb->sqlQuote($max_cid),
+					'ORDER BY date ASC'
+				)}
+			];
+		} elsif ($d2_seen) {
+			$special_cids = $cids = [ sort { $a <=> $b } grep { !$seen{$_} } keys %$comments ];
+		} elsif ($placeholders) {
+			@placeholders = split /[,;]/, $placeholders;
+			$special_cids = [ sort { $a <=> $b } @placeholders ];
+			if ($form->{d2_seen_ex}) {
+				my @seen;
+				my $lastcid = 0;
+				my %check = (%seen, map { $_ => 1 } @placeholders);
+				for my $cid (sort { $a <=> $b } keys(%check)) {
+					push @seen, $lastcid ? $cid - $lastcid : $cid;
+					$lastcid = $cid;
+				}
+				$d2_seen_0 = join ',', @seen;
+			}
+		}
+
+		if (@$special_cids) {
 			my @cid_data = map {{
 				uid    => $comments->{$_}{uid},
 				pid    => $comments->{$_}{pid},
 				points => $comments->{$_}{points},
 				kids   => []
-			}} @$cids;
+			}} @$special_cids;
 
-			$data{new_cids_order} = [ @$cids ];
+			$data{new_cids_order} = [ @$special_cids ];
 			$data{new_cids_data}  = \@cid_data;
 
-			my %cid_map = map { ($_ => 1) } @$cids;
+			my %cid_map = map { ($_ => 1) } @$special_cids;
 			$data{new_thresh_totals} = commentCountThreshold(
 				{ map { ($_ => $comments->{$_}) } grep { $cid_map{$_} } keys %$comments },
 				0,
-				{ map { ($_ => 1) } grep { !$comments->{$_}{pid} } @$cids }
+				{ map { ($_ => 1) } grep { !$comments->{$_}{pid} } @$special_cids }
 			);
 		}
 #use Data::Dumper; print STDERR Dumper \$comments, \%data;
@@ -359,12 +400,15 @@ sub fetchComments {
 	# prune out hiddens we don't need, if threshold is sent (which means
 	# we are not asking for a specific targetted comment(s) to highlight,
 	# but just adjusting for a threshold or getting new comments
-	if ($form->{threshold} && $form->{highlightthresh}) {
+	if (defined($form->{threshold}) && defined($form->{highlightthresh})) {
 		for (my $i = 0; $i < @$cids; $i++) {
 			my $class = 'oneline';
 			my $cid = $cids->[$i];
 			my $comment = $comments->{$cid};
-			if ($comment->{points} < $form->{threshold}) {
+			if ($comment->{dummy}) {
+				$class = 'hidden';
+				$keep_hidden{$cid} = 1;
+			} elsif ($comment->{points} < $form->{threshold}) {
 				if ($user->{is_anon} || ($user->{uid} != $comment->{uid})) {
 					$class = 'hidden';
 					$keep_hidden{$cid} = 1;
@@ -378,6 +422,8 @@ sub fetchComments {
 				$get_pieces_cids{$cid} = 1;
 			}
 		}
+	} else {
+		$comments->{$_}{class} = 'full' for @$cids;
 	}
 
 	for my $cid (@$cids) {
@@ -424,11 +470,23 @@ sub fetchComments {
 #use Data::Dumper; print STDERR Dumper \@hidden_cids, \@pieces_cids, \@abbrev_cids, \%get_pieces_cids, \%keep_hidden, \%pieces, \%abbrev, \%html, \%html_append_substr, $form, \%data;
 
 	$options->{content_type} = 'application/json';
-	return Data::JavaScript::Anon->anon_dump({
+	my %to_dump = (
 		update_data        => \%data,
 		html               => \%html,
 		html_append_substr => \%html_append_substr
-	});
+	);
+	if ($d2_seen_0) {
+		my $total = $slashdb->countCommentsBySid($id);
+		$total -= $d2_seen_0 =~ tr/,//; # total
+		$total--; # off by one
+		$to_dump{eval_first} ||= '';
+		$to_dump{eval_first} .= "d2_seen = '$d2_seen_0'; updateMoreNum($total);";
+	}
+	if ($placeholders) {
+		$to_dump{eval_first} ||= '';
+		$to_dump{eval_first} .= "placeholder_no_update = " . Data::JavaScript::Anon->anon_dump({ map { $_ => 1 } @placeholders }) . ';';
+	}
+	return Data::JavaScript::Anon->anon_dump(\%to_dump);
 }
 
 sub updateD2prefs {

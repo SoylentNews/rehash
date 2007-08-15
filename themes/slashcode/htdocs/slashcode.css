@@ -336,3 +336,5 @@ ul.menu a, ul.menu a:visited { color: #000; }
 .popup-contents { background: #ccc; font-size: 80%; padding: 5px; }
 .popup-message  { background: #933; font-size: 100%; color: #fff; font-weight: bold; text-align: right; }
 #sectionprefs-contents { background: #fff }
+
+.horizontal .ccw-header-links { top: 0pt; }

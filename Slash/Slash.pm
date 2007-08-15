@@ -73,6 +73,8 @@ sub selectComments {
 			  $constants->{comment_maxscore});
 	my $num_scores = $max - $min + 1;
 
+	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
+
 	my $commentsort = defined $options->{commentsort}
 		? $options->{commentsort}
 		: $user->{commentsort};
@@ -138,30 +140,71 @@ sub selectComments {
 #		$user->{state}{noreparent} = 1 if $commentsort > 3;
 
 		$C->{points} = _get_points($C, $user, $min, $max, $max_uid, $reasons);
-
-		# Let us fill the hash range for hitparade
-		$comments->{0}{totals}[$comments->{0}{total_keys}{$C->{points}}]++;  
 	}
 
-	# If we are sorting by highest score we resort to figure in bonuses
-	if ($commentsort == 3) {
-		@$thisComment = sort {
-			$b->{points} <=> $a->{points} || $a->{cid} <=> $b->{cid}
-		} @$thisComment;
-	} elsif ($commentsort == 1 || $commentsort == 5) {
-		@$thisComment = sort {
-			$b->{cid} <=> $a->{cid}
-		} @$thisComment;
+	my($oldComment, %old_comments);
+	# XXXd2 disable for sub-threads for now ($cid)
+	if ($discussion2 && !$cid && $user->{d2_comment_q} && !$options->{no_d2}) {
+		my $limits = $slashdb->getDescriptions('d2_comment_limits');
+		my $max = $limits->{ $user->{d2_comment_q} };
+		my @new_comments;
+		$options->{existing} ||= {};
+		@$thisComment = sort { $a->{cid} <=> $b->{cid} } @$thisComment;
+
+		if (1) { # XXXd2 by score
+			for my $C (sort { $b->{points} <=> $a->{points} || $a->{cid} <=> $b->{cid} } @$thisComment) {
+				next if $options->{existing}{$C->{cid}};
+
+				if ($cid) {
+					if (@new_comments >= $max) {
+						push @new_comments, $C if $cid == $C->{cid};
+					} else {
+						push @new_comments, $C;
+					}
+				} else {
+					push @new_comments, $C;
+					last if @new_comments >= $max;
+				}
+			}
+		}
+
+		my @seen;
+		my $lastcid = 0;
+		my %check = (%{$options->{existing}}, map { $_->{cid} => 1 } @new_comments);
+		for my $cid (sort { $a <=> $b } keys(%check)) {
+			push @seen, $lastcid ? $cid - $lastcid : $cid;
+			$lastcid = $cid;
+		}
+		$comments->{0}{d2_seen} = join ',', @seen;
+
+		@new_comments = sort { $a->{cid} <=> $b->{cid} } @new_comments;
+		($oldComment, $thisComment) = ($thisComment, \@new_comments);
+		%old_comments = map { $_->{cid} => $_ } @$oldComment;
+
 	} else {
-		@$thisComment = sort {
-			$a->{cid} <=> $b->{cid}
-		} @$thisComment;
+		# If we are sorting by highest score we resort to figure in bonuses
+		if ($commentsort == 3) {
+			@$thisComment = sort {
+				$b->{points} <=> $a->{points} || $a->{cid} <=> $b->{cid}
+			} @$thisComment;
+		} elsif ($commentsort == 1 || $commentsort == 5) {
+			@$thisComment = sort {
+				$b->{cid} <=> $a->{cid}
+			} @$thisComment;
+		} else {
+			@$thisComment = sort {
+				$a->{cid} <=> $b->{cid}
+			} @$thisComment;
+		}
 	}
 
 	# This loop mainly takes apart the array and builds 
 	# a hash with the comments in it.  Each comment is
 	# in the index of the hash (based on its cid).
 	for my $C (@$thisComment) {
+		# Let us fill the hash range for hitparade
+		$comments->{0}{totals}[$comments->{0}{total_keys}{$C->{points}}]++;  
+
 		# So we save information. This will only have data if we have 
 		# happened through this cid while it was a pid for another
 		# comments. -Brian
@@ -173,8 +216,8 @@ sub selectComments {
 		$comments->{$C->{cid}} = $C;
 
 		# Kids is what displayThread will actually use.
-		$comments->{$C->{cid}}{kids} = $tmpkids;
-		$comments->{$C->{cid}}{visiblekids} = $tmpvkids;
+		$comments->{$C->{cid}}{kids} = $tmpkids || [];
+		$comments->{$C->{cid}}{visiblekids} = $tmpvkids || 0;
 
 		# The comment pushes itself onto its parent's
 		# kids array.
@@ -198,10 +241,12 @@ sub selectComments {
 	# otherwise-empty comment's visiblekids field and appended to an
 	# otherwise-empty kids arrayref.  For cleanliness' sake, eliminate
 	# those comments.  We do leave "comment 0" alone, though.
-	my @phantom_cids =
-		grep { $_ > 0 && !defined $comments->{$_}{cid} }
-		keys %$comments;
-	delete @$comments{@phantom_cids};
+	if (!$oldComment) {
+		my @phantom_cids =
+			grep { $_ > 0 && !defined $comments->{$_}{cid} }
+			keys %$comments;
+		delete @$comments{@phantom_cids};
+	}
 
 	my $count = @$thisComment;
 
@@ -219,10 +264,45 @@ sub selectComments {
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 
 	reparentComments($comments, $reader, $options);
+
+	if ($oldComment) {
+		for my $cid (sort { $a <=> $b } keys %$comments) {
+			my $C = $comments->{$cid};
+
+			# && !$options->{existing}{ $C->{pid} }
+			while ($C->{pid}) {
+				my $parent = $comments->{ $C->{pid} } || {};
+				if (!$parent || !$parent->{kids} || !$parent->{cid} || !defined($parent->{pid}) || !defined($parent->{points})) {
+					$parent = $comments->{ $C->{pid} } = {
+						cid    => $C->{pid},
+						pid    => ($old_comments{ $C->{pid} } && $old_comments{ $C->{pid} }{ pid }) || 0,
+						kids   => [ ],
+						points => -2,
+						dummy  => 1,
+						%$parent,
+					};
+				}
+
+				unless (grep { $_ == $C->{cid} } @{$parent->{kids}}) {
+					push @{$parent->{kids}}, $C->{cid};
+				}
+				if ($parent->{pid} == 0) {
+					unless (grep { $_ == $parent->{cid} } @{$comments->{0}{kids}}) {
+						push @{$comments->{0}{kids}}, $parent->{cid};
+					}
+				} else {
+				}
+				$C = $parent;
+			}
+		}
+	}
+
 	return($comments, $count);
 }
 
 sub jsSelectComments {
+	# XXXd2 selectComments() is being called twice in same request ... compare and consolidate
+	# also consolidate code with ajax.pl:fetchComments
 	# version 0.9 is broken; 0.6 and 1.00 seem to work -- pudge 2006-12-19
 	require Data::JavaScript::Anon;
 	my($slashdb, $constants, $user, $form) = @_;
@@ -257,6 +337,7 @@ sub jsSelectComments {
 		}
 	);
 
+	my $d2_seen_0 = $comments->{0}{d2_seen} || '';
 	delete $comments->{0}; # non-comment data
 	if ($pid && exists $comments->{$pid}) {
 		$comments = _get_thread($comments, $pid);
@@ -304,6 +385,14 @@ sub jsSelectComments {
 	$user->{is_anon}  ||= 0;
 	$user->{is_admin} ||= 0;
 
+	my $extra = '';
+	if ($d2_seen_0) {
+		my $total = $slashdb->countCommentsBySid($id);
+		$total -= $d2_seen_0 =~ tr/,//; # total
+		$total--; # off by one
+		$extra .= "d2_seen = '$d2_seen_0';\nmore_comments_num = $total;\n";
+	}
+
 	return <<EOT;
 comments = $anon_comments;
 
@@ -321,6 +410,8 @@ user_threshold = $threshold;
 user_highlightthresh = $highlightthresh;
 
 discussion_id = $id;
+
+$extra
 EOT
 }
 
@@ -344,6 +435,7 @@ sub commentCountThreshold {
 	}
 
 	for my $cid (keys %$comments) {
+		next if $comments->{$cid}{dummy};
 		my $T  = $comments->{$cid}{points};
 		my $HT = $T;
 		if (!$user->{is_anon} && $user->{uid} == $comments->{$cid}{uid}) {
@@ -917,7 +1009,7 @@ sub printComments {
 	# We have to get the comment text we need (later we'll search/replace
 	# them into the text).
 	my $comment_text = $slashdb->getCommentTextCached(
-		$comments, $user->{state}{cids},
+		$comments, [ grep { !$comments->{$_}{dummy} } @{$user->{state}{cids}} ],
 		{ mode => $form->{mode}, cid => $form->{cid}, discussion2 => $discussion2 }
 	);
 
@@ -1040,7 +1132,9 @@ sub displayThread {
 		$form->{startat} = 0; # Once We Finish Skipping... STOP
 
 		my $class = 'oneline';
-		if ($comment->{points} < $threshold) {
+		if ($comment->{dummy}) {
+			$class = 'hidden';
+		} elsif ($comment->{points} < $threshold) {
 			if ($user->{is_anon} || ($user->{uid} != $comment->{uid})) {
 				if ($discussion2) {
 					$class = 'hidden';
@@ -1056,7 +1150,7 @@ sub displayThread {
 		$class = 'full' if $highlight;
 		$comment->{class} = $class;
 
-		$user->{state}{comments}{totals}{$class}++;
+		$user->{state}{comments}{totals}{$class}++ unless $comment->{dummy};
 
 		my $finish_list = 0;
 
@@ -1086,7 +1180,7 @@ sub displayThread {
 			} else {
 				$return .= dispComment($comment, { noshow => $noshow, pieces => $pieces });
 			}
-			$displayed++;
+			$displayed++ unless $comment->{dummy};
 		} else {
 			my $pntcmt = @{$comments->{$comment->{pid}}{kids}} > $user->{commentspill};
 			$return .= $const->{commentbegin} .

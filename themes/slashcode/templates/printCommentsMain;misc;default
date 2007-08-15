@@ -170,7 +170,7 @@ __template__
 				[% END %]
 		<span class="ccw-header-links">
     [% IF discussion2 && !cid %]
-        <a href="javascript:ajaxFetchComments(0,1)">Update</a> | 
+        <a href="javascript:ajaxFetchComments(0,1)"><span id="more_comments_num_b"></span> More</a> | 
     [% END; IF user.is_admin && user.d2prefs_debug %]
         <a href="javascript:showPrefs('reading')">Prefs</a>
     [% ELSIF !user.is_anon %]
@@ -252,7 +252,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 		</div>
 		<div class="commentControlFooter">
     [% IF discussion2 && !cid %]
-        <a href="javascript:ajaxFetchComments(0,1)">Update</a> | 
+        <a href="javascript:ajaxFetchComments(0,1)"><span id="more_comments_num_c"></span> More</a> | 
     [% END; IF user.is_admin && user.d2prefs_debug %]
         <a href="javascript:showPrefs('reading')">Prefs</a>
     [% ELSIF !user.is_anon %]
