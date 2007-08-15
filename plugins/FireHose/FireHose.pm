@@ -837,7 +837,7 @@ sub reject {
 	my $user = getCurrentUser();
 	my $tags = getObject("Slash::Tags");
 	my $item = $self->getFireHose($id);
-	return unless $id && $user->{is_admin};
+	return unless $id;
 	if ($item) {
 		$self->setFireHose($id, { rejected => "yes" });
 		if ($item->{globjid} && !isAnon($user->{uid})) {
@@ -1605,7 +1605,7 @@ sub getAndSetOptions {
 
 	$mode = $modes->{$mode} ? $mode : "fulltitle";
 	$options->{mode} = $mode;
-	$options->{pause} = $user->{firehose_paused};
+	$options->{pause} = defined $user->{firehose_pause} ? $user->{firehose_pause} : 1;
 	$form->{pause} = 1 if $no_saved;
 
 	if (defined $form->{pause}) {
