@@ -196,7 +196,7 @@ cmdrtaco dot net but be forgiving of beta code!
 [% IF refresh_options && refresh_options.maxtime %]
 	var maxtime = '[% refresh_options.maxtime %]';
 	var insert_new_at = '[% refresh_options.insert_new_at %]';
-	[% UNLESS user.firehose_paused || !user.firehose_paused.defined %]
+	[% IF !options.pause %]
 		firehose_play();
 	[% END %]
 
