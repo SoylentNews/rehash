@@ -137,7 +137,7 @@ END %]
 			</li>
 			[% IF item.discussion;
 			   disc = Slash.db.getDiscussion(item.discussion); %]
-			<li class="comments[% IF !disc.commentcount %] nocomment[% END %]">
+			<li class="comments[% IF !disc.commentcount || options.nocommentcnt %] nocomment[% END %]">
 				[% skin = gSkin %]
 				[% IF item.type == "story"; skin = Slash.db.getSkin(item.primaryskid); END %]
 				<a href="[% skin.rootdir %]/comments.pl?sid=[% item.discussion %]">[% disc.commentcount %]</a> <span>comment[% IF disc.commentcount != 1 %]s[% END %]</span>

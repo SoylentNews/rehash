@@ -1597,6 +1597,12 @@ sub getAndSetOptions {
 	} else {
 		$options->{mixedmode} = $user->{firehose_mixedmode};
 	}
+
+	if (defined $form->{nocommentcnt} && $form->{setfield}) {
+		$options->{nocommentcnt} = $form->{nocommentcnt} ? 1 : 0;
+	} else {
+		$options->{nocommentcnt} = $user->{firehose_nocommentcnt};
+	}
 	my $mode = $form->{mode} || $user->{firehose_mode};
 	$mode = "fulltitle" if $mode eq "mixed";
 
