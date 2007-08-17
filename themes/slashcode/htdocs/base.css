@@ -751,4 +751,12 @@ a.ac-source
 #ac-choices li.yui-ac-highlight { background: #ff0; }
 
 
-
+/* modal */
+#modal_cover {background-color: #222; height: 100%; opacity: 0.75; filter: alpha(opacity=75); position: fixed; width: 100%; z-index: 1000000;}
+#modal_box .generaltitle .title h3 {background: transparent; margin: 0; padding: .1em .3em 0 .3em;}
+#modal_box .generaltitle .title { margin: 0; border: none;}
+#modal_box {position: fixed; margin: 15% 25%; width: 60%;z-index: 1000001;border: 4px solid #222;}
+#modal_box h3 a {position: absolute !important; right: .3em; top: .3em}
+#modal_box #modal_box_content legend {display: none;}
+#modal_box #modal_box_content fieldset {margin: 0;padding: 0;border: none;}
+#modal_box #modal_box_content {background-color: #fff;padding: 0 2em 2em 2em; border-top: 1px solid #222;}
