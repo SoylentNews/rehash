@@ -57,7 +57,7 @@ sub main {
 				$redirect = 1 if !$ops{$op}[4]{$_}; 
 			}
 		} 
-		if (redirect && ($ops{$op}[3] && $ops{$op}[3] eq $form->{anonval})) {
+		if ($redirect && ($ops{$op}[3] && $ops{$op}[3] eq $form->{anonval})) {
 			$redirect = 0;
 		} 
 		if ($redirect) {
