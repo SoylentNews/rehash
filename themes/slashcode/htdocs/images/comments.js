@@ -1109,12 +1109,18 @@ function updateMoreNum(num) { // should be an integer, or empty string
 	if (num == 0)
 		num = '';
 
+	var num_a;
+	if (!num)
+		num_a = 'Check for more';
+	else
+		num_a = 'Retrieve more of the ' + num + ' remaining';
+
 	var a = $('more_comments_num_a');
 	var b = $('more_comments_num_b');
 	var c = $('more_comments_num_c');
 
 	if (a)
-		a.innerHTML = num;
+		a.innerHTML = num_a;
 	if (b)
 		b.innerHTML = num;
 	if (c)
