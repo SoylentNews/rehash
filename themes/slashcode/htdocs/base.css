@@ -759,4 +759,4 @@ a.ac-source
 #modal_box h3 a {position: absolute !important; right: .3em; top: .3em}
 #modal_box #modal_box_content legend {display: none;}
 #modal_box #modal_box_content fieldset {margin: 0;padding: 0;border: none;}
-#modal_box #modal_box_content {background-color: #fff;padding: 0 2em 2em 2em; border-top: 1px solid #222;}
+#modal_box #modal_box_content {overflow: auto; background-color: #fff;padding: 0 2em 2em 2em; border-top: 1px solid #222;}
