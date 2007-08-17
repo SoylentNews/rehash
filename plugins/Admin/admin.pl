@@ -1652,6 +1652,8 @@ sub extractChosenFromForm {
 				? 30
 				: $constants->{topic_popup_defaultweight} || 10;
 			my $chosen_topic = $slashdb->getTopic($tid);
+			# XXX the above variable is not used. was there supposed
+			# to be more code here or something?
 		}
 	} else {
 		my(%chosen);
