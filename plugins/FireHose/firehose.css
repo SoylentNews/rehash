@@ -458,7 +458,7 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .subdue {background: #000; opacity: .3; position: relative; z-index: 10000}
 .admin .contentsadmin ul.menu {margin: 0}
 
-.briefarticle .storylinks .comments {position: absolute !important; top: .5em !important; right: 1em !important; display: block; border: none; font-size: 75%;}
-.briefarticle .storylinks .comments a {text-decoration: none; text-align: center; background:transparent url('/images/sic_icons.png') no-repeat scroll 0px -1393px; padding: 10px 7px 9px 7px;}
-.briefarticle .storylinks .comments a:hover {background:transparent url('/images/sic_icons.png') no-repeat scroll 0px -1491px;}
+.briefarticle .storylinks .comments {position: absolute !important; top: .7em !important; width: 10px; right: 1.8em !important; display: block; border: none; font-size: 75%; text-align: center; }
+.briefarticle .storylinks .comments a {text-decoration: none; background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat 0px -1400px; padding: 4px 20px 3px 2px; text-align: center; }
+.briefarticle .storylinks .comments a:hover {background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat scroll 0px -1498px; color: #fff !important}
 .briefarticle .storylinks .comments.nocomment, .briefarticle .storylinks .comments span  {display: none}
