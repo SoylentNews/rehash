@@ -4695,8 +4695,6 @@ UPDATE message_codes SET delivery_bvalue = 15 WHERE type = 'Comment Reply';
 # 2007-08-08
 UPDATE vars SET value = 'T_2_5_0_169' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 INSERT INTO code_param VALUES (NULL, 'd2_comment_q', 0, 'All');
@@ -4712,4 +4710,6 @@ INSERT INTO code_param VALUES (NULL, 'd2_comment_limits', 9, 50);
 
 # 2007-08-15
 UPDATE vars SET value = 'T_2_5_0_170' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
