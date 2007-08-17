@@ -456,7 +456,7 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .generaltitle, .title, .generaltitle h3 {line-height: 160% !important;}
 
 .subdue {background: #000; opacity: .3; position: relative; z-index: 10000}
-.admin .contentsadmin ul.menu {margin: 0}
+.admin .contentsadmin ul.menu, .admin .contentsadmin ul {margin: 0}
 
 .briefarticle .storylinks .comments {position: absolute !important; top: .7em !important; width: 10px; right: 1.8em !important; display: block; border: none; font-size: 75%; text-align: center; }
 .briefarticle .storylinks .comments a {text-decoration: none; background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat 0px -1400px; padding: 4px 20px 3px 2px; text-align: center; }
