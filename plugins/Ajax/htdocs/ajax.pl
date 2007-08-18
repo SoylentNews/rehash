@@ -123,7 +123,7 @@ sub getSectionPrefsHTML {
 	}
 
 	my $topic_tree = $reader->getTopicTree();
-	my $nexus_tids_ar = $reader->getStorypickableNexusChildren($constants->{mainpage_nexus_tid});
+	my $nexus_tids_ar = $reader->getMainpageDisplayableNexuses();
 	my $nexus_hr = { };
 	my $skins = $reader->getSkins();
 
@@ -182,9 +182,9 @@ sub getSectionPrefsHTML {
 }
 
 sub setSectionNexusPrefs() {
-	my ($slashdb, $constants, $user, $form) = @_;
-	
-	my $nexus_tids_ar = $slashdb->getStorypickableNexusChildren($constants->{mainpage_nexus_tid}, 1);
+	my($slashdb, $constants, $user, $form) = @_;
+
+	my $nexus_tids_ar = getMainpageDisplayableNexuses();
 
 	my @story_always_nexus 		= split ",", $user->{story_always_nexus} || "";
 	my @story_full_brief_nexus 	= split ",", $user->{story_full_brief_nexus} || "";

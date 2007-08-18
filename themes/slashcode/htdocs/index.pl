@@ -92,26 +92,37 @@ my $start_time = Time::HiRes::time;
 	my $gse_hr = { };
 	# Set the characteristics that stories can be in to appear.  This
 	# is a simple list:  the current skin's nexus, and then if the
-	# current skin is the mainpage, add in the list of story_always_topic
-	# and story_always_nexus tids, and story_always_author uids..
+	# current skin is the mainpage, add in the list of nexuses that
+	# the mainpage needs the user's story_always_topic
+	# and story_always_nexus tids.
+	# It's pretty ugly that this duplicates some of the effect of
+	# getDispModesForStories().  This code really should be
+	# simplified and consolidated.
 	$gse_hr->{tid} = [ $gSkin->{nexus} ];
 	if ($gSkin->{skid} == $constants->{mainpage_skid}) {
-		my $nexus_children = $reader->getStorypickableNexusChildren($constants->{mainpage_nexus_tid});
-		push @{$gse_hr->{tid}}, @$nexus_children;
-		
-		my @always_tids = split ",",
-			$user->{story_always_topic};
+		# This may or may not be necessary;  gSE() should
+		# already know to do this.  But it should not hurt
+		# to add the tids here.
+		if ($constants->{brief_sectional_mainpage}) {
+			my $nexus_children = $reader->getMainpageDisplayableNexuses();
+			push @{$gse_hr->{tid}}, @$nexus_children;
+		}
 
-		# Let gse know that we're asking for extra tids  beyond those expected by default
-		$gse_hr->{tid_extras} = 1 if @always_tids;
-		
-		push @{$gse_hr->{tid}}, @$nexus_children;
-		push @{$gse_hr->{tid}}, @always_tids,
-			if @always_tids;
+		my @extra_tids = split ",", $user->{story_always_topic};
+		push @extra_tids, split ",", $user->{story_always_nexus};
+		# Let gse know that we're asking for extra tids beyond
+		# those expected by default.  
+		if (@extra_tids) {
+			$gse_hr->{tid_extras} = 1;
+			push @{$gse_hr->{tid}}, @extra_tids;
+		}
+
 		# Eliminate duplicates and sort.
 		my %tids = ( map { ($_, 1) } @{$gse_hr->{tid}} );
-		$gse_hr->{tid} = [ sort { $a <=> $b } keys %tids ];
+		$gse_hr->{tid} = [ keys %tids ];
 	}
+	@{ $gse_hr->{tid} } = sort { $a <=> $b } @{ $gse_hr->{tid} };
+
 	# Now exclude characteristics.  One tricky thing here is that
 	# we never exclude the nexus for the current skin -- if the user
 	# went to foo.sitename.com explicitly, then they're going to see
@@ -307,16 +318,15 @@ my $start_time = Time::HiRes::time;
 
 }
 
-
 sub getDispModesForStories {
 	my($stories, $stories_data_cache, $user, $modes, $story_to_dispmode_hr) = @_;
 
-	my @story_always_topic = split (',', $user->{story_always_topic});
-	my @story_always_nexus = split (',', $user->{story_always_nexus});
-	my @story_full_brief_nexus = split (',', $user->{story_full_brief_nexus});
-	my @story_brief_always_nexus = split (',', $user->{story_brief_always_nexus});
-	my @story_full_best_nexus = split (',', $user->{story_full_best_nexus});
-	my @story_brief_best_nexus = split (',', $user->{story_brief_best_nexus});
+	my @story_always_topic =	split (',', $user->{story_always_topic});
+	my @story_always_nexus =	split (',', $user->{story_always_nexus});
+	my @story_full_brief_nexus =	split (',', $user->{story_full_brief_nexus});
+	my @story_brief_always_nexus =	split (',', $user->{story_brief_always_nexus});
+	my @story_full_best_nexus =	split (',', $user->{story_full_best_nexus});
+	my @story_brief_best_nexus =	split (',', $user->{story_brief_best_nexus});
 
 	my(%mp_dispmode_nexus, %sec_dispmode_nexus);
 	$mp_dispmode_nexus{$_}  = $modes->[0] foreach (@story_always_nexus, @story_full_brief_nexus, @story_full_best_nexus);

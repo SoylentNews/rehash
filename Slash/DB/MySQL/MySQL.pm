@@ -7040,7 +7040,8 @@ sub _gse_sectioncollapse {
 	for my $tid (keys %nexuses) {
 		# XXX Should optimize this by writing a version of
 		# getNexusChildrenTids() which takes multiple inputs
-		# and chases them all down together.
+		# and chases them all down together.  Not a huge
+		# deal since sectioncollapse is probably going away.
 		for my $new (@{ $self->getNexusChildrenTids($tid) }) {
 			$nexuses{$new} = 1;
 		}
@@ -10672,7 +10673,11 @@ sub getUser {
 		if (defined($mcdanswer) || $used_shortcut) {
 			print STDERR scalar(gmtime) . " $$ mcd getUser '$mcdkey$uid' elapsed=$elapsed cache HIT" . ($used_shortcut ? " shortcut" : "") . "\n";;
 		} else {
-			print STDERR scalar(gmtime) . " $$ mcd getUser '$mcdkey$uid' elapsed=$elapsed cache MISS can '$gtd->{can_use_mcd}' rawmcdanswer: " . Dumper($rawmcdanswer);
+			# Just to prevent "uninitialized" warnings on debug print
+			$val ||= '';
+			$gtd->{all} ||= '';
+			$gtd->{can_use_mcd} ||= '';
+			print STDERR scalar(gmtime) . " $$ mcd getUser '$mcdkey$uid' elapsed=$elapsed cache MISS can '$gtd->{can_use_mcd}' val '$val' gtd-all='$gtd->{all}' gtd-cum='$gtd->{can_use_mcd}' rawmcdanswer: " . Dumper($rawmcdanswer);
 		}
 	}
 
@@ -10968,6 +10973,9 @@ sub _getUser_get_table_data {
 			}
 			if (grep { $_ ne 'users_hits' } @$tables_needed) {
 				$can_use_mcd = 1;
+			}
+			if ($mcddebug > 1) {
+				print STDERR scalar(gmtime) . " $$ mcd _getU_gtd need_db='$need_db' can_use_mcd='$can_use_mcd' tables_needed='@$tables_needed' gtdcachekey='$gtdcachekey'\n";
 			}
 		}
 
@@ -11703,6 +11711,15 @@ sub getRandomSpamArmor {
 
 	# array index automatically int'd
 	return $ret->{$armor_keys[rand($#armor_keys + 1)]};
+}
+
+########################################################
+sub getMainpageDisplayableNexuses {
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	my $nexus_list = $constants->{mainpage_displayable_nexuses} || '';
+	return [ split /\s*,\s*/, $nexus_list ] if $nexus_list;
+	return $self->getStorypickableNexusChildren(0, 1);
 }
 
 ########################################################

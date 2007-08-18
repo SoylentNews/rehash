@@ -1789,6 +1789,8 @@ sub tildeEd {
 	my @nexustid_order = sort {($b == $constants->{mainpage_nexus_tid}) <=> ($a == $constants->{mainpage_nexus_tid}) || 
 				    lc $nexus_hr->{$a} cmp lc $nexus_hr->{$b} } keys %$nexus_hr;
 
+	my $mp_disp_nexuses = $reader->getMainpageDisplayableNexuses();
+	my %mp_disp_nexus = ( map { ($_, 1) } @$mp_disp_nexuses );
 	for my $tid (@nexustid_order) {
 		     if ($prefs{story_never_nexus}{$tid}) {
 			$story023_default{nexus}{$tid} = 0;
@@ -1803,7 +1805,12 @@ sub tildeEd {
 		} elsif ($prefs{story_brief_best_nexus}) {
 			$story023_default{nexus}{$tid} = 1;
 		} else {
-			if ($constants->{brief_sectional_mainpage}) {
+			# If brief_sectional_mainpage is set, then all
+			# nexuses in getMainpageDisplayableNexuses are,
+			# by default, shown as brief on the mainpage.
+			if ($constants->{brief_sectional_mainpage}
+				&& $mp_disp_nexus{$tid}
+			) {
 				$story023_default{nexus}{$tid} = 4;
 			} else {
 				$story023_default{nexus}{$tid} = 2;

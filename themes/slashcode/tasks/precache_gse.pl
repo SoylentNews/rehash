@@ -61,7 +61,7 @@ $task{$me}{code} = sub {
 	my $mp_tid = $constants->{mainpage_nexus_tid};
 	my $default_maxstories = getCurrentAnonymousCoward("maxstories");
 
-	my $tids = $slashdb->getStorypickableNexusChildren($mp_tid);
+	my $tids = $slashdb->getMainpageDisplayableNexuses();
 	push @$tids, $mp_tid;
 	my @gse_1min = (
 		{ fake_secs_ahead =>  45,
