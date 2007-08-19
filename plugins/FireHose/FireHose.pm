@@ -1980,14 +1980,19 @@ sub getFireHoseTagsTop {
 	my $user 	= getCurrentUser();
 	my $constants 	= getCurrentStatic();
 	my $tags_top	 = [];
+
+	# The meaning of the number after the colon is referenced in
+	# firehose_tags_top;misc;default and (if nonzero) is passed to
+	# YAHOO.slashdot.gCompleterWidget.attach().
 	if ($user->{is_admin}) {
 		if ($item->{type} eq "story") {
+			# 5 = add completer_handleNeverDisplay
 			push @$tags_top, "$item->{type}:5";
 		} else {
 			push @$tags_top, "$item->{type}:6";
 		}
 	} else {
-		push @$tags_top, ($item->{type});
+		push @$tags_top, $item->{type};
 	}
 	
 	if ($item->{primaryskid} && $item->{primaryskid} != $constants->{mainpage_skid}) {
@@ -2000,6 +2005,7 @@ sub getFireHoseTagsTop {
 	}
 	my %seen_tags = map { $_ => 1 } @$tags_top;
 	
+	# 0 = is a link, not a menu
 	push @$tags_top, map { "$_:0" } grep {!$seen_tags{$_}} split (/\s+/, $item->{toptags});
 
 	return $tags_top;
