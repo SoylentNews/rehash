@@ -208,8 +208,9 @@ sub run {
 	if ($plugin->{FireHose}) {
 		my $firehose = getObject('Slash::FireHose');
 		my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
+		my @top = ( );
 		if ($fhid) {
-			my @top = grep { $scores{$_} >= $minscore1 }
+			@top = grep { $scores{$_} >= $minscore1 }
 				sort {
 					$scores{$b} <=> $scores{$a}
 					||
@@ -218,6 +219,7 @@ sub run {
 			$#top = 4 if $#top > 4;
 			$firehose->setFireHose($fhid, { toptags => join(' ', @top) });
 		}
+		main::tagboxLog("Top->run $affected_id with " . scalar(@$tag_ar) . " tags, setFireHose $fhid to '@top' >= $minscore1");
 	}
 
 	if ($type eq 'stories') {
