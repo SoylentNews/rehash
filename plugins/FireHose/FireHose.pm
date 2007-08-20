@@ -1826,7 +1826,7 @@ sub getAndSetOptions {
 
 	foreach (qw(nodates nobylines nothumbs nocolors)) {
 		if ($form->{setfield}) {
-			if ($form->{defined($_)}) {
+			if (defined $form->{$_}) {
 				$options->{$_} = $form->{$_} ? 1 : 0;
 			} else {
 				$options->{$_} = $user->{"firehose_$_"};
@@ -2055,6 +2055,7 @@ sub listView {
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $options = $lv_opts->{options} || $self->getAndSetOptions();
 	my $base_page = $lv_opts->{fh_page} || "firehose.pl";
+
 
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($options);
 
