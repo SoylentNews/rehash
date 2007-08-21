@@ -256,6 +256,17 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
                 <li><strong><a href="/faq/tags.shtml#tags300">What are Slashdot Bookmarks?</a></strong></li>
                 <li><strong><a href="/faq/tags.shtml#tags310">How do I save a Slashdot Bookmark?</a></strong></li>
                 <li><strong><a href="/faq/tags.shtml#tags320">How do I share my Bookmarks?</a></strong></li>
+	</ul><!-- Firehose -->
+        <h2><strong><a href="/faq/firehose.shtml">Firehose</a></strong></h2>
+        <ul>
+                <li><strong><a href="/faq/firehose.shtml#fh100">What is the Slashdot Firehose?</a></strong></li>
+                <li><strong><a href="/faq/firehose.shtml#fh200">Why does the Firehose have articles in it?</a></strong></li>
+                <li><strong><a href="/faq/firehose.shtml#fh300">What do the colors mean?</a></strong></li>
+                <li><strong><a href="/faq/firehose.shtml#fh400">How does the calendar widget work?</a></strong></li>
+                <li><strong><a href="/faq/firehose.shtml#fh500">What can I do with the Firehose tabs?</a></strong></li>
+                <li><strong><a href="/faq/firehose.shtml#fh600">What browsers are supported?</a></strong></li>
+                <li><strong><a href="/faq/firehose.shtml#fh700">Why didn't you post a submission that made it to red?</a></strong></li>
+                <li><strong><a href="/faq/firehose.shtml#fh800">Doesn't this make you just like...</a></strong></li>
 	</ul>
 
 <!--#include virtual="/slashfoot.inc"-->
