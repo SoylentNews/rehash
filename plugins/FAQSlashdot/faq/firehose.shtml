@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+        <title>Slashdot FAQ - Feeds</title>
+<!-- $Id$ -->
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
+
+        <ul class="menu">
+		<li><a href="subscriptions.shtml">Previous Section</a></li>
+		<li><a href="slashmeta.shtml">Next section</a></li>
+		<li><a href="index.shtml">Index</a></li>
+	</ul>
+        
+        <hr>
+
+<h2><a name="fh100">What is the Slashdot Firehose?</a></h2>
+	<p>The Slashdot Firehose is a way for you to participate in the Slashdot editorial
+process.  You are able to
+see all the content submitted to Slashdot: from RSS Feeds and user submissions, to journal entries and
+successful completed Slashdot stories.</p>
+
+<p>You can participate by voting on these entries: click the minus icon if you don't think the story is great
+for Slashdot, and click the plus if you do.  Better yet, when you make these choices you can help further refine
+your decision by clarifying why you made the choice you did.  You can tell us if a story was binspam, or a
+dupe, or insightful.  If you don't like the options provided in the pop-up windows, you can always open the
+tagging box and provide whatever tags you think will help Slashdot Editors, and other Slashdot Readers
+make informed decisions about the content they are reading.</p>
+	<p><em><small>
+		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
+		Last Modified: 08/02/2007
+	</small></em></p>
+
+<h2><a name="fh200">Why does the Firehose have articles in it?</a></h2>
+	<p>The Firehose has all data on Slashdot.  RSS Feeds.  Journal Entries.  Story Submissions.  And of course,
+accepted Slashdot Stories.  The idea is that this view of Slashdot can provide you a single place to view
+all Slashdot content in one interface.</p>
+
+<p>If you don't like any particular data type, you can filter it out.  If you don't like journals, you can just filter on
+-journal and they are gone.  If you don't want Slashdot stories,  -story will get you there.
+</p>
+<p>You will note a variety of interesting options that allow you to control how this page is displayed.  For example,
+if you filter on 'story' and set 'expand top rated' you will see a page that is very similar to Slashdot's main page today... except that it dynamically updates and allows voting and in-place expansion of sectional content.  Alternatively, filtering to -story and toggling 'abbreviated mode' will let you see a real-time stream of reader contributions.  It's really up to you</p>
+	<p><em><small>
+		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
+		Last Modified: 08/02/2007
+	</small></em></p>
+
+<h2><a name="fh300">What do the colors mean?</a></h2>
+	<p>The spectrum of colors represents an overall quality rating for content.  Red is the most popular, the highest
+rated, and hopefully the best content on Slashdot.   There is relatively little Red content, although most stories
+we post default to red.  Some stories show up as orange.  As you work down the spectrum you will find more
+content.  Default submissions to the Firehose start at blue.  At indigo you will find a number of RSS feeds and
+journal entries.  At violet you are probably wasting your time, and at black you definitely are!
+</p>
+
+<p>Play with the color slider to find the level you enjoy reading most at.  Use Red or Orange for busy days or if you
+are a casual reader.  The lower you pull the slider, the more content you will see.
+</p>
+	<p><em><small>
+		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
+		Last Modified: 08/02/2007
+	</small></em></p>
+	
+<h2><a name="fh400">How does the calendar widget work?</a></h2>
+	<p>The Firehose is usable in 3 "Modes".  In "latest content" mode you are looking at the last few days of Slashdot
+content.  Display is optimized for you to easily navigate within this small bit of time.  In 'Day Of' mode you will
+see content only from (surprise) any day you specify in the calender.  Finally in 'Search Archive' mode you will
+search the entire database.  For now, this goes back only perhaps 6 months but eventually we think this can
+replace our existing search infrastructure.</p>
+	<p><em><small>
+		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
+		Last Modified: 08/02/2007
+	</small></em></p>
+	
+<h2><a name="fh500">What can I do with the Firehose tabs?</a></h2>
+	<p>We've found that we like to use the firehose in a number of different ways.  Sometimes I want a casual view of
+Slashdot, and other times i want to see more stories.  Sometimes I want to see only the stories I've tagged.  Other
+times I just want to see Journals.  Well, shockingly enough, each tab will remember your settings and allow you
+to quickly return to them later.
+</p>
+
+<p>If you change your settings, you do so in an 'Untitled' tab.  If you click on your tab, you can name it which will save
+it for later.  Also, you can subscribe to an RSS feed for any particular tab if that's your cup of tea.  Please keep
+in mind that we have a robots.txt file that restricts the rate that you refresh pages.  I'd suggest a 30 minute minimum.
+</p>
+	<p><em><small>
+		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
+		Last Modified: 08/02/2007
+	</small></em></p>
+	
+<h2><a name="fh600">What browsers are supported?</a></h2>
+	<p>Currently we work great under Firefox 1.5 and 2.0, as well as Safari.  IE7 is functional but has glitches
+that we are working to fix.  The iPhone functions as well with a number of optimizations for small screens (although
+the bandwidth requirements are still fairly steep so you are probably better off on a WiFi connection for now)
+</p>
+
+<p>IE6 is known to be broken.  Other browsers might work, but we haven't really tested them.</p>
+	<p><em><small>
+		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
+		Last Modified: 08/02/2007
+	</small></em></p>
+	
+<h2><a name="fh700">Why didn't you post a submission that made it to red?</a></h2>
+	<p>Slashdot is a complex beast with readers with a wide variety of interests.  Part of
+the job of Slashdot Editor is to create a website that is interesting to all of us.  That
+means that sometimes our opinions may differ from yours.  We use the voting in the Firehose
+as an indicator of value, but not as the definitive measure of if something is a Slashdot
+story.
+
+</p> <p>If you don't like that, you can simply remove our Slashdot stories by putting -story  in
+your filter.  The firehose you read will be then be completely reader driven.  We believe that
+the way we've built this system can appeal to the wide variety of Slashdot readers without compromising
+the story quality for our core audience.
+</p>
+	<p><em><small>
+		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
+		Last Modified: 08/02/2007
+	</small></em></p>
+	
+<h2><a name="fh800">Doesn't this make you just like...</a></h2>
+	<p>Well first of all, we're happy to use good ideas when we see them.  Countless websites have knocked off
+our cool ideas, just like we joyously took ideas from those that came before us.  But ultimately the idea
+here is not to imitate any other social network news site.  We feel that the editorial layer that exists on
+top of Slashdot is important.  But we also think that having many eyeballs will help us more efficiently
+sort through the ever increasing volume of content on this here internet of ours.  That's why we'll aim to
+strike a balance.  Slashdot stories will continue to be posted by our editors.  We will use the advice given
+to us by our readers.  Sometimes we will agree, and other times we won't.  You are welcome to read more or less
+editor content depending on your tastes.
+</p>
+<p>At the end of the day, striking a balance between the wisdom of crowds and the tyranny of mobs is a difficult
+one.  It's also a personal one: some people might regard it as having a moral component.  Others may just want
+to read a bunch of good stories no matter what the methodology.  We're hoping that we can strike a balance that
+will work for everyone.  Your feedback can only improve the system for everyone.
+</p>
+	<p><em><small>
+		Answered by: <a href="mailto:cmdrtaco@slashdot.org">CmdrTaco</a><br>
+		Last Modified: 08/02/2007
+	</small></em></p>
+
+        <hr>
+        <ul class="menu">
+		<li><a href="tags.shtml">Previous Section</a></li>
+	
+		<li><a href="index.shtml">Index</a></li>
+	</ul>
+
+<!--#include virtual="/slashfoot.inc"-->
