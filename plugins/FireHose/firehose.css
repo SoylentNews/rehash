@@ -232,22 +232,25 @@ div.tags table.data td input {width: auto !important;}
 div.tags div.tagtitleclosed, div.tags div.tagtitleopen  {
 background:transparent none repeat scroll 0% !important;
 bottom:6px;
-margin-left:15em;
-margin-right:1em;
 position:absolute !important;
 right:1em;
-width:auto;
+padding-bottom: .2em !important
 }
 
-div.tags div.tagtitleopen {right: 18em;}
+.article div.tagtitleclosed {left: 33%; width: 60%; text-align: right;}
+div.tags div.tagtitleopen {left: 35%; width: 30%;}
 .usermode div.tags div.tagbody div.tagextra, .usermode div.tags div.tagbody div.tagadmin {display:none !important;}
-div.tags div.tagbody div.taguser  {text-align: right; border: none !important; padding: 0 !important; width: 19em; position: absolute; bottom: 0; right: 1em; background: transparent !important;}
-div.tags div.tagbody div.taguser input {width: 12em !important; position: absolute; bottom: .5em; right: 5em;}
-div.tags div.tagbody div.taguser input.button {width: 4em !important; position: absolute; bottom: .5em; right: 0;}
+div.tags div.tagbody {margin-bottom: 4em;}
+div.tags div.tagbody div.taguser  {background: transparent !important;}
+div.tags div.tagbody div.taguser input {width: 9em !important; position: absolute; bottom: .5em; right: 4em;}
+div.tags div.tagbody div.taguser input.button {width: 3em !important; position: absolute; bottom: .5em; right: 1em;}
 div.tags i input, div.tags div.tagbody input {font-size: 95% !important;}
+
 .article div.tagtitleclosed span span, .article div.tagtitleopen span span {color: #055; width: auto; text-decoration: underline}
 
-div.tags div.tagtitleopen span.tagsheader { background:transparent url('//images.slashdot.org/login-arrow-expanded.gif') no-repeat scroll 0pt 50% !important; }
+div.tags div.tagtitleopen span.tagsheader {background:transparent url('//images.slashdot.org/login-arrow-expanded.gif') no-repeat scroll 0pt 50% !important; }
+div.tags div.tagtitleopen span.tagsheader, div.tags div.tagtitleclosed span.tagsheader {text-indent: 5000em !important; left: 0 !important; overflow: hidden; position: relative !important; margin-right: 5px; padding: 10px 5px 3px 5px !important; font-size: 0;}
+div.tags div.tagtitleopen a {text-decoration: none;}
 
 div.tags  div.tagbody .message {
 font-size:92%;
@@ -349,6 +352,7 @@ ul.menu a img {margin: 0 0 -4px 0}
 
 /* article bottom */
 div.storylinks ul li.comments {position: relative; width: auto; text-align: left; margin: 0; padding: 0;}
+div.storylinks ul {padding-right: 60% !important}
 
 /* login pop */
 #login_cover {background-color: #222; height: 100%; opacity: 0.75;position: fixed;width: 100%;z-index: 1000000;}
@@ -462,3 +466,4 @@ div.storylinks ul li.comments {position: relative; width: auto; text-align: left
 .briefarticle .storylinks .comments a {text-decoration: none; background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat 0px -1400px; padding: 4px 20px 3px 2px; text-align: center; }
 .briefarticle .storylinks .comments a:hover {background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat scroll 0px -1498px; color: #fff !important}
 .briefarticle .storylinks .comments.nocomment, .briefarticle .storylinks .comments span  {display: none}
+
