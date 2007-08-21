@@ -234,11 +234,12 @@ background:transparent none repeat scroll 0% !important;
 bottom:6px;
 position:absolute !important;
 right:1em;
-padding-bottom: .2em !important
+padding: 0 !important;
+padding-bottom: .4em !important
 }
 
-.article div.tagtitleclosed {left: 33%; width: 60%; text-align: right;}
-div.tags div.tagtitleopen {left: 35%; width: 30%;}
+.article div.tagtitleclosed {left: 33%; width: 60%; text-align: right; margin-left: 5% !important;}
+div.tags div.tagtitleopen {left: 55%; width: 30%; margin-left: -7em !important; text-align: right}
 .usermode div.tags div.tagbody div.tagextra, .usermode div.tags div.tagbody div.tagadmin {display:none !important;}
 div.tags div.tagbody {margin-bottom: 4em;}
 div.tags div.tagbody div.taguser  {background: transparent !important;}
