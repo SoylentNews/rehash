@@ -29,7 +29,7 @@ __template__
 			[% PROCESS firehose_tags_top id = id tags_top = tags_top -%]
 		</span>
 		[%- IF user.tags_canwrite_stories && (user.firehose_usermode || !user.is_admin) %]
-			<span class="tagname"><span class="tagmenu">, <a onClick="attachCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose', 4, {action1:completer_setTag})">feedback</a></span></span>
+			<span class="tagname"><span class="tagmenu">, <a onClick="clickCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose', 4, {action1:completer_setTag})">feedback</a></span></span>
 		[% END %]
 		[% IF user.is_admin && !user.firehose_usermode -%]
 			<i>(<span id="note-form-[% item.id %]" class="hide"><input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30" onkeyup="handleEnter(event, firehose_save_note, '[% id %]')"> <input type="button" value="note" onclick="firehose_save_note('[% item.id %]')"></span><a id="note-text-[% item.id %]" onclick="firehose_open_note('[% item.id %]')">[% IF !item.note  %]Note[% END %][% item.note | strip_literal %]</a>)</i>

@@ -23,7 +23,7 @@ __template__
 		<span class="tagname"><a href="/tags/[% t | strip_html %]">[% t | strip_html %]</a></span>[% IF !loop.last() || story.is_future %], [% END -%]
 	[%- END %]
 [%- END %]
-[%- IF user.tags_canwrite_stories && story.is_future %]<span class="tagmenu"><a onClick="attachCompleter(this, '[% sidenc %]','[% user.is_admin %]','stories', 4, {action1:completer_setTag})">feedback</a></span>[% END %]
+[%- IF user.tags_canwrite_stories && story.is_future %]<span class="tagmenu"><a onClick="clickCompleter(this, '[% sidenc %]','[% user.is_admin %]','stories', 4, {action1:completer_setTag})">feedback</a></span>[% END %]
 <i>(<a href="/faq/tags.shtml">tagging beta</a>)</i>
 </div>
 

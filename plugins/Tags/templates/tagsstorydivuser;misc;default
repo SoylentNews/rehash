@@ -15,7 +15,7 @@ tagsstorydivuser
 __template__
 
 [% PROCESS ajax_reskey_tag reskey_label => 'newtags-reskey-' _ sidenc, reskey_name => 'ajax_tags_write' %]
-<input type="text" class="slashdot-tag-completer" id="newtags-[% sidenc %]" name="newtags-[% sidenc %]" value="[% newtagspreloadtext | strip_attribute %]" size=50 maxlength=60 onkeyup="handleEnter(event, tagsCreateForStory, '[% sidenc %]')" autocomplete="off" onfocus="attachCompleter(this,'[% sidenc %]','[% user.is_admin %]','stories', 0)">
+<input type="text" class="slashdot-tag-completer" id="newtags-[% sidenc %]" name="newtags-[% sidenc %]" value="[% newtagspreloadtext | strip_attribute %]" size=50 maxlength=60 onkeyup="handleEnter(event, tagsCreateForStory, '[% sidenc %]')" autocomplete="off" onfocus="focusCompleter(this,'[% sidenc %]','[% user.is_admin %]','stories', 0)">
 <input type="button" value="Tag" onclick="tagsCreateForStory('[% sidenc %]')" class="button">
 
 [% IF firstnottag_orig %]

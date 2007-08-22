@@ -317,7 +317,11 @@ function completer_save_tab(s, params) {
 	firehose_save_tab(params._id);
 }
 
-function attachCompleter( obj, id, is_admin, type, tagDomain, customize ) {
+function clickCompleter( obj, id, is_admin, type, tagDomain, customize ) {
+  return attachCompleter(obj, id, is_admin, type, tagDomain, customize);
+}
+
+function focusCompleter( obj, id, is_admin, type, tagDomain, customize ) {
   if ( navigator.vendor !== undefined ) {
     var vendor = navigator.vendor.toLowerCase();
     if ( vendor.indexOf("apple") != -1
@@ -325,6 +329,10 @@ function attachCompleter( obj, id, is_admin, type, tagDomain, customize ) {
       return false;
   }
 
+  return attachCompleter(obj, id, is_admin, type, tagDomain, customize);
+}
+
+function attachCompleter( obj, id, is_admin, type, tagDomain, customize ) {
   if ( customize === undefined )
     customize = new Object();
 	customize._id = id;
