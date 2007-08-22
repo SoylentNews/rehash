@@ -1120,7 +1120,7 @@ function firehose_play() {
 	if ($('message_area'))
 		$('message_area').innerHTML = "";
 	if ($('pauseorplay'))
-		$('pauseorplay').innerHTML = "Updating";
+		$('pauseorplay').innerHTML = "Updated";
 	var pause = $('pause');
 	
 	var play_div = $('play');
