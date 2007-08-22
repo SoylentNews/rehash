@@ -77,7 +77,11 @@ __template__
 			[% IF !split_refresh %]<span id="afterwidget">[% END %]
 		[% ELSE %]
 			<span>
+			[% IF cur_day.2 %]
+				<a href="[% gSkin.rootdir %]/[% day_page %]">[% cur_day.1 | strip_literal %]</a>
+			[% ELSE %]
 				<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
+			[% END %]
 			</span>
 		[% END %]
 		

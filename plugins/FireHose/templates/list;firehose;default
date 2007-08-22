@@ -94,7 +94,7 @@ END; login_block = BLOCK %]
 [% theupdatetime = Slash.timeCalc(Slash.db.getTime(), "%H:%M"); %]
 [% refresh_text = "";
    IF !user.is_anon;
-   	refresh_text = '<span style="font-size:60%">(Updated <span id="local_last_update_time">' _ theupdatetime _ '</span><span id="gmt_update_time"></span> Currently <span id="pauseorplay">Paused</span>)</span><span id="busy" class="hide"><img src="' _ constants.imagedir _ '/spinner.gif" alt="*"></span>';
+   	refresh_text = '<span style="font-size:60%">(<span id="pauseorplay">Paused</span> <span id="local_last_update_time">' _ theupdatetime _ '</span><span id="gmt_update_time"></span>)</span><span id="busy" class="hide"><img src="' _ constants.imagedir _ '/spinner.gif" alt="*"></span>';
    END;
 %]
 [% PROCESS titlebar title="$constants.sitename Firehose $refresh_text" %]

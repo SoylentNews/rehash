@@ -63,7 +63,7 @@ END %]
 [% END %]
 	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode options = options %]
 	[% title_type = item.type == "story" ? "story" : "firehose" %]
-	[% PROCESS titlebar h3id="title-" _ item.id id="" future = future title_type = title_type title_type_id = "ttype-" _ item.id %]
+	[% PROCESS titlebar h3id="title-" _ item.id id="" future = future title_type = title_type title_type_id = "ttype-" _ item.id options = options %]
 [% END %]
 	[% IF bodywrapper;
 		Slash.getData('byline', { adminmode => adminmode, item => item, the_user => the_user }, 'firehose');
@@ -103,7 +103,7 @@ END %]
 			[% END %]
 [% IF full %]
 		[% IF (future || item.type=="story") %]<div class="whitewash">[% END %]
-		[% PROCESS tagsfirehosedivtagbox id = item.id  tags_top = tags_top vote = vote options = options %]
+		[% PROCESS tagsfirehosedivtagbox id = item.id  tags_top = tags_top vote = vote options = options item = item %]
 		[% IF (future || item.type=="story") %]</div>[% END %]
 [% IF divwrapper; IF storylinkwrapper %]
 <div class="storylinks">

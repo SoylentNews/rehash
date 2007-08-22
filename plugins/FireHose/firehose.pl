@@ -27,9 +27,9 @@ sub main {
 	my $anonval = $constants->{firehose_anonval_param} || "";
 
 	my %ops = (
-		list		=> [1,  \&list, 1, $anonval, { issue => 1, page => 1, query_apache => 1, virtual_user => 1, startdate => 1, duration => 1 }],
+		list		=> [1,  \&list, 1, $anonval, { issue => 1, page => 1, query_apache => -1, virtual_user => -1, startdate => 1, duration => 1 }],
 		view		=> [1, 	\&view, 0,  ""],
-		default		=> [1,	\&list, 1,  $anonval, { issue => 1, page => 1, query_apache => 1, virtual_user => 1, startdate => 1, duration => 1 }],
+		default		=> [1,	\&list, 1,  $anonval, { issue => 1, page => 1, query_apache => -1, virtual_user => -1, startdate => 1, duration => 1 }],
 		edit		=> [1,	\&edit, 100,  ""],
 		rss		=> [1,  \&rss, 1, ""]
 	);
@@ -53,9 +53,13 @@ sub main {
 		my $redirect = 0;
 		if ($ops{$op}[4] && ref($ops{$op}[4]) eq "HASH") {
 			$redirect = 0;
+			my $count;
 			foreach (keys %$form) {
 				$redirect = 1 if !$ops{$op}[4]{$_}; 
+				$count++ if $ops{$op}[4]{$_} && $ops{$op}[4]{$_} > 0;
 			}
+			# Redirect if there are no operative non/system ops  
+			$redirect = 1 if $count == 0;
 		} 
 		if ($redirect && ($ops{$op}[3] && $ops{$op}[3] eq $form->{anonval})) {
 			$redirect = 0;
@@ -67,7 +71,11 @@ sub main {
 	}
 
 	if ($op ne "rss") {
-		header("$constants->{sitename} - Firehose", '') or return;
+		my $title = "$constants->{sitename} - Firehose";
+		if ($form->{index}) {
+			$title = "$constants->{sitename} - $constants->{slogan}";
+		}
+		header($title, '') or return;
 	}
 
 	$ops{$op}[FUNCTION]->($slashdb, $constants, $user, $form, $gSkin);
