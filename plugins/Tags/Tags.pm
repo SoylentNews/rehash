@@ -1234,7 +1234,7 @@ sub ajaxListTagnames {
 	my $prefix = '';
 	$prefix = lc($1) if $form->{prefix} =~ /([A-Za-z0-9]{1,20})/;
 	my $len = length($prefix);
-	my $notize = $form->{prefix} =~ /^!/ ? '!' : '';
+	my $notize = $form->{prefix} =~ /^([-!])/ ? $1 : '';
 
 	my $tnhr = $tags_reader->listTagnamesByPrefix($prefix);
 
