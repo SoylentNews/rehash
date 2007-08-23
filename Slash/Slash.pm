@@ -47,7 +47,7 @@ $VERSION   	= '2.005000';  # v2.5.0
 
 	dispComment displayStory displayRelatedStories displayThread dispStory
 	getOlderStories getOlderDays getOlderDaysFromDay printComments
-	jsSelectComments commentCountThreshold
+	jsSelectComments commentCountThreshold commentThresholds
 
 	tempUofmLinkGenerate tempUofmCipherObj
 );
@@ -151,21 +151,26 @@ sub selectComments {
 		$options->{existing} ||= {};
 		@$thisComment = sort { $a->{cid} <=> $b->{cid} } @$thisComment;
 
-		if (1) { # XXXd2 by score
-			for my $C (sort { $b->{points} <=> $a->{points} || $a->{cid} <=> $b->{cid} } @$thisComment) {
-				next if $options->{existing}{$C->{cid}};
+		my $sort_comments;
+		if (!$user->{d2_comment_order}) { # score
+			$sort_comments = [ sort {
+				$b->{points} <=> $a->{points}
+					||
+				$a->{cid} <=> $b->{cid}
+			} @$thisComment ];
+		} else { # date / cid
+			$sort_comments = $thisComment;
+		}
 
-				if ($cid) {
-					if (@new_comments >= $max) {
-						push @new_comments, $C if $cid == $C->{cid};
-					} else {
-						push @new_comments, $C;
-					}
-				} else {
-					push @new_comments, $C;
-					last if @new_comments >= $max;
-				}
+		for my $C (@$sort_comments) {
+			next if $options->{existing}{$C->{cid}};
+
+			if ($cid && @new_comments >= $max) {
+				push @new_comments, $C if $cid == $C->{cid};
+			} else {
+				push @new_comments, $C;
 			}
+			last if !$cid && @new_comments >= $max;
 		}
 
 		my @seen;
@@ -311,9 +316,9 @@ sub jsSelectComments {
 	$user      ||= getCurrentUser();
 	$form      ||= getCurrentForm();
 
-	$user->{mode} = 'thread';
-	$user->{reparent} = 0;
-	$user->{state}{max_depth} = $constants->{max_depth} + 3;
+	my $id = $form->{sid};
+	my $pid = $form->{cid} || 0;
+	return unless $id;
 
 	my $threshold = defined $user->{d2_threshold} ? $user->{d2_threshold} : $user->{threshold};
 	my $highlightthresh = defined $user->{d2_highlightthresh} ? $user->{d2_highlightthresh} : $user->{highlightthresh};
@@ -323,33 +328,23 @@ sub jsSelectComments {
 	}
 	$highlightthresh = $threshold if $highlightthresh < $threshold;
 
-	my $id = $form->{sid};
-	return unless $id;
-
-	my $pid = $form->{cid} || 0;
-
-	my($comments) = selectComments(
-		$slashdb->getDiscussion($id),
-		$pid,
-		{
-			commentsort	=> 0,
-			threshold	=> -1
-		}
-	);
+	# only differences:
+	#    sco: force_read, one_cid_only, threshold (was -1 here, matters?)
+	my($comments) = $user->{state}{selectComments}{comments};
 
 	my $d2_seen_0 = $comments->{0}{d2_seen} || '';
-	delete $comments->{0}; # non-comment data
+	#delete $comments->{0}; # non-comment data
 	if ($pid && exists $comments->{$pid}) {
 		$comments = _get_thread($comments, $pid);
 	}
 
-	my @roots = $pid ? $pid : grep { !$comments->{$_}{pid} } keys %$comments;
+	my @roots = $pid ? $pid : grep { $_ && !$comments->{$_}{pid} } keys %$comments;
 	my %roots_hash = ( map { $_ => 1 } @roots );
 	my $thresh_totals;
 
 	if ($form->{full}) {
 		my $comment_text = $slashdb->getCommentTextCached(
-			$comments, [ keys %$comments ],
+			$comments, [ grep $_, keys %$comments ],
 		);
 
 		for my $cid (keys %$comment_text) {
@@ -358,7 +353,7 @@ sub jsSelectComments {
 	} else {
 		my $comments_new;
 		my @keys = qw(pid kids points uid);
-		for my $cid (keys %$comments) {
+		for my $cid (grep $_, keys %$comments) {
 			@{$comments_new->{$cid}}{@keys} = @{$comments->{$cid}}{@keys};
 
 			# we only care about it if it is not original ... we could
@@ -434,17 +429,12 @@ sub commentCountThreshold {
 		}
 	}
 
-	for my $cid (keys %$comments) {
+	for my $cid (grep $_, keys %$comments) {
 		next if $comments->{$cid}{dummy};
-		my $T  = $comments->{$cid}{points};
-		my $HT = $T;
-		if (!$user->{is_anon} && $user->{uid} == $comments->{$cid}{uid}) {
-			$T = 5;
-		}
+
+		my($T, $HT) = commentThresholds($comments->{$cid}, $roots_hash->{$cid}, $user);
 		if ($cid == $pid) {
 			$HT += 7; # THE root comment is always full
-		} elsif ($roots_hash->{$cid}) {
-			$HT++;
 		}
 
 		for my $i (-1..$T) {
@@ -465,6 +455,25 @@ sub commentCountThreshold {
 	}
 	return \%thresh_totals;
 }
+
+sub commentThresholds {
+	my($comment, $root, $user) = @_;
+	$user ||= getCurrentUser();
+
+	my $T  = $comment->{points};
+	my $HT = $T;
+
+	if (!$user->{is_anon} && $user->{uid} == $comment->{uid}) {
+		$T = 5;
+	}
+
+	if ($root) {
+		$HT++;
+	}
+
+	return($T, $HT);
+}
+
 
 sub _get_thread {
 	my($comments, $pid, $newcomments) = @_;
@@ -892,6 +901,12 @@ sub printComments {
 	$sco->{one_cid_only} = 0;
 
 	my($comments, $count) = selectComments($discussion, $cidorpid, $sco);
+	if ($discussion2) {
+		$user->{state}{selectComments} = {
+			comments	=> $comments,
+			count		=> $count
+		};
+	}
 
 	if ($cidorpid && !exists($comments->{$cidorpid})) {
 		# No such comment in this discussion.

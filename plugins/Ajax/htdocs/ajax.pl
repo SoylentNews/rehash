@@ -88,6 +88,8 @@ sub main {
 		$slashdb, $constants, $user, $form, $options
 	);
 
+#	print STDERR "AJAX7 $$: $user->{uid}, $op ($retval)\n";
+
 	if ($retval) {
 		header_ajax($options);
 		print $retval;
@@ -294,7 +296,7 @@ sub fetchComments {
 	my @placeholders;
 
 	$user->{state}{ajax_accesslog_op} = "ajax_comments_fetch";
-#use Data::Dumper; print STDERR Dumper [ $cids, $id, $cid, $max_cid ];
+#use Data::Dumper; print STDERR Dumper [ $cids, $id, $cid, $max_cid, $d2_seen ];
 	# XXX error?
 	return unless $id && ($max_cid || @$cids || $d2_seen);
 
@@ -336,7 +338,7 @@ sub fetchComments {
 	return unless $comments && keys %$comments;
 
 	my $d2_seen_0 = $comments->{0}{d2_seen} || '';
-	delete $comments->{0}; # non-comment data
+	#delete $comments->{0}; # non-comment data
 
 	my %data;
 	if ($max_cid || $d2_seen || $placeholders) {
@@ -351,7 +353,7 @@ sub fetchComments {
 				)}
 			];
 		} elsif ($d2_seen) {
-			$special_cids = $cids = [ sort { $a <=> $b } grep { !$seen{$_} } keys %$comments ];
+			$special_cids = $cids = [ sort { $a <=> $b } grep { $_ && !$seen{$_} } keys %$comments ];
 		} elsif ($placeholders) {
 			@placeholders = split /[,;]/, $placeholders;
 			$special_cids = [ sort { $a <=> $b } @placeholders ];
@@ -380,7 +382,7 @@ sub fetchComments {
 
 			my %cid_map = map { ($_ => 1) } @$special_cids;
 			$data{new_thresh_totals} = commentCountThreshold(
-				{ map { ($_ => $comments->{$_}) } grep { $cid_map{$_} } keys %$comments },
+				{ map { ($_ => $comments->{$_}) } grep { $_ && $cid_map{$_} } keys %$comments },
 				0,
 				{ map { ($_ => 1) } grep { !$comments->{$_}{pid} } @$special_cids }
 			);
@@ -408,14 +410,20 @@ sub fetchComments {
 			if ($comment->{dummy}) {
 				$class = 'hidden';
 				$keep_hidden{$cid} = 1;
-			} elsif ($comment->{points} < $form->{threshold}) {
-				if ($user->{is_anon} || ($user->{uid} != $comment->{uid})) {
-					$class = 'hidden';
-					$keep_hidden{$cid} = 1;
+			} else {
+				# for now we only readjust for children of ROOT (pid==0);
+				# if we make this work for threads, we will need to know
+				# the pid of the page, and adjust this accordingly
+				my($T, $HT) = commentThresholds($comment, !$comment->{pid}, $user);
+				if ($T < $form->{threshold}) {
+					if ($user->{is_anon} || ($user->{uid} != $comment->{uid})) {
+						$class = 'hidden';
+						$keep_hidden{$cid} = 1;
+					}
 				}
+				$class = 'full' if $HT >= $form->{highlightthresh}
+					&& $class ne 'hidden';
 			}
-			$class = 'full' if $comment->{points} >= $form->{highlightthresh}
-				&& $class ne 'hidden';
 			$comment->{class} = $class;
 
 			if ($class eq 'oneline') {
