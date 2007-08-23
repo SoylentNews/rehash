@@ -136,7 +136,7 @@ sub UserLog {
 			$statsSave->addStatDaily("subscribe_runout", 1);
 		}
 	}
-	if ($user_update && %$user_update) {
+	if ($user_update && keys(%$user_update)) {
 		if ($constants->{memcached_debug}) {
 			print STDERR scalar(gmtime) . " $$ mcd UserLog id=$user->{uid} setUser: upd '$user_update' keys '" . join(" ", sort keys %$user_update) . "'\n";
 		}
