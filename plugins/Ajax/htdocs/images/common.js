@@ -81,17 +81,17 @@ function closePopup(id, refresh) {
 }
 
 function handleEnter(ev, func, arg) {
-        if (!ev) {
-                ev = window.event;
-        }
-        var code = ev.which || ev.keyCode;
-        if (code == 13) { // return/enter
+	if (!ev) {
+		ev = window.event;
+	}
+	var code = ev.which || ev.keyCode;
+	if (code == 13) { // return/enter
 		func(arg);
-                ev.returnValue = true;
-                return true;
-        }
-        ev.returnValue = false;
-        return false;
+		ev.returnValue = true;
+		return true;
+	}
+	ev.returnValue = false;
+	return false;
 }
 
 
@@ -155,7 +155,7 @@ function toggleIntro(id, toggleid) {
 
 function tagsToggleStoryDiv(id, is_admin, type) {
 	var bodyid = 'toggletags-body-' + id;
-        var tagsbody = $(bodyid);
+	var tagsbody = $(bodyid);
 	if (tagsbody.className == 'tagshide') {
 		tagsShowBody(id, is_admin, '', type);
 	} else {
@@ -166,22 +166,22 @@ function tagsToggleStoryDiv(id, is_admin, type) {
 function tagsHideBody(id) {
 	// Make the body of the tagbox vanish
 	var tagsbodyid = 'toggletags-body-' + id;
-        var tagsbody = $(tagsbodyid);
+	var tagsbody = $(tagsbodyid);
 	tagsbody.className = "tagshide"
 
 	// Make the title of the tagbox change back to regular
 	var titleid = 'tagbox-title-' + id;
-        var title = $(titleid);
+	var title = $(titleid);
 	title.className = "tagtitleclosed";
 
 	// Make the tagbox change back to regular.
 	var tagboxid = 'tagbox-' + id;
-        var tagbox = $(tagboxid);
+	var tagbox = $(tagboxid);
 	tagbox.className = "tags";
 
 	// Toggle the button back.
 	var tagsbuttonid = 'toggletags-button-' + id;
-        var tagsbutton = $(tagsbuttonid);
+	var tagsbutton = $(tagsbuttonid);
 	tagsbutton.innerHTML = "[+]";
 }
 
@@ -200,22 +200,22 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 	
 	// Toggle the button to show the click was received
 	var tagsbuttonid = 'toggletags-button-' + id;
-        var tagsbutton = $(tagsbuttonid);
+	var tagsbutton = $(tagsbuttonid);
 	tagsbutton.innerHTML = "[-]";
 
 	// Make the tagbox change to the slashbox class
 	var tagboxid = 'tagbox-' + id;
-        var tagbox = $(tagboxid);
+	var tagbox = $(tagboxid);
 	tagbox.className = "tags";
 
 	// Make the title of the tagbox change to white-on-green
 	var titleid = 'tagbox-title-' + id;
-        var title = $(titleid);
+	var title = $(titleid);
 	title.className = "tagtitleopen";
 
 	// Make the body of the tagbox visible
 	var tagsbodyid = 'toggletags-body-' + id;
-        var tagsbody = $(tagsbodyid);
+	var tagsbody = $(tagsbodyid);
 	
 	tagsbody.className = "tagbody";
 	
@@ -293,24 +293,24 @@ function tagsOpenAndEnter(id, tagname, is_admin, type) {
 }
 
 function completer_renameMenu( s, params ) {
-  if ( s )
-    params._sourceEl.innerHTML = s;
+	if ( s )
+		params._sourceEl.innerHTML = s;
 }
 
 function completer_setTag( s, params ) {
-  createTag(s, params._id, params._type);
-  var tagField = document.getElementById('newtags-'+params._id);
-  if ( tagField ) {
-    var s = tagField.value.slice(-1);
-    if ( s.length && s != " " )
-      tagField.value += " ";
-    tagField.value += s;
-  }
+	createTag(s, params._id, params._type);
+	var tagField = document.getElementById('newtags-'+params._id);
+	if ( tagField ) {
+		var s = tagField.value.slice(-1);
+		if ( s.length && s != " " )
+			tagField.value += " ";
+		tagField.value += s;
+	}
 }
 
 function completer_handleNeverDisplay( s, params ) {
-  if ( s == "neverdisplay" )
-    admin_neverdisplay("", "firehose", params._id);
+	if ( s == "neverdisplay" )
+		admin_neverdisplay("", "firehose", params._id);
 }
 
 function completer_save_tab(s, params) {
@@ -318,29 +318,29 @@ function completer_save_tab(s, params) {
 }
 
 function clickCompleter( obj, id, is_admin, type, tagDomain, customize ) {
-  return attachCompleter(obj, id, is_admin, type, tagDomain, customize);
+	return attachCompleter(obj, id, is_admin, type, tagDomain, customize);
 }
 
 function focusCompleter( obj, id, is_admin, type, tagDomain, customize ) {
-  if ( navigator.vendor !== undefined ) {
-    var vendor = navigator.vendor.toLowerCase();
-    if ( vendor.indexOf("apple") != -1
-         || vendor.indexOf("kde") != -1 )
-      return false;
-  }
+	if ( navigator.vendor !== undefined ) {
+		var vendor = navigator.vendor.toLowerCase();
+		if ( vendor.indexOf("apple") != -1
+				|| vendor.indexOf("kde") != -1 )
+			return false;
+	}
 
-  return attachCompleter(obj, id, is_admin, type, tagDomain, customize);
+	return attachCompleter(obj, id, is_admin, type, tagDomain, customize);
 }
 
 function attachCompleter( obj, id, is_admin, type, tagDomain, customize ) {
-  if ( customize === undefined )
-    customize = new Object();
+	if ( customize === undefined )
+		customize = new Object();
 	customize._id = id;
 	customize._is_admin = is_admin;
 	customize._type = type;
 	if ( tagDomain != 0 && customize.queryOnAttach === undefined )
-	  customize.queryOnAttach = true;
-  
+		customize.queryOnAttach = true;
+	
 	if ( !YAHOO.slashdot.gCompleterWidget )
 		YAHOO.slashdot.gCompleterWidget = new YAHOO.slashdot.AutoCompleteWidget();
 
@@ -553,7 +553,7 @@ function firehose_set_options(name, value) {
 			// set page
 			page = 0;
 			var attributes = { 
-				 opacity: { from: 1, to: 0 }
+				opacity: { from: 1, to: 0 }
 			};
 			var myAnim = new YAHOO.util.Anim("firehoselist", attributes); 
 			myAnim.duration = 1;
@@ -727,9 +727,9 @@ function show_nodnix_menu(elem, id, menu, show_delay, hide_delay) {
 		g_pending_showmenu = setTimeout("show_nodnix_menu(g_elem_for_pending_showmenu, g_id_for_pending_showmenu, g_menu_for_pending_showmenu)", show_delay);
 	}
 
-  if ( hide_delay != undefined && hide_delay != 0 ) {
-    hide_nodnix_menu(hide_delay);
-  }
+	if ( hide_delay != undefined && hide_delay != 0 ) {
+		hide_nodnix_menu(hide_delay);
+	}
 }
 
 function dont_show_nodnix_menu() {
@@ -810,7 +810,7 @@ function json_update(response) {
 		}
 	}
 
- 	if (response.html) {
+	if (response.html) {
 		for (el in response.html) {
 			if ($(el))
 				$(el).innerHTML = response.html[el];
@@ -879,8 +879,8 @@ function firehose_handle_update() {
 			}
 
 			var attributes = { 
-				 opacity: { from: 0, to: 1 },
-				 height: { from: 0, to: toheight }
+				opacity: { from: 0, to: 1 },
+				height: { from: 0, to: toheight }
 			};
 			var myAnim = new YAHOO.util.Anim(fh, attributes); 
 			myAnim.duration = 0.7;
@@ -911,8 +911,8 @@ function firehose_handle_update() {
 				// Don't delete admin looking at this in expanded view
 			} else {
 				var attributes = { 
-					 height: { to: 0 },
-					 opacity: { to: 0}
+					height: { to: 0 },
+					opacity: { to: 0}
 				};
 				var myAnim = new YAHOO.util.Anim(fh, attributes); 
 				myAnim.duration = 0.4;
@@ -1162,14 +1162,14 @@ function firehose_remove_entry(id) {
 	var fh = $('firehose-' + id);
 	if (fh) {
 		var attributes = { 
-			 height: { to: 0 },
-			 opacity: { to: 0 }
+			height: { to: 0 },
+			opacity: { to: 0 }
 		};
 		var myAnim = new YAHOO.util.Anim(fh, attributes); 
 		myAnim.duration = 0.5;
 		myAnim.onComplete.subscribe(function() {
-		    var el = this.getEl();
-		        el.parentNode.removeChild(el);
+			var el = this.getEl();
+			el.parentNode.removeChild(el);
 		});
 		myAnim.animate();
 	}
@@ -1190,7 +1190,7 @@ function firehose_calendar_init( widget ) {
 function firehose_slider_init() {
 	fh_colorslider = YAHOO.widget.Slider.getHorizSlider("colorsliderbg", "colorsliderthumb", 0, 105, fh_ticksize);
 	fh_colorslider.setValue(fh_ticksize * fh_colors_hash[fh_color] , 1);
-        fh_colorslider.subscribe("slideEnd", firehose_slider_end);
+	fh_colorslider.subscribe("slideEnd", firehose_slider_end);
 }	
 
 function firehose_slider_set_color(color) {
@@ -1203,8 +1203,8 @@ function firehose_slider_end(offsetFromStart) {
 	var newVal = fh_colorslider.getValue();
 	var color = fh_colors[ newVal / fh_ticksize ];
 	$('fh_slider_img').title = "Firehose filtered to " + color;
-	if(fh_slider_init_set) {
-	 	firehose_set_options("color", color)
+	if (fh_slider_init_set) {
+		firehose_set_options("color", color)
 	}
 	fh_slider_init_set = 1;
 }
@@ -1239,28 +1239,28 @@ function vendorStoryPopup() {
 }
 
 function pausePopVendorStory2(id) {
-        vendor_popup_id=id;
-        closePopup('vendorStory-26-popup');
-        vendor_popup_timerids[id] = setTimeout("vendorStoryPopup2()", 500);
+	vendor_popup_id=id;
+	closePopup('vendorStory-26-popup');
+	vendor_popup_timerids[id] = setTimeout("vendorStoryPopup2()", 500);
 }
 
 function vendorStoryPopup2() {
-        id = vendor_popup_id;
-        var title = "<a href='//intel.vendors.slashdot.org' onclick=\"javascript:urchinTracker('/vendor_intel-popup/intel_popup_title');\">Intel's Opinion Center</a>";
-        var buttons = createPopupButtons("<a href=\"javascript:closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
-        title = title + buttons;
-        var closepopup = function (e) {
-        if (!e) var e = window.event;
-        var relTarg = e.relatedTarget || e.toElement;
-        if (relTarg && relTarg.id == "vendorStory-26-popup") {
-                closePopup("vendorStory-26-popup");
-        }
-        };
-        createPopup(getXYForId('sponsorlinks2', 0, 0), title, "vendorStory-" + id, "Loading", "", closepopup );
-        var params = [];
-        params['op'] = 'getTopVendorStory';
-        params['skid'] = id;
-        ajax_update(params, "vendorStory-" + id + "-contents");
+	id = vendor_popup_id;
+	var title = "<a href='//intel.vendors.slashdot.org' onclick=\"javascript:urchinTracker('/vendor_intel-popup/intel_popup_title');\">Intel's Opinion Center</a>";
+	var buttons = createPopupButtons("<a href=\"javascript:closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
+	title = title + buttons;
+	var closepopup = function (e) {
+		if (!e) var e = window.event;
+		var relTarg = e.relatedTarget || e.toElement;
+		if (relTarg && relTarg.id == "vendorStory-26-popup") {
+			closePopup("vendorStory-26-popup");
+		}
+	};
+	createPopup(getXYForId('sponsorlinks2', 0, 0), title, "vendorStory-" + id, "Loading", "", closepopup );
+	var params = [];
+	params['op'] = 'getTopVendorStory';
+	params['skid'] = id;
+	ajax_update(params, "vendorStory-" + id + "-contents");
 }
 
 function logToDiv(id, message) {
