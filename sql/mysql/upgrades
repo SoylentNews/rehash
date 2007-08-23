@@ -4707,8 +4707,6 @@ INSERT INTO code_param VALUES (NULL, 'd2_comment_limits', 9, 50);
 # 2007-08-15
 UPDATE vars SET value = 'T_2_5_0_170' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 INSERT INTO code_param VALUES (NULL, 'd2_comment_order', 0, 'Score');
@@ -4720,4 +4718,6 @@ INSERT INTO vars (name, value, description) VALUES ('mainpage_displayable_nexuse
 
 # 2007-08-22
 UPDATE vars SET value = 'T_2_5_0_171' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
