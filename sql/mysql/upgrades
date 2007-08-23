@@ -4695,8 +4695,6 @@ UPDATE message_codes SET delivery_bvalue = 15 WHERE type = 'Comment Reply';
 # 2007-08-08
 UPDATE vars SET value = 'T_2_5_0_169' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 INSERT INTO code_param VALUES (NULL, 'd2_comment_q', 0, 'All');
 INSERT INTO code_param VALUES (NULL, 'd2_comment_q', 1, 'Tiny');
 INSERT INTO code_param VALUES (NULL, 'd2_comment_q', 5, 'Medium');
@@ -4706,12 +4704,20 @@ INSERT INTO code_param VALUES (NULL, 'd2_comment_limits', 1, 5);
 INSERT INTO code_param VALUES (NULL, 'd2_comment_limits', 5, 25);
 INSERT INTO code_param VALUES (NULL, 'd2_comment_limits', 9, 50);
 
-# PUDGE LAST UPDATED HERE
-
 # 2007-08-15
 UPDATE vars SET value = 'T_2_5_0_170' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# SLASHDOT LAST UPDATED HERE
+
+INSERT INTO code_param VALUES (NULL, 'd2_comment_order', 0, 'Score');
+INSERT INTO code_param VALUES (NULL, 'd2_comment_order', 1, 'Date');
+
+# PUDGE LAST UPDATED HERE
+
 INSERT INTO vars (name, value, description) VALUES ('mainpage_displayable_nexuses', '', 'List of nexuses that can appear on the mainpage depending on settings; if empty, getStorypickableNexusChildren is used instead');
+
+# 2007-08-22
+UPDATE vars SET value = 'T_2_5_0_171' WHERE name = 'cvs_tag_currentcode';
 
