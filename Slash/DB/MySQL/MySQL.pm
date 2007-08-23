@@ -224,14 +224,14 @@ my %descriptions = (
 	'bytelimit_sub'
 		=> sub { $_[0]->sqlSelectMany('code, name', 'code_param', "type='bytelimit' OR type='bytelimit_sub'") },
 
-	countries => sub {
-		$_[0]->sqlSelectMany(
-			'code,CONCAT(code," (",name,")") as name',
-			'string_param',
-			'type="iso_countries"',
-			'ORDER BY name'
-		);
-	},
+	'countries'
+		=> sub { $_[0]->sqlSelectMany(
+				'code,CONCAT(code," (",name,")") as name',
+				'string_param',
+				'type="iso_countries"',
+				'ORDER BY name'
+			);
+		},
 
 	'forums'
 		=> sub { $_[0]->sqlSelectMany('subsections.id, subsections.title', 'section_subsections, subsections', "section_subsections.subsection=subsections.id AND section_subsections.section='forums'") },
