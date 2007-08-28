@@ -22,7 +22,11 @@ fh_page = fh_page || "firehose.pl";
 IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid != constants.mainpage_skid && item.type == "story";
 	the_skin = Slash.db.getSkin(item.primaryskid);
 	IF user.is_anon;
-		the_skin_title = '<a href="' _ the_skin.rootdir _ '/' _ the_skin.name _ '/firehose.shtml" title="Filter to '_ the_skin.title _'" class="skin">' _ the_skin.title _ ":</a> ";
+		index_add = "";
+		IF form.index;
+			index_add = "index_";
+		END;
+		the_skin_title = '<a href="' _ the_skin.rootdir _ '/' _ the_skin.name _ '/' _ index_add _ 'firehose.shtml" title="Filter to '_ the_skin.title _'" class="skin">' _ the_skin.title _ ":</a> ";
 	ELSE;
 		the_skin_title = '<a href="' _ gSkin.rootdir _ "/" _ fh_page _ '?fhfilter=' _ the_skin.name _ '" title="Filter to '_ the_skin.title _'" class="skin">' _ the_skin.title _ ":</a> ";
 	END;
@@ -31,8 +35,25 @@ ELSIF item.type == "feed" && item.srcname;
 		srcname_filter = Slash.strip_paramattr(srcname_filter);
 		the_skin_title = '<a href="' _ gSkin.rootdir _ "/" _ fh_page _ '?fhfilter=' _ srcname_filter _ '" title="Filter to '_ item.srcname _'"  class="skin">' _ item.srcname _ ":</a> ";
 END;
+
 title = item.title;
-title = "<a onclick=\"toggle_firehose_body('$item.id', $adminmode); return false\" href=\"$gSkin.rootdir/firehose.pl?op=view&amp;id=$item.id\">$title</a>";
+onclick = "onclick=\"toggle_firehose_body('$item.id', $adminmode); return false\"";
+title_href="$gSkin.rootdir/firehose.pl?op=view&amp;id=$item.id";
+IF form.index;
+	onclick="";
+	IF item.type == "story";
+		story = Slash.db.getStory(item.srcid);
+		link = Slash.linkStory({
+			sid	=>	story.sid,
+			tid	=> 	story.tid,
+			skin	=>	story.primaryskid
+		}, 0);
+		title_href = link.0;
+	END;
+END;
+
+
+title = "<a $onclick href=\"$title_href\">$title</a>";
 title = the_skin_title _ title;
 IF item.url_id;
         title = title _ "<span class=\"external\"><a href=\"" _ url.url _ "\" title=\"External link - " _ url.url _ "\" target=\"_blank\">[-&gt;]</a></span>";

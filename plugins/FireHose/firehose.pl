@@ -98,6 +98,10 @@ sub view {
 	my $firehose_reader = getObject("Slash::FireHose", { db_type => 'reader' });
 	my $options = $firehose->getAndSetOptions();
 	my $item = $firehose_reader->getFireHose($form->{id});
+    	my $vote = '';
+	if ($item) {
+		$vote = $firehose->getUserFireHoseVotesForGlobjs($user->{uid}, [$item->{globjid}])->{$item->{globjid}};
+	}
 	if ($item && $item->{id} && ($item->{public} eq "yes" || $user->{is_admin}) ) {
 		if ($user->{is_admin}) {
 			$firehose->setFireHoseSession($item->{id});
@@ -109,7 +113,8 @@ sub view {
 			mode			=> 'full',
 			tags_top		=> $tags_top,
 			options			=> $options,
-			nostorylinkwrapper	=> $discussion ? 1 : 0
+			nostorylinkwrapper	=> $discussion ? 1 : 0,
+			vote			=> $vote
 		});
 
 		slashDisplay("view", {
