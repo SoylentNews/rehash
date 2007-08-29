@@ -1976,18 +1976,6 @@ sub _hard_dispComment {
 		$score_to_display .= ")";
 	}
 
-	if (0 && $discussion2) {
-		$comment_links = <<EOT;
-			<span class="comment_links" style="font-size: smaller">[
-				Experimental threading:
-				<a href="#" onclick="return setFocusComment($comment->{cid},0,1)">One</a>
-				<a href="#" onclick="return setFocusComment($comment->{cid},0,2)">Two</a>
-				<a href="#" onclick="return setFocusComment($comment->{cid},0,3)">Three</a>
-				<a href="#" onclick="return setFocusComment($comment->{cid},0,4)">Four</a>
-			]</span>
-EOT
-	}
-
 	if ($comment->{sid} && $comment->{cid}) {
 		$comment_link_to_display = qq| (<a href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}">#$comment->{cid}</a>)|;
 	} else {

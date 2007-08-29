@@ -35,13 +35,6 @@ __template__
 			<h4><a name="[% cid %]">[% subject %]</a></h4>
 			[%- END %]
 			[% UNLESS user.noscores %]<span id="comment_score_[% cid %]" class="score">(Score:[% IF points.length; points; ELSE; "?"; END %][% IF reasons && reason %], [% reasons.$reason.name %][% END %])</span>[% END %]
-			[% IF 0 && discussion2 %]<span class="comment_links" style="font-size: smaller">[
-				Experimental threading:
-				<a href="#" onclick="return setFocusComment([% cid %],0,1)">One</a>
-				<a href="#" onclick="return setFocusComment([% cid %],0,2)">Two</a>
-				<a href="#" onclick="return setFocusComment([% cid %],0,3)">Three</a>
-				<a href="#" onclick="return setFocusComment([% cid %],0,4)">Four</a>
-			]</span>[% END %]
 		</div>
 		<div class="details">
 			by
