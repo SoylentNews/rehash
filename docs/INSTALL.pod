@@ -161,10 +161,8 @@ lock, create, drop, index and alter.  For example, if your whole site
 server, and you wanted to use the mysql username 'slash', you might:
 
 	GRANT SELECT, INSERT, UPDATE, DELETE, LOCK TABLES, CREATE, DROP,
-	INDEX, ALTER ON slash.* TO 'slash'@'localhost' IDENTIFIED BY
-	(quoted password);
-
-(XXX is Create_temp_table_priv required? don't think so)
+	INDEX, ALTER, PROCESS ON slash.* TO 'slash'@'localhost'
+	IDENTIFIED BY (quoted password);
 
 In this case, 'slash' would also be the name of your MySQL user as
 described in L<"Types of Users"> below.  You'll have to give your MySQL
