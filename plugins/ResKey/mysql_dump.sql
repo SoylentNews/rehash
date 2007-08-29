@@ -42,6 +42,7 @@ INSERT INTO reskey_resources VALUES (6, 'submit', 'no');
 INSERT INTO reskey_resources VALUES (7, 'journal-soap-get', 'no');
 INSERT INTO reskey_resources VALUES (8, 'bookmark', 'no');
 INSERT INTO reskey_resources VALUES (9, 'comments-moderation-ajax', 'yes');
+INSERT INTO reskey_resources VALUES (10, 'misc', 'no');
 
 ##### comments
 ### checks
@@ -208,3 +209,24 @@ INSERT INTO reskey_resources VALUES (200, 'badge_vote_static', 'yes');
 INSERT INTO reskey_resource_checks VALUES (NULL, 200, 'all', 'Slash::ResKey::Checks::User',                101);
 INSERT INTO reskey_resource_checks VALUES (NULL, 200, 'use', 'Slash::ResKey::Checks::Post',                151);
 INSERT INTO reskey_vars VALUES (200, 'user_seclev', 1, 'Minimum seclev to use resource');
+
+
+
+##### misc
+### checks
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'use', 'Slash::ResKey::Checks::Post',                151);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::AL2::AnonNoPost',     301);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::AL2::NoSubmit',       551);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::Duration',            601);
+
+### vars
+INSERT INTO reskey_vars VALUES (10, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (10, 'acl_no', 'reskey_no_misc', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (10, 'duration_max-failures',  10, 'how many failures per reskey');
+
+
+

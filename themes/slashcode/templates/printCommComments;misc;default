@@ -101,7 +101,7 @@ __template__
 	[% lcp %]
 
 [% IF discussion2 && !cid %]
-<div class="prev-next"><a href="javascript:ajaxFetchComments(0,1)"><span id="more_comments_num_a">More</span> comments</a></div>
+<div class="prev-next"><a href="javascript:ajaxFetchComments(0,1)"><span id="more_comments_num_a" class="hide">More comments</span></a></div>
 [% END %]
 
 [% IF moderate_form %]

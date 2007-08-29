@@ -12,6 +12,7 @@ var fetch_comments = [];
 var fetch_comments_pieces = {};
 var update_comments = {};
 var root_comments_hash = {};
+var last_updated_comments = [];
 var more_comments_num;
 var behaviors = {
 	'default': { ancestors: 'none', parent: 'none', children: 'none', descendants: 'none', siblings: 'none', sameauthor: 'none' }, 
@@ -742,6 +743,14 @@ function ajaxFetchComments(cids, option, thresh) {
 			}
 
 			if (update && update.new_cids_order) {
+				for (var i = 0; i < last_updated_comments.length; i++) {
+					var this_cid = last_updated_comments[i];
+					var this_id  = $('tree_' + this_cid);
+					if (this_id)
+						this_id.className = this_id.className.replace('newcomment', '');
+				}
+				last_updated_comments = [];
+					
 				for (var i = 0; i < update.new_cids_order.length; i++) {
 					var this_cid = update.new_cids_order[i];
 					if (placeholder_no_update[this_cid])
@@ -750,6 +759,10 @@ function ajaxFetchComments(cids, option, thresh) {
 					updateDisplayMode(this_cid, mode, 1);
 					currents[displaymode[this_cid]]++;
 					updateComment(this_cid, mode);
+
+					var this_id  = $('tree_' + this_cid);
+					this_id.className = this_id.className + ' newcomment';
+					last_updated_comments.push(this_cid);
 				}
 				// later we may need to find a known point and scroll
 				// to it, but for now we don't want to do this -- pudge
@@ -1021,6 +1034,10 @@ function boxStatus(bool) {
 
 function enableControls() {
 	boxStatus(0);
+	var morelink = $('more_comments_num_a');
+	if (morelink)
+		morelink.className = 'show';
+
 	d2act();
 	loaded = 1;
 }
@@ -1112,8 +1129,12 @@ function updateMoreNum(num) { // should be an integer, or empty string
 	var num_a;
 	if (!num)
 		num_a = 'Check for more';
-	else
-		num_a = 'Retrieve more of the ' + num + ' remaining';
+	else {
+		if (num == 1)
+			num_a = 'Retrieve the 1 remaining comment';
+		else
+			num_a = 'Retrieve more of the ' + num + ' remaining comments';
+	}
 
 	var a = $('more_comments_num_a');
 	var b = $('more_comments_num_b');

@@ -4707,8 +4707,6 @@ INSERT INTO code_param VALUES (NULL, 'd2_comment_limits', 9, 50);
 # 2007-08-15
 UPDATE vars SET value = 'T_2_5_0_170' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 INSERT INTO code_param VALUES (NULL, 'd2_comment_order', 0, 'Score');
 INSERT INTO code_param VALUES (NULL, 'd2_comment_order', 1, 'Date');
 
@@ -4720,4 +4718,24 @@ INSERT INTO vars (name, value, description) VALUES ('mainpage_displayable_nexuse
 UPDATE vars SET value = 'T_2_5_0_171' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
+# reskey updates
+INSERT INTO reskey_resources VALUES (10, 'misc', 'no');
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'use', 'Slash::ResKey::Checks::Post',                151);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::AL2::AnonNoPost',     301);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::AL2::NoSubmit',       551);
+INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::Duration',            601);
+INSERT INTO reskey_vars VALUES (10, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (10, 'acl_no', 'reskey_no_misc', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (10, 'duration_max-failures',  10, 'how many failures per reskey');
+
+# 2007-08-28
+UPDATE vars SET value = 'T_2_5_0_172' WHERE name = 'cvs_tag_currentcode';
+
 

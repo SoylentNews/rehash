@@ -206,9 +206,9 @@ IF do_br %]<br>[% END %]
 	<script type="text/javascript">
 <!--
 	comment_body_reply[[% form.pid %]] = '[% pid_reply %]';
+	document.write('<input type="button" name="quotereply" id="quotereply" value="Quote" class="button" onclick="quoteReply([% form.pid %])">');
 //-->
 	</script>
-	<input type="button" name="quotereply" id="quotereply" value="Quote" class="button" onclick="quoteReply([% form.pid %])">
 	[% END %]
 
 </p>
