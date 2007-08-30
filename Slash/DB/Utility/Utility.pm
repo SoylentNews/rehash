@@ -225,6 +225,11 @@ sub sqlConnect {
 
 	return 0 unless dbAvailable();
 
+	# ping() isn't currently implemented so it is unnecessary;
+	# if it actually did run a query on the DB to determine
+	# whether the connection were active, calling it here
+	# would be a mistake.  I think we want to check
+	# dbh->{Active} instead. XXX -Jamie
 	if (!(defined $self->{_dbh}) || !$self->{_dbh}->ping) {
 	#if (!(defined $self->{_dbh}) || !$self->{_dbh}->can("ping") || !$self->{_dbh}->ping) {
 # Ok, new connection, lets create it
