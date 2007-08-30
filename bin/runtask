@@ -237,7 +237,6 @@ sub parse_slash_sites {
 	# will give us 4294967294, so let's get it that way. -- pudge
 	my($c_name, $c_pass, $c_uid, $c_gid) = getpwuid($uid);
 	if ( $uid != $c_uid || $gid != $c_gid ) {
-#	if ( $uid != $orig_euid or $gid != $orig_egid ) {
 		die "can't set uid/gid to $uid/$gid ($>/$))";
 	}
 	# If we made it this far, everything's cool
