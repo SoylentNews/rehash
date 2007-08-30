@@ -603,7 +603,7 @@ $include
     <Perl>
         # if you need to debug, temporarily turn this on
         # \$Apache::Registry::Debug = 4;
-        my \@pls     = qw(index comments article users journal search);
+        my \@pls     = qw(index comments article users journal search ajax firehose);
         my \$vhost   = '$host_noport';
         my \$docroot = '$prefix_site/$sitename/htdocs';
         my \$r       = Apache::RegistryLoader->new;
