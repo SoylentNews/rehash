@@ -2199,7 +2199,7 @@ option.
 
 String.  There are types of DBs (reader, writer, search, log), and there may be more
 than one DB of each type.  By passing a db_type instead of a virtual_user, you
-request any DB of that ype, instead of a specific DB.
+request any DB of that type, instead of a specific DB.
 
 If neither "virtual_user" or "db_type" is passed, then the function will do a
 lookup of the class for what type of DB handle it wants, and then pick one
