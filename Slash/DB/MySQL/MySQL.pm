@@ -4966,11 +4966,12 @@ sub _get_where_and_valuelist_al2 {
 		@values = values %$srcids;
 	} elsif (ref($srcids) eq 'ARRAY') {
 		@values = @$srcids;
-	} else {
-		use Data::Dumper;
-		warn "logic error: arg to _get_where_and_valuelist_al2 was: " . Dumper($srcids);
-		# We will return an appropriate error value below.
 	}
+#	else {
+#		use Data::Dumper;
+#		warn "logic error: arg to _get_where_and_valuelist_al2 was: " . Dumper($srcids);
+#		# We will return an appropriate error value below.
+#	}
 
 	# A srcid type that get_srcid_sql_in() does not accept is the
 	# raw IP number.  Eliminate those.
