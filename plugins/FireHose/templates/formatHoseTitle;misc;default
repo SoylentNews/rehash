@@ -17,6 +17,11 @@ __template__
 [%
 adminmode = adminmode || "0";
 the_skin_title = "";
+rnf = "";
+IF nofollow;
+	rnf= " rel=\"nofollow\"";
+END;
+
 
 fh_page = fh_page || "firehose.pl";
 IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid != constants.mainpage_skid && item.type == "story";
@@ -53,10 +58,10 @@ IF form.index;
 END;
 
 
-title = "<a $onclick href=\"$title_href\">$title</a>";
+title = "<a $onclick $rnf href=\"$title_href\">$title</a>";
 title = the_skin_title _ title;
 IF item.url_id;
-        title = title _ "<span class=\"external\"><a href=\"" _ url.url _ "\" title=\"External link - " _ url.url _ "\" target=\"_blank\">[-&gt;]</a></span>";
+        title = title _ "<span class=\"external\"><a href=\"" _ url.url _ "\" $rnf title=\"External link - " _ url.url _ "\" target=\"_blank\">[-&gt;]</a></span>";
 END;
 title = title _ " " _ '<span class="date';
 IF options.nodates; 

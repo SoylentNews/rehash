@@ -14,6 +14,13 @@ __seclev__
 10000
 __template__
 [% 
+    firehose = Slash.getObject("Slash::FireHose");
+    pop_val = firehose.getPopLevelForPopularity(item.userpop);
+    nofollow = 1;
+    IF pop_val <= 4;
+    	nofollow = 0;
+    END;
+
     mode = mode || "fulltitle";
     divwrapper = 1;
     storylinkwrapper = 1;

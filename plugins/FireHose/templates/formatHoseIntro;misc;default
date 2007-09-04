@@ -35,7 +35,7 @@ IF item.url_id && url.url;
 	introtext = introtext _ "<a href='" _ url.url _ "'>" _ Slash.strip_literal(url.url) _ "</a>";
 END;
 
-IF !forform && item.type != "story";
+IF (!forform && item.type != "story") || nofollow;
 	introtext = Slash.noFollow(introtext);
 END;
 

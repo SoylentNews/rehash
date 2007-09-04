@@ -21,6 +21,9 @@ __template__
 		extra_uid = user.state.firehose_user_uid;
 		page_extras = "&amp;op=userfirehose&amp;uid=$extra_uid";
 	END;
+	IF form.index;
+		page_extras = page_extras _ "&amp;index=1";
+	END;
 %]
 
 [% IF !contentsonly %]<span class="firehose_paginate" id="firehose_pages">[% END;
