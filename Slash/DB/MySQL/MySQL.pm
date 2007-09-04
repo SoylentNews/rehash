@@ -8669,7 +8669,9 @@ sub getStoidFromSid {
 	my($mcd, $mcdkey);
 	if ($mcd = $self->getMCD()) {
 		$mcdkey = "$self->{_mcd_keyprefix}:sid:";
-		if (my $answer = $mcd->get("$mcdkey$sid")) {
+		my $answer = $mcd->get("$mcdkey$sid");
+		if (defined $answer) {
+			$answer = undef if $answer eq '0';
 			$self->{_sid_conversion_cache}{$sid} = $answer;
 			return $answer;
 		}
@@ -8678,7 +8680,7 @@ sub getStoidFromSid {
 	my $stoid = $self->sqlSelect("stoid", "stories", "sid=$sid_q");
 	$self->{_sid_conversion_cache}{$sid} = $stoid;
 	my $exptime = 86400;
-	$mcd->set("$mcdkey$sid", $stoid, $exptime) if $mcd;
+	$mcd->set("$mcdkey$sid", $stoid || 0, $exptime) if $mcd;
 	return $stoid;
 }
 
