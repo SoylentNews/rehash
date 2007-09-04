@@ -7,7 +7,7 @@ CREATE TABLE firehose (
 	uid mediumint(8) unsigned NOT NULL default '0',
 	globjid int unsigned NOT NULL default '0',
 	discussion mediumint UNSIGNED NOT NULL default '0',
-	type ENUM("submission","journal","bookmark","feed", "story") default 'submission',
+	type ENUM("submission","journal","bookmark","feed","story","vendor","misc") default 'submission',
 	createtime datetime NOT NULL default '0000-00-00 00:00:00',
 	popularity float NOT NULL default '0',
 	popularity2 float NOT NULL default '0',

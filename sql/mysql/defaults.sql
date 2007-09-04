@@ -299,6 +299,81 @@ INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Hold','H
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Quick','Quick');
 INSERT INTO string_param (type, code, name) VALUES ('submission-notes','Back','Back');
 
+
+INSERT INTO string_param (type, code, name) VALUES ('us_states','AL','Alabama');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','AK','Alaska');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','AS','American Samoa');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','AZ','Arizona');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','AR','Arkansas');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','CA','California');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','CO','Colorado');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','CT','Connecticut');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','DE','Delaware');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','DC','District of Columbia');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','FM','Federated States of Micronesia');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','FL','Florida');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','GA','Georgia');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','GU','Guam');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','HI','Hawaii');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','ID','Idaho');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','IL','Illinois');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','IN','Indiana');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','IA','Iowa');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','KS','Kansas');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','KY','Kentucky');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','LA','Louisiana');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','ME','Maine');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','MH','Marshall Islands');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','MD','Maryland');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','MA','Massachusetts');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','MI','Michigan');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','MN','Minnesota');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','MS','Mississippi');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','MO','Missouri');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','MT','Montana');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','NE','Nebraska');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','NV','Nevada');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','NH','New Hampshire');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','NJ','New Jersey');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','NM','New Mexico');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','NY','New York');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','NC','North Carolina');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','ND','North Dakota');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','MP','Northern Mariana Islands');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','OH','Ohio');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','OK','Oklahoma');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','OR','Oregon');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','PW','Palau');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','PA','Pennsylvania');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','PR','Puerto Rico');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','RI','Rhode Island');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','SC','South Carolina');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','SD','South Dakota');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','TN','Tennessee');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','TX','Texas');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','UT','Utah');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','VT','Vermont');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','VI','Virgin Islands');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','VA','Virginia');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','WA','Washington');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','WV','West Virginia');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','WI','Wisconsin');
+INSERT INTO string_param (type, code, name) VALUES ('us_states','WY','Wyoming');
+
+INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','AB','Alberta');
+INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','BC','British Columbia');
+INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','MB','Manitoba');
+INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','NB','New Brunswick');
+INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','NL','Newfoundland and Labrador');
+INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','NT','Northwest Territories');
+INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','NS','Nova Scotia');
+INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','NU','Nunavut');
+INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','ON','Ontario');
+INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','PE','Prince Edward Island');
+INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','QC','Quebec');
+INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','SK','Saskatchewan');
+INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','YT','Yukon');
+
 -- ISO Country Names and Abbreviations (ISO 3166)
 -- http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html
 

@@ -686,6 +686,11 @@ function ajaxFetchComments(cids, option, thresh) {
 		onComplete: function (transport) {
 			var response = eval_response(transport);
 
+			if (!response) {
+				boxStatus(0);
+				return;
+			}
+
 			var update = response.update_data;
 			if (update && update.new_cids_order) {
 				var root;

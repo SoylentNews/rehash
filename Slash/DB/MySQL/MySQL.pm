@@ -233,6 +233,33 @@ my %descriptions = (
 			);
 		},
 
+	'us_states'
+		=> sub { $_[0]->sqlSelectMany(
+				'code,CONCAT(code," (",name,")") as name',
+				'string_param',
+				'type="us_states"',
+				'ORDER BY name'
+			);
+		},
+
+	'ca_provinces'
+		=> sub { $_[0]->sqlSelectMany(
+				'code,CONCAT(code," (",name,")") as name',
+				'string_param',
+				'type="ca_provinces"',
+				'ORDER BY name'
+			);
+		},
+
+	'states_and_provinces'
+		=> sub { $_[0]->sqlSelectMany(
+				'code,CONCAT(code," (",name,")") as name',
+				'string_param',
+				'type="ca_provinces" OR type="us_states"',
+				'ORDER BY name'
+			);
+		},
+
 	'forums'
 		=> sub { $_[0]->sqlSelectMany('subsections.id, subsections.title', 'section_subsections, subsections', "section_subsections.subsection=subsections.id AND section_subsections.section='forums'") },
 

@@ -107,7 +107,7 @@ sub view {
 			$firehose->setFireHoseSession($item->{id});
 		}
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
-		my $discussion = $item->{type} eq 'submission' && $item->{discussion};
+		my $discussion = $item->{type} =~ /^submission|misc$/ && $item->{discussion};
 
 		my $firehosetext = $firehose_reader->dispFireHose($item, {
 			mode			=> 'full',
