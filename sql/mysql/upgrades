@@ -4817,6 +4817,6 @@ INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','YT','Yukon')
 
 # PUDGE LAST UPDATED HERE
 
-# Slashdot only: glob basic css
-UPDATE css SET file="core-tidied.css" WHERE file="base.css";
-DELETE FROM css WHERE file IN ("slashdot.css", "ostgnavbar.css");
+# 2007-09-05
+UPDATE vars SET value = 'T_2_5_0_173' WHERE name = 'cvs_tag_currentcode';
+
