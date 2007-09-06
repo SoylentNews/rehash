@@ -258,16 +258,12 @@ right: 0;
 }
 
 /* Icons and imagery for articles */
+
 .edit
 {
-	position: absolute !important;
-	top: 17px;
-	right: 25px;
-}
-.edit a
-{
-	background: url('//images.slashdot.org/sic_icons.png') no-repeat 27px -398px !important;
-	width: 20px;
+        position: absolute !important;
+        top: 19px;
+        right: 28px;
 }
 
 .external { padding: 0 20px 0 5px; display: inline; }
