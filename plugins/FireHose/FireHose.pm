@@ -2330,7 +2330,7 @@ sub ajaxFireHoseUsage {
 	my $downlabel = $constants->{tags_downvote_tagname} || 'nix';
 	my $down_id = $tags->getTagnameidFromNameIfExists($downlabel);
 	
-	my $uplabel = $constants->{tags_downvote_tagname} || 'nod';
+	my $uplabel = $constants->{tags_upvote_tagname} || 'nod';
 	my $up_id = $tags->getTagnameidFromNameIfExists($uplabel);
 	my $data = {};
 
