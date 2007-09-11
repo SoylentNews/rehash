@@ -360,6 +360,9 @@ function createTag(tag, id, type) {
 	params['name'] = tag;
 	params['id'] = id;
 	params['type'] = type;
+	if (tag == "hold" && fh_is_admin) {
+		firehose_collapse_entry(id);
+	}
 	ajax_update(params, '');
 }
 
