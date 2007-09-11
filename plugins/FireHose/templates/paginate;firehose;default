@@ -17,7 +17,7 @@ __template__
 [% fh_page = fh_page || "firehose.pl" %]
 [% day_page = fh_page %]
 [% IF fh_page == "users.pl"; day_page = "firehose.pl"; END %]
-
+[% index_extra = form.issue ? "&amp;index=1" : "" %]
 
 
 [% IF !contentsonly %]
@@ -50,7 +50,7 @@ __template__
 		FOREACH cur_day = days;
 		%]
 		<span class="inactive">
-			<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
+			<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?issue=[% cur_day.0 %][% index_extra %]">[% cur_day.1 | strip_literal %]</a>
 		</span>
 		[% END %]
 		[% IF !split_refresh %]</span>[% END %]
@@ -80,7 +80,7 @@ __template__
 			[% IF cur_day.2 %]
 				<a href="[% gSkin.rootdir %]/[% day_page %]">[% cur_day.1 | strip_literal %]</a>
 			[% ELSE %]
-				<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?issue=[% cur_day.0 %]">[% cur_day.1 | strip_literal %]</a>
+				<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?issue=[% cur_day.0 %][% index_extra %]">[% cur_day.1 | strip_literal %]</a>
 			[% END %]
 			</span>
 		[% END %]
