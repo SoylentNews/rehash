@@ -1584,7 +1584,7 @@ sub getAndSetOptions {
 	$opts 	        ||= {};
 	my $options 	= {};
 
-	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1 }; # , misc => 1 ? -- pudge
+	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1 , misc => 1 }; 
 	my $modes = { full => 1, fulltitle => 1 };
 	my $pagesizes = { "small" => 1, "large" => 1 };
 
@@ -1694,7 +1694,7 @@ sub getAndSetOptions {
 		$fhfilter = $user->{firehose_fhfilter} unless $no_saved;
 		$options->{fhfilter} = $fhfilter;
 	}
-	
+
 	# XXX
 	my $user_tabs = $self->getUserTabs();
 	my %user_tab_names = map { $_->{tabname} => 1 } @$user_tabs;
@@ -1794,6 +1794,10 @@ sub getAndSetOptions {
 
 	if ($form->{index}) {
 		$mode = "fulltitle";
+		if ($gSkin->{nexus} != $constants->{mainpage_nexus_tid}) {
+			$mode = "full";
+		}
+
 	}
 	
 	if ($mode eq "full") {
@@ -1930,13 +1934,15 @@ sub getAndSetOptions {
 		$options->{skipmenu} = 1;
 		$options->{skippop} = 1;
 		if (!$form->{issue}) {
-			$options->{duration} = 7;
+			$options->{duration} = -1;
 			$options->{startdate} = '';
 		}
 		$options->{mode} = 'fulltitle';
 		$options->{color} = 'black';
 		$options->{nocolors} = 1;
-		$options->{mixedmode} = 1;
+		if ($gSkin->{nexus} == $constants->{mainpage_nexus_tid}) {
+			$options->{mixedmode} = 1;
+		}
 	}
 	
 
