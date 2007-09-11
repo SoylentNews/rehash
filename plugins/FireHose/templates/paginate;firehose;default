@@ -76,7 +76,7 @@ __template__
 			[% IF split_refresh %]<!-- split -->[% END %]
 			[% IF !split_refresh %]<span id="afterwidget">[% END %]
 		[% ELSE %]
-			<span>
+			<span class="inactive">
 			[% IF cur_day.2 %]
 				<a href="[% gSkin.rootdir %]/[% day_page %]">[% cur_day.1 | strip_literal %]</a>
 			[% ELSE %]
