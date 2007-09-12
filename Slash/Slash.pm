@@ -369,7 +369,7 @@ sub jsSelectComments {
 	}
 
 	my($max_cid) = sort { $b <=> $a } keys %$comments;
-	$max_cid ||= 0;
+	$max_cid ||= -1;
 
 	my $anon_comments = Data::JavaScript::Anon->anon_dump($comments);
 	my $anon_roots    = Data::JavaScript::Anon->anon_dump(\@roots);
