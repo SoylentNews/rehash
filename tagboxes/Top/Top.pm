@@ -146,8 +146,6 @@ sub run {
 	my $tagboxdb = getObject('Slash::Tagbox');
 
 	my($type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
-	if (!$type) { warn "Tagbox::Top::run finds no type for '$affected_id'" } # debug assertion, can prob remove
-	return unless $type && ($type eq 'stories' || $type eq 'urls');
 
 	# Get the list of tags applied to this object.  If we're doing
 	# URL popularity, that's only the tags within the past few days.
