@@ -4715,8 +4715,6 @@ INSERT INTO vars (name, value, description) VALUES ('mainpage_displayable_nexuse
 # 2007-08-22
 UPDATE vars SET value = 'T_2_5_0_171' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 # reskey updates
 INSERT INTO reskey_resources VALUES (10, 'misc', 'no');
 INSERT INTO reskey_resource_checks VALUES (NULL, 10, 'all', 'Slash::ResKey::Checks::User',                101);
@@ -4733,8 +4731,6 @@ INSERT INTO reskey_vars VALUES (10, 'duration_max-failures',  10, 'how many fail
 
 # 2007-08-28
 UPDATE vars SET value = 'T_2_5_0_172' WHERE name = 'cvs_tag_currentcode';
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
 
 
 ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc") default 'submission';
@@ -4819,4 +4815,11 @@ INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','YT','Yukon')
 
 # 2007-09-05
 UPDATE vars SET value = 'T_2_5_0_173' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
+# 2007-09-13
+UPDATE vars SET value = 'T_2_5_0_174' WHERE name = 'cvs_tag_currentcode';
 
