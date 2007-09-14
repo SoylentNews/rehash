@@ -1934,7 +1934,7 @@ sub getAndSetOptions {
 	if ($form->{index}) {
 		$options->{skipmenu} = 1;
 		$options->{skippop} = 1;
-		if (!$form->{issue}) {
+		if (!$form->{issue} || getCurrentSkin()->{nexus} != $constants->{mainpage_nexus_tid}) {
 			$options->{duration} = -1;
 			$options->{startdate} = '';
 		}
