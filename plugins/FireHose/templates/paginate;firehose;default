@@ -29,7 +29,7 @@ __template__
 	[% day = Slash.db.getDay(0) %]
 	[% IF !split_refresh %]<span id="beforewidget">[% END %]
 	<span class="inactive">
-		<a href="[% gSkin.rootdir %]/[% day_page %]">Today</a>
+		<a href="[% gSkin.rootdir %]/[% day_page %][% IF form.index %]?index=1[% END %]">Today</a>
 	</span>
 	[% IF !split_refresh %]</span>[% END %]
 	[% IF split_refresh %]<!-- split -->[% END %]
@@ -109,12 +109,12 @@ __template__
 [% ELSIF options.duration == -1 && !options.startdate %]
 	[% IF !split_refresh %]<span id="beforewidget">[% END %]
 	<span class="inactive">
-		<a href="[% gSkin.rootdir %]/[% day_page %]">Today</a>
+		<a href="[% gSkin.rootdir %]/[% day_page %][% IF form.index %]?index=1[% END %]">Today</a>
 	</span>
 	[% IF !split_refresh %]
 	</span>
 	 <span class="active">
-		[% IF form.skipmenu %]
+		[% IF form.skipmenu || form.index %]
 			[% PROCESS datewidget id='fhcalendar_pag' init='firehose_calendar_init' date="" %]
 		[% ELSE %]
 			[% PROCESS datewidget id='fhcalendar_pag' peer = 'fhcalendar' init='firehose_calendar_init' %]
