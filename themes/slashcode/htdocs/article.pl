@@ -242,7 +242,7 @@ sub main {
 	}
 
 	my $plugins = $slashdb->getDescriptions('plugins');
-	if (!$user->{is_anon} && $plugins->{Tags}) {
+	if (!$user->{is_anon} && $plugins->{Tags} && $story) {
 		my $tagsdb = getObject('Slash::Tags');
 		$tagsdb->markViewed($user->{uid},
 			$reader->getGlobjidCreate('stories', $story->{stoid}));
