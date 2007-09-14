@@ -4816,10 +4816,10 @@ INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','YT','Yukon')
 # 2007-09-05
 UPDATE vars SET value = 'T_2_5_0_173' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # 2007-09-13
 UPDATE vars SET value = 'T_2_5_0_174' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
