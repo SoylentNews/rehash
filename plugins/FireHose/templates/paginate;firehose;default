@@ -17,7 +17,7 @@ __template__
 [% fh_page = fh_page || "firehose.pl" %]
 [% day_page = fh_page %]
 [% IF fh_page == "users.pl"; day_page = "firehose.pl"; END %]
-[% index_extra = form.issue ? "&amp;index=1" : "" %]
+[% index_extra = form.index ? "&amp;index=1" : "" %]
 
 
 [% IF !contentsonly %]
