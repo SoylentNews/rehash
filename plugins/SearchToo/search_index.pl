@@ -23,7 +23,7 @@ $task{$me}{code} = sub {
 	$searchtoo->copyBackup;
 	$searchtoo->backup(1);
 	my $backup_duration = time - $backup_start_time;
-	if ($backup_duration > 30) {
+	if ($backup_duration > 60) {
 		slashdErrnote("backup process took $backup_duration seconds; file cleanup may be required");
 	}
 
