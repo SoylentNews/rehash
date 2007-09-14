@@ -1938,11 +1938,13 @@ sub getAndSetOptions {
 			$options->{duration} = -1;
 			$options->{startdate} = '';
 		}
-		$options->{mode} = 'fulltitle';
 		$options->{color} = 'black';
 		$options->{nocolors} = 1;
 		if (getCurrentSkin()->{nexus} == $constants->{mainpage_nexus_tid}) {
 			$options->{mixedmode} = 1;
+			$options->{mode} = 'fulltitle';
+		} else {
+			$options->{mode} = 'full';
 		}
 	}
 	
