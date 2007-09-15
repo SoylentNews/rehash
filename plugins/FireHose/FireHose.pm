@@ -1945,6 +1945,7 @@ sub getAndSetOptions {
 			$options->{mode} = 'fulltitle';
 		} else {
 			$options->{mode} = 'full';
+			$options->{mixedmode} = 0;
 		}
 	}
 	
@@ -2002,6 +2003,7 @@ sub getAndSetOptions {
 	if ($options->{issue}) {
 		$options->{duration} = 1;
 	}
+
 
 	return $options;
 }
