@@ -107,5 +107,10 @@ YAHOO.slashdot.SlashBox.prototype.onDragDrop = function(e, id)
         all += sep + bid;
         sep = ",";
       }
-    //... more here...
+
+    var params = [];
+    params['op'] = 'page_save_user_boxes';
+    params['reskey'] = reskey_static;
+    params['bids'] = all;
+    ajax_update(params, '');
   }
