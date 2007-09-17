@@ -367,6 +367,7 @@ sub saveUserBoxes {
 		{ slashboxes => $user->{slashboxes} });
 }
 
+#################################################################
 sub ajaxSaveUserBoxes {
 	my($slashdb, $constants, $user, $form) = @_;
 	return if $user->{is_anon};
@@ -374,7 +375,6 @@ sub ajaxSaveUserBoxes {
 	$slashdb->setUser($user->{uid},
 		{ slashboxes => $user->{slashboxes} });
 }
-
 
 #################################################################
 sub getUserBoxes {
