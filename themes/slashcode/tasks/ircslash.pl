@@ -346,6 +346,7 @@ my %cmds = (
 	lcr		=> \&cmd_lcr,
 	lcrset		=> \&cmd_lcrset,
 	re		=> \&cmd_re,
+	d		=> \&cmd_roll,
 );
 sub handle_cmd {
 	my($service, $cmd, $event) = @_;
@@ -487,6 +488,16 @@ sub cmd_re {
 	my($service, $info) = @_;
 	send_msg(getIRCData('re', {
 		nickname	=> $info->{text} || $info->{event}{nick},
+	}), { $service => 1 });
+}
+
+sub cmd_roll {
+	my($service, $info) = @_;
+	my($n) = $info->{text} =~ /(\d+)/;
+	my @n = (1 .. $n);
+	send_msg(getIRCData('roll', {
+		num       => $n[rand @n],
+		nickname  => $info->{event}{nick},
 	}), { $service => 1 });
 }
 

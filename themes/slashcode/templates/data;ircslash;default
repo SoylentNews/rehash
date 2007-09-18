@@ -23,7 +23,10 @@ __template__
 	Commands: help, [un]hush, [un]ignore, slashd, ping, who, whois (UID|NICK), lcr [SITE], lcrset SITE TAG, quote SYMBOL, dbs, re[% IF plugins.daddypants %], daddypants [now|next|today|tomorrow|N days][% END %]
 
 [% CASE 're' %]
-	Welcome back, [% nickname %]
+	Welcome back, [% nickname %].
+
+[% CASE 'roll' %]
+	You rolled a [% num %], [% nickname %].
 
 [% CASE 'exiting' %]
 	Exiting (slashd should restart me within a minute)
