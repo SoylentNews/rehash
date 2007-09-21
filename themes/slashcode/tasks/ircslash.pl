@@ -494,9 +494,9 @@ sub cmd_re {
 sub cmd_roll {
 	my($service, $info) = @_;
 	my($n) = $info->{text} =~ /(\d+)/;
-	my @n = (1 .. $n);
+	$n ||= 100;
 	send_msg(getIRCData('roll', {
-		num       => $n[rand @n],
+		num       => int(rand $n)+1,
 		nickname  => $info->{event}{nick},
 	}), { $service => 1 });
 }
