@@ -1827,6 +1827,15 @@ sub getAndSetOptions {
 		}
 	}
 
+	if ($form->{gadget}) {
+			$options->{smalldevices} = 1;
+			if ($mode eq "full") {
+				$options->{limit} = $pagesize eq "large" ? 15 : 10;
+			} else {
+				$options->{limit} = $pagesize eq "large" ? 20 : 15;
+			}
+	}
+
 	if ($user->{is_admin} && $form->{setusermode}) {
 		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "" });
 	}
@@ -2012,6 +2021,7 @@ sub getFireHoseTagsTop {
 	my($self, $item) = @_;
 	my $user 	= getCurrentUser();
 	my $constants 	= getCurrentStatic();
+	my $form = getCurrentForm();
 	my $tags_top	 = [];
 
 	# The meaning of the number after the colon is referenced in
@@ -2047,6 +2057,10 @@ sub getFireHoseTagsTop {
 		if ($ENV{HTTP_USER_AGENT} =~ $smalldev_re) {
 			$#{@$user_tags_top} = 2;
 		}
+	}
+
+	if ($form->{gadget}) {
+		$#{@$user_tags_top} = 2;
 	}
 
 	push @$tags_top, @$user_tags_top;
