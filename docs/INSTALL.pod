@@ -228,6 +228,8 @@ instead of bash, which apparently breaks the above step (because dash's
 into it, but for now apparently (temporarily) linking /bin/sh to /bin/bash
 during this step is a workaround.
 L<https:E<sol>E<sol>launchpad.netE<sol>ubuntuE<sol>+spec/dash-as-bin-sh>
+(Update: this appears to no longer be a problem, but if you encounter
+problems on Ubuntu, check where your /bin/sh points.)
 
 =item 4.
 

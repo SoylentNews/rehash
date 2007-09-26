@@ -183,7 +183,9 @@ INSTALLATION
         dash's 'echo -E' isn't compliant enough for apache's 'configure').
         We're looking into it, but for now apparently (temporarily) linking
         /bin/sh to /bin/bash during this step is a workaround.
-        "dash-as-bin-sh" in https://launchpad.net/ubuntu/+spec
+        "dash-as-bin-sh" in https://launchpad.net/ubuntu/+spec (Update: this
+        appears to no longer be a problem, but if you encounter problems on
+        Ubuntu, check where your /bin/sh points.)
 
     4.  Install the perl modules.
 
