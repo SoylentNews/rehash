@@ -61,6 +61,7 @@ CREATE TABLE tagboxes (
 	tbid			smallint UNSIGNED NOT NULL AUTO_INCREMENT,
 	name			VARCHAR(32) DEFAULT '' NOT NULL,
 	affected_type		ENUM('user', 'globj') NOT NULL,
+	clid			smallint UNSIGNED NOT NULL,
 	weight			FLOAT UNSIGNED DEFAULT 1.0 NOT NULL,
 	last_run_completed	datetime,
 	last_tagid_logged	int UNSIGNED NOT NULL,
@@ -111,11 +112,14 @@ CREATE TABLE tags_userchange (
 ) TYPE=InnoDB;
 
 CREATE TABLE tags_peerweight (
+	tpwid		int UNSIGNED NOT NULL AUTO_INCREMENT,
 	uid		mediumint UNSIGNED NOT NULL DEFAULT '0',
+	clid		smallint UNSIGNED NOT NULL,
 	gen		smallint UNSIGNED NOT NULL DEFAULT '0',
 	weight		float NOT NULL DEFAULT '0',
-	PRIMARY KEY (uid),
-	KEY gen_uid (gen, uid)
+	PRIMARY KEY (tpwid),
+	UNIQUE uid_clid (uid, clid),
+	KEY clid_gen_uid (clid, gen, uid)
 ) TYPE=InnoDB;
 
 CREATE TABLE tagnames_similar (

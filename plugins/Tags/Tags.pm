@@ -547,8 +547,8 @@ sub getTagsByGlobjid {
 # to 1.  "Rounded" means round to 3 decimal places.
 
 sub addRoundedCloutsToTagArrayref {
-	my($self, $ar, $options) = @_;
-	$self->addCloutsToTagArrayref($ar, $options);
+	my($self, $ar, $clout_type) = @_;
+	$self->addCloutsToTagArrayref($ar, $clout_type);
 	for my $tag_hr (@$ar) {
 		$tag_hr->{tag_clout}     = sprintf("%.3f", $tag_hr->{tag_clout});
 		$tag_hr->{tagname_clout} = sprintf("%.3f", $tag_hr->{tagname_clout});
@@ -558,9 +558,10 @@ sub addRoundedCloutsToTagArrayref {
 }
 
 sub addCloutsToTagArrayref {
-	my($self, $ar, $options) = @_;
+	my($self, $ar, $clout_type) = @_;
 
-	return if !$ar || !@$ar;
+if (!$clout_type) { use Carp; Carp::cluck("no clout_type for addCloutsToTagArrayref"); }
+	return if !$ar || !@$ar || !$clout_type;
 	my $constants = getCurrentStatic();
 
 	# Pull values from tag params named 'tag_clout'
@@ -582,46 +583,39 @@ sub addCloutsToTagArrayref {
 	my %uid = map { ($_->{uid}, 1) } @$ar;
 	my @uids = sort { $a <=> $b } keys %uid;
 	my $uids_in_str = join(',', @uids);
-	my $uid_info_hr;
-	my $clout_field = $options->{cloutfield} || $constants->{tags_usecloutfield} || '';
-	if ($clout_field) {
-		$uid_info_hr = $self->sqlSelectAllHashref(
-			'uid',
-			'users.uid AS uid, seclev, karma, tag_clout, users_param.value AS paramclout',
-			"users,
-			 users_info LEFT JOIN users_param
-				ON (users_info.uid=users_param.uid AND users_param.name='$clout_field')",
-			"users.uid=users_info.uid AND users.uid IN ($uids_in_str)");
-	} else {
-		$uid_info_hr = $self->sqlSelectAllHashref(
-			'uid',
-			'users.uid AS uid, seclev, karma, tag_clout',
-			'users, users_info',
-			"users.uid=users_info.uid AND users.uid IN ($uids_in_str)");
-	}
+	my $clid = $self->getCloutTypes()->{$clout_type};
+if (!$clid) { use Carp; Carp::cluck("no clid for addCloutsToTagArrayref '$clout_type'"); }
+	my $uid_info_hr = $self->sqlSelectAllHashref(
+		'uid',
+		'users.uid AS uid, seclev, karma, tag_clout,
+			UNIX_TIMESTAMP(created_at) AS created_at_ut,
+		 clout',
+		"users,
+		 users_info LEFT JOIN users_clout
+			ON (users_info.uid=users_clout.uid AND clid=$clid)",
+		"users.uid=users_info.uid AND users.uid IN ($uids_in_str)");
 #print STDERR "uids_in_str='$uids_in_str'\n";
 
+	my $clout_info = $self->getCloutInfo($clid);
 	my $uid_clout_hr = { };
 	for my $uid (keys %$uid_info_hr) {
-		if (defined $uid_info_hr->{$uid}{paramclout}) {
-			$uid_clout_hr->{$uid} = $uid_info_hr->{$uid}{paramclout}
-				* $constants->{tags_usecloutfield_mult};
+		if (defined $uid_info_hr->{$uid}{clout}) {
+			$uid_clout_hr->{$uid} = $uid_info_hr->{$uid}{clout};
 		} else {
-			if ((!$options->{cloutfield} || $options->{cloutfield} eq $constants->{tags_usecloutfield})
-				&& length $constants->{tags_usecloutfield_default}) {
-				# There's a default clout for users who don't have
-				# the param field in question.  Use it.
-				$uid_clout_hr->{$uid} = $constants->{tags_usecloutfield_default}+0;
-			} else {
-				# There's no default value.  Use the old formula.
-				# (XXX These hardcoded numbers really should be
-				# parameterized, but I'm not sure how long
-				# this formula is going to stick around...)
-				$uid_clout_hr->{$uid} = $uid_info_hr->{$uid}{karma} >= -3
-					? log($uid_info_hr->{$uid}{karma}+10) : 0;
-				$uid_clout_hr->{$uid} += 5 if $uid_info_hr->{$uid}{seclev} > 1;
-				$uid_clout_hr->{$uid} *= $uid_info_hr->{$uid}{tag_clout};
-			}
+			# There's a default clout for users who don't have
+			# the clout type in question.  Use it.
+			my %user_stub = %{ $uid_info_hr->{$uid} };
+#			my $user_stub = {
+#				uid		=> $uid,
+#				seclev		=> $uid_info_hr->{$uid}{seclev},
+#				karma		=> $uid_info_hr->{$uid}{karma},
+#				tag_clout	=> $uid_info_hr->{$uid}{tag_clout},
+#				created_at_ut	=> $uid_info_hr->{$uid}{created_at_ut},
+#			}
+			# XXX this stub is good enough for now but we may
+			# need the whole actual getUser() user at some
+			# future time
+			$uid_clout_hr->{$uid} = $clout_info->{class}->getUserClout(\%user_stub);
 		}
 	}
 
@@ -767,7 +761,7 @@ sub getUidsUsingTagname {
 }
 
 sub getAllObjectsTagname {
-	my($self, $name, $options) = @_;
+	my($self, $name, $clout_type, $options) = @_;
 #	my $mcd = undef;
 #	my $mcdkey = undef;
 #	if (!$options->{include_private}) {
@@ -787,7 +781,7 @@ sub getAllObjectsTagname {
 		"tagnameid=$id AND inactivated IS NULL $private_clause",
 		'ORDER BY tagid');
 	$self->addGlobjEssentialsToHashrefArray($hr_ar);
-	$self->addCloutsToTagArrayref($hr_ar, $options);
+	$self->addCloutsToTagArrayref($hr_ar, $clout_type);
 #	if ($mcd) {
 #		my $constants = getCurrentStatic();
 #		my $secs = $constants->{memcached_exptime_tags_brief} || 300;
@@ -1197,7 +1191,7 @@ sub ajaxTagHistory {
 	$summ->{n_viewed} = scalar grep { $_->{tagname} eq $viewed_tagname } @$tags_ar;
 	$tags_ar = [ grep { $_->{tagname} ne $viewed_tagname } @$tags_ar ];
 
-	$tags_reader->addRoundedCloutsToTagArrayref($tags_ar, { cloutfield => 'tagpeerval' });
+	$tags_reader->addRoundedCloutsToTagArrayref($tags_ar, 'describe');
 
 	# XXX right now hard-code the tag summary to FHPopularity tagbox.
 	# If we start using another tagbox, we'll have to change this too.
@@ -1465,7 +1459,7 @@ sub listTagnamesAll {
 }
 
 sub listTagnamesActive {
-	my($self, $options) = @_;
+	my($self, $clout_type, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $max_num =         $options->{max_num}         || 100;
 	my $seconds =         $options->{seconds}         || (3600*6);
@@ -1497,7 +1491,7 @@ sub listTagnamesActive {
 		 AND IF(tag_params.value     IS NULL, 1, tag_params.value)     > 0
 		 AND IF(tagname_params.value IS NULL, 1, tagname_params.value) > 0");
 	return [ ] unless $ar && @$ar;
-	$self->addCloutsToTagArrayref($ar);
+	$self->addCloutsToTagArrayref($ar, $clout_type);
 
 	# Sum up the clout for each tagname, and the median time it
 	# was seen within the interval in question.

@@ -157,7 +157,7 @@ sub run {
 		$options->{days_back} = $days_back;
 	}
 	my $tag_ar = $tagsdb->getTagsByGlobjid($affected_id, $options);
-	$tagsdb->addCloutsToTagArrayref($tag_ar, { cloutfield => 'tagpeerval' });
+	$tagsdb->addCloutsToTagArrayref($tag_ar, 'describe');
 	main::tagboxLog("Top->run called for $affected_id, " . scalar(@$tag_ar) . " tags");
 
 	# Generate the space-separated list of the top 5 scoring tags.

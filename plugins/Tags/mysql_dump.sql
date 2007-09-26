@@ -26,9 +26,6 @@ INSERT INTO vars (name, value, description) VALUES ('tags_urls_lastscanned', '0'
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_top_minscore', '2', 'Minimum score a tag must have to make it into the top tags for a urls');
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_pos_tags', 'plus', '| separated list of tags applied which positively affect url popularity');
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_neg_tags', 'minus|binspam', '| separated list of tags applied which negatively affect url popularity');
-INSERT INTO vars (name, value, description) VALUES ('tags_usecloutfield', '', 'Use a users_param field for clout? Leave empty to use users_info.tag_clout times some simple multipliers');
-INSERT INTO vars (name, value, description) VALUES ('tags_usecloutfield_default', '', 'If empty string, then users with no tags_usecloutfield param use the old formula based on karma. If number, then those users use this number. If tags_usecloutfield not defined, leave this the empty string.');
-INSERT INTO vars (name, value, description) VALUES ('tags_usecloutfield_mult', '1.0', 'Multiply the users_param field by this');
 INSERT INTO vars (name, value, description) VALUES ('tags_userfrac_read', '1', 'Fraction (0.0-1.0) of user UIDs which are allowed to read tags, if tags_*_allow* is set that way');
 INSERT INTO vars (name, value, description) VALUES ('tags_userfrac_write', '0.95', 'Fraction (0.0-1.0) of user UIDs which are allowed to tag, if tags_*_allow* is set that way');
 INSERT INTO vars (name, value, description) VALUES ('tags_tagname_regex', '^\!?[a-z][a-z0-9/]{0,63}$', 'Regex that tag names must conform to');

@@ -4732,9 +4732,7 @@ INSERT INTO reskey_vars VALUES (10, 'duration_max-failures',  10, 'how many fail
 # 2007-08-28
 UPDATE vars SET value = 'T_2_5_0_172' WHERE name = 'cvs_tag_currentcode';
 
-
 ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc") default 'submission';
-
 
 INSERT INTO string_param (type, code, name) VALUES ('us_states','AL','Alabama');
 INSERT INTO string_param (type, code, name) VALUES ('us_states','AK','Alaska');
@@ -4810,7 +4808,6 @@ INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','QC','Quebec'
 INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','SK','Saskatchewan');
 INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','YT','Yukon');
 
-
 # PUDGE LAST UPDATED HERE
 
 # 2007-09-05
@@ -4827,4 +4824,56 @@ INSERT INTO ajax_ops VALUES (NULL, 'page_save_user_boxes', 'Slash::Page', 'ajaxS
 
 # 2007-09-17
 UPDATE vars SET value = 'T_2_5_0_175' WHERE name = 'cvs_tag_currentcode';
+
+# If this emits an error that the key does not exist, that's OK.
+# (It will not harm anything to run.)
+ALTER TABLE users_param DROP INDEX uid;
+# Check your table definition;  if its param_id is already int, this
+# ALTER is unnecessary (but will not harm anything except taking time).
+ALTER TABLE users_param MODIFY param_id int UNSIGNED NOT NULL AUTO_INCREMENT;
+
+CREATE TABLE users_clout (
+	clout_id	int UNSIGNED NOT NULL AUTO_INCREMENT,
+	uid		mediumint UNSIGNED NOT NULL,
+	clid		smallint UNSIGNED NOT NULL,
+	clout		float UNSIGNED DEFAULT NULL,
+	PRIMARY KEY (clout_id),
+	UNIQUE uid_clid (uid, clid),
+	INDEX clid (clid)
+) TYPE=InnoDB;
+CREATE TABLE clout_types (
+	clid		smallint UNSIGNED NOT NULL AUTO_INCREMENT,
+	name		varchar(16) NOT NULL,
+	class		varchar(255) NOT NULL,
+	PRIMARY KEY (clid),
+	UNIQUE name (name)
+) TYPE=InnoDB;
+
+# For plugins/Tags
+DELETE FROM vars WHERE name IN ('tags_usecloutfield', 'tags_usecloutfield_default', 'tags_usecloutfield_mult');
+UPDATE vars SET description='Multiply the users_clout field by this' where name='tags_usecloutfield_mult';
+ALTER TABLE tagboxes ADD COLUMN clid smallint UNSIGNED NOT NULL AFTER affected_type;
+DROP TABLE IF EXISTS tags_peerweight;
+CREATE TABLE tags_peerclout (
+	tpcid		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	uid		mediumint UNSIGNED NOT NULL DEFAULT '0',
+	clid		smallint UNSIGNED NOT NULL,
+	gen		smallint UNSIGNED NOT NULL DEFAULT '0',
+	clout		float UNSIGNED NOT NULL DEFAULT '0',
+	PRIMARY KEY (tpcid),
+	UNIQUE uid_clid (uid, clid),
+	KEY clid_gen_uid (clid, gen, uid)
+) TYPE=InnoDB;
+
+# For plugins/FireHose
+INSERT IGNORE INTO vars (name,value,description) SELECT CONCAT('tagbox_firehosescores_', SUBSTRING(name, 22)), value, description FROM vars WHERE name like 'tagbox_fhpopularity2_%';
+DELETE FROM vars WHERE name='firehose_userpop_col';
+UPDATE firehose SET popularity=popularity2;
+ALTER TABLE firehose DROP COLUMN popularity2;
+INSERT INTO clout_types (clid, name, class) VALUES (1, 'describe', 'Slash::Clout::Describe');
+INSERT INTO clout_types (clid, name, class) VALUES (2, 'vote',     'Slash::Clout::Vote');
+INSERT INTO clout_types (clid, name, class) VALUES (3, 'moderate', 'Slash::Clout::Moderate');
+INSERT INTO users_clout (clout_id, uid, clid, clout) SELECT NULL, uid, 1, value+0 FROM users_param WHERE name='tagpeerval';
+INSERT INTO users_clout (clout_id, uid, clid, clout) SELECT NULL, uid, 2, value+0 FROM users_param WHERE name='tagpeerval2';
+DELETE FROM users_param WHERE name IN ('tagpeerval', 'tagpeerval2');
 

@@ -152,7 +152,6 @@ sub update_feederlog {
 		"tagid > $min_max_tagid $deactivated_tagids_clause",
 		"ORDER BY tagid ASC LIMIT $max_rows_total");
 	my $max_tagid = @$tags_ar ? $tags_ar->[-1]{tagid} : undef;
-	$tagsdb->addCloutsToTagArrayref($tags_ar);
 
 	# If nothing changed, we're done.
 	return 0 if
@@ -169,15 +168,20 @@ sub update_feederlog {
 	# data the tagbox returns into the tagboxlog_feeder table and
 	# then mark that tagbox as being logged up to that point.
 
+	my $clout_types = $tagsdb->getCloutTypes();
 	for my $tagbox (@$tagboxes) {
+
+		my @tags_copy = @$tags_ar;
+		my $clout_type = $clout_types->{ $tagbox->{clid} };
+		$tagsdb->addCloutsToTagArrayref(\@tags_copy, $clout_type);
 
 		my $feeder_ar;
 
 		#### Newly created tags
-		if (@$tags_ar) {
+		if (@tags_copy) {
 			my $tags_this_tagbox_ar = [
 				grep { $_->{tagid} > $tagbox->{last_tagid_logged} }
-				@$tags_ar
+				@tags_copy
 			];
 			# Mostly for responsiveness reasons, don't process
 			# more than 1000 feeder rows at a time.
@@ -212,7 +216,7 @@ sub update_feederlog {
 			# were deactivated since the last time this tagbox logged.
 			my $deactivated_tags_this_tagbox_ar = [
 				grep { exists $deactivated_tagids_this_tagbox_hr->{ $_->{tagid} } }
-				@$tags_ar
+				@tags_copy
 			];
 			# Add the tdid field to each tag in that list (the tagbox's
 			# feed_deactivatedtags() method will want to pass it along

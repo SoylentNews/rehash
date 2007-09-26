@@ -50,7 +50,6 @@ sub createFireHose {
 	$data->{-createtime} = "NOW()" if !$data->{createtime} && !$data->{-createtime};
 	$data->{discussion} ||= 0 if defined $data->{discussion};
 	$data->{popularity} ||= 0;
-	$data->{popularity2} ||= 0;
 	$data->{editorpop} ||= 0;
 	$data->{body_length} = $data->{bodytext} ? length($data->{bodytext}) : 0;
 	$data->{word_count} = countWords($data->{introtext}) + countWords($data->{bodytext});
@@ -136,7 +135,6 @@ sub createItemFromJournal {
 			public 			=> "yes",
 			introtext 		=> $introtext,
 			popularity		=> $popularity,
-			popularity2		=> $popularity,
 			editorpop		=> $popularity,
 			tid			=> $journal->{tid},
 			srcid			=> $id,
@@ -184,7 +182,6 @@ sub createUpdateItemFromBookmark {
 			url_id 		=> $bookmark->{url_id},
 			uid 		=> $bookmark->{uid},
 			popularity 	=> $popularity,
-			popularity2 	=> $popularity,
 			editorpop	=> $popularity,
 			activity 	=> $activity,
 			public 		=> "yes",
@@ -240,7 +237,6 @@ sub createItemFromSubmission {
 			uid 			=> $submission->{uid},
 			introtext 		=> $submission->{story},
 			popularity 		=> $midpop,
-			popularity2 		=> $midpop,
 			editorpop 		=> $midpop,
 			public 			=> "yes",
 			attention_needed 	=> "yes",
@@ -325,7 +321,6 @@ sub createItemFromStory {
 			introtext	=> parseSlashizedLinks($story->{introtext}),
 			bodytext	=> parseSlashizedLinks($story->{bodytext}),
 			popularity	=> $popularity,
-			popularity2	=> $popularity,
 			editorpop	=> $popularity,
 			primaryskid	=> $story->{primaryskid},
 			tid 		=> $story->{tid},
@@ -423,8 +418,6 @@ sub getFireHoseEssentials {
 	$options->{orderdir} = uc($options->{orderdir}) eq 'ASC' ? 'ASC' : 'DESC';
 	#($user->{is_admin} && $options->{orderby} eq 'createtime' ? 'ASC' :'DESC');
 
-	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
-
 	my @where;
 	my $tables = 'firehose';
 	my $filter_globjids;
@@ -464,7 +457,7 @@ sub getFireHoseEssentials {
 			}
 		}
 	}
-	my $columns = "firehose.*, firehose.$popularitycol AS userpop";
+	my $columns = "firehose.*, firehose.popularity AS userpop";
 
 		if ($options->{createtime_no_future}) {
 			push @where, 'createtime <= NOW()';
@@ -539,7 +532,7 @@ sub getFireHoseEssentials {
 			if ($user->{is_admin} && !$user->{firehose_usermode}) {
 				push @where, "editorpop >= $pop_q";
 			} else {
-				push @where, "$popularitycol >= $pop_q";
+				push @where, "popularity >= $pop_q";
 			}
 		}
 		if ($user->{is_admin}) {
@@ -689,10 +682,9 @@ sub getFireHose {
 
 	# XXX cache this eventually
 	my $constants = getCurrentStatic();
-	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
 	my $id_q = $self->sqlQuote($id);
 	my $answer = $self->sqlSelectHashref(
-		"*, firehose.$popularitycol AS userpop, UNIX_TIMESTAMP(firehose.createtime) AS createtime_ut",
+		"*, firehose.popularity AS userpop, UNIX_TIMESTAMP(firehose.createtime) AS createtime_ut",
 		"firehose", "id=$id_q");
 	my $append = $self->sqlSelectHashref("*", "firehose_text", "id=$id_q");
 
@@ -1094,12 +1086,11 @@ sub ajaxFireHoseGetUpdates {
 	my $mode = $opts->{mode};
 	my $curmode = $opts->{mode};
 	my $mixed_abbrev_pop = $firehose->getMinPopularityForColorLevel(1);
-	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
 
 	foreach (@$items) {
 		if ($opts->{mixedmode}) {
 			$curmode = "full";
-			$curmode = "fulltitle" if $_->{$popularitycol} < $mixed_abbrev_pop;
+			$curmode = "fulltitle" if $_->{popularity} < $mixed_abbrev_pop;
 
 		}
 		my $item = {};
@@ -1657,13 +1648,12 @@ sub getAndSetOptions {
 	}
 	$options->{color} ||= $user->{firehose_color};
 
-	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
 	if ($form->{orderby}) {
 		if ($form->{orderby} eq "popularity") {
 			if ($user->{is_admin} && !$user->{firehose_usermode}) {
-				$options->{orderby} = "editorpop";
+				$options->{orderby} = 'editorpop';
 			} else {
-				$options->{orderby} = $popularitycol;
+				$options->{orderby} = 'popularity';
 			}
 		} else {
 			$options->{orderby} = "createtime";
@@ -2144,12 +2134,11 @@ sub listView {
 	my $curmode = $options->{mode};
 	my $mixed_abbrev_pop = $self->getMinPopularityForColorLevel(1);
 	my $constants = getCurrentStatic();
-	my $popularitycol = $constants->{firehose_userpop_col} || 'popularity';
 	
 	foreach (@$items) {
 		if ($options->{mixedmode}) {
 			$curmode = "full";
-			$curmode = "fulltitle" if $_->{$popularitycol} < $mixed_abbrev_pop;
+			$curmode = "fulltitle" if $_->{popularity} < $mixed_abbrev_pop;
 
 		}
 		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime && $_->{createtime} lt $now;

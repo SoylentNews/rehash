@@ -149,7 +149,7 @@ sub run {
 
 	# Add up unique users who have tagged this globjid.
 	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
-	$tagsdb->addCloutsToTagArrayref($tags_ar);
+	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
 	my %user_clout = ( map { ($_->{uid}, $_->{user_clout}) } @$tags_ar );
 	for my $uid (keys %user_clout) {
 		$activity += $user_clout{$uid};

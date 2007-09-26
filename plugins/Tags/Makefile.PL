@@ -8,5 +8,6 @@ WriteMakefile(
     	{
 		'Tags.pm' =>   '$(INST_LIBDIR)/Tags.pm',
 		'Tagbox.pm' => '$(INST_LIBDIR)/Tagbox.pm',
+		'Clout.pm' =>  '$(INST_LIBDIR)/Clout.pm',
     	},
 );

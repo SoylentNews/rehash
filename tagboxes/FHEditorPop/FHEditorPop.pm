@@ -191,7 +191,7 @@ sub run {
 	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
 	my $admins = $self->getAdmins();
 	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0, $options);
-	$tagsdb->addCloutsToTagArrayref($tags_ar);
+	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
 	my $udc_cache = { };
 	for my $tag_hr (@$tags_ar) {
 		next if $options->{starting_only};

@@ -10745,7 +10745,8 @@ sub _getUser_do_selects {
 
 	# Now get the params and the ACLs.  In the special case
 	# where we are being asked to get "all" params (not an
-	# arrayref of specific params), we also get the ACLs too.
+	# arrayref of specific params), we also get the ACLs
+	# and clouts too.
 	my $param_ar = [ ];
 	if ($params eq "all") {
 		# ...we could rewrite this to use sqlSelectAllKeyValue,
@@ -10763,6 +10764,14 @@ sub _getUser_do_selects {
 			"uid = $uid_q");
 		for my $acl (@$acl_ar) {
 			$answer->{acl}{$acl} = 1;
+		}
+		my $clout_types = $self->getCloutTypes();
+		my $clout_hr = $self->sqlSelectAllKeyValue(
+			'clid, clout',
+			'users_clout',
+			"uid = $uid_q");
+		for my $clid (keys %$clout_hr) {
+			$answer->{clout}{ $clout_types->{$clid} } = $clout_hr->{$clid};
 		}
 		if ($mcddebug > 1) {
 			print STDERR scalar(gmtime) . " $$ mcd gU_ds got all " . scalar(@$acl_ar) . " acls\n";
@@ -12142,6 +12151,56 @@ sub _addGlobjEssentials_comments {
 		$data_hr->{$globjid}{title} = $commentdata_hr->{$cid}{subject};
 		$data_hr->{$globjid}{created_at} = $commentdata_hr->{$cid}{date};
 	}
+}
+
+# Returns a hashref in which the keys are either numeric clid's OR
+# the names of clout types, and the values are the opposite.  So if
+# the clid_types table is the row (1, 'vote', 'Slash::Foo'),
+# then this method will return the hashref: { vote => '1',
+# '1' => 'vote' }.
+# XXX is the 'name' column really necessary or can I just have all
+# the code refer to the class name?
+
+sub getCloutTypes {
+	my($self) = @_;
+
+	my $constants = getCurrentStatic();
+	my $table_cache		= "_clouttypes_cache";
+	my $table_cache_time	= "_clouttypes_cache_time";
+	_genericCacheRefresh($self, 'clouttypes', $constants->{block_expire});
+	return $self->{$table_cache} if $self->{$table_cache_time};
+
+	# Cache needs to be built, so build it.
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $hr = $reader->sqlSelectAllKeyValue('clid, name', 'clout_types');
+	my @clids = keys %$hr;
+	for my $clid (@clids) { $hr->{$hr->{$clid}} = $clid }
+
+	$self->{$table_cache} = $hr;
+	$self->{$table_cache_time} = time;
+	return $hr;
+}
+
+# If the clid_types table is the row (1, 'vote', 'Slash::Clout::Vote'),
+# then this method will return the hashref: { 1 =>
+# { name => 'vote' }, { class => 'Slash::Clout::Vote' }, { clid => 1 } }
+
+sub getCloutInfo {
+	my($self) = @_;
+
+	my $constants = getCurrentStatic();
+	my $table_cache		= "_cloutclass_cache";
+	my $table_cache_time	= "_cloutclass_cache_time";
+	_genericCacheRefresh($self, 'cloutclass', $constants->{block_expire});
+	return $self->{$table_cache} if $self->{$table_cache_time};
+
+	# Cache needs to be built, so build it.
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $hr = $reader->sqlSelectAllHashref('clid', '*', 'clout_types');
+
+	$self->{$table_cache} = $hr;
+	$self->{$table_cache_time} = time;
+	return $hr;
 }
 
 sub getActiveAdminCount {

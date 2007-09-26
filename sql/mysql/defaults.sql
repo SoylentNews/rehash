@@ -42,6 +42,9 @@ INSERT INTO al2_types VALUES (10, 8, 'nopostanon', 'No Comment Post Anon');
 #
 
 
+INSERT INTO clout_types (clid, name, class) VALUES (1, 'describe', 'Slash::Clout::Describe');
+INSERT INTO clout_types (clid, name, class) VALUES (2, 'vote',     'Slash::Clout::Vote');
+INSERT INTO clout_types (clid, name, class) VALUES (3, 'moderate', 'Slash::Clout::Moderate');
 
 #
 # Dumping data for table 'code_param'

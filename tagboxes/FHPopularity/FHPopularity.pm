@@ -179,7 +179,7 @@ sub run {
 	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
 	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
 	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0, $options);
-	$tagsdb->addCloutsToTagArrayref($tags_ar);
+	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
 	for my $tag_hr (@$tags_ar) {
 		next if $options->{starting_only};
 		my $sign = 0;
