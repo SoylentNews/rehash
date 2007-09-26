@@ -502,7 +502,6 @@ sub getFireHoseEssentials {
 			push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $dur_q DAY)";
 		}
 
-
 		foreach my $prefix ("","not_") {
 			foreach my $base qw(primaryskid uid type) {
 				if ($options->{"$prefix$base"}) {
