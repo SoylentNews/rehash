@@ -20,7 +20,7 @@ use Slash::Utility;
 use Slash::DB;
 use Slash::Install;
 use Getopt::Std;
-use JavaScript::Minifier 0.02, qw( jsmin );
+use JavaScript::Minifier 0.02;
 
 (my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 my $PROGNAME = basename($0);
@@ -91,7 +91,13 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 			my($min_src, $min_dest);
 			open $min_src, '<', $destpath;
 			open $min_dest, '>', "${path}${name}-minified.js";
-			jsmin($min_src, $min_dest);
+			if (JavaScript::Minifier->can('jsmin')) {
+				JavaScript::Minifier::jsmin($min_src, $min_dest);
+			} elsif (JavaScript::Minifier->can('minify')) {
+				JavaScript::Minifier::minify(input => $min_src, outfile => $min_dest);
+			} else {
+				die "I give up, how does JavaScript::Minifier $JavaScript::Minifier::VERSION do its thing?";
+			}
 		}
 
 		# ...similarly for CSS, I'll also make a `csstidied' version
