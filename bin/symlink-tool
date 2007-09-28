@@ -94,11 +94,9 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 			if (JavaScript::Minifier->can('jsmin')) {
 				JavaScript::Minifier::jsmin($min_src, $min_dest);
 			} elsif (JavaScript::Minifier->can('minify')) {
-				# in 0.02 the args are checked at compile time and this fails,
-				# so wrap in eval :/ -- pudge
-				eval "JavaScript::Minifier::minify(
+				&JavaScript::Minifier::minify(
 					input => $min_src, outfile => $min_dest
-				)";
+				);
 			} else {
 				die "I give up, how does JavaScript::Minifier $JavaScript::Minifier::VERSION do its thing?";
 			}
