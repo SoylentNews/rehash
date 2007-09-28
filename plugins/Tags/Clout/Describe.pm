@@ -1,5 +1,9 @@
 package Slash::Clout::Describe;
 
+use vars qw($VERSION);
+
+($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+
 # Hard-coded constants should be in the vars table.
 
 # cumfrac is the cumulative fraction of how much weight is propagated

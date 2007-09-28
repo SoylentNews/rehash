@@ -97,7 +97,7 @@ sub populate_tags_udc {
 		"created_at BETWEEN FROM_UNIXTIME($hour) AND DATE_ADD(FROM_UNIXTIME($hour), INTERVAL 3599 SECOND)
 		 AND tagnameid IN ($dnid, $upid)
 		 AND inactivated IS NULL");
-	$tags_reader->addCloutsToTagArrayref($tags_ar);
+	$tags_reader->addCloutsToTagArrayref($tags_ar, 'vote');
 
 	my $cloutsum = 0;
 	my $admins = $tags_reader->getAdmins();
@@ -140,26 +140,29 @@ sub project_tags_udc {
 		$hour_weight->{$h} = 1 + $lookback_hours-$h;
 		$hour_weight_sum += $hour_weight->{$h};
 	}
-	for my $h ($hoursback .. $lookback_hours) {
-		# Now load up the periodic ratios for all involved hours.
-		my $this_hour_ut = $cur_hour - 3600*$h;
-		my($this_hourofday, $this_dayofweek) =
-			$slashdb->sqlSelect("HOUR(FROM_UNIXTIME($this_hour_ut)), DAYOFWEEK(FROM_UNIXTIME($this_hour_ut))");
-		my $this_hour_ratio = $proportion_hourofday->{$this_hourofday}*24;
-		my $this_day_ratio  = $proportion_dayofweek->{$this_dayofweek}*7;
-		$period_ratio->{$h} = $this_hour_ratio * $this_day_ratio;
-#print STDERR "period ratio for $this_hour_ut ($cur_hour - $h): $period_ratio->{$h} (day $this_dayofweek hour $this_hourofday hour_ratio $this_hour_ratio day_ratio $this_day_ratio)\n";
-	}
-	# the formula is:
-	# predictedudc =
-	#	sum( hourweight(hour) * actualudc(old) / periodratio(old) )
-	#	* periodratio(next)
-	#	/ sumhourweight
 	my $proj_sum = 0;
-	for my $h (1 .. $lookback_hours) {
-		$proj_sum += $hour_weight->{$h} * $cloutsum_hourback->{$h} / $period_ratio->{$h};
+	if ($hour_weight_sum) {
+		for my $h ($hoursback .. $lookback_hours) {
+			# Now load up the periodic ratios for all involved hours.
+			my $this_hour_ut = $cur_hour - 3600*$h;
+			my($this_hourofday, $this_dayofweek) =
+				$slashdb->sqlSelect("HOUR(FROM_UNIXTIME($this_hour_ut)), DAYOFWEEK(FROM_UNIXTIME($this_hour_ut))");
+			my $this_hour_ratio = $proportion_hourofday->{$this_hourofday}*24;
+			my $this_day_ratio  = $proportion_dayofweek->{$this_dayofweek}*7;
+			$period_ratio->{$h} = $this_hour_ratio * $this_day_ratio;
+#print STDERR "period ratio for $this_hour_ut ($cur_hour - $h): $period_ratio->{$h} (day $this_dayofweek hour $this_hourofday hour_ratio $this_hour_ratio day_ratio $this_day_ratio)\n";
+		}
+		# the formula is:
+		# predictedudc =
+		#	sum( hourweight(hour) * actualudc(old) / periodratio(old) )
+		#	* periodratio(next)
+		#	/ sumhourweight
+		for my $h (1 .. $lookback_hours) {
+			$proj_sum += $hour_weight->{$h} * $cloutsum_hourback->{$h} / $period_ratio->{$h}
+				if $period_ratio->{$h};
+		}
+		$proj_sum *= $period_ratio->{$hoursback} / $hour_weight_sum;
 	}
-	$proj_sum *= $period_ratio->{$hoursback} / $hour_weight_sum;
 #print STDERR "sum for $hoursback: $proj_sum\n";
 
 	$slashdb->sqlReplace('tags_udc',

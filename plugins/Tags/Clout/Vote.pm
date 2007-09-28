@@ -1,8 +1,26 @@
 package Slash::Clout::Vote;
 
+use vars qw($VERSION);
+
+($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+
 my $cumfrac = 0.45;
 my $months_back = 4;
 my $clid = 2;
+
+sub getUserClout {
+	my($class, $user_stub) = @_;
+	my $clout = $user_stub->{karma} >= -3
+		? log($user_stub->{karma}+10)/50
+		: 0;
+	$clout *= $user_stub->{tag_clout};
+	my $secs_since = time - $user_stub->{created_at_ut};
+	my $frac = $secs_since / 120*86400;
+	$frac = 0.1 if $frac < 0.1;
+	$frac = 1   if $frac > 1;
+	$clout *= $frac;
+	return $clout;
+}
 
 sub get_nextgen {
 	my($class, $g) = @_;

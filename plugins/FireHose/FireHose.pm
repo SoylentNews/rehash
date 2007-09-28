@@ -1594,13 +1594,13 @@ sub getAndSetOptions {
 	} else {
 		$options->{nocommentcnt} = $user->{firehose_nocommentcnt};
 	}
-	my $mode = $form->{mode} || $user->{firehose_mode};
+	my $mode = $form->{mode} || $user->{firehose_mode} || '';
 	$mode = "fulltitle" if $mode eq "mixed";
 
 	my $pagesize = $pagesizes->{$form->{pagesize}} ? $form->{pagesize} : $user->{firehose_pagesize} || "small";
 	$options->{pagesize} = $pagesize;
 
-	$mode = $modes->{$mode} ? $mode : "fulltitle";
+	$mode = $mode && $modes->{$mode} ? $mode : "fulltitle";
 	$options->{mode} = $mode;
 	$options->{pause} = defined $user->{firehose_pause} ? $user->{firehose_pause} : 1;
 	$form->{pause} = 1 if $no_saved;
@@ -1806,7 +1806,7 @@ sub getAndSetOptions {
 
 	if ($constants->{smalldevices_ua_regex}) {
 		my $smalldev_re = qr($constants->{smalldevices_ua_regex});
-		if ($ENV{HTTP_USER_AGENT} =~ $smalldev_re) {
+		if ($ENV{HTTP_USER_AGENT} && $ENV{HTTP_USER_AGENT} =~ $smalldev_re) {
 			$options->{smalldevices} = 1;
 			if ($mode eq "full") {
 				$options->{limit} = $pagesize eq "large" ? 15 : 10;
@@ -2208,9 +2208,9 @@ sub getUserTabs {
 	$options ||= {};
 	my $user = getCurrentUser();
 	my $uid_q = $self->sqlQuote($user->{uid});
-	my @where;
+	my @where = ( );
 	push @where, "uid=$uid_q";
-	push @where, "tabname like '$options->{prefix}%'";
+	push @where, "tabname LIKE '$options->{prefix}%'" if $options->{prefix};
 	my $where = join ' AND ', @where;
 
 	my $tabs = $self->sqlSelectAllHashrefArray("*", "firehose_tab", $where, "order by tabname asc");
