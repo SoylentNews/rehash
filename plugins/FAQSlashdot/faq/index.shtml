@@ -19,7 +19,7 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
         <h2><strong><a href="/faq/editorial.shtml">Editorial</a></strong></h2>
         <ul>
                 <li><strong><a href="/faq/editorial.shtml#ed100">How do I submit stories to Slashdot?</a></strong></li>
-                <li><strong><a href="/faq/editorial.shtml#ed101">How do I add a "Slashdot It" link to my own page?</a></strong></li>
+                <li><strong><a href="/faq/editorial.shtml#ed101">How do I add a badge or "Slashdot It" link to my own page?</a></strong></li>
                 <li><a href="/faq/editorial.shtml#ed102">Where do I submit corrections or updates to previous stories?</a></li>
                 <li><strong><a href="/faq/editorial.shtml#ed103">Where do I submit Press Releases?</a></strong></li>
                 <li><strong><a href="/faq/editorial.shtml#ed104">Can I email you a Story Submission?</a></strong></li>
