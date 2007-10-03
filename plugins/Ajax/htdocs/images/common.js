@@ -531,6 +531,7 @@ function firehose_set_options(name, value) {
 				params['fhfilter'] = theForm.elements[i].value;
 			}
 		}
+		page = 0;
 	}
 	if (name != "color") {
 	for (i=0; i< pairs.length; i++) {
