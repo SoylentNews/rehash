@@ -1195,20 +1195,18 @@ sub ajaxTagHistory {
 
 	$tags_reader->addRoundedCloutsToTagArrayref($tags_ar, 'describe');
 
-	# XXX right now hard-code the tag summary to FHPopularity tagbox.
-	# If we start using another tagbox, we'll have to change this too.
 	my $tagboxdb = getObject('Slash::Tagbox');
 	if (@$tags_ar && $globjid && $tagboxdb) {
-		my $fhp = getObject('Slash::Tagbox::FHPopularity');
-		if ($fhp) {
+		my $fhs = getObject('Slash::Tagbox::FireHoseScores');
+		if ($fhs) {
 			my $authors = $slashdb->getAuthors();
 			my $starting_score =
-				$fhp->run($globjid, { return_only => 1, starting_only => 1 });
+				$fhs->run($globjid, { return_only => 1, starting_only => 1 });
 			$summ->{up_pop}   = sprintf("%+0.2f",
-				$fhp->run($globjid, { return_only => 1, upvote_only => 1 })
+				$fhs->run($globjid, { return_only => 1, upvote_only => 1 })
 				- $starting_score );
 			$summ->{down_pop} = sprintf("%0.2f",
-				$fhp->run($globjid, { return_only => 1, downvote_only => 1 })
+				$fhs->run($globjid, { return_only => 1, downvote_only => 1 })
 				- $starting_score );
 			my $upvoteid   = $tags_reader->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
 			my $downvoteid = $tags_reader->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
