@@ -248,6 +248,7 @@ sub getStartingColorLevel {
 			$color_level = $this_color_level if $this_color_level < $color_level;
 		}
 	}
+	return($color_level, $extra_pop);
 }
 
 { # closure
