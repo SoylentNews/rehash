@@ -268,5 +268,7 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
                 <li><strong><a href="/faq/firehose.shtml#fh700">Why didn't you post a submission that made it to red?</a></strong></li>
                 <li><strong><a href="/faq/firehose.shtml#fh800">Doesn't this make you just like...</a></strong></li>
 	</ul>
+	</ul><!-- Badges -->
+        <h2><strong><a href="/faq/badges.shtml">Badges How-To</a></strong></h2>
 
 <!--#include virtual="/slashfoot.inc"-->

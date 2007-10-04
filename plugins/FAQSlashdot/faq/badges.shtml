@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+        <title>Slashdot FAQ - Badges How-To</title>
+<!-- $Id$ -->
+<!--#include virtual="/slashcssbase.inc"-->
+<!--#include virtual="/slashhead-gen-full.inc"-->
+
+        <ul class="menu">
+                 <li><a href="firehose.shtml">Previous Section</a></li>
+		             <li><a href="faq-meta.shtml">Next section</a></li>
+                 <li><a href="index.shtml">Index</a></li>
+       	</ul>
+        
+        <hr>
+
+
+<h2>Put a Piece of Slashdot on Your Page</h2>
+<p>You can add a badge or link to your page (or for a blog, to your page template,
+to get one on every page) to easily allow your readers to submit it to Slashdot
+for consideration; and once submitted, take them to the discussion.</p>
+
+<h2><a name="ba100" id="ba100">Badges</a>
+<img src="http://images.slashdot.org/sdit4n.png" style="margin-bottom:-0.1em; padding-left:0.25em;" alt="sample Slashdot badge" title="a Slashdot badge looks like this"/>
+</h2>
+<p>A Slashdot badge is the easiest and most powerful tool to do this.  Add a badge
+to your web page by including this snippet of HTML:
+<xmp><script src="http://slashdot.org/slashdot-it.js" type="text/javascript"></script></xmp></p>
+
+<p>If your page hasn't yet been submitted, a badge allows your readers to easily do so.
+Once it has been submitted, the color accent reflects its popularity and the toggle lets
+them vote on it in our system.  The badge itself links to your submitted story and
+its discussion on Slashdot.  Both anonymous and logged-in users can submit, but only
+logged-in users can vote directly.  Anonymous users are taken to the intermediate step
+of logging in.  Logged-in users who have already voted will see the state of their vote
+in the toggle.  For instance, like this:</p>
+
+<p><img src="http://images.slashdot.org/sdit2u.png" style="padding-left:2em;"
+alt="sample Slashdot badge" title="a Slashdot badge looks like this"/></p>
+
+<p>The Slashdot badge is somewhat customizable by setting some values in JavaScript 
+before you invoke the badge script. For instance, you can suggest a title for the 
+submission by setting <i>slashdot_title</i> or to specify a specific URL
+instead of the page the browser is currently showing by using <i>slashdot_url</i>.
+This might look like this:
+<xmp><script type="text/javascript">
+  slashdot_title="Your Title Here";
+  slashdot_url="http://example.com/my-story.html";
+</script>
+<script src="http://slashdot.org/slashdot-it.js" type="text/javascript"></script></xmp></p>
+
+
+<h2><a name="ba101" id="ba101">Links</a></h2>
+<p>For security or control reasons, you might wish to use your own image and formatting
+with a plain HTML link.  This snippet builds the appropriate link automatically, you can
+paste it directly into your page as is:
+<xmp><a href="javascript:location.href='http://slashdot.org/slashdot-it.pl?op=basic&url='+encodeURIComponent(location.href)">Slashdot It!</a></xmp></p>
+
+<p>Or you can construct the URL argument `by hand' for each page, e.g.,
+<xmp><!-- for a page at http://example.com/my-story.html, edit as appropriate for your site -->
+<a href="http://slashdot.org/slashdot-it.pl?op=basic&url=http%3A%2F%2Fexample.com%2Fmy-story.html">Slashdot It!</a></xmp></p>
+
+<p>These simple links don't have all the power of badges.  As with badges, your readers can
+easily submit a story or follow the link to the already-submitted story and discussion.
+There they will see its popularity and be able to vote --- things the simple link
+won't let them do directly from your page.  The benefit to you is you can completely control
+the style, image, and formatting of such links, e.g., with CSS, to fit the rest of the page.
+It's all up to you.</p>
+
+        <hr>
+        <ul class="menu">
+                
+                        <li><a href="faq-meta.shtml">Previous Section</a></li>
+		                    <li><a href="faq-meta.shtml">Next section</a></li>
+                        <li><a href="index.shtml">Index</a></li>
+                </ul>
+        
+
+<!--#include virtual="/slashfoot.inc"-->
