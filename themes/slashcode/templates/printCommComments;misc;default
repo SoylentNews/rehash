@@ -33,7 +33,7 @@ __template__
 [% END %]
 
 [% IF discussion2 %]
-	[% IF user.discussion2 == "slashdot" %]
+	[% IF discussion2 == "slashdot" %]
 	<script src="[% constants.imagedir %]/comments.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 	[%- ELSE %]
 	<script src="http://socialcomputingresearch.net/slashdot/js/comments.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
@@ -136,7 +136,7 @@ __template__
 		pieces_comments      = [[% user.state.comments.pieces.join(',') %]];
 		init_hiddens         = [[% user.state.comments.hiddens.join(',') %]];
 
-		[% IF user.discussion2 == "slashdot" %]d2act();
+		[% IF discussion2 == "slashdot" %]d2act();
 		[% END -%]finishLoading();
 //-->
 	</script>

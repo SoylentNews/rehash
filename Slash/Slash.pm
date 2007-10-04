@@ -47,7 +47,7 @@ $VERSION   	= '2.005000';  # v2.5.0
 
 	dispComment displayStory displayRelatedStories displayThread dispStory
 	getOlderStories getOlderDays getOlderDaysFromDay printComments
-	jsSelectComments commentCountThreshold commentThresholds
+	jsSelectComments commentCountThreshold commentThresholds discussion2
 
 	tempUofmLinkGenerate tempUofmCipherObj
 );
@@ -73,7 +73,7 @@ sub selectComments {
 			  $constants->{comment_maxscore});
 	my $num_scores = $max - $min + 1;
 
-	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
+	my $discussion2 = discussion2($user);
 
 	my $commentsort = defined $options->{commentsort}
 		? $options->{commentsort}
@@ -142,11 +142,18 @@ sub selectComments {
 		$C->{points} = _get_points($C, $user, $min, $max, $max_uid, $reasons);
 	}
 
+	my $d2_comment_q = $user->{d2_comment_q};
+	if ($discussion2 && !$d2_comment_q) {
+		if ($user->{is_anon}) {
+			$d2_comment_q = 5;
+		}
+	}
+
 	my($oldComment, %old_comments);
 	# XXXd2 disable for sub-threads for now ($cid)
-	if ($discussion2 && !$cid && $user->{d2_comment_q} && !$options->{no_d2}) {
+	if ($discussion2 && !$cid && !$options->{no_d2}) {
 		my $limits = $slashdb->getDescriptions('d2_comment_limits');
-		my $max = $limits->{ $user->{d2_comment_q} };
+		my $max = $d2_comment_q ? $limits->{ $d2_comment_q } : 0;
 		my @new_comments;
 		$options->{existing} ||= {};
 		@$thisComment = sort { $a->{cid} <=> $b->{cid} } @$thisComment;
@@ -165,12 +172,15 @@ sub selectComments {
 		for my $C (@$sort_comments) {
 			next if $options->{existing}{$C->{cid}};
 
-			if ($cid && @new_comments >= $max) {
-				push @new_comments, $C if $cid == $C->{cid};
+			if ($max && @new_comments >= $max) {
+				if ($cid) {
+					push @new_comments, $C if $cid == $C->{cid};
+				} else {
+					last;
+				}
 			} else {
 				push @new_comments, $C;
 			}
-			last if !$cid && @new_comments >= $max;
 		}
 
 		my @seen;
@@ -872,7 +882,7 @@ sub printComments {
 		return 0;
 	}
 
-	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
+	my $discussion2 = discussion2($user);
 
 	if ($discussion2 && $user->{mode} ne 'metamod') {
 		$user->{mode} = $form->{mode} = 'thread';
@@ -1106,7 +1116,7 @@ sub displayThread {
 	my $hidden = my $skipped = 0;
 	my $return = '';
 
-	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
+	my $discussion2 = discussion2($user);
 	my $threshold = $discussion2 && defined $user->{d2_threshold} ? $user->{d2_threshold} : $user->{threshold};
 	my $highlightthresh = $discussion2 && defined $user->{d2_highlightthresh} ? $user->{d2_highlightthresh} : $user->{highlightthresh};
 	$highlightthresh = $threshold if $highlightthresh < $threshold;
@@ -1357,7 +1367,7 @@ EOT
 
 #use Data::Dumper; print STDERR "dispComment hard='$constants->{comments_hardcoded}' can_mod='$can_mod' comment: " . Dumper($comment) . "reasons: " . Dumper($reasons);
 
-	my $discussion2 = $user->{discussion2} && $user->{discussion2} =~ /^(?:slashdot|uofm)$/;
+	my $discussion2 = discussion2($user);
 
 	return _hard_dispComment(
 		$comment, $constants, $user, $form, $comment_shrunk,
@@ -1977,7 +1987,13 @@ sub _hard_dispComment {
 	}
 
 	if ($comment->{sid} && $comment->{cid}) {
-		$comment_link_to_display = qq| (<a href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}">#$comment->{cid}</a>)|;
+		my $link = linkComment({
+			sid	=> $comment->{sid},
+			cid	=> $comment->{cid},
+			subject	=> "#$comment->{cid}",
+			subject_only => 1,
+		}, 1);
+		$comment_link_to_display = qq| ($link)|;
 	} else {
 		$comment_link_to_display = " ";
 	}
@@ -2220,6 +2236,18 @@ sub tempUofmCipherObj {
 	});
 
 	return $cipher;
+}
+
+########################################################
+# is discussion2 active?
+sub discussion2 {
+	my $user = $_[0] || getCurrentUser();
+	if ($user->{discussion2}) {
+		return $user->{discussion2} =~ /^(?:slashdot|uofm)$/
+			? $user->{discussion2} : 0;
+	} else {
+		return $user->{state}{no_d2} ? 0 : 'slashdot';
+	}
 }
 
 1;

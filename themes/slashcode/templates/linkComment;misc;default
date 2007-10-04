@@ -22,7 +22,21 @@ en_US
 __name__
 linkComment
 __template__
-<a href="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;op=[% op %]&amp;threshold=[% threshold %]&amp;commentsort=[% commentsort %]&amp;mode=[% mode %][% IF startat %]&amp;startat=[% startat %][% END %][% IF user.state.tid %]&amp;tid=[% user.state.tid %][% END %][% IF comment %]&amp;cid=[% cid %][% ELSE %]&amp;pid=[% pid %][% IF cid %]#[% cid %][% END %][% END %]"[% IF onclick %] onclick="[% onclick %]"[% END %]>[% subject %]</a>
+<a href="[% gSkin.rootdir %]/comments.pl?sid=[% sid 
+                                              %]&amp;op=[% op;
+IF threshold.defined                          %]&amp;threshold=[% threshold; END;
+IF commentsort.defined                        %]&amp;commentsort=[% commentsort; END;
+IF mode.defined                               %]&amp;mode=[% mode; END;
+IF (user.state.no_d2 || no_d2)                %]&amp;no_d2=1[% END;
+IF startat                                    %]&amp;startat=[% startat; END;
+IF (user.state.tid && constants.tids_in_urls) %]&amp;tid=[% user.state.tid; END;
+IF comment
+	%]&amp;cid=[% cid;
+ELSE;
+	IF pid %]&amp;pid=[% pid; END;
+	IF cid %]#[% cid; END;
+END %]"[% IF onclick %] onclick="[% onclick %]"[% END 
+%]>[% subject %]</a>
 
 [% IF !subject_only %]
 	[% IF nickname %]

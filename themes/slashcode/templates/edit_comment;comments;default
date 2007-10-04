@@ -201,7 +201,7 @@ IF do_br %]<br>[% END %]
 	[% IF !user.is_anon || (user.is_anon && preview) %]
 	<input type="submit" name="op" value="Submit" class="button">
 	[% END %]
-	[% IF form.pid && user.discussion2 && user.discussion2 == "slashdot" %]
+	[% IF form.pid && Slash.discussion2() == "slashdot" %]
 	<script src="[% constants.imagedir %]/comments.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 	<script type="text/javascript">
 <!--

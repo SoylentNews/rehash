@@ -1325,11 +1325,12 @@ sub _hard_linkComment {
 	my $display = qq|<a href="$gSkin->{rootdir}/comments.pl?sid=$linkdata->{sid}|;
 	$display .= "&amp;op=$linkdata->{op}" if $linkdata->{op};
 	$display .= "&amp;threshold=" . (defined($linkdata->{threshold}) ? $linkdata->{threshold} : $user->{threshold});
-	$display .= "&amp;commentsort=$user->{commentsort}";
+	$display .= "&amp;commentsort=$user->{commentsort}" if defined $user->{commentsort};
+	$display .= "&amp;mode=$user->{mode}" if defined $user->{mode};
+	$display .= "&amp;no_d2=1" if $user->{state}{no_d2} || $linkdata->{no_d2};
+	$display .= "&amp;startat=$linkdata->{startat}" if $linkdata->{startat};
 	$display .= "&amp;tid=$user->{state}{tid}"
 		if $constants->{tids_in_urls} && $user->{state}{tid};
-	$display .= "&amp;mode=$user->{mode}";
-	$display .= "&amp;startat=$linkdata->{startat}" if $linkdata->{startat};
 
 	if ($printcomment) {
 		$display .= "&amp;cid=$linkdata->{cid}";
@@ -1347,7 +1348,7 @@ sub _hard_linkComment {
 		$display .= " " . timeCalc($linkdata->{date}) 
 			if $date;
 	}
-	$display .= "\n";
+	#$display .= "\n";
 
 	return $display;
 }

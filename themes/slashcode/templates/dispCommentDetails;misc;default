@@ -21,14 +21,18 @@ dispCommentDetails
 __template__
 			[% IF !is_anon && fakeemail %]&lt;<a href="mailto:[% fakeemail | strip_paramattr_nonhttp %]">[% fakeemail_vis | strip_literal %]</a>&gt;[% END %]
 			on [% Slash.timeCalc(time) %]
-			[% IF sid && cid %] (<a href="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</a>)[% END %]
+			[% IF sid && cid %] ([% Slash.linkComment({
+				sid     => sid,
+				cid     => cid,
+				subject => ('#' _ cid),
+				subject_only => 1
+			}, 1) %])[% END %]
 			<small>
 			[% has_homepage = homepage && homepage.length > 8;
 				has_journal = journal_last_entry_date.search('[1-9]');
 				IF !is_anon && (has_homepage || has_journal) %]
 					<br>
-					(
-					[% IF has_homepage %]
+					([% IF has_homepage %]
 						<a href="[% homepage %]">[% homepage | strip_literal %]</a>
 					[% IF has_journal %]| [% END %]
 					[% END %]
@@ -36,8 +40,7 @@ __template__
 						Last Journal:
 						<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/">[%
 						Slash.timeCalc(journal_last_entry_date) %]</a>
-					[% END %]
-					)
+					[% END %])
 				[% END %]
 				[% ipid_display %]
 			</small>

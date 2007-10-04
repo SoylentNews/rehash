@@ -16,6 +16,7 @@ en_US
 __name__
 zoo_icons
 __template__
+[%# this could also use comment.badge_id, by passing badge_id = foo, which is how harddispcomment works -- pudge %]
 [% user_person = Slash.db.getUser(person);
    IF person && !implied && user_person.acl.employee && user_person.badge_id;
       badges = Slash.db.getBadgeDescriptions;

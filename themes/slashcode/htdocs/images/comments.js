@@ -41,7 +41,6 @@ var user_highlightthresh_orig = -9;
 var loaded = 0;
 var shift_down = 0;
 var alt_down = 0;
-var max_cid = 0;
 var d2_seen = '';
 
 var agt = navigator.userAgent.toLowerCase();
@@ -652,8 +651,6 @@ function ajaxFetchComments(cids, option, thresh) {
 		cids              = [];
 		if (option && d2_seen)
 			params['d2_seen']  = d2_seen;
-		else if (option)
-			params['max_cid'] = max_cid;
 		else
 			params['cids']    = noshow_comments;
 	}
@@ -664,7 +661,7 @@ function ajaxFetchComments(cids, option, thresh) {
 
 	params['cid']             = root_comment;
 	params['discussion_id']   = discussion_id;
-	params['reskey']          = reskey_static;
+//	params['reskey']          = reskey_static;
 
 	var abbrev = {};
 	for (var i = 0; i < cids.length; i++) {
@@ -697,9 +694,6 @@ function ajaxFetchComments(cids, option, thresh) {
 				var pids = {};
 				for (var i = 0; i < update.new_cids_order.length; i++) {
 					var this_cid = update.new_cids_order[i];
-					if (i == (update.new_cids_order.length-1) && this_cid) {
-						max_cid = this_cid;
-					}
 					cids.push(this_cid);
 					addComment(this_cid, update.new_cids_data[i]);
 					if (!comments[this_cid]['pid']) {
@@ -827,7 +821,9 @@ function ajaxFetchComments(cids, option, thresh) {
 }
 
 function savePrefs() {
-	if ((user_threshold_orig != user_threshold)
+	if (!user_is_anon
+		&&
+	    (user_threshold_orig != user_threshold)
 		||
 	    (user_highlightthresh_orig != user_highlightthresh)
 	) {
@@ -854,6 +850,7 @@ function readRest(cid) {
 	params['op']  = 'comments_read_rest';
 	params['cid'] = cid;
 	params['sid'] = discussion_id;
+//	params['reskey'] = reskey_static;
 
 	var handlers = {
 		onComplete: function() {
@@ -872,6 +869,9 @@ function readRest(cid) {
 }
 
 function doModerate(el) {
+	if (user_is_anon)
+		return false;
+
 	var matches = el.name.match(/_(\d+)$/);
 	var cid = matches[1];
 
@@ -1110,12 +1110,13 @@ function toggleDisplayOptions() {
 	d2act();
 	gods.style.display = 'block';
 
-
-	var params = [];
-	params['comments_control'] = newMode;
-	params['op'] = 'comments_set_prefs';
-	params['reskey'] = reskey_static;
-	ajax_update(params);
+	if (!user_is_anon) {
+		var params = [];
+		params['comments_control'] = newMode;
+		params['op'] = 'comments_set_prefs';
+		params['reskey'] = reskey_static;
+		ajax_update(params);
+	}
 
 	return false;
 }
