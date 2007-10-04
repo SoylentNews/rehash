@@ -4808,22 +4808,16 @@ INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','QC','Quebec'
 INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','SK','Saskatchewan');
 INSERT INTO string_param (type, code, name) VALUES ('ca_provinces','YT','Yukon');
 
-# PUDGE LAST UPDATED HERE
-
 # 2007-09-05
 UPDATE vars SET value = 'T_2_5_0_173' WHERE name = 'cvs_tag_currentcode';
 
 # 2007-09-13
 UPDATE vars SET value = 'T_2_5_0_174' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 INSERT INTO ajax_ops VALUES (NULL, 'page_save_user_boxes', 'Slash::Page', 'ajaxSaveUserBoxes', 'ajax_user_static', 'use');
 
 # 2007-09-17
 UPDATE vars SET value = 'T_2_5_0_175' WHERE name = 'cvs_tag_currentcode';
-
-# SLASHDOT LAST UPDATED HERE
 
 # If this emits an error that the key does not exist, that's OK.
 # (It will not harm anything to run.)
@@ -4833,20 +4827,20 @@ ALTER TABLE users_param DROP INDEX uid;
 ALTER TABLE users_param MODIFY param_id int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 CREATE TABLE users_clout (
-	clout_id	int UNSIGNED NOT NULL AUTO_INCREMENT,
-	uid		mediumint UNSIGNED NOT NULL,
-	clid		smallint UNSIGNED NOT NULL,
-	clout		float UNSIGNED DEFAULT NULL,
-	PRIMARY KEY (clout_id),
-	UNIQUE uid_clid (uid, clid),
-	INDEX clid (clid)
+        clout_id        int UNSIGNED NOT NULL AUTO_INCREMENT,
+        uid             mediumint UNSIGNED NOT NULL,
+        clid            smallint UNSIGNED NOT NULL,
+        clout           float UNSIGNED DEFAULT NULL,
+        PRIMARY KEY (clout_id),
+        UNIQUE uid_clid (uid, clid),
+        INDEX clid (clid)
 ) TYPE=InnoDB;
 CREATE TABLE clout_types (
-	clid		smallint UNSIGNED NOT NULL AUTO_INCREMENT,
-	name		varchar(16) NOT NULL,
-	class		varchar(255) NOT NULL,
-	PRIMARY KEY (clid),
-	UNIQUE name (name)
+        clid            smallint UNSIGNED NOT NULL AUTO_INCREMENT,
+        name            varchar(16) NOT NULL,
+        class           varchar(255) NOT NULL,
+        PRIMARY KEY (clid),
+        UNIQUE name (name)
 ) TYPE=InnoDB;
 
 # For plugins/Tags
@@ -4858,14 +4852,14 @@ UPDATE tagboxes SET clid=2 WHERE name IN ('FHActivity', 'FHEditorPop', 'FHPopula
 UPDATE tagboxes SET clid=3 WHERE name IN ('CommentScoreReason');
 DROP TABLE IF EXISTS tags_peerweight;
 CREATE TABLE tags_peerclout (
-	tpcid		int UNSIGNED NOT NULL AUTO_INCREMENT,
-	uid		mediumint UNSIGNED NOT NULL DEFAULT '0',
-	clid		smallint UNSIGNED NOT NULL,
-	gen		smallint UNSIGNED NOT NULL DEFAULT '0',
-	clout		float UNSIGNED NOT NULL DEFAULT '0',
-	PRIMARY KEY (tpcid),
-	UNIQUE uid_clid (uid, clid),
-	KEY clid_gen_uid (clid, gen, uid)
+        tpcid           int UNSIGNED NOT NULL AUTO_INCREMENT,
+        uid             mediumint UNSIGNED NOT NULL DEFAULT '0',
+        clid            smallint UNSIGNED NOT NULL,
+        gen             smallint UNSIGNED NOT NULL DEFAULT '0',
+        clout           float UNSIGNED NOT NULL DEFAULT '0',
+        PRIMARY KEY (tpcid),
+        UNIQUE uid_clid (uid, clid),
+        KEY clid_gen_uid (clid, gen, uid)
 ) TYPE=InnoDB;
 
 # For plugins/FireHose
@@ -4883,5 +4877,14 @@ DELETE FROM users_param WHERE name IN ('tagpeerval', 'tagpeerval2');
 # 2007-09-26
 UPDATE vars SET value = 'T_2_5_0_176' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# PUDGE LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
 UPDATE tagboxes SET clid=2 WHERE name='FirstMover';
+
+# 2007-10-04
+UPDATE vars SET value = 'T_2_5_0_177' WHERE name = 'cvs_tag_currentcode';
 
