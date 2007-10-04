@@ -16,7 +16,7 @@
         <hr>
 
 <h2><a name="fe100">Where can I get Slashdot's main feed?</a></h2>
-	<p>The syndication feed for the Slashdot front page is available in <a href="http://rss.slashdot.org/Slashdot/slashdot">RSS 0.9</a>, <a href="http://rss.slashdot.org/Slashdot/slashdot/to">RSS 1.0</a>, and <a href="http://rss.slashdot.org/Slashdot/slashdotatom">Atom 1.0</a> formats.  Please do not request feeds more than once every 30 minutes.</p>
+	<p>The syndication feed for the Slashdot front page is available in <a href="http://rss.slashdot.org/Slashdot/slashdot/to">RSS 0.9</a>, <a href="http://rss.slashdot.org/Slashdot/slashdot">RSS 1.0</a>, and <a href="http://rss.slashdot.org/Slashdot/slashdotatom">Atom 1.0</a> formats.  Please do not request feeds more than once every 30 minutes.</p>
 	<p><em><small>
 		Answered by: <a href="mailto:pudge@slashdot.org">pudge</a><br>
 		Last Modified: 12/12/06
