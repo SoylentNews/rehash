@@ -59,15 +59,31 @@ sub createFireHose {
 	$text_data->{introtext} = delete $data->{introtext};
 	$text_data->{bodytext} = delete $data->{bodytext};
 
-	$self->sqlInsert("firehose", $data);
-	$text_data->{id} = $self->getLastInsertId({ table => 'firehose', prime => 'id' });
+	$self->sqlDo('SET AUTOCOMMIT=0');
+	my $ok = $self->sqlInsert("firehose", $data);
+	if (!$ok) {
+		warn "could not create firehose row, '$ok'";
+	}
+	if ($ok) {
+		$text_data->{id} = $self->getLastInsertId({ table => 'firehose', prime => 'id' });
 
-	my $searchtoo = getObject('Slash::SearchToo');
-	if ($searchtoo) {
-		$searchtoo->storeRecords(firehose => $text_data->{id}, { add => 1 });
+		my $searchtoo = getObject('Slash::SearchToo');
+		if ($searchtoo) {
+			$searchtoo->storeRecords(firehose => $text_data->{id}, { add => 1 });
+		}
+
+		$ok = $self->sqlInsert("firehose_text", $text_data);
+		if (!$ok) {
+			warn "could not create firehose_text row for id '$text_data->{id}'";
+		}
 	}
 
-	$self->sqlInsert("firehose_text", $text_data);
+	if ($ok) {
+		$self->sqlDo('COMMIT');
+	} else {
+		$self->sqlDo('ROLLBACK');
+	}
+	$self->sqlDo('SET AUTOCOMMIT=1');
 
 	return $text_data->{id};
 }
@@ -731,8 +747,8 @@ sub allowSubmitForUrl {
 	if ($user->{is_anon}) {
 		return !$self->sqlCount("firehose", "url_id=$url_id_q");
 	} else {
-		my $uid_q;
-		return !$self->sqlCount("firehose", "url_id=$url_id_q and uid != $uid_q");
+		my $uid_q = $self->sqlQuote($user->{uid});
+		return !$self->sqlCount("firehose", "url_id=$url_id_q AND uid != $uid_q");
 	}
 }
 
