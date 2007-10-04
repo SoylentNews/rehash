@@ -4854,7 +4854,7 @@ DELETE FROM vars WHERE name IN ('tags_usecloutfield', 'tags_usecloutfield_defaul
 UPDATE vars SET description='Multiply the users_clout field by this' where name='tags_usecloutfield_mult';
 ALTER TABLE tagboxes ADD COLUMN clid smallint UNSIGNED NOT NULL AFTER affected_type;
 UPDATE tagboxes SET clid=1 WHERE name IN ('TagCountUser', 'Top');
-UPDATE tagboxes SET clid=2 WHERE name IN ('FHActivity', 'FHEditorPop', 'FHPopularity', 'FHPopularity2', 'FireHoseScores');
+UPDATE tagboxes SET clid=2 WHERE name IN ('FHActivity', 'FHEditorPop', 'FHPopularity', 'FHPopularity2', 'FireHoseScores', 'FirstMover');
 UPDATE tagboxes SET clid=3 WHERE name IN ('CommentScoreReason');
 DROP TABLE IF EXISTS tags_peerweight;
 CREATE TABLE tags_peerclout (
@@ -4882,4 +4882,6 @@ DELETE FROM users_param WHERE name IN ('tagpeerval', 'tagpeerval2');
 
 # 2007-09-26
 UPDATE vars SET value = 'T_2_5_0_176' WHERE name = 'cvs_tag_currentcode';
+
+UPDATE tagboxes SET clid=2 WHERE name='FirstMover';
 
