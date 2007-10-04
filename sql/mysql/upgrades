@@ -4883,6 +4883,7 @@ UPDATE vars SET value = 'T_2_5_0_176' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+# For plugins/Tags
 UPDATE tagboxes SET clid=2 WHERE name='FirstMover';
 
 # 2007-10-04
