@@ -399,7 +399,7 @@ sub rss_story {
 		if $story->{title};
 	if ($story->{sid}) {
 		my $edit = "admin.pl?op=edit&sid=$story->{sid}";
-		$action = "article.pl?sid=$story->{sid}\&from=rss";
+		$action = "article.pl?sid=$story->{sid}&from=rss";
 		if ($story->{primaryskid}) {
 			my $dir = url2abs(
 				$reader->getSkin($story->{primaryskid})->{rootdir},
@@ -413,7 +413,7 @@ sub rss_story {
 			$edit = "$channel->{'link'}$edit";
 			$action = "$channel->{'link'}$action";
 		}
-		$_ = $self->encode($_, 'link') for ($encoded_item->{'link'}, $edit);
+		$_ = $self->encode($_, 'link') for ($encoded_item->{'link'}, $edit, $action);
 
 		if (getCurrentUser('is_admin')) {
 			$story->{introtext} .= qq[\n\n<p><a href="$edit">[ Edit ]</a></p>];
