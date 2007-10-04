@@ -40,3 +40,5 @@ use vars qw($VERSION);
 #        $slashdb->sqlDo("SET AUTOCOMMIT=1");
 #}
 
+1;
+
