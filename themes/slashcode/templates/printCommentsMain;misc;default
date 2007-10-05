@@ -149,13 +149,15 @@ __template__
 		<small>
 		<b>The Fine Print:</b> [% fineprint %]
 		</small>
-[% IF !user.state.no_d2 %]<noscript><br><small>This page requires JavaScript to view properly.  You can also see the [% Slash.linkComment({
+Without JavaScript enabled, you might want to use <a>the classic discussion system</a> instead. If you login, you can remember this preference
+
+[% IF !user.state.no_d2 %]<noscript><br><small>Without JavaScript enabled, you might want to use [% Slash.linkComment({
 	sid	=> sid,
 	pid	=> pid,
-	subject	=> 'rest of the discussion',
+	subject	=> 'the classic discussion system',
 	subject_only => 1,
 	no_d2   => 1
-}) %].</small></noscript>[% END %]
+}) %] instead.  If you <a href="[% gSkin.rootdir %]/login.pl">login</a>, you can remember this preference.</small></noscript>[% END %]
 	</div>
 	</div>
 	[% IF discussion2 %]

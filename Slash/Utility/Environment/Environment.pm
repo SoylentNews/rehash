@@ -1568,17 +1568,16 @@ sub prepareUser {
 	$user->{karma_bonus}  = '+1' unless defined($user->{karma_bonus});
 	# see Slash::discussion2()
 	$user->{state}{no_d2} = $form->{no_d2} ? 1 : 0;
+	$user->{discussion2} ||= 'none';
 
 	# pct of anon users get this
 	if ($user->{is_anon} && !$user->{state}{no_d2}) {
-		$user->{discussion2} = 'none';
-
 #		my $i = hex(substr($user->{srcids}{16}, -2));
 		$hostip =~ /^(\d+).(\d+).(\d+).(\d+)$/;
 		my $i = $2;
 
-#		# for (0..255) { $x = ((($_-1)/256) < .01); last if !$x; printf "%d:%d\n", $_, $x; }
-		if (0 && $ENV{GATEWAY_INTERFACE} && (($i-1)/256) < .01 ) {  # 1 percent, x.(0..3).y.z
+#		# for (0..255) { $x = ((($_-1)/256) < .1); last if !$x; printf "%d:%d\n", $_, $x; }
+		if ($ENV{GATEWAY_INTERFACE} && ( $i == 144 || $i == 113 || ((($i-1)/256) < .1) ) ) {  # 10 percent, x.(0..3).y.z
 			my $d2 = 'slashdot';
 
 			# get user-agent (ENV not populated yet)
