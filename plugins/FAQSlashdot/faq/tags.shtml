@@ -177,13 +177,14 @@ like a cheap, fast
 <a href="/submit.pl">submit.pl</a>.</p>
 
 <p><img src="http://images.slashdot.org/sdit6n.png" alt="sample slashdot badge" style="float:left; padding-right:1.5em;">
-You could use the above HTTP link format; but we recommend using our
-badge (which looks like this).  Besides allowing submission,
-badges show readers the current popularity of a submitted page
+Badges look like this, and besides allowing submission,
+show readers the current popularity of a submitted page
 and let them vote on it themselves. Here's a block of
 HTML you can include in any page:</p>
 
 <blockquote><p><pre>&lt;script src="http://slashdot.org/slashdot-it.js" type="text/javascript"&gt;&lt;/script&gt;</pre></blockquote>
+
+<p>You'll find details and examples in our <a href="/faq/badges.shtml">Badges How-To</a>.</p>
 
 <p><i><font size=-1>Answered by: <a href="mailto:scc@slashdot.org">scc</a></font></i>
 <br><i><font size=-1>Last Modified: 10/03/07</font></i>
