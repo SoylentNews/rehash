@@ -186,7 +186,8 @@ sub getSectionPrefsHTML {
 sub setSectionNexusPrefs() {
 	my($slashdb, $constants, $user, $form) = @_;
 
-	my $nexus_tids_ar = getMainpageDisplayableNexuses();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $nexus_tids_ar = $reader->getMainpageDisplayableNexuses();
 
 	my @story_always_nexus 		= split ",", $user->{story_always_nexus} || "";
 	my @story_full_brief_nexus 	= split ",", $user->{story_full_brief_nexus} || "";
