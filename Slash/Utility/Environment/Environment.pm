@@ -1578,7 +1578,7 @@ sub prepareUser {
 		my $i = $2;
 
 #		# for (0..255) { $x = ((($_-1)/256) < .01); last if !$x; printf "%d:%d\n", $_, $x; }
-		if ($ENV{GATEWAY_INTERFACE} && (($i-1)/256) < .01 ) {  # 1 percent, x.(0..3).y.z
+		if (0 && $ENV{GATEWAY_INTERFACE} && (($i-1)/256) < .01 ) {  # 1 percent, x.(0..3).y.z
 			my $d2 = 'slashdot';
 
 			# get user-agent (ENV not populated yet)
