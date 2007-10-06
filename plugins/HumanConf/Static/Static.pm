@@ -147,9 +147,11 @@ sub deleteOldFromPool {
 		my @row_ids_to_delete = ( );
 		for my $hcpid (@hcpids_to_delete) {
 			my $filedir = $q_hr->{$pool_hr->{$hcpid}{hcqid}}{filedir};
-			my $filename = $pool_hr->{$hcpid}{filename};
-			my $fullname = catfile($filedir, $filename);
 			my $errstr = "";
+			my $filename = $pool_hr->{$hcpid}{filename};
+			$errstr = "filename is empty for hcpid '$hcpid'"
+				if !$filename;
+			my $fullname = catfile($filedir, $filename);
 			$errstr = "file '$fullname' does not exist"
 				if !-e $fullname;
 			$errstr = "parent dir of '$fullname' not writable"
@@ -292,13 +294,14 @@ sub addPool {
 			$scale = 3 if $scale > 3;
 			$width *= $scale; $height *= $scale;
 		}
+		my $alt = getData('imgalttext', {}, 'humanconf');
 		$html = join("",
 			qq{<img src="},
 			$self->{questioncache}{$question}{urlprefix},
 			"/",
 			$filename,
 			qq{" width=$width height=$height border=0 },
-			qq{alt="} . getData('imgalttext', {}, 'humanconf') . qq{">}
+			qq{alt="$alt">}
 		);
 	}
 
@@ -312,7 +315,7 @@ sub addPool {
 
 sub get_sizediff {
 	my($self, $gdtext, $pixels_wanted, $font, $fontsize) = @_;
-	$gdtext->set_font($font, $fontsize);
+	$gdtext->set_font($font, $fontsize) or die("g_s gdt->set_font('$font', '$fontsize') failed: " . $gdtext->error);
 	my($tempw, $temph) = ($gdtext->get("width"), $gdtext->get("height"));
 	my $pixels = ($tempw+$self->{imagemargin}) * ($temph+$self->{imagemargin});
 	my $diff = abs($pixels - $pixels_wanted);
@@ -477,7 +480,7 @@ sub drawImage {
 	my $answer = $self->shortRandText();
 	my @font_args = $self->get_font_args($answer);
 	my $gdtext = $self->get_new_gdtext($answer);
-	$gdtext->set_font(@font_args);
+	$gdtext->set_font(@font_args) or die("dI gdt->set_font('@font_args') failed: " . $gdtext->error);
 
 	# Based on the font size for this word, and the resulting size
 	# of the drawn text, set up the image object.
@@ -564,7 +567,7 @@ sub drawImage {
 		halign => 'center', valign => 'center',
 		text   => $answer,
 	);
-	$gdtextalign_bbox->set_font(@font_args);
+	$gdtextalign_bbox->set_font(@font_args) or die("gdta_b->set_font('@font_args') failed: " . $gdtextalign_bbox->error);
 	my($center_x, $center_y) = (int($width/2), int($height/2));
 	# Pick an angle between $max_angle/4 and $max_angle, randomly
 	# positive or negative.
@@ -588,7 +591,7 @@ sub drawImage {
 		colour => $textcolor, # apparently Australians prefer a 'u'
 		text   => $answer_left,
 	);
-	$gdtextalign_left->set_font(@font_args);
+	$gdtextalign_left->set_font(@font_args) or die("gdta_l->set_font('@font_args') failed: " . $gdtextalign_left->error);
 	my $cl_y = int(($ll_y+$ul_y)/2);
 	my @bb = $gdtextalign_left->draw(int($ul_x), $cl_y, $angle);
 #printf STDERR "gdta_left drew left-top $answer_left at ul_x=$ul_x,cl_y=$cl_y angle=%.4f, bb: @bb\n", $angle;
@@ -600,7 +603,7 @@ sub drawImage {
 		colour => $textcolor, # apparently Australians prefer a 'u'
 		text   => $answer_right,
 	);
-	$gdtextalign_right->set_font(@font_args);
+	$gdtextalign_right->set_font(@font_args) or die("gdta_r->set_font('@font_args') failed: " . $gdtextalign_right->error);
 	my $cr_y = int(($lr_y+$ur_y)/2);
 	@bb = $gdtextalign_right->draw(int($lr_x), $cr_y, $angle_right);
 #printf STDERR "gdta_right drew right-bottom $answer_right at lr_x=$lr_x,cr_y$cr_y angle=%.4f, bb: @bb\n", $angle;
