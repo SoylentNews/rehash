@@ -1500,6 +1500,9 @@ sub prepareUser {
 	# First we find a good reader DB so that we can use that for the user
 	my $user_types = setUserDBs();
 	my $reader = getObject('Slash::DB', { virtual_user => $user_types->{reader} });
+	if (!$reader) {
+		die "no reader found in prepareUser($uid), user_types: " . join(',', sort keys %$user_types);
+	}
 
 	if (!$uid) {
 		# No user defined;  set the anonymous coward user.
@@ -2304,34 +2307,44 @@ sub getObject {
 	}
 
 	if (!$data->{nocache} && $objects->{$class, $vuser}) {
-		# we've been here before, and it didn't work last time ...
-		# what, you think you can try it again and it will work
-		# magically this time?  you think you're better than me?
+		# We tried this before (and we're allowed to use the cache
+		# to return the last result).
 		if ($objects->{$class, $vuser} eq 'NA') {
+			# It failed.  Don't waste time retrying.
 			return undef;
-		} else {
-			return $objects->{$class, $vuser};
 		}
-
-	} else {
-		loadClass($class);
-
-		if ($@) {
-			errorLog($@);
-		} elsif (!$class->can("new")) {
-			errorLog("Class $class is not returning an object.  Try " .
-				"`perl -M$class -le '$class->new'` to see why.\n");
-		} else {
-			my $object = $class->new($vuser, @args);
-			if ($object) {
-				$objects->{$class, $vuser} = $object if !$data->{nocache};
-				return $object;
-			}
-		}
-
-		$objects->{$class, $vuser} = 'NA' if !$data->{nocache};
-		return undef;
+		# We tried this before and it succeeded.
+		return $objects->{$class, $vuser};
 	}
+
+	# We either haven't tried loading this class before, or were
+	# asked not to use the cache.
+	if (loadClass($class)) { # 'require' the class
+		my $object = $class->new($vuser, @args);
+		if ($object) {
+			$objects->{$class, $vuser} = $object if !$data->{nocache};
+			return $object;
+		}
+		errorLog("Class $class returned false for new()");
+	} else {
+		if ($@) {
+			errorLog("Class $class could not be loaded: '$@'");
+		} elsif (!$class->can("new")) {
+			errorLog("Class $class is not returning an object, or"
+				. " at least not one that has a new() method.  Try"
+				. "`perl -M$class -le '$class->new'` to see why");
+		} else {
+			errorLog("Class $class could not be loaded");
+		}
+	}
+
+	# We got here because the 'return' in the successful case above
+	# was not reached.  So we know either the attempt to 'require'
+	# the class or call new() for the class failed.  Unless the
+	# caller requested that we not cache this information, mark the
+	# cache so we don't waste time with those shenanigans again.
+	$objects->{$class, $vuser} = 'NA' if !$data->{nocache};
+	return undef;
 }
 
 {
@@ -2339,25 +2352,36 @@ my %classes;
 sub loadClass {
 	my($class) = @_;
 
+	# If we use a cache, we won't actually call eval.  If that's the
+	# case, make sure we don't mislead the caller as to whether
+	# there's an error.
+	undef $@;
+
 	if ($classes{$class}) {
-		if ($classes{$class} eq 'NA') {
-			return 0;  # previous failure
-		}
-		return $classes{$class};  # previous success
+		# The eval to load this class was called earlier.  If it
+		# succeeded, this cached value will be 1;  otherwise it
+		# will be 'NA'.  Note that in this case, we return false
+		# indicating error without setting $@ to what the error
+		# was.
+		return($classes{$class} ne 'NA');
 	}
 
-	# see if module has been loaded in already ...
+	# To avoid calling eval unless necessary (eval'ing a string is slow),
+	# we also check %INC.  If this class was perhaps require'd by some
+	# other part of the code, we can avoid an eval here.
 	(my $file = $class) =~ s|::|/|g;
-	# ... because i really hate eval
-	undef $@;  # for good measure
 	eval "require $class" unless exists $INC{"$file.pm"};
-
+	
 	if ($@) {
+		# Our attempt to load the class failed.  Return false,
+		# and in this case, $@ tells what the error was.
 		$classes{$class} = 'NA';
 		return 0;
-	} else {
-		return $classes{$class} = 1;
 	}
+	# We loaded the class successfully.  Set the cache to 1 to
+	# short-circuit the next time loadClass is called, and
+	# return true.
+	return $classes{$class} = 1;
 }
 }
 
@@ -3446,6 +3470,8 @@ sub STORE {
 		warn "$$: bad hash: [$key] => [$value]: ", join "|", caller(0);
 	}
 }
+
+0 if $Slash::Utility::NO_ERROR_LOG; # prevent a "Used only once" warning
 
 1;
 
