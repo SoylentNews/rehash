@@ -8,6 +8,9 @@ use strict;
 use File::Temp 'tempfile';
 use Image::Size;
 use Time::HiRes;
+use LWP::UserAgent;
+use URI::URL;
+use XML::Simple;
 
 use Slash;
 use Slash::Display;
