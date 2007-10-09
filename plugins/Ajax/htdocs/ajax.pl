@@ -501,6 +501,41 @@ sub updateD2prefs {
 	$slashdb->setUser($user->{uid}, \%save);
 }
 
+sub getModalPrefs {
+
+        my($slashdb, $constants, $user, $form) = @_;
+
+        return slashDisplay('prefs_' . $form->{'section'},
+                {
+                user => $user,
+                },
+                { Return => 1 }
+        );
+
+}
+
+sub saveModalPrefs {
+
+        my($slashdb, $constants, $user, $form) = @_;
+
+        # Ajax returns our form as key=value, so trick URI into decoding for us.
+        use URI;
+        my $url = URI->new('//e.a/?' . $form->{'data'});
+        my %params = $url->query_form;
+
+        # Specific to D2 for the time being
+        my $user_edits_table = {
+                d2_comment_q     => $params{'d2_comment_q'}     || undef,
+                d2_comment_order => $params{'d2_comment_order'} || undef,
+                emaildisplay     => $params{'emaildisplay'}     || undef,
+                nosigs           => ($params{'nosigs'}          ? 1 : 0),
+                no_spell         => ($params{'no_spell'}        ? 1 : 0),
+        };
+
+        $slashdb->setUser($params{uid}, $user_edits_table);
+
+}
+
 # comments
 ###################
 
@@ -569,6 +604,16 @@ sub getOps {
 #			function	=> \&tagsCreateForStory,
 #			reskey_type	=> 'createuse',
 #		},
+                getModalPrefs  => {
+                        function => \&getModalPrefs,
+                        reskey_name     => 'ajax_user',
+                        reskey_type     => 'createuse',
+                },
+                saveModalPrefs => {
+                        function => \&saveModalPrefs,
+                        reskey_name     => 'ajax_user',
+                        reskey_type     => 'createuse',
+                },
 		default	=> {
 			function	=> \&default,		
 		},
