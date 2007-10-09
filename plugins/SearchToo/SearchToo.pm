@@ -14,14 +14,20 @@ use base 'Slash::DB::Utility';
 sub new {
 	my($class, $user, @args) = @_;
 
+	return undef unless $class->isInstalled();
+
+	# We don't instantiate an object of class Slash::SearchToo.
+	# Instead, a var determines which API subclass of S::ST the
+	# site wants, and an object of that class is created here
+	# and returned.
 	my $constants = getCurrentStatic();
-	return unless $constants->{plugin}{'SearchToo'};
-
 	my $api_class = $constants->{search_too_class} || 'Slash::SearchToo::Classic';
-	# we COULD do a use base here ... but then different Slash sites
-	# cannot use different backends, so hang it -- pudge
-	my $self = getObject($api_class, $user, @args);
+	return undef unless $api_class->isInstalled();
+	# Just in case this var is set incorrectly, prevent an infinite
+	# loop between new and getObject.
+	die "var 'search_too_class' invalid" if $api_class eq $class;
 
+	my $self = getObject($api_class, $user, @args);
 	if (!$self) {
 		warn "Could not get $api_class: $@";
 		$self = {};
@@ -31,6 +37,11 @@ sub new {
 	}
 
 	return $self;
+}
+
+sub isInstalled {
+	my $constants = getCurrentStatic();
+	return $constants->{plugin}{SearchToo} || 0;
 }
 
 #################################################################
