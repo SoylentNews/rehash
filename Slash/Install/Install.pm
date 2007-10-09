@@ -25,6 +25,9 @@ sub new {
 	bless($self, $class);
 	$self->{virtual_user} = $user;
 	$self->sqlConnect;
+	# XXX Anyone know why this is called directly?  We use $self->{slashdb}
+	# at a number of places below and I can't figure out why we don't just
+	# use getCurrentDB().
 	$self->{slashdb} = Slash::DB->new($user);
 
 	return $self;
