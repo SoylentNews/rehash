@@ -1,0 +1,91 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+prefs_d2
+__template__
+
+<h2><b>Discussion 2</b></h2>
+<form id ="modal_prefs" method="post">
+
+[% PROCESS reskey_tag %]
+
+<input type="hidden" name="formname"  value="editcomm">
+<input type="hidden" name="op" value="savecomm">
+<input type="hidden" name="uid" value="[% user.uid %]">
+
+<table width="100%">
+	<tr>
+	<td valign="middle">
+		[% IF user.discussion2 && user.discussion2 == "slashdot" %]
+                	<blockquote>
+			<div>
+                	How Many Comments
+                	[% comment_q = Slash.db.getDescriptions('d2_comment_q');
+                   	comment_q_def = user.d2_comment_q || 0;
+                   	Slash.createSelect('d2_comment_q', comment_q, comment_q_def, 1) %]<br>
+                	
+			Comment Retrieval Order
+                	[% comment_order = Slash.db.getDescriptions('d2_comment_order');
+                   	comment_order_def = user.d2_comment_order || 0;
+                   	Slash.createSelect('d2_comment_order', comment_order, comment_order_def, 1) %]
+                	</div>
+			</blockquote>
+                [% END %]
+
+                <p><b>Email Display</b>
+                (currently
+                [%- IF !user.fakeemail; " not displayed";
+                ELSE; ": <tt>"; user.fakeemail | strip_literal; "</tt>";
+                END %])<br>
+                [% IF !user.emaildisplay.defined;
+                        IF user.fakeemail %]
+                        <i>(Your current email address was apparently set before
+                        users' email addresses were forced to one of the below
+                        choices. Please pick one and click Save.)</i><br>
+                        [% END;
+                        user.emaildisplay = 0;
+                END;
+                IF user.emaildisplay.defined;
+                        emaildisplay.${user.emaildisplay} = constants.markup_checked_attribute;
+                END %]
+                <blockquote>
+		<div>
+                <input type="radio" name="emaildisplay" [% emaildisplay.0 %] value=0> Do not display an e-mail address.<br>
+                <input type="radio" name="emaildisplay" [% emaildisplay.1 %] value=1> Show your email address with random SPAM-armoring applied.<br>
+                [% PROCESS formNote note='This changes weekly' %]
+                <input type="radio" name="emaildisplay" [% emaildisplay.2 %] value=2> Show your real email address without cowering behind childish anonymity or obfuscation.
+                </div>
+		</blockquote>
+
+		[% s_check = '';
+		IF user.nosigs;
+			s_check = constants.markup_checked_attribute;
+		END %]
+
+		<label><input type="checkbox" name="nosigs"[% s_check %]>&nbsp;Disable Sigs</label>
+                [% PROCESS formNote note='Strip sig quotes from comments' %]
+
+                [% IF user.is_admin;
+			nospell_check = '';
+			IF user.no_spell;
+				nospell_check = constants.markup_checked_attribute;
+			END %]
+                	<label><input type="checkbox" name="no_spell"[% nospell_check %]>&nbsp;Disable Spellchecker</label>
+                [% END %]
+	</td>
+	</tr>
+</table>
+<p>
+<input type="button" value="Save" onclick="saveModalPrefs()">
+</form>
+__seclev__
+500
+__version__
+$Id$
