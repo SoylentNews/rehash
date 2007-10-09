@@ -13,8 +13,6 @@ __template__
 
 <form id ="modal_prefs" method="post">
 
-[% PROCESS reskey_tag %]
-
 <input type="hidden" name="formname"  value="editcomm">
 <input type="hidden" name="op" value="savecomm">
 <input type="hidden" name="uid" value="[% user.uid %]">

@@ -602,12 +602,12 @@ sub getOps {
 #		},
                 getModalPrefs           => {
                         function        => \&getModalPrefs,
-                        reskey_name     => 'ajax_user',
+                        reskey_name     => 'ajax_user_static',
                         reskey_type     => 'createuse',
                 },
                 saveModalPrefs          => {
                         function        => \&saveModalPrefs,
-                        reskey_name     => 'ajax_user',
+                        reskey_name     => 'ajax_user_static',
                         reskey_type     => 'createuse',
                 },
 		default	=> {
