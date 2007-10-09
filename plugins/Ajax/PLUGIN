@@ -33,3 +33,4 @@ template=templates/ajax_reskey_tag;misc;default
 template=templates/data;ajax;default
 template=templates/sectionpref;ajax;default
 template=templates/datewidget;misc;default
+template=templates/prefs_d2;ajax;default
