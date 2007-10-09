@@ -1368,69 +1368,65 @@ var modal_box   = 0;
 var modal_inst  = 0;
 
 function init_modal_divs() {
-        modal_cover = document.getElementById('modal_cover');
-        modal_box   = document.getElementById('modal_box');
-
+	modal_cover = $('modal_cover');
+	modal_box   = $('modal_box');
 }
 
 function install_modal() {
-        if (modal_inst)
-                return;
+	if (modal_inst)
+		return;
 
-        if (!modal_cover || !modal_box)
-                init_modal_divs();
+	if (!modal_cover || !modal_box)
+		init_modal_divs();
 
-        if (!modal_cover || !modal_box)
-                return;
+	if (!modal_cover || !modal_box)
+		return;
 
-        modal_cover.parentNode.removeChild(modal_cover);
-        modal_box.parentNode.removeChild(modal_box);
+	modal_cover.parentNode.removeChild(modal_cover);
+	modal_box.parentNode.removeChild(modal_box);
 
-        var top_parent=document.getElementById('top_parent');
-        top_parent.parentNode.insertBefore(modal_cover, top_parent);
-        top_parent.parentNode.insertBefore(modal_box, top_parent);
-        modal_inst=1;
+	var top_parent = $('top_parent');
+	top_parent.parentNode.insertBefore(modal_cover, top_parent);
+	top_parent.parentNode.insertBefore(modal_box, top_parent);
+	modal_inst = 1;
 }
 
 function show_modal_box() {
-        if (!modal_inst)
-                install_modal();
+	if (!modal_inst)
+		install_modal();
 
-        if (modal_cover && modal_box) {
-                modal_cover.style.display = '';
-                modal_box.style.display = '';
-        }
+	if (modal_cover && modal_box) {
+		modal_cover.style.display = '';
+		modal_box.style.display = '';
+	}
 
-        return;
+	return;
 }
 
 function hide_modal_box() {
-        if (!modal_inst)
-                install_modal();
+	if (!modal_inst)
+		install_modal();
 
-        if (modal_cover && modal_box) {
-                modal_box.style.display = 'none';
-                modal_cover.style.display = 'none';
-        }
+	if (modal_cover && modal_box) {
+		modal_box.style.display = 'none';
+		modal_cover.style.display = 'none';
+	}
 
-        return;
+	return;
 }
 
 function getModalPrefs(section) {
-        var params = [];
-        params['op'] = 'getModalPrefs';
-        params['section'] = section;
-        var url = 'ajax.pl';
-        var handlers = {onComplete:show_modal_box};
-        ajax_update(params, 'modal_box_content', handlers);
-
+	var params = [];
+	params['op'] = 'getModalPrefs';
+	params['section'] = section;
+	var handlers = {onComplete:show_modal_box};
+	ajax_update(params, 'modal_box_content', handlers);
 }
 
 function saveModalPrefs() {
-        var params = [];
-        params['op'] = 'saveModalPrefs';
-        params['data'] = Form.serialize(document.forms['modal_prefs']);
-        var url = 'ajax.pl';
-        var handlers = {onComplete:hide_modal_box};
-        ajax_update(params, '', handlers);
+	var params = [];
+	params['op'] = 'saveModalPrefs';
+	params['data'] = Form.serialize(document.forms['modal_prefs']);
+	var handlers = {onComplete:hide_modal_box};
+	ajax_update(params, '', handlers);
 }

@@ -1589,7 +1589,7 @@ sub prepareUser {
 			@headers{map lc, keys %headers} = values %headers;
 			my $ua = $r->headers_in->{'user-agent'};
 			if ($ua =~ /MSIE (\d+)/) {
-				$d2 = 'none' if $1 < 7;
+				$d2 = 'none';# if $1 < 7;
 			}
 
 			$user->{discussion2} = $d2;

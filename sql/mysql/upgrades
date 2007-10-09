@@ -4887,6 +4887,9 @@ UPDATE vars SET value = 'T_2_5_0_177' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# 2007-10-05
+UPDATE vars SET value = 'T_2_5_0_178' WHERE name = 'cvs_tag_currentcode';
+
 # SLASHDOT LAST UPDATED HERE
 
 # For modal preferences

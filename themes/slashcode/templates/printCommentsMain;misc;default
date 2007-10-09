@@ -149,8 +149,6 @@ __template__
 		<small>
 		<b>The Fine Print:</b> [% fineprint %]
 		</small>
-Without JavaScript enabled, you might want to use <a>the classic discussion system</a> instead. If you login, you can remember this preference
-
 [% IF !user.state.no_d2 %]<noscript><br><small>Without JavaScript enabled, you might want to use [% Slash.linkComment({
 	sid	=> sid,
 	pid	=> pid,

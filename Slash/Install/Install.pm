@@ -27,7 +27,8 @@ sub new {
 	$self->sqlConnect;
 	# XXX Anyone know why this is called directly?  We use $self->{slashdb}
 	# at a number of places below and I can't figure out why we don't just
-	# use getCurrentDB().
+	# use getCurrentDB(). -- jamie
+	# beats me! -- pudge
 	$self->{slashdb} = Slash::DB->new($user);
 
 	return $self;
