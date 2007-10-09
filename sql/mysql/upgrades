@@ -4894,3 +4894,10 @@ UPDATE vars SET value = 'T_2_5_0_178' WHERE name = 'cvs_tag_currentcode';
 
 # For modal preferences
 INSERT INTO vars (name, value, description) VALUES ('modal_prefs_active', 1, 'Toggles modal preferences on/off');
+
+# For plugins/HumanConf
+ALTER TABLE humanconf_pool CHANGE filename filename_img VARCHAR(63) NOT NULL, ADD COLUMN filename_mp3 VARCHAR(63) DEFAULT NULL AFTER filename_img, CHANGE html html VARCHAR(255) NOT NULL;
+INSERT INTO vars (name, value, description) VALUES ('hc_cepstral', '0', 'Use Cepstral audio to spell words for the vision-impaired?');
+INSERT INTO vars (name, value, description) VALUES ('hc_cepstral_mp3encoder', '', 'Name of your system\'s preferred mp3 encoder');
+INSERT INTO vars (name, value, description) VALUES ('hc_cepstral_voices', 'William', 'Space-sep list of Cepstral voicesto use, if hc_cepstral is set');
+

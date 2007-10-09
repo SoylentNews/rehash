@@ -12,6 +12,7 @@ use vars qw( %task $me $task_exit_flag );
 $task{$me}{timespec} = '10,40 * * * *';
 $task{$me}{timespec_panic_1} = '';
 $task{$me}{on_startup} = 1;
+$task{$me}{resource_locks} = getCurrentStatic('hc_cepstral') ? { cepstral => 1 } : { };
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
 

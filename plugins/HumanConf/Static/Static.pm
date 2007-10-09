@@ -10,6 +10,7 @@ use Digest::MD5;
 use File::Spec::Functions;
 use GD;
 use GD::Text::Align;
+use File::Temp 'tempfile';
 use Slash;
 use Slash::Utility;
 
@@ -22,17 +23,15 @@ use base 'Slash::DB::MySQL';
 
 sub new {
 	my($class, $user) = @_;
+
+	return unless $class->isInstalled();
+
 	my $self = {};
-
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $plugins = $slashdb->getDescriptions('plugins');
-	return unless $plugins->{HumanConf};
-
 	bless($self, $class);
 	$self->{virtual_user} = $user;
 	$self->sqlConnect();
 
+	my $constants = getCurrentStatic();
 	$self->{imagemargin} = $constants->{hc_q1_margin} || 6;
 
 	# Set the list of possible fonts.
@@ -130,7 +129,7 @@ sub deleteOldFromPool {
 		# their info.
 		my $pool_hr = $self->sqlSelectAllHashref(
 			"hcpid",
-			"hcpid, hcqid, filename",
+			"hcpid, hcqid, filename_img",
 			"humanconf_pool",
 			"inuse=2",
 			"ORDER BY hcpid ASC LIMIT $want_delete"
@@ -148,20 +147,36 @@ sub deleteOldFromPool {
 		for my $hcpid (@hcpids_to_delete) {
 			my $filedir = $q_hr->{$pool_hr->{$hcpid}{hcqid}}{filedir};
 			my $errstr = "";
-			my $filename = $pool_hr->{$hcpid}{filename};
-			$errstr = "filename is empty for hcpid '$hcpid'"
-				if !$filename;
-			my $fullname = catfile($filedir, $filename);
-			$errstr = "file '$fullname' does not exist"
-				if !-e $fullname;
-			$errstr = "parent dir of '$fullname' not writable"
+			my $filename_img = $pool_hr->{$hcpid}{filename_img};
+			$errstr = "filename_img is empty for hcpid '$hcpid'"
+				if !$filename_img;
+			my $fullname_img = catfile($filedir, $filename_img);
+			$errstr = "file img '$fullname_img' does not exist"
+				if !-e $fullname_img;
+			$errstr = "parent dir of img '$fullname_img' not writable"
 				if !-w $filedir;
 			if (!$errstr) {
-				my $success = unlink $fullname;
+				my $success = unlink $fullname_img;
 				if (!$success) {
 					# Could not delete this file, but
 					# we know it's there.  That's bad.
-					$errstr = "unlink '$fullname' failed, $!";
+					$errstr = "unlink img '$fullname_img' failed, $!";
+				}
+			}
+			my $filename_mp3 = $pool_hr->{$hcpid}{filename_mp3};
+			if ($filename_mp3) {
+				my $fullname_mp3 = catfile($filedir, $filename_mp3);
+				$errstr = "file mp3 '$fullname_mp3' does not exist"
+					if !-e $fullname_mp3;
+				$errstr = "parent dir of mp3 '$fullname_mp3' not writable"
+					if !-w $filedir;
+				if (!$errstr) {
+					my $success = unlink $fullname_mp3;
+					if (!$success) {
+						# Could not delete this file, but
+						# we know it's there.  That's bad.
+						$errstr = "unlink mp3 '$fullname_mp3' failed, $!";
+					}
 				}
 			}
 			# Whether the attempt to delete the file succeeded
@@ -227,19 +242,19 @@ sub fillPool {
 
 sub addPool {
 	my($self, $question) = @_;
-	my($answer, $extension, $method, $retval);
+	my($answer, $extension_img, $method, $gdimage);
 	my $image_format = getCurrentStatic('hc_image_format') || 'jpeg';
 	$image_format =~ s/\W+//g;
 
 	if ($question == 1) {
 		if ($image_format =~ /^jpe?g$/) {
-			$extension = '.jpg';
+			$extension_img = '.jpg';
 			$method = 'jpeg';
 		} else {
-			$extension = ".$image_format";
+			$extension_img = ".$image_format";
 			$method = $image_format;
 		}
-		($answer, $retval) = $self->drawImage();
+		($answer, $gdimage) = $self->drawImage();
 	} else {
 		warn "HumanConf warning: addPool called with"
 			. " unknown question number: $question";
@@ -258,36 +273,37 @@ sub addPool {
 	my $hcpid = $self->getLastInsertId();
 	my $dir = $self->{questioncache}{$question}{filedir};
 
-	my($filename, $full_filename) = ('', '');
+	my($filename_img, $full_filename_img) = ('', '');
+	my $filename_mp3 = undef;
 	my $randomfactor = 0;
-	while (!$filename) {
+	my $encoded_name = '';
+	while (!$filename_img) {
 		# Loop until we get a filename that isn't already used.
 		# (Collisions should only occur one time in a zillion, but
 		# it's always a good idea to check.)
-		my $encoded_name = $self->encode_hcpid($hcpid + $randomfactor);
-		$filename = sprintf("%02d/%s%s", $hcpid % 100, $encoded_name, $extension);
-		$full_filename = "$dir/$filename";
-		if (-e $full_filename) {
-			$filename = "";
+		$encoded_name = $self->encode_hcpid($hcpid + $randomfactor);
+		$filename_img = sprintf("%02d/%s%s", $hcpid % 100, $encoded_name, $extension_img);
+		$full_filename_img = "$dir/$filename_img";
+		if (-e $full_filename_img) {
+			$filename_img = "";
 			$randomfactor = int(rand(1000));
 		}
 	}
-	my $full_dir = $full_filename;
-	$full_dir =~ s{/[^/]+$}{};
+	my $full_dir = $full_filename_img; $full_dir =~ s{/[^/]+$}{};
 	my @created_dirs = File::Path::mkpath($full_dir, 0, 0755);
 	$self->writeBlankIndexes(@created_dirs) if @created_dirs;
 
 	my $html = "";
 	if ($question == 1) {
 		my $constants = getCurrentStatic();
-		if (!open(my $fh, ">$full_filename")) {
+		if (!open(my $fh, ">$full_filename_img")) {
 			warn "HumanConf warning: addPool could not create"
-				. " '$full_filename', '$!'";
+				. " '$full_filename_img', '$!'";
 		} else {
-			print $fh $retval->$method;
+			print $fh $gdimage->$method;
 			close $fh;
 		}
-		my($width, $height) = $retval->getBounds();
+		my($width, $height) = $gdimage->getBounds();
 		if ($width*$height < $self->{prefnumpixels}/1.5) {
 			# Display small images at larger sizes for easier reading.
 			my $scale = int($self->{prefnumpixels}/($width*$height) + 0.5);
@@ -295,22 +311,65 @@ sub addPool {
 			$width *= $scale; $height *= $scale;
 		}
 		my $alt = getData('imgalttext', {}, 'humanconf');
-		$html = join("",
+		$html = join('',
 			qq{<img src="},
 			$self->{questioncache}{$question}{urlprefix},
 			"/",
-			$filename,
+			$filename_img,
 			qq{" width=$width height=$height border=0 },
 			qq{alt="$alt">}
 		);
+		if ($constants->{hc_cepstral}) {
+			$filename_mp3 = write_mp3_file($answer, $dir, $hcpid, $encoded_name);
+			if ($filename_mp3) {
+				$html .= join('',
+					qq{ [<a href="},
+					$self->{questioncache}{$question}{urlprefix},
+					"/",
+					$filename_mp3,
+					qq{" target="_new">mp3</a>]}
+				);
+			}
+		}
 	}
 
 	$self->sqlUpdate("humanconf_pool", {
-		filename =>	$filename,
+		filename_img =>	$filename_img,
+		filename_mp3 =>	$filename_mp3,
 		html =>		$html,
 		inuse =>	0,
 		-created_at =>	'NOW()',
 	}, "hcpid=$hcpid");
+}
+
+sub write_mp3_file {
+	my($answer, $dir, $hcpid, $encoded_name) = @_;
+	my $constants = getCurrentStatic();
+	my $filename_mp3 = sprintf("%02d/%s%s", $hcpid % 100, $encoded_name, '.mp3');
+	my $full_filename_mp3 = "$dir/$filename_mp3";
+	my $ssml_text = join('<break time=\"1s\">',
+		map { uc } split //, $answer);
+
+	my @voices = split / /, ($constants->{hc_cepstral_voices} || 'William');
+	my $voice = $voices[rand @voices];
+	$ssml_text = "<voice name=\"$voice\">$ssml_text</voice>";
+
+	my $logdir = $constants->{logdir};
+	my $cepstral_prefix = catfile($logdir, "cepstral.");
+	my $ssml_fh = undef;
+	my $ssml_file = File::Temp::mktemp("${cepstral_prefix}XXXXXXXXXX.ssml");
+	if (open(my $ssml_fh, ">$ssml_file")) {
+		print $ssml_fh $ssml_text;
+		close $ssml_fh;
+	}
+	my $wav_file = $ssml_file; $wav_file =~ s/\.ssml$/.wav/;
+	system("swift -f $ssml_file -o $wav_file");
+	unlink($ssml_file);
+	if ($constants->{hc_cepstral_mp3encoder}) {
+		system("$constants->{hc_cepstral_mp3encoder} -S --resample 22.05 $wav_file $full_filename_mp3");
+	}
+	unlink($wav_file);
+	return $full_filename_mp3;
 }
 
 sub get_sizediff {

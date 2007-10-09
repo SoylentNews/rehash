@@ -21,8 +21,9 @@ CREATE TABLE humanconf_pool (
 	lastused	TIMESTAMP,
 	created_at	DATETIME NOT NULL,
 	inuse		TINYINT DEFAULT '0' NOT NULL,
-	filename	CHAR(63) NOT NULL,
-	html		CHAR(255) NOT NULL,
+	filename_img	VARCHAR(63) NOT NULL,
+	filename_mp3	VARCHAR(63) DEFAULT NULL,
+	html		VARCHAR(255) NOT NULL,
 	PRIMARY KEY (hcpid),
 	KEY answer (answer),
 	KEY lastused (lastused)

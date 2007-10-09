@@ -18,6 +18,7 @@ my $total_freshens = 0;
 $task{$me}{timespec} = '0-59 * * * *';
 $task{$me}{timespec_panic_1} = '1-59/10 * * * *';
 $task{$me}{timespec_panic_2} = '';
+$task{$me}{resource_locks} = getCurrentStatic('cepstral_audio') ? { cepstral => 1 } : { };
 $task{$me}{on_startup} = 1;
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {

@@ -5,6 +5,9 @@
 INSERT INTO humanconf_questions (hcqid, filedir, urlprefix, question) VALUES (1, '/usr/local/slash/site/www.example.com/htdocs/images/hc', 'http://www.example.com/images/hc', 'To confirm you\'re not a script,<BR>please type the text shown in this image:');
 
 INSERT INTO vars (name, value, description) VALUES ('hc', '0', 'HumanConf master switch, 0=off, 1=on');
+INSERT INTO vars (name, value, description) VALUES ('hc_cepstral', '0', 'Use Cepstral audio to spell words for the vision-impaired?');
+INSERT INTO vars (name, value, description) VALUES ('hc_cepstral_mp3encoder', '', 'Name of your system\'s preferred mp3 encoder');
+INSERT INTO vars (name, value, description) VALUES ('hc_cepstral_voices', 'William', 'Space-sep list of Cepstral voices to use, if hc_cepstral is set');
 INSERT INTO vars (name, value, description) VALUES ('hc_fontpath', '/usr/share/fonts/truetype', 'GD::Text font_path');
 INSERT INTO vars (name, value, description) VALUES ('hc_formname_regex', '^(?:comments|(?:login|users)/(?:nu|mp))$', 'Formnames which (may) require HumanConf');
 INSERT INTO vars (name, value, description) VALUES ('hc_maxkarma', '25', 'Maximum karma at which users need HumanConf (beyond this we assume they are human) - set large negative to exempt all logged-in users, set large positive if all users must comply');
