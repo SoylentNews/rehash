@@ -23,7 +23,6 @@ my $query_ref_regex = qr{(HASH|ARRAY|SCALAR|GLOB|CODE|LVALUE|IO|REF)\(0x[0-9a-f]
 ########################################################
 # Generic methods for libraries.
 ########################################################
-#Class variable that stores the database handle
 sub new {
 	my($class, $user, @args) = @_;
 	my $self = {};
@@ -50,6 +49,13 @@ sub new {
 	$self->{_querylog} = { };
 
 	return $self;
+}
+
+# Subclasses may implement their own methods of determining whether
+# their class is "installed" or not.  For example, plugins may want
+# to check $constants->{plugin}{Foo}.
+sub isInstalled {
+	return 1;
 }
 
 ##################################################################

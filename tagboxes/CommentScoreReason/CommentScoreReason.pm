@@ -39,15 +39,12 @@ use base 'Slash::DB::MySQL';
 sub new {
 	my($class, $user) = @_;
 
-	my $plugin = getCurrentStatic('plugin');
-	return undef if !$plugin->{Tags} || !$plugin->{TagModeration};
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	my $tagbox = getCurrentStatic('tagbox');
-	return undef if !$tagbox->{$tagbox_name};
+	return undef unless $class->isInstalled();
 
 	# Note that getTagboxes() would call back to this new() function
 	# if the tagbox objects have not yet been created -- but the
 	# no_objects option prevents that.  See getTagboxes() for details.
+	my($tagbox_name) = $class =~ /(\w+)$/;
 	my %self_hash = %{ getObject('Slash::Tagbox')->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
 	my $self = \%self_hash;
 	return undef if !$self || !keys %$self;
@@ -57,6 +54,14 @@ sub new {
 	$self->sqlConnect();
 
 	return $self;
+}
+
+sub isInstalled {
+	my($class) = @_;
+	my $constants = getCurrentStatic();
+	return undef if !$constants->{plugin}{Tags} || !$constants->{plugin}{TagModeration};
+	my($tagbox_name) = $class =~ /(\w+)$/;
+	return undef if !$constants->{tagbox}{$tagbox_name};
 }
 
 sub feed_newtags {

@@ -20,6 +20,13 @@ my $dsnmods = {
 	mysql	=> 'MySQL',
 };
 
+# It may be of interest to note that while all the other subclasses
+# of Slash::DB and Slash::DB::Utility typically have their new()
+# method invoked via getObject() and loadClass(), Slash::DB->new()
+# is called directly by createEnvironment().  This is because it
+# needs to set up the current db before prepareUser() retrieves it
+# with getCurrentDB().
+
 sub new {
 	my($class, $user) = @_;
 	my $dsn = DBIx::Password::getDriver($user);
@@ -27,6 +34,7 @@ sub new {
 		my $dbclass = ($ENV{GATEWAY_INTERFACE})
 			? "Slash::DB::$modname"
 			: "Slash::DB::Static::$modname";
+#use Carp; Carp::cluck("$$ Slash::DB->new evaling 'use $dbclass'");
 		eval "use $dbclass"; die $@ if $@;
 
 		# Bless into the class we're *really* wanting -- thebrain
@@ -43,6 +51,16 @@ sub new {
 	} else {
 		die "DBIx::Password has no information about the virtual user '$user'. Most likely either you mistyped it (maybe in slash.sites or your SlashVirtualUser directive?), or DBIx::Password is misconfigured somehow";
 	}
+}
+
+# Slash::DB->new returns an object that's a subclass of
+# Slash::DB::Utility, where isInstalled is defined.
+# But Slash::DB->isInstalled is called before new is called,
+# so it can't inherit Slash::DB::Utility::isInstalled.
+# So we define our own here.
+
+sub isInstalled {
+	1;
 }
 
 sub DESTROY {

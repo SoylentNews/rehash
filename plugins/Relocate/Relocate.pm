@@ -20,8 +20,7 @@ use base 'Slash::DB::Utility';
 sub new {
 	my($class, $user) = @_;
 
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'Relocate'};
+	return unless $class->isInstalled();
 
 	my $self = bless({}, $class);
 	$self->{virtual_user} = $user;
@@ -30,6 +29,11 @@ sub new {
 	$self->{'_prime'} = "id";
 
 	return $self;
+}
+
+sub isInstalled {
+	my $constants = getCurrentStatic();
+	return $constants->{plugin}{Relocate} || 0;
 }
 
 sub create {

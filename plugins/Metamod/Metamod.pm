@@ -20,19 +20,20 @@ use base 'Slash::DB::MySQL';
 
 sub new {
 	my($class, $user) = @_;
-	my $self = {};
 
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{Metamod};
+	return undef unless $class->isInstalled();
 
-	my $constants = getCurrentStatic();
-	return undef unless $constants->{m2};
-
+	my $self = { };
 	bless($self, $class);
 	$self->{virtual_user} = $user;
 	$self->sqlConnect();
 
 	return $self;
+}
+
+sub isInstalled {
+	my $constants = getCurrentStatic();
+	return $constants->{plugin}{Metamod} && $constants->{m2};
 }
 
 ########################################################

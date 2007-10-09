@@ -301,6 +301,7 @@ sub _whereFormkey {
 # XXX I don't think this method is used anywhere.  Also, I'm
 # really sure these "Notes" are about five years out of date.
 # Can we delete this code? - Jamie, August 2006
+# (It's used in Slash::DB::Utility::new)
 
 ########################################################
 # Notes:

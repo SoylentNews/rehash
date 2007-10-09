@@ -2320,16 +2320,18 @@ sub getObject {
 	# We either haven't tried loading this class before, or were
 	# asked not to use the cache.
 	if (loadClass($class)) { # 'require' the class
-		my $object = $class->new($vuser, @args);
-		if ($object) {
-			$objects->{$class, $vuser} = $object if !$data->{nocache};
-			return $object;
+		if ($class->isInstalled($vuser) && $class->can('new')) {
+			my $object = $class->new($vuser, @args);
+			if ($object) {
+				$objects->{$class, $vuser} = $object if !$data->{nocache};
+				return $object;
+			}
+			errorLog("Class $class is installed for '$vuser' but returned false for new()");
 		}
-		errorLog("Class $class returned false for new()");
 	} else {
 		if ($@) {
 			errorLog("Class $class could not be loaded: '$@'");
-		} elsif (!$class->can("new")) {
+		} elsif (!$class->can('new')) {
 			errorLog("Class $class is not returning an object, or"
 				. " at least not one that has a new() method.  Try"
 				. "`perl -M$class -le '$class->new'` to see why");
