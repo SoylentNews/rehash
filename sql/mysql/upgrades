@@ -4901,3 +4901,5 @@ INSERT INTO vars (name, value, description) VALUES ('hc_cepstral', '0', 'Use Cep
 INSERT INTO vars (name, value, description) VALUES ('hc_cepstral_mp3encoder', '', 'Name of your system\'s preferred mp3 encoder');
 INSERT INTO vars (name, value, description) VALUES ('hc_cepstral_voices', 'William', 'Space-sep list of Cepstral voicesto use, if hc_cepstral is set');
 
+ALTER TABLE dateformats MODIFY format VARCHAR(64) DEFAULT NULL;
+UPDATE dateformats SET format='%A %B %d, @%I:%M%p IF_OLD %A %B %d %Y, @%I:%M%p' where format='%A %B %d, @%I:%M%p';

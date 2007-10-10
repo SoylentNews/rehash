@@ -396,7 +396,7 @@ CREATE TABLE css (
 DROP TABLE IF EXISTS dateformats;
 CREATE TABLE dateformats (
 	id tinyint UNSIGNED DEFAULT '0' NOT NULL,
-	format varchar(32),
+	format varchar(64),
 	description varchar(64),
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;

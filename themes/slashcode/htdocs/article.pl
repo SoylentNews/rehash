@@ -16,15 +16,6 @@ sub main {
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
 
-	# XXX If this is being called from freshenup to write an .shtml file
-	# for a story being archived, or for one older than say 30 days,
-	# and if a var shows the AC needs a datecode different from normal
-	# for such calls, set $user->{dfid} to a new special value that
-	# includes the year, call setCurrentDate($user), then re-call
-	# the last two lines from createEnvironment() after prepareUser():
-	# createCurrentUser($user);
-	# createCurrentAnonymousCoward($user);
-
 	my $story;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
