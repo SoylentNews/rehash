@@ -182,7 +182,11 @@ __template__
     [% END; IF user.is_admin && user.d2prefs_debug %]
         <a href="javascript:showPrefs('reading')">Prefs</a>
     [% ELSIF !user.is_anon %]
-        <a href="[% gSkin.rootdir %]/my/comments">Prefs</a>
+        [% IF constants.modal_prefs_active %]
+                <a href="javascript:getModalPrefs('d2');">Prefs</a>
+        [% ELSE %]
+                <a href="[% gSkin.rootdir %]/my/comments">Prefs</a>
+        [% END %]
     [% END %]
 		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
 		  [% IF !user.is_anon %] | [% END %]
