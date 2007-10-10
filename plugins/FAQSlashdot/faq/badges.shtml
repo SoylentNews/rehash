@@ -61,6 +61,23 @@ paste it directly into your page as is:
 <xmp><!-- for a page at http://example.com/my-story.html, edit as appropriate for your site -->
 <a href="http://slashdot.org/slashdot-it.pl?op=basic&url=http%3A%2F%2Fexample.com%2Fmy-story.html">Slashdot It!</a></xmp></p>
 
+<p>You can add a `favicon'-sized Slashdot icon like so:
+<xmp><img src="http://images.slashdot.org/favicon.ico" alt="Slashdot" border="0" height="16" width="16"></xmp>
+Inserting that into the link (or really duplicating the link to get everything just right) produces:</p>
+
+<p style="padding-left:2em;"><!--
+  HERE IS THE SIMPLE LINK AND FAVICON:
+--><a href="javascript:location.href='http://slashdot.org/slashdot-it.pl?op=basic&url='+encodeURIComponent(location.href)"
+><img src="http://images.slashdot.org/favicon.ico" alt="Slashdot" border="0" height="16" width="16"
+></a>&nbsp;<a href="javascript:location.href='http://slashdot.org/slashdot-it.pl?op=basic&url='+encodeURIComponent(location.href)"
+>Slashdot It!</a><!--
+  END
+--></p>
+
+<p>View the source if you need to see the exact HTML used to make the link above.
+You are welcome to download the <a href="http://images.slashdot.org/favicon.ico">favicon image</a>
+to rehost from your own server if you prefer.</p>
+
 <p>These simple links don't have all the power of badges.  As with badges, your readers can
 easily submit a story or follow the link to the already-submitted story and discussion.
 There they will see its popularity and be able to vote --- things the simple link
