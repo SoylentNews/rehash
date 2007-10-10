@@ -286,7 +286,6 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 </div>
 <a name="topcomment"></a>
 
-<div id="modal_parent"></div>
 <div id="modal_cover" style="display:none" onclick="hide_modal_box()"></div>
 <div id="modal_box" style="display:none">
         <div class="generaltitle" >
