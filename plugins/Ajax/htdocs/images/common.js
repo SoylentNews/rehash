@@ -1385,7 +1385,7 @@ function install_modal() {
 	modal_cover.parentNode.removeChild(modal_cover);
 	modal_box.parentNode.removeChild(modal_box);
 
-	var modal_parent = $('modal_parent');
+	var modal_parent = $('top_parent');
 	modal_parent.parentNode.insertBefore(modal_cover, modal_parent);
 	modal_parent.parentNode.insertBefore(modal_box, modal_parent);
 	modal_inst = 1;
