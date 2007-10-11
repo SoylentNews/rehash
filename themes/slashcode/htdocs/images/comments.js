@@ -823,9 +823,9 @@ function ajaxFetchComments(cids, option, thresh) {
 function savePrefs() {
 	if (!user_is_anon
 		&&
-	    (user_threshold_orig != user_threshold)
+	    ((user_threshold_orig != user_threshold)
 		||
-	    (user_highlightthresh_orig != user_highlightthresh)
+	    (user_highlightthresh_orig != user_highlightthresh))
 	) {
 		var params = [];
 		params['op'] = 'comments_set_prefs';

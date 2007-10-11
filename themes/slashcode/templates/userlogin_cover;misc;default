@@ -1,0 +1,32 @@
+__section__
+default
+__description__
+The block that has the login fields for the user
+
+* return_url = specific URL to return to after log-in (default is rootdir/)
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+userlogin_cover
+__template__
+
+<div id="login_cover" style="display:none" onclick="hide_login_box()"></div>
+<div id="login_box" style="display:none">
+[% PROCESS titlebar
+	title => "Please Log In to Continue" _
+		'<a href="javascript:hide_login_box()" class="close" title="Close this box"><img id="login_box_close" src="' _
+		gSkin.imagedir _ '/images/sic_close.png" alt="Close"></a>'
+%]
+<div id="login_box_content">
+[% PROCESS userlogin # pass 'return_url' as parameter to userlogin_cover template %]
+</div></div>
+<script type="text/javascript">logged_in = 0</script>
+
+__seclev__
+10000
+__version__
+$Id$

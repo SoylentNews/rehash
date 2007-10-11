@@ -15,24 +15,11 @@ __seclev__
 __template__
 [% PROCESS autocomplete %]
 [% PROCESS nodnix_menus %]
-[% login_inner_block = BLOCK %]
-[% this_fhfilter = form.fhfilter | fixparam;
-   PROCESS userlogin
-	return_url = gSkin.rootdir _ '/firehose.pl?op=view&id=' _ form.id;
-END; login_block = BLOCK %]
-<div id="login_cover" style="display:none" onclick="hide_login_box()"></div>
-<div id="login_box" style="display:none">
-[% PROCESS titlebar
-	title => "Please Log In to Continue" _
-		'<a href="javascript:hide_login_box()"><img id="login_box_close" src="' _
-		gSkin.imagedir _ '/images/sic_close.png"></a>'
-%]
-<div id="login_box_content">
-[% login_inner_block %]
-</div></div>
-<script type="text/javascript">logged_in = 0</script>
-[% END # login_block %]
-[% IF user.is_anon; login_block; END %]
+[% IF user.is_anon;
+   	this_fhid = form.id | fixparam;
+   	PROCESS userlogin_cover
+   		return_url = gSkin.rootdir _ '/firehose.pl?op=view&id=' _ this_fhid;
+END %]
 [% firehosetext %]
 __version__
 $Id$

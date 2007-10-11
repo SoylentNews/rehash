@@ -1422,6 +1422,8 @@ function getModalPrefs(section) {
 	params['reskey'] = reskey_static;
 	var handlers = {onComplete:show_modal_box};
 	ajax_update(params, 'modal_box_content', handlers);
+
+	return;
 }
 
 function saveModalPrefs() {

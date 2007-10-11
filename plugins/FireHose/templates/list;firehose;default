@@ -61,35 +61,22 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
 </div>
 [% END %]
 <div id="messagearea"></div>
-[% login_inner_block = BLOCK %]
-[% this_fhfilter = form.fhfilter | fixparam;
-   PROCESS userlogin
+[% login_block = BLOCK;
+   this_fhfilter = form.fhfilter | fixparam;
+   PROCESS userlogin_cover
 	return_url = gSkin.rootdir _ '/firehose.pl?section=' _ form.section _
-		     '&color=' _ form.color _
-		     '&mode=' _ form.mode _
-		     '&duration=' _ form.duration _
-		     '&fhfilter=' _ this_fhfilter _
-		     '&skipmenu=' _ form.skipmenu _
-		     '&skippop=' _ form.skippop _
-		     '&no_saved=1';
-END; login_block = BLOCK %]
-<div id="login_cover" style="display:none" onclick="hide_login_box()"></div>
-<div id="login_box" style="display:none">
-[% PROCESS titlebar
-	title => "Please Log In to Continue" _
-		'<a href="javascript:hide_login_box()" class="close" title="Close this box"><img id="login_box_close" src="' _
-		gSkin.imagedir _ '/images/sic_close.png" alt="Close"></a>'
-%]
-<div id="login_box_content">
-[% login_inner_block %]
-</div></div>
-<script type="text/javascript">logged_in = 0</script>
-[% END # login_block %]
-
-[% IF form.skipmenu || options.skipmenu %]
-	[% IF user.is_anon; login_block; END %]
-[% ELSE %]
-[% PROCESS nodnix_menus %]
+		'&color=' _ form.color _
+		'&mode=' _ form.mode _
+		'&duration=' _ form.duration _
+		'&fhfilter=' _ this_fhfilter _
+		'&skipmenu=' _ form.skipmenu _
+		'&skippop=' _ form.skippop _
+		'&no_saved=1';
+   END; # login_block
+   IF form.skipmenu || options.skipmenu;
+	IF user.is_anon; login_block; END;
+   ELSE;
+     PROCESS nodnix_menus %]
 <div class="firemenu">
 [% theupdatetime = Slash.timeCalc(Slash.db.getTime(), "%H:%M"); %]
 [% refresh_text = "";
@@ -109,7 +96,7 @@ END; login_block = BLOCK %]
 	[% END %]
         [% IF user.is_anon %]
                 [% login_block %]
-<div class="subdue" onclick="javascript:show_login_box(); return false">
+<div class="subdue" onclick="show_login_box()">
         [% END %]
         <form action="[% gSkin.rootdir %]/firehose.pl" method="get" name="firehoseform">
                 <fieldset>

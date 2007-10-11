@@ -344,16 +344,6 @@ ul.menu a img {margin: 0 0 -4px 0}
 div.storylinks ul li.comments {position: relative; width: auto; text-align: left; margin: 0; padding: 0;}
 div.storylinks ul {padding-right: 60% !important}
 
-/* login pop */
-#login_cover {background-color: #222; height: 100%; opacity: 0.75;position: fixed;width: 100%;z-index: 1000000; overflow: hidden;}
-#login_box .generaltitle .title h3 {background: transparent; margin: 0; padding: .1em .3em 0 .3em;}
-#login_box .generaltitle .title {margin: 0;border: none;}
-#login_box {position: fixed;margin: 25%;width: 50%;z-index: 1000001;border: 4px solid #222;}
-#login_box h3 a {position: absolute !important;right: .3em;top: .3em}
-#login_box #login_box_content legend {display: none;}
-#login_box #login_box_content fieldset {margin: 0;padding: 0;border: none;}
-#login_box #login_box_content {background-color: #fff;padding: 0 2em 2em 2em; border-top: 1px solid #222;}
-
 /*.pop0 { background-color: #cde; }
 .pop1 { background-color: #c00; }
 .pop2 { background-color: #f93; }

@@ -22,7 +22,7 @@ sub new {
 	# and returned.
 	my $constants = getCurrentStatic();
 	my $api_class = $constants->{search_too_class} || 'Slash::SearchToo::Classic';
-	return undef unless $api_class->isInstalled();
+#	return undef unless $api_class->isInstalled();
 	# Just in case this var is set incorrectly, prevent an infinite
 	# loop between new and getObject.
 	die "var 'search_too_class' invalid" if $api_class eq $class;
