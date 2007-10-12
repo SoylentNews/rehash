@@ -23,7 +23,7 @@ CREATE TABLE humanconf_pool (
 	inuse		TINYINT DEFAULT '0' NOT NULL,
 	filename_img	VARCHAR(63) NOT NULL,
 	filename_mp3	VARCHAR(63) DEFAULT NULL,
-	html		VARCHAR(255) NOT NULL,
+	html		TEXT NOT NULL,
 	PRIMARY KEY (hcpid),
 	KEY answer (answer),
 	KEY lastused (lastused)

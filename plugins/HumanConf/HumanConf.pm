@@ -78,7 +78,7 @@ sub createFormkeyHC {
 			"hcpid, html",
 			"humanconf_pool",
 			"hcqid=" . $slashdb->sqlQuote($hcqid)
-				. " AND filename != ''"
+				. " AND filename_img != ''"
 				. " AND created_at < DATE_SUB(NOW(), INTERVAL $secs SECOND)"
 				. " AND inuse = 0",
 			"ORDER BY RAND() LIMIT 1"
