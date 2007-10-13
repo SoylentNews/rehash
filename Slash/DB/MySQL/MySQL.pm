@@ -10279,7 +10279,7 @@ sub setUser {
 	my %old_values = ( );
 	my %new_values = ( );
 	if ($constants->{plugin}{Tags}) {
-		my @update_keys = sort keys %$hashref;
+		my @update_keys = sort map { s/^-//; $_ } keys %$hashref;
 		my $tagboxdb = getObject('Slash::Tagbox');
 		my @log_keys = $tagboxdb->userKeysNeedTagLog(\@update_keys);
 		%old_values = ( map { ($_, undef) } @log_keys );
@@ -10308,7 +10308,7 @@ sub setUser {
 		}
 		# If a tagbox needs copies of before-and-after data, first
 		# get a copy of the old data.
-		my @columns_needed = grep { exists $old_values{$_} } keys %minihash;
+		my @columns_needed = sort grep { exists $old_values{$_} } map { s/^-//; $_ } keys %minihash;
 		if (@columns_needed) {
 			my $old_hr = $self->sqlSelectHashref(
 				join(',', @columns_needed), $table, $where);

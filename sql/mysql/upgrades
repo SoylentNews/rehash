@@ -4910,3 +4910,9 @@ UPDATE vars SET value = 'T_2_5_0_179' WHERE name = 'cvs_tag_currentcode';
 # For plugins/HumanConf
 ALTER TABLE humanconf_pool MODIFY html TEXT NOT NULL;
 
+# For tagboxes/FireHoseScores
+INSERT INTO tagbox_userkeyregexes VALUES ('FireHoseScores', '^tag_clout$');
+
+# For tagboxes/Top
+INSERT INTO tagbox_userkeyregexes VALUES ('Top', '^tag_clout$');
+

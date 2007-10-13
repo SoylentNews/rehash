@@ -5,3 +5,5 @@ INSERT INTO tagbox_userkeyregexes VALUES ('Top', '^tag_clout$');
 INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_top_minscore_stories', '2', 'Minimum score a tag must have to make it into the top tags for a story');
 INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_top_minscore_urls', '2', 'Minimum score a tag must have to make it into the top tags for a URL');
 
+INSERT INTO tagbox_userkeyregexes VALUES ('Top', '^tag_clout$');
+
