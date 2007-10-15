@@ -3168,12 +3168,27 @@ typically be in) or as a 64-bit (16-char) hex string, and it will return
 an SQL function or value which can be used as part of a test against
 or an assignment into an SQL integer value.  This value should _not_ be
 quoted but rather inserted directly into an SQL request.  For example,
-if passed "123" (a user id), will return "'123'" (same value,
-quoted);  if passed "200123456789abcd" (an encoded IP), will return
-"CONV('200123456789abcd', 16, 10)" which can be used as an assignment
-into or test against a BIGINT column.
+if passed "123" (a user id), will return "CAST('123' AS UNSIGNED)"
+(same value, quoted);  if passed "200123456789abcd" (an encoded IP),
+will return "CAST(CONV('200123456789abcd', 16, 10) AS UNSIGNED" which
+can be used as an assignment into or test against a BIGINT column.
 
 For speed, does not do error-checking against the value passed in.
+
+There are tricky technical reasons why all values that are used in
+comparisons to srcid columns must be wrapped in a CAST(x AS UNSIGNED).
+Tricky enough that I submitted a MySQL bug report which turned out to
+be not a bug:  <http://bugs.mysql.com/bug.php?id=24759>.  The short
+explanation is that any comparison of a number (the srcid column in
+the table) to a string results in both being internally converted to
+a float before the comparison, and floats with more bits of data than
+will fit in their mantissa do not always compare "equal to themselves."
+We must ensure that the values compared against the BIGINT column are not
+strings, and that means wrapping both a quoted uid ('123' is a string)
+and a CONV (which returns a string) in a CAST.  Note that even integers
+known to have fewer bits than a float's mantissa, such as uid's, cannot
+be quoted strings, as that can break equality testing even for other
+properly-CAST values in an IN list.
 
 Usage:
 
@@ -3197,10 +3212,9 @@ sub get_srcid_sql_in {
 	my $slashdb = getCurrentDB();
 	my $srcid_q = $slashdb->sqlQuote($srcid);
 	my $type = get_srcid_type($srcid);
-	if ($type eq 'uid') {
-		return $srcid_q;
-	}
-	return "CAST(CONV($srcid_q, 16, 10) AS UNSIGNED)";
+	return $type eq 'uid'
+		? "CAST($srcid_q) AS UNSIGNED"
+		: "CAST(CONV($srcid_q, 16, 10) AS UNSIGNED)";
 }
 
 #========================================================================
