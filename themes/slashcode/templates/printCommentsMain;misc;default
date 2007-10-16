@@ -186,7 +186,7 @@ __template__
    		return_url = gSkin.rootdir _ '/comments.pl?sid=' _ sid %]
         <a href="[% gSkin.rootdir %]/login.pl" onclick="show_login_box(); return false">Login</a>
     [% ELSE %]
-        <a href="[% gSkin.rootdir %]/my/comments"[% IF constants.modal_prefs_active %] onclick="getModalPrefs('d2'); return false"[% END %]>Prefs</a>
+        <a href="[% gSkin.rootdir %]/my/comments"[% IF constants.modal_prefs_active %] onclick="getModalPrefs('d2', 'Discussion 2'); return false"[% END %]>Prefs</a>
     [% END %]
 
 		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
@@ -272,7 +272,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
    		return_url = gSkin.rootdir _ '/comments.pl?sid=' _ sid %]
         <a href="[% gSkin.rootdir %]/login.pl" onclick="show_login_box(); return false">Login</a>
     [% ELSE %]
-        <a href="[% gSkin.rootdir %]/my/comments"[% IF constants.modal_prefs_active %] onclick="getModalPrefs('d2'); return false"[% END %]>Prefs</a>
+        <a href="[% gSkin.rootdir %]/my/comments"[% IF constants.modal_prefs_active %] onclick="getModalPrefs('d2', 'Discussion 2'); return false"[% END %]>Prefs</a>
     [% END %]
 		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
 			| [% Slash.linkComment({
@@ -296,7 +296,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 <div id="modal_cover" style="display:none" onclick="hide_modal_box()"></div>
 <div id="modal_box" style="display:none">
         <div class="generaltitle" >
-                <div class="title"><h3>Modify Your Preferences <a href="javascript:hide_modal_box()"><img src="[% gSkin.imagedir %]/images/sic_close.png" alt="Close"></a></h3></div>
+                <div class="title"><h3><div id="preference_title"></div> <a href="javascript:hide_modal_box()"><img src="[% gSkin.imagedir %]/images/sic_close.png" alt="Close"></a></h3></div>
         </div>
         <div id="modal_box_content">Content here</div>
 </div>
