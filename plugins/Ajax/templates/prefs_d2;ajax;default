@@ -68,14 +68,6 @@ __template__
 
 		<label><input type="checkbox" name="nosigs"[% s_check %]>&nbsp;Disable Sigs</label>
                 [% PROCESS formNote note='Strip sig quotes from comments' %]
-
-                [% IF user.is_admin;
-			nospell_check = '';
-			IF user.no_spell;
-				nospell_check = constants.markup_checked_attribute;
-			END %]
-                	<label><input type="checkbox" name="no_spell"[% nospell_check %]>&nbsp;Disable Spellchecker</label>
-                [% END %]
 	</td>
 	</tr>
 </table>

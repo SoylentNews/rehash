@@ -526,7 +526,6 @@ sub saveModalPrefs {
                 d2_comment_order => $params{'d2_comment_order'} || undef,
                 emaildisplay     => $params{'emaildisplay'}     || undef,
                 nosigs           => ($params{'nosigs'}          ? 1 : 0),
-                no_spell         => ($params{'no_spell'}        ? 1 : 0),
         };
 
         $slashdb->setUser($params{uid}, $user_edits_table);
