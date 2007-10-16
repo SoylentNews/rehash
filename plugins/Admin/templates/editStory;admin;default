@@ -246,17 +246,25 @@ __template__
 				[% PROCESS editbuttons %]
 
 				<label>
-					Upload an image/audio file for this story
+					Upload an image/audio file for this story [% IF pending_file_count %]([% pending_file_count %] awaiting processing)[% END %]
 				</label>
 				<input type="file" name="media_file">
 
-				[% IF story_media_ref %]
+				[% IF story_static_files && story_static_files.size  %]
 					<label>
-						Media Files associated with this story
+						<a href="[% constants.rootdir %]/admin.pl?op=static_files&amp;sid=[% sid %]">Media Files associated with this story</a>
 					</label>
-					<table border="0" class="data">
-					[% FOREACH mfile = story_media_ref %]
-					<tr><td>mfile.smid</td><td>mfile.name</td></tr>
+					<table cellpadding="3" cellspacing="3">
+					[% FOREACH mfile = story_static_files %]
+					[% trunc_name = mfile.name %]
+					[% trunc_name = trunc_name.replace('^\d+',"") %]
+					<tr><td>[% mfile.sfid %]</td><td><a href="[% constants.imagedir %]/articles/[% sid %][% trunc_name %]" style="color:#fff">[% mfile.name %]</td><td>[% constants.imagedir %]/articles/[% sid %][% trunc_name %]</td>
+<td>
+[% IF mfile.filetype == "image" %]
+<img src="[% constants.imagedir %]/articles/[% sid %][% trunc_name %]" width="25%" height="25%">
+[% END %]
+</td>
+</tr>
 					[% END %]
 					</table>
 				[% END %]

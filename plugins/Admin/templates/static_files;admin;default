@@ -1,0 +1,31 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+admin
+__lang__
+en_US
+__name__
+static_files
+__seclev__
+10000
+__template__
+<table cellpadding="3" cellspacing="3">
+[% FOREACH mfile = story_static_files %]
+	[% trunc_name = mfile.name %]
+	[% trunc_name = trunc_name.replace('^\d+',"") %]
+	<tr><td>[% mfile.sfid %]</td><td><a href="[% constants.imagedir %]/articles/[% sid %][% trunc_name %]">[% mfile.name %]</td><td>[% constants.imagedir %]/articles/[% sid %][% trunc_name %]</td></tr>
+	[% IF mfile.filetype == "image" %]
+	<tr><td colspan="3"><img src="[% constants.imagedir %]/articles/[% sid %][% trunc_name %]"></td></tr>
+	[% END %]
+
+[% END %]
+</table>
+
+
+
+__version__
+$Id$
