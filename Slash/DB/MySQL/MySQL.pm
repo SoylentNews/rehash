@@ -277,7 +277,6 @@ my %descriptions = (
 
 	'd2_comment_order'
 		=> sub { $_[0]->sqlSelectMany('code, name', 'code_param', "type='d2_comment_order'") },
-
 );
 
 ########################################################
@@ -12446,6 +12445,37 @@ sub getMediaFile {
 	} else {
 		return $self->sqlSelect("width, height, location", "stories_media", "name=$data");
 	}
+}
+
+sub addFileToQueue {
+	my($self, $file) = @_;
+	$self->sqlInsert("file_queue", $file);
+}
+
+sub numPendingFilesForStory {
+	my($self, $stoid) = @_;
+	my $stoid_q = $self->sqlQuote($stoid);
+	$self->sqlCount("file_queue", "stoid=$stoid_q");
+}
+
+sub addStoryStaticFile {
+	my($self, $data) = @_;
+	$data ||= "";
+	
+	# Guess at file type if it isn't set
+	if ($data->{name} =~ /\.(jpg|gif|png)$/) {
+		$data->{filetype} ||= "image";
+	} elsif ($data->{name} =~ /\.(jpg|gif|png)$/) {
+		$data->{filetype} ||= "audio";
+	}
+
+	$self->sqlInsert("story_static_files", $data);
+}
+
+sub getStaticFilesForStory {
+	my($self, $stoid) = @_;
+	my $stoid_q = $self->sqlQuote($stoid);
+	return $self->sqlSelectAllHashrefArray("*", "story_static_files", "stoid=$stoid_q");
 }
 
 ########################################################

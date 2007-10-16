@@ -1917,6 +1917,17 @@ sub getUrlsNeedingRefresh {
 	);
 }
 
+sub getNextFileQueueCmds {
+	my($self) = @_;
+	return $self->sqlSelectAllHashrefArray("*", "file_queue", "", "ORDER BY fqid LIMIT 10");
+}
+
+sub deleteFileQueueCmd {
+	my($self,$fqid) = @_;
+	my $fqid_q = $self->sqlQuote($fqid);
+	$self->sqlDelete("file_queue", "fqid=$fqid_q");
+}
+
 1;
 
 __END__
