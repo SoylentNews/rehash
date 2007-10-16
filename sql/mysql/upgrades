@@ -4885,12 +4885,8 @@ UPDATE tagboxes SET clid=2 WHERE name='FirstMover';
 # 2007-10-04
 UPDATE vars SET value = 'T_2_5_0_177' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # 2007-10-05
 UPDATE vars SET value = 'T_2_5_0_178' WHERE name = 'cvs_tag_currentcode';
-
-# SLASHDOT LAST UPDATED HERE
 
 # For modal preferences
 INSERT INTO vars (name, value, description) VALUES ('modal_prefs_active', 1, 'Toggles modal preferences on/off');
@@ -4906,6 +4902,16 @@ UPDATE dateformats SET format='%A %B %d, @%I:%M%p IF_OLD %A %B %d %Y, @%I:%M%p' 
 
 # 2007-10-11
 UPDATE vars SET value = 'T_2_5_0_179' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
+
+# default prefs for new /. accounts
+INSERT INTO string_param (type, code, name) VALUES ('otherusersparam','discussion2','slashdot');
+INSERT INTO string_param (type, code, name) VALUES ('otherusersparam','d2_comment_q','5'); # medium
+INSERT INTO string_param (type, code, name) VALUES ('otherusersparam','d2_comment_order','0'); # score
 
 # For plugins/HumanConf
 ALTER TABLE humanconf_pool MODIFY html TEXT NOT NULL;

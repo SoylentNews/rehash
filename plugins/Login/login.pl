@@ -446,10 +446,10 @@ sub getOtherUserParams {
 	my $params  = $reader->getDescriptions('otherusersparam');
 
 	for my $param (keys %$params) {
-		if (exists $form->{$param}) {
-			# set user too for output in this request
-			$data->{$param} = $user->{$param} = $form->{$param} || undef;
-		}
+		# set user too for output in this request
+		$data->{$param} = $user->{$param} = defined($form->{$param})
+			? $form->{$param}
+			: $params->{$param};
 	}
 }
 

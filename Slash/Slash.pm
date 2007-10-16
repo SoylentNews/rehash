@@ -145,7 +145,7 @@ sub selectComments {
 	my $d2_comment_q = $user->{d2_comment_q};
 	if ($discussion2 && !$d2_comment_q) {
 		if ($user->{is_anon}) {
-			$d2_comment_q = 5;
+			$d2_comment_q = 5; # medium
 		}
 	}
 

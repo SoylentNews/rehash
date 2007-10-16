@@ -1580,7 +1580,7 @@ sub prepareUser {
 		my $i = $2;
 
 #		# for (0..255) { $x = ((($_-1)/256) < .1); last if !$x; printf "%d:%d\n", $_, $x; }
-		if ($ENV{GATEWAY_INTERFACE} && ( $i == 144 || $i == 113 || ((($i-1)/256) < .1) ) ) {  # 10 percent, x.(0..3).y.z
+		if ($ENV{GATEWAY_INTERFACE} && ( $i == 144 || ((($i-1)/256) < .5) ) ) {  # 10 percent, x.(0..3).y.z
 			my $d2 = 'slashdot';
 
 			# get user-agent (ENV not populated yet)
@@ -1844,7 +1844,7 @@ Hashref of cleaned-up data.
 		url_id spider_id miner_id keyword_id
 		st_main_select stc_main_select
 		parent_topic child_topic
-		skid primaryskid
+		skid primaryskid d2_comment_q d2_comment_order
 	),
 	# Survey
 	qw(

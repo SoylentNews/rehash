@@ -2743,6 +2743,13 @@ sub saveComm {
 	my $clsmall_bonus = ($form->{clsmall_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{clsmall_bonus};
 	my $clbig_bonus = ($form->{clbig_bonus} !~ /^[\-+]?\d+$/) ? 0 : $form->{clbig_bonus};
 
+	# plum
+	$form->{d2_comment_q} = (isSubscriber($user_edit) || $user_edit->{seclev} >= 100)
+		? $form->{d2_comment_q}
+		: ($form->{d2_comment_q} eq '0')
+			? 1
+			: $form->{d2_comment_q};
+
 	my $user_edits_table = {
 		discussion2		=> $form->{discussion2} || undef,
 		d2_comment_q		=> $form->{d2_comment_q} || undef,
