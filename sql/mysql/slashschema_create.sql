@@ -509,6 +509,20 @@ CREATE TABLE dst (
 	PRIMARY KEY (region)
 ) TYPE=InnoDB;
 
+
+#
+# Table structure for table 'file_queue'
+#
+
+CREATE TABLE `file_queue` (
+	`fqid` int(10) unsigned NOT NULL auto_increment,
+	`stoid` mediumint(8) unsigned default NULL,
+	`fhid` mediumint(8) unsigned default NULL,
+	`file` varchar(255) default NULL,
+	`action` enum('upload','thumbnails') default NULL,
+	PRIMARY KEY  (`fqid`)
+) ENGINE=InnoDB;
+
 #
 # Table structure for table 'formkeys'
 #
@@ -1047,6 +1061,21 @@ CREATE TABLE story_topics_rendered (
 	UNIQUE story_topic (stoid, tid),
 	INDEX tid_stoid (tid, stoid)
 ) TYPE=InnoDB;
+
+
+#
+# Table structure for table 'story_static_files'
+#
+
+DROP TABLE IF EXISTS story_static_files;
+CREATE TABLE story_static_files(
+	sfid mediumint unsigned NOT NULL auto_increment,
+	stoid mediumint unsigned NOT NULL,
+	filetype ENUM("file", "image", "audio") not null default "file",
+	name varchar(255) default '' NOT NULL,
+	PRIMARY KEY (sfid),
+	INDEX stoid(stoid)
+) ENGINE=InnoDB;
 
 #
 # Table structure for table 'string_param'
