@@ -160,6 +160,7 @@ task=tasks/open_backend.pl
 task=tasks/p2f_hof_topics.pl
 task=tasks/performance_stats.pl
 task=tasks/precache_gse.pl
+task=tasks/process_file_queue.pl
 task=tasks/refresh_authors_cache.pl
 task=tasks/refresh_section_metakeywords.pl
 task=tasks/report_slashd_errors.pl
