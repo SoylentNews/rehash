@@ -1415,7 +1415,8 @@ function hide_modal_box() {
 	return;
 }
 
-function getModalPrefs(section) {
+function getModalPrefs(section, title) {
+        document.getElementById('preference_title').innerHTML = title;
 	var params = [];
 	params['op'] = 'getModalPrefs';
 	params['section'] = section;
