@@ -3213,7 +3213,7 @@ sub get_srcid_sql_in {
 	my $srcid_q = $slashdb->sqlQuote($srcid);
 	my $type = get_srcid_type($srcid);
 	return $type eq 'uid'
-		? "CAST($srcid_q) AS UNSIGNED"
+		? "CAST($srcid_q AS UNSIGNED)"
 		: "CAST(CONV($srcid_q, 16, 10) AS UNSIGNED)";
 }
 
