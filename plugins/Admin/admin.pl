@@ -2110,7 +2110,7 @@ sub updateStory {
 
 ##################################################################
 sub handleMediaFileForStory {
-	my ($stoid) = @_;
+	my($stoid) = @_;
 	my $form    = getCurrentForm();
 	my $slashdb = getCurrentDB();
 	if ($form->{media_file}) {

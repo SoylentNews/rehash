@@ -4923,20 +4923,25 @@ INSERT INTO tagbox_userkeyregexes VALUES ('FireHoseScores', '^tag_clout$');
 INSERT INTO tagbox_userkeyregexes VALUES ('Top', '^tag_clout$');
 
 
-CREATE TABLE `file_queue` (
-	`fqid` int(10) unsigned NOT NULL auto_increment,
-	`stoid` mediumint(8) unsigned default NULL,
-	`fhid` mediumint(8) unsigned default NULL,
-	`file` varchar(255) default NULL,
-	`action` enum('upload','thumbnails') default NULL,
-	PRIMARY KEY  (`fqid`)
+CREATE TABLE file_queue (
+        fqid int(10) unsigned NOT NULL auto_increment,
+        stoid mediumint(8) unsigned default NULL,
+        fhid mediumint(8) unsigned default NULL,
+        file varchar(255) default NULL,
+        action enum('upload','thumbnails') default NULL,
+        PRIMARY KEY  (fqid)
 ) ENGINE=InnoDB;
 
 CREATE TABLE story_static_files(
-	sfid mediumint unsigned NOT NULL auto_increment,
-	stoid mediumint unsigned NOT NULL,
-	filetype ENUM("file", "image", "audio") not null default "file",
-	name varchar(255) default '' NOT NULL,
-	PRIMARY KEY (sfid),
-	INDEX stoid(stoid)
+        sfid mediumint unsigned NOT NULL auto_increment,
+        stoid mediumint unsigned NOT NULL,
+        filetype ENUM("file", "image", "audio") not null default "file",
+        name varchar(255) default '' NOT NULL,
+        PRIMARY KEY (sfid),
+        INDEX stoid(stoid)
 ) ENGINE=InnoDB;
+
+
+# 2007-10-16
+UPDATE vars SET value = 'T_2_5_0_180' WHERE name = 'cvs_tag_currentcode';
+

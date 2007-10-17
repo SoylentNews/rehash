@@ -514,13 +514,13 @@ CREATE TABLE dst (
 # Table structure for table 'file_queue'
 #
 
-CREATE TABLE `file_queue` (
-	`fqid` int(10) unsigned NOT NULL auto_increment,
-	`stoid` mediumint(8) unsigned default NULL,
-	`fhid` mediumint(8) unsigned default NULL,
-	`file` varchar(255) default NULL,
-	`action` enum('upload','thumbnails') default NULL,
-	PRIMARY KEY  (`fqid`)
+CREATE TABLE file_queue (
+	fqid int(10) unsigned NOT NULL auto_increment,
+	stoid mediumint(8) unsigned default NULL,
+	fhid mediumint(8) unsigned default NULL,
+	file varchar(255) default NULL,
+	action enum('upload','thumbnails') default NULL,
+	PRIMARY KEY  (fqid)
 ) ENGINE=InnoDB;
 
 #
