@@ -37,7 +37,7 @@ use base 'Slash::DB::MySQL';
 sub new {
 	my($class, $user) = @_;
 
-	return unless if !$class->isInstalled();
+	return if !$class->isInstalled();
 
 	# Note that getTagboxes() would call back to this new() function
 	# if the tagbox objects have not yet been created -- but the
