@@ -2159,9 +2159,9 @@ EOT
 	my $classattr = $discussion2 ? qq[ class="$class"] : '';
 
 	my $head = $discussion2 ? <<EOT1 : <<EOT2;
-			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return setFocusComment($comment->{cid})">$comment->{subject}</a></h4>
+			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return setFocusComment($comment->{cid})">$comment->{subject}</a>
 EOT1
-			<h4><a name="$comment->{cid}">$comment->{subject}</a></h4>
+			<h4><a name="$comment->{cid}">$comment->{subject}</a>
 EOT2
 
 	my $return = '';
@@ -2176,7 +2176,7 @@ EOT
 		<div class="title">
 $head
 $comment_links
-		 	<span id="comment_score_$comment->{cid}" class="score">$score_to_display</span>
+		 	<span id="comment_score_$comment->{cid}" class="score">$score_to_display</span></h4>
 		</div>
 		<div class="details">
 			by $user_nick_to_display$zoosphere_display
