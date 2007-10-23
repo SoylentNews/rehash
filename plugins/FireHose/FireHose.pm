@@ -53,6 +53,7 @@ sub createFireHose {
 	$data->{editorpop} ||= 0;
 	$data->{body_length} = $data->{bodytext} ? length($data->{bodytext}) : 0;
 	$data->{word_count} = countWords($data->{introtext}) + countWords($data->{bodytext});
+	$data->{mediatype} ||= "none";
 
 	my $text_data = {};
 	$text_data->{title} = delete $data->{title};
@@ -265,6 +266,7 @@ sub createItemFromSubmission {
 			email			=> $submission->{email},
 			emaildomain		=> $submission->{emaildomain},
 			name			=> $submission->{name},
+			mediatype		=> $submission->{mediatype}
 		};
 		$data->{url_id} = $submission->{url_id} if $submission->{url_id};
 		my $firehose_id = $self->createFireHose($data);
