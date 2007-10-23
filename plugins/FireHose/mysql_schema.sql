@@ -35,6 +35,7 @@ CREATE TABLE firehose (
 	body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	srcname VARCHAR(32) NOT NULL DEFAULT '',
+	mediatype enum("text", "none", "video", "image", "audio") default "none" NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE globjid (globjid),
 	KEY createtime (createtime),
