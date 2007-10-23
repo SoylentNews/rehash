@@ -13,6 +13,7 @@ var fetch_comments_pieces = {};
 var update_comments = {};
 var root_comments_hash = {};
 var last_updated_comments = [];
+var last_updated_comments_index = -1;
 var more_comments_num;
 var behaviors = {
 	'default': { ancestors: 'none', parent: 'none', children: 'none', descendants: 'none', siblings: 'none', sameauthor: 'none' }, 
@@ -64,6 +65,7 @@ function updateComment(cid, mode) {
 			} else if (viewmodevalue[mode] >= viewmodevalue['full']) {
 				var cd = fetchEl('comment_otherdetails_' + cid);
 				if (!cd.innerHTML) {
+					cd.innerHTML = '<br><b><big>Loading ...</big></b>';
 					fetch_comments.push(cid);
 					fetch_comments_pieces[cid] = 1;
 					doshort = 1;
@@ -72,7 +74,7 @@ function updateComment(cid, mode) {
 		}
 		if (doshort)
 			setShortSubject(cid, mode, cl);
-		existingdiv.className = mode;
+		existingdiv.className = existingdiv.className.replace(/full|hidden|oneline/, mode);
 	}
 
 	if (placeholder)
@@ -143,6 +145,10 @@ function setFocusComment(cid, alone, mods) {
 	setDefaultDisplayMode(abscid);
 	if ((alone && alone == 2) || (!alone && viewmodevalue[displaymode[abscid]] == viewmodevalue['full']))
 		cid = '-' + abscid;
+
+	if ( (abscid == cid && checkAdTimer(cid)) )
+		adTimerInsert = cid;
+
 
 // this doesn't work
 //	var statusdiv = $('comment_status_' + abscid);
@@ -431,10 +437,12 @@ function addComment(cid, comment, html) {
 			var parent = comments[pid];
 			parent['kids'].push(cid);
 
-			// XXX: not QUITE right, but works for now ...
-			// ideally this would stick in a previous </ul>
-			// rather than adding a new one -- pudge
-			tree.innerHTML = tree.innerHTML + '<ul>' + html + '</ul>';
+			var commtree = $('commtree_' + pid);
+			if (commtree) {
+				commtree.innerHTML = commtree.innerHTML + html;
+			} else {
+				tree.innerHTML = tree.innerHTML + '<ul id="commtree_' + pid + '">' + html + '</ul>';
+			}
 		}
 
 	} else {
@@ -523,7 +531,7 @@ function setDefaultDisplayMode(cid) {
 	var comment = fetchEl('comment_' + cid);
 	if (!comment) { return }
 
-	var defmode = comment.className;
+	var defmode = comment.className.match(/full|hidden|oneline/);
 	if (!defmode) { return }
 
 	futuredisplaymode[cid] = prehiddendisplaymode[cid] = displaymode[cid] = defmode;
@@ -636,7 +644,7 @@ function toHash(thisobject) {
 	}).join(';');
 }
 
-function ajaxFetchComments(cids, option, thresh) {
+function ajaxFetchComments(cids, option, thresh, highlight) {
 	if (cids && !cids.length)
 		return;
 
@@ -737,6 +745,7 @@ function ajaxFetchComments(cids, option, thresh) {
 					loadNamedElement('comment_sig_' + cids[i]);
 					loadNamedElement('comment_otherdetails_' + cids[i]);
 					loadNamedElement('comment_sub_' + cids[i]);
+					loadNamedElement('comment_top_' + cids[i]);
 				}
 				setShortSubject(cids[i]);
 			}
@@ -744,11 +753,12 @@ function ajaxFetchComments(cids, option, thresh) {
 			if (update && update.new_cids_order) {
 				for (var i = 0; i < last_updated_comments.length; i++) {
 					var this_cid = last_updated_comments[i];
-					var this_id  = $('tree_' + this_cid);
+					var this_id  = fetchEl('comment_top_' + this_cid);
 					if (this_id)
-						this_id.className = this_id.className.replace('newcomment', '');
+						this_id.className = this_id.className.replace(' newcomment', '');
 				}
 				last_updated_comments = [];
+				last_updated_comments_index = -1;
 					
 				for (var i = 0; i < update.new_cids_order.length; i++) {
 					var this_cid = update.new_cids_order[i];
@@ -759,10 +769,13 @@ function ajaxFetchComments(cids, option, thresh) {
 					currents[displaymode[this_cid]]++;
 					updateComment(this_cid, mode);
 
-					var this_id  = $('tree_' + this_cid);
-					this_id.className = this_id.className + ' newcomment';
-					last_updated_comments.push(this_cid);
+					var this_id  = fetchEl('comment_top_' + this_cid);
+					if (this_id) {
+						this_id.className = this_id.className + ' newcomment';
+						last_updated_comments.push(this_cid);
+					}
 				}
+
 				// later we may need to find a known point and scroll
 				// to it, but for now we don't want to do this -- pudge
 				//if (!commentIsInWindow(update.new_cids_order[0])) {
@@ -783,7 +796,25 @@ function ajaxFetchComments(cids, option, thresh) {
 			}
 
 			updateHiddens(cids);
+			if (update && update.new_cids_order && highlight && last_updated_comments.length) {
+				last_updated_comments_index = last_updated_comments_index + 1;
+				setFocusComment(last_updated_comments[0], 1);
+			}
 			boxStatus(0);
+
+			if (0 && adTimerInsert) {
+				var tree = $('tree_' + adTimerInsert);
+				if (tree) {
+					var commtree = $('commtree_' + adTimerInsert);
+					var html = '<li id="comment_ad_' + adTimerInsert + '" class="inlinead"> SLASHDOT AD! </li>';
+					if (commtree) {
+						commtree.innerHTML = html + commtree.innerHTML;
+					} else {
+						tree.innerHTML = tree.innerHTML + '<ul id="commtree_' + adTimerInsert + '">' + html + '</ul>';
+					}
+				}
+				adTimerInsert = 0;
+			}
 		}
 	};
 
@@ -976,6 +1007,15 @@ function finishLoading() {
 
 	//window.onbeforeunload = function () { savePrefs() };
 	//window.onunload = function () { savePrefs() };
+
+	if (1 || user_is_admin) {
+		if (window.addEventListener) // DOM method for binding an event
+			window.addEventListener('keydown', keyHandler, false);
+		else if (window.attachEvent) // IE exclusive method for binding an event
+			window.attachEvent('onkeydown', keyHandler)
+		else if (document.getElementById) // support older modern browsers
+			document.body.onkeydown = keyHandler;
+	}
 
 	if (more_comments_num)
 		updateMoreNum(more_comments_num);
@@ -1541,7 +1581,94 @@ YAHOO.slashdot.ThresholdBar.prototype.alignElWithMouse = function( el, iPageX, i
 
 
 
+var adTimerSecs;
+var adTimerClicks;
+var adTimerInsert;
+var adTimerSecsMax   = 10;
+var adTimerClicksMax = 5;
+var adTimerSeen = {};
 
+resetAdTimer();
+
+function checkAdTimer (cid) {
+	clickAdTimer();
+
+	if (cid && adTimerSeen[cid])
+		return 0;
+
+	var ad = 0;
+	if (adTimerClicks >= adTimerClicksMax)
+		ad = 1;
+	else {
+		var secs = getSeconds() - adTimerSecs;
+		if (secs >= adTimerSecsMax)
+			ad = 1;
+	}
+
+	if (!ad)
+		return 0;
+
+	if (cid)
+		adTimerSeen[cid] = 1;
+
+	resetAdTimer();
+	return 1;
+}
+
+function resetAdTimer () {
+	adTimerSecs   = getSeconds();
+	adTimerClicks = 0;
+}
+
+function clickAdTimer () {
+	adTimerClicks = adTimerClicks + 1;
+}
+
+function getSeconds () {
+	return new Date().getTime()/1000;
+}
+
+
+function keyHandler(e) {
+	e = e || window.event;
+
+	if (e) {
+		// don't handle for forms ... "type" should handle all our cases here
+		if (e.target && e.target.type)
+			return;
+
+		var c = e.keyCode;
+		if (c) {
+			var key = String.fromCharCode(c);
+			if (key == 'J' || key == 'K') {
+				if (last_updated_comments.length) {
+					var i = last_updated_comments_index;
+					var l = last_updated_comments.length - 1;
+					var update = 0;
+					if (key == 'J') {
+						update = 1;
+						if (i == 0)
+							i = l;
+						else
+							i = i - 1;
+					} else if (key == 'K') {
+						if (i == l) {
+							ajaxFetchComments(0, 1, '', 1);
+						} else {
+							update = 1;
+							i = i + 1;
+						}
+					}
+
+					if (update) {
+						last_updated_comments_index = i;
+						setFocusComment(last_updated_comments[i], 1);
+					}
+				}
+			}
+		}
+	}
+}
 
 
 function dummyComment(cid) {

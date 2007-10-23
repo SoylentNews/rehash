@@ -105,6 +105,7 @@ sub selectComments {
 		cache_read_only	=> $cache_read_only,
 		one_cid_only	=> $options->{one_cid_only},
 	};
+	$gcfu_opt->{discussion2} = $discussion2;
 	if ($options->{force_read_from_master}) {
 		$thisComment = $slashdb->getCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
 	} else {
@@ -1209,7 +1210,7 @@ sub displayThread {
 		} else {
 			my $pntcmt = @{$comments->{$comment->{pid}}{kids}} > $user->{commentspill};
 			$return .= $const->{commentbegin} .
-				linkComment($comment, $pntcmt, 1);
+				linkComment($comment, $pntcmt, { date => 1 });
 			$finish_list++;
 		}
 		$return .= $const->{fullcommentend} if ($user->{mode} eq 'flat');
@@ -1217,9 +1218,12 @@ sub displayThread {
 		if ($comment->{kids} && ($user->{mode} ne 'parents' || $pid)) {
 			if (my $str = displayThread($sid, $cid, $lvl+1, $comments, $const)) {
 				$return .= $const->{cagebegin} if $cagedkids;
-				$return .= $const->{indentbegin} if $indent;
+				if ($indent && $const->{indentbegin}) {
+					(my $indentbegin = $const->{indentbegin}) =~ s/^(<[^<>]+)>$/$1 id="commtree_$cid">/;
+					$return .= $indentbegin;
+				}
 				$return .= $str;
-				$return .= "$const->{indentend}" if $indent;
+				$return .= $const->{indentend} if $indent;
 				$return .= $const->{cageend} if $cagedkids;
 			}
 			# in flat or nested mode, all visible kids will
@@ -1347,7 +1351,7 @@ sub dispComment {
 		vislenify($comment); # create $comment->{ipid_vis} and {subnetid_vis}
 		if ($constants->{comments_hardcoded}) {
 			$comment->{ipid_display} = <<EOT;
-<br>IPID: <a href="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{ipid}&amp;fieldname=ipid">$comment->{ipid_vis}</a>&nbsp;&nbsp;SubnetID: 
+IPID: <a href="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{ipid}&amp;fieldname=ipid">$comment->{ipid_vis}</a>&nbsp;&nbsp;SubnetID: 
 <a href="$constants->{real_rootdir}/users.pl?op=userinfo&amp;userfield=$comment->{subnetid}&amp;fieldname=subnetid">$comment->{subnetid_vis}</a>
 EOT
 		} else {
@@ -1978,7 +1982,7 @@ sub _hard_dispComment {
 
 	$time_to_display = timeCalc($comment->{date});
 	unless ($user->{noscores}) {
-		$score_to_display .= "(Score:";
+		$score_to_display .= " (Score:";
 		$score_to_display .= length($comment->{points}) ? $comment->{points} : "?";
 		if ($reasons && $comment->{reason}) {
 			$score_to_display .= ", $reasons->{$comment->{reason}}{name}";
@@ -1992,7 +1996,7 @@ sub _hard_dispComment {
 			cid	=> $comment->{cid},
 			subject	=> "#$comment->{cid}",
 			subject_only => 1,
-		}, 1);
+		}, 1, { noextra => 1 });
 		$comment_link_to_display = qq| ($link)|;
 	} else {
 		$comment_link_to_display = " ";
@@ -2172,7 +2176,7 @@ EOT2
 EOT
 
 	$return .= <<EOT if !$options->{noshow};
-	<div class="commentTop">
+	<div id="comment_top_$comment->{cid}" class="commentTop">
 		<div class="title">
 $head
 $comment_links

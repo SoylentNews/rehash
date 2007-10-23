@@ -22,8 +22,8 @@ en_US
 __name__
 linkComment
 __template__
-<a href="[% gSkin.rootdir %]/comments.pl?sid=[% sid 
-                                              %]&amp;op=[% op;
+<a href="[% gSkin.rootdir %]/comments.pl?sid=[% sid;
+IF op.defined                                 %]&amp;op=[% op; END;
 IF threshold.defined                          %]&amp;threshold=[% threshold; END;
 IF commentsort.defined                        %]&amp;commentsort=[% commentsort; END;
 IF mode.defined                               %]&amp;mode=[% mode; END;

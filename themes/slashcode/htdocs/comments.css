@@ -137,6 +137,10 @@ html > body .commentwrap table {
 
 .hide { display: none   }
 .show { display: inline }
+.newcomment {
+	opacity: .75;
+	filter: alpha(opacity=75);
+}
 
 
 .comment > .hidden  {

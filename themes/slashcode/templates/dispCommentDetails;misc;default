@@ -26,7 +26,7 @@ __template__
 				cid     => cid,
 				subject => ('#' _ cid),
 				subject_only => 1
-			}, 1) %])[% END %]
+			}, 1, { noextra => 1 }) %])[% END %]
 			<small>
 			[% has_homepage = homepage && homepage.length > 8;
 				has_journal = journal_last_entry_date.search('[1-9]');

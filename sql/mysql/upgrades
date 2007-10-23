@@ -4903,8 +4903,6 @@ UPDATE dateformats SET format='%A %B %d, @%I:%M%p IF_OLD %A %B %d %Y, @%I:%M%p' 
 # 2007-10-11
 UPDATE vars SET value = 'T_2_5_0_179' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 
 # default prefs for new /. accounts
 INSERT INTO string_param (type, code, name) VALUES ('otherusersparam','discussion2','slashdot');
@@ -4943,6 +4941,10 @@ CREATE TABLE story_static_files(
 # 2007-10-16
 UPDATE vars SET value = 'T_2_5_0_180' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
 INSERT INTO string_param (type, code, name) VALUES ('mediatypes','none','None');
 INSERT INTO string_param (type, code, name) VALUES ('mediatypes','video','Video');
 INSERT INTO string_param (type, code, name) VALUES ('mediatypes','image','Image');
@@ -4961,5 +4963,7 @@ ALTER TABLE story_static_files ADD COLUMN width smallint unsigned not null defau
 ALTER TABLE story_static_files ADD COLUMN height smallint unsigned not null default 0;
 
 INSERT INTO vars (name, value, description) VALUES ('admin_use_blob_for_upload', '1', 'Use blobs for fileuploading - 1 for yes, 0 for no or file-based uploading');
-# SLASHCODE/USEPERL LAST UPDATED HERE
+
+UPDATE string_param SET name = '9' WHERE type = 'otherusersparam' AND code = 'd2_comment_q'; # large
+
 

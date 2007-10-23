@@ -191,14 +191,13 @@ __template__
 
 		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
 			| [% Slash.linkComment({
-				sid => sid,
-				cid => cid,
-				op  => 'reply',
-				subject => 'Reply',
+				sid          => sid,
+				cid          => cid,
+				op           => 'reply',
+				subject      => 'Reply',
 				subject_only => 1
-				});
-			%]
-    [% END %]
+			}) %]
+		[% END %]
 		</span>
 		<span title="Toggle window location" onclick="toggleDisplayOptions()" class="close">/</span>
 				</h4>
@@ -225,18 +224,18 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
             <div id="ccw-full-panel" class="ccw-panel">
               <div class="ccw-panel-border"></div>
               <div id="ccw-full-count-pos" class="ccw-core-pos ccw-count-pos">
-                <span id="ccw-full-count-text" class="ccw-count-text"><span id="currentFull"></span><span id="ccw-full-phrase"> Full</span></span>
+                <span id="ccw-full-count-text" class="ccw-count-text"><span id="currentFull"></span><span id="ccw-full-phrase">&nbsp;Full</span></span>
               </div>
             </div>
             <div id="ccw-abbr-panel" class="ccw-panel">
               <div class="ccw-panel-border"></div>
               <div id="ccw-abbr-count-pos" class="ccw-core-pos ccw-count-pos">
-                <span id="ccw-abbr-count-text" class="ccw-count-text"><span id="currentOneline"></span><span id="ccw-abbr-phrase"> Abbreviated</span></span>
+                <span id="ccw-abbr-count-text" class="ccw-count-text"><span id="currentOneline"></span><span id="ccw-abbr-phrase">&nbsp;Abbreviated</span></span>
               </div>
             </div>
             <div id="ccw-hide-panel" class="ccw-panel">
               <div id="ccw-hide-count-pos" class="ccw-core-pos ccw-count-pos">
-                <span id="ccw-hide-count-text" class="ccw-count-text"><span id="currentHidden"></span><span id="ccw-hide-phrase"> Hidden</span></span>
+                <span id="ccw-hide-count-text" class="ccw-count-text"><span id="currentHidden"></span><span id="ccw-hide-phrase">&nbsp;Hidden</span></span>
               </div>
             </div>
           </div>
@@ -276,13 +275,12 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
     [% END %]
 		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
 			| [% Slash.linkComment({
-				sid => sid,
-				cid => cid,
-				op  => 'reply',
-				subject => 'Reply',
+				sid          => sid,
+				cid          => cid,
+				op           => 'reply',
+				subject      => 'Reply',
 				subject_only => 1
-				});
-			%]
+			}) %]
 		[% END %]
 		</div>
 		<div id="commentControlBoxStatus" class="hide"><b>Loading ... Please wait.</b></div>

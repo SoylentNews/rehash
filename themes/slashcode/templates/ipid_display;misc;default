@@ -12,7 +12,7 @@ en_US
 __name__
 ipid_display
 __template__
-<br>IPID:
+IPID:
 <a href="[%
 gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[%
 data.ipid %]&amp;fieldname=ipid">[% data.ipid_vis %]</a>&nbsp;&nbsp;SubnetID:

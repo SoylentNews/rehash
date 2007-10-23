@@ -27,7 +27,7 @@ __template__
 <div id="comment_status_[% cid %]" class="commentstatus"></div>
 <div id="comment_[% cid %]"[% IF discussion2 %] class="[% class %]"[% END %]>
 [% END; IF !options.noshow %]
-	<div class="commentTop">
+	<div id="comment_top_[% cid %]" class="commentTop">
 		<div class="title">
 			[% IF discussion2 %]
 			<h4><a id="comment_link_[% cid %]" name="comment_link_[% cid %]" href="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]" onclick="return setFocusComment([% cid %])">[% subject %]</a>

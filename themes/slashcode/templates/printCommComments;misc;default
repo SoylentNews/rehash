@@ -101,7 +101,17 @@ __template__
 	[% lcp %]
 
 [% IF discussion2 && !cid %]
-<div class="prev-next"><a href="javascript:ajaxFetchComments(0,1)"><span id="more_comments_num_a" class="hide">Check for more</span></a></div>
+<div class="prev-next"><a href="javascript:ajaxFetchComments(0,1)"><span id="more_comments_num_a" class="hide">Check for more</span></a>
+	[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
+		| [% Slash.linkComment({
+			sid          => sid,
+			cid          => cid,
+			op           => 'reply',
+			subject      => 'Reply',
+			subject_only => 1
+		});
+	END %]
+</div>
 [% END %]
 
 [% IF moderate_form %]
