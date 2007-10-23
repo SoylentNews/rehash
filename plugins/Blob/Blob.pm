@@ -176,6 +176,12 @@ sub clean {
 	return $self->sqlDelete($self->{_table}, "reference_count < 1");
 }
 
+sub get {
+	my($self, $sig) = @_;
+	my $sig_q = $self->sqlQuote($sig);
+	return $self->sqlSelectHashref($self->{_table}, "id = $siq_q");
+}
+
 sub getFilesForStories {
 	my($self) = @_;
 	$self->sqlSelectAllHashrefArray('*', 'story_files', '', "ORDER BY stoid,description");
