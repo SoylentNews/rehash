@@ -277,6 +277,8 @@ my %descriptions = (
 
 	'd2_comment_order'
 		=> sub { $_[0]->sqlSelectMany('code, name', 'code_param', "type='d2_comment_order'") },
+	'mediatypes'
+		=> sub { $_[0]->sqlSelectMany('code, name', 'string_param', "type='mediatypes'")}
 );
 
 ########################################################
