@@ -7,6 +7,7 @@
 use File::Path;
 use File::Temp;
 use File::Copy;
+use Image::Size;
 use Slash::Constants ':slashd';
 
 use strict;
@@ -28,6 +29,9 @@ $task{$me}{code} = sub {
 			$file_queue_cmds = $slashdb->getNextFileQueueCmds();
 		}
 		$cmd = shift @$file_queue_cmds;
+		if ($cmd->{blobid}) {
+			$cmd->{file} = blobToFile($cmd->{blobid});
+		}
 		if($cmd) {
 			handleFileCmd($cmd);
 		}
@@ -39,7 +43,36 @@ $task{$me}{code} = sub {
 sub handleFileCmd {
 	my($cmd) = @_;
 	my $slashdb = getCurrentDB();
+	if ($cmd->{action} eq "thumbnails") {
+		slashdLog("Creating Thumbnails");
+		my $files = uploadFile($cmd);
+		$files ||= [];
+		slashdLog("after upload file");
+		foreach (@$files) {
+			slashdLog("thumbing $_");
+			my ($name, $path) = fileparse($_);
+			my ($namebase, $suffix) = $name =~ /^(\w+\-\d+)\.(\w+)$/;
+			my $thumb = $namebase . "-thumb." . $suffix;
+			my $thumbsm = $namebase . "-thumbsm." . $suffix;
+			slashdLog("About to create thumb $path$thumb");
+			system("convert -size 100x100 $path$name $path$thumb");
+			my $data = {
+				stoid => $cmd->{stoid},
+				name => $thumb
+			};
+			addStoryFile($data, $path);
+
+			slashdLog("About to create thumbsms $path$thumbsm");
+			system("convert -size 50x50 $path$name $path$thumbsm");
+			$data = {
+				stoid => $cmd->{stoid},
+				name => $thumbsm
+			};
+			addStoryFile($data, $path);
+		}
+	}
 	if ($cmd->{action} eq "upload") {
+		slashdLog("handling upload\n");
 		uploadFile($cmd);
 	}
 	$slashdb->deleteFileQueueCmd($cmd->{fqid});
@@ -78,28 +111,46 @@ sub verifyFileLocation {
     return $file =~ /^\/tmp\/upload\/\w+(\.\w+)?$/
 }
 
+sub blobToFile {
+	my($blobid) = @_;
+	my $blob = getObject("Slash::Blob");
+	my $blob_ref = $blob->get($blobid);
+	my($suffix) = $blob_ref->{filename} =~ /(\.\w+$)/;
+	$suffix = lc($suffix);
+	my ($ofh, $tmpname) = mkstemps("/tmp/upload/fileXXXXXX", $suffix );
+	print $ofh $blob_ref->{data};
+	close $ofh;
+	return $tmpname;
+}
+
 sub uploadFile {
 	my($cmd) = @_;
 	my @suffixlist = ();
 	my $slashdb = getCurrentDB();
 	my $story = $slashdb->getStory($cmd->{stoid});
+	my @files;
+
+	my $file = $cmd->{file};
+
 	if ($story->{sid}) {
 		my $destpath = getStoryFileDir($story->{sid});
 		makeFileDir($destpath);
 		my ($prefix) = $story->{sid} =~ /^\d\d\/\d\d\/\d\d\/(\d+)$/;
 		
-		my ($name,$path,$suffix) = fileparse($cmd->{file},@suffixlist);
+		my ($name,$path,$suffix) = fileparse($file,@suffixlist);
 	        ($suffix) = $name =~ /(\.\w+)$/;
-		if (verifyFileLocation($cmd->{file})) {
-			my $destfile = copyFileToLocation($cmd->{file}, $destpath, $prefix);
+		if (verifyFileLocation($file)) {
+			my $destfile = copyFileToLocation($file, $destpath, $prefix);
+			push @files, $destfile if $destfile;
 			my $name = fileparse($destfile);
 			my $data = {
 				stoid => $cmd->{stoid},
 				name => $name
 			};
 
-			$slashdb->addStoryStaticFile($data);
+			addStoryFile($data, "$destpath/");
 		}
+
 
 	}
 	if ($cmd->{fhid}) {
@@ -107,8 +158,10 @@ sub uploadFile {
 		makeFileDir($destpath);
 		my $numdir = sprintf("%09d",$cmd->{fhid});
 		my ($prefix) = $numdir =~ /\d\d\d\d\d\d(\d\d\d)/;
-		copyFileToLocation($cmd->{file}, $destpath, $prefix);
+		my $destfile = copyFileToLocation($cmd->{file}, $destpath, $prefix);
+		push @files, $destfile if $destfile;
 	}
+	return \@files;
 }
 
 sub copyFileToLocation {
@@ -137,6 +190,18 @@ sub copyFileToLocation {
 		slashdLog("Couldn't save file to dir - too many already exist");
 	}
 	return $ret_val;
+}
+
+sub addStoryFile {
+	my($data, $path) = @_;
+	print "Add story file\n";
+	my $slashdb = getCurrentDB();
+	slashdLog("addStoryFile $path $data->{name}");
+	if ($data->{name} =~ /\.(png|gif|jpg)$/i && $path) {
+		($data->{width}, $data->{height}) = imgsize("$path$data->{name}");
+		slashdLog("addStoryFile $data->{width} $data->{height}");
+	}
+	$slashdb->addStoryStaticFile($data);
 }
 
 1;
