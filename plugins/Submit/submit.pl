@@ -628,7 +628,8 @@ sub saveSub {
 		story		=> $form->{story},
 		subj		=> $form->{subj},
 		tid		=> $form->{tid},
-		primaryskid	=> $form->{primaryskid}
+		primaryskid	=> $form->{primaryskid},
+		mediatype	=> $form->{mediatype},
 	};
 	$submission->{url_id} = $url_id if $url_id;
 

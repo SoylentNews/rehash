@@ -86,9 +86,7 @@ __template__
 			[% PROCESS formNote note => "Where users can contact you" %]
 			[% IF constants.plugin.FireHose %]
 				[% PROCESS formLabel value => "Url"  %]
-				<input type="text" name="url" value="[% form.url | strip_attribute %]" size="50">
-				[% PROCESS formLabel value => "Media type" %]
-				[% Slash.createSelect('mediiatype', Slash.db.getDescriptions('mediatypes'), { default => form.mediatype || "none" , return => 1 }) %]
+				<input type="text" name="url" value="[% form.url | strip_attribute %]" size="50"> Url type [% Slash.createSelect('mediiatype', Slash.db.getDescriptions('mediatypes'), { default => form.mediatype || "none" , return => 1 }) %]
 				[% PROCESS formNote note => "Main url of submission (optional but if provided must be unique) " %]
 			[% END %]
 			[% PROCESS formLabel value => "Subject"  %]
