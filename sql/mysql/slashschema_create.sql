@@ -520,6 +520,7 @@ CREATE TABLE file_queue (
 	fhid mediumint(8) unsigned default NULL,
 	file varchar(255) default NULL,
 	action enum('upload','thumbnails') default NULL,
+	 blobid VARCHAR(32) DEFAULT "" NOT NULL,
 	PRIMARY KEY  (fqid)
 ) ENGINE=InnoDB;
 
@@ -1073,6 +1074,8 @@ CREATE TABLE story_static_files(
 	stoid mediumint unsigned NOT NULL,
 	filetype ENUM("file", "image", "audio") not null default "file",
 	name varchar(255) default '' NOT NULL,
+	width smallint unsigned not null default 0,
+	height smallint unsigned not null default 0,
 	PRIMARY KEY (sfid),
 	INDEX stoid(stoid)
 ) ENGINE=InnoDB;
@@ -1114,6 +1117,7 @@ CREATE TABLE submissions (
 	del tinyint DEFAULT '0' NOT NULL,
 	weight float DEFAULT '0' NOT NULL, 
 	signature varchar(32) NOT NULL,
+	mediatype enum("text", "none", "video", "image", "audio") default "none" NOT NULL,
 	PRIMARY KEY (subid),
 	UNIQUE signature (signature),
 	KEY emaildomain (emaildomain),

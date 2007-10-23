@@ -4943,5 +4943,20 @@ CREATE TABLE story_static_files(
 # 2007-10-16
 UPDATE vars SET value = 'T_2_5_0_180' WHERE name = 'cvs_tag_currentcode';
 
+INSERT INTO string_param (type, code, name) VALUES ('mediatypes','none','None');
+INSERT INTO string_param (type, code, name) VALUES ('mediatypes','video','Video');
+INSERT INTO string_param (type, code, name) VALUES ('mediatypes','image','Image');
+INSERT INTO string_param (type, code, name) VALUES ('mediatypes','audio','Audio');
+INSERT INTO string_param (type, code, name) VALUES ('mediatypes','text','Text');
+
+ALTER TABLE submissions ADD COLUMN mediatype enum("none", "text", "video","image","audio") default "none" NOT NULL;
+
+# For plugins/FireHose
+ALTER TABLE firehose ADD COLUMN mediatype enum("none", "text", "video","image","audio") default "none" NOT NULL;
+
+ALTER TABLE file_queue ADD COLUMN blobid VARCHAR(32) DEFAULT "" NOT NULL;
+ALTER TABLE story_static_files ADD COLUMN width smallint unsigned not null default 0;  
+ALTER TABLE story_static_files ADD COLUMN height smallint unsigned not null default 0;
+
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
