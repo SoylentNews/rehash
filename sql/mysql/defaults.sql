@@ -737,6 +737,7 @@ INSERT INTO vars (name, value, description) VALUES ('admin_secure_ip_regex', '^1
 INSERT INTO vars (name, value, description) VALUES ('admin_story_lookahead_default', 365*86400, 'In the admin.pl storylist, how many seconds to look into the future for all stories by default (but see skins_admin_story_lookahead_mainpage)');
 INSERT INTO vars (name, value, description) VALUES ('admin_story_lookahead_infinite', '0', 'In the admin.pl storylist, always show all future stories no matter how far in the future?');
 INSERT INTO vars (name, value, description) VALUES ('admin_story_lookahead_mainpage', 72*3600, 'In the admin.pl storylist, how many seconds to look into the future for stories on the mainpage');
+INSERT INTO vars (name, value, description) VALUES ('admin_use_blob_for_upload', '1', 'Use blobs for fileuploading - 1 for yes, 0 for no or file-based uploading');
 INSERT INTO vars (name, value, description) VALUES ('admin_warn_primaryskid', '', 'Warn admin if a story is saved with the following primaryskids (skids delimited by |)');
 INSERT INTO vars (name, value, description) VALUES ('admin_timeout','30','time in minutes before idle admin session ends');
 INSERT INTO vars (name, value, description) VALUES ('adminmail','admin@example.com','All admin mail goes here');

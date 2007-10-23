@@ -4954,9 +4954,12 @@ ALTER TABLE submissions ADD COLUMN mediatype enum("none", "text", "video","image
 # For plugins/FireHose
 ALTER TABLE firehose ADD COLUMN mediatype enum("none", "text", "video","image","audio") default "none" NOT NULL;
 
+
+
 ALTER TABLE file_queue ADD COLUMN blobid VARCHAR(32) DEFAULT "" NOT NULL;
 ALTER TABLE story_static_files ADD COLUMN width smallint unsigned not null default 0;  
 ALTER TABLE story_static_files ADD COLUMN height smallint unsigned not null default 0;
 
+INSERT INTO vars (name, value, description) VALUES ('admin_use_blob_for_upload', '1', 'Use blobs for fileuploading - 1 for yes, 0 for no or file-based uploading');
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
