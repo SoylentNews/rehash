@@ -17,9 +17,9 @@ __template__
 [% FOREACH mfile = story_static_files %]
 	[% trunc_name = mfile.name %]
 	[% trunc_name = trunc_name.replace('^\d+',"") %]
-	<tr><td>[% mfile.sfid %]</td><td><a href="[% constants.imagedir %]/articles/[% sid %][% trunc_name %]">[% mfile.name %]</td><td>[% constants.imagedir %]/articles/[% sid %][% trunc_name %]</td></tr>
+	<tr><td>[% mfile.sfid %]</td><td><a href="[% constants.imagedir %]/articles/[% sid %][% trunc_name %]">[% mfile.name %]</td><td>[% constants.imagedir %]/articles/[% sid %][% trunc_name %]</td><td>[% mfile.width %]</td><td>[% mfile.height %]</td></tr>
 	[% IF mfile.filetype == "image" %]
-	<tr><td colspan="3"><img src="[% constants.imagedir %]/articles/[% sid %][% trunc_name %]"></td></tr>
+	<tr><td colspan="t"><img src="[% constants.imagedir %]/articles/[% sid %][% trunc_name %]"></td></tr>
 	[% END %]
 
 [% END %]

@@ -248,7 +248,7 @@ __template__
 				<label>
 					Upload an image/audio file for this story [% IF pending_file_count %]([% pending_file_count %] awaiting processing)[% END %]
 				</label>
-				<input type="file" name="media_file">
+				<input type="file" name="media_file"><select name="media_action"><option value="upload">upload</option><option value="thumbnails">thumbnails</option></select>
 
 				[% IF story_static_files && story_static_files.size  %]
 					<label>
@@ -259,6 +259,8 @@ __template__
 					[% trunc_name = mfile.name %]
 					[% trunc_name = trunc_name.replace('^\d+',"") %]
 					<tr><td>[% mfile.sfid %]</td><td><a href="[% constants.imagedir %]/articles/[% sid %][% trunc_name %]" style="color:#fff">[% mfile.name %]</td><td>[% constants.imagedir %]/articles/[% sid %][% trunc_name %]</td>
+					<td>[% mfile.width %]</td>
+					<td>[% mfile.height %]</td>
 <td>
 [% IF mfile.filetype == "image" %]
 <img src="[% constants.imagedir %]/articles/[% sid %][% trunc_name %]" width="25%" height="25%">
