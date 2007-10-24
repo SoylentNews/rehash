@@ -34,9 +34,12 @@ $task{$me}{code} = sub {
 	$globj_types = $slashdb->getGlobjTypes();
 	$clout_types = $slashdb->getCloutTypes();
 	$clout_info  = $slashdb->getCloutInfo();
+	my $total_inserts = 0;
 
 	for my $clid (sort { $a <=> $b } grep { /^\d+$/ } keys %$clout_types) {
 		my $class = $clout_info->{$clid}{class};
+		my $clout = getObject($class);
+		next unless $clout;
 		sleep 5;
 		$tags_peerclout = $slashdb->sqlSelectAllKeyValue(
 			'uid, clout',
@@ -49,21 +52,38 @@ $task{$me}{code} = sub {
 			while (1) {
 				my $lastgen_count = $slashdb->sqlCount('tags_peerclout',
 					"clid=$clid AND gen=$g");
+				slashdLog("gen $g for $clout_types->{$clid}: $lastgen_count");
 				last unless $lastgen_count;
-				my $hr_ar = $class->get_nextgen($g);
-				slashdLog("$class gen $g produces " . scalar(@$hr_ar) . " rows");
-				my $insert_ar = $class->process_nextgen($hr_ar);
+				my $hr_ar = $clout->get_nextgen($g);
+				slashdLog("$class gen $g produces " . scalar(defined($hr_ar) ? @$hr_ar : 0) . " rows");
+				my $insert_ar = $clout->process_nextgen($hr_ar, $tags_peerclout);
+				slashdLog("$class gen $g insert_ar count: " . scalar(@$insert_ar));
+				$total_inserts += scalar(@$insert_ar);
 				++$g;
-				for my $hr (@$insert_ar) { $hr->{clid} = $clid }
-				$class->insert_nextgen($g, $insert_ar);
-				$class->update_tags_peerclout($insert_ar);
+				my $total_rows = insert_nextgen($tags_peerclout, $clid, $g, $insert_ar);
+				slashdLog("$class inserted $total_rows rows");
 				sleep 5;
 			}
-			$class->copy_peerclout_sql();
+			$clout->copy_peerclout_sql();
 		}
 
 	}
+
+	return "$total_inserts inserts";
 };
+
+sub insert_nextgen {
+	my($tags_peerclout, $clid, $gen, $insert_ar) = @_;
+	my $slashdb = getCurrentDB();
+	my $rows = 0;
+	for my $hr (@$insert_ar) {
+                ($hr->{clid}, $hr->{gen}) = ($clid, $gen);
+if (!$rows) { use Data::Dumper; my $hd = Dumper($hr); $hd =~ s/\s+/ /g; print STDERR "insert hr: $hd\n"; }
+                $rows += $slashdb->sqlInsert('tags_peerclout', $hr);
+                $tags_peerclout->{ $hr->{uid} } = $hr->{clout};
+        }
+	return $rows;
+}
 
 1;
 

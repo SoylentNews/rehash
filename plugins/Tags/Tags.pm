@@ -26,14 +26,19 @@ sub new {
 	my($class, $user) = @_;
 	my $self = {};
 
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{Tags};
+	return undef unless $class->isInstalled();
 
 	bless($self, $class);
 	$self->{virtual_user} = $user;
 	$self->sqlConnect();
 
 	return $self;
+}
+
+sub isInstalled {
+	my($class) = @_;
+	my $constants = getCurrentStatic();
+	return $constants->{plugin}{Tags} || 0;
 }
 
 ########################################################
@@ -617,7 +622,8 @@ if (!$clout_info) { use Carp; Carp::cluck("getCloutInfo returned false for clid=
 			# XXX this stub is good enough for now but we may
 			# need the whole actual getUser() user at some
 			# future time
-			$uid_clout_hr->{$uid} = $clout_info->{class}->getUserClout(\%user_stub);
+			my $clout = getObject($clout_info->{class}, { db_type => 'reader' });
+			$uid_clout_hr->{$uid} = $clout->getUserClout(\%user_stub);
 		}
 	}
 

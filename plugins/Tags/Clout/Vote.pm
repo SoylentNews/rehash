@@ -1,15 +1,30 @@
 package Slash::Clout::Vote;
 
+use strict;
+use warnings;
+use Slash::Utility;
+use base 'Slash::Clout';
+
 use vars qw($VERSION);
 
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 
-my $cumfrac = 0.45;
-my $months_back = 4;
-my $clid = 2;
+sub init {
+        my($self) = @_;
+        $self->SUPER::init(@_);
+        # Hard-coded constants should be in the vars table.
+        # cumfrac is the cumulative fraction of how much weight is propagated
+        # for each matching tag.  E.g. if $cumfrac is 0.5, the first match may
+        # propagate up to 50% of the weight, the second another 25%, the
+        # third another 12.5% etc.
+        $self->{cumfrac} = 0.45;
+	$self->{debug_uids} = { };
+	$self->{debug} = 0;
+	1;
+}
 
 sub getUserClout {
-	my($class, $user_stub) = @_;
+	my($self, $user_stub) = @_;
 	my $clout = $user_stub->{karma} >= -3
 		? log($user_stub->{karma}+10)/50
 		: 0;
@@ -23,12 +38,13 @@ sub getUserClout {
 }
 
 sub get_nextgen {
-	my($class, $g) = @_;
+	my($self, $g) = @_;
 
 	# Populate the firehose_ogaspt table with the necessary data.
 	my $constants = getCurrentStatic();
 	my $subscribe_future_secs = $constants->{subscribe_future_secs};
 	my $slashdb = getCurrentDB();
+	my $globj_types = $slashdb->getGlobjTypes();
 	$slashdb->sqlDelete('firehose_ogaspt');
 	# First, the pub dates for submissions that made it into stories.
 	$slashdb->sqlDo("INSERT INTO firehose_ogaspt
@@ -37,9 +53,9 @@ sub get_nextgen {
 			WHERE stories.stoid=story_param.stoid
 				AND in_trash='no'
 				AND story_param.name='subid'
-				AND globjs.gtid='$globjtypes->{submissions}'
+				AND globjs.gtid='$globj_types->{submissions}'
 				AND story_param.value=globjs.target_id
-				AND stories.time >= DATE_SUB(NOW(), INTERVAL $months_back MONTH)
+				AND stories.time >= DATE_SUB(NOW(), INTERVAL $self->{months_back} MONTH)
 			GROUP BY globjid");
 	# Then, the same for journal entries that made it into stories.
 	$slashdb->sqlDo("INSERT INTO firehose_ogaspt
@@ -48,9 +64,9 @@ sub get_nextgen {
 			WHERE stories.stoid=story_param.stoid
 				AND in_trash='no'
 				AND story_param.name='journal_id'
-				AND globjs.gtid='$globjtypes->{journals}'
+				AND globjs.gtid='$globj_types->{journals}'
 				AND story_param.value=globjs.target_id
-				AND stories.time >= DATE_SUB(NOW(), INTERVAL $months_back MONTH)
+				AND stories.time >= DATE_SUB(NOW(), INTERVAL $self->{months_back} MONTH)
 			GROUP BY globjid");
 	# Those queries run in under a second each.  But, wait a decent
 	# amount of time for them to replicate.
@@ -93,16 +109,20 @@ sub get_nextgen {
 			 AND tagnames_similar.dest_tnid=newtag.tagnameid
 		 AND simil != 0
 		 AND sourcetag.tagid != newtag.tagid
-		 AND newtag.created_at >= DATE_SUB(NOW(), INTERVAL $months_back MONTH)
+		 AND newtag.created_at >= DATE_SUB(NOW(), INTERVAL $self->{months_back} MONTH)
 		 AND newtag.uid=users_info.uid
 		 AND newtpc.uid IS NULL
-		 AND sourcetpc.gen=$g",
+		 AND sourcetpc.gen=$g
+		 AND sourcetpc.clid=$self->{clid}",
 		"ORDER BY newtag.tagid");
 	return $hr_ar;
 }
 
 sub process_nextgen {
-	my($class, $hr_ar) = @_;
+	my($self, $hr_ar, $tags_peerclout) = @_;
+
+	$self->count_uid_nodnix($hr_ar);
+
 	my %newtag_uid = ( map { $_->{newtag_uid}, 1 } @$hr_ar );
 	my @newtag_uid = sort { $a <=> $b } keys %newtag_uid;
 	my $user_nodnixes_min = 3;
@@ -111,7 +131,8 @@ sub process_nextgen {
 	my $insert_ar = [ ];
 	my $i = 0;
 	for my $newtag_uid (@newtag_uid) {
-		my $user_nodnixes_count = $nodc->{$newtag_uid} + $nixc->{$newtag_uid};
+		++$self->{debug} if $self->{debug_uids}{$newtag_uid};
+		my $user_nodnixes_count = ($self->{nodc}{$newtag_uid} || 0) + ($self->{nixc}{$newtag_uid} || 0);
 		my $user_nodnixes_mult = 0;
 		if ($user_nodnixes_count >= $user_nodnixes_full) {
 			$user_nodnixes_mult = 1;
@@ -121,35 +142,38 @@ sub process_nextgen {
 		}
 		my $weight = 0;
 		my(@match, $clout, $created_at, $karma, $tokens, $uid_mults);
-		if ($debug_uids->{$newtag_uid}) {
-			slashdLog("$class starting uid=%d user_nodnixes_mult=%.3f", $newtag_uid, $user_nodnixes_mult);
+		if ($self->{debug}) {
+			print STDERR ref($self) . sprintf(" starting uid=%d user_nodnixes_mult=%.3f\n",
+				$newtag_uid, $user_nodnixes_mult);
 		}
 		if ($user_nodnixes_mult > 0) {
 			@match = grep { $_->{newtag_uid} == $newtag_uid } @$hr_ar;
 			my $match0 = $match[0];
 			($clout, $created_at, $karma, $tokens) =
 				($match0->{clout}, $match0->{created_at_ut}, $match0->{karma}, $match0->{tokens});
-			$uid_mults = $class->get_mults(\@match);
-			$uid_mults->{'-1'} = $class->get_mult_timebeforepub(\@match);
-			$weight = $class->get_total_weight($uid_mults, $clout, $created_at, $karma, $tokens)
+			$uid_mults = $self->get_mults(\@match);
+			$uid_mults->{'-1'} = $self->get_mult_timebeforepub(\@match);
+			$weight = $self->get_total_weight($tags_peerclout, $uid_mults,
+				$clout, $created_at, $karma, $tokens, $newtag_uid)
 				* $user_nodnixes_mult;
 		}
 		push @$insert_ar, {
 			uid =>		$newtag_uid,
 			clout =>	$weight,
 		};
-		if ($debug_uids->{$newtag_uid}) {
-			$debug = 1;
-			slashdLog(sprintf("$class uid=%d user_nodnixes_mult=%.3f weight=%.6f mults: %s",
+		if ($self->{debug}) {
+			use Data::Dumper;
+			print STDERR sprintf("%s uid=%d user_nodnixes_mult=%.3f weight=%.6f mults: %s\n",
+				ref($self),
 				$newtag_uid, $user_nodnixes_mult,
-				$class->get_total_weight($uid_mults, $clout, $created_at, $karma, $tokens),
-				Dumper($uid_mults)));
-			$debug = 0;
+				$weight,
+				Dumper($uid_mults));
 		}
 		++$i;
-		if ($i % 1000 == 0) {
-			slashdLog("$class process_nextgen processed $i (uid $newtag_uid, matched " . scalar(@match) . ")");
+		if ($i % 100 == 0) {
+			print STDERR scalar(localtime) . " " . ref($self) . " process_nextgen processed $i (uid $newtag_uid, matched " . scalar(@match) . ")\n";
 		}
+		--$self->{debug} if $self->{debug_uids}{$newtag_uid};
 		Time::HiRes::sleep(0.01);
 	}
 
@@ -157,13 +181,14 @@ sub process_nextgen {
 }
 
 sub count_uid_nodnix {
-	my($class, $hr_ar) = @_;
+	my($self, $hr_ar) = @_;
+	$self->{nodc} = $self->{nixc} = { };
 	my %uid_needed = ( );
 	for my $hr (@$hr_ar) {
 		my $uid = $hr->{sourcetag_uid};
-		$uid_needed{$uid} = 1 if !exists $nodc->{$uid};
+		$uid_needed{$uid} = 1 if !exists $self->{nodc}{$uid};
 		$uid = $hr->{newtag_uid};
-		$uid_needed{$uid} = 1 if !exists $nodc->{$uid};
+		$uid_needed{$uid} = 1 if !exists $self->{nodc}{$uid};
 	}
 	return unless keys %uid_needed;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
@@ -175,29 +200,29 @@ sub count_uid_nodnix {
 		my $nod_hr = $reader->sqlSelectAllKeyValue(
 			'uid, COUNT(*)',
 			'tags',
-			"tagnameid='$tagnameid->{nod}' AND uid IN ($uid_str)
-			 AND created_at >= DATE_SUB(NOW(), INTERVAL $months_back MONTH)",
+			"tagnameid='$self->{nodid}' AND uid IN ($uid_str)
+			 AND created_at >= DATE_SUB(NOW(), INTERVAL $self->{months_back} MONTH)",
 			'GROUP BY uid');
 		my $nix_hr = $reader->sqlSelectAllKeyValue(
 			'uid, COUNT(*)',
 			'tags',
-			"tagnameid='$tagnameid->{nix}' AND uid IN ($uid_str)
-			 AND created_at >= DATE_SUB(NOW(), INTERVAL $months_back MONTH)",
+			"tagnameid='$self->{nixid}' AND uid IN ($uid_str)
+			 AND created_at >= DATE_SUB(NOW(), INTERVAL $self->{months_back} MONTH)",
 			'GROUP BY uid');
 		for my $uid (@uid_chunk) {
-			$nodc->{$uid} = $nod_hr->{$uid} || 0;
-			$nixc->{$uid} = $nix_hr->{$uid} || 0;
+			$self->{nodc}{$uid} = $nod_hr->{$uid} || 0;
+			$self->{nixc}{$uid} = $nix_hr->{$uid} || 0;
 		}
 		sleep 1 if @uids_needed;
 	}
 }
 
 sub get_mults {
-	my($class, $match_ar) = @_;
+	my($self, $match_ar) = @_;
 
 	my $uid_mults = { };
 	for my $hr (@$match_ar) {
-		my $mult = $class->get_mult($hr);
+		my $mult = $self->get_mult($hr);
 		$uid_mults->{ $hr->{sourcetag_uid} } ||= [ ];
 		push @{$uid_mults->{ $hr->{sourcetag_uid} }}, $mult;
 	}
@@ -205,15 +230,17 @@ sub get_mults {
 }
 
 sub get_mult {
-	my($class, $hr) = @_;
+	my($self, $hr) = @_;
 
 	my $mult = $hr->{simil};
+	my $slashdb = getCurrentDB();
+	my $globj_types = $slashdb->getGlobjTypes();
 
 	# If this tag-match is too old, it earns the new user less credit.
 	my $older_tag = $hr->{sourcetag_created_at_ut};
 	$older_tag = $hr->{newtag_created_at_ut} if $hr->{newtag_created_at_ut} < $older_tag;
 	my $tag_age = time - $older_tag;
-	my $max_days = $months_back * 30 + 1;
+	my $max_days = $self->{months_back} * 30 + 1;
 	if ($tag_age < 7 * 86400) {
 		# tags within the past week get full credit
 	} elsif ($tag_age < 30 * 86400) {
@@ -254,7 +281,7 @@ sub get_mult {
 	}
 
 	# Tagging different types gets different mults.
-	my $type = $globjtypes->{ $hr->{gtid} };
+	my $type = $globj_types->{ $hr->{gtid} };
 	if ($type eq 'comments') {
 		# fair bit of credit for matching mods on comments
 		# XXX may need to adjust this if it turns out that we're
@@ -270,18 +297,18 @@ sub get_mult {
 	# rare choice (for either user) is considered more indicative.
 	my($su,  $nu)  = ($hr->{sourcetag_uid},       $hr->{newtag_uid});
 	my($stn, $ntn) = ($hr->{sourcetag_tagnameid}, $hr->{newtag_tagnameid});
-	my($nodid, $nixid) = ($stn == $tagnameid->{nod}, $stn == $tagnameid->{nix});
+	my($nodid, $nixid) = ($stn == $self->{nodid}, $stn == $self->{nixid});
 	if (    ( $stn == $nodid || $stn == $nixid )
 	&&      ( $ntn == $nodid || $ntn == $nixid ) ) {
 		my($su, $nu) = ($hr->{sourcetag_uid}, $hr->{newtag_uid});
-		my $snod = $nodc->{$su};
-		my $snix = $nixc->{$su};
-		my $nnod = $nodc->{$nu};
-		my $nnix = $nixc->{$nu};
+		my $snod = $self->{nodc}{$su};
+		my $snix = $self->{nixc}{$su};
+		my $nnod = $self->{nodc}{$nu};
+		my $nnix = $self->{nixc}{$nu};
 		my $sfrac = ($stn == $nodid ? $snix : $snod) / ($snod+$snix+1);
 		my $nfrac = ($ntn == $nodid ? $nnix : $nnod) / ($nnod+$nnix+1);
-		if ($debug) {
-			slashdLog("$class get_mult su='$su' nu='$nu' sfrac='$sfrac' nfrac='$nfrac'");
+		if ($self->{debug}) {
+			print STDERR ref($self) . " get_mult su='$su' nu='$nu' sfrac='$sfrac' nfrac='$nfrac'\n";
 		}
 		$mult *= $sfrac * $nfrac;
 	}
@@ -290,15 +317,15 @@ sub get_mult {
 }
 
 sub get_mult_timebeforepub {
-	my($class, $match_ar) = @_;
+	my($self, $match_ar) = @_;
 	
 	my $tbp_mults = [ ];
 	for my $hr (@$match_ar) {
 		next unless $hr->{duration} == -1 && defined $hr->{timebeforepub};
 		my $nodnix;
-		if ($hr->{sourcetag_tagnameid} == $tagnameid->{nod}) {
+		if ($hr->{sourcetag_tagnameid} == $self->{nodid}) {
 			$nodnix = 1;
-		} elsif ($hr->{sourcetag_tagnameid} == $tagnameid->{nix}) {
+		} elsif ($hr->{sourcetag_tagnameid} == $self->{nixid}) {
 			$nodnix = -1;
 		} else {
 			next;
@@ -324,7 +351,8 @@ sub get_mult_timebeforepub {
 sub get_total_weight {
 		# uid_mults is a hashref where the key is the source uid and
 		# the value is an arrayref of mults from that uid
-	my($class, $uid_mults, $clout, $created_at, $karma, $tokens) = @_;
+	my($self, $tags_peerclout, $uid_mults,
+		$clout, $created_at, $karma, $tokens, $new_uid) = @_;
 		
 	return 0 if $clout == 0 || $tokens < -1000 || $karma < -10;
 
@@ -338,20 +366,22 @@ sub get_total_weight {
 	# correlations with other users' tags.
 	if ($uid_mults->{'-1'}) {
 		if (@{$uid_mults->{'-1'}}) {
-			my @balanced = $class->balance_weight_vectors(@{$uid_mults->{'-1'}});
+			print STDERR "get_total_weight for $new_uid calling balance_weight_vectors -1\n" if $self->{debug};
+			my @balanced = $self->balance_weight_vectors(@{$uid_mults->{'-1'}});
 			push @total_mults, $constants->{tags_tagpeerval_postingbonus}
-				* $class->sum_weight_vectors(@balanced);
+				* $self->sum_weight_vectors(@balanced);
 			$any_weight = 1;
 		}
 		delete $uid_mults->{'-1'};
 	}
 	
 	# Start by sorting source uids by decreasing weight.
-	my @source_uids = sort { $tags_peerweight->{$b} <=> $tags_peerweight->{$a} } keys %$uid_mults;
+	my @nodef = grep { !defined $tags_peerclout->{$_} } keys %$uid_mults; $#nodef = 20 if $#nodef > 20; print STDERR "get_total_weight for $new_uid nodef: '@nodef'\n" if @nodef;
+	my @source_uids = sort { $tags_peerclout->{$b} <=> $tags_peerclout->{$a} } keys %$uid_mults;
 
 	# If all source uids have weight 0, we know the answer quickly.
 	for my $uid (@source_uids) {
-		if ($tags_peerweight->{$uid} > 0) {
+		if ($tags_peerclout->{$uid} > 0) {
 			$any_weight = 1;
 			last;
 		}
@@ -360,21 +390,21 @@ sub get_total_weight {
 
 	# Get the mult for each of those
 	for my $uid (@source_uids) {
-		my @balanced = $class->balance_weight_vectors(@{$uid_mults->{$uid}});
-		push @total_mults, $tags_peerweight->{$uid} * $class->sum_weight_vectors(@balanced);
-		if ($debug) {
-			my @t2 = map { sprintf("%.5g", @_) } @total_mults;
-			slashdLog("$class source_uid=$uid ($tags_peerweight->{$uid}) total_mults='@t2'");
+	print STDERR "get_total_weight for $new_uid calling balance_weight_vectors $uid\n" if $self->{debug};
+		my @balanced = $self->balance_weight_vectors(@{$uid_mults->{$uid}});
+		push @total_mults, $tags_peerclout->{$uid} * $self->sum_weight_vectors(@balanced);
+		if ($self->{debug}) {
+			my @t2 = map { sprintf("%.6g", $_) } @total_mults;
+			print STDERR "get_total_weight for $new_uid source_uid=$uid (clout $tags_peerclout->{$uid}), total_mults='@t2' from balanced '@balanced'\n";
 		}
 	}
 
 	# Then (using the same decreasing-multipliers algorithm) get the
 	# total of all those mults.
-	my @balanced = $class->balance_weight_vectors(@total_mults);
-	my $total = $class->sum_weight_vectors(@balanced);
-	if ($debug) {
-		slashdLog("$class total=$total");
-	}
+	print STDERR "get_total_weight for $new_uid calling balance_weight_vectors total\n" if $self->{debug};
+	my @balanced = $self->balance_weight_vectors(@total_mults);
+	my $total = $self->sum_weight_vectors(@balanced);
+	print STDERR ref($self) . " total=$total for uid $new_uid\n" if $self->{debug};
 	
 	# If this user was created recently, less weight for them.
 	my $daysold = (time - $created_at)/86400;
@@ -415,11 +445,11 @@ sub get_total_weight {
 }
 
 sub balance_weight_vectors {
-	my $class = shift @_;
-	my @w = sort { abs($b) <=> abs($a) || $b > $a } @_;
+	my($self, @w) = @_;
+	@w = sort { abs($b) <=> abs($a) || $b > $a } @w;
 	my $w_pos_mag = 0; for my $w (@w) { $w_pos_mag += $w if $w > 0 };
 	my $w_neg_mag = 0; for my $w (@w) { $w_neg_mag -= $w if $w < 0 };
-	return @_ if !$w_pos_mag && !$w_neg_mag;
+	return @w if !$w_pos_mag && !$w_neg_mag;
 
 	my @ret;
 	# Swinging more than 60-40% one way or the other reduces the
@@ -427,63 +457,53 @@ sub balance_weight_vectors {
 	my $total = $w_pos_mag+$w_neg_mag;
 	if ($w_pos_mag > $total * 0.60) {
 		my $neg_reduc_factor = $w_neg_mag*3/$w_pos_mag;
-		@ret = map { $_ < 0 ? $_*$neg_reduc_factor : $_ } @_;
+		@ret = map { $_ < 0 ? $_*$neg_reduc_factor : $_ } @w;
 	} elsif ($w_neg_mag > $total * 0.60) {
 		my $pos_reduc_factor = $w_pos_mag*3/$w_neg_mag;
-		@ret = map { $_ > 0 ? $_*$pos_reduc_factor : $_ } @_;
+		@ret = map { $_ > 0 ? $_*$pos_reduc_factor : $_ } @w;
 	} else {
 		# No change.
-		@ret = @_;
+		@ret = @w;
 	}
-	if ($debug) {
-		my @w2 = map { sprintf("%5d", @_) } @w;   $#w2 = 4 if $#w2 > 4;
-		my @r2 = map { sprintf("%5d", @_) } @ret; $#r2 = 4 if $#r2 > 4;
-		slashdLog(sprintf("$class balance_weight_vectors pos=%.5g neg=%.5g from '%s' to '%s'",
-			$w_pos_mag, $w_neg_mag, join(' ', @w2), join(' ', @r2)));
+	if ($self->{debug} || $w_pos_mag > 10_000 || $w_neg_mag > 10_000) {
+		my @w2 = @w;   $#w2 = 4 if $#w2 > 4;
+		my @r2 = @ret; $#r2 = 4 if $#r2 > 4;
+		print STDERR sprintf("%s balance_weight_vectors posmag=%0.5g negmag=%0.5g from '%s' to '%s'\n",
+			ref($self), $w_pos_mag, $w_neg_mag, join(' ', @w2), join(' ', @r2));
 	}
 	return @ret;
 }
 
 sub sum_weight_vectors {
-	my $class = shift @_;
-	my @w = sort { abs($b) <=> abs($a) || $b > $a } @_;
+	my($self, @v) = @_;
+	my @w = sort { abs($b) <=> abs($a) || $b > $a } @v;
 	$#w = 50 if $#w > 50; # beyond this point contributions are tiny
 	my $weight = 0;
 	my $cur_magnitude = 1;
 	for my $w (@w) {
-		$cur_magnitude *= $cumfrac;
+		$cur_magnitude *= $self->{cumfrac};
 		$weight += $cur_magnitude * $w;
 	}
 	$weight = 0 if $weight < 0;
-	if ($debug) {
-		slashdLog("$class sum_weight_vectors weight='$weight' w='@w'");
+	if ($self->{debug}) {
+		print STDERR ref($self) . " sum_weight_vectors weight='$weight' w='@w'\n";
 	}
 	return $weight;
 }
 
-sub insert_nextgen {
-	my($class, $g, $insert_ar) = @_;
-	my $slashdb = getCurrentDB();
-	# XXX Should turn off autocommit for this loop
-	for my $hr (@$insert_ar) {
-		$hr->{gen} = $g;
-		$slashdb->sqlInsert('tags_peerclout', $hr);
-	}
-}
-
 sub update_tags_peerclout {
-	my($class, $insert_ar) = @_;
+	my($self, $insert_ar, $tags_peerclout) = @_;
 	for my $hr (@$insert_ar) {
 		$tags_peerclout->{ $hr->{uid} } = $hr->{clout};
 	}
 }
 
-sub copy_peerweight_sql {
-	my($class) = $_;
+sub copy_peerclout_sql {
+	my($self) = @_;
 	my $slashdb = getCurrentDB();
 	$slashdb->sqlDo("SET AUTOCOMMIT=0");
-        $slashdb->sqlDo("UPDATE users_clout SET clout=NULL WHERE clid='$clid'");
-        $slashdb->sqlDo("INSERT INTO users_clout (clout_id, uid, clid, clout) SELECT NULL, uid, '$clid', clout FROM tags_peerclout WHERE clid='$clid'");
+        $slashdb->sqlDo("UPDATE users_clout SET clout=NULL WHERE clid='$self->{clid}'");
+        $slashdb->sqlDo("REPLACE INTO users_clout (clout_id, uid, clid, clout) SELECT NULL, uid, '$self->{clid}', clout FROM tags_peerclout WHERE clid='$self->{clid}'");
 	$slashdb->sqlDo("COMMIT");
 	$slashdb->sqlDo("SET AUTOCOMMIT=1");
 }
