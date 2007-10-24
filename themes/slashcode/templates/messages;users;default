@@ -119,8 +119,8 @@ change your password, or just click pretty widgets to kill time.
 
 [% CASE 'tilded_box_msg' %]
 	<p>If you find a problem, or have a reasonable suggestion
-	for new RSS feeds, please contact
-	<a href="mailto:[% constants.adminmail | strip_attribute %]">[% constants.siteadmin_name %]</a>.
+	for new RSS feeds, please
+	<a href="mailto:[% constants.adminmail | strip_attribute %]">email us</a>.
 
 	<p></td></tr></table>
 
