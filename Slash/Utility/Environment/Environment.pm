@@ -3170,7 +3170,7 @@ or an assignment into an SQL integer value.  This value should _not_ be
 quoted but rather inserted directly into an SQL request.  For example,
 if passed "123" (a user id), will return "CAST('123' AS UNSIGNED)"
 (same value, quoted);  if passed "200123456789abcd" (an encoded IP),
-will return "CAST(CONV('200123456789abcd', 16, 10) AS UNSIGNED" which
+will return "CAST(CONV('200123456789abcd', 16, 10) AS UNSIGNED)" which
 can be used as an assignment into or test against a BIGINT column.
 
 For speed, does not do error-checking against the value passed in.
