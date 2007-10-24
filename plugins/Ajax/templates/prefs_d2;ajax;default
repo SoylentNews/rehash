@@ -20,6 +20,8 @@ __template__
 <table width="100%">
 	<tr>
 	<td valign="middle">
+                &nbsp;<p>
+
 		[% IF user.discussion2 && user.discussion2 == "slashdot" %]
                 	<blockquote>
 			<div>
@@ -36,31 +38,6 @@ __template__
 			</blockquote>
                 [% END %]
 
-                <p><b>Email Display</b>
-                (currently
-                [%- IF !user.fakeemail; " not displayed";
-                ELSE; ": <tt>"; user.fakeemail | strip_literal; "</tt>";
-                END %])<br>
-                [% IF !user.emaildisplay.defined;
-                        IF user.fakeemail %]
-                        <i>(Your current email address was apparently set before
-                        users' email addresses were forced to one of the below
-                        choices. Please pick one and click Save.)</i><br>
-                        [% END;
-                        user.emaildisplay = 0;
-                END;
-                IF user.emaildisplay.defined;
-                        emaildisplay.${user.emaildisplay} = constants.markup_checked_attribute;
-                END %]
-                <blockquote>
-		<div>
-                <input type="radio" name="emaildisplay" [% emaildisplay.0 %] value=0> Do not display an e-mail address.<br>
-                <input type="radio" name="emaildisplay" [% emaildisplay.1 %] value=1> Show your email address with random SPAM-armoring applied.<br>
-                [% PROCESS formNote note='This changes weekly' %]
-                <input type="radio" name="emaildisplay" [% emaildisplay.2 %] value=2> Show your real email address without cowering behind childish anonymity or obfuscation.
-                </div>
-		</blockquote>
-
 		[% s_check = '';
 		IF user.nosigs;
 			s_check = constants.markup_checked_attribute;
@@ -68,6 +45,37 @@ __template__
 
 		<label><input type="checkbox" name="nosigs"[% s_check %]>&nbsp;Disable Sigs</label>
                 [% PROCESS formNote note='Strip sig quotes from comments' %]
+
+                <p>
+
+                [% n_check = '';
+                IF user.noscores;
+                        n_check = constants.markup_checked_attribute;
+                END %]
+                <label><input type="checkbox" name="noscores"[% n_check %]>&nbsp;Do Not Display Scores</label>
+                [% PROCESS formNote note="Hides score: They still <b>apply</b> you just don't see them." %]
+
+                &nbsp;<p>
+
+                [% UNLESS user.domaintags.defined; user.domaintags = 2; END %]
+                [% domaintags.${user.domaintags} = constants.markup_checked_attribute -%]
+
+                <b>Display Link Domains?</b> (shows the actual domain of any link in brackets)<br>
+                <blockquote><div>
+                <input type="radio" name="domaintags" [% domaintags.0 %] value=0> Never show link domains<br>
+                <input type="radio" name="domaintags" [% domaintags.1 %] value=1> Show the links domain only in recommended situations<br>
+                <input type="radio" name="domaintags" [% domaintags.2 %] value=2> Always show link domains
+                </div></blockquote>
+
+                <p>
+
+                [% IF user.is_admin && constants.m2 %]
+                        [% s_m2c_check = '';
+                        IF user.m2_with_comm_mod;
+                                s_m2c_check = constants.markup_checked_attribute;
+                        END %]
+                <label><input type="checkbox" name="m2_with_mod_on_comm" [% s_m2c_check %]>&nbsp;Show Metamoderation in Comment Moderation Listing</label>
+                [% END %]
 	</td>
 	</tr>
 </table>

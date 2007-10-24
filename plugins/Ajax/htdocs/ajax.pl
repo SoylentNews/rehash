@@ -524,8 +524,10 @@ sub saveModalPrefs {
         my $user_edits_table = {
                 d2_comment_q     => $params{'d2_comment_q'}     || undef,
                 d2_comment_order => $params{'d2_comment_order'} || undef,
-                emaildisplay     => $params{'emaildisplay'}     || undef,
                 nosigs           => ($params{'nosigs'}          ? 1 : 0),
+                noscores          => ($params{'noscores'}            ? 1 : 0),
+                domaintags        => ($params{'domaintags'} != 2     ? $params{'domaintags'} : undef),
+                m2_with_comm_mod  => ($params{'m2_with_mod_on_comm'} ? 1 : undef),
         };
 
         $slashdb->setUser($params{uid}, $user_edits_table);
