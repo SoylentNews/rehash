@@ -14,9 +14,9 @@ __seclev__
 10000
 __template__
 [% IF user.state.ssl %]
-	<a href="javascript:location.href='[% constants.absolutedir_secure %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title)">[% title || "Post to $constants.sitename" %]</a>
+	<a href="#" onclick="location.href='[% constants.absolutedir_secure %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title); return false">[% title || "Post to $constants.sitename" %]</a>
 [% ELSE %]
-	<a href="javascript:location.href='[% constants.absolutedir %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title)">[% title || "Post to $constants.sitename" %]</a>
+	<a href="#" onclick="location.href='[% constants.absolutedir %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title); return false">[% title || "Post to $constants.sitename" %]</a>
 [% END %]
 __version__
 $Id$

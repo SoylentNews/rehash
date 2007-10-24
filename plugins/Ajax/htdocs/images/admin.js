@@ -87,7 +87,7 @@ function tagsHistory(id, type) {
 	var tagshistid = "taghist-" + id;
 	var popupid    = "taghistory-" + id;
 	var title      = "History ";
-	var buttons    = createPopupButtons("<a href=\"#\">[?]</a></span><span><a href=\"javascript:closePopup('" + popupid + "-popup')\">[X]</a>");
+	var buttons    = createPopupButtons("<a href=\"#\" onclick=\"return false\">[?]</a></span><span><a href=\"#\" onclick=\"closePopup('" + popupid + "-popup'); return false\">[X]</a>");
 	title = title + buttons;
 	createPopup(getXYForId(tagshistid), title, popupid);
 	ajax_update(params, "taghistory-" + id + "-contents");
@@ -123,7 +123,7 @@ function remarks_popup() {
 	var params = [];
 	params['op'] = 'remarks_config';
 	var title = "Remarks Config ";
-	var buttons = createPopupButtons('<a href="javascript:closePopup(\'remarksconfig-popup\', 1)">[X]</a>');
+	var buttons = createPopupButtons('<a href="#" onclick="closePopup(\'remarksconfig-popup\', 1); return false">[X]</a>');
 	title = title + buttons;
 	createPopup(getXYForId('remarks_table'), title + buttons, 'remarksconfig');
 	ajax_update(params, 'remarksconfig-contents');

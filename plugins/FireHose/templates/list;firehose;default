@@ -47,7 +47,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
 
 <div id="slashboxes">
 [% UNLESS user.noboxes %]
-  [% IF slashboxes && !(form.smalldevices || form.gadget || (constants.smalldevices_ua_regex && ua.match(constants.smalldevices_ua_regex)));
+  [% IF slashboxes && !(form.smalldevices || form.embed || (constants.smalldevices_ua_regex && ua.match(constants.smalldevices_ua_regex)));
     slashboxes %]
   [% END %]
 [% END %]

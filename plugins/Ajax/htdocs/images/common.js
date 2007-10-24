@@ -1226,7 +1226,7 @@ function clearVendorPopupTimers() {
 function vendorStoryPopup() {
 	id = vendor_popup_id;
 	var title = "<a href='//intel.vendors.slashdot.org' onclick=\"javascript:urchinTracker('/vendor_intel-popup/intel_popup_title');\">Intel's Opinion Center</a>";
-	var buttons = createPopupButtons("<a href=\"javascript:closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
+	var buttons = createPopupButtons("<a href=\"#\" onclick=\"closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
 	title = title + buttons;
 	var closepopup = function (e) {
 	if (!e) var e = window.event;
@@ -1251,7 +1251,7 @@ function pausePopVendorStory2(id) {
 function vendorStoryPopup2() {
 	id = vendor_popup_id;
 	var title = "<a href='//intel.vendors.slashdot.org' onclick=\"javascript:urchinTracker('/vendor_intel-popup/intel_popup_title');\">Intel's Opinion Center</a>";
-	var buttons = createPopupButtons("<a href=\"javascript:closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
+	var buttons = createPopupButtons("<a href=\"#\" onclick=\"closePopup('vendorStory-" + id + "-popup')\">[X]</a>");
 	title = title + buttons;
 	var closepopup = function (e) {
 		if (!e) var e = window.event;

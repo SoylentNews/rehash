@@ -151,7 +151,7 @@ END;
 	[% title %]  [% IF story.commentcount %][% IF thresh_commentcount && story.commentcount != thresh_commentcount %][% thresh_commentcount %] of [% END %][% story.commentcount %] comment[% IF story.commentcount > 1 %]s[% END %][% END %] 
 	[% IF user.is_admin %]<a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">(edit)</a>[% END %]
 	[% IF expandable %]
-	<a href="javascript:toggleIntro('intro-[% story.stoid %]','togglest-[% story.stoid %]');"><span id="togglest-[% story.stoid %]">[+]</span></a>
+	<a href="#" onclick="toggleIntro('intro-[% story.stoid %]','togglest-[% story.stoid %]'); return false"><span id="togglest-[% story.stoid %]">[+]</span></a>
 	[% END %]
 	[% IF getintro %]
 	<div class="introhide" id="intro-[% story.stoid %]">

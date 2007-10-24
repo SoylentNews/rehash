@@ -178,9 +178,9 @@ __template__
 				[% END %]
 		<span class="ccw-header-links">
     [% IF discussion2 && !cid && !pid %]
-        <a href="javascript:ajaxFetchComments(0,1)"><span id="more_comments_num_b"></span> More</a> | 
+        <a href="#" onclick="ajaxFetchComments(0,1); return false"><span id="more_comments_num_b"></span> More</a> | 
     [% END; IF user.is_admin && user.d2prefs_debug %]
-        <a href="javascript:showPrefs('reading')">Prefs</a>
+        <a href="#" onclick="showPrefs('reading'); return false">Prefs</a>
     [% ELSIF user.is_anon;
    	PROCESS userlogin_cover
    		return_url = gSkin.rootdir _ '/comments.pl?sid=' _ sid %]
@@ -263,9 +263,9 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 		</div>
 		<div class="commentControlFooter">
     [% IF discussion2 && !cid && !pid %]
-        <a href="javascript:ajaxFetchComments(0,1)"><span id="more_comments_num_c"></span> More</a> | 
+        <a href="#" onclick="ajaxFetchComments(0,1); return false"><span id="more_comments_num_c"></span> More</a> | 
     [% END; IF user.is_admin && user.d2prefs_debug %]
-        <a href="javascript:showPrefs('reading')">Prefs</a>
+        <a href="#" onclick="showPrefs('reading'); return false">Prefs</a>
     [% ELSIF user.is_anon;
    	PROCESS userlogin_cover
    		return_url = gSkin.rootdir _ '/comments.pl?sid=' _ sid %]
@@ -294,7 +294,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 <div id="modal_cover" style="display:none" onclick="hide_modal_box()"></div>
 <div id="modal_box" style="display:none">
         <div class="generaltitle" >
-                <div class="title"><h3><div id="preference_title"></div> <a href="javascript:hide_modal_box()"><img src="[% gSkin.imagedir %]/images/sic_close.png" alt="Close"></a></h3></div>
+                <div class="title"><h3><div id="preference_title"></div> <a href="#" onclick="hide_modal_box(); return false"><img src="[% gSkin.imagedir %]/images/sic_close.png" alt="Close"></a></h3></div>
         </div>
         <div id="modal_box_content">Content here</div>
 </div>

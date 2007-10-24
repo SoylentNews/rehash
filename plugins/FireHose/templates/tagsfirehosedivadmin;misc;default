@@ -17,7 +17,7 @@ __template__
 
 [% PROCESS ajax_reskey_tag reskey_label => 'admin_commands-reskey-' _ id, reskey_name => 'ajax_admin' %]
 <input type="text" id="tags_admin_commands-[% id %]" name="tags_admin_commands-[% id %]" value="" size=50 maxlength=60 onkeyup="handleEnter(event, adminTagsCommands, '[% id %]','firehose')">
-<input type="button" value="Admin" onclick="adminTagsCommands('[% id %]','firehose')" class="button"> <span id="taghist-[% id %]"><a href="javascript:tagsHistory('[% id %]','firehose')">[History]</a></span>
+<input type="button" value="Admin" onclick="adminTagsCommands('[% id %]','firehose')" class="button"> <span id="taghist-[% id %]"><a href="#" onclick="tagsHistory('[% id %]','firehose'); return false">[History]</a></span>
 
 <div>[% tags_admin_str %]</div>
 

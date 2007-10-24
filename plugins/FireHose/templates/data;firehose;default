@@ -89,7 +89,7 @@ __template__
 		[% IF user.state.firehose_page == "user" %]
 			This user's Firehose page contains no [% IF form.page %]additional [% END %]entries;
 		[% ELSE %]
-			No matches were found.  You may want to try [% IF new_color %]<a href="?[% IF form.gadget %]gadget=1&amp;[% END %]color=[% new_color | strip_paramattr %]">[% END %]lowering your color threshold[% IF new_color %] to [% new_color %][% END %][% IF new_color %]</a>[% END %]  or [% IF options.duration != -1 %]<a href="?[% IF form.gadget %]gadget=1&amp;[% END %]startdate=&amp;duration=-1">[% END %]expanding your time window[% IF options.duration != -1 %]</a>[% END %]
+			No matches were found.  You may want to try [% IF new_color %]<a href="?[% IF form.embed %]embed=1&amp;[% END %]color=[% new_color | strip_paramattr %]">[% END %]lowering your color threshold[% IF new_color %] to [% new_color %][% END %][% IF new_color %]</a>[% END %]  or [% IF options.duration != -1 %]<a href="?[% IF form.embed %]embed=1&amp;[% END %]startdate=&amp;duration=-1">[% END %]expanding your time window[% IF options.duration != -1 %]</a>[% END %]
 		[% END %]
 		</b>
 		<br><br>

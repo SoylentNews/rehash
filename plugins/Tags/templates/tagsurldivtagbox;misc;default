@@ -17,10 +17,10 @@ __template__
 
 <div id="tagbox-[% url_id %]" class="tags">
 
-<div id="tagbox-title-[% url_id %]" class="tagtitleclosed">&nbsp;[% IF user.tags_canwrite_stories %]<a href="javascript:tagsToggleStoryDiv('[% url_id %]','[% user.is_admin %]','urls');">[% ELSIF user.is_anon %]<a href="[% gSkin.rootdir %]/login.pl">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% url_id %]">[+]</span></a>
+<div id="tagbox-title-[% url_id %]" class="tagtitleclosed">&nbsp;[% IF user.tags_canwrite_stories %]<a href="#" onclick="tagsToggleStoryDiv('[% url_id %]','[% user.is_admin %]','urls'); return false">[% ELSIF user.is_anon %]<a href="[% gSkin.rootdir %]/login.pl">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% url_id %]">[+]</span></a>
 [% IF tags_top.size %]
 	[% FOR t = tags_top -%]
-		<span class="tagname">[% IF user.tags_canwrite_stories %]<a href="javascript:tagsOpenAndEnter('[% url_id %]','[% t %]','[% user.is_admin %]','urls')">[% END %][% t | strip_html %][% IF user.tags_canwrite_stories %]</a>[% END %]</span>[% IF !loop.last() %], [% END -%]
+		<span class="tagname">[% IF user.tags_canwrite_stories %]<a href="#" onclick="tagsOpenAndEnter('[% url_id %]','[% t %]','[% user.is_admin %]','urls'); return false">[% END %][% t | strip_html %][% IF user.tags_canwrite_stories %]</a>[% END %]</span>[% IF !loop.last() %], [% END -%]
 	[%- END %]
 [% END %]
 <i>(<a href="/faq/tags.shtml">tagging beta</a>)</i>
@@ -32,7 +32,7 @@ __template__
 	[% IF tags_example.size %]
 		<div>Examples:
 		[% FOR t = tags_example -%]
-			<span class="tagname"><a href="javascript:tagsOpenAndEnter('[% url_id %]','[% t %]','[% user.is_admin %]','urls')">[% t | strip_html %]</a></span>[% IF !loop.last() %], [% END -%]
+			<span class="tagname"><a href="#" onclick="tagsOpenAndEnter('[% url_id %]','[% t %]','[% user.is_admin %]','urls'); return false">[% t | strip_html %]</a></span>[% IF !loop.last() %], [% END -%]
 		[%- END %]
 		</div>
 	[% END %]

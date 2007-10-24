@@ -276,7 +276,7 @@ function kidHiddens(cid, kidhiddens) {
 		else
 			return kidhiddens + 1;
 	} else if (kidhiddens) {
-		var kidstring = '<a href="javascript:revealKids(' + cid + ')">' + kidhiddens;
+		var kidstring = '<a href="#" onclick="revealKids(' + cid + '); return false">' + kidhiddens;
 		if (kidhiddens == 1) {
 			kidstring += ' hidden comment</a>';
 		} else {

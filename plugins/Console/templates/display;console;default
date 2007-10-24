@@ -34,7 +34,7 @@ __template__
 		[% firehosebox %]
 		</div>
 	[% ELSE %]
-	<a href="javascript:reloadBin()">Reload Bin</a>
+	<a href="#" onclick="reloadBin(); return false">Reload Bin</a>
 	<br>
 	<iframe name="submitframe" id="submitiframe" src="[% gSkin.rootdir %]/submit.pl?op=list&amp;nowrapper=1&amp;fromconsole=1" width="100%" height="800"></iframe>
 	[% END %]

@@ -17,13 +17,13 @@ __template__
 [% IF user.tags_canread_stories %]
 <div id="tagbox-[% sidenc %]" class="tags">
 
-<div id="tagbox-title-[% sidenc %]" class="tagtitleclosed">&nbsp;[% IF user.tags_canwrite_stories %]<a href="javascript:tagsToggleStoryDiv('[% sidenc %]','[% user.is_admin %]');">[% ELSIF user.is_anon %]<a href="[% gSkin.rootdir %]/login.pl">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% sidenc %]">[+]</span></a>
+<div id="tagbox-title-[% sidenc %]" class="tagtitleclosed">&nbsp;[% IF user.tags_canwrite_stories %]<a href="#" onclick="tagsToggleStoryDiv('[% sidenc %]','[% user.is_admin %]'); return false">[% ELSIF user.is_anon %]<a href="[% gSkin.rootdir %]/login.pl">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% sidenc %]">[+]</span></a>
 [% IF tags_top.size %]
 	[% FOR t = tags_top -%]
 		<span class="tagname"><a href="/tags/[% t | strip_html %]">[% t | strip_html %]</a></span>[% IF !loop.last() || story.is_future %], [% END -%]
 	[%- END %]
 [%- END %]
-[%- IF user.tags_canwrite_stories && story.is_future %]<span class="tagmenu"><a onClick="clickCompleter(this, '[% sidenc %]','[% user.is_admin %]','stories', 4, {action1:completer_setTag})">feedback</a></span>[% END %]
+[%- IF user.tags_canwrite_stories && story.is_future %]<span class="tagmenu"><a onClick="clickCompleter(this, '[% sidenc %]','[% user.is_admin %]','stories', 4, {action1:completer_setTag}); return false">feedback</a></span>[% END %]
 <i>(<a href="/faq/tags.shtml">tagging beta</a>)</i>
 </div>
 

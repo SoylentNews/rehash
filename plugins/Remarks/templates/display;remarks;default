@@ -27,7 +27,7 @@ __template__
 
 <table class="data" width="100%">
 	<tr class="data_head">
-		<th colspan="5">Remarks (Last Updated [% Slash.timeCalc(Slash.db.getTime, '%Y-%m-%d %H:%M:%S %Z', 0) %]) <a href="javascript:remarks_popup()">[Config]</a></th>
+		<th colspan="5">Remarks (Last Updated [% Slash.timeCalc(Slash.db.getTime, '%Y-%m-%d %H:%M:%S %Z', 0) %]) <a href="#" onclick="remarks_popup(); return false">[Config]</a></th>
 	</tr>
 [% i = 1; FOREACH remark = remarks_ref; i = i == 1 ? 2 : 1 %]
 	<tr class="data_hl[% i %]"> <!-- remark.id:[% remark.rid %] -->

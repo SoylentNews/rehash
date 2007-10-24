@@ -180,7 +180,7 @@ sub ajaxConfigSave {
 	}
 	$slashdb->setUser($user->{uid}, $data) if keys %$data;
 	# this should be in a template -- pudge
-	return "<a href=\"javascript:closePopup('remarksconfig-popup', 1)\">Close</a>";
+	return "<a href=\"#\" onclick=\"closePopup('remarksconfig-popup', 1)\">Close</a>";
 }
 
 1;

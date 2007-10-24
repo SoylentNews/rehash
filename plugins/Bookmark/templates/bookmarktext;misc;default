@@ -24,9 +24,9 @@ __template__
 <br>
 <p>		               
 <xmp><!-- Start [% constants.sitename %] It link -->
-<a href="javascript:location.href='[% constants.absolutedir %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">
+<a href="#" onclick="location.href='[% constants.absolutedir %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title); return false">
 <img src="[% constants.absolutedir %]/favicon.ico" alt="[% constants.sitename %]" border="0" height="16" width="16"></a> &nbsp;
-<a href="javascript:location.href='[% constants.absolutedir %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">[% constants.sitename %] It!
+<a href="#" onclick="location.href='[% constants.absolutedir %]/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title); return false">[% constants.sitename %] It!
 <!-- End [% constants.sitename %] It link -->
 </xmp></p>
 <br>

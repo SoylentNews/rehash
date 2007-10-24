@@ -17,22 +17,22 @@ __template__
 <div id="tagbox-[% id %]" class="tags">
 [% IF !form.skipvote && !options.nothumbs %]
 	<span id="updown-[% item.id %]" class="vote[% IF vote == "down" %]ddown[% ELSIF vote == "up" %]dup[% END %]">
-	  <a href="javascript:firehose_up_down('[% item.id %]','+')" class="up" title="Vote this item up"
+	  <a href="#" onclick="firehose_up_down('[% item.id %]','+'); return false" class="up" title="Vote this item up"
 	     [% IF !user.is_anon %]onMouseDown="show_nod_menu(this, '[% item.id %]')" onMouseOver="show_nod_menu(this, '[% item.id %]', 1200, 5200)" onMouseOut="dont_show_nodnix_menu()"[% END %]>+</a>
-	  <a href="javascript:firehose_up_down('[% item.id %]','-')" class="down" title="Vote this item down"
+	  <a href="#" onclick="firehose_up_down('[% item.id %]','-'); return false" class="down" title="Vote this item down"
 	     [% IF !user.is_anon %]onMouseDown="show_nix_menu(this, '[% item.id %]')" onMouseOver="show_nix_menu(this, '[% item.id %]', 1200, 5200)" onMouseOut="dont_show_nodnix_menu()"[% END %]>-</a>
 	</span>  
 [% END %]
 	<div id="tagbox-title-[% id %]" class="tagtitleclosed">
-		&nbsp;[% IF user.tags_canwrite_stories %]<a href="javascript:tagsToggleStoryDiv('[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose');">[% ELSIF user.is_anon %]<a href="javascript:show_login_box()">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% id %]">[+]</span></a>
+		&nbsp;[% IF user.tags_canwrite_stories %]<a href="#" onclick="tagsToggleStoryDiv('[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose'); return false">[% ELSIF user.is_anon %]<a href="#" onclick="show_login_box(); return false">[% ELSE %]<a href="[% gSkin.rootdir %]/subscribe.pl">[% END %]<span class="tagsheader" id="toggletags-button-[% id %]">[+]</span></a>
 		<span id="tags-top-[% id %]">
 			[% PROCESS firehose_tags_top id = id tags_top = tags_top item = item -%]
 		</span>
 		[%- IF user.tags_canwrite_stories && (user.firehose_usermode || !user.is_admin) %]
-			<span class="tagname"><span class="tagmenu">, <a onClick="clickCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose', 4, {action1:completer_setTag})">feedback</a></span></span>
+			<span class="tagname"><span class="tagmenu">, <a onClick="clickCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose', 4, {action1:completer_setTag}); return false">feedback</a></span></span>
 		[% END %]
 		[% IF user.is_admin && !user.firehose_usermode -%]
-			<i>(<span id="note-form-[% item.id %]" class="hide"><input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30" onkeyup="handleEnter(event, firehose_save_note, '[% id %]')"> <input type="button" value="note" onclick="firehose_save_note('[% item.id %]')"></span><a id="note-text-[% item.id %]" onclick="firehose_open_note('[% item.id %]')">[% IF !item.note  %]Note[% END %][% item.note | strip_literal %]</a>)</i>
+			<i>(<span id="note-form-[% item.id %]" class="hide"><input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30" onkeyup="handleEnter(event, firehose_save_note, '[% id %]')"> <input type="button" value="note" onclick="firehose_save_note('[% item.id %]')"></span><a id="note-text-[% item.id %]" href="#" onclick="firehose_open_note('[% item.id %]'); return false">[% IF !item.note  %]Note[% END %][% item.note | strip_literal %]</a>)</i>
 		[%- END -%]
 	</div>
 
@@ -49,7 +49,7 @@ __template__
 		<div id="tags-user-[% id %]" class="taguser"></div>
 	[% IF user.is_admin && !user.firehose_usermode %]
 		<div id="tags-admin-[% id %]" class="tagadmin"></div>
-		<div id="admin-extras-[% item.id %]" class="tagadminextra"><a href="javascript:firehose_get_admin_extras('[% item.id %]')">Get extras</a></div>
+		<div id="admin-extras-[% item.id %]" class="tagadminextra"><a href="#" onclick="firehose_get_admin_extras('[% item.id %]'); return false">Get extras</a></div>
 	[% END %]
 		<div id="toggletags-message-[% id %]" class="message"></div>
 	</div>

@@ -81,7 +81,7 @@ function flipLink(cid, mode) {
 
 function renderCommentOneLine(cid) { 
 	var comment = comments[cid];
-	var retval = flipLink(cid, 'oneline') + '<a href="javascript:setFocusComment('+cid+');">';
+	var retval = flipLink(cid, 'oneline') + '<a href="#" onclick="setFocusComment('+cid+'); return false">';
 
 	retval = retval + comment['subject']+'</a> by '+comment['nickname'];
 
@@ -92,7 +92,7 @@ function renderCommentOneLine(cid) {
 
 function renderCommentFull(cid) {
 	var comment = comments[cid];
-	return '<div class="commentTop"> '+flipLink(cid,'full')+'<div class="title"><h4><a name="14620800">'+comment['subject']+'</a></h4>                    (Score: '+comment['points']+', XXXXX) </div> <div class="details">                    by '+comment['nickname']+ ' on '+comment['date']+' (<a href="javascript:setFocusComment('+cid+');">'+cid+'</a>) </div></div>            <div class="commentBody">  '+comment['comment']+'  </div>'+ replyTo(cid);
+	return '<div class="commentTop"> '+flipLink(cid,'full')+'<div class="title"><h4><a name="14620800">'+comment['subject']+'</a></h4>                    (Score: '+comment['points']+', XXXXX) </div> <div class="details">                    by '+comment['nickname']+ ' on '+comment['date']+' (<a href="#" onclick="setFocusComment('+cid+'); return false">'+cid+'</a>) </div></div>            <div class="commentBody">  '+comment['comment']+'  </div>'+ replyTo(cid);
 }
 
 function renderComment(cid, mode) {

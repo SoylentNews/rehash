@@ -1807,7 +1807,8 @@ sub getAndSetOptions {
 			$mode = "full";
 		}
 	}
-	
+
+    # number of firehose items per page in the normal case
 	if ($mode eq "full") {
 		if ($user->{is_admin}) {
 			$options->{limit} = $pagesize eq "large" ? 50 : 25;
@@ -1822,19 +1823,17 @@ sub getAndSetOptions {
 		}
 	}
 
-	if ($constants->{smalldevices_ua_regex}) {
+    # the non-normal cases: a small device (e.g., iPhone) or an embedded use (e.g., Google Gadget)
+  my $force_smaller = $form->{embed};
+	if (!$force_smaller && $constants->{smalldevices_ua_regex}) {
 		my $smalldev_re = qr($constants->{smalldevices_ua_regex});
 		if ($ENV{HTTP_USER_AGENT} && $ENV{HTTP_USER_AGENT} =~ $smalldev_re) {
-			$options->{smalldevices} = 1;
-			if ($mode eq "full") {
-				$options->{limit} = $pagesize eq "large" ? 15 : 10;
-			} else {
-				$options->{limit} = $pagesize eq "large" ? 20 : 15;
-			}
+		  $force_smaller = 1;
 		}
 	}
 
-	if ($form->{gadget}) {
+    # ...for which we'll have fewer items per page
+	if ($force_smaller) {
 			$options->{smalldevices} = 1;
 			if ($mode eq "full") {
 				$options->{limit} = $pagesize eq "large" ? 15 : 10;
@@ -2066,7 +2065,7 @@ sub getFireHoseTagsTop {
 		}
 	}
 
-	if ($form->{gadget}) {
+	if ($form->{embed}) {
 		$#{@$user_tags_top} = 2;
 	}
 
