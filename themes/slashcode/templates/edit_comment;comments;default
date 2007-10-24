@@ -237,7 +237,8 @@ IF do_br %]<br>[% END %]
 				</ul>
 
 				<p>
-					Problems regarding accounts or comment posting should be sent to <a href="mailto:[% constants.adminmail | strip_attribute %]">[% constants.siteadmin_name %]</a>.
+					If you are having a problem with accounts or comment posting,
+					please <a href="mailto:[% constants.adminmail | strip_attribute %]">yell for help</a>.
 				</p>
 			</div>	
 		</fieldset>
