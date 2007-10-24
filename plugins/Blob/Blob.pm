@@ -179,7 +179,7 @@ sub clean {
 sub get {
 	my($self, $sig) = @_;
 	my $sig_q = $self->sqlQuote($sig);
-	return $self->sqlSelectHashref($self->{_table}, "id = $siq_q");
+	return $self->sqlSelectHashref($self->{_table}, "id = $sig_q");
 }
 
 sub getFilesForStories {
