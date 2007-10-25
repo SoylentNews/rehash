@@ -347,7 +347,7 @@ sub write_mp3_file {
 	my $constants = getCurrentStatic();
 	my $filename_mp3 = sprintf("%02d/%s%s", $hcpid % 100, $encoded_name, '.mp3');
 	my $full_filename_mp3 = "$dir/$filename_mp3";
-	my $ssml_text = join('<break time=\"1s\">',
+	my $ssml_text = join(' ',
 		"\u$answer.",
 		map { "\u$_." } split //, $answer);
 
