@@ -2176,7 +2176,7 @@ EOT2
 EOT
 
 	$return .= <<EOT if !$options->{noshow};
-	<div id="comment_top_$comment->{cid}" class="commentTop">
+	<div id="comment_top_$comment->{cid}" class="commentTop newcomment">
 		<div class="title">
 $head
 $comment_links

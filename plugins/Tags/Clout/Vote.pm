@@ -137,8 +137,8 @@ sub process_nextgen {
 		if ($user_nodnixes_count >= $user_nodnixes_full) {
 			$user_nodnixes_mult = 1;
 		} elsif ($user_nodnixes_count >= $user_nodnixes_min) {
-			$user_nodnixes_mult = ($user_nodnixes_count+1-$user_nodnixes_min)
-				/ ($user_nodnixes_full+1-$user_nodnixes_min);
+			$user_nodnixes_mult = ($user_nodnixes_count+1-$user_nodnixes_min) /
+				($user_nodnixes_full+1-$user_nodnixes_min);
 		}
 		my $weight = 0;
 		my(@match, $clout, $created_at, $karma, $tokens, $uid_mults);

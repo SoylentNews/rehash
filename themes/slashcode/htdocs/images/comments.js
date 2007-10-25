@@ -14,6 +14,7 @@ var update_comments = {};
 var root_comments_hash = {};
 var last_updated_comments = [];
 var last_updated_comments_index = -1;
+var current_cid = 0;
 var more_comments_num;
 var behaviors = {
 	'default': { ancestors: 'none', parent: 'none', children: 'none', descendants: 'none', siblings: 'none', sameauthor: 'none' }, 
@@ -146,8 +147,11 @@ function setFocusComment(cid, alone, mods) {
 	if ((alone && alone == 2) || (!alone && viewmodevalue[displaymode[abscid]] == viewmodevalue['full']))
 		cid = '-' + abscid;
 
-	if ( (abscid == cid && checkAdTimer(cid)) )
-		adTimerInsert = cid;
+	if (abscid == cid) { // expanding == selecting
+		setCurrentComment(cid);
+		if (checkAdTimer(cid))
+			adTimerInsert = cid;
+	}
 
 
 // this doesn't work
@@ -158,21 +162,23 @@ function setFocusComment(cid, alone, mods) {
 //	if (!user_is_admin) // XXX: for now, admins-only, for testing
 //		mods = 1;
 
-	if (!alone && mods) {
-		if (mods == 1 || ((mods == 3) && (abscid == cid)) || ((mods == 4) && (abscid != cid))) {
-			shift_down = 0;
-			alt_down   = 0;
-		} else if (mods == 2 || ((mods == 3) && (abscid != cid)) || ((mods == 4) && (abscid == cid))) {
-			shift_down = 1;
-			alt_down   = 0;
-		} else if (mods == 5) {
-			shift_down = 1;
-			alt_down   = 1;
-		}
-	}
-
-	if (shift_down && alt_down)
-		alone = 1;
+// 	if (!alone && mods) {
+// 		if (mods == 1 || ((mods == 3) && (abscid == cid)) || ((mods == 4) && (abscid != cid))) {
+// 			shift_down = 0;
+// 			alt_down   = 0;
+// 		} else if (mods == 2 || ((mods == 3) && (abscid != cid)) || ((mods == 4) && (abscid == cid))) {
+// 			shift_down = 1;
+// 			alt_down   = 0;
+// 		} else if (mods == 5) {
+// 			shift_down = 1;
+// 			alt_down   = 1;
+// 		}
+// 	}
+// 
+// 	if (shift_down && alt_down)
+// 		alone = 1;
+// 
+// 	resetModifiers();
 
 	if (alone && alone == 1) {
 		var thismode = abscid == cid ? 'full' : 'oneline';
@@ -182,8 +188,6 @@ function setFocusComment(cid, alone, mods) {
 	}
 	updateCommentTree(abscid);
 	finishCommentUpdates();
-
-//	resetModifiers();
 
 //	statusdiv.innerHTML = '';
 
@@ -653,6 +657,9 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 
 	var params = [];
 	params['op']              = 'comments_fetch';
+
+	var newoldstuff = cids ? 0 : 1;
+
 	if (cids) {
 		params['cids']    = cids;
 	} else {
@@ -697,7 +704,8 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 			}
 
 			var update = response.update_data;
-			if (update && update.new_cids_order) {
+			var do_update = (update && update.new_cids_order) ? 1 : 0;
+			if (do_update) {
 				var root;
 				var pids = {};
 				for (var i = 0; i < update.new_cids_order.length; i++) {
@@ -750,28 +758,30 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 				setShortSubject(cids[i]);
 			}
 
-			if (update && update.new_cids_order) {
-				for (var i = 0; i < last_updated_comments.length; i++) {
-					var this_cid = last_updated_comments[i];
-					var this_id  = fetchEl('comment_top_' + this_cid);
-					if (this_id)
-						this_id.className = this_id.className.replace(' newcomment', '');
+			if (do_update) {
+				if (newoldstuff) {
+					for (var i = 0; i < last_updated_comments.length; i++) {
+						var this_cid = last_updated_comments[i];
+						var this_id  = fetchEl('comment_top_' + this_cid);
+						if (this_id)
+							this_id.className = this_id.className.replace(' newcomment', ' oldcomment');
+					}
+					last_updated_comments = [];
+					last_updated_comments_index = -1;
 				}
-				last_updated_comments = [];
-				last_updated_comments_index = -1;
-					
+
 				for (var i = 0; i < update.new_cids_order.length; i++) {
 					var this_cid = update.new_cids_order[i];
-					if (placeholder_no_update[this_cid])
-						continue;
-					var mode = determineMode(this_cid);
-					updateDisplayMode(this_cid, mode, 1);
-					currents[displaymode[this_cid]]++;
-					updateComment(this_cid, mode);
+					if (!placeholder_no_update[this_cid]) {
+						var mode = determineMode(this_cid);
+						updateDisplayMode(this_cid, mode, 1);
+						currents[displaymode[this_cid]]++;
+						updateComment(this_cid, mode);
+					}
 
 					var this_id  = fetchEl('comment_top_' + this_cid);
 					if (this_id) {
-						this_id.className = this_id.className + ' newcomment';
+						this_id.className = this_id.className.replace(' oldcomment', ' newcomment');
 						last_updated_comments.push(this_cid);
 					}
 				}
@@ -796,7 +806,7 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 			}
 
 			updateHiddens(cids);
-			if (update && update.new_cids_order && highlight && last_updated_comments.length) {
+			if (do_update && highlight && last_updated_comments.length) {
 				last_updated_comments_index = last_updated_comments_index + 1;
 				setFocusComment(last_updated_comments[0], 1);
 			}
@@ -1008,6 +1018,14 @@ function finishLoading() {
 	//window.onbeforeunload = function () { savePrefs() };
 	//window.onunload = function () { savePrefs() };
 
+	var noshow_comments_hash = {};
+	for (var i = 0; i < noshow_comments.length; i++) { noshow_comments_hash[noshow_comments[i]] = 1 }
+	for (var cid in comments) {
+		if (!noshow_comments_hash[cid])
+			last_updated_comments.push(cid);
+	}
+	last_updated_comments = last_updated_comments.sort(function (a, b) { return (a - b) });
+
 	if (1 || user_is_admin) {
 		if (window.addEventListener) // DOM method for binding an event
 			window.addEventListener('keydown', keyHandler, false);
@@ -1044,22 +1062,21 @@ function resetModifiers () {
 	alt_down   = 0;
 }
 
-function doModifiers () {
-	return;
-	var ev = window.event;
+function doModifiers (e) {
+	e = e || window.event;
 	shift_down = 0;
 	alt_down   = 0;
 
-	if (ev) {
-		if (ev.modifiers) {
+	if (e) {
+		if (e.modifiers) {
 			if (e.modifiers & Event.SHIFT_MASK)
 				shift_down = 1;
 			if (e.modifiers & Event.ALT_MASK)
 				alt_down = 1;
 		} else {
-			if (ev.shiftKey)
+			if (e.shiftKey)
 				shift_down = 1;
-			if (ev.altKey)
+			if (e.altKey)
 				alt_down = 1;
 		}
 	}
@@ -1629,6 +1646,24 @@ function getSeconds () {
 }
 
 
+function setCurrentComment (cid) {
+	if (current_cid) {
+		var this_id  = fetchEl('comment_top_' + current_cid);
+		if (this_id) {
+			this_id.className = this_id.className.replace(' newcomment', ' oldcomment');
+			this_id.className = this_id.className.replace(' currcomment', '');
+		}
+	}
+
+
+	var this_id  = fetchEl('comment_top_' + cid);
+	if (this_id) {
+		this_id.className = this_id.className + ' currcomment';
+	}
+	current_cid = cid;
+}
+
+
 function keyHandler(e) {
 	e = e || window.event;
 
@@ -1640,19 +1675,20 @@ function keyHandler(e) {
 		var c = e.keyCode;
 		if (c) {
 			var key = String.fromCharCode(c);
-			if (key == 'J' || key == 'K') {
+			if (key == 'J' || key == 'K' || key == 'W' || key == 'S') {
 				if (last_updated_comments.length) {
 					var i = last_updated_comments_index;
 					var l = last_updated_comments.length - 1;
 					var update = 0;
-					if (key == 'J') {
+					if (key == 'J' || key == 'S') {
 						update = 1;
-						if (i == 0)
+						if (i <= 0)
 							i = l;
 						else
 							i = i - 1;
-					} else if (key == 'K') {
-						if (i == l) {
+					} else if (key == 'K' || key == 'W') {
+						if (i >= l) {
+							update = 2;
 							ajaxFetchComments(0, 1, '', 1);
 						} else {
 							update = 1;
@@ -1661,13 +1697,22 @@ function keyHandler(e) {
 					}
 
 					if (update) {
-						last_updated_comments_index = i;
-						setFocusComment(last_updated_comments[i], 1);
+						doModifiers(e);
+						var this_shift_down = shift_down;
+						resetModifiers();
+						if (this_shift_down && current_cid) { // if shift, collapse previously selected
+							setFocusComment('-' + current_cid, 1);
+						}
+						if (update == 1) {
+							last_updated_comments_index = i;
+							setFocusComment(last_updated_comments[i], 1);
+						}
 					}
 				}
 			}
 		}
 	}
+
 }
 
 
