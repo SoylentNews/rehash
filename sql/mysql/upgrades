@@ -4877,8 +4877,6 @@ DELETE FROM users_param WHERE name IN ('tagpeerval', 'tagpeerval2');
 # 2007-09-26
 UPDATE vars SET value = 'T_2_5_0_176' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
-
 # For plugins/Tags
 UPDATE tagboxes SET clid=2 WHERE name='FirstMover';
 
@@ -4941,9 +4939,9 @@ CREATE TABLE story_static_files(
 # 2007-10-16
 UPDATE vars SET value = 'T_2_5_0_180' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
+
+# PUDGE LAST UPDATED HERE
 
 INSERT INTO string_param (type, code, name) VALUES ('mediatypes','none','None');
 INSERT INTO string_param (type, code, name) VALUES ('mediatypes','video','Video');
@@ -4956,8 +4954,6 @@ ALTER TABLE submissions ADD COLUMN mediatype enum("none", "text", "video","image
 # For plugins/FireHose
 ALTER TABLE firehose ADD COLUMN mediatype enum("none", "text", "video","image","audio") default "none" NOT NULL;
 
-
-
 ALTER TABLE file_queue ADD COLUMN blobid VARCHAR(32) DEFAULT "" NOT NULL;
 ALTER TABLE story_static_files ADD COLUMN width smallint unsigned not null default 0;  
 ALTER TABLE story_static_files ADD COLUMN height smallint unsigned not null default 0;
@@ -4966,4 +4962,9 @@ INSERT INTO vars (name, value, description) VALUES ('admin_use_blob_for_upload',
 
 UPDATE string_param SET name = '9' WHERE type = 'otherusersparam' AND code = 'd2_comment_q'; # large
 
+
+# 2007-10-25
+UPDATE vars SET value = 'T_2_5_0_181' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
