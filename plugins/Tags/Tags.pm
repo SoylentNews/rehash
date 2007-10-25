@@ -11,7 +11,7 @@ use Slash;
 use Slash::Display;
 use Slash::Utility;
 use Slash::DB::Utility;
-use Slash::Clout;
+#use Slash::Clout;
 use Apache::Cookie;
 use vars qw($VERSION);
 use base 'Slash::DB::Utility';
