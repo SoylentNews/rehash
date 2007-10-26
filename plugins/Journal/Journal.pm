@@ -61,10 +61,14 @@ sub set {
 	$self->sqlUpdate('journals', \%j1, "id=$id") if keys %j1;
 	$self->sqlUpdate('journals_text', \%j2, "id=$id") if $j2{article};
 	if ($constants->{plugin}{FireHose}) {
-		my $journal_item = $self->get($id);
-		my $firehose = getObject("Slash::FireHose");
-		if ($journal_item->{promotetype} eq "publicize" || $journal_item->{promotetype} eq "publish") {
-			$firehose->createUpdateItemFromJournal($id);
+		my $reskey = getObject('Slash::ResKey');
+		my $rkey = $reskey->key('submit', { nostate => 1 });
+		if ($rkey && $rkey->createuse) {
+			my $journal_item = $self->get($id);
+			my $firehose = getObject("Slash::FireHose");
+			if ($journal_item->{promotetype} eq "publicize" || $journal_item->{promotetype} eq "publish") {
+				$firehose->createUpdateItemFromJournal($id);
+			}
 		}
 	}
 }
@@ -210,11 +214,15 @@ sub create {
 	my $slashdb = getCurrentDB();
 	$slashdb->setUser($uid, { journal_last_entry_date => $date });
 	if ($constants->{plugin}{FireHose}) {
-		my $firehose = getObject("Slash::FireHose");
-		my $journal = getObject("Slash::Journal");
-		my $j = $journal->get($id);
-		if ($j->{promotetype} eq "publicize" || $j->{promotetype} eq "publish") {
-			$firehose->createItemFromJournal($id);
+		my $reskey = getObject('Slash::ResKey');
+		my $rkey = $reskey->key('submit', { nostate => 1 });
+		if ($rkey && $rkey->createuse) {
+			my $firehose = getObject("Slash::FireHose");
+			my $journal = getObject("Slash::Journal");
+			my $j = $journal->get($id);
+			if ($j->{promotetype} eq "publicize" || $j->{promotetype} eq "publish") {
+				$firehose->createItemFromJournal($id);
+			}
 		}
 	}
 

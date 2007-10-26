@@ -4941,8 +4941,6 @@ UPDATE vars SET value = 'T_2_5_0_180' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
-# PUDGE LAST UPDATED HERE
-
 INSERT INTO string_param (type, code, name) VALUES ('mediatypes','none','None');
 INSERT INTO string_param (type, code, name) VALUES ('mediatypes','video','Video');
 INSERT INTO string_param (type, code, name) VALUES ('mediatypes','image','Image');
@@ -4967,4 +4965,6 @@ UPDATE string_param SET name = '9' WHERE type = 'otherusersparam' AND code = 'd2
 UPDATE vars SET value = 'T_2_5_0_181' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# PUDGE LAST UPDATED HERE
 
