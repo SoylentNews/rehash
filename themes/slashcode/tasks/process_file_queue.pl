@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/local/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
@@ -55,7 +55,7 @@ sub handleFileCmd {
 			my $thumb = $namebase . "-thumb." . $suffix;
 			my $thumbsm = $namebase . "-thumbsm." . $suffix;
 			slashdLog("About to create thumb $path$thumb");
-			system("convert -size 100x100 $path$name $path$thumb");
+			system("/usr/bin/convert -size 260x194  $path$name  -resize '130x97>'  -bordercolor black -border 48 -gravity center -crop 130x97+0+0 -page +0+0 $path$thumb");
 			my $data = {
 				stoid => $cmd->{stoid},
 				name => $thumb
@@ -63,7 +63,7 @@ sub handleFileCmd {
 			addStoryFile($data, $path);
 
 			slashdLog("About to create thumbsms $path$thumbsm");
-			system("convert -size 50x50 $path$name $path$thumbsm");
+			system("/usr/bin/convert -size 100x74 $path$name  -resize '50x37>'  -bordercolor black -border 18 -gravity center -crop 50x37+0+0 -page +0+0 $path$thumbsm");
 			$data = {
 				stoid => $cmd->{stoid},
 				name => $thumbsm
@@ -77,7 +77,7 @@ sub handleFileCmd {
 	}
 	$slashdb->deleteFileQueueCmd($cmd->{fqid});
 	if (verifyFileLocation($cmd->{file})) {
-		unlink $cmd->{file};
+		# unlink $cmd->{file};
 	}
 }
 
@@ -118,6 +118,7 @@ sub blobToFile {
 	my($suffix) = $blob_ref->{filename} =~ /(\.\w+$)/;
 	$suffix = lc($suffix);
 	my ($ofh, $tmpname) = mkstemps("/tmp/upload/fileXXXXXX", $suffix );
+	slashdLog("Writing file data to $tmpname\n");
 	print $ofh $blob_ref->{data};
 	close $ofh;
 	return $tmpname;
@@ -201,6 +202,8 @@ sub addStoryFile {
 		($data->{width}, $data->{height}) = imgsize("$path$data->{name}");
 		slashdLog("addStoryFile $data->{width} $data->{height}");
 	}
+	$data->{width} ||= 0;
+        $data->{height} ||= 0;
 	$slashdb->addStoryStaticFile($data);
 }
 
