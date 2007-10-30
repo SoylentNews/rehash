@@ -12460,9 +12460,10 @@ sub numPendingFilesForStory {
 	$self->sqlCount("file_queue", "stoid=$stoid_q");
 }
 
-sub addStoryStaticFile {
+sub addStaticFile {
 	my($self, $data) = @_;
-	$data ||= "";
+	my $constants = getCurrentStatic();
+	$data ||= {};
 	
 	# Guess at file type if it isn't set
 	if ($data->{name} =~ /\.(jpg|gif|png)$/) {
@@ -12470,14 +12471,26 @@ sub addStoryStaticFile {
 	} elsif ($data->{name} =~ /\.(jpg|gif|png)$/) {
 		$data->{filetype} ||= "audio";
 	}
+	$data->{name} =~ s/^\Q$constants->{basedir}\E\/images//g;
 
-	$self->sqlInsert("story_static_files", $data);
+	$self->sqlInsert("static_files", $data);
+	my $sfid = $self->getLastInsertId;
+	return $sfid;
 }
 
 sub getStaticFilesForStory {
 	my($self, $stoid) = @_;
 	my $stoid_q = $self->sqlQuote($stoid);
-	return $self->sqlSelectAllHashrefArray("*", "story_static_files", "stoid=$stoid_q");
+	return $self->sqlSelectAllHashrefArray("*", "static_files", "stoid=$stoid_q");
+}
+
+sub getStaticFile {
+	my $answer = _genericGetCache({
+		table		=> 'static_files',
+		table_prime	=> 'sfid',
+		arguments	=> \@_,
+	});
+	return $answer;
 }
 
 ########################################################
