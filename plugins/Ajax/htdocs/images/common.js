@@ -139,6 +139,17 @@ function firehose_open_prefs() {
 	obj.className = "";
 }
 
+function toggleId(id, first, second) {
+	var obj =$(id);
+	if (obj.className == first) {
+		obj.className = second;
+	} else if (obj.className == second) {
+		obj.className = first;
+	} else {
+		obj.className = first;
+	}
+}
+
 function toggleIntro(id, toggleid) {
 	var obj = $(id);
 	var toggle = $(toggleid);

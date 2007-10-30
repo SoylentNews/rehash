@@ -301,3 +301,11 @@ function firehose_get_and_post(id) {
 	};
 	ajax_update(params, 'postform-'+id, handlers); 
 }
+
+function appendToBodytext(text) {
+	var obj = $('admin-bodytext');
+	if (obj) {
+		obj.className = "show";
+		obj.value = obj.value  + text;
+	}
+}
