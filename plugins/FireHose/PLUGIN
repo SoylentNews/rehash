@@ -32,5 +32,6 @@ template=templates/tagsfirehosedivtagbox;misc;default
 template=templates/tagsfirehosedivuser;misc;default
 task=firehose_reject_old.pl
 task=firehose_backend.pl
+task=firehose_get_thumbnails.pl
 image=images/colorscale.png
 image=images/slidethumb.png

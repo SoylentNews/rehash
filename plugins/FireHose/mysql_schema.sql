@@ -35,6 +35,7 @@ CREATE TABLE firehose (
 	body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	srcname VARCHAR(32) NOT NULL DEFAULT '',
+	thumb MEDIUMINT UNSIGNED,
 	mediatype enum("text", "none", "video", "image", "audio") default "none" NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE globjid (globjid),
@@ -56,6 +57,7 @@ CREATE TABLE firehose_text(
 	title VARCHAR(80),
 	introtext text,
 	bodytext text,
+	media text,
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
 
