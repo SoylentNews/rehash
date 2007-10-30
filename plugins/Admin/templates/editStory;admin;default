@@ -248,26 +248,39 @@ __template__
 				<label>
 					Upload an image/audio file for this story [% IF pending_file_count %]([% pending_file_count %] awaiting processing)[% END %]
 				</label>
-				<input type="file" name="media_file"><select name="media_action"><option value="upload">upload</option><option value="thumbnails">thumbnails</option></select>
+				<input type="file" name="media_file">
 
 				[% IF story_static_files && story_static_files.size  %]
 					<label>
 						<a href="[% constants.rootdir %]/admin.pl?op=static_files&amp;sid=[% sid %]">Media Files associated with this story</a>
 					</label>
 					<table cellpadding="3" cellspacing="3">
+					<tr><td>Select <br>Thumb</td><td colspan="3"></td><td>Click to <br>add to body</td></tr>
 					[% FOREACH mfile = story_static_files %]
-					[% trunc_name = mfile.name %]
-					[% trunc_name = trunc_name.replace('^\d+',"") %]
-					<tr><td>[% mfile.sfid %]</td><td><a href="[% constants.imagedir %]/articles/[% sid %][% trunc_name %]" style="color:#fff">[% mfile.name %]</td><td>[% constants.imagedir %]/articles/[% sid %][% trunc_name %]</td>
-					<td>[% mfile.width %]</td>
+					[% filename = mfile.name %]
+					[% filename = filename.replace(".*\/", ""); %]
+					<tr><td><input type="radio" name="thumb" value="[% mfile.sfid %]" [% IF storyref.thumb == mfile.sfid; constants.markup_checked_attribute; END %]></td><td>[% filename %]</td><td>[% mfile.width %]</td>
 					<td>[% mfile.height %]</td>
+
 <td>
 [% IF mfile.filetype == "image" %]
-<img src="[% constants.imagedir %]/articles/[% sid %][% trunc_name %]" width="25%" height="25%">
+[% height = mfile.height; width = mfile.width %]
+[% IF width && height %]
+	[% WHILE (height > 225 || width > 225) %]
+		[% height = height / 1.3  %]
+		[% width = width / 1.3 %]
+	[% END %]
+	[% width = width.int %]
+	[% height = height.int %]
+[% END %]
+<a href="#bodytext" onclick="appendToBodytext('\n<img src=\'[% constants.imagedir %][% mfile.name %]\' width=\'[% mfile.width %]\' height=\'[% mfile.height %]\'>')"><img src="[% constants.imagedir %][% mfile.name %]" width="[% width %]" height="[% height %]"></a>
+[% ELSE %]
+<a href="#bodytext" onclick="appendToBodytext('\n<a href=\'[% constants.imagedir %][% mfile.name %]\'>[% filename %]</a>')">Add [% filename %]</a>
 [% END %]
 </td>
 </tr>
 					[% END %]
+					<tr><td><input type="radio" name="thumb" value="0"></td><td>None</td><td colspan="1"></td></tr>
 					</table>
 				[% END %]
 
@@ -275,10 +288,15 @@ __template__
 					Upload a file for bodytext
 				</label>
 				<input type="file" name="bodytext_file">
+				<a name="bodytext"></a>
 				<label>
-					Extended Copy[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
+					<a href="#" onclick="toggleId('admin-bodytext','hide','show'); return false">Extended Copy</a>[% IF storyref.bodytext_wordcount %] <em>([% storyref.bodytext_wordcount %] word[% IF storyref.bodytext_wordcount != 1; "s"; END %])</em>[% END %]
 				</label>
-				<textarea name="bodytext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual">[% storyref.bodytext | strip_literal %]</textarea>
+				<textarea name="bodytext" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-bodytext" class="[% storyref.bodytext ? "show" : "hide" %]">[% storyref.bodytext | strip_literal %]</textarea>
+				<label>
+					<a href="#" onclick="toggleId('admin-media','hide','show'); return false">Media</a>
+				</label>
+				<textarea name="media" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% storyref.media ? "show" : "hide" %]">[% storyref.media | strip_literal %]</textarea>
 				<div class="notes">[% ispell_comments.bodytext %]</div>
 				[% PROCESS editbuttons %]
 			</fieldset>
