@@ -75,14 +75,18 @@ END %]
 	[% IF bodywrapper;
 		Slash.getData('byline', { adminmode => adminmode, item => item, the_user => the_user }, 'firehose');
 	%]
-
-	<div class="[% IF bodycontent && mode == "fulltitle" %]hide[% ELSIF bodycontent %]body[% ELSE %]empty[% END %]" id="fhbody-[% item.id %]"  [% IF !topic.image %]style="min-height: auto !important; "[% END %]>
+	[% hasimage = topic.image || item.thumb && item.type == "story" || adminmode && item.type == "submission" %]
+	<div class="[% IF bodycontent && mode == "fulltitle" %]hide[% ELSIF bodycontent %]body[% ELSE %]empty[% END %]" id="fhbody-[% item.id %]"  [% IF !hasimage  %]style="min-height: auto !important; "[% END %]>
 	[% END %]
-		[% IF item.tid %]
+		[% IF hasimage %]
 		<div class="topic">
 			[% IF bodycontent %]
 			[% topic = Slash.db.getTopic(item.tid) %]
-			[% IF user.noicons || user.simpledesign || user.lowbandwidth %]
+			[% IF item.thumb && (item.type == "story" || (item.type == "submission" && adminmode))%]
+				 [% file = Slash.db.getStaticFile(item.thumb); %]
+				<img src="[% constants.imagedir %][% file.name %]" alt="thumbnail" [% IF file.width; "width='$file.width'"; END; IF file.height; " height='$file.height'"; END; %]>
+							 
+			[% ELSIF user.noicons || user.simpledesign || user.lowbandwidth %]
 				[ <a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">[% topic.textname %]</a> ]
 			[% ELSIF topic.image %]
 				<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">
@@ -99,6 +103,11 @@ END %]
 			   PROCESS formatHoseIntro; 
 			END %]
 			[% introtext %]
+			[% IF item.media %]
+			<div class="media">
+			[% item.media %]
+			</div>
+			[% END %]
 		</div>
 	[% IF bodywrapper %]
 	</div>
