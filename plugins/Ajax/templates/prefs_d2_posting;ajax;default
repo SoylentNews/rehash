@@ -1,0 +1,140 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+prefs_d2_posting
+__template__
+
+[% hi = constants.comment_maxscore - constants.comment_minscore %]
+[% lo = '-' _ hi %]
+[% range = [ lo .. hi ] %]
+
+<form id ="modal_prefs" method="post">
+
+<input type="hidden" name="formname" value="d2_posting">
+<input type="hidden" name="uid" value="[% user.uid %]">
+
+<table width="100%">
+	<tr>
+	<td valign="middle">
+	&nbsp;<p>
+
+	<b>Email Display</b>
+        (currently
+        [%- IF !user.fakeemail; " not displayed";
+        ELSE; ": <tt>"; user.fakeemail | strip_literal; "</tt>";
+        END %])<br>
+        [% IF !user.emaildisplay.defined;
+        	IF user.fakeemail %]
+        	<i>(Your current email address was apparently set before
+                users' email addresses were forced to one of the below
+                choices. Please pick one and click Save.)</i><br>
+                [% END;
+                user.emaildisplay = 0;
+        END;
+        IF user.emaildisplay.defined;
+        	emaildisplay.${user.emaildisplay} = constants.markup_checked_attribute;
+        END %]
+        <blockquote><div>
+        <input type="radio" name="emaildisplay" [% emaildisplay.0 %] value=0> Do not display an e-mail address.<br>
+        <input type="radio" name="emaildisplay" [% emaildisplay.1 %] value=1> Show your email address with weekly updating spam armoring.<br>
+        <input type="radio" name="emaildisplay" [% emaildisplay.2 %] value=2> Show your real email address without cowering behind childish anonymity or obfuscation.
+        </div></blockquote>
+
+	<b><a name="karma_bonus">Karma Bonus</a></b> (modifier assigned to posts where the user has good karma)<br>
+	[% karma_bonus = 0;
+	IF user.karma_bonus;
+		karma_bonus = user.karma_bonus;
+	END %]
+	[% Slash.createSelect('karma_bonus', range, karma_bonus, 1, 1) %]
+
+	&nbsp;<p>
+
+	[% IF user.karma > constants.goodkarma;
+		b_check = '';
+		IF user.nobonus;
+			b_check = constants.markup_checked_attribute;
+		END %]
+		<input type="hidden" name="nobonus_present" value="1">
+		<label><input type="checkbox" name="nobonus"[% b_check %]> No Karma Bonus</label>
+
+		&nbsp;<p>
+	[% END %]
+
+	<b><a name="subscriber_bonus">Subscriber Bonus</a></b> (modifier assigned to posts where the user was a subscriber)<br>
+	[% subscriber_bonus = 0;
+	IF user.subscriber_bonus;
+		subscriber_bonus = user.subscriber_bonus;
+        END %]
+	[% Slash.createSelect('subscriber_bonus', range, subscriber_bonus, 1, 1) %] 
+
+	&nbsp;<p>
+
+	[% IF user.is_subscriber;
+		sb_check = '';
+		IF user.nosubscriberbonus;
+			sb_check = constants.markup_checked_attribute;
+		END %]
+                <input type="hidden" name="nosubscriberbonus_present" value="1">
+                <label><input type="checkbox" name="nosubscriberbonus"[% sb_check %]> No Subscriber Bonus</label>
+	[% END %]
+
+	<label>Comment Box Size</label>
+	[% textarea_cols = constants.textarea_cols;
+	IF user.textarea_cols;
+		textarea_cols = user.textarea_cols;
+	END;
+
+	textarea_rows = constants.textarea_rows;
+	IF user.textarea_rows;
+		textarea_rows = user.textarea_rows;
+	END %]
+
+	Columns: <input type="text" name="textarea_cols" size="4" value="[% user.textarea_cols || constants.textarea_cols %]">
+        Rows: <input type="text" name="textarea_rows" size="4" value="[% user.textarea_rows || constants.textarea_rows %]">
+        [% PROCESS formNote note="Also applies to other large text boxes" %]
+
+	<label>Comment Post Mode</label>
+	[%
+	formats = Slash.db.getDescriptions('postmodes');
+	Slash.createSelect('posttype', formats, user.posttype, 1);
+	%]
+
+	&nbsp;<p>
+
+	[%
+	p_check = '';
+       	IF user.postanon;
+        	p_check = constants.markup_checked_attribute;
+	END;
+	%]
+	
+	[% IF constants.allow_anonymous && (user.karma > -1 || p_check) %]
+		<input type="hidden" name="postanon_present" value="1">
+		<label><input type="checkbox" name="postanon"[% p_check %]> Post Anonymously</label>
+		</label>
+	[% END %]
+
+	[% IF user.is_admin;
+		nospell_check = '';
+		IF user.no_spell;
+			nospell_check = constants.markup_checked_attribute;
+		END %]
+		<label><input type="checkbox" name="no_spell"[% nospell_check %]> Disable Spellchecker</label>
+	[% END %]
+	</td>
+	</tr>
+</table>
+&nbsp;<p>
+<input type="button" value="Save" onclick="saveModalPrefs()">
+</form>
+__seclev__
+500
+__version__
+$Id$
