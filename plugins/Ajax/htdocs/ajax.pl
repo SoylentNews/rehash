@@ -520,16 +520,38 @@ sub saveModalPrefs {
         my $url = URI->new('//e.a/?' . $form->{'data'});
         my %params = $url->query_form;
 
-        # Specific to D2 for the time being
-        my $user_edits_table = {
-                d2_comment_q     => $params{'d2_comment_q'}     || undef,
-                d2_comment_order => $params{'d2_comment_order'} || undef,
-                nosigs           => ($params{'nosigs'}          ? 1 : 0),
-                noscores          => ($params{'noscores'}            ? 1 : 0),
-                domaintags        => ($params{'domaintags'} != 2     ? $params{'domaintags'} : undef),
-                m2_with_comm_mod  => ($params{'m2_with_mod_on_comm'} ? 1 : undef),
-        };
-
+	# Specific to D2 display and posting prefs for the time being.
+	my $user_edits_table;
+	if ($params{'formname'} eq 'd2_display') {
+		$user_edits_table = {
+			discussion2       => ($params{'discussion2'})        ? 'slashdot' : 'none',
+			d2_comment_q      => $params{'d2_comment_q'}         || undef,
+			d2_comment_order  => $params{'d2_comment_order'}     || undef,
+			nosigs            => ($params{'nosigs'}              ? 1 : 0),
+			noscores          => ($params{'noscores'}            ? 1 : 0),
+			domaintags        => ($params{'domaintags'} != 2     ? $params{'domaintags'} : undef),
+			m2_with_comm_mod  => ($params{'m2_with_mod_on_comm'} ? 1 : undef),
+		}
+	}
+	else {
+		my $karma_bonus      = ($params{'karma_bonus'}      !~ /^[\-+]?\d+$/) ? "+1" : $params{'karma_bonus'};
+		my $subscriber_bonus = ($params{'subscriber_bonus'} !~ /^[\-+]?\d+$/) ? "+1" : $params{'subscriber_bonus'};
+		$user_edits_table = {
+			emaildisplay      => $params{'emaildisplay'} || undef,
+			karma_bonus       => ($karma_bonus ne '+1' ? $karma_bonus : undef),
+			nobonus           => ($params{'nobonus'} ? 1 : undef),
+			subscriber_bonus  => ($subscriber_bonus || undef),
+			nosubscriberbonus => ($params{'nosubscriberbonus'} ? 1 : undef),
+			posttype          => $params{'posttype'},
+			textarea_rows     => ($params{'textarea_rows'} != $constants->{'textarea_rows'}
+				? $params{'textarea_rows'} : undef),
+			textarea_cols     => ($params{'textarea_cols'} != $constants->{'textarea_cols'}
+				? $params{'textarea_cols'} : undef),
+			postanon          => ($params{'postanon'} ? 1 : undef),
+			no_spell          => ($params{'no_spell'} ? 1 : undef),
+		};
+	}
+	
         $slashdb->setUser($params{uid}, $user_edits_table);
 }
 
