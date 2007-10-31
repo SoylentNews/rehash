@@ -1443,6 +1443,12 @@ function saveModalPrefs() {
 	params['op'] = 'saveModalPrefs';
 	params['data'] = Form.serialize(document.forms['modal_prefs']);
 	params['reskey'] = reskey_static;
-	var handlers = {onComplete:hide_modal_box};
+	var handlers = {
+		onComplete: function() {
+			hide_modal_box();
+			if (document.forms['modal_prefs'].refreshable.value)
+				document.location=document.forms['modal_prefs'].refreshable.value;
+		}
+	};
 	ajax_update(params, '', handlers);
 }
