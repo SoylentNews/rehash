@@ -1133,6 +1133,7 @@ sub ajaxFireHoseGetUpdates {
 					slashDisplay("formatHoseIntro", { introtext => $introtext, url => $url, $item => $item }, { Return => 1 });
 					$html->{"text-$_->{id}"} = $introtext;
 					$html->{"fhtime-$_->{id}"} = timeCalc($item->{createtime});
+					$html->{"topic-$_->{id}"} = slashDisplay("dispTopicFireHose", { item => $item, adminmode => $adminmode }, { Return => 1});
 					# updated
 				}
 			}

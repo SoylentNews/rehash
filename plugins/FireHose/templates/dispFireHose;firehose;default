@@ -79,20 +79,9 @@ END %]
 	<div class="[% IF bodycontent && mode == "fulltitle" %]hide[% ELSIF bodycontent %]body[% ELSE %]empty[% END %]" id="fhbody-[% item.id %]"  [% IF !hasimage  %]style="min-height: auto !important; "[% END %]>
 	[% END %]
 		[% IF hasimage %]
-		<div class="topic">
+		<div class="topic" id="topic-[% item.id %]">
 			[% IF bodycontent %]
-			[% topic = Slash.db.getTopic(item.tid) %]
-			[% IF item.thumb && (item.type == "story" || (item.type == "submission" && adminmode))%]
-				 [% file = Slash.db.getStaticFile(item.thumb); %]
-				<img src="[% constants.imagedir %][% file.name %]" alt="thumbnail" [% IF file.width; "width='$file.width'"; END; IF file.height; " height='$file.height'"; END; %]>
-							 
-			[% ELSIF user.noicons || user.simpledesign || user.lowbandwidth %]
-				[ <a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">[% topic.textname %]</a> ]
-			[% ELSIF topic.image %]
-				<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">
-				<img src="[% constants.imagedir %]/topics/[% topic.image %]" width="[% topic.width %]" height="[% topic.height %]" alt="[% topic.textname %]" title="[% topic.textname %]" >
-			</a>
-			[% END %]
+			[% PROCESS dispTopicFireHose item = item %]
 			[% END %]
 		</div>
 		[% END %]

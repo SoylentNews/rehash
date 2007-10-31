@@ -21,7 +21,7 @@ use vars qw(
 	%task	$me	$task_exit_flag
 );
 
-$task{$me}{timespec} = '0-59 * * * *';
+$task{$me}{timespec} = '0-59/2 * * * *';
 $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;

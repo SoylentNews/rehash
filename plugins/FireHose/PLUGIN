@@ -14,6 +14,7 @@ template=templates/data;firehose;default
 template=templates/datelaunch;misc;default
 template=templates/daybreak;firehose;default
 template=templates/dispFireHose;firehose;default
+template=template/dispTopicFireHose;misc;default
 template=templates/fhadvprefpane;misc;default
 template=templates/fireHoseForm;misc;default
 template=templates/firehose_pages;misc;default
