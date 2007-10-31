@@ -156,7 +156,17 @@ END %]
 		<a href="[% gSkin.rootdir %]/users.pl">Create an Account!</a>
 		[% END %]
 
-	 
+[% IF !user.is_anon && user.discussion2 && user.discussion2 == "slashdot";
+        prefslink = "<a href=\"" _ gSkin.rootdir _ "/my/comments\" target=\"_blank\"";
+
+        IF constants.modal_prefs_active;
+                prefslink = prefslink _ "  onclick=\"getModalPrefs('d2_posting', 'Discussion 2')\; return false\"";
+        END;
+
+        prefslink = prefslink _ ">Customize Posting Preferences</a><p>&nbsp;<br>";
+
+        prefslink;
+END %]
 
 [% IF !user.is_anon && user.karma > constants.goodkarma %]
 		<input type="hidden" name="nobonus_present" value="1">
@@ -244,6 +254,14 @@ IF do_br %]<br>[% END %]
 		</fieldset>
 		</form>
 	</div>
+</div>
+
+<div id="modal_cover" style="display:none" onclick="hide_modal_box()"></div>
+<div id="modal_box" style="display:none">
+        <div class="generaltitle" >
+                <div class="title"><h3><div id="preference_title"></div> <a href="#" onclick="hide_modal_box(); return false"><img src="[% gSkin.imagedir %]/images/sic_close.png" alt="Close"></a></h3></div>
+        </div>
+        <div id="modal_box_content"></div>
 </div>
 __seclev__
 1000
