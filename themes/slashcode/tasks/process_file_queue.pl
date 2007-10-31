@@ -29,13 +29,13 @@ $task{$me}{code} = sub {
 			$file_queue_cmds = $slashdb->getNextFileQueueCmds();
 		}
 		$cmd = shift @$file_queue_cmds;
-		if ($cmd->{blobid}) {
-			$cmd->{file} = blobToFile($cmd->{blobid});
-		}
-		if ($cmd->{action} eq 'upload' && $cmd->{file} =~ /\.(jpg|gif|png)/i) {
-			$cmd->{action} = "thumbnails";
-		}
-		if($cmd) {
+		if ($cmd) {
+			if ($cmd->{blobid}) {
+				$cmd->{file} = blobToFile($cmd->{blobid});
+			}
+			if ($cmd->{action} eq 'upload' && $cmd->{file} =~ /\.(jpg|gif|png)/i) {
+				$cmd->{action} = "thumbnails";
+			}
 			handleFileCmd($cmd);
 		}
 		last if $task_exit_flag;
