@@ -144,10 +144,6 @@ html > body .commentwrap table {
 }
 .newcomment {
 }
-.currcomment {
-	opacity: .50;
-	filter: alpha(opacity=50);
-}
 
 .comment > .hidden  {
 	display: none;
@@ -169,6 +165,10 @@ html > body .commentwrap table {
 	width: 99%;
 	height: 1.3em;
 	overflow: hidden;
+}
+
+.comment > .currcomment {
+	border: 1px dotted #666;
 }
 
 /* lots of space between lines */

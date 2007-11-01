@@ -4939,8 +4939,6 @@ CREATE TABLE story_static_files(
 # 2007-10-16
 UPDATE vars SET value = 'T_2_5_0_180' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 INSERT INTO string_param (type, code, name) VALUES ('mediatypes','none','None');
 INSERT INTO string_param (type, code, name) VALUES ('mediatypes','video','Video');
 INSERT INTO string_param (type, code, name) VALUES ('mediatypes','image','Image');
@@ -4968,6 +4966,8 @@ UPDATE vars SET value = 'T_2_5_0_181' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
 
+# SLASHDOT LAST UPDATED HERE
+
 # For plugins/FireHose
 # Install File::Types for plugins/FireHose 
 ALTER TABLE firehose_text ADD COLUMN media TEXT;
@@ -4975,3 +4975,4 @@ ALTER TABLE firehose ADD thumb MEDIUMINT UNSIGNED;
 
 RENAME TABLES story_static_files to static_files;
 ALTER TABLE static_files ADD COLUMN fhid mediumint unsigned NOT NULL;
+

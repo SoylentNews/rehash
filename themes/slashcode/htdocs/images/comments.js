@@ -29,6 +29,7 @@ var currents = { full: 0, oneline: 0, hidden: 0 };
 var commentelements = {};
 var thresh_totals = {};
 
+var ajaxCommentsWaitQueue = [];
 var boxStatusQueue = [];
 var comment_body_reply = [];
 var root_comment = 0;
@@ -652,6 +653,9 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 	if (cids && !cids.length)
 		return;
 
+	if (!cids && ajaxCommentsWait())
+		return;
+
 	if (option)
 		thresh = 1;
 
@@ -699,7 +703,7 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 			var response = eval_response(transport);
 
 			if (!response) {
-				boxStatus(0);
+				ajaxCommentsStatus(0);
 				return;
 			}
 
@@ -766,8 +770,6 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 						if (this_id)
 							this_id.className = this_id.className.replace(' newcomment', ' oldcomment');
 					}
-					last_updated_comments = [];
-					last_updated_comments_index = -1;
 				}
 
 				for (var i = 0; i < update.new_cids_order.length; i++) {
@@ -808,9 +810,9 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 			updateHiddens(cids);
 			if (do_update && highlight && last_updated_comments.length) {
 				last_updated_comments_index = last_updated_comments_index + 1;
-				setFocusComment(last_updated_comments[0], 1);
+				setFocusComment(last_updated_comments[last_updated_comments_index], 1);
 			}
-			boxStatus(0);
+			ajaxCommentsStatus(0);
 
 			if (0 && adTimerInsert) {
 				var tree = $('tree_' + adTimerInsert);
@@ -828,7 +830,7 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 		}
 	};
 
-	boxStatus(1);
+	ajaxCommentsStatus(1);
 	ajax_update(params, '', handlers);
 
 	if (cids) {
@@ -1080,6 +1082,21 @@ function doModifiers (e) {
 				alt_down = 1;
 		}
 	}
+}
+
+function ajaxCommentsWait() {
+	return ajaxCommentsWaitQueue.length ? 1 : 0;
+}
+
+function ajaxCommentsStatus(bool) {
+	boxStatus(bool);
+
+	if (bool)
+		ajaxCommentsWaitQueue.push(1);
+	else
+		ajaxCommentsWaitQueue.shift();
+
+	return true;
 }
 
 function boxStatus(bool) {
@@ -1647,19 +1664,25 @@ function getSeconds () {
 
 
 function setCurrentComment (cid) {
+	var this_id;
 	if (current_cid) {
-		var this_id  = fetchEl('comment_top_' + current_cid);
-		if (this_id) {
+		if (cid == current_cid)
+			return;
+
+		this_id  = fetchEl('comment_top_' + current_cid);
+		if (this_id)
 			this_id.className = this_id.className.replace(' newcomment', ' oldcomment');
+
+		this_id  = fetchEl('comment_' + current_cid);
+		if (this_id)
 			this_id.className = this_id.className.replace(' currcomment', '');
-		}
 	}
 
 
-	var this_id  = fetchEl('comment_top_' + cid);
-	if (this_id) {
+	this_id  = fetchEl('comment_' + cid);
+	if (this_id)
 		this_id.className = this_id.className + ' currcomment';
-	}
+
 	current_cid = cid;
 }
 
@@ -1682,12 +1705,15 @@ function keyHandler(e) {
 					var update = 0;
 					if (key == 'J' || key == 'S') {
 						update = 1;
-						if (i <= 0)
-							i = l;
-						else
+						if (i <= 0) {
+							// this did go back to end; nothing, for now
+							//i = l;
+						} else
 							i = i - 1;
 					} else if (key == 'K' || key == 'W') {
 						if (i >= l) {
+							if (ajaxCommentsWait)
+								return;
 							update = 2;
 							ajaxFetchComments(0, 1, '', 1);
 						} else {
