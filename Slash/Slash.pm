@@ -72,6 +72,8 @@ sub selectComments {
 	my($min, $max) = ($constants->{comment_minscore}, 
 			  $constants->{comment_maxscore});
 	my $num_scores = $max - $min + 1;
+# print STDERR scalar(gmtime) . " selectComments cid undef for $discussion\n" if !defined($cid);
+	$cid ||= 0;
 
 	my $discussion2 = discussion2($user);
 
@@ -139,8 +141,8 @@ sub selectComments {
 		# I'm still looking into how to get parent links and
 		# children to show up properly in flat mode. - Jamie 2002/07/30
 #		$user->{state}{noreparent} = 1 if $commentsort > 3;
-
-		$C->{points} = _get_points($C, $user, $min, $max, $max_uid, $reasons);
+#my $errstr = "selectComments discid=$discussion->{id} cid=$cid options=" . Dumper($options); $errstr =~ s/\s+/ /g;
+		$C->{points} = _get_points($C, $user, $min, $max, $max_uid, $reasons); # , $errstr
 	}
 
 	my $d2_comment_q = $user->{d2_comment_q};
@@ -518,7 +520,8 @@ sub constrain_score {
 }
 
 sub _get_points {
-	my($C, $user, $min, $max, $max_uid, $reasons) = @_;
+	my($C, $user, $min, $max, $max_uid, $reasons, $errstr) = @_;
+#use Data::Dumper; print STDERR scalar(gmtime) . " _get_points errstr='$errstr' C: " . Dumper($C) if !defined($C->{pointsorig}) || !defined($C->{tweak_orig}) || !defined($C->{points}) || !defined($C->{tweak});
 	my $hr = {
 		score_start => constrain_score($C->{pointsorig} + $C->{tweak_orig}),
 		moderations => constrain_score($C->{points} + $C->{tweak}) - constrain_score($C->{pointsorig} + $C->{tweak_orig}),
@@ -719,7 +722,8 @@ sub reparentComments {
 		# But, if all its (great-etc.) grandparents are either invisible
 		# or chronologically precede the root comment, don't reparent it
 		# at all.
-		if ($user->{reparent} && $comments->{$x}{points} >= $threshold) { # XXX either $comments->{$x}{points} or $threshold is undefined here, not sure which or why
+		# XXX either $comments->{$x}{points} or $threshold is sometimes undefined here, not sure which or why
+		if ($user->{reparent} && $comments->{$x}{points} >= $threshold) {
 			my $tmppid = $pid;
 			while ($tmppid
 				&& $comments->{$tmppid} && defined($comments->{$tmppid}{points})
@@ -1618,14 +1622,14 @@ sub displayStory {
 		# Only do the following if force_cache_freshen is not set:
 		# as it is by freshenup.pl when (re)building the 'rendered'
 		# cached data for a story.
-		my $df = ($user->{mode} eq "archive" || ($story->{is_archived} eq "yes" && $user->{is_anon}))
-			? $constants->{archive_dateformat} : "";
-		my $storytime = timeCalc($story->{'time'}, $df);
+		my $is_old = $user->{mode} eq 'archive' || ($story->{is_archived} eq 'yes' && $user->{is_anon});
+		my $df = $is_old ? $constants->{archive_dateformat} : '';
 		my $atstorytime;
 		if ($options->{is_future} && !($user->{author} || $user->{is_admin})) {
 			$atstorytime = $constants->{subscribe_future_name};
 		} else {
-			$atstorytime = $user->{aton} . " " . timeCalc($story->{'time'}, $df);
+			$atstorytime = $user->{aton} . ' '
+				. timeCalc($story->{'time'}, $df, 0, { is_old => $is_old });
 		}
 		$return =~ s/\Q__TIME_TAG__\E/$atstorytime/;
 
