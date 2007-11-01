@@ -157,7 +157,9 @@ sub createItemFromJournal {
 			tid			=> $journal->{tid},
 			srcid			=> $id,
 			discussion		=> $journal->{discussion},
-			type			=> $type
+			type			=> $type,
+			ipid			=> $user->{ipid},
+			subnetid		=> $user->{subnetid},
 		};
 		$self->createFireHose($data);
 		if ($publicize && !isAnon($journal->{uid})) {
