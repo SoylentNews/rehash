@@ -75,7 +75,7 @@ END %]
 	[% IF bodywrapper;
 		Slash.getData('byline', { adminmode => adminmode, item => item, the_user => the_user }, 'firehose');
 	%]
-	[% hasimage = topic.image || item.thumb && item.type == "story" || adminmode && item.type == "submission" %]
+	[% hasimage = item.tid || (item.thumb && item.type == "story") || (adminmode && item.type == "submission") %]
 	<div class="[% IF bodycontent && mode == "fulltitle" %]hide[% ELSIF bodycontent %]body[% ELSE %]empty[% END %]" id="fhbody-[% item.id %]"  [% IF !hasimage  %]style="min-height: auto !important; "[% END %]>
 	[% END %]
 		[% IF hasimage %]
