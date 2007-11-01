@@ -228,9 +228,7 @@ sub mailPasswd {
 		@srcids{keys %{$user->{srcids}}} = values %{$user->{srcids}};
 		delete $srcids{uid};
 
-		if ($reader->checkAL2(\%srcids, 'nopost')
-			|| $reader->checkAL2(\%srcids, 'nopostanon')
-		) {
+		if ($reader->checkAL2(\%srcids, [qw( nopost nopostanon spammer )])) {
 			push @note, getData('mail_readonly');
 			$error = 1;
 

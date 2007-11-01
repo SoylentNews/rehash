@@ -13,10 +13,14 @@ CREATE TABLE journals (
 	tid SMALLINT UNSIGNED NOT NULL,
 	promotetype ENUM ("publicize","publish", "post") NOT NULL DEFAULT "publish",
 	last_update timestamp NOT NULL,
+	srcid_32 BIGINT UNSIGNED NOT NULL DEFAULT 0,
+	srcid_24 BIGINT UNSIGNED NOT NULL DEFAULT 0,
 	PRIMARY KEY (id),
 	KEY uid_date_id (uid,date,id),
 	KEY IDandUID (id,uid),
-	KEY tid (tid)
+	KEY tid (tid),
+	KEY srcid_32 (srcid_32),
+	KEY srcid_24 (srcid_24)
 );
 
 DROP TABLE IF EXISTS journals_text;

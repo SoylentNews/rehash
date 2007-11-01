@@ -5334,18 +5334,26 @@ sub getAL2Comments {
 
 sub checkAL2 {
 	my($self, $srcids, $type) = @_;
+	my $type_ar = ref($type) ? $type : [ $type ];
 
 	# If the caller is querying about a type that does not
 	# exist for this site, that's OK, it just means that no
-	# srcid can have it.  So we can return without querying
-	# the DB.
+	# srcid can have it.  If none of the types given exist,
+	# we can return without querying the DB.
 	my $types = $self->getAL2Types();
-	return 0 if !exists $types->{$type};
+	my $any_exist = 0;
+	for my $t (@$type_ar) {
+		$any_exist = 1, last if exists $types->{$t};
+	}
+	return 0 unless $any_exist;
 
-	# It's at least possible that the srcids have this type,
-	# so run the check.
+	# It's at least possible that the srcids have one or more
+	# of these types, so run the check.
 	my $data = $self->getAL2($srcids);
-	return $data->{$type} ? 1 : 0;
+	for my $t (@$type_ar) {
+		return 1 if exists $types->{$t} && $data->{$type};
+	}
+	return 0;
 }
 
 sub getAL2List {

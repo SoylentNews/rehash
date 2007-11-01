@@ -8,6 +8,7 @@ INSERT IGNORE INTO reskey_vars VALUES (8, 'duration_uses', 30, 'min duration (in
 INSERT IGNORE INTO reskey_vars VALUES (8, 'duration_max-uses', '30', 'how many uses per timeframe');
 
 INSERT INTO reskey_resource_checks (rkrcid, rkrid, type, class, ordernum) VALUES (NULL, 8,'use','Slash::ResKey::Checks::Post',151);
+INSERT INTO reskey_resource_checks (rkrcid, rkrid, type, class, ordernum) VALUES (NULL, 8,'all','Slash::ResKey::Checks::Spammer',531);
 INSERT INTO reskey_resource_checks (rkrcid, rkrid, type, class, ordernum) VALUES (NULL, 8,'all','Slash::ResKey::Checks::Duration',601);
 INSERT INTO reskey_resource_checks (rkrcid, rkrid, type, class, ordernum) VALUES (NULL ,8,'all','Slash::ResKey::Checks::User',101);
 

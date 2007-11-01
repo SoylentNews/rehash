@@ -696,10 +696,11 @@ sub mailPasswd {
 		# user, to determine whether this IP is OK'd to
 		# send the mail to the target user.
 		# XXXSRCID This should check a separate field like
-		# 'openproxy' instead of piggybacking off of 'nopost'
+		# 'openproxy' instead of piggybacking off of the
+		# existing nopost and spammer
 		my $srcids_to_check = $user->{srcids};
 		$err_name = 'mailpasswd_readonly_err'
-			if $reader->checkAL2($srcids_to_check, 'nopost');
+			if $reader->checkAL2($srcids_to_check, [qw( nopost spammer )]);
 	}
 	if (!$err_name) {
 		$err_name = 'mailpasswd_toooften_err'
@@ -3176,7 +3177,7 @@ sub saveMiscOpts {
 sub listReadOnly {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $readonlylist = $reader->getAL2List('nopost');
+	my $readonlylist = $reader->getAL2List([qw( nopost spammer )]);
 
 	slashDisplay('listReadOnly', {
 		readonlylist => $readonlylist,

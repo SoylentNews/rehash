@@ -4916,17 +4916,16 @@ INSERT INTO tagbox_userkeyregexes VALUES ('FireHoseScores', '^tag_clout$');
 # For tagboxes/Top
 INSERT INTO tagbox_userkeyregexes VALUES ('Top', '^tag_clout$');
 
-
 CREATE TABLE file_queue (
         fqid int(10) unsigned NOT NULL auto_increment,
         stoid mediumint(8) unsigned default NULL,
         fhid mediumint(8) unsigned default NULL,
         file varchar(255) default NULL,
         action enum('upload','thumbnails') default NULL,
-        PRIMARY KEY  (fqid)
+        PRIMARY KEY (fqid)
 ) ENGINE=InnoDB;
 
-CREATE TABLE story_static_files(
+CREATE TABLE story_static_files (
         sfid mediumint unsigned NOT NULL auto_increment,
         stoid mediumint unsigned NOT NULL,
         filetype ENUM("file", "image", "audio") not null default "file",
@@ -4934,7 +4933,6 @@ CREATE TABLE story_static_files(
         PRIMARY KEY (sfid),
         INDEX stoid(stoid)
 ) ENGINE=InnoDB;
-
 
 # 2007-10-16
 UPDATE vars SET value = 'T_2_5_0_180' WHERE name = 'cvs_tag_currentcode';
@@ -4969,10 +4967,34 @@ UPDATE vars SET value = 'T_2_5_0_181' WHERE name = 'cvs_tag_currentcode';
 # SLASHDOT LAST UPDATED HERE
 
 # For plugins/FireHose
-# Install File::Types for plugins/FireHose 
+# Install CPAN module File::Type for plugins/FireHose 
 ALTER TABLE firehose_text ADD COLUMN media TEXT;
 ALTER TABLE firehose ADD thumb MEDIUMINT UNSIGNED;
 
 RENAME TABLES story_static_files to static_files;
 ALTER TABLE static_files ADD COLUMN fhid mediumint unsigned NOT NULL;
+
+# for plugins/Journal
+ALTER TABLE journals ADD COLUMN srcid_32 BIGINT UNSIGNED NOT NULL DEFAULT 0, ADD COLUMN srcid_24 BIGINT UNSIGNED NOT NULL DEFAULT 0;
+ALTER TABLE journals ADD INDEX srcid_32 (srcid_32), ADD INDEX srcid_24 (srcid_24);
+
+# for plugins/Bookmark
+ALTER TABLE bookmarks ADD COLUMN srcid_32 BIGINT UNSIGNED NOT NULL DEFAULT 0, ADD COLUMN srcid_24 BIGINT UNSIGNED NOT NULL DEFAULT 0;
+ALTER TABLE bookmarks ADD INDEX srcid_32 (srcid_32), ADD INDEX srcid_24 (srcid_24);
+INSERT INTO reskey_resource_checks VALUES (NULL, 8, 'all', 'Slash::ResKey::Checks::AL2::Spammer', 531);
+
+SELECT @maxbitpos := MAX(bitpos) FROM al2_types;
+INSERT INTO al2_types VALUES (NULL, @maxbitpos+1, 'spammer', 'Spammer');
+
+INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::AL2::Spammer', 531);
+INSERT INTO reskey_resource_checks VALUES (NULL, 2, 'all', 'Slash::ResKey::Checks::AL2::Spammer', 531);
+INSERT INTO reskey_resource_checks VALUES (NULL, 3, 'all', 'Slash::ResKey::Checks::AL2::Spammer', 531);
+INSERT INTO reskey_resource_checks VALUES (NULL, 4, 'all', 'Slash::ResKey::Checks::AL2::Spammer', 531);
+INSERT INTO reskey_resource_checks VALUES (NULL, 5, 'all', 'Slash::ResKey::Checks::AL2::Spammer', 531);
+INSERT INTO reskey_resource_checks VALUES (NULL, 6, 'all', 'Slash::ResKey::Checks::AL2::Spammer', 531);
+INSERT INTO reskey_resource_checks VALUES (NULL, 9, 'all', 'Slash::ResKey::Checks::AL2::Spammer', 531);
+INSERT INTO reskey_resource_checks VALUES (NULL,10, 'all', 'Slash::ResKey::Checks::AL2::Spammer', 531);
+
+# For tagboxes/Top
+INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_top_excludetagnames', 'yes no binspam dupe notthebest offtopic stupid slownewsday interesting funny insightful', 'Minimum score a tag must have to make it into the top tags for a story or firehose item');
 

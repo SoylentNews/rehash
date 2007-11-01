@@ -1,7 +1,9 @@
 __section__
 default
 __description__
-You should describe stuff here.
+If the list of these tags is changed, consider also updating the var
+'tagbox_top_excludetagnames'.
+
 __title__
 Useless title to template
 __page__
