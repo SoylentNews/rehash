@@ -39,17 +39,21 @@ $task{$me}{code} = sub {
 		my ($scheme, $domain, $path, $query, $frag) = uri_split($_->{url});
 		my $page = get $_->{url};
 		slashdLog("$_->{id}: $_->{url}\n");
+		my @pairs = split(/&/, $query);
+		my $params = {};
+		foreach my $pair (@pairs) {
+			my ($name, $value) = split(/=/, $pair);
+			$params->{$name}= $value;
+		}
 		if ($page) {
-			if ($domain =~ /youtube\.com/) {
-				my @pairs = split(/&/, $query);
-				my $params = {};
-				foreach my $pair (@pairs) {
-					my ($name, $value) = split(/=/, $pair);
-					$params->{$name}= $value;
-				}
-				if ($params->{v}) {
-					$thumb = "http://img.youtube.com/vi/$params->{v}/0.jpg";
-				}
+			if ($domain =~ /youtube\.com/ && $params->{v}) {
+				$thumb = "http://img.youtube.com/vi/$params->{v}/0.jpg";
+			} elsif ($domain =~ /video.google.com/ && $params->{docid}) {
+				my $feed = get "http://video.google.com/videofeed?docid=$params->{docid}";
+				$feed =~/<media:thumbnail url="([^"]+)"/;
+				$thumb = $1;
+				$thumb =~ s/amp;//g;
+				
 			} elsif ($page =~ /link\s+rel="videothumbnail"\s+href="([^"]*)"/) {
 				$thumb = $1;
 			} elsif ($page =~ /link\s+rel="image_src"\s+href="([^"]*)"/) {
