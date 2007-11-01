@@ -21,8 +21,8 @@ __template__
 [% STOP %]
 [% END %]
 [% user.noscores = 1; # Do not show scores in comment display. %]
-<b>PLEASE READ THE DIRECTIONS CAREFULLY BEFORE EMAILING
-[% constants.siteadmin_name.uc %]!</b> <p>What follows are random
+<b>PLEASE READ THE DIRECTIONS CAREFULLY BEFORE EMAILING US!</b>
+<p>What follows are random
 moderations performed on comments in the last few weeks on [% constants.sitename %].
 You are asked to <b>honestly</b> evaluate the actions of the moderator of each
 comment. Moderators who are ranked poorly will cease to be eligible for
