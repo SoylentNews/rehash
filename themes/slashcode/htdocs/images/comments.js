@@ -1712,7 +1712,7 @@ function keyHandler(e) {
 							i = i - 1;
 					} else if (key == 'K' || key == 'W') {
 						if (i >= l) {
-							if (ajaxCommentsWait)
+							if (ajaxCommentsWait())
 								return;
 							update = 2;
 							ajaxFetchComments(0, 1, '', 1);
