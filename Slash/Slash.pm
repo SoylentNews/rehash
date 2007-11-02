@@ -1629,7 +1629,7 @@ sub displayStory {
 			$atstorytime = $constants->{subscribe_future_name};
 		} else {
 			$atstorytime = $user->{aton} . ' '
-				. timeCalc($story->{'time'}, $df, 0, { is_old => $is_old });
+				. timeCalc($story->{'time'}, $df, undef, { is_old => $is_old });
 		}
 		$return =~ s/\Q__TIME_TAG__\E/$atstorytime/;
 
