@@ -13,14 +13,20 @@ __template__
 
 <form id ="modal_prefs" method="post">
 
-<input type="hidden" name="formname"  value="editcomm">
-<input type="hidden" name="op" value="savecomm">
+<input type="hidden" name="formname" value="d2_display">
 <input type="hidden" name="uid" value="[% user.uid %]">
+<input type="hidden" name="refreshable" value="">
 
 <table width="100%">
 	<tr>
 	<td valign="middle">
-                &nbsp;<p>
+		[% d2_check = '';
+		IF user.discussion2 == 'slashdot';
+			d2_check = constants.markup_checked_attribute;
+		END %]
+		<label><input type="checkbox" name="discussion2"[% d2_check %] onclick="javascript:void(document.forms['modal_prefs'].refreshable.value=document.URL);">&nbsp;Enable Dynamic Discussions</label>
+
+		&nbsp;<p>
 
 		[% IF user.discussion2 && user.discussion2 == "slashdot" %]
                 	<blockquote>
