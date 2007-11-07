@@ -231,8 +231,8 @@ sub run {
 				} keys %scores;
 			$#top = 4 if $#top > 4;
 			$firehose->setFireHose($fhid, { toptags => join(' ', @top) });
+			main::tagboxLog("Top->run $affected_id with " . scalar(@$tag_ar) . " tags, setFireHose $fhid to '@top' >= $minscore1");
 		}
-		main::tagboxLog("Top->run $affected_id with " . scalar(@$tag_ar) . " tags, setFireHose $fhid to '@top' >= $minscore1");
 	}
 
 	if ($type eq 'stories') {
