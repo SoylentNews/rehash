@@ -5075,11 +5075,13 @@ sub getAL2TypeById {
 # 	{ norss => 0, trusted => 1, comment => 'we love these guys' },
 # 	{ adminuid => 78724 });
 
-# This method always succeeds.  It returns 1 if a row was actually
-# added to al2, 0 if there was merely an existing row that was updated.
+# This method always succeeds unless srcid is 0.  It returns
+# 1 if a row was actually added to al2, 0 if there was merely an
+# existing row that was updated.
 
 sub setAL2 {
 	my($self, $srcid, $type_hr, $options) = @_;
+	return undef if !$srcid;
 	my $adminuid = $options->{adminuid} || getCurrentUser('uid') || 0;
 	my $ts_sql = $options->{ts} ? $self->sqlQuote($options->{ts}) : 'NOW()';
 
@@ -12140,6 +12142,8 @@ sub _addGlobjEssentials_journals {
 	for my $id (@journal_ids) {
 		my $globjid = $journals_hr->{$id};
 		my $fixnick = $journaldata_hr->{$id}{nickname};
+if (!defined $fixnick) { print STDERR scalar(gmtime) . " _addGlobjEssentials_journals no nick for journal $id\n"; }
+		$fixnick = fixparam($fixnick || '');
 		$data_hr->{$globjid}{url} = "$constants->{rootdir}/~$fixnick/journal/$id";
 		$data_hr->{$globjid}{title} = $journaldata_hr->{$id}{description};
 		$data_hr->{$globjid}{created_at} = $journaldata_hr->{$id}{date};
