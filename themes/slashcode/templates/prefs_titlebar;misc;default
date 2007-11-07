@@ -23,8 +23,13 @@ tabs = [
 	{ link = "/users.pl?op=edithome",	label = "Homepage",	sel_label = "home" },
 	{ link = "/users.pl?op=editcomm",	label = "Comments",	sel_label = "comments" }
 ];
-IF constants.plugin.Messages; tabs.push(
-	{ link = "/my/messages",		label = "Messages",	sel_label = "messages" },
+IF constants.plugin.Messages;
+        messages_link = "/my/messages";
+        IF constants.modal_prefs_active;
+                messages_link = messages_link _ "\" onclick=\"getModalPrefs('messages', 'Messages')\; return false";
+        END;
+        tabs.push(
+        { link = messages_link,                 label = "Messages",     sel_label = "messages" },
 ); END;
 IF constants.plugin.Journal; tabs.push(
 	{ link = "/journal.pl?op=editprefs",	label = "Journal",	sel_label = "journal" },
