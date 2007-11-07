@@ -1567,7 +1567,7 @@ sub listTagnamesActive {
 }
 
 sub listTagnamesRecent {
-	my($self, $options) = @_;
+	my($self, $clout_type, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $seconds =         $options->{seconds}         || (3600*6);
 	my $include_private = $options->{include_private} || 0;
