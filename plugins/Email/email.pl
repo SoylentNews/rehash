@@ -178,7 +178,7 @@ sub emailStory {
 	}
 
 	# XXXSRCID might want to do this on a reader db
-	if ($slashdb->checkAL2($user->{srcids}, 'nopost')) {
+	if ($slashdb->checkAL2($user->{srcids}, [qw( nopost spammer )])) {
 		print getData('readonly');
 		return;
 	}
