@@ -200,8 +200,8 @@ sub create {
 		-date		=> 'NOW()',
 		posttype	=> $posttype,
 		promotetype	=> $promotetype,
-		srcid_24	=> get_srcid_sql_in($user->{srcids}{24}),
-		srcid_32	=> get_srcid_sql_in($user->{srcids}{32}),
+		-srcid_24	=> get_srcid_sql_in($user->{srcids}{24}),
+		-srcid_32	=> get_srcid_sql_in($user->{srcids}{32}),
 	});
 
 	my($id) = $self->getLastInsertId({ table => 'journals', prime => 'id' });

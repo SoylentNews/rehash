@@ -110,8 +110,8 @@ sub saveBookmark {
 		url_id 		=> $url_id,
 		uid    		=> $user->{uid},
 		title		=> strip_notags($form->{title}),
-		srcid_32	=> get_srcid_sql_in($user->{srcids}{32}),
-		srcid_24	=> get_srcid_sql_in($user->{srcids}{24}),
+		-srcid_32	=> get_srcid_sql_in($user->{srcids}{32}),
+		-srcid_24	=> get_srcid_sql_in($user->{srcids}{24}),
 	};
 
 	my $bookmark_id;
