@@ -1,0 +1,23 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+modal_footer
+__template__
+<div id="modal_cover" style="display:none" onclick="hide_modal_box()"></div>
+<div id="modal_box" style="display:none">
+        <div class="generaltitle" >
+                <div class="title"><h3><div id="preference_title"></div> <a href="#" onclick="hide_modal_box(); return false"><img src="[% gSkin.imagedir %]/images/sic_close.png" alt="Close"></a></h3></div>
+        </div>
+        <div id="modal_box_content"></div>
+</div>
+__seclev__
+500
+__version__
+$Id$
