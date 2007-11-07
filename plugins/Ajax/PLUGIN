@@ -35,3 +35,5 @@ template=templates/sectionpref;ajax;default
 template=templates/datewidget;misc;default
 template=templates/prefs_d2;ajax;default
 template=templates/prefs_d2_posting;ajax;default
+template=templates/prefs_messages;ajax;default
+template=templates/modal_footer;misc;default
