@@ -1,0 +1,99 @@
+__section__
+default
+__description__
+* messagecodes   = hashref of message codes
+* displaymodes   = hashref of delivery modes
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+prefs_messages
+__template__
+<div id="users-blocks">
+	<div class="generalbody">
+		[%
+		   usernick = user.nickname | strip_literal;
+
+		   modenone = Slash.MSG_MODE_NONE;
+		   modemail = Slash.MSG_MODE_EMAIL;
+		   modeweb  = Slash.MSG_MODE_WEB;
+		%]
+
+		From this page you can configure various messages that [% constants.sitename %] can optionally send to you. The primary options are [% deliverymodes.$modenone %] (Disabled), [% deliverymodes.$modemail %], [% deliverymodes.$modeweb %], [% IF constants.im_screenname %]AIM,[% END %] and Mobile Text. Not all options are available for all message types.  [% deliverymodes.$modeweb %] messages <b>will be deleted</b> after <b>[% constants.message_web_expire || 31 %] days</b>.[% IF constants.im_screenname %] If you plan on receiving AIM messages, please add [% constants.im_screenname %] to your buddylist.[% END %]
+
+	&nbsp;<p>
+
+	<form id ="modal_prefs" method="post">
+	[%
+	messages = Slash.getObject('Slash::Messages');
+	%]
+	<table cellspacing="10">
+	[%
+	FOREACH type = bvmessagecodes.keys.sort;
+		code = bvmessagecodes.$type.code;
+		UNLESS messages.checkMessageUser(code, user) && bvmessagecodes.$type.seclev < 100;
+			NEXT;
+		END
+	%]
+		<tr>
+		<td><b>[% type %]</td></b>
+		<td><select name="deliverymodes_[% code %]">
+		[% FOREACH valid_code = bvmessagecodes.$type.valid_bvdeliverymodes.sort %]
+			<option value="[% valid_code %]"[% IF prefs.${code} == valid_code %] selected[% END %]>[% bvdeliverymodes.$valid_code.name %]</option>
+		[% END %]
+		</select>
+		</td>
+		[% IF type == 'Comment Reply' %]
+			<tr>
+			<td style="padding-left: 15px;">
+			[% thresh = user.message_threshold.defined ? user.message_threshold : constants.message_threshold;
+			Slash.createSelect('message_threshold', Slash.db.getDescriptions('threshcodes'), thresh, 1) %]
+			</td>
+			<td style="padding-left: 15px;">
+			<b>Minimum Threshold</b>
+			</td>
+			</tr>
+		[% END %]
+		</tr>
+	[% END %]
+	</table>
+
+	[% IF user.seclev >= 100 %]
+		<h3>Admin Options</h3>
+
+		<table cellspacing="10">
+        	[%
+        	FOREACH type = bvmessagecodes.keys.sort;
+                	code = bvmessagecodes.$type.code;
+                	UNLESS messages.checkMessageUser(code, user) && bvmessagecodes.$type.seclev >= 100;
+                        	NEXT;
+                	END
+        	%]
+                	<tr>
+                	<td><b>[% type %]</td></b>
+                	<td><select name="deliverymodes_[% code %]">
+                	[% FOREACH valid_code = bvmessagecodes.$type.valid_bvdeliverymodes.sort %]
+                        	<option value="[% valid_code %]"[% IF prefs.${code} == valid_code %] selected[% END %]>[% bvdeliverymodes.$valid_code.name %]</option>
+                	[% END %]
+                	</select>
+                	</td>
+                	</tr>
+        	[% END %]
+        	</table>
+	[% END %]
+
+	&nbsp;<p>
+
+	<input type="hidden" name="uid" value="[% user.uid %]">
+	<input type="hidden" name="formname" value="messages">
+	<input type="button" value="Save" onclick="saveModalPrefs()">
+	</form>
+	</div>
+</div>
+__seclev__
+500
+__version__
+$Id$
