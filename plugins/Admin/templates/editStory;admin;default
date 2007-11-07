@@ -244,11 +244,14 @@ __template__
 				<div class="notes">[% ispell_comments.introtext %]</div>
 
 				[% PROCESS editbuttons %]
-
+				[% IF newarticle %]
+					Need to save the story before you can upload files to it <br>
+				[% ELSE %]
 				<label>
 					Upload an image/audio file for this story [% IF pending_file_count %]([% pending_file_count %] awaiting processing)[% END %]
 				</label>
 				<input type="file" name="media_file">
+				[% END %]
 
 				[% IF story_static_files && story_static_files.size  %]
 					<label>
@@ -257,30 +260,34 @@ __template__
 					<table cellpadding="3" cellspacing="3">
 					<tr><td>Select <br>Thumb</td><td colspan="3"></td><td>Click to <br>add to body</td></tr>
 					[% FOREACH mfile = story_static_files %]
-					[% filename = mfile.name %]
-					[% filename = filename.replace(".*\/", ""); %]
-					<tr><td><input type="radio" name="thumb" value="[% mfile.sfid %]" [% IF storyref.thumb == mfile.sfid; constants.markup_checked_attribute; END %]></td><td>[% filename %]</td><td>[% mfile.width %]</td>
-					<td>[% mfile.height %]</td>
+					[% bigfile = mfile.name %]
+					[% IF mfile.filetype != "image" || (mfile.filetype == "image" && bigfile.match('-thumb\.')) %]
+						[% filename = mfile.name %]
+						[% filename = filename.replace(".*\/", ""); %]
+						<tr><td><input type="radio" name="thumb" value="[% mfile.sfid %]" [% IF storyref.thumb == mfile.sfid; constants.markup_checked_attribute; END %]></td><td>[% filename %]</td><td>[% mfile.width %]</td>
+						<td>[% mfile.height %]</td>
 
-<td>
-[% IF mfile.filetype == "image" %]
-[% height = mfile.height; width = mfile.width %]
-[% IF width && height %]
-	[% WHILE (height > 225 || width > 225) %]
-		[% height = height / 1.3  %]
-		[% width = width / 1.3 %]
-	[% END %]
-	[% width = width.int %]
-	[% height = height.int %]
-[% END %]
-<a href="#bodytext" onclick="appendToBodytext('\n<img src=\'[% constants.imagedir %][% mfile.name %]\' width=\'[% mfile.width %]\' height=\'[% mfile.height %]\'>')"><img src="[% constants.imagedir %][% mfile.name %]" width="[% width %]" height="[% height %]"></a>
-[% ELSE %]
-<a href="#bodytext" onclick="appendToBodytext('\n<a href=\'[% constants.imagedir %][% mfile.name %]\'>[% filename %]</a>')">Add [% filename %]</a>
-[% END %]
+						<td>
+						[% IF mfile.filetype == "image" %]
+							[% height = mfile.height; width = mfile.width %]
+							[% IF width && height %]
+								[% WHILE (height > 225 || width > 225) %]
+									[% height = height / 1.3  %]
+									[% width = width / 1.3 %]
+								[% END %]
+								[% width = width.int %]
+								[% height = height.int %]
+							[% END %]
+							[% bigfile = bigfile.replace('-thumb') %]
+							<a href="#bodytext" onclick="appendToBodytext('\n<a href=\'[% constants.imagedir %][% bigfile %]\'><img src=\'[% constants.imagedir %][% mfile.name %]\' width=\'[% mfile.width %]\' height=\'[% mfile.height %]\'></a>')"><img src="[% constants.imagedir %][% mfile.name %]" width="[% width %]" height="[% height %]"></a>
+						[% ELSE %]
+							<a href="#bodytext" onclick="appendToBodytext('\n<a href=\'[% constants.imagedir %][% mfile.name %]\'>[% filename %]</a>')">Add [% filename %]</a>
+						[% END %]
 </td>
 </tr>
 					[% END %]
-					<tr><td><input type="radio" name="thumb" value="0"></td><td>None</td><td colspan="1"></td></tr>
+					[% END %]
+					<tr><td><input type="radio" name="thumb" value="0" [% IF !storyref.thumb; constants.markup_checked_attribute; END %]></td><td>None</td><td colspan="1"></td></tr>
 					</table>
 				[% END %]
 
