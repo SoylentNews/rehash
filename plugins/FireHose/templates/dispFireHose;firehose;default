@@ -32,7 +32,6 @@ __template__
     	story = Slash.db.getStory(item.srcid);
 	future = story.is_future;
     END;
-
     IF mode == "fulltitle";
     	IF !bodycontent_include;
 	    	bodycontent = 0;
@@ -48,7 +47,6 @@ __template__
     IF nostorylinkwrapper;
         storylinkwrapper = 0;
     END;
-    adminmode = 0;
     IF user.is_admin;
     	adminmode = 1;
         IF options.firehose_usermode.defined;
@@ -60,6 +58,7 @@ __template__
 	END;
     END;
 %]
+[% hasimage = item.tid || (item.thumb && item.type == "story") || (adminmode && item.type == "submission") %]
 [% IF item.url_id;
 	url = Slash.db.getUrl(item.url_id);
 END %]
@@ -75,7 +74,6 @@ END %]
 	[% IF bodywrapper;
 		Slash.getData('byline', { adminmode => adminmode, item => item, the_user => the_user }, 'firehose');
 	%]
-	[% hasimage = item.tid || (item.thumb && item.type == "story") || (adminmode && item.type == "submission") %]
 	<div class="[% IF bodycontent && mode == "fulltitle" %]hide[% ELSIF bodycontent %]body[% ELSE %]empty[% END %]" id="fhbody-[% item.id %]"  [% IF !hasimage  %]style="min-height: auto !important; "[% END %]>
 	[% END %]
 		[% IF hasimage %]
