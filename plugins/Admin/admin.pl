@@ -1240,6 +1240,11 @@ sub editStory {
 		} else {
 			$display_check = $form->{display} ? $constants->{markup_checked_attribute} : '';
 		}
+		
+		$stoid = $slashdb->getStory($form->{stoid} || $form->{sid}, 'stoid', 1);
+		if ($stoid) {
+			handleMediaFileForStory($stoid);
+		}
 
 	} elsif ($stoid) { # Loading an existing SID
 
@@ -1517,7 +1522,9 @@ sub editStory {
 	if ($stoid || $form->{sid}) {
 		my $story = $slashdb->getStory($form->{sid});
 		$stoid ||= $story->{stoid};
-		$pending_file_count = $slashdb->numPendingFilesForStory($stoid); 		$story_static_files = $slashdb->getStaticFilesForStory($stoid);
+		my $fhid = $form->{fhid} || $story->{fhid};
+		$pending_file_count = $slashdb->numPendingFilesForStory($stoid); 
+		$story_static_files = $slashdb->getStaticFiles($stoid, $fhid);
 	}
 	slashDisplay('editStory', {
 		stoid			=> $stoid,
