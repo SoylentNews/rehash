@@ -12492,6 +12492,20 @@ sub getStaticFilesForStory {
 	return $self->sqlSelectAllHashrefArray("*", "static_files", "stoid=$stoid_q");
 }
 
+sub getStaticFiles {
+	my($self, $stoid, $fhid) = @_;
+	my $stoid_q = $self->sqlQuote($stoid);
+	my $fhid_q = $self->sqlQuote($fhid);
+	my @where;
+	push @where, "stoid=$stoid_q";
+	push @where, "fhid=$fhid_q";
+	my $where = join ' OR ', @where;
+	print STDERR " $where \n";
+	return $self->sqlSelectAllHashrefArray("*", "static_files", $where);
+}
+
+
+
 sub getStaticFile {
 	my $answer = _genericGetCache({
 		table		=> 'static_files',
