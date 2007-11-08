@@ -4867,12 +4867,15 @@ INSERT IGNORE INTO vars (name,value,description) SELECT CONCAT('tagbox_firehoses
 DELETE FROM vars WHERE name='firehose_userpop_col';
 UPDATE firehose SET popularity=popularity2;
 ALTER TABLE firehose DROP COLUMN popularity2;
-INSERT INTO clout_types (clid, name, class) VALUES (1, 'describe', 'Slash::Clout::Describe');
-INSERT INTO clout_types (clid, name, class) VALUES (2, 'vote',     'Slash::Clout::Vote');
-INSERT INTO clout_types (clid, name, class) VALUES (3, 'moderate', 'Slash::Clout::Moderate');
+
+# For plugins/Tags
 INSERT INTO users_clout (clout_id, uid, clid, clout) SELECT NULL, uid, 1, value+0 FROM users_param WHERE name='tagpeerval';
 INSERT INTO users_clout (clout_id, uid, clid, clout) SELECT NULL, uid, 2, value+0 FROM users_param WHERE name='tagpeerval2';
 DELETE FROM users_param WHERE name IN ('tagpeerval', 'tagpeerval2');
+
+INSERT INTO clout_types (clid, name, class) VALUES (1, 'describe', 'Slash::Clout::Describe');
+INSERT INTO clout_types (clid, name, class) VALUES (2, 'vote',     'Slash::Clout::Vote');
+INSERT INTO clout_types (clid, name, class) VALUES (3, 'moderate', 'Slash::Clout::Moderate');
 
 # 2007-09-26
 UPDATE vars SET value = 'T_2_5_0_176' WHERE name = 'cvs_tag_currentcode';
@@ -5001,7 +5004,7 @@ UPDATE vars SET value = 'T_2_5_0_182' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
-# Falk
+# for plugins/Falk
 ALTER TABLE ad_settings ADD COLUMN always TINYINT UNSIGNED NOT NULL DEFAULT 0;
 
 # don't remove this if you want it ... but remove it if you don't!
@@ -5010,5 +5013,29 @@ DELETE FROM message_codes WHERE code = 18;
 
 # 2007-11-08
 UPDATE vars SET value = 'T_2_5_0_183' WHERE name = 'cvs_tag_currentcode';
+
+# Redundant for many sites, but this is here because an earlier error
+# in the upgrades file may have left your site without them if you
+# didn't have the FireHose plugin installed.
+INSERT IGNORE INTO clout_types (clid, name, class) VALUES (1, 'describe', 'Slash::Clout::Describe');
+INSERT IGNORE INTO clout_types (clid, name, class) VALUES (2, 'vote',     'Slash::Clout::Vote');
+INSERT IGNORE INTO clout_types (clid, name, class) VALUES (3, 'moderate', 'Slash::Clout::Moderate');
+
+# For plugins/Tags
+# Also redundant, but if you have Tags and no FireHose you may
+# need this.
+INSERT IGNORE INTO users_clout (clout_id, uid, clid, clout) SELECT NULL, uid, 1, value+0 FROM users_param WHERE name='tagpeerval';
+INSERT IGNORE INTO users_clout (clout_id, uid, clid, clout) SELECT NULL, uid, 2, value+0 FROM users_param WHERE name='tagpeerval2';
+DELETE FROM users_param WHERE name IN ('tagpeerval', 'tagpeerval2');
+
+# for plugins/FireHose
+ALTER TABLE firehose ADD COLUMN is_spam enum('no', 'yes') DEFAULT 'no' AFTER attention_needed;
+# This may throw an error but that's OK - just fixing an earlier bug
+# in this upgrades file
+ALTER TABLE firehose DROP COLUMN popularity2;
+
+# for tagboxes/Despam
+INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_despam_binspamsallowed_ip', '3', 'Number of binspam tags allowed before action is taken for an IP');
+INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_despam_decloutdaysback', '7', 'Number of days to look back to declout upvoters');
 
 
