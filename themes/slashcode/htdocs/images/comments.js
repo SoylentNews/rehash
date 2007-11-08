@@ -1702,43 +1702,41 @@ function keyHandler(e) {
 		if (c) {
 			var key = String.fromCharCode(c);
 			if (key == 'J' || key == 'K' || key == 'W' || key == 'S') {
-				if (last_updated_comments.length) {
-					var i = last_updated_comments_index;
-					var l = last_updated_comments.length - 1;
-					var update = 0;
-					if (key == 'J' || key == 'S') {
+				var i = last_updated_comments_index;
+				var l = last_updated_comments.length - 1;
+				var update = 0;
+				if (key == 'J' || key == 'S') {
+					update = 1;
+					if (i <= 0) {
+						// this did go back to end; nothing, for now
+						//i = l;
+					} else
+						i = i - 1;
+				} else if (key == 'K' || key == 'W') {
+					if (i >= l) {
+						if (ajaxCommentsWait())
+							return;
+						update = 2;
+						ajaxFetchComments(0, 1, '', 1);
+					} else {
 						update = 1;
-						if (i <= 0) {
-							// this did go back to end; nothing, for now
-							//i = l;
-						} else
-							i = i - 1;
-					} else if (key == 'K' || key == 'W') {
-						if (i >= l) {
-							if (ajaxCommentsWait())
-								return;
-							update = 2;
-							ajaxFetchComments(0, 1, '', 1);
-						} else {
-							update = 1;
-							if (!i && !last_updated_comments_started && commentIsInWindow(last_updated_comments[i]))
-								i = i + 1;
-							else
-								last_updated_comments_started = 1; // only come here once
-						}
+						if (!i && !last_updated_comments_started && !commentIsInWindow(last_updated_comments[i]))
+							last_updated_comments_started = 1; // only come here once
+						else
+							i = i + 1;
 					}
+				}
 
-					if (update) {
-						doModifiers(e);
-						var this_shift_down = shift_down;
-						resetModifiers();
-						if (this_shift_down && current_cid) { // if shift, collapse previously selected
-							setFocusComment('-' + current_cid, 1);
-						}
-						if (update == 1) {
-							last_updated_comments_index = i;
-							setFocusComment(last_updated_comments[i], 1);
-						}
+				if (update) {
+					doModifiers(e);
+					var this_shift_down = shift_down;
+					resetModifiers();
+					if (this_shift_down && current_cid) { // if shift, collapse previously selected
+						setFocusComment('-' + current_cid, 1);
+					}
+					if (update == 1) {
+						last_updated_comments_index = i;
+						setFocusComment(last_updated_comments[i], 1);
 					}
 				}
 			}
