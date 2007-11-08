@@ -79,7 +79,7 @@ Page size: [% Slash.createSelect('pagesize', { 'small' => 'Small', 'large' => 'L
 </tr>
 <tr>
 	<td>
-		[% IF options.orderby == "popularity" || options.orderby == "editorpop" || options.orderby == "popularity2" %]
+		[% IF options.orderby == "popularity" || options.orderby == "editorpop" %]
 			<span id="advpopularity" onclick="firehose_set_options('orderby','createtime')"><a href="#">Popularity</a></span>
 		[% ELSE  %]
 			<span id="advtime" onclick="firehose_set_options('orderby','popularity')"><a href="#">Time</a></span>

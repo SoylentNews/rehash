@@ -10,13 +10,13 @@ CREATE TABLE firehose (
 	type ENUM("submission","journal","bookmark","feed","story","vendor","misc") default 'submission',
 	createtime datetime NOT NULL default '0000-00-00 00:00:00',
 	popularity float NOT NULL default '0',
-	popularity2 float NOT NULL default '0',
 	editorpop float NOT NULL default '0',
 	activity float NOT NULL default '0',
 	accepted enum('no','yes') default 'no',
 	rejected enum('no','yes') default 'no',
 	public enum('no','yes') default 'no',
 	attention_needed enum('no','yes') default 'no',
+	is_spam enum('no', 'yes') default 'no',
 	primaryskid smallint(5) default '0',
 	tid smallint(6) default '0',
 	srcid mediumint(8) unsigned NOT NULL default '0',
@@ -40,8 +40,7 @@ CREATE TABLE firehose (
 	PRIMARY KEY (id),
 	UNIQUE globjid (globjid),
 	KEY createtime (createtime),
-	KEY popularity (popularity),
-	KEY popularity2 (popularity2)
+	KEY popularity (popularity)
 ) TYPE=InnoDB;
 
 # The table giving an Object's Generally Accepted Story Publication Time
