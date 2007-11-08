@@ -145,6 +145,8 @@ sub run {
 	my $tagboxdb = getObject('Slash::Tagbox');
 	my $firehose = getObject('Slash::FireHose');
 
+	my $fhitem = $firehose->getFireHose($affected_id);
+
 	# All firehose entries start out with popularity 1.
 	my $popularity = 1;
 
@@ -212,6 +214,14 @@ sub run {
 #main::tagboxLog(sprintf("extra_pop for %d: %.6f * %.6f", $tag_hr->{tagid}, $extra_pop, $udc_mult));
 		$extra_pop *= $udc_mult;
 		$popularity += $extra_pop;
+	}
+
+	# If this is spam, its score goes way down.
+	if ($fhitem->{is_spam} eq 'yes') {
+		my $max = defined($constants->{firehose_spam_score})
+			? $constants->{firehose_spam_score}
+			: -50;
+		$popularity = $max if $popularity > $max;
 	}
 
 	# Set the corresponding firehose row to have this popularity.

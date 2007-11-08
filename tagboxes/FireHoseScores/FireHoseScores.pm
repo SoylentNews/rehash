@@ -235,6 +235,14 @@ sub run {
 		$popularity += $extra_pop;
 	}
 
+	# If this is spam, its score goes way down.
+	if ($fhitem->{is_spam} eq 'yes') {
+		my $max = defined($constants->{firehose_spam_score})
+			? $constants->{firehose_spam_score}
+			: -50;
+		$popularity = $max if $popularity > $max;
+	}
+
 	# Set the corresponding firehose row to have this popularity.
 	if ($options->{return_only}) {
 		return $popularity;

@@ -135,12 +135,7 @@ sub run {
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
 	my $firehose_db = getObject('Slash::FireHose');
-
-	my $affected_id_q = $self->sqlQuote($affected_id);
-	my $fhid = $self->sqlSelect('id', 'firehose', "globjid = $affected_id_q");
-	warn "Slash::Tagbox::Despam->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
-	my $fhitem = $firehose_db->getFireHose($fhid);
-	my $submitter_uid = $fhitem->{uid};
+	my $slashdb = getCurrentDB();
 
 	my $admins = $tagsdb->getAdmins();
 	my $admin_in_str = join(',',
@@ -149,18 +144,60 @@ sub run {
 		keys %$admins);
 	return unless $admin_in_str;
 
-	my $slashdb = getCurrentStatic();
-	my $binspam_count = $slashdb->sqlCount(
-		'tags, firehose',
-		"tags.uid IN ($admin_in_str)
-		 AND tags.inactivated IS NULL
-		 AND tags.tagnameid = $self->{spamid}
-		 AND tags.globjid = firehose.globjid
-		 AND firehose.uid = $submitter_uid");
-	if ($binspam_count > $constants->{tagbox_despam_binspamsallowed}) {
-		main::tagboxLog(sprintf("%s->run marking uid %d for %d admin binspam tags, latest %d (%d)",
-			ref($self), $submitter_uid, $binspam_count, $fhid, $affected_id));
-		$self->despam_uid($submitter_uid, $binspam_count);
+	my $affected_id_q = $self->sqlQuote($affected_id);
+	my $fhid = $self->sqlSelect('id', 'firehose', "globjid = $affected_id_q");
+	warn "Slash::Tagbox::Despam->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
+	my $fhitem = $firehose_db->getFireHose($fhid);
+	my $submitter_uid = $fhitem->{uid};
+	my $submitter_srcid = $fhitem->{srcid_32};
+
+	main::tagboxLog(sprintf("%s->run marking fhid %d as is_spam", ref($self), $fhid));
+	$slashdb->sqlUpdate('firehose', { is_spam => 'yes' }, "id=$fhid");
+
+	if (isAnon($submitter_uid)) {
+		# Non-logged-in user, check by IP (srcid_32)
+		if ($submitter_srcid) {
+			my $binspam_count = $slashdb->sqlCount(
+				'tags, firehose',
+				"tags.uid IN ($admin_in_str)
+				 AND tags.inactivated IS NULL
+				 AND tags.tagnameid = $self->{spamid}
+				 AND tags.globjid = firehose.globjid
+				 AND firehose.srcid_32 = $submitter_srcid");
+			if ($binspam_count > $constants->{tagbox_despam_binspamsallowed_ip}) {
+				main::tagboxLog(sprintf("%s->run marking srcid %s for %d admin binspam tags, based on %d (%d)",
+				ref($self), $submitter_srcid, $binspam_count, $fhid, $affected_id));
+				$self->despam_srcid($fhitem, $binspam_count);
+			}
+		}
+	} else {
+		# Logged-in user, check by uid
+		my $binspam_count = $slashdb->sqlCount(
+			'tags, firehose',
+			"tags.uid IN ($admin_in_str)
+			 AND tags.inactivated IS NULL
+			 AND tags.tagnameid = $self->{spamid}
+			 AND tags.globjid = firehose.globjid
+			 AND firehose.uid = $submitter_uid");
+		if ($binspam_count > $constants->{tagbox_despam_binspamsallowed}) {
+			main::tagboxLog(sprintf("%s->run marking uid %d for %d admin binspam tags, based on %d (%d)",
+				ref($self), $submitter_uid, $binspam_count, $fhid, $affected_id));
+			$self->despam_uid($fhitem, $binspam_count);
+		}
+	}
+}
+
+sub despam_srcid {
+	my($self, $srcid, $count) = @_;
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my $al2_hr = $slashdb->getAL2($srcid);
+	if ($count > $constants->{tagbox_despam_binspamsallowed_ip}) {
+		main::tagboxLog("marking $srcid as spammer for $count");
+		if (!$al2_hr->{spammer}) {
+			$slashdb->setAL2($srcid, { spammer => 1, comment => "Despam $count" });
+		}
 	}
 }
 
@@ -172,48 +209,58 @@ sub despam_uid {
 	my $tagboxdb = getObject('Slash::Tagbox');
 
 	# First, set the user's 'spammer' AL2.
-	$slashdb->setAL2($uid, { spammer => 1, comment => "Despam $count" });
+	my $adminuid = $constants->{tagbox_despam_al2adminuid};
+	my $al2_hr = $slashdb->getAL2($uid);
+	if (!$al2_hr->{spammer}) {
+		$slashdb->setAL2($uid, { spammer => 1, comment => "Despam $count" },
+			{ adminuid => $adminuid });
+	}
 
 	# Next, set the user's clout manually to 0.
 	$slashdb->setUser($uid, { tag_clout => 0 });
 
+        # Next, mark as spam everything the user's submitted.
+	$slashdb->sqlUpdate('firehose', { is_spam => 'yes' },
+		"accepted != 'no' AND uid=$uid");
+
 	# Next, if $count is high enough, set the 'spammer' AL2 for all
 	# the IPID's the user has submitted from.
-	my $days = defined($constants->{tagbox_despam_ipdayslookback})
-		? $constants->{tagbox_despam_ipdayslookback} : 60;
-	my %srcid_used = ( );
-	if ($days) {
-		my $sub_ipid_ar = $reader->sqlSelectColArrayref(
-			'DISTINCT ipid',
-			'submissions',
-			"uid=$uid AND time >= DATE_SUB(NOW(), INTERVAL $days DAY)");
-		my $journal_srcid_ar = $reader->sqlSelectColArrayref(
-			'DISTINCT ' . get_srcid_sql_out('srcid_32'),
-			'journals',
-			"uid=$uid AND date >= DATE_SUB(NOW(), INTERVAL $days DAY)");
-		my $book_srcid_ar = $reader->sqlSelectColArrayref(
-			'DISTINCT ' . get_srcid_sql_out('srcid_32'),
-			'bookmarks',
-			"uid=$uid AND time >= DATE_SUB(NOW(), INTERVAL $days DAY)");
-		for my $ipid (@$sub_ipid_ar) {
-			my $srcid = convert_srcid(ipid => $ipid);
-			$srcid_used{$srcid} = 1;
-		}
-		for my $srcid (@$journal_srcid_ar) {
-			$srcid_used{$srcid} = 1;
-		}
-		for my $srcid (@$book_srcid_ar) {
-			$srcid_used{$srcid} = 1;
-		}
-		my @srcids = sort keys %srcid_used;
-		for my $srcid (@srcids) {
-			$slashdb->setAL2($srcid, { spammer => 1, comment => "Despam $count" });
+	if ($count > $constants->{tagbox_despam_binspamsallowed_ip}) {
+		my $days = defined($constants->{tagbox_despam_ipdayslookback})
+			? $constants->{tagbox_despam_ipdayslookback} : 60;
+		my %srcid_used = ( );
+		if ($days) {
+			my $sub_ipid_ar = $reader->sqlSelectColArrayref(
+				'DISTINCT ipid',
+				'submissions',
+				"uid=$uid AND time >= DATE_SUB(NOW(), INTERVAL $days DAY) AND ipid != ''");
+			my $journal_srcid_ar = $reader->sqlSelectColArrayref(
+				'DISTINCT ' . get_srcid_sql_out('srcid_32'),
+				'journals',
+				"uid=$uid AND date >= DATE_SUB(NOW(), INTERVAL $days DAY) AND srcid_32 != 0");
+			my $book_srcid_ar = $reader->sqlSelectColArrayref(
+				'DISTINCT ' . get_srcid_sql_out('srcid_32'),
+				'bookmarks',
+				"uid=$uid AND createdtime >= DATE_SUB(NOW(), INTERVAL $days DAY) AND srcid_32 != 0");
+			for my $ipid (@$sub_ipid_ar) {
+				my $srcid = convert_srcid(ipid => $ipid);
+				$srcid_used{$srcid} = 1;
+			}
+			for my $srcid (@$journal_srcid_ar) {
+				$srcid_used{$srcid} = 1;
+			}
+			for my $srcid (@$book_srcid_ar) {
+				$srcid_used{$srcid} = 1;
+			}
+			my @srcids = sort grep { $_ } keys %srcid_used;
+			for my $srcid (@srcids) {
+				$al2_hr = $slashdb->getAL2($srcid);
+				if (!$al2_hr->{spammer}) {
+					$slashdb->setAL2($srcid, { spammer => 1, comment => "Despam $count for $uid" });
+				}
+			}
 		}
 	}
-
-	# Next, reject everything the user's submitted.
-	$slashdb->sqlUpdate('firehose', { rejected => 'yes' },
-		"accepted != 'no' AND uid=$uid");
 
 	# Next, declout everyone who's upvoted any of the user's
 	# recent submissions (except bookmarks, because those are
@@ -230,7 +277,7 @@ sub despam_uid {
 	my $max_clout = defined($constants->{tagbox_despam_upvotermaxclout})
 		? $constants->{tagbox_despam_upvotermaxclout} : '0.85';
 	for my $upvoter (@$upvoter_ar) {
-print STDERR "Despam setting user $upvoter clout to $max_clout\n";
+		main::tagboxLog("setting user $upvoter clout to max $max_clout for upvoting user $uid");
 		$slashdb->setUser($upvoter, {
 			-tag_clout => "MAX(tag_clout, $max_clout)"
 		});
@@ -257,7 +304,6 @@ print STDERR "Despam setting user $upvoter clout to $max_clout\n";
 			});
 		}
 	}
-	sleep 10;
 }
 
 1;
