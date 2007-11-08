@@ -13,7 +13,8 @@ var fetch_comments_pieces = {};
 var update_comments = {};
 var root_comments_hash = {};
 var last_updated_comments = [];
-var last_updated_comments_index = -1;
+var last_updated_comments_index = 0;
+var last_updated_comments_started = 0;
 var current_cid = 0;
 var more_comments_num;
 var behaviors = {
@@ -1037,6 +1038,8 @@ function finishLoading() {
 			document.body.onkeydown = keyHandler;
 	}
 
+	setCurrentComment(last_updated_comments[i]);
+
 	if (more_comments_num)
 		updateMoreNum(more_comments_num);
 	updateTotals();
@@ -1718,7 +1721,10 @@ function keyHandler(e) {
 							ajaxFetchComments(0, 1, '', 1);
 						} else {
 							update = 1;
-							i = i + 1;
+							if (!i && !last_updated_comments_started && commentIsInWindow(last_updated_comments[i]))
+								i = i + 1;
+							else
+								last_updated_comments_started = 1; // only come here once
 						}
 					}
 
