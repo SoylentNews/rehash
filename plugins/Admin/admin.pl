@@ -1240,7 +1240,7 @@ sub editStory {
 		} else {
 			$display_check = $form->{display} ? $constants->{markup_checked_attribute} : '';
 		}
-		
+
 		$stoid = $slashdb->getStory($form->{stoid} || $form->{sid}, 'stoid', 1);
 		if ($stoid) {
 			handleMediaFileForStory($stoid);

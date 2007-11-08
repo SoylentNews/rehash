@@ -32,7 +32,7 @@ sub main {
 		errorLog("No Ajax op '$op' found");
 		$op = 'default';
 	}
-	
+
 #	print STDERR "AJAX2 $$: $user->{uid}, $op\n";
 
 	$op = 'default' unless $ops->{$op}{function} || (
@@ -44,14 +44,14 @@ sub main {
 
 	$ops->{$op}{function} ||= loadCoderef($ops->{$op}{class}, $ops->{$op}{subroutine});
 	$op = 'default' unless $ops->{$op}{function};
-	
+
 #	print STDERR "AJAX4 $$: $user->{uid}, $op\n";
 
 	$form->{op} = $op;  # save for others to use
 
 	my $reskey_name = $ops->{$op}{reskey_name} || 'ajax_base';
 	$ops->{$op}{reskey_type} ||= 'use';
-	
+
 #	print STDERR "AJAX5 $$: $user->{uid}, $op\n";
 
 	if ($reskey_name ne 'NA') {
@@ -212,7 +212,6 @@ sub setSectionNexusPrefs() {
 				}
 			}
 		}
-			
 	}
 
 
@@ -220,13 +219,13 @@ sub setSectionNexusPrefs() {
 		my $value = $update->{$tid};
 
 		# First remove tid in question from all arrays
-		@story_always_nexus 		= grep { $_ != $tid } @story_always_nexus; 
+		@story_always_nexus 		= grep { $_ != $tid } @story_always_nexus;
 		@story_full_brief_nexus 	= grep { $_ != $tid } @story_full_brief_nexus;
 		@story_brief_always_nexus 	= grep { $_ != $tid } @story_brief_always_nexus;
 		@story_full_best_nexus 		= grep { $_ != $tid } @story_full_best_nexus;
 		@story_brief_best_nexus 	= grep { $_ != $tid } @story_brief_best_nexus;
 		@story_never_nexus 		= grep { $_ != $tid } @story_never_nexus;
-			
+
 		# Then add it to the correct array
 		if ($value == 5) {
 			push @story_always_nexus, $tid;
@@ -249,7 +248,7 @@ sub setSectionNexusPrefs() {
 	my $story_full_best_nexus	= join ",", @story_full_best_nexus;
 	my $story_brief_best_nexus	= join ",", @story_brief_best_nexus;
 	my $story_never_nexus       	= join ",", @story_never_nexus;
-				
+
 	$slashdb->setUser($user->{uid}, {
 			story_always_nexus => $story_always_nexus,
 			story_full_brief_nexus => $story_full_brief_nexus,
@@ -502,56 +501,55 @@ sub updateD2prefs {
 }
 
 sub getModalPrefs {
-        my($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form) = @_;
 
-        if ($form->{'section'} eq 'messages') {
-                my $messages  = getObject('Slash::Messages');
-                my $deliverymodes   = $messages->getDescriptions('deliverymodes');
-                my $messagecodes    = $messages->getDescriptions('messagecodes');
-                my $bvdeliverymodes = $messages->getDescriptions('bvdeliverymodes');
-                my $bvmessagecodes  = $messages->getDescriptions('bvmessagecodes_slev');
+	if ($form->{'section'} eq 'messages') {
+		my $messages  = getObject('Slash::Messages');
+		my $deliverymodes   = $messages->getDescriptions('deliverymodes');
+		my $messagecodes    = $messages->getDescriptions('messagecodes');
+		my $bvdeliverymodes = $messages->getDescriptions('bvdeliverymodes');
+		my $bvmessagecodes  = $messages->getDescriptions('bvmessagecodes_slev');
 
-                foreach my $bvmessagecode (keys %$bvmessagecodes) {
-                        $bvmessagecodes->{$bvmessagecode}->{'valid_bvdeliverymodes'} = [];
-                        foreach my $bvdeliverymode (keys %$bvdeliverymodes) {
-                                # skip if we have no valid delivery modes (i.e. off)
-                                if (!$bvmessagecodes->{$bvmessagecode}->{'delivery_bvalue'}) {
-                                        delete $bvmessagecodes->{$bvmessagecode};
-                                        last;
-                                }
-                        }
-                }
+		foreach my $bvmessagecode (keys %$bvmessagecodes) {
+			$bvmessagecodes->{$bvmessagecode}->{'valid_bvdeliverymodes'} = [];
+			foreach my $bvdeliverymode (keys %$bvdeliverymodes) {
+				# skip if we have no valid delivery modes (i.e. off)
+				if (!$bvmessagecodes->{$bvmessagecode}->{'delivery_bvalue'}) {
+					delete $bvmessagecodes->{$bvmessagecode};
+					last;
+				}
+			}
+		}
 
-                my $prefs = $messages->getPrefs($user->{'uid'});
-                return
-                        slashDisplay('prefs_messages', {
-                                userm           => $user,
-                                prefs           => $prefs,
-                                messagecodes    => $messagecodes,
-                                deliverymodes   => $deliverymodes,
-                                bvmessagecodes  => $bvmessagecodes,
-                                bvdeliverymodes => $bvdeliverymodes
-                        },
-                        { Return => 1 }
-                );
-        }
-        else {
-                return
-                        slashDisplay('prefs_' . $form->{'section'}, {
-                                user => $user,
-                        },
-                        { Return => 1 }
-                );
-        }
+		my $prefs = $messages->getPrefs($user->{'uid'});
+		return
+			slashDisplay('prefs_messages', {
+				userm           => $user,
+				prefs           => $prefs,
+				messagecodes    => $messagecodes,
+				deliverymodes   => $deliverymodes,
+				bvmessagecodes  => $bvmessagecodes,
+				bvdeliverymodes => $bvdeliverymodes
+			},
+			{ Return => 1 }
+		);
+	} else {
+		return
+			slashDisplay('prefs_' . $form->{'section'}, {
+				user => $user,
+			},
+			{ Return => 1 }
+		);
+	}
 }
 
 sub saveModalPrefs {
-        my($slashdb, $constants, $user, $form) = @_;
+	my($slashdb, $constants, $user, $form) = @_;
 
-        # Ajax returns our form as key=value, so trick URI into decoding for us.
-        use URI;
-        my $url = URI->new('//e.a/?' . $form->{'data'});
-        my %params = $url->query_form;
+	# Ajax returns our form as key=value, so trick URI into decoding for us.
+	require URI;
+	my $url = URI->new('//e.a/?' . $form->{'data'});
+	my %params = $url->query_form;
 
 	# Specific to D2 display and posting prefs for the time being.
 	my $user_edits_table;
@@ -567,10 +565,10 @@ sub saveModalPrefs {
 		};
 	}
 
-        if ($params{'formname'} eq 'd2_posting') {
+	if ($params{'formname'} eq 'd2_posting') {
 		my $karma_bonus      = ($params{'karma_bonus'}      !~ /^[\-+]?\d+$/) ? "+1" : $params{'karma_bonus'};
 		my $subscriber_bonus = ($params{'subscriber_bonus'} !~ /^[\-+]?\d+$/) ? "+1" : $params{'subscriber_bonus'};
-                
+
 		$user_edits_table = {
 			emaildisplay      => $params{'emaildisplay'} || undef,
 			karma_bonus       => ($karma_bonus ne '+1' ? $karma_bonus : undef),
@@ -586,31 +584,30 @@ sub saveModalPrefs {
 			no_spell          => ($params{'no_spell'} ? 1 : undef),
 		};
 	}
-	
-        if ($params{'formname'} eq 'messages') {
-                my $messages  = getObject('Slash::Messages');
-                my $messagecodes = $messages->getDescriptions('messagecodes');
-                my %message_prefs;
 
-                for my $code (keys %$messagecodes) {
-                        my $coderef = $messages->getMessageCode($code);
-                        if ((!exists($params{"deliverymodes_$code"})) ||
-                            (!$messages->checkMessageUser($code, $slashdb->getUser($params{uid})))) {
-                                    $message_prefs{$code} = -1;
-                        }
-                        else {
-                                $message_prefs{$code} = fixint($params{"deliverymodes_$code"});
-                        }
-                }
-        
-                $messages->setPrefs($params{uid}, \%message_prefs);
+	if ($params{'formname'} eq 'messages') {
+		my $messages  = getObject('Slash::Messages');
+		my $messagecodes = $messages->getDescriptions('messagecodes');
+		my %message_prefs;
 
-                $user_edits_table = {
-                        message_threshold => $params{'message_threshold'},
-                };
-        }
-        
-        $slashdb->setUser($params{uid}, $user_edits_table);
+		for my $code (keys %$messagecodes) {
+			my $coderef = $messages->getMessageCode($code);
+			if ((!exists($params{"deliverymodes_$code"})) ||
+			    (!$messages->checkMessageUser($code, $slashdb->getUser($params{uid})))) {
+				$message_prefs{$code} = -1;
+			} else {
+				$message_prefs{$code} = fixint($params{"deliverymodes_$code"});
+			}
+		}
+
+		$messages->setPrefs($params{uid}, \%message_prefs);
+
+		$user_edits_table = {
+			message_threshold => $params{'message_threshold'},
+		};
+	}
+
+	$slashdb->setUser($params{uid}, $user_edits_table);
 }
 
 # comments
@@ -681,18 +678,18 @@ sub getOps {
 #			function        => \&tagsCreateForStory,
 #			reskey_type     => 'createuse',
 #		},
-                getModalPrefs           => {
-                        function        => \&getModalPrefs,
-                        reskey_name     => 'ajax_user_static',
-                        reskey_type     => 'createuse',
-                },
-                saveModalPrefs          => {
-                        function        => \&saveModalPrefs,
-                        reskey_name     => 'ajax_user_static',
-                        reskey_type     => 'createuse',
-                },
+		getModalPrefs           => {
+			function        => \&getModalPrefs,
+			reskey_name     => 'ajax_user_static',
+			reskey_type     => 'createuse',
+		},
+		saveModalPrefs          => {
+			function        => \&saveModalPrefs,
+			reskey_name     => 'ajax_user_static',
+			reskey_type     => 'createuse',
+		},
 		default	=> {
-			function        => \&default,		
+			function        => \&default,
 		},
 	);
 
