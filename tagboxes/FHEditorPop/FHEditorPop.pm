@@ -145,7 +145,8 @@ sub run {
 	my $tagboxdb = getObject('Slash::Tagbox');
 	my $firehose = getObject('Slash::FireHose');
 
-	my $fhitem = $firehose->getFireHose($affected_id);
+	my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
+	my $fhitem = $firehose->getFireHose($fhid);
 
 	# All firehose entries start out with popularity 1.
 	my $popularity = 1;
@@ -225,8 +226,6 @@ sub run {
 	}
 
 	# Set the corresponding firehose row to have this popularity.
-	my $affected_id_q = $self->sqlQuote($affected_id);
-	my $fhid = $self->sqlSelect('id', 'firehose', "globjid = $affected_id_q");
 	my $firehose_db = getObject('Slash::FireHose');
 	warn "Slash::Tagbox::FHEditorPop->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
 	if ($options->{return_only}) {
