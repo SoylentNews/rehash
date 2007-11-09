@@ -166,8 +166,7 @@ sub run {
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
 	my $firehose_db = getObject('Slash::FireHose');
-	my $affected_id_q = $self->sqlQuote($affected_id);
-	my $fhid = $self->sqlSelect('id', 'firehose', "globjid = $affected_id_q");
+	my $fhid = $firehose_db->getFireHoseIdFromGlobjid($affected_id);
 	warn "Slash::Tagbox::FireHoseScores->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
 	my $fhitem = $firehose_db->getFireHose($fhid);
 
