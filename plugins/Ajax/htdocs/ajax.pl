@@ -518,6 +518,11 @@ sub getModalPrefs {
 					delete $bvmessagecodes->{$bvmessagecode};
 					last;
 				}
+                                # build our list of valid delivery modes
+                                if (($bvdeliverymodes->{$bvdeliverymode}->{'bitvalue'} & $bvmessagecodes->{$bvmessagecode}->{'delivery_bvalue'}) ||
+                                    ($bvdeliverymodes->{$bvdeliverymode}->{'bitvalue'} == 0)) {
+                                        push(@{$bvmessagecodes->{$bvmessagecode}->{'valid_bvdeliverymodes'}}, $bvdeliverymodes->{$bvdeliverymode}->{'code'});
+                                }
 			}
 		}
 
