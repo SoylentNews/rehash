@@ -45,7 +45,7 @@ $task{$me}{code} = sub {
 	# runtask -u slashusername -o run_all=1,timeout_shtml=300 freshenup
 	$do_all = 1 
 		if $constants->{task_options}{run_all};
-	my $timeout_render = 30;
+	my $timeout_render = $constants->{task_options}{timeout_render} || 30;
 	my $timeout_shtml = $constants->{task_options}{timeout_shtml} || 90;
 
 	my $max_stories = defined($constants->{freshenup_max_stories})
