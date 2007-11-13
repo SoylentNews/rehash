@@ -40,6 +40,7 @@ INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title
 INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('newestthree','<!-- newestthree -->',100,'static','','',0,'Newest Three',1,NULL,NULL,0);
 INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('recenttopics','none yet',500,'static','Recent Topics','mainpage',0,'Recent Topics',1,'',NULL,0);
 INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('friends_journal','',1,'portald','This adds a box where all of your friend\'s latest journal entries will be displayed.','mainpage',5,'Friend\'s Journal Entries',1,NULL,NULL,0);
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('spamurlregexes','',100,'static','Whitespace-delimited list of regexes which indicate a spammer URL.','mainpage',5,'Spam URL Regexes',0,NULL,NULL,0);
 
 
 #

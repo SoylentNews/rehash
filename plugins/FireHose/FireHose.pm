@@ -35,7 +35,7 @@ use Data::JavaScript::Anon;
 use Date::Calc qw(Days_in_Month Add_Delta_YMD);
 use POSIX qw(ceil);
 use LWP::UserAgent;
-use URI::URL;
+use URI;
 use XML::Simple;
 
 use base 'Slash::DB::Utility';
@@ -759,6 +759,38 @@ sub allowSubmitForUrl {
 		my $uid_q = $self->sqlQuote($user->{uid});
 		return !$self->sqlCount("firehose", "url_id=$url_id_q AND uid != $uid_q");
 	}
+}
+
+sub getURLsForItem {
+	my($self, $item) = @_;
+	my $url_id = $item->{url_id};
+	my $url =         $url_id ? $self->getUrl($url_id)->{url} : undef;
+	my $url_prepend =    $url ? qq{<a href="$url">$url</a>}   : '';
+	my $text = qq{$url_prepend $item->introtext $item->{bodytext}};
+
+	my %urls = ( );
+	my $tokens = HTML::TokeParser->new(\$text);
+	return ( ) unless $tokens;
+	while (my $token = $tokens->get_tag('a')) {
+		my $linkurl = $token->[1]{href};
+		next unless $linkurl;
+		my $canon = URI->new($linkurl)->canonical()->as_string();
+		$urls{$canon} = 1;
+	}
+	return sort keys %urls;
+}
+
+sub itemHasSpamURL {
+	my($self, $item) = @_;
+	my @spamurlregexes = grep { $_ } split /\s+/, ($self->getBlock('spamurlregexes') || '');
+	return 0 unless @spamurlregexes;
+	my @urls = $self->getURLsForItem($item);
+	for my $url (@urls) {
+		for my $regex (@spamurlregexes) {
+			return 1 if $url =~ $regex;
+		}
+	}
+	return 0;
 }
 
 sub getPrimaryFireHoseItemByUrl {
@@ -1566,7 +1598,7 @@ sub getYoogliSimilarForItem {
 	return 0 unless $user->{is_admin} && $constants->{yoogli_oai_query_base} && $constants->{yoogli_oai_result_count};
 
 	my $query = $constants->{yoogli_oai_query_base} .= '?verb=GetRecord&metadataPrefix=oai_dc&rescount=';
-	$query .= $constants->{yoogli_oai_result_count} . '&identifier=' . URI::URL->new($item->{introtext});
+	$query .= $constants->{yoogli_oai_result_count} . '&identifier=' . URI->new($item->{introtext});
 	my $yoogli_similar_stories = {};
 
 	my $ua = new LWP::UserAgent;

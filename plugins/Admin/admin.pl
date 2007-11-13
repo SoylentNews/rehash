@@ -9,7 +9,7 @@ use File::Temp 'tempfile';
 use Image::Size;
 use Time::HiRes;
 use LWP::UserAgent;
-use URI::URL;
+use URI;
 use XML::Simple;
 
 use Slash;
@@ -1449,7 +1449,7 @@ sub editStory {
 	my $yoogli_similar_stories = {};
 	if ($constants->{yoogli_oai_search}) {
 		my $query = $constants->{yoogli_oai_query_base} .= '?verb=GetRecord&metadataPrefix=oai_dc&rescount=';
-		$query .= $constants->{yoogli_oai_result_count} . '&identifier=' . URI::URL->new($storyref->{introtext});
+		$query .= $constants->{yoogli_oai_result_count} . '&identifier=' . URI->new($storyref->{introtext});
 
 		my $ua = new LWP::UserAgent;
 		$ua->timeout($constants->{yoogli_oai_result_count} + 2);
