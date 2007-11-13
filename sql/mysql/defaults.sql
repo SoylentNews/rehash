@@ -25,7 +25,7 @@ INSERT INTO al2_types VALUES (7, 5, 'nosubmit', 'No Story Submit');
 INSERT INTO al2_types VALUES (8, 6, 'trusted', 'Trusted');
 INSERT INTO al2_types VALUES (9, 7, 'proxy', 'Valid Proxy');
 INSERT INTO al2_types VALUES (10, 8, 'nopostanon', 'No Comment Post Anon');
-INSERT INTO al2_types VALUES (11, 9, 'binspam', 'Binspammer');
+INSERT INTO al2_types VALUES (11, 9, 'spammer', 'Spammer');
 
 
 #
@@ -746,6 +746,7 @@ INSERT INTO vars (name, value, description) VALUES ('adminmail_ban','admin@examp
 INSERT INTO vars (name, value, description) VALUES ('adminmail_check_replication', 0, 'Check replication if is caught up before starting adminmail');
 INSERT INTO vars (name, value, description) VALUES ('adminmail_mod','admin@example.com','All admin mail about moderation goes here');
 INSERT INTO vars (name, value, description) VALUES ('adminmail_post','admin@example.com','All admin mail about comment posting goes here');
+INSERT IGNORE INTO vars (name, value, description) VALUES ('al2_type_aliases', 'spammer->nosubmit spammer->nopost nopost->nopostanon', 'List of AL2s that imply other AL2s, in a whitespace-delimited list of A->B format');
 INSERT INTO vars (name, value, description) VALUES ('allow_anonymous','1','allow anonymous posters');
 INSERT INTO vars (name, value, description) VALUES ('allow_nonadmin_ssl','0','0=users with seclev <= 1 cannot access the site over Secure HTTP; 1=they all can; 2=only if they are subscribers');
 INSERT INTO vars (name, value, description) VALUES ('anonymous_coward_uid', '1', 'UID to use for anonymous coward');
