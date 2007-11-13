@@ -5227,11 +5227,8 @@ sub getAL2 {
 	}
 
 	# XXXSRCID Try to use memcached to retrieve this data.
-#use Data::Dumper; $Data::Dumper::Sortkeys = 1;
-#print STDERR "getAL2 srcids: " . Dumper($srcids);
 	my($where) = $self->_get_where_and_valuelist_al2($srcids);
 	my $values = $self->sqlSelectColArrayref('value', 'al2', $where);
-#print STDERR "getAL2 where: '$where' values: " . Dumper($values);
 
 	# The al2.value column ORs together for all the AL2 rows that
 	# apply for a user.  E.g. if the subnet has 'nopost' set, the
@@ -5251,9 +5248,7 @@ sub getAL2 {
 		) {
 			$retval->{$name} = $al2types->{$name};
 		}
-#print STDERR "getAL2 name=$name bv=$bitvector bp=$al2types->{$name}{bitpos}\n";
 	}
-#if ($retval && keys %$retval) { print STDERR "getAL2 retval keys: '" . join(" ", sort keys %$retval) . "'\n"; }
 	return $retval;
 }
 
@@ -5267,8 +5262,6 @@ sub getAL2Log {
 	if (!ref($srcid)) {
 		$srcid = { get_srcid_type($srcid) => $srcid };
 	}
-#use Data::Dumper; $Data::Dumper::Sortkeys = 1;
-#print STDERR "getAL2Log srcid: " . Dumper($srcid);
 	my($where) = $self->_get_where_and_valuelist_al2($srcid);
 
 	# Do the main select on al2_log to pull in all the changes made
