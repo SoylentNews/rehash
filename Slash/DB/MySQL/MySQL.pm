@@ -6603,7 +6603,7 @@ sub _stories_time_clauses {
 		}
 	} else {
 		$is_future_column = '0 AS is_future';
-		$where = "$column_name < $now";
+		$where = "$column_name <= $now";
 	}
 
 	return ($is_future_column, $where);
