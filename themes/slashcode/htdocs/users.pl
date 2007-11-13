@@ -700,7 +700,7 @@ sub mailPasswd {
 		# existing nopost and spammer
 		my $srcids_to_check = $user->{srcids};
 		$err_name = 'mailpasswd_readonly_err'
-			if $reader->checkAL2($srcids_to_check, [qw( nopost spammer )]);
+			if $reader->checkAL2($srcids_to_check, 'nopost');
 	}
 	if (!$err_name) {
 		$err_name = 'mailpasswd_toooften_err'
@@ -3177,7 +3177,7 @@ sub saveMiscOpts {
 sub listReadOnly {
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	my $readonlylist = $reader->getAL2List([qw( nopost spammer )]);
+	my $readonlylist = $reader->getAL2List('nopost');
 
 	slashDisplay('listReadOnly', {
 		readonlylist => $readonlylist,
