@@ -167,7 +167,7 @@ sub run {
 			if ($binspam_count > $constants->{tagbox_despam_binspamsallowed_ip}) {
 				main::tagboxLog(sprintf("%s->run marking srcid %s for %d admin binspam tags, based on %d (%d)",
 				ref($self), $submitter_srcid, $binspam_count, $fhid, $affected_id));
-				$self->despam_srcid($fhitem, $binspam_count);
+				$self->despam_srcid($submitter_srcid, $binspam_count);
 			}
 		}
 	} else {
@@ -182,7 +182,7 @@ sub run {
 		if ($binspam_count > $constants->{tagbox_despam_binspamsallowed}) {
 			main::tagboxLog(sprintf("%s->run marking uid %d for %d admin binspam tags, based on %d (%d)",
 				ref($self), $submitter_uid, $binspam_count, $fhid, $affected_id));
-			$self->despam_uid($fhitem, $binspam_count);
+			$self->despam_uid($submitter_uid, $binspam_count);
 		}
 	}
 }
