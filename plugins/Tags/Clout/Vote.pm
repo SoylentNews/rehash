@@ -297,7 +297,7 @@ sub get_mult {
 	# rare choice (for either user) is considered more indicative.
 	my($su,  $nu)  = ($hr->{sourcetag_uid},       $hr->{newtag_uid});
 	my($stn, $ntn) = ($hr->{sourcetag_tagnameid}, $hr->{newtag_tagnameid});
-	my($nodid, $nixid) = ($stn == $self->{nodid}, $stn == $self->{nixid});
+	my($nodid, $nixid) = ($self->{nodid}, $self->{nixid});
 	if (    ( $stn == $nodid || $stn == $nixid )
 	&&      ( $ntn == $nodid || $ntn == $nixid ) ) {
 		my($su, $nu) = ($hr->{sourcetag_uid}, $hr->{newtag_uid});
