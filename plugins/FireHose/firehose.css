@@ -434,6 +434,10 @@ div.storylinks ul {padding-right: 60% !important}
 #nixmenu ul {margin: 0 0 0 43px; background: #222; opacity: .9; border: 1px solid #111;}
 #nodmenu li:hover, #nixmenu li:hover, #nodmenu li.selected, #nixmenu li.selected  {background: #000; color: #fff;}
 
+.embed #nodmenu .menu, #console #nodmenu .menu {left: 20px !important; background: url('//images.slashdot.org/popup_nix.png') no-repeat;}
+.embed #nixmenu .menu, #console #nixmenu .menu {left: 25px !important;}
+.embed #nodmenu ul, #console #nodmenu ul {margin: 0 0 0 43px; background: #222; opacity: .9; border: 1px solid #111;}
+
 .article .title, .article h3, .article .generaltitle {border: none !important}
 .article .generaltitle, #firehoselist .article .title, .article h3 {line-height: 170% !important;}
 .briefarticle .generaltitle, .briefarticle .title, .briefarticle h3 {line-height: 160% !important;}
