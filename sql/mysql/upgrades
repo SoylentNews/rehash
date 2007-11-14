@@ -5041,12 +5041,13 @@ UPDATE vars SET value = 'T_2_5_0_183' WHERE name = 'cvs_tag_currentcode';
 INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('spamurlregexes','',100,'static','Whitespace-delimited list of regexes which indicate a spammer URL.','mainpage',5,'Spam URL Regexes',0,NULL,NULL,0);
 INSERT IGNORE INTO vars (name, value, description) VALUES ('al2_type_aliases', 'spammer->nosubmit spammer->nopost nopost->nopostanon', 'List of AL2s that imply other AL2s, in a whitespace-delimited list of A->B format');
 
-# For D2 preferences
 UPDATE code_param SET name = 'Few' WHERE type = 'd2_comment_q' AND name = 'Tiny';
 UPDATE code_param SET name = 'More' WHERE type = 'd2_comment_q' AND name = 'Medium';
 UPDATE code_param SET name = 'Many' WHERE type = 'd2_comment_q' AND name = 'Large';
 UPDATE code_param SET name = 'Oldest' WHERE type = 'd2_comment_order' AND name = 'Date';
 UPDATE code_param SET name = 'Highest Rated' WHERE type = 'd2_comment_order' AND name = 'Score';
+
+UPDATE al2_types SET name='spammer',title='Binspammer' WHERE name='binspam';
 
 # 2007-11-14
 UPDATE vars SET value = 'T_2_5_0_184' WHERE name = 'cvs_tag_currentcode';
