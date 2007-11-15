@@ -5007,8 +5007,6 @@ ALTER TABLE ad_settings ADD COLUMN always TINYINT UNSIGNED NOT NULL DEFAULT 0;
 # 18 = "Invalid HTML Input" (see the Messages dump to add back)
 DELETE FROM message_codes WHERE code = 18;
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # Redundant for many sites, but this is here because an earlier error
 # in the upgrades file may have left your site without them if you
 # didn't have the FireHose plugin installed.
@@ -5047,8 +5045,10 @@ UPDATE code_param SET name = 'Many' WHERE type = 'd2_comment_q' AND name = 'Larg
 UPDATE code_param SET name = 'Oldest' WHERE type = 'd2_comment_order' AND name = 'Date';
 UPDATE code_param SET name = 'Highest Rated' WHERE type = 'd2_comment_order' AND name = 'Score';
 
-UPDATE al2_types SET name='spammer',title='Binspammer' WHERE name='binspam';
+UPDATE al2_types SET name='spammer',title='Spammer' WHERE name='binspam';
 
 # 2007-11-14
 UPDATE vars SET value = 'T_2_5_0_184' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
