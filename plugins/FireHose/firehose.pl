@@ -65,7 +65,8 @@ sub main {
 			$redirect = 0;
 		} 
 		if ($redirect) {
-			redirect("$gSkin->{rootdir}/firehose.shtml");
+			my $prefix = $form->{embed} ? "embed_" : "";
+			redirect("$gSkin->{rootdir}/${prefix}firehose.shtml");
 			return;
 		}
 	}
