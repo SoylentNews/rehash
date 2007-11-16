@@ -271,10 +271,10 @@ sub balance_weight_vectors {
 	my $total = $w_pos_mag+$w_neg_mag;
 	if ($w_pos_mag > $total * 0.60) {
 		my $neg_reduc_factor = $w_neg_mag*3/$w_pos_mag;
-		@ret = map { $_ < 0 ? $_*$neg_reduc_factor : $_ } @_;
+		@ret = map { $_ < 0 ? $_*$neg_reduc_factor : $_ } @w;
 	} elsif ($w_neg_mag > $total * 0.60) {
 		my $pos_reduc_factor = $w_pos_mag*3/$w_neg_mag;
-		@ret = map { $_ > 0 ? $_*$pos_reduc_factor : $_ } @_;
+		@ret = map { $_ > 0 ? $_*$pos_reduc_factor : $_ } @w;
 	} else {
 		# No change.
 		@ret = @w;
