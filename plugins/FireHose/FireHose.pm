@@ -782,7 +782,7 @@ sub getURLsForItem {
 
 sub itemHasSpamURL {
 	my($self, $item) = @_;
-	my @spamurlregexes = grep { $_ } split /\s+/, ($self->getBlock('spamurlregexes') || '');
+	my @spamurlregexes = grep { $_ } split /\s+/, ($self->getBlock('spamurlregexes', 'block') || '');
 	return 0 unless @spamurlregexes;
 	my @urls = $self->getURLsForItem($item);
 	for my $url (@urls) {
