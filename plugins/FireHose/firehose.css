@@ -451,4 +451,4 @@ div.storylinks ul {padding-right: 60% !important}
 .briefarticle .storylinks .comments a:hover {background:transparent url('//images.slashdot.org/sic_icons.png') no-repeat scroll 0px -1498px; color: #fff !important}
 .briefarticle .storylinks .comments.nocomment, .briefarticle .storylinks .comments span  {display: none}
 
-.embed .paginate, .embed .firemenu, .embed + .copyright { display: none; }
+.embed .paginate, .embed .firemenu, .embed a.skin, .copyright.embed { display: none; }
