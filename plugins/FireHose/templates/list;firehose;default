@@ -132,7 +132,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
 [% END %]
 </div>
 </div>
-[% IF !user.is_admin || (user.is_admin && user.firehose_usermode ) %]
+[% IF !form.embed && (!user.is_admin || (user.is_admin && user.firehose_usermode )) %]
 <p style="padding: 1em 1em 0 1em">
 The Slashdot Firehose is a collaborative system designed to allow
 users to assist our editors in the story selection process.  The hose
