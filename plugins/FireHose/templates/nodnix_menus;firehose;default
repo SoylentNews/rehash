@@ -33,6 +33,7 @@ __template__
       <li title="Tag this item 'offtopic', voting it down" onmousedown="nodnix_tag('offtopic', '-')">offtopic</li>
       <li title="Tag this item 'stupid', voting it down" onmousedown="nodnix_tag('stupid', '-')">stupid</li>
       <li title="Tag this item 'slownewsday', voting it down" onmousedown="nodnix_tag('slownewsday', '-')">slownewsday</li>
+      <li title="Tag this item 'stale', voting it down" onmousedown="nodnix_tag('stale', '-')">stale</li>
     </ul>
   </div>
 </div>
