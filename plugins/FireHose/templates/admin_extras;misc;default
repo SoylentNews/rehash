@@ -40,7 +40,7 @@ __template__
         </tr>
 </table>
 </form>
-[% IF similar_stories.size > 0 or yoogli_similar_stories %]
+[% IF similar_stories.size > 0 %]
 	<table border="0" cellpadding="2" cellspacing="0" class="data">
 		<tr class="data_head"><td><b>Similar Stories</b></td></tr>
 		[% FOREACH story = similar_stories %]
@@ -64,16 +64,6 @@ __template__
 			</td>
 			</tr>
 		[% END %]
-                [% FOREACH story = yoogli_similar_stories.keys.sort %]
-                        <tr>
-                        <td>&nbsp;</td>
-                        <td>Y=[% yoogli_similar_stories.$story.relevance.substr(0, 4) %]</td>
-                        <td valign="TOP"><a href="[% yoogli_similar_stories.$story.url %]" title="[% yoogli_similar_stories.$story.title %]">
-                        [% yoogli_similar_stories.$story.title.substr(0, 35) %]...</a></td>
-                        <td valign="TOP">[% Slash.timeCalc(yoogli_similar_stories.$story.date, "%Y-%m-%d") %]</td>
-                        <td>&nbsp;</td>
-                        </tr>
-                [% END %]
 	</table>
 [% END %]
 __version__
