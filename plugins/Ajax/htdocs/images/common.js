@@ -1451,7 +1451,7 @@ function saveModalPrefs() {
 		onComplete: function() {
 			hide_modal_box();
 			if (document.forms['modal_prefs'].refreshable.value)
-				document.location=document.forms['modal_prefs'].refreshable.value;
+				document.location=document.URL;
 		}
 	};
 	ajax_update(params, '', handlers);
