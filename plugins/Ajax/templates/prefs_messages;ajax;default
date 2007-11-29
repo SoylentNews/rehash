@@ -12,8 +12,6 @@ en_US
 __name__
 prefs_messages
 __template__
-<div id="users-blocks">
-	<div class="generalbody">
 		[%
 		   usernick = user.nickname | strip_literal;
 
@@ -21,6 +19,8 @@ __template__
 		   modemail = Slash.MSG_MODE_EMAIL;
 		   modeweb  = Slash.MSG_MODE_WEB;
 		%]
+
+                &nbsp;<br>
 
 		From this page you can configure various messages that [% constants.sitename %] can optionally send to you. The primary options are [% deliverymodes.$modenone %] (Disabled), [% deliverymodes.$modemail %], [% deliverymodes.$modeweb %], [% IF constants.im_screenname %]AIM,[% END %] and Mobile Text. Not all options are available for all message types.  [% deliverymodes.$modeweb %] messages <b>will be deleted</b> after <b>[% constants.message_web_expire || 31 %] days</b>.[% IF constants.im_screenname %] If you plan on receiving AIM messages, please add [% constants.im_screenname %] to your buddylist.[% END %]
 
@@ -91,8 +91,6 @@ __template__
 	<input type="hidden" name="formname" value="messages">
 	<input type="button" value="Save" onclick="saveModalPrefs()">
 	</form>
-	</div>
-</div>
 __seclev__
 500
 __version__
