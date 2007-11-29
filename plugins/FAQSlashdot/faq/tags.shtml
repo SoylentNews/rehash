@@ -40,7 +40,7 @@ depends on you.  If you choose to add your own tags, be aware:</p>
 multiple tags. Use "bigbrother", not "big brother".
 <li>For the <b>opposite</b> of a tag, prefix it with "!", e.g.  "!funny"
 means "not funny."</li>
-<li>Keep your tags brief.</li>
+<li>Keep your tags brief. No full sentences. Tags are not comments.</li>
 <li>We provide a few example tags for you. Use them if you like.</li>
 <li>Don't forget to click 'Tag' to save your tags.</li>
 <li>After you save, your current list of tags is put back into the
@@ -50,7 +50,8 @@ re-click Tag.</li>
 <li>Tags must be all-lowercase, no punctuation. Numbers can  
 appear but can't be first. Smoosh them up: for "Web 2.0", tag  
 "web20". Max 64 chars.</li>
-<li>Avoid plurals when possible: "harddrive", not "harddrives".</li>
+<li>Avoid plurals when possible: "harddrive", not "harddrives".
+But sometimes singular would be silly: "starwars".</li>
 </ul>
 
 <p>We're excited about this, and see huge potential for this system.
@@ -60,7 +61,7 @@ really limited only by your participation, and our database hardware!
 
 <p><i><font size=-1>Answered by: <a  
 href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 11/02/06</font></i>
+<br><i><font size=-1>Last Modified: 11/22/07</font></i>
 
 
 
@@ -115,11 +116,13 @@ Using it accurately and quickly will do the opposite.)</p>
 grammatical errors, or bad HTML like a malformed link. Do not tag
 the story with the misspelled word in question.</p>
 
-<p>These tags will alert us to problems immediately (but they won't show
-up on the top tags list).</p>
+<p>These tags will alert us to problems immediately, which we love!
+But they won't show up on the top tags list. Trying to get around this
+with similarly spelled (but system-meaningless) tags like "dupitydupe"
+is discouraged.</p>
 
 <p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
-<br><i><font size=-1>Last Modified: 11/02/06</font></i>
+<br><i><font size=-1>Last Modified: 11/22/07</font></i>
 
 
 <br><a name="tags300" id="tags300"></a>
