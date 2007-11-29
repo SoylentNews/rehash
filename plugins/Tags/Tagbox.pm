@@ -287,6 +287,20 @@ sub addFeederInfo {
 	return $self->sqlInsert('tagboxlog_feeder', $info_hr);
 }
 
+sub forceFeederRecalc {
+	my($self, $tbid, $affected_id) = @_;
+	my $info_hr = {
+		-created_at =>	'NOW()',
+		tbid =>		$tbid,
+		affected_id =>	$affected_id,
+		importance =>	9999,
+		tagid =>	0,
+		tdid =>		0,
+		tuid =>		0,
+	};
+	return $self->sqlInsert('tagboxlog_feeder', $info_hr);
+}
+
 sub markTagboxLogged {
 	my($self, $tbid, $update_hr) = @_;
 	$self->sqlUpdate('tagboxes', $update_hr, "tbid=$tbid");
