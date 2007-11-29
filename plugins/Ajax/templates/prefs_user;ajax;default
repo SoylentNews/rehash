@@ -1,0 +1,104 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+prefs_user
+__template__
+
+		[% IF constants.offer_insecure_login_link %]
+		&nbsp;<br>
+		You can automatically log in by clicking <a href="[% gSkin.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% user.logtoken | strip_paramattr %]" onclick="hide_modal_box()">This Link</a> and Bookmarking the resulting page. This is totally insecure, but very convenient. 
+		[% END %]
+
+                <form id ="modal_prefs" method="post">
+			<input type="hidden" name="formname" value="user">
+                        <input type="hidden" name="uid" value="[% user.uid %]">
+                        <input type="hidden" name="name" value="[% user.nickname | strip_attribute %]">
+
+			&nbsp;<p>
+
+			<b>Real Name</b>&nbsp;<input type="text" name="realname" value="[% user.realname | strip_attribute %]" size="40">
+
+			&nbsp;<p><br>
+
+			<b>Email Address</b>&nbsp;<input type="text" name="realemail" value="[% user.realemail | strip_attribute %]" size="40">
+			<div class="notes">
+				Required but never displayed publicly, unless you specify so in your comment preferences. This is where your passwd is mailed.  If you change this address, a notification will be sent, and you will need to follow the enclosed instructions to re-register.
+			</div>
+			
+			&nbsp;<p>			
+
+			<b>Homepage</b>&nbsp;<input type="text" name="homepage" value="[% user.homepage | strip_attribute %]" size="40">
+			<div class="notes">
+				You must enter a fully qualified URL.
+			</div>
+
+			&nbsp;<p>
+
+                        [% IF user.is_admin && constants.slashbox_whatsplaying %]
+                                <b>What I'm Playing For</b>&nbsp;
+                                <input type="text" name="playing" value="[% user.playing | strip_attribute %]" size="40">
+                                <div class="notes">
+                                        A pipe ("|") separated list of games you're currently enthralled with. This'll be used for the "What We're Playing" Slashbox.
+                                </div>
+
+                        &nbsp;<p>
+                        [% END %]
+
+			<b>AIM</b>&nbsp;<input type="text" name="aim" value="[% user.aim | strip_attribute %]" size="40">
+			<br>
+
+			<span style="padding-left: 15px;"><input type="checkbox" name="aimdisplay" value="1"[% IF user.aimdisplay %] checked="checked" [% END %]>&nbsp;<b>Do not make this AIM nick public</b></span>
+
+			&nbsp;<p><br>
+
+			<b>ICQ UIN</b>&nbsp;<input type="text" name="icq" value="[% user.icq | strip_attribute %]" size="40">
+
+			&nbsp;<p><br>
+
+			<b>Yahoo! ID</b>&nbsp;<input type="text" name="yahoo" value="[% user.yahoo | strip_attribute %]" size="40">
+
+			&nbsp;<p><br>
+
+			<b>Jabber</b>&nbsp;<input type="text" name="jabber" value="[% user.jabber | strip_attribute %]" size="40">
+
+			&nbsp;<p><br>
+
+			<b>Public Calendar</b>&nbsp;<input type="text" name="calendar_url" value="[% user.calendar_url | strip_attribute %]" size="40">
+			<div class="notes">
+				You must enter a fully qualified URL, for an iCal calendar.
+			</div>
+
+			&nbsp;<p>
+
+			<b>Mobile Text Address</b>&nbsp;<input type="text" name="mobile_text_address" value="[% user.mobile_text_address | strip_attribute %]" size="40">
+
+			&nbsp;<p><br>
+
+			<b>Sig</b>
+			<br>
+			<textarea name="sig" rows="2" cols="30">[% user.sig | strip_literal %]</textarea>
+                        <div class="notes">Appended to the end of comments you post. 120 chars.</div>
+
+			&nbsp;<p>
+
+			<b>Bio</b>
+			<br>
+			<textarea name="bio" rows="5" cols="30" wrap="virtual">[% user.bio | strip_literal %]</textarea>
+                        <div class="notes">This information is publicly displayed on your user page.  255 chars.</div>
+
+                        &nbsp;<p>
+
+			<input type="button" value="Save" onclick="saveModalPrefs()">
+
+		</form>
+__seclev__
+500
+__version__
+$Id$
