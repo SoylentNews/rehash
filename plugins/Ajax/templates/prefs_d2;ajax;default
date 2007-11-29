@@ -24,7 +24,7 @@ __template__
 		IF user.discussion2 == 'slashdot';
 			d2_check = constants.markup_checked_attribute;
 		END %]
-		<label><input type="checkbox" name="discussion2"[% d2_check %] onclick="javascript:void(document.forms['modal_prefs'].refreshable.value=document.URL);">&nbsp;Enable Dynamic Discussions</label>
+		<label><input type="checkbox" name="discussion2"[% d2_check %] onclick="javascript:void(document.forms['modal_prefs'].refreshable.value=1);">&nbsp;Enable Dynamic Discussions</label>
 
 		&nbsp;<p>
 
