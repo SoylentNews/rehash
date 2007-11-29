@@ -819,6 +819,8 @@ EOT
 	}
 
 	$data{top_referers} = $logdb->getTopReferers({count => 20});
+	$data{top_badgehosts} = $logdb->getTopBadgeHosts({count => 20});
+	$data{top_badgeurls} = $logdb->getTopBadgeURLs({count => 20});
 
 	my $new_users_yest = $slashdb->getNumNewUsersSinceDaysback(1)
 		- $slashdb->getNumNewUsersSinceDaysback(0);

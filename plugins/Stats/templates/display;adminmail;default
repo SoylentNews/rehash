@@ -164,6 +164,24 @@ Top referers:
 [% END %]
 [% END %]
 
+[% IF top_badgehosts.size %]
+-----------------------      
+
+Top badge hosts:
+[% FOREACH badgehost = top_badgehosts -%]
+[% badgehost.1 %]  [% badgehost.0 %]
+[% END %]
+[% END %]
+
+[% IF top_badgeurls.size %]
+-----------------------      
+
+Top badge URLs:
+[% FOREACH badgeurl = top_badgeurls -%]
+[% badgeurl.1 %]  [% badgeurl.0 %]
+[% END %]
+[% END %]
+
 [% IF errors.size -%]
 -----------------------      
 Error count by Page:
