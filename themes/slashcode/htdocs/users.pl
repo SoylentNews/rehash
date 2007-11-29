@@ -906,7 +906,7 @@ sub showFireHose {
 	$form->{mode} = "full";
 	$form->{color} = "black";
 	$form->{orderby} = "createtime";
-	$form->{orderdidr} = "DESC";
+	$form->{orderdir} = "DESC";
 	$form->{skipmenu} = 1;
 	$form->{duration} = -1;
 	$form->{fhfilter} = "\"user:$user_edit->{nickname}\"";
