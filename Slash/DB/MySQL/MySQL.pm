@@ -12384,20 +12384,12 @@ sub updateSubMemory {
 	my $noid = $self->sqlSelect('noid','submissions_notes',
 		'submatch=' . $self->sqlQuote($submatch));
 
-        if ($noid) {
-                $self->sqlUpdate('submissions_notes', {
-                        subnote => $subnote,
-                        uid     => $user->{uid},
-                        '-time' => 'NOW()',
-                }, "noid=" . $noid);
-        } else {
-                $self->sqlInsert('submissions_notes', {
-                        submatch        => $submatch,
-                        subnote         => $subnote,
-			uid             => $user->{uid},
-                        '-time'         => 'NOW()',
-                });
-	}
+	$self->sqlInsert('submissions_notes', {
+       		submatch        => $submatch,
+		subnote         => $subnote,
+		uid             => $user->{uid},
+                '-time'         => 'NOW()',
+        });
 }
 
 sub getSubmissionMemory {
