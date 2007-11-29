@@ -1,0 +1,81 @@
+__section__
+default
+__description__
+* nexusref = hashref of nexus information
+	$n = name (textname) for nexus with tid $n
+* nexustid_order = list of the fields of nexusref to display, in display order
+
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+prefs_sectional
+__template__
+[% style_enabled = "color: #000; background: #fff;" %]
+[% style_disabled = "color: #999; background: #ccc;" %]
+
+&nbsp;<p>
+
+<form id="modal_prefs" method="post">
+<table border="0" cellpadding="1" cellspacing="0" width="100%">
+	<tr>
+		<td>&nbsp;</td>
+		<td align="center">
+			<img src="[% constants.imagedir %]/article_none.gif" alt="Never" title="Never"><br>
+		</td>
+		<td align="center" valign="top">
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief Best Only" title="Brief Best Only"><br>
+		</td>
+		<td align="center" valign="top">
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full Best Only" title="Full Best Only"><br>
+		</td>
+		<td align="center" valign="top">
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief All" title="Brief All"><br>
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Brief All" title="Brief All"><br>
+		</td>
+		<td align="center" valign="top">
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full / Brief" title="Full / Brief"><br>
+			<img src="[% constants.imagedir %]/article_brief.gif" alt="Full / Brief" title="Full / Brief"><br>
+		</td>
+		<td align="center" valign="top">
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full All" title="Full All"><br>
+			<img src="[% constants.imagedir %]/article_full.gif" alt="Full All" title="Full All">
+		</td>
+		
+	</tr>
+	<tr class="secpref_master">
+		<td style="padding-left: 5px;"><b>All Sections</b></td>
+		<td>&nbsp;</td>
+		[% FOREACH value = [ 1 2 3 4 5] -%]
+			<td align="center"><input type="radio" name="nexus_master" value="[% value %]" onclick="masterChange(this); return true;"[% IF master_value != "" && master_value == value; constants.markup_checked_attribute; END; %]></td>
+		[%- END %]
+	</tr>
+[% FOREACH nexustid = nexustid_order %]
+	<tr align="center" class="secpref_nexus_row" style="[% IF multiple_values == 0; style_disabled; ELSE; style_enabled; END; %]">
+		[%-	# really should have nexusref have another field for the
+			# url of the (first) skin that uses it, and link this in
+			# here, but ... I'm in a hurry
+		-%]
+		<td align="left" style="padding-left: 5px;"><b>[% nexusref.$nexustid | strip_literal %]</b></td>
+[% FOREACH value = [ 0 1 2 3 4 5] -%]
+		<td align="center"><input type="radio" name="nexustid[% nexustid %]" value="[% value %]"
+			[%- IF story023_default.nexus.$nexustid == value; constants.markup_checked_attribute; END %] onclick="individualChange(this); return true;"></td>
+[%- END %]
+	</tr>
+[%- END -%]
+</table>
+
+&nbsp;<p>
+
+<input type="hidden" name="formname" value="sectional">
+<input type="hidden" name="refreshable" value="1">
+<input type="button" value="Save" onclick="saveModalPrefs()">
+
+</form>
+__seclev__
+500
+__version__
+$Id$
