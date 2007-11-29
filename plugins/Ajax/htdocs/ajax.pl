@@ -171,7 +171,7 @@ sub getSectionPrefsHTML {
 
 	my $master_value = !$multiple_values ? $first_val : "";
 
-	return slashDisplay("sectionpref",
+	return slashDisplay("prefs_sectional",
 		{
 			nexusref		=> $nexus_hr,
 			nexustid_order		=> \@nexustid_order,
@@ -183,7 +183,7 @@ sub getSectionPrefsHTML {
 	);
 }
 
-sub setSectionNexusPrefs() {
+sub setSectionNexusPrefs {
 	my($slashdb, $constants, $user, $form) = @_;
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
@@ -259,7 +259,7 @@ sub setSectionNexusPrefs() {
 		}
 	);
 
-	return getData('set_section_prefs_success_msg');
+        #return getData('set_section_prefs_success_msg');
 }
 
 ###################
@@ -538,8 +538,10 @@ sub getModalPrefs {
 			},
 			{ Return => 1 }
 		);
-	} else {
-		return
+	} elsif ($form->{'section'} eq 'sectional') {
+               getSectionPrefsHTML($slashdb, $constants, $user, $form);
+        } else {
+                return
 			slashDisplay('prefs_' . $form->{'section'}, {
 				user => $user,
 			},
@@ -571,14 +573,9 @@ sub saveModalPrefs {
 	}
 
 	if ($params{'formname'} eq 'd2_posting') {
-		my $karma_bonus      = ($params{'karma_bonus'}      !~ /^[\-+]?\d+$/) ? "+1" : $params{'karma_bonus'};
-		my $subscriber_bonus = ($params{'subscriber_bonus'} !~ /^[\-+]?\d+$/) ? "+1" : $params{'subscriber_bonus'};
-
 		$user_edits_table = {
 			emaildisplay      => $params{'emaildisplay'} || undef,
-			karma_bonus       => ($karma_bonus ne '+1' ? $karma_bonus : undef),
 			nobonus           => ($params{'nobonus'} ? 1 : undef),
-			subscriber_bonus  => ($subscriber_bonus || undef),
 			nosubscriberbonus => ($params{'nosubscriberbonus'} ? 1 : undef),
 			posttype          => $params{'posttype'},
 			textarea_rows     => ($params{'textarea_rows'} != $constants->{'textarea_rows'}
@@ -612,6 +609,109 @@ sub saveModalPrefs {
 		};
 	}
 
+        if ($params{'formname'} eq 'user') {
+                my $user_edit = $slashdb->getUser($params{uid});
+                my $gSkin = getCurrentSkin();
+
+                # Real Email
+                if ($user_edit->{realemail} ne $params{realemail}) {
+                        if ($slashdb->existsEmail($params{realemail})) {
+                                $params{realemail} = $user_edit->{realemail};
+                        }
+                }
+
+                # Homepage
+                my $homepage = $params{homepage};
+                $homepage = '' if $homepage eq 'http://';
+                $homepage = fudgeurl($homepage);
+                $homepage = URI->new_abs($homepage, $gSkin->{absolutedir})
+                               ->canonical
+                               ->as_string if $homepage ne '';
+                $homepage = substr($homepage, 0, 100) if $homepage ne '';
+
+                # Calendar
+                my $calendar_url = $params{calendar_url};
+                if (length $calendar_url) {
+                        $calendar_url =~ s/^webcal/http/i;
+                        $calendar_url = fudgeurl($calendar_url);
+                        $calendar_url = URI->new_abs($calendar_url, $gSkin->{absolutedir})
+                                           ->canonical
+                                           ->as_string if $calendar_url ne '';
+                        $calendar_url =~ s|^http://||i;
+                        $calendar_url = substr($calendar_url, 0, 200) if $calendar_url ne '';
+                }
+
+                my(%extr, $err_message, %limit);
+                $limit{sig} = 120;
+                $limit{bio} = $constants->{users_bio_length} || 1024;
+
+                for my $key (keys %limit) {
+                        my $dat = chopEntity($params{$key}, $limit{$key});
+                        $dat = strip_html($dat);
+                        $dat = balanceTags($dat, { deep_nesting => 2, length => $limit{$key} });
+                        $dat = addDomainTags($dat) if $dat;
+
+                        if ($key eq 'sig' && defined($dat) && length($dat) > 200) {
+                                $extr{sig} = undef;
+                        }
+
+                        if ((length($dat) > 1 && !filterOk('comments', 'postersubj', $dat, \$err_message)) ||
+                            (!compressOk('comments', 'postersubj', $dat))) {
+                                $extr{$key} = undef;
+                        }
+                        else {
+                                $extr{$key} = $dat;
+                        }
+                }
+
+                $user_edits_table = {
+                        homepage            => $homepage,
+                        realname            => $params{realname},
+                        calendar_url        => $calendar_url,
+                        yahoo               => $params{yahoo},
+                        jabber              => $params{jabber},
+                        aim                 => $params{aim},
+                        aimdisplay          => $params{aimdisplay},
+                        icq                 => $params{icq},
+                        playing             => $params{playing},
+                        mobile_text_address => $params{mobile_text_address},
+                };
+
+                for (keys %extr) {
+                        $user_edits_table->{$_} = $extr{$_} if defined $extr{$_};
+                }
+
+                for (keys %$user_edits_table) {
+                        $user_edits_table->{$_} = '' unless defined $user_edits_table->{$_};
+                }
+
+                if ($user_edit->{realemail} ne $params{realemail}) {
+                        $user_edits_table->{realemail} = chopEntity($params{realemail}, 50);
+                        my $new_fakeemail = '';
+
+                        if ($user->{emaildisplay}) {
+                                $new_fakeemail = getArmoredEmail($params{uid}, $user_edits_table->{realemail}) if $user->{emaildisplay} == 1;
+                                $new_fakeemail = $user_edits_table->{realemail} if $user->{emaildisplay} == 2;
+                        }
+                        $user_edits_table->{fakeemail} = $new_fakeemail;
+                }
+
+                my $reader = getObject('Slash::DB', { db_type => 'reader' });
+                my $otherparams  = $reader->getDescriptions('otherusersparam');
+                for my $param (keys %$otherparams) {
+                        if (exists $params{$param}) {
+                                $user_edits_table->{$param} = $user->{$param} = $params{$param} || undef;
+                        }
+                }
+        }
+
+        if ($params{'formname'} eq "sectional") {
+                setSectionNexusPrefs($slashdb, $constants, $user, \%params);
+        }
+        else {
+                $slashdb->setUser($params{uid}, $user_edits_table);
+        }
+        
 	$slashdb->setUser($params{uid}, $user_edits_table);
 }
 
