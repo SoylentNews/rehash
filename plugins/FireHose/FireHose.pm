@@ -612,7 +612,15 @@ sub getFireHoseEssentials {
 
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
 	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
-	my $count = $self->sqlSelect("count(*)", $tables, $where, $count_other);
+	my $count;
+	if ($options->{tagged_by_uid}) {
+		my $rows = $self->sqlSelectAllHashrefArray("count(*)", $tables, $where, $count_other);
+		$count = @$rows;
+	} else {
+		$count = $self->sqlSelect("count(*)", $tables, $where, $count_other);
+	}
+
+
 	my $page_size = $options->{limit} || 1;
 	$results->{records_pages} ||= ceil($count / $page_size);
 	$results->{records_page}  ||= (int(($options->{offset} || 0) / $options->{limit}) + 1) || 1;
@@ -647,7 +655,6 @@ sub getFireHoseEssentials {
 
 		$items = $hr_ar;
 	}
-
 	return($items, $results, $count);
 }
 
@@ -1628,7 +1635,6 @@ sub getAndSetOptions {
 			$self->setUser($user->{uid}, { firehose_paused => $options->{pause} });
 		}
 	}
-
 	if (defined $form->{duration}) {
 		if ($form->{duration} =~ /^-?\d+$/) {
 			$options->{duration} = $form->{duration};
@@ -1658,7 +1664,6 @@ sub getAndSetOptions {
 	
 
 	my $colors = $self->getFireHoseColors();
-
 	if ($form->{color} && $colors->{$form->{color}}) {
 		$options->{color} = $form->{color};
 	}
@@ -2017,7 +2022,6 @@ sub getAndSetOptions {
 	if ($options->{issue}) {
 		$options->{duration} = 1;
 	}
-
 
 	return $options;
 }
