@@ -47,15 +47,6 @@ __template__
         <input type="radio" name="emaildisplay" [% emaildisplay.2 %] value=2> Show your real email address without cowering behind childish anonymity or obfuscation.
         </div></blockquote>
 
-	<b><a name="karma_bonus">Karma Bonus</a></b> (modifier assigned to posts where the user has good karma)<br>
-	[% karma_bonus = 0;
-	IF user.karma_bonus;
-		karma_bonus = user.karma_bonus;
-	END %]
-	[% Slash.createSelect('karma_bonus', range, karma_bonus, 1, 1) %]
-
-	&nbsp;<p>
-
 	[% IF user.karma > constants.goodkarma;
 		b_check = '';
 		IF user.nobonus;
@@ -63,18 +54,7 @@ __template__
 		END %]
 		<input type="hidden" name="nobonus_present" value="1">
 		<label><input type="checkbox" name="nobonus"[% b_check %]> No Karma Bonus</label>
-
-		&nbsp;<p>
 	[% END %]
-
-	<b><a name="subscriber_bonus">Subscriber Bonus</a></b> (modifier assigned to posts where the user was a subscriber)<br>
-	[% subscriber_bonus = 0;
-	IF user.subscriber_bonus;
-		subscriber_bonus = user.subscriber_bonus;
-        END %]
-	[% Slash.createSelect('subscriber_bonus', range, subscriber_bonus, 1, 1) %] 
-
-	&nbsp;<p>
 
 	[% IF user.is_subscriber;
 		sb_check = '';
