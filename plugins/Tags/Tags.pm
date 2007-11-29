@@ -364,22 +364,41 @@ sub setTag {
 	my($self, $id, $params) = @_;
 	return 0 if !$id || !$params || !%$params;
 
+	my $tagboxdb = getObject("Slash::Tagbox");
+	my @feeder = ( );
+	my $tagboxes = $tagboxdb->getTagboxes();
+	my($globjid, $uid) = $self->sqlSelect('globjid, uid', 'tags', "tagid=$id");
+
 	my $changed = 0;
 	for my $key (sort keys %$params) {
 		next if $key =~ /^(tagid|tagname|tagnameid|globjid|uid|created_at|inactivated|private)$/; # don't get to override existing fields
 		my $value = $params->{$key};
+		my $this_changed = 0;
 		if (defined($value) && length($value)) {
-			$changed = 1 if $self->sqlReplace('tag_params', {
+			$this_changed = 1 if $self->sqlReplace('tag_params', {
 				tagid =>	$id,
 				name =>		$key,
 				value =>	$value,
 			});
 		} else {
 			my $key_q = $self->sqlQuote($key);
-			$changed = 1 if $self->sqlDelete('tag_params',
+			$this_changed = 1 if $self->sqlDelete('tag_params',
 				"tagid = $id AND name = $key_q"
 			);
 		}
+		if ($this_changed) {
+			for my $tagbox_hr (@$tagboxes) {
+				my $tbid = $tagbox_hr->{tbid};
+				my $affected = $tagbox_hr->{affected_type} eq 'user'
+					? $uid : $globjid;
+				$tagboxdb->addFeederInfo($tbid, {
+					affected_id =>	$affected,
+					importance =>	1,
+					tagid =>	$id,
+				});
+			}
+		}
+		$changed ||= $this_changed;
 	}
 
 	if ($changed) {
@@ -1126,6 +1145,14 @@ sub ajaxProcessAdminTags {
 		$tags->processAdminCommand($c, $id, $table);
 	}
 
+	my $globjid = $tags_reader->getGlobjidFromTargetIfExists($table, $id);
+	my $tagboxdb = getObject('Slash::Tagbox');
+	my $tagboxes = $tagboxdb->getTagboxes();
+	for my $tagbox_hr (@$tagboxes) {
+		next if $tagbox_hr->{affected_type} eq 'user';
+		$tagboxdb->forceFeederRecalc($tagbox_hr->{tbid}, $globjid);
+	}
+
 	my $tags_admin_str = "Performed commands: '@commands'.";
 	if ($type eq "stories") {
 		return slashDisplay('tagsstorydivadmin', {
@@ -1407,7 +1434,7 @@ sub getOppositeTagname {
 # are all the opposites of at least one of the inputs.
 
 sub getOppositeTagnameids {
-	my($self, $data) = @_;
+	my($self, $data, $create) = @_;
 
 	my @tagnameids = ( );
 	$data = [ $data ] if !ref($data);
@@ -1434,7 +1461,15 @@ sub getOppositeTagnameids {
 	# Type one:
 	my @tagnames =		map { $self->getTagnameDataFromId($_)->{tagname} }	@tagnameids;
 	my @opp_tagnames =	map { $self->getOppositeTagname($_) }			@tagnames;
-	my @opp_tagnameids_1 =	map { $self->getTagnameidCreate($_) }			@opp_tagnames;
+	my @opp_tagnameids_1 =	( );
+	if ($create) {
+		@opp_tagnameids_1 =
+				map { $self->getTagnameidCreate($_) }			@opp_tagnames;
+	} else {
+		@opp_tagnameids_1 =
+				grep { $_ }
+				map { $self->getTagnameidFromNameIfExists($_) }		@opp_tagnames;
+	}
 	# Type two:
 	my $src_tnids_str = join(',', @tagnameids);
 	my $opp_tagnameids_2_ar = $self->sqlSelectColArrayref(
@@ -1683,6 +1718,14 @@ sub markViewed {
 		globjid    => $globjid,
 		-viewed_at => 'NOW()',
 	}, { ignore => 1, delayed => 1 });
+}
+
+sub getRecentTagnamesOfInterest {
+	my($self, $options) = @_;
+	my $secsback = $options->{secsback} || 12 * 3600;
+	my $tagnameidsback = $options->{tagnameidsback} || 1000;
+	my $tagname_ar = $self->listTagnamesRecent({ seconds => $secsback });
+	
 }
 
 #################################################################
