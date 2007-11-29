@@ -17,12 +17,12 @@ function configSectionPopup() {
 function masterChange(el) {
 	swapClassColors('secpref_master','secpref_nexus_row');
 	updateNexusAllTidPrefs(el);
-	postSectionPrefChanges(el);	
+	//postSectionPrefChanges(el);	
 }
 
 function individualChange(el) {
 	swapClassColors('secpref_nexus_row','secpref_master');
-	postSectionPrefChanges(el);	
+	//postSectionPrefChanges(el);	
 }
 
 function postSectionPrefChanges(el) {
@@ -50,7 +50,8 @@ function swapClassColors(class_name_active, class_name_deactive) {
 }
 
 function updateNexusAllTidPrefs(el) {
-	theForm = document.forms["sectionprefs"];
+	//theForm = document.forms["sectionprefs"];
+	theForm = document.forms["modal_prefs"];
 	for(i=0; i<theForm.elements.length; i++){
 		var regex = /^nexustid\d+$/;
 		if (regex.test(theForm.elements[i].name)) {
