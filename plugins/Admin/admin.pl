@@ -2061,6 +2061,12 @@ sub updateStory {
 	$data->{neverdisplay} = $form->{display} ? '' : 1;
 
 #print STDERR "admin.pl before updateStory data: " . Dumper($data);
+	if ($data->{neverdisplay}) {
+		print STDERR "Setting sid: $form->{sid} to neverdisplay\n";
+		use Data::Dumper;
+		print STDERR Dumper($form);
+		print STDERR Dumper($data);
+	}
 	if (!$slashdb->updateStory($form->{sid}, $data)) {
 		titlebar('100%', getTitle('story_update_failed'));
 		editStory(@_);
