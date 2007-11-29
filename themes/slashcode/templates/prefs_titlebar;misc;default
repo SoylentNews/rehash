@@ -18,8 +18,13 @@ __template__
 PROCESS titlebar title=title;
 '<div id="usermenu">'; 
 
+user_link = '/users.pl?op=edituser';
+IF constants.modal_prefs_active;
+        user_link = user_link _ "\" onclick=\"getModalPrefs('user', 'User')\; return false";
+END;
+
 tabs = [
-	{ link = "/users.pl?op=edituser",	label = "User",		sel_label = "user" },
+	{ link = user_link,                     label = "User",		sel_label = "user" },
 	{ link = "/users.pl?op=edithome",	label = "Homepage",	sel_label = "home" },
 	{ link = "/users.pl?op=editcomm",	label = "Comments",	sel_label = "comments" }
 ];
