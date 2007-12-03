@@ -282,7 +282,13 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 				subject_only => 1
 			}) %]
 		[% END %]
-			<div id="bindings-legend">
+			<div id="bindings-legend">Keybindings Beta<br>
+<a href="#" onclick="keyHandler('','Q'); return false" title="previous comment by load order">Q</a>
+<a href="#" onclick="keyHandler('','W'); return false" title="previous thread"               >W</a>
+<a href="#" onclick="keyHandler('','E'); return false" title="next comment by load order"    >E</a><br>
+<a href="#" onclick="keyHandler('','A'); return false" title="previous comment in thread"    >A</a>
+<a href="#" onclick="keyHandler('','S'); return false" title="next thread"                   >S</a>
+<a href="#" onclick="keyHandler('','D'); return false" title="next comment in thread"        >D</a>
 			</div>
 		</div>
 		<div id="commentControlBoxStatus" class="hide"><b>Loading ... Please wait.</b></div>

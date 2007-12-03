@@ -14,7 +14,7 @@ var update_comments = {};
 var root_comments_hash = {};
 var last_updated_comments = [];
 var last_updated_comments_index = 0;
-var last_updated_comments_started = 0;
+var comments_started = 0;
 var current_cid = 0;
 var more_comments_num;
 var behaviors = {
@@ -45,6 +45,7 @@ var user_highlightthresh_orig = -9;
 var loaded = 0;
 var shift_down = 0;
 var alt_down = 0;
+var ctrl_down = 0;
 var d2_seen = '';
 
 var agt = navigator.userAgent.toLowerCase();
@@ -123,14 +124,14 @@ function updateCommentTree(cid, threshold, subexpand) {
 
 	var kidhiddens = 0;
 	if (comment && comment['kids'] && comment['kids'].length) {
-		if (!subexpand) {
-			if (shift_down && !alt_down && futuredisplaymode[cid] == 'full') {
-				subexpand = 1;
-			} else if (shift_down && !alt_down && futuredisplaymode[cid] == 'oneline') {
-				subexpand = 2;
-				threshold = user_threshold;
-			}
-		}
+// 		if (!subexpand) {
+// 			if (shift_down && !alt_down && futuredisplaymode[cid] == 'full') {
+// 				subexpand = 1;
+// 			} else if (shift_down && !alt_down && futuredisplaymode[cid] == 'oneline') {
+// 				subexpand = 2;
+// 				threshold = user_threshold;
+// 			}
+// 		}
 
 		for (var kiddie = 0; kiddie < comment['kids'].length; kiddie++) {
 			kidhiddens += updateCommentTree(comment['kids'][kiddie], threshold, subexpand);
@@ -644,6 +645,8 @@ function refreshCommentDisplays() {
 /*******************/
 /* misc. functions */
 /*******************/
+function numsort (a, b) { return (a - b) }
+
 function toHash(thisobject) {
 	return thisobject.map(function (pair) {
 		return pair.map(encodeURIComponent).join(',');
@@ -1027,7 +1030,7 @@ function finishLoading() {
 		if (!noshow_comments_hash[cid])
 			last_updated_comments.push(cid);
 	}
-	last_updated_comments = last_updated_comments.sort(function (a, b) { return (a - b) });
+	last_updated_comments = last_updated_comments.sort(numsort);
 
 	if (1 || user_is_admin) {
 		if (window.addEventListener) // DOM method for binding an event
@@ -1038,7 +1041,7 @@ function finishLoading() {
 			document.body.onkeydown = keyHandler;
 	}
 
-	setCurrentComment(last_updated_comments[i]);
+	setCurrentComment(last_updated_comments[last_updated_comments_index]);
 
 	if (more_comments_num)
 		updateMoreNum(more_comments_num);
@@ -1065,12 +1068,12 @@ function cloneObject(what) {
 function resetModifiers () {
 	shift_down = 0;
 	alt_down   = 0;
+	ctrl_down  = 0;
 }
 
 function doModifiers (e) {
 	e = e || window.event;
-	shift_down = 0;
-	alt_down   = 0;
+	resetModifiers();
 
 	if (e) {
 		if (e.modifiers) {
@@ -1078,11 +1081,15 @@ function doModifiers (e) {
 				shift_down = 1;
 			if (e.modifiers & Event.ALT_MASK)
 				alt_down = 1;
+			if (e.modifiers & Event.CTRL_MASK)
+				ctrl_down = 1;
 		} else {
 			if (e.shiftKey)
 				shift_down = 1;
 			if (e.altKey)
 				alt_down = 1;
+			if (e.ctrlKey)
+				ctrl_down = 1;
 		}
 	}
 }
@@ -1299,7 +1306,10 @@ function viewWindowBottom() {
 }
 
 function commentIsInWindow(cid) {
-	return isInWindow(fetchEl('comment_' + cid));
+	var in_window = isInWindow(fetchEl('comment_' + cid));
+	if (in_window && fetchEl('comment_body_' + cid))
+		in_window = isInWindow(fetchEl('comment_body_' + cid));
+	return in_window;
 }
 
 function isInWindow(obj) {
@@ -1690,59 +1700,217 @@ function setCurrentComment (cid) {
 }
 
 
-function keyHandler(e) {
-	e = e || window.event;
+/* keys
+prev comment: A, H
+next comment: D, L
+prev thread: W, J
+next thread: S, K
+prev comm chrono: Q
+next comm chrono: E
+*/
 
-	if (e) {
+var validkeys = {
+	A: { thread : 1, prev: 1, comment: 1 },
+	D: { thread : 1, next: 1, comment: 1 },
+	W: { thread : 1, prev: 1 },
+	S: { thread : 1, next: 1 },
+	Q: { chrono : 1, prev: 1, comment: 1 },
+	E: { chrono : 1, next: 1, comment: 1 },
+};
+
+validkeys['H'] = validkeys['A'];
+validkeys['L'] = validkeys['D'];
+validkeys['J'] = validkeys['W'];
+validkeys['K'] = validkeys['S'];
+
+function keyHandler(e, k) {
+	if (!k)
+		e = e || window.event;
+
+	if (k || e) {
 		// don't handle for forms ... "type" should handle all our cases here
-		if (e.target && e.target.type)
+		if (!k && e.target && e.target.type)
 			return;
 
-		var c = e.keyCode;
-		if (c) {
-			var key = String.fromCharCode(c);
-			if (key == 'J' || key == 'K' || key == 'W' || key == 'S') {
+		var c;
+		if (e)
+			c = e.keyCode;
+		if (k || c) {
+			if (!k)
+				doModifiers(e);
+			var collapseCurrent = shift_down;
+			var getNextUnread   = ctrl_down;
+			if (!k)
+				resetModifiers();
+
+			var update = 0;
+			var next_cid = 0;
+			var key = k || String.fromCharCode(c);
+			var keyo = validkeys[key];
+			// forward and back between comments, in order of how they were loaded
+			if (keyo && keyo['chrono']) {
 				var i = last_updated_comments_index;
 				var l = last_updated_comments.length - 1;
-				var update = 0;
-				if (key == 'J' || key == 'S') {
-					update = 1;
+				update = 1;
+
+				if (keyo['prev']) {
 					if (i <= 0) {
 						// this did go back to end; nothing, for now
 						//i = l;
 					} else
 						i = i - 1;
-				} else if (key == 'K' || key == 'W') {
+				} else if (keyo['next']) {
 					if (i >= l) {
 						if (ajaxCommentsWait())
 							return;
 						update = 2;
 						ajaxFetchComments(0, 1, '', 1);
 					} else {
-						update = 1;
-						if (!i && !last_updated_comments_started && !commentIsInWindow(last_updated_comments[i]))
-							last_updated_comments_started = 1; // only come here once
+						if (!i && noSeeFirstComment(last_updated_comments[i]))
+							comments_started = 1; // only come here once
 						else
 							i = i + 1;
 					}
 				}
 
-				if (update) {
-					doModifiers(e);
-					var this_shift_down = shift_down;
-					resetModifiers();
-					if (this_shift_down && current_cid) { // if shift, collapse previously selected
-						setFocusComment('-' + current_cid, 1);
-					}
-					if (update == 1) {
-						last_updated_comments_index = i;
-						setFocusComment(last_updated_comments[i], 1);
+				if (update == 1) {
+					last_updated_comments_index = i;
+					next_cid = last_updated_comments[i];
+				}
+			}
+
+			// forward and back between threads, and comments within each thread
+			else if (keyo && keyo['thread']) {
+				update = 1;
+				if (keyo['next']) {
+					if (noSeeFirstComment(current_cid))
+						next_cid = current_cid;
+					else {
+						if (keyo['comment'])
+							next_cid = commTreeNextComm(current_cid, 0, getNextUnread);
+						else
+							next_cid = commTreeNextComm(comments[current_cid].pid, current_cid, getNextUnread);
 					}
 				}
+
+				else if (keyo['prev'] && keyo['comment'])
+					next_cid = commTreePrevComm(current_cid);
+
+				else if (keyo['prev'])
+					next_cid = commTreePrevComm(current_cid, 1);
+			}
+
+			if (update && next_cid) {
+				comments_started = 1;
+				if (collapseCurrent && current_cid)
+					setFocusComment('-' + current_cid, 1);
+				if (update == 1)
+					setFocusComment(next_cid, 1);
 			}
 		}
 	}
+}
 
+// at first comment, comment is not in window OR comment is not full
+function noSeeFirstComment (cid) {
+	setDefaultDisplayMode(cid);
+	if (!comments_started && (!commentIsInWindow(cid) || (viewmodevalue[displaymode[cid]] < viewmodevalue['full']))) {
+		return 1;
+	}
+	return 0;
+}
+
+// XXX somehow sync this with the prev/next by load order?  might require
+// a quick grep to find the position
+function commTreeNextComm (cid, old_cid, getNextUnread) {
+	var kids;
+	if (cid)
+		kids = sortKids(cid);
+	else
+		kids = rootSort();
+
+	for (var i = 0; i < kids.length; i++) {
+		var next_cid = kids[i];
+		if (next_cid > old_cid) {
+			if (next_cid)
+				if (!getNextUnread || (next_cid = getNextUnreadCid(next_cid)))
+					return next_cid;
+			continue;
+		}
+	}
+
+	if (!cid)
+		return 0; // at the end, stay where we are
+
+	// we can't continue here, go back up a level
+	return commTreeNextComm(comments[cid].pid, cid, getNextUnread);
+}
+
+function commTreePrevComm (cid, to_parent) {
+	var root_kids = root_comments.sort(numsort);
+	var comm = comments[cid];
+	var pid = comm.pid;
+
+	if (to_parent == 1) {
+		if (pid)
+			return pid;
+		else // if in roots, then just climb up roots
+			return commTreePrevComm(cid, 2);
+	}
+
+	var kids;
+	if (pid)
+		kids = sortKids(pid);
+	else
+		kids = root_kids;
+
+	for (var i = 0; i < kids.length; i++) {
+		if (cid == kids[i]) {
+			if (i == 0) // go up
+				return pid;
+			else if (to_parent)
+				return kids[i - 1];
+			else 
+				return getLastChild(kids[i - 1]);
+		}
+	}
+}
+
+function rootSort() { // maybe cache later
+	return root_comments.sort(numsort);
+}
+
+function sortKids(cid) { // maybe cache later
+	return comments[cid].kids.sort(numsort);
+}
+
+function isUnread(cid) {
+	var this_id  = fetchEl('comment_top_' + cid);
+	if (this_id)
+		if (this_id.className.match(' oldcomment'))
+			return 0;
+		else
+			return 1;
+}
+
+function getNextUnreadCid(cid) {
+	if (isUnread(cid))
+		return cid;
+	var kids = sortKids(cid);
+	for (var i = 0; i < kids.length; i++) {
+		var next_cid = getNextUnreadCid(kids[i]);
+		if (next_cid)
+			return next_cid;
+	}
+	return 0;
+}
+
+function getLastChild(cid) {
+	var kids = sortKids(cid);
+	if (kids.length)
+		return getLastChild(kids[kids.length - 1]);
+	else
+		return cid;
 }
 
 
