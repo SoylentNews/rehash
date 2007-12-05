@@ -19,6 +19,7 @@ __template__
   <div class="menu" onmouseover="dont_hide_nodnix_menu()" onmouseout="hide_nodnix_menu(750)" onmousedown="hide_nodnix_menu()">
     <ul>
       <li title="Tag this item 'interesting', voting it up" onmousedown="nodnix_tag('interesting', '+')">interesting</li>
+      <li title="Tag this item 'fresh', voting it up" onmousedown="nodnix_tag('fresh', '+')">fresh</li>
       <li title="Tag this item 'funny', voting it up" onmousedown="nodnix_tag('funny', '+')">funny</li>
       <li title="Tag this item 'insightful', voting it up" onmousedown="nodnix_tag('insightful', '+')">insightful</li>
     </ul>
