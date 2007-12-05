@@ -1839,11 +1839,7 @@ sub getAndSetOptions {
 	# ...for which we'll have fewer items per page
 	if ($force_smaller) {
 		$options->{smalldevices} = 1;
-		if ($mode eq "full") {
-			$options->{limit} = $pagesize eq "large" ? 15 : 10;
-		} else {
-			$options->{limit} = $pagesize eq "large" ? 20 : 15;
-		}
+		$options->{limit} = 10;
 	}
 
 	if ($user->{is_admin} && $form->{setusermode}) {
