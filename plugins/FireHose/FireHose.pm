@@ -1711,9 +1711,9 @@ sub getAndSetOptions {
 	# XXX
 	my $user_tabs = $self->getUserTabs();
 	my %user_tab_names = map { $_->{tabname} => 1 } @$user_tabs;
-	my %firehose_tabs_given = map { $_ => 1 } split (/\|/, $user->{firehose_tabs_given});
+	my $tabs_given = $user->{firehose_tabs_given} || '';
+	my %firehose_tabs_given = map { $_ => 1 } split (/\|/, $tabs_given);
 	my @tab_fields = qw(tabname filter mode color orderdir orderby);
-	my $tabs_given = $user->{firehose_tabs_given};
 
 	my $system_tabs = $self->getSystemDefaultTabs();
 	foreach my $tab (@$system_tabs) {
