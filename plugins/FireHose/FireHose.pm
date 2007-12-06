@@ -298,6 +298,7 @@ sub updateItemFromStory {
 		if ($id) {
 			# If a story is getting its primary skid to an ignored value set its firehose entry to non-public
 			my $public = ($story->{neverdisplay} || $ignore_skids{$story->{primaryskid}}) ? "no" : "yes";
+			print STDERR "Stoid: $story->{stoid} FHID: $id Public: $public ND: $story->{neverdisplay}\n";
 			my $data = {
 				title 		=> $story->{title},
 				uid		=> $story->{uid},
@@ -2017,6 +2018,10 @@ sub getAndSetOptions {
 
 	if ($options->{issue}) {
 		$options->{duration} = 1;
+	}
+
+	if ($user->{state}{firehose_page} eq "user") {
+		print STDERR "Users UID $user->{state}{firehose_uid} firehose duration $options->{duration}\n" if $options->{duration} != -1;
 	}
 
 	return $options;
