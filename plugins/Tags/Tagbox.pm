@@ -314,8 +314,7 @@ sub markTagboxRunComplete {
 	push @id_clauses, "tagid <= $affected_hr->{max_tagid}" if $affected_hr->{max_tagid};
 	push @id_clauses, "tdid  <= $affected_hr->{max_tdid}"  if $affected_hr->{max_tdid};
 	push @id_clauses, "tuid  <= $affected_hr->{max_tuid}"  if $affected_hr->{max_tuid};
-	die "markTagboxRunComplete called with no max ids: " . Dumper($affected_hr)
-		if !@id_clauses;
+	@id_clauses = ("tagid=0 AND tdid=0 AND tuid=0") if !@id_clauses;
 	my $id_clause = join(' OR ', @id_clauses);
 	$delete_clause .= " AND ($id_clause)";
 
