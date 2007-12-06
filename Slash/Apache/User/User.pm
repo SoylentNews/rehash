@@ -946,6 +946,10 @@ Bender:You can't count on God for jack! He pretty much told me so himself.
 Bender:Stop doing the right thing, you jerk!
 Bender:Are you familiar with the old robot saying "does not compute"?
 Bender:The sparks keep me warm.
+Bender:Boy, were we suckers!
+Bender:Whaddya say, folks? Hot or not?
+Bender:Bender knows when to use finesse.
+Bender:And I bet it's gonna get a lot more confusing.
 Fry:There's a lot about my face you don't know.
 Fry:These new hands are great. I'm gonna break them in tonight.
 Fry:I refuse to testify on the grounds that my organs will be chopped up into a patty.
@@ -992,6 +996,9 @@ Fry:Please, Mr. Nixon! We're appealing to your sense of decency!
 Fry:I have more important things to do today than laugh and clap my hands.
 Fry:I'll be whatever I wanna do.
 Fry:There's a political debate on. Quick, change the channel!
+Fry:It's all there, in the macaroni.
+Fry:Can I pull up my pants now?
+Fry:Robots don't go to heaven.
 Leela:There's a political debate on. Quick, change the channel!
 Leela:You did the best you could, I guess, and some of these gorillas are okay.
 Leela:This wangs chung.
@@ -1001,6 +1008,8 @@ Leela:This is by a wide margin the least likely thing that has ever happened.
 Leela:I'm a millionaire! Suddenly I have an opinion about the capital gains tax.
 Leela:Do you have idiots on your planet?
 Leela:My old life wasn't as glamorous as my webpage made it look.
+Leela:No, Leela will show you out.
+Hermes:Without my body, I'm a nobody.
 EOT
 
 1;
