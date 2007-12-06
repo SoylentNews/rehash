@@ -1,0 +1,26 @@
+__section__
+default
+__description__
+Show the console box for recent tagnames
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+recenttagnamesbox
+__template__
+<table cellspacing="0" cellpadding="2">
+[% FOREACH rt_hr = rtoi %]
+   <tr><td>[% rt_hr.tagname %]
+   [% FOREACH globj = rt_hr.globjs %]
+	<a href="[% globj.url | strip_urlattr %]" title="[% globj.title | strip_attribute %]">[% globj.linktext %]</a>
+   [% END %]
+   </td></tr>
+[% END %]
+</table>
+__seclev__
+10000
+__version__
+$Id$

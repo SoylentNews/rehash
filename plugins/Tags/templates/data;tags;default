@@ -42,6 +42,9 @@ __template__
 		<i>(none)</i>
 	[% END %]
 
+[% CASE 'recenttagnamesbox_js' %]
+	<script type="text/javascript">admin_recenttagnamesbox_fetch(60);</script>
+
 [% CASE 'error' %]
 	Sorry, an error occurred.
 	[% returnme.data_constant = 1 %] 

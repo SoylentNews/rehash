@@ -60,10 +60,15 @@ sub display {
 	my $firehosebox = "";
 	if ($constants->{plugin}{FireHose}) {
 		my $firehose = getObject("Slash::FireHose");
-		$user->{state}{firehose_page} = "console";
+		local $user->{state}{firehose_page} = 'console';
 		$firehosebox = $firehose->listView({ fh_page => 'console.pl'});
 	}
-
+	my $tagnamesbox = '';
+	my $tags = getObject('Slash::Tags');
+	if ($tags) {
+		my $rtoi_ar = $tags->getRecentTagnamesOfInterest();
+		$tagnamesbox = $tags->showRecentTagnamesBox();
+	}
 
 	slashDisplay('display', {
 		remarks 	=> $remarkstext,
@@ -71,7 +76,8 @@ sub display {
 		slashdbox 	=> $slashdbox,
 		perfbox		=> $perfbox,
 		authorbox	=> $authorbox,
-		firehosebox	=> $firehosebox
+		firehosebox	=> $firehosebox,
+		tagnamesbox	=> $tagnamesbox,
 	});
 
 }

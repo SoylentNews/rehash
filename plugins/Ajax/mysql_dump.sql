@@ -162,6 +162,7 @@ INSERT INTO ajax_ops VALUES (NULL, 'admin_slashdbox', 'Slash::Admin', 'ajax_slas
 INSERT INTO ajax_ops VALUES (NULL, 'admin_storyadminbox', 'Slash::Admin', 'ajax_storyadminbox', 'ajax_admin', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'admin_authorbox', 'Slash::Admin', 'ajax_authorbox', 'ajax_admin', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'admin_perfbox', 'Slash::Admin', 'ajax_perfbox', 'ajax_admin', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'admin_recenttagnamesbox', 'Slash::Tags', 'ajax_recenttagnamesbox', 'ajax_admin', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'admin_learnword', 'Slash::Admin', 'admin_learnword', 'ajax_admin', 'createuse');
 
 

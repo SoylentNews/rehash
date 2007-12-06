@@ -5055,6 +5055,12 @@ UPDATE vars SET value = 'yes no binspam dupe notthebest offtopic stupid slownews
 
 # PUDGE LAST UPDATED HERE
 
+# for plugins/Tags
+INSERT INTO ajax_ops VALUES (NULL, 'admin_recenttagnamesbox', 'Slash::Tags', 'ajax_recenttagnamesbox', 'ajax_admin', 'createuse');
+
+# for plugins/FireHose
+INSERT IGNORE INTO ajax_ops VALUES (NULL, 'firehose_usage', 'Slash::FireHose', 'ajaxFireHoseUsage', 'ajax_admin', 'createuse');
+
 # 2007-12-05
 UPDATE vars SET value = 'T_2_5_0_185' WHERE name = 'cvs_tag_currentcode';
 

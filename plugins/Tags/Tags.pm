@@ -1180,17 +1180,23 @@ sub normalizeAndOppositeAdminCommands {
 		$_adcmd_prefix{0} = '_';
 		for my $i (1..5) { $_adcmd_prefix{$i} = '#' x $i }
 	}
+	my @new = ( );
 	my %count = ( );
 	for my $c (@commands) {
 		my($type, $tagname) = $self->getTypeAndTagnameFromAdminCommand($c);
 		next unless $type;
+		if ($type !~ /$(_|#+)/) {
+			push @new, $c;
+			next;
+		}
 		my $count = $type =~ tr/#/#/;
 		$count{$tagname} ||= 0;
 		$count{$tagname} = $count if $count{$tagname} < $count;
 		my $opp = $self->getOppositeTagname($tagname);
 		$count{$opp} ||= 0;
 	}
-	my @new = ( map { $_adcmd_prefix{$count{$_}} . $_ } sort keys %count );
+	
+	push @new, ( map { $_adcmd_prefix{$count{$_}} . $_ } sort keys %count );
 	return @new;
 }
 }
@@ -1318,8 +1324,17 @@ sub processAdminCommand {
 
 	my $new_min_tagid = 0;
 
-#print STDERR "type '$type' for c '$c' new_clout '$new_user_clout' for table $table id $id\n";
-	if ($type eq '^') {
+print STDERR "type '$type' for c '$c' new_clout '$new_user_clout' for table $table id $id\n";
+	if ($type eq '+') {
+		# Plus sign means admin is saying this tagname is "OK",
+		# which (at least so far, 2007/12) means it is not
+		# malicious or stupid or pointless or etc.
+		$self->setTagname($tagnameid, { admin_ok => 1 });
+	} elsif ($type eq ')') {
+		# Right-paren means admin is labelling this tagname as
+		# descriptive.  Mnemonic: ")" looks like "D"
+		$self->setTagname($tagnameid, { descriptive => 1 });
+	} elsif ($type eq '^') {
 		# Set individual clouts to 0 for tags of this name on
 		# this story that have already been applied.  Future
 		# tags of this name on this story will apply with
@@ -1396,7 +1411,7 @@ sub processAdminCommand {
 
 sub getTypeAndTagnameFromAdminCommand {
 	my($self, $c) = @_;
-	my($type, $tagname) = $c =~ /^(\^|\$?\_|\$?\#{1,5})(.+)$/;
+	my($type, $tagname) = $c =~ /^(\^|\+|\)|\$?\_|\$?\#{1,5})(.+)$/;
 #print STDERR scalar(gmtime) . " get c '$c' type='$type' tagname='$tagname'\n";
 	return (undef, undef) if !$type || !$self->tagnameSyntaxOK($tagname);
 	return($type, $tagname);
@@ -1722,10 +1737,157 @@ sub markViewed {
 
 sub getRecentTagnamesOfInterest {
 	my($self, $options) = @_;
+	my $max_num = $options->{max_num} || 10;
+	my $min_weight = $options->{min_weight} || 1;
+
+	# First, collect the list of all tagnames used recently.
 	my $secsback = $options->{secsback} || 12 * 3600;
-	my $tagnameidsback = $options->{tagnameidsback} || 1000;
-	my $tagname_ar = $self->listTagnamesRecent({ seconds => $secsback });
-	
+	my $tagname_recent_ar = $self->listTagnamesRecent({ seconds => $secsback });
+	# If none, short-circuit out.
+	return [ ] if !@$tagname_recent_ar;
+
+	# Get their tagnameids.
+	my $tagname_str = join(',', map { $self->sqlQuote($_) } sort @$tagname_recent_ar);
+	my $tagnameid_to_name = $self->sqlSelectAllKeyValue(
+		'tagnameid, tagname',
+		'tagnames',
+		"tagname IN ($tagname_str)");
+	my $tagnameid_str = join(',', map { $self->sqlQuote($_) } sort keys %$tagnameid_to_name);
+	my $tagname_to_id = { reverse %$tagnameid_to_name };
+
+	# Next, build a hash identifying which of those are new tagnames,
+	# i.e. which were used for the first time within the same recent
+	# time interval we're looking at.
+	my $tagname_firstrecent_ar = $self->sqlSelectColArrayref(
+		'tagname, MIN(created_at) AS firstuse',
+		'tagnames, tags',
+		"tagnames.tagnameid IN ($tagnameid_str)
+		 AND tagnames.tagnameid=tags.tagnameid",
+		"GROUP BY tagname
+		 HAVING firstuse >= DATE_SUB(NOW(), INTERVAL $secsback SECOND)");
+	my %tagname_firstrecent = ( map { ($_, 1) } @$tagname_firstrecent_ar );
+
+	# Build a regex that will identify tagnames that begin with an
+	# author's name, and a hash matching recent tagnames.
+	my $author_names = join('|', map { "\Q\L$_\E" } @{ $self->getAuthorNames() });
+	my $author_regex = qr{^($author_names)};
+	my %tagname_startauthor = ( map { ($_, 1) }
+		grep { $_ =~ $author_regex } @$tagname_recent_ar );
+
+	# Build a hash identifying those tagnames which have been
+	# marked by an admin, at any time, as being "ok."
+	my $tagnameid_ok_ar = $self->sqlSelectColArrayref(
+		'DISTINCT tagnameid',
+		'tagcommand_adminlog',
+		"tagnameid IN ($tagnameid_str)
+		 AND cmdtype='+'");
+	my %tagname_adminok = ( map { ($tagnameid_to_name->{$_}, 1) } @$tagnameid_ok_ar );
+
+	# Build a hash identifying those tagnames which have been
+	# marked by an admin, at any time, as being bad (# etc.).
+	my $tagnameid_bad_ar = $self->sqlSelectColArrayref(
+		'DISTINCT tagnameid',
+		'tagcommand_adminlog',
+		"tagnameid IN ($tagnameid_str)
+		 AND cmdtype REGEXP '#'");
+	my %tagname_bad = ( map { ($tagnameid_to_name->{$_}, 1) } @$tagnameid_bad_ar );
+
+	# Using the hashes, build a list of all recent tagnames which
+	# are of interest.
+	my @tagnames_of_interest = grep {
+		     $tagname_bad{$_}
+		||   $tagname_startauthor{$_}
+		|| ( $tagname_firstrecent{$_} && !$tagname_adminok{$_} )
+	} @$tagname_recent_ar;
+if (!@tagnames_of_interest) { use Data::Dumper; print STDERR "none interesting in '@$tagname_recent_ar', bad: " . Dumper(\%tagname_bad) . "startauthor: " . Dumper(\%tagname_startauthor) . "firstrecent: " . Dumper(\%tagname_firstrecent) . "adminok: " . Dumper(\%tagname_adminok); }
+	return [ ] if !@tagnames_of_interest;
+	my @tagnameids_of_interest = map { $tagname_to_id->{$_} } @tagnames_of_interest;
+	my $tagnameids_of_interest_str = join(',', map { $self->sqlQuote($_) }
+		sort @tagnameids_of_interest);
+
+	# Now sort the tagnames in order of the sum of their current
+	# weights.  Exclude those with sum weight 0, because there's
+	# no need for admins to evaluate those.
+	my $tags_ar = $self->sqlSelectAllHashrefArray(
+		'*',
+		'tags',
+		"tagnameid IN ($tagnameids_of_interest_str)
+		 AND created_at >= DATE_SUB(NOW(), INTERVAL $secsback SECOND)");
+	$self->addCloutsToTagArrayref($tags_ar, 'describe');
+	my %tagnameid_weightsum = ( );
+	my %t_globjid_weightsum = ( );
+	for my $tag_hr (@$tags_ar) {
+		my $tc = $tag_hr->{total_clout};
+		next unless $tc;
+		my $tagnameid = $tag_hr->{tagnameid};
+		my $globjid = $tag_hr->{globjid};
+		$tagnameid_weightsum{ $tagnameid } ||= 0;
+		$tagnameid_weightsum{ $tagnameid }  += $tc;
+		$t_globjid_weightsum{ $tagnameid }{ $globjid } ||= 0;
+		$t_globjid_weightsum{ $tagnameid }{ $globjid }  += $tc;
+	}
+	my @tagnameids_top =
+		sort { $tagnameid_weightsum{$b} <=> $tagnameid_weightsum{$a}
+			|| $b <=> $a }
+		grep { $tagnameid_weightsum{$_} >= $min_weight }
+		keys %tagnameid_weightsum;
+	$#tagnameids_top = $max_num-1 if $#tagnameids_top > $max_num;
+
+	# Now we just have to construct the data structure to return.
+	my @rtoi = ( );
+	my %globjid_linktext = ( );
+	my $linktext_next = 'a'; # label the links simply 'a', 'b', etc.
+	for my $tagnameid (@tagnameids_top) {
+		my @globjids =
+			sort { $t_globjid_weightsum{$tagnameid}{$b} <=> $t_globjid_weightsum{$tagnameid}{$a}
+				|| $b <=> $a }
+			keys %{$t_globjid_weightsum{$tagnameid}};
+		$#globjids = $max_num-1 if $#globjids > $max_num;
+		my @globjid_data = ( );
+		for my $globjid (@globjids) {
+			my $lt = $globjid_linktext{$globjid} || '';
+			if (!$lt) {
+				$lt = $globjid_linktext{$globjid} = $linktext_next;
+				++$linktext_next;
+			}
+			push @globjid_data, {
+				globjid => $globjid,
+				linktext => $lt,
+			};
+		}
+		$self->addGlobjEssentialsToHashrefArray(\@globjid_data);
+		push @rtoi, {
+			tagname =>	$tagnameid_to_name->{$tagnameid},
+			globjs =>	\@globjid_data,
+		};
+	}
+use Data::Dumper; print STDERR scalar(localtime) . " rtoi: " . Dumper(\@rtoi);
+
+	return \@rtoi;
+}
+
+sub showRecentTagnamesBox {
+	my($self, $options) = @_;
+	my $rtoi_ar = $self->getRecentTagnamesOfInterest($options);
+
+	my $text = slashDisplay('recenttagnamesbox', {
+		rtoi => $rtoi_ar,
+	}, { Return => 1 });
+
+	return $text if $options->{contents_only};
+
+	my $updater = getData('recenttagnamesbox_js', { }, 'tags') if $options->{updater};
+	slashDisplay('sidebox', {
+		updater		=> $updater,
+		title		=> 'Recent Tagnames',
+		contents	=> $text,
+		name		=> 'recenttagnames',
+	}, { Return => 1 });
+}
+
+sub ajax_recenttagnamesbox {
+	my $tagsdb = getObject("Slash::Tags");
+	$tagsdb->showRecentTagnamesBox({ contents_only => 1});
 }
 
 #################################################################

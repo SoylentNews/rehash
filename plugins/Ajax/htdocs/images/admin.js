@@ -180,6 +180,12 @@ function admin_storyadminbox_fetch(secs) {
 	ajax_periodic_update(secs, params, "storyadmin-content");
 }
 
+function admin_recenttagnamesbox_fetch(secs) {
+	var params = [];
+	params['op'] = 'admin_recenttagnamesbox';
+	ajax_periodic_update(secs, params, "recenttagnames-content");
+}
+
 function console_update(use_fh_interval, require_fh_timeout) {
 	use_fh_interval = use_fh_interval || 0;
 

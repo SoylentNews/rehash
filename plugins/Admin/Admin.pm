@@ -454,10 +454,10 @@ sub showSlashdBox {
 		tasks_next              => \@tasks_next,
 		tasks_inprogress        => \@tasks_inprogress,
 		tasks_last              => \@tasks_last,
-	}, , { Return => 1 });
-	
+	}, { Return => 1 });
+
 	return $text if $options->{contents_only};
-	
+
 	$updater = getData('slashdbox_js', {}, "admin") if $options->{updater};
 	slashDisplay('sidebox', {
 		updater 	=> $updater,
@@ -478,7 +478,7 @@ sub showPerformanceBox {
 	my $updater;
 	my $perf_box = slashDisplay('performance_box', {}, { Return => 1 });
 	return $perf_box if $options->{contents_only};
-	$updater =getData('perfbox_js', {}, "admin") if $options->{updater};
+	$updater = getData('perfbox_js', {}, "admin") if $options->{updater};
 	slashDisplay("sidebox", {
 		updater 	=> $updater,
 		name 		=> 'performancebox',
