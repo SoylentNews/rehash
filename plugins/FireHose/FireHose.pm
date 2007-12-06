@@ -771,8 +771,9 @@ sub allowSubmitForUrl {
 sub getURLsForItem {
 	my($self, $item) = @_;
 	my $url_id = $item->{url_id};
-	my $url =         $url_id ? $self->getUrl($url_id)->{url} : undef;
-	my $url_prepend =    $url ? qq{<a href="$url">$url</a>}   : '';
+	my $url = $url_id ? $self->getUrl($url_id) : undef;
+	$url = $url->{url} if $url;
+	my $url_prepend = $url ? qq{<a href="$url">$url</a>}   : '';
 	my $text = qq{$url_prepend $item->introtext $item->{bodytext}};
 
 	my %urls = ( );
