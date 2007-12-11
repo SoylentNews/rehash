@@ -1325,8 +1325,8 @@ sub processAdminCommand {
 	my $new_min_tagid = 0;
 
 print STDERR "type '$type' for c '$c' new_clout '$new_user_clout' for table $table id $id\n";
-	if ($type eq '+') {
-		# Plus sign means admin is saying this tagname is "OK",
+	if ($type eq '*') {
+		# Asterisk means admin is saying this tagname is "OK",
 		# which (at least so far, 2007/12) means it is not
 		# malicious or stupid or pointless or etc.
 		$self->setTagname($tagnameid, { admin_ok => 1 });
@@ -1780,7 +1780,7 @@ sub getRecentTagnamesOfInterest {
 		'DISTINCT tagnameid',
 		'tagcommand_adminlog',
 		"tagnameid IN ($tagnameid_str)
-		 AND cmdtype='+'");
+		 AND cmdtype='*'");
 	my %tagname_adminok = ( map { ($tagnameid_to_name->{$_}, 1) } @$tagnameid_ok_ar );
 
 	# Build a hash identifying those tagnames which have been
@@ -1795,11 +1795,12 @@ sub getRecentTagnamesOfInterest {
 	# Using the hashes, build a list of all recent tagnames which
 	# are of interest.
 	my @tagnames_of_interest = grep {
-		     $tagname_bad{$_}
-		||   $tagname_startauthor{$_}
-		|| ( $tagname_firstrecent{$_} && !$tagname_adminok{$_} )
+		!$tagname_adminok{$_}
+		&& (	   $tagname_bad{$_}
+			|| $tagname_startauthor{$_}
+			|| $tagname_firstrecent{$_}
+		)
 	} @$tagname_recent_ar;
-if (!@tagnames_of_interest) { use Data::Dumper; print STDERR "none interesting in '@$tagname_recent_ar', bad: " . Dumper(\%tagname_bad) . "startauthor: " . Dumper(\%tagname_startauthor) . "firstrecent: " . Dumper(\%tagname_firstrecent) . "adminok: " . Dumper(\%tagname_adminok); }
 	return [ ] if !@tagnames_of_interest;
 	my @tagnameids_of_interest = map { $tagname_to_id->{$_} } @tagnames_of_interest;
 	my $tagnameids_of_interest_str = join(',', map { $self->sqlQuote($_) }
@@ -1816,11 +1817,29 @@ if (!@tagnames_of_interest) { use Data::Dumper; print STDERR "none interesting i
 	$self->addCloutsToTagArrayref($tags_ar, 'describe');
 	my %tagnameid_weightsum = ( );
 	my %t_globjid_weightsum = ( );
+	# Admins will care less about new tagnames applied to data types other
+	# than stories, and less about poorly scored items.  Downweight tags
+	# on such objects.
+	my %type_wmult = ( submissions => 0.6, journals => 0.4, urls => 0.2 );
+	my $firehose = getObject('Slash::FireHose');
+	my $fh_min_score;
+	if ($firehose) {
+		$fh_min_score = $firehose->getMinPopularityForColorLevel($constants->{tags_rectn_mincare} || 5);
+	}
 	for my $tag_hr (@$tags_ar) {
 		my $tc = $tag_hr->{total_clout};
 		next unless $tc;
 		my $tagnameid = $tag_hr->{tagnameid};
 		my $globjid = $tag_hr->{globjid};
+		my($type) = $self->getGlobjTarget($globjid);
+		if ($firehose) {
+			my $fhid = $firehose->getFireHoseIdFromGlobjid($globjid);
+			my $item = $firehose->getFireHose($fhid) if $fhid;
+			$tc *= $constants->{tags_rectn_nocaremult}
+				if $item && $item->{userpop} < $fh_min_score;
+		}
+		next unless $tc;
+		$tc *= ($type_wmult{$type} || 1);
 		$tagnameid_weightsum{ $tagnameid } ||= 0;
 		$tagnameid_weightsum{ $tagnameid }  += $tc;
 		$t_globjid_weightsum{ $tagnameid }{ $globjid } ||= 0;
@@ -1861,7 +1880,6 @@ if (!@tagnames_of_interest) { use Data::Dumper; print STDERR "none interesting i
 			globjs =>	\@globjid_data,
 		};
 	}
-use Data::Dumper; print STDERR scalar(localtime) . " rtoi: " . Dumper(\@rtoi);
 
 	return \@rtoi;
 }

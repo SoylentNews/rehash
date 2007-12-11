@@ -13,6 +13,8 @@ INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_mins', '3',
 INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_num', '10', 'Number of tagnames returned by listTagnamesByPrefix');
 INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_priority', 'back bookmark feed hold journal none quik submission story', 'Tagnames to give priority to on autocomplete');
 INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_priority_score', '999', 'Fake score to give any tagnames from tags_autocomplete_priority which may match a prefix');
+INSERT INTO vars (name, value, description) VALUES ('tags_rectn_mincare', '5', 'Minimum color slice number to "care" about tags for Recent Tagnames (only matters if FireHose installed)');
+INSERT INTO vars (name, value, description) VALUES ('tags_rectn_nocaremult', '0', 'If tags_rectn_mincare excludes an item, how less do we still care? 1=no change, 0=not at all');
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_allowread', '0', 'Who is allowed to see existing tags on stories (incl. search on them)? 0=nobody 1=admins 2=subscribers 2.5=tags_stories_allowread ACL 3=non-neg. karma 4=all logged in (3,4: up to tags_userfrac_read)');
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_allowwrite', '0', 'Who is allowed to tag stories? 0=nobody 1=admins 2=subscribers 2.5=tags_stories_allowwrite ACL 3=non-neg. karma 4=all logged in (3,4: up to tags_userfrac_write)');
 INSERT INTO vars (name, value, description) VALUES ('tags_stories_examples_pre', 'dupe typo', 'Example tags for stories before they go live');
