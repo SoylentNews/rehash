@@ -43,7 +43,6 @@ sub ajaxConsoleUpdate {
 	my $html = {};
 	my $admindb 	= getObject('Slash::Admin');
 	$html->{'storyadmin-content'}	= $admindb->showStoryAdminBox("", { contents_only => 1});
-	$html->{'slashdbox-content'}	= $admindb->showSlashdBox({ contents_only => 1});
 	$html->{'performancebox-content'}	= $admindb->showPerformanceBox({ contents_only => 1});
 	$html->{'authoractivity-content'}	= $admindb->showAuthorActivityBox({ contents_only => 1});
 	if (my $tagsdb = getObject('Slash::Tags')) {

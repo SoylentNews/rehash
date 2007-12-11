@@ -14,10 +14,9 @@ __template__
 <div id="slashboxes">
 	[% authorbox %]
 	[% storyadmin %]
+	[% tagnamesbox %]
 	[% perfbox %]
 	[% Slash.sidebox("Firehose Usage", ' ', "firehose_usage", 1) %]
-	[% slashdbox %]
-	[% tagnamesbox %]
 </div>
 <div id="console">
 	[% remarks %]

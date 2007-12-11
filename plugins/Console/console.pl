@@ -54,7 +54,6 @@ sub display {
 
 	my $admindb 	= getObject('Slash::Admin');
 	my $storyadmin 	= $admindb->showStoryAdminBox("");
-	my $slashdbox 	= $admindb->showSlashdBox();
 	my $perfbox	= $admindb->showPerformanceBox();
 	my $authorbox	= $admindb->showAuthorActivityBox();
 	my $firehosebox = "";
@@ -73,7 +72,6 @@ sub display {
 	slashDisplay('display', {
 		remarks 	=> $remarkstext,
 		storyadmin 	=> $storyadmin,
-		slashdbox 	=> $slashdbox,
 		perfbox		=> $perfbox,
 		authorbox	=> $authorbox,
 		firehosebox	=> $firehosebox,
