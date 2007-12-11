@@ -19,6 +19,7 @@ use Slash;
 use Slash::Utility;
 use Slash::DB;
 use Slash::Install;
+use Template;
 use Getopt::Std;
 use JavaScript::Minifier 0.02;
 
@@ -76,12 +77,23 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
 			catfile($theme_or_plugin->{dir},
 				$theme_or_plugin->{'glob'}{$glob})
 		);
-		my $filelist = "";
+		my @filelist = ( );
 		for my $file (@{$theme_or_plugin->{$glob}}) {
-			$filelist .= canonpath(catfile($theme_or_plugin->{dir}, $file)) . " ";
+			push @filelist, canonpath(catfile($theme_or_plugin->{dir}, $file));
 		}
 
-		system("cat $filelist > $destpath");
+		my $glob_template = Template->new({
+			INCLUDE_PATH	=> $theme_or_plugin->{dir},
+			PROCESS				=> \@filelist,
+			OUTPUT				=> \$destpath,
+			ABSOLUTE			=> 1,
+			RELATIVE			=> 1,
+			INTERPOLATE		=> 0,
+		}) || die "$Template::ERROR\n";
+		
+		$glob_template->process($filelist[0], $constants, $destpath) || die $glob_template->error(), "\n";
+
+		# system("cat $filelist > $destpath");
 		my($name, $path, $suffix) = fileparse($destpath, qr/\.[^.]*/);
 
 		# you can glob any kinds of files you like, even mixing them...
