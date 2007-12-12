@@ -178,6 +178,7 @@ sub getSectionPrefsHTML {
 			story023_default	=> \%story023_default,
 			multiple_values		=> $multiple_values,
 			master_value		=> $master_value,
+                        tabbed                  => $form->{'tabbed'},
 		},
 		{ Return => 1 }
 	);
@@ -534,7 +535,8 @@ sub getModalPrefs {
 				messagecodes    => $messagecodes,
 				deliverymodes   => $deliverymodes,
 				bvmessagecodes  => $bvmessagecodes,
-				bvdeliverymodes => $bvdeliverymodes
+				bvdeliverymodes => $bvdeliverymodes,
+                                tabbed          => $form->{'tabbed'},
 			},
 			{ Return => 1 }
 		);
@@ -543,7 +545,8 @@ sub getModalPrefs {
         } else {
                 return
 			slashDisplay('prefs_' . $form->{'section'}, {
-				user => $user,
+				user   => $user,
+                                tabbed => $form->{'tabbed'},
 			},
 			{ Return => 1 }
 		);
