@@ -5072,3 +5072,5 @@ UPDATE tagcommand_adminlog SET cmdtype='*' WHERE cmdtype='+';
 INSERT INTO vars (name, value, description) VALUES ('tags_rectn_mincare', '5', 'Minimum color slice number to "care" about tags for Recent Tagnames (only matters if FireHose installed)');
 INSERT INTO vars (name, value, description) VALUES ('tags_rectn_nocaremult', '0', 'If tags_rectn_mincare excludes an item, how less do we still care? 1=no change, 0=not at all');
 
+#For plugins FireHose
+INSERT INTO ajax_ops VALUES (NULL, 'admin_submit_memory', 'Slash::Admin', 'ajax_sub_memory', 'ajax_admin_static', 'use');
