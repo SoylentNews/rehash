@@ -1737,6 +1737,7 @@ sub markViewed {
 
 sub getRecentTagnamesOfInterest {
 	my($self, $options) = @_;
+	my $constants = getCurrentStatic();
 	my $max_num = $options->{max_num} || 10;
 	my $min_weight = $options->{min_weight} || 1;
 
