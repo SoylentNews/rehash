@@ -12113,6 +12113,7 @@ sub _addGlobjEssentials_stories {
 
 sub _addGlobjEssentials_urls {
 	my($self, $ar, $data_hr) = @_;
+	my $constants = getCurrentStatic();
 	my $urls_hr = _addGlobjEssentials_getids($ar, 'urls');
 	my @url_ids = sort { $a <=> $b } keys %$urls_hr;
 	my $id_str = join(',', @url_ids);
@@ -12122,9 +12123,25 @@ sub _addGlobjEssentials_urls {
 			'urls',
 			"url_id IN ($id_str)")
 		: { };
+	my $hoseid_hr = { };
+	my $firehose = getObject('Slash::FireHose');
+	if ($firehose) {
+		$hoseid_hr = $id_str
+			? $self->sqlSelectAllKeyValue(
+				'DISTINCT url_id, id',
+				'firehose',
+				"url_id IN ($id_str) AND type='bookmark'")
+			: { };
+	}
 	for my $url_id (@url_ids) {
 		my $globjid = $urls_hr->{$url_id};
-		$data_hr->{$globjid}{url} = $urldata_hr->{$url_id}{url};
+		# If there's a firehose entry for this URL's bookmark,
+		# link to it.  Otherwise, link directly to the URL.
+		# Is this a good idea?  Since there's no way to delete
+		# a firehose entry, I think so.
+		$data_hr->{$globjid}{url} = $hoseid_hr->{$url_id}
+			? "$constants->{rootdir}/firehose.pl?op=view&id=$hoseid_hr->{$url_id}"
+			: $urldata_hr->{$url_id}{url};
 		$data_hr->{$globjid}{title} = $urldata_hr->{$url_id}{validatedtitle}
 			|| $urldata_hr->{$url_id}{initialtitle};
 		$data_hr->{$globjid}{created_at} = $urldata_hr->{$url_id}{createtime};
