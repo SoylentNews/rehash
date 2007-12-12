@@ -594,6 +594,10 @@ sub getFireHoseEssentials {
 		push @where, "firehose.id IN ($id_str)";
 	}
 
+	if ($options->{not_id}) {
+		push @where, "firehose.id != " . $self->sqlQuote($options->{not_id});
+	}
+
 	my $limit_str = '';
 	my $where = (join ' AND ', @where) || '';
 
@@ -2021,9 +2025,10 @@ sub getAndSetOptions {
 		$options->{duration} = 1;
 	}
 
-	if ($user->{state}{firehose_page} eq "user") {
-		print STDERR "Users UID $user->{state}{firehose_uid} firehose duration $options->{duration}\n" if $options->{duration} != -1;
+	if ($form->{not_id} && $form->{not_id} =~ /^\d+$/) {
+		$options->{not_id} = $form->{not_id};
 	}
+
 
 	return $options;
 }
@@ -2121,11 +2126,22 @@ sub listView {
 	$lv_opts ||= {};
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
+	my $gSkin = getCurrentSkin();
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
+	my $featured;
+
+	if ($gSkin->{name} eq "idle") {
+		my ($res) = $firehose_reader->getFireHoseEssentials({ primaryskid => $gSkin->{skid}, type => "story", limit => 1, orderby => 'createtime', orderdir => 'DESC'});
+		if ($res && $res->[0]) {
+			$featured = $firehose_reader->getFireHose($res->[0]->{id});
+		}
+	}
 	my $options = $lv_opts->{options} || $self->getAndSetOptions();
 	my $base_page = $lv_opts->{fh_page} || "firehose.pl";
 
-
+	if ($featured && $featured->{id}) {
+		$options->{no_id} = $featured->{id};
+	}
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($options);
 
 	my $itemnum = scalar @$items;
@@ -2202,7 +2218,8 @@ sub listView {
 		slashboxes	=> $Slashboxes,
 		last_day	=> $last_day,
 		fh_page		=> $base_page,
-		search_results	=> $results
+		search_results	=> $results,
+		featured	=> $featured,
 	}, { Page => "firehose", Return => 1 });
 }
 
