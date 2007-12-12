@@ -20,6 +20,15 @@ __template__
 		   modeweb  = Slash.MSG_MODE_WEB;
 		%]
 
+                [% IF tabbed == 1 %]
+                <div style="margin: 0 -2em 0em -2em; background: #e6e6e6;">
+                &nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('user', 'User', 1); return false;">User</a>
+                &nbsp;|&nbsp;
+                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc;">Messages</span>
+                </div>
+                [% END %]
+
                 &nbsp;<br>
 
 		From this page you can configure various messages that [% constants.sitename %] can optionally send to you. The primary options are [% deliverymodes.$modenone %] (Disabled), [% deliverymodes.$modemail %], [% deliverymodes.$modeweb %], [% IF constants.im_screenname %]AIM,[% END %] and Mobile Text. Not all options are available for all message types.  [% deliverymodes.$modeweb %] messages <b>will be deleted</b> after <b>[% constants.message_web_expire || 31 %] days</b>.[% IF constants.im_screenname %] If you plan on receiving AIM messages, please add [% constants.im_screenname %] to your buddylist.[% END %]
