@@ -1430,12 +1430,13 @@ function hide_modal_box() {
 	return;
 }
 
-function getModalPrefs(section, title) {
+function getModalPrefs(section, title, tabbed) {
         document.getElementById('preference_title').innerHTML = title;
 	var params = [];
 	params['op'] = 'getModalPrefs';
 	params['section'] = section;
 	params['reskey'] = reskey_static;
+        params['tabbed'] = tabbed;
 	var handlers = {onComplete:show_modal_box};
 	ajax_update(params, 'modal_box_content', handlers);
 
