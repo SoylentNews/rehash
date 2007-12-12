@@ -273,7 +273,8 @@ sub despam_uid {
 		 AND firehose.uid = $uid
 		 AND type IN ('submission', 'journal')
 		 AND createtime >= DATE_SUB(NOW(), INTERVAL $daysback DAY)
-		 AND tagnameid = $self->{upvoteid}");
+		 AND tagnameid = $self->{upvoteid}
+		 AND inactivated IS NULL");
 	my $max_clout = defined($constants->{tagbox_despam_upvotermaxclout})
 		? $constants->{tagbox_despam_upvotermaxclout} : '0.85';
 	for my $upvoter (@$upvoter_ar) {
