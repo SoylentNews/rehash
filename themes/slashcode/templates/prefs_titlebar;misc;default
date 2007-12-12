@@ -20,7 +20,7 @@ PROCESS titlebar title=title;
 
 user_link = '/users.pl?op=edituser';
 IF constants.modal_prefs_active;
-        user_link = user_link _ "\" onclick=\"getModalPrefs('user', 'User')\; return false";
+        user_link = user_link _ "\" onclick=\"getModalPrefs('user', 'User', 1)\; return false";
 END;
 
 tabs = [
@@ -31,7 +31,7 @@ tabs = [
 IF constants.plugin.Messages;
         messages_link = "/my/messages";
         IF constants.modal_prefs_active;
-                messages_link = messages_link _ "\" onclick=\"getModalPrefs('messages', 'Messages')\; return false";
+                messages_link = messages_link _ "\" onclick=\"getModalPrefs('messages', 'Messages', 1)\; return false";
         END;
         tabs.push(
         { link = messages_link,                 label = "Messages",     sel_label = "messages" },
