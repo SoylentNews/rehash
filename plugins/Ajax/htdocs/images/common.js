@@ -19,6 +19,7 @@ var firehose_removed_first = '0';
 var firehose_future;
 var firehose_removals;
 var firehose_is_embedded = 0;
+var firehose_not_id = 0;
 var fh_colorslider; 
 var fh_ticksize;
 var fh_pageval = 0;
@@ -502,7 +503,7 @@ function firehose_set_options(name, value) {
 	var params = [];
 	params['op'] = 'firehose_set_options';
 	params['reskey'] = reskey_static;
-	theForm = document.forms["firehoseform"];
+	var theForm = document.forms["firehoseform"];
 	if (name == "firehose_usermode") {
 		if (value ==  true) {
 			value = 1;
@@ -537,7 +538,7 @@ function firehose_set_options(name, value) {
 		}
 	}
 
-	if (name == "fhfilter") {
+	if (name == "fhfilter" && theForm) {
 		for (i=0; i< theForm.elements.length; i++) {
 			if (theForm.elements[i].name == "fhfilter") {
 				params['fhfilter'] = theForm.elements[i].value;
@@ -560,7 +561,7 @@ function firehose_set_options(name, value) {
 			}
 		}
 	}
-	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode") {
+	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs") {
 		// blur out then remove items
 		if (name == "mode") {
 			fh_view_mode = value;
@@ -1009,7 +1010,9 @@ function firehose_get_next_updates() {
 
 
 function firehose_get_updates_handler(transport) {
-	$('busy').className = "hide";
+	if ($('busy')) {
+		$('busy').className = "hide";
+	}
 	var response = eval_response(transport);
 	var processed = 0;
 	firehose_removals = response.update_data.removals;
@@ -1040,15 +1043,20 @@ function firehose_get_updates_handler(transport) {
 
 function firehose_get_item_idstring() {
 	var fhl = $('firehoselist');
-	var children = fhl.childNodes;
 	var str = "";
-	var id;
-	for (var i = 0; i < children.length; i++) {
-		if (children[i].id) {
-			id = children[i].id;
-			id = id.replace(/^firehose-/g, "");
-			id = id.replace(/^\s+|\s+$/g, "");
-			str = str + id + ",";
+	var children;
+	if(fhl) {
+		var id;
+		children = fhl.childNodes;
+		if (children) {
+		for (var i = 0; i < children.length; i++) {
+			if (children[i].id) {
+				id = children[i].id;
+				id = id.replace(/^firehose-/g, "");
+				id = id.replace(/^\s+|\s+$/g, "");
+				str = str + id + ",";
+			}
+		}
 		}
 	}
 	return str;
@@ -1060,7 +1068,7 @@ function firehose_get_updates(options) {
 	run_before_update();
 	if ((fh_play == 0 && !options.oneupdate) || fh_is_updating == 1) {
 		firehose_add_update_timerid(setTimeout("firehose_get_updates()", 2000));
-		//alert("wait loop: " + fh_is_updating);
+	//	alert("wait loop: " + fh_is_updating);
 		return;
 	}
 	if (fh_update_timerids.length > 0) {
@@ -1079,11 +1087,14 @@ function firehose_get_updates(options) {
 	params['duration'] = firehose_duration;
 	params['issue'] = firehose_issue;
 	params['page'] = page;
+	params['not_id'] = firehose_not_id;
 	if ( firehose_is_embedded ) {
 		params['embed'] = 1;
 	}
 	params['fh_pageval'] = fh_pageval;
-	$('busy').className = "";
+	if ($('busy')) {
+		$('busy').className = "";
+	}
 	ajax_update(params, '', handlers);
 }
 
@@ -1136,10 +1147,12 @@ function firehose_play() {
 	fh_play = 1;
 	setFirehoseAction();
 	firehose_set_options('pause', '0');
+	var pausepanel = $('pauseorplay');
 	if ($('message_area'))
 		$('message_area').innerHTML = "";
-	if ($('pauseorplay'))
-		$('pauseorplay').innerHTML = "Updated";
+	if (pausepanel) {
+		pausepanel.innerHTML = "Updated";
+	}
 	var pause = $('pause');
 	
 	var play_div = $('play');
@@ -1157,8 +1170,9 @@ function firehose_pause() {
 	var play_div = $('play');
 	pause.className = "hide";
 	play_div.className = "show";
-	if ($('pauseorplay'))
+	if ($('pauseorplay')) {
 		$('pauseorplay').innerHTML = "Paused";
+	}
 	firehose_set_options('pause', '1');
 }
 
