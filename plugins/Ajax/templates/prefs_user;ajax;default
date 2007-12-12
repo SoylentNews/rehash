@@ -11,6 +11,15 @@ __name__
 prefs_user
 __template__
 
+                [% IF tabbed == 1 %]
+                <div style="margin: 0 -2em 0em -2em; background: #e6e6e6;">
+                &nbsp;
+                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc;">User</span>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('messages', 'Messages', 1); return false;">Messages</a>
+                </div>
+                [% END %]
+
 		[% IF constants.offer_insecure_login_link %]
 		&nbsp;<br>
 		You can automatically log in by clicking <a href="[% gSkin.rootdir %]/index.pl?op=userlogin&amp;logtoken=[% user.logtoken | strip_paramattr %]" onclick="hide_modal_box()">This Link</a> and Bookmarking the resulting page. This is totally insecure, but very convenient. 
