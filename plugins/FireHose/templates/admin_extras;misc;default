@@ -27,17 +27,20 @@ __template__
         </tr>
 [% END # FOREACH %]
         <tr>
-                <td><input name="submatch" size="10"></td>
-                <td colspan="2"><input name="subnote" size="40"></td>
+                <td><input name="submatch" size="10" id="submatch-[% item.id %]"></td>
+                <td colspan="2"><input name="subnote" size="40" id="subnote-[% item.id %]"></td>
                 <td>
                       [% IF form.nowrapper %]<input type="hidden" name="nowrapper" value="1">[% END %]
                       [% IF form.fromconsole %]<input type="hidden" name="fromconsole" value="1">[% END %]
                       <input type="hidden" name="op" value="viewsub">
                       <input type="hidden" name="subid" value="[% subid %]">
-                      <input type="submit" value="Remember">
+                      <input type="submit" value="Remember" onclick="admin_submit_memory([% item.id %]); return false;">
               </td>
 
         </tr>
+	<tr>
+		<td colspan="2" id="sub_mem_message-[% item.id %]"></td>
+	</tr>
 </table>
 </form>
 [% IF similar_stories.size > 0 %]

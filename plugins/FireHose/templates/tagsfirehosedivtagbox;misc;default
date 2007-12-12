@@ -15,7 +15,7 @@ tagsfirehosedivtagbox
 __template__
 [% IF user.tags_canread_stories %]
 <div id="tagbox-[% id %]" class="tags">
-[% IF !form.skipvote && !options.nothumbs %]
+[% IF !form.skipvote && !options.nothumbs && !skipvote %]
 	<span id="updown-[% item.id %]" class="vote[% IF vote == "down" %]ddown[% ELSIF vote == "up" %]dup[% END %]">
 	  <a href="#" onclick="firehose_up_down('[% item.id %]','+'); return false" class="up" title="Vote this item up"
 	     [% IF !user.is_anon %]onMouseDown="show_nod_menu(this, '[% item.id %]')" onMouseOver="show_nod_menu(this, '[% item.id %]', 1200, 5200)" onMouseOut="dont_show_nodnix_menu()"[% END %]>+</a>

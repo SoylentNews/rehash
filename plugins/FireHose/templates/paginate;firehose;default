@@ -35,7 +35,7 @@ __template__
 	[% IF split_refresh %]<!-- split -->[% END %]
 	[% IF !split_refresh %]
 	<span class="active">
-		[% IF form.skipmenu %]
+		[% IF form.skipmenu || no_peer %]
 			[% PROCESS datewidget id='fhcalendar_pag' init='firehose_calendar_init' %]
 		[% ELSE %]
 			[% PROCESS datewidget id='fhcalendar_pag' peer = 'fhcalendar' init='firehose_calendar_init' %]
