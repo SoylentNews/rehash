@@ -259,6 +259,16 @@ sub ajax_neverdisplay {
 
 }
 
+sub ajax_sub_memory {
+	my $slashdb = getCurrentDB();
+	my $form = getCurrentForm();
+	my $user = getCurrentUser();
+	return unless $user->{is_admin};
+	$slashdb->updateSubMemory($form->{submatch}, $form->{subnote});
+	return "Added note of $form->{subnote} for term $form->{submatch"; 
+
+}
+
 ##################################################################
 sub getStorySignoffs {
 	my($self, $stoid) = @_;
