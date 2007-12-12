@@ -2008,11 +2008,16 @@ sub getAndSetOptions {
 	$options->{public} = "yes";
 	if ($adminmode) {
 		# $options->{attention_needed} = "yes";
-		$options->{accepted} = "no" if !$options->{accepted};
-		$options->{rejected} = "no" if !$options->{rejected};
+		if ($user->{state}{firehose_page} ne "user") {
+			$options->{accepted} = "no" if !$options->{accepted};
+			$options->{rejected} = "no" if !$options->{rejected};
+		}
 		$options->{duration} ||= -1;
 	} else  {
-		$options->{accepted} = "no" if !$options->{accepted};
+		if ($user->{state}{firehose_page} ne "user") {
+			$options->{accepted} = "no" if !$options->{accepted};
+		}
+		
 		$options->{duration} ||= 1;
 		if ($user->{is_subscriber} && !$no_saved) {
 			$options->{createtime_subscriber_future} = 1;
