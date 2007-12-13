@@ -88,7 +88,7 @@ html > body .commentwrap table {
 	padding: .3em;
 }
 
-.commentshrunk, .commentstatus { font-weight: bold }
+.commentshrunk, .commentstatus, .commentload { font-weight: bold }
 
 .quote {
     margin-bottom: .75em;

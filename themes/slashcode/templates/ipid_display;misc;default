@@ -12,13 +12,12 @@ en_US
 __name__
 ipid_display
 __template__
-IPID:
+<span class="user_ipid_display">[<a href="[%
+gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[%
+data.ipid %]&amp;fieldname=ipid">[% data.ipid_vis %]</a>
 <a href="[%
 gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[%
-data.ipid %]&amp;fieldname=ipid">[% data.ipid_vis %]</a>&nbsp;&nbsp;SubnetID:
-<a href="[%
-gSkin.rootdir %]/users.pl?op=userinfo&amp;userfield=[%
-data.subnetid %]&amp;fieldname=subnetid">[% data.subnetid_vis %]</a>
+data.subnetid %]&amp;fieldname=subnetid">[% data.subnetid_vis %]]</a></span>
 
 __seclev__
 10000

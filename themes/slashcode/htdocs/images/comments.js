@@ -48,6 +48,15 @@ var alt_down = 0;
 var ctrl_down = 0;
 var d2_seen = '';
 
+var adTimerSecs;
+var adTimerClicks;
+var adTimerInsert;
+var adTimerSecsMax   = 120;
+var adTimerClicksMax = 10;
+var adTimerSeen = {};
+var adTimerUrl  = '';
+resetAdTimer();
+
 var agt = navigator.userAgent.toLowerCase();
 var is_firefox = (agt.indexOf("firefox") != -1);
 
@@ -69,7 +78,9 @@ function updateComment(cid, mode) {
 			} else if (viewmodevalue[mode] >= viewmodevalue['full']) {
 				var cd = fetchEl('comment_otherdetails_' + cid);
 				if (!cd.innerHTML) {
-					cd.innerHTML = '<br><b><big>Loading ...</big></b>';
+					var cs = fetchEl('comment_sub_' + cid);
+					if (cs)
+						cs.innerHTML = '<span class="commentload">Loading ...</span>';
 					fetch_comments.push(cid);
 					fetch_comments_pieces[cid] = 1;
 					doshort = 1;
@@ -152,8 +163,7 @@ function setFocusComment(cid, alone, mods) {
 
 	if (abscid == cid) { // expanding == selecting
 		setCurrentComment(cid);
-		if (checkAdTimer(cid))
-			adTimerInsert = cid;
+		checkAdTimer(cid);
 	}
 
 
@@ -183,6 +193,10 @@ function setFocusComment(cid, alone, mods) {
 // 
 // 	resetModifiers();
 
+	var was_hidden = 0;
+	if (displaymode[abscid] == 'hidden' || prehiddendisplaymode[abscid] == 'hidden')
+		was_hidden = 1;
+
 	if (alone && alone == 1) {
 		var thismode = abscid == cid ? 'full' : 'oneline';
 		updateDisplayMode(abscid, thismode, 1);
@@ -194,9 +208,11 @@ function setFocusComment(cid, alone, mods) {
 
 //	statusdiv.innerHTML = '';
 
-	if (!commentIsInWindow(abscid)) {
+	if (!commentIsInWindow(abscid))
 		scrollWindowTo(abscid);
-	}
+
+	if (was_hidden)
+		updateHiddens([abscid]);
 
 	return false;
 }
@@ -352,15 +368,7 @@ function selectParent(cid, collapse) {
 
 	var comment = comments[cid];
 	if (comment && fetchEl('comment_' + cid)) {
-		var was_hidden = 0;
-		if (displaymode[cid] == 'hidden')
-			was_hidden = 1;
-
 		setFocusComment(cid, (collapse ? 2 : 1));
-
-		if (was_hidden)
-			updateHiddens([cid]);
-
 		return false;
 	} else {
 		return true; // follow link
@@ -730,39 +738,22 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 				// for some reason the modification done in addComment
 				// invalidates the linkage fetchEl() uses to get
 				// an element, so we need to refetch them
+				// for now, trying on-demand
 				if (is_firefox) {
-					// this is the worst ... not sure what else to do
-					if (root) {
-						var commlist = fetchEl('commentlisting');
-						loadAllElements('span', commlist);
-						loadAllElements('div', commlist);
-						loadAllElements('li', commlist);
-						loadAllElements('a', commlist);
-					} else {
+ 					if (root) {
+ 						reloadForFirefox('commentlisting');
+ 					} else {
 						for (var pid in pids) {
-							var tree = fetchEl('tree_' + pid);
-							loadAllElements('span', commlist);
-							loadAllElements('div', commlist);
-							loadAllElements('li', commlist);
-							loadAllElements('a', commlist);
-						}
-					}
+ 							reloadForFirefox('tree_' + pid);
+ 						}
+ 					}
 				}
 			}
 
 			json_update(response);
 
 			for (var i = 0; i < cids.length; i++) {
-				// this is needed for Firefox
-				// better way to do automatically?
-				if (is_firefox) {
-					loadNamedElement('comment_link_' + cids[i]);
-					loadNamedElement('comment_shrunk_' + cids[i]);
-					loadNamedElement('comment_sig_' + cids[i]);
-					loadNamedElement('comment_otherdetails_' + cids[i]);
-					loadNamedElement('comment_sub_' + cids[i]);
-					loadNamedElement('comment_top_' + cids[i]);
-				}
+				reloadCommentForFirefox(cids[i]);
 				setShortSubject(cids[i]);
 			}
 
@@ -818,18 +809,20 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 			}
 			ajaxCommentsStatus(0);
 
-			if (0 && adTimerInsert) {
+			if (adTimerInsert) {
 				var tree = $('tree_' + adTimerInsert);
 				if (tree) {
+					var adcall = '<iframe src="' + adTimerUrl + '" height="110" width="740"></iframe>';
+					var html = '<li id="comment_ad_' + adTimerInsert + '" class="inlinead"> ' + adcall +'  </li>';
+
 					var commtree = $('commtree_' + adTimerInsert);
-					var html = '<li id="comment_ad_' + adTimerInsert + '" class="inlinead"> SLASHDOT AD! </li>';
 					if (commtree) {
 						commtree.innerHTML = html + commtree.innerHTML;
 					} else {
 						tree.innerHTML = tree.innerHTML + '<ul id="commtree_' + adTimerInsert + '">' + html + '</ul>';
 					}
+					resetAdTimer();
 				}
-				adTimerInsert = 0;
 			}
 		}
 	};
@@ -988,16 +981,70 @@ function loadAllElements(tagname, parent) {
 	return;
 }
 
+function reloadForFirefox(obj_name) {
+	if (is_firefox) {
+		var obj = $(obj_name);
+		loadAllElements('span', obj);
+		loadAllElements('div', obj);
+		loadAllElements('li', obj);
+		loadAllElements('a', obj);
+	}
+}
+
+function reloadCommentForFirefox(cid) {
+	if (is_firefox) {
+		loadNamedElement('comment_link_' + cid);
+		loadNamedElement('comment_shrunk_' + cid);
+		loadNamedElement('comment_sig_' + cid);
+		loadNamedElement('comment_otherdetails_' + cid);
+		loadNamedElement('comment_sub_' + cid);
+		loadNamedElement('comment_top_' + cid);
+	}
+}
+
 function loadNamedElement(name) {
 	commentelements[name] = $(name);
 	return;
 }
 
 function fetchEl(str) {
-	return loaded
-		? (is_firefox ? commentelements[str] : $(str))
-		: $(str);
+	var obj;
+
+	if (loaded && is_firefox) {
+		obj = commentelements[str];
+		// any other special cases to ignore? -- pudge
+		if (!str.match(/^hidestring_/))
+			if (!obj || !grepCommentNode(obj, str))
+				obj = commentelements[str] = $(str);
+	} else {
+		obj = $(str);
+	}
+
+	return obj;
 }
+
+// this is a generalized fix for Firefox, to find orphaned nodes
+// maybe more than we need? keep this around in case we need,
+// but maybe don't use it for now -- pudge
+function grepNode(obj, id) {
+	if (!id)
+		id = '^commentlisting$';
+	var parent = obj.parentNode;
+	if (!parent)
+		return false;
+//	if (parent.nodeName == '#document')
+	if (parent.id.match(id))
+		return parent;
+	return grepNode(parent);
+}
+
+function grepCommentNode(obj, str) {
+	var results = str.match(/^(tree|comment)_(\w+_)?\d+$/);
+	if (results)
+		return grepNode(obj)
+	return true;
+}
+
 
 function finishLoading() {
 	if (is_firefox) {
@@ -1031,6 +1078,7 @@ function finishLoading() {
 			last_updated_comments.push(cid);
 	}
 	last_updated_comments = last_updated_comments.sort(numsort);
+	root_comments = root_comments.sort(numsort);
 
 	if (1 || user_is_admin) {
 		if (window.addEventListener) // DOM method for binding an event
@@ -1627,26 +1675,19 @@ YAHOO.slashdot.ThresholdBar.prototype.alignElWithMouse = function( el, iPageX, i
 }
 
 
-
-var adTimerSecs;
-var adTimerClicks;
-var adTimerInsert;
-var adTimerSecsMax   = 10;
-var adTimerClicksMax = 5;
-var adTimerSeen = {};
-
-resetAdTimer();
-
 function checkAdTimer (cid) {
+	if (!adTimerUrl)
+		return;
+
 	clickAdTimer();
 
 	if (cid && adTimerSeen[cid])
 		return 0;
 
 	var ad = 0;
-	if (adTimerClicks >= adTimerClicksMax)
+	if (adTimerClicks >= adTimerClicksMax) {
 		ad = 1;
-	else {
+	} else {
 		var secs = getSeconds() - adTimerSecs;
 		if (secs >= adTimerSecsMax)
 			ad = 1;
@@ -1655,14 +1696,14 @@ function checkAdTimer (cid) {
 	if (!ad)
 		return 0;
 
-	if (cid)
-		adTimerSeen[cid] = 1;
-
-	resetAdTimer();
-	return 1;
+	adTimerInsert = cid;
 }
 
 function resetAdTimer () {
+	if (adTimerInsert) {
+		adTimerSeen[adTimerInsert] = 1;
+	}
+	adTimerInsert = 0;
 	adTimerSecs   = getSeconds();
 	adTimerClicks = 0;
 }
@@ -1715,13 +1756,13 @@ var validkeys = {
 	W: { thread : 1, prev: 1 },
 	S: { thread : 1, next: 1 },
 	Q: { chrono : 1, prev: 1, comment: 1 },
-	E: { chrono : 1, next: 1, comment: 1 },
+	E: { chrono : 1, next: 1, comment: 1 }
 };
 
 validkeys['H'] = validkeys['A'];
 validkeys['L'] = validkeys['D'];
-validkeys['J'] = validkeys['W'];
-validkeys['K'] = validkeys['S'];
+validkeys['J'] = validkeys['S'];
+validkeys['K'] = validkeys['W'];
 
 function keyHandler(e, k) {
 	if (!k)
@@ -1830,11 +1871,15 @@ function commTreeNextComm (cid, old_cid, getNextUnread) {
 		kids = rootSort();
 
 	for (var i = 0; i < kids.length; i++) {
-		var next_cid = kids[i];
-		if (next_cid > old_cid) {
-			if (next_cid)
-				if (!getNextUnread || (next_cid = getNextUnreadCid(next_cid)))
-					return next_cid;
+		var this_cid;
+		if (!old_cid)
+			this_cid = kids[i];
+		else if (kids[i] == old_cid)
+			this_cid = kids[i+1];
+
+		if (this_cid) {
+			if (!getNextUnread || (this_cid = getNextUnreadCid(this_cid)))
+				return this_cid;
 			continue;
 		}
 	}
@@ -1847,7 +1892,7 @@ function commTreeNextComm (cid, old_cid, getNextUnread) {
 }
 
 function commTreePrevComm (cid, to_parent) {
-	var root_kids = root_comments.sort(numsort);
+	var root_kids = rootSort();
 	var comm = comments[cid];
 	var pid = comm.pid;
 
@@ -1877,11 +1922,11 @@ function commTreePrevComm (cid, to_parent) {
 }
 
 function rootSort() { // maybe cache later
-	return root_comments.sort(numsort);
+	return root_comments; //.sort(numsort);
 }
 
 function sortKids(cid) { // maybe cache later
-	return comments[cid].kids.sort(numsort);
+	return comments[cid].kids; //.sort(numsort);
 }
 
 function isUnread(cid) {

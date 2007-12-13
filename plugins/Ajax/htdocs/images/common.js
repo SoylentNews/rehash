@@ -1045,18 +1045,18 @@ function firehose_get_item_idstring() {
 	var fhl = $('firehoselist');
 	var str = "";
 	var children;
-	if(fhl) {
+	if (fhl) {
 		var id;
 		children = fhl.childNodes;
 		if (children) {
-		for (var i = 0; i < children.length; i++) {
-			if (children[i].id) {
-				id = children[i].id;
-				id = id.replace(/^firehose-/g, "");
-				id = id.replace(/^\s+|\s+$/g, "");
-				str = str + id + ",";
+			for (var i = 0; i < children.length; i++) {
+				if (children[i].id) {
+					id = children[i].id;
+					id = id.replace(/^firehose-/g, "");
+					id = id.replace(/^\s+|\s+$/g, "");
+					str = str + id + ",";
+				}
 			}
-		}
 		}
 	}
 	return str;

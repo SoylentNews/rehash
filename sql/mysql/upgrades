@@ -5046,8 +5046,6 @@ UPDATE al2_types SET name='spammer',title='Spammer' WHERE name='binspam';
 # 2007-11-14
 UPDATE vars SET value = 'T_2_5_0_184' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 # not for slashdot
 UPDATE vars SET value = 'yes no binspam dupe notthebest offtopic stupid slownewsday interesting funny insightful' WHERE name = 'tagbox_top_excludetagnames';
 
@@ -5055,8 +5053,6 @@ UPDATE vars SET value = 'yes no binspam dupe notthebest offtopic stupid slownews
 
 # 2007-12-05
 UPDATE vars SET value = 'T_2_5_0_185' WHERE name = 'cvs_tag_currentcode';
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
 
 # for plugins/Tags
 INSERT INTO ajax_ops VALUES (NULL, 'admin_recenttagnamesbox', 'Slash::Tags', 'ajax_recenttagnamesbox', 'ajax_admin', 'createuse');
@@ -5067,6 +5063,10 @@ INSERT IGNORE INTO ajax_ops VALUES (NULL, 'firehose_usage', 'Slash::FireHose', '
 # 2007-12-05
 UPDATE vars SET value = 'T_2_5_0_186' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
+
 # for plugins/Tags
 UPDATE tagcommand_adminlog SET cmdtype='*' WHERE cmdtype='+';
 INSERT INTO vars (name, value, description) VALUES ('tags_rectn_mincare', '5', 'Minimum color slice number to "care" about tags for Recent Tagnames (only matters if FireHose installed)');
@@ -5074,3 +5074,4 @@ INSERT INTO vars (name, value, description) VALUES ('tags_rectn_nocaremult', '0'
 
 #For plugins FireHose
 INSERT INTO ajax_ops VALUES (NULL, 'admin_submit_memory', 'Slash::Admin', 'ajax_sub_memory', 'ajax_admin_static', 'use');
+

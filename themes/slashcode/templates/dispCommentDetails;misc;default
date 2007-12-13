@@ -29,20 +29,14 @@ __template__
 			}, 1, { noextra => 1 }) %])[% END %]
 			<small>
 			[% has_homepage = homepage && homepage.length > 8;
-				has_journal = journal_last_entry_date.search('[1-9]');
-				IF !is_anon && (has_homepage || has_journal) %]
-					<br>
-					([% IF has_homepage %]
-						<a href="[% homepage %]">[% homepage | strip_literal %]</a>
-					[% IF has_journal %]| [% END %]
-					[% END %]
-					[% IF has_journal %]
-						Last Journal:
-						<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/">[%
-						Slash.timeCalc(journal_last_entry_date) %]</a>
-					[% END %])
-				[% END %]
-				[% ipid_display %]
+			   has_journal = journal_last_entry_date.search('[1-9]');
+			   IF !is_anon && (has_homepage || has_journal);
+				IF has_homepage %]
+				<a href="[% homepage %]" title="[% homepage %]" class="user_homepage_display">Homepage</a>
+				[% END ; IF has_journal %]
+				<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/" title="[% Slash.timeCalc(journal_last_entry_date) %]" class="user_journal_display">Journal</a>
+				[% END ; END %]
+			[% ipid_display %]
 			</small>
 __seclev__
 10000
