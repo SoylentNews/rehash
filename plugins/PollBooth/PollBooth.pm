@@ -243,7 +243,7 @@ sub getPollUpdateHashFromStory {
 		"stories",
 		"stoid=$stoid");
 	my $data;
-	my $viewable = $self->checkStoryViewable($stoid);
+	my $viewable = $self->checkStoryViewable($stoid, 0, { no_time_restrict => 1});
 	if ($story_ref->{qid}) {
 		$data->{date}           = $story_ref->{time} if $opts->{date};
 		$data->{polltype}       = $viewable ? "story" : "nodisplay" if $opts->{polltype};
