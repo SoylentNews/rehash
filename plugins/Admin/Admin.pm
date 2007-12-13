@@ -265,8 +265,7 @@ sub ajax_sub_memory {
 	my $user = getCurrentUser();
 	return unless $user->{is_admin};
 	$slashdb->updateSubMemory($form->{submatch}, $form->{subnote});
-	return "Added note of $form->{subnote} for term $form->{submatch"; 
-
+	return "Added note of $form->{subnote} for term $form->{submatch}";
 }
 
 ##################################################################
