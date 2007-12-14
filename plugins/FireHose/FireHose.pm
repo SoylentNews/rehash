@@ -2145,7 +2145,7 @@ sub listView {
 	my $base_page = $lv_opts->{fh_page} || "firehose.pl";
 
 	if ($featured && $featured->{id}) {
-		$options->{no_id} = $featured->{id};
+		$options->{not_id} = $featured->{id};
 	}
 	my($items, $results) = $firehose_reader->getFireHoseEssentials($options);
 
