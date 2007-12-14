@@ -14,7 +14,11 @@ en_US
 __name__
 pollplug
 __template__
-[% pb = Slash.getObject("Slash::PollBooth");
+[% pb = Slash.getObject("Slash::PollBooth") %]
+[% IF !qid && skid %]
+	qid = pb.getCurrentQidForSkid(skid);
+[% END %]
+[%
    poll =  pb.getPollQuestion(qid);
    answers  = pb.getPollAnswers(qid, ['answer', 'votes']);
    totalvotes = poll.voters;

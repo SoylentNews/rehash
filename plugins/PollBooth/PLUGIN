@@ -9,6 +9,7 @@ template=templates/data;pollBooth;default
 template=templates/editpoll;pollBooth;default
 template=templates/listpolls;pollBooth;default
 template=templates/pollbooth;misc;default
+template=templates/pollplug;misc;default
 template=templates/savepoll;pollBooth;default
 template=templates/vote;pollBooth;default
 template=templates/detachpoll;pollBooth;default
