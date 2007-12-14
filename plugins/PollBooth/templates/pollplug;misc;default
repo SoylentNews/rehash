@@ -1,0 +1,37 @@
+__section__
+default
+__description__
+Display votes and graph of votes
+
+* qid = question ID
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+pollplug
+__template__
+[% pb = Slash.getObject("Slash::PollBooth");
+   poll =  pb.getPollQuestion(qid);
+   answers  = pb.getPollAnswers(qid, ['answer', 'votes']);
+   totalvotes = poll.voters;
+%]
+[% maxvotes = -1 %]
+[% FOR answer = answers %]
+	[% IF answer.1 > maxvotes;
+		poll_option     = answer.0;
+		votes      = answer.1;
+		percent    = poll.voters ? (votes / totalvotes * 100) : 0; 
+		percent = percent.int;
+		maxvotes = votes || "";
+        END; 
+END %]
+[% percent %]% Voted '[% poll_option %]' for '<a href="[% gSkin.rootdir %]/pollBooth.pl?op=vote&amp;qid=[% qid %]&amp;aid=-1">[% poll.question %]</a>'
+
+__seclev__
+10000
+__version__
+$Id$
