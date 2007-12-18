@@ -102,12 +102,14 @@ sub getMostNonnegativeTaggedGlobjs {
 		$types_clause = " AND gtid IN ($typeids)";
 	}
 
-	my $tagnames = $constants->{tags_negative_tagnames} || $constants->{tags_downvote_tagname} || 'nix';
 	my $tagsdb = getObject('Slash::Tags');
+	my $tagnames = $tagsdb->getNegativeTags;
+	$tagnames = ['nix'] unless @$tagnames;
+	#$constants->{tags_negative_tagnames} || $constants->{tags_downvote_tagname} || 'nix';
 	my $tagnameids = join ',', grep $_, map {
 		s/\s+//g;
 		$tagsdb->getTagnameidFromNameIfExists($_)
-	} split /,/, $tagnames;
+	} @$tagnames; # split /,/, $tagnames;
 	my $tagnameid_clause = '';
 	$tagnameid_clause = " AND tagnameid NOT IN ($tagnameids)" if $tagnameids;
 

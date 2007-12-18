@@ -1,8 +1,8 @@
 __section__
 default
 __description__
-If the list of these tags is changed, consider also updating the var
-'tagbox_top_excludetagnames'.
+To get something on this list, make sure it is in tagnames_param for
+posneg='+' or '-', and popup='1'.
 
 __title__
 Useless title to template
@@ -15,28 +15,28 @@ nodnix_menus
 __seclev__
 10000
 __template__
-<div id="nodmenu">
+[% tags_reader = Slash.getObject('Slash::Tags', { db_type => 'reader' });
+   postags = tags_reader.getPositivePopupTags.sort;
+   negtags = tags_reader.getNegativePopupTags.sort;
+
+   IF postags.size %]<div id="nodmenu">
   <div class="menu" onmouseover="dont_hide_nodnix_menu()" onmouseout="hide_nodnix_menu(750)" onmousedown="hide_nodnix_menu()">
     <ul>
-      <li title="Tag this item 'interesting', voting it up" onmousedown="nodnix_tag('interesting', '+')">interesting</li>
-      <li title="Tag this item 'fresh', voting it up" onmousedown="nodnix_tag('fresh', '+')">fresh</li>
-      <li title="Tag this item 'funny', voting it up" onmousedown="nodnix_tag('funny', '+')">funny</li>
-      <li title="Tag this item 'insightful', voting it up" onmousedown="nodnix_tag('insightful', '+')">insightful</li>
+    [%- FOR postag IN postags %]
+      <li title="Tag this item '[% postag %]', voting it up" onmousedown="nodnix_tag('[% postag %]', '+')">[% postag %]</li>
+    [%- END %]
     </ul>
   </div>
 </div>
-<div id="nixmenu">
+[% END; IF negtags.size %]<div id="nixmenu">
   <div class="menu" onmouseover="dont_hide_nodnix_menu()" onmouseout="hide_nodnix_menu(750)" onmousedown="hide_nodnix_menu()">
     <ul>
-      <li title="Tag this item 'binspam', voting it down" onmousedown="nodnix_tag('binspam', '-')">binspam</li>
-      <li title="Tag this item 'dupe', voting it down" onmousedown="nodnix_tag('dupe', '-')">dupe</li>
-      <li title="Tag this item 'notthebest', voting it down" onmousedown="nodnix_tag('notthebest', '-')">notthebest</li>
-      <li title="Tag this item 'offtopic', voting it down" onmousedown="nodnix_tag('offtopic', '-')">offtopic</li>
-      <li title="Tag this item 'stupid', voting it down" onmousedown="nodnix_tag('stupid', '-')">stupid</li>
-      <li title="Tag this item 'slownewsday', voting it down" onmousedown="nodnix_tag('slownewsday', '-')">slownewsday</li>
-      <li title="Tag this item 'stale', voting it down" onmousedown="nodnix_tag('stale', '-')">stale</li>
+    [%- FOR negtag IN negtags %]
+      <li title="Tag this item '[% negtag %]', voting it down" onmousedown="nodnix_tag('[% negtag %]', '+')">[% negtag %]</li>
+    [%- END %]
     </ul>
   </div>
 </div>
+[% END %]
 __version__
 $Id$

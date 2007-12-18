@@ -204,7 +204,8 @@ sub run {
 	my %nontop = ( map { ($_, 1) }
 		grep { $_ }
 		map { ($_, $tags_reader->getOppositeTagname($_)) }
-		split / /, ($constants->{tagbox_top_excludetagnames} || '')
+		@{$tags_reader->getExcludedTags}
+#		split / /, ($constants->{tagbox_top_excludetagnames} || '')
 	);
 	# Eliminate tagnames that are just the author's name.
 	my @names = map { lc } @{ $tags_reader->getAuthorNames() };

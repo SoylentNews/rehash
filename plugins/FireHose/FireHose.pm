@@ -460,18 +460,21 @@ sub getFireHoseEssentials {
 		} elsif ($options->{tagged_positive} || $options->{tagged_negative} || $options->{tagged_non_negative}) {
 			my $labels;
 			my $not = '';
+			my $tags = getObject('Slash::Tags');
+
 			if ($options->{tagged_positive}) {
-				$labels = $constants->{tags_positive_tagnames} || 'nod';
+				$labels = $tags->getPositiveTags;
+				$labels = ['nod'] unless @$labels;
 			} else { # tagged_non_negative || tagged_negative
-				$labels = $constants->{tags_negative_tagnames} || 'nix';
+				$labels = $tags->getNegativeTags;
+				$labels = ['nix'] unless @$labels;
 				$not = 'NOT' if $options->{tagged_non_negative};
 			}
 
-			my $tags = getObject('Slash::Tags');
 			my $ids = join ',', grep $_, map {
 				s/\s+//g;
 				$tags->getTagnameidFromNameIfExists($_)
-			} split /,/, $labels;
+			} @$labels;
 			push @where, "tags.tagnameid $not IN ($ids)";
 
 			if ($not) {

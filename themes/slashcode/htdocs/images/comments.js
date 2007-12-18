@@ -46,6 +46,7 @@ var loaded = 0;
 var shift_down = 0;
 var alt_down = 0;
 var ctrl_down = 0;
+var meta_down = 0;
 var d2_seen = '';
 
 var adTimerSecs;
@@ -1117,6 +1118,7 @@ function resetModifiers () {
 	shift_down = 0;
 	alt_down   = 0;
 	ctrl_down  = 0;
+	meta_down  = 0;
 }
 
 function doModifiers (e) {
@@ -1131,6 +1133,8 @@ function doModifiers (e) {
 				alt_down = 1;
 			if (e.modifiers & Event.CTRL_MASK)
 				ctrl_down = 1;
+			if (e.modifiers & Event.META_MASK)
+				meta_down = 1;
 		} else {
 			if (e.shiftKey)
 				shift_down = 1;
@@ -1138,6 +1142,8 @@ function doModifiers (e) {
 				alt_down = 1;
 			if (e.ctrlKey)
 				ctrl_down = 1;
+			if (e.metaKey)
+				meta_down = 1;
 		}
 	}
 }
@@ -1781,8 +1787,13 @@ function keyHandler(e, k) {
 				doModifiers(e);
 			var collapseCurrent = shift_down;
 			var getNextUnread   = ctrl_down;
+			var skipit = 0;
+			if (meta_down || alt_down)
+				skipit = 1;
 			if (!k)
 				resetModifiers();
+			if (skipit)
+				return;
 
 			var update = 0;
 			var next_cid = 0;

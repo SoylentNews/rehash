@@ -5063,10 +5063,6 @@ INSERT IGNORE INTO ajax_ops VALUES (NULL, 'firehose_usage', 'Slash::FireHose', '
 # 2007-12-05
 UPDATE vars SET value = 'T_2_5_0_186' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 # for plugins/Tags
 UPDATE tagcommand_adminlog SET cmdtype='*' WHERE cmdtype='+';
 INSERT INTO vars (name, value, description) VALUES ('tags_rectn_mincare', '5', 'Minimum color slice number to "care" about tags for Recent Tagnames (only matters if FireHose installed)');
@@ -5077,6 +5073,10 @@ INSERT INTO ajax_ops VALUES (NULL, 'admin_submit_memory', 'Slash::Admin', 'ajax_
 
 # 2007-12-13
 UPDATE vars SET value = 'T_2_5_0_187' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # for plugins/Metamod
 INSERT INTO vars (name, value, description) VALUES ('m2_only_perdec', '10', 'What perdecage of mods should get M2d? 1=1/10th, 10=all');
