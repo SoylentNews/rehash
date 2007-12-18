@@ -359,6 +359,11 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._newCompleter = function( tagDomain 
 
 YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParams, tagDomain )
   {
+      // onTextboxBlur should have already hidden the previous instance (if any), but if events
+      //  come out of order, we must hide now to prevent broken listeners
+    if ( this._sourceEl )
+      this._hide();
+
     this._sourceEl = obj;
 
     if ( this._sourceEl )
