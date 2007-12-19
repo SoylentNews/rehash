@@ -561,7 +561,7 @@ sub saveModalPrefs {
 	my $url = URI->new('//e.a/?' . $form->{'data'});
 	my %params = $url->query_form;
 
-	# Specific to D2 display and posting prefs for the time being.
+        # D2 display
 	my $user_edits_table;
 	if ($params{'formname'} eq 'd2_display') {
 		$user_edits_table = {
@@ -575,6 +575,7 @@ sub saveModalPrefs {
 		};
 	}
 
+        # D2 posting
 	if ($params{'formname'} eq 'd2_posting') {
 		$user_edits_table = {
 			emaildisplay      => $params{'emaildisplay'} || undef,
@@ -590,6 +591,7 @@ sub saveModalPrefs {
 		};
 	}
 
+        # Messages
 	if ($params{'formname'} eq 'messages') {
 		my $messages  = getObject('Slash::Messages');
 		my $messagecodes = $messages->getDescriptions('messagecodes');
@@ -612,6 +614,7 @@ sub saveModalPrefs {
 		};
 	}
 
+        # Generic user
         if ($params{'formname'} eq 'user') {
                 my $user_edit = $slashdb->getUser($params{uid});
                 my $gSkin = getCurrentSkin();
@@ -708,14 +711,38 @@ sub saveModalPrefs {
                 }
         }
 
+        # Sections
         if ($params{'formname'} eq "sectional") {
                 setSectionNexusPrefs($slashdb, $constants, $user, \%params);
         }
-        else {
+
+        # Homepage
+        if ($params{'formname'} eq "home") {
+                $user_edits_table = {
+                        maxstories      => 30,
+                        lowbandwidth    => ($params{lowbandwidth}    ? 1 : 0),
+                        simpledesign    => ($params{simpledesign}    ? 1 : 0),
+                        noicons         => ($params{noicons}         ? 1 : 0),
+                        willing         => ($params{willing}         ? 1 : 0),
+                        tags_turnedoff  => ($params{showtags}        ? undef : 1),
+                        opt_osdn_navbar => ($params{opt_osdn_navbar} ? 1 : 0),
+                };
+
+                if (defined $params{tzcode} && defined $params{tzformat}) {
+                        $user_edits_table->{tzcode} = $params{tzcode};
+                        $user_edits_table->{dfid}   = $params{tzformat};
+                        $user_edits_table->{dst}    = $params{dst};
+                }
+
+                if (!isAnon($params{uid}) && !$params{willing}) {
+                        $slashdb->setUser($params{uid}, { points => 0 });
+                }
+        }
+
+        # Everything but Sections is saved here.
+        if ($params{'formname'} ne "sectional") {
                 $slashdb->setUser($params{uid}, $user_edits_table);
         }
-        
-	$slashdb->setUser($params{uid}, $user_edits_table);
 }
 
 # comments
