@@ -21,11 +21,15 @@ __template__
 		%]
 
                 [% IF tabbed == 1 %]
-                <div style="margin: 0 -2em 0em -2em; background: #e6e6e6;">
+                <div style="text-align: center;">
                 &nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('user', 'User', 1); return false;">User</a>
                 &nbsp;|&nbsp;
-                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc;">Messages</span>
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('home', 'Homepage', 1); return false;">Homepage</a>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('sectional', 'Sectional Display', 1); return false;">Sections</a>
+                &nbsp;|&nbsp;
+                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Messages</span>
                 </div>
                 [% END %]
 
