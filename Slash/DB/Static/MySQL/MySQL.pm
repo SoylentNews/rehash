@@ -1928,6 +1928,23 @@ sub deleteFileQueueCmd {
 	$self->sqlDelete("file_queue", "fqid=$fqid_q");
 }
 
+sub getRecentThumbAndMediaStories {
+	my ($self, $skid, $limit) = @_;
+	$limit ||= 20;
+
+	my $skid_clause = "";
+	$skid_clause = " AND primaryskid = " .$self->sqlQuote($skid) if $skid;
+
+	return $self->sqlSelectColArrayref(
+		"story_param.stoid", 
+		"stories,story_param", 
+		"name in ('thumb','media') AND stories.stoid=story_param.stoid 
+		 AND time <= NOW() $skid_clause", 
+		"GROUP BY stories.stoid ORDER BY time DESC LIMIT $limit"
+	);
+
+}
+
 1;
 
 __END__
