@@ -17,10 +17,35 @@ __template__
 [% style_enabled = "color: #000; background: #fff;" %]
 [% style_disabled = "color: #999; background: #ccc;" %]
 
-&nbsp;<p>
+                [% IF tabbed == 1 %]
+                <div style="text-align: center;">
+                &nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('user', 'User', 1); return false;">User</a>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('home', 'Homepage', 1); return false;">Homepage</a>
+                &nbsp;|&nbsp;
+                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Sections</span>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('messages', 'Messages', 1); return false;">Messages</a>
+                </div>
+                [% END %]
+
+<br>
+
+For each section, you may choose from a range of display options.
+
+<br><br>
+
+You have the ability to choose how much or how little content you  want to see from each section. Further, you have the ability to choose if you want to view each type of article in 'Full Text' or 'Abbreviated' format.
+
+<br><br>
+
+<a href="[% gSkin.rootdir %]/faq/UI.shtml#ui500">Learn more about your options for controlling the amount of content on your index page.</a>
+
+<br><br>
 
 <form id="modal_prefs" method="post">
-<table border="0" cellpadding="1" cellspacing="0" width="100%">
+<table border="0" cellpadding="1" cellspacing="0" width="99%">
 	<tr>
 		<td>&nbsp;</td>
 		<td align="center">
