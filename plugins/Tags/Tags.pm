@@ -422,7 +422,7 @@ sub setTag {
 
 sub setTagname {
 	my($self, $id, $params) = @_;
-	return 0 if !$id || !$params || !%$params;
+	return 0 if !$id || $id !~ /^\d+$/ || !$params || !%$params;
 
 	my $changed = 0;
 	for my $key (sort keys %$params) {

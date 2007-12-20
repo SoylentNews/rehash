@@ -5081,3 +5081,7 @@ UPDATE vars SET value = 'T_2_5_0_187' WHERE name = 'cvs_tag_currentcode';
 # for plugins/Metamod
 INSERT INTO vars (name, value, description) VALUES ('m2_only_perdec', '10', 'What perdecage of mods should get M2d? 1=1/10th, 10=all');
 
+# for plugins/Tags
+# perl -MSlash::Test=virtusername -le 'map { $tags->setTagname($_, { exclude => 1 }) } map { $tags->getTagnameidCreate($_) } split / /, $constants->{tagbox_top_excludetagnames}; map { $tags->setTagname($_, { posneg => "-" }) } map { $tags->getTagnameidCreate($_) } split ",", $constants->{tags_negative_tagnames};'
+DELETE FROM vars WHERE name IN ('tagbox_top_excludetagnames', 'tags_negative_tagnames');
+
