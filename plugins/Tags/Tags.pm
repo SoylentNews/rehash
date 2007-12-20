@@ -1909,9 +1909,9 @@ sub ajax_recenttagnamesbox {
 	$tagsdb->showRecentTagnamesBox({ contents_only => 1});
 }
 
-sub getTagnameParamsByNameValue {
+sub getTagnameidsByParam {
 	my($self, $name, $value) = @_;
-	return $self->sqlSelectAll('tagnameid', 'tagname_params',
+	return $self->sqlSelectColArrayref('tagnameid', 'tagname_params',
 		'name=' . $self->sqlQuote($name),
 		'AND value=' . $self->sqlQuote($value)
 	);
@@ -1919,8 +1919,8 @@ sub getTagnameParamsByNameValue {
 
 sub getTagnamesByParam {
 	my($self, $name, $value) = @_;
-	my $tagnameids = $self->getTagnameParamsByNameValue($name, $value);
-	return [ map { $self->getTagnameDataFromId($_->[0])->{tagname} } @$tagnameids ];
+	my $tagnameids = $self->getTagnameidsByParam($name, $value);
+	return [ map { $self->getTagnameDataFromId($_)->{tagname} } @$tagnameids ];
 }
 
 sub getPopupTags {
