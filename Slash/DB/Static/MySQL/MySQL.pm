@@ -1929,7 +1929,7 @@ sub deleteFileQueueCmd {
 }
 
 sub getRecentThumbAndMediaStories {
-	my ($self, $skid, $limit) = @_;
+	my($self, $skid, $limit) = @_;
 	$limit ||= 20;
 
 	my $skid_clause = "";
