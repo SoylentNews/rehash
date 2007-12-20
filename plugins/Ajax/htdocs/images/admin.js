@@ -47,6 +47,15 @@ function admin_neverdisplay(stoid, type, fhid) {
 	}
 }
 
+function admin_submit_memory(fhid) {
+	var params = [];
+	params['op'] = 'admin_submit_memory';
+	params['reskey'] = reskey_static;
+	params['submatch'] = $('submatch-'+fhid).value;
+	params['subnote'] = $('subnote-'+fhid).value;
+	ajax_update(params, 'sub_mem_message-'+fhid);
+}
+
 function adminTagsCommands(id, type) {
 	var toggletags_message_id = 'toggletags-message-' + id;
 	var toggletags_message_el = $(toggletags_message_id);
