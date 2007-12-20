@@ -1855,7 +1855,7 @@ sub getAndSetOptions {
 		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "" });
 	}
 
-	foreach (qw(nodates nobylines nothumbs nocolors)) {
+	foreach (qw(nodates nobylines nothumbs nocolors noslashboxes nomarquee)) {
 		if ($form->{setfield}) {
 			if (defined $form->{$_}) {
 				$options->{$_} = $form->{$_} ? 1 : 0;
@@ -2138,7 +2138,7 @@ sub listView {
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $featured;
 
-	if ($gSkin->{name} eq "idle") {
+	if ($gSkin->{name} eq "idle" && !$user->{firehose_nomarquee}) {
 		my($res) = $firehose_reader->getFireHoseEssentials({ primaryskid => $gSkin->{skid}, type => "story", limit => 1, orderby => 'createtime', orderdir => 'DESC'});
 		if ($res && $res->[0]) {
 			$featured = $firehose_reader->getFireHose($res->[0]->{id});
