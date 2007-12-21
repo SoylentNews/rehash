@@ -32,7 +32,7 @@ __template__
   <div class="menu" onmouseover="dont_hide_nodnix_menu()" onmouseout="hide_nodnix_menu(750)" onmousedown="hide_nodnix_menu()">
     <ul>
     [%- FOR negtag IN negtags %]
-      <li title="Tag this item '[% negtag %]', voting it down" onmousedown="nodnix_tag('[% negtag %]', '+')">[% negtag %]</li>
+      <li title="Tag this item '[% negtag %]', voting it down" onmousedown="nodnix_tag('[% negtag %]', '-')">[% negtag %]</li>
     [%- END %]
     </ul>
   </div>
