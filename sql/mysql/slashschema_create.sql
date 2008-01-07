@@ -38,7 +38,7 @@ CREATE TABLE accesslog (
 	dat varchar(254),
 	uid mediumint UNSIGNED NOT NULL,
 	ts datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
-	query_string varchar(50),
+	query_string varchar(254),
 	user_agent varchar(50),
 	skid SMALLINT UNSIGNED DEFAULT 0 NOT NULL,
 	bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,

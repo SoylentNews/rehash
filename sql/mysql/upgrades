@@ -5088,3 +5088,5 @@ DELETE FROM vars WHERE name IN ('tagbox_top_excludetagnames', 'tags_negative_tag
 # 2007-12-20
 UPDATE vars SET value = 'T_2_5_0_188' WHERE name = 'cvs_tag_currentcode';
 
+ALTER TABLE accesslog CHANGE query_string query_string VARCHAR(254) DEFAULT NULL;
+
