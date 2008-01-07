@@ -1856,8 +1856,8 @@ Hashref of cleaned-up data.
 
 	# fields that have ONLY a-zA-Z0-9_
 	my %alphas = map {($_ => 1)} qw(
-		fieldname formkey commentstatus filter
-		hcanswer mode op section thisname type reskey
+		content_type fieldname formkey commentstatus filter
+		hcanswer mode op section thisname type reskey userfield
 		comments_control
 	),
 	# Survey
