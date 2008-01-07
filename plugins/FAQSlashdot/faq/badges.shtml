@@ -50,6 +50,14 @@ This might look like this:
 </script>
 <script src="http://slashdot.org/slashdot-it.js" type="text/javascript"></script></xmp></p>
 
+<p>The examples above show the (default) horizontal style badge.
+Alternatively, you can have vertical badges by setting <i>slashdot_badge_style</i>:
+<xmp>slashdot_badge_style='v0';</xmp>
+Vertical badges look like this:</p>
+
+<p><img src="http://images.slashdot.org/sditv2u.png" style="padding-left:2em;"
+alt="sample Slashdot badge" title="a vertical Slashdot badge looks like this"/></p>
+
 
 <h2><a name="ba101" id="ba101">Links</a></h2>
 <p>For security or control reasons, you might wish to use your own image and formatting
