@@ -151,8 +151,8 @@ sub run {
 	my $submitter_uid = $fhitem->{uid};
 	my $submitter_srcid = $fhitem->{srcid_32};
 
-	main::tagboxLog(sprintf("%s->run marking fhid %d as is_spam", ref($self), $fhid));
-	$slashdb->sqlUpdate('firehose', { is_spam => 'yes' }, "id=$fhid");
+	main::tagboxLog(sprintf("%s->run marking fhid %d (%d) as is_spam", ref($self), $fhid, $affected_id));
+	$firehose_db->setFireHose($fhid, { is_spam => 'yes' });
 
 	if (isAnon($submitter_uid)) {
 		# Non-logged-in user, check by IP (srcid_32)
