@@ -20,7 +20,9 @@ __name__
 printCommentsMain
 __template__
 [% horiz = 0; rooted = 0;
-   IF user.comments_control;
+   IF gSkin.name == 'idle';
+   	horiz = 1;
+   ELSIF user.comments_control;
    	rooted = 1 IF user.comments_control == 'rooted';
    	horiz = 1 IF rooted || user.comments_control == 'horizontal';
    ELSE;
