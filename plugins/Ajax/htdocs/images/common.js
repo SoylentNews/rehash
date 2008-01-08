@@ -1183,10 +1183,12 @@ function firehose_add_update_timerid(timerid) {
 function firehose_collapse_entry(id) {
 	var fhbody = $('fhbody-'+id);
 	var fh = $('firehose-'+id);
-	if (fhbody.className == "body") {
+	if (fhbody && fhbody.className == "body") {
 		fhbody.className = "hide";
+	}
+	if (fh) {	
 		fh.className = "briefarticle";
-	}	
+	}
 	tagsHideBody(id)
 
 }
