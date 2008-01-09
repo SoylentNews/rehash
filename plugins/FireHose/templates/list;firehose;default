@@ -153,9 +153,9 @@ cmdrtaco dot net but be forgiving of beta code!
 </span>
 [% PROCESS paginate options = options ulid = "fh-paginate" divid = "fh-pag-div" num_items = itemnum fh_page = fh_page %]
 <script type="text/javascript">
-	firehose_startdate = '[% options.startdate.replace('-','') %]';
-	firehose_issue = '[% options.issue %]';
-	firehose_duration = '[% options.duration %]';
+	firehose_settings.startdate = '[% options.startdate.replace('-','') %]';
+	firehose_settings.issue = '[% options.issue %]';
+	firehose_settings.duration = '[% options.duration %]';
 	[% IF fh_page == "console.pl" %]
 		fh_pageval = 1;
 	[% ELSIF fh_page == "users.pl" %]
@@ -176,7 +176,7 @@ cmdrtaco dot net but be forgiving of beta code!
 	var fh_view_mode = '[% options.mode %]';
 	var page = '[% page %]';
 	[% IF form.embed %]
-	firehose_is_embedded = 1; // defined in common.js
+	firehose_settings.is_embedded = 1; // defined in common.js
 	[% END %]
 	fh_is_admin = [% IF user.is_admin && !user.firehose_usermode %]1[% ELSE %]0[% END %];
 	var updateIntervalType = [% IF user.is_admin && !user.firehose_usermode %]1[% ELSE %]2[% END %];

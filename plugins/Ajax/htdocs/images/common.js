@@ -1,25 +1,29 @@
 // _*_ Mode: JavaScript; tab-width: 8; indent-tabs-mode: true _*_
 // $Id$
 
+	// global settings, but a firehose might use a local settings object instead
+var firehose_settings = {};
+  firehose_settings.updates = Array(0);
+  firehose_settings.updates_size = 0;
+  firehose_settings.ordered = Array(0);
+  firehose_settings.before = Array(0);
+  firehose_settings.after = Array(0);
+  firehose_settings.startdate = '';
+  firehose_settings.duration = '';
+  firehose_settings.issue = '';
+  firehose_settings.removed_first = '0';
+  firehose_settings.future = null;
+  firehose_settings.removals = null;
+  firehose_settings.is_embedded = 0;
+  firehose_settings.not_id = 0;
+
+  // globals we haven't yet decided to move into |firehose_settings|
 var fh_play = 0;
 var fh_is_timed_out = 0;
 var fh_is_updating = 0;
 var fh_update_timerids = Array(0);
 var fh_is_admin = 0;
 var console_updating = 0;
-var firehose_updates = Array(0);
-var firehose_updates_size = 0;
-var firehose_ordered = Array(0);
-var firehose_before = Array(0);
-var firehose_after = Array(0);
-var firehose_startdate = '';
-var firehose_issue = '';
-var firehose_duratiton = '';
-var firehose_removed_first = '0';
-var firehose_future;
-var firehose_removals;
-var firehose_is_embedded = 0;
-var firehose_not_id = 0;
 var fh_colorslider; 
 var fh_ticksize;
 var fh_pageval = 0;
@@ -587,17 +591,17 @@ function firehose_set_options(name, value) {
 	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" || name == "issue" || name == "pagesize") { 
 		params[name] = value;
 		if (name == "startdate") {
-			firehose_startdate = value;
+			firehose_settings.startdate = value;
 		}
 		if (name == "duration")  {
-			firehose_duration = value;
+			firehose_settings.duration = value;
 		}
 		if (name == "issue") {
-			firehose_issue = value;
-			firehose_startdate = value;
+			firehose_settings.issue = value;
+			firehose_settings.startdate = value;
 			duration = 1;
 			page = 0;
-			var issuedate = firehose_issue.substr(5,2) + "/" + firehose_issue.substr(8,2) + "/" + firehose_issue.substr(10,2);
+			var issuedate = firehose_settings.issue.substr(5,2) + "/" + firehose_settings.issue.substr(8,2) + "/" + firehose_settings.issue.substr(10,2);
 
 			if ($('fhcalendar')) {
 				$('fhcalendar')._widget.setDate(issuedate, "day");
@@ -875,15 +879,15 @@ function json_update(response) {
 
 
 function firehose_handle_update() {
-	if (firehose_updates.length > 0) {
-		var el = firehose_updates.pop();
+	if (firehose_settings.updates.length > 0) {
+		var el = firehose_settings.updates.pop();
 		var fh = 'firehose-' + el[1];
 		var wait_interval = 800;
 		if(el[0] == "add") {
-			if (firehose_before[el[1]] && $('firehose-' + firehose_before[el[1]])) {
-				new Insertion.After('firehose-' + firehose_before[el[1]], el[2]);
-			} else if (firehose_after[el[1]] && $('firehose-' + firehose_after[el[1]])) {
-				new Insertion.Before('firehose-' + firehose_after[el[1]], el[2]);
+			if (firehose_settings.before[el[1]] && $('firehose-' + firehose_settings.before[el[1]])) {
+				new Insertion.After('firehose-' + firehose_settings.before[el[1]], el[2]);
+			} else if (firehose_settings.after[el[1]] && $('firehose-' + firehose_settings.after[el[1]])) {
+				new Insertion.Before('firehose-' + firehose_settings.after[el[1]], el[2]);
 			} else if (insert_new_at == "bottom") {
 				new Insertion.Bottom('firehoselist', el[2]);
 			} else {
@@ -902,16 +906,16 @@ function firehose_handle_update() {
 			var myAnim = new YAHOO.util.Anim(fh, attributes); 
 			myAnim.duration = 0.7;
 
-			if (firehose_updates_size > 10) {
+			if (firehose_settings.updates_size > 10) {
 				myAnim.duration = myAnim.duration / 2;
 				wait_interval = wait_interval / 2;
 			}
-			if (firehose_updates_size > 20) {
+			if (firehose_settings.updates_size > 20) {
 				myAnim.duration = myAnim.duration / 2;
 				wait_interval = wait_interval / 2;
 
 			}
-			if (firehose_updates_size > 30) {
+			if (firehose_settings.updates_size > 30) {
 				myAnim.duration = myAnim.duration / 1.5;
 				wait_interval = wait_interval / 2;
 			}
@@ -935,16 +939,16 @@ function firehose_handle_update() {
 				myAnim.duration = 0.4;
 				wait_interval = 500;
 				
-				if (firehose_updates_size > 10) {
+				if (firehose_settings.updates_size > 10) {
 					myAnim.duration = myAnim.duration * 2;
-					if (!firehose_removed_first) {
+					if (!firehose_settings.removed_first) {
 						wait_interval = wait_interval * 2;
 					} else {
 						wait_interval = 50;
 					}
 				}
-				firehose_removed_first = 1;
-				if (firehose_removals < 10 ) {
+				firehose_settings.removed_first = 1;
+				if (firehose_settings.removals < 10 ) {
 					myAnim.onComplete.subscribe(function() {
 						var elem = this.getEl();
 						if (elem && elem.parentNode) {
@@ -969,25 +973,25 @@ function firehose_handle_update() {
 }
 
 function firehose_reorder() {
-	if (firehose_ordered) {
+	if (firehose_settings.ordered) {
 		var fhlist = $('firehoselist');
 		if (fhlist) {
 			var item_count = 0;
-			for (i = 0; i < firehose_ordered.length; i++) {
-				if (/^\d+$/.test(firehose_ordered[i])) {
+			for (i = 0; i < firehose_settings.ordered.length; i++) {
+				if (/^\d+$/.test(firehose_settings.ordered[i])) {
 					item_count++;
 				}
-				var fhel = $('firehose-' + firehose_ordered[i]);
+				var fhel = $('firehose-' + firehose_settings.ordered[i]);
 				if (fhlist && fhel) {
 					fhlist.appendChild(fhel);
 				}
-				if ( firehose_future[firehose_ordered[i]] ) {
-					if ($("ttype-" + firehose_ordered[i])) {
-						$("ttype-" + firehose_ordered[i]).className = "future";	
+				if ( firehose_settings.future[firehose_settings.ordered[i]] ) {
+					if ($("ttype-" + firehose_settings.ordered[i])) {
+						$("ttype-" + firehose_settings.ordered[i]).className = "future";	
 					}
 				} else {
-					if ($("ttype-" + firehose_ordered[i]) && $("ttype-" + firehose_ordered[i]).className == "future") {
-						$("ttype-" + firehose_ordered[i]).className = "story";	
+					if ($("ttype-" + firehose_settings.ordered[i]) && $("ttype-" + firehose_settings.ordered[i]).className == "future") {
+						$("ttype-" + firehose_settings.ordered[i]).className = "story";	
 					}
 				}
 			}
@@ -1015,17 +1019,17 @@ function firehose_get_updates_handler(transport) {
 	}
 	var response = eval_response(transport);
 	var processed = 0;
-	firehose_removals = response.update_data.removals;
-	firehose_ordered = response.ordered;
-	firehose_future = response.future;
-	firehose_before = Array(0);
-	firehose_after = Array(0);
-	for (i = 0; i < firehose_ordered.length; i++) {
+	firehose_settings.removals = response.update_data.removals;
+	firehose_settings.ordered = response.ordered;
+	firehose_settings.future = response.future;
+	firehose_settings.before = Array(0);
+	firehose_settings.after = Array(0);
+	for (i = 0; i < firehose_settings.ordered.length; i++) {
 		if (i > 0) {
-			firehose_before[firehose_ordered[i]] = firehose_ordered[i - 1];
+			firehose_settings.before[firehose_settings.ordered[i]] = firehose_settings.ordered[i - 1];
 		}
-		if (i < (firehose_ordered.length - 1)) {
-			firehose_after[firehose_ordered[i]] = firehose_ordered[i + 1];
+		if (i < (firehose_settings.ordered.length - 1)) {
+			firehose_settings.after[firehose_settings.ordered[i]] = firehose_settings.ordered[i + 1];
 		}
 	}
 	if (response.html) {
@@ -1033,9 +1037,9 @@ function firehose_get_updates_handler(transport) {
 		processed = processed + 1;
 	}
 	if (response.updates) {
-		firehose_updates = response.updates;
-		firehose_updates_size = firehose_updates.length;
-		firehose_removed_first = 0;
+		firehose_settings.updates = response.updates;
+		firehose_settings.updates_size = firehose_settings.updates.length;
+		firehose_settings.removed_first = 0;
 		processed = processed + 1;
 		firehose_handle_update();
 	}
@@ -1083,12 +1087,12 @@ function firehose_get_updates(options) {
 	params['op'] = 'firehose_get_updates';
 	params['ids'] = firehose_get_item_idstring();
 	params['updatetime'] = update_time;
-	params['startdate'] = firehose_startdate;
-	params['duration'] = firehose_duration;
-	params['issue'] = firehose_issue;
+	params['startdate'] = firehose_settings.startdate;
+	params['duration'] = firehose_settings.duration;
+	params['issue'] = firehose_settings.issue;
 	params['page'] = page;
-	params['not_id'] = firehose_not_id;
-	if ( firehose_is_embedded ) {
+	params['not_id'] = firehose_settings.not_id;
+	if ( firehose_settings.is_embedded ) {
 		params['embed'] = 1;
 	}
 	params['fh_pageval'] = fh_pageval;
@@ -1212,7 +1216,7 @@ function firehose_remove_entry(id) {
 
 var firehose_cal_select_handler = function(type,args,obj) { 
 	var selected = args[0];
-	firehose_issue = '';
+	firehose_settings.issue = '';
 	firehose_set_options('startdate', selected.startdate);
 	firehose_set_options('duration', selected.duration);
 }; 
