@@ -69,9 +69,9 @@ sub geturl {
 
 ################################################################################
 
-sub getTop10Comments {
+sub getTopComments {
 	my $constants = getCurrentStatic();
-	my $A =	$backupdb->getTop10Comments;
+	my $A =	$backupdb->getTopComments;
 
 	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 	my $reasons = $moddb->getReasons;
@@ -90,7 +90,7 @@ sub getTop10Comments {
 EOT
 	}
 	$block .= '</ul>';
-	setblock('top10comments', $block);
+	setblock('topcomments', $block);
 
 }
 

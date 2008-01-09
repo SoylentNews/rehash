@@ -809,19 +809,19 @@ sub getMailingList {
 
 ########################################################
 # For portald
-sub getTop10Comments {
+sub getTopComments {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 
 	my($min_score, $max_score) =
 		($constants->{comment_minscore}, $constants->{comment_maxscore});
 
-	my $num_wanted = $constants->{top10comm_num} || 10;
-	my $daysback = $constants->{top10comm_days} || 1;
+	my $num_wanted = $constants->{topcomm_num} || 5;
+	my $daysback = $constants->{topcomm_days} || 1;
 
 	my $cids = [];
 	my $comments = [];
-	my $num_top10_comments = 0;
+	my $num_top_comments = 0;
 	my $max_cid = $self->getMaxCid();
 
 	# To make this select a LOT faster, we limit not only by date
@@ -832,7 +832,7 @@ sub getTop10Comments {
 
 	while (1) {
 		# Select the latest comments with high scores.  If we
-		# can't get 10 of them, our standards are too high;
+		# can't get 5 of them, our standards are too high;
 		# lower our minimum score requirement and re-SELECT.
 		$cids = $self->sqlSelectAll(
 			'cid',
@@ -842,8 +842,8 @@ sub getTop10Comments {
 				AND points >= $max_score",
 			'ORDER BY date DESC');
 
-		$num_top10_comments = scalar(@$cids);
-		last if $num_top10_comments >= $num_wanted;
+		$num_top_comments = scalar(@$cids);
+		last if $num_top_comments >= $num_wanted;
                 # Didn't get $num_wanted... try again with lower standards.
                 --$max_score;
                 # If this is as low as we can get... take what we have.
@@ -863,22 +863,22 @@ sub getTop10Comments {
 	}
 
 	@$cids = sort { $a->[1] <=> $b->[1] } @$cids;
-	$num_top10_comments = 0;
+	$num_top_comments = 0;
 
 	while (@$cids
-		&& $cids->[$num_top10_comments]
-		&& @{$cids->[$num_top10_comments]}
-		&& $num_top10_comments < $num_wanted
+		&& $cids->[$num_top_comments]
+		&& @{$cids->[$num_top_comments]}
+		&& $num_top_comments < $num_wanted
 	) {
 		my $comment = $self->sqlSelectArrayRef(
 			"stories.sid, title, cid, subject, date, nickname, comments.points, comments.reason",
 			"comments, stories, story_text, users",
-			"cid=$cids->[$num_top10_comments]->[0]
+			"cid=$cids->[$num_top_comments]->[0]
 				AND stories.stoid = story_text.stoid
 				AND users.uid=comments.uid
                                 AND comments.sid=stories.discussion");
 		push @$comments, $comment if $comment;
-		++$num_top10_comments;
+		++$num_top_comments;
 	}
 
 	formatDate($comments, 4, 4);
