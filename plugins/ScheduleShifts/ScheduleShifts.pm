@@ -389,7 +389,7 @@ sub getShift {
 
 	# hr begin in our defined TZ, length in hours
 	my @shifts = map {
-		[ @{ %{ $self->{shift_defs}{$_} } }{qw(start length)} ]
+		[ @{ $self->{shift_defs}{$_} }{qw(start length)} ]
 	} @{ $self->{shift_types} };
 
 	# we only need to find out needed week, day of week, and hour
