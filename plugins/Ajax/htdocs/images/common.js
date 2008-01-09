@@ -1477,3 +1477,30 @@ function saveModalPrefs() {
 	};
 	ajax_update(params, '', handlers);
 }
+
+function ajaxSaveSlashboxes() {
+  var wrapper = document.getElementById('slashboxes');
+  var titles = YAHOO.util.Dom.getElementsByClassName('title', 'div', wrapper);
+  var sep = "";
+  var all = "";
+  for ( i=0; i<titles.length; ++i) {
+    var bid = titles[i].id.slice(0,-6);
+    all += sep + bid;
+    sep = ",";
+  }
+
+  var params = [];
+  params['op'] = 'page_save_user_boxes';
+  params['reskey'] = reskey_static;
+  params['bids'] = all;
+  ajax_update(params, '');
+}
+
+function ajaxRemoveSlashbox( id ) {
+  var slashboxes = document.getElementById('slashboxes');
+  var box = document.getElementById(id);
+  if ( box.parentNode === slashboxes ) {
+    slashboxes.removeChild(box);
+    ajaxSaveSlashboxes();
+  }
+}

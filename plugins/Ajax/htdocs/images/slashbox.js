@@ -97,20 +97,5 @@ YAHOO.slashdot.SlashBox.prototype.onDragOut = function(e, id)
 
 YAHOO.slashdot.SlashBox.prototype.onDragDrop = function(e, id)
   {
-    var wrapper = document.getElementById('slashboxes');
-    var titles = YAHOO.util.Dom.getElementsByClassName('title', 'div', wrapper);
-    var sep = "";
-    var all = "";
-    for ( i=0; i<titles.length; ++i)
-      {
-        var bid = titles[i].id.slice(0,-6);
-        all += sep + bid;
-        sep = ",";
-      }
-
-    var params = [];
-    params['op'] = 'page_save_user_boxes';
-    params['reskey'] = reskey_static;
-    params['bids'] = all;
-    ajax_update(params, '');
+    ajaxSaveSlashboxes();
   }
