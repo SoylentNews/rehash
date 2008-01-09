@@ -14,12 +14,12 @@ use Slash::Display;
 use Slash::Utility;
 
 use vars qw(
-	%task	$me	$task_exit_flag	$parent_pid	$has_proc_processtable
-	$hushed	%stoid	$clean_exit_flag	%success
-	$irc	$conn	$nick	$channel
-	$jnick	$jabber	$jconn	$jtime	$jid	$jserver	$jchannel	$jchanserver
-	$remarks_active	$next_remark_id	$next_handle_remarks
-	$shifts
+        %task   $me     $task_exit_flag $parent_pid $has_proc_processtable
+        $hushed %stoid  $clean_exit_flag %success
+        $irc    $conn   $nick   $channel
+        $jname  $jnick  $jabber $jconn  $jtime  $jid $juserserver $jserver $jchannel $jchanserver
+        $remarks_active $next_remark_id $next_handle_remarks
+        $shifts
 );
 
 $! = 0;
@@ -136,19 +136,23 @@ sub jabberinit {
 
 	require Net::Jabber;
 
-	$jserver =	$constants->{jabberslash_server}
+	$jserver =      $constants->{jabberslash_server}
 				|| 'jabber.org';
-	my $port =	$constants->{jabberslash_port}
+	$juserserver =  $constants->{jabberslash_user_server}
+				|| $jserver;
+	my $port =      $constants->{jabberslash_port}
 				|| 5222;
-	my $jname =	$constants->{jabberslash_ircname}
+	$jname =        $constants->{jabberslash_ircname}
 				|| "$constants->{sitename} slashd";
-	$jnick =	$constants->{jabberslash_nick}
+	$jnick =        $constants->{jabberslash_nick}
 				|| $constants->{ircslash_nick}
 				|| ( map { s/\W+//g; $_ } $jname )[0];
-	my $password =	$constants->{jabberslash_password}
+	my $password =  $constants->{jabberslash_password}
 				|| '';
-	my $tls =	$constants->{jabberslash_tls}
+	my $tls =       $constants->{jabberslash_tls}
 				|| 0;
+
+	$jtime = timeCalc(scalar(localtime(time())), '%Y-%m-%d %H:%M:%S', 0);
 
 	$jabber = new Net::Jabber::Client (
 #		debuglevel	=> 2,
@@ -250,8 +254,10 @@ sub j_on_auth {
 	# we want to msg ourselves to catch the current time from the
 	# Jabber server, so we can skip messages from the channel log
 	# when we enter the channel
+	my $to = "$jchannel\@$jchanserver/$jnick";
+	slashdLog("sending to: $to");
 	$jabber->MessageSend(
-		to		=> "$jchannel\@$jserver/$jnick",
+		to		=> $to,
 		type		=> 'chat',
 		body		=> 'timestamp',
 	);
@@ -272,6 +278,7 @@ sub j_on_msg {
 	my $fromJID = $message->GetFrom('jid');
 	my $from = $fromJID->GetResource;
 	my $body = $message->GetBody;
+	#slashdLog("msg: [$from] $body");
 
 	return if !$from || !$body;
 
@@ -280,10 +287,11 @@ sub j_on_msg {
 	eval { $time = $message->GetTimeStamp };
 	if ($time) {
 		$time = timeCalc($time, '%Y-%m-%d %H:%M:%S', 0);
+		#slashdLog("time: $time");
 
 		# save time we enter the channel, if timestamp message
 		if ($from eq $jnick && $body eq 'timestamp') {
-			print "Setting timestamp to $time\n";
+			slashdLog("Setting timestamp to $time");
 			$jtime = $time;
 			return;
 		}
@@ -414,9 +422,9 @@ sub send_msg {
 
 			for my $to (keys %users) {
 				if ($to =~ m|(\w+)/(\w+)|) {
-					$to = "$1\@$jserver/$2";
+					$to = "$1\@$juserserver/$2";
 				} else {
-					$to = "$to\@$jserver";
+					$to = "$to\@$juserserver";
 				}
 				push @to, $to;
 			}
