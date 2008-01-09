@@ -1956,7 +1956,7 @@ sub getPositivePopupTags {
 
 sub getExcludedTags {
 	my($self) = @_;
-	return $self->getTagnamesByParam('excluded', '1');
+	return $self->getTagnamesByParam('exclude', '1');
 }
 
 sub getNegativeTags {
