@@ -5094,3 +5094,7 @@ ALTER TABLE accesslog CHANGE query_string query_string VARCHAR(254) DEFAULT NULL
 UPDATE vars SET name = 'topcomm_num', value = 5, description = 'Number of comments wanted for the Hot Comments slashbox. Defaults to 5.' WHERE name = 'top10comm_num';
 UPDATE vars SET name = 'topcomm_days', description = 'Look back (n) days to display the Hot Comments slashbox' WHERE name = 'top10comm_days';
 UPDATE blocks SET bid = 'topcomments', title = 'Hot Comments' WHERE bid = 'top10comments';
+
+# for plugins/Tags
+INSERT INTO vars (name, value, description) VALUES ('tags_active_mincare', '5', 'Minimum color slice number to "care" about tags for the Slashdot Recent Tags box (only matters if FireHose installed and if you are Slashdot)');
+

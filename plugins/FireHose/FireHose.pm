@@ -666,9 +666,22 @@ sub getFireHoseEssentials {
 	return($items, $results, $count);
 }
 
+# A single-globjid wrapper around getUserFireHoseVotesForGlobjs.
+
+sub getUserFireHoseVoteForGlobjid {
+	my($self, $uid, $globjid) = @_;
+	my $vote_hr = $self->getUserFireHoseVotesForGlobjs($uid, [ $globjid ]);
+	return $vote_hr->{$globjid};
+}
+
+# This isn't super important but I'd prefer the method name to
+# be getUserFireHoseVotesForGlobjids.  We spelled out "Globjid"
+# in the methods getTagsByGlobjid and getFireHoseIdFromGlobjid.
+# Not worth changing right now - Jamie 2008-01-09
+
 sub getUserFireHoseVotesForGlobjs {
 	my($self, $uid, $globjs) = @_;
-	my $constants = getCurrentUser();
+	my $constants = getCurrentStatic();
 
 	return {} if !$globjs;
 	$globjs = [$globjs] if !ref $globjs;
@@ -686,7 +699,8 @@ sub getUserFireHoseVotesForGlobjs {
 	my $results = $self->sqlSelectAllKeyValue(
 		"globjid,tagnameid",
 		"tags", 
-		"globjid in ($glob_str) and inactivated is NULL AND uid = $uid_q AND tagnameid IN ($upid,$dnid)"
+		"globjid IN ($glob_str) AND inactivated IS NULL
+		 AND uid = $uid_q AND tagnameid IN ($upid,$dnid)"
 	);
 
 	foreach (keys %$results) {
@@ -811,13 +825,12 @@ sub itemHasSpamURL {
 sub getPrimaryFireHoseItemByUrl {
 	my($self, $url_id) = @_;
 	my $ret_val = 0;
-	my $constants = getCurrentUser();
 	if ($url_id) {
 		my $url_id_q = $self->sqlQuote($url_id);
 		my $count = $self->sqlCount("firehose", "url_id=$url_id_q");
 		if ($count > 0) {
 			my($uid, $id) = $self->sqlSelect("uid,id", "firehose", "url_id = $url_id_q", "order by id asc");
-			if ($uid == $constants->{anon_coward_uid}) {
+			if (isAnon($uid)) {
 				$ret_val = $id;
 			} else {
 				# Logged in, give precedence to most recent submission
