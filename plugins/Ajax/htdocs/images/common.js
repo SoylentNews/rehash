@@ -1,7 +1,7 @@
 // _*_ Mode: JavaScript; tab-width: 8; indent-tabs-mode: true _*_
 // $Id$
 
-	// global settings, but a firehose might use a local settings object instead
+// global settings, but a firehose might use a local settings object instead
 var firehose_settings = {};
   firehose_settings.updates = Array(0);
   firehose_settings.updates_size = 0;
@@ -17,7 +17,7 @@ var firehose_settings = {};
   firehose_settings.is_embedded = 0;
   firehose_settings.not_id = 0;
 
-  // globals we haven't yet decided to move into |firehose_settings|
+// globals we haven't yet decided to move into |firehose_settings|
 var fh_play = 0;
 var fh_is_timed_out = 0;
 var fh_is_updating = 0;
@@ -857,7 +857,7 @@ function json_update(response) {
 		for (el in response.html_append_substr) {
 			if ($(el)) {
 				var this_html = $(el).innerHTML;
-				var i = $(el).innerHTML.search(/<span class="substr"> <\/span>[\s\S]*$/i);
+				var i = $(el).innerHTML.search(/<span class="?substr"?> ?<\/span>[\s\S]*$/i);
 				if (i == -1) {
 					$(el).innerHTML += response.html_append_substr[el];
 				} else {
@@ -1479,28 +1479,28 @@ function saveModalPrefs() {
 }
 
 function ajaxSaveSlashboxes() {
-  var wrapper = document.getElementById('slashboxes');
-  var titles = YAHOO.util.Dom.getElementsByClassName('title', 'div', wrapper);
-  var sep = "";
-  var all = "";
-  for ( i=0; i<titles.length; ++i) {
-    var bid = titles[i].id.slice(0,-6);
-    all += sep + bid;
-    sep = ",";
-  }
+	var wrapper = document.getElementById('slashboxes');
+	var titles = YAHOO.util.Dom.getElementsByClassName('title', 'div', wrapper);
+	var sep = "";
+	var all = "";
+	for ( i=0; i<titles.length; ++i) {
+		var bid = titles[i].id.slice(0,-6);
+		all += sep + bid;
+		sep = ",";
+	}
 
-  var params = [];
-  params['op'] = 'page_save_user_boxes';
-  params['reskey'] = reskey_static;
-  params['bids'] = all;
-  ajax_update(params, '');
+	var params = [];
+	params['op'] = 'page_save_user_boxes';
+	params['reskey'] = reskey_static;
+	params['bids'] = all;
+	ajax_update(params, '');
 }
 
 function ajaxRemoveSlashbox( id ) {
-  var slashboxes = document.getElementById('slashboxes');
-  var box = document.getElementById(id);
-  if ( box.parentNode === slashboxes ) {
-    slashboxes.removeChild(box);
-    ajaxSaveSlashboxes();
-  }
+	var slashboxes = document.getElementById('slashboxes');
+	var box = document.getElementById(id);
+	if ( box.parentNode === slashboxes ) {
+		slashboxes.removeChild(box);
+		ajaxSaveSlashboxes();
+	}
 }
