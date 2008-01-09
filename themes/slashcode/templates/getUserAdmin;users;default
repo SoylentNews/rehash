@@ -9,6 +9,7 @@ Template for editing user
 * nickname_checked = whether or not nickname is checked
 * author_flag = current user is author
 * authoredit_flag = current user can edit authors
+* clout_types_ar = arrayref of alphabetic clout types
 
 __title__
 users admin
@@ -152,10 +153,16 @@ __template__
 			[% IF useredit.uid %]
 				<b>Tokens:</b>
 				<input type="text" name="tokens" size="6" value="[% useredit.tokens | strip_attribute %]">&nbsp;&nbsp;
-				<b>Tagclout:</b>
-				<input type="text" name="tag_clout" size="6" value="[% useredit.tag_clout | strip_attribute %]">&nbsp;&nbsp;
 				<b>M2Info:</b>
 				<input type="text" name="m2info" value="[% useredit.m2info | strip_attribute %]">
+
+				<p><b>Clout, Manual:</b>
+				<input type="text" name="tag_clout" size="6" value="[% useredit.tag_clout | strip_attribute %]">&nbsp;&nbsp;
+				<b>Automated:</b>
+				[% FOREACH clout_type IN clout_types_ar %]
+				&nbsp;[% clout_type %]
+				[% useredit.clout.$clout_type.defined ? useredit.clout.$clout_type : '(none)' %]
+				[% END %]
 			[% END %]
 				<p>
 				<input type="submit" name="saveuseradmin" value="Save [% IF useredit.nickname; useredit.nickname | strip_attribute; END %]" class="button">
