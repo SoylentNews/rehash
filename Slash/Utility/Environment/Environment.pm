@@ -1823,7 +1823,7 @@ Hashref of cleaned-up data.
 
 	# fields that are numeric only
 	my %nums = map {($_ => 1)} qw(
-		approved artcount art_offset bseclev id
+		approved artcount art_offset bseclev
 		buymore cid clbig clsmall cm_offset
 		commentlimit commentsort commentspill
 		del displaystatus limit
@@ -1856,9 +1856,9 @@ Hashref of cleaned-up data.
 
 	# fields that have ONLY a-zA-Z0-9_
 	my %alphas = map {($_ => 1)} qw(
-		content_type fieldname formkey commentstatus filter
-		hcanswer mode op section thisname type reskey userfield
-		comments_control
+		commentstatus comments_control content_type
+		fieldname filter formkey hcanswer id
+		mode op reskey section thisname type
 	),
 	# Survey
 	qw(
@@ -1878,6 +1878,12 @@ Hashref of cleaned-up data.
 		query		=> sub { $_[0] =~ s|[\000-\040<>\177-\377]+| |g;
 			        	 $_[0] =~ s|\s+| |g;				},
 		colorblock	=> sub { $_[0] =~ s|[^\w#,]+||g				},
+# What I actually want to do for userfield is allow it to match
+# [\w.]+, or pass emailValid(), or be changed to the return value
+# from nickFix().  For technical reasons I'm putting that off
+# until probably next week.  Until then this breaks some very
+# minor functionality. - Jamie 2008-01-09
+		userfield	=> sub { $_[0] =~ s|[^\w.@ -]||g			},
 	);
 
 
