@@ -463,7 +463,7 @@ ALTER TABLE formkeys CHANGE COLUMN formname formname varchar(32) DEFAULT '' NOT 
 ALTER TABLE vars CHANGE COLUMN name name varchar(48) DEFAULT '' NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('lonetags','P|LI|BR|IMG','Tags that don\'t need to be closed');
 
-INSERT INTO vars (name, value, description) VALUES ('top10comm_num','10','Number of comments wanted for the Top 10 Comments slashbox (if not 10, you ought to rename it maybe)');
+INSERT INTO vars (name, value, description) VALUES ('topcomm_num','5','Number of comments wanted for the Hot Comments slashbox. Defaults to 5.');
 INSERT INTO vars (name, value, description) VALUES ('anon_name_alt','An anonymous coward','Name of anonymous user to be displayed in stories');
 
 # End of T_2_3_0_28, Start of T_2_3_0_29
@@ -2480,7 +2480,7 @@ CREATE TABLE topic_param (
 UPDATE vars SET name='m1_pointgrant_factor_upfairratio', description='Factor of upmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)' WHERE name='m1_pointgrant_factor_fairratio';
 INSERT INTO vars (name,value,description) SELECT 'm1_pointgrant_factor_downfairratio', value, 'Factor of downmods fairness ratio in deciding who is eligible for moderation (1=irrelevant, 2=top user twice as likely)' FROM vars WHERE name='m1_pointgrant_factor_upfairratio';
 
-INSERT INTO vars (name, value, description) VALUES ('top10comm_days','1','Look back (n) days to display the Top 10 Comments slashbox');
+INSERT INTO vars (name, value, description) VALUES ('topcomm_days','1','Look back (n) days to display the Hot Comments slashbox');
 INSERT INTO vars (name, value, description) VALUES ('dbs_revive_seconds','30','After a DB goes from isalive=no to yes, ramp up accesses to it over how many seconds?');
 
 # Only run these on your search db.  If the latter throws a
@@ -5090,3 +5090,7 @@ UPDATE vars SET value = 'T_2_5_0_188' WHERE name = 'cvs_tag_currentcode';
 
 ALTER TABLE accesslog CHANGE query_string query_string VARCHAR(254) DEFAULT NULL;
 
+# For portald and the Hot Comments slashbox.
+UPDATE vars SET name = 'topcomm_num', value = 5, description = 'Number of comments wanted for the Hot Comments slashbox. Defaults to 5.' WHERE name = 'top10comm_num';
+UPDATE vars SET name = 'topcomm_days', description = 'Look back (n) days to display the Hot Comments slashbox' WHERE name = 'top10comm_days';
+UPDATE blocks SET bid = 'topcomments', title = 'Hot Comments' WHERE bid = 'top10comments';
