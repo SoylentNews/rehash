@@ -275,7 +275,7 @@ for (@{$RDFlist}) {
 
 $slashdb->setCurrentSectionPolls();
 
-getTop10Comments();
+getTopComments();
 getSlashdotPoll();
 getUptime();
 
