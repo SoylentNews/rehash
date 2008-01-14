@@ -1583,8 +1583,7 @@ sub getUserAuthenticate {
 	}
 
 	if ($kind != $PUBLIC && $kind != $LOGTOKEN && !$uid_verified) {
-		my $cryptpasswd = encryptPassword($passwd);
-		my @pass = $self->sqlSelect(
+		my($db_uid, $db_passwd, $db_newpasswd) = $self->sqlSelect(
 			'uid,passwd,newpasswd',
 			'users',
 			"uid=$uid_try_q"
@@ -1592,8 +1591,8 @@ sub getUserAuthenticate {
 
 		# try ENCRYPTED -> ENCRYPTED
 		if ($kind == $EITHER || $kind == $ENCRYPTED) {
-			if ($passwd eq $pass[$PASSWD]) {
-				$uid_verified = $pass[$UID];
+			if (comparePassword($passwd, $db_passwd, 0, ($kind == $ENCRYPTED))) {
+				$uid_verified = $db_uid;
 				# get existing logtoken, if exists, or new one
 				$cookpasswd = $self->getLogToken($uid_verified, 1);
 			}
@@ -1601,8 +1600,8 @@ sub getUserAuthenticate {
 
 		# try PLAINTEXT -> ENCRYPTED
 		if (($kind == $EITHER || $kind == $PLAIN) && !$uid_verified) {
-			if ($cryptpasswd eq $pass[$PASSWD]) {
-				$uid_verified = $pass[$UID];
+			if (comparePassword($passwd, $db_passwd, ($kind == $PLAIN), 0)) {
+				$uid_verified = $db_uid;
 				# get existing logtoken, if exists, or new one
 				$cookpasswd = $self->getLogToken($uid_verified, 1);
 			}
@@ -1610,14 +1609,15 @@ sub getUserAuthenticate {
 
 		# try PLAINTEXT -> NEWPASS
 		if (($kind == $EITHER || $kind == $PLAIN) && !$uid_verified) {
-			if ($passwd eq $pass[$NEWPASSWD]) {
+			if ($passwd eq $db_newpasswd) {
+				my $cryptpasswd = encryptPassword($passwd);
 				$self->sqlUpdate('users', {
 					newpasswd	=> '',
 					passwd		=> $cryptpasswd
 				}, "uid=$uid_try_q");
 				$newpass = 1;
 
-				$uid_verified = $pass[$UID];
+				$uid_verified = $db_uid;
 				# delete existing logtokens
 				$self->deleteLogToken($uid_verified, 1);
 				# create new logtoken
