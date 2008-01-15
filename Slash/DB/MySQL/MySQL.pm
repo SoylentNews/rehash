@@ -9970,53 +9970,43 @@ sub getTopicParamsForTid {
 	return $self->sqlSelectAllHashrefArray("*", "topic_param", "tid = $tid_q");
 }
 
-########################################################
-# As of 2004/04:
+# getStoryTopics returns a hashref whose keys are the tids
+# chosen for a story.  The values depend on $add_names:
+#
 # $add_names of 1 means to return the alt text, which is the
 # human-readable name of a topic.  This is currently used
 # only in article.pl to add these words and phrases to META
 # information on the webpage.
+#
 # $add_names of 2 means to return the name, which is a
 # (not-guaranteed-unique) short single keyword.  This is
 # currently used only in adminmail.pl to append something
 # descriptive to the numeric tid for the topichits_123_foo
 # stats.
+#
+# Any other $add_names value means to return '1' for values.
+
 sub getStoryTopics {
 	my($self, $id, $add_names) = @_;
-	my($topicdesc);
 
 	my $stoid = $self->getStoidFromSidOrStoid($id);
 	return undef unless $stoid;
 
-	my $topics = $self->sqlSelectAll(
+	my $topics = $self->sqlSelectColArrayref(
 		'tid',
 		'story_topics_chosen',
 		"stoid=$stoid"
 	);
 
-	# All this to avoid a join. :/
-	#
-	# Poor man's hash assignment from an array for the short names.
-	# XXX This really should be done by pulling data from
-	# getTopicTree()
-	$topicdesc =  {
-		map { @{$_} }
-		@{$self->sqlSelectAll(
-			'tid, keyword',
-			'topics'
-		)}
-	} if $add_names == 2;
+	my $field = '';
+	if ($add_names == 1) {		$field = 'textname'	}
+	elsif ($add_names == 2) {	$field = 'keyword'	}
 
-	# We use a Description for the long names.
-	$topicdesc = $self->getDescriptions('topics')
-		if !$topicdesc && $add_names;
-
-	my $answer;
-	for my $topic (@$topics) {
-		$answer->{$topic->[0]} = $add_names && $topicdesc
-			? $topicdesc->{$topic->[0]} : 1;
+	my $tree = $self->getTopicTree();
+	my $answer = { };
+	for my $tid (keys %$tree) {
+		$answer->{$tid} = $field ? $tree->{$tid}{$field} : 1;
 	}
-
 	return $answer;
 }
 
