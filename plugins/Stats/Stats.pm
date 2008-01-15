@@ -1710,7 +1710,7 @@ sub getTopBadgeHosts {
 	for my $duple (@$top_ar) {
 		my($uri, $c) = @$duple;
 		my $uri_obj = URI->new($uri);
-		my $host = $uri_obj ? $uri_obj->host() : $uri;
+		my $host = $uri_obj && $uri_obj->can('host') ? $uri_obj->host() : $uri;
 		$count{$host} += $c;
 	}
 	my @top_hosts = (sort { $count{$b} <=> $count{$a} || $a <=> $b } keys %count);
