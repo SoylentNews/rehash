@@ -795,7 +795,9 @@ sub getURLsForItem {
 	my $url = $url_id ? $self->getUrl($url_id) : undef;
 	$url = $url->{url} if $url;
 	my $url_prepend = $url ? qq{<a href="$url">$url</a>}   : '';
-	my $text = qq{$url_prepend $item->introtext $item->{bodytext}};
+	my $intro = $item->{introtext} || '';
+	my $body = $item->{bodytext} || '';
+	my $text = "$url_prepend $intro $body";
 
 	my %urls = ( );
 	my $tokens = HTML::TokeParser->new(\$text);
@@ -829,13 +831,15 @@ sub getPrimaryFireHoseItemByUrl {
 		my $url_id_q = $self->sqlQuote($url_id);
 		my $count = $self->sqlCount("firehose", "url_id=$url_id_q");
 		if ($count > 0) {
-			my($uid, $id) = $self->sqlSelect("uid,id", "firehose", "url_id = $url_id_q", "order by id asc");
+			my($uid, $id) = $self->sqlSelect("uid,id",
+				"firehose", "url_id = $url_id_q", "ORDER BY id ASC");
 			if (isAnon($uid)) {
 				$ret_val = $id;
 			} else {
 				# Logged in, give precedence to most recent submission
 				my $uid_q = $self->sqlQuote($uid);
-				my($submitted_id) = $self->sqlSelect("id", "firehose", "url_id = $url_id_q AND uid=$uid_q", "order by id desc");
+				my($submitted_id) = $self->sqlSelect("id",
+					"firehose", "url_id = $url_id_q AND uid=$uid_q", "ORDER BY id DESC");
 				$ret_val = $submitted_id ? $submitted_id : $id;
 			}
 		}
@@ -1651,9 +1655,11 @@ sub getAndSetOptions {
 	$options->{pause} = defined $user->{firehose_pause} ? $user->{firehose_pause} : 1;
 	$form->{pause} = 1 if $no_saved;
 
+	my $firehose_page = $user->{state}{firehose_page} || '';
+
 	if (defined $form->{pause}) {
 		$options->{pause} = $user->{firehose_paused} = $form->{pause} ? 1 : 0;
-		if (!$user->{state}{firehose_page} eq "user") {
+		if ($firehose_page ne 'user') {
 			$self->setUser($user->{uid}, { firehose_paused => $options->{pause} });
 		}
 	}
@@ -1994,7 +2000,7 @@ sub getAndSetOptions {
 	if (!$user->{is_anon} && !$opts->{no_set} && !$form->{index}) {
 		my $data_change = {};
 		my @skip_options_save = qw(uid not_uid type not_type primaryskid not_primaryskid smalldevices);
-		if ($user->{state}{firehose_page} eq "user") {
+		if ($firehose_page eq 'user') {
 			push @skip_options_save, "nothumbs", "nocolors", "pause", "mode", "orderdir", "orderby", "fhfilter", "color";
 		}
 		my %skip_options = map { $_ => 1 } @skip_options_save;
@@ -2024,13 +2030,13 @@ sub getAndSetOptions {
 	$options->{public} = "yes";
 	if ($adminmode) {
 		# $options->{attention_needed} = "yes";
-		if ($user->{state}{firehose_page} ne "user") {
+		if ($firehose_page ne "user") {
 			$options->{accepted} = "no" if !$options->{accepted};
 			$options->{rejected} = "no" if !$options->{rejected};
 		}
 		$options->{duration} ||= -1;
 	} else  {
-		if ($user->{state}{firehose_page} ne "user") {
+		if ($firehose_page ne "user") {
 			$options->{accepted} = "no" if !$options->{accepted};
 		}
 		
@@ -2273,7 +2279,7 @@ sub getUserTabs {
 	push @where, "tabname LIKE '$options->{prefix}%'" if $options->{prefix};
 	my $where = join ' AND ', @where;
 
-	my $tabs = $self->sqlSelectAllHashrefArray("*", "firehose_tab", $where, "order by tabname asc");
+	my $tabs = $self->sqlSelectAllHashrefArray("*", "firehose_tab", $where, "ORDER BY tabname ASC");
 	@$tabs = sort { 
 			$b->{tabname} eq "untitled" ? -1 : 
 				$a->{tabname} eq "untitled" ? 1 : 0	||
