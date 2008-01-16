@@ -39,7 +39,7 @@ $task{$me}{code} = sub {
 		my ($scheme, $domain, $path, $query, $frag) = uri_split($_->{url});
 		my $page = get $_->{url};
 		slashdLog("$_->{id}: $_->{url}\n");
-		my @pairs = split(/&/, $query);
+		my @pairs = split /&/, ($query || '');
 		my $params = {};
 		foreach my $pair (@pairs) {
 			my ($name, $value) = split(/=/, $pair);
