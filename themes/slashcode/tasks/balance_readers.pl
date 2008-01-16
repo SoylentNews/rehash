@@ -379,11 +379,11 @@ sub adjust_readers {
 
 		# If this DB is marked as isalive='no', it's not our
 		# responsibility, skip it.
-		next VU if $reader_info->{dead};
+		next VU if $reader_info->{$vu}{dead};
 
 		# If this DB was not reachable, set its weight to 0
 		# immediately.
-		if ($reader_info->{unreachable}) {
+		if ($reader_info->{$vu}{unreachable}) {
 			set_reader_weight_adjust($slashdb, $vu, 0);
 			next VU;
 		}
