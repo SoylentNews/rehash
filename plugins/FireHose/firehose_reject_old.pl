@@ -22,7 +22,7 @@ $task{$me}{fork} = SLASHD_NOWAIT;
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user, $info, $gSkin) = @_;
 	my $firehose = getObject("Slash::FireHose");
-	my $old = $slashdb->sqlSelectColArrayref("id", "firehose", "createtime < DATE_SUB(NOW(),INTERVAL 7 DAY) and category ='' and rejected='no'");
+	my $old = $slashdb->sqlSelectColArrayref("id", "firehose", "createtime < DATE_SUB(NOW(),INTERVAL 7 DAY) and type !='story' AND category ='' and rejected='no'");
 	foreach (@$old) {
 		$firehose->reject($_);
 	}
