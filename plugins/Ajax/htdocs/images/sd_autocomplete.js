@@ -508,7 +508,11 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onTextboxKeyUp = function( e, me )
           me._hide();
           break;
         case 13:
-          me._completer.unmatchedItemSelectEvent.fire(me._completer, me, me._completer._sCurQuery);
+        		// I'm sorry to say we have to test first, something somehow somewhere can still leave
+        		//	leave this listener dangling; want to look deeper into this, as this would _still_
+        		//	leave the listener dangling
+        	if ( me._completer )
+          	me._completer.unmatchedItemSelectEvent.fire(me._completer, me, me._completer._sCurQuery);
           break;
         default:
           if ( me._pending_hide )
