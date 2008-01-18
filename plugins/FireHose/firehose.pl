@@ -27,9 +27,9 @@ sub main {
 	my $anonval = $constants->{firehose_anonval_param} || "";
 
 	my %ops = (
-		list		=> [1,  \&list, 1, $anonval, { index => 1, issue => 1, page => 1, query_apache => -1, virtual_user => -1, startdate => 1, duration => 1 }],
+		list		=> [1,  \&list, 1, $anonval, { index => 1, issue => 1, page => 1, query_apache => -1, virtual_user => -1, startdate => 1, duration => 1, tab => 1, tabtype => 1 }],
 		view		=> [1, 	\&view, 0,  ""],
-		default		=> [1,	\&list, 1,  $anonval, { index => 1, issue => 1, page => 1, query_apache => -1, virtual_user => -1, startdate => 1, duration => 1 }],
+		default		=> [,	\&list, 1,  $anonval, { index => 1, issue => 1, page => 1, query_apache => -1, virtual_user => -1, startdate => 1, duration => 1, tab => 1, tabtype => 1 }],
 		edit		=> [1,	\&edit, 100,  ""],
 		rss		=> [1,  \&rss, 1, ""]
 	);
@@ -108,7 +108,7 @@ sub view {
 			$firehose->setFireHoseSession($item->{id});
 		}
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
-		my $discussion = $item->{type} =~ /^submission|misc$/ && $item->{discussion};
+		my $discussion = $item->{discussion};
 
 		my $firehosetext = $firehose_reader->dispFireHose($item, {
 			mode			=> 'full',
