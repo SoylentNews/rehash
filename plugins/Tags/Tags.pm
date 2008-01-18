@@ -190,9 +190,8 @@ sub createTag {
 		# a tag_clout in tagname_params.
 		my $admincmds_ar = $self->getTagnameAdmincmds(
 			$tag->{tagnameid}, $tag->{globjid});
-		# Any admin command other than '^' means clout must be set
-		# to 0.
-		if (grep { $_->{cmdtype} ne '^' } @$admincmds_ar) {
+		# Any negative admin command means clout must be set to 0.
+		if (grep { $_->{cmdtype} =~ /^[_#]/ } @$admincmds_ar) {
 			my $count = $self->sqlInsert('tag_params', {
 				tagid =>	$tagid,
 				name =>		'tag_clout',
