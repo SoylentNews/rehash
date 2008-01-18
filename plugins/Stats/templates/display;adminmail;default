@@ -60,7 +60,7 @@ gstatic total:        -          -   [% grand_total_static %]
 [%- FOREACH pagetype = extra_pagetypes -%]
 [% pt_uids = pagetype _ "_uids"; pt_ipids = pagetype _ "_ipids" ; pt_page = pagetype _ "_page" ; pt_bytes = pagetype _ "_bytes"; pt_label = pagetype _ "_label"; -%]
 [% IF $pt_page > 0 -%]
-     [% $pt_label %]: [% $pt_uids %]   [% $pt_ipids %]   [% $pt_page %] ([% $pt_bytes %])
+   [% $pt_label %]: [% $pt_uids %]   [% $pt_ipids %]   [% $pt_page %] ([% $pt_bytes %])
 [% END -%]
 [% END %]
 
