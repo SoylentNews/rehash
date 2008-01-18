@@ -14,6 +14,7 @@ firehose_tabs
 __seclev__
 10000
 __template__
+[% fh = Slash.getObject("Slash::FireHose"); %]
 [% rss_options = { "fhfilter" => "filter", "orderdir" => "orderdir", "orderby" => "orderby", color => "color", "duration" => "duration" } %]
 [% rss_param_str = "" %]
 [% FOREACH param = rss_options.keys;
@@ -30,6 +31,12 @@ END %]
 		 END;
 		Slash.createSelect('tab', tabnames, { default => tab_current, return => 1, onchange => "firehose_set_options('tab', this.options[this.selectedIndex].value])"});
 	 ELSE %]
+	 	<li id="fhtab-section" [% IF options.sel_tabtype == "tabsection" %]class="active"[% END %]>[% fh.createSectionSelect(section) %]</li>
+	 	<li id="fhtab-recent" [% IF options.sel_tabtype == "tabrecent" %]class="active"[% END %]><a href="?tabtype=tabrecent" onclick="firehose_set_options('tabtype','tabrecent'); return false">Recent</a></li>
+	 	<li id="fhtab-popular" [% IF options.sel_tabtype == "tabpopular" %]class="active"[% END %]><a href="?tabtype=tabpopular" onclick="firehose_set_options('tabtype','tabpopular'); return false">Popular</a></li>
+		[% IF !user.is_anon %]
+	 	<li id="fhtab-user" [% IF options.sel_tabtype == "tabuser" %]class="active"[% END %]><a href="?tabtype=tabuser" onclick="firehose_set_options('tabtype','tabuser'); return false">[% user.nickname | strip_literal %]</a></li>
+		[% END %]
 	[% FOREACH tab = tabs %]
 		<li id="fhtab-[% tab.tabid %]"[% IF tab.active %] class="active"[% END %]>
 		[% IF tab.active %]<span id="tab-form-[% tab.tabid %]" class="hide"><input type="text" onfocus="focusCompleter(this, '[% tab.tabid %]', '[% user.is_admin && !user.firehose_usermode %]','firehosetab', 7, { yui:{minQueryLength:0, autoHighlight:false }, action1:completer_save_tab } )" id="tab-input-[% tab.tabid %]" size="12" value="[% tab.tabname | strip_literal %]"></span>[% END %]

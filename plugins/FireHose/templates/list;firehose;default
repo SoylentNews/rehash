@@ -46,6 +46,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
 [% ua = env.HTTP_USER_AGENT %]
 
 <div id="slashboxes">
+[% Slash.getAd(2) %]
 [% UNLESS user.noboxes %]
   [% IF slashboxes && !(form.smalldevices || form.embed || (constants.smalldevices_ua_regex && ua.match(constants.smalldevices_ua_regex)));
     slashboxes %]
@@ -90,7 +91,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
 <div id="message_area">
 </div>
 	[% IF !user.is_anon %]
-		[% PROCESS firehose_tabs tabs = options.tabs options = options %]
+		[% PROCESS firehose_tabs tabs = options.tabs options = options section=section %]
                 <div class="advpref" align="right"><a href="#" id="fh_adv_pref_toggle" onclick="firehose_toggle_advpref(); return false" title="Firehose preferences"></a></div>
 		[% PROCESS adv_pref_firehose options = options %]
 	[% END %]
@@ -144,6 +145,7 @@ cmdrtaco dot net but be forgiving of beta code!
 </p>
 [% END %]
 [% END # form.skipmenu %]
+[% Slash.getAd(6) %]
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
@@ -156,6 +158,7 @@ cmdrtaco dot net but be forgiving of beta code!
 	firehose_settings.startdate = '[% options.startdate.replace('-','') %]';
 	firehose_settings.issue = '[% options.issue %]';
 	firehose_settings.duration = '[% options.duration %]';
+	firehose_settings.section = '[% section %]';
 	[% IF fh_page == "console.pl" %]
 		fh_pageval = 1;
 	[% ELSIF fh_page == "users.pl" %]
