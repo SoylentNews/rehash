@@ -26,6 +26,7 @@ use Slash::Constants ':slashd';
 $task{$me}{timespec} = '2-59/5 * * * *';
 $task{$me}{timespec_panic_1} = ''; # not that important
 $task{$me}{fork} = SLASHD_NOWAIT;
+$task{$me}{on_startup} = 1;
 
 $task{$me}{code} = sub {
 	my($virtual_user, $constants, $slashdb, $user) = @_;
