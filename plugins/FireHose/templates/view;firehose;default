@@ -13,13 +13,20 @@ view
 __seclev__
 10000
 __template__
-[% PROCESS autocomplete %]
-[% PROCESS nodnix_menus %]
-[% IF user.is_anon;
-   	this_fhid = form.id | fixparam;
-   	PROCESS userlogin_cover
+<div class="view">
+	[% PROCESS autocomplete %]
+	[% PROCESS nodnix_menus %]
+	[% IF user.is_anon;
+	   	this_fhid = form.id | fixparam;
+	   	PROCESS userlogin_cover
    		return_url = gSkin.rootdir _ '/firehose.pl?op=view&id=' _ this_fhid;
-END %]
-[% firehosetext %]
+	END %]
+	<div class="head">
+       		<div class="yui-b">
+		<!-- block -->
+		</div>
+		[% firehosetext %]
+	</div>
+</div>
 __version__
 $Id$
