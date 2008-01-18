@@ -298,7 +298,6 @@ sub updateItemFromStory {
 		if ($id) {
 			# If a story is getting its primary skid to an ignored value set its firehose entry to non-public
 			my $public = ($story->{neverdisplay} || $ignore_skids{$story->{primaryskid}}) ? "no" : "yes";
-			print STDERR "Stoid: $story->{stoid} FHID: $id Public: $public ND: $story->{neverdisplay}\n";
 			my $data = {
 				title 		=> $story->{title},
 				uid		=> $story->{uid},
@@ -992,7 +991,7 @@ sub ajaxFireHoseSetOptions {
 	my $firehose = getObject("Slash::FireHose");
 	my $opts = $firehose->getAndSetOptions();
 	my $html = {};
-	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts }, { Return => 1});
+	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts, section => $form->{section} }, { Return => 1});
 	$html->{fhoptions} = slashDisplay("firehose_options", { nowrapper => 1, options => $opts }, { Return => 1});
 	$html->{fhadvprefpane} = slashDisplay("fhadvprefpane", { options => $opts }, { Return => 1});
 
@@ -1275,6 +1274,7 @@ sub ajaxFireHoseGetUpdates {
 	}, { Return => 1 });
 
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
+	$html->{filter_text} = "Filtered to '".strip_literal($opts->{fhfilter})."'";
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
 	$html->{itemsreturned} = $num_items == 0 ?  getData("noitems", { options => $opts }, 'firehose') : "";
 
@@ -1623,15 +1623,23 @@ sub getAndSetOptions {
 	my $user 	= getCurrentUser();
 	my $constants 	= getCurrentStatic();
 	my $form 	= getCurrentForm();
+	my $gSkin	= getCurrentSkin();
+
 	$opts 	        ||= {};
 	my $options 	= {};
 
 	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1, misc => 1 }; 
+	my $tabtypes = { tabsection => 1, tabpopular => 1, tabrecent => 1, tabuser => 1};
+	
+	my $tabtype = $tabtypes->{$form->{tabtype}} ? $form->{tabtype} : '';
+
+
 	my $modes = { full => 1, fulltitle => 1 };
 	my $pagesizes = { "small" => 1, "large" => 1 };
 
 	my $no_saved = $form->{no_saved};
 	$opts->{no_set} ||= $no_saved;
+	$opts->{initial} ||= 0;
 
 	if (defined $form->{mixedmode} && $form->{setfield}) {
 		$options->{mixedmode} = $form->{mixedmode} ? 1 : 0;
@@ -1727,6 +1735,41 @@ sub getAndSetOptions {
 
 	my $fhfilter;
 
+	if ($opts->{initial} && !$tabtype) {
+		$tabtype = 'tabsection';
+		$form->{section} = $gSkin->{skid} == $constants->{mainpage_skid} ? 0 : $gSkin->{skid};
+	}
+
+	my $the_skin = $self->getSkin($form->{section});
+
+
+	if ($tabtype eq 'tabsection') {
+		$form->{fhfilter} = "story";
+		$options->{orderdir} = "DESC";
+		$options->{orderby} = "createtime";
+		$options->{color} = "black";
+	} elsif ($tabtype eq 'tabrecent') {
+		$form->{fhfilter} = "-story";
+		$options->{orderby} = "createtime";
+		$options->{orderdir} = "DESC";
+		$options->{color} = "blue";
+	} elsif ($tabtype eq 'tabpopular') {
+		$form->{fhfilter} = "-story";
+		$options->{orderby} = "popularity";
+		$options->{orderdir} = "DESC";
+		$options->{color} = "black";
+	} elsif ($tabtype eq 'tabuser') {
+		$form->{fhfilter} = "user:";
+		$options->{orderby} = "popularity";
+		$options->{color} = "black";
+		$options->{orderdir} = "DESC";
+		$options->{orderby} = "createtime";
+	}
+
+	if ($tabtype) {
+		$form->{fhfilter} = "$the_skin->{name} $form->{fhfilter}" if $the_skin->{skid} != $constants->{mainpage_skid};
+	}
+
 
 	if (defined $form->{fhfilter}) {
 		$fhfilter = $form->{fhfilter};
@@ -1736,37 +1779,10 @@ sub getAndSetOptions {
 		$options->{fhfilter} = $fhfilter;
 	}
 
-	# XXX
 	my $user_tabs = $self->getUserTabs();
 	my %user_tab_names = map { $_->{tabname} => 1 } @$user_tabs;
-	my $tabs_given = $user->{firehose_tabs_given} || '';
-	my %firehose_tabs_given = map { $_ => 1 } split (/\|/, $tabs_given);
 	my @tab_fields = qw(tabname filter mode color orderdir orderby);
 
-	my $system_tabs = $self->getSystemDefaultTabs();
-	foreach my $tab (@$system_tabs) {
-		my $data = {};
-		foreach (@tab_fields) {
-			$data->{$_} = $tab->{$_};
-			
-			if ($tab->{$_} eq "User" && $_ eq "tabname") {
-				$data->{$_} = $user->{nickname};
-				$data->{$_} =~ s/[^A-Za-z0-9_-]//g;
-				if(length $data->{$_} > 16) {
-					$data->{$_} = substr($data->{$_}, 0, 16);
-				}
-				$data->{$_} = "User" if length($data->{$_}) == 0;
-			}
-			foreach my $field (qw(uid nickname)) {
-				$data->{$_} =~ s/{$field}/$user->{$field}/g;
-			}
-		}
-		if (!$user_tab_names{$tab->{tabname}} && !$firehose_tabs_given{$tab->{tabname}} && !$user->{is_anon}) {
-			$self->createUserTab($user->{uid}, $data); 
-			$tabs_given .= $tab->{tabname} ."|";
-			$self->setUser($user->{uid}, { firehose_tabs_given => $tabs_given });
-		}
-	}
 	$user_tabs = $self->getUserTabs();
 
 
@@ -1776,19 +1792,37 @@ sub getAndSetOptions {
 		filter 		=> "fhfilter" 
 	};
 
+	my $skin_prefix="";
+	if ($the_skin && $the_skin->{name} && $the_skin->{skid} != $constants->{mainpage_skid})  {
+		$skin_prefix = "$the_skin->{name} ";
+	}
+	my $system_tabs = [ 
+		{ tabtype => 'tabsection', color => 'black', filter => $skin_prefix . "story"},
+		{ tabtype => 'tabpopular', color => 'black', filter => "$skin_prefix\-story"},
+		{ tabtype => 'tabrecent',  color => 'blue',  filter => "$skin_prefix\-story"},
+	];
+
+	if (!$user->{is_anon}) {
+		push @$system_tabs, { tabtype => 'tabuser', color => 'black', filter => $skin_prefix . "user:"};
+	}
+
+	my $sel_tabtype;
+
 	my $tab_match = 0;
-	foreach my $tab (@$user_tabs) {
+	foreach my $tab (@$user_tabs, @$system_tabs) {
 		my $equal = 1;
 		foreach (keys %$tab_compare) {
 			$options->{$tab_compare->{$_}} ||= "";
 			if ($tab->{$_} ne $options->{$tab_compare->{$_}}) {
 				$equal = 0;
-				#print STDERR "$tab->{tabname} -> $_ doesn't match\n";
 			}
 		}
 		if ($equal) {
 			$tab_match = 1;
 			$tab->{active} = 1;
+			if (defined $tab->{tabtype}) {
+				$sel_tabtype = $tab->{tabtype};
+			}
 			
 			# Tab match if new option is being set update tab
 			if ($form->{orderdir} || $form->{orderby} || $form->{mode}) {
@@ -1900,6 +1934,7 @@ sub getAndSetOptions {
 			$fhfilter .= " $gSkin->{name}";
 		}
 	}
+
 	my $fh_ops = $self->splitOpsFromString($fhfilter);
 	
 
@@ -2012,6 +2047,7 @@ sub getAndSetOptions {
 	}
 
 	$options->{tabs} = $user_tabs;
+	$options->{sel_tabtype} = $sel_tabtype;
 
 	if ($user->{is_admin} && $form->{setusermode}) {
 		$options->{firehose_usermode} = $form->{firehose_usermode} ? 1 : "";
@@ -2154,6 +2190,8 @@ sub listView {
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $gSkin = getCurrentSkin();
+	my $form = getCurrentForm();
+
 	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
 	my $featured;
 
@@ -2163,7 +2201,8 @@ sub listView {
 			$featured = $firehose_reader->getFireHose($res->[0]->{id});
 		}
 	}
-	my $options = $lv_opts->{options} || $self->getAndSetOptions();
+	my $initial = ($form->{tab} || $form->{tabtype} || $form->{fhfilter}) ? 0 : 1;
+	my $options = $lv_opts->{options} || $self->getAndSetOptions({ initial => $initial });
 	my $base_page = $lv_opts->{fh_page} || "firehose.pl";
 
 	if ($featured && $featured->{id}) {
@@ -2232,6 +2271,12 @@ sub listView {
 	} else {
 		$refresh_options->{insert_new_at} = "top";
 	}
+	
+	my $section = 0;
+	if ($gSkin->{skid} != $constants->{mainpage_skid}) {
+		$section = $gSkin->{skid};
+	}
+
 	slashDisplay("list", {
 		itemstext	=> $itemstext, 
 		itemnum		=> $itemnum,
@@ -2247,6 +2292,7 @@ sub listView {
 		fh_page		=> $base_page,
 		search_results	=> $results,
 		featured	=> $featured,
+		section		=> $section
 	}, { Page => "firehose", Return => 1 });
 }
 
@@ -2348,13 +2394,20 @@ sub addDayBreaks {
 	my @retitems;
 	my $last_day = "00000000";
 	my $days_processed = 0;
+	my $last_days_processed = 0;
 	foreach (@$items) {
 		my $cur_day = $_->{createtime};
 		$cur_day =  timeCalc($cur_day, "%Y%m%d %T", $offset);
 		$cur_day =~ s/ \d\d:\d\d:\d\d$//g;
-		if ($cur_day ne $last_day && $days_processed >= 3) {
-			push @retitems, { id => "day-$cur_day", day => $cur_day, last_day => $last_day };
+		if ($cur_day ne $last_day) {
+			if ($last_days_processed >= 5) {
+				push @retitems, { id => "day-$cur_day", day => $cur_day, last_day => $last_day };
+			}
+			$last_days_processed = 0;
+		} else {
+			$last_days_processed++;
 		}
+		
 		push @retitems, $_;
 		$last_day = $cur_day;
 		$days_processed++;
@@ -2436,6 +2489,27 @@ sub getNextItemsForThumbnails {
 	$limit = " LIMIT $limit" if $limit;
 	$lastid = " AND firehose.id > $lastid" if defined $lastid;
 	return $self->sqlSelectAllHashrefArray("firehose.id,urls.url", "firehose,urls", "firehose.type='submission' AND firehose.url_id=urls.url_id AND mediatype='video' $lastid", "ORDER BY firehose.id ASC $limit");
+}
+
+sub createSectionSelect {
+	my($self, $default) = @_;
+	my $skins = $self->getSkins();
+	my $constants = getCurrentStatic();
+	my $ordered = [];
+	my $menu;
+
+	foreach my $skid (keys %$skins) {
+		if ($skins->{$skid}{skid} == $constants->{mainpage_skid}) {
+			$menu->{0} = $constants->{sitename};
+		} else {
+			$menu->{$skid} = $skins->{$skid}{title};
+		}
+	}
+
+	@$ordered = sort {$a == 0 ? -1 : $b == 0 ? 1 : 0 || $menu->{$a} cmp $menu->{$b} } keys %$menu;
+	return createSelect("fh_section", $menu, { default => $default, return => 1, nsort => 0, ordered => $ordered, multiple => 0, onchange =>"firehose_set_options('tabsection', this.options[this.selectedIndex].value)"});
+
+	
 }
 
 1;
