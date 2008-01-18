@@ -205,6 +205,7 @@ True if email is valid, false otherwise.
 
 sub emailValid {
 	my($email) = @_;
+	return 0 if !$email;
 
 	my $constants = getCurrentStatic();
 	return 0 if $constants->{email_domains_invalid}

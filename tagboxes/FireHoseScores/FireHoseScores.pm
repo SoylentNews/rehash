@@ -313,11 +313,11 @@ sub get_udc_mult {
 	my $curhour = $prevhour+3600;
 	my $nexthour = $prevhour+3600;
 	my $tagsdb = getObject('Slash::Tags');
-	$cache->{$prevhour} = $tagsdb->sqlSelect('udc', 'tags_udc', "hourtime=FROM_UNIXTIME($prevhour)")
+	$cache->{$prevhour} = $tagsdb->sqlSelect('udc', 'tags_udc', "hourtime=FROM_UNIXTIME($prevhour)") || 0
 		if !defined $cache->{$prevhour};
-	$cache->{$curhour}  = $tagsdb->sqlSelect('udc', 'tags_udc', "hourtime=FROM_UNIXTIME($curhour)")
+	$cache->{$curhour}  = $tagsdb->sqlSelect('udc', 'tags_udc', "hourtime=FROM_UNIXTIME($curhour)")  || 0
 		if !defined $cache->{$curhour};
-	$cache->{$nexthour} = $tagsdb->sqlSelect('udc', 'tags_udc', "hourtime=FROM_UNIXTIME($nexthour)")
+	$cache->{$nexthour} = $tagsdb->sqlSelect('udc', 'tags_udc', "hourtime=FROM_UNIXTIME($nexthour)") || 0
 		if !defined $cache->{$nexthour};
 	my $prevudc = $cache->{$prevhour};
 	my $curudc  = $cache->{$curhour};
@@ -329,7 +329,8 @@ sub get_udc_mult {
 	my $udc = $prevudc*$prevweight + $curudc*$curweight + $nextudc*$nextweight;
 	if ($udc == 0) {
 		# This shouldn't happen on a site with any reasonable amount of
-		# up and down voting.  If it does, punt.
+		# up and down voting, unless the tags_udc task has failed to run
+		# for the past hour or two.  If it does happen, punt.
 		main::tagboxLog(sprintf("get_udc_mult punting prev %d %.6f cur %d %.6f next %d %.6f time %d thru %.6f prevw %.6f curw %.6f nextw %.6f",
 			$prevhour, $cache->{$prevhour}, $curhour, $cache->{$curhour}, $nexthour,  $cache->{$nexthour},
 			$time, $thru_frac, $prevweight, $curweight, $nextweight));
