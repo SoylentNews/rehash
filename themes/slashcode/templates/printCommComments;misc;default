@@ -42,7 +42,7 @@ __template__
 <!--
 	window.onscroll = d2act;
 	boxStatus(1);
-[% Slash.jsSelectComments(Slash.db, constants, user, { sid => sid, cid => cid }) %]
+[% Slash.jsSelectComments(Slash.db, constants, user, { sid => sid, cid => cid }, gSkin) %]
 //-->
 	</script>
 [% END %]

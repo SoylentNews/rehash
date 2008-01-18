@@ -361,12 +361,20 @@ sub fetchComments {
 		}
 
 		if (@$special_cids) {
-			my @cid_data = map {{
-				uid    => $comments->{$_}{uid},
-				pid    => $comments->{$_}{pid},
-				points => $comments->{$_}{points},
-				kids   => []
-			}} @$special_cids;
+			my @cid_data;
+			for my $cid (@$special_cids) {
+				my $comments_new = {
+					uid     => $comments->{$cid}{uid},
+					pid     => $comments->{$cid}{pid},
+					points  => $comments->{$cid}{points},
+					kids    => []
+				};
+				if ($comments->{$cid}{subject_orig} && $comments->{$cid}{subject_orig} eq 'no') {
+					$comments_new->{subject} = $comments->{$cid}{subject};
+					$comments->{$cid}{subject} = 'Re:';
+				}
+				push @cid_data, $comments_new;
+			}
 
 			$data{new_cids_order} = [ @$special_cids ];
 			$data{new_cids_data}  = \@cid_data;

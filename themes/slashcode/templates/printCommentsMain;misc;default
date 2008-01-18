@@ -115,6 +115,7 @@ __template__
 	<div class="commentBoxForm" id="commentControlBox">
 [% UNLESS discussion2 %]
 		<form action="[% gSkin.rootdir %]/comments.pl">
+		[% IF user.state.no_d2 %]<input type="hidden" name="no_d2" value="1">[% END %]
 		<fieldset>
 		<legend>Display Options</legend>
 		[% UNLESS discussion2 %]

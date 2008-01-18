@@ -254,13 +254,13 @@ sub j_on_auth {
 	# we want to msg ourselves to catch the current time from the
 	# Jabber server, so we can skip messages from the channel log
 	# when we enter the channel
-	my $to = "$jchannel\@$jchanserver/$jnick";
-	slashdLog("sending to: $to");
-	$jabber->MessageSend(
-		to		=> $to,
-		type		=> 'chat',
-		body		=> 'timestamp',
-	);
+# 	my $to = "$jchannel\@$jchanserver/$jnick";
+# 	slashdLog("sending to: $to");
+# 	$jabber->MessageSend(
+# 		to		=> $to,
+# 		type		=> 'chat',
+# 		body		=> 'timestamp',
+# 	);
 
 	# XXX: this will silently fail on a nick collision ...
 	$jabber->MUCJoin(

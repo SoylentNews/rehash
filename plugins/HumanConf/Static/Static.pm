@@ -367,7 +367,7 @@ sub write_mp3_file {
 	system("swift -f $ssml_file -o $wav_file");
 	unlink($ssml_file);
 	if ($constants->{hc_cepstral_mp3encoder}) {
-		system("$constants->{hc_cepstral_mp3encoder} -S --resample 22.05 $wav_file $full_filename_mp3");
+		system("TERM=dumb $constants->{hc_cepstral_mp3encoder} -S --resample 22.05 $wav_file $full_filename_mp3");
 	}
 	unlink($wav_file);
 	return $filename_mp3;
