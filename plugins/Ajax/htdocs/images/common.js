@@ -16,6 +16,7 @@ var firehose_settings = {};
   firehose_settings.removals = null;
   firehose_settings.is_embedded = 0;
   firehose_settings.not_id = 0;
+  firehose_settings.section = 0;
 
 // globals we haven't yet decided to move into |firehose_settings|
 var fh_play = 0;
@@ -621,6 +622,17 @@ function firehose_set_options(name, value) {
 			firehose_get_updates({ oneupdate: 1 });
 		}
 	};
+
+	if (name == 'tabsection') {
+		firehose_settings.section = value;
+		params['tabtype'] = 'tabsection';
+	}
+
+	if (name == 'tabtype') {
+		params['tabtype'] = value;
+	}
+
+	params['section'] = firehose_settings.section;
 	ajax_update(params, '', handlers);
 }
 
@@ -1090,6 +1102,7 @@ function firehose_get_updates(options) {
 	params['startdate'] = firehose_settings.startdate;
 	params['duration'] = firehose_settings.duration;
 	params['issue'] = firehose_settings.issue;
+	params['section'] = firehose_settings.section;
 	params['page'] = page;
 	params['not_id'] = firehose_settings.not_id;
 	if ( firehose_settings.is_embedded ) {
