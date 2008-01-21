@@ -821,6 +821,14 @@ EOT
 	$data{top_referers} = $logdb->getTopReferers({count => 20});
 	$data{top_badgehosts} = $logdb->getTopBadgeHosts({count => 20});
 	$data{top_badgeurls} = $logdb->getTopBadgeURLs({count => 20});
+	for my $host_duple (@{ $data{top_badgehosts} }) {
+		my($host, $count) = @$host_duple;
+		$host =~ s/\W+/_/g;
+		$statsSave->createStatDaily("badgehost_$host", $count);
+	}
+
+	$data{bookmarks_anon} = $logdb->getNumBookmarks({ anon_only => 1 });
+	$statsSave->createStatDaily("bookmarks_anon", $data{bookmarks_anon});
 
 	my $new_users_yest = $slashdb->getNumNewUsersSinceDaysback(1)
 		- $slashdb->getNumNewUsersSinceDaysback(0);
@@ -861,7 +869,7 @@ EOT
 	}
 
 	if ($firehose) {
-		my $fh_report;
+		my $fh_report = '';
 		my $fh_nods_nix = $stats->getTagCountForDay($yesterday, ["nod", "nix" ]);
 		$statsSave->createStatDaily("firehose_nod_nix", $fh_nods_nix);
 		$fh_report .= "Firehose total nods & nixes: $fh_nods_nix\n";
@@ -894,7 +902,7 @@ EOT
 	}
 
 	if ($tags) {
-		my $tags_report;
+		my $tags_report = '';
 		my $tags_users = $stats->getTagCountForDay($yesterday, [], 1);
 		$statsSave->createStatDaily("tags_users", $tags_users);
 		$tags_report .= "Tags active users: $tags_users\n";

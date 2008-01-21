@@ -1758,7 +1758,7 @@ sub getTopBadgeURLs {
 sub getTopBadgeHosts {
 	my($self, $options) = @_;
 	my $count = $options->{count} || 10;
-	my $url_count = $count * 20;
+	my $url_count = $count * 40;
 	my $top_ar = $self->getTopBadgeURLs({ count => $url_count });
 	my %count = ( );
 	for my $duple (@$top_ar) {
@@ -1773,7 +1773,17 @@ sub getTopBadgeHosts {
 	return \@top;
 }
 
-########################################################
+sub getNumBookmarks {
+	my($self, $options) = @_;
+	my $constants = getCurrentStatic();
+	my $anon_clause = '';
+	$anon_clause = " AND uid=$constants->{anonymous_coward_uid}" if $options->{anon_only};
+	return $self->sqlCount('bookmark_id',
+		'bookmarks',
+		"createdtime $self->{_day_between_clause} $anon_clause");
+}
+
+#######################################################
 sub countSfNetIssues {
 	my($self, $group_id) = @_;
 	my $constants = getCurrentStatic();
