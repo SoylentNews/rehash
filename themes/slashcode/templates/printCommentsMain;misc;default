@@ -202,7 +202,7 @@ __template__
 			}) %]
 		[% END %]
 		</span>
-		<span title="Toggle window location" onclick="toggleDisplayOptions()" class="close">/</span>
+		<span id="d2toggle" title="Toggle window location" onclick="toggleDisplayOptions()" class="close">/</span>
 				</h4>
 			</div>
 		</div>
