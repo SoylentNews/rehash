@@ -76,25 +76,19 @@ sub feed_newtags {
 		main::tagboxLog("Despam->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
 	}
 
-	# The algorithm of the importance of tags to this tagbox is simple
-	# (at least for now).  'binspam' from an admin on a firehose item
-	# is important.  Other tags are not.
 	my $slashdb = getCurrentDB();
 	my $admins = $slashdb->getAdmins();
 
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
+		# All admin binspam tags are equally important.
+		# All other tags are equally unimportant :)
 		next unless $tag_hr->{tagnameid} == $self->{spamid} && $admins->{ $tag_hr->{uid} };
 		my $ret_hr = {
+			tagid =>	$tag_hr->{tagid},
 			affected_id =>	$tag_hr->{globjid},
 			importance =>	1,
 		};
-		# We identify this little chunk of importance by either
-		# tagid or tdid depending on whether the source data had
-		# the tdid field (which tells us whether feed_newtags was
-		# "really" called via feed_deactivatedtags).
-		if ($tag_hr->{tdid})	{ $ret_hr->{tdid}  = $tag_hr->{tdid}  }
-		else			{ $ret_hr->{tagid} = $tag_hr->{tagid} }
 		push @$ret_ar, $ret_hr;
 	}
 	return [ ] if !@$ret_ar;
@@ -111,16 +105,19 @@ sub feed_newtags {
 	my %fh_globjs = ( map { $_, 1 } @$fh_globjs_ar );
 	$ret_ar = [ grep { $fh_globjs{ $_->{affected_id} } } @$ret_ar ];
 
-	main::tagboxLog("Despam->feed_newtags returning " . scalar(@$ret_ar));
+	main::tagboxLog("Despam->feed_newtags returning " . scalar(@$ret_ar) . ": '@$ret_ar'");
 	return $ret_ar;
 }
 
 sub feed_deactivatedtags {
 	my($self, $tags_ar) = @_;
-	main::tagboxLog("Despam->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
-	my $ret_ar = $self->feed_newtags($tags_ar);
-	main::tagboxLog("Despam->feed_deactivatedtags returning " . scalar(@$ret_ar));
-	return $ret_ar;
+	# XXX This need not do anything, I don't think -- not even call
+	# feed_newtags.
+	# The way Despam is set up, 2 admin binspam tags will mark a globjid,
+	# and even if 1 of them is deactivated a moment later, we have no way
+	# to undo the process.
+	main::tagboxLog("Despam->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "', returning nothing");
+	return [ ];
 }
 
 sub feed_userchanges {
@@ -151,34 +148,36 @@ sub run {
 	my $submitter_uid = $fhitem->{uid};
 	my $submitter_srcid = $fhitem->{srcid_32};
 
-	main::tagboxLog(sprintf("%s->run marking fhid %d (%d) as is_spam", ref($self), $fhid, $affected_id));
+	my $binspam_count = $slashdb->sqlCount(
+		'tags, firehose',
+		"tags.uid IN ($admin_in_str)
+		 AND tags.inactivated IS NULL
+		 AND tags.tagnameid = $self->{spamid}
+		 AND tags.globjid = firehose.globjid
+		 AND firehose.uid = $submitter_uid");
+	my $binspam_tagids = $slashdb->sqlSelectColArrayref(
+		'tagid',
+		'tags',
+		"tags.uid IN ($admin_in_str)
+		 AND tags.inactivated IS NULL
+		 AND tags.tagnameid = $self->{spamid}
+		 AND tags.globjid = firehose.globjid
+		 AND firehose.uid = $submitter_uid");
+	main::tagboxLog(sprintf("%s->run marking fhid %d (%d) as is_spam (for count %d on uid %d: '%s')",
+		ref($self), $fhid, $affected_id, $binspam_count, $submitter_uid, join(' ', @$binspam_tagids)));
 	$firehose_db->setFireHose($fhid, { is_spam => 'yes' });
 
 	if (isAnon($submitter_uid)) {
 		# Non-logged-in user, check by IP (srcid_32)
-		if ($submitter_srcid) {
-			my $binspam_count = $slashdb->sqlCount(
-				'tags, firehose',
-				"tags.uid IN ($admin_in_str)
-				 AND tags.inactivated IS NULL
-				 AND tags.tagnameid = $self->{spamid}
-				 AND tags.globjid = firehose.globjid
-				 AND firehose.srcid_32 = $submitter_srcid");
-			if ($binspam_count > $constants->{tagbox_despam_binspamsallowed_ip}) {
-				main::tagboxLog(sprintf("%s->run marking srcid %s for %d admin binspam tags, based on %d (%d)",
-				ref($self), $submitter_srcid, $binspam_count, $fhid, $affected_id));
-				$self->despam_srcid($submitter_srcid, $binspam_count);
-			}
+		if ($submitter_srcid &&
+			$binspam_count > $constants->{tagbox_despam_binspamsallowed_ip}
+		) {
+			main::tagboxLog(sprintf("%s->run marking srcid %s for %d admin binspam tags, based on %d (%d)",
+			ref($self), $submitter_srcid, $binspam_count, $fhid, $affected_id));
+			$self->despam_srcid($submitter_srcid, $binspam_count);
 		}
 	} else {
 		# Logged-in user, check by uid
-		my $binspam_count = $slashdb->sqlCount(
-			'tags, firehose',
-			"tags.uid IN ($admin_in_str)
-			 AND tags.inactivated IS NULL
-			 AND tags.tagnameid = $self->{spamid}
-			 AND tags.globjid = firehose.globjid
-			 AND firehose.uid = $submitter_uid");
 		if ($binspam_count > $constants->{tagbox_despam_binspamsallowed}) {
 			main::tagboxLog(sprintf("%s->run marking uid %d for %d admin binspam tags, based on %d (%d)",
 				ref($self), $submitter_uid, $binspam_count, $fhid, $affected_id));
