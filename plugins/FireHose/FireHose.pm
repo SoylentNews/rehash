@@ -1833,7 +1833,7 @@ sub getAndSetOptions {
 				$data->{mode}  	  = $options->{mode};
 				$data->{filter}	  = $options->{fhfilter};
 				$data->{color}	  = $options->{color};
-				if (!$user->{is_anon}) {
+				if (!$user->{is_anon} && $tab->{tabname}) {
 					$self->createOrReplaceUserTab($user->{uid}, $tab->{tabname}, $data) ;
 				}
 			}
