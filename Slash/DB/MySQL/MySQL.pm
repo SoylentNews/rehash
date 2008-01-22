@@ -10004,7 +10004,7 @@ sub getStoryTopics {
 
 	my $tree = $self->getTopicTree();
 	my $answer = { };
-	for my $tid (keys %$tree) {
+	for my $tid (@$topics) {
 		$answer->{$tid} = $field ? $tree->{$tid}{$field} : 1;
 	}
 	return $answer;
