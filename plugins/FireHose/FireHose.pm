@@ -1833,7 +1833,9 @@ sub getAndSetOptions {
 				$data->{mode}  	  = $options->{mode};
 				$data->{filter}	  = $options->{fhfilter};
 				$data->{color}	  = $options->{color};
-				$self->createOrReplaceUserTab($user->{uid}, $tab->{tabname}, $data);
+				if (!$user->{is_anon}) {
+					$self->createOrReplaceUserTab($user->{uid}, $tab->{tabname}, $data) ;
+				}
 			}
 		}
 	}
@@ -1843,7 +1845,9 @@ sub getAndSetOptions {
 		foreach (keys %$tab_compare) {
 			$data->{$_} = $options->{$tab_compare->{$_}} || '';
 		}
-		$self->createOrReplaceUserTab($user->{uid}, "untitled", $data);
+		if (!$user->{is_anon}) {
+			$self->createOrReplaceUserTab($user->{uid}, "untitled", $data);
+		}
 		$user_tabs = $self->getUserTabs();
 		foreach (@$user_tabs) {
 			$_->{active} = 1 if $_->{tabname} eq "untitled" 
