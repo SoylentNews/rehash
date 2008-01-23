@@ -2267,7 +2267,7 @@ sub listView {
 		}
 		$i++;
 	}
-	my $Slashboxes = displaySlashboxes();
+	my $Slashboxes = displaySlashboxes($gSkin);
 	my $refresh_options;
 	$refresh_options->{maxtime} = $maxtime;
 	if (uc($options->{orderdir}) eq "ASC") {
@@ -2365,7 +2365,7 @@ sub ajaxFirehoseListTabs {
 	my $firehose = getObject("Slash::FireHose");
 	my $tabs = $firehose->getUserTabs({ prefix => $form->{prefix}});
 	@$tabs = map { $_->{tabname}} grep { $_->{tabname} ne "untitled" } @$tabs;
-	return join "\n", @$tabs;
+	return join "\n", @$tabs, "untit";
 }
 
 sub splitOpsFromString {
