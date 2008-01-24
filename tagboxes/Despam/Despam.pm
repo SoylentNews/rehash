@@ -122,7 +122,7 @@ sub feed_deactivatedtags {
 
 sub feed_userchanges {
 	my($self, $users_ar) = @_;
-	main::tagboxLog("Despam->feed_userchanges called (oddly): users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'");
+	main::tagboxLog("Despam->feed_userchanges called (oddly): users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "', returning nothing");
 	return [ ];
 }
 
@@ -157,7 +157,7 @@ sub run {
 		 AND firehose.uid = $submitter_uid");
 	my $binspam_tagids = $slashdb->sqlSelectColArrayref(
 		'tagid',
-		'tags',
+		'tags, firehose',
 		"tags.uid IN ($admin_in_str)
 		 AND tags.inactivated IS NULL
 		 AND tags.tagnameid = $self->{spamid}
