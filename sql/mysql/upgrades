@@ -5092,14 +5092,13 @@ INSERT INTO vars (name, value, description) VALUES ('tags_active_mincare', '5', 
 # 2008-01-09
 UPDATE vars SET value = 'T_2_5_0_189' WHERE name = 'cvs_tag_currentcode';
 
+# 2008-01-21
+UPDATE vars SET value = 'T_2_5_0_190' WHERE name = 'cvs_tag_currentcode';
+
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
 
-# 2008-01-21
-UPDATE vars SET value = 'T_2_5_0_190' WHERE name = 'cvs_tag_currentcode';
-
-# 2008-01-24
 # For plugins/Slashboxes
 UPDATE vars SET name = 'topcomm_num', value = 5, description = 'Number of comments wanted for the Hot Comments slashbox. Defaults to 5.' WHERE name = 'top10comm_num';
 UPDATE vars SET name = 'topcomm_days', description = 'Look back (n) days to display the Hot Comments slashbox' WHERE name = 'top10comm_days';
@@ -5115,3 +5114,6 @@ UPDATE blocks SET ordernum = 6, portal = 1 WHERE bid = 'index_jobs';
 UPDATE blocks SET ordernum = 7 WHERE bid = 'index_qlinks';
 UPDATE blocks SET ordernum = 8 WHERE bid = 'mainpage_more';
 UPDATE blocks SET ordernum = -1 WHERE bid = 'freshmeat';
+
+# 2008-01-24
+UPDATE vars SET value = 'T_2_5_0_191' WHERE name = 'cvs_tag_currentcode';

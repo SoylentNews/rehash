@@ -394,7 +394,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParam
             YAHOO.util.Dom.removeClass(this._spareInput, "hidden");
             this._spareInput.value = "";
             this._spareInput.focus();
-        		this._pending_hide = setTimeout("YAHOO.slashdot.gCompleterWidget._hide()", 15000);
+            this._pending_hide = setTimeout("YAHOO.slashdot.gCompleterWidget._hide()", 15000);
           }
         else
           YAHOO.util.Dom.addClass(this._spareInput, "hidden");
