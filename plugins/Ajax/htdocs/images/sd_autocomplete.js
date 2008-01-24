@@ -394,6 +394,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParam
             YAHOO.util.Dom.removeClass(this._spareInput, "hidden");
             this._spareInput.value = "";
             this._spareInput.focus();
+        		this._pending_hide = setTimeout("YAHOO.slashdot.gCompleterWidget._hide()", 15000);
           }
         else
           YAHOO.util.Dom.addClass(this._spareInput, "hidden");
@@ -402,9 +403,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParam
         this._completer.unmatchedItemSelectEvent.subscribe(this._onSdItemSelectEvent, this);
         this._completer.textboxBlurEvent.subscribe(this._onSdTextboxBlurEvent, this);
 
-        YAHOO.util.Event.addListener(this._textField(), "keyup", this._onSdTextboxKeyUp, this, true);
-
-        this._pending_hide = setTimeout("YAHOO.slashdot.gCompleterWidget._hide()", 15000);
+        YAHOO.util.Event.addListener(this._textField(), "keydown", this._onSdTextboxKeyDown, this, true);
       }
   }
 
@@ -422,7 +421,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._hide = function()
       {
         YAHOO.util.Dom.removeClass(this._sourceEl, "ac-source");
 
-        YAHOO.util.Event.removeListener(this._textField(), "keyup", this._onSdTextboxKeyUp, this, true);
+        YAHOO.util.Event.removeListener(this._textField(), "keydown", this._onSdTextboxKeyDown, this, true);
         this._completer.itemSelectEvent.unsubscribe(this._onSdItemSelectEvent, this);
         this._completer.unmatchedItemSelectEvent.unsubscribe(this._onSdItemSelectEvent, this);
         this._completer.textboxBlurEvent.unsubscribe(this._onSdTextboxBlurEvent, this);
@@ -447,7 +446,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype.attach = function( obj, callbackPara
     if ( denyThisAttach )
       return;
 
-    if ( newSourceEl )
+    if ( newSourceEl && newSourceEl !== this._sourceEl )
       {
         callbackParams._sourceEl = newSourceEl;
         this._show(newSourceEl, callbackParams, tagDomain);
@@ -493,7 +492,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onSdTextboxBlurEvent = function( ty
     me._denyNextAttachTo = o;
   }
 
-YAHOO.slashdot.AutoCompleteWidget.prototype._onSdTextboxKeyUp = function( e, me )
+YAHOO.slashdot.AutoCompleteWidget.prototype._onSdTextboxKeyDown = function( e, me )
   {
     if ( me._callbackParams && me._callbackParams.delayAutoHighlight )
       {
@@ -511,12 +510,13 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onSdTextboxKeyUp = function( e, me 
         	// I'm sorry to say we have to test first, something somehow somewhere can still leave
         	//	leave this listener dangling; want to look deeper into this, as this would _still_
         	//	leave the listener dangling
-        	if ( me._completer )
-          	me._completer.unmatchedItemSelectEvent.fire(me._completer, me, me._completer._sCurQuery);
+          if ( me._completer )
+            me._completer.unmatchedItemSelectEvent.fire(me._completer, me, me._completer._sCurQuery);
           break;
         default:
           if ( me._pending_hide )
             clearTimeout(me._pending_hide);
+          if ( me._needsSpareInput() )
           me._pending_hide = setTimeout("YAHOO.slashdot.gCompleterWidget._hide()", 15000);
       }
   }
