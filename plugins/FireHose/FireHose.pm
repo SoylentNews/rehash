@@ -292,8 +292,6 @@ sub updateItemFromStory {
 	my $constants = getCurrentStatic();
 	my %ignore_skids = map {$_ => 1 } @{$constants->{firehose_story_ignore_skids}};
 	my $story = $self->getStory($id, "", 1);
-	use Data::Dumper;
-	print STDERR Dumper($story);
 	if ($story) {
 		my $globjid = $self->getGlobjidCreate("stories", $story->{stoid});
 		my $id = $self->getFireHoseIdFromGlobjid($globjid);
@@ -2209,9 +2207,9 @@ sub listView {
 		my $featured_ops ={ primaryskid => $gSkin->{skid}, type => "story", limit => 1, orderby => 'createtime', orderdir => 'DESC'};
 
 		if ($user->{is_subscriber}) {
-			$options->{createtime_subscriber_future} = 1;
+			$featured_ops->{createtime_subscriber_future} = 1;
 		} else {
-			$options->{createtime_no_future} = 1;
+			$featured_ops->{createtime_no_future} = 1;
 		}
 
 		my($res) = $firehose_reader->getFireHoseEssentials($featured_ops);
