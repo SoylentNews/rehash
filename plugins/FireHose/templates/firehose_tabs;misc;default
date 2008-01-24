@@ -31,11 +31,15 @@ END %]
 		 END;
 		Slash.createSelect('tab', tabnames, { default => tab_current, return => 1, onchange => "firehose_set_options('tab', this.options[this.selectedIndex].value])"});
 	 ELSE %]
-	 	<li id="fhtab-section" [% IF options.sel_tabtype == "tabsection" %]class="active"[% END %]>[% fh.createSectionSelect(section) %]</li>
-	 	<li id="fhtab-recent" [% IF options.sel_tabtype == "tabrecent" %]class="active"[% END %]><a href="?tabtype=tabrecent" onclick="firehose_set_options('tabtype','tabrecent'); return false">Recent</a></li>
-	 	<li id="fhtab-popular" [% IF options.sel_tabtype == "tabpopular" %]class="active"[% END %]><a href="?tabtype=tabpopular" onclick="firehose_set_options('tabtype','tabpopular'); return false">Popular</a></li>
+	 	<li id="fhtab-section" [% IF options.sel_tabtype == "tabsection" %]class="active"[% END %]>[% UNLESS options.sel_tabtype == "tabsection" %]<a href="#" onclick="firehose_set_options('tabsection',firehose_settings.section); return false">Stories</a>[% END %]
+<noscript><form action="/firehose.pl" method="post"><input type="hidden" name="tabtype" value="tabsection"></noscript>
+[% fh.createSectionSelect(section) %]
+<noscript><input type="submit" name="change" value="change"></form></noscript>
+</li>
+	 	<li id="fhtab-recent" [% IF options.sel_tabtype == "tabrecent" %]class="active"[% END %]><a href="/firehose.pl?tabtype=tabrecent" onclick="firehose_set_options('tabtype','tabrecent'); return false">Recent</a></li>
+	 	<li id="fhtab-popular" [% IF options.sel_tabtype == "tabpopular" %]class="active"[% END %]><a href="/firehose.pl?tabtype=tabpopular" onclick="firehose_set_options('tabtype','tabpopular'); return false">Popular</a></li>
 		[% IF !user.is_anon %]
-	 	<li id="fhtab-user" [% IF options.sel_tabtype == "tabuser" %]class="active"[% END %]><a href="?tabtype=tabuser" onclick="firehose_set_options('tabtype','tabuser'); return false">[% user.nickname | strip_literal %]</a></li>
+	 	<li id="fhtab-user" [% IF options.sel_tabtype == "tabuser" %]class="active"[% END %]><a href="/firehose.pl?tabtype=tabuser" onclick="firehose_set_options('tabtype','tabuser'); return false">[% user.nickname | strip_literal %]</a></li>
 		[% END %]
 	[% FOREACH tab = tabs %]
 		<li id="fhtab-[% tab.tabid %]"[% IF tab.active %] class="active"[% END %]>

@@ -24,6 +24,9 @@ __template__
 	IF form.index;
 		page_extras = page_extras _ "&amp;index=1";
 	END;
+	IF options.sel_tabtype;
+		page_extras = page_extras _ "&amp;tabtype=" _ options.sel_tabtype;
+	END;
 %]
 
 [% IF !contentsonly %]<span class="firehose_paginate" id="firehose_pages">[% END;
