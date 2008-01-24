@@ -89,6 +89,9 @@ sub displaySlashboxes {
 				'login'
 			);
 
+                } elsif ($bid eq 'index_jobs' && ($user->{is_anon} || !$constants->{use_default_slashboxes})) {
+                        # do nothing!
+                        
 		} elsif ($bid eq 'poll' && !$constants->{poll_cache}) {
 			# this is only executed if poll is to be dynamic
 			$return .= portalsidebox(
@@ -123,6 +126,9 @@ sub displaySlashboxes {
 				@{$data}{qw(title block bid url)},
 				$getblocks
 			);
+
+                } elsif ($bid eq 'srandblock_ostg' && !$constants->{use_default_slashboxes}) {
+                        # Don't add this Slashbox at all if the site has it toggled off
 
 		} else {
 			$boxcache->{$bid} ||= portalsidebox(
