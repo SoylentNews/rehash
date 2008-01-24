@@ -657,22 +657,12 @@ sub displayStories {
 				}
 
 				my @commentcount_link;
-				my $thresh = $threshComments[$user->{threshold} + 1];
-
-				if ($user->{threshold} > -1 && $story->{commentcount} ne $thresh) {
-					$commentcount_link[0] = linkStory({
-						sid		=> $story->{sid},
-						tid		=> $story->{tid},
-						threshold	=> $user->{threshold},
-						'link'		=> $thresh,
-						skin		=> $story->{primaryskid},
-					}, '', $ls_other);
-				}
+				my $thresh = $threshComments[1];  # threshold == 0
 
 				$commentcount_link[1] = linkStory({
 					sid		=> $story->{sid},
 					tid		=> $story->{tid},
-					threshold	=> -1,
+					threshold	=> 0,
 					'link'		=> $story->{commentcount} || 0,
 					skin		=> $story->{primaryskid}
 				}, '', $ls_other);
