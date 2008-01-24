@@ -229,6 +229,8 @@ __template__
 			<a href="[% env.script_name %]?op=previewbox&amp;bid=[% bid | strip_paramattr %]">
 			[% IF bid == 'srandblock' %]
 				Semi-Random Box
+                        [% ELSIF bid == 'srandblock_ostg' %]
+                                Semi-Random OSTG Content
 			[% ELSE %]
 				[% section_descref.$bid.title || bid %]
 			[% END %]
