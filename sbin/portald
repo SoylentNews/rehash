@@ -294,7 +294,7 @@ foreach (keys %savedBlocks) {
 }
 
 # from 'portald-site'
-newSemiRandomBlock($slashdb) if defined &newSemiRandomBlock;
+newSemiRandomOSTGBlock($slashdb) if defined &newSemiRandomOSTGBlock;
 
 portaldLog("Sucessfully Saved Portals");
 
