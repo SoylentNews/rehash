@@ -5086,21 +5086,32 @@ UPDATE vars SET value = 'T_2_5_0_188' WHERE name = 'cvs_tag_currentcode';
 
 ALTER TABLE accesslog CHANGE query_string query_string VARCHAR(254) DEFAULT NULL;
 
-# For portald and the Hot Comments slashbox.
-UPDATE vars SET name = 'topcomm_num', value = 5, description = 'Number of comments wanted for the Hot Comments slashbox. Defaults to 5.' WHERE name = 'top10comm_num';
-UPDATE vars SET name = 'topcomm_days', description = 'Look back (n) days to display the Hot Comments slashbox' WHERE name = 'top10comm_days';
-UPDATE blocks SET bid = 'topcomments', title = 'Hot Comments' WHERE bid = 'top10comments';
-
 # for plugins/Tags
 INSERT INTO vars (name, value, description) VALUES ('tags_active_mincare', '5', 'Minimum color slice number to "care" about tags for the Slashdot Recent Tags box (only matters if FireHose installed and if you are Slashdot)');
 
-# 2007-01-09
+# 2008-01-09
 UPDATE vars SET value = 'T_2_5_0_189' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
 
-# 2007-01-21
+# 2008-01-21
 UPDATE vars SET value = 'T_2_5_0_190' WHERE name = 'cvs_tag_currentcode';
 
+# 2008-01-24
+# For plugins/Slashboxes
+UPDATE vars SET name = 'topcomm_num', value = 5, description = 'Number of comments wanted for the Hot Comments slashbox. Defaults to 5.' WHERE name = 'top10comm_num';
+UPDATE vars SET name = 'topcomm_days', description = 'Look back (n) days to display the Hot Comments slashbox' WHERE name = 'top10comm_days';
+UPDATE blocks SET bid = 'topcomments', title = 'Hot Comments' WHERE bid = 'top10comments';
+INSERT INTO vars (name, value, description) VALUES ('lastsrandsec_ostg', 'linuxcom', 'Last Block used in the semi-random OSTG block');
+
+# set to '1' for Slashdot
+INSERT INTO vars (name, value, description) VALUES ('use_default_slashboxes', 0, 'Toggle to turn off certain blocks on a per-site basis');
+
+INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('srandblock_ostg', '', 100, 'portald','', 1, 5, 'Linux.com', 1, 'http://www.linux.com/', 'http://www.linux.com/feature?theme=rss', 0);
+UPDATE blocks SET ordernum = 3 WHERE bid = 'poll;
+UPDATE blocks SET ordernum = 6, portal = 1 WHERE bid = 'index_jobs';
+UPDATE blocks SET ordernum = 7 WHERE bid = 'index_qlinks';
+UPDATE blocks SET ordernum = 8 WHERE bid = 'mainpage_more';
+UPDATE blocks SET ordernum = -1 WHERE bid = 'freshmeat';
