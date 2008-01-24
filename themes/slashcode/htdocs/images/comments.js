@@ -377,6 +377,12 @@ function selectParent(cid, collapse) {
 	return false;
 }
 
+function vertBarClick (pid) {
+	comments_started = 1;
+	setCurrentComment(pid);
+	return selectParent(pid, 2);
+}
+
 function setShortSubject(cid, mode, cl) {
 	if (!cl)
 		cl = fetchEl('comment_link_' + cid);
@@ -1860,7 +1866,7 @@ function keyHandler(e, k) {
 	}
 }
 
-// at first comment, comment is not in window OR comment is not full
+// at first comment, and comment is not in window OR comment is not full
 function noSeeFirstComment (cid) {
 	setDefaultDisplayMode(cid);
 	if (!comments_started && (!commentIsInWindow(cid) || (viewmodevalue[displaymode[cid]] < viewmodevalue['full']))) {
