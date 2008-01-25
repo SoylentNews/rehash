@@ -645,32 +645,28 @@ sub displayStories {
 				$link = "$story->{word_count} $msg->{words}";
 			}
 	
-			if ($story->{body_length} || $story->{commentcount}) {
-				if (!$constants->{index_readmore_with_bytes}) {
-					push @links, linkStory({
-						'link'		=> $link,
-						sid		=> $story->{sid},
-						tid		=> $story->{tid},
-						mode		=> 'nocomment',
-						skin		=> $story->{primaryskid},
-					}, '', $ls_other) if $story->{body_length};
-				}
-
-				my @commentcount_link;
-				my $thresh = $threshComments[1];  # threshold == 0
-
-				$commentcount_link[1] = linkStory({
+			if (!$constants->{index_readmore_with_bytes}) {
+				push @links, linkStory({
+					'link'		=> $link,
 					sid		=> $story->{sid},
 					tid		=> $story->{tid},
-					threshold	=> 0,
-					'link'		=> $story->{commentcount} || 0,
-					skin		=> $story->{primaryskid}
-				}, '', $ls_other);
-
-				push @commentcount_link, $thresh, ($story->{commentcount} || 0);
-				push @links, getData('comments', { cc => \@commentcount_link })
-					if $story->{commentcount} || $thresh;
+					mode		=> 'nocomment',
+					skin		=> $story->{primaryskid},
+				}, '', $ls_other) if $story->{body_length};
 			}
+
+			my @commentcount_link;
+			my $thresh = $threshComments[1];  # threshold == 0
+
+			$commentcount_link[1] = linkStory({
+				sid		=> $story->{sid},
+				tid		=> $story->{tid},
+				'link'		=> $story->{commentcount} || 0,
+				skin		=> $story->{primaryskid}
+			}, '', $ls_other);
+
+			push @commentcount_link, $thresh, ($story->{commentcount} || 0);
+			push @links, getData('comments', { cc => \@commentcount_link });
 
 			if ($story->{primaryskid} != $constants->{mainpage_skid} && $gSkin->{skid} == $constants->{mainpage_skid}) {
 				my $skin = $reader->getSkin($story->{primaryskid});

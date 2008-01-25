@@ -5095,8 +5095,6 @@ UPDATE vars SET value = 'T_2_5_0_189' WHERE name = 'cvs_tag_currentcode';
 # 2008-01-21
 UPDATE vars SET value = 'T_2_5_0_190' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 # For plugins/Slashboxes
 UPDATE vars SET name = 'topcomm_num', value = 5, description = 'Number of comments wanted for the Hot Comments slashbox. Defaults to 5.' WHERE name = 'top10comm_num';
 UPDATE vars SET name = 'topcomm_days', description = 'Look back (n) days to display the Hot Comments slashbox' WHERE name = 'top10comm_days';
@@ -5117,4 +5115,6 @@ UPDATE blocks SET ordernum = -1 WHERE bid = 'freshmeat';
 UPDATE vars SET value = 'T_2_5_0_191' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
