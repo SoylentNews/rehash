@@ -1526,10 +1526,10 @@ sub setFireHose {
 
 	my $text_data = {};
 
-	$text_data->{title} = delete $data->{title} if defined $data->{title};
-	$text_data->{introtext} = delete $data->{introtext} if defined $data->{introtext};
-	$text_data->{bodytext} = delete $data->{bodytext} if defined $data->{bodytext};
-	$text_data->{media} = delete $data->{media} if defined $data->{media};
+	$text_data->{title} = delete $data->{title} if exists $data->{title};
+	$text_data->{introtext} = delete $data->{introtext} if exists $data->{introtext};
+	$text_data->{bodytext} = delete $data->{bodytext} if exists $data->{bodytext};
+	$text_data->{media} = delete $data->{media} if exists $data->{media};
 
 	$self->sqlUpdate('firehose', $data, "id=$id_q");
 	$self->sqlUpdate('firehose_text', $text_data, "id=$id_q") if keys %$text_data;
