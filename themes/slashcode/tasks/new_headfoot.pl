@@ -89,7 +89,7 @@ sub skinHeaders {
 		}
 
 		open my $fh, ">$file" or die "Can't open $file : $!";
-		my $footer = footer({ Return => 1 });
+		my $footer = footer({ Return => 1, Page=> $_->[0] });
 		print $fh $footer;
 		close $fh;
 	}
