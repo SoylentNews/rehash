@@ -400,10 +400,15 @@ $task{$me}{code} = sub {
 	if ($dirty_skins{$mp_skid} || $w ne "ok") {
 		my($base) = split(/\./, $gSkin->{index_handler});
 		$slashdb->setVar("writestatus", "ok");
+		my $extra_args = "";
+		if ($base eq "firehose") {
+			$extra_args = " anonval=$constants->{firehose_anonval_param}" if $constants->{firehose_anonval_param};
+		}
+
 		prog2file(
 			"$basedir/$gSkin->{index_handler}", 
 			"$basedir/$base.shtml", {
-				args =>		"$args section='$gSkin->{name}'",
+				args =>		"$args section='$gSkin->{name}'$extra_args",
 				verbosity =>	verbosity(),
 				handle_err =>	0
 		});
@@ -435,16 +440,23 @@ $task{$me}{code} = sub {
 			my($base) = split(/\./, $index_handler);
 			# XXXSKIN - more hardcoding (see Slash::Utility::Display)
 			my $skinname = $skin->{name} eq 'mainpage' ? 'articles' : $skin->{name};
+			my $extra_args = "";
+			if ($base eq "firehose") {
+				$extra_args = " anonval=$constants->{firehose_anonval_param}" if $constants->{firehose_anonval_param};
+			}
+
 			prog2file(
 				"$basedir/$index_handler", 
 				"$basedir/$skinname/$base.shtml", {
-					args =>		"$args section='$skin->{name}'",
+					args =>		"$args section='$skin->{name}'$extra_args",
 					verbosity =>	verbosity(),
 					handle_err =>	0
 			});
 			if ($constants->{plugin}{FireHose}) {
-				gen_firehose_static($virtual_user, "index_firehose.shtml", $skin->{name}, $skinname, { skipmenu => 1, skippop => 1, fhfilter => "'story $skin->{name}'", duration => "7", mode => 'fulltitle', mixedmode => '1', setfield => '1', color => "black", index => "1", nocolors => "1"  }); 
-				gen_firehose_static($virtual_user, "firehose.shtml", $skin->{name}, $skinname, { duration => "7", mode => 'fulltitle', mixedmode => '1', setfield => '1', color => "blue", nodates => '1', fhfilter => "'$skin->{name}'" }); 
+				gen_firehose_static($virtual_user, "index_firehose.shtml", $skin->{name}, $skinname, { skipmenu => 1, skippop => 1, fhfilter => "'story $skin->{name}'", duration => "7", mode => 'fulltitle', mixedmode => '1', setfield => '1', color => "black", index => "1", nocolors => "1"  });
+				if($base ne "firehose") { 
+					gen_firehose_static($virtual_user, "firehose.shtml", $skin->{name}, $skinname, { duration => "7", mode => 'fulltitle', mixedmode => '1', setfield => '1', color => "blue", nodates => '1', fhfilter => "'$skin->{name}'" }); 
+				}
 				gen_firehose_static($virtual_user, "embed_index.shtml", $gSkin->{name}, "", { embed => '1', smalldevices => '1', fhfilter => "'story $skin->{name}'", duration => "7", mode => 'fulltitle', setfield => '1', color => "black", index => "1", nodates => '1', nocolors => 1  }); 
 				gen_firehose_static($virtual_user, "embed_firehose.shtml", $skin->{name}, $skinname, { embed => '1', smalldevices => '1', duration => "7", mode => 'fulltitle', setfield => '1', color => "blue", nodates => '1', fhfilter => "'$skin->{name}'" }); 
 			}
