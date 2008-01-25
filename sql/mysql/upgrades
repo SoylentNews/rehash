@@ -5095,8 +5095,6 @@ UPDATE vars SET value = 'T_2_5_0_189' WHERE name = 'cvs_tag_currentcode';
 # 2008-01-21
 UPDATE vars SET value = 'T_2_5_0_190' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # For plugins/Slashboxes
@@ -5109,7 +5107,7 @@ INSERT INTO vars (name, value, description) VALUES ('lastsrandsec_ostg', 'linuxc
 INSERT INTO vars (name, value, description) VALUES ('use_default_slashboxes', 0, 'Toggle to turn off certain blocks on a per-site basis');
 
 INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('srandblock_ostg', '', 100, 'portald','', 1, 5, 'Linux.com', 1, 'http://www.linux.com/', 'http://www.linux.com/feature?theme=rss', 0);
-UPDATE blocks SET ordernum = 3 WHERE bid = 'poll;
+UPDATE blocks SET ordernum = 3 WHERE bid = 'poll';
 UPDATE blocks SET ordernum = 6, portal = 1 WHERE bid = 'index_jobs';
 UPDATE blocks SET ordernum = 7 WHERE bid = 'index_qlinks';
 UPDATE blocks SET ordernum = 8 WHERE bid = 'mainpage_more';
@@ -5117,3 +5115,6 @@ UPDATE blocks SET ordernum = -1 WHERE bid = 'freshmeat';
 
 # 2008-01-24
 UPDATE vars SET value = 'T_2_5_0_191' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
