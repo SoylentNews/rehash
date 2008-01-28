@@ -2519,6 +2519,7 @@ sub getOpAndDatFromStatusAndURI {
 	my($status, $uri, $dat) = @_;
 	$dat ||= "";
 
+	# XXX check regexSid()
 	my $page = qr|\d{2}/\d{2}/\d{2}/\d{4,7}|;
 
 	if ($status == 302) {
@@ -2605,6 +2606,7 @@ sub getOpAndDatFromStatusAndURI {
 	} elsif ($uri =~ m|^/([^/]*)/([^/]*/)+$|) {
 		$uri = $1;
 	}
+	$uri = 'image' if $uri eq 'images';
 	($uri, $dat);
 }
 

@@ -169,6 +169,7 @@ sub nick2matchname {
 
 #========================================================================
 # If you change createSid() for your site, change regexSid() too.
+# Check getOpAndDatFromStatusAndURI also.
 # If your site will have multiple formats of sids, you'll want this
 # to continue matching the old formats too.
 # NOTE: sid is also used for discussion ID (and maybe stoid too?),
