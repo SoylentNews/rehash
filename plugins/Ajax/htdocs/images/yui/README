@@ -1,0 +1,9 @@
+This directory holds a subset of the files from the YAHOO User Interface toolkit (YUI).
+See <http://developer.yahoo.com/yui/>.  We are currently using version 2.4.1.
+
+The calendar.css file is the non-skin top level version from that release.  It is a super-set
+of calendar-core.css.  That file is not needed.
+
+Except for autocomplete.js, these files are straight from the release.  We have patched
+autocomplete.js to also understand "POST".  Be sure to diff and re-apply if you update to
+a later version of YUI.

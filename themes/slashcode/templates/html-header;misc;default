@@ -38,6 +38,7 @@ __template__
 <script src="[% constants.imagedir %]/yui/slider.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% END -%]
 <script src="[% constants.imagedir %]/yui/connection.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/datasource-beta.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/calendar.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/sd_autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>

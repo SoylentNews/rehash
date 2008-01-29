@@ -21,6 +21,7 @@ htdoc=htdocs/images/yui/animation.js
 htdoc=htdocs/images/yui/autocomplete.js
 htdoc=htdocs/images/yui/calendar.js
 htdoc=htdocs/images/yui/slider.js
+htdoc=htdocs/images/yui/datasource-beta.js
 htdoc=htdocs/images/sd_autocomplete.js
 htdoc=htdocs/images/sd_calendar.js
 htdoc=htdocs/images/slashbox.js
