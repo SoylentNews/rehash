@@ -218,7 +218,7 @@ sub run {
 	}
 
 	# If this is spam, its score goes way down.
-	if ($fhitem->{is_spam} eq 'yes') {
+	if ($fhitem->{is_spam} eq 'yes' || $firehose_db->itemHasSpamURL($fhitem)) {
 		my $max = defined($constants->{firehose_spam_score})
 			? $constants->{firehose_spam_score}
 			: -50;
