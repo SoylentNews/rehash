@@ -1558,7 +1558,8 @@ sub dispFireHose {
 		options			=> $options->{options},
 		vote			=> $options->{vote},
 		bodycontent_include	=> $options->{bodycontent_include},
-		nostorylinkwrapper	=> $options->{nostorylinkwrapper}
+		nostorylinkwrapper	=> $options->{nostorylinkwrapper},
+		view_mode		=> $options->{view_mode}
 	}, { Page => "firehose",  Return => 1 });
 }
 

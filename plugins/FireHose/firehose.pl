@@ -112,6 +112,7 @@ sub view {
 
 		my $firehosetext = $firehose_reader->dispFireHose($item, {
 			mode			=> 'full',
+			view_mode		=> 1,
 			tags_top		=> $tags_top,
 			options			=> $options,
 			nostorylinkwrapper	=> $discussion ? 1 : 0,

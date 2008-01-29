@@ -90,10 +90,6 @@ END %]
 			   PROCESS formatHoseIntro; 
 			END %]
 			[% introtext %]
-			[% IF item.media %]
-			<div class="media">
-			[% item.media %]
-			</div>
 			[% END %]
 		</div>
 	[% IF bodywrapper %]

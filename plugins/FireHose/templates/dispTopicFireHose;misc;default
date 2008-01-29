@@ -18,6 +18,7 @@ __template__
 	[% file = Slash.db.getStaticFile(item.thumb); %]
 	[% link_url = "";
 	   IF item.type == "story";
+		story = Slash.db.getStory(item.srcid); 
  		story_link_ar = Slash.linkStory ({
 		 	sid	=> story.sid,
 			link	=> story.title,
