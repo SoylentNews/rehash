@@ -685,6 +685,7 @@ function firehose_remove_tab(tabid) {
 	params['op'] = 'firehose_remove_tab';
 	params['tabid'] = tabid;
 	params['reskey'] = reskey_static;
+	params['section'] = firehose_settings.section;
 	ajax_update(params, '', handlers);
 
 }
@@ -1252,25 +1253,28 @@ function firehose_calendar_init( widget ) {
 }
 
 function firehose_slider_init() {
+	if (!fh_slider_init_set) {
 	fh_colorslider = YAHOO.widget.Slider.getHorizSlider("colorsliderbg", "colorsliderthumb", 0, 105, fh_ticksize);
-	fh_colorslider.setValue(fh_ticksize * fh_colors_hash[fh_color] , 1);
+	var fh_set_val_return = fh_colorslider.setValue(fh_ticksize * fh_colors_hash[fh_color] , 1);
+	var fh_get_val_return = fh_colorslider.getValue();
 	fh_colorslider.subscribe("slideEnd", firehose_slider_end);
+	}
 }	
-
-function firehose_slider_set_color(color) {
-	if (!check_logged_in()) return;
-
-	fh_colorslider.setValue(fh_ticksize * fh_colors_hash[color] , 1);
-}
 
 function firehose_slider_end(offsetFromStart) {
 	var newVal = fh_colorslider.getValue();
+	if (newVal) {
+		fh_slider_init_set = 1;
+	}
 	var color = fh_colors[ newVal / fh_ticksize ];
 	$('fh_slider_img').title = "Firehose filtered to " + color;
 	if (fh_slider_init_set) {
 		firehose_set_options("color", color)
 	}
-	fh_slider_init_set = 1;
+}
+
+function firehose_change_section_anon(section) {
+	window.location.href= window.location.protocol + "//" + window.location.host + "/firehose.pl?section=" + encodeURIComponent(section) + "&tabtype=tabsection";
 }
 
 function pausePopVendorStory(id) {
@@ -1354,6 +1358,7 @@ function firehose_save_tab(id) {
 	};
 	params['op'] = 'firehose_save_tab';
 	params['tabname'] = ti.value;
+	params['section'] = firehose_settings.section;
 
 	params['tabid'] = id;
 	ajax_update(params, '',  handlers);
