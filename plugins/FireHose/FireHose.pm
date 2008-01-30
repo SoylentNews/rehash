@@ -978,7 +978,7 @@ sub ajaxRemoveUserTab {
 	my $firehose = getObject("Slash::FireHose");
 	my $opts = $firehose->getAndSetOptions();
 	my $html = {};
-	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts }, { Return => 1});
+	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts, section => $form->{section} }, { Return => 1});
 
 	return Data::JavaScript::Anon->anon_dump({
 		html	=> $html
@@ -991,7 +991,7 @@ sub ajaxFireHoseSetOptions {
 	my $firehose = getObject("Slash::FireHose");
 	my $opts = $firehose->getAndSetOptions();
 	my $html = {};
-	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts, section => $form->{section} }, { Return => 1});
+	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts, section => $form->{section}  }, { Return => 1});
 	$html->{fhoptions} = slashDisplay("firehose_options", { nowrapper => 1, options => $opts }, { Return => 1});
 	$html->{fhadvprefpane} = slashDisplay("fhadvprefpane", { options => $opts }, { Return => 1});
 
@@ -1060,7 +1060,7 @@ sub ajaxSaveFirehoseTab {
 
 	my $opts = $firehose->getAndSetOptions();
 	my $html = {};
-	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts }, { Return => 1});
+	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts, section => $form->{section} }, { Return => 1});
 	$html->{message_area} = $message;
 	return Data::JavaScript::Anon->anon_dump({
 		html	=> $html
@@ -1745,7 +1745,7 @@ sub getAndSetOptions {
 		}
 	}
 
-	my $the_skin = $self->getSkin($form->{section});
+	my $the_skin = $form->{section} ? $self->getSkin($form->{section}) : $gSkin;
 
 
 	if ($tabtype eq 'tabsection') {
@@ -1757,7 +1757,7 @@ sub getAndSetOptions {
 		$form->{fhfilter} = "-story";
 		$options->{orderby} = "createtime";
 		$options->{orderdir} = "DESC";
-		$options->{color} = "blue";
+		$options->{color} = "indigo";
 	} elsif ($tabtype eq 'tabpopular') {
 		$form->{fhfilter} = "-story";
 		$options->{orderby} = "popularity";
@@ -1804,7 +1804,7 @@ sub getAndSetOptions {
 	my $system_tabs = [ 
 		{ tabtype => 'tabsection', color => 'black', filter => $skin_prefix . "story"},
 		{ tabtype => 'tabpopular', color => 'black', filter => "$skin_prefix\-story"},
-		{ tabtype => 'tabrecent',  color => 'blue',  filter => "$skin_prefix\-story"},
+		{ tabtype => 'tabrecent',  color => 'indigo',  filter => "$skin_prefix\-story"},
 	];
 
 	if (!$user->{is_anon}) {
@@ -1943,7 +1943,6 @@ sub getAndSetOptions {
 			$fhfilter .= " $gSkin->{name}";
 		}
 	}
-
 	my $fh_ops = $self->splitOpsFromString($fhfilter);
 	
 
@@ -2101,7 +2100,6 @@ sub getAndSetOptions {
 		$options->{not_id} = $form->{not_id};
 	}
 
-
 	return $options;
 }
 
@@ -2218,7 +2216,8 @@ sub listView {
 			$featured = $firehose_reader->getFireHose($res->[0]->{id});
 		}
 	}
-	my $initial = ($form->{tab} || $form->{tabtype} || $form->{fhfilter} || $form->{page}) ? 0 : 1;
+	my $initial = ($form->{tab} || $form->{tabtype} || $form->{fhfilter} || defined $form->{page} || $lv_opts->{fh_page} eq "console.pl" ) ? 0 : 1;
+
 	my $options = $lv_opts->{options} || $self->getAndSetOptions({ initial => $initial });
 	my $base_page = $lv_opts->{fh_page} || "firehose.pl";
 
@@ -2510,9 +2509,10 @@ sub getNextItemsForThumbnails {
 
 sub createSectionSelect {
 	my($self, $default) = @_;
-	my $skins = $self->getSkins();
-	my $constants = getCurrentStatic();
-	my $ordered = [];
+	my $skins 	= $self->getSkins();
+	my $constants 	= getCurrentStatic();
+	my $user = 	getCurrentUser();
+	my $ordered 	= [];
 	my $menu;
 
 	foreach my $skid (keys %$skins) {
@@ -2522,9 +2522,12 @@ sub createSectionSelect {
 			$menu->{$skid} = $skins->{$skid}{title};
 		}
 	}
+	my $onchange = $user->{is_anon} 
+		? "firehose_change_section_anon(this.options[this.selectedIndex].value)" 
+		: "firehose_set_options('tabsection', this.options[this.selectedIndex].value)";
 
 	@$ordered = sort {$a == 0 ? -1 : $b == 0 ? 1 : 0 || $menu->{$a} cmp $menu->{$b} } keys %$menu;
-	return createSelect("section", $menu, { default => $default, return => 1, nsort => 0, ordered => $ordered, multiple => 0, onchange =>"firehose_set_options('tabsection', this.options[this.selectedIndex].value)"});
+	return createSelect("section", $menu, { default => $default, return => 1, nsort => 0, ordered => $ordered, multiple => 0, onchange => $onchange });
 
 	
 }
