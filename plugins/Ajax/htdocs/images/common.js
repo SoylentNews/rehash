@@ -504,7 +504,7 @@ function firehose_set_options(name, value) {
 		["orderdir", 	"ASC", 		"asc",		"desc",		"DESC"],
 		["orderdir", 	"DESC", 	"desc",		"asc",		"ASC"],
 		["mode", 	"full", 	"abbrev",	"full",		"fulltitle"],
-		["mode", 	"fulltitle", 	"full",		"abbrev",	"full"],
+		["mode", 	"fulltitle", 	"full",		"abbrev",	"full"]
 	];
 	var params = [];
 	params['op'] = 'firehose_set_options';
