@@ -218,6 +218,7 @@ sub run {
 	}
 
 	# If this is spam, its score goes way down.
+	my $firehose_db = getObject('Slash::FireHose');
 	if ($fhitem->{is_spam} eq 'yes' || $firehose_db->itemHasSpamURL($fhitem)) {
 		my $max = defined($constants->{firehose_spam_score})
 			? $constants->{firehose_spam_score}
@@ -226,7 +227,6 @@ sub run {
 	}
 
 	# Set the corresponding firehose row to have this popularity.
-	my $firehose_db = getObject('Slash::FireHose');
 	warn "Slash::Tagbox::FHEditorPop->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
 	if ($options->{return_only}) {
 		return $popularity;
