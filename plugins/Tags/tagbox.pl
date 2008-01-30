@@ -195,7 +195,7 @@ main::tagboxLog("update_feederlog name=$tagbox->{name} tbid=$tagbox->{tbid} objt
 				$feeder_ar = undef;
 				$feeder_ar = $tagbox->{object}->feed_newtags($tags_this_tagbox_ar);
 				# XXX optimize by consolidating here: sum importances, max tagids
-main::tagboxLog("update_feederlog name=$tagbox->{name} inserting " . ($feeder_ar ? scalar(@$feeder_ar) : 'none'));
+main::tagboxLog("update_feederlog name=$tagbox->{name} inserting " . ($feeder_ar ? scalar(@$feeder_ar) : 'none') . ' based on ' . scalar(@$tags_this_tagbox_ar) . ' tags');
 				insert_feederlog($tagbox, $feeder_ar) if $feeder_ar;
 				# XXX The previous insert and this update should be wrapped
 				# in a transaction.
