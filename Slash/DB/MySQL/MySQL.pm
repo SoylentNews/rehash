@@ -6701,9 +6701,9 @@ sub _stories_time_clauses {
 # options is that any change to any story necessitates invalidating all
 # memcached data that might now or might previously have referenced
 # that story.  There is no way to delete all memcached keys that match
-# a regex or prefix (and this is by design:  it will never have this
+# a regex or prefix (and this is by design:  it may never have this
 # capability), so by keeping only 1-2 keys for each tid, instead of
-# keeping a key for every possibly option, we make that deletion
+# keeping a key for every possible option, we make that deletion
 # tractable and even easy.
 #
 # There are only two elements to a memcached gSE key:  the tid of the
