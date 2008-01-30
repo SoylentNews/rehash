@@ -5121,3 +5121,6 @@ UPDATE vars SET value = 'T_2_5_0_191' WHERE name = 'cvs_tag_currentcode';
 # for plugins/Admin
 INSERT INTO vars (name, value, description) VALUES ('topics_sectional_weight', '10', 'Minimum weight for sectional stories');
 
+# For plugins/Stats
+ALTER TABLE stats_daily MODIFY name varchar(48) NOT NULL DEFAULT '';
+

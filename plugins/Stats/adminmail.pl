@@ -827,8 +827,8 @@ EOT
 		$statsSave->createStatDaily("badgehost_$host", $count);
 	}
 
-	$data{bookmarks_anon} = $logdb->getNumBookmarks({ anon_only => 1 });
-	$statsSave->createStatDaily("bookmarks_anon", $data{bookmarks_anon});
+	$data{bookmarks} = $stats->getNumBookmarks();
+	$statsSave->createStatDaily("bookmarks", $data{bookmarks});
 
 	my $new_users_yest = $slashdb->getNumNewUsersSinceDaysback(1)
 		- $slashdb->getNumNewUsersSinceDaysback(0);
