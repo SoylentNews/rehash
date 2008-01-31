@@ -1376,15 +1376,28 @@ sub convert_tokens_to_points {
 	# update all at once on just one table and since we're using
 	# + and - instead of using absolute values. - Jamie 2002/08/08
 
+	my($num_high, $sum_high, @high_uids) = (0, 0);
 	for my $uid (@$uids) {
 		next unless $uid;
+		my $user = $self->getUser($uid);
+		my @clouts = grep { $_ } values %{ $user->{clout} };
+		my $high_clout = $constants->{m1_pointgrant_highclout} || 4;
+		my $high_clout_count = scalar grep { $_ > $high_clout } @clouts;
+		if ($high_clout_count > 0) {
+			$num_high++;
+			$sum_high += $high_clout_count;
+			push @high_uids, $uid;
+		}
+		my $this_pointgain = $pointtrade * (1 + $high_clout_count);
+		my $this_maxpoints = $maxpoints  * (1 + $high_clout_count);
 		my $rows = $self->setUser($uid, {
 			-lastgranted    => 'NOW()',
 			-tokens         => "GREATEST(0, tokens - $tokentrade)",
-			-points         => "LEAST(points + $pointtrade, $maxpoints)",
+			-points         => "LEAST(points + $this_pointgain, $this_maxpoints)",
 		});
 		$granted{$uid} = 1 if $rows;
 	}
+	main::slashdLog("convert_tokens_to_points num_high=$num_high sum_high=$sum_high high_uids='@high_uids'");
 
 	# We used to do some fancy footwork with a cursor and locking
 	# tables.  The only difference between that code and this is that
