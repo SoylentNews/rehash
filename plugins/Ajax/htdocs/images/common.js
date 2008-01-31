@@ -1254,10 +1254,10 @@ function firehose_calendar_init( widget ) {
 
 function firehose_slider_init() {
 	if (!fh_slider_init_set) {
-	fh_colorslider = YAHOO.widget.Slider.getHorizSlider("colorsliderbg", "colorsliderthumb", 0, 105, fh_ticksize);
-	var fh_set_val_return = fh_colorslider.setValue(fh_ticksize * fh_colors_hash[fh_color] , 1);
-	var fh_get_val_return = fh_colorslider.getValue();
-	fh_colorslider.subscribe("slideEnd", firehose_slider_end);
+		fh_colorslider = YAHOO.widget.Slider.getHorizSlider("colorsliderbg", "colorsliderthumb", 0, 105, fh_ticksize);
+		var fh_set_val_return = fh_colorslider.setValue(fh_ticksize * fh_colors_hash[fh_color] , 1);
+		var fh_get_val_return = fh_colorslider.getValue();
+		fh_colorslider.subscribe("slideEnd", firehose_slider_end);
 	}
 }	
 
@@ -1494,7 +1494,7 @@ function getModalPrefs(section, title, tabbed) {
 }
 
 function firehose_get_media_popup(id) {
-	if($('preference_title')) {
+	if ($('preference_title')) {
 		$('preference_title').innerHTML = "Media";
 	}
 	var params = [];

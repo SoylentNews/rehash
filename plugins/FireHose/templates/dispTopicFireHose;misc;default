@@ -38,3 +38,5 @@ __template__
 	<img src="[% constants.imagedir %]/topics/[% topic.image %]" width="[% topic.width %]" height="[% topic.height %]" alt="[% topic.textname %]" title="[% topic.textname %]" >
 	</a>
 [% END %]
+__version__
+$Id$
