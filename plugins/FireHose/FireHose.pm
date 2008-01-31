@@ -1643,8 +1643,8 @@ sub getAndSetOptions {
 	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1, misc => 1 }; 
 	my $tabtypes = { tabsection => 1, tabpopular => 1, tabrecent => 1, tabuser => 1};
 	
-	my $tabtype = $tabtypes->{$form->{tabtype}} ? $form->{tabtype} : '';
-
+	my $tabtype = '';
+	$tabtype = $form->{tabtype} if $form->{tabtype} && $tabtypes->{ $form->{tabtype} };
 
 	my $modes = { full => 1, fulltitle => 1 };
 	my $pagesizes = { "small" => 1, "large" => 1 };
