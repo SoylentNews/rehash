@@ -24,7 +24,11 @@ __template__
                 &nbsp;|&nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('home', 'Homepage', 1); return false;">Homepage</a>
                 &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('slashboxes', 'Slashboxes', 1); return false;">Slashboxes</a>
+                &nbsp;|&nbsp;
                 <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Sections</span>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('authors', 'Authors', 1); return false;">Authors</a>
                 &nbsp;|&nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('messages', 'Messages', 1); return false;">Messages</a>
                 </div>
