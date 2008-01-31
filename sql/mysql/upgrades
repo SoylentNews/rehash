@@ -5126,3 +5126,7 @@ ALTER TABLE stats_daily MODIFY name varchar(48) NOT NULL DEFAULT '';
 
 # For plugins/FireHose
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_media', 'Slash::FireHose', 'ajaxFetchMedia', 'ajax_base', 'createuse');
+
+# 2008-01-31
+UPDATE vars SET value = 'T_2_5_0_192' WHERE name = 'cvs_tag_currentcode';
+
