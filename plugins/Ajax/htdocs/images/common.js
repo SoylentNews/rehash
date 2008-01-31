@@ -1493,6 +1493,17 @@ function getModalPrefs(section, title, tabbed) {
 	return;
 }
 
+function firehose_get_media_popup(id) {
+	if($('preference_title')) {
+		$('preference_title').innerHTML = "Media";
+	}
+	var params = [];
+	params['op'] = 'firehose_get_media';
+	params['id'] = id;
+	var handlers = {onComplete:show_modal_box};
+	ajax_update(params, 'modal_box_content', handlers);
+}
+
 function saveModalPrefs() {
 	var params = [];
 	params['op'] = 'saveModalPrefs';
