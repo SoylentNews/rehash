@@ -846,6 +846,17 @@ sub getPrimaryFireHoseItemByUrl {
 	return $ret_val;
 }
 
+sub ajaxFetchMedia {
+	my $form = getCurrentForm();
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	my $firehose = getObject("Slash::FireHose");
+	my $id = $form->{id};
+	return unless $id && $firehose;
+	my $item = $firehose->getFireHose($id);
+	return $item->{media};
+}
+
 sub fetchItemText {
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
