@@ -1,0 +1,92 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+prefs_slashboxes
+__template__
+
+<form id ="modal_prefs" method="post">
+
+<input type="hidden" name="formname" value="slashboxes">
+<input type="hidden" name="uid" value="[% user.uid %]">
+<input type="hidden" name="refreshable" value="">
+
+                [% IF tabbed == 1 %]
+                <div style="text-align: center;">
+                &nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('user', 'User', 1); return false;">User</a>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('home', 'Homepage', 1); return false;">Homepage</a>
+                &nbsp;|&nbsp;
+                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Slashboxes</span>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('sectional', 'Sectional Display', 1); return false;">Sections</a>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('authors', 'Authors', 1); return false;">Authors</a>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('messages', 'Messages', 1); return false;">Messages</a>
+                </div>
+                [% END %]
+
+                <br>
+
+                You can choose at most [% constants.slashboxes_maxnum %] boxes. If you find a problem, or have a reasonable suggestion for new RSS feeds, please contact
+                <a href="mailto:[% constants.adminmail | strip_attribute %]">[% constants.siteadmin_name %]</a>.
+
+                <br><br>
+                
+                <input type="checkbox" name="useslashboxes"[% IF !user.noboxes %] checked[% END %]><strong>Use Slashboxes</strong>
+
+                <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                [% FOREACH bid = box_order %]
+                        [% IF loop.index % 3 == 0 %]
+                                <tr valign="top" align="left">
+                        [% END %]
+                                <td>
+                                <input type="checkbox" name="showbox_[% bid | strip_attribute %]"[% section_descref.$bid.checked %]>
+                                <a href="/users.pl?op=previewbox&amp;bid=[% bid | strip_paramattr %]">
+                                [% IF bid == 'srandblock' %]
+                                        Semi-Random Box
+                                [% ELSIF bid == 'srandblock_ostg' %]
+                                        Semi-Random OSTG Content
+                                [% ELSE %]
+                                        [% section_descref.$bid.title || bid %]
+                                [% END %]
+                                </a>
+                                </td>
+                        [% IF loop.index % 3 == 2 %]
+                                </tr>
+                        [% END %]
+                [% END %]
+                [% remaining_cells = 2 - (box_order.max % 3);
+                WHILE remaining_cells;
+                        remaining_cells = remaining_cells - 1; -%]
+                        <td>&nbsp;</td>
+                [% END %]
+                </tr>
+        </table>
+
+        <br>
+
+        <table width="100%" bgcolor="[% user.colors.bg_2 %]" border="0">
+        <tr>
+        <td>
+                If you choose '<b>User Space</b>' above, the contents of this box will be inside:<br>
+                <textarea name="mylinks" rows=8 cols="40" wrap="VIRTUAL">[% userspace | strip_literal %]</textarea>
+        </td>
+        </tr>
+        </table>
+
+        <input type="button" value="Save" onclick="saveModalPrefs()">
+
+</form>
+__seclev__
+500
+__version__
+$Id$
