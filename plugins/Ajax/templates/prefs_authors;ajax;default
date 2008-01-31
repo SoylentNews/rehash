@@ -1,0 +1,72 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+prefs_authors
+__template__
+
+<form id ="modal_prefs" method="post">
+
+<input type="hidden" name="formname" value="authors">
+<input type="hidden" name="uid" value="[% user.uid %]">
+<input type="hidden" name="refreshable" value="">
+
+                [% IF tabbed == 1 %]
+                <div style="text-align: center;">
+                &nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('user', 'User', 1); return false;">User</a>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('home', 'Homepage', 1); return false;">Homepage</a>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('slashboxes', 'Slashboxes', 1); return false;">Slashboxes</a>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('sectional', 'Sectional Display', 1); return false;">Sections</a>
+                &nbsp;|&nbsp;
+                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Authors</span>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('messages', 'Messages', 1); return false;">Messages</a>
+                </div>
+                [% END %]
+
+                <br>
+
+                Uncheck any author name to exclude their stories from your [% constants.sitename %] homepage.
+
+                <br><br>                
+
+                <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                [% FOR aid = aid_order %]
+                        [% IF loop.index % 3 == 0 %]
+                                <tr>
+                        [% END %]
+                        <td>
+                        <input type="checkbox" name="aid[% aid %]"
+                        [% IF story_never_author.$aid > 0 %] checked[%END %]>
+                        [% author_hr.$aid | strip_literal %]
+                        </td>
+                        [% IF loop.index % 3 == 2 %]
+                                </tr>
+                        [% END %]        
+                [% END %]
+                [% remaining_cells = 2 - (box_order.max % 3);
+                WHILE remaining_cells;
+                        remaining_cells = remaining_cells - 1; %]
+                        <td>&nbsp;</td>
+                [% END %]
+                </tr>
+                </table>
+
+                <br>
+
+                <input type="button" value="Save" onclick="saveModalPrefs()">
+</form>
+__seclev__
+500
+__version__
+$Id$
