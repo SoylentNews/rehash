@@ -5124,3 +5124,5 @@ INSERT INTO vars (name, value, description) VALUES ('topics_sectional_weight', '
 # For plugins/Stats
 ALTER TABLE stats_daily MODIFY name varchar(48) NOT NULL DEFAULT '';
 
+# For plugins/FireHose
+INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_media', 'Slash::FireHose', 'ajaxFetchMedia', 'ajax_base', 'createuse');
