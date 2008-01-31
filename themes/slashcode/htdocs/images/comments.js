@@ -48,6 +48,7 @@ var alt_down = 0;
 var ctrl_down = 0;
 var meta_down = 0;
 var d2_seen = '';
+var low_bandwidth = 0;
 
 var adTimerSecs;
 var adTimerClicks;
@@ -1243,9 +1244,14 @@ function toggleDisplayOptions() {
 	} else if ( d2out.className == 'horizontal' ) { // horizontal->rooted
 		newMode = 'rooted';
 		d2out.className = 'horizontal rooted';
-	} else { // (rooted, none)->vertical
-		newMode = d2out.className = 'vertical';
-		gCommentControlWidget.setOrientation('Y');
+	} else {
+		if (!low_bandwidth) { // (rooted, none)->vertical
+			newMode = d2out.className = 'vertical';
+			gCommentControlWidget.setOrientation('Y');
+		} else { // vertical not happy in low-bandwidth
+			newMode = d2out.className = 'horizontal';
+			gCommentControlWidget.setOrientation('X');
+		}
 	}
 
 	d2act();
@@ -1988,4 +1994,3 @@ function dummyComment(cid) {
 
 	return(html.replace(/\-\-CID\-\-/g, cid));
 }
-

@@ -1570,7 +1570,7 @@ sub setDiscussion2 {
 	my($form, $slashdb, $user, $constants, $gSkin) = @_;
 	return if $user->{is_anon};
 	$slashdb->setUser($user->{uid}, {
-		discussion2 => $form->{discussion2_slashdot} ? 'slashdot' : ''
+		discussion2 => $form->{discussion2_slashdot} ? 'slashdot' : 'none'
 	});
 
 	my $referrer = $ENV{HTTP_REFERER};
