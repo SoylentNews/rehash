@@ -64,14 +64,16 @@ $task{$me}{code} = sub {
 
 	my $min_tag_hour_ut = $slashdb->sqlSelect(
 		'FLOOR(UNIX_TIMESTAMP(MIN(created_at))/3600)*3600', 'tags');
-	my $min_pop_hour_ut = $slashdb->sqlSelect(
-		'FLOOR(UNIX_TIMESTAMP(MIN(hourtime  ))/3600)*3600', 'tags_udc');
-	my $hour_ut = $min_pop_hour_ut - 3600;
-	while ($hour_ut >= $min_tag_hour_ut && time() < $start_time + $max_run_time && !$task_exit_flag) {
-		populate_tags_udc($hour_ut);
-		$hour_ut -= 3600;
-		Time::HiRes::sleep(0.1);
-		++$updated;
+	if (defined $min_tag_hour_ut) {
+		my $min_pop_hour_ut = $slashdb->sqlSelect(
+			'FLOOR(UNIX_TIMESTAMP(MIN(hourtime  ))/3600)*3600', 'tags_udc');
+		my $hour_ut = $min_pop_hour_ut - 3600;
+		while ($hour_ut >= $min_tag_hour_ut && time() < $start_time + $max_run_time && !$task_exit_flag) {
+			populate_tags_udc($hour_ut);
+			$hour_ut -= 3600;
+			Time::HiRes::sleep(0.1);
+			++$updated;
+		}
 	}
 
 	sleep 5;
