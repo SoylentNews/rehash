@@ -41,3 +41,5 @@ template=templates/modal_footer;misc;default
 template=templates/prefs_user;ajax;default
 template=templates/prefs_sectional;ajax;default
 template=templates/prefs_home;ajax;default
+template=templates/prefs_slashboxes;ajax;default
+template=templates/prefs_authors;ajax;default
