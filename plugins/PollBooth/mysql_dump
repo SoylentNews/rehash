@@ -2,7 +2,7 @@
 # $Id$
 #
 
-INSERT INTO discussion_kinds (dkid, name) VALUES (NULL, 'poll');
+INSERT IGNORE INTO discussion_kinds (dkid, name) VALUES (NULL, 'poll');
 
 INSERT INTO hooks (param, class, subroutine) VALUES ('admin_save_story_success','Slash::PollBooth','createAutoPollFromStory');
 

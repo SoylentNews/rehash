@@ -6,8 +6,8 @@
 #INSERT INTO people (uid, person, type) VALUES (1,2,"friend");
 #INSERT INTO people (uid, person, type) VALUES (2,2,"friend");
 
-INSERT INTO discussion_kinds (dkid, name) VALUES (NULL, 'journal');
-INSERT INTO discussion_kinds (dkid, name) VALUES (NULL, 'journal-story');
+INSERT IGNORE INTO discussion_kinds (dkid, name) VALUES (NULL, 'journal');
+INSERT IGNORE INTO discussion_kinds (dkid, name) VALUES (NULL, 'journal-story');
 
 INSERT INTO journal_themes (name) VALUES ('generic');
 INSERT INTO journal_themes (name) VALUES ('greypage');
