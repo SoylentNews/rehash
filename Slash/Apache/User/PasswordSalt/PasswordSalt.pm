@@ -69,15 +69,16 @@ sub loadSalts {
 	close $fh;
 }
 
-sub getSalts {
+sub getPwSalts {
 	my($virtual_user) = @_;
+	return [ ] if !$virtual_user;
 	loadSalts();
 	return $salt_hr->{$virtual_user} || [ ];
 }
 
-sub getCurrentSalt {
+sub getCurrentPwSalt {
 	my($virtual_user) = @_;
-	my $salt_ar = getSalts($virtual_user);
+	my $salt_ar = getPwSalts($virtual_user);
 	return @$salt_ar ? $salt_ar->[-1] : '';
 }
 

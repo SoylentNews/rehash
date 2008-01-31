@@ -805,7 +805,7 @@ sub encryptPassword {
 	my($passwd) = @_;
 	my $slashdb = getCurrentDB();
 	my $vu = $slashdb->{virtual_user};
-	my $salt = Slash::Apache::User::PasswordSalt::getCurrentSalt($vu);
+	my $salt = Slash::Apache::User::PasswordSalt::getCurrentPwSalt($vu);
 	return md5_hex("$salt$passwd");
 }
 
@@ -2046,7 +2046,7 @@ sub approveTag {
 		for my $a (@attr_order) {
 			my $a_lc = lc $a;
 			next unless $allowed{$a_lc};
-			my $data = $attr_data{$a_lc};
+			my $data = $attr_data{$a_lc} || '';
 			$data = fudgeurl($data) if $allowed{$a_lc}{url};
 			next unless length $data;
 			$wholetag .= qq{ $a_lc="$data"};
