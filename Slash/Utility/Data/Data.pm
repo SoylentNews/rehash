@@ -867,7 +867,7 @@ sub comparePassword {
 		return 1 if md5_hex($passwd) eq $md5;
 		my $slashdb = getCurrentDB();
 		my $vu = $slashdb->{virtual_user};
-		my $salt_ar = Slash::Apache::User::PasswordSalt::getSalts($vu);
+		my $salt_ar = Slash::Apache::User::PasswordSalt::getPwSalts($vu);
 		for my $salt (reverse @$salt_ar) {
 			return 1 if md5_hex("$salt$passwd") eq $md5;
 		}
