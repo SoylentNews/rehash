@@ -42,7 +42,7 @@ END %]
    commentcnt = 0;
    disc = Slash.db.getDiscussion(pollfull.discussion);
    IF disc;
-	   commentcnt = disc.commentcnt;
+	   commentcnt = disc.commentcount;
    END;
 %]
 [% PROCESS pollbooth question = poll.question answers = pollfull.answers qid = qid has_activated = has_activated poll_open = is_open voters = poll.voters comments = commentcnt %]
