@@ -47,6 +47,7 @@ __template__
 <script src="[% constants.imagedir %]/slashbox.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% END -%]
 <script src="[% constants.imagedir %]/common.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/nodnix.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% IF user.is_admin -%]
 <script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% END %]
