@@ -33,7 +33,9 @@ __template__
 		maxvotes = votes || "";
         END; 
 END %]
-[% percent %]% Voted '[% poll_option %]' for '<a href="[% gSkin.rootdir %]/pollBooth.pl?op=vote&amp;qid=[% qid %]&amp;aid=-1" onclick="$('pollplug_pb').style.display='block';return false;">[% poll.question %]</a>'
+<div id="pollplug">
+[% percent %]% Voted '[% poll_option %]' for '<a href="[% gSkin.rootdir %]/pollBooth.pl?op=vote&amp;qid=[% qid %]&amp;aid=-1" onclick="$('pollplug_pb').style.display='block'; $('pollplug').style.display='none'; return false;">[% poll.question %]</a>'
+</div>
 <div id="pollplug_pb" style="display:none">
 
 [% is_open = pb.isPollOpen(qid) 
