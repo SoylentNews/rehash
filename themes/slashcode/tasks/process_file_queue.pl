@@ -145,6 +145,12 @@ sub uploadFile {
 	my @files;
 
 	my $file = $cmd->{file};
+	if ($file =~ /\.(gif|jpg)$/i) {
+		my $filepng = $file;
+		$filepng =~s /\.(gif|jpg)$/\.png/;
+		system("/usr/bin/convert $file $filepng");
+		$file = $filepng;
+	}
 
 	if ($story->{sid}) {
 		my $destpath = getStoryFileDir($story->{sid});
