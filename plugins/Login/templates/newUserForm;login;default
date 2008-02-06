@@ -31,7 +31,7 @@ __template__
 				<label>
 					Nick Name
 				</label>
-				<input type="text" name="newusernick" value="">
+				<input type="text" name="newusernick" value="" maxlength="20">
 				<div class="note">
 					(Note: only the characters <tt>[% chars | strip_literal %]</tt>, plus space, are allowed in nicknames, and all others will be stripped out.)
 				</div>
