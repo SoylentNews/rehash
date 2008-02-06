@@ -105,7 +105,7 @@ sub edit {
 		? $user->{hits_bought_today_max}
 		: "";
 
-	titlebar("100%", "Editing Subscription...", {
+	titlebar("100%", "Configuring Subscription", {
 		template =>		'prefs_titlebar',
 		tab_selected =>		'subscription',
 	});
@@ -170,7 +170,7 @@ sub save {
 		$hbtm;
 	$slashdb->setUser($user_edit->{uid}, $user_update);
 
-	titlebar("100%", "Editing Subscription...", {
+	titlebar("100%", "Configuring Subscription", {
 		template =>		'prefs_titlebar',
 		tab_selected =>		'subscription',
 	});
