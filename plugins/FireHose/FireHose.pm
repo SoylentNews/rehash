@@ -1802,12 +1802,6 @@ sub getAndSetOptions {
 	$user_tabs = $self->getUserTabs();
 
 
-	
-	my $tab_compare = { 
-		color 		=> "color", 
-		filter 		=> "fhfilter" 
-	};
-
 	my $skin_prefix="";
 	if ($the_skin && $the_skin->{name} && $the_skin->{skid} != $constants->{mainpage_skid})  {
 		$skin_prefix = "$the_skin->{name} ";
@@ -1824,12 +1818,24 @@ sub getAndSetOptions {
 
 	my $sel_tabtype;
 
+	my $tab_compare = { 
+		color 		=> "color", 
+		filter 		=> "fhfilter" 
+	};
+
 	my $tab_match = 0;
 	foreach my $tab (@$user_tabs, @$system_tabs) {
 		my $equal = 1;
-		foreach (keys %$tab_compare) {
-			$options->{$tab_compare->{$_}} ||= "";
-			if ($tab->{$_} ne $options->{$tab_compare->{$_}}) {
+
+		my $this_tab_compare;
+		%$this_tab_compare = %$tab_compare;
+
+		$this_tab_compare->{orderby} = 'orderby' if defined $tab->{tabtype};
+		
+
+		foreach (keys %$this_tab_compare) {
+			$options->{$this_tab_compare->{$_}} ||= "";
+			if ($tab->{$_} ne $options->{$this_tab_compare->{$_}}) {
 				$equal = 0;
 			}
 		}

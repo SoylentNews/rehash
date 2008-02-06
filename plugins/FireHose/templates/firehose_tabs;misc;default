@@ -23,6 +23,7 @@ __template__
 	rss_param_str = rss_param_str _ "=" _ Slash.strip_attribute(options.${rss_options.$param});
 END %]
 [% END %]
+[% active_set = 0; %]
 [% UNLESS nodiv %]<ul class="menu" id="fhtablist">[% END %]
 	[% IF options.smalldevices %]
 		[% FOREACH tab = tabs;
@@ -33,30 +34,31 @@ END %]
 		 END;
 		Slash.createSelect('tab', tabnames, { default => tab_current, return => 1, onchange => "firehose_set_options('tab', this.options[this.selectedIndex].value])"});
 	 ELSE %]
-	 	<li id="fhtab-section" [% IF options.sel_tabtype == "tabsection" %]class="active"[% END %]>[% UNLESS options.sel_tabtype == "tabsection" %]<a href="/firehose.pl?tabtype=tabsection[% IF form.section %]&amp;section=[% form.section | strip_attribute %][% END %]"
+	 	<li id="fhtab-section" [% IF options.sel_tabtype == "tabsection" && !active_set; active_set = 1; %]class="active"[% END %]>[% UNLESS options.sel_tabtype == "tabsection" %]<a href="/firehose.pl?tabtype=tabsection[% IF form.section %]&amp;section=[% form.section | strip_attribute %][% END %]"
  onclick="firehose_set_options('tabsection',firehose_settings.section); return false">Stories</a>[% END %]
 <noscript><form action="/firehose.pl" method="post"><input type="hidden" name="tabtype" value="tabsection"></noscript>
 [% fh.createSectionSelect(section) %]
 <noscript><input type="submit" name="change" value="change"></form></noscript>
 		[% IF options.sel_tabtype == "tabsection" && !user.is_anon && rss_param_str %]<a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]" title="RSS for Section"><img src="[% constants.imagedir %]/feed.png" alt="rss"></a>[% END %]
 </li>
-	 	<li id="fhtab-recent" [% IF options.sel_tabtype == "tabrecent" %]class="active"[% END %]><a href="/firehose.pl?tabtype=tabrecent[% IF form.section %]&amp;section=[% form.section | strip_attribute %][% END %]" onclick="firehose_set_options('tabtype','tabrecent'); return false">Recent</a>
+	 	<li id="fhtab-recent" [% IF options.sel_tabtype == "tabrecent" && !active_set; active_set = 1; %]class="active"[% END %]><a href="/firehose.pl?tabtype=tabrecent[% IF form.section %]&amp;section=[% form.section | strip_attribute %][% END %]" onclick="firehose_set_options('tabtype','tabrecent'); return false">Recent</a>
 		[% IF options.sel_tabtype == "tabrecent" && !user.is_anon && rss_param_str %]<a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]" title="RSS for Recent"><img src="[% constants.imagedir %]/feed.png" alt="rss"></a>[% END %]
 </li>
-	 	<li id="fhtab-popular" [% IF options.sel_tabtype == "tabpopular" %]class="active"[% END %]><a href="/firehose.pl?tabtype=tabpopular[% IF form.section %]&amp;section=[% form.section | strip_attribute %][% END %]" onclick="firehose_set_options('tabtype','tabpopular'); return false">Popular</a>
+	 	<li id="fhtab-popular" [% IF options.sel_tabtype == "tabpopular" && !active_set; active_set = 1; %]class="active"[% END %]><a href="/firehose.pl?tabtype=tabpopular[% IF form.section %]&amp;section=[% form.section | strip_attribute %][% END %]" onclick="firehose_set_options('tabtype','tabpopular'); return false">Popular</a>
 		[% IF options.sel_tabtype == "tabpopular" && !user.is_anon && rss_param_str %]<a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]" title="RSS for Popular"><img src="[% constants.imagedir %]/feed.png" alt="rss"></a>[% END %]
 		</li>
 		[% IF !user.is_anon %]
-	 	<li id="fhtab-user" [% IF options.sel_tabtype == "tabuser" %]class="active"[% END %]><a href="/firehose.pl?tabtype=tabuser[% IF form.section %]&amp;section=[% form.section | strip_attribute %][% END %]" onclick="firehose_set_options('tabtype','tabuser'); return false">[% user.nickname | strip_literal %]</a>
+	 	<li id="fhtab-user" [% IF options.sel_tabtype == "tabuser" && !active_set; active_set = 1; %]class="active"[% END %]><a href="/firehose.pl?tabtype=tabuser[% IF form.section %]&amp;section=[% form.section | strip_attribute %][% END %]" onclick="firehose_set_options('tabtype','tabuser'); return false">[% user.nickname | strip_literal %]</a>
 		[% IF options.sel_tabtype == "tabuser" && !user.is_anon && rss_param_str %]<a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]" title="RSS for [% user.nickname | strip_literal %]"><img src="[% constants.imagedir %]/feed.png" alt="rss"></a>[% END %]
 		</li>
 		[% END %]
-	[% FOREACH tab = tabs %]
-		<li id="fhtab-[% tab.tabid %]"[% IF tab.active %] class="active"[% END %]>
-		[% IF tab.active %]<span id="tab-form-[% tab.tabid %]" class="hide"><input type="text" onfocus="focusCompleter(this, '[% tab.tabid %]', '[% user.is_admin && !user.firehose_usermode %]','firehosetab', 7, { yui:{minQueryLength:0, autoHighlight:false }, action1:completer_save_tab } )" id="tab-input-[% tab.tabid %]" size="12" value="[% tab.tabname | strip_literal %]"></span>[% END %]
+	[% FOREACH tab = tabs %
+		[% this_tab_active = 0 %]]
+		<li id="fhtab-[% tab.tabid %]"[% IF tab.active && !active_set; active_set = 1; this_tab_active = 1; %] class="active"[% END %]>
+		[% IF this_tab_active %]<span id="tab-form-[% tab.tabid %]" class="hide"><input type="text" onfocus="focusCompleter(this, '[% tab.tabid %]', '[% user.is_admin && !user.firehose_usermode %]','firehosetab', 7, { yui:{minQueryLength:0, autoHighlight:false }, action1:completer_save_tab } )" id="tab-input-[% tab.tabid %]" size="12" value="[% tab.tabname | strip_literal %]"></span>[% END %]
 		<a href="[% IF tab.active %]#[% ELSE %]?tab=[% tab.tabname | strip_attribute %][% END %]" id="tab-text-[% tab.tabid %]" onClick="[% IF tab.active %]firehose_open_tab('[% tab.tabid %]');[% ELSE %]firehose_set_options('tab','[% tab.tabname %]');[% END %] return false;" [% IF tab.active %]title="Edit this tab"[% END %]>[% tab.tabname | strip_literal %][% IF tab.active %]<img src="[% constants.imagedir %]/sic_edit.png" alt="Edit">[% END %]</a>
-		[% IF tab.active && rss_param_str %]<a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]" title="RSS for [% tab.tabname | strip_literal %]"><img src="[% constants.imagedir %]/feed.png" alt="rss"></a>[% END %]
-		[% IF tab.active && tab.tabname != "untitled" %]<span id="fhtabdel" class="close" title="Close this tab"><a href="#" onclick="firehose_remove_tab([% tab.tabid %])">[X]</a></span>[% END %]</li>
+		[% IF this_tab_active && rss_param_str %]<a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]" title="RSS for [% tab.tabname | strip_literal %]"><img src="[% constants.imagedir %]/feed.png" alt="rss"></a>[% END %]
+		[% IF this_tab_active && tab.tabname != "untitled" %]<span id="fhtabdel" class="close" title="Close this tab"><a href="#" onclick="firehose_remove_tab([% tab.tabid %])">[X]</a></span>[% END %]</li>
 	[% END %]
 	[% END %]
 [% UNLESS nodiv %]</ul>[% END %]
