@@ -772,3 +772,10 @@ a.ac-source
 #login_box #login_box_content fieldset {margin: 0;padding: 0;border: none;}
 #login_box #login_box_content {background-color: #fff;padding: 0 2em 2em 2em; border-top: 1px solid #222;}
 
+/* modal preference help */
+div.modalprefhelp {
+        padding: 15px 15px 15px 15px;
+        width: 550px;
+        border-style: solid;
+        border-width: 2px;
+}                                
