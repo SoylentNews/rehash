@@ -25,7 +25,7 @@ __template__
 	<tr>
 		<td>
 		<b>Nick Name</b><br>
-		<input type="text" name="newusernick" value="" maxlength="20">
+		<input type="text" name="newusernick" value="" maxlength="[% constants.nick_maxlen %]">
 		</td>
 	</tr>
 	<tr>
