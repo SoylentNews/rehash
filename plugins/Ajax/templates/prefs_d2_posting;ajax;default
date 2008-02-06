@@ -15,6 +15,15 @@ __template__
 [% lo = '-' _ hi %]
 [% range = [ lo .. hi ] %]
 
+                [% IF tabbed == 1 %]
+                <div style="text-align: center;">
+                &nbsp;
+                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Posting</span>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('d2', 'Discussion 2', 1); return false;">Viewing</a>
+                </div>
+                [% END %]
+
 <form id ="modal_prefs" method="post">
 
 <input type="hidden" name="formname" value="d2_posting">
@@ -76,9 +85,12 @@ __template__
 		textarea_rows = user.textarea_rows;
 	END %]
 
-	Columns: <input type="text" name="textarea_cols" size="4" value="[% user.textarea_cols || constants.textarea_cols %]">
-        Rows: <input type="text" name="textarea_rows" size="4" value="[% user.textarea_rows || constants.textarea_rows %]">
-        [% PROCESS formNote note="Also applies to other large text boxes" %]
+        Columns: <input type="text" name="textarea_cols" size="4" value="[% user.textarea_cols || constants.textarea_cols %]">
+        Rows: <input type="text" name="textarea_rows" size="4" value="[% user.textarea_rows || constants.textarea_rows %]">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_textarea');" style="text-decoration: none;">[?]</a>
+        <br>
+        <div id="modalprefhelp_textarea" class="modalprefhelp" style="display: none;">
+                Also applies to other large text boxes.
+        </div>
 
 	<label>Comment Post Mode</label>
 	[%

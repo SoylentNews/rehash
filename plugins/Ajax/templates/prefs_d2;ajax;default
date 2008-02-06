@@ -11,6 +11,15 @@ __name__
 prefs_d2
 __template__
 
+                [% IF tabbed == 1 %]
+                <div style="text-align: center;">
+                &nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('d2_posting', 'Discussion 2', 1); return false;">Posting</a>
+                &nbsp;|&nbsp;
+                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Viewing</span>
+                </div>
+                [% END %]
+
 <form id ="modal_prefs" method="post">
 
 <input type="hidden" name="formname" value="d2_display">
@@ -47,19 +56,29 @@ __template__
 			s_check = constants.markup_checked_attribute;
 		END %]
 
-		<label><input type="checkbox" name="nosigs"[% s_check %]>&nbsp;Disable Sigs</label>
-                [% PROCESS formNote note='Strip sig quotes from comments' %]
+                <br>
 
-                <p>
+                input type="checkbox" name="nosigs"[% s_check %]>&nbsp;<b>Disable Sigs</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sigs');" style="text-decoration: none;">[?]</a>
+                <br>
+                <div id="modalprefhelp_sigs" class="modalprefhelp" style="display: none;">
+                        Strip sig quotes from comments.
+                </div>
+
+                <br>
 
                 [% n_check = '';
                 IF user.noscores;
                         n_check = constants.markup_checked_attribute;
                 END %]
-                <label><input type="checkbox" name="noscores"[% n_check %]>&nbsp;Do Not Display Scores</label>
-                [% PROCESS formNote note="Hides score: They still <b>apply</b> you just don't see them." %]
 
-                &nbsp;<p>
+                <input type="checkbox" name="noscores"[% n_check %]>&nbsp;<b>Do Not Display Scores</b><a href="#" onclick="displayModalPrefHelp('modalprefhelp_scores');" style="text-decoration: none;">[?]</a>
+                <br>
+                <div id="modalprefhelp_scores" class="modalprefhelp" style="display: none;">
+                        Hides score: They still <b>apply</b> you just don't see them.
+                </div>               
+ 
+
+                <br>
 
                 [% UNLESS user.domaintags.defined; user.domaintags = 2; END %]
                 [% domaintags.${user.domaintags} = constants.markup_checked_attribute -%]
