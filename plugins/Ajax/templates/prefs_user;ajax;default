@@ -16,14 +16,6 @@ __template__
                 &nbsp;
                 <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">User</span>
                 &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('home', 'Homepage', 1); return false;">Homepage</a>
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('slashboxes', 'Slashboxes', 1); return false;">Slashboxes</a>
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('sectional', 'Sectional Display', 1); return false;">Sections</a>
-                &nbsp;|&nbsp;
-                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('authors', 'Authors', 1); return false;">Authors</a>
-                &nbsp;|&nbsp;
                 <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('messages', 'Messages', 1); return false;">Messages</a>
                 </div>
                 [% END %]
@@ -34,87 +26,102 @@ __template__
 		[% END %]
 
                 <form id ="modal_prefs" method="post">
-			<input type="hidden" name="formname" value="user">
+                        <input type="hidden" name="formname" value="user">
                         <input type="hidden" name="uid" value="[% user.uid %]">
                         <input type="hidden" name="name" value="[% user.nickname | strip_attribute %]">
 
-			&nbsp;<p>
+                        &nbsp;<p>
 
-			<b>Real Name</b>&nbsp;<input type="text" name="realname" value="[% user.realname | strip_attribute %]" size="40">
+                        <b>Real Name</b>&nbsp;<input type="text" name="realname" value="[% user.realname | strip_attribute %]" size="40">
 
-			&nbsp;<p><br>
+                        &nbsp;<p><br>
 
-			<b>Email Address</b>&nbsp;<input type="text" name="realemail" value="[% user.realemail | strip_attribute %]" size="40">
-			<div class="notes">
-				Required but never displayed publicly, unless you specify so in your comment preferences. This is where your passwd is mailed.  If you change this address, a notification will be sent, and you will need to follow the enclosed instructions to re-register.
-			</div>
-			
-			&nbsp;<p>			
+                        <b>Email Address</b>&nbsp;<input type="text" name="realemail" value="[% user.realemail | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_email');" style="text-decoration: none;">[?]</a>
+                        <br>
+                        <div id="modalprefhelp_email" class="modalprefhelp" style="display: none;">
+                                Required but never displayed publicly, unless you specify so in your comment preferences. This is where your passwd is mailed. If you change this address, a notification will be sent, and you will need to follow the enclosed instructions to re-register.
+                        </div>
 
-			<b>Homepage</b>&nbsp;<input type="text" name="homepage" value="[% user.homepage | strip_attribute %]" size="40">
-			<div class="notes">
-				You must enter a fully qualified URL.
-			</div>
+                        &nbsp;<p>
 
-			&nbsp;<p>
+                        <b>Homepage</b>&nbsp;<input type="text" name="homepage" value="[% user.homepage | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_homepage');" style="text-decoration: none;" style="text-decoration: none;">[?]</a>
+                        <br>
+                        <div id="modalprefhelp_homepage" class="modalprefhelp" style="display: none;">
+                                You must enter a fully qualified URL.
+                        </div>
+
+                        &nbsp;<p>
 
                         [% IF user.is_admin && constants.slashbox_whatsplaying %]
                                 <b>What I'm Playing For</b>&nbsp;
-                                <input type="text" name="playing" value="[% user.playing | strip_attribute %]" size="40">
-                                <div class="notes">
+                                <input type="text" name="playing" value="[% user.playing | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_playing');" style="text-decoration: none;">[?]</a>
+                                <br>
+                                <div id="modalprefhelp_playing" class="modalprefhelp" style="display: none;">
                                         A pipe ("|") separated list of games you're currently enthralled with. This'll be used for the "What We're Playing" Slashbox.
                                 </div>
 
                         &nbsp;<p>
                         [% END %]
 
-			<b>AIM</b>&nbsp;<input type="text" name="aim" value="[% user.aim | strip_attribute %]" size="40">
-			<br>
+                        <b>AIM</b>&nbsp;<input type="text" name="aim" value="[% user.aim | strip_attribute %]" size="40">
+                        <br>
 
-			<span style="padding-left: 15px;"><input type="checkbox" name="aimdisplay" value="1"[% IF user.aimdisplay %] checked="checked" [% END %]>&nbsp;<b>Do not make this AIM nick public</b></span>
+                        <span style="padding-left: 15px;"><input type="checkbox" name="aimdisplay" value="1"[% IF user.aimdisplay %] checked="checked" [% END %]>&nbsp;<b>Do not make this AIM nick public</b></span>
 
-			&nbsp;<p><br>
+                        &nbsp;<p><br>
 
-			<b>ICQ UIN</b>&nbsp;<input type="text" name="icq" value="[% user.icq | strip_attribute %]" size="40">
+                        <b>ICQ UIN</b>&nbsp;<input type="text" name="icq" value="[% user.icq | strip_attribute %]" size="40">
 
-			&nbsp;<p><br>
+                        &nbsp;<p><br>
 
-			<b>Yahoo! ID</b>&nbsp;<input type="text" name="yahoo" value="[% user.yahoo | strip_attribute %]" size="40">
+                        <b>Yahoo! ID</b>&nbsp;<input type="text" name="yahoo" value="[% user.yahoo | strip_attribute %]" size="40">
 
-			&nbsp;<p><br>
+                        &nbsp;<p><br>
 
-			<b>Jabber</b>&nbsp;<input type="text" name="jabber" value="[% user.jabber | strip_attribute %]" size="40">
+                        <b>Jabber</b>&nbsp;<input type="text" name="jabber" value="[% user.jabber | strip_attribute %]" size="40">
 
-			&nbsp;<p><br>
+                        &nbsp;<p><br>
 
-			<b>Public Calendar</b>&nbsp;<input type="text" name="calendar_url" value="[% user.calendar_url | strip_attribute %]" size="40">
-			<div class="notes">
-				You must enter a fully qualified URL, for an iCal calendar.
-			</div>
-
-			&nbsp;<p>
-
-			<b>Mobile Text Address</b>&nbsp;<input type="text" name="mobile_text_address" value="[% user.mobile_text_address | strip_attribute %]" size="40">
-
-			&nbsp;<p><br>
-
-			<b>Sig</b>
-			<br>
-			<textarea name="sig" rows="2" cols="30">[% user.sig | strip_literal %]</textarea>
-                        <div class="notes">Appended to the end of comments you post. 120 chars.</div>
-
-			&nbsp;<p>
-
-			<b>Bio</b>
-			<br>
-			<textarea name="bio" rows="5" cols="30" wrap="virtual">[% user.bio | strip_literal %]</textarea>
-                        <div class="notes">This information is publicly displayed on your user page.  255 chars.</div>
+                        <b>Public Calendar</b>&nbsp;<input type="text" name="calendar_url" value="[% user.calendar_url | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_calendar');" style="text-decoration: none;">[?]</a>
+                        <br>
+                        <div id="modalprefhelp_calendar" class="modalprefhelp" style="display: none;">
+                                You must enter a fully qualified URL, for an iCal calendar.
+                        </div>
 
                         &nbsp;<p>
 
-			<input type="button" value="Save" onclick="saveModalPrefs()">
+                        <b>Mobile Text Address</b>&nbsp;<input type="text" name="mobile_text_address" value="[% user.mobile_text_address | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_mobile');" style="text-decoration: none;">[?]</a>
+                        <br>
+                        <div id="modalprefhelp_mobile" class="modalprefhelp" style="display: none;">
+                                Set this if you plan to have Messages sent to your mobile device.
+                        </div>
 
-		</form>
+                        &nbsp;<p>
+
+                        <b>Sig</b>
+                        <br>
+                        <textarea name="sig" rows="2" cols="30">[% user.sig | strip_literal %]</textarea>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sig');" style="text-decoration: none;">[?]</a>
+                        <br>
+                        <div id="modalprefhelp_sig" class="modalprefhelp" style="display: none;">
+                                Appended to the end of comments you post. 120 chars.
+                        </div>
+
+                        &nbsp;<p>
+
+                        <b>Bio</b>
+                        <br>
+                        <textarea name="bio" rows="5" cols="30" wrap="virtual">[% user.bio | strip_literal %]</textarea>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_bio');" style="text-decoration: none;">[?]</a>
+                        <br>
+                        <div id="modalprefhelp_bio" class="modalprefhelp" style="display: none;">
+                                This information is publicly displayed on your user page.  255 chars.
+                        </div>
+
+                        &nbsp;<p>
+
+                        <input type="button" value="Save" onclick="saveModalPrefs()">
+
+                </form>
+
 __seclev__
 500
 __version__
