@@ -1453,3 +1453,9 @@ function ajaxRemoveSlashbox( id ) {
 		ajaxSaveSlashboxes();
 	}
 }
+
+function displayModalPrefHelp(element) {
+        var elem = document.getElementById(element);
+        var vis = elem.style;
+        vis.display = (!vis.display || vis.display == 'block') ? 'none' : 'block';
+}
