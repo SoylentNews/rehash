@@ -1807,9 +1807,9 @@ sub getAndSetOptions {
 		$skin_prefix = "$the_skin->{name} ";
 	}
 	my $system_tabs = [ 
-		{ tabtype => 'tabsection', color => 'black', filter => $skin_prefix . "story"},
-		{ tabtype => 'tabpopular', color => 'black', filter => "$skin_prefix\-story"},
-		{ tabtype => 'tabrecent',  color => 'indigo',  filter => "$skin_prefix\-story"},
+		{ tabtype => 'tabsection', color => 'black', filter => $skin_prefix . "story", orderby => 'createtime'},
+		{ tabtype => 'tabpopular', color => 'black', filter => "$skin_prefix\-story", orderby => 'popularity'},
+		{ tabtype => 'tabrecent',  color => 'indigo',  filter => "$skin_prefix\-story", orderby => 'createtime'},
 	];
 
 	if (!$user->{is_anon}) {
