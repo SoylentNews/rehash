@@ -20,6 +20,7 @@ __template__
    negtags = tags_reader.getNegativePopupTags.sort;
 
    IF postags.size %]<div id="nodmenu">
+  <input id="nod-input" type="text">
   <div class="menu" onmouseover="dont_hide_nodnix_menu()" onmouseout="hide_nodnix_menu(750)" onmousedown="hide_nodnix_menu()">
     <ul>
     [%- FOR postag IN postags %]
@@ -29,6 +30,7 @@ __template__
   </div>
 </div>
 [% END; IF negtags.size %]<div id="nixmenu">
+  <input id="nix-input" type="text">
   <div class="menu" onmouseover="dont_hide_nodnix_menu()" onmouseout="hide_nodnix_menu(750)" onmousedown="hide_nodnix_menu()">
     <ul>
     [%- FOR negtag IN negtags %]

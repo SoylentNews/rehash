@@ -424,6 +424,10 @@ div.storylinks ul {padding-right: 60% !important}
 #firehoselist {position: relative}
 
 /* nodmenu */
+#nod-input, #nix-input {display: none; position: absolute; font-size: 11px; top:-55px; width: 101px;}
+#nod-input {left: -150px;}
+#nix-input {left: 58px;}
+#nodmenu.editing #nod-input, #nixmenu.editing #nix-input {display: block;}
 #nodmenu, #nixmenu {display: none; width: 200px; z-index: 100000; position: absolute !important; font-size: 11px}
 #nodmenu .menu, #nixmenu .menu {top: -35px; width: 150px; height: 15em; z-index: 1000000 !important; position: absolute !important; font-size: 11px}
 #nodmenu .menu {left: -150px !important;  background: url('//images.slashdot.org/popup_nod.png') no-repeat;}
