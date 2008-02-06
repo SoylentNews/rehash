@@ -39,7 +39,7 @@ __template__
 	User Info for [% md5id_vis %] ([% id %])
 
 [% CASE 'editUser_title' %]
-	Editing [% user_edit.nickname | strip_literal %] ([% user_edit.uid %]) [% user_edit.realemail | strip_literal %]
+        Configuring User Preferences For [% user_edit.nickname | strip_literal %] ([% user_edit.uid %]) [% user_edit.realemail | strip_literal %]
 
 [% CASE 'changePasswd_title' %]
 	Change password for [% user_edit.nickname | strip_literal %] ( [% user_edit.uid %]) 
@@ -51,10 +51,10 @@ __template__
 	Customize Slashboxes
 
 [% CASE 'editHome_title' %]
-	Customize [% constants.sitename %]'s Display
+        Configuring [% constants.sitename %]'s Homepage
 
 [% CASE 'editComm_title' %]
-	Comment Options
+        Configuring Comments
 
 [% CASE 'editMiscOpts_title' %]
 	Miscellaneous Options
