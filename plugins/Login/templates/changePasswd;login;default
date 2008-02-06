@@ -16,7 +16,7 @@ __template__
         [% PROCESS userboxes %]
 </div>
 [% thisnickname = user.nickname | strip_literal;
-   title = "Change password for $thisnickname ($user.uid)" %]
+   title = "Configuring Password For $thisnickname ($user.uid)" %]
 <div id="users-blocks">
         [% PROCESS prefs_titlebar tab_selected='password' %]
         <div class="generalbody">
