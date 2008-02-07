@@ -6140,7 +6140,7 @@ sub getCommentTextCached {
 	my $possible_chop  = !$opt->{full} && !($opt->{mode} && $opt->{mode} eq 'archive');
 	my $abbreviate_ok  = $opt->{discussion2} && $possible_chop;
 	my $abbreviate_len = 256;
-	my $max_len = $user->{maxcommentsize};
+	my $max_len = $constants->{default_maxcommentsize};
 
 	# We have to get the comment text we need (later we'll search/replace
 	# them into the text).
@@ -6157,8 +6157,7 @@ sub getCommentTextCached {
 	my $mcd = $self->getMCD();
 	$mcd = undef if
 		   $opt->{mode} && $opt->{mode} eq 'archive'
-		|| $user->{domaintags} != 2
-		|| $user->{maxcommentsize} != $constants->{default_maxcommentsize};
+		|| $user->{domaintags} != 2;
 
 	# loop here, pull what cids we can
 	my($mcd_debug, $mcdkey, $mcdkey_abbrev, $mcdkey_full, $mcdkeylen);

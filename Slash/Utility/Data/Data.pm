@@ -103,6 +103,7 @@ BEGIN {
 	noFollow
 	regexSid
 	revertQuote
+	prepareQuoteReply
 	root2abs
 	roundrand
 	set_rootdir
@@ -1633,6 +1634,23 @@ sub revertQuote {
 		}
 	}
 	return($str);
+}
+
+
+sub prepareQuoteReply {
+	my($reply) = @_;
+	my $pid_reply = $reply->{comment} = parseDomainTags($reply->{comment}, 0, 1, 1);
+	$pid_reply = revertQuote($pid_reply);
+
+	# prep for JavaScript
+	$pid_reply =~ s|\\|\\\\|g;
+	$pid_reply =~ s|'|\\'|g;
+	$pid_reply =~ s|([\r\n])|\\n|g;
+
+	$pid_reply =~ s{<nobr> <wbr></nobr>(\s*)} {$1 || ' '}gie;
+	#my $nick = strip_literal($reply->{nickname});
+	#$pid_reply = "<div>$nick ($reply->{uid}) wrote: <quote>$pid_reply</quote></div>";
+	$pid_reply = "<quote>$pid_reply</quote>";
 }
 
 

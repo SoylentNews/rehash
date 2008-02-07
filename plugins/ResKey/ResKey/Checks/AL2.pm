@@ -14,6 +14,7 @@ use Slash::Utility;
 use Slash::Constants ':reskey';
 
 our($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our @ISA    = qw(Exporter);
 our @EXPORT = qw(AL2Check);
 
 # simple AL2 check that others can inherit; returns death if check returns true

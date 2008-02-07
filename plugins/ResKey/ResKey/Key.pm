@@ -254,7 +254,7 @@ sub AUTOLOAD {
 		goto &$sub;
 
 	} elsif (!$can) {
-		errorLog("no method $name") unless
+		errorLog("no method $name : [$AUTOLOAD @_]") unless
 			$name =~ /^(?:DESTROY)$/;
 		return;
 	}

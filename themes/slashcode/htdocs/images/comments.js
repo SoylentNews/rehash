@@ -951,10 +951,16 @@ function replyTo(cid) {
 }
 
 function quoteReply(pid) {
-	var this_reply = comment_body_reply[pid];
+	var this_reply = getQuotedText(comment_body_reply[pid]);
+	var postercomment = $('postercomment_' + pid) || $('postercomment');
+	if (postercomment)
+		postercomment.value = this_reply + postercomment.value;
+	return false;
+}
 
+function getQuotedText(this_reply) {
 	// tailor whitespace to postmode
-	if ($('posttype').value != 2) {
+	if (!$('posttype') || $('posttype').value != 2) {
 		this_reply = this_reply.replace(/<br>/g, "\n");
 	} else {
 		this_reply = this_reply.replace(/<br>\n*/g, "<br>\n");
@@ -967,8 +973,9 @@ function quoteReply(pid) {
 	this_reply = this_reply.replace(/^\n+/g, "");
 	this_reply = this_reply.replace(/<\/quote>\n*/g, "</quote>\n\n");
 
-	$('postercomment').value = this_reply + $('postercomment').value;
+	return this_reply;
 }
+
 
 /*********************/
 /* utility functions */

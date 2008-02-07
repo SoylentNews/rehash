@@ -1079,10 +1079,14 @@ sub printComments {
 	if ($discussion2) {
 		my @abbrev     = grep { defined($comments->{$_}{abbreviated}) && $comments->{$_}{abbreviated} != -1 } keys %$comments;
 		my @not_abbrev = grep { defined($comments->{$_}{abbreviated}) && $comments->{$_}{abbreviated} == -1 } keys %$comments;
-		for my $cid (@abbrev, @not_abbrev) {
-			$comment_html =~ s|<div id="comment_shrunk_$cid" class="commentshrunk">.+?</div>||;
-			$comment_html =~ s|<div id="comment_sig_$cid" class="sig hide">|<div id="comment_sig_$cid" class="sig">|;
-		}
+		my %abbrev_and_not = map { $_ => 1 } (@abbrev, @not_abbrev);
+		$comment_html =~ s|(<div id="comment_shrunk_(\d+)" class="commentshrunk">.+?</div>)|$abbrev_and_not{$2} ? '' : $1|eg;
+		$comment_html =~ s|((<div id="comment_sig_(\d+)" class="sig) hide">)|$abbrev_and_not{$3} ? qq{$2">} : $1|eg;
+
+#		for my $cid (@abbrev, @not_abbrev) {
+#			$comment_html =~ s|<div id="comment_shrunk_$cid" class="commentshrunk">.+?</div>||;
+#			$comment_html =~ s|<div id="comment_sig_$cid" class="sig hide">|<div id="comment_sig_$cid" class="sig">|;
+#		}
 
 		if (@abbrev) {
 			my $abbrev_comments = join ',', map { "$_:$comments->{$_}{abbreviated}" } @abbrev;
@@ -1340,7 +1344,7 @@ sub dispComment {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $gSkin = getCurrentSkin();
-	my $maxcommentsize = $options->{maxcommentsize} || $user->{maxcommentsize};
+	my $maxcommentsize = $options->{maxcommentsize} || $constants->{default_maxcommentsize};
 
 	my $comment_shrunk;
 
