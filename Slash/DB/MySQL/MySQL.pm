@@ -3411,6 +3411,14 @@ sub markStoryDirty {
 ########################################################
 sub deleteStory {
 	my($self, $id) = @_;
+	my $constants = getCurrentStatic();
+	if ($constants->{plugin}{FireHose}) {
+		my $stoid = $self->getStoidFromSidOrStoid($id);
+		my $firehose = getObject("Slash::FireHose");
+		my $globjid = $self->getGlobjidCreate("stories", $stoid);
+		my $fhid = $firehose->getFireHoseIdFromGlobjid($globjid);
+		$firehose->setFireHose($fhid, { public => "no", rejected => "yes"});
+	}
 	return $self->setStory($id, { in_trash => 'yes' });
 }
 
