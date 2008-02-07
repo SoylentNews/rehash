@@ -408,6 +408,27 @@ EOT
 		$statsSave->createStatDaily("other_bytes", $bytes);
 		$statsSave->createStatDaily("other_page", $pages);
 	}
+	my %combo = (
+		ind		=> [ ['index'],			[]			],
+		ind_no_art	=> [ ['index'],			['article']		],
+		ind_no_rss	=> [ ['index'],			['rss']			],
+		indart		=> [ ['index','article'],	[]			],
+		indart_no_rss	=> [ ['index','article'],	['rss']			],
+		art		=> [ ['article'],		[]			],
+		art_no_ind	=> [ ['article'],		['index']		],
+		art_no_rss	=> [ ['article'],		['rss']			],
+		rss		=> [ ['rss'],			[]			],
+		rss_no_ind	=> [ ['rss'],			['index']		],
+		rss_no_art	=> [ ['rss'],			['article']		],
+		rss_no_indart	=> [ ['rss'],			['index','article']	],
+		rssart		=> [ ['rss','article'],		[]			],
+		rssart_no_ind	=> [ ['rss','article'],		['index']		],
+	);
+	for my $key (sort keys %combo) {
+		my @args = @{ $combo{$key} };
+		$statsSave->createStatDaily("opcombo_$key",
+			$logdb->getOpCombinationStats(@args));
+	}
 	slashdLog("Page Counting End");
 
 # Not yet
