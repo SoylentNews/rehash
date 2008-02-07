@@ -77,6 +77,8 @@ sub selectComments {
 
 	my $discussion2 = discussion2($user);
 
+#slashProf("sC setup");
+
 	# it's a bit of a drag, but ... oh well! 
 	# print_cchp gets messed up with d2, so we just punt and have
 	# selectComments called twice if necessary, the first time doing
@@ -121,11 +123,14 @@ sub selectComments {
 		one_cid_only	=> $options->{one_cid_only},
 	};
 	$gcfu_opt->{discussion2} = $discussion2;
+#slashProf("sC getCommentsForUser");
 	if ($options->{force_read_from_master}) {
 		$thisComment = $slashdb->getCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
 	} else {
 		$thisComment = $reader->getCommentsForUser($discussion->{id}, $cid, $gcfu_opt);
 	}
+#slashProf("", "sC getCommentsForUser");
+#slashProfBail() if $cid || @$thisComment < 100;
 
 	if (!$thisComment) {
 		_print_cchp($discussion);
@@ -165,6 +170,7 @@ sub selectComments {
 		}
 	}
 
+#slashProf("sC main sort", "sC setup");
 	my($oldComment, %old_comments);
 	# XXXd2 disable for sub-threads for now ($cid)
 	if ($discussion2 && !$cid && !$options->{no_d2}) {
@@ -229,6 +235,8 @@ sub selectComments {
 			} @$thisComment;
 		}
 	}
+##slashProf("sC fudging", "sC main sort");
+#slashProf("", "sC main sort");
 
 	# This loop mainly takes apart the array and builds 
 	# a hash with the comments in it.  Each comment is
@@ -267,6 +275,7 @@ sub selectComments {
 		# Just a point rule -Brian
 		$user->{points} = 0 if $C->{uid} == $user->{uid}; # Mod/Post Rule
 	}
+##slashProf("sC more fudging", "sC fudging");
 
 	# After that loop, there may be comments in the $comments hashref
 	# which have no visible parents and thus which incremented an
@@ -282,6 +291,7 @@ sub selectComments {
 
 	my $count = @$thisComment;
 
+##slashProf("sC counting", "sC more fudging");
 	# Cascade comment point totals down to the lowest score, so
 	# (2, 1, 3, 5, 4, 2, 1) becomes (18, 16, 15, 12, 7, 3, 1).
 	# We do a bit of a weird thing here, returning this data in
@@ -295,8 +305,12 @@ sub selectComments {
 
 	_print_cchp($discussion, $count, $comments->{0}{totals});
 
+##slashProf("sC reparenting", "sC counting");
+#slashProf("sC reparenting");
 	reparentComments($comments, $reader, $options);
 
+##slashProf("sC d2 fudging", "sC reparenting");
+#slashProf("", "sC reparenting");
 	if ($oldComment) {
 		for my $cid (sort { $a <=> $b } keys %$comments) {
 			my $C = $comments->{$cid};
@@ -329,10 +343,13 @@ sub selectComments {
 		}
 	}
 
+##slashProf("", "sC d2 fudging");
+
 	return($comments, $count);
 }
 
 sub jsSelectComments {
+#slashProf("jsSelectComments");
 	# XXXd2 selectComments() is being called twice in same request ... compare and consolidate
 	# also consolidate code with ajax.pl:fetchComments
 	# version 0.9 is broken; 0.6 and 1.00 seem to work -- pudge 2006-12-19
@@ -428,6 +445,7 @@ sub jsSelectComments {
 		(my $url = $constants->{run_ads_inline_comments}) =~ s/<topic>/$gSkin->{name}/g;
 		$extra .= "adTimerUrl = '$url';\n";
 	}
+#slashProf("", "jsSelectComments");
 
 	return <<EOT;
 comments = $anon_comments;
@@ -917,6 +935,9 @@ sub printComments {
 
 	my $discussion2 = discussion2($user);
 
+#slashProfInit();
+#slashProf("printComments: $discussion2, $discussion->{id}");
+
 	if ($discussion2 && $user->{mode} ne 'metamod') {
 		$user->{mode} = $form->{mode} = 'thread';
 		$user->{commentsort} = 0;
@@ -943,7 +964,9 @@ sub printComments {
 	# read it here, don't use the one_cid_only optimization feature.
 	$sco->{one_cid_only} = 0;
 
+#slashProf("selectComments");
 	my($comments, $count) = selectComments($discussion, $cidorpid, $sco);
+#slashProf("", "selectComments");
 	if ($discussion2) {
 		$user->{state}{selectComments} = {
 			comments	=> $comments,
@@ -989,6 +1012,7 @@ sub printComments {
 		slashDisplay('printCommNoArchive', { discussion => $discussion });
 	}
 
+#slashProf("printCommentsMain");
 	slashDisplay('printCommentsMain', {
 		comments	=> $comments,
 		title		=> $discussion->{title},
@@ -999,6 +1023,7 @@ sub printComments {
 		pid		=> $pid,
 		lvl		=> $lvl,
 	});
+#slashProf("", "printCommentsMain");
 
 	return if $user->{state}{nocomment} || $user->{mode} eq 'nocomment';
 
@@ -1040,6 +1065,7 @@ sub printComments {
 		}
 	}
 
+#slashProf("printCommComments");
 	my $anon_dump;
 	if ($discussion2) {
 		require Data::JavaScript::Anon;
@@ -1064,12 +1090,14 @@ sub printComments {
 		anon_dump	=> $anon_dump,
 	}, { Return => 1 });
 
+#slashProf("getCommentTextCached", "printCommComments");
 	# We have to get the comment text we need (later we'll search/replace
 	# them into the text).
 	my $comment_text = $slashdb->getCommentTextCached(
 		$comments, [ grep { !$comments->{$_}{dummy} } @{$user->{state}{cids}} ],
 		{ mode => $form->{mode}, cid => $form->{cid}, discussion2 => $discussion2 }
 	);
+#slashProf("comment regexes", "getCommentTextCached");
 
 	# OK we have all the comment data in our hashref, so the search/replace
 	# on the nearly-fully-rendered page will work now.
@@ -1093,6 +1121,10 @@ sub printComments {
 			$comment_html =~ s|abbrev_comments      = {};|abbrev_comments      = {$abbrev_comments};|;
 		}
 	}
+
+#slashProf("", "comment regexes");
+#slashProf("", "printComments: $discussion2, $discussion->{id}");
+#slashProfEnd();
 
 	print $comment_html;
 }
@@ -1140,6 +1172,7 @@ The 'displayThread' template block.
 =cut
 
 sub displayThread {
+#slashProf("displayThread");
 	my($sid, $pid, $lvl, $comments, $const) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
@@ -1300,6 +1333,7 @@ sub displayThread {
 			$return .= $const->{cagebigend} if $cagedkids;
 		}
 	}
+#slashProf("", "displayThread");
 
 	return $return;
 }

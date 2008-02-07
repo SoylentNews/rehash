@@ -3327,6 +3327,7 @@ sub slashProfEnd {
 	if ($silent) {
 		# Output is disabled for this profile.  And after we
 		# did all that work!  What a shame :)
+		$prof_ok = 0;
 		@prof = ();
 		return;
 	}
@@ -3427,6 +3428,7 @@ EOT
 
 	print STDERR "$prefix *** End profiling\n\n";
 
+	$prof_ok = 0;
 	@prof = ();
 }
 }
