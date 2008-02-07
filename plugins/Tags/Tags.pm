@@ -1810,10 +1810,15 @@ sub getRecentTagnamesOfInterest {
 		 AND cmdtype REGEXP '#'");
 	my %tagname_bad = ( map { ($tagnameid_to_name->{$_}, 1) } @$tagnameid_bad_ar );
 
+	# Build a hash identifying topic tagnames.
+	my $topics = $self->getTopics();
+	my %tagname_topic = ( map { ($topics->{$_}{keyword}, 1) } keys %$topics );
+
 	# Using the hashes, build a list of all recent tagnames which
 	# are of interest.
 	my @tagnames_of_interest = grep {
-		!$tagname_adminok{$_}
+		   !$tagname_adminok{$_}
+		&& !$tagname_topic{$_}
 		&& (	   $tagname_bad{$_}
 			|| $tagname_startauthor{$_}
 			|| $tagname_firstrecent{$_}
