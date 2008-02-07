@@ -61,7 +61,7 @@
 #firehose_pages a { color: #bbb; border: 1px solid #444; background: #444; padding: 3px !important; }
 #firehose_pages a:hover { color: #ccc; border: 1px solid #666; background: #555;}
 #firehose_pages a.fh_cur_page { margin: 0; color: #fff !important; border: 1px solid #555; background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x;}
-#firehose_pages a b {color: #888; font-size: 130%; font-family: georgia; sans-serif}
+#firehose_pages a b {color: #888; font-size: 130%; font-family: georgia, sans-serif}
 #fhcalendar_pag {float: left !important;}
 
 
@@ -326,7 +326,7 @@ span.date-tab { background:transparent url('//images.slashdot.org/sic_icons.png'
 #fh-paginate .day.date-tab.active {padding: 10px 17px 10px 0 !important}
 
 span.date-tab.active div.tab-button { background: #066; }
-#.date-widget.all span.date-tab, .date-widget.now span.date-tab { display: none; }
+.date-widget.all span.date-tab, .date-widget.now span.date-tab { display: none; }
 .firemenu #fhcalendar-calendar-pane {right: 1em}
 #fh_change_range { font-size: 80% }
 .firemenu .date-tab-bar {float: right; padding: 0 15px .5em 0; margin-right: .6em}
