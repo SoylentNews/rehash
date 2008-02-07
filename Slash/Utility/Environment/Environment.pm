@@ -3320,8 +3320,16 @@ sub slashProfInit {
 }
 
 sub slashProfEnd {
+	my($prefixstr, $silent) = @_;
 	my $use_profiling = getCurrentStatic('use_profiling');
 	return unless $use_profiling && $prof_ok && @prof;
+
+	if ($silent) {
+		# Output is disabled for this profile.  And after we
+		# did all that work!  What a shame :)
+		@prof = ();
+		return;
+	}
 
 	my $first = $prof[0][0];
 	my $last  = $first;  # Matthew 20:16
@@ -3341,7 +3349,9 @@ sub slashProfEnd {
 
 	local $\;
 
-	my $prefix = sprintf("PROF %d:%d:", $$, getCurrentUser('uid'));
+	my $user = getCurrentUser();
+	my $prefix = sprintf("PROF %d:%d:%s:%s:",
+		$$, $user->{uid}, vislenify($user->{ipid}), ($prefixstr || ''));
 
 	print STDERR "\n$prefix *** Begin profiling\n";
 	print STDERR "$prefix *** Begin ordered\n" if $use_profiling > 1;
@@ -3414,7 +3424,6 @@ EOT
 $prefix %-64.64s % 6d $unit (%6.6s%%)
 EOT
 	}
-
 
 	print STDERR "$prefix *** End profiling\n\n";
 
