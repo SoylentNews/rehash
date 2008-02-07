@@ -710,7 +710,12 @@ sub userdir_handler {
 					my $filter = fixparam("user:");
 					$r->args("op=userfirehose");
 					$r->uri('users.pl');
-					$r->filename($constants->{basedir} . '/users.pl')
+					$r->filename($constants->{basedir} . '/users.pl');
+
+                                } elsif ($op eq 'preferences') {
+                                        $r->args("op=displayprefs");
+                                        $r->uri('/preferences.pl');
+                                        $r->filename($constants->{basedir} . '/preferences.pl');
 
 				} else {
 					$r->args("op=edituser");
