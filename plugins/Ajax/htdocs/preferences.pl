@@ -57,10 +57,9 @@ sub main {
 }
 
 sub display_prefs {
-       
-        my $user = getCurrentUser();
+	my($form, $slashdb, $user, $constants) = @_;
 
-        slashDisplay('prefs_main', { discussion2 => $user->{discussion2}}, { Page => "ajax" });
+	slashDisplay('prefs_main', { discussion2 => $user->{discussion2}}, { Page => "ajax" });
         
 }
 
