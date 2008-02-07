@@ -13,46 +13,25 @@ en_US
 __name__
 prefs_titlebar
 __template__
-[% thisnickname = user.nickname | strip_literal;
-   title = title || "$thisnickname (This is you!)";
+
+[%
+thisnickname = user.nickname | strip_literal;
+title = title || "$thisnickname (This is you!)";
 PROCESS titlebar title=title;
-'<div id="usermenu">'; 
+%]
 
-user_link = '/users.pl?op=edituser';
-IF constants.modal_prefs_active;
-        user_link = user_link _ "\" onclick=\"getModalPrefs('user', 'User', 1)\; return false";
-END;
+[% IF title != 'Preferences' %]
+<div id="usermenu">
 
-tabs = [
-	{ link = user_link,                     label = "User",		sel_label = "user" },
-	{ link = "/users.pl?op=edithome",	label = "Homepage",	sel_label = "home" },
-	{ link = "/users.pl?op=editcomm",	label = "Comments",	sel_label = "comments" }
-];
-IF constants.plugin.Messages;
-        messages_link = "/my/messages";
-        IF constants.modal_prefs_active;
-                messages_link = messages_link _ "\" onclick=\"getModalPrefs('messages', 'Messages', 1)\; return false";
-        END;
-        tabs.push(
-        { link = messages_link,                 label = "Messages",     sel_label = "messages" },
-); END;
-IF constants.plugin.Journal; tabs.push(
-	{ link = "/journal.pl?op=editprefs",	label = "Journal",	sel_label = "journal" },
-); END;
-IF Slash.db.getMiscUserOpts.size; tabs.push(
-	{ link = "/users.pl?op=editmiscopts",	label = "Misc",		sel_label = "misc" },
-); END;
-IF constants.plugin.Subscribe; tabs.push(
-	{ link = "/subscribe.pl",		label = "Subscription",	sel_label = "subscription" },
-); END;
-tabs.push(
-	{ link = "/my/password",		label = "Password",	sel_label = "password" },
-);
-IF constants.plugin.Tags; tabs.push(
-	{ link = "/users.pl?op=edittags",	label = "Tags",		sel_label = "tags" },
-); END;
+[%
+tabs = [ { link = '/my/preferences', label = "Return to Help & Preferences", sel_label = "preferences" }, ]
+%]
 
-PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected; '</div>' %]
+[% PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected %]
+
+</div>
+
+[% END %]
 
 __seclev__
 10000
