@@ -11,6 +11,7 @@ image=htdocs/images/yui/callt.gif
 image=htdocs/images/yui/calrt.gif
 image=htdocs/images/yui/calx.gif
 htdoc=htdocs/ajax.pl
+htdoc=htdocs/preferences.pl
 htdoc=htdocs/images/admin.js
 htdoc=htdocs/images/yui/yahoo.js
 htdoc=htdocs/images/yui/dom.js
