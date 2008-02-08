@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+d<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -37,25 +37,126 @@
         </small></em></p>
 
 
-<h2><a name="cm120" id="cm120">What is Discussion2?</a></h2>
-	<p>Currently a small population of Slashdot readers are being asked to test a revised discussion/comment system.  The initial testing group will consist of our subscribed users, and will eventually expand to more users as we become comfortable with scalability, performance, and usability issues.</p>
-	<p>The most substantial art of Discussion2 is a new JavaScript/CSS architecture that will allow users to traverse trees of discussions without reloading pages.  You can expand/contract threads.  You can change your threshold.  You can narrow or expand the quality of the comments you are seeing... and all of these things without reloading a page!</p>
-	<h3>Still Yet TODO</h3>
-	<ul>
-		<li>Backwards compatibility with non-javascript browsers</li>
-		<li>embedding reply functionality</li>
-		<li>embedding moderation functionality</li>
-		<li>live polling to reflect new comments &amp; moderation without a reload</li>
-		<li>persist user preferences from article to article</li>
-		<li>new UI for controlling preferences</li>
-	</ul>
-	<p>What we have is a pretty good start.  The old Slashdot 'Threshold' still exists, but we've coupled it with a Better/Worse button that allows you to narrow &amp; expand the forum that you are reading based on quality.  Think of threshold as 'Quantity' and think of Better/Worse as 'Quality'.  When we start deploying the new moderation system, this functionality will improve, but for now this is a nice improvement on what we have.  You can set a lower threshold, with a higher quality setting, and see a large portion of the discussion, but only the "Best" comments will be expanded into full text.  Since the whole thing is dynamic, you can do all of this quickly, efficiently, and in very few page loads.</p>
-	<p>The current plan is that this view eventually replaces the nested &amp; threaded views on Slashdot.  Once we work out the remaining quirks with javascript compatibility, users without javascript should be able to use the new forum with little or no noticable changes.  Possibly this new code will replace flat mode as well, but that's a little more up in the air.</p>
-	<p>Feel free to give us feedback on this.  You ought to know the email addresses to contact.  pudge especially is the main coder on this project, although I won't place his email address here for the spammers to eat, I bet you can guess it based on his nickname and what the domain name of this website is.</p>
-        <p><em><small>
-                Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-                Last Modified: 5/3/06
-        </small></em></p>
+<h2><a name="cm120" id="cm120">What is 'D2' or 'Discussion2'</a></h2>
+<p>These are both nicknames given to Slashdot's Next Generation ajaxified, buzzword compliant comment system.
+Our old system was based on the traditional late 90's model of web design: you load pages and follow threads
+by loading new pages.  The new D2 system uses in-line AJAX requests to make it possible for you to follow a
+discussion with thousands of comments in a single page.</p>
+<p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+Last Modified: 2/7/08</small></em></p>
+
+
+<h2><a name="cm121" id="cm121">How do I change thresholds in Discussion2?</a></h2>
+<p>The floating widget contains 2 sliders that allow you to independently control the score threshold at which
+comments are displayed in Full Text, Abbreviated Text, and Hidden.  You can drag and drop them and
+adjust your preferences to find the balance of score and comment text you want.
+<p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+Last Modified: 2/7/08</small></em></p>
+
+
+<h2><a name="cm122" id="cm122">Where is nested mode in D2?</a></h2>
+<p>Nested mode as an explicit option is gone.  You essentially fake it by dragging the 2 sliders together.  When
+you do this, they move as a single unit, and you no longer see abbreviated comments.  This is exactly what
+nested mode did before, but you have the added benefit of being able to do this without reloading the page.
+<p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+Last Modified: 2/7/08</small></em></p>
+
+
+<h2><a name="cm123" id="cm123">Where is 'Page 2' in D2?</a></h2>
+<p>Default discussions will contain a relatively small number of comments.  Clicking 'More' will retrieve blocks
+of additional comments if they are available.  So you don't need to continuously load new pages and lose your
+place.  Instead you can follow threads and missing comments will be retrieved as you navigate down the
+threads.
+<p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+Last Modified: 2/7/08</small></em></p>
+
+
+
+<h2><a name="cm124" id="cm124">Why can't I get all the comments at once in D2?</a></h2>
+<p>Right now you have to retrieve comments in smaller blocks.  This is to find a balance between performance
+and bandwidth.  Processing huge chunks of XML sucks on slower computers, and can take forever if you are
+on a slow network connection.  Logged-in users can change the number of comments they retrieve with each
+request.  We'll be tweaking the exact sizes based on reader feedback.  Subscribers have the ability to download
+the entire discussion in one massive request, but we are very hesitant to enable that blindly since it
+can cause slow browsers to a choke. 
+<p>The balance between huge pages, which take more bandwidth, CPU and memory to load, against
+small pages which can be retrieved almost instantly is tricky.  After all, half of Slashdot readers don't read
+the discussions at all, so we need to create a default setting that works well for both casual and hard core
+readers.  If you log in you can retrieve more comments in each click... I suspect that this will be 'enough'
+comments for all but the most obsessive reader.
+<p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+Last Modified: 2/7/08</small></em></p>
+
+
+
+<h2><a name="cm125" id="cm125">How do I make the D2 Floating Slider go away?</a></h2>
+<p>The upper right hand corner of the floating D2 configuration widget has a little icon that toggles between 3 different 'modes'.  They are
+<OL>
+ <LI>Floating on the left hand side of the screen in the margin (the default, and I think nicest view)</LI>
+ <LI>Floating at the top of the screen (some people might like it this way, and on narrower browsers, this will work better.</LI>
+ <LI>'Locked' or stuck... in this mode, the floater stays pinned atop the discussion.  You can't change your thresholds within the page.  You can't load 'More' comments within the middle of a discussion, but for a lot of people, this may provide a cleaner view of discussions that they might like.</LI>
+</OL>
+<p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+Last Modified: 2/7/08</small></em></p>
+
+
+
+<h2><a name="cm126" id="cm126">How do I get rid of D2 and use the classic Slashdot comment system I know and love?</a></h2>
+<p>You need to log in, click 'Prefs' from the widget, and disable 'Enable Dynamic Discussions'.  Alternatively,
+you could run MSIE6.  Since D2 does not work under MSIE6, we disable it for users with that browser!
+<p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+Last Modified: 2/7/08</small></em></p>
+
+
+
+
+
+<h2><a name="cm127" id="cm127">I don't see D2 in my browser!</a></h2>
+<p>Currently, D2 is not supported in IE6- since these days only 10% of Slashdot readers use IE6, and that population
+is shrinking daily, we don't intend to work on compatibility.  You should upgrade to MSIE7, or better yet, Firefox.
+<p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+Last Modified: 2/7/08</small></em></p>
+
+
+<h2><a name="cm128" id="cm128">How about keybinding support?</a></h2>
+<p>Keybinding support is very experimental in D2, but already it is a powerful way of navigating forums.  We
+use the standard 'WASD' directional keys familiar to gamers for navigation.  Currently the keys that we support
+are as follows:
+<UL>
+ <LI>W/S, 'Up and Down' navigate you to previous and next thread.</LI>
+ <LI>A/D 'Left and Right' navigate you to the previous and next comment (following the threads)</LI>
+ <LI>Q/E 'Strafe' navigates you to previous and next comment by the order in which you loaded comments.  You can toggled your load order between Score and Date.  What this means is that you can navigate a slashdot discussion from oldest to newest, or from Score:5 to Score:-1, whichever you prefer.  You can change your load order in the preferences box.</LI>
+</UL>
+
+<p>Note that if you hold the shift key while pressing one of these keybindings, you will 'collapse' the comment
+that you leave.  In this way, you can press perhaps Shift-D repeatedly to read every comment on the page, collapsing the comments behind you so its easy to keep your place.
+<p>Also, when you get to the end of the discussion, continuing to press the next key (S or D) will check to see if
+more comments exist, and if they do, it will retrieve them.
+<P>This is all very experimental, and we're open to feedback.
+<p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+Last Modified: 2/7/08</small></em></p>
+
+
+
+<h2><a name="cm129" id="cm129">Why is there a square around a comment?</a></h2>
+<p>
+This is the 'current' comment for the purpose of key stroke discussion navigation.  Pressing the WASD keys
+allow you to navigate the discussion without your mouse.
+<p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+Last Modified: 2/7/08</small></em></p>
+
+
+
+<h2><a name="cm130" id="cm130">What is Next for D2?</a></h2>
+<p>
+<UL>
+ <LI>Bug fixing and compatibility fixing.</LI>
+ <LI>More keybindings to improve mouseless navigation</LI>
+ <LI>Comment posting from within the D2 interface</LI>
+</UL
+<p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
+Last Modified: 2/7/08</small></em></p>
+
 
 
 
