@@ -62,6 +62,17 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
         <h2><strong><a href="/faq/com-mod.shtml">Comments and Moderation</a></strong></h2>
         <ul>
                 <li><strong><a href="/faq/com-mod.shtml#cm100">What's up with flat/threaded/nested comments?</a></strong></li>
+                <li><strong><a href="/faq/com-mod.shtml#cm120">What is 'D2' or 'Discussion2'</a></strong></li>
+				<li><strong><a href="/faq/com-mod.shtml#cm121">How do I change thresholds in Discussion2?</a></strong></li>
+				<li><strong><a href="/faq/com-mod.shtml#cm122">Where is nested mode in D2?</a></strong></li>
+				<li><strong><a href="/faq/com-mod.shtml#cm123">Where is 'Page 2' in D2?</a></strong></li>
+				<li><strong><a href="/faq/com-mod.shtml#cm124">Why can't I get all the comments at once in D2?</a></strong></li>
+				<li><strong><a href="/faq/com-mod.shtml#cm125">How do I make the D2 Floating Slider go away?</a></strong></li>
+				<li><strong><a href="/faq/com-mod.shtml#cm126">How do I get rid of D2 and use the classic Slashdot comment system I know and love?</a></strong></li>
+				<li><strong><a href="/faq/com-mod.shtml#cm127">I don't see D2 in my browser!</a></strong></li>
+				<li><strong><a href="/faq/com-mod.shtml#cm128">How about keybinding support?</a></strong></li>
+				<li><strong><a href="/faq/com-mod.shtml#cm129">Why is there a square around a comment?</a></strong></li>
+				<li><strong><a href="/faq/com-mod.shtml#cm130">What is Next for D2?</a></strong></li>
                 <li><strong><a href="/faq/com-mod.shtml#cm150">Will you delete my comment?</a></strong></li>
                 <li><strong><a href="/faq/com-mod.shtml#cm200">Why did my comment get deleted?</a></strong></li>
                 <li><strong><a href="/faq/com-mod.shtml#cm300">Why did it take so long for my comment to appear?</a></strong></li>
