@@ -88,6 +88,7 @@ use vars qw($VERSION @EXPORT);
 
 	debugHash
 	slashProf
+	slashProfBail
 	slashProfInit
 	slashProfEnd
 
@@ -3351,8 +3352,9 @@ sub slashProfEnd {
 	local $\;
 
 	my $user = getCurrentUser();
+	my $vislen = getCurrentStatic('id_md5_vislength') || 5;
 	my $prefix = sprintf("PROF %d:%d:%s:%s:",
-		$$, $user->{uid}, vislenify($user->{ipid}), ($prefixstr || ''));
+		$$, $user->{uid}, substr($user->{ipid}, 0, $vislen), ($prefixstr || ''));
 
 	print STDERR "\n$prefix *** Begin profiling\n";
 	print STDERR "$prefix *** Begin ordered\n" if $use_profiling > 1;
