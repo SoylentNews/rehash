@@ -433,6 +433,7 @@ div.storylinks ul {padding-right: 60% !important}
 #nodmenu .menu, #nixmenu .menu {top: -35px; width: 150px; height: 15em; z-index: 1000000 !important; position: absolute !important; font-size: 11px}
 #nodmenu .menu {left: -150px !important;  background: url('//images.slashdot.org/popup_nod.png') no-repeat;}
 #nixmenu .menu {left: 15px !important; text-align: right; background: url('//images.slashdot.org/popup_nix.png') no-repeat;}
+#nodmenu.editing.soon .menu.basic, #nixmenu.editing.soon .menu.basic {display: block;}
 #nodmenu.editing .menu.basic, #nixmenu.editing .menu.basic {display: none;}
 
 #nodmenu li, #nixmenu li {list-style: none; color: #ddd; padding: 1px 4px}

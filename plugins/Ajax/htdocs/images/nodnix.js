@@ -5,6 +5,9 @@ var nodmenu = null;
 var nixmenu = null;
 var nodnix_listener = null;
 
+var nod_completer = null;
+var nix_completer = null;
+
 function get_nod_menu() {
 	if ( !nodmenu )
 		nodmenu = document.getElementById('nodmenu');
@@ -15,6 +18,30 @@ function get_nix_menu() {
 	if ( !nixmenu )
 		nixmenu = document.getElementById('nixmenu');
 	return nixmenu;
+}
+
+function get_predefined_nodnix_tags() {
+  var tags = [];
+  var query = current_nodnix_input().getAttribute("updown");
+  var listEl = query=="+" ? document.getElementById('static-nod-completions')
+                          : document.getElementById('static-nix-completions');
+  if ( listEl ) {
+    var itemEls = listEl.getElementsByTagName('li');
+    for ( var i=0; i<itemEls.length; ++i )
+      tags.push([itemEls[i].textContent]);
+  }
+  return tags;
+}
+var predefinedDS = new YAHOO.widget.DS_JSFunction(get_predefined_nodnix_tags);
+
+
+var proxyDS = new Object();
+proxyDS.__proto__ = YAHOO.slashdot.dataSources[0];
+proxyDS.doQuery = function( oCallbackFn, sQuery, oParent ) {
+  if ( sQuery && sQuery.length )
+    this.__proto__.doQuery(oCallbackFn, sQuery, oParent)
+  else
+    predefinedDS.doQuery(oCallbackFn, sQuery, oParent);
 }
 
 function get_nodnix_listener() {
@@ -44,9 +71,11 @@ function get_nodnix_listener() {
     keylist2.push(YAHOO.util.KeyListener.KEY.ENTER);
 
     var setupCompleter = function(inputEl, containerEl) {
-      var ac = new YAHOO.widget.AutoComplete(inputEl, containerEl, YAHOO.slashdot.dataSources[0]);
-      ac.typeAhead = true;
+      var ac = new YAHOO.widget.AutoComplete(inputEl, containerEl, proxyDS);
+      //ac.typeAhead = true;
       ac.allowBrowserAutocomplete = false;
+      ac.highlightClassName = "selected";
+      ac.minQueryLength = 0;
 
       ac.textboxBlurEvent.subscribe(handle_nodnix_blur);
       ac.itemSelectEvent.subscribe(handle_nodnix_select);
@@ -58,8 +87,8 @@ function get_nodnix_listener() {
       return ac;
     }
 
-    setupCompleter("nod-input", "nod-completions");
-    setupCompleter("nix-input", "nix-completions");
+    nod_completer = setupCompleter("nod-input", "nod-completions");
+    nix_completer = setupCompleter("nix-input", "nix-completions");
   }
   return nodnix_listener;
 }
@@ -176,8 +205,15 @@ function handle_nodnix_key( type, args, obj ) {
   }
 }
 
+function soon_is_now() {
+  YAHOO.util.Dom.removeClass(get_nod_menu(), 'soon');
+  YAHOO.util.Dom.removeClass(get_nix_menu(), 'soon');
+}
+
 function begin_nodnix_editing() {
   get_nodnix_listener().disable();
+  YAHOO.util.Dom.addClass(get_nod_menu(), 'soon');
+  YAHOO.util.Dom.addClass(get_nix_menu(), 'soon');
   YAHOO.util.Dom.addClass(get_nod_menu(), 'editing');
   YAHOO.util.Dom.addClass(get_nix_menu(), 'editing');
   dont_hide_nodnix_menu();
@@ -185,6 +221,9 @@ function begin_nodnix_editing() {
   var input = current_nodnix_input();
   input.value = "";
   input.focus();
+
+  (input.getAttribute("updown")=="+" ? nod_completer : nix_completer).sendQuery();
+  setTimeout("soon_is_now()", 225);
 }
 
 function end_nodnix_editing() {
