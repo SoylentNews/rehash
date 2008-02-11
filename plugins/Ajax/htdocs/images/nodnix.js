@@ -1,11 +1,6 @@
 // _*_ Mode: JavaScript; tab-width: 8; indent-tabs-mode: true _*_
 // $Id$
 
-var temp_nod_tags = ["fresh", "funny", "insightful", "interesting"];
-var temp_nix_tags = ["binspam", "dupe", "notthebest", "offtopic", "slownewsday", "stale", "stupid"];
-var temp_nod_ds = new YAHOO.widget.DS_JSArray(temp_nod_tags);
-var temp_nix_ds = new YAHOO.widget.DS_JSArray(temp_nix_tags);
-
 var nodmenu = null;
 var nixmenu = null;
 var nodnix_listener = null;
@@ -48,8 +43,10 @@ function get_nodnix_listener() {
     keylist2.push(YAHOO.util.KeyListener.KEY.ESCAPE);
     keylist2.push(YAHOO.util.KeyListener.KEY.ENTER);
 
-    var setupCompleter = function(inputEl, containerEl, dataSource) {
-      var ac = new YAHOO.widget.AutoComplete(inputEl, containerEl, dataSource);
+    var setupCompleter = function(inputEl, containerEl) {
+      var ac = new YAHOO.widget.AutoComplete(inputEl, containerEl, YAHOO.slashdot.dataSources[0]);
+      ac.typeAhead = true;
+      ac.allowBrowserAutocomplete = false;
 
       ac.textboxBlurEvent.subscribe(handle_nodnix_blur);
       ac.itemSelectEvent.subscribe(handle_nodnix_select);
@@ -61,8 +58,8 @@ function get_nodnix_listener() {
       return ac;
     }
 
-    setupCompleter("nod-input", "nod-completions", temp_nod_ds);
-    setupCompleter("nix-input", "nix-completions", temp_nix_ds);
+    setupCompleter("nod-input", "nod-completions");
+    setupCompleter("nix-input", "nix-completions");
   }
   return nodnix_listener;
 }
