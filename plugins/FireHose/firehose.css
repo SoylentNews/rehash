@@ -427,11 +427,13 @@ div.storylinks ul {padding-right: 60% !important}
 #nod-input, #nix-input {display: none; position: absolute; font-size: 11px; top:-55px; width: 101px;}
 #nod-input {left: -150px;}
 #nix-input {left: 58px;}
-#nodmenu.editing #nod-input, #nixmenu.editing #nix-input {display: block;}
+#nodmenu .menu.autocomplete, #nixmenu .menu.autocomplete {display: none;}
+#nodmenu.editing #nod-input, #nixmenu.editing #nix-input, #nodmenu.editing .menu.autocomplete, #nixmenu.editing .menu.autocomplete {display: block;}
 #nodmenu, #nixmenu {display: none; width: 200px; z-index: 100000; position: absolute !important; font-size: 11px}
 #nodmenu .menu, #nixmenu .menu {top: -35px; width: 150px; height: 15em; z-index: 1000000 !important; position: absolute !important; font-size: 11px}
 #nodmenu .menu {left: -150px !important;  background: url('//images.slashdot.org/popup_nod.png') no-repeat;}
 #nixmenu .menu {left: 15px !important; text-align: right; background: url('//images.slashdot.org/popup_nix.png') no-repeat;}
+#nodmenu.editing .menu.basic, #nixmenu.editing .menu.basic {display: none;}
 
 #nodmenu li, #nixmenu li {list-style: none; color: #ddd; padding: 1px 4px}
 #nodmenu ul {margin: 0 43px 0 0; background: #222; opacity: .9; border: 1px solid #111;}
