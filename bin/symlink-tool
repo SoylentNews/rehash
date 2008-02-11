@@ -121,7 +121,7 @@ for my $theme_or_plugin ($theme_hr, values %$plugin_list) {
  		  # create a `tidied' version of css globs if csstidy is available,
  		  #   else the tidied version is just a link to the original concatenation
  		  # consider: allow custom install dir for csstidy? a la sbindir, datadir, hc_fontpath, et al
- 			if ( system("csstidy $destpath --silent --template=high $tidiedpath") != 0 ) {
+ 			if ( system("csstidy $destpath --silent=true --template=high $tidiedpath") != 0 ) {
  			  link("$destpath", "$tidiedpath");
  			}
  		}
