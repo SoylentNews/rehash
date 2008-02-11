@@ -15,11 +15,7 @@ __template__
 
 [% IF user.is_admin %]
 
-[% PROCESS ajax_reskey_tag reskey_label => 'admin_commands-reskey-' _ sidenc, reskey_name => 'ajax_admin' %]
-<input type="text" id="tags_admin_commands-[% sidenc %]" name="tags_admin_commands-[% sidenc %]" value="" size=50 maxlength=150 onkeyup="handleEnter(event, adminTagsCommands, '[% sidenc %]')">
-<input type="button" value="Admin" onclick="adminTagsCommands('[% sidenc %]','stories')" class="button"> <span id="taghist-[% sidenc %]"><a href="#" onclick="tagsHistory('[% sidenc %]','stories'); return false">[History]</a></span>
-
-<div>[% tags_admin_str %]</div>
+<span id="taghist-[% sidenc %]"><a href="#" onclick="tagsHistory('[% sidenc %]','stories'); return false">[History]</a></span>
 
 [% END %]
 

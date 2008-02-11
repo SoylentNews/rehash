@@ -985,15 +985,27 @@ sub setTagsForGlobj {
 	
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
-
 	my $priv_tagnames = $self->getPrivateTagnames();
-	
+
+	$tag_string ||= $form->{tags} || '';
+
+	if ($user->{is_admin}) {
+		my @admin_commands =
+			grep { $tags->adminPseudotagnameSyntaxOK($_) }
+			map { lc }
+			split /[\s,]+/,
+			$tag_string;
+		for my $c (@admin_commands) {
+			$self->processAdminCommand($c, $id, $table);
+		}
+	}
+
 	my %new_tagnames =
 		map { ($_, 1) }
 		grep { $tags->tagnameSyntaxOK($_) }
 		map { lc }
 		split /[\s,]+/,
-		($tag_string || $form->{tags} || '');
+		$tag_string;
 
 	my $uid = $options->{uid} || $user->{uid};
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
