@@ -457,7 +457,8 @@ sub send {
 		}
 
                 # Email and Mobile messages are both Email modes, but use different recipients.
-                if ($msg->{user}{prefs}{$msg->{code}} == $self->getMessageDeliveryByName("Mobile")) {
+                my $mobile_code = $self->getMessageDeliveryByName('Mobile');
+                if ($mobile_code && $msg->{user}{prefs}{$msg->{code}} == $mobile_code) {
                         $addr = $msg->{user}{mobile_text_address};
                 } else {
                         $addr = $msg->{altto} || $msg->{user}{realemail};
