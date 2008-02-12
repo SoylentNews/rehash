@@ -1326,16 +1326,17 @@ sub processAdminCommand {
 
 	my $systemwide = $type =~ /^\$/ ? 1 : 0;
 	my $globjid = $systemwide ? undef : $self->getGlobjidCreate($table, $id);
+
 	my $hashmark_count = $type =~ s/\#/\#/g;
-	my $user_clout_reduction = $clout_reduc_map[$hashmark_count-1];
+	my $user_clout_reduction = 0;
+	$user_clout_reduction = $clout_reduc_map[$hashmark_count-1] if $hashmark_count;
 	$user_clout_reduction = 1 if $user_clout_reduction > 1;
-	# Eventually we need to define FLOATs for clout and multiply
-	# them together, but for now it's an overwrite.
+
 	my $new_user_clout = 1-$user_clout_reduction;
 
 	my $new_min_tagid = 0;
 
-print STDERR "type '$type' for c '$c' new_clout '$new_user_clout' for table $table id $id\n";
+#print STDERR "type '$type' s=$systemwide for c '$c' new_clout '$new_user_clout' for table $table id $id\n";
 	if ($type eq '*') {
 		# Asterisk means admin is saying this tagname is "OK",
 		# which (at least so far, 2007/12) means it is not
@@ -1365,12 +1366,16 @@ print STDERR "type '$type' for c '$c' new_clout '$new_user_clout' for table $tab
 			if ($new_user_clout < 1) {
 				my $uids = $self->sqlSelectColArrayref('uid', 'tags',
 					"tagnameid=$tagnameid AND inactivated IS NULL");
+#print STDERR "systemwide uids: '@$uids'\n";
 				if (@$uids) {
 					my @uids_changed = ( );
 					for my $uid (@$uids) {
+						my $max_clout = $self->getAdminCommandMaxClout($uid);
+#print STDERR "systemwide maxclout=$max_clout for uid=$uid\n";
+						$max_clout = $new_user_clout if $new_user_clout < $max_clout;
 						push @uids_changed, $uid
 							if $self->setUser($uid, {
-								-tag_clout => "LEAST(tag_clout, $new_user_clout)"
+								-tag_clout => "LEAST(tag_clout, $max_clout)"
 							});
 					}
 					my $uids_str = join(',', @uids_changed);
@@ -1397,9 +1402,11 @@ print STDERR "type '$type' for c '$c' new_clout '$new_user_clout' for table $tab
 				if (@$uids) {
 					my @uids_changed = ( );
 					for my $uid (@$uids) {
+						my $max_clout = $self->getAdminCommandMaxClout($uid);
+						$max_clout = $new_user_clout if $new_user_clout < $max_clout;
 						push @uids_changed, $uid
 							if $self->setUser($uid, {
-								-tag_clout => "LEAST(tag_clout, $new_user_clout)"
+								-tag_clout => "LEAST(tag_clout, $max_clout)"
 							});
 					}
 					my $uids_str = join(',', @uids_changed);
@@ -1418,11 +1425,40 @@ print STDERR "type '$type' for c '$c' new_clout '$new_user_clout' for table $tab
 
 	return $tagnameid;
 }
+
+my @pound_exp_map = qw(  1.05  1.10  1.20  1.30  1.50  ); # should be a var
+
+sub getAdminCommandMaxClout {
+	my($self, $uid) = @_;
+	my $count_hr = $self->getAdminCommandCountAffectingUID($uid);
+#use Data::Dumper; $Data::Dumper::Sortkeys=1;
+#print STDERR "getAdminCommandCountAffectingUID returns for $uid: " . Dumper($count_hr);
+	return 1 if !keys %$count_hr;
+
+	my $max_count = (sort { $b <=> $a } keys %$count_hr)[0];
+	$count_hr->{$max_count}--;
+	my $user_clout_reduction = 0;
+	$user_clout_reduction = $clout_reduc_map[$max_count-1] if $max_count;
+	$user_clout_reduction = 1 if $user_clout_reduction > 1;
+	my $max_clout = 1-$user_clout_reduction;
+
+	my $exponent = 1;
+	for my $pound_count (keys %$count_hr) {
+		$exponent += $pound_exp_map[$pound_count-1] ** $count_hr->{$pound_count}
+			- 1;
+#print STDERR "getAdminCommandCountAffectingUID exponent after key=$pound_count: $exponent\n";
+	}
+	$max_clout = $max_clout ** $exponent;
+#print STDERR "getAdminCommandCountAffectingUID max_clout: $max_clout\n";
+
+	return $max_clout;
+}
+
 } # closure
 
 sub getTypeAndTagnameFromAdminCommand {
 	my($self, $c) = @_;
-	my($type, $tagname) = $c =~ /^(\^|\+|\)|\$?\_|\$?\#{1,5})(.+)$/;
+	my($type, $tagname) = $c =~ /^(\^|\*|\)|\$?\_|\$?\#{1,5})(.+)$/;
 #print STDERR scalar(gmtime) . " get c '$c' type='$type' tagname='$tagname'\n";
 	return (undef, undef) if !$type || !$self->tagnameSyntaxOK($tagname);
 	return($type, $tagname);
@@ -1441,6 +1477,25 @@ sub logAdminCommand {
 		adminuid =>	getCurrentUser('uid'),
 		-created_at =>	'NOW()',
 	});
+}
+
+sub getAdminCommandCountAffectingUID {
+	my($self, $uid) = @_;
+	my $cmdtype_ar = $self->sqlSelectColArrayref(
+		'cmdtype',
+		'tagcommand_adminlog, tags',
+		"tags.uid=$uid
+		 AND tags.inactivated IS NULL
+		 AND     tagcommand_adminlog.tagnameid = tags.tagnameid
+		 AND ( ( tagcommand_adminlog.globjid = tags.globjid AND cmdtype LIKE '#%' )
+		    OR ( tagcommand_adminlog.globjid IS NULL AND cmdtype LIKE '\$#%' )
+		 )");
+	my %pound_count = ( );
+	for my $type (@$cmdtype_ar) {
+		my $hashmark_count = $type =~ s/\#/\#/g;
+		$pound_count{$hashmark_count}++;
+	}
+	return \%pound_count;
 }
 
 # This returns just the single tagname that is the opposite of
