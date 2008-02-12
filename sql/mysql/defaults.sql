@@ -954,6 +954,7 @@ INSERT INTO vars (name, value, description) VALUES ('login_temp_minutes', '10', 
 INSERT INTO vars (name, value, description) VALUES ('mailfrom','admin@example.com','All mail addressed from the site looks like it is coming from here');
 INSERT INTO vars (name, value, description) VALUES ('mailpass_max_hours','48','Mailing a password only allowed mailpass_max_num times per account per this many hours');
 INSERT INTO vars (name, value, description) VALUES ('mailpass_max_num','2','Mailing a password only allowed this many times per account per mainpass_max_hours hours');
+INSERT INTO vars (name, value, description) VALUES ('mailpass_valid_days','3','A mailed newpasswd is expired after this many days');
 INSERT INTO vars (name, value, description) VALUES ('mainfontface','verdana,helvetica,arial','Fonts');
 INSERT INTO vars (name, value, description) VALUES ('mainpage_displayable_nexuses', '', 'List of nexuses that can appear on the mainpage depending on settings; if empty, getStorypickableNexusChildren is used instead');
 INSERT INTO vars (name, value, description) VALUES ('mainpage_skid','1','ID of the skin considered "mainpage", the front page, what used to be meant by "always display"');
