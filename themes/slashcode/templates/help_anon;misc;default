@@ -1,0 +1,42 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+help_anon
+__template__
+
+<h2>Not Logged In?</h2>
+
+<br>
+
+<h3><a href="[% constants.rootdir %]/login.pl" style="text-decoration: none;">Login</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_login'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<div style="padding-left: 10px;">
+        <div id="modalprefhelp_login" class="modalprefhelp" style="display: none;">
+        Logged in users have a variety of benefits on Slashdot that are unavailable to users who don't bother logging in.
+        </div>
+
+        <div style="padding-left: 15px;"><a href="/faq/accounts.shtml#ac050" target="_blank">Why log in?</a>, <a href="/faq/accounts.shtml#ac1200" target="_blank">What are Login Sessions?</a></div>
+
+</div>
+
+<br>
+
+<h3><a href="/faq/accounts.shtml" target="_blank" style="text-decoration: none;">Accounts</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_accounts'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<div style="padding-left: 10px;">
+        <div id="modalprefhelp_accounts" class="modalprefhelp" style="display: none;">
+        Having trouble with your account? Learn about account security, how to change your password, and how to avoid getting banned.
+        </div>
+
+        <div style="padding-left: 15px;"><a href="[% constants.rootdir %]/login.pl?op=newuserform" target="_blank">Create an account</a>, <a href="/faq/accounts.shtml#ac300" target="_blank">I forgot/can't get my password!</a>, <a href="/faq/accounts.shtml#ac400" target="_blank">I'm having trouble logging in</a>.</div>
+</div>
+
+__seclev__
+500
+__version__
+$Id$
