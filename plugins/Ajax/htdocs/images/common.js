@@ -33,6 +33,9 @@ var fh_use_jquery = 0;
 var vendor_popup_timerids = Array(0);
 var vendor_popup_id = 0;
 var fh_slider_init_set = 0;
+var ua=navigator.userAgent;
+var is_ie = ua.match("/MSIE/");
+
 
 // eventually add site specific constants like this to a separate .js
 var sitename = "Slashdot";
@@ -575,15 +578,18 @@ function firehose_set_options(name, value) {
 		if ($('firehoselist')) {
 			// set page
 			page = 0;
-			var attributes = { 
-				opacity: { from: 1, to: 0 }
-			};
-			var myAnim = new YAHOO.util.Anim("firehoselist", attributes); 
-			myAnim.duration = 1;
-			myAnim.onComplete.subscribe(function() {
-				$('firehoselist').style.opacity = "1";
-			});
-			myAnim.animate();
+			
+			if (!is_ie) {
+				var attributes = { 
+					opacity: { from: 1, to: 0 }
+				};
+				var myAnim = new YAHOO.util.Anim("firehoselist", attributes); 
+				myAnim.duration = 1;
+				myAnim.onComplete.subscribe(function() {
+					$('firehoselist').style.opacity = "1";
+				});
+				myAnim.animate();
+			}
 			// remove elements
 			setTimeout("firehose_remove_all_items()", 600);
 		}
@@ -824,9 +830,11 @@ function firehose_handle_update() {
 			}
 
 			var attributes = { 
-				opacity: { from: 0, to: 1 },
 				height: { from: 0, to: toheight }
 			};
+			if (!is_ie) {
+				attributes.opacity = { from: 0, to: 1 };
+			}
 			var myAnim = new YAHOO.util.Anim(fh, attributes); 
 			myAnim.duration = 0.7;
 
@@ -865,9 +873,12 @@ function firehose_handle_update() {
 				// Don't delete admin looking at this in expanded view
 			} else {
 				var attributes = { 
-					height: { to: 0 },
-					opacity: { to: 0}
+					height: { to: 0 }
 				};
+				
+				if (!is_ie) {
+					attributes.opacity = { to: 0};
+				}
 				var myAnim = new YAHOO.util.Anim(fh, attributes); 
 				myAnim.duration = 0.4;
 				wait_interval = 500;
@@ -1135,9 +1146,11 @@ function firehose_remove_entry(id) {
 	var fh = $('firehose-' + id);
 	if (fh) {
 		var attributes = { 
-			height: { to: 0 },
-			opacity: { to: 0 }
+			height: { to: 0 }
 		};
+		if (!is_ie) {
+			attributes.opacity = { to: 0 };
+		}
 		var myAnim = new YAHOO.util.Anim(fh, attributes); 
 		myAnim.duration = 0.5;
 		myAnim.onComplete.subscribe(function() {
@@ -1408,8 +1421,9 @@ function firehose_get_media_popup(id) {
 	var params = [];
 	params['op'] = 'firehose_get_media';
 	params['id'] = id;
-	var handlers = {onComplete:show_modal_box};
-	ajax_update(params, 'modal_box_content', handlers);
+	show_modal_box();
+	$('modal_box_content').innerHTML = "<h4>Loading...</h4><img src='/images/spinner_large.gif'>";
+	ajax_update(params, 'modal_box_content');
 }
 
 function saveModalPrefs() {
@@ -1463,13 +1477,12 @@ function displayModalPrefHelp(element) {
 function toggle_filter_prefs() {
 	var fps = $('filter_play_status');
 	var fp  = $('filter_prefs');
-	console.log("toggle_filter_prefs");
 	if (fps) {
-//		console.log("got fps");
 		if (fps.className == "") {
-//			fps.className = "hide";
+			fps.className = "hide";
 			if (fp) {
 				fp.className = "";
+				setTimeout("firehose_slider_init()",500);
 			} 
 		} else if (fps.className == "hide") {
 			fps.className = "";
