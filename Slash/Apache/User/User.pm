@@ -267,7 +267,9 @@ sub handler {
 
 		my($tmpuid, $value) = eatUserCookie($logtoken || ($cookies->{user} && $cookies->{user}->value));
 		my $cookvalue;
-		if ($tmpuid && $tmpuid > 0 && $tmpuid != $constants->{anonymous_coward_uid}) {
+		if ($tmpuid && $tmpuid > 0 && !isAnon($tmpuid)) {
+			# Seems like this should be "? 4 : 3" because if it's not a temp
+			# logtoken it's a regular logtoken, right? -Jamie 2008-02-11
 			my $kind = $user_temp->{state}{login_public} eq 'yes' ? 4 : 0;
 			($uid, $cookvalue) =
 				$slashdb->getUserAuthenticate($tmpuid, $value, $kind, 1);
@@ -522,6 +524,8 @@ sub userLogin {
 	# my($EITHER, $PLAIN, $ENCRYPTED, $LOGTOKEN) = (0, 1, 2, 3);
 	## this is disabled for now; some people still using saved URLs
 	## with encrypted passwords etc. ... come back to it later -- pudge
+	## It's now much (much) later and we can probably disable this
+	## malfeature if we want. -Jamie 2008-02-11
 	my $kind = 0; #$logtoken ? 3 : 1;
 
 	my($uid, $cookvalue, $newpass) =
