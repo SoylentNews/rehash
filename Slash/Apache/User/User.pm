@@ -596,6 +596,13 @@ sub userdir_handler {
 		return OK;
 	}
 
+        if ($uri =~ m[^/help (?: /([^?]*) | /? ) $]x) {
+                $r->args("op=displayhelp");
+                $r->uri('/help.pl');
+                $r->filename($constants->{basedir} . '/help.pl');
+                return OK;
+        }
+        
 	# for self-references (/~/ and /my/)
 	if (($saveuri =~ m[^/(?:%7[eE]|~)] && $uri =~ m[^/~ (?: /(.*) | /? ) $]x)
 		# /my/ or /my can match, but not /mything
