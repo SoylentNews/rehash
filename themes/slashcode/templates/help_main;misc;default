@@ -1,0 +1,129 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+help_main
+__template__
+
+[%
+IF !user.is_anon;
+        PROCESS prefs_titlebar title='Help & Preferences';
+ELSE;
+        PROCESS prefs_titlebar title='Help';
+END
+%]
+
+<div style="float: left; width: 42%;">
+<h2>Help</h2>
+
+<br>
+
+<h3><a href="/faq" target="_blank" style="text-decoration: none;">FAQ</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_1'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<div style="padding-left: 10px;">
+        <div id="modalprefhelp_1" class="modalprefhelp" style="display: none;">
+        Herein lies everything you've ever wanted to know about Slashdot but were afraid to ask. Read about our hardware, traffic, the comments and moderation system,
+        or the mighty Firehose. Learn how to submit book reviews and suggest interview guests.<br>
+        </div>
+
+        <div style="padding-left: 15px;"><a href="/faq/com-mod.shtml" target="_blank">Comments and Moderation</a>, <a href="/faq/editorial.shtml#ed100" target="_blank">Submissions</a>, <a href="/faq/interviews.shtml" target="_blank">Interviews</a>, <a href="/faq/tech.shtml" target="_blank">Technology</a>.</div>
+
+</div>
+
+<br>
+
+<h3><a href="/about.shtml" target="_blank" style="text-decoration: none;">About Slashdot</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_2'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<div style="padding-left: 10px;">
+        <div id="modalprefhelp_2" class="modalprefhelp" style="display: none;">
+        Slashdot was originally created in September of 1997 by <a href="http://cmdrtaco.net/" target="_blank">Rob "CmdrTaco" Malda</a>. Today it is owned by <a href="http://sourceforge.com/" target="_blank">Sourceforge Inc</a>.<br>
+        </div>
+
+        <div style="padding-left: 15px;"><a href="/faq/slashmeta.shtml#sm100" target="_blank">Who does this?</a>, <a href="faq/slashmeta.shtml#sm330" target="_blank">Why are you so successful?</a></div>
+
+</div>
+
+<br>
+
+<h3><a href="/code.shtml" target="_blank" style="text-decoration: none;">About Slashcode</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_3'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<div style="padding-left: 10px;">
+        <div id="modalprefhelp_3" class="modalprefhelp" style="display: none;">
+        Slashcode is wrangled and various other deeds of a technical nature are committed by the <a href="http://sourceforge.com/" target="_blank">SourceForce Inc.</a> Slashteam.<br>
+        </div>
+
+        <div style="padding-left: 15px;"><a href="http://www.slashcode.com/faq.shtml" target="_blank">Slashcode's FAQ</a>, <a href="http://sourceforge.net/projects/slashcode/" target="_blank">Project summary</a>, <a href="http://sourceforge.net/project/stats/?group_id=4421&ugn=slashcode" target="_blank">Statistics</a>.</div>
+
+</div>
+
+<br>
+
+<h3><a href="http://sourceforge.net/projects/slashcode/" target="_blank" style="text-decoration: none;">Bug Reports</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_6'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<div style="padding-left: 10px;">
+        <div id="modalprefhelp_6" class="modalprefhelp" style="display: none;">
+        Have you found a bug? You may let us know about it by submitting to our bug tracker. Please remember, this is for bug submissions and <b>not</b> for feature requests. You
+        will need a valid email address if you're submitting a bug anonymously.<br>
+        </div>
+
+        <div style="padding-left: 15px;"><a href="/faq/suggestions.shtml#su1500" target="_blank">I have found a bug. Who do I contact?</a></div></div>
+
+<br>
+
+<h3><a href="/faq/subscriptions.shtml" target="_blank" style="text-decoration: none;">Subscriptions</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_7'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<div style="padding-left: 10px;">
+        <div id="modalprefhelp_7" class="modalprefhelp" style="display: none;">
+        Read about why we offer subscriptions and how you may get one. Want to give a subscription to a friend? Having trouble with your subscription or payment?<br>
+        </div>
+
+        <div style="padding-left: 15px;"><a href="/faq/subscriptions.shtml#ss100" target="_blank">Why do you offer subscriptions?</a>, <a href="/faq/subscriptions.shtml#ss300" target="_blank">How much does a subscription cost?</a>, <a href="/faq/subscriptions.shtml#ss700" target="_blank">Do I have to subscribe?</a>, <a href="/subscribe.pl" target="_blank">Subscribe.</div>
+</div>
+
+<br>
+
+<h3><a href="http://web.sourceforge.com/media_kit.php" target="_blank" style="text-decoration: none;">Advertising&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_8'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<div style="padding-left: 10px;">
+        <div id="modalprefhelp_8" class="modalprefhelp" style="display: none;">
+        Ever wonder why there are banner ads on Slashdot? Would you like to see yours up there?<br>
+        </div>
+
+        <div style="padding-left: 15px;"><a href="/faq/advertising.shtml#ad100" target="_blank">Can I advertise on Slashdot</a>, <a href="/faq/advertising.shtml#ad600" target="_blank">A banner ad is distorting my browser!</a>, <a href="http://web.sourceforge.com/media_kit.php" target="_blank">Advertise</a>.</div>
+</div>
+
+<br>
+
+<h3><a href="/supporters.shtml" target="_blank" style="text-decoration: none;">Supporters</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_5'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<div style="padding-left: 10px;">
+        <div id="modalprefhelp_5" class="modalprefhelp" style="display: none;">
+        Browse the multitude of sites that have linked to us by using one of our snazzy <a href="http://slashdot.org/prettypictures.shtml" target="_blank">banners</a>.
+        </div>
+
+        <div style="padding-left: 15px;"><a href="http://sourceforge.net/" target="_blank">SourceForge.net</a>, <a href="http://www.thinkgeek.com/" target="_blank">ThinkGeek</a>, <a href="http://freshmeat.net/" target="_blank">Freshmeat</a>, <a href="http://www.itmanagersjournal.com/" target="_blank">IT Manager's Journal</a>, <a href="http://www.linux.com/" target="_blank">Linux.com</a>.</div>
+
+</div>
+
+<br>
+
+<h3><a href="http://web.sourceforge.com/privacy.php" target="_blank" style="text-decoration: none;">Privacy Policy&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_9'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<div style="padding-left: 10px;">
+        <div id="modalprefhelp_9" class="modalprefhelp" style="display: none;">
+        Read our privacy policy if you're at all worried about cookies, email, or security in general.
+        </div>
+
+        <div style="padding-left: 15px;"></div>
+</div>
+
+</div>
+
+<div style="float: left; width: 42%; padding-left: 20px;">
+[% other %]
+</div>
+
+<div style="clear: both;">
+</div>
+__seclev__
+500
+__version__
+$Id$
