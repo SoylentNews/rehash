@@ -604,6 +604,16 @@ sub forgetRemarks {
 }
 
 ########################################################
+# For daily_forget.pl
+sub forgetNewPasswds {
+	my($self) = @_;
+	my $days = getCurrentStatic('mailpass_valid_days') || 3;
+	return $self->sqlUpdate('users',
+		{ newpasswd => undef, newpasswd_ts => undef },
+		"newpasswd IS NOT NULL AND newpasswd_ts < DATE_SUB(NOW(), INTERVAL $days DAY)");
+}
+
+########################################################
 # For dailystuff
 sub deleteDaily {
 	my($self) = @_;

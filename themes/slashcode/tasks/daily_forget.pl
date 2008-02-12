@@ -25,6 +25,7 @@ $task{$me}{code} = sub {
 		$slashdb->forgetRemarks,
 		$slashdb->forgetStoryTextRendered,
 		$slashdb->forgetErrnotes,
+		$slashdb->forgetNewPasswds,
 	);
 	return "forgotten: '@forgotten'";
 };

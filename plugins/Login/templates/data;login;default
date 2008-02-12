@@ -137,7 +137,8 @@ __template__
 
 [% CASE 'mail_mailed_note' %]
 	The password for [% name %] was emailed to its registered
-	email address.
+	email address. It will remain valid for
+	[% constants.mailpass_valid_days %] days.
 
 [% CASE 'mail_subject' %]
 	[% constants.sitename %] User Password for [% nickname %]
@@ -165,6 +166,9 @@ was [% remote_ip %].[% IF user_agent %]  Its user agent was
 [% IF x_forwarded_for %]In case that's a properly-configured proxy,
 the value of its X-Forwarded-For header was "[% x_forwarded_for %]" --
 but don't trust that value unless you know a reason to (we don't).[% END %]
+
+If you don't use this new password within [% constants.mailpass_valid_days %] days, it will expire
+and you'll have to send yourself another one.
 
 [% END %]
 
