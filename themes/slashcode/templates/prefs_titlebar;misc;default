@@ -20,11 +20,11 @@ title = title || "$thisnickname (This is you!)";
 PROCESS titlebar title=title;
 %]
 
-[% IF title != 'Preferences' %]
+[% IF title != 'Preferences' && title != 'Help & Preferences' && title != 'Help' %]
 <div id="usermenu">
 
 [%
-tabs = [ { link = '/my/preferences', label = "Return to Help & Preferences", sel_label = "preferences" }, ]
+tabs = [ { link = '/help', label = "Return to Help & Preferences", sel_label = "preferences" }, ]
 %]
 
 [% PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected %]
