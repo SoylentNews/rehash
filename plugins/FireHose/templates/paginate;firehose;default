@@ -18,6 +18,12 @@ __template__
 [% day_page = fh_page %]
 [% IF fh_page == "users.pl"; day_page = "firehose.pl"; END %]
 [% index_extra = form.index ? "&amp;index=1" : "" %]
+[% idle_submit_plug = "";
+   IF gSkin.name == "idle";
+   	idle_submit_plug = '<span class="inactive"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '">Submit Idle Story</a></span>';
+   END;
+
+%]
 
 
 [% IF !contentsonly %]
@@ -53,6 +59,7 @@ __template__
 			<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?issue=[% cur_day.0 %][% index_extra %]">[% cur_day.1 | strip_literal %]</a>
 		</span>
 		[% END %]
+		[% idle_submit_plug %]
 		[% IF !split_refresh %]</span>[% END %]
 [% ELSIF options.startdate && options.duration == 1;
 	day = day || options.startdate;
@@ -86,6 +93,7 @@ __template__
 		[% END %]
 		
 [%	END %]
+	[% idle_submit_plug %]
 [% IF !split_refresh %]</span>[% END %]
 [% ELSIF options.startdate && options.duration >= 28 && options.duration <= 31;
 	firehose = Slash.getObject("Slash::FireHose");
@@ -105,6 +113,7 @@ __template__
 		[%
 		END;
 	END;
+	idle_submit_plug;
 %]
 [% ELSIF options.duration == -1 && !options.startdate %]
 	[% IF !split_refresh %]<span id="beforewidget">[% END %]
@@ -125,6 +134,7 @@ __template__
 	[% IF split_refresh %]<!-- split -->[% END %]
 	[% IF !split_refresh %]
 	<span id="afterwidget">
+	[% idle_submit_plug %]
 	</span>
 	[% END %]
 [% ELSE %]

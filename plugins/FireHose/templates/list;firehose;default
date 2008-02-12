@@ -13,6 +13,7 @@ list
 __seclev__
 10000
 __template__
+[% firehose = Slash.getObject("Slash::FireHose"); %]
 [% IF env.script_name == "/firehose.pl" || form.ssi %]
 <script type="text/javascript">
   YAHOO.slashdot.SlashBoxApp = function()
@@ -155,10 +156,10 @@ cmdrtaco dot net but be forgiving of beta code!
 </span>
 [% PROCESS paginate options = options ulid = "fh-paginate" divid = "fh-pag-div" num_items = itemnum fh_page = fh_page %]
 <script type="text/javascript">
-	firehose_settings.startdate = '[% options.startdate.replace('-','') %]';
-	firehose_settings.issue = '[% options.issue %]';
-	firehose_settings.duration = '[% options.duration %]';
-	firehose_settings.section = '[% section %]';
+	firehose_settings.startdate = [% firehose.js_anon_dump(options.startdate.replace('-','')) %];
+	firehose_settings.issue = [% firehose.js_anon_dump(options.issue) %];
+	firehose_settings.duration = [% firehose.js_anon_dump(options.duration) %];
+	firehose_settings.section = [% firehose.js_anon_dump(section) %];
 	[% IF fh_page == "console.pl" %]
 		fh_pageval = 1;
 	[% ELSIF fh_page == "users.pl" %]
@@ -166,18 +167,15 @@ cmdrtaco dot net but be forgiving of beta code!
 	[% END %]
 
 	var firehose_action_time = 0;
-	var fh_color = '[% options.color || user.firehose_color || "indigo" %]';
-	fh_colors = [
-		[%- FOREACH color=colors -%]
-			"[%- color -%]",
-		[% END %]
-	];
+	[% options_color = (options.color || user.firehose_color || "indigo") %]
+	var fh_color = [% firehose.js_anon_dump(options_color) %];
+	fh_colors = [% firehose.js_anon_dump(colors) %];
 	var fh_colors_hash = new Array(0);
 	for (var i=0; i< fh_colors.length; i++) {
 		fh_colors_hash[fh_colors[i]] = i;
 	}
-	var fh_view_mode = '[% options.mode %]';
-	var page = '[% page %]';
+	var fh_view_mode = [% firehose.js_anon_dump(options.mode) %];
+	var page = [% firehose.js_anon_dump(page) %];
 	[% IF form.embed %]
 	firehose_settings.is_embedded = 1; // defined in common.js
 	[% END %]
@@ -185,10 +183,10 @@ cmdrtaco dot net but be forgiving of beta code!
 	var updateIntervalType = [% IF user.is_admin && !user.firehose_usermode %]1[% ELSE %]2[% END %];
 	var inactivity_timeout = [% IF user.is_admin && !user.firehose_usermode %]10800[% ELSE %]3600[% END %];
 	setFirehoseAction();
-	var update_time = '[% refresh_options.maxtime %]';
+	var update_time = [% firehose.js_anon_dump(refresh_options.maxtime) %];
 [% IF refresh_options && refresh_options.maxtime %]
-	var maxtime = '[% refresh_options.maxtime %]';
-	var insert_new_at = '[% refresh_options.insert_new_at %]';
+	var maxtime = [% firehose.js_anon_dump(refresh_options.maxtime) %];
+	var insert_new_at = [% firehose.js_anon_dump(refresh_options.insert_new_at) %];
 	[% IF !options.pause %]
 		firehose_play();
 	[% END %]

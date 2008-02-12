@@ -16,19 +16,9 @@ __template__
 [% topic = Slash.db.getTopic(item.tid) %]
 [% IF (item.thumb && (item.type == "story" || (item.type == "submission" && adminmode))) %]
 	[% file = Slash.db.getStaticFile(item.thumb); %]
-	[% link_url = "";
-	   IF item.type == "story";
-		story = Slash.db.getStory(item.srcid); 
- 		story_link_ar = Slash.linkStory ({
-		 	sid	=> story.sid,
-			link	=> story.title,
-			tid	=> story.tid
-			skin	=> story.primaryskid
-		 }, 0);
-		 link_url = story_link_ar.0;
-	ELSE;
-		link_url = constants.rootdir _ "/firehose.pl?op=view&amp;id=" _ item.id;
-	END %]
+	[% fh = Slash.getObject("Slash::FireHose");
+	   link_url = fh.linkFireHose(item);
+	%]
 	<a href="[% link_url %]"><img src="[% constants.imagedir %][% file.name %]" alt="thumbnail" [% IF file.width; "width='$file.width'"; END; IF file.height; " height='$file.height'"; END; %] [% IF item.media %]onclick="firehose_get_media_popup('[% item.id %]'); return false;"[% END %]></a><br>[% IF item.media %]<a href="[% link_url %]" onclick="firehose_get_media_popup('[% item.id %]')">[% END %]<br>[% IF item.media %]<a href="[% link_url %]" onclick="firehose_get_media_popup('[% item.id %]'); return false;">Watch</a>[% END %]
 							 
 [% ELSIF user.noicons || user.simpledesign || user.lowbandwidth %]
