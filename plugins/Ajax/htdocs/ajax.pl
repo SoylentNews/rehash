@@ -605,6 +605,17 @@ sub getModalPrefs {
                         },
                         { Return => 1 }
                 );
+
+        } elsif ($form->{'section'} eq 'admin') {
+                return if !$user->{is_admin};
+
+                return
+                        slashDisplay('prefs_admin', {
+                                user   => $user,
+                                tabbed => $form->{'tabbed'},
+                        },
+                        { Return => 1 }
+                );
                 
         } else {
                 
@@ -636,7 +647,6 @@ sub saveModalPrefs {
 			nosigs            => ($params{'nosigs'}              ? 1 : 0),
 			noscores          => ($params{'noscores'}            ? 1 : 0),
 			domaintags        => ($params{'domaintags'} != 2     ? $params{'domaintags'} : undef),
-			m2_with_comm_mod  => ($params{'m2_with_mod_on_comm'} ? 1 : undef),
 		};
 	}
 
@@ -652,7 +662,6 @@ sub saveModalPrefs {
 			textarea_cols     => ($params{'textarea_cols'} != $constants->{'textarea_cols'}
 				? $params{'textarea_cols'} : undef),
 			postanon          => ($params{'postanon'} ? 1 : undef),
-			no_spell          => ($params{'no_spell'} ? 1 : undef),
 		};
 	}
 
@@ -744,7 +753,6 @@ sub saveModalPrefs {
                         aim                 => $params{aim},
                         aimdisplay          => $params{aimdisplay},
                         icq                 => $params{icq},
-                        playing             => $params{playing},
                         mobile_text_address => $params{mobile_text_address},
                 };
 
@@ -886,7 +894,19 @@ sub saveModalPrefs {
                 };
 
         }
-        
+
+        if ($params{'formname'} eq "admin") {
+               return if !$user->{is_admin};
+
+              $user_edits_table = {
+                     playing           => $params{playing},
+                     no_spell          => ($params{'no_spell'} ? 1 : undef),
+                     mod_with_comm     => ($params{'mod_with_comm'} ? 1 : undef),
+                     m2_with_mod       => ($params{'m2_with_mod'} ? 1 : undef),
+                     m2_with_comm_mod  => ($params{'m2_with_mod_on_comm'} ? 1 : undef),
+              };
+        }
+
         # Everything but Sections is saved here.
         if ($params{'formname'} ne "sectional") {
                 $slashdb->setUser($params{uid}, $user_edits_table);
