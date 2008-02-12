@@ -493,6 +493,7 @@ sub fetchComments {
 		$to_dump{eval_first} ||= '';
 		$to_dump{eval_first} .= "placeholder_no_update = " . Data::JavaScript::Anon->anon_dump({ map { $_ => 1 } @placeholders }) . ';';
 	}
+	writeLog($id);
 	return Data::JavaScript::Anon->anon_dump(\%to_dump);
 }
 
