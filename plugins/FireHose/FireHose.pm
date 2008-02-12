@@ -1758,7 +1758,6 @@ sub getAndSetOptions {
 
 	my $the_skin = $form->{section} ? $self->getSkin($form->{section}) : $gSkin;
 
-
 	if ($tabtype eq 'tabsection') {
 		$form->{fhfilter} = "story";
 		$options->{orderdir} = "DESC";
@@ -2547,6 +2546,37 @@ sub createSectionSelect {
 	return createSelect("section", $menu, { default => $default, return => 1, nsort => 0, ordered => $ordered, multiple => 0, onchange => $onchange });
 
 	
+}
+
+sub linkFireHose {
+	my ($self, $id_or_item) = (@_);
+	my $gSkin 	= getCurrentSkin();
+	my $constants 	= getCurrentStatic();
+	my $link_url;
+	my $item = ref($id_or_item) ? $id_or_item : $self->getFireHose($id_or_item);
+
+
+	if ($item->{type} eq "story") {
+		my $story = $self->getStory($item->{srcid});
+		my $story_link_ar = $self->getStory({
+			sid	=> $story->{sid},
+			link 	=> $story->{title},
+			tid 	=> $story->{tid},
+			skin	=> $story->{primaryskid}
+		}, 0);
+		$link_url = $story_link_ar->[0];
+	} elsif ($item->{type} eq "journal") {
+		my $the_user = $self->getUser($item->{uid});
+		$link_url = $constants->{rootdir} . "/~" . fixparam($the_user->{nickname}) . "/journal/$item->{srcid}"; 
+	} else {
+		$link_url = $gSkin->{rootdir} . '/firehose.pl?op=view&amp;id=' . $item->{id};
+	}
+
+}
+
+sub js_anon_dump {
+	my ($self, $var) = @_;
+	return Data::JavaScript::Anon->anon_dump($var);
 }
 
 1;
