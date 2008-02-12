@@ -6,6 +6,7 @@
 package Slash::Apache::User::PasswordSalt;
 
 use strict;
+use Carp;
 use File::Spec::Functions;
 use Slash::Utility::Environment;
 use vars qw($REVISION $VERSION);
@@ -46,9 +47,9 @@ $VERSION   	= '2.003000';  # v2.3.0
 # this is only a minor setback.)
 #
 
+{ # closure
 
 my $salt_hr = undef;
-
 
 sub loadSalts {
 	return if defined $salt_hr;
@@ -71,6 +72,7 @@ sub loadSalts {
 
 sub getPwSalts {
 	my($virtual_user) = @_;
+	abortIfSuspiciousCaller();
 	return [ ] if !$virtual_user;
 	loadSalts();
 	return $salt_hr->{$virtual_user} || [ ];
@@ -80,6 +82,37 @@ sub getCurrentPwSalt {
 	my($virtual_user) = @_;
 	my $salt_ar = getPwSalts($virtual_user);
 	return @$salt_ar ? $salt_ar->[-1] : '';
+}
+
+} # end closure
+
+#
+# This module's purpose is circumvented if there's a way an attacker
+# can read any data from getPwSalts().  We consider the case of an
+# attacker who may be able to evaluate a template and see the results.
+# While this module's methods are not made available to the template
+# processing code (see Slash::Display::Plugin, which exports only
+# Slash.pm methods in Slash.* and DB methods in Slash.db.*), we add
+# this extra check to try to ensure that its data can't be read from a
+# template.
+#
+# As of this writing (2008-02-12) there should be no reason to think
+# that a template needs to read password salt.
+#
+
+sub abortIfSuspiciousCaller() {
+	my $i = 1;
+	while (my @c = caller($i)) {
+		my($package, $filename, $line, $subroutine) = @c;
+		# If we go back up the call chain to a package we know we can
+		# trust, then we can stop looking.
+		last if $package =~ /^(main|Apache::PerlRun|Apache::ROOT::.*)$/;
+		if ($package =~ /^Template/ || $subroutine eq '(eval)') {
+			# This exits the entire script immediately.
+			confess(scalar(gmtime) . " $$ SuspiciousCaller for salt at package '$package'");
+		}
+		++$i;
+	}
 }
 
 1;
