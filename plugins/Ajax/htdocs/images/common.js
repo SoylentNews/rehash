@@ -1459,3 +1459,24 @@ function displayModalPrefHelp(element) {
         var vis = elem.style;
         vis.display = (!vis.display || vis.display == 'block') ? 'none' : 'block';
 }
+
+function toggle_filter_prefs() {
+	var fps = $('filter_play_status');
+	var fp  = $('filter_prefs');
+	console.log("toggle_filter_prefs");
+	if (fps) {
+//		console.log("got fps");
+		if (fps.className == "") {
+//			fps.className = "hide";
+			if (fp) {
+				fp.className = "";
+			} 
+		} else if (fps.className == "hide") {
+			fps.className = "";
+			if (fp) {
+				fp.className = "hide";
+			}
+		}
+	}
+
+}
