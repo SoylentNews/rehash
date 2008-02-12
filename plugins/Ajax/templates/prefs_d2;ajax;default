@@ -27,38 +27,48 @@ __template__
 <input type="hidden" name="refreshable" value="">
 
 <table width="100%">
-	<tr>
-	<td valign="middle">
-		[% d2_check = '';
-		IF user.discussion2 == 'slashdot';
-			d2_check = constants.markup_checked_attribute;
-		END %]
-		<label><input type="checkbox" name="discussion2"[% d2_check %] onclick="javascript:void(document.forms['modal_prefs'].refreshable.value=1);">&nbsp;Enable Dynamic Discussions</label>
-
-		&nbsp;<p>
-
-		[% IF user.discussion2 && user.discussion2 == "slashdot" %]
-                	<blockquote>
-			<div>
-			Retrieve [% comment_q_name = (user.is_subscriber || user.is_admin) ? 'd2_comment_q_all' : 'd2_comment_q';
-			   comment_q = Slash.db.getDescriptions(comment_q_name);
-			   Slash.createSelect('d2_comment_q', comment_q, user.d2_comment_q, 1) %] Comments<br>
-
-			Get [% comment_order = Slash.db.getDescriptions('d2_comment_order');
-			   comment_order_def = user.d2_comment_order || 0; # score
-			   Slash.createSelect('d2_comment_order', comment_order, comment_order_def, 1) %] Comments First
-			</div>
-			</blockquote>
-                [% END %]
-
-		[% s_check = '';
-		IF user.nosigs;
-			s_check = constants.markup_checked_attribute;
-		END %]
+        <tr>
+        <td valign="middle">
+                [% d2_check = '';
+                IF user.discussion2 == 'slashdot';
+                        d2_check = constants.markup_checked_attribute;
+                END %]
+                <input type="checkbox" name="discussion2"[% d2_check %] onclick="javascript:void(document.forms['modal_prefs'].refreshable.value=1);">&nbsp;<b>Enable Dynamic Discussions</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussions');" style="text-decoration: none;">[?]</a>
+                <br>
+                <div id="modalprefhelp_discussions" class="modalprefhelp" style="display: none;">
+                        Toggle between Discussion 2 and the classic discussion system.
+                </div>
 
                 <br>
 
-                input type="checkbox" name="nosigs"[% s_check %]>&nbsp;<b>Disable Sigs</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sigs');" style="text-decoration: none;">[?]</a>
+                [% IF user.discussion2 && user.discussion2 == "slashdot" %]
+                        <blockquote>
+                        <div>
+                        Retrieve [% comment_q_name = (user.is_subscriber || user.is_admin) ? 'd2_comment_q_all' : 'd2_comment_q';
+                           comment_q = Slash.db.getDescriptions(comment_q_name);
+                           Slash.createSelect('d2_comment_q', comment_q, user.d2_comment_q, 1) %] Comments&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sortorder');" style="text-decoration: none;">[?]</a>
+
+                        <br>
+
+                        Get [% comment_order = Slash.db.getDescriptions('d2_comment_order');
+                           comment_order_def = user.d2_comment_order || 0; # score
+                           Slash.createSelect('d2_comment_order', comment_order, comment_order_def, 1) %] Comments First
+                        </div>
+                        </blockquote>
+                [% END %]
+
+                <div id="modalprefhelp_sortorder" class="modalprefhelp" style="display: none;">
+                        Set the number of comments you want to retrieve at one time, and their sort order.
+                </div>
+
+                [% s_check = '';
+                IF user.nosigs;
+                        s_check = constants.markup_checked_attribute;
+                END %]
+
+                <br>
+
+                <input type="checkbox" name="nosigs"[% s_check %]>&nbsp;<b>Disable Sigs</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sigs');" style="text-decoration: none;">[?]</a>
                 <br>
                 <div id="modalprefhelp_sigs" class="modalprefhelp" style="display: none;">
                         Strip sig quotes from comments.
@@ -70,39 +80,33 @@ __template__
                 IF user.noscores;
                         n_check = constants.markup_checked_attribute;
                 END %]
-
-                <input type="checkbox" name="noscores"[% n_check %]>&nbsp;<b>Do Not Display Scores</b><a href="#" onclick="displayModalPrefHelp('modalprefhelp_scores');" style="text-decoration: none;">[?]</a>
+                <input type="checkbox" name="noscores"[% n_check %]>&nbsp;<b>Do Not Display Scores</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_scores');" style="text-decoration: none;">[?]</a>
                 <br>
                 <div id="modalprefhelp_scores" class="modalprefhelp" style="display: none;">
-                        Hides score: They still <b>apply</b> you just don't see them.
-                </div>               
- 
+                        Hide scores. They still <b>apply</b>, but you just don't see them.
+                </div>
 
                 <br>
 
                 [% UNLESS user.domaintags.defined; user.domaintags = 2; END %]
                 [% domaintags.${user.domaintags} = constants.markup_checked_attribute -%]
 
-                <b>Display Link Domains?</b> (shows the actual domain of any link in brackets)<br>
+                <b>Display Link Domains?</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_domains');" style="text-decoration: none;">[?]</a>
+                <br>
+                <div id="modalprefhelp_domains" class="modalprefhelp" style="display: none;">
+                        Show the actual domain of any link in brackets.
+                </div>
+
                 <blockquote><div>
                 <input type="radio" name="domaintags" [% domaintags.0 %] value=0> Never show link domains<br>
                 <input type="radio" name="domaintags" [% domaintags.1 %] value=1> Show the links domain only in recommended situations<br>
                 <input type="radio" name="domaintags" [% domaintags.2 %] value=2> Always show link domains
                 </div></blockquote>
 
-                <p>
-
-                [% IF user.is_admin && constants.m2 %]
-                        [% s_m2c_check = '';
-                        IF user.m2_with_comm_mod;
-                                s_m2c_check = constants.markup_checked_attribute;
-                        END %]
-                <label><input type="checkbox" name="m2_with_mod_on_comm" [% s_m2c_check %]>&nbsp;Show Metamoderation in Comment Moderation Listing</label>
-                [% END %]
-	</td>
-	</tr>
+        </td>
+        </tr>
 </table>
-<p>
+<br>
 <input type="button" value="Save" onclick="saveModalPrefs()">
 </form>
 __seclev__

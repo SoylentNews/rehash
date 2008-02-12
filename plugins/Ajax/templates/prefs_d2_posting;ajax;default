@@ -30,25 +30,25 @@ __template__
 <input type="hidden" name="uid" value="[% user.uid %]">
 
 <table width="100%">
-	<tr>
-	<td valign="middle">
-	&nbsp;<p>
+        <tr>
+        <td valign="middle">
+        &nbsp;<p>
 
-	<b>Email Display</b>
+        <b>Email Display</b>
         (currently
         [%- IF !user.fakeemail; " not displayed";
         ELSE; ": <tt>"; user.fakeemail | strip_literal; "</tt>";
         END %])<br>
         [% IF !user.emaildisplay.defined;
-        	IF user.fakeemail %]
-        	<i>(Your current email address was apparently set before
+                IF user.fakeemail %]
+                <i>(Your current email address was apparently set before
                 users' email addresses were forced to one of the below
                 choices. Please pick one and click Save.)</i><br>
                 [% END;
                 user.emaildisplay = 0;
         END;
         IF user.emaildisplay.defined;
-        	emaildisplay.${user.emaildisplay} = constants.markup_checked_attribute;
+                emaildisplay.${user.emaildisplay} = constants.markup_checked_attribute;
         END %]
         <blockquote><div>
         <input type="radio" name="emaildisplay" [% emaildisplay.0 %] value=0> Do not display an e-mail address.<br>
@@ -56,72 +56,86 @@ __template__
         <input type="radio" name="emaildisplay" [% emaildisplay.2 %] value=2> Show your real email address without cowering behind childish anonymity or obfuscation.
         </div></blockquote>
 
-	[% IF user.karma > constants.goodkarma;
-		b_check = '';
-		IF user.nobonus;
-			b_check = constants.markup_checked_attribute;
-		END %]
-		<input type="hidden" name="nobonus_present" value="1">
-		<label><input type="checkbox" name="nobonus"[% b_check %]> No Karma Bonus</label>
-	[% END %]
+        [% IF user.karma > constants.goodkarma;
+                b_check = '';
+                IF user.nobonus;
+                        b_check = constants.markup_checked_attribute;
+                END %]
+                <input type="hidden" name="nobonus_present" value="1">
+                <b><input type="checkbox" name="nobonus"[% b_check %]>&nbsp;No Karma Bonus</b><a href="#" onclick="displayModalPrefHelp('modalprefhelp_karma');" style="text-decoration: none;">[?]</a>
+                <br>
+                <div id="modalprefhelp_karma" class="modalprefhelp" style="display: none;">
+                        Normally users with high karma post at Score: 2, but you can choose to post down in the Score: 1 gutters with the rest of the user population with this option.
+                </div>
 
-	[% IF user.is_subscriber;
-		sb_check = '';
-		IF user.nosubscriberbonus;
-			sb_check = constants.markup_checked_attribute;
-		END %]
+        [% END %]
+
+        [% IF user.is_subscriber;
+                sb_check = '';
+                IF user.nosubscriberbonus;
+                        sb_check = constants.markup_checked_attribute;
+                END %]
                 <input type="hidden" name="nosubscriberbonus_present" value="1">
-                <label><input type="checkbox" name="nosubscriberbonus"[% sb_check %]> No Subscriber Bonus</label>
-	[% END %]
+                <b><input type="checkbox" name="nosubscriberbonus"[% sb_check %]>&nbsp;No Subscriber Bonus</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_subscriber');" style="text-decoration: none;">[?]</a>
+                <br>
+                <div id="modalprefhelp_subscriber" class="modalprefhelp" style="display: none;">
+                        Our paying subscribers are allowed to post at Score: 2, but if you think that this is unnecessary, then you can turn it off.
+                </div>
 
-	<label>Comment Box Size</label>
-	[% textarea_cols = constants.textarea_cols;
-	IF user.textarea_cols;
-		textarea_cols = user.textarea_cols;
-	END;
+        [% END %]
 
-	textarea_rows = constants.textarea_rows;
-	IF user.textarea_rows;
-		textarea_rows = user.textarea_rows;
-	END %]
-
-        Columns: <input type="text" name="textarea_cols" size="4" value="[% user.textarea_cols || constants.textarea_cols %]">
-        Rows: <input type="text" name="textarea_rows" size="4" value="[% user.textarea_rows || constants.textarea_rows %]">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_textarea');" style="text-decoration: none;">[?]</a>
+        <b>Comment Box Size</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_textarea');" style="text-decoration: none;">[?]</a>
         <br>
         <div id="modalprefhelp_textarea" class="modalprefhelp" style="display: none;">
                 Also applies to other large text boxes.
         </div>
 
-	<label>Comment Post Mode</label>
-	[%
-	formats = Slash.db.getDescriptions('postmodes');
-	Slash.createSelect('posttype', formats, user.posttype, 1);
-	%]
+        [% textarea_cols = constants.textarea_cols;
+        IF user.textarea_cols;
+                textarea_cols = user.textarea_cols;
+        END;
 
-	&nbsp;<p>
+        textarea_rows = constants.textarea_rows;
+        IF user.textarea_rows;
+                textarea_rows = user.textarea_rows;
+        END %]
 
-	[%
-	p_check = '';
-       	IF user.postanon;
-        	p_check = constants.markup_checked_attribute;
-	END;
-	%]
-	
-	[% IF constants.allow_anonymous && (user.karma > -1 || p_check) %]
-		<input type="hidden" name="postanon_present" value="1">
-		<label><input type="checkbox" name="postanon"[% p_check %]> Post Anonymously</label>
-		</label>
-	[% END %]
+        Columns: <input type="text" name="textarea_cols" size="4" value="[% user.textarea_cols || constants.textarea_cols %]">
+        Rows: <input type="text" name="textarea_rows" size="4" value="[% user.textarea_rows || constants.textarea_rows %]">
 
-	[% IF user.is_admin;
-		nospell_check = '';
-		IF user.no_spell;
-			nospell_check = constants.markup_checked_attribute;
-		END %]
-		<label><input type="checkbox" name="no_spell"[% nospell_check %]> Disable Spellchecker</label>
-	[% END %]
-	</td>
-	</tr>
+        <br><br>
+
+        <b>Comment Post Mode</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_postmode');" style="text-decoration: none;">[?]</a>
+        <br>
+        <div id="modalprefhelp_postmode" class="modalprefhelp" style="display: none;">
+                Posting modes determine how the text that you enter for a comment is interpreted and thus how it will be displayed to the reader. The posting modes are:<br>
+                <b>HTML Formatted:</b> You determine the formatting, using allowed HTML tags and entities.<br>
+                <b>Plain Old Text:</b> Same as "HTML Formatted", except that &lt;BR&gt; is automatically inserted for newlines, and other whitespace is converted to non-breaking spaces in a more-or-less intelligent way.<br>
+                <b>Extrans:</b> Same as "Plain Old Text", except that & and &lt; and &gt; are converted to entities (no HTML markup allowed).<br>
+                <b>Code:</b> Same as "Extrans", but a monospace font is used, and a best attempt is made at performing proper indentation.
+        </div>
+        [%
+        formats = Slash.db.getDescriptions('postmodes');
+        Slash.createSelect('posttype', formats, user.posttype, 1);
+        %]
+
+        &nbsp;<p>
+
+        [%
+        p_check = '';
+        IF user.postanon;
+                p_check = constants.markup_checked_attribute;
+        END;
+        %]
+
+        [% IF constants.allow_anonymous && (user.karma > -1 || p_check) %]
+                <input type="hidden" name="postanon_present" value="1">
+                <label><input type="checkbox" name="postanon"[% p_check %]> Post Anonymously</label>
+                </label>
+        [% END %]
+
+        </td>
+        </tr>
 </table>
 &nbsp;<p>
 <input type="button" value="Save" onclick="saveModalPrefs()">
