@@ -130,6 +130,7 @@ htdoc=htdocs/images/comments.js
 htdoc=htdocs/images/comments2.js
 htdoc=htdocs/images/dumper.js
 htdoc=htdocs/badge.pl
+htdoc=htdocs/help.pl
 glob=badgejs:htdocs/badge.js
 badgejs=htdocs/badge.js
 css=htdocs/admin.css
@@ -332,6 +333,8 @@ template=templates/hrefLink;misc;default
 template=templates/userLink;misc;default
 template=templates/fileLink;misc;default
 template=templates/imageLink;misc;default
+template=templates/help_main;misc;default
+template=templates/help_anon;misc;default
 
 misc=misc/spamarmors
 plugin=Admin
