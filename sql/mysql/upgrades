@@ -5133,3 +5133,6 @@ UPDATE vars SET value = 'T_2_5_0_193' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+ALTER TABLE users MODIFY newpasswd varchar(32) default '', ADD COLUMN newpasswd_ts datetime DEFAULT NULL AFTER newpasswd;
+UPDATE users SET newpasswd=MD5(newpasswd), newpasswd_ts=NOW() WHERE newpasswd IS NOT NULL;
+

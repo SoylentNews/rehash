@@ -1531,6 +1531,7 @@ sub deleteUser {
 		realemail	=> '',
 		fakeemail	=> '',
 		newpasswd	=> '',
+		newpasswd_ts	=> undef,
 		homepage	=> '',
 		passwd		=> '',
 		people		=> '',
@@ -1591,7 +1592,7 @@ sub getUserAuthenticate {
 
 		# try ENCRYPTED -> ENCRYPTED
 		if ($kind == $EITHER || $kind == $ENCRYPTED) {
-			if (comparePassword($passwd, $db_passwd, 0, ($kind == $ENCRYPTED))) {
+			if (comparePassword($passwd, $db_passwd, $uid_try, 0, ($kind == $ENCRYPTED))) {
 				$uid_verified = $db_uid;
 				# get existing logtoken, if exists, or new one
 				$cookpasswd = $self->getLogToken($uid_verified, 1);
@@ -1600,7 +1601,7 @@ sub getUserAuthenticate {
 
 		# try PLAINTEXT -> ENCRYPTED
 		if (($kind == $EITHER || $kind == $PLAIN) && !$uid_verified) {
-			if (comparePassword($passwd, $db_passwd, ($kind == $PLAIN), 0)) {
+			if (comparePassword($passwd, $db_passwd, $uid_try, ($kind == $PLAIN), 0)) {
 				$uid_verified = $db_uid;
 				# get existing logtoken, if exists, or new one
 				$cookpasswd = $self->getLogToken($uid_verified, 1);
@@ -1609,8 +1610,8 @@ sub getUserAuthenticate {
 
 		# try PLAINTEXT -> NEWPASS
 		if (($kind == $EITHER || $kind == $PLAIN) && !$uid_verified) {
-			if ($passwd eq $db_newpasswd) {
-				my $cryptpasswd = encryptPassword($passwd);
+			if (comparePassword($passwd, $db_newpasswd, $uid_try, ($kind == $PLAIN), 0)) {
+				my $cryptpasswd = encryptPassword($passwd, $uid_try);
 				$self->sqlUpdate('users', {
 					newpasswd	=> '',
 					passwd		=> $cryptpasswd
@@ -1736,7 +1737,8 @@ sub getNewPasswd {
 	my($self, $uid) = @_;
 	my $newpasswd = changePassword();
 	$self->sqlUpdate('users', {
-		newpasswd => $newpasswd
+		newpasswd =>		encryptPassword($newpasswd, $uid),
+		-newpasswd_ts =>	'NOW()',
 	}, 'uid=' . $self->sqlQuote($uid));
 	return $newpasswd;
 }
@@ -1747,9 +1749,11 @@ sub getNewPasswd {
 sub resetUserAccount {
 	my($self, $uid) = @_;
 	my $newpasswd = changePassword();
+	my $enc = encryptPassword($newpasswd, $uid);
 	$self->sqlUpdate('users', {
-		newpasswd => $newpasswd,
-		passwd	  => encryptPassword($newpasswd)
+		passwd =>		$enc,
+		newpasswd =>		$enc,
+		newpasswd_ts =>		undef,
 	}, 'uid=' . $self->sqlQuote($uid));
 	return $newpasswd;
 }
@@ -10278,7 +10282,8 @@ sub setUser {
 	if (exists $hashref->{passwd}) {
 		# get rid of newpasswd if defined in DB
 		$hashref->{newpasswd} = '';
-		$hashref->{passwd} = encryptPassword($hashref->{passwd});
+		$hashref->{newpasswd_ts} = undef,
+		$hashref->{passwd} = encryptPassword($hashref->{passwd}, $uid);
 	}
 	$hashref->{people} = freeze($hashref->{people}) if $hashref->{people};
 	if (exists $hashref->{slashboxes}) {
@@ -10327,7 +10332,7 @@ sub setUser {
 		my $where = "uid=$uid";
 		my %minihash = ( );
 		for my $key (@{$update_tables{$table}}) {
-			if (defined $hashref->{$key}) {
+			if (exists $hashref->{$key}) {
 				$minihash{$key} = $hashref->{$key};
 				if ($options->{and_where}) {
 					my $and_where = undef;
