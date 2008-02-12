@@ -1,0 +1,85 @@
+__section__
+default
+__description__
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+prefs_admin
+__template__
+[% IF user.is_admin %]
+
+                [% IF tabbed == 1 %]
+                <div style="text-align: center;">
+                &nbsp;
+                <a href="#" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('user', 'User', 1); return false;">User</a>
+                &nbsp;|&nbsp;
+                <a href="#" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('messages', 'Messages', 1); return false;">Messages</a>
+                &nbsp;|&nbsp;
+                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Admin</span>
+                </div>
+                [% END %]
+
+                <br>
+
+                <form id ="modal_prefs" method="post">
+			<input type="hidden" name="formname" value="admin">
+                        <input type="hidden" name="uid" value="[% user.uid %]">
+                        <input type="hidden" name="name" value="[% user.nickname | strip_attribute %]">
+
+                        [% IF constants.slashbox_whatsplaying %]
+                                <h3>User Info</h3>
+                                <b>What I'm Playing For</b>&nbsp;<input type="text" name="playing" value="[% user.playing | strip_attribute %]" size="40">
+                                <br><br>
+                        [% END %]
+
+                        <h3>Comments</h3>
+
+                        [% nospell_check = '';
+                        IF user.no_spell;
+                                nospell_check = constants.markup_checked_attribute;
+                        END %]
+
+                        <input type="checkbox" name="no_spell"[% nospell_check %]>&nbsp;<b>Disable Spellchecker</b>
+
+                        <br><br>
+
+                        [% s_mod_check = '';
+                        IF user.mod_with_comm;
+                                s_mod_check = constants.markup_checked_attribute;
+                        END %]
+
+                        <input type="checkbox" name="mod_with_comm" [% s_mod_check %]></b>&nbsp;<b>Show Moderations in User Comment Listing</b>
+
+                        <br><br>
+
+                        [% s_m2_check = '';
+                        IF user.m2_with_mod;
+                                s_m2_check = constants.markup_checked_attribute;
+                        END %]
+
+                        <input type="checkbox" name="m2_with_mod" [% s_m2_check %]>&nbsp;<b>Show Metamoderation in User Moderation Listing</b>
+
+                        <br><br>
+
+                        [% s_m2c_check = '';
+                        IF user.m2_with_mod;
+                                s_m2c_check = constants.markup_checked_attribute;
+                        END %]
+
+                        <input type="checkbox" name="m2_with_mod_on_comm" [% s_m2c_check %]>&nbsp;<b>Show Metamoderation in Comment Moderation Listing</b>
+
+                        <br><br>
+
+			<input type="button" value="Save" onclick="saveModalPrefs()">
+
+		</form>
+
+[% END %]
+__seclev__
+500
+__version__
+$Id$
