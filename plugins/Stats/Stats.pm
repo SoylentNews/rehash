@@ -96,7 +96,7 @@ sub new {
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_host_addr");
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_build_unique_uid");
 		$self->sqlDo("CREATE TABLE accesslog_temp_host_addr (host_addr char(32) NOT NULL, anon ENUM('no','yes') NOT NULL DEFAULT 'yes', PRIMARY KEY (host_addr, anon)) TYPE = InnoDB");
-		$self->sqlDo("CREATE TABLE accesslog_temp_uidip (uidip varchar(32) NOT NULL, op varchar(254) NOT NULL, PRIMARY KEY (uidip, op)) TYPE = InnoDB");
+		$self->sqlDo("CREATE TABLE accesslog_build_uidip (uidip varchar(32) NOT NULL, op varchar(254) NOT NULL, PRIMARY KEY (uidip, op), INDEX (op)) TYPE = InnoDB");
 		$self->sqlDo("CREATE TABLE accesslog_build_unique_uid ( uid MEDIUMINT UNSIGNED NOT NULL, PRIMARY KEY (uid)) TYPE = InnoDB");
 
 		# Then, get the schema in its CREATE TABLE statement format.
@@ -223,7 +223,7 @@ sub new {
 			);
 
 		return undef unless $self->_do_insert_select(
-			"accesslog_temp_uidip",
+			"accesslog_build_uidip",
 			"IF(uid = $constants->{anonymous_coward_uid}, uid, host_addr), op",
 			"accesslog_temp",
 			"",
@@ -232,7 +232,7 @@ sub new {
 			);
 	
 		return undef unless $self->_do_insert_select(
-			"accesslog_temp_uidip",
+			"accecsslog_build_uidip",
 			"IF(uid = $constants->{anonymous_coward_uid}, uid, host_addr), op",
 			"accesslog_temp_rss",
 			"",
@@ -1117,7 +1117,7 @@ sub getOpCombinationStats {
 	my $tn = 0;
 	for my $hit (@$hit_ar) {
 		++$tn;
-		push @tables, "accesslog_temp_uidip AS a$tn";
+		push @tables, "accecsslog_build_uidip AS a$tn";
 		push @where, "a$tn.uidip = a1.uidip" if $tn > 1;
 		push @where, "a$tn.op=" . $self->sqlQuote($hit);
 	}
@@ -1125,7 +1125,7 @@ sub getOpCombinationStats {
 		my $tnprev = $tn;
 		++$tn;
 		my $notlist = join ',', map { $self->sqlQuote($_) } @$nohit_ar;
-		$tables[-1] .= " LEFT JOIN accesslog_temp_uidip AS a$tn
+		$tables[-1] .= " LEFT JOIN accecsslog_build_uidip AS a$tn
 			ON (a$tn.uidip=a$tnprev.uidip AND a$tn.op IN ($notlist))";
 		push @where, "a$tn.op IS NULL";
 	}
