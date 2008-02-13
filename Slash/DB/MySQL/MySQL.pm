@@ -1737,8 +1737,8 @@ sub getNewPasswd {
 	my($self, $uid) = @_;
 	my $newpasswd = changePassword();
 	$self->sqlUpdate('users', {
-		newpasswd =>		encryptPassword($newpasswd, $uid),
-		-newpasswd_ts =>	'NOW()',
+		newpasswd     => encryptPassword($newpasswd, $uid),
+		-newpasswd_ts => 'NOW()',
 	}, 'uid=' . $self->sqlQuote($uid));
 	return $newpasswd;
 }
@@ -1751,9 +1751,9 @@ sub resetUserAccount {
 	my $newpasswd = changePassword();
 	my $enc = encryptPassword($newpasswd, $uid);
 	$self->sqlUpdate('users', {
-		passwd =>		$enc,
-		newpasswd =>		$enc,
-		newpasswd_ts =>		undef,
+		passwd       => $enc,
+		newpasswd    => $enc,
+		newpasswd_ts => undef,
 	}, 'uid=' . $self->sqlQuote($uid));
 	return $newpasswd;
 }

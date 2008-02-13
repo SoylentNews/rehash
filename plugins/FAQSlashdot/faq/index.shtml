@@ -62,7 +62,7 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
         <h2><strong><a href="/faq/com-mod.shtml">Comments and Moderation</a></strong></h2>
         <ul>
                 <li><strong><a href="/faq/com-mod.shtml#cm100">What's up with flat/threaded/nested comments?</a></strong></li>
-                <li><strong><a href="/faq/com-mod.shtml#cm120">What is 'D2' or 'Discussion2'</a></strong></li>
+                <li><strong><a href="/faq/com-mod.shtml#cm120">What is 'D2' or 'Discussion2'?</a></strong></li>
 				<li><strong><a href="/faq/com-mod.shtml#cm121">How do I change thresholds in Discussion2?</a></strong></li>
 				<li><strong><a href="/faq/com-mod.shtml#cm122">Where is nested mode in D2?</a></strong></li>
 				<li><strong><a href="/faq/com-mod.shtml#cm123">Where is 'Page 2' in D2?</a></strong></li>
