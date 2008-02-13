@@ -10808,16 +10808,28 @@ sub _getUser_do_selects {
 		for my $acl (@$acl_ar) {
 			$answer->{acl}{$acl} = 1;
 		}
+		if ($mcddebug > 1) {
+			print STDERR scalar(gmtime) . " $$ mcd gU_ds got all " . scalar(@$acl_ar) . " acls\n";
+		}
+		# Get the clouts from users_clout.  Rows can be missing from
+		# this table and often are, in which case they are filled in
+		# with data from the clout classes' getUserClout methods.
 		my $clout_types = $self->getCloutTypes();
+		my $clout_info = $self->getCloutInfo();
 		my $clout_hr = $self->sqlSelectAllKeyValue(
 			'clid, clout',
 			'users_clout',
 			"uid = $uid_q");
-		for my $clid (keys %$clout_hr) {
-			$answer->{clout}{ $clout_types->{$clid} } = $clout_hr->{$clid};
-		}
-		if ($mcddebug > 1) {
-			print STDERR scalar(gmtime) . " $$ mcd gU_ds got all " . scalar(@$acl_ar) . " acls\n";
+		for my $clid (grep /^\d+$/, keys %$clout_types) {
+			my $this_clout;
+			if (defined($clout_hr->{$clid})) {
+				$this_clout = $clout_hr->{$clid};
+			} else {
+				my $this_info = $clout_info->{$clid};
+				my $clout_obj = getObject($this_info->{class}, { db_type => 'reader' });
+				$this_clout = $clout_obj->getUserClout($answer);
+			}
+			$answer->{clout}{ $clout_types->{$clid} } = $this_clout;
 		}
 	} elsif (ref($params) eq 'ARRAY' && @$params) {
 		my $param_list = join(",", map { $self->sqlQuote($_) } @$params);

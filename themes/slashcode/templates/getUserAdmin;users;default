@@ -161,7 +161,9 @@ __template__
 				<b>Automated:</b>
 				[% FOREACH clout_type IN clout_types_ar %]
 				&nbsp;[% clout_type %]
-				[% useredit.clout.$clout_type.defined ? useredit.clout.$clout_type : '(none)' %]
+				[% IF useredit.clout.$clout_type.defined;
+				   FILTER format('%.4f'); useredit.clout.$clout_type; END;
+				   ELSE; '(none)'; END %]
 				[% END %]
 			[% END %]
 				<p>

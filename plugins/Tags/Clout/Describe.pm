@@ -2,6 +2,7 @@ package Slash::Clout::Describe;
 
 use strict;
 use warnings;
+use Date::Parse qw( str2time );
 use Slash::Utility;
 use base 'Slash::Clout';
 
@@ -30,11 +31,19 @@ sub getUserClout {
 		: 0;
 	$clout += 5 if $user_stub->{seclev} > 1;
 	$clout *= $user_stub->{tag_clout};
-	my $secs_since = time - $user_stub->{created_at_ut};
-	my $frac = $secs_since / 30*86400;
+
+	my $created_at_ut;
+	if (defined($user_stub->{created_at_ut})) {
+		$created_at_ut = $user_stub->{created_at_ut};
+	} else {
+		$created_at_ut = str2time( $user_stub->{created_at} );
+	}
+	my $secs_since = time - $created_at_ut;
+	my $frac = $secs_since / (30*86400);
 	$frac = 0.1 if $frac < 0.1;
 	$frac = 1   if $frac > 1;
 	$clout *= $frac;
+
 	return $clout;
 }
 
