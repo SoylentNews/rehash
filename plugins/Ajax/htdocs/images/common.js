@@ -379,17 +379,17 @@ function createTag(tag, id, type) {
 	var params = [];
 	params['id'] = id;
 	params['type'] = type;
-	if ( fh_is_admin ) {
+	if ( fh_is_admin && ("_#)^*".indexOf(tag[0]) != -1) ) {
 	  params['op'] = 'tags_admin_commands';
 	  params['reskey'] = $('admin_commands-reskey-' + id).value;
 	  params['command'] = tag;
-	  if (tag == "hold") {
-	    firehose_collapse_entry(id);
-	  }
 	} else {
 	  params['op'] = 'tags_create_tag';
 	  params['reskey'] = reskey_static;
 	  params['name'] = tag;
+	  if ( fh_is_admin && (tag == "hold") ) {
+	    firehose_collapse_entry(id);
+	  }
 	}
 	ajax_update(params, '');
 }
