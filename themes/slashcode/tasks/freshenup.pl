@@ -416,10 +416,10 @@ $task{$me}{code} = sub {
 		if ($constants->{plugin}{FireHose}) {
 			gen_firehose_static($virtual_user, "index_firehose.shtml", $gSkin->{name}, "", {  skipmenu => 1, skippop => 1, fhfilter => "story", duration => "7", mode => 'fulltitle', mixedmode => '1', setfield => '1', color => "black", index => "1", nocolors => 1  });
 			if ($base ne "firehose") {
-				gen_firehose_static($virtual_user, "firehose.shtml", $gSkin->{name}, "", { duration => "7", mode => 'fulltitle', mixedmode => '1', setfield => '1', color => "blue", nodates => '1'  });
+				gen_firehose_static($virtual_user, "firehose.shtml", $gSkin->{name}, "", { fhfilter => " ", duration => "7", mode => 'fulltitle', mixedmode => '1', setfield => '1', color => "blue", nodates => '1'  });
 			}
 			gen_firehose_static($virtual_user, "embed_index.shtml", $gSkin->{name}, "", { embed => '1', smalldevices => '1', fhfilter => "story", duration => "7", mode => 'fulltitle', setfield => '1', color => "black", index => "1", nodates => '1', nocolors => 1  }); 
-			gen_firehose_static($virtual_user, "embed_firehose.shtml", $gSkin->{name}, "", { embed => '1', smalldevices => '1', duration => "7", mode => 'fulltitle', setfield => '1', color => "blue", nodates => '1'  }); 
+			gen_firehose_static($virtual_user, "embed_firehose.shtml", $gSkin->{name}, "", { embed => '1', smalldevices => '1', duration => "7", mode => 'fulltitle', setfield => '1', color => "blue", nodates => '1', fhfilter => ""  }); 
 		}
 		$slashdb->markSkinClean($mp_skid);
 		delete $dirty_skins{$mp_skid};
