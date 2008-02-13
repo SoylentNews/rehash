@@ -377,13 +377,19 @@ function reportError(request) {
 
 function createTag(tag, id, type) {
 	var params = [];
-	params['op'] = 'tags_create_tag';
-	params['reskey'] = reskey_static;
-	params['name'] = tag;
 	params['id'] = id;
 	params['type'] = type;
-	if (tag == "hold" && fh_is_admin) {
-		firehose_collapse_entry(id);
+	if ( fh_is_admin ) {
+	  params['op'] = 'tags_admin_commands';
+	  params['reskey'] = $('admin_commands-reskey-' + id).value;
+	  params['command'] = tag;
+	  if (tag == "hold") {
+	    firehose_collapse_entry(id);
+	  }
+	} else {
+	  params['op'] = 'tags_create_tag';
+	  params['reskey'] = reskey_static;
+	  params['name'] = tag;
 	}
 	ajax_update(params, '');
 }
