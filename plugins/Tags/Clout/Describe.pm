@@ -36,7 +36,7 @@ sub getUserClout {
 	if (defined($user_stub->{created_at_ut})) {
 		$created_at_ut = $user_stub->{created_at_ut};
 	} else {
-		$created_at_ut = str2time( $user_stub->{created_at} );
+		$created_at_ut = str2time( $user_stub->{created_at} ) || 0;
 	}
 	my $secs_since = time - $created_at_ut;
 	my $frac = $secs_since / (30*86400);
