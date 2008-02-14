@@ -129,7 +129,7 @@ sub deleteOldFromPool {
 		# their info.
 		my $pool_hr = $self->sqlSelectAllHashref(
 			"hcpid",
-			"hcpid, hcqid, filename_img",
+			"hcpid, hcqid, filename_img, filename_mp3",
 			"humanconf_pool",
 			"inuse=2",
 			"ORDER BY hcpid ASC LIMIT $want_delete"
