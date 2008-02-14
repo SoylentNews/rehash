@@ -15,7 +15,7 @@ tagsurldivuser
 __template__
 
 [% PROCESS ajax_reskey_tag reskey_label => 'newtags-reskey-' _ id, reskey_name => 'ajax_tags_write' %]
-<input type="text" id="newtags-[% id %]" name="newtags-[% id %]" value="[% newtagspreloadtext | strip_attribute %]" size=50 maxlength=60>
+<input type="text" id="newtags-[% id %]" name="newtags-[% id %]" value="[% newtagspreloadtext | strip_attribute %]" size=50 maxlength=[% IF user.is_admin; 120; ELSE; 60; END %]>
 <input type="button" value="Tag" onclick="tagsCreateForUrl('[% id %]')" class="button">
 
 [% IF firstnottag_orig %]
