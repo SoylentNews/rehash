@@ -232,7 +232,7 @@ sub new {
 			);
 	
 		return undef unless $self->_do_insert_select(
-			"accecsslog_build_uidip",
+			"accesslog_build_uidip",
 			"IF(uid = $constants->{anonymous_coward_uid}, uid, host_addr), op",
 			"accesslog_temp_rss",
 			"",
@@ -1117,7 +1117,7 @@ sub getOpCombinationStats {
 	my $tn = 0;
 	for my $hit (@$hit_ar) {
 		++$tn;
-		push @tables, "accecsslog_build_uidip AS a$tn";
+		push @tables, "accesslog_build_uidip AS a$tn";
 		push @where, "a$tn.uidip = a1.uidip" if $tn > 1;
 		push @where, "a$tn.op=" . $self->sqlQuote($hit);
 	}
@@ -1125,7 +1125,7 @@ sub getOpCombinationStats {
 		my $tnprev = $tn;
 		++$tn;
 		my $notlist = join ',', map { $self->sqlQuote($_) } @$nohit_ar;
-		$tables[-1] .= " LEFT JOIN accecsslog_build_uidip AS a$tn
+		$tables[-1] .= " LEFT JOIN accesslog_build_uidip AS a$tn
 			ON (a$tn.uidip=a$tnprev.uidip AND a$tn.op IN ($notlist))";
 		push @where, "a$tn.op IS NULL";
 	}
