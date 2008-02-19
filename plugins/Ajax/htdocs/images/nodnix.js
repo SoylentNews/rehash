@@ -234,8 +234,7 @@ function handle_nodnix_select( type, args ) {
   if ( tagname !== undefined && tagname !== null ) {
     if ( typeof tagname != 'string' )
       tagname = tagname[0];
-    nodnix_tag(tagname, current_nodnix_input().getAttribute("updown"));
-      // QUESTION: what if the user is typing a negative tagname in the positive box?
+    nodnix_tag(tagname);
   }
   hide_nodnix_menu();
 }
