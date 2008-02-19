@@ -1,3 +1,8 @@
+__section__
+default
+__description__
+This div gets filled in with the results of tag queries, and appears near nod/nix menus.
+
 __title__
 Useless title to template
 __page__
@@ -10,9 +15,9 @@ __seclev__
 10000
 __template__
 <div id="tagstack">
-  <ul id="stack-system"></ul>
-  <ul id="stack-top"></ul>
-  <ul id="stack-user"></ul>
+  <ul id="stack-system">system tags</ul>
+  <ul id="stack-top">top tags</ul>
+  <ul id="stack-user">my tags</ul>
 </div>
 __version__
 $Id$
