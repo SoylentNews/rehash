@@ -1,0 +1,18 @@
+__title__
+Useless title to template
+__page__
+firehose
+__lang__
+en_US
+__name__
+tagstack
+__seclev__
+10000
+__template__
+<div id="tagstack">
+  <ul id="stack-system"></ul>
+  <ul id="stack-top"></ul>
+  <ul id="stack-user"></ul>
+</div>
+__version__
+$Id$
