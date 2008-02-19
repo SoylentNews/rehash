@@ -1,23 +1,19 @@
 // _*_ Mode: JavaScript; tab-width: 8; indent-tabs-mode: true _*_
 // $Id$
 
-var nodmenu = null;
-var nixmenu = null;
-var nodnix_listener = null;
-
 var nod_completer = null;
 var nix_completer = null;
 
 function get_nod_menu() {
-	if ( !nodmenu )
-		nodmenu = document.getElementById('nodmenu');
-	return nodmenu;
+	if ( !get_nod_menu.nodmenu )
+		get_nod_menu.nodmenu = document.getElementById('nodmenu');
+	return get_nod_menu.nodmenu;
 }
 
 function get_nix_menu() {
-	if ( !nixmenu )
-		nixmenu = document.getElementById('nixmenu');
-	return nixmenu;
+	if ( !get_nix_menu.nixmenu )
+		get_nix_menu.nixmenu = document.getElementById('nixmenu');
+	return get_nix_menu.nixmenu;
 }
 
 function get_predefined_nodnix_tags() {
@@ -45,7 +41,7 @@ proxyDS.doQuery = function( oCallbackFn, sQuery, oParent ) {
 }
 
 function get_nodnix_listener() {
-  if ( !nodnix_listener ) {
+  if ( !get_nodnix_listener.nodnix_listener ) {
     var keylist = new Array(); // must be an actual Array(), not just [], for YUI to do-the-right-thing
     keylist.push(YAHOO.util.KeyListener.KEY.ESCAPE);
 
@@ -56,7 +52,7 @@ function get_nodnix_listener() {
     for ( var i=0; i<extras.length; ++i )
       keylist.push(extras.charCodeAt(i));
 
-    nodnix_listener = new YAHOO.util.KeyListener(document, {keys:keylist},
+    get_nodnix_listener.nodnix_listener = new YAHOO.util.KeyListener(document, {keys:keylist},
                                                            {fn:handle_nodnix_key});
 
 
@@ -84,7 +80,7 @@ function get_nodnix_listener() {
     nod_completer = setupCompleter("nod-input", "nod-completions");
     nix_completer = setupCompleter("nix-input", "nix-completions");
   }
-  return nodnix_listener;
+  return get_nodnix_listener.nodnix_listener;
 }
 
 
