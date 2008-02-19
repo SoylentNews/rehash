@@ -874,12 +874,13 @@ sub comparePassword {
 		my $slashdb = getCurrentDB();
 		my $vu = $slashdb->{virtual_user};
 		my $salt_ar = Slash::Apache::User::PasswordSalt::getPwSalts($vu);
+		unshift @$salt_ar, ''; # always test the case of no salt
 		for my $salt (reverse @$salt_ar) {
 			# The current way of encrypting a user's password.
 			return 1 if md5_hex("$salt:$uid:$passwd") eq $md5;
 			# An older way, which we have to check for reverse
 			# compatibility.
-			return 1 if md5_hex("$salt$passwd") eq $md5;
+			return 1 if length($salt) && md5_hex("$salt$passwd") eq $md5;
 		}
 	}
 	return 0;
