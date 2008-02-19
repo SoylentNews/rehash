@@ -561,6 +561,16 @@ B<NOTE>: Read the message printed at the end of running install_slashsite.
 Failure to pay attention here is another common reason we see for Slash
 installations not working.
 
+B<Ubuntu NOTE>: Reported after installing on Kubuntu 7.10, a Slash install's
+idea of run-levels was not sufficient to start slashd at boot.  The following
+makes sure that all the right run-levels are covered, and that rebuilding
+Slash won't mistakenly double-start the daemon:
+
+  sudo update-rc.d -f slash remove
+  sudo update-rc.d slash defaults
+  sudo mv /etc/rc3.d/S*slash /etc/rc3.d/S99slash
+  sudo mv /etc/rc6.d/K*slash /etc/rc6.d/K99slash
+
 =item 7.
 
 B<Start it up.>
