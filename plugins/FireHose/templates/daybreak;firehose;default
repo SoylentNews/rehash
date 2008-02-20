@@ -13,6 +13,7 @@ daybreak
 __seclev__
 10000
 __template__
+[% fh = Slash.getObject("Slash::FireHose") %]
 [% page = form.page || 0 %]
 [% fh_page = fh_page || "firehose.pl" %]
 [% day_page = fh_page %]
@@ -21,8 +22,8 @@ __template__
 <div align="center" class="daybreak" id="[% id %]">
 	[% last_days = Slash.getOlderDaysFromDay(last_day, 0, 0, { skip_add_today => 1, show_future_days => 1 }) %]
 	[% cur_days = Slash.getOlderDaysFromDay(cur_day, 0, 0, { skip_add_today => 1, show_future_days => 1 }) %]
-	<a onclick="firehose_set_options('issue', '[% last_day %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?issue=[% last_day %]&amp;duration=1[% index_extra %]">[% last_days.0.1 %]</a><br>
-	<a onclick="firehose_set_options('issue', '[% cur_day %]'); return false;"  href="[% gSkin.rootdir %]/[% day_page %]?issue=[% cur_day %]&amp;duration=1[% index_extra %]">[% cur_days.0.1 %]</a><br>
+	<a onclick="firehose_set_options('issue', '[% last_day %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => last_day, duration => 1}); f; %][% index_extra %]">[% last_days.0.1 %]</a><br>
+	<a onclick="firehose_set_options('issue', '[% cur_day %]'); return false;"  href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, {startdate => cur_day, duration => 1 }); f; %][% index_extra %]">[% cur_days.0.1 %]</a><br>
 </div>
 __version__
 $Id$

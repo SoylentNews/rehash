@@ -11,10 +11,9 @@ en_US
 __name__
 firehose_pages
 __template__
-[% 
-	start_day = options.startdate.replace('-');
-	duration = options.duration;
-	param_str = "&amp;startdate=$start_day&amp;duration=$duration";
+[%
+	fh = Slash.getObject("Slash::FireHose");	
+	param_str = fh.genFireHoseParams(options);
 
 	page_extras = "";
 	IF fh_page == "users.pl";

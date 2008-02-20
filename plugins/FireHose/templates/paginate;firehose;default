@@ -13,6 +13,7 @@ paginate
 __seclev__
 10000
 __template__
+[% fh = Slash.getObject("Slash::FireHose") %]
 [% days = []; %]
 [% fh_page = fh_page || "firehose.pl" %]
 [% day_page = fh_page %]
@@ -35,7 +36,7 @@ __template__
 	[% day = Slash.db.getDay(0) %]
 	[% IF !split_refresh %]<span id="beforewidget">[% END %]
 	<span class="inactive">
-		<a href="[% gSkin.rootdir %]/[% day_page %][% IF form.index %]?index=1[% END %]">Today</a>
+		<a href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => 7 }); f; %][% IF form.index %]&amp;index=1[% END %]">Today</a>
 	</span>
 	[% IF !split_refresh %]</span>[% END %]
 	[% IF split_refresh %]<!-- split -->[% END %]
@@ -56,7 +57,7 @@ __template__
 		FOREACH cur_day = days;
 		%]
 		<span class="inactive">
-			<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?issue=[% cur_day.0 %][% index_extra %]">[% cur_day.1 | strip_literal %]</a>
+			<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => cur_day.0, duration => 1}); f; %][% index_extra %]">[% cur_day.1 | strip_literal %]</a>
 		</span>
 		[% END %]
 		[% idle_submit_plug %]
@@ -87,7 +88,7 @@ __template__
 			[% IF cur_day.2 %]
 				<a href="[% gSkin.rootdir %]/[% day_page %]">[% cur_day.1 | strip_literal %]</a>
 			[% ELSE %]
-				<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?issue=[% cur_day.0 %][% index_extra %]">[% cur_day.1 | strip_literal %]</a>
+				<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => cur_day.0, duration => 1}); f; %][% index_extra %]">[% cur_day.1 | strip_literal %]</a>
 			[% END %]
 			</span>
 		[% END %]
@@ -118,7 +119,7 @@ __template__
 [% ELSIF options.duration == -1 && !options.startdate %]
 	[% IF !split_refresh %]<span id="beforewidget">[% END %]
 	<span class="inactive">
-		<a href="[% gSkin.rootdir %]/[% day_page %][% IF form.index %]?index=1[% END %]">Today</a>
+		<a href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => 7}); f; %][% IF form.index %]index=1[% END %]">Today</a>
 	</span>
 	[% IF !split_refresh %]
 	</span>
