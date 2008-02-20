@@ -119,21 +119,6 @@ __template__
         Slash.createSelect('posttype', formats, user.posttype, 1);
         %]
 
-        &nbsp;<p>
-
-        [%
-        p_check = '';
-        IF user.postanon;
-                p_check = constants.markup_checked_attribute;
-        END;
-        %]
-
-        [% IF constants.allow_anonymous && (user.karma > -1 || p_check) %]
-                <input type="hidden" name="postanon_present" value="1">
-                <label><input type="checkbox" name="postanon"[% p_check %]> Post Anonymously</label>
-                </label>
-        [% END %]
-
         </td>
         </tr>
 </table>
