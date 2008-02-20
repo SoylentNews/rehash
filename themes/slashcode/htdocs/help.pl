@@ -33,7 +33,8 @@ sub main {
 		# "pause" is special, it does a 302 redirect so we need
 		# to not output any HTML.  Everything else gets this,
 		# header and menu.
-		header("Help") or return;
+                my $helptitle = ($user->{is_anon}) ? 'Help' : 'Help & Preferences';
+		header($helptitle) or return;
 		print createMenu('users', {
 			style =>	'tabbed',
 			justify =>	'right',
