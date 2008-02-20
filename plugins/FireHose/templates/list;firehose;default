@@ -156,14 +156,19 @@ cmdrtaco dot net but be forgiving of beta code!
 </span>
 [% PROCESS paginate options = options ulid = "fh-paginate" divid = "fh-pag-div" num_items = itemnum fh_page = fh_page %]
 <script type="text/javascript">
-	firehose_settings.startdate = [% firehose.js_anon_dump(options.startdate.replace('-','')) %];
+	[% FOR opt = [ 'startdate', 'mode', 'fhfilter', 'orderdir', 'orderby', 'startdate', 'duration', 'color'] %]
+		[%- opt_value = options.$opt -%]
+		[% IF opt == startdate %]
+			[% opt_value = opt_value.replace('-',''); %]
+		[%- END -%]
+		firehose_settings.[% opt %] = [% firehose.js_anon_dump(opt_value) %];
+	[% END %]
 	firehose_settings.issue = [% firehose.js_anon_dump(options.issue) %];
-	firehose_settings.duration = [% firehose.js_anon_dump(options.duration) %];
 	firehose_settings.section = [% firehose.js_anon_dump(section) %];
 	[% IF fh_page == "console.pl" %]
-		fh_pageval = 1;
+		firehose_settings.pageval = 1;
 	[% ELSIF fh_page == "users.pl" %]
-		fh_pageval = 2;
+		firehose_settings.pageval = 2;
 	[% END %]
 
 	var firehose_action_time = 0;
@@ -175,7 +180,7 @@ cmdrtaco dot net but be forgiving of beta code!
 		fh_colors_hash[fh_colors[i]] = i;
 	}
 	var fh_view_mode = [% firehose.js_anon_dump(options.mode) %];
-	var page = [% firehose.js_anon_dump(page) %];
+	firehose_settings.page = [% firehose.js_anon_dump(page) %];
 	[% IF form.embed %]
 	firehose_settings.is_embedded = 1; // defined in common.js
 	[% END %]
