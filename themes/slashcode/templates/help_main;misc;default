@@ -43,7 +43,7 @@ END
         Slashdot was originally created in September of 1997 by <a href="http://cmdrtaco.net/" target="_blank">Rob "CmdrTaco" Malda</a>. Today it is owned by <a href="http://sourceforge.com/" target="_blank">Sourceforge Inc</a>.<br>
         </div>
 
-        <div style="padding-left: 15px;"><a href="/faq/slashmeta.shtml#sm100" target="_blank">Who does this?</a>, <a href="faq/slashmeta.shtml#sm330" target="_blank">Why are you so successful?</a></div>
+        <div style="padding-left: 15px;"><a href="/faq/slashmeta.shtml#sm100" target="_blank">Who does this?</a>, <a href="faq/slashmeta.shtml#sm330" target="_blank">Why are you so successful?</a>, <a href="http://web.sourceforge.com/privacy.php" target="_blank">Privacy policy</a>.</div>
 
 </div>
 
@@ -78,7 +78,7 @@ END
         Read about why we offer subscriptions and how you may get one. Want to give a subscription to a friend? Having trouble with your subscription or payment?<br>
         </div>
 
-        <div style="padding-left: 15px;"><a href="/faq/subscriptions.shtml#ss100" target="_blank">Why do you offer subscriptions?</a>, <a href="/faq/subscriptions.shtml#ss300" target="_blank">How much does a subscription cost?</a>, <a href="/faq/subscriptions.shtml#ss700" target="_blank">Do I have to subscribe?</a>, <a href="/subscribe.pl" target="_blank">Subscribe.</div>
+        <div style="padding-left: 15px;"><a href="/faq/subscriptions.shtml#ss100" target="_blank">Why do you offer subscriptions?</a>, <a href="/faq/subscriptions.shtml#ss300" target="_blank">How much does a subscription cost?</a>, <a href="/faq/subscriptions.shtml#ss700" target="_blank">Do I have to subscribe?</a>, <a href="/subscribe.pl" target="_blank">Subscribe</a>.</div>
 </div>
 
 <br>
@@ -102,17 +102,6 @@ END
 
         <div style="padding-left: 15px;"><a href="http://sourceforge.net/" target="_blank">SourceForge.net</a>, <a href="http://www.thinkgeek.com/" target="_blank">ThinkGeek</a>, <a href="http://freshmeat.net/" target="_blank">Freshmeat</a>, <a href="http://www.itmanagersjournal.com/" target="_blank">IT Manager's Journal</a>, <a href="http://www.linux.com/" target="_blank">Linux.com</a>.</div>
 
-</div>
-
-<br>
-
-<h3><a href="http://web.sourceforge.com/privacy.php" target="_blank" style="text-decoration: none;">Privacy Policy&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_9'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
-<div style="padding-left: 10px;">
-        <div id="modalprefhelp_9" class="modalprefhelp" style="display: none;">
-        Read our privacy policy if you're at all worried about cookies, email, or security in general.
-        </div>
-
-        <div style="padding-left: 15px;"></div>
 </div>
 
 </div>

@@ -29,7 +29,7 @@ END
         Configure your real name, email address, instant messaging nicks, your sig, and more. You may also change your password and manage your subscriptions from here.
         </div>
 
-        <div style="padding-left: 15px;"><a href="/my/messages" onclick="getModalPrefs('messages', 'Messages'); return false">Messages</a>, <a href="/subscribe.pl">Subscriptions</a>, <a href="/my/password">Password</a>.</div>
+        <div style="padding-left: 15px;"><a href="/users.pl?op=edituser" onclick="javascript:getModalPrefs('user', 'User', 1); return false">General</a>, <a href="/my/messages" onclick="getModalPrefs('messages', 'Messages', 1); return false">Messages</a>, <a href="/subscribe.pl">Subscriptions</a>, <a href="/my/password">Password</a>.</div>
 </div>
 
 <br>
@@ -43,7 +43,7 @@ END
         the ability to choose if you want to view each type of article in 'Full Text' or 'Abbreviated' format.
         </div>
 
-        <div style="padding-left: 15px;"><a href="/users.pl?op=edithome" onclick="getModalPrefs('home', 'Homepage'); return false">General</a>, <a href="/users.pl?op=edithome" onclick="getModalPrefs('slashboxes', 'Slashboxes'); return false">Slashboxes</a>, <a href="/users.pl?op=edithome" onclick="getModalPrefs('sectional', 'Sectional Display'); return false">Sections</a>, <a href="/users.pl?op=edithome" onclick="getModalPrefs('authors', 'Authors'); return false">Authors</a>.</div>
+        <div style="padding-left: 15px;"><a href="/users.pl?op=edithome" onclick="getModalPrefs('home', 'Homepage', 1); return false">General</a>, <a href="/users.pl?op=edithome" onclick="getModalPrefs('slashboxes', 'Slashboxes', 1); return false">Slashboxes</a>, <a href="/users.pl?op=edithome" onclick="getModalPrefs('sectional', 'Sectional Display', 1); return false">Sections</a>, <a href="/users.pl?op=edithome" onclick="getModalPrefs('authors', 'Authors', 1); return false">Authors</a>.</div>
 </div>
 
 <br>
@@ -56,7 +56,7 @@ END
         bonuses to comments. You may also sort comments by their score or date, and choose how many to retrieve at one time.
         </div>
 
-        <div style="padding-left: 15px;"><a href="[% gSkin.rootdir %]/my/comments"[% IF discussion2 == 'slashdot' %] onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false"[% END %]>Posting</a>, <a href="[% gSkin.rootdir %]/my/comments"[% IF discussion2 == 'slashdot' %] onclick="getModalPrefs('d2', 'Discussion 2'); return false"[% END %]>Viewing</a>.</div>
+        <div style="padding-left: 15px;"><a href="[% gSkin.rootdir %]/my/comments"[% IF discussion2 == 'slashdot' %] onclick="getModalPrefs('d2_posting', 'Discussion 2', 1); return false"[% END %]>Posting</a>, <a href="[% gSkin.rootdir %]/my/comments"[% IF discussion2 == 'slashdot' %] onclick="getModalPrefs('d2', 'Discussion 2', 1); return false"[% END %]>Viewing</a>.</div>
 </div>
 
 <br>
