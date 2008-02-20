@@ -424,11 +424,14 @@ div.storylinks ul {padding-right: 60% !important}
 #firehoselist {position: relative}
 
 /* nodmenu */
-#nod-input, #nix-input {display: none; position: absolute; font-size: 11px; top:-55px; width: 101px;}
-#nod-input {left: -150px;}
-#nix-input {left: 58px;}
+#nod-user-tags, #nix-user-tags {display: none; position: absolute; top:-55px; width:500px;}
+#nod-user-tags ol, #nix-user-tags ol {display: inline; list-style: none; padding: 0 0.2em; margin: 0 -0.2em;}
+#nod-user-tags li, #nix-user-tags li {display: inline; padding: 0 0 0 0.3em; margin: 0; }
+#nod-input, #nix-input {display: inline; font-size: 11px; width: 101px;}
+#nod-user-tags {left: -150px;}
+#nix-user-tags {left: 58px;}
 #nodmenu .menu.autocomplete, #nixmenu .menu.autocomplete {display: none;}
-#nodmenu.editing #nod-input, #nixmenu.editing #nix-input, #nodmenu.editing .menu.autocomplete, #nixmenu.editing .menu.autocomplete {display: block;}
+#nodmenu.editing #nod-user-tags, #nixmenu.editing #nix-user-tags, #nodmenu.editing .menu.autocomplete, #nixmenu.editing .menu.autocomplete {display: block;}
 #nodmenu, #nixmenu {display: none; width: 200px; z-index: 100000; position: absolute !important; font-size: 11px}
 #nodmenu .menu, #nixmenu .menu {top: -35px; width: 150px; height: 15em; z-index: 1000000 !important; position: absolute !important; font-size: 11px}
 #nodmenu .menu {left: -150px !important;  background: url('//images.slashdot.org/popup_nod.png') no-repeat;}
@@ -443,9 +446,11 @@ div.storylinks ul {padding-right: 60% !important}
 
 .embed #nodmenu .menu, #console #nodmenu .menu {left: 20px !important; background: url('//images.slashdot.org/popup_nix.png') no-repeat;}
 .embed #nixmenu .menu, #console #nixmenu .menu {left: 25px !important;}
-.embed #nod-input, #console #nod-input {left: 63px !important;}
-.embed #nix-input, #console #nix-input {left: 68px !important;}
+.embed #nod-user-tags, #console #nod-input {left: 63px !important;}
+.embed #nix-user-tags, #console #nix-input {left: 68px !important;}
 .embed #nodmenu ul, #console #nodmenu ul {margin: 0 0 0 43px; background: #222; opacity: .9; border: 1px solid #111;}
+ol#nod-hardened, ol#nix-hardened, ol#nod-hardened li, ol#nix-hardened li {background: black !important;}
+ol#nod-hardened, ol#nix-hardened {margin-left: 0 !important; padding-left: 0 !important;}
 
 .article .title, .article h3, .article .generaltitle {border: none !important}
 .article .generaltitle, #firehoselist .article .title, .article h3 {line-height: 170% !important;}

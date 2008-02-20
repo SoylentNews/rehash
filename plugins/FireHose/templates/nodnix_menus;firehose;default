@@ -20,7 +20,7 @@ __template__
    negtags = tags_reader.getNegativePopupTags.sort;
 
    IF postags.size %]<div id="nodmenu">
-  <input id="nod-input" type="text" updown="+">
+  <span id="nod-user-tags"><input id="nod-input" type="text" updown="+"><ol id="nod-hardened"></ol></span>
   <div class="menu basic" onmouseover="dont_hide_nodnix_menu()" onmouseout="hide_nodnix_menu(750)" onmousedown="hide_nodnix_menu()">
     <ul id="static-nod-completions">
     [%- FOR postag IN postags %]
@@ -31,7 +31,7 @@ __template__
   <div id="nod-completions" class="menu autocomplete"></div>
 </div>
 [% END; IF negtags.size %]<div id="nixmenu">
-  <input id="nix-input" type="text" updown="-">
+  <span id="nix-user-tags"><input id="nix-input" type="text" updown="-"><ol id="nix-hardened"></ol></span>
   <div class="menu basic" onmouseover="dont_hide_nodnix_menu()" onmouseout="hide_nodnix_menu(750)" onmousedown="hide_nodnix_menu()">
     <ul id="static-nix-completions">
     [%- FOR negtag IN negtags %]

@@ -18,7 +18,7 @@ function get_nix_menu() {
 
 function get_predefined_nodnix_tags() {
   var tags = [];
-  var query = current_nodnix_input().getAttribute("updown");
+  var query = _get_nodnix('input').getAttribute("updown");
   var listEl = query=="+" ? document.getElementById('static-nod-completions')
                           : document.getElementById('static-nix-completions');
   if ( listEl ) {
@@ -57,6 +57,7 @@ function get_nodnix_listener() {
 
 
     var keylist2 = new Array();
+    keylist2.push(YAHOO.util.KeyListener.KEY.SPACE);
     keylist2.push(YAHOO.util.KeyListener.KEY.ESCAPE);
     keylist2.push(YAHOO.util.KeyListener.KEY.ENTER);
 
@@ -165,13 +166,16 @@ function show_nix_menu(elem, id, show_delay, hide_delay) {
 	show_nodnix_menu(elem, id, get_nix_menu(), show_delay, hide_delay);
 }
 
-function current_nodnix_input() {
+function _get_nodnix( tag ) {
   var menu;
      ((menu=get_nod_menu()).style.display != 'none')
   || ((menu=get_nix_menu()).style.display != 'none')
   ||  (menu=null);
 
-  return YAHOO.util.Dom.hasClass(menu, 'editing') ? menu.getElementsByTagName('input')[0] : null;
+  if ( ! YAHOO.util.Dom.hasClass(menu, 'editing') )
+    return;
+
+  return menu.getElementsByTagName(tag)[0];
 }
 
 function handle_nodnix_key( type, args, obj ) {
@@ -208,9 +212,11 @@ function begin_nodnix_editing() {
   YAHOO.util.Dom.addClass(get_nix_menu(), 'editing');
   dont_hide_nodnix_menu();
 
-  var input = current_nodnix_input();
+  var input = _get_nodnix('input');
   input.value = "";
   input.focus();
+  
+  _get_nodnix('ol').innerHTML = "";
 
   (input.getAttribute("updown")=="+" ? nod_completer : nix_completer).sendQuery();
   setTimeout("soon_is_now()", 225);
@@ -225,24 +231,35 @@ function handle_nodnix_blur( type, args ) {
   hide_nodnix_menu();
 }
 
-function handle_nodnix_select( type, args ) {
+function handle_nodnix_select( type, args, stay_open ) {
   var tagname = args[2];
   if ( tagname !== undefined && tagname !== null ) {
     if ( typeof tagname != 'string' )
       tagname = tagname[0];
     nodnix_tag(tagname);
+      // now 'harden' the tag
+    var list = _get_nodnix('ol');
+    list.innerHTML = '<li>' + tagname + '</li>' + list.innerHTML;
+    _get_nodnix('input').value = "";
   }
-  hide_nodnix_menu();
+  if ( !stay_open )
+    hide_nodnix_menu();
 }
 
 function handle_completer_key( type, args ) {
   var key = args[0];
+  var event = args[1];
+  var stay_open = false;
   switch ( key ) {
     case YAHOO.util.KeyListener.KEY.ESCAPE:
       hide_nodnix_menu();
       break;
+    case YAHOO.util.KeyListener.KEY.SPACE:
+      YAHOO.util.Event.stopEvent(event);
+      stay_open = true;
+      // fall through
     case YAHOO.util.KeyListener.KEY.ENTER:
-      handle_nodnix_select("", [null, null, current_nodnix_input().value]);
+      handle_nodnix_select("", [null, null, _get_nodnix('input').value], stay_open);
       break;
   }
 }
