@@ -661,7 +661,6 @@ sub saveModalPrefs {
 				? $params{'textarea_rows'} : undef),
 			textarea_cols     => ($params{'textarea_cols'} != $constants->{'textarea_cols'}
 				? $params{'textarea_cols'} : undef),
-			postanon          => ($params{'postanon'} ? 1 : undef),
 		};
 	}
 
