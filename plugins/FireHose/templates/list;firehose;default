@@ -93,8 +93,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
 </div>
 	[% IF !user.is_anon %]
 		[% PROCESS firehose_tabs tabs = options.tabs options = options section=section %]
-                <div class="advpref" align="right"><a href="#" id="fh_adv_pref_toggle" onclick="firehose_toggle_advpref(); return false" title="Firehose preferences"></a></div>
-		[% PROCESS adv_pref_firehose options = options %]
+                <div class="advpref" align="right"><a href="#" id="fh_adv_pref_toggle" onclick="getModalPrefs('fh', 'Firehose'); return false" title="Firehose preferences"></a></div>
 	[% END %]
         [% IF user.is_anon %]
                 [% login_block %]
