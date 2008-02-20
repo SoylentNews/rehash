@@ -17,7 +17,7 @@ __template__
     firehose = Slash.getObject("Slash::FireHose");
     pop_val = firehose.getPopLevelForPopularity(item.userpop);
     nofollow = 1;
-    IF pop_val <= 4;
+    IF item.type == "story";
     	nofollow = 0;
     END;
 
