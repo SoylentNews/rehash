@@ -13,82 +13,146 @@ fhadvprefpane
 __seclev__
 10000
 __template__
-<table width="100%">
-<tr>
-	<td>
-		[% paused = 0;
-	   	IF form.pause.defined;
-			paused = form.pause;
-		ELSE;
-			paused = user.firehose_pause;
-		END;
-		%]
-		[% IF paused %]
-			<span id="advplay" onclick="firehose_play()"><a href="#">Paused</a></span>
-		[% ELSE %]
-			<span id="advpause" onclick="firehose_pause()"><a href="#">Updating</a></span>
-		[% END %]
-	</td>
-	<td>Toggles between a paused or dynamically updating Firehose</td>
-	<td rowspan="4">
-<input type="checkbox" name="nodates" onchange="firehose_set_options('nodates', !this.checked)" [% IF !options.nodates; constants.markup_checked_attribute; END %]> Dates<br>
-<input type="checkbox" name="nobylines" onchange="firehose_set_options('nobylines', !this.checked)" [% IF !options.nobylines; constants.markup_checked_attribute; END %]> Bylines <br>
-<input type="checkbox" name="nothumbs" onchange="firehose_set_options('nothumbs', !this.checked)" [% IF !options.nothumbs; constants.markup_checked_attribute; END %]> Thumbs <br>
-<input type="checkbox" name="nocolors" onchange="firehose_set_options('nocolors', !this.checked)" [% IF !options.nocolors; constants.markup_checked_attribute; END %]> Color Swatches<br>
-<input type="checkbox" name="mixedmode" onchange="firehose_set_options('mixedmode', this.checked)" [% IF options.mixedmode; constants.markup_checked_attribute; END %]> Expand Top Rated<br>
-<input type="checkbox" name="nocommentcount" onchange="firehose_set_options('nocommentcnt', !this.checked)" [% IF !options.nocommentcnt; constants.markup_checked_attribute; END %]> Show comment count for abbreviated<br>
-[% default = options.pagesize || "small" %]
-Page size: [% Slash.createSelect('pagesize', { 'small' => 'Small', 'large' => 'Large'}, { default => default, onchange => "firehose_set_options('pagesize',this.options[this.selectedIndex].value)", return => 1} ) %]<br>
-[% IF user.is_admin %]
-	<input type="hidden" name="setusermode" value="1">
-	<input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode || user.firehose_usermode %]> User Mode
-[% END %]
-	<div align="right">
-<form method="POST" action="[% env.script_name %]"><div>
-<input type="hidden" name="fhfilter" value="">
-<input type="hidden" name="color" value="indigo">
-<input type="hidden" name="orderby" value="createtime">
-<input type="hidden" name="orderdir" value="DESC">
-<input type="hidden" name="mode" value="fulltitle">
-<input type="hidden" name="pause" value="1">
-<input type="hidden" name="duration" value="7">
-<input type="submit" value="Reset to Defaults">
-</div></form>
-</div>
-	</td>
-</tr>
-<tr>
-	<td>
-		[% IF options.mode == "fulltitle" || !options.mode %]
-			<span id="advabbrev" onclick="firehose_set_options('mode','full')"><a href="#">Headlines</a></span>
-		[% ELSE %]
-			<span id="advfull"  onclick="firehose_set_options('mode','fulltitle')"><a href="#">Full Article</a></span>
-		[% END %]
-	</td>
-	<td>Display stories in a brief or verbose format</td>
-</tr>
-<tr>
-	<td>
-		[% IF options.orderdir == "ASC" %]
-			<span id="advdesc"  onclick="firehose_set_options('orderdir','DESC')"><a href="#">Ascending</a></span>
-		[% ELSE %]
-			<span id="advasc" onclick="firehose_set_options('orderdir','ASC')"><a href="#">Descending</a></span>
-		[% END %]
-	</td>
-	<td>Forwards or Backwards.  You make the call!</td>
-</tr>
-<tr>
-	<td>
-		[% IF options.orderby == "popularity" || options.orderby == "editorpop" %]
-			<span id="advpopularity" onclick="firehose_set_options('orderby','createtime')"><a href="#">Popularity</a></span>
-		[% ELSE  %]
-			<span id="advtime" onclick="firehose_set_options('orderby','popularity')"><a href="#">Time</a></span>
-		[% END %]
-	</td>
-	<td>Choose if you want your Firehose ordered by date
-	or popularity</td>
-</tr>
 
+<div id="fhadvprefpane">
+
+<br>
+
+[% paused = 0;
+IF form.pause.defined;
+        paused = form.pause;
+ELSE;
+        paused = user.firehose_pause;
+END;
+%]
+<table width="100%" style="background: #ccc;">
+        <tr>
+                <td>
+                [% IF paused %]
+                        <span id="advplay" onclick="firehose_play()"><a href="#" style="text-decoration: none; color: black;">Paused</a></span>
+                [% ELSE %]
+                        <span id="advpause" onclick="firehose_pause()"><a href="#" style="text-decoration: none; color: black;">Updating</a></span>
+                [% END %]
+                </td>
+
+                <td>
+                Toggles between a paused or dynamically updating Firehose
+                </td>
+        </tr>
+
+        <tr>
+                <td>
+                [% IF options.mode == "fulltitle" || !options.mode %]
+                        <span id="advabbrev" onclick="firehose_set_options('mode','full')"><a href="#" style="text-decoration: none; color: black;">Headlines</a></span>
+                [% ELSE %]
+                        <span id="advfull"  onclick="firehose_set_options('mode','fulltitle')"><a href="#" style="text-decoration: none; color: black;">Full Article</a></span>
+                [% END %]
+                </td>
+
+                <td>
+                Display stories in a brief or verbose format
+                </td>
+        </tr>
+
+        <tr>
+                <td>
+                [% IF options.orderdir == "ASC" %]
+                        <span id="advdesc"  onclick="firehose_set_options('orderdir','DESC')"><a href="#" style="text-decoration: none; color: black;">Ascending</a></span>
+                [% ELSE %]
+                        <span id="advasc" onclick="firehose_set_options('orderdir','ASC')"><a href="#" style="text-decoration: none; color: black;">Descending</a></span>
+                [% END %]
+                </td>
+
+                <td>
+                Forwards or Backwards. You make the call!
+                </td>
+        </tr>
+
+        <tr>
+                <td>
+                [% IF options.orderby == "popularity" || options.orderby == "editorpop" || options.orderby == "popularity2" %]
+                        <span id="advpopularity" onclick="firehose_set_options('orderby','createtime')"><a href="#" style="text-decoration: none; color: black;">Popularity</a></span>
+                [% ELSE  %]
+                <span id="advtime" onclick="firehose_set_options('orderby','popularity')"><a href="#" style="text-decoration: none; color: black;">Time</a></span>
+                [% END %]
+                </td>
+
+                <td>
+                Choose if you want your Firehose ordered by date
+                </td>
+        </tr>
 </table>
+
+<br>
+
+<input type="checkbox" name="nodates" onchange="firehose_set_options('nodates', !this.checked)" [% IF !options.nodates; constants.markup_checked_attribute; END %]> <b>Dates</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nodates'); return false" title="Click To Expand Help" style="text-decoration: none; color: #055;">[?]</a>
+<br>
+<div style="padding-left: 10px;">
+        <div id="modalprefhelp_nodates" class="modalprefhelp" style="display: none;">
+        Determines whether dates should be shown in collapsed mode.
+        </div>
+</div>
+
+<br>
+
+<input type="checkbox" name="nobylines" onchange="firehose_set_options('nobylines', !this.checked)" [% IF !options.nobylines; constants.markup_checked_attribute; END %]> <b>Bylines</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nobylines'); return false" title="Click To Expand Help" style="text-decoration: none; color: #055;">[?]</a>
+<br>
+<div style="padding-left: 10px;">
+        <div id="modalprefhelp_nobylines" class="modalprefhelp" style="display: none;">
+        Determines whether the byline of the creating user should be shown in  collapsed mode.
+        </div>
+</div>
+
+<br>
+
+<input type="checkbox" name="nothumbs" onchange="firehose_set_options('nothumbs', !this.checked)" [% IF !options.nothumbs; constants.markup_checked_attribute; END %]> <b>Thumbs</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nothumbs'); return false" title="Click To Expand Help" style="text-decoration: none; color: #055;">[?]</a>
+<br>
+<div style="padding-left: 10px;">
+        <div id="modalprefhelp_nothumbs" class="modalprefhelp" style="display: none;">
+        Determines whether thumb icons used for voting are available.
+        </div>
+</div>
+
+<br>
+
+<input type="checkbox" name="nocolors" onchange="firehose_set_options('nocolors', !this.checked)" [% IF !options.nocolors; constants.markup_checked_attribute; END %]> <b>Color Swatches</b>
+
+<br><br>
+
+<input type="checkbox" name="mixedmode" onchange="firehose_set_options('mixedmode', this.checked)" [% IF options.mixedmode; constants.markup_checked_attribute; END %]> <b>Expand Top Rated</b>
+
+<br><br>
+
+<input type="checkbox" name="nocommentcount" onchange="firehose_set_options('nocommentcnt', !this.checked)" [% IF !options.nocommentcnt; constants.markup_checked_attribute; END %]> <b>Show comment count for abbreviated</b>
+
+<br><br>
+
+[% default = options.pagesize || "small" %]
+<b>Page size</b> [% Slash.createSelect('pagesize', { 'small' => 'Small', 'large' => 'Large'}, { default => default, onchange => "firehose_set_options('pagesize',this.options[this.selectedIndex].value)", return => 1} ) %]
+
+<br><br>
+
+[% IF user.is_admin %]
+        <input type="hidden" name="setusermode" value="1">
+        <input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)" [% constants.markup_checked_attribute IF options.firehose_usermode %]> <b>User Mode</b>
+
+<br><br>
+[% END %]
+
+<form method="POST" action="/firehose.pl">
+<div>
+        <input type="hidden" name="fhfilter" value="">
+        <input type="hidden" name="color" value="indigo">
+        <input type="hidden" name="orderby" value="createtime">
+        <input type="hidden" name="orderdir" value="DESC">
+        <input type="hidden" name="mode" value="fulltitle">
+        <input type="hidden" name="pause" value="1">
+        <input type="hidden" name="duration" value="7">
+        <input type="submit" value="Reset to Defaults">
+</div>
+</form>
+
+</div>
+
 __version__
 $Id$
