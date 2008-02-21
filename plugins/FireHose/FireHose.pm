@@ -1009,13 +1009,19 @@ sub ajaxFireHoseSetOptions {
 	my $values = {};
 	$values->{'firehose-filter'} = $opts->{fhfilter};
 	my $eval_last = "";
-	if ($form->{tab}) {
+	if ($form->{tab} || $form->{tabtype}) {
 		$eval_last = "firehose_slider_set_color('$opts->{color}')";
+	}
+
+	my $eval_first = "";
+	for my $o (qw(startdate mode fhfilter orderdir orderby startdate duration color)) {
+		$eval_first .= Data::JavaScript::Anon->var_dump("firehose_settings.$o", $opts->{$o});
 	}
 
 	return Data::JavaScript::Anon->anon_dump({
 		html		=> $html,
 		value		=> $values,
+		eval_first	=> $eval_first,
 		eval_last	=> $eval_last
 	});
 }
@@ -1774,7 +1780,7 @@ sub getAndSetOptions {
 		$options->{orderdir} = "DESC";
 		$options->{color} = "black";
 	} elsif ($tabtype eq 'tabuser') {
-		$form->{fhfilter} = "user:";
+		$form->{fhfilter} = "\"user:$user->{nickname}\"";
 		$options->{orderby} = "popularity";
 		$options->{color} = "black";
 		$options->{orderdir} = "DESC";
@@ -1812,7 +1818,7 @@ sub getAndSetOptions {
 	];
 
 	if (!$user->{is_anon}) {
-		push @$system_tabs, { tabtype => 'tabuser', color => 'black', filter => $skin_prefix . "user:"};
+		push @$system_tabs, { tabtype => 'tabuser', color => 'black', filter => $skin_prefix . "\"user:$user->{nickname}\""};
 	}
 
 	my $sel_tabtype;
@@ -2549,16 +2555,15 @@ sub createSectionSelect {
 }
 
 sub linkFireHose {
-	my ($self, $id_or_item) = (@_);
+	my($self, $id_or_item) = (@_);
 	my $gSkin 	= getCurrentSkin();
 	my $constants 	= getCurrentStatic();
 	my $link_url;
 	my $item = ref($id_or_item) ? $id_or_item : $self->getFireHose($id_or_item);
 
-
 	if ($item->{type} eq "story") {
 		my $story = $self->getStory($item->{srcid});
-		my $story_link_ar = $self->getStory({
+		my $story_link_ar = linkStory({
 			sid	=> $story->{sid},
 			link 	=> $story->{title},
 			tid 	=> $story->{tid},
@@ -2575,8 +2580,27 @@ sub linkFireHose {
 }
 
 sub js_anon_dump {
-	my ($self, $var) = @_;
+	my($self, $var) = @_;
 	return Data::JavaScript::Anon->anon_dump($var);
+}
+
+sub genFireHoseParams {
+	my($self, $options, $data) = @_;
+	$data ||= {};
+	my @params;
+
+	foreach my $label (qw(fhfilter color orderdir orderby startdate duration mode)) {
+	
+		my $value = defined $data->{$label} ? $data->{$label} : $options->{$label};
+		if ($label eq "startdate") {
+			$value =~s /-//g;
+		}
+		push @params, "$label=$value";
+		
+	}
+
+	my $str =  join('&amp;', @params);
+	return $str;
 }
 
 1;
