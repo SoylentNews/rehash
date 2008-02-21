@@ -30,6 +30,7 @@ Unless otherwise noted, they are publically available functions.
 use strict;
 use Slash::Utility::Access;
 use Slash::Utility::Anchor;
+use Slash::Utility::Comments;
 use Slash::Utility::Data;
 use Slash::Utility::Display;
 use Slash::Utility::Environment;
@@ -42,6 +43,7 @@ use vars qw($VERSION @EXPORT);
 @EXPORT = (
 	@Slash::Utility::Access::EXPORT,
 	@Slash::Utility::Anchor::EXPORT,
+	@Slash::Utility::Comments::EXPORT,
 	@Slash::Utility::Data::EXPORT,
 	@Slash::Utility::Display::EXPORT,
 	@Slash::Utility::Environment::EXPORT,

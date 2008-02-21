@@ -328,7 +328,7 @@ sub fetchComments {
 		}
 	}
 
-	my($comments) = Slash::selectComments(
+	my($comments) = selectComments(
 		$discussion,
 		$cid,
 		\%select_options,
@@ -456,7 +456,7 @@ sub fetchComments {
 	$form->{mode} = 'archive';
 
 	for my $cid (@hidden_cids) {
-		$html{'comment_' . $cid} = Slash::dispComment($comments->{$cid}, {
+		$html{'comment_' . $cid} = dispComment($comments->{$cid}, {
 			noshow_show => 1,
 			pieces      => $get_pieces_cids{$cid}
 		});
@@ -464,7 +464,7 @@ sub fetchComments {
 
 	for my $cid (@pieces_cids) {
 		@html{'comment_otherdetails_' . $cid, 'comment_sub_' . $cid} =
-			Slash::dispComment($comments->{$cid}, {
+			dispComment($comments->{$cid}, {
 				show_pieces => 1
 			});
 	}

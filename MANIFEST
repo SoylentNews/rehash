@@ -380,7 +380,6 @@ themes/slashcode/templates/delSection;sections;default
 themes/slashcode/templates/del_message;comments;default
 themes/slashcode/templates/deleted_cids;comments;default
 themes/slashcode/templates/discreate;comments;default
-themes/slashcode/templates/discuss_list;comments;default
 themes/slashcode/templates/dispComment;misc;default
 themes/slashcode/templates/dispComment;misc;light
 themes/slashcode/templates/dispLinkComment;misc;default
@@ -442,7 +441,6 @@ themes/slashcode/templates/moderation;comments;default
 themes/slashcode/templates/motd;misc;default
 themes/slashcode/templates/netIDInfo;users;default
 themes/slashcode/templates/newUserForm;users;default
-themes/slashcode/templates/newdiscussion;comments;default
 themes/slashcode/templates/organisation;misc;default
 themes/slashcode/templates/pollbooth;misc;default
 themes/slashcode/templates/portalboxtitle;misc;default

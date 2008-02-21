@@ -30,14 +30,9 @@ __template__
         </div>
 [% END %]
 
-[% IF newdiscussion || form.newdiscussion %]
-	[% PROCESS titlebar title="Create New $label" %]
-[% ELSE %]
-	[% PROCESS titlebar title="Post Comment" %]
-[% END %]
+[% PROCESS titlebar title="Post Comment" %]
 	<div class="generalbody">
 <!-- error message -->
-<!-- newdiscussion [% newdiscussion %] form.newdiscussion [% form.newdiscussion %] -->
 [% IF error_message %]
         <div class="error">
                 [% error_message %]
@@ -47,13 +42,7 @@ __template__
 <form action="[% gSkin.rootdir %]/comments.pl" method="post">
 [% IF preview %]                
 	<fieldset>
-		<legend>
-        [% IF newdiscussion || form.newdiscussion %]
-                Preview [% $label %]
-        [% ELSE %]              
-                Preview Comment
-        [% END %]               
-		</legend>
+		<legend>Preview Comment</legend>
 		[% preview %]   
 	</fieldset>
 [% END %]    
@@ -72,11 +61,6 @@ __template__
 	<input type="hidden" name="threshold" value="[% user.threshold %]">
 	<input type="hidden" name="commentsort" value="[% user.commentsort %]">
         [% IF gotmodwarning %]<input type="hidden" name="gotmodwarning" value="1">[% END %]
-
-[% IF newdiscussion || form.newdiscussion %]
-	<input type="hidden" name="indextype" value="[% indextype %]">
-	<input type="hidden" name="newdiscussion" value="[% newdiscussion %]">
-[% END %]
 
 [% PROCESS formkey_tag %]
 
@@ -115,17 +99,6 @@ END %]
 	[% PROCESS formLabel value => 'URL' %]
 		<a href="[% user.homepage %]" rel="nofollow">[% user.homepage | strip_literal %]</a>
 [% END %]
-
-	[% IF newdiscussion || form.newdiscussion %]
-			[% PROCESS formLabel value=>'Topic' %]
-				[% Slash.selectTopic('topic', form.topic, section, 1) %]
-		[% IF section_select %]
-			Section: 
-				[% section_select %]
-		[% END %]
-			[% PROCESS formLabel value=>'URL' %]
-				<input type="text" name="url" value="[% form.url | strip_attribute %]" size="50">
-	[% END %]
 
 	[% PROCESS formLabel value => 'Subject' %]
 		<input type="text" name="postersubj" value="[% form.postersubj | strip_attribute %]" size="50" maxlength="50">

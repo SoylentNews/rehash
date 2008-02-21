@@ -85,7 +85,7 @@ sub ajaxModerateCid {
 		if ($ret_val > 0) {
 			my $comment = $self->getComment($cid) or return;
 			my $reasons = $self->getReasons or return;
-			my $points = Slash::_get_points(
+			my $points = getPoints(
 				$comment, $user,
 				$constants->{comment_minscore}, $constants->{comment_maxscore},
 				$self->countUsers({ max => 1 }), $self->getReasons
@@ -742,7 +742,7 @@ sub dispModCommentLog {
 
 		my $user = getCurrentUser();
 		my $points;
-		($points, $modifier_hr) = Slash::_get_points($comment, $user, $min, $max, $max_uid, $reasons);
+		($points, $modifier_hr) = getPoints($comment, $user, $min, $max, $max_uid, $reasons);
 	}
 
 	my $this_user;
@@ -890,17 +890,17 @@ sub moderateCheck {
 
 	# all of these can be removed in favor of reskeys, later
 	if (!dbAvailable('write_comments')) {
-		return { msg => Slash::_comments_getError('comment_db_down') };
+		return { msg => Slash::Utility::Comments::getError('comment_db_down') };
 	}
 
 	if (!$constants->{m1}) {
-		return { msg => Slash::_comments_getError('no_moderation') };
+		return { msg => Slash::Utility::Comments::getError('no_moderation') };
 	}
 
 	if ($discussion->{type} eq 'archived' &&
 	   !$constants->{comments_moddable_archived} &&
 	   !$form->{meta_mod_only}) {
-		return { msg => Slash::_comments_getError('archive_error') };
+		return { msg => Slash::Utility::Comments::getError('archive_error') };
 	}
 
 	my $return = {};
@@ -909,7 +909,7 @@ sub moderateCheck {
 			&& $user->{seclev} >= $constants->{authors_unlimited}
 		)       || $user->{acl}{modpoints_always};
 	if ($return->{count}) {
-		$return->{msg} = Slash::_comments_getError('already posted');
+		$return->{msg} = Slash::Utility::Comments::getError('already posted');
 	}
 
 	return $return;

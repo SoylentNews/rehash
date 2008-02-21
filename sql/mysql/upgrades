@@ -5143,3 +5143,9 @@ UPDATE vars SET value = 'T_2_5_0_194' WHERE name = 'cvs_tag_currentcode';
 # For sites *without* plugins/Tags
 DELETE FROM clout_types;
 
+# these have not been used in years
+DELETE FROM templates WHERE page = "comments" AND skin = "default" AND name IN ("newdiscussion","discuss_list","udiscuss_list");
+
+# 2008-02-20
+UPDATE vars SET value = 'T_2_5_0_195' WHERE name = 'cvs_tag_currentcode';
+

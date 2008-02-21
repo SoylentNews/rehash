@@ -29,7 +29,9 @@ sub require {
 
 #	printf "%s called %s (%s)\n", $caller, $required, $package;
 	push @{$data{$caller}}, $package;
-	CORE::require $required;
+	eval {
+		CORE::require $required;
+	} or warn $@;
 }
 
 
@@ -50,7 +52,7 @@ package main;
 use strict;
 
 use File::Find;
-die $0;
+#die $0;
 my $path = shift @ARGV || '/usr/local/src/slash/main/slash/';
 $path .= '/' unless $path =~ m|/$|;
 
@@ -75,7 +77,9 @@ for my $f (sort keys %pms) {
 #	next unless $f eq 'Slash::DB::MySQL';
 	$SIG{__WARN__} = \&warner;
 	Slash::Test::Dependencies->export($f, 'require');
-	require $pms{$f};
+	eval {
+		require $pms{$f};
+	} or warn $@;
 }
 
 # make sure we get an error, for testing
