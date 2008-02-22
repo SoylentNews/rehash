@@ -1017,7 +1017,7 @@ sub ajaxFireHoseSetOptions {
 	my $eval_first = "";
 	for my $o (qw(startdate mode fhfilter orderdir orderby startdate duration color)) {
 		my $value = $opts->{$o};
-		if ($o eq 'orderby' && $value == 'editorpop') {
+		if ($o eq 'orderby' && $value eq 'editorpop') {
 			$value = 'popularity';
 		}
 		$eval_first .= "firehose_settings.$o = " . Data::JavaScript::Anon->anon_dump("$value") . "; ";
