@@ -1774,20 +1774,24 @@ sub getAndSetOptions {
 		$options->{orderdir} = "DESC";
 		$options->{orderby} = "createtime";
 		$options->{color} = "black";
+		$form->{color} = "black";
 	} elsif ($tabtype eq 'tabrecent') {
 		$form->{fhfilter} = "-story";
 		$options->{orderby} = "createtime";
 		$options->{orderdir} = "DESC";
 		$options->{color} = "indigo";
+		$form->{color} = "indigo";
 	} elsif ($tabtype eq 'tabpopular') {
 		$form->{fhfilter} = "-story";
 		$options->{orderby} = "popularity";
 		$options->{orderdir} = "DESC";
 		$options->{color} = "black";
+		$form->{color} = "black";
 	} elsif ($tabtype eq 'tabuser') {
 		$form->{fhfilter} = "\"user:$user->{nickname}\"";
 		$options->{orderby} = "popularity";
 		$options->{color} = "black";
+		$form->{color} = "black";
 		$options->{orderdir} = "DESC";
 		$options->{orderby} = "createtime";
 	}
