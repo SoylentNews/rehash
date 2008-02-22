@@ -1211,6 +1211,10 @@ function firehose_slider_end(offsetFromStart) {
 	}
 }
 
+function firehose_slider_set_color(color) {
+	fh_colorslider.setValue(fh_ticksize * fh_colors_hash[color] , 1);
+}
+
 function firehose_change_section_anon(section) {
 	window.location.href= window.location.protocol + "//" + window.location.host + "/firehose.pl?section=" + encodeURIComponent(section) + "&tabtype=tabsection";
 }
