@@ -7,13 +7,20 @@
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
 
-        <ul class="menu">
-                 <li><a href="com-mod.shtml">Previous Section</a></li>
-                 <li><a href="accounts.shtml">Next section</a></li>
-                 <li><a href="index.shtml">Index</a></li>
-        </ul>
-        
-        <hr>
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>Meta-moderation</h3>
+                </div>
+        </div>
+
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="com-mod.shtml" class="begin">Previous Section</a></span></li>
+                <li><span class="begin"><a href="accounts.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
 
 <h2><a name="mm100" id="mm100">What do "M1" and "M2" mean?</a></h2>
         <p>M1 and M2 are Slashdot shorthand for "moderation" and "metamoderation," respectively. We also use these with suffixes For example, if you see the term "M2ed," it means "metamoderated." Likewise, the term "M1er" means "Moderator."</p>
