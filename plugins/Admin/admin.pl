@@ -2059,14 +2059,31 @@ sub updateStory {
 	}
 
 	$data->{neverdisplay} = $form->{display} ? '' : 1;
-
-#print STDERR "admin.pl before updateStory data: " . Dumper($data);
 	if ($data->{neverdisplay}) {
 		print STDERR "Setting sid: $form->{sid} to neverdisplay\n";
 		use Data::Dumper;
 		print STDERR Dumper($form);
 		print STDERR Dumper($data);
 	}
+
+	if ($constants->{brief_sectional_mainpage}) {
+		$data->{offmainpage} = undef;
+		my $sectional_weight = $constants->{topics_sectional_weight} || 10;
+		if (!$rendered_hr->{ $constants->{mainpage_nexus_tid} }) {
+			my $mdn_ar = $slashdb->getMainpageDisplayableNexuses();
+			my $mdn_hr = { map { ($_, 1) } @$mdn_ar };
+			my $any_sectional = 0;
+			for my $tid (keys %$rendered_hr) {
+				$any_sectional = 1, last
+					if $rendered_hr->{$tid} >= $sectional_weight
+						&& $mdn_hr->{$tid};
+			}
+			$data->{offmainpage} = 1 if !$any_sectional;
+		}
+		
+	}
+
+#print STDERR "admin.pl before updateStory data: " . Dumper($data);
 	if (!$slashdb->updateStory($form->{sid}, $data)) {
 		titlebar('100%', getTitle('story_update_failed'));
 		editStory(@_);
