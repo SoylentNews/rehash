@@ -7,12 +7,19 @@
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
 
-        <ul class="menu">
-               <li><a href="editorial.shtml">Next section</a></li>
-               <li><a href="index.shtml">Index</a></li>
-       	</ul>
-        
-        <hr>
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>FAQ Meta</h3>
+                </div>
+        </div>
+
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="editorial.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
 
 <h2><a name="fm100" id="fm100">What is this document?</a></h2>
         <p>This is the Frequently Asked Questions (FAQ) file for Slashdot. As its name implies, it is intended to address questions that the Slashdot crew are asked repeatedly.</p>

@@ -9,7 +9,18 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
 
-        <h1>Slashdot FAQ</h1><!-- FAQ Meta -->
+        <div class="generaltitle" >
+                <div class="title">
+                        <h3>Slashdot FAQ</h3>
+                </div>
+        </div>
+
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                </ul>
+        </div>
+
         <h2><strong><a href="/faq/faq-meta.shtml">FAQ Meta</a></strong></h2>
         <ul>
                 <li><strong><a href="/faq/faq-meta.shtml#fm100">What is this document?</a></strong></li>

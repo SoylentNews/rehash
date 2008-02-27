@@ -6,12 +6,21 @@
 <!-- $Id$ -->
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
-	<ul class="menu">
-               <li><a href="tech.shtml">Previous Section</a></li>
-               <li><a href="suggestions.shtml">Next section</a></li>
-               <li><a href="index.shtml">Index</a></li>
-	</ul>
-        <hr>
+
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>Advertising</h3>
+                </div>
+        </div>
+
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="tech.shtml" class="begin">Previous Section</a></span></li>
+                <li><span class="begin"><a href="suggestions.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
 
 <h2><a name="ad100">Can I advertise on Slashdot?</a></h2>
         <p>Yes! You too can have banner ads at the top of Slashdot. Impress your friends! Terrify your competitors!</p>

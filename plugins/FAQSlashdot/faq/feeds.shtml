@@ -7,13 +7,20 @@
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
 
-        <ul class="menu">
-		<li><a href="subscriptions.shtml">Previous Section</a></li>
-		<li><a href="slashmeta.shtml">Next section</a></li>
-		<li><a href="index.shtml">Index</a></li>
-	</ul>
-        
-        <hr>
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>Feeds</h3>
+                </div>
+        </div>
+
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="subscriptions.shtml" class="begin">Previous Section</a></span></li>
+                <li><span class="begin"><a href="slashmeta.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
 
 <h2><a name="fe100">Where can I get Slashdot's main feed?</a></h2>
 	<p>The syndication feed for the Slashdot front page is available in <a href="http://rss.slashdot.org/Slashdot/slashdot/to">RSS 0.9</a>, <a href="http://rss.slashdot.org/Slashdot/slashdot">RSS 1.0</a>, and <a href="http://rss.slashdot.org/Slashdot/slashdotatom">Atom 1.0</a> formats.  Please do not request feeds more than once every 30 minutes.</p>

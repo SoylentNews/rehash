@@ -6,12 +6,21 @@
 <!-- $Id$ -->
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
-	<ul class="menu">
-            	<li><a href="metamod.shtml">Previous section</a></li>
-                <li><a href="friends.shtml">Next section</a></li>
-                <li><a href="index.shtml">Index</a></li>
-	</ul>
-        <hr>
+
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>Accounts</h3>
+                </div>
+        </div>
+
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="metamod.shtml" class="begin">Previous Section</a></span></li>
+                <li><span class="begin"><a href="friends.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
 
 <h2><a name="ac050">Why should I log in?</a></h2>
         <p>Logged in users have a variety of benefits on Slashdot that are unavailable to users who don't bother logging in. Among these benefits are:</p>

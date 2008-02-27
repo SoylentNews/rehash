@@ -6,13 +6,22 @@
 <!-- $Id$ -->
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
-		<ul class="menu">
-                        <li><a href="UI.shtml">Previous section</a></li>
-                        <li><a href="metamod.shtml">Next section</a></li>
-                        <li><a href="index.shtml">Index</a></li>
-		</ul>
-        <hr>
-        
+       
+                <div class="generaltitle">
+                        <div class="title">
+                                <h3>Comments and Moderation</h3>
+                        </div>
+                </div>
+
+                <div id="usermenu">
+                        <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                                <li><span class="begin"><a href="interviews.shtml" class="begin">Previous Section</a></span></li>
+                                <li><span class="begin"><a href="metamod.shtml" class="begin">Next Section</a></span></li>
+                        </ul>
+                </div>
+ 
 <h2><a name="cm100" id="cm100">What's up with flat/threaded/nested comments?</a></h2>
         <p>These are just different ways of displaying what can be a rather long list of comments. Here's the rundown:</p>
         <ul>
