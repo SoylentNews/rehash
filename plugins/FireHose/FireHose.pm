@@ -1020,6 +1020,9 @@ sub ajaxFireHoseSetOptions {
 		if ($o eq 'orderby' && $value eq 'editorpop') {
 			$value = 'popularity';
 		}
+		if ($o eq 'startdate') {
+			$value =~ s/-//g;
+		}
 		$eval_first .= "firehose_settings.$o = " . Data::JavaScript::Anon->anon_dump("$value") . "; ";
 	}
 
