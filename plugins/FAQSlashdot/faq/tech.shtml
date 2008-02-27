@@ -7,12 +7,20 @@
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
 
-        <ul class="menu">
-                 <li><a href="slashmeta.shtml">Previous section</a></li>
-                 <li><a href="advertising.shtml">Next section</a></li>
-                 <li><a href="index.shtml">Index</a></li>
-        </ul>
-        <hr>
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>Tech</h3>
+                </div>
+        </div>
+
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="slashmeta.shtml" class="begin">Previous Section</a></span></li>
+                <li><span class="begin"><a href="advertising.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
 
 <h2><a name="te050" id="te050">What kind of hardware does Slashdot run on?</a></h2>
         <p>[ <em>Note: This writeup originally appeared as a Slashdot post. You can see the original post, complete with comments, <a href="http://slashdot.org/articles/00/05/18/1427203.shtml">here</a>.</em> ]</p>

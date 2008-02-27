@@ -9,16 +9,22 @@
 ($VERSION) = '$Id$' =~ /^\$Id: \S+ (\S+)/
 -->
 
-<table>
-<tr>
-<td><a href="suggestions.shtml">Previous section</a></td>
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>Tags</h3>
+                </div>
+        </div>
 
-<td><a href="index.shtml">Index</a></td>
-</tr>
-</table>
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="suggestions.shtml" class="begin">Previous Section</a></span></li>
+                <li><span class="begin"><a href="firehose.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
 
-<hr>
-<br><a name="tags100" id="tags100"></a>
+<a name="tags100" id="tags100"></a>
 <h2>What is this crazy tags thing?</h2>
 <p> Slashdot is currently experimenting with tagging articles.  You are
 encouraged to use this feature to submit a handful of tags: brief labels

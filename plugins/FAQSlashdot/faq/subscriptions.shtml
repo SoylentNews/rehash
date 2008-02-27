@@ -7,13 +7,20 @@
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
 
-	<ul class="menu">
-		<li><a href="friends.shtml">Previous section</a></li>
-		<li><a href="feeds.shtml">Next section</a></li>
-		<li><a href="index.shtml">Index</a></li>
-	</ul>
-        
-        <hr>
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>Subscriptions</h3>
+                </div>
+        </div>
+
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="friends.shtml" class="begin">Previous Section</a></span></li>
+                <li><span class="begin"><a href="feeds.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
 
 <h2><a name="ss100" id="ss100">Why does Slashdot have subscriptions?</a></h2>
         <p>Read <a href="http://slashdot.org/article.pl?sid=02/03/01/1352200&amp;mode=nocomment">CmdrTaco's story</a> to learn why Slashdot implemented a subscription system.</p>
