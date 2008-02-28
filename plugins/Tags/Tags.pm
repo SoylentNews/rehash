@@ -565,14 +565,79 @@ sub getTagsByGlobjid {
 	return $ar;
 }
 
+# Given a tagnameid, return what clid type should be used for it
+# (0 = unknown).
+
+{ # closure
+my($reason_names, $upvoteid, $downvoteid) = (undef, undef, undef);
+sub getTagnameidClid {
+	my($self, $tagnameid) = @_;
+	if ($tagnameid !~ /^\d+$/) {
+		warn "non-numeric tagnameid passed to getTagnameCloutType: $tagnameid";
+		return 0;
+	}
+	my $constants = getCurrentStatic();
+
+	my $mcd = $self->getMCD();
+	my $mcdkey = undef;
+	if ($mcd) {
+		$mcdkey = "$self->{_mcd_keyprefix}:tanc:";
+		my $value = $mcd->get("$mcdkey$tagnameid");
+		return $value if defined $value;
+	}
+
+	my $clid = 0;
+	my $tn_data = undef;
+	my $types = $self->getCloutTypes();
+
+	# Is it a vote?
+	if ($types->{vote}) {
+		if (!$clid) {
+			$upvoteid   ||= $self->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
+			$clid = $types->{vote} if $tagnameid == $upvoteid;
+		}
+		if (!$clid) {
+			$downvoteid ||= $self->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
+			$clid = $types->{vote} if $tagnameid == $downvoteid;
+		}
+	}
+
+	# Is it descriptive?
+	if ($types->{describe} && !$clid) {
+		$tn_data = $self->getTagnameDataFromId($tagnameid);
+		$clid = $types->{describe} if $tn_data->{descriptive};
+	}
+
+	# Is it a moderation?
+	if ($types->{moderate} && $constants->{m1} && $constants->{m1_pluginname}) {
+		if (!$clid) {
+			if (!$reason_names) {
+				my $mod_db = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+				my $reasons = $mod_db->getReasons();
+				$reason_names = {
+					map { (lc($reasons->{$_}{name}), 1) }
+					keys %$reasons
+				};
+			}
+			$tn_data ||= $self->getTagnameDataFromId($tagnameid);
+			$clid = $types->{moderate} if $reason_names->{ $tn_data->{tagname} };
+		}
+	}
+
+	$mcd->set("$mcdkey$tagnameid", $clid, $constants->{memcached_exptime_tags}) if $mcd;
+
+	return $clid;
+}
+} # end closure
+
 # Given an arrayref of hashrefs representing tags, such as that
 # returned by getTagsByNameAndIdArrayref, add three fields to each
 # hashref:  tag_clout, tagname_clout, user_clout.  Values default
 # to 1.  "Rounded" means round to 3 decimal places.
 
 sub addRoundedCloutsToTagArrayref {
-	my($self, $ar, $clout_type) = @_;
-	$self->addCloutsToTagArrayref($ar, $clout_type);
+	my($self, $ar) = @_;
+	$self->addCloutsToTagArrayref($ar);
 	for my $tag_hr (@$ar) {
 		$tag_hr->{tag_clout}     = sprintf("%.3f", $tag_hr->{tag_clout});
 		$tag_hr->{tagname_clout} = sprintf("%.3f", $tag_hr->{tagname_clout});
@@ -582,10 +647,9 @@ sub addRoundedCloutsToTagArrayref {
 }
 
 sub addCloutsToTagArrayref {
-	my($self, $ar, $clout_type) = @_;
+	my($self, $ar) = @_;
 
-if (!$clout_type) { use Carp; Carp::cluck("no clout_type for addCloutsToTagArrayref"); }
-	return if !$ar || !@$ar || !$clout_type;
+	return if !$ar || !@$ar;
 	my $constants = getCurrentStatic();
 
 	# Pull values from tag params named 'tag_clout'
@@ -596,55 +660,36 @@ if (!$clout_type) { use Carp; Carp::cluck("no clout_type for addCloutsToTagArray
 		"tagid IN ($tagids_in_str) AND name='tag_clout'");
 
 	# Pull values from tagname params named 'tag_clout'
+	my $tagname_clout_hr = { };
 	my %tagnameid = map { ($_->{tagnameid}, 1) } @$ar;
-	my @tagnameids = sort { $a <=> $b } keys %tagnameid;
-	my $tagnameids_in_str = join(',', @tagnameids);
-	my $tagname_clout_hr = $self->sqlSelectAllKeyValue(
-		'tagnameid, value', 'tagname_params',
-		"tagnameid IN ($tagnameids_in_str) AND name='tag_clout'");
-
-	# Pull values from users_clout
-	my %uid = map { ($_->{uid}, 1) } @$ar;
-	my @uids = sort { $a <=> $b } keys %uid;
-	my $uids_in_str = join(',', @uids);
-	my $clid = $self->getCloutTypes()->{$clout_type};
-if (!$clid) { use Carp; Carp::cluck("no clid for addCloutsToTagArrayref '$clout_type'"); }
-	my $clout_info = $self->getCloutInfo()->{$clid};
-if (!$clout_info) { use Carp; Carp::cluck("getCloutInfo returned false for clid=$clid") }
-	my $uid_info_hr = $self->sqlSelectAllHashref(
-		'uid',
-		'users.uid AS uid, seclev, karma, tag_clout,
-			UNIX_TIMESTAMP(created_at) AS created_at_ut,
-		 clout',
-		"users,
-		 users_info LEFT JOIN users_clout
-			ON (users_info.uid=users_clout.uid AND clid=$clid)",
-		"users.uid=users_info.uid AND users.uid IN ($uids_in_str)");
-#print STDERR "uids_in_str='$uids_in_str'\n";
-
-	my $uid_clout_hr = { };
-	for my $uid (keys %$uid_info_hr) {
-		if (defined $uid_info_hr->{$uid}{clout}) {
-			$uid_clout_hr->{$uid} = $uid_info_hr->{$uid}{clout};
-		} else {
-			# There's a default clout for users who don't have
-			# the clout type in question.  Use it.
-			my %user_stub = %{ $uid_info_hr->{$uid} };
-#			my $user_stub = {
-#				uid		=> $uid,
-#				seclev		=> $uid_info_hr->{$uid}{seclev},
-#				karma		=> $uid_info_hr->{$uid}{karma},
-#				tag_clout	=> $uid_info_hr->{$uid}{tag_clout},
-#				created_at_ut	=> $uid_info_hr->{$uid}{created_at_ut},
-#			}
-			# XXX this stub is good enough for now but we may
-			# need the whole actual getUser() user at some
-			# future time
-			my $clout = getObject($clout_info->{class}, { db_type => 'reader' });
-			$uid_clout_hr->{$uid} = $clout->getUserClout(\%user_stub);
-		}
+	for my $tagnameid (keys %tagnameid) {
+		my $tn_data = $self->getTagnameDataFromId($tagnameid);
+		$tagname_clout_hr->{$tagnameid} = $tn_data->{tag_clout} || 1;
 	}
 
+	# Record which clout type each tagname uses
+	my $tagname_clid_hr = { };
+	for my $tagnameid (keys %tagnameid) {
+		my $clid = $self->getTagnameidClid($tagnameid);
+		$tagname_clid_hr->{$tagnameid} = $clid;
+	}
+
+	# Tagnames with unspecified clout type get a reduced form
+	# of some other clout type.
+	my $default_clout_clid = $constants->{tags_unknowntype_default_clid} || 1;
+	my $default_clout_mult = $constants->{tags_unknowntype_default_mult} || 0.3;
+
+	# Get clouts for all users referenced.
+	my $user_clout_hr = { };
+	my %uid = map { ($_->{uid}, 1) } @$ar;
+	for my $uid (keys %uid) {
+		# XXX getUser($foo, 'clout') does not work at the moment,
+		# so getUser($foo)->{clout} is used instead
+		$user_clout_hr->{$uid} = $self->getUser($uid)->{clout};
+	}
+
+
+	my $clout_types = $self->getCloutTypes();
 	for my $tag_hr (@$ar) {
 		$tag_hr->{tag_clout}     = defined($tag_clout_hr    ->{$tag_hr->{tagid}})
 						 ? $tag_clout_hr    ->{$tag_hr->{tagid}}
@@ -652,8 +697,14 @@ if (!$clout_info) { use Carp; Carp::cluck("getCloutInfo returned false for clid=
 		$tag_hr->{tagname_clout} = defined($tagname_clout_hr->{$tag_hr->{tagnameid}})
 						 ? $tagname_clout_hr->{$tag_hr->{tagnameid}}
 						 : 1;
-		$tag_hr->{user_clout}    =	   $uid_clout_hr    ->{$tag_hr->{uid}};
-#print STDERR "uc='$tag_hr->{user_clout}' for uid '$tag_hr->{uid}' for " . Dumper($tag_hr) if !defined $tag_hr->{user_clout};
+		my $mult = 1;
+		my $tagname_clid = $tagname_clid_hr->{$tag_hr->{tagnameid}};
+		if (!$tagname_clid) {
+			$mult = $default_clout_mult;
+			$tagname_clid = $default_clout_clid;
+		}
+		my $tagname_clout_name = $clout_types->{ $tagname_clid };
+		$tag_hr->{user_clout}    = $mult * $user_clout_hr   ->{$tag_hr->{uid}}{$tagname_clout_name};
 		$tag_hr->{total_clout} = $tag_hr->{tag_clout} * $tag_hr->{tagname_clout} * $tag_hr->{user_clout};
 	}
 }
@@ -787,7 +838,7 @@ sub getUidsUsingTagname {
 }
 
 sub getAllObjectsTagname {
-	my($self, $name, $clout_type, $options) = @_;
+	my($self, $name, $options) = @_;
 #	my $mcd = undef;
 #	my $mcdkey = undef;
 #	if (!$options->{include_private}) {
@@ -807,7 +858,7 @@ sub getAllObjectsTagname {
 		"tagnameid=$id AND inactivated IS NULL $private_clause",
 		'ORDER BY tagid');
 	$self->addGlobjEssentialsToHashrefArray($hr_ar);
-	$self->addCloutsToTagArrayref($hr_ar, $clout_type);
+	$self->addCloutsToTagArrayref($hr_ar);
 #	if ($mcd) {
 #		my $constants = getCurrentStatic();
 #		my $secs = $constants->{memcached_exptime_tags_brief} || 300;
@@ -822,6 +873,29 @@ sub getTagnameParams {
 	my($self, $tagnameid) = @_;
 	return $self->sqlSelectAllKeyValue('name, value', 'tagname_params',
 		"tagnameid=$tagnameid");
+}
+
+sub getWorstAdminCmdtype {
+	my($self, $tagnameid, $globjid) = @_;
+	$globjid ||= 0;
+	my $ar = $self->getTagnameAdmincmds($tagnameid, $globjid);
+	my $worst = '';
+	my $worst_count = 0;
+	for my $hr (@$ar) {
+		my $cmdtype = $hr->{cmdtype};
+		     if ($cmdtype eq '_' && $worst_count == 0) {
+			$worst = '_';
+		} elsif ($cmdtype =~ /^[*)]$/ && $worst eq '') {
+			$worst = $cmdtype;
+		} elsif ($cmdtype =~ /^\#+$/) {
+			my $count = $cmdtype =~ tr/#/#/;
+			if ($count > $worst_count) {
+				$worst = $cmdtype;
+				$worst_count = $count;
+			}
+		}
+	}
+	return $worst;
 }
 
 sub getTagnameAdmincmds {
@@ -1255,7 +1329,21 @@ sub ajaxTagHistory {
 	$summ->{n_viewed} = scalar grep { $_->{tagname} eq $viewed_tagname } @$tags_ar;
 	$tags_ar = [ grep { $_->{tagname} ne $viewed_tagname } @$tags_ar ];
 
-	$tags_reader->addRoundedCloutsToTagArrayref($tags_ar, 'describe');
+	$tags_reader->addRoundedCloutsToTagArrayref($tags_ar);
+
+	my $clout_types = $tags_reader->getCloutTypes();
+	for my $tag (@$tags_ar) {
+		my $clid = $tags_reader->getTagnameidClid($tag->{tagnameid});
+		$tag->{clout_code} = $clid
+			? uc( substr( $clout_types->{$clid}, 0, 1) )
+			: '';
+		my $cmd = $tags_reader->getWorstAdminCmdtype($tag->{tagnameid}, $tag->{globjid});
+		if (!$tag->{clout_code}) {
+			$tag->{clout_code} = $cmd;
+		} elsif ($cmd) {
+			$tag->{clout_code} = "$tag->{clout_code} $cmd";
+		}
+	}
 
 	my $tagboxdb = getObject('Slash::Tagbox');
 	if (@$tags_ar && $globjid && $tagboxdb) {
@@ -1593,7 +1681,7 @@ sub listTagnamesAll {
 }
 
 sub listTagnamesActive {
-	my($self, $clout_type, $options) = @_;
+	my($self, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $max_num =         $options->{max_num}         || 100;
 	my $seconds =         $options->{seconds}         || (3600*6);
@@ -1643,7 +1731,7 @@ sub listTagnamesActive {
 		 AND IF(tagname_params.value IS NULL, 1, tagname_params.value) > 0
 		 $slice_where_clause");
 	return [ ] unless $ar && @$ar;
-	$self->addCloutsToTagArrayref($ar, $clout_type);
+	$self->addCloutsToTagArrayref($ar);
 
 	# Sum up the clout for each tagname, and the median time it
 	# was seen within the interval in question.
@@ -1701,7 +1789,7 @@ sub listTagnamesActive {
 }
 
 sub listTagnamesRecent {
-	my($self, $clout_type, $options) = @_;
+	my($self, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $seconds =         $options->{seconds}         || (3600*6);
 	my $include_private = $options->{include_private} || 0;
@@ -1904,7 +1992,7 @@ sub getRecentTagnamesOfInterest {
 		'tags',
 		"tagnameid IN ($tagnameids_of_interest_str)
 		 AND created_at >= DATE_SUB(NOW(), INTERVAL $secsback SECOND)");
-	$self->addCloutsToTagArrayref($tags_ar, 'describe');
+	$self->addCloutsToTagArrayref($tags_ar);
 	my %tagnameid_weightsum = ( );
 	my %t_globjid_weightsum = ( );
 	# Admins will care less about new tagnames applied to data types other

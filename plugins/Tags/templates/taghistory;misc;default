@@ -27,16 +27,17 @@ __template__
 <table class="data">
 [% toggle = 1 %]
 [% IF tags.size > 0 %]
-	<tr class="data_hl0"><td colspan="6">Viewed by [% summary.n_viewed %]</td></tr>
-	<tr class="data_hl0"><td colspan="6">
+	<tr class="data_hl0"><td colspan="7">Viewed by [% summary.n_viewed %]</td></tr>
+	<tr class="data_hl0"><td colspan="7">
 		[% constants.tags_upvote_tagname %]: [% summary.up_count %] [% summary.up_pop %]
 		(ed: [% summary.up_count_ed %])</td></tr>
-	<tr class="data_hl0"><td colspan="6">
+	<tr class="data_hl0"><td colspan="7">
 		[% constants.tags_downvote_tagname %]: [% summary.down_count %] [% summary.down_pop %]
 		(ed: [% summary.down_count_ed %])</td></tr>
 	[% FOREACH tag = tags %]
 		<tr class="data_hl[% toggle %]">
 			[% nickname = Slash.db.getUser(tag.uid, "nickname") %]
+			<td align=left>[% tag.clout_code %]</td>
 			<td>[% tag.tagname %]</td>
 			<td align=left>[% tag.tag_clout %]</td>
 			<td align=left>[% tag.tagname_clout %]</td>

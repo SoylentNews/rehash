@@ -5149,3 +5149,7 @@ UPDATE vars SET value = 'T_2_5_0_195' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# for plugins/Tags
+INSERT INTO vars (name, value, description) VALUES ('tags_unknowntype_default_clid', '1', 'For tags of unknown type, which clout id do we pretend they are?');
+INSERT INTO vars (name, value, description) VALUES ('tags_unknowntype_default_mult', '0.3', 'For tags of unknown type, what multiplier do we give to the tagging user clout or type tags_unknowntype_default_clid?');
+
