@@ -40,7 +40,7 @@ __template__
 
                         &nbsp;<p><br>
 
-                        <b>Email Address</b>&nbsp;<input type="text" name="realemail" value="[% user.realemail | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_email');" style="text-decoration: none;">[?]</a>
+                        <b>Email Address</b>&nbsp;<input type="text" name="realemail" value="[% user.realemail | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_email');" class="help">?</a>
                         <br>
                         <div id="modalprefhelp_email" class="modalprefhelp" style="display: none;">
                                 Required but never displayed publicly, unless you specify so in your comment preferences. This is where your passwd is mailed. If you change this address, a notification will be sent, and you will need to follow the enclosed instructions to re-register.
@@ -48,7 +48,7 @@ __template__
 
                         &nbsp;<p>
 
-                        <b>Homepage</b>&nbsp;<input type="text" name="homepage" value="[% user.homepage | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_homepage');" style="text-decoration: none;" style="text-decoration: none;">[?]</a>
+                        <b>Homepage</b>&nbsp;<input type="text" name="homepage" value="[% user.homepage | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_homepage');" class="help">?</a>
                         <br>
                         <div id="modalprefhelp_homepage" class="modalprefhelp" style="display: none;">
                                 You must enter a fully qualified URL for your homepage.
@@ -75,7 +75,7 @@ __template__
 
                         &nbsp;<p><br>
 
-                        <b>Public Calendar</b>&nbsp;<input type="text" name="calendar_url" value="[% user.calendar_url | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_calendar');" style="text-decoration: none;">[?]</a>
+                        <b>Public Calendar</b>&nbsp;<input type="text" name="calendar_url" value="[% user.calendar_url | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_calendar');" class="help">?</a>
                         <br>
                         <div id="modalprefhelp_calendar" class="modalprefhelp" style="display: none;">
                                 You must enter a fully qualified URL for your iCal calendar.
@@ -83,7 +83,7 @@ __template__
 
                         &nbsp;<p>
 
-                        <b>Mobile Text Address</b>&nbsp;<input type="text" name="mobile_text_address" value="[% user.mobile_text_address | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_mobile');" style="text-decoration: none;">[?]</a>
+                        <b>Mobile Text Address</b>&nbsp;<input type="text" name="mobile_text_address" value="[% user.mobile_text_address | strip_attribute %]" size="40">&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_mobile');" class="help">?</a>
                         <br>
                         <div id="modalprefhelp_mobile" class="modalprefhelp" style="display: none;">
                                 Set this if you plan to have Messages sent to your mobile device.
@@ -91,7 +91,7 @@ __template__
 
                         &nbsp;<p>
 
-                        <b>Sig</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sig');" style="text-decoration: none;">[?]</a>
+                        <b>Sig</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sig');" class="help">?</a>
                         <div id="modalprefhelp_sig" class="modalprefhelp" style="display: none;">
                                 Appended to the end of comments you post. The maximum is 120 characters.
                         </div>
@@ -102,7 +102,7 @@ __template__
 
                         &nbsp;<p>
 
-                        <b>Bio</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_bio');" style="text-decoration: none;">[?]</a>
+                        <b>Bio</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_bio');" class="help">?</a>
                         <div id="modalprefhelp_bio" class="modalprefhelp" style="display: none;">
                                 This information is publicly displayed on your user page. The maximum is 255 characters.
                         </div>
