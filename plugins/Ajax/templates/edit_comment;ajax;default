@@ -1,0 +1,70 @@
+__section__
+default
+__description__
+Template which renders the comment editor.
+
+* error_message = error message if there is an error
+* preview = preview of comment, if applicable
+* reply = hashref of comment replying to
+* hide_name = hide name / log out link
+* hide_email = hide email display
+* extras = array of any extras associated with this comment
+ 
+__title__
+
+__page__
+ajax
+__lang__
+en_US
+__name__
+edit_comment
+__template__
+<div id="wide">
+[% IF pid %]
+        [% PROCESS titlebar title="Reply to: $reply.subject" %]
+[% ELSE %]
+        [% PROCESS titlebar title="Reply to: XXXXX" %]
+[% END %]
+
+[% IF user.is_anon %]<p>
+	[% IF constants.allow_anonymous %]
+You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
+in now</a>, or <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>/
+	[% ELSE %]
+You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
+in now</a>, <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>,
+or post as <b>[% user.nickname | strip_literal %]</b>.
+	[% END %]
+</p>[% END %]
+
+[% IF !user.is_anon || constants.allow_anonymous %]
+<form action="[% gSkin.rootdir %]/comments.pl" method="post">
+	<div id="replyto_preview_[% pid %]" class="replyto_reply" onclick="editReply([% pid %])"></div>
+	<div id="replyto_reply_[% pid %]" class="replyto_reply">
+<input type="hidden" name="sid" value="[% sid %]">
+[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
+[% IF gotmodwarning %]<input type="hidden" name="gotmodwarning" value="1">[% END # XXXXX %]
+[% reskey_label = "reskey_reply_$pid"; PROCESS reskey_tag %]
+<p><input type="text" name="postersubj_[% pid %]" id="postersubj_[% pid %]" value="Re:[% reply.subject | strip_attribute %]" size="50" maxlength="50">
+[<a href="[% gSkin.rootdir %]/my/comments" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">Customize Posting Preferences</a>]</p>
+<p><textarea wrap="virtual" name="postercomment_[% pid %]" id="postercomment_[% pid %]" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]"></textarea></p>
+
+[% IF constants.allow_anonymous && user.karma > -1 && !user.is_anon && (discussion.commentstatus == 'enabled' || discussion.commentstatus == 'logged_in')  %]
+	<p><input type="checkbox" name="postanon"> Post Anonymously</p>
+[% END %]
+
+	</div>
+	<div id="replyto_msg_[% pid %]" class="replyto_msg"></div>
+	<div id="replyto_buttons_[% pid %]" class="replyto_buttons">
+<input type="button" name="preview_[% pid %]"    id="preview_[% pid %]"    value="Preview" class="button" onclick="previewReply([% pid %]); return false;">
+<input type="button" name="submit_[% pid %]"     id="submit_[% pid %]"     value="Submit"  class="button" onclick="fetchEl('preview_[% pid %]').style.display='inline'; fetchEl('submit_[% pid %]').style.display='none';  return false;" style="display: none">
+<input type="button" name="quotereply_[% pid %]" id="quotereply_[% pid %]" value="Quote"   class="button" onclick="quoteReply([% pid %]); return false;">
+	</div>
+</form>
+[% END # IF !user.is_anon || constants.allow_anonymous %]
+</div>
+
+__seclev__
+1000
+__version__
+$Id$
