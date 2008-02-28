@@ -33,7 +33,7 @@ __template__
                 IF user.discussion2 == 'slashdot';
                         d2_check = constants.markup_checked_attribute;
                 END %]
-                <input type="checkbox" name="discussion2"[% d2_check %] onclick="javascript:void(document.forms['modal_prefs'].refreshable.value=1);">&nbsp;<b>Enable Dynamic Discussions</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussions');" style="text-decoration: none;">[?]</a>
+                <input type="checkbox" name="discussion2"[% d2_check %] onclick="javascript:void(document.forms['modal_prefs'].refreshable.value=1);">&nbsp;<b>Enable Dynamic Discussions</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussions');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_discussions" class="modalprefhelp" style="display: none;">
                         Toggle between Discussion 2 and the classic discussion system.
@@ -46,7 +46,7 @@ __template__
                         <div>
                         Retrieve [% comment_q_name = (user.is_subscriber || user.is_admin) ? 'd2_comment_q_all' : 'd2_comment_q';
                            comment_q = Slash.db.getDescriptions(comment_q_name);
-                           Slash.createSelect('d2_comment_q', comment_q, user.d2_comment_q, 1) %] Comments&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sortorder');" style="text-decoration: none;">[?]</a>
+                           Slash.createSelect('d2_comment_q', comment_q, user.d2_comment_q, 1) %] Comments&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sortorder');" class="help">?</a>
 
                         <br>
 
@@ -68,7 +68,7 @@ __template__
 
                 <br>
 
-                <input type="checkbox" name="nosigs"[% s_check %]>&nbsp;<b>Disable Sigs</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sigs');" style="text-decoration: none;">[?]</a>
+                <input type="checkbox" name="nosigs"[% s_check %]>&nbsp;<b>Disable Sigs</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sigs');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_sigs" class="modalprefhelp" style="display: none;">
                         Strip sig quotes from comments.
@@ -80,7 +80,7 @@ __template__
                 IF user.noscores;
                         n_check = constants.markup_checked_attribute;
                 END %]
-                <input type="checkbox" name="noscores"[% n_check %]>&nbsp;<b>Do Not Display Scores</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_scores');" style="text-decoration: none;">[?]</a>
+                <input type="checkbox" name="noscores"[% n_check %]>&nbsp;<b>Do Not Display Scores</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_scores');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_scores" class="modalprefhelp" style="display: none;">
                         Hide scores. They still <b>apply</b>, but you just don't see them.
@@ -91,7 +91,7 @@ __template__
                 [% UNLESS user.domaintags.defined; user.domaintags = 2; END %]
                 [% domaintags.${user.domaintags} = constants.markup_checked_attribute -%]
 
-                <b>Display Link Domains?</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_domains');" style="text-decoration: none;">[?]</a>
+                <b>Display Link Domains?</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_domains');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_domains" class="modalprefhelp" style="display: none;">
                         Show the actual domain of any link in brackets.

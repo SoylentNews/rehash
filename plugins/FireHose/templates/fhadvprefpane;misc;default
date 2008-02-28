@@ -85,7 +85,7 @@ END;
 
 <br>
 
-<input type="checkbox" name="nodates" onchange="firehose_set_options('nodates', !this.checked)" [% IF !options.nodates; constants.markup_checked_attribute; END %]> <b>Dates</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nodates'); return false" title="Click To Expand Help" style="text-decoration: none; color: #055;">[?]</a>
+<input type="checkbox" name="nodates" onchange="firehose_set_options('nodates', !this.checked)" [% IF !options.nodates; constants.markup_checked_attribute; END %]> <b>Dates</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nodates'); return false" title="Click To Expand Help" class="help">?</a>
 <br>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_nodates" class="modalprefhelp" style="display: none;">
@@ -95,7 +95,7 @@ END;
 
 <br>
 
-<input type="checkbox" name="nobylines" onchange="firehose_set_options('nobylines', !this.checked)" [% IF !options.nobylines; constants.markup_checked_attribute; END %]> <b>Bylines</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nobylines'); return false" title="Click To Expand Help" style="text-decoration: none; color: #055;">[?]</a>
+<input type="checkbox" name="nobylines" onchange="firehose_set_options('nobylines', !this.checked)" [% IF !options.nobylines; constants.markup_checked_attribute; END %]> <b>Bylines</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nobylines'); return false" title="Click To Expand Help" class="help">?</a>
 <br>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_nobylines" class="modalprefhelp" style="display: none;">
@@ -105,7 +105,7 @@ END;
 
 <br>
 
-<input type="checkbox" name="nothumbs" onchange="firehose_set_options('nothumbs', !this.checked)" [% IF !options.nothumbs; constants.markup_checked_attribute; END %]> <b>Thumbs</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nothumbs'); return false" title="Click To Expand Help" style="text-decoration: none; color: #055;">[?]</a>
+<input type="checkbox" name="nothumbs" onchange="firehose_set_options('nothumbs', !this.checked)" [% IF !options.nothumbs; constants.markup_checked_attribute; END %]> <b>Thumbs</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nothumbs'); return false" title="Click To Expand Help" class="help">?</a>
 <br>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_nothumbs" class="modalprefhelp" style="display: none;">

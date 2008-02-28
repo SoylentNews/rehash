@@ -15,7 +15,7 @@ __template__
 
 <br>
 
-<h3><a href="[% constants.rootdir %]/login.pl" style="text-decoration: none;">Login</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_login'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<h3><a href="[% constants.rootdir %]/login.pl" style="text-decoration: none;">Login</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_login'); return false" title="Click To Expand Help" class="help">?</a></h3>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_login" class="modalprefhelp" style="display: none;">
         Logged in users have a variety of benefits on Slashdot that are unavailable to users who don't bother logging in.
@@ -27,7 +27,7 @@ __template__
 
 <br>
 
-<h3><a href="/faq/accounts.shtml" target="_blank" style="text-decoration: none;">Accounts</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_accounts'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<h3><a href="/faq/accounts.shtml" target="_blank" style="text-decoration: none;">Accounts</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_accounts'); return false" title="Click To Expand Help" class="help">?</a></h3>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_accounts" class="modalprefhelp" style="display: none;">
         Having trouble with your account? Learn about account security, how to change your password, and how to avoid getting banned.

@@ -62,7 +62,7 @@ __template__
                         b_check = constants.markup_checked_attribute;
                 END %]
                 <input type="hidden" name="nobonus_present" value="1">
-                <b><input type="checkbox" name="nobonus"[% b_check %]>&nbsp;No Karma Bonus</b><a href="#" onclick="displayModalPrefHelp('modalprefhelp_karma');" style="text-decoration: none;">[?]</a>
+                <b><input type="checkbox" name="nobonus"[% b_check %]>&nbsp;No Karma Bonus</b><a href="#" onclick="displayModalPrefHelp('modalprefhelp_karma');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_karma" class="modalprefhelp" style="display: none;">
                         Normally users with high karma post at Score: 2, but you can choose to post down in the Score: 1 gutters with the rest of the user population with this option.
@@ -76,7 +76,7 @@ __template__
                         sb_check = constants.markup_checked_attribute;
                 END %]
                 <input type="hidden" name="nosubscriberbonus_present" value="1">
-                <b><input type="checkbox" name="nosubscriberbonus"[% sb_check %]>&nbsp;No Subscriber Bonus</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_subscriber');" style="text-decoration: none;">[?]</a>
+                <b><input type="checkbox" name="nosubscriberbonus"[% sb_check %]>&nbsp;No Subscriber Bonus</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_subscriber');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_subscriber" class="modalprefhelp" style="display: none;">
                         Our paying subscribers are allowed to post at Score: 2, but if you think that this is unnecessary, then you can turn it off.
@@ -84,7 +84,7 @@ __template__
 
         [% END %]
 
-        <b>Comment Box Size</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_textarea');" style="text-decoration: none;">[?]</a>
+        <b>Comment Box Size</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_textarea');" class="help">?</a>
         <br>
         <div id="modalprefhelp_textarea" class="modalprefhelp" style="display: none;">
                 Also applies to other large text boxes.
@@ -105,7 +105,7 @@ __template__
 
         <br><br>
 
-        <b>Comment Post Mode</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_postmode');" style="text-decoration: none;">[?]</a>
+        <b>Comment Post Mode</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_postmode');" class="help">?</a>
         <br>
         <div id="modalprefhelp_postmode" class="modalprefhelp" style="display: none;">
                 Posting modes determine how the text that you enter for a comment is interpreted and thus how it will be displayed to the reader. The posting modes are:<br>

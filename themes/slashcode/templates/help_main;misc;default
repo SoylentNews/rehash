@@ -24,7 +24,7 @@ END
 
 <br>
 
-<h3><a href="/faq" style="text-decoration: none;">FAQ</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_1'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<h3><a href="/faq" style="text-decoration: none;">FAQ</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_1'); return false" title="Click To Expand Help" class="help">?</a></h3>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_1" class="modalprefhelp" style="display: none;">
         Herein lies everything you've ever wanted to know about Slashdot but were afraid to ask. Read about our hardware, traffic, the comments and moderation system,
@@ -37,7 +37,7 @@ END
 
 <br>
 
-<h3><a href="/about.shtml" style="text-decoration: none;">About Slashdot</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_2'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<h3><a href="/about.shtml" style="text-decoration: none;">About Slashdot</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_2'); return false" title="Click To Expand Help" class="help">?</a></h3>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_2" class="modalprefhelp" style="display: none;">
         Slashdot was originally created in September of 1997 by <a href="http://cmdrtaco.net/" target="_blank">Rob "CmdrTaco" Malda</a>. Today it is owned by <a href="http://sourceforge.com/" target="_blank">Sourceforge Inc</a>.<br>
@@ -49,7 +49,7 @@ END
 
 <br>
 
-<h3><a href="/code.shtml" style="text-decoration: none;">About Slashcode</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_3'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<h3><a href="/code.shtml" style="text-decoration: none;">About Slashcode</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_3'); return false" title="Click To Expand Help" class="help">?</a></h3>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_3" class="modalprefhelp" style="display: none;">
         Slashcode is wrangled and various other deeds of a technical nature are committed by the <a href="http://sourceforge.com/" target="_blank">SourceForce Inc.</a> Slashteam.<br>
@@ -61,7 +61,7 @@ END
 
 <br>
 
-<h3><a href="http://sourceforge.net/projects/slashcode/" target="_blank" style="text-decoration: none;">Bug Reports</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_6'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<h3><a href="http://sourceforge.net/projects/slashcode/" target="_blank" style="text-decoration: none;">Bug Reports</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_6'); return false" title="Click To Expand Help" class="help">?</a></h3>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_6" class="modalprefhelp" style="display: none;">
         Have you found a bug? You may let us know about it by submitting to our bug tracker. Please remember, this is for bug submissions and <b>not</b> for feature requests. You
@@ -72,7 +72,7 @@ END
 
 <br>
 
-<h3><a href="/faq/subscriptions.shtml" style="text-decoration: none;">Subscriptions</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_7'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<h3><a href="/faq/subscriptions.shtml" style="text-decoration: none;">Subscriptions</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_7'); return false" title="Click To Expand Help" class="help">?</a></h3>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_7" class="modalprefhelp" style="display: none;">
         Read about why we offer subscriptions and how you may get one. Want to give a subscription to a friend? Having trouble with your subscription or payment?<br>
@@ -83,7 +83,7 @@ END
 
 <br>
 
-<h3><a href="http://web.sourceforge.com/media_kit.php" target="_blank" style="text-decoration: none;">Advertising&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_8'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<h3><a href="http://web.sourceforge.com/media_kit.php" target="_blank" style="text-decoration: none;">Advertising&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_8'); return false" title="Click To Expand Help" class="help">?</a></h3>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_8" class="modalprefhelp" style="display: none;">
         Ever wonder why there are banner ads on Slashdot? Would you like to see yours up there?<br>
@@ -94,7 +94,7 @@ END
 
 <br>
 
-<h3><a href="/supporters.shtml" style="text-decoration: none;">Supporters</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_5'); return false" title="Click To Expand Help" style="text-decoration: none;">[?]</a></h3>
+<h3><a href="/supporters.shtml" style="text-decoration: none;">Supporters</a>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_5'); return false" title="Click To Expand Help" class="help">?</a></h3>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_5" class="modalprefhelp" style="display: none;">
         Browse the multitude of sites that have linked to us by using one of our snazzy <a href="/prettypictures.shtml">banners</a>.
