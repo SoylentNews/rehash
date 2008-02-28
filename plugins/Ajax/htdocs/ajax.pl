@@ -63,7 +63,9 @@ sub main {
 		}
 		if ($ops->{$op}{reskey_type} eq 'createuse') {
 			$rkey->createuse;
-		} else {
+		} elsif ($ops->{$op}{reskey_type} eq 'touch') {
+			$rkey->touch;
+		} else  {
 			$rkey->use;
 		}
 		if (!$rkey->success) {
@@ -265,6 +267,71 @@ sub setSectionNexusPrefs {
 
 ###################
 # comments
+
+sub submitReply {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	my $pid = $form->{pid} || 0;
+	my $sid = $form->{sid} or return;
+
+}
+
+sub previewReply {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	my $pid = $form->{pid} || 0;
+	my $sid = $form->{sid} or return;
+
+	$user->{state}{ajax_accesslog_op} = 'comments_preview_reply';
+
+	my $discussion = $slashdb->getDiscussion($sid);
+	my $comment = preProcessComment($form, $user, $discussion);
+	my $preview = postProcessComment({ %$comment, %$user }, 0, $discussion);
+	my $html = prevComment($preview, $user);
+
+
+	$options->{content_type} = 'application/json';
+	my %to_dump = (html => { "replyto_preview_$pid" => $html });
+#use Data::Dumper; print STDERR Dumper \%to_dump; 
+
+	return Data::JavaScript::Anon->anon_dump(\%to_dump);
+}
+
+
+sub replyForm {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	my $pid = $form->{pid} || 0;
+	my $sid = $form->{sid} or return;
+
+	$user->{state}{ajax_accesslog_op} = 'comments_reply_form';
+
+	my($reply, $pid_reply);
+	$reply = $slashdb->getCommentReply($sid, $pid) if $pid;
+	$pid_reply = prepareQuoteReply($reply) if $pid && $reply;
+
+	my $reskey = getObject('Slash::ResKey');
+	my $rkey = $reskey->key('comments', { nostate => 1 });
+	$rkey->create;
+
+	my %to_dump;
+	if ($rkey->success) {
+		my $reply_html = slashDisplay('edit_comment', {
+			sid    => $sid,
+			pid    => $pid,
+			reply  => $reply,
+			rkey   => $rkey
+		}, { Return => 1 });
+		%to_dump = (html => { "replyto_$pid" => $reply_html });
+	} else {
+		%to_dump = (html => { "replyto_$pid" => $rkey->errstr });
+	}
+
+	$options->{content_type} = 'application/json';
+	$to_dump{eval_first} = "comment_body_reply[$pid] = '$pid_reply';" if $pid_reply;
+
+#use Data::Dumper; print STDERR Dumper \%to_dump; 
+
+	return Data::JavaScript::Anon->anon_dump(\%to_dump);
+}
+
 
 sub readRest {
 	my($slashdb, $constants, $user, $form) = @_;
@@ -550,104 +617,103 @@ sub getModalPrefs {
 			{ Return => 1 }
 		);
 	} elsif ($form->{'section'} eq 'sectional') {
-                
-               getSectionPrefsHTML($slashdb, $constants, $user, $form);
+	       getSectionPrefsHTML($slashdb, $constants, $user, $form);
 
-        } elsif ($form->{'section'} eq 'slashboxes') {
-                my $section_descref = { };
-                my $box_order;
-                my $sections_description = $slashdb->getSectionBlocks();
-                my $slashboxes_hr = { };
-                my $slashboxes_textlist = $user->{slashboxes};
-                my $userspace = $user->{mylinks} || "";
+	} elsif ($form->{'section'} eq 'slashboxes') {
+		my $section_descref = { };
+		my $box_order;
+		my $sections_description = $slashdb->getSectionBlocks();
+		my $slashboxes_hr = { };
+		my $slashboxes_textlist = $user->{slashboxes};
+		my $userspace = $user->{mylinks} || "";
 
-                if (!$slashboxes_textlist) {
-                        my($boxes, $skinBoxes) = $slashdb->getPortalsCommon();
-                        $slashboxes_textlist = join ",", @{$skinBoxes->{$constants->{mainpage_skid}}};
-                }
+		if (!$slashboxes_textlist) {
+			my($boxes, $skinBoxes) = $slashdb->getPortalsCommon();
+			$slashboxes_textlist = join ",", @{$skinBoxes->{$constants->{mainpage_skid}}};
+		}
 
-                for my $bid (map { /^'?([^']+)'?$/; $1 } split(/,/, $slashboxes_textlist)) {
-                        $slashboxes_hr->{$bid} = 1;
-                }
+		for my $bid (map { /^'?([^']+)'?$/; $1 } split(/,/, $slashboxes_textlist)) {
+			$slashboxes_hr->{$bid} = 1;
+		}
 
-                for my $ary (sort { lc $a->[1] cmp lc $b->[1]} @$sections_description) {
-                        my($bid, $title, $boldflag) = @$ary;
-                        push @$box_order, $bid;
-                        $section_descref->{$bid}{checked} = $slashboxes_hr->{$bid} ? $constants->{markup_checked_attribute} : '';
-                        $title =~ s/<(.*?)>//g;
-                        $section_descref->{$bid}{title} = $title;
-                }
+		for my $ary (sort { lc $a->[1] cmp lc $b->[1]} @$sections_description) {
+			my($bid, $title, $boldflag) = @$ary;
+			push @$box_order, $bid;
+			$section_descref->{$bid}{checked} = $slashboxes_hr->{$bid} ? $constants->{markup_checked_attribute} : '';
+			$title =~ s/<(.*?)>//g;
+			$section_descref->{$bid}{title} = $title;
+		}
 
-                return
-                        slashDisplay('prefs_slashboxes', {
-                                box_order         => $box_order,
-                                section_descref   => $section_descref,
-                                userspace         => $userspace,
-                                tabbed            => $form->{'tabbed'},
-                        },
-                        { Return => 1 }
-                );
+		return
+			slashDisplay('prefs_slashboxes', {
+				box_order	  => $box_order,
+				section_descref	  => $section_descref,
+				userspace	  => $userspace,
+				tabbed		  => $form->{'tabbed'},
+			},
+			{ Return => 1 }
+		);
 
-        } elsif ($form->{'section'} eq 'authors') {
+	} elsif ($form->{'section'} eq 'authors') {
 
-                my $author_hr = $slashdb->getDescriptions('authors');
-                my @aid_order = sort { lc $author_hr->{$a} cmp lc $author_hr->{$b} } keys %$author_hr;
-                my %story_never_author;
-                map { $story_never_author{$_} = 1 } keys %$author_hr;
-                map { $story_never_author{$_} = 0 } split(/,/, $user->{story_never_author});
+		my $author_hr = $slashdb->getDescriptions('authors');
+		my @aid_order = sort { lc $author_hr->{$a} cmp lc $author_hr->{$b} } keys %$author_hr;
+		my %story_never_author;
+		map { $story_never_author{$_} = 1 } keys %$author_hr;
+		map { $story_never_author{$_} = 0 } split(/,/, $user->{story_never_author});
 
-                return
-                        slashDisplay('prefs_authors', {
-                                aid_order          => \@aid_order,
-                                author_hr          => $author_hr,
-                                story_never_author => \%story_never_author,
-                                tabbed             => $form->{'tabbed'},
-                        },
-                        { Return => 1 }
-                );
+		return
+			slashDisplay('prefs_authors', {
+				aid_order	   => \@aid_order,
+				author_hr	   => $author_hr,
+				story_never_author => \%story_never_author,
+				tabbed		   => $form->{'tabbed'},
+			},
+			{ Return => 1 }
+		);
 
-        } elsif ($form->{'section'} eq 'admin') {
-                return if !$user->{is_admin};
+	} elsif ($form->{'section'} eq 'admin') {
+		return if !$user->{is_admin};
 
-                return
-                        slashDisplay('prefs_admin', {
-                                user   => $user,
-                                tabbed => $form->{'tabbed'},
-                        },
-                        { Return => 1 }
-                );
+		return
+			slashDisplay('prefs_admin', {
+				user   => $user,
+				tabbed => $form->{'tabbed'},
+			},
+			{ Return => 1 }
+		);
 
-        } elsif ($form->{'section'} eq 'fh') {
+	} elsif ($form->{'section'} eq 'fh') {
 
-                my $firehose = getObject("Slash::FireHose");
-                my $opts = $firehose->getAndSetOptions();
-                $opts->{firehose_usermode} = $user->{firehose_usermode} if $user->{is_admin};
+		my $firehose = getObject("Slash::FireHose");
+		my $opts = $firehose->getAndSetOptions();
+		$opts->{firehose_usermode} = $user->{firehose_usermode} if $user->{is_admin};
 
-                return
-                        slashDisplay('fhadvprefpane', {
-                                options => $opts,
-                                user    => $user,
-                        },
-                        { Return => 1 }
-                );
-                
-        } elsif ($form->{'section'} eq 'ifh') {
+		return
+			slashDisplay('fhadvprefpane', {
+				options => $opts,
+				user	=> $user,
+			},
+			{ Return => 1 }
+		);
+		
+	} elsif ($form->{'section'} eq 'ifh') {
 
-                my $firehose = getObject("Slash::FireHose");
-                my $opts = $firehose->getAndSetOptions();
-                $opts->{firehose_usermode} = $user->{firehose_usermode} if $user->{is_admin};
+		my $firehose = getObject("Slash::FireHose");
+		my $opts = $firehose->getAndSetOptions();
+		$opts->{firehose_usermode} = $user->{firehose_usermode} if $user->{is_admin};
 
-                return
-                        slashDisplay('fhadvprefpane', {
-                                options => $opts,
-                                user    => $user,
-                        },
-                        { Page => 'misc', Skin => 'idle', Return => 1 }
-                );
+		return
+			slashDisplay('fhadvprefpane', {
+				options => $opts,
+				user	=> $user,
+			},
+			{ Page => 'misc', Skin => 'idle', Return => 1 }
+		);
 
-        } else {
-                
-                return
+	} else {
+		
+		return
 			slashDisplay('prefs_' . $form->{'section'}, {
 				user   => $user,
                                 tabbed => $form->{'tabbed'},
@@ -715,229 +781,230 @@ sub saveModalPrefs {
 		};
 	}
 
-        # Generic user
-        if ($params{'formname'} eq 'user') {
-                my $user_edit = $slashdb->getUser($params{uid});
-                my $gSkin = getCurrentSkin();
+	# Generic user
+	if ($params{'formname'} eq 'user') {
+		my $user_edit = $slashdb->getUser($params{uid});
+		my $gSkin = getCurrentSkin();
 
-                # Real Email
-                if ($user_edit->{realemail} ne $params{realemail}) {
-                        if ($slashdb->existsEmail($params{realemail})) {
-                                $params{realemail} = $user_edit->{realemail};
-                        }
-                }
+		# Real Email
+		if ($user_edit->{realemail} ne $params{realemail}) {
+			if ($slashdb->existsEmail($params{realemail})) {
+				$params{realemail} = $user_edit->{realemail};
+			}
+		}
 
-                # Homepage
-                my $homepage = $params{homepage};
-                $homepage = '' if $homepage eq 'http://';
-                $homepage = fudgeurl($homepage);
-                $homepage = URI->new_abs($homepage, $gSkin->{absolutedir})
-                               ->canonical
-                               ->as_string if $homepage ne '';
-                $homepage = substr($homepage, 0, 100) if $homepage ne '';
+		# Homepage
+		my $homepage = $params{homepage};
+		$homepage = '' if $homepage eq 'http://';
+		$homepage = fudgeurl($homepage);
+		$homepage = URI->new_abs($homepage, $gSkin->{absolutedir})
+			       ->canonical
+			       ->as_string if $homepage ne '';
+		$homepage = substr($homepage, 0, 100) if $homepage ne '';
 
-                # Calendar
-                my $calendar_url = $params{calendar_url};
-                if (length $calendar_url) {
-                        $calendar_url =~ s/^webcal/http/i;
-                        $calendar_url = fudgeurl($calendar_url);
-                        $calendar_url = URI->new_abs($calendar_url, $gSkin->{absolutedir})
-                                           ->canonical
-                                           ->as_string if $calendar_url ne '';
-                        $calendar_url =~ s|^http://||i;
-                        $calendar_url = substr($calendar_url, 0, 200) if $calendar_url ne '';
-                }
+		# Calendar
+		my $calendar_url = $params{calendar_url};
+		if (length $calendar_url) {
+			$calendar_url =~ s/^webcal/http/i;
+			$calendar_url = fudgeurl($calendar_url);
+			$calendar_url = URI->new_abs($calendar_url, $gSkin->{absolutedir})
+					   ->canonical
+					   ->as_string if $calendar_url ne '';
+			$calendar_url =~ s|^http://||i;
+			$calendar_url = substr($calendar_url, 0, 200) if $calendar_url ne '';
+		}
 
-                my(%extr, $err_message, %limit);
-                $limit{sig} = 120;
-                $limit{bio} = $constants->{users_bio_length} || 1024;
+		my(%extr, $err_message, %limit);
+		$limit{sig} = 120;
+		$limit{bio} = $constants->{users_bio_length} || 1024;
 
-                for my $key (keys %limit) {
-                        my $dat = chopEntity($params{$key}, $limit{$key});
-                        $dat = strip_html($dat);
-                        $dat = balanceTags($dat, { deep_nesting => 2, length => $limit{$key} });
-                        $dat = addDomainTags($dat) if $dat;
+		for my $key (keys %limit) {
+			my $dat = chopEntity($params{$key}, $limit{$key});
+			$dat = strip_html($dat);
+			$dat = balanceTags($dat, { deep_nesting => 2, length => $limit{$key} });
+			$dat = addDomainTags($dat) if $dat;
 
-                        if ($key eq 'sig' && defined($dat) && length($dat) > 200) {
-                                $extr{sig} = undef;
-                        }
+			if ($key eq 'sig' && defined($dat) && length($dat) > 200) {
+				$extr{sig} = undef;
+			}
 
-                        if ((length($dat) > 1 && !filterOk('comments', 'postersubj', $dat, \$err_message)) ||
-                            (!compressOk('comments', 'postersubj', $dat))) {
-                                $extr{$key} = undef;
-                        }
-                        else {
-                                $extr{$key} = $dat;
-                        }
-                }
+			if ((length($dat) > 1 && !filterOk('comments', 'postersubj', $dat, \$err_message)) ||
+			    (!compressOk('comments', 'postersubj', $dat))) {
+				$extr{$key} = undef;
+			}
+			else {
+				$extr{$key} = $dat;
+			}
+		}
 
-                $user_edits_table = {
-                        homepage            => $homepage,
-                        realname            => $params{realname},
-                        calendar_url        => $calendar_url,
-                        yahoo               => $params{yahoo},
-                        jabber              => $params{jabber},
-                        aim                 => $params{aim},
-                        aimdisplay          => $params{aimdisplay},
-                        icq                 => $params{icq},
-                        mobile_text_address => $params{mobile_text_address},
-                };
+		$user_edits_table = {
+			homepage	    => $homepage,
+			realname	    => $params{realname},
+			calendar_url	    => $calendar_url,
+			yahoo		    => $params{yahoo},
+			jabber		    => $params{jabber},
+			aim		    => $params{aim},
+			aimdisplay	    => $params{aimdisplay},
+			icq		    => $params{icq},
+			mobile_text_address => $params{mobile_text_address},
+		};
 
-                for (keys %extr) {
-                        $user_edits_table->{$_} = $extr{$_} if defined $extr{$_};
-                }
+		for (keys %extr) {
+			$user_edits_table->{$_} = $extr{$_} if defined $extr{$_};
+		}
 
-                for (keys %$user_edits_table) {
-                        $user_edits_table->{$_} = '' unless defined $user_edits_table->{$_};
-                }
+		for (keys %$user_edits_table) {
+			$user_edits_table->{$_} = '' unless defined $user_edits_table->{$_};
+		}
 
-                if ($user_edit->{realemail} ne $params{realemail}) {
-                        $user_edits_table->{realemail} = chopEntity($params{realemail}, 50);
-                        my $new_fakeemail = '';
+		if ($user_edit->{realemail} ne $params{realemail}) {
+			$user_edits_table->{realemail} = chopEntity($params{realemail}, 50);
+			my $new_fakeemail = '';
 
-                        if ($user->{emaildisplay}) {
-                                $new_fakeemail = getArmoredEmail($params{uid}, $user_edits_table->{realemail}) if $user->{emaildisplay} == 1;
-                                $new_fakeemail = $user_edits_table->{realemail} if $user->{emaildisplay} == 2;
-                        }
-                        $user_edits_table->{fakeemail} = $new_fakeemail;
-                }
+			if ($user->{emaildisplay}) {
+				$new_fakeemail = getArmoredEmail($params{uid}, $user_edits_table->{realemail}) if $user->{emaildisplay} == 1;
+				$new_fakeemail = $user_edits_table->{realemail} if $user->{emaildisplay} == 2;
+			}
+			$user_edits_table->{fakeemail} = $new_fakeemail;
+		}
 
-                my $reader = getObject('Slash::DB', { db_type => 'reader' });
-                my $otherparams  = $reader->getDescriptions('otherusersparam');
-                for my $param (keys %$otherparams) {
-                        if (exists $params{$param}) {
-                                $user_edits_table->{$param} = $user->{$param} = $params{$param} || undef;
-                        }
-                }
-        }
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		my $otherparams	 = $reader->getDescriptions('otherusersparam');
+		for my $param (keys %$otherparams) {
+			if (exists $params{$param}) {
+				$user_edits_table->{$param} = $user->{$param} = $params{$param} || undef;
+			}
+		}
+	}
 
-        # Sections
-        if ($params{'formname'} eq "sectional") {
-                setSectionNexusPrefs($slashdb, $constants, $user, \%params);
-        }
+	# Sections
+	if ($params{'formname'} eq "sectional") {
+		setSectionNexusPrefs($slashdb, $constants, $user, \%params);
+	}
 
-        # Homepage
-        if ($params{'formname'} eq "home") {
-                $user_edits_table = {
-                        maxstories      => 30,
-                        lowbandwidth    => ($params{lowbandwidth}    ? 1 : 0),
-                        simpledesign    => ($params{simpledesign}    ? 1 : 0),
-                        noicons         => ($params{noicons}         ? 1 : 0),
-                        willing         => ($params{willing}         ? 1 : 0),
-                        tags_turnedoff  => ($params{showtags}        ? undef : 1),
-                        opt_osdn_navbar => ($params{opt_osdn_navbar} ? 1 : 0),
-                };
+	# Homepage
+	if ($params{'formname'} eq "home") {
+		$user_edits_table = {
+			maxstories	=> 30,
+			lowbandwidth	=> ($params{lowbandwidth}    ? 1 : 0),
+			simpledesign	=> ($params{simpledesign}    ? 1 : 0),
+			noicons		=> ($params{noicons}	     ? 1 : 0),
+			willing		=> ($params{willing}	     ? 1 : 0),
+			tags_turnedoff	=> ($params{showtags}	     ? undef : 1),
+			opt_osdn_navbar => ($params{opt_osdn_navbar} ? 1 : 0),
+		};
 
-                if (defined $params{tzcode} && defined $params{tzformat}) {
-                        $user_edits_table->{tzcode} = $params{tzcode};
-                        $user_edits_table->{dfid}   = $params{tzformat};
-                        $user_edits_table->{dst}    = $params{dst};
-                }
+		if (defined $params{tzcode} && defined $params{tzformat}) {
+			$user_edits_table->{tzcode} = $params{tzcode};
+			$user_edits_table->{dfid}   = $params{tzformat};
+			$user_edits_table->{dst}    = $params{dst};
+		}
 
-                if (!isAnon($params{uid}) && !$params{willing}) {
-                        $slashdb->setUser($params{uid}, { points => 0 });
-                }
-        }
+		if (!isAnon($params{uid}) && !$params{willing}) {
+			$slashdb->setUser($params{uid}, { points => 0 });
+		}
+	}
 
-        if ($params{'formname'} eq "slashboxes") {
-                my $slashboxes = $user->{slashboxes};
-                my($boxes, $skinBoxes) = $slashdb->getPortalsCommon();
-                my $default_slashboxes_textlist = join ",",
-                        @{$skinBoxes->{$constants->{mainpage_skid}}};
+	if ($params{'formname'} eq "slashboxes") {
+		my $slashboxes = $user->{slashboxes};
+		my($boxes, $skinBoxes) = $slashdb->getPortalsCommon();
+		my $default_slashboxes_textlist = join ",",
+			@{$skinBoxes->{$constants->{mainpage_skid}}};
 
-                $slashboxes = $default_slashboxes_textlist if !$slashboxes;
-                my @slashboxes = split /,/, $slashboxes;
-                my %slashboxes = ( );
+		$slashboxes = $default_slashboxes_textlist if !$slashboxes;
+		my @slashboxes = split /,/, $slashboxes;
+		my %slashboxes = ( );
 
-                for my $i (0..$#slashboxes) {
-                        $slashboxes{$slashboxes[$i]} = $i;
-                }
+		for my $i (0..$#slashboxes) {
+			$slashboxes{$slashboxes[$i]} = $i;
+		}
 
-                for my $key (sort grep /^showbox_/, keys %params) {
-                        my($bid) = $key =~ /^showbox_(\w+)$/;
-                        next if length($bid) < 1 || length($bid) > 30 || $bid !~ /^\w+$/;
-                        if (! exists $slashboxes{$bid}) {
-                                $slashboxes{$bid} = 999;
-                        }
-                }
+		for my $key (sort grep /^showbox_/, keys %params) {
+			my($bid) = $key =~ /^showbox_(\w+)$/;
+			next if length($bid) < 1 || length($bid) > 30 || $bid !~ /^\w+$/;
+			if (! exists $slashboxes{$bid}) {
+				$slashboxes{$bid} = 999;
+			}
+		}
 
-                for my $bid (@slashboxes) {
-                        delete $slashboxes{$bid} unless $params{"showbox_$bid"};
-                }
+		for my $bid (@slashboxes) {
+			delete $slashboxes{$bid} unless $params{"showbox_$bid"};
+		}
 
-                @slashboxes = sort { $slashboxes{$a} <=> $slashboxes{$b} || $a cmp $b } keys %slashboxes;
-                $#slashboxes = 19 if $#slashboxes > 19;
-                $slashboxes = join ",", @slashboxes;
-                $slashboxes = "" if ($slashboxes eq $default_slashboxes_textlist);
+		@slashboxes = sort { $slashboxes{$a} <=> $slashboxes{$b} || $a cmp $b } keys %slashboxes;
+		$#slashboxes = 19 if $#slashboxes > 19;
+		$slashboxes = join ",", @slashboxes;
+		$slashboxes = "" if ($slashboxes eq $default_slashboxes_textlist);
 
-                $slashboxes =~ s/[^\w,-]//g;
-                my @items = grep { $_ } split /,/, $slashboxes;
-                $slashboxes = join ",", @items;
+		$slashboxes =~ s/[^\w,-]//g;
+		my @items = grep { $_ } split /,/, $slashboxes;
+		$slashboxes = join ",", @items;
 
-                if (length($slashboxes) > 1024) {
-                        $slashboxes = substr($slashboxes, 0, 1024);
-                        $slashboxes =~ s/,?\w*$//g;
-                } elsif (length($slashboxes) < 1) {
-                        $slashboxes = '';
-                }
+		if (length($slashboxes) > 1024) {
+			$slashboxes = substr($slashboxes, 0, 1024);
+			$slashboxes =~ s/,?\w*$//g;
+		} elsif (length($slashboxes) < 1) {
+			$slashboxes = '';
+		}
 
-                $user_edits_table->{slashboxes} = $slashboxes;
+		$user_edits_table->{slashboxes} = $slashboxes;
 
-                $user_edits_table->{mylinks} = balanceTags(strip_html(
-                        chopEntity($params{mylinks} || '', 255)
-                ), { deep_nesting => 2, length => 255 });
+		$user_edits_table->{mylinks} = balanceTags(strip_html(
+			chopEntity($params{mylinks} || '', 255)
+		), { deep_nesting => 2, length => 255 });
 
-                $user_edits_table->{mylinks} = '' unless defined $user_edits_table->{mylinks};
+		$user_edits_table->{mylinks} = '' unless defined $user_edits_table->{mylinks};
 
-        }
+	}
 
-        if ($params{'formname'} eq "authors") {
-                my $author_hr = $slashdb->getDescriptions('authors');
-                my ($story_author_all, @story_never_author);
+	if ($params{'formname'} eq "authors") {
+		my $author_hr = $slashdb->getDescriptions('authors');
+		my ($story_author_all, @story_never_author);
 
-                for my $aid (sort { $a <=> $b } keys %$author_hr) {
-                        my $key = "aid$aid";
-                        $story_author_all++;
-                        push(@story_never_author, $aid) if (!$params{$key});
-                }
+		for my $aid (sort { $a <=> $b } keys %$author_hr) {
+			my $key = "aid$aid";
+			$story_author_all++;
+			push(@story_never_author, $aid) if (!$params{$key});
+		}
 
-                $#story_never_author = 299 if $#story_never_author  > 299;
+		$#story_never_author = 299 if $#story_never_author  > 299;
 
-                my $story_never_author = join(",", @story_never_author);
-                $story_never_author =~ s/[^\w,-]//g;
-                my @items = grep { $_ } split /,/, $story_never_author;
-                $story_never_author = join ",", @items;
+		my $story_never_author = join(",", @story_never_author);
+		$story_never_author =~ s/[^\w,-]//g;
+		my @items = grep { $_ } split /,/, $story_never_author;
+		$story_never_author = join ",", @items;
 
-                my $len ||= $constants->{checklist_length} || 255;
-                if (length($story_never_author) > $len) {
-                        $story_never_author = substr($story_never_author, 0, $len);
-                        $story_never_author =~ s/,?\w*$//g;
-                } elsif (length($story_never_author) < 1) {
-                        $story_never_author = '';
-                }
+		my $len ||= $constants->{checklist_length} || 255;
+		if (length($story_never_author) > $len) {
+			$story_never_author = substr($story_never_author, 0, $len);
+			$story_never_author =~ s/,?\w*$//g;
+		} elsif (length($story_never_author) < 1) {
+			$story_never_author = '';
+		}
 
-                $user_edits_table = {
-                        story_never_author => $story_never_author,
-                };
+		$user_edits_table = {
+			story_never_author => $story_never_author,
+		};
 
-        }
+	}
 
-        if ($params{'formname'} eq "admin") {
-               return if !$user->{is_admin};
+	if ($params{'formname'} eq "admin") {
+		return if !$user->{is_admin};
 
-              $user_edits_table = {
-                     playing           => $params{playing},
-                     no_spell          => ($params{'no_spell'} ? 1 : undef),
-                     mod_with_comm     => ($params{'mod_with_comm'} ? 1 : undef),
-                     m2_with_mod       => ($params{'m2_with_mod'} ? 1 : undef),
-                     m2_with_comm_mod  => ($params{'m2_with_mod_on_comm'} ? 1 : undef),
-              };
-        }
+		$user_edits_table = {
+			test_code         => ($params{'test_code'} ? 1 : undef),
+			playing           => $params{playing},
+			no_spell          => ($params{'no_spell'} ? 1 : undef),
+			mod_with_comm     => ($params{'mod_with_comm'} ? 1 : undef),
+			m2_with_mod       => ($params{'m2_with_mod'} ? 1 : undef),
+			m2_with_comm_mod  => ($params{'m2_with_mod_on_comm'} ? 1 : undef),
+		};
+	}
 
         # Everything but Sections is saved here.
-        if ($params{'formname'} ne "sectional") {
-                $slashdb->setUser($params{uid}, $user_edits_table);
-        }
+	if ($params{'formname'} ne "sectional") {
+		$slashdb->setUser($params{uid}, $user_edits_table);
+	}
 }
 
 # comments
@@ -975,6 +1042,21 @@ sub getOps {
 	);
 
 	my %mainops = (
+		comments_submit_reply  => {
+			function        => \&previewReply,
+			reskey_name     => 'comments',
+			reskey_type     => 'use',
+		},
+		comments_preview_reply  => {
+			function        => \&previewReply,
+			reskey_name     => 'comments',
+			reskey_type     => 'touch',
+		},
+		comments_reply_form     => {
+			function        => \&replyForm,
+			reskey_name     => 'ajax_base',
+			reskey_type     => 'createuse',
+		},
 		comments_read_rest      => {
 			function        => \&readRest,
 			reskey_name     => 'ajax_base',

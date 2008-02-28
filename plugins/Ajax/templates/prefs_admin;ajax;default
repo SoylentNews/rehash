@@ -30,6 +30,8 @@ __template__
                         <input type="hidden" name="uid" value="[% user.uid %]">
                         <input type="hidden" name="name" value="[% user.nickname | strip_attribute %]">
 
+                        <input type="checkbox" name="test_code"[% constants.markup_checked_attribute IF user.test_code %]>&nbsp;<b>Enable Test Code</b>
+
                         [% IF constants.slashbox_whatsplaying %]
                                 <h3>User Info</h3>
                                 <b>What I'm Playing For</b>&nbsp;<input type="text" name="playing" value="[% user.playing | strip_attribute %]" size="40">

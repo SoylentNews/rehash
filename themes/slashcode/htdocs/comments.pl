@@ -532,299 +532,6 @@ sub editComment {
 
 
 ##################################################################
-# Validate comment, looking for errors
-sub validateComment {
-	my($comm, $subj, $error_message, $preview, $wsfactor) = @_;
-	$wsfactor ||= 1;
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
-	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	
-	my $form_success = 1;
-	my $message = '';
-
-	if (!dbAvailable("write_comments")) {
-		$$error_message = getError('comment_db_down');
-		$form_success = 0;
-		return;
-	}
-
-	my $srcids_to_check = $user->{srcids};
-
-	# We skip the UID test for anonymous users (anonymous posting
-	# is banned by setting nopost for the anonymous uid, and we
-	# want to check that separately elsewhere).  Note that
-	# checking the "post anonymously" checkbox doesn't eliminate
-	# a uid check for a logged-in user.
-	delete $srcids_to_check->{uid} if $user->{is_anon};
-
-	# If the user is anonymous, or has checked the 'post anonymously'
-	# box, check to see whether anonymous posting is turned off for
-	# this srcid.
-	my $read_only = 0;
-	$read_only = 1 if ($user->{is_anon} || $form->{postanon})
-		&& $reader->checkAL2($srcids_to_check, 'nopostanon');
-
-	# Whether the user is anonymous or not, check to see whether
-	# all posting is turned off for this srcid.
-	$read_only ||= $reader->checkAL2($srcids_to_check, 'nopost');
-
-	# If posting is disabled, return the error message.
-	if ($read_only) {
-		$$error_message = getError('readonly');
-		$form_success = 0;
-		# editComment('', $$error_message), return unless $preview;
-		return;
-	}
-
-	# New check (March 2004):  depending on the settings of
-	# a var and whether the user is posting anonymous, we
-	# might scan the IP they're coming from to see if we can use
-	# some commonly-used proxy ports to access our own site.
-	# If we can, they're coming from an open HTTP proxy, which
-	# we don't want to allow to post.
-	if ($constants->{comments_portscan}
-		&& ( $constants->{comments_portscan} == 2
-			|| $constants->{comments_portscan} == 1 && $user->{is_anon} )
-	) {
-		my $is_trusted = $slashdb->checkAL2($user->{srcids}, 'trusted');
-		if (!$is_trusted) {
-#use Time::HiRes; my $start_time = Time::HiRes::time;
-			my $is_proxy = $slashdb->checkForOpenProxy($user->{hostip});
-#my $elapsed = sprintf("%.3f", Time::HiRes::time - $start_time); print STDERR scalar(localtime) . " comments.pl cfop returned '$is_proxy' for '$user->{hostip}' in $elapsed secs\n";
-			if ($is_proxy) {
-				$$error_message = getError('open proxy', {
-					unencoded_ip	=> $ENV{REMOTE_ADDR},
-					port		=> $is_proxy,
-				});
-				$form_success = 0;
-				return;
-			}
-		}
-	}
-
-	# New check (July 2002):  there is a max number of posts per 24-hour
-	# period, either based on IPID for anonymous users, or on UID for
-	# logged-in users.  Logged-in users get a max number of posts that
-	# is related to their karma.  The comments_perday_bykarma var
-	# controls it (that var is turned into a hashref in MySQL.pm when
-	# the vars table is read in, whose keys we loop over to find the
-	# appropriate level).
-	# See also comments_maxposts in formkeyErrors - Jamie 2005/05/30
-
-	my $min_cid_1_day_old = $slashdb->getVar('min_cid_last_1_days','value', 1) || 0;
-	
-	if (($user->{is_anon} || $form->{postanon}) && $constants->{comments_perday_anon}
-		&& !$user->{is_admin}) {
-		my($num_comm, $sum_mods) = $reader->getNumCommPostedAnonByIPID(
-			$user->{ipid}, 24, $min_cid_1_day_old);
-		my $num_allowed = $constants->{comments_perday_anon};
-		if ($sum_mods - $num_comm + $num_allowed <= 0) {
-
-			$$error_message = getError('comments post limit daily', {
-				limit => $constants->{comments_perday_anon}
-			});
-			$form_success = 0;
-			return;
-
-		}
-	} elsif (!$user->{is_anon} && $constants->{comments_perday_bykarma}
-		&& !$user->{is_admin}) {
-		my($num_comm, $sum_mods) = $reader->getNumCommPostedByUID(
-			$user->{uid}, 24, $min_cid_1_day_old);
-		my $num_allowed = 9999;
-		K_CHECK: for my $k (sort { $a <=> $b }
-			keys %{$constants->{comments_perday_bykarma}}) {
-			if ($user->{karma} <= $k) {
-				$num_allowed = $constants->{comments_perday_bykarma}{$k};
-				last K_CHECK;
-			}
-		}
-		if ($sum_mods - $num_comm + $num_allowed <= 0) {
-
-			$$error_message = getError('comments post limit daily', {
-				limit => $num_allowed
-			});
-			$form_success = 0;
-			return;
-
-		}
-	}
-
-	if (isTroll()) {
-		if ($constants->{comment_is_troll_disable_and_log}) {
-			$user->{state}{is_troll} = 1;
-		} else {
-			$$error_message = getError('troll message', {
-				unencoded_ip => $ENV{REMOTE_ADDR}      
-			});
-			return;
-		}
-	}
-
-	if ($user->{is_anon} || $form->{postanon}) {
-		my $uid_to_check = $user->{uid};
-		if (!$user->{is_anon}) {
-			$uid_to_check = getCurrentAnonymousCoward('uid');
-		}
-		if (!$slashdb->checkAllowAnonymousPosting($uid_to_check)) {
-			$$error_message = getError('anonymous disallowed');
-			return;
-		}
-	}
-
-	if (!$user->{is_anon} && $form->{postanon} && $user->{karma} < 0) {
-		$$error_message = getError('postanon_option_disabled');
-		return;
-	}
-
-	my $post_restrictions = $reader->getNetIDPostingRestrictions("subnetid", $user->{subnetid});
-	if ($user->{is_anon} || $form->{postanon}) {
-		if ($post_restrictions->{no_anon}) {
-			my $logged_in_allowed = !$post_restrictions->{no_post};
-			$$error_message = getError('troll message', {
-				unencoded_ip 		=> $ENV{REMOTE_ADDR},
-				logged_in_allowed 	=> $logged_in_allowed      
-			});
-			return;
-		}
-	}
-
-	if (!$user->{is_admin} && $post_restrictions->{no_post}) {
-		$$error_message = getError('troll message', {
-			unencoded_ip 		=> $ENV{REMOTE_ADDR},
-		});
-		return;
-	}
-
-
-	$$subj =~ s/\(Score(.*)//i;
-	$$subj =~ s/Score:(.*)//i;
-
-	$$subj =~ s/&(#?[a-zA-Z0-9]+);?/approveCharref($1)/sge;
-
-	for ($$comm, $$subj) {
-		my $d = decode_entities($_);
-		$d =~ s/&#?[a-zA-Z0-9]+;//g;	# remove entities we don't know
-		if ($d !~ /\w/) {		# require SOME non-whitespace
-			$$error_message = getError('no body');
-			return;
-		}
-	}
-
-	unless (defined($$comm = balanceTags($$comm, { deep_nesting => 1 }))) {
-		# only time this should return an error is if the HTML is busted
-		$$error_message = getError('broken html');
-		return ;
-	}
-
-	my $dupRows = $slashdb->findCommentsDuplicate($form->{sid}, $$comm);
-	if ($dupRows) {
-		$$error_message = getError('duplication error');
-		$form_success = 0;
-		return unless $preview;
-	}
-
-	my $kickin = $constants->{comments_min_line_len_kicks_in};
-	if ($constants->{comments_min_line_len} && length($$comm) > $kickin) {
-
-		my $max_comment_len = $constants->{default_maxcommentsize};
-		my $check_prefix = substr($$comm, 0, $max_comment_len);
-		my $check_prefix_len = length($check_prefix);
-		my $min_line_len_max = $constants->{comments_min_line_len_max}
-			|| $constants->{comments_min_line_len}*2;
-		my $min_line_len = $constants->{comments_min_line_len}
-			+ ($min_line_len_max - $constants->{comments_min_line_len})
-				* ($check_prefix_len - $kickin)
-				/ ($max_comment_len - $kickin); # /
-
-		my $check_notags = strip_nohtml($check_prefix);
-		# Don't count & or other chars used in entity tags;  don't count
-		# chars commonly used in ascii art.  Not that it matters much.
-		# Do count chars commonly used in source code.
-		my $num_chars = $check_notags =~ tr/A-Za-z0-9?!(){}[]+='"@$-//;
-
-		# Note that approveTags() has already been called by this point,
-		# so all tags present are legal and uppercased.
-		my $breaktags = $constants->{'approvedtags_break'}
-			|| [qw(HR BR LI P OL UL BLOCKQUOTE DIV)];
-		my $breaktags_1_regex = "<(?:" . join("|", @$breaktags) . ")>";
-		my $breaktags_2_regex = "<(?:" . join("|", grep /^(P|BLOCKQUOTE)$/, @$breaktags) . ")>";
-		my $num_lines = 0;
-		$num_lines++ while $check_prefix =~ /$breaktags_1_regex/gi;
-		$num_lines++ while $check_prefix =~ /$breaktags_2_regex/gi;
-
-		if ($num_lines > 3) {
-			my $avg_line_len = $num_chars/$num_lines;
-			if ($avg_line_len < $min_line_len) {
-				$$error_message = getError('low chars-per-line', {
-					ratio 	=> sprintf("%0.1f", $avg_line_len),
-				});
-				$form_success = 0;
-				return unless $preview;
-			}
-		}
-	}
-
-	# Test comment and subject using filterOk and compressOk.
-	# If the filter is matched against the content, or the comment
-	# compresses too well, display an error with the particular
-	# message for the filter that was matched.
-	my $fields = {
-			postersubj 	=> 	$$subj,
-			postercomment 	=>	$$comm,
-	};
-
-	for (keys %$fields) {
-		# run through filters
-		if (! filterOk('comments', $_, $fields->{$_}, \$message)) {
-			$$error_message = getError('filter message', {
-					err_message	=> $message,
-			});
-			return unless $preview;
-			$form_success = 0;
-			last;
-		}
-		# run through compress test
-		if (! compressOk('comments', $_, $fields->{$_}, $wsfactor)) {
-			# blammo luser
-			$$error_message = getError('compress filter', {
-					ratio	=> $_,
-			});
-			return unless $preview;
-			$form_success = 0;
-			last;
-		}
-	}
-
-	if (	    $constants->{m1}
-		&& !$user->{is_anon}
-		&& !$form->{postanon}
-		&& !$form->{gotmodwarning}
-		&& !( $constants->{authors_unlimited}
-			&& $user->{seclev} >= $constants->{authors_unlimited} )
-		&& !$user->{acl}{modpoints_always}
-		&&  $moddb
-		&&  $moddb->countUserModsInDiscussion($user->{uid}, $form->{sid}) > 0
-	) {
-		$$error_message = getError("moderations to be lost");
-		$form_success = 0;
-		return;
-	}
-
-	$$error_message ||= '';
-	# Return false if error condition...
-	return if ! $form_success;
-
-	# ...otherwise return true.
-	return 1;
-}
-
-
-##################################################################
 # Previews a comment for submission
 sub previewForm {
 	my($error_message, $discussion) = @_;
@@ -834,6 +541,7 @@ sub previewForm {
 	my $constants = getCurrentStatic();
 
 	my $comment = preProcessComment($form, $user, $discussion, $error_message) or return;
+	return $$error_message if $comment eq '-1';
 	my $preview = postProcessComment({ %$comment, %$user }, 0, $discussion);
 
 	if ($constants->{plugin}{Subscribe}) {
@@ -856,25 +564,16 @@ sub submitComment {
 	my($form, $slashdb, $user, $constants, $discussion) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
-	$form->{nobonus}  = $user->{nobonus}	unless $form->{nobonus_present};
-	$form->{postanon} = $user->{postanon}	unless $form->{postanon_present};
-	$form->{nosubscriberbonus} = $user->{nosubscriberbonus}
-						unless $form->{nosubscriberbonus_present};
-
 	my $header_emitted = 0;
-	my $sid = $form->{sid};
 
-	# Couple of rules on how to treat the discussion depending on how mode is set -Brian
-	$discussion->{type} = isDiscussionOpen($discussion);
-
-	if ($discussion->{type} eq 'archived') {
+ 	my $error_message;
+	my $comment = preProcessComment($form, $user, $discussion, \$error_message);
+	if ($comment eq '-1') { # die!
 		header('Comments', $discussion->{section}) or return;
-		print getError('archive_error');
+		print $$error_message;
 		return;
 	}
 
- 	my $error_message;
-	my $comment = preProcessComment($form, $user, $discussion, $error_message);
 	if (!$comment) {
 		# The comment did not validate.  We're not actually going to
 		# post the comment this time around, we are (probaly) just
@@ -903,230 +602,26 @@ sub submitComment {
 		titlebar("100%", getData('submitted_comment'));
 	}
 
-#print STDERR scalar(localtime) . " $$ E header_emitted=$header_emitted do_emit_html=$do_emit_html redirect_to=" . (defined($redirect_to) ? $redirect_to : "undef") . "\n";
+	my $saved_comment = saveComment($form, $comment, $user, $discussion, \$error_message);
 
-	# Set starting points to the AC's starting points, by default.
-	# If the user is posting under their own name, we'll reset this
-	# value (and add other modifiers) in a moment.
-	my $pts = getCurrentAnonymousCoward('defaultpoints');
-
-	my $karma_bonus = 0;
-	my $subscriber_bonus = 0;
-	my $tweak = 0;
-	if (!$user->{is_anon} && !$form->{postanon}) {
-
-		$pts = $user->{defaultpoints};
-
-		if ($constants->{karma_posting_penalty_style} == 0) {
-			$pts-- if $user->{karma} < 0;
-			$pts-- if $user->{karma} < $constants->{badkarma};
-                } else {
-			$tweak-- if $user->{karma} < 0;
-			$tweak-- if $user->{karma} < $constants->{badkarma};
-		}
-		# Enforce proper ranges on comment points.
-		my($minScore, $maxScore) =
-			($constants->{comment_minscore}, $constants->{comment_maxscore});
-		$pts = $minScore if $pts < $minScore;
-		$pts = $maxScore if $pts > $maxScore;
-		$karma_bonus = 1 if $pts >= 1 && $user->{karma} > $constants->{goodkarma}
-			&& !$form->{nobonus};
-		$subscriber_bonus = 1 if $constants->{plugin}{Subscribe}
-			&& $user->{is_subscriber}
-			&& (!$form->{nosubscriberbonus} || $form->{nosubscriberbonus} ne 'on');
-	}
-
-	my $posters_uid = $user->{uid};
-	if ($form->{postanon}
-		&& $reader->checkAllowAnonymousPosting()
-		&& $user->{karma} > -1
-		&& ($discussion->{commentstatus} eq 'enabled'
-			||
-		    $discussion->{commentstatus} eq 'logged_in')) {
-		$posters_uid = getCurrentAnonymousCoward('uid');
-	}
-
-#print STDERR scalar(localtime) . " $$ F header_emitted=$header_emitted do_emit_html=$do_emit_html\n";
-
-	my $clean_comment = {
-		subject		=> $comment->{subject},
-		comment		=> $comment->{comment},
-		sid		=> $comment->{sid},
-		pid		=> $comment->{pid},
-		ipid		=> $user->{ipid},
-		subnetid	=> $user->{subnetid},
-		uid		=> $posters_uid,
-		points		=> $pts,
-		tweak		=> $tweak,
-		tweak_orig	=> $tweak,
-		karma_bonus	=> $karma_bonus ? 'yes' : 'no',
-	};
-	
-	if ($constants->{plugin}{Subscribe}) {
-		$clean_comment->{subscriber_bonus} = $subscriber_bonus ? 'yes' : 'no';
-	}
-
-	my $maxCid = $slashdb->createComment($clean_comment);
-	if ($constants->{comment_karma_disable_and_log}) {
-		my $post_str = "";
-		$post_str .= "NO_ANON " if $user->{state}{commentkarma_no_anon};
-		$post_str .= "NO_POST " if $user->{state}{commentkarma_no_post};
-		if ($posters_uid == $constants->{anonymous_coward_uid} && $user->{state}{commentkarma_no_anon}) {
-			$slashdb->createCommentLog({
-				cid	=> $maxCid,
-				logtext	=> "COMMENTKARMA ANON: $post_str"
-			});
-		} elsif ($posters_uid != $constants->{anonymous_coward_uid} && $user->{state}{commentkarma_no_post}) {
-			$slashdb->createCommentLog({
-				cid	=> $maxCid,
-				logtext	=> "COMMENTKARMA USER: $post_str"
-			});
-		}
-	}
-	if ($constants->{comment_is_troll_disable_and_log}) {
-		$slashdb->createCommentLog({
-			cid	=> $maxCid,
-			logtext	=> "ISTROLL"
-		});
-	}
-
-#print STDERR scalar(localtime) . " $$ G maxCid=$maxCid\n";
-
-	# make the formkeys happy
-	$form->{maxCid} = $maxCid;
-
-	$slashdb->setUser($user->{uid}, {
-		'-expiry_comm'	=> 'expiry_comm-1',
-	}) if allowExpiry();
-
-	if ($maxCid == -1) {
-		# What vars should be accessible here?
-		if (!$header_emitted) {
-			header('Comments', $discussion->{section}) or return;
-		}
-		print getError('submission error');
-		return(0);
-
-	} elsif (!$maxCid) {
-		# This site has more than 2**32 comments.  Wow.
-		if (!$header_emitted) {
-			header('Comments', $discussion->{section}) or return;
-		}
-		print getError('maxcid exceeded');
-		return(0);
+	if (!$saved_comment) {
+ 		if (!$header_emitted) {
+ 			header('Comments', $discussion->{section}) or return;
+ 		}
+ 		print $error_message if $error_message;
+ 		return;
 	}
 
 	if ($do_emit_html) {
 		slashDisplay('comment_submit', {
 			metamod_elig => metamod_elig($user),
 		});
-	}
 
-	my $saved_comment = $slashdb->getComment($maxCid);
+ 		print $error_message if $error_message;
 
-	slashHook('comment_save_success', { comment => $saved_comment });
-
-	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
-	if ($moddb) {
-		my $text = $moddb->checkDiscussionForUndoModeration($sid);
-		print $text if $text;
-	}
-
-	if ($do_emit_html) {
-		printComments($discussion, $maxCid, $maxCid,
+		printComments($discussion, $saved_comment->{cid}, $saved_comment->{cid},
 			{ force_read_from_master => 1, just_submitted => 1 }
 		);
-	}
-
-	my $tc = $slashdb->getVar('totalComments', 'value', 1);
-	$slashdb->setVar('totalComments', ++$tc);
-
-	# This is for stories. If a sid is only a number
-	# then it belongs to discussions, if it has characters
-	# in it then it belongs to stories and we should
-	# update to help with stories/hitparade.
-	# -Brian
-	if ($discussion->{sid}) {
-		$slashdb->setStory($discussion->{sid}, { writestatus => 'dirty' });
-	}
-
-	$slashdb->setUser($clean_comment->{uid}, {
-		-totalcomments => 'totalcomments+1',
-	}) if !isAnon($clean_comment->{uid});
-
-	my($messages, $reply, %users);
-	my $kinds = $reader->getDescriptions('discussion_kinds');
-	if ($form->{pid}
-		|| $kinds->{ $discussion->{dkid} } =~ /^journal/
-		|| $constants->{commentnew_msg}) {
-		$messages = getObject('Slash::Messages');
-		$reply = $slashdb->getCommentReply($form->{sid}, $maxCid);
-	}
-
-	$clean_comment->{pointsorig} = $clean_comment->{points};
-
-	# reply to comment
-	if ($messages && $form->{pid}) {
-		my $parent = $slashdb->getCommentReply($sid, $form->{pid});
-		my $users  = $messages->checkMessageCodes(MSG_CODE_COMMENT_REPLY, [$parent->{uid}]);
-		if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
-			my $data  = {
-				template_name	=> 'reply_msg',
-				subject		=> { template_name => 'reply_msg_subj' },
-				reply		=> $reply,
-				parent		=> $parent,
-				discussion	=> $discussion,
-			};
-
-			$messages->create($users->[0], MSG_CODE_COMMENT_REPLY, $data);
-			$users{$users->[0]}++;
-		}
-	}
-
-	# reply to journal
-	if ($messages && $kinds->{ $discussion->{dkid} } =~ /^journal/) {
-		my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
-		if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
-			my $data  = {
-				template_name	=> 'journrep',
-				subject		=> { template_name => 'journrep_subj' },
-				reply		=> $reply,
-				discussion	=> $discussion,
-			};
-
-			$messages->create($users->[0], MSG_CODE_JOURNAL_REPLY, $data);
-			$users{$users->[0]}++;
-		}
-	}
-
-	# comment posted
-	if ($messages && $constants->{commentnew_msg}) {
-		my $users = $messages->getMessageUsers(MSG_CODE_NEW_COMMENT);
-
-		my $data  = {
-			template_name	=> 'commnew',
-			subject		=> { template_name => 'commnew_subj' },
-			reply		=> $reply,
-			discussion	=> $discussion,
-		};
-
-		my @users_send;
-		for my $usera (@$users) {
-			next if $users{$usera};
-			push @users_send, $usera;
-			$users{$usera}++;
-		}
-		$messages->create(\@users_send, MSG_CODE_NEW_COMMENT, $data) if @users_send;
-	}
-
-	if ($constants->{validate_html}) {
-		my $validator = getObject('Slash::Validator');
-		my $test = parseDomainTags($comment->{comment});
-		$validator->isValid($test, {
-			data_type	=> 'comment',
-			data_id		=> $maxCid,
-			message		=> 1
-		}) if $validator;
 	}
 
 	# OK -- if we make it all the way here, and there were
@@ -1146,40 +641,6 @@ sub submitComment {
 	return(1);
 }
 
-
-##################################################################
-# Decide whether or not to send a given message to a given user
-sub _send_comment_msg {
-	my($uid, $uids, $pts, $C) = @_;
-	my $constants	= getCurrentStatic();
-	my $reader	= getObject('Slash::DB', { db_type => 'reader' });
-	my $user	= getCurrentUser();
-
-	return unless $uid;			# no user
-	return if $uids->{$uid};		# user not already being msgd
-	return if $user->{uid} == $uid;		# don't msg yourself
-
-	my $otheruser = $reader->getUser($uid);
-
-	# use message_threshold in vars, unless user has one
-	# a message_threshold of 0 is valid, but "" is not
-	my $message_threshold = length($otheruser->{message_threshold})
-		? $otheruser->{message_threshold}
-		: length($constants->{message_threshold})
-			? $constants->{message_threshold}
-			: undef;
-
-	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
-	my $newpts = getPoints($C, $otheruser,
-		$constants->{comment_minscore}, $constants->{comment_maxscore},
-		$reader->countUsers({ max => 1 }), $mod_reader->getReasons,
-	);
-
-	# only if reply pts meets message threshold
-	return if defined $message_threshold && $newpts < $message_threshold;
-
-	return 1;
-}
 
 ##################################################################
 sub moderate {

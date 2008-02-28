@@ -23,12 +23,13 @@ Slash::Utility::Comments - Comments API for Slash
 
 use strict;
 use Fcntl;
-use Slash::Display;
 use Slash::Utility::Access;
 use Slash::Utility::Data;
 use Slash::Utility::Display;
 use Slash::Utility::Environment;
-use Slash::Constants qw(:strip :people);
+use Slash::Display;
+use Slash::Hook;
+use Slash::Constants qw(:strip :people :messages);
 
 use base 'Exporter';
 use vars qw($VERSION @EXPORT);
@@ -38,7 +39,7 @@ use vars qw($VERSION @EXPORT);
 	constrain_score dispComment displayThread printComments
 	jsSelectComments commentCountThreshold commentThresholds discussion2
 	tempUofmLinkGenerate tempUofmCipherObj selectComments
-	getPoints preProcessComment postProcessComment prevComment
+	getPoints preProcessComment postProcessComment prevComment saveComment
 );
 
 
@@ -333,8 +334,6 @@ sub selectComments {
 
 sub jsSelectComments {
 #slashProf("jsSelectComments");
-	# XXXd2 selectComments() is being called twice in same request ... compare and consolidate
-	# also consolidate code with ajax.pl:fetchComments
 	# version 0.9 is broken; 0.6 and 1.00 seem to work -- pudge 2006-12-19
 	require Data::JavaScript::Anon;
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;
@@ -366,7 +365,7 @@ sub jsSelectComments {
 		$comments = _get_thread($comments, $pid);
 	}
 
-	my @roots = $pid ? $pid : grep { $_ && !$comments->{$_}{pid} } keys %$comments;
+	my @roots = $pid ? $pid : @{$comments->{$pid}{kids}};
 	my %roots_hash = ( map { $_ => 1 } @roots );
 	my $thresh_totals;
 
@@ -1328,6 +1327,12 @@ sub preProcessComment {
 	my $constants = getCurrentStatic();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 
+	$discussion->{type} = isDiscussionOpen($discussion);
+	if ($discussion->{type} eq 'archived') {
+		$$error_message = getError('archive_error');
+		return -1;
+	}
+
 	my $tempSubject = strip_notags($comm->{postersubj});
 	my $tempComment = $comm->{postercomment};
 
@@ -1447,6 +1452,213 @@ sub prevComment {
 
 	$user->{mode} = $tm;
 	return $previewForm;
+}
+
+sub saveComment {
+	my($comm, $comment, $user, $discussion, $error_message) = @_; # probably $comm = $form
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+
+	$comm->{nobonus}  = $user->{nobonus}	unless $comm->{nobonus_present};
+	$comm->{postanon} = $user->{postanon}	unless $comm->{postanon_present};
+	$comm->{nosubscriberbonus} = $user->{nosubscriberbonus}
+						unless $comm->{nosubscriberbonus_present};
+
+#print STDERR scalar(localtime) . " $$ E header_emitted=$header_emitted do_emit_html=$do_emit_html redirect_to=" . (defined($redirect_to) ? $redirect_to : "undef") . "\n";
+
+	# Set starting points to the AC's starting points, by default.
+	# If the user is posting under their own name, we'll reset this
+	# value (and add other modifiers) in a moment.
+	my $pts = getCurrentAnonymousCoward('defaultpoints');
+	my $karma_bonus = 0;
+	my $subscriber_bonus = 0;
+	my $tweak = 0;
+
+	if (!$comm->{anon}) {
+		$pts = $user->{defaultpoints};
+
+		if ($constants->{karma_posting_penalty_style} == 0) {
+			$pts-- if $user->{karma} < 0;
+			$pts-- if $user->{karma} < $constants->{badkarma};
+                } else {
+			$tweak-- if $user->{karma} < 0;
+			$tweak-- if $user->{karma} < $constants->{badkarma};
+		}
+		# Enforce proper ranges on comment points.
+		my($minScore, $maxScore) =
+			($constants->{comment_minscore}, $constants->{comment_maxscore});
+		$pts = $minScore if $pts < $minScore;
+		$pts = $maxScore if $pts > $maxScore;
+		$karma_bonus = 1 if $pts >= 1 && $user->{karma} > $constants->{goodkarma}
+			&& !$comm->{nobonus};
+		$subscriber_bonus = 1 if $constants->{plugin}{Subscribe}
+			&& $user->{is_subscriber}
+			&& (!$comm->{nosubscriberbonus} || $comm->{nosubscriberbonus} ne 'on');
+	}
+
+#print STDERR scalar(localtime) . " $$ F header_emitted=$header_emitted do_emit_html=$do_emit_html\n";
+
+	my $clean_comment = {
+		subject		=> $comment->{subject},
+		comment		=> $comment->{comment},
+		sid		=> $comment->{sid},
+		pid		=> $comment->{pid},
+		ipid		=> $user->{ipid},
+		subnetid	=> $user->{subnetid},
+		uid		=> $comment->{uid},
+		points		=> $pts,
+		tweak		=> $tweak,
+		tweak_orig	=> $tweak,
+		karma_bonus	=> $karma_bonus ? 'yes' : 'no',
+	};
+
+	if ($constants->{plugin}{Subscribe}) {
+		$clean_comment->{subscriber_bonus} = $subscriber_bonus ? 'yes' : 'no';
+	}
+
+	my $maxCid = $slashdb->createComment($clean_comment);
+	if ($constants->{comment_karma_disable_and_log}) {
+		my $post_str = "";
+		$post_str .= "NO_ANON " if $user->{state}{commentkarma_no_anon};
+		$post_str .= "NO_POST " if $user->{state}{commentkarma_no_post};
+		if (isAnon($comment->{uid}) && $user->{state}{commentkarma_no_anon}) {
+			$slashdb->createCommentLog({
+				cid	=> $maxCid,
+				logtext	=> "COMMENTKARMA ANON: $post_str"
+			});
+		} elsif (!isAnon($comment->{uid}) && $user->{state}{commentkarma_no_post}) {
+			$slashdb->createCommentLog({
+				cid	=> $maxCid,
+				logtext	=> "COMMENTKARMA USER: $post_str"
+			});
+		}
+	}
+	if ($constants->{comment_is_troll_disable_and_log}) {
+		$slashdb->createCommentLog({
+			cid	=> $maxCid,
+			logtext	=> "ISTROLL"
+		});
+	}
+
+#print STDERR scalar(localtime) . " $$ G maxCid=$maxCid\n";
+
+	# make the formkeys happy
+	$comm->{maxCid} = $maxCid;
+
+	$slashdb->setUser($user->{uid}, {
+		'-expiry_comm'	=> 'expiry_comm-1',
+	}) if allowExpiry();
+
+	if ($maxCid == -1) {
+		$$error_message = getError('submission error');
+		return -1;
+
+	} elsif (!$maxCid) {
+		# This site has more than 2**32 comments?  Wow.
+		$$error_message = getError('maxcid exceeded');
+		return -1;
+	}
+
+
+	my $saved_comment = $slashdb->getComment($maxCid);
+	slashHook('comment_save_success', { comment => $saved_comment });
+
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+	if ($moddb) {
+		my $text = $moddb->checkDiscussionForUndoModeration($comm->{sid});
+		# XXX
+		print $text if $text;
+	}
+
+	my $tc = $slashdb->getVar('totalComments', 'value', 1);
+	$slashdb->setVar('totalComments', ++$tc);
+
+
+	if ($discussion->{sid}) {
+		$slashdb->setStory($discussion->{sid}, { writestatus => 'dirty' });
+	}
+
+	$slashdb->setUser($clean_comment->{uid}, {
+		-totalcomments => 'totalcomments+1',
+	}) if !isAnon($clean_comment->{uid});
+
+	my($messages, $reply, %users);
+	my $kinds = $reader->getDescriptions('discussion_kinds');
+	if ($comm->{pid}
+		|| $kinds->{ $discussion->{dkid} } =~ /^journal/
+		|| $constants->{commentnew_msg}) {
+		$messages = getObject('Slash::Messages');
+		$reply = $slashdb->getCommentReply($comm->{sid}, $maxCid);
+	}
+
+	$clean_comment->{pointsorig} = $clean_comment->{points};
+
+	# reply to comment
+	if ($messages && $comm->{pid}) {
+		my $parent = $slashdb->getCommentReply($comm->{sid}, $comm->{pid});
+		my $users  = $messages->checkMessageCodes(MSG_CODE_COMMENT_REPLY, [$parent->{uid}]);
+		if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
+			my $data  = {
+				template_name	=> 'reply_msg',
+				subject		=> { template_name => 'reply_msg_subj' },
+				reply		=> $reply,
+				parent		=> $parent,
+				discussion	=> $discussion,
+			};
+
+			$messages->create($users->[0], MSG_CODE_COMMENT_REPLY, $data);
+			$users{$users->[0]}++;
+		}
+	}
+
+	# reply to journal
+	if ($messages && $kinds->{ $discussion->{dkid} } =~ /^journal/) {
+		my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
+		if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
+			my $data  = {
+				template_name	=> 'journrep',
+				subject		=> { template_name => 'journrep_subj' },
+				reply		=> $reply,
+				discussion	=> $discussion,
+			};
+
+			$messages->create($users->[0], MSG_CODE_JOURNAL_REPLY, $data);
+			$users{$users->[0]}++;
+		}
+	}
+
+	# comment posted
+	if ($messages && $constants->{commentnew_msg}) {
+		my $users = $messages->getMessageUsers(MSG_CODE_NEW_COMMENT);
+
+		my $data  = {
+			template_name	=> 'commnew',
+			subject		=> { template_name => 'commnew_subj' },
+			reply		=> $reply,
+			discussion	=> $discussion,
+		};
+
+		my @users_send;
+		for my $usera (@$users) {
+			next if $users{$usera};
+			push @users_send, $usera;
+			$users{$usera}++;
+		}
+		$messages->create(\@users_send, MSG_CODE_NEW_COMMENT, $data) if @users_send;
+	}
+
+	if ($constants->{validate_html}) {
+		my $validator = getObject('Slash::Validator');
+		my $test = parseDomainTags($comment->{comment});
+		$validator->isValid($test, {
+			data_type	=> 'comment',
+			data_id		=> $maxCid,
+			message		=> 1
+		}) if $validator;
+	}
+
+	return $saved_comment;
 }
 
 
@@ -1725,7 +1937,7 @@ EOT
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
 			subject_only => 1,
-			#onclick	=> ($discussion2 ? "replyTo($comment->{cid}); return false;" : '')
+			onclick	=> (($discussion2 && $user->{test_code}) ? "replyTo($comment->{cid}); return false;" : '')
 		}) unless $user->{state}{discussion_archived};
 
 		push @link, linkComment({
@@ -2160,6 +2372,40 @@ sub validateComment {
 	return if ! $form_success;
 
 	# ...otherwise return true.
+	return 1;
+}
+
+##################################################################
+# Decide whether or not to send a given message to a given user
+sub _send_comment_msg {
+	my($uid, $uids, $pts, $C) = @_;
+	my $constants	= getCurrentStatic();
+	my $reader	= getObject('Slash::DB', { db_type => 'reader' });
+	my $user	= getCurrentUser();
+
+	return unless $uid;			# no user
+	return if $uids->{$uid};		# user not already being msgd
+	return if $user->{uid} == $uid;		# don't msg yourself
+
+	my $otheruser = $reader->getUser($uid);
+
+	# use message_threshold in vars, unless user has one
+	# a message_threshold of 0 is valid, but "" is not
+	my $message_threshold = length($otheruser->{message_threshold})
+		? $otheruser->{message_threshold}
+		: length($constants->{message_threshold})
+			? $constants->{message_threshold}
+			: undef;
+
+	my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+	my $newpts = getPoints($C, $otheruser,
+		$constants->{comment_minscore}, $constants->{comment_maxscore},
+		$reader->countUsers({ max => 1 }), $mod_reader->getReasons,
+	);
+
+	# only if reply pts meets message threshold
+	return if defined $message_threshold && $newpts < $message_threshold;
+
 	return 1;
 }
 

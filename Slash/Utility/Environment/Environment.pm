@@ -1693,6 +1693,8 @@ print STDERR scalar(localtime) . " Env.pm $$ userHasDaypass uid=$user->{uid} cs=
 		$user->{state}{lostprivs} = 1;
 	}
 
+	$user->{test_code} ||= $constants->{test_code};
+
 	if ($constants->{plugin}{Tags}) {
 		my $max_uid;
 		my $write = $constants->{tags_stories_allowwrite} || 0;

@@ -28,7 +28,7 @@ __template__
 				op	=> 'Reply',
 				subject	=> 'Reply to This',
 				subject_only => 1,
-				#onclick	=> (discussion2 ? "return replyTo($cid)" : '')
+				onclick	=> ((discussion2 && user.test_code) ? "replyTo($cid); return false;" : '')
 			}) %]
 		[% END %]
 

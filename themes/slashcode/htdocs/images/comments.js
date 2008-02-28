@@ -92,6 +92,15 @@ function updateComment(cid, mode) {
 //		if (doshort)
 		setShortSubject(cid, mode, cl);
 		existingdiv.className = existingdiv.className.replace(/full|hidden|oneline/, mode);
+		if (adTimerUrl) {
+			var addiv = fetchEl('comment_ad_' + cid);
+			if (addiv) {
+				if (mode == 'hidden')
+					addiv.style.display = 'none';
+				else
+					addiv.style.display = 'block';
+			}
+		}
 	}
 
 	if (placeholder)
@@ -771,6 +780,7 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 							this_id.className = this_id.className.replace(' newcomment', ' oldcomment');
 					}
 				}
+				last_updated_comments_index = last_updated_comments.length - 1;
 
 				for (var i = 0; i < update.new_cids_order.length; i++) {
 					var this_cid = update.new_cids_order[i];
@@ -809,8 +819,14 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 
 			updateHiddens(cids);
 			if (do_update && highlight && last_updated_comments.length) {
-				last_updated_comments_index = last_updated_comments_index + 1;
-				setFocusComment(last_updated_comments[last_updated_comments_index], 1);
+				for (var i = last_updated_comments_index + 1; i < last_updated_comments.length; i++) {
+					last_updated_comments_index = i;
+					if (highlight > 1 && last_updated_comments.length > i && !isUnread(last_updated_comments[i]))
+						continue;
+					setFocusComment(last_updated_comments[i], 1);
+					break;
+				}
+						
 			}
 			ajaxCommentsStatus(0);
 
@@ -941,11 +957,75 @@ function doModerate(el) {
 	return false;
 }
 
-// not used yet
-function replyTo(cid) {
-	var replydiv = fetchEl('replyto_' + cid);
+function editReply(pid) {
+	var replydiv = fetchEl('replyto_' + pid);
+	var reply = fetchEl('replyto_reply_' + pid);
+	var preview = fetchEl('replyto_preview_' + pid);
+	if (!replydiv || !reply || !preview)
+		return false;
 
-	replydiv.innerHTML = '';
+	preview.style.display = 'none';
+	reply.style.display   = 'block';
+	fetchEl('submit_' + pid).style.display  = 'none';
+	fetchEl('preview_' + pid).style.display = 'inline';
+}
+
+function previewReply(pid) {
+	var replydiv = fetchEl('replyto_' + pid);
+	var reply = fetchEl('replyto_reply_' + pid);
+	var preview = fetchEl('replyto_preview_' + pid);
+	var msg = fetchEl('replyto_msg_' + pid);
+	var this_reskey = fetchEl('reskey_reply_' + pid);
+	var postercomment = fetchEl('postercomment_' + pid);
+	var postersubj = fetchEl('postersubj_' + pid);
+
+	if (!replydiv || !reply || !preview || !msg || !this_reskey)
+		return false;
+
+	var params = [];
+	params['op']  = 'comments_preview_reply';
+	params['pid'] = pid;
+	params['sid'] = discussion_id;
+	params['postersubj'] = postersubj.value;
+	params['postercomment'] = postercomment.value;
+	params['reskey'] = this_reskey.value;
+
+	// XXX disable Reply to This link 
+	msg.innerHTML = 'Loading...';
+
+	var handlers = {
+		onComplete: function(transport) {
+			msg.innerHTML = '';
+			json_handler(transport);
+			reply.style.display   = 'none';
+			preview.style.display = 'block';
+			// depends on error result
+			fetchEl('submit_' + pid).style.display  = 'inline';
+			fetchEl('preview_' + pid).style.display = 'none';
+		}
+	};
+
+	ajax_update(params, '', handlers);
+
+}
+
+function replyTo(pid) {
+	var replydiv = fetchEl('replyto_' + pid);
+	if (!replydiv)
+		return false; // seems we shouldn't be here ...
+
+	var params = [];
+	params['op']  = 'comments_reply_form';
+	params['pid'] = pid;
+	params['sid'] = discussion_id;
+
+	replydiv.innerHTML = 'Loading...';
+
+	var handlers = {
+		onComplete: json_handler
+	};
+
+	ajax_update(params, '', handlers);
 
 	return false;
 }
@@ -1090,7 +1170,7 @@ function finishLoading() {
 			last_updated_comments.push(cid);
 	}
 	last_updated_comments = last_updated_comments.sort(numsort);
-	root_comments = root_comments.sort(numsort);
+	//root_comments = root_comments.sort(numsort);
 
 	if (1 || user_is_admin) {
 		if (window.addEventListener) // DOM method for binding an event
@@ -1377,8 +1457,8 @@ function viewWindowBottom() {
 
 function commentIsInWindow(cid) {
 	var in_window = isInWindow(fetchEl('comment_' + cid));
-	if (in_window && fetchEl('comment_body_' + cid))
-		in_window = isInWindow(fetchEl('comment_body_' + cid));
+	if (in_window && fetchEl('comment_sub_' + cid))
+		in_window = isInWindow(fetchEl('comment_sub_' + cid));
 	return in_window;
 }
 
@@ -1770,6 +1850,7 @@ prev thread: W, J
 next thread: S, K
 prev comm chrono: Q
 next comm chrono: E
+next unread comm: F
 */
 
 var validkeys = {
@@ -1778,7 +1859,8 @@ var validkeys = {
 	W: { thread : 1, prev: 1 },
 	S: { thread : 1, next: 1 },
 	Q: { chrono : 1, prev: 1, comment: 1 },
-	E: { chrono : 1, next: 1, comment: 1 }
+	E: { chrono : 1, next: 1, comment: 1 },
+	F: { thread : 1, next: 1, comment: 1, unread: 1 },
 };
 
 validkeys['H'] = validkeys['A'];
@@ -1854,9 +1936,18 @@ function keyHandler(e, k) {
 					if (noSeeFirstComment(current_cid))
 						next_cid = current_cid;
 					else {
-						if (keyo['comment'])
+						if (keyo['unread'])
+							getNextUnread = 1;
+						if (keyo['comment']) {
 							next_cid = commTreeNextComm(current_cid, 0, getNextUnread);
-						else
+							if (!next_cid) {
+								if (ajaxCommentsWait())
+									return;
+								update = 2;
+								var highlight = 1 + getNextUnread;
+								ajaxFetchComments(0, 1, '', highlight);
+							}
+						} else
 							next_cid = commTreeNextComm(comments[current_cid].pid, current_cid, getNextUnread);
 					}
 				}
@@ -1901,7 +1992,7 @@ function commTreeNextComm (cid, old_cid, getNextUnread) {
 		var this_cid;
 		if (!old_cid)
 			this_cid = kids[i];
-		else if (kids[i] == old_cid)
+		else if (kids[i] >= old_cid)
 			this_cid = kids[i+1];
 
 		if (this_cid) {
@@ -1959,12 +2050,13 @@ function sortKids(cid) { // maybe cache later
 function isUnread(cid) {
 	var this_id  = fetchEl('comment_top_' + cid);
 	if (this_id)
-		if (this_id.className.match(' oldcomment'))
-			return 0;
-		else
+		if (this_id.className.match(' newcomment'))
 			return 1;
+		else
+			return 0;
 }
 
+// XXX should we climb all the way back up the tree if we find nothing?
 function getNextUnreadCid(cid) {
 	if (isUnread(cid))
 		return cid;
