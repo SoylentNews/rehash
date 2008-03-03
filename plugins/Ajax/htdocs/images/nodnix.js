@@ -215,8 +215,16 @@ function begin_nodnix_editing() {
   var input = _get_nodnix('input');
   input.value = "";
   input.focus();
-  
-  _get_nodnix('ol').innerHTML = "";
+
+  var tag_list = _get_nodnix('ol');
+  tag_list.innerHTML = "";
+
+  // ajax request to fill the user tags list
+  var params = [];
+  params['op'] = 'tags_get_user_firehose';
+  params['id'] = g_nodnix_item_id;
+  params['nodnix'] = 1;
+  ajax_update(params, tag_list, {});
 
   (input.getAttribute("updown")=="+" ? nod_completer : nix_completer).sendQuery();
   setTimeout("soon_is_now()", 225);

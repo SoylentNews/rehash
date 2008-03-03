@@ -1,0 +1,21 @@
+__section__
+default
+__description__
+id = id
+newtagspreloadtext = text to preload the newtags-# field with
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+tagsnodnixuser
+__template__
+[% FOREACH tag = newtagspreloadtext.split(' ') %]
+<li>[% tag %]</li>
+[% END %]
+__seclev__
+10000
+__version__
+$Id$

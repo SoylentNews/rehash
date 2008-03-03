@@ -32,6 +32,7 @@ template=templates/reject_firehose;misc;default
 template=templates/tagsfirehosedivadmin;misc;default
 template=templates/tagsfirehosedivtagbox;misc;default
 template=templates/tagsfirehosedivuser;misc;default
+template=templates/tagsnodnixuser;misc;default
 task=firehose_reject_old.pl
 task=firehose_backend.pl
 task=firehose_get_thumbnails.pl
