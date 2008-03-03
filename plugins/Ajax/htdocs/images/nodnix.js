@@ -253,12 +253,15 @@ function handle_nodnix_select( type, args, stay_open ) {
     nodnix_tag(tagname);
       // now 'harden' the tag
     var list = _get_nodnix('ol');
-    list.innerHTML = '<li>' + tagname + '</li>' + list.innerHTML;
+    list.innerHTML = handle_nodnix_select.template_string.split('$').join(tagname) + list.innerHTML;
     _get_nodnix('input').value = "";
   }
   if ( !stay_open )
     hide_nodnix_menu();
 }
+
+  // WARNING: keep this string in sync with tagsnodnixuser;misc;default
+handle_nodnix_select.template_string = '<li>$<span class="tag-actions"><span class="not-tag" onclick="nodnix_not_tag(\'$\')">!</span> <span class="del-tag" onclick="nodnix_del_tag(\'$\')">x</span></span></li>';
 
 function handle_completer_key( type, args ) {
   var key = args[0];

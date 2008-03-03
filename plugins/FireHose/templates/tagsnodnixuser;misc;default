@@ -3,6 +3,8 @@ default
 __description__
 id = id
 newtagspreloadtext = text to preload the newtags-# field with
+
+WARNING: keep the related string in nodnix.js in sync with the <li> expansion, below
 __title__
 
 __page__
