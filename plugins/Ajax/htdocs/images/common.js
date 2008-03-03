@@ -603,7 +603,7 @@ function firehose_set_options(name, value) {
 				myAnim.animate();
 			}
 			// remove elements
-			setTimeout("firehose_remove_all_items()", 600);
+			setTimeout(firehose_remove_all_items, 600);
 		}
 	}
 	}
@@ -927,7 +927,7 @@ function firehose_handle_update() {
 				}
 			}
 		}
-		setTimeout("firehose_handle_update()", wait_interval);
+		setTimeout(firehose_handle_update, wait_interval);
 	} else {
 		firehose_reorder();
 		firehose_get_next_updates();
@@ -971,7 +971,7 @@ function firehose_get_next_updates() {
 	var interval = getFirehoseUpdateInterval();
 	//alert("fh_get_next_updates");
 	fh_is_updating = 0;
-	firehose_add_update_timerid(setTimeout("firehose_get_updates()", interval));
+	firehose_add_update_timerid(setTimeout(firehose_get_updates, interval));
 }
 
 
@@ -1033,7 +1033,7 @@ function firehose_get_updates(options) {
 	options = options || {};
 	run_before_update();
 	if ((fh_play == 0 && !options.oneupdate) || fh_is_updating == 1) {
-		firehose_add_update_timerid(setTimeout("firehose_get_updates()", 2000));
+		firehose_add_update_timerid(setTimeout(firehose_get_updates, 2000));
 	//	alert("wait loop: " + fh_is_updating);
 		return;
 	}
@@ -1222,7 +1222,7 @@ function firehose_change_section_anon(section) {
 function pausePopVendorStory(id) {
 	vendor_popup_id=id;
 	closePopup('vendorStory-26-popup');
-	vendor_popup_timerids[id] = setTimeout("vendorStoryPopup()", 500);
+	vendor_popup_timerids[id] = setTimeout(vendorStoryPopup, 500);
 }
 
 function clearVendorPopupTimers() {
@@ -1251,7 +1251,7 @@ function vendorStoryPopup() {
 function pausePopVendorStory2(id) {
 	vendor_popup_id=id;
 	closePopup('vendorStory-26-popup');
-	vendor_popup_timerids[id] = setTimeout("vendorStoryPopup2()", 500);
+	vendor_popup_timerids[id] = setTimeout(vendorStoryPopup2, 500);
 }
 
 function vendorStoryPopup2() {
@@ -1503,7 +1503,7 @@ function toggle_filter_prefs() {
 			fps.className = "hide";
 			if (fp) {
 				fp.className = "";
-				setTimeout("firehose_slider_init()",500);
+				setTimeout(firehose_slider_init,500);
 			} 
 		} else if (fps.className == "hide") {
 			fps.className = "";

@@ -220,7 +220,7 @@ function firehose_usage() {
 	params['op'] = 'firehose_usage'
 	var interval = 300000;
 	ajax_update(params, 'firehose_usage-content');
-	setTimeout("firehose_usage()", interval);
+	setTimeout(firehose_usage, interval);
 }
 
 function make_spelling_correction(misspelled_word, form_element) {

@@ -394,7 +394,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParam
             YAHOO.util.Dom.removeClass(this._spareInput, "hidden");
             this._spareInput.value = "";
             this._spareInput.focus();
-            this._pending_hide = setTimeout("YAHOO.slashdot.gCompleterWidget._hide()", 15000);
+            this._pending_hide = setTimeout(YAHOO.slashdot.gCompleterWidget._hide, 15000);
           }
         else
           YAHOO.util.Dom.addClass(this._spareInput, "hidden");
@@ -517,6 +517,6 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onSdTextboxKeyDown = function( e, m
           if ( me._pending_hide )
             clearTimeout(me._pending_hide);
           if ( me._needsSpareInput() )
-          me._pending_hide = setTimeout("YAHOO.slashdot.gCompleterWidget._hide()", 15000);
+          me._pending_hide = setTimeout(YAHOO.slashdot.gCompleterWidget._hide, 15000);
       }
   }

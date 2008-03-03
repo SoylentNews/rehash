@@ -123,7 +123,7 @@ function hide_nodnix_menu( delay ) {
 	} else {
 		if ( g_pending_hidemenu )
 			clearTimeout(g_pending_hidemenu);
-		g_pending_hidemenu = setTimeout("hide_nodnix_menu()", delay);
+		g_pending_hidemenu = setTimeout(hide_nodnix_menu, delay);
 	}
 }
 
@@ -233,7 +233,7 @@ function begin_nodnix_editing() {
   ajax_update(params, tag_list, {});
 
   (input.getAttribute("updown")=="+" ? nod_completer : nix_completer).sendQuery();
-  setTimeout("soon_is_now()", 225);
+  setTimeout(soon_is_now, 225);
 }
 
 function end_nodnix_editing() {
