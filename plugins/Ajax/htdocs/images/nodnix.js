@@ -100,6 +100,12 @@ function nodnix_tag( tag, up_down ) {
 		firehose_up_down(g_nodnix_item_id, up_down);
 }
 
+function nodnix_not_tag( tag ) {
+}
+
+function nodnix_del_tag( tag ) {
+}
+
 function hide_nod_menu() {
 	get_nod_menu().style.display = 'none';
 }

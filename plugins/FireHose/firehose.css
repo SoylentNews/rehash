@@ -449,8 +449,13 @@ div.storylinks ul {padding-right: 60% !important}
 .embed #nod-user-tags, #console #nod-input {left: 63px !important;}
 .embed #nix-user-tags, #console #nix-input {left: 68px !important;}
 .embed #nodmenu ul, #console #nodmenu ul {margin: 0 0 0 43px; background: #222; opacity: .9; border: 1px solid #111;}
-ol#nod-hardened, ol#nix-hardened, ol#nod-hardened li, ol#nix-hardened li {background: black !important;}
-ol#nod-hardened, ol#nix-hardened {margin-left: 0 !important; padding-left: 0 !important;}
+ol#nod-hardened, ol#nix-hardened, ol#nod-hardened li, ol#nix-hardened li {position: relative; background: black !important;}
+ol#nod-hardened, ol#nix-hardened {margin-left: 0 !important; padding-left: 0 !important; cursor: pointer;}
+
+.tag-actions {display: none; position: absolute; opacity: 0.6; top: -0.75em; right: 0; width: 1.5em; font-size: 120%; text-align: center; color: black; background-color: white; -moz-border-radius: 0.1em; -webkit-border-radius: 0.1em;}
+li:hover .tag-actions {display: inline;}
+li .tag-actions:hover {opacity: 0.9;}
+li .tag-actions .not-tag:hover, li .tag-actions .del-tag:hover {color: red;}
 
 .article .title, .article h3, .article .generaltitle {border: none !important}
 .article .generaltitle, #firehoselist .article .title, .article h3 {line-height: 170% !important;}
