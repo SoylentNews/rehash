@@ -100,7 +100,12 @@ function nodnix_tag( tag, up_down ) {
 		firehose_up_down(g_nodnix_item_id, up_down);
 }
 
-function nodnix_not_tag( tag ) {
+function nodnix_not_tag( old_tag ) {
+  var new_tag = old_tag[0]=='!' ? old_tag.slice(1) : '!'+old_tag;
+	createTag(new_tag, g_nodnix_item_id, "firehose");
+	var tag_list = _get_nodnix('ol');
+	  // XXX not a good idea if the tag happens to be 'span' or 'li', etc
+	tag_list.innerHTML = tag_list.innerHTML.replace(old_tag, new_tag, "g");
 }
 
 function nodnix_del_tag( tag ) {
@@ -261,7 +266,7 @@ function handle_nodnix_select( type, args, stay_open ) {
 }
 
   // WARNING: keep this string in sync with tagsnodnixuser;misc;default
-handle_nodnix_select.template_string = '<li>$<span class="tag-actions"><span class="not-tag" onclick="nodnix_not_tag(\'$\')">!</span> <span class="del-tag" onclick="nodnix_del_tag(\'$\')">x</span></span></li>';
+handle_nodnix_select.template_string = '<li>$<span class="tag-actions"><a class="not-tag" onmousedown="nodnix_not_tag(\'$\'); return false" href="#">!</a> <a class="del-tag" onmousedown="nodnix_del_tag(\'$\'); return false" href="#">x</a></span></li>';
 
 function handle_completer_key( type, args ) {
   var key = args[0];
