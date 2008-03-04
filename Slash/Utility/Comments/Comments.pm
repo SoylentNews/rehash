@@ -38,7 +38,7 @@ use vars qw($VERSION @EXPORT);
 @EXPORT		= qw(
 	constrain_score dispComment displayThread printComments
 	jsSelectComments commentCountThreshold commentThresholds discussion2
-	tempUofmLinkGenerate tempUofmCipherObj selectComments
+	tempUofmLinkGenerate tempUofmCipherObj selectComments preProcessReplyForm
 	getPoints preProcessComment postProcessComment prevComment saveComment
 );
 
@@ -534,6 +534,17 @@ sub getError {
 	my($value, $hashref, $nocomm) = @_;
 	$hashref ||= {};
 	$hashref->{value} = $value;
+
+	# this is a cheap hack to NOT print titlebar in getError if we
+	# are calling from ajax.pl ... easier than reorganizing the code
+	# for now -- pudge 2008/03/04
+	for (0..9) {
+		if ((caller($_))[1] =~ /\bajax\.pl$/) {
+			$hashref->{no_titlebar} = 1;
+			last;
+		}
+	}
+
 	return slashDisplay('errors', $hashref,
 		{ Return => 1, Nocomm => $nocomm, Page => 'comments' });
 }
@@ -599,7 +610,7 @@ sub getPoints {
 
 	# Keep your friends close but your enemies closer.
 	# Or ignore them, we don't care.
-	if ($user->{uid} != $C->{uid}) {
+	if ($user->{people} && $user->{uid} != $C->{uid}) {
 		if ($user->{people}{FRIEND()}{$C->{uid}}) {
 			$hr->{people_bonus_friend} =
 				$user->{people_bonus_friend};
@@ -1322,6 +1333,16 @@ sub displayThread {
 
 #========================================================================
 
+sub preProcessReplyForm {
+	my($form, $reply) = @_;
+	$form->{postersubj} = decode_entities($reply->{subject});
+	$form->{postersubj} =~ s/^Re://i;
+	$form->{postersubj} =~ s/\s\s/ /g;
+	$form->{postersubj} = "Re:$form->{postersubj}";
+}
+
+#========================================================================
+
 sub preProcessComment {
 	my($comm, $user, $discussion, $error_message) = @_; # probably $comm = $form
 	my $constants = getCurrentStatic();
@@ -1407,22 +1428,23 @@ sub postProcessComment {
 		$comm->{comment} = parseDomainTags($comm->{comment},
 			!$comm->{anon} && $comm->{fakeemail});
 
-#		my $discussion = $slashdb->getDiscussion($comm->{sid}) || 0;	
 		my $extras = [];
 		my $disc_skin = $slashdb->getSkin($discussion->{primaryskid});
 		$extras = $slashdb->getNexusExtrasForChosen(
 			{ $disc_skin->{nexus} => 1 },
 			{ content_type => "comment" })
 			if $disc_skin && $disc_skin->{nexus};
-			
+
 		my $preview = {
-			nickname		=> $comm->{postanon}
+			nickname		=> $comm->{anon}
 							? getCurrentAnonymousCoward('nickname')
 							: $comm->{nickname},
+			uid			=> $comm->{anon}
+							? getCurrentAnonymousCoward('uid')
+							: $comm->{uid},
 			pid			=> $comm->{pid},
-			uid			=> $comm->{postanon} ? '' : $comm->{uid},
-			homepage		=> $comm->{postanon} ? '' : $comm->{homepage},
-			fakeemail		=> $comm->{postanon} ? '' : $comm->{fakeemail},
+			homepage		=> $comm->{anon} ? '' : $comm->{homepage},
+			fakeemail		=> $comm->{anon} ? '' : $comm->{fakeemail},
 			journal_last_entry_date	=> $comm->{journal_last_entry_date} || '',
 			'time'			=> $slashdb->getTime,
 			subject			=> $comm->{subject},
@@ -1567,7 +1589,7 @@ sub saveComment {
 	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 	if ($moddb) {
 		my $text = $moddb->checkDiscussionForUndoModeration($comm->{sid});
-		# XXX
+		# XXX doesn't work for D2
 		print $text if $text;
 	}
 
@@ -1931,14 +1953,14 @@ EOT
 		&& $comment->{nickname} ne "-") { # this last test probably useless
 		my @link = ( );
 
-		push @link, linkComment({
+		push @link, (qq'<span id="reply_link_$comment->{cid}">' . linkComment({
 			sid	=> $comment->{sid},
 			pid	=> $comment->{cid},
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
 			subject_only => 1,
 			onclick	=> (($discussion2 && $user->{test_code}) ? "replyTo($comment->{cid}); return false;" : '')
-		}) unless $user->{state}{discussion_archived};
+		}) . '</span>') unless $user->{state}{discussion_archived};
 
 		push @link, linkComment({
 			sid	=> $comment->{sid},

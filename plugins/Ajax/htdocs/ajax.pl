@@ -54,6 +54,8 @@ sub main {
 
 #	print STDERR "AJAX5 $$: $user->{uid}, $op\n";
 
+	my $options = {};
+
 	if ($reskey_name ne 'NA') {
 		my $reskey = getObject('Slash::ResKey');
 		my $rkey = $reskey->key($reskey_name);
@@ -61,6 +63,7 @@ sub main {
 			print STDERR scalar(localtime) . " ajax.pl main no rkey for op='$op' name='$reskey_name'\n";
 			return;
 		}
+		$options->{rkey} = $rkey;
 		if ($ops->{$op}{reskey_type} eq 'createuse') {
 			$rkey->createuse;
 		} elsif ($ops->{$op}{reskey_type} eq 'touch') {
@@ -85,7 +88,6 @@ sub main {
 	}
 #	print STDERR "AJAX6 $$: $user->{uid}, $op\n";
 
-	my $options = {};
 	my $retval = $ops->{$op}{function}->(
 		$slashdb, $constants, $user, $form, $options
 	);
@@ -273,6 +275,23 @@ sub submitReply {
 	my $pid = $form->{pid} || 0;
 	my $sid = $form->{sid} or return;
 
+	$user->{state}{ajax_accesslog_op} = 'comments_submit_reply';
+
+	my($error_message, $saved_comment);
+	my $discussion = $slashdb->getDiscussion($sid);
+	my $comment = preProcessComment($form, $user, $discussion, \$error_message);
+	if (!$error_message) {
+		$options->{rkey}->use or $error_message = $options->{rkey}->errstr;
+	}
+	$saved_comment = saveComment($form, $comment, $user, $discussion, \$error_message)
+		unless $error_message;
+	my $cid = $saved_comment && $saved_comment ne '-1' ? $saved_comment->{cid} : 0;
+
+	$options->{content_type} = 'application/json';
+	my %to_dump = ( cid => $cid, error => $error_message );
+#use Data::Dumper; print STDERR Dumper \%to_dump;
+
+	return Data::JavaScript::Anon->anon_dump(\%to_dump);
 }
 
 sub previewReply {
@@ -282,14 +301,23 @@ sub previewReply {
 
 	$user->{state}{ajax_accesslog_op} = 'comments_preview_reply';
 
+	my($error_message, $preview, $html);
 	my $discussion = $slashdb->getDiscussion($sid);
-	my $comment = preProcessComment($form, $user, $discussion);
-	my $preview = postProcessComment({ %$comment, %$user }, 0, $discussion);
-	my $html = prevComment($preview, $user);
-
+	my $comment = preProcessComment($form, $user, $discussion, \$error_message);
+	if ($comment && $comment ne '-1') {
+		$preview = postProcessComment({ %$comment, %$form, %$user }, 0, $discussion);
+		$html = prevComment($preview, $user);
+	}
 
 	$options->{content_type} = 'application/json';
-	my %to_dump = (html => { "replyto_preview_$pid" => $html });
+	my %to_dump = (
+		error => $error_message,
+	);
+	$to_dump{html} = { "replyto_preview_$pid" => $html } if $html;
+	$to_dump{eval_first} = "\$('gotmodwarning_$pid').value = 1;"
+		if $form->{gotmodwarning} || ($error_message && $error_message eq
+			Slash::Utility::Comments::getError("moderations to be lost")
+		);
 #use Data::Dumper; print STDERR Dumper \%to_dump; 
 
 	return Data::JavaScript::Anon->anon_dump(\%to_dump);
@@ -304,8 +332,10 @@ sub replyForm {
 	$user->{state}{ajax_accesslog_op} = 'comments_reply_form';
 
 	my($reply, $pid_reply);
+	my $discussion = $slashdb->getDiscussion($sid);
 	$reply = $slashdb->getCommentReply($sid, $pid) if $pid;
 	$pid_reply = prepareQuoteReply($reply) if $pid && $reply;
+	preProcessReplyForm($form, $reply);
 
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey = $reskey->key('comments', { nostate => 1 });
@@ -314,10 +344,11 @@ sub replyForm {
 	my %to_dump;
 	if ($rkey->success) {
 		my $reply_html = slashDisplay('edit_comment', {
-			sid    => $sid,
-			pid    => $pid,
-			reply  => $reply,
-			rkey   => $rkey
+			discussion => $discussion,
+			sid        => $sid,
+			pid        => $pid,
+			reply      => $reply,
+			rkey       => $rkey
 		}, { Return => 1 });
 		%to_dump = (html => { "replyto_$pid" => $reply_html });
 	} else {
@@ -326,7 +357,6 @@ sub replyForm {
 
 	$options->{content_type} = 'application/json';
 	$to_dump{eval_first} = "comment_body_reply[$pid] = '$pid_reply';" if $pid_reply;
-
 #use Data::Dumper; print STDERR Dumper \%to_dump; 
 
 	return Data::JavaScript::Anon->anon_dump(\%to_dump);
@@ -1043,9 +1073,9 @@ sub getOps {
 
 	my %mainops = (
 		comments_submit_reply  => {
-			function        => \&previewReply,
+			function        => \&submitReply,
 			reskey_name     => 'comments',
-			reskey_type     => 'use',
+			reskey_type     => 'touch',
 		},
 		comments_preview_reply  => {
 			function        => \&previewReply,

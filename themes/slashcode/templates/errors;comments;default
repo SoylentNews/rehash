@@ -87,19 +87,19 @@ CASE "discussions max posts" %]
 
 [% # INVALID FORMKEY
 CASE "invalid formkey" %]
-[% PROCESS titlebar width="100%" title="Invalid form key!" %]
+[% PROCESS titlebar width="100%" title="Invalid form key!" UNLESS no_titlebar %]
 <br><p><b>form key: [% formkey %] !</b></p>
  
 [% # RESPONSE LIMIT 
 CASE "comments response limit" %]
-[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" UNLESS no_titlebar %]
 <p>[% constants.sitename %] requires you to wait [% limit %] between
 hitting 'reply' and submitting a comment.</p>
 <p>It's been [% response %] since you hit 'reply'!</p>
 
 [% # POST LIMIT
 CASE "comments post limit" %]
-[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" UNLESS no_titlebar %]
 <p>[% constants.sitename %] requires you to wait between
 each successful posting of a comment to allow everyone a fair chance
 at posting a comment.</p>
@@ -107,14 +107,14 @@ at posting a comment.</p>
 
 [% # POST LIMIT
 CASE "discussions post limit" %]
-[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" %]
+[% PROCESS titlebar width="100%" title="Slow Down Cowboy!" UNLESS no_titlebar %]
 <p>[% constants.sitename %] requires you to wait between
 each successful creation of a discussion .</p>
 <p>It's been [% interval %] since you last successfully created a discussion.</p>
 
 [% # USED FORM
 CASE "used form" %]
-[% PROCESS titlebar width="100%" title="Form Error!" %]
+[% PROCESS titlebar width="100%" title="Form Error!" UNLESS no_titlebar %]
 This form has been used already to submit a comment [% interval %] ago.
 You can not use a form and hit the back button to use it again.
 
@@ -124,7 +124,7 @@ CASE "readonly" %]
 
 [% # TOO MANY POSTS
 CASE "comments post limit daily" %]
-[% PROCESS titlebar width="100%" title="Call It A Night, Cowboy!" %]
+[% PROCESS titlebar width="100%" title="Call It A Night, Cowboy!" UNLESS no_titlebar %]
 <p>[% constants.sitename %] only allows
 [% IF user.is_anon; "anonymous users";
 ELSE; "a user with your karma"; END %]
@@ -176,14 +176,14 @@ Your comment has too few characters per line (currently [% ratio %]).<br>
 
 [% # FILTER MESSAGE.
 CASE "filter message" %]
-[% PROCESS titlebar width="100%" title="Lameness filter encountered. Post aborted!" %]
+[% PROCESS titlebar width="100%" title="Lameness filter encountered. Post aborted!" UNLESS no_titlebar %]
 [% IF err_message %]
 <b>Reason: [% err_message %]</b><br>
 [% END %]
 
 [% # COMPRESS FILTER.
 CASE "compress filter" %]
-[% PROCESS titlebar width="100%" title="Lameness filter encountered." %]
+[% PROCESS titlebar width="100%" title="Lameness filter encountered." UNLESS no_titlebar %]
 Your comment violated the "[% ratio %]" compression filter. Try less
 whitespace and/or less repetition[%
 IF ratio == 'postersubj' %] in the subject line[% END %].
@@ -214,11 +214,11 @@ CASE "formabuse_usedform" %]
 form [% formname %] [% formkey %] already submitted 
 
 [% CASE "seclevtoolow" %]
-[% PROCESS titlebar width="100%" title="No permissions" %]
+[% PROCESS titlebar width="100%" title="No permissions" UNLESS no_titlebar %]
 You do not have appropriate permissions to perform that action.
 
 [% CASE "nosubscription" %]
-[% PROCESS titlebar width="100%" title="Not subscriber, or not subscribed page" %]
+[% PROCESS titlebar width="100%" title="Not subscriber, or not subscribed page" UNLESS no_titlebar %]
 You can't see this discussion because it's scheduled in the future,
 where only subscribers can see it.<p>
 Either you are not a subscriber to [% constants.sitename %], or you
@@ -229,13 +229,13 @@ Any of these three possible issues can be resolved at
 <a href="[% gSkin.rootdir %]/subscribe.pl">your subscription page</a>.<p>
 
 [% CASE "moderations to be lost" %]
-[% PROCESS titlebar width="100%" title="You've Already Moderated this Discussion" %]
+[% PROCESS titlebar width="100%" title="You've Already Moderated this Discussion" UNLESS no_titlebar %]
 If you continue to post this comment, all moderations done to this discussion will
 be undone!  Are you sure you want to post?
 
 [% # NO DISCUSSION ID SPECIFIED
 CASE "no sid" %]
-[% PROCESS titlebar width="100%" title="No Discussion Specified" %]
+[% PROCESS titlebar width="100%" title="No Discussion Specified" UNLESS no_titlebar %]
 You did not specify a discussion ID. If you clicked on a link internal
 to [% constants.sitename %], this is a bug. If not, someone sent you
 to a silly invalid URL.

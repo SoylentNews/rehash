@@ -203,7 +203,7 @@ sub main {
 			header($title, $section) or return;
 			$header_emitted = 1;
 		}
-		print getError('login error');
+		print Slash::Utility::Comments::getError('login error');
 		$op = 'preview';
 	}
 	$op = 'default' if
@@ -217,7 +217,7 @@ sub main {
 			header($title, $section) or return;
 			$header_emitted = 1;
 		}
-		print getError("nosubscription");
+		print Slash::Utility::Comments::getError("nosubscription");
 	}
 
 #print STDERR scalar(localtime) . " $$ B op=$op header_emitted=$header_emitted\n";
@@ -369,18 +369,6 @@ sub _buildargs {
 	return fixurl($uri);
 }
 
-#################################################################
-# this groups all the errors together in
-# one template, called "errors;comments;default"
-# Why not just getData??? -Brian
-sub getError {
-	my($value, $hashref, $nocomm) = @_;
-	$hashref ||= {};
-	$hashref->{value} = $value;
-	return slashDisplay('errors', $hashref,
-		{ Return => 1, Nocomm => $nocomm });
-}
-
 ##################################################################
 sub delete {
 	my($form, $slashdb, $user, $constants) = @_;
@@ -449,7 +437,7 @@ sub editComment {
 	if ($sid) { $sid =~ /(\d+)/; $sid = $1 }
 	if (!$sid) {
 		# Need a discussion ID to reply to, or there's no point.
-		print getError('no sid');
+		print Slash::Utility::Comments::getError('no sid');
 		return;
 	}
 
@@ -461,7 +449,7 @@ sub editComment {
 
 	# An attempt to reply to a comment that doesn't exist is an error.
 	if ($pid && !%$reply) {
-		print getError('no such parent');
+		print Slash::Utility::Comments::getError('no such parent');
 		return;
 	} elsif ($pid) {
 		$pid_reply = prepareQuoteReply($reply);
@@ -485,12 +473,12 @@ sub editComment {
 	# just in case the user fudged it.
 	if (($user->{is_anon} || $form->{postanon})
 		&& !$slashdb->checkAllowAnonymousPosting($user->{uid})) {
-		print getError('anonymous disallowed');
+		print Slash::Utility::Comments::getError('anonymous disallowed');
 		return;
 	}
 
 	if ($discussion->{type} eq 'archived') {
-		print getError('archive_error');
+		print Slash::Utility::Comments::getError('archive_error');
 		return;
 	}
 
@@ -498,12 +486,7 @@ sub editComment {
 		$preview = previewForm(\$error_message, $discussion) or $error_flag++;
 	}
 
-	if (%$reply && !$form->{postersubj}) {
-		$form->{postersubj} = decode_entities($reply->{subject});
-		$form->{postersubj} =~ s/^Re://i;
-		$form->{postersubj} =~ s/\s\s/ /g;
-		$form->{postersubj} = "Re:$form->{postersubj}";
-	}
+	preProcessReplyForm($form, $reply);
 	
 	my $extras = [];	
 	my $disc_skin = $slashdb->getSkin($discussion->{primaryskid});
@@ -514,8 +497,10 @@ sub editComment {
 		if $disc_skin && $disc_skin->{nexus};
 
 	my $gotmodwarning;
-	$gotmodwarning = 1 if $form->{gotmodwarning}
-		|| $error_message && $error_message eq getError("moderations to be lost");
+	$gotmodwarning = 1 if $form->{gotmodwarning} ||
+		($error_message && $error_message eq
+			Slash::Utility::Comments::getError("moderations to be lost")
+		);
 
 	slashDisplay('edit_comment', {
 		pid_reply	=> $pid_reply,
@@ -542,7 +527,7 @@ sub previewForm {
 
 	my $comment = preProcessComment($form, $user, $discussion, $error_message) or return;
 	return $$error_message if $comment eq '-1';
-	my $preview = postProcessComment({ %$comment, %$user }, 0, $discussion);
+	my $preview = postProcessComment({ %$comment, %$form, %$user }, 0, $discussion);
 
 	if ($constants->{plugin}{Subscribe}) {
 		$preview->{subscriber_bonus} =
@@ -685,9 +670,9 @@ sub moderate {
 			# went wrong.
 			if ($ret_val < 0) {
 				if ($ret_val == -1) {
-					print getError('no points');
+					print Slash::Utility::Comments::getError('no points');
 				} elsif ($ret_val == -2){
-					print getError('not enough points');
+					print Slash::Utility::Comments::getError('not enough points');
 				}
 			} else {
 				$was_touched += $ret_val;

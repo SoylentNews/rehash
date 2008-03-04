@@ -22,14 +22,14 @@ __template__
 		[
 		
 		[% IF !user.state.discussion_archived && !user.state.discussion_future_nopost %]
-			[% Slash.linkComment({
+			<span id="reply_link_[% cid %]">[% Slash.linkComment({
 				sid	=> sid,
 				pid	=> cid,
 				op	=> 'Reply',
 				subject	=> 'Reply to This',
 				subject_only => 1,
 				onclick	=> ((discussion2 && user.test_code) ? "replyTo($cid); return false;" : '')
-			}) %]
+			}) %]</span>
 		[% END %]
 
 		[% IF !(user.state.discussion_archived) && ( do_parent || can_mod || can_del ) %] | [% END %]

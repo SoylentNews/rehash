@@ -43,22 +43,28 @@ or post as <b>[% user.nickname | strip_literal %]</b>.
 	<div id="replyto_reply_[% pid %]" class="replyto_reply">
 <input type="hidden" name="sid" value="[% sid %]">
 [% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
-[% IF gotmodwarning %]<input type="hidden" name="gotmodwarning" value="1">[% END # XXXXX %]
+<input type="hidden" name="gotmodwarning_[% pid %]" id="gotmodwarning_[% pid %]" value="0">
 [% reskey_label = "reskey_reply_$pid"; PROCESS reskey_tag %]
-<p><input type="text" name="postersubj_[% pid %]" id="postersubj_[% pid %]" value="Re:[% reply.subject | strip_attribute %]" size="50" maxlength="50">
+<p><input type="text" name="postersubj_[% pid %]" id="postersubj_[% pid %]" value="[% form.postersubj | strip_attribute %]" size="50" maxlength="50">
 [<a href="[% gSkin.rootdir %]/my/comments" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">Customize Posting Preferences</a>]</p>
 <p><textarea wrap="virtual" name="postercomment_[% pid %]" id="postercomment_[% pid %]" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]"></textarea></p>
 
 [% IF constants.allow_anonymous && user.karma > -1 && !user.is_anon && (discussion.commentstatus == 'enabled' || discussion.commentstatus == 'logged_in')  %]
-	<p><input type="checkbox" name="postanon"> Post Anonymously</p>
+	<p><input type="checkbox" name="postanon_[% pid %]" id="postanon_[% pid %]"> Post Anonymously</p>
 [% END %]
 
 	</div>
 	<div id="replyto_msg_[% pid %]" class="replyto_msg"></div>
-	<div id="replyto_buttons_[% pid %]" class="replyto_buttons">
-<input type="button" name="preview_[% pid %]"    id="preview_[% pid %]"    value="Preview" class="button" onclick="previewReply([% pid %]); return false;">
-<input type="button" name="submit_[% pid %]"     id="submit_[% pid %]"     value="Submit"  class="button" onclick="fetchEl('preview_[% pid %]').style.display='inline'; fetchEl('submit_[% pid %]').style.display='none';  return false;" style="display: none">
-<input type="button" name="quotereply_[% pid %]" id="quotereply_[% pid %]" value="Quote"   class="button" onclick="quoteReply([% pid %]); return false;">
+	<div class="replyto_buttons">
+		<span id="replyto_buttons_1_[% pid %]">
+<input type="button" name="preview_[% pid %]"    id="preview_[% pid %]"    value="Preview"          class="button" onclick="previewReply([% pid %]); return false;">
+<input type="button" name="quotereply_[% pid %]" id="quotereply_[% pid %]" value="Quote Parent"     class="button" onclick="quoteReply([% pid %]);   return false;">
+		</span><span id="replyto_buttons_2_[% pid %]" style="display: none">
+<input type="button" name="submit_[% pid %]"     id="submit_[% pid %]"     value="Submit"           class="button" onclick="submitReply([% pid %]);  return false;">
+<input type="button" name="edit_[% pid %]"       id="edit_[% pid %]"       value="Continue Editing" class="button" onclick="editReply([% pid %]);    return false;">
+		</span><span id="replyto_buttons_3_[% pid %]">
+<input type="button" name="cancel_[% pid %]"     id="cancel_[% pid %]"     value="Cancel"           class="button" onclick="cancelReply([% pid %]);  return false;">
+		</span>
 	</div>
 </form>
 [% END # IF !user.is_anon || constants.allow_anonymous %]
