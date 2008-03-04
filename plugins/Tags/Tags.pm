@@ -849,7 +849,7 @@ sub getAllObjectsTagname {
 #		my $value = $mcd->get("$mcdkey$name");
 #		return $value if defined $value;
 #	}
-	my $private_clause = $options->{include_private} ? '' : " AND private='no'";
+	my $private_clause = ref($options) && $options->{include_private} ? '' : " AND private='no'";
 	my $id = $self->getTagnameidFromNameIfExists($name);
 	return [ ] if !$id;
 	my $hr_ar = $self->sqlSelectAllHashrefArray(
@@ -1683,10 +1683,10 @@ sub listTagnamesAll {
 sub listTagnamesActive {
 	my($self, $options) = @_;
 	my $constants = getCurrentStatic();
-	my $max_num =         $options->{max_num}         || 100;
-	my $seconds =         $options->{seconds}         || (3600*6);
-	my $include_private = $options->{include_private} || 0;
-	my $min_slice =       $options->{min_slice}       || 0;
+	my $max_num =         ref($options) && $options->{max_num}         || 100;
+	my $seconds =         ref($options) && $options->{seconds}         || (3600*6);
+	my $include_private = ref($options) && $options->{include_private} || 0;
+	my $min_slice =       ref($options) && $options->{min_slice}       || 0;
 	$min_slice = 0 if !$constants->{plugin}{FireHose};
 
 	# This seems like a horrendous query, but I _think_ it will run
@@ -1791,8 +1791,8 @@ sub listTagnamesActive {
 sub listTagnamesRecent {
 	my($self, $options) = @_;
 	my $constants = getCurrentStatic();
-	my $seconds =         $options->{seconds}         || (3600*6);
-	my $include_private = $options->{include_private} || 0;
+	my $seconds =         ref($options) && $options->{seconds}         || (3600*6);
+	my $include_private = ref($options) && $options->{include_private} || 0;
 	my $private_clause = $include_private ? '' : " AND private='no'";
 	my $recent_ar = $self->sqlSelectColArrayref(
 		'DISTINCT tagnames.tagname',
