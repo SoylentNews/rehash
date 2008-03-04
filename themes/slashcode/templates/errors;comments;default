@@ -151,11 +151,11 @@ Due to excessive bad posting from this IP or Subnet, [% IF logged_in_allowed
 %]anonymous [% END %]comment posting
 has temporarily been disabled. 
 [% IF logged_in_allowed %]
-You can still login to post.  However, if bad posting continues from your IP
+You can still log in to post.  However, if bad posting continues from your IP
 or Subnet that privilege could be revoked as well.
 [% END %]
 If it's you, consider this a chance to
-sit in the timeout corner[% IF logged_in_allowed %] or login and improve your posting[% END %]
+sit in the timeout corner[% IF logged_in_allowed %] or log in and improve your posting[% END %]
 . If it's someone else, this is a chance to hunt them down.
 If you think this is unfair, please email
 [% IF constants.adminmail_mod; constants.adminmail_mod;
