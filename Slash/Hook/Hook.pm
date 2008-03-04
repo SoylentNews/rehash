@@ -5,9 +5,6 @@
 
 package Slash::Hook;
 use strict;
-use DBIx::Password;
-use Slash;
-use Slash::DB;
 use Slash::Utility::Environment; # avoid cross-caller issues
 use vars qw($VERSION);
 
