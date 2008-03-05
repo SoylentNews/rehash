@@ -1131,6 +1131,10 @@ function firehose_play() {
 	}
 }
 
+function is_firehose_playing() {
+  return YAHOO.util.Dom.hasClass('play', 'hide');
+}
+
 function firehose_pause() {
 	fh_play = 0;
 	var pause = $('pause');

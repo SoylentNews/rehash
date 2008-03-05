@@ -216,6 +216,11 @@ function soon_is_now() {
 }
 
 function begin_nodnix_editing() {
+  if ( is_firehose_playing() ) {
+    firehose_pause();
+    end_nodnix_editing.restore_firehose_state = firehose_play;
+  }
+
   get_nodnix_listener().disable();
   YAHOO.util.Dom.addClass(get_nod_menu(), 'soon');
   YAHOO.util.Dom.addClass(get_nix_menu(), 'soon');
@@ -244,7 +249,10 @@ function begin_nodnix_editing() {
 function end_nodnix_editing() {
   YAHOO.util.Dom.removeClass(get_nod_menu(), 'editing');
   YAHOO.util.Dom.removeClass(get_nix_menu(), 'editing');
+  end_nodnix_editing.restore_firehose_state();
+  end_nodnix_editing.restore_firehose_state = function(){}
 }
+end_nodnix_editing.restore_firehose_state = function(){}
 
 function handle_nodnix_blur( type, args ) {
   hide_nodnix_menu();
