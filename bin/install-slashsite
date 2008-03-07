@@ -26,7 +26,7 @@ my $PROGNAME = basename($0);
 
 my %opts;
 # Remember to doublecheck these match usage()!
-usage('Options used incorrectly') unless getopts('hvu:H:n:xRL:i:T:P:a:e:p:o:g:', \%opts);
+usage('Options used incorrectly') unless getopts('hvfu:H:n:xRL:i:T:P:a:e:p:o:g:', \%opts);
 usage() if !$opts{'u'} and ($opts{'h'} or !keys %opts);
 # if invoked with both -u and -h, call usage() later, after we load Slash::Install
 version() if $opts{'v'};
