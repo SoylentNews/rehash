@@ -340,6 +340,7 @@ plugin=Journal
 plugin=Login
 plugin=Hof
 plugin=Messages
+plugin=Moderation
 plugin=PollBooth
 plugin=Print
 plugin=PubKey
