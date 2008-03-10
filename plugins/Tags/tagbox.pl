@@ -282,7 +282,7 @@ main::tagboxLog("update_feederlog name=$tagbox->{name} inserting " . ($feeder_ar
 sub insert_feederlog {
 	my($tagbox, $feeder_ar) = @_;
 	for my $feeder_hr (@$feeder_ar) {
-main::tagboxLog("addFeederInfo: tbid=$tagbox->{tbid} tagid=$feeder_hr->{tagid} affected_id=$feeder_hr->{affected_id} imp=$feeder_hr->{importance}");
+{ my $fstr = Dumper($feeder_hr); $fstr =~ s/\s+/ /g; main::tagboxLog("addFeederInfo: tbid=$tagbox->{tbid} f: $fstr"); }
 		$tagboxdb->addFeederInfo($tagbox->{tbid}, $feeder_hr);
 	}
 }
@@ -300,6 +300,10 @@ sub run_tagboxes_until {
 		for my $affected_hr (@$affected_ar) {
 			my $tagbox = $tagboxdb->getTagboxes($affected_hr->{tbid}, [qw( object )]);
 #my $ad = Dumper($affected_hr); $ad =~ s/\s+/ /g; my $tb = Dumper($tagbox); $tb =~ s/\s+/ /g; print STDERR "r_t_u affected_hr: $ad tagbox: $tb\n";
+if ($affected_hr->{tbid} == 17) {
+my $feeder_ar = $tagboxdb->sqlSelectAllHashrefArray('*', 'tagboxlog_feeder', "tbid=17 AND affected_id=$affected_hr->{affected_id}", 'ORDER BY tfid');
+print STDERR "r_t_u rows for tbid=17 id=$affected_hr->{affected_id}: " . Dumper($feeder_ar)
+}
 			$tagbox->{object}->run($affected_hr->{affected_id});
 			$tagboxdb->markTagboxRunComplete($affected_hr);
 			last if time() >= $run_until || $task_exit_flag;

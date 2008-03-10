@@ -685,7 +685,8 @@ sub addCloutsToTagArrayref {
 	for my $uid (keys %uid) {
 		# XXX getUser($foo, 'clout') does not work at the moment,
 		# so getUser($foo)->{clout} is used instead
-		$user_clout_hr->{$uid} = $self->getUser($uid)->{clout};
+		my $user = $self->getUser($uid);
+		$user_clout_hr->{$uid} = $self->getUser($uid)->{clout} if $user;
 	}
 
 
@@ -704,7 +705,9 @@ sub addCloutsToTagArrayref {
 			$tagname_clid = $default_clout_clid;
 		}
 		my $tagname_clout_name = $clout_types->{ $tagname_clid };
-		$tag_hr->{user_clout}    = $mult * $user_clout_hr   ->{$tag_hr->{uid}}{$tagname_clout_name};
+		my $clout = $user_clout_hr->{$tag_hr->{uid}};
+		my $clout_specific = $clout ? $clout->{$tagname_clout_name} : 0;
+		$tag_hr->{user_clout}    = $mult * $clout_specific;
 		$tag_hr->{total_clout} = $tag_hr->{tag_clout} * $tag_hr->{tagname_clout} * $tag_hr->{user_clout};
 	}
 }
@@ -1838,6 +1841,7 @@ sub listTagnamesByPrefix {
 		return $ret_str if $ret_str;
 	}
 
+	# XXX boost SUM if tagname is descriptive
 	my $ar = $reader->sqlSelectAllHashrefArray(
 		'tagname,
 		 COUNT(DISTINCT tags.uid) AS c,
