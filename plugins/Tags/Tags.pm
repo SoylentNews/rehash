@@ -1193,27 +1193,27 @@ sub ajaxCreateForStory {
 }
 
 sub ajaxDeactivateTag {
-  my($self, $constants, $user, $form) = @_;
-  my $type = $form->{type} || "stories";
-  my $tags = getObject('Slash::Tags'); # XXX isn't this the same as $self? -Jamie (copied from elsewhere in this file)
+	my($self, $constants, $user, $form) = @_;
+	my $type = $form->{type} || "stories";
+	my $tags = getObject('Slash::Tags'); # XXX isn't this the same as $self? -Jamie
 
-  my ($table, $id);
+	my ($table, $id);
 
-  if ( $type eq "firehose" ) {
-    my $firehose = getObject("Slash::FireHose");
-    my $item = $firehose->getFireHose($form->{id});
-    ($table, $id) = $tags->getGlobjTarget($item->{globjid});
-  } else {
-    # XXX doesn't work yet for stories or urls
-    return;
-  }
+	if ($type eq "firehose") {
+		my $firehose = getObject("Slash::FireHose");
+		my $item = $firehose->getFireHose($form->{id});
+		($table, $id) = $tags->getGlobjTarget($item->{globjid});
+	} else {
+		# XXX doesn't work yet for stories or urls
+		return;
+	}
 
-  $tags->deactivateTag({
-    uid =>    $user->{uid},
-    name =>   $form->{tag},
-    table =>  $table,
-    id =>     $id
-  });
+	$tags->deactivateTag({
+		uid =>		$user->{uid},
+		name =>		$form->{tag},
+		table =>	$table,
+		id =>		$id,
+	});
 }
 
 sub ajaxProcessAdminTags {
@@ -1406,6 +1406,13 @@ sub ajaxListTagnames {
 	$prefix = lc($1) if $form->{prefix} =~ /([A-Za-z0-9]{1,20})/;
 	my $len = length($prefix);
 	my $notize = $form->{prefix} =~ /^([-!])/ ? $1 : '';
+
+	my $minlen = $constants->{tags_prefixlist_minlen} || 3;
+	if ($len < $minlen) {
+		# Too short to give a meaningful suggestion, and the
+		# shorter the prefix the longer the DB query takes.
+		return '';
+	}
 
 	my $tnhr = $tags_reader->listTagnamesByPrefix($prefix);
 

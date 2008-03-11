@@ -10,6 +10,7 @@ INSERT INTO vars (name, value, description) VALUES ('tags_admin_autoaddstorytopi
 INSERT INTO vars (name, value, description) VALUES ('tags_cache_expire', '180', 'Local data cache expiration for tags');
 INSERT INTO vars (name, value, description) VALUES ('tags_list_mintc', '4', 'Minimum value of total_clout for tagged items shown at /tags/foo');
 INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_minc', '4', 'Minimum value of c (count) for tagnames returned by listTagnamesByPrefix');
+INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_minlen', '3', 'Minimum length of a tag prefix to bother looking up suggestions for');
 INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_mins', '3', 'Minimum value of s (clout sum) for tagnames returned by listTagnamesByPrefix');
 INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_num', '10', 'Number of tagnames returned by listTagnamesByPrefix');
 INSERT INTO vars (name, value, description) VALUES ('tags_prefixlist_priority', 'back bookmark feed hold journal none quik submission story', 'Tagnames to give priority to on autocomplete');
