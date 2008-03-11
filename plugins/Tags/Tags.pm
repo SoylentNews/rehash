@@ -1192,6 +1192,30 @@ sub ajaxCreateForStory {
 	return $retval;
 }
 
+sub ajaxDeactivateTag {
+  my($self, $constants, $user, $form) = @_;
+  my $type = $form->{type} || "stories";
+  my $tags = getObject('Slash::Tags'); # XXX isn't this the same as $self? -Jamie (copied from elsewhere in this file)
+
+  my ($table, $id);
+
+  if ( $type eq "firehose" ) {
+    my $firehose = getObject("Slash::FireHose");
+    my $item = $firehose->getFireHose($form->{id});
+    ($table, $id) = $tags->getGlobjTarget($item->{globjid});
+  } else {
+    # XXX doesn't work yet for stories or urls
+    return;
+  }
+
+  $tags->deactivateTag({
+    uid =>    $user->{uid},
+    name =>   $form->{tag},
+    table =>  $table,
+    id =>     $id
+  });
+}
+
 sub ajaxProcessAdminTags {
 	my($slashdb, $constants, $user, $form) = @_;
 #print STDERR "ajaxProcessAdminTags\n";
