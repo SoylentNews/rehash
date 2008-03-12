@@ -826,12 +826,12 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 
 			updateHiddens(cids);
 			if (do_update && highlight && last_updated_comments.length) {
-				for (var i = last_updated_comments_index + 1; i < last_updated_comments.length; i++) {
-					last_updated_comments_index = i;
-					if (highlight > 1 && last_updated_comments.length > i && !isUnread(last_updated_comments[i]))
-						continue;
-					setFocusComment(last_updated_comments[i], 1);
-					break;
+				var next_cid = commTreeNextComm(0, 0, 1);
+				if (next_cid) {
+					if (highlight > 1)
+						setFocusComment('-' + current_cid, 1);
+					setCurrentComment(next_cid);
+					setFocusComment(next_cid, 1);
 				}
 			}
 			ajaxCommentsStatus(0);
@@ -966,9 +966,11 @@ function doModerate(el) {
 function cancelReply(pid) {
 	var replydiv = $('replyto_' + pid);
 	replydiv.innerHTML = '';
-	var reply_link = $('reply_link_' + pid);
-	reply_link.innerHTML = reply_link_html[pid];
-	reply_link_html[pid] = '';
+	if (pid) { // XXX
+		var reply_link = $('reply_link_' + pid);
+		reply_link.innerHTML = reply_link_html[pid];
+		reply_link_html[pid] = '';
+	}
 }
 
 function editReply(pid) {
@@ -1007,7 +1009,7 @@ function replyPreviewOrSubmit (pid, op, handlers) {
 	params['postercomment'] = $('postercomment_' + pid).value;
 
 	var postanon = $('postanon_' + pid);
-	if (postanon.checked)
+	if (postanon && postanon.checked)
 		params['postanon'] = postanon.value;
 
 	msg.innerHTML = 'Loading...';
@@ -1068,9 +1070,11 @@ function replyTo(pid) {
 	var handlers = {
 		onComplete: function(transport) {
 			json_handler(transport);
-			var reply_link = $('reply_link_' + pid);
-			reply_link_html[pid] = reply_link.innerHTML;
-			reply_link.innerHTML = '<a href="#" onclick="cancelReply(' + pid + '); return false;">Cancel Reply</a>';
+			if (pid) { // XXX
+				var reply_link = $('reply_link_' + pid);
+				reply_link_html[pid] = reply_link.innerHTML;
+				reply_link.innerHTML = '<a href="#" onclick="cancelReply(' + pid + '); return false;">Cancel Reply</a>';
+			}
 			$('postercomment_' + pid).focus();
 		}
 	};
@@ -1870,6 +1874,9 @@ function getSeconds () {
 
 
 function setCurrentComment (cid) {
+	if (!cid)
+		return false;
+
 	var this_id;
 	if (current_cid) {
 		if (cid == current_cid)
@@ -1995,11 +2002,11 @@ function keyHandler(e, k) {
 							getNextUnread = 1;
 						if (keyo['comment']) {
 							next_cid = commTreeNextComm(current_cid, 0, getNextUnread);
-							if (!next_cid && getNextUnread) {
+							if (!next_cid) { // && getNextUnread) {
 								if (ajaxCommentsWait())
 									return;
 								update = 2;
-								var highlight = 1 + getNextUnread;
+								var highlight = 1 + collapseCurrent;
 								ajaxFetchComments(0, 1, '', highlight);
 							}
 						} else

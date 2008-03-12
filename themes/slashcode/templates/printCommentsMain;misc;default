@@ -201,7 +201,8 @@ __template__
 				cid          => cid,
 				op           => 'reply',
 				subject      => 'Reply',
-				subject_only => 1
+				subject_only => 1,
+				onclick      => ((discussion2 && user.test_code) ? "replyTo(0); return false;" : '')
 			}) %]
 		[% END %]
 		</span>
@@ -285,7 +286,8 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 				cid          => cid,
 				op           => 'reply',
 				subject      => 'Reply',
-				subject_only => 1
+				subject_only => 1,
+				onclick      => ((discussion2 && user.test_code) ? "replyTo(0); return false;" : '')
 			}) %]
 		[% END %]
 			<div id="bindings-legend">Keybindings Beta<br>

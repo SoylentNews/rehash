@@ -1335,6 +1335,8 @@ sub displayThread {
 
 sub preProcessReplyForm {
 	my($form, $reply) = @_;
+	return unless $form->{pid} && $reply->{subject};
+
 	$form->{postersubj} = decode_entities($reply->{subject});
 	$form->{postersubj} =~ s/^Re://i;
 	$form->{postersubj} =~ s/\s\s/ /g;

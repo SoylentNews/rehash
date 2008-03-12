@@ -20,11 +20,9 @@ __name__
 edit_comment
 __template__
 <div id="wide">
-[% IF pid %]
-        [% PROCESS titlebar title="Reply to: $reply.subject" %]
-[% ELSE %]
-        [% PROCESS titlebar title="Reply to: XXXXX" %]
-[% END %]
+[% this_title = pid ? reply.subject : discussion.title;
+   this_title = this_title | strip_html;
+   PROCESS titlebar title="Reply to: $this_title" %]
 
 [% IF user.is_anon %]<p>
 	[% IF constants.allow_anonymous %]
@@ -46,7 +44,7 @@ or post as <b>[% user.nickname | strip_literal %]</b>.
 <input type="hidden" name="gotmodwarning_[% pid %]" id="gotmodwarning_[% pid %]" value="0">
 [% reskey_label = "reskey_reply_$pid"; PROCESS reskey_tag %]
 <p><input type="text" name="postersubj_[% pid %]" id="postersubj_[% pid %]" value="[% form.postersubj | strip_attribute %]" size="50" maxlength="50">
-[<a href="[% gSkin.rootdir %]/my/comments" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">Customize Posting Preferences</a>]</p>
+[% UNLESS user.is_anon %][<a href="[% gSkin.rootdir %]/my/comments" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">Customize Posting Preferences</a>][% END %]</p>
 <p><textarea wrap="virtual" name="postercomment_[% pid %]" id="postercomment_[% pid %]" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]"></textarea></p>
 
 [% IF constants.allow_anonymous && user.karma > -1 && !user.is_anon && (discussion.commentstatus == 'enabled' || discussion.commentstatus == 'logged_in')  %]
