@@ -311,6 +311,14 @@ automatically follow dependencies and commit the change:
 	cpan> o conf prerequisites_policy follow
 	cpan> o conf commit
 
+=item B<Data::JavaScript::Anon>
+
+There are bugs in versions earlier than 1.00 that break our JS.  Unfortunately,
+CPAN seems to prefer version 0.9 even though 1.00 is available.  You may
+have to install a better version in CPAN by hand:
+
+  cpan> install A/AD/ADAMK/Data-JavaScript-Anon-1.00.tar.gz
+
 =item B<Additional Libraries>
 
 You must have certain libraries existing on your system before building,
