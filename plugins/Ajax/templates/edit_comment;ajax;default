@@ -56,7 +56,8 @@ or post as <b>[% user.nickname | strip_literal %]</b>.
 	<div class="replyto_buttons">
 		<span id="replyto_buttons_1_[% pid %]">
 <input type="button" name="preview_[% pid %]"    id="preview_[% pid %]"    value="Preview"          class="button" onclick="previewReply([% pid %]); return false;">
-<input type="button" name="quotereply_[% pid %]" id="quotereply_[% pid %]" value="Quote Parent"     class="button" onclick="quoteReply([% pid %]);   return false;">
+[%- IF pid # not for root-level reply %]
+<input type="button" name="quotereply_[% pid %]" id="quotereply_[% pid %]" value="Quote Parent"     class="button" onclick="quoteReply([% pid %]);   return false;">[% END %]
 		</span><span id="replyto_buttons_2_[% pid %]" style="display: none">
 <input type="button" name="submit_[% pid %]"     id="submit_[% pid %]"     value="Submit"           class="button" onclick="submitReply([% pid %]);  return false;">
 <input type="button" name="edit_[% pid %]"       id="edit_[% pid %]"       value="Continue Editing" class="button" onclick="editReply([% pid %]);    return false;">

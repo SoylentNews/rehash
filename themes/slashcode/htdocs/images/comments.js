@@ -1060,6 +1060,12 @@ function replyTo(pid) {
 	if (!replydiv)
 		return false; // seems we shouldn't be here ...
 
+	var postercomment = $('postercomment_' + pid);
+	if (postercomment) {
+		postercomment.focus(); // already have one, bail
+		return false;
+	}
+
 	var params = [];
 	params['op']  = 'comments_reply_form';
 	params['pid'] = pid;
