@@ -7,13 +7,20 @@
 <!--#include virtual="/slashcssbase.inc"-->
 <!--#include virtual="/slashhead-gen-full.inc"-->
 
-        <ul class="menu">
-                 <li><a href="accounts.shtml">Previous section</a></li>
-                 <li><a href="subscriptions.shtml">Next section</a></li>
-                 <li><a href="index.shtml">Index</a></li>
-        </ul>
-        
-        <hr>
+        <div class="generaltitle">
+                <div class="title">
+                        <h3>Friends and Journals</h3>
+                </div>
+        </div>
+
+        <div id="usermenu">
+                <ul class="menu" style="padding: 5px 10px 5px 10px;">
+                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
+                <li><span class="begin"><a href="accounts.shtml" class="begin">Previous Section</a></span></li>
+                <li><span class="begin"><a href="subscriptions.shtml" class="begin">Next Section</a></span></li>
+                </ul>
+        </div>
 
 <h2><a name="fj100" id="fj100">Where is my journal?</a></h2>
         <p><em>Your</em> journal can be found at <a href="http://slashdot.org/my/journal">http://slashdot.org/my/journal</a>.</p>
