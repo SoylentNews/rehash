@@ -42,7 +42,6 @@ __template__
                 <br>
 
                 [% IF user.discussion2 && user.discussion2 == "slashdot" %]
-                        <blockquote>
                         <div>
                         Retrieve [% comment_q_name = (user.is_subscriber || user.is_admin) ? 'd2_comment_q_all' : 'd2_comment_q';
                            comment_q = Slash.db.getDescriptions(comment_q_name);
@@ -54,7 +53,6 @@ __template__
                            comment_order_def = user.d2_comment_order || 0; # score
                            Slash.createSelect('d2_comment_order', comment_order, comment_order_def, 1) %] Comments First
                         </div>
-                        </blockquote>
                 [% END %]
 
                 <div id="modalprefhelp_sortorder" class="modalprefhelp" style="display: none;">
@@ -97,11 +95,11 @@ __template__
                         Show the actual domain of any link in brackets.
                 </div>
 
-                <blockquote><div>
+                <div>
                 <input type="radio" name="domaintags" [% domaintags.0 %] value=0> Never show link domains<br>
                 <input type="radio" name="domaintags" [% domaintags.1 %] value=1> Show the links domain only in recommended situations<br>
                 <input type="radio" name="domaintags" [% domaintags.2 %] value=2> Always show link domains
-                </div></blockquote>
+                </div>
 
         </td>
         </tr>
