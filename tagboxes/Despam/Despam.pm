@@ -292,9 +292,9 @@ sub run {
 	# If appropriate, mark the submitter's uid or ipid as a spammer
 	# and mark _all_ their submissions as binspam.
 	if ($mark_srcid && $check_type) {
-		main::tagboxLog(sprintf("%s->run marking spammer AL2 srcid=%d",
+		main::tagboxLog(sprintf("%s->run marking spammer AL2 srcid=%s",
 			ref($self), $srcid));
-		$slashdb->setAL2($srcid, { spammer => 1 });
+		$slashdb->setAL2($srcid, { spammer => 1 }, { adminuid => 1183959 });
 	}
 }
 
