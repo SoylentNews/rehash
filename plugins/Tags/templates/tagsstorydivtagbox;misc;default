@@ -13,7 +13,7 @@ en_US
 __name__
 tagsstorydivtagbox
 __template__
-[% sidenc = story.sid.replace("/",":") %]
+[% sidenc = story.sid.replace("/","-")    # no '/'s in html ids (see: http://www.w3.org/TR/html401/types.html) %]
 [% IF user.tags_canread_stories %]
 <div id="tagbox-[% sidenc %]" class="tags">
 
