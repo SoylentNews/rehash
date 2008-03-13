@@ -52,7 +52,7 @@ END %]
 
 
 [% END %]
-Copyright 1997-2006 [% constants.sitepublisher %].  All rights reserved.
+Copyright 1997-2008 [% constants.sitepublisher %].  All rights reserved.
 
 __seclev__
 500
