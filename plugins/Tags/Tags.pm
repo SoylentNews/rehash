@@ -968,7 +968,7 @@ sub ajaxGetUserStory {
 	my($self, $constants, $user, $form) = @_;
 
 	my $sidenc = $form->{sidenc};
-	my $sid = $sidenc; $sid =~ tr{:}{/};
+	my $sid = $sidenc; $sid =~ tr{-}{/};
 	my $stoid = $self->getStoidFromSid($sid);
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 #print STDERR scalar(localtime) . " ajaxGetUserStory for stoid=$stoid sidenc=$sidenc tr=$tags_reader\n";
@@ -1026,7 +1026,7 @@ sub ajaxGetUserUrls {
 sub ajaxGetAdminStory {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $sidenc = $form->{sidenc};
-	my $sid = $sidenc; $sid =~ tr{:}{/};
+	my $sid = $sidenc; $sid =~ tr{-}{/};
 
 	if (!$sid || $sid !~ regexSid() || !$user->{is_admin}) {
 		return getData('error', {}, 'tags');
@@ -1158,7 +1158,7 @@ sub ajaxCreateForUrl {
 sub ajaxCreateForStory {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $sidenc = $form->{sidenc};
-	my $sid = $sidenc; $sid =~ tr{:}{/};
+	my $sid = $sidenc; $sid =~ tr{-}{/};
 	my $tags = getObject('Slash::Tags');
 	my $tagsstring = $form->{tags};
 	if (!$sid || $sid !~ regexSid() || $user->{is_anon} || !$tags) {
@@ -1224,7 +1224,7 @@ sub ajaxProcessAdminTags {
 	my($id, $table, $sid, $sidenc, $itemid);
 	if ($type eq "stories") {
 		$sidenc = $form->{sidenc};
-		$sid = $sidenc; $sid =~ tr{:}{/};
+		$sid = $sidenc; $sid =~ tr{-}{/};
 		$id = $slashdb->getStoidFromSid($sid);
 		$table = "stories";
 	} elsif ($type eq "urls") {
@@ -1320,7 +1320,7 @@ sub ajaxTagHistory {
 	my $table;
 	if ($form->{type} eq "stories") {
 		my $sidenc = $form->{sidenc};
-		my $sid = $sidenc; $sid =~ tr{:}{/};
+		my $sid = $sidenc; $sid =~ tr{-}{/};
 		$id = $slashdb->getStoidFromSid($sid);
 		$table = "stories"
 	} elsif ($form->{type} eq "urls") {
