@@ -18,7 +18,7 @@ var pointsums = [];
 
 var remainingroots = [];
 var allroothiddens = 0;
-var rootpe;
+var root_task;
 
 function togglevis(nr)
 {
@@ -108,13 +108,13 @@ function renderComment(cid, mode) {
 }
 
 function updateComment(cid, mode) {
-	var existingdiv = $(cid + '_comment');
+	var existingdiv = jQuery('#' + cid + '_comment')[0];
 	if (existingdiv) {
 		existingdiv.innerHTML = renderComment(cid, mode);
 		/* if (displaymode['cid'] == 'hidden') {
-			$(cid + "_tree").className = "hide";
+			jQuery('#' + cid + "_tree")[0].className = "hide";
 		} else {
-			$(cid + "_tree").className = "comment";
+			jQuery('#' + cid + "_tree")[0].className = "comment";
 		} */
 	}
 	displaymode[cid] = mode;
@@ -181,15 +181,16 @@ function updateCommentTree(cid) {
 		}	
 	}
 
+  var el = jQuery("#"+cid+"_hiddens")[0];
 	if (displaymode[cid] == 'hidden') {
-		$(cid+"_hiddens").className = "hide";
+		el.className = "hide";
 		return kidhiddens + 1 ;
 
 	} else if (kidhiddens) {
-		$(cid+"_hiddens").innerHTML = kidhiddens+" reply are hidden."; 
-		$(cid+"_hiddens").className = "show";
+		el.innerHTML = kidhiddens+" reply are hidden.";
+		el.className = "show";
 	} else {
-		$(cid+"_hiddens").className = "hide"; 
+		el.className = "hide";
 	} 
 	return 0;
 }
@@ -199,24 +200,23 @@ function renderRootsAsync() {
 	var step = 2;
 	var i = 0;
 	var root;
-	var element = 'commentlisting';
+	var element_id = '#commentlisting';
+	var element = jQuery(element_id)[0];
 
 	while (remainingroots.length && i < step) {
 		root = remainingroots.shift();
 		rootret = renderCommentTree(root);
-		$(element).innerHTML = $(element).innerHTML + rootret[0];
+		element.innerHTML += rootret[0];
 		allroothiddens += rootret[1];
 		i++;
 	}
 
 	if (remainingroots.length) { return void(0); }
 	if (allroothiddens) {
-		$(element).innerHTML = $(element).innerHTML + '<li id="roothiddens">'+allroothiddens+' comments are beneath your threshhold</li>'
+		element.innerHTML += '<li id="roothiddens">'+allroothiddens+' comments are beneath your threshhold</li>'
 	} else {
-		$(element).innerHTML = $(element).innerHTML + '<li id="roothiddens" class="hide"></li>'
+		element.innerHTML += '<li id="roothiddens" class="hide"></li>'
 	}
-
-	rootpe.currentlyExecuting = true;
 }
 
 function renderRoots(element) {
@@ -232,11 +232,11 @@ function renderRoots(element) {
 	refreshDisplayModes(); 
 
 	remainingroots = root_comments.concat([]); 
-	rootpe = new PeriodicalExecuter(renderRootsAsync, .5);
+	root_task = setInterval(renderRootsAsync, 500);
 }
 
 function getComments(sid, element) {
-	var params = [];
+	var params = {};
 	params['op'] = 'get_comments';
 	params['sid'] = sid;
 	ajax_update(params, '', { evalScripts: 1 }, 'http://use.perl.org/ajax.pl');
@@ -265,7 +265,7 @@ function renderBehaviorWidget(ctype, elementname) {
 		newhtml = newhtml + "</select></label></li>";
 	}
 
-	$(elementname).innerHTML = newhtml;
+	jQuery(make_selector(elementname))[0].innerHTML = newhtml;
 
 	return void(0);
 }
@@ -294,16 +294,16 @@ function renderThreshholdWidget() {
 		sum = pointsums[i] + sum;
 	}
 	
-	$('threshholdselect').length = 0;
-	$('fullthreshholdselect').length = 0;
+	jQuery('#threshholdselect')[0].length = 0;
+	jQuery('#fullthreshholdselect')[0].length = 0;
 	var retval = "";
 	for (var i = 0; i <= 6; i++) {
-		$('threshholdselect').options[i] = new Option((i-1)+": "+pointsums[i]+" comments", i-1); 
-		$('fullthreshholdselect').options[i] = new Option((i-1)+": "+pointsums[i]+" comments", i-1); 
+		jQuery('#threshholdselect')[0].options[i] = new Option((i-1)+": "+pointsums[i]+" comments", i-1);
+		jQuery('#fullthreshholdselect')[0].options[i] = new Option((i-1)+": "+pointsums[i]+" comments", i-1);
 	}
 
-	$('threshholdselect').value = threshhold;
-	$('fullthreshholdselect').value = fullthreshhold;
+	jQuery('#threshholdselect')[0].value = threshhold;
+	jQuery('#fullthreshholdselect')[0].value = fullthreshhold;
 
 	return void(0);
 }
@@ -443,10 +443,10 @@ function refreshCommentDisplays() {
 		roothiddens += updateCommentTree(root_comments[root]);
 	}
 	if (roothiddens) {
-		$('roothiddens').innerHTML = roothiddens + " comments are beneath your threshhold";
-		$('roothiddens').className = "show";
+		jQuery('#roothiddens')[0].innerHTML = roothiddens + " comments are beneath your threshhold";
+		jQuery('#roothiddens')[0].className = "show";
 	} else {
-		$('roothiddens').className = "hide";
+		jQuery('#roothiddens')[0].className = "hide";
 	}
 	/* NOTE need to display note for hidden root comments */
 	return void(0);
@@ -457,25 +457,25 @@ function refreshSettings() {
 	var changed = 0;
 	/* one of the threshholds have changed, rerender */
 
-	if (threshhold != $('threshholdselect').value) {
-		threshhold = $('threshholdselect').value;
+	if (threshhold != jQuery('#threshholdselect')[0].value) {
+		threshhold = jQuery('#threshholdselect')[0].value;
 		changed = 1;
 	}
 
-	if (fullthreshhold != $('fullthreshholdselect').value) {
-		fullthreshhold = $('fullthreshholdselect').value;
+	if (fullthreshhold != jQuery('#fullthreshholdselect')[0].value) {
+		fullthreshhold = jQuery('#fullthreshholdselect')[0].value;
 		changed = 1;
 	}
 	/* not sure if these are right is it value?*/
 
 	if (threshhold > fullthreshhold) {
 		threshhold = fullthreshhold;
-		$('threshholdselect').value = $('fullthreshholdselect').value;
+		jQuery('#threshholdselect')[0].value = jQuery('#fullthreshholdselect')[0].value;
 		changed = 1;
 	}
 	
 	var pd;
-	if ($('promotedepth').checked) {
+	if (jQuery('#promotedepth')[0].checked) {
 		pd = 1;
 	} else {
 		pd = 0;
@@ -489,8 +489,8 @@ function refreshSettings() {
 	prefbehaviors = ['default', 'focus'];
 	for (var ctype in prefbehaviors) { 
 		for (var relation in behaviors[ctype]) {
-			if (behaviors[ctype][relation] != $(ctype+'_'+relation).value) {
-				behaviors[ctype][relation] = $(ctype+'_'+relation).value;
+			if (behaviors[ctype][relation] != jQuery('#'+ctype+'_'+relation)[0].value) {
+				behaviors[ctype][relation] = jQuery('#'+ctype+'_'+relation)[0].value;
 				changed = 1;
 			}
 		}

@@ -217,7 +217,7 @@ function soon_is_now() {
 
 function refresh_tag_bar( tag_list ) {
   // ajax request to fill the user tags list
-  var params = [];
+  var params = {};
   params['op'] = 'tags_get_user_firehose';
   params['id'] = g_nodnix_item_id;
   params['nodnix'] = 1;

@@ -1,6 +1,15 @@
 // _*_ Mode: JavaScript; tab-width: 8; indent-tabs-mode: true _*_
 // $Id$
 
+// by now, both jQuery and prototype have loaded.  Tell jQuery to play nice (for now)
+if ( jQuery !== undefined )
+  jQuery.noConflict();
+
+// temporary glue massages what prototype wants in $(expr) to what jQuery wants
+function make_selector( expr ) {
+  return (typeof expr !== 'string' || expr[0]=='#') ? expr : '#'+expr;
+}
+
 // global settings, but a firehose might use a local settings object instead
 var firehose_settings = {};
   firehose_settings.startdate = '';
@@ -88,7 +97,7 @@ function createPopupButtons() {
 }
 
 function closePopup(id, refresh) {
-	var el = $(id);
+	var el = jQuery(make_selector(id))[0];
 	if (el) {
 		el.parentNode.removeChild(el);
 	}
@@ -131,8 +140,9 @@ function moveByXY(div, x, y) {
 }
 
 function getXYForId(id, addWidth, addHeight) {
-	var div = $(id);
-	var xy = Position.cumulativeOffset(div);
+	var div = jQuery(make_selector(id))[0];
+	var offset = jQuery(div).offset();
+	var xy = [ offset.left, offset.top ];
 	if (addWidth) {
 		xy[0] = xy[0] + div.offsetWidth;
 	}
@@ -143,7 +153,7 @@ function getXYForId(id, addWidth, addHeight) {
 }
 
 function firehose_toggle_advpref() {
-	var obj = $('fh_advprefs');
+	var obj = jQuery('#fh_advprefs')[0];
 	if (obj.className == 'hide') {
 		obj.className = "";
 	} else {
@@ -152,12 +162,12 @@ function firehose_toggle_advpref() {
 }
 
 function firehose_open_prefs() {
-	var obj = $('fh_advprefs');
+	var obj = jQuery('#fh_advprefs')[0];
 	obj.className = "";
 }
 
 function toggleId(id, first, second) {
-	var obj =$(id);
+	var obj =jQuery(make_selector(id))[0];
 	if (obj.className == first) {
 		obj.className = second;
 	} else if (obj.className == second) {
@@ -168,8 +178,8 @@ function toggleId(id, first, second) {
 }
 
 function toggleIntro(id, toggleid) {
-	var obj = $(id);
-	var toggle = $(toggleid);
+	var obj = jQuery(make_selector(id))[0];
+	var toggle = jQuery(make_selector(toggleid))[0];
 	if (obj.className == 'introhide') {
 		obj.className = "intro"
 		toggle.innerHTML = "[-]";
@@ -182,8 +192,8 @@ function toggleIntro(id, toggleid) {
 }
 
 function tagsToggleStoryDiv(id, is_admin, type) {
-	var bodyid = 'toggletags-body-' + id;
-	var tagsbody = $(bodyid);
+	var bodyid = '#toggletags-body-' + id;
+	var tagsbody = jQuery(bodyid)[0];
 	if (tagsbody.className == 'tagshide') {
 		tagsShowBody(id, is_admin, '', type);
 	} else {
@@ -193,23 +203,23 @@ function tagsToggleStoryDiv(id, is_admin, type) {
 
 function tagsHideBody(id) {
 	// Make the body of the tagbox vanish
-	var tagsbodyid = 'toggletags-body-' + id;
-	var tagsbody = $(tagsbodyid);
+	var tagsbodyid = '#toggletags-body-' + id;
+	var tagsbody = jQuery(tagsbodyid)[0];
 	tagsbody.className = "tagshide"
 
 	// Make the title of the tagbox change back to regular
-	var titleid = 'tagbox-title-' + id;
-	var title = $(titleid);
+	var titleid = '#tagbox-title-' + id;
+	var title = jQuery(titleid)[0];
 	title.className = "tagtitleclosed";
 
 	// Make the tagbox change back to regular.
-	var tagboxid = 'tagbox-' + id;
-	var tagbox = $(tagboxid);
+	var tagboxid = '#tagbox-' + id;
+	var tagbox = jQuery(tagboxid)[0];
 	tagbox.className = "tags";
 
 	// Toggle the button back.
-	var tagsbuttonid = 'toggletags-button-' + id;
-	var tagsbutton = $(tagsbuttonid);
+	var tagsbuttonid = '#toggletags-button-' + id;
+	var tagsbutton = jQuery(tagsbuttonid)[0];
 	tagsbutton.innerHTML = "[+]";
 }
 
@@ -227,36 +237,36 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 	//alert("Tags show body / Type: " + type );
 	
 	// Toggle the button to show the click was received
-	var tagsbuttonid = 'toggletags-button-' + id;
-	var tagsbutton = $(tagsbuttonid);
+	var tagsbuttonid = '#toggletags-button-' + id;
+	var tagsbutton = jQuery(tagsbuttonid)[0];
 	tagsbutton.innerHTML = "[-]";
 
 	// Make the tagbox change to the slashbox class
-	var tagboxid = 'tagbox-' + id;
-	var tagbox = $(tagboxid);
+	var tagboxid = '#tagbox-' + id;
+	var tagbox = jQuery(tagboxid)[0];
 	tagbox.className = "tags";
 
 	// Make the title of the tagbox change to white-on-green
-	var titleid = 'tagbox-title-' + id;
-	var title = $(titleid);
+	var titleid = '#tagbox-title-' + id;
+	var title = jQuery(titleid)[0];
 	title.className = "tagtitleopen";
 
 	// Make the body of the tagbox visible
-	var tagsbodyid = 'toggletags-body-' + id;
-	var tagsbody = $(tagsbodyid);
+	var tagsbodyid = '#toggletags-body-' + id;
+	var tagsbody = jQuery(tagsbodyid)[0];
 	
 	tagsbody.className = "tagbody";
 	
 	// If the tags-user div hasn't been filled, fill it.
-	var tagsuserid = 'tags-user-' + id;
-	var tagsuser = $(tagsuserid);
+	var tagsuserid = '#tags-user-' + id;
+	var tagsuser = jQuery(tagsuserid)[0];
 	if (tagsuser.innerHTML == "") {
 		// The tags-user-123 div is empty, and needs to be
 		// filled with the tags this user has already
 		// specified for this story, and a reskey to allow
 		// the user to enter more tags.
 		tagsuser.innerHTML = "Retrieving...";
-		var params = [];
+		var params = {};
 		if (type == "stories") {
 			params['op'] = 'tags_get_user_story';
 			params['sidenc'] = id;
@@ -271,8 +281,8 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 		params['newtagspreloadtext'] = newtagspreloadtext;
 		var handlers = {
 			onComplete: function() { 
-				var textid = 'newtags-' + id;
-				var input = $(textid);
+				var textid = '#newtags-' + id;
+				var input = jQuery(textid)[0];
 				input.focus();
 			}
 		}
@@ -287,7 +297,7 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 		// user is not actually an admin.
 		if (is_admin) {
 			var tagsadminid = 'tags-admin-' + id;
-			params = [];
+			params = {};
 			if (type == "stories") {
 				params['op'] = 'tags_get_admin_story';
 				params['sidenc'] = id;
@@ -307,8 +317,8 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 			// that we append some text to the user text.
 			// We can't do that by passing it in, so do it
 			// manually now.
-			var textinputid = 'newtags-' + id;
-			var textinput = $(textinputid);
+			var textinputid = '#newtags-' + id;
+			var textinput = jQuery(textinputid)[0];
 			textinput.value = textinput.value + ' ' + newtagspreloadtext;
 			textinput.focus();
 		}
@@ -382,12 +392,12 @@ function reportError(request) {
 }
 
 function createTag(tag, id, type) {
-	var params = [];
+	var params = {};
 	params['id'] = id;
 	params['type'] = type;
 	if ( fh_is_admin && ("_#)^*".indexOf(tag[0]) != -1) ) {
 	  params['op'] = 'tags_admin_commands';
-	  params['reskey'] = $('admin_commands-reskey-' + id).value;
+	  params['reskey'] = jQuery('#admin_commands-reskey-' + id)[0].value;
 	  params['command'] = tag;
 	} else {
 	  params['op'] = 'tags_create_tag';
@@ -401,16 +411,16 @@ function createTag(tag, id, type) {
 }
 
 function tagsCreateForStory(id) {
-	var toggletags_message_id = 'toggletags-message-' + id;
-	var toggletags_message_el = $(toggletags_message_id);
+	var toggletags_message_id = '#toggletags-message-' + id;
+	var toggletags_message_el = jQuery(toggletags_message_id)[0];
 	toggletags_message_el.innerHTML = 'Saving tags...';
 
-	var params = [];
+	var params = {};
 	params['op'] = 'tags_create_for_story';
 	params['sidenc'] = id;
-	var newtagsel = $('newtags-' + id);
+	var newtagsel = jQuery('#newtags-' + id)[0];
 	params['tags'] = newtagsel.value;
-	var reskeyel = $('newtags-reskey-' + id);
+	var reskeyel = jQuery('#newtags-reskey-' + id)[0];
 	params['reskey'] = reskeyel.value;
 
 	ajax_update(params, 'tags-user-' + id);
@@ -420,16 +430,16 @@ function tagsCreateForStory(id) {
 }
 
 function tagsCreateForUrl(id) {
-	var toggletags_message_id = 'toggletags-message-' + id;
-	var toggletags_message_el = $(toggletags_message_id);
+	var toggletags_message_id = '#toggletags-message-' + id;
+	var toggletags_message_el = jQuery(toggletags_message_id)[0];
 	toggletags_message_el.innerHTML = 'Saving tags...';
 
-	var params = [];
+	var params = {};
 	params['op'] = 'tags_create_for_url';
 	params['id'] = id;
-	var newtagsel = $('newtags-' + id);
+	var newtagsel = jQuery('#newtags-' + id)[0];
 	params['tags'] = newtagsel.value;
-	var reskeyel = $('newtags-reskey-' + id);
+	var reskeyel = jQuery('#newtags-reskey-' + id)[0];
 	params['reskey'] = reskeyel.value;
 
 	ajax_update(params, 'tags-user-' + id);
@@ -440,7 +450,7 @@ function tagsCreateForUrl(id) {
 
 //Firehose functions begin
 function setOneTopTagForFirehose(id, newtag) {
-	var params = [];
+	var params = {};
 	params['op'] = 'firehose_update_one_tag';
 	params['id'] = id;
 	params['tags'] = newtag;
@@ -449,16 +459,16 @@ function setOneTopTagForFirehose(id, newtag) {
 }
 
 function tagsCreateForFirehose(id) {
-	var toggletags_message_id = 'toggletags-message-' + id;
-	var toggletags_message_el = $(toggletags_message_id);
+	var toggletags_message_id = '#toggletags-message-' + id;
+	var toggletags_message_el = jQuery(toggletags_message_id)[0];
 	toggletags_message_el.innerHTML = 'Saving tags...';
 	
-	var params = [];
+	var params = {};
 	params['op'] = 'tags_create_for_firehose';
 	params['id'] = id;
-	var newtagsel = $('newtags-' + id);
+	var newtagsel = jQuery('#newtags-' + id)[0];
 	params['tags'] = newtagsel.value; 
-	var reskeyel = $('newtags-reskey-' + id);
+	var reskeyel = jQuery('#newtags-reskey-' + id)[0];
 	params['reskey'] = reskeyel.value;
 
 	ajax_update(params, 'tags-user-' + id);
@@ -466,12 +476,12 @@ function tagsCreateForFirehose(id) {
 }
 
 function toggle_firehose_body(id, is_admin) {
-	var params = [];
+	var params = {};
 	setFirehoseAction();
 	params['op'] = 'firehose_fetch_text';
 	params['id'] = id;
-	var fhbody = $('fhbody-'+id);
-	var fh = $('firehose-'+id);
+	var fhbody = jQuery('#fhbody-'+id)[0];
+	var fh = jQuery('#firehose-'+id)[0];
 	var usertype = fh_is_admin ? " adminmode" : " usermode";
 	if (fhbody.className == "empty") {
 		var handlers = {
@@ -503,7 +513,7 @@ function toggle_firehose_body(id, is_admin) {
 }
 
 function toggleFirehoseTagbox(id) {
-	var fhtb = $('fhtagbox-'+id);
+	var fhtb = jQuery('#fhtagbox-'+id)[0];
 	if (fhtb.className == "hide") {
 		fhtb.className = "tagbox";
 	} else {
@@ -521,7 +531,7 @@ function firehose_set_options(name, value) {
 		["mode", 	"full", 	"abbrev",	"full",		"fulltitle"],
 		["mode", 	"fulltitle", 	"full",		"abbrev",	"full"]
 	];
-	var params = [];
+	var params = {};
 	params['op'] = 'firehose_set_options';
 	params['reskey'] = reskey_static;
 	var theForm = document.forms["firehoseform"];
@@ -548,7 +558,7 @@ function firehose_set_options(name, value) {
 		}
 
 		if (classname) {
-			var els = document.getElementsByClassName(classname, $('firehoselist'));
+			var els = document.getElementsByClassName(classname, jQuery('#firehoselist')[0]);
 			var classval = classname;
 			if (value) {
 				classval = classval + " hide";
@@ -572,12 +582,12 @@ function firehose_set_options(name, value) {
 		var el = pairs[i];
 		if (name == el[0] && value == el[1]) {
 			firehose_settings[name] = value;
-			if ($(el[2])) {
-				$(el[2]).id = el[3];
-				if($(el[3])) {
+			if (jQuery(make_selector(el[2]))[0]) {
+				jQuery(make_selector(el[2]))[0].id = el[3];
+				if(jQuery(make_selector(el[3]))[0]) {
 					var namenew = el[0];
 					var valuenew = el[4];
-					$(el[3]).firstChild.onclick = function() { firehose_set_options(namenew, valuenew); return false;}
+					jQuery(make_selector(el[3]))[0].firstChild.onclick = function() { firehose_set_options(namenew, valuenew); return false;}
 				}
 			}
 		}
@@ -587,7 +597,7 @@ function firehose_set_options(name, value) {
 		if (name == "mode") {
 			fh_view_mode = value;
 		}
-		if ($('firehoselist')) {
+		if (jQuery('#firehoselist')[0]) {
 			// set page
 			page = 0;
 			
@@ -598,7 +608,7 @@ function firehose_set_options(name, value) {
 				var myAnim = new YAHOO.util.Anim("firehoselist", attributes); 
 				myAnim.duration = 1;
 				myAnim.onComplete.subscribe(function() {
-					$('firehoselist').style.opacity = "1";
+					jQuery('#firehoselist')[0].style.opacity = "1";
 				});
 				myAnim.animate();
 			}
@@ -623,11 +633,11 @@ function firehose_set_options(name, value) {
 			firehose_settings.page = 0;
 			var issuedate = firehose_settings.issue.substr(5,2) + "/" + firehose_settings.issue.substr(8,2) + "/" + firehose_settings.issue.substr(10,2);
 
-			if ($('fhcalendar')) {
-				$('fhcalendar')._widget.setDate(issuedate, "day");
+			if (jQuery('#fhcalendar')[0]) {
+				jQuery('#fhcalendar')[0]._widget.setDate(issuedate, "day");
 			}
-			if ($('fhcalendar_pag')) {
-				$('fhcalendar_pag')._widget.setDate(issuedate, "day");
+			if (jQuery('#fhcalendar_pag')[0]) {
+				jQuery('#fhcalendar_pag')[0]._widget.setDate(issuedate, "day");
 			}
 		}
 		if (name == "color") {
@@ -662,7 +672,7 @@ function firehose_set_options(name, value) {
 }
 
 function firehose_remove_all_items() {
-	var fhl = $('firehoselist');
+	var fhl = jQuery('#firehoselist')[0];
 	var children = fhl.childNodes;
 	for (var i = children.length -1 ; i >= 0; i--) {
 		var el = children[i];
@@ -677,7 +687,7 @@ function firehose_up_down(id, dir) {
 	if (!check_logged_in()) return;
 
 	setFirehoseAction();
-	var params = [];
+	var params = {};
 	var handlers = {
 		onComplete: json_handler
 	};
@@ -685,7 +695,7 @@ function firehose_up_down(id, dir) {
 	params['id'] = id;
 	params['reskey'] = reskey_static;
 	params['dir'] = dir;
-	var updown = $('updown-' + id);
+	var updown = jQuery('#updown-' + id)[0];
 	ajax_update(params, '', handlers);
 	if (updown) {
 		if (dir == "+") {
@@ -702,7 +712,7 @@ function firehose_up_down(id, dir) {
 
 function firehose_remove_tab(tabid) {
 	setFirehoseAction();
-	var params = [];
+	var params = {};
 	var handlers = {
 		onComplete:  json_handler
 	};
@@ -718,39 +728,34 @@ function firehose_remove_tab(tabid) {
 // firehose functions end
 
 // helper functions
-function ajax_update(params, onsucc, options, url) {
-	var h = $H(params);
+function ajax_update(request_params, id, handlers, request_url) {
+	// make an ajax request to request_url with request_params, on success,
+	//  update the innerHTML of the element with id
 
-	if (!url)
-		url = '/ajax.pl';
+	var opts = {
+		url: request_url || '/ajax.pl',
+		data: request_params,
+		type: 'POST',
+		contentType: 'application/x-www-form-urlencoded',
+	};
 
-	if (!options)
-		options = {};
+	if ( id ) {
+		opts['success'] = function(html){
+			jQuery(make_selector(id)).html(html);
+		}
+	}
 
-	options.method = 'post';
-	options.parameters = h.toQueryString();
+	if ( handlers && handlers.onComplete ) {
+		opts['complete'] = handlers.onComplete;
+	}
 
-	var ajax = new Ajax.Updater(
-		{ success: onsucc },
-		url,
-		options
-	);
+	jQuery.ajax(opts);
 }
 
-function ajax_periodic_update(secs, params, onsucc, options, url) {
-	var h = $H(params);
-	
-	if (!url) 
-		url = '/ajax.pl';
-		
-	if (!options)
-		options = {};
-
-	options.frequency = secs;
-	options.method = 'post';
-	options.parameters = h.toQueryString();
-
-	var ajax = new Ajax.PeriodicalUpdater({ success: onsucc }, url, options);
+function ajax_periodic_update(interval_in_seconds, request_params, id, handlers, request_url) {
+	setInterval(function(){
+		ajax_update(request_params, id, handlers, request_url);
+	}, interval_in_seconds*1000);
 }
 
 function eval_response(transport) {
@@ -780,35 +785,35 @@ function json_update(response) {
 
 	if (response.html) {
 		for (el in response.html) {
-			if ($(el))
-				$(el).innerHTML = response.html[el];
+			if (jQuery(make_selector(el))[0])
+				jQuery(make_selector(el))[0].innerHTML = response.html[el];
 		}
 		
 	} 
 
 	if (response.value) {
 		for (el in response.value) {
-			if ($(el))
-				$(el).value = response.value[el];
+			if (jQuery(make_selector(el))[0])
+				jQuery(make_selector(el))[0].value = response.value[el];
 		}
 	}
 
 	if (response.html_append) {
 		for (el in response.html_append) {
-			if ($(el))
-				$(el).innerHTML = $(el).innerHTML + response.html_append[el];
+			if (jQuery(make_selector(el))[0])
+				jQuery(make_selector(el))[0].innerHTML = jQuery(make_selector(el))[0].innerHTML + response.html_append[el];
 		}
 	}
 
 	if (response.html_append_substr) {
 		for (el in response.html_append_substr) {
-			if ($(el)) {
-				var this_html = $(el).innerHTML;
-				var i = $(el).innerHTML.search(/<span class="?substr"?> ?<\/span>[\s\S]*$/i);
+			if (jQuery(make_selector(el))[0]) {
+				var this_html = jQuery(make_selector(el))[0].innerHTML;
+				var i = jQuery(make_selector(el))[0].innerHTML.search(/<span class="?substr"?> ?<\/span>[\s\S]*$/i);
 				if (i == -1) {
-					$(el).innerHTML += response.html_append_substr[el];
+					jQuery(make_selector(el))[0].innerHTML += response.html_append_substr[el];
 				} else {
-					$(el).innerHTML = $(el).innerHTML.substr(0, i) +
+					jQuery(make_selector(el))[0].innerHTML = jQuery(make_selector(el))[0].innerHTML.substr(0, i) +
 						response.html_append_substr[el];
 				}
 			}
@@ -831,16 +836,14 @@ function firehose_handle_update() {
 		var fh = 'firehose-' + el[1];
 		var wait_interval = 800;
 		if(el[0] == "add") {
-			if (firehose_before[el[1]] && $('firehose-' + firehose_before[el[1]])) {
-				new Insertion.After('firehose-' + firehose_before[el[1]], el[2]);
-
-
-			} else if (firehose_after[el[1]] && $('firehose-' + firehose_after[el[1]])) {
-				new Insertion.Before('firehose-' + firehose_after[el[1]], el[2]);
+			if (firehose_before[el[1]] && jQuery('#firehose-' + firehose_before[el[1]]).size()) {
+				jQuery('#firehose-' + firehose_before[el[1]]).after(el[2]);
+			} else if (firehose_after[el[1]] && jQuery('#firehose-' + firehose_after[el[1]]).size()) {
+				jQuery('#firehose-' + firehose_after[el[1]]).before(el[2]);
 			} else if (insert_new_at == "bottom") {
-				new Insertion.Bottom('firehoselist', el[2]);
+				jQuery('#firehoselist').append(el[2]);
 			} else {
-				new Insertion.Top('firehoselist', el[2]);
+				jQuery('#firehoselist').prepend(el[2]);
 			}
 		
 			var toheight = 50;
@@ -872,8 +875,8 @@ function firehose_handle_update() {
 			}
 
 			myAnim.onComplete.subscribe(function() {
-				if ($(fh)) {
-					$(fh).style.height = "";
+				if (jQuery(make_selector(fh))[0]) {
+					jQuery(make_selector(fh))[0].style.height = "";
 					if (fh_use_jquery) {
 						jQuery("#" + fh + " h3 a[class!='skin']").click(
 				                	function(){
@@ -887,7 +890,7 @@ function firehose_handle_update() {
 			});
 			myAnim.animate();
 		} else if (el[0] == "remove") {
-			var fh_node = $(fh);
+			var fh_node = jQuery(make_selector(fh))[0];
 			if (fh_is_admin && fh_view_mode == "fulltitle" && fh_node && fh_node.className == "article" ) {
 				// Don't delete admin looking at this in expanded view
 			} else {
@@ -920,7 +923,7 @@ function firehose_handle_update() {
 					});
 					myAnim.animate(); 
 				} else {
-					var elem = $(fh);
+					var elem = jQuery(make_selector(fh))[0];
 					wait_interval = 25;
 					if (elem && elem.parentNode) {
 						elem.parentNode.removeChild(elem);
@@ -937,24 +940,24 @@ function firehose_handle_update() {
 
 function firehose_reorder() {
 	if (firehose_ordered) {
-		var fhlist = $('firehoselist');
+		var fhlist = jQuery('#firehoselist')[0];
 		if (fhlist) {
 			var item_count = 0;
 			for (i = 0; i < firehose_ordered.length; i++) {
 				if (/^\d+$/.test(firehose_ordered[i])) {
 					item_count++;
 				}
-				var fhel = $('firehose-' + firehose_ordered[i]);
+				var fhel = jQuery('#firehose-' + firehose_ordered[i])[0];
 				if (fhlist && fhel) {
 					fhlist.appendChild(fhel);
 				}
 				if ( firehose_future[firehose_ordered[i]] ) {
-					if ($("ttype-" + firehose_ordered[i])) {
-						$("ttype-" + firehose_ordered[i]).className = "future";	
+					if (jQuery("#ttype-" + firehose_ordered[i])[0]) {
+						jQuery("#ttype-" + firehose_ordered[i])[0].className = "future";
 					}
 				} else {
-					if ($("ttype-" + firehose_ordered[i]) && $("ttype-" + firehose_ordered[i]).className == "future") {
-						$("ttype-" + firehose_ordered[i]).className = "story";	
+					if (jQuery("#ttype-" + firehose_ordered[i])[0] && jQuery("#ttype-" + firehose_ordered[i])[0].className == "future") {
+						jQuery("#ttype-" + firehose_ordered[i])[0].className = "story";
 					}
 				}
 			}
@@ -977,8 +980,8 @@ function firehose_get_next_updates() {
 
 
 function firehose_get_updates_handler(transport) {
-	if ($('busy')) {
-		$('busy').className = "hide";
+	if (jQuery('#busy')[0]) {
+		jQuery('#busy')[0].className = "hide";
 	}
 	var response = eval_response(transport);
 	var processed = 0;
@@ -1009,7 +1012,7 @@ function firehose_get_updates_handler(transport) {
 }
 
 function firehose_get_item_idstring() {
-	var fhl = $('firehoselist');
+	var fhl = jQuery('#firehoselist')[0];
 	var str = "";
 	var children;
 	if (fhl) {
@@ -1043,7 +1046,7 @@ function firehose_get_updates(options) {
 		while(id = fh_update_timerids.pop()) { clearTimeout(id) };
 	}
 	fh_is_updating = 1
-	var params = [];
+	var params = {};
 	var handlers = {
 		onComplete: firehose_get_updates_handler
 	};
@@ -1059,8 +1062,8 @@ function firehose_get_updates(options) {
 		params['embed'] = 1;
 	}
 	params['fh_pageval'] = firehose_settings.pageval;
-	if ($('busy')) {
-		$('busy').className = "";
+	if (jQuery('#busy')[0]) {
+		jQuery('#busy')[0].className = "";
 	}
 	ajax_update(params, '', handlers);
 }
@@ -1104,8 +1107,8 @@ function run_before_update() {
 	var secs = getSecsSinceLastFirehoseAction();
 	if (secs > inactivity_timeout) {
 		fh_is_timed_out = 1;
-		if ($('message_area'))
-			$('message_area').innerHTML = "Automatic updates have been slowed due to inactivity";
+		if (jQuery('#message_area')[0])
+			jQuery('#message_area')[0].innerHTML = "Automatic updates have been slowed due to inactivity";
 		//firehose_pause();
 	}
 }
@@ -1114,15 +1117,15 @@ function firehose_play() {
 	fh_play = 1;
 	setFirehoseAction();
 	firehose_set_options('pause', '0');
-	var pausepanel = $('pauseorplay');
-	if ($('message_area'))
-		$('message_area').innerHTML = "";
+	var pausepanel = jQuery('#pauseorplay')[0];
+	if (jQuery('#message_area')[0])
+		jQuery('#message_area')[0].innerHTML = "";
 	if (pausepanel) {
 		pausepanel.innerHTML = "Updated";
 	}
-	var pause = $('pause');
+	var pause = jQuery('#pause')[0];
 	
-	var play_div = $('play');
+	var play_div = jQuery('#play')[0];
 	if (play_div) {
 		play_div.className = "hide";
 	}
@@ -1137,12 +1140,12 @@ function is_firehose_playing() {
 
 function firehose_pause() {
 	fh_play = 0;
-	var pause = $('pause');
-	var play_div = $('play');
+	var pause = jQuery('#pause')[0];
+	var play_div = jQuery('#play')[0];
 	pause.className = "hide";
 	play_div.className = "show";
-	if ($('pauseorplay')) {
-		$('pauseorplay').innerHTML = "Paused";
+	if (jQuery('#pauseorplay')[0]) {
+		jQuery('#pauseorplay')[0].innerHTML = "Paused";
 	}
 	firehose_set_options('pause', '1');
 }
@@ -1152,8 +1155,8 @@ function firehose_add_update_timerid(timerid) {
 }
 
 function firehose_collapse_entry(id) {
-	var fhbody = $('fhbody-'+id);
-	var fh = $('firehose-'+id);
+	var fhbody = jQuery('#fhbody-'+id)[0];
+	var fh = jQuery('#firehose-'+id)[0];
 	if (fhbody && fhbody.className == "body") {
 		fhbody.className = "hide";
 	}
@@ -1165,7 +1168,7 @@ function firehose_collapse_entry(id) {
 }
 
 function firehose_remove_entry(id) {
-	var fh = $('firehose-' + id);
+	var fh = jQuery('#firehose-' + id)[0];
 	if (fh) {
 		var attributes = { 
 			height: { to: 0 }
@@ -1210,7 +1213,7 @@ function firehose_slider_end(offsetFromStart) {
 		fh_slider_init_set = 1;
 	}
 	var color = fh_colors[ newVal / fh_ticksize ];
-	$('fh_slider_img').title = "Firehose filtered to " + color;
+	jQuery('#fh_slider_img')[0].title = "Firehose filtered to " + color;
 	if (fh_slider_init_set) {
 		firehose_set_options("color", color)
 	}
@@ -1247,7 +1250,7 @@ function vendorStoryPopup() {
 	}
 	};
 	createPopup(getXYForId('sponsorlinks', 0, 0), title, "vendorStory-" + id, "Loading", "", closepopup );
-	var params = [];
+	var params = {};
 	params['op'] = 'getTopVendorStory';
 	params['skid'] = id;
 	ajax_update(params, "vendorStory-" + id + "-contents");
@@ -1272,14 +1275,14 @@ function vendorStoryPopup2() {
 		}
 	};
 	createPopup(getXYForId('sponsorlinks2', 0, 0), title, "vendorStory-" + id, "Loading", "", closepopup );
-	var params = [];
+	var params = {};
 	params['op'] = 'getTopVendorStory';
 	params['skid'] = id;
 	ajax_update(params, "vendorStory-" + id + "-contents");
 }
 
 function logToDiv(id, message) {
-	var div = $(id);
+	var div = jQuery(make_selector(id))[0];
 	if (div) {
 	div.innerHTML = div.innerHTML + message + "<br>";
 	}
@@ -1287,19 +1290,19 @@ function logToDiv(id, message) {
 
 
 function firehose_open_tab(id) {
-	var tf = $('tab-form-'+id);
-	var tt = $('tab-text-'+id);
-	var ti = $('tab-input-'+id);
+	var tf = jQuery('#tab-form-'+id)[0];
+	var tt = jQuery('#tab-text-'+id)[0];
+	var ti = jQuery('#tab-input-'+id)[0];
 	tf.className="";
 	ti.focus();
 	tt.className="hide";
 }
 
 function firehose_save_tab(id) {
-	var tf = $('tab-form-'+id);
-	var tt = $('tab-text-'+id);
-	var ti = $('tab-input-'+id);
-	var params = [];
+	var tf = jQuery('#tab-form-'+id)[0];
+	var tt = jQuery('#tab-text-'+id)[0];
+	var ti = jQuery('#tab-input-'+id)[0];
+	var params = {};
 	var handlers = {
 		onComplete: json_handler 
 	};
@@ -1380,8 +1383,8 @@ var modal_box   = 0;
 var modal_inst  = 0;
 
 function init_modal_divs() {
-	modal_cover = $('modal_cover');
-	modal_box   = $('modal_box');
+	modal_cover = jQuery('#modal_cover')[0];
+	modal_box   = jQuery('#modal_box')[0];
 }
 
 function install_modal() {
@@ -1397,7 +1400,7 @@ function install_modal() {
 	modal_cover.parentNode.removeChild(modal_cover);
 	modal_box.parentNode.removeChild(modal_box);
 
-	var modal_parent = $('top_parent');
+	var modal_parent = jQuery('#top_parent')[0];
 	modal_parent.parentNode.insertBefore(modal_cover, modal_parent);
 	modal_parent.parentNode.insertBefore(modal_box, modal_parent);
 	modal_inst = 1;
@@ -1429,7 +1432,7 @@ function hide_modal_box() {
 
 function getModalPrefs(section, title, tabbed) {
         document.getElementById('preference_title').innerHTML = title;
-	var params = [];
+	var params = {};
 	params['op'] = 'getModalPrefs';
 	params['section'] = section;
 	params['reskey'] = reskey_static;
@@ -1441,21 +1444,21 @@ function getModalPrefs(section, title, tabbed) {
 }
 
 function firehose_get_media_popup(id) {
-	if ($('preference_title')) {
-		$('preference_title').innerHTML = "Media";
+	if (jQuery('#preference_title')[0]) {
+		jQuery('#preference_title')[0].innerHTML = "Media";
 	}
-	var params = [];
+	var params = {};
 	params['op'] = 'firehose_get_media';
 	params['id'] = id;
 	show_modal_box();
-	$('modal_box_content').innerHTML = "<h4>Loading...</h4><img src='/images/spinner_large.gif'>";
+	jQuery('#modal_box_content')[0].innerHTML = "<h4>Loading...</h4><img src='/images/spinner_large.gif'>";
 	ajax_update(params, 'modal_box_content');
 }
 
 function saveModalPrefs() {
-	var params = [];
+	var params = {};
 	params['op'] = 'saveModalPrefs';
-	params['data'] = Form.serialize(document.forms['modal_prefs']);
+	params['data'] = jQuery("#modal_prefs").serialize();
 	params['reskey'] = reskey_static;
 	var handlers = {
 		onComplete: function() {
@@ -1478,7 +1481,7 @@ function ajaxSaveSlashboxes() {
 		sep = ",";
 	}
 
-	var params = [];
+	var params = {};
 	params['op'] = 'page_save_user_boxes';
 	params['reskey'] = reskey_static;
 	params['bids'] = all;
@@ -1501,8 +1504,8 @@ function displayModalPrefHelp(element) {
 }
 
 function toggle_filter_prefs() {
-	var fps = $('filter_play_status');
-	var fp  = $('filter_prefs');
+	var fps = jQuery('#filter_play_status')[0];
+	var fp  = jQuery('#filter_prefs')[0];
 	if (fps) {
 		if (fps.className == "") {
 			fps.className = "hide";

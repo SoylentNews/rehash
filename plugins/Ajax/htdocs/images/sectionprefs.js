@@ -7,7 +7,7 @@ function configSectionPopup() {
 	createPopup(getXYForId('links-sections-title'), title, "sectionprefs", "", "Loading...");
 	
 	var url = 'ajax.pl';
-	var params = []; 
+	var params = {};
 	params['op'] = 'getSectionPrefsHTML';
 
 	ajax_update(params, 'sectionprefs-contents');
@@ -26,12 +26,11 @@ function individualChange(el) {
 }
 
 function postSectionPrefChanges(el) {
-	var params = [];
+	var params = {};
 	params['op'] = 'setSectionNexusPrefs';
 	params[el.name] = el.value;
-	var h = $H(params);
 	
-	var sec_pref_msg = $("sectionprefs-message");
+	var sec_pref_msg = jQuery("#sectionprefs-message")[0];
 	sec_pref_msg.innerHTML = "Saving...";
 	var url = 'ajax.pl';
 	ajax_update(params, 'sectionprefs-message'); 

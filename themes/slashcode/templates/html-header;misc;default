@@ -28,7 +28,7 @@ __template__
 [% IF file.ie_cond %]<!--[if [% file.ie_cond %]]>[% END %]<link rel="[% file.rel %]" type="[% file.type %]" media="[% file.media %]" href="[% IF constants.css_use_imagedir; constants.imagedir; ELSE; constants.rootdir; END %]/[% file.file %]?[% constants.cvs_tag_currentcode %]"[% IF file.title %] title="[% file.title %]"[% END %]>[% IF file.ie_cond %]<![endif]-->[% END %]
 [% END -%]
 [%- IF constants.plugin.Ajax %]
-<script src="[% constants.imagedir %]/prototype.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery-1.2.3.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/yahoo.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/dom.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/event.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
