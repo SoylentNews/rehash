@@ -1,6 +1,6 @@
 // $Id$
 
-// javascript:jQuery('#commentControlBox')[0].innerHTML = Dumper(displaymode)
+// javascript:$dom('commentControlBox').innerHTML = Dumper(displaymode)
 
 // ===================================================================
 // Author: Matt Kruse <matt@mattkruse.com>

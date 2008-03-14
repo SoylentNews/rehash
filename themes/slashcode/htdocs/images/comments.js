@@ -180,7 +180,7 @@ function setFocusComment(cid, alone, mods) {
 
 
 // this doesn't work
-//	var statusdiv = jQuery('#comment_status_' + abscid)[0];
+//	var statusdiv = $dom('comment_status_' + abscid);
 //	statusdiv.innerHTML = 'Working ...';
 
 //	doModifiers();
@@ -433,7 +433,7 @@ function addComment(cid, comment, html, front) {
 	}
 	var pid = comment['pid'];
 
-	if (jQuery('#tree_' + cid)[0]) {
+	if ($dom('tree_' + cid)) {
 		if (pid) {
 			var parent = comments[pid];
 			var seen = 0;
@@ -461,7 +461,7 @@ function addComment(cid, comment, html, front) {
 	html = html || dummyComment(cid);
 
 	if (pid) {
-		var tree = jQuery('#tree_' + pid)[0];
+		var tree = $dom('tree_' + pid);
 		if (tree) {
 			setDefaultDisplayMode(pid);
 			var parent = comments[pid];
@@ -470,7 +470,7 @@ function addComment(cid, comment, html, front) {
 			else
 				parent['kids'].push(cid);
 
-			var commtree = jQuery('#commtree_' + pid)[0];
+			var commtree = $dom('commtree_' + pid);
 			if (commtree) {
 				if (front)
 					commtree.innerHTML = html + commtree.innerHTML;
@@ -482,7 +482,7 @@ function addComment(cid, comment, html, front) {
 		}
 
 	} else {
-		var commlist = jQuery('#commentlisting')[0];
+		var commlist = $dom('commentlisting');
 		if (commlist) {
 			root_comments.push(cid);
 			root_comments_hash[cid] = 1;
@@ -662,10 +662,10 @@ function refreshCommentDisplays() {
 	finishCommentUpdates();
 
 	if (roothiddens) {
-		jQuery('#roothiddens')[0].innerHTML = roothiddens + ' comments are beneath your threshhold';
-		jQuery('#roothiddens')[0].className = 'show';
+		$dom('roothiddens').innerHTML = roothiddens + ' comments are beneath your threshhold';
+		$dom('roothiddens').className = 'show';
 	} else {
-		jQuery('#roothiddens')[0].className = 'hide';
+		$dom('roothiddens').className = 'hide';
 	}
 	/* NOTE need to display note for hidden root comments */
 	return void(0);
@@ -826,7 +826,7 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 						}
 					}
 				}
-				jQuery('#titlecountnum')[0].innerHTML = thresh_totals[6][6][1]; // total
+				$dom('titlecountnum').innerHTML = thresh_totals[6][6][1]; // total
 				updateTotals();
 			}
 
@@ -843,12 +843,12 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 			ajaxCommentsStatus(0);
 
 			if (adTimerInsert) {
-				var tree = jQuery('#tree_' + adTimerInsert)[0];
+				var tree = $dom('tree_' + adTimerInsert);
 				if (tree) {
 					var adcall = '<iframe src="' + adTimerUrl + '" height="110" width="740" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe>';
 					var html = '<li id="comment_ad_' + adTimerInsert + '" class="inlinead"> ' + adcall +'  </li>';
 
-					var commtree = jQuery('#commtree_' + adTimerInsert)[0];
+					var commtree = $dom('commtree_' + adTimerInsert);
 					if (commtree) {
 						commtree.innerHTML = html + commtree.innerHTML;
 					} else {
@@ -970,36 +970,36 @@ function doModerate(el) {
 }
 
 function cancelReply(pid) {
-	var replydiv = jQuery('#replyto_' + pid)[0];
+	var replydiv = $dom('replyto_' + pid);
 	replydiv.innerHTML = '';
 	if (pid) { // XXX
-		var reply_link = jQuery('#reply_link_' + pid)[0];
+		var reply_link = $dom('reply_link_' + pid);
 		reply_link.innerHTML = reply_link_html[pid];
 		reply_link_html[pid] = '';
 	}
 }
 
 function editReply(pid) {
-	var replydiv = jQuery('#replyto_' + pid)[0];
-	var reply = jQuery('#replyto_reply_' + pid)[0];
-	var preview = jQuery('#replyto_preview_' + pid)[0];
+	var replydiv = $dom('replyto_' + pid);
+	var reply = $dom('replyto_reply_' + pid);
+	var preview = $dom('replyto_preview_' + pid);
 	if (!replydiv || !reply || !preview)
 		return false;
 
 	preview.style.display = 'none';
 	reply.style.display   = 'block';
 
-	jQuery('#replyto_buttons_2_' + pid)[0].style.display  = 'none';
-	jQuery('#replyto_buttons_1_' + pid)[0].style.display = 'inline';
+	$dom('replyto_buttons_2_' + pid).style.display  = 'none';
+	$dom('replyto_buttons_1_' + pid).style.display = 'inline';
 }
 
 function replyPreviewOrSubmit (pid, op, handlers) {
-	var replydiv = jQuery('#replyto_' + pid)[0];
-	var reply = jQuery('#replyto_reply_' + pid)[0];
-	var preview = jQuery('#replyto_preview_' + pid)[0];
-	var this_reskey = jQuery('#reskey_reply_' + pid)[0];
+	var replydiv = $dom('replyto_' + pid);
+	var reply = $dom('replyto_reply_' + pid);
+	var preview = $dom('replyto_preview_' + pid);
+	var this_reskey = $dom('reskey_reply_' + pid);
 	var msgdiv = 'replyto_msg_' + pid;
-	var msg = jQuery(make_selector(msgdiv))[0];
+	var msg = $dom(msgdiv);
 
 	if (!replydiv || !reply || !preview || !this_reskey || !msg)
 		return false;
@@ -1010,11 +1010,11 @@ function replyPreviewOrSubmit (pid, op, handlers) {
 	params['sid'] = discussion_id;
 	params['reskey'] = this_reskey.value;
 	params['msgdiv'] = msgdiv;
-	params['gotmodwarning'] = jQuery('#gotmodwarning_' + pid)[0].value;
-	params['postersubj'] = jQuery('#postersubj_' + pid)[0].value;
-	params['postercomment'] = jQuery('#postercomment_' + pid)[0].value;
+	params['gotmodwarning'] = $dom('gotmodwarning_' + pid).value;
+	params['postersubj'] = $dom('postersubj_' + pid).value;
+	params['postercomment'] = $dom('postercomment_' + pid).value;
 
-	var postanon = jQuery('#postanon_' + pid)[0];
+	var postanon = $dom('postanon_' + pid);
 	if (postanon && postanon.checked)
 		params['postanon'] = postanon.value;
 
@@ -1025,7 +1025,7 @@ function replyPreviewOrSubmit (pid, op, handlers) {
 function submitReply(pid) {
 	return replyPreviewOrSubmit(pid, 'comments_submit_reply', {
 		onComplete: function(transport) {
-			var msg = jQuery('#replyto_msg_' + pid)[0];
+			var msg = $dom('replyto_msg_' + pid);
 			msg.innerHTML = '';
 			var response = json_handler(transport);
 
@@ -1045,28 +1045,28 @@ function submitReply(pid) {
 function previewReply(pid) {
 	return replyPreviewOrSubmit(pid, 'comments_preview_reply', {
 		onComplete: function(transport) {
-			var msg = jQuery('#replyto_msg_' + pid)[0];
+			var msg = $dom('replyto_msg_' + pid);
 			msg.innerHTML = '';
 			var response = json_handler(transport);
 
 			if (response.error)
 				msg.innerHTML = response.error;
 			if (response.html) {
-				jQuery('#replyto_reply_' + pid)[0].style.display   = 'none';
-				jQuery('#replyto_preview_' + pid)[0].style.display = 'block';
-				jQuery('#replyto_buttons_1_' + pid)[0].style.display  = 'none';
-				jQuery('#replyto_buttons_2_' + pid)[0].style.display = 'inline';
+				$dom('replyto_reply_' + pid).style.display   = 'none';
+				$dom('replyto_preview_' + pid).style.display = 'block';
+				$dom('replyto_buttons_1_' + pid).style.display  = 'none';
+				$dom('replyto_buttons_2_' + pid).style.display = 'inline';
 			}
 		}
 	});
 }
 
 function replyTo(pid) {
-	var replydiv = jQuery('#replyto_' + pid)[0];
+	var replydiv = $dom('replyto_' + pid);
 	if (!replydiv)
 		return false; // seems we shouldn't be here ...
 
-	var postercomment = jQuery('#postercomment_' + pid);
+	var postercomment = $dom('postercomment_' + pid);
 	if (postercomment) {
 		postercomment.focus(); // already have one, bail
 		return false;
@@ -1083,11 +1083,11 @@ function replyTo(pid) {
 		onComplete: function(transport) {
 			json_handler(transport);
 			if (pid) { // XXX
-				var reply_link = jQuery('#reply_link_' + pid)[0];
+				var reply_link = $dom('reply_link_' + pid);
 				reply_link_html[pid] = reply_link.innerHTML;
 				reply_link.innerHTML = '<a href="#" onclick="cancelReply(' + pid + '); return false;">Cancel Reply</a>';
 			}
-			jQuery('#postercomment_' + pid)[0].focus();
+			$dom('postercomment_' + pid).focus();
 		}
 	};
 
@@ -1098,7 +1098,7 @@ function replyTo(pid) {
 
 function quoteReply(pid) {
 	var this_reply = getQuotedText(comment_body_reply[pid]);
-	var postercomment = jQuery('#postercomment_' + pid)[0] || jQuery('#postercomment')[0];
+	var postercomment = $dom('postercomment_' + pid) || $dom('postercomment');
 	if (postercomment)
 		postercomment.value = this_reply + postercomment.value;
 	return false;
@@ -1106,7 +1106,7 @@ function quoteReply(pid) {
 
 function getQuotedText(this_reply) {
 	// tailor whitespace to postmode
-	if (!jQuery('#posttype')[0] || jQuery('#posttype')[0].value != 2) {
+	if (!$dom('posttype') || $dom('posttype').value != 2) {
 		this_reply = this_reply.replace(/<br>/g, "\n");
 	} else {
 		this_reply = this_reply.replace(/<br>\n*/g, "<br>\n");
@@ -1141,7 +1141,7 @@ function loadAllElements(tagname, parent) {
 
 function reloadForFirefox(obj_name) {
 	if (is_firefox) {
-		var obj = jQuery(make_selector(obj_name))[0];
+		var obj = $dom(obj_name);
 		loadAllElements('span', obj);
 		loadAllElements('div', obj);
 		loadAllElements('li', obj);
@@ -1161,7 +1161,7 @@ function reloadCommentForFirefox(cid) {
 }
 
 function loadNamedElement(name) {
-	commentelements[name] = jQuery(make_selector(name))[0];
+	commentelements[name] = $dom(name);
 	return;
 }
 
@@ -1173,9 +1173,9 @@ function fetchEl(str) {
 		// any other special cases to ignore? -- pudge
 		if (!str.match(/^hidestring_/))
 			if (!obj || !grepCommentNode(obj, str))
-				obj = commentelements[str] = jQuery(make_selector(str))[0];
+				obj = commentelements[str] = $dom(str);
 	} else {
-		obj = jQuery(make_selector(str))[0];
+		obj = $dom(str);
 	}
 
 	return obj;
@@ -1321,7 +1321,7 @@ function ajaxCommentsStatus(bool) {
 }
 
 function boxStatus(bool) {
-	var box = jQuery('#commentControlBoxStatus')[0];
+	var box = $dom('commentControlBoxStatus');
 	if (bool) {
 		boxStatusQueue.push(1);
 		box.className = '';
@@ -1334,7 +1334,7 @@ function boxStatus(bool) {
 
 function enableControls() {
 	boxStatus(0);
-	var morelink = jQuery('#more_comments_num_a')[0];
+	var morelink = $dom('more_comments_num_a');
 	if (morelink)
 		morelink.className = 'show';
 
@@ -1343,11 +1343,11 @@ function enableControls() {
 }
 
 function floatButtons () {
-	jQuery('#gods')[0].className='thor';
+	$dom('gods').className='thor';
 }
 
 function d2act () {
-	var gd = jQuery('#d2act')[0]; 
+	var gd = $dom('d2act');
 	if (gd) {
 		var targetTop = YAHOO.util.Dom.getY('commentwrap');
 		var vOffset = 0;
@@ -1360,7 +1360,7 @@ function d2act () {
   
 		var oldpos = gd.style.position;
 
-		var mode = jQuery('#d2out')[0].className;
+		var mode = $dom('d2out').className;
 		if (mode=='horizontal rooted' || targetTop>vOffset) {
 			gd.style.position = 'absolute';
 			gd.className      = 'rooted';
@@ -1374,15 +1374,15 @@ function d2act () {
 		// for Safari and maybe others, force redraw on change
 		if ( oldpos != gd.style.position ) {
 			gd.style.display = 'none';
-			setTimeout("jQuery('#d2act')[0].style.display = 'inline'", 1);
+			setTimeout("$dom('d2act').style.display = 'inline'", 1);
 			// gd.style.display = 'inline';
 		}
 	}
 }
 
 function toggleDisplayOptions() {
-	var gods  = jQuery('#gods')[0];
-	var d2out = jQuery('#d2out')[0];
+	var gods  = $dom('gods');
+	var d2out = $dom('d2out');
 
 	// update user prefs
 	var newMode = '';
@@ -1423,9 +1423,9 @@ function toggleDisplayOptions() {
 
 
 function updateTotals() {
-	jQuery('#currentHidden' )[0].innerHTML = currents['hidden'];
-	jQuery('#currentFull'   )[0].innerHTML = currents['full'];
-	jQuery('#currentOneline')[0].innerHTML = currents['oneline'];
+	$dom('currentHidden' ).innerHTML = currents['hidden'];
+	$dom('currentFull'   ).innerHTML = currents['full'];
+	$dom('currentOneline').innerHTML = currents['oneline'];
 }
 
 function updateMoreNum(num) { // should be an integer, or empty string
@@ -1442,9 +1442,9 @@ function updateMoreNum(num) { // should be an integer, or empty string
 			num_a = 'Retrieve more of the ' + num + ' remaining comments';
 	}
 
-	var a = jQuery('#more_comments_num_a')[0];
-	var b = jQuery('#more_comments_num_b')[0];
-	var c = jQuery('#more_comments_num_c')[0];
+	var a = $dom('more_comments_num_a');
+	var b = $dom('more_comments_num_b');
+	var c = $dom('more_comments_num_c');
 
 	if (a)
 		a.innerHTML = num_a;
@@ -1457,7 +1457,7 @@ function updateMoreNum(num) { // should be an integer, or empty string
 
 function scrollWindowTo(cid) {
 	var comment_y = getOffsetTop(fetchEl('comment_' + cid));
-	if (jQuery('#d2out')[0].className == 'horizontal')
+	if ($dom('d2out').className == 'horizontal')
 		comment_y -= 60;
 	scroll(viewWindowLeft(), comment_y);
 }

@@ -23,7 +23,7 @@ function um_set_settings(behavior) {
 
 function admin_signoff(stoid, type, id) {
 	var params = {};
-	var reskeyel = jQuery('#signoff-reskey-' + stoid)[0];
+	var reskeyel = $dom('signoff-reskey-' + stoid);
 	params['op'] = 'admin_signoff';
 	params['stoid'] = stoid;
 	params['reskey'] = reskeyel.value;
@@ -51,8 +51,8 @@ function admin_submit_memory(fhid) {
 	var params = {};
 	params['op'] = 'admin_submit_memory';
 	params['reskey'] = reskey_static;
-	params['submatch'] = jQuery('#submatch-'+fhid)[0].value;
-	params['subnote'] = jQuery('#subnote-'+fhid)[0].value;
+	params['submatch'] = $dom('submatch-'+fhid).value;
+	params['subnote'] = $dom('subnote-'+fhid).value;
 	ajax_update(params, 'sub_mem_message-'+fhid);
 }
 
@@ -74,9 +74,9 @@ function adminTagsCommands(id, type) {
 		params['id'] = id;
 	}
 	params['type'] = type;
-	var tags_admin_commands_el = jQuery('#tags_admin_commands-' + id)[0];
+	var tags_admin_commands_el = $dom('tags_admin_commands-' + id);
 	params['commands'] = tags_admin_commands_el.value;
-	var reskeyel = jQuery('#admin_commands-reskey-' + id)[0];
+	var reskeyel = $dom('admin_commands-reskey-' + id);
 	params['reskey'] = reskeyel.value;
 	ajax_update(params, 'tags-admin-' + id);
 
@@ -103,8 +103,8 @@ function tagsHistory(id, type) {
 }
 
 function remarks_create() {
-	var reskey = jQuery('#remarks_reskey')[0];
-	var remark = jQuery('#remarks_new')[0];
+	var reskey = $dom('remarks_reskey');
+	var remark = $dom('remarks_new');
 	if (!remark || !remark.value || !reskey || !reskey.value) {
 		return false;
 	}
@@ -113,7 +113,7 @@ function remarks_create() {
 	params['op']     = 'remarks_create';
 	params['remark'] = remark.value;
 	params['reskey'] = reskey.value;
-	remarks_max = jQuery('#remarks_max')[0];
+	remarks_max = $dom('remarks_max');
 	if (remarks_max && remarks_max.value) {
 		params['limit'] = remarks_max.value;
 	}
@@ -141,10 +141,10 @@ function remarks_popup() {
 
 function remarks_config_save() {
 	var params = {};
-	var reskey = jQuery('#remarks_reskey')[0];
-	var min_priority = jQuery('#remarks_min_priority')[0];
-	var limit = jQuery('#remarks_limit')[0];
-	var filter = jQuery('#remarks_filter')[0];
+	var reskey = $dom('remarks_reskey');
+	var min_priority = $dom('remarks_min_priority');
+	var limit = $dom('remarks_limit');
+	var filter = $dom('remarks_filter');
 	params['op'] = 'remarks_config_save';
 	if (!reskey && !reskey.value) {
 		return false;
@@ -158,7 +158,7 @@ function remarks_config_save() {
 	if (filter) {
 		params['filter'] = filter.value;
 	}
-	var message = jQuery('#remarksconfig-message')[0];
+	var message = $dom('remarksconfig-message');
 	if (message) {
 		message.innerHTML = "Saving...";
 	}
@@ -266,7 +266,7 @@ function make_spelling_correction(misspelled_word, form_element) {
 
 function firehose_reject (el) {
 	var params = {};
-	var fh = jQuery('#firehose-' + el.value)[0];
+	var fh = $dom('firehose-' + el.value);
 	params['op'] = 'firehose_reject';
 	params['id'] = el.value;
 	params['reskey'] = reskey_static;
@@ -275,18 +275,18 @@ function firehose_reject (el) {
 }
 
 function firehose_open_note(id) {
-	var nf = jQuery('#note-form-'+id)[0];
-	var nt = jQuery('#note-text-'+id)[0];
-	var ni = jQuery('#note-input-'+id)[0];
+	var nf = $dom('note-form-'+id);
+	var nt = $dom('note-text-'+id);
+	var ni = $dom('note-input-'+id);
 	nf.className="";
 	ni.focus();
 	nt.className="hide";
 }
 
 function firehose_save_note(id) {
-	var nf = jQuery('#note-form-'+id)[0];
-	var nt = jQuery('#note-text-'+id)[0];
-	var ni = jQuery('#note-input-'+id)[0];
+	var nf = $dom('note-form-'+id);
+	var nt = $dom('note-text-'+id);
+	var ni = $dom('note-input-'+id);
 	var params = {};
 	params['op'] = 'firehose_save_note';
 	params['note'] = ni.value;
@@ -312,13 +312,13 @@ function firehose_get_and_post(id) {
 	params['op'] = 'firehose_get_form';
 	firehose_collapse_entry(id);
 	var handlers = {
-		onComplete: function() { jQuery('#postform-'+id)[0].submit();}
+		onComplete: function() { $dom('postform-'+id).submit();}
 	};
 	ajax_update(params, 'postform-'+id, handlers); 
 }
 
 function appendToBodytext(text) {
-	var obj = jQuery('#admin-bodytext')[0];
+	var obj = $dom('admin-bodytext');
 	if (obj) {
 		obj.className = "show";
 		obj.value = obj.value  + text;
