@@ -36,7 +36,9 @@ modCommentLog
 __template__
 [% IF mod_admin %]
 [% 
+hr_shown = 0; mod_index = 0;
 down=0; cnt=0; m2_down=0; m2_count=0; m2_offside=0; 
+a_up=0; a_sum=0; a_count=0; up=0; sum=0; count=0; a_m2_count=0;
 a_down=0; a_cnt=0; a_m2_down=0; a_m2_up=0; m2_count=0; a_m2_offside=0; a_m2_unfair_votes=0; unanimous = 0; unresolved=0;
 show_uid_totals = (type == "uid" && (this_user.totalmods || this_user.downmods || this_user.upmods || this_user.m2unfair || this_user.m2unfairpercent || this_user.stirred));
 
@@ -84,8 +86,6 @@ bg_toggle = 0;
 			<th align=left>Moderatee [% IF constants.m2 %]<span class="admin_data_label">/ Metamoderator</span>[% END %]</th>
 		[% END %]
 	</tr>
-		[% hr_shown = 0; 
-		   mod_index = 0; %]
 		[% FOREACH moderation = mods %]
 		[% IF constants.m2 && type == "cid" && constants.show_m2s_with_mods && show_m2s && constants.m2_multicount; 
 			prev_index = mod_index - 1;
@@ -205,6 +205,7 @@ bg_toggle = 0;
 		<input type="hidden" name="op" value="moderate">
 		[%- IF constants.modal_prefs_active %]
 		<input type="hidden" name="formname" value="metamoderate">
+		<input type="hidden" name="refreshable" value="">
 		<input type="button" value="MetaModerate" onclick="saveModalPrefs()">
 		[%- ELSE %]
 		<input type="submit" name="submit" value="MetaModerate">
