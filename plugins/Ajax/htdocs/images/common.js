@@ -47,9 +47,6 @@ var ua=navigator.userAgent;
 var is_ie = ua.match("/MSIE/");
 
 
-// eventually add site specific constants like this to a separate .js
-var sitename = "Slashdot";
-
 function createPopup(xy, titlebar, name, contents, message, onmouseout) {
 	var body = document.getElementsByTagName("body")[0]; 
 	var div = document.createElement("div");
@@ -956,11 +953,7 @@ function firehose_reorder() {
 					}
 				}
 			}
-			if (console_updating) {
-				document.title = sitename + " - Console (" + item_count + ")";
-			} else {
-				document.title = sitename + " - Firehose (" + item_count + ")";
-			}
+			document.title = "[% sitename %] - " + (console_updating ? "Console" : "Firehose") + " (" + item_count + ")";
 		}
 	}
 
