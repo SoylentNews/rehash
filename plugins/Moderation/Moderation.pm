@@ -91,10 +91,12 @@ sub ajaxModerateCid {
 				$self->countUsers({ max => 1 }), $self->getReasons
 			);
 
-			$html->{$score}  = "(Score:$points";
+			$html->{$score}  = "Score:$points";
+			$html->{$score} = qq[<a href="#" onclick="getModalPrefs('modcommentlog', 'Moderation Comment Log', [% cid %]); return false">$html->{score}</a>];
+				if $constants->{modal_prefs_active} && $user->{is_admin};
 			$html->{$score} .= ", $reasons->{$comment->{reason}}{name}"
 				if $comment->{reason} && $reasons->{$comment->{reason}};
-			$html->{$score} .= ")";
+			$html->{$score} = "($html->{score})";
 
 			my $ptstr = $user->{points} == 1 ? 'point' : 'points';
 			$html->{$select} = "Moderated '$reasons->{$reason}{name}.'  $user->{points} $ptstr left.";

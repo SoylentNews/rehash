@@ -741,6 +741,22 @@ sub getModalPrefs {
 			{ Page => 'misc', Skin => 'idle', Return => 1 }
 		);
 
+	} elsif ($form->{'section'} eq 'modcommentlog') {
+		my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+		if ($moddb) {
+			# we hijack "tabbed" as our cid -- pudge
+			return $moddb->dispModCommentLog('cid', $form->{'tabbed'}, {
+				show_m2s        => ($constants->{m2}
+					? (defined($form->{show_m2s})
+						? $form->{show_m2s}
+						: $user->{m2_with_comm_mod}
+					) : 0),
+				need_m2_form    => $constants->{m2},
+				need_m2_button  => $constants->{m2},
+				title           => " "
+			});
+		}
+
 	} else {
 		
 		return
@@ -761,7 +777,7 @@ sub saveModalPrefs {
 	my $url = URI->new('//e.a/?' . $form->{'data'});
 	my %params = $url->query_form;
 
-        # D2 display
+	# D2 display
 	my $user_edits_table;
 	if ($params{'formname'} eq 'd2_display') {
 		$user_edits_table = {
@@ -774,7 +790,7 @@ sub saveModalPrefs {
 		};
 	}
 
-        # D2 posting
+	# D2 posting
 	if ($params{'formname'} eq 'd2_posting') {
 		$user_edits_table = {
 			emaildisplay      => $params{'emaildisplay'} || undef,
@@ -788,7 +804,17 @@ sub saveModalPrefs {
 		};
 	}
 
-        # Messages
+	# Messages
+	if ($params{'formname'} eq 'metamoderate') {
+		if ($constants->{m2} && $user->{is_admin}) {
+			# metaModerate uses $form ... whether it should or not! -- pudge
+			@$form{keys %params} = values %params;
+			my $metamod_db = getObject('Slash::Metamod');
+			$metamod_db->metaModerate($user->{is_admin}) if $metamod_db;
+		}
+	}
+
+	# Messages
 	if ($params{'formname'} eq 'messages') {
 		my $messages  = getObject('Slash::Messages');
 		my $messagecodes = $messages->getDescriptions('messagecodes');

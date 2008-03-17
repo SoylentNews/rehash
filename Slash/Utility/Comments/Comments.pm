@@ -1624,13 +1624,16 @@ sub saveComment {
 		my $users  = $messages->checkMessageCodes(MSG_CODE_COMMENT_REPLY, [$parent->{uid}]);
 		if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
 			my $data  = {
-				template_name	=> 'reply_msg',
-				subject		=> { template_name => 'reply_msg_subj' },
-				reply		=> $reply,
-				parent		=> $parent,
-				discussion	=> $discussion,
+				template_name   => 'reply_msg',
+				template_page   => 'comments',
+				subject         => {
+					template_name => 'reply_msg_subj',
+					template_page => 'comments',
+				},
+				reply           => $reply,
+				parent          => $parent,
+				discussion      => $discussion,
 			};
-
 			$messages->create($users->[0], MSG_CODE_COMMENT_REPLY, $data);
 			$users{$users->[0]}++;
 		}
@@ -1641,10 +1644,14 @@ sub saveComment {
 		my $users  = $messages->checkMessageCodes(MSG_CODE_JOURNAL_REPLY, [$discussion->{uid}]);
 		if (_send_comment_msg($users->[0], \%users, $pts, $clean_comment)) {
 			my $data  = {
-				template_name	=> 'journrep',
-				subject		=> { template_name => 'journrep_subj' },
-				reply		=> $reply,
-				discussion	=> $discussion,
+				template_name   => 'journrep',
+				template_page   => 'comments',
+				subject         => {
+					template_name => 'journrep_subj',
+					template_page => 'comments',
+				},
+				reply           => $reply,
+				discussion      => $discussion,
 			};
 
 			$messages->create($users->[0], MSG_CODE_JOURNAL_REPLY, $data);
@@ -1657,10 +1664,14 @@ sub saveComment {
 		my $users = $messages->getMessageUsers(MSG_CODE_NEW_COMMENT);
 
 		my $data  = {
-			template_name	=> 'commnew',
-			subject		=> { template_name => 'commnew_subj' },
-			reply		=> $reply,
-			discussion	=> $discussion,
+			template_name   => 'commnew',
+			template_page   => 'comments',
+			subject         => {
+				template_name => 'commnew_subj',
+				template_page => 'comments',
+			},
+			reply           => $reply,
+			discussion      => $discussion,
 		};
 
 		my @users_send;
@@ -1869,12 +1880,18 @@ sub _hard_dispComment {
 
 	$time_to_display = timeCalc($comment->{date});
 	unless ($user->{noscores}) {
-		$score_to_display .= " (Score:";
-		$score_to_display .= length($comment->{points}) ? $comment->{points} : "?";
+		$score_to_display .= "Score:";
+		if (length $comment->{points}) {
+			$score_to_display .= $comment->{points};
+			$score_to_display = qq[<a href="#" onclick="getModalPrefs('modcommentlog', 'Moderation Comment Log', [% cid %]); return false">$score_to_display</a>]
+				if $constants->{modal_prefs_active} && $user->{is_admin};
+		} else {
+			$score_to_display .= '?';
+		}
 		if ($reasons && $comment->{reason}) {
 			$score_to_display .= ", $reasons->{$comment->{reason}}{name}";
 		}
-		$score_to_display .= ")";
+		$score_to_display = " ($score_to_display)";
 	}
 
 	if ($comment->{sid} && $comment->{cid}) {
