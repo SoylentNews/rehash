@@ -1883,7 +1883,7 @@ sub _hard_dispComment {
 		$score_to_display .= "Score:";
 		if (length $comment->{points}) {
 			$score_to_display .= $comment->{points};
-			$score_to_display = qq[<a href="#" onclick="getModalPrefs('modcommentlog', 'Moderation Comment Log', [% cid %]); return false">$score_to_display</a>]
+			$score_to_display = qq[<a href="#" onclick="getModalPrefs('modcommentlog', 'Moderation Comment Log', $comment->{cid}); return false">$score_to_display</a>]
 				if $constants->{modal_prefs_active} && $user->{is_admin};
 		} else {
 			$score_to_display .= '?';
