@@ -1,10 +1,6 @@
 // _*_ Mode: JavaScript; tab-width: 8; indent-tabs-mode: true _*_
 // $Id$
 
-// by now, both jQuery and prototype have loaded.  Tell jQuery to play nice (for now)
-if ( jQuery !== undefined )
-  jQuery.noConflict();
-
 function $dom( id ) {
 	return document.getElementById(id);
 }
