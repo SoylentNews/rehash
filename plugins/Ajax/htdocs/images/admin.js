@@ -21,18 +21,6 @@ function um_set_settings(behavior) {
 	ajax_update(params, 'links-vendors-content');
 }
 
-function admin_signoff(stoid, type, id) {
-	var params = {};
-	var reskeyel = $dom('signoff-reskey-' + stoid);
-	params['op'] = 'admin_signoff';
-	params['stoid'] = stoid;
-	params['reskey'] = reskeyel.value;
-	ajax_update(params, 'signoff_' + stoid);
-	if (type == "firehose") {
-		firehose_collapse_entry(id);
-	}
-}
-
 function admin_neverdisplay(stoid, type, fhid) {
 	var params = {};
 	params['op'] = 'admin_neverdisplay';
@@ -301,7 +289,12 @@ function firehose_get_admin_extras(id) {
 	params['id'] = id;
 	params['op'] = 'firehose_get_admin_extras';
 	var handlers = {
-		onComplete: json_handler
+		onComplete: function(transport) {
+			json_handler(transport);
+			if (firehoseIsInWindow(id)) {
+				scrollToWindowFirehose(id);
+			}
+		}
 	};
 	ajax_update(params, '', handlers);
 }
@@ -319,6 +312,14 @@ function firehose_get_and_post(id) {
 
 function appendToBodytext(text) {
 	var obj = $dom('admin-bodytext');
+	if (obj) {
+		obj.className = "show";
+		obj.value = obj.value  + text;
+	}
+}
+
+function appendToMedia(text) {
+	var obj = $dom('admin-media');
 	if (obj) {
 		obj.className = "show";
 		obj.value = obj.value  + text;

@@ -29,6 +29,8 @@ var firehose_settings = {};
   firehose_removals = null;
   firehose_future = null;
 
+  var firehose_cur = 0;
+
 // globals we haven't yet decided to move into |firehose_settings|
 var fh_play = 0;
 var fh_is_timed_out = 0;
@@ -477,7 +479,10 @@ function toggle_firehose_body(id, is_admin) {
 	var usertype = fh_is_admin ? " adminmode" : " usermode";
 	if (fhbody.className == "empty") {
 		var handlers = {
-			onComplete: function() { 
+			onComplete: function() {
+				if(firehoseIsInWindow(id)) { 
+					scrollToWindowFirehose(id); 
+				}
 				firehose_get_admin_extras(id); 
 			}
 		};
@@ -1510,3 +1515,126 @@ function toggle_filter_prefs() {
 	}
 
 }
+
+function admin_signoff(stoid, type, id) {
+	var params = [];
+	params['op'] = 'admin_signoff';
+	params['stoid'] = stoid;
+	params['reskey'] = reskey_static;
+	ajax_update(params, 'signoff_' + stoid);
+	if (type == "firehose") {
+		firehose_collapse_entry(id);
+	}
+}
+
+
+function scrollWindowToFirehose(fhid) {
+	var firehose_y = getOffsetTop($('firehose-' + fhid));
+	console.log(firehose_y);
+	scroll(viewWindowLeft(), firehose_y);
+}
+
+function viewWindowLeft() {
+	if (self.pageXOffset) // all except Explorer
+	{
+		return self.pageXOffset;
+	}
+	else if (document.documentElement && document.documentElement.scrollTop)
+		// Explorer 6 Strict
+	{
+		return document.documentElement.scrollLeft;
+	}
+	else if (document.body) // all other Explorers
+	{
+		return document.body.scrollLeft;
+	}
+}
+
+function getOffsetTop (el) {
+	if (!el)
+		return false;
+	var ot = el.offsetTop;
+	while((el = el.offsetParent) != null)
+		ot += el.offsetTop;
+	return ot;
+}
+
+function firehoseIsInWindow(fhid, just_head) {
+	var in_window = isInWindow($('firehose-' + fhid));
+	return in_window;
+}
+
+function isInWindow(obj) {
+	var y = getOffsetTop(obj);
+
+	if (y > viewWindowTop() && y < viewWindowBottom()) {
+		return 1;
+	}
+	return 0;
+}
+
+function viewWindowTop() {
+	if (self.pageYOffset) // all except Explorer
+	{
+		return self.pageYOffset;
+	}
+	else if (document.documentElement && document.documentElement.scrollTop)
+		// Explorer 6 Strict
+	{
+		return document.documentElement.scrollTop;
+	}
+	else if (document.body) // all other Explorers
+	{
+		return document.body.scrollTop;
+	}
+	return;
+}
+
+function viewWindowBottom() {
+	return viewWindowTop() + (window.innerHeight || document.documentElement.clientHeight);
+}
+
+function firehose_get_cur() {
+	if (!firehose_cur) {
+		firehose_cur = firehose_ordered[0];
+		firehose_set_cur(firehose_cur);
+	}
+	return firehose_cur;
+}
+
+function firehose_set_cur(id) {
+	firehose_cur = id;
+}
+
+function firehose_get_pos_of_id(id) {
+	var ret;
+	for (var i=0; i< firehose_ordered.length; i++) {
+		if (firehose_ordered[i] == id) {
+			ret = i;
+		}
+	}
+	return ret;
+}
+
+function firehose_go_next() {
+	var cur = firehose_get_cur();
+	var pos = firehose_get_pos_of_id(cur);
+	if (pos < (firehose_ordered.length - 1)) {
+		pos++;
+	}
+	firehose_set_cur(firehose_ordered[pos]);
+	scrollWindowToFirehose(firehose_cur);
+}
+
+function firehose_go_prev() {
+	var cur = firehose_get_cur();
+	var pos = firehose_get_pos_of_id(cur);
+	if (pos>0) {
+		pos--;
+	}
+	firehose_set_cur(firehose_ordered[pos]);
+	scrollWindowToFirehose(firehose_cur);
+
+}
+
+
