@@ -71,7 +71,7 @@ END %]
 		[% mypagemenu = PROCESS pagemenu; IF mypagemenu %]<br>[% mypagemenu %][% END %] 
 		<div class="topic">
 			[% seen_topics.${topic.tid} = 1 %]
-			[% IF user.noicons || user.simpledesign || user.lowbandwidth %]
+			[% IF user.noicons || user.simpledesign || user.lowbandwidth || user.pda %]
 				[ <a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">[% topic.textname %]</a> ]
 			[% ELSIF topic.image %]
 				<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">
