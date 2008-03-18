@@ -265,6 +265,9 @@ sub previewForm {
 		}
 	}
 
+	my $url = "";
+	$url = $slashdb->getUrl($sub->{url_id}) if $sub->{url_id};
+
         foreach my $memory (@$sub_memory) {
                 my $match = $memory->{submatch};
 
@@ -272,7 +275,8 @@ sub previewForm {
                     $sub->{name}  =~ m/$match/i ||
                     $sub->{subj}  =~ m/$match/i ||
                     $sub->{ipid}  =~ m/$match/i ||
-                    $sub->{story} =~ m/$match/i) {
+                    $sub->{story} =~ m/$match/i ||
+		    $url =~ m/$match/i ) {
                         push @$subnotes_ref, $memory;
                 }
         }
