@@ -561,7 +561,7 @@ sub getFireHoseEssentials {
 				push @where, "popularity >= $pop_q";
 			}
 		}
-		if ($user->{is_admin}) {
+		if ($user->{is_admin} || $user->{acl}{signoff_allowed}) {
 			my $signoff_label = 'sign' . $user->{uid} . 'ed';
 
 			if ($options->{unsigned}) {
@@ -1603,6 +1603,9 @@ sub getMemoryForItem {
 	return [] unless $item && $user->{is_admin};
 	my $subnotes_ref = [];
 	my $sub_memory = $self->getSubmissionMemory();
+	my $url = "";
+	$url = $self->getUrl($item->{url_id}) if $item->{url_id};
+
 	foreach my $memory (@$sub_memory) {
 		my $match = $memory->{submatch};
 
@@ -1610,7 +1613,8 @@ sub getMemoryForItem {
 		    $item->{name}  =~ m/$match/i ||
 		    $item->{title}  =~ m/$match/i ||
 		    $item->{ipid}  =~ m/$match/i ||
-		    $item->{introtext} =~ m/$match/i) {
+		    $item->{introtext} =~ m/$match/i ||
+		    $url =~ m/$match/i) {
 			push @$subnotes_ref, $memory;
 		}
 	}
