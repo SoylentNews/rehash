@@ -5162,3 +5162,5 @@ UPDATE vars SET value = 'T_2_5_0_197' WHERE name = 'cvs_tag_currentcode';
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
+
+UPDATE vars SET value = 'SourceForge\, Inc' WHERE name = 'sitepublisher';
