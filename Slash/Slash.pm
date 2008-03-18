@@ -217,6 +217,7 @@ sub displayStory {
 		&& $story->{rendered} && !$options->{force_cache_freshen}
 		&& !$form->{simpledesign} && !$user->{simpledesign}
 		&& !$form->{lowbandwidth} && !$user->{lowbandwidth}
+		&& !$form->{pda} && !$user->{pda} 
 		&& (!$form->{ssi} || $form->{ssi} ne 'yes')
 		&& !$user->{noicons}
 		&& !$form->{issue}
