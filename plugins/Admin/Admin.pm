@@ -221,7 +221,7 @@ sub ajax_signoff {
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
-	return unless $user->{is_admin};
+	return unless $user->{is_admin} || $user->{acl}{signoff_allowed};
 	
 	my $stoid = $form->{stoid};
 	my $uid   = $user->{uid};
@@ -326,11 +326,11 @@ sub getSignoffData {
 	my($self, $days) = @_;
 	my $days_q = $self->sqlQuote($days);
 	my $signoff_info = $self->sqlSelectAllHashrefArray(
-		"stories.stoid, users.uid, (unix_timestamp(min(signoff_time)) - unix_timestamp(stories.time)) / 60 AS min_to_sign, users.nickname",
+		"stories.stoid, users.uid, (unix_timestamp(min(signoff_time)) - unix_timestamp(stories.time)) / 60 AS min_to_sign, users.nickname, users.seclev",
 		"stories, story_topics_rendered, signoff, users",
 		"stories.stoid = story_topics_rendered.stoid AND signoff.stoid=stories.stoid AND users.uid = signoff.uid
 	         AND stories.time <= NOW() AND stories.time > DATE_SUB(NOW(), INTERVAL $days_q DAY)",
-		"GROUP BY signoff.uid, signoff.stoid"
+		"GROUP BY signoff.uid, signoff.stoid ORDER BY users.seclev DESC"
 	);
 	return $signoff_info;
 

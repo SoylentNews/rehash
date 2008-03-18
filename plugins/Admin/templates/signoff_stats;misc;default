@@ -23,16 +23,22 @@ __template__
 	</td>
 	[% END %]
 </tr>
-
-[% FOREACH author = author_info.keys %]
-	<tr class="data_hl1"><td>[% author_info.$author.nickname %]</td>
+[% seen_admin = 0 %]
+[% separator = 0 %]
+[% FOREACH author = author_array %]
+	[% IF author.seclev >= 100; seen_admin = 1; END %]
+	[% IF seen_admin && author.seclev < 100 && !separator %]
+		<tr><td colspan="6"><b>Non-Admins</b></td></tr>
+		[% separator = 1; %]
+	[% END %]
+	<tr class="data_hl1"><td>[% author.nickname %]</td>
 	[% FOREACH days = num_days %]
 	[% num_stories = stoids_for_days.$days.keys.size || 0 %]
-	[% cnt = author_info.$author.$days.cnt || 0 %]
+	[% cnt = author.$days.cnt || 0 %]
 	<td>[% cnt %] of [% num_stories %]</td>
 	<td> 
 		[% IF cnt > 0 %]
-			[% avg_time = author_info.$author.$days.tot_time / cnt %]
+			[% avg_time = author.$days.tot_time / cnt %]
 			[% avg_time.int %] m
 		[% ELSE %]
 			N/A

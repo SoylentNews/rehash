@@ -248,7 +248,7 @@ __template__
 						<a href="[% constants.rootdir %]/admin.pl?op=static_files&amp;sid=[% sid %]">Media Files associated with this story</a>
 					</label>
 					<table cellpadding="3" cellspacing="3">
-					<tr><td>Select <br>Thumb</td><td colspan="3"></td><td>Click to <br>add to body</td></tr>
+					<tr><td>Select <br>Thumb</td><td colspan="3"></td><td>Click to <br>add to body</td><td>Click to add<br>to media</td></tr>
 					[% FOREACH mfile = story_static_files %]
 					[% bigfile = mfile.name %]
 					[% IF mfile.filetype != "image" || (mfile.filetype == "image" && bigfile.match('-thumb\.')) %]
@@ -274,6 +274,13 @@ __template__
 							<a href="#bodytext" onclick="appendToBodytext('\n<a href=\'[% constants.imagedir %][% mfile.name %]\'>[% filename %]</a>')">Add [% filename %]</a>
 						[% END %]
 </td>
+<td>
+	[% IF mfile.filetype == "image" %]
+		<a href="#media" onclick="appendToMedia('\n<a href=\'[% constants.imagedir %][% bigfile %]\'><img src=\'[% constants.imagedir %][% mfile.name %]\' width=\'[% mfile.width %]\' height=\'[% mfile.height %]\'></a>')"><img src="[% constants.imagedir %][% mfile.name %]" width="[% width %]" height="[% height %]"></a>
+	[% ELSE %]
+		<a href="#media" onclick="appendToMedia('\n<a href=\'[% constants.imagedir %][% mfile.name %]\'>[% filename %]</a>')">Add [% filename %]</a>
+	[% END %]
+</td>
 </tr>
 					[% END %]
 					[% END %]
@@ -293,6 +300,7 @@ __template__
 				<label>
 					<a href="#" onclick="toggleId('admin-media','hide','show'); return false">Media</a>
 				</label>
+				<a name="media"></a>
 				<textarea name="media" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" wrap="virtual" id="admin-media" class="[% storyref.media ? "show" : "hide" %]">[% storyref.media | strip_literal %]</textarea>
 				<div class="notes">[% ispell_comments.bodytext %]</div>
 				[% PROCESS editbuttons %]
