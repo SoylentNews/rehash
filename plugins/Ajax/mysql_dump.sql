@@ -155,7 +155,7 @@ INSERT INTO ajax_ops VALUES (NULL, 'remarks_config', 'Slash::Remarks', 'ajaxFetc
 INSERT INTO ajax_ops VALUES (NULL, 'remarks_config_save', 'Slash::Remarks', 'ajaxConfigSave', 'ajax_admin', 'createuse');
 
 # signoff
-INSERT INTO ajax_ops VALUES (NULL, 'admin_signoff', 'Slash::Admin', 'ajax_signoff', 'ajax_admin', 'use');
+INSERT INTO ajax_ops VALUES (NULL, 'admin_signoff', 'Slash::Admin', 'ajax_signoff', 'ajax_user_static', 'createuse');
 
 # slashboxes
 INSERT INTO ajax_ops VALUES (NULL, 'admin_slashdbox', 'Slash::Admin', 'ajax_slashdbox', 'ajax_admin', 'createuse');
