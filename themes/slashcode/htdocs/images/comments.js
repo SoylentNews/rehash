@@ -1471,55 +1471,12 @@ function getOffsetLeft (el) {
 	return ol;
 }
 
-function getOffsetTop (el) {
-	if (!el)
-		return false;
-	var ot = el.offsetTop;
-	while((el = el.offsetParent) != null)
-		ot += el.offsetTop;
-	return ot;
-}
 
-function viewWindowLeft() {
-	if (self.pageXOffset) // all except Explorer
-	{
-		return self.pageXOffset;
-	}
-	else if (document.documentElement && document.documentElement.scrollTop)
-		// Explorer 6 Strict
-	{
-		return document.documentElement.scrollLeft;
-	}
-	else if (document.body) // all other Explorers
-	{
-		return document.body.scrollLeft;
-	}
-}
-
-function viewWindowTop() {
-	if (self.pageYOffset) // all except Explorer
-	{
-		return self.pageYOffset;
-	}
-	else if (document.documentElement && document.documentElement.scrollTop)
-		// Explorer 6 Strict
-	{
-		return document.documentElement.scrollTop;
-	}
-	else if (document.body) // all other Explorers
-	{
-		return document.body.scrollTop;
-	}
-	return;
-}
 
 function viewWindowRight() {
 	return viewWindowLeft() + (window.innerWidth || document.documentElement.clientWidth);
 }
 
-function viewWindowBottom() {
-	return viewWindowTop() + (window.innerHeight || document.documentElement.clientHeight);
-}
 
 function commentIsInWindow(cid, just_head) {
 	var in_window = isInWindow(fetchEl('comment_' + cid));
@@ -1528,14 +1485,6 @@ function commentIsInWindow(cid, just_head) {
 	return in_window;
 }
 
-function isInWindow(obj) {
-	var y = getOffsetTop(obj);
-
-	if (y > viewWindowTop() && y < viewWindowBottom()) {
-		return 1;
-	}
-	return 0;
-}
 
 
 /* code for the draggable threshold widget */

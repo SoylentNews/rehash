@@ -95,7 +95,17 @@ END %]
 			[% story.introtext %]
 		</div>
 
-[% IF full && user.is_admin && !preview && env.script_name != '/admin.pl' %]<br><a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</a>&nbsp;[% IF constants.plugin.Ajax %][% PROCESS signoff stoid = story.stoid %] [% PROCESS neverdisplay stoid = stoid %][% END %][% END %]
+[% IF full && user.is_admin && !preview && env.script_name != '/admin.pl' %]<br><a href="[% gSkin.rootdir -%]/admin.pl?op=edit&amp;sid=[% story.sid %]">[ Edit ]</a>&nbsp;[% END %]
+[% IF full && !preview && env.script_name != '/admin.pl' %]
+	[% IF constants.plugin.Ajax %]
+		[% IF user.is_admin || user.acl.signoff_allowed %]
+			[% PROCESS signoff stoid = story.stoid %]
+		[% END %]
+		[% IF user.is_admin %]
+			[% PROCESS neverdisplay stoid = stoid %]
+		[% END %]
+	[% END %]
+[% END %]
 
 [% IF story.is_future && !user.is_admin %]<p>See any serious problems with this story?
 [% IF constants.ircslash_remarks %]
