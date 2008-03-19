@@ -603,6 +603,9 @@ sub getTagnameidClid {
 	}
 
 	# Is it descriptive?
+	# XXX this should be optimized by retrieving the list of _all_
+	# descriptive tagnames in memcached or the local closure and
+	# doing a lookup on that.
 	if ($types->{describe} && !$clid) {
 		$tn_data = $self->getTagnameDataFromId($tagnameid);
 		$clid = $types->{describe} if $tn_data->{descriptive};
@@ -1854,25 +1857,65 @@ sub tagnameorder {
 	$a2 cmp $b2 || $a1 cmp $b1;
 }
 
+{ # closure
+my $tagname_cache_lastcheck = 1;
 sub listTagnamesByPrefix {
 	my($self, $prefix_str, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $ret_hr;
+
+	my $mcd = undef;
+	$mcd = $self->getMCD() unless $options;
+	my $mcdkey = "$self->{_mcd_keyprefix}:tag_prefx:";
+	if ($mcd) {
+		$ret_hr = $mcd->get("$mcdkey$prefix_str");
+		return $ret_hr if $ret_hr;
+	}
+
+	# If the tagname_cache table has been filled, use it.
+	# Otherwise, perform an expensive query directly.
+	# The logic is that $tagname_cache_lastcheck stays a
+	# large positive number (a timestamp) until we determine
+	# that the table _does_ have rows, at which point that
+	# number drops to 0.  Once its value hits 0, it is never
+	# checked again.
+	if ($tagname_cache_lastcheck > 0 && $tagname_cache_lastcheck < time()-3600) {
+		my $rows = $reader->sqlCount('tagname_cache');
+		$tagname_cache_lastcheck = $rows ? 0 : time;
+	}
+	my $use_cache_table = $tagname_cache_lastcheck ? 0 : 1;
+	if ($use_cache_table) {
+		$ret_hr = $self->listTagnamesByPrefix_cache($prefix_str, $options);
+	} else {
+		$ret_hr = $self->listTagnamesByPrefix_direct($prefix_str, $options);
+	}
+
+	if ($mcd) {
+		# The expiration we use is much longer than the tags_cache_expire
+		# var since the cache data changes only once a day.
+		$mcd->set("$mcdkey$prefix_str", $ret_hr, 3600);
+	}
+
+	return $ret_hr;
+}
+}
+
+# This is a quick-and-dirty (and not very accurate) estimate which
+# is only performed for a site which has not built its tagname_cache
+# table yet.  Hopefully most sites will use this the first day the
+# Tags plugin is installed and then never again.
+
+sub listTagnamesByPrefix_direct {
+	my($self, $prefix_str, $options) = @_;
+	my $constants = getCurrentStatic();
 	my $like_str = $self->sqlQuote("$prefix_str%");
 	my $minc = $self->sqlQuote($options->{minc} || $constants->{tags_prefixlist_minc} ||  4);
 	my $mins = $self->sqlQuote($options->{mins} || $constants->{tags_prefixlist_mins} ||  3);
 	my $num  = $options->{num}  || $constants->{tags_prefixlist_num};
 	$num = 10 if !$num || $num !~ /^(\d+)$/ || $num < 1;
 
-	my $mcd = undef;
-	$mcd = $self->getMCD() unless $options;
-	my $mcdkey = "$self->{_mcd_keyprefix}:tag_prefx:";
-	if ($mcd) {
-		my $ret_str = $mcd->get("$mcdkey$prefix_str");
-		return $ret_str if $ret_str;
-	}
-
-	# XXX boost SUM if tagname is descriptive
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $ar = $reader->sqlSelectAllHashrefArray(
 		'tagname,
 		 COUNT(DISTINCT tags.uid) AS c,
@@ -1891,10 +1934,22 @@ sub listTagnamesByPrefix {
 	for my $hr (@$ar) {
 		$ret_hr->{ $hr->{tagname} } = $hr->{sc};
 	}
-	if ($mcd) {
-		my $mcdexp = $constants->{tags_cache_expire} || 180;
-		$mcd->set("$mcdkey$prefix_str", $ret_hr, $mcdexp)
-	}
+	return $ret_hr;
+}
+
+sub listTagnamesByPrefix_cache {
+	my($self, $prefix_str, $options) = @_;
+	my $constants = getCurrentStatic();
+	my $like_str = $self->sqlQuote("$prefix_str%");
+	my $num  = $options->{num}  || $constants->{tags_prefixlist_num};
+	$num = 10 if !$num || $num !~ /^(\d+)$/ || $num < 1;
+
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $ret_hr = $reader->sqlSelectAllKeyValue(
+		'tagname, weight',
+		'tagname_cache',
+		"tagname LIKE $like_str",
+		"ORDER BY weight DESC LIMIT $num");
 	return $ret_hr;
 }
 

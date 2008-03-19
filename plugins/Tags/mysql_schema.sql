@@ -33,7 +33,19 @@ CREATE TABLE tagnames (
 	PRIMARY KEY tagnameid (tagnameid),
 	UNIQUE tagname (tagname)
 ) TYPE=InnoDB;
-	
+
+# tagname_cache is not normalized because it's intended to be used
+# for quick lookups.
+
+DROP TABLE IF EXISTS tagname_cache;
+CREATE TABLE tagname_cache (
+	tagnameid	int UNSIGNED NOT NULL,
+	tagname		VARCHAR(64) NOT NULL,
+	weight		FLOAT UNSIGNED DEFAULT 0.0 NOT NULL,
+	PRIMARY KEY tagnameid (tagnameid),
+	UNIQUE tagname (tagname),
+) TYPE=InnoDB;
+
 DROP TABLE IF EXISTS tagname_params;
 CREATE TABLE tagname_params (
 	tagnameid	int UNSIGNED NOT NULL,

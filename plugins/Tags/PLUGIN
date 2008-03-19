@@ -6,6 +6,7 @@ mysql_dump=mysql_dump.sql
 mysql_schema=mysql_schema.sql
 requiresplugin=Ajax
 task=tagbox.pl
+task=tags_tagnamecache.pl
 task=tags_udc.pl
 task=tags_updateclouts.pl
 template=templates/data;tags;default
