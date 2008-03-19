@@ -1471,12 +1471,9 @@ function getOffsetLeft (el) {
 	return ol;
 }
 
-
-
 function viewWindowRight() {
 	return viewWindowLeft() + (window.innerWidth || document.documentElement.clientWidth);
 }
-
 
 function commentIsInWindow(cid, just_head) {
 	var in_window = isInWindow(fetchEl('comment_' + cid));
@@ -1484,7 +1481,6 @@ function commentIsInWindow(cid, just_head) {
 		in_window = isInWindow(fetchEl('comment_sub_' + cid));
 	return in_window;
 }
-
 
 
 /* code for the draggable threshold widget */
@@ -1917,7 +1913,7 @@ function keyHandler(e, k) {
 			var next_cid = 0;
 			var key = k || String.fromCharCode(c);
 			var keyo = validkeys[key];
-			if (keyo && keyo['reply'] && current_cid) {
+			if (keyo && keyo['reply'] && user.is_subscriber && current_cid) { // XXX
 				replyTo(current_cid);
 
 			// forward and back between comments, in order of how they were loaded

@@ -5049,8 +5049,6 @@ UPDATE vars SET value = 'T_2_5_0_184' WHERE name = 'cvs_tag_currentcode';
 # not for slashdot
 UPDATE vars SET value = 'yes no binspam dupe notthebest offtopic stupid slownewsday interesting funny insightful' WHERE name = 'tagbox_top_excludetagnames';
 
-# PUDGE LAST UPDATED HERE
-
 # 2007-12-05
 UPDATE vars SET value = 'T_2_5_0_185' WHERE name = 'cvs_tag_currentcode';
 
@@ -5163,7 +5161,7 @@ UPDATE vars SET value = 'T_2_5_0_197' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
-UPDATE vars SET value = 'SourceForge\, Inc' WHERE name = 'sitepublisher';
+# PUDGE LAST UPDATED HERE
 
 # for plugins/Ajax
 UPDATE ajax_ops set reskey_name = 'ajax_user_static', reskey_type='createuse' WHERE op='admin_signoff';

@@ -24,10 +24,12 @@ __template__
    this_title = this_title | strip_html;
    PROCESS titlebar title="Reply to: $this_title" %]
 
+<p>If you have difficulty with this form, please use the <a href="[% gSkin.rootdir %]/comments.pl?op=Reply&amp;sid=[% sid %]&amp;pid=[% pid %]">old form</a>.</p>
+
 [% IF user.is_anon %]<p>
 	[% IF constants.allow_anonymous %]
 You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
-in now</a>, or <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>/
+in now</a>, or <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>.
 	[% ELSE %]
 You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
 in now</a>, <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>,
@@ -44,12 +46,11 @@ or post as <b>[% user.nickname | strip_literal %]</b>.
 <input type="hidden" name="gotmodwarning_[% pid %]" id="gotmodwarning_[% pid %]" value="0">
 [% reskey_label = "reskey_reply_$pid"; PROCESS reskey_tag %]
 <p><input type="text" name="postersubj_[% pid %]" id="postersubj_[% pid %]" value="[% form.postersubj | strip_attribute %]" size="50" maxlength="50">
-[% UNLESS user.is_anon %][<a href="[% gSkin.rootdir %]/my/comments" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">Customize Posting Preferences</a>][% END %]</p>
+[% UNLESS user.is_anon %][<a href="[% gSkin.rootdir %]/my/comments" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">Options</a>]
+[%- IF constants.allow_anonymous && user.karma > -1 && (discussion.commentstatus == 'enabled' || discussion.commentstatus == 'logged_in') -%]
+	<input type="checkbox" name="postanon_[% pid %]" id="postanon_[% pid %]"> Post Anonymously
+[%- END %]</p>[% END %]
 <p><textarea wrap="virtual" name="postercomment_[% pid %]" id="postercomment_[% pid %]" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]"></textarea></p>
-
-[% IF constants.allow_anonymous && user.karma > -1 && !user.is_anon && (discussion.commentstatus == 'enabled' || discussion.commentstatus == 'logged_in')  %]
-	<p><input type="checkbox" name="postanon_[% pid %]" id="postanon_[% pid %]"> Post Anonymously</p>
-[% END %]
 
 	</div>
 	<div id="replyto_msg_[% pid %]" class="replyto_msg"></div>

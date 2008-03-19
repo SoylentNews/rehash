@@ -598,7 +598,7 @@ sub getPoints {
 
 	# Adjust reasons. Do we need a reason?
 	# Are you threatening me?
-	if ($reasons) {
+	if ($reasons && $C->{reason}) {
 		my $reason_name = $reasons->{$C->{reason}}{name};
 		if ($reason_name && $user->{"reason_alter_$reason_name"}) {
 			$hr->{reason_bonus} =
@@ -1359,7 +1359,7 @@ sub preProcessComment {
 	my $tempSubject = strip_notags($comm->{postersubj});
 	my $tempComment = $comm->{postercomment};
 
-	$comm->{anon} = 0;
+	$comm->{anon} = $user->{is_anon};
 	if ($comm->{postanon}
 		&& $reader->checkAllowAnonymousPosting
 		&& $user->{karma} > -1
@@ -1884,7 +1884,7 @@ sub _hard_dispComment {
 		if (length $comment->{points}) {
 			$score_to_display .= $comment->{points};
 			$score_to_display = qq[<a href="#" onclick="getModalPrefs('modcommentlog', 'Moderation Comment Log', $comment->{cid}); return false">$score_to_display</a>]
-				if $constants->{modal_prefs_active} && $user->{is_admin};
+				if $constants->{modal_prefs_active} && !$user->{is_anon};
 		} else {
 			$score_to_display .= '?';
 		}
@@ -1978,7 +1978,7 @@ EOT
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
 			subject_only => 1,
-			onclick	=> (($discussion2 && $user->{test_code}) ? "replyTo($comment->{cid}); return false;" : '')
+			onclick	=> (($discussion2 && $user->{is_subscriber}) ? "replyTo($comment->{cid}); return false;" : '')
 		}) . '</span>') unless $user->{state}{discussion_archived};
 
 		push @link, linkComment({

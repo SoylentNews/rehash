@@ -93,7 +93,7 @@ sub ajaxModerateCid {
 
 			$html->{$score}  = "Score:$points";
 			$html->{$score} = qq[<a href="#" onclick="getModalPrefs('modcommentlog', 'Moderation Comment Log', $cid); return false">$html->{$score}</a>]
-				if $constants->{modal_prefs_active} && $user->{is_admin};
+				if $constants->{modal_prefs_active} && !$user->{is_anon};
 			$html->{$score} .= ", $reasons->{$comment->{reason}}{name}"
 				if $comment->{reason} && $reasons->{$comment->{reason}};
 			$html->{$score} = "($html->{$score})";

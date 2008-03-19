@@ -52,13 +52,13 @@ sub create_comment_vote {
 	my $extras;
 	$extras =  $slashdb->getNexusExtrasForChosen({$disc_skin->{nexus} => 1}, {content_type => "comment"}) if $disc_skin && $disc_skin->{nexus};
 
-	return unless $extras;
+	return 0 unless $extras;
 	
 	foreach my $extra(@$extras) {
 		$can_create_vote=1 if $extra->[1] eq "comment_vote";	
 	}
 
-	return unless $can_create_vote;
+	return 0 unless $can_create_vote;
 	
 	my $active = "yes";
 	my $val = 0;

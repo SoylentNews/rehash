@@ -45,7 +45,7 @@ show_uid_totals = (type == "uid" && (this_user.totalmods || this_user.downmods |
 bg_toggle = 0;
 %]
 [% IF mods.size > 0  || show_uid_totals %]
-	[% IF user.is_admin and need_m2_form %]
+	[% IF user.is_admin && need_m2_form %]
 	<form method="post"[% IF constants.modal_prefs_active %] id="modal_prefs"[% END %] action="[% gSkin.rootdir %]/comments.pl">
 	<div>
 	[% END %]
@@ -55,7 +55,7 @@ bg_toggle = 0;
 	[% total_cols = 6 %]	
 	[% IF title;
 		extra = "";
-		IF constants.m2;
+		IF constants.m2 && !constants.modal_prefs_active;
 			show_m2s_op = show_m2s ? 0 : 1;
 			self_url = PROCESS base_url_mod;
 			url_tail = PROCESS state_url_mod override = { show_m2s => show_m2s_op};

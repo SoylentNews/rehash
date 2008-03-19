@@ -309,6 +309,7 @@ sub previewReply {
 		$html = prevComment($preview, $user);
 	}
 
+	$error_message ||= 'This comment will not be saved until you click the Submit button below.';
 	$options->{content_type} = 'application/json';
 	my %to_dump = (
 		error => $error_message,
