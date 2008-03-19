@@ -269,14 +269,14 @@ __template__
 								[% height = height.int %]
 							[% END %]
 							[% bigfile = bigfile.replace('-thumb') %]
-							<a href="#bodytext" onclick="appendToBodytext('\n<a href=\'[% constants.imagedir %][% bigfile %]\'><img src=\'[% constants.imagedir %][% mfile.name %]\' width=\'[% mfile.width %]\' height=\'[% mfile.height %]\'></a>')"><img src="[% constants.imagedir %][% mfile.name %]" width="[% width %]" height="[% height %]"></a>
+							<a href="#bodytext" onclick="appendToBodytext('\n<img src=\'[% constants.imagedir %][% bigfile %]\'>')"><img src="[% constants.imagedir %][% mfile.name %]" width="[% width %]" height="[% height %]"></a>
 						[% ELSE %]
 							<a href="#bodytext" onclick="appendToBodytext('\n<a href=\'[% constants.imagedir %][% mfile.name %]\'>[% filename %]</a>')">Add [% filename %]</a>
 						[% END %]
 </td>
 <td>
 	[% IF mfile.filetype == "image" %]
-		<a href="#media" onclick="appendToMedia('\n<a href=\'[% constants.imagedir %][% bigfile %]\'><img src=\'[% constants.imagedir %][% mfile.name %]\' width=\'[% mfile.width %]\' height=\'[% mfile.height %]\'></a>')"><img src="[% constants.imagedir %][% mfile.name %]" width="[% width %]" height="[% height %]"></a>
+		<a href="#media" onclick="appendToMedia('\n<img src=\'[% constants.imagedir %][% bigfile %]\'>')"><img src="[% constants.imagedir %][% mfile.name %]" width="[% width %]" height="[% height %]"></a>
 	[% ELSE %]
 		<a href="#media" onclick="appendToMedia('\n<a href=\'[% constants.imagedir %][% mfile.name %]\'>[% filename %]</a>')">Add [% filename %]</a>
 	[% END %]
