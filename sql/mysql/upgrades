@@ -5166,12 +5166,35 @@ UPDATE vars SET value = 'T_2_5_0_197' WHERE name = 'cvs_tag_currentcode';
 # for plugins/Ajax
 UPDATE ajax_ops set reskey_name = 'ajax_user_static', reskey_type='createuse' WHERE op='admin_signoff';
 
+# comments
+DELETE FROM reskey_resource_checks WHERE rkrid = 1;
+INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::User',                101);
+INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::ACL',                 201);
+INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::AL2::AnonNoPost',     301);
+INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::AL2::NoPostAnon',     401);
+INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
+INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::AL2::Spammer',        531);
+INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::Duration',            601);
+
+DELETE FROM reskey_vars WHERE rkrid = 1;
+INSERT INTO reskey_vars VALUES (1, 'adminbypass', 1, 'If admin, bypass checks for duration, proxy, and user');
+INSERT INTO reskey_vars VALUES (1, 'acl_no', 'reskey_no_comments', 'If this ACL present, can\'t use resource');
+INSERT INTO reskey_vars VALUES (1, 'user_seclev', 0, 'Minimum seclev to use resource');
+INSERT INTO reskey_vars VALUES (1, 'duration_max-uses',      30, 'how many uses per timeframe');
+INSERT INTO reskey_vars VALUES (1, 'duration_max-failures',  10, 'how many failures per reskey');
+INSERT INTO reskey_vars VALUES (1, 'duration_uses',          60, 'min duration (in seconds) between uses');
+INSERT INTO reskey_vars VALUES (1, 'duration_creation-use',  10, 'min duration between (in seconds) creation and use');
+
 # for plugins/Tags
 CREATE TABLE tagname_cache (
-	tagnameid	int UNSIGNED NOT NULL,
-	tagname		VARCHAR(64) NOT NULL,
-	weight		FLOAT UNSIGNED DEFAULT 0.0 NOT NULL,
-	PRIMARY KEY tagnameid (tagnameid),
-	UNIQUE tagname (tagname),
+   tagnameid   int UNSIGNED NOT NULL,
+   tagname     VARCHAR(64) NOT NULL,
+   weight      FLOAT UNSIGNED DEFAULT 0.0 NOT NULL,
+   PRIMARY KEY tagnameid (tagnameid),
+   UNIQUE tagname (tagname),
 ) TYPE=InnoDB;
+
+
+# 2008-03-19
+UPDATE vars SET value = 'T_2_5_0_198' WHERE name = 'cvs_tag_currentcode';
 

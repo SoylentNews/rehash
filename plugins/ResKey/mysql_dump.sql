@@ -54,7 +54,7 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Check
 INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
 INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::AL2::Spammer',        531);
 INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::Duration',            601);
-INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'use', 'Slash::ResKey::Checks::ProxyScan',          1001);
+#INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'use', 'Slash::ResKey::Checks::ProxyScan',          1001);
 
 # dummy example of how to disable the Slash::ResKey::Checks::User check for "touch"
 # (maybe, for example, because the check isn't needed)
@@ -66,8 +66,8 @@ INSERT INTO reskey_vars VALUES (1, 'acl_no', 'reskey_no_comments', 'If this ACL 
 INSERT INTO reskey_vars VALUES (1, 'user_seclev', 0, 'Minimum seclev to use resource');
 INSERT INTO reskey_vars VALUES (1, 'duration_max-uses',      30, 'how many uses per timeframe');
 INSERT INTO reskey_vars VALUES (1, 'duration_max-failures',  10, 'how many failures per reskey');
-INSERT INTO reskey_vars VALUES (1, 'duration_uses',         120, 'min duration (in seconds) between uses');
-INSERT INTO reskey_vars VALUES (1, 'duration_creation-use',   5, 'min duration between (in seconds) creation and use');
+INSERT INTO reskey_vars VALUES (1, 'duration_uses',          60, 'min duration (in seconds) between uses');
+INSERT INTO reskey_vars VALUES (1, 'duration_creation-use',  10, 'min duration between (in seconds) creation and use');
 
 
 
