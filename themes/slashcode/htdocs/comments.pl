@@ -527,7 +527,7 @@ sub previewForm {
 
 	my $comment = preProcessComment($form, $user, $discussion, $error_message) or return;
 	return $$error_message if $comment eq '-1';
-	my $preview = postProcessComment({ %$comment, %$form, %$user }, 0, $discussion);
+	my $preview = postProcessComment({ %$user, %$form, %$comment }, 0, $discussion);
 
 	if ($constants->{plugin}{Subscribe}) {
 		$preview->{subscriber_bonus} =
