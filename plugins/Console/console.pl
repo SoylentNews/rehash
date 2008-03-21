@@ -65,8 +65,7 @@ sub display {
 	my $tagnamesbox = '';
 	my $tags = getObject('Slash::Tags');
 	if ($tags) {
-		my $rtoi_ar = $tags->getRecentTagnamesOfInterest();
-		$tagnamesbox = $tags->showRecentTagnamesBox();
+		$tagnamesbox = $tags->showRecentTagnamesBox({ box_only => 1});
 	}
 
 	slashDisplay('display', {
