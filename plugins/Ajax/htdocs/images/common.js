@@ -1517,7 +1517,7 @@ function toggle_filter_prefs() {
 }
 
 function admin_signoff(stoid, type, id) {
-	var params = [];
+	var params = {};
 	params['op'] = 'admin_signoff';
 	params['stoid'] = stoid;
 	params['reskey'] = reskey_static;

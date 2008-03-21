@@ -48,7 +48,7 @@ __template__
 [% END %]
 [% IF needjssubmit %]
 <script type="text/javascript">
-	$('postform-[% item.id %]').submit();
+	$dom('postform-[% item.id %]').submit();
 </script>
 [% END %]
 __version__
