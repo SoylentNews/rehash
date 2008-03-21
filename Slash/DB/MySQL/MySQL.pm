@@ -7923,7 +7923,7 @@ sub getSignoffCountHashForStoids {
 		"stoid", 
 		"stoid, COUNT(DISTINCT signoff.uid) AS cnt",
 		"signoff, users",
-		"users.uid = signoffs.uid stoid in ($stoid_list) $user_limit_clause",
+		"users.uid = signoff.uid AND stoid IN ($stoid_list) $user_limit_clause",
 		"GROUP BY stoid"
 	);
 	
