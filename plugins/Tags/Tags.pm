@@ -2154,11 +2154,16 @@ sub getRecentTagnamesOfInterest {
 
 sub showRecentTagnamesBox {
 	my($self, $options) = @_;
-	my $rtoi_ar = $self->getRecentTagnamesOfInterest($options);
+	$options ||= {};
 
-	my $text = slashDisplay('recenttagnamesbox', {
-		rtoi => $rtoi_ar,
-	}, { Return => 1 });
+	my $text = " ";
+	
+	unless ($options->{box_only}) {
+		my $rtoi_ar = $self->getRecentTagnamesOfInterest();
+		$text = slashDisplay('recenttagnamesbox', {
+			rtoi => $rtoi_ar,
+		}, { Return => 1 });
+	}
 
 	return $text if $options->{contents_only};
 
