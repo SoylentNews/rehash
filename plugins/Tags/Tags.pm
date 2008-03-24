@@ -728,6 +728,8 @@ sub getAllTagsFromUser {
 	my $orderdir = uc($options->{orderdir}) eq "DESC" ? "DESC" : "ASC";
 	my $inact_clause =   $options->{include_inactive} ? '' : ' AND inactivated IS NULL';
 	my $private_clause = $options->{include_private}  ? '' : " AND private='no'";
+	my $tagname_clause = $options->{tagnameid}
+		? ' AND tags.tagnameid=' . $self->sqlQuote($options->{tagnameid}) : '';
 
 	my($table_extra, $where_extra) = ("","");
 	my $uid_q = $self->sqlQuote($uid);
@@ -752,7 +754,7 @@ sub getAllTagsFromUser {
 		'tags.*',
 		"tags $table_extra",
 		"tags.uid = $uid_q
-		 $inact_clause $private_clause $where_extra",
+		 $inact_clause $private_clause $tagname_clause $where_extra",
 		"ORDER BY $orderby $orderdir $limit");
 	return [ ] unless $ar && @$ar;
 	$self->dataConversionForHashrefArray($ar);
@@ -2015,19 +2017,48 @@ sub getRecentTagnamesOfInterest {
 		'tagnameid, tagname',
 		'tagnames',
 		"tagname IN ($tagname_str)");
-	my $tagnameid_str = join(',', map { $self->sqlQuote($_) } sort keys %$tagnameid_to_name);
+	my $tagnameid_recent_ar = [ sort { $a <=> $b } keys %$tagnameid_to_name ];
 	my $tagname_to_id = { reverse %$tagnameid_to_name };
 
-	# Next, build a hash identifying which of those are new tagnames,
-	# i.e. which were used for the first time within the same recent
-	# time interval we're looking at.
-	my $tagname_firstrecent_ar = $self->sqlSelectColArrayref(
-		'tagname, MIN(created_at) AS firstuse',
-		'tagnames, tags',
-		"tagnames.tagnameid IN ($tagnameid_str)
-		 AND tagnames.tagnameid=tags.tagnameid",
-		"GROUP BY tagname
-		 HAVING firstuse >= DATE_SUB(NOW(), INTERVAL $secsback SECOND)");
+	# Heuristic to optimize the selection process.  Right now we have
+	# a list of many tagnameids (say, around 1000), most of which are
+	# not new (were used prior to the time interval in question).
+	# We eliminate those known not to be new by finding the newest
+	# tagnameid for the day prior to the time interval, then grepping
+	# out tagnameids in our list less than that.
+	#
+	# That should leave us with a much shorter list which will be
+	# processed much faster.  On a non-busy site or during a
+	# pathological case where nobody types in any new tagnames for an
+	# entire day, the worst case here is that the processing is as
+	# slow as it was prior to this optimization (up to a minute or so
+	# on Slashdot).
+	my $tagid_secsback = $self->sqlSelect('MIN(tagid)', 'tags',
+		"created_at >= DATE_SUB(NOW(), INTERVAL $secsback SECOND)")
+		|| 0;
+	my $secsback_1moreday = $secsback + 86400;
+	my $tagid_secsback_1moreday = $self->sqlSelect('MIN(tagid)', 'tags',
+		"created_at >= DATE_SUB(NOW(), INTERVAL $secsback_1moreday SECOND)")
+		|| 0;
+	my $max_previously_known_tagnameid = $self->sqlSelect('MAX(tagnameid)', 'tags',
+		"tagid BETWEEN $tagid_secsback_1moreday AND $tagid_secsback")
+		|| 0;
+	$tagnameid_recent_ar = [
+		grep { $_ > $max_previously_known_tagnameid }
+		@$tagnameid_recent_ar ]
+		if $max_previously_known_tagnameid > 0;
+	my $tagnameid_str = join(',', map { $self->sqlQuote($_) } @$tagnameid_recent_ar);
+
+	# Now do the select to find the actually-new tagnameids.
+	my $tagnameid_firstrecent_ar = $self->sqlSelectColArrayref(
+		'DISTINCT tagnameid',
+		'tags',
+		"tagid >= $tagid_secsback AND tagnameid IN ($tagnameid_str)");
+
+	# Run through the hash we built earlier to convert ids back to names.
+	my $tagname_firstrecent_ar = [
+		map { $tagnameid_to_name->{$_} }
+		@$tagnameid_firstrecent_ar ];
 	my %tagname_firstrecent = ( map { ($_, 1) } @$tagname_firstrecent_ar );
 
 	# Build a regex that will identify tagnames that begin with an
@@ -2081,7 +2112,7 @@ sub getRecentTagnamesOfInterest {
 		'*',
 		'tags',
 		"tagnameid IN ($tagnameids_of_interest_str)
-		 AND created_at >= DATE_SUB(NOW(), INTERVAL $secsback SECOND)");
+		 AND tagid >= $tagid_secsback");
 	$self->addCloutsToTagArrayref($tags_ar);
 	my %tagnameid_weightsum = ( );
 	my %t_globjid_weightsum = ( );

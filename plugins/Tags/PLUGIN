@@ -20,4 +20,6 @@ template=templates/tagsurldivuser;misc;default
 template=templates/tagsurldivadmin;misc;default
 template=templates/taghistory;misc;default
 template=templates/usertaghistory;users;default
+template=templates/usertagnames;users;default
 template=templates/usertags;users;default
+template=templates/usertagsforname;users;default

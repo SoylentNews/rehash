@@ -612,6 +612,7 @@ sub userdir_handler {
 		}
 
 		my($op, $extra) = split /\//, $string, 2;
+		$extra ||= '';
 
 		my $logged_in = $r->header_in('Cookie') =~ $USER_MATCH;
 		my $try_login = !$logged_in && $logtoken;
@@ -634,9 +635,9 @@ sub userdir_handler {
 				$found_the_op = 1;
 				if ($op eq 'journal') {
 					my $args;
-					if ($extra && $extra =~ /^\d+$/) {
+					if ($extra =~ /^\d+$/) {
 						$args = "id=$extra&op=edit";
-					} elsif ($extra && $extra eq 'friends') {
+					} elsif ($extra eq 'friends') {
 						$args = "op=friendview";
 					} else {
 						$args = "op=list";
@@ -703,7 +704,10 @@ sub userdir_handler {
 					$r->filename($constants->{basedir} . '/journal.pl');
 
 				} elsif ($op eq 'tags') {
-					$r->args("op=showtags");
+					my $args = 'op=showtags';
+					# XXX "!" is a 'reserved' char in URI, escape it here?
+					$args .= "&tagname=$extra" if $extra;
+					$r->args($args);
 					$r->uri('/users.pl');
 					$r->filename($constants->{basedir} . '/users.pl');
 
@@ -846,7 +850,10 @@ sub userdir_handler {
 			$r->filename($constants->{basedir} . '/journal.pl');
 
 		} elsif ($op eq 'tags') {
-			$r->args("op=showtags&nick=$nick&uid=$uid");
+			my $args = "op=showtags&nick=$nick&uid=$uid";
+			# XXX "!" is a 'reserved' char in URI, escape it here?
+			$args .= "&tagname=$extra" if $extra;
+			$r->args($args);
 			$r->uri('/users.pl');
 			$r->filename($constants->{basedir} . '/users.pl');
 

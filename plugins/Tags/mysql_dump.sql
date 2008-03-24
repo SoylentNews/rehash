@@ -34,6 +34,7 @@ INSERT INTO vars (name, value, description) VALUES ('tags_urls_pos_tags', 'plus'
 INSERT INTO vars (name, value, description) VALUES ('tags_urls_neg_tags', 'minus|binspam', '| separated list of tags applied which negatively affect url popularity');
 INSERT INTO vars (name, value, description) VALUES ('tags_userfrac_read', '1', 'Fraction (0.0-1.0) of user UIDs which are allowed to read tags, if tags_*_allow* is set that way');
 INSERT INTO vars (name, value, description) VALUES ('tags_userfrac_write', '0.95', 'Fraction (0.0-1.0) of user UIDs which are allowed to tag, if tags_*_allow* is set that way');
+INSERT INTO vars (name, value, description) VALUES ('tags_usershow_cutoff', '200', 'More tags than this, and instead of showing the full taglist /~user/tags will show the list of tagnames');
 INSERT INTO vars (name, value, description) VALUES ('tags_tagname_regex', '^\!?[a-z][a-z0-9/]{0,63}$', 'Regex that tag names must conform to');
 INSERT INTO vars (name, value, description) VALUES ('tags_upvote_tagname', 'nod', 'Tag for upvote');
 INSERT INTO vars (name, value, description) VALUES ('tags_downvote_tagname', 'nix', 'Tag for downvote');

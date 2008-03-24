@@ -1594,6 +1594,7 @@ sub saveTags {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
+	my $tagname = $form->{tagname};
 
 	return if $user->{is_anon}; # shouldn't be, but can't hurt to check
 
@@ -1611,6 +1612,11 @@ sub showTags {
 	my $constants = getCurrentStatic();
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 
+	# XXX if $user_edit->{acl}{spammer}, either abort or put ref=nofollow in all links
+
+	my $tagname = $form->{tagname} || '';
+	$tagname = '' if !$tags_reader->tagnameSyntaxOK($tagname);
+
 	my($uid, $user_edit);
 	if ($form->{uid} || $form->{nick}) {
 		$uid = $form->{uid} || $tags_reader->getUserUID($form->{nick});
@@ -1627,11 +1633,41 @@ sub showTags {
 		return;
 	}
 
-	my $tags_ar = $tags_reader->getGroupedTagsFromUser($user_edit->{uid});
-	slashDisplay('usertags', {
-		useredit	=> $user_edit,
-		tags_grouped	=> $tags_ar,
-	});
+	my $tagnameid = $tags_reader->getTagnameidFromNameIfExists($tagname);
+	if ($tagnameid) {
+		# Show all user's tags for one particular tagname.
+		my $tags_hr = $tags_reader->getGroupedTagsFromUser($user_edit->{uid},
+			{ tagnameid => $tagnameid });
+		my $tags_ar = $tags_hr->{$tagname} || [ ];
+		slashDisplay('usertagsforname', {
+			useredit	=> $user_edit,
+			tagname		=> $tagname,
+			tags		=> $tags_ar,
+		});
+		
+	} else {
+		my $tags_hr = $tags_reader->getGroupedTagsFromUser($user_edit->{uid});
+		my $num_tags = 0;
+		for my $tn (keys %$tags_hr) {
+			$num_tags += scalar @{ $tags_hr->{$tn} };
+		}
+		my $cutoff = $constants->{tags_usershow_cutoff} || 200;
+		if ($num_tags <= $cutoff) {
+			# Show all user's tags, grouped by tagname.
+			slashDisplay('usertags', {
+				useredit	=> $user_edit,
+				tags_grouped	=> $tags_hr,
+			});
+		} else {
+			# Show all user's tagnames, with links to show all
+			# tags for each particular tagname.
+			my $tagname_ar = [ sort keys %$tags_hr ];
+			slashDisplay('usertagnames', {
+				useredit	=> $user_edit,
+				tagnames	=> $tagname_ar,
+			});
+		}
+	}
 }
 
 #################################################################

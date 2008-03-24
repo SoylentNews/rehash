@@ -1879,10 +1879,12 @@ Hashref of cleaned-up data.
 		colorblock	=> sub { $_[0] =~ s|[^\w#,]+||g				},
 # What I actually want to do for userfield is allow it to match
 # [\w.]+, or pass emailValid(), or be changed to the return value
-# from nickFix().  For technical reasons I'm putting that off
-# until probably next week.  Until then this breaks some very
-# minor functionality. - Jamie 2008-01-09
+# from nickFix().  But nickFix() uses constants, which might not
+# be set up at this point. - Jamie 2008-01-09
 		userfield	=> sub { $_[0] =~ s|[^\w.@ -]||g			},
+# Ditto here, really - Jamie 2008-03-24
+		tagname		=> sub { $_[0] = '' unless
+					 $_[0] =~ /^\!?[a-z][a-z0-9]{0,62}$/		},
 	);
 
 
