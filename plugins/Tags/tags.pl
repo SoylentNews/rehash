@@ -61,7 +61,7 @@ sub main {
 			@objects = @$value;
 #print STDERR "tags.pl got '$mcdkey$tagname' as " . scalar(@objects) . " objects\n";
 		} else {
-			my $objects = $tags_reader->getAllObjectsTagname($tagname, 'describe');
+			my $objects = $tags_reader->getAllObjectsTagname($tagname);
 			my %globjids = ( map { ( $_->{globjid}, 1 ) } @$objects );
 			my $mintc = defined($constants->{tags_list_mintc}) ? $constants->{tags_list_mintc} : 4;
 			for my $globjid (keys %globjids) {
