@@ -43,7 +43,7 @@ sub _formnameNeedsHC {
 }
 
 sub createFormkeyHC {
-	my($self, $formname) = @_;
+	my($self, $formname, $options) = @_;
 
 	# Only certain formnames need human confirmation.  From any       
 	# other formname, just return 1, meaning everything is ok
@@ -54,7 +54,7 @@ sub createFormkeyHC {
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
-	my $formkey = $form->{formkey};
+	my $formkey = $options->{frkey} || $form->{formkey};
 	return 0 unless $formkey;
 
 	# Decide which question we're asking.
@@ -122,7 +122,7 @@ sub createFormkeyHC {
 }
 
 sub reloadFormkeyHC {
-	my($self, $formname) = @_;
+	my($self, $formname, $options) = @_;
 
 	my $user = getCurrentUser();
 
@@ -138,7 +138,7 @@ sub reloadFormkeyHC {
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
-	my $formkey = $form->{formkey};
+	my $formkey = $options->{frkey} || $form->{formkey};
 	my $formkey_quoted = $slashdb->sqlQuote($form->{formkey});
 
 	my($hcid, $html, $question, $tries_left) = $slashdb->sqlSelect(
@@ -159,7 +159,7 @@ sub reloadFormkeyHC {
 }
 
 sub validFormkeyHC {
-	my($self, $formname) = @_;
+	my($self, $formname, $options) = @_;
 
 	# Only certain formnames need human confirmation.  Other formnames
 	# won't even have HC data created for them, so there's no need to
@@ -168,7 +168,7 @@ sub validFormkeyHC {
 
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
-	my $formkey = $form->{formkey};
+	my $formkey = $options->{frkey} || $form->{formkey};
 	return 'invalidhc' unless $formkey;
 
 	my $formkey_quoted = $slashdb->sqlQuote($form->{formkey});
