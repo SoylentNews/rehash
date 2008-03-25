@@ -54,6 +54,7 @@ INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Check
 INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::AL2::NoPost',         501);
 INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::AL2::Spammer',        531);
 INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::Duration',            601);
+INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::HumanConf',           701);
 #INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'use', 'Slash::ResKey::Checks::ProxyScan',          1001);
 
 # dummy example of how to disable the Slash::ResKey::Checks::User check for "touch"
@@ -68,6 +69,10 @@ INSERT INTO reskey_vars VALUES (1, 'duration_max-uses',      30, 'how many uses 
 INSERT INTO reskey_vars VALUES (1, 'duration_max-failures',  10, 'how many failures per reskey');
 INSERT INTO reskey_vars VALUES (1, 'duration_uses',          60, 'min duration (in seconds) between uses');
 INSERT INTO reskey_vars VALUES (1, 'duration_creation-use',  10, 'min duration between (in seconds) creation and use');
+INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon',         300, 'duration_uses for anon');
+INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon-trolla', 3600, 'duration_uses for anon + trolla AL2');
+INSERT INTO reskey_vars VALUES (1, 'duration_uses-trolla',       300, 'duration_uses for tolla AL2');
+INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon-mult',    1.5, 'multiply by this amount for each comment previously posted in the past 24 hours');
 
 
 

@@ -10,11 +10,17 @@ __lang__
 en_US
 __name__
 data
-__seclev__
-10000
 __template__
 [% SWITCH value %]
 	
 [% CASE 'set_section_prefs_success_msg' %]
 	<a href="#" onclick="window.location.reload(); return false" style="color:#fff;">Close</a>
+
+[% CASE 'inline preview warning' %]
+	<p>This comment will not be saved until you click the Submit button below.</p>
+
 [% END %]
+__seclev__
+1000
+__version__
+$Id$

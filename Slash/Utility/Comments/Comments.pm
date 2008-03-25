@@ -38,7 +38,7 @@ use vars qw($VERSION @EXPORT);
 @EXPORT		= qw(
 	constrain_score dispComment displayThread printComments
 	jsSelectComments commentCountThreshold commentThresholds discussion2
-	tempUofmLinkGenerate tempUofmCipherObj selectComments preProcessReplyForm
+	selectComments preProcessReplyForm
 	getPoints preProcessComment postProcessComment prevComment saveComment
 );
 
@@ -1980,7 +1980,7 @@ EOT
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
 			subject_only => 1,
-			onclick	=> (($discussion2 && (!$constants->{subscribe} || $user->{is_subscriber})) ? "replyTo($comment->{cid}); return false;" : '')
+			onclick	=> (($discussion2 && !$user->{is_anon}) ? "replyTo($comment->{cid}); return false;" : '')
 		}) . '</span>') unless $user->{state}{discussion_archived};
 
 		push @link, linkComment({
@@ -2486,41 +2486,9 @@ sub isTroll {
 # is discussion2 active?
 sub discussion2 {
 	my $user = $_[0] || getCurrentUser();
-	return $user->{discussion2} =~ /^(?:slashdot|uofm)$/
+	return $user->{discussion2} eq 'slashdot'
 		? $user->{discussion2} : 0;
 }
-
-
-sub tempUofmLinkGenerate {
-	require URI::Escape;
-
-	my $constants = getCurrentStatic();
-	my $user = getCurrentUser();
-
-	my $cipher = tempUofmCipherObj() or return;
-
-	my $encrypted = $cipher->encrypt($user->{uid} . '|' . $user->{nickname});
-	return sprintf($constants->{uofm_address}, URI::Escape::uri_escape($encrypted));
-}
-
-sub tempUofmCipherObj {
-	my $constants = getCurrentStatic();
-	return unless $constants->{uofm_key} && $constants->{uofm_iv};
-
-	require Crypt::CBC;
-
-	my $cipher = Crypt::CBC->new({
-		key		=> $constants->{uofm_key},
-		iv		=> $constants->{uofm_iv},
-		cipher		=> 'Blowfish',
-		regenerate_key	=> 0,
-		padding		=> 'null',
-		prepend_iv	=> 0
-	});
-
-	return $cipher;
-}
-
 
 
 1;

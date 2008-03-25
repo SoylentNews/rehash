@@ -141,7 +141,15 @@ sub new {
 	if ($reskey) {
 		$reskey =~ s|[^a-zA-Z0-9_]+||g;
 	} elsif (!defined $reskey) {
-		$reskey = $opts->{nostate} ? '' : getCurrentForm('reskey');
+		$reskey = getCurrentForm('reskey') unless $opts->{nostate}; # if we already have one
+		if (!$reskey) {
+			if ($self->static) {
+				$reskey = $self->makeStaticKey;
+			} else {
+				$reskey = $self->createResKey;  
+				$self->unsaved(1); # still needs to be inserted/checked
+			}
+		}
 	}
 
 	# reskey() to set the value is called only here and from dbCreate
@@ -233,7 +241,7 @@ sub AUTOLOAD {
 	if ($name =~ /^(?:noop|success|failure|death)$/) {
 		$sub = _createStatusAccessor($name, \@_);
 
-	} elsif ($name =~ /^(?:error|reskey|debug|rkrid|resname|origtype|type|code|opts|static)$/) {
+	} elsif ($name =~ /^(?:error|reskey|debug|rkrid|resname|origtype|type|code|opts|static|unsaved)$/) {
 		$sub = _createAccessor($name, \@_);
 
 	} elsif ($name =~ /^(?:create|touch|use|createuse)$/) {
@@ -315,7 +323,7 @@ sub _createActionMethod {
 		# create is done for use, too.
 		if ($self->type eq 'createuse') {
 			$self->type('use');
-			unless ($self->reskey) {
+			if ($self->unsaved) {
 				$self->dbCreate;
 			}
 		}
@@ -413,6 +421,11 @@ sub _createCheckMethod {
 }
 
 #========================================================================
+sub createResKey {
+	return getAnonId(1, 20);
+}
+
+#========================================================================
 sub dbCreate {
 	my($self) = @_;
 	$self->_flow;
@@ -431,16 +444,15 @@ sub dbCreate {
 	# bothering).  When we do pull it out, remember to lose
 	# the 'use Time::HiRes' :)
 	if ($self->static) {
-		$self->reskey($self->makeStaticKey);
 		$ok = 1;
 	} else {
-		my $reskey = '';
+		my $reskey = $self->reskey;
 		my $srcid = $self->getSrcid;
 
 		my $try_num = 1;
 		my $num_tries = 10;
 		while ($try_num < $num_tries) {
-			$reskey = getAnonId(1, 20);
+			$reskey ||= $self->createResKey;
 			my $rows = $slashdb->sqlInsert('reskeys', {
 				reskey		=> $reskey,
 				rkrid		=> $self->rkrid,
@@ -451,9 +463,14 @@ sub dbCreate {
 
 			if ($rows > 0) {
 				$self->reskey($reskey);
+				$self->unsaved(0);
 				$ok = 1;
 				last;
 			}
+
+			# blank for next try
+			$reskey = '';
+			
 
 			# The INSERT failed because $reskey is already being
 			# used.  Presumably this would be due to a collision
@@ -471,6 +488,11 @@ sub dbCreate {
 		}
 		if ($try_num > 1) {
 			errorLog("Slash::ResKey::Key->create INSERT failed $try_num times: uid=$user->{uid} rkrid=$self->{rkrid} reskey=$reskey");
+			# XXX: this should be more modularized, bad to keep
+			# this all here, but OK to hack in for now -- pudge
+			if (&Slash::ResKey::Checks::HumanConf::updateResKey) {
+				Slash::ResKey::Checks::HumanConf::updateResKey($self);
+			}
 		}
 	}
 

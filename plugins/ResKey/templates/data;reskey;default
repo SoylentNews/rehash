@@ -75,6 +75,16 @@ __template__
 	You must wait a little bit before using this resource; please try again later.
 
 
+[%# HumanConf %]
+[% CASE 'invalidhcretry' %]
+	You failed to confirm you are a human. Please double-check the image and
+	make sure you typed in what it says.
+
+[% CASE 'invalidhc' %]
+	You failed to confirm you are a human. Please start from the beginning
+	and try again.  If you are a human, we apologize for the inconvenience.
+
+
 [%# ProxyScan %]
 [% CASE 'open proxy' %]
 	You may not post using an open proxy.

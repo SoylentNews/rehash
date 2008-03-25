@@ -1015,6 +1015,10 @@ function replyPreviewOrSubmit (pid, op, handlers) {
 	params['postersubj'] = $dom('postersubj_' + pid).value;
 	params['postercomment'] = $dom('postercomment_' + pid).value;
 
+	var hcanswer = $dom('hcanswer_' + pid);
+	if (hcanswer)
+		params['hcanswer'] = hcanswer.value;
+
 	var postanon = $dom('postanon_' + pid);
 	if (postanon && postanon.checked)
 		params['postanon'] = postanon.value;

@@ -140,9 +140,8 @@ sub minDurationBetweenUses {
 	my($self, $reskey_obj) = @_;
 
 	my $slashdb = getCurrentDB();
-	my $check_vars = $self->getCheckVars;
 
-	my $limit = $check_vars->{duration_uses};
+	my $limit = &duration;
 	if ($limit) {
 		my $where = $self->getWhereUserClause;
 		$where .= ' AND rkrid=' . $self->rkrid;
@@ -183,6 +182,59 @@ sub minDurationBetweenCreateAndUse {
 	}
 
 	return;
+}
+
+
+sub duration {
+	my($self, $reskey_obj) = @_;
+	(my $caller = (caller(1))[3]) =~ s/^.*:(\w+)$/$1/;
+
+	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $constants = getCurrentStatic();
+	my $form = getCurrentForm();
+	my $user = getCurrentUser();
+
+	my $check_vars = $self->getCheckVars;
+	my $limit = $constants->{reskey_timeframe};
+	my $duration = 0;
+
+	if ($caller eq 'minDurationBetweenUses') {
+		my $duration_name      = 'duration_uses';
+		my $duration_name_anon = "$duration_name-anon";
+		# this is kinda ugly ... i'd like a better way to know anon, and
+		# this constant should be a reskey constant i think -- pudge 2008.03.21
+		my $is_anon = $user->{is_anon} || $form->{postanon} || $user->{karma} < $constants->{formkey_minloggedinkarma};
+		$duration = $check_vars->{$is_anon ? $duration_name_anon : $duration_name} || 0;
+
+		# If this user has access modifiers applied, check for possible
+		# different speed limits based on those.  First match, if any,
+		# wins. (taken from MySQL::checkPostInterval()
+		my $al2_hr = $user->{srcids} ? $reader->getAL2($user->{srcids}) : { };
+		my $al2_name_used = "_none_"; # for debugging
+		for my $al2_name (sort keys %$al2_hr) {
+			my $sl_name_al2 = $is_anon
+				? "$duration_name_anon-$al2_name"
+				: "$duration_name-$al2_name";
+			if (defined $check_vars->{$sl_name_al2}) {
+				$al2_name_used = $al2_name;
+				$duration = $check_vars->{$sl_name_al2};
+				last;
+			}
+		}
+
+		if ($self->resname eq 'comments' && $is_anon) {
+			my $multiplier = $check_vars->{"$duration_name_anon-mult"};
+			if ($multiplier && $multiplier != 1) {
+				my $num_comm = $reader->getNumCommPostedAnonByIPID($user->{ipid});
+				$duration *= ($multiplier ** $num_comm);
+				$duration = int($duration + 0.5);
+			}
+		}
+		print STDERR $duration;
+	}
+
+
+	return $duration;
 }
 
 

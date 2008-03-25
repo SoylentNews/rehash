@@ -113,7 +113,7 @@ function createPopupButtons() {
 }
 
 function closePopup(id, refresh) {
-	$('#'+id).remove()
+	$('#'+id).remove();
 	if (refresh) {
 		window.location.reload();
 	}

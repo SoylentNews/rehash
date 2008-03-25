@@ -36,7 +36,8 @@ sub new {
 }
 
 sub _formnameNeedsHC {
-        my($self, $formname) = @_;            
+        my($self, $formname, $options) = @_;            
+	return 1 if $options->{needs_hc};
 	my $regex = getCurrentStatic('hc_formname_regex') || '^comments$';
         return 1 if $formname =~ /$regex/;
         return 0;
@@ -48,7 +49,7 @@ sub createFormkeyHC {
 	# Only certain formnames need human confirmation.  From any       
 	# other formname, just return 1, meaning everything is ok
 	# (no humanconf necessary).
-	return 'ok' if !$self->_formnameNeedsHC($formname);
+	return 'ok' if !$self->_formnameNeedsHC($formname, $options);
 
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
@@ -113,12 +114,21 @@ sub createFormkeyHC {
 	return 0 unless $success;
 	my $hcid = $slashdb->getLastInsertId();
 
-	$user->{state}{hcid} = $hcid; # for debugging
+	$user->{state}{hcid} = $hcid;
 	$user->{state}{hc} = 1;
 	$user->{state}{hcinvalid} = 0;
 	$user->{state}{hcquestion} = $question;
 	$user->{state}{hchtml} = $html;
 	return 1;
+}
+
+sub updateFormkeyHCValue {
+	my($self, $hcid, $formkey) = @_;
+	my $slashdb = getCurrentDB();
+	return $slashdb->sqlUpdate('humanconf', {
+			formkey => $formkey
+		}, 'hcid=' . $slashdb->sqlQuote($hcid)
+	);
 }
 
 sub reloadFormkeyHC {
@@ -129,9 +139,9 @@ sub reloadFormkeyHC {
 	# Only certain formnames need human confirmation.  Other formnames
 	# won't even have HC data created for them, so there's no need to
 	# waste time hitting the DB.
-	if (!$self->_formnameNeedsHC($formname)) {
+	if (!$self->_formnameNeedsHC($formname, $options)) {
 		$user->{state}{hc} = 0;
-		return ;
+		return;
 	}
 	$user->{state}{hc} = 1;
 
@@ -139,7 +149,7 @@ sub reloadFormkeyHC {
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $formkey = $options->{frkey} || $form->{formkey};
-	my $formkey_quoted = $slashdb->sqlQuote($form->{formkey});
+	my $formkey_quoted = $slashdb->sqlQuote($formkey);
 
 	my($hcid, $html, $question, $tries_left) = $slashdb->sqlSelect(
 		"hcid, html, question, tries_left",
@@ -156,6 +166,7 @@ sub reloadFormkeyHC {
 		$user->{state}{hcinvalid} = 1;
 		$user->{state}{hcerror} = getData('nomorechances', {}, 'humanconf');
 	}
+	return !$user->{state}{hcinvalid};
 }
 
 sub validFormkeyHC {
@@ -164,14 +175,14 @@ sub validFormkeyHC {
 	# Only certain formnames need human confirmation.  Other formnames
 	# won't even have HC data created for them, so there's no need to
 	# waste time hitting the DB.
-	return 'ok' if !$self->_formnameNeedsHC($formname);
+	return 'ok' if !$self->_formnameNeedsHC($formname, $options);
 
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $formkey = $options->{frkey} || $form->{formkey};
 	return 'invalidhc' unless $formkey;
 
-	my $formkey_quoted = $slashdb->sqlQuote($form->{formkey});
+	my $formkey_quoted = $slashdb->sqlQuote($formkey);
 
 	# If this formkey is valid, and there is a corresponding humanconf
 	# entry, check that as well.  Note that if there is an hcid in the 
@@ -183,7 +194,7 @@ sub validFormkeyHC {
                 "humanconf, humanconf_pool",
                 "humanconf.formkey = $formkey_quoted
                  AND humanconf_pool.hcpid = humanconf.hcpid
-		 AND tries_left > 0"      
+		 AND tries_left > 0"
         );
         if (!$hcid) {
                 # No humanconf associated with this formkey.  Either there

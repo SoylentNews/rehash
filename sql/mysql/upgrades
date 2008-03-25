@@ -5197,6 +5197,11 @@ UPDATE vars SET value = 'T_2_5_0_198' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::HumanConf', 701);
+INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon',         300, 'duration_uses for anon');
+INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon-trolla', 3600, 'duration_uses for anon + trolla AL2');
+INSERT INTO reskey_vars VALUES (1, 'duration_uses-trolla',       300, 'duration_uses for tolla AL2');
+INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon-mult',    1.5, 'multiply by this amount for each comment previously posted in the past 24 hours');
+
 # for plugins/Tags
 INSERT INTO vars (name, value, description) VALUES ('tags_usershow_cutoff', '200', 'More tags than this, and instead of showing the full taglist /~user/tags will show the list of tagnames');
-

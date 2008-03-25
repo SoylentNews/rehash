@@ -6,8 +6,11 @@ ResKey/Checks/ACL.pm
 ResKey/Checks/AL2/AnonNoPost.pm
 ResKey/Checks/AL2/NoPost.pm
 ResKey/Checks/AL2/NoPostAnon.pm
+ResKey/Checks/AL2/NoSubmit.pm
+ResKey/Checks/AL2/Spammer.pm
 ResKey/Checks/AL2.pm
 ResKey/Checks/Duration.pm
+ResKey/Checks/HumanConf.pm
 ResKey/Checks/Moderate.pm
 ResKey/Checks/Post.pm
 ResKey/Checks/ProxyScan.pm
