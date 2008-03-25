@@ -44,7 +44,7 @@ __template__
 
 <a name="acomments"></a>
 <div class="commentwrap" id="commentwrap">
-[% IF (!user.is_anon && !user.acl.discussion2_uofm) || user.is_admin %]
+[% IF !user.is_anon %]
 <div class="commentBox" style="font-size: 120%">
 	<form method="GET" action="[% gSkin.rootdir %]/comments.pl">
 	<div>
@@ -61,10 +61,6 @@ __template__
 
 	</div>
 	</form>
-</div>
-[% END; IF (user.acl.discussion2_uofm_signup && !user.acl.discussion2_uofm && (user.is_admin || !user.is_subscriber)) && constants.uofm_key && constants.uofm_iv && env.http_user_agent.search('Firefox/1\.5') %]
-<div class="commentBox" style="font-size: 120%">
-<a href="[% Slash.tempUofmLinkGenerate() %]">Want to test an experimental interface for comments?</a>
 </div>
 [% END %]
 
@@ -202,7 +198,7 @@ __template__
 				op           => 'reply',
 				subject      => 'Reply',
 				subject_only => 1,
-				onclick      => ((discussion2 && (!constants.subscribe || user.is_subscriber)) ? "replyTo(0); return false;" : '')
+				onclick      => ((discussion2 && !user.is_anon) ? "replyTo(0); return false;" : '')
 			}) %]
 		[% END %]
 		</span>
@@ -287,7 +283,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 				op           => 'reply',
 				subject      => 'Reply',
 				subject_only => 1,
-				onclick      => ((discussion2 && (!constants.subscribe || user.is_subscriber)) ? "replyTo(0); return false;" : '')
+				onclick      => ((discussion2 && !user.is_anon) ? "replyTo(0); return false;" : '')
 			}) %]
 		[% END %]
 			<div id="bindings-legend">Keybindings Beta<br>

@@ -112,7 +112,7 @@ __template__
 			op           => 'reply',
 			subject      => 'Reply',
 			subject_only => 1,
-			onclick      => ((discussion2 && (!constants.subscribe || user.is_subscriber)) ? "replyTo(0); return false;" : '')
+			onclick      => ((discussion2 && !user.is_anon) ? "replyTo(0); return false;" : '')
 		});
 	END %]
 </div>

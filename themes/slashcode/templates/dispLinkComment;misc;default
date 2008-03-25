@@ -28,7 +28,7 @@ __template__
 				op	=> 'Reply',
 				subject	=> 'Reply to This',
 				subject_only => 1,
-				onclick	=> ((discussion2 && (!constants.subscribe || user.is_subscriber)) ? "replyTo($cid); return false;" : '')
+				onclick	=> ((discussion2 && !user.is_anon) ? "replyTo($cid); return false;" : '')
 			}) %]</span>
 		[% END %]
 
