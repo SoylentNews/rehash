@@ -105,7 +105,6 @@ sub getMostNonnegativeTaggedGlobjs {
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagnames = $tagsdb->getNegativeTags;
 	$tagnames = ['nix'] unless @$tagnames;
-	#$constants->{tags_negative_tagnames} || $constants->{tags_downvote_tagname} || 'nix';
 	my $tagnameids = join ',', grep $_, map {
 		s/\s+//g;
 		$tagsdb->getTagnameidFromNameIfExists($_)

@@ -205,7 +205,6 @@ sub run {
 		grep { $_ }
 		map { ($_, $tags_reader->getOppositeTagname($_)) }
 		@{$tags_reader->getExcludedTags}
-#		split / /, ($constants->{tagbox_top_excludetagnames} || '')
 	);
 	# Eliminate tagnames that are just the author's name.
 	my @names = map { lc } @{ $tags_reader->getAuthorNames() };
