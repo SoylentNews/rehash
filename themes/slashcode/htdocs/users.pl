@@ -1594,7 +1594,6 @@ sub saveTags {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
-	my $tagname = $form->{tagname};
 
 	return if $user->{is_anon}; # shouldn't be, but can't hurt to check
 
