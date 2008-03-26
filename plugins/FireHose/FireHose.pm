@@ -378,6 +378,9 @@ sub getFireHoseEssentials {
 
 	$options ||= {};
 	$options->{limit} ||= 50;
+	my $ps = $options->{limit};
+	
+	$options->{limit} += $options->{more_num} if $options->{more_num};
 
 	my $pop;
 	$pop = $self->getMinPopularityForColorLevel($colors->{$options->{color}})
@@ -628,7 +631,7 @@ sub getFireHoseEssentials {
 	}
 
 
-	my $page_size = $options->{limit} || 1;
+	my $page_size = $ps || 1;
 	$results->{records_pages} ||= ceil($count / $page_size);
 	$results->{records_page}  ||= (int(($options->{offset} || 0) / $options->{limit}) + 1) || 1;
 
@@ -2145,6 +2148,11 @@ sub getAndSetOptions {
 	if ($form->{not_id} && $form->{not_id} =~ /^\d+$/) {
 		$options->{not_id} = $form->{not_id};
 	}
+	
+	if ($form->{more_num} && $form->{more_num} =~ /^\d+$/) {
+		$options->{more_num} = $form->{more_num};
+	}
+
 	return $options;
 }
 
