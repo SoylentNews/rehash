@@ -285,7 +285,7 @@ sub submitReply {
 		unless $error_message;
 	my $cid = $saved_comment && $saved_comment ne '-1' ? $saved_comment->{cid} : 0;
 
-	# go back to HumanConf is we still have errors left to display
+	# go back to HumanConf if we still have errors left to display
 	$error_message &&= slashDisplay('hc_comment', { pid => $pid });
 
 	$options->{content_type} = 'application/json';
