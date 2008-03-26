@@ -66,7 +66,7 @@ __template__
        IF i_page == start_page_num %]<b>&lsaquo;</b> [% END;
        IF i_page == page_cur %]<strong>[% i_page %]</strong>[%
          ELSE; i_page; END;
-       IF i_page == end_page_num %] <b>&rsaquo;</b>[% END %]</a>
+       IF i_page == end_page_num %] [% IF !options.more_num || options.more_num < 100 %]<a href="#" onclick="firehose_more(); return false;" id="firehose_more">get more <b>&rsaquo;</b></a>[% END %][% END %]</a>
 [%   END;
      END;
 
