@@ -3455,6 +3455,7 @@ sub setStory {
 	# Of course, markStoryClean and -Dirty work too
 
 	my($dirty_change, $dirty_newval);
+
 	if ($change_hr->{writestatus}) {
 		$dirty_change = 1;
 		$dirty_newval =	  $change_hr->{writestatus} eq 'dirty'	? 1 : 0;
@@ -3466,6 +3467,11 @@ sub setStory {
 		$dirty_change = 1;
 		$dirty_newval = $change_hr->{is_dirty};
 		delete $change_hr->{is_dirty}
+	}
+
+	if ($change_hr->{introtext} && $change_hr->{introtext} =~ /href=\"SELF\"/) {
+		my $link_url = $self->_getStorySelfLink($stoid, $change_hr);
+		$change_hr->{introtext} =~ s/href=\"SELF\"/href="$link_url"/;
 	}
 
 	$change_hr->{is_archived} = $change_hr->{is_archived} ? 'yes' : 'no'
@@ -12567,6 +12573,23 @@ sub getStaticFile {
 		arguments	=> \@_,
 	});
 	return $answer;
+}
+
+sub _getStorySelfLink {
+	my($self, $stoid, $change_hr) = @_; 
+	my $story = $self->getStory($stoid);
+	my $data = {};
+	my $link  = $change_hr->{title} || $story->{title};
+	my $tid   = $change_hr->{tid} || $story->{tid};
+	my $skin  = $change_hr->{primaryskid} || $story->{primary_skid};
+
+	my $story_link_ar = linkStory({
+		sid 	=> $story->{sid},
+		link 	=> $link,
+		tid	=> $tid,
+		skin	=> $skin
+	});
+	return $story_link_ar->[0];
 }
 
 ########################################################
