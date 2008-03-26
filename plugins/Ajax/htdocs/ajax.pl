@@ -286,7 +286,7 @@ sub submitReply {
 	my $cid = $saved_comment && $saved_comment ne '-1' ? $saved_comment->{cid} : 0;
 
 	# go back to HumanConf if we still have errors left to display
-	$error_message &&= slashDisplay('hc_comment', { pid => $pid });
+	$error_message &&= slashDisplay('hc_comment', { pid => $pid }, { Return => 1 });
 
 	$options->{content_type} = 'application/json';
 	my %to_dump = ( cid => $cid, error => $error_message );
@@ -312,7 +312,7 @@ sub previewReply {
 
 	if ($html) {
 		$error_message .= getData('inline preview warning');
-		$error_message .= slashDisplay('hc_comment', { pid => $pid });
+		$error_message .= slashDisplay('hc_comment', { pid => $pid }, { Return => 1 });
 	}
 	$options->{content_type} = 'application/json';
 	my %to_dump = (
