@@ -160,7 +160,7 @@ html > body .commentwrap table {
 .comment > .oneline {
 	border: 1px solid #e5e5e5;
 	margin: 1em 0 0 0;
-	padding: .3em 0 0 0;
+	padding: 0.35em 0 0 0.25em;
 	position: relative;
 	width: 99%;
 	height: 1.3em;
@@ -168,7 +168,8 @@ html > body .commentwrap table {
 }
 
 .comment > .currcomment {
-	border: 1px dotted #666;
+	margin: 0.85em 0px -0.15em -0.15em;
+	border: .15em solid rgb(142,142,142);
 }
 
 /* lots of space between lines */
@@ -385,28 +386,33 @@ div.ccw-panel, #ccw-control,
 
 .nbutton{
     background: #666 url("/images/corner_w_tl.png") top left no-repeat;
-        color:#fff;
-        margin:0.25em;
-        padding: .4em 0;
+    color:#fff;
+    margin:0.25em;
+    padding: .4em 0;
 }
 .nbutton p{
-        display:inline;
-        background: transparent url("/images/corner_w_tr.png") top right no-repeat;
-        padding: .4em 0;
+    display:inline;
+    background: transparent url("/images/corner_w_tr.png") top right no-repeat;
+    padding: .4em 0;
 }
 .nbutton p b{
-        display:inline;
-        background: transparent url("/images/corner_w_bl.png") bottom left no-repeat;
-        padding: .4em 0;
+    display:inline;
+    background: transparent url("/images/corner_w_bl.png") bottom left no-repeat;
+    padding: .4em 0;
 }
 .nbutton p b a {
-        background: transparent url("/images/corner_w_br.png") bottom right no-repeat !important;
-        padding: .4em 1em;
-        color:#fff !important;
-        font-weight:normal;
-        text-decoration:none;
+    background: transparent url("/images/corner_w_br.png") bottom right no-repeat !important;
+    padding: .4em 1em;
+    color:#fff !important;
+    font-weight:normal;
+    text-decoration:none;
 }
 .nbutton:hover {background-color: #444}
 
+span.current {position: absolute; left: .5em; margin-top: -.2em; z-index: 0; font-weight: bold; font-size: 197%;}
 
+.contain {
+	border: .15em solid #d5d5d5;
+	border-top: none;
+}
 

@@ -2015,7 +2015,7 @@ EOT
 		my $link = join(" ", @link);
 
 		if (@link) {
-			$commentsub = "$link";
+			$commentsub = $link;
 		}
 
 	}
@@ -2071,6 +2071,7 @@ EOT
 
 	my $class = $comment->{class}; 
 	my $classattr = $discussion2 ? qq[ class="$class"] : '';
+	my $contain = $class eq 'full' ? ' contain' : '';
 
 	my $head = $discussion2 ? <<EOT1 : <<EOT2;
 			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return setFocusComment($comment->{cid})">$comment->{subject}</a>
@@ -2080,7 +2081,7 @@ EOT2
 
 	my $return = '';
 	$return = <<EOT if !$options->{noshow_show};
-<li id="tree_$comment->{cid}" class="comment">
+<li id="tree_$comment->{cid}" class="comment$contain">
 <div id="comment_status_$comment->{cid}" class="commentstatus"></div>
 <div id="comment_$comment->{cid}"$classattr>
 EOT

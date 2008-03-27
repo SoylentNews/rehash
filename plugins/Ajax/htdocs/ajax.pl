@@ -70,11 +70,14 @@ sub main {
 			$rkey->use;
 		}
 		if (!$rkey->success) {
+			# feel free to send msgdiv => 'thisdivhere' to the ajax call,
+			# and any reskey error messages will be sent to it
 			if ($form->{msgdiv}) {
 				header_ajax({ content_type => 'application/json' });
 				(my $msgdiv = $form->{msgdiv}) =~ s/[^\w-]+//g;
 				print Data::JavaScript::Anon->anon_dump({
-					html	=> { $msgdiv => $rkey->errstr },
+					html	  => { $msgdiv => $rkey->errstr },
+					eval_last => "\$('#$msgdiv').show()"
 				});
 			}
 			$rkey->ERROR($op);

@@ -292,10 +292,16 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 <a href="#" onclick="keyHandler('','E'); return false" title="next comment by load order"    >E</a><br>
 <a href="#" onclick="keyHandler('','A'); return false" title="previous comment in thread"    >A</a>
 <a href="#" onclick="keyHandler('','S'); return false" title="next thread"                   >S</a>
-<a href="#" onclick="keyHandler('','D'); return false" title="next comment in thread"        >D</a>
+<a href="#" onclick="keyHandler('','D'); return false" title="next comment in thread"        >D</a><br>
+<a href="#" onclick="keyHandler('','R'); return false" title="reply to current comment"      >R</a>
+<a href="#" onclick="keyHandler('','P'); return false" title="parent of current comment"     >P</a>
+<a href="#" onclick="keyHandler('','M'); return false" title="history of current comment"    >M</a><br>
+<a href="#" onclick="keyHandler('','T'); return false" title="first comment"                 >T</a>
+<a href="#" onclick="keyHandler('','G'); return false" title="get more comments"             >G</a>
+<a href="#" onclick="keyHandler('','V'); return false" title="last comment"                  >V</a>
 			</div>
 		</div>
-		<div id="commentControlBoxStatus" class="hide"><b>Loading ... Please wait.</b></div>
+		<div id="commentControlBoxStatus" class="hide"><b>Loading... please wait.</b></div>
 	</div>
 </div>
 		</div>

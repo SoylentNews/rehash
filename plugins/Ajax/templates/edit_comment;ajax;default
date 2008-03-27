@@ -24,7 +24,7 @@ __template__
 	<p class="warning">
 		[% IF constants.allow_anonymous %]
 	You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
-	in now</a>, or <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>/
+	in now</a>, or <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>.
 		[% ELSE %]
 	You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
 	in now</a>, <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>,
@@ -35,7 +35,7 @@ __template__
 
 [% IF !user.is_anon || constants.allow_anonymous %]
 	<form action="[% gSkin.rootdir %]/comments.pl" method="post">
-		<div id="replyto_preview_[% pid %]" class="replyto_reply" onclick="editReply([% pid %])"></div>
+		<div id="replyto_preview_[% pid %]" class="replyto_reply" ondblclick="editReply([% pid %])"></div>
 		<div id="replyto_reply_[% pid %]" class="replyto_reply">
 			<input type="hidden" name="sid" value="[% sid %]">
 			[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
@@ -58,7 +58,7 @@ __template__
 				<textarea wrap="virtual" name="postercomment_[% pid %]" id="postercomment_[% pid %]" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]"></textarea>	
 			</div>
 		</div>
-		<div id="replyto_msg_[% pid %]" class="replyto_msg"></div>
+		<div id="replyto_msg_[% pid %]" class="replyto_msg" style="display: none"></div>
 		<div class="replyto_buttons">
 			<span id="replyto_buttons_1_[% pid %]">
 				<input type="button" name="preview_[% pid %]" id="preview_[% pid %]" value="Preview" class="button" onclick="previewReply([% pid %]); return false;">

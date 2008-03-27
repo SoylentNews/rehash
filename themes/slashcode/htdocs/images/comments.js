@@ -84,7 +84,7 @@ function updateComment(cid, mode) {
 				if (!cd.innerHTML) {
 					var cs = fetchEl('comment_sub_' + cid);
 					if (cs)
-						cs.innerHTML = '<span class="commentload">Loading ...</span>';
+						cs.innerHTML = '<span class="commentload">Loading...</span>';
 					fetch_comments.push(cid);
 					fetch_comments_pieces[cid] = 1;
 					doshort = 1;
@@ -93,7 +93,14 @@ function updateComment(cid, mode) {
 		}
 //		if (doshort)
 		setShortSubject(cid, mode, cl);
-		existingdiv.className = existingdiv.className.replace(/full|hidden|oneline/, mode);
+		var new_class = existingdiv.className.replace(/full|hidden|oneline/, mode);
+		if (new_class != existingdiv.className) {
+			existingdiv.className = new_class;
+			var parentdiv = fetchEl('tree_' + cid);
+			parentdiv.className = parentdiv.className.replace(' contain', '');
+			if (mode == 'full')
+				parentdiv.className = parentdiv.className + ' contain';
+		}
 		if (adTimerUrl) {
 			var addiv = fetchEl('comment_ad_' + cid);
 			if (addiv) {
@@ -941,7 +948,7 @@ function readRest(cid) {
 		}
 	};
 
-	shrunkdiv.innerHTML = 'Loading...';
+	shrunkdiv.innerHTML = '<span class="loading">Loading...</span>';
 	ajax_update(params, 'comment_body_' + cid, handlers);
 
 	return false;
@@ -992,11 +999,26 @@ function editReply(pid) {
 	if (!replydiv || !reply || !preview)
 		return false;
 
+	setReplyMsg(pid, '');
 	preview.style.display = 'none';
 	reply.style.display   = 'block';
 
 	$dom('replyto_buttons_2_' + pid).style.display  = 'none';
 	$dom('replyto_buttons_1_' + pid).style.display = 'inline';
+}
+
+function setReplyMsg(pid, msg) {
+	if (!pid)
+		return;
+	var msgdiv = $('#replyto_msg_' + pid);
+	if (!msgdiv)
+		return;
+
+	msgdiv.html(msg);
+	if (msg)
+		msgdiv.show();
+	else
+		msgdiv.hide();
 }
 
 function replyPreviewOrSubmit (pid, op, handlers) {
@@ -1005,9 +1027,8 @@ function replyPreviewOrSubmit (pid, op, handlers) {
 	var preview = $dom('replyto_preview_' + pid);
 	var this_reskey = $dom('reskey_reply_' + pid);
 	var msgdiv = 'replyto_msg_' + pid;
-	var msg = $dom(msgdiv);
 
-	if (!replydiv || !reply || !preview || !this_reskey || !msg)
+	if (!replydiv || !reply || !preview || !this_reskey)
 		return false;
 
 	var params = {};
@@ -1028,20 +1049,18 @@ function replyPreviewOrSubmit (pid, op, handlers) {
 	if (postanon && postanon.checked)
 		params['postanon'] = postanon.value;
 
-	msg.innerHTML = 'Loading...';
+	setReplyMsg(pid, '<span class="loading">Loading...</span>');
 	ajax_update(params, '', handlers);
 }
 
 function submitReply(pid) {
 	return replyPreviewOrSubmit(pid, 'comments_submit_reply', {
 		onComplete: function(transport) {
-			var msg = $dom('replyto_msg_' + pid);
-			msg.innerHTML = '';
+			setReplyMsg(pid, '');
 			var response = json_handler(transport);
-
 			var cid = response.cid;
 			if (response.error)
-				msg.innerHTML = response.error;
+				setReplyMsg(pid, response.error);
 			else if (cid) {
 				cancelReply(pid);
 				addComment(cid, { pid: pid, kids: [] }, '', 1);
@@ -1055,17 +1074,15 @@ function submitReply(pid) {
 function previewReply(pid) {
 	return replyPreviewOrSubmit(pid, 'comments_preview_reply', {
 		onComplete: function(transport) {
-			var msg = $dom('replyto_msg_' + pid);
-			msg.innerHTML = '';
+			setReplyMsg(pid, '');
 			var response = json_handler(transport);
-
 			if (response.error)
-				msg.innerHTML = response.error;
+				setReplyMsg(pid, response.error);
 			if (response.html) {
-				$dom('replyto_reply_' + pid).style.display   = 'none';
-				$dom('replyto_preview_' + pid).style.display = 'block';
-				$dom('replyto_buttons_1_' + pid).style.display  = 'none';
-				$dom('replyto_buttons_2_' + pid).style.display = 'inline';
+				$('#replyto_reply_' + pid).hide();
+				$('#replyto_preview_' + pid).show();
+				$('#replyto_buttons_1_' + pid).hide();
+				$('#replyto_buttons_2_' + pid).show();
 			}
 		}
 	});
@@ -1087,7 +1104,7 @@ function replyTo(pid) {
 	params['pid'] = pid;
 	params['sid'] = discussion_id;
 
-	replydiv.innerHTML = 'Loading...';
+	replydiv.innerHTML = '<span class="loading">Loading...</span>';
 
 	var handlers = {
 		onComplete: function(transport) {
@@ -1095,7 +1112,7 @@ function replyTo(pid) {
 			if (pid) { // XXX
 				var reply_link = $dom('reply_link_' + pid);
 				reply_link_html[pid] = reply_link.innerHTML;
-				reply_link.innerHTML = '<a href="#" onclick="cancelReply(' + pid + '); return false;">Cancel Reply</a>';
+				reply_link.innerHTML = '<p><b><a href="#" onclick="cancelReply(' + pid + '); return false;">Cancel Reply</a></b></p>';
 			}
 			$dom('postercomment_' + pid).focus();
 		}
@@ -1849,19 +1866,19 @@ function setCurrentComment (cid) {
 		if (cid == current_cid)
 			return;
 
-		this_id  = fetchEl('comment_top_' + current_cid);
-		if (this_id)
-			this_id.className = this_id.className.replace(' newcomment', ' oldcomment');
+		this_id = $('#comment_top_' + current_cid);
+		this_id.removeClass('newcomment');
+		this_id.addClass('oldcomment');
 
-		this_id  = fetchEl('comment_' + current_cid);
-		if (this_id)
-			this_id.className = this_id.className.replace(' currcomment', '');
+		this_id = $('#comment_' + current_cid);
+		this_id.removeClass('currcomment');
+		$('.current').remove();
 	}
 
 
-	this_id  = fetchEl('comment_' + cid);
-	if (this_id)
-		this_id.className = this_id.className + ' currcomment';
+	this_id = $('#comment_' + cid);
+	this_id.addClass('currcomment');
+	this_id.before('<span class="current">&rsaquo;</span>');
 
 	current_cid = cid;
 }
@@ -1878,14 +1895,15 @@ next unread comm: F
 reply to current comment: R
 parent of current comment: P
 history (modlog) of current comment: M
-skip to end (last): V XXX
-skip to top (first): T XXX
-get more comments: G XXX
+skip to end (last): V
+skip to top (first): T
+get more comments: G
 lower top threshold: [
-raise top threshold: [
+raise top threshold: ]
 lower bottom threshold: ,
 raise bottom threshold: .
-toggle d2 widget: /
+toggle d2 widget: / XXX
+hide_modal_box(): esc XXX
 */
 
 var validkeys = {
@@ -1911,7 +1929,6 @@ var validkeys = {
 	',' : { thresh : 1, bottom : 1, down: 1 },
 	'.' : { thresh : 1, bottom : 1, up  : 1 },
 
-	// esc = hide_modal_box() ?
 };
 
 validkeys['H'] = validkeys['A'];
@@ -1976,10 +1993,13 @@ function keyHandler(e, k) {
 						ajaxFetchComments(0, 1);
 
 					else if (keyo['skip']) { // XXX how to find top/bottom?
-						if (keyo['top'])
-							1;
-						if (keyo['bottom'])
-							1;
+						if (keyo['top']) {
+							next_cid = commTreeFirstComm();
+							update = 1;
+						} else if (keyo['bottom']) {
+							next_cid = commTreeLastComm();
+							update = 1;
+						}
 					}
 
 				// threshold keys keys
@@ -2105,6 +2125,30 @@ function commTreeNextComm (cid, old_cid, getNextUnread) {
 
 	// we can't continue here, go back up a level
 	return commTreeNextComm(comments[cid].pid, cid, getNextUnread);
+}
+
+function commTreeLastComm () {
+	var this_cid = current_cid;
+	if (!current_cid)
+		this_cid = last_updated_comments[0];
+	for (;;) {
+		var new_cid = commTreeNextComm(this_cid);
+		if (!new_cid)
+			return this_cid;
+		this_cid = new_cid;
+	}
+}
+
+function commTreeFirstComm () {
+	var this_cid = current_cid;
+	if (!current_cid)
+		this_cid = last_updated_comments[0];
+	for (;;) {
+		var new_cid = commTreePrevComm(this_cid, 2);
+		if (!new_cid)
+			return this_cid;
+		this_cid = new_cid;
+	}
 }
 
 function commTreePrevComm (cid, to_parent) {
