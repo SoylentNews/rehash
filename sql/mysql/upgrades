@@ -5205,3 +5205,5 @@ INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon-mult',    1.5, 'multiply 
 
 # for plugins/Tags
 INSERT INTO vars (name, value, description) VALUES ('tags_usershow_cutoff', '200', 'More tags than this, and instead of showing the full taglist /~user/tags will show the list of tagnames');
+INSERT INTO vars (name, value, description) VALUES ('tags_active_maxshow', '200', 'Maximum number of tagged objects to display on /tags/foo');
+

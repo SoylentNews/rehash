@@ -73,12 +73,18 @@ sub main {
 				push @objects, {
 					url	=> $objs[0]{url},
 					title	=> $objs[0]{title},
-					count	=> $sum_tc,
+					clout	=> $sum_tc,
 				} if $sum_tc >= $mintc;
 			}
-			@objects = sort { $b->{count} <=> $a->{count} || ($a->{title}||'') cmp ($b->{title}||'') } @objects;
+			@objects = sort {
+				    $b->{clout}      <=>  $a->{clout}
+				|| ($a->{title}||'') cmp ($b->{title}||'')
+			} @objects;
+			my $max_display = $constants->{tags_active_maxshow} || 200;
+			if (scalar @objects > $max_display) {
+				$#objects = $max_display-1;
+			}
 			if ($mcd) {
-				my $constants = getCurrentStatic();
 				my $secs = $constants->{memcached_exptime_tags_brief} || 300;
 				$mcd->set("$mcdkey$tagname", \@objects, $secs);
 #print STDERR "tags.pl set '$mcdkey$tagname' to " . scalar(@objects) . " objects\n";

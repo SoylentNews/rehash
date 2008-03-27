@@ -847,6 +847,7 @@ sub getUidsUsingTagname {
 
 sub getAllObjectsTagname {
 	my($self, $name, $options) = @_;
+	my $constants = getCurrentStatic();
 #	my $mcd = undef;
 #	my $mcdkey = undef;
 #	if (!$options->{include_private}) {
@@ -860,12 +861,20 @@ sub getAllObjectsTagname {
 	my $private_clause = ref($options) && $options->{include_private} ? '' : " AND private='no'";
 	my $id = $self->getTagnameidFromNameIfExists($name);
 	return [ ] if !$id;
+	# XXX make this degrade gracefully if plugins/FireHose not installed
+	my $firehose_db = getObject('Slash::FireHose');
+	my $min_pop = $options->{min_pop}
+		|| $firehose_db->getMinPopularityForColorLevel( $constants->{tags_active_mincare} || 5 );
+	# 117K rows unjoined, 7 seconds ; 10K rows unjoined, 3 seconds ; 10K rows joined, 18 seconds
 	my $hr_ar = $self->sqlSelectAllHashrefArray(
 		'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
-		'tags',
-		"tagnameid=$id AND inactivated IS NULL $private_clause",
-		'ORDER BY tagid');
+		'tags, firehose',
+		"tags.globjid=firehose.globjid AND popularity >= $min_pop
+		 AND tagnameid=$id AND inactivated IS NULL $private_clause",
+		'ORDER BY tagid DESC LIMIT 5000');
+	# 117K rows, 6 minutes ; 10K rows, 30 seconds
 	$self->addGlobjEssentialsToHashrefArray($hr_ar);
+	# 117K rows, 8 minutes ; 10K rows, 60 seconds
 	$self->addCloutsToTagArrayref($hr_ar);
 #	if ($mcd) {
 #		my $constants = getCurrentStatic();
