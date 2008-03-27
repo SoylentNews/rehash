@@ -5197,6 +5197,7 @@ UPDATE vars SET value = 'T_2_5_0_198' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+# for plugins/ResKey
 INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::HumanConf', 701);
 INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon',         300, 'duration_uses for anon');
 INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon-trolla', 3600, 'duration_uses for anon + trolla AL2');
@@ -5206,4 +5207,9 @@ INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon-mult',    1.5, 'multiply 
 # for plugins/Tags
 INSERT INTO vars (name, value, description) VALUES ('tags_usershow_cutoff', '200', 'More tags than this, and instead of showing the full taglist /~user/tags will show the list of tagnames');
 INSERT INTO vars (name, value, description) VALUES ('tags_active_maxshow', '200', 'Maximum number of tagged objects to display on /tags/foo');
+
+# for tagboxes/FHEditorPop
+INSERT INTO vars (name, value, description) VALUES ('tagbox_fheditorpop_susp_flagpop', '185', 'Admin score to artificially raise a suspicious host item to until an admin tags it');
+INSERT INTO vars (name, value, description) VALUES ('tagbox_fheditorpop_susp_maxtaggers', '7', 'Max number of unique users tagging (not voting) a low-scoring firehose item that should not raise suspicion');
+INSERT INTO vars (name, value, description) VALUES ('tagbox_fheditorpop_susp_minscore', '100', 'Min score required to not raise suspicion');
 

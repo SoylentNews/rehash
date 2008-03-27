@@ -217,9 +217,30 @@ sub run {
 		$popularity += $extra_pop;
 	}
 
+	# If more than a certain number of users have tagged this item with
+	# public non-voting tags and its popularity is low, there may be a
+	# bad reason why.  Boost its editor score up so that an editor sees
+	# it and can review it.
+	if ($popularity >= ($constants->{tagbox_fheditorpop_susp_minscore} || 100)) {
+		my $max_taggers = $constants->{tagbox_fheditorpop_susp_maxtaggers} || 7;
+		my $flag_pop = $constants->{tagbox_fheditorpop_susp_flagpop} || 185;
+		my %tagger_uids = ( );
+		my $tagged_by_admin = 0;
+		for my $tag_hr (@$tags_ar) {
+			next if    $tag_hr->{tagnameid} == $upvoteid
+				|| $tag_hr->{tagnameid} == $downvoteid
+				|| $tag_hr->{private};
+			my $uid = $tag_hr->{uid};
+			$tagged_by_admin = 1, last if $admins->{$uid};
+			$tagger_uids{$uid} = 1;
+		}
+		if (!$tagged_by_admin && scalar(keys %tagger_uids) > $max_taggers) {
+			$popularity = $flag_pop;
+		}
+	}
+
 	# If this is spam, its score goes way down.
-	my $firehose_db = getObject('Slash::FireHose');
-	if ($fhitem->{is_spam} eq 'yes' || $firehose_db->itemHasSpamURL($fhitem)) {
+	if ($fhitem->{is_spam} eq 'yes' || $firehose->itemHasSpamURL($fhitem)) {
 		my $max = defined($constants->{firehose_spam_score})
 			? $constants->{firehose_spam_score}
 			: -50;
@@ -227,12 +248,12 @@ sub run {
 	}
 
 	# Set the corresponding firehose row to have this popularity.
-	warn "Slash::Tagbox::FHEditorPop->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
+	warn "Slash::Tagbox::FHEditorPop->run bad data, fhid='$fhid' db='$firehose'" if !$fhid || !$firehose;
 	if ($options->{return_only}) {
 		return $popularity;
 	}
 	main::tagboxLog(sprintf("FHEditorPop->run setting %d (%d) to %.6f", $fhid, $affected_id, $popularity));
-	$firehose_db->setFireHose($fhid, { editorpop => $popularity });
+	$firehose->setFireHose($fhid, { editorpop => $popularity });
 }
 
 { # closure
