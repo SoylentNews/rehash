@@ -1,0 +1,58 @@
+__section__
+default
+__description__
+useredit = user whose tags for a particular tagname are being displayed
+tagname = the tagname
+tags = an arrayref of hashrefs of the public tags applied by that user with that tagname
+
+This template and its API will likely change.
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+usertagsforname
+__template__
+[% thisnickname = useredit.nickname | strip_literal;
+   thistagname = tagname | strip_literal;
+   url_nick = useredit.nickname | strip_paramattr;
+   url_tagname = tagname | strip_paramattr;
+   url_base = "$gSkin.rootdir/~$url_nick/";
+   uid = useredit.uid;
+   title = "Items tagged <a href=\"$gSkin.rootdir/tags/$url_tagname\">$thistagname</a> by <a href=\"$url_base\">$thisnickname ($uid)</a>";
+   PROCESS user_titlebar tab_selected='tags' %]
+
+[% IF user.tags_canread_stories && tags.size %]
+<div><table border="0" cellpadding="0" cellspacing="0" width="100%" class="tagslist">
+[% FOREACH tag = tags %]
+	[% UNLESS tag.globj_type == "submissions" %]
+		<tr>
+		<td valign="top">
+			[% IF tag.globj_type == "stories" %]
+				[% PROCESS linkStory dynamic=1 sid=tag.story.sid text=tag.story.title title=tag.story.title %]
+			[% ELSIF tag.globj_type == "urls" %]
+				<a href="[% tag.url.url %]">[% tag.url.bookmark.title || tag.url.validtitle || tag.url.initialtitle | strip_literal %]</a>
+			[% ELSIF tag.globj_type == "journals" %]
+				[% nick = Slash.db.getUser(tag.journal.uid, 'nickname') %]
+				<a href="[% gSkin.rootdir %]/~[% nick | fixparam %]/journal/[% tag.journal.id %]/">[% tag.journal.description | strip_literal %]</a>
+			[% END %]
+		</td>
+		</tr>
+	[% END;
+END %]
+</table></div>
+[% ELSE %]
+	[% IF !user.tags_canread_stories %]
+	<div>You are unable to read tags at this time.</div>
+	[% ELSE %]
+	<div>This user hasn't publicly tagged anything "[% thistagname %]".</div>
+	[% END %]
+[% END %]
+
+__seclev__
+10000
+__version__
+$Id$

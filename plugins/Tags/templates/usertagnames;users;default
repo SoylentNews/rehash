@@ -1,0 +1,43 @@
+__section__
+default
+__description__
+useredit = user whose tags are being displayed
+user_submenu = html text of user submenu, if any
+tagnames = array of tagnames
+
+This template and its API will likely change.
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+usertagnames
+__template__
+[% thisnickname = useredit.nickname | strip_literal;
+   url_nick = useredit.nickname | strip_paramattr;
+   url_base = "$gSkin.rootdir/~$url_nick/";
+   uid = useredit.uid;
+   title = "Tags by <a href=\"$url_base\">$thisnickname ($uid)</a>";
+   PROCESS user_titlebar tab_selected='tags' %]
+
+[% IF user.tags_canread_stories && tagnames.size %]
+<div><table border="0" cellpadding="0" cellspacing="0" width="100%" class="tagslist">
+[% FOREACH tagname = tagnames %]
+	<tr><td class="tagname" valign="top"><a href="[% url_base %]tags/[% tagname | strip_paramattr %]">[% tagname | strip_html %]</a></td></tr>
+[% END %]
+</table></div>
+[% ELSE %]
+	[% IF !user.tags_canread_stories %]
+	<div>You are unable to read tags at this time.</div>
+	[% ELSE %]
+	<div>No tags have been assigned.</div>
+	[% END %]
+[% END %]
+
+__seclev__
+10000
+__version__
+$Id$
