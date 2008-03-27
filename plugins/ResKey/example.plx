@@ -11,19 +11,19 @@ my $debug = 0;
 for (1..1) {
 	$reskey = getObject('Slash::ResKey');
 
-	$lkey = $reskey->key('comments-moderation-ajax', {
-		debug	=> $debug
-	});
-
-	handle($lkey, 'create');
-	handle($lkey, 'use') for 0..19;
-
-
-	$rkey = $reskey->key('pollbooth', {
-		debug	=> $debug,
-		qid	=> 1
-	});
-	handle($rkey, 'createuse');
+# 	$lkey = $reskey->key('comments-moderation-ajax', {
+# 		debug	=> $debug
+# 	});
+# 
+# 	handle($lkey, 'create');
+# 	handle($lkey, 'use') for 0..19;
+# 
+# 
+# 	$rkey = $reskey->key('pollbooth', {
+# 		debug	=> $debug,
+# 		qid	=> 1
+# 	});
+# 	handle($rkey, 'createuse');
 
 
 	$rkey1 = $reskey->key('comments', {
@@ -32,6 +32,13 @@ for (1..1) {
 
 	handle($rkey1, 'create');
 	handle($rkey1, 'touch');
+	chomp(my $answer = <>);
+	getCurrentForm()->{hcanswer} = $answer;
+	handle($rkey1, 'use');
+
+use Data::Dumper;
+print $rkey1;
+exit;
 
 	$rkey2 = $reskey->key('comments', {
 		debug	=> $debug,

@@ -77,10 +77,7 @@ sub main {
 					html	=> { $msgdiv => $rkey->errstr },
 				});
 			}
-			printf STDERR "AJAXE %d: UID:%d, op:%s: %s (%s:%s:%s:%s:%s:%s:%s)\n",
-				$$, $user->{uid}, $op, $rkey->errstr, $rkey->reskey,
-				$rkey->type, $rkey->resname, $rkey->rkrid, $rkey->code, $rkey->static,
-				$user->{srcids}{ 24 };
+			$rkey->ERROR($op);
 			return;
 		}
 	}
@@ -279,14 +276,20 @@ sub submitReply {
 	my $discussion = $slashdb->getDiscussion($sid);
 	my $comment = preProcessComment($form, $user, $discussion, \$error_message);
 	if (!$error_message) {
-		$options->{rkey}->use or $error_message = $options->{rkey}->errstr;
+		unless ($options->{rkey}->use) {
+			$error_message = $options->{rkey}->errstr;
+		}
 	}
 	$saved_comment = saveComment($form, $comment, $user, $discussion, \$error_message)
 		unless $error_message;
 	my $cid = $saved_comment && $saved_comment ne '-1' ? $saved_comment->{cid} : 0;
 
-	# go back to HumanConf if we still have errors left to display
-	$error_message &&= slashDisplay('hc_comment', { pid => $pid }, { Return => 1 });
+	if ($error_message) {
+		$error_message = getData('inline preview warning') . $error_message
+			unless $options->{rkey}->death;
+		# go back to HumanConf if we still have errors left to display
+		$error_message .= slashDisplay('hc_comment', { pid => $pid }, { Return => 1 });
+	}
 
 	$options->{content_type} = 'application/json';
 	my %to_dump = ( cid => $cid, error => $error_message );
@@ -311,7 +314,7 @@ sub previewReply {
 	}
 
 	if ($html) {
-		$error_message .= getData('inline preview warning');
+		$error_message = getData('inline preview warning') . $error_message;
 		$error_message .= slashDisplay('hc_comment', { pid => $pid }, { Return => 1 });
 	}
 	$options->{content_type} = 'application/json';
@@ -750,7 +753,7 @@ sub getModalPrefs {
 		my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 		if ($moddb) {
 			# we hijack "tabbed" as our cid -- pudge
-			return $moddb->dispModCommentLog('cid', $form->{'tabbed'}, {
+			my $return = $moddb->dispModCommentLog('cid', $form->{'tabbed'}, {
 				show_m2s        => ($constants->{m2}
 					? (defined($form->{show_m2s})
 						? $form->{show_m2s}
@@ -760,6 +763,8 @@ sub getModalPrefs {
 				need_m2_button  => $constants->{m2},
 				title           => " "
 			});
+			$return ||= getData('no modcommentlog');
+			return $return;
 		}
 
 	} else {

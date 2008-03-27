@@ -955,7 +955,7 @@ sub checkDiscussionForUndoModeration {
 		}
 	}
 
-	my $removed_text = slashDisplay('undo_mod', { removed => $removed }, { Return => 1 });
+	my $removed_text = slashDisplay('undo_mod', { removed => $removed }, { Return => 1, Page => 'comments' });
 	return $removed_text;
 }
 

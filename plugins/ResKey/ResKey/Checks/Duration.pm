@@ -230,7 +230,6 @@ sub duration {
 				$duration = int($duration + 0.5);
 			}
 		}
-		print STDERR $duration;
 	}
 
 

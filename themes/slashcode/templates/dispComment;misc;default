@@ -34,7 +34,7 @@ __template__
 			[% ELSE %]
 			<h4><a name="[% cid %]">[% subject %]</a>
 			[%- END %]
-			[% UNLESS user.noscores %]<span id="comment_score_[% cid %]" class="score">([% IF constants.modal_prefs_active && !user.is_anon %]<a href="#" onclick="getModalPrefs('modcommentlog', 'Moderation Comment Log', [% cid %]); return false">[% END %]Score:[% points.length ? points : "?" %][% IF constants.modal_prefs_active && !user.is_anon %]</a>[% END %][% IF reasons && reason %], [% reasons.$reason.name %][% END %])</span>[% END %]</h4>
+			[% UNLESS user.noscores %]<span id="comment_score_[% cid %]" class="score">([% IF constants.modal_prefs_active %]<a href="#" onclick="[% IF user.is_anon %]show_login_box()[% ELSE %]getModalPrefs('modcommentlog', 'Moderation Comment Log', [% cid %])[% END %]; return false">[% END %]Score:[% points.length ? points : "?" %][% IF constants.modal_prefs_active && !user.is_anon %]</a>[% END %][% IF reasons && reason %], [% reasons.$reason.name %][% END %])</span>[% END %]</h4>
 		</div>
 		<div class="details">
 			by

@@ -19,6 +19,9 @@ __template__
 [% CASE 'inline preview warning' %]
 	<p>This comment will not be saved until you click the Submit button below.</p>
 
+[% CASE 'no modcommentlog' %]
+	<p>No comment history available.</p>
+
 [% END %]
 __seclev__
 1000

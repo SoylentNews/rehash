@@ -995,6 +995,15 @@ sub getCurrentSalts {
 	return $salts;
 }
 
+sub ERROR {
+	my($self, $extra, $user) = @_;
+	$extra ||= '';
+	$user ||= getCurrentUser();
+	printf STDERR "AJAXE %d: UID:%d, extra:%s: %s (%s) (%s:%s:%s:%s:%s:%s:%s)\n",
+		$$, $user->{uid}, $extra, $self->errstr, $self->error->[0], $self->reskey,
+		$self->type, $self->resname, $self->rkrid, $self->code, $self->static,
+		$user->{srcids}{ 24 };
+}
 
 1;
 

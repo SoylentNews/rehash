@@ -262,7 +262,7 @@ function changeHT(delta) {
 	changeThreshold(user_threshold + ''); // needs to be a string value
 }
 
-function changeT(delta) {
+function changeT(delta, skip_ht) {
 	if (!delta)
 		return void(0);
 
@@ -271,14 +271,19 @@ function changeT(delta) {
 	threshold = Math.min(Math.max(threshold, -1), 6);
 
 	// HT moves with T, but that is taken care of by changeThreshold()
-	changeThreshold(threshold + ''); // needs to be a string value
+	changeThreshold(threshold + '', skip_ht); // needs to be a string value
 }
 
-function changeThreshold(threshold) {
+function changeThreshold(threshold, skip_ht) {
 	var threshold_num = parseInt(threshold);
 	var t_delta = threshold_num + (user_highlightthresh - user_threshold);
-	user_highlightthresh = Math.min(Math.max(t_delta, -1), 6);
 	user_threshold = threshold_num;
+	if (skip_ht) { // don't move highlightthresh with thresh
+		if (user_threshold > user_highlightthresh)
+			user_highlightthresh = user_threshold;
+	} else {
+		user_highlightthresh = Math.min(Math.max(t_delta, -1), 6);
+	}
 
 	for (var root = 0; root < root_comments.length; root++) {
 		updateCommentTree(root_comments[root], threshold);
@@ -1491,13 +1496,13 @@ function commentIsInWindow(cid, just_head) {
 /* code for the draggable threshold widget */
 
 function showPrefs( category ) {
-	var panel = document.getElementById("d2prefs");
+	var panel = $dom("d2prefs");
 	panel.className = category;
 	panel.style.display = "block";
 }
 
 function hidePrefs() {
-	var panel = document.getElementById("d2prefs");
+	var panel = $dom("d2prefs");
 	panel.className = "";
 	panel.style.display = "none";
 }
@@ -1870,7 +1875,17 @@ next thread: S, K
 prev comm chrono: Q
 next comm chrono: E
 next unread comm: F
-reply: R
+reply to current comment: R
+parent of current comment: P
+history (modlog) of current comment: M
+skip to end (last): V XXX
+skip to top (first): T XXX
+get more comments: G XXX
+lower top threshold: [
+raise top threshold: [
+lower bottom threshold: ,
+raise bottom threshold: .
+toggle d2 widget: /
 */
 
 var validkeys = {
@@ -1881,13 +1896,35 @@ var validkeys = {
 	Q: { chrono : 1, prev: 1, comment: 1 },
 	E: { chrono : 1, next: 1, comment: 1 },
 	F: { thread : 1, next: 1, comment: 1, unread: 1 },
-	R: { reply  : 1 },
+
+	R: { current : 1, reply   : 1 },
+	P: { current : 1, parent  : 1 },
+	M: { current : 1, history : 1 },
+
+	G: { nav: 1, more : 1 },
+	T: { nav: 1, skip : 1, top    : 1 }, 
+	V: { nav: 1, skip : 1, bottom : 1 }, 
+
+	// these do not work, different codes coming through
+	'[' : { thresh : 1, top    : 1, down: 1 },
+	']' : { thresh : 1, top    : 1, up  : 1 },
+	',' : { thresh : 1, bottom : 1, down: 1 },
+	'.' : { thresh : 1, bottom : 1, up  : 1 },
+
+	// esc = hide_modal_box() ?
 };
 
 validkeys['H'] = validkeys['A'];
 validkeys['L'] = validkeys['D'];
 validkeys['J'] = validkeys['S'];
 validkeys['K'] = validkeys['W'];
+
+//testing
+//validkeys['1'] = validkeys['['];
+//validkeys['2'] = validkeys[']'];
+//validkeys['3'] = validkeys[','];
+//validkeys['4'] = validkeys['.'];
+
 
 function keyHandler(e, k) {
 	if (!k)
@@ -1918,69 +1955,103 @@ function keyHandler(e, k) {
 			var next_cid = 0;
 			var key = k || String.fromCharCode(c);
 			var keyo = validkeys[key];
-			if (keyo && keyo['reply'] && user_is_subscriber && current_cid) { // XXX
-				replyTo(current_cid);
+			if (keyo) {
+				// keys that rely on current comment
+				if (keyo['current'] && current_cid) {
+					if (keyo['reply'] && !user_is_anon) // XXX will be anon too
+						replyTo(current_cid);
 
-			// forward and back between comments, in order of how they were loaded
-			} else if (keyo && keyo['chrono']) {
-				var i = last_updated_comments_index;
-				var l = last_updated_comments.length - 1;
-				update = 1;
+					else if (keyo['history'])
+						getModalPrefs('modcommentlog', 'Moderation Comment Log', current_cid);
 
-				if (keyo['prev']) {
-					if (i <= 0) {
-						// this did go back to end; nothing, for now
-						//i = l;
-					} else
-						i = i - 1;
-				} else if (keyo['next']) {
-					if (i >= l) {
-						if (ajaxCommentsWait())
-							return;
-						update = 2;
-						ajaxFetchComments(0, 1, '', 1);
-					} else {
-						if (!i && noSeeFirstComment(last_updated_comments[i]))
-							comments_started = 1; // only come here once
-						else
-							i = i + 1;
+					else if (keyo['parent']) {
+						if (current_cid && comments[current_cid] && comments[current_cid]['pid'])
+							selectParent(comments[current_cid]['pid']);
 					}
-				}
 
-				if (update == 1) {
-					last_updated_comments_index = i;
-					next_cid = last_updated_comments[i];
-				}
-			}
 
-			// forward and back between threads, and comments within each thread
-			else if (keyo && keyo['thread']) {
-				update = 1;
-				if (keyo['next']) {
-					if (noSeeFirstComment(current_cid))
-						next_cid = current_cid;
-					else {
-						if (keyo['unread'])
-							getNextUnread = 1;
-						if (keyo['comment']) {
-							next_cid = commTreeNextComm(current_cid, 0, getNextUnread);
-							if (!next_cid) { // && getNextUnread) {
-								if (ajaxCommentsWait())
-									return;
-								update = 2;
-								var highlight = 1 + collapseCurrent;
-								ajaxFetchComments(0, 1, '', highlight);
-							}
+				// misc. navigation keys
+				} else if (keyo['nav']) {
+					if (keyo['more'])
+						ajaxFetchComments(0, 1);
+
+					else if (keyo['skip']) { // XXX how to find top/bottom?
+						if (keyo['top'])
+							1;
+						if (keyo['bottom'])
+							1;
+					}
+
+				// threshold keys keys
+				} else if (keyo['thresh']) {
+					if (keyo['top'])
+						changeHT(keyo['up'] ? 1 : -1);
+					if (keyo['bottom'])
+						changeT((keyo['up'] ? 1 : -1), 1);
+					gCommentControlWidget.setTHT(user_threshold, user_highlightthresh);
+
+
+				// forward and back between comments, in order of how they were loaded
+				} else if (keyo['chrono']) {
+					var i = last_updated_comments_index;
+					var l = last_updated_comments.length - 1;
+					update = 1;
+
+					if (keyo['prev']) {
+						if (i <= 0) {
+							// this did go back to end; nothing, for now
+							//i = l;
 						} else
-							next_cid = commTreeNextComm(comments[current_cid].pid, current_cid, getNextUnread);
+							i = i - 1;
+					} else if (keyo['next']) {
+						if (i >= l) {
+							if (ajaxCommentsWait())
+								return;
+							update = 2;
+							ajaxFetchComments(0, 1, '', 1);
+						} else {
+							if (!i && noSeeFirstComment(last_updated_comments[i]))
+								comments_started = 1; // only come here once
+							else
+								i = i + 1;
+						}
+					}
+
+					if (update == 1) {
+						last_updated_comments_index = i;
+						next_cid = last_updated_comments[i];
 					}
 				}
 
-				else if (keyo['prev'] && keyo['comment'])
-					next_cid = commTreePrevComm(current_cid);
-
-				else if (keyo['prev'])
-					next_cid = commTreePrevComm(current_cid, 1);
+				// forward and back between threads, and comments within each thread
+				else if (keyo['thread']) {
+					update = 1;
+					if (keyo['next']) {
+						if (noSeeFirstComment(current_cid))
+							next_cid = current_cid;
+						else {
+							if (keyo['unread'])
+								getNextUnread = 1;
+							if (keyo['comment']) {
+								next_cid = commTreeNextComm(current_cid, 0, getNextUnread);
+								if (!next_cid) { // && getNextUnread) {
+									if (ajaxCommentsWait())
+										return;
+									update = 2;
+									var highlight = 1 + collapseCurrent;
+									ajaxFetchComments(0, 1, '', highlight);
+								}
+							} else
+								next_cid = commTreeNextComm(comments[current_cid].pid, current_cid, getNextUnread);
+						}
+					}
+	
+					else if (keyo['prev'] && keyo['comment'])
+						next_cid = commTreePrevComm(current_cid);
+	
+					else if (keyo['prev'])
+						next_cid = commTreePrevComm(current_cid, 1);
+				}
 			}
 
 			if (update && next_cid) {
