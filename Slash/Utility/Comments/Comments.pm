@@ -1978,23 +1978,23 @@ EOT
 		&& $comment->{nickname} ne "-") { # this last test probably useless
 		my @link = ( );
 
-		push @link, (qq'<span id="reply_link_$comment->{cid}">' . linkComment({
+		push @link, (qq'<span id="reply_link_$comment->{cid}" class="nbutton"><p><b>' . linkComment({
 			sid	=> $comment->{sid},
 			pid	=> $comment->{cid},
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
 			subject_only => 1,
 			onclick	=> (($discussion2 && !$user->{is_anon}) ? "replyTo($comment->{cid}); return false;" : '')
-		}) . '</span>') unless $user->{state}{discussion_archived};
+		}) . '</b></p></span>') unless $user->{state}{discussion_archived};
 
-		push @link, linkComment({
+		push @link, (qq'<span class="nbutton"><p><b>' . linkComment({
 			sid	=> $comment->{sid},
 			cid	=> $comment->{original_pid},
 			pid	=> $comment->{original_pid},
 			subject	=> 'Parent',
 			subject_only => 1,
 			onclick	=> ($discussion2 ? "return selectParent($comment->{original_pid})" : '')
-		}, 1) if $comment->{original_pid};# && !($discussion2 &&
+		}, 1) . '</b></p></span>') if $comment->{original_pid};# && !($discussion2 &&
 #			(!$form->{cid} || $form->{cid} != $comment->{cid})
 #		);
 
@@ -2012,10 +2012,10 @@ EOT
 		push @link, qq|<input type="checkbox" name="del_$comment->{cid}">|
 			if $user->{is_admin};
 
-		my $link = join(" | ", @link);
+		my $link = join(" ", @link);
 
 		if (@link) {
-			$commentsub = "[ $link ]";
+			$commentsub = "$link";
 		}
 
 	}

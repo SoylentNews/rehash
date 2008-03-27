@@ -19,57 +19,64 @@ en_US
 __name__
 edit_comment
 __template__
-<div id="wide">
-[% this_title = pid ? reply.subject : discussion.title;
-   this_title = this_title | strip_html;
-   PROCESS titlebar title="Reply to: $this_title" %]
-
-<p>If you have difficulty with this form, please use the <a href="[% gSkin.rootdir %]/comments.pl?op=Reply&amp;sid=[% sid %]&amp;pid=[% pid %]">old form</a>.</p>
-
-[% IF user.is_anon %]<p>
-	[% IF constants.allow_anonymous %]
-You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
-in now</a>, or <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>.
-	[% ELSE %]
-You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
-in now</a>, <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>,
-or post as <b>[% user.nickname | strip_literal %]</b>.
-	[% END %]
-</p>[% END %]
+<div id="wide" class="inline_comment">
+[% IF user.is_anon %]
+	<p class="warning">
+		[% IF constants.allow_anonymous %]
+	You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
+	in now</a>, or <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>/
+		[% ELSE %]
+	You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
+	in now</a>, <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>,
+	or post as <b>[% user.nickname | strip_literal %]</b>.
+		[% END %]
+	</p>
+[% END %]
 
 [% IF !user.is_anon || constants.allow_anonymous %]
-<form action="[% gSkin.rootdir %]/comments.pl" method="post">
-	<div id="replyto_preview_[% pid %]" class="replyto_reply" onclick="editReply([% pid %])"></div>
-	<div id="replyto_reply_[% pid %]" class="replyto_reply">
-<input type="hidden" name="sid" value="[% sid %]">
-[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
-<input type="hidden" name="gotmodwarning_[% pid %]" id="gotmodwarning_[% pid %]" value="0">
-[% reskey_label = "reskey_reply_$pid"; PROCESS reskey_tag %]
-<p><input type="text" name="postersubj_[% pid %]" id="postersubj_[% pid %]" value="[% form.postersubj | strip_attribute %]" size="50" maxlength="50">
-[% UNLESS user.is_anon %][<a href="[% gSkin.rootdir %]/my/comments" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">Options</a>]
-[%- IF constants.allow_anonymous && user.karma > -1 && (discussion.commentstatus == 'enabled' || discussion.commentstatus == 'logged_in') -%]
-	<input type="checkbox" name="postanon_[% pid %]" id="postanon_[% pid %]"> Post Anonymously
-[%- END %]</p>[% END %]
-<p><textarea wrap="virtual" name="postercomment_[% pid %]" id="postercomment_[% pid %]" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]"></textarea></p>
-
-	</div>
-	<div id="replyto_msg_[% pid %]" class="replyto_msg"></div>
-	<div class="replyto_buttons">
-		<span id="replyto_buttons_1_[% pid %]">
-<input type="button" name="preview_[% pid %]"    id="preview_[% pid %]"    value="Preview"          class="button" onclick="previewReply([% pid %]); return false;">
-[%- IF pid # not for root-level reply %]
-<input type="button" name="quotereply_[% pid %]" id="quotereply_[% pid %]" value="Quote Parent"     class="button" onclick="quoteReply([% pid %]);   return false;">[% END %]
-		</span><span id="replyto_buttons_2_[% pid %]" style="display: none">
-<input type="button" name="submit_[% pid %]"     id="submit_[% pid %]"     value="Submit"           class="button" onclick="submitReply([% pid %]);  return false;">
-<input type="button" name="edit_[% pid %]"       id="edit_[% pid %]"       value="Continue Editing" class="button" onclick="editReply([% pid %]);    return false;">
-		</span><span id="replyto_buttons_3_[% pid %]">
-<input type="button" name="cancel_[% pid %]"     id="cancel_[% pid %]"     value="Cancel"           class="button" onclick="cancelReply([% pid %]);  return false;">
-		</span>
-	</div>
-</form>
+	<form action="[% gSkin.rootdir %]/comments.pl" method="post">
+		<div id="replyto_preview_[% pid %]" class="replyto_reply" onclick="editReply([% pid %])"></div>
+		<div id="replyto_reply_[% pid %]" class="replyto_reply">
+			<input type="hidden" name="sid" value="[% sid %]">
+			[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
+			<input type="hidden" name="gotmodwarning_[% pid %]" id="gotmodwarning_[% pid %]" value="0">
+			[% reskey_label = "reskey_reply_$pid"; PROCESS reskey_tag %]
+			<div class="generaltitle">
+				<div class="title">
+					<h3>
+						<input type="text" name="postersubj_[% pid %]" id="postersubj_[% pid %]" value="[% form.postersubj | strip_attribute %]" size="50" maxlength="50">
+						[% UNLESS user.is_anon %]
+							[%- IF constants.allow_anonymous && user.karma > -1 && (discussion.commentstatus == 'enabled' || discussion.commentstatus == 'logged_in') -%]
+									<input type="checkbox" name="postanon_[% pid %]" id="postanon_[% pid %]"> Post Anonymously
+							[%- END %]
+						[% END %]
+					</h3>
+					[% UNLESS user.is_anon %]<span id="pref"><a href="[% gSkin.rootdir %]/my/comments" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">Preferences</a></span>[% END %]
+				</div>
+			</div>
+			<div class="generalbody">
+				<textarea wrap="virtual" name="postercomment_[% pid %]" id="postercomment_[% pid %]" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]"></textarea>	
+			</div>
+		</div>
+		<div id="replyto_msg_[% pid %]" class="replyto_msg"></div>
+		<div class="replyto_buttons">
+			<span id="replyto_buttons_1_[% pid %]">
+				<input type="button" name="preview_[% pid %]" id="preview_[% pid %]" value="Preview" class="button" onclick="previewReply([% pid %]); return false;">
+				[%- IF pid # not for root-level reply %]
+				<input type="button" name="quotereply_[% pid %]" id="quotereply_[% pid %]" value="Quote Parent" class="button" onclick="quoteReply([% pid %]); return false;">[% END %]
+			</span>
+			<span id="replyto_buttons_2_[% pid %]" style="display: none">
+				<input type="button" name="submit_[% pid %]" id="submit_[% pid %]" value="Submit" class="button" onclick="submitReply([% pid %]); return false;">
+				<input type="button" name="edit_[% pid %]" id="edit_[% pid %]" value="Continue Editing" class="button" onclick="editReply([% pid %]); return false;">
+				<span class="state">Preview</span>
+			</span>
+			<span id="replyto_buttons_3_[% pid %]">
+				<input type="button" name="cancel_[% pid %]" id="cancel_[% pid %]" value="Cancel" class="button" onclick="cancelReply([% pid %]); return false;">
+			</span>
+		</div>
+	</form>
 [% END # IF !user.is_anon || constants.allow_anonymous %]
 </div>
-
 __seclev__
 1000
 __version__
