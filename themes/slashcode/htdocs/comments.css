@@ -379,3 +379,34 @@ div.ccw-panel, #ccw-control,
 #ccw-hide-bar-tab { border-top-width: 0; }
 .horizontal #ccw-abbr-bar-tab { border-bottom-width: 1px; border-right: none; }
 .horizontal #ccw-hide-bar-tab { border-top-width: 1px; border-left: none; }
+
+
+/* Action Buttons */
+
+.nbutton{
+    background: #666 url("/images/corner_w_tl.png") top left no-repeat;
+        color:#fff;
+        margin:0.25em;
+        padding: .4em 0;
+}
+.nbutton p{
+        display:inline;
+        background: transparent url("/images/corner_w_tr.png") top right no-repeat;
+        padding: .4em 0;
+}
+.nbutton p b{
+        display:inline;
+        background: transparent url("/images/corner_w_bl.png") bottom left no-repeat;
+        padding: .4em 0;
+}
+.nbutton p b a {
+        background: transparent url("/images/corner_w_br.png") bottom right no-repeat !important;
+        padding: .4em 1em;
+        color:#fff !important;
+        font-weight:normal;
+        text-decoration:none;
+}
+.nbutton:hover {background-color: #444}
+
+
+
