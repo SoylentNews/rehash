@@ -7877,6 +7877,7 @@ sub createSignoff {
 
 	$signoff_type ||= '';
 	$self->sqlInsert("signoff", { stoid => $stoid, uid => $uid, signoff_type => $signoff_type });
+	$self->setStory($stoid, { thumb_signoff_needed => 0 });
 
 	if ($constants->{plugin}{FireHose}) {
 		my $firehose = getObject("Slash::FireHose");
@@ -7945,6 +7946,19 @@ sub getSignoffsForStory {
 		"signoff, users",
 		"signoff.stoid=$stoid_q AND users.uid=signoff.uid"
 	);
+}
+
+sub deleteSignoffsForStory {
+	my($self, $stoid) = @_;
+	my $constants = getCurrentStatic();
+	my $stoid_q = $self->sqlQuote($stoid);
+	$self->sqlDelete("signoff", "stoid=$stoid_q");
+	if ($constants->{plugin}{FireHose}) {
+		my $firehose = getObject("Slash::FireHose");
+		my ($id) = $self->sqlSelect("id", "firehose", "type='story' and srcid=$stoid_q");
+		$firehose->setFireHose($id, { signoffs => '' });
+
+	}
 }
 
 sub getSignoffsInLastMinutes {
