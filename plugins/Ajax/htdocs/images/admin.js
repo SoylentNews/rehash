@@ -200,7 +200,7 @@ function console_update(use_fh_interval, require_fh_timeout) {
 	if(use_fh_interval) {
 		interval = getFirehoseUpdateInterval(); 
 	}
-	setTimeout("console_update(" + use_fh_interval + "," + fh_is_timed_out +")", interval);
+	setTimeout("console_update(" + use_fh_interval + "," + fh_is_timed_out +")", interval * 2);
 }
 
 function firehose_usage() {
