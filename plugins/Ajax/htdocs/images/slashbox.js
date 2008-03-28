@@ -13,7 +13,7 @@ YAHOO.slashdot.SlashBox = function( id, sGroup, config ) {
 YAHOO.extend(YAHOO.slashdot.SlashBox, YAHOO.util.DDProxy);
 
 
-YAHOO.slashdot.SlashBox.prototype.createFrame() {
+YAHOO.slashdot.SlashBox.prototype.createFrame = function() {
 	// ...
 }
 
