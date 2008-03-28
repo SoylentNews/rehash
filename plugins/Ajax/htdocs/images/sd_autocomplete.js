@@ -334,7 +334,7 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._newCompleter = function( tagDomain 
 		c = new YAHOO.widget.AutoComplete("ac-select-input", "ac-choices", YAHOO.slashdot.dataSources[tagDomain]);
 		c.minQueryLength = 0;
 
-			// hack? -- override YUI's private member function so that for top tags auto-complete, right arrow means select
+		// hack? -- override YUI's private member function so that for top tags auto-complete, right arrow means select
 		c._jumpSelection = function() { if ( this._oCurItem ) this._selectItem(this._oCurItem); };
 	} else {
 		c = new YAHOO.widget.AutoComplete(this._sourceEl, "ac-choices", YAHOO.slashdot.dataSources[tagDomain]);
@@ -351,8 +351,8 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._newCompleter = function( tagDomain 
 }
 
 YAHOO.slashdot.AutoCompleteWidget.prototype._show = function( obj, callbackParams, tagDomain ) {
-		// onTextboxBlur should have already hidden the previous instance (if any), but if events
-		//	come out of order, we must hide now to prevent broken listeners
+	// onTextboxBlur should have already hidden the previous instance (if any), but if events
+	// come out of order, we must hide now to prevent broken listeners
 	if ( this._sourceEl )
 		this._hide();
 
@@ -442,8 +442,8 @@ YAHOO.slashdot.AutoCompleteWidget.prototype.attach = function( obj, callbackPara
 
 YAHOO.slashdot.AutoCompleteWidget.prototype._onSdClick = function( e, me ) {
 		// if the user re-clicked the item to which I'm attached, then they mean to hide me
-		//	I'm going to hide automatically, because a click outside the text will blur, and that makes me go away
-		//	but I need to remember _not_ to let the current click re-show me
+		// I'm going to hide automatically, because a click outside the text will blur, and that makes me go away
+		// but I need to remember _not_ to let the current click re-show me
 	var reclicked = me._sourceEl && YAHOO.util.Event.getTarget(e, true) == me._sourceEl;
 	me._denyNextAttachTo = reclicked ? me._sourceEl : null;
 }
@@ -485,8 +485,8 @@ YAHOO.slashdot.AutoCompleteWidget.prototype._onSdTextboxKeyDown = function( e, m
 			break;
 		case 13:
 			// I'm sorry to say we have to test first, something somehow somewhere can still
-			//	leave this listener dangling; want to look deeper into this, as this would _still_
-			//	leave the listener dangling
+			// leave this listener dangling; want to look deeper into this, as this would _still_
+			// leave the listener dangling
 			if ( me._completer )
 				me._completer.unmatchedItemSelectEvent.fire(me._completer, me, me._completer._sCurQuery);
 			break;

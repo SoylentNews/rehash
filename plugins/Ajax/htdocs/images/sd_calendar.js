@@ -29,9 +29,9 @@ function datesToHumanReadable( date1, date2 ) {
 	function day_ordinal( d ) {
 		switch ( d ) {
 			case 1: case 21: case 31: return d+"st";
-			case 2: case 22:					return d+"nd";
-			case 3: case 23:					return d+"rd";
-			default:									return d+"th";
+			case 2: case 22:          return d+"nd";
+			case 3: case 23:          return d+"rd";
+			default:                  return d+"th";
 		}
 	}
 
@@ -210,8 +210,8 @@ YAHOO.slashdot.DateWidget.prototype._setDateFromSelection = function( date, allo
 	if ( allowModeChange==true ) {
 		var today = new Date();
 		var newMode = ( date.getFullYear() == today.getFullYear()
-								 && date.getMonth()		 == today.getMonth()
-								 && date.getDate()		 == today.getDate() ) ? "now" : "day";
+		             && date.getMonth()    == today.getMonth()
+		             && date.getDate()     == today.getDate() ) ? "now" : "day";
 
 		this.muteEvents();
 		modeChanged = this.setMode(newMode);

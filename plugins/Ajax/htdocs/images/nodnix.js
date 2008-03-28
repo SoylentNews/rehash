@@ -20,7 +20,7 @@ function get_predefined_nodnix_tags() {
 	var tags = [];
 	var query = _get_nodnix('input').getAttribute("updown");
 	var listEl = query=="+" ? document.getElementById('static-nod-completions')
-													: document.getElementById('static-nix-completions');
+
 	if ( listEl ) {
 		var itemEls = listEl.getElementsByTagName('li');
 		for ( var i=0; i<itemEls.length; ++i )
@@ -53,7 +53,6 @@ function get_nodnix_listener() {
 			keylist.push(extras.charCodeAt(i));
 
 		get_nodnix_listener.nodnix_listener = new YAHOO.util.KeyListener(document, {keys:keylist},
-																													 {fn:handle_nodnix_key});
 
 
 		var keylist2 = new Array();
@@ -104,7 +103,7 @@ function nodnix_not_tag( old_tag ) {
 	var new_tag = old_tag[0]=='!' ? old_tag.slice(1) : '!'+old_tag;
 	createTag(new_tag, g_nodnix_item_id, "firehose");
 	var tag_list = _get_nodnix('ol');
-		// XXX not a good idea if the tag happens to be 'span' or 'li', etc
+	// XXX not a good idea if the tag happens to be 'span' or 'li', etc
 	tag_list.innerHTML = tag_list.innerHTML.replace(old_tag, new_tag, "g");
 }
 
@@ -179,9 +178,9 @@ function show_nix_menu(elem, id, show_delay, hide_delay) {
 
 function _get_nodnix( tag ) {
 	var menu;
-		 ((menu=get_nod_menu()).style.display != 'none')
+	   ((menu=get_nod_menu()).style.display != 'none')
 	|| ((menu=get_nix_menu()).style.display != 'none')
-	||	(menu=null);
+	||  (menu=null);
 
 	if ( ! YAHOO.util.Dom.hasClass(menu, 'editing') )
 		return;
@@ -193,9 +192,9 @@ function handle_nodnix_key( type, args, obj ) {
 	if ( args ) {
 		var event = args[1];
 		if ( event ) {
-				// space key initiates editing, but _doesn't_ go into the text field (swallow it)
-				// escape key hides the menu before we even start editing (and we swallow it)
-				// any other key initiates editing and goes into the text field (don't swallow it)
+			// space key initiates editing, but _doesn't_ go into the text field (swallow it)
+			// escape key hides the menu before we even start editing (and we swallow it)
+			// any other key initiates editing and goes into the text field (don't swallow it)
 			var isSPACE = event.keyCode == YAHOO.util.KeyListener.KEY.SPACE;
 			var isESCAPE = event.keyCode == YAHOO.util.KeyListener.KEY.ESCAPE;
 
@@ -276,7 +275,7 @@ function handle_nodnix_select( type, args, stay_open ) {
 		hide_nodnix_menu();
 }
 
-	// WARNING: keep this string in sync with tagsnodnixuser;misc;default
+// WARNING: keep this string in sync with tagsnodnixuser;misc;default
 handle_nodnix_select.template_string = '<li>$<span class="tag-actions"><a class="not-tag" onmousedown="nodnix_not_tag(\'$\'); return false" href="#">!</a> <a class="del-tag" onmousedown="nodnix_del_tag(\'$\'); return false" href="#">x</a></span></li>';
 
 function handle_completer_key( type, args ) {
