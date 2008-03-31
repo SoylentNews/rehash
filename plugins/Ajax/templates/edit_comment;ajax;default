@@ -19,7 +19,7 @@ en_US
 __name__
 edit_comment
 __template__
-<div id="wide" class="inline_comment">
+<div class="inline_comment">
 [% IF user.is_anon %]
 	<p class="warning">
 		[% IF constants.allow_anonymous %]
@@ -51,7 +51,7 @@ __template__
 							[%- END %]
 						[% END %]
 					</h3>
-					[% UNLESS user.is_anon %]<span id="pref"><a href="[% gSkin.rootdir %]/my/comments" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">Preferences</a></span>[% END %]
+					[% UNLESS user.is_anon %]<span class="pref"><a href="[% gSkin.rootdir %]/my/comments" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">Preferences</a></span>[% END %]
 				</div>
 			</div>
 			<div class="generalbody">

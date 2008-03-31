@@ -739,7 +739,8 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 		params['highlightthresh'] = user_highlightthresh;
 	}
 
-	params['cid']             = root_comment;
+	if (root_comment)
+		params['cid']     = root_comment;
 	params['discussion_id']   = discussion_id;
 //	params['reskey']          = reskey_static;
 
@@ -1015,9 +1016,7 @@ function editReply(pid) {
 }
 
 function setReplyMsg(pid, msg) {
-	if (!pid)
-		return;
-	var msgdiv = $('#replyto_msg_' + pid);
+	var msgdiv = $('#replyto_msg_' + (pid || 0));
 	if (!msgdiv)
 		return;
 

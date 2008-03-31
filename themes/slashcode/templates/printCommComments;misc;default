@@ -47,7 +47,7 @@ __template__
 	</script>
 [% END %]
 
-[% IF cid %]
+[% IF cid && !discussion2 %]
 	<ul id="commentlisting" class="[% user.mode %]">
 	[% Slash.dispComment(comment) %]
 	<div class="comment_footer">
@@ -88,21 +88,20 @@ __template__
 [% END %]
 
 	[% lcp %]
-	[% IF lvl %]
-	[% END %]
-	[% thread = Slash.displayThread(sid, pid, lvl, comments) %]
+	[% IF lvl; END %]
+	[% this_pid = discussion2 ? 0 : pid;
+	   thread = Slash.displayThread(sid, this_pid, lvl, comments) %]
 	[% IF thread || discussion2 %]
-		[% UNLESS cid %]<ul id="commentlisting"[% IF discussion2 %] class="d2"[% END %]>[% END %]
+		[% IF !cid || discussion2 %]<ul id="commentlisting"[% IF discussion2 %] class="d2"[% END %]>[% END %]
 			[% thread || '' %]
 			<li id="roothiddens" class="hide"></li>
-		[% UNLESS cid %]</ul>[% END %]
+		[% IF !cid || discussion2 %]</ul>[% END %]
 	[% END %]
-	[% IF cid %]</ul>[% END %]
-	[% IF lvl %]
-	[% END %]
+	[% IF cid && !discussion2 %]</ul>[% END %]
+	[% IF lvl; END %]
 	[% lcp %]
 
-[% IF discussion2 && !cid %]
+[% IF discussion2 %]
 <div id="replyto_0"></div>
 <div class="prev-next"><a href="#" onclick="ajaxFetchComments(0,1); return false"><span id="more_comments_num_a" class="hide">Check for more</span></a>
 	[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]

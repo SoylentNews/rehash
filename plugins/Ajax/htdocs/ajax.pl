@@ -396,11 +396,11 @@ sub readRest {
 sub fetchComments {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 
-	my $cids         = [ grep /^\d+$/, ($form->{_multi}{cids} ? @{$form->{_multi}{cids}} : $form->{cids}) ];
+	my $cids         = [ grep { defined && /^\d+$/ } ($form->{_multi}{cids} ? @{$form->{_multi}{cids}} : $form->{cids}) ];
 	my $id           = $form->{discussion_id} || 0;
 	my $cid          = $form->{cid} || 0; # root id
 	my $d2_seen      = $form->{d2_seen};
-	my $placeholders = [ grep /^\d+$/, ($form->{_multi}{placeholders} ? @{$form->{_multi}{placeholders}} : $form->{placeholders}) ];
+	my $placeholders = [ grep { defined && /^\d+$/ } ($form->{_multi}{placeholders} ? @{$form->{_multi}{placeholders}} : $form->{placeholders}) ];
 
 	$user->{state}{ajax_accesslog_op} = "ajax_comments_fetch";
 #use Data::Dumper; print STDERR Dumper [ $form, $cids, $id, $cid, $d2_seen ];

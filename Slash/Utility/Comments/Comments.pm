@@ -156,14 +156,24 @@ sub selectComments {
 
 #slashProf("sC main sort", "sC setup");
 	my($oldComment, %old_comments);
-	# XXXd2 disable for sub-threads for now ($cid)
-	if ($discussion2 && !$cid && !$options->{no_d2}) {
+	if ($discussion2 && !$options->{no_d2}) {
 		my $limits = $slashdb->getDescriptions('d2_comment_limits');
 		my $max = $d2_comment_q ? $limits->{ $d2_comment_q } : 0;
 		$max = int($max/2) if $shtml;
 		my @new_comments;
 		$options->{existing} ||= {};
 		@$thisComment = sort { $a->{cid} <=> $b->{cid} } @$thisComment;
+
+		# we need to filter which comments are descendants of $cid
+		my %cid_seen;
+		if ($cid) {
+			# this only works because we are already in cid order
+			for my $C (@$thisComment) {
+				if ($cid == $C->{cid} || $cid_seen{$C->{pid}}) {
+					$cid_seen{$C->{cid}} = 1;
+				}
+			}
+		}
 
 		my $sort_comments;
 		if (!$user->{d2_comment_order}) { # score
@@ -176,16 +186,21 @@ sub selectComments {
 			$sort_comments = $thisComment;
 		}
 
+
 		for my $C (@$sort_comments) {
 			next if $options->{existing}{$C->{cid}};
 
 			if ($max && @new_comments >= $max) {
 				if ($cid) {
+					# still include $cid even if it would
+					# otherwise be excluded (should only
+					# matter if not sorting by date
 					push @new_comments, $C if $cid == $C->{cid};
 				} else {
 					last;
 				}
 			} else {
+				next if $cid && !$cid_seen{$C->{cid}};
 				push @new_comments, $C;
 			}
 		}
@@ -193,9 +208,9 @@ sub selectComments {
 		my @seen;
 		my $lastcid = 0;
 		my %check = (%{$options->{existing}}, map { $_->{cid} => 1 } @new_comments);
-		for my $cid (sort { $a <=> $b } keys(%check)) {
-			push @seen, $lastcid ? $cid - $lastcid : $cid;
-			$lastcid = $cid;
+		for my $this_cid (sort { $a <=> $b } keys(%check)) {
+			push @seen, $lastcid ? $this_cid - $lastcid : $this_cid;
+			$lastcid = $this_cid;
 		}
 		$comments->{0}{d2_seen} = join ',', @seen;
 
@@ -296,8 +311,8 @@ sub selectComments {
 ##slashProf("sC d2 fudging", "sC reparenting");
 #slashProf("", "sC reparenting");
 	if ($oldComment) {
-		for my $cid (sort { $a <=> $b } keys %$comments) {
-			my $C = $comments->{$cid};
+		for my $this_cid (sort { $a <=> $b } keys %$comments) {
+			my $C = $comments->{$this_cid};
 
 			# && !$options->{existing}{ $C->{pid} }
 			while ($C->{pid}) {
@@ -344,7 +359,6 @@ sub jsSelectComments {
 	$gSkin     ||= getCurrentSkin();
 
 	my $id = $form->{sid};
-	my $pid = $form->{cid} || 0;
 	return unless $id;
 
 	my $threshold = defined $user->{d2_threshold} ? $user->{d2_threshold} : $user->{threshold};
@@ -360,12 +374,8 @@ sub jsSelectComments {
 	my($comments) = $user->{state}{selectComments}{comments};
 
 	my $d2_seen_0 = $comments->{0}{d2_seen} || '';
-	#delete $comments->{0}; # non-comment data
-	if ($pid && exists $comments->{$pid}) {
-		$comments = _get_thread($comments, $pid);
-	}
 
-	my @roots = $pid ? $pid : @{$comments->{$pid}{kids}};
+	my @roots = @{$comments->{0}{kids}};
 	my %roots_hash = ( map { $_ => 1 } @roots );
 	my $thresh_totals;
 
@@ -392,7 +402,7 @@ sub jsSelectComments {
 			}
 		}
 
-		$thresh_totals = commentCountThreshold($comments, $pid, \%roots_hash);
+		$thresh_totals = commentCountThreshold($comments, 0, \%roots_hash);
 		$comments = $comments_new;
 	}
 
@@ -435,7 +445,6 @@ comments = $anon_comments;
 
 thresh_totals = $anon_thresh;
 
-root_comment = $pid;
 root_comments = $anon_roots;
 root_comments_hash = $anon_rootsh;
 max_cid = $max_cid;
@@ -722,6 +731,7 @@ sub reparentComments {
 
 	my $max_depth_allowed = $user->{state}{max_depth} || $constants->{max_depth} || 7;
 
+	# even if !reparent, we still want to be here so we can set comments at max depth
 	return if $user->{state}{noreparent} || (!$max_depth_allowed && !$user->{reparent});
 
 	# Adjust the max_depth_allowed for the root pid or cid.
@@ -1023,7 +1033,7 @@ sub printComments {
 	return if $user->{state}{nocomment} || $user->{mode} eq 'nocomment';
 
 	my($comment, $next, $previous);
-	if ($cid) {
+	if ($cid && !$discussion2) {
 		my($next, $previous);
 		$comment = $comments->{$cid};
 		if (my $sibs = $comments->{$comment->{pid}}{kids}) {

@@ -416,3 +416,17 @@ span.current {position: absolute; left: .5em; margin-top: -.2em; z-index: 0; fon
 	border-top: none;
 }
 
+.inline_comment {border: 2px solid #666; margin: 1em; position: relative;}
+.inline_comment input[type="text"] {width: auto}
+.inline_comment textarea {margin: 1em; width: auto}
+.inline_comment .generalbody {margin: 0; padding: 0;}
+.inline_comment .pref {position: absolute; right: 0; top: -.8em}
+.inline_comment .pref a {right: 10px; background-image: url("/images/sic_icons.png"); color: #fff; background-repeat: no-repeat; background-position: 0px -1198px;padding: 5px 10px; position:absolute; text-decoration:none; text-indent:-7000em; top: .8em; }
+.inline_comment .state { display: none }
+.inline_comment .replyto_buttons, .inlinemsg {margin: .5em 1em;}
+.inline_comment #commentlisting {padding: 0; margin: 0;}
+.warning {background: #ffd; border: 1px solid #fe6; padding: .5em; margin: .5em 0 1em 0; color: #000;}
+.inline_comment .replyto_msg {background: #fdd; border: 1px solid #fbb; padding: .5em; margin: .5em 1em 0; color: #000 }
+.inline_comment .commentload {margin: 0 1em; font-weight: bold; color: #aaa;}
+.inline_comment .contain {margin: 0; padding: 0; border: none}
+
