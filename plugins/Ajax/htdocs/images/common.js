@@ -636,7 +636,7 @@ function ajax_update(request_params, id, handlers, request_url) {
 		url: request_url || '/ajax.pl',
 		data: request_params,
 		type: 'POST',
-		contentType: 'application/x-www-form-urlencoded',
+		contentType: 'application/x-www-form-urlencoded'
 	};
 
 	if ( id ) {

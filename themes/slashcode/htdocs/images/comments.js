@@ -401,10 +401,17 @@ function selectParent(cid, collapse) {
 	return false;
 }
 
-function vertBarClick (pid) {
-	comments_started = 1;
-	setCurrentComment(pid);
-	return selectParent(pid, 2);
+function vertBarClick() {
+	if (this && this.id) {
+		var pid = this.id.match(/_(\d+)/);
+		pid = pid[1];
+
+		if (pid) {
+			comments_started = 1;
+			setCurrentComment(pid);
+			return selectParent(pid, 2);
+		}
+	}
 }
 
 function setShortSubject(cid, mode, cl) {
@@ -581,9 +588,9 @@ function setDefaultDisplayMode(cid) {
 	if (!comment) { return }
 
 	var defmode = comment.className.match(/full|hidden|oneline/);
-	if (!defmode) { return }
+	if (!defmode || !defmode.length || !defmode[0]) { return }
 
-	futuredisplaymode[cid] = prehiddendisplaymode[cid] = displaymode[cid] = defmode;
+	futuredisplaymode[cid] = prehiddendisplaymode[cid] = displaymode[cid] = defmode[0];
 }
 
 function updateDisplayMode(cid, mode, newdefault) {
@@ -1276,6 +1283,8 @@ function finishLoading() {
 
 	setCurrentComment(last_updated_comments[last_updated_comments_index]);
 
+	//$('.contain').click(vertBarClick);
+
 	if (more_comments_num)
 		updateMoreNum(more_comments_num);
 	updateTotals();
@@ -1927,6 +1936,8 @@ var validkeys = {
 	221 : { chr: ']', thresh : 1, top    : 1, up  : 1 },
 	188 : { chr: ',', thresh : 1, bottom : 1, down: 1 },
 	190 : { chr: '.', thresh : 1, bottom : 1, up  : 1 },
+
+	191 : { chr: '/', toggle : 1, widget : 1 }
 };
 
 validkeys['H'] = validkeys['A'];
@@ -1971,8 +1982,12 @@ function keyHandler(e, k) {
 			var key = k || validkeys[c] ? c : String.fromCharCode(c);
 			var keyo = validkeys[key];
 			if (keyo) {
+				if (keyo['toggle']) {
+					if (keyo['widget'])
+						toggleDisplayOptions();
+
 				// keys that rely on current comment
-				if (keyo['current'] && current_cid) {
+				} else if (keyo['current'] && current_cid) {
 					if (keyo['reply'] && !user_is_anon) // XXX will be anon too
 						replyTo(current_cid);
 
