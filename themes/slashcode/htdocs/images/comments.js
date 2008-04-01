@@ -739,10 +739,11 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 		params['highlightthresh'] = user_highlightthresh;
 	}
 
-	if (root_comment)
-		params['cid']     = root_comment;
+// we could use this in future if we want to restrict "More" to
+// the cid's thread when possible
+//	if (root_comment)
+//		params['cid']     = root_comment;
 	params['discussion_id']   = discussion_id;
-//	params['reskey']          = reskey_static;
 
 	var abbrev = {};
 	for (var i = 0; i < cids.length; i++) {
@@ -995,8 +996,12 @@ function cancelReply(pid) {
 	replydiv.innerHTML = '';
 	if (pid) { // XXX
 		var reply_link = $dom('reply_link_' + pid);
-		reply_link.innerHTML = reply_link_html[pid];
-		reply_link_html[pid] = '';
+		// in some cases this won't exist; if not, fine, we
+		// just don't do it
+		if (reply_link || !reply_link_html[pid]) {
+			reply_link.innerHTML = reply_link_html[pid];
+			reply_link_html[pid] = '';
+		}
 	}
 }
 
@@ -1117,8 +1122,12 @@ function replyTo(pid) {
 			json_handler(transport);
 			if (pid) { // XXX
 				var reply_link = $dom('reply_link_' + pid);
-				reply_link_html[pid] = reply_link.innerHTML;
-				reply_link.innerHTML = '<p><b><a href="#" onclick="cancelReply(' + pid + '); return false;">Cancel Reply</a></b></p>';
+				// in some cases this won't exist; if not, fine, we
+				// just don't do it
+				if (reply_link) {
+					reply_link_html[pid] = reply_link.innerHTML;
+					reply_link.innerHTML = '<p><b><a href="#" onclick="cancelReply(' + pid + '); return false;">Cancel Reply</a></b></p>';
+				}
 			}
 			$dom('postercomment_' + pid).focus();
 		}
@@ -1245,9 +1254,6 @@ function finishLoading() {
 		loadAllElements('a');
 	}
 
-	if (root_comment)
-		currents['full'] += 1;
-
 	for (var i = 0; i < root_comments.length; i++) {
 		root_comments_hash[ root_comments[i] ] = 1;
 	}
@@ -1280,7 +1286,7 @@ function finishLoading() {
 			document.body.onkeydown = keyHandler;
 	}
 
-	setCurrentComment(last_updated_comments[last_updated_comments_index]);
+	setCurrentComment(root_comment || last_updated_comments[last_updated_comments_index]);
 
 	//$('.contain').click(vertBarClick);
 
@@ -1910,7 +1916,7 @@ lower top threshold: [
 raise top threshold: ]
 lower bottom threshold: ,
 raise bottom threshold: .
-toggle d2 widget: / XXX
+toggle d2 widget: /
 hide_modal_box(): esc XXX
 */
 

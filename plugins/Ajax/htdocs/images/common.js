@@ -36,6 +36,8 @@ jQuery.fn.extend({
 
 });
 
+var reskey_static = '';
+
 // global settings, but a firehose might use a local settings object instead
 var firehose_settings = {};
   firehose_settings.startdate = '';
@@ -620,7 +622,7 @@ function firehose_remove_tab(tabid) {
 		op:		'firehose_remove_tab',
 		tabid:		tabid,
 		reskey:		reskey_static,
-		section:	firehose_settings.section,
+		section:	firehose_settings.section
 	}, '', { onComplete: json_handler });
 
 }
@@ -1260,6 +1262,8 @@ function hide_modal_box() {
 }
 
 function getModalPrefs(section, title, tabbed) {
+	if (!reskey_static)
+		return show_login_box();
 	document.getElementById('preference_title').innerHTML = title;
 	var params = {};
 	params['op'] = 'getModalPrefs';

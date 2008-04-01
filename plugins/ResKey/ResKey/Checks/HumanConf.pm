@@ -48,7 +48,7 @@ sub doCheckTouch {
 
 	my $hc = getObject('Slash::HumanConf');
 	if (!$hc || !$hc->reloadFormkeyHC($self->resname, { frkey => $self->reskey, needs_hc => 1 })) {
-		return(RESKEY_DEATH, ['hcinvalid']);
+		return(RESKEY_DEATH, ['invalidhc']);
 	}
 
 	return RESKEY_SUCCESS;
@@ -65,11 +65,7 @@ sub doCheckUse {
 	my $return = $hc->validFormkeyHC($self->resname, { frkey => $self->reskey, needs_hc => 1 });
 	if ($return ne 'ok') {
 		$hc->reloadFormkeyHC($self->resname, { frkey => $self->reskey, needs_hc => 1 });
-		if ($return =~ /retry/) {
-			return(RESKEY_FAILURE, [$return]);
-		} else {
-			return(RESKEY_DEATH, [$return]);
-		}
+		return(($return =~ /retry/ ? RESKEY_FAILURE : RESKEY_DEATH), [$return]);
 	}
 
 	return RESKEY_SUCCESS;

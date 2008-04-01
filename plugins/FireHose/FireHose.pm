@@ -638,8 +638,6 @@ sub getFireHoseEssentials {
 
 	my $future_count = $count - $options->{limit} - $offset;
 
-
-
 	if (keys %$filter_globjids) {
 		for my $i (0 .. $#{$hr_ar}) {
 			my $el = $hr_ar->[$i] or last;

@@ -167,6 +167,8 @@ sub selectComments {
 		# we need to filter which comments are descendants of $cid
 		my %cid_seen;
 		if ($cid) {
+			# for display later
+			$user->{state}{d2_defaultclass}{$cid} = 'full';
 			# this only works because we are already in cid order
 			for my $C (@$thisComment) {
 				if ($cid == $C->{cid} || $cid_seen{$C->{pid}}) {
@@ -317,15 +319,27 @@ sub selectComments {
 			# && !$options->{existing}{ $C->{pid} }
 			while ($C->{pid}) {
 				my $parent = $comments->{ $C->{pid} } || {};
+				# parents of our main cid!
+				if ($cid && $C->{pid} < $cid) {
+					$user->{state}{d2_defaultclass}{$C->{pid}} = 'oneline';
+				}
+
 				if (!$parent || !$parent->{kids} || !$parent->{cid} || !defined($parent->{pid}) || !defined($parent->{points})) {
-					$parent = $comments->{ $C->{pid} } = {
-						cid    => $C->{pid},
-						pid    => ($old_comments{ $C->{pid} } && $old_comments{ $C->{pid} }{ pid }) || 0,
-						kids   => [ ],
-						points => -2,
-						dummy  => 1,
-						%$parent,
-					};
+					# parents of our main cid, so spend time
+					# finding it ...
+					if ($cid && $C->{pid} < $cid) {
+						$parent = $old_comments{ $C->{pid} };
+					} else {
+						$parent = {
+							cid    => $C->{pid},
+							pid    => ($old_comments{ $C->{pid} } && $old_comments{ $C->{pid} }{ pid }) || 0,
+							kids   => [ ],
+							points => -2,
+							dummy  => 1,
+							%$parent,
+						};
+					}
+					$comments->{ $C->{pid} } = $parent;
 				}
 
 				unless (grep { $_ == $C->{cid} } @{$parent->{kids}}) {
@@ -418,6 +432,7 @@ sub jsSelectComments {
 	$user->{is_anon}       ||= 0;
 	$user->{is_admin}      ||= 0;
 	$user->{is_subscriber} ||= 0;
+	my $root_comment = $user->{state}{selectComments}{cidorpid} || 0;
 
 	my $extra = '';
 	if ($d2_seen_0) {
@@ -445,6 +460,7 @@ comments = $anon_comments;
 
 thresh_totals = $anon_thresh;
 
+root_comment = $root_comment;
 root_comments = $anon_roots;
 root_comments_hash = $anon_rootsh;
 max_cid = $max_cid;
@@ -974,8 +990,9 @@ sub printComments {
 #slashProf("", "selectComments");
 	if ($discussion2) {
 		$user->{state}{selectComments} = {
-			comments	=> $comments,
-			count		=> $count
+			cidorpid	=> $cidorpid,
+			comments        => $comments,
+			count           => $count
 		};
 	}
 
@@ -1248,6 +1265,9 @@ sub displayThread {
 
 		my $highlight = ($comment->{points} >= $highlightthresh && $class ne 'hidden') ? 1 : 0;
 		$class = 'full' if $highlight;
+		if ($discussion2 && $user->{state}{d2_defaultclass}{$cid}) {
+			$class = $user->{state}{d2_defaultclass}{$cid};
+		}
 		$comment->{class} = $class;
 
 		$user->{state}{comments}{totals}{$class}++ unless $comment->{dummy};
@@ -1896,9 +1916,7 @@ sub _hard_dispComment {
 		if (length $comment->{points}) {
 			$score_to_display .= $comment->{points};
 			if ($constants->{modal_prefs_active}) {
-				my $func = $user->{is_anon}
-					? 'show_login_box()'
-					: "getModalPrefs('modcommentlog', 'Moderation Comment Log', $comment->{cid})";
+				my $func = "getModalPrefs('modcommentlog', 'Moderation Comment Log', $comment->{cid})";
 				$score_to_display = qq[<a href="#" onclick="$func; return false">$score_to_display</a>];
 			}
 		} else {
@@ -2004,9 +2022,7 @@ EOT
 			subject	=> 'Parent',
 			subject_only => 1,
 			onclick	=> ($discussion2 ? "return selectParent($comment->{original_pid})" : '')
-		}, 1) . '</b></p></span>') if $comment->{original_pid};# && !($discussion2 &&
-#			(!$form->{cid} || $form->{cid} != $comment->{cid})
-#		);
+		}, 1) . '</b></p></span>') if $comment->{original_pid};
 
 #use Data::Dumper; print STDERR "_hard_dispComment createSelect can_mod='$can_mod' disc_arch='$user->{state}{discussion_archived}' modd_arch='$constants->{comments_moddable_archived}' cid='$comment->{cid}' reasons: " . Dumper($reasons);
 
