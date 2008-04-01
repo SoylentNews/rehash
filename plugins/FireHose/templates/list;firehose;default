@@ -153,6 +153,7 @@ cmdrtaco dot net but be forgiving of beta code!
 <span id="itemsreturned">
 	[% IF itemnum == 0; Slash.getData('noitems', { options => options }, 'firehose'); END %]
 </span>
+[% firehose_more %]
 [% PROCESS paginate options = options ulid = "fh-paginate" divid = "fh-pag-div" num_items = itemnum fh_page = fh_page %]
 <script type="text/javascript">
 	[% FOR opt = [ 'startdate', 'mode', 'fhfilter', 'orderdir', 'orderby', 'startdate', 'duration', 'color'] %]

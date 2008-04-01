@@ -93,6 +93,24 @@ __template__
 		[% END %]
 		</b>
 		<br><br>
+[% CASE 'firehose_more_link' %]
+		[% extra_onclick = '' %]
+		[% IF !contentsonly %]
+		<div id="firehose_more">
+		[% END %]
+		[% IF day_label && day_count;
+			label = day_count _ " more " _ $day_label _ "...";
+		   ELSIF future_count > 0;
+		        label = future_count _ " more...";
+		   ELSIF future_count <= 0 && options.duration != -1;
+		   	label = "No more in time window, click to expand to all";
+			extra_onclick = 'firehose_set_options(\'duration\', -1); ';
+		   END;
+		%]
+		<a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a>
+		[% IF !contentsonly %]
+		</div>
+		[% END %]
 [% CASE 'notavailable' %]
 	The item you're trying to view either does not exist, or is not viewable to you.
 [% END %]
