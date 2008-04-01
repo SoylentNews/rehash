@@ -52,6 +52,7 @@ var firehose_settings = {};
   firehose_settings.more_num = 0;
 
 // Settings to port out of settings object
+  firehose_item_count = 0;
   firehose_updates = Array(0);
   firehose_updates_size = 0;
   firehose_ordered = Array(0);
@@ -839,10 +840,10 @@ function firehose_reorder() {
 	if (firehose_ordered) {
 		var fhlist = $('#firehoselist');
 		if (fhlist) {
-			var item_count = 0;
+			firehose_item_count = firehose_ordered.length;
 			for (i = 0; i < firehose_ordered.length; ++i) {
-				if (/^\d+$/.test(firehose_ordered[i])) {
-					++item_count;
+				if (!/^\d+$/.test(firehose_ordered[i])) {
+					--firehose_item_count;
 				}
 				$('#firehose-'+firehose_ordered[i]).appendTo(fhlist);
 				if ( firehose_future[firehose_ordered[i]] ) {
@@ -851,7 +852,7 @@ function firehose_reorder() {
 					$('#ttype-'+firehose_ordered[i]+'.future').setClass('story');
 				}
 			}
-			document.title = "[% sitename %] - " + (console_updating ? "Console" : "Firehose") + " (" + item_count + ")";
+			document.title = "[% sitename %] - " + (console_updating ? "Console" : "Firehose") + " (" + firehose_item_count + ")";
 		}
 	}
 
@@ -1354,7 +1355,6 @@ function admin_signoff(stoid, type, id) {
 
 function scrollWindowToFirehose(fhid) {
 	var firehose_y = getOffsetTop($('firehose-' + fhid));
-	console.log(firehose_y);
 	scroll(viewWindowLeft(), firehose_y);
 }
 
@@ -1446,7 +1446,6 @@ function firehose_go_next() {
 	if (pos < (firehose_ordered.length - 1)) {
 		pos++;
 	} else {
-		firehose_more();
 	}
 	firehose_set_cur(firehose_ordered[pos]);
 	scrollWindowToFirehose(firehose_cur);
@@ -1465,13 +1464,12 @@ function firehose_go_prev() {
 
 function firehose_more() {
 	var increment_by = 10;
-	var max_more = 100;
 	firehose_settings.more_num = firehose_settings.more_num + increment_by;
-	if (firehose_settings.more_num > max_more) {
-		firehose_settings.more_num = max_more;
+	
+	if ((firehose_item_count + increment_by) >= 200) {
 		$('#firehose_more').hide();
 	}
-	firehose_get_updates();
+	firehose_set_options('more_num', firehose_settings.more_num);
 }
 
 
