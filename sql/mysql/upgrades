@@ -5238,3 +5238,7 @@ CREATE TABLE user_event_types (
    type varchar(32) NOT NULL default '',
    PRIMARY KEY code (code)
 ) TYPE=InnoDB;
+
+# 2008-04-02
+UPDATE vars SET value = 'T_2_5_0_199' WHERE name = 'cvs_tag_currentcode';
+
