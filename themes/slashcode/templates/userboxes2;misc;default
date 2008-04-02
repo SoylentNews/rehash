@@ -1,0 +1,147 @@
+__section__
+default
+__description__
+Displays the three user boxes (fancybox's).
+
+* useredit = user being viewed ("edit" is for historical reasons)
+  (if not given, the standard "user" will be used)
+
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+userboxes2
+__template__
+[%
+
+IF !useredit; useredit = user; END;
+
+IF !useredit.is_anon;
+
+	# First box:  general user info
+
+	title = 'User Bio';
+	contents = BLOCK;
+		'<a href="'; gSkin.rootdir; '/~';
+			useredit.nickname | strip_paramattr; '/">';
+                        useredit.nickname | strip_literal; '</a> ';
+		PROCESS zoo_icons person=useredit.uid implied="";
+		IF user.uid == useredit.uid OR user.is_admin;
+			# Looking at ourselves; show our real name and email info.
+			'<br>'; IF useredit.realname; useredit.realname | strip_literal; ELSE; '(no real name given)'; END;
+			'<br><a href="mailto:';
+				useredit.realemail | strip_paramattr; '">';
+				Slash.ellipsify(Slash.strip_literal(useredit.realemail)); '</a>';
+			'<br>&nbsp;&nbsp;';
+			IF useredit.fakeemail;
+				IF useredit.fakeemail == useredit.realemail;
+					'(shown without obfuscation)';
+				ELSE;
+					'shown as <a href="mailto:';
+					useredit.fakeemail | strip_paramattr; '">';
+					Slash.ellipsify(Slash.strip_literal(useredit.fakeemail)); '</a>';
+				END;
+			ELSE;
+				'(email not shown publicly)';
+			END;
+		ELSE;
+			# Looking at someone else; show fake email info.
+			'<br>&nbsp;&nbsp;';
+			IF useredit.fakeemail;
+				'<a href="mailto:';
+					useredit.fakeemail | strip_paramattr; '">';
+					Slash.ellipsify(Slash.strip_literal(useredit.fakeemail)); '</a>';
+			ELSE;
+				'(email not shown publicly)';
+			END;
+		END;
+
+		IF useredit.homepage;
+			'<br><a href="';
+			useredit.homepage | strip_attribute;
+			'"';
+			IF useredit.karma <= constants.goodkarma;
+				' rel="nofollow"';
+			END;
+			'>';
+			Slash.ellipsify(Slash.strip_literal(useredit.homepage)); '</a>';
+		END;
+
+		IF user.uid == useredit.uid OR user.is_admin;
+			'<br>Karma: ';
+			PROCESS karma karma=useredit.karma admin_flag=user.is_admin;
+		END;
+
+		IF useredit.aim && !useredit.aimdisplay;
+			'<br><b>AOL IM:</b> ';
+			useredit.aim | strip_literal;
+			' (<b><a href="aim:addbuddy?screenname=';
+			useredit.aim | strip_attribute;
+			'">Add Buddy</a>, ';
+			'<a href="aim:goim?screenname=';
+			useredit.aim | strip_attribute;
+			'&amp;message=Greetings!">Send Message</a></b>)';
+		END;
+
+		IF useredit.yahoo;
+			'<br><b>Yahoo! ID:</b> ';
+			'<a href="http://profiles.yahoo.com/';
+			useredit.yahoo | strip_attribute;
+			'">';
+			useredit.yahoo | strip_literal;
+			'</a> (<b><a href="http://edit.yahoo.com/config/set_buddygrp?';
+			'.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=';
+			useredit.yahoo | strip_attribute;
+			'">Add User</a>, ';
+			'<a href="http://edit.yahoo.com/config/send_webmesg?.target=';
+			useredit.yahoo | strip_attribute;
+			'">Send Message</a></b>)';
+		END;
+
+		IF useredit.jabber;
+			'<br><b>Jabber:</b> ';
+			useredit.jabber | strip_literal;
+		END;
+
+		IF useredit.calendar_url;
+			'<br><b>Public Calendar:</b> ';
+			'<a href="webcal://';
+			useredit.calendar_url | strip_attribute;
+			'">Subscribe</a>, <a href="http://';
+			useredit.calendar_url | strip_attribute;
+			'">Download</a>';
+		END;
+
+                IF useredit.bio;
+                        '<br><hr>';
+			Slash.parseDomainTags(useredit.bio);
+                END;
+
+	END;
+	Slash.sidebox(title, contents, "user-info", 1);
+
+        # Latest comments box
+        contents = '';
+        FOREACH cid = latest_comments.keys.sort;
+                contents = contents _ '<a href="' _ constants.absolutedir_secure _ '/comments.pl?sid=' _ latest_comments.$cid.sid _ '&cid=' _ cid _'">' _ latest_comments.$cid.subject _ '</a><br>';
+        END;
+        title = 'Latest Comments';
+        Slash.sidebox(title, contents, "user-info", 1);
+
+        # Latest journals box
+        contents = '';
+        FOREACH jid = latest_journals.keys.sort;
+                contents = contents _ '<a href="' _ constants.absolutedir_secure _ '/~' _ useredit.nickname _ '/journal/' _ latest_journals.$jid.id _ '">' _ latest_journals.$jid.desc _ '</a><br>';
+        END; 
+        title = 'Latest Journal Entries';
+        Slash.sidebox(title, contents, "user-info", 1);
+
+END %]
+
+__seclev__
+1000
+__version__
+$Id$
