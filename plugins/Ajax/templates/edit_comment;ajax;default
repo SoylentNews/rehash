@@ -64,6 +64,8 @@ __template__
 				<input type="button" name="preview_[% pid %]" id="preview_[% pid %]" value="Preview" class="button" onclick="previewReply([% pid %]); return false;">
 				[%- IF pid # not for root-level reply %]
 				<input type="button" name="quotereply_[% pid %]" id="quotereply_[% pid %]" value="Quote Parent" class="button" onclick="quoteReply([% pid %]); return false;">[% END %]
+				[%- UNLESS user.is_anon %]
+				<input type="button" name="prefs_[% pid %]" id="prefs_[% pid %]" value="Options" class="button" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">[% END %]
 			</span>
 			<span id="replyto_buttons_2_[% pid %]" style="display: none">
 				<input type="button" name="submit_[% pid %]" id="submit_[% pid %]" value="Submit" class="button" onclick="submitReply([% pid %]); return false;">

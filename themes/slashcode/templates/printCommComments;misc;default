@@ -149,8 +149,7 @@ __template__
 		pieces_comments      = [[% user.state.comments.pieces.join(',') %]];
 		init_hiddens         = [[% user.state.comments.hiddens.join(',') %]];
 
-		[% IF discussion2 == "slashdot" %]d2act();
-		[% END -%]finishLoading();
+		finishLoading();
 //-->
 	</script>
 [% END %]

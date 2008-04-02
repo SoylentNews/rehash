@@ -214,6 +214,7 @@ YAHOO.slashdot.ThresholdApp = function() {
     init: function() {
       gCommentControlWidget = new YAHOO.slashdot.ThresholdWidget([% "'X'" IF horiz %]);
       gCommentControlWidget.setTHT(user_threshold, user_highlightthresh);
+      updateTotals();
     }
   };
 }();

@@ -319,16 +319,14 @@ sub selectComments {
 			# && !$options->{existing}{ $C->{pid} }
 			while ($C->{pid}) {
 				my $parent = $comments->{ $C->{pid} } || {};
-				# parents of our main cid!
-				if ($cid && $C->{pid} < $cid) {
-					$user->{state}{d2_defaultclass}{$C->{pid}} = 'oneline';
-				}
 
 				if (!$parent || !$parent->{kids} || !$parent->{cid} || !defined($parent->{pid}) || !defined($parent->{points})) {
 					# parents of our main cid, so spend time
 					# finding it ...
 					if ($cid && $C->{pid} < $cid) {
+						$user->{state}{d2_defaultclass}{$C->{pid}} = 'oneline';
 						$parent = $old_comments{ $C->{pid} };
+						$count++;
 					} else {
 						$parent = {
 							cid    => $C->{pid},

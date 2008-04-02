@@ -118,7 +118,7 @@ html > body .commentwrap table {
 	margin: 0 0 0 -.3em;
 	padding: 0 .3em;
 	text-decoration: none;
-	background: url("http://images.slashcode.com/comm-minus.gif") 0 .2em no-repeat;
+	background: url("/images/comm-minus.gif") 0 .2em no-repeat;
 	right: -1.4em;
 	z-index: 2;
 	cursor: pointer;
@@ -129,7 +129,7 @@ html > body .commentwrap table {
 	margin: 0;
 	padding: 0 .3em;
 	text-decoration: none;
-	background: url("http://images.slashcode.com/comm-plus.gif") 0 .2em no-repeat;
+	background: url("/images/comm-plus.gif") 0 .2em no-repeat;
 	right: -1.4em;
 	z-index: 1;
 	cursor: pointer;
@@ -385,23 +385,23 @@ div.ccw-panel, #ccw-control,
 /* Action Buttons */
 
 .nbutton{
-    background: #666 url("/images/corner_w_tl.png") top left no-repeat;
+    background: #666 none top left no-repeat;
     color:#fff;
     margin:0.25em;
     padding: .4em 0;
 }
 .nbutton p{
     display:inline;
-    background: transparent url("/images/corner_w_tr.png") top right no-repeat;
+    background: transparent none top right no-repeat;
     padding: .4em 0;
 }
 .nbutton p b{
     display:inline;
-    background: transparent url("/images/corner_w_bl.png") bottom left no-repeat;
+    background: transparent none bottom left no-repeat;
     padding: .4em 0;
 }
 .nbutton p b a {
-    background: transparent url("/images/corner_w_br.png") bottom right no-repeat !important;
+    background: transparent none bottom right no-repeat !important;
     padding: .4em 1em;
     color:#fff !important;
     font-weight:normal;

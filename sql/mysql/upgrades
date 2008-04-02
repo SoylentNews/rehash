@@ -5191,8 +5191,6 @@ CREATE TABLE tagname_cache (
 # 2008-03-19
 UPDATE vars SET value = 'T_2_5_0_198' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # PUDGE LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
@@ -5241,4 +5239,6 @@ CREATE TABLE user_event_types (
 
 # 2008-04-02
 UPDATE vars SET value = 'T_2_5_0_199' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
