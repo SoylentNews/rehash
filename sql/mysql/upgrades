@@ -5213,3 +5213,28 @@ INSERT INTO vars (name, value, description) VALUES ('tagbox_fheditorpop_susp_fla
 INSERT INTO vars (name, value, description) VALUES ('tagbox_fheditorpop_susp_maxtaggers', '7', 'Max number of unique users tagging (not voting) a low-scoring firehose item that should not raise suspicion');
 INSERT INTO vars (name, value, description) VALUES ('tagbox_fheditorpop_susp_minscore', '100', 'Min score required to not raise suspicion');
 
+# for User2
+CREATE TABLE user_events (
+   eid int UNSIGNED NOT NULL auto_increment,
+   code int UNSIGNED NOT NULL default 0,
+   uid mediumint(8) UNSIGNED NOT NULL default 0,
+   event int UNSIGNED NOT NULL default 0,
+   date datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY eid (eid),
+   KEY uid (uid)
+) TYPE=InnoDB;
+
+CREATE TABLE user_event_blocks (
+   bid int UNSIGNED NOT NULL auto_increment,
+   uid mediumint UNSIGNED NOT NULL default 0,
+   code int UNSIGNED NOT NULL default 0,
+   block varchar(255) default NULL,
+   PRIMARY KEY bid (bid),
+   KEY uid (uid)
+) TYPE=InnoDB;
+
+CREATE TABLE user_event_types (
+   code smallint UNSIGNED NOT NULL auto_increment,
+   type varchar(32) NOT NULL default '',
+   PRIMARY KEY code (code)
+) TYPE=InnoDB;
