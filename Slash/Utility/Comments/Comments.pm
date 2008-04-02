@@ -357,7 +357,9 @@ sub selectComments {
 			$lastcid = $this_cid;
 		}
 		my @old_seen = split /,/, $comments->{0}{d2_seen};
-		$old_seen[0] = $old_seen[0] - $lastcid;
+		if (@seen && @old_seen) {
+			$old_seen[0] = $old_seen[0] - $lastcid;
+		}
 		$comments->{0}{d2_seen} = join ',', @seen, @old_seen;
 	}
 
