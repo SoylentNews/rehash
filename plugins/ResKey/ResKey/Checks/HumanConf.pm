@@ -73,11 +73,9 @@ sub doCheckUse {
 
 
 sub useHumanConf {
-	return 1;	# for testing!
 	my($self) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-
 
 	return 0 if
 			# HumanConf is not running...
