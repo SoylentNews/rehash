@@ -102,8 +102,8 @@ __template__
 			label = day_count _ " more " _ $day_label _ "...";
 		   ELSIF future_count > 0;
 		        label = future_count _ " more...";
-		   ELSIF future_count <= 0 && options.duration != -1;
-		   	label = "No more in time window, click to expand to all";
+		   ELSIF future_count <= 0 && !options.startdate && options.duration != -1 && options.orderby == "createtime";
+		   	label = "Get more...";
 			extra_onclick = 'firehose_set_options(\'duration\', -1); ';
 		   END;
 		%]
