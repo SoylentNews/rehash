@@ -636,7 +636,7 @@ sub getFireHoseEssentials {
 	$results->{records_pages} ||= ceil($count / $page_size);
 	$results->{records_page}  ||= (int(($options->{offset} || 0) / $options->{limit}) + 1) || 1;
 
-	my $future_count = $count - $options->{limit} - $offset;
+	my $future_count = $count - $options->{limit} - ($options->{offset} || 0);
 
 	if (keys %$filter_globjids) {
 		for my $i (0 .. $#{$hr_ar}) {
