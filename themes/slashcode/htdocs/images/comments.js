@@ -819,7 +819,7 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 
 				for (var i = 0; i < update.new_cids_order.length; i++) {
 					var this_cid = update.new_cids_order[i];
-					if (!placeholder_no_update[this_cid]) {
+					if (!placeholder_no_update[this_cid] && comments[this_cid]['points'] >= -1) {
 						var mode = determineMode(this_cid);
 						updateDisplayMode(this_cid, mode, 1);
 						currents[displaymode[this_cid]]++;
@@ -1629,6 +1629,7 @@ YAHOO.slashdot.ThresholdWidget.prototype._getEl = function( id ) {
 
 YAHOO.slashdot.ThresholdWidget.prototype.setTHT = function( T, HT ) {
 	this._setTs(pinToRange(this.constraintRange, [HT, T]));
+	updateTotals();
 }
 
 YAHOO.slashdot.ThresholdWidget.prototype.getTHT = function() {
@@ -1639,6 +1640,7 @@ YAHOO.slashdot.ThresholdWidget.prototype.stepTHT = function( threshold, step ) {
 	var ts = this.displayedTs.slice();
 	ts[threshold] += step;
 	this._setTs(pinToRange(this.constraintRange, ts));
+	updateTotals();
 }
 
 YAHOO.slashdot.ThresholdWidget.prototype.setCounts = function( counts ) {
@@ -1814,6 +1816,7 @@ YAHOO.slashdot.ThresholdBar.prototype.onDrag = function( e ) {
 
 YAHOO.slashdot.ThresholdBar.prototype.endDrag = function( e ) {
 	this.parentWidget._onBarEndDrag(this.whichBar);
+	updateTotals();
 }
 
 YAHOO.slashdot.ThresholdBar.prototype.alignElWithMouse = function( el, iPageX, iPageY ) {

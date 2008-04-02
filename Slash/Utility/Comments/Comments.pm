@@ -302,18 +302,13 @@ sub selectComments {
 	}
 
 	# get the total visible kids for each comment --Pater
-	countTotalVisibleKids($comments);
+	countTotalVisibleKids($comments) unless $discussion2;
 
-	_print_cchp($discussion, $count, $comments->{0}{totals});
-
-##slashProf("sC reparenting", "sC counting");
-#slashProf("sC reparenting");
-	reparentComments($comments, $reader, $options);
-
-##slashProf("sC d2 fudging", "sC reparenting");
-#slashProf("", "sC reparenting");
+##slashProf("sC d2 fudging", "sC counting");
 	if ($oldComment) {
+		my @new_seen;
 		for my $this_cid (sort { $a <=> $b } keys %$comments) {
+			next unless $this_cid;
 			my $C = $comments->{$this_cid};
 
 			# && !$options->{existing}{ $C->{pid} }
@@ -326,6 +321,7 @@ sub selectComments {
 					if ($cid && $C->{pid} < $cid) {
 						$user->{state}{d2_defaultclass}{$C->{pid}} = 'oneline';
 						$parent = $old_comments{ $C->{pid} };
+						push @new_seen, $C->{pid};
 						$count++;
 					} else {
 						$parent = {
@@ -352,9 +348,26 @@ sub selectComments {
 				$C = $parent;
 			}
 		}
+
+		# fix d2_seen
+		my @seen;
+		my $lastcid = 0;
+		for my $this_cid (sort { $a <=> $b } @new_seen) {
+			push @seen, $lastcid ? $this_cid - $lastcid : $this_cid;
+			$lastcid = $this_cid;
+		}
+		my @old_seen = split /,/, $comments->{0}{d2_seen};
+		$old_seen[0] = $old_seen[0] - $lastcid;
+		$comments->{0}{d2_seen} = join ',', @seen, @old_seen;
 	}
 
 ##slashProf("", "sC d2 fudging");
+
+	_print_cchp($discussion, $count, $comments->{0}{totals});
+
+#slashProf("sC reparenting");
+	reparentComments($comments, $reader, $options);
+#slashProf("", "sC reparenting");
 
 	return($comments, $count);
 }
@@ -754,7 +767,7 @@ sub reparentComments {
 	# when $form->{cid|pid} is set.  And besides, max depth we
 	# display is for display, so it should be based on how much
 	# we're displaying, not on absolute depth of this thread.
-	my $root_cid_or_pid = $form->{cid} || $form->{pid} || 0;
+	my $root_cid_or_pid = discussion2($user) ? 0 : ($form->{cid} || $form->{pid} || 0);
 	if ($root_cid_or_pid) {
 		my $tmpcid = $root_cid_or_pid;
 		while ($tmpcid) {
