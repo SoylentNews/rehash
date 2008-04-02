@@ -1,0 +1,4 @@
+# $Id$
+name=RecentTags
+description=Update the Recent Tags homepage slashbox
+mysql_dump=mysql_dump.sql
