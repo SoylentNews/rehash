@@ -130,6 +130,7 @@ htdoc=htdocs/ok.txt
 htdoc=htdocs/robots.txt
 htdoc=htdocs/topics.pl
 htdoc=htdocs/users.pl
+htdoc=htdocs/users2.pl
 htdoc=htdocs/images/comments.js
 htdoc=htdocs/images/dumper.js
 htdoc=htdocs/badge.pl
