@@ -26,9 +26,24 @@ sub init {
 
 sub getUserClout {
 	my($self, $user_stub) = @_;
-	my $clout = $user_stub->{karma} >= -3
-		? log($user_stub->{karma}+10)/50
-		: 0;
+
+	my $clout;
+	my $karma = $user_stub->{karma};
+	if ($karma >= 1) {
+		# Full graduated clout for positive karma.
+		$clout = log($karma+5); # karma 1 clout 1.8 ; karma 50 clout 4.0
+	} elsif ($karma == 0) {
+		# Karma of 0 means low clout.
+		$clout = 0.1;
+	} elsif ($karma >= -2) {
+		# Mild negative karma means extremely low clout.
+		$clout = ($karma+3)*0.01;
+	} else {
+		# Significant negative karma means no clout.
+		$clout = 0;
+	}
+	$clout /= 10;
+
 	$clout *= $user_stub->{tag_clout};
 
 	my $created_at_ut;
