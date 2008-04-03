@@ -402,7 +402,7 @@ sub jsSelectComments {
 
 	my $d2_seen_0 = $comments->{0}{d2_seen} || '';
 
-	my @roots = @{$comments->{0}{kids}};
+	my @roots = @{$comments->{0}{kids} || []};
 	my %roots_hash = ( map { $_ => 1 } @roots );
 	my $thresh_totals;
 
