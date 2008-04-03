@@ -82,7 +82,7 @@ sub feed_newtags {
 		# Tags outside the window aren't important (maybe this tagbox
 		# is running through a backlog)
 		my $seconds_old = time - $tag_hr->{created_at_ut};
-		next if $seconds_old > $seconds__back;
+		next if $seconds_old > $seconds_back;
 		# Tags that the Top tagbox excludes aren't important.
 		next if $exclude_tagnameid{ $tag_hr->{tagnameid} };
 		# Tags on a hose item under the minslice aren't important.
