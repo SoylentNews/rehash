@@ -116,7 +116,7 @@ function createPopup(xy, titlebar, name, contents, message, onmouseout) {
 }
 
 function createPopupButtons() {
-	return '<span class="buttons"><span>' + arguments.join('</span><span>') + '</span></span>';
+	return '<span class="buttons"><span>' + $.makeArray(arguments).join('</span><span>') + '</span></span>';
 }
 
 function closePopup(id, refresh) {
