@@ -5193,8 +5193,6 @@ UPDATE vars SET value = 'T_2_5_0_198' WHERE name = 'cvs_tag_currentcode';
 
 # PUDGE LAST UPDATED HERE
 
-# SLASHDOT LAST UPDATED HERE
-
 # for plugins/ResKey
 INSERT INTO reskey_resource_checks VALUES (NULL, 1, 'all', 'Slash::ResKey::Checks::HumanConf', 701);
 INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon',         300, 'duration_uses for anon');
@@ -5242,9 +5240,14 @@ UPDATE vars SET value = 'T_2_5_0_199' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# SLASHDOT LAST UPDATED HERE
+
 # for tagboxes/RecentTags
 INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_recenttags_minclout', '4', 'Minimum clout sum to count a tagname');
 
 # for plugins/Tags
 INSERT INTO vars (name, value, description) VALUES ('tags_updateclouts_debuguids', '', 'UIDs to print debug info on during clout recalculation');
+
+# 2008-04-04
+UPDATE vars SET value = 'T_2_5_0_200' WHERE name = 'cvs_tag_currentcode';
 
