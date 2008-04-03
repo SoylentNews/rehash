@@ -490,7 +490,7 @@ sub dbCreate {
 			errorLog("Slash::ResKey::Key->create INSERT failed $try_num times: uid=$user->{uid} rkrid=$self->{rkrid} reskey=$reskey");
 			# XXX: this should be more modularized, bad to keep
 			# this all here, but OK to hack in for now -- pudge
-			if (&Slash::ResKey::Checks::HumanConf::updateResKey) {
+			if (defined &Slash::ResKey::Checks::HumanConf::updateResKey) {
 				Slash::ResKey::Checks::HumanConf::updateResKey($self);
 			}
 		}
