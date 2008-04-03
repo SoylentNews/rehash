@@ -858,7 +858,8 @@ sub getAllObjectsTagname {
 #		my $value = $mcd->get("$mcdkey$name");
 #		return $value if defined $value;
 #	}
-	my $private_clause = ref($options) && $options->{include_private} ? '' : " AND private='no'";
+	$options = { } if !$options || !ref $options;
+	my $private_clause = $options->{include_private} ? '' : " AND private='no'";
 	my $id = $self->getTagnameidFromNameIfExists($name);
 	return [ ] if !$id;
 	# XXX make this degrade gracefully if plugins/FireHose not installed
@@ -1712,6 +1713,7 @@ sub setLastscanned {
 
 sub listTagnamesAll {
 	my($self, $options) = @_;
+	$options = { } if !$options || !ref $options;
 	my $tagname_ar;
 	if ($options->{really_all}) {
 		$tagname_ar = $self->sqlSelectColArrayref('tagname', 'tagnames',
@@ -1731,7 +1733,7 @@ sub listTagnamesAll {
 sub listTagnamesActive {
 	my($self, $options) = @_;
 	my $constants = getCurrentStatic();
-	$options ||= { };
+	$options = { } if !$options || !ref $options;
 	my $max_num =         defined($options->{max_num})	   ? $options->{max_num} : 100;
 	my $seconds =         defined($options->{seconds})	   ? $options->{seconds} : (3600*6);
 	my $include_private = defined($options->{include_private}) ? $options->{include_private} : 0;
@@ -1841,8 +1843,9 @@ sub listTagnamesActive {
 sub listTagnamesRecent {
 	my($self, $options) = @_;
 	my $constants = getCurrentStatic();
-	my $seconds =         ref($options) && $options->{seconds}         || (3600*6);
-	my $include_private = ref($options) && $options->{include_private} || 0;
+	$options = { } if !$options || !ref $options;
+	my $seconds =         $options->{seconds}         || (3600*6);
+	my $include_private = $options->{include_private} || 0;
 	my $private_clause = $include_private ? '' : " AND private='no'";
 	my $recent_ar = $self->sqlSelectColArrayref(
 		'DISTINCT tagnames.tagname',
