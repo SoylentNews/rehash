@@ -156,3 +156,6 @@ div.briefarticles
 { background: #ddd !important;}
 
 
+div.commentTop div.title h4, .comment .oneline div.title h4 a {background: transparent !important;}
+ .comment .oneline div.title h4 a {color: #00E !important}
+
