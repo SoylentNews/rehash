@@ -33,8 +33,6 @@ __template__
 	</p>
 [% END %]
 
-<p>If you have difficulty with this form, please use the <a href="[% gSkin.rootdir %]/comments.pl?op=Reply&amp;sid=[% sid %]&amp;pid=[% pid %]">old form</a>.</p>
-
 [% IF !user.is_anon || constants.allow_anonymous %]
 	<form action="[% gSkin.rootdir %]/comments.pl" method="post">
 		<div id="replyto_preview_[% pid %]" class="replyto_reply" ondblclick="editReply([% pid %])"></div>
@@ -57,6 +55,7 @@ __template__
 				</div>
 			</div>
 			<div class="generalbody">
+				<p>If you have difficulty with this form, please use the <a href="[% gSkin.rootdir %]/comments.pl?op=Reply&amp;sid=[% sid %]&amp;pid=[% pid %]">old form</a>.</p>
 				<textarea wrap="virtual" name="postercomment_[% pid %]" id="postercomment_[% pid %]" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]"></textarea>	
 			</div>
 		</div>
