@@ -18,7 +18,7 @@ __template__
 	story = Slash.db.getStory(item.srcid);
 	
  END %]
-[% IF (item.thumb && (item.type == "story" && (!story.thumb_signoff_needed || adminmode)) || (item.type == "submission" && adminmode)) %]
+[% IF item.thumb && ((item.type == "story" && (!story.thumb_signoff_needed || adminmode)) || (item.type == "submission" && adminmode)) %]
 	[% file = Slash.db.getStaticFile(item.thumb); %]
 	[% fh = Slash.getObject("Slash::FireHose");
 	   link_url = fh.linkFireHose(item);
