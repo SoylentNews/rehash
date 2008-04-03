@@ -19,7 +19,10 @@ sub init {
 	# propagate up to 50% of the weight, the second another 25%, the
 	# third another 12.5% etc.
 	$self->{cumfrac} = 0.5;
-	$self->{debug_uids} = { };
+	my $constants = getCurrentStatic();
+	$self->{debug_uids} = { map { ($_, 1) } split / /,
+		($constants->{tags_updateclouts_debuguids} || '')
+	};
 	$self->{debug} = 0;
 	1;
 }
@@ -33,7 +36,7 @@ sub getUserClout {
 		$clout = log($karma+5); # karma 1 clout 1.8 ; karma 50 clout 4.0
 	} elsif ($karma == 0) {
 		# Karma of 0 means low clout.
-		$clout = 0.1;
+		$clout = 0.2;
 	} elsif ($karma >= -2) {
 		# Mild negative karma means extremely low clout.
 		$clout = ($karma+3)*0.01;
