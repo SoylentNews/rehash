@@ -1476,7 +1476,7 @@ function firehose_more() {
 	var increment_by = 10;
 	firehose_settings.more_num = firehose_settings.more_num + increment_by;
 	
-	if ((firehose_item_count + increment_by) >= 200) {
+	if (((firehose_item_count + increment_by) >= 200) && !fh_is_admin) {
 		$('#firehose_more').hide();
 	}
 	firehose_set_options('more_num', firehose_settings.more_num);

@@ -2158,7 +2158,7 @@ sub getAndSetOptions {
 
 	if ($form->{more_num} && $form->{more_num} =~ /^\d+$/) {
 		$options->{more_num} = $form->{more_num};
-		if (($options->{limit} + $options->{more_num}) > 200) {
+		if (!$user->{is_admin} && (($options->{limit} + $options->{more_num}) > 200)) {
 			$options->{more_num} = 200 - $options->{limit} ;
 		}
 	}
