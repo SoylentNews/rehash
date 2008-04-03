@@ -323,9 +323,7 @@ sub _createActionMethod {
 		# create is done for use, too.
 		if ($self->type eq 'createuse') {
 			$self->type('use');
-			if ($self->unsaved) {
-				$self->dbCreate;
-			}
+			$self->dbCreate if $self->unsaved;
 		}
 
 		if ($self->type eq 'use' && !$self->static) {
@@ -446,7 +444,8 @@ sub dbCreate {
 	if ($self->static) {
 		$ok = 1;
 	} else {
-		my $reskey = $self->reskey;
+		my $reskey;
+		$reskey = $self->reskey if $self->unsaved;
 		my $srcid = $self->getSrcid;
 
 		my $try_num = 1;
@@ -471,7 +470,6 @@ sub dbCreate {
 			# blank for next try
 			$reskey = '';
 			
-
 			# The INSERT failed because $reskey is already being
 			# used.  Presumably this would be due to a collision
 			# in the randomly-generated string, which indicates
