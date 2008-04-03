@@ -86,6 +86,7 @@ html > body .commentwrap table {
 	border: 1px solid #ddd;
 	border-bottom: none;
 	padding: .3em;
+	overflow: hidden;
 }
 
 .commentshrunk, .commentstatus, .commentload { font-weight: bold }
