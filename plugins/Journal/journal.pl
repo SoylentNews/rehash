@@ -699,6 +699,7 @@ sub doSaveArticle {
 	}
 
         # Add the User2 event.
+        if ($event_id) {
         my $events = $slashdb->sqlSelectAllHashref(
                 'eid', 'eid, date', 'user_events', "uid = " . $user->{uid} . " and code = 2");
 
@@ -735,6 +736,7 @@ sub doSaveArticle {
 
                 $slashdb->sqlUpdate('user_event_blocks', { block => $new_blocks }, "uid = " . $user->{uid} . " and code = 2");
         }
+        } # $event_id
 
 	return 0;
 }
