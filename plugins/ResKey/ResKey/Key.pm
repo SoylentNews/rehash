@@ -487,6 +487,7 @@ sub dbCreate {
 			Time::HiRes::sleep(rand($try_num));
 		}
 		if ($try_num > 1) {
+			$try_num--;
 			errorLog("Slash::ResKey::Key->create INSERT failed $try_num times: uid=$user->{uid} rkrid=$self->{rkrid} reskey=$reskey");
 			# XXX: this should be more modularized, bad to keep
 			# this all here, but OK to hack in for now -- pudge
