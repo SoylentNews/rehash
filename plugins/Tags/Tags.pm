@@ -1731,10 +1731,12 @@ sub listTagnamesAll {
 sub listTagnamesActive {
 	my($self, $options) = @_;
 	my $constants = getCurrentStatic();
-	my $max_num =         ref($options) && $options->{max_num}         || 100;
-	my $seconds =         ref($options) && $options->{seconds}         || (3600*6);
-	my $include_private = ref($options) && $options->{include_private} || 0;
-	my $min_slice =       ref($options) && $options->{min_slice}       || 0;
+	$options ||= { };
+	my $max_num =         defined($options->{max_num})	   ? $options->{max_num} : 100;
+	my $seconds =         defined($options->{seconds})	   ? $options->{seconds} : (3600*6);
+	my $include_private = defined($options->{include_private}) ? $options->{include_private} : 0;
+	my $min_slice =       defined($options->{min_slice})	   ? $options->{min_slice} : 0;
+	my $min_clout =       defined($options->{min_clout})	   ? $options->{min_clout} : $constants->{tags_stories_top_minscore} || 0;
 	$min_slice = 0 if !$constants->{plugin}{FireHose};
 
 	# This seems like a horrendous query, but I _think_ it will run
@@ -1820,7 +1822,7 @@ sub listTagnamesActive {
 
 	# List all tags with at least a minimum clout.
 	my @tagnames = grep
-		{ $tagname_clout{$_} >= $constants->{tags_stories_top_minscore} }
+		{ $tagname_clout{$_} >= $min_clout }
 		keys %tagname_clout;
 
 	# Sort by sum of normalized clout and (opposite of) last-seen time.

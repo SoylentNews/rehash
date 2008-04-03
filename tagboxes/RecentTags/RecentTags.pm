@@ -65,7 +65,7 @@ sub feed_newtags {
 	my($self, $tags_ar) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
-	my $secondsback = $constants->{tagbox_recenttags_secondsback};
+	my $seconds_back = $constants->{tagbox_recenttags_secondsback};
 	my $exclude_tagnames = $constants->{tagbox_top_excludetagnames} || 'yes no';
 	my %exclude_tagnameid = (
 		map { ($tagsdb->getTagnameidCreate($_), 1) }
@@ -82,7 +82,7 @@ sub feed_newtags {
 		# Tags outside the window aren't important (maybe this tagbox
 		# is running through a backlog)
 		my $seconds_old = time - $tag_hr->{created_at_ut};
-		next if $seconds_old > $secondsback;
+		next if $seconds_old > $seconds__back;
 		# Tags that the Top tagbox excludes aren't important.
 		next if $exclude_tagnameid{ $tag_hr->{tagnameid} };
 		# Tags on a hose item under the minslice aren't important.
@@ -94,12 +94,11 @@ sub feed_newtags {
 		my $pop = $firehose->{popularity} || 0;
 		my $minpop = $firehosedb->getMinPopularityForColorLevel($minslice);
 		next if $pop < $minpop;
-		# We could here reduce importance if the tag is not Descriptive
-		# or has a reduced clout.  XXX
-		my $importance = 1;
 		my $ret_hr = {
-			affected_id =>	$tag_hr->{globjid},
-			importance =>	$importance,
+			affected_id =>  1,
+			# We could here reduce importance if the tag is not Descriptive
+			# or has a reduced clout.  XXX
+			importance =>   0.1,
 		};
 		# We identify this little chunk of importance by either
 		# tagid or tdid depending on whether the source data had
@@ -142,7 +141,13 @@ sub run {
 	);
 	my $num_wanted = $constants->{tagbox_recenttags_num} || 5;
 	my $max_num = $num_wanted + scalar(keys %exclude_tagname);
-	my $tagnames_ar = $tags_reader->listTagnamesActive({ max_num => $max_num, seconds => 3600 });
+	my $seconds_back = $constants->{tagbox_recenttags_secondsback} || 7200;
+	my $min_clout = $constants->{tagbox_recenttags_minclout} || 4.0;
+	my $tagnames_ar = $tags_reader->listTagnamesActive({
+		max_num => $max_num,
+		seconds => $seconds_back,
+		min_clout => $min_clout,
+	});
 
 	# Strip out tagnames we want to exclude.
 	@$tagnames_ar = grep { !$exclude_tagname{$_} } @$tagnames_ar;
