@@ -31,7 +31,10 @@ jQuery.fn.extend({
 	},
 
 	toggleClasses: function( c1, c2, force ) {
-		return this.mapClass({c1:c2, c2:c1, '?':force})
+		var map = { '?': force };
+		map[c1]=c2;
+		map[c2]=c1;
+		return this.mapClass(map);
 	}
 
 });
