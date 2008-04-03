@@ -35,11 +35,11 @@ sub main {
 				: 'active';
 
 		if ($type eq 'all') {
-			$index_hr->{tagnames} = $tags_reader->listTagnamesAll('describe');
+			$index_hr->{tagnames} = $tags_reader->listTagnamesAll();
 		} elsif ($type eq 'active') {
-			$index_hr->{tagnames} = $tags_reader->listTagnamesActive('describe');
+			$index_hr->{tagnames} = $tags_reader->listTagnamesActive();
 		} else { # recent
-			$index_hr->{tagnames} = $tags_reader->listTagnamesRecent('describe');
+			$index_hr->{tagnames} = $tags_reader->listTagnamesRecent();
 		}
 
 		$title = getData('head1');
