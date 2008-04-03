@@ -168,7 +168,7 @@ sub run {
 	}
 	$block .= '</ul>';
 	main::tagboxLog("RecentTags->run setting Recent Tags to '@$tagnames_ar' (" . length($block) . " chars)");
-	setblock('activetags', $block);
+	$self->setBlock('activetags', { block => $block });
 }
 
 1;
