@@ -172,7 +172,7 @@ function updateCommentTree(cid, threshold, subexpand) {
 	return kidHiddens(cid, kidhiddens);
 }
 
-function setFocusComment(cid, alone, mods) {
+function setFocusComment(cid, alone, no_ads) {
 	if (!loaded)
 		return false;
 
@@ -183,7 +183,8 @@ function setFocusComment(cid, alone, mods) {
 
 	if (abscid == cid) { // expanding == selecting
 		setCurrentComment(cid);
-		checkAdTimer(cid);
+		if (!no_ads)
+			checkAdTimer(cid);
 	}
 
 
@@ -1075,7 +1076,7 @@ function submitReply(pid) {
 			else if (cid) {
 				cancelReply(pid);
 				addComment(cid, { pid: pid, kids: [] }, '', 1);
-				setFocusComment(cid, 1);
+				setFocusComment(cid, 1, 1);
 			}
 		}
 	});
@@ -1477,9 +1478,9 @@ function updateMoreNum(num) { // should be an integer, or empty string
 		num_a = 'Check for more';
 	else {
 		if (num == 1)
-			num_a = 'Retrieve the 1 remaining comment';
+			num_a = 'Get 1 More Comment';
 		else
-			num_a = 'Retrieve more of the ' + num + ' remaining comments';
+			num_a = 'Get ' + num + ' More Comments';
 	}
 
 	var a = $dom('more_comments_num_a');
@@ -1836,18 +1837,19 @@ YAHOO.slashdot.ThresholdBar.prototype.alignElWithMouse = function( el, iPageX, i
 
 
 function checkAdTimer (cid) {
-	if (!adTimerUrl)
+	if (!adTimerUrl || !cid)
 		return;
 
-	clickAdTimer();
-
-	if (cid && adTimerSeen[cid])
+	if (adTimerSeen[cid] && adTimerSeen[cid] == 2)
 		return 0;
 
+	if (!adTimerSeen[cid])
+		clickAdTimer(cid);
+
 	var ad = 0;
-	if (adTimerClicks >= adTimerClicksMax) {
+	if (adTimerClicks >= adTimerClicksMax)
 		ad = 1;
-	} else {
+	else {
 		var secs = getSeconds() - adTimerSecs;
 		if (secs >= adTimerSecsMax)
 			ad = 1;
@@ -1860,15 +1862,15 @@ function checkAdTimer (cid) {
 }
 
 function resetAdTimer () {
-	if (adTimerInsert) {
-		adTimerSeen[adTimerInsert] = 1;
-	}
+	if (adTimerInsert)
+		adTimerSeen[adTimerInsert] = 2;
 	adTimerInsert = 0;
 	adTimerSecs   = getSeconds();
 	adTimerClicks = 0;
 }
 
-function clickAdTimer () {
+function clickAdTimer (cid) {
+	adTimerSeen[cid] = adTimerSeen[cid] || 1;
 	adTimerClicks = adTimerClicks + 1;
 }
 
@@ -1915,6 +1917,7 @@ next unread comm: F
 reply to current comment: R
 parent of current comment: P
 history (modlog) of current comment: M
+hide history: X
 skip to end (last): V
 skip to top (first): T
 get more comments: G
@@ -1923,7 +1926,6 @@ raise top threshold: ]
 lower bottom threshold: ,
 raise bottom threshold: .
 toggle d2 widget: /
-hide_modal_box(): esc XXX
 */
 
 var validkeys = {
@@ -1938,6 +1940,7 @@ var validkeys = {
 	R: { current : 1, reply   : 1 },
 	P: { current : 1, parent  : 1 },
 	M: { current : 1, history : 1 },
+	X: { current : 1, history : 1, hide : 1 },
 
 	G: { nav: 1, more : 1 },
 	T: { nav: 1, skip : 1, top    : 1 }, 
@@ -2002,10 +2005,13 @@ function keyHandler(e, k) {
 					if (keyo['reply'] && !user_is_anon) // XXX will be anon too
 						replyTo(current_cid);
 
-					else if (keyo['history'])
-						getModalPrefs('modcommentlog', 'Moderation Comment Log', current_cid);
+					else if (keyo['history']) {
+						if (keyo['hide'])
+							hide_modal_box(); // this works for ALL modal boxes
+						else
+							getModalPrefs('modcommentlog', 'Moderation Comment Log', current_cid);
 
-					else if (keyo['parent']) {
+					} else if (keyo['parent']) {
 						if (current_cid && comments[current_cid] && comments[current_cid]['pid'])
 							selectParent(comments[current_cid]['pid']);
 					}

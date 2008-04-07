@@ -24,10 +24,15 @@ en_US
 __name__
 printCommComments
 __template__
-[% moderate_form   = can_moderate || user.acl.candelcomments_always %]
-[% moderate_button = (can_moderate
+[% can_del = (constants.authors_unlimited
+		&& user.is_admin
+		&& user.seclev >= constants.authors_unlimited
+	) || user.acl.candelcomments_always;
+   moderate_form   = (!discussion2 || can_del) && (can_moderate || user.acl.candelcomments_always);
+   moderate_button = (can_moderate
 	&& user.mode != 'archive'
-	&& ( !user.state.discussion_archived || constants.comments_moddable_archived)) %]
+	&& ( !user.state.discussion_archived || constants.comments_moddable_archived));
+%]
 [% IF moderate_form %]
 	<form action="[% gSkin.rootdir %]/comments.pl" method="post">
 [% END %]
@@ -35,8 +40,6 @@ __template__
 [% IF discussion2 %]
 	[% IF discussion2 == "slashdot" %]
 	<script src="[% constants.imagedir %]/comments.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-	[%- ELSE %]
-	<script src="http://socialcomputingresearch.net/slashdot/js/comments.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 	[%- END %]
 	<script type="text/javascript">
 <!--
@@ -103,38 +106,43 @@ __template__
 
 [% IF discussion2 %]
 <div id="replyto_0"></div>
-<div class="prev-next"><a href="#" onclick="ajaxFetchComments(0,1); return false"><span id="more_comments_num_a" class="hide">Check for more</span></a>
-	[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
-		| [% Slash.linkComment({
-			sid          => sid,
-			cid          => cid,
-			op           => 'reply',
-			subject      => 'Reply',
-			subject_only => 1,
-			onclick      => ((discussion2 && !user.is_anon) ? "replyTo(0); return false;" : '')
-		});
-	END %]
-</div>
 [% END %]
+
+<div id="discussion_buttons">
+
+[% IF discussion2 %]
+<span class="nbutton"><p><b><a href="#" onclick="ajaxFetchComments(0,1); return false"><span id="more_comments_num_a" class="hide">Get More Comments</span></a></b></p></span>
+[% END %]
+
+[% IF discussion2 && !user.state.discussion_archived && !user.state.discussion_future_nopost %]
+<span class="nbutton"><p><b>[% Slash.linkComment({
+	sid          => sid,
+	cid          => cid,
+	op           => 'reply',
+	subject      => 'Reply',
+	subject_only => 1,
+	onclick      => ((discussion2 && !user.is_anon) ? "replyTo(0); return false;" : '')
+}) %]</b></p></span>
+[% END %]
+
+[% IF (can_moderate || user.acl.candelcomments_always) %]
+<span class="nbutton"><p><b><a href="[% gSkin.rootdir %]/moderation.shtml">Moderator Help</a></b></p></span>[% END %]
 
 [% IF moderate_form %]
 	[% IF moderate_button %]
-		<div>Have you read the
-		<a href="[% gSkin.rootdir %]/moderation.shtml">Moderator Guidelines</a>
-		yet?
+		<span class="nbutton"><p><b>
 		<input type="hidden" name="op" value="moderate">
 		<input type="hidden" name="sid" value="[% sid %]">
 		<input type="hidden" name="cid" value="[% cid %]">
 		<input type="hidden" name="pid" value="[% pid %]">
 		<input type="submit" value="moderate" class="button">
-		</div>
-		[% IF (constants.authors_unlimited && user.seclev >= constants.authors_unlimited)
-			|| user.acl.candelcomments_always %]
-			[% PROCESS formNote note='Checked comments will be deleted.' %]
-		[% END %]
+		</b></p></span>
+	        [% IF can_del %]<a href="#" onclick="displayModalPrefHelp('discussion_delete_help'); return false" title="Click To Expand Help" class="help">?</a>
+	        <div id="discussion_delete_help" class="modalprefhelp" style="display: none;">Checked comments will be deleted.</div>[% END %]
 	[% END %]
 	</form>
 [% END %]
+</div>
 
 [% IF discussion2 %]
 	<script type="text/javascript">

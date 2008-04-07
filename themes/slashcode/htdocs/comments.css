@@ -236,9 +236,6 @@ html > body .commentwrap table {
 #commentlisting {clear: right;}
 #commentControlBoxStatus {border-bottom: 1px solid #444; border-top: 1px solid #ccc; text-align: center; padding: 3px; background: #666; color: #fff; }
 
-#bindings-legend {display: none; position: relative; text-align: center; font-family: monospace}
-.vertical #bindings-legend {display: block;}
-
 .escape-link { position: absolute; left: 0.8em; }
 
 .horizontal .loki {display: block;}
