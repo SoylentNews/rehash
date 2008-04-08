@@ -13,25 +13,17 @@ YAHOO.slashdot.SlashBox = function( id, sGroup, config ) {
 YAHOO.extend(YAHOO.slashdot.SlashBox, YAHOO.util.DDProxy);
 
 
-YAHOO.slashdot.SlashBox.prototype.createFrame = function() {
-	// ...
-}
-
-
 YAHOO.slashdot.SlashBox.prototype.startDrag = function(x, y) {
-	var dragEl = this.getDragEl();
-	var clickEl = this.getEl();
-
-	dragEl.innerHTML = clickEl.innerHTML;
-	dragEl.className = clickEl.className;
-
-	YAHOO.util.Dom.addClass(clickEl, "to-be-moved");
-		// so we can style the object-to-be-moved in CSS
+	var orig = $(this.getEl());
+	var dragCopy = $(this.getDragEl());
+	// dragging a copy, make sure it has the same contents and class as the original
+	dragCopy.html(orig.html()).setClass(orig.attr('className'));
+	orig.addClass("to-be-moved");
 }
 
 YAHOO.slashdot.SlashBox.prototype.endDrag = function(e) {
-	YAHOO.util.Dom.removeClass(this.getEl(), "to-be-moved");
-		// done moving, back to your regularly scheduled CSS (see this.startDrag)
+	$(this.getEl()).removeClass("to-be-moved");
+	// done moving, back to your regularly scheduled CSS (see this.startDrag)
 }
 
 YAHOO.slashdot.SlashBox.prototype.onDragOver = function(e, id) {
@@ -67,20 +59,14 @@ YAHOO.slashdot.SlashBox.prototype.onDragOver = function(e, id) {
 
 YAHOO.slashdot.SlashBox.prototype.onDragEnter = function(e, id) {
 	if ( id == this.deleteBoundaryId ) {
-		var dragEl = this.getDragEl();
-		var clickEl = this.getEl();
-		YAHOO.util.Dom.removeClass(dragEl, "to-be-deleted");
-		YAHOO.util.Dom.removeClass(clickEl, "to-be-deleted");
+		$([this.getDragEl(), this.getEl()]).removeClass("to-be-deleted");
 			// so we can style the object-to-be-moved in CSS
 	}
 }
 
 YAHOO.slashdot.SlashBox.prototype.onDragOut = function(e, id) {
 	if ( id == this.deleteBoundaryId ) {
-		var dragEl = this.getDragEl();
-		var clickEl = this.getEl();
-		YAHOO.util.Dom.addClass(dragEl, "to-be-deleted");
-		YAHOO.util.Dom.addClass(clickEl, "to-be-deleted");
+		$([this.getDragEl(), this.getEl()]).addClass("to-be-deleted");
 			// so we can style the object-to-be-moved in CSS
 	}
 }

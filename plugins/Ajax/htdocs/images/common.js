@@ -1160,8 +1160,8 @@ var login_box   = 0;
 var login_inst  = 0;
 
 function init_login_divs() {
-	login_cover = document.getElementById('login_cover');
-	login_box   = document.getElementById('login_box');
+	login_cover = $dom('login_cover');
+	login_box   = $dom('login_box');
 }
 
 function install_login() {
@@ -1270,28 +1270,23 @@ function hide_modal_box() {
 function getModalPrefs(section, title, tabbed) {
 	if (!reskey_static)
 		return show_login_box();
-	document.getElementById('preference_title').innerHTML = title;
-	var params = {};
-	params['op'] = 'getModalPrefs';
-	params['section'] = section;
-	params['reskey'] = reskey_static;
-	params['tabbed'] = tabbed;
-	var handlers = {onComplete:show_modal_box};
-	ajax_update(params, 'modal_box_content', handlers);
-
-	return;
+	$('#preference_title').html(title);
+	ajax_update({
+		op:		'getModalPrefs',
+		section:	section,
+		reskey:		reskey_static,
+		tabbed:		tabbed
+	}, 'modal_box_content', { onComplete: show_modal_box });
 }
 
 function firehose_get_media_popup(id) {
-	if ($dom('preference_title')) {
-		$dom('preference_title').innerHTML = "Media";
-	}
-	var params = {};
-	params['op'] = 'firehose_get_media';
-	params['id'] = id;
+	$('#preference_title').html('Media');
 	show_modal_box();
-	$dom('modal_box_content').innerHTML = "<h4>Loading...</h4><img src='/images/spinner_large.gif'>";
-	ajax_update(params, 'modal_box_content');
+	$('#modal_box_content').html("<h4>Loading...</h4><img src='/images/spinner_large.gif'>");
+	ajax_update({
+		op:	'firehose_get_media',
+		id:	id
+	}, 'modal_box_content');
 }
 
 function saveModalPrefs() {
@@ -1325,10 +1320,9 @@ function ajaxRemoveSlashbox( id ) {
 	}
 }
 
-function displayModalPrefHelp(element) {
-        var elem = document.getElementById(element);
-        var vis = elem.style;
-        vis.display = (!vis.display || vis.display == 'block') ? 'none' : 'block';
+function displayModalPrefHelp(id) {
+	var el = $('#'+id);
+	el.css('display', el.css('display')!='none' ? 'none' : 'block');
 }
 
 function toggle_filter_prefs() {

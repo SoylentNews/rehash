@@ -1,34 +1,32 @@
 // $Id$
 
 function um_ajax(the_behaviors, the_events) {
-	var params = {};
-	params['op'] = 'um_ajax';
-	params['behaviors'] = the_behaviors;
-	params['events'] = the_events;
-	ajax_update(params, 'links-vendors-content');
+	ajax_update({
+		op:		'um_ajax',
+		behaviors:	the_behaviors,
+		events:		the_events
+	}, 'links-vendors-content');
 }
 
 function um_fetch_settings() {
-	var params = {};
-	params['op'] = 'um_fetch_settings';
-	ajax_update(params, 'links-vendors-content');
+	ajax_update({ op: 'um_fetch_settings' }, 'links-vendors-content');
 }
 
 function um_set_settings(behavior) {
-	var params = {};
-	params['op'] = 'um_set_settings';
-	params['behavior'] = behavior;
-	ajax_update(params, 'links-vendors-content');
+	ajax_update({
+		op:		'um_set_settings',
+		behavior:	behavior
+	}, 'links-vendors-content');
 }
 
 function admin_neverdisplay(stoid, type, fhid) {
-	var params = {};
-	params['op'] = 'admin_neverdisplay';
-	params['reskey'] = reskey_static;
-	params['stoid'] = stoid;
-	params['fhid'] = fhid;
 	if (confirm("Set story to neverdisplay?")) {
-		ajax_update(params, 'nvd-' + stoid);
+		ajax_update({
+			op:	'admin_neverdisplay',
+			reskey:	reskey_static,
+			stoid:	stoid,
+			fhid:	fhid
+		}, 'nvd-' + stoid);
 		if (type == "firehose") {
 			firehose_remove_entry(fhid);
 		}
@@ -36,12 +34,12 @@ function admin_neverdisplay(stoid, type, fhid) {
 }
 
 function admin_submit_memory(fhid) {
-	var params = {};
-	params['op'] = 'admin_submit_memory';
-	params['reskey'] = reskey_static;
-	params['submatch'] = $dom('submatch-'+fhid).value;
-	params['subnote'] = $dom('subnote-'+fhid).value;
-	ajax_update(params, 'sub_mem_message-'+fhid);
+	ajax_update({
+		op:		'admin_submit_memory',
+		reskey:		reskey_static,
+		submatch:	$('#submatch-'+fhid).val(),
+		subnote:	$('#subnote-'+fhid).val()
+	}, 'sub_mem_message-'+fhid);
 }
 
 function adminTagsCommands(id, type) {
@@ -154,33 +152,23 @@ function remarks_config_save() {
 }
 
 function admin_slashdbox_fetch(secs) {
-	var params = {};
-	params['op'] = 'admin_slashdbox';
-	ajax_periodic_update(secs, params, "slashdbox-content");
+	ajax_periodic_update(secs, { op: 'admin_slashdbox' }, "slashdbox-content");
 }
 
 function admin_perfbox_fetch(secs) {
-	var params = {};
-	params['op'] = 'admin_perfbox';
-	ajax_periodic_update(secs, params, "performancebox-content");
+	ajax_periodic_update(secs, { op: 'admin_perfbox' }, "performancebox-content");
 }
 
 function admin_authorbox_fetch(secs) {
-	var params = {};
-	params['op'] = 'admin_authorbox';
-	ajax_periodic_update(secs, params, "authoractivity-content");
+	ajax_periodic_update(secs, { op: 'admin_authorbox' }, "authoractivity-content");
 }
 
 function admin_storyadminbox_fetch(secs) {
-	var params = {};
-	params['op'] = 'admin_storyadminbox';
-	ajax_periodic_update(secs, params, "storyadmin-content");
+	ajax_periodic_update(secs, { op: 'admin_storyadminbox' }, "storyadmin-content");
 }
 
 function admin_recenttagnamesbox_fetch(secs) {
-	var params = {};
-	params['op'] = 'admin_recenttagnamesbox';
-	ajax_periodic_update(secs, params, "recenttagnames-content");
+	ajax_periodic_update(secs, { op: 'admin_recenttagnamesbox' }, "recenttagnames-content");
 }
 
 function console_update(use_fh_interval, require_fh_timeout) {
@@ -190,24 +178,17 @@ function console_update(use_fh_interval, require_fh_timeout) {
 		return;
 	}
 
-	var params = {};
-	params['op'] = 'console_update'
-	var handlers = {
-		onComplete: json_handler
-	};
-	ajax_update(params, '', handlers);
+	ajax_update({ op: 'console_update' }, '', { onComplete: json_handler });
 	var interval = 30000;
 	if(use_fh_interval) {
 		interval = getFirehoseUpdateInterval(); 
 	}
-	setTimeout("console_update(" + use_fh_interval + "," + fh_is_timed_out +")", interval * 2);
+	setTimeout(function(){console_update(use_fh_interval, fh_is_timed_out)}, interval * 2);
 }
 
 function firehose_usage() {
-	var params = {};
-	params['op'] = 'firehose_usage'
 	var interval = 300000;
-	ajax_update(params, 'firehose_usage-content');
+	ajax_update({ op: 'firehose_usage' }, 'firehose_usage-content');
 	setTimeout(firehose_usage, interval);
 }
 
@@ -253,69 +234,60 @@ function make_spelling_correction(misspelled_word, form_element) {
 }
 
 function firehose_reject (el) {
-	var params = {};
-	var fh = $dom('firehose-' + el.value);
-	params['op'] = 'firehose_reject';
-	params['id'] = el.value;
-	params['reskey'] = reskey_static;
-	ajax_update(params, 'reject_' + el.value);
+	ajax_update({
+		op:	'firehose_reject',
+		id:	el.value,
+		reskey:	reskey_static
+	}, 'reject_' + el.value);
 	firehose_remove_entry(el.value);
 }
 
 function firehose_open_note(id) {
-	var nf = $dom('note-form-'+id);
-	var nt = $dom('note-text-'+id);
-	var ni = $dom('note-input-'+id);
-	nf.className="";
-	ni.focus();
-	nt.className="hide";
+	$('#note-form-'+id).removeClass();
+	$('#note-input-'+id).each(function(){this.focus()});
+	$('#note-text-'+id).setClass("hide");
 }
 
 function firehose_save_note(id) {
-	var nf = $dom('note-form-'+id);
-	var nt = $dom('note-text-'+id);
-	var ni = $dom('note-input-'+id);
-	var params = {};
-	params['op'] = 'firehose_save_note';
-	params['note'] = ni.value;
-	params['id'] = id;
-	ajax_update(params, 'note-text-'+id);
-	nf.className = "hide";
-	nt.className = "";
+	ajax_update({
+		op:	'firehose_save_note',
+		note:	$('#note-input-'+id).val(),
+		id:	id
+	}, 'note-text-'+id);
+	$('#note-form-'+id).setClass("hide");
+	$('#note-text-'+id).removeClass();
 }
 
 function firehose_get_admin_extras(id) {
-	var params = {};
-	params['id'] = id;
-	params['op'] = 'firehose_get_admin_extras';
-	var handlers = {
+	ajax_update({
+		op:	'firehose_get_admin_extras',
+		id:	id
+	}, '', {
 		onComplete: function(transport) {
 			json_handler(transport);
 			if (firehoseIsInWindow(id)) {
 				scrollToWindowFirehose(id);
 			}
 		}
-	};
-	ajax_update(params, '', handlers);
+	});
 }
 
 function firehose_get_and_post(id) {
-	var params = {};
-	params['id']  = id;
-	params['op'] = 'firehose_get_form';
-	firehose_collapse_entry(id);
-	var handlers = {
-		onComplete: function() { $dom('postform-'+id).submit();}
-	};
-	ajax_update(params, 'postform-'+id, handlers); 
+	ajax_update({
+		op:	'firehose_get_form',
+		id:	id
+	}, 'postform-'+id, {
+		onComplete: function() {
+			$dom('postform-'+id).submit()
+		}
+	});
 }
 
 function appendToBodytext(text) {
-	var obj = $dom('admin-bodytext');
-	if (obj) {
-		obj.className = "show";
-		obj.value = obj.value  + text;
-	}
+	$('#admin-bodytext').each(function(){
+		this.className = "show";
+		this.value += text;
+	})
 }
 
 function appendToMedia(text) {
