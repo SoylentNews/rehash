@@ -177,7 +177,7 @@ sub run {
 		 AND tagnameid=$self->{spamid}
 		 AND uid IN ($admin_in_str)
 		 AND inactivated IS NULL");
-	my $is_spam = $binspam_count_globjid > 0 ? 1 : 0;
+	my $is_spam = ($binspam_count_globjid > 0);
 
 	# Now see how many times this globjid's uid (or, if anonymous, ipid)
 	# was tagged binspam by an admin.  If greater than a certain
@@ -243,29 +243,52 @@ sub run {
 	# check_type=ipid	clear 1 globj	set 1 globjid	set all globjids, setAL2
 
 	# Always set/clear at least the one globjid affected.
-	my %globjids = ( $affected_id, 1 );
-	if ($mark_srcid && $check_type) {
+	my %globjids_mark_spam = ( $affected_id, 1 );
+	if ($is_spam) {
 		# Set/clear both the individual globjid and all its
-		# fellow submitted globjids, if known.
+		# fellow admin-tagged globjids, if known.  This is
+		# almost certainly redundant since run() was surely
+		# called on those ids as well (or will be shortly).
+		# So XXX consider removing this code after checking
+		# the logs to make sure this works as I expect.
 		for my $tagid (keys %$binspam_tagid_globj_hr) {
-			$globjids{ $binspam_tagid_globj_hr->{$tagid} } = 1;
+			$globjids_mark_spam{ $binspam_tagid_globj_hr->{$tagid} } = 1;
 		}
 	}
+
+	# %$binspam_tagid_globj_hr only contains the tags on the globjs
+	# which have already been tagged by admins.  There may be more
+	# globjs submitted which have not (yet) been tagged.  If the
+	# srcid needs to be marked, and we have a valid check_type to
+	# mark, fetch the list of all submissions from that check_type
+	# and mark them.  As long as $check_type is set to uid or ipid,
+	# the only complicated part of this has already been done by
+	# setting $table_clause and $where_clause.
+	if ($mark_srcid && $check_type) {
+		my $all_globjid_ar = $slashdb->sqlSelectColArrayref(
+			'firehose.globjid',
+			"firehose$table_clause",
+			$where_clause);
+		for my $globjid (@$all_globjid_ar) {
+			$globjids_mark_spam{$globjid} = 1;
+		}
+	}
+	
 	# Convert that list of globjids to firehose ids.
-	my $globjid_in_str = join(',', sort { $a <=> $b } keys %globjids);
-	my $fhid_hr = $slashdb->sqlSelectAllKeyValue(
+	my $globjid_in_str = join(',', sort { $a <=> $b } keys %globjids_mark_spam);
+	my $fhid_mark_spam_hr = $slashdb->sqlSelectAllKeyValue(
 		'id, globjid',
 		'firehose',
 		"globjid IN ($globjid_in_str)");
 	main::tagboxLog(sprintf("%s->run globjids '%s' -> fhids '%s'",
 		ref($self),
-		join(' ', sort { $a <=> $b } keys %globjids),
-		join(' ', sort { $a <=> $b } keys %$fhid_hr)));
+		join(' ', sort { $a <=> $b } keys %globjids_mark_spam),
+		join(' ', sort { $a <=> $b } keys %$fhid_mark_spam_hr)));
 
 	# Loop on all the fhids required to be changed, setting or
 	# clearing them as appropriate.
-	for my $fhid (sort { $a <=> $b } keys %$fhid_hr) {
-		my $globjid = $fhid_hr->{$fhid};
+	for my $fhid (sort { $a <=> $b } keys %$fhid_mark_spam_hr) {
+		my $globjid = $fhid_mark_spam_hr->{$fhid};
 		my $rows = $firehose_db->setFireHose($fhid, { is_spam => ($is_spam ? 'yes' : 'no') });
 		main::tagboxLog(sprintf("%s->run marked fhid %d (%d) as is_spam=%d rows=%s",
 			ref($self), $fhid, $globjid, $is_spam, $rows));
