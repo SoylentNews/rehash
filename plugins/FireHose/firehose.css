@@ -139,8 +139,6 @@ ul.menu#fhtablist li.active a, .paginate .active a
 }
 
 ul.menu#fhtablist li.active:before, .paginate .active:before { content: ""; }
-#beforewidget, .paginate span.active {float: left}
-#beforewidget span, #afterwidget span {line-height:270% !important}
 .paginate .calendar-pane {margin: 0;} 
 
 /* Pagination */
@@ -472,3 +470,5 @@ li .tag-actions .not-tag:hover, li .tag-actions .del-tag:hover {color: red;}
 .briefarticle .storylinks .comments.nocomment, .briefarticle .storylinks .comments span  {display: none}
 
 .embed .paginate, .embed .firemenu, .embed a.skin, .copyright.embed { display: none; }
+#firehose_more { margin-left: 5px; padding-left: 3px; background: #aaa; }
+#firehose_more a { color: #333; }

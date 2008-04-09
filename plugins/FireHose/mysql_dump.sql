@@ -31,6 +31,7 @@ INSERT INTO vars (name, value, description) VALUES ('firehose_slice_points', '29
 INSERT INTO vars (name, value, description) VALUES ('firehose_spam_score', '-50', 'Popularity score assigned to all firehose items with is_spam=yes');
 INSERT INTO vars (name, value, description) VALUES ('firehose_color_labels', 'red|orange|yellow|green|blue|purple|violet|black', 'Firehose color labels');
 INSERT INTO vars (name, value, description) VALUES ('firehose_anonval_param', '', 'String needed to be passed in anonval form param to validate requests, set to a string to enforce this validation');
+INSERT INTO vars (name, value, description) VALUES ('firehose_logging', '0', 'Log firehose usage info?');
 
 INSERT INTO firehose_tab VALUES (1,0,'Firehose','','createtime','DESC','indigo','fulltitle');
 INSERT INTO firehose_tab VALUES (2,0,'Slashdot','story','createtime','DESC','black','full');

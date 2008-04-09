@@ -36,6 +36,7 @@ use Date::Calc qw(Days_in_Month Add_Delta_YMD);
 use POSIX qw(ceil);
 use LWP::UserAgent;
 use URI;
+use Time::HiRes;
 
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
@@ -379,8 +380,18 @@ sub getFireHoseEssentials {
 	$options ||= {};
 	$options->{limit} ||= 50;
 	my $ps = $options->{limit};
+
+	my $fetch_extra = 0;
+	my ($day_num, $day_label, $day_count);
 	
 	$options->{limit} += $options->{more_num} if $options->{more_num};
+
+	my $fetch_size = $options->{limit};
+	if ($options->{orderby} eq "createtime") {
+		$fetch_extra = 1;
+		$fetch_size++;
+	}
+	
 
 	my $pop;
 	$pop = $self->getMinPopularityForColorLevel($colors->{$options->{color}})
@@ -413,7 +424,7 @@ sub getFireHoseEssentials {
 				$opts{dayduration} = $options->{duration};
 			}
 
-			$opts{records_max}	= $options->{limit}		unless $options->{nolimit};
+			$opts{records_max}	= $fetch_size		unless $options->{nolimit};
 			$opts{records_start}	= $options->{offset}		if $options->{offset};
 			$opts{sort}		= 3;  # sorting handled by caller
 
@@ -616,13 +627,21 @@ sub getFireHoseEssentials {
 		$offset = defined $options->{offset} ? $options->{offset} : '';
 		$offset = '' if $offset !~ /^\d+$/;
 		$offset = "$offset, " if length $offset;
-		$limit_str = "LIMIT $offset $options->{limit}" unless $options->{nolimit};
+		$limit_str = "LIMIT $offset $fetch_size" unless $options->{nolimit};
 		$other .= " ORDER BY $options->{orderby} $options->{orderdir} $limit_str";
 	}
 
 
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
 	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
+
+	if ($fetch_extra && @$hr_ar == $fetch_size) {
+		$fetch_extra = pop @$hr_ar;
+
+		($day_num, $day_label, $day_count) = $self->getNextDayAndCount($fetch_extra, $options, $tables, \@where, $count_other);
+
+	}
+
 	my $count;
 	if ($options->{tagged_by_uid}) {
 		my $rows = $self->sqlSelectAllHashrefArray("count(*)", $tables, $where, $count_other);
@@ -667,7 +686,38 @@ sub getFireHoseEssentials {
 
 		$items = $hr_ar;
 	}
-	return($items, $results, $count, $future_count);
+	return($items, $results, $count, $future_count, $day_num, $day_label, $day_count);
+}
+
+sub getNextDayAndCount {
+	my($self, $item, $opts, $tables, $where_ar, $other) = @_;
+
+	my $user = getCurrentUser();
+
+	my $item_day = timeCalc($item->{createtime}, '%Y-%m-%d');
+
+	my $is_desc = $opts->{orderdir} eq "DESC";
+
+	my $border_time = $is_desc ? "$item_day 00:00:00" : "$item_day 23:59:59";
+	$border_time = timeCalc($border_time, "%Y-%m-%d %T", -$user->{off_set});
+
+	my $it_cmp =  $is_desc ? "<=" : ">=";
+	my $bt_cmp =  $is_desc ? ">=" : "<=";
+
+	my $i_time_q 	  = $self->sqlQuote($item->{createtime});
+	my $border_time_q = $self->sqlQuote($border_time);
+
+	my $where = join ' AND ', @$where_ar, "createtime $it_cmp $i_time_q", "createtime $bt_cmp $border_time_q";
+
+	my $day_count = $self->sqlSelect("count(*)", $tables, $where, $other);
+	
+	my $day_labels = getOlderDaysFromDay($item_day, 0, 0, { skip_add_today => 1, show_future_days => 1 });
+
+	return ($day_labels->[0]->[0], $day_labels->[0]->[1], $day_count);
+
+	
+
+
 }
 
 # A single-globjid wrapper around getUserFireHoseVotesForGlobjs.
@@ -1006,7 +1056,14 @@ sub ajaxFireHoseSetOptions {
 	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
 	my $opts = $firehose->getAndSetOptions();
-	
+
+	$firehose->createSettingLog({ 
+		uid => $user->{uid}, 
+		name => $form->{setting_name}, 
+		value => $form->{$form->{setting_name}}, 
+		"-ts" => "NOW()"}
+	);
+
 	my $html = {};
 	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts, section => $form->{section}  }, { Return => 1});
 	$html->{fhoptions} = slashDisplay("firehose_options", { nowrapper => 1, options => $opts }, { Return => 1});
@@ -1156,8 +1213,9 @@ sub ajaxGetAdminFirehose {
 
 sub ajaxFireHoseGetUpdates {
 	my($slashdb, $constants, $user, $form, $options) = @_;
+	my $start = Time::HiRes::time();
 
-	my $update_data = { removals => 0, items => 0 };
+	my $update_data = { removals => 0, items => 0, updates => 0, new => 0 };
 
 	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
@@ -1168,7 +1226,7 @@ sub ajaxFireHoseGetUpdates {
 	my %ids = map { $_ => 1 } @ids;
 	my %ids_orig = ( %ids ) ;
 	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
-	my($items, $results, $count, $future_count) = $firehose_reader->getFireHoseEssentials($opts);
+	my($items, $results, $count, $future_count, $day_num, $day_label, $day_count) = $firehose_reader->getFireHoseEssentials($opts);
 	my $num_items = scalar @$items;
 	my $future = {};
 	my $globjs = [];
@@ -1232,6 +1290,7 @@ sub ajaxFireHoseGetUpdates {
 					$html->{"text-$_->{id}"} = $introtext;
 					$html->{"fhtime-$_->{id}"} = timeCalc($item->{createtime});
 					$html->{"topic-$_->{id}"} = slashDisplay("dispTopicFireHose", { item => $item, adminmode => $adminmode }, { Return => 1});
+					$update_data->{updates}++;
 					# updated
 				}
 			}
@@ -1241,6 +1300,7 @@ sub ajaxFireHoseGetUpdates {
 			if ($_->{day}) {
 				push @$updates, ["add", $_->{id}, slashDisplay("daybreak", { options => $opts, cur_day => $_->{day}, last_day => $_->{last_day}, id => "firehose-day-$_->{day}", fh_page => $base_page }, { Return => 1, Page => "firehose" }) ];
 			} else {
+				$update_data->{new}++;
 				push @$updates, ["add", $_->{id}, slashDisplay("dispFireHose", { mode => $curmode, item => $item, tags_top => $tags_top, vote => $votes->{$item->{globjid}}, options => $opts }, { Return => 1, Page => "firehose" })];
 			}
 			$added->{$_->{id}}++;
@@ -1278,25 +1338,31 @@ sub ajaxFireHoseGetUpdates {
 		push @$updates, ["remove", $_, ""];
 		$update_data->{removals}++;
 	}
+	
+	my $firehose_more_data = { 
+		future_count => $future_count, 
+		options => $opts,
+		day_num	=> $day_num,
+		day_label => $day_label, 
+		day_count => $day_count,
+		contentsonly => 0,
+	};
 
 
-	my $html2split = slashDisplay("paginate", {
+	$html->{'fh-paginate'} = slashDisplay("paginate", {
 		contentsonly	=> 1,
 		day		=> $last_day,
+		last_day	=> $last_day,
 		page		=> $form->{page},
 		options		=> $opts,
 		ulid		=> "fh-paginate",
 		divid		=> "fh-pag-div",
 		num_items	=> $num_items,
 		fh_page		=> $base_page,
+		firehose_more_data => $firehose_more_data,
 		split_refresh	=> 1
 	}, { Return => 1, Page => "firehose" });
 
-	my ($beforewidget, $afterwidget) = split('<!-- split -->', $html2split);
-
-	$html->{beforewidget} = $beforewidget;
-	$html->{afterwidget} = $afterwidget;
-	
 	$html->{firehose_pages} = slashDisplay("firehose_pages", {
 		page		=> $form->{page},
 		num_items	=> $num_items,
@@ -1310,7 +1376,7 @@ sub ajaxFireHoseGetUpdates {
 	$html->{filter_text} = "Filtered to ".strip_literal($opts->{color})." '".strip_literal($opts->{fhfilter})."'";
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
 	$html->{itemsreturned} = $num_items == 0 ?  getData("noitems", { options => $opts }, 'firehose') : "";
-	$html->{firehose_more} = getData("firehose_more_link", { options => $opts, future_count => $future_count, contentsonly => 1}, 'firehose');
+#	$html->{firehose_more} = getData("firehose_more_link", { options => $opts, future_count => $future_count, contentsonly => 1, day_label => $day_label, day_count => $day_count }, 'firehose');
 
 	my $data_dump =  Data::JavaScript::Anon->anon_dump({
 		html		=> $html,
@@ -1324,7 +1390,25 @@ sub ajaxFireHoseGetUpdates {
 	my $reskey = getObject("Slash::ResKey");
 	my $user_rkey = $reskey->key('ajax_user_static', { no_state => 1 });
 	$reskey_dump .= "reskey_static = '" . $user_rkey->reskey() . "';\n" if $user_rkey->create();
-	return "$data_dump\n$reskey_dump";
+
+	my $duration = Time::HiRes::time() - $start;
+	my $more_num = $options->{more_num} || 0;
+	
+	my $retval =  "$data_dump\n$reskey_dump";
+
+	my $updatelog = {
+		uid 		=> $user->{uid},
+		new_count 	=> $update_data->{new},
+		update_count	=> $update_data->{updates},
+		total_num	=> $update_data->{items},
+		more_num	=> $more_num,
+		"-ts"		=> "NOW()",
+		duration	=> $duration,
+		bytes 		=> length($retval)
+	};
+	$firehose->createUpdateLog($updatelog);
+
+	return $retval;
 
 }
 
@@ -1803,6 +1887,7 @@ sub getAndSetOptions {
 		$form->{fhfilter} = "-story";
 		$options->{orderby} = "createtime";
 		$options->{orderdir} = "DESC";
+
 		$options->{color} = "indigo";
 		$form->{color} = "indigo";
 	} elsif ($tabtype eq 'tabpopular') {
@@ -2161,6 +2246,9 @@ sub getAndSetOptions {
 		if (!$user->{is_admin} && (($options->{limit} + $options->{more_num}) > 200)) {
 			$options->{more_num} = 200 - $options->{limit} ;
 		}
+		if ($options->{more_num} > $user->{firehose_max_more_num}) {
+			$self->setUser($user->{uid}, { firehose_max_more_num => $options->{more_num}});
+		}
 	}
 
 	return $options;
@@ -2287,7 +2375,7 @@ sub listView {
 	if ($featured && $featured->{id}) {
 		$options->{not_id} = $featured->{id};
 	}
-	my($items, $results, $count, $future_count) = $firehose_reader->getFireHoseEssentials($options);
+	my($items, $results, $count, $future_count, $day_num, $day_label, $day_count) = $firehose_reader->getFireHoseEssentials($options);
 
 	my $itemnum = scalar @$items;
 
@@ -2355,26 +2443,31 @@ sub listView {
 	if ($gSkin->{skid} != $constants->{mainpage_skid}) {
 		$section = $gSkin->{skid};
 	}
-
-	my $firehose_more = getData('firehose_more_link', { future_count => $future_count, options => $options }, 'firehose');
+	my $firehose_more_data = { 
+		future_count => $future_count, 
+		options => $options,
+		day_num	=> $day_num,
+		day_label => $day_label, 
+		day_count => $day_count
+	};
 
 	slashDisplay("list", {
-		itemstext	=> $itemstext, 
-		itemnum		=> $itemnum,
-		page		=> $options->{page}, 
-		options		=> $options,
-		refresh_options	=> $refresh_options,
-		votes		=> $votes,
-		colors		=> $colors,
-		colors_hash	=> $colors_hash,
-		tabs		=> $options->{tabs},
-		slashboxes	=> $Slashboxes,
-		last_day	=> $last_day,
-		fh_page		=> $base_page,
-		search_results	=> $results,
-		featured	=> $featured,
-		section		=> $section,
-		firehose_more 	=> $firehose_more
+		itemstext		=> $itemstext, 
+		itemnum			=> $itemnum,
+		page			=> $options->{page}, 
+		options			=> $options,
+		refresh_options		=> $refresh_options,
+		votes			=> $votes,
+		colors			=> $colors,
+		colors_hash		=> $colors_hash,
+		tabs			=> $options->{tabs},
+		slashboxes		=> $Slashboxes,
+		last_day		=> $last_day,
+		fh_page			=> $base_page,
+		search_results		=> $results,
+		featured		=> $featured,
+		section			=> $section,
+		firehose_more_data 	=> $firehose_more_data
 	}, { Page => "firehose", Return => 1 });
 }
 
@@ -2479,8 +2572,7 @@ sub addDayBreaks {
 	my $last_days_processed = 0;
 	foreach (@$items) {
 		my $cur_day = $_->{createtime};
-		$cur_day =  timeCalc($cur_day, "%Y%m%d %T", $offset);
-		$cur_day =~ s/ \d\d:\d\d:\d\d$//g;
+		$cur_day =  timeCalc($cur_day, "%Y%m%d", $offset);
 		if ($cur_day ne $last_day) {
 			if ($last_days_processed >= 5) {
 				push @retitems, { id => "day-$cur_day", day => $cur_day, last_day => $last_day };
@@ -2647,6 +2739,19 @@ sub genFireHoseParams {
 	return $str;
 }
 
+sub createUpdateLog {
+	my($self, $data) = @_;
+	return if !getCurrentStatic("firehose_logging");
+	$data->{uid} ||= getCurrentUser('uid');
+	$self->sqlInsert("firehose_update_log", $data);
+}
+
+sub createSettingLog {
+	my($self, $data) = @_;
+	return if !getCurrentStatic("firehose_logging");
+	$data->{uid} ||= getCurrentUser('uid');
+	$self->sqlInsert("firehose_setting_log", $data);
+}
 1;
 
 __END__
