@@ -1385,6 +1385,36 @@ sub showInfo {
                                 = $reader->sqlSelect("id, description", "journals", "discussion = $journal_block");
                 }
 
+                # Latest event
+                my @latest_event_index = $reader->sqlSelect("event, code", "user_events", "uid = $uid", "order by date desc limit 1");
+
+                my ($root_table, $text_table, $event_subject, $event_text, $event_rkey, $event_tkey);
+
+                if ($latest_event_index[1] == 1) {
+                        $root_table    = 'comments';
+                        $text_table    = 'comment_text';
+                        $event_subject = 'subject';
+                        $event_text    = 'comment';
+                        $event_rkey    = 'cid';
+                        $event_tkey    = 'cid';
+                } else {
+                        $root_table    = 'journals';
+                        $text_table    = 'journals_text';
+                        $event_subject = 'description';
+                        $event_text    = 'article';
+                        $event_rkey    = 'discussion';
+                        $event_tkey    = 'id';
+                }
+
+                my $latest_event;
+                ($latest_event->{key}, $latest_event->{subject}) =
+                        $reader->sqlSelect("$event_tkey, $event_subject", "$root_table", "uid = $uid and $event_rkey = " . $latest_event_index[0]);
+
+                $latest_event->{text} =
+                        $reader->sqlSelect($event_text, $text_table, "$event_tkey = " . $latest_event->{key});
+
+                $latest_event->{code} = $latest_event_index[1];
+
 		slashDisplay('userInfo2', {
 			title			=> $title,
 			uid			=> $uid,
@@ -1409,6 +1439,7 @@ sub showInfo {
 			tagshist		=> $tagshist,
                         latest_comments         => \%latest_comments,
                         latest_journals         => \%latest_journals,
+                        latest_event            => $latest_event,
 		}, { Page => 'users', Skin => 'default'});
 	}
 
