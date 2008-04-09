@@ -1744,7 +1744,7 @@ sub getTopBadgeURLs {
 	my $top_ar = $self->sqlSelectAll(
 		"query_string AS qs, COUNT(*) AS c",
 		"accesslog_temp",
-		"op='slashdot-it'",
+		"op='slashdot-it' AND query_string NOT LIKE '%from=rssbadge'",
 		"GROUP BY qs ORDER BY c DESC, qs LIMIT $count"
 	);
 	for my $duple (@$top_ar) {
