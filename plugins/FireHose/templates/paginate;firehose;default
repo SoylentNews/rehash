@@ -34,55 +34,50 @@ __template__
 
 [% IF options.duration == 7 && !options.startdate %]
 	[% day = Slash.db.getDay(0) %]
-	[% IF !split_refresh %]<span id="beforewidget">[% END %]
 	<span class="inactive">
 		<a href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => 7 }); f; %][% IF form.index %]&amp;index=1[% END %]">Today</a>
 	</span>
-	[% IF !split_refresh %]</span>[% END %]
-	[% IF split_refresh %]<!-- split -->[% END %]
-	[% IF !split_refresh %]
-	<span class="active">
-		[% IF form.skipmenu || no_peer %]
-			[% PROCESS datewidget id='fhcalendar_pag' init='firehose_calendar_init' %]
-		[% ELSE %]
-			[% PROCESS datewidget id='fhcalendar_pag' peer = 'fhcalendar' init='firehose_calendar_init' %]
-		[% END %]
-		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options contentsonly = 0 %]
-	</span>
-	[% END %]
-	[% max_days_ahead = options.smalldevices ? 2 : 3 %]
-	[% days = Slash.getOlderDaysFromDay(day, 1, max_days_ahead, { "show_future_days" => 1, skip_add_today => 1 }); %]
-		[% IF !split_refresh %]<span id="afterwidget">[% END %]
+	[% IF options.orderby == "createtime";
+		 max_days_ahead = options.smalldevices ? 1 : 2;
+		days = Slash.getOlderDaysFromDay(last_day, -1, max_days_ahead, { "show_future_days" => 1, skip_add_today => 1 }); 
+	   ELSE;
+		max_days_ahead = options.smalldevices ? 2 : 3;
+		days = Slash.getOlderDaysFromDay(day, 1, max_days_ahead, { "show_future_days" => 1, skip_add_today => 1 }); 
+	   END;
+	%]
 		[%
+		got_more_link = 0;
 		FOREACH cur_day = days;
 		%]
-		<span class="inactive">
+		<span class="[% IF cur_day.0 != last_day %]in[% END %]active">
 			<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => cur_day.0, duration => 1}); f; %][% index_extra %]">[% cur_day.1 | strip_literal %]</a>
+				[% IF firehose_more_data.day_num == cur_day.0 %]
+					[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
+					[% got_more_link = 1; %]
+				[% ELSIF firehose_more_data.future_count <= 0 && cur_day.0 == last_day %]
+					[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
+					[% got_more_link = 1; %]
+				[% END %]
+		</span>
+		[% END %]
+		[% IF !got_more_link %]
+		<span class="inactive">
+			[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
 		</span>
 		[% END %]
 		[% idle_submit_plug %]
-		[% IF !split_refresh %]</span>[% END %]
 [% ELSIF options.startdate && options.duration == 1;
 	day = day || options.startdate;
 	day = day.replace('-','');
 	day = day || Slash.db.getDay(0);
 	max_days_ahead = options.smalldevices ? 2 : 3;
 	days = Slash.getOlderDaysFromDay(day, -1, max_days_ahead); %]
-	[% IF !split_refresh %]<span id="beforewidget">[% END %]
+
 	[% FOREACH cur_day = days;
 		IF day == cur_day.0; %]
-			[% IF !split_refresh %]</span>[% END %]
-			[% IF !split_refresh %]
 			<span class="active">
-			[% IF form.skipmenu %]
-				[% PROCESS datewidget id='fhcalendar_pag' init='firehose_calendar_init'  %]
-			[% ELSE %]
-				[% PROCESS datewidget id='fhcalendar_pag' peer = 'fhcalendar' init='firehose_calendar_init' %]
-			[% END %]
+				<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => cur_day.0, duration => 1}); f; %][% index_extra %]">[% cur_day.1 | strip_literal %]</a>
 			</span>
-			[% END %]
-			[% IF split_refresh %]<!-- split -->[% END %]
-			[% IF !split_refresh %]<span id="afterwidget">[% END %]
 		[% ELSE %]
 			<span class="inactive">
 			[% IF cur_day.2 %]
@@ -95,7 +90,6 @@ __template__
 		
 [%	END %]
 	[% idle_submit_plug %]
-[% IF !split_refresh %]</span>[% END %]
 [% ELSIF options.startdate && options.duration >= 28 && options.duration <= 31;
 	firehose = Slash.getObject("Slash::FireHose");
 	days = firehose.getOlderMonthsFromDay(options.startdate,-2, 2);
@@ -104,7 +98,6 @@ __template__
 		%]
 		<span class="active">
 			<a href="[% gSkin.rootdir %]/[% day_page %]?startdate=[% cur_day.0 %]&amp;duration=[% cur_day.2 %]">[% cur_day.1 | strip_literal %]</a>
-			[% PROCESS datelaunch %]
 			[% PROCESS firehose_pages page = page num_items = num_items day_page = fh_page options=options %]
 		</span>
 		[% ELSE %]
@@ -117,27 +110,13 @@ __template__
 	idle_submit_plug;
 %]
 [% ELSIF options.duration == -1 && !options.startdate %]
-	[% IF !split_refresh %]<span id="beforewidget">[% END %]
 	<span class="inactive">
 		<a href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => 7}); f; %][% IF form.index %]index=1[% END %]">Today</a>
+	<span class="active">
+		[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
 	</span>
-	[% IF !split_refresh %]
-	</span>
-	 <span class="active">
-		[% IF form.skipmenu || form.index %]
-			[% PROCESS datewidget id='fhcalendar_pag' init='firehose_calendar_init' date="" %]
-		[% ELSE %]
-			[% PROCESS datewidget id='fhcalendar_pag' peer = 'fhcalendar' init='firehose_calendar_init' %]
-		[% END %]
-		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
-	</span>
-	[% END %]
-	[% IF split_refresh %]<!-- split -->[% END %]
-	[% IF !split_refresh %]
-	<span id="afterwidget">
 	[% idle_submit_plug %]
 	</span>
-	[% END %]
 [% ELSE %]
 	[% time_label = "";
 	   IF options.duration == -1;
@@ -153,7 +132,6 @@ __template__
 	[% UNLESS nopages %]
 		<span class="active">
 		[% time_label %]
-		[% PROCESS datelaunch %]
 		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
 		</span>
 

@@ -96,20 +96,37 @@ __template__
 [% CASE 'firehose_more_link' %]
 		[% extra_onclick = '' %]
 		[% IF !contentsonly %]
-		<div id="firehose_more">
+		<span id="firehose_more">
 		[% END %]
-		[% IF day_label && day_count;
-			label = day_count _ " more " _ $day_label _ "...";
-		   ELSIF future_count > 0;
-		        label = future_count _ " more...";
-		   ELSIF future_count <= 0 && !options.startdate && options.duration != -1 && options.orderby == "createtime";
-		   	label = "Get more...";
-			extra_onclick = 'firehose_set_options(\'duration\', -1); ';
+		[% label = "Get more &raquo;" %]
+		[% IF day_label && day_count && options.duration != -1;
+			label = day_count _ " more &raquo;";
+		   ELSIF future_count > 0 ;
+		   	IF options.duration == -1;
+			        label = future_count _ " more in archive &raquo;";
+			ELSE;
+			        label = future_count _ " more &raquo;";
+			END;
+		   ELSIF future_count <= 0 ;
+		   	IF !options.startdate && options.duration != -1 && options.orderby == "createtime";
+			   	label = "Get more...";
+				extra_onclick = 'firehose_set_options(\'duration\', -1); ';
+			ELSIF options.orderby != "createtime";
+				fh = Slash.getObject("Slash::FireHose") 
+				fh_array = fh.getFireHoseColors(1);
+				fh_hash  = fh.getFireHoseColors();
+				fh_num   = fh_hash.${options.color};
+				new_color   = fh_array.$fh_num;
+				IF new_color;
+					label = "Lower threshold to $new_color &raquo;";
+					extra_onclick = "firehose_slider_set_color('" _ new_color _ "');";
+				END;
+			END;
 		   END;
 		%]
 		<a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a>
 		[% IF !contentsonly %]
-		</div>
+		</span>
 		[% END %]
 [% CASE 'notavailable' %]
 	The item you're trying to view either does not exist, or is not viewable to you.
