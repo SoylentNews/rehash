@@ -1753,7 +1753,7 @@ sub resetUserAccount {
 	$self->sqlUpdate('users', {
 		passwd       => $enc,
 		newpasswd    => $enc,
-		newpasswd_ts => undef,
+		newpasswd_ts => undef, # should this be NOW() ?
 	}, 'uid=' . $self->sqlQuote($uid));
 	return $newpasswd;
 }
@@ -5071,7 +5071,10 @@ sub _load_al2_type_aliases {
 	my @aliases = grep { $_ } split /\s+/, $alias_text;
 	for my $alias (@aliases) {
 		my($src, $implied) = $alias =~ /^(\w+)->(\w+)$/;
-		$_al2_type_aliases->{$src} = $implied if $src && $implied;
+		if ($src && $implied) {
+			$_al2_type_aliases->{$src} ||= [ ];
+			push @{ $_al2_type_aliases->{$src} }, $implied;
+		}
 	}
 }
 sub getAL2TypeAliases {
@@ -5295,8 +5298,10 @@ sub getAL2 {
 	my $aliases = $self->getAL2TypeAliases();
 	for my $src (keys %$aliases) {
 		if ($retval->{$src}) {
-			my $implied = $aliases->{$src};
-			$retval->{$implied} = { implied_by => $src };
+			my $implied_ar = $aliases->{$src};
+			for my $imp (@$implied_ar) {
+				$retval->{$imp} ||= { implied_by => $src };
+			}
 		}
 	}
 
