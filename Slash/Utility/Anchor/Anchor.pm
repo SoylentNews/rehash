@@ -268,7 +268,7 @@ sub http_send {
 
 	if ($opt->{etag} || $opt->{do_etag}) {
 		if ($opt->{do_etag} && $opt->{content}) {
-			$opt->{etag} = md5_hex($opt->{content});
+			$opt->{etag} = get_etag($opt->{content});
 		}
 		$r->header_out('ETag', $opt->{etag});
 
@@ -305,7 +305,10 @@ sub http_send {
 	return 1;
 }
 
-
+sub get_etag {
+	my($content) = @_;
+	return md5_hex($content);
+}
 
 #========================================================================
 
