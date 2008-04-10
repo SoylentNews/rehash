@@ -39,6 +39,7 @@ use vars qw($VERSION @EXPORT);
 ($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
 @EXPORT	   = qw(
 	http_send
+	get_etag
 	header
 	footer
 	redirect
