@@ -124,7 +124,11 @@ __template__
 			END;
 		   END;
 		%]
-		<a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a>
+		[% IF user.is_anon %]
+			<a href="#" onclick="show_login_box(); return false;">[% label %]</a>
+		[% ELSE %]
+			<a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a>
+		[% END %]
 		[% IF !contentsonly %]
 		</span>
 		[% END %]
