@@ -19,21 +19,21 @@ en_US
 __name__
 edit_comment
 __template__
-<div class="inline_comment">
 [% IF user.is_anon %]
-	<p class="warning">
-		[% IF constants.allow_anonymous %]
-	You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
-	in now</a>, or <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>.
-		[% ELSE %]
-	You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
-	in now</a>, <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>,
-	or post as <b>[% user.nickname | strip_literal %]</b>.
-		[% END %]
-	</p>
+<div class="warning">
+	[% IF constants.allow_anonymous %]
+You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
+in now</a>, or <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>.
+	[% ELSE %]
+You are not logged in.  You can <a href=\"${gSkin.rootdir}/login.pl\">log
+in now</a>, <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>,
+or post as <b>[% user.nickname | strip_literal %]</b>.
+	[% END %]
+</div>
 [% END %]
 
 [% IF !user.is_anon || constants.allow_anonymous %]
+<div class="inline_comment">
 	<form action="[% gSkin.rootdir %]/comments.pl" method="post">
 		<div id="replyto_preview_[% pid %]" class="replyto_reply" ondblclick="editReply([% pid %])"></div>
 		<div id="replyto_reply_[% pid %]" class="replyto_reply">
@@ -78,8 +78,8 @@ __template__
 			</span>
 		</div>
 	</form>
-[% END # IF !user.is_anon || constants.allow_anonymous %]
 </div>
+[% END # IF !user.is_anon || constants.allow_anonymous %]
 __seclev__
 1000
 __version__

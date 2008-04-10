@@ -604,6 +604,8 @@ sub submitComment {
 
  		print $error_message if $error_message;
 
+		# so other code thinks we are viewing this comment from a link -- pudge
+		$form->{cid} = $saved_comment->{cid};
 		printComments($discussion, $saved_comment->{cid}, $saved_comment->{cid},
 			{ force_read_from_master => 1, just_submitted => 1 }
 		);

@@ -331,8 +331,10 @@ sub previewReply {
 		);
 
 	my $max_duration = $options->{rkey}->max_duration;
-	$to_dump{eval_last}  = "submitCountdown($pid,$max_duration,1);"
-		if defined($max_duration) && length($max_duration);
+	if (defined($max_duration) && length($max_duration)) {
+		$max_duration = 0 if $max_duration > 30;
+		$to_dump{eval_last} = "submitCountdown($pid,$max_duration);"
+	}
 
 #use Data::Dumper; print STDERR Dumper \%to_dump; 
 

@@ -130,16 +130,16 @@ __template__
 
 [% IF moderate_form %]
 	[% IF moderate_button %]
-		<span class="nbutton"><p><b>
+		[% IF can_del %]<span class="nbutton"><p><b>[% END %]
 		<input type="hidden" name="op" value="moderate">
 		<input type="hidden" name="sid" value="[% sid %]">
 		<input type="hidden" name="cid" value="[% cid %]">
 		<input type="hidden" name="pid" value="[% pid %]">
-		[% IF can_del %]<a href="#" onclick="$('#commentform').submit(); return false">Delete</a>
-		[% ELSE %]<input type="submit" value="moderate" class="button">
-		[% END %]</b></p></span>
-	        [% IF can_del %]<a href="#" onclick="displayModalPrefHelp('discussion_delete_help'); return false" title="Click To Expand Help" class="help">?</a>
-	        <div id="discussion_delete_help" class="modalprefhelp" style="display: none;">Checked comments will be deleted.</div>[% END %]
+		[% IF can_del %]<a href="#" onclick="$('#commentform').submit(); return false">Delete</a></b></p></span>
+		<a href="#" onclick="displayModalPrefHelp('discussion_delete_help'); return false" title="Click To Expand Help" class="help">?</a>
+	        <div id="discussion_delete_help" class="modalprefhelp" style="display: none;">Checked comments will be deleted.</div>
+	        [%- ELSE %]<input type="submit" value="moderate" class="button">
+	        [% END %]
 	[% END %]
 	</form>
 [% END %]
