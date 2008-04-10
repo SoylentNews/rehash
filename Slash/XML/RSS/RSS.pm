@@ -433,7 +433,7 @@ sub rss_story {
 		my $desc = $self->rss_item_description($item->{description} || $story->{introtext});
 		if ($desc) {
 			$encoded_item->{description} = $desc;
-			$encoded_item->{description} .= qq{<p><iframe src="$channel->{'link'}slashdot-it.pl?op=display&amp;style=h0&amp;sid=$story->{sid}&amp;from=rssbadge" height="25" width="130" scrolling="no" frameborder="0"></iframe></p>};
+			$encoded_item->{description} .= qq{<p><a href="$action"><img src="$channel->{'link'}slashdot-it.pl?from=rss&amp;op=image&amp;style=h0&amp;sid=$story->{sid}"></a></p>};
 			$encoded_item->{description} .= "<p><a href=\"$action\">Read more of this story</a> at $constants->{sitename}.</p>" if $action;
 			# add poll if any
 			$encoded_item->{description} .= pollbooth($story->{qid},1, 0, 1) if $story->{qid};
