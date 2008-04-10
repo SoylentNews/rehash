@@ -15,7 +15,7 @@
 
         <div id="usermenu">
                 <ul class="menu" style="padding: 5px 10px 5px 10px;">
-                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                <li><span class="begin"><a href="/help" class="begin">Return to Help &amp; Preferences</a></span></li>
                 <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
                 <li><span class="begin"><a href="friends.shtml" class="begin">Previous Section</a></span></li>
                 <li><span class="begin"><a href="feeds.shtml" class="begin">Next Section</a></span></li>

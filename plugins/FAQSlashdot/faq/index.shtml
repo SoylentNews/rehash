@@ -17,7 +17,7 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
 
         <div id="usermenu">
                 <ul class="menu" style="padding: 5px 10px 5px 10px;">
-                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                <li><span class="begin"><a href="/help" class="begin">Return to Help &amp; Preferences</a></span></li>
                 </ul>
         </div>
 
@@ -289,7 +289,6 @@ $VERSION = sprintf "%d.%03d", q$Id$ =~ /(\d+)/g
                 <li><strong><a href="/faq/firehose.shtml#fh600">What browsers are supported?</a></strong></li>
                 <li><strong><a href="/faq/firehose.shtml#fh700">Why didn't you post a submission that made it to red?</a></strong></li>
                 <li><strong><a href="/faq/firehose.shtml#fh800">Doesn't this make you just like...</a></strong></li>
-	</ul>
 	</ul><!-- Badges -->
         <h2><strong><a href="/faq/badges.shtml">Badges How-To</a></strong></h2>
 

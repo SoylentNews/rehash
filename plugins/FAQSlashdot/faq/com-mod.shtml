@@ -15,7 +15,7 @@
 
                 <div id="usermenu">
                         <ul class="menu" style="padding: 5px 10px 5px 10px;">
-                                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                                <li><span class="begin"><a href="/help" class="begin">Return to Help &amp; Preferences</a></span></li>
                                 <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
                                 <li><span class="begin"><a href="interviews.shtml" class="begin">Previous Section</a></span></li>
                                 <li><span class="begin"><a href="metamod.shtml" class="begin">Next Section</a></span></li>
@@ -100,11 +100,11 @@ Last Modified: 2/7/08</small></em></p>
 
 <h2><a name="cm125" id="cm125">How do I make the D2 Floating Slider go away?</a></h2>
 <p>The upper right hand corner of the floating D2 configuration widget has a little icon that toggles between 3 different 'modes'.  They are
-<OL>
- <LI>Floating on the left hand side of the screen in the margin (the default, and I think nicest view)</LI>
- <LI>Floating at the top of the screen (some people might like it this way, and on narrower browsers, this will work better.</LI>
- <LI>'Locked' or stuck... in this mode, the floater stays pinned atop the discussion.  You can't change your thresholds within the page.  You can't load 'More' comments within the middle of a discussion, but for a lot of people, this may provide a cleaner view of discussions that they might like.</LI>
-</OL>
+<ol>
+ <li>Floating on the left hand side of the screen in the margin (the default, and I think nicest view)</li>
+ <li>Floating at the top of the screen (some people might like it this way, and on narrower browsers, this will work better.</li>
+ <li>'Locked' or stuck... in this mode, the floater stays pinned atop the discussion.  You can't change your thresholds within the page.  You can't load 'More' comments within the middle of a discussion, but for a lot of people, this may provide a cleaner view of discussions that they might like.</li>
+</ol>
 <p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
 Last Modified: 2/7/08</small></em></p>
 
@@ -127,23 +127,36 @@ is shrinking daily, we don't intend to work on compatibility.  You should upgrad
 Last Modified: 2/7/08</small></em></p>
 
 
-<h2><a name="cm128" id="cm128">How about keybinding support?</a></h2>
-<p>Keybinding support is very experimental in D2, but already it is a powerful way of navigating forums.  We
-use the standard 'WASD' directional keys familiar to gamers for navigation.  Currently the keys that we support
-are as follows:
-<UL>
- <LI>W/S, 'Up and Down' navigate you to previous and next thread.</LI>
- <LI>A/D 'Left and Right' navigate you to the previous and next comment (following the threads)</LI>
- <LI>Q/E 'Strafe' navigates you to previous and next comment by the order in which you loaded comments.  You can toggled your load order between Score and Date.  What this means is that you can navigate a slashdot discussion from oldest to newest, or from Score:5 to Score:-1, whichever you prefer.  You can change your load order in the preferences box.</LI>
-</UL>
+<h2><a name="cm128" id="cm128">What are the Keyboard Shortcuts Available in Discussion2?</a></h2>
+<p>Slashdot's Discussion2 system is a work in progress,
+and as such as about a zillion keybindings that are
+all subject to change.  Most of them are documented
+here.
+</p>
+<ul>
 
-<p>Note that if you hold the shift key while pressing one of these keybindings, you will 'collapse' the comment
-that you leave.  In this way, you can press perhaps Shift-D repeatedly to read every comment on the page, collapsing the comments behind you so its easy to keep your place.
-<p>Also, when you get to the end of the discussion, continuing to press the next key (S or D) will check to see if
-more comments exist, and if they do, it will retrieve them.
-<P>This is all very experimental, and we're open to feedback.
+<li>Previous/Next Comment (Following Threads) A/D
+<li>Previous/Next Comment Sibling W/S
+<li>Previous/Next Comment (Chronologically) Q/E
+<li>Next Unread Comment: F
+<li>Reply to Current Comment: R
+<li>Parent of Current Comment: P
+<li>Moderation Log of Current Comment: M (close with X)
+<li>Skip to End: V
+<li>Skip to Top: T
+<li>Get More Comments: G
+<li>Raise/Lower Abbreviation Threshold: [/]
+<li>Raise/Lower Hide Threshold: ,/.
+<li>Toggle D2 Floater Widget: /
+</ul>
+
+<p>Note that if you press a 'Next' key when you are at the end of a discussion will attempt to 'G'et more comments.
+Also, holding down 'Shift' while using the navigation keys will hide the comment you just left.  So you can press
+'shift-d' and leave the comments you have already read closed behind you as you read on.
+</p>
+
 <p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
-Last Modified: 2/7/08</small></em></p>
+Last Modified: 4/7/08</small></em></p>
 
 
 
@@ -158,11 +171,11 @@ Last Modified: 2/7/08</small></em></p>
 
 <h2><a name="cm130" id="cm130">What is Next for D2?</a></h2>
 <p>
-<UL>
- <LI>Bug fixing and compatibility fixing.</LI>
- <LI>More keybindings to improve mouseless navigation</LI>
- <LI>Comment posting from within the D2 interface</LI>
-</UL
+<ul>
+ <li>Bug fixing and compatibility fixing.</li>
+ <li>More keybindings to improve mouseless navigation</li>
+ <li>Comment posting from within the D2 interface</li>
+</ul>
 <p><em><small>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a><br>
 Last Modified: 2/7/08</small></em></p>
 

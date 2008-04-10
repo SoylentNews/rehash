@@ -15,7 +15,7 @@
 
         <div id="usermenu">
                 <ul class="menu" style="padding: 5px 10px 5px 10px;">
-                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                <li><span class="begin"><a href="/help" class="begin">Return to Help &amp; Preferences</a></span></li>
                 <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
                 <li><span class="begin"><a href="firehose.shtml" class="begin">Previous Section</a></span></li>
                 </ul>
@@ -27,7 +27,7 @@ to get one on every page) to easily allow your readers to submit it to Slashdot
 for consideration; and once submitted, take them to the discussion.</p>
 
 <h2><a name="ba100" id="ba100">Badges</a>
-<img src="http://images.slashdot.org/sdit4n.png" style="margin-bottom:-0.1em; padding-left:0.25em;" alt="sample Slashdot badge" title="a Slashdot badge looks like this"/>
+<img src="http://images.slashdot.org/sdit4n.png" style="margin-bottom:-0.1em; padding-left:0.25em;" alt="sample Slashdot badge" title="a Slashdot badge looks like this">
 </h2>
 <p>A Slashdot badge is the easiest and most powerful tool to do this.  Add a badge
 to your web page by including this snippet of HTML:
@@ -42,7 +42,7 @@ of logging in.  Logged-in users who have already voted will see the state of the
 in the toggle.  For instance, like this:</p>
 
 <p><img src="http://images.slashdot.org/sdit2u.png" style="padding-left:2em;"
-alt="sample Slashdot badge" title="a Slashdot badge looks like this"/></p>
+alt="sample Slashdot badge" title="a Slashdot badge looks like this"></p>
 
 <p>The Slashdot badge is somewhat customizable by setting some values in JavaScript 
 before you invoke the badge script. For instance, you can suggest a title for the 
@@ -61,18 +61,18 @@ Alternatively, you can have vertical badges by setting <i>slashdot_badge_style</
 Vertical badges look like this:</p>
 
 <p><img src="http://images.slashdot.org/sditv2u.png" style="padding-left:2em;"
-alt="sample Slashdot badge" title="a vertical Slashdot badge looks like this"/></p>
+alt="sample Slashdot badge" title="a vertical Slashdot badge looks like this"></p>
 
 
 <h2><a name="ba101" id="ba101">Links</a></h2>
 <p>For security or control reasons, you might wish to use your own image and formatting
 with a plain HTML link.  This snippet builds the appropriate link automatically, you can
 paste it directly into your page as is:
-<xmp><a href="javascript:location.href='http://slashdot.org/slashdot-it.pl?op=basic&url='+encodeURIComponent(location.href)">Slashdot It!</a></xmp></p>
+<xmp><a href="javascript:location.href='http://slashdot.org/slashdot-it.pl?op=basic&amp;url='+encodeURIComponent(location.href)">Slashdot It!</a></xmp></p>
 
 <p>Or you can construct the URL argument `by hand' for each page, e.g.,
 <xmp><!-- for a page at http://example.com/my-story.html, edit as appropriate for your site -->
-<a href="http://slashdot.org/slashdot-it.pl?op=basic&url=http%3A%2F%2Fexample.com%2Fmy-story.html">Slashdot It!</a></xmp></p>
+<a href="http://slashdot.org/slashdot-it.pl?op=basic&amp;url=http%3A%2F%2Fexample.com%2Fmy-story.html">Slashdot It!</a></xmp></p>
 
 <p>You can add a `favicon'-sized Slashdot icon like so:
 <xmp><img src="http://images.slashdot.org/favicon.ico" alt="Slashdot" border="0" height="16" width="16"></xmp>
@@ -80,9 +80,9 @@ Inserting that into the link (or really duplicating the link to get everything j
 
 <p style="padding-left:2em;"><!--
   HERE IS THE SIMPLE LINK AND FAVICON:
---><a href="javascript:location.href='http://slashdot.org/slashdot-it.pl?op=basic&url='+encodeURIComponent(location.href)"
+--><a href="javascript:location.href='http://slashdot.org/slashdot-it.pl?op=basic&amp;url='+encodeURIComponent(location.href)"
 ><img src="http://images.slashdot.org/favicon.ico" alt="Slashdot" border="0" height="16" width="16"
-></a>&nbsp;<a href="javascript:location.href='http://slashdot.org/slashdot-it.pl?op=basic&url='+encodeURIComponent(location.href)"
+></a>&nbsp;<a href="javascript:location.href='http://slashdot.org/slashdot-it.pl?op=basic&amp;url='+encodeURIComponent(location.href)"
 >Slashdot It!</a><!--
   END
 --></p>

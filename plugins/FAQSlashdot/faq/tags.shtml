@@ -17,7 +17,7 @@
 
         <div id="usermenu">
                 <ul class="menu" style="padding: 5px 10px 5px 10px;">
-                <li><span class="begin"><a href="/help" class="begin">Return to Help & Preferences</a></span></li>
+                <li><span class="begin"><a href="/help" class="begin">Return to Help &amp; Preferences</a></span></li>
                 <li><span class="begin"><a href="/faq" class="begin">Return to the FAQ</a></span></li>
                 <li><span class="begin"><a href="suggestions.shtml" class="begin">Previous Section</a></span></li>
                 <li><span class="begin"><a href="firehose.shtml" class="begin">Next Section</a></span></li>
@@ -166,9 +166,9 @@ browser button, and save it dynamically from your browser toolbar:</p>
 bookmark toolbar, or right-click and save the link as a bookmark.
 Subscribers using SSL will want to use the HTTPS version of this link.</p>
 
-<p>HTTP: <a href="javascript:location.href='http://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">Post to Slashdot</a> (general users)
+<p>HTTP: <a href="javascript:location.href='http://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title)">Post to Slashdot</a> (general users)
 <br>
-HTTPS: <a href="javascript:location.href='https://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)">Post to Slashdot</a> (for subscribers using SSL)
+HTTPS: <a href="javascript:location.href='https://slashdot.org/bookmark.pl?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title)">Post to Slashdot</a> (for subscribers using SSL)
 </p>
 
 <p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
@@ -205,7 +205,7 @@ HTML you can include in any page:</p>
 <p>Your bookmarks are available to you at <a
 href="/my/bookmarks">/my/bookmarks</a>.  You can access other users'
 bookmarks from their homepages.  To read mine, you would use
-<a href=/~CmdrTaco/bookmarks/>/~CmdrTaco/bookmarks</a>.
+<a href="/~CmdrTaco/bookmarks/">/~CmdrTaco/bookmarks</a>.
 </p>
 <p><i><font size=-1>Answered by: <a href="mailto:malda@slashdot.org">CmdrTaco</a></font></i>
 <br><i><font size=-1>Last Modified: 3/22/06</font></i>
