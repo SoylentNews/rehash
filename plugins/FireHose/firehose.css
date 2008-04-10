@@ -58,9 +58,9 @@
 .paginate li.active, #fhtablist li.active { font-weight: bold; }
 #fhtablist li.active a img { margin-left: .3em}
 #fhtablist li.active a { padding: 0 }
-#firehose_pages a { color: #bbb; border: 1px solid #444; background: #444; padding: 3px !important; }
-#firehose_pages a:hover { color: #ccc; border: 1px solid #666; background: #555;}
-#firehose_pages a.fh_cur_page { margin: 0; color: #fff !important; border: 1px solid #555; background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x;}
+#firehose_pages a, #firehose_more a { color: #bbb; border: 1px solid #444; background: #444; padding: 3px !important; }
+#firehose_pages a:hover, #firehose_more a { color: #ccc; border: 1px solid #666; background: #555;}
+#firehose_pages a.fh_cur_page, #firehose_more a { margin: 0; color: #fff !important; border: 1px solid #555; background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x;}
 #firehose_pages a b {color: #888; font-size: 130%; font-family: georgia, sans-serif}
 #fhcalendar_pag {float: left !important;}
 
@@ -126,7 +126,7 @@ ul.menu#fhtablist li.active
         border: 1px solid #666;
         border-bottom: 1px solid #777;
         border-left: 1px solid #777;
-        padding: .3em !important;
+        padding: .5em .3em .5em .3em !important;
 	margin: 0 .3em;
 	white-space: nowrap;
 }
@@ -150,7 +150,7 @@ ul.menu#fhtablist li.active:before, .paginate .active:before { content: ""; }
 .admin .paginate { margin-right: 0; }
 .paginate .menu { background: url('//images.slashdot.org/corner_w_br.png') right bottom no-repeat; 
 height:2.9em;
-padding-top:0.4em;}
+padding-top:0.9em;}
 
 
 /* Articles */
@@ -470,5 +470,3 @@ li .tag-actions .not-tag:hover, li .tag-actions .del-tag:hover {color: red;}
 .briefarticle .storylinks .comments.nocomment, .briefarticle .storylinks .comments span  {display: none}
 
 .embed .paginate, .embed .firemenu, .embed a.skin, .copyright.embed { display: none; }
-#firehose_more { margin-left: 5px; padding-left: 3px; background: #aaa; }
-#firehose_more a { color: #333; }
