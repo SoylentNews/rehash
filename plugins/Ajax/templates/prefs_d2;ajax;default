@@ -29,11 +29,7 @@ __template__
 <table width="100%">
         <tr>
         <td valign="middle">
-                [% d2_check = '';
-                IF user.discussion2 == 'slashdot';
-                        d2_check = constants.markup_checked_attribute;
-                END %]
-                <input type="checkbox" name="discussion2"[% d2_check %] onclick="javascript:void(document.forms['modal_prefs'].refreshable.value=1);">&nbsp;<b>Enable Dynamic Discussions</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussions');" class="help">?</a>
+                <input type="checkbox" name="discussion2"[% constants.markup_checked_attribute IF user.discussion2 == 'slashdot'  %] onclick="void(document.forms['modal_prefs'].refreshable.value=1);">&nbsp;<b>Enable Dynamic Discussions</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussions');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_discussions" class="modalprefhelp" style="display: none;">
                         Toggle between Discussion 2 and the classic discussion system.
@@ -42,6 +38,14 @@ __template__
                 <br>
 
                 [% IF user.discussion2 && user.discussion2 == "slashdot" %]
+                	[% # i know the logic here is backward, but it still makes the most sense to me! -- pudge %]
+                        <input type="checkbox" id="d2_keybindings_switch" name="d2_keybindings_switch"[% constants.markup_checked_attribute IF !user.d2_keybindings_switch %] onclick="d2_keybindings_off = $('#d2_keybindings_switch').attr('checked') ? 0 : 1">&nbsp;<b>Enable Dynamic Discussion Keybindings</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussion_keys');" class="help">?</a>
+                        <br>
+                        <div id="modalprefhelp_discussion_keys" class="modalprefhelp" style="display: none;">
+                                Toggle to enable <a href="http://slashdot.org/faq/com-mod.shtml#cm128">Discussion 2 keybindings</a>.
+                        </div>
+                        <br>
+
                         <div>
                         Retrieve [% comment_q_name = (user.is_subscriber || user.is_admin) ? 'd2_comment_q_all' : 'd2_comment_q';
                            comment_q = Slash.db.getDescriptions(comment_q_name);

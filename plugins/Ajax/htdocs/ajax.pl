@@ -312,7 +312,7 @@ sub previewReply {
 	my $discussion = $slashdb->getDiscussion($sid);
 	my $comment = preProcessComment($form, $user, $discussion, \$error_message);
 	if ($comment && $comment ne '-1') {
-		my $preview = postProcessComment({ %$comment, %$form, %$user }, 0, $discussion);
+		my $preview = postProcessComment({ %$user, %$form, %$comment }, 0, $discussion);
 		$html = prevComment($preview, $user);
 	}
 
@@ -329,6 +329,11 @@ sub previewReply {
 		if $form->{gotmodwarning} || ($error_message && $error_message eq
 			Slash::Utility::Comments::getError("moderations to be lost")
 		);
+
+	my $max_duration = $options->{rkey}->max_duration;
+	$to_dump{eval_last}  = "submitCountdown($pid,$max_duration,1);"
+		if defined($max_duration) && length($max_duration);
+
 #use Data::Dumper; print STDERR Dumper \%to_dump; 
 
 	return Data::JavaScript::Anon->anon_dump(\%to_dump);
@@ -368,6 +373,7 @@ sub replyForm {
 
 	$options->{content_type} = 'application/json';
 	$to_dump{eval_first} = "comment_body_reply[$pid] = '$pid_reply';" if $pid_reply;
+
 #use Data::Dumper; print STDERR Dumper \%to_dump; 
 
 	return Data::JavaScript::Anon->anon_dump(\%to_dump);
@@ -792,12 +798,17 @@ sub saveModalPrefs {
 	my $user_edits_table;
 	if ($params{'formname'} eq 'd2_display') {
 		$user_edits_table = {
-			discussion2       => ($params{'discussion2'})        ? 'slashdot' : 'none',
-			d2_comment_q      => $params{'d2_comment_q'}         || undef,
-			d2_comment_order  => $params{'d2_comment_order'}     || undef,
-			nosigs            => ($params{'nosigs'}              ? 1 : 0),
-			noscores          => ($params{'noscores'}            ? 1 : 0),
-			domaintags        => ($params{'domaintags'} != 2     ? $params{'domaintags'} : undef),
+			discussion2        => ($params{'discussion2'})        ? 'slashdot' : 'none',
+			# i know the logic here is backward, but it still makes the most sense to me!
+			# we only want to save the pref for people who turn it off, but the checkbox
+			# is on by default, so if the value is true then it is on, and if false,
+			# it is off -- pudge
+			d2_keybindings_switch => $params{'d2_keybindings_switch'}   ? undef : 1,
+			d2_comment_q          => $params{'d2_comment_q'}         || undef,
+			d2_comment_order      => $params{'d2_comment_order'}     || undef,
+			nosigs                => ($params{'nosigs'}              ? 1 : 0),
+			noscores              => ($params{'noscores'}            ? 1 : 0),
+			domaintags            => ($params{'domaintags'} != 2     ? $params{'domaintags'} : undef),
 		};
 	}
 

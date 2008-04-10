@@ -327,11 +327,13 @@ sub selectComments {
 						$parent = {
 							cid    => $C->{pid},
 							pid    => ($old_comments{ $C->{pid} } && $old_comments{ $C->{pid} }{ pid }) || 0,
+							opid   => ($old_comments{ $C->{pid} } && $old_comments{ $C->{pid} }{ original_pid }) || 0,
 							kids   => [ ],
 							points => -2,
 							dummy  => 1,
 							%$parent,
 						};
+						$parent->{opid} ||= $parent->{pid};
 					}
 					$comments->{ $C->{pid} } = $parent;
 				}
@@ -419,6 +421,7 @@ sub jsSelectComments {
 		my @keys = qw(pid points uid);
 		for my $cid (grep $_, keys %$comments) {
 			@{$comments_new->{$cid}}{@keys} = @{$comments->{$cid}}{@keys};
+			$comments_new->{$cid}{opid} = $comments->{$cid}{original_pid};
 			$comments_new->{$cid}{kids} = [sort { $a <=> $b } @{$comments->{$cid}{kids}}];
 
 			# we only care about it if it is not original ... we could
@@ -453,6 +456,9 @@ sub jsSelectComments {
 		$total -= $d2_seen_0 =~ tr/,//; # total
 		$total--; # off by one
 		$extra .= "d2_seen = '$d2_seen_0';\nmore_comments_num = $total;\n";
+	}
+	if ($user->{d2_keybindings_switch}) {
+		$extra .= "d2_keybindings_off = 1;\n";
 	}
 
 	# maybe also check if this ad should be running with some other var?
@@ -2025,7 +2031,7 @@ EOT
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
 			subject_only => 1,
-			onclick	=> (($discussion2 && !$user->{is_anon}) ? "replyTo($comment->{cid}); return false;" : '')
+			onclick	=> ($discussion2 ? "replyTo($comment->{cid}); return false;" : '')
 		}) . '</b></p></span>') unless $user->{state}{discussion_archived};
 
 		push @link, (qq'<span class="nbutton"><p><b>' . linkComment({

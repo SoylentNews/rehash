@@ -62,19 +62,19 @@ __template__
 		<div id="replyto_msg_[% pid %]" class="replyto_msg" style="display: none"></div>
 		<div class="replyto_buttons">
 			<span id="replyto_buttons_1_[% pid %]">
-				<input type="button" name="preview_[% pid %]" id="preview_[% pid %]" value="Preview" class="button" onclick="previewReply([% pid %]); return false;">
+				<span id="preview_[% pid %]" class="nbutton"><p><b><a href="#" onclick="previewReply([% pid %]); return false;">Preview</a></b></p></span>
 				[%- IF pid # not for root-level reply %]
-				<input type="button" name="quotereply_[% pid %]" id="quotereply_[% pid %]" value="Quote Parent" class="button" onclick="quoteReply([% pid %]); return false;">[% END %]
+				<span id="quotereply_[% pid %]" class="nbutton"><p><b><a href="#" onclick="quoteReply([% pid %]); return false;">Quote Parent</a></b></p></span>[% END %]
 				[%- UNLESS user.is_anon %]
-				<input type="button" name="prefs_[% pid %]" id="prefs_[% pid %]" value="Options" class="button" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">[% END %]
+				<span id="prefs_[% pid %]" class="nbutton"><p><b><a href="#" onclick="getModalPrefs('d2_posting', 'Discussion 2'); return false;">Options</a></b></p></span>[% END %]
 			</span>
 			<span id="replyto_buttons_2_[% pid %]" style="display: none">
-				<input type="button" name="submit_[% pid %]" id="submit_[% pid %]" value="Submit" class="button" onclick="submitReply([% pid %]); return false;">
-				<input type="button" name="edit_[% pid %]" id="edit_[% pid %]" value="Continue Editing" class="button" onclick="editReply([% pid %]); return false;">
+				<span id="submit_[% pid %]" class="nbutton"><p><b><a href="#" onclick="submitReply([% pid %]); return false;">Submit<span id="submit_countdown_[% pid %]"></span></a></b></p></span>
+				<span id="edit_[% pid %]" class="nbutton"><p><b><a href="#" onclick="editReply([% pid %]); return false;">Continue Editing</a></b></p></span>
 				<span class="state">Preview</span>
 			</span>
 			<span id="replyto_buttons_3_[% pid %]">
-				<input type="button" name="cancel_[% pid %]" id="cancel_[% pid %]" value="Cancel" class="button" onclick="cancelReply([% pid %]); return false;">
+				<span id="cancel_[% pid %]" class="nbutton"><p><b><a href="#" onclick="cancelReply([% pid %]); return false;">Cancel</a></b></p></span>
 			</span>
 		</div>
 	</form>

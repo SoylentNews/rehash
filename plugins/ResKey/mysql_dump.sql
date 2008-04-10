@@ -73,6 +73,7 @@ INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon',         300, 'duration_
 INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon-trolla', 3600, 'duration_uses for anon + trolla AL2');
 INSERT INTO reskey_vars VALUES (1, 'duration_uses-trolla',       300, 'duration_uses for tolla AL2');
 INSERT INTO reskey_vars VALUES (1, 'duration_uses-anon-mult',    1.5, 'multiply by this amount for each comment previously posted in the past 24 hours');
+INSERT INTO reskey_vars VALUES (1, 'max_duration', 1, 'boolean for whether to store max duration in reskey object on creation');
 
 
 

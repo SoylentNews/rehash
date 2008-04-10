@@ -30,7 +30,9 @@ var viewmodevalue = { full: 3, oneline: 2, hidden: 1};
 var currents = { full: 0, oneline: 0, hidden: 0 };
 var commentelements = {};
 var thresh_totals = {};
+var d2_keybindings_off = 0;
 
+var submitCountdowns = {};
 var ajaxCommentsWaitQueue = [];
 var boxStatusQueue = [];
 var comment_body_reply = [];
@@ -389,7 +391,7 @@ function updateHiddens(cids) {
 }
 
 function selectParent(cid, collapse) {
-	if (!loaded)
+	if (!loaded || !cid)
 		return false;
 
 	var comment = comments[cid];
@@ -1139,6 +1141,42 @@ function replyTo(pid) {
 	return false;
 }
 
+function submitCountdown(pid, countSecs) {
+	var count = $('#submit_countdown_' + pid);
+	if (!count.length)
+		return;
+
+	var counter = submitCountdowns[pid];
+	if (counter) {
+		if (countSecs == counter['countSecs'])
+			return;
+		clearInterval(counter['counter']); // just in case
+	}
+
+	if (!countSecs) { // we're at 0, so let's go home
+		count.html('');
+		return;
+	}
+
+	counter = submitCountdowns[pid] = [];
+	var date = new Date;
+	counter['targetSecs'] = countSecs + (date.getTime() / 1000);
+	counter['countSecs']  = countSecs;
+
+	count.html(' (' + countSecs + ')');
+
+	counter['counter'] = window.setInterval(function() {
+		var date = new Date;
+		var nowSecs = Math.ceil(counter['targetSecs'] - (date.getTime() / 1000));
+		if (nowSecs > 0)
+			count.html(' (' + nowSecs + ')');
+		else {
+			count.html('');
+			clearInterval(counter['counter']);
+		}
+	}, 1000);
+}
+
 function quoteReply(pid) {
 	var this_reply = getQuotedText(comment_body_reply[pid]);
 	var postercomment = $dom('postercomment_' + pid) || $dom('postercomment');
@@ -1294,6 +1332,20 @@ function finishLoading() {
 	if (more_comments_num)
 		updateMoreNum(more_comments_num);
 	enableControls();
+
+	// if deep in a thread, scroll to fifth grandparent, so we can see
+	// some of thread, and the comment requested
+	if (root_comment) {
+		var this_cid = root_comment;
+		for (var i = 0; i < 5; i++) {
+			var comm = comments[this_cid];
+			var pid = comm.opid || comm.pid;
+			if (pid == 0)
+				break;
+			this_cid = pid;
+		}
+		scrollWindowTo(this_cid);
+	}
 
 	//setTimeout('ajaxFetchComments()', 10*1000);
 }
@@ -1486,6 +1538,7 @@ function updateMoreNum(num) { // should be an integer, or empty string
 	var a = $dom('more_comments_num_a');
 	var b = $dom('more_comments_num_b');
 	var c = $dom('more_comments_num_c');
+	var d = $dom('more_comments_num_d');
 
 	if (a)
 		a.innerHTML = num_a;
@@ -1493,6 +1546,8 @@ function updateMoreNum(num) { // should be an integer, or empty string
 		b.innerHTML = num;
 	if (c)
 		c.innerHTML = num;
+	if (d)
+		d.innerHTML = num;
 }
 
 
@@ -1525,18 +1580,6 @@ function commentIsInWindow(cid, just_head) {
 
 
 /* code for the draggable threshold widget */
-
-function showPrefs( category ) {
-	var panel = $dom("d2prefs");
-	panel.className = category;
-	panel.style.display = "block";
-}
-
-function hidePrefs() {
-	var panel = $dom("d2prefs");
-	panel.className = "";
-	panel.style.display = "none";
-}
 
 function partitionedRange( range, partitions ) {
 	return [].concat(range[0], partitions, range[1]);
@@ -1967,6 +2010,9 @@ validkeys['K'] = validkeys['W'];
 
 
 function keyHandler(e, k) {
+	if (d2_keybindings_off)
+		return;
+
 	if (!k)
 		e = e || window.event;
 
@@ -2002,7 +2048,7 @@ function keyHandler(e, k) {
 
 				// keys that rely on current comment
 				} else if (keyo['current'] && current_cid) {
-					if (keyo['reply'] && !user_is_anon) // XXX will be anon too
+					if (keyo['reply'])
 						replyTo(current_cid);
 
 					else if (keyo['history']) {
@@ -2013,7 +2059,7 @@ function keyHandler(e, k) {
 
 					} else if (keyo['parent']) {
 						if (current_cid && comments[current_cid] && comments[current_cid]['pid'])
-							selectParent(comments[current_cid]['pid']);
+							selectParent(comments[current_cid]['opid'] || comments[current_cid]['pid']);
 					}
 
 

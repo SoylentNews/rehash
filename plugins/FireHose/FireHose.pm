@@ -382,8 +382,8 @@ sub getFireHoseEssentials {
 	my $ps = $options->{limit};
 
 	my $fetch_extra = 0;
-	my ($day_num, $day_label, $day_count);
-	
+	my($day_num, $day_label, $day_count);
+
 	$options->{limit} += $options->{more_num} if $options->{more_num};
 
 	my $fetch_size = $options->{limit};
@@ -391,7 +391,6 @@ sub getFireHoseEssentials {
 		$fetch_extra = 1;
 		$fetch_size++;
 	}
-	
 
 	my $pop;
 	$pop = $self->getMinPopularityForColorLevel($colors->{$options->{color}})
@@ -424,8 +423,8 @@ sub getFireHoseEssentials {
 				$opts{dayduration} = $options->{duration};
 			}
 
-			$opts{records_max}	= $fetch_size		unless $options->{nolimit};
-			$opts{records_start}	= $options->{offset}		if $options->{offset};
+			$opts{records_max}	= $fetch_size             unless $options->{nolimit};
+			$opts{records_start}	= $options->{offset}      if $options->{offset};
 			$opts{sort}		= 3;  # sorting handled by caller
 
 			# just a few options to carry over
@@ -637,9 +636,9 @@ sub getFireHoseEssentials {
 
 	if ($fetch_extra && @$hr_ar == $fetch_size) {
 		$fetch_extra = pop @$hr_ar;
-
-		($day_num, $day_label, $day_count) = $self->getNextDayAndCount($fetch_extra, $options, $tables, \@where, $count_other);
-
+		($day_num, $day_label, $day_count) = $self->getNextDayAndCount(
+			$fetch_extra, $options, $tables, \@where, $count_other
+		);
 	}
 
 	my $count;
@@ -713,11 +712,7 @@ sub getNextDayAndCount {
 	
 	my $day_labels = getOlderDaysFromDay($item_day, 0, 0, { skip_add_today => 1, show_future_days => 1 });
 
-	return ($day_labels->[0]->[0], $day_labels->[0]->[1], $day_count);
-
-	
-
-
+	return($day_labels->[0]->[0], $day_labels->[0]->[1], $day_count);
 }
 
 # A single-globjid wrapper around getUserFireHoseVotesForGlobjs.
@@ -1887,7 +1882,6 @@ sub getAndSetOptions {
 		$form->{fhfilter} = "-story";
 		$options->{orderby} = "createtime";
 		$options->{orderdir} = "DESC";
-
 		$options->{color} = "indigo";
 		$form->{color} = "indigo";
 	} elsif ($tabtype eq 'tabpopular') {

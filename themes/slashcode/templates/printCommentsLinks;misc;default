@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+Links for various places on comments page
+
+* commentslinks_id = unique id for this instantiation of the links
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+printCommentsLinks
+__template__
+[% IF discussion2 %]
+	<a href="#" onclick="ajaxFetchComments(0,1); return false"><span id="more_comments_num_[% commentslinks_id %]"></span> More</a> | 
+[% END; IF user.is_anon;
+	PROCESS userlogin_cover
+		return_url = gSkin.rootdir _ '/comments.pl?sid=' _ sid %]
+	<a href="[% gSkin.rootdir %]/login.pl" onclick="show_login_box(); return false">Login</a>
+[% ELSE %]
+	<a href="[% gSkin.rootdir %]/my/comments"[% IF constants.modal_prefs_active %] onclick="getModalPrefs('d2', 'Discussion 2'); return false"[% END %]>Prefs</a>
+[% END %]
+
+[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
+	| [% Slash.linkComment({
+		sid          => sid,
+		cid          => cid,
+		op           => 'reply',
+		subject      => 'Reply',
+		subject_only => 1,
+		onclick      => (discussion2 ? "replyTo(0); return false;" : '')
+	});
+END %]
+__seclev__
+10000
+__version__
+$Id$

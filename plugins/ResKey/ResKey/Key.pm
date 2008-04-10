@@ -241,7 +241,7 @@ sub AUTOLOAD {
 	if ($name =~ /^(?:noop|success|failure|death)$/) {
 		$sub = _createStatusAccessor($name, \@_);
 
-	} elsif ($name =~ /^(?:error|reskey|debug|rkrid|resname|origtype|type|code|opts|static|unsaved)$/) {
+	} elsif ($name =~ /^(?:error|reskey|debug|rkrid|resname|origtype|type|code|opts|static|unsaved|max_duration)$/) {
 		$sub = _createAccessor($name, \@_);
 
 	} elsif ($name =~ /^(?:create|touch|use|createuse)$/) {
@@ -795,7 +795,7 @@ sub get {
 		$reskey_obj = $slashdb->sqlSelectHashref('*', 'reskeys', "reskey=$reskey_q");
 	}
 
-	if (!$reskey_obj) {
+	if (!$reskey_obj && !$self->unsaved) {
 		$self->death(1);
 		$self->error(['reskey not found']);
 	}

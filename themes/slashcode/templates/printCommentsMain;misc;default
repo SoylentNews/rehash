@@ -38,33 +38,16 @@ __template__
 	point[% user.points == 1 ? '' : 's' %] &nbsp; 
 [% END %]
 
-[% IF user.is_admin && user.d2prefs_debug %]
-[% IF (!user.is_anon); PROCESS d2prefs; END %]
-[% END %]
-
 <a name="acomments"></a>
 <div class="commentwrap" id="commentwrap">
-[% IF !user.is_anon %]
+[% IF discussion2 %]
 <div class="commentBox" style="font-size: 120%">
-	<form method="GET" action="[% gSkin.rootdir %]/comments.pl">
 	<div>
-[% IF title %]
-<span class="escape-link"><a href="[% link | strip_urlattr %]" title="Back to Article - [% title | strip_attribute %]">[% title %]</a></span>
-[% END %]
-	<input type="hidden" name="op" value="setDiscussion2">
-	<input type="hidden" name="sid" value="[% sid %]">
-	[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
-	[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
-	<input type="checkbox" name="discussion2_slashdot" value="1" onchange="this.form.submit();"[% constants.markup_checked_attribute IF discussion2 == 'slashdot' %]>
-	I am willing to help test <a href="http://slashdot.org/faq/com-mod.shtml#cm120">Slashdot's New Discussion System</a>.
-	<noscript><input type="submit"></noscript>
-
+[% IF title %]<span class="escape-link"><a href="[% link | strip_urlattr %]" title="Back to Article - [% title | strip_attribute %]">[% title %]</a></span>[% END %]
+<span class="commentBoxLinks">[% PROCESS printCommentsLinks commentslinks_id => 'd' %]</span>
 	</div>
-	</form>
 </div>
-[% END %]
-
-[% UNLESS discussion2 %]
+[% ELSE %]
 <div class="commentBox">
 [% IF title %]
 	<a href="[% link | strip_urlattr %]">[% title %]</a>
@@ -91,22 +74,13 @@ __template__
 			subject	=> 'Top',
 			subject_only => 1,
 		}) %]
+
 [% IF user.points; modpoints; END %]
-
-[% IF count %]
-	| <b>[% count %]</b> comments
-[% END %]
-
-[% IF lvl && user.mode == 'thread' %]
-	([% spilltext %]) | Index Only
-[% END %]
-
-[% IF form.startat %]
-		| Starting at #[% form.startat %]
-[% END %]
-
+[% IF count %]| <b>[% count %]</b> comments[% END %]
+[% IF lvl && user.mode == 'thread' %]([% spilltext %]) | Index Only[% END %]
+[% IF form.startat %]| Starting at #[% form.startat %][% END %]
 		| <a href="[% gSkin.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">Search Discussion</a>
-	</div>
+</div>
 [% END %]
 	<div class="commentBoxForm" id="commentControlBox">
 [% UNLESS discussion2 %]
@@ -114,7 +88,6 @@ __template__
 		[% IF user.state.no_d2 %]<input type="hidden" name="no_d2" value="1">[% END %]
 		<fieldset>
 		<legend>Display Options</legend>
-		[% UNLESS discussion2 %]
 		
 		Threshold: [%
 			Slash.selectThreshold(comments.0.totals);
@@ -122,17 +95,11 @@ __template__
 			  Slash.selectMode(user.mode);
 			END;
 			Slash.selectSortcode(user.commentsort) %]
-		[% END %]
 
 	[% UNLESS user.is_anon %]
-		[% UNLESS discussion2 %]
 		Save: <input type="checkbox" name="savechanges" class="button">
-		[% END %]
 	[%- END %]
-		[% UNLESS discussion2 %]
 		<input type="submit" name="op" value="Change" class="button">
-		[% END %]
-
 		<input type="hidden" name="sid" value="[% sid %]">
 		[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
 		[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
@@ -178,30 +145,7 @@ __template__
 						subject_only => 1,
 				}) %]
 				[% END %]
-		<span class="ccw-header-links">
-    [% IF discussion2 %]
-        <a href="#" onclick="ajaxFetchComments(0,1); return false"><span id="more_comments_num_b"></span> More</a> | 
-    [% END; IF user.is_admin && user.d2prefs_debug %]
-        <a href="#" onclick="showPrefs('reading'); return false">Prefs</a>
-    [% ELSIF user.is_anon;
-   	PROCESS userlogin_cover
-   		return_url = gSkin.rootdir _ '/comments.pl?sid=' _ sid %]
-        <a href="[% gSkin.rootdir %]/login.pl" onclick="show_login_box(); return false">Login</a>
-    [% ELSE %]
-        <a href="[% gSkin.rootdir %]/my/comments"[% IF constants.modal_prefs_active %] onclick="getModalPrefs('d2', 'Discussion 2'); return false"[% END %]>Prefs</a>
-    [% END %]
-
-		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
-			| [% Slash.linkComment({
-				sid          => sid,
-				cid          => cid,
-				op           => 'reply',
-				subject      => 'Reply',
-				subject_only => 1,
-				onclick      => ((discussion2 && !user.is_anon) ? "replyTo(0); return false;" : '')
-			}) %]
-		[% END %]
-		</span>
+		<span class="ccw-header-links">[% PROCESS printCommentsLinks commentslinks_id => 'b' %]</span>
 		<span id="d2toggle" title="Toggle window location" onclick="toggleDisplayOptions()" class="close">/</span>
 				</h4>
 			</div>
@@ -265,29 +209,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
         </div>
       </div>
 		</div>
-		<div class="commentControlFooter">
-    [% IF discussion2 %]
-        <a href="#" onclick="ajaxFetchComments(0,1); return false"><span id="more_comments_num_c"></span> More</a> | 
-    [% END; IF user.is_admin && user.d2prefs_debug %]
-        <a href="#" onclick="showPrefs('reading'); return false">Prefs</a>
-    [% ELSIF user.is_anon;
-   	PROCESS userlogin_cover
-   		return_url = gSkin.rootdir _ '/comments.pl?sid=' _ sid %]
-        <a href="[% gSkin.rootdir %]/login.pl" onclick="show_login_box(); return false">Login</a>
-    [% ELSE %]
-        <a href="[% gSkin.rootdir %]/my/comments"[% IF constants.modal_prefs_active %] onclick="getModalPrefs('d2', 'Discussion 2'); return false"[% END %]>Prefs</a>
-    [% END %]
-		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
-			| [% Slash.linkComment({
-				sid          => sid,
-				cid          => cid,
-				op           => 'reply',
-				subject      => 'Reply',
-				subject_only => 1,
-				onclick      => ((discussion2 && !user.is_anon) ? "replyTo(0); return false;" : '')
-			}) %]
-		[% END %]
-		</div>
+		<div class="commentControlFooter">[% PROCESS printCommentsLinks commentslinks_id => 'c' %]</div>
 		<div id="commentControlBoxStatus" class="hide"><b>Loading... please wait.</b></div>
 	</div>
 </div>

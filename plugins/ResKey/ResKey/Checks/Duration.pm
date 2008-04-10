@@ -26,8 +26,12 @@ sub doCheckCreate {
 		return RESKEY_SUCCESS;
 	}
 
+	setMaxDuration($self);
+
 	my @return = maxUsesPerTimeframe($self);
-	return @return || RESKEY_SUCCESS;
+	return @return if @return;
+
+	return RESKEY_SUCCESS;
 }
 
 sub doCheckTouch {
@@ -39,6 +43,8 @@ sub doCheckTouch {
 	if ($check_vars->{adminbypass} && $user->{is_admin}) {
 		return RESKEY_SUCCESS;
 	}
+
+	setMaxDuration($self);
 
 	my $reskey_obj = $self->get;
 
@@ -89,9 +95,8 @@ sub maxFailures {
 	$reskey_obj ||= {};
 
 	my $slashdb = getCurrentDB();
-	my $check_vars = $self->getCheckVars;
 
-	my $max_failures = $check_vars->{'duration_max-failures'};
+	my($max_failures) = duration($self);
 	if ($max_failures && $reskey_obj->{rkid}) {
 		my $where = "rkid=$reskey_obj->{rkid} AND failures > $max_failures";
 		my $rows = $slashdb->sqlCount('reskeys', $where);
@@ -110,12 +115,9 @@ sub maxUsesPerTimeframe {
 	my($self, $reskey_obj) = @_;
 	$reskey_obj ||= {};
 
-	my $constants = getCurrentStatic();
 	my $slashdb = getCurrentDB();
-	my $check_vars = $self->getCheckVars;
 
-	my $max_uses = $check_vars->{'duration_max-uses'};
-	my $limit = $constants->{reskey_timeframe};
+	my($max_uses, $limit) = duration($self);
 	if ($max_uses && $limit) {
 		my $where = $self->getWhereUserClause;
 		$where .= ' AND rkrid=' . $self->rkrid;
@@ -141,7 +143,7 @@ sub minDurationBetweenUses {
 
 	my $slashdb = getCurrentDB();
 
-	my $limit = &duration;
+	my($limit) = duration($self);
 	if ($limit) {
 		my $where = $self->getWhereUserClause;
 		$where .= ' AND rkrid=' . $self->rkrid;
@@ -164,13 +166,10 @@ sub minDurationBetweenCreateAndUse {
 	my($self, $reskey_obj) = @_;
 
 	my $slashdb = getCurrentDB();
-	my $check_vars = $self->getCheckVars;
 
-	my $limit = $check_vars->{'duration_creation-use'};
+	my($limit) = duration($self);
 	if ($limit && $reskey_obj->{rkid}) {
-		my $where = "rkid=$reskey_obj->{rkid}";
-		$where .= ' AND rkrid=' . $self->rkrid;
-		$where .= ' AND is_alive="no" AND ';
+		my $where = "rkid=$reskey_obj->{rkid} AND ";
 		$where .= "create_ts > DATE_SUB(NOW(), INTERVAL $limit SECOND)";
 
 		my $rows = $slashdb->sqlCount('reskeys', $where);
@@ -184,10 +183,11 @@ sub minDurationBetweenCreateAndUse {
 	return;
 }
 
-
 sub duration {
-	my($self, $reskey_obj) = @_;
-	(my $caller = (caller(1))[3]) =~ s/^.*:(\w+)$/$1/;
+	# $do is a flag that tells the code to actually check the interval
+	# using DB calls if necessary -- pudge
+	my($self, $caller, $do) = @_;
+	($caller = (caller(1))[3]) =~ s/^.*:(\w+)$/$1/ unless $caller;
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
@@ -195,8 +195,8 @@ sub duration {
 	my $user = getCurrentUser();
 
 	my $check_vars = $self->getCheckVars;
-	my $limit = $constants->{reskey_timeframe};
-	my $duration = 0;
+	my $timeframe = $constants->{reskey_timeframe};
+	my @duration;
 
 	if ($caller eq 'minDurationBetweenUses') {
 		my $duration_name      = 'duration_uses';
@@ -204,7 +204,7 @@ sub duration {
 		# this is kinda ugly ... i'd like a better way to know anon, and
 		# this constant should be a reskey constant i think -- pudge 2008.03.21
 		my $is_anon = $user->{is_anon} || $form->{postanon} || $user->{karma} < $constants->{formkey_minloggedinkarma};
-		$duration = $check_vars->{$is_anon ? $duration_name_anon : $duration_name} || 0;
+		$duration[0] = $check_vars->{$is_anon ? $duration_name_anon : $duration_name} || 0;
 
 		# If this user has access modifiers applied, check for possible
 		# different speed limits based on those.  First match, if any,
@@ -217,7 +217,7 @@ sub duration {
 				: "$duration_name-$al2_name";
 			if (defined $check_vars->{$sl_name_al2}) {
 				$al2_name_used = $al2_name;
-				$duration = $check_vars->{$sl_name_al2};
+				$duration[0] = $check_vars->{$sl_name_al2};
 				last;
 			}
 		}
@@ -226,15 +226,70 @@ sub duration {
 			my $multiplier = $check_vars->{"$duration_name_anon-mult"};
 			if ($multiplier && $multiplier != 1) {
 				my $num_comm = $reader->getNumCommPostedAnonByIPID($user->{ipid});
-				$duration *= ($multiplier ** $num_comm);
-				$duration = int($duration + 0.5);
+				$duration[0] *= ($multiplier ** $num_comm);
+				$duration[0] = int($duration[0] + 0.5);
 			}
 		}
+
+		if ($do && $duration[0]) {
+			my $slashdb = getCurrentDB();
+			# see minDurationBetweenUses()
+			my $where = $self->getWhereUserClause;
+			$where .= ' AND rkrid=' . $self->rkrid;
+			$where .= ' AND is_alive="no" AND ';
+			$where .= "submit_ts > DATE_SUB(NOW(), INTERVAL $duration[0] SECOND)";
+			my $seconds_left = $slashdb->sqlSelect(
+				"($duration[0] - TIME_TO_SEC(TIMEDIFF(NOW(), submit_ts))) AS diff",
+				'reskeys', $where, "ORDER BY submit_ts DESC LIMIT 1"
+			);
+			$duration[0] = $seconds_left || 0;
+		}
+
+	} elsif ($caller eq 'minDurationBetweenCreateAndUse') {
+		my $duration_name = 'duration_creation-use';
+		$duration[0] = $check_vars->{$duration_name} || 0;
+
+		if ($do && $duration[0]) {
+			my $reskey_obj = $self->get;
+			if ($reskey_obj) {
+				my $slashdb = getCurrentDB();
+				# see minDurationBetweenCreateAndUse()
+				my $where = "rkid=$reskey_obj->{rkid}";
+				my $seconds_left = $slashdb->sqlSelect(
+					"($duration[0] - TIME_TO_SEC(TIMEDIFF(NOW(), create_ts))) AS diff",
+					'reskeys', $where
+				);
+				$duration[0] = $seconds_left || 0;
+			}
+		}
+
+	} elsif ($caller eq 'maxUsesPerTimeframe') {
+		my $duration_name = 'duration_max-uses';
+		$duration[0] = $check_vars->{$duration_name} || 0;
+		$duration[1] = $timeframe; 
+
+	} elsif ($caller eq 'maxFailures') {
+		my $duration_name = 'duration_max-failures';
+		$duration[0] = $check_vars->{$duration_name} || 0;
 	}
 
 
-	return $duration;
+	return(@duration);
 }
 
+sub setMaxDuration {
+	my($self) = @_;
+	my $check_vars = $self->getCheckVars;
+
+	if ($check_vars->{max_duration}) {
+		my @durations;
+		push @durations, (duration($self, 'minDurationBetweenUses', 1))[0];
+		push @durations, (duration($self, 'minDurationBetweenCreateAndUse', 1))[0];
+
+		my($max_duration) = sort { $b <=> $a } @durations;
+		$self->max_duration($max_duration);
+	}
+
+}
 
 1;

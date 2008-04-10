@@ -5253,25 +5253,29 @@ UPDATE vars SET value = 'T_2_5_0_200' WHERE name = 'cvs_tag_currentcode';
 
 # For plugins/FireHose
 CREATE TABLE firehose_update_log(
-	id mediumint(8) unsigned NOT NULL auto_increment,
-	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
-	new_count SMALLINT UNSIGNED NOT NULL DEFAULT '0', 
-	update_count SMALLINT UNSIGNED NOT NULL DEFAULT '0',
-	total_num SMALLINT UNSIGNED NOT NULL DEFAULT '0',
-	more_num SMALLINT UNSIGNED NOT NULL DEFAULT '0',
-	ts datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
-	duration FLOAT DEFAULT 0.0 NOT NULL,
-	PRIMARY KEY (id)
+  id mediumint(8) unsigned NOT NULL auto_increment,
+  uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+  new_count SMALLINT UNSIGNED NOT NULL DEFAULT '0', 
+  update_count SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+  total_num SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+  more_num SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+  ts datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
+  duration FLOAT DEFAULT 0.0 NOT NULL,
+  PRIMARY KEY (id)
 ) TYPE=InnoDB;
 
 CREATE TABLE firehose_setting_log(
-	id mediumint(8) unsigned NOT NULL auto_increment,
-	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
-	name VARCHAR(32) NOT NULL DEFAULT '',
-	value VARCHAR(64) NOT NULL DEFAULT '',
-	ts datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
-	bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,
-	PRIMARY KEY (id)
+  id mediumint(8) unsigned NOT NULL auto_increment,
+  uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+  name VARCHAR(32) NOT NULL DEFAULT '',
+  value VARCHAR(64) NOT NULL DEFAULT '',
+  ts datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
+  bytes mediumint UNSIGNED DEFAULT 0 NOT NULL,
+  PRIMARY KEY (id)
 );
 
 INSERT INTO vars (name, value, description) VALUES ('firehose_logging', '0', 'Log firehose usage info?');
+
+# for plugins/ResKey (comments)
+INSERT INTO reskey_vars VALUES (1, 'max_duration', 1, 'boolean for whether to store max duration in reskey object on creation');
+

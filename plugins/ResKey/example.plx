@@ -31,6 +31,9 @@ for (1..1) {
 	});
 
 	handle($rkey1, 'create');
+use Data::Dumper;
+print Dumper $rkey1;
+exit;
 	handle($rkey1, 'touch');
 	chomp(my $answer = <>);
 	getCurrentForm()->{hcanswer} = $answer;

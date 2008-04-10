@@ -209,15 +209,6 @@ html > body .commentwrap table {
 
 /* D2 Widget */
 
-#d2prefs { background-color: lightgray; padding: 1em; width: 20em; border: 1px solid black; display: none; position: absolute; z-index: 1 }
-#d2prefs  .pref-group { margin-top: 1.5em; }
-#d2prefs  .pref-group-comment { font-size: smaller; margin: 0.5em 1em; }
-#d2prefs  .pref-group h1 { font-size: 110%; }
-#d2prefs  .reading-prefs, #d2prefs  .writing-prefs { display: none; }
-#d2prefs.reading .reading-prefs, #d2prefs.writing .writing-prefs { display: block; }
-
-#d2prefs-closebox { display: block; position: absolute; right: 4px; top: 4px; height: 12px; width: 12px; border: 1px solid darkgray; }
-
 #d2act {display: none; position: relative; opacity: 1; z-index: 1000; width: 9.3em; text-align: center; }
 .vertical #d2act {position: relative; left: 1.2em !important}
 .vertical #d2act.rooted {left:-10.6em !important}
@@ -237,6 +228,8 @@ html > body .commentwrap table {
 #commentControlBoxStatus {border-bottom: 1px solid #444; border-top: 1px solid #ccc; text-align: center; padding: 3px; background: #666; color: #fff; }
 
 .escape-link { position: absolute; left: 0.8em; }
+.commentBox div { text-align: right }
+.commentBoxLinks { padding-right: 0.8em; }
 
 .horizontal .loki {display: block;}
 .horizontal #d2act {background: #fff; left: 0 !important; right: 0; opacity: 1; top: 0; z-index: 1000; border: none; border-right: 2px solid #aaa; width: auto; margin:0 1.25em 0 11.75em; text-align: center}
@@ -422,6 +415,7 @@ span.current {position: absolute; left: .5em; margin-top: -.2em; z-index: 0; fon
 .inline_comment .pref a {right: 10px; background-image: url("/images/sic_icons.png"); color: #fff; background-repeat: no-repeat; background-position: 0px -1198px;padding: 5px 10px; position:absolute; text-decoration:none; text-indent:-7000em; top: .8em; }
 .inline_comment .state { display: none }
 .inline_comment .replyto_buttons, .inlinemsg {margin: .5em 1em;}
+.inline_comment .replyto_buttons, #discussion_buttons { font-size: 80% }
 .inline_comment #commentlisting {padding: 0; margin: 0;}
 .warning {background: #ffd; border: 1px solid #fe6; padding: .5em; margin: .5em 0 1em 0; color: #000;}
 .inline_comment .replyto_msg {background: #fdd; border: 1px solid #fbb; padding: .5em; margin: .5em 1em 0; color: #000 }

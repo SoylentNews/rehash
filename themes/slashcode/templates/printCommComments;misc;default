@@ -34,7 +34,7 @@ __template__
 	&& ( !user.state.discussion_archived || constants.comments_moddable_archived));
 %]
 [% IF moderate_form %]
-	<form action="[% gSkin.rootdir %]/comments.pl" method="post">
+	<form id="commentform" name="commentform" action="[% gSkin.rootdir %]/comments.pl" method="post">
 [% END %]
 
 [% IF discussion2 %]
@@ -121,7 +121,7 @@ __template__
 	op           => 'reply',
 	subject      => 'Reply',
 	subject_only => 1,
-	onclick      => ((discussion2 && !user.is_anon) ? "replyTo(0); return false;" : '')
+	onclick      => (discussion2 ? "replyTo(0); return false;" : '')
 }) %]</b></p></span>
 [% END %]
 
@@ -135,8 +135,9 @@ __template__
 		<input type="hidden" name="sid" value="[% sid %]">
 		<input type="hidden" name="cid" value="[% cid %]">
 		<input type="hidden" name="pid" value="[% pid %]">
-		<input type="submit" value="moderate" class="button">
-		</b></p></span>
+		[% IF can_del %]<a href="#" onclick="$('#commentform').submit(); return false">Delete</a>
+		[% ELSE %]<input type="submit" value="moderate" class="button">
+		[% END %]</b></p></span>
 	        [% IF can_del %]<a href="#" onclick="displayModalPrefHelp('discussion_delete_help'); return false" title="Click To Expand Help" class="help">?</a>
 	        <div id="discussion_delete_help" class="modalprefhelp" style="display: none;">Checked comments will be deleted.</div>[% END %]
 	[% END %]
