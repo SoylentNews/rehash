@@ -457,6 +457,7 @@ function toggleFirehoseTagbox(id) {
 }
 
 function firehose_set_options(name, value) {
+	
 	var pairs = [
 		// name		value		curid		newid		newvalue 	title 
 		["orderby", 	"createtime", 	"popularity",	"time",		"popularity"	],
@@ -467,6 +468,7 @@ function firehose_set_options(name, value) {
 		["mode", 	"fulltitle", 	"full",		"abbrev",	"full"]
 	];
 	var params = {};
+	params['setting_name'] = name;
 	params['op'] = 'firehose_set_options';
 	params['reskey'] = reskey_static;
 	var theForm = document.forms["firehoseform"];
@@ -590,6 +592,10 @@ function firehose_set_options(name, value) {
 
 	if (name == 'tabtype') {
 		params['tabtype'] = value;
+	}
+
+	if (name == 'more_num') {
+		params['ask_more'] = 1;
 	}
 
 	params['section'] = firehose_settings.section;
