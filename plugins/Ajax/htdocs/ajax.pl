@@ -287,15 +287,23 @@ sub submitReply {
 		unless $error_message;
 	my $cid = $saved_comment && $saved_comment ne '-1' ? $saved_comment->{cid} : 0;
 
+	$options->{content_type} = 'application/json';
+	my %to_dump = ( cid => $cid );
+
 	if ($error_message) {
 		$error_message = getData('inline preview warning') . $error_message
 			unless $options->{rkey}->death;
 		# go back to HumanConf if we still have errors left to display
 		$error_message .= slashDisplay('hc_comment', { pid => $pid }, { Return => 1 });
+		$to_dump{error} = $error_message;
+
+		my $max_duration = $options->{rkey}->max_duration;
+		if (defined($max_duration) && length($max_duration)) {
+			$max_duration = 0 if $max_duration > 60;
+			$to_dump{eval_last} = "submitCountdown($pid,$max_duration);"
+		}
 	}
 
-	$options->{content_type} = 'application/json';
-	my %to_dump = ( cid => $cid, error => $error_message );
 #use Data::Dumper; print STDERR Dumper \%to_dump;
 
 	return Data::JavaScript::Anon->anon_dump(\%to_dump);
@@ -332,7 +340,7 @@ sub previewReply {
 
 	my $max_duration = $options->{rkey}->max_duration;
 	if (defined($max_duration) && length($max_duration)) {
-		$max_duration = 0 if $max_duration > 30;
+		$max_duration = 0 if $max_duration > 60;
 		$to_dump{eval_last} = "submitCountdown($pid,$max_duration);"
 	}
 

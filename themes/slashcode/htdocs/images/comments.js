@@ -1153,7 +1153,7 @@ function submitCountdown(pid, countSecs) {
 		clearInterval(counter['counter']); // just in case
 	}
 
-	if (!countSecs) { // we're at 0, so let's go home
+	if (!countSecs || countSecs < 1) { // we're at 0, so let's go home
 		count.html('');
 		return;
 	}
