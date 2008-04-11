@@ -239,7 +239,7 @@ sub duration {
 			$where .= ' AND is_alive="no" AND ';
 			$where .= "submit_ts > DATE_SUB(NOW(), INTERVAL $duration[0] SECOND)";
 			my $seconds_left = $slashdb->sqlSelect(
-				"($duration[0] - TIME_TO_SEC(TIMEDIFF(NOW(), submit_ts))) AS diff",
+				"($duration[0] - (TIME_TO_SEC(NOW()) - TIME_TO_SEC(create_ts))) AS diff",
 				'reskeys', $where, "ORDER BY submit_ts DESC LIMIT 1"
 			);
 			$duration[0] = $seconds_left || 0;
@@ -256,7 +256,7 @@ sub duration {
 				# see minDurationBetweenCreateAndUse()
 				my $where = "rkid=$reskey_obj->{rkid}";
 				my $seconds_left = $slashdb->sqlSelect(
-					"($duration[0] - TIME_TO_SEC(TIMEDIFF(NOW(), create_ts))) AS diff",
+					"($duration[0] - (TIME_TO_SEC(NOW()) - TIME_TO_SEC(create_ts))) AS diff",
 					'reskeys', $where
 				);
 				$duration[0] = $seconds_left || 0;
