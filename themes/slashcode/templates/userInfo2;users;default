@@ -1,0 +1,268 @@
+__section__
+default
+__description__
+Display user's info
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+userInfo2
+__template__
+[% orig_title = title %]
+
+        <div class="head">
+                <div class="article">
+                        <h3>[% latest_event.subject %]</h3>
+                        <div class="body">
+                                [% latest_event.text %]
+                        </div>
+                </div>
+
+        </div>
+
+        <div id="yui-main">
+                <div class="yui-b">
+                        <br>&nbsp;
+                        <h2>We probably want some kind of header here to describe the contents of the data pane.</h2>
+
+                        [% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
+                </div>
+        </div>
+
+        <div id="slashboxes" class="yui-b">
+                <div class="block">
+                        <div class="title">
+                                <h4>User Bio</h4>
+                        </div>
+
+                        <div class="content">
+                                [%
+                                '<a href="'; gSkin.rootdir; '/~';
+                                useredit.nickname | strip_paramattr; '/">';
+                                useredit.nickname | strip_literal; '</a> ';
+                                PROCESS zoo_icons person=useredit.uid implied="";
+
+                                IF user.uid == useredit.uid OR user.is_admin;
+                                        '<br>'; IF useredit.realname; useredit.realname | strip_literal; ELSE; '(no real name given)'; END;
+                                        '<br><a href="mailto:';
+                                        useredit.realemail | strip_paramattr; '">';
+                                        Slash.ellipsify(Slash.strip_literal(useredit.realemail)); '</a>';
+                                        '<br>';
+
+                                        IF useredit.fakeemail;
+                                                IF useredit.fakeemail == useredit.realemail;
+                                                        '(shown without obfuscation)';
+                                                ELSE;
+                                                        'shown as <a href="mailto:';
+                                                        useredit.fakeemail | strip_paramattr; '">';
+                                                        Slash.ellipsify(Slash.strip_literal(useredit.fakeemail)); '</a>';
+                                                END;
+                                        ELSE;
+                                                '(email not shown publicly)';
+                                        END;
+                                ELSE;
+                                        '<br>&nbsp;&nbsp;';
+                                        IF useredit.fakeemail;
+                                                '<a href="mailto:';
+                                                useredit.fakeemail | strip_paramattr; '">';
+                                                Slash.ellipsify(Slash.strip_literal(useredit.fakeemail)); '</a>';
+                                        ELSE;
+                                                '(email not shown publicly)';
+                                        END;
+                                END;
+
+                                IF useredit.homepage;
+                                '<br><a href="';
+                                useredit.homepage | strip_attribute;
+                                '"';
+                                IF useredit.karma <= constants.goodkarma;
+                                        ' rel="nofollow"';
+                                END;
+                                '>';
+                                Slash.ellipsify(Slash.strip_literal(useredit.homepage)); '</a>';
+                        END;
+
+                        IF user.uid == useredit.uid OR user.is_admin;
+                                '<br>Karma: ';
+                                PROCESS karma karma=useredit.karma admin_flag=user.is_admin;
+                        END;
+
+                        IF useredit.aim && !useredit.aimdisplay;
+                                '<br><b>AOL IM:</b> ';
+                                useredit.aim | strip_literal;
+                                ' (<b><a href="aim:addbuddy?screenname=';
+                                useredit.aim | strip_attribute;
+                                '">Add Buddy</a>, ';
+                                '<a href="aim:goim?screenname=';
+                                useredit.aim | strip_attribute;
+                                '&amp;message=Greetings!">Send Message</a></b>)';
+                        END;
+
+                        IF useredit.yahoo;
+                                '<br><b>Yahoo! ID:</b> ';
+                                '<a href="http://profiles.yahoo.com/';
+                                useredit.yahoo | strip_attribute;
+                                '">';
+                                useredit.yahoo | strip_literal;
+                                '</a> (<b><a href="http://edit.yahoo.com/config/set_buddygrp?';
+                                '.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=';
+                                useredit.yahoo | strip_attribute;
+                                '">Add User</a>, ';
+                                '<a href="http://edit.yahoo.com/config/send_webmesg?.target=';
+                                useredit.yahoo | strip_attribute;
+                                '">Send Message</a></b>)';
+                        END;
+
+                        IF useredit.jabber;
+                                '<br><b>Jabber:</b> ';
+                                useredit.jabber | strip_literal;
+                        END;
+
+                        IF useredit.calendar_url;
+                                '<br><b>Public Calendar:</b> ';
+                                '<a href="webcal://';
+                                useredit.calendar_url | strip_attribute;
+                                '">Subscribe</a>, <a href="http://';
+                                useredit.calendar_url | strip_attribute;
+                                '">Download</a>';
+                        END;
+
+                        IF useredit.bio;
+                                '<br><hr>';
+                                Slash.parseDomainTags(useredit.bio);
+                        END;
+                        %]
+                        </div>
+                </div>
+
+                <div class="block">
+                        <div class="title">
+                                <h4>Latest Comments</h4>
+                        </div>
+
+                        <div class="content">
+                                <ul>
+                                [% FOREACH cid = latest_comments.keys.sort %]
+                                        <li><a href="[% constants.absolutedir_secure %]/comments.pl?sid=[% latest_comments.$cid.sid %]&cid=[% cid %]">[% latest_comments.$cid.subject %]</a></li>
+                                [% END %]
+                                </ul>
+                        </div>
+                </div>
+
+                <div class="block">
+                        <div class="title">
+                                <h4>Latest Journal Entries</h4>
+                        </div>
+
+                        <div class="content">
+                                <ul>
+                                [% FOREACH jid = latest_journals.keys.sort %]
+                                        <li><a href="[% constants.absolutedir_secure %]/~[% useredit.nickname %]/journal/[% latest_journals.$jid.id %]">[% latest_journals.$jid.desc %]</a><br></li>
+                                [% END %]
+                                </ul>
+                        </div>
+                </div>
+
+                <div class="block">
+                        <div class="title">
+                                <h4>Box 3</h4>
+                        </div>
+
+                        <div class="content">
+                                <ul>
+                                <li>Foo</li>
+                                <li>Bar</li>
+                                </ul>
+                        </div>
+                </div>
+
+                <div class="block">
+                        <div class="title">
+                                <h4>Box 4</h4>
+                        </div>
+
+                        <div class="content">
+                                <ul>
+                                <li>Foo</li>
+                                <li>Bar</li>
+                                </ul>
+                        </div>
+                </div>
+
+                <div class="block">
+                        <div class="title">
+                                <h4>Box 5</h4>
+                        </div>
+
+                        <div class="content">
+                                <ul>
+                                <li>Foo</li>
+                                <li>Bar</li>
+                                </ul>
+                        </div>
+                </div>
+
+                <div class="block">
+                        <div class="title">
+                                <h4>Box 6</h4>
+                        </div>
+
+                        <div class="content">
+                                <ul>
+                                <li>Foo</li>
+                                <li>Bar</li>
+                                </ul>
+                        </div>
+                </div>
+
+                <div class="block">
+                        <div class="title">
+                                <h4>Box 7</h4>
+                        </div>
+
+                        <div class="content">
+                                <ul>
+                                <li>Foo</li>
+                                <li>Bar</lil>
+                                </ul>
+                        </div>
+                </div>
+
+                <div class="block">
+                        <div class="title">
+                                <h4>Box 8</h4>
+                        </div>
+
+                        <div class="content">
+                                <ul>
+                                <li>Foo</li>
+                                <li>Bar</li>
+                                </ul>
+                        </div>
+                </div>
+
+                <div class="block">
+                        <div class="title">
+                                <h4>Box 9</h4>
+                        </div>
+
+                        <div class="content">
+                                <ul>
+                                <li>Foo</li>
+                                <li>Bar</li>
+                                </ul>
+                        </div>
+                </div>
+
+        </div>
+
+[% title = orig_title %]
+
+__seclev__
+500
+__version__
+$Id$
