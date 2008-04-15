@@ -4,6 +4,7 @@ __description__
 The printing of the comments
 
 * can_moderate = boolean for whether current user is eligible to moderate
+	at least one comment
 * comment = hashref of main comment to display (if cid is specified)
 * comments = big ol' arrayref of comments
 * next = hashref of next comment for "next" link
@@ -23,21 +24,34 @@ en_US
 __name__
 printCommComments
 __template__
-[% USE Slash %]
-
-[% IF can_moderate %]
-	<FORM ACTION="[% constants.rootdir %]/comments.pl" METHOD="POST">
-	<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
-	<INPUT TYPE="HIDDEN" NAME="cid" VALUE="[% cid %]">
-	<INPUT TYPE="HIDDEN" NAME="pid" VALUE="[% pid %]">
+[% can_del = (constants.authors_unlimited
+		&& user.is_admin
+		&& user.seclev >= constants.authors_unlimited
+	) || user.acl.candelcomments_always;
+   moderate_form   = (!discussion2 || can_del) && (can_moderate || user.acl.candelcomments_always);
+   moderate_button = (can_moderate
+	&& user.mode != 'archive'
+	&& ( !user.state.discussion_archived || constants.comments_moddable_archived));
+%]
+[% IF moderate_form %]
+	<form id="commentform" name="commentform" action="[% gSkin.rootdir %]/comments.pl" method="post">
 [% END %]
 
+[% IF discussion2 %]
+	<script src="[% constants.imagedir %]/comments.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+	<script type="text/javascript">
+<!--
+	window.onscroll = d2act;
+	boxStatus(1);
+[% Slash.jsSelectComments(Slash.db, constants, user, { sid => sid, cid => cid }, gSkin) %]
+//-->
+	</script>
+[% END %]
 
-[% IF cid %]
+[% IF cid && !discussion2 %]
+	<ul id="commentlisting" class="[% user.mode %] d1">
 	[% Slash.dispComment(comment) %]
-	</TD></TR>
-	<TR><TD BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER">
-
+	<div class="comment_footer">
 	[% IF previous %]
 		&lt;&lt;[% Slash.linkComment(previous, 1) %]
 	[% END %]
@@ -45,7 +59,7 @@ __template__
 	[% IF previous && (comment.pid || next) %]
 		|
 	[% END %]
-
+	
 	[% IF comment.pid %]
 		[% Slash.linkComment(comment, 1) %]
 	[% END %]
@@ -57,42 +71,95 @@ __template__
 	[% IF next %]
 		[% Slash.linkComment(next, 1) %]&gt;&gt;
 	[% END %]
-
-	</TD></TR>
-	<TR><TD ALIGN="CENTER">
-	[% Slash.moderatorCommentLog('cid', cid); %]
-	</TD></TR>
+	</div>
+	[% UNLESS constants.modal_prefs_active;
+	   m1_classname = "Slash::" _ constants.m1_pluginname;
+	   moddb = Slash.getObject(m1_classname);
+	   IF moddb;
+		   moddb.dispModCommentLog('cid', cid, {
+			show_m2s =>	  constants.m2 ? (form.show_m2s.defined
+							? form.show_m2s : user.m2_with_comm_mod)
+						: 0,
+			need_m2_form =>	  constants.m2 ? !moderate_form : 0,
+			need_m2_button => constants.m2,
+			title => " " });
+	   END;
+	   END; # constants.modal_prefs_active
+	%]
 [% END %]
 
 	[% lcp %]
-	[% IF lvl %]
-	<TR><TD>
+	[% IF lvl; END %]
+	[% this_pid = discussion2 ? 0 : pid;
+	   thread = Slash.displayThread(sid, this_pid, lvl, comments) %]
+	[% IF thread || discussion2 %]
+		[% IF !cid || discussion2 %]<ul id="commentlisting" class="[% discussion2 ? 'd2' : 'd1' %]">[% END %]
+			[% thread || '' %]
+			<li id="roothiddens" class="hide"></li>
+		[% IF !cid || discussion2 %]</ul>[% END %]
 	[% END %]
-	[% Slash.displayThread(sid, pid, lvl, comments) %]
-	[% IF lvl %]
-	</TD></TR>
-	[% END %]
+	[% IF cid && !discussion2 %]</ul>[% END %]
+	[% IF lvl; END %]
 	[% lcp %]
 
-[% IF (can_moderate && user.mode != 'archive'
-	&& (
-		!user.state.discussion_archived
-		|| constants.comments_moddable_archived
-)) %]
-	<TR><TD>
-		<P>Have you read the
-		<A HREF="[% constants.rootdir %]/moderation.shtml">Moderator Guidelines</A>
-		yet?
-		<INPUT TYPE="HIDDEN" NAME="op" VALUE="moderate">
-		<INPUT TYPE="SUBMIT" VALUE="moderate">
-	[% IF (constants.authors_unlimited && user.seclev >= constants.authors_unlimited)
-		|| user.acl.candelcomments_always %]
-		<BR><B>NOTE: Checked comments will be deleted.</B>
-	[% END %]
-	</TD></TR></FORM>
+[% IF discussion2 %]
+<div id="replyto_0"></div>
 [% END %]
 
-</TABLE>
+<div id="discussion_buttons">
+
+[% IF discussion2 %]
+<span class="nbutton"><p><b><a href="#" onclick="ajaxFetchComments(0,1); return false"><span id="more_comments_num_a" class="hide">Get More Comments</span></a></b></p></span>
+[% END %]
+
+[% IF discussion2 && !user.state.discussion_archived && !user.state.discussion_future_nopost %]
+<span class="nbutton"><p><b>[% Slash.linkComment({
+	sid          => sid,
+	cid          => cid,
+	op           => 'reply',
+	subject      => 'Reply',
+	subject_only => 1,
+	onclick      => (discussion2 ? "replyTo(0); return false;" : '')
+}) %]</b></p></span>
+[% END %]
+
+[% IF (can_moderate || user.acl.candelcomments_always) %]
+<span class="nbutton"><p><b><a href="[% gSkin.rootdir %]/moderation.shtml">Moderator Help</a></b></p></span>[% END %]
+
+[% IF moderate_form %]
+	[% IF moderate_button %]
+		[% IF can_del %]<span class="nbutton"><p><b>[% END %]
+		<input type="hidden" name="op" value="moderate">
+		<input type="hidden" name="sid" value="[% sid %]">
+		<input type="hidden" name="cid" value="[% cid %]">
+		<input type="hidden" name="pid" value="[% pid %]">
+		[% IF can_del %]<a href="#" onclick="$('#commentform').submit(); return false">Delete</a></b></p></span>
+		<a href="#" onclick="displayModalPrefHelp('discussion_delete_help'); return false" title="Click To Expand Help" class="help">?</a>
+	        <div id="discussion_delete_help" class="modalprefhelp" style="display: none;">Checked comments will be deleted.</div>
+	        [%- ELSE %]<input type="submit" value="moderate" class="button">
+	        [% END %]
+	[% END %]
+	</form>
+[% END %]
+</div>
+
+[% IF discussion2 %]
+	<script type="text/javascript">
+<!--
+		currents['hidden']   = [% user.state.comments.totals.hidden  || 0 %];
+		currents['full']     = [% user.state.comments.totals.full    || 0 %];
+		currents['oneline']  = [% user.state.comments.totals.oneline || 0 %];
+		// currents_total = [% (user.state.comments.totals.hidden || 0 ) + (user.state.comments.totals.full || 0) + (user.state.comments.totals.oneline || 0)  %];
+
+		abbrev_comments      = {};
+		noshow_comments      = [[% user.state.comments.noshow.join(',') %]];
+		pieces_comments      = [[% user.state.comments.pieces.join(',') %]];
+		init_hiddens         = [[% user.state.comments.hiddens.join(',') %]];
+
+		finishLoading();
+//-->
+	</script>
+[% END %]
 
 __seclev__
 10000

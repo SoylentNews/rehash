@@ -13,11 +13,10 @@ en_US
 __name__
 preview_comm
 __template__
-[% USE Slash %]
-<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" WIDTH="95%" ALIGN="CENTER">
+<ul id="commentlisting" class="[% Slash.discussion2() ? 'd2' : 'd1' %]">
 [% Slash.dispComment(preview) %]
-</TABLE>
-
+</li>
+</ul>
 
 __seclev__
 1000
