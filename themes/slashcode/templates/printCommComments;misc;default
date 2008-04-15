@@ -41,6 +41,8 @@ __template__
 	<script src="[% constants.imagedir %]/comments.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 	<script type="text/javascript">
 <!--
+[%- IF gSkin.name != 'idle' %]
+	d2_keybindings_disable[191] = 1;[% END # turn off '/' key %]
 	window.onscroll = d2act;
 	boxStatus(1);
 [% Slash.jsSelectComments(Slash.db, constants, user, { sid => sid, cid => cid }, gSkin) %]
