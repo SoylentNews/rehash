@@ -1078,6 +1078,9 @@ function submitReply(pid) {
 			else if (cid) {
 				cancelReply(pid);
 				addComment(cid, { pid: pid, kids: [] }, '', 1);
+				setDefaultDisplayMode(cid);
+				// add it to the totals (for subtraction in updateComment())
+				currents[displaymode[cid]]++;
 				setFocusComment(cid, 1, 1);
 			}
 		}
