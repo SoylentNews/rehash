@@ -5284,5 +5284,9 @@ UPDATE vars SET value = 'T_2_5_0_201' WHERE name = 'cvs_tag_currentcode';
 INSERT INTO reskey_resource_checks VALUES (NULL, 6, 'all', 'Slash::ResKey::Checks::HumanConf',           701);
 INSERT INTO reskey_resource_checks VALUES (NULL, 6, 'all', 'Slash::ResKey::Checks::ProxyScan',           801);
 
+# for plugins/ResKey (comments)
+DELETE FROM reskey_vars WHERE rkrid = 1 AND name = 'max_duration';
+INSERT INTO reskey_vars VALUES (1, 'max_duration_touch', 1, 'boolean for whether to store max duration in reskey object on touch');
+
 # PUDGE LAST UPDATED HERE
 
