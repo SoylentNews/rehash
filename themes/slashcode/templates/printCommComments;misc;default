@@ -125,6 +125,9 @@ __template__
 }) %]</b></p></span>
 [% END %]
 
+[% IF !user.is_anon %]
+<span class="nbutton"><p><b><a href="[% gSkin.rootdir %]/my/comments"[% IF constants.modal_prefs_active %] onclick="getModalPrefs('d2', 'Discussion 2'); return false"[% END %]>Prefs</a></b></p></span>[% END %]
+
 [% IF (can_moderate || user.acl.candelcomments_always) %]
 <span class="nbutton"><p><b><a href="[% gSkin.rootdir %]/moderation.shtml">Moderator Help</a></b></p></span>[% END %]
 
@@ -141,9 +144,9 @@ __template__
 	        [%- ELSE %]<input type="submit" value="moderate" class="button">
 	        [% END %]
 	[% END %]
-	</form>
 [% END %]
 </div>
+[% IF moderate_form %]	</form>[% END %]
 
 [% IF discussion2 %]
 	<script type="text/javascript">

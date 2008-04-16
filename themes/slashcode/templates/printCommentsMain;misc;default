@@ -136,7 +136,9 @@ __template__
 			<div class="title">
 				<h4>
 				[% IF this_title %]
-					<span class="h-inline"><a href="[% link | strip_urlattr %]" title="Back to Article - [% this_title | strip_attribute %]">[% this_title %]</a></span>
+					<span class="h-inline">[% IF user.state.d2asp -%]
+					<a href="[% constants.rootdir %]/" title="[% constants.sitename | strip_attribute %]">[% constants.sitename %]</a>:[% END %]
+					<a href="[% link | strip_urlattr %]" title="Back to Article - [% this_title | strip_attribute %]">[% this_title %]</a></span>
 					<span class="titlecount"><a href="[% link | strip_urlattr %]#topcomment" title="Back to Top Comment - [% this_title | strip_attribute %]"><span id="titlecountnum">[% count %]</span>&nbsp;Comment[% count == 1 ? '' : 's' %]</a></span>
 				[% ELSE %] 
 					[% Slash.linkComment({
@@ -223,6 +225,10 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
 	[% END %]
 </div>
 <a name="topcomment"></a>
+[% IF user.state.d2asp %]
+<div style="text-align:center; margin-top: 1.5em; margin-bottom: -1.5em;">
+<iframe src="http://slashdot.org/images/iframe/idle.html" height="110" width="740" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe></div>
+[% END %]
 
 __seclev__
 10000
