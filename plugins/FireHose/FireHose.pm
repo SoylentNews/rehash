@@ -533,10 +533,16 @@ sub getFireHoseEssentials {
 		my $st_q  = $self->sqlQuote(timeCalc($options->{startdate}, '%Y-%m-%d %T', -$user->{off_set}));
 
 		if ($options->{startdate}) {
-			push @where, "createtime >= $st_q";
 
 			if ($options->{duration} && $options->{duration} >= 0 ) {
+				push @where, "createtime >= $st_q";
 				push @where, "createtime <= DATE_ADD($st_q, INTERVAL $dur_q DAY)";
+			} elsif ($options->{duration} == -1) {
+				if ($options->{orderdir} eq "ASC") {
+					push @where, "createtime >= $st_q";
+				} else {
+					my $end_q = $self->sqlQuote(timeCalc("$options->{startdate} 23:59:59", '%Y-%m-%d %T', -$user->{off_set}));				   push @where, "createtime <= $end_q";
+				}
 			}
 		} elsif (defined $options->{duration} && $options->{duration} >= 0) {
 			push @where, "createtime >= DATE_SUB(NOW(), INTERVAL $dur_q DAY)";
