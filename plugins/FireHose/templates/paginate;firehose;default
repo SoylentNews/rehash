@@ -1,0 +1,148 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+firehose
+__lang__
+en_US
+__name__
+paginate
+__seclev__
+10000
+__template__
+[% fh = Slash.getObject("Slash::FireHose") %]
+[% days = []; %]
+[% fh_page = fh_page || "firehose.pl" %]
+[% day_page = fh_page %]
+[% IF fh_page == "users.pl"; day_page = "firehose.pl"; END %]
+[% index_extra = form.index ? "&amp;index=1" : "" %]
+[% idle_submit_plug = "";
+   IF gSkin.name == "idle";
+   	idle_submit_plug = '<span class="inactive"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '">Submit Idle Story</a></span>';
+   END;
+
+%]
+
+
+[% IF !contentsonly %]
+<div class="paginate" [% IF divid %]id="[% divid %]"[% END %]>
+<div class="menu" [% IF ulid %]id="[% ulid %]"[% END %]>
+[% END %]
+[% IF options.duration == 7 && !options.startdate %]
+	[% day = Slash.db.getDay(0) %]
+	<span class="inactive">
+		<a href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => 7 }); f; %][% IF form.index %]&amp;index=1[% END %]">Today</a>
+	</span>
+	[% IF options.orderby == "createtime";
+		 max_days_ahead = options.smalldevices ? 1 : 2;
+		days = Slash.getOlderDaysFromDay(last_day, -1, max_days_ahead, { skip_add_today => 1, skip_future => 1 }); 
+	   ELSE;
+		max_days_ahead = options.smalldevices ? 2 : 3;
+		days = Slash.getOlderDaysFromDay(day, 1, max_days_ahead, {  skip_add_today => 1, skip_future => 1 });
+	   END;
+	%]
+		[%
+		got_more_link = 0;
+		FOREACH cur_day = days;
+		%]
+		<span class="[% IF (cur_day.0 != last_day || options.orderby != "createtime") || firehose_more_data.future_count <= 0 %]in[% END %]active">
+			<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => cur_day.0, duration => 1}); f; %][% index_extra %]">[% cur_day.1 | strip_literal %]</a>
+				[% IF firehose_more_data.day_num == cur_day.0 && firehose_more_data.future_count >=0 %]
+					[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
+					[% got_more_link = 1; %]
+				[% END %]
+		</span>
+		[% END %]
+		[% IF !got_more_link %]
+		<span class="active">
+			[% IF options.orderby != "createtime" %]
+				<a href="#" onclick="firehose_slider_set_color('[% options.color %]'); return false">[% options.color.ucfirst %]</a>
+			[% ELSIF firehose_more_data.future_count <=0  %]
+				<a href="#">Archive</a>
+			[% ELSE %]
+				[% firehose_more_data.need_day_label = 1 %]
+			[% END %]
+			[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
+		</span>
+		[% END %]
+		[% idle_submit_plug %]
+[% ELSIF options.startdate && options.duration == 1;
+	day = day || options.startdate;
+	day = day.replace('-','');
+	day = day || Slash.db.getDay(0);
+	max_days_ahead = options.smalldevices ? 2 : 3;
+	days = Slash.getOlderDaysFromDay(day, -1, max_days_ahead); %]
+
+	[% FOREACH cur_day = days;
+		IF day == cur_day.0; %]
+			<span class="active">
+				<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => cur_day.0, duration => 1}); f; %][% index_extra %]">[% cur_day.1 | strip_literal %]</a> [% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
+			</span>
+		[% ELSE %]
+			<span class="inactive">
+			[% IF cur_day.2 %]
+				<a href="[% gSkin.rootdir %]/[% day_page %]">[% cur_day.1 | strip_literal %]</a>
+			[% ELSE %]
+				<a onclick="firehose_set_options('issue','[% cur_day.0 %]'); return false;" href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => cur_day.0, duration => 1}); f; %][% index_extra %]">[% cur_day.1 | strip_literal %]</a>
+			[% END %]
+			</span>
+		[% END %]
+		
+[%	END %]
+	[% idle_submit_plug %]
+[% ELSIF options.startdate && options.duration >= 28 && options.duration <= 31;
+	firehose = Slash.getObject("Slash::FireHose");
+	days = firehose.getOlderMonthsFromDay(options.startdate,-2, 2);
+	FOREACH cur_day = days;
+		IF cur_day.3 == 1;
+		%]
+		<span class="active">
+			<a href="[% gSkin.rootdir %]/[% day_page %]?startdate=[% cur_day.0 %]&amp;duration=[% cur_day.2 %]">[% cur_day.1 | strip_literal %]</a>
+			[% PROCESS firehose_pages page = page num_items = num_items day_page = fh_page options=options %]
+		</span>
+		[% ELSE %]
+		<span>
+			<a href="[% gSkin.rootdir %]/[% day_page %]?startdate=[% cur_day.0 %]&amp;duration=[% cur_day.2 %]">[% cur_day.1 | strip_literal %]</a>
+		</span>
+		[%
+		END;
+	END;
+	idle_submit_plug;
+%]
+[% ELSIF options.duration == -1  %]
+	<span class="inactive">
+		<a href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => 7}); f; %][% IF form.index %]index=1[% END %]">Today</a>
+	<span class="active">
+		<a href="#">Archive</a> [% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
+	</span>
+	[% idle_submit_plug %]
+	</span>
+[% ELSE %]
+	[% time_label = "";
+	   IF options.duration == -1;
+	   	time_label = "All time: ";
+	   ELSIF options.duratiton == 7;
+	   	time_label = "Last week";
+	   ELSIF options.duration == 1;
+	        time_label = "Last day";
+	   ELSE;
+	   	time_label = "Last " _ options.duration _ " days:";
+	   END;
+	%]
+	[% UNLESS nopages %]
+		<span class="active">
+		[% time_label %]
+		[% PROCESS firehose_pages page = page num_items = num_items fh_page = fh_page options=options %]
+		</span>
+
+	[% END %]
+[% END %]
+[% IF !contentsonly %]
+</div>
+</div>
+[% END %]
+__version__
+$Id$
