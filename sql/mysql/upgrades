@@ -5293,3 +5293,7 @@ INSERT INTO reskey_vars VALUES (1, 'max_duration_touch', 1, 'boolean for whether
 # for plugins/FireHose
 ALTER TABLE firehose_update_log ADD bytes mediumint UNSIGNED DEFAULT 0 NOT NULL;
 ALTER TABLE firehose_setting_log DROP column bytes; 
+
+# 2008-04-16
+UPDATE vars SET value = 'T_2_5_0_202' WHERE name = 'cvs_tag_currentcode';
+
