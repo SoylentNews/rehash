@@ -100,7 +100,10 @@ __template__
 		[% END %]
 		[% label = "Get more &raquo;" %]
 		[% IF day_label && day_count && options.duration != -1;
-			label = day_count _ " more &raquo;";
+			IF need_day_label;
+				label = $day_label _ " ";
+			END;
+			label = label _ day_count _ " more &raquo;";
 		   ELSIF future_count > 0 ;
 		   	IF options.duration == -1;
 			        label = future_count _ " more &raquo;";
@@ -108,8 +111,8 @@ __template__
 			        label = future_count _ " more &raquo;";
 			END;
 		   ELSIF future_count <= 0 ;
-		   	IF !options.startdate && options.duration != -1 && options.orderby == "createtime";
-			   	label = "Get more...";
+			IF options.duration != -1 && options.orderby == "createtime";
+				label = "Get more &raquo;";
 				extra_onclick = 'firehose_set_options(\'duration\', -1); ';
 			ELSIF options.orderby != "createtime";
 				fh = Slash.getObject("Slash::FireHose") 
@@ -129,8 +132,8 @@ __template__
 		[% ELSE %]
 			<a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a>
 		[% END %]
+		<span class="busy" style="display:none"><img src="[% constants.imagedir %]/spinner_grey.gif"></span>
 		[% IF !contentsonly %]
-		<span id="busy"></span>
 		</span>
 		[% END %]
 [% CASE 'notavailable' %]
