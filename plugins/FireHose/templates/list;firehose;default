@@ -171,6 +171,9 @@ cmdrtaco dot net but be forgiving of beta code!
 	[% END %]
 
 	var firehose_action_time = 0;
+	[% IF options.pagesize == "large" %]
+	firehose_more_increment = 15;
+	[% END %]
 	[% options_color = (options.color || user.firehose_color || "indigo") %]
 	var fh_color = [% firehose.js_anon_dump(options_color) %];
 	fh_colors = [% firehose.js_anon_dump(colors) %];
