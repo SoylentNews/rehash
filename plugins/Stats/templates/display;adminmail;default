@@ -16,13 +16,13 @@ __template__
 
 [% constants.sitename %] Stats for [% day %]
 
-[% constants.absolutedir_secure %]/stats.pl?op=report&report=main&stats_days=7
+[% gSkin.absolutedir_secure %]/stats.pl?op=report&report=main&stats_days=7
 
                    UIDs      IPIDs      Pages 
-        total: [% users %]   [% unique %]   [% total %] ([% total_bytes %])
+        total:        -          -   [% total %] ([% total_bytes %])
  static total:        -          -   [% total_static %]
 gstatic total:        -          -   [% grand_total_static %]
-  grand total:        -          -   [% grand_total %] ([% grand_total_bytes %])
+  grand total: [% users %]   [% unique %]   [% grand_total %] ([% grand_total_bytes %])
  secure total:        -          -   [% total_secure %]
 [% IF constants.subscribe %]sbscrbr total:        -          -   [% total_subscriber %]
 [% END %]
@@ -57,8 +57,13 @@ gstatic total:        -          -   [% grand_total_static %]
 [% IF other_page > 0 -%]
         other: [% other_uids %]   [% other_ipids %]   [% other_page %] ([% other_bytes %])
 [% END -%]
+[%- FOREACH pagetype = extra_pagetypes -%]
+[% pt_uids = pagetype _ "_uids"; pt_ipids = pagetype _ "_ipids" ; pt_page = pagetype _ "_page" ; pt_bytes = pagetype _ "_bytes"; pt_label = pagetype _ "_label"; -%]
+[% IF $pt_page > 0 -%]
+   [% $pt_label %]: [% $pt_uids %]   [% $pt_ipids %]   [% $pt_page %] ([% $pt_bytes %])
+[% END -%]
+[% END %]
 
-    accesslog: [% accesslog %] rows total
      formkeys: [% formkeys %] rows total
      comments: [% comments %] posted yesterday
   submissions: [% submissions %] submissions 
@@ -87,17 +92,30 @@ gstatic total:        -          -   [% grand_total_static %]
     Avg Hits Per Article:   [% avg_hits_per_story.0 %]|[% avg_hits_per_story.1 %]|[% avg_hits_per_story.2 %]
 Avg Comments Per Article:   [% avg_comments_per_story.0 %]|[% avg_comments_per_story.1 %]|[% avg_comments_per_story.2 %]
 
------------------------
 [% rand_users_yest.size %] random users created yesterday:
-[% FOREACH ru = rand_users_yest %][% ru.nickname %] ([% ru.uid %]) <[% ru.realemail %]>[% IF !loop.last %]  [% IF loop.count mod 2 == 0; "\n"; END %][% END %][% END %]
+[% FOREACH ru = rand_users_yest %][% ru.nickname %] ([% ru.uid %]) <[% ru.realemail %]>
+[% END %]
 
-Recent top [% top_recent_domains.size %] email domains:
-[% FOREACH trd = top_recent_domains; trd.c; "  "; trd.domain; "\n"; END %]
+Recent top [% top_recent_domains.size %] email domains over last [% top_recent_domains_daysback %] days ([% top_recent_domains_newaccounts %] accounts):
+[% FOREACH trd = top_recent_domains; trd.c; "  "; trd.initdomain; " "; top_recent_domains_newnicks.$trd.initdomain %]
+[% END %]
 
------------------------
-[% FOREACH section = sections -%]
+[% IF top_relocated_urls %]
+Top Relocated URLS
+[% FOREACH tru = top_relocated_urls; tru.count; "  "; tru.stats_type; "  "; tru.url; "\n"; END %]
+[% END %]
+
+Pages From RSS By Section
+------------------------------------------------
+Section		         Pages     UIDS    IPIDS
+[% FOREACH section = skins -%]
+[%- rss_skin_name = section.skin_name FILTER format('%20s') -%]
+[%  rss_skin_name %]  [% section.page_from_rss %] [% section.uid_from_rss %] [% section.ipid_from_rss %]
+[% END %]
+
+[% FOREACH section = skins -%]
 [% IF section.pages < 1 ; NEXT ; END %]
-For [% section.section_name %]
+For [% section.skin_name %]
                   Pages      IPs   Bandwidth    Users
         total: [% section.pages %] [% section.ipids %] [% section.bytes %] [% section.site_users %]
 [% IF section.index.pages > 0 -%]
@@ -124,20 +142,51 @@ For [% section.section_name %]
 [% IF section.other.pages > 0 -%]
         other: [% section.other.pages %] [% section.other.ipids %] [% section.other.bytes %] [% section.other.users %]
 [% END -%]
+[%- FOREACH pagetype = extra_pagetypes -%]
+[% IF section.${pagetype}.pages > 0 -%]
+     [% section.${pagetype}.label %]: [% section.${pagetype}.pages %] [% section.${pagetype}.ipids %] [% section.${pagetype}.bytes %] [% section.${pagetype}.users %]
+[% END -%]
+[% END %]
 [% END -%]
 
 -----------------------
 
-[% FOREACH item = lazy -%]
+Top stories viewed by article.pl:
+[% FOREACH item = lazy_article -%]
 [% item %]
 [% END %]
 
+[% IF lazy_rss.size %]
+Top stories viewed in RSS:
+[% FOREACH item = lazy_rss -%]
+[% item %]
+[% END %]
+
+[% END %]
 [% IF top_referers.size %]
 -----------------------      
 
 Top referers:
 [% FOREACH referer = top_referers -%]
 [% referer.1 %]  [% referer.0 %]
+[% END %]
+[% END %]
+
+[% IF top_badgehosts.size %]
+-----------------------      
+
+Top badge hosts:
+[% FOREACH badgehost = top_badgehosts -%]
+[% badgehost.1 %]  [% badgehost.0 %]
+[% END %]
+[% END %]
+
+[% IF top_badgeurls.size %]
+-----------------------      
+
+Top badge URLs:
+[% FOREACH badgeurl = top_badgeurls -%]
+[% badgeurl.1 %]  [% badgeurl.0 %]
 [% END %]
 [% END %]
 
@@ -166,14 +215,27 @@ Page           Status              Count
                 " total\n";
         END;
 END %]
------------------------
 [% IF crawling_subscribers %]
+---------------------------------
 Possible Subscriber Comment Crawlers
 
 Count  Nickname
 [% crawling_subscribers %]
-
 [% END %]
+
+[% IF firehose_report %]
+Firehose Report
+------------------------------------
+[% firehose_report %]
+[% END %]
+
+[% IF tags_report %]
+Tags Report
+------------------------------------
+[% tags_report %]
+[% END %]
+
+
 __seclev__
 100
 __version__
