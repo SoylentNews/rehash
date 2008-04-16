@@ -1,0 +1,141 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+firehose
+__lang__
+en_US
+__name__
+data
+__seclev__
+10000
+__template__
+[% rnf = ' rel="nofollow"' %]
+[% SWITCH value %]
+
+[% CASE 'byline' %]
+	[% IF !hidediv %]
+	<div class="details" id="details-[% item.id %]">
+	[% END %]
+	<b>
+	[%- IF adminmode && item.type == "submission" %]<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% item.srcid %]">[% END -%]
+	[% IF item.type == "submission" %]
+		Submitted
+	[% ELSIF item.type == "journal" %]
+		Journal
+	[% ELSIF item.type == "story" %]
+		Posted
+	[% ELSIF item.type == "bookmark" %]
+		Bookmark
+	[% ELSIF item.type == "feed" %]
+		From feed
+	[% ELSE %]
+		Submitted
+	[% END %]
+	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
+	by [% IF adminmode && item.type != "story" %]
+		[% the_user.nickname | strip_literal %]
+		(<a href="[% gSkin.rootdir %]/users.pl?uid=[% the_user.uid %]">[% the_user.uid %]</a>)
+	[% END %]
+	[% IF extras && num_from_uid != '0' %]
+		([% accepted_from_uid %]/[% num_from_uid %]) 
+	[% END %]
+	[% IF adminmode && ( item.name || item.email ) %]
+		([% item.name %])<a href="[% item.email | strip_attribute %]"[% rnf %]>[% item.email | strip_literal %]</a>
+	[% ELSE %]
+		[% IF item.type == "submission" %]
+			[% IF item.email %]<a href="[% item.email | strip_attribute %]"[% rnf %]>[% END %][% item.name | strip_literal %][% IF item.email %]</a>[% END %]
+		[% ELSIF item.type == "story" %]
+			[% IF the_user.homepage %]<a href="[% the_user.homepage %]"[% rnf %]>[% END %][% the_user.nickname %][% IF the_user.homepage %]</a>[% END %]
+		[% ELSE %]
+			[% the_user.nickname | strip_literal %]
+		[% END %]
+	[% END %]
+	[% IF extras && num_with_emaildomain != '0' %]
+		([% accepted_from_emaildomain %]/[% num_with_emaildomain %]) 
+	[% END %]
+
+	[% IF adminmode %]
+		[%  Slash.vislenify(item); %]
+		<a href="[% gSkin.rootdir -%]/users.pl?op=userinfo&amp;userfield=[% item.ipid -%]&amp;fieldname=ipid">[% item.ipid_vis -%]</a>
+		[% IF item.type == "story" %]
+			[% story = Slash.db.getStory(item.srcid) %]
+			[% IF story && story.fhid %]<a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% story.fhid %]">Original Submission</a>[% END %]
+		[% ELSIF item.stoid;
+			to_story = Slash.db.getStory(item.stoid) %]
+			<a href="[% gSkin.rootdir %]/article.pl?sid=[% to_story.sid | strip_attribute %]">Posted as Story</a>
+		[% END %]
+	[% END %]
+	[% IF extras && adminmode && num_with_ipid != '0' %]
+		([% accepted_from_ipid %]/[% num_with_ipid %])
+	[% END %]
+	[% user.aton %] <span id="fhtime-[% item.id %]">[% Slash.timeCalc(item.createtime) %]</span></b><br>
+		[% IF constants.use_dept && item.dept %]<strong>from the <b>[% item.dept %]</b> dept.</strong>[% END %]
+	[% IF !hidediv %]
+
+	</div>
+	[% END %]
+[% CASE 'noitems' %]
+	[% fh = Slash.getObject("Slash::FireHose") 
+	   fh_array = fh.getFireHoseColors(1);
+	   fh_hash  = fh.getFireHoseColors();
+	   fh_num   = fh_hash.${options.color};
+	   new_color   = fh_array.$fh_num;
+	%]
+		<b>
+		[% IF user.state.firehose_page == "user" %]
+			This user's Firehose page contains no [% IF form.page %]additional [% END %]entries;
+		[% ELSE %]
+			No matches were found.  You may want to try [% IF new_color %]<a href="?[% IF form.embed %]embed=1&amp;[% END %]color=[% new_color | strip_paramattr %]">[% END %]lowering your color threshold[% IF new_color %] to [% new_color %][% END %][% IF new_color %]</a>[% END %]  or [% IF options.duration != -1 %]<a href="?[% IF form.embed %]embed=1&amp;[% END %]startdate=&amp;duration=-1">[% END %]expanding your time window[% IF options.duration != -1 %]</a>[% END %]
+		[% END %]
+		</b>
+		<br><br>
+[% CASE 'firehose_more_link' %]
+		[% extra_onclick = '' %]
+		[% IF !contentsonly %]
+		<span id="firehose_more">
+		[% END %]
+		[% label = "Get more &raquo;" %]
+		[% IF day_label && day_count && options.duration != -1;
+			label = day_count _ " more &raquo;";
+		   ELSIF future_count > 0 ;
+		   	IF options.duration == -1;
+			        label = future_count _ " more &raquo;";
+			ELSE;
+			        label = future_count _ " more &raquo;";
+			END;
+		   ELSIF future_count <= 0 ;
+		   	IF !options.startdate && options.duration != -1 && options.orderby == "createtime";
+			   	label = "Get more...";
+				extra_onclick = 'firehose_set_options(\'duration\', -1); ';
+			ELSIF options.orderby != "createtime";
+				fh = Slash.getObject("Slash::FireHose") 
+				fh_array = fh.getFireHoseColors(1);
+				fh_hash  = fh.getFireHoseColors();
+				fh_num   = fh_hash.${options.color};
+				new_color   = fh_array.$fh_num;
+				IF new_color;
+					label = "More $new_color &raquo;";
+					extra_onclick = "firehose_slider_set_color('" _ new_color _ "');";
+				END;
+			END;
+		   END;
+		%]
+		[% IF user.is_anon %]
+			<a href="#" onclick="show_login_box(); return false;">[% label %]</a>
+		[% ELSE %]
+			<a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a>
+		[% END %]
+		[% IF !contentsonly %]
+		<span id="busy"></span>
+		</span>
+		[% END %]
+[% CASE 'notavailable' %]
+	The item you're trying to view either does not exist, or is not viewable to you.
+[% END %]
+
+__version__
+$Id$
