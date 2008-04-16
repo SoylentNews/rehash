@@ -66,6 +66,7 @@ var firehose_settings = {};
   firehose_removed_first = '0';
   firehose_removals = null;
   firehose_future = null;
+  firehose_more_increment = 10;
 
   var firehose_cur = 0;
 
@@ -1473,10 +1474,9 @@ function firehose_go_prev() {
 }
 
 function firehose_more() {
-	var increment_by = 10;
 	firehose_settings.more_num = firehose_settings.more_num + increment_by;
 	
-	if (((firehose_item_count + increment_by) >= 200) && !fh_is_admin) {
+	if (((firehose_item_count + firehose_more_increment) >= 200) && !fh_is_admin) {
 		$('#firehose_more').hide();
 	}
 	firehose_set_options('more_num', firehose_settings.more_num);
