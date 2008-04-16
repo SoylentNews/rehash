@@ -1474,7 +1474,7 @@ function firehose_go_prev() {
 }
 
 function firehose_more() {
-	firehose_settings.more_num = firehose_settings.more_num + increment_by;
+	firehose_settings.more_num = firehose_settings.more_num + firehose_more_increment;
 	
 	if (((firehose_item_count + firehose_more_increment) >= 200) && !fh_is_admin) {
 		$('#firehose_more').hide();
