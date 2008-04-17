@@ -1354,7 +1354,7 @@ sub countDailyStoriesAccessRSS {
 	my $sid_hr = { };
 	my $regex_sid = regexSid();
 	for my $qs (keys %$qs_hr) {
-		my($sid) = $qs =~ /sid=\b([\d/]+)\b/;
+		my($sid) = $qs =~ m{sid=\b([\d/]+)\b};
 		next unless $sid =~ $regex_sid;
 		$sid_hr->{$sid} ||= 0;
 		$sid_hr->{$sid} += $qs_hr->{$qs};
