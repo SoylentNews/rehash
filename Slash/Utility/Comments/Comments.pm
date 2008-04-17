@@ -448,6 +448,7 @@ sub jsSelectComments {
 	$user->{is_anon}       ||= 0;
 	$user->{is_admin}      ||= 0;
 	$user->{is_subscriber} ||= 0;
+	$user->{state}{d2asp}  ||= 0;
 	my $root_comment = $user->{state}{selectComments}{cidorpid} || 0;
 
 	my $extra = '';
@@ -490,6 +491,7 @@ user_is_admin = $user->{is_admin};
 user_is_subscriber = $user->{is_subscriber};
 user_threshold = $threshold;
 user_highlightthresh = $highlightthresh;
+user_d2asp = $user->{state}{d2asp};
 
 discussion_id = $id;
 

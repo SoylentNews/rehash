@@ -47,6 +47,7 @@ var user_threshold = 0;
 var user_highlightthresh = 0;
 var user_threshold_orig = -9;
 var user_highlightthresh_orig = -9;
+var user_d2asp = 0;
 var loaded = 0;
 var shift_down = 0;
 var alt_down = 0;
@@ -1455,7 +1456,7 @@ function d2act () {
 		var oldpos = gd.style.position;
 
 		var mode = $dom('d2out').className;
-		if (mode=='horizontal rooted' || targetTop>vOffset) {
+		if (!user_d2asp && (mode=='horizontal rooted' || targetTop>vOffset)) {
 			gd.style.position = 'absolute';
 			gd.className      = 'rooted';
 			gd.style.top      = '0px';
@@ -1485,7 +1486,7 @@ function toggleDisplayOptions() {
 	gods.style.display = 'none';
 
 	// none -> ( vertical -> horizontal -> rooted )
-	if ( d2out.className == 'vertical' ) { // vertical->horizontal
+	if ( user_d2asp || d2out.className == 'vertical' ) { // vertical->horizontal
 		newMode = d2out.className = 'horizontal';
 		gCommentControlWidget.setOrientation('X');
 	} else if ( d2out.className == 'horizontal' ) { // horizontal->rooted
