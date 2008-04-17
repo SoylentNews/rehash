@@ -11,6 +11,7 @@ Display submission form
 * topic = submission topic hashref
 * width = passed to titlebar
 * title = passed to titlebar
+* pending = html of pending submissions
 __title__
 
 __page__
@@ -20,7 +21,8 @@ en_US
 __name__
 displayForm
 __template__
-
+<div class="generalbody">
+[% pending %]
 [% # set the variable 'subtext'
    submission.storyonly = 0;
    submission.email = fakeemail;
@@ -51,26 +53,30 @@ __template__
 	</div>
 	[% END %]
 [% END %]
+
 	<p>
 	Here is where you can submit a story for the [% constants.sitename %] Editors to peer at it, poke it with a stick, and perhaps post it for all to share and enjoy.  It is <strong>very</strong> important that you write a clear simple subject, and include relevant links in your story.  If you wish to be anonymous, feel free to leave the identifying fields blank.  Anonymity has no effect on whether we will accept or reject the story.
 	</p>
+
+[%# username is the only of from, email, subj that needs to be filtered in %]
+
 	<form action="[% env.script_name %]" method="post">
-        [% IF savestory %]
-                <fieldset>
-                        <legend>
-                                Preview Submission
-                        </legend>
+	[% IF savestory %]
+		<fieldset>
+			<legend>
+				Preview Submission
+			</legend>
 			<div class="article">
-                        	[% PROCESS titlebar width => "100%", title => form.subj %]
+				[% PROCESS titlebar width => "100%", title => form.subj %]
 				<div class="body">
-                        		<div class="topic">
-                                		<img src="[% constants.imagedir %]/topics/[% topic.image %]" alt="[% topic.textname %]" width="[% topic.width %]" height="[% topic.height %]">
-                        		</div>
-                       			[% subtext %]
+					<div class="topic">
+						<img src="[% constants.imagedir %]/topics/[% topic.image %]" alt="[% topic.textname %]" width="[% topic.width %]" height="[% topic.height %]">
+					</div>
+					[% subtext %]
 				</div>
 			</div>
-                </fieldset>
-        [% END %]
+		</fieldset>
+	[% END %]
 		<fieldset>
 			<legend>
 				Story Submission Form
@@ -86,15 +92,18 @@ __template__
 			[% PROCESS formNote note => "Where users can contact you" %]
 			[% IF constants.plugin.FireHose %]
 				[% PROCESS formLabel value => "Url"  %]
-				<input type="text" name="url" value="[% form.url | strip_attribute %]" size="50"> Url type [% Slash.createSelect('mediiatype', Slash.db.getDescriptions('mediatypes'), { default => form.mediatype || "none" , return => 1 }) %]
+				<input type="text" name="url" value="[% form.url | strip_attribute %]" size="50"> Url type:
+				[% Slash.createSelect('mediatype', Slash.db.getDescriptions('mediatypes'), { default => form.mediatype || "none" , return => 1 }) %]
 				[% PROCESS formNote note => "Main url of submission (optional but if provided must be unique) " %]
 			[% END %]
+
 			[% PROCESS formLabel value => "Subject"  %]
 			<input type="text" name="subj" value="[% form.subj %]" size="50" maxlength="50">
-			[% PROCESS formNote note => "Be descriptive and concise! For best results, put the most important words first."%]
-			[% PROCESS formNote note => "Bad subjects=&#39;Check This Out!&#39; or &#39;An Article&#39;.  We get many submissions each day, and if yours isn't clear, it will be deleted." %]
+			[% PROCESS formNote note => "Be descriptive and concise!" %]
+			[% PROCESS formNote note => "(Nondescriptive subjects like 'Check this out!' usually just get deleted, because we get many every day. For best results, put the important words early.)" %]
+
 	[% FOR extra = extras %]
-			[% PROCESS formLabel value => extra.0  %]
+		[% PROCESS formLabel value => extra.0, comment => "" %]
 		[% IF extra.2 == 'text' %]
 			<input type="text" name="[% extra.1 %]" value="[% form.${extra.1} | strip_attribute %]" size="50">
 		[% ELSIF extra.2 == 'textarea' %]
@@ -104,6 +113,7 @@ __template__
 			[% Slash.createSelect(extra.1, Slash.db.getDescriptions('genericstring',extra.1), form.${extra.1}, 1, 1) %]	
 		[% END %]
 	[% END %]
+
 			[% hide_section_select = 0; hide_topic_select = 0 %]
 			[% primaryskid_val = form.primaryskid.defined ? form.primaryskid : constants.submission_default_skid;
 			IF constants.submission_force_default || (form.primaryskid && form.hss);
@@ -134,12 +144,13 @@ __template__
 			[% Slash.createSelect('tid', topic_values, form.tid, 1, 0, 1)%]	
 		[% END %]
 			[% submitToLabel = skins.${constants.mainpage_skid}.title || "the main section" %]
-			[% PROCESS formNote note =>"In general, submit to $submitToLabel" %]
+			[% PROCESS formNote note => "In general, submit to $submitToLabel" %]
+
 			[% PROCESS formLabel value => "The Scoop" %]
 			<textarea wrap="virtual" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]" name="story">[% form.story | strip_literal %]</textarea><br>
 			[% PROCESS formNote note => "Are you sure you included a URL?  Did you test them for typos?" %]
 			[% PROCESS formNote note => "HTML is fine, but double check those URLs and HTML tags!" %]
-			[% PROCESS formLabel value => "Submission format" %]
+			[% PROCESS formLabel value => "Submission format", comment => "" %]
 			[% def_type = form.sub_type || 'html'; sub_types = { "html" => "HTML Formatted", "plain" => "Plain Old Text" }; Slash.createSelect('sub_type', sub_types, def_type, 1) %]
 			[% IF form.url_id %]
 				<input type="hidden" name="url_id" value="[% form.url_id | strip_attribute %]">
@@ -158,6 +169,7 @@ __template__
 		[% END %]
 		</fieldset>
 	</form>
+</div>
 __seclev__
 10000
 __version__
