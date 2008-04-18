@@ -102,8 +102,9 @@ __template__
 		[% IF day_label && day_count && options.duration != -1;
 			IF need_day_label;
 				label = $day_label _ " ";
+			ELSE;
+				label = label _ day_count _ " more &raquo;";
 			END;
-			label = label _ day_count _ " more &raquo;";
 		   ELSIF future_count > 0 ;
 		   	IF options.duration == -1;
 			        label = future_count _ " more &raquo;";
