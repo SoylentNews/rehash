@@ -1333,7 +1333,10 @@ sub createAccessLog {
 		$dat ||= $uri;
 	}
 
-	return if $op eq 'slashdot-it' && !$constants->{slashdotit_accesslog};
+	return if $op eq 'slashdot-it'
+		&& !$constants->{slashdotit_accesslog}
+			|| ( $constants->{slashdotit_accesslog} < 1
+				&& rand() > $constants->{slashdotit_accesslog} );
 
 	my $uid = $user->{uid} || $constants->{anonymous_coward_uid};
 	my $skin_name = getCurrentSkin('name');
