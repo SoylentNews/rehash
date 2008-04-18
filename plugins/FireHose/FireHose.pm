@@ -1373,6 +1373,9 @@ sub ajaxFireHoseGetUpdates {
 		search_results	=> $results
 	}, { Return => 1 });
 
+	my $recent = $slashdb->getTime({ add_secs => "-300"});
+	$update_time = $recent if $recent gt $update_time;
+
 	$html->{local_last_update_time} = timeCalc($slashdb->getTime(), "%H:%M");
 	$html->{filter_text} = "Filtered to ".strip_literal($opts->{color})." '".strip_literal($opts->{fhfilter})."'";
 	$html->{gmt_update_time} = " (".timeCalc($slashdb->getTime(), "%H:%M", 0)." GMT) " if $user->{is_admin};
@@ -1388,14 +1391,16 @@ sub ajaxFireHoseGetUpdates {
 		future		=> $future,
 	});
 	my $reskey_dump = "";
+	my $update_time_dump;
 	my $reskey = getObject("Slash::ResKey");
 	my $user_rkey = $reskey->key('ajax_user_static', { no_state => 1 });
 	$reskey_dump .= "reskey_static = '" . $user_rkey->reskey() . "';\n" if $user_rkey->create();
 
 	my $duration = Time::HiRes::time() - $start;
 	my $more_num = $options->{more_num} || 0;
-	
-	my $retval =  "$data_dump\n$reskey_dump";
+
+	$update_time_dump = "update_time= ".Data::JavaScript::Anon->anon_dump($update_time);
+	my $retval =  "$data_dump\n$reskey_dump\n$update_time_dump";
 
 	my $updatelog = {
 		uid 		=> $user->{uid},
