@@ -46,7 +46,9 @@ function split_if_string( list, sep ){
 
 function join_wrap( a, elem_prefix, elem_suffix, list_prefix, list_suffix ) {
 	var result = '';
-	if ( a.length ) {
+	if ( a && a.length ) {
+		a = split_if_string(a);
+
 		var ep = elem_prefix || '';
 		var es = elem_suffix || '';
 							// Example:
