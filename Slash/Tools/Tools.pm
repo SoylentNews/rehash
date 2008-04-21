@@ -11,16 +11,22 @@ use warnings;
 use Carp;
 use DB_File;
 use Fcntl qw(O_RDWR O_CREAT);
+use File::Basename qw(basename dirname);
 use File::Find;
 
 use base 'Exporter';
 
+our %config;
 our @EXPORT = qw(
-	pmpath pathpm pmpathsrc syntax_check counterpart
+	pmpath pathpm pmpathsrc counterpart srcfile installfile basefile
+	basefile basename dirname
+	syntax_check %CONFIG
 );
 
 my(%cache);
-our %config = (
+# if cache gets stale, you can use force => 0, or heck, just
+# rm ~/.slash_tools_cache
+our %CONFIG = (
 	source  => '/usr/local/src/slash',
 	install => '/usr/local/slash',
 	cache   => "$ENV{HOME}/.slash_tools_cache",
@@ -33,22 +39,22 @@ sub import {
         my $class = ref $proto || $proto;
 
 	my %newconfig = @_;
-	if (open my $fh, '<', $newconfig{config} || $config{config}) {
+	if (open my $fh, '<', $newconfig{config} || $CONFIG{config}) {
 		while (<$fh>) {
 			next if /^\W/;
 			chomp;
 			my @a = split ' ', $_, 2;
-			$config{$a[0]} = $a[1] if $a[0] && $a[1];
+			$CONFIG{$a[0]} = $a[1] if $a[0] && $a[1];
 		}
 	}
 
 	# handle config inputs, which means we are ignoring normal
 	# import behavior ... you get everything, which is not really
 	# playing nice, but oh well! -- pudge
-	%config = ( %config, %newconfig );
+	%CONFIG = ( %CONFIG, %newconfig );
 
-	tie %cache, 'DB_File', $config{cache}, O_RDWR|O_CREAT, 0644, $DB_HASH
-		or croak "Can't tie to $config{cache}: $!";
+	tie %cache, 'DB_File', $CONFIG{cache}, O_RDWR|O_CREAT, 0644, $DB_HASH
+		or croak "Can't tie to $CONFIG{cache}: $!";
 
 	local $Exporter::ExportLevel = 1;
 	return $class->SUPER::import;
@@ -67,25 +73,54 @@ sub syntax_check {
 	}
 }
 
+# return the base file of the requested file (relative to src)
+sub basefile {
+	my($file, $force) = @_;
+	if ($file !~ /^\Q$CONFIG{source}\E/) {
+		$file = counterpart($file, $force);
+	}
+	$file =~ s/^\Q$CONFIG{source}\/\E//;
+	return $file;
+}
+
+
+# return the src file of the requested file
+sub srcfile {
+	my($file, $force) = @_;
+	if ($file !~ /^\Q$CONFIG{source}\E/) {
+		return counterpart($file, $force);
+	}
+	return $file;
+}
+
+# return the installed file of the requested file
+sub installfile {
+	my($file, $force) = @_;
+	if ($file =~ /^\Q$CONFIG{source}\E/) {
+		return counterpart($file, $force);
+	}
+	return $file;
+}
+
 sub counterpart {
 	my($this, $force) = @_;
 	my $counterpart;
 
-	my $key = join $;, 'pathpm', $config{source}, $config{install}, $this;
-	$force = $config{force} unless defined $force;
+	my $key = join $;, 'pathpm', $CONFIG{source}, $CONFIG{install}, $this;
+	$force = $CONFIG{force} unless defined $force;
 	return $cache{$key} if !$force && $cache{$key};
 
 	if ($this =~ /\.pm$/) {
-		if ($this =~ /^\Q$config{source}\E/) {
+		if ($this =~ /^\Q$CONFIG{source}\E/) {
 			$counterpart = pmpath(pathpm($this, $force), $force);
 		} else {
 			$counterpart = pmpathsrc(pathpm($this, $force), $force);
 		}
 	} else {
-		if ($this =~ /^\Q$config{source}\E/) {
-			($counterpart = $this) =~ s/^\Q$config{source}\E/$config{install}/;
+		if ($this =~ /^\Q$CONFIG{source}\E/) {
+			($counterpart = $this) =~ s/^\Q$CONFIG{source}\E/$CONFIG{install}/;
 		} else {
-			($counterpart = $this) =~ s/^\Q$config{install}\E/$config{source}/;
+			($counterpart = $this) =~ s/^\Q$CONFIG{install}\E/$CONFIG{source}/;
 		}
 	}
 
@@ -104,7 +139,7 @@ sub _getpackage {
 			return $1;
 		}
 	} else {
-		warn "Can't open $path: $!";
+		carp "Can't open $path: $!";
 		return;
 	}
 
@@ -116,7 +151,7 @@ sub pathpm {
 	return unless $path;
 
 	my $key = join $;, 'pathpm', $path;
-	$force = $config{force} unless defined $force;
+	$force = $CONFIG{force} unless defined $force;
 	return $cache{$key} if !$force && $cache{$key};
 
 	my $package = _getpackage($path);
@@ -130,8 +165,8 @@ sub pmpathsrc {
 	my($module, $force) = @_;
 	return unless defined $module;
 
-	my $key = join $;, 'pmpathsrc', $config{source}, $module;
-	$force = $config{force} unless defined $force;
+	my $key = join $;, 'pmpathsrc', $CONFIG{source}, $module;
+	$force = $CONFIG{force} unless defined $force;
 	return $cache{$key} if !$force && $cache{$key};
 
 	(my $modname = $module) =~ s/^.+::(\w+)$/$1/;
@@ -144,19 +179,20 @@ sub pmpathsrc {
 		my $name = $File::Find::name;
 
 		my $package = _getpackage($name);
-		$cache{$key} = $found = $name if $package;
-	}, $config{source});
+		$cache{$key} = $found = $name if $package && $package eq $module;
+	}, $CONFIG{source});
 
 	return $found;
 }
 
 # convert a perl module to an installed path
 sub pmpath {
+	undef $@;
 	my($module, $force) = @_;
 	return unless defined $module;
 
 	my $key = join $;, 'pmpath', $module;
-	$force = $config{force} unless defined $force;
+	$force = $CONFIG{force} unless defined $force;
 	return $cache{$key} if !$force && $cache{$key};
 
 	(my $path = $module) =~ s{::}{/}g;
@@ -180,7 +216,7 @@ sub pmpath {
 		}
 
 		if (!$return || ! -e $return) {
-			carp "path for '$module' not found, error: $@\n";
+			$@ = "install path for '$module' not found";
 		} else {
 			$cache{$key} = $return;
 		}
@@ -188,11 +224,103 @@ sub pmpath {
 		if ($INC{$pathmod}) {
 			$cache{$key} = $return = $INC{$pathmod};
 		} else {
-			carp "path for '$module' unavailable in %INC\n";
+			carp "path for '$module' unavailable in %INC";
 		}
 	}
 
 	return $return;
+}
+
+
+package Slash::Tools::BBEdit;
+use Carp;
+use Cwd;
+use File::Basename;
+
+sub new {
+	require Mac::Glue;
+	bless { glue => Mac::Glue->new('BBEdit') }, __PACKAGE__;
+}
+
+sub front {
+	my($self) = @_;
+	return $self->{glue}->obj(window => 1)->get;
+}
+
+sub frontpath {
+	my($self) = @_;
+	return $self->front->prop('file')->get;
+}
+
+sub output {
+	my($self, $output, $opt) = @_;
+
+	my $title = $opt->{title} || 'Slash Tools Output';
+	open my $bbedit, qq'|bbedit --view-top --clean -t "$title"' or carp $!;
+	print $bbedit $output;
+}
+
+sub file {
+	my($self) = @_;
+
+	my $file = $ARGV[0];
+	unless ($file) {
+		$file = $self->frontpath;
+	}
+
+	return $file;
+}
+
+sub do_prep {
+	my($self) = @_;
+
+	my $origfile = $self->file;
+	return unless $origfile;
+	my $file = Slash::Tools::basefile($origfile);
+
+	my $orig_cwd = cwd();
+	chdir $Slash::Tools::CONFIG{source};
+
+	return($file, $orig_cwd);
+}
+
+sub do {
+	my($self, $cmd, $opt) = @_;
+
+	my($file, $orig_cwd) = $self->do_prep;
+	my $basename = basename($file);
+
+	my $output = `$cmd \Q$file\E`;
+	$self->output($output, { title => "$cmd $basename" });
+	$self->front->prop('source_language')->set(to => '(none)')
+		if $opt->{notype};
+
+	chdir $orig_cwd;
+}
+
+sub gitdiff {
+	my($self, $args) = @_;
+
+	my($file, $orig_cwd) = $self->do_prep;
+
+	local $ENV{GIT_EXTERNAL_DIFF} = 'bbdiff-git';
+	system('git', 'diff', split(' ', $args), '--', $file);
+
+	chdir $orig_cwd;
+}
+
+sub diff {
+	my($self, $args, $file) = @_;
+
+	$file ||= $self->file;
+	my $src_file = Slash::Tools::srcfile($file);
+	my $install_file = Slash::Tools::installfile($file);
+
+	if (-f $src_file && -f $install_file) {
+		system('bbdiff', split(' ', ($args||'')), $install_file, $src_file);
+	} else {
+		carp "$src_file or $install_file does not exist";
+	}
 }
 
 1;
@@ -221,7 +349,7 @@ find(sub {
 	my $counterpart = counterpart($name) || '';
 	printf "%s => %s\n", $name, $counterpart
 		if !$counterpart || !-e $counterpart;
-}, $Slash::Tools::config{source});
+}, $CONFIG{source});
 
 
 # do syntax checks of modules
