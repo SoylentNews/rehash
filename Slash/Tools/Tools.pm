@@ -274,14 +274,13 @@ sub file {
 sub do_prep {
 	my($self) = @_;
 
-	my $origfile = $self->file;
-	return unless $origfile;
-	my $file = Slash::Tools::basefile($origfile);
+	my $file = $self->file;
+	return unless $file;
 
-	my $orig_cwd = cwd();
-	chdir $Slash::Tools::CONFIG{source};
+	my $cwd = cwd();
+	chdir dirname(Slash::Tools::srcfile($file));
 
-	return($file, $orig_cwd);
+	return(basename($file), $cwd);
 }
 
 sub do {
@@ -291,9 +290,11 @@ sub do {
 	my $basename = basename($file);
 
 	my $output = `$cmd \Q$file\E`;
-	$self->output($output, { title => "$cmd $basename" });
-	$self->front->prop('source_language')->set(to => '(none)')
-		if $opt->{notype};
+	if ($output) {
+		$self->output($output, { title => "$cmd $basename" });
+		$self->front->prop('source_language')->set(to => '(none)')
+			if $opt->{notype};
+	}
 
 	chdir $orig_cwd;
 }
