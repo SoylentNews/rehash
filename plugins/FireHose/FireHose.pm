@@ -805,7 +805,8 @@ sub getFireHose {
 	$answer->{note} = $self->getGlobjAdminnote($answer->{globjid}) || '';
 	
 	if ($mcd && $answer->{title}) {
-		my $item = $mcd->set("$mcdkey:$id", $answer);
+		my $exptime = $constants->{firehose_memcached_exptime} || 600;
+		$mcd->set("$mcdkey:$id", $answer, $exptime);
 	}
 
 	return $answer;
