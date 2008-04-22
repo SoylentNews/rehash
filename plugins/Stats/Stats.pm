@@ -1749,11 +1749,14 @@ sub getTopBadgeURLs {
 	my $constants = getCurrentStatic();
 	return [ ] unless $constants->{basedomain} eq 'slashdot.org';
 
+	# If Slash::XML::RSS::rssstory()'s text for its <img src>
+	# badge changes, the query_string check here may also
+	# have to change.
 	my $count = $options->{count} || 10;
 	my $top_ar = $self->sqlSelectAll(
 		"query_string AS qs, COUNT(*) AS c",
 		"accesslog_temp",
-		"op='slashdot-it' AND query_string NOT LIKE '%from=rssbadge'",
+		"op='slashdot-it' AND query_string NOT LIKE 'from=rss%'",
 		"GROUP BY qs ORDER BY c DESC, qs LIMIT $count"
 	);
 	for my $duple (@$top_ar) {
