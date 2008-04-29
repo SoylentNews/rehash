@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -20,6 +20,7 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
+	my $gSkin     = getCurrentSkin();
 
 	# we can make a separate reader and writer, but we need to write, so
 	# for now ... writer
@@ -36,6 +37,7 @@ sub main {
 		table	=> [ $admin,		\&table		],
 		csv	=> [ $admin,		\&csv		],
 		list	=> [ $admin_post,	\&list		],
+		topics	=> [ $admin,		\&topics	],
 
 		default	=> [ $admin,		\&list		]
 	);
@@ -47,7 +49,7 @@ sub main {
 	}
 
 	if (!$ops{$op}[ALLOWED]) {
-		redirect("$constants->{rootdir}/users.pl");
+		redirect("$gSkin->{rootdir}/");
 		return;
 	}
 
@@ -67,28 +69,28 @@ sub main {
 sub _get_graph_data {
 	my($slashdb, $constants, $user, $form, $stats) = @_;
 
-	my $sections = _get_sections();
+	my $skins = _get_skins();
 	my(%days, @data);
 	for my $namesec (@{$form->{stats_graph_multiple}}) {
-		my($name, $section, $label) = split /,/, $namesec;
+		my($name, $skid, $label) = split /,/, $namesec;
 
 		my $stats_data = $stats->getAllStats({
-			section	=> $section,
+			skid	=> $skid,
 			name	=> $name,
 			days	=> $form->{stats_days}  # 0 || 14 || 31*3
 		});
 
 		my $data;
-		for my $day (keys %{$stats_data->{$section}}) {
+		for my $day (keys %{$stats_data->{$skid}}) {
 			next if $day eq 'names';
-			$data->{$day} = $stats_data->{$section}{$day}{$name};
+			$data->{$day} = $stats_data->{$skid}{$day}{$name};
 			$days{$day} ||= $data->{$day};
 		}
 
 		$label ||= '';
 		push @data, {
 			data  => $data,
-			type  => "$name / $sections->{$section}",
+			type  => "$name / $skins->{$skid}",
 			label => $label,
 		};
 	}
@@ -107,8 +109,8 @@ sub _get_graph_id {
 
 	my @id;
 	for my $namesec (@{$form->{stats_graph_multiple}}) {
-		my($name, $section, $label) = split /,/, $namesec;
-		push @id, join '-', map { uri_escape($_, '\W') } ($name, $section, $label);
+		my($name, $skid, $label) = split /,/, $namesec;
+		push @id, join '-', map { uri_escape($_, '\W') } ($name, $skid, $label);
 	}
 
 	for ($form->{stats_days}, $form->{title}, $form->{type}, $form->{byweekavg}) {
@@ -145,24 +147,18 @@ sub csv {
 		Return		=> 1,
 	});
 
-	my $filename = join '-',
+	my $filename = join('-',
 		$constants->{sitename},
 		$form->{stats_days},
-		$form->{title};
-	$filename =~ s/[^\w_.-]+//g;
+		$form->{title}) . '.csv';
 
-	my $r = Apache->request;
-	$r->content_type('text/csv');
-	$r->header_out('Cache-control', 'private');
-	$r->header_out('Pragma', 'no-cache');
-	$r->header_out('Content-Disposition', "attachment; filename=$filename.csv");
-	$r->status(200);
-	$r->send_http_header;
-	return 1 if $r->header_only;
-	$r->rflush;
-	$r->print($content);
-	$r->status(200);
-	return 1;
+	http_send({
+		content_type	=> 'text/csv',
+		filename	=> $filename,
+		do_etag		=> 1,
+		dis_type	=> 'attachment',
+		content		=> $content
+	});
 }
 
 sub graph {
@@ -175,6 +171,7 @@ sub graph {
 		: {};
 	my $content = $image->{data};
 	my $type    = $image->{content_type} || 'image/png';
+	(my $ext    = $type) =~ s|^.+/||;
 
 	# make image if we don't have it ...
 	if (! $content) {
@@ -193,24 +190,25 @@ sub graph {
 		});
 	}
 
-	my $r = Apache->request;
-	$r->content_type($type);
-	$r->header_out('Cache-control', 'private');
-	$r->header_out('Pragma', 'no-cache');
-	$r->status(200);
-	$r->send_http_header;
-	return 1 if $r->header_only;
-	$r->rflush;
-	$r->print($content);
-	$r->status(200);
-	return 1;
+	my $filename = join('-',
+		$constants->{sitename},
+		$form->{stats_days},
+		$form->{title}) . '.' . $ext;
+
+	http_send({
+		content_type	=> $type,
+		filename	=> $filename,
+		do_etag		=> 1,
+		dis_type	=> 'inline',
+		content		=> $content
+	});
 }
 
 sub report {
 	my($slashdb, $constants, $user, $form, $stats) = @_;
 
 	slashDisplay('report', {
-		sections	=> _get_sections(),
+		skins	=> _get_skins(),
 	});
 }
 
@@ -218,14 +216,35 @@ sub list {
 	my($slashdb, $constants, $user, $form, $stats) = @_;
 
 	my $stats_data = {};
+	my($stats_name, $sep_name_select, $stats_name_pre);
+	my $days = $form->{stats_days} || 1;
+	
+	#############################################################
+	# Using this 2 select method with the new index 
+	# should be fast for all date ranges and much faster at 
+	# a high number of days.  If it turns out to be slower at
+	# the small-sized date ranges we could just use this method
+	# for days > 7 or 14 for instance also remeber that days<0 
+	# refers to forever if we do this.    --vroom 2004/01/27
+	##############################################################
+
+	
+	$stats_name 	 = $form->{stats_name};
+	$stats_name_pre  = $form->{stats_name_pre};
+	# only do a separate select if we are limiting the names of the data coming back
+	$sep_name_select = ($form->{stats_name_pre} || $form->{stats_name});
+
 	$stats_data = $stats->getAllStats({
-		section	=> $form->{stats_section},
-		days	=> $form->{stats_days} || 1,
-	}) unless $form->{type} eq 'graphs';
+		skid	 		=> $form->{stats_skid},
+		days	 		=> $form->{stats_days} || 1,
+		name	 		=> $stats_name,
+		name_pre 		=> $stats_name_pre,
+		separate_name_select 	=> $sep_name_select 
+	}) unless $form->{type} && $form->{type} eq 'graphs';
 
 	slashDisplay('list', {
 		stats_data	=> $stats_data,
-		sections	=> _get_sections(),
+		skins		=> _get_skins(),
 	});
 }
 
@@ -236,12 +255,21 @@ sub _set_legend {
 	$gd->set_legend(@$legend);
 }
 
-sub _get_sections {
+sub _get_skins {
 	my $slashdb = getCurrentDB();
 	# don't modify the data, copy it
-	my %sections = %{$slashdb->getDescriptions('sections-all')};
-	$sections{all} = 'All';
-	return \%sections;
+	my %skins = %{$slashdb->getDescriptions('skins')};
+	$skins{0} = 'All';
+	return \%skins;
+}
+
+sub topics {
+	my($slashdb, $constants, $user, $form, $stats) = @_;
+	my $days = $form->{days} ||= 30;
+	my $sort = $form->{sort} eq "name" ? "name" : "hits";
+	my $topic_stats = $stats->getTopicStats($days, $sort);
+	slashDisplay("topic_stats", { topic_stats => $topic_stats });
+
 }
 
 createEnvironment();

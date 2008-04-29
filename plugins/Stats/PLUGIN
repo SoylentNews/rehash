@@ -19,3 +19,4 @@ template=templates/make_graph;stats;default
 template=templates/report;stats;default
 template=templates/stats_days;stats;default
 template=templates/table;stats;default
+template=templates/topic_stats;stats;default

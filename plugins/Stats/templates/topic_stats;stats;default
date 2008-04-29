@@ -1,0 +1,44 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+stats
+__lang__
+en_US
+__name__
+topic_stats
+__seclev__
+10000
+__template__
+<p>
+<form action="[% constants.rootdir %]/stats.pl" method="get">
+<input type="hidden" name="op" value="topics">
+Days: [% Slash.createSelect('days', [30, 60, 90, 180, 365], form.days, 1, 1) %]
+Sort By [% Slash.createSelect('sort', ["hits", "name"], form.sort, 1) %]
+<input type="submit">
+</form>
+<p>
+
+<table border="1" cellpadding="5" cellspacing="5">
+<tr>
+	<td>Topic</td>
+	<td>Total Stories</td>
+	<td>Total Hits</td>
+	<td>Total Comments</td>
+	<td>Avg Hits</td>
+	<td>Avg Comments</td>
+</tr>
+[% FOREACH topic = topic_stats %]
+<tr>
+	<td>[% topic.textname %]<br><img src="[% constants.imagedir %]/topics/[% topic.image %]" alt="[% topic.textname %]"></td>
+	<td>[% topic.cnt %]</td>
+	<td>[% topic.sum_hits %]</td>
+	<td>[% topic.sum_cc %]</td>
+	<td>[% topic.avg_hits %]</td>
+	<td>[% topic.avg_cc %]</td>
+</tr>
+[% END %]
+</table>
