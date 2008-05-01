@@ -1216,6 +1216,8 @@ sub ajaxFireHoseGetUpdates {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	my $start = Time::HiRes::time();
 
+	slashProfInit();
+
 	my $update_data = { removals => 0, items => 0, updates => 0, new => 0 };
 
 	$options->{content_type} = 'application/json';
@@ -1227,7 +1229,9 @@ sub ajaxFireHoseGetUpdates {
 	my %ids = map { $_ => 1 } @ids;
 	my %ids_orig = ( %ids ) ;
 	my $opts = $firehose->getAndSetOptions({ no_set => 1 });
+	slashProf("firehose_update_gfe");
 	my($items, $results, $count, $future_count, $day_num, $day_label, $day_count) = $firehose_reader->getFireHoseEssentials($opts);
+	slashProf("","firehose_update_gfe");
 	my $num_items = scalar @$items;
 	my $future = {};
 	my $globjs = [];
@@ -1302,7 +1306,16 @@ sub ajaxFireHoseGetUpdates {
 				push @$updates, ["add", $_->{id}, slashDisplay("daybreak", { options => $opts, cur_day => $_->{day}, last_day => $_->{last_day}, id => "firehose-day-$_->{day}", fh_page => $base_page }, { Return => 1, Page => "firehose" }) ];
 			} else {
 				$update_data->{new}++;
-				push @$updates, ["add", $_->{id}, slashDisplay("dispFireHose", { mode => $curmode, item => $item, tags_top => $tags_top, vote => $votes->{$item->{globjid}}, options => $opts }, { Return => 1, Page => "firehose" })];
+				my $data = {
+					mode => $curmode,
+					item => $item,
+					tags_top => $tags_top,
+					vote => $votes->{$item->{globjid}},
+					options => $opts
+				};
+				slashProf("firehosedisp");
+				push @$updates, ["add", $_->{id}, $firehose->dispFireHose($item, $data) ];
+				slashProf("","firehosedisp");
 			}
 			$added->{$_->{id}}++;
 		}
@@ -1413,6 +1426,7 @@ sub ajaxFireHoseGetUpdates {
 		bytes 		=> length($retval)
 	};
 	$firehose->createUpdateLog($updatelog);
+	slashProfEnd();
 
 	return $retval;
 
@@ -1624,6 +1638,7 @@ sub setSectionTopicsFromTagstring {
 
 sub setFireHose {
 	my($self, $id, $data) = @_;
+	my $constants = getCurrentStatic();
 	return undef unless $id && $data;
 	return 0 if !%$data;
 	my $id_q = $self->sqlQuote($id);
@@ -1668,8 +1683,13 @@ sub setFireHose {
 	$rows += $self->sqlUpdate('firehose_text', $text_data, "id=$id_q") if keys %$text_data;
 #{ use Data::Dumper; my $dstr = Dumper($text_data); $dstr =~ s/\s+/ /g; print STDERR "setFireHose B rows=$rows for id=$id_q data: $dstr\n"; }
 
-	if ($mcd) {
+	if ($mcd && $constants->{firehose_mcd_disp}) {
 		 $mcd->delete("$mcdkey:$id", 3);
+		 my $keys = $self->genFireHoseMCDAllKeys($id);
+		 foreach (@$keys) {
+			$mcd->delete($_, 3);
+		 }
+
 	}
 
 	my $searchtoo = getObject('Slash::SearchToo');
@@ -1683,11 +1703,60 @@ sub setFireHose {
 	return $rows;
 }
 
+
+# This generates the key for memcaching dispFireHose results
+# if no key is returned no caching or fetching from cache will
+# take place
+
+sub genFireHoseMCDKey {
+	my($self, $id, $options) = @_;
+	my $gSkin = getCurrentSkin();
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+	my $constants = getCurrentStatic();
+
+	my $mcd = $self->getMCD();
+	my $mcdkey;
+
+	return if $gSkin->{skid} != $constants->{mainpage_skid};
+	return if !$constants->{firehose_mcd_disp};
+
+	if ($mcd && !$options->{nodates} && !$options->{nobylines} && !$options->{nocolors} && !$options->{nothumbs} && !$form->{skippop} && !$form->{index} && !$options->{vote} && !$user->{is_admin}) {
+		$mcdkey = "$self->{_mcd_keyprefix}:dispfirehose-$options->{mode}:$id";
+	}
+	return $mcdkey;
+
+}
+
+sub genFireHoseMCDAllKeys {
+	my($self, $id) = @_;
+	my $keys = [];
+	my $mcd = $self->getMCD();
+	my $mcdkey;
+	if ($mcd) {
+		foreach my $mode (qw(full fulltitle)) {
+			push @$keys, "$self->{_mcd_keyprefix}:dispfirehose-$mode:$id";
+		}
+	}
+	return $keys;
+}
+
+
 sub dispFireHose {
 	my($self, $item, $options) = @_;
 	$options ||= {};
+	my $mcd = $self->getMCD();
+	my $mcdkey;
+	if ($mcd) {
+		$mcdkey = $self->genFireHoseMCDKey($item->{id}, $options);
+		my $cached;
+		if ($mcdkey) {
+			$cached = $mcd->get("$mcdkey");
+		}
+		return $cached;
+	}
 
-	slashDisplay('dispFireHose', {
+	my $retval = slashDisplay('dispFireHose', {
 		item			=> $item,
 		mode			=> $options->{mode},
 		tags_top		=> $options->{tags_top},
@@ -1697,6 +1766,14 @@ sub dispFireHose {
 		nostorylinkwrapper	=> $options->{nostorylinkwrapper},
 		view_mode		=> $options->{view_mode}
 	}, { Page => "firehose",  Return => 1 });
+
+	if ($mcd) {
+		$mcdkey = $self->genFireHoseMCDKey($item->{id}, $options);
+		if ($mcdkey) {
+			$mcd->set($mcdkey, $retval, 180);
+		}
+	}
+	return $retval;
 }
 
 sub getMemoryForItem {
@@ -2384,7 +2461,9 @@ sub listView {
 	if ($featured && $featured->{id}) {
 		$options->{not_id} = $featured->{id};
 	}
+	slashProf("get_fhe");
 	my($items, $results, $count, $future_count, $day_num, $day_label, $day_count) = $firehose_reader->getFireHoseEssentials($options);
+	slashProf("","get_fhe");
 
 	my $itemnum = scalar @$items;
 
@@ -2429,6 +2508,7 @@ sub listView {
 			$itemstext .= slashDisplay("daybreak", { options => $options, cur_day => $day, last_day => $_->{last_day}, id => "firehose-day-$day", fh_page => $base_page }, { Return => 1, Page => "firehose" });
 		} else {
 	$last_day = timeCalc($item->{createtime}, "%Y%m%d");
+			slashProf("firehosedisp");
 			$itemstext .= $self->dispFireHose($item, {
 				mode			=> $curmode,
 				tags_top		=> $tags_top,
@@ -2436,6 +2516,7 @@ sub listView {
 				vote			=> $votes->{$item->{globjid}},
 				bodycontent_include	=> $user->{is_anon} 
 			});
+			slashProf("","firehosedisp");
 		}
 		$i++;
 	}
