@@ -119,6 +119,7 @@ sub new {
 			my $new_sql = $create_sql;
 			$new_sql =~ s/__TABLENAME__/$new_table/;
 			$self->sqlDo($new_sql);
+			$self->sqlDo("ALTER TABLE $new_table DROP INDEX ts");
 		}
 
 		# Create the accesslog_temp table, then add indexes to its data.
@@ -136,21 +137,13 @@ sub new {
 			"id BETWEEN $minid AND $maxid AND ts $self->{_day_between_clause}
 			 AND status  = 200 AND op != 'rss'",
 			3, 60);
-		# Some of these (notably ts) may be redundant but that's OK,
-		# they will just throw errors we don't care about.  They're here
-		# in case the table on the DB we're operating on has had its ts
-		# index removed.
+		# Some of these may be redundant but that's OK, they will
+		# just throw errors we don't care about.
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX uid (uid)");
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX skid_op (skid,op)");
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX op_uid_skid (op, uid, skid)");
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX referer (referer(4))");
-		# XXX there should be a way to check whether the source accesslog table
-		# already had this index, and if so, to leave it off.
 		$self->sqlDo("ALTER TABLE accesslog_temp ADD INDEX ts (ts)");
-		$self->sqlDo("ALTER TABLE accesslog_temp_errors ADD INDEX ts (ts)");
-		$self->sqlDo("ALTER TABLE accesslog_temp_subscriber ADD INDEX ts (ts)");
-		$self->sqlDo("ALTER TABLE accesslog_temp_other ADD INDEX ts (ts)");
-		$self->sqlDo("ALTER TABLE accesslog_temp_rss ADD INDEX ts (ts)");
 
 		# Create the other accesslog_temp_* tables and add their indexes.
 		return undef unless $self->_do_insert_select(
@@ -160,6 +153,7 @@ sub new {
 			"id BETWEEN $minid AND $maxid AND ts $self->{_day_between_clause}
 			 AND status  = 200 AND op = 'rss'",
 			3, 60);
+		$self->sqlDo("ALTER TABLE accesslog_temp_rss ADD INDEX ts (ts)");
 		return undef unless $self->_do_insert_select(
 			"accesslog_temp_errors",
 			"*",
@@ -167,6 +161,7 @@ sub new {
 			"id BETWEEN $minid AND $maxid AND ts $self->{_day_between_clause}
 			 AND status != 200",
 			3, 60);
+		$self->sqlDo("ALTER TABLE accesslog_temp_errors ADD INDEX ts (ts)");
 
 		my $stats_reader = getObject('Slash::Stats', { db_type => 'reader' });	
 		my $recent_subscribers = $stats_reader->getRecentSubscribers();
@@ -180,6 +175,7 @@ sub new {
 				"accesslog_temp",
 				"uid IN ($recent_subscriber_uidlist)",
 				3, 60);
+			$self->sqlDo("ALTER TABLE accesslog_temp_subscriber ADD INDEX ts (ts)");
 		}
 
 		my @pages;
@@ -197,8 +193,9 @@ sub new {
 			"accesslog_temp",
 			"op NOT IN ($page_list)",
 			3, 60);
+		$self->sqlDo("ALTER TABLE accesslog_temp_other ADD INDEX ts (ts)");
 
-		# Add in the indexes we need for those tables.
+		# Add in the non-ts indexes we need for those tables.
 		$self->sqlDo("ALTER TABLE accesslog_temp_errors ADD INDEX status_op_skid (status, op, skid)");
 		$self->sqlDo("ALTER TABLE accesslog_temp_subscriber ADD INDEX skid (skid)");
 		$self->sqlDo("ALTER TABLE accesslog_temp_other ADD INDEX skid (skid)");
