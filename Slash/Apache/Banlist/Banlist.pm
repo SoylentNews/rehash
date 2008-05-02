@@ -1,57 +1,59 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
+
+# This handler is called in the fourth Apache phase, access control.
 
 package Slash::Apache::Banlist;
 
 use strict;
 use Apache::Constants qw(:common);
-use Digest::MD5 'md5_hex';
 
 use Slash;
 use Slash::Display;
 use Slash::Utility;
 use Slash::XML;
 
-use vars qw($VERSION);
-
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 sub handler {
 	my($r) = @_;
 
 	return DECLINED unless $r->is_main;
 
+	$Slash::Apache::User::request_start_time ||= Time::HiRes::time;
+
 	# Ok, this will make it so that we can reliably use Apache->request
 	Apache->request($r);
+
+	# Get some information about the IP this request is coming from.
 	my $hostip = $r->connection->remote_ip;
+	my($cur_ip, $cur_subnet) = get_srcids({ ip => $hostip },
+		{ no_md5 => 1,	return_only => [qw( ip subnet )] });
+	my($cur_srcid_ip, $cur_srcid_subnet) = get_srcids({ ip => $hostip },
+		{ 		return_only => [qw( ip subnet )] });
+#print STDERR scalar(localtime) . " hostip='$hostip' cur_ip='$cur_ip' cur_subnet='$cur_subnet' cur_srcid_ip='$cur_srcid_ip' cur_srcid_subnet='$cur_srcid_subnet'\n";
 
-print STDERR scalar(localtime) . " Banlist.pm $$ $hostip " . $r->method . " " . $r->uri . "\n";
-
-	my($cur_ip, $cur_subnet) = get_ipids($hostip, 1);
-	my($cur_ipid, $cur_subnetid) = get_ipids($hostip);
-
+	# Set up DB objects.
 	my $slashdb = getCurrentDB();
 	my $reader_user = $slashdb->getDB('reader');
-
 	my $reader = getObject('Slash::DB', { virtual_user => $reader_user });
-	$reader->sqlConnect();
+	$reader->sqlConnect;
 
-	my $is_rss = $r->uri =~ m{(
-		\.(?:xml|rss|rdf)$
-			|
-		content_type=rss
-	)}x;  # also check for content_type in POST?
+	# Check what kind of access this is.
+	
+	my($is_rss, $is_palm, $feed_type) = _check_rss_and_palm($r);
 
-	my $is_palm = $r->uri =~ /^\/palm/;
+	# Abort this Apache request if this IP address is outright banned.
 
-	# check for ban
-	my $banlist = $reader->getBanList();
-	if ($banlist->{$cur_ipid} || $banlist->{$cur_subnetid}) {
+	my $banlist = $reader->getBanList;
+#use Data::Dumper; $Data::Dumper::Sortkeys=1;
+#print STDERR "cur_srcid_ip='$cur_srcid_ip' cur_srcid_subnet='$cur_srcid_subnet' banlist: " . Dumper($banlist);
+	if ($banlist->{$cur_srcid_ip} || $banlist->{$cur_srcid_subnet}) {
+		_create_banned_user($hostip);
 		# Send a special "you are banned" page if the user is
 		# hitting RSS.
-		return _send_rss($r, 'ban') if $is_rss;
+		return _send_rss($r, 'ban', $cur_srcid_ip, $feed_type) if $is_rss;
 		# Send our usual "you are banned" page, whether the user
 		# is on palm or not.  It's mostly text so palm users
 		# should not have a problem with it.
@@ -64,33 +66,77 @@ print STDERR scalar(localtime) . " Banlist.pm $$ $hostip " . $r->method . " " . 
 		return FORBIDDEN;
 	}
 
-	# check for RSS abuse
-	my $rsslist = $reader->getNorssList();
-	if ($is_rss && ($rsslist->{$cur_ipid} || $rsslist->{$cur_subnet})) {
-		return _send_rss($r, 'abuse', $cur_ipid);
+	# Send a special "RSS banned" page if this IP address is banned
+	# from reading RSS.
+	if ($is_rss) {
+		my $rsslist = $reader->getNorssList;
+		if ($rsslist->{$cur_srcid_ip} || $rsslist->{$cur_srcid_subnet}) {
+			_create_banned_user($hostip);
+			return _send_rss($r, 'abuse', $cur_srcid_ip, $feed_type);
+		}
 	}
 
-	# check for Palm abuse
-	my $palmlist = $reader->getNopalmList();
-	if ($is_palm && ($palmlist->{$cur_ipid} || $palmlist->{$cur_subnet})) {
-		$r->custom_response(FORBIDDEN,
-			slashDisplay('bannedtext_palm',
-				{ ip => $cur_ip },
-				{ Return => 1   }
-			)
-		);
-		return FORBIDDEN;
+	# Send a special "Palm banned" page if this IP addresss is banned
+	# from reading Palm pages.
+	if ($is_palm) {
+		my $palmlist = $reader->getNopalmList;
+		if ($palmlist->{$cur_srcid_ip} || $palmlist->{$cur_subnet}) {
+			_create_banned_user($hostip);
+			$r->custom_response(FORBIDDEN,
+				slashDisplay('bannedtext_palm',
+					{ ip => $cur_ip },
+					{ Return => 1   }
+				)
+			);
+			return FORBIDDEN;
+		}
 	}
 
+	# The IP address is not banned and can proceed.
 	return OK;
 }
 
+# Now we need to create a user hashref for that global
+# current user, so these fields of accesslog get written
+# correctly when we log this attempted hit.  We do this
+# dummy hashref with the bare minimum of values that we need,
+# instead of going through prepareUser(), because this is
+# much, much faster.
+sub _create_banned_user {
+	my($hostip) = @_;
+	my($ipid, $subnetid) = get_ipids($hostip);
+	my $user = {
+		uid		=> getCurrentStatic('anonymous_coward_uid'),
+		ipid		=> $ipid,
+		subnetid	=> $subnetid,
+	};
+	createCurrentUser($user);
+}
+
+
+sub _check_rss_and_palm {
+	my($r) = @_;
+	my $is_rss = $r->uri =~ m{(
+		\.(xml|rss|rdf|atom)$
+			|
+		content_type=(rss|atom)
+	)}x;
+	my $feed_type = $1 || $2 || 'rss';
+	$feed_type = 'rss' unless $feed_type eq 'atom';
+
+	# XXX Should we also check for content_type in POST?
+	my $is_palm = $r->uri =~ /^\/palm/;
+	return($is_rss, $is_palm, $feed_type);
+}
+
 sub _send_rss {
-	my($r, $type, $ipid) = @_;
-	$r->content_type('text/xml');
-	$r->status(202);
-	$r->send_http_header;
-	$r->print(_get_rss_msg($type, $ipid));
+	my($r, $type, $srcid_ip, $feed_type) = @_;
+	http_send({
+		content_type	=> 'text/xml',
+		status		=> 202,
+		content		=> _get_rss_msg($type, $srcid_ip, $feed_type),
+	});
+
 	return DONE;
 }
 
@@ -98,27 +144,34 @@ sub _send_rss {
 # templates don't work with Slash::XML right now,
 # and redirecting will cause *more* traffic than
 # just spitting it out here; so cache it in $RSS_*
+# XXX that really should be a cache that eventually expires
 my(%RSS);
 
 sub _get_rss_msg {
-	my($type, $ipid) = @_;
+	my($type, $srcid_ip, $feed_type) = @_;
 	$type ||= 'abuse';
-	$ipid ||= '(unknown)';
+	$srcid_ip ||= '(unknown)';
+	$feed_type ||= 'rss';
 
-	return $RSS{$type} if exists $RSS{$type};
+	return $RSS{$type}{$srcid_ip} if exists $RSS{$type}{$srcid_ip};
 
 	# template puts data in $items
 	my $items = [];
 	slashDisplay('bannedtext_rss', {
-		items	=> $items,
-		type	=> $type,
-		ipid	=> $ipid,
+		items		=> $items,
+		type		=> $type,
+		srcid_ip	=> $srcid_ip,
 	}, { Return => 1 });
 
-	return $RSS{$type} = xmlDisplay(rss => {
+	$RSS{$type}{$srcid_ip} = xmlDisplay($feed_type => {
 		rdfitemdesc	=> 1,
 		items		=> $items,
 	}, { Return => 1 } );
+	if (!$RSS{$type}{$srcid_ip}) {
+		# Just a quick sanity error check.
+		errorLog("xmlDisplay for type='$type' srcid_ip='$srcid_ip' empty");
+	}
+	return $RSS{$type}{$srcid_ip};
 }
 
 }

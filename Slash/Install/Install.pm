@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Install;
 use strict;
@@ -12,12 +11,11 @@ use File::Copy;
 use File::Find;
 use File::Path;
 use File::Spec;
-use vars qw($VERSION);
 use base 'Slash::DB::Utility';
 
 # BENDER: Like most of life's problems, this one can be solved with bending.
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 sub new {
 	my($class, $user) = @_;
@@ -25,6 +23,10 @@ sub new {
 	bless($self, $class);
 	$self->{virtual_user} = $user;
 	$self->sqlConnect;
+	# XXX Anyone know why this is called directly?  We use $self->{slashdb}
+	# at a number of places below and I can't figure out why we don't just
+	# use getCurrentDB(). -- jamie
+	# beats me! -- pudge
 	$self->{slashdb} = Slash::DB->new($user);
 
 	return $self;
@@ -51,6 +53,9 @@ sub get {
 	my($self, $key) = @_;
 	my $count = $self->sqlCount('site_info', "name=" . $self->sqlQuote($key));
 	my $hash;
+	# This "if count > 1" thing is pretty dumb, even lamer than
+	# checking wantarray.  Be nice if we could make this smarter.
+	# Jamie 2004/05
 	if ($count > 1) {
 		$hash = $self->sqlSelectAllHashref('param_id', '*', 'site_info', "name=" . $self->sqlQuote($key));
 	} else {
@@ -102,6 +107,7 @@ sub readTemplateFile {
 	for (@file) {
 		if (/^__(.*)__$/) {
 			$latch = $1;
+			$latch = 'skin' if $latch eq 'section';
 			next;
 		}
 		$val{$latch} .= $_ if $latch;
@@ -112,7 +118,7 @@ sub readTemplateFile {
 		# fields are used in ways that may be sensitive to
 		# extraneous whitespace.
 		local $/ = "";
-		for (qw| name page section lang seclev version |) {
+		for (qw| name page skin lang seclev version |) {
 			chomp($val{$_}) if $val{$_};
 		}
 	}
@@ -127,7 +133,7 @@ sub writeTemplateFile {
 	my($self, $filename, $template) = @_;
 	my $fh = gensym;
 	open($fh, "> $filename\0") or die "Can't open $filename to write to: $!";
-	for (qw(section description title page lang name template seclev version)) { #(keys %$template) {
+	for (qw(skin description title page lang name template seclev version)) { #(keys %$template) {
 		next if $_ eq 'tpid';
 		print $fh "__${_}__\n";
 		$template->{$_} =~ s/\015\012/\n/g;
@@ -140,7 +146,7 @@ sub installTheme {
 	my($self, $answer, $themes, $symlink) = @_;
 	$themes ||= $self->{'_themes'};
 
-	$self->_install($themes->{$answer}, $symlink);
+	$self->_install($themes->{$answer}, $symlink, 'theme');
 }
 
 sub installThemes {
@@ -149,8 +155,8 @@ sub installThemes {
 
 	for my $answer (@$answers) {
 		for (keys %$themes) {
-			if ($answer eq $themes->{$_}{installorder}) {
-				$self->_install($themes->{$_}, $symlink, 0);
+			if ($answer eq $themes->{$_}{order}) {
+				$self->_install($themes->{$_}, $symlink, 'theme');
 			}
 		}
 	}
@@ -160,7 +166,7 @@ sub installPlugin {
 	my($self, $answer, $plugins, $symlink) = @_;
 	$plugins ||= $self->{'_plugins'};
 
-	$self->_install($plugins->{$answer}, $symlink, 1);
+	$self->_install($plugins->{$answer}, $symlink, 'plugin');
 }
 
 sub installPlugins {
@@ -170,10 +176,30 @@ sub installPlugins {
 	for my $answer (@$answers) {
 		for (keys %$plugins) {
 			if ($answer eq $plugins->{$_}{order}) {
-				$self->_install($plugins->{$_}, $symlink, 1);
+				$self->_install($plugins->{$_}, $symlink, 'plugin');
 			}
 		}
 	}
+}
+
+sub installTagbox {
+        my($self, $answer, $tagboxes, $symlink) = @_;
+        $tagboxes ||= $self->{'_tagboxes'};
+    
+        $self->_install($tagboxes->{$answer}, $symlink, 'tagbox');
+}
+
+sub installTagboxes {
+        my($self, $answers, $tagboxes, $symlink) = @_;
+        $tagboxes ||= $self->{'_tagboxes'};
+
+        for my $answer (@$answers) {
+                for (keys %$tagboxes) {
+                        if ($answer eq $tagboxes->{$_}{order}) {
+                                $self->_install($tagboxes->{$_}, $symlink, 'tagbox');
+                        }
+                }
+        }
 }
 
 # Used internally by the _process_fh_into_sql method (which in
@@ -223,14 +249,16 @@ sub _process_fh_into_sql {
 };
 
 sub _install {
-	my($self, $hash, $symlink, $is_plugin) = @_;
+	my($self, $hash, $symlink, $type) = @_;
+
 	# Yes, performance wise this is questionable, if getValue() was
 	# cached.... who cares this is the install. -Brian
 	if ($self->exists('hash', $hash->{name})) {
 		print STDERR "Plugin $hash->{name} has already been installed\n";
 		return;
 	}
-	if ($is_plugin) {
+
+	if ($type eq 'plugin') {
 		return if $self->exists('plugin', $hash->{name});
 
 		$self->create({
@@ -243,7 +271,9 @@ sub _install {
 			value           => $symlink ? 1 : 0,
 			description     => "$hash->{name} plugin files installed symlink?"
 		});
-	} else {
+	}
+	
+	if ($type eq 'theme') {
 		# not sure if this is what we want, but leave it
 		# in until someone complains.  really, we should
 		# have reinstall theme/plugin methods or
@@ -255,20 +285,32 @@ sub _install {
 		return if $self->exists('theme', $hash->{name});
 
 		$self->create({
-			name            => 'theme',
-			value           => $hash->{'name'},
-			description     => $hash->{'description'},
+			name		=> 'theme',
+			value		=> $hash->{'name'},
+			description	=> $hash->{'description'},
 		});
 		$self->create({
-			name            => 'theme_' . $hash->{name} . '_symlink',
-			value           => $symlink ? 1 : 0,
-			description     => "$hash->{name} theme files installed symlink?"
+			name		=> 'theme_' . $hash->{name} . '_symlink',
+			value		=> $symlink ? 1 : 0,
+			description	=> "$hash->{name} theme files installed symlink?"
 		});
 	}
+
+	if ($type eq 'tagbox') {
+		return if $self->exists('tagbox', $hash->{name});
+
+		$self->create({
+			name		=> 'tagbox',
+			value		=> $hash->{'name'},
+			description	=> $hash->{'description'},
+		}); 
+	}
+
 	my $driver = $self->getValue('db_driver');
 	my $prefix_site = $self->getValue('site_install_directory');
 
 	my %stuff = ( # [relative directory, executable]
+		css		=> ["htdocs",			1],
 		htdoc		=> ["htdocs",			1],
 		htdoc_code	=> ["htdocs/code",		0],
 		htdoc_faq	=> ["htdocs/faq",		0],
@@ -328,7 +370,11 @@ sub _install {
 		}
 	}
 
+	##############################
+
 	my($sql, @sql, @create);
+
+	# First, apply the schema.
 
 	my $mldhr = {	# "mungeline data hashref"
 		hostname	=> $self->getValue("basedomain"),
@@ -346,6 +392,34 @@ sub _install {
 		}
 	}
 
+	for my $statement (@sql) {
+		next unless $statement;
+		$statement =~ s/;\s*$//;
+		my $rows = $self->sqlDo($statement);
+		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
+			print "=== ($type $hash->{name}) Failed on: $statement:\n";
+		}
+	}
+	@sql = ();
+
+	# Second, install any required plugins.  This comes before the dump in
+	# case the theme's dump file writes to any tables/columns that were
+	# added by a plugin.
+
+	if ($hash->{plugin}) {
+		my @k = sort {
+				$hash->{plugin}{$a}{installorder} <=> $hash->{plugin}{$b}{installorder}
+				||
+				$a cmp $b
+			}
+			keys %{$hash->{plugin}};
+		for my $plugin_name (@k) {
+			$self->installPlugin($plugin_name, 0, $symlink);
+		}
+	}
+
+	# Third, apply the dump.
+
 	if ($hash->{"${driver}_dump"}) {
 		my $dump_file = "$hash->{dir}/" . $hash->{"${driver}_dump"};
 		my $fh = gensym;
@@ -362,22 +436,14 @@ sub _install {
 		$statement =~ s/;\s*$//;
 		my $rows = $self->sqlDo($statement);
 		if (!$rows && $statement !~ /^INSERT\s+IGNORE\b/i) {
-			print "Failed on :$statement:\n";
+			print "=== ($type $hash->{name}) Failed on: $statement:\n";
 		}
 	}
 	@sql = ();
 
-	if ($hash->{plugin}) {
-		for (sort {
-			$hash->{plugin}{$a}{installorder} <=> $hash->{plugin}{$b}{installorder}
-			||
-			$a cmp $b
-		} keys %{$hash->{plugin}}) {
-			$self->installPlugin($_, 0, $symlink);
-		}
-	}
+	##############################
 
-	unless ($is_plugin) {
+	if ($type eq "theme") {
 		my(%templates, @no_templates);
 		for my $name (@{$hash->{'include_theme'}}) {
 			my $slash_prefix = $self->get('base_install_directory')->{value};
@@ -407,7 +473,7 @@ sub _install {
 			    warn "Template file $hash->{'dir'}/$_ could not be opened: $!\n";
 			    next;
 			}
-			my $key = "$template->{name};$template->{page};$template->{section}";
+			my $key = "$template->{name};$template->{page};$template->{skin}";
 			# This is not actually needed since cleanup occurs at the end -Brian
 			if ($hash->{'no-template'} && ref($hash->{'no-template'}) eq 'ARRAY') {
 				next if (grep { $key eq $_ }  @{$hash->{'no-template'}} );
@@ -435,7 +501,7 @@ sub _install {
 		next unless $_;
 		s/;$//;
 		unless ($self->sqlDo($_)) {
-			print "Failed on :$_:\n";
+			print "=== ($type $hash->{name}) Failed on: $_:\n";
 		}
 	}
 	@sql = ();
@@ -451,13 +517,16 @@ sub _install {
 		}
 	}
 
-	unless ($is_plugin) {
+	if ($type eq "theme") {
 		# This is where we cleanup any templates that don't belong
 		for (@{$hash->{'no-template'}}) {
-			my ($name, $page, $section) = split /;/, $_;
-			my $tpid = $self->{slashdb}->getTemplateByName($name, 'tpid', '', $page, $section);
-			$self->{slashdb}->deleteTemplate($tpid)
-				if $tpid;
+			my($name, $page, $skin) = split /;/, $_;
+			my $tpid = $self->{slashdb}->getTemplateByName($name, {
+				values  => 'tpid',
+				page    => $page,
+				skin    => $skin
+			});
+			$self->{slashdb}->deleteTemplate($tpid) if $tpid;
 		}
 	}
 }
@@ -477,10 +546,19 @@ sub getThemeList {
 	return $theme_list;
 }
 
+sub getTagboxList {
+	my $tagbox_list = _getList(@_, 'tagboxes', 'TAGBOX');
+	setListOrder($tagbox_list);
+	setListInstallOrder($tagbox_list);
+	return $tagbox_list;
+}
+
 sub getSiteTemplates {
 	my($self) = @_;
 	my (%templates, @no_templates, @final);
-	my $slash_prefix = $self->get('base_install_directory')->{value};
+	my $bid = $self->get('base_install_directory');
+	die "cannot find base_install_directory, DB is probably unreachable" if !$bid;
+	my $slash_prefix = $bid->{value};
 	my $plugins = $self->get('plugin');
 	my @plugins;
 	for (keys %$plugins) {
@@ -491,8 +569,12 @@ sub getSiteTemplates {
 	# it might be nice if this looks in the THEME file ... -- pudge
 	my $include_theme = $self->get('include_theme');
 	if ($include_theme) {
-		my @no_templates; # Not current used -Brian
-		_parseFilesForTemplates("$slash_prefix/themes/$include_theme->{value}/THEME", \%templates, \@no_templates);
+#		my @no_templates; # Not current used -Brian
+		# Do we mean to not pass in the first @my_templates
+		# that was used? I don't know what was intended here.
+		# - Jamie 2004/05
+		my @no_templates_2;
+		_parseFilesForTemplates("$slash_prefix/themes/$include_theme->{value}/THEME", \%templates, \@no_templates_2);
 	}
 	$theme = $theme->{value};
 	_parseFilesForTemplates("$slash_prefix/themes/$theme/THEME", \%templates, \@no_templates);
@@ -562,7 +644,7 @@ sub _getList {
 			my($key, $val) = split(/=/, $_, 2);
 			$key = lc $key;
 			if ($key =~ /^(
-				htdoc | htdoc_code | htdoc_faq | 
+				css | htdoc | htdoc_code | htdoc_faq | 
 				image | image_award | image_banner | image_faq |
 				no-template | include_theme | task | template | sbin | misc | topic
 			)s?$/x) {
@@ -571,6 +653,14 @@ sub _getList {
 				plugin | requiresplugin
 			)s?$/x) {
 				$hash{$dir}{$1}{$val} = 1;
+			} elsif ($key =~ /^(
+				glob
+			)s?$/x) {
+				my($globkey, $globdest) = split(/:/, $val, 2);
+				$globkey = lc $globkey;
+				$hash{$dir}{$1}{$globkey} = $globdest;
+			} elsif (exists $hash{$dir}{'glob'}{$key}) {
+				push @{$hash{$dir}{$key}}, $val;
 			} else {
 				$hash{$dir}{$key} = $val;
 			}

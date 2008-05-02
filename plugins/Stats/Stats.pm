@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Stats;
 
@@ -18,11 +17,10 @@ use Slash::Utility;
 use Slash::DB::Utility;
 use LWP::UserAgent;
 
-use vars qw($VERSION);
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 sub new {
 	my($class, $user, $options) = @_;
@@ -2238,7 +2236,3 @@ __END__
 =head1 SEE ALSO
 
 Slash(3).
-
-=head1 VERSION
-
-$Id$

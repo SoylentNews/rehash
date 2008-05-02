@@ -4,6 +4,5 @@ use DBIx::Password;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Slash::Blob',
-    'VERSION_FROM' => 'Blob.pm', # finds $VERSION
     'PM'	=> { 'Blob.pm' => '$(INST_LIBDIR)/Blob.pm' },
 );

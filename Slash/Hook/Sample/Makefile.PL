@@ -3,5 +3,4 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Slash::Hook::Sample',
-    'VERSION_FROM' => 'Sample.pm', # finds $VERSION
 );

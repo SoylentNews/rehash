@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Journal;
 
@@ -11,12 +10,10 @@ use Slash;
 use Slash::Constants qw(:messages);
 use Slash::Utility;
 
-use vars qw($VERSION);
-use base 'Exporter';
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 # On a side note, I am not sure if I liked the way I named the methods either.
 # -Brian
@@ -36,16 +33,41 @@ sub new {
 
 sub set {
 	my($self, $id, $values) = @_;
-	my $uid = $ENV{SLASH_USER};
+	my $uid = getCurrentUser('uid');
+	my $constants = getCurrentStatic();
 
 	return unless $self->sqlSelect('id', 'journals', "uid=$uid AND id=$id");
 
 	my(%j1, %j2);
 	%j1 = %$values;
+
+	# verify we're allowed to do this at some point, ie can't unset if it's already set
+	if (defined $j1{promotetype} && $constants->{journal_allow_journal2submit} ) {
+		my $cur_promotetype = $self->get($id, "promotetype");
+		if ($cur_promotetype eq "publish" && $j1{promotetype} eq "post") {
+			$j1{promotetype} = "publish";
+		}
+		if ($cur_promotetype eq "publicize") {
+			$j1{promotetype} = "publicize";
+		}
+	}
+
 	$j2{article}  = delete $j1{article};
+	$j1{"-last_update"} = 'now()';
 
 	$self->sqlUpdate('journals', \%j1, "id=$id") if keys %j1;
 	$self->sqlUpdate('journals_text', \%j2, "id=$id") if $j2{article};
+	if ($constants->{plugin}{FireHose}) {
+		my $reskey = getObject('Slash::ResKey');
+		my $rkey = $reskey->key('submit', { nostate => 1 });
+		if ($rkey && $rkey->createuse) {
+			my $journal_item = $self->get($id);
+			my $firehose = getObject("Slash::FireHose");
+			if ($journal_item->{promotetype} eq "publicize" || $journal_item->{promotetype} eq "publish") {
+				$firehose->createUpdateItemFromJournal($id);
+			}
+		}
+	}
 }
 
 sub getsByUid {
@@ -57,7 +79,9 @@ sub getsByUid {
 
 	my $answer = $self->sqlSelectAll(
 		'date, article, description, journals.id, posttype, tid, discussion',
-		'journals, journals_text', $where, $order
+		'journals, journals_text',
+		$where,
+		$order
 	);
 	return $answer;
 }
@@ -65,38 +89,73 @@ sub getsByUid {
 sub getsByUids {
 	my($self, $uids, $start, $limit, $options) = @_;
 	return unless @$uids;
-	my $list = join(",", @$uids);
-	my $answer;
+	my $t_o = $options->{titles_only};
+	my $uids_list = join(",", @$uids);
 	my $order = "ORDER BY journals.date DESC";
-	$order .= " LIMIT $start, $limit" if $limit;
+	my $order_limit = $order;
+	$order_limit .= " LIMIT $start, $limit" if $limit;
 
-	# Note - if the *.uid table in the where clause is journals, MySQL
-	# does a table scan on journals_text.  Make it users and it
-	# correctly uses an index on uid.  Logically they are the same and
-	# the DB *really* should be smart enough to pick up on that, but no.
-	# At least, not in MySQL 3.23.49a.
+	# The list may be quite large, potentially hundreds or even
+	# thousands of users, forming a significant portion of all the
+	# journal-writing users on a site.  We're splitting this select
+	# up into three separate ones.  The uid_date_id index lets this
+	# first select succeed without even hitting the data (and yes
+	# the ",id" component of that index is required for this to be
+	# true, at least on the version of MySQL and the data set I
+	# tested it on for Slashdot).
 
-	if ($options->{titles_only}) {
-		my $where = "users.uid IN ($list) AND users.uid=journals.uid";
+	# First, get the list of journal IDs for the UIDs given.
+	my $journals_hr = $self->sqlSelectAllKeyValue(
+		'id, uid',
+		'journals',
+		"uid IN ($uids_list)",
+		$order_limit);
+	return unless $journals_hr && %$journals_hr;
 
-		$answer = $self->sqlSelectAllHashrefArray(
-			'description, id, nickname',
-			'journals, users',
-			$where,
-			$order
-		);
+	# Second, pull nickname from users for the uids identified.
+	my @uids_found = sort keys %{ { map { ($_, 1) } values %$journals_hr } };
+	my $uids_found_list = join(',', @uids_found);
+	my $uid_nick_hr = $self->sqlSelectAllKeyValue(
+		'uid, nickname',
+		'users',
+		"uid IN ($uids_found_list)");
+
+	# Third, pull the required data from journals, and if necessary
+	# journals_text.  If in the last few moments any journals from
+	# the first select have become unavailable, that's OK, we just
+	# won't return any information about them.
+	# Oh, and yes, it is _insane_ that this method returns an
+	# arrayref of nine-element arrayrefs normally, but an arrayref
+	# of hashrefs if called with the "titles_only" option.
+	# That should be fixed someday.
+	my @journal_ids_found = sort keys %$journals_hr;
+	my $journal_ids_found_list = join(',', @journal_ids_found);
+	my $columns =	$t_o	? 'id, description'
+				: 'date, article, description, journals.id,
+				   posttype, tid, discussion, journals.uid';
+	my $tables =	$t_o	? 'journals'
+				: 'journals, journals_text';
+	my $where =	$t_o	? "journals.id IN ($journal_ids_found_list)"
+				: "journals.id IN ($journal_ids_found_list)
+				   AND journals_text.id = journals.id";
+	my $retval;
+	if ($t_o) {
+		$retval = $self->sqlSelectAllHashrefArray(
+			$columns, $tables, $where, $order);
+		for my $hr (@$retval) {
+			my $id = $hr->{id};
+			my $uid = $journals_hr->{$id};
+			$hr->{nickname} = $uid_nick_hr->{$uid};
+		}
 	} else {
-		my $where = "users.uid IN ($list) AND journals.id=journals_text.id AND users.uid=journals.uid";
-
-		$answer = $self->sqlSelectAll(
-			'journals.date, article, description, journals.id,
-			 posttype, tid, discussion, users.uid, users.nickname',
-			'journals, journals_text, users',
-			$where,
-			$order
-		);
+		$retval = $self->sqlSelectAll(
+			$columns, $tables, $where, $order);
+		for my $ar (@$retval) {
+			my $uid = $ar->[7];
+			push @$ar, $uid_nick_hr->{$uid};
+		}
 	}
-	return $answer;
+	return $retval;
 }
 
 sub list {
@@ -114,25 +173,32 @@ sub listFriends {
 	my $list = join(",", @$uids);
 	my $order = "ORDER BY date DESC";
 	$order .= " LIMIT $limit" if $limit;
-	my $answer = $self->sqlSelectAll('id, journals.date, description, journals.uid, users.nickname', 'journals,users', "journals.uid in ($list) AND users.uid=journals.uid", $order);
+	my $answer = $self->sqlSelectAll('id, journals.date, description, journals.uid, users.nickname',
+		'journals,users',
+		"journals.uid in ($list) AND users.uid=journals.uid", $order);
 
 	return $answer;
 }
 
 sub create {
-	my($self, $description, $article, $posttype, $tid) = @_;
+	my($self, $description, $article, $posttype, $tid, $promotetype) = @_;
 
 	return unless $description;
 	return unless $article;
 	return unless $tid;
 
-	my $uid = $ENV{SLASH_USER};
+	my $constants = getCurrentStatic();
+
+	my $user = getCurrentUser();
 	$self->sqlInsert("journals", {
-		uid		=> $uid,
+		uid		=> $user->{uid},
 		description	=> $description,
 		tid		=> $tid,
-		-date		=> 'now()',
+		-date		=> 'NOW()',
 		posttype	=> $posttype,
+		promotetype	=> $promotetype,
+		-srcid_24	=> get_srcid_sql_in($user->{srcids}{24}),
+		-srcid_32	=> get_srcid_sql_in($user->{srcids}{32}),
 	});
 
 	my($id) = $self->getLastInsertId({ table => 'journals', prime => 'id' });
@@ -145,14 +211,27 @@ sub create {
 
 	my($date) = $self->sqlSelect('date', 'journals', "id=$id");
 	my $slashdb = getCurrentDB();
-	$slashdb->setUser($uid, { journal_last_entry_date => $date });
+	$slashdb->setUser($user->{uid}, { journal_last_entry_date => $date });
+	if ($constants->{plugin}{FireHose}) {
+		my $reskey = getObject('Slash::ResKey');
+		my $rkey = $reskey->key('submit', { nostate => 1 });
+		if ($rkey && $rkey->createuse) {
+			my $firehose = getObject("Slash::FireHose");
+			my $journal = getObject("Slash::Journal");
+			my $j = $journal->get($id);
+			if ($j->{promotetype} eq "publicize" || $j->{promotetype} eq "publish") {
+				$firehose->createItemFromJournal($id);
+			}
+		}
+	}
+
 
 	return $id;
 }
 
 sub remove {
 	my($self, $id) = @_;
-	my $uid = $ENV{SLASH_USER};
+	my $uid = getCurrentUser('uid');
 
 	my $journal = $self->get($id);
 	return unless $journal->{uid} == $uid;
@@ -167,7 +246,22 @@ sub remove {
 
 	if ($journal->{discussion}) {
 		my $slashdb = getCurrentDB();
-		$slashdb->deleteDiscussion($journal->{discussion});
+		# if has been submitted as story or submission, don't
+		# delete the discussion
+		if ($journal->{promotetype} eq 'publicize' || $journal->{promotetype} eq "publish") {
+			my $kind = $self->getDiscussion($journal->{discussion}, 'kind');
+			my $kinds = $self->getDescriptions('discussion_kinds');
+			# set to disabled only if the journal has not been
+			# converted to a journal-story (it will get re-enabled
+			# later if it is converted to a journal-story)
+			if ($kinds->{$kind} eq 'journal') {
+				$slashdb->setDiscussion($journal->{discussion}, {
+					commentstatus	=> 'disabled',
+				});
+			}
+		} else {
+			$slashdb->deleteDiscussion($journal->{discussion});
+		}
 	}
 
 	my $date = $self->sqlSelect('MAX(date)', 'journals', "uid=$uid");
@@ -243,7 +337,7 @@ EOT
 
 sub themes {
 	my($self) = @_;
-	my $uid = $ENV{SLASH_USER};
+	my $uid = getCurrentUser('uid');
 	my $sql;
 	$sql .= "SELECT name from journal_themes";
 	$self->sqlConnect;
@@ -329,6 +423,270 @@ sub get {
 
 	return $answer;
 }
+
+sub updateStoryFromJournal {
+	my($self, $src_journal, $options) = @_;
+	my $slashdb = getCurrentDB();
+
+	my $stoid = $slashdb->sqlSelect("stoid", "journal_transfer", "id=$src_journal->{id}");
+	return unless $stoid;
+
+	my $data = {};
+	$data->{title} = $src_journal->{description};
+	my $text = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
+	($data->{introtext}, $data->{bodytext}) = $self->splitJournalTextForStory($text);
+
+	$data->{topics_chosen} = $options->{topics_chosen} if $options->{topics_chosen};
+	$slashdb->updateStory($stoid, $data);
+}
+
+sub createSubmissionFromJournal {
+	my($self, $src_journal, $options) = @_;
+	my $slashdb   = getCurrentDB();
+	my $constants = getCurrentStatic();
+	$options ||= {};
+
+	my $journal_user = $slashdb->getUser($src_journal->{uid});
+
+	my $story = $src_journal->{article};
+	
+	$story =~ s/^$Slash::Utility::Data::WS_RE+//io;
+	$story =~ s/$Slash::Utility::Data::WS_RE+$//io;
+	
+	$story = balanceTags(strip_mode($story, $src_journal->{posttype}));
+	#perhaps need more string cleanup from submit.pl's findStory here
+
+	my $primaryskid = $constants->{journal2submit_skid} || $constants->{mainpage_skid};
+	my $fakeemail = "mailto:$journal_user" if $journal_user->{fakeemail};
+
+	my $submission = {
+		email		=> $journal_user->{fakeemail},
+		uid		=> $journal_user->{uid},
+		name		=> $journal_user->{nickname},
+		story		=> $story,
+		subj		=> $src_journal->{description},
+		tid		=> $src_journal->{tid},
+		primaryskid 	=> $primaryskid,
+		journal_id 	=> $src_journal->{id},
+		discussion 	=> $src_journal->{discussion},
+		by		=> $options->{submission_param}{by}     || $journal_user->{nickname},
+		# $fakeemail can be undef, but setSubmission can't set a param to NULL
+		# (schema forbids, and setSubmission is too dumb not to try). so the
+		# empty string is a last resort. the better fix would be to fix
+		# setSubmission and/or _genericSet to handle undef values for params
+		# the way setStory does, by deleting the param row if any.
+		by_url 		=> $options->{submission_param}{by_url} || $journal_user->{homepage} || $fakeemail || '',
+	};
+
+	my $sub_param = $options->{submission_param} || {};
+
+	foreach (keys %$sub_param) {
+		$submission->{$_} = $sub_param->{$_} if !defined $submission->{$_};
+	}
+
+	my $subid = $slashdb->createSubmission($submission);
+	if ($subid) {
+		$self->logJournalTransfer($src_journal->{id}, $subid);
+	} else {
+		print STDERR ("Failed attempting to transfer journal id: $src_journal->{id}\n");
+	}
+	return $subid;
+}
+
+sub createStoryFromJournal { 
+	my($self, $src_journal, $options) = @_;
+	$options ||= {};
+
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my $journal_user = $slashdb->getUser($src_journal->{uid});
+
+	my $text = balanceTags(strip_mode($src_journal->{article}, $src_journal->{posttype}));
+	my($intro, $body) = $self->splitJournalTextForStory($text);
+
+	my $skid = $options->{skid} || $constants->{journal2submit_skid} || $constants->{mainpage_skid};
+
+	my $fakeemail = "mailto:$journal_user->{fakeemail}" if $journal_user->{fakeemail};
+
+	my $story_param = $options->{story_param} || {};
+
+	my %story = (
+		title		=> $src_journal->{description},
+		uid		=> $journal_user->{uid},
+		introtext	=> $intro,
+		bodytext	=> $body,
+		'time'		=> $slashdb->getTime(), 
+		commentstatus	=> 'enabled',
+		journal_id 	=> $src_journal->{id},
+		by		=> $options->{story_param}{by}     || $journal_user->{nickname},
+		by_url 		=> $options->{story_param}{by_url} || $journal_user->{homepage} || $fakeemail,
+		discussion	=> $src_journal->{discussion},
+	);
+
+	$story{neverdisplay} = $options->{neverdisplay} if $options->{neverdisplay};
+
+	foreach (keys %$story_param) {
+		$story{$_} = $story_param->{$_} if !defined $story{$_};
+	}
+
+	# this sets weight (front page, etc.) ... not sure which weight to use;
+	# 20/10 is for section-only, 40/30 is for mainpage
+
+	my $skin = $slashdb->getSkin($skid);
+	my $skin_nexus = $skin->{nexus};
+ 	
+	# May need to change
+	$story{topics_chosen} = $options->{topics_chosen}
+		|| { $src_journal->{tid} => 10, $skin_nexus => 20 }; 
+ 	
+	my $topiclist = $slashdb->getTopiclistFromChosen(
+ 		$story{topics_chosen}
+	);
+
+	my $admindb = getObject('Slash::Admin');
+ 	$story{relatedtext} = $admindb->relatedLinks(
+		"$story{title} $story{introtext} $story{bodytext}",
+ 	       $topiclist,
+ 	       '', # user's nickname
+ 	       '', # user's uid
+        );
+
+	my $sid = $slashdb->createStory(\%story);
+	my $stoid = $slashdb->getStoidFromSidOrStoid($sid);
+	$self->logJournalTransfer($src_journal->{id}, 0, $stoid);
+}
+
+sub splitJournalTextForStory {
+	my($self, $text) = @_;
+	my($intro, $body) = split(/<br>|<\/p>/i, $text, 2);
+
+	for ($intro, $body) {
+		s/^$Slash::Utility::Data::WS_RE+//io if defined;
+		s/$Slash::Utility::Data::WS_RE+$//io if defined;
+
+		$_ = balanceTags($_);
+	}
+
+	return($intro, $body);
+}
+
+sub logJournalTransfer {
+	my($self, $id, $subid, $stoid) = @_;
+	my $slashdb = getCurrentDB();
+	$stoid ||=0;
+	$subid ||=0;
+	return if !$id;
+
+	$slashdb->sqlInsert("journal_transfer", { id => $id, subid => $subid, stoid => $stoid, updated => 0 });
+}
+
+sub hasJournalTransferred {
+	my($self, $id) = @_;
+	return $self->sqlCount("journal_transfer", "id=$id")
+}
+
+sub promoteJournal {
+	my($data) = @_;
+	my $constants = getCurrentStatic();
+	my $user      = getCurrentUser();
+	my $journal = getObject('Slash::Journal'); 
+
+	return 0 unless $constants->{journal_allow_journal2submit};
+	return 0 unless $data && $data->{id};
+	my $src_journal = $journal->get($data->{id});
+	if ($src_journal->{promotetype} eq "publicize") {
+		my $transferred = $journal->hasJournalTransferred($data->{id});
+		if ($user->{acl}{journal_to_story}) {
+			unless ($transferred) {
+				$journal->createStoryFromJournal($src_journal, { neverdisplay => 1} );
+			} else {
+				$journal->updateStoryFromJournal($src_journal);	
+			}
+		} else {
+			unless ($transferred) {
+				if ($constants->{journal_create_submission}) {
+					$journal->createSubmissionFromJournal($src_journal);
+				}
+			} else {
+				# Apply edit?
+			}
+		}
+	}
+	return 1;
+}
+
+
+sub updateTransferredJournalDiscussions {
+	my($self) = @_;
+
+	my $journal_stories = $self->sqlSelectAllHashrefArray(
+		'journal_transfer.id, stories.stoid, discussion, ' .
+			'primaryskid, tid, sid, time, title',
+		'journal_transfer, stories, story_text',
+		'journal_transfer.stoid != 0 AND journal_transfer.updated = 0 AND ' .
+			'journal_transfer.stoid = stories.stoid AND ' .
+			'stories.time <= NOW() AND '.
+			'stories.stoid = story_text.stoid'
+	);
+
+	for my $journal_story (@$journal_stories) {
+		my $url	= $self->getUrlFromSid(
+			$journal_story->{sid},
+			$journal_story->{primaryskid},
+			$journal_story->{tid}
+		);
+
+		my $discussion = {
+			title		=> $journal_story->{title},
+			url		=> $url,
+			ts		=> $journal_story->{'time'}
+		};
+
+		if ($self->setDiscussion($journal_story->{discussion}, $discussion)) {
+			$self->sqlUpdate('journal_transfer', {
+				updated	=> 1,
+			}, 'id=' . $self->sqlQuote($journal_story->{id}));
+		}
+	}
+
+	# if was made a story, then story deleted, we revert discussion data
+	# to point to journal (IF stoid = 0 AND updated = 1)
+	# ts, title, url from journal
+	# revert dkid to 'journal'
+	# blank out stoid, sid, primaryskid
+	my $revert_journals = $self->sqlSelectAllHashrefArray(
+		'journal_transfer.id, journals.discussion, journals.description, journals.date, journals.uid, nickname',
+		'journal_transfer, journals, users',
+		'journal_transfer.stoid = 0 AND journal_transfer.updated = 1 AND ' .
+			'journal_transfer.id = journals.id AND ' .
+			'users.uid = journals.uid'
+	);
+
+	my $constants = getCurrentStatic();
+	for my $revert_journal (@$revert_journals) {
+		my $url = "$constants->{rootdir}/~" .
+			fixparam($revert_journal->{nickname}) .
+			"/journal/$revert_journal->{id}";
+
+		my $discussion = {
+			title		=> $revert_journal->{description},
+			url		=> $url,
+			ts		=> $revert_journal->{date},
+			stoid		=> 0,
+			sid		=> '',
+			primaryskid	=> 0,
+			kind		=> 'journal',
+		};
+
+		if ($self->setDiscussion($revert_journal->{discussion}, $discussion)) {
+			$self->sqlUpdate('journal_transfer', {
+				updated	=> 0,
+			}, 'id=' . $self->sqlQuote($revert_journal->{id}));
+		}
+	}
+}
+
 
 sub DESTROY {
 	my($self) = @_;

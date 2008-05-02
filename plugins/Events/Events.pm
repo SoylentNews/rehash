@@ -1,7 +1,6 @@
 # This code is released under the GPL.
 # Copyright 2001 by Brian Aker. See README
 # and COPYING for more information, or see http://software.tangent.org/.
-# $Id$
 
 package Slash::Events;
 
@@ -14,12 +13,10 @@ use Slash::DB::Utility;
 use HTML::CalendarMonth;
 use HTML::AsSubs;
 
-use vars qw($VERSION @EXPORT);
-use base 'Exporter';
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 # On a side note, I am not sure if I liked the way I named the methods either.
 # -Brian

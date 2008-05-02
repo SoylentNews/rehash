@@ -1,15 +1,15 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::DB::Oracle;
 
 use strict;
-use vars qw($VERSION @ISA);
+use vars qw(@ISA);
+use Slash::Constants ();
 
 @ISA = qw( Slash::DB::Utility );
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 1;
 

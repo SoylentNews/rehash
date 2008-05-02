@@ -3,6 +3,5 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Slash::Hof',
-    'VERSION_FROM' => 'Hof.pm', # finds $VERSION
     'PM'	=> { 'Hof.pm' => '$(INST_LIBDIR)/Hof.pm' },
 );

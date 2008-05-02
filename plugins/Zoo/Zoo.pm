@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Zoo;
 
@@ -12,11 +11,10 @@ use Slash::Constants qw(:people :messages);
 use Slash::Utility;
 use Slash::DB::Utility;
 
-use vars qw($VERSION @EXPORT);
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 # "There ain't no justice" -Niven
 # We can try. 	-Brian
@@ -53,14 +51,14 @@ sub getRelationships {
 		}
 	}
 	return [qw()] unless @people;
-	
-	my $rel = $self->sqlSelectAll(
+	@people = sort { $a <=> $b } @people;
+	my $people_str = join(",", @people);
+
+	return $self->sqlSelectAll(
 		'uid, nickname, journal_last_entry_date',
 		'users',
-		" uid IN (" . join(",", @people) .") ",
-		" ORDER BY nickname "
-	);
-	return $rel;
+		"uid IN ($people_str)",
+		'ORDER BY nickname');
 }
 
 # Get the details for relationships
@@ -93,6 +91,7 @@ sub setFoe {
 sub _set {
 	my($self, $uid, $person, $type, $const) = @_;
 	my $slashdb = getCurrentDB();
+
 #Removed this, since when we make the relationship it will now swap whatever bits we 
 #need swapped, this no longer matters. -Brian
 #	# Lets see if we need to wipe out a relationship first....
@@ -100,9 +99,14 @@ sub _set {
 #	# We need to check to see if type has value to make sure we are not looking at fan or freak
 #	$self->delete($uid, $person, $current_standing->{type})
 #		if ($current_standing && $current_standing->{type});
+
+	# Make sure $person actually exists.
+	return unless $self->sqlSelect('uid', 'users', "uid=$person");
+
 	# First we do the main person
 	# We insert to make sure a position exists for this relationship and then we update.
 	# If I ever removed freak/fan from the table this could be done as a replace.
+	# XXX This should be a transaction.
 	$self->sqlInsert('people', { uid => $uid,  person => $person }, { ignore => 1});
 	$self->sqlUpdate('people', { type => $type }, "uid = $uid AND person = $person");
 	my $people = $self->rebuildUser($uid);
@@ -115,13 +119,26 @@ sub _set {
 	my $s_const = $type eq 'foe' ? FREAK : FAN;
 	$self->sqlInsert('people', { uid => $person,  person => $uid }, { ignore => 1});
 	$self->sqlUpdate('people', { perceive => $s_type }, "uid = $person AND person = $uid");
+	# XXX transaction should end here I think
 
+	# Mark other users as dirty (needing to be changed) as 
+	# appropriate, but do it a few at a time with a short
+	# sleep between, to avoid bogging the master DB or
+	# lagging its slave DBs.  Yes, this method is called
+	# by interactive code, not (just) the backend, so I
+	# don't really like adding the sleep(), but we still
+	# need to do this.
 	my $uid_ar = $self->sqlSelectColArrayref('uid', 'people',
 		"person=$uid AND type='friend'");
 	push @$uid_ar, $person;
-	my $uid_list = join (',', @$uid_ar);
-	$self->sqlUpdate("users_info", { people_status => 'dirty' }, "uid IN ($uid_list)");
-	$self->setUser_delete_memcached($uid_ar);
+	my $splice_count = 100;
+	while (@$uid_ar) {
+		my @uid_chunk = splice @$uid_ar, 0, $splice_count;
+		my $uid_list = join (',', @uid_chunk);
+		$self->sqlUpdate("users_info", { people_status => 'dirty' }, "uid IN ($uid_list)");
+		$self->setUser_delete_memcached($uid_ar);
+		Time::HiRes::sleep(0.2);
+	}
 }
 
 
@@ -195,7 +212,7 @@ sub count {
 
 sub getFriendsWithJournals {
 	my($self) = @_;
-	my $uid = $ENV{SLASH_USER};
+	my $uid = getCurrentUser('uid');
 
 	my($friends, $journals, $ids, %data);
 	$friends = $self->sqlSelectAll(
@@ -229,7 +246,7 @@ sub getFriendsWithJournals {
 sub getFriendsForMessage {
 	my($self) = @_;
 	my $code  = MSG_CODE_JOURNAL_FRIEND;
-	my $uid   = $ENV{SLASH_USER};
+	my $uid   = getCurrentUser('uid');
 	my $cols  = "pp.uid";
 	my $table = "people AS pp, users_messages as um";
 	my $where = <<SQL;
@@ -256,21 +273,21 @@ sub getZooUsersForProcessing {
 
 sub rebuildUser {
 	my($self, $uid) = @_;
-	my $data =  $self->sqlSelectAllHashrefArray('*', 'people', "uid = $uid");
+	my $data = $self->sqlSelectAllHashrefArray('*', 'people', "uid = $uid");
 	my $people;
 
 	my @friends;
 	if ($data) {
 		for (@$data) {
-			if ($_->{type} eq 'friend') {
+			if ($_->{type} && $_->{type} eq 'friend') {
 				$people->{FRIEND()}{$_->{person}} = 1;
 				push @friends, $_->{person};
-			} elsif ($_->{type} eq 'foe') {
+			} elsif ($_->{type} && $_->{type} eq 'foe') {
 				$people->{FOE()}{$_->{person}} = 1;
 			}
-			if ($_->{perceive} eq 'fan') {
+			if ($_->{perceive} && $_->{perceive} eq 'fan') {
 				$people->{FAN()}{$_->{person}} = 1;
-			} elsif ($_->{perceive} eq 'freak') {
+			} elsif ($_->{perceive} && $_->{perceive} eq 'freak') {
 				$people->{FREAK()}{$_->{person}} = 1;
 			}
 		}
@@ -278,7 +295,7 @@ sub rebuildUser {
 
 	my $list = join (',', @friends);
 	if (scalar(@friends) && $list) {
-		$data =  $self->sqlSelectAllHashrefArray('*', 'people', "uid IN ($list) AND type IS NOT NULL");
+		$data = $self->sqlSelectAllHashrefArray('*', 'people', "uid IN ($list) AND type IS NOT NULL");
 		for (@$data) {
 			if ($_->{type} eq 'friend') {
 				$people->{FOF()}{$_->{person}}{$_->{uid}} = 1;

@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Utility;
 
@@ -30,18 +29,20 @@ Unless otherwise noted, they are publically available functions.
 use strict;
 use Slash::Utility::Access;
 use Slash::Utility::Anchor;
+use Slash::Utility::Comments;
 use Slash::Utility::Data;
 use Slash::Utility::Display;
 use Slash::Utility::Environment;
 use Slash::Utility::System;
+use Slash::Constants ();
 
 use base 'Exporter';
-use vars qw($VERSION @EXPORT);
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-@EXPORT = (
+our $VERSION = $Slash::Constants::VERSION;
+our @EXPORT = (
 	@Slash::Utility::Access::EXPORT,
 	@Slash::Utility::Anchor::EXPORT,
+	@Slash::Utility::Comments::EXPORT,
 	@Slash::Utility::Data::EXPORT,
 	@Slash::Utility::Display::EXPORT,
 	@Slash::Utility::Environment::EXPORT,

@@ -3,5 +3,4 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Slash::Messages::DB::MySQL',
-    'VERSION_FROM' => 'MySQL.pm', # finds $VERSION
 );

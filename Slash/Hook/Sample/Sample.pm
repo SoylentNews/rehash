@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Hook::Sample;
 use strict;
@@ -9,11 +8,10 @@ use DBIx::Password;
 use Slash;
 use Slash::DB;
 use Slash::Utility;
-use vars qw($VERSION);
 
 # Shake well, serve warm.
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 
 sub sample {

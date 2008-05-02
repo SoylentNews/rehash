@@ -1,17 +1,15 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Search::SOAP;
 
 use strict;
 use Slash::Utility;
 use Slash::DB::Utility;
-use vars qw($VERSION);
 use base 'Slash::DB::Utility';
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 # As a note I will be adding support for sort later.
 # I want to make it easy for people just to pass in a string
@@ -27,7 +25,8 @@ sub findComments {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;
@@ -45,7 +44,8 @@ sub findUsers {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;
@@ -63,7 +63,8 @@ sub findStory {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;
@@ -81,7 +82,8 @@ sub findJournalEntry {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;
@@ -99,7 +101,8 @@ sub findPollQuestion {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;
@@ -117,7 +120,8 @@ sub findSubmission {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;
@@ -135,7 +139,8 @@ sub findRSS {
 	my($self, $query, $options) = @_;
 	$options->{query} = $query;
 
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
+	my $slashdb = getCurrentDB();
+	my $searchDB = getObject('Slash::Search', { db_type => 'search' });
 	my $constants = getCurrentStatic();
 
 	my $answers;
@@ -143,24 +148,6 @@ sub findRSS {
 		return;
 	} else {
 		$answers = $searchDB->findRSS($options, 0, MAX_NUM);
-	}
-
-	return $answers;
-}
-
-####################################################################################
-sub findDiscussion {
-	my($self, $query, $options) = @_;
-	$options->{query} = $query;
-
-	my($slashdb, $searchDB) = Slash::Search::SelectDataBases();
-	my $constants = getCurrentStatic();
-
-	my $answers;
-	if ($constants->{panic} >= 1 or $constants->{search_google}) {
-		return;
-	} else {
-		$answers = $searchDB->findDiscussion($options, 0, MAX_NUM);
 	}
 
 	return $answers;

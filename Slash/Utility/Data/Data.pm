@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Utility::Data;
 
@@ -24,26 +23,45 @@ LONG DESCRIPTION.
 
 =cut
 
+BEGIN {
+#	$HTML::TreeBuilder::DEBUG = 2;
+}
+
 use strict;
 use Date::Format qw(time2str);
 use Date::Language;
 use Date::Parse qw(str2time);
 use Digest::MD5 qw(md5_hex md5_base64);
-use HTML::Entities;
+use Email::Valid;
+use HTML::Entities qw(:DEFAULT %char2entity %entity2char);
 use HTML::FormatText;
+use HTML::Tagset ();
 use HTML::TreeBuilder;
+use Lingua::Stem;
 use POSIX qw(UINT_MAX);
 use Safe;
 use Slash::Constants qw(:strip);
 use Slash::Utility::Environment;
+use Slash::Apache::User::PasswordSalt;
 use URI;
 use XML::Parser;
 
 use base 'Exporter';
-use vars qw($VERSION @EXPORT);
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-@EXPORT	   = qw(
+# whitespace regex
+our $WS_RE = qr{(?: \s | </? (?:br|p) (?:\ /)?> )*}x;
+
+# without this, HTML::TreeBuilder will skip slash
+BEGIN {
+	$HTML::Tagset::isKnown{slash} = 1;
+	$HTML::Tagset::optionalEndTag{slash} = 1;
+	$HTML::Tagset::isBodyElement{slash} = 1;
+	$HTML::Tagset::isPhraseMarkup{slash} = 1;
+	$HTML::Tagset::linkElements{slash} = ['src', 'href'];
+}
+
+our $VERSION = $Slash::Constants::VERSION;
+our @EXPORT  = qw(
 	addDomainTags
 	createStoryTopicData
 	slashizeLinks
@@ -53,11 +71,16 @@ use vars qw($VERSION @EXPORT);
 	balanceTags
 	changePassword
 	chopEntity
+	cleanRedirectUrl
+	cleanRedirectUrlFromForm
 	commify
+	comparePassword
 	countTotalVisibleKids
 	countWords
+	createSid
 	decode_entities
 	ellipsify
+	emailValid
 	encryptPassword
 	findWords
 	fixHref
@@ -65,14 +88,22 @@ use vars qw($VERSION @EXPORT);
 	fixparam
 	fixurl
 	fudgeurl
+	fullhost_to_domain
 	formatDate
 	getArmoredEmail
+	getRandomWordFromDictFile
 	createLogToken
 	grepn
 	html2text
+	issueAge
 	nickFix
 	nick2matchname
+	noFollow
+	regexSid
+	revertQuote
+	prepareQuoteReply
 	root2abs
+	roundrand
 	set_rootdir
 	sitename2filename
 	strip_anchor
@@ -86,21 +117,28 @@ use vars qw($VERSION @EXPORT);
 	strip_notags
 	strip_plaintext
 	strip_paramattr
+	strip_paramattr_nonhttp
 	strip_urlattr
+	submitDomainAllowed
 	timeCalc
+	url2html
 	url2abs
+	urlFromSite
 	xmldecode
 	xmlencode
 	xmlencode_plain
+	validUrl
 	vislenify
 );
+
 
 # really, these should not be used externally, but we leave them
 # here for reference as to what is in the package
 # @EXPORT_OK = qw(
 # 	approveTag
 # 	breakHtml
-# 	processCustomTags
+# 	processCustomTagsPre
+#	processCustomTagsPost
 # 	stripByMode
 # );
 
@@ -108,10 +146,14 @@ use vars qw($VERSION @EXPORT);
 
 sub nickFix {
 	my($nick) = @_;
+	return '' if !$nick;
 	my $constants = getCurrentStatic();
+	my $nc = $constants->{nick_chars} || join('', 'a' .. 'z');
+	my $nr = $constants->{nick_regex} || '^[a-z]$';
 	$nick =~ s/\s+/ /g;
-	$nick =~ s/[^$constants->{nick_chars}]+//g;
+	$nick =~ s/[^$nc]+//g;
 	$nick = substr($nick, 0, $constants->{nick_maxlen});
+	return '' if $nick !~ $nr;
 	return $nick;
 }
 
@@ -124,6 +166,131 @@ sub nick2matchname {
 	return $nick;
 }
 
+#========================================================================
+# If you change createSid() for your site, change regexSid() too.
+# Check getOpAndDatFromStatusAndURI also.
+# If your site will have multiple formats of sids, you'll want this
+# to continue matching the old formats too.
+# NOTE: sid is also used for discussion ID (and maybe stoid too?),
+# such as in comments.pl, so that's what the \d{1,8} is for. -- pudge
+sub regexSid {
+	return qr{\b(\d{2}/\d{2}/\d{2}/\d{3,8}|\d{1,8})\b};
+}
+
+#========================================================================
+
+=head2 emailValid(EMAIL)
+
+Returns true if email is valid, false otherwise.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item EMAIL
+
+Email address to check.
+
+=back
+
+=item Return value
+
+True if email is valid, false otherwise.
+
+=back
+
+=cut
+
+sub emailValid {
+	my($email) = @_;
+	return 0 if !$email;
+
+	my $constants = getCurrentStatic();
+	return 0 if $constants->{email_domains_invalid}
+		&& ref($constants->{email_domains_invalid})
+		&& $email =~ $constants->{email_domains_invalid};
+
+	my $valid = Email::Valid->new;
+	return 0 unless $valid->rfc822($email);
+
+	return 1;
+}
+
+#========================================================================
+
+=head2 issueAge(ISSUE)
+
+Returns the "age" in days of an issue, given in issue mode form: yyyymmdd.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item ISSUE
+
+Which issue, in yyyymmdd form (matches /^\d{8}$/)
+
+=back
+
+=item Return value
+
+Age in days of that issue (a decimal number).  Takes current user's
+timezone into account.  Return value of 0 indicates error.
+
+=back
+
+=cut
+
+sub issueAge {
+	my($issue) = @_;
+	return 0 unless $issue =~ /^\d{8}$/;
+	my $user = getCurrentUser();
+	my $issue_unix_timestamp = timeCalc("${issue}0000", '%s', -$user->{off_set});
+	my $age = (time - $issue_unix_timestamp) / 86400;
+	$age = 0.00001 if $age == 0; # don't return 0 on success
+	return $age;
+}
+
+#========================================================================
+
+=head2 submitDomainAllowed(DOMAIN)
+
+Returns true if domain is allowed, false otherwise.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item DOMAIN
+
+host domain to check.
+
+=back
+
+=item Return value
+
+True if domain is valid, false otherwise.
+
+=back
+
+=cut
+
+sub submitDomainAllowed {
+        my($domain) = @_;
+
+        my $constants = getCurrentStatic();
+        return 0 if $constants->{submit_domains_invalid}
+                && ref($constants->{submit_domains_invalid})
+                && $domain =~ $constants->{submit_domains_invalid};
+
+        return 1;
+}
 #========================================================================
 
 =head2 root2abs()
@@ -148,10 +315,38 @@ sub root2abs {
 	my $user = getCurrentUser();
 
 	if ($user->{state}{ssl}) {
-		return getCurrentStatic('absolutedir_secure');
+		return getCurrentSkin('absolutedir_secure');
 	} else {
-		return getCurrentStatic('absolutedir');
+		return getCurrentSkin('absolutedir');
 	}
+}
+
+#========================================================================
+
+=head2 roundrand()
+
+Rounds a real value to an integer value, randomly, with the
+two options weighted in linear proportion to the fractional
+component.  E.g. 1.3 is 30% likely to round to 1, 70% to 2.
+And -4.9 is 90% likely to round to -5, 10% to -4.
+
+=over 4
+
+=item Return value
+
+Input value converted to integer.
+
+=back
+
+=cut
+
+sub roundrand {
+	my($real) = @_;
+	return 0 if !$real;
+	my $i = int($real);
+	$i-- if $real < 0;
+	my $frac = $real - $i;
+	return( (rand(1) >= $frac) ? $i : $i+1 );
 }
 
 #========================================================================
@@ -178,8 +373,8 @@ rootdir variable, converted to proper scheme.
 
 sub set_rootdir {
 	my($sectionurl, $rootdir) = @_;
-	my $rooturi    = new URI $rootdir, "http";
-	my $sectionuri = new URI $sectionurl, "http";
+	my $rooturi    = new URI $rootdir, 'http';
+	my $sectionuri = new URI $sectionurl, 'http';
 
 	$sectionuri->scheme($rooturi->scheme || undef);
 	return $sectionuri->as_string;
@@ -216,33 +411,72 @@ Fixed URL.
 
 sub cleanRedirectUrl {
 	my($redirect) = @_;
+	my $gSkin = getCurrentSkin();
+
+	if (urlFromSite($redirect)) {
+		my $base = root2abs();
+		return URI->new_abs($redirect || $gSkin->{rootdir}, $base);
+	} else {
+		return url2abs($gSkin->{rootdir});
+	}
+}
+
+
+sub urlFromSite {
+	my($url) = @_;
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $gSkin = getCurrentSkin();
 
-	# We absolutize the return-to URL to our homepage just to
+	# We absolutize the return-to URL to our domain just to
 	# be sure nobody can use the site as a redirection service.
 	# We decide whether to use the secure homepage or not
 	# based on whether the current page is secure.
-	my $base = rootabs();
-	my $clean = URI->new_abs($redirect || $constants->{rootdir}, $base);
+	my $base = root2abs();
+	my $clean = URI->new_abs($url || $gSkin->{rootdir}, $base);
 
-	my $site_domain = $constants->{basedomain};
-	$site_domain =~ s/^www\.//;
-	$site_domain =~ s/:.+$//;	# strip port, if available
-
-	my $host = $clean->can('host') ? $clean->host : '';
-	$host =~ s/^www\.//;
-
-	if ($site_domain eq $host) {
-		# Cool, it goes to our site.  Send the user there.
-		$clean = $clean->as_string;
-	} else {
-		# Bogus, it goes to another site.  op=userlogin is not a
-		# URL redirection service, sorry.
-		$clean = url2abs($constants->{rootdir});
+	# obviously, file: URLs are local
+	if ($clean->scheme eq 'file') {
+		return 1;
 	}
 
-	return $clean;
+	my @site_domain = split m/\./, $gSkin->{basedomain};
+	my $site_domain = @site_domain >= 2 ? join '.', @site_domain[-2, -1] : '';
+	$site_domain =~ s/:.+$//;	# strip port, if available
+
+	my @host = split m/\./, ($clean->can('host') ? $clean->host : '');
+	return 0 if scalar(@host) < 2;
+	my $host = join '.', @host[-2, -1];
+
+	return $site_domain eq $host;
+}
+
+#========================================================================
+
+sub cleanRedirectUrlFromForm {
+	my($redirect_formname) = @_;
+	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
+	my $form = getCurrentForm();
+
+	my $formname = $redirect_formname ? "returnto_$redirect_formname" : 'returnto';
+	my $formname_confirm = "${formname}_confirm";
+	my $returnto = $form->{$formname} || '';
+	return undef if !$returnto;
+
+	my $returnto_confirm = $form->{$formname_confirm} || '';
+
+	my $returnto_passwd = $constants->{returnto_passwd};
+	my $confirmed = md5_hex("$returnto$returnto_passwd") eq $returnto_confirm;
+	if ($confirmed) {
+		# The URL and the password have been concatted together
+		# and confirmed with the MD5, so we know it comes from a
+		# trusted source.  Approve it.
+		return $returnto;
+	} else {
+		# There is no proper MD5, so don't redirect.
+		return undef;
+	}
 }
 
 #========================================================================
@@ -423,15 +657,15 @@ The 'atonish' and 'aton' template blocks.
 
 sub timeCalc {
 	# raw mysql date of story
-	my($date, $format, $off_set) = @_;
+	my($date, $format, $off_set, $options) = @_;
 	my $user = getCurrentUser();
 	my(@dateformats, $err);
 
-	$off_set = $user->{off_set} unless defined $off_set;
+	$off_set = $user->{off_set} || 0 if !defined $off_set;
 
 	if ($date) {
-		# massage data for YYYYMMDDHHmmSS or YYYYMMDDHHmm
-		$date =~ s/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})?$/"$1-$2-$3 $4:$5:" . ($6 || '00')/e;
+		# massage data for YYYYMMDDHHmmSS or YYYYMMDDHHmm (with optional TZ)
+		$date =~ s/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})?( [a-zA-Z]+)?$/"$1-$2-$3 $4:$5:" . ($6 || '00') . ($7 || '')/e;
 
 		# find out the user's time based on personal offset in seconds
 		$date = str2time($date) + $off_set;
@@ -444,12 +678,26 @@ sub timeCalc {
 	# so it's not a performance hit
 	my $lang = getCurrentStatic('datelang');
 
+	# If no format passed in, default to the current user's.
+	$format ||= $user->{'format'};
+
+	if ($format =~ /\bIF_OLD\b/) {
+		# Split $format into its new half and old half.
+		my($format_new, $format_old) = $format =~ /^(.+?)\s*\bIF_OLD\b\s*(.+)$/;
+		warn "format cannot be parsed: '$format'" if !defined($format_new);
+		# Reassign whichever half we want back to $format.
+		$format = $date < time() - 180*86400
+			|| ($options && $options->{is_old})
+			? $format_old
+			: $format_new;
+	}
+
 	# convert the raw date to pretty formatted date
 	if ($lang && $lang ne 'English') {
 		my $datelang = Date::Language->new($lang);
-		$date = $datelang->time2str($format || $user->{'format'}, $date);
+		$date = $datelang->time2str($format, $date);
 	} else {
-		$date = time2str($format || $user->{'format'}, $date);
+		$date = time2str($format, $date);
 	}
 
 	# return the new pretty date
@@ -483,14 +731,14 @@ randomness.
 =cut
 
 sub createLogToken {
-	my $str = "";
+	my $str = '';
 	my $need_srand = 0;
 	while (length($str) < 22) {
 		if ($need_srand) {
 			srand();
 			$need_srand = 0;
 		}
-		my $r = rand(UINT_MAX) . ":" . rand(UINT_MAX);
+		my $r = rand(UINT_MAX) . ':' . rand(UINT_MAX);
 		my $md5 = md5_base64($r);
 		$md5 =~ tr/A-Za-z0-9//cd;
 		$str .= substr($md5, int(rand 8) + 5, 3);
@@ -527,8 +775,10 @@ Random password.
 
 =head2 encryptPassword(PASSWD)
 
-Encrypts given password.  Currently uses MD5, but could change in the future,
-so do not depend on implementation.
+Encrypts given password, using the most recent salt (if any) in
+Slash::Apache::User::PasswordSalt for the current virtual user.
+Currently uses MD5, but could change in the future, so do not
+depend on the implementation.
 
 =over 4
 
@@ -551,8 +801,87 @@ Encrypted password.
 =cut
 
 sub encryptPassword {
-	my($passwd) = @_;
-	return md5_hex($passwd);
+	my($passwd, $uid) = @_;
+	$uid ||= '';
+	my $slashdb = getCurrentDB();
+	my $vu = $slashdb->{virtual_user};
+	my $salt = Slash::Apache::User::PasswordSalt::getCurrentPwSalt($vu);
+	return md5_hex("$salt:$uid:$passwd");
+}
+
+#========================================================================
+
+=head2 comparePassword(PASSWD, MD5, ISPLAIN, ISENC)
+
+Given a password and an MD5 hex string, compares the two to see if they
+represent the same value.  To be precise:
+
+If the password given is equal to the MD5 string, it must already be
+in MD5 format and be correct, so return true
+
+Otherwise, the password is assumed to be plaintext.  Each possible
+salt-encryption of it (including the encryption with empty salt) is
+compared against the MD5 string.  True is returned if there is any
+match.
+
+If ISPLAIN is true, PASSWD is assumed to be plaintext, so the
+(trivial equality) test against the encrypted MD5 is not performed.
+
+If ISENC is true, PASSWD is assumed to be already encrypted, so the
+tests of salting and encrypting it are not performed.
+
+(If neither is true, all tests are performed.  If both are true, no
+tests are performed and 0 is returned.)
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item PASSWD
+
+Possibly-correct password, either plaintext or already-MD5's,
+to be checked.
+
+=item MD5
+
+Encrypted correct password.
+
+=back
+
+=item Return value
+
+0 or 1.
+
+=back
+
+=cut
+
+sub comparePassword {
+	my($passwd, $md5, $uid, $is_plain, $is_enc) = @_;
+	if (!$is_plain) {
+		return 1 if $passwd eq $md5;
+	}
+	if (!$is_enc) {
+		# An old way of encrypting a user's password, which we have
+		# to check for reverse compatibility.
+		return 1 if md5_hex($passwd) eq $md5;
+
+		# No?  OK let's see if it matches any of the salts.
+		my $slashdb = getCurrentDB();
+		my $vu = $slashdb->{virtual_user};
+		my $salt_ar = Slash::Apache::User::PasswordSalt::getPwSalts($vu);
+		unshift @$salt_ar, ''; # always test the case of no salt
+		for my $salt (reverse @$salt_ar) {
+			# The current way of encrypting a user's password.
+			return 1 if md5_hex("$salt:$uid:$passwd") eq $md5;
+			# An older way, which we have to check for reverse
+			# compatibility.
+			return 1 if length($salt) && md5_hex("$salt$passwd") eq $md5;
+		}
+	}
+	return 0;
 }
 
 #========================================================================
@@ -647,9 +976,9 @@ The manipulated string.
 
 { # closure for stripByMode
 
-my %latin1_to_ascii = (
+my %ansi_to_ascii = (
+	131	=> 'f',
 	133	=> '...',
-	135	=> 'f',
 	138	=> 'S',
 	140	=> 'OE',
 	142	=> 'Z',
@@ -735,6 +1064,96 @@ my %latin1_to_ascii = (
 	255	=> 'y',
 );
 
+my %ansi_to_utf = (
+	128	=> 8364,
+	129	=> '',
+	130	=> 8218,
+	131	=> 402,
+	132	=> 8222,
+	133	=> 8230,
+	134	=> 8224,
+	135	=> 8225,
+	136	=> 710,
+	137	=> 8240,
+	138	=> 352,
+	139	=> 8249,
+	140	=> 338,
+	141	=> '',
+	142	=> 381,
+	143	=> '',
+	144	=> '',
+	145	=> 8216,
+	146	=> 8217,
+	147	=> 8220,
+	148	=> 8221,
+	149	=> 8226,
+	150	=> 8211,
+	151	=> 8212,
+	152	=> 732,
+	153	=> 8482,
+	154	=> 353,
+	155	=> 8250,
+	156	=> 339,
+	157	=> '',
+	158	=> 382,
+	159	=> 376,
+);
+
+# protect the hash by just returning it, for external use only
+sub _ansi_to_ascii { %ansi_to_ascii }
+sub _ansi_to_utf   { %ansi_to_utf }
+
+sub _charsetConvert {
+	my($char, $constants) = @_;
+	$constants ||= getCurrentStatic();
+
+	my $str = '';
+	if ($constants->{draconian_charset_convert}) {
+		if ($constants->{draconian_charrefs}) {
+			if ($constants->{good_numeric}{$char}) {
+				$str = sprintf('&#%u;', $char);
+			} else { # see if char is in %good_entity
+				my $ent = $char2entity{chr $char};
+				if ($ent) {
+					(my $data = $ent) =~ s/^&(\w+);$/$1/;
+					$str = $ent if $constants->{good_entity}{$data};
+				}
+			}
+		}
+		# fall back
+		$str ||= $ansi_to_ascii{$char};
+	}
+
+	# fall further back
+	# if the char is a special one we don't recognize in Latin-1,
+	# convert it here.  this does not prevent someone from manually
+	# entering &#147; or some such, if they feel they need to, it is
+	# to help catch it when browsers send non-Latin-1 data even though
+	# they shouldn't
+	$char = $ansi_to_utf{$char} if exists $ansi_to_utf{$char};
+	$str ||= sprintf('&#%u;', $char) if length $char;
+	return $str;
+}
+
+sub _fixupCharrefs {
+	my $constants = getCurrentStatic();
+
+	return if $constants->{bad_numeric};
+
+	# At the moment, unless the "draconian" rule is set, only
+	# entities that change the direction of text are forbidden.
+	# For more information, see
+	# <http://www.w3.org/TR/html4/struct/dirlang.html#bidirection>
+	# and <http://www.htmlhelp.com/reference/html40/special/bdo.html>.
+	$constants->{bad_numeric}  = { map { $_, 1 } @{$constants->{charrefs_bad_numeric}} };
+	$constants->{bad_entity}   = { map { $_, 1 } @{$constants->{charrefs_bad_entity}} };
+
+	$constants->{good_numeric} = { map { $_, 1 } @{$constants->{charrefs_good_numeric}},
+		grep { $_ < 128 || $_ > 159 } keys %ansi_to_ascii };
+	$constants->{good_entity}  = { map { $_, 1 } @{$constants->{charrefs_good_entity}}, qw(apos quot),
+		grep { s/^&(\w+);$/$1/ } map { $char2entity{chr $_} }
+		grep { $_ < 128 || $_ > 159 } keys %ansi_to_ascii };
+}
 
 my %action_data = ( );
 
@@ -765,10 +1184,14 @@ my %actions = (
 	breakHtml_ifwhitefix => sub {
 			${$_[0]} = breakHtml(${$_[0]})
 				unless $action_data{no_white_fix};	},
-	processCustomTags => sub {
-			${$_[0]} = processCustomTags(${$_[0]});		},
+	processCustomTagsPre => sub {
+			${$_[0]} = processCustomTagsPre(${$_[0]});	},
+	processCustomTagsPost => sub {
+			${$_[0]} = processCustomTagsPost(${$_[0]});	},
 	approveTags => sub {
 			${$_[0]} =~ s/<(.*?)>/approveTag($1)/sge;	},
+	url2html => sub {
+			${$_[0]} = url2html(${$_[0]});			},
 	approveCharrefs => sub {
 			${$_[0]} =~ s{
 				&(\#?[a-zA-Z0-9]+);?
@@ -776,8 +1199,8 @@ my %actions = (
 	space_between_tags => sub {
 			${$_[0]} =~ s/></> </g;				},
 	whitespace_tagify => sub {
-			${$_[0]} =~ s/\n/<BR>/gi;  # pp breaks
-			${$_[0]} =~ s/(?:<BR>\s*){2,}<BR>/<BR><BR>/gi;
+			${$_[0]} =~ s/\n/<br>/gi;  # pp breaks
+			${$_[0]} =~ s/(?:<br>\s*){2,}<br>/<br><br>/gi;
 			# Preserve leading indents / spaces
 			# can mess up internal tabs, oh well
 			${$_[0]} =~ s/\t/    /g;			},
@@ -786,10 +1209,10 @@ my %actions = (
 				("&nbsp; " x (length($1)/2)) .
 				(defined($2) ? "&nbsp;$2" : "")
 			}eg;
-			${$_[0]} = "<TT>${$_[0]}</TT>";			},
+			${$_[0]} = "<tt>${$_[0]}</tt>";			},
 	newline_indent => sub {
-			${$_[0]} =~ s{<BR>\n?( +)} {
-				"<BR>\n" . ("&nbsp; " x length($1))
+			${$_[0]} =~ s{<br>\n?( +)} {
+				"<br>\n" . ('&nbsp; ' x length($1))
 			}ieg;						},
 	remove_tags => sub {
 			${$_[0]} =~ s/<.*?>//gs;			},
@@ -805,12 +1228,13 @@ my %actions = (
 
 	encode_high_bits => sub {
 			# !! assume Latin-1 !!
-			if (getCurrentStatic('draconian_charset')) {
-				my $convert = getCurrentStatic('draconian_charset_convert');
+			my $constants = getCurrentStatic();
+			if ($constants->{draconian_charset}) {
 				# anything not CRLF tab space or ! to ~ in Latin-1
 				# is converted to entities, where approveCharrefs or
 				# encode_html_amp takes care of them later
-				${$_[0]} =~ s/([^\n\r\t !-~])/($convert && $latin1_to_ascii{ord($1)}) || sprintf("&#%u;", ord($1))/ge;
+				_fixupCharrefs();
+				${$_[0]} =~ s[([^\n\r\t !-~])][ _charsetConvert(ord($1), $constants)]ge;
 			}						},
 );
 
@@ -836,7 +1260,6 @@ my %mode_actions = (
 			encode_html_amp
 			encode_html_ltgt
 			breakHtml_ifwhitefix
-			processCustomTags
 			remove_trailing_lts
 			approveTags
 			space_between_tags
@@ -852,9 +1275,10 @@ my %mode_actions = (
 			newline_to_local
 			trailing_whitespace
 			encode_high_bits
-			processCustomTags
+			processCustomTagsPre
 			remove_trailing_lts
 			approveTags
+			processCustomTagsPost
 			space_between_tags
 			encode_html_ltgt_stray
 			encode_html_amp_ifnotent
@@ -866,9 +1290,10 @@ my %mode_actions = (
 			newline_to_local
 			trailing_whitespace
 			encode_high_bits
-			processCustomTags
+			processCustomTagsPre
 			remove_trailing_lts
 			approveTags
+			processCustomTagsPost
 			space_between_tags
 			encode_html_ltgt_stray
 			encode_html_amp_ifnotent
@@ -896,13 +1321,16 @@ my %mode_actions = (
 
 sub stripByMode {
 	my($str, $fmode, $no_white_fix) = @_;
+	$str = '' if !defined($str);
 	$fmode ||= NOHTML;
 	$no_white_fix = 1 if !defined($no_white_fix) && $fmode == LITERAL;
 	$action_data{no_white_fix} = $no_white_fix || 0;
 
 	my @actions = @{$mode_actions{$fmode}};
+#my $c = 0; print STDERR "stripByMode:start:$c:[{ $str }]\n";
 	for my $action (@actions) {
 		$actions{$action}->(\$str, $fmode);
+#$c++; print STDERR "stripByMode:$action:$c:[{ $str }]\n";
 	}
 	return $str;
 }
@@ -963,15 +1391,26 @@ sub strip_plaintext	{ stripByMode($_[0], PLAINTEXT,	@_[1 .. $#_]) }
 
 =head2 strip_paramattr(STRING [, NO_WHITESPACE_FIX])
 
+=head2 strip_paramattr_nonhttp(STRING [, NO_WHITESPACE_FIX])
+
 =head2 strip_urlattr(STRING [, NO_WHITESPACE_FIX])
 
 Wrappers for strip_attribute(fixparam($param), $no_whitespace_fix) and
 strip_attribute(fudgeurl($url), $no_whitespace_fix).
 
+Note that http is a bit of a special case:  its parameters can be escaped
+with "+" for " ", instead of just "%20".  So strip_paramattr should
+probably be renamed strip_paramattrhttp to best indicate that it is a
+special case.  But because the special case is also the most common case,
+with over 100 occurrences in the code, we leave it named strip_paramattr,
+and create a new function strip_paramattr_nonhttp which must be used for
+URI schemes which do not behave in that way.
+
 =cut
 
-sub strip_paramattr	{ strip_attribute(fixparam($_[0]), $_[1]) }
-sub strip_urlattr	{ strip_attribute(fudgeurl($_[0]), $_[1]) }
+sub strip_paramattr		{ strip_attribute(fixparam($_[0]), $_[1]) }
+sub strip_paramattr_nonhttp	{ my $h = strip_attribute(fixparam($_[0]), $_[1]); $h =~ s/\+/%20/g; $h }
+sub strip_urlattr		{ strip_attribute(fudgeurl($_[0]), $_[1]) }
 
 
 #========================================================================
@@ -1012,7 +1451,6 @@ C<approveTag> function, C<approveCharref> function.
 
 sub stripBadHtml {
 	my($str) = @_;
-#print STDERR "stripBadHtml 1 '$str'\n";
 
 	$str =~ s/<(?!.*?>)//gs;
 	$str =~ s/<(.*?)>/approveTag($1)/sge;
@@ -1038,21 +1476,21 @@ sub stripBadHtml {
 		)
 	}{&lt;$1}gx;
 
-#print STDERR "stripBadHtml 2 '$str'\n";
 	my $ent = qr/#?[a-zA-Z0-9]+/;
 	$str =~ s/&(?!$ent;)/&amp;/g;
 	$str =~ s/&($ent);?/approveCharref($1)/ge;
-#print STDERR "stripBadHtml 3 '$str'\n";
 
 	return $str;
 }
 
 #========================================================================
 
-=head2 processCustomTags(STRING)
+=head2 processCustomTagsPre(STRING)
 
-Private function.  It does processing of special custom tags
-(so far, just ECODE).
+=head2 processCustomTagsPost(STRING)
+
+Private function.  It does processing of special custom tags (in Pre, ECODE;
+in Post, QUOTE).
 
 =over 4
 
@@ -1072,14 +1510,14 @@ Processed string.
 
 =item Dependencies
 
-It is meant to be used before C<stripBadHtml> is called, only
-from regular posting modes, HTML and PLAINTEXT.
+Pre is meant to be used before C<approveTag> is called; Post after.
+Both are called only from regular posting modes, HTML and PLAINTEXT.
 
 =back
 
 =cut
 
-sub processCustomTags {
+sub processCustomTagsPre {
 	my($str) = @_;
 	my $constants = getCurrentStatic();
 
@@ -1103,32 +1541,126 @@ sub processCustomTags {
 	## -- pudge
 
 	# ECODE must be in approvedtags
-	if (grep /^ECODE$/, @{$constants->{approvedtags}}) {
+	if (grep /^ecode$/i, @{$constants->{approvedtags}}) {
+		$str =~ s|<(/?)literal>|<${1}ecode>|gi;  # we used to accept "literal" too
 		my $ecode   = 'ecode';
 		my $open    = qr[\n* <\s* (?:$ecode) (?: \s+ END="(\w+)")? \s*> \n*]xsio;
-		my $close_1 = qr[$open (.*?) \n* <\s* /\2    \s*> \n*]xsio;  # if END is used
-		my $close_2 = qr[$open (.*?) \n* <\s* /ECODE \s*> \n*]xsio;  # if END is not used
+		my $close_1 = qr[($open (.*?) \n* <\s* /\2    \s*> \n*)]xsio;  # if END is used
+		my $close_2 = qr[($open (.*?) \n* <\s* /ECODE \s*> \n*)]xsio;  # if END is not used
 
 		while ($str =~ m[($open)]g) {
 			my $len = length($1);
 			my $end = $2;
 			my $pos = pos($str) - $len;
 
-			my $newlen = 25;  # length('<BLOCKQUOTE></BLOCKQUOTE>')
 			my $close = $end ? $close_1 : $close_2;
-
-			my $ok = $str =~ s[^ (.{$pos}) $close][
-				my $code = strip_code($3);
-				$newlen += length($code);
-				$1 . "<BLOCKQUOTE>$code</BLOCKQUOTE>";
-			]xsie;
-
-			pos($str) = $pos + $newlen if $ok;
+			my $substr = substr($str, $pos);
+			if ($substr =~ m/^$close/si) {
+				my $len = length($1);
+				my $codestr = $3;
+				# remove these if they were added by url2html; I know
+				# this is a rather cheesy way to do this, but c'est la vie
+				# -- pudge
+				$codestr =~ s{<a href="[^"]+" rel="url2html-$$">(.+?)</a>}{$1}g;
+				my $code = strip_code($codestr);
+				my $newstr = "<p><blockquote>$code</blockquote></p>";
+				substr($str, $pos, $len) = $newstr;
+				pos($str) = $pos + length($newstr);
+			}
 		}
+	}
+	return $str;
+}
+
+sub processCustomTagsPost {
+	my($str) = @_;
+	my $constants = getCurrentStatic();
+
+	# QUOTE must be in approvedtags
+	if (grep /^quote$/i, @{$constants->{approvedtags}}) {
+		my $quote   = 'quote';
+		my $open    = qr[\n* <\s*  $quote \s*> \n*]xsio;
+		my $close   = qr[\n* <\s* /$quote \s*> \n*]xsio;
+
+		$str =~ s/$open/<p><div class="quote">/g;
+		$str =~ s/$close/<\/div><\/p>/g;
+	}
+
+	# just fix the whitespace for blockquote to something that looks
+	# universally good
+	if (grep /^blockquote$/i, @{$constants->{approvedtags}}) {
+		my $quote   = 'blockquote';
+		my $open    = qr[\s* <\s*  $quote \s*> \n*]xsio;
+		my $close   = qr[\s* <\s* /$quote \s*> \n*]xsio;
+
+		$str =~ s/(?<!<p>)$open/<p><$quote>/g;
 	}
 
 	return $str;
 }
+
+# revert div class="quote" back to <quote>, handles nesting
+sub revertQuote {
+	my($str) = @_;
+
+	my $bail = 0;
+	while ($str =~ m|((<p>)?<div class="quote">)(.+)$|sig) {
+		my($found, $p, $rest) = ($1, $2, $3);
+		my $pos = pos($str) - (length($found) + length($rest));
+		substr($str, $pos, length($found)) = '<quote>';
+		pos($str) = $pos + length('<quote>');
+
+		my $c = 0;
+		$bail = 1;
+		while ($str =~ m|(<(/?)div.*?>(</p>)?)|sig) {
+			my($found, $end, $p2) = ($1, $2, $3);
+			if ($end && !$c) {
+				$bail = 0;  # if we don't get here, something is wrong
+				my $len = length($found);
+				# + 4 is for the </p>
+				my $pl = $p && $p2 ? 4 : 0;
+				substr($str, pos($str) - $len, $len + $pl) = '</quote>';
+				pos($str) = 0;
+				last;
+			} elsif ($end) {
+				$c--;
+			} else {
+				$c++;
+			}
+		}
+
+		if ($bail) {
+			use Data::Dumper;
+			warn "Stuck in endless loop: " . Dumper({
+				found	=> $found,
+				p	=> $p,
+				rest	=> $rest,
+				'pos'	=> $pos,
+				str	=> $str,
+			});
+			last;
+		}
+	}
+	return($str);
+}
+
+
+sub prepareQuoteReply {
+	my($reply) = @_;
+	my $pid_reply = $reply->{comment} = parseDomainTags($reply->{comment}, 0, 1, 1);
+	$pid_reply = revertQuote($pid_reply);
+
+	# prep for JavaScript
+	$pid_reply =~ s|\\|\\\\|g;
+	$pid_reply =~ s|'|\\'|g;
+	$pid_reply =~ s|([\r\n])|\\n|g;
+
+	$pid_reply =~ s{<nobr> <wbr></nobr>(\s*)} {$1 || ' '}gie;
+	#my $nick = strip_literal($reply->{nickname});
+	#$pid_reply = "<div>$nick ($reply->{uid}) wrote: <quote>$pid_reply</quote></div>";
+	$pid_reply = "<quote>$pid_reply</quote>";
+}
+
 
 #========================================================================
 
@@ -1167,6 +1699,9 @@ The text.
 
 sub breakHtml {
 	my($text, $mwl) = @_;
+	return $text if $Slash::Utility::Data::approveTag::admin
+		     && $Slash::Utility::Data::approveTag::admin > 1;
+
 	my $constants = getCurrentStatic();
 	$mwl = $mwl || $constants->{breakhtml_wordlength} || 50;
 
@@ -1178,8 +1713,7 @@ sub breakHtml {
 
 	# These are tags that "break" a word;
 	# a<P>b</P> breaks words, y<B>z</B> does not
-	my $approvedtags_break = $constants->{'approvedtags_break'}
-		|| [qw(HR BR LI P OL UL BLOCKQUOTE DIV)];
+	my $approvedtags_break = $constants->{'approvedtags_break'} || [];
 	my $break_tag = join '|', @$approvedtags_break;
 	$break_tag = qr{(?:$break_tag)}i;
 
@@ -1227,15 +1761,15 @@ sub breakHtml {
 		(?:^|\G|\s)		# Must start at a word bound
 		(?:
 			(?>(?:<[^>]+>)*)	# Eat up HTML tags
-			(?:			# followed by either
+			(			# followed by either
 				$nbe		# an entity (char. ref.)
-			|	\S		# or an ordinary char
+			|	(?!$nbe)\S	# or an ordinary char
 			)
 		){$mwl}			# $mwl non-HTML-tag chars in a row
 	)}{
-		substr($1, 0, -1)
+		substr($1, 0, -length($2))
 		. $workaround_start
-		. substr($1, -1)
+		. substr($1, -length($2))
 		. $workaround_end
 	}gsex;
 
@@ -1309,7 +1843,8 @@ sub fixHref {  # I don't like this.  we need to change it. -- pudge
 		}
 	}
 
-	my $rootdir = getCurrentStatic('rootdir');
+	my $gSkin = getCurrentSkin();
+	my $rootdir = $gSkin->{rootdir};
 	if ($rel_url =~ /^www\.\w+/) {
 		# errnum 1
 		$abs_url = "http://$rel_url";
@@ -1421,11 +1956,31 @@ in HREFs through C<fudgeurl>.
 
 =cut
 
+{
+	# here's a simple hardcoded list of replacement tags, ones
+	# we don't really care about, or that are no longer valid.
+	# we just replace them with sane substitutes, if and only if
+	# they are not in approvedtags already
+	my %replace = (
+		em	=> 'i',
+		strong	=> 'b',
+		dfn	=> 'i',
+		code	=> 'tt',
+		samp	=> 'tt',
+		kbd	=> 'tt',
+		var	=> 'i',
+		cite	=> 'i',
+
+		address	=> 'i',
+		lh	=> 'li',
+		dir	=> 'ul',
+	);
+
 sub approveTag {
 	my($wholetag) = @_;
+	my $constants = getCurrentStatic();
 
 	$wholetag =~ s/^\s*(.*?)\s*$/$1/; # trim leading and trailing spaces
-	$wholetag =~ s/\bstyle\s*=(.*)$//is; # go away please
 
 	# Take care of URL:foo and other HREFs
 	# Using /s means that the entire variable is treated as a single line
@@ -1433,85 +1988,118 @@ sub approveTag {
 	# knows how to handle multi-line URLs (it removes whitespace).
 	if ($wholetag =~ /^URL:(.+)$/is) {
 		my $url = fudgeurl($1);
-		return qq!<A HREF="$url">$url</A>!;
+		return qq!<a href="$url">$url</a>!;
 	}
 
-	# Build the hash of approved tags.
-	my $approvedtags = getCurrentStatic("approvedtags");
+	# Build the hash of approved tags
+	# XXX someday maybe should be an option, not a global var ...
+	my $approvedtags = $Slash::Utility::Data::approveTag::admin && $constants->{approvedtags_admin}
+		? $constants->{approvedtags_admin}
+		: $constants->{approvedtags};
 	my %approved =
-		map  { (uc($_), 1)   }
-		grep { $_ ne 'ECODE' }
+		map  { (lc, 1)   }
+		grep { !/^ecode$/i }
 		@$approvedtags;
 
 	# We can do some checks at this point.  $t is the tag minus its
-	# properties, e.g. for "<A HREF=foo>", $t will be "A".
+	# properties, e.g. for "<a href=foo>", $t will be "a".
 	my($taglead, $slash, $t) = $wholetag =~ m{^(\s*(/?)\s*(\w+))};
-	my $t_uc = uc $t;
-	if (!$approved{$t_uc}) {
-		return "";
+	my $t_lc = lc $t;
+	if (!$approved{$t_lc}) {
+		if ($replace{$t_lc} && $approved{ $replace{$t_lc} }) {
+			$t = $t_lc = $replace{$t_lc};
+		} else {
+			if ($constants->{approveTag_debug}) {
+				$Slash::Utility::Data::approveTag::removed->{$t_lc} ||= 0;
+				$Slash::Utility::Data::approveTag::removed->{$t_lc}++;
+			}
+			return '';
+		}
 	}
 
-	# Some tags allow attributes, or require attributes to be useful.
-	# These tags go through a secondary, fancier approval process.
-	# Note that approvedtags overrides what is/isn't allowed here.
-	# (At some point we should put this hash into a var, maybe
-	# like "a:href_RU img:src_RU,alt,width,height,longdesc_U"?)
-	my %attr = (
-		A =>	{ HREF =>	{ ord => 1, req => 1, url => 1 } },
-		IMG =>	{ SRC =>	{ ord => 1, req => 1, url => 1 },
-			  ALT =>	{ ord => 2                     },
-			  WIDTH =>	{ ord => 3                     },
-			  HEIGHT =>	{ ord => 4                     },
-			  LONGDESC =>	{ ord => 5,           url => 1 }, },
-	);
+	# These are now stored in a var approvedtags_attr
+	#
+	# A string in the format below:
+	# a:href_RU img:src_RU,alt_N,width,height,longdesc_U
+	# 
+	# Is decoded into the following data structure for attribute
+	# approval
+	#
+	# {
+	#	a =>	{ href =>	{ ord => 1, req => 1, url => 1 } },
+	#	img =>	{ src =>	{ ord => 1, req => 1, url => 1 },
+	#		  alt =>	{ ord => 2, req => 2           },
+	#		  width =>	{ ord => 3                     },
+	#		  height =>	{ ord => 4                     },
+	#		  longdesc =>	{ ord => 5,           url => 1 }, },
+	# }
+	# this is decoded in Slash/DB/MySQL.pm getSlashConf
+
+	my $attr = $Slash::Utility::Data::approveTag::admin && $constants->{approvedtags_attr_admin}
+		? $constants->{approvedtags_attr_admin}
+		: $constants->{approvedtags_attr};
+	$attr ||= {};
+
 	if ($slash) {
-
 		# Close-tags ("</A>") never get attributes.
-		$wholetag = "/$t";
+		$wholetag = "/$t_lc";
 
-	} elsif ($attr{$t_uc}) {
-
+	} elsif ($attr->{$t_lc}) {
 		# This is a tag with attributes, verify them.
 
-		my %allowed = %{$attr{$t_uc}};
+		my %allowed = %{$attr->{$t_lc}};
 		my %required =
 			map  { $_, $allowed{$_}  }
 			grep { $allowed{$_}{req} }
 			keys   %allowed;
 
-		my $tree = HTML::TreeBuilder->new_from_content("<$wholetag>");
-		my($elem) = $tree->look_down(_tag => 'body')->content_list;
+		my $tree = HTML::TreeBuilder->new; #_from_content("<$wholetag>");
+		$tree->attr_encoded(1);
+		$tree->implicit_tags(0);
+		$tree->parse("<$wholetag>");
+		$tree->eof;
+		my $elem = $tree->look_down(_tag => $t_lc);
 		# look_down() can return a string for some kinds of bogus data
 		return "" unless $elem && ref($elem) eq 'HTML::Element';
 		my @attr_order =
-			sort { $allowed{uc $a}{ord} <=> $allowed{uc $b}{ord} }
-			grep { !/^_/ && exists $allowed{uc $_} }
+			sort { $allowed{lc $a}{ord} <=> $allowed{lc $b}{ord} }
+			grep { !/^_/ && exists $allowed{lc $_} }
 			$elem->all_attr_names;
 		my %attr_data  = map { ($_, $elem->attr($_)) } @attr_order;
-		my $num_req_found = 0;
-		$wholetag = "$t_uc";
+		my %found;
+		$wholetag = $t_lc;
+
 		for my $a (@attr_order) {
-			my $a_uc = uc $a;
-			next unless $allowed{$a_uc};
-			my $data = $attr_data{$a};
-			$data = fudgeurl($data) if $allowed{$a_uc}{url};
-			next unless $data;
-			$wholetag .= qq{ $a_uc="$data"};
-			++$num_req_found if $required{$a_uc};
+			my $a_lc = lc $a;
+			next unless $allowed{$a_lc};
+			my $data = $attr_data{$a_lc} || '';
+			$data = fudgeurl($data) if $allowed{$a_lc}{url};
+			next unless length $data;
+			$wholetag .= qq{ $a_lc="$data"};
+			++$found{$a_lc} if $required{$a_lc};
 		}
+
 		# If the required attributes were not all present, the whole
-		# tag is invalid.
-		return "" unless $num_req_found == scalar(keys %required);
+		# tag is invalid, unless req == 2, in which case we fudge it
+		for my $a (keys %required) {
+			my $a_lc = lc $a;
+			next if $found{$a_lc};
+			if ($required{$a}{req} == 2) {
+				# is there some better default than "*"?
+				$wholetag .= qq{ $a_lc="*"};
+			} else {
+				return '';
+			}
+		}
 
 	} else {
-
 		# No attributes allowed.
-		$wholetag = $t;
-
+		$wholetag = $t_lc;
 	}
 
 	# If we made it here, the tag is valid.
 	return "<$wholetag>";
+}
 }
 
 #========================================================================
@@ -1554,26 +2142,16 @@ sub approveCharref {
 
 	my $ok = 1; # Everything not forbidden is permitted.
 
-	if ($constants->{draconian_charrefs}) {
-		# Don't mess around trying to guess what to forbid.
-		# Everything is forbidden except a very few known to
-		# be good.
-		$ok = 0 unless $charref =~ /^(amp|lt|gt)$/;
-	}
-
-	# At the moment, unless the "draconian" rule is set, only
-	# entities that change the direction of text are forbidden.
-	# For more information, see
-	# <http://www.w3.org/TR/html4/struct/dirlang.html#bidirection>
-	# and <http://www.htmlhelp.com/reference/html40/special/bdo.html>.
-	my %bad_numeric = map { $_, 1 } @{$constants->{charrefs_bad_numeric}};
-	my %bad_entity  = map { $_, 1 } @{$constants->{charrefs_bad_entity}};
+	_fixupCharrefs();
+	my %ansi_to_ascii = _ansi_to_ascii();
+	my $ansi_to_utf   = _ansi_to_utf();
+	my $decimal = 0;
 
 	if ($ok == 1 && $charref =~ /^#/) {
 		# Probably a numeric character reference.
-		my $decimal = 0;
 		if ($charref =~ /^#x([0-9a-f]+)$/i) {
 			# Hexadecimal encoding.
+			$charref =~ s/^#X/#x/; # X should work fine, but x is better
 			$decimal = hex($1); # always returns a positive integer
 		} elsif ($charref =~ /^#(\d+)$/) {
 			# Decimal encoding.
@@ -1582,21 +2160,46 @@ sub approveCharref {
 			# Unknown, assume flawed.
 			$ok = 0;
 		}
+
+		# NB: 1114111/10FFFF is highest allowed by Unicode spec,
+		# but 917631/E007F is highest with actual glyph
 		$ok = 0 if $decimal <= 0 || $decimal > 65534; # sanity check
-		$ok = 0 if $bad_numeric{$decimal};
+		if ($constants->{draconian_charrefs}) {
+			if (!$constants->{good_numeric}{$decimal}) {
+				$ok = $ansi_to_ascii{$decimal} ? 2 : 0;
+			}
+		} else {
+			$ok = 0 if $constants->{bad_numeric}{$decimal};
+		}
 	} elsif ($ok == 1 && $charref =~ /^([a-z0-9]+)$/i) {
 		# Character entity.
-		my $entity = lc $1;
-		$ok = 0 if $bad_entity{$entity};
+#		my $entity = lc $1;
+		my $entity = $1;  # case matters
+		if ($constants->{draconian_charrefs}) {
+			if (!$constants->{good_entity}{$entity}) {
+				if (defined $entity2char{$entity}) {
+					$decimal = ord $entity2char{$entity};
+					$ok = $ansi_to_ascii{$decimal} ? 2 : 0;
+				} else {
+					$ok = 0;
+				}
+			}
+		} else {
+			$ok = 0 if $constants->{bad_entity}{$entity}
+				|| ($constants->{draconian_charset} && ! exists $entity2char{$entity});
+		}
 	} elsif ($ok == 1) {
 		# Unknown character reference type, assume flawed.
 		$ok = 0;
 	}
 
-	if ($ok) {
+	# special case for old-style broken entities we want to convert to ASCII
+	if ($ok == 2 && $decimal) {
+		return $ansi_to_ascii{$decimal};
+	} elsif ($ok) {
 		return "&$charref;";
 	} else {
-		return "";
+		return '';
 	}
 }
 
@@ -1616,7 +2219,11 @@ Prepares data to be a parameter in a URL.  Such as:
 
 =item DATA
 
-The data to be escaped.
+The data to be escaped.  B<NOTE>: space characters are encoded as C<+>
+instead of C<%20>.  If you must have C<%20>, perform an C<s/\+/%20/g>
+on the result.  Note that this is designed for HTTP URIs, the most
+common scheme;  for other schemes, refer to the comments documenting
+strip_paramattr and strip_paramattr_nonhttp.
 
 =back
 
@@ -1630,7 +2237,8 @@ The escaped data.
 
 sub fixparam {
 	my($url) = @_;
-	$url =~ s/([^$URI::unreserved])/$URI::Escape::escapes{$1}/oge;
+	$url =~ s/([^$URI::unreserved ])/$URI::Escape::escapes{$1}/og;
+	$url =~ s/ /+/g;
 	return $url;
 }
 
@@ -1662,11 +2270,19 @@ The escaped data.
 
 =cut
 
+{
+# [] is only allowed for IPV6 (see RFC 2732), and we don't use IPV6 ...
+# in theory others could still create links to them, but we would need
+# better heuristics for it, in another place in the code
+(my $allowed = $URI::uric) =~ s/[\[\]]//g;
+# add '#' to allowed characters, since it is often included
+$allowed .= '#';
 sub fixurl {
 	my($url) = @_;
-	# add '#' to allowed characters, since it is often included
-	$url =~ s/([^$URI::uric#])/$URI::Escape::escapes{$1}/oge;
+	$url =~ s/([^$allowed])/$URI::Escape::escapes{$1}/og;
+	$url =~ s/%(?![a-fA-F0-9]{2})/%25/g;
 	return $url;
+}
 }
 
 #========================================================================
@@ -1677,7 +2293,7 @@ Prepares data to be a URL.  Such as:
 
 =over 4
 
-	my $url = fixparam($someurl);
+	my $url = fudgeurl($someurl);
 
 =item Parameters
 
@@ -1697,13 +2313,11 @@ The escaped data.
 
 =cut
 
-{
-# Use a closure so we only have to generate the regex once.
-my $scheme_regex = "";
 sub fudgeurl {
 	my($url) = @_;
 
-	my $constants = getCurrentStatic();
+	### should we just escape spaces, quotes, apostrophes, and <> instead
+	### of removing them? -- pudge
 
 	# Remove quotes and whitespace (we will expect some at beginning and end,
 	# probably)
@@ -1719,10 +2333,7 @@ sub fudgeurl {
 	# run it through the grungy URL miscellaneous-"fixer"
 	$url = fixHref($url) || $url;
 
-	if (!$scheme_regex) {
-		$scheme_regex = join("|", map { lc } @{$constants->{approved_url_schemes}});
-		$scheme_regex = qr{^(?:$scheme_regex)$};
-	}
+	my $scheme_regex = _get_scheme_regex();
 
 	my $uri = new URI $url;
 	my $scheme = undef;
@@ -1745,14 +2356,18 @@ sub fudgeurl {
 		# XXX Rethink this -- it could probably be put lower down, in
 		# the "if" that handles stripping the userinfo.  We don't
 		# really need to add the scheme for most URLs. - Jamie
-		$uri->scheme("http");
+
+		# and we should only add scheme if not a local site URL
+		my($from_site) = urlFromSite($uri->as_string);
+		$uri->scheme('http') unless $from_site;
 	}
+
 	if (!$uri) {
 
 		# Nothing we can do with it; manipulate the probably-bogus
 		# $url at the end of this function and return it.
 
-	} elsif ($scheme && $scheme !~ $scheme_regex) {
+	} elsif ($scheme && $scheme !~ /^$scheme_regex$/) {
 
 		$url =~ s/^$scheme://i;
 		$url =~ tr/A-Za-z0-9-//cd; # allow only a few chars, for security
@@ -1776,7 +2391,11 @@ sub fudgeurl {
 			# then make sure the host and port are legit, and
 			# zap the port if it's the default port.
 			my $host = $uri->host;
-			$host =~ tr/A-Za-z0-9.-//cd; # per RFC 1035
+			# Re the below line, see RFC 1035 and maybe 2396.
+			# Underscore is not recommended and Slash has
+			# disallowed it for some time, but allowing it
+			# is really the right thing to do.
+			$host =~ tr/A-Za-z0-9._-//cd;
 			$uri->host($host);
 			if ($uri->can('authority') && $uri->authority) {
 				# We don't allow anything in the authority except
@@ -1792,7 +2411,26 @@ sub fudgeurl {
 				$uri->authority($authority);
 			}
 		}
+
+		if ($scheme && $scheme eq 'mailto') {
+			if (my $query = $uri->query) {
+				$query =~ s/@/%40/g;
+				$uri->query($query);
+			}
+		}
+
 		$url = $uri->canonical->as_string;
+
+		if ($url =~ /#/) {
+			my $token = ':::INSERT__23__HERE:::';
+			# no # is OK, unless ...
+			$url =~ s/#/$token/g;
+			if ($url =~ m|^https?://|i || $url =~ m|^/|) {
+				# HTTP, in which case the first # is OK
+				$url =~ s/$token/#/;
+			}
+			$url =~ s/$token/%23/g;
+		}
 	}
 
 	# These entities can crash browsers and don't belong in URLs.
@@ -1802,6 +2440,14 @@ sub fudgeurl {
 	$decoded_url =~ s{ &(\#?[a-zA-Z0-9]+);? } { approveCharref($1) }gex;
 	return $decoded_url =~ /^[\s\w]*script\b/i ? undef : $url;
 }
+
+sub _get_scheme_regex {
+	my $constants = getCurrentStatic();
+	if (! $constants->{approved_url_schemes_regex}) {
+		$constants->{approved_url_schemes_regex} = join('|', map { lc } @{$constants->{approved_url_schemes}});
+		$constants->{approved_url_schemes_regex} = qr{(?:$constants->{approved_url_schemes_regex})};
+	}
+	return $constants->{approved_url_schemes_regex};
 }
 
 #========================================================================
@@ -1832,12 +2478,48 @@ Chomped string.
 =cut
 
 sub chopEntity {
-	my($text, $length) = @_;
-	$text = substr($text, 0, $length) if $length;
+	my($text, $length, $end) = @_;
+	if ($length && $end) {
+		$text = substr($text, -$length);
+	} elsif ($length) {
+		$text = substr($text, 0, $length);
+	}	
 	$text =~ s/&#?[a-zA-Z0-9]*$//;
 	$text =~ s/<[^>]*$//;
 	return $text;
 }
+
+
+sub url2html {
+	my($text) = @_;
+	return '' if !defined($text) || $text eq '';
+
+	my $scheme_regex = _get_scheme_regex();
+
+	# we know this can break real URLs, but probably will
+	# preserve real URLs more often than it will break them
+	# was ['":=>]
+	# should we parse the HTML instead?  problematic ...
+	$text =~  s{(?<!\S)((?:$scheme_regex):/{0,2}[$URI::uric#]+)}{
+		my $url   = fudgeurl($1);
+		my $extra = '';
+		$extra = $1 if $url =~ s/([?!;:.,']+)$//;
+		$extra = ')' . $extra if $url !~ /\(/ && $url =~ s/\)$//;
+print STDERR "url2html s/// url='$url' extra='$extra'\n" if !defined($url) || !defined($extra);
+		qq[<a href="$url" rel="url2html-$$">$url</a>$extra];
+	}ogie;
+	# url2html-$$ is so we can remove the whole thing later for ecode
+
+	return $text;
+}
+
+
+sub noFollow {
+	my($html) = @_;
+	$html =~ s/(<a href=.+?)>/$1 rel="nofollow">/gis;
+	return $html;
+}
+
 
 
 # DOCUMENT after we remove some of this in favor of
@@ -1847,8 +2529,8 @@ sub html2text {
 	my($html, $col) = @_;
 	my($text, $tree, $form, $refs);
 
-	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
+	my $gSkin     = getCurrentSkin();
 
 	$col ||= 74;
 
@@ -1862,7 +2544,7 @@ sub html2text {
 	$text = $form->format($tree);
 	1 while chomp($text);
 
-	return $text, $refs->get_refs($constants->{absolutedir});
+	return $text, $refs->get_refs($gSkin->{absolutedir});
 }
 
 sub HTML::FormatText::AddRefs::new {
@@ -1930,7 +2612,7 @@ sub HTML::FormatText::AddRefs::get_refs {
 
 #========================================================================
 
-=head2 balanceTags(HTML [, DEEP_NESTING])
+=head2 balanceTags(HTML [, OPTIONS])
 
 Balances HTML tags; if tags are not closed, close them; if they are not
 open, remove close tags; if they are in the wrong order, reorder them
@@ -1946,93 +2628,469 @@ open, remove close tags; if they are in the wrong order, reorder them
 
 The HTML to balance.
 
-=item DEEP_NESTING
+=item OPTIONS
 
-Integer for how deep to allow nesting indenting tags, 0 means
-no limit.
+A hashref for various options.
+
+=over 4
+
+=item deep_nesting
+
+Integer for how deep to allow nesting indenting tags, 0 means no limit, 1 means
+to use var (nesting_maxdepth).  Default is 0.
+
+=item deep_su
+
+Integer for how deep to allow nesting sup/sub tags, 0 means no limit, 1 means
+to use var (nest_su_maxdepth).  Default is 0.
+
+=item length
+
+A maximum length limit for the result.
+
+=back
 
 =back
 
 =item Return value
 
-The balances HTML.
+The balanced HTML.
 
 =item Dependencies
 
-The 'approvedtags' and 'lonetags' entries in the vars table.
+The 'approvedtags' entry in the vars table.
 
 =back
 
 =cut
 
-sub balanceTags {
-	my($html, $max_nest_depth) = @_;
-	my(%tags, @stack, $match, %lone, $tag, $close, $whole);
-	my $constants = getCurrentStatic();
+{
+	# these are the tags we know about.
+	# they are hardcoded because the code must know about each one at 
+	# a fairly low level; if you want to add more, then we need to
+	# change the code for them.  in theory we could generalize it more,
+	# using vars for all this, but that is a low priority.
+	my %known_tags	= map { ( lc, 1 ) } qw(
+		b i p br a ol ul li dl dt dd em strong tt blockquote div ecode quote
+		img hr big small sub sup span
+		q dfn code samp kbd var cite address ins del
+		h1 h2 h3 h4 h5 h6
+	);
+	# NB: ECODE is excluded because it is handled elsewhere.
 
-	# set up / get preferences
-	if (@{$constants->{lonetags}}) {
-		# ECODE is an exception, to be handled elsewhere
-		$match = join '|', grep !/^ECODE$/,
-			@{$constants->{approvedtags}};
-	} else {
-		$constants->{lonetags} = [qw(P LI BR IMG)];
-		$match = join '|', grep !/^(?:P|LI|BR|ECODE)$/,
-			@{$constants->{approvedtags}};
+	# tags that are indented, so we can make sure indentation level is not too great
+	my %is_nesting  = map { ( lc, 1 ) } qw(ol ul dl blockquote quote);
+
+	# or sub-super level
+	my %is_suscript = map { ( lc, 1 ) } qw(sub sup);
+
+	# block elements cannot be inside certain other elements; this defines which are which
+	my %is_block    = map { ( lc, 1 ) } qw(p ol ul li dl dt dd blockquote quote div hr address h1 h2 h3 h4 h5 h6);
+	my %no_block    = map { ( lc, 1 ) } qw(b i strong em tt q dfn code samp kbd var cite address ins del big small span p sub sup a h1 h2 h3 h4 h5 h6);
+
+	# when a style tag is cut off prematurely because of a newly introduced block
+	# element, we want to re-start the style inside the block; it is not perfect,
+	# but that's why we're here, innit?
+	my %is_style    = map { ( lc, 1 ) } qw(b i strong em tt q dfn code samp kbd var cite big small span);
+
+	# tags that CAN be empty
+	my %empty	= map { ( lc, 1 ) } qw(p br img hr);
+	# tags that HAVE to be empty
+	my %really_empty = %empty;
+	# for now p is the only one ... var?
+	delete $really_empty{'p'};
+
+
+	# define the lists, and the content elements in the lists, in both directions
+	my %lists = (
+		dl		=> ['dd', 'dt'],
+		ul		=> ['li'],
+		ol		=> ['li'],
+		# blockquote not a list, but has similar semantics:
+		# everything in a blockquote needs to be in a block element,
+		# so we choose two that would fit the bill
+		blockquote	=> ['div'],
+	);
+	my %needs_list = (
+		dd		=> qr/dl/,
+		dt		=> qr/dl/,
+		li		=> qr/ul|ol/,
+	);
+
+	# regexes to use later
+	my $list_re = join '|', keys %lists;
+	my %lists_re;
+	for my $list (keys %lists) {
+		my $re = join '|', @{$lists{$list}};
+		$lists_re{$list} = qr/$re/;
 	}
-	%lone = map { ($_, 1) } @{$constants->{lonetags}};
 
-	# If the quoted slash in the next line bothers you, then feel free to
-	# remove it. It's just there to prevent broken syntactical highlighting
-	# on certain editors (vim AND xemacs).  -- Cliff
-	# maybe you should use a REAL editor, like BBEdit.  :) -- pudge
-	while ($html =~ m|(<(\/?)($match)\b[^>]*>)|igo) { # loop over tags
-		($tag, $close, $whole) = (uc($3), $2, $1);
+sub balanceTags {
+	my($html, $options) = @_;
+	return '' if !defined($html) || !length($html);
+	my $orightml = $html;
+	my $constants = getCurrentStatic();
+	my $cache = getCurrentCache();
 
+	my($max_nest_depth, $max_su_depth) = (0, 0);
+	if (ref $options) {
+		$max_nest_depth = ($options->{deep_nesting} && $options->{deep_nesting} == 1)
+			? $constants->{nesting_maxdepth}
+			: ($options->{deep_nesting} || 0);
+		$max_su_depth   = ($options->{deep_su} && $options->{deep_su} == 1)
+			? $constants->{nest_su_maxdepth}
+			: ($options->{deep_su} || 0);
+	} else {
+		# deprecated
+		$max_nest_depth = ($options && $options == 1)
+			? $constants->{nesting_maxdepth}
+			: ($options || 0);
+	}
+
+	my(%tags, @stack, $tag, $close, $whole, $both, @list, $nesting_level, $su_level);
+
+	# cache this regex
+	# if $options->{admin} then allow different regex ... also do in approveTag
+	my $matchname = $options->{admin} ? 'match_admin' : 'match';
+	my $varname   = $options->{admin} && $constants->{approvedtags_admin}
+		? 'approvedtags_admin'
+		: 'approvedtags';
+	my $match = $cache->{balanceTags}{$matchname};
+	if (!$match) {
+		$match = join '|', grep $known_tags{$_},
+			map lc, @{$constants->{$varname}};
+		$cache->{balanceTags}{$matchname} = $match = qr/$match/;
+	}
+
+	## this is the main loop.  it finds a tag, any tag
+	while ($html =~ /(<(\/?)($match)\b[^>]*?( \/)?>)/sig) { # loop over tags
+		($tag, $close, $whole, $both) = (lc($3), $2, $1, $4);
+#		printf "DEBUG:%d:%s:%s: %d:%s\n%s\n\n", pos($html), $tag, $whole, scalar(@stack), "@stack", $html;
+
+		# this is a closing tag (note: not an opening AND closing tag,
+		# like <br /> ... that is handled with opening tags)
 		if ($close) {
-			if (@stack && $tags{$tag}) {
-				# Close the tag on the top of the stack
+			# we have opened this tag already, handle closing of it
+			if (!$really_empty{$tag} && @stack && $tags{$tag}) {
+				# the tag is the one on the top of the stack,
+				# remove from stack and counter, and move on
 				if ($stack[-1] eq $tag) {
-					$tags{$tag}--;
 					pop @stack;
+					$tags{$tag}--;
 
-				# Close tag somewhere else in stack
-				} else {
-					my $p = pos($html) - length($whole);
-					if (exists $lone{$stack[-1]}) {
-						pop @stack;
-					} else {
-						substr($html, $p, 0) = "</$stack[-1]>";
+					# we keep track of lists in an add'l stack,
+					# so pop off that one too
+					if ($lists{$tag}) {
+						my $pop = pop @list;
+						# this should always be equal, else why
+						# would it be bottom of @stack too?
+						# so warn if it isn't ...
+						warn "huh?  $tag ne $pop?" if $tag ne $pop;
 					}
-					pos($html) = $p;  # don't remove this from stack, go again
+
+				# Close tag somewhere else in stack; add it to the
+				# text and then loop back to catch it properly
+				# XXX we could optimize here so we don't need to loop back
+				} else {
+					_substitute(\$html, $whole, "</$stack[-1]>", 1, 1);
 				}
 
+			# Close tag not on stack; just delete it, since it is
+			# obviously not needed
 			} else {
-				# Close tag not on stack; just delete it
-				my $p = pos($html) - length($whole);
-				$html =~ s|^(.{$p})\Q$whole\E|$1|si;
-				pos($html) = $p;
+				_substitute(\$html, $whole, '');
 			}
 
+
+		# this is an open tag (or combined, like <br />)
 		} else {
+			# the tag nests, and we don't want to nest too deeply,
+			# so just remove it if we are in too deep already
+			if ($is_nesting{$tag} && $max_nest_depth) {
+				my $cur_depth = 0;
+				$cur_depth += $tags{$_} || 0 for keys %is_nesting;
+				if ($cur_depth >= $max_nest_depth) {
+					_substitute(\$html, $whole, '');
+					next;
+				}
+			}
+
+			# the tag nests, and we don't want to nest too deeply,
+			# so just remove it if we are in too deep already
+			if ($is_suscript{$tag} && $max_su_depth) {
+				my $cur_depth = 0;
+				$cur_depth += $tags{$_} for keys %is_suscript;
+				if ($cur_depth >= $max_su_depth) {
+					_substitute(\$html, $whole, '');
+					next;
+				}
+			}
+
+			# we are directly inside a list (UL), but this tag must be
+			# a list element (LI)
+			# this comes now because it could include a closing tag
+# this isn't necessary anymore, with _validateLists()
+#			if (@stack && $lists{$stack[-1]} && !(grep { $tag eq $_ } @{$lists{$stack[-1]}}) ) {
+#				my $replace = $lists{$stack[-1]}[0];
+#				_substitute(\$html, $whole, "<$replace>$whole");
+#				$tags{$replace}++;
+#				push @stack, $replace;
+#			}
+
+			if ($needs_list{$tag}) {
+				# tag needs a list, like an LI needs a UL or OL, but we
+				# are not inside one: replace it with a P.  not pretty,
+				# but you should be more careful about what you put in there!
+				if (!@list || $list[-1] !~ /^(?:$needs_list{$tag})$/) {
+					my $replace = @list ? $lists{$list[-1]}[0] : 'p';
+					_substitute(\$html, $whole, "<$replace>");
+					pos($html) -= length("<$replace>");
+					next;  # try again
+
+				# we are inside a list (UL), and opening a new list item (LI),
+				# but a previous one is already open
+				} else {
+					for my $check (reverse @stack) {
+						last if $check =~ /^(?:$needs_list{$tag})/;
+						if ($needs_list{$check}) {
+							my $newtag = '';
+							while (my $pop = pop @stack) {
+								$tags{$pop}--;
+								$newtag .= "</$pop>";
+								last if $needs_list{$pop};
+							}
+							_substitute(\$html, $whole, $newtag, 0, 1);
+							_substitute(\$html, '', $whole);
+							last;
+						}
+					}
+				}
+			}
+
+			# if we are opening a block tag, make sure no open no_block
+			# tags are on the stack currently.  if they are, close them
+			# first!
+			if ($is_block{$tag} || $tag eq 'a' || $tag eq 'br') {
+				# a is a special case for a and br: we do not want a or b tags
+				# to be included in a tags, even though they are not blocks;
+				# another var for this special case?
+				my @no_block = ($tag eq 'a' || $tag eq 'br') ? 'a' : keys %no_block; 
+				my $newtag  = '';  # close no_block tags
+				my $newtag2 = '';  # re-open closed style tags inside block
+
+				while (grep { $tags{$_} } @no_block) {
+					my $pop = pop @stack;
+					$tags{$pop}--;
+					$newtag .= "</$pop>";
+					if ($is_style{$pop}) {
+						$newtag2 = "<$pop>" . $newtag2;
+					}
+				}
+
+				if ($newtag) {
+					_substitute(\$html, $whole, $newtag . $whole . $newtag2);
+					# loop back to catch newly added tags properly
+					# XXX we could optimize here so we don't need to loop back
+					pos($html) -= length($whole . $newtag2);
+					next;
+				}
+			}
+
+			# the tag must be an empty tag, e.g. <br />; if it has $both, do
+			# nothing, else add the " /".  since we are closing the tag
+			# here, we don't need to add it to the stack
+			if ($really_empty{$tag} || ($empty{$tag} && $both)) {
+				# this is the only difference we have between
+				# XHTML and HTML, in this part of the code
+				if ($constants->{xhtml} && !$both) {
+					(my $newtag = $whole) =~ s/^<(.+?)>$/<$1 \/>/;
+					_substitute(\$html, $whole, $newtag);
+				} elsif (!$constants->{xhtml} && $both) {
+					(my $newtag = $whole) =~ s/^<(.+?)>$/<$1>/;
+					_substitute(\$html, $whole, $newtag);
+				}
+				next;
+			}
+
+			# opening a new tag to be added to the stack
 			$tags{$tag}++;
 			push @stack, $tag;
 
-			if ($max_nest_depth) {
-				my $cur_depth = 0;
-				for (qw( UL OL DIV BLOCKQUOTE )) { $cur_depth += $tags{$_} }
-				return undef if $cur_depth > $max_nest_depth;
-			}
+			# we keep track of lists in an add'l stack, for
+			# the immediately above purpose, so push it on here
+			push @list, $tag if $lists{$tag};
 		}
 
 	}
 
-	$html =~ s/\s+$//;
+	$html =~ s/\s+$//s;
 
 	# add on any unclosed tags still on stack
-	$html .= join '', map { "</$_>" } grep {! exists $lone{$_}} reverse @stack;
+	$html .= join '', map { "</$_>" } grep { !exists $really_empty{$_} } reverse @stack;
+
+	_validateLists(\$html);
+	_removeEmpty(\$html);
+
+	# if over limit, do it again
+	if ($options->{length} && $options->{length} < length($html)) {
+		my $limit = delete $options->{length};
+		while ($limit > 0 && length($html) > $limit) {
+			$limit -= 1;
+			$html = balanceTags(chopEntity($orightml, $limit), $options);
+
+			# until we get wrap fix in CSS
+			my $nobr  = () = $html =~ m|<nobr>|g;
+			my $wbr   = () = $html =~ m|<wbr>|g;
+			my $nobre = () = $html =~ m|</nobr>|g;
+			$html .= '<wbr>'   if $nobr > $wbr;
+			$html .= '</nobr>' if $nobr > $nobre;
+		}
+	}
 
 	return $html;
+}
+
+sub _removeEmpty {
+	my($html) = @_;
+	my $p    = getCurrentStatic('xhtml') ? '<p />' : '<p>';
+
+	$$html =~ s|<p>\s*</p>|$p|g;
+	while ($$html =~ m|<(\w+)>\s*</\1>|) {
+		$$html =~ s|<(\w+)>\s*</\1>\s*||g;
+	}
+
+	# for now, only remove <br> and <p> as whitespace inside
+	# lists, where we are more likely to mistakenly run into it,
+	# where it will cause more problems
+	for my $re (values %lists_re) {
+		while ($$html =~ m|<($re)>$WS_RE</\1>|) {
+			$$html =~ s|<($re)>$WS_RE</\1>\s*||g;
+		}
+	}
+}
+
+
+# validate the structure of lists ... essentially, make sure
+# they are properly nested, that everything in a list is inside
+# a proper li/dt/dd, etc.
+
+sub _validateLists {
+	my($html) = @_;
+
+	# each nested list is cleaned up and then stored in the hash,
+	# to be expanded later
+	my %full;
+	# counter for %full
+	my $j = 0;
+	
+	# the main loop finds paired list tags, and what is between them,
+	# like <ul> ... </ul>
+	while ($$html =~ m:(<($list_re)>(.*?)</\2>):sig) {
+		my($whole, $list, $content) = ($1, $2, $3);
+		# if we don't have an innermost list, but there's another
+		# list nested inside this one, increment pos and try again
+		if ($content =~ /<(?:$list_re)>/) {
+			pos($$html) -= length($whole) - length("<$list>");
+			next;
+		}
+
+		# the default element to use inside the list, for content
+		# that is not inside any proper element
+		my $inside = $lists{$list}[0] || '';
+print STDERR "_validateLists logic error, no entry for list '$list'\n" if !$inside;
+		my $re     = $lists_re{$list};
+
+		# since we are looking at innermost lists, we do not
+		# need to worry about stacks or nesting, just keep
+		# track of the current element that we are in
+		my $in    = '';
+
+		# the secondary loop finds either a tag, or text between tags
+		while ($content =~ m!\s*([^<]+|<([^\s>]+).*?>)!sig) {
+			my($whole, $tag) = ($1, $2);
+			next if $whole !~ /\S/;
+			# we only care here if this is one that can be inside a list
+			if ($tag) {
+				# if open tag ...
+				if ($tag =~ /^(?:$re)$/) {
+					# add new close tag if we are current inside a tag
+					if ($in) {
+						_substitute(\$content, $whole, "</$in>", 0, 1);
+						_substitute(\$content, '', $whole);
+					}
+					# set new open tag
+					$in = $tag;
+					next;
+
+				# if close tag ...
+				} elsif ($tag =~ /^\/(?:$re)$/) {
+					# remove if we are not already inside a tag
+					_substitute(\$content, $whole, '') unless $in;
+					# this should not usually happen, as
+					# we've already balanced the tags
+					#warn "huh?  $tag ne /$in?" if $tag ne "/$in";
+					# set to no open tag
+					$in = '';
+					next;
+				}
+			}
+
+			# we are NOT an appropriate tag, or inside one, so
+			# create one to be inside of
+			if (!$in) {
+				$in = $inside;
+				_substitute(\$content, $whole, "<$inside>$whole");
+			}
+		}
+
+		# now done with loop, so add rest of $in if there is any
+		$content =~ s|(\s*)$|</$in>$1| if $in;
+
+		# we have nesting to deal with, so replace this part
+		# with a temporary token and cache the result in the hash
+		$full{$j} = "<$list>$content</$list>";
+		_substitute($html, $whole, "<FULL-$j>");
+		$j++;
+		pos($$html) = 0;  # start over
+	}
+
+	# expand it all back out
+	while ($j--) {
+		last if $j < 0;
+		$$html =~ s/<FULL-$j>/$full{$j}/;
+	}
+
+	return 1;
+}
+
+# put a string into the current position in that string, and update
+# pos() accordingly
+sub _substitute {
+	my($full, $old, $new, $zeropos, $ws_backup) = @_;
+	# zeropos is for when we add a close tag or somesuch, but don't touch
+	# the stack, and just let the code handle it by keeping pos right in
+	# front of the new tag
+
+	my $len = length $old;
+	my $p = pos($$full) - $len;
+
+	# back up insert past whitespace
+	if ($ws_backup) {
+		my $o = $p;
+		while (substr($$full, $p-1, 1) =~ /\s/) {
+			# just in case
+			last if $p == 0;
+			$p--;
+			$len++ unless $zeropos;
+		}
+		if (!$zeropos && $p != $o) {
+			$new .= substr($$full, $p, $o-$p);
+		}
+	}
+
+	substr($$full, $p, ($zeropos ? 0 : $len)) = $new;
+	pos($$full) = $p + ($zeropos ? 0 : length($new));
+}
 }
 
 #========================================================================
@@ -2062,6 +3120,10 @@ required, the user can choose to leave it up to us.
 
 Boolean overriding RECOMMENDED; it strips out all domain tags if true.
 
+=item NOTITLE
+
+Boolean which strips out title attributes for links if true
+
 =back
 
 =item Return value
@@ -2073,8 +3135,8 @@ The parsed HTML.
 =cut
 
 sub parseDomainTags {
-	my($html, $recommended, $notags) = @_;
-	return "" if !defined($html) || $html eq "";
+	my($html, $recommended, $notags, $notitle) = @_;
+	return '' if !defined($html) || $html eq '';
 
 	my $user = getCurrentUser();
 
@@ -2092,11 +3154,13 @@ sub parseDomainTags {
 		);
 
 	if ($want_tags && !$notags) {
-		$html =~ s{</A ([^>]+)>}{</A> [$1]}gi;
+		$html =~ s{</a ([^<>]+)>}{</a> [$1]}gi;
 	} else {
-		$html =~ s{</A[^>]+>}{</A>}gi;
+		$html =~ s{</a[^<>]+>}   {</a>}gi;
 	}
 
+	$html =~ s{<a([^>]*) title="([^"]+")>} {<a$1>}gi if $notitle;
+	
 	return $html;
 }
 
@@ -2131,13 +3195,15 @@ The parsed HTML.
 
 sub parseSlashizedLinks {
 	my($html, $options) = @_;
+	$html = '' if !defined($html);
+	$options = '' if !defined($options);
 	$html =~ s{
-		<A[ ]HREF="__SLASHLINK__"
+		<a[ ]href="__SLASHLINK__"
 		([^>]+)
 		>
 	}{
 		_slashlink_to_link($1, $options)
-	}gxe;
+	}igxe;
 	return $html;
 }
 
@@ -2145,51 +3211,55 @@ sub parseSlashizedLinks {
 
 sub _slashlink_to_link {
 	my($sl, $options) = @_;
+	my $constants = getCurrentStatic();
 	my $ssi = getCurrentForm('ssi') || 0;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
-	my $constants = getCurrentStatic();
-	my $root = $constants->{rootdir};
 	my %attr = $sl =~ / (\w+)="([^"]+)"/g;
 	# We should probably de-strip-attribute the values of %attr
 	# here, but it really doesn't matter.
 
 	# Load up special values and delete them from the attribute list.
-	my $sn = delete $attr{sn} || "";
-	my $sect = delete $attr{sect} || "";
-	my $section = $sect ? $reader->getSection($sect) : {};
-	my $sect_root = $section->{rootdir} || $root;
+	my $sn = delete $attr{sn} || '';
+	my $skin_id = delete $attr{sect} || '';
+
+	# skin_id could be a name, a skid, or blank, or invalid.
+	# In any case, get its skin hashref and its name.
+	my $skin = undef;
+	$skin = $reader->getSkin($skin_id) if $skin_id;
+	$skin ||= $reader->getSkin($constants->{mainpage_skid});
+	my $skin_name = $skin->{name};
+	my $skin_root = $skin->{rootdir};
 	if ($options && $options->{absolute}) {
-		$sect_root = URI->new_abs($sect_root, $options->{absolute})
+		$skin_root = URI->new_abs($skin_root, $options->{absolute})
 			->as_string;
 	}
-	my $frag = delete $attr{frag} || "";
+	my $frag = delete $attr{frag} || '';
 	# Generate the return value.
-	my $retval = q{<A HREF="};
+	my $url = '';
 	if ($sn eq 'comments') {
-		$retval .= qq{$sect_root/comments.pl?};
-		$retval .= join("&",
+		$url .= qq{$skin_root/comments.pl?};
+		$url .= join('&',
 			map { qq{$_=$attr{$_}} }
 			sort keys %attr);
-		$retval .= qq{#$frag} if $frag;
+		$url .= qq{#$frag} if $frag;
 	} elsif ($sn eq 'article') {
 		# Different behavior here, depending on whether we are
 		# outputting for a dynamic page, or a static one.
 		# This is the main reason for doing slashlinks at all!
 		if ($ssi) {
-			$retval .= qq{$sect_root/};
-			$retval .= qq{$sect/$attr{sid}.shtml};
-			$retval .= qq{?tid=$attr{tid}} if $attr{tid};
-			$retval .= qq{#$frag} if $frag;
+			$url .= qq{$skin_root/};
+			$url .= qq{$skin_name/$attr{sid}.shtml};
+			$url .= qq{?tid=$attr{tid}} if $attr{tid};
+			$url .= qq{#$frag} if $frag;
 		} else {
-			$retval .= qq{$sect_root/article.pl?};
-			$retval .= join("&",
+			$url .= qq{$skin_root/article.pl?};
+			$url .= join('&',
 				map { qq{$_=$attr{$_}} }
 				sort keys %attr);
-			$retval .= qq{#$frag} if $frag;
+			$url .= qq{#$frag} if $frag;
 		}
 	}
-	$retval .= q{">};
-	return $retval;
+	return q{<a href="} . strip_urlattr($url) . q{">};
 }
 
 #========================================================================
@@ -2230,14 +3300,14 @@ sub addDomainTags {
 	my $in_a = 0;
 	$html =~ s
 	{
-		( < (/?) A \b[^>]* > )
+		( < (/?) a \b[^>]* > )
 	}{
 		my $old_in_a = $in_a;
 		my $new_in_a = !$2;
 		$in_a = $new_in_a;
-		(($old_in_a && $new_in_a) ? "</A>" : "") . $1
+		(($old_in_a && $new_in_a) ? '</a>' : '') . $1
 	}gixe;
-	$html .= "</A>" if $in_a;
+	$html .= '</a>' if $in_a;
 
 	# Now, since we know that every <A> has a </A>, this pattern will
 	# match and let the subroutine above do its magic properly.
@@ -2248,15 +3318,15 @@ sub addDomainTags {
 
 	$html =~ s
 	{
-		(<A\s+HREF="		# $1 is the whole <A HREF...>
+		(<a\s+href="		# $1 is the whole <A HREF...>
 			([^">]*)	# $2 is the URL (quotes guaranteed to
 					# be there thanks to approveTag)
 		">)
 		(.*?)			# $3 is whatever's between <A> and </A>
-		</A\b[^>]*>
+		</a\b[^>]*>
 	}{
 		$3	? _url_to_domain_tag($1, $2, $3)
-			: ""
+			: ''
 	}gisex;
 
 	# If there were unmatched <A> tags in the original, balanceTags()
@@ -2266,42 +3336,70 @@ sub addDomainTags {
 	# and doesn't overlap, so now we can just remove the extra ones,
 	# which are easy to tell because they DON'T have domain tags.
 
-	$html =~ s{</A>}{}g;
+	$html =~ s{</a>}{}gi;
 
 	return $html;
 }
 
+sub fullhost_to_domain {
+	my($fullhost) = @_;
+	my $info = lc $fullhost;
+	if ($info =~ m/^([\d.]+)\.in-addr\.arpa$/) {
+		$info = join('.', reverse split /\./, $1);
+	}
+	if ($info =~ m/^(\d{1,3}\.){3}\d{1,3}$/) {
+		# leave a numeric IP address alone
+	} elsif ($info =~ m/([\w-]+\.[a-z]{3,4})$/) {
+		# a.b.c.d.com -> d.com
+		$info = $1;
+	} elsif ($info =~ m/([\w-]+\.[a-z]{2,4}\.[a-z]{2})$/) {
+		# a.b.c.d.co.uk -> d.co.uk
+		$info = $1;
+	} elsif ($info =~ m/([\w-]+\.[a-z]{2})$/) {
+		# a.b.c.realdomain.gr -> realdomain.gr
+		$info = $1;
+	} else {
+		# any other a.b.c.d.e -> c.d.e
+		my @info = split /\./, $info;
+		my $num_levels = scalar @info;
+		if ($num_levels >= 3) {
+			$info = join('.', @info[-3..-1]);
+		}
+	}
+	return $info;
+}
+
 sub _url_to_domain_tag {
 	my($href, $link, $body) = @_;
-	my $absolutedir = getCurrentStatic('absolutedir');
+	my $absolutedir = getCurrentSkin('absolutedir');
 	my $uri = URI->new_abs($link, $absolutedir);
 	my $uri_str = $uri->as_string;
-	my($info, $host, $scheme) = ("", "", "");
-	if ($uri->can("host") and $host = $uri->host) {
-		$info = lc $host;
-		if ($info =~ m/^([\d.]+)\.in-addr\.arpa$/) {
-			$info = join(".", reverse split /\./, $1);
-		}
-		if ($info =~ m/^(\d{1,3}\.){3}\d{1,3}$/) {
-			# leave a numeric IP address alone
-		} elsif ($info =~ m/([\w-]+\.[a-z]{3,4})$/) {
-			# a.b.c.d.com -> d.com
-			$info = $1;
-		} elsif ($info =~ m/([\w-]+\.[a-z]{2,4}\.[a-z]{2})$/) {
-			# a.b.c.d.co.uk -> d.co.uk
-			$info = $1;
-		} elsif ($info =~ m/([\w-]+\.[a-z]{2})$/) {
-			# a.b.c.realdomain.gr -> realdomain.gr
-			$info = $1;
-		} else {
-			# any other a.b.c.d.e -> c.d.e
-			my @info = split /\./, $info;
-			my $num_levels = scalar @info;
-			if ($num_levels >= 3) {
-				$info = join(".", @info[-3..-1]);
+
+	my($info, $scheme) = ('', '');
+	if ($uri->can('host')) {
+		my $host;
+		unless (($host = $uri->host)
+				&&
+			$uri->can('scheme')
+				&&
+			($scheme = $uri->scheme)
+		) {
+			# If this URL is malformed in a particular
+			# way ("scheme:///host"), treat it the way
+			# that many browsers will (rightly or
+			# wrongly) treat it.
+			if ($uri_str =~ s|$scheme:///+|$scheme://|) {
+				$uri = URI->new_abs($uri_str, $absolutedir);
+				$uri_str = $uri->as_string;
+				$host = $uri->host;
 			}
 		}
-	} elsif ($uri->can("scheme") and $scheme = $uri->scheme) {
+		$info = fullhost_to_domain($host) if $host;
+	}
+
+	if (!$info && ($scheme || (
+		$uri->can('scheme') && ($scheme = $uri->scheme)
+	))) {
 		# Most schemes, like ftp or http, have a host.  Some,
 		# most notably mailto and news, do not.  For those,
 		# at least give the user an idea of why not, by
@@ -2315,20 +3413,19 @@ sub _url_to_domain_tag {
 		} else {
 			$info = lc $scheme;
 		}
-	} else {
-		$info = "?";
 	}
-	if ($info ne "?") {
-		$info =~ tr/A-Za-z0-9.-//cd;
-	}
+
+	$info =~ tr/A-Za-z0-9.-//cd if $info;
+
 	if (length($info) == 0) {
-		$info = "?";
+		$info = '?';
 	} elsif (length($info) >= 25) {
-		$info = substr($info, 0, 10) . "..." . substr($info, -10);
+		$info = substr($info, 0, 10) . '...' . substr($info, -10);
 	}
+
 	# Add a title tag to make this all friendly for those with vision
 	# and similar issues -Brian
-	$href =~ s/>/ TITLE="$info">/ if $info ne '?';
+	$href =~ s/>/ title="$info">/ if $info ne '?';
 	return "$href$body</a $info>";
 }
 
@@ -2385,23 +3482,27 @@ sub _link_to_slashlink {
 	my($pre, $url, $post) = @_;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
 	my $virtual_user = getCurrentVirtualUser();
 	my $retval = "$pre$url$post";
-	my $abs = $constants->{absolutedir};
+	my $abs = $gSkin->{absolutedir};
+	my $skins = $reader->getSkins();
 #print STDERR "_link_to_slashlink begin '$url'\n";
 
 	if (!defined($urla{$virtual_user})) {
-		# URLs may show up in any section, which means when absolutized
+		# URLs may show up in any skins, which means when absolutized
 		# their host may be either the main one or a sectional one.
 		# We have to allow for any of those possibilities.
-		my $sections = $reader->getSections();
-		my @sect_urls = grep { $_ }
-			map { $sections->{$_}{rootdir} }
-			sort keys %$sections;
+		my @skin_urls = grep { $_ }
+			map { $skins->{$_}{rootdir} }
+			sort keys %$skins;
 		my %all_urls = ( );
-		for my $url ($abs, @sect_urls) {
+		for my $url ($abs, @skin_urls) {
 			my $new_url = URI->new($url);
 			# Remove the scheme to make it relative (schemeless).
+			# XXXSECTIONTOPICS hey, skin urls should already be schemeless, test this
+			# XXXSKIN - no, urls are not schemeless, rootdirs are
+			# (and they are generated, at this point, from urls)
 			$new_url->scheme(undef);
 			my $new_url_q = quotemeta($new_url->as_string);
 			$all_urls{"(?:https?:)?$new_url"} = 1;
@@ -2409,7 +3510,6 @@ sub _link_to_slashlink {
 		my $any_host = "(?:"
 			. join("|", sort keys %all_urls)
 			. ")";
-#print STDERR "link_to_slashlink abs '$abs' any_host '$any_host'\n";
 		# All possible URLs' arguments, soon to be attributes
 		# in the new tag (thus "urla").	Values are the name
 		# of the script ("sn") and expressions that can pull
@@ -2430,7 +3530,6 @@ sub _link_to_slashlink {
 				  sid => qr{\bsid=(\d+)},
 				  cid => qr{\bcid=(\d+)} },
 		);
-#use Data::Dumper; print STDERR Dumper(\%urla);
 	}
 	# Get a reference to the URL argument hash for this
 	# virtual user, thus "urlavu".
@@ -2458,14 +3557,18 @@ sub _link_to_slashlink {
 		# Section and topic attributes get thrown in too.
 		if ($attr{sn} eq 'comments') {
 			# sid is actually a discussion id!
-			$attr{sect} = $reader->getDiscussion(
-				$attr{sid}, 'section');
+			# XXXSECTIONTOPICS
+			my $primaryskid = $reader->getDiscussion(
+				$attr{sid}, 'primaryskid');
+			$attr{sect} = $skins->{$primaryskid}{name};
 			$attr{tid} = $reader->getDiscussion(
 				$attr{sid}, 'topic');
 		} else {
 			# sid is a story id
-			$attr{sect} = $reader->getStory( 
-				$attr{sid}, 'section', 1);
+			# XXXSECTIONTOPICS
+			my $primaryskid = $reader->getStory( 
+				$attr{sid}, 'primaryskid', 1);
+			$attr{sect} = $skins->{$primaryskid}{name};
 			$attr{tid} = $reader->getStory(
 				$attr{sid}, 'tid', 1);
 		}
@@ -2477,14 +3580,13 @@ sub _link_to_slashlink {
 	# If we have something good in %attr, we can go ahead and
 	# use our custom tag.  Concatenate it together.
 	if ($attr{sn}) {
-		$retval = q{<A HREF="__SLASHLINK__" }
+		$retval = q{<a href="__SLASHLINK__" }
 			. join(" ",
 				map { qq{$_="} . strip_attribute($attr{$_}) . qq{"} }
 				sort keys %attr)
 			. q{>};
 	}
 
-#print STDERR "_link_to_slashlink end '$url'\n";
 	# Return either the new $retval we just made, or just send the
 	# original text back.
 	return $retval;
@@ -2573,6 +3675,7 @@ XML::Parser::Expat(3).
 
 sub xmlencode {
 	my($text, $nohtml) = @_;
+	return '' if !defined($text) || length($text) == 0;
 
 	# if there is an & that is not part of an entity, convert it
 	# to &amp;
@@ -2763,14 +3866,14 @@ sub ellipsify {
 	if (length($text) > $len) {
 		my $len2 = int(($len-7)/2);
 		if ($len2 >= 4) {
-			$text = substr($text, 0, $len2)
-				. " ... "
-				. substr($text, -$len2);
+			$text = chopEntity($text, $len2)
+				. ' ... '
+				. chopEntity($text, $len2, 1);
 		} elsif ($len >= 8) {
-			$text = substr($text, 0, $len-4)
-				. " ...";
+			$text = chopEntity($text, $len-4)
+				. ' ...';
 		} else {
-			$text = substr($text, 0, $len);
+			$text = chopEntity($text, $len);
 		}
 	}
 	return $text;
@@ -2854,10 +3957,127 @@ EOT
 	}
 }
 
+#========================================================================
+
+=head2 getRandomWordFromDictFile (FILENAME, OPTIONS)
+
+Pulls a random word from a dictionary file on disk (e.g. /usr/dict/words)
+based on certain parameters.
+
+=over 4
+
+=item Parameters
+
+=over 4
+
+=item FILENAME
+
+The name of the disk file to read from.
+
+=back
+
+=item OPTIONS
+
+min_chars is the word length minimum, or 1 by default.
+
+max_chars is the word length maximum, or 99 by default.
+
+word_regex is the regex to match a word; by default this will include
+all words of all-lowercase letters (e.g. no "O'Reilly") between the
+min_chars and max_chars lengths.
+
+excl_regexes is an arrayref of regular expressions.  If any one of them
+matches a word it will not be returned.
+
+=item Return value
+
+The word found.
+
+=back
+
+=cut
+
+sub getRandomWordFromDictFile {
+	my($filename, $options) = @_;
+	my $min_chars = $options->{min_chars} || 1;
+	$min_chars = 1 if $min_chars < 1;
+	my $max_chars = $options->{max_chars} || 99;
+        my $word_regex = $options->{word_regex} || qr{^([a-z]{$min_chars,$max_chars})$};
+	my $excl_regexes = $options->{excl_regexes} || [ ];
+
+	return '' if !$filename || !-r $filename;
+        my $filesize = -s $filename;
+        return '' if !$filesize;
+        my $word = '';
+
+        # Start looking in the dictionary at a random location.
+        my $start_seek = int(rand($filesize-$max_chars));
+        my $fh;
+        if (!open($fh, "<", $filename)) {
+                return '';
+        }
+        if (!seek($fh, $start_seek, 0)) {
+                return '';
+        }
+        my $line = <$fh>;		# throw first (likely partial) line away
+        my $reseeks = 0;		# how many times have we moved the seek point?
+        my $bytes_read_total = 0;	# how much have we read in total?
+        my $bytes_read_thisseek = 0;	# how much read since last reseek?
+        LINE: while ($line = <$fh>) {
+                if (!$line) {
+                        # We just hit the end of the file.  Roll around
+                        # to the beginning.
+                        if (!seek($fh, 0, 0)) {
+                                last LINE;
+                        }
+                        ++$reseeks;
+                        next LINE;
+                }
+                $bytes_read_total += length($line);
+                $bytes_read_thisseek += length($line);
+                if ($bytes_read_thisseek >= $filesize * 0.001) {
+                        # If we've had to read through more than 0.1% of
+                        # the dictionary to find a word of the appropriate
+                        # length, we're obviously in a part of the
+                        # dictionary that doesn't have any acceptable words
+                        # (maybe a section with all-capitalized words).
+                        # Try another section.
+                        if (!seek($fh, int(rand($filesize-$max_chars)), 0)) {
+                                last LINE;
+                        }
+                        $line = <$fh>; # throw likely partial away
+                        ++$reseeks;
+                        $bytes_read_thisseek = 0;
+                }
+                if ($bytes_read_total >= $filesize) {
+                        # If we've read a total of more than the complete
+                        # file and haven't found a word, give up.
+                        last LINE;
+                }
+                chomp $line;
+                if ($line =~ $word_regex) {
+                        $word = $1;
+                        for my $r (@$excl_regexes) {
+                                if ($word =~ /$r/) {
+                                        # Skip this word.
+#print STDERR "word=$word start_seek=$start_seek SKIPPING regex=$r\n";
+                                        $word = '';
+                                        next LINE;
+                                }
+                        }
+                        last LINE;
+                }
+        }
+        close $fh;
+#print STDERR "word=$word start_seek=$start_seek bytes_read_thisseek=$bytes_read_thisseek bytes_read_total=$bytes_read_total\n";
+        return $word;
+}
+
 ########################################################
 # fix parameter input that should be integers
 sub fixint {
 	my($int) = @_;
+	return if !defined($int);
 	$int =~ s/^\+//;
 	$int =~ s/^(-?[\d.]+).*$/$1/s or return;
 	return $int;
@@ -2892,6 +4112,43 @@ sub countWords {
 }
 
 ########################################################
+# If you change createSid() for your site, change regexSid() too.
+sub createSid {
+	my($bogus_sid) = @_;
+	# yes, this format is correct, don't change it :-)
+	my $sidformat = '%02d/%02d/%02d/%02d%0d2%02d';
+	# Create a sid based on the current time.
+	my @lt;
+	my $start_time = time;
+	if ($bogus_sid) {
+		# If we were called being told that there's at
+		# least one sid that is invalid (already taken),
+		# then look backwards in time until we find it,
+		# then go one second further.
+		my $loops = 1000;
+		while (--$loops) {
+			$start_time--;
+			@lt = localtime($start_time);
+			$lt[5] %= 100; $lt[4]++; # year and month
+			last if $bogus_sid eq sprintf($sidformat, @lt[reverse 0..5]);
+		}
+		if ($loops) {
+			# Found the bogus sid by looking
+			# backwards.  Go one second further.
+			$start_time--;
+		} else {
+			# Something's wrong.  Skip ahead in
+			# time instead of back (not sure what
+			# else to do).
+			$start_time = time + 1;
+		}
+	}
+	@lt = localtime($start_time);
+	$lt[5] %= 100; $lt[4]++; # year and month
+	return sprintf($sidformat, @lt[reverse 0..5]);
+}
+
+########################################################
 # A very careful extraction of all the words from HTML text.
 # URLs count as words.  (A different algorithm than countWords
 # because countWords just has to be fast; this has to be
@@ -2900,6 +4157,15 @@ sub countWords {
 sub findWords {
 	my($args_hr) = @_;
 	my $constants = getCurrentStatic();
+	my $gSkin = getCurrentSkin();
+	my $use_stemming = $constants->{stem_uncommon_words};
+	my $language = $constants->{rdflanguage} || "EN-US";
+	$language = uc($language);
+	my $stemmer = Lingua::Stem->new(-locale => $language);
+	$stemmer->stem_caching({ -level => 2 });
+	my $text_return_hr = {};
+	my @word_stems;
+
 
 	# Return a hashref;  keys are the words, values are hashrefs
 	# with the number of times they appear and so on.
@@ -2910,7 +4176,7 @@ sub findWords {
 		# The default weight for each chunk of text is 1.
 		my $weight_factor = $args_hr->{$key}{weight} || 1;
 
-		my $text = $args_hr->{$key}{text};
+		my $text = $args_hr->{$key}{text} || '';
 
 		# Pull out linked URLs from $text and treat them specially.
 		# We only recognize the two most common types of link.
@@ -2925,7 +4191,7 @@ sub findWords {
 			([^"<>]+)
 		}gxi;
 		foreach my $url (@urls_ahref, @urls_imgsrc) {
-			my $uri = URI->new_abs($url, $constants->{absolutedir})
+			my $uri = URI->new_abs($url, $gSkin->{absolutedir})
 				->canonical;
 			$url = $uri->as_string;
 			# Tiny URLs don't count.
@@ -2970,13 +4236,37 @@ sub findWords {
 			# Ignore *all* words less than 3 chars.
 			next if length($word) < 3;
 			my $ww = $weight_factor * ($cap ? 1.3 : 1);
-			$wordcount->{lc $word}{weight} += $ww;
+			my $log_word = $word;
+			if ($use_stemming) {
+				# For performance reasons we don't want to stem story text for all 
+				# stories we are comparing to in getSimilarStories.
+				# Instead we make sure the stems we save are substrings of the word
+				# anchored at the beginning
+				#
+				# A breakdown of stem/word comparisons based on /usr/dict/words
+				# 70%    $stem eq $word
+				# 93%    $stem is a substring of $word anchored at the beginning
+				# 100%   $stem w/o its last letter is a substring of $word anchored at the beginning
+				#
+				# For now use the stem only if it a substring of the word anchored at the beginning
+				# otherwise use the complete word.  That way we can do a pattern match to check against
+				# older stories rather than stemming them for comparison
+				
+
+				my $stems = $stemmer->stem($word);
+				$log_word = $stems->[0];
+				$log_word = $word if $word!~/^\Q$log_word\E/i;
+				push @word_stems, $log_word;
+			}
+
+			$wordcount->{lc $log_word}{weight} += $ww;
 		}
-		my %uniquewords = map { ( lc($_), 1 ) } @words;
+		my %uniquewords = map { ( lc($_), 1 ) } $use_stemming ? @word_stems: @words;
 		for my $word (keys %uniquewords) {
 			$wordcount->{$word}{count}++;
 		}
 	}
+	$stemmer->clear_stem_cache();
 
 	return $wordcount;
 }
@@ -3059,13 +4349,16 @@ sub grepn {
 	return;
 }
 
-#========================================================================
-# Removed from openbackend
+##################################################################
 sub sitename2filename {
 	my($section) = @_;
+	$section ||= '';
 	my $filename = '';
 
-	if ($section ne 'light') {
+	# XXXSKIN - hardcode 'index' for the sake of RSS feeds
+	if ($section eq 'mainpage') {
+		$filename = 'index';
+	} elsif ($section ne 'light') {
 		$filename = $section || lc getCurrentStatic('sitename');
 	} else {
 		$filename = lc getCurrentStatic('sitename');
@@ -3087,35 +4380,15 @@ sub countTotalVisibleKids {
 	my $last_updated_uid = 0;
 	$pid               ||= 0;
 
-	$total += $comments->{$pid}{visiblekids};
-	if ($constants->{ubb_like_forums}) {
-		$last_updated     = $comments->{$pid}{date};
-		$last_updated_uid = $comments->{$pid}{uid};
-	}
+	$total += $comments->{$pid}{visiblekids} || 0;
 
 	for my $cid (@{$comments->{$pid}{kids}}) {
 		my($num_kids, $date_test, $uid) =
 			countTotalVisibleKids($comments, $cid);
 		$total += $num_kids;
-
-		if ($constants->{ubb_like_forums}) {
-			if ($date_test gt $last_updated) {
-				$last_updated     = $date_test;
-				$last_updated_uid = $uid;
-			}
-			if ($comments->{$cid}{date} gt $last_updated) {
-				$last_updated     = $comments->{$cid}{date};
-				$last_updated_uid = $comments->{$cid}{uid};
-			}
-		}
 	}
 
 	$comments->{$pid}{totalvisiblekids} = $total;
-	# don't do the next two if pid=0
-	if ($pid && $constants->{ubb_like_forums}) {
-		$comments->{$pid}{last_updated}     = $last_updated;
-		$comments->{$pid}{last_updated_uid} = $last_updated_uid;
-	}
 
 	return($total, $last_updated, $last_updated_uid);
 }
@@ -3140,7 +4413,7 @@ sub createStoryTopicData {
 	my @original = @tids;
 	my %original_seen = map { ($_, 1) } @original;
 
-	my $topics = $slashdb->getTopics();
+	my $topics = $slashdb->getTopics;
 	my %seen = map { ($_, 1) } @tids;
 	for my $tid (@tids) {
 		my $new_tid = $topics->{$tid}{parent_topic};
@@ -3165,6 +4438,24 @@ sub createStoryTopicData {
 	return \%tid_ref;
 }
 
+# check whether url is correctly formatted and has a scheme that is allowed for bookmarks and submissions
+sub validUrl {
+	my($url) = @_;
+	my $constants = getCurrentStatic();
+	my $fudgedurl = fudgeurl($url);
+	
+	my @allowed_schemes = split(/\|/, $constants->{bookmark_allowed_schemes} || "http|https");
+	my %allowed_schemes = map { $_ => 1 } @allowed_schemes;
+
+	my $scheme;
+	
+	if ($fudgedurl) {
+		my $uri = new URI $fudgedurl;
+		$scheme = $uri->scheme if $uri && $uri->can("scheme");
+	}		
+	return ($fudgedurl && $scheme && $allowed_schemes{$scheme});
+}
+
 
 1;
 
@@ -3174,7 +4465,3 @@ __END__
 =head1 SEE ALSO
 
 Slash(3), Slash::Utility(3).
-
-=head1 VERSION
-
-$Id$

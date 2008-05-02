@@ -3,6 +3,5 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'      => 'Slash::Subscribe',
-    'VERSION_FROM' => 'Subscribe.pm', # finds $VERSION
     'PM'        => { 'Subscribe.pm' => '$(INST_LIBDIR)/Subscribe.pm' },
 );

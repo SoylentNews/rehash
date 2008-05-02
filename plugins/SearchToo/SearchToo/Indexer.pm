@@ -7,11 +7,10 @@ use File::Path;
 use File::Spec::Functions;
 use Slash::Utility;
 use Slash::DB::Utility;
-use vars qw($VERSION);
 use base 'Slash::SearchToo';
 require Slash::SearchToo::Classic;
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 # FRY: I did it!  And it's all thanks to the books at my local library.
 

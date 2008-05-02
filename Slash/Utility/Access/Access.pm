@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Utility::Access;
 
@@ -30,13 +29,12 @@ use Slash::Display;
 use Slash::Utility::Data;
 use Slash::Utility::Environment;
 use Slash::Utility::System;
-use Slash::Constants qw(:web :people);
+use Slash::Constants qw(:web :people :messages);
 
 use base 'Exporter';
-use vars qw($VERSION @EXPORT);
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-@EXPORT	   = qw(
+our $VERSION = $Slash::Constants::VERSION;
+our @EXPORT	   = qw(
 	checkFormPost
 	formkeyError
 	formkeyHandler
@@ -129,6 +127,8 @@ sub formkeyError {
 	my $form = getCurrentForm();
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
+
+	$formname =~ s|/\w+$||;  # remove /nu, /mp, etc.
 
 	my $abuse_reasons = { usedform => 1, invalid => 1, maxposts => 1,
 		invalidhc => 1 };
@@ -238,6 +238,8 @@ sub intervalString {
 sub formkeyHandler {
 	# ok, I know we don't like refs, but I don't wanna rewrite the 
 	# whole damned system
+
+
 	my($formkey_op, $formname, $formkey, $message_ref, $options) = @_;
 	my $form = getCurrentForm();
 	my $user = getCurrentUser();
@@ -287,7 +289,8 @@ sub formkeyHandler {
 		# check interval from this attempt to last successful post
 		if (my $interval = $slashdb->checkPostInterval($formname)) {	
 			$msg = formkeyError('speed', $formname, $interval);
-			$error_flag = 1;
+			# give the user a preview form so they can post after time limit
+			$error_flag = -1;
 		}
 	} elsif ($formkey_op eq 'formkey_check') {
 		# check if form already used
@@ -388,11 +391,13 @@ sub checkFormPost {
 		if ($slashdb->checkTimesPosted($formname, $max, $id, $formkey_earliest)) {
 			undef $formkey unless $formkey =~ /^\w{10}$/;
 
-			unless ($formkey && $slashdb->checkFormkey($formkey_earliest, $formname, $id, $formkey)) {
-				$slashdb->createAbuse("invalid form key", $formname, $ENV{QUERY_STRING});
-				$$err_message = Slash::getData('invalidformkey', '', '');
-				return;
-			}
+# wtf?  no method checkFormkey exists ...
+# of course, checkFormPost is never even called ...
+#			unless ($formkey && $slashdb->checkFormkey($formkey_earliest, $formname, $id, $formkey)) {
+#				$slashdb->createAbuse("invalid form key", $formname, $ENV{QUERY_STRING});
+#				$$err_message = Slash::getData('invalidformkey', '', '');
+#				return;
+#			}
 
 			if (submittedAlready($formkey, $formname, $err_message)) {
 				$slashdb->createAbuse("form already submitted", $formname, $ENV{QUERY_STRING});
@@ -515,6 +520,12 @@ sub compressOk {
 	my($formname, $field, $content, $wsfactor) = @_;
 	$wsfactor ||= 1;
 
+	# If no content (or I suppose the single char '0') is passed in,
+	# just report that it passes the test.  Hopefully the caller is
+	# performing other checks to make sure that boundary condition
+	# is addressed.
+	return 1 if !$content;
+
 	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $user      = getCurrentUser();
@@ -532,10 +543,10 @@ sub compressOk {
 	# larger the value the more difficult to accept a comment with lots
 	# of whitespace.  Values between 0.2 and 5 probably make sense.
 	my $slice_size = $constants->{comment_compress_slice} || 500;
-	my $nbsp_space = " " x (1 + int(11 * $wsfactor));
-	my $breaktag_space = " " x (1 + int(3 * $wsfactor));
-	my $spacerun_min = 1 + int(4 / $wsfactor);
-	my $spacerun_exp = 1 + 0.4 * $wsfactor;
+	my $nbsp_space = " " x (1 + int(1 * $wsfactor));
+	my $breaktag_space = " " x (1 + int(1 * $wsfactor));
+	my $spacerun_min = 1 + int(16 / $wsfactor);
+	my $spacerun_exp = 1 + 0.1 * $wsfactor;
 
 	my $orig_length = length($content);
 	my $slice_remainder = $orig_length % $slice_size;
@@ -727,8 +738,7 @@ sub setUserExpired {
 
 		my $reg_subj = Slash::getData('rereg_email_subject', '', '');
 
-		# Send the message (message code == -2)
-		doEmail($uid, $reg_subj, $reg_msg, -2);
+		doEmail($uid, $reg_subj, $reg_msg, MSG_CODE_REGISTRATION);
 	} else {
 		# We only need to clear these.
 		$slashdb->setUser($uid, {
@@ -757,7 +767,8 @@ sub isDiscussionOpen {
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
 	my $people = $slashdb->getUser($discussion->{uid}, 'people');
-	if ($discussion->{commentstatus} eq 'friends_only' || $discussion->{commentstatus} eq 'friends_fof_only') {
+	if ($discussion->{commentstatus} eq 'friends_only'
+		|| $discussion->{commentstatus} eq 'friends_fof_only') {
 		my $orig = $discussion->{type};
 		$discussion->{type} = 'archived';
 		if ($people) {
@@ -766,6 +777,8 @@ sub isDiscussionOpen {
 				$discussion->{commentstatus} eq 'friends_fof_only'
 					&&
 				$people->{FOF()}{$user->{uid}}
+					&&
+				!$people->{FOE()}{$user->{uid}}
 				)
 			);
 		}
@@ -780,11 +793,21 @@ sub isDiscussionOpen {
 				|| (
 					$discussion->{commentstatus} eq 'no_foe_eof'
 						&&
+					!$people->{FRIEND()}{$user->{uid}}
+						&&
 					$people->{EOF()}{$user->{uid}}
 				)
 			);
 		}
+	} elsif ($discussion->{commentstatus} eq 'logged_in') {
+		# user just has to be logged in, but A.C. posting still allowed
+		if ($user->{is_anon}) {
+			$discussion->{type} = 'archived';
+		}
 	}
+
+	$discussion->{user_nopost} = 1 if $discussion->{type} eq 'archived';
+
 	return $discussion->{type};
 }
 
@@ -797,7 +820,3 @@ __END__
 =head1 SEE ALSO
 
 Slash(3), Slash::Utility(3).
-
-=head1 VERSION
-
-$Id$

@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::DB::Utility;
 
@@ -10,19 +9,18 @@ use Config '%Config';
 use Slash::Utility;
 use DBIx::Password;
 use Time::HiRes;
-use vars qw($VERSION);
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 # FRY: Bender, if this is some kind of scam, I don't get it.  You already
 # have my power of attorney.
 
 my $timeout = 30; # This should eventualy be a parameter that is configurable
+my $query_ref_regex = qr{(HASH|ARRAY|SCALAR|GLOB|CODE|LVALUE|IO|REF)\(0x[0-9a-f]{3,16}\)}; # this too
 
 ########################################################
 # Generic methods for libraries.
 ########################################################
-#Class variable that stores the database handle
 sub new {
 	my($class, $user, @args) = @_;
 	my $self = {};
@@ -30,7 +28,7 @@ sub new {
 
 	bless($self, $class);
 	$self->{virtual_user} = $user;
-	$self->sqlConnect();
+	$self->sqlConnect() or return undef;
 
 	if ($self->can('init')) {
 		# init should return TRUE for success, else
@@ -49,6 +47,13 @@ sub new {
 	$self->{_querylog} = { };
 
 	return $self;
+}
+
+# Subclasses may implement their own methods of determining whether
+# their class is "installed" or not.  For example, plugins may want
+# to check $constants->{plugin}{Foo}.
+sub isInstalled {
+	return 1;
 }
 
 ##################################################################
@@ -113,6 +118,7 @@ sub gets {
 	} else {
 		$sth = $self->sqlSelectMany('*', $table, $where);
 	}
+	return undef unless $sth;
 
 	while (my $row = $sth->fetchrow_hashref) {
 		$return{ $row->{$prime} } = $row;
@@ -131,7 +137,7 @@ sub list {
 	my $prime = $self->{'_prime'};
 
 	$val ||= $prime;
-	$self->sqlConnect();
+	$self->sqlConnect() or return undef;
 	my $qlid = $self->_querylog_start('SELECT', $table);
 	my $list = $self->{_dbh}->selectcol_arrayref("SELECT $val FROM $table");
 	$self->_querylog_finish($qlid);
@@ -202,7 +208,7 @@ sub exists {
 
 	my $sql = "SELECT count(*) FROM $table WHERE $where";
 	# we just need one stinkin value to see if this exists
-	$self->sqlConnect();
+	$self->sqlConnect() or return undef;
 	my $qlid = $self->_querylog_start('DELETE', $table);
 	my $count = $self->{_dbh}->selectrow_array($sql);
 	$self->_querylog_finish($qlid);
@@ -221,6 +227,13 @@ sub sqlConnect {
 		$self->{_dbh}->disconnect;
 	}
 
+	return 0 unless dbAvailable();
+
+	# ping() isn't currently implemented so it is unnecessary;
+	# if it actually did run a query on the DB to determine
+	# whether the connection were active, calling it here
+	# would be a mistake.  I think we want to check
+	# dbh->{Active} instead. XXX -Jamie
 	if (!(defined $self->{_dbh}) || !$self->{_dbh}->ping) {
 	#if (!(defined $self->{_dbh}) || !$self->{_dbh}->can("ping") || !$self->{_dbh}->ping) {
 # Ok, new connection, lets create it
@@ -271,7 +284,7 @@ sub getLastInsertId {
 	# We're not going to go through sqlSelect() because that will
 	# involve querylog code;  we'll fetch this value here.
 	my $sql = "SELECT LAST_INSERT_ID()";
-	$self->sqlConnect;
+	$self->sqlConnect() or return undef;
 	my $sth = $self->{_dbh}->prepare($sql);
 	if (!$sth->execute) {
 		$self->sqlErrorLog($sql);
@@ -283,6 +296,45 @@ sub getLastInsertId {
 	return $id;
 }
 
+
+#######################################################
+# set a system variable if necessary.  this will only be
+# good for the current session.  don't forget to set it
+# back anyway.
+sub sqlSetVar {
+	my($self, $var, $value) = @_;
+	return if $ENV{GATEWAY_INTERFACE} && !getCurrentUser('is_admin');
+
+	# can't use sqlQuote for this, can't be quoted
+	$var =~ s/\W+//;   # just in case
+	$value =~ s/\D+//; # ditto (any non-numeric vars we might adjust?)
+
+	$self->sqlDo("SET $var = $value");
+}
+
+#######################################################
+# get the value of a named system variable
+sub sqlGetVar {
+	my($self, $var) = @_;
+
+	# to mirror what we do in sqlSetVar
+	$var =~ s/\W+//;
+
+	my $sql = "SHOW VARIABLES LIKE '$var'";
+	my $sth = $self->{_dbh}->prepare($sql);
+
+	if (!$sth->execute) {
+		$self->sqlErrorLog($sql);
+		$self->sqlConnect;
+		return undef;
+	}
+
+	my($name, $value) = $sth->fetchrow;
+	$sth->finish;
+	return $value;
+}
+
+
 ########################################################
 # The SQL query logging methods
 #
@@ -293,6 +345,7 @@ sub getLastInsertId {
 sub _querylog_enabled {
 	my($self) = @_;
 
+	return 0 unless dbAvailable();
 	return $self->{_querylog}{enabled}
 		if defined $self->{_querylog}{enabled}
 			&& $self->{_querylog}{next_check_time} > time;
@@ -398,22 +451,34 @@ sub _querylog_writecache {
 	my($self) = @_;
 	return unless ref($self->{_querylog}{cache})
 		&& @{$self->{_querylog}{cache}};
-	my $dbh = $self->{_querylog}{db}{_dbh};
-	return unless $dbh;
-	$dbh->do("SET AUTOCOMMIT=0");
+	my $qdb = $self->{_querylog}{db};
+	return unless $qdb;
+#	$qdbh->{AutoCommit} = 0;
+	$qdb->sqlDo("SET AUTOCOMMIT=0");
 	while (my $sql = shift @{$self->{_querylog}{cache}}) {
-		$dbh->do($sql);
+		$qdb->sqlDo($sql);
 	}
-	$dbh->do("COMMIT");
-	$dbh->do("SET AUTOCOMMIT=1");
+	$qdb->sqlDo("COMMIT");
+	$qdb->sqlDo("SET AUTOCOMMIT=1");
+#	$qdbh->commit;
+#	$qdbh->{AutoCommit} = 1;
 }
 
 ########################################################
 # Useful SQL Wrapper Functions
 ########################################################
 
+sub _refCheck {
+	my($self, $where) = @_;
+	return if !$where || $where !~ $query_ref_regex;
+	my @c = caller(1);
+	my $w2 = $where; $w2 =~ s/\s+/ /g;
+	warn scalar(gmtime) . " query text contains ref string ($c[0] $c[1] $c[2] $c[3]): $w2\n";
+}
+
 sub sqlSelectMany {
 	my($self, $select, $from, $where, $other, $options) = @_;
+	$self->_refCheck($where);
 
 	my $distinct = ($options && $options->{distinct}) ? "DISTINCT" : "";
 	my $sql = "SELECT $distinct $select ";
@@ -421,13 +486,13 @@ sub sqlSelectMany {
 	$sql .= "  WHERE $where " if $where;
 	$sql .= "        $other" if $other;
 
-	$self->sqlConnect;
+	$self->sqlConnect() or return undef;
 	my $sth = $self->{_dbh}->prepare($sql);
 	if ($sth->execute) {
 		return $sth;
 	} else {
-		$sth->finish;
 		$self->sqlErrorLog($sql);
+		$sth->finish;
 		$self->sqlConnect;
 		return undef;
 	}
@@ -437,13 +502,14 @@ sub sqlSelectMany {
 # $options is a hash, add optional pieces here.
 sub sqlSelect {
 	my($self, $select, $from, $where, $other, $options) = @_;
+	$self->_refCheck($where);
 	my $distinct = ($options && $options->{distinct}) ? "DISTINCT" : "";
 	my $sql = "SELECT $distinct $select ";
 	$sql .= "FROM $from " if $from;
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;
 
-	$self->sqlConnect();
+	$self->sqlConnect() or return undef;
 	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->{_dbh}->prepare($sql);
 	if (!$sth->execute) {
@@ -466,12 +532,13 @@ sub sqlSelect {
 ########################################################
 sub sqlSelectArrayRef {
 	my($self, $select, $from, $where, $other) = @_;
+	$self->_refCheck($where);
 	my $sql = "SELECT $select ";
 	$sql .= "FROM $from " if $from;
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;
 
-	$self->sqlConnect();
+	$self->sqlConnect() or return undef;
 	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->{_dbh}->prepare($sql);
 	if (!$sth->execute) {
@@ -493,19 +560,15 @@ sub sqlSelectHash {
 }
 
 ##########################################################
-# selectCount 051199
-# inputs: scalar string table, scaler where clause
-# returns: via ref from input
-# Simple little function to get the count of a table
-##########################################################
 sub sqlCount {
 	my($self, $table, $where) = @_;
+	$self->_refCheck($where);
 
 	my $sql = "SELECT COUNT(*) AS count FROM $table";
 	$sql .= " WHERE $where" if $where;
 
 	# we just need one stinkin value - count
-	$self->sqlConnect();
+	$self->sqlConnect() or return undef;
 	my $qlid = $self->_querylog_start("SELECT", $table);
 	my $count = $self->{_dbh}->selectrow_array($sql);
 	$self->_querylog_finish($qlid);
@@ -517,13 +580,14 @@ sub sqlCount {
 ########################################################
 sub sqlSelectHashref {
 	my($self, $select, $from, $where, $other) = @_;
+	$self->_refCheck($where);
 
 	my $sql = "SELECT $select ";
 	$sql .= "FROM $from " if $from;
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;
 
-	$self->sqlConnect();
+	$self->sqlConnect() or return undef;
 	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->{_dbh}->prepare($sql);
 
@@ -541,6 +605,7 @@ sub sqlSelectHashref {
 ########################################################
 sub sqlSelectColArrayref {
 	my($self, $select, $from, $where, $other, $options) = @_;
+	$self->_refCheck($where);
 	my $distinct = ($options && $options->{distinct}) ? "DISTINCT" : "";
 
 	my $sql = "SELECT $distinct $select ";
@@ -548,9 +613,14 @@ sub sqlSelectColArrayref {
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;
 
-	$self->sqlConnect();
+	$self->sqlConnect() or return undef;
 	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->{_dbh}->prepare($sql);
+	unless ($sth) {
+		$self->sqlErrorLog($sql);
+		$self->sqlConnect;
+		return;
+	}
 
 	my $array = $self->{_dbh}->selectcol_arrayref($sth);
 	unless (defined($array)) {
@@ -579,20 +649,21 @@ sub sqlSelectColArrayref {
 # array ref of all records
 sub sqlSelectAll {
 	my($self, $select, $from, $where, $other) = @_;
+	$self->_refCheck($where);
 
 	my $sql = "SELECT $select ";
 	$sql .= "FROM $from " if $from;
 	$sql .= "WHERE $where " if $where;
 	$sql .= "$other" if $other;
 
-	$self->sqlConnect();
+	$self->sqlConnect() or return undef;
 
 	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $H = $self->{_dbh}->selectall_arrayref($sql);
 	unless ($H) {
 		$self->sqlErrorLog($sql);
 		$self->sqlConnect;
-		return;
+		return undef;
 	}
 	$self->_querylog_finish($qlid);
 	return $H;
@@ -612,7 +683,8 @@ sub sqlSelectAll {
 # returns:
 # hash ref of all records
 sub sqlSelectAllHashref {
-	my($self, $id, $select, $from, $where, $other) = @_;
+	my($self, $id, $select, $from, $where, $other, $options) = @_;
+	$self->_refCheck($where);
 	# Yes, if $id is not in $select things will be bad
 	
 	# Allow $id to be an arrayref to collect multiple rows of results
@@ -628,6 +700,7 @@ sub sqlSelectAllHashref {
 
 	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->sqlSelectMany($select, $from, $where, $other);
+	return undef unless $sth;
 	my $returnable = { };
 	while (my $row = $sth->fetchrow_hashref) {
 		my $reference = $returnable;
@@ -635,6 +708,11 @@ sub sqlSelectAllHashref {
 			$reference = \%{$reference->{$row->{$next_id}}};
 		}
 		%$reference = %$row;
+		if ($options->{thin}) {
+			for my $next_id (@$id) {
+				delete $reference->{$next_id};
+			}
+		}
 	}
 	$sth->finish;
 	$self->_querylog_finish($qlid);
@@ -656,6 +734,7 @@ sub sqlSelectAllHashref {
 # array ref of all records
 sub sqlSelectAllHashrefArray {
 	my($self, $select, $from, $where, $other) = @_;
+	$self->_refCheck($where);
 
 	my $sql = "SELECT $select ";
 	$sql .= "FROM $from " if $from;
@@ -664,7 +743,8 @@ sub sqlSelectAllHashrefArray {
 
 	my $qlid = $self->_querylog_start("SELECT", $from);
 	my $sth = $self->sqlSelectMany($select, $from, $where, $other);
-	my @returnable;
+	return undef unless $sth;
+	my @returnable = ( );
 	while (my $row = $sth->fetchrow_hashref) {
 		push @returnable, $row;
 	}
@@ -675,16 +755,189 @@ sub sqlSelectAllHashrefArray {
 }
 
 ########################################################
+# sqlSelectAllKeyValue - this function returns the entire
+# set of rows in a hashref, where the keys are the first
+# column requested and the values are the second.
+# (Name collisions are the caller's problem)
+#
+# inputs:
+# select - exactly 2 columns to select
+# from - tables
+# where - where clause
+# other - limit, asc ...
+#
+# returns:
+# hashref, keys first column, values the second
+sub sqlSelectAllKeyValue {
+	my($self, $select, $from, $where, $other) = @_;
+	$self->_refCheck($where);
+
+	my $sql = "SELECT $select ";
+	$sql .= "FROM $from " if $from;
+	$sql .= "WHERE $where " if $where;
+	$sql .= "$other" if $other;
+
+	$self->sqlConnect() or return undef;
+
+	my $qlid = $self->_querylog_start("SELECT", $from);
+	my $H = $self->{_dbh}->selectall_arrayref($sql);
+	unless ($H) {
+		$self->sqlErrorLog($sql);
+		$self->sqlConnect;
+		return undef;
+	}
+	$self->_querylog_finish($qlid);
+
+	my $hashref = { };
+	for my $duple (@$H) {
+		$hashref->{$duple->[0]} = $duple->[1];
+	}
+	return $hashref;
+}
+
+########################################################
+# This is a little different from the other sqlSelect* methods.
+#
+# Its reason for existing is that sometimes, for performance reasons,
+# you want to do a select on a large table that is limited by a key
+# that differs from the column you actually want to limit by, though
+# both of them increase (or decrease) together.  For example, perhaps
+# you want to do a SELECT on an accesslog table with millions of rows
+# based on a range of accesslog.ts, but to make sure the query optimizer
+# restricts by primary key, you'd prefer to determine the range of
+# accesslog.id that spans the rows in question, and offer that as
+# part of the WHERE clause as well.  The optimizer doesn't know that
+# the columns id and ts increase together, but you do.  Telling the
+# optimizer that it can restrict by the numeric key may not make your
+# query faster, but it might, and in non-pathological situations it
+# won't make it slower.
+#
+# This method will return a boundary value of a numeric key column
+# based on an inequality test for a different column that must be
+# approximately monotonic with the key.  It will always return quickly,
+# since it uses a binary search to narrow down the value sought, and
+# all its SELECTs are primary key lookups.
+#
+# Note that there must not be "holes" in the table where a value of the
+# numeric key is missing even though there are values present both above
+# and below it, or the answer may impose an incorrectly strict limitation
+# (this bug may be fixed in the future).  This includes "holes" in the
+# values for that key in the rows returned by the where clause.
+#
+# For example, if you wanted to count the number of distinct uids in
+# a very large accesslog table in several hours, the easy way is:
+#
+# $c = $slashdb->sqlSelect("COUNT(DISTINCT uid)", "accesslog",
+#     "ts BETWEEN '2001-01-01 01:00:00' AND '2001-01-01 03:00:00'");
+#
+# but it may be faster, and certainly won't be significantly slower,
+# to do:
+#
+# $minid = $slashdb->sqlSelectNumericKeyAssumingMonotonic("accesslog", "min", "id", "ts >= '2001-01-01 01:00:00'");
+# $maxid = $slashdb->sqlSelectNumericKeyAssumingMonotonic("accesslog", "max", "id", "ts <= '2001-01-01 03:00:00'");
+# $c = $slashdb->sqlSelect("COUNT(DISTINCT uid)", "accesslog",
+#     "id BETWEEN $minid AND $maxid AND ts BETWEEN '2001-01-01 01:00:00' AND '2001-01-01 03:00:00'");
+
+sub sqlSelectNumericKeyAssumingMonotonic {
+	my($self, $table, $minmax, $keycol, $clause, $max_gap) = @_;
+	my $constants = getCurrentStatic();
+	$max_gap ||= ($constants->{db_auto_increment_increment} || 1)-1;
+	$self->_refCheck($clause);
+
+	# Set up $minmax appropriately.
+	$minmax = uc($minmax);
+	if ($minmax !~ /^(MIN|MAX)$/) {
+		die "sqlSelectNumericKeyAssumingMonotonic called with minmax='$minmax'";
+	}
+	# In MixedCaps to avoid typo bugs and make the code perhaps
+	# a bit clearer.  This is the opposite of $minmax.
+	my $MaxMin = $minmax eq 'MIN' ? 'MAX' : 'MIN';
+
+	# We pretend the "left" end of the table is the end pointed to
+	# by whichever direction $minmax points, and the "right" end
+	# is the end $MaxMin points to.
+	# First, seed the leftmost variable with the id at the left end
+	# of the table.
+	my $leftmost = $self->sqlSelect("$minmax($keycol)", $table);
+	# If no such id, the table is empty.
+	return undef unless $leftmost;
+	# If the test actually passes for that id, then it's not a
+	# failure at all, and we know our answer already.
+	return $leftmost if $self->sqlSelect($keycol, $table, "$keycol=$leftmost AND ($clause)");
+
+	# Next, seed the rightmost with the id at the right end.
+	my $rightmost = $self->sqlSelect("$MaxMin($keycol)", $table);
+	# If that test fails, then there are no rows satisfying the
+	# desired condition, so we know our answer.
+	return undef if !$self->sqlSelect($keycol, $table, "$keycol=$rightmost AND ($clause)");
+
+	# Now iterate a binary search into the table.
+	my $answer = undef;
+	while (!$answer) {
+		# If we're really close, just do the SELECT.
+		if (abs($leftmost - $rightmost) < 100) {
+			my($min, $max);
+			if ($minmax eq 'MIN') { $min = $leftmost; $max = $rightmost }
+					 else { $min = $rightmost; $max = $leftmost }
+			$answer = $self->sqlSelect("$minmax($keycol)", $table,
+				"$keycol BETWEEN $min AND $max
+				 AND ($clause)");
+			if (!$answer) {
+				# Table may have changed, that's one of
+				# the risks of using this method.  Return
+				# the approximately correct answer that
+				# was, at least at one time, valid.
+				$answer = $leftmost;
+			}
+		}
+		last if $answer;
+		# If we're not that close, narrow it down.  To allow for gaps
+		# in the keycol, 
+		my $middle = int(($leftmost + $rightmost) / 2);
+		my $middle_clause;
+		if ($max_gap) {
+			my $middle_min = int($middle - $max_gap/2);
+			$middle_min = 0 if $middle_min < 0; # very unlikely! but just in case
+			my $middle_max = int($middle + $max_gap/2);
+			$middle_clause = "$keycol BETWEEN $middle_min AND $middle_max";
+		} else {
+			$middle_clause = "$keycol=$middle";
+		}
+		my $hit = $self->sqlSelect($keycol, $table,
+			"($middle_clause) AND ($clause)");
+		if ($hit) {
+			$rightmost = $middle;
+		} else {
+			$leftmost = $middle;
+		}
+	}
+	return $answer;
+}
+
+########################################################
 sub sqlUpdate {
-	my($self, $table, $data, $where, $options) = @_;
+	my($self, $tables, $data, $where, $options) = @_;
+	$self->_refCheck($where);
 
 	# If no changes were passed in, there's nothing to do.
 	# (And if we tried to proceed we'd generate an SQL error.)
 	return 0 if !keys %$data;
 
-	my $sql = "UPDATE $table SET ";
+	my $sql = "UPDATE ";
+	# What's inside /*! */ will be treated as a comment by most
+	# other SQL servers, but MySQL will parse it.  Kinda pointless
+	# since we've basically given up on ever supporting DBs other
+	# than MySQL, but what the heck.
+	$sql .= "/*! IGNORE */ " if $options->{ignore};
 
-	my @data_fields = ( );
+	my $table_str;
+	if (ref $tables) {
+		$table_str = join(",", @$tables);
+	} else {
+		$table_str = $tables;
+	}
+	$sql .= $table_str;
+
 	my $order_hr = { };
 	if ($options && $options->{assn_order}) {
 		# Reorder the data fields into the order given.  Any
@@ -703,23 +956,27 @@ sub sqlUpdate {
 	# behavior as of August 2002.  It should not break anything,
 	# because nothing previous should have relied on perl's
 	# natural hash key sort order!
+	my @data_fields = ( );
 	@data_fields = sort {
 		($order_hr->{$a} || 9999) <=> ($order_hr->{$b} || 9999)
 		||
 		$a cmp $b
 	} keys %$data;
-
+	my @set_clauses = ( );
 	for my $field (@data_fields) {
 		if ($field =~ /^-/) {
 			$field =~ s/^-//;
-			$sql .= "\n  $field = $data->{-$field},";
+			push @set_clauses, "$field = $data->{-$field}";
 		} else {
-			$sql .= "\n $field = " . $self->sqlQuote($data->{$field}) . ',';
+			my $data_q = $self->sqlQuote($data->{$field});
+			push @set_clauses, "$field = $data_q";
 		}
 	}
-	chop $sql; # lose the terminal ","
-	$sql .= "\nWHERE $where\n";
-	my $qlid = $self->_querylog_start("UPDATE", $table);
+	$sql .= " SET " . join(", ", @set_clauses) if @set_clauses;
+
+	$sql .= " WHERE $where" if $where;
+
+	my $qlid = $self->_querylog_start("UPDATE", $table_str);
 	my $rows = $self->sqlDo($sql);
 	$self->_querylog_finish($qlid);
 	return $rows;
@@ -728,6 +985,7 @@ sub sqlUpdate {
 ########################################################
 sub sqlDelete {
 	my($self, $table, $where, $limit) = @_;
+	$self->_refCheck($where);
 	return unless $table;
 	my $sql = "DELETE FROM $table";
 	$sql .= " WHERE $where" if $where;
@@ -742,9 +1000,10 @@ sub sqlDelete {
 sub sqlInsert {
 	my($self, $table, $data, $options) = @_;
 	my($names, $values);
-	# oddly enough, this hack seems to work for all DBs -- pudge
-	# Its an ANSI sql comment I believe -Brian
-	# Hmmmmm... we can trust getCurrentStatic here? - Jamie
+	# What's inside /*! */ will be treated as a comment by most
+	# other SQL servers, but MySQL will parse it.  Kinda pointless
+	# since we've basically given up on ever supporting DBs other
+	# than MySQL, but what the heck.
 	my $delayed = ($options->{delayed} && !getCurrentStatic('delayed_inserts_off'))
 		? " /*! DELAYED */" : "";
 	my $ignore = $options->{ignore} ? " /*! IGNORE */" : "";
@@ -772,7 +1031,7 @@ sub sqlInsert {
 #################################################################
 sub sqlQuote {
 	my($self, $value) = @_;
-	$self->sqlConnect;
+	$self->sqlConnect() or return undef;
 	if (ref($value) eq 'ARRAY') {
 		my(@array);
 		for (@$value) {
@@ -787,7 +1046,8 @@ sub sqlQuote {
 #################################################################
 sub sqlDo {
 	my($self, $sql) = @_;
-	$self->sqlConnect();
+	$self->_refCheck($sql);
+	$self->sqlConnect() or return undef;
 	my $rows = $self->{_dbh}->do($sql);
 	unless ($rows) {
 		unless ($sql =~ /^INSERT\s+IGNORE\b/i) {
@@ -806,7 +1066,7 @@ sub sqlErrorLog {
 	my($self, $sql) = @_;
 	my $error = $self->sqlError || 'no error string';
 
-	my @return = ("DB='$self->{virtual_user}'", "hostinfo='$self->{_dbh}->{mysql_hostinfo}'", $error);
+	my @return = ("virtuser='$self->{virtual_user}'", "hostinfo='$self->{_dbh}->{mysql_hostinfo}'", $error);
 	push @return, $sql if $sql;
 	errorLog(join ' -- ', @return);
 }

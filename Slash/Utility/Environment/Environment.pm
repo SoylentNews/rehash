@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Utility::Environment;
 
@@ -28,13 +27,13 @@ use strict;
 use Apache::ModuleConfig;
 use Digest::MD5 'md5_hex';
 use Time::HiRes;
+use Slash::Constants ();
 use Socket qw( inet_aton inet_ntoa );
 
 use base 'Exporter';
-use vars qw($VERSION @EXPORT);
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-@EXPORT	   = qw(
+our $VERSION = $Slash::Constants::VERSION;
+our @EXPORT  = qw(
 
 	dbAvailable
 
@@ -3525,7 +3524,3 @@ __END__
 =head1 SEE ALSO
 
 Slash(3), Slash::Utility(3).
-
-=head1 VERSION
-
-$Id$

@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Constants;
 
@@ -27,14 +26,14 @@ The constants below are grouped by tag.
 
 use strict;
 use base 'Exporter';
-use vars qw(@ISA $VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS %CONSTANTS);
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = '2.005001'; # v2.5.1
+our %CONSTANTS;
 
 constants();
-@EXPORT		= qw();
-@EXPORT_OK	= map { keys %{$CONSTANTS{$_}} } keys %CONSTANTS;
-%EXPORT_TAGS	= (
+our @EXPORT		= qw();
+our @EXPORT_OK	= map { keys %{$CONSTANTS{$_}} } keys %CONSTANTS;
+our %EXPORT_TAGS	= (
 	all	=> [@EXPORT_OK],
 	map { ($_, [keys %{$CONSTANTS{$_}}]) } keys %CONSTANTS
 );
@@ -43,7 +42,7 @@ constants();
 sub constants {
 	my($group, @syms, @nums);
 
-	while (<DATA>) {
+	for (readline(DATA)) {
 		if (/^=head2 (\w+)$/ || /^__END__$/) {
 			if ($group && @syms && @nums) {
 				@{$CONSTANTS{$group}}{@syms} = @nums;
@@ -110,10 +109,15 @@ These constants are for message delivery modes and message type codes.
 	MSG_CODE_EMAILSTORY
 	MSG_CODE_ZOO_CHANGE
 	MSG_CODE_BADPASSWORD
+	MSG_CODE_MODSTATS
+	MSG_CODE_SUBSCRIPTION_LOW
+	MSG_CODE_SUBSCRIPTION_OUT
+	MSG_CODE_SCHEDULECHG
+	MSG_CODE_HTML_INVALID
 
 =cut
 
-# -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13
+# -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
 
 =pod
 
@@ -131,10 +135,24 @@ These constants are used for web programs, for the op hashes.
 
 	ALLOWED
 	FUNCTION
+	MINSECLEV
 
 =cut
 
-# 0 1
+# 0 1 2
+
+=head2 reskey
+
+These constants are used for resource keys.
+
+	RESKEY_NOOP
+	RESKEY_SUCCESS
+	RESKEY_FAILURE
+	RESKEY_DEATH
+
+=cut
+
+# -1 0 1 2
 
 =head2 strip
 
@@ -195,7 +213,3 @@ in modules, etc.
 =head1 SEE ALSO
 
 Slash(3).
-
-=head1 VERSION
-
-$Id$

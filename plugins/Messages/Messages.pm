@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Messages;
 
@@ -35,14 +34,12 @@ More to come.
 
 use strict;
 use base qw(Slash::Messages::DB::MySQL);
-use vars qw($VERSION);
-use Email::Valid;
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::Constants ':messages';
 use Slash::Display;
 use Slash::Utility;
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 
 #========================================================================
@@ -60,7 +57,7 @@ Will drop a serialized message into message_drop.
 =item TO_ID
 
 The UID of the user the message is sent to.  Must match a valid
-uid in the users table.
+uid in the users table.  Can be an arrayref of UIDs.
 
 =item TYPE
 
@@ -96,7 +93,7 @@ Default is 'now'.
 
 =item Return value
 
-The created message's "id" in the message_drop table.
+The created message's "id" (or multiple ids) in the message_drop table.
 
 =item Dependencies
 
@@ -108,6 +105,7 @@ Whatever templates are passed in.
 
 sub create {
 	my($self, $uid, $type, $data, $fid, $altto, $send) = @_;
+	my $gSkin = getCurrentSkin();
 	my $message;
 
 	# must not contain non-numeric
@@ -122,18 +120,29 @@ sub create {
 		return 0;
 	}
 
+	$uid = [$uid] unless ref $uid;
+	my @users;
+
 	if (!$altto) {
 		# check for $uid existence
-		my $slashdb = getCurrentDB();
-		unless ($slashdb->getUser($uid)) {
-			messagedLog(getData("user not found", { uid => $uid }, "messages"));
-			return 0;
+		my $reader = getObject('Slash::Journal', { db_type => 'reader' });
+		for my $u (@$uid) {
+			if ($reader->existsUid($u)) {
+				push @users, $u;
+			} else {
+				messagedLog(getData("user not found", { uid => $u }, "messages"));
+			}
 		}
 	} else {
-		if (!defined($uid) || $uid =~ /\D/) {
-			$uid = 0;
+		for my $u (@$uid) {
+			if (!defined($uid) || $uid =~ /\D/) {
+				$u = 0;
+			}
+			push @users, $u;
 		}
 	}
+
+	return 0 unless @users;
 
 	if (!ref $data) {
 		$message = $data;
@@ -147,11 +156,11 @@ sub create {
 		}
 
 		my $user = getCurrentUser();
-		$data->{_NAME}    = delete($data->{template_name});
-		$data->{_PAGE}    = delete($data->{template_page})
+		$data->{_NAME} = delete($data->{template_name});
+		$data->{_PAGE} = delete($data->{template_page})
 			|| $user->{currentPage};
-		$data->{_SECTION} = delete($data->{template_section})
-			|| $user->{currentSection};
+		$data->{_SKIN} = delete($data->{template_skin})
+			|| $gSkin->{name};
 
 		# set subject
 		if (exists $data->{subject} && ref($data->{subject}) eq 'HASH') {
@@ -163,11 +172,11 @@ sub create {
 				return 0;
 			}
 
-			$data->{subject}{_NAME}    = delete($data->{subject}{template_name});
-			$data->{subject}{_PAGE}    = delete($data->{subject}{template_page})
+			$data->{subject}{_NAME} = delete($data->{subject}{template_name});
+			$data->{subject}{_PAGE} = delete($data->{subject}{template_page})
 				|| $data->{_PAGE}    || $user->{currentPage};
-			$data->{subject}{_SECTION} = delete($data->{subject}{template_section})
-				|| $data->{_SECTION} || $user->{currentSection};
+			$data->{subject}{_SKIN} = delete($data->{subject}{template_skin})
+				|| $data->{_SKIN} || $gSkin->{name};
 		}
 
 		$data->{_templates}{email}{content}	||= 'msg_email';
@@ -183,9 +192,14 @@ sub create {
 		return 0;
 	}
 
-	my($msg_id) = $self->_create($uid, $code, $message, $fid, $altto, $send);
-	return $msg_id;
+	my @msg_ids;
+	for my $u (@users) {
+		my($msg_id) = $self->_create($u, $code, $message, $fid, $altto, $send);
+		push @msg_ids, $msg_id if $msg_id;
+	}
+	return @msg_ids > 1 ? @msg_ids : $msg_ids[0];
 }
+
 
 #========================================================================
 
@@ -323,11 +337,26 @@ sub checkMessageCodes {
 	return \@newuids;
 }
 
+
+# verify user can receive message
+sub checkMessageUser {
+	my($self, $code, $userm) = @_;
+	my $coderef = $self->getMessageCode($code) or return [];
+	my $ok = ($userm->{seclev} >= $coderef->{seclev}
+		||
+	   ($coderef->{acl} && $userm->{acl}{ $coderef->{acl} })
+		||
+	   ($coderef->{subscribe} && isSubscriber($userm))
+	);
+	return $ok;
+}
+
+
 # must return an array ref
 sub getMessageUsers {
 	my($self, $code) = @_;
 	my $coderef = $self->getMessageCode($code) or return [];
-	my $users = $self->_getMessageUsers($code, $coderef->{seclev}, $coderef->{subscribe});
+	my $users = $self->_getMessageUsers($code, $coderef->{seclev}, $coderef->{subscribe}, $coderef->{acl});
 	return $users || [];
 }
 
@@ -336,14 +365,12 @@ sub getMode {
 	my($self, $msg) = @_;
 	my $code = $msg->{code};
 	my $mode = $msg->{user}{prefs}{$code};
+        $mode = MSG_MODE_EMAIL if $msg->{user}{prefs}{$code} == $self->getMessageDeliveryByName("Mobile");
 
 	my $coderef = $self->getMessageCode($code) or return MSG_MODE_NOCODE;
 
 	# user not allowed to receive this message type
-	return MSG_MODE_NOCODE if
-		( $msg->{user}{seclev} < $coderef->{seclev} )
-			||
-		( $coderef->{subscribe} && !isSubscriber($msg->{user}) );
+	return MSG_MODE_NOCODE unless $self->checkMessageUser($code, $msg->{user});
 
 	# user has no delivery mode set
 	return MSG_MODE_NONE if	$mode == MSG_MODE_NONE
@@ -427,8 +454,15 @@ sub send {
 			return 0;
 		}
 
-		$addr    = $msg->{altto} || $msg->{user}{realemail};
-		unless (Email::Valid->rfc822($addr)) {
+                # Email and Mobile messages are both Email modes, but use different recipients.
+                my $mobile_code = $self->getMessageDeliveryByName('Mobile');
+                if ($mobile_code && $msg->{user}{prefs}{$msg->{code}} == $mobile_code) {
+                        $addr = $msg->{user}{mobile_text_address};
+                } else {
+                        $addr = $msg->{altto} || $msg->{user}{realemail};
+                }
+		
+                unless (emailValid($addr)) {
 			messagedLog(getData("send mail error", {
 				addr	=> $addr,
 				uid	=> $msg->{user}{uid},
@@ -488,6 +522,7 @@ sub quicksend {
 	my $slashdb = getCurrentDB();
 
 	return unless $tuser;
+	$code = -1 unless defined $code;
 	($code, my($type)) = $self->getDescription('messagecodes', $code);
 	$code = -1 unless defined $code;
 
@@ -546,7 +581,7 @@ sub bulksend {
 	my $subject = $self->callTemplate('msg_email_subj', $msg);
 
 	if (bulkEmail($addrs, $subject, $content)) {
-		$self->log($msg, MSG_MODE_EMAIL);
+		$self->log($msg, MSG_MODE_EMAIL, scalar @$addrs);
 		return 1;
 	} else {
 		messagedLog(getData("send mail error", {
@@ -568,7 +603,7 @@ sub getWeb {
 
 sub getWebByUID {
 	my($self, $uid) = @_;
-	$uid ||= $ENV{SLASH_USER};
+	$uid ||= getCurrentUser('uid');
 
 	my $msguser = $self->getUser($uid);
 	my $msgs = $self->_get_web_by_uid($uid) or return 0;
@@ -838,7 +873,7 @@ sub render {
 =head2 callTemplate(DATA, MESSAGE)
 
 A wrapper for calling templates in Slash::Messages.  It tries to figure
-out the right page/section to call the template in, etc.  It sets the
+out the right page/skin to call the template in, etc.  It sets the
 Nocomm parameter in its call to slashDisplay().
 
 =over 4
@@ -851,7 +886,7 @@ Nocomm parameter in its call to slashDisplay().
 
 This can either be a template name, or a hashref of template data.
 If a hashref, the _NAME parameter is the template name.  The
-_PAGE and _SECTION parameters may also be set.  These will all be
+_PAGE and _SKIN parameters may also be set.  These will all be
 set appropriately by the create() method.  The rest of
 the key/value pairs will be passed to the template.
 
@@ -876,6 +911,7 @@ sub callTemplate {
 	my($self, $data, $msg) = @_;
 	my $slashdb   = getCurrentDB();
 	my $constants = getCurrentStatic();
+	my $gSkin     = getCurrentSkin();
 	my $name;
 
 	if (ref($data) eq 'HASH' && exists $data->{_NAME}) {
@@ -891,12 +927,12 @@ sub callTemplate {
 		Return  => 1,
 		Nocomm  => 1,
 		Page    => 'messages',
-		Section => 'NONE',
+		Skin    => 'NONE',
 	};
 
-	# set Page and Section as from the caller
-	$opt->{Page}    = delete($data->{_PAGE})    if exists $data->{_PAGE};
-	$opt->{Section} = delete($data->{_SECTION}) if exists $data->{_SECTION};
+	# set Page and Skin as from the caller
+	$opt->{Page} = delete($data->{_PAGE}) if exists $data->{_PAGE};
+	$opt->{Skin} = delete($data->{_SKIN}) if exists $data->{_SKIN};
 
 	# $msg->{user} could be a ref to some, but not all, user info, or a UID.  heh.
 	my $seclev = ref $msg->{user}
@@ -910,8 +946,8 @@ sub callTemplate {
 			: 0;
 
 	$data->{absolutedir} = $seclev && $seclev >= 100
-		? $constants->{absolutedir_secure}
-		: $constants->{absolutedir};
+		? $gSkin->{absolutedir_secure}
+		: $gSkin->{absolutedir};
 
 	my $new = slashDisplay($name, { %$data, msg => $msg }, $opt);
 	return $new;
@@ -955,10 +991,16 @@ always return a list of (code, description).
 
 sub getDescription {
 	my($self, $codetype, $key) = @_;
+if (!defined($key) || !length($key)) {
+my $codetype_str = defined($codetype) ? $codetype : '(undef)';
+my $key_str = defined($key) ? $key : '(undef)';
+print STDERR "Message.pm getDescription called with codetype='$codetype_str' key='$key_str'\n";
+return;
+}
 
 	my $codes = $self->getDescriptions($codetype);
 
-	if ($key =~ /^\d+$/) {
+	if ($key =~ /^-?\d+$/) {
 		unless (exists $codes->{$key}) {
 			return;
 		}
@@ -1051,24 +1093,35 @@ sub send_mod_msg {
 			$discussion->{realurl} = "/comments.pl?sid=$discussion->{id}";
 		}
 
+		my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
 		my $data  = {
 			template_name	=> $type,
+			template_page	=> 'comments',
 			subject		=> {
 				template_name => $type . '_subj'
 			},
 			comment		=> $comm,
 			discussion	=> $discussion,
 			moderation	=> {
-				user	=> $user,
 				value	=> $val,
 				reason	=> $reason,
 			},
-			reasons		=> $slashdb->getReasons(),
+			reasons		=> $mod_reader->getReasons(),
 		};
 		$self->create($users->[0],
 			MSG_CODE_COMMENT_MODERATE, $data, 0, '', 'collective'
 		);
 	}
+}
+
+sub getMessageDeliveryByName {
+        my($self, $name) = @_;
+
+        my $slashdb = getCurrentDB();
+        my $name_q = $slashdb->sqlQuote($name);
+        my $code = $slashdb->sqlSelect("code", "message_deliverymodes", "name = $name_q");
+
+        return($code);
 }
 
 1;
@@ -1079,7 +1132,3 @@ __END__
 =head1 SEE ALSO
 
 Slash(3).
-
-=head1 VERSION
-
-$Id$

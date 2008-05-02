@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::HumanConf::Static;
 
@@ -10,51 +9,34 @@ use Digest::MD5;
 use File::Spec::Functions;
 use GD;
 use GD::Text::Align;
+use File::Temp 'tempfile';
 use Slash;
 use Slash::Utility;
 
-use vars qw($VERSION);
 use base 'Exporter';
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 sub new {
 	my($class, $user) = @_;
+
+	return unless $class->isInstalled();
+
 	my $self = {};
-
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $plugins = $slashdb->getDescriptions('plugins');
-	return unless $plugins->{HumanConf};
-
 	bless($self, $class);
 	$self->{virtual_user} = $user;
 	$self->sqlConnect();
 
-	# Use trial and error to find a "fallback" font we like.
-	# If we want to get fancy, we could do the same with some
-	# TTF fonts which could scale, and try to find good point
-	# sizes for them too (names of TTF fonts should be stored
-	# in a var).
-	$self->{imagemargin} = 6;
-	my @possible_fonts = ( gdMediumBoldFont, gdLargeFont, gdGiantFont );
-	$self->{prefnumpixels} = $constants->{hc_q1_prefnumpixels} || 1000;
-	my $gdtext = new GD::Text();
-	$gdtext->font_path($constants->{hc_fontpath} || '/usr/share/fonts/truetype');
-	$gdtext->set_text($self->shortRandText());
-	my $smallest_diff = 2**31;
-	for my $font (@possible_fonts) {
-		$gdtext->set_font(font => $font);
-		my($tempw, $temph) = ($gdtext->get("width"), $gdtext->get("height"));
-		my $pixels = ($tempw+$self->{imagemargin}) * ($temph+$self->{imagemargin});
-		my $diff = $pixels - $self->{prefnumpixels};
-		$diff = -$diff if $diff < 0;
-		if ($diff < $smallest_diff) {
-			$self->{font} = $font;
-			$smallest_diff = $diff;
-		}
+	my $constants = getCurrentStatic();
+	$self->{imagemargin} = $constants->{hc_q1_margin} || 6;
+
+	# Set the list of possible fonts.
+	if ($constants->{hc_possible_fonts} && @{$constants->{hc_possible_fonts}}) {
+		@{ $self->{possible_fonts} } = @{$constants->{hc_possible_fonts}};
+	} else {
+		@{ $self->{possible_fonts} } = ( gdMediumBoldFont, gdLargeFont, gdGiantFont );
 	}
 
 	return $self;
@@ -75,13 +57,13 @@ sub deleteOldFromPool {
 		# Delete at least enough to recycle the pool regularly.
 		# Since by default hc_maintain_pool runs 2 times an hour,
 		# the default fraction is enough to guarantee complete
-		# pool turnover every two days.
+		# pool turnover every day.
 		# Note that $runs_per_hour should be coordinated with
 		# the timespec in the task .pl file;  there isn't a good
 		# way to do this at the moment.  Eventually we'll have
 		# DB-based timespecs and we can read that...
 		my $runs_per_hour = 2;
-		$want_delete_fraction = 1/($runs_per_hour*24*2)
+		$want_delete_fraction = 1/($runs_per_hour*24)
 	}
 	my $want_delete = int($cursize*$want_delete_fraction);
 		# Don't delete so many that the pool will get too empty,
@@ -108,7 +90,10 @@ sub deleteOldFromPool {
 	my $delrows = 0;
 	my $loop_num = 1;
 	my $remaining_to_delete = $want_delete;
+	my $successfully_deleted = 0;
 	my $secs = $constants->{hc_pool_secs_before_del} || 21600;
+	my $lastused_max_secs = $secs * 2;
+	$lastused_max_secs = 86400*3 if $lastused_max_secs < 86400*3;
 	my $q_hr = $self->sqlSelectAllHashref(
 		"hcqid",
 		"hcqid, filedir",
@@ -132,7 +117,7 @@ sub deleteOldFromPool {
 			"humanconf_pool",
 			{ inuse => 2, -lastused => "lastused" },
 			"lastused < DATE_SUB(NOW(), INTERVAL $secs SECOND) 
-			 AND inuse = 0
+			 AND (inuse = 0 OR lastused < DATE_SUB(NOW(), INTERVAL $lastused_max_secs SECOND))
 			 $hcpid_clause"
 		);
 		next if !$rows;
@@ -142,7 +127,7 @@ sub deleteOldFromPool {
 		# their info.
 		my $pool_hr = $self->sqlSelectAllHashref(
 			"hcpid",
-			"hcpid, hcqid, filename",
+			"hcpid, hcqid, filename_img, filename_mp3",
 			"humanconf_pool",
 			"inuse=2",
 			"ORDER BY hcpid ASC LIMIT $want_delete"
@@ -159,19 +144,37 @@ sub deleteOldFromPool {
 		my @row_ids_to_delete = ( );
 		for my $hcpid (@hcpids_to_delete) {
 			my $filedir = $q_hr->{$pool_hr->{$hcpid}{hcqid}}{filedir};
-			my $filename = $pool_hr->{$hcpid}{filename};
-			my $fullname = catfile($filedir, $filename);
 			my $errstr = "";
-			$errstr = "file '$fullname' does not exist"
-				if !-e $fullname;
-			$errstr = "parent dir of '$fullname' not writable"
+			my $filename_img = $pool_hr->{$hcpid}{filename_img};
+			$errstr = "filename_img is empty for hcpid '$hcpid'"
+				if !$filename_img;
+			my $fullname_img = catfile($filedir, $filename_img);
+			$errstr = "file img '$fullname_img' does not exist"
+				if !-e $fullname_img;
+			$errstr = "parent dir of img '$fullname_img' not writable"
 				if !-w $filedir;
 			if (!$errstr) {
-				my $success = unlink $fullname;
+				my $success = unlink $fullname_img;
 				if (!$success) {
 					# Could not delete this file, but
 					# we know it's there.  That's bad.
-					$errstr = "unlink '$fullname' failed, $!";
+					$errstr = "unlink img '$fullname_img' failed, $!";
+				}
+			}
+			my $filename_mp3 = $pool_hr->{$hcpid}{filename_mp3};
+			if ($filename_mp3) {
+				my $fullname_mp3 = catfile($filedir, $filename_mp3);
+				$errstr = "file mp3 '$fullname_mp3' does not exist"
+					if !-e $fullname_mp3;
+				$errstr = "parent dir of mp3 '$fullname_mp3' not writable"
+					if !-w $filedir;
+				if (!$errstr) {
+					my $success = unlink $fullname_mp3;
+					if (!$success) {
+						# Could not delete this file, but
+						# we know it's there.  That's bad.
+						$errstr = "unlink mp3 '$fullname_mp3' failed, $!";
+					}
 				}
 			}
 			# Whether the attempt to delete the file succeeded
@@ -184,21 +187,11 @@ sub deleteOldFromPool {
 		# Delete the rows of the ones whose files we deleted.
 		if (@row_ids_to_delete) {
 			my $hcpids_list = join(",", @row_ids_to_delete);
-			my $new_delrows = $self->sqlDelete(
-				"humanconf_pool",
-				"hcpid IN ($hcpids_list)"
-			);
-			if ($new_delrows != $remaining_to_delete) {
-				warn "HumanConf warning: deleted number"
-					. " of rows '$new_delrows'"
-					. " not equal to attempted number to delete"
-					. " '$remaining_to_delete'";
-			}
+			my $new_delrows = $self->sqlDelete('humanconf_pool', "hcpid IN ($hcpids_list)");
+			$self->sqlDelete('humanconf', "hcpid IN ($hcpids_list)");
+			$successfully_deleted += $new_delrows;
 			$remaining_to_delete -= $new_delrows;
 			$delrows += $new_delrows;
-		} else {
-			warn "HumanConf warning: no rows to delete; attempted"
-				. " '$remaining_to_delete'";
 		}
 
 		# Pass 5:
@@ -211,6 +204,10 @@ sub deleteOldFromPool {
 		);
 
 		++$loop_num;
+	}
+
+	if ($loop_num > 2) {
+		warn scalar(gmtime) . " hc_maintain_pool.pl deleteOldFromPool looped $loop_num times, deleted $successfully_deleted of $want_delete";
 	}
 	
 	# Return the number of rows successfully deleted.  This
@@ -243,13 +240,19 @@ sub fillPool {
 
 sub addPool {
 	my($self, $question) = @_;
-	my $answer;
-	my $extension;
-	my $retval;
+	my($answer, $extension_img, $method, $gdimage);
+	my $image_format = getCurrentStatic('hc_image_format') || 'jpeg';
+	$image_format =~ s/\W+//g;
 
 	if ($question == 1) {
-		$extension = ".jpg";
-		($answer, $retval) = $self->drawImage();
+		if ($image_format =~ /^jpe?g$/) {
+			$extension_img = '.jpg';
+			$method = 'jpeg';
+		} else {
+			$extension_img = ".$image_format";
+			$method = $image_format;
+		}
+		($answer, $gdimage) = $self->drawImage();
 	} else {
 		warn "HumanConf warning: addPool called with"
 			. " unknown question number: $question";
@@ -261,67 +264,260 @@ sub addPool {
 	my $success = $self->sqlInsert("humanconf_pool", {
 		hcqid =>	$question,
 		answer =>	$answer,
-		filename =>	"",
+		filename_img =>	"",
 		html =>		"",
 		inuse =>	1,
 	});
 	my $hcpid = $self->getLastInsertId();
 	my $dir = $self->{questioncache}{$question}{filedir};
 
-	my($filename, $full_filename) = ('', '');
+	my($filename_img, $full_filename_img) = ('', '');
+	my $filename_mp3 = undef;
 	my $randomfactor = 0;
-	while (!$filename) {
+	my $encoded_name = '';
+	while (!$filename_img) {
 		# Loop until we get a filename that isn't already used.
 		# (Collisions should only occur one time in a zillion, but
 		# it's always a good idea to check.)
-		my $encoded_name = $self->encode_hcpid($hcpid + $randomfactor);
-		$filename = sprintf("%02d/%s$extension", $hcpid%100, $encoded_name);
-		$full_filename = "$dir/$filename";
-		if (-e $full_filename) {
-			$filename = "";
-			$randomfactor = rand(1000);
+		$encoded_name = $self->encode_hcpid($hcpid + $randomfactor);
+		$filename_img = sprintf("%02d/%s%s", $hcpid % 100, $encoded_name, $extension_img);
+		$full_filename_img = "$dir/$filename_img";
+		if (-e $full_filename_img) {
+			$filename_img = "";
+			$randomfactor = int(rand(1000));
 		}
 	}
-	my $full_dir = $full_filename;
-	$full_dir =~ s{/[^/]+$}{};
+	my $full_dir = $full_filename_img; $full_dir =~ s{/[^/]+$}{};
 	my @created_dirs = File::Path::mkpath($full_dir, 0, 0755);
 	$self->writeBlankIndexes(@created_dirs) if @created_dirs;
 
 	my $html = "";
 	if ($question == 1) {
 		my $constants = getCurrentStatic();
-		if (!open(my $fh, ">$full_filename")) {
+		if (!open(my $fh, ">$full_filename_img")) {
 			warn "HumanConf warning: addPool could not create"
-				. " '$full_filename', '$!'";
+				. " '$full_filename_img', '$!'";
 		} else {
-			print $fh $retval->jpeg;
+			print $fh $gdimage->$method;
 			close $fh;
 		}
-		my($width, $height) = $retval->getBounds();
+		my($width, $height) = $gdimage->getBounds();
 		if ($width*$height < $self->{prefnumpixels}/1.5) {
 			# Display small images at larger sizes for easier reading.
 			my $scale = int($self->{prefnumpixels}/($width*$height) + 0.5);
 			$scale = 3 if $scale > 3;
 			$width *= $scale; $height *= $scale;
 		}
-		$html = join("",
+		my $alt = getData('imgalttext', {}, 'humanconf');
+		$html = join('',
 			qq{<img src="},
 			$self->{questioncache}{$question}{urlprefix},
 			"/",
-			$filename,
+			$filename_img,
 			qq{" width=$width height=$height border=0 },
-			qq{alt="random letters - if you are visually impaired, please email us at }
-				. fixparam($constants->{adminmail})
-				. qq{">}
+			qq{alt="$alt">}
 		);
+		if ($constants->{hc_cepstral}) {
+			$filename_mp3 = write_mp3_file($answer, $dir, $hcpid, $encoded_name);
+			if ($filename_mp3) {
+				$html .= join('',
+					qq{ [<a href="},
+					$self->{questioncache}{$question}{urlprefix},
+					"/",
+					$filename_mp3,
+					qq{" target="_new">mp3</a>]}
+				);
+			}
+		}
 	}
 
 	$self->sqlUpdate("humanconf_pool", {
-		filename =>	$filename,
+		filename_img =>	$filename_img,
+		filename_mp3 =>	$filename_mp3,
 		html =>		$html,
 		inuse =>	0,
 		-created_at =>	'NOW()',
 	}, "hcpid=$hcpid");
+}
+
+sub write_mp3_file {
+	my($answer, $dir, $hcpid, $encoded_name) = @_;
+	my $constants = getCurrentStatic();
+	my $filename_mp3 = sprintf("%02d/%s%s", $hcpid % 100, $encoded_name, '.mp3');
+	my $full_filename_mp3 = "$dir/$filename_mp3";
+	my $ssml_text = join(' ',
+		"\u$answer.",
+		map { "\u$_." } split //, $answer);
+
+	my @voices = split / /, ($constants->{hc_cepstral_voices} || 'William');
+	my $voice = $voices[rand @voices];
+	$ssml_text = "<voice name=\"$voice\">$ssml_text</voice>";
+
+	my $logdir = $constants->{logdir};
+	my $cepstral_prefix = catfile($logdir, "cepstral.");
+	my $ssml_fh = undef;
+	my $ssml_file = File::Temp::mktemp("${cepstral_prefix}.ssml.XXXXXXXXXX");
+	if (open(my $ssml_fh, ">$ssml_file")) {
+		print $ssml_fh $ssml_text;
+		close $ssml_fh;
+	}
+	my $wav_file = $ssml_file; $wav_file =~ s/\.ssml\./.wav./;
+	system("swift -f $ssml_file -o $wav_file");
+	unlink($ssml_file);
+	if ($constants->{hc_cepstral_mp3encoder}) {
+		system("TERM=dumb $constants->{hc_cepstral_mp3encoder} -S --resample 22.05 $wav_file $full_filename_mp3");
+	}
+	unlink($wav_file);
+	return $filename_mp3;
+}
+
+sub get_sizediff {
+	my($self, $gdtext, $pixels_wanted, $font, $fontsize) = @_;
+	$gdtext->set_font($font, $fontsize) or die("g_s gdt->set_font('$font', '$fontsize') failed: " . $gdtext->error);
+	my($tempw, $temph) = ($gdtext->get("width"), $gdtext->get("height"));
+	my $pixels = ($tempw+$self->{imagemargin}) * ($temph+$self->{imagemargin});
+	my $diff = abs($pixels - $pixels_wanted);
+	return $diff;
+}
+
+sub get_new_gdtext {
+	my($self, $text) = @_;
+	my $constants = getCurrentStatic();
+
+	my $gdtext = new GD::Text();
+	$gdtext->font_path($constants->{hc_fontpath} || '/usr/share/fonts/truetype');
+	$gdtext->set_text($text);
+
+	return $gdtext;
+}
+
+sub get_font_args {
+	my($self, $text) = @_;
+	my $constants = getCurrentStatic();
+
+	my $gdtext = $self->get_new_gdtext($text);
+
+	$self->{prefnumpixels} = $constants->{hc_q1_prefnumpixels} || 1000;
+
+	my @pf = @{ $self->{possible_fonts} };
+	my $font = @pf[rand @pf] || '';
+	my $first_fontsize_try = 30; # default first guess
+	if ( $font =~ m{^(\w+)/(\d+)$} ) {
+		$font = $1;
+		$first_fontsize_try = $2;
+	}
+
+	# "pixels wanted"
+	my $pw = $self->{prefnumpixels};
+
+	# We are looking for the minimum of the pixel difference.  Since
+	# image size increases monotonically with font size, there is
+	# guaranteed to be exactly 1 or 2 values at which the pixel diff
+	# is at a minimum.  We begin with one guess, then check the
+	# diffs immediately above and below it to see which is headed in
+	# the right direction.
+	my $i = $first_fontsize_try - 1;
+	my $j = $first_fontsize_try; # first guess
+	my $k = $first_fontsize_try + 1;
+	my $di = $self->get_sizediff($gdtext, $pw, $font, $i);
+	my $dj = $self->get_sizediff($gdtext, $pw, $font, $j);
+	my $dk = $self->get_sizediff($gdtext, $pw, $font, $k);
+	if ($di == $dj || $dj == $dk) {
+		# Two values being equal means that they are both the
+		# minimum, so we can return either one.  We got lucky!
+		return ($font, $j);
+	}
+	if ($di > $dj && $dj < $dk) {
+		# The center value being smaller than the other two
+		# means that it is the one minimum.  We got lucky!
+		return ($font, $j);
+	}
+
+	# Either i or k is a better choice than j.  Figure out which,
+	# then set up the vars so we walk up or down sizes starting
+	# from there.
+	my @vals = ( $j );
+	my $start = $j;
+	my $multiplier;
+	if ($di < $dj) {
+		# i is a better direction, so we walk down.
+		$multiplier = 5/6;
+		push @vals, $i;
+	} else {
+		# k is a better direction, so we walk up.
+		$multiplier = 6/5;
+		push @vals, $k;
+	}
+
+	# Walk up or down until we bridge the minimum.  We'll know
+	# that happens when we find a value that _increases_ from
+	# the minimum seen so far.  We want to save the last 3
+	# values found, at that point.
+	my $min_so_far = $dj;
+	my $best_size = $j;
+	my $found_min = 0;
+	my $next_try = $start;
+	my($fontsize_smallest, $fontsize_largest) = (5, 100);
+	while (!$found_min) {
+		my $old_try = $next_try;
+		$next_try = int($old_try * $multiplier + 0.5);
+		if ($next_try == $old_try) {
+			# Must change by at least one point size
+			if ($multiplier < 1) {
+				$next_try = $old_try - 1;
+			} else {
+				$next_try = $old_try + 1;
+			}
+		}
+		push @vals, $next_try;
+		my $new_d = $self->get_sizediff($gdtext, $pw, $font, $next_try);
+		if ($new_d < $min_so_far) {
+			# That beats the old record.
+			$min_so_far = $new_d;
+			$best_size = $next_try;
+		} else {
+			# OK, we've crossed the minimum and come back up.
+			$found_min = 1;
+		}
+		if ($next_try < $fontsize_smallest || $next_try > $fontsize_largest) {
+			# We're out of bounds, that's bad.
+			$found_min = 1;
+			print STDERR scalar(gmtime) . " Font size out of bounds: $font $next_try $new_d\n";
+		}
+	}
+
+	# The answer we want is somewhere in the range of the last
+	# 3 values we checked.
+	my($left, $right);
+	if ($multiplier < 1) {
+		$left = $vals[-1];
+		$right = $vals[-3];
+	} else {
+		$left = $vals[-3];
+		$right = $vals[-1];
+	}
+#print STDERR "font=$font left=$left right=$right vals=@vals\n";
+
+	# Hopefully this is a narrow range so we can just check values
+	# within it to find the answer we want.  (This could be better
+	# optimized, but at this point, image generation happens very
+	# quickly, so I'm satisfied so far.)
+	$min_so_far = 2**31 - 1;
+	$best_size = undef;
+	DO_TRY: for $next_try ($left .. $right) {
+		my $new_d = $self->get_sizediff($gdtext, $pw, $font, $next_try);
+		if ($new_d < $min_so_far) {
+			$min_so_far = $new_d;
+			$best_size = $next_try;
+		} else {
+#print STDERR "font=$font next_try=$next_try new_d=$new_d min_so_far=$min_so_far done\n";
+			# We've just gone past the minimum, we're done.
+			last DO_TRY;
+		}
+#print STDERR "font=$font next_try=$next_try new_d=$new_d min_so_far=$min_so_far best_size=$best_size\n";
+	}
+
+	return($font, $best_size);
 }
 
 sub drawImage {
@@ -339,52 +535,78 @@ sub drawImage {
 
 	# Set up the text object (this could probably be cached in $self,
 	# but it hardly takes any time to do it over and over).
-	my $gdtext = new GD::Text();
-	$gdtext->font_path($constants->{hc_fontpath} || '/usr/share/fonts/truetype');
+	my $answer = $self->shortRandText();
+	my @font_args = $self->get_font_args($answer);
+	my $gdtext = $self->get_new_gdtext($answer);
+	$gdtext->set_font(@font_args) or die("dI gdt->set_font('@font_args') failed: " . $gdtext->error);
 
-	# Set up the text, and set up the image.
-	my $answer = shortRandText();
-	$gdtext->set_text($answer);
-	$gdtext->set_font( font => $self->{font} );
+	# Based on the font size for this word, and the resulting size
+	# of the drawn text, set up the image object.
 	my($width, $height) = ($gdtext->get("width")+$self->{imagemargin},
 		$gdtext->get("height")+$self->{imagemargin});
 	my $image = new GD::Image($width, $height);
 
 	# Set up the image's colors.
 	my $background = $image->colorAllocate(255, 255, 255);
-	# And now some fancy footwork to pick a light, "pastel"ish,
-	# reasonably saturated color.
-	my $hue_rand = 160;
-	my @pc = ( 255-int(rand($hue_rand)) );
-	$hue_rand -= 255-$pc[0];
-	push @pc, 255-int(rand($hue_rand));
-	@pc = reverse @pc if rand(1) < 0.5;
-	if (rand(1) < 1/3)	{ unshift @pc, 255 }
-	elsif (rand(1) < 0.5)	{ @pc = ( $pc[0], 255, $pc[1] ) }
-	else			{ push @pc, 255 }
-	my $polycolor = $image->colorAllocate(@pc);
 	my $offblack = int(rand(10));
 	my $textcolor = $image->colorAllocate($offblack, $offblack, $offblack);
+
 	my $n_dotcolors = 10;
 	my @dotcolor = ( );
 	for (1..$n_dotcolors) {
 		push @dotcolor, $image->colorAllocate(
-			int(255-rand(64)),
-			int(255-rand(64)),
-			int(255-rand(64)),
+			int(255-rand(192)),
+			int(255-rand(192)),
+			int(255-rand(192)),
 		);
 	}
 
 	# Paint the white background.
 	$image->filledRectangle(0, 0, $width, $height, $background);
 
-	# Draw a light-colored random polygon on the image.
-	my $poly = new GD::Polygon;
-	my $n_vertices = int(rand(2)+3);
-	for (1..$n_vertices) {
-		$poly->addPt(int(rand($width)), int(rand($height)));
+	if ($image->can('setThickness')) {
+		# I don't think GD prior to 2.07 has setThickness().
+		$image->setThickness($constants->{hc_q1_linethick} || 1);
 	}
-	$image->polygon($poly, $polycolor);
+	my $poly = new GD::Polygon;
+	if ($width+$height > 100) {
+		# Draw a grid of lines on the image, same color as the text.
+		my $lc = $constants->{hc_q1_linecloseness} || 8;
+		my $pixels_between = ($width+$height)/$lc;
+		$pixels_between = 20 if $pixels_between < 20;
+		my $offset = int(rand($pixels_between));
+		my $x = int(rand($pixels_between));
+		while ($x < $width) {
+			$poly->addPt($x, 0);
+			$poly->addPt($x+$offset, $height-1) if $x+$offset < $width;
+			$x += $pixels_between;
+		}
+		my $y = int(rand($pixels_between));
+		while ($y < $width) {
+			$poly->addPt(0, $y);
+			$poly->addPt($width-1, $y+$offset) if $y+$offset < $height;
+			$y += $pixels_between;
+		}
+		$image->polygon($poly, $textcolor);
+	} else {
+		# And now some fancy footwork to pick a light, "pastel"ish,
+		# reasonably saturated color.
+		my $hue_rand = 160;
+		my @pc = ( 255-int(rand($hue_rand)) );
+		$hue_rand -= 255-$pc[0];
+		push @pc, 255-int(rand($hue_rand));
+		@pc = reverse @pc if rand(1) < 0.5;
+		if (rand(1) < 1/3)	{ unshift @pc, 255 }
+		elsif (rand(1) < 0.5)	{ @pc = ( $pc[0], 255, $pc[1] ) }
+		else			{ push @pc, 255 }
+		my $polycolor = $image->colorAllocate(@pc);
+		# Draw a light-colored random polygon on the image.
+		my $n_vertices = int(rand(2)+3);
+		for (1..$n_vertices) {
+			$poly->addPt(int(rand($width)), int(rand($height)));
+		}
+		$image->polygon($poly, $polycolor);
+	}
 
 	# Speckle with random dots (number proportional to the size of
 	# the image).
@@ -392,19 +614,57 @@ sub drawImage {
 	$n_dots += rand($n_dots/3);
 	$n_dots -= rand($n_dots*2/3);
 	for (1..int($n_dots)) {
-		my($x, $y) = (int(rand($width)), int(rand($height)));
-		$image->setPixel($x, $y, @dotcolor[rand($n_dotcolors)]);
+		my($px, $py) = (int(rand($width)), int(rand($height)));
+		$image->setPixel($px, $py, @dotcolor[rand($n_dotcolors)]);
 	}
 
-	# Superimpose the text over the random stuff.
-	my $gdtextalign = new GD::Text::Align(
+	# Set up an alignment box so we can determine where to put the
+	# text on the image.
+	my $gdtextalign_bbox = new GD::Text::Align(
 		$image,
-		halign=>"center", valign=>"center",
-		color => $textcolor
+		halign => 'center', valign => 'center',
+		text   => $answer,
 	);
-	$gdtextalign->set(text => $gdtext->get("text"));
-	$gdtextalign->set_font($gdtext->get("font") , $gdtext->get("ptsize"));
-	$gdtextalign->draw(int($width/2), int($height/2), 0);
+	$gdtextalign_bbox->set_font(@font_args) or die("gdta_b->set_font('@font_args') failed: " . $gdtextalign_bbox->error);
+	my($center_x, $center_y) = (int($width/2), int($height/2));
+	# Pick an angle between $max_angle/4 and $max_angle, randomly
+	# positive or negative.
+	my $max_angle = $constants->{hc_q1_maxrad} || 0.2;
+	my $angle = (rand(1)*0.75)*$max_angle + $max_angle/4;
+	$angle *= -1 if rand(1) < 0.5;
+	# The variable names stand for lower left x coordinate, etc.
+	my($ll_x, $ll_y, $lr_x, $lr_y, $ur_x, $ur_y, $ul_x, $ul_y) =
+		$gdtextalign_bbox->bounding_box($center_x, $center_y, 0);
+#print STDERR "aligned $answer center=$center_x, $center_y angle=$angle bb: $ll_x, $ll_y, $lr_x, $lr_y, $ur_x, $ur_y, $ul_x, $ul_y\n";
+
+	# We're done with the alignment box now.  Place the text on the
+	# image according to the bounding box.  Split the string into a
+	# left and right half and draw them separately.
+	my $string_break = int(rand(length($answer)-2))+1;
+	my $answer_left = substr($answer, 0, $string_break);
+	my $angle_left = $angle;
+	my $gdtextalign_left = new GD::Text::Align(
+		$image,
+		halign => 'left', valign => 'center',
+		colour => $textcolor, # apparently Australians prefer a 'u'
+		text   => $answer_left,
+	);
+	$gdtextalign_left->set_font(@font_args) or die("gdta_l->set_font('@font_args') failed: " . $gdtextalign_left->error);
+	my $cl_y = int(($ll_y+$ul_y)/2);
+	my @bb = $gdtextalign_left->draw(int($ul_x), $cl_y, $angle);
+#printf STDERR "gdta_left drew left-top $answer_left at ul_x=$ul_x,cl_y=$cl_y angle=%.4f, bb: @bb\n", $angle;
+	my $answer_right = substr($answer, $string_break);
+	my $angle_right = rand(1) < 0.5 ? $angle : -$angle;
+	my $gdtextalign_right = new GD::Text::Align(
+		$image,
+		halign => 'right', valign => 'center',
+		colour => $textcolor, # apparently Australians prefer a 'u'
+		text   => $answer_right,
+	);
+	$gdtextalign_right->set_font(@font_args) or die("gdta_r->set_font('@font_args') failed: " . $gdtextalign_right->error);
+	my $cr_y = int(($lr_y+$ur_y)/2);
+	@bb = $gdtextalign_right->draw(int($lr_x), $cr_y, $angle_right);
+#printf STDERR "gdta_right drew right-bottom $answer_right at lr_x=$lr_x,cr_y$cr_y angle=%.4f, bb: @bb\n", $angle;
 
 	return($answer, $image);
 }
@@ -412,19 +672,36 @@ sub drawImage {
 sub shortRandText {
 	my($self) = @_;
 	my $constants = getCurrentStatic();
-	my $num_chars = $constants->{hc_q1_numchars} || 3;
-	my @c = ('a'..'k',
-		# Noel, Noel
-		# (we don't use letters that could be confused
-		# with numbers or other letters)
-		'm', 'n', 'p'..'t', 'v'..'z');
+
 	my $text = "";
+	if ($constants->{hc_q1_usedict} && $constants->{hc_q1_numchars} > 2) {
+		$text = $self->shortRandText_dict();
+	}
+	return $text if $text;
+
+	my $omit = $constants->{hc_q1_lettersomit} || 'hlou';
+	my $omit_regex = qr{[^$omit]};
+	my $num_chars = $constants->{hc_q1_numchars} || 3;
+	my @c = grep /$omit_regex/, ('a' .. 'z');
 	while (!$text) {
 		for (1..$num_chars) {
 			$text .= $c[rand(@c)];
 		}
 	}
-	$text;
+	return $text;
+}
+
+sub shortRandText_dict {
+	my $constants = getCurrentStatic();
+	my $filename = $constants->{hc_q1_usedict};
+	return "" if !$filename || !-r $filename;
+	my $options = {
+		min_chars	=> $constants->{hc_q1_numchars} - 1,
+		max_chars	=> $constants->{hc_q1_numchars} + 1,
+		excl_regexes	=> [ split / /, ($constants->{hc_q1_usedict_excl} || "") ],
+	};
+	$options->{min_chars} = 3 if $options->{min_chars} < 3;
+	return getRandomWordFromDictFile($filename, $options);
 }
 
 # To prevent attackers from pulling down all the images and manually
@@ -460,4 +737,3 @@ sub writeBlankIndexes {
 }
 
 1;
-

@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Test;
 
@@ -55,8 +54,14 @@ Slash::Test - Command-line Slash testing
 
 Will export everything from Slash, Slash::Utility, Slash::Display,
 Slash::Constants, Slash::XML, and Data::Dumper into the current namespace.
-Will export $user, $anon, $form, $constants, and $slashdb as global variables
-into the current namespace.
+Will export $user, $anon, $form, $constants, $slashdb, and $gSkin as global
+variables into the current namespace, along with a few other useful
+variables: $self (alias to $slashdb), $reader_db, $log_db, $writer_db,
+and $search_db.
+
+Also the name of each plugin will be a global variable referencing its
+object (e.g., C<$journal> is automatically created as a L<Slash::Journal>
+object).
 
 So use it one of three ways (use the default Virtual User,
 or pass it in via the import list, or pass in with slashTest()), and then
@@ -92,10 +97,9 @@ use Slash::XML;
 
 use strict;
 use base 'Exporter';
-use vars qw($VERSION @EXPORT);
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-@EXPORT = (
+our $VERSION = $Slash::Constants::VERSION;
+our @EXPORT = (
 	@Slash::EXPORT,
 	@Slash::Constants::EXPORT_OK,
 	@Slash::Display::EXPORT,
@@ -146,7 +150,8 @@ None.
 =item Side effects
 
 Set up the environment with createEnvironment(), export $user, $anon,
-$form, $constants, and $slashdb into current namespace.
+$form, $constants, $slashdb, and $gSkin into current namespace.  $self
+is an alias to $slashdb.
 
 =back
 
@@ -157,18 +162,18 @@ sub slashTest {
 	my($VirtualUser, $noerr) = @_;
 
 	die 'No virtual user' unless defined $VirtualUser and $VirtualUser ne '';
-	push @ARGV, 'virtual_user=' . $VirtualUser;
+	unshift @ARGV, 'virtual_user=' . $VirtualUser;
 	eval { createEnvironment() };
 	die $@ if $@ && !$noerr;
 
-	# this should later be done automatically by the user init code
-	Slash::Utility::Anchor::getSectionColors();
+	setCurrentSkin(determineCurrentSkin());
 
-	$::slashdb   = getCurrentDB();
+	$::self = $::slashdb = getCurrentDB();
 	$::constants = getCurrentStatic();
 	$::user      = getCurrentUser();
 	$::anon      = getCurrentAnonymousCoward();
 	$::form      = getCurrentForm();
+	$::gSkin     = getCurrentSkin();
 
 	$::reader_db	= getObject('Slash::DB', { db_type => 'reader' });
 	$::writer_db	= getObject('Slash::DB', { db_type => 'writer' });
@@ -187,6 +192,8 @@ sub slashTest {
 			${"main::$name"} = $object;
 		}
 	}
+
+	$Data::Dumper::Sortkeys = 1;
 }
 
 #========================================================================
@@ -196,7 +203,7 @@ sub slashTest {
 A wrapper for slashDisplay().
 
 Pass in the full name of a template (e.g., "motd;misc;default", or just
-"motd" to accept default for page and section), and an optional HASHREF
+"motd" to accept default for page and skin), and an optional HASHREF
 of data.
 
 Nocomm is true.  Default is to print (else make RETURN true).
@@ -223,7 +230,7 @@ sub Display {
 Tests a template.
 
 Pass in the full name of a template (e.g., "motd;misc;default", or just
-"motd" to accept default for page and section), and an optional HASHREF
+"motd" to accept default for page and skin), and an optional HASHREF
 of data.
 
 No output is produced, only errors.
@@ -248,7 +255,7 @@ sub Test {
 sub _getTemplate {
 	my($template) = @_;
 
-	my($page, $section, $data) = ('', '', {});
+	my($page, $skin, $data) = ('', '', {});
 	if (!$template) {
 		$template = '';
 		while (<>) {
@@ -256,11 +263,11 @@ sub _getTemplate {
 		}
 		$template = \ "$template";  # anon template should be a reference
 	} elsif ($template =~ /^(\w+);(\w+);(\w+)$/) {
-		($template, $page, $section) = ($1, $2, $3)
+		($template, $page, $skin) = ($1, $2, $3)
 	}
 
-	$data->{Page}    = $page if $page;
-	$data->{Section} = $section if $section;
+	$data->{Page} = $page if $page;
+	$data->{Skin} = $skin if $skin;
 
 	return($template, $data);
 }
@@ -274,7 +281,3 @@ __END__
 =head1 SEE ALSO
 
 Slash(3).
-
-=head1 VERSION
-
-$Id$

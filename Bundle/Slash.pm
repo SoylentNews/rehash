@@ -1,10 +1,6 @@
 package Bundle::Slash;
 
-#
-# $Id$
-#
-
-$Bundle::Slash::VERSION = '2.33';
+$Bundle::Slash::VERSION = '2.52';
 
 1;
 
@@ -39,6 +35,8 @@ MIME::Base64            - why after URI if URI needs it?
 
 Bundle::LWP		- URI,HTML::Parser,MIME::Base64
 
+MIME::Types		- for Blob plugin
+
 HTML::Element           - For doing HTML-to-text
 
 Font::AFM               - ditto
@@ -50,6 +48,8 @@ HTML::TokeParser
 HTML::ElementTable	- required by HTML::CalendarMonth
 
 HTML::CalendarMonth	- used for Events plugin
+
+HTML::PopupTreeSelect   - topic selection on admin.pl
 
 Mail::Sendmail
 
@@ -103,13 +103,33 @@ AppConfig		- Should be installed with TT, but sometimes not?
 
 Template		- Template Toolkit
 
+LWP::Parallel
+
+Lingua::Stem
+
+URI::Find
+
+Config::General		- HTML validator
+
+Set::IntSpan		- HTML validator
+
+Text::Iconv		- HTML validator
+
+Data::JavaScript::Anon	- perl2js data structures
+
+JavaScript::Minifier 0.02
+
+Net::OSCAR              - Needed by the IM bot
 
 =head1 DESCRIPTION
 
 mod_perl must be installed by hand, because of the special configuration
 required for it.
 
-Optional but recommended modules include:  Cache::Memcached Silly::Werder
-GD GD::Text
+Our optional modules, which are not required for a default install
+and thus not installed by default, but which may become required as
+you edit your site configuration, are: Cache::Memcached Silly::Werder
+GD GD::Text GD::Graph Apache::SSI Apache::RegistryFilter GraphViz
+Net::IRC Proc::ProcessTable Net::Jabber File::Type
 
 =cut

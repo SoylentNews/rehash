@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::NewsVac;
 
@@ -53,7 +52,6 @@ but is a little annoying.
 
 
 use strict;
-use vars qw($VERSION @EXPORT);
 
 use Slash 2.003;	# require Slash 2.3
 use 5.006;		# requires some 5.6-specific stuff, like our()
@@ -79,9 +77,9 @@ use XML::RSS;
 use Slash::Display;
 use Slash::Utility;
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
-use vars qw($VERSION $callback_ref);
+use vars qw($callback_ref);
 
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
@@ -6278,7 +6276,3 @@ __END__
 =head1 SEE ALSO
 
 Slash(3).
-
-=head1 VERSION
-
-$Id$

@@ -3,5 +3,4 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Slash::Custom::Bulkmail',
-    'VERSION_FROM' => 'Bulkmail.pm', # finds $VERSION
 );

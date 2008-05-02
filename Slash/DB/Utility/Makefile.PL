@@ -3,5 +3,4 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Slash::DB::Utility',
-    'VERSION_FROM' => 'Utility.pm', # finds $VERSION
 );
