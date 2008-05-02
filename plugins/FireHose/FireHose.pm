@@ -1753,7 +1753,7 @@ sub dispFireHose {
 		if ($mcdkey) {
 			$cached = $mcd->get("$mcdkey");
 		}
-		return $cached;
+		return $cached if $cached;
 	}
 
 	my $retval = slashDisplay('dispFireHose', {
