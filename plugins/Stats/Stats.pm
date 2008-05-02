@@ -94,7 +94,7 @@ sub new {
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_rss");
 
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_temp_host_addr");
-		$self->sqlDo("DROP TABLE IF EXISTS accesslog_build_uid_ip");
+		$self->sqlDo("DROP TABLE IF EXISTS accesslog_build_uidip");
 		$self->sqlDo("DROP TABLE IF EXISTS accesslog_build_unique_uid");
 		$self->sqlDo("CREATE TABLE accesslog_temp_host_addr (host_addr char(32) NOT NULL, anon ENUM('no','yes') NOT NULL DEFAULT 'yes', PRIMARY KEY (host_addr, anon)) TYPE = InnoDB");
 		$self->sqlDo("CREATE TABLE accesslog_build_uidip (uidip varchar(32) NOT NULL, op varchar(254) NOT NULL, PRIMARY KEY (uidip, op), INDEX (op)) TYPE = InnoDB");
