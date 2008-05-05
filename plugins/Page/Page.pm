@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Page;
 
@@ -11,12 +10,10 @@ use Slash::Display;
 use Slash::Utility;
 use Data::Dumper;
 
-use vars qw($VERSION @EXPORT);
-use base 'Exporter';
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 #################################################################
 # Ok, so we want a nice module to do the front page and utilise 
@@ -124,30 +121,24 @@ sub displayStories {
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
+	my $gSkin = getCurrentSkin();
 
 	my $misc = {};
-	$misc->{subsection} = $other->{subsection};
-	my $tid = $other->{tid} || '';
+	my $tid = $other->{tid};
+	my $offset = $other->{offset};
+	if ($section) {
+		my $skin = $self->getSkin($section);
+		$tid ||= $self->getNexusFromSkid($skin->{skid});
+	}
+
+	$tid ||= $gSkin->{nexus} || '';
 
 	my $limit = $other->{count};
-	if ($misc->{subsection}) {
-		my $subsections = $self->getDescriptions(
-			'section_subsection_names', $section
-		); 
-		# from title to id
-		$misc->{subsection} = $subsections->{$other->{subsection}};
-		$limit ||= $self->getSubSection(
-			$misc->{subsection}, 'artcount'
-		);
-	} else {
-		$limit ||= $self->getSection($section, 'artcount');
-	}
+	$limit ||= $self->getSection($section, 'artcount');
 
 	my $storystruct = [];
 
-	my $stories = $self->getStoriesEssentials(
-		$limit, $section, $tid, $misc
-	);
+	my $stories = $self->getStoriesEssentials({ limit => $limit, tid => $tid, offset => $offset });
 
 	my $i = 0;
 
@@ -155,9 +146,10 @@ sub displayStories {
 	# 	return $self->displayStoryList($stories, $other)
 	# - Cliff
 	while (my $story = shift @{$stories}) {
-		my($sid, $section, $time, $title) = @{$story}{qw(sid section time title)}; #[0, 1, 2, 9];
+		my($sid, $primaryskid, $time, $title) = @{$story}{qw(sid primaryskid time title)}; #[0, 1, 2, 9];
 		my $atstorytime;
-
+		my $storyskin = $self->getSkin($primaryskid);
+		my $section = $storyskin->{name};
 		if ($other->{titles_only}) {
 			my $storycontent = $self->getStoryTitleContent({ 
 					sid 	=> $sid, 
@@ -165,7 +157,7 @@ sub displayStories {
 					title 	=> $title,
 					section	=> $section
 			});
-			$storystruct->[$i]{widget} = $storycontent;
+			$storystruct->[$i]{widget} = $storycontent
 		} else {
 			my $storyref = $self->prepareStory($sid);
 			my $storycontent = '';
@@ -199,6 +191,8 @@ sub prepareStory {
 
 	# get the body, introtext... 
 	my $storyref = $self->getStory($sid);
+	my $storyskin = $self->getSkin($storyref->{primaryskid});
+	$storyref->{section} = $storyskin->{name} if $storyskin;
 
 	return if ! $storyref;
 
@@ -209,12 +203,13 @@ sub prepareStory {
 	}
 
 	$storyref->{introtext} = parseSlashizedLinks($storyref->{introtext});
+	$storyref->{introtext} = processSlashTags($storyref->{introtext});
 	$storyref->{bodytext} =  parseSlashizedLinks($storyref->{bodytext});
+	$storyref->{bodytext} =  processSlashTags($storyref->{bodytext});
 
 	$storyref->{authorref} = $self->getAuthor($storyref->{uid});
 
 	$storyref->{topicref} = $self->getTopic($storyref->{tid});
-	$storyref->{topicref}{image} = "$constants->{imagedir}/topics/$storyref->{topicref}{image}" if $storyref->{topicref}{image} =~ /^\w+\.\w+$/; 
 
 	$storyref->{sectionref} = $self->getSection($storyref->{section});
 
@@ -241,6 +236,7 @@ sub getLinksContent {
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
+	my $gSkin     = getCurrentSkin();
 
 	# posts in each threshold
 	my @threshComments = split m/,/, $storyref->{hitparade}; 
@@ -303,9 +299,9 @@ sub getLinksContent {
 		if ($SECT->{rootdir}) {
 			$url = "$SECT->{rootdir}/";
 		} elsif ($user->{is_anon}) {
-			$url = "$constants->{rootdir}/$storyref->{section}/";
+			$url = "$gSkin->{rootdir}/$storyref->{section}/";
 		} else {
-			$url = "$constants->{rootdir}/index.pl?section=$storyref->{section}";
+			$url = "$gSkin->{rootdir}/index.pl?section=$storyref->{section}";
 		}
 
 		push @links, [ $url, $SECT->{hostname} || $SECT->{title} ];
@@ -313,7 +309,7 @@ sub getLinksContent {
 
 	if ($user->{seclev} >= 100) {
 		push @links, [
-			"$constants->{rootdir}/admin.pl?op=edit&sid=$storyref->{sid}",
+			"$gSkin->{rootdir}/admin.pl?op=edit&sid=$storyref->{sid}",
 			'Edit'
 		];
 	}
@@ -322,7 +318,7 @@ sub getLinksContent {
 		slashDisplay('storylink', {
 			links	=> \@links,
 			sid	=> $storyref->{sid},
-		}, { Section => 'default', Return => 1});
+		}, { Skin => 'default', Return => 1});
 
 	return($storycontent);
 }
@@ -359,19 +355,29 @@ sub getStoryTitleContent {
 # absolutely.  we should hide the details there.  but this is in a lot of
 # places (modules, index, users); let's come back to it later.  -- pudge
 sub saveUserBoxes {
-	my(@a) = @_;
+	my(@slashboxes) = @_;
 	my $slashdb = getCurrentDB();
 	my $user = getCurrentUser();
-	$user->{exboxes} = @a ? sprintf("'%s'", join "','", @a) : '';
-	$slashdb->setUser($user->{uid}, { exboxes => $user->{exboxes} })
-		unless $user->{is_anon};
+	return if $user->{is_anon};
+	$user->{slashboxes} = join ",", @slashboxes;
+	$slashdb->setUser($user->{uid},
+		{ slashboxes => $user->{slashboxes} });
+}
+
+#################################################################
+sub ajaxSaveUserBoxes {
+	my($slashdb, $constants, $user, $form) = @_;
+	return if $user->{is_anon};
+	$user->{slashboxes} = $form->{bids};
+	$slashdb->setUser($user->{uid},
+		{ slashboxes => $user->{slashboxes} });
 }
 
 #################################################################
 sub getUserBoxes {
-	my $boxes = getCurrentUser('exboxes');
+	my $boxes = getCurrentUser('slashboxes');
 	$boxes =~ s/'//g;
-	return split m/,/, $boxes;
+	return split /,/, $boxes;
 }
 
 #################################################################
@@ -415,29 +421,31 @@ sub rmBid {
 
 #################################################################
 sub displayStandardBlocks {
-	my($self, $section_passed, $older_stories_essentials) = @_;
+	my($self, $skin_passed, $older_stories_essentials) = @_;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $cache = getCurrentCache();
 	
-	my $section = $slashdb->getSection($section_passed);
+	my $skin = $slashdb->getSkin($skin_passed);
 
 	return if $user->{noboxes};
 
 	my(@boxes, $return, $boxcache);
-	my($boxBank, $sectionBoxes) = $slashdb->getPortalsCommon();
-	my $getblocks = $section->{section} || 'index';
+	my($boxBank, $skinBoxes) = $slashdb->getPortalsCommon();
+	my $getblocks = $skin->{skid} || $constants->{mainpage_skid};
 
 	# two variants of box cache: one for index with portalmap,
 	# the other for any other section, or without portalmap
 
-	if ($user->{exboxes} && ($getblocks eq 'index' || $constants->{slashbox_sections})) {
+	if ($user->{slashboxes}
+		&& ($getblocks == $constants->{mainpage_skid} || $constants->{slashbox_sections})
+	) {
 		@boxes = getUserBoxes();
 		$boxcache = $cache->{slashboxes}{index_map}{$user->{light}} ||= {};
 	} else {
-		@boxes = @{$sectionBoxes->{$getblocks}}
-			if ref $sectionBoxes->{$getblocks};
+		@boxes = @{$skinBoxes->{$getblocks}}
+			if ref $skinBoxes->{$getblocks};
 		$boxcache = $cache->{slashboxes}{$getblocks}{$user->{light}} ||= {};
 	}
 
@@ -454,7 +462,7 @@ sub displayStandardBlocks {
 			$return .= portalbox(
 				$constants->{fancyboxwidth},
 				getData('morehead'),
-				getOlderStories($older_stories_essentials, $section),
+				getOlderStories($older_stories_essentials, $skin),
 				$bid
 			) if @$older_stories_essentials;
 

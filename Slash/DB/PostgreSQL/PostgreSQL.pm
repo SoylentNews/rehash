@@ -1,19 +1,17 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::DB::PostgreSQL;
 use strict;
 use Slash::Utility;
 use URI ();
-use vars qw($VERSION);
 
 use base 'Slash::DB';
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 # BENDER: I hate people who love me.  And they hate me.
 

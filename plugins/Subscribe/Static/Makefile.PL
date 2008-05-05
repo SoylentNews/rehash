@@ -2,5 +2,4 @@
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'      => 'Slash::Subscribe::Static',
-    'VERSION_FROM' => 'Static.pm', # finds $VERSION
 );

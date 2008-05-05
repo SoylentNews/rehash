@@ -3,5 +3,4 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Slash::Display::Plugin',
-    'VERSION_FROM' => 'Plugin.pm', # finds $VERSION
 );

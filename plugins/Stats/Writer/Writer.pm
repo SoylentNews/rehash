@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Stats::Writer;
 
@@ -11,11 +10,10 @@ use Slash;
 use Slash::Utility;
 use Slash::DB::Utility;
 
-use vars qw($VERSION);
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 # On a side note, I am not sure if I liked the way I named the methods either.
 # -Brian
@@ -44,28 +42,31 @@ sub createStatDaily {
 	$options ||= {};
 	my $day = $options->{day} || $self->{_day};
 
-	my $section = $options->{section} || 'all';
+	my $skid = $options->{skid} || 0;
 	my $insert = {
 		'day'	=> $day,
 		'name'	=> $name,
 		'value'	=> $value,
 	};
-	$insert->{section} = $section;
+	$insert->{skid} = $skid;
 
 	my $overwrite = $self->{_overwrite} || $options->{overwrite};
 	if ($overwrite) {
 		my $where = "day=" . $self->sqlQuote($day)
 			. " AND name=" . $self->sqlQuote($name);
-		$where .= " AND section=" . $self->sqlQuote($section);
-		$self->{_dbh}{AutoCommit} = 0;
+		$where .= " AND skid=" . $self->sqlQuote($skid);
+#		$self->{_dbh}{AutoCommit} = 0;
+		$self->sqlDo("SET AUTOCOMMIT=0");
 		$self->sqlDelete('stats_daily', $where);
 	}
 
 	$self->sqlInsert('stats_daily', $insert, { ignore => 1 });
 
 	if ($overwrite) {
-		$self->{_dbh}->commit;
-		$self->{_dbh}{AutoCommit} = 1;
+#		$self->{_dbh}->commit;
+#		$self->{_dbh}{AutoCommit} = 1;
+		$self->sqlDo("COMMIT");
+		$self->sqlDo("SET AUTOCOMMIT=1");
 	}
 }
 
@@ -75,8 +76,8 @@ sub updateStatDaily {
 
 	my $where = "day = " . $self->sqlQuote($self->{_day});
 	$where .= " AND name = " . $self->sqlQuote($name);
-	my $section = $options->{section} || 'all';
-	$where .= " AND section = " . $self->sqlQuote($section);
+	my $skid = $options->{skid} || 0;
+	$where .= " AND skid = " . $self->sqlQuote($skid);
 
 	return $self->sqlUpdate('stats_daily', {
 		-value =>	$update_clause,

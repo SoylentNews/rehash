@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Blob;
 
@@ -9,40 +8,28 @@ use strict;
 use DBIx::Password;
 use Slash;
 use Slash::Utility;
+use MIME::Types;
 use Digest::MD5 'md5_hex';
 
-use vars qw($VERSION);
 use base 'Exporter';
 use base 'Slash::DB::Utility';
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
-# Mime/Type hash (couldn't find a module that I liked that would do this -Brian
-# there are plenty of other methods out there, this needs to be replaced -- pudge
-my %mimetypes = (
-	jpeg => 'image/jpeg',
-	jpg  => 'image/jpeg',
-	gif  => 'image/gif',
-	png  => 'image/png',
-	tiff => 'image/tiff',
-	tif  => 'image/tiff',
-	ps   => 'application/postscript',
-	eps  => 'application/postscript',
-	zip  => 'application/zip',
-	doc  => 'application/msword',
-	xls  => 'application/ms-excel',
-	pdf  => 'application/pdf',
-	gz   => 'application/x-gzip',
-	bz2  => 'application/x-bzip2',
-	rpm  => 'application/x-rpm',
+# When this plugin was first written, it used a hardcoded hash to
+# store MIME types.  Now we use the MIME::Types module.  But for
+# backwards compatibility, here are the overrides for just the
+# four types where our hardcoded hash differed from the (current)
+# values returned by MIME::Types.  Honestly my guess is that
+# MIME::Types is right and we were wrong, and we should remove
+# this (except for 'text'), but for now, let's make it completely
+# backwards compatible.
+
+my %mimetype_overrides = (
 	mp3  => 'audio/mp3',
-	ra   => 'audio/x-realaudio',
-	html => 'text/html',
-	htm  => 'text/html',
-	txt  => 'text/plain',
+	rpm  => 'application/x-rpm',
 	text => 'text/plain',
-	xml  => 'text/xml',
-	rtf  => 'text/rtf',
+	xls  => 'application/ms-excel',
 );
 
 sub new {
@@ -67,10 +54,14 @@ sub create {
 	my $prime = $self->{'_prime'};
 
 	$values->{seclev} ||= 0;
-	# Couldn't find a module that did this
 	if (!$values->{content_type} && $values->{filename}) {
 		(my $ext = lc $values->{filename}) =~ s/^.*\.([^.]+)$/$1/s;
-		$values->{content_type} = $mimetypes{$ext};
+		if ($mimetype_overrides{$ext}) {
+			$values->{content_type} = $mimetype_overrides{$ext};
+		} else {
+			my $m = MIME::Types->new();
+			$values->{content_type} = $m->mimeTypeOf($values->{filename}) if $m;
+		}
 	}
 	$values->{content_type} ||= 'application/octet-stream';
 
@@ -83,7 +74,87 @@ sub create {
 		$self->sqlDo("UPDATE $self->{'_table'} SET reference_count=(reference_count +1) WHERE id = '$found'");
 	} else {
 		$values->{$prime} = $id;
-		$self->sqlInsert($table, $values);
+
+		# if the size of the data is greater than the size of the max
+		# packet MySQL can accept, let's set it higher before saving the
+		# data -- pudge
+
+		my $len = length $values->{data};
+		my $var = 'max_allowed_packet';
+		my $value;
+
+		my $base = 1024**2;  # 1MB
+		if ($len > $base) {
+			$value = $self->sqlGetVar($var);
+			my $needed = $len + $base;
+
+			if ($value < $needed) {
+				return unless $self->sqlSetVar($var, $needed*2);
+				my $check = $self->sqlGetVar($var);
+				if ($check < $needed) {
+					errorLog("Value of $var is $check, should be $needed\n");
+					return undef;
+				}
+
+				# easily turn off for testing
+				my $do_chunk = 1;
+				my($size, $data);
+
+				# chunking will be used here because 1. on old
+				# 3.x client lib, you cannot set the max packet size
+				# larger, and 2. sometimes the MySQL server "goes
+				# away" with a lot of data anyway.  although in such
+				# cases, we have trouble *getting* the data back,
+				# but this is a problem for another day. -- pudge
+				if ($do_chunk) {
+					# smarter?
+					$size = $base >= $value ? $base/2 : $base; 
+					$data = $values->{data};
+					$values->{data} = substr($data, 0, $size, '');
+				}
+
+				$self->sqlInsert($table, $values) or return undef;
+
+				if ($do_chunk) {
+					while (length $data) {
+						my $chunk = $self->sqlQuote(substr($data, 0, $size, ''));
+						my $ok = $self->sqlUpdate($table, {
+								-data => "CONCAT(data, $chunk)"
+							}, $where
+						);
+
+						if (!$ok) { # abort
+							$self->sqlDelete($table, $where);
+							return undef;
+						}
+					}
+				}
+
+				# the new value is only session-specific anyway,
+				# but set it back for good measure
+				$self->sqlSetVar($var, $value);
+
+			} else {
+				undef $value;
+			}
+		}
+
+		# true $value means we already saved the data
+		unless ($value) {
+			$self->sqlInsert($table, $values) or return undef;
+		}
+
+		# verify we saved what we think we did
+		# (note: even when we cannot retrieve all the data we saved,
+		# the MD5() check still works, so the data is all there; maybe
+		# some other MySQL setting about getting large amounts of data
+		# is giving us problems in the tests -- pudge
+		my $md5 = $self->sqlSelect('MD5(data)', $table, $where);
+		unless ($md5 eq $id) {
+			errorLog("md5:$md5 != id:$id\n");
+			$self->sqlDelete($table, $where);
+			return undef;
+		}
 	}
 
 	return $found || $id ;
@@ -91,30 +162,61 @@ sub create {
 
 sub delete {
 	my($self, $sig) = @_;
-
-	$self->sqlDo("UPDATE $self->{'_table'} SET reference_count=(reference_count -1) WHERE id = '$sig'");
+	my $sig_q = $self->sqlQuote($sig);
+	return $self->sqlUpdate(
+		$self->{_table},
+		{ -reference_count => "reference_count - 1" },
+		"id = $sig_q");
 }
 
 sub clean {
 	my($self, $sig) = @_;
+	return $self->sqlDelete($self->{_table}, "reference_count < 1");
+}
 
-	$self->sqlDo("DELETE FROM $self->{'_table'} WHERE reference_count < 1");
+sub get {
+	my($self, $sig) = @_;
+	my $sig_q = $self->sqlQuote($sig);
+	return $self->sqlSelectHashref("*", $self->{_table}, "id = $sig_q");
 }
 
 sub getFilesForStories {
 	my($self) = @_;
-	$self->sqlSelectAllHashrefArray('*', 'story_files', '', "ORDER BY sid,description");
+	$self->sqlSelectAllHashrefArray('*', 'story_files', '', "ORDER BY stoid,description");
 }
 
 sub getFilesForStory {
-	my($self, $sid) = @_;
-	return unless $sid;
-	$self->sqlSelectAllHashrefArray('*', 'story_files', "sid=" . $self->sqlQuote($sid), "ORDER BY description");
+	my($self, $id) = @_;
+	return unless $id;
+
+	# Grandfather in an old-style sid.
+	my $stoid;
+	my $id_style = $self->_storyidstyle($id);
+	if ($id_style eq 'stoid') {
+		$stoid = $id;
+	} else {
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		$stoid = $reader->getStory($id, 'stoid', 1);
+		return 0 unless $stoid;
+	}
+
+	$self->sqlSelectAllHashrefArray('*', 'story_files',
+		"stoid=$stoid",
+		"ORDER BY description");
 }
 
 sub createFileForStory {
 	my($self, $values) = @_;
-	return unless $values->{sid} && $values->{data};
+	return unless $values->{data}
+		&& ($values->{sid} || $values->{stoid});
+
+	# Grandfather in an old-style sid.
+	if (!$values->{stoid}) {
+		my $reader = getObject('Slash::DB', { db_type => 'reader' });
+		my $stoid = $reader->getStory($values->{sid}, 'stoid', 1);
+		return unless $stoid;
+		$values->{stoid} = $stoid;
+	}
 
 	my $content = {
 		seclev		=> $values->{seclev},
@@ -123,14 +225,15 @@ sub createFileForStory {
 		data		=> $values->{data},
 	};
 
-	my $id = $self->create($content);
+	my $id = $self->create($content) or return undef;
+
 	my $content_type = $self->get($id, 'content_type');
 
 	my $file_content = {
-		sid         => $values->{sid},
-		description => $values->{description} || $values->{filename} || $content_type,
-		isimage     => ($content_type =~ /^image/) ? 'yes': 'no',
-		file_id     => $id,
+		stoid		=> $values->{stoid},
+		description	=> $values->{description} || $values->{filename} || $content_type,
+		isimage		=> ($content_type =~ /^image/) ? 'yes': 'no',
+		file_id		=> $id,
 	};
 	$self->sqlInsert('story_files', $file_content);
 
@@ -139,17 +242,27 @@ sub createFileForStory {
 
 sub deleteStoryFile {
 	my($self, $id) = @_;
-	my $file_id = $self->sqlSelect("file_id", "story_files", "id =" . $self->sqlQuote($id));
+	my $id_q = $self->sqlQuote($id);
+	my $file_id = $self->sqlSelect("file_id",
+		"story_files",
+		"id = $id_q");
+	return undef if !$file_id;
 	$self->delete($file_id);
-	$self->sqlDelete("story_files", "id=" . $self->sqlQuote($id));
+	return $self->sqlDelete("story_files", "id=$id_q");
 }
 
+sub _storyidstyle {
+	my($self, $id) = @_;
+	if ($id =~ /^\d+$/) {
+		return "stoid";
+	}
+	return "sid";
+}
 
 sub DESTROY {
 	my($self) = @_;
 	$self->{_dbh}->disconnect if !$ENV{GATEWAY_INTERFACE} && $self->{_dbh};
 }
-
 
 1;
 

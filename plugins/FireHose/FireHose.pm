@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::FireHose;
 
@@ -40,9 +39,9 @@ use Time::HiRes;
 
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
-use vars qw($VERSION);
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
+
 sub createFireHose {
 	my($self, $data) = @_;
 	$data->{dept} ||= "";
@@ -1753,7 +1752,7 @@ sub dispFireHose {
 		if ($mcdkey) {
 			$cached = $mcd->get("$mcdkey");
 		}
-		return $cached;
+		return $cached if $cached;
 	}
 
 	my $retval = slashDisplay('dispFireHose', {
@@ -2857,7 +2856,3 @@ __END__
 =head1 SEE ALSO
 
 Slash(3).
-
-=head1 VERSION
-
-$Id$

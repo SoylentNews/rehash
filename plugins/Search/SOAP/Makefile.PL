@@ -3,6 +3,5 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Slash::Search::SOAP',
-    'VERSION_FROM' => 'SOAP.pm', # finds $VERSION
     'PM'	=> { 'SOAP.pm' => '$(INST_LIBDIR)/SOAP.pm' },
 );

@@ -3,5 +3,4 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Slash::Apache::Log',
-    'VERSION_FROM' => 'Log.pm', # finds $VERSION
 );

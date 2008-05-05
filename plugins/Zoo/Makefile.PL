@@ -4,6 +4,5 @@ use DBIx::Password;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Slash::Zoo',
-    'VERSION_FROM' => 'Zoo.pm', # finds $VERSION
     'PM'	=> { 'Zoo.pm' => '$(INST_LIBDIR)/Zoo.pm' },
 );

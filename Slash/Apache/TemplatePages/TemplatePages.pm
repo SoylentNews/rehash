@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Apache::TemplatePages;
 
@@ -9,9 +8,8 @@ use strict;
 use Slash::Display;
 use Slash::Utility;
 use Apache::Constants qw(:common);
-use vars qw($VERSION);
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 # AMY: Leela's gonna kill me.
 # BENDER: Naw, she'll probably have me do it.
@@ -19,16 +17,21 @@ use vars qw($VERSION);
 sub handler {
 	my($r) = @_;
 	my $constants = getCurrentStatic();
+	return NOT_FOUND unless dbAvailable();
 	my $slashdb = getCurrentDB();
-	return NOT_FOUND if -e "$constants->{datadir}/dboff";
 	my $page = $r->uri;
 	$page =~ s|^/(.*)\.tmpl$|$1|;
-	my $section = getCurrentForm('section');
-	my $title = $slashdb->getTemplateByName('body', 'title', 1, $page, $section);
+	my $skin = getCurrentSkin('name');
+	my $title = $slashdb->getTemplateByName('body', {
+		values          => 'title',
+		cache_flag      => 1,
+		page            => $page,
+		skin            => $skin
+	});
 	if ($title) {
-		header($title, $section) or return;
-		my $display = slashDisplay('body', '', { Page => $page, Section => $section, Return => 1 });
-		$r->print($display);
+		header($title, $skin) or return;
+		my $display = slashDisplay('body', '', { Page => $page, Skin => $skin, Return => 1 });
+		print $display;
 		footer();
 	} else {
 		return NOT_FOUND;

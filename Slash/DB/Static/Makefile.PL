@@ -4,5 +4,4 @@ use ExtUtils::MakeMaker;
 WriteMakefile();
 #WriteMakefile(
 #    'NAME'	=> 'Slash::DB',
-#    'VERSION_FROM' => 'DB.pm', # finds $VERSION
-#);
+##);

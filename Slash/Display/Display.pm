@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Display;
 
@@ -48,11 +47,11 @@ use Slash::Utility::System;
 use Template 2.07;
 
 use base 'Exporter';
-use vars qw($VERSION @EXPORT @EXPORT_OK $CONTEXT %FILTERS $TEMPNAME);
+use vars qw($CONTEXT %FILTERS $TEMPNAME);
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-@EXPORT	   = qw(slashDisplay slashDisplayName);
-@EXPORT_OK = qw(get_template);
+our $VERSION = $Slash::Constants::VERSION;
+our @EXPORT  = qw(slashDisplay slashDisplayName);
+our @EXPORT_OK = qw(get_template);
 my(%objects);
 
 # FRY: That doesn't look like an L at all. Unless you count lowercase.
@@ -105,26 +104,36 @@ block this is.  Default is to include comments if the var
 "template_show_comments" is true, to not include comments
 if it is false.  It is true by default.
 
-=item Section
+If the var "template_show_comments" is greater than 1,
+the Nocomm boolean will be ignored and the HTML comments
+will ALWAYS be inserted around templates (except when they
+are invoked from within other templates by INCLUDE or
+PROCESS).  This is NOT what you want for a public site, since
+(for example) email built up from templates will have HTML
+comments in it which will confuse your readers;  HTML tags
+built from several templates may have HTML comments "inside"
+them, breaking your HTML syntax;  etc.
 
-Each template is assigned to a section.  This section may be
-a section defined as a site section, or some arbitrary section
-name.  By default, the section that is used is whatever section
+=item Skin
+
+Each template is assigned to a skin.  This skin may be
+a skin defined as a site skin, or some arbitrary skin
+name.  By default, the skin that is used is whatever skin
 the user is in, but it can be overridden by setting this parameter.
-If a template in the current section is not found, it defaults
-to section "default".
+If a template in the current skin is not found, it defaults
+to skin "default".
 
-Section will also default first to "light" if the user is in light
+Skin will also default first to "light" if the user is in light
 mode (and fall back to "default," again, if no template for the
-"light" section exists).
+"light" skin exists).
 
-A Section value of "NONE" will cause no section to be defined, so
+A Skin value of "NONE" will cause no skin to be defined, so
 "default" will be used.
 
 =item Page
 
-Similarly to sections, each template is assigned to a page.
-This section may be a page defined in the site, or some arbitrary
+Similarly to skins, each template is assigned to a page.
+This page may be a page defined in the site, or some arbitrary
 page name.  By default, the page that is used is whatever page
 the user is on (such as "users" for "users.pl"), but it can be
 overridden by setting this parameter.  If a template in the current
@@ -158,30 +167,34 @@ sub slashDisplay {
 	my $reader    = getObject('Slash::DB', { db_type => 'reader' }); 
 	my $user      = getCurrentUser();
 
-	my($origSection, $origPage, $tempdata);
+	my($origSkin, $origPage, $tempdata);
 	unless (ref($name) eq 'HASH') {
 		$name = slashDisplayName($name, $data, $opt);
 	}
 
-	($name, $data, $opt, $origSection, $origPage, $tempdata) = @{$name}{qw(
-		name data opt origSection origPage tempdata
+	($name, $data, $opt, $origSkin, $origPage, $tempdata) = @{$name}{qw(
+		name data opt origSkin origPage tempdata
 	)};
 
-	$TEMPNAME = 'anon';
+	local $TEMPNAME = 'anon';
 	unless (ref $name) {
 		# we don't want to have to call this here, but because
 		# it is cached the performance hit is generally light,
 		# and this is the only good way to get the actual name,
-		# page, section, we bite the bullet and do it
-		$tempdata ||= $reader->getTemplateByName($name, [qw(tpid page section)]);
-		$TEMPNAME = "ID $tempdata->{tpid}, " .
-			"$name;$tempdata->{page};$tempdata->{section}";
-	}
+		# page, skin, we bite the bullet and do it
+		$tempdata ||= $reader->getTemplateByName($name, [qw(tpid page skin)]);
 
-	my @comments = (
-		"\n\n<!-- start template: $TEMPNAME -->\n\n",
-		"\n\n<!-- end template: $TEMPNAME -->\n\n"
-	);
+		# might as well bail here if we can't find the template
+		if (!$tempdata) {
+			# restore our original values
+			$user->{currentSkin}	= $origSkin;
+			$user->{currentPage}	= $origPage;
+			return;
+		}
+
+		$TEMPNAME = "ID $tempdata->{tpid}, " .
+			"$name;$tempdata->{page};$tempdata->{skin}";
+	}
 
 	# copy parent data structure so it is not modified,
 	# so it is left alone on return back to caller
@@ -192,7 +205,8 @@ sub slashDisplay {
 
 	# we only populate $err if !$ret ... still, if $err
 	# is false, then we assume everything is OK
-	my($err, $ret, $out);
+	my($err, $ret);
+	my $out = '';
 
 	{
 		local $SIG{__WARN__} = \&tempWarn;
@@ -206,11 +220,14 @@ sub slashDisplay {
 		}
 	}
 
-	my $Nocomm = defined $opt->{Nocomm}
-		? $opt->{Nocomm}
-		: !$constants->{template_show_comments};
+	# template_show_comments == 0		never show HTML comments
+	# template_show_comments == 1		show them if !$opt->{Nocomm}
+	# template_show_comments == 2		always show them - debug only!
 
-	$out = $comments[0] . $out . $comments[1] unless $Nocomm;
+	my $show_comm = $constants->{template_show_comments} ? 1 : 0;
+	$show_comm &&= 0 if $opt->{Nocomm} && $constants->{template_show_comments} < 2;
+	$out = "\n\n<!-- start template: $TEMPNAME -->\n\n$out\n\n<!-- end template: $TEMPNAME -->\n\n"
+		if $show_comm;
 
 	if ($err) {
 		errorLog("$TEMPNAME : $err");
@@ -219,7 +236,7 @@ sub slashDisplay {
 	}
 
 	# restore our original values
-	$user->{currentSection}	= $origSection;
+	$user->{currentSkin}	= $origSkin;
 	$user->{currentPage}	= $origPage;
 
 	return $opt->{Return} ? $out : $ret;
@@ -234,25 +251,21 @@ sub slashDisplayName {
 	my $constants = getCurrentStatic();
 	my $reader    = getObject('Slash::DB', { db_type => 'reader' }); 
 	my $user      = getCurrentUser();
+	my $gSkin     = getCurrentSkin();
 
 	# save for later (local() seems not to work ... ?)
-	my $origSection = $user->{currentSection};
+	my $origSkin = $user->{currentSkin} || $gSkin->{name};
 	my $origPage = $user->{currentPage};
 
 	# allow slashDisplay(NAME, DATA, RETURN) syntax
 	if (! ref $opt) {
-		$opt = $opt == 1 ? { Return => 1 } : {};
+		$opt = ($opt && $opt == 1) ? { Return => 1 } : {};
 	}
 
-	if ($opt->{Section} && $opt->{Section} eq 'NONE') {
-		$user->{currentSection} = 'default';
-	# admin and light are special cases
-	} elsif ($user->{currentSection} eq 'admin') {
-		$user->{currentSection} = 'admin';
-	} elsif ($user->{light}) {
-		$user->{currentSection} = 'light';
-	} elsif ($opt->{Section}) {
-		$user->{currentSection} = $opt->{Section};
+	if ($opt->{Skin} && $opt->{Skin} eq 'NONE') {
+		$user->{currentSkin} = 'default';
+	} elsif ($opt->{Skin}) {
+		$user->{currentSkin} = $opt->{Skin};
 	}
 
 	if ($opt->{Page} && $opt->{Page} eq 'NONE') {
@@ -261,19 +274,19 @@ sub slashDisplayName {
 		$user->{currentPage} = $opt->{Page};
 	}
 
-	for (qw[currentSection currentPage]) {
+	for (qw[currentSkin currentPage]) {
 		$user->{$_} = defined $user->{$_} ? $user->{$_} : '';
 	}
 
 	my $tempdata;
-	$tempdata = $reader->getTemplateByName($name, [qw(tpid page section)])
+	$tempdata = $reader->getTemplateByName($name, [qw(tpid page skin)])
 		if $opt->{GetName};
 
 	return {
 		name        => $name,
 		data        => $data,
 		opt         => $opt,
-		origSection => $origSection,
+		origSkin    => $origSkin,
 		origPage    => $origPage,
 		tempdata    => $tempdata,
 	};
@@ -326,22 +339,23 @@ my $strip_mode = sub {
 # for a template and you don't want your tags running
 # up against each other.		- Cliff 8/1/01
 %FILTERS = (
-	decode_entities	=> \&decode_entities,
-	fixparam	=> \&fixparam,
-	fixurl		=> \&fixurl,
-	fudgeurl	=> \&fudgeurl,
-	strip_paramattr	=> \&strip_paramattr,
-	strip_urlattr	=> \&strip_urlattr,
-	strip_anchor	=> \&strip_anchor,
-	strip_attribute	=> \&strip_attribute,
-	strip_code	=> \&strip_code,
-	strip_extrans	=> \&strip_extrans,
-	strip_html	=> \&strip_html,
-	strip_literal	=> \&strip_literal,
-	strip_nohtml	=> \&strip_nohtml,
-	strip_notags	=> \&strip_notags,
-	strip_plaintext	=> \&strip_plaintext,
-	strip_mode	=> [ $strip_mode, 1 ],
+	decode_entities		=> \&decode_entities,
+	fixparam		=> \&fixparam,
+	fixurl			=> \&fixurl,
+	fudgeurl		=> \&fudgeurl,
+	strip_paramattr		=> \&strip_paramattr,
+	strip_paramattr_nonhttp	=> \&strip_paramattr_nonhttp,
+	strip_urlattr		=> \&strip_urlattr,
+	strip_anchor		=> \&strip_anchor,
+	strip_attribute		=> \&strip_attribute,
+	strip_code		=> \&strip_code,
+	strip_extrans		=> \&strip_extrans,
+	strip_html		=> \&strip_html,
+	strip_literal		=> \&strip_literal,
+	strip_nohtml		=> \&strip_nohtml,
+	strip_notags		=> \&strip_notags,
+	strip_plaintext		=> \&strip_plaintext,
+	strip_mode		=> [ $strip_mode, 1 ],
 	%FILTERS
 );
 

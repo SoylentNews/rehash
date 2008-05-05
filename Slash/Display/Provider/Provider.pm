@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Display::Provider;
 
@@ -30,13 +29,13 @@ and C<_refresh>.
 =cut
 
 use strict;
-use vars qw($VERSION $DEBUG);
+use vars qw($DEBUG);
 use base qw(Template::Provider);
 use File::Spec::Functions;
 use Slash::Utility::Environment;
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
-$DEBUG     = $Template::Provider::DEBUG || 0 unless defined $DEBUG;
+our $VERSION = $Slash::Constants::VERSION;
+$DEBUG       = $Template::Provider::DEBUG || 0 unless defined $DEBUG;
 
 # BENDER: Oh, no room for Bender, huh?  Fine.  I'll go build my own lunar
 # lander.  With blackjack.  And hookers.  In fact, forget the lunar lander
@@ -78,8 +77,8 @@ sub fetch {
 		print STDERR "fetch text : $text\n" if $DEBUG > 1;
 		my $reader = getObject('Slash::DB', { db_type => 'reader' }); 
 
-		my $temp = $reader->getTemplateByName($text, [qw(tpid page section)]);
-		$compname = "$text;$temp->{page};$temp->{section}"
+		my $temp = $reader->getTemplateByName($text, [qw(tpid page skin)]);
+		$compname = "$text;$temp->{page};$temp->{skin}"
 			if $self->{COMPILE_DIR};
 		$name = $temp->{tpid};
 		undef $text;
@@ -252,12 +251,14 @@ my $anon = Slash::getCurrentAnonymousCoward();
 my $user = Slash::getCurrentUser();
 my $form = Slash::getCurrentForm();
 my $constants = Slash::getCurrentStatic();
+my $gSkin = Slash::getCurrentSkin();
 
 $stash->set('Slash', $context->plugin('Slash'));
 $stash->set('anon', $anon);
 $stash->set('user', $user);
 $stash->set('form', $form);
 $stash->set('constants', $constants);
+$stash->set('gSkin', $gSkin);
 $stash->set('env', { map { (lc, $ENV{$_}) } keys %ENV });
 EOF
 

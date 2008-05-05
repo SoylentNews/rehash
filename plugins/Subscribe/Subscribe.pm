@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Subscribe;
 
@@ -10,12 +9,10 @@ use Slash;
 use Slash::Utility;
 use Slash::DB::Utility;
 
-use vars qw($VERSION);
-
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 sub new {
 	my($class) = @_;
@@ -228,9 +225,13 @@ sub plummyPage {
 # By default, allow readers to buy x pages for $y, 2x pages for $2y,
 # etc.  If you want to have n-for-the-price-of-m sales or whatever,
 # change the logic here.
+# Also, if someone hacks the HTML to purchase a fraction of a 
+# subscription, they get nothing.
 sub convertDollarsToPages {
 	my($self, $amount) = @_;
 	my $constants = getCurrentStatic();
+	my $paypal_amt = $constants->{paypal_amount};
+	$amount = 0 if !$paypal_amt || ($amount / $paypal_amt) != int($amount / $paypal_amt);
 	return sprintf("%0.0f", $amount*$constants->{paypal_num_pages}/
 		$constants->{paypal_amount});
 }
@@ -328,7 +329,7 @@ sub getSubscriptionsForUser {
 		"ORDER BY spid",
 	);
 	$sp ||= [ ];
-	formatDate($sp, 0);
+	formatDate($sp, 0, 0, "%m-%d-%y @%I:%M %p");
 	return $sp;
 }
 
@@ -353,7 +354,7 @@ sub getSubscriptionsPurchasedByUser {
 		"ORDER BY spid",
 	);
 	$sp ||= [ ];
-	formatDate($sp, 0);
+	formatDate($sp, 0, 0, "%m-%d-%y @%I:%M %p");
 	return $sp;
 }
 

@@ -4,7 +4,6 @@ use DBIx::Password;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Slash::HumanConf',
-    'VERSION_FROM' => 'HumanConf.pm', # finds $VERSION
     'PM'	=> {
     	'HumanConf.pm' => '$(INST_LIBDIR)/HumanConf.pm',
     },

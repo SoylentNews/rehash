@@ -4,5 +4,4 @@ use DBIx::Password;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'FAQ',
-    'VERSION_FROM' => 'faq.shtml', # finds $VERSION
 );

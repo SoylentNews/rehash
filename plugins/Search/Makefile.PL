@@ -3,6 +3,5 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Slash::Search',
-    'VERSION_FROM' => 'Search.pm', # finds $VERSION
     'PM'	=> { 'Search.pm' => '$(INST_LIBDIR)/Search.pm' },
 );

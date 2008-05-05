@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Display::Plugin;
 
@@ -12,7 +11,6 @@ Slash::Display::Plugin - Template Toolkit plugin for Slash
 
 =head1 SYNOPSIS
 
-	[% USE Slash %]
 	[% Slash.someFunction('some data') %]
 	[% Slash.db.someMethod(var1, var2) %]
 
@@ -22,7 +20,7 @@ Slash::Display::Plugin - Template Toolkit plugin for Slash
 Call available exported functions from Slash and Slash::Utility
 from within your template.  Also call methods from Slash::DB
 with the C<db> method.  Constants from Slash::Constants are
-available.  Invoke with C<[% USE Slash %]>.
+available.
 
 C<[% Slash.version %]> gives the version of Slash.
 C<[% Slash.VERSION %]> (note case) gives the version
@@ -30,7 +28,7 @@ of this Slash Template plugin.
 
 C<[% Slash.Display %]> provides access to C<slashDisplay()>.  Use
 this B<sparingly>, only when you need to pass in certain options
-(such as setting Section or Page).  In the general case, use
+(such as setting Skin or Page).  In the general case, use
 C<PROCESS> in the template, or C<INCLUDE> if necessary.
 This method will always set C<Return>, so you may assign its
 result to a variable, or call it by itself to have its result
@@ -58,13 +56,12 @@ the current one to be used.
 =cut
 
 use strict;
-use vars qw($VERSION $AUTOLOAD);
+use vars qw($AUTOLOAD);
 use Slash ();
-use Slash::Constants ();
 use Slash::Utility ();
 use base qw(Template::Plugin);
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 # BENDER: Forget your stupid theme park!  I'm gonna make my own!
 # With hookers!  And blackjack!  In fact, forget the theme park!

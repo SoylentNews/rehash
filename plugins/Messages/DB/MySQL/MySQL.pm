@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Messages::DB::MySQL;
 
@@ -26,18 +25,23 @@ use Slash::Constants qw(:messages);
 use Slash::Utility;
 use Storable qw(freeze thaw);
 
-use vars '$VERSION';
 use base 'Slash::DB::Utility';	# first for object init stuff, but really
 				# needs to be second!  figure it out. -- pudge
 use base 'Slash::DB::MySQL';
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 my %descriptions = (
 	'deliverymodes'
 		=> sub { $_[0]->sqlSelectMany('code,name', 'code_param', "type='deliverymodes'") },
 	'messagecodes'
 		=> sub { $_[0]->sqlSelectMany('code,type', 'message_codes', "code >= 0") },
+	'bvdeliverymodes'
+		=> sub { $_[0]->sqlSelectAllHashref('code', 'code,name,bitvalue', 'message_deliverymodes') },
+	'bvmessagecodes'
+		=> sub { $_[0]->sqlSelectAllHashref('type', 'code,type,delivery_bvalue', 'message_codes', "code >= 0") },
+        'bvmessagecodes_slev'
+                => sub { $_[0]->sqlSelectAllHashref('type', 'code,type,seclev,delivery_bvalue', 'message_codes', "code >= 0") },
 );
 
 sub getDescriptions {
@@ -60,7 +64,7 @@ sub getMessageCode {
 		return $self->{$cache}{$code};
 	}
 
-	my $row = $self->sqlSelectHashref('code,type,seclev,modes,send,subscribe',
+	my $row = $self->sqlSelectHashref('code,type,seclev,modes,send,subscribe,acl',
 		'message_codes', "code=$code");
 	$codeBank->{$code} = $row if $row;
 
@@ -137,11 +141,12 @@ sub init {
 }
 
 sub log {
-	my($self, $msg, $mode) = @_;
+	my($self, $msg, $mode, $count) = @_;
+	$count = 1 if !$count || $count < 1;
 	my $table = $self->{_log_table};
 	$msg->{user} ||= {};
 
-	$self->sqlInsert($table, {
+	my %data = (
 		id	=> $msg->{id},
 		user	=> (ref($msg->{user})
 				? ($msg->{user}{uid} || 0)
@@ -153,7 +158,10 @@ sub log {
 			   ),
 		code	=> $msg->{code},
 		mode	=> $mode,
-	}, { delayed => 1 });
+	);
+
+	$self->sqlInsert($table, \%data, { delayed => 1 })
+		for 1 .. $count;
 }
 
 sub _create_web {
@@ -222,7 +230,7 @@ sub _get_web_by_uid {
 	my $prime = "message_web.id=message_web_text.id AND user";
 	my $other = "ORDER BY date ASC";
 
-	my $id_db = $self->sqlQuote($uid || $ENV{SLASH_USER});
+	my $id_db = $self->sqlQuote($uid || getCurrentUser('uid'));
 	my $data = $self->sqlSelectAllHashrefArray(
 		$cols, $table, "$prime=$id_db", $other
 	);
@@ -234,7 +242,7 @@ sub _get_web_count_by_uid {
 	my $table = $self->{_web_table};
 	my $cols  = "readed";
 
-	my $uid_db = $self->sqlQuote($uid || $ENV{SLASH_USER});
+	my $uid_db = $self->sqlQuote($uid || getCurrentUser('uid'));
 	my $data = $self->sqlSelectAll(
 		$cols, $table, "user=$uid_db AND " .
 		"$self->{_web_table1}.$self->{_web_prime1} = $self->{_web_table2}.$self->{_web_prime2}",
@@ -267,7 +275,7 @@ sub _gets {
 	my $table = $self->{_drop_table};
 	my $cols  = $self->{_drop_cols};
 
-	$count = 1 if $count =~ /\D/;
+	$count = 1 if $count && $count =~ /\D/;
 	my $other = "ORDER BY date ASC";
 	$other .= " LIMIT $count" if $count;
 
@@ -370,12 +378,12 @@ sub _delete_web {
 	my $where2 = "$prime1=$id_db";
 
 	unless ($override) {
-		$uid ||= $ENV{SLASH_USER};
+		$uid ||= getCurrentUser('uid');
 		return 0 unless $uid;
 		my $uid_db = $self->sqlQuote($uid);
 		my $where  = $where1 . " AND user=$uid_db";
 		my($check) = $self->sqlSelect('user', $table1, $where);
-		return 0 unless $check eq $uid;
+		return 0 unless defined($check) && $check eq $uid;
 	}
 
 	$self->sqlDo("DELETE FROM $table1 WHERE $where1");
@@ -438,28 +446,50 @@ sub _getMailingUsers {
 	
 	my $users  = $self->_getMailingUsersRaw($code);
 	my $fields = [qw(
-		realemail exsect extid exaid
-		sectioncollapse daily_mail_special seclev
+		realemail
+		story_never_topic	story_never_author	story_never_nexus
+		story_always_topic	story_always_author	story_always_nexus
+		sectioncollapse
+		daily_mail_special seclev
 	)];
+	# XXX While normally I'm all in favor of using object-specific
+	# get and set methods, here getUser() may be the wrong approach.
+	# We may have tens of thousands of users in @$users and it will
+	# be a significant optimization of resources both for slashd and
+	# for the database to grab just the above fields all at once.
+	# -Jamie 2007-08-08
 	$users     = { map { $_ => $self->getUser($_, $fields) } @$users };
 	return $users;
 }
 
 sub _getMessageUsers {
-	my($self, $code, $seclev, $subscribe) = @_;
+	my($self, $code, $seclev, $subscribe, $acl) = @_;
 	return unless $code =~ /^-?\d+$/;
 	my $cols  = "users_messages.uid";
 	my $table = "users_messages";
 	my $where = "users_messages.code=$code AND users_messages.mode >= 0";
 
+	my @users;
 	if ($seclev && $seclev =~ /^-?\d+$/) {
-		$table .= ",users";
-		$where .= " AND users.uid = users_messages.uid AND seclev >= $seclev";
+		my $seclevt = "$table,users";
+		my $seclevw = "$where AND users.uid = users_messages.uid AND seclev >= $seclev";
+		my $seclevu = $self->sqlSelectColArrayref($cols, $seclevt, $seclevw) || [];
+		push @users, @$seclevu;
 	}
 
-	my $users = $self->sqlSelectColArrayref($cols, $table, $where) || [];
-	$users = [ grep { isSubscriber($_) } @$users ] if $subscribe;
-	return $users;
+	if ($acl) {
+		my $acl_q = $self->sqlQuote($acl);
+		my $aclt = "$table,users_acl";
+		my $aclw = "$where AND users_acl.uid = users_messages.uid AND users_acl.acl=$acl_q";
+		my $aclu = $self->sqlSelectColArrayref($cols, $aclt, $aclw) || [];
+		push @users, @$aclu;
+	}
+
+
+	my %seen;
+	@users = grep { !$seen{$_}++     } @users;
+	@users = grep { isSubscriber($_) } @users if $subscribe;
+	return \@users;
 }
 
 1;

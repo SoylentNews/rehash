@@ -1,19 +1,28 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::Apache::Log;
 
 use strict;
 use Slash::Utility;
 use Apache::Constants qw(:common);
-use vars qw($VERSION);
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 # AMY: Leela's gonna kill me.
 # BENDER: Naw, she'll probably have me do it.
+
+# Note regarding Apache::DBI:
+# Slash does not use Apache::DBI (it's just an extra, unnecessary,
+# layer of dbh caching).  However, some sites may use it, perhaps for
+# other database-backed projects on the same web server.  Apache::DBI
+# pushes a PerlCleanupHandler with every created dbh, to roll back
+# any open transactions.  The docs for Apache.pm say a handler added
+# with push_handlers will be called "before any configured handlers,"
+# i.e. before Slash's PerlCleanupHandler, i.e. before the functions below.
+# Since createLog and setUser don't leave any transactions open, this
+# should not be a problem.
 
 #
 # This is the first PerlCleanupHandler in each site's .conf file
@@ -23,8 +32,8 @@ use vars qw($VERSION);
 
 sub handler {
 	my($r) = @_;
+	return OK unless dbAvailable("write_accesslog");
 	my $constants = getCurrentStatic();
-	return OK if -e "$constants->{datadir}/dboff";
 
 	# Notes has a bug (still in apache 1.3.17 at
 	# last look). Apache's directory sub handler
@@ -33,17 +42,8 @@ sub handler {
 	my $uri = $r->uri;
 	my $dat = $r->err_header_out('SLASH_LOG_DATA');
 
-	# Added this so that small sites would not have admin logins 
-	# recorded in their stats. -Brian
-
-	# so it will still log it if the admin DOES request
-	# to admin.pl?  i thought you wanted it to NOT log
-	# requests to admin.pl?  should the !~ be =~ ?
-	# or am i just not thinking clearly? -- pudge
-
-	if (!$constants->{log_admin} && $uri !~ /admin\.pl/ ) {
-		return OK if getCurrentUser('is_admin');
-	}
+	# There used to be some (broken) logic here involving the
+	# log_admin var, but that's been moved to createLog().
 
 	createLog($uri, $dat, $r->status);
 
@@ -63,11 +63,12 @@ sub UserLog {
 	my($r) = @_;
 
 	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+
 	return if !$user || !$user->{uid} || $user->{is_anon};
 
 	my $user_update = undef;
 	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
 
 	# First check to see if this is an admin who sent a password
 	# in cleartext.  If so and if we want to flag that, flag it
@@ -87,13 +88,15 @@ sub UserLog {
 	# this is an admin who just sent a password in the clear.
 	# There are other less-important things that might get updated
 	# but none of them matters enough to continue processing.
-	if ($op eq 'image' and !$user_update->{admin_clearpass}) {
+	if ($op eq 'image' && !$user_update->{admin_clearpass}) {
 #		print STDERR scalar(gmtime) . " $$ UserLog short-circuit image\n";
 		return ;
 	}
 
 	# For the below logic, note that if we're on an image hit,
 	# page_buying will be false.
+	# Err, and that doesn't matter since if we're on an image,
+	# we already returned.  So I'm not sure why I wrote that.
 	if ($constants->{subscribe}
 		&& ($user->{is_subscriber} || !$constants->{subscribe_hits_only})
 	) {
@@ -105,6 +108,9 @@ sub UserLog {
 		my @gmt = gmtime;
 		my $today = sprintf("%04d%02d%02d",
 			$gmt[5]+1900, $gmt[4]+1, $gmt[3]);
+		# See the code near the end of MySQL.pm _getUser_do_selects()
+		# which forces $user->{lastclick} to be in the numeric format
+		# originally used by the MySQL 4.0 TIMESTAMP column type.
 		if ($today eq substr($user->{lastclick}, 0, 8)) {
 			# User may or may not be a subscriber, and may or may not
 			# be buying this page.  The day has not rolled over.
@@ -139,10 +145,12 @@ sub UserLog {
 			$statsSave->addStatDaily("subscribe_runout", 1);
 		}
 	}
-	if ($constants->{memcached_debug}) {
-		print STDERR scalar(gmtime) . " $$ mcd UserLog id=$user->{uid} setUser: upd '$user_update' keys '" . join(" ", sort keys %$user_update) . "'\n";
+	if ($user_update && keys(%$user_update)) {
+		if ($constants->{memcached_debug}) {
+			print STDERR scalar(gmtime) . " $$ mcd UserLog id=$user->{uid} setUser: upd '$user_update' keys '" . join(" ", sort keys %$user_update) . "'\n";
+		}
+		$slashdb->setUser($user->{uid}, $user_update);
 	}
-	$slashdb->setUser($user->{uid}, $user_update) if $user_update && %$user_update;
 
 	return OK;
 }

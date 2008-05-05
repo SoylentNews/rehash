@@ -1,7 +1,6 @@
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
 package Slash::DB::MySQL;
 use strict;
@@ -15,12 +14,12 @@ use Slash::Utility;
 use Storable qw(thaw freeze);
 use URI ();
 use Slash::Custom::ParUserAgent;
-use vars qw($VERSION $_proxy_port);
+use vars qw($_proxy_port);
 use base 'Slash::DB';
 use base 'Slash::DB::Utility';
 use Slash::Constants ':messages';
 
-($VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+our $VERSION = $Slash::Constants::VERSION;
 
 # Fry: How can I live my life if I can't tell good from evil?
 

@@ -3,5 +3,4 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Slash::Utility::Anchor',
-    'VERSION_FROM' => 'Anchor.pm', # finds $VERSION
 );
