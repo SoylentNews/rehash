@@ -130,6 +130,29 @@ sub getFireHoseColors {
 	return $colors;
 }
 
+sub createItemFromComment {
+	my($self, $cid) = @_;
+	my $comment = $self->getComment($cid);
+	my $text = $self->getCommentText($cid);
+	my $popularity = $self->getEntryPopularityForColorLevel(7);
+	my $globjid = $self->getGlobjidCreate("comments", $cid);
+	my $data = {
+		uid		=> $comment->{uid},
+		public		=> "yes",
+		title		=> $comment->{subject},
+		introtext	=> $text,
+		ipid		=> $comment->{ipid},
+		subnetid 	=> $comment->{subnetid},
+		type		=> "comment",
+		srcid		=> $comment->{cid},
+		popularity	=> $popularity,
+		editorpop	=> $popularity,
+		globjid		=> $globjid,
+		#XXX discussion?
+	};
+	$self->createFireHose($data);
+		
+}
 
 
 sub createItemFromJournal {
@@ -1845,7 +1868,7 @@ sub getAndSetOptions {
 	$opts 	        ||= {};
 	my $options 	= {};
 
-	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1, misc => 1 }; 
+	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1, misc => 1, comment => 1 };
 	my $tabtypes = { tabsection => 1, tabpopular => 1, tabrecent => 1, tabuser => 1};
 	
 	my $tabtype = '';

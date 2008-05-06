@@ -12603,6 +12603,16 @@ sub getStaticFile {
 	return $answer;
 }
 
+sub isCommentPromoted {
+	my($self, $cid) = @_;
+	return $self->sqlCount("comment_promote_log", "cid=" . $self->sqlQuote($cid));
+}
+
+sub logCommentPromotion {
+	my($self, $cid) = @_;
+	$self->sqlInsert("comment_promote_log", { cid => $cid, -ts => "NOW()" });
+}
+
 sub _getStorySelfLink {
 	my($self, $stoid, $change_hr) = @_; 
 	my $story = $self->getStory($stoid);
