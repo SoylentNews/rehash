@@ -151,7 +151,7 @@ sub run {
 	@$tagnames_ar = grep { !$exclude_tagname{$_} } @$tagnames_ar;
 
 	# Max of 5 or whatever.
-	$#$tagnames_ar = 4 if scalar(@$tagnames_ar) > $num_wanted;
+	$#$tagnames_ar = $num_wanted-1 if scalar(@$tagnames_ar) > $num_wanted;
 
 	if (scalar(@$tagnames_ar) < $num_wanted) {
 		# If we don't get as many as we wanted, leave up
