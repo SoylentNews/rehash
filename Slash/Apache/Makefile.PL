@@ -49,5 +49,6 @@ command_table(\@directives);
 
 WriteMakefile(
     'NAME'	=> 'Slash::Apache',
+    'VERSION_FROM' => 'Apache.pm',
     'INC'	=> Apache::src->new->inc, 
 );

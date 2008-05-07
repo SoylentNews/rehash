@@ -23,5 +23,6 @@ command_table(\@directives);
 
 WriteMakefile(
 	'NAME'	=> 'Slash::Apache::User',
+	'VERSION_FROM' => 'User.pm',
 	'INC'       => Apache::src->new->inc,
 );
