@@ -5291,8 +5291,6 @@ ALTER TABLE firehose_setting_log DROP column bytes;
 # 2008-04-16
 UPDATE vars SET value = 'T_2_5_0_202' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
-
 ALTER TABLE sessions ADD column last_action varchar(16);
 
 # For plugins/FireHose
@@ -5310,4 +5308,6 @@ ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","
 
 # for plugins/Stats
 INSERT INTO vars (name, value, description) VALUES ('stats_firehose_spamcount', '0', 'Number of firehose items marked as is_spam');
+
+# PUDGE LAST UPDATED HERE
 
