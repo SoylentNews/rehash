@@ -121,7 +121,7 @@ __template__
 %]
 [% ELSIF options.duration == -1  %]
 	<span class="inactive">
-		<a href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => 7}); f; %][% IF form.index %]index=1[% END %]">Today</a>
+		<a href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => 7, no_label => "1"}); f; %][% IF form.index %]index=1[% END %]">Today</a>
 	<span class="active">
 		<a href="#">Archive</a> [% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
 	</span>
