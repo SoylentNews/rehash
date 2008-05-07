@@ -5305,4 +5305,9 @@ UPDATE vars SET value = 'T_2_5_0_203' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+# for plugins/FireHose
 ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment") default 'submission';
+
+# for plugins/Stats
+INSERT INTO vars (name, value, description) VALUES ('stats_firehose_spamcount', '0', 'Number of firehose items marked as is_spam');
+

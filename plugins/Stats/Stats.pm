@@ -2221,6 +2221,29 @@ sub getTopicStats {
 
 }
 
+sub tallyBinspam {
+       my($self) = @_;
+       my $constants = getCurrentStatic();
+       return (undef, undef) unless $constants->{plugin}{Tags} && $constants->{plugin}{FireHose};
+
+       my $tagsdb = getObject('Slash::Tags');
+       my $binspam_tagnameid = $tagsdb->getTagnameidCreate('binspam');
+       my $old_count = $constants->{stats_firehose_spamcount} || 0;
+       my $admins = $self->getAdmins();
+       my $admin_uid_str = join(',', sort { $a <=> $b } keys %$admins);
+       my $binspam_tag = $self->sqlCount(
+               'tags',
+               "uid IN ($admin_uid_str)
+                AND created_at $self->{_day_between_clause}
+                AND inactivated IS NULL
+                AND tagnameid=$binspam_tagnameid");
+       my $is_spam_count = $self->sqlCount('firehose', "is_spam='yes'") || 0;
+       $is_spam_count = $old_count if $is_spam_count < $old_count;
+       my $is_spam_new = $is_spam_count - $old_count;
+       $self->setVar('stats_firehose_spamcount', $is_spam_count);
+       return($binspam_tag, $is_spam_new);
+}
+
 ########################################################
 sub DESTROY {
 	my($self) = @_;
