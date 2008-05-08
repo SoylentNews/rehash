@@ -19,19 +19,44 @@ en_US
 __name__
 printCommentsMain
 __template__
-[% USE Slash %]
+[% horiz = 0; rooted = 0;
+   IF gSkin.name == 'idle' || user.lowbandwidth;
+   	horiz = 1;
+   ELSIF user.comments_control;
+   	rooted = 1 IF user.comments_control == 'rooted';
+   	horiz = 1 IF rooted || user.comments_control == 'horizontal';
+   ELSE;
+   	horiz = 1 IF constants.comments_control_horizontal;
+   END;
+   count = 0 UNLESS count;
+   discussion2 = Slash.discussion2();
+   this_title = title;
+   spilltext = "Spill at <b>${user.commentspill}</b>!";
+   fineprint = 'The following comments are owned by whoever posted them.  We are not responsible for them in any way.';
+   modpoints = BLOCK %]
+	| <b>[% user.points %]</b>
+	<a href="[% gSkin.rootdir %]/moderation.shtml">
+	moderator</a>
+	point[% user.points == 1 ? '' : 's' %] &nbsp; 
+[% END %]
 
-<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="2">
-
-	<TR><TD BGCOLOR="[% user.bg.3 %]" ALIGN="CENTER">
-		<FONT SIZE="2" COLOR="[% user.fg.3 %]">
-[% IF title %]
-		<A HREF="[% link %]"><FONT COLOR="[% user.fg.3 %]">[% title %]</FONT></A>
+<a name="acomments"></a>
+<div class="commentwrap" id="commentwrap">
+[% IF discussion2; IF !user.state.d2asp %]
+<div class="commentBox" style="font-size: 120%">
+	<div>
+[% IF this_title %]<span class="escape-link"><a href="[% link | strip_urlattr %]" title="Back to Article - [% this_title | strip_attribute %]">[% this_title %]</a></span>[% END %]
+<span class="commentBoxLinks">[% PROCESS printCommentsLinks commentslinks_id => 'd' %]</span>
+	</div>
+</div>
+[% END; ELSE %]
+<div class="commentBox">
+[% IF this_title %]
+	<a href="[% link | strip_urlattr %]">[% this_title %]</a>
 [% ELSE %]
 	[% Slash.linkComment({
 		sid	=> sid,
 		pid	=> pid,
-		color	=> user.fg.3,
 		subject	=> 'Top',
 		subject_only => 1,
 	}) %]
@@ -40,54 +65,32 @@ __template__
 	|
 
 [% IF user.is_anon %]
-		<A HREF="[% constants.rootdir %]/users.pl">
-			<FONT COLOR="[% user.fg.3 %]">Log in/Create an Account</FONT>
-		</A>
+	<a href="[% gSkin.rootdir %]/users.pl">Log In/Create an Account</a>
 [% ELSE %]
-		<A HREF="[% constants.rootdir %]/my/comments/">
-			<FONT COLOR="[% user.fg.3 %]">Preferences</FONT>
-		</A>
+		<a href="[% gSkin.rootdir %]/my/comments">Preferences</a>
 [% END %]
-
+[% IF sid %]
 		| [% Slash.linkComment({
 			sid	=> sid,
 			pid	=> 0,
-			color	=> user.fg.3,
 			subject	=> 'Top',
 			subject_only => 1,
-		}) %]
+		}); END %]
 
-[% IF user.points %]
-		| <B>[% user.points %]</B>
-		<A HREF="[% constants.rootdir %]/moderation.shtml">
-		<FONT COLOR="[% user.fg.3 %]">moderator</FONT></A>
-		point[% user.points == 1 ? '' : 's' %]
+[% IF user.points; modpoints; END %]
+[% IF count %]| <b>[% count %]</b> comments[% END %]
+[% IF lvl && user.mode == 'thread' %]([% spilltext %]) | Index Only[% END %]
+[% IF sid && form.startat %]| Starting at #[% form.startat %][% END %]
+		| <a href="[% gSkin.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">Search Discussion</a>
+</div>
 [% END %]
-
-[% IF count %]
-		| <B>[% count %]</B> comments
-[% END %]
-
-[% IF lvl && user.mode == 'thread' %]
-		(Spill at <B>[% user.commentspill %]</B>!) | Index Only
-[% END %]
-
-[% IF form.startat %]
-		| Starting at #[% form.startat %]
-[% END %]
-
-		| <A HREF="[% constants.rootdir %]/search.pl?op=comments&amp;sid=[% sid %]">
-<FONT COLOR="[% user.fg.3 %]">Search Discussion</FONT></A></FONT>
-	</TD></TR>
-
-	<TR><TD BGCOLOR="[% user.bg.2 %]" ALIGN="CENTER">
-		<FORM ACTION="[% constants.rootdir %]/comments.pl">
-		<FONT SIZE="2">
-		<INPUT TYPE="HIDDEN" NAME="sid" VALUE="[% sid %]">
-		<INPUT TYPE="HIDDEN" NAME="cid" VALUE="[% cid %]">
-		<INPUT TYPE="HIDDEN" NAME="pid" VALUE="[% pid %]">
-		<INPUT TYPE="HIDDEN" NAME="startat" VALUE="[% form.startat %]">
-
+	<div class="commentBoxForm" id="commentControlBox">
+[% UNLESS discussion2 %]
+		<form action="[% gSkin.rootdir %]/comments.pl">
+		[% IF user.state.no_d2 %]<input type="hidden" name="no_d2" value="1">[% END %]
+		<fieldset>
+		<legend>Display Options</legend>
+		
 		Threshold: [%
 			Slash.selectThreshold(comments.0.totals);
 			IF user.mode != 'parents' && user.mode != 'child';
@@ -96,25 +99,144 @@ __template__
 			Slash.selectSortcode(user.commentsort) %]
 
 	[% UNLESS user.is_anon %]
-		Save:<INPUT TYPE="CHECKBOX" NAME="savechanges">
-	[% END %]
-
-		<INPUT TYPE="submit" NAME="op" VALUE="Change">
+		Save: <input type="checkbox" name="savechanges" class="button">
+	[%- END %]
+		<input type="submit" name="op" value="Change" class="button">
+		<input type="hidden" name="sid" value="[% sid %]">
+		[% IF cid %]<input type="hidden" name="cid" value="[% cid %]">[% END %]
+		[% IF pid %]<input type="hidden" name="pid" value="[% pid %]">[% END %]
+		[% IF form.startat %]<input type="hidden" name="startat" value="[% form.startat %]">[% END %]
 		[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
-			<INPUT TYPE="submit" NAME="op" VALUE="Reply">
+			<input type="submit" name="op" value="Reply" class="button">
 		[% END %]
-		</FONT>
-		</FORM>
-	</TD></TR>
-	<TR><TD BGCOLOR="[% user.bg.3 %]" ALIGN="CENTER">
-		<FONT COLOR="[% user.fg.3 %]" SIZE="1">
-<B>The Fine Print:</B>
-The following comments are owned by whoever posted them.
-We are not responsible for them in any way.
-</FONT></TD></TR>
 
-[% IF user.mode == 'nocomment' %]
-		</TABLE>
+		</fieldset>
+		</form>
+[% END %]<div></div>
+	<div class="commentBox">
+		<small>
+		<b>The Fine Print:</b> [% fineprint %]
+		</small>
+[% IF !user.state.no_d2 %]<noscript><br><small>Without JavaScript enabled, you might want to
+[% IF user.is_anon %]use [% Slash.linkComment({
+	sid	=> sid,
+	pid	=> pid,
+	subject	=> 'the classic discussion system',
+	subject_only => 1,
+	no_d2   => 1
+}) %] instead.  If you <a href="[% gSkin.rootdir %]/login.pl">login</a>, you can remember this preference.
+[% ELSE %]<a href="[% gSkin.rootdir %]/users.pl?op=editcomm">turn on Classic Discussion System in your preferences</a> instead.
+[% END %]</small></noscript>[% END %]
+	</div>
+	</div>
+	[% IF discussion2 %]
+		<div id="d2out" class="[% IF horiz %]horizontal[% IF rooted %] rooted[% END %][% ELSE %]vertical[% END %]">
+		<div id="d2act" class="hide">
+		<div class="loki" id="gods">
+		<div class="block">
+			<div class="title">
+[% # this DOES NOT WORK.  we need logic for getting "fh_item." and for the pop color -- pudge %]
+[% IF user.state.d2asp -%]<span class="soda pop[% fh_item.pop || 0 %]"></span>
+<span id="updown-[% fh_item.id %]" class="vote[% IF vote == "down" %]ddown[% ELSIF vote == "up" %]dup[% END %]">
+  <a href="#" onclick="firehose_up_down('[% fh_item.id %]','+'); return false" class="up" title="Vote this item up"
+     [% IF !user.is_anon %]onMouseDown="show_nod_menu(this, '[% fh_item.id %]')" onMouseOver="show_nod_menu(this, '[% fh_item.id %]', 1200, 5200)" onMouseOut="dont_show_nodnix_menu()"[% END %]>+</a>
+  <a href="#" onclick="firehose_up_down('[% fh_item.id %]','-'); return false" class="down" title="Vote this item down"
+     [% IF !user.is_anon %]onMouseDown="show_nix_menu(this, '[% fh_item.id %]')" onMouseOver="show_nix_menu(this, '[% item.id %]', 1200, 5200)" onMouseOut="dont_show_nodnix_menu()"[% END %]>-</a>
+</span>[% END %]
+				<h4>
+				[% IF this_title %]
+					<span class="h-inline">[% IF user.state.d2asp -%]
+					<a href="[% constants.rootdir %]/" title="[% constants.sitename | strip_attribute %]">[% constants.sitename %]</a>:[% END %]
+					<a href="[% link | strip_urlattr %]" title="Back to Article - [% this_title | strip_attribute %]">[% this_title %]</a></span>
+					<span class="titlecount"><a href="[% link | strip_urlattr %]#topcomment" title="Back to Top Comment - [% this_title | strip_attribute %]"><span id="titlecountnum">[% count %]</span>&nbsp;Comment[% count == 1 ? '' : 's' %]</a></span>
+				[% ELSE %] 
+					[% Slash.linkComment({
+						sid	=> sid,
+						pid	=> pid,
+						subject	=> 'Comments',
+						subject_only => 1,
+				}) %]
+				[% END %]
+		<span class="ccw-header-links">[% PROCESS printCommentsLinks commentslinks_id => 'b' %]</span>
+		<span id="d2toggle" title="Toggle window location" onclick="toggleDisplayOptions()" class="close">/</span>
+				</h4>
+			</div>
+		</div>
+<script type="text/javascript">
+gCommentControlWidget = null;
+
+YAHOO.slashdot.ThresholdApp = function() {
+  return {
+    init: function() {
+      gCommentControlWidget = new YAHOO.slashdot.ThresholdWidget([% "'X'" IF horiz %]);
+      gCommentControlWidget.setTHT(user_threshold, user_highlightthresh);
+      updateTotals();
+    }
+  };
+}();
+
+YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.ThresholdApp.init);
+</script>
+		<div id="bones">
+      <div id="ccw">
+        <div id="ccw-body" class="ccw-core">
+          <div id="ccw-panel-container" class="ccw-core">
+            <div id="ccw-full-panel" class="ccw-panel">
+              <div class="ccw-panel-border"></div>
+              <div id="ccw-full-count-pos" class="ccw-core-pos ccw-count-pos">
+                <span id="ccw-full-count-text" class="ccw-count-text"><span id="currentFull"></span><span id="ccw-full-phrase">&nbsp;Full</span></span>
+              </div>
+            </div>
+            <div id="ccw-abbr-panel" class="ccw-panel">
+              <div class="ccw-panel-border"></div>
+              <div id="ccw-abbr-count-pos" class="ccw-core-pos ccw-count-pos">
+                <span id="ccw-abbr-count-text" class="ccw-count-text"><span id="currentOneline"></span><span id="ccw-abbr-phrase">&nbsp;Abbreviated</span></span>
+              </div>
+            </div>
+            <div id="ccw-hide-panel" class="ccw-panel">
+              <div id="ccw-hide-count-pos" class="ccw-core-pos ccw-count-pos">
+                <span id="ccw-hide-count-text" class="ccw-count-text"><span id="currentHidden"></span><span id="ccw-hide-phrase">&nbsp;Hidden</span></span>
+              </div>
+            </div>
+          </div>
+    
+          <div id="ccw-control" class="ccw-core">
+            <div id="ccw-centering-rail" class="ccw-core">
+              <div id="ccw-hide-bar-pos" class="ccw-core-pos">
+                <div id="ccw-hide-bar" class="ccw-bar">
+                  <div id="ccw-hide-bar-tab" class="ccw-bar-tab"></div>
+                  <div id="ccw-hide-bar-upzone" class="ccw-upzone" onclick="gCommentControlWidget.stepTHT(HIDE_BAR, +1)"></div>
+                  <div id="ccw-hide-bar-downzone" class="ccw-downzone" onclick="gCommentControlWidget.stepTHT(HIDE_BAR, -1)"></div>
+                </div>
+              </div>
+              <div id="ccw-abbr-bar-pos" class="ccw-core-pos">
+                <div id="ccw-abbr-bar" class="ccw-bar">
+                  <div id="ccw-abbr-bar-tab" class="ccw-bar-tab"></div>
+                  <div id="ccw-abbr-bar-upzone" class="ccw-upzone" onclick="gCommentControlWidget.stepTHT(ABBR_BAR, +1)"></div>
+                  <div id="ccw-abbr-bar-downzone" class="ccw-downzone" onclick="gCommentControlWidget.stepTHT(ABBR_BAR, -1)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+		</div>
+		<div class="commentControlFooter">[% 
+			PROCESS printCommentsLinks commentslinks_id => 'c';
+			IF user.is_anon;  # XXX no sid?
+			   	PROCESS userlogin_cover return_url = gSkin.rootdir _ '/comments.pl?sid=' _ sid;
+   			END;
+		%]</div>
+		<div id="commentControlBoxStatus" class="hide"><b>Loading... please wait.</b></div>
+	</div>
+</div>
+		</div>
+	[% END %]
+</div>
+<a name="topcomment"></a>
+[% IF user.state.d2asp %]
+<div style="text-align:center; margin-top: 1.5em; margin-bottom: -1.5em;">
+<iframe src="http://slashdot.org/images/iframe/idle.html" height="110" width="740" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe></div>
 [% END %]
 
 __seclev__
