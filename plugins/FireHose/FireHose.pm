@@ -1083,7 +1083,7 @@ sub genSetOptionsReturn {
 	$data->{html}->{fhoptions} = slashDisplay("firehose_options", { nowrapper => 1, options => $opts }, { Return => 1});
 	$data->{html}->{fhadvprefpane} = slashDisplay("fhadvprefpane", { options => $opts }, { Return => 1});
 
-	$data->{values}->{'firehose-filter'} = $opts->{fhfilter};
+	$data->{value}->{'firehose-filter'} = $opts->{fhfilter};
 	if ($form->{tab} || $form->{tabtype}) {
 		$data->{eval_last} = "firehose_slider_set_color('$opts->{color}')";
 	}
