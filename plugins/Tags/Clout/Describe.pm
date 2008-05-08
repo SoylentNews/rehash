@@ -16,7 +16,7 @@ sub init {
 	# for each matching tag.  E.g. if $cumfrac is 0.5, the first match may
 	# propagate up to 50% of the weight, the second another 25%, the
 	# third another 12.5% etc.
-	$self->{cumfrac} = 0.5;
+	$self->{cumfrac} = 0.6;
 	my $constants = getCurrentStatic();
 	$self->{debug_uids} = { map { ($_, 1) } split / /,
 		($constants->{tags_updateclouts_debuguids} || '')

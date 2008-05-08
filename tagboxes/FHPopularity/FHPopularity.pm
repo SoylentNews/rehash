@@ -3,6 +3,8 @@
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 
+# This tagbox is outdated, superceded by FireHoseScores
+
 package Slash::Tagbox::FHPopularity;
 
 =head1 NAME

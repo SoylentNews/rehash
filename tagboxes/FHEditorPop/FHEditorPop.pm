@@ -207,8 +207,9 @@ sub run {
 		my $seclev = exists $admins->{ $tag_hr->{uid} }
 			? $admins->{ $tag_hr->{uid} }{seclev}
 			: 1;
-		my $editor_mult = $seclev >= 100 ? ($constants->{tagbox_fheditorpop_edmult} || 10) : 1;
-		my $extra_pop = $tag_hr->{total_clout} * $editor_mult * $sign;
+		my $editor_mult    = $seclev >= 100 ? ($constants->{tagbox_fheditorpop_edmult}    || 10   ) : 1;
+		my $noneditor_mult = $seclev ==   1 ? ($constants->{tagbox_fheditorpop_nonedmult} ||  0.75) : 1;
+		my $extra_pop = $tag_hr->{total_clout} * $editor_mult * $noneditor_mult * $sign;
 		my $udc_mult = get_udc_mult($tag_hr->{created_at_ut}, $udc_cache);
 #main::tagboxLog(sprintf("extra_pop for %d: %.6f * %.6f", $tag_hr->{tagid}, $extra_pop, $udc_mult));
 		$extra_pop *= $udc_mult;
@@ -243,6 +244,20 @@ sub run {
 			? $constants->{firehose_spam_score}
 			: -50;
 		$popularity = $max if $popularity > $max;
+	}
+
+	# If this is a comment item that's been nodded/nixed by an editor,
+	# its score goes way down (so no other editors have to bother with it).
+	if ($fhitem->{type} eq 'comment') {
+		for my $tag_hr (@$tags_ar) {
+			if ( (     $tag_hr->{tagnameid} != $upvoteid
+				|| $tag_hr->{tagnameid} == $downvoteid )
+			    && $admins->{ $tag_hr->{uid} }
+			) {
+				$popularity = -50 if $popularity > -50;
+				last;
+			}
+		}
 	}
 
 	# Set the corresponding firehose row to have this popularity.
@@ -295,7 +310,7 @@ sub get_udc_mult {
 		$udc = $constants->{tagbox_fheditorpop_udcbasis};
 	}
 	my $udc_mult = $constants->{tagbox_fheditorpop_udcbasis}/$udc;
-	my $max_mult = $constants->{tagbox_fhpopularity2_maxudcmult} || 5;
+	my $max_mult = $constants->{tagbox_fheditorpop_maxudcmult} || 5;
 	$udc_mult = $max_mult if $udc_mult > $max_mult;
 #	main::tagboxLog(sprintf("get_udc_mult %0.3f time %d p %.3f c %.3f n %.3f th %.3f pw %.3f cw %.3f nw %.3f udc %.3f\n",
 #		$udc_mult, $time, $prevudc, $curudc, $nextudc, $thru_frac, $prevweight, $curweight, $nextweight, $udc));

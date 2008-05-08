@@ -202,6 +202,16 @@ sub run {
 		}
 	}
 
+	# Also, admins may get reduced upvote clout.
+	if ($constants->{firehose_adminupclout} && $constants->{firehose_adminupclout} != 1) {
+		my $admins = $tagsdb->getAdmins();
+		for my $tag_hr (@$tags_ar) {
+			$tag_hr->{total_clout} *= $constants->{firehose_adminupclout}
+				if    $tag_hr->{tagnameid} == $upvoteid
+				   && $admins->{ $tag_hr->{uid} };
+		}
+	}
+
 	# Early in a globj's lifetime, if there have been few votes,
 	# upvotes count for more, and downvotes for less.
 	my($up_mult, $down_mult) = (1, 1);
