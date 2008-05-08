@@ -1062,6 +1062,7 @@ sub printComments {
 		cid		=> $cid,
 		pid		=> $pid,
 		lvl		=> $lvl,
+		options		=> $options,
 	});
 #slashProf("", "printCommentsMain");
 
