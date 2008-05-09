@@ -5320,3 +5320,15 @@ INSERT INTO vars (name, value, description) VALUES ('firehose_adminupclout', '0.
 # for tagboxes/FHEditorPop
 UPDATE vars SET name='tagbox_fheditorpop_maxudcmult' WHERE name='tagbox_fhpopularity2_maxudcmult';
 
+
+CREATE TABLE comment_promote_log (
+	id int unsigned NOT NULL auto_increment,
+	cid int unsigned NOT NULL default '0',
+	ts datetime NOT NULL default '1970-01-01 00:00:00',
+	PRIMARY KEY  (id),
+	KEY cid (cid)
+) ENGINE=InnoDB; 
+
+
+# For plugins/Firehose
+ALTER TABLE firehose CHANGE COLUMN srcid srcid int UNSIGNED NOT NULL DEFAULT '0'; 

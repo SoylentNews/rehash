@@ -19,7 +19,7 @@ CREATE TABLE firehose (
 	is_spam enum('no', 'yes') default 'no',
 	primaryskid smallint(5) default '0',
 	tid smallint(6) default '0',
-	srcid mediumint(8) unsigned NOT NULL default '0',
+	srcid int(8) unsigned NOT NULL default '0',
 	url_id mediumint(8) unsigned NOT NULL default '0',
 	toptags varchar(255) default '',
 	email varchar(255) NOT NULL default '',

@@ -319,6 +319,21 @@ CREATE TABLE comment_log (
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
 
+#
+# Table structure for table 'comment_promote_log'
+#
+DROP TABLE IF EXISTS comment_promote_log;
+
+CREATE TABLE comment_promote_log (
+	id int unsigned NOT NULL auto_increment,
+	cid int unsigned NOT NULL default '0',
+	ts datetime NOT NULL default '1970-01-01 00:00:00',
+	PRIMARY KEY  (id),
+	KEY cid (cid)
+) ENGINE=InnoDB; 
+
+
+
 
 #
 # Table structure for table 'comment_text'
