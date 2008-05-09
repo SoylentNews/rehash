@@ -1114,7 +1114,7 @@ function previewReply(pid) {
 	});
 }
 
-function replyTo(pid) {
+function replyTo(pid, nofocus) {
 	var replydiv = $dom('replyto_' + pid);
 	if (!replydiv)
 		return false; // seems we shouldn't be here ...
@@ -1144,7 +1144,8 @@ function replyTo(pid) {
 					reply_link.innerHTML = '<p><b><a href="#" onclick="cancelReply(' + pid + '); return false;">Cancel Reply</a></b></p>';
 				}
 			}
-			$dom('postercomment_' + pid).focus();
+			if (!nofocus)
+				$dom('postercomment_' + pid).focus();
 		}
 	};
 

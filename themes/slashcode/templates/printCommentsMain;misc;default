@@ -28,7 +28,7 @@ __template__
    ELSE;
    	horiz = 1 IF constants.comments_control_horizontal;
    END;
-   count = 0 UNLESS count;
+   count = count || 0;
    discussion2 = Slash.discussion2();
    this_title = title;
    spilltext = "Spill at <b>${user.commentspill}</b>!";
@@ -136,13 +136,13 @@ __template__
 		<div class="block">
 			<div class="title">
 [% IF user.state.d2asp -%]<span class="soda pop[% options.fh_item.popval || 0 %]"></span>
-<a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% options.fh_item.id %]"><span id="updown-[% options.fh_item.id %]" class="vote[% IF vote == "down" %]ddown[% ELSIF vote == "up" %]dup[% END %]">
+<a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% options.fh_item.id %]"><span id="updown-[% options.fh_item.id %]" class="vote[% IF vote == "down" %]ddown[% ELSIF vote == "up" %]dup[% END %]" style="top: 0.3em">
 <span class="up">+</span><span class="down">-</span>
 </span></a>[% END %]
 				<h4>
 				[% IF this_title %]
 					<span class="h-inline">[% IF user.state.d2asp -%]
-					<a href="[% constants.rootdir %]/" title="[% constants.sitename | strip_attribute %]">[% constants.sitename %]</a>:[% END %]
+					<a href="[% constants.rootdir %]/" title="[% constants.sitename | strip_attribute %]" style="margin-left:4em">[% constants.sitename %]</a>:[% END %]
 					<a href="[% link | strip_urlattr %]" title="Back to Article - [% this_title | strip_attribute %]">[% this_title %]</a></span>
 					<span class="titlecount"><a href="[% link | strip_urlattr %]#topcomment" title="Back to Top Comment - [% this_title | strip_attribute %]"><span id="titlecountnum">[% count %]</span>&nbsp;Comment[% count == 1 ? '' : 's' %]</a></span>
 				[% ELSE %] 

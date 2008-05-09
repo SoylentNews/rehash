@@ -164,6 +164,13 @@ __template__
 		init_hiddens         = [[% user.state.comments.hiddens.join(',') %]];
 
 		finishLoading();
+
+[% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
+		if (thresh_totals[6][6][1] == 0) {
+			replyTo(0, 1);
+		}
+[% END %]
+
 //-->
 	</script>
 [% END %]
