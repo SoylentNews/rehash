@@ -5332,3 +5332,4 @@ CREATE TABLE comment_promote_log (
 # For plugins/Firehose
 ALTER TABLE firehose CHANGE COLUMN srcid srcid int UNSIGNED NOT NULL DEFAULT '0'; 
 
+ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment", "discussion") default 'submission';
