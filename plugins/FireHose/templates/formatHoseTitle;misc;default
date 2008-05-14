@@ -43,7 +43,14 @@ END;
 
 title = item.title;
 IF item.type == "comment";
-	title = "Comment: " _ item.title;
+	com = Slash.db.getComment(item.srcid);
+	score = com.points + com.tweak;
+	score = Slash.constrain_score(score);
+	reason = "";
+	IF com.reason;
+		reason = ", " _ constants.reasons.${com.reason}.name;
+	END;
+	title = "Comment: " _ item.title _ " (Score " _ score _ reason _ ")";
 END;
 onclick = "onclick=\"toggle_firehose_body('$item.id', $adminmode); return false\"";
 title_href="$gSkin.rootdir/firehose.pl?op=view&amp;id=$item.id";

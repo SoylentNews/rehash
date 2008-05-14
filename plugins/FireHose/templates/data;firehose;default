@@ -32,7 +32,7 @@ __template__
 		Bookmark
 	[% ELSIF item.type == "feed" %]
 		From feed
-	[% ELSE %]
+	[% ELSIF item.type != "comment" %]
 		Submitted
 	[% END %]
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
@@ -64,10 +64,6 @@ __template__
 		[% IF item.type == "story" %]
 			[% story = Slash.db.getStory(item.srcid) %]
 			[% IF story && story.fhid %]<a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% story.fhid %]">Original Submission</a>[% END %]
-		[% ELSIF item.type == "comment";
-			com = Slash.db.getComment(item.srcid);
-			disc = Slash.db.getDiscussion(com.sid); %]
-			<br>From discussion: <a href="[% disc.url %]">[% disc.title | strip_literal %]</a><br>
 		[% ELSIF item.stoid;
 			to_story = Slash.db.getStory(item.stoid) %]
 			<a href="[% gSkin.rootdir %]/article.pl?sid=[% to_story.sid | strip_attribute %]">Posted as Story</a>
@@ -76,7 +72,16 @@ __template__
 	[% IF extras && adminmode && num_with_ipid != '0' %]
 		([% accepted_from_ipid %]/[% num_with_ipid %])
 	[% END %]
-	[% user.aton %] <span id="fhtime-[% item.id %]">[% Slash.timeCalc(item.createtime) %]</span></b><br>
+	[% user.aton %] <span id="fhtime-[% item.id %]">[% Slash.timeCalc(item.createtime) %]</span></b>
+	[% IF item.type == "comment" %]
+		(<a href="[% gSkin.rootdir %]/comments.pl?sid=[% item.discussion %]&amp;cid=[% item.srcid %]">#[% item.srcid %]</a>)
+	[% END %]
+	<br>
+	[% IF item.type == "comment";
+		com = Slash.db.getComment(item.srcid);
+		disc = Slash.db.getDiscussion(com.sid); %]
+		Attached to: <a href="[% disc.url %]">[% disc.title | strip_literal %]</a><br>
+	[% END %]
 		[% IF constants.use_dept && item.dept %]<strong>from the <b>[% item.dept %]</b> dept.</strong>[% END %]
 	[% IF !hidediv %]
 
