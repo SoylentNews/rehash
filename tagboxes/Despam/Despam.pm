@@ -307,6 +307,10 @@ sub run {
 				main::tagboxLog(sprintf("%s->run force recalc tbid=%d globjid=%d",
 					ref($self), $tbid, $globjid));
 			}
+			# Add this change to the daily stats.
+			my $statsSave = getObject('Slash::Stats::Writer');
+			$statsSave->addStatDaily('firehose_binspam_despam',
+				$is_spam ? '+1' : '-1');
 		}
 	}
 

@@ -942,9 +942,11 @@ EOT
 	}
 
 	if ($firehose && $tags) {
-		my($binspam_tag_count, $is_spam_new_count) = $stats->tallyBinspam();
-		$data{binspam_tag_count} = $binspam_tag_count;
+		my($binspam_globj_count, $is_spam_new_count, $autodetected_count)
+			= $stats->tallyBinspam();
+		$data{binspam_globj_count} = $binspam_globj_count;
 		$data{is_spam_new_count} = $is_spam_new_count;
+		$data{is_spam_autodetected_count} = $autodetected_count;
 	}
 
 	if ($tags) {

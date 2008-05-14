@@ -229,9 +229,10 @@ Firehose Report
 [% firehose_report %]
 [% END %]
 
-[% IF is_spam_new_count %]
+[% IF is_spam_new_count.defined %]
 Yesterday's admin binspam tags: [% binspam_tag_count %]
 Yesterday's hose item is_spams: [% is_spam_new_count %]
+Yesterday's Despam autodetects: [% is_spam_autodetected_count %]
 [% END %]
 
 [% IF tags_report %]

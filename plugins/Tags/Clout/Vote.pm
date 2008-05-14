@@ -172,8 +172,8 @@ sub process_nextgen {
 				($user_nodnixes_full+1-$user_nodnixes_min);
 		}
 		if ($self->{debug_uids}{$newtag_uid}) {
-			print STDERR sprintf("%s tags_updateclouts %s process_nextgen starting uid=%d user_nodnixes_mult=%.6f\n",
-				scalar(gmtime), ref($self), $newtag_uid, $user_nodnixes_mult);
+			print STDERR sprintf("%s tags_updateclouts %s process_nextgen starting uid=%d user_nodnixes_count=%d _mult=%.6f\n",
+				scalar(gmtime), ref($self), $newtag_uid, $user_nodnixes_count, $user_nodnixes_mult);
 			++$self->{debug};
 		}
 
@@ -256,6 +256,10 @@ sub count_uid_nodnix {
 		for my $uid (@uid_chunk) {
 			$self->{nodc}{$uid} = $nod_hr->{$uid} || 0;
 			$self->{nixc}{$uid} = $nix_hr->{$uid} || 0;
+			if ($self->{debug_uids}{$uid}) {
+				print STDERR sprintf("%s tags_updateclouts %s count_uid_nodnix uid=%d nod=%s nix=%s\n",
+					scalar(gmtime), ref($self), $uid, $self->{nodc}{$uid}, $self->{nixc}{$uid});
+			}
 		}
 		sleep 1 if @uids_needed;
 	}
