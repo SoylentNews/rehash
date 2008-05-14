@@ -134,8 +134,22 @@ sub createItemFromComment {
 	my($self, $cid) = @_;
 	my $comment = $self->getComment($cid);
 	my $text = $self->getCommentText($cid);
-	my $popularity = $self->getEntryPopularityForColorLevel(7);
 	my $globjid = $self->getGlobjidCreate("comments", $cid);
+	my $score = constrain_score($comment->{points} + $comment->{tweak} >= 3);
+
+	my($popularity, $editorpop);
+	$editorpop = $self->getEntryPopularityForColorLevel(4);
+
+	if ($score >= 3) {
+		$popularity = $self->getEntryPopularityForColorLevel(4);
+	} elsif ($score == 2) {
+		$popularity = $self->getEntryPopularityForColorLevel(5);
+	} elsif ($score >= 0) {
+		$popularity = $self->getEntryPopularityForColorLevel(6);
+	} else {
+		$popularity = $self->getEntryPopularityForColorLevel(7);
+	}
+
 	my $data = {
 		uid		=> $comment->{uid},
 		public		=> "yes",
@@ -146,9 +160,9 @@ sub createItemFromComment {
 		type		=> "comment",
 		srcid		=> $comment->{cid},
 		popularity	=> $popularity,
-		editorpop	=> $popularity,
+		editorpop	=> $editorpop,
 		globjid		=> $globjid,
-		#XXX discussion?
+		discussion	=> $comment->{sid},
 	};
 	$self->createFireHose($data);
 		

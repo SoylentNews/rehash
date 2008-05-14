@@ -299,6 +299,18 @@ sub getStartingColorLevel {
 			# all its nexuses.
 			$color_level = $this_color_level if $this_color_level < $color_level;
 		}
+	} elsif ($type eq "comments") {
+		my $comment = $self->getComment($target_id);
+		my $score = constrain_score($comment->{points} + $comment->{tweak});
+		if ($score >= 3) {
+			$color_level = 4;
+		} elsif ($score == 2) {
+			$color_level = 5
+		} elsif ($score >= 0) {
+			$color_level = 6
+		} else {
+			$color_level = 7;
+		}
 	}
 	return($color_level, $extra_pop);
 }

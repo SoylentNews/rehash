@@ -188,6 +188,8 @@ sub run {
 			# all its nexuses.
 			$color_level = $this_color_level if $this_color_level < $color_level;
 		}
+	} elsif ($type eq "comments") {
+		$color_level = 4;
 	}
 	$popularity = $firehose->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 
