@@ -5321,15 +5321,19 @@ UPDATE vars SET name='tagbox_fheditorpop_maxudcmult' WHERE name='tagbox_fhpopula
 # SLASHDOT LAST UPDATED HERE
 
 CREATE TABLE comment_promote_log (
-	id int unsigned NOT NULL auto_increment,
-	cid int unsigned NOT NULL default '0',
-	ts datetime NOT NULL default '1970-01-01 00:00:00',
-	PRIMARY KEY  (id),
-	KEY cid (cid)
+  id int unsigned NOT NULL auto_increment,
+  cid int unsigned NOT NULL default '0',
+  ts datetime NOT NULL default '1970-01-01 00:00:00',
+  PRIMARY KEY  (id),
+  KEY cid (cid)
 ) ENGINE=InnoDB; 
 
 
 # For plugins/Firehose
 ALTER TABLE firehose CHANGE COLUMN srcid srcid int UNSIGNED NOT NULL DEFAULT '0'; 
 
-ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment", "discussion") default 'submission';
+ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc","comment","discussion") default 'submission';
+
+# 2008-05-15
+UPDATE vars SET value = 'T_2_5_0_205' WHERE name = 'cvs_tag_currentcode';
+

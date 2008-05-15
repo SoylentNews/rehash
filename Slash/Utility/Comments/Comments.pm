@@ -36,7 +36,7 @@ our $VERSION = $Slash::Constants::VERSION;
 our @EXPORT  = qw(
 	constrain_score dispComment displayThread printComments
 	jsSelectComments commentCountThreshold commentThresholds discussion2
-	selectComments preProcessReplyForm
+	selectComments preProcessReplyForm makeCommentBitmap parseCommentBitmap
 	getPoints preProcessComment postProcessComment prevComment saveComment
 );
 
@@ -205,14 +205,9 @@ sub selectComments {
 			}
 		}
 
-		my @seen;
-		my $lastcid = 0;
-		my %check = (%{$options->{existing}}, map { $_->{cid} => 1 } @new_comments);
-		for my $this_cid (sort { $a <=> $b } keys(%check)) {
-			push @seen, $lastcid ? $this_cid - $lastcid : $this_cid;
-			$lastcid = $this_cid;
-		}
-		$comments->{0}{d2_seen} = join ',', @seen;
+		$comments->{0}{d2_seen} = makeCommentBitmap({
+			%{$options->{existing}}, map { $_->{cid} => 1 } @new_comments
+		});
 
 		@new_comments = sort { $a->{cid} <=> $b->{cid} } @new_comments;
 		($oldComment, $thisComment) = ($thisComment, \@new_comments);
@@ -349,18 +344,9 @@ sub selectComments {
 			}
 		}
 
-		# fix d2_seen
-		my @seen;
-		my $lastcid = 0;
-		for my $this_cid (sort { $a <=> $b } @new_seen) {
-			push @seen, $lastcid ? $this_cid - $lastcid : $this_cid;
-			$lastcid = $this_cid;
-		}
-		my @old_seen = split /,/, $comments->{0}{d2_seen};
-		if (@seen && @old_seen) {
-			$old_seen[0] = $old_seen[0] - $lastcid;
-		}
-		$comments->{0}{d2_seen} = join ',', @seen, @old_seen;
+		# fix d2_seen to include new cids ... these will all be after
+		# the last element in seen, which makes this simpler
+		$comments->{0}{d2_seen} = makeCommentBitmap(\@new_seen, $comments->{0}{d2_seen});
 	}
 
 ##slashProf("", "sC d2 fudging");
@@ -572,6 +558,45 @@ sub _get_thread {
 		}
 	}
 	return $newcomments;
+}
+
+sub parseCommentBitmap {
+	my($bitmap) = @_;
+	return {} unless $bitmap;
+	my $lastcid = 0;
+	my %comments;
+	for my $cid (split /,/, $bitmap) {
+		$cid = $lastcid ? $lastcid + $cid : $cid;
+		$comments{$cid} = 1;
+		$lastcid = $cid;
+	}
+	return \%comments;
+}
+
+sub makeCommentBitmap {
+	my($comments, $old) = @_;
+	my $lastcid = 0;
+	my @bitmap;
+	for my $cid (sort { $a <=> $b } ((ref($comments) eq 'HASH')
+			? keys %$comments
+			: @$comments
+		)
+	) {
+		push @bitmap, $lastcid ? $cid - $lastcid : $cid;
+		$lastcid = $cid;
+	}
+
+	my $bitmap = join ',', @bitmap;
+
+	if ($old) {
+		return $old unless $bitmap;
+
+		my @old = split /,/, $old, 2;
+		$old[0] = $old[0] - $lastcid;
+		return join ',', $bitmap, @old;
+	}
+
+	return $bitmap;
 }
 
 
