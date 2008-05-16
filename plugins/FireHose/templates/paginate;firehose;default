@@ -21,7 +21,8 @@ __template__
 [% index_extra = form.index ? "&amp;index=1" : "" %]
 [% idle_submit_plug = "";
    IF gSkin.name == "idle";
-   	idle_submit_plug = '<span class="inactive"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '">Submit Idle Story</a></span>';
+   	idle_submit_plug = '<br style="clear: left">
+		<span class="nbutton" style="margin-left: 1em"><p><b><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '">Submit Idle Story</a></b></p></span>';
    END;
 
 %]
@@ -75,7 +76,6 @@ __template__
 			[% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
 		</span>
 		[% END %]
-		[% idle_submit_plug %]
 [% ELSIF options.startdate && options.duration == 1;
 	day = day || options.startdate;
 	day = day.replace('-','');
@@ -151,5 +151,7 @@ __template__
 </div>
 </div>
 [% END %]
+[% idle_submit_plug %]
+
 __version__
 $Id$
