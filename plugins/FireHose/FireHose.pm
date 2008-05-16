@@ -135,7 +135,7 @@ sub createItemFromComment {
 	my $comment = $self->getComment($cid);
 	my $text = $self->getCommentText($cid);
 	my $globjid = $self->getGlobjidCreate("comments", $cid);
-	my $score = constrain_score($comment->{points} + $comment->{tweak} >= 3);
+	my $score = constrain_score($comment->{points} + $comment->{tweak});
 
 	my($popularity, $editorpop);
 	$editorpop = $self->getEntryPopularityForColorLevel(4);
