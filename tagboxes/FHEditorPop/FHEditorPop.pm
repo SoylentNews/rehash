@@ -252,7 +252,7 @@ sub run {
 	# its score goes way down (so no other editors have to bother with it).
 	if ($fhitem->{type} eq 'comment') {
 		for my $tag_hr (@$tags_ar) {
-			if ( (     $tag_hr->{tagnameid} != $upvoteid
+			if ( (     $tag_hr->{tagnameid} == $upvoteid
 				|| $tag_hr->{tagnameid} == $downvoteid )
 			    && $admins->{ $tag_hr->{uid} }
 			) {
