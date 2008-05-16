@@ -21,6 +21,7 @@ use strict;
 
 use Slash;
 use Slash::DB;
+use Slash::Utility::Comments;
 use Slash::Utility::Environment;
 use Slash::Tagbox;
 
