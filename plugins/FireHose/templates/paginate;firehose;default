@@ -98,8 +98,7 @@ __template__
 			</span>
 		[% END %]
 		
-[%	END %]
-	[% idle_submit_plug %]
+[% END %]
 [% ELSIF options.startdate && options.duration >= 28 && options.duration <= 31;
 	firehose = Slash.getObject("Slash::FireHose");
 	days = firehose.getOlderMonthsFromDay(options.startdate,-2, 2);
@@ -117,15 +116,12 @@ __template__
 		[%
 		END;
 	END;
-	idle_submit_plug;
 %]
 [% ELSIF options.duration == -1  %]
 	<span class="inactive">
 		<a href="[% gSkin.rootdir %]/[% day_page %]?[% f = fh.genFireHoseParams(options, { startdate => '', duration => 7, no_label => "1"}); f; %][% IF form.index %]index=1[% END %]">Today</a>
 	<span class="active">
 		<a href="#">Archive</a> [% Slash.getData('firehose_more_link', firehose_more_data, 'firehose'); %]
-	</span>
-	[% idle_submit_plug %]
 	</span>
 [% ELSE %]
 	[% time_label = "";
