@@ -2414,12 +2414,12 @@ sub getFireHoseTagsTop {
 	if ($constants->{smalldevices_ua_regex}) {
 		my $smalldev_re = qr($constants->{smalldevices_ua_regex});
 		if ($ENV{HTTP_USER_AGENT} =~ $smalldev_re) {
-			$#{@$user_tags_top} = 2;
+			$#$user_tags_top = 2;
 		}
 	}
 
 	if ($form->{embed}) {
-		$#{@$user_tags_top} = 2;
+		$#$user_tags_top = 2;
 	}
 
 	push @$tags_top, @$user_tags_top;
