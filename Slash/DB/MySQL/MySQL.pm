@@ -11,7 +11,7 @@ use Time::Local;
 use Date::Format qw(time2str);
 use Data::Dumper;
 use Slash::Utility;
-use Storable qw(thaw freeze);
+use Storable qw(thaw nfreeze);
 use URI ();
 use Slash::Custom::ParUserAgent;
 use vars qw($_proxy_port);
@@ -1457,7 +1457,7 @@ sub createAccessLogAdmin {
 	# And just what was the admin doing? -Brian
 	$op = $form->{op} if $form->{op};
 	$status ||= $r->status;
-	my $form_freeze = freeze($form);
+	my $form_freeze = nfreeze($form);
 
 	$self->sqlInsert('accesslog_admin', {
 		host_addr	=> $r->connection->remote_ip,
@@ -10320,7 +10320,7 @@ sub setUser {
 		$hashref->{newpasswd_ts} = undef,
 		$hashref->{passwd} = encryptPassword($hashref->{passwd}, $uid);
 	}
-	$hashref->{people} = freeze($hashref->{people}) if $hashref->{people};
+	$hashref->{people} = nfreeze($hashref->{people}) if $hashref->{people};
 	if (exists $hashref->{slashboxes}) {
 		my @slashboxes = grep /^[\w-]+$/, split /,/, $hashref->{slashboxes};
 		$hashref->{slashboxes} = join ",", @slashboxes;

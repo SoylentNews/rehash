@@ -23,7 +23,7 @@ use strict;
 use Slash::DB;
 use Slash::Constants qw(:messages);
 use Slash::Utility;
-use Storable qw(freeze thaw);
+use Storable qw(nfreeze thaw);
 
 use base 'Slash::DB::Utility';	# first for object init stuff, but really
 				# needs to be second!  figure it out. -- pudge
@@ -193,7 +193,7 @@ sub _create {
 	my $prime = $self->{_drop_prime};
 
 	# fix scalar to be a ref for freezing
-	my $frozen = freeze(ref $message ? $message : \$message);
+	my $frozen = nfreeze(ref $message ? $message : \$message);
 	$self->sqlInsert($table, {
 		user	=> $user,
 		fuser	=> $fuser,

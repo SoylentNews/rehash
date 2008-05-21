@@ -108,24 +108,24 @@ __template__
 		<span id="firehose_more">
 		[% END %]
 		[% IF !need_label;
-			label = "Get more &raquo;";
+			label = "more &rsaquo;";
 		   END;
 		%]
 		[% IF day_label && day_count && options.duration != -1;
 			IF need_day_label;
 				label = $day_label _ " ";
 			ELSE;
-				label = label _ day_count _ " more &raquo;";
+				label = label _ day_count _ " more &rsaquo;";
 			END;
 		   ELSIF future_count > 0 ;
 		   	IF options.duration == -1;
-			        label = future_count _ " more &raquo;";
+			        label = future_count _ " more &rsaquo;";
 			ELSE;
-			        label = future_count _ " more &raquo;";
+			        label = future_count _ " more &rsaquo;";
 			END;
 		   ELSIF future_count <= 0 ;
 			IF options.duration != -1 && options.orderby == "createtime";
-				label = "Get more &raquo;";
+				label = "more &rsaquo;";
 				extra_onclick = 'firehose_set_options(\'duration\', -1); ';
 			ELSIF options.orderby != "createtime";
 				fh = Slash.getObject("Slash::FireHose") 
