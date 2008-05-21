@@ -130,6 +130,7 @@ Our optional modules, which are not required for a default install
 and thus not installed by default, but which may become required as
 you edit your site configuration, are: Cache::Memcached Silly::Werder
 GD GD::Text GD::Graph Apache::SSI Apache::RegistryFilter GraphViz
-Net::IRC Proc::ProcessTable Net::Jabber File::Type
+Net::IRC Proc::ProcessTable Net::Jabber File::Type Linux::Pid
+File::Type Apache::SSI String::Similarity
 
 =cut
