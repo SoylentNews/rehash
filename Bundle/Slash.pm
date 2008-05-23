@@ -131,6 +131,8 @@ and thus not installed by default, but which may become required as
 you edit your site configuration, are: Cache::Memcached Silly::Werder
 GD GD::Text GD::Graph Apache::SSI Apache::RegistryFilter GraphViz
 Net::IRC Proc::ProcessTable Net::Jabber File::Type Linux::Pid
-File::Type Apache::SSI String::Similarity
+File::Type Apache::SSI String::Similarity Devel::Size Devel::FindGlobals
+Slash::Client JavaScript::Minifier Template::Plugin::GD Net::Telnet
+Finance::Quote Net::OSCAR
 
 =cut
