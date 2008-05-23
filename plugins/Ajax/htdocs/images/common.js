@@ -627,7 +627,7 @@ function firehose_up_down(id, dir) {
 
 	$('#updown-'+id).setClass(dir=='+' ? 'votedup' : 'voteddown');
 
-	if ( fh_is_admin && (dir == "-" || $('#title-'+id+':contains("Comment:")')) {
+	if ( fh_is_admin && (dir == "-" || $('#title-'+id+':contains("Comment:")')) ) {
 		firehose_collapse_entry(id);
 	}
 }
