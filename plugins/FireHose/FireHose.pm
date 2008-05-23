@@ -423,7 +423,7 @@ sub getFireHoseEssentials {
 	$options->{limit} += $options->{more_num} if $options->{more_num};
 
 	my $fetch_size = $options->{limit};
-	if ($options->{orderby} eq "createtime") {
+	if ($options->{orderby} && $options->{orderby} eq "createtime") {
 		$fetch_extra = 1;
 		$fetch_size++;
 	}
