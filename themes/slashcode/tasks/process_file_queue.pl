@@ -66,7 +66,6 @@ sub handleFileCmd {
 			my $thumbsm = $namebase . "-thumbsm." . $suffix;
 			slashdLog("About to create thumb $path$thumb");
 			system("$convert -size 260x194  $path$name  -resize '130x97>'  -bordercolor transparent  -border 48 -gravity center -crop 130x97+0+0 -page +0+0 $path$thumb");
-			
 			my $data = {
 				stoid => $cmd->{stoid} || 0,
 				fhid  => $cmd->{fhid} || 0 ,
@@ -82,9 +81,7 @@ sub handleFileCmd {
 			}
 
 			slashdLog("About to create thumbsms $path$thumbsm");
-			
 			system("$convert -size 100x74 $path$name  -resize '50x37>'  -bordercolor transparent -border 18 -gravity center -crop 50x37+0+0 -page +0+0 $path$thumbsm");
-			
 			$data = {
 				stoid => $cmd->{stoid} || 0,
 				fhid  => $cmd->{fhid} || 0,
