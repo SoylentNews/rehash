@@ -897,6 +897,7 @@ INSERT INTO vars (name, value, description) VALUES ('http_proxy','','http://prox
 INSERT INTO vars (name, value, description) VALUES ('id_md5_vislength','5','Num chars to display for ipid/subnetid (0 for all)');
 INSERT INTO vars (name, value, description) VALUES ('ignore_uid_date_index', '1', 'Ignore uid_date index on comments where it may slow performance');
 INSERT INTO vars (name, value, description) VALUES ('imagedir','//www.example.com/images','Absolute URL for image directory');
+INSERT INTO vars (name, value, description) VALUES ('imagemagick_convert', '/usr/bin/convert', 'Location of imagemagick convert for thumbnail generation');
 INSERT INTO vars (name, value, description) VALUES ('index_gse_backup_prob','0','Probability that index.pl getStoriesEssentials will look to backup_db_user instead of the main db: 0=never, 1=always');
 INSERT INTO vars (name, value, description) VALUES ('index_handler','index.pl','The perl servlet to call for connections to the root of the server.');
 INSERT INTO vars (name, value, description) VALUES ('index_handler_noanon','home','The shtml page to call if a user is anon and index_noanon is set');
