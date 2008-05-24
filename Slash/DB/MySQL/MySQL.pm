@@ -8749,7 +8749,7 @@ sub getStoidFromSidOrStoid {
 sub getStoidFromSid {
 	my($self, $sid) = @_;
 	return undef if !$sid;
-	return undef if $sid !~ regexSid();
+	return undef if $sid !~ regexSid(1);
 	if (my $stoid = $self->{_sid_conversion_cache}{$sid}) {
 		return $stoid;
 	}
