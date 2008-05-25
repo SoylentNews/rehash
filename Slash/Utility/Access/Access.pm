@@ -461,7 +461,11 @@ sub filterOk {
 		if ($minimum_match) {
 			$number_match = "{$minimum_match,}";
 		} elsif ($ratio > 0) {
-			$number_match = "{" . int(length($text_to_test)*$ratio + 1) . ",}";
+			my $num = int(length($text_to_test)*$ratio + 1);
+			my $max = 2**15-1;
+			# temporary fix 2008-05-23
+			$num = $max if $num >= $max;
+			$number_match = "{$num,}";
 		} else {
 			$number_match = "";
 		}
