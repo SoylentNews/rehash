@@ -103,7 +103,7 @@ sub abortIfSuspiciousCaller() {
 		my($package, $filename, $line, $subroutine) = @c;
 		# If we go back up the call chain to a package we know we can
 		# trust, then we can stop looking.
-		last if $package =~ /^(main|Apache::PerlRun|Apache::ROOT::.*)$/;
+		last if $package =~ /^(main|Apache::PerlRun|Apache::ROOT.*)$/;
 		if ($package =~ /^Template/ || $subroutine eq '(eval)') {
 			# This exits the entire script immediately.
 			confess(scalar(gmtime) . " $$ SuspiciousCaller for salt at package '$package'");
