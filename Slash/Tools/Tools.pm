@@ -21,7 +21,12 @@ our @EXPORT = qw(
 	pmpath pathpm pmpathsrc counterpart srcfile installfile basefile
 	basefile basename dirname
 	syntax_check %CONFIG
+	@BIN_EXT $BIN_EXT $BIN_RE
 );
+
+our @BIN_EXT = qw(gz tgz bz2 gif jpg png ico);
+our $BIN_EXT = join '|', @BIN_EXT;
+our $BIN_RE  = qr/\.(?:$BIN_EXT)$/;
 
 my(%cache);
 # if cache gets stale, you can use force => 0, or heck, just
@@ -323,6 +328,31 @@ sub diff {
 		carp "$src_file or $install_file does not exist";
 	}
 }
+
+
+package Slash::Tools::Mac;
+
+sub new {
+	require MacPerl;
+	shift;
+	my $self = bless { @_ }, __PACKAGE__;
+	$self->{creator} ||= 'R*ch';
+	$self;
+}
+
+sub set_type {
+	my $self = shift;
+	return unless $self->{creator};
+
+	my($file) = @_;
+	return if $file =~ $BIN_RE;
+
+	my($creator, $type) = MacPerl::GetFileInfo($file);
+	return if $creator && $type && $creator eq $self->{creator} && $type eq 'TEXT';
+
+	MacPerl::SetFileInfo($self->{creator}, 'TEXT', $file);
+}
+
 
 1;
 

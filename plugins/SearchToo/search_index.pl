@@ -104,12 +104,12 @@ $task{$me}{code} = sub {
 		} else {
 			$searchtoo->deleteStoredRecords(\@iids_d);
 		}
+
+		$searchtoo->finish;
 	}
 
 	$searchtoo->backup(0);
 	$searchtoo->moveLive;
-
-	$searchtoo->finish;
 
 	slashdLog("Moved new index live");
 	slashdLog("Finished");

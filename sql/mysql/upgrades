@@ -5310,15 +5310,11 @@ INSERT INTO vars (name, value, description) VALUES ('stats_firehose_spamcount', 
 # 2008-05-07
 UPDATE vars SET value = 'T_2_5_0_204' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # for plugins/FireHose
 INSERT INTO vars (name, value, description) VALUES ('firehose_adminupclout', '0.5', 'Admin clout for upvotes can be reduced by specifying a number between 0 and 1');
 
 # for tagboxes/FHEditorPop
 UPDATE vars SET name='tagbox_fheditorpop_maxudcmult' WHERE name='tagbox_fhpopularity2_maxudcmult';
-
-# SLASHDOT LAST UPDATED HERE
 
 CREATE TABLE comment_promote_log (
   id int unsigned NOT NULL auto_increment,
@@ -5336,4 +5332,16 @@ ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","
 
 # 2008-05-15
 UPDATE vars SET value = 'T_2_5_0_205' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# 2008-05-21
+UPDATE vars SET value = 'T_2_5_0_206' WHERE name = 'cvs_tag_currentcode';
+
+INSERT INTO vars (name, value, description) VALUES ('imagemagick_convert', '/usr/bin/convert', 'Location of imagemagick convert for thumbnail generation');
+
+# 2008-05-22
+UPDATE vars SET value = 'T_2_5_0_207' WHERE name = 'cvs_tag_currentcode';
 

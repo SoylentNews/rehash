@@ -1347,7 +1347,7 @@ sub countDailyStoriesAccessRSS {
 		"op='slashdot-it' AND query_string LIKE '%from=rssbadge'",
 		'GROUP BY query_string');
 	my $sid_hr = { };
-	my $regex_sid = regexSid();
+	my $regex_sid = regexSid(1);
 	for my $qs (keys %$qs_hr) {
 		my($sid) = $qs =~ m{sid=\b([\d/]+)\b};
 		next unless $sid =~ $regex_sid;

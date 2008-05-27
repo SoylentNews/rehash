@@ -288,6 +288,10 @@ sub ConnectionIsSSL {
 	# That probably didn't work so let's get that data the hard way.
 	my $r = Apache->request;
 	return 0 if !$r;
+
+	my $x = $r->header_in('X-SFINC-SSL');
+	return 1 if $x && $x eq 'true';
+
 	my $subr = $r->lookup_uri($r->uri);
 	if ($subr) {
 		my $se = $subr->subprocess_env('HTTPS');

@@ -627,7 +627,7 @@ function firehose_up_down(id, dir) {
 
 	$('#updown-'+id).setClass(dir=='+' ? 'votedup' : 'voteddown');
 
-	if (dir == "-" && fh_is_admin) {
+	if ( fh_is_admin && (dir == "-" || $('#title-'+id+':contains("Comment:")')) ) {
 		firehose_collapse_entry(id);
 	}
 }
@@ -1110,9 +1110,13 @@ function firehose_slider_end(offsetFromStart) {
 		fh_slider_init_set = 1;
 	}
 	var color = fh_colors[ newVal / fh_ticksize ];
-	$dom('fh_slider_img').title = "Firehose filtered to " + color;
-	if (fh_slider_init_set) {
-		firehose_set_options("color", color)
+	if (color !== undefined) {
+		$dom('fh_slider_img').title = "Firehose filtered to " + color;
+		if (fh_slider_init_set) {
+			firehose_set_options("color", color)
+		}
+	} else if (firehohse_settings.color !== undefined) {
+		firehose_slider_set_color(firehose_settings.color)
 	}
 }
 

@@ -1871,7 +1871,7 @@ Hashref of cleaned-up data.
 		logtoken	=> sub { $_[0] = '' unless
 					 $_[0] =~ m|^\d+::[A-Za-z0-9]{22}$|		},
 		sid		=> sub { $_[0] = '' unless
-					 $_[0] =~ Slash::Utility::Data::regexSid()	},
+					 $_[0] =~ Slash::Utility::Data::regexSid(1)	},
 		flags		=> sub { $_[0] =~ s|[^a-z0-9_,]||g			},
 		query		=> sub { $_[0] =~ s|[\000-\040<>\177-\377]+| |g;
 			        	 $_[0] =~ s|\s+| |g;				},
