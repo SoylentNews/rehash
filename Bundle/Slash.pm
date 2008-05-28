@@ -133,6 +133,6 @@ GD GD::Text GD::Graph Apache::SSI Apache::RegistryFilter GraphViz
 Net::IRC Proc::ProcessTable Net::Jabber File::Type Linux::Pid
 File::Type Apache::SSI String::Similarity Devel::Size Devel::FindGlobals
 Slash::Client JavaScript::Minifier Template::Plugin::GD Net::Telnet
-Finance::Quote Net::OSCAR Date::ICal
+Finance::Quote Net::OSCAR Date::ICal WWW::Mechanize
 
 =cut
