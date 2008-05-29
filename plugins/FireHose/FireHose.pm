@@ -2762,29 +2762,40 @@ sub getFireHoseItemsByUrl {
 sub ajaxFireHoseUsage {
 	my($slashdb, $constants, $user, $form) = @_;
 
-	my $tags = getObject('Slash::Tags');
+	my $tag_reader = getObject('Slash::Tags', { db_type => 'reader' });
+
 	my $downlabel = $constants->{tags_downvote_tagname} || 'nix';
-	my $down_id = $tags->getTagnameidFromNameIfExists($downlabel);
+	my $down_id = $tag_reader->getTagnameidFromNameIfExists($downlabel);
 	
 	my $uplabel = $constants->{tags_upvote_tagname} || 'nod';
-	my $up_id = $tags->getTagnameidFromNameIfExists($uplabel);
+	my $up_id = $tag_reader->getTagnameidFromNameIfExists($uplabel);
 	my $data = {};
 
+#	$data->{fh_users} = $tags_reader->sqlSelect("COUNT(DISTINCT uid)", "tags",
+#		"tagnameid IN ($up_id, $down_id)");
+	my $d_clause = " AND created_at > DATE_SUB(NOW(), INTERVAL 1 DAY)";
+	my $h_clause = " AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)";
+	$data->{fh_users_day} = $tags_reader->sqlSelect("COUNT(DISTINCT uid)", "tags",
+		"tagnameid IN ($up_id, $down_id) $d_clause");
+	$data->{fh_users_hour} = $tags_reader->sqlSelect("COUNT(DISTINCT uid)", "tags",
+		"tagnameid IN ($up_id, $down_id) $h_clause");
+	$data->{tag_cnt_day} = $tags_reader->sqlSelect("COUNT(*)", "tags,users,firehose",
+		"firehose.globjid=tags.globjid AND tags.uid=users.uid AND users.seclev = 1 $d_clause");
+	$data->{tag_cnt_hour} = $tags_reader->sqlSelect("COUNT(*)", "tags,users,firehose",
+		"firehose.globjid=tags.globjid AND tags.uid=users.uid AND users.seclev = 1 $h_clause");
+	$data->{nod_cnt_day} = $tags_reader->sqlSelect("COUNT(*)", "tags,users",
+		"tags.uid=users.uid AND users.seclev = 1 AND tagnameid IN ($up_id) $d_clause");
+	$data->{nod_cnt_hour} = $tags_reader->sqlSelect("COUNT(*)", "tags,users",
+		"tags.uid=users.uid AND users.seclev = 1 AND tagnameid IN ($up_id) $h_clause");
+	$data->{nix_cnt_day} = $tags_reader->sqlSelect("COUNT(*)", "tags,users",
+		"tags.uid=users.uid AND users.seclev = 1 AND tagnameid IN ($down_id) $d_clause");
+	$data->{nix_cnt_hour} = $tags_reader->sqlSelect("COUNT(*)", "tags,users",
+		"tags.uid=users.uid AND users.seclev = 1 AND tagnameid IN ($down_id) $h_clause");
+	$data->{globjid_cnt_day} = $tags_reader->sqlSelect("COUNT(DISTINCT globjid)", "tags,users",
+		"tags.uid=users.uid AND users.seclev = 1 AND tagnameid IN ($up_id, $down_id) $d_clause");
+	$data->{globjid_cnt_hour} = $tags_reader->sqlSelect("COUNT(DISTINCT globjid)", "tags,users",
+		"tags.uid=users.uid AND users.seclev = 1 AND tagnameid IN ($up_id, $down_id) $h_clause");
 
-	$data->{fh_users} = $slashdb->sqlSelect("count(distinct uid)", "tags", "tagnameid in($up_id, $down_id)");
-	my $d_clause = " and created_at > date_sub(now(), interval 1 day)";
-	my $h_clause = " and created_at > date_sub(now(), interval 1 hour)";
-	$data->{fh_users_day} = $slashdb->sqlSelect("count(distinct uid)", "tags", "tagnameid in($up_id, $down_id) $d_clause");
-	$data->{fh_users_hour} = $slashdb->sqlSelect("count(distinct uid)", "tags", "tagnameid in($up_id, $down_id) $h_clause");
-	$data->{tag_cnt} = $slashdb->sqlSelect("count(*)", "tags,users,firehose", "firehose.globjid=tags.globjid AND tags.uid=users.uid AND users.seclev = 1 $d_clause");
-	$data->{tag_cnt_hour} = $slashdb->sqlSelect("count(*)", "tags,users,firehose", "firehose.globjid=tags.globjid AND tags.uid=users.uid AND users.seclev = 1 $h_clause");
-	$data->{nod_cnt} = $slashdb->sqlSelect("count(*)", "tags,users", "tags.uid=users.uid AND users.seclev = 1 AND tagnameid in($up_id) $d_clause");
-	$data->{nod_cnt_hour} = $slashdb->sqlSelect("count(*)", "tags,users", "tags.uid=users.uid AND users.seclev = 1 AND tagnameid in($up_id) $h_clause");
-	$data->{nix_cnt} = $slashdb->sqlSelect("count(*)", "tags,users", "tags.uid=users.uid AND users.seclev = 1 AND tagnameid in($down_id) $d_clause");
-	$data->{nix_cnt_hour} = $slashdb->sqlSelect("count(*)", "tags,users", "tags.uid=users.uid AND users.seclev = 1 AND tagnameid in($down_id) $h_clause");
-
-	$data->{globjid_cnt} = $slashdb->sqlSelect("count(distinct globjid)", "tags,users", "tags.uid=users.uid AND users.seclev = 1 AND tagnameid in($up_id, $down_id) $d_clause");
-	$data->{globjid_cnt_hour} = $slashdb->sqlSelect("count(distinct globjid)", "tags,users", "tags.uid=users.uid AND users.seclev = 1 AND tagnameid in($up_id, $down_id) $h_clause");
 	slashDisplay("firehose_usage", $data, { Return => 1 });
 }
 
