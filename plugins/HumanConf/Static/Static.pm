@@ -55,15 +55,19 @@ sub deleteOldFromPool {
 	my $cursize = $self->getPoolSize();
 	if (!defined($want_delete_fraction)) {
 		# Delete at least enough to recycle the pool regularly.
-		# Since by default hc_maintain_pool runs 2 times an hour,
-		# the default fraction is enough to guarantee complete
-		# pool turnover every day.
+		# The default fraction is enough to guarantee the pool
+		# turns over once every 3 days.
+		my $turnover_secs = $constants->{hc_turnover_secs} || 86400*3;
 		# Note that $runs_per_hour should be coordinated with
 		# the timespec in the task .pl file;  there isn't a good
-		# way to do this at the moment.  Eventually we'll have
-		# DB-based timespecs and we can read that...
-		my $runs_per_hour = 2;
-		$want_delete_fraction = 1/($runs_per_hour*24)
+		# way to do this at the moment.  Maybe someday we'll have
+		# DB-based timespecs and we can read that.
+		my $runs_per_hour = 4;
+		# I'll spell out the arithmetic with intermediate variables
+		# for clarity.
+		my $secs_between_run = 3600/$runs_per_hour;
+		my $runs_for_turnover = $turnover_secs/$secs_between_run;
+		$want_delete_fraction = 1/$runs_for_turnover;
 	}
 	my $want_delete = int($cursize*$want_delete_fraction);
 		# Don't delete so many that the pool will get too empty,

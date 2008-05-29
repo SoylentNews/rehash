@@ -5345,3 +5345,6 @@ INSERT INTO vars (name, value, description) VALUES ('imagemagick_convert', '/usr
 # 2008-05-22
 UPDATE vars SET value = 'T_2_5_0_207' WHERE name = 'cvs_tag_currentcode';
 
+# for plugins/HumanConf
+INSERT INTO vars (name, value, description) VALUES ('hc_turnover_secs', '259200', 'Seconds in which the entire humanconf pool should be replaced out');
+
