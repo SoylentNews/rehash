@@ -5348,8 +5348,11 @@ UPDATE vars SET value = 'T_2_5_0_207' WHERE name = 'cvs_tag_currentcode';
 # for plugins/HumanConf
 INSERT INTO vars (name, value, description) VALUES ('hc_turnover_secs', '259200', 'Seconds in which the entire humanconf pool should be replaced out');
 
-#For plugins/FireHose
-ALTER TABLE firehose ADD INDEX url_id (url_id);
-
+# for plugins/FireHose
 ALTER TABLE urls ADD INDEX bfu (believed_fresh_until);
 ALTER TABLE firehose ADD INDEX url_id (url_id);
+
+UPDATE vars SET name='clientip_xff_trust_regex' WHERE name='x_forwarded_for_trust_regex';
+INSERT IGNORE INTO vars (name, value, description) VALUES ('clientip_xff_trust_regex','^127\\.0\\.0\\.1$','IP addresses from which we will trust an X-Forwarded-For header');
+INSERT INTO vars (name, value, description) VALUES ('clientip_xff_trust_header','','Name of HTTP request header to prefer over "X-Forwarded-For", if present');
+

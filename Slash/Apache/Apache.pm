@@ -247,11 +247,14 @@ sub SlashCompileTemplates ($$$) {
 # use a closure to store the regex that matches incoming IP number.
 {
 my $trusted_ip_regex = undef;
+my $trusted_header = undef;
 sub ProxyRemoteAddr ($) {
 	my($r) = @_;
 
-	if (!defined($trusted_ip_regex)) {
-		$trusted_ip_regex = getCurrentStatic("x_forwarded_for_trust_regex");
+	# Set up the variables that are loaded only once.
+	if (!defined($trusted_ip_regex) || !defined($trusted_header)) {
+		my $constants = getCurrentStatic();
+		$trusted_ip_regex = $constants->{clientip_xff_trust_regex};
 		if ($trusted_ip_regex) {
 			# Avoid a little processing each time by doing
 			# the regex parsing just once.
@@ -263,16 +266,29 @@ sub ProxyRemoteAddr ($) {
 			# If defined but false, disable.
 			$trusted_ip_regex = '0';
 		}
+		$trusted_header = $constants->{clientip_trust_header} || '';
 	}
-	return OK if $trusted_ip_regex eq '0';
 
-	# Since any client can forge X-Forwarded-For, we ignore it...
-	return OK unless $r->connection->remote_ip =~ $trusted_ip_regex;
+	# If the actual IP the connection came from is not trusted, we
+	# skip the following processing.  An untrusted client could send
+	# any header with any value.
+	if ($trusted_ip_regex eq '0'
+		|| $r->connect->remote_ip !~ $trusted_ip_regex) {
+		return OK;
+	}
 
-	# ...unless the connection comes from a trusted source.
-	my $xf = $r->header_in('X-Forward-Pound') || $r->header_in('X-Forwarded-For');
-	if (my($ip) = $xf =~ /([^,\s]+)$/) {
-		$r->connection->remote_ip($ip);
+	# The connection comes from a trusted IP.  Use either the
+	# specified header (which presumably the trusted IP overwrites
+	# or modifies) and pull from it the last IP on its list (so
+	# presumably if the trusted IP does merely modify the header,
+	# it appends the actual original IP to its value).
+	my $xf = undef;
+	$xf = $r->header_in($trusted_header) if $trusted_header;
+	$xf ||= $r->header_in('X-Forwarded-For');
+	if ($xf) {
+		if (my($ip) = $xf =~ /([\d.]+)$/) {
+			$r->connection->remote_ip($ip);
+		}
 	}
 
 	return OK;
