@@ -1917,7 +1917,7 @@ sub getUrlsNeedingFirstCheck {
 
 	if ($options->{limit_to_firehose} && $constants->{plugin}{FireHose}) {
 		$extra_tables = ",firehose";
-		$extra_tables = "AND urls.url_id=firehose.url_id";
+		$extra_where = "AND urls.url_id=firehose.url_id";
 	}
 	return $self->sqlSelectAllHashrefArray("*", "urls $extra_tables", "last_attempt IS NULL $extra_where", "ORDER BY urls.url_id ASC LIMIT $options->{limit}");
 }
