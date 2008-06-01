@@ -9,6 +9,7 @@
 #
 use Slash::Constants ':slashd';
 use LWP::Parallel::UserAgent;
+use HTTP::Request;
 use Encode 'encode_utf8';
 
 use strict;
@@ -62,16 +63,21 @@ $task{$me}{code} = sub {
 		$ua->redirect  (1);
 
 		foreach (@set) {
-			my $req = HTTP::Request("GET", $_->{url});
+			my $req = HTTP::Request->new("GET", $_->{url});
 			$ua->register($req);
 		}
 
 		my $entries = $ua->wait();
-
 		foreach (keys %$entries) {
 			my $res = $entries->{$_}->response;
+			while (defined $res->previous) {
+				print "Going to prev\n";
+				$res = $res->previous;
+			}
 			my $url = $res->request->url;
-			my $item = $urls_hr->{$url};
+			
+			my $item = $urls_hr->{"$url"};
+			
 			my $url_update = { url_id => $item->{url_id} };
 
 			if ($res->is_success) {
@@ -88,7 +94,7 @@ $task{$me}{code} = sub {
 			}
 			# If this is a second or greater, we adjust the amount of time between refreshes to slowly increase
 			# time between refreshes
-			if ($url->{last_attempt}) {
+			if ($item->{last_attempt}) {
 				my $secs = $slashdb->sqlSelect("UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP('$url->{last_attempt}')");
 				my $decay = 1.2;
 				my $secs_until_next = int($secs * $decay);
@@ -96,8 +102,9 @@ $task{$me}{code} = sub {
 			}
 
 			$url_update->{status_code} = $res->code;
-			$url_update->{reason_phrase} = $res->reason;
+			$url_update->{reason_phrase} = $res->status_line;
 			$url_update->{"-last_attempt"} = "NOW()";
+			$slashdb->setUrl($item->{url_id}, $url_update);
 		}
 
 	}
