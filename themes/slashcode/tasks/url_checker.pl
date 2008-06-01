@@ -81,7 +81,6 @@ $task{$me}{code} = sub {
 
 			if ($res->is_success) {
 				my $validatedtitle = $res->title;
-				slashdLog($validatedtitle);
 				if (defined $validatedtitle) {
 					$url_update->{validatedtitle} = strip_notags($validatedtitle);
 					$url_update->{"-last_success"} = "NOW()";
