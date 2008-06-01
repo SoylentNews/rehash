@@ -71,7 +71,6 @@ $task{$me}{code} = sub {
 		foreach (keys %$entries) {
 			my $res = $entries->{$_}->response;
 			while (defined $res->previous) {
-				print "Going to prev\n";
 				$res = $res->previous;
 			}
 			my $url = $res->request->url;
@@ -81,7 +80,8 @@ $task{$me}{code} = sub {
 			my $url_update = { url_id => $item->{url_id} };
 
 			if ($res->is_success) {
-				my $validatedtitle = $res->{title};
+				my $validatedtitle = $res->title;
+				slashdLog($validatedtitle);
 				if (defined $validatedtitle) {
 					$url_update->{validatedtitle} = strip_notags($validatedtitle);
 					$url_update->{"-last_success"} = "NOW()";
