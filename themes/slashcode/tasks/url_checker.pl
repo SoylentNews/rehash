@@ -94,7 +94,7 @@ $task{$me}{code} = sub {
 			# If this is a second or greater, we adjust the amount of time between refreshes to slowly increase
 			# time between refreshes
 			if ($item->{last_attempt}) {
-				my $secs = $slashdb->sqlSelect("UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP('$url->{last_attempt}')");
+				my $secs = $slashdb->sqlSelect("UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP('$item->{last_attempt}')");
 				my $decay = 1.2;
 				my $secs_until_next = int($secs * $decay);
 				$url_update->{"-believed_fresh_until"} = "DATE_ADD(NOW(), INTERVAL $secs_until_next SECOND)";
