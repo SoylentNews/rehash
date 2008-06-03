@@ -516,7 +516,9 @@ sub copyBackup {
 			while (my $f = readdir($dh)) {
 				next if $f =~ /^\./;
 				my $file = catfile($back, 'invindex', $f);
-				if (-f $file && -s _ == 0 && -M _ > 1) {
+				lstat $file;
+				# file is empty and more than an hour old
+				if (-f $file && -s _ == 0 && -M _ > 1/24) {
 					unlink $file;
 				}
 			}
