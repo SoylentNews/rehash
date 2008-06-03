@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -23,6 +23,7 @@ use Carp;
 use Errno;
 use File::Basename;
 use File::Path;
+use File::Temp 'tempfile';
 use File::Spec::Functions qw(:DEFAULT devnull);
 use LWP::UserAgent;
 use HTTP::Request;
@@ -44,13 +45,37 @@ use vars qw(
 	%resource_info
 	$event_ar
 	$cron
+	$task_exit_flag
+	$PROGNAME $virtual_user
 );
 
-my $virtual_user = $ARGV[0];
-createEnvironment($virtual_user);
+$virtual_user = $ARGV[0];
+
+# Rename the binary in the process list, to make identification
+# with `ps` easier (see also do_child below).
+$PROGNAME = basename($0);
+$0 = "$PROGNAME $virtual_user";
+
+eval {
+	createEnvironment($virtual_user);
+};
+if ($@) {
+	if ($@ =~ /DBIx::Password has no information about the virtual user/
+		&& $virtual_user eq 'start') {
+		die <<"EOT";
+$@
+To be more specific, your error is that, per step 7 of the INSTALLATION
+section in the INSTALL file (please reread), you need to start slashd
+with '/etc/init.d/slash start', not '/usr/local/slash/sbin/slashd start'.
+EOT
+	}
+	die $@;
+}
 my $constants = getCurrentStatic();
 my $slashdb = getCurrentDB();
 my $user = getCurrentUser();
+setCurrentSkin(determineCurrentSkin());
+my $gSkin = getCurrentSkin();
 my %pids = ( );
 
 main();
@@ -72,6 +97,26 @@ sub slashdLog {
 		$args[0] = "[$pids{$$}{taskname}] $args[0]";
 	}
 	doLog('slashd', \@args);
+}
+
+# Tagboxes get the option to log to a separate file.
+
+sub tagboxLog {
+	my(@args) = @_;
+	doLog('tagbox', \@args);
+}
+
+# A command to log an error to a DB table.  This is only for messages
+# that are important enough that the admins should see them (maybe in
+# the admin.pl backend, but definitely in email at the end of the day).
+
+sub slashdErrnote {
+	my($errnote, $moreinfo) = @_;
+	my $taskname = "SLASHD"; # the default if not called from a task
+	if ($pids{$$} && $pids{$$}{forktype} == SLASHD_NOWAIT) {
+		$taskname = $pids{$$}{taskname};
+	}
+	$slashdb->insertErrnoteLog($taskname, $errnote, $moreinfo);
 }
 
 # log children ending
@@ -127,27 +172,12 @@ sub slashdLogDie {
 	die $err;
 }
 
-# What time does the database think it is?  Our tasks are synched to
-# that time, which may be different from the time that the machine
-# we're running on thinks it is.
-#
-# We use two closure'd variables here and do a little dance just to
-# avoid calling SELECT NOW() more than once every ten minutes.
-# Not that it really matters, this optimization saves just about
-# nothing, but there's just no need, clocks can't possibly drift
-# anywere near that much.
+# The closure and cache that was done on this is now done in
+# MySQL.pm, making this utility function pretty much a no-op.
 
-{ my($last_db_time_offset, $last_db_time_confirm) = (undef, undef);
 sub db_time {
-	my $my_time = time;
-	if (!$last_db_time_confirm
-		or $my_time > $last_db_time_confirm + 600) {
-		my $db_time = timeCalc($slashdb->getTime(), "%s", 0);
-		$last_db_time_offset = $db_time - $my_time;
-		$last_db_time_confirm = $my_time;
-	}
-	return $my_time + $last_db_time_offset;
-} }
+	return $slashdb->getTime({ unix_format => 1 });
+}
 
 # Get the logging verbosity from the database.
 #
@@ -182,8 +212,9 @@ sub update_static {
 	my $my_time = time;
 	my $changed = 0;
 	if (!$last_static_update
-		or $my_time > $last_static_update + 30) {
+		|| $my_time > $last_static_update + 30) {
 		my $old_panic = $constants->{panic} || 0;
+		sleep 5 until $slashdb->sqlConnect();
 		createCurrentStatic($slashdb->getSlashConf());
 		$constants = getCurrentStatic();
 		$last_static_update = $my_time;
@@ -196,8 +227,26 @@ sub update_static {
 	return $changed;
 } }
 
+sub send_children_usr1 {
+	my @pids = sort { $a <=> $b } keys %pids;
+	if (@pids) {
+		my @info_str = ( );
+		for my $pid (@pids) {
+			my $success = kill USR1 => $pid;
+			push @info_str, "pid $pid ($pids{$pid}{taskname})"
+				. ($success ? "" : " (FAILED)");
+		}
+		slashdLog("sent SIGUSR1 to running tasks: @info_str");
+	}
+}
+
 sub slashdLogInit {
-	doLogInit('slashd');
+	doLogInit('slashd', { exit_func => \&send_children_usr1 });
+	# When the parent process gets tapped with a USR1 signal,
+	# pass it along to all the children (it's their cue to exit
+	# at their earliest appropriate opportunity -- they also get
+	# that if the parent gets a TERM or INT).
+	$SIG{USR1} = \&send_children_usr1;
 }
 
 sub init_cron {
@@ -253,7 +302,8 @@ sub process_tasks {
 
 	# "require" all the task files -- each will put its info into
 	# $task{"filename.pl"}
-	my %success = my %failure = ( );
+	my %success = ( );
+	my %failure = ( );
 	my $dir = catdir($constants->{datadir}, "tasks");
 	if (!-e $dir or !-d _ or !-r _) {
 		slashdLogDie(<<EOT);
@@ -286,8 +336,56 @@ you really don't want me to use a task file that's world-writable: $fullname
 EOT
 		}
 		my $file = basename($fullname);
+
+		# we want to encapsulate each task automatically.  to do that,
+		# we automatically create a package name for each task, and
+		# then we manually import the symbols we want into that package.
+		# then it is written out as a temp file, and THAT file is
+		# require'd, not the actual task.
+		# we may be importing more than we need for coderefs, but
+		# i didn't feel like looking at each task individually.
+
+		(my $tmppackage = $file) =~ s/\.pl$//;
+		$tmppackage =~ s/\W/_/g;
+		$tmppackage =~ s/^([^a-zA-Z])/a_$1/g;
+		$tmppackage = "Slash::Task::$tmppackage";
+
+		# replace tmppackage in string where appropriate
+		(my $addtxt = <<'EOT') =~ s/\${?tmppackage}?/$tmppackage/g;
+package $tmppackage;
+
+{ no strict 'refs';
+	my @scalar = qw(me task_exit_flag);
+	my @hash   = qw(task);
+	my @code   = (qw(
+			slashdLog slashdErrnote slashdLogDie
+			tagboxLog verbosity db_time init_cron
+		),
+		grep { *{"main::$_"}{CODE} }
+			@Slash::EXPORT, @Slash::Display::EXPORT,
+			@Slash::Utility::EXPORT,
+			@File::Spec::Functions::EXPORT,
+			@LWP::UserAgent::EXPORT, @URI::Escape::EXPORT,
+			@File::Basename::EXPORT, @File::Path::EXPORT,
+			@Time::Local::EXPORT, @Time::HiRes::EXPORT
+	);
+
+	*{"${tmppackage}::$_"} = *{"main::$_"}{HASH}   for @hash;
+	*{"${tmppackage}::$_"} = *{"main::$_"}{SCALAR} for @scalar;
+	*{"${tmppackage}::$_"} = *{"main::$_"}{CODE}   for @code;
+}
+
+EOT
+
+		my($tmpfh, $tmpfile) = tempfile();
+		my $tmptxt = do { open my $fh, '<', $fullname; local $/; <$fh> };
+		print $tmpfh $addtxt, $tmptxt;
+		$tmpfh->flush; # can't close fh until we require the file,
+		               # else the file might disappear
+
 		my $ok = 0;
-		eval { local $me = $file; $ok = require $fullname; };
+		eval { local $me = $file; $ok = require $tmpfile };
+
 		if ($@) {
 			slashdLog("requiring '$fullname' raised exception: $@");
 			$ok = 0;
@@ -296,11 +394,7 @@ EOT
 			slashdLog("requiring '$fullname' caused error: $!");
 			$ok = 0;
 		}
-		if (!defined($task{$file}{timespec})) {
-			slashdLog("'$fullname' did not set timespec properly");
-			$ok = 0;
-		}
-		if (!$task{$file}{code} or ref $task{$file}{code} ne 'CODE') {
+		if (!$task{$file}{code} || ref $task{$file}{code} ne 'CODE') {
 			slashdLog("'$fullname' did not set code properly");
 			$ok = 0;
 		}
@@ -308,11 +402,18 @@ EOT
 		# MAY OR MAY NOT want to run on an automated AND/OR a manual
 		# type basis: this allows the user to decide.
 		if ($task{$file}{standalone}) {
-			slashdLog("'$fullname' available via runtask, only!");
+			slashdLog("'$fullname' only runs via runtask (this is not an error)");
+			$ok = 0;
+		}
+		if (!defined($task{$file}{timespec})) {
+			slashdLog("'$fullname' did not set timespec properly");
 			$ok = 0;
 		}
 		if ($ok) {
 			$success{$file} = 1;
+			# Allow a default value for at least this one field
+			# (and maybe others, later... haven't decided yet)
+			$task{$file}{fork} ||= SLASHD_NOWAIT;
 		} else {
 			delete $task{$file} if $task{$file};
 			$failure{$file} = 1;
@@ -342,6 +443,45 @@ EOT
 	);
 	slashdLogDie("aborting: no files successfully processed from $dir")
 		if !%task;
+
+	# Adjust timespecs for any tasks that have a var to override it.
+	my @adjusted = ( );
+	for my $file (sort keys %task) {
+		(my $file_nopl = $file) =~ s/\.pl$//;
+		my $varname = "task_timespec_$file_nopl";
+		next unless $constants->{$varname}
+			&& $constants->{$varname} ne $task{$file}{timespec};
+		$task{$file}{timespec} = $constants->{$varname};
+		push @adjusted, "$file ($task{$file}{timespec})";
+	}
+	if (@adjusted) {
+		slashdLog("Custom timespecs: @adjusted");
+	}
+
+	# Check the timespecs for the tasks, make sure they are valid.
+	my %invalid_timespec = ( );
+	my $db_time = db_time();
+	for my $file (sort keys %task) {
+		my @timespecs = ( );
+		for my $key (qw( timespec timespec_panic_1 timespec_panic_2 )) {
+			push @timespecs, $task{$file}{$key} if $task{$file}{$key};
+		}
+		CHECK: for my $check_spec (@timespecs) {
+			eval { $cron->get_next_execution_time($check_spec, $db_time) };
+			if ($@) {
+				# If the timespec is invalid, Schedule::Cron calls die().
+				# Trap that and log a warning instead.
+				my $err = "Invalid timespec '$check_spec' for $file, ignoring task. $@";
+				slashdErrnote($err);
+				slashdLog($err);
+				$invalid_timespec{$file} = 1;
+				last CHECK;
+			}
+		}
+	}
+	for my $file (keys %invalid_timespec) {
+		delete $task{$file};
+	}
 
 	# The appropriate data is in $task{"filename.pl"} -- write it all into
 	# the $cron object.
@@ -467,12 +607,15 @@ sub insert_task_event {
 			. scalar(localtime($next_time)));
 	}
 
-	# Rebuild the array in the proper order.
+	# Rebuild the array in the proper order.  Wrap this in a transaction
+	# so the DB doesn't have to go to disk 50 times, it can write all
+	# the rows at once.
 	$event_ar = [ ];
 	my @files = rebuild_event_ar($event_hr);
+	$slashdb->sqlDo("SET AUTOCOMMIT=0");
 	for my $file (@files) {
 		push @$event_ar, [ $file, $event_hr->{$file}{until_time} ];
-		(my $file_nopl = $file) =~ s/\.pl//;
+		(my $file_nopl = $file) =~ s/\.pl$//;
 		my @u = gmtime($event_hr->{$file}{until_time});
 		my $options = {
 			next_begin => sprintf("%4d-%02d-%02d %02d:%02d:%02d",
@@ -482,6 +625,8 @@ sub insert_task_event {
 		};
 		$slashdb->setSlashdStatus($file_nopl, $options);
 	}
+	$slashdb->sqlDo("COMMIT");
+	$slashdb->sqlDo("SET AUTOCOMMIT=1");
 }
 
 # Sort the events from the hash back into an array.  We choose the
@@ -659,9 +804,10 @@ sub main {
 	init_cron();
 	process_tasks();
 	init_event_ar();
+	$task_exit_flag = 0;
 
-	# Here's the main event loop, which never returns (slashd is
-	# typically ended with a SIGTERM from /etc/*/init.d/slash stop).
+	# Set some signal handlers.  First, when a child exits, this
+	# handler gets called (right now it does nothing).
 
 	$SIG{CHLD} = sub {
 		# Logging is for debugging only!!  Almost anything you do
@@ -673,6 +819,9 @@ sub main {
 		# slashdLog("SIGCHLD called in $$")
 		# NOTE: perl 5.8 has safe signals.
 	};
+
+	# Here's the main event loop, which never returns (slashd is
+	# typically ended with a SIGTERM from /etc/*/init.d/slash stop).
 
 	# daemonize
 	open(STDOUT, '+>' . devnull());
@@ -744,13 +893,22 @@ sub main {
 
 		# kill the dbh, we have too many problems
 		# if it sticks around during a fork -- pudge
-
-		$slashdb->{_dbh}->disconnect;
+		$slashdb->getMCD()->disconnect_all() if $slashdb->getMCD();
+		$slashdb->{_dbh}->disconnect if $slashdb->{_dbh};
 		undef $slashdb->{_dbh};
 
 		FORK: {
+			$args->{parent_pid} = $$;
 			$args->{pid} = my $pid = fork();
-
+			if (!dbAvailable()) {
+				# Don't we want to do this _before_ we fork?
+				# (It's not like calling dbAvailable() and
+				# then sqlConnect() is atomic anyway.)
+				# - Jamie
+				slashdLog("DB unavailable waiting to start next task");
+				sleep 5 until dbAvailable();
+				slashdLog("DB available again preparing to start next task");
+			};
 			# Parent and child now separately reconnect.
 			$slashdb->sqlConnect();
 
@@ -804,13 +962,13 @@ sub do_parent {
 		# log when next task is running
 		end_log($basename, 0, "", SLASHD_LOG_NEXT_TASK);
 		if (verbosity() >= 4) {
-			slashdLog("Parent $$: sleep for 2 seconds after fork()");
+			slashdLog("Parent $$: sleep for 1 second after fork()");
 		}
 
-		sleep 2;
+		sleep 1;
 
 		if (verbosity() >= 4) {
-			slashdLog("Parent $$: slept for 2 seconds after fork()");
+			slashdLog("Parent $$: slept for 1 second after fork()");
 		}
 
 	} elsif ($forktype == SLASHD_WAIT) {
@@ -840,12 +998,15 @@ sub do_parent {
 sub do_child {
 	my($args) = @_;
 	my($basename, $forktype, $subref, $basename_nopl,
-		$start_time, $invocation_num) =
-		@{$args}{qw(basename forktype subref basename_nopl
-		start_time invocation_num)};
+		$start_time, $invocation_num, $parent_pid) =
+		@{$args}{qw(
+			basename forktype subref basename_nopl
+			start_time invocation_num parent_pid
+		)};
 
-	# In doLogPid we set a handler for these that deletes the slashd.pid
-	# file;  children don't have the right to do that.
+	# In doLogPid (which is called by doLogInit, which is called by
+	# slashdLogInit) we had set a handler for these that deletes the
+	# slashd.pid file.  Children don't have the right to do that.
 	$SIG{TERM} = $SIG{INT} = 'DEFAULT';
 
 	# Children may use system(), backticks, or open() pipes, all of which
@@ -854,8 +1015,20 @@ sub do_child {
 	# action for SIGCHLD is to ignore it.
 	$SIG{CHLD} = 'DEFAULT';
 
+	# If someone sends this child a SIGUSR1, that means it should exit
+	# at its earliest appropriate opportunity.  It's up to the task code
+	# to check this var and behave accordingly, though.
+	$SIG{USR1} = sub { $task_exit_flag = 1 };
+
+	# Change the name of the child process in the process list to be
+	# simply "slashd virtuser taskname".  This makes identification of
+	# the children in `ps` much easier.
+	$0 = "$PROGNAME $virtual_user $basename_nopl";
+
+	setUserDBs($user);
+
 	if (verbosity() >= 4) {
-		slashdLog("Child $$ [$me]: sleep for 2 seconds after fork()");
+		slashdLog("Child $$ [$me]: sleep for 1 second after fork()");
 	}
 
 	$pids{$$} = {
@@ -869,22 +1042,23 @@ sub do_child {
 	# Give the parent a chance to get into its REAPER loop.  This
 	# shouldn't be necessary now that the parent is not using $SIG{CHLD}
 	# to handle reaping child processes, but it still isn't a bad idea.
-	sleep 2;
+	sleep 1;
 	slashdLog("$basename begin ($$)") if verbosity() >= 2;
 
 	if (verbosity() >= 4) {
-		slashdLog("Child $$: slept for 2 seconds after fork()");
+		slashdLog("Child $$: slept for 1 second after fork()");
 	}
 
 	my $info = {
-		invocation_num => $invocation_num,
+		invocation_num	=> $invocation_num,
+		parent_pid	=> $parent_pid,
 	};
 	if (verbosity() >= 4) {
 		slashdLog("invocation_num $info->{invocation_num}");
 	}
 	srand;
 	my $summary = $subref->($virtual_user, $constants, $slashdb, $user,
-		$info);
+		$info, $gSkin);
 
 	my $end_time = Time::HiRes::time;
 	my $duration = sprintf("%.2f", $end_time - $start_time);
@@ -931,6 +1105,11 @@ sub PRINT {
 sub PRINTF {
 	my($fh, $format, @args) = @_;
 	main::slashdLog(sprintf($format, @args));
+}
+
+sub FILENO {
+	my($fh) = @_;
+	return fileno($fh);
 }
 
 1;
