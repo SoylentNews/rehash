@@ -991,9 +991,10 @@ CREATE TABLE stories (
 	in_trash ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
 	day_published DATE DEFAULT '1970-01-01' NOT NULL,
 	qid MEDIUMINT UNSIGNED DEFAULT NULL,
-	last_update timestamp NOT NULL,
+	last_update TIMESTAMP NOT NULL,
 	body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
+	archive_last_update DATETIME DEFAULT '1970-01-01 00:00:00' NOT NULL,
 	PRIMARY KEY (stoid),
 	UNIQUE sid (sid),
 	INDEX uid (uid),
@@ -1302,9 +1303,10 @@ CREATE TABLE urls (
 	validatedtitle VARCHAR(255),
 	tags_top VARCHAR(255) DEFAULT '' NOT NULL,
 	popularity float DEFAULT '0' NOT NULL,
+	anon_bookmarks MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL
 	PRIMARY KEY (url_id),
 	UNIQUE url_digest (url_digest),
-	anon_bookmarks MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL
+	INDEX bfu (believed_fresh_until)
 );
 
 #
