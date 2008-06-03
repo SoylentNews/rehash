@@ -2144,6 +2144,7 @@ sub _do_insert_select {
 			sleep $sleep_time;
 		} else {
 			print STDERR scalar(localtime) . " INSERT-SELECT $to_table still failed, giving up\n";
+			$slashdb->insertErrnoteLog("adminmail", "Failed creating table '$to_table'", "Checked replication $try_num times without success, giving up");
 			return undef;
 		}
 
