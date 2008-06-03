@@ -21,7 +21,7 @@ our $VERSION = $Slash::Constants::VERSION;
 sub init {
 	my($self) = @_;
 
-	$self->{months_back} = 4; # default
+	$self->{months_back} = 2; # default
 	my $slashdb = getCurrentDB();
         my $info = $slashdb->getCloutInfo();
         for my $clid (keys %$info) {

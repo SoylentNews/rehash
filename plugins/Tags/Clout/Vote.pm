@@ -101,6 +101,8 @@ sub get_nextgen {
 	sleep 10;
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $mintagid = $reader->sqlSelect('MIN(tagid)', 'tags',
+		"created_at >= DATE_SUB(NOW(), INTERVAL $self->{months_back} MONTH)");
 	my $hr_ar = $reader->sqlSelectAllHashrefArray(
 		"sourcetag.uid AS sourcetag_uid,
 		 UNIX_TIMESTAMP(newtag.created_at)-UNIX_TIMESTAMP(sourcetag.created_at)
@@ -114,7 +116,6 @@ sub get_nextgen {
 		 newtag.uid AS newtag_uid,
 		 simil,
 		 users_info.tag_clout,
-		 UNIX_TIMESTAMP(users_info.created_at) AS created_at_ut,
 		 IF(firehose_ogaspt.pubtime IS NULL,
 			NULL,
 			UNIX_TIMESTAMP(firehose_ogaspt.pubtime)-UNIX_TIMESTAMP(newtag.created_at))
@@ -138,8 +139,9 @@ sub get_nextgen {
 			 AND sourcetag.tagnameid=tagnames_similar.src_tnid
 			 AND tagnames_similar.dest_tnid=newtag.tagnameid
 		 AND simil != 0
+		 AND sourcetag.tagid >= $mintagid
 		 AND sourcetag.tagid != newtag.tagid
-		 AND newtag.created_at >= DATE_SUB(NOW(), INTERVAL $self->{months_back} MONTH)
+		 AND newtag.tagid >= $mintagid
 		 AND newtag.uid=users.uid
 		 AND newtag.uid=users_info.uid
 		 AND newtpc.uid IS NULL
