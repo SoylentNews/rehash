@@ -147,6 +147,36 @@ sub edit {
 		return;
 	}
 	my $item = $firehose->getFireHose($form->{id});
+
+	if ($item->{type} eq 'submission') {
+		# here we fix up some things for authors, namely the subject
+		# line and do some (extremely) simple quote manipulation. This
+		# is also where someday we'll contact the jabber bot to alert
+		# authors that a story is being edited.         --Pater
+		if ($item->{introtext} =~ m/^[^"]*"[^"]*"[^"]*$/s) {
+                	$item->{introtext} =~ s/"/'/g;
+        	}
+
+        	my @words = split / /, $item->{title};
+        	my @newwords;
+
+        	for (my $i = 0; $i < @words; $i++) {
+                	my $word = $words[$i];
+
+                	if ($i == 0) {
+                        	$word = ucfirst $word;
+                	} elsif ($word =~ m/^a(n|nd)?$|^the$|^of$/i) {
+                        	$word = lcfirst $word;
+                	} else {
+                        	$word = ucfirst $word;
+                	}
+
+                	push @newwords, $word;
+        	}
+
+        	$item->{title} = join(' ', @newwords);
+	}
+
 	my $url;
 	$url = $slashdb->getUrl($item->{url_id}) if $item->{url_id};
 	my $the_user = $slashdb->getUser($item->{uid});
