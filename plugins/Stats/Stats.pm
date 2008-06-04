@@ -1008,8 +1008,7 @@ sub countSubmissionsByDay {
 sub countSubmissionsByCommentIPID {
 	my($self, $ipids, $options) = @_;
 	return unless @$ipids;
-	my $slashdb = getCurrentDB();
-	my $in_list = join(",", map { $slashdb->sqlQuote($_) } @$ipids);
+	my $in_list = join(",", map { $self->sqlQuote($_) } @$ipids);
 
 	my $where = "time $self->{_day_between_clause}
 		AND ipid IN ($in_list)";
@@ -2144,7 +2143,7 @@ sub _do_insert_select {
 			sleep $sleep_time;
 		} else {
 			print STDERR scalar(localtime) . " INSERT-SELECT $to_table still failed, giving up\n";
-			$slashdb->insertErrnoteLog("adminmail", "Failed creating table '$to_table'", "Checked replication $try_num times without success, giving up");
+			$self->insertErrnoteLog("adminmail", "Failed creating table '$to_table'", "Checked replication $try_num times without success, giving up");
 			return undef;
 		}
 

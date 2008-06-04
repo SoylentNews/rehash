@@ -949,7 +949,7 @@ EOT
 		$data{is_spam_new_count} = $is_spam_new_count;
 		$statsSave->createStatDaily('is_spam_new_count', $is_spam_new_count);
 		$data{is_spam_autodetected_count} = $autodetected_count;
-		$statsSave->createStatDaily('is_spam_autodetected_count', $is_spam_autodetected_count);
+		$statsSave->createStatDaily('is_spam_autodetected_count', $autodetected_count);
 	}
 
 	if ($tags) {
