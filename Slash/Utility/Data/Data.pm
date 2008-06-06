@@ -1206,6 +1206,15 @@ my %actions = (
 			# Preserve leading indents / spaces
 			# can mess up internal tabs, oh well
 			${$_[0]} =~ s/\t/    /g;			},
+	paragraph_wrap => sub {
+			# start off the text with a <p>!
+			${$_[0]} = '<p>' . ${$_[0]} unless ${$_[0]} =~ /^\s*<p>/s;
+			# this doesn't assume there will be only two BRs,
+			# but it does come after whitespace_tagify, so
+			# chances are, will be only two BRs in a row
+			${$_[0]} =~ s/(?:<br>){2}/<p>/g;
+			# make sure we don't end with a <br><p> or <br>
+			${$_[0]} =~ s/<br>(<p>|$)/$1/g;			},
 	whitespace_and_tt => sub {
 			${$_[0]} =~ s{((?:  )+)(?: (\S))?} {
 				("&nbsp; " x (length($1)/2)) .
@@ -1287,7 +1296,8 @@ my %mode_actions = (
 			approveCharrefs
 			breakHtml_ifwhitefix
 			whitespace_tagify
-			newline_indent			)],
+			newline_indent
+			paragraph_wrap			)],
 	HTML, [qw(
 			newline_to_local
 			trailing_whitespace
