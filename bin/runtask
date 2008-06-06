@@ -217,6 +217,7 @@ package $tmppackage;
 	*{"${tmppackage}::$_"} = *{"main::$_"}{CODE}   for @code;
 }
 
+#line 1
 EOT
 
 		my($tmpfh, $tmpfile) = tempfile();
