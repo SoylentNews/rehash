@@ -475,7 +475,6 @@ li .tag-actions .not-tag:hover, li .tag-actions .del-tag:hover {color: red;}
 
 .view div.tags div.tagtitleclosed, .view div.tags div.tagtitleopen {
 margin:0pt 0pt -1.4em 0pt;
-position:relative !important;
 text-align:right;
 }
 
