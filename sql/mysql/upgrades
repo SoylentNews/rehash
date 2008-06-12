@@ -5356,12 +5356,16 @@ UPDATE vars SET name='clientip_xff_trust_regex' WHERE name='x_forwarded_for_trus
 INSERT IGNORE INTO vars (name, value, description) VALUES ('clientip_xff_trust_regex','^127\\.0\\.0\\.1$','IP addresses from which we will trust an X-Forwarded-For header');
 INSERT INTO vars (name, value, description) VALUES ('clientip_xff_trust_header','','Name of HTTP request header to prefer over "X-Forwarded-For", if present');
 
-
 ALTER TABLE stories ADD COLUMN archive_last_update DATETIME DEFAULT '1970-01-01 00:00:00' NOT NULL;
 # keep last_update the same
 UPDATE stories SET archive_last_update=last_update, last_update=last_update;
 
-
 # 2008-06-04
 UPDATE vars SET value = 'T_2_5_0_208' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/Tags
+INSERT INTO vars (name, value, description) VALUES ('tags_overnight_minweightsum', '0.1', 'Minimum tagbox weight sum for
+ overnight processing. To disable overnight difference, set to 1');
+INSERT INTO vars (name, value, description) VALUES ('tags_overnight_starthour', '7', 'GMT hour at which overnight processing begins');
+INSERT INTO vars (name, value, description) VALUES ('tags_overnight_stophour', '10', 'GMT hour after which overnight processing ends');
 

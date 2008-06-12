@@ -218,8 +218,9 @@ sub logUserChange {
 }
 
 sub getMostImportantTagboxAffectedIDs {
-	my($self, $num) = @_;
+	my($self, $num, $min_weightsum) = @_;
 	$num ||= 10;
+	$min_weightsum ||= 1;
 	return $self->sqlSelectAllHashrefArray(
 		'tagboxes.tbid,
 		 affected_id,
@@ -230,7 +231,7 @@ sub getMostImportantTagboxAffectedIDs {
 		'tagboxes, tagboxlog_feeder',
 		'tagboxes.tbid=tagboxlog_feeder.tbid',
 		"GROUP BY tagboxes.tbid, affected_id
-		 HAVING sum_imp_weight >= 1
+		 HAVING sum_imp_weight >= $min_weightsum
 		 ORDER BY sum_imp_weight DESC LIMIT $num");
 }
 
