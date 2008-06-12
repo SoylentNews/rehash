@@ -329,7 +329,7 @@ sub previewReply {
 		error => $error_message,
 	);
 	$to_dump{html} = { "replyto_preview_$pid" => $html } if $html;
-	$to_dump{eval_first} = "\$('gotmodwarning_$pid').value = 1;"
+	$to_dump{eval_first} = "\$dom('gotmodwarning_$pid').value = 1;"
 		if $form->{gotmodwarning} || ($error_message && $error_message eq
 			Slash::Utility::Comments::getError("moderations to be lost")
 		);
