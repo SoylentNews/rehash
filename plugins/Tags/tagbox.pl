@@ -289,6 +289,7 @@ sub insert_feederlog {
 
 sub run_tagboxes_until {
 	my($run_until) = @_;
+	my $constants = getCurrentStatic();
 	my $activity = 0;
 	$tagboxes = $tagboxdb->getTagboxes();
 	my $overnight_sum = defined($constants->{tags_overnight_minweightsum})
