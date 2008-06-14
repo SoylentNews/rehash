@@ -351,23 +351,28 @@ function kidHiddens(cid, kidhiddens) {
 	return 0;
 }
 
-function revealKids(cid) {
+function revealKids(cid, not_top) {
 	if (!loaded)
 		return false;
 
 	setDefaultDisplayMode(cid);
 	var comment = comments[cid];
+	var len = comment['kids'].length;
 
-	if (comment['kids'].length) {
-		for (var kiddie = 0; kiddie < comment['kids'].length; kiddie++) {
+	if (len) {
+		var only_one = 0;
+		if (!not_top && len == 1)
+			only_one = 1;
+
+		for (var kiddie = 0; kiddie < len; kiddie++) {
 			var kid = comment['kids'][kiddie];
 			setDefaultDisplayMode(kid);
 			if (comments[kid]['points'] == -2) { // -2 is special case for placeholder-hiddens
-				revealKids(kid);
+				revealKids(kid, 1); // 1 == not at the top level
 				continue;
 			}
 			if (displaymode[kid] == 'hidden') {
-				futuredisplaymode[kid] = 'oneline';
+				futuredisplaymode[kid] = only_one ? 'full' : 'oneline';
 				updateDisplayMode(kid, futuredisplaymode[kid], 1);
 				updateComment(kid, futuredisplaymode[kid]);
 			}
@@ -493,8 +498,8 @@ function addComment(cid, comment, html, front) {
 	html = html || dummyComment(cid);
 
 	if (pid) {
-		var tree = $dom('tree_' + pid);
-		if (tree) {
+		var tree = $('tree_' + pid);
+		if (tree.html()) {
 			setDefaultDisplayMode(pid);
 			var parent = comments[pid];
 			if (front)
@@ -502,24 +507,27 @@ function addComment(cid, comment, html, front) {
 			else
 				parent['kids'].push(cid);
 
-			var commtree = $dom('commtree_' + pid);
-			if (commtree) {
+			var commtree = $('#commtree_' + pid);
+			if (commtree.html()) {
 				if (front)
-					commtree.innerHTML = html + commtree.innerHTML;
+					commtree.before(html); //commtree.innerHTML = html + commtree.innerHTML;
 				else
-					commtree.innerHTML = commtree.innerHTML + html;
+					commtree.after(html); //commtree.innerHTML = commtree.innerHTML + html;
 			} else {
-				tree.innerHTML = tree.innerHTML + '<ul id="commtree_' + pid + '">' + html + '</ul>';
+				tree.after('<ul id="commtree_' + pid + '">' + html + '</ul>');
+				//tree.innerHTML = tree.innerHTML + '<ul id="commtree_' + pid + '">' + html + '</ul>';
 			}
 		}
 
 	} else {
-		var commlist = $dom('commentlisting');
-		if (commlist) {
+		var commlist = $('#commentlisting');
+
+		if (commlist.html()) {
 			root_comments.push(cid);
 			root_comments_hash[cid] = 1;
 
-			commlist.innerHTML = commlist.innerHTML.replace(/(<li id="roothiddens" class="hide".*?>)/i, html + "$1");
+			$('#roothiddens').before(html);
+			//commlist.innerHTML = commlist.innerHTML.replace(/(<li id="roothiddens" class="hide".*?>)/i, html + "$1");
 		}
 	}
 
