@@ -29,7 +29,7 @@ __template__
 	If this is correct select your payment type below:
 		<center><table border=0 cellpadding=3><tr>
 		<td>[% PROCESS paypalbut %]</td>
-		<!-- <td>[% PROCESS ccbut %]</td> -->
+		<td>[% PROCESS ccbut %]</td>
 		</tr></table></center>
 	[% ELSIF type == "gift" %]
 		[% IF sub_user %]
@@ -42,7 +42,7 @@ __template__
 			[% gift.uid = uid; gift.puid = user.uid %]
 			<center><table border=0 cellpadding=3><tr>
 			<td>[% PROCESS paypalbut gift = gift from = from %]</td>
-			<!-- <td>[% PROCESS ccbut gift = gift from = from %]</td> -->
+			<td>[% PROCESS ccbut gift = gift from = from %]</td>
 			</tr></table></center>
 		[% ELSE %]
 			<p>No user was found for the UID ([% uid %]) you specified.  Please <a href="[% gSkin.rootdir %]/subscribe.pl">go back</a> and correct this to continue.
