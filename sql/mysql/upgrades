@@ -5371,3 +5371,6 @@ INSERT INTO vars (name, value, description) VALUES ('tags_overnight_minweightsum
 INSERT INTO vars (name, value, description) VALUES ('tags_overnight_starthour', '7', 'GMT hour at which overnight processing begins');
 INSERT INTO vars (name, value, description) VALUES ('tags_overnight_stophour', '10', 'GMT hour after which overnight processing ends');
 
+# for tagboxes/CommentScoreReason
+INSERT INTO vars (name, value, description) VALUES ('tagbox_csr_baseneediness', '60', 'Base neediness score for comments that have been moderated');
+
