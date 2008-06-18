@@ -30,6 +30,7 @@ htdoc=htdocs/images/common.js
 htdoc=htdocs/images/nodnix.js
 htdoc=htdocs/images/jquery/jquery-1.2.6.js
 htdoc=htdocs/images/jquery/slashdot.jquery.js
+htdoc=htdocs/images/tagbar.js
 htdoc=htdocs/images/sectionprefs.js
 requiresplugin=ResKey
 template=templates/ajax_reskey_signoff;misc;default
