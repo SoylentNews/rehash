@@ -167,9 +167,9 @@ sub run {
 		$neediness -= 1000 if $mod_user->{seclev} > 1;
 	}
 	# Scale neediness to match the firehose color range.
-	my $top_entry = 290;
+	my $top_entry_score = 290;
 	if (my $firehose = getObject('Slash::FireHose')) {
-		$top_entry = $firehose->getEntryPopularityForColorLevel(1);
+		$top_entry_score = $firehose->getEntryPopularityForColorLevel(1);
 	}
 	$neediness *= $top_entry_score/$base_neediness;
 	# If we are only doing a certain percentage of neediness here,
