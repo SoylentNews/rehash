@@ -1,0 +1,53 @@
+.tbar ul {
+	list-style: none;
+	padding: 0;
+}
+
+.mark_not { color: red }
+.mark_pound { font-weight: bold }
+.mark_3 { color: orange }
+.mark_4 { color: darkgray }
+
+.tbar li, .tbar ul {
+	display: inline;
+	padding: 0 0.25em 0 0;
+}
+
+.tbar {
+	display: block;
+	position: relative;
+}
+
+.tbar span.tag {
+	font-family: Optima, sans serif;
+}
+
+.tbar span.tag:hover {
+	cursor: pointer;
+	background-color: lightgray;
+}
+
+.tbar ul.tmenu {
+	display: none;
+	position: absolute;
+	top: -5px;
+	right: 5px;
+}
+
+.tbar > ul > li {
+	position: relative;
+}
+
+.tbar > ul > li:hover ul.tmenu {
+	display: inline;
+}
+
+.tmenu li {
+	font-size: 80%;
+	padding: 0 0.2em;
+	color: darkgreen;
+}
+
+.tmenu li:hover {
+	background-color: lightgray;
+}
