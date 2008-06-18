@@ -83,11 +83,11 @@ sub get_cidglobjid_to_discglobjid_hr {
 		'comments',
 		"cid IN ($cids_wanted_str)");
 	# Get the globjid for each discussion id, creating it if necessary..
-	my $discs_wanted_ar = sort { $a <=> $b } values %$cid_to_discid_hr;
+	my $discs_wanted_ar = [ sort { $a <=> $b } values %$cid_to_discid_hr ];
 	my $discid_to_discglobjid_hr = { };
 	for my $discid (@$discs_wanted_ar) {
-		$discid_to_discglobjid_hr->{$disc_id} = $self->getGlobjidCreate(
-			'discussions', $disc_id, { reader_ok => 1 });
+		$discid_to_discglobjid_hr->{$discid} = $self->getGlobjidCreate(
+			'discussions', $discid, { reader_ok => 1 });
 	}
 
 	# Match up each cid's globjid to its discussion's globjid.
