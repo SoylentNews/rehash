@@ -37,6 +37,7 @@ our @EXPORT  = qw(
 	constrain_score dispComment displayThread printComments
 	jsSelectComments commentCountThreshold commentThresholds discussion2
 	selectComments preProcessReplyForm makeCommentBitmap parseCommentBitmap
+	saveCommentBitmap getCommentBitmap saveCommentReadLog
 	getPoints preProcessComment postProcessComment prevComment saveComment
 );
 
@@ -558,6 +559,50 @@ sub _get_thread {
 		}
 	}
 	return $newcomments;
+}
+
+sub saveCommentReadLog {
+	my($comments, $discussion_id, $uid) = @_;
+
+	$uid ||= getCurrentUser('uid');
+	my $slashdb = getCurrentDB();
+
+	# cache inserts?
+	for my $cid (@$comments) {
+		$slashdb->sqlInsert('users_comments_read_log', {
+			uid            => $uid,
+			discussion_id  => $discussion_id,
+			cid            => $cid
+		}, { ignore => 1 });
+	}
+}
+
+
+sub getCommentBitmap {
+	my($discussion_id, $uid) = @_;
+
+	$uid ||= getCurrentUser('uid');
+	my $slashdb = getCurrentDB(); # is reader fast enough to be useful?
+
+	my $bitmap = $slashdb->sqlSelect('comment_bitmap', 'users_comments_read',
+		'uid=' . $slashdb->sqlQuote($uid) . ' AND discussion_id=' .
+		$slashdb->sqlQuote($discussion_id)
+	);
+
+	return $bitmap;
+}
+
+sub saveCommentBitmap {
+	my($bitmap, $discussion_id, $uid) = @_;
+
+	$uid ||= getCurrentUser('uid');
+	my $slashdb = getCurrentDB();
+
+	$slashdb->sqlReplace('users_comments_read', {
+		uid            => $uid,
+		discussion_id  => $discussion_id,
+		comment_bitmap => $bitmap
+	});
 }
 
 sub parseCommentBitmap {
