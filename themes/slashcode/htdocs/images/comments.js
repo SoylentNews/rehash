@@ -499,7 +499,7 @@ function addComment(cid, comment, html, front) {
 
 	if (pid) {
 		var tree = $('tree_' + pid);
-		if (tree.html()) {
+		if (tree.length) {
 			setDefaultDisplayMode(pid);
 			var parent = comments[pid];
 			if (front)
@@ -508,26 +508,24 @@ function addComment(cid, comment, html, front) {
 				parent['kids'].push(cid);
 
 			var commtree = $('#commtree_' + pid);
-			if (commtree.html()) {
+			if (commtree.length) {
 				if (front)
-					commtree.before(html); //commtree.innerHTML = html + commtree.innerHTML;
+					commtree.before(html);
 				else
-					commtree.after(html); //commtree.innerHTML = commtree.innerHTML + html;
+					commtree.after(html);
 			} else {
 				tree.after('<ul id="commtree_' + pid + '">' + html + '</ul>');
-				//tree.innerHTML = tree.innerHTML + '<ul id="commtree_' + pid + '">' + html + '</ul>';
 			}
 		}
 
 	} else {
 		var commlist = $('#commentlisting');
 
-		if (commlist.html()) {
+		if (commlist.length) {
 			root_comments.push(cid);
 			root_comments_hash[cid] = 1;
 
 			$('#roothiddens').before(html);
-			//commlist.innerHTML = commlist.innerHTML.replace(/(<li id="roothiddens" class="hide".*?>)/i, html + "$1");
 		}
 	}
 
@@ -1123,12 +1121,12 @@ function previewReply(pid) {
 }
 
 function replyTo(pid, nofocus) {
-	var replydiv = $dom('replyto_' + pid);
-	if (!replydiv)
+	var replydiv = $('#replyto_' + pid);
+	if (!replydiv.length)
 		return false; // seems we shouldn't be here ...
 
-	var postercomment = $dom('postercomment_' + pid);
-	if (postercomment) {
+	var postercomment = $('#postercomment_' + pid);
+	if (postercomment.length) {
 		postercomment.focus(); // already have one, bail
 		return false;
 	}
@@ -1138,22 +1136,22 @@ function replyTo(pid, nofocus) {
 	params['pid'] = pid;
 	params['sid'] = discussion_id;
 
-	replydiv.innerHTML = '<span class="loading">Loading...</span>';
+	replydiv.html('<span class="loading">Loading...</span>');
 
 	var handlers = {
 		onComplete: function(transport) {
 			json_handler(transport);
 			if (pid) { // XXX
-				var reply_link = $dom('reply_link_' + pid);
+				var reply_link = $('#reply_link_' + pid);
 				// in some cases this won't exist; if not, fine, we
 				// just don't do it
-				if (reply_link) {
-					reply_link_html[pid] = reply_link.innerHTML;
-					reply_link.innerHTML = '<p><b><a href="#" onclick="cancelReply(' + pid + '); return false;">Cancel Reply</a></b></p>';
+				if (reply_link.length) {
+					reply_link_html[pid] = reply_link.html();
+					reply_link.html('<p><b><a href="#" onclick="cancelReply(' + pid + '); return false;">Cancel Reply</a></b></p>');
 				}
 			}
 			if (!nofocus)
-				$dom('postercomment_' + pid).focus();
+				$('#postercomment_' + pid).focus();
 		}
 	};
 
