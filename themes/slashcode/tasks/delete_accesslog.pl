@@ -40,7 +40,7 @@ $task{$me}{code} = sub {
 	# If the log master is ENGINE=BLACKHOLE, we can't delete from there;
 	# delete from the log slave instead.
 	my $delete_db = $logdb;
-	if (! $logdb->sqlSelect('id', 'accesslog' "id=$id") {
+	if (! $logdb->sqlSelect('id', 'accesslog', "id=$id")) {
 		$delete_db = $log_slave;
 	}
 

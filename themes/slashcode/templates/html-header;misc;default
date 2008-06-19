@@ -13,12 +13,48 @@ en_US
 __name__
 html-header
 __template__
+[% UNLESS only_css %]
 [% DEFAULT title="$constants.sitename: $constants.slogan" %]
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<HTML><HEAD><TITLE>[% title | strip_notags %]</TITLE>
-[% IF meta_desc %]
-<META NAME="DESCRIPTION" CONTENT="[% meta_desc | strip_attribute %]">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+            "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="[% constants.content_type_webpage %]">
+[% IF meta_desc %]<meta name="description" content="[% meta_desc | strip_attribute %]">[% END %]
+<title>[% title | strip_notags %]</title>
 [% END %]
+[% css = Slash.db.getCSS() %]
+[%- FOREACH file = css -%]
+[% IF file.ie_cond %]<!--[if [% file.ie_cond %]]>[% END %]<link rel="[% file.rel %]" type="[% file.type %]" media="[% file.media %]" href="[% IF constants.css_use_imagedir; constants.imagedir; ELSE; constants.rootdir; END %]/[% file.file %]?[% constants.cvs_tag_currentcode %]"[% IF file.title %] title="[% file.title %]"[% END %]>[% IF file.ie_cond %]<![endif]-->[% END %]
+[% END -%]
+[%- IF constants.plugin.Ajax %]
+<script src="[% constants.imagedir %]/jquery/jquery-1.2.6.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/slashdot.jquery.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/tagbar.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/yahoo.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/dom.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/event.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/dragdrop.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/animation.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% IF user.currentPage == "firehose" || user.currentPage == "console" -%]
+<script src="[% constants.imagedir %]/yui/slider.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% END -%]
+<script src="[% constants.imagedir %]/yui/connection.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/datasource-beta.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/yui/calendar.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/sd_autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/sd_calendar.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% IF user.currentPage == "firehose" -%]
+<script src="[% constants.imagedir %]/slashbox.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% END -%]
+<script src="[% constants.imagedir %]/common.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/nodnix.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% IF user.is_admin -%]
+<script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+[% END %]
+[% PROCESS ajax_reskey_tag reskey_label => 'reskey_static', reskey_name => 'ajax_user_static', reskey_tag_js => 2 %]
+[% END # constants.plugin.Ajax %]
 __seclev__
 10000
 __version__

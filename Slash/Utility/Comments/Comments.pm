@@ -1667,8 +1667,7 @@ sub saveComment {
 	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 	if ($moddb) {
 		my $text = $moddb->checkDiscussionForUndoModeration($comm->{sid});
-		# XXX doesn't work for D2
-		print $text if $text;
+		print $text if $text && !discussion2($user);
 	}
 
 	my $tc = $slashdb->getVar('totalComments', 'value', 1);

@@ -230,7 +230,7 @@ Firehose Report
 [% END %]
 
 [% IF is_spam_new_count.defined %]
-Yesterday's admin binspam tags: [% binspam_tag_count %]
+Yesterday's admin binspammed globjs: [% binspam_globj_count %]
 Yesterday's hose item is_spams: [% is_spam_new_count %]
 Yesterday's Despam autodetects: [% is_spam_autodetected_count %]
 [% END %]

@@ -21,11 +21,14 @@ sub new {
 	my($class, $user) = @_;
 	my $self = {};
 
+	(my $modname = $class) =~ s/^Slash:://;
+
 	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{Moderation};
+	return unless $plugin->{$modname};
 
 	my $constants = getCurrentStatic();
-	return undef unless $constants->{m1} && $constants->{m1_pluginname} eq 'Moderation';
+	return undef unless $constants->{m1}
+		&& $constants->{m1_pluginname} eq $modname;
 
 	bless($self, $class);
 	$self->{virtual_user} = $user;
@@ -59,7 +62,7 @@ sub getReasons {
 
 sub ajaxModerateCid {
 	my($slashdb, $constants, $user, $form, $options) = @_;
-	my $self = getObject('Slash::Moderation');
+	my $self = getObject('Slash::' . $constants->{m1_pluginname});
 	my $cid = $form->{cid} or return;
 	my $sid = $form->{sid} or return;
 	my $reason = $form->{reason} or return;
@@ -103,9 +106,7 @@ sub ajaxModerateCid {
 		} elsif (!$ret_val) {
 			$html->{$select} = "Error: No moderation performed.";
 
-		} elsif ($ret_val == -1) {
-
-		} elsif ($ret_val == -2) {
+		} elsif ($ret_val == -1 || $ret_val == -2) {
 			$html->{$select} = "Error: $user->{points} moderation points left.";
 		}
 	}
@@ -146,39 +147,12 @@ sub moderateComment {
 		|| ( $constants->{authors_unlimited}
 			&& $user->{seclev} >= $constants->{authors_unlimited} );
 
-	if ($user->{points} < 1 && !$superAuthor) {
+	# this check is done already, but we want to return a specific error
+	if (1 > $user->{points} && !$user->{acl}{modpoints_always} && !$superAuthor) {
 		return -1;
 	}
 
-	my $comment = $self->getComment($cid);
-
-	$comment->{time_unixepoch} = timeCalc($comment->{date}, "%s", 0);
-
-	# The user should not have been been presented with the menu
-	# to moderate if any of the following tests trigger, but,
-	# an unscrupulous user could have faked their submission with
-	# or without us presenting them the menu options.  So do the
-	# tests again.  XXX  These tests are basically copy-and-pasted
-	# from Slash.pm _can_mod, which should be rectified. -Jamie
-	# use reskeys instead ... -Pudge
-	# One or more reskey checks will need to invoke can_mod or some
-	# subset of it. -Jamie
-	unless ($superAuthor) {
-		# Do not allow moderation of any comments with the same UID as the
-		# current user (duh!).
-		return 0 if $user->{uid} == $comment->{uid};
-		# Do not allow moderation of any comments (anonymous or otherwise)
-		# with the same IP as the current user.
-		return 0 if $user->{ipid} eq $comment->{ipid};
-		# If the var forbids it, do not allow moderation of any comments
-		# with the same *subnet* as the current user.
-		return 0 if $constants->{mod_same_subnet_forbid}
-			and $user->{subnetid} eq $comment->{subnetid};
-		# Do not allow moderation of comments that are too old.
-		return 0 unless $comment->{time_unixepoch} >= time() - 3600*
-			($constants->{comments_moddable_hours}
-				|| 24*$constants->{archive_delay});
-	}
+	my $comment = $options->{comment} || $self->getComment($cid);
 
 	# Start putting together the data we'll need to display to
 	# the user.
@@ -233,7 +207,7 @@ sub moderateComment {
 
 	# If more than 1 mod point needed, we might not have enough,
 	# so this might still fail.
-	if ($pointsneeded > $user->{points} && !$superAuthor) {
+	if ($pointsneeded > $user->{points} && !$user->{acl}{modpoints_always} && !$superAuthor) {
 		return -2;
 	}
 
@@ -992,6 +966,9 @@ sub undoModeration {
 			"cid=$cid AND uid=$uid"
 		);
 
+		# Remove any tags on that comment by this user, as well.
+		$self->removeModTags($uid, $cid);
+
 		# Restore modded user's karma, again within the proper boundaries.
 		my $adjust = -$val;
 		$adjust =~ s/^([^+-])/+$1/;
@@ -1189,6 +1166,9 @@ sub createModeratorLog {
 		my $mod_id = $self->getLastInsertId();
 		$metamod_db->adjustForNewMod($uid, $cid, $reason, $active, $mod_id);
 	}
+
+	$self->createModTag($uid, $cid, $reason);
+
 	return $ret_val;
 }
 
@@ -1357,15 +1337,12 @@ sub convert_tokens_to_points {
 	# update all at once on just one table and since we're using
 	# + and - instead of using absolute values. - Jamie 2002/08/08
 
-	for my $uid (@$uids) {
-		next unless $uid;
-		my $rows = $self->setUser($uid, {
-			-lastgranted    => 'NOW()',
-			-tokens         => "GREATEST(0, tokens - $tokentrade)",
-			-points         => "LEAST(points + $pointtrade, $maxpoints)",
-		});
-		$granted{$uid} = 1 if $rows;
-	}
+	$self->setModPoints($uids, \%granted, {
+		pointtrade => $pointtrade,
+		maxpoints  => $maxpoints,
+		tokentrade => $tokentrade
+	});
+
 
 	# We used to do some fancy footwork with a cursor and locking
 	# tables.  The only difference between that code and this is that
@@ -1844,6 +1821,24 @@ sub updateTokens {
 			# hit the DB too hard.
 			Time::HiRes::sleep($sleep_time) if @uids && $sleep_time;
 		}
+	}
+}
+
+# placeholders, used only in TagModeration
+sub removeModTags {}
+sub createModTag  {}
+
+sub setModPoints {
+	my($self, $uids, $granted, $opts) = @_;
+
+	for my $uid (@$uids) {
+		next unless $uid;
+		my $rows = $self->setUser($uid, {
+			-lastgranted    => 'NOW()',
+			-tokens         => "GREATEST(0, tokens - $opts->{tokentrade})",
+			-points         => "LEAST(points + $opts->{pointtrade}, $opts->{maxpoints})",
+		});
+		$granted->{$uid} = 1 if $rows;
 	}
 }
 

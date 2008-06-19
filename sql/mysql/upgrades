@@ -5305,8 +5305,6 @@ ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","
 # for plugins/Stats
 INSERT INTO vars (name, value, description) VALUES ('stats_firehose_spamcount', '0', 'Number of firehose items marked as is_spam');
 
-# PUDGE LAST UPDATED HERE
-
 # 2008-05-07
 UPDATE vars SET value = 'T_2_5_0_204' WHERE name = 'cvs_tag_currentcode';
 
@@ -5333,10 +5331,6 @@ ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","
 # 2008-05-15
 UPDATE vars SET value = 'T_2_5_0_205' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # 2008-05-21
 UPDATE vars SET value = 'T_2_5_0_206' WHERE name = 'cvs_tag_currentcode';
 
@@ -5356,3 +5350,27 @@ ALTER TABLE urls ADD INDEX bfu (believed_fresh_until);
 
 # for plugins/FireHose
 ALTER TABLE firehose ADD INDEX url_id (url_id);
+
+ALTER TABLE stories ADD COLUMN archive_last_update DATETIME DEFAULT '1970-01-01 00:00:00' NOT NULL;
+# keep last_update the same
+UPDATE stories SET archive_last_update=last_update, last_update=last_update;
+
+
+# 2008-06-04
+UPDATE vars SET value = 'T_2_5_0_208' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# PUDGE LAST UPDATED HERE
+
+# for plugins/Tags
+INSERT INTO vars (name, value, description) VALUES ('tags_overnight_minweightsum', '0.1', 'Minimum tagbox weight sum for
+ overnight processing. To disable overnight difference, set to 1');
+INSERT INTO vars (name, value, description) VALUES ('tags_overnight_starthour', '7', 'GMT hour at which overnight processing begins');
+INSERT INTO vars (name, value, description) VALUES ('tags_overnight_stophour', '10', 'GMT hour after which overnight processing ends');
+
+# for tagboxes/CommentScoreReason
+INSERT INTO vars (name, value, description) VALUES ('tagbox_csr_baseneediness', '60', 'Base neediness score for comments that have been moderated');
+

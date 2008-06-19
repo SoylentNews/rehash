@@ -945,8 +945,11 @@ EOT
 		my($binspam_globj_count, $is_spam_new_count, $autodetected_count)
 			= $stats->tallyBinspam();
 		$data{binspam_globj_count} = $binspam_globj_count;
+		$statsSave->createStatDaily('binspam_globj_count', $binspam_globj_count);
 		$data{is_spam_new_count} = $is_spam_new_count;
+		$statsSave->createStatDaily('is_spam_new_count', $is_spam_new_count);
 		$data{is_spam_autodetected_count} = $autodetected_count;
+		$statsSave->createStatDaily('is_spam_autodetected_count', $autodetected_count);
 	}
 
 	if ($tags) {

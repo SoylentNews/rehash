@@ -147,12 +147,49 @@ sub run {
 	return unless $tags_ar && @$tags_ar;
 	my($keep_karma_bonus, $karma_bonus_downmods_left) = (1, $constants->{mod_karma_bonus_max_downmods});
 	my $current_reason_mode = 0;
+	my $base_neediness = $constants->{tagbox_csr_baseneediness} || 60;
+	my $neediness = $base_neediness;
+
+	# First scan: neediness (comments.f3).
+	for my $tag (@$tags_ar) {
+		# Do nothing if this tag was inactivated.
+		next if $tag->{inactivated};
+		# If this was a moderation _or_ a nod/nix (indicating dis/agreement),
+		# neediness changes.  If this was done by an admin, neediness
+		# changes a lot.
+		my $reason = $tagnameid_reasons{$tag->{tagnameid}};
+		next unless $reason || $tag->{tagnameid} == $self->{nodid} || $tag->{tagnameid} == $self->{nixid};
+		my $mod_user = $self->getUser($tag->{uid});
+		my $root_net_fairs = ( $mod_user->{up_fair} + $mod_user->{down_fair}
+			- ($mod_user->{up_unfair} + $mod_user->{down_unfair}) )
+			** 0.5;
+		$neediness -= $root_net_fairs;
+		$neediness -= 1000 if $mod_user->{seclev} > 1;
+	}
+	# Scale neediness to match the firehose color range.
+	my $top_entry_score = 290;
+	if (my $firehose = getObject('Slash::FireHose')) {
+		$top_entry_score = $firehose->getEntryPopularityForColorLevel(1);
+	}
+	$neediness *= $top_entry_score/$base_neediness;
+	# If we are only doing a certain percentage of neediness here,
+	# this would be the place to hash the comment cid with salt and
+	# drop its score to -50 unless it randomly qualified.
+	# Minimum neediness is -50.
+	$neediness = -50 if $neediness < -50;
+
+	# Second scan: overall reason (comments.f2), and traditional
+	# comment score (comments.f1).
 	my $allreasons_hr = {( %{$reasons} )};
 	for my $id (keys %$allreasons_hr) {
 		$allreasons_hr->{$id} = { reason => $id, c => 0 };
 	}
 	for my $tag (@$tags_ar) {
+		# Do nothing if this tag was inactivated.
 		next if $tag->{inactivated};
+		# Currently, only actual moderations (not nod/nixes) change a
+		# comment's score (and reason).  Only continue processing if
+		# this is an actual moderation.
 		my $reason = $tagnameid_reasons{$tag->{tagnameid}};
 		next unless $reason;
 		if ($reason->{val} < 0) {
@@ -175,6 +212,7 @@ sub run {
 	$self->sqlUpdate('comments', {
 			f1 =>	$new_score,
 			f2 =>	$current_reason_mode,
+			f3 =>	$neediness,
 		}, "cid='$cid'");
 }
 

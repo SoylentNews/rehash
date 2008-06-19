@@ -111,10 +111,9 @@ sub feed_userchanges {
 
 sub run {
 	my($self, $affected_id) = @_;
-	my $tagboxdb = getObject('Slash::Tagbox');
-	my $user_tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
-	main::tagboxLog("TagCountUser->run called for $affected_id, ar count " . scalar(@$user_tags_ar));
-	my $count = grep { !defined $_->{inactivated} } @$user_tags_ar;
+	my $tagboxdb = getObject('Slash::Tagbox', { db_type => 'reader' });
+	my $count = $tagboxdb->sqlCount('tags', "uid=$affected_id AND inactivated IS NULL");
+	main::tagboxLog("TagCountUser->run called for $affected_id, count $count");
 	$self->setUser($affected_id, { tag_count => $count });
 }
 

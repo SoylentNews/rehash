@@ -518,7 +518,7 @@ sub copyBackup {
 				my $file = catfile($back, 'invindex', $f);
 				lstat $file;
 				# file is empty and more than an hour old
-				if (-f $file && -s _ == 0 && -M _ > 1/24) {
+				if (-f _ && -s _ == 0 && -M _ > 1/24) {
 					unlink $file;
 				}
 			}

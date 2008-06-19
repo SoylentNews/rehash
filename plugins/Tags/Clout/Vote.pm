@@ -101,6 +101,8 @@ sub get_nextgen {
 	sleep 10;
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $mintagid = $reader->sqlSelect('MIN(tagid)', 'tags',
+		"created_at >= DATE_SUB(NOW(), INTERVAL $self->{months_back} MONTH)");
 	my $hr_ar = $reader->sqlSelectAllHashrefArray(
 		"sourcetag.uid AS sourcetag_uid,
 		 UNIX_TIMESTAMP(newtag.created_at)-UNIX_TIMESTAMP(sourcetag.created_at)
@@ -114,7 +116,6 @@ sub get_nextgen {
 		 newtag.uid AS newtag_uid,
 		 simil,
 		 users_info.tag_clout,
-		 UNIX_TIMESTAMP(users_info.created_at) AS created_at_ut,
 		 IF(firehose_ogaspt.pubtime IS NULL,
 			NULL,
 			UNIX_TIMESTAMP(firehose_ogaspt.pubtime)-UNIX_TIMESTAMP(newtag.created_at))
@@ -138,8 +139,9 @@ sub get_nextgen {
 			 AND sourcetag.tagnameid=tagnames_similar.src_tnid
 			 AND tagnames_similar.dest_tnid=newtag.tagnameid
 		 AND simil != 0
+		 AND sourcetag.tagid >= $mintagid
 		 AND sourcetag.tagid != newtag.tagid
-		 AND newtag.created_at >= DATE_SUB(NOW(), INTERVAL $self->{months_back} MONTH)
+		 AND newtag.tagid >= $mintagid
 		 AND newtag.uid=users.uid
 		 AND newtag.uid=users_info.uid
 		 AND newtpc.uid IS NULL
@@ -237,7 +239,7 @@ sub count_uid_nodnix {
 	return unless keys %uid_needed;
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
 	my @uids_needed = sort { $a <=> $b } keys %uid_needed;
-	my $splice_count = 2000;
+	my $splice_count = 20;
 	while (@uids_needed) {
 		my @uid_chunk = splice @uids_needed, 0, $splice_count;
 		my $uid_str = join(",", @uid_chunk);
@@ -253,12 +255,21 @@ sub count_uid_nodnix {
 			"tagnameid='$self->{nixid}' AND uid IN ($uid_str)
 			 AND created_at >= DATE_SUB(NOW(), INTERVAL $self->{months_back} MONTH)",
 			'GROUP BY uid');
+		if (grep { $self->{debug_uids}{$_} } @uid_chunk) {
+			my $nod_d = Dumper($nod_hr); $nod_d =~ s/\s+/ /g;
+			my $nix_d = Dumper($nix_hr); $nix_d =~ s/\s+/ /g;
+			print STDERR sprintf("%s tags_updateclouts %s count_uid_nodnix splice nod_d=%s nix_d=%s\n",
+				scalar(gmtime), ref($self),
+				$nod_d, $nix_d);
+		}
 		for my $uid (@uid_chunk) {
 			$self->{nodc}{$uid} = $nod_hr->{$uid} || 0;
 			$self->{nixc}{$uid} = $nix_hr->{$uid} || 0;
 			if ($self->{debug_uids}{$uid}) {
-				print STDERR sprintf("%s tags_updateclouts %s count_uid_nodnix uid=%d nod=%s nix=%s\n",
-					scalar(gmtime), ref($self), $uid, $self->{nodc}{$uid}, $self->{nixc}{$uid});
+				print STDERR sprintf("%s tags_updateclouts %s count_uid_nodnix uid=%d nod=%s nix=%s nodc=%s nixc=%s\n",
+					scalar(gmtime), ref($self), $uid,
+					$nod_hr->{$uid}, $nix_hr->{$uid},
+					$self->{nodc}{$uid}, $self->{nixc}{$uid});
 			}
 		}
 		sleep 1 if @uids_needed;

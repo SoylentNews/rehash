@@ -3530,6 +3530,13 @@ sub setStory {
 
 	$change_hr->{day_published} = $change_hr->{'time'} if $change_hr->{'time'};
 
+	# what about stories set to ND?  this is not supported by our OAI code,
+	# i think, but let's update anyway -- pudge
+	if (grep /^(title|uid|time|introtext|bodytext|primaryskid|tid|neverdisplay)$/, keys %$change_hr) {
+		# this is the only place this ever changes
+		$change_hr->{-archive_last_update} = 'NOW()';
+	}
+
 	# Now we know exactly what columns have to change.  Figure out
 	# which tables they belong to.
 
@@ -7543,6 +7550,11 @@ sub createStory {
 		$story->{sid} = createSid();
 		my $sid_ok = 0;
 		while ($sid_ok == 0) {
+			# we rely on logic in setStory() later to properly
+			# set up the data for a story, so we can't someday
+			# just change this to do an insert of all the story
+			# data, we do need to continue pass it through
+			# setStory()
 			$sid_ok = $self->sqlInsert('stories',
 				{ sid => $story->{sid} },
 				{ ignore => 1 } ); # don't need error messages
