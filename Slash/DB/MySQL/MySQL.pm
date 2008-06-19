@@ -6275,11 +6275,10 @@ sub getCommentTextCached {
 	for my $cid (keys %$more_comment_text) {
 		my $abbreviate = $abbreviate_ok && $comments->{$cid}{class} eq 'oneline';
 		my $original_text = $more_comment_text->{$cid};
+		my $this_max_len = $abbreviate ? $abbreviate_len : $max_len;
 		if (	   $possible_chop
 			&& !($opt->{cid} && $opt->{cid} eq $cid)
-			&& $comments->{$cid}{len} > (
-				$abbreviate ? $abbreviate_len : $max_len
-			)
+			&& ($comments->{$cid}{len} > ($this_max_len + 256))
 		) {
 			# We remove the domain tags so that strip_html will not
 			# consider </a blah> to be a non-approved tag.  We'll
@@ -6287,7 +6286,7 @@ sub getCommentTextCached {
 			# the comment down to size, then massage it to make sure
 			# we still have good HTML after the chop.
 			my $abbrev_text = parseDomainTags($more_comment_text->{$cid}, 0, 1, 1);
-			my $this_len = $max_len;
+			my $this_len = $this_max_len;
 			if ($abbreviate) {
 				my $str = $abbrev_text;
 				# based on revertQuote() ... we replace the unused
@@ -6332,6 +6331,7 @@ sub getCommentTextCached {
 				unless ($bail) {
 					$str =~ s/(?<!<)(<[^<>]+>)/'<<'.length($1).'>>'/ge;
 
+					# count up where we're at
 					my $plen = $this_len = 0;
 					while ($str =~ /([^<>]|<<(\d+)>>)/g) {
 						my $len1 = length $1;
@@ -6341,7 +6341,7 @@ sub getCommentTextCached {
 							$this_len += $len1;
 							$plen += $len1;
 						}
-						last if $plen >= $abbreviate_len;
+						last if $plen >= $this_max_len + 256; # rest getting cut anyway
 					}
 				}
 			}
