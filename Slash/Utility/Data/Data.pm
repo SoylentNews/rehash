@@ -2700,6 +2700,9 @@ The 'approvedtags' entry in the vars table.
 	my %is_block    = map { ( lc, 1 ) } qw(p ol ul li dl dt dd blockquote quote div hr address h1 h2 h3 h4 h5 h6);
 	my %no_block    = map { ( lc, 1 ) } qw(b i strong em tt q dfn code samp kbd var cite address ins del big small span p sub sup a h1 h2 h3 h4 h5 h6);
 
+	# needs a <p> inside it
+	my %needs_p     = map { ( lc, 1 ) } qw(blockquote quote div);
+
 	# when a style tag is cut off prematurely because of a newly introduced block
 	# element, we want to re-start the style inside the block; it is not perfect,
 	# but that's why we're here, innit?
@@ -2737,6 +2740,8 @@ The 'approvedtags' entry in the vars table.
 		$lists_re{$list} = qr/$re/;
 	}
 
+	my $is_block_re = join '|', keys %is_block;
+
 sub balanceTags {
 	my($html, $options) = @_;
 	return '' if !defined($html) || !length($html);
@@ -2773,6 +2778,11 @@ sub balanceTags {
 			map lc, @{$constants->{$varname}};
 		$cache->{balanceTags}{$matchname} = $match = qr/$match/;
 	}
+
+	# easier to do this before we start the loop, and then fix it inside
+	# we need to make sure when a block ends, a new <p> begins
+	$html =~ s|(</(?:$is_block_re)>)|$1<p>|g;
+
 
 	## this is the main loop.  it finds a tag, any tag
 	while ($html =~ /(<(\/?)($match)\b[^>]*?( \/)?>)/sig) { # loop over tags
@@ -2927,6 +2937,9 @@ sub balanceTags {
 			# opening a new tag to be added to the stack
 			$tags{$tag}++;
 			push @stack, $tag;
+			if ($needs_p{$tag}) {
+				_substitute(\$html, '', '<p>', 1);
+			}
 
 			# we keep track of lists in an add'l stack, for
 			# the immediately above purpose, so push it on here
@@ -2966,7 +2979,12 @@ sub _removeEmpty {
 	my($html) = @_;
 	my $p    = getCurrentStatic('xhtml') ? '<p />' : '<p>';
 
-	$$html =~ s|<p>\s*</p>|$p|g;
+	# remove consecutive <p> tags
+	1 while $$html =~ s|<p>\s*</?p>|$p|g;
+	# remove <p> tags before beginning, or end, of blocks, or end of string
+	1 while $$html =~ s{\s* <p> \s*  ( $ | </?$is_block_re> )}{$1}gx;
+
+	# remove still-empty tags
 	while ($$html =~ m|<(\w+)>\s*</\1>|) {
 		$$html =~ s|<(\w+)>\s*</\1>\s*||g;
 	}
