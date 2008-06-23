@@ -498,7 +498,7 @@ function addComment(cid, comment, html, front) {
 	html = html || dummyComment(cid);
 
 	if (pid) {
-		var tree = $('tree_' + pid);
+		var tree = $('#tree_' + pid);
 		if (tree.length) {
 			setDefaultDisplayMode(pid);
 			var parent = comments[pid];
@@ -514,7 +514,7 @@ function addComment(cid, comment, html, front) {
 				else
 					commtree.after(html);
 			} else {
-				tree.after('<ul id="commtree_' + pid + '">' + html + '</ul>');
+				tree.append('<ul id="commtree_' + pid + '">' + html + '</ul>');
 			}
 		}
 
