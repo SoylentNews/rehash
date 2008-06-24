@@ -5376,3 +5376,5 @@ UPDATE vars SET value = 'T_2_5_0_209' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# for plugins/FireHose
+INSERT INTO ajax_ops VALUES (NULL, 'tags_get_top_firehose', 'Slash::FireHose', 'ajaxGetFireHoseTagsTop', 'ajax_tags_write', 'createuse');

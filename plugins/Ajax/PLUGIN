@@ -54,3 +54,4 @@ template=templates/prefs_authors;ajax;default
 template=templates/prefs_main;ajax;default
 template=templates/prefs_admin;ajax;default
 template=templates/sectionpref;ajax;default
+template=templates/tag_widget;misc;default

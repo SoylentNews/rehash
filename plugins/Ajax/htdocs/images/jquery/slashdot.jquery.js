@@ -40,15 +40,19 @@ jQuery.fn.extend({
 
 
 function split_if_string( list, sep ){
-	return typeof list === 'string' ? list.split(sep || /\s+/) : list
+	if ( typeof list !== 'string' )
+		return list;
+	else if ( ! list.length )
+		return [];
+	else
+		return list.split(sep || /\s+/);
 }
 
 
 function join_wrap( a, elem_prefix, elem_suffix, list_prefix, list_suffix ) {
 	var result = '';
+	a = split_if_string(a);
 	if ( a && a.length ) {
-		a = split_if_string(a);
-
 		var ep = elem_prefix || '';
 		var es = elem_suffix || '';
 							// Example:
@@ -61,10 +65,9 @@ function join_wrap( a, elem_prefix, elem_suffix, list_prefix, list_suffix ) {
 
 
 function map_list_to_set( list, map_fn ){
+	list = split_if_string(list);
 	if ( !list || !list.length )
 		return;
-
-	list = split_if_string(list);
 
 	if ( map_fn === undefined )
 		map_fn = function(x){return x};
