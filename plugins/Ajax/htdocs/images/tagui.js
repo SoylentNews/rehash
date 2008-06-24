@@ -127,12 +127,13 @@ var tbar_fns = {
 
 
 	fetch_tags: function(){
+		var tb = this;
 		$.post('/ajax.pl', {
 			op:		this.tagbar_data.fetch_op,
 			id:		this.tagbar_data.item_id,
 			no_markup:	1
 		}, function( tags ) {
-			this.set_tags(tags)
+			tb.set_tags(tags)
 		})
 	},
 
@@ -147,7 +148,31 @@ var tbar_fns = {
 			this.update_tags(op+tag);
 	}
 
-};
+}; // tbar_fns
+
+
+var twidget_fns = {
+
+	each_bar: function( fn ){
+		$('.tbar', this).each(fn);
+	},
+
+	connect_to: function( item_id ){
+		this.each_bar(function(){
+			this.remove_tags();
+			this.tagbar_data.item_id = item_id;
+		});
+		this.fetch_tags();
+	},
+
+	fetch_tags: function(){
+		this.each_bar(function(){
+			this.fetch_tags();
+		});
+	}
+
+}; // twidget_fns
+
 
 
 
@@ -158,12 +183,13 @@ function tag_bar( item_id, ajax_op, menu_cmds, tags ){
 		$('<div class="tbar"><ul></ul></div>')[0],
 		tbar_fns,
 		{ tagbar_data: {
-			request_op:	ajax_op,
+			fetch_op:	ajax_op,
 			item_id:	item_id,
 			menu_template:	join_wrap(menu_cmds, '<li>', '</li>', '<ul class="tmenu">', '</ul>')
 		}}
 	);
 	new_bar.tagbar_data.list_el = $('ul', new_bar)[0];
-	new_bar.update_tags(tags);
+	if ( tags !== undefined )
+		new_bar.update_tags(tags);
 	return new_bar;
 }

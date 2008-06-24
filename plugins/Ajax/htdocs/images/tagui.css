@@ -51,3 +51,13 @@
 .tmenu li:hover {
 	background-color: lightgray;
 }
+
+#tag-widget {
+  display: block;
+  position: absolute;
+  z-index: 10;
+  background-color: white;
+  border: 4px dotted darkgray;
+  padding: 0.4em;
+  min-width: 6em;
+}
