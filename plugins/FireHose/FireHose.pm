@@ -1226,6 +1226,10 @@ sub ajaxGetUserFirehose {
 	my $newtagspreloadtext = join ' ', @newtagspreload;
 	#print STDERR "ajaxGetUserFirehose $newtagspreloadtext\n\n";
 
+	if ( $form->{no_markup} ) {
+		return $newtagspreloadtext;
+	}
+
 	return slashDisplay($form->{nodnix} ? 'tagsnodnixuser' : 'tagsfirehosedivuser', {
 		id =>		$id,
 		newtagspreloadtext =>	$newtagspreloadtext,
@@ -2426,6 +2430,13 @@ sub getFireHoseTagsTop {
 
 	
 	return $tags_top;
+}
+
+sub ajaxGetFireHoseTagsTop {
+	my($slashdb, $constants, $user, $form) = @_;
+	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
+	my $item = $firehose_reader->getFireHose($form->{id});
+	return $item->{toptags};
 }
 
 sub getMinPopularityForColorLevel {
