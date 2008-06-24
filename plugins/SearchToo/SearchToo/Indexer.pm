@@ -516,10 +516,16 @@ sub copyBackup {
 			while (my $f = readdir($dh)) {
 				next if $f =~ /^\./;
 				my $file = catfile($back, 'invindex', $f);
+
 				lstat $file;
-				# file is empty and more than an hour old
-				if (-f _ && -s _ == 0 && -M _ > 1/24) {
-					unlink $file;
+				# file is empty ...
+				if (-f _ && -s _ == 0) {
+					# ... and more than an hour old
+					# current time - (time script started -
+					# file modify time since script started)
+					my $time = time - ($^T - ((-M _) * 86400));
+					# convert $time to days
+					unlink $file if (($time/86400) > 1/24);
 				}
 			}
 		} else {
