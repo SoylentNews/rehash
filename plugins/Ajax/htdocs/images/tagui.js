@@ -1,4 +1,4 @@
-// tagbar.js
+// tagui.js
 
 function bare_tag( t ){
 		// XXX what are the real requirements for a tag?
@@ -143,8 +143,8 @@ var tbar_fns = {
 		else if ( op != tag )
 			this.update_tags(op+tag);
 	}
-};
 
+};
 
 
 
