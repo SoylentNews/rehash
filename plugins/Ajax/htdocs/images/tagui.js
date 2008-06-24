@@ -1,6 +1,9 @@
 // tagui.js
 
 function bare_tag( t ){
+	if ( typeof t !== 'string' || ! t.length )
+		return t;
+
 		// XXX what are the real requirements for a tag?
 	return /[a-z][a-z0-9]*/.exec(t.toLowerCase())[0]
 }
