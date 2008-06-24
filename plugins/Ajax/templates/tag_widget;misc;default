@@ -1,0 +1,29 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+tag_widget
+__seclev__
+10000
+__template__
+<script type="text/javascript">
+$(function(){
+	var w = $('#tag-widget');
+	$.extend(w[0], twidget_fns);
+	w.hide()
+	 .append(tag_bar(null, 'tags_get_top_firehose', '! x'))
+	 .append(tag_bar(null, 'tags_get_user_firehose', '_ # ! )'))
+	 .append(tag_bar(null, 'tags_get_user_firehose'));
+})
+</script>
+<div id="tag-widget">
+</div>
+__version__
+$Id$
