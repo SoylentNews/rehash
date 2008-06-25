@@ -168,7 +168,8 @@ sub run {
 	}
 	# Scale neediness to match the firehose color range.
 	my $top_entry_score = 290;
-	if (my $firehose = getObject('Slash::FireHose')) {
+	my $firehose = getObject('Slash::FireHose');
+	if ($firehose) {
 		$top_entry_score = $firehose->getEntryPopularityForColorLevel(1);
 	}
 	$neediness *= $top_entry_score/$base_neediness;
@@ -208,6 +209,11 @@ sub run {
 	my $new_karma_bonus = ($karma_bonus eq 'yes' && $keep_karma_bonus) ? 1 : 0;
 
 #main::tagboxLog("CommentScoreReason->run setting cid $cid to score: $new_score, $reasons->{$current_reason_mode}{name} kb '$karma_bonus'->'$new_karma_bonus'");
+
+	if ($firehose) {
+		my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
+		$firehose->setFireHose($fhid, { neediness => $neediness });
+	}
 
 	$self->sqlUpdate('comments', {
 			f1 =>	$new_score,
