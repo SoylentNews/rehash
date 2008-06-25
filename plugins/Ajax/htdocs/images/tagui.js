@@ -1,11 +1,13 @@
 // tagui.js
 
 function bare_tag( t ){
-	if ( typeof t !== 'string' || ! t.length )
-		return t;
-
+	try {
 		// XXX what are the real requirements for a tag?
-	return /[a-z][a-z0-9]*/.exec(t.toLowerCase())[0]
+		return /[a-z][a-z0-9]*/.exec(t.toLowerCase())[0]
+	} catch (e) {
+		// I can't do anything with it; I guess you must know what you're doing
+		return t
+	}
 }
 
 

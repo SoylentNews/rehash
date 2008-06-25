@@ -40,12 +40,12 @@ jQuery.fn.extend({
 
 
 function split_if_string( list, sep ){
-	if ( typeof list !== 'string' )
-		return list;
-	else if ( ! list.length )
-		return [];
-	else
-		return list.split(sep || /\s+/);
+	try {
+		return list.length ? list.split(sep || /\s+/) : []
+	} catch ( e ) {
+		// if it's not actually splitable, I don't have to do anything
+		return list || []
+	}
 }
 
 
