@@ -391,6 +391,12 @@ sub getPollVotesMax {
 	return $answer;
 }
 
+sub getPollDaysOld {
+	my($self) = @_;
+	return $self->sqlSelect('to_days(now()) - to_days(max(date))','pollquestions');
+	
+}
+
 sub DESTROY {
 	my($self) = @_;
 	$self->{_dbh}->disconnect if !$ENV{GATEWAY_INTERFACE} && $self->{_dbh};
