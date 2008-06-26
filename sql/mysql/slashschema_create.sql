@@ -319,6 +319,21 @@ CREATE TABLE comment_log (
 	PRIMARY KEY (id)
 ) TYPE=InnoDB;
 
+#
+# Table structure for table 'comment_promote_log'
+#
+DROP TABLE IF EXISTS comment_promote_log;
+
+CREATE TABLE comment_promote_log (
+	id int unsigned NOT NULL auto_increment,
+	cid int unsigned NOT NULL default '0',
+	ts datetime NOT NULL default '1970-01-01 00:00:00',
+	PRIMARY KEY  (id),
+	KEY cid (cid)
+) ENGINE=InnoDB; 
+
+
+
 
 #
 # Table structure for table 'comment_text'
@@ -976,9 +991,10 @@ CREATE TABLE stories (
 	in_trash ENUM('no', 'yes') DEFAULT 'no' NOT NULL,
 	day_published DATE DEFAULT '1970-01-01' NOT NULL,
 	qid MEDIUMINT UNSIGNED DEFAULT NULL,
-	last_update timestamp NOT NULL,
+	last_update TIMESTAMP NOT NULL,
 	body_length MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	word_count MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
+	archive_last_update DATETIME DEFAULT '1970-01-01 00:00:00' NOT NULL,
 	PRIMARY KEY (stoid),
 	UNIQUE sid (sid),
 	INDEX uid (uid),
@@ -1070,7 +1086,7 @@ CREATE TABLE story_topics_rendered (
 #
 
 DROP TABLE IF EXISTS static_files;
-CREATE TABLE story_static_files(
+CREATE TABLE static_files(
 	sfid mediumint unsigned NOT NULL auto_increment,
 	stoid mediumint unsigned NOT NULL,
 	fhid mediumint unsigned NOT NULL,
@@ -1287,9 +1303,10 @@ CREATE TABLE urls (
 	validatedtitle VARCHAR(255),
 	tags_top VARCHAR(255) DEFAULT '' NOT NULL,
 	popularity float DEFAULT '0' NOT NULL,
+	anon_bookmarks MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL
 	PRIMARY KEY (url_id),
 	UNIQUE url_digest (url_digest),
-	anon_bookmarks MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL
+	INDEX bfu (believed_fresh_until)
 );
 
 #
@@ -1374,6 +1391,35 @@ CREATE TABLE users_comments (
 	PRIMARY KEY (uid),
 	KEY points (points)
 ) TYPE=InnoDB;
+
+#
+# Table structure for table 'users_comments_read'
+#
+
+DROP TABLE IF EXISTS users_comments_read;
+CREATE TABLE users_comments_read (
+	read_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	uid MEDIUMINT UNSIGNED NOT NULL,
+	discussion_id MEDIUMINT UNSIGNED NOT NULL,
+	comment_bitmap MEDIUMBLOB,
+	PRIMARY KEY (read_id),
+	UNIQUE uid_key (uid,discussion_id)
+) TYPE=InnoDB;
+
+#
+# Table structure for table 'users_comments_read_log'
+#
+
+DROP TABLE IF EXISTS users_comments_read_log;
+CREATE TABLE users_comments_read_log (
+	read_log_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	uid MEDIUMINT UNSIGNED NOT NULL,
+	discussion_id MEDIUMINT UNSIGNED NOT NULL,
+	cid INT UNSIGNED NOT NULL,
+	PRIMARY KEY (read_log_id),
+	UNIQUE uid_key (uid,discussion_id,cid)
+) TYPE=InnoDB;
+
 
 #
 # Table structure for table 'users_hits'
