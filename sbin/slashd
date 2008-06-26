@@ -145,10 +145,11 @@ sub REAPER {
 		slashdLog("$taskname reaped ($pid)") if verbosity() >= 3;
 		delete $pids{$pid};
 		if ($status || $signal) {
-			slashdLog(sprintf
+			my $oddexit = sprintf
 				"%s odd exit (status %d, signal %d)",
-				$taskname, $status, $signal
-			);
+				$taskname, $status, $signal;
+			slashdLog($oddexit);
+			slashdErrnote($oddexit);
 		}
 		set_resources($taskname, -1);
 		insert_task_event($taskname, 0);
