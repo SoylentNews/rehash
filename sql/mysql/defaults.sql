@@ -781,6 +781,8 @@ INSERT INTO vars (name, value, description) VALUES ('cache_enabled_template','1'
 INSERT INTO vars (name, value, description) VALUES ('charrefs_bad_entity','zwnj|zwj|lrm|rlm','Entities that approveCharref should always delete');
 INSERT INTO vars (name, value, description) VALUES ('charrefs_bad_numeric','8204|8205|8206|8207|8236|8237|8238','Numeric references that approveCharref should always delete');
 INSERT INTO vars (name, value, description) VALUES ('checklist_length','255','Length of user_index checklist fields (default is VARCHAR(255))');
+INSERT INTO vars (name, value, description) VALUES ('clientip_xff_trust_regex','^127\\.0\\.0\\.1$','IP addresses from which we will trust an X-Forwarded-For header');
+INSERT INTO vars (name, value, description) VALUES ('clientip_xff_trust_header','','Name of HTTP request header to prefer over "X-Forwarded-For", if present');
 INSERT INTO vars (name, value, description) VALUES ('cookie_location','classbid','Default for user\'s cookie_location value (also see users_info schema!)');
 INSERT INTO vars (name, value, description) VALUES ('comment_cache_max_hours','96','Discussion age at which comments are no longer cached');
 INSERT INTO vars (name, value, description) VALUES ('comment_compress_slice','500','Chars to slice comment into for compressOk');
@@ -832,7 +834,7 @@ INSERT INTO vars (name, value, description) VALUES ('cur_performance_stat_ops', 
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_lastid', '0', 'accesslogid to start searching at');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_weeks', '8', 'number of weeks back to compare current stats to');
 INSERT INTO vars (name, value, description) VALUES ('currentqid',1,'The Current Question on the homepage pollbooth');
-INSERT INTO vars (name, value, description) VALUES ('cvs_tag_currentcode','T_2_5_0_204','The current cvs tag that the code was updated to - this does not affect site behavior but may be useful for your records');
+INSERT INTO vars (name, value, description) VALUES ('cvs_tag_currentcode','T_2_5_0_210','The current cvs tag that the code was updated to - this does not affect site behavior but may be useful for your records');
 INSERT INTO vars (name, value, description) VALUES ('datadir','/usr/local/slash/www.example.com','What is the root of the install for Slash');
 INSERT INTO vars (name, value, description) VALUES ('db_auto_increment_increment','1','If your master DB uses auto_increment_increment, i.e. multiple master replication, echo its value into this var');
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_disp','0','Display dbsparklines in the currentAdminUsers box?');
@@ -897,6 +899,7 @@ INSERT INTO vars (name, value, description) VALUES ('http_proxy','','http://prox
 INSERT INTO vars (name, value, description) VALUES ('id_md5_vislength','5','Num chars to display for ipid/subnetid (0 for all)');
 INSERT INTO vars (name, value, description) VALUES ('ignore_uid_date_index', '1', 'Ignore uid_date index on comments where it may slow performance');
 INSERT INTO vars (name, value, description) VALUES ('imagedir','//www.example.com/images','Absolute URL for image directory');
+INSERT INTO vars (name, value, description) VALUES ('imagemagick_convert', '/usr/bin/convert', 'Location of imagemagick convert for thumbnail generation');
 INSERT INTO vars (name, value, description) VALUES ('index_gse_backup_prob','0','Probability that index.pl getStoriesEssentials will look to backup_db_user instead of the main db: 0=never, 1=always');
 INSERT INTO vars (name, value, description) VALUES ('index_handler','index.pl','The perl servlet to call for connections to the root of the server.');
 INSERT INTO vars (name, value, description) VALUES ('index_handler_noanon','home','The shtml page to call if a user is anon and index_noanon is set');

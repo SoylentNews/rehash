@@ -5389,3 +5389,6 @@ CREATE TABLE firehose_skin_volume(
 	PRIMARY KEY (skid)
 );
 
+# 2008-06-26
+UPDATE vars SET value = 'T_2_5_0_210' WHERE name = 'cvs_tag_currentcode';
+
