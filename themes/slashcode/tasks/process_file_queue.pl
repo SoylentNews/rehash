@@ -64,12 +64,7 @@ sub handleFileCmd {
 			my ($namebase, $suffix) = $name =~ /^(\w+\-\d+)\.(\w+)$/;
 			my $thumb = $namebase . "-thumb." . $suffix;
 			my $thumbsm = $namebase . "-thumbsm." . $suffix;
-<<<<<<< Updated upstream:themes/slashcode/tasks/process_file_queue.pl
 			my $thumblg = $namebase . "-thumblg." . $suffix;
-=======
-			my $thumblg = $namebase . "-thumlg." . $suffix;
->>>>>>> Stashed changes:themes/slashcode/tasks/process_file_queue.pl
-
 
 			slashdLog("About to create thumb $path$thumb");
 			system("$convert -size 260x194  $path$name  -resize '130x97>'  -bordercolor transparent  -border 48 -gravity center -crop 130x97+0+0 -page +0+0 $path$thumb");
