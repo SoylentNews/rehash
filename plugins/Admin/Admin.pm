@@ -333,6 +333,25 @@ sub getSignoffData {
 
 }
 
+sub showAdminTodo {
+	my($self) = @_;
+	my $gSkin = getCurrentSkin();
+	my $pb_reader = getObject("Slash::PollBooth", { db_type => 'reader' });
+	my $text = "";
+	my $days = $pb_reader->getPollDaysOld();
+	if ($days > 3 ) {
+		$text .= "<b><a href=\"" . $gSkin->{rootdir} . "/pollBooth.pl\">Poll</a> has not been updated in $days days</b><br>";
+		$text .= '<a href="#" onclick=\'firehose_set_options("setfhfilter", "poll hold")\'>View current poll submissions</a><br><hr>';
+	}
+	if ($text) {
+		slashDisplay('sidebox', {
+			title 		=> 'Admin Todo',
+			contents	=> $text,
+			name 		=> 'admintodo',
+		}, { Return => 1});
+	}
+}
+
 sub showStoryAdminBox {
 	my ($self, $storyref, $options) = @_;
 	my $user = getCurrentUser();

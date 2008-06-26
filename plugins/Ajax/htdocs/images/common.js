@@ -1,44 +1,6 @@
 // _*_ Mode: JavaScript; tab-width: 8; indent-tabs-mode: true _*_
 // $Id$
 
-function $dom( id ) {
-	return document.getElementById(id);
-}
-
-jQuery.fn.extend({
-
-	mapClass: function( map ) {
-		map['?'] = map['?'] || [];
-		return this.each(function() {
-			var unique = {};
-			var cl = [];
-			$.each($.map(this.className.split(/\s+/), function(k){
-				return k in map ? map[k] : ('*' in map ? map['*'] : k)
-			}).concat(map['+']), function(i, k) {
-				if ( k && !(k in unique) ) {
-					unique[k] = true;
-					cl.push(k);
-				}
-			});
-			this.className = (cl.length ? cl : map['?']).join(' ');
-		});
-	},
-
-	setClass: function( c1 ) {
-		return this.each(function() {
-			this.className = c1
-		});
-	},
-
-	toggleClasses: function( c1, c2, force ) {
-		var map = { '?': force };
-		map[c1]=c2;
-		map[c2]=c1;
-		return this.mapClass(map);
-	}
-
-});
-
 var reskey_static = '';
 
 // global settings, but a firehose might use a local settings object instead
@@ -512,6 +474,13 @@ function firehose_set_options(name, value) {
 		firehose_settings.page = 0;
 		firehose_settings.more_num = 0;
 	}
+
+	if (name == "setfhfilter") {
+		firehose_settings.fhfilter = value;
+		firehose_settings.page = 0;
+		firehose_settings.more_num = 0;
+	}
+
 	if (name != "color") {
 	for (i=0; i< pairs.length; i++) {
 		var el = pairs[i];
@@ -627,7 +596,7 @@ function firehose_up_down(id, dir) {
 
 	$('#updown-'+id).setClass(dir=='+' ? 'votedup' : 'voteddown');
 
-	if (dir == "-" && fh_is_admin) {
+	if ( fh_is_admin && (dir == "-" || $('#title-'+id+':contains("Comment:")')) ) {
 		firehose_collapse_entry(id);
 	}
 }
@@ -1110,9 +1079,13 @@ function firehose_slider_end(offsetFromStart) {
 		fh_slider_init_set = 1;
 	}
 	var color = fh_colors[ newVal / fh_ticksize ];
-	$dom('fh_slider_img').title = "Firehose filtered to " + color;
-	if (fh_slider_init_set) {
-		firehose_set_options("color", color)
+	if (color !== undefined) {
+		$dom('fh_slider_img').title = "Firehose filtered to " + color;
+		if (fh_slider_init_set) {
+			firehose_set_options("color", color)
+		}
+	} else if (firehohse_settings.color !== undefined) {
+		firehose_slider_set_color(firehose_settings.color)
 	}
 }
 
