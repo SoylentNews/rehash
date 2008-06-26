@@ -11,6 +11,7 @@ CREATE TABLE firehose (
 	createtime datetime NOT NULL default '0000-00-00 00:00:00',
 	popularity float NOT NULL default '0',
 	editorpop float NOT NULL default '0',
+	neediness float NOT NULL default '0',
 	activity float NOT NULL default '0',
 	accepted enum('no','yes') default 'no',
 	rejected enum('no','yes') default 'no',
@@ -41,6 +42,7 @@ CREATE TABLE firehose (
 	UNIQUE globjid (globjid),
 	KEY createtime (createtime),
 	KEY popularity (popularity),
+	KEY neediness (neediness),
 	KEY url_id (url_id)
 ) TYPE=InnoDB;
 
