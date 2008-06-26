@@ -5299,18 +5299,90 @@ INSERT INTO vars (name, value, description) VALUES ('firehose_mcd_disp', '1', 'C
 # 2008-05-01
 UPDATE vars SET value = 'T_2_5_0_203' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 # for plugins/FireHose
 ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment") default 'submission';
 
 # for plugins/Stats
 INSERT INTO vars (name, value, description) VALUES ('stats_firehose_spamcount', '0', 'Number of firehose items marked as is_spam');
 
-# PUDGE LAST UPDATED HERE
-
 # 2008-05-07
 UPDATE vars SET value = 'T_2_5_0_204' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/FireHose
+INSERT INTO vars (name, value, description) VALUES ('firehose_adminupclout', '0.5', 'Admin clout for upvotes can be reduced by specifying a number between 0 and 1');
+
+# for tagboxes/FHEditorPop
+UPDATE vars SET name='tagbox_fheditorpop_maxudcmult' WHERE name='tagbox_fhpopularity2_maxudcmult';
+
+CREATE TABLE comment_promote_log (
+  id int unsigned NOT NULL auto_increment,
+  cid int unsigned NOT NULL default '0',
+  ts datetime NOT NULL default '1970-01-01 00:00:00',
+  PRIMARY KEY  (id),
+  KEY cid (cid)
+) ENGINE=InnoDB; 
+
+
+# For plugins/Firehose
+ALTER TABLE firehose CHANGE COLUMN srcid srcid int UNSIGNED NOT NULL DEFAULT '0'; 
+
+ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc","comment","discussion") default 'submission';
+
+# 2008-05-15
+UPDATE vars SET value = 'T_2_5_0_205' WHERE name = 'cvs_tag_currentcode';
+
+# 2008-05-21
+UPDATE vars SET value = 'T_2_5_0_206' WHERE name = 'cvs_tag_currentcode';
+
+INSERT INTO vars (name, value, description) VALUES ('imagemagick_convert', '/usr/bin/convert', 'Location of imagemagick convert for thumbnail generation');
+
+# 2008-05-22
+UPDATE vars SET value = 'T_2_5_0_207' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/HumanConf
+INSERT INTO vars (name, value, description) VALUES ('hc_turnover_secs', '259200', 'Seconds in which the entire humanconf pool should be replaced out');
+
+UPDATE vars SET name='clientip_xff_trust_regex' WHERE name='x_forwarded_for_trust_regex';
+INSERT IGNORE INTO vars (name, value, description) VALUES ('clientip_xff_trust_regex','^127\\.0\\.0\\.1$','IP addresses from which we will trust an X-Forwarded-For header');
+INSERT INTO vars (name, value, description) VALUES ('clientip_xff_trust_header','','Name of HTTP request header to prefer over "X-Forwarded-For", if present');
+
+ALTER TABLE urls ADD INDEX bfu (believed_fresh_until);
+
+# for plugins/FireHose
+ALTER TABLE firehose ADD INDEX url_id (url_id);
+
+ALTER TABLE stories ADD COLUMN archive_last_update DATETIME DEFAULT '1970-01-01 00:00:00' NOT NULL;
+# keep last_update the same
+UPDATE stories SET archive_last_update=last_update, last_update=last_update;
+
+
+# 2008-06-04
+UPDATE vars SET value = 'T_2_5_0_208' WHERE name = 'cvs_tag_currentcode';
+
+# PUDGE LAST UPDATED HERE
+
+# for plugins/Tags
+INSERT INTO vars (name, value, description) VALUES ('tags_overnight_minweightsum', '0.1', 'Minimum tagbox weight sum for overnight processing. To disable overnight difference, set to 1');
+INSERT INTO vars (name, value, description) VALUES ('tags_overnight_starthour', '7', 'GMT hour at which overnight processing begins');
+INSERT INTO vars (name, value, description) VALUES ('tags_overnight_stophour', '10', 'GMT hour after which overnight processing ends');
+
+# for tagboxes/CommentScoreReason
+INSERT INTO vars (name, value, description) VALUES ('tagbox_csr_baseneediness', '60', 'Base neediness score for comments that have been moderated');
+
+# 2008-06-19
+UPDATE vars SET value = 'T_2_5_0_209' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# for plugins/FireHose
+INSERT INTO ajax_ops VALUES (NULL, 'tags_get_top_firehose', 'Slash::FireHose', 'ajaxGetFireHoseTagsTop', 'ajax_tags_write', 'createuse');
+
+CREATE TABLE firehose_skin_volume(
+	skid SMALLINT UNSIGNED NOT NULL,
+	story_vol MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL,
+	other_vol MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL,
+	PRIMARY KEY (skid)
+);
 

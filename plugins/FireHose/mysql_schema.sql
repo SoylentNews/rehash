@@ -7,7 +7,7 @@ CREATE TABLE firehose (
 	uid mediumint(8) unsigned NOT NULL default '0',
 	globjid int unsigned NOT NULL default '0',
 	discussion mediumint UNSIGNED NOT NULL default '0',
-	type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment") default 'submission',
+	type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment", "discussion") default 'submission',
 	createtime datetime NOT NULL default '0000-00-00 00:00:00',
 	popularity float NOT NULL default '0',
 	editorpop float NOT NULL default '0',
@@ -19,7 +19,7 @@ CREATE TABLE firehose (
 	is_spam enum('no', 'yes') default 'no',
 	primaryskid smallint(5) default '0',
 	tid smallint(6) default '0',
-	srcid mediumint(8) unsigned NOT NULL default '0',
+	srcid int(8) unsigned NOT NULL default '0',
 	url_id mediumint(8) unsigned NOT NULL default '0',
 	toptags varchar(255) default '',
 	email varchar(255) NOT NULL default '',
@@ -40,7 +40,8 @@ CREATE TABLE firehose (
 	PRIMARY KEY (id),
 	UNIQUE globjid (globjid),
 	KEY createtime (createtime),
-	KEY popularity (popularity)
+	KEY popularity (popularity),
+	KEY url_id (url_id)
 ) TYPE=InnoDB;
 
 # The table giving an Object's Generally Accepted Story Publication Time
@@ -98,3 +99,10 @@ CREATE TABLE firehose_setting_log(
 	PRIMARY KEY (id)
 );
 
+DROP TABLE IF EXISTS firehose_skin_volume;
+CREATE TABLE firehose_skin_volume(
+	skid SMALLINT UNSIGNED NOT NULL,
+	story_vol MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL,
+	other_vol MEDIUMINT UNSIGNED DEFAULT '0' NOT NULL,
+	PRIMARY KEY (skid)
+);
