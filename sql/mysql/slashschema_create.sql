@@ -1393,31 +1393,15 @@ CREATE TABLE users_comments (
 ) TYPE=InnoDB;
 
 #
-# Table structure for table 'users_comments_read'
-#
-
-DROP TABLE IF EXISTS users_comments_read;
-CREATE TABLE users_comments_read (
-	read_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	uid MEDIUMINT UNSIGNED NOT NULL,
-	discussion_id MEDIUMINT UNSIGNED NOT NULL,
-	comment_bitmap MEDIUMBLOB,
-	PRIMARY KEY (read_id),
-	UNIQUE uid_key (uid,discussion_id)
-) TYPE=InnoDB;
-
-#
 # Table structure for table 'users_comments_read_log'
 #
 
 DROP TABLE IF EXISTS users_comments_read_log;
 CREATE TABLE users_comments_read_log (
-	read_log_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
 	uid MEDIUMINT UNSIGNED NOT NULL,
 	discussion_id MEDIUMINT UNSIGNED NOT NULL,
-	cid INT UNSIGNED NOT NULL,
-	PRIMARY KEY (read_log_id),
-	UNIQUE uid_key (uid,discussion_id,cid)
+	cid MEDIUMINT UNSIGNED NOT NULL,
+	UNIQUE (discussion_id,uid,cid)
 ) TYPE=InnoDB;
 
 
