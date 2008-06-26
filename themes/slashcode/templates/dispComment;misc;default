@@ -4,7 +4,7 @@ __description__
 Display a comment
 
 * comment_shrunk = comment was too long; this is the stripped down version
-* reasons = hashref of moderation "reasons"
+* reasons = hashref of moderation "reasons" (or undef if no moderation plugin)
 * can_mod = boolean for whether or not current user can moderate
 * is_anon = boolean for whether or not comment user is anonymous
 
@@ -22,79 +22,61 @@ en_US
 __name__
 dispComment
 __template__
-	<TR><TD>
-	<TABLE WIDTH="100%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
-		<TR VALIGN="TOP">
-			<TD BGCOLOR="[% user.bg.3 %]"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
-			<TD BGCOLOR="[% user.bg.3 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0"><TR><TD>
-				<FONT FACE="[% constants.mainfontface %]" SIZE="3" COLOR="[% user.fg.0 %]"><A NAME="[% cid %]"><B>[% subject %]</B></A>
-[% UNLESS user.noscores %] (Score:[% IF points.length; points; ELSE; "?"; END %][% IF reason %], [% reasons.$reason.name %][% END %])[% END %]
-</FONT>
-			</TD></TR></TABLE></TD>
-			<TD BGCOLOR="[% user.bg.3 %]" ALIGN="RIGHT"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="4" HEIGHT="4" ALT=""></TD>
-		</TR>
-
-		<TR>
-			<TD BACKGROUND="[% constants.imagedir %]/gl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-			<TD BGCOLOR="#E6E6E6" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="#E6E6E6">
-
-<FONT FACE="[% constants.mainfontface %]" SIZE="1">by
-[% IF !is_anon %]<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</A>[% END %]
-[% IF !is_anon && subscriber_bonus == "yes"; " *"; END %]
-[% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
-[% IF !is_anon && fakeemail %]&lt;<A HREF="mailto:[% fakeemail | fixparam %]">[% fakeemail_vis | strip_literal %]</A>&gt;[% END %]
-on [% Slash.timeCalc(time) %]
-[% IF sid && cid %] (<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]">#[% cid %]</A>)</FONT>[% END %]
-
-[% has_homepage = homepage && homepage.length > 8;
-   has_journal = journal_last_entry_date.search('[1-9]');
-   IF !is_anon && (has_homepage || has_journal) %]
-	<BR><FONT FACE="[% constants.mainfontface %]" SIZE="1">(
-	[% IF has_homepage %]
-		<A HREF="[% homepage %]">[% homepage | strip_literal %]</A>
-		[% IF has_journal %] | [% END %]
+[% IF !options.noshow_show %]
+<li id="tree_[% cid %]" class="comment[% IF class == 'full' %] contain[% END %]">
+<div id="comment_status_[% cid %]" class="commentstatus"></div>
+<div id="comment_[% cid %]"[% IF discussion2 %] class="[% class %]"[% END %]>
+[% END; IF !options.noshow %]
+	<div id="comment_top_[% cid %]" class="commentTop [% has_read ? 'oldcomment' : 'newcomment' %]">
+		<div class="title">
+			[% IF discussion2 %]
+			<h4><a id="comment_link_[% cid %]" name="comment_link_[% cid %]" href="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]" onclick="return setFocusComment([% cid %])">[% subject %]</a>
+			[% ELSE %]
+			<h4><a name="[% cid %]">[% subject %]</a>
+			[%- END %]
+			[% UNLESS user.noscores %]<span id="comment_score_[% cid %]" class="score">([% IF constants.modal_prefs_active %]<a href="#" onclick="getModalPrefs('modcommentlog', 'Moderation Comment Log', [% cid %]); return false">[% END %]Score:[% points.length ? points : "?" %][% IF constants.modal_prefs_active %]</a>[% END %][% IF reasons && reason %], [% reasons.$reason.name %][% END %])</span>[% END %]</h4>
+		</div>
+		<div class="details">
+			by
+			[% IF !is_anon %]<a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/">[% END %][% nickname | strip_literal %][% IF !is_anon %] ([% uid %])</a>[% END %]
+			[% IF !is_anon && subscriber_bonus == "yes"; " *"; END %]
+			[% IF !is_anon %][% PROCESS zoo_icons person=uid bonus=1 %][% END %]
+			<span class="otherdetails" id="comment_otherdetails_[% cid %]">[% PROCESS dispCommentDetails IF !options.pieces %]</span>
+		</div>
+	</div>
+	<div class="commentBody">
+		<div id="comment_body_[% cid %]">[% comment %]</div>
+		[% IF sig && !user.nosigs %]
+		<div id="comment_sig_[% cid %]" class="sig[% ' hide' IF comment_shrunk %]">[% sig %]</div>
+		[% END %]
+	[% IF comment_shrunk;
+		readtext = 'Read the rest of this comment...';
+		IF discussion2;
+			linkComment = "<a class=\"readrest\" href=\"" _ gSkin.rootdir _ "/comments.pl?sid=$sid&amp;cid=$cid\" onclick=\"return readRest($cid)\">$readtext</a>";
+		ELSE;
+			linkComment = Slash.linkComment({
+				sid     => sid,
+				cid     => cid,
+				pid     => cid,
+				subject => readtext,
+				subject_only => 1
+			}, 1);
+		END %]
+		<div id="comment_shrunk_[% cid %]" class="commentshrunk">[% linkComment %]</div>
 	[% END %]
-	[% IF has_journal %]
-		Last Journal:
-		<A HREF="[% constants.real_rootdir %]/~[% nickname | fixparam %]/journal/">[%
-			Slash.timeCalc(journal_last_entry_date) %]</A>
-	[% END %]
-	)</FONT>
-[% END %]
+	</div>
+	[% PROCESS dispLinkComment %]
+[% END; #  IF !options.noshow
+   IF !options.noshow_show %]
+</div>
 
-[% ipid_display %]
+[% IF discussion2 %]
+<div id="replyto_[% cid %]"></div>
 
-			</TD></TR></TABLE></TD>
-			<TD BACKGROUND="[% constants.imagedir %]/gr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-		</TR>
-
-		<TR><TD BGCOLOR="#006666" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
-		<TR>
-			<TD BACKGROUND="[% constants.imagedir %]/wl.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-			<TD BGCOLOR="[% user.bg.1 %]" WIDTH="100%"><TABLE WIDTH="100%" BORDER="0" CELLPADDING="5" CELLSPACING="0"><TR><TD BGCOLOR="[% user.bg.1 %]">
-[% comment %]
-[% UNLESS user.nosigs %]
-	<BR>[% sig %]
-[% END %]
-
-[% IF comment_shrunk;
-	linkComment = Slash.linkComment({
-		sid	=> sid,
-		cid	=> cid,
-		pid	=> cid,
-		subject	=> 'Read the rest of this comment...',
-		subject_only => 1
-	}, 1) %]
-	<P><B>[% linkComment %]</B>
-[% END %]
-			</TD></TR></TABLE></TD>
-			<TD BACKGROUND="[% constants.imagedir %]/wr.gif"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="11" HEIGHT="11" ALT=""></TD>
-		</TR>
-		<TR><TD BGCOLOR="[% user.bg.3 %]" COLSPAN="3"><IMG SRC="[% constants.imagedir %]/pix.gif" WIDTH="1" HEIGHT="1"></TD></TR>
-	</TABLE>
-	</TD></TR>
-
-[% PROCESS dispLinkComment %]
+<ul id="group_[% cid %]">
+	<li id="hiddens_[% cid %]" class="hide"></li>
+</ul>
+[% END; END # !options.noshow_show %]
 
 __seclev__
 10000

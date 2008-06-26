@@ -36,7 +36,8 @@ our $VERSION = $Slash::Constants::VERSION;
 our @EXPORT  = qw(
 	constrain_score dispComment displayThread printComments
 	jsSelectComments commentCountThreshold commentThresholds discussion2
-	selectComments preProcessReplyForm
+	selectComments preProcessReplyForm makeCommentBitmap parseCommentBitmap
+	saveCommentBitmap getCommentBitmap saveCommentReadLog getCommentReadLog
 	getPoints preProcessComment postProcessComment prevComment saveComment
 );
 
@@ -205,14 +206,9 @@ sub selectComments {
 			}
 		}
 
-		my @seen;
-		my $lastcid = 0;
-		my %check = (%{$options->{existing}}, map { $_->{cid} => 1 } @new_comments);
-		for my $this_cid (sort { $a <=> $b } keys(%check)) {
-			push @seen, $lastcid ? $this_cid - $lastcid : $this_cid;
-			$lastcid = $this_cid;
-		}
-		$comments->{0}{d2_seen} = join ',', @seen;
+		$comments->{0}{d2_seen} = makeCommentBitmap({
+			%{$options->{existing}}, map { $_->{cid} => 1 } @new_comments
+		});
 
 		@new_comments = sort { $a->{cid} <=> $b->{cid} } @new_comments;
 		($oldComment, $thisComment) = ($thisComment, \@new_comments);
@@ -237,6 +233,10 @@ sub selectComments {
 ##slashProf("sC fudging", "sC main sort");
 #slashProf("", "sC main sort");
 
+	my $comments_read = $user->{is_admin}
+		? getCommentReadLog($discussion->{id}, $user->{uid})
+		: {};
+
 	# This loop mainly takes apart the array and builds 
 	# a hash with the comments in it.  Each comment is
 	# in the index of the hash (based on its cid).
@@ -257,6 +257,8 @@ sub selectComments {
 		# Kids is what displayThread will actually use.
 		$comments->{$C->{cid}}{kids} = $tmpkids || [];
 		$comments->{$C->{cid}}{visiblekids} = $tmpvkids || 0;
+
+		$comments->{$C->{cid}}{has_read} = $comments_read->{$C->{cid}};
 
 		# The comment pushes itself onto its parent's
 		# kids array.
@@ -349,18 +351,9 @@ sub selectComments {
 			}
 		}
 
-		# fix d2_seen
-		my @seen;
-		my $lastcid = 0;
-		for my $this_cid (sort { $a <=> $b } @new_seen) {
-			push @seen, $lastcid ? $this_cid - $lastcid : $this_cid;
-			$lastcid = $this_cid;
-		}
-		my @old_seen = split /,/, $comments->{0}{d2_seen};
-		if (@seen && @old_seen) {
-			$old_seen[0] = $old_seen[0] - $lastcid;
-		}
-		$comments->{0}{d2_seen} = join ',', @seen, @old_seen;
+		# fix d2_seen to include new cids ... these will all be after
+		# the last element in seen, which makes this simpler
+		$comments->{0}{d2_seen} = makeCommentBitmap(\@new_seen, $comments->{0}{d2_seen});
 	}
 
 ##slashProf("", "sC d2 fudging");
@@ -419,6 +412,7 @@ sub jsSelectComments {
 		my @keys = qw(pid points uid);
 		for my $cid (grep $_, keys %$comments) {
 			@{$comments_new->{$cid}}{@keys} = @{$comments->{$cid}}{@keys};
+			$comments_new->{$cid}{read} = $comments->{$cid}{has_read} ? 1 : 0;
 			$comments_new->{$cid}{opid} = $comments->{$cid}{original_pid};
 			$comments_new->{$cid}{kids} = [sort { $a <=> $b } @{$comments->{$cid}{kids}}];
 
@@ -572,6 +566,102 @@ sub _get_thread {
 		}
 	}
 	return $newcomments;
+}
+
+sub saveCommentReadLog {
+	my($comments, $discussion_id, $uid) = @_;
+
+	$uid ||= getCurrentUser('uid');
+	my $slashdb = getCurrentDB();
+
+	# cache inserts?
+	for my $cid (@$comments) {
+		$slashdb->sqlInsert('users_comments_read_log', {
+			uid            => $uid,
+			discussion_id  => $discussion_id,
+			cid            => $cid
+		}, { ignore => 1 });
+	}
+}
+
+sub getCommentReadLog {
+	my($discussion_id, $uid) = @_;
+
+	$uid ||= getCurrentUser('uid');
+	my $slashdb = getCurrentDB();
+
+	my $comments_read = $slashdb->sqlSelectAllKeyValue(
+		'cid, 1',
+		'users_comments_read_log',
+		'uid=' . $slashdb->sqlQuote($uid) .
+		' AND discussion_id=' . $slashdb->sqlQuote($discussion_id)
+	);
+}
+
+sub getCommentBitmap {
+	my($discussion_id, $uid) = @_;
+
+	$uid ||= getCurrentUser('uid');
+	my $slashdb = getCurrentDB(); # is reader fast enough to be useful?
+
+	my $bitmap = $slashdb->sqlSelect('comment_bitmap', 'users_comments_read',
+		'uid=' . $slashdb->sqlQuote($uid) . ' AND discussion_id=' .
+		$slashdb->sqlQuote($discussion_id)
+	);
+
+	return $bitmap;
+}
+
+sub saveCommentBitmap {
+	my($bitmap, $discussion_id, $uid) = @_;
+
+	$uid ||= getCurrentUser('uid');
+	my $slashdb = getCurrentDB();
+
+	$slashdb->sqlReplace('users_comments_read', {
+		uid            => $uid,
+		discussion_id  => $discussion_id,
+		comment_bitmap => $bitmap
+	});
+}
+
+sub parseCommentBitmap {
+	my($bitmap) = @_;
+	return {} unless $bitmap;
+	my $lastcid = 0;
+	my %comments;
+	for my $cid (split /,/, $bitmap) {
+		$cid = $lastcid ? $lastcid + $cid : $cid;
+		$comments{$cid} = 1;
+		$lastcid = $cid;
+	}
+	return \%comments;
+}
+
+sub makeCommentBitmap {
+	my($comments, $old) = @_;
+	my $lastcid = 0;
+	my @bitmap;
+	for my $cid (sort { $a <=> $b } ((ref($comments) eq 'HASH')
+			? keys %$comments
+			: @$comments
+		)
+	) {
+		push @bitmap, $lastcid ? $cid - $lastcid : $cid;
+		$lastcid = $cid;
+	}
+
+	my $bitmap = join ',', @bitmap;
+
+	if ($old) {
+		return $old unless $bitmap;
+
+		my @old = split /,/, $old, 2;
+		$old[0] = $old[0] - $lastcid;
+		return join ',', $bitmap, @old;
+	}
+
+	return $bitmap;
 }
 
 
@@ -1062,6 +1152,7 @@ sub printComments {
 		cid		=> $cid,
 		pid		=> $pid,
 		lvl		=> $lvl,
+		options		=> $options,
 	});
 #slashProf("", "printCommentsMain");
 
@@ -1641,8 +1732,7 @@ sub saveComment {
 	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
 	if ($moddb) {
 		my $text = $moddb->checkDiscussionForUndoModeration($comm->{sid});
-		# XXX doesn't work for D2
-		print $text if $text;
+		print $text if $text && !discussion2($user);
 	}
 
 	my $tc = $slashdb->getVar('totalComments', 'value', 1);
@@ -2130,8 +2220,10 @@ EOT2
 <div id="comment_$comment->{cid}"$classattr>
 EOT
 
+	my $new_old_comment = $comment->{has_read} ? 'oldcomment' : 'newcomment';
+
 	$return .= <<EOT if !$options->{noshow};
-	<div id="comment_top_$comment->{cid}" class="commentTop newcomment">
+	<div id="comment_top_$comment->{cid}" class="commentTop $new_old_comment">
 		<div class="title">
 $head
 $comment_links

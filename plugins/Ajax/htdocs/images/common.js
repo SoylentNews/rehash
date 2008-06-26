@@ -616,16 +616,21 @@ function firehose_remove_tab(tabid) {
 // firehose functions end
 
 // helper functions
-function ajax_update(request_params, id, handlers, request_url) {
+function ajax_update(request_params, id, handlers, options) {
 	// make an ajax request to request_url with request_params, on success,
 	//  update the innerHTML of the element with id
+	if (!options)
+		options = {};
 
 	var opts = {
-		url: request_url || '/ajax.pl',
+		url: options['request_url'] || '/ajax.pl',
 		data: request_params,
 		type: 'POST',
 		contentType: 'application/x-www-form-urlencoded'
 	};
+
+	if (options['async_off'])
+		opts['async'] = false;
 
 	if ( id ) {
 		opts['success'] = function(html){
@@ -640,9 +645,9 @@ function ajax_update(request_params, id, handlers, request_url) {
 	jQuery.ajax(opts);
 }
 
-function ajax_periodic_update(interval_in_seconds, request_params, id, handlers, request_url) {
+function ajax_periodic_update(interval_in_seconds, request_params, id, handlers, options) {
 	setInterval(function(){
-		ajax_update(request_params, id, handlers, request_url);
+		ajax_update(request_params, id, handlers, options);
 	}, interval_in_seconds*1000);
 }
 
