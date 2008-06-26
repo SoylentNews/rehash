@@ -2013,8 +2013,14 @@ function setCurrentComment (cid) {
 }
 
 function setCommentRead (cid) {
-	if (!comments[cid]['read'] && !read_comments[cid] && $('#comment_otherdetails_' + cid).length)
+	if (!comments[cid]['read']
+		&& !read_comments[cid]
+		&& $('#comment_otherdetails_' + cid).length
+		&& !noSeeFirstComment(cid)
+		&& user_is_admin
+	) {
 		read_comments[cid] = 1;
+	}
 }
 
 function updateReadComments () {
