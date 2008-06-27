@@ -5372,10 +5372,6 @@ INSERT INTO vars (name, value, description) VALUES ('tagbox_csr_baseneediness', 
 # 2008-06-19
 UPDATE vars SET value = 'T_2_5_0_209' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # for plugins/FireHose
 INSERT INTO ajax_ops VALUES (NULL, 'tags_get_top_firehose', 'Slash::FireHose', 'ajaxGetFireHoseTagsTop', 'ajax_tags_write', 'createuse');
 
@@ -5393,10 +5389,14 @@ DROP TABLE IF EXISTS users_comments_read_log;
 CREATE TABLE users_comments_read_log (
 	uid MEDIUMINT UNSIGNED NOT NULL,
 	discussion_id MEDIUMINT UNSIGNED NOT NULL,
-	cid MEDIUMINT UNSIGNED NOT NULL,
+	cid INT UNSIGNED NOT NULL,
 	UNIQUE (discussion_id,uid,cid)
 ) TYPE=InnoDB;
 
 # 2008-06-26
 UPDATE vars SET value = 'T_2_5_0_210' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 

@@ -1400,7 +1400,7 @@ DROP TABLE IF EXISTS users_comments_read_log;
 CREATE TABLE users_comments_read_log (
 	uid MEDIUMINT UNSIGNED NOT NULL,
 	discussion_id MEDIUMINT UNSIGNED NOT NULL,
-	cid MEDIUMINT UNSIGNED NOT NULL,
+	cid INT UNSIGNED NOT NULL,
 	UNIQUE (discussion_id,uid,cid)
 ) TYPE=InnoDB;
 
