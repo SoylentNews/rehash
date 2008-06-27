@@ -69,7 +69,8 @@ var tbar_fns = {
 
 	// replace existing tags and/or add new tags; preserves order of existing tags
 	//  optional string, how, tells where to add new tags { 'append', 'prepend' }
-	update_tags: function( tags, how ){
+	//  optional string, annotate, tells a css class to add to all touched tags
+	update_tags: function( tags, how, annotate ){
 		// the intersection of the requested vs. existing tags are the ones I can update in-place
 		var update_map = this.map_tags(tags = split_if_string(tags));
 
@@ -99,9 +100,13 @@ var tbar_fns = {
 			changed_tags = changed_tags.add( new_elems.find('.tag') );
 		}
 
-		// for every .tag element we touched/created, fix the style to match the kind of tag
+		// for every .tag element we touched/created, fix the style to match the kind of tag and add annotate if supplied
+		//   Use case for annotate: the tag was modified locally, we mark it with "local-only" until the server
+		//   comes back with a complete list in response that will wipe out the "local-only" style, essentially
+		//   confirming the user's change has been recorded
+		var base_classes = 'tag ' + (annotate ? annotate+' ' : '');
 		changed_tags.each(function(){
-			this.className = $.trim('tag ' + tag_style($(this).text()));
+			this.className = $.trim(base_classes + tag_style($(this).text()));
 		});
 	},
 
