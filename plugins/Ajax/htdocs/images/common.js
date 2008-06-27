@@ -885,6 +885,13 @@ function firehose_handle_update() {
 		firehose_reorder();
 		firehose_get_next_updates();
 	}
+
+	// XXX temporary admin-only access to the unfinished tag-wiget
+	if ( fh_is_admin ) {
+		$('#firehose h3:has(a[class!=skin]):not([dcset])')
+			.dblclickToggle(open_firehose_tag_widget, close_firehose_tag_widget)
+			.attr('dcset', true);
+	}
 }
 
 function firehose_adjust_window(onscreen) {

@@ -34,6 +34,27 @@ jQuery.fn.extend({
 		map[c1]=c2;
 		map[c2]=c1;
 		return this.mapClass(map);
+	},
+
+	// an exact copy of jQuery's built-in toggle(), but s/click/dblclick/
+	dblclickToggle: function( fn ) {
+		// Save reference to arguments for access in closure
+		var args = arguments, i = 1;
+
+		// link all the functions, so any of them can unbind this click handler
+		while( i < args.length )
+			jQuery.event.proxy( fn, args[i++] );
+
+		return this.dblclick( jQuery.event.proxy( fn, function(event) {
+			// Figure out which function to execute
+			this.lastToggle = ( this.lastToggle || 0 ) % i;
+
+			// Make sure that clicks stop
+			event.preventDefault();
+
+			// and execute the function
+			return args[ this.lastToggle++ ].apply( this, arguments ) || false;
+		}));
 	}
 
 });
