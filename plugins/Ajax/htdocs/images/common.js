@@ -776,16 +776,15 @@ function firehose_handle_update() {
 			}
 
 			myAnim.onComplete.subscribe(function() {
-				if ($dom(fh)) {
-					$dom(fh).style.height = "";
+				var fh_node = $dom(fh);
+				if (fh_node) {
+					fh_node.style.height = "";
 					if (fh_use_jquery) {
-						jQuery("#" + fh + " h3 a[class!='skin']").click(
-				                	function(){
-                	        				jQuery(this).parent('h3').next('div.hide').toggle("fast");
-				                        	jQuery(this).parent('h3').find('a img').toggle("fast");
-                        			        	return false;
-                        				}
-                				);
+						$("h3 a[class!='skin']", fh_node).click(function(){
+							var h3 = $(this).parent('h3');
+							h3.next('div.hid').and(h3.find('a img')).toggle("fast");
+							return false;
+						});
 					}
 				}
 			});
