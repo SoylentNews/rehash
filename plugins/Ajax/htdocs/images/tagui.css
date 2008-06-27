@@ -8,14 +8,28 @@
 .mark_3 { color: orange }
 .mark_4 { color: darkgray }
 
+.tbar span.tag.local-only { color: gray }
+
 .tbar li, .tbar ul {
 	display: inline;
 	padding: 0 0.25em 0 0;
 }
 
+.tbars, .tbar, .tag, .tmenu {
+	user-select: none;
+}
+
 .tbar {
-	display: block;
+	display: inline;
 	position: relative;
+}
+
+.tbars.stack, .tbars.stack .tbar {
+	display: block;
+}
+
+.tbars.train, .tbars.train .tbar {
+	display: inline;
 }
 
 .tbar span.tag {
@@ -42,10 +56,18 @@
 	display: inline;
 }
 
+/* for debugging */
+.tbar[get=top] { border: 1px solid red }
+.tbar[get=system] { border: 1px solid blue }
+
 .tmenu li {
 	font-size: 80%;
 	padding: 0 0.2em;
 	color: darkgreen;
+}
+
+.tag-editor {
+	display: inline;
 }
 
 .tmenu li:hover {
@@ -53,11 +75,18 @@
 }
 
 .tag-widget {
-  display: block;
-  position: absolute;
-  z-index: 10;
-  background-color: white;
-  border: 4px dotted darkgray;
-  padding: 0.4em;
-  min-width: 6em;
+	display: block;
+	position: relative;
+	z-index: 10;
+	background-color: white;
+	border: 4px dotted darkgray;
+	padding: 0.4em;
+	min-width: 6em;
+}
+
+.tag-widget .busy {
+	display: block;
+	position: absolute;
+	top: 0;
+	right: 0;
 }

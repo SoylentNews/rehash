@@ -221,6 +221,9 @@ var twidget_fns = {
 
 
 	_submit_fetch: function( tag_cmds ){
+		var widget = this;
+		var $busy = $('.busy', widget).show();
+
 		if ( tag_cmds ) {
 			// 'harden' the new tags into the user tag-bar, but styled 'local-only'
 			$('.tbar[get*=user]', this).each(function(){
@@ -228,7 +231,6 @@ var twidget_fns = {
 			});
 		}
 
-		var widget = this;
 		$.post('/ajax.pl', {
 			op:	'tags_setget_combined',
 			id:	this.tagwidget_data.item_id,
@@ -237,6 +239,7 @@ var twidget_fns = {
 		}, function( response ){
 			// console.log(response);
 			widget.set_tags(response)
+			$busy.hide();
 		});
 		return this
 	},
@@ -264,7 +267,7 @@ var twidget_fns = {
 
 	open: function(){
 		this.tagwidget_data.$parent_entry.addClass('tagging');
-		$(this).show()
+		$(this).slideDown(100)
 			.find(':text')
 			.each(function(){
 				this.focus()
@@ -274,7 +277,7 @@ var twidget_fns = {
 
 
 	close: function(){
-		$(this).hide();
+		$(this).slideUp(100);
 		this.tagwidget_data.$parent_entry.removeClass('tagging');
 		return this
 	}
@@ -311,6 +314,9 @@ function create_firehose_vote_handler( firehose_id ) {
 		 $('<div get="vote" style="display:none"></div>')[0],
 		 {
 			set_tags: function( tags ){
+				if ( tags.length > 3 )
+					tags = tags.split(' ')[0];
+
 				firehose_fix_up_down(firehose_id, {
 					'':	'vote',
 					'nod':	'votedup',
