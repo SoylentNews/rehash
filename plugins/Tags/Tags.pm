@@ -2137,12 +2137,13 @@ sub getRecentTagnamesOfInterest {
 	if ($firehose) {
 		$fh_min_score = $firehose->getMinPopularityForColorLevel($constants->{tags_rectn_mincare} || 5);
 	}
+	my $target_hr = $self->getGlobjTargets([ map { $_->{globjid} } @$tags_ar ]);
 	for my $tag_hr (@$tags_ar) {
 		my $tc = $tag_hr->{total_clout};
 		next unless $tc;
 		my $tagnameid = $tag_hr->{tagnameid};
 		my $globjid = $tag_hr->{globjid};
-		my($type) = $self->getGlobjTarget($globjid);
+		my $type = $target_hr->{$globjid][0];
 		if ($firehose) {
 			my $fhid = $firehose->getFireHoseIdFromGlobjid($globjid);
 			my $item = $firehose->getFireHose($fhid) if $fhid;

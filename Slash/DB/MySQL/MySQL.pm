@@ -12085,7 +12085,6 @@ sub getGlobjTypes {
 
 # Given a globjid, returns its globj_type and target_id.  Returns
 # undef if the object does not exist.
-# XXX should REALLY optimize to work with a list
 # XXX should memcached
 
 sub getGlobjTarget {
@@ -12098,6 +12097,23 @@ sub getGlobjTarget {
 	my $types = $self->getGlobjTypes;
 	return undef unless $types->{$gtid};
 	return ($types->{$gtid}, $target_id);
+}
+
+# Given an arrayref of globjids, returns a hashref where each key is a
+# globjid and its value is an arrayref of its gtid,target_id.
+# XXX should memcached
+
+sub getGlobjTargets {
+	my($self, $globjid_ar) = @_;
+	return { } if !$globjid_ar || !@$globjid_ar;
+
+	my $target_hr = { };
+	my $in_str = join(',', grep /^\d+$/, @$globjid_ar);
+	my $ar_ar = $self->sqlSelectAll('globjid, gtid, target_id', 'globjs', "globjid IN ($in_str)");
+	for my $ar (@$ar_ar) {
+		$target_hr->{ $ar->[0] } = [ $ar->[1], $ar->[2] ];
+	}
+	return $target_hr;
 }
 
 # Returns the string associated with a single globj's admin note.

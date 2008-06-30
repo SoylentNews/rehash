@@ -163,6 +163,35 @@ sub getTagboxes {
 }
 }
 
+# Cache a list of which gtids map to which tagboxes, so we can quickly
+# return a list of tagboxes that want a "nosy" entry for a given gtid.
+# Input is a hashref with the globj fields (the only one this cares
+# about at the moment is gtid, but that may change in future).  Output
+# is an array of tagbox IDs.
+
+{ # closure XXX this won't work with multiple sites, fix
+my $gtid_to_tbids = { };
+sub getTagboxesNosyForGlobj {
+	my($self, $globj_hr) = @_;
+	my $gtid;
+	if (!$gtid_to_tbids) {
+		my $globj_types = $self->getGlobjTypes();
+		for $gtid (grep /^\d+$/, keys %$globj_types) {
+			$gtid_to_tbids->{ $gtid } = [ ];
+		}
+		my $tagboxes = $self->getTagboxes();
+		for my $tb_hr (@$tagboxes) {
+			my @nosy = grep /^\d+$/, split / /, $tb_hr->{nosy_gtids};
+			for $gtid (@nosy) {
+				push @{ $gtid_to_tbids->{$gtid} }, $tb_hr->{tbid};
+			}
+		}
+	}
+	$gtid = $globj_hr->{gtid};
+	return @{ $gtid_to_tbids->{$gtid} };
+}
+}
+
 { # closure XXX this won't work with multiple sites, fix
 my $userkey_masterregex;
 sub userKeysNeedTagLog {
@@ -218,19 +247,18 @@ sub logUserChange {
 }
 
 sub getMostImportantTagboxAffectedIDs {
-	my($self, $num) = @_;
+	my($self, $num, $min_weightsum) = @_;
 	$num ||= 10;
+	$min_weightsum ||= 1;
 	return $self->sqlSelectAllHashrefArray(
 		'tagboxes.tbid,
 		 affected_id,
-		 MAX(tagid) AS max_tagid,
-		 MAX(tdid)  AS max_tdid,
-		 MAX(tuid)  AS max_tuid,
+		 MAX(tfid) AS max_tfid,
 		 SUM(importance*weight) AS sum_imp_weight',
 		'tagboxes, tagboxlog_feeder',
 		'tagboxes.tbid=tagboxlog_feeder.tbid',
 		"GROUP BY tagboxes.tbid, affected_id
-		 HAVING sum_imp_weight >= 1
+		 HAVING sum_imp_weight >= $min_weightsum
 		 ORDER BY sum_imp_weight DESC LIMIT $num");
 }
 
@@ -280,8 +308,6 @@ sub addFeederInfo {
 	my($self, $tbid, $info_hr) = @_;
 	$info_hr->{-created_at} = 'NOW()';
 	$info_hr->{tbid} = $tbid;
-	die "attempt to create tagboxlog_feeder row with no non-NULL ids: " . Dumper($info_hr)
-		if !( $info_hr->{tagid} || $info_hr->{tdid} || $info_hr->{tuid} );
 	return $self->sqlInsert('tagboxlog_feeder', $info_hr);
 }
 
@@ -292,9 +318,9 @@ sub forceFeederRecalc {
 		tbid =>		$tbid,
 		affected_id =>	$affected_id,
 		importance =>	9999,
-		tagid =>	0,
-		tdid =>		0,
-		tuid =>		0,
+		tagid =>	undef,
+		tdid =>		undef,
+		tuid =>		undef,
 	};
 	return $self->sqlInsert('tagboxlog_feeder', $info_hr);
 }
@@ -308,13 +334,7 @@ sub markTagboxRunComplete {
 	my($self, $affected_hr) = @_;
 
 	my $delete_clause = "tbid=$affected_hr->{tbid} AND affected_id=$affected_hr->{affected_id}";
-	my @id_clauses = ( );
-	push @id_clauses, "tagid <= $affected_hr->{max_tagid}" if $affected_hr->{max_tagid};
-	push @id_clauses, "tdid  <= $affected_hr->{max_tdid}"  if $affected_hr->{max_tdid};
-	push @id_clauses, "tuid  <= $affected_hr->{max_tuid}"  if $affected_hr->{max_tuid};
-	@id_clauses = ("tagid=0 AND tdid=0 AND tuid=0") if !@id_clauses;
-	my $id_clause = join(' OR ', @id_clauses);
-	$delete_clause .= " AND ($id_clause)";
+	$delete_clause .= " AND tfid <= $affected_hr->{max_tfid}";
 
 	$self->sqlDelete('tagboxlog_feeder', $delete_clause);
 	$self->sqlUpdate('tagboxes',

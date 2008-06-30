@@ -5,6 +5,8 @@
 
 # Requires TagModeration plugin (not (just) Moderation)
 
+# XXX add comments gtid as nosy
+
 package Slash::Tagbox::CommentScoreReason;
 
 =head1 NAME
@@ -149,6 +151,11 @@ sub run {
 	my $current_reason_mode = 0;
 	my $base_neediness = $constants->{tagbox_csr_baseneediness} || 60;
 	my $neediness = $base_neediness;
+
+
+# Sun Jun 29 01:33:40 2008 CommentScoreReason->run setting cid=22886594 fhid=0 globjid=2059928 to score=0 reason=1 neediness=137
+# Sun Jun 29 01:33:40 2008 CommentScoreReason->run setting cid=22886640 fhid=0 globjid=2059992 to score=2 reason=7 neediness=137
+
 
 	# First scan: neediness (comments.f3).
 	for my $tag (@$tags_ar) {
