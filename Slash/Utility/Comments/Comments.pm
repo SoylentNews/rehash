@@ -37,7 +37,6 @@ our @EXPORT  = qw(
 	constrain_score dispComment displayThread printComments
 	jsSelectComments commentCountThreshold commentThresholds discussion2
 	selectComments preProcessReplyForm makeCommentBitmap parseCommentBitmap
-	saveCommentBitmap getCommentBitmap saveCommentReadLog getCommentReadLog
 	getPoints preProcessComment postProcessComment prevComment saveComment
 );
 
@@ -233,8 +232,8 @@ sub selectComments {
 ##slashProf("sC fudging", "sC main sort");
 #slashProf("", "sC main sort");
 
-	my $comments_read = $user->{is_admin}
-		? getCommentReadLog($discussion->{id}, $user->{uid})
+	my $comments_read = ($user->{is_subscriber} || $user->{is_admin})
+		? $slashdb->getCommentReadLog($discussion->{id}, $user->{uid})
 		: {};
 
 	# This loop mainly takes apart the array and builds 
@@ -453,6 +452,9 @@ sub jsSelectComments {
 	if ($user->{d2_keybindings_switch}) {
 		$extra .= "d2_keybindings_off = 1;\n";
 	}
+	if ($user->{d2_reverse_switch}) {
+		$extra .= "d2_reverse_shift = 1;\n";
+	}
 
 	# maybe also check if this ad should be running with some other var?
 	# from ads table? -- pudge
@@ -566,63 +568,6 @@ sub _get_thread {
 		}
 	}
 	return $newcomments;
-}
-
-sub saveCommentReadLog {
-	my($comments, $discussion_id, $uid) = @_;
-
-	$uid ||= getCurrentUser('uid');
-	my $slashdb = getCurrentDB();
-
-	# cache inserts?
-	for my $cid (@$comments) {
-		$slashdb->sqlInsert('users_comments_read_log', {
-			uid            => $uid,
-			discussion_id  => $discussion_id,
-			cid            => $cid
-		}, { ignore => 1 });
-	}
-}
-
-sub getCommentReadLog {
-	my($discussion_id, $uid) = @_;
-
-	$uid ||= getCurrentUser('uid');
-	my $slashdb = getCurrentDB();
-
-	my $comments_read = $slashdb->sqlSelectAllKeyValue(
-		'cid, 1',
-		'users_comments_read_log',
-		'uid=' . $slashdb->sqlQuote($uid) .
-		' AND discussion_id=' . $slashdb->sqlQuote($discussion_id)
-	);
-}
-
-sub getCommentBitmap {
-	my($discussion_id, $uid) = @_;
-
-	$uid ||= getCurrentUser('uid');
-	my $slashdb = getCurrentDB(); # is reader fast enough to be useful?
-
-	my $bitmap = $slashdb->sqlSelect('comment_bitmap', 'users_comments_read',
-		'uid=' . $slashdb->sqlQuote($uid) . ' AND discussion_id=' .
-		$slashdb->sqlQuote($discussion_id)
-	);
-
-	return $bitmap;
-}
-
-sub saveCommentBitmap {
-	my($bitmap, $discussion_id, $uid) = @_;
-
-	$uid ||= getCurrentUser('uid');
-	my $slashdb = getCurrentDB();
-
-	$slashdb->sqlReplace('users_comments_read', {
-		uid            => $uid,
-		discussion_id  => $discussion_id,
-		comment_bitmap => $bitmap
-	});
 }
 
 sub parseCommentBitmap {

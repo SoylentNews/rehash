@@ -40,6 +40,7 @@ var thresh_totals = {
 };
 var d2_keybindings_off = 0;
 var d2_keybindings_disable = {};
+var d2_reverse_shift = 0;
 
 var submitCountdowns = {};
 var ajaxCommentsWaitQueue = [];
@@ -858,7 +859,7 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 			}
 
 			if (do_update) {
-			  if (!user_is_admin) {
+			  if (!user_is_subscriber && !user_is_admin) {
 				if (newoldstuff) {
 					for (var i = 0; i < last_updated_comments.length; i++) {
 						var this_cid = last_updated_comments[i];
@@ -879,7 +880,7 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 						updateComment(this_cid, mode);
 					}
 
-				  if (!user_is_admin) {
+				  if (!!user_is_subscriber && !user_is_admin) {
 					var this_id  = fetchEl('comment_top_' + this_cid);
 					if (this_id) {
 						this_id.className = this_id.className.replace(' oldcomment', ' newcomment');
@@ -2017,7 +2018,7 @@ function setCommentRead (cid) {
 		&& !read_comments[cid]
 		&& $('#comment_otherdetails_' + cid).length
 		&& !noSeeFirstComment(cid)
-		&& user_is_admin
+		&& (user_is_subscriber || user_is_admin)
 	) {
 		read_comments[cid] = 1;
 	}
@@ -2113,6 +2114,8 @@ function keyHandler(e, k) {
 			if (!k)
 				doModifiers(e);
 			var collapseCurrent = shift_down;
+			if (d2_reverse_shift)
+				collapseCurrent = !collapseCurrent;
 			var getNextUnread   = ctrl_down; // not working right, and interfering anyway -- pudge
 			var skipit = 0;
 			if (meta_down || alt_down || ctrl_down)

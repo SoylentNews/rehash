@@ -11,7 +11,7 @@ use Time::Local;
 use Date::Format qw(time2str);
 use Data::Dumper;
 use Slash::Utility;
-use Storable qw(thaw freeze);
+use Storable qw(thaw nfreeze);
 use URI ();
 use Slash::Custom::ParUserAgent;
 use vars qw($_proxy_port);
@@ -1457,7 +1457,7 @@ sub createAccessLogAdmin {
 	# And just what was the admin doing? -Brian
 	$op = $form->{op} if $form->{op};
 	$status ||= $r->status;
-	my $form_freeze = freeze($form);
+	my $form_freeze = nfreeze($form);
 
 	$self->sqlInsert('accesslog_admin', {
 		host_addr	=> $r->connection->remote_ip,
@@ -3529,6 +3529,13 @@ sub setStory {
 	# with time.
 
 	$change_hr->{day_published} = $change_hr->{'time'} if $change_hr->{'time'};
+
+	# what about stories set to ND?  this is not supported by our OAI code,
+	# i think, but let's update anyway -- pudge
+	if (grep /^(title|uid|time|introtext|bodytext|primaryskid|tid|neverdisplay)$/, keys %$change_hr) {
+		# this is the only place this ever changes
+		$change_hr->{-archive_last_update} = 'NOW()';
+	}
 
 	# Now we know exactly what columns have to change.  Figure out
 	# which tables they belong to.
@@ -6268,11 +6275,10 @@ sub getCommentTextCached {
 	for my $cid (keys %$more_comment_text) {
 		my $abbreviate = $abbreviate_ok && $comments->{$cid}{class} eq 'oneline';
 		my $original_text = $more_comment_text->{$cid};
+		my $this_max_len = $abbreviate ? $abbreviate_len : $max_len;
 		if (	   $possible_chop
 			&& !($opt->{cid} && $opt->{cid} eq $cid)
-			&& $comments->{$cid}{len} > (
-				$abbreviate ? $abbreviate_len : $max_len
-			)
+			&& ($comments->{$cid}{len} > ($this_max_len + 256))
 		) {
 			# We remove the domain tags so that strip_html will not
 			# consider </a blah> to be a non-approved tag.  We'll
@@ -6280,7 +6286,7 @@ sub getCommentTextCached {
 			# the comment down to size, then massage it to make sure
 			# we still have good HTML after the chop.
 			my $abbrev_text = parseDomainTags($more_comment_text->{$cid}, 0, 1, 1);
-			my $this_len = $max_len;
+			my $this_len = $this_max_len;
 			if ($abbreviate) {
 				my $str = $abbrev_text;
 				# based on revertQuote() ... we replace the unused
@@ -6325,6 +6331,7 @@ sub getCommentTextCached {
 				unless ($bail) {
 					$str =~ s/(?<!<)(<[^<>]+>)/'<<'.length($1).'>>'/ge;
 
+					# count up where we're at
 					my $plen = $this_len = 0;
 					while ($str =~ /([^<>]|<<(\d+)>>)/g) {
 						my $len1 = length $1;
@@ -6334,7 +6341,7 @@ sub getCommentTextCached {
 							$this_len += $len1;
 							$plen += $len1;
 						}
-						last if $plen >= $abbreviate_len;
+						last if $plen >= $this_max_len + 256; # rest getting cut anyway
 					}
 				}
 			}
@@ -6467,6 +6474,71 @@ sub getComments {
 		'comments',
 		"cid=$cid AND sid=$sid_quoted"
 	);
+}
+
+#######################################################
+sub saveCommentReadLog {
+	my($self, $comments, $discussion_id, $uid) = @_;
+
+	$uid ||= getCurrentUser('uid');
+
+	my($mcd, $mcdkey);
+	if (@$comments) {
+		$mcd = $self->getMCD;
+		$mcdkey = "$self->{_mcd_keyprefix}:cmr:$uid:$discussion_id";
+	}
+
+	if ($mcd) {
+		$mcd->delete($mcdkey);
+	}
+
+	# cache inserts?
+	for my $cid (@$comments) {
+		$self->sqlInsert('users_comments_read_log', {
+			uid            => $uid,
+			discussion_id  => $discussion_id,
+			cid            => $cid
+		}, { ignore => 1 });
+	}
+
+	if ($mcd) {
+		my $comments_read = $self->getCommentReadLog($discussion_id, $uid, 1);
+		$mcd->set($mcdkey, $comments_read) if $comments_read;
+	}
+
+	1;
+}
+
+#######################################################
+sub getCommentReadLog {
+	my($self, $discussion_id, $uid, $no_mcd) = @_;
+
+	$uid ||= getCurrentUser('uid');
+
+	my($mcd, $mcdkey);
+	if (!$no_mcd) {
+		$mcd = $self->getMCD;
+		$mcdkey = "$self->{_mcd_keyprefix}:cmr:$uid:$discussion_id";
+	}
+
+	my $comments_read;
+	if ($mcd) {
+		$comments_read = $mcd->get($mcdkey);
+		return $comments_read if $comments_read;
+	}
+
+	$comments_read = $self->sqlSelectAllKeyValue(
+		'cid, 1',
+		'users_comments_read_log',
+		'uid=' . $self->sqlQuote($uid) .
+		' AND discussion_id=' . $self->sqlQuote($discussion_id)
+	) or return;
+
+	if ($mcd) {
+		$mcd->add($mcdkey, $comments_read);
+	}
+
+	return $comments_read;
 }
 
 #######################################################
@@ -7543,6 +7615,11 @@ sub createStory {
 		$story->{sid} = createSid();
 		my $sid_ok = 0;
 		while ($sid_ok == 0) {
+			# we rely on logic in setStory() later to properly
+			# set up the data for a story, so we can't someday
+			# just change this to do an insert of all the story
+			# data, we do need to continue pass it through
+			# setStory()
 			$sid_ok = $self->sqlInsert('stories',
 				{ sid => $story->{sid} },
 				{ ignore => 1 } ); # don't need error messages
@@ -8749,7 +8826,7 @@ sub getStoidFromSidOrStoid {
 sub getStoidFromSid {
 	my($self, $sid) = @_;
 	return undef if !$sid;
-	return undef if $sid !~ regexSid();
+	return undef if $sid !~ regexSid(1);
 	if (my $stoid = $self->{_sid_conversion_cache}{$sid}) {
 		return $stoid;
 	}
@@ -10320,7 +10397,7 @@ sub setUser {
 		$hashref->{newpasswd_ts} = undef,
 		$hashref->{passwd} = encryptPassword($hashref->{passwd}, $uid);
 	}
-	$hashref->{people} = freeze($hashref->{people}) if $hashref->{people};
+	$hashref->{people} = nfreeze($hashref->{people}) if $hashref->{people};
 	if (exists $hashref->{slashboxes}) {
 		my @slashboxes = grep /^[\w-]+$/, split /,/, $hashref->{slashboxes};
 		$hashref->{slashboxes} = join ",", @slashboxes;

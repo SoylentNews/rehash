@@ -419,7 +419,7 @@ sub fetchComments {
 #use Data::Dumper; print STDERR Dumper [ $form, $cids, $id, $cid, $d2_seen, $read_comments ];
 	return unless $id;
 
-	saveCommentReadLog($read_comments, $id, $user->{uid}) if @$read_comments;
+	$slashdb->saveCommentReadLog($read_comments, $id, $user->{uid}) if @$read_comments;
 
 	# XXX error?
 	return unless (@$cids || $d2_seen);
@@ -803,7 +803,8 @@ sub saveModalPrefs {
 			# we only want to save the pref for people who turn it off, but the checkbox
 			# is on by default, so if the value is true then it is on, and if false,
 			# it is off -- pudge
-			d2_keybindings_switch => $params{'d2_keybindings_switch'}   ? undef : 1,
+			d2_reverse_switch     => $params{'d2_reverse_switch'}     ? 1 : undef,
+			d2_keybindings_switch => $params{'d2_keybindings_switch'} ? undef : 1,
 			d2_comment_q          => $params{'d2_comment_q'}         || undef,
 			d2_comment_order      => $params{'d2_comment_order'}     || undef,
 			nosigs                => ($params{'nosigs'}              ? 1 : 0),
