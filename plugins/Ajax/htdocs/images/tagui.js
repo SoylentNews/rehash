@@ -25,13 +25,13 @@ function tag_style( t ){
 
 
 function tag_click( event ) {
-	var tag_elem = $('.tag', this);
-	var tag = tag_elem.text();
+	var $tag_el = $('.tag', this);
+	var tag = $tag_el.text();
 	var op	= $(event.target).text();
 
 	// op differs from tag when the click was in a menu
 	//	so, if in a menu, or right on the tag itself, do something
-	if ( event.target!==this && (op!==tag || event.target===tag_elem[0]) )
+	if ( event.target!==this && (op!==tag || event.target===$tag_el[0]) )
 		$(this).parents('.tbar')[0].click_tag(tag, op);
 }
 
@@ -74,7 +74,7 @@ var tbar_fns = {
 		// the intersection of the requested vs. existing tags are the ones I can update in-place
 		var update_map = this.map_tags(tags = split_if_string(tags));
 
-		// update in-place the ones we can; build a list of the ones we can't
+		// update in-place the ones we can; build a list of the ones we can't ($.map returns a js array)
 		var new_tags = $.map(tags, function(t){
 			var bt = bare_tag(t);
 			if ( bt in update_map )
@@ -84,20 +84,20 @@ var tbar_fns = {
 		});
 
 		// a $ list of the actual .tag elements we updated in-place
-		var changed_tags = $(values(update_map));
+		var $changed_tags = $(values(update_map));
 
 		if ( new_tags.length ) {
 			// construct all the completely new tag entries and associated machinery
-			var new_elems = $(join_wrap(new_tags, '<li><span class="tag">', '</span></li>'))
+			var $new_elems = $(join_wrap(new_tags, '<li><span class="tag">', '</span></li>'))
 				.click(tag_click) // one click-handler per tag, and it's on the <li>
 				.append(this.tagbar_data.menu_template);
 
 			// by default, insert the new tags at the front of the tagbar
 			if ( how !== 'append' ) how = 'prepend';
-			$(this.tagbar_data.list_el)[how](new_elems);
+			$(this.tagbar_data.list_el)[how]($new_elems);
 
-			// add in a $ list of the actual .tag elements we created from scratch
-			changed_tags = changed_tags.add( new_elems.find('.tag') );
+			// add in a list of the actual .tag elements we created from scratch
+			$changed_tags = $changed_tags.add( $new_elems.find('.tag') );
 		}
 
 		// for every .tag element we touched/created, fix the style to match the kind of tag and add annotate if supplied
@@ -105,7 +105,7 @@ var tbar_fns = {
 		//   comes back with a complete list in response that will wipe out the "local-only" style, essentially
 		//   confirming the user's change has been recorded
 		var base_classes = 'tag ' + (annotate ? annotate+' ' : '');
-		changed_tags.each(function(){
+		$changed_tags.each(function(){
 			this.className = $.trim(base_classes + tag_style($(this).text()));
 		});
 		return this
