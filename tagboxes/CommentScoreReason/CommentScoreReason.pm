@@ -62,6 +62,7 @@ sub isInstalled {
 	return undef if !$constants->{plugin}{Tags} || !$constants->{plugin}{TagModeration};
 	my($tagbox_name) = $class =~ /(\w+)$/;
 	return undef if !$constants->{tagbox}{$tagbox_name};
+	return 1;
 }
 
 sub feed_newtags {
