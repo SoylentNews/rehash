@@ -130,6 +130,36 @@ function getXYForId(id, addWidth, addHeight) {
 	return [ offset.left, offset.top ];
 }
 
+function firehose_id_of( expr ) {
+	try {
+		// We accept a number, or...
+		if ( typeof expr === 'number' )
+			return expr;
+
+		// ...a dom element that is or is within a firehose entry, or...
+		else if ( typeof expr === 'object' && expr.parentNode ) {
+			if ( expr.id && expr.id.match(/-\d+$/) )
+				expr = expr.id;
+			else
+				expr = $(expr).parents('[id^=firehose-]').attr('id');
+		}
+
+		// ...a string that is a number or the id of
+		//	a dom element that is or is within a firehose entry.
+		var match = /(?:.+-)?(\d+)$/.exec(expr);
+
+		// We return an integer id.
+		if ( match )
+			return parseInt(match[1]);
+	}
+	catch ( e ) {
+		// If we can't deduce an integer id; we won't throw...
+	}
+
+	// ...but we won't return an answer, either.
+	return undefined;
+}
+
 function firehose_toggle_advpref() {
 	$('#fh_advprefs').toggleClass('hide');
 }
