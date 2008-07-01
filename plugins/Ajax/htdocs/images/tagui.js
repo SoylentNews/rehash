@@ -164,17 +164,15 @@ var tbar_fns = {
 
 var twidget_fns = {
 
+	init: function( firehose_id ){
+		$(this).append(tag_bar(firehose_id, 'tags_get_top_firehose', '! x'))
+			.append(tag_bar(firehose_id, 'tags_get_user_firehose', '_ # ! )'))
+			.append(tag_bar(firehose_id, 'tags_get_user_firehose'))
+	},
+
 	each_bar: function( fn ){
 		$('.tbar', this).each(fn);
 		return this
-	},
-
-	connect_to: function( item_id ){
-		this.each_bar(function(){
-			this.remove_tags();
-			this.tagbar_data.item_id = item_id;
-		});
-		return this.fetch_tags();
 	},
 
 	fetch_tags: function(){
@@ -182,13 +180,56 @@ var twidget_fns = {
 			this.fetch_tags();
 		});
 		return this
+	},
+
+	open: function(){
+		$(this).show()
+			.find(':text')
+			.each(function(){
+				this.focus()
+			});
+		return this
+	},
+
+	close: function(){
+		$(this).hide();
+		return this
 	}
 
 }; // twidget_fns
 
+function open_tag_widget( event, selector ) {
+	// Walk up to the dom element for this entire entry
+	$(selector || this).parents('[id^=firehose-]').andSelf()
 
+		// ...then back down to the tag-widget (if closed) within.
+		.find('.tag-widget:hidden')
 
+		// Initialize if it's only a stub...
+		.filter('.stub').each(function(){
+		       $.extend(this, twidget_fns);
+		       this.init(firehose_id_of(this.id))
+		}).removeClass('stub')
 
+		// ...and now that it's ready, we can just tell it to open itself.
+		.end().each(function(){
+		       this.open();
+		       this.fetch_tags();
+		});
+}
+
+function close_tag_widget( event, selector ) {
+	// Walk up to the dom element for this entire entry
+       $(selector || this).parents('[id^=firehose-]').andSelf()
+
+		// ...then back down to the tag-widget (if open) within.
+               .find('.tag-widget:visible')
+
+		// We can just tell it to close itself.
+               .each(function(){
+                       this.close()
+               })
+}
 
 
 function tag_bar( item_id, ajax_op, menu_cmds, tags ){

@@ -1,7 +1,9 @@
 __section__
 default
 __description__
-You should describe stuff here.
+This builds a tag-widget bound to a containing firehose entry.
+
+item_id = the firehose id to which this widget will be bound
 __title__
 Useless title to template
 __page__
@@ -13,17 +15,7 @@ tag_widget
 __seclev__
 10000
 __template__
-<script type="text/javascript">
-$(function(){
-	var $widget = $('#tag-widget');
-	$.extend($widget[0], twidget_fns);
-	$widget.hide()
-		.append(tag_bar(null, 'tags_get_top_firehose', '! x'))
-		.append(tag_bar(null, 'tags_get_user_firehose', '_ # ! )'))
-		.append(tag_bar(null, 'tags_get_user_firehose'));
-})
-</script>
-<div id="tag-widget">
+<div id="tag-widget-[% item_id %]" class="tag-widget stub" style="display: none">
 </div>
 __version__
 $Id$
