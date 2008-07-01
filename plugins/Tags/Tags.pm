@@ -2143,7 +2143,7 @@ sub getRecentTagnamesOfInterest {
 		next unless $tc;
 		my $tagnameid = $tag_hr->{tagnameid};
 		my $globjid = $tag_hr->{globjid};
-		my $type = $target_hr->{$globjid][0];
+		my $type = $target_hr->{$globjid}[0];
 		if ($firehose) {
 			my $fhid = $firehose->getFireHoseIdFromGlobjid($globjid);
 			my $item = $firehose->getFireHose($fhid) if $fhid;
