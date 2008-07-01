@@ -108,6 +108,7 @@ var tbar_fns = {
 		changed_tags.each(function(){
 			this.className = $.trim(base_classes + tag_style($(this).text()));
 		});
+		return this
 	},
 
 
@@ -119,7 +120,8 @@ var tbar_fns = {
 
 		$.each(tags, function(bt, entry){
 			$(entry).parents('li').eq(0).remove()
-		})
+		});
+		return this
 	},
 
 
@@ -129,7 +131,7 @@ var tbar_fns = {
 		this.remove_tags(this.map_tags(function(bt){
 			return !(bt in allowed_tags)
 		}));
-		this.update_tags(tags, 'append')
+		return this.update_tags(tags, 'append')
 	},
 
 
@@ -141,7 +143,8 @@ var tbar_fns = {
 			no_markup:	1
 		}, function( tags ) {
 			tb.set_tags(tags)
-		})
+		});
+		return this
 	},
 
 
@@ -153,6 +156,7 @@ var tbar_fns = {
 			this.update_tags(tag.slice(1));
 		else if ( op != tag )
 			this.update_tags(op+tag);
+		return this
 	}
 
 }; // tbar_fns
@@ -162,6 +166,7 @@ var twidget_fns = {
 
 	each_bar: function( fn ){
 		$('.tbar', this).each(fn);
+		return this
 	},
 
 	connect_to: function( item_id ){
@@ -169,13 +174,14 @@ var twidget_fns = {
 			this.remove_tags();
 			this.tagbar_data.item_id = item_id;
 		});
-		this.fetch_tags();
+		return this.fetch_tags();
 	},
 
 	fetch_tags: function(){
 		this.each_bar(function(){
 			this.fetch_tags();
 		});
+		return this
 	}
 
 }; // twidget_fns
