@@ -39,7 +39,7 @@ var fh_is_updating = 0;
 var fh_update_timerids = Array(0);
 var fh_is_admin = 0;
 var console_updating = 0;
-var fh_colorslider; 
+var fh_colorslider;
 var fh_ticksize;
 var fh_colors = Array(0);
 var fh_use_jquery = 0;
@@ -51,7 +51,7 @@ var is_ie = ua.match("/MSIE/");
 
 
 function createPopup(xy, titlebar, name, contents, message, onmouseout) {
-	var body = document.getElementsByTagName("body")[0]; 
+	var body = document.getElementsByTagName("body")[0];
 	var div = document.createElement("div");
 	div.id = name + "-popup";
 	div.style.position = "absolute";
@@ -62,7 +62,7 @@ function createPopup(xy, titlebar, name, contents, message, onmouseout) {
 
 	var leftpos = xy[0] + "px";
 	var toppos  = xy[1] + "px";
-	
+
 	div.style.left = leftpos;
 	div.style.top = toppos;
 	div.style.zIndex = "100";
@@ -209,7 +209,7 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 	$('#tagbox-'+id).setClass("tags");			// Make the tagbox change to the slashbox class
 	$('#tagbox-title-'+id).setClass("tagtitleopen");	// Make the title of the tagbox change to white-on-green
 	$('#toggletags-body-'+id).setClass("tagbody");		// Make the body of the tagbox visible
-	
+
 	// If the tags-user div hasn't been filled, fill it.
 	var tagsuser = $('#tags-user-' + id);
 	if (tagsuser.html() == "") {
@@ -232,7 +232,7 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 		}
 		params['newtagspreloadtext'] = newtagspreloadtext;
 		var handlers = {
-			onComplete: function() { 
+			onComplete: function() {
 				$dom('newtags-'+id).focus();
 			}
 		}
@@ -327,7 +327,7 @@ function attachCompleter( obj, id, is_admin, type, tagDomain, customize ) {
 	customize._type = type;
 	if ( tagDomain != 0 && customize.queryOnAttach === undefined )
 		customize.queryOnAttach = true;
-	
+
 	if ( !YAHOO.slashdot.gCompleterWidget )
 		YAHOO.slashdot.gCompleterWidget = new YAHOO.slashdot.AutoCompleteWidget();
 
@@ -398,7 +398,7 @@ function setOneTopTagForFirehose(id, newtag) {
 
 function tagsCreateForFirehose(id) {
 	var status = $('#toggletags-message-'+id).html('Saving tags...');
-	
+
 	ajax_update({
 		op:	'tags_create_for_firehose',
 		id:	id,
@@ -420,10 +420,10 @@ function toggle_firehose_body(id, is_admin) {
 	if (fhbody.className == "empty") {
 		var handlers = {
 			onComplete: function() {
-				if(firehoseIsInWindow(id)) { 
-					scrollWindowToFirehose(id); 
+				if(firehoseIsInWindow(id)) {
+					scrollWindowToFirehose(id);
 				}
-				firehose_get_admin_extras(id); 
+				firehose_get_admin_extras(id);
 			}
 		};
 		params['reskey'] = reskey_static;
@@ -453,7 +453,7 @@ function firehose_set_options(name, value) {
 	if (name == "color" && value === undefined) {
 		return;
 	}
-	
+
 	var pairs = [
 		// name		value		curid		newid		newvalue 	title 
 		["orderby", 	"createtime", 	"popularity",	"time",		"popularity"	],
@@ -534,12 +534,12 @@ function firehose_set_options(name, value) {
 		if ($dom('firehoselist')) {
 			// set page
 			page = 0;
-			
+
 			if (!is_ie) {
-				var attributes = { 
+				var attributes = {
 					opacity: { from: 1, to: 0 }
 				};
-				var myAnim = new YAHOO.util.Anim("firehoselist", attributes); 
+				var myAnim = new YAHOO.util.Anim("firehoselist", attributes);
 				myAnim.duration = 1;
 				myAnim.onComplete.subscribe(function() {
 					$dom('firehoselist').style.opacity = "1";
@@ -547,12 +547,12 @@ function firehose_set_options(name, value) {
 				myAnim.animate();
 			}
 			// remove elements
-			setTimeout(firehose_remove_all_items, 600);
+			firehose_remove_all_items();
 		}
 	}
 	}
 
-	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" || name == "issue" || name == "pagesize") { 
+	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" || name == "issue" || name == "pagesize") {
 		params[name] = value;
 		if (name == "startdate") {
 			firehose_settings.startdate = value;
@@ -582,7 +582,7 @@ function firehose_set_options(name, value) {
 	}
 
 	var handlers = {
-		onComplete: function(transport) { 
+		onComplete: function(transport) {
 			json_handler(transport);
 			firehose_get_updates({ oneupdate: 1 });
 		}
@@ -720,8 +720,8 @@ function json_update(response) {
 		for (el in response.html) {
 			$('#'+el).html(response.html[el]);
 		}
-		
-	} 
+
+	}
 
 	if (response.value) {
 		for (el in response.value) {
@@ -748,8 +748,8 @@ function json_update(response) {
 				found.html(this_html + response.html_append_substr[el]);
 			}
 		}
-	}		
-	
+	}
+
 	if (response.eval_last) {
 		try {
 			eval(response.eval_last)
@@ -786,19 +786,19 @@ function firehose_handle_update() {
 			} else {
 				$('#firehoselist').prepend(el[2]);
 			}
-		
+
 			var toheight = 50;
 			if (fh_view_mode == "full") {
 				toheight = 200;
 			}
 
-			var attributes = { 
+			var attributes = {
 				height: { from: 0, to: toheight }
 			};
 			if (!is_ie) {
 				attributes.opacity = { from: 0, to: 1 };
 			}
-			var myAnim = new YAHOO.util.Anim(fh, attributes); 
+			var myAnim = new YAHOO.util.Anim(fh, attributes);
 			myAnim.duration = 0.7;
 
 			if (firehose_updates_size > 10) {
@@ -836,17 +836,17 @@ function firehose_handle_update() {
 			if (fh_is_admin && fh_view_mode == "fulltitle" && fh_node && fh_node.className == "article" ) {
 				// Don't delete admin looking at this in expanded view
 			} else {
-				var attributes = { 
+				var attributes = {
 					height: { to: 0 }
 				};
-				
+
 				if (!is_ie) {
 					attributes.opacity = { to: 0};
 				}
-				var myAnim = new YAHOO.util.Anim(fh, attributes); 
+				var myAnim = new YAHOO.util.Anim(fh, attributes);
 				myAnim.duration = 0.4;
 				wait_interval = 500;
-				
+
 				if (firehose_updates_size > 10) {
 					myAnim.duration = myAnim.duration * 2;
 					if (!firehose_removed_first) {
@@ -867,7 +867,7 @@ function firehose_handle_update() {
 							elem.parentNode.removeChild(elem);
 						}
 					});
-					myAnim.animate(); 
+					myAnim.animate();
 				} else {
 					var elem = $dom(fh);
 					wait_interval = 25;
@@ -1074,7 +1074,7 @@ function firehose_pause() {
 }
 
 function firehose_add_update_timerid(timerid) {
-	fh_update_timerids.push(timerid);		
+	fh_update_timerids.push(timerid);
 }
 
 function firehose_collapse_entry(id) {
@@ -1087,13 +1087,13 @@ function firehose_collapse_entry(id) {
 function firehose_remove_entry(id) {
 	var fh = $dom('firehose-' + id);
 	if (fh) {
-		var attributes = { 
+		var attributes = {
 			height: { to: 0 }
 		};
 		if (!is_ie) {
 			attributes.opacity = { to: 0 };
 		}
-		var myAnim = new YAHOO.util.Anim(fh, attributes); 
+		var myAnim = new YAHOO.util.Anim(fh, attributes);
 		myAnim.duration = 0.5;
 		myAnim.onComplete.subscribe(function() {
 			var el = this.getEl();
@@ -1103,12 +1103,12 @@ function firehose_remove_entry(id) {
 	}
 }
 
-var firehose_cal_select_handler = function(type,args,obj) { 
+var firehose_cal_select_handler = function(type,args,obj) {
 	var selected = args[0];
 	firehose_settings.issue = '';
 	firehose_set_options('startdate', selected.startdate);
 	firehose_set_options('duration', selected.duration);
-}; 
+};
 
 
 function firehose_calendar_init( widget ) {
@@ -1122,7 +1122,7 @@ function firehose_slider_init() {
 		var fh_get_val_return = fh_colorslider.getValue();
 		fh_colorslider.subscribe("slideEnd", firehose_slider_end);
 	}
-}	
+}
 
 function firehose_slider_end(offsetFromStart) {
 	var newVal = fh_colorslider.getValue();
@@ -1405,7 +1405,7 @@ function toggle_filter_prefs() {
 			if (fp) {
 				fp.className = "";
 				setTimeout(firehose_slider_init,500);
-			} 
+			}
 		} else if (fps.className == "hide") {
 			fps.className = "";
 			if (fp) {
@@ -1543,7 +1543,7 @@ function firehose_go_prev() {
 
 function firehose_more() {
 	firehose_settings.more_num = firehose_settings.more_num + firehose_more_increment;
-	
+
 	if (((firehose_item_count + firehose_more_increment) >= 200) && !fh_is_admin) {
 		$('#firehose_more').hide();
 	}
