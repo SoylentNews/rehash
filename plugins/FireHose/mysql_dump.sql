@@ -13,6 +13,8 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_remove_tab', 'Slash::FireHose', 'aj
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_list_tabs', 'Slash::FireHose', 'ajaxFirehoseListTabs', 'ajax_user_static', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_usage', 'Slash::FireHose', 'ajaxFireHoseUsage', 'ajax_admin', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_media', 'Slash::FireHose', 'ajaxFetchMedia', 'ajax_base', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'tags_get_top_firehose', 'Slash::FireHose', 'ajaxGetFireHoseTagsTop', 'ajax_tags_write', 'createuse');
+INSERT INTO ajax_ops VALUES (NULL, 'tags_get_combined_firehose', 'Slash::FireHose', 'ajaxGetCombinedFirehose', 'ajax_tags_write', 'createuse');
 INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum, ie_cond) VALUES ('stylesheet','text/css','screen, projection','firehose.css','','','firehose','no','',2,0, '');
 INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum, ie_cond) VALUES ('stylesheet','text/css','screen, projection','firehose.css','','','users','no','',2,0, '');
 INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum, ie_cond) VALUES ('stylesheet','text/css','screen, projection','calendar.css','','','firehose','no','',2,0, '');
@@ -25,6 +27,7 @@ INSERT INTO ajax_ops VALUES (NULL, 'firehose_get_updates', 'Slash::FireHose', 'a
 INSERT INTO ajax_ops VALUES (NULL, 'firehose_set_options', 'Slash::FireHose', 'ajaxFireHoseSetOptions', 'ajax_user_static', 'use');
 INSERT INTO vars (name, value, description) VALUES ('firehose_admindownclout', '0.5', 'Admin clout for downvotes can be reduced by specifying a number between 0 and 1');
 INSERT INTO vars (name, value, description) VALUES ('firehose_adminudcclout', '0.5', 'Admin clout for udc purposes (number between 0 and 1, probably');
+INSERT INTO vars (name, value, description) VALUES ('firehose_adminupclout', '0.5', 'Admin clout for upvotes can be reduced by specifying a number between 0 and 1');
 INSERT INTO vars (name, value, description) VALUES ('firehose_story_ignore_skids', '', 'list of skids that you want to not want created or shown as firehose entries.  Delimit skids with |');
 INSERT INTO vars (name, value, description) VALUES ('firehose_color_slices', '30|30|0.2|0.2|0.2|0.2|0.2|0.0', 'Number or percent of remaining stories at each color level separated by | 30|0.5|0.5 would mean 30 stories at the level of highest popularity and 50% at each of remainining stories at the next 2 levels');
 INSERT INTO vars (name, value, description) VALUES ('firehose_memcached_exptime', '600', 'Seconds to cache firehose data generally');

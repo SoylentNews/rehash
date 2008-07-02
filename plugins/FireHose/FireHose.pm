@@ -1238,6 +1238,19 @@ sub ajaxGetUserFirehose {
 	}, { Return => 1 });
 }
 
+sub ajaxGetCombinedFirehose {
+	my($slashdb, $constants, $user, $form) = @_;
+	$form->{no_markup} = 1;
+
+	my $user_tags = ajaxGetUserFirehose($slashdb, $constants, $user, $form);
+	my $top_tags = ajaxGetFireHoseTagsTop($slashdb, $constants, $user, $form);
+	my $system_tags = 'systemtagshere';
+
+	return	"<user>" . $user_tags . "\n" .
+		"<top>" . $top_tags . "\n" .
+		"<system>" . $system_tags;
+}
+
 sub ajaxGetAdminFirehose {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $id = $form->{id};
