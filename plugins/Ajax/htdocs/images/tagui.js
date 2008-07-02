@@ -136,13 +136,13 @@ var tbar_fns = {
 
 
 	fetch_tags: function(){
-		var tb = this;
+		var bar = this;
 		$.post('/ajax.pl', {
 			op:		this.tagbar_data.fetch_op,
 			id:		this.tagbar_data.item_id,
 			no_markup:	1
-		}, function( tags ) {
-			tb.set_tags(tags)
+		}, function( response ) {
+			bar.set_tags(response)
 		});
 		return this
 	},
@@ -165,6 +165,10 @@ var tbar_fns = {
 var twidget_fns = {
 
 	init: function( firehose_id ){
+		this.tagwidget_data = {
+			item_id:	firehose_id
+		}
+
 		$(this).append(tag_bar(firehose_id, 'top'))
 			.append(tag_bar(firehose_id, 'user'))
 			.append(tag_bar(firehose_id, 'system'));
@@ -176,9 +180,34 @@ var twidget_fns = {
 		return this
 	},
 
+	set_tags: function( tags ){
+		var widget = this;
+
+		$.each(tags.split('\n'), function(){
+			var which_bar = 'user';
+			var this_bars_tags = this;
+
+			var match = /^<(\w+)>?(.*)$/.exec(this);
+			if ( match ) {
+				which_bar = match[1];
+				this_bars_tags = match[2];
+			}
+
+			$('.tbars .tbar.'+which_bar, widget).each(function(){
+				this.set_tags(this_bars_tags)
+			})
+		});
+		return this
+	},
+
 	fetch_tags: function(){
-		this.each_bar(function(){
-			this.fetch_tags();
+		var widget = this;
+		$.post('/ajax.pl', {
+			op:		'tags_get_combined_firehose',
+			id:		this.tagwidget_data.item_id,
+			no_markup:	1
+		}, function( response ){
+			widget.set_tags(response)
 		});
 		return this
 	},
