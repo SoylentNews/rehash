@@ -220,6 +220,7 @@ sub createUpdateItemFromBookmark {
 	my $url_globjid = $self->getGlobjidCreate("urls", $bookmark->{url_id});
 	my $type = $options->{type} || "bookmark";
 	my($count) = $self->sqlCount("firehose", "globjid=$url_globjid");
+	my $firehose_id;
 	my $popularity = defined $options->{popularity}
 		? $options->{popularity}
 		: $type eq "feed"
@@ -250,7 +251,7 @@ sub createUpdateItemFromBookmark {
 				$data->{srcname} = $feed->{feedname};
 			}
 		}
-		my $firehose_id = $self->createFireHose($data);
+		$firehose_id = $self->createFireHose($data);
 		if ($firehose_id && $type eq "feed") {
 			my $discussion_id = $self->createDiscussion({
 				uid		=> 0,
@@ -277,6 +278,7 @@ sub createUpdateItemFromBookmark {
 			});
 		}
 	}
+	return $firehose_id;
 }
 
 sub createItemFromSubmission {
