@@ -43,6 +43,7 @@ template=templates/datewidget;misc;default
 template=templates/edit_comment;ajax;default
 template=templates/hc_comment;ajax;default
 template=templates/modal_footer;misc;default
+template=templates/no_markup;misc;default
 template=templates/prefs_d2;ajax;default
 template=templates/prefs_d2_posting;ajax;default
 template=templates/prefs_messages;ajax;default

@@ -1223,13 +1223,18 @@ sub ajaxGetUserFirehose {
 	my $newtagspreloadtext = join ' ', @newtagspreload;
 	#print STDERR "ajaxGetUserFirehose $newtagspreloadtext\n\n";
 
+	my $template;
 	if ( $form->{no_markup} ) {
-		return $newtagspreloadtext;
+		$template = 'no_markup';
+	} elsif ( $form->{nodnix} ) {
+		$template = 'tagsnodnixuser';
+	} else {
+		$template = 'tagsfirehosedivuser';
 	}
 
-	return slashDisplay($form->{nodnix} ? 'tagsnodnixuser' : 'tagsfirehosedivuser', {
+	return slashDisplay($template, {
 		id =>		$id,
-		newtagspreloadtext =>	$newtagspreloadtext,
+		content =>	$newtagspreloadtext,
 	}, { Return => 1 });
 }
 
@@ -1565,7 +1570,7 @@ sub ajaxCreateForFirehose {
 
 	my $retval = slashDisplay('tagsfirehosedivuser', {
 		id =>		$id,
-		newtagspreloadtext =>	$newtagspreloadtext,
+		content =>	$newtagspreloadtext,
 	}, { Return => 1 });
 
 #print STDERR scalar(localtime) . " ajaxCreateForFirehose 4 for id=$id tagnames='@tagnames' newtagspreloadtext='$newtagspreloadtext' returning: $retval\n";
