@@ -2418,14 +2418,17 @@ sub getInitTabtypeOptions {
 
 	$vol ||= { story_vol => 0, other_vol => 0};
 
-	if ($name eq "tabsection" && !$day_specified) {
-		if ($vol->{story_vol} > 25) {
-			$set_option->{duration} = 7;
-		} else {
-			$set_option->{duration} = -1;
+	if ($name eq "tabsection") {
+		$set_option->{mixedmode} = "1";
+		$set_option->{mode} = "full";
+		if (!$day_specified) {
+			if ($vol->{story_vol} > 25) {
+				$set_option->{duration} = 7;
+			} else {
+				$set_option->{duration} = -1;
+			}
 		}
 		$set_option->{startdate} = "";
-		$set_option->{mixedmode} = "1";
 	} elsif (($name eq "tabpopular" || $name eq "tabrecent") && !$day_specified) {
 		if ($vol->{story_vol} > 25) {
 			$set_option->{duration} = 7;
