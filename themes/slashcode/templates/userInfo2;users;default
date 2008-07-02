@@ -136,8 +136,9 @@ __template__
 
         <div class="nav">
                 <ul class="menu" id="tablist">
-                [% IF latest_comments.size != 0 %]<li><a href="">Comments</a></li>[% END %]
-                [% IF latest_journals.size != 0 %]<li><a href="">Journals</a></li>[% END %]
+                [% IF latest_comments.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]">Comments</a></li>[% END %]
+                [% IF latest_journals.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]">Journals</a></li>[% END %]
+                [% IF latest_submissions.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]">Submissions</a></li>[% END %]
                 </ul>
         </div>
 
@@ -172,6 +173,23 @@ __template__
                 </div>
         </div>
         [% END %]
+
+        [% IF latest_submissions.size != 0 %]
+        <div class="block" id="latest_submissions">
+                <div class="title" id="latest_submissions_title">
+                        <h4>Latest Submissions</h4>
+                </div>
+
+                <div class="content" id="latest_submissions_content">
+                        <ul>
+                        [% FOREACH sid = latest_submissions.keys.sort %]
+                        <li><a href="[% constants.absolutedir_secure %]/firehose.pl?op=view&id=[% latest_submissions.$sid.id %]">[% latest_submissions.$sid.title %]</a></li>
+                        [% END %]
+                        </ul>
+                </div>
+        </div>
+        [% END %]
+
         </div>
 
         <div id="yui-main">
