@@ -24,15 +24,35 @@ function tag_style( t ){
 }
 
 
-function tag_click( event ) {
+function click_tag( event ) {
 	var $tag_el = $('.tag', this);
 	var tag = $tag_el.text();
 	var op	= $(event.target).text();
 
 	// op differs from tag when the click was in a menu
 	//	so, if in a menu, or right on the tag itself, do something
-	if ( event.target!==this && (op!==tag || event.target===$tag_el[0]) )
-		$(this).parents('.tbar')[0].click_tag(tag, op);
+	if ( event.target!==this && (op!==tag || event.target===$tag_el[0]) ) {
+		var command = normalize_tag_command(tag, op);
+		var $widget = $(this).parents('.tag-widget').eq(0);
+
+		if ( event.shiftKey ) {
+			// if the shift key is down, append the tag to the edit field
+			$widget.find('.tag-entry:text').each(function(){
+				if ( this.value ) {
+					var last_char = this.value[ this.value.length-1 ];
+					if ( '-#!)_ '.indexOf(last_char) == -1 )
+						this.value += ' ';
+				}
+				this.value += command;
+				this.focus();
+			});
+		} else {
+			// otherwise, send it the server to be processed
+			$widget.each(function(){
+				this.submit_tags(command)
+			});
+		}
+	}
 }
 
 
@@ -89,7 +109,7 @@ var tbar_fns = {
 		if ( new_tags.length ) {
 			// construct all the completely new tag entries and associated machinery
 			var $new_elems = $(join_wrap(new_tags, '<li><span class="tag">', '</span></li>'))
-				.click(tag_click) // one click-handler per tag, and it's on the <li>
+				.click(click_tag) // one click-handler per tag, and it's on the <li>
 				.append(this.tagbar_data.menu_template);
 
 			// by default, insert the new tags at the front of the tagbar
@@ -106,7 +126,7 @@ var tbar_fns = {
 		//   confirming the user's change has been recorded
 		var base_classes = 'tag ' + (annotate ? annotate+' ' : '');
 		$changed_tags.each(function(){
-			this.className = $.trim(base_classes + tag_style($(this).text()));
+			this.className = $.trim(base_classes + tag_style($(this).text()))
 		});
 		return this
 	},
@@ -134,32 +154,39 @@ var tbar_fns = {
 		return this.update_tags(tags, 'append')
 	},
 
-
-	fetch_tags: function(){
-		var bar = this;
-		$.post('/ajax.pl', {
-			op:		this.tagbar_data.fetch_op,
-			id:		this.tagbar_data.item_id,
-			no_markup:	1
-		}, function( response ) {
-			bar.set_tags(response)
-		});
-		return this
-	},
-
-
-	click_tag: function( tag, op ){
-		// alert(this.tagbar_data.item_id + ': ' + (op!==tag ? 'apply "'+op+'" to' : 'clicked on') + ' the tag "' + tag + '"');
-		if ( op == "x" )
-			this.remove_tags(tag);
-		else if ( op.length == 1 && op == tag[0] )
-			this.update_tags(tag.slice(1));
-		else if ( op != tag )
-			this.update_tags(op+tag);
-		return this
-	}
-
 }; // tbar_fns
+
+
+// XXX temporarily handle some special cases myself.
+// Jamie will want to know about this.
+function normalize_nodnix( expr ){
+	return expr.replace(normalize_nodnix.pattern, _normalize_nodnix);
+}
+normalize_nodnix.pattern = /-!(nod|nix)|-(nod|nix)|!(nod|nix)|nod|nix/g;
+
+function _normalize_nodnix( cmd ){
+	if ( cmd == 'nod' || cmd == '!nix' )
+		return 'nod -nix';
+	else if ( cmd == 'nix' || cmd == '!nod' )
+		return 'nix -nod';
+	else if ( cmd == '-!nix' )
+		return '-nod';
+	else if ( cmd == '-!nod' )
+		return '-nix';
+	else
+		return cmd;
+}
+
+function normalize_tag_command( tag, op ){
+	if ( op == "x" )
+		return '-' + tag;
+	else if ( tag.length > 1 && op.length == 1 && op == tag[0] )
+		return tag.slice(1);
+	else if ( op != tag )
+		return op + tag;
+	else
+		return tag;
+}
 
 
 var twidget_fns = {
@@ -169,48 +196,70 @@ var twidget_fns = {
 			item_id:	firehose_id
 		}
 
-		$(this).append(create_tag_bar(firehose_id, 'top'))
-			.append(create_tag_bar(firehose_id, 'user'))
-			.append(create_tag_bar(firehose_id, 'system'));
+		$(this).prepend(create_tag_bar(null, 'nod nix'))
+			.find('.tbars')
+			.append($( $.map(['user', 'top', 'system'], function(k){
+				return create_tag_bar(k)
+			}) ));
 		return this
 	},
 
-	each_bar: function( fn ){
-		$('.tbar', this).each(fn);
-		return this
-	},
 
 	set_tags: function( tags ){
 		var widget = this;
-
 		$.each(tags.split('\n'), function(){
-			var which_bar = 'user';
-			var this_bars_tags = this;
-
 			var match = /^<(\w+)>?(.*)$/.exec(this);
 			if ( match ) {
-				which_bar = match[1];
-				this_bars_tags = match[2];
+				$('[get*='+match[1]+']', widget).each(function(){
+					this.set_tags(match[2])
+				})
 			}
-
-			$('.tbars .tbar.'+which_bar, widget).each(function(){
-				this.set_tags(this_bars_tags)
-			})
 		});
 		return this
 	},
 
-	fetch_tags: function(){
+
+	_submit_fetch: function( tag_cmds ){
+		if ( tag_cmds ) {
+			// 'harden' the new tags into the user tag-bar, but styled 'local-only'
+			$('.tbar[get*=user]', this).each(function(){
+				this.update_tags(tag_cmds, 'prepend', 'local-only')
+			});
+		}
+
 		var widget = this;
 		$.post('/ajax.pl', {
-			op:		'tags_get_combined_firehose',
-			id:		this.tagwidget_data.item_id,
-			no_markup:	1
+			op:	'tags_setget_combined',
+			id:	this.tagwidget_data.item_id,
+			tags:	tag_cmds || '',
+			reskey:	reskey_static,
 		}, function( response ){
+			// console.log(response);
 			widget.set_tags(response)
 		});
 		return this
 	},
+
+
+	fetch_tags: function(){
+		return this._submit_fetch()
+	},
+
+
+	submit_tags: function( tag_cmds ){
+		// If the caller didn't directly supply the tags/commands...
+		if ( !tag_cmds ) {
+			// ...then get them from the text edit field
+			var $input = $('.tag-entry:text', this);
+			tag_cmds = $input.val();
+			$input.val('');
+		}
+
+		// submit the new tags for server and await a unified response that
+		//	will replace any 'local-only' tags
+		return this._submit_fetch(normalize_nodnix(tag_cmds))
+	},
+
 
 	open: function(){
 		$(this).show()
@@ -220,6 +269,7 @@ var twidget_fns = {
 			});
 		return this
 	},
+
 
 	close: function(){
 		$(this).hide();
@@ -262,38 +312,23 @@ function close_tag_widget( event, selector ) {
 }
 
 
-function create_tag_bar( item_id, bar_kind, tags ){
-	bar_kind = bar_kind in create_tag_bar.bar_templates ? bar_kind : 'user';
-	var tmpl = create_tag_bar.bar_templates[bar_kind];
+function create_tag_bar( bar_selector, tags ){
+	var menu_template = create_tag_bar.menu_templates[bar_selector] || '';
 
 	var new_bar = $.extend(
-		$('<div class="'+bar_kind+' tbar"><ul></ul></div>')[0],
+		$('<div class="tbar"'+(bar_selector ? ' get="'+bar_selector+'"' : '')+'><ul></ul></div>')[0],
 		tbar_fns,
 		{ tagbar_data: {
-			fetch_op:	tmpl.fetch_op,
-			item_id:	item_id,
-			menu_template:	join_wrap(tmpl.menu_cmds, '<li>', '</li>', '<ul class="tmenu">', '</ul>')
+			menu_template:	join_wrap(menu_template, '<li>', '</li>', '<ul class="tmenu">', '</ul>')
 		}}
 	);
 	new_bar.tagbar_data.list_el = $('ul', new_bar)[0];
 	if ( tags !== undefined )
 		new_bar.update_tags(tags);
-	return new_bar;
+	return new_bar
 }
 
-create_tag_bar.bar_templates = {
-	user: {
-		fetch_op:	'tags_get_user_firehose',
-		menu_cmds:	'! x'
-	},
-
-	top: {
-		fetch_op:	'tags_get_top_firehose',
-		menu_cmds:	'_ # ! )'
-	},
-
-	system: {
-		fetch_op:	'tags_get_system_firehose',
-		menu_cmds:	null
-	}
+create_tag_bar.menu_templates = {
+	user:	'! x',
+	top:	'_ # ! )',
 }
