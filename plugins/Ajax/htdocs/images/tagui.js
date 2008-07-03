@@ -169,9 +169,9 @@ var twidget_fns = {
 			item_id:	firehose_id
 		}
 
-		$(this).append(tag_bar(firehose_id, 'top'))
-			.append(tag_bar(firehose_id, 'user'))
-			.append(tag_bar(firehose_id, 'system'));
+		$(this).append(create_tag_bar(firehose_id, 'top'))
+			.append(create_tag_bar(firehose_id, 'user'))
+			.append(create_tag_bar(firehose_id, 'system'));
 		return this
 	},
 
@@ -262,9 +262,9 @@ function close_tag_widget( event, selector ) {
 }
 
 
-function tag_bar( item_id, bar_kind, tags ){
-	bar_kind = bar_kind in tag_bar.bar_templates ? bar_kind : 'user';
-	var tmpl = tag_bar.bar_templates[bar_kind];
+function create_tag_bar( item_id, bar_kind, tags ){
+	bar_kind = bar_kind in create_tag_bar.bar_templates ? bar_kind : 'user';
+	var tmpl = create_tag_bar.bar_templates[bar_kind];
 
 	var new_bar = $.extend(
 		$('<div class="'+bar_kind+' tbar"><ul></ul></div>')[0],
@@ -281,7 +281,7 @@ function tag_bar( item_id, bar_kind, tags ){
 	return new_bar;
 }
 
-tag_bar.bar_templates = {
+create_tag_bar.bar_templates = {
 	user: {
 		fetch_op:	'tags_get_user_firehose',
 		menu_cmds:	'! x'
