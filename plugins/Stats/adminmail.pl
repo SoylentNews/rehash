@@ -447,7 +447,7 @@ EOT
 	# 1 hour
 	slashdLog("Sectional Stats Begin");
 	my $skins =  $slashdb->getDescriptions('skins');
-	my $stats_from_rss = $logdb->countFromRSSStatsBySections();
+	my $stats_from_rss = $logdb->countFromRSSStatsBySections({ no_op => $constants->{op_exclude_from_countdaily} });
 	#XXXSECTIONTOPICS - don't think we need this anymore but just making sure
 	#$sections->{index} = 'index';
 	
@@ -942,9 +942,14 @@ EOT
 	}
 
 	if ($firehose && $tags) {
-		my($binspam_tag_count, $is_spam_new_count) = $stats->tallyBinspam();
-		$data{binspam_tag_count} = $binspam_tag_count;
+		my($binspam_globj_count, $is_spam_new_count, $autodetected_count)
+			= $stats->tallyBinspam();
+		$data{binspam_globj_count} = $binspam_globj_count;
+		$statsSave->createStatDaily('binspam_globj_count', $binspam_globj_count);
 		$data{is_spam_new_count} = $is_spam_new_count;
+		$statsSave->createStatDaily('is_spam_new_count', $is_spam_new_count);
+		$data{is_spam_autodetected_count} = $autodetected_count;
+		$statsSave->createStatDaily('is_spam_autodetected_count', $autodetected_count);
 	}
 
 	if ($tags) {
