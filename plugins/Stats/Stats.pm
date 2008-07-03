@@ -1008,8 +1008,7 @@ sub countSubmissionsByDay {
 sub countSubmissionsByCommentIPID {
 	my($self, $ipids, $options) = @_;
 	return unless @$ipids;
-	my $slashdb = getCurrentDB();
-	my $in_list = join(",", map { $slashdb->sqlQuote($_) } @$ipids);
+	my $in_list = join(",", map { $self->sqlQuote($_) } @$ipids);
 
 	my $where = "time $self->{_day_between_clause}
 		AND ipid IN ($in_list)";
@@ -1288,11 +1287,20 @@ sub countDailyByPages {
 
 ########################################################
 sub countFromRSSStatsBySections {
-	my ($self) = @_;
+	my($self, $options) = @_;
+	my $op_clause = '';
+	if ($options->{no_op}) {
+		my $no_op = $options->{no_op};
+		$no_op = [ $no_op ] if !ref($no_op);
+		if (@$no_op) {
+			my $op_not_in = join(",", map { $self->sqlQuote($_) } @$no_op);
+			$op_clause = " AND op NOT IN ($op_not_in)";
+		}
+	}
 	$self->sqlSelectAllHashref("skid",
 		"skid, count(*) AS cnt, COUNT(DISTINCT uid) AS uids, COUNT(DISTINCT host_addr) AS ipids",
 		"accesslog_temp",
-		"referer='rss'",
+		"referer='rss'$op_clause",
 		"GROUP BY skid");
 }
 
@@ -1347,7 +1355,7 @@ sub countDailyStoriesAccessRSS {
 		"op='slashdot-it' AND query_string LIKE '%from=rssbadge'",
 		'GROUP BY query_string');
 	my $sid_hr = { };
-	my $regex_sid = regexSid();
+	my $regex_sid = regexSid(1);
 	for my $qs (keys %$qs_hr) {
 		my($sid) = $qs =~ m{sid=\b([\d/]+)\b};
 		next unless $sid =~ $regex_sid;
@@ -2144,6 +2152,7 @@ sub _do_insert_select {
 			sleep $sleep_time;
 		} else {
 			print STDERR scalar(localtime) . " INSERT-SELECT $to_table still failed, giving up\n";
+			$self->insertErrnoteLog("adminmail", "Failed creating table '$to_table'", "Checked replication $try_num times without success, giving up");
 			return undef;
 		}
 
@@ -2222,26 +2231,47 @@ sub getTopicStats {
 }
 
 sub tallyBinspam {
-       my($self) = @_;
-       my $constants = getCurrentStatic();
-       return (undef, undef) unless $constants->{plugin}{Tags} && $constants->{plugin}{FireHose};
+	my($self) = @_;
+	my $constants = getCurrentStatic();
+	return (undef, undef, undef)
+		unless $constants->{plugin}{Tags} && $constants->{plugin}{FireHose};
 
-       my $tagsdb = getObject('Slash::Tags');
-       my $binspam_tagnameid = $tagsdb->getTagnameidCreate('binspam');
-       my $old_count = $constants->{stats_firehose_spamcount} || 0;
-       my $admins = $self->getAdmins();
-       my $admin_uid_str = join(',', sort { $a <=> $b } keys %$admins);
-       my $binspam_tag = $self->sqlCount(
-               'tags',
-               "uid IN ($admin_uid_str)
-                AND created_at $self->{_day_between_clause}
-                AND inactivated IS NULL
-                AND tagnameid=$binspam_tagnameid");
-       my $is_spam_count = $self->sqlCount('firehose', "is_spam='yes'") || 0;
-       $is_spam_count = $old_count if $is_spam_count < $old_count;
-       my $is_spam_new = $is_spam_count - $old_count;
-       $self->setVar('stats_firehose_spamcount', $is_spam_count);
-       return($binspam_tag, $is_spam_new);
+	# Count all globjs which got 'binspam' tags applied by admins
+	# during the previous day, but only globjs which did _not_ get
+	# any admin 'binspam' tags in days previous (we already counted
+	# those).
+	my $tagsdb = getObject('Slash::Tags');
+	my $binspam_tagnameid = $tagsdb->getTagnameidCreate('binspam');
+	my $admins = $self->getAdmins();
+	my $admin_uid_str = join(',', sort { $a <=> $b } keys %$admins);
+	my $binspammed_globj = $self->sqlSelect(
+		'COUNT(DISTINCT t1.globjid)',
+		"tags AS t1 LEFT JOIN tags AS t2
+			ON (    t1.globjid=t2.globjid
+			    AND t2.tagnameid=$binspam_tagnameid
+			    AND t2.uid IN ($admin_uid_str)
+			    AND t2.created_at < '$self->{_day} 00:00:00'
+			    AND t2.inactivated IS NULL )",
+		"t1.uid IN ($admin_uid_str)
+		 AND t1.created_at $self->{_day_between_clause}
+		 AND t1.inactivated IS NULL
+		 AND t1.tagnameid=$binspam_tagnameid
+		 AND t2.tagid IS NULL");
+
+	# Get the total is_spam count in the hose.
+	my $old_count = $constants->{stats_firehose_spamcount} || 0;
+	my $is_spam_count = $self->sqlCount('firehose', "is_spam='yes'") || 0;
+	$is_spam_count = $old_count if $is_spam_count < $old_count;
+	my $is_spam_new = $is_spam_count - $old_count;
+	$self->setVar('stats_firehose_spamcount', $is_spam_count);
+
+	# And get the count of is_spams added automatically by tagboxes/Despam.
+	my $statsSave = getObject('Slash::Stats::Writer', { day => $self->{_day} });
+	# Create it if it doesn't exist, so stats have an unbroken sequence.
+	$statsSave->createStatDaily('firehose_binspam_despam', 0);
+	my $autodetected = $self->getStatToday('firehose_binspam_despam');
+ 
+	return($binspammed_globj, $is_spam_new, $autodetected);
 }
 
 ########################################################
