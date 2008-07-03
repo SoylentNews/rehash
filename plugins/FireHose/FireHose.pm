@@ -1225,7 +1225,7 @@ sub ajaxGetUserFirehose {
 
 	my $template;
 	if ( $form->{no_markup} ) {
-		$template = 'no_markup';
+		$template = 'combined_tags';
 	} elsif ( $form->{nodnix} ) {
 		$template = 'tagsnodnixuser';
 	} else {
@@ -1234,7 +1234,7 @@ sub ajaxGetUserFirehose {
 
 	return slashDisplay($template, {
 		id =>		$id,
-		content =>	$newtagspreloadtext,
+		user_tags =>	$newtagspreloadtext,
 	}, { Return => 1 });
 }
 
@@ -1244,11 +1244,13 @@ sub ajaxGetCombinedFirehose {
 
 	my $user_tags = ajaxGetUserFirehose($slashdb, $constants, $user, $form);
 	my $top_tags = ajaxGetFireHoseTagsTop($slashdb, $constants, $user, $form);
-	my $system_tags = 'systemtagshere';
+	my $system_tags = '';
 
-	return	"<user>" . $user_tags . "\n" .
-		"<top>" . $top_tags . "\n" .
-		"<system>" . $system_tags;
+	return slashDisplay('combined_tags', {
+		user_tags =>	$user_tags,
+		top_tags =>	$top_tags,
+		system_tags =>	$system_tags,
+	}, { Return => 1 });
 }
 
 sub ajaxGetAdminFirehose {

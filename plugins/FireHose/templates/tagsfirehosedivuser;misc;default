@@ -2,7 +2,7 @@ __section__
 default
 __description__
 id = id
-content = text to preload the newtags-# field with
+user_tags = text to preload the newtags-# field with
 __title__
 
 __page__
@@ -14,7 +14,7 @@ tagsfirehosedivuser
 __template__
 
 [% PROCESS ajax_reskey_tag reskey_label => 'newtags-reskey-' _ id, reskey_name => 'ajax_tags_write' %]
-<input type="text" class="slashdot-tag-completer" id="newtags-[% id %]" name="newtags-[% id %]" value="[% content | strip_attribute %]" size=50 maxlength=60 autocomplete="off" onkeyup="handleEnter(event, tagsCreateForFirehose, '[% id %]','firehose')" onfocus="focusCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose', 0)">
+<input type="text" class="slashdot-tag-completer" id="newtags-[% id %]" name="newtags-[% id %]" value="[% user_tags | strip_attribute %]" size=50 maxlength=60 autocomplete="off" onkeyup="handleEnter(event, tagsCreateForFirehose, '[% id %]','firehose')" onfocus="focusCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose', 0)">
 <input type="button" value="Tag" onclick="tagsCreateForFirehose('[% id %]')" class="button">
 
 __seclev__
