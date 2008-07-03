@@ -2484,17 +2484,18 @@ function dummyComment(cid) {
 	return(html.replace(/\-\-CID\-\-/g, cid));
 }
 
-function reduceThreshold(highlight) {
+function reduceThreshold(highlight, no_save) {
 	if (highlight < 0) {
 		hide_modal_box();
 		no_lower_threshold = 1;
 		return;
 	}
 
-	if ($('#d2_save_threshold_1').attr('checked'))
+	if (no_save)
 		user_threshold_save = 0;
 
 	hide_modal_box();
+	$('#modal_box_content').html('');
 
 	// if we are collapsing, then do not move HT too, so the comments stay closed
 	changeT(-1, (highlight > 1));
@@ -2511,32 +2512,27 @@ function reduceThresholdPrint(highlight) {
 	if (currents['hidden'] <= 0 || user_threshold <= -1 || no_lower_threshold)
 		return;
 
-	$('#preference_title').html('Threshold Reached');
+	$('#preference_title').html('No More Comments At This Threshold');
 	show_modal_box();
 
 	var html = '<div>\
-<p>There are no more new comments available at Score:--SCORE--.</p>\
-\
-<p>\
-Lower your threshold to Score:--SCORE1-- for\
-<input type="radio" name="d2_save_threshold" id="d2_save_threshold_1" value="1" --CHECKED1--> this discussion or\
-<input type="radio" name="d2_save_threshold" id="d2_save_threshold_2" value="2" --CHECKED2--> all discussions?\
-<br>\
-<input type="button" value="Yes" onclick="reduceThreshold(--HIGHLIGHT--)">\
-<input type="button" value="No" onclick="reduceThreshold(-1)">\
+<p>There are no more comments available at Score:--SCORE--, but there might be more at Score:--SCORE1--.</p><p>Would you like to lower your threshold for \
+<input type="button" value="this" onclick="reduceThreshold(--HIGHLIGHT--,1)"> \
+<input type="button" value="all"  onclick="reduceThreshold(--HIGHLIGHT--)"> \
+discussions?<br>\
+<input type="button" value="No Thanks" onclick="reduceThreshold(-1)">\
 </p>\
 \
-<p><i>(Remember that you can always adjust these controls with the slider widget\
-visible to the left or top of the discussion.)</i></p>\
+<p><i>(Remember that you can always adjust these controls with the slider widget \
+visible to the --LEFTORTOP-- of the discussion.)</i></p>\
 </div>';
 
 	html = html.replace(/\-\-SCORE\-\-/g, user_threshold);
 	html = html.replace(/\-\-SCORE1\-\-/g, (user_threshold-1));
 	html = html.replace(/\-\-HIGHLIGHT\-\-/g, highlight);
-	if (user_threshold_save)
-		html = html.replace(/\-\-CHECKED2\-\-/g, 'checked');
-	else
-		html = html.replace(/\-\-CHECKED1\-\-/g, 'checked');
+
+	var leftortop = $('#d2out').hasClass('horizontal') ? 'top' : 'left';
+	html = html.replace(/\-\-LEFTORTOP\-\-/g, leftortop);
 
 	$('#modal_box_content').html(html);
 }
