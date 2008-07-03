@@ -477,6 +477,7 @@ sub fetchComments {
 					uid     => $comments->{$cid}{uid},
 					pid     => $comments->{$cid}{pid},
 					points  => $comments->{$cid}{points},
+					read    => $comments->{$cid}{has_read} || 0,
 					kids    => []
 				};
 				if ($comments->{$cid}{subject_orig} && $comments->{$cid}{subject_orig} eq 'no') {
@@ -586,22 +587,24 @@ sub fetchComments {
 # XXX update noshow_comments, pieces_comments -- pudge
 #use Data::Dumper; print STDERR Dumper \@hidden_cids, \@pieces_cids, \@abbrev_cids, \%get_pieces_cids, \%keep_hidden, \%pieces, \%abbrev, \%html, \%html_append_substr, $form, \%data;
 
+	$user->{d2_comment_order} ||= 0;
+
 	$options->{content_type} = 'application/json';
 	my %to_dump = (
 		read_comments      => $read_comments,  # send back so we can just mark them
 		update_data        => \%data,
 		html               => \%html,
-		html_append_substr => \%html_append_substr
+		html_append_substr => \%html_append_substr,
+		eval_first         => "d2_comment_order = $user->{d2_comment_order};"
 	);
+
 	if ($d2_seen_0) {
 		my $total = $slashdb->countCommentsBySid($id);
 		$total -= $d2_seen_0 =~ tr/,//; # total
 		$total--; # off by one
-		$to_dump{eval_first} ||= '';
 		$to_dump{eval_first} .= "d2_seen = '$d2_seen_0'; updateMoreNum($total);";
 	}
 	if (@$placeholders) {
-		$to_dump{eval_first} ||= '';
 		$to_dump{eval_first} .= "placeholder_no_update = " . Data::JavaScript::Anon->anon_dump({ map { $_ => 1 } @$placeholders }) . ';';
 	}
 	writeLog($id);
@@ -775,7 +778,6 @@ sub getModalPrefs {
 		}
 
 	} else {
-		
 		return
 			slashDisplay('prefs_' . $form->{'section'}, {
 				user   => $user,

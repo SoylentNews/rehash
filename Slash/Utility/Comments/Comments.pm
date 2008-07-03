@@ -436,10 +436,11 @@ sub jsSelectComments {
 	my $anon_thresh   = Data::JavaScript::Anon->anon_dump($thresh_totals || {});
 	s/\s+//g for ($anon_thresh, $anon_roots, $anon_rootsh);
 
-	$user->{is_anon}       ||= 0;
-	$user->{is_admin}      ||= 0;
-	$user->{is_subscriber} ||= 0;
-	$user->{state}{d2asp}  ||= 0;
+	$user->{is_anon}          ||= 0;
+	$user->{is_admin}         ||= 0;
+	$user->{is_subscriber}    ||= 0;
+	$user->{state}{d2asp}     ||= 0;
+	$user->{d2_comment_order} ||= 0;
 	my $root_comment = $user->{state}{selectComments}{cidorpid} || 0;
 
 	my $extra = '';
@@ -479,6 +480,7 @@ root_comments = $anon_roots;
 root_comments_hash = $anon_rootsh;
 max_cid = $max_cid;
 
+d2_comment_order = $user->{d2_comment_order};
 user_uid = $user->{uid};
 user_is_anon = $user->{is_anon};
 user_is_admin = $user->{is_admin};
