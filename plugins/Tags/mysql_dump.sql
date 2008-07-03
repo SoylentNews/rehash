@@ -57,6 +57,7 @@ INSERT INTO ajax_ops VALUES (NULL, 'tags_admin_commands', 'Slash::Tags', 'ajaxPr
 INSERT INTO ajax_ops VALUES (NULL, 'tags_history', 'Slash::Tags', 'ajaxTagHistory', 'ajax_admin', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'tags_list_tagnames', 'Slash::Tags', 'ajaxListTagnames', 'ajax_tags_read', 'createuse');
 INSERT INTO ajax_ops VALUES (NULL, 'tags_deactivate', 'Slash::Tags', 'ajaxDeactivateTag', 'ajax_tags_write', 'use');
+INSERT INTO ajax_ops VALUES (NULL, 'tags_setget_combined', 'Slash::Tags', 'ajaxSetGetCombinedTags', 'ajax_tags_write', 'createuse');
 
 INSERT INTO menus VALUES (NULL, 'tagszg', 'Active', 'active', '[% gSkin.rootdir %]/tags',        1, 1, 1);
 INSERT INTO menus VALUES (NULL, 'tagszg', 'Recent', 'recent', '[% gSkin.rootdir %]/tags/recent', 1, 1, 2);

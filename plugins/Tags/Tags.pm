@@ -241,7 +241,7 @@ sub ajaxCreateTag {
 
 sub deactivateTag {
 	my($self, $hr, $options) = @_;
-	my $tag = $self->_setuptag($hr, { tagname_not_required => 1 });
+	my $tag = $self->_setuptag($hr, { tagname_not_required => !$options->{tagname_required} });
 	return 0 if !$tag;
 	my $prior_clause = '';
 	$prior_clause = " AND tagid < $options->{tagid_prior_to}" if $options->{tagid_prior_to};
@@ -1108,14 +1108,22 @@ sub setTagsForGlobj {
 
 	# Deactivate any tags previously specified that were deleted from
 	# the tagbox.
-	my @deactivate_tagnames	= grep { !$new_tagnames{$_} } sort keys %old_tagnames;
+	my @deactivate_tagnames;
+	if ( ! $options->{deactivate_by_operator} ) {
+		@deactivate_tagnames	= grep { !$new_tagnames{$_} } sort keys %old_tagnames;
+	} else {
+		@deactivate_tagnames =
+			map { $1 if /^-(.+)/ }
+			split /[\s,]+/,
+			lc $tag_string;
+	}
 	for my $tagname (@deactivate_tagnames) {
 		$tags->deactivateTag({
 			uid =>		$uid,
 			name =>		$tagname,
 			table =>	$table,
 			id =>		$id
-		});
+		}, { tagname_required => 1 });
 	}
 
 	my @created_tagnames = ( );
@@ -1295,6 +1303,52 @@ sub ajaxProcessAdminTags {
 			tags_admin_str  =>	$tags_admin_str,
 		}, { Return => 1 });
 	}
+}
+
+sub ajaxSetGetCombinedTags {
+	my($slashdb, $constants, $user, $form) = @_;
+
+	my $type = $form->{type} || 'firehose';
+
+	my $base_item;
+	my $globjid;
+	if ( $type eq 'firehose' ) {
+		my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
+		$base_item = $firehose_reader->getFireHose($form->{id});
+		$globjid = $base_item->{globjid} if $base_item;
+	}
+	# XXX TO DO: handle other types here, setting $base_item appropriately
+
+	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+	if (!$globjid || $globjid !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
+		return getData('error', {}, 'tags');
+	}
+	my($table, $item_id) = $tags_reader->getGlobjTarget($globjid);
+
+	my $uid = $user->{uid};
+
+	# if we have to execute commands, do them _before_ we fetch any tag lists
+	my $user_tags = '';
+	if ( $form->{tags} ) {
+		my $tags_writer = getObject('Slash::Tags');
+		$user_tags = $tags_writer->setTagsForGlobj($item_id, $table, '', {
+			deactivate_by_operator => 1,
+		});
+	} else {
+		my $current_tags_array = $tags_reader->getTagsByNameAndIdArrayref($table, $item_id, { uid => $uid });
+		$user_tags = join ' ', sort map { $_->{tagname} } @$current_tags_array;
+	}
+
+	my $top_tags = $base_item ? $base_item->{toptags} : '';
+
+	# XXX how to get the system tags?
+	my $system_tags = '';
+
+	return slashDisplay('combined_tags', {
+		user_tags =>	$user_tags,
+		top_tags =>	$top_tags,
+		system_tags =>	$system_tags,
+	}, { Return => 1 });
 }
 
 {
