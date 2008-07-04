@@ -174,7 +174,7 @@ my $gtid_to_tbids = { };
 sub getTagboxesNosyForGlobj {
 	my($self, $globj_hr) = @_;
 	my $gtid;
-	if (!$gtid_to_tbids) {
+	if (!keys %$gtid_to_tbids) {
 		my $globj_types = $self->getGlobjTypes();
 		for $gtid (grep /^\d+$/, keys %$globj_types) {
 			$gtid_to_tbids->{ $gtid } = [ ];
