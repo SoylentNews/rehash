@@ -4,6 +4,7 @@ description="FireHose"
 glob=firehosecss:htdocs/firehose.css
 firehosecss=firehose.css
 firehosecss=../Ajax/htdocs/images/tagui.css
+firehosecss=../Ajax/htdocs/images/jquery/jquery.autocomplete.css
 css=htdocs/firehose.css
 htdoc=firehose.pl
 mysql_dump=mysql_dump.sql
