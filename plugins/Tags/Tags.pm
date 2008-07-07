@@ -549,6 +549,9 @@ sub getTagsByGlobjid {
 	if ($options->{tagnameid}) {
 		my $tagnameid_q = $self->sqlQuote($options->{tagnameid});
 		$tagnameid_where = " AND tagnameid = $tagnameid_q";
+	} elsif ($options->{limit_to_tagnames}) {
+		my $in_clause = join ',', grep { $_ } map { $self->getTagnameidFromNameIfExists($_) } @{ $options->{limit_to_tagnames} };
+		$tagnameid_where = " AND tagnameid IN ($in_clause)";
 	}
 
 	my $ar = $self->sqlSelectAllHashrefArray(
@@ -1305,6 +1308,16 @@ sub ajaxProcessAdminTags {
 	}
 }
 
+sub getUserNodNixForGlobj {
+	my($self, $globjid, $uid) = @_;
+	my $current_vote_tags_array = $self->getTagsByGlobjid($globjid, {
+		uid => $uid,
+		include_private => 1,
+		limit_to_tagnames => ['nod', 'nix']
+	});
+	return join ' ', sort map { $_->{tagname} } @$current_vote_tags_array;
+}
+
 sub ajaxSetGetCombinedTags {
 	my($slashdb, $constants, $user, $form) = @_;
 
@@ -1345,7 +1358,10 @@ sub ajaxSetGetCombinedTags {
 	# XXX how to get the system tags?
 	my $system_tags = '';
 
+	my $vote_tags = $tags_reader->getUserNodNixForGlobj($globjid, $uid);
+
 	return slashDisplay('combined_tags', {
+		vote_tags =>	$vote_tags,
 		user_tags =>	$user_tags,
 		top_tags =>	$top_tags,
 		system_tags =>	$system_tags,

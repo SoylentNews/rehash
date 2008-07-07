@@ -4,18 +4,13 @@ __description__
 Used to produce an easily parse-able, comprehensive list of tags, e.g., as
 needed by the tag widget.
 
-You supply user_tags, top_tags, and system_tags.
+You supply vote_tags, user_tags, top_tags, and system_tags.
 
 In the output, the lists will be separated by newlines.  The tags within each
 list will be separated by whatever you used in the caller (hopefully spaces).
-
-If you only supply one list, what you get back will be only that list,
-unadorned. If you supply more than one, or else if you set require_markers to
-true, then each list in the output will be prefixed with a header of the form
-'<class>', where class is 'user', 'top', or 'system'.
-
-The tag-widget's ajax code parses this form directly, but this template may be
-useful elsewhere, possibly to simplify logic in single-list no_markup cases.
+Each list in the output will be prefixed with a header of the form '<category>',
+where category is 'vote', 'user', 'top', or 'system'.  As an empty list is
+meaningful, all four lists are always present and labeled.
 __title__
 Useless title to template
 __page__
@@ -27,9 +22,9 @@ combined_tags
 __seclev__
 10000
 __template__
-[% require_markers = require_markers || (((user_tags ? 1 : 0) + (top_tags ? 1 : 0) + (system_tags ? 1 : 0)) > 1) -%]
-[% IF user_tags %][% IF require_markers %]<user>[% END %][% user_tags %]
-[% END %][% IF top_tags %][% IF require_markers %]<top>[% END %][% top_tags %]
-[% END %][% IF system_tags %][% IF require_markers %]<system>[% END %][% system_tags %][% END %]
+<vote>[% vote_tags %]
+<user>[% user_tags %]
+<top>[% top_tags %]
+<system>[% system_tags %]
 __version__
 $Id$
