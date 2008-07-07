@@ -1184,6 +1184,15 @@ function submitReply(pid) {
 				// add it to the totals (for subtraction in updateComment())
 				currents[displaymode[cid]]++;
 				setFocusComment(cid, 1, 1);
+				var threshes = [-1,0,1,2,3,4,5,6];
+				for (var i = 0; i <= threshes.length; i++) {
+					var thresh = threshes[i];
+					for (var hthresh in thresh_totals[thresh]) {
+						var mode = determineMode(cid, thresh, hthresh);
+						thresh_totals[thresh][hthresh][ viewmodevalue[mode] ]++;
+					}
+				}
+				$('#titlecountnum').html(thresh_totals[6][6][1]); // total
 			}
 		}
 	});
@@ -2254,11 +2263,11 @@ function keyHandler(e, k) {
 				else if (keyo['thread']) {
 					update = 1;
 					if (keyo['next']) {
-						if (noSeeFirstComment(current_cid))
+						if (keyo['unread'])
+							getNextUnread = 1;
+						if (current_cid && noSeeFirstComment(current_cid, getNextUnread))
 							next_cid = current_cid;
 						else {
-							if (keyo['unread'])
-								getNextUnread = 1;
 							if (keyo['comment']) {
 								next_cid = commTreeNextComm(current_cid, 0, getNextUnread);
 								if (!next_cid) { // && getNextUnread) {
@@ -2293,10 +2302,11 @@ function keyHandler(e, k) {
 }
 
 // at first comment, and comment is not in window OR comment is not full
-function noSeeFirstComment (cid) {
+function noSeeFirstComment (cid, getNextUnread) {
 	setDefaultDisplayMode(cid);
 	if (!comments_started && (!commentIsInWindow(cid) || (viewmodevalue[displaymode[cid]] < viewmodevalue['full']))) {
-		return 1;
+		if (!getNextUnread || isUnread(cid))
+			return 1;
 	}
 	return 0;
 }
@@ -2377,8 +2387,12 @@ function commTreeFirstComm () {
 }
 
 function commTreePrevComm (cid, to_parent) {
+	if (!cid)
+		return;
 	var root_kids = rootSort();
 	var comm = comments[cid];
+	if (!comm)
+		return;
 	var pid = comm.pid;
 
 	if (to_parent == 1) {
@@ -2428,7 +2442,7 @@ function isUnread(cid) {
 			)
 		) {
 			return 1;
-		} else {
+		} else if (parseInt(comments[cid]['read']) == 1) {
 			// sometimes things happen in the wrong order, and
 			// a comment was not fully rendered when it was set
 			// to read, so clean up here just in case; this is a
@@ -2502,6 +2516,8 @@ function reduceThreshold(highlight, no_save) {
 	gCommentControlWidget.setTHT(user_threshold, user_highlightthresh);
 
 	var next_cid = commTreeNextComm(0, 0, 1);
+	if (!next_cid)
+		return;
 	if (highlight)
 		setFocusComment('-' + current_cid, 1);
 	setFocusComment(next_cid, 1);

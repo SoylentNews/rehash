@@ -585,7 +585,7 @@ sub fetchComments {
 	}
 
 # XXX update noshow_comments, pieces_comments -- pudge
-#use Data::Dumper; print STDERR Dumper \@hidden_cids, \@pieces_cids, \@abbrev_cids, \%get_pieces_cids, \%keep_hidden, \%pieces, \%abbrev, \%html, \%html_append_substr, $form, \%data;
+#use Data::Dumper; print STDERR Dumper \@hidden_cids, \@pieces_cids, \@abbrev_cids, \%get_pieces_cids, \%keep_hidden, \%pieces, \%abbrev, \%html, \%html_append_substr, $form, \%data, $d2_seen_0;
 
 	$user->{d2_comment_order} ||= 0;
 
