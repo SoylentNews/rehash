@@ -191,9 +191,10 @@ function normalize_tag_command( tag, op ){
 
 var twidget_fns = {
 
-	init: function( firehose_id ){
+	init: function( item_id, $parent_entry ){
 		this.tagwidget_data = {
-			item_id:	firehose_id
+			item_id:	item_id,
+			$parent_entry:	$parent_entry
 		}
 
 		$(this).prepend(create_tag_bar(null, 'nod nix'))
@@ -262,6 +263,7 @@ var twidget_fns = {
 
 
 	open: function(){
+		this.tagwidget_data.$parent_entry.addClass('tagging');
 		$(this).show()
 			.find(':text')
 			.each(function(){
@@ -273,43 +275,11 @@ var twidget_fns = {
 
 	close: function(){
 		$(this).hide();
+		this.tagwidget_data.$parent_entry.removeClass('tagging');
 		return this
 	}
 
 }; // twidget_fns
-
-function open_tag_widget( event, selector ) {
-	// Walk up to the dom element for this entire entry
-	$(selector || this).parents('[id^=firehose-]').andSelf()
-
-		// ...then back down to the tag-widget (if closed) within.
-		.find('.tag-widget:hidden')
-
-		// Initialize if it's only a stub...
-		.filter('.stub').each(function(){
-		       $.extend(this, twidget_fns);
-		       this.init(firehose_id_of(this.id))
-		}).removeClass('stub')
-
-		// ...and now that it's ready, we can just tell it to open itself.
-		.end().each(function(){
-		       this.open();
-		       this.fetch_tags();
-		});
-}
-
-function close_tag_widget( event, selector ) {
-	// Walk up to the dom element for this entire entry
-       $(selector || this).parents('[id^=firehose-]').andSelf()
-
-		// ...then back down to the tag-widget (if open) within.
-               .find('.tag-widget:visible')
-
-		// We can just tell it to close itself.
-               .each(function(){
-                       this.close()
-               })
-}
 
 
 function create_tag_bar( bar_selector, tags ){
@@ -331,4 +301,60 @@ function create_tag_bar( bar_selector, tags ){
 create_tag_bar.menu_templates = {
 	user:	'! x',
 	top:	'_ # ! )',
+}
+
+
+// when the tag-widget is used in the firehose:
+
+function create_firehose_vote_handler( firehose_id ) {
+	return $.extend(
+		 $('<div get="vote" style="display:none"></div>')[0],
+		 {
+			set_tags: function( tags ){
+				firehose_fix_up_down(firehose_id, {
+					'':	'vote',
+					'nod':	'votedup',
+					'nix':	'voteddown'
+				}[tags])
+			},
+		 }
+	);
+}
+
+function open_firehose_tag_widget( event, selector ) {
+	// Walk up to the dom element for this entire entry
+	$(selector || this).parents('[id^=firehose-]').andSelf()
+
+		// ...then back down to the tag-widget (if closed) within.
+		.find('.tag-widget:hidden')
+
+		// Initialize if it's only a stub...
+		.filter('.stub').each(function(){
+			$.extend(this, twidget_fns);
+			var firehose_id = firehose_id_of(this.id);
+			this.init(
+				firehose_id,
+				$(this).prepend(create_firehose_vote_handler(firehose_id))
+					.parents('[id^=firehose-]')
+			);
+		}).removeClass('stub')
+
+		// ...and now that it's ready, we can just tell it to open itself.
+		.end().each(function(){
+		       this.open();
+		       this.fetch_tags();
+		});
+}
+
+function close_firehose_tag_widget( event, selector ) {
+	// Walk up to the dom element for this entire entry
+       $(selector || this).parents('[id^=firehose-]').andSelf()
+
+		// ...then back down to the tag-widget (if open) within.
+               .find('.tag-widget:visible')
+
+		// We can just tell it to close itself.
+               .each(function(){
+                       this.close()
+               })
 }

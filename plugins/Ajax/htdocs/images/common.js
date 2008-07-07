@@ -624,10 +624,20 @@ function firehose_up_down(id, dir) {
 		dir:	dir
 	}, '', { onComplete: json_handler });
 
-	$('#updown-'+id).setClass(dir=='+' ? 'votedup' : 'voteddown');
+	// we changed the tags outside the widget; tell the widget (if any)
+	// the widget will automatically fix the up/down state by calling firehose_fix_up_down
+	if ( ! $('#tag-widget-'+id+':not(.stub)').each(function(){ this.fetch_tags() }).length ) {
+		// but if we didn't find any un-stubbed widgets, do it ourselves
+		firehose_fix_up_down(id, dir=='+' ? 'votedup' : 'voteddown');
+	}
+}
 
-	if ( fh_is_admin && (dir == "-" || $('#title-'+id+':contains("Comment:")')) ) {
-		firehose_collapse_entry(id);
+function firehose_fix_up_down(id, new_state) {
+	var $updown = $('#updown-'+id);
+	if ( ! $updown.hasClass(new_state) ) {
+		$updown.setClass(new_state);
+		if ( fh_is_admin && (new_state=='voteddown' || $('#title-'+id+':contains("Comment:")')) )
+			firehose_collapse_entry(id);
 	}
 }
 
