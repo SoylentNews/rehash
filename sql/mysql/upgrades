@@ -5396,10 +5396,6 @@ CREATE TABLE users_comments_read_log (
 # 2008-06-26
 UPDATE vars SET value = 'T_2_5_0_210' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # for plugins/Tags
 ALTER TABLE tagboxes ADD COLUMN nosy_gtids varchar(255) DEFAULT '' NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('tags_feederlog_largerows', '50000', 'Number of rows at which the feederlog is considered "large", slowing additions');
@@ -5411,4 +5407,8 @@ INSERT INTO ajax_ops VALUES (NULL, 'tags_get_combined_firehose', 'Slash::FireHos
 
 # 2008-07-03
 UPDATE vars SET value = 'T_2_5_0_211' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHDOT LAST UPDATED HERE
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
