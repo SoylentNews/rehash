@@ -1106,12 +1106,12 @@ sub setTagsForGlobj {
 	# Create any tag specified but only if it does not already exist.
 	my @create_tagnames	= grep { !$old_tagnames{$_} } sort keys %new_tagnames;
 
-	# Deactivate any tags previously specified that were deleted from
-	# the tagbox.
 	my @deactivate_tagnames;
 	if ( ! $options->{deactivate_by_operator} ) {
+		# Deactivate any tags previously specified that were deleted from the tagbox.
 		@deactivate_tagnames	= grep { !$new_tagnames{$_} } sort keys %old_tagnames;
 	} else {
+		# Deactivate any tags that are supplied as "-tag"
 		@deactivate_tagnames =
 			map { $1 if /^-(.+)/ }
 			split /[\s,]+/,
@@ -1123,7 +1123,7 @@ sub setTagsForGlobj {
 			name =>		$tagname,
 			table =>	$table,
 			id =>		$id
-		}, { tagname_required => 1 });
+		}, { tagname_required => $options->{tagname_required} });
 	}
 
 	my @created_tagnames = ( );
@@ -1141,7 +1141,7 @@ sub setTagsForGlobj {
 	}
 
 	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $id,
-		{ uid => $uid }); # don't list private tags
+		{ uid => $uid, include_private => $options->{include_private} }); # don't list private tags unless forced
 	my $newtagspreloadtext = join ' ', sort map { $_->{tagname} } @$now_tags_ar;
 	return $newtagspreloadtext;
 }
@@ -1333,6 +1333,7 @@ sub ajaxSetGetCombinedTags {
 		my $tags_writer = getObject('Slash::Tags');
 		$user_tags = $tags_writer->setTagsForGlobj($item_id, $table, '', {
 			deactivate_by_operator => 1,
+			tagname_required => 1
 		});
 	} else {
 		my $current_tags_array = $tags_reader->getTagsByNameAndIdArrayref($table, $item_id, { uid => $uid });
