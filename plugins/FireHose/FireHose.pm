@@ -1240,21 +1240,6 @@ sub ajaxGetUserFirehose {
 	}, { Return => 1 });
 }
 
-sub ajaxGetCombinedFirehose {
-	my($slashdb, $constants, $user, $form) = @_;
-	$form->{no_markup} = 1;
-
-	my $user_tags = ajaxGetUserFirehose($slashdb, $constants, $user, $form);
-	my $top_tags = ajaxGetFireHoseTagsTop($slashdb, $constants, $user, $form);
-	my $system_tags = '';
-
-	return slashDisplay('combined_tags', {
-		user_tags =>	$user_tags,
-		top_tags =>	$top_tags,
-		system_tags =>	$system_tags,
-	}, { Return => 1 });
-}
-
 sub ajaxGetAdminFirehose {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $id = $form->{id};
