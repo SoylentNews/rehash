@@ -5373,7 +5373,7 @@ INSERT INTO vars (name, value, description) VALUES ('tagbox_csr_baseneediness', 
 UPDATE vars SET value = 'T_2_5_0_209' WHERE name = 'cvs_tag_currentcode';
 
 # for plugins/FireHose
-INSERT INTO ajax_ops VALUES (NULL, 'tags_get_top_firehose', 'Slash::FireHose', 'ajaxGetFireHoseTagsTop', 'ajax_tags_write', 'createuse');
+# INSERT INTO ajax_ops VALUES (NULL, 'tags_get_top_firehose', 'Slash::FireHose', 'ajaxGetFireHoseTagsTop', 'ajax_tags_write', 'createuse');
 
 ALTER TABLE firehose ADD COLUMN neediness float NOT NULL default '0' AFTER editorpop;
 ALTER TABLE firehose ADD INDEX neediness (neediness);
@@ -5413,3 +5413,4 @@ UPDATE vars SET value = 'T_2_5_0_211' WHERE name = 'cvs_tag_currentcode';
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 DELETE FROM ajax_ops WHERE op='tags_get_combined_firehose';
+DELETE FROM ajax_ops WHERE op='tags_get_top_firehose';
