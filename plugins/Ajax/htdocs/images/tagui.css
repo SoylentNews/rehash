@@ -15,13 +15,17 @@
 	padding: 0 0.25em 0 0;
 }
 
-.tbars, .tbar, .tag, .tmenu {
+.tbars, .tbar, .tag, .tmenu, h1.legend {
 	user-select: none;
 }
 
 .tbar {
 	display: inline;
 	position: relative;
+}
+
+.tbar h1.legend {
+	display: none;
 }
 
 .tbars.stack, .tbars.stack .tbar {

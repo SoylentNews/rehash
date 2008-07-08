@@ -208,10 +208,16 @@ var twidget_fns = {
 			$parent_entry:	$parent_entry
 		}
 
+		var bar_labels = {
+			user:	"My Tags",
+			top:	"Top Tags",
+			system:	"System Tags"
+		}
+
 		$(this).prepend(create_tag_bar(null, 'nod nix'))
 			.find('.tbars')
 			.append($( $.map(['user', 'top', 'system'], function(k){
-				return create_tag_bar(k)
+				return create_tag_bar(k, null, bar_labels[k])
 			}) ));
 
 		// XXX testing autocomplete
@@ -300,11 +306,14 @@ var twidget_fns = {
 }; // twidget_fns
 
 
-function create_tag_bar( bar_selector, tags ){
+function create_tag_bar( bar_selector, tags, label ){
 	var menu_template = create_tag_bar.menu_templates[bar_selector] || '';
 
+	var attrs = 'class="tbar"' + (bar_selector ? ' get="'+bar_selector+'"' : '');
+	var legend = label ? '<h1 class="legend">' + label + '</h1>' : '';
+
 	var new_bar = $.extend(
-		$('<div class="tbar"'+(bar_selector ? ' get="'+bar_selector+'"' : '')+'><ul></ul></div>')[0],
+		$('<div '+attrs+'>'+legend+'<ul></ul></div>')[0],
 		tbar_fns,
 		{ tagbar_data: {
 			menu_template:	join_wrap(menu_template, '<li>', '</li>', '<ul class="tmenu">', '</ul>')
