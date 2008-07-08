@@ -341,7 +341,7 @@ sub showAdminTodo {
 	my $days = $pb_reader->getPollDaysOld();
 	if ($days > 3 ) {
 		$text .= "<b><a href=\"" . $gSkin->{rootdir} . "/pollBooth.pl\">Poll</a> has not been updated in $days days</b><br>";
-		$text .= '<a href="#" onclick=\'firehose_set_options("setfhfilter", "poll hold")\'>View current poll submissions</a><br><hr>';
+		$text .= '<a href="#" onclick=\'firehose_set_options("setfhfilter", "polls hold")\'>View current poll submissions</a><br><hr>';
 	}
 	if ($text) {
 		slashDisplay('sidebox', {
