@@ -213,6 +213,19 @@ var twidget_fns = {
 			.append($( $.map(['user', 'top', 'system'], function(k){
 				return create_tag_bar(k)
 			}) ));
+
+		// XXX testing autocomplete
+		$(this).find('.tag-entry').autocomplete('/ajax.pl', {
+			loadingClass:		'working',
+			minChars:		3,
+			multiple:		true,
+			multipleSeparator:	' ',
+			autoFill:		true,
+			max:			25,
+			extraParams: {
+				op:		'tags_list_tagnames',
+			},
+		});
 		return this
 	},
 
