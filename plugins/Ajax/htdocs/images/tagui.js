@@ -270,7 +270,7 @@ var twidget_fns = {
 		}, function( response ){
 			// console.log(response);
 			widget.set_tags(response);
-			$busy.hide()
+			$busy.removeAttr('style')
 		});
 		return this
 	},
