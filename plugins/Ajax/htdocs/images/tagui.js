@@ -24,6 +24,17 @@ function tag_style( t ){
 }
 
 
+function textfield_submit_tags( text_el, widget ){
+	var $this = $(text_el);
+	var $widget = widget ? $(widget) : $this.parents('.tag-widget').eq(0);
+	$widget.each(function(){
+		var tag_cmds = $this.val();
+		$this.val('');
+		this.submit_tags(tag_cmds);
+	})
+}
+
+
 function click_tag( event ) {
 	var $tag_el = $('.tag', this);
 	var tag = $tag_el.text();
@@ -32,7 +43,7 @@ function click_tag( event ) {
 	// op differs from tag when the click was in a menu
 	//	so, if in a menu, or right on the tag itself, do something
 	if ( event.target!==this && (op!==tag || event.target===$tag_el[0]) ) {
-		var command = normalize_tag_command(tag, op);
+		var command = normalize_tag_menu_command(tag, op);
 		var $widget = $(this).parents('.tag-widget').eq(0);
 
 		if ( event.shiftKey ) {
@@ -177,7 +188,7 @@ function _normalize_nodnix( cmd ){
 		return cmd;
 }
 
-function normalize_tag_command( tag, op ){
+function normalize_tag_menu_command( tag, op ){
 	if ( op == "x" )
 		return '-' + tag;
 	else if ( tag.length > 1 && op.length == 1 && op == tag[0] )
@@ -226,6 +237,7 @@ var twidget_fns = {
 
 		if ( tag_cmds ) {
 			// 'harden' the new tags into the user tag-bar, but styled 'local-only'
+			// tags in the response from the server will wipe-out local-only
 			$('.tbar[get*=user]', this).each(function(){
 				this.update_tags(tag_cmds, 'prepend', 'local-only')
 			});
@@ -251,16 +263,6 @@ var twidget_fns = {
 
 
 	submit_tags: function( tag_cmds ){
-		// If the caller didn't directly supply the tags/commands...
-		if ( !tag_cmds ) {
-			// ...then get them from the text edit field
-			var $input = $('.tag-entry:text', this);
-			tag_cmds = $input.val();
-			$input.val('');
-		}
-
-		// submit the new tags for server and await a unified response that
-		//	will replace any 'local-only' tags
 		return this._submit_fetch(normalize_nodnix(tag_cmds))
 	},
 
