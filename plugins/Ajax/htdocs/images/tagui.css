@@ -90,3 +90,7 @@
 	top: 0;
 	right: 0;
 }
+
+.tag-widget .working + .widget-busy {
+	display: block;
+}

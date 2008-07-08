@@ -18,9 +18,9 @@ __template__
 <div id="tag-widget-[% item_id %]" class="tag-widget stub" style="display: none">
 	<form class="tag-editor" onsubmit="form_submit_tags(this, this.parentNode); return false">
 		<input class="tag-entry" type="text"></input>
+		<span class="widget-busy"><img src="[% constants.imagedir %]/spinner2.gif"></span>
 	</form>
 	<div class="tbars train"></div>
-	<span class="busy" style="display: none"><img src="[% constants.imagedir %]/spinner2.gif"></span>
 </div>
 __version__
 $Id$
