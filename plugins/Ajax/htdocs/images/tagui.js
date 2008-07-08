@@ -24,12 +24,12 @@ function tag_style( t ){
 }
 
 
-function textfield_submit_tags( text_el, widget ){
-	var $this = $(text_el);
-	var $widget = widget ? $(widget) : $this.parents('.tag-widget').eq(0);
+function form_submit_tags( form, widget ){
+	var $input = $('.tag-entry:input', form);
+	var $widget = widget ? $(widget) : $(form).parents('.tag-widget').eq(0);
 	$widget.each(function(){
-		var tag_cmds = $this.val();
-		$this.val('');
+		var tag_cmds = $input.val();
+		$input.val('');
 		this.submit_tags(tag_cmds);
 	})
 }
