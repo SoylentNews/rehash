@@ -1,4 +1,4 @@
-// tagui.js
+; // tagui.js
 
 function bare_tag( t ){
 	try {
