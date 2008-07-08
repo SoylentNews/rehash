@@ -84,8 +84,8 @@
 	min-width: 6em;
 }
 
-.tag-widget .busy {
-	display: block;
+.tag-widget .widget-busy {
+	display: none;
 	position: absolute;
 	top: 0;
 	right: 0;

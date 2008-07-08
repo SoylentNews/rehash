@@ -233,7 +233,7 @@ var twidget_fns = {
 
 	_submit_fetch: function( tag_cmds ){
 		var widget = this;
-		var $busy = $('.busy', widget).show();
+		var $busy = $('.widget-busy', widget).show();
 
 		if ( tag_cmds ) {
 			// 'harden' the new tags into the user tag-bar, but styled 'local-only'
@@ -250,8 +250,8 @@ var twidget_fns = {
 			reskey:	reskey_static,
 		}, function( response ){
 			// console.log(response);
-			widget.set_tags(response)
-			$busy.hide();
+			widget.set_tags(response);
+			$busy.hide()
 		});
 		return this
 	},
