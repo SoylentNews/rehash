@@ -19,116 +19,146 @@ __template__
 
 [% CASE 'keywordDelete-message' %]
 	[% returnme.data_constant = 1 %]
-	Keyword has been deleted
+	<div class="message">Keyword has been deleted</div>
 
 [% CASE 'keywordSave-message' %]
 	[% returnme.data_constant = 1 %]
-	Keyword has been saved
+	<div class="message">Keyword has been saved</div>
 
 [% CASE 'aclSave-message' %]
-Created new user ACL <tt>[% form.thisname %]</tt><BR>
+	<div class="message">Created new user ACL <tt>[% form.thisname %]</tt></div>
 
 [% CASE 'varSave-message' %]
-Saved [% form.thisname %]<BR>
+	<div class="message">Saved [% form.thisname %]</div>
 
 [% CASE 'varDelete-message' %]
-<B>Deleted [% form.thisname %]!</B><BR>
+	<div class="message"><strong>Deleted [% form.thisname %]!</strong></div>
 
 [% CASE 'authorInsert-message' %]
-	Inserted [% form.thisaid %]<BR>
+	<div class="message">Inserted [% form.thisaid %]</div>
 
 [% CASE 'authorSave-message' %]
-	Saved [% form.thisaid %]<BR>
+	<div class="message">Saved [% form.thisaid %]</div>
 
 [% CASE 'authorDelete-message' %]
-	<B>Deleted [% form.thisaid %]!</B><BR>
+	<div class="message"><strong>Deleted [% form.thisaid %]!</strong></div>
 
 [% CASE 'authorDelete-confirm-message' %]
-	<B>Do you really want to delete [% aid %]?</B><BR>
-	<INPUT TYPE="HIDDEN" VALUE="[% aid %]" NAME="thisaid">
-	<INPUT TYPE="SUBMIT" VALUE="Cancel delete [% aid %]" NAME="authordelete_cancel">
-	<INPUT TYPE="SUBMIT" VALUE="Delete [% aid %]" NAME="authordelete_confirm">
+	<div class="message warn"><strong>Do you really want to delete [% aid %]?</strong></div>
+	<input type="hidden" value="[% aid %]" name="thisaid">
+	<input type="submit" value="Cancel delete [% aid %]" name="authordelete_cancel">
+	<input type="submit" value="Delete [% aid %]" name="authordelete_confirm">
 
 [% CASE 'authorDelete-deleted-message' %]
-	<B>Deleted [% aid %]!</B><BR>
+	<div class="message"><strong>Deleted [% aid %]!</strong></div>
 
 [% CASE 'authorDelete-cancel-message' %]
-	<B>Canceled Deletion of [% aid %]!</B><BR>
+	<div class="message"><strong>Canceled Deletion of [% aid %]!</strong></div>
 
 [% CASE 'blockSave-exists-message' %]
-	<P><B>This block, [% bid %], already exists! <BR>Hit the "back" button, and try another bid (look at the blocks pulldown to see if you are using an existing one.)</P>
+	<div class="message error"><strong>This block, [% bid %], already exists!</strong>
+<br>Hit the "back" button, and try another bid (look at the blocks pulldown to see if you are using an existing one.)</div>
 
 [% CASE 'templateSave-exists-message' %]
-	<P><B>This template, [% name %], TPID [% tpid %], already exists! <BR>Hit the "back" button, and try another bid (loo
+	<div class="message error"><strong>This template, [% name %], TPID [% tpid %], already exists!</div>
 
 [% CASE 'blockSave-inserted-message' %]
-	Inserted [% bid %]<BR>
+	<div class="message">Inserted [% bid %]</div>
 
 [% CASE 'templateSave-inserted-message' %]
-	Inserted template [% name %], TPID [% tpid %]<BR>
+	<div class="message">Inserted template [% name %], TPID [% tpid %]</div>
 
 [% CASE 'blockSave-saved-message' %]
-	Saved [% bid %]<BR>
+	<div class="message">Saved [% bid %]</div>
 
 [% CASE 'templateSave-saved-message' %]
-	Saved template [% name %], TPID [% tpid %]<BR>
+	<div class="message">Saved template [% name %], TPID [% tpid %]</div>
 
 [% CASE 'seclev-message' %]
-	You don't have privileges to template name [% name %], TPID [% tpid %]<BR>
+	<div class="message error">You don't have privileges to template name [% name %], TPID [% tpid %]</div>
 	
 [% CASE 'blockDelete-message' %]
-	<B>Deleted [% bid %]!</B><BR>
+	<div class="message"><strong>Deleted [% bid %]!</strong></div>
 
 [% CASE 'templateDelete-message' %]
-	<B>Deleted [% name %], TPID [% tpid %]!</B><BR>
+	<div class="message"><strong>Deleted [% name %], TPID [% tpid %]!</strong></div>
 
 [% CASE 'topicSave-message' %]
-	<B>Saved [% form.tid %]!</B><BR>
+	<div class="message"><strong>Saved [% form.tid %]!</strong></div>
 
 [% CASE 'updateFilter-message' %]
 
 	[% IF ! form.regex %]
-	<B>You haven't typed in a regex.</B><BR>
+	<div class="message error"><strong>You haven't typed in a regex.</strong></div>
 	[% END %]
 
 	[% IF ! form.field %]
-	<B>You haven't typed in a form field.</B><BR>
+	<div class="message error"><strong>You haven't typed in a form field.</strong></div>
 	[% END %]
 
 [% CASE 'topicDelete-message' %]
-	<B>Deleted [% tid %]!</B><BR>
+	[% IF !form.tid %]
+	<div class="message"><strong>Deletion failed!</strong></div>
+	[% ELSE %]
+	<div class="message"><strong>Deleted [% tid %]!</strong></div>
+	[% END %]
 
 [% CASE 'clearpass-warning' %]
-	<BLOCKQUOTE><P ALIGN="CENTER"><B>**&nbsp;Your admin password has been sent
-	in the clear. Please return to
-	<A HREF="[% constants.absolutedir_secure %]">the secure site</A>
-	and then
-	<A HREF="[% constants.absolutedir_secure %]/users.pl?op=changepasswd">change
-	your password</A>
-	immediately! If you have additional problems, please contact the
-	<A HREF="mailto:[% constants.adminmail | strip_attribute %]">site admin</a>.[%
-	IF moreinfo %] More info: "[% moreinfo | strip_literal %]".[%
-	END %]&nbsp;**</B></P></BLOCKQUOTE>
+	<blockquote><p align="CENTER" class="message warn"><strong>**&nbsp;Your admin password has been sent in the clear. Please return to <a href="[% gSkin.absolutedir_secure %]">the secure site</a> and then <a href="[% gSkin.absolutedir_secure %]/my/password">change your password</a> immediately! If you have additional problems, please contact the <a href="mailto:[% constants.adminmail | strip_attribute %]">site admin</a>.[% IF moreinfo %] More info: "[% moreinfo | strip_literal %]".[% END %]&nbsp;**</strong></p></blockquote>
 
 [% # NO POINTS.
 CASE "no points" %]
-	You don't have any moderator points.<BR>
+	<div class="message">You don't have any moderator points.</div>
 
 [% # NO POINTS.
 CASE "not enough points" %]
-	You don't have enough moderator points.<BR>
+	<div class="message warn">You don't have enough moderator points.</div>
 
 [% CASE "unknown_moderation_warning" %]
-	An unknown error occurred while moderating.<BR>
+	<div class="message error">An unknown error occurred while moderating.</div>
 
 [% CASE "moderate_recent_message" %]
-	<P>Return to the set of <A HREF="[% constants.rootdir %]/admin.pl?op=recent&amp;startat=[% startat %]">recent comments</A> you were just moderating.</P>
+	<div class="message">Return to the set of <a href="[% gSkin.rootdir %]/admin.pl?op=recent&amp;startat=[% startat %]">recent comments</a> you were just moderating.</div>
+
+[% CASE "moderate_recent_message_returnto" %]
+	<div class="message">Return to the set of <a href="[% Slash.cleanRedirectUrl(returnto) %]">comments</a> you were just moderating.</div>
 
 [% CASE "no-mcd-stats" %]
-	<p>Looks like memcached is not running, it's turned off in vars,
-	or Cache::Memcached does not support the <tt>stats()</tt> call.
-	No stats are available.
+	<div class="message error">Looks like memcached is not running, it's turned off in vars, or Cache::Memcached does not support the <tt>stats()</tt> call.  No stats are available.</div>
 
+[% CASE "no-tid-specified" %]
+	<div class="message error"><strong>Please go back and select a topic before proceeding.</strong></div>
+
+[% # COMMENT TABLE NOT AVAILABLE FOR WRITING
+CASE "comment_db_down" %]
+	<div class="message error">
+		Database maintenance is currently taking place.  Some items such as comment posting and moderation are currently unavailable.
+	</div>
+
+[% CASE "ispell_nonrec" %]
+	<i>ispell doesn't recognize:</i>
+
+[% CASE "ispell_sugg" %]
+	<br><i>Suggested:</i>
+
+[% CASE 'authorbox_js' %]
+	<script type="text/javascript">admin_authorbox_fetch(30);</script>
+
+[% CASE 'slashdbox_js' %]
+	<script type="text/javascript">admin_slashdbox_fetch(60);</script>
+
+[% CASE 'perfbox_js' %]
+	<script type="text/javascript">admin_perfbox_fetch(90);</script>
+
+[% CASE 'storyadminbox_js' %]
+	<script type="text/javascript">admin_storyadminbox_fetch(30);</script>
+
+[% CASE 'thumb_link_large' %]
+[% IF full_img -%]
+<a href=\'[% constants.imagedir %][% full_img.name %]\'><img src=\'[% constants.imagedir %][% thumb_img.name %]\'></a>
+[%- ELSE -%]
+<img src=\'[% constants.imagedir %][% thumb_img.name %]\'>
+[%- END -%]
 [% END %]
 __seclev__
 10000

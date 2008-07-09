@@ -646,6 +646,34 @@ sub ajax_learnword {
 	}
 }
 
+sub getStoryThumbLargeLink {
+	my($self, $id, $stoid) = @_;
+	my $file = $self->getStaticFile($id);
+	my $full_name = $file->{name};
+	$full_name =~ s/(-thumb[^.]*)\././g;
+	my $thumb_lg_name = $full_name;
+	$thumb_lg_name =~ s/\./-thumblg./;
+
+	my $stoid_q = $self->sqlQuote($stoid);
+	my $name_q = $self->sqlQuote($full_name);
+
+	my $full_img = $self->sqlSelectHashref("*", "static_files", "stoid=$stoid_q AND name = $name_q");
+
+	$name_q = $self->sqlQuote($thumb_lg_name);
+	my $thumb_lg_img = $self->sqlSelectHashref("*", "static_files", "stoid=$stoid_q AND name = $name_q");
+
+	if ($full_img && $full_img->{sfid} && $thumb_lg_img && $thumb_lg_img->{sfid}) {
+		if ($full_img->{height} > $thumb_lg_img->{height} || $full_img->{width} > $thumb_lg_img->{height}) {
+			return getData('thumb_link_large', { full_img => $full_img, thumb_img => $thumb_lg_img });
+		} else {
+			return getData('thumb_link_large', { thumb_img => $thumb_lg_img });
+		}
+	}
+
+
+
+}
+
 sub DESTROY {
 	my($self) = @_;
 	$self->{_dbh}->disconnect if !$ENV{GATEWAY_INTERFACE} && $self->{_dbh};
