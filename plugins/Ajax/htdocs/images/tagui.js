@@ -125,7 +125,7 @@ var tbar_fns = {
 
 			// by default, insert the new tags at the front of the tagbar
 			if ( how !== 'append' ) how = 'prepend';
-			$(this.tagbar_data.list_el)[how]($new_elems);
+			this.tagbar_data.$list_el[how]($new_elems);
 
 			// add in a list of the actual .tag elements we created from scratch
 			$changed_tags = $changed_tags.add( $new_elems.find('.tag') );
@@ -208,17 +208,7 @@ var twidget_fns = {
 			$parent_entry:	$parent_entry
 		}
 
-		var bar_labels = {
-			user:	"My Tags",
-			top:	"Top Tags",
-			system:	"System Tags"
-		}
-
-		$(this).prepend(create_tag_bar(null, 'nod nix'))
-			.find('.tbars')
-			.append($( $.map(['user', 'top', 'system'], function(k){
-				return create_tag_bar(k, null, bar_labels[k])
-			}) ));
+		$init_tag_bars('.tbar.stub, [get]:not([class])', this);
 
 		// XXX testing autocomplete
 		$(this).find('.tag-entry').autocomplete('/ajax.pl', {
@@ -306,36 +296,63 @@ var twidget_fns = {
 }; // twidget_fns
 
 
-function create_tag_bar( bar_selector, tags, label ){
-	var menu_template = create_tag_bar.menu_templates[bar_selector] || '';
+function $init_tag_bars( selector, widget, options ){
+	// <div get="user" label="My Tags">tag1 tag2 tag3</div>
+	widget = widget || $(selector).eq(0).parents('.tag-widget').get(0);
 
-	var attrs = 'class="tbar"' + (bar_selector ? ' get="'+bar_selector+'"' : '');
-	var legend = label ? '<h1 class="legend">' + label + '</h1>' : '';
+	return $(selector, widget).each(function(){
+		var $this_bar = $(this);
 
-	var new_bar = $.extend(
-		$('<div '+attrs+'>'+legend+'<ul></ul></div>')[0],
-		tbar_fns,
-		{ tagbar_data: {
-			menu_template:	join_wrap(menu_template, '<li>', '</li>', '<ul class="tmenu">', '</ul>')
-		}}
-	);
-	new_bar.tagbar_data.list_el = $('ul', new_bar)[0];
-	if ( tags !== undefined )
-		new_bar.update_tags(tags);
-	return new_bar
+		var menu_template = join_wrap(
+			$this_bar.attr('menu') || $init_tag_bars.menu_templates[$this_bar.attr('get')] || '',
+			'<li>', '</li>',
+			'<ul class="tmenu">', '</ul>'
+		);
+
+		var t, legend = (t=$this_bar.attr('label')) ? '<h1 class="legend">' + t + '</h1>' : '';
+
+		var tags = $this_bar.text();
+		$this_bar.html(legend+'<ul></ul>');
+
+		$.extend(
+			this,
+			tbar_fns,
+			{ tagbar_data: {
+				menu_template:	menu_template,
+				$list_el:	$this_bar.find('ul'),
+				widget_el:	widget,
+			} },
+			options
+		);
+
+		if ( tags ) this.set_tags(tags);
+
+	}).addClass('tbar').removeClass('stub').removeAttr('menu').removeAttr('label')
 }
 
-create_tag_bar.menu_templates = {
+$init_tag_bars.menu_templates = {
 	user:	'! x',
 	top:	'_ # ! )',
 }
 
 
+function create_tag_bar( listens_for, tags, label ){
+	var get_attr	= listens_for ? ' get="'+listens_for+'"' : '';
+	var label_attr	= label ? ' label="'+label+'"' : '';
+	var tag_bar_div	= (
+		'<div' + get_attr + label_attr + '>' +
+			tags +
+		'</div>'
+	);
+
+	return $init_tag_bars(tag_bar_div).get(0)
+}
+
 // when the tag-widget is used in the firehose:
 
 function create_firehose_vote_handler( firehose_id ) {
 	return $.extend(
-		 $('<div get="vote" style="display:none"></div>')[0],
+		 $('<div class="connector" get="vote" style="display:none"></div>')[0],
 		 {
 			set_tags: function( tags ){
 				if ( tags.length > 3 )
