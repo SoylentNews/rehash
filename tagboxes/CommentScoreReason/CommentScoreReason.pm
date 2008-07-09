@@ -23,6 +23,8 @@ Slash::Tagbox::CommentScoreReason - track comment score and reason
 
 use strict;
 
+use Digest::MD5 'md5_hex';
+
 use Slash;
 use Slash::DB;
 use Slash::Utility::Environment;
@@ -226,7 +228,11 @@ sub run {
 
 	if ($firehose) {
 		my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
-		$firehose->setFireHose($fhid, { neediness => $neediness });
+		if (!$fhid) {
+			$fhid = $self->addCommentToHoseIfAppropriate($firehose,
+				$affected_id, $cid, $neediness, $new_score);
+		}
+		$firehose->setFireHose($fhid, { neediness => $neediness }) if $fhid;
 	}
 
 	$self->sqlUpdate('comments', {
@@ -234,6 +240,27 @@ sub run {
 			f2 =>	$current_reason_mode,
 			f3 =>	$neediness,
 		}, "cid='$cid'");
+}
+
+sub addCommentToHoseIfAppropriate {
+	my($self, $firehose, $globjid, $cid, $neediness, $score) = @_;
+	my $constants = getCurrentStatic();
+
+	my $fhid = 0;
+
+	# If neediness exceeds a threshold, the comment has a chance of appearing.
+	my $min = $constants->{tagbox_csr_minneediness} || 138;
+	return 0 if $neediness < $min;
+
+	# Hash its cid;  if the last 4 hex digits interpreted as a fraction are
+	# within the range determined, add it to the hose.
+	my $percent = $constants->{tagbox_csr_needinesspercent} || 5;
+	my $hex_percent = int(hex(substr(md5_hex($cid), -4)) * 100 / 65536);
+	return 0 if $hex_percent >= $percent;
+
+	$fhid = $firehose->createItemFromComment($cid);
+
+	return $fhid;
 }
 
 1;

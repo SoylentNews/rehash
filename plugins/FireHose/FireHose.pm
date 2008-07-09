@@ -137,9 +137,9 @@ sub createItemFromComment {
 	my $globjid = $self->getGlobjidCreate("comments", $cid);
 	my $score = constrain_score($comment->{points} + $comment->{tweak});
 
-	my($popularity, $editorpop);
-	$editorpop = $self->getEntryPopularityForColorLevel(4);
-
+	# Set initial popularity scores, but we'll be forcing a quick
+	# recalculation of them.
+	my($popularity, $editorpop, $neediness);
 	if ($score >= 3) {
 		$popularity = $self->getEntryPopularityForColorLevel(4);
 	} elsif ($score == 2) {
@@ -149,6 +149,8 @@ sub createItemFromComment {
 	} else {
 		$popularity = $self->getEntryPopularityForColorLevel(7);
 	}
+	$editorpop = $self->getEntryPopularityForColorLevel(5);
+	$neediness = $self->getEntryPopularityForColorLevel(5);
 
 	my $data = {
 		uid		=> $comment->{uid},
@@ -164,7 +166,18 @@ sub createItemFromComment {
 		globjid		=> $globjid,
 		discussion	=> $comment->{sid},
 	};
-	$self->createFireHose($data);
+	my $fhid = $self->createFireHose($data);
+
+	my $tagboxdb = getObject('Slash::Tagbox');
+	if ($tagboxdb) {
+		for my $tbname (qw( FHPopularity FHEditorPop CommentScoreReason )) {
+			my $tagbox = $tagboxdb->getTagboxes($tbname);
+			next unless $tagbox;
+			$tagboxdb->forceFeederRecalc($tagbox->{tbid}, $globjid);
+		}
+	}
+
+	return $fhid;
 }
 
 
