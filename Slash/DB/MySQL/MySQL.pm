@@ -3483,6 +3483,16 @@ sub setStory {
 		$change_hr->{introtext} =~ s/href=\"SELF\"/href="$link_url"/;
 	}
 
+	if (defined $change_hr->{media}) {
+		if($change_hr->{media} && $change_hr->{media} =~ /<(embed|object)/i) {
+			$change_hr->{mediatype} = "video";
+		} elsif ($change_hr->{media} && $change_hr->{media} =~ /<img/i) {
+			$change_hr->{mediatype} = "image";
+		} else {
+			$change_hr->{mediatype} = "";
+		}
+	}
+
 	$change_hr->{is_archived} = $change_hr->{is_archived} ? 'yes' : 'no'
 		if defined $change_hr->{is_archived};
 	$change_hr->{in_trash} = $change_hr->{in_trash} ? 'yes' : 'no'
@@ -3501,7 +3511,7 @@ sub setStory {
 	if (!exists($change_hr->{last_update})
 		&& !exists($change_hr->{-last_update})) {
 		my @non_cchp = grep !/^(commentcount|hitparade|hits)$/, keys %$change_hr;
-		@fh_update_fields = grep /^(title|uid|time|introtext|bodytext|primaryskid|tid|neverdisplay|media|thumb)$/, keys %$change_hr;
+		@fh_update_fields = grep /^(title|uid|time|introtext|bodytext|primaryskid|tid|neverdisplay|media|mediatype|thumb)$/, keys %$change_hr;
 		
 		if (@non_cchp > 0) {
 			$change_hr->{-last_update} = 'NOW()';

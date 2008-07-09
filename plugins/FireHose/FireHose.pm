@@ -364,6 +364,13 @@ sub updateItemFromStory {
 				word_count	=> $story->{word_count},
 				thumb		=> $story->{thumb},
 			};
+			if(defined $story->{mediatype}) {
+				if(!$story->{mediatype}) {
+					$data->{mediatype} = "none";
+				} else {
+					$data->{mediatype} = $story->{mediatype};
+				}
+			}
 			$self->setFireHose($id, $data);
 		}
 	}
@@ -403,6 +410,13 @@ sub createItemFromStory {
 			discussion	=> $story->{discussion},
 			thumb		=> $story->{thumb},
 		};
+		if(defined $story->{mediatype}) {
+			if(!$story->{mediatype}) {
+				$data->{mediatype} = "none";
+			} else {
+				$data->{mediatype} = $story->{mediatype};
+			}
+		}
 		$self->createFireHose($data);
 	}
 }
