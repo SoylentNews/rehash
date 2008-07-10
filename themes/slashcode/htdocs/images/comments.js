@@ -63,6 +63,7 @@ var user_threshold_orig = -9;
 var user_highlightthresh_orig = -9;
 var user_d2asp = 0;
 
+var async_off = 0;
 var loaded = 0;
 var shift_down = 0;
 var alt_down = 0;
@@ -792,6 +793,10 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 		else
 			params['cids']    = noshow_comments;
 	}
+
+	if (async_off) // global
+		options['async_off'] = 1;
+
 	if (thresh) {
 		params['threshold']       = user_threshold;
 		params['highlightthresh'] = user_highlightthresh;
@@ -2511,9 +2516,14 @@ function reduceThreshold(highlight, no_save) {
 	hide_modal_box();
 	$('#modal_box_content').html('');
 
+	// this could trigger a comment load, which could interfere with the
+	// comment load on setFocusComment if they return in the wrong order
+	async_off = 1;
+
 	// if we are collapsing, then do not move HT too, so the comments stay closed
 	changeT(-1, (highlight > 1));
 	gCommentControlWidget.setTHT(user_threshold, user_highlightthresh);
+	async_off = 0;
 
 	var next_cid = commTreeNextComm(0, 0, 1);
 	if (!next_cid)
