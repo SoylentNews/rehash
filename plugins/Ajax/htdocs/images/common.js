@@ -633,9 +633,14 @@ function firehose_up_down(id, dir) {
 }
 
 function firehose_fix_up_down(id, new_state) {
+	// Find the (possibly) affected +/- capsule.
 	var $updown = $('#updown-'+id);
-	if ( ! $updown.hasClass(new_state) ) {
+
+	if ( $updown.length && ! $updown.hasClass(new_state) ) {
+		// We found the capsule, and it's state needs to be fixed.
 		$updown.setClass(new_state);
+
+		// When ad admin nixes something, it should collapse and get out of the way.
 		if ( fh_is_admin && (new_state=='voteddown' || $('#title-'+id+':contains("Comment:")')) )
 			firehose_collapse_entry(id);
 	}
@@ -887,7 +892,7 @@ function firehose_handle_update() {
 	}
 
 	// XXX temporary admin-only access to the unfinished tag-wiget
-	if ( fh_is_admin ) {
+	if ( fh_is_admin && $('.tag-widget').length ) {
 		$('#firehose h3:has(a[class!=skin]):not([dcset])')
 			.dblclickToggle(open_firehose_tag_widget, close_firehose_tag_widget)
 			.attr('dcset', true);
@@ -1078,10 +1083,11 @@ function firehose_add_update_timerid(timerid) {
 }
 
 function firehose_collapse_entry(id) {
-	$('#fhbody-'+id+'.body').setClass('hide');
-	$('#firehose-'+id).setClass('briefarticle');
+	var $entry = $('#firehose-'+id);
+	close_firehose_tag_widget($entry);
+	$entry.find('#fhbody-'+id+'.body').setClass('hide')
+		.end().setClass('briefarticle');
 	tagsHideBody(id)
-
 }
 
 function firehose_remove_entry(id) {
