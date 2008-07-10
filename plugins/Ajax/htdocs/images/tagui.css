@@ -1,18 +1,19 @@
-.tbar ul {
+div.tag-widget .tbar ul {
 	list-style: none;
 	padding: 0;
 }
 
-.mark_not { color: red }
-.mark_pound { font-weight: bold }
-.mark_3 { color: orange }
-.mark_4 { color: darkgray }
+.bang { text-decoration: outline }
+.pound { font-weight: bold }
+.descriptive { color: orange }
+.ignore { color: darkgray }
 
 .tbar span.tag.local-only { color: gray }
 
-.tbar li, .tbar ul {
+div.tag-widget .tbar li, div.tag-widget .tbar ul {
 	display: inline;
-	padding: 0 0.25em 0 0;
+	padding: 0 0.25em 0 0.25em !important;
+	margin: 0 !important;
 }
 
 .tbars, .tbar, .tag, .tmenu, h1.legend {
@@ -22,6 +23,7 @@
 .tbar {
 	display: inline;
 	position: relative;
+	padding-left: 0.25em;
 }
 
 .tbar h1.legend {
@@ -40,23 +42,27 @@
 	font-family: Optima, sans serif;
 }
 
+.tbar[get=user] span.tag:hover {
+	background-color: inherit;
+}
+
 .tbar span.tag:hover {
-	cursor: pointer;
+	cursor: arrow;
 	background-color: lightgray;
 }
 
-.tbar ul.tmenu {
+div.tag-widget .tbar ul.tmenu {
 	display: none;
 	position: absolute;
-	top: -5px;
-	right: 5px;
+	top: -9px;
+	right: -2px;
 }
 
 .tbar > ul > li {
 	position: relative;
 }
 
-.tbar > ul > li:hover ul.tmenu {
+div.tag-widget .tbar > ul > li:hover ul.tmenu {
 	display: inline;
 }
 
@@ -64,18 +70,21 @@
 .tbar[get=top] { border: 1px solid red }
 .tbar[get=system] { border: 1px solid blue }
 
-.tmenu li {
-	font-size: 80%;
-	padding: 0 0.2em;
+div.tag-widget .tmenu > li {
+	font-size: 110%;
+	padding: 0 0.2em !important;
+	margin: 0 !important;
 	color: darkgreen;
+	cursor: arrow;
 }
 
 .tag-editor {
 	display: inline;
 }
 
-.tmenu li:hover {
-	background-color: lightgray;
+div.tag-widget .tmenu > li:hover {
+	color: white;
+	background-color: black !important;
 }
 
 .tag-widget {
@@ -97,4 +106,24 @@
 
 .tag-widget .working + .widget-busy {
 	display: block;
+}
+
+div.tag-widget [get=context] {
+	font-style: italic;
+	font-weight: bold;
+}
+
+.tbar[get=user] span.p,
+.tbar[get=user] span.t,
+.tbar[get=user] span.s,
+.tbar[get=top]  span.s {
+	display: none;
+}
+
+span.s1, span.t2 {
+	font-weight: bold;
+}
+
+span.e {
+	color: blue;
 }

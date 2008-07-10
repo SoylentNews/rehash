@@ -11,19 +11,6 @@ function bare_tag( t ){
 }
 
 
-function tag_style( t ){
-	var tag_styles = {
-		'!': 'mark_not',
-		'#': 'mark_pound',
-		')': 'mark_3',
-		'_': 'mark_4'
-	};
-
-	var k = t[0];
-	return (k in tag_styles) ? tag_styles[k] : '';
-}
-
-
 function form_submit_tags( form, widget ){
 	var $input = $('.tag-entry:input', form);
 	var $widget = widget ? $(widget) : $(form).parents('.tag-widget').eq(0);
@@ -135,9 +122,10 @@ var tbar_fns = {
 		//   Use case for annotate: the tag was modified locally, we mark it with "local-only" until the server
 		//   comes back with a complete list in response that will wipe out the "local-only" style, essentially
 		//   confirming the user's change has been recorded
-		var base_classes = 'tag ' + (annotate ? annotate+' ' : '');
+		var base_classes = 'tag' + (annotate ? ' '+annotate : '');
 		$changed_tags.each(function(){
-			this.className = $.trim(base_classes + tag_style($(this).text()))
+			var style = local_style_for($(this).text());
+			this.className = style ? base_classes + ' ' + style : base_classes
 		});
 		return this
 	},
@@ -236,6 +224,7 @@ var twidget_fns = {
 				})
 			}
 		});
+		style_tags_globally(this);
 		return this
 	},
 
@@ -404,4 +393,150 @@ function close_firehose_tag_widget( event, selector ) {
                .each(function(){
                        this.close()
                })
+}
+
+
+
+/*
+	'u'	user tag
+	't'	top tag
+	's'	system tag
+	'd'	data type
+	'e'	editor tag ('hold', 'back', etc)
+	'f'	feedback tag ('error', 'dupe', etc)
+	'p'	private tag
+	't2'	topic
+	's1'	section
+	'y'	nod
+	'x'	nix
+	'bang'
+	'pound'
+	'paren'
+	'underscore'
+ */
+
+
+
+
+
+
+var well_known_tags = {};
+
+$(function(){
+	update_style_map(well_known_tags, 's1', YAHOO.slashdot.sectionTags);
+	update_style_map(well_known_tags, 't2', YAHOO.slashdot.topicTags);
+	update_style_map(well_known_tags, 'f', YAHOO.slashdot.feedbackTags);
+	update_style_map(well_known_tags, 'e', YAHOO.slashdot.actionTags);
+	update_style_map(well_known_tags, 'e', YAHOO.slashdot.fhitemOpts);
+	update_style_map(well_known_tags, 'e', YAHOO.slashdot.storyOpts);
+	update_style_map(well_known_tags, 'y p', ['nod']);
+	update_style_map(well_known_tags, 'x p', ['nix']);
+})
+
+function update_style_map( style_map, style, tags ){
+	var sp_style = ' ' + style;
+
+	function update( tag ){
+		if ( tag in style_map )
+			style_map[tag] += sp_style
+		else
+			style_map[tag] = style
+	}
+
+	function update_from_set( key, value ){ update(key) }
+	function update_from_list(){ update(this) }
+
+	$.each(tags, (tags.length === undefined) ? update_from_set : update_from_list);
+}
+
+var tag_prefix_styles = {
+	'!': 'bang',
+	'#': 'pound',
+	')': 'descriptive',
+	'_': 'ignore'
+};
+
+function local_style_for( tag ){
+
+	var style = '';
+	var sep = '';
+
+	function include( expr ){
+		if ( expr ){
+			style += sep + expr;
+			sep = ' ';
+		}
+	}
+
+	include(well_known_tags[bare_tag(tag)]);
+	include(tag_prefix_styles[ tag[0] ]);
+
+	return style;
+}
+
+var style_for_bar = { user: 'u', top: 't', system: 's' };
+
+function style_tags_globally( widget ){
+	var done = {};
+	var style_map = {};
+
+	// Step 1: build one big dictionary mapping tag names to 'global' styles
+	// that is, styles we deduce from where a tag appears.  If a tag appears
+	// in the user tag bar, then every occurance of that tag will be styled
+	// to indicate that.
+
+	// So, for each of the big three (user, top, system) tag bars; extract
+	// their tags, and update our style map with a class for that bar
+	$('.tbar[get]', widget).each(function(){
+		var bar = $(this).attr('get');
+		var style = style_for_bar[bar];
+
+		// style true for a bar that exclusively gets one of the big three
+		// so: if it's one of the big three that we haven't yet seen...
+		if ( style && !done[bar] ){
+			update_style_map(
+				style_map,
+				style,
+
+				// build an array of all the tag names in this bar
+				$('span.tag', this).map(function(){
+					return $(this).text()
+				})
+			);
+			done[bar] = true;
+		}
+	});
+
+	// style_map now contains every tag in the user, top, and system bars
+	// (i.e., all tags that globally influence each other) and maps those
+	// tag names to strings containing a style class for each bar in which
+	// the tag appeared, e.g., if 'hello' is in both the user and top tag
+	// bars, then style_map['hello'] == 'u t' (mod order)
+
+	// Step 2: for tags that are sections, topics, etc., add corresponding styles
+	$.each(style_map, function(k, v){
+		var local_styles = local_style_for(k);
+		if ( local_styles )
+			style_map[k] += ' ' + local_styles;
+	});
+
+	// Step 3: find every tag span and apply the styles we've calculated
+        $('.tbar span.tag', widget).each(function(){
+		var new_className = 'tag';
+		var tag = $(this).text();
+		if ( tag in style_map )
+			// we saw this tag, and know all the styles
+			new_className += ' ' + style_map[tag];
+		else {
+			// didn't see this tag on the global phase, so it has
+			// no global styles, but it _might_ still have local
+			// which we'll cache in case we see this tag again
+			var local_styles = style_map[tag] = local_style_for(tag);
+			if ( local_styles ) {
+				new_className += ' ' + local_styles;
+			}
+		}
+
+                this.className = new_className;
+        })
 }
