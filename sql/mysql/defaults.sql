@@ -26,6 +26,7 @@ INSERT INTO al2_types VALUES (8, 6, 'trusted', 'Trusted');
 INSERT INTO al2_types VALUES (9, 7, 'proxy', 'Valid Proxy');
 INSERT INTO al2_types VALUES (10, 8, 'nopostanon', 'No Comment Post Anon');
 INSERT INTO al2_types VALUES (11, 9, 'spammer', 'Spammer');
+INSERT INTO al2_types VALUES (12, 10, 'openproxy', 'Open Proxy');
 
 
 #

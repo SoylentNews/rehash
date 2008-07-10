@@ -169,13 +169,11 @@ sub handler {
 		# open proxies.	Check both the ipid and the subnetid (we
 		# can't use values in $user because that doesn't get set
 		# up until prepareUser is called, later in this function).
-		# XXXSRCID: really should have a separate 'openproxy'
-		# attribute instead of piggybacking off 'nopost'.
 		my $read_only = 0;
 		my $hostip = $r->connection->remote_ip;
 		my $srcids = get_srcids({ ip => $hostip });
-		$read_only = 1 if $reader->checkAL2($srcids, 'nopost')
-			|| $reader->checkAL2($srcids, 'nopostanon');
+		$read_only = 1 if $reader->checkAL2($srcids,
+			[qw( nopost nopostanon openproxy )]);
 
 		my $newpass;
 		if ($read_only || !$tmpuid) {

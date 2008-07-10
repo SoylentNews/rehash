@@ -5423,3 +5423,6 @@ INSERT INTO vars (name, value, description) VALUES ('tagbox_csr_needinesspercent
 # 2008-07-10
 UPDATE vars SET value = 'T_2_5_0_212' WHERE name = 'cvs_tag_currentcode';
 
+SELECT @maxbitpos := MAX(bitpos) FROM al2_types;
+INSERT INTO al2_types VALUES (NULL, @maxbitpos+1, 'openproxy', 'Open Proxy');
+

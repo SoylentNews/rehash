@@ -4351,6 +4351,7 @@ sub getKnownOpenProxy {
 		"open_proxies",
 		"$col = $ip_q AND ts >= DATE_SUB(NOW(), INTERVAL $hours_back HOUR)");
 #print STDERR scalar(localtime) . " getKnownOpenProxy returning " . (defined($port) ? "'$port'" : "undef") . " for ip '$ip'\n";
+	# XXX also checkAL2(srcid, 'openproxy') here?
 	return $port;
 }
 
@@ -4366,6 +4367,7 @@ sub setKnownOpenProxy {
 	$xff = undef unless $xff && length($xff) >= 7
 		&& $xff =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/;
 	$duration = undef if !$duration;
+	# XXX also setAL2(srcid, 'openproxy', {some admin uid}) here?
 #print STDERR scalar(localtime) . " setKnownOpenProxy doing sqlReplace ip '$ip' port '$port'\n";
 	return $self->sqlReplace("open_proxies", {
 		ip =>	$ip,
@@ -5116,6 +5118,7 @@ sub getAL2TypeAliases {
 my %_al2_types_by_id = ( );
 sub getAL2TypeById {
 	my($self, $al2tid) = @_;
+	return undef if !$al2tid;
 	# Return from cache if available.
 	return $_al2_types_by_id{$al2tid} if defined($_al2_types_by_id{$al2tid});
 	# Need to scan the hash.
@@ -5178,6 +5181,7 @@ sub setAL2 {
 		map { $self->getAL2TypeById($_) }
 		sort { $a <=> $b }
 		map { $al2types->{$_}{al2tid} }
+		grep { exists $al2types->{$_} }
 		keys %$type_hr;
 	for my $type (@types) {
 		# undef for a type field means "don't change or log anything"
