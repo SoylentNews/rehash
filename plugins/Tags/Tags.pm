@@ -1487,7 +1487,7 @@ sub ajaxListTagnames {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 
-	$form->{prefix} ||= $form->{q} || '';
+	$form->{prefix} ||= $form->{'q'} || '';
 
 	my $prefix = '';
 	$prefix = lc($1) if $form->{prefix} =~ /([A-Za-z0-9]{1,20})/;
