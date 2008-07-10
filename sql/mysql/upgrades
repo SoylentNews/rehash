@@ -5400,7 +5400,6 @@ UPDATE vars SET value = 'T_2_5_0_210' WHERE name = 'cvs_tag_currentcode';
 ALTER TABLE tagboxes ADD COLUMN nosy_gtids varchar(255) DEFAULT '' NOT NULL;
 INSERT INTO vars (name, value, description) VALUES ('tags_feederlog_largerows', '50000', 'Number of rows at which the feederlog is considered "large", slowing additions');
 INSERT INTO vars (name, value, description) VALUES ('tags_tagbox_lastglobjid', '0', 'Last globjid that the tagbox scanned for possible insertion into feeder log');
-INSERT INTO ajax_ops VALUES (NULL, 'tags_setget_combined', 'Slash::Tags', 'ajaxSetGetCombinedTags', 'ajax_tags_write', 'createuse');
 
 # for plugins/FireHose
 # INSERT INTO ajax_ops VALUES (NULL, 'tags_get_combined_firehose', 'Slash::FireHose', 'ajaxGetCombinedFirehose', 'ajax_tags_write', 'createuse');
@@ -5415,8 +5414,12 @@ UPDATE vars SET value = 'T_2_5_0_211' WHERE name = 'cvs_tag_currentcode';
 # for plugins/Tags
 DELETE FROM ajax_ops WHERE op='tags_get_combined_firehose';
 DELETE FROM ajax_ops WHERE op='tags_get_top_firehose';
+INSERT INTO ajax_ops VALUES (NULL, 'tags_setget_combined', 'Slash::Tags', 'ajaxSetGetCombinedTags', 'ajax_tags_write', 'createuse');
 
 # for tagboxes/CommentScoreReason
 INSERT INTO vars (name, value, description) VALUES ('tagbox_csr_minneediness', '138', 'Minimum neediness score to possibly insert a needy comment into the firehose');
 INSERT INTO vars (name, value, description) VALUES ('tagbox_csr_needinesspercent', '5', 'Percentage of comments with the necessary minimum neediness which actually do get inserted into the firehose');
+
+# 2008-07-10
+UPDATE vars SET value = 'T_2_5_0_212' WHERE name = 'cvs_tag_currentcode';
 
