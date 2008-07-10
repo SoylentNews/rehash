@@ -624,12 +624,28 @@ function firehose_up_down(id, dir) {
 		dir:	dir
 	}, '', { onComplete: json_handler });
 
-	// we changed the tags outside the widget; tell the widget (if any)
-	// the widget will automatically fix the up/down state by calling firehose_fix_up_down
-	if ( ! $('#tag-widget-'+id+':not(.stub)').each(function(){ this.fetch_tags() }).length ) {
-		// but if we didn't find any un-stubbed widgets, do it ourselves
+
+	// We changed the tags outside the notice of the tag widget (if any).
+	// If there is one, we need to tell it.  Look for the tag widget.
+	var $tag_widget = $('#tag-widget-'+id);
+	if ( $tag_widget.length ) {
+		// We found one.  We need to make it fetch any new tags, which
+		// in turn will make the widget call firehose_fix_up_down.
+		var tag_widget = $tag_widget.get(0);
+		if ( $tag_widget.is(':hidden') )
+			// It's hidden; it automatically fetches new tags on open.
+			open_firehose_tag_widget(null, $tag_widget);
+		else
+			// It's already open; we have to tell it to fetch the new tags.
+			tag_widget.fetch_tags();
+
+		// Show appropriate suggestions.
+		tag_widget.set_context(dir=='+' ? 'nod' : 'nix');
+	} else {
+		// No tag widget; we have to call directly...
 		firehose_fix_up_down(id, dir=='+' ? 'votedup' : 'voteddown');
 	}
+
 }
 
 function firehose_fix_up_down(id, new_state) {

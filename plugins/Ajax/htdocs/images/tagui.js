@@ -265,6 +265,14 @@ var twidget_fns = {
 	},
 
 
+	set_context: function( context ){
+		var context_tags = '<context>' + tag_context[context];
+		$('[get=context]', this).each(function(){
+			this.set_tags(context_tags)
+		})
+	},
+
+
 	open: function(){
 		this.tagwidget_data.$parent_entry.addClass('tagging');
 		$(this).slideDown(100)
