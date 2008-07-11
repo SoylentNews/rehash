@@ -2982,7 +2982,7 @@ sub _removeEmpty {
 	# remove consecutive <p> or <p>, <br> tags
 	1 while $$html =~ s{<p> \s* <(?: /?p | br(?:\ /)? )>} {$p}gx;
 	# remove <p> and <br> tags before beginning, or end, of blocks, or end of string
-	1 while $$html =~ s{\s* <(?: p | br(?:\ /)?) > \s*  ( $ | </?$is_block_re> )} {$1}gx;
+	1 while $$html =~ s{\s* <(?: p | br(?:\ /)?) > \s*  ( $ | </?(?:$is_block_re)> )} {$1}gx;
 
 	# remove still-empty tags
 	while ($$html =~ m|<(\w+)>\s*</\1>|) {
