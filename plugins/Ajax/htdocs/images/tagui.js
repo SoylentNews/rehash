@@ -355,14 +355,10 @@ function create_firehose_vote_handler( firehose_id ) {
 		 $('<div class="connector" get="vote" style="display:none"></div>')[0],
 		 {
 			set_tags: function( tags ){
-				if ( tags.length > 3 )
-					tags = tags.split(' ')[0];
-
 				firehose_fix_up_down(firehose_id, {
-					'':	'vote',
 					'nod':	'votedup',
 					'nix':	'voteddown'
-				}[tags])
+				}[tags] || 'vote')
 			},
 		 }
 	);
