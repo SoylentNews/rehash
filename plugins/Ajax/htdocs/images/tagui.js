@@ -218,6 +218,7 @@ var twidget_fns = {
 
 
 	set_tags: function( tags ){
+		console.log('widget.set_tags("'+tags+'")');
 		var widget = this;
 		$.each(tags.split('\n'), function(){
 			var match = /^<(\w+)>?(.*)$/.exec(this);
@@ -253,7 +254,7 @@ var twidget_fns = {
 			// console.log(response);
 			widget.set_tags(response);
 			$busy.removeAttr('style')
-		});
+		}, 'text');
 		return this
 	},
 
