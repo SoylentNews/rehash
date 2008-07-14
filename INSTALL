@@ -359,7 +359,8 @@ INSTALLATION
         proceeding. Note that Net::Cmd has a history of being a little
         broken in its tests; if it fails on tests 8 and 9 of t/require, then
         it's OK; just do "force install Net::Cmd" and repeat "install
-        Bundle::LWP".
+        Bundle::LWP". On Mac OS X and possibly other operating systems, if
+        LWP's live/https tests fail, "install Net::SSL" manually and retry.
 
         Assuming you chose to install the LWP, then after it's been
         configured successfully, again, "exit" the CPAN and reinvoke it.

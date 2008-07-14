@@ -407,6 +407,8 @@ Make sure all those modules are installed and up to date before
 proceeding.  Note that Net::Cmd has a history of being a little broken
 in its tests;  if it fails on tests 8 and 9 of t/require, then it's OK;
 just do C<force install Net::Cmd> and repeat C<install Bundle::LWP>.
+On Mac OS X and possibly other operating systems, if LWP's live/https
+tests fail, C<install Net::SSL> manually and retry.
 
 Assuming you chose to install the LWP, then after it's been configured
 successfully, again, C<exit> the CPAN and reinvoke it.
