@@ -117,10 +117,10 @@ div.tag-widget [get=context] {
 	font-weight: bold;
 }
 
-.tbar[get=user] span.p,
-.tbar[get=user] span.t,
-.tbar[get=user] span.s,
-.tbar[get=top]  span.s {
+.tbar[get=user] li.p,
+.tbar[get=user] li.t,
+.tbar[get=user] li.s,
+.tbar[get=top]  li.s {
 	display: none;
 }
 

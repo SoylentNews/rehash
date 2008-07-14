@@ -550,21 +550,24 @@ function style_tags_globally( widget ){
 
 	// Step 3: find every tag span and apply the styles we've calculated
         $('.tbar span.tag', widget).each(function(){
-		var new_className = 'tag';
-		var tag = $(this).text();
+		var $this = $(this);
+		var tag = $this.text();
+
+		var class_list = '';
 		if ( tag in style_map )
 			// we saw this tag, and know all the styles
-			new_className += ' ' + style_map[tag];
+			class_list = style_map[tag];
 		else {
 			// didn't see this tag on the global phase, so it has
 			// no global styles, but it _might_ still have local
 			// which we'll cache in case we see this tag again
 			var local_styles = style_map[tag] = local_style_for(tag);
 			if ( local_styles ) {
-				new_className += ' ' + local_styles;
+				class_list = local_styles;
 			}
 		}
 
-                this.className = new_className;
+		$this.parent().setClass(class_list);
+		this.className = class_list ? 'tag '+class_list : 'tag';
         })
 }
