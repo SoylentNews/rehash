@@ -72,7 +72,6 @@ div.tag-widget.sorting .tbar > ul > li:hover ul.tmenu {
 
 /* for debugging */
 .tbar[get=top] { border: 1px solid red }
-.tbar[get=system] { border: 1px solid blue }
 
 div.tag-widget .tmenu > li {
 	font-size: 110%;
@@ -105,7 +104,7 @@ div.tag-widget .tmenu > li:hover {
 	display: none;
 	position: absolute;
 	top: 0;
-	right: 0;
+	left: 0;
 }
 
 .tag-widget .working + .widget-busy {
@@ -125,9 +124,9 @@ div.tag-widget [get=context] {
 }
 
 span.s1, span.t2 {
-	font-weight: bold;
+	/* font-weight: bold; */
 }
 
 span.e {
-	color: blue;
+	/* color: blue; */
 }
