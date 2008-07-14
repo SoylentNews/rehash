@@ -172,9 +172,12 @@ var tbar_fns = {
 // XXX temporarily handle some special cases myself.
 // Jamie will want to know about this.
 function normalize_nodnix( expr ){
-	return expr.replace(normalize_nodnix.pattern, _normalize_nodnix);
+	return expr.replace(_normalize_nodnix.pattern, _normalize_nodnix)
 }
-normalize_nodnix.pattern = /-!(nod|nix)|-(nod|nix)|!(nod|nix)|nod|nix/g;
+
+function normalize_no_nodnix( expr ){
+	return expr.replace(_normalize_nodnix.pattern, '')
+}
 
 function _normalize_nodnix( cmd ){
 	if ( cmd == 'nod' || cmd == '!nix' )
@@ -188,6 +191,7 @@ function _normalize_nodnix( cmd ){
 	else
 		return cmd;
 }
+_normalize_nodnix.pattern = /-!(nod|nix)|-(nod|nix)|!(nod|nix)|nod|nix/g;
 
 function normalize_tag_menu_command( tag, op ){
 	if ( op == "x" )
@@ -251,10 +255,13 @@ var twidget_fns = {
 		var $busy = $('.widget-busy', widget).show();
 
 		if ( tag_cmds ) {
+			var command_feedback = normalize_no_nodnix(tag_cmds);
+			tag_cmds = normalize_nodnix(tag_cmds);
+
 			// 'harden' the new tags into the user tag-bar, but styled 'local-only'
 			// tags in the response from the server will wipe-out local-only
 			$('.tbar[get*=user]', this).each(function(){
-				this.update_tags(tag_cmds, 'prepend', 'local-only')
+				this.update_tags(command_feedback, 'prepend', 'local-only')
 			});
 		}
 
@@ -278,7 +285,7 @@ var twidget_fns = {
 
 
 	submit_tags: function( tag_cmds ){
-		return this._submit_fetch(normalize_nodnix(tag_cmds))
+		return this._submit_fetch(tag_cmds)
 	},
 
 
