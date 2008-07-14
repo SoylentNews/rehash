@@ -93,12 +93,15 @@ var tbar_fns = {
 		var update_map = this.map_tags(tags = split_if_string(tags));
 
 		// update in-place the ones we can; build a list of the ones we can't ($.map returns a js array)
+		var new_tags_seen = {};
 		var new_tags = $.map(tags, function(t){
 			var bt = bare_tag(t);
 			if ( bt in update_map )
 				$(update_map[bt]).html(t);
-			else
-				return t;
+			else if ( !(bt in new_tags_seen) ) {
+				new_tags_seen[bt] = true;
+				return t
+			}
 		});
 
 		// a $ list of the actual .tag elements we updated in-place
