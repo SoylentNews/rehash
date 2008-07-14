@@ -23,15 +23,25 @@ function form_submit_tags( form, widget ){
 
 
 function click_tag( event ) {
-	var $tag_el = $('.tag', this);
+	var $tag_el = $(this).find('.tag').andSelf().eq(0);
 	var tag = $tag_el.text();
 	var op	= $(event.target).text();
 
+	var its_the_capsule = op==tag && (op=='+' || op=='-');
+	if ( its_the_capsule ) {
+		tag = { '+': 'nod', '-': 'nix' }[op];
+		op = '';
+	}
+
 	// op differs from tag when the click was in a menu
 	//	so, if in a menu, or right on the tag itself, do something
-	if ( event.target!==this && (op!==tag || event.target===$tag_el[0]) ) {
+	if ( (event.target!==this || its_the_capsule) && (op!==tag || event.target===$tag_el[0]) ) {
 		var command = normalize_tag_menu_command(tag, op);
-		var $widget = $(this).parents('.tag-widget').eq(0);
+		var $widget = (
+			its_the_capsule
+				? $(this).parents('[id^=firehose]').find('.tag-widget')
+				: $(this).parents('.tag-widget')
+		).eq(0);
 
 		if ( event.shiftKey ) {
 			// if the shift key is down, append the tag to the edit field
