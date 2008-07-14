@@ -241,7 +241,7 @@ sub ajaxCreateTag {
 
 sub deactivateTag {
 	my($self, $hr, $options) = @_;
-	my $tag = $self->_setuptag($hr, { tagname_not_required => 1 });
+	my $tag = $self->_setuptag($hr, { tagname_not_required => !$options->{tagname_required} });
 	return 0 if !$tag;
 	my $prior_clause = '';
 	$prior_clause = " AND tagid < $options->{tagid_prior_to}" if $options->{tagid_prior_to};
@@ -549,6 +549,9 @@ sub getTagsByGlobjid {
 	if ($options->{tagnameid}) {
 		my $tagnameid_q = $self->sqlQuote($options->{tagnameid});
 		$tagnameid_where = " AND tagnameid = $tagnameid_q";
+	} elsif ($options->{limit_to_tagnames}) {
+		my $in_clause = join ',', grep { $_ } map { $self->getTagnameidFromNameIfExists($_) } @{ $options->{limit_to_tagnames} };
+		$tagnameid_where = " AND tagnameid IN ($in_clause)";
 	}
 
 	my $ar = $self->sqlSelectAllHashrefArray(
@@ -1106,16 +1109,24 @@ sub setTagsForGlobj {
 	# Create any tag specified but only if it does not already exist.
 	my @create_tagnames	= grep { !$old_tagnames{$_} } sort keys %new_tagnames;
 
-	# Deactivate any tags previously specified that were deleted from
-	# the tagbox.
-	my @deactivate_tagnames	= grep { !$new_tagnames{$_} } sort keys %old_tagnames;
+	my @deactivate_tagnames;
+	if ( ! $options->{deactivate_by_operator} ) {
+		# Deactivate any tags previously specified that were deleted from the tagbox.
+		@deactivate_tagnames	= grep { !$new_tagnames{$_} } sort keys %old_tagnames;
+	} else {
+		# Deactivate any tags that are supplied as "-tag"
+		@deactivate_tagnames =
+			map { $1 if /^-(.+)/ }
+			split /[\s,]+/,
+			lc $tag_string;
+	}
 	for my $tagname (@deactivate_tagnames) {
 		$tags->deactivateTag({
 			uid =>		$uid,
 			name =>		$tagname,
 			table =>	$table,
 			id =>		$id
-		});
+		}, { tagname_required => $options->{tagname_required} });
 	}
 
 	my @created_tagnames = ( );
@@ -1133,7 +1144,7 @@ sub setTagsForGlobj {
 	}
 
 	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $id,
-		{ uid => $uid }); # don't list private tags
+		{ uid => $uid, include_private => $options->{include_private} }); # don't list private tags unless forced
 	my $newtagspreloadtext = join ' ', sort map { $_->{tagname} } @$now_tags_ar;
 	return $newtagspreloadtext;
 }
@@ -1297,6 +1308,94 @@ sub ajaxProcessAdminTags {
 	}
 }
 
+sub getUserNodNixForGlobj {
+	my($self, $globjid, $uid) = @_;
+	my $current_vote_tags_array = $self->getTagsByGlobjid($globjid, {
+		uid => $uid,
+		include_private => 1,
+		limit_to_tagnames => ['nod', 'nix']
+	});
+	return join ' ', sort map { $_->{tagname} } @$current_vote_tags_array;
+}
+
+sub ajaxSetGetCombinedTags {
+	my($slashdb, $constants, $user, $form) = @_;
+
+	my $type = $form->{type} || 'firehose';
+
+	my ($base_item, $base_writer);
+	my $globjid;
+	if ( $type eq 'firehose' ) {
+		$base_writer = getObject('Slash::FireHose');
+		$base_item = $base_writer->getFireHose($form->{id});
+		$globjid = $base_item->{globjid} if $base_item;
+	}
+	# XXX TO DO: handle other types here, setting $base_item appropriately
+
+	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+	if (!$globjid || $globjid !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
+		return getData('error', {}, 'tags');
+	}
+	my($table, $item_id) = $tags_reader->getGlobjTarget($globjid);
+
+	my $uid = $user->{uid};
+
+	# if we have to execute commands, do them _before_ we fetch any tag lists
+	my $user_tags = '';
+	if ( $form->{tags} ) {
+		my $tags_writer = getObject('Slash::Tags');
+		$user_tags = $tags_writer->setTagsForGlobj($item_id, $table, '', {
+			deactivate_by_operator => 1,
+			tagname_required => 1
+		});
+		if ( $user->{is_admin} && $type eq 'firehose' ) {
+			my $added_tags =
+				join ' ',
+				map { $1 unless /^-(.+)/ }
+				split /\s+/,
+				lc $form->{tags};
+
+			$base_writer->setSectionTopicsFromTagstring($form->{id}, $added_tags);
+		};
+	} else {
+		my $current_tags_array = $tags_reader->getTagsByNameAndIdArrayref($table, $item_id, { uid => $uid });
+		$user_tags = join ' ', sort map { $_->{tagname} } @$current_tags_array;
+	}
+
+	my $datatype_tag = $base_item ? $base_item->{type} : '';
+	my $top_tags = $base_item ? $base_item->{toptags} : '';
+
+	my $section_tag = '';
+	my $s = $base_item->{primaryskid};
+	if ( $s ) {
+		if ( $s != $constants->{mainpage_skid} ) {
+			my $skin = $base_writer->getSkin($s);
+			$section_tag = $skin->{name};
+		} else {
+			$section_tag = 'slashdot';
+		}
+	}
+
+	my $topic_tags = '';
+	my $t = $base_item->{tid};
+	if ( $t ) {
+		my $topic = $base_writer->getTopic($t);
+		$topic_tags = $topic->{keyword};
+	}
+
+	my $vote_tags = $tags_reader->getUserNodNixForGlobj($globjid, $uid);
+
+	# XXX how to get the system tags?
+	my $system_tags = $datatype_tag . ' ' . $section_tag . ' ' . $topic_tags;
+
+	return slashDisplay('combined_tags', {
+		vote_tags =>	$vote_tags,
+		user_tags =>	$user_tags,
+		top_tags =>	$top_tags,
+		system_tags =>	$system_tags,
+	}, { Return => 1 });
+}
+
 {
 my %_adcmd_prefix = ( );
 sub normalizeAndOppositeAdminCommands {
@@ -1415,6 +1514,9 @@ sub ajaxTagHistory {
 sub ajaxListTagnames {
 	my($slashdb, $constants, $user, $form) = @_;
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+
+	$form->{prefix} ||= $form->{'q'} || '';
+
 	my $prefix = '';
 	$prefix = lc($1) if $form->{prefix} =~ /([A-Za-z0-9]{1,20})/;
 	my $len = length($prefix);

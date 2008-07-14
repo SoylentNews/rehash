@@ -1,63 +1,132 @@
-.tbar ul {
+div.tag-widget .tbar ul {
 	list-style: none;
 	padding: 0;
 }
 
-.mark_not { color: red }
-.mark_pound { font-weight: bold }
-.mark_3 { color: orange }
-.mark_4 { color: darkgray }
+.bang { text-decoration: outline }
+.pound { font-weight: bold }
+.descriptive { color: orange }
+.ignore { color: darkgray }
 
-.tbar li, .tbar ul {
+.tbar span.tag.local-only { color: gray }
+
+div.tag-widget .tbar li, div.tag-widget .tbar ul {
 	display: inline;
-	padding: 0 0.25em 0 0;
+	padding: 0 0.25em 0 0.25em !important;
+	margin: 0 !important;
+}
+
+.tbars, .tbar, .tag, .tmenu, h1.legend {
+	user-select: none;
 }
 
 .tbar {
-	display: block;
+	display: inline;
 	position: relative;
+	padding-left: 0.25em;
+}
+
+.tbar h1.legend {
+	display: none;
+}
+
+.tbars.stack, .tbars.stack .tbar {
+	display: block;
+}
+
+.tbars.train, .tbars.train .tbar {
+	display: inline;
 }
 
 .tbar span.tag {
 	font-family: Optima, sans serif;
 }
 
+.tbar[get=user] span.tag:hover {
+	background-color: inherit;
+}
+
 .tbar span.tag:hover {
-	cursor: pointer;
+	cursor: arrow;
 	background-color: lightgray;
 }
 
-.tbar ul.tmenu {
+div.tag-widget .tbar ul.tmenu {
 	display: none;
 	position: absolute;
-	top: -5px;
-	right: 5px;
+	top: -9px;
+	right: -2px;
 }
 
 .tbar > ul > li {
 	position: relative;
 }
 
-.tbar > ul > li:hover ul.tmenu {
+div.tag-widget .tbar > ul > li:hover ul.tmenu {
 	display: inline;
 }
 
-.tmenu li {
-	font-size: 80%;
-	padding: 0 0.2em;
-	color: darkgreen;
+div.tag-widget.sorting .tbar > ul > li:hover ul.tmenu {
+	display: none;
 }
 
-.tmenu li:hover {
-	background-color: lightgray;
+/* for debugging */
+.tbar[get=top] { border: 1px solid red }
+
+div.tag-widget .tmenu > li {
+	font-size: 110%;
+	padding: 0 0.2em !important;
+	margin: 0 !important;
+	color: darkgreen;
+	cursor: arrow;
+}
+
+.tag-editor {
+	display: inline;
+}
+
+div.tag-widget .tmenu > li:hover {
+	color: white;
+	background-color: black !important;
 }
 
 .tag-widget {
-  display: block;
-  position: absolute;
-  z-index: 10;
-  background-color: white;
-  border: 4px dotted darkgray;
-  padding: 0.4em;
-  min-width: 6em;
+	display: block;
+	position: relative;
+	z-index: 10;
+	background-color: white;
+	border: 4px dotted darkgray;
+	padding: 0.4em;
+	min-width: 6em;
+}
+
+.tag-widget .widget-busy {
+	display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.tag-widget .working + .widget-busy {
+	display: block;
+}
+
+div.tag-widget [get=context] {
+	font-style: italic;
+	font-weight: bold;
+}
+
+.tbar[get=user] li.p,
+.tbar[get=user] li.t,
+.tbar[get=user] li.s,
+.tbar[get=top]  li.s {
+	display: none;
+}
+
+span.s1, span.t2 {
+	/* font-weight: bold; */
+}
+
+span.e {
+	/* color: blue; */
 }
