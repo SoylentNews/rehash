@@ -3483,6 +3483,16 @@ sub setStory {
 		$change_hr->{introtext} =~ s/href=\"SELF\"/href="$link_url"/;
 	}
 
+	if (defined $change_hr->{media}) {
+		if($change_hr->{media} && $change_hr->{media} =~ /<(embed|object)/i) {
+			$change_hr->{mediatype} = "video";
+		} elsif ($change_hr->{media} && $change_hr->{media} =~ /<img/i) {
+			$change_hr->{mediatype} = "image";
+		} else {
+			$change_hr->{mediatype} = "";
+		}
+	}
+
 	$change_hr->{is_archived} = $change_hr->{is_archived} ? 'yes' : 'no'
 		if defined $change_hr->{is_archived};
 	$change_hr->{in_trash} = $change_hr->{in_trash} ? 'yes' : 'no'
@@ -3501,7 +3511,7 @@ sub setStory {
 	if (!exists($change_hr->{last_update})
 		&& !exists($change_hr->{-last_update})) {
 		my @non_cchp = grep !/^(commentcount|hitparade|hits)$/, keys %$change_hr;
-		@fh_update_fields = grep /^(title|uid|time|introtext|bodytext|primaryskid|tid|neverdisplay|media|thumb)$/, keys %$change_hr;
+		@fh_update_fields = grep /^(title|uid|time|introtext|bodytext|primaryskid|tid|neverdisplay|media|mediatype|thumb)$/, keys %$change_hr;
 		
 		if (@non_cchp > 0) {
 			$change_hr->{-last_update} = 'NOW()';
@@ -4341,6 +4351,7 @@ sub getKnownOpenProxy {
 		"open_proxies",
 		"$col = $ip_q AND ts >= DATE_SUB(NOW(), INTERVAL $hours_back HOUR)");
 #print STDERR scalar(localtime) . " getKnownOpenProxy returning " . (defined($port) ? "'$port'" : "undef") . " for ip '$ip'\n";
+	# XXX also checkAL2(srcid, 'openproxy') here?
 	return $port;
 }
 
@@ -4356,6 +4367,7 @@ sub setKnownOpenProxy {
 	$xff = undef unless $xff && length($xff) >= 7
 		&& $xff =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/;
 	$duration = undef if !$duration;
+	# XXX also setAL2(srcid, 'openproxy', {some admin uid}) here?
 #print STDERR scalar(localtime) . " setKnownOpenProxy doing sqlReplace ip '$ip' port '$port'\n";
 	return $self->sqlReplace("open_proxies", {
 		ip =>	$ip,
@@ -5106,6 +5118,7 @@ sub getAL2TypeAliases {
 my %_al2_types_by_id = ( );
 sub getAL2TypeById {
 	my($self, $al2tid) = @_;
+	return undef if !$al2tid;
 	# Return from cache if available.
 	return $_al2_types_by_id{$al2tid} if defined($_al2_types_by_id{$al2tid});
 	# Need to scan the hash.
@@ -5168,6 +5181,7 @@ sub setAL2 {
 		map { $self->getAL2TypeById($_) }
 		sort { $a <=> $b }
 		map { $al2types->{$_}{al2tid} }
+		grep { exists $al2types->{$_} }
 		keys %$type_hr;
 	for my $type (@types) {
 		# undef for a type field means "don't change or log anything"
@@ -6481,6 +6495,7 @@ sub saveCommentReadLog {
 	my($self, $comments, $discussion_id, $uid) = @_;
 
 	$uid ||= getCurrentUser('uid');
+	return if isAnon($uid);
 
 	my($mcd, $mcdkey);
 	if (@$comments) {
@@ -6514,6 +6529,7 @@ sub getCommentReadLog {
 	my($self, $discussion_id, $uid, $no_mcd) = @_;
 
 	$uid ||= getCurrentUser('uid');
+	return if isAnon($uid);
 
 	my($mcd, $mcdkey);
 	if (!$no_mcd) {
