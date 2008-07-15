@@ -142,50 +142,23 @@ function updateComment(cid, mode) {
 	return void(0);
 }
 
-function updateCommentTree(cid, threshold, subexpand) {
+function updateCommentTree(cid, threshold, lowestmode, skip_read) {
 	setDefaultDisplayMode(cid);
 	var comment = comments[cid];
 
-	// skip the root comment, if it exists; leave it full, but let user collapse
-	// if he chooses, and leave it that way: this comment will not move with
-	// T/HT changes
-	if ((subexpand || threshold) && cid != root_comment) {
-		if (subexpand && subexpand == 1) {
-			if (prehiddendisplaymode[cid] == 'oneline' || prehiddendisplaymode[cid] == 'full') {
-				futuredisplaymode[cid] = 'full';
-			} else {
-				futuredisplaymode[cid] = 'hidden';
-			}
-		} else {
-			futuredisplaymode[cid] = determineMode(cid, threshold, user_highlightthresh);
-		}
+	// skip the root comment, if it exists; leave it full
+	if (threshold && cid != root_comment)
+		futuredisplaymode[cid] = determineMode(cid, threshold, user_highlightthresh, lowestmode, skip_read);
 
+	if (displaymode[cid] != futuredisplaymode[cid]) {
 		updateDisplayMode(cid, futuredisplaymode[cid], 1);
+		update_comments[cid] = futuredisplaymode[cid];
 	}
-
-//	if (subexpand && subexpand == 2) {
-//		updateComment(cid, 'hidden');
-//		prehiddendisplaymode[cid] = futuredisplaymode[cid];
-//	} else if (futuredisplaymode[cid] && futuredisplaymode[cid] != displaymode[cid]) {
-		//updateComment(cid, futuredisplaymode[cid]);
-		if (displaymode[cid] != futuredisplaymode[cid]) {
-			update_comments[cid] = futuredisplaymode[cid];
-		}
-//	}
 
 	var kidhiddens = 0;
 	if (comment && comment['kids'] && comment['kids'].length) {
-// 		if (!subexpand) {
-// 			if (shift_down && !alt_down && futuredisplaymode[cid] == 'full') {
-// 				subexpand = 1;
-// 			} else if (shift_down && !alt_down && futuredisplaymode[cid] == 'oneline') {
-// 				subexpand = 2;
-// 				threshold = user_threshold;
-// 			}
-// 		}
-
 		for (var kiddie = 0; kiddie < comment['kids'].length; kiddie++) {
-			kidhiddens += updateCommentTree(comment['kids'][kiddie], threshold, subexpand);
+			kidhiddens += updateCommentTree(comment['kids'][kiddie], threshold, lowestmode, skip_read);
 		}
 	}
 
@@ -290,7 +263,7 @@ function changeHT(delta) {
 	changeThreshold(user_threshold + ''); // needs to be a string value
 }
 
-function changeT(delta, skip_ht) {
+function changeT(delta, skip_ht, lowestmode) {
 	if (!delta)
 		return void(0);
 
@@ -299,10 +272,10 @@ function changeT(delta, skip_ht) {
 	threshold = Math.min(Math.max(threshold, -1), 6);
 
 	// HT moves with T, but that is taken care of by changeThreshold()
-	changeThreshold(threshold + '', skip_ht); // needs to be a string value
+	changeThreshold(threshold + '', skip_ht, lowestmode); // needs to be a string value
 }
 
-function changeThreshold(threshold, skip_ht) {
+function changeThreshold(threshold, skip_ht, lowestmode) {
 	var threshold_num = parseInt(threshold);
 	var t_delta = threshold_num + (user_highlightthresh - user_threshold);
 	user_threshold = threshold_num;
@@ -314,7 +287,7 @@ function changeThreshold(threshold, skip_ht) {
 	}
 
 	for (var root = 0; root < root_comments.length; root++) {
-		updateCommentTree(root_comments[root], threshold);
+		updateCommentTree(root_comments[root], threshold, lowestmode, skip_ht);
 	}
 	finishCommentUpdates(1);
 
@@ -690,18 +663,29 @@ function getSliderTotals(thresh, hthresh) {
 	];
 }
 
-function determineMode(cid, thresh, hthresh) {
+function determineMode(cid, thresh, hthresh, lowestmode, skip_read) {
 	if (!thresh)
 		thresh  = user_threshold;
 	if (!hthresh)
 		hthresh = user_highlightthresh;
 
+	// lowestmode tells us to NOT change the mode of a comment
+	// that is above a certain mode
+	if (lowestmode && viewmodevalue[displaymode[cid]] > viewmodevalue[lowestmode])
+		return displaymode[cid];
+
+	var mode;
 	if (thresh >= 6 || (comments[cid]['points'] < thresh && (user_is_anon || user_uid != comments[cid]['uid'])))
-		return 'hidden';
+		mode = 'hidden';
 	else if (comments[cid]['points'] < (hthresh - (root_comments_hash[cid] ? 1 : 0)))
-		return 'oneline';
+		mode = 'oneline';
 	else
-		return 'full';
+		mode = 'full';
+
+	if (skip_read && comments[cid]['read'] && (viewmodevalue[mode] > viewmodevalue['oneline']))
+		mode = 'oneline';
+
+	return mode;
 }
 
 function finishCommentUpdates(thresh) {
@@ -873,7 +857,7 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 				for (var i = 0; i < update.new_cids_order.length; i++) {
 					var this_cid = update.new_cids_order[i];
 					if (!placeholder_no_update[this_cid] && comments[this_cid]['points'] >= -1) {
-						var mode = determineMode(this_cid);
+						var mode = determineMode(this_cid, null, null, null, (highlight > 1));
 						updateDisplayMode(this_cid, mode, 1);
 						currents[displaymode[this_cid]]++;
 						updateComment(this_cid, mode);
@@ -2501,7 +2485,7 @@ function reduceThreshold(highlight, no_save) {
 	async_off = 1;
 
 	// if we are collapsing, then do not move HT too, so the comments stay closed
-	changeT(-1, (highlight > 1));
+	changeT(-1, (highlight > 1), 'hidden');
 	gCommentControlWidget.setTHT(user_threshold, user_highlightthresh);
 	async_off = 0;
 

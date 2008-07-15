@@ -74,6 +74,10 @@ sub selectComments {
 		delete $form->{cchp};
 	}
 
+	my $comments_read = !$user->{is_anon}
+		? $slashdb->getCommentReadLog($discussion->{id}, $user->{uid})
+		: {};
+
 	my $commentsort = defined $options->{commentsort}
 		? $options->{commentsort}
 		: $user->{commentsort};
@@ -232,10 +236,6 @@ sub selectComments {
 ##slashProf("sC fudging", "sC main sort");
 #slashProf("", "sC main sort");
 
-	my $comments_read = !$user->{is_anon}
-		? $slashdb->getCommentReadLog($discussion->{id}, $user->{uid})
-		: {};
-
 	# This loop mainly takes apart the array and builds 
 	# a hash with the comments in it.  Each comment is
 	# in the index of the hash (based on its cid).
@@ -258,6 +258,8 @@ sub selectComments {
 		$comments->{$C->{cid}}{visiblekids} = $tmpvkids || 0;
 
 		$comments->{$C->{cid}}{has_read} = $comments_read->{$C->{cid}};
+		$user->{state}{d2_defaultclass}{$C->{cid}} = 'oneline'
+			if $user->{d2_reverse_switch} && $comments_read->{$C->{cid}};
 
 		# The comment pushes itself onto its parent's
 		# kids array.
