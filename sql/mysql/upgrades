@@ -5426,3 +5426,4 @@ UPDATE vars SET value = 'T_2_5_0_212' WHERE name = 'cvs_tag_currentcode';
 SELECT @maxbitpos := MAX(bitpos) FROM al2_types;
 INSERT INTO al2_types VALUES (NULL, @maxbitpos+1, 'openproxy', 'Open Proxy');
 
+UPDATE ajax_ops SET reskey_name='ajax_user_static' WHERE op='tags_setget_combined';
