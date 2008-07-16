@@ -164,7 +164,7 @@ var tbar_fns = {
 			return !(bt in allowed_tags)
 		}));
 		return this.update_tags(tags, 'append')
-	},
+	}
 
 }; // tbar_fns
 
@@ -224,11 +224,11 @@ var twidget_fns = {
 			autoFill:		true,
 			max:			25,
 			extraParams: {
-				op:		'tags_list_tagnames',
+				op:		'tags_list_tagnames'
 			},
 			formatItem: function(row /*, i, N, query*/){
 				return row.split(/\s+/)[0]
-			},
+			}
 		});
 		return this
 	},
@@ -269,7 +269,7 @@ var twidget_fns = {
 			op:	'tags_setget_combined',
 			id:	this.tagwidget_data.item_id,
 			tags:	tag_cmds || '',
-			reskey:	reskey_static,
+			reskey:	reskey_static
 		}, function( response ){
 			// console.log(response);
 			widget.set_tags(response);
@@ -341,7 +341,7 @@ function $init_tag_bars( selector, widget, options ){
 			{ tagbar_data: {
 				menu_template:	menu_template,
 				$list_el:	$this_bar.find('ul'),
-				widget_el:	widget,
+				widget_el:	widget
 			} },
 			options
 		);
@@ -353,7 +353,7 @@ function $init_tag_bars( selector, widget, options ){
 
 $init_tag_bars.menu_templates = {
 	user:	'! x',
-	top:	'_ # ! )',
+	top:	'_ # ! )'
 }
 
 
@@ -380,7 +380,7 @@ function create_firehose_vote_handler( firehose_id ) {
 					'nod':	'votedup',
 					'nix':	'voteddown'
 				}[tags] || 'vote')
-			},
+			}
 		 }
 	);
 }
