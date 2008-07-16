@@ -87,7 +87,7 @@ BEGIN { $ENV{TZ} = 'GMT' }
 
 use Data::Dumper;
 use File::Spec::Functions;
-use Storable qw(freeze thaw);
+use Storable qw(nfreeze thaw);
 
 use Slash;
 use Slash::Constants ':all';
@@ -106,7 +106,7 @@ our @EXPORT = (
 	@Slash::Utility::EXPORT,
 	@Slash::XML::EXPORT,
 	@Data::Dumper::EXPORT,
-	qw(freeze thaw),
+	qw(nfreeze thaw),
 	'slashTest',
 	'Display',
 	'Test',
@@ -189,6 +189,7 @@ sub slashTest {
 		my $object = getObject("Slash::$plugin");
 		if ($object) {
 			no strict 'refs';
+			no warnings 'once';
 			${"main::$name"} = $object;
 		}
 	}
