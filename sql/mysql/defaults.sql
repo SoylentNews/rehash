@@ -26,6 +26,7 @@ INSERT INTO al2_types VALUES (8, 6, 'trusted', 'Trusted');
 INSERT INTO al2_types VALUES (9, 7, 'proxy', 'Valid Proxy');
 INSERT INTO al2_types VALUES (10, 8, 'nopostanon', 'No Comment Post Anon');
 INSERT INTO al2_types VALUES (11, 9, 'spammer', 'Spammer');
+INSERT INTO al2_types VALUES (12, 10, 'openproxy', 'Open Proxy');
 
 
 #
@@ -834,7 +835,7 @@ INSERT INTO vars (name, value, description) VALUES ('cur_performance_stat_ops', 
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_lastid', '0', 'accesslogid to start searching at');
 INSERT INTO vars (name, value, description) VALUES ('cur_performance_stats_weeks', '8', 'number of weeks back to compare current stats to');
 INSERT INTO vars (name, value, description) VALUES ('currentqid',1,'The Current Question on the homepage pollbooth');
-INSERT INTO vars (name, value, description) VALUES ('cvs_tag_currentcode','T_2_5_0_210','The current cvs tag that the code was updated to - this does not affect site behavior but may be useful for your records');
+INSERT INTO vars (name, value, description) VALUES ('cvs_tag_currentcode','T_2_5_0_213','The current cvs tag that the code was updated to - this does not affect site behavior but may be useful for your records');
 INSERT INTO vars (name, value, description) VALUES ('datadir','/usr/local/slash/www.example.com','What is the root of the install for Slash');
 INSERT INTO vars (name, value, description) VALUES ('db_auto_increment_increment','1','If your master DB uses auto_increment_increment, i.e. multiple master replication, echo its value into this var');
 INSERT INTO vars (name, value, description) VALUES ('dbsparklines_disp','0','Display dbsparklines in the currentAdminUsers box?');

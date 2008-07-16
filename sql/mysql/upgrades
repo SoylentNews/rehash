@@ -5434,3 +5434,6 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fheditorpop_m
 # for tagboxes/FHPopularity
 INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity_maybefrac', '1.0', 'Amount that an editor nod+maybe boosts popularity, expressed as fraction of a plain nod');
 
+# 2008-07-16
+UPDATE vars SET value = 'T_2_5_0_213' WHERE name = 'cvs_tag_currentcode';
+
