@@ -1925,7 +1925,7 @@ sub getAndSetOptions {
 	my $options 	= {};
 
 	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1, misc => 1, comment => 1 };
-	my $tabtypes = { tabsection => 1, tabpopular => 1, tabrecent => 1, tabuser => 1};
+	my $tabtypes = { tabsection => 1, tabpopular => 1, tabrecent => 1, tabuser => 1, metamod => 1};
 
 	my $tabtype = '';
 	$tabtype = $form->{tabtype} if $form->{tabtype} && $tabtypes->{ $form->{tabtype} };
@@ -2008,6 +2008,8 @@ sub getAndSetOptions {
 			} else {
 				$options->{orderby} = 'popularity';
 			}
+		} elsif ($form->{orderby} eq 'neediness') {
+			$options->{orderby} = 'neediness';
 		} else {
 			$options->{orderby} = "createtime";
 		}
@@ -2062,11 +2064,16 @@ sub getAndSetOptions {
 		$form->{color} = "black";
 	} elsif ($tabtype eq 'tabuser') {
 		$form->{fhfilter} = "\"user:$user->{nickname}\"";
-		$options->{orderby} = "popularity";
 		$options->{color} = "black";
 		$form->{color} = "black";
 		$options->{orderdir} = "DESC";
 		$options->{orderby} = "createtime";
+	} elsif ($tabtype eq 'metamod') {
+		$form->{fhfilter} = "comment";
+		$options->{color} = "black";
+		$form->{color} = "black";
+		$options->{orderdir} = "DESC";
+		$options->{orderby} = "neediness";
 	}
 
 	if ($tabtype) {
