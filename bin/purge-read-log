@@ -1,0 +1,74 @@
+#!/usr/bin/perl -w
+
+use strict;
+use File::Basename;
+use Getopt::Std;
+use Slash::DB;
+use Slash::Utility;
+
+(my $VERSION) = ' $Revision$ ' =~ /\$Revision:\s+([^\s]+)/;
+my $PROGNAME = basename($0);
+
+my %opts;
+# Remember to doublecheck these match usage()!
+usage('Options used incorrectly') unless getopts('hvu:d:', \%opts);
+usage() if $opts{'h'} || !$opts{'d'} || !$opts{'u'} || !keys %opts;
+version() if $opts{'v'};
+
+createEnvironment($opts{'u'});
+
+usage() if $opts{'d'} =~ /\D/;
+if ($opts{'d'} < 14) {
+	local $| = 1;
+	print "Are you sure you want to delete all rows for\n",
+	      "discussions less than $opts{'d'} days? [yN] ";
+	chomp(my $line = <>);
+	exit unless $line =~ /y/i;
+}
+
+
+
+
+{
+	my $slashdb = getCurrentDB();
+	warn $@ unless $slashdb->sqlDo(<<EOT);
+DELETE users_comments_read_log
+FROM users_comments_read_log, discussions
+WHERE discussion_id=discussions.id
+  AND discussions.ts < DATE_SUB(NOW(), INTERVAL $opts{'d'} DAY)
+EOT
+}
+
+sub usage {
+	print "*** $_[0]\n" if $_[0];
+	# Remember to doublecheck these match getopts()!
+	print <<EOT;
+
+Usage: $PROGNAME [OPTIONS] ... [FILES]
+
+SHORT PROGRAM DESCRIPTION
+
+Main options:
+	-h	Help (this message)
+	-v	Version
+	-u	Virtual user (default is "slash")
+	-d      Discussions that are more than -d days old will be purged
+
+EOT
+	exit;
+}
+
+sub version {
+	print <<EOT;
+
+$PROGNAME $VERSION
+
+This code is a part of Slash, and is released under the GPL.
+Copyright 1997-2008 by Open Source Technology Group. See README
+and COPYING for more information, or see http://slashcode.com/.
+
+EOT
+	exit;
+}
+
+__END__
