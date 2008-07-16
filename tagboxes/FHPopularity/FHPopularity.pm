@@ -3,6 +3,8 @@
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 
+# This tagbox is outdated, superceded by FireHoseScores
+
 package Slash::Tagbox::FHPopularity;
 
 =head1 NAME
@@ -70,13 +72,15 @@ sub feed_newtags {
 	my $tagsdb = getObject('Slash::Tags');
 
 	# The algorithm of the importance of tags to this tagbox is simple.
-	# 'nod' and 'nix' are important.  Other tags are not.
+	# 'nod', 'nix', and sometimes 'maybe' are important.  Other tags are not.
 	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
 	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
+	my $maybeid    = $tagsdb->getTagnameidCreate('maybe');
 
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
-		next unless $tag_hr->{tagnameid} == $upvoteid || $tag_hr->{tagnameid} == $downvoteid;
+		next unless $tag_hr->{tagnameid} == $upvoteid || $tag_hr->{tagnameid} == $downvoteid
+			|| $tag_hr->{tagnameid} == $maybeid;
 		my $ret_hr = {
 			affected_id =>	$tag_hr->{globjid},
 			importance =>	1,
@@ -120,7 +124,7 @@ sub feed_userchanges {
 	my $constants = getCurrentStatic();
 	main::tagboxLog("FHPopularity->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'");
 
-	# XXX need to fill this in, and check FirstMover feed_userchanges too
+	# XXX need to fill this in
 
 	return [ ];
 }
@@ -174,21 +178,64 @@ sub run {
 			# all its nexuses.
 			$color_level = $this_color_level if $this_color_level < $color_level;
 		}
+	} elsif ($type eq "comments") {
+		my $comment = $self->getComment($target_id);
+		my $score = constrain_score($comment->{points} + $comment->{tweak});
+		   if ($score >= 3) {   $color_level = 4 }
+		elsif ($score >= 2) {   $color_level = 5 }
+		elsif ($score >= 1) {   $color_level = 6 }
+		else {                  $color_level = 7 }
 	}
 	$popularity = $firehose->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 
 	# Add up nods and nixes.
 	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
 	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
+	my $maybeid    = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
+	my $admins = $self->getAdmins();
 	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0, $options);
 	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
+	my($n_admin_maybes, $n_admin_nixes, $maybe_pop_delta) = (0, 0, 0);
 	for my $tag_hr (@$tags_ar) {
 		next if $options->{starting_only};
+		next if $tag_hr->{inactivated};
 		my $sign = 0;
 		$sign =  1 if $tag_hr->{tagnameid} == $upvoteid   && !$options->{downvote_only};
 		$sign = -1 if $tag_hr->{tagnameid} == $downvoteid && !$options->{upvote_only};
 		next unless $sign;
-		$popularity += $tag_hr->{total_clout} * $sign;
+		my $seclev = exists $admins->{ $tag_hr->{uid} }
+			? $admins->{ $tag_hr->{uid} }{seclev}
+			: 1;
+		my $extra_pop = $tag_hr->{total_clout} * $sign;
+		if ($seclev > 1 && $sign == 1) {
+			# If this admin nod comes with a 'maybe', don't change
+			# popularity yet;  save it up and wait to see if any
+			# admins end up 'nix'ing.
+			if (grep {
+				     $_->{tagnameid} == $maybeid
+				&&   $_->{uid}       == $tag_hr->{uid}
+				&&   $_->{globjid}   == $tag_hr->{globjid}
+				&& ! $_->{inactivated}
+			} @$tags_ar) {
+				++$n_admin_maybes;
+				$maybe_pop_delta += $extra_pop;
+				$extra_pop = 0;
+			}
+		} elsif ($seclev > 1 && $sign == -1) {
+			++$n_admin_nixes;
+		}
+		$popularity += $extra_pop;
+	}
+	if ($n_admin_maybes > 0) {
+		if ($n_admin_nixes) {
+			# If any admin nixes, then all the admin nod+maybes are
+			# ignored.  The nixes have already been counted normally.
+		} else {
+			# No admin nixes, so the maybes boost editor popularity by
+			# some fraction of the usual amount.
+			my $frac = $constants->{tagbox_fhpopularity_maybefrac} || 1.0;
+			$popularity += $maybe_pop_delta * $frac;
+		}
 	}
 
 	# Set the corresponding firehose row to have this popularity.
