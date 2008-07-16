@@ -67,7 +67,7 @@ sub handleFileCmd {
 			my $thumblg = $namebase . "-thumblg." . $suffix;
 
 			slashdLog("About to create thumb $path$thumb");
-			system("$convert -size 260x194  $path$name  -resize '130x97>'  -bordercolor transparent  -border 48 -gravity center -crop 130x97+0+0 -page +0+0 $path$thumb");
+			system("$convert -size 260x194  $path$name  -resize '130x97>'  -bordercolor transparent  -border 48 -gravity center -crop 130x97+0+0 -page +0+0 -colors 256 -depth 8 -compress BZip $path$thumb");
 			my $data = {
 				stoid => $cmd->{stoid} || 0,
 				fhid  => $cmd->{fhid} || 0 ,
@@ -83,7 +83,7 @@ sub handleFileCmd {
 			}
 
 			slashdLog("About to create thumbsms $path$thumbsm");
-			system("$convert -size 100x74 $path$name  -resize '50x37>'  -bordercolor transparent -border 18 -gravity center -crop 50x37+0+0 -page +0+0 $path$thumbsm");
+			system("$convert -size 100x74 $path$name  -resize '50x37>'  -bordercolor transparent -border 18 -gravity center -crop 50x37+0+0 -page +0+0 -colors 256 -depth 8 -compress BZip $path$thumbsm");
 			$data = {
 				stoid => $cmd->{stoid} || 0,
 				fhid  => $cmd->{fhid} || 0,
@@ -92,7 +92,7 @@ sub handleFileCmd {
 			addFile($data);
 
 			slashdLog("About to create thumblg $path$thumblg");
-			system("$convert $path$name  -resize '425x344>' $path$thumblg");
+			system("$convert $path$name  -resize '425x344>' -colors 256 -depth 8 -compress BZip $path$thumblg");
 			$data = {
 				stoid => $cmd->{stoid} || 0,
 				fhid  => $cmd->{fhid} || 0,
