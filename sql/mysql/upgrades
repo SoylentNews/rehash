@@ -5427,3 +5427,10 @@ SELECT @maxbitpos := MAX(bitpos) FROM al2_types;
 INSERT INTO al2_types VALUES (NULL, @maxbitpos+1, 'openproxy', 'Open Proxy');
 
 UPDATE ajax_ops SET reskey_name='ajax_user_static' WHERE op='tags_setget_combined';
+
+# for tagboxes/FHEditorPop
+INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fheditorpop_maybefrac', '0.1', 'Amount that an editor nod+maybe boosts editorpop, expressed as fraction of a plain editor nod');
+
+# for tagboxes/FHPopularity
+INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity_maybefrac', '1.0', 'Amount that an editor nod+maybe boosts popularity, expressed as fraction of a plain nod');
+
