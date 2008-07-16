@@ -1190,6 +1190,7 @@ sub editStory {
 		$storyref->{commentstatus} = $form->{commentstatus};
 
 		$storyref->{uid} ||= $user->{uid};
+		$storyref->{dept} ||= '';
 		$storyref->{dept} =~ s/[-\s]+/-/g;
 		$storyref->{dept} =~ s/^-//;
 		$storyref->{dept} =~ s/-$//;
@@ -1585,6 +1586,7 @@ sub extractRelatedStoriesFromForm {
 
 	# Extract sids from urls in introtext and bodytext
 	foreach ($form->{introtext}, $form->{bodytext}) {
+		next unless $_;
 		push @$related, $1 while /$match/g;
 		push @$related_cids, $1 while /$match_cid/g;
 	}

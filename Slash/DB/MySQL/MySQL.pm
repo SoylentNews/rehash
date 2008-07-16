@@ -5946,7 +5946,7 @@ sub getStoryByTimeAdmin {
 	# order is irrelevant -- pudge
 	my $order = $sign eq '<' ? 'DESC' : 'ASC';
 
-	$where .= " AND sid != '$story->{sid}'" if !$options->{no_story};
+	$where .= " AND sid != '$story->{sid}'" if !$options->{no_story} && $story->{sid};
 	my $timebase = $story ? $self->sqlQuote($story->{time}) : "NOW()";
 	$where .= " AND DATE_SUB($timebase, INTERVAL $options->{hours_back} HOUR) " if $options->{hours_back};
 	$where .= " AND DATE_ADD($timebase, INTERVAL $options->{hours_forward} HOUR) " if $options->{hours_forward};
@@ -8475,7 +8475,7 @@ sub _getMCDStats_percentify {
 # prettier compromise.  I'm just saying. - Jamie
 sub autoUrl {
 	my($self, $section, @data) = @_;
-	my $data = join ' ', @data;
+	my $data = @data ? join(' ', @data) : '';
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 
