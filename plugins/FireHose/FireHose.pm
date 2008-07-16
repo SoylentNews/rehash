@@ -137,9 +137,9 @@ sub createItemFromComment {
 	my $globjid = $self->getGlobjidCreate("comments", $cid);
 	my $score = constrain_score($comment->{points} + $comment->{tweak});
 
-	my($popularity, $editorpop);
-	$editorpop = $self->getEntryPopularityForColorLevel(4);
-
+	# Set initial popularity scores, but we'll be forcing a quick
+	# recalculation of them.
+	my($popularity, $editorpop, $neediness);
 	if ($score >= 3) {
 		$popularity = $self->getEntryPopularityForColorLevel(4);
 	} elsif ($score == 2) {
@@ -149,6 +149,8 @@ sub createItemFromComment {
 	} else {
 		$popularity = $self->getEntryPopularityForColorLevel(7);
 	}
+	$editorpop = $self->getEntryPopularityForColorLevel(5);
+	$neediness = $self->getEntryPopularityForColorLevel(5);
 
 	my $data = {
 		uid		=> $comment->{uid},
@@ -164,7 +166,18 @@ sub createItemFromComment {
 		globjid		=> $globjid,
 		discussion	=> $comment->{sid},
 	};
-	$self->createFireHose($data);
+	my $fhid = $self->createFireHose($data);
+
+	my $tagboxdb = getObject('Slash::Tagbox');
+	if ($tagboxdb) {
+		for my $tbname (qw( FHPopularity FHEditorPop CommentScoreReason )) {
+			my $tagbox = $tagboxdb->getTagboxes($tbname);
+			next unless $tagbox;
+			$tagboxdb->forceFeederRecalc($tagbox->{tbid}, $globjid);
+		}
+	}
+
+	return $fhid;
 }
 
 
@@ -220,6 +233,7 @@ sub createUpdateItemFromBookmark {
 	my $url_globjid = $self->getGlobjidCreate("urls", $bookmark->{url_id});
 	my $type = $options->{type} || "bookmark";
 	my($count) = $self->sqlCount("firehose", "globjid=$url_globjid");
+	my $firehose_id;
 	my $popularity = defined $options->{popularity}
 		? $options->{popularity}
 		: $type eq "feed"
@@ -250,7 +264,7 @@ sub createUpdateItemFromBookmark {
 				$data->{srcname} = $feed->{feedname};
 			}
 		}
-		my $firehose_id = $self->createFireHose($data);
+		$firehose_id = $self->createFireHose($data);
 		if ($firehose_id && $type eq "feed") {
 			my $discussion_id = $self->createDiscussion({
 				uid		=> 0,
@@ -277,6 +291,7 @@ sub createUpdateItemFromBookmark {
 			});
 		}
 	}
+	return $firehose_id;
 }
 
 sub createItemFromSubmission {
@@ -349,6 +364,13 @@ sub updateItemFromStory {
 				word_count	=> $story->{word_count},
 				thumb		=> $story->{thumb},
 			};
+			if(defined $story->{mediatype}) {
+				if(!$story->{mediatype}) {
+					$data->{mediatype} = "none";
+				} else {
+					$data->{mediatype} = $story->{mediatype};
+				}
+			}
 			$self->setFireHose($id, $data);
 		}
 	}
@@ -388,6 +410,13 @@ sub createItemFromStory {
 			discussion	=> $story->{discussion},
 			thumb		=> $story->{thumb},
 		};
+		if(defined $story->{mediatype}) {
+			if(!$story->{mediatype}) {
+				$data->{mediatype} = "none";
+			} else {
+				$data->{mediatype} = $story->{mediatype};
+			}
+		}
 		$self->createFireHose($data);
 	}
 }
@@ -1225,7 +1254,7 @@ sub ajaxGetUserFirehose {
 
 	my $template;
 	if ( $form->{no_markup} ) {
-		$template = 'no_markup';
+		$template = 'combined_tags';
 	} elsif ( $form->{nodnix} ) {
 		$template = 'tagsnodnixuser';
 	} else {
@@ -1234,21 +1263,8 @@ sub ajaxGetUserFirehose {
 
 	return slashDisplay($template, {
 		id =>		$id,
-		content =>	$newtagspreloadtext,
+		user_tags =>	$newtagspreloadtext,
 	}, { Return => 1 });
-}
-
-sub ajaxGetCombinedFirehose {
-	my($slashdb, $constants, $user, $form) = @_;
-	$form->{no_markup} = 1;
-
-	my $user_tags = ajaxGetUserFirehose($slashdb, $constants, $user, $form);
-	my $top_tags = ajaxGetFireHoseTagsTop($slashdb, $constants, $user, $form);
-	my $system_tags = 'systemtagshere';
-
-	return	"<user>" . $user_tags . "\n" .
-		"<top>" . $top_tags . "\n" .
-		"<system>" . $system_tags;
 }
 
 sub ajaxGetAdminFirehose {
@@ -2170,36 +2186,6 @@ sub getAndSetOptions {
 		}
 	}
 
-	# number of firehose items per page in the normal case
-	if ($mode eq "full") {
-		if ($user->{is_admin}) {
-			$options->{limit} = $pagesize eq "large" ? 50 : 25;
-		} else {
-			$options->{limit} = $pagesize eq "large" ? 25 : 15;
-		}
-	} else {
-		if ($user->{is_admin}) {
-			$options->{limit} = 50;
-		} else {
-			$options->{limit} = $pagesize eq "large" ? 30 : 25;
-		}
-	}
-
-	# the non-normal cases: a small device (e.g., iPhone) or an embedded use (e.g., Google Gadget)
-	my $force_smaller = $form->{embed};
-	if (!$force_smaller && $constants->{smalldevices_ua_regex}) {
-		my $smalldev_re = qr($constants->{smalldevices_ua_regex});
-		if ($ENV{HTTP_USER_AGENT} && $ENV{HTTP_USER_AGENT} =~ $smalldev_re) {
-			$force_smaller = 1;
-		}
-	}
-
-	# ...for which we'll have fewer items per page
-	if ($force_smaller) {
-		$options->{smalldevices} = 1;
-		$options->{limit} = 10;
-	}
-
 	if ($user->{is_admin} && $form->{setusermode}) {
 		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "" });
 	}
@@ -2401,7 +2387,48 @@ sub getAndSetOptions {
 			$options->{$_} = $set_opts->{$_};
 		}
 	}
+	$options->{smalldevices} = 1 if $self->shouldForceSmall();
+	$options->{limit} = $self->getFireHoseLimitSize($options->{mode}, $pagesize, $options->{smalldevices});
 	return $options;
+}
+
+sub getFireHoseLimitSize {
+	my($self, $mode, $pagesize, $forcesmall) = @_;
+	my $user = getCurrentUser();
+	my $constants = getCurrentStatic();
+	my $form = getCurrentForm();
+
+	my $limit;
+
+	if ($mode eq "full") {
+		if ($user->{is_admin}) {
+			$limit = $pagesize eq "large" ? 50 : 25;
+		} else {
+			$limit = $pagesize eq "large" ? 25 : 15;
+		}
+	} else {
+		$limit = $user->{is_admin} ? 50 :
+			$pagesize eq "large" ? 30 : 25;
+	}
+
+	$limit = 10 if $forcesmall;
+	return $limit;
+}
+
+sub shouldForceSmall {
+	my($self) = @_;
+	my $form = getCurrentForm();
+	my $constants = getCurrentStatic();
+
+	# the non-normal cases: a small device (e.g., iPhone) or an embedded use (e.g., Google Gadget)
+	my $force_smaller = $form->{embed} ? 1 : 0;
+	if (!$force_smaller && $constants->{smalldevices_ua_regex}) {
+		my $smalldev_re = qr($constants->{smalldevices_ua_regex});
+		if ($ENV{HTTP_USER_AGENT} && $ENV{HTTP_USER_AGENT} =~ $smalldev_re) {
+			$force_smaller = 1;
+		}
+	}
+	return $force_smaller;
 }
 
 sub getInitTabtypeOptions {
@@ -2414,14 +2441,17 @@ sub getInitTabtypeOptions {
 
 	$vol ||= { story_vol => 0, other_vol => 0};
 
-	if ($name eq "tabsection" && !$day_specified) {
-		if ($vol->{story_vol} > 25) {
-			$set_option->{duration} = 7;
-		} else {
-			$set_option->{duration} = -1;
+	if ($name eq "tabsection") {
+		$set_option->{mixedmode} = "1";
+		$set_option->{mode} = "full";
+		if (!$day_specified) {
+			if ($vol->{story_vol} > 25) {
+				$set_option->{duration} = 7;
+			} else {
+				$set_option->{duration} = -1;
+			}
 		}
 		$set_option->{startdate} = "";
-		$set_option->{mixedmode} = "1";
 	} elsif (($name eq "tabpopular" || $name eq "tabrecent") && !$day_specified) {
 		if ($vol->{story_vol} > 25) {
 			$set_option->{duration} = 7;
@@ -2483,13 +2513,6 @@ sub getFireHoseTagsTop {
 	push @$tags_top, @$user_tags_top;
 
 	return $tags_top;
-}
-
-sub ajaxGetFireHoseTagsTop {
-	my($slashdb, $constants, $user, $form) = @_;
-	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
-	my $item = $firehose_reader->getFireHose($form->{id});
-	return $item->{toptags};
 }
 
 sub getMinPopularityForColorLevel {
@@ -2556,7 +2579,6 @@ sub listView {
 		}
 	}
 	my $initial = ($form->{tab} || $form->{tabtype} || $form->{fhfilter} || defined $form->{page} || $lv_opts->{fh_page} eq "console.pl" || $form->{ssi} && defined $form->{fhfilter}) ? 0 : 1;
-
 	my $options = $lv_opts->{options} || $self->getAndSetOptions({ initial => $initial });
 	my $base_page = $lv_opts->{fh_page} || "firehose.pl";
 
