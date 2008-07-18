@@ -5419,10 +5419,6 @@ INSERT INTO vars (name, value, description) VALUES ('tagbox_csr_needinesspercent
 # 2008-07-10
 UPDATE vars SET value = 'T_2_5_0_212' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 SELECT @maxbitpos := MAX(bitpos) FROM al2_types;
 INSERT INTO al2_types VALUES (NULL, @maxbitpos+1, 'openproxy', 'Open Proxy');
 
@@ -5437,3 +5433,6 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity_
 # 2008-07-16
 UPDATE vars SET value = 'T_2_5_0_213' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
