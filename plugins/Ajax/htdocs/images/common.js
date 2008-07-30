@@ -951,7 +951,13 @@ function firehose_reorder() {
 					$('#ttype-'+firehose_ordered[i]+'.future').setClass('story');
 				}
 			}
-			document.title = "[% sitename %] - " + (console_updating ? "Console" : "Firehose") + " (" + firehose_item_count + ")";
+			var newtitle = document.title;
+			if (/\(\d+\)/.test(newtitle)) {
+				newtitle.replace(/(\(\d+\))/,"(" + firehose_item_count + ")");
+			} else {
+				newtitle = newtitle + " (" + firehose_item_count + ")";
+			}
+			document.title = newtitle;
 		}
 	}
 
