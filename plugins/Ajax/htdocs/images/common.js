@@ -1150,7 +1150,7 @@ function firehose_slider_init() {
 }
 
 function firehose_slider_end(offsetFromStart) {
-	var newVal = fh_colorslider.getValue();
+	var newVal = Math.round(fh_colorslider.getValue());
 	if (newVal) {
 		fh_slider_init_set = 1;
 	}
