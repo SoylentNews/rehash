@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -30,13 +30,17 @@ use XML::RSS;
 use Slash;
 use Slash::Utility;
 use Slash::Display;
+use Slash::XML;
 
 my $virtual_user = $ARGV[0];
-createEnvironment($ARGV[0]);
+createEnvironment($virtual_user);
 my $constants = getCurrentStatic();
 my $slashdb = getCurrentDB();
+setCurrentSkin(determineCurrentSkin());
+my $gSkin = getCurrentSkin();
 my $totalChangedStories = 1;
 
+my $br = $constants->{xhtml} ? '<br />' : '<br>';
 my $backupdb = getObject('Slash::DB', { db_type => 'reader' });
 
 ################################################################################
@@ -66,31 +70,53 @@ sub geturl {
 
 ################################################################################
 
-sub getTop10Comments {
-	my $A =	$backupdb->getTop10Comments();
+sub getTopComments {
+	my $constants = getCurrentStatic();
+	my $A =	$backupdb->getTopComments;
 
-	my $reasons = $slashdb->getReasons();
+	my $moddb = getObject("Slash::$constants->{m1_pluginname}");
+	my $reasons = $moddb->getReasons;
 
-	my $block;
+	my @items;
+	my $block = '<ul>';
 	foreach (@$A) {
-		my($sid, $title, $cid, $subj, $d, $nickname, $points, $reason) = @$_;
+		my($sid, $title, $cid, $subj, $d, $nickname, $points, $reason, $date) = @$_;
+		push @items, {
+			'link'  => "$gSkin->{absolutedir}/comments.pl?sid=$sid&cid=$cid",
+			title   => "$subj ($points points, $reasons->{$reason}{name})",
+			'time'  => $date,
+			creator => $nickname,
+			description => "Attached to <a href=\"$gSkin->{absolutedir}/article.pl?sid=$sid\">$title</a>"
+		};
 		$block .= <<EOT;
 
-&middot; <B><A HREF="$constants->{rootdir}/comments.pl?sid=$sid&amp;cid=$cid">$subj</A>
+<li> <b><a href="$gSkin->{rootdir}/comments.pl?sid=$sid&amp;cid=$cid">$subj</a>
 	($points points, $reasons->{$reason}{name})
-	by $nickname</B>
+	by $nickname</b>
 	on $d
-	<FONT SIZE="1">attached to
-	<A HREF="$constants->{rootdir}/article.pl?sid=$sid">$title</A></FONT><BR>
+	<small>attached to
+	<a href="$gSkin->{rootdir}/article.pl?sid=$sid">$title</a></small></li>
 EOT
 	}
-	setblock("top10comments", $block);
+	$block .= '</ul>';
+	setblock('topcomments', $block);
 
+	if (@items && -d "$constants->{basedir}/privaterss/") {
+		my $rss = xmlDisplay('rss', {
+			channel => {
+				title       => "$constants->{sitename}: Hot Comments",
+				'link'      => "$gSkin->{absolutedir}/",
+			},
+			items   => \@items,
+			rdfitemdesc_html => 1
+		}, 1);
+		save2file("$constants->{basedir}/privaterss/topcomments.rss", $rss);
+	}
 }
 
 #################################################################
 sub getSlashdotPoll {
-	setblock("poll", pollbooth('_currentqid', 1));
+	setblock('poll', pollbooth('_currentqid', 1));
 }
 
 
@@ -109,22 +135,22 @@ The fortune command.
 #################################################################
 sub getUptime {
 	my $x = `/usr/bin/uptime`;
-	$x = "<B>time:</B> $x";
-	$x =~ s/up/\n<BR><B>uptime:<\/B>/g;
-	$x =~ s/load average:/\n<BR><B>load average:<\/B>/;
+	$x = "<b>time:</b> $x";
+	$x =~ s/up/\n$br<b>uptime:<\/b>/g;
+	$x =~ s/load average:/\n<br><b>load average:<\/b>/;
 	my $ps = `/bin/ps aux | /usr/bin/wc -l`;
 	$ps--;
-	$x .= "<BR><B>processes:</B> $ps <BR>";
+	$x .= "$br<b>processes:</b> $ps$br";
 
 	my $stats = $x;
 
 #	my $tc = $constants->{totalComments};
 	my $th = $constants->{totalhits};
 
-#	$stats .= "<B>yesterday:</B> $yesterday<BR>
-#		<B>today:</B> $today<BR>
-#		<B>ever:</B> $th<BR>";
-	$stats .= "<B>totalhits:</B> $th<BR>";
+#	$stats .= "<b>yesterday:</b> $yesterday<br>
+#		<b>today:</b> $today<br>
+#		<b>ever:</b> $th<br>";
+	$stats .= "<b>totalhits:</b> $th$br";
 
 	setblock('uptime', $stats);
 }
@@ -140,16 +166,39 @@ sub setblock {
 
 #################################################################
 sub getRDF {
-	#gets an RDF file, and formats it as a /. block
+	#gets an RDF file, and formats it as a Slash block
 
 	my($bid, $url, $other) = @_;
+	$other ||= '';
 	my $rss = new XML::RSS;
-	my $template_name ||= $slashdb->getBlock($bid, 'rss_template');
+	my $template_name = $slashdb->getBlock($bid, 'rss_template');
 	my $items ||= $slashdb->getBlock($bid, 'items');
-	$items ||= $constants->{max_items};
+	$items ||= $constants->{rss_max_items_incoming};
 	$template_name ||= $constants->{default_rss_template};
 
-	my $d = geturl($url);
+	my $d;
+	# this only works for a very limited subset of RSS feeds,
+	# the section-only story ones, and it only works for
+	# where $section matches something getSkin() knows about
+	### this is incomplete -- pudge
+	if (0 && $url =~ m{^//([^/]+)/([^.+])\.(\w+)}) {
+		my($host, $section, $ext) = ($1, $2, $3);
+		my $skin = $slashdb->getSkin($section);
+		if ($skin) {
+			
+		}
+
+		# bah, never mind!
+		if (!$d) {
+			$url = "http:$url";
+			$d = geturl($url);
+		}
+	}
+
+	$d ||= geturl($url);
+	if (urlFromSite($url)) {
+		$d =~ s/(?:&(?:amp;)?|\?)from=rss//g;
+	}
 
 	if (!$d) {
 		portaldLog("failed to get $bid: $@");
@@ -165,9 +214,9 @@ sub getRDF {
 		portaldLog("$bid did not parse properly:$err");
 		return;
 	} else {
-		my $str;
+		my $str = '';
 		my $i = 0;
-		my $bd_regex = qr{\Q$constants->{basedomain}};
+		my $bd_regex = qr{\Q$gSkin->{basedomain}};
 		for my $item (@{$rss->{items}}) {
 			# hopefully this xmldecode() will break nothing
 			for (keys %{$item}) {
@@ -179,10 +228,11 @@ sub getRDF {
 			next unless $link;
 
 			# convert links to sections of our own site
-			# into a non-scheme-specific format
+			# into a non-scheme-specific format ...
+			# unless host begins with "rss." (this could be a separate var ...)
 			my $uri = URI->new($link);
 			if ($uri->can('authority')) {
-				$uri->scheme(undef) if $uri->authority =~ /\b$bd_regex\Z/;
+				$uri->scheme(undef) if $uri->authority =~ /\b$bd_regex\Z/ && $uri->authority !~ /^rss\./;
 			}
 
 			$item->{link} = $uri->as_string or next;
@@ -193,6 +243,7 @@ sub getRDF {
 			$item->{counter} = $i + 1;
 			$str .= slashDisplay($template_name, {
 				item	=> $item,
+				bid 	=> $bid
 			}, {
 				Nocomm	=> 1,
 				Return	=> 1,
@@ -203,6 +254,15 @@ sub getRDF {
 
 			last if ++$i >= $items && $items > 0;
 		}
+
+		# If the template that displays the items (as
+		# determined by the rss_template field in the
+		# blocks table) seems to be putting <li> tags
+		# around the items, then it probably wants a
+		# <ul></ul> around the list.  This is a bit
+		# hacky but should help make strictly parsed
+		# versions of HTML work better.
+		$str = "<ul>\n$str\n</ul>" if $str && $str =~ /^\s*<li>/;
 
 		setblock($bid, "$str$other");
 		return 1;
@@ -235,7 +295,7 @@ for (@{$RDFlist}) {
 
 $slashdb->setCurrentSectionPolls();
 
-getTop10Comments();
+getTopComments();
 getSlashdotPoll();
 getUptime();
 
@@ -254,7 +314,7 @@ foreach (keys %savedBlocks) {
 }
 
 # from 'portald-site'
-newSemiRandomBlock($slashdb) if defined &newSemiRandomBlock;
+newSemiRandomOSTGBlock($slashdb) if defined &newSemiRandomOSTGBlock;
 
 portaldLog("Sucessfully Saved Portals");
 

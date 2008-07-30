@@ -879,7 +879,7 @@ sub getTopComments {
 		&& $num_top_comments < $num_wanted
 	) {
 		my $comment = $self->sqlSelectArrayRef(
-			"stories.sid, title, cid, subject, date, nickname, comments.points, comments.reason",
+			"stories.sid, title, cid, subject, date, nickname, comments.points, comments.reason, date",
 			"comments, stories, story_text, users",
 			"cid=$cids->[$num_top_comments]->[0]
 				AND stories.stoid = story_text.stoid
@@ -1908,20 +1908,31 @@ sub avgDynamicDurationForMinutesBack {
 }
 
 sub getUrlsNeedingFirstCheck {
-	my($self) = @_;
-	return $self->sqlSelectAllHashrefArray("*", "urls", "last_attempt IS NULL", "ORDER BY url_id ASC");
+	my($self, $options) = @_;
+	my $constants = getCurrentStatic();
+	$options ||= {};
+	$options->{limit} ||= 50;
+
+	my($extra_tables,$extra_where) = ('','');
+
+	if ($options->{limit_to_firehose} && $constants->{plugin}{FireHose}) {
+		$extra_tables = ",firehose";
+		$extra_where = "AND urls.url_id=firehose.url_id";
+	}
+	return $self->sqlSelectAllHashrefArray("*", "urls $extra_tables", "last_attempt IS NULL $extra_where", "ORDER BY urls.url_id ASC LIMIT $options->{limit}");
 }
 
 sub getUrlsNeedingRefresh {
-	my($self, $limit) = @_;
-	$limit ||= 50;
+	my($self, $options) = @_;
+	$options ||= {};
+	$options->{limit} ||= 50;
 	return $self->sqlSelectAllHashrefArray(
 		"*", 
 		"urls", 
 		"last_attempt IS NOT NULL 
 		 AND believed_fresh_until IS NOT NULL 
 		 AND believed_fresh_until < NOW()", 
-		"ORDER BY believed_fresh_until ASC LIMIT $limit"
+		"ORDER BY believed_fresh_until ASC LIMIT $options->{limit}"
 	);
 }
 
