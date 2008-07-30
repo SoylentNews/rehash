@@ -322,16 +322,18 @@ sub selectComments {
 					if ($cid && $C->{pid} < $cid) {
 						$user->{state}{d2_defaultclass}{$C->{pid}} = 'oneline';
 						$parent = $old_comments{ $C->{pid} };
+						$parent->{has_read} = $comments_read->{$C->{pid}};
 						push @new_seen, $C->{pid};
 						$count++;
 					} else {
 						$parent = {
-							cid    => $C->{pid},
-							pid    => ($old_comments{ $C->{pid} } && $old_comments{ $C->{pid} }{ pid }) || 0,
-							opid   => ($old_comments{ $C->{pid} } && $old_comments{ $C->{pid} }{ original_pid }) || 0,
-							kids   => [ ],
-							points => -2,
-							dummy  => 1,
+							cid      => $C->{pid},
+							pid      => ($old_comments{ $C->{pid} } && $old_comments{ $C->{pid} }{ pid }) || 0,
+							opid     => ($old_comments{ $C->{pid} } && $old_comments{ $C->{pid} }{ original_pid }) || 0,
+							kids     => [ ],
+							points   => -2,
+							dummy    => 1,
+							has_read => $comments_read->{$C->{pid}},
 							%$parent,
 						};
 						$parent->{opid} ||= $parent->{pid};
