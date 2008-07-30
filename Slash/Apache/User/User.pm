@@ -169,13 +169,11 @@ sub handler {
 		# open proxies.	Check both the ipid and the subnetid (we
 		# can't use values in $user because that doesn't get set
 		# up until prepareUser is called, later in this function).
-		# XXXSRCID: really should have a separate 'openproxy'
-		# attribute instead of piggybacking off 'nopost'.
 		my $read_only = 0;
 		my $hostip = $r->connection->remote_ip;
 		my $srcids = get_srcids({ ip => $hostip });
-		$read_only = 1 if $reader->checkAL2($srcids, 'nopost')
-			|| $reader->checkAL2($srcids, 'nopostanon');
+		$read_only = 1 if $reader->checkAL2($srcids,
+			[qw( nopost nopostanon openproxy )]);
 
 		my $newpass;
 		if ($read_only || !$tmpuid) {
@@ -783,25 +781,31 @@ sub userdir_handler {
 			$r->filename($constants->{basedir} . '/users.pl');
 
 		} elsif ($op eq 'journal') {
-			my $args = "op=display&nick=$nick&uid=$uid";
-			$extra .= '/' . $more;
-			if ($extra) {
-				if ($extra =~ /^(\d+)\/$/) {
-					$args .= "&id=$1";
-				}
-				if ($extra =~ s/^friends\///) {
-					$args =~ s/display/friendview/;
-				}
-				if ($extra =~ m{^ (rss|atom) / ? $}x) {
-					$args .= "&logtoken=$logtoken" if $logtoken;
-					$args .= "&content_type=$1";
-				}
-			}
-			$args .= "&$query";
-			$r->args($args);
-			$r->uri('/journal.pl');
-			$r->filename($constants->{basedir} . '/journal.pl');
+                        if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)]) {
+                                $r->args("nick=$nick&dp=journal&uid=$uid");
+                                $r->uri('/users2.pl');
+                                $r->filename($constants->{basedir} . '/users2.pl');
+                        } else {
+			        my $args = "op=display&nick=$nick&uid=$uid";
+			        $extra .= '/' . $more;
+			        if ($extra) {
+				        if ($extra =~ /^(\d+)\/$/) {
+					        $args .= "&id=$1";
+				        }
+				        if ($extra =~ s/^friends\///) {
+					        $args =~ s/display/friendview/;
+				        }
+				        if ($extra =~ m{^ (rss|atom) / ? $}x) {
+					        $args .= "&logtoken=$logtoken" if $logtoken;
+					        $args .= "&content_type=$1";
+				        }
+			        }
 
+			        $args .= "&$query";
+			        $r->args($args);
+			        $r->uri('/journal.pl');
+			        $r->filename($constants->{basedir} . '/journal.pl');
+                        }
 		} elsif ($op eq 'discussions') {
 			$r->args("op=creator_index&nick=$nick&uid=$uid");
 			$r->uri('/comments.pl');
@@ -813,15 +817,25 @@ sub userdir_handler {
 			$r->filename($constants->{basedir} . '/pubkey.pl');
 
 		} elsif ($op eq 'submissions') {
-			$r->args("nick=$nick&op=usersubmissions&uid=$uid");
-			$r->uri('/users.pl');
-			$r->filename($constants->{basedir} . '/users.pl');
-
+                        if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)]) {
+                                $r->args("nick=$nick&dp=submissions&uid=$uid");
+                                $r->uri('/users2.pl');
+                                $r->filename($constants->{basedir} . '/users2.pl');
+                        } else {
+			        $r->args("nick=$nick&op=usersubmissions&uid=$uid");
+			        $r->uri('/users.pl');
+			        $r->filename($constants->{basedir} . '/users.pl');
+                        }
 		} elsif ($op eq 'comments') {
-			$r->args("nick=$nick&op=usercomments&uid=$uid");
-			$r->uri('/users.pl');
-			$r->filename($constants->{basedir} . '/users.pl');
-
+                        if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)]) {
+                                $r->args("nick=$nick&dp=comments&uid=$uid");
+                                $r->uri('/users2.pl');
+                                $r->filename($constants->{basedir} . '/users2.pl');
+                        } else {
+			        $r->args("nick=$nick&op=usercomments&uid=$uid");
+			        $r->uri('/users.pl');
+			        $r->filename($constants->{basedir} . '/users.pl');
+                        }
 		} elsif ($op =~ /^(?:friends|fans|freaks|foes|zoo)$/) {
 			my $args = "op=$op&nick=$nick&uid=$uid";
 			$extra .= '/' . $more;
