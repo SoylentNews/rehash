@@ -172,23 +172,23 @@ sub edit {
 			$item->{introtext} =~ s/"/'/g;
 		}
 
-	my @words = split / /, $item->{title};
-	my @newwords;
+		my @words = split / /, $item->{title};
+		my @newwords;
 
-	for (my $i = 0; $i < @words; $i++) {
-		my $word = $words[$i];
-		if ($i == 0) {
-			$word = ucfirst $word;
-		} elsif ($word =~ m/^a(n|nd)?$|^the$|^of$/i) {
-			$word = lcfirst $word;
-		} else {
-			$word = ucfirst $word;
+		for (my $i = 0; $i < @words; $i++) {
+			my $word = $words[$i];
+			if ($i == 0) {
+				$word = ucfirst $word;
+			} elsif ($word =~ m/^a(n|nd)?$|^the$|^of$/i) {
+				$word = lcfirst $word;
+			} else {
+				$word = ucfirst $word;
+			}
+
+			push @newwords, $word;
 		}
 
-		push @newwords, $word;
-	}
-
-	$item->{title} = join(' ', @newwords);
+		$item->{title} = join(' ', @newwords);
 	}
 
 	my $url;
