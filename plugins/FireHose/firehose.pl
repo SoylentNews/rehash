@@ -31,6 +31,7 @@ sub main {
 		view		=> [1, 	\&view, 0,  ""],
 		default		=> [1,	\&list, 1,  $anonval, { index => 1, issue => 1, page => 1, query_apache => -1, virtual_user => -1, startdate => 1, duration => 1, tab => 1, tabtype => 1, change => 1, section => 1 }],
 		edit		=> [1,	\&edit, 100,  ""],
+		metamod		=> [1,  \&metamod, 1, ""],
 		rss		=> [1,  \&rss, 1, ""]
 	);
 
@@ -73,6 +74,9 @@ sub main {
 
 	if ($op ne "rss") {
 		my $title = "$constants->{sitename} - Firehose";
+		if ($op eq "metamod") {
+			$title = "$constants->{sitename} - Metamod";
+		}
 		if ($form->{index}) {
 			$title = "$constants->{sitename} - $constants->{slogan}";
 		}
@@ -94,6 +98,17 @@ sub list {
 	print $firehose->listView();
 	slashProfEnd();
 }
+
+sub metamod {
+	my($slashdb, $constants, $user, $form, $gSkin) = @_;
+	my $firehose = getObject("Slash::FireHose");
+	$form->{tabtype} = "metamod";
+	$form->{skipmenu} = 1;
+	$form->{metamod} = 1;
+	print $firehose->listView();
+}
+
+
 
 sub view {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;

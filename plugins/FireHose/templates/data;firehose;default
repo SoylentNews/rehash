@@ -32,7 +32,7 @@ __template__
 		Bookmark
 	[% ELSIF item.type == "feed" %]
 		From feed
-	[% ELSE %]
+	[% ELSIF item.type != "comment" %]
 		Submitted
 	[% END %]
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
@@ -64,10 +64,6 @@ __template__
 		[% IF item.type == "story" %]
 			[% story = Slash.db.getStory(item.srcid) %]
 			[% IF story && story.fhid %]<a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% story.fhid %]">Original Submission</a>[% END %]
-		[% ELSIF item.type == "comment";
-			com = Slash.db.getComment(item.srcid);
-			disc = Slash.db.getDiscussion(com.sid); %]
-			<br>From discussion: <a href="[% disc.url %]">[% disc.title | strip_literal %]</a><br>
 		[% ELSIF item.stoid;
 			to_story = Slash.db.getStory(item.stoid) %]
 			<a href="[% gSkin.rootdir %]/article.pl?sid=[% to_story.sid | strip_attribute %]">Posted as Story</a>
@@ -76,7 +72,16 @@ __template__
 	[% IF extras && adminmode && num_with_ipid != '0' %]
 		([% accepted_from_ipid %]/[% num_with_ipid %])
 	[% END %]
-	[% user.aton %] <span id="fhtime-[% item.id %]">[% Slash.timeCalc(item.createtime) %]</span></b><br>
+	[% user.aton %] <span id="fhtime-[% item.id %]">[% Slash.timeCalc(item.createtime) %]</span></b>
+	[% IF item.type == "comment" %]
+		(<a href="[% gSkin.rootdir %]/comments.pl?sid=[% item.discussion %]&amp;cid=[% item.srcid %]">#[% item.srcid %]</a>)
+	[% END %]
+	<br>
+	[% IF item.type == "comment";
+		com = Slash.db.getComment(item.srcid);
+		disc = Slash.db.getDiscussion(com.sid); %]
+		Attached to: <a href="[% disc.url %]">[% disc.title | strip_literal %]</a><br>
+	[% END %]
 		[% IF constants.use_dept && item.dept %]<strong>from the <b>[% item.dept %]</b> dept.</strong>[% END %]
 	[% IF !hidediv %]
 
@@ -103,24 +108,24 @@ __template__
 		<span id="firehose_more">
 		[% END %]
 		[% IF !need_label;
-			label = "Get more &raquo;";
+			label = "more &rsaquo;";
 		   END;
 		%]
 		[% IF day_label && day_count && options.duration != -1;
 			IF need_day_label;
 				label = $day_label _ " ";
 			ELSE;
-				label = label _ day_count _ " more &raquo;";
+				label = label _ day_count _ " more &rsaquo;";
 			END;
 		   ELSIF future_count > 0 ;
 		   	IF options.duration == -1;
-			        label = future_count _ " more &raquo;";
+			        label = future_count _ " more &rsaquo;";
 			ELSE;
-			        label = future_count _ " more &raquo;";
+			        label = future_count _ " more &rsaquo;";
 			END;
 		   ELSIF future_count <= 0 ;
 			IF options.duration != -1 && options.orderby == "createtime";
-				label = "Get more &raquo;";
+				label = "more &rsaquo;";
 				extra_onclick = 'firehose_set_options(\'duration\', -1); ';
 			ELSIF options.orderby != "createtime";
 				fh = Slash.getObject("Slash::FireHose") 
@@ -140,12 +145,15 @@ __template__
 		[% ELSE %]
 			<a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a>
 		[% END %]
-		<span class="busy" style="display:none"><img src="[% constants.imagedir %]/spinner_grey.gif"></span>
+		<span class="busy" style="display:none"><img src="[% constants.imagedir %]/spinner2.gif"></span>
 		[% IF !contentsonly %]
 		</span>
 		[% END %]
 [% CASE 'notavailable' %]
 	The item you're trying to view either does not exist, or is not viewable to you.
+[% CASE 'metamod_msg' %]
+For [% constants.sitename %]'s moderation system to function properly, we need your help.  Below are a number of random user comments in our system.  You are asked to decide if these are good or bad.  Clicking the + and - indicates that you think that a comment is good or bad.  You are welcome to skip any comment that you are unsure about.  What is most important is that you are objective and honest- a comment that you mark with the '+' means that you think that other [% constants.sitename %] readers would benefit from this comment.  Don't hesitate to flag mediocrity with the '-' graphic either.  The only way the system gets smarter is if you are honest, objective and a little bit harsh.
+
 [% END %]
 
 __version__

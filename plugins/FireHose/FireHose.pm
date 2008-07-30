@@ -809,20 +809,25 @@ sub getUserFireHoseVotesForGlobjs {
 	my $upvote   = $constants->{tags_upvote_tagname}   || 'nod';
 	my $downvote = $constants->{tags_downvote_tagname} || 'nix';
 
+	my $metaup =   "metanod";
+	my $metadown = "metadown";
+
 	my $tags = getObject("Slash::Tags", { db_type => "reader" });
 	my $upid = $tags->getTagnameidCreate($upvote);
 	my $dnid = $tags->getTagnameidCreate($downvote);
+	my $metaupid = $tags->getTagnameidCreate($upvote);
+	my $metadnid = $tags->getTagnameidCreate($downvote);
 
 	my $results = $self->sqlSelectAllKeyValue(
 		"globjid,tagnameid",
 		"tags",
 		"globjid IN ($glob_str) AND inactivated IS NULL
-		 AND uid = $uid_q AND tagnameid IN ($upid,$dnid)"
+		 AND uid = $uid_q AND tagnameid IN ($upid,$dnid,$metaupid,$metadnid)"
 	);
 
 	foreach (keys %$results) {
-		$results->{$_} = "up" if $results->{$_} == $upid;
-		$results->{$_} = "down" if $results->{$_} == $dnid;
+		$results->{$_} = "up" if $results->{$_} == $upid || $results->{$_} == $metaupid;
+		$results->{$_} = "down" if $results->{$_} == $dnid || $results->{$_} == $metadnid;
 	}
 
 	return $results;
@@ -1125,7 +1130,7 @@ sub genSetOptionsReturn {
 
 	$data->{value}->{'firehose-filter'} = $opts->{fhfilter};
 	if ($form->{tab} || $form->{tabtype}) {
-		$data->{eval_last} = "firehose_slider_set_color('$opts->{color}')";
+		$data->{eval_last} = "firehose_slider_set_color('$opts->{color}');";
 	}
 
 	my $eval_first = "";
@@ -1511,8 +1516,7 @@ sub ajaxFireHoseGetUpdates {
 }
 
 sub firehose_vote {
-	my($self, $id, $uid, $dir) = @_;
-
+	my($self, $id, $uid, $dir, $meta) = @_;
 	my $tag;
 	my $constants = getCurrentStatic();
 	my $tags = getObject('Slash::Tags');
@@ -1521,6 +1525,11 @@ sub firehose_vote {
 
 	my $upvote   = $constants->{tags_upvote_tagname}   || 'nod';
 	my $downvote = $constants->{tags_downvote_tagname} || 'nix';
+
+	if ($meta) {
+		$upvote = "metanod";
+		$downvote = "metanix";
+	}
 
 	if ($dir eq "+") {
 		$tag = $upvote;
@@ -1546,10 +1555,11 @@ sub ajaxUpDownFirehose {
 	my $firehose = getObject('Slash::FireHose');
 	my $item = $firehose->getFireHose($id);
 	my $tags = getObject('Slash::Tags');
+	my $meta = $form->{meta};
 
 	my($table, $itemid) = $tags->getGlobjTarget($item->{globjid});
 
-	$firehose->firehose_vote($id, $user->{uid}, $form->{dir});
+	$firehose->firehose_vote($id, $user->{uid}, $form->{dir}, $meta);
 
 	my $now_tags_ar = $tags->getTagsByNameAndIdArrayref($table, $itemid,
 		{ uid => $user->{uid}, include_private => 1 });
@@ -2074,6 +2084,8 @@ sub getAndSetOptions {
 		$form->{color} = "black";
 		$options->{orderdir} = "DESC";
 		$options->{orderby} = "neediness";
+		$options->{mode} = "full";
+		$options->{mixedmode} = 0;
 	}
 
 	if ($tabtype) {
@@ -2418,7 +2430,7 @@ sub getFireHoseLimitSize {
 			$pagesize eq "large" ? 30 : 25;
 	}
 
-	$limit = 10 if $forcesmall;
+	$limit = 10 if $forcesmall || $form->{metamod};
 	return $limit;
 }
 
@@ -2467,6 +2479,9 @@ sub getInitTabtypeOptions {
 		}
 		$set_option->{startdate} = "";
 		$set_option->{mixedmode} = "1";
+	} elsif ($name eq "metamod") {
+		$set_option->{duration} = 7;
+		$set_option->{startdate} = '';
 	}
 	return $set_option;
 }

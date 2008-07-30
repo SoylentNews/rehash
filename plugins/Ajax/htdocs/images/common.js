@@ -17,6 +17,7 @@ var firehose_settings = {};
   firehose_settings.not_id = 0;
   firehose_settings.section = 0;
   firehose_settings.more_num = 0;
+  firehose_settings.metamod = 0;
 
 // Settings to port out of settings object
   firehose_item_count = 0;
@@ -613,15 +614,20 @@ function firehose_remove_all_items() {
 }
 
 
-function firehose_up_down(id, dir) {
+function firehose_up_down(id, dir, type) {
 	if (!check_logged_in()) return;
 
 	setFirehoseAction();
+	var meta = 0;
+	if (type && type == "comment") {
+		meta = 1;
+	}
 	ajax_update({
 		op:	'firehose_up_down',
 		id:	id,
 		reskey:	reskey_static,
-		dir:	dir
+		dir:	dir,
+		meta:	meta
 	}, '', { onComplete: json_handler });
 
 

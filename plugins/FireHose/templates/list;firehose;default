@@ -63,6 +63,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
 </div>
 [% END %]
 <div id="messagearea"></div>
+[% IF form.metamod %][% Slash.getData('metamod_msg') %][% END %]
 [% login_block = BLOCK;
    this_fhfilter = form.fhfilter | fixparam;
    PROCESS userlogin_cover
@@ -164,6 +165,7 @@ cmdrtaco dot net but be forgiving of beta code!
 	[% END %]
 	firehose_settings.issue = [% firehose.js_anon_dump(options.issue) %];
 	firehose_settings.section = [% firehose.js_anon_dump(section) %];
+	firehose_settings.metamod = [% form.metamod ? 1 : 0 %];
 	[% IF fh_page == "console.pl" %]
 		firehose_settings.pageval = 1;
 	[% ELSIF fh_page == "users.pl" %]
@@ -183,7 +185,7 @@ cmdrtaco dot net but be forgiving of beta code!
 	}
 	var fh_view_mode = [% firehose.js_anon_dump(options.mode) %];
 	firehose_settings.page = [% firehose.js_anon_dump(page) %];
-	[% IF form.embed %]
+	[% IF form.embed || form.tabtype == "1" %]
 	firehose_settings.is_embedded = 1; // defined in common.js
 	[% END %]
 	fh_is_admin = [% IF user.is_admin && !user.firehose_usermode %]1[% ELSE %]0[% END %];
