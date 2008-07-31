@@ -15,7 +15,7 @@ tag_widget
 __seclev__
 10000
 __template__
-<div id="tag-widget-[% item_id %]" class="tag-widget stub" style="display: none">
+<div id="tag-widget-[% item_id %]" class="tag-widget stub">
 	<form class="tag-editor" onsubmit="form_submit_tags(this); return false">
 		<input class="tag-entry" type="text" size="10">
 		<span class="tag-server-busy"><img src="[% constants.imagedir %]/spinner2.gif"></span>

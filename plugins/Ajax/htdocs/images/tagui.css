@@ -8,7 +8,7 @@ div.tag-widget .tag-display ul {
 .descriptive { color: orange }
 .ignore { color: darkgray }
 
-.tag-display span.tag.local-only { color: gray }
+.tag-display span.tag.not-saved { color: gray }
 
 div.tag-widget .tag-display li, div.tag-widget .tag-display ul {
 	display: inline;
@@ -101,7 +101,7 @@ div.tag-widget .tmenu > li:hover {
 	z-index: 10;
 	background-color: white;
 	border: 4px dotted darkgray;
-	padding: 0.4em;
+	padding: 0 0.4em 0 0.8em;
 	min-width: 6em;
 }
 
@@ -134,10 +134,9 @@ div.tag-widget [listen=context] {
 	display: none;
 }
 
-span.s1, span.t2 {
-	/* font-weight: bold; */
-}
-
-span.e {
-	/* color: blue; */
+.tag-widget.stub,
+.tag-display.stub,
+.tag-display.no-tags,
+.tag-display[listen=user].no-visible-tags {
+	display: none;
 }
