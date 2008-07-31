@@ -1,4 +1,4 @@
-div.tag-widget .tbar ul {
+div.tag-widget .tag-display ul {
 	list-style: none;
 	padding: 0;
 }
@@ -8,70 +8,75 @@ div.tag-widget .tbar ul {
 .descriptive { color: orange }
 .ignore { color: darkgray }
 
-.tbar span.tag.local-only { color: gray }
+.tag-display span.tag.local-only { color: gray }
 
-div.tag-widget .tbar li, div.tag-widget .tbar ul {
+div.tag-widget .tag-display li, div.tag-widget .tag-display ul {
 	display: inline;
 	padding: 0 0.25em 0 0.25em !important;
 	margin: 0 !important;
 }
 
-.tbars, .tbar, .tag, .tmenu, h1.legend {
+.tag-display-set, .tag-display, .tag, .tmenu, h1.legend {
 	user-select: none;
 }
 
-.tbar {
+.tag-display {
 	display: inline;
 	position: relative;
 	padding-left: 0.25em;
 }
 
-.tbar h1.legend {
+.tag-display h1.legend {
 	display: none;
 }
 
-.tbars.stack, .tbars.stack .tbar {
+.tag-display-set.stack, .tag-display-set.stack .tag-display {
 	display: block;
 }
 
-.tbars.train, .tbars.train .tbar {
+.tag-display-set.train, .tag-display-set.train .tag-display {
 	display: inline;
 }
 
-.tbar span.tag {
+.tag-display span.tag {
 	font-family: Optima, sans serif;
 }
 
-.tbar[get=user] span.tag:hover {
+.tag-display[listen=user] span.tag:hover {
 	background-color: inherit;
 }
 
-.tbar span.tag:hover {
+.tag-display span.tag:hover {
 	cursor: arrow;
 	background-color: lightgray;
 }
 
-div.tag-widget .tbar ul.tmenu {
+.nod-nix-reasons .tag-display span.tag:hover {
+	color: black;
+	background-color: white;
+}
+
+div.tag-widget .tag-display ul.tmenu {
 	display: none;
 	position: absolute;
 	top: -9px;
 	right: -2px;
 }
 
-.tbar > ul > li {
+.tag-display > ul > li {
 	position: relative;
 }
 
-div.tag-widget .tbar > ul > li:hover ul.tmenu {
+div.tag-widget .tag-display > ul > li:hover ul.tmenu {
 	display: inline;
 }
 
-div.tag-widget.sorting .tbar > ul > li:hover ul.tmenu {
+div.tag-widget.sorting .tag-display > ul > li:hover ul.tmenu {
 	display: none;
 }
 
 /* for debugging */
-.tbar[get=top] { border: 1px solid red }
+.tag-display[listen=top] { border: 1px solid red }
 
 div.tag-widget .tmenu > li {
 	font-size: 110%;
@@ -91,7 +96,7 @@ div.tag-widget .tmenu > li:hover {
 }
 
 .tag-widget {
-	display: block;
+	display: none;
 	position: relative;
 	z-index: 10;
 	background-color: white;
@@ -100,26 +105,32 @@ div.tag-widget .tmenu > li:hover {
 	min-width: 6em;
 }
 
-.tag-widget .widget-busy {
+.tag-widget.nod-nix-reasons {
+	color: inherit;
+	background-color: inherit;
+	border: none;
+}
+
+.tag-widget .tag-server-busy {
 	display: none;
 	position: absolute;
 	top: 0;
 	left: 0;
 }
 
-.tag-widget .working + .widget-busy {
+.tag-widget .working + .tag-server-busy {
 	display: block;
 }
 
-div.tag-widget [get=context] {
+div.tag-widget [listen=context] {
 	font-style: italic;
 	font-weight: bold;
 }
 
-.tbar[get=user] li.p,
-.tbar[get=user] li.t,
-.tbar[get=user] li.s,
-.tbar[get=top]  li.s {
+.tag-display[listen=user] li.p,
+.tag-display[listen=user] li.t,
+.tag-display[listen=user] li.s,
+.tag-display[listen=top]  li.s {
 	display: none;
 }
 

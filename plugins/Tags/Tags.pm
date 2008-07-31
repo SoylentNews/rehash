@@ -1388,12 +1388,7 @@ sub ajaxSetGetCombinedTags {
 	# XXX how to get the system tags?
 	my $system_tags = $datatype_tag . ' ' . $section_tag . ' ' . $topic_tags;
 
-	return slashDisplay('combined_tags', {
-		vote_tags =>	$vote_tags,
-		user_tags =>	$user_tags,
-		top_tags =>	$top_tags,
-		system_tags =>	$system_tags,
-	}, { Return => 1 });
+	return '<vote>' . $vote_tags . '<user>' . $user_tags . '<top>'. $top_tags . '<system>' . $system_tags;
 }
 
 {

@@ -70,7 +70,6 @@ END %]
 	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode options = options %]
 	[% title_type = item.type == "story" ? "story" : "firehose" %]
 	[% PROCESS titlebar h3id="title-" _ item.id id="" future = future title_type = title_type title_type_id = "ttype-" _ item.id options = options %]
-	[% IF user.tagwidget_debug ; PROCESS tag_widget item_id = item.id ; END %]
 [% END %]
 	[% IF bodywrapper;
 		Slash.getData('byline', { adminmode => adminmode, item => item, the_user => the_user }, 'firehose');
@@ -106,6 +105,7 @@ END %]
 			<div><a href="[% gSkin.rootdir %]/firehose.pl?op=edit&amp;id=[% item.id %]" title="Preview the editable version of this">Edit Preview</a></div>
 			</form>
 			[% END %]
+	[% IF user.tagwidget_debug ; PROCESS tag_widget item_id = item.id ; END %]
 [% IF full %]
 		[% IF (future || item.type=="story") %]<div class="whitewash">[% END %]
 		[% PROCESS tagsfirehosedivtagbox id = item.id  tags_top = tags_top vote = vote options = options item = item %]

@@ -1,6 +1,89 @@
 ; // tagui.js
 
-function bare_tag( t ){
+var tag_server_fns = {
+
+	broadcast_tag_lists: function( broadcasts ){
+		var tuples = ('<user>' + broadcasts).split(/\n?<(\w*)>/).slice(1);
+		if ( tuples && tuples.length >= 2 ) {
+			var $listeners = $('.ready[listen]', this);
+			while ( tuples.length >= 2 ) {
+				var broadcast_kind = tuples.shift();
+				var broadcast = tuples.shift();
+
+				if ( ! broadcast.length )
+					continue;
+
+				$listeners.filter('[listen*=' + broadcast_kind + ']').each(function(){
+					if ( this.receive_broadcast )
+						this.receive_broadcast(broadcast, broadcast_kind);
+					//else
+					//	console.log('broadcast --- "ready", but no handler: ', this);
+				})
+			}
+			style_tags_globally(this, $listeners);
+		}
+		return this
+	},
+
+	_tags_via_ajax: function( tag_cmds ){
+		var server = this;
+		var $busy = $('.tag-server-busy', server).show();
+
+		if ( tag_cmds ) {
+			var command_feedback = normalize_no_nodnix(tag_cmds);
+			tag_cmds = normalize_nodnix(tag_cmds);
+
+			// 'harden' the new tags into the user tag-display, but styled 'local-only'
+			// tags in the response from the server will wipe-out local-only
+			$('.tag-display.ready[listen*=user]', this).each(function(){
+				this.update_tags(command_feedback, 'prepend', 'local-only')
+			});
+		}
+
+		$.post('/ajax.pl', {
+			op:	'tags_setget_combined',
+			id:	$(this).attr('tag-server'),
+			tags:	tag_cmds || '',
+			reskey:	reskey_static,
+		}, function( server_response ){
+			//console.log('server._tags_via_ajax --- server_response: ' + server_response);
+			server.broadcast_tag_lists(server_response);
+			$busy.removeAttr('style')
+		}, 'text');
+		return this
+	},
+
+
+	fetch_tags: function(){
+		return this._tags_via_ajax()
+	},
+
+
+	submit_tags: function( tag_cmds ){
+		return this._tags_via_ajax(tag_cmds)
+	}
+
+};
+
+function install_tag_server( selector, item_id ) {
+	return $(selector)
+		.attr('tag-server', item_id)
+		.each(function(){
+			$.extend(this, tag_server_fns)
+		})
+}
+
+
+function refresh_tags( selector ){
+	return $(selector)
+		.nearest_parent('[tag-server]')
+			.each(function(){ this.fetch_tags() })
+		.end()
+}
+
+
+
+function bare_tag( t ) {
 	try {
 		// XXX what are the real requirements for a tag?
 		return /[a-z][a-z0-9]*/.exec(t.toLowerCase())[0]
@@ -11,19 +94,44 @@ function bare_tag( t ){
 }
 
 
-function form_submit_tags( form, widget ){
+function set_context_from_tags( root, tags ) {
+	var context = $.map(split_if_string(tags), function(k){
+		if ( k in context_triggers )
+			return k
+	}).reverse()[0] || undefined;
+
+	var is_nodnix_context = context=='nod' || context=='nix';
+
+	$('.tag-widget', root)
+		.each(function(){
+			if ( this.set_context )
+				this.set_context(
+					($(this).hasClass('nod-nix-reasons') == is_nodnix_context)
+						? context
+						: undefined
+				)
+		})
+}
+
+
+function form_submit_tags( form ){
+	var $form = $(form);
 	var $input = $('.tag-entry:input', form);
-	var $widget = widget ? $(widget) : $(form).parents('.tag-widget').eq(0);
-	$widget.each(function(){
+	var $server = $form.nearest_parent('[tag-server]');
+
+	$server.each(function(){
 		var tag_cmds = $input.val();
 		$input.val('');
 		this.submit_tags(tag_cmds);
+		set_context_from_tags(this, tag_cmds);
 	})
 }
 
 
 function click_tag( event ) {
-	var $tag_el = $(this).find('.tag').andSelf().eq(0);
+	var $this = $(this);
+
+	var $tag_el = $this.find('.tag').andSelf().eq(0);
 	var tag = $tag_el.text();
 	var op	= $(event.target).text();
 
@@ -37,15 +145,11 @@ function click_tag( event ) {
 	//	so, if in a menu, or right on the tag itself, do something
 	if ( (event.target!==this || its_the_capsule) && (op!==tag || event.target===$tag_el[0]) ) {
 		var command = normalize_tag_menu_command(tag, op);
-		var $widget = (
-			its_the_capsule
-				? $(this).parents('[id^=firehose]').find('.tag-widget')
-				: $(this).parents('.tag-widget')
-		).eq(0);
+		var $server = $this.nearest_parent('[tag-server]');
 
 		if ( event.shiftKey ) {
 			// if the shift key is down, append the tag to the edit field
-			$widget.find('.tag-entry:text').each(function(){
+			$server.find('.tag-entry:text:visible').each(function(){
 				if ( this.value ) {
 					var last_char = this.value[ this.value.length-1 ];
 					if ( '-#!)_ '.indexOf(last_char) == -1 )
@@ -56,15 +160,18 @@ function click_tag( event ) {
 			});
 		} else {
 			// otherwise, send it the server to be processed
-			$widget.each(function(){
+			$server.each(function(){
 				this.submit_tags(command)
 			});
 		}
+
+		set_context_from_tags($server, tag)
 	}
+
 }
 
 
-var tbar_fns = {
+var tag_display_fns = {
 
 	// return a dictionary mapping bare tags to the corresponding *.tag DOM element
 	map_tags: function( how ){
@@ -121,11 +228,11 @@ var tbar_fns = {
 			// construct all the completely new tag entries and associated machinery
 			var $new_elems = $(join_wrap(new_tags, '<li><span class="tag">', '</span></li>'))
 				.click(click_tag) // one click-handler per tag, and it's on the <li>
-				.append(this.tagbar_data.menu_template);
+				.append(this.tag_display_data.menu_template);
 
-			// by default, insert the new tags at the front of the tagbar
+			// by default, insert the new tags at the front of the list
 			if ( how !== 'append' ) how = 'prepend';
-			this.tagbar_data.$list_el[how]($new_elems);
+			this.tag_display_data.$list_el[how]($new_elems);
 
 			// add in a list of the actual .tag elements we created from scratch
 			$changed_tags = $changed_tags.add( $new_elems.find('.tag') );
@@ -164,9 +271,14 @@ var tbar_fns = {
 			return !(bt in allowed_tags)
 		}));
 		return this.update_tags(tags, 'append')
+	},
+
+
+	receive_broadcast: function( tags ){
+		this.set_tags(tags)
 	}
 
-}; // tbar_fns
+}; // tag_display_fns
 
 
 // XXX temporarily handle some special cases myself.
@@ -205,15 +317,10 @@ function normalize_tag_menu_command( tag, op ){
 }
 
 
-var twidget_fns = {
+var tag_widget_fns = {
 
-	init: function( item_id, $parent_entry ){
-		this.tagwidget_data = {
-			item_id:	item_id,
-			$parent_entry:	$parent_entry
-		}
-
-		$init_tag_bars('.tbar.stub, [get]:not([class])', this);
+	init: function(){
+		$init_tag_displays($('.tag-display.stub, [listen]:not([class])', this));
 
 		// XXX testing autocomplete
 		$(this).find('.tag-entry').autocomplete('/ajax.pl', {
@@ -234,193 +341,189 @@ var twidget_fns = {
 	},
 
 
-	set_tags: function( tags ){
-		console.log('widget.set_tags("'+tags+'")');
-		var widget = this;
-		$.each(tags.split('\n'), function(){
-			var match = /^<(\w+)>?(.*)$/.exec(this);
-			if ( match ) {
-				$('[get*='+match[1]+']', widget).each(function(){
-					this.set_tags(match[2])
-				})
-			}
-		});
-		style_tags_globally(this);
-		return this
-	},
-
-
-	_submit_fetch: function( tag_cmds ){
-		var widget = this;
-		var $busy = $('.widget-busy', widget).show();
-
-		if ( tag_cmds ) {
-			var command_feedback = normalize_no_nodnix(tag_cmds);
-			tag_cmds = normalize_nodnix(tag_cmds);
-
-			// 'harden' the new tags into the user tag-bar, but styled 'local-only'
-			// tags in the response from the server will wipe-out local-only
-			$('.tbar[get*=user]', this).each(function(){
-				this.update_tags(command_feedback, 'prepend', 'local-only')
-			});
-		}
-
-		$.post('/ajax.pl', {
-			op:	'tags_setget_combined',
-			id:	this.tagwidget_data.item_id,
-			tags:	tag_cmds || '',
-			reskey:	reskey_static
-		}, function( response ){
-			// console.log(response);
-			widget.set_tags(response);
-			$busy.removeAttr('style')
-		}, 'text');
-		return this
-	},
-
-
-	fetch_tags: function(){
-		return this._submit_fetch()
-	},
-
-
-	submit_tags: function( tag_cmds ){
-		return this._submit_fetch(tag_cmds)
-	},
-
-
 	set_context: function( context ){
-		var context_tags = '<context>' + tag_context[context];
-		$('[get=context]', this).each(function(){
-			this.set_tags(context_tags)
-		})
+		var suggestions = suggestions_for_context[context]
+				|| ( (context in context_triggers)
+						? suggestions_for_context['default']
+						: '' );
+		$('.ready[listen=context]', this)
+			.each(function(){
+				this.set_tags(suggestions)
+			})[context && suggestions ? 'show' : 'hide']()
 	},
 
 
 	open: function(){
-		this.tagwidget_data.$parent_entry.addClass('tagging');
-		$(this).slideDown(100)
-			.find(':text')
-			.each(function(){
-				this.focus()
-			});
+		// $(this).nearest_parent('[tag-server]').addClass('tagging');
+		$(this)
+			.filter(':hidden')
+			.slideDown(100)
+			.find(':text').eq(0)
+				.each(function(){
+					this.focus()
+				});
 		return this
 	},
 
 
 	close: function(){
-		$(this).slideUp(100);
-		this.tagwidget_data.$parent_entry.removeClass('tagging');
+		// $(this).nearest_parent('[tag-server]').removeClass('tagging');
+		$(this)
+			.filter(':visible')
+			.slideUp(100);
 		return this
 	}
 
-}; // twidget_fns
+}; // tag_widget_fns
 
 
-function $init_tag_bars( selector, widget, options ){
-	// <div get="user" label="My Tags">tag1 tag2 tag3</div>
-	widget = widget || $(selector).eq(0).parents('.tag-widget').get(0);
+function open_tag_widget( selector, fetch ){
+	var $widgets = $init_tag_widgets($(selector).filter(':hidden'));
 
-	return $(selector, widget).each(function(){
-		var $this_bar = $(this);
+	if ( fetch ) {
+		$widgets.nearest_parent('[tag-server]')
+			.each(function(){
+				this.fetch_tags()
+			})
+	}
 
-		var menu_template = join_wrap(
-			$this_bar.attr('menu') || $init_tag_bars.menu_templates[$this_bar.attr('get')] || '',
-			'<li>', '</li>',
-			'<ul class="tmenu">', '</ul>'
-		);
-
-		var t, legend = (t=$this_bar.attr('label')) ? '<h1 class="legend">' + t + '</h1>' : '';
-
-		var tags = $this_bar.text();
-		$this_bar.html(legend+'<ul></ul>');
-
-		$.extend(
-			this,
-			tbar_fns,
-			{ tagbar_data: {
-				menu_template:	menu_template,
-				$list_el:	$this_bar.find('ul'),
-				widget_el:	widget
-			} },
-			options
-		);
-
-		if ( tags ) this.set_tags(tags);
-
-	}).addClass('tbar').removeClass('stub').removeAttr('menu').removeAttr('label')
+	return $widgets.each(function(){this.open()})
 }
 
-$init_tag_bars.menu_templates = {
+function close_tag_widget( selector ){
+	return $(selector).filter(':visible').each(function(){this.close()})
+}
+
+function close_tag_widget_event( event ){
+	close_tag_widget($(this).nearest_parent('.tag-widget'))
+}
+
+
+
+function $init_tag_displays( selector, options ){
+	options = options || {};
+
+	var $tag_displays = $(selector);
+
+	// <div listen="user" label="My Tags">tag1 tag2 tag3</div>
+	$tag_displays
+		.each(function(){
+			var $this = $(this);
+
+			var menu_template = join_wrap(
+				$this.attr('menu') || $init_tag_displays.menu_templates[$this.attr('listen')] || '',
+				'<li>', '</li>',
+				'<ul class="tmenu">', '</ul>'
+			);
+
+			var t, legend = (t=$this.attr('label')) ? '<h1 class="legend">' + t + '</h1>' : '';
+
+			var tags = $this.text();
+			$this.html(legend+'<ul></ul>');
+
+			$.extend(
+				this,
+				tag_display_fns,
+				{ tag_display_data: {
+					menu_template:	menu_template,
+					$list_el:	$this.find('ul')
+				} },
+				options
+			);
+
+			if ( tags ) this.set_tags(tags);
+		})
+		.addClass('tag-display ready')
+		.removeClass('stub')
+		.removeAttr('menu')
+		.removeAttr('label');
+
+	return $tag_displays
+}
+
+function $init_tag_widgets( selector, options ){
+	options = options || {};
+
+	var $tag_widgets = $(selector);
+
+	$tag_widgets
+		.filter('.stub')
+			.each(function(){
+				$.extend(
+					this,
+					tag_widget_fns,
+					options
+				).init()
+			})
+			.removeClass('stub');
+
+	return $tag_widgets
+}
+
+$init_tag_displays.menu_templates = {
 	user:	'! x',
 	top:	'_ # ! )'
 }
 
 
-function create_tag_bar( listens_for, tags, label ){
-	var get_attr	= listens_for ? ' get="'+listens_for+'"' : '';
-	var label_attr	= label ? ' label="'+label+'"' : '';
-	var tag_bar_div	= (
-		'<div' + get_attr + label_attr + '>' +
-			tags +
-		'</div>'
-	);
 
-	return $init_tag_bars(tag_bar_div).get(0)
-}
 
 // when the tag-widget is used in the firehose:
+function add_firehose_nodnix_glue( parent ){
 
-function create_firehose_vote_handler( firehose_id ) {
-	return $.extend(
-		 $('<div class="connector" get="vote" style="display:none"></div>')[0],
-		 {
-			set_tags: function( tags ){
-				firehose_fix_up_down(firehose_id, {
-					'nod':	'votedup',
-					'nix':	'voteddown'
-				}[tags] || 'vote')
+	// XXX do this in a template, and change this to an 'init' type function
+	var $parent = $(parent)
+		.append('<div class="tag-widget nod-nix-reasons stub" style="display:none">' +
+				'<div class="tag-display stub" listen="context" />' +
+				'<div class="firehose-listener" listen="vote" style="display:none" />' +
+			'</div>');
+
+	// add a special widget to show the nod/nix suggestions (right in the title bar)
+	var $widgets = $parent.find('.nod-nix-reasons');
+	$init_tag_widgets(
+		$widgets,
+
+		// override tag_widget_fns.set_context so this widget can hide/show based on context
+		{
+			set_context: function( context ){
+				var widget = this;
+				if ( context == 'nod' || context == 'nix' ) {
+					// for nod or nix, show the associated suggestions
+					var suggestions = suggestions_for_context[context];
+					$('.ready[listen=context]', this)
+						.each(function(){
+							this.set_tags(suggestions)
+						})
+						// and depart that context with the very first selection
+						.one("click", function(){
+							widget.set_context(/*no context*/)
+						});
+					widget.open()
+				} else {
+					// for any other context (including no context), be hidden
+					widget.close()
+				}
 			}
-		 }
+		}
 	);
-}
 
-function open_firehose_tag_widget( event, selector ) {
-	// Walk up to the dom element for this entire entry
-	$(selector || this).parents('[id^=firehose-]').andSelf()
+	// add a 'listener' to fix the up/down vote
+	$widgets.find('.firehose-listener[listen=vote]')
+		.each(function(){
+			$.extend(
+				this,
+				{
+					receive_broadcast: function( tags ){
+						firehose_fix_up_down(
+							$(this).nearest_parent('[tag-server]').attr('tag-server'),
+							{ nod: 'votedup', nix: 'voteddown' }[tags] || 'vote'
+						)
+					}
+				}
+			)
+		})
+		.addClass('ready');
 
-		// ...then back down to the tag-widget (if closed) within.
-		.find('.tag-widget:hidden')
-
-		// Initialize if it's only a stub...
-		.filter('.stub').each(function(){
-			$.extend(this, twidget_fns);
-			var firehose_id = firehose_id_of(this.id);
-			this.init(
-				firehose_id,
-				$(this).prepend(create_firehose_vote_handler(firehose_id))
-					.parents('[id^=firehose-]')
-			);
-		}).removeClass('stub')
-
-		// ...and now that it's ready, we can just tell it to open itself.
-		.end().each(function(){
-		       this.open();
-		       this.fetch_tags();
-		});
-}
-
-function close_firehose_tag_widget( event, selector ) {
-	// Walk up to the dom element for this entire entry
-       $(selector || this).parents('[id^=firehose-]').andSelf()
-
-		// ...then back down to the tag-widget (if open) within.
-               .find('.tag-widget:visible')
-
-		// We can just tell it to close itself.
-               .each(function(){
-                       this.close()
-               })
 }
 
 
@@ -443,10 +546,7 @@ function close_firehose_tag_widget( event, selector ) {
 	'underscore'
  */
 
-
-
-
-
+var context_triggers = map_list_to_set(['nod', 'nix', 'submission','journal','bookmark','feed','story','vendor','misc','comment','discussion']);
 
 var well_known_tags = {};
 
@@ -510,36 +610,36 @@ function style_tags_globally( widget ){
 
 	// Step 1: build one big dictionary mapping tag names to 'global' styles
 	// that is, styles we deduce from where a tag appears.  If a tag appears
-	// in the user tag bar, then every occurance of that tag will be styled
+	// in the user tag-display, then every occurance of that tag will be styled
 	// to indicate that.
 
-	// So, for each of the big three (user, top, system) tag bars; extract
-	// their tags, and update our style map with a class for that bar
-	$('.tbar[get]', widget).each(function(){
-		var bar = $(this).attr('get');
-		var style = style_for_bar[bar];
+	// So, for each of the big three (user, top, system) tag-displays; extract
+	// their tags, and update our style map with a class for that display
+	$('.tag-display.ready[listen]', widget).each(function(){
+		var display = $(this).attr('listen');
+		var style = style_for_bar[display];
 
-		// style true for a bar that exclusively gets one of the big three
+		// style true for a display that exclusively gets one of the big three
 		// so: if it's one of the big three that we haven't yet seen...
-		if ( style && !done[bar] ){
+		if ( style && !done[display] ){
 			update_style_map(
 				style_map,
 				style,
 
-				// build an array of all the tag names in this bar
+				// build an array of all the tag names in this display
 				$('span.tag', this).map(function(){
 					return $(this).text()
 				})
 			);
-			done[bar] = true;
+			done[display] = true;
 		}
 	});
 
-	// style_map now contains every tag in the user, top, and system bars
+	// style_map now contains every tag in the user, top, and system displays
 	// (i.e., all tags that globally influence each other) and maps those
-	// tag names to strings containing a style class for each bar in which
+	// tag names to strings containing a style class for each display in which
 	// the tag appeared, e.g., if 'hello' is in both the user and top tag
-	// bars, then style_map['hello'] == 'u t' (mod order)
+	// displays, then style_map['hello'] == 'u t' (mod order)
 
 	// Step 2: for tags that are sections, topics, etc., add corresponding styles
 	$.each(style_map, function(k, v){
@@ -549,7 +649,7 @@ function style_tags_globally( widget ){
 	});
 
 	// Step 3: find every tag span and apply the styles we've calculated
-        $('.tbar span.tag', widget).each(function(){
+        $('.tag-display span.tag', widget).each(function(){
 		var $this = $(this);
 		var tag = $this.text();
 

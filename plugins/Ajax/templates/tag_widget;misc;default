@@ -16,15 +16,17 @@ __seclev__
 10000
 __template__
 <div id="tag-widget-[% item_id %]" class="tag-widget stub" style="display: none">
-	<div class="tbar stub" get="context">nod nix</div>
-	<form class="tag-editor" onsubmit="form_submit_tags(this, this.parentNode); return false">
+	<form class="tag-editor" onsubmit="form_submit_tags(this); return false">
 		<input class="tag-entry" type="text" size="10">
-		<span class="widget-busy"><img src="[% constants.imagedir %]/spinner2.gif"></span>
+		<span class="tag-server-busy"><img src="[% constants.imagedir %]/spinner2.gif"></span>
 	</form>
-	<div class="tbars train">
-		<div class="tbar stub" get="user" label="My Tags"></div>
-		<div class="tbar stub" get="top" label="Top Tags"></div>
-		<div class="tbar stub" get="system" label="System Tags"></div>
+	<div class="tag-display-set train">
+		<div class="tag-display stub" listen="user" label="My Tags"></div>
+		<div class="tag-display stub" listen="top" label="Top Tags"></div>
+		<div class="tag-display stub" listen="system" label="System Tags"></div>
+	</div>
+	<div class="context-sensitive">
+		<div class="tag-display stub" listen="context"></div>
 	</div>
 </div>
 __version__

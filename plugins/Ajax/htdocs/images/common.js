@@ -188,6 +188,8 @@ function tagsToggleStoryDiv(id, is_admin, type) {
 }
 
 function tagsHideBody(id) {
+	close_tag_widget('#firehoselist > #firehose-'+id+' #tag-widget-'+id);
+
 	$('#toggletags-body-'+id).setClass('tagshide');		// Make the body of the tagbox vanish
 	$('#tagbox-title-'+id).setClass('tagtitleclosed');	// Make the title of the tagbox change back to regular
 	$('#tagbox-'+id).setClass('tags');			// Make the tagbox change back to regular.
@@ -203,6 +205,8 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 		if (fh_is_admin) {
 			firehose_get_admin_extras(id);
 		}
+
+		open_tag_widget('#firehoselist > #firehose-'+id+' #tag-widget-'+id, 'fetch-tags-now')
 	}
 
 	//alert("Tags show body / Type: " + type );
@@ -417,6 +421,7 @@ function toggle_firehose_body(id, is_admin) {
 	params['id'] = id;
 	var fhbody = $dom('fhbody-'+id);
 	var fh = $dom('firehose-'+id);
+
 	var usertype = fh_is_admin ? " adminmode" : " usermode";
 	if (fhbody.className == "empty") {
 		var handlers = {
@@ -436,11 +441,13 @@ function toggle_firehose_body(id, is_admin) {
 	} else if (fhbody.className == "body") {
 		fhbody.className = "hide";
 		fh.className = "briefarticle" + usertype;
+		close_tag_widget($(fh).find('#tag-widget-'+id));
 		/*if (is_admin)
 			tagsHideBody(id);*/
 	} else if (fhbody.className == "hide") {
 		fhbody.className = "body";
 		fh.className = "article" + usertype;
+		open_tag_widget($(fh).find('#tag-widget-'+id), 'fetch-tags-now');
 		/*if (is_admin)
 			tagsShowBody(id, is_admin, '', "firehose"); */
 	}
@@ -633,25 +640,23 @@ function firehose_up_down(id, dir, type) {
 
 	// We changed the tags outside the notice of the tag widget (if any).
 	// If there is one, we need to tell it.  Look for the tag widget.
-	var $tag_widget = $('#tag-widget-'+id);
-	if ( $tag_widget.length ) {
-		// We found one.  We need to make it fetch any new tags, which
-		// in turn will make the widget call firehose_fix_up_down.
-		var tag_widget = $tag_widget.get(0);
-		if ( $tag_widget.is(':hidden') )
-			// It's hidden; it automatically fetches new tags on open.
-			open_firehose_tag_widget(null, $tag_widget);
-		else
-			// It's already open; we have to tell it to fetch the new tags.
-			tag_widget.fetch_tags();
+	var new_context = {'+':'nod', '-':'nix'}[dir];
+	var found_widgets = 0;
 
-		// Show appropriate suggestions.
-		tag_widget.set_context(dir=='+' ? 'nod' : 'nix');
+	var $server = $('#firehoselist > [tag-server='+id+']');
+	$server
+		.find('.tag-widget:not(.stub)')
+			.each(function(){
+				++found_widgets;
+				this.set_context(new_context)
+			});
+
+	if ( found_widgets ) {
+		$server[0].fetch_tags()
 	} else {
 		// No tag widget; we have to call directly...
-		firehose_fix_up_down(id, dir=='+' ? 'votedup' : 'voteddown');
+		firehose_fix_up_down(id, {'+':'votedup', '-':'voteddown'}[dir])
 	}
-
 }
 
 function firehose_fix_up_down(id, new_state) {
@@ -915,12 +920,16 @@ function firehose_handle_update() {
 
 	// XXX temporary admin-only access to the unfinished tag-wiget
 	if ( fh_is_admin && $('.tag-widget').length ) {
-		$('#firehose h3:has(a[class!=skin]):not([dcset])')
-			.dblclickToggle(open_firehose_tag_widget, close_firehose_tag_widget)
-			.attr('dcset', true)
-			.parents('[id^=firehose-]')
-			.find('.up, .down')
-			.click(click_tag)
+		add_firehose_nodnix_glue(
+			$('#firehoselist > [class*=article]:not([tag-server])')
+				.each(function(){
+					install_tag_server(this, firehose_id_of(this))
+				})
+				.find('.up, .down')
+					.click(click_tag)
+				.end()
+				.find('.title')
+		)
 	}
 }
 
@@ -1114,10 +1123,11 @@ function firehose_add_update_timerid(timerid) {
 }
 
 function firehose_collapse_entry(id) {
-	var $entry = $('#firehose-'+id);
-	close_firehose_tag_widget($entry);
-	$entry.find('#fhbody-'+id+'.body').setClass('hide')
-		.end().setClass('briefarticle');
+	$('#firehoselist > #firehose-'+id)
+		.find('#fhbody-'+id+'.body')
+			.setClass('hide')
+		.end()
+		.setClass('briefarticle');
 	tagsHideBody(id)
 }
 
