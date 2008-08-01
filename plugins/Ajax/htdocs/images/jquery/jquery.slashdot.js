@@ -44,8 +44,14 @@ jQuery.fn.extend({
 	},
 
 	nearest_parent: function( selector ) {
-		var $answer = this.filter(selector);
-		return ($answer.length ? $answer : this.parents(selector)).eq(0)
+		var answer = this.map(function(){
+			var $this = $(this);
+			return $this.is(selector)
+				? this
+				: $this.parents(selector + ':first')[0]
+		});
+
+		return this.pushStack($.unique(answer))
 	}
 
 });
