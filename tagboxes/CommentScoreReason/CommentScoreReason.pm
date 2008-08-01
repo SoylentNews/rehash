@@ -151,6 +151,11 @@ sub run {
 
 	my $mod_score_sum = 0;
 	my($type, $cid) = $self->getGlobjTarget($affected_id);
+	if ($type ne 'comments') {
+		my $comments_gtid = $self->getGlobjTypes()->{comments};
+		main::tagboxLog("ERROR - CommentScoreReason->run invoked for non-comment globj $affected_id, type='$type' comments_gtid=$comments_gtid");
+		return;
+	}
 	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
 	return unless $tags_ar && @$tags_ar;
 	my($keep_karma_bonus, $karma_bonus_downmods_left) = (1, $constants->{mod_karma_bonus_max_downmods});
