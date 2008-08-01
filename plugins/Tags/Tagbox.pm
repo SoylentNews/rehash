@@ -174,7 +174,7 @@ my $gtid_to_tbids = { };
 sub getTagboxesNosyForGlobj {
 	my($self, $globj_hr) = @_;
 	my $gtid;
-	if (!$gtid_to_tbids) {
+	if (!keys %$gtid_to_tbids) {
 		my $globj_types = $self->getGlobjTypes();
 		for $gtid (grep /^\d+$/, keys %$globj_types) {
 			$gtid_to_tbids->{ $gtid } = [ ];
@@ -264,6 +264,7 @@ sub getMostImportantTagboxAffectedIDs {
 
 sub getTagboxTags {
 	my($self, $tbid, $affected_id, $extra_levels, $options) = @_;
+	warn "no tbid for $self" if !$tbid;
 	$extra_levels ||= 0;
 	my $type = $options->{type} || $self->getTagboxes($tbid, 'affected_type')->{affected_type};
 #print STDERR "getTagboxTags($tbid, $affected_id, $extra_levels), type=$type\n";
