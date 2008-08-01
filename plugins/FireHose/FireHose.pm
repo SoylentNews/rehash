@@ -810,13 +810,13 @@ sub getUserFireHoseVotesForGlobjs {
 	my $downvote = $constants->{tags_downvote_tagname} || 'nix';
 
 	my $metaup =   "metanod";
-	my $metadown = "metadown";
+	my $metadown = "metanix";
 
 	my $tags = getObject("Slash::Tags", { db_type => "reader" });
 	my $upid = $tags->getTagnameidCreate($upvote);
 	my $dnid = $tags->getTagnameidCreate($downvote);
-	my $metaupid = $tags->getTagnameidCreate($upvote);
-	my $metadnid = $tags->getTagnameidCreate($downvote);
+	my $metaupid = $tags->getTagnameidCreate($metaup);
+	my $metadnid = $tags->getTagnameidCreate($metadown);
 
 	my $results = $self->sqlSelectAllKeyValue(
 		"globjid,tagnameid",
@@ -829,7 +829,6 @@ sub getUserFireHoseVotesForGlobjs {
 		$results->{$_} = "up" if $results->{$_} == $upid || $results->{$_} == $metaupid;
 		$results->{$_} = "down" if $results->{$_} == $dnid || $results->{$_} == $metadnid;
 	}
-
 	return $results;
 }
 
