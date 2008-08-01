@@ -105,10 +105,10 @@ END %]
 			<div><a href="[% gSkin.rootdir %]/firehose.pl?op=edit&amp;id=[% item.id %]" title="Preview the editable version of this">Edit Preview</a></div>
 			</form>
 			[% END %]
-	[% IF user.tagwidget_debug ; PROCESS tag_widget item_id = item.id ; END %]
 [% IF full %]
 		[% IF (future || item.type=="story") %]<div class="whitewash">[% END %]
 		[% PROCESS tagsfirehosedivtagbox id = item.id  tags_top = tags_top vote = vote options = options item = item %]
+		[% IF user.tagwidget_debug ; PROCESS tag_widget item_id = item.id ; END %]
 		[% IF (future || item.type=="story") %]</div>[% END %]
 [% IF divwrapper; IF storylinkwrapper %]
 <div class="storylinks">
