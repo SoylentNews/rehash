@@ -5433,6 +5433,10 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity_
 # 2008-07-16
 UPDATE vars SET value = 'T_2_5_0_213' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHDOT LAST UPDATED HERE
+
+# 2008-07-31
+UPDATE vars SET value = 'T_2_5_0_214' WHERE name = 'cvs_tag_currentcode';
+
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
-# SLASHDOT LAST UPDATED HERE
