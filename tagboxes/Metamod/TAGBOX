@@ -1,0 +1,7 @@
+name=Metamod
+description=Update user values based on metamoderation of their mods
+mysql_schema=mysql_schema.sql
+mysql_dump=mysql_dump.sql
+requiresplugin=Ajax
+requiresplugin=Tags
+requiresplugin=TagModeration
