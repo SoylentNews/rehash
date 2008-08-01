@@ -23,6 +23,8 @@ Slash::Tagbox::CommentScoreReason - track comment score and reason
 
 use strict;
 
+use Digest::MD5 'md5_hex';
+
 use Slash;
 use Slash::DB;
 use Slash::Utility::Environment;
@@ -143,15 +145,12 @@ sub run {
 		my $tagnameid = $tagsdb->getTagnameidCreate($name);
 		$tagnameid_reasons{$tagnameid} = $reasons->{$id};
 	}
+	for my $tagname (qw( nod nix metanod metanix )) {
+		$self->{"${tagname}id"} ||= $tagsdb->getTagnameidCreate($tagname);
+	}
 
 	my $mod_score_sum = 0;
 	my($type, $cid) = $self->getGlobjTarget($affected_id);
-	if ($type ne 'comments') {
-		# this should be unnecessary now, leave in for a week to make sure I squashed this bug
-		my $comments_gtid = $self->getGlobjTypes()->{comments};
-		main::tagboxLog("ERROR - CommentScoreReason->run invoked for non-comment globj $affected_id, type='$type' comments_gtid=$comments_gtid");
-		return;
-	}
 	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
 	return unless $tags_ar && @$tags_ar;
 	my($keep_karma_bonus, $karma_bonus_downmods_left) = (1, $constants->{mod_karma_bonus_max_downmods});
@@ -165,21 +164,31 @@ sub run {
 
 
 	# First scan: neediness (comments.f3).
+	my($up_rnf, $down_rnf) = (0, 0);
 	for my $tag (@$tags_ar) {
 		# Do nothing if this tag was inactivated.
 		next if $tag->{inactivated};
 		# If this was a moderation _or_ a nod/nix (indicating dis/agreement),
 		# neediness changes.  If this was done by an admin, neediness
 		# changes a lot.
-		my $reason = $tagnameid_reasons{$tag->{tagnameid}};
-		next unless $reason || $tag->{tagnameid} == $self->{nodid} || $tag->{tagnameid} == $self->{nixid};
+		my $tagnameid = $tag->{tagnameid};
+		my $reason = $tagnameid_reasons{$tagnameid};
+		my $dir = 0;
+		if ($reason->{val} > 0 || $tagnameid == $self->{nodid} || $tagnameid == $self->{metanodid}) {
+			$dir = 1;
+		} elsif ($reason->{val} < 0 || $tagnameid == $self->{nixid} || $tagnameid == $self->{metanixid}) {
+			$dir = -1;
+		}
+		next unless $dir;
 		my $mod_user = $self->getUser($tag->{uid});
-		my $root_net_fairs = ( $mod_user->{up_fair} + $mod_user->{down_fair}
-			- ($mod_user->{up_unfair} + $mod_user->{down_unfair}) )
-			** 0.5;
-		$neediness -= $root_net_fairs;
+		my $net_fairs = $mod_user->{up_fair} + $mod_user->{down_fair}
+			- ($mod_user->{up_unfair} + $mod_user->{down_unfair});
+		my $root_net_fairs = ($net_fairs <= 1) ? 1 : ($net_fairs ** 0.5);
+		if ($dir > 0) { $up_rnf += $root_net_fairs }
+		else { $down_rnf += $root_net_fairs }
 		$neediness -= 1000 if $mod_user->{seclev} > 1;
 	}
+	$neediness -= abs($up_rnf - $down_rnf);
 	# Scale neediness to match the firehose color range.
 	my $top_entry_score = 290;
 	my $firehose = getObject('Slash::FireHose');
@@ -205,7 +214,8 @@ sub run {
 		# Currently, only actual moderations (not nod/nixes) change a
 		# comment's score (and reason).  Only continue processing if
 		# this is an actual moderation.
-		my $reason = $tagnameid_reasons{$tag->{tagnameid}};
+		my $tagnameid = $tag->{tagnameid};
+		my $reason = $tagnameid_reasons{$tagnameid};
 		next unless $reason;
 		if ($reason->{val} < 0) {
 			$keep_karma_bonus = 0 if --$karma_bonus_downmods_left < 0;
@@ -226,7 +236,11 @@ sub run {
 
 	if ($firehose) {
 		my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
-		$firehose->setFireHose($fhid, { neediness => $neediness });
+		if (!$fhid) {
+			$fhid = $self->addCommentToHoseIfAppropriate($firehose,
+				$affected_id, $cid, $neediness, $new_score);
+		}
+		$firehose->setFireHose($fhid, { neediness => $neediness }) if $fhid;
 	}
 
 	$self->sqlUpdate('comments', {
@@ -234,6 +248,27 @@ sub run {
 			f2 =>	$current_reason_mode,
 			f3 =>	$neediness,
 		}, "cid='$cid'");
+}
+
+sub addCommentToHoseIfAppropriate {
+	my($self, $firehose, $globjid, $cid, $neediness, $score) = @_;
+	my $constants = getCurrentStatic();
+
+	my $fhid = 0;
+
+	# If neediness exceeds a threshold, the comment has a chance of appearing.
+	my $min = $constants->{tagbox_csr_minneediness} || 138;
+	return 0 if $neediness < $min;
+
+	# Hash its cid;  if the last 4 hex digits interpreted as a fraction are
+	# within the range determined, add it to the hose.
+	my $percent = $constants->{tagbox_csr_needinesspercent} || 5;
+	my $hex_percent = int(hex(substr(md5_hex($cid), -4)) * 100 / 65536);
+	return 0 if $hex_percent >= $percent;
+
+	$fhid = $firehose->createItemFromComment($cid);
+
+	return $fhid;
 }
 
 1;

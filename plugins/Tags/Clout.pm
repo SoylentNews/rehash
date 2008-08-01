@@ -21,7 +21,7 @@ our $VERSION = $Slash::Constants::VERSION;
 sub init {
 	my($self) = @_;
 
-	$self->{months_back} = 4; # default
+	$self->{months_back} = 2; # default
 	my $slashdb = getCurrentDB();
         my $info = $slashdb->getCloutInfo();
         for my $clid (keys %$info) {
@@ -30,9 +30,9 @@ sub init {
         warn "cannot find clid for $self" if !$self->{clid};
 
 	my $constants = getCurrentStatic();
-	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	$self->{nodid} = $tags_reader->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
-	$self->{nixid} = $tags_reader->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
+	my $tagsdb = getObject('Slash::Tags');
+	$self->{nodid} = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
+	$self->{nixid} = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
 	1;
 }
 
