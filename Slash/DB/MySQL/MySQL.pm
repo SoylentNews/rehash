@@ -8259,7 +8259,8 @@ sub getSlashConf {
 		karma_adj =>			{ -10 => 'Terrible',	-1 => 'Bad',	    0 => 'Neutral',
 						   12 => 'Positive',	25 => 'Good',	99999 => 'Excellent' },
 		mod_up_points_needed =>		{ },
-		m2_consequences =>		{ 0.00 => [qw(  0    +2   -100 -1   )],
+						#          m2_f_t m2_u_t  m1_t m1_k
+		m2_consequences =>		{ 0.00 => [qw( -5    +2   -100 -1   )],
 						  0.15 => [qw( -2    +1    -40 -1   )],
 						  0.30 => [qw( -0.5  +0.5  -20  0   )],
 						  0.35 => [qw(  0     0    -10  0   )],
@@ -8268,7 +8269,7 @@ sub getSlashConf {
 						  0.70 => [qw(  0     0     +2  0   )],
 						  0.80 => [qw( +0.01 -1     +3  0   )],
 						  0.90 => [qw( +0.02 -2     +4  0   )],
-						  1.00 => [qw( +0.05  0     +5 +0.5 )],	},
+						  1.00 => [qw( +0.05 -5     +5 +0.5 )],	},
 		m2_consequences_repeats =>	{ 3 => -4, 5 => -12, 10 => -100 },
 		# 40=0|30=Mainpage|20=0|10=Sectional|0=0
 		topic_popup_weights	=>	{ 40 => 0, 30 => 'Mainpage', 20 => 0, 10 => 'Sectional', 0 => 0 },
