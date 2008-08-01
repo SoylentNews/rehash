@@ -26,24 +26,30 @@ var tag_server_fns = {
 	},
 
 	_tags_via_ajax: function( tag_cmds ){
-		var server = this;
-		var $busy = $('.tag-server-busy', server).show();
-
 		if ( tag_cmds ) {
-			var command_feedback = normalize_no_nodnix(tag_cmds);
-			tag_cmds = normalize_nodnix(tag_cmds);
+			tag_cmds = normalize_tag_commands(tag_cmds, /*excluding: user tags under */this);
+
+			// if caller wanted to execute some commands,
+			//	but they were all normalized away
+			if ( !tag_cmds.length )
+				// ...then there's no work to do (not even fetching)
+				return this;
+
 
 			// 'harden' the new tags into the user tag-display, but styled 'local-only'
 			// tags in the response from the server will wipe-out local-only
+			var command_feedback = normalize_tag_commands(tag_cmds, /*excluding:*/nodnix_commands);
 			$('.tag-display.ready[listen*=user]', this).each(function(){
 				this.update_tags(command_feedback, 'prepend', 'local-only')
 			});
 		}
 
+		var server = this;
+		var $busy = $('.tag-server-busy', server).show();
 		$.post('/ajax.pl', {
 			op:	'tags_setget_combined',
 			id:	$(this).attr('tag-server'),
-			tags:	tag_cmds || '',
+			tags:	list_as_string(tag_cmds),
 			reskey:	reskey_static,
 		}, function( server_response ){
 			//console.log('server._tags_via_ajax --- server_response: ' + server_response);
@@ -273,29 +279,24 @@ var tag_display_fns = {
 }; // tag_display_fns
 
 
-// XXX temporarily handle some special cases myself.
-// Jamie will want to know about this.
-function normalize_nodnix( expr ){
-	return expr.replace(_normalize_nodnix.pattern, _normalize_nodnix)
-}
+function cached_user_tags( selector ){
+	var $selector = $(selector);
 
-function normalize_no_nodnix( expr ){
-	return expr.replace(_normalize_nodnix.pattern, '')
-}
+	var tags = $selector
+		.find('.tag-display.ready[listen=user] span.tag')
+			.map(function(){
+				return $(this).text()
+			})
+			.get();
 
-function _normalize_nodnix( cmd ){
-	if ( cmd == 'nod' || cmd == '!nix' )
-		return 'nod -nix';
-	else if ( cmd == 'nix' || cmd == '!nod' )
-		return 'nix -nod';
-	else if ( cmd == '-!nix' )
-		return '-nod';
-	else if ( cmd == '-!nod' )
-		return '-nix';
-	else
-		return cmd;
+	var vote = $selector.nearest_parent('[tag-server]').find('[id^=updown-]').attr('className');
+	vote = { 'votedup':'nod', 'voteddown':'nix' }[vote];
+
+	if ( vote )
+		tags.push(vote);
+
+	return tags
 }
-_normalize_nodnix.pattern = /-!(nod|nix)|-(nod|nix)|!(nod|nix)|nod|nix/g;
 
 function normalize_tag_menu_command( tag, op ){
 	if ( op == "x" )
@@ -306,6 +307,98 @@ function normalize_tag_menu_command( tag, op ){
 		return op + tag;
 	else
 		return tag;
+}
+
+
+
+// Tags.pm doesn't automatically handle '!(nod|nix)'
+//	and requires (some) hand-holding to prevent an item from being tagged both nod and nix at once
+var nodnix_commands = {
+	'nod':		['nod', '-nix'],
+	'nix':		['nix', '-nod'],
+	'!nod':		['nix', '-nod'],
+	'!nix':		['nod', '-nix'],
+	'-nod':		['-nod'],
+	'-nix':		['-nix'],
+	'-!nod':	['-nix'],
+	'-!nix':	['-nod']
+};
+
+// filters commands, returning a list 'normalized' (as per comment at 'nodnix_commands', above)
+// and omitting any "add" commands for tags in excludes, or "deactivate" commands for tags _not_ in excludes
+// commands is a list (string or array)
+// excludes is either a list or set of tags/commands to remove,
+//	or else a jQuery selector (DOM element, string selector, or jQuery wrapped list) under which
+//	exists a user tag list... we'll build the real exclusion list from that
+function normalize_tag_commands( commands, excludes ){
+
+	// want to iterate over commands, so ensure it is an array
+	commands = list_as_array(commands);
+	if ( !commands.length )
+		return [];
+
+	// beware, provide a complete list for excludes, or nothing at all,
+	// else -tag commands can be dropped on the floor
+
+	// want to repeatedly test for inclusion in excludes, so ensure excludes is a set
+	if ( excludes )
+		try {
+			// if excludes looks like a string
+			if ( excludes.split ) {
+				// and that string works as a jQuery selector
+				var $temp = $(excludes);
+				if ( $temp.length )
+					// treat it as such
+					excludes = $temp;
+				// otherwise a string is probably a space-separated command list
+			}
+
+			// if excludes is dom element or a jquery wrapped list...
+			if ( excludes.nodeType !== undefined || excludes.jquery !== undefined )
+				// ...caller means a list of the user tags within (returns an array)
+				excludes = cached_user_tags(excludes);
+
+			// if excludes is a list (string or array)...
+			if ( excludes.length !== undefined )
+				excludes = map_list_to_set(excludes);
+
+			// excludes should already be a set, let's make sure it's not empty
+			if ( !keys(excludes).length )
+				excludes = null;
+		} catch (e) {
+			excludes = null;
+		}
+
+	var filter_minus = true;
+	if ( !excludes ) {
+		filter_minus = false;
+		excludes = {};
+	}
+
+	function un( tag ){
+		return tag[0]=='-' ? tag.substring(1) : '-'+tag
+	}
+
+	// .reverse(): process the commands from right to left
+	// so only the _last_ occurance is kept in case of duplicates
+	var already = {};
+	return $.map(commands.reverse(), function( c ){
+		var mapped = [];
+		$.each(c in nodnix_commands ? nodnix_commands[c] : [c], function(i, cmd){
+			if ( cmd
+				&& !(cmd in already)
+				&& !(cmd in excludes)
+				&& ( !filter_minus
+					|| cmd[0] != '-'
+					|| un(cmd) in excludes ) ) {
+				mapped.push(cmd);
+				already[ cmd ] = true;
+				already[ un(cmd) ] = true;
+			}
+		});
+
+		return mapped
+	}).reverse()
 }
 
 
