@@ -129,20 +129,23 @@ function form_submit_tags( form ){
 function click_tag( event ) {
 	var $this = $(this);
 
-	var $tag_el = $this.find('.tag').andSelf().eq(0);
-	var tag = $tag_el.text();
-	var op	= $(event.target).text();
+	var $target = $(event.target);
 
-	var its_the_capsule = op==tag && (op=='+' || op=='-');
-	if ( its_the_capsule ) {
-		tag = { '+': 'nod', '-': 'nix' }[op];
-		op = '';
+	var command='';
+
+	if ( $target.is('a.up') ) {
+		command = 'nod';
+	} else if ( $target.is('a.down') ) {
+		command = 'nix';
+	} else if ( $target.is('.tag') ) {
+		command = $target.text();
+	} else if ( $target.is('.tmenu li') ) {
+		var op = $target.text();
+		var tag = $target.nearest_parent(':has(span.tag)').find('.tag').text();
+		command = normalize_tag_menu_command(tag, op);
 	}
 
-	// op differs from tag when the click was in a menu
-	//	so, if in a menu, or right on the tag itself, do something
-	if ( (event.target!==this || its_the_capsule) && (op!==tag || event.target===$tag_el[0]) ) {
-		var command = normalize_tag_menu_command(tag, op);
+	if ( command ) {
 		var $server = $this.nearest_parent('[tag-server]');
 
 		if ( event.shiftKey ) {
@@ -163,9 +166,8 @@ function click_tag( event ) {
 			});
 		}
 
-		set_context_from_tags($server, tag)
+		set_context_from_tags($server, command)
 	}
-
 }
 
 
@@ -225,7 +227,6 @@ var tag_display_fns = {
 		if ( new_tags.length ) {
 			// construct all the completely new tag entries and associated machinery
 			var $new_elems = $(join_wrap(new_tags, '<li><span class="tag">', '</span></li>'))
-				.click(click_tag) // one click-handler per tag, and it's on the <li>
 				.append(this.tag_display_data.menu_template);
 
 			// by default, insert the new tags at the front of the list
@@ -511,6 +512,7 @@ function $init_tag_displays( selector, options ){
 
 			if ( tags ) this.set_tags(tags);
 		})
+		.click(click_tag) // one click-handler per display
 		.addClass('tag-display ready')
 		.removeClass('stub')
 		.removeAttr('menu')
