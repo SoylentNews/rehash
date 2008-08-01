@@ -1539,7 +1539,7 @@ sub ajaxListTagnames {
 
 	my $ret_str = '';
 	for my $tagname (sort { $tnhr->{$b} <=> $tnhr->{$a} } keys %$tnhr) {
-		$ret_str .= sprintf("%s%s\t%d\n", $notize, $tagname, $tnhr->{$tagname});
+		$ret_str .= sprintf("%s%s\n", $notize, $tagname);
 	}
 #use Data::Dumper; print STDERR scalar(localtime) . " ajaxListTagnames uid=$user->{uid} prefix='$prefix' tnhr: " . Dumper($tnhr);
 	return $ret_str;

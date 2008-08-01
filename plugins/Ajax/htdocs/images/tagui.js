@@ -332,9 +332,6 @@ var tag_widget_fns = {
 			max:			25,
 			extraParams: {
 				op:		'tags_list_tagnames'
-			},
-			formatItem: function(row /*, i, N, query*/){
-				return row[0].split(/\s+/)[0]
 			}
 		});
 		return this
