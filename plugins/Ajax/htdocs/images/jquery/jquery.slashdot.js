@@ -66,11 +66,11 @@ is a string representation for the logical list
 
 	['tag1', 'tag2', 'tag3']
 
-split_if_string comes in when you need your "logical list" to really be a
+list_as_array comes in when you need your "logical list" to really be a
 concrete array of individual strings; building you that _actual_ list.  It is
 also designed to "nest": if the data came to you already in the form of an array
-of strings, split_if_string just hands it right back to you. That is, for any
-input that is _not_ split-able, split_if_string's goal is to be the identity
+of strings, list_as_array just hands it right back to you. That is, for any
+input that is _not_ split-able, list_as_array's goal is to be the identity
 function.
 
 Because we're thinking of the logical list implied by your string, there are a
@@ -80,7 +80,7 @@ false. Leading or trailing whitespace in the input list must be ignored.
 JavaScript's split won't give us the answer we want for any of these cases (if
 it did, we'd just call it directly!).
 */
-function split_if_string( list ){
+function list_as_array( list ){
 	if ( list ) {
 
 		// trim leading/trailing whitespace if we can
@@ -97,11 +97,22 @@ function split_if_string( list ){
 	return []
 }
 
+function list_as_string( list ){
+	if ( list ) {
+		if ( list.join )
+			list = list.join(' ');
+
+		return /\S/.test(list) ? list : ''
+	}
+
+	return ''
+}
+
 
 function join_wrap( a, elem_prefix, elem_suffix, list_prefix, list_suffix ) {
 	// always returns a string, even if it's the empty string, ''
 	var result = '';
-	a = split_if_string(a);
+	a = list_as_array(a);
 	if ( a && a.length ) {
 		var ep = elem_prefix || '';
 		var es = elem_suffix || '';
@@ -120,7 +131,7 @@ function map_list_to_set( list, map_fn ){
 	//	on lists, e.g., union, intersection, difference.
 
 	// list (required) can be an array or a string
-	list = split_if_string(list);
+	list = list_as_array(list);
 
 	// map_fn (optional) allows you to filter the list
 	if ( map_fn === undefined )

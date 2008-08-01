@@ -87,7 +87,7 @@ function bare_tag( t ) {
 
 
 function set_context_from_tags( root, tags ) {
-	var context = $.map(split_if_string(tags), function(k){
+	var context = $.map(list_as_array(tags), function(k){
 		if ( k in context_triggers )
 			return k
 	}).reverse()[0] || undefined;
@@ -199,7 +199,7 @@ var tag_display_fns = {
 	//  optional string, annotate, tells a css class to add to all touched tags
 	update_tags: function( tags, how, annotate ){
 		// the intersection of the requested vs. existing tags are the ones I can update in-place
-		var update_map = this.map_tags(tags = split_if_string(tags));
+		var update_map = this.map_tags(tags = list_as_array(tags));
 
 		// update in-place the ones we can; build a list of the ones we can't ($.map returns a js array)
 		var new_tags_seen = {};
@@ -258,7 +258,7 @@ var tag_display_fns = {
 
 	// like remove_tags() followed by update_tags(tags) except order preserving for existing tags
 	set_tags: function( tags ){
-		var allowed_tags = map_list_to_set(tags = split_if_string(tags), bare_tag);
+		var allowed_tags = map_list_to_set(tags = list_as_array(tags), bare_tag);
 		this.remove_tags(this.map_tags(function(bt){
 			return !(bt in allowed_tags)
 		}));
