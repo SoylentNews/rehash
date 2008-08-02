@@ -74,14 +74,6 @@ function install_tag_server( selector, item_id ) {
 }
 
 
-function refresh_tags( selector ){
-	return $(selector)
-		.nearest_parent('[tag-server]')
-			.each(function(){ this.fetch_tags() })
-		.end()
-}
-
-
 
 function bare_tag( t ) {
 	try {
@@ -389,10 +381,6 @@ function open_tag_widget( selector, fetch ){
 
 function close_tag_widget( selector ){
 	return $(selector).filter(':visible').each(function(){this.close()})
-}
-
-function close_tag_widget_event( event ){
-	close_tag_widget($(this).nearest_parent('.tag-widget'))
 }
 
 
