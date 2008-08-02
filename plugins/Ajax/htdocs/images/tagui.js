@@ -250,7 +250,7 @@ var tag_display_fns = {
 			tags = this.map_tags(tags);
 
 		$.each(tags, function(bt, entry){
-			$(entry).parents('li').eq(0).remove()
+			$(entry).parents('li:first').remove()
 		});
 		return this
 	},
@@ -347,7 +347,7 @@ var tag_widget_fns = {
 		$(this)
 			.filter(':hidden')
 			.slideDown(100)
-			.find(':text').eq(0)
+			.find(':text:visible:first')
 				.each(function(){
 					this.focus()
 				});
