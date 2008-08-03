@@ -43,6 +43,10 @@ jQuery.fn.extend({
 		return this.mapClass(map);
 	},
 
+	toggleClassTo: function( css_class, expr ) {
+		return this[ expr ? 'addClass' : 'removeClass' ](css_class)
+	},
+
 	nearest_parent: function( selector ) {
 		var answer = this.map(function(){
 			var $this = $(this);
