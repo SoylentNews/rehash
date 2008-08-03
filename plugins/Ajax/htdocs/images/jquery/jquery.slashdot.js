@@ -56,6 +56,14 @@ jQuery.fn.extend({
 		});
 
 		return this.pushStack($.unique(answer))
+	},
+
+	separate: function( f ){
+		var pass, fail;
+		[ pass, fail ] = separate(this, $.isFunction(f) ? f : function(e){
+			return $(e).is(f)
+		});
+		return [ $(pass), $(fail) ]
 	}
 
 });
@@ -86,6 +94,9 @@ it did, we'd just call it directly!).
 */
 function list_as_array( list ){
 	if ( list ) {
+		// jQuery wrapped elements are already an array
+		if ( list.jquery !== undefined )
+			return list;
 
 		// trim leading/trailing whitespace if we can
 		if ( list.replace  )
@@ -185,4 +196,13 @@ function keys( dict ){
 
 function values( dict ){
 	return map_set_to_list(dict, function(k, v){return v})
+}
+
+
+function separate( list, fn ){
+	var answer = { true: [], false: [] };
+	$.each(list_as_array(list), function(i, elem){
+		answer[!!fn.apply(elem, [elem, i])].push(elem)
+	})
+	return [ answer[true], answer[false] ]
 }
