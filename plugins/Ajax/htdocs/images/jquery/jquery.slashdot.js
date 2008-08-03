@@ -49,10 +49,20 @@ jQuery.fn.extend({
 
 	nearest_parent: function( selector ) {
 		var answer = this.map(function(){
+			var match;
+
 			var $this = $(this);
-			return $this.is(selector)
-				? this
-				: $this.parents(selector + ':first')[0]
+			if ( $this.is(selector) )
+				match = this;
+
+			$this.parents().each(function(){
+				if ( $(this).is(selector) ) {
+					match = this;
+					return false
+				}
+			});
+
+			return match
 		});
 
 		return this.pushStack($.unique(answer))
