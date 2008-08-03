@@ -231,7 +231,7 @@ var tag_display_fns = {
 
 		if ( new_tags.length ) {
 			// construct all the completely new tag entries and associated machinery
-			var $new_elems = $(join_wrap(new_tags, '<li><span class="tag">', '</span></li>'))
+			var $new_elems = $(join_wrap(new_tags, '<li class="p"><span class="tag">', '</span></li>'))
 				.append(this.tag_display_data.menu_template);
 
 			// by default, insert the new tags at the front of the list

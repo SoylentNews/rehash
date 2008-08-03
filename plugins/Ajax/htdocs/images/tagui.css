@@ -96,10 +96,10 @@ div.tag-widget .tmenu > li:hover {
 }
 
 .tag-widget {
-	display: none;
+	display: block;
 	position: relative;
 	z-index: 10;
-	background-color: white;
+	background-color: transparent;
 	border: 4px dotted darkgray;
 	padding: 0 0.4em 0 0.8em;
 	min-width: 6em;
