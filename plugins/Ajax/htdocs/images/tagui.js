@@ -139,7 +139,7 @@ function click_tag( event ) {
 		command = 'nix';
 	} else if ( $target.is('.tag') ) {
 		command = $target.text();
-	} else if ( $target.is('.tmenu li') ) {
+	} else if ( $target.parent().is('.tmenu') ) {
 		var op = $target.text();
 		var tag = $target.nearest_parent(':has(span.tag)').find('.tag').text();
 		command = normalize_tag_menu_command(tag, op);
