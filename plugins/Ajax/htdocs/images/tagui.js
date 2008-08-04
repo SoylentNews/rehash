@@ -468,23 +468,49 @@ function normalize_tag_commands( commands, excludes ){
 }
 
 
+var gFocusedText;
+
 var tag_widget_fns = {
 
 	init: function(){
 		$init_tag_displays($('.tag-display.stub, [listen]:not([class])', this));
 
-		// XXX testing autocomplete
-		$(this).find('.tag-entry').autocomplete('/ajax.pl', {
-			loadingClass:		'working',
-			minChars:		3,
-			multiple:		true,
-			multipleSeparator:	' ',
-			autoFill:		true,
-			max:			25,
-			extraParams: {
-				op:		'tags_list_tagnames'
-			}
-		});
+		$(this)
+			.find('.tag-entry')
+				.focus(function(event){
+					gFocusedText = this
+				})
+				.blur(function(event){
+					if ( gFocusedText === this )
+						gFocusedText = null
+				})
+				.keypress(function(event){
+					var ESC=27, SPACE=32;
+
+					var $this = $(this);
+					switch ( event.which || event.keyCode ) {
+						case ESC:
+							$this.val('');
+							return false;
+
+						case SPACE:
+							var form = $this.parent()[0]
+							setTimeout(function(){
+								form_submit_tags(form)
+							}, 0);
+						default:
+							return true;
+					}
+				})
+				.autocomplete('/ajax.pl', {
+					loadingClass:		'working',
+					minChars:		3,
+					autoFill:		true,
+					max:			25,
+					extraParams: {
+						op:		'tags_list_tagnames'
+					}
+				});
 		return this
 	},
 

@@ -51,6 +51,7 @@ var ua=navigator.userAgent;
 var is_ie = ua.match("/MSIE/");
 
 
+
 function createPopup(xy, titlebar, name, contents, message, onmouseout) {
 	var body = document.getElementsByTagName("body")[0];
 	var div = document.createElement("div");
@@ -793,6 +794,8 @@ function json_update(response) {
 
 
 function firehose_handle_update() {
+	var focused_text_field = gFocusedText;
+
 	if (firehose_updates.length > 0) {
 		var el = firehose_updates.pop();
 		var fh = 'firehose-' + el[1];
@@ -931,6 +934,9 @@ function firehose_handle_update() {
 				.find('.title')
 		)
 	}
+
+	if ( focused_text_field )
+		focused_text_field.focus();
 }
 
 function firehose_adjust_window(onscreen) {

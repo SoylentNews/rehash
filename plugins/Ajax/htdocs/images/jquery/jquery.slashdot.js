@@ -216,3 +216,10 @@ function separate( list, fn ){
 	})
 	return [ answer[true], answer[false] ]
 }
+
+
+function splice_string( s, offset, length, replacement ){
+	if ( length || replacement )
+		s = s.slice(0, offset) + (replacement||'') + s.slice(offset+(length||0))
+	return s
+}
