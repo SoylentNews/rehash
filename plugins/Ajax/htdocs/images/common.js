@@ -968,7 +968,7 @@ function firehose_reorder() {
 			}
 			var newtitle = document.title;
 			if (/\(\d+\)/.test(newtitle)) {
-				newtitle.replace(/(\(\d+\))/,"(" + firehose_item_count + ")");
+				newtitle = newtitle.replace(/(\(\d+\))/,"(" + firehose_item_count + ")");
 			} else {
 				newtitle = newtitle + " (" + firehose_item_count + ")";
 			}
