@@ -669,7 +669,7 @@ function firehose_fix_up_down(id, new_state) {
 		$updown.setClass(new_state);
 
 		// When ad admin nixes something, it should collapse and get out of the way.
-		if ( fh_is_admin && (new_state=='voteddown' || $('#title-'+id).is(':contains("Comment:")')) )
+		if ((fh_is_admin || firehose_settings.metamod) && (new_state=='voteddown' || $('#title-'+id).is(':contains("Comment:")')) )
 			firehose_collapse_entry(id);
 	}
 }

@@ -102,9 +102,11 @@ sub list {
 sub metamod {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 	my $firehose = getObject("Slash::FireHose");
-	$form->{tabtype} = "metamod";
-	$form->{skipmenu} = 1;
-	$form->{metamod} = 1;
+	$form->{tabtype} 	= "metamod";
+	$form->{skipmenu} 	= 1;
+	$form->{metamod} 	= 1;
+	$form->{pause} 		= 1;
+	$form->{no_saved} 	= 1;
 	print $firehose->listView();
 }
 

@@ -13,6 +13,9 @@ list
 __seclev__
 10000
 __template__
+[% IF form.metamod %]
+<div id="metamodwrap">
+[% END %]
 [% firehose = Slash.getObject("Slash::FireHose"); %]
 [% IF env.script_name == "/firehose.pl" || form.ssi %]
 <script type="text/javascript">
@@ -45,11 +48,10 @@ __template__
 YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
 </script>
 [% ua = env.HTTP_USER_AGENT %]
-
 <div id="slashboxes">
 [% Slash.getAd(2) %]
 [% UNLESS user.noboxes %]
-  [% IF slashboxes && !(form.smalldevices || form.embed || (constants.smalldevices_ua_regex && ua.match(constants.smalldevices_ua_regex)));
+  [% IF slashboxes && !(form.smalldevices || form.embed || form.metamod || (constants.smalldevices_ua_regex && ua.match(constants.smalldevices_ua_regex)));
     slashboxes %]
   [% END %]
 [% END %]
@@ -57,7 +59,11 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
 <div id="message">
 	<div class="content">
 		<p>
-		[% PROCESS rand_mesg %]
+		[% IF form.metamod %]
+			Meta-Moderation
+		[% ELSE %]
+			[% PROCESS rand_mesg %]
+		[% END %]
 		</p>
 	</div>
 </div>
@@ -173,7 +179,7 @@ cmdrtaco dot net but be forgiving of beta code!
 	[% END %]
 
 	var firehose_action_time = 0;
-	[% IF options.pagesize == "large" %]
+	[% IF options.pagesize == "large" && !form.metamod %]
 	firehose_more_increment = 15;
 	[% END %]
 	[% options_color = (options.color || user.firehose_color || "indigo") %]
@@ -207,6 +213,9 @@ firehose_slider_init();
 
 [% END %]
 </script>
+[% IF form.metamod %]
+</div>
+[% END %]
 
 __version__
 $Id$
