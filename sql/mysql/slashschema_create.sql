@@ -732,6 +732,19 @@ CREATE TABLE pollvoters (
 	KEY qid (qid,id,uid)
 ) TYPE=InnoDB;
 
+DROP TABLE IF EXISTS projects;
+CREATE TABLE projects (
+	id mediumint UNSIGNED NOT NULL auto_increment,
+	unixname varchar(24) NOT NULL DEFAULT '',
+	textname varchar(64) NOT NULL DEFAULT '',
+	url_id INT(10) UNSIGNED NOT NULL DEFAULT 0,
+	createtime DATETIME DEFAULT '1970-01-01 00:00:00' NOT NULL,
+	srcname varchar(32) NOT NULL DEFAULT 0,
+	description         TEXT NOT NULL DEFAULT '',
+	PRIMARY KEY (id),
+	UNIQUE unixname (unixname)
+) Type=InnoDB;
+
 #
 # Table structure for table 'querylog'
 #

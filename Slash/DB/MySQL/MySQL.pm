@@ -12723,6 +12723,26 @@ sub logCommentPromotion {
 	$self->sqlInsert("comment_promote_log", { cid => $cid, -ts => "NOW()" });
 }
 
+sub createProject {
+	my($self, $data) = @_;
+	$self->sqlInsert("projects", $data);
+}
+
+sub getProject {
+	my $answer = _genericGetCache({
+		table		=> 'topics',
+		table_prime	=> 'tid',
+		arguments	=> \@_,
+	});
+	return $answer;
+}
+
+sub getProjectByName {
+	my ($self, $name) = @_;
+	my $name_q = $self->sqlQuote($name);
+	return $self->sqlSelectHashref("*","projects", "unixname=$name_q");
+}
+
 sub _getStorySelfLink {
 	my($self, $stoid, $change_hr) = @_; 
 	my $story = $self->getStory($stoid);

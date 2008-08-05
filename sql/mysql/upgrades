@@ -5440,3 +5440,5 @@ UPDATE vars SET value = 'T_2_5_0_214' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+# for plugins/FireHose
+ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment","discussion","project") default 'submission';
