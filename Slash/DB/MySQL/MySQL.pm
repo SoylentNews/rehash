@@ -12751,7 +12751,17 @@ sub DESTROY {
 	# Slash::DB::Utility).
 	$self->_querylog_writecache;
 
-	$self->SUPER::DESTROY if $self->can("SUPER::DESTROY"); # up up up up up up
+	# Slash::Tagbox, a subclass of MySQL.pm, does this too:
+	#	$self->{_dbh}->disconnect if $self->{_dbh} && !$ENV{GATEWAY_INTERFACE};
+	# I'm not sure why we don't do that here instead.  I'm not sure
+	# how often it actually happens that a MySQL.pm is destroyed by
+	# slashd, and I don't know exactly how DBI.pm handles disconnects
+	# for its connect_cached pool, but if DESTROY is called, wouldn't
+	# it make sense to help mysqld manage its connections by releasing
+	# a dbh?
+	# - jamie 2008/08/04
+
+	$self->SUPER::DESTROY if $self->can("SUPER::DESTROY");
 }
 
 
