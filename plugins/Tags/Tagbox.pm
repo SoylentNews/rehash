@@ -66,6 +66,7 @@ sub new {
 	bless($self, $class);
 	$self->{virtual_user} = $user;
 	$self->sqlConnect();
+warn "Tagbox new calling init";
 
 	$self->init();
 	$self->init_tagfilters();
@@ -84,6 +85,7 @@ sub isInstalled {
 
 sub init {
 	my($self) = @_;
+warn "Tagbox init";
 	# by default, nothing to init
 }
 
