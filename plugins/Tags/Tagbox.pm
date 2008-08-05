@@ -453,7 +453,7 @@ sub feed_newtags_filter {
 	# If a tagnameid filter is in place, eliminate any tags with
 	# tagnames not on the list.
 	if ($self->{filter_tagnameid}) {
-		my $tagnameid_ar = ref($self->{filter_tagnameid}})
+		my $tagnameid_ar = ref($self->{filter_tagnameid})
 			? $self->{filter_tagnameid} : [ $self->{filter_tagnameid} ];
 		my %tagnameid_wanted = ( map { ($_, 1) } @$tagnameid_ar );
 		$tags_ar = [ grep { $tagnameid_wanted{ $_->{tagnameid} } } @$tags_ar ];
@@ -462,17 +462,21 @@ sub feed_newtags_filter {
 	# If a gtid filter is in place, eliminate any tags on globjs
 	# not of those type(s).
 	if ($self->{filter_gtid}) {
-		my $gtid_ar = ref($self->{filter_gtid}})
+		my $gtid_ar = ref($self->{filter_gtid})
 			? $self->{filter_gtid} : [ $self->{filter_gtid} ];
-		my %all_globjids = ( map { ($_->{globjid}, 1) } @$tags_ar );
-		my $all_globjids_str = join(",", sort { $a <=> $b } keys %all_globjids);
-		return [ ] if !$comments_gtid || !$all_globjids_str;
-		my $globjids_wanted_ar = $self->sqlSelectColArrayref(
-			'globjid',
-			'globjs',
-			"globjid IN ($all_globjids_str) AND gtid=$comments_gtid");
-		my %globjid_wanted = ( map { ($_, 1) } @$globjids_wanted_ar );
-		$tags_ar = [ grep { $globjid_wanted{ $_->{globjid} } } @$tags_ar ];
+		my $all_gtid_str = join(',', sort { $a <=> $b } @$gtid_ar);
+		my $all_globjids_str = join(',', sort { $a <=> $b } keys %all_globjids);
+		if ($all_gtid_str && $all_globjids_str) {
+			my $globjids_wanted_ar = $self->sqlSelectColArrayref(
+				'globjid',
+				'globjs',
+				"globjid IN ($all_globjids_str)
+				 AND gtid IN ($all_gtid_str)");
+			my %globjid_wanted = ( map { ($_, 1) } @$globjids_wanted_ar );
+			$tags_ar = [ grep { $globjid_wanted{ $_->{globjid} } } @$tags_ar ];
+		} else {
+			$tags_ar = [ ];
+		}
 	}
 
 	return $tags_ar;
