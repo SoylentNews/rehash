@@ -189,7 +189,7 @@ function tagsToggleStoryDiv(id, is_admin, type) {
 }
 
 function tagsHideBody(id) {
-	close_tag_widget('#firehoselist > #firehose-'+id+' #tag-widget-'+id);
+	//close_tag_widget('#firehoselist > #firehose-'+id+' #tag-widget-'+id);
 
 	$('#toggletags-body-'+id).setClass('tagshide');		// Make the body of the tagbox vanish
 	$('#tagbox-title-'+id).setClass('tagtitleclosed');	// Make the title of the tagbox change back to regular
@@ -207,7 +207,7 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 			firehose_get_admin_extras(id);
 		}
 
-		open_tag_widget('#firehoselist > #firehose-'+id+' #tag-widget-'+id, 'fetch-tags-now')
+		//open_tag_widget('#firehoselist > #firehose-'+id+' #tag-widget-'+id, 'fetch-tags-now')
 	}
 
 	//alert("Tags show body / Type: " + type );
@@ -216,66 +216,68 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 	$('#tagbox-title-'+id).setClass("tagtitleopen");	// Make the title of the tagbox change to white-on-green
 	$('#toggletags-body-'+id).setClass("tagbody");		// Make the body of the tagbox visible
 
-	// If the tags-user div hasn't been filled, fill it.
-	var tagsuser = $('#tags-user-' + id);
-	if (tagsuser.html() == "") {
-		// The tags-user-123 div is empty, and needs to be
-		// filled with the tags this user has already
-		// specified for this story, and a reskey to allow
-		// the user to enter more tags.
-		tagsuser.html("Retrieving...");
-		var params = {};
-		if (type == "stories") {
-			params['op'] = 'tags_get_user_story';
-			params['sidenc'] = id;
-		} else if (type == "urls") {
-			//alert('getting user urls ' + id);
-			params['op'] = 'tags_get_user_urls';
-			params['id'] = id;
-		} else if (type == "firehose") {
-			params['op'] = 'tags_get_user_firehose';
-			params['id'] = id;
-		}
-		params['newtagspreloadtext'] = newtagspreloadtext;
-		var handlers = {
-			onComplete: function() {
-				$dom('newtags-'+id).focus();
-			}
-		}
-		ajax_update(params, 'tags-user-' + id, handlers);
-		//alert('after ajax_update ' + tagsuserid);
-
-		// Also fill the admin div.  Note that if the user
-		// is not an admin, this call will not actually
-		// return the necessary form (which couldn't be
-		// submitted anyway).  The is_admin parameter just
-		// saves us an ajax call to find that out, if the
-		// user is not actually an admin.
-		if (is_admin) {
-			var tagsadminid = 'tags-admin-' + id;
-			params = {};
+	// If there is a tags-user div, and it hasn't been filled, fill it.
+	var $tagsuser = $('#tags-user-' + id);
+	if ( $tagsuser.length ) {
+		if ($tagsuser.html() == "") {
+			// The tags-user-123 div is empty, and needs to be
+			// filled with the tags this user has already
+			// specified for this story, and a reskey to allow
+			// the user to enter more tags.
+			$tagsuser.html("Retrieving...");
+			var params = {};
 			if (type == "stories") {
-				params['op'] = 'tags_get_admin_story';
+				params['op'] = 'tags_get_user_story';
 				params['sidenc'] = id;
 			} else if (type == "urls") {
-				params['op'] = 'tags_get_admin_url';
+				//alert('getting user urls ' + id);
+				params['op'] = 'tags_get_user_urls';
 				params['id'] = id;
 			} else if (type == "firehose") {
-				params['op'] = 'tags_get_admin_firehose';
+				params['op'] = 'tags_get_user_firehose';
 				params['id'] = id;
 			}
-			ajax_update(params, tagsadminid);
-		}
+			params['newtagspreloadtext'] = newtagspreloadtext;
+			var handlers = {
+				onComplete: function() {
+					$dom('newtags-'+id).focus();
+				}
+			}
+			ajax_update(params, 'tags-user-' + id, handlers);
+			//alert('after ajax_update ' + tagsuserid);
 
-	} else {
-		if (newtagspreloadtext) {
-			// The box was already open but it was requested
-			// that we append some text to the user text.
-			// We can't do that by passing it in, so do it
-			// manually now.
-			var textinput = $dom('newtags-'+id);
-			textinput.value += ' ' + newtagspreloadtext;
-			textinput.focus();
+			// Also fill the admin div.  Note that if the user
+			// is not an admin, this call will not actually
+			// return the necessary form (which couldn't be
+			// submitted anyway).  The is_admin parameter just
+			// saves us an ajax call to find that out, if the
+			// user is not actually an admin.
+			if (is_admin) {
+				var tagsadminid = 'tags-admin-' + id;
+				params = {};
+				if (type == "stories") {
+					params['op'] = 'tags_get_admin_story';
+					params['sidenc'] = id;
+				} else if (type == "urls") {
+					params['op'] = 'tags_get_admin_url';
+					params['id'] = id;
+				} else if (type == "firehose") {
+					params['op'] = 'tags_get_admin_firehose';
+					params['id'] = id;
+				}
+				ajax_update(params, tagsadminid);
+			}
+
+		} else {
+			if (newtagspreloadtext) {
+				// The box was already open but it was requested
+				// that we append some text to the user text.
+				// We can't do that by passing it in, so do it
+				// manually now.
+				var textinput = $dom('newtags-'+id);
+				textinput.value += ' ' + newtagspreloadtext;
+				textinput.focus();
+			}
 		}
 	}
 }
@@ -442,13 +444,13 @@ function toggle_firehose_body(id, is_admin) {
 	} else if (fhbody.className == "body") {
 		fhbody.className = "hide";
 		fh.className = "briefarticle" + usertype;
-		close_tag_widget($(fh).find('#tag-widget-'+id));
+		//close_tag_widget($(fh).find('#tag-widget-'+id));
 		/*if (is_admin)
 			tagsHideBody(id);*/
 	} else if (fhbody.className == "hide") {
 		fhbody.className = "body";
 		fh.className = "article" + usertype;
-		open_tag_widget($(fh).find('#tag-widget-'+id), 'fetch-tags-now');
+		//open_tag_widget($(fh).find('#tag-widget-'+id), 'fetch-tags-now');
 		/*if (is_admin)
 			tagsShowBody(id, is_admin, '', "firehose"); */
 	}
@@ -464,7 +466,7 @@ function firehose_set_options(name, value) {
 	}
 
 	var pairs = [
-		// name		value		curid		newid		newvalue 	title 
+		// name		value		curid		newid		newvalue 	title
 		["orderby", 	"createtime", 	"popularity",	"time",		"popularity"	],
 		["orderby", 	"popularity", 	"time",		"popularity",	"createtime"	],
 		["orderdir", 	"ASC", 		"asc",		"desc",		"DESC"],
@@ -686,6 +688,171 @@ function firehose_remove_tab(tabid) {
 }
 
 
+//
+// firehose + tagui
+//
+
+var $related_trigger = $();
+
+function firehose_toggle_tagui( toggle ) {
+	setFirehoseAction();
+
+	var $toggle = $(toggle), $widget = $(toggle.parentNode), $server = $(toggle).nearest_parent('[tag-server]');
+	var id = $server.attr('tag-server');
+
+	var button_text;
+
+	$widget.each(function(){
+		this.set_context()
+	});
+
+	var expanded = $widget.toggleClass('expanded').hasClass('expanded');
+
+	if ( expanded ) {
+		button_text = '[-]';
+		$server.each(function(){ this.fetch_tags() });
+		if ( fh_is_admin )
+			firehose_get_admin_extras(id);
+		$widget.find('.tag-entry:visible:first').each(function(){
+			this.focus()
+		});
+	} else {
+		button_text = '[+]';
+	}
+
+	$('.button', toggle).text(button_text);
+	$server
+		.find('#toggletags-body-'+id)
+			.toggleClassTo('tagshide', !expanded)
+			.toggleClassTo('tagbody', expanded);
+}
+
+function firehose_click_tag( event ) {
+	var $target = $(event.target);
+	var command='';
+
+	$related_trigger = $target;
+
+	if ( $target.is('a.up') ) {
+		command = 'nod';
+	} else if ( $target.is('a.down') ) {
+		command = 'nix';
+	} else if ( $target.is('.tag') ) {
+		command = $target.text();
+	} else if ( $target.parent().is('.tmenu') ) {
+		var op = $target.text();
+		var $tag = $target.nearest_parent(':has(span.tag)').find('.tag');
+		$related_trigger = $tag;
+
+		var tag = $tag.text();
+		command = normalize_tag_menu_command(tag, op);
+	} else {
+		$related_target = $()
+	}
+
+	if ( command ) {
+		var $server = $target.nearest_parent('[tag-server]');
+
+		if ( event.shiftKey ) {
+			// if the shift key is down, append the tag to the edit field
+			$server.find('.tag-entry:text:visible:first').each(function(){
+				if ( this.value ) {
+					var last_char = this.value[ this.value.length-1 ];
+					if ( '-^#!)_ '.indexOf(last_char) == -1 )
+						this.value += ' ';
+				}
+				this.value += command;
+				this.focus();
+			});
+		} else {
+			// otherwise, send it the server to be processed
+			$server.each(function(){
+				this.submit_tags(command, { fade_remove: 400, classes: 'not-saved'})
+			});
+		}
+	}
+
+	return false
+}
+
+function firehose_handle_context_triggers( commands ){
+	var context;
+	$.each(commands.slice(0).reverse(), function(i, command){
+		if ( command in context_triggers ) {
+			context = command;
+			return false
+		}
+	});
+
+	$('.tag-widget:not(.nod-nix-reasons)', this)
+		.each(function(){
+			this.set_context(context)
+		});
+
+	return commands
+}
+
+
+function firehose_handle_nodnix( commands ){
+	if ( commands.length ) {
+		var $reasons = $('.nod-nix-reasons', this);
+		function nodnix_context( context ){
+			$reasons.each(function(){
+				this.set_context(context)
+			})
+		}
+
+		nodnix_context(undefined);
+
+		var tag_server = this;
+		$.each(commands.slice(0).reverse(), function(i, cmd){
+			if ( cmd=='nod' || cmd=='nix' ) {
+				firehose_fix_up_down(
+					tag_server.getAttribute('tag-server'),
+					{ nod:'votedup', nix:'voteddown' }[cmd]
+				);
+				nodnix_context(cmd);
+				return false
+			}
+		})
+	}
+
+	return commands
+}
+
+function firehose_handle_comment_nodnix( commands ){
+	return $.map(commands, function( cmd ){
+		var match = /^([-!]*)(nod|nix)$/.match(cmd);
+		if ( match ) {
+			return match[1] + 'meta' + match[2]
+		}
+		return cmd
+	})
+}
+
+
+function firehose_init_tagui( parents ){
+	$init_tag_widgets(
+		$(parents)
+			.append('<div class="tag-widget nod-nix-reasons stub">' +
+					'<div class="tag-display stub" context="related" />' +
+				'</div>')
+			.nearest_parent('[tag-server]')
+				.each(function(){
+					var $this	= $(this);
+					var id		= $this.attr('tag-server');
+					var is_comment	= $this.attr('type') == 'comment';
+
+					if ( fh_is_admin )
+						this.command_pipeline.push(firehose_handle_admin_commands)
+					this.command_pipeline.push(
+						firehose_handle_context_triggers,
+						is_comment ? firehose_handle_comment_nodnix : firehose_handle_nodnix
+					);
+				})
+				.find('.tag-widget')
+	)
+}
 // firehose functions end
 
 // helper functions
@@ -922,21 +1089,18 @@ function firehose_handle_update() {
 	}
 
 	// XXX temporary admin-only access to the unfinished tag-wiget
-	if ( fh_is_admin && $('.tag-widget').length ) {
-		add_firehose_nodnix_glue(
+	if ( fh_is_admin && $('.tag-widget:first').length ) {
+		firehose_init_tagui(
 			$('#firehoselist > [class*=article]:not([tag-server])')
 				.each(function(){
 					install_tag_server(this, firehose_id_of(this))
 				})
-				.find('.up, .down')
-					.click(click_tag)
-				.end()
 				.find('.title')
 		)
 	}
 
 	if ( focused_text_field )
-		focused_text_field.focus();
+		focused_text_field.triggerHandler('focus');
 }
 
 function firehose_adjust_window(onscreen) {

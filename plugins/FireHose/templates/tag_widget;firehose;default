@@ -1,0 +1,97 @@
+__section__
+default
+__description__
+This builds a tag-widget bound to a containing firehose entry.
+
+tags_top
+__title__
+Useless title to template
+__page__
+firehose
+__lang__
+en_US
+__name__
+tag_widget
+__seclev__
+10000
+__template__
+[% IF user.tags_canread_stories %]
+	[%# the nod/nix 'capsule' %]
+	[% IF !form.skipvote && !options.nothumbs && !skipvote %]
+	<div class="tags">
+		<span id="updown-[% item.id %]" class="vote[% IF vote == "down" %]ddown[% ELSIF vote == "up" %]dup[% END %]">
+			<a href="#" class="up" title="Vote this item up">+</a>
+			<a href="#" class="down" title="Vote this item down">-</a>
+		</span>
+	</div>
+	[% END %]
+[% IF user.tags_canwrite_stories %]
+	<div class="tagshide" id="toggletags-body-[% id %]">
+	[% IF user.is_admin && !user.firehose_usermode %]
+		<div id="tags-admin-[% id %]" class="tagadmin"></div>
+		<div id="admin-extras-[% item.id %]" class="tagadminextra"><a href="#" onclick="firehose_get_admin_extras('[% item.id %]'); return false">Get extras</a></div>
+	[% END %]
+		<div id="toggletags-message-[% id %]" class="message"></div>
+	</div>
+[% END %]
+<div id="tag-widget-[% id %]" class="tag-widget body-widget stub">
+	[% IF user.is_admin && !user.firehose_usermode %]
+	<span class="admin-buttons">
+		[%# the note %]
+		<div class="note-wrapper[% IF !item.note %] no-note[% END %]">
+			[%# the note edit field (hidden by default) %]
+			<span id="note-form-[% item.id %]" class="hide">
+				<input type="text" id="note-input-[% item.id %]" value="[% item.note | strip_attribute %]" size="30" onkeyup="handleEnter(event, firehose_save_note, '[% id %]')">
+				<input type="button" value="save" onclick="firehose_save_note('[% item.id %]')">
+			</span>
+			[%# the note button %]
+			<a id="note-text-[% item.id %]" href="#" onclick="firehose_open_note('[% item.id %]'); return false">
+				[%- IF !item.note  %]N[% END -%][% item.note | strip_literal -%]
+			</a>
+		</div>
+		[%# the history button %]
+		<span id="taghist-[% id %]"><a href="#" onclick="tagsHistory('[% id %]','firehose'); return false">H</a></span>
+	</span>
+	[% END %]
+	[%# the disclosure triangle %]
+<a class="edit-toggle"
+	[%- IF user.tags_canwrite_stories	%] href="#" onclick="firehose_toggle_tagui(this), false"
+	[%- ELSIF user.is_anon			%] href="#" onclick="show_login_box(), false"
+	[%- ELSE				%] href="[% gSkin.rootdir %]/subscribe.pl"
+	[%- END %]><span class="button">[+]</span></a>
+<div class="tag-display-set train">
+	[% PROCESS tag_display context = "top" label = "Top Tags" tags = [] %]
+	[% PROCESS tag_display context = "system" label = "System Tags" tags = tags_top %]
+[% IF user.tags_canwrite_stories %]
+	[% IF item.type == "story" -%]
+		[%- IF constants.signoff_use
+			&& ((user.is_admin && !user.firehose_usermode) || user.acl.signoff_allowed)
+			&& ! Slash.db.hasUserSignedStory(item.srcid, user.uid)- %]
+			[%- PROCESS tag_display
+				context = "signoff"
+				label = "Signoff"
+				tags = ["unsigned"]
+				attributes = 'stoid="' _ item.srcid _ '"'
+			-%]
+		[%- END -%]
+	[%- END %]
+	[% PROCESS tag_display context = "user" label = "My Tags" tags = [] attributes = '' %]
+</div>
+[%# the tag input field %]
+<form class="tag-editor" onsubmit="form_submit_tags(this, {fade_remove: 400, classes:'not-saved'}); return false">
+	<input class="tag-entry" type="text" size="10">
+	<span class="tag-server-busy"><img src="[% constants.imagedir %]/spinner2.gif"></span>
+</form>
+[%# the suggestions bar %]
+<div class="context-sensitive">
+	[% PROCESS tag_display context = "related" label = "Suggestions" tags = [] attributes = '' %]
+</div>
+[% ELSE %]
+</div>
+[%# progress spinner in case it wasn't provided by the input field %]
+<span class="tag-server-busy"><img src="[% constants.imagedir %]/spinner2.gif"></span>
+[% END %]
+</div>
+[% END %]
+__version__
+$Id$

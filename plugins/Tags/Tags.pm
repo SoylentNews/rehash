@@ -1346,7 +1346,8 @@ sub ajaxSetGetCombinedTags {
 		my $tags_writer = getObject('Slash::Tags');
 		$user_tags = $tags_writer->setTagsForGlobj($item_id, $table, '', {
 			deactivate_by_operator => 1,
-			tagname_required => 1
+			tagname_required => 1,
+			include_private => 1
 		});
 		if ( $user->{is_admin} && $type eq 'firehose' ) {
 			my $added_tags =
@@ -1358,7 +1359,7 @@ sub ajaxSetGetCombinedTags {
 			$base_writer->setSectionTopicsFromTagstring($form->{id}, $added_tags);
 		};
 	} else {
-		my $current_tags_array = $tags_reader->getTagsByNameAndIdArrayref($table, $item_id, { uid => $uid });
+		my $current_tags_array = $tags_reader->getTagsByNameAndIdArrayref($table, $item_id, { uid => $uid, include_private => 1 });
 		$user_tags = join ' ', sort map { $_->{tagname} } @$current_tags_array;
 	}
 
@@ -1372,7 +1373,7 @@ sub ajaxSetGetCombinedTags {
 			my $skin = $base_writer->getSkin($s);
 			$section_tag = $skin->{name};
 		} else {
-			$section_tag = 'slashdot';
+			$section_tag = 'mainpage';
 		}
 	}
 
@@ -1383,12 +1384,12 @@ sub ajaxSetGetCombinedTags {
 		$topic_tags = $topic->{keyword};
 	}
 
-	my $vote_tags = $tags_reader->getUserNodNixForGlobj($globjid, $uid);
+	# my $vote_tags = $tags_reader->getUserNodNixForGlobj($globjid, $uid);
 
 	# XXX how to get the system tags?
 	my $system_tags = $datatype_tag . ' ' . $section_tag . ' ' . $topic_tags;
 
-	return '<vote>' . $vote_tags . '<user>' . $user_tags . '<top>'. $top_tags . '<system>' . $system_tags;
+	return '<user>' . $user_tags . '<top>'. $top_tags . '<system>' . $system_tags;
 }
 
 {

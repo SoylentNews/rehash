@@ -1,0 +1,34 @@
+__section__
+default
+__description__
+This builds a tag-display
+
+context	        = what tags to programmatically insert, e.g., 'user', 'top'
+tags	        = array of initial tags
+label	        = optional display legend, e.g., "My Tags"
+class           = additional class(es)
+attributes      = additional attributes, e.g., 'stoid="247"'
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+tag_display
+__seclev__
+10000
+__template__
+[% sep = '' -%]
+<div class="tag-display stub[% IF class %] [% class %][% END %]"
+	[%- IF context %] context="[% context %]"[%END %]
+	[%- IF label %] label="[% label %]"[% END -%]
+	[%- IF attributes %] [% attributes %][% END %]>
+	[%- IF tags.size -%]
+		[%- FOR t = tags -%]
+			[%- sep %][% t.split(':').0 -%]
+		[%- sep = ' '; END -%]
+	[%- END -%]
+</div>
+__version__
+$Id$

@@ -2,22 +2,20 @@
 
 var tag_server_fns = {
 
-	broadcast_tag_lists: function( broadcasts ){
-		var tuples = ('<user>' + broadcasts).split(/\n?<(\w*)>/).slice(1);
+	broadcast_tag_lists: function( broadcasts, options ){
+		var tuples = ('<notify>' + broadcasts).split(/\n?<([\w:]*)>/).slice(1);
 		if ( tuples && tuples.length >= 2 ) {
-			var $listeners = $('.ready[listen]', this);
+			var $listeners = $('.ready[context]', this);
+
+			// work backwards so 'notify' context is last
 			while ( tuples.length >= 2 ) {
-				var broadcast_kind = tuples.shift();
-				var broadcast = tuples.shift();
+				var data = tuples.pop();
+				var context_name, context = tuples.pop();
+				[ context_name ] = context.split(':');
 
-				if ( ! broadcast.length )
-					continue;
-
-				$listeners.filter('[listen*=' + broadcast_kind + ']').each(function(){
+				$listeners.filter('[context*=' + context_name + ']').each(function(){
 					if ( this.receive_broadcast )
-						this.receive_broadcast(broadcast, broadcast_kind);
-					//else
-					//	console.log('broadcast --- "ready", but no handler: ', this);
+						this.receive_broadcast(data, context, options);
 				})
 			}
 			recompute_css_classes(this, $listeners);
@@ -25,9 +23,45 @@ var tag_server_fns = {
 		return this
 	},
 
-	_tags_via_ajax: function( tag_cmds ){
+
+	preprocess_commands: function( commands, options ){
+		var server = this;
+		$.each(this.command_pipeline, function(i, handler){
+			commands = handler.apply(server, [ commands, options ])
+		});
+
+		return commands
+	},
+
+
+	_tags_via_ajax: function( tag_cmds, options ){
+
+		var feedback_options = $.extend(
+			{},
+			{ // default feedback
+				order:		'append',
+				classes:	'not-saved'
+			},
+			options
+		);
+
+		var server_params = $.extend(
+			{},
+			{ // default params for the server-side handler
+				op:		'tags_setget_combined',
+				id:		$(this).attr('tag-server'),
+				reskey:		reskey_static,
+				limit_fetch:	''
+			},
+			options
+		);
+		server_params.tags = '';
+
 		if ( tag_cmds ) {
-			tag_cmds = normalize_tag_commands(tag_cmds, /*excluding: user tags under */this);
+			tag_cmds = normalize_tag_commands(
+				this.preprocess_commands(list_as_array(tag_cmds), options),
+				this
+			);
 
 			// if caller wanted to execute some commands,
 			//	but they were all normalized away
@@ -38,44 +72,80 @@ var tag_server_fns = {
 
 			// 'harden' the new tags into the user tag-display, but styled 'not-saved'
 			// tags in the response from the server will wipe-out 'not-saved'
-			var command_feedback = normalize_tag_commands(tag_cmds, /*excluding:*/nodnix_commands);
-			$('.tag-display.ready[listen*=user]', this).each(function(){
-				this.update_tags(command_feedback, 'prepend', 'not-saved')
+			var $user_displays = $('.tag-display.ready[context*=user]', this);
+			$user_displays.each(function(){
+				this.update_tags(tag_cmds, feedback_options)
 			});
+
+			// Just for fun...
+			if ( options && options.classes )
+				animate_wiggle($user_displays.find('.'+options.classes + ':not(:contains("-"))'));
+
+			server_params.tags = list_as_string(tag_cmds);
+			// console.log('SENDING: '+server_params.tags);
 		}
 
-		var server = this;
-		var $busy = $('.tag-server-busy', server).show();
-		$.post('/ajax.pl', {
-			op:	'tags_setget_combined',
-			id:	$(this).attr('tag-server'),
-			tags:	list_as_string(tag_cmds),
-			reskey:	reskey_static,
-		}, function( server_response ){
-			//console.log('server._tags_via_ajax --- server_response: ' + server_response);
-			server.broadcast_tag_lists(server_response);
-			$busy.removeAttr('style')
-		}, 'text');
+
+		var tag_server = this.mark_busy(true);
+		$.ajax($.extend(
+			{},
+			{
+				url:		'/ajax.pl',
+				type:		'POST',
+				dataType:	'text',
+				data:		server_params,
+				success: 	function( server_response ){
+							// console.log('RECEIVED: '+server_response);
+							tag_server.broadcast_tag_lists(server_response, options)
+						},
+				complete: 	function(){
+							tag_server.mark_busy(false)
+						}
+			},
+			options && options.ajax
+		));
 		return this
 	},
 
 
-	fetch_tags: function(){
-		return this._tags_via_ajax()
+	fetch_tags: function( options ){
+		return this._tags_via_ajax('', options)
 	},
 
 
-	submit_tags: function( tag_cmds ){
-		return this._tags_via_ajax(tag_cmds)
+	submit_tags: function( tag_cmds, options ){
+		return this._tags_via_ajax(tag_cmds, options)
+	},
+
+
+	mark_busy: function( if_busy ){
+		var was_busy = this.busy_depth > 0;
+		this.busy_depth += if_busy ? 1 : -1;
+		var now_busy = this.busy_depth > 0;
+
+		if ( now_busy != was_busy ) {
+			var $busy = $('.tag-server-busy', this);
+			if ( now_busy )
+				$busy.show();
+			else
+				$busy.removeAttr('style')
+		}
+
+		return this
 	}
 
 };
 
 function install_tag_server( selector, item_id ) {
+	if ( item_id === undefined )
+		item_id = '*';
+
 	return $(selector)
 		.attr('tag-server', item_id)
 		.each(function(){
-			$.extend(this, tag_server_fns)
+			$.extend(this, tag_server_fns);
+			this.busy_depth = 0;
+			this.command_pipeline = [ normalize_nodnix ];
 		})
 }
 
@@ -92,82 +162,29 @@ function bare_tag( t ) {
 }
 
 
-function set_context_from_tags( root, tags ) {
-	var context = $.map(list_as_array(tags), function(k){
-		if ( k in context_triggers )
-			return k
-	}).reverse()[0] || undefined;
-
-	var is_nodnix_context = context=='nod' || context=='nix';
-
-	$('.tag-widget', root)
+function form_submit_tags( form, options ){
+	var $input = $('.tag-entry:input', form);
+	$related_trigger = $input;
+	$(form).nearest_parent('[tag-server]')
 		.each(function(){
-			if ( this.set_context )
-				this.set_context(
-					($(this).hasClass('nod-nix-reasons') == is_nodnix_context)
-						? context
-						: undefined
-				)
+			var tag_cmds = $input.val();
+			$input.val('');
+			this.submit_tags(tag_cmds, options)
 		})
 }
 
 
-function form_submit_tags( form ){
-	var $form = $(form);
-	var $input = $('.tag-entry:input', form);
-	var $server = $form.nearest_parent('[tag-server]');
-
-	$server.each(function(){
-		var tag_cmds = $input.val();
-		$input.val('');
-		this.submit_tags(tag_cmds);
-		set_context_from_tags(this, tag_cmds);
-	})
-}
-
-
-function click_tag( event ) {
-	var $this = $(this);
-
-	var $target = $(event.target);
-
-	var command='';
-
-	if ( $target.is('a.up') ) {
-		command = 'nod';
-	} else if ( $target.is('a.down') ) {
-		command = 'nix';
-	} else if ( $target.is('.tag') ) {
-		command = $target.text();
-	} else if ( $target.parent().is('.tmenu') ) {
-		var op = $target.text();
-		var tag = $target.nearest_parent(':has(span.tag)').find('.tag').text();
-		command = normalize_tag_menu_command(tag, op);
-	}
-
-	if ( command ) {
-		var $server = $this.nearest_parent('[tag-server]');
-
-		if ( event.shiftKey ) {
-			// if the shift key is down, append the tag to the edit field
-			$server.find('.tag-entry:text:visible:first').each(function(){
-				if ( this.value ) {
-					var last_char = this.value[ this.value.length-1 ];
-					if ( '-#!)_ '.indexOf(last_char) == -1 )
-						this.value += ' ';
-				}
-				this.value += command;
-				this.focus();
-			});
-		} else {
-			// otherwise, send it the server to be processed
-			$server.each(function(){
-				this.submit_tags(command)
-			});
-		}
-
-		set_context_from_tags($server, command)
-	}
+function animate_wiggle( selector ){
+	var $list = $(selector);
+	$list
+		.animate({left: '-=3px'}, 20)
+		.animate({left: '+=6px'}, 20)
+		.animate({left: '-=6px'}, 20)
+		.animate({left: '+=6px'}, 20)
+		.animate({left: '-=3px'}, 20)
+		.queue(function(){
+			$(this).css({left: ''}).dequeue()
+		})
 }
 
 
@@ -194,25 +211,36 @@ var tag_display_fns = {
 		}
 
 		// now that we know how, iterate over my actual tags to build the result set
-		var m = {};
+		var if_mapped_all = true, map = {};
 		$('.tag', this).each(function(){
 			var bt = bare_tag($(this).text());
 			if ( map_fn(bt) )
-				m[bt] = this
+				map[bt] = this;
+			else
+				if_mapped_all = false
 		});
-		return m
+		return [ map, if_mapped_all ]
 	},
 
 
 	// replace existing tags and/or add new tags; preserves order of existing tags
-	//  optional string, how, tells where to add new tags { 'append', 'prepend' }
-	//  optional string, annotate, tells a css class to add to all touched tags
-	update_tags: function( tags, how, annotate ){
+	//  optional string, options.order, tells where to add new tags { 'append', 'prepend' }
+	//  optional string, options.classes, tells a css class to add to all touched tags
+	update_tags: function( tags, options ){
+		options = $.extend(
+			{},
+			{
+				order:		'append',
+				classes:	''
+			},
+			options
+		);
+
 		// invariant: before.count_tags() <= after.count_tags()
 		// no other call adds tags (except by calling _me_)
 
 		// the intersection of the requested vs. existing tags are the ones I can update in-place
-		var update_map = this.map_tags(tags = list_as_array(tags));
+		var update_map; [ update_map ] = this.map_tags(tags = list_as_array(tags));
 
 		// update in-place the ones we can; build a list of the ones we can't ($.map returns a js array)
 		var new_tags_seen = {};
@@ -234,57 +262,74 @@ var tag_display_fns = {
 			var $new_elems = $(join_wrap(new_tags, '<li class="p"><span class="tag">', '</span></li>'))
 				.append(this.tag_display_data.menu_template);
 
-			// by default, insert the new tags at the front of the list
-			if ( how !== 'append' ) how = 'prepend';
-			this.tag_display_data.$list_el[how]($new_elems);
+			this.tag_display_data.$list_el[options.order]($new_elems);
 
 			// add in a list of the actual .tag elements we created from scratch
 			$changed_tags = $changed_tags.add( $new_elems.find('.tag') );
 
-			this.mark_if_empty(false);
+			this.$mark_empty(false);
 		}
 
 		// for every .tag we added/changed, fix parent <li>'s css class(es)
-		//   Use case for annotate: the tag was modified locally, we mark it with "not-saved" until the server
+		//   Use case for options.classes: the tag was modified locally, we mark it with "not-saved" until the server
 		//   comes back with a complete list in response that will wipe out the "not-saved" class, essentially
 		//   confirming the user's change has been recorded
 		$changed_tags.each(function(){
 			var $tag = $(this);
 			$tag.parent()
 				.removeClass()
-				.addClass(static_css_classes_for($tag.text()) + ' ' + (annotate||''));
+				.addClass(static_css_classes_for($tag.text()) + ' ' + options.classes);
 		});
 		return this
 	},
 
 
-	remove_tags: function( tags ){
+	remove_tags: function( tags, options ){
+		var opts = $.extend({}, { fade_remove: 0 }, options);
+
 		// invariant: before.count_tags() >= after.count_tags()
 		// no other call removes tags (except by calling _me_)
 
 		// when called without an argument, removes all tags, otherwise
 		//   tags to remove may be specified by string, an array, or the result of a previous call to map_tags
+		var if_remove_all;
 		if ( !tags || tags.length )
-			tags = this.map_tags(tags);
+			[ tags, if_remove_all ] = this.map_tags(tags);
 
-		$.each(tags, function(bt, entry){
-			$(entry).parents('li:first').remove()
-		});
-		return this.mark_if_empty()
+		var $remove_li = $(values(tags)).parent();
+
+		var display = this;
+		if ( opts.fade_remove ) {
+			$remove_li
+				.fadeOut(opts.fade_remove)
+				.queue(function(){
+					$(this).remove().dequeue();
+					if ( if_remove_all )
+						display.$mark_empty();
+				})
+		} else {
+			$remove_li.remove();
+			this.$mark_empty(if_remove_all);
+		}
+
+		return this
 	},
 
 
 	// like remove_tags() followed by update_tags(tags) except order preserving for existing tags
-	set_tags: function( tags ){
+	set_tags: function( tags, options ){
 		var allowed_tags = map_list_to_set(tags = list_as_array(tags), bare_tag);
-		this.remove_tags(this.map_tags(function(bt){
+		var removed_tags; [ removed_tags ] = this.map_tags(function(bt){
 			return !(bt in allowed_tags)
-		}));
-		return this.update_tags(tags, 'append')
+		});
+
+		return this
+			.remove_tags(removed_tags, options)
+			.update_tags(tags, options)
 	},
 
 
-	mark_if_empty: function( if_empty ){
+	$mark_empty: function( if_empty ){
 		var $this = $(this);
 		if ( if_empty === undefined )
 			if_empty = ! $this.is(':has(span.tag)');
@@ -292,13 +337,13 @@ var tag_display_fns = {
 	},
 
 
-	mark_dirty: function( if_dirty ){
+	$mark_dirty: function( if_dirty ){
 		return $(this).toggleClassTo('dirty', if_dirty)
 	},
 
 
-	receive_broadcast: function( tags ){
-		return this.set_tags(tags)
+	receive_broadcast: function( tags, context, options ){
+		return this.set_tags(tags, options)
 	}
 
 }; // tag_display_fns
@@ -308,13 +353,13 @@ function $init_tag_displays( selector, options ){
 
 	var $tag_displays = $(selector);
 
-	// <div listen="user" label="My Tags">tag1 tag2 tag3</div>
+	// <div context="user" label="My Tags">tag1 tag2 tag3</div>
 	$tag_displays
 		.each(function(){
 			var $this = $(this);
 
 			var menu_template = join_wrap(
-				$this.attr('menu') || $init_tag_displays.menu_templates[$this.attr('listen')] || '',
+				$this.attr('menu') || $init_tag_displays.menu_templates[$this.attr('context')] || '',
 				'<li>', '</li>',
 				'<ul class="tmenu">', '</ul>'
 			);
@@ -339,29 +384,23 @@ function $init_tag_displays( selector, options ){
 
 			if ( tags ) this.set_tags(tags);
 		})
-		.click(click_tag) // one click-handler per display
 
 	return $tag_displays
 }
 
+$init_tag_displays.menu_templates = {
+	user:	'! x',
+	top:	'_ # ! )'
+}
+
 
 function cached_user_tags( selector ){
-	var $selector = $(selector);
-
-	var tags = $selector
-		.find('.tag-display.ready[listen=user] span.tag')
+	return $(selector)
+		.find('.tag-display.ready[context=user] span.tag')
 			.map(function(){
 				return $(this).text()
 			})
-			.get();
-
-	var vote = $selector.nearest_parent('[tag-server]').find('[id^=updown-]').attr('className');
-	vote = { 'votedup':'nod', 'voteddown':'nix' }[vote];
-
-	if ( vote )
-		tags.push(vote);
-
-	return tags
+			.get()
 }
 
 function normalize_tag_menu_command( tag, op ){
@@ -389,6 +428,12 @@ var nodnix_commands = {
 	'-!nod':	['-nix'],
 	'-!nix':	['-nod']
 };
+
+function normalize_nodnix( commands ){
+	return $.map(commands, function( cmd ){
+		return (cmd in nodnix_commands) ? nodnix_commands[cmd] : cmd
+	})
+}
 
 // filters commands, returning a list 'normalized' (as per comment at 'nodnix_commands', above)
 // and omitting any "add" commands for tags in excludes, or "deactivate" commands for tags _not_ in excludes
@@ -448,32 +493,51 @@ function normalize_tag_commands( commands, excludes ){
 	// .reverse(): process the commands from right to left
 	// so only the _last_ occurance is kept in case of duplicates
 	var already = {};
-	return $.map(commands.reverse(), function( c ){
-		var mapped = [];
-		$.each(c in nodnix_commands ? nodnix_commands[c] : [c], function(i, cmd){
-			if ( cmd
-				&& !(cmd in already)
-				&& !(cmd in excludes)
-				&& ( !filter_minus
-					|| cmd[0] != '-'
-					|| un(cmd) in excludes ) ) {
-				mapped.push(cmd);
-				already[ cmd ] = true;
-				already[ un(cmd) ] = true;
-			}
-		});
+	return $.map(commands.reverse(), function( cmd ){
+		if ( cmd
+			&& !(cmd in already)
+			&& !(cmd in excludes)
+			&& ( !filter_minus
+				|| cmd[0] != '-'
+				|| un(cmd) in excludes ) ) {
 
-		return mapped
+			already[ cmd ] = true;
+			already[ un(cmd) ] = true;
+			return cmd
+		}
 	}).reverse()
 }
 
+
+function slide_context_display( display ){
+	try {
+		var $display = $(display);
+		var display_width = $display.children('ul:first').width();
+
+		var $entry = $display.nearest_parent('[tag-server]');
+		var left_edge = $entry.offset().left;
+		var right_edge = left_edge + $entry.width();
+
+		var align_to = $related_trigger.offset().left;
+		if ( align_to + display_width > right_edge )
+			align_to = right_edge - display_width;
+		align_to -= 20;
+
+		var distance = align_to - $display.offset().left;
+		$display.css({width: display_width});
+		$display.animate({left: '+='+distance});
+	} catch ( e ) {
+	}
+
+	return $display
+}
 
 var gFocusedText;
 
 var tag_widget_fns = {
 
 	init: function(){
-		$init_tag_displays($('.tag-display.stub, [listen]:not([class])', this));
+		$init_tag_displays($('.tag-display.stub, [context]:not([class])', this));
 
 		$(this)
 			.find('.tag-entry')
@@ -492,11 +556,10 @@ var tag_widget_fns = {
 						case ESC:
 							$this.val('');
 							return false;
-
 						case SPACE:
-							var form = $this.parent()[0]
+							var $form = $this.parent();
 							setTimeout(function(){
-								form_submit_tags(form)
+								$form.trigger("onsubmit")
 							}, 0);
 						default:
 							return true;
@@ -516,14 +579,49 @@ var tag_widget_fns = {
 
 
 	set_context: function( context ){
-		var suggestions = suggestions_for_context[context]
-				|| ( (context in context_triggers)
-						? suggestions_for_context['default']
-						: '' );
-		$('.ready[listen=context]', this)
+		var suggested_tags = '';
+		if ( context ) {
+			if ( !(context in suggestions_for_context) && context in context_triggers )
+				context = 'default';
+
+			if ( context in suggestions_for_context )
+				suggested_tags = suggestions_for_context[context];
+		}
+
+		suggested_tags = list_as_array(suggested_tags);
+		var has_tags = suggested_tags.length != 0;
+
+		var $nodnix, $others;
+		[ $nodnix, $others ] = $('.ready[context=related]', this).separate(function( elem ){
+			return $(elem).is(':has(.nod-nix-reasons)')
+		})
+
+		$nodnix.each(function(){
+			this.set_tags(suggested_tags)
+		});
+
+		$others
 			.each(function(){
-				this.set_tags(suggestions)
-			})
+				var $this = $(this);
+
+				var had_tags = $this.find('span.tag').length != 0;
+
+				if ( had_tags != has_tags )
+					$this.slideUp(100);
+
+				this.set_tags(suggested_tags);
+
+				if ( has_tags ) {
+					if ( !had_tags )
+						$this.slideDown(100);
+
+					$this.queue(function(){
+						slide_context_display(this).dequeue();
+					});
+				}
+
+			});
+		return this
 	},
 
 
@@ -586,50 +684,17 @@ function $init_tag_widgets( selector, options ){
 	return $tag_widgets
 }
 
-$init_tag_displays.menu_templates = {
-	user:	'! x',
-	top:	'_ # ! )'
-}
 
 
 
 
-// when the tag-widget is used in the firehose:
-function add_firehose_nodnix_glue( parent ){
 
-	// XXX do this in a template, and change this to an 'init' type function
-	var $parent = $(parent)
-		.append('<div class="tag-widget nod-nix-reasons stub">' +
-				'<div class="tag-display stub" listen="context" />' +
-				'<div class="firehose-listener" listen="vote" />' +
-			'</div>');
 
-	// add a special widget to show the nod/nix suggestions (right in the title bar)
-	var $widgets = $parent.find('.nod-nix-reasons');
-	open_tag_widget($init_tag_widgets($widgets));
-
-	// add a 'listener' to fix the up/down vote
-	$widgets.find('.firehose-listener[listen=vote]')
-		.each(function(){
-			$.extend(
-				this,
-				{
-					receive_broadcast: function( tags ){
-						firehose_fix_up_down(
-							$(this).nearest_parent('[tag-server]').attr('tag-server'),
-							{ nod: 'votedup', nix: 'voteddown' }[tags] || 'vote'
-						)
-					}
-				}
-			)
-		})
-		.addClass('ready');
-
-}
 
 
 
 /*
+	'w'	warning
 	'u'	user tag
 	't'	top tag
 	's'	system tag
@@ -647,19 +712,22 @@ function add_firehose_nodnix_glue( parent ){
 	'underscore'
  */
 
-var context_triggers = map_list_to_set(['nod', 'nix', 'submission','journal','bookmark','feed','story','vendor','misc','comment','discussion']);
+var context_triggers = map_list_to_set(['submission','journal','bookmark','feed','story','vendor','misc','comment','discussion']);
 
 var well_known_tags = {};
 
 $(function(){
 	update_class_map(well_known_tags, 's1', YAHOO.slashdot.sectionTags);
 	update_class_map(well_known_tags, 't2', YAHOO.slashdot.topicTags);
-	update_class_map(well_known_tags, 'f', YAHOO.slashdot.feedbackTags);
-	update_class_map(well_known_tags, 'e', YAHOO.slashdot.actionTags);
-	update_class_map(well_known_tags, 'e', YAHOO.slashdot.fhitemOpts);
-	update_class_map(well_known_tags, 'e', YAHOO.slashdot.storyOpts);
+	//update_class_map(well_known_tags, 'f', YAHOO.slashdot.feedbackTags);
+	//update_class_map(well_known_tags, 'e', YAHOO.slashdot.actionTags);
+	//update_class_map(well_known_tags, 'e', YAHOO.slashdot.fhitemOpts);
+	//update_class_map(well_known_tags, 'e', YAHOO.slashdot.storyOpts);
 	update_class_map(well_known_tags, 'y p', ['nod']);
 	update_class_map(well_known_tags, 'x p', ['nix']);
+
+	if ( fh_is_admin )
+		update_class_map(well_known_tags, 'w p', ['signed', 'unsigned', 'signoff']);
 })
 
 function update_class_map( css_class_map, css_class, tags ){
@@ -703,7 +771,7 @@ function static_css_classes_for( tag ){
 	return css_class
 }
 
-var css_class_for_listen = { user: 'u', top: 't', system: 's' };
+var css_class_for_context = { user: 'u', top: 't', system: 's' };
 
 function recompute_css_classes( root ){
 	var already = {};
@@ -719,10 +787,10 @@ function recompute_css_classes( root ){
 	// So, for each of the big three (user, top, system) tag-displays; extract
 	// their tags, and update our css class map for that display
 	$displays
-		.filter('.ready[listen]:not(.no-tags)')
+		.filter('.ready[context]:not(.no-tags)')
 			.each(function(){
-				var display = $(this).attr('listen');
-				var css_class = css_class_for_listen[display];
+				var display = $(this).attr('context');
+				var css_class = css_class_for_context[display];
 
 				// css_class true for a display that exclusively gets one of the big three
 				// so: if it's one of the big three that we haven't yet seen...
@@ -777,7 +845,7 @@ function recompute_css_classes( root ){
 				$tag.parent().setClass(class_list);
 			})
 		.end()
-		.filter('[listen=user]')
+		.filter('[context=user]')
 			.each(function(){ // for each display of user tags
 				var $this = $(this);
 				$this.toggleClassTo(

@@ -10,11 +10,18 @@ div.tag-widget .tag-display ul {
 
 .tag-display span.tag.not-saved { color: gray }
 
-div.tag-widget .tag-display li, div.tag-widget .tag-display ul {
+div.tag-widget .tag-display li {
 	display: inline;
 	padding: 0 0.25em 0 0.25em !important;
 	margin: 0 !important;
 }
+
+div.tag-widget .tag-display ul {
+	display: inline;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
 
 .tag-display-set, .tag-display, .tag, .tmenu, h1.legend {
 	user-select: none;
@@ -26,8 +33,11 @@ div.tag-widget .tag-display li, div.tag-widget .tag-display ul {
 	padding-left: 0.25em;
 }
 
-.tag-display h1.legend {
-	display: none;
+.tag-display[context=related] {
+	display: block;
+	position: relative;
+	text-align: left;
+	width: auto;
 }
 
 .tag-display-set.stack, .tag-display-set.stack .tag-display {
@@ -38,12 +48,29 @@ div.tag-widget .tag-display li, div.tag-widget .tag-display ul {
 	display: inline;
 }
 
-.tag-display span.tag {
+.tag-display-set.train {
+	margin-right: 1.5em;
+}
+
+.tag-display span.tag, .tag-widget .admin-buttons {
 	font-family: Optima, sans serif;
 }
 
-.tag-display[listen=user] span.tag:hover {
+.tag-widget .admin-buttons {
+	padding-right: 2.7em;
+}
+
+.tag-widget .admin-buttons .note-input {
+	font-style: italic;
+}
+
+.tag-display[context=user] span.tag:hover,
+.tag-display[context=signoff] span.tag:hover {
 	background-color: inherit;
+}
+
+.tag-widget .admin-buttons a {
+	text-decoration: none;
 }
 
 .tag-display span.tag:hover {
@@ -53,7 +80,7 @@ div.tag-widget .tag-display li, div.tag-widget .tag-display ul {
 
 .nod-nix-reasons .tag-display span.tag:hover {
 	color: black;
-	background-color: white;
+	background-color: inherit;
 }
 
 div.tag-widget .tag-display ul.tmenu {
@@ -62,6 +89,38 @@ div.tag-widget .tag-display ul.tmenu {
 	top: -9px;
 	right: -2px;
 }
+
+
+.tag-display > h1.legend {
+	display: none;
+	position: absolute;
+	top: -1em;
+	left: 0.3em;
+	width: 9em;
+	text-align: left;
+	-moz-opacity: 0.5;
+	opacity: 0.5;
+	z-index: 2;
+}
+
+.tag-display[context=related] > h1.legend {
+	bottom: -2em !important;
+	top: inherit;
+}
+
+.tag-display:hover {
+	border-top: 4px solid lightgray;
+}
+
+.tag-display[context=related]:hover {
+	border-top: inherit;
+	border-bottom: 4px solid lightgray outset;
+}
+
+.tag-display:hover h1.legend {
+	display: block;
+}
+
 
 .tag-display > ul > li {
 	position: relative;
@@ -75,9 +134,6 @@ div.tag-widget.sorting .tag-display > ul > li:hover ul.tmenu {
 	display: none;
 }
 
-/* for debugging */
-.tag-display[listen=top] { border: 1px solid red }
-
 div.tag-widget .tmenu > li {
 	font-size: 110%;
 	padding: 0 0.2em !important;
@@ -88,6 +144,7 @@ div.tag-widget .tmenu > li {
 
 .tag-editor {
 	display: inline;
+	position: relative;
 }
 
 div.tag-widget .tmenu > li:hover {
@@ -97,46 +154,124 @@ div.tag-widget .tmenu > li:hover {
 
 .tag-widget {
 	display: block;
-	position: relative;
+	position: absolute;
+	right: 0;
+	bottom: 6px;
 	z-index: 10;
 	background-color: transparent;
-	border: 4px dotted darkgray;
 	padding: 0 0.4em 0 0.8em;
 	min-width: 6em;
+	text-align: right;
 }
 
 .tag-widget.nod-nix-reasons {
+	position: relative;
+	bottom: 0;
 	color: inherit;
 	background-color: inherit;
-	border: none;
+	text-align: inherit;
+	padding-left: 0.8em;
 }
 
 .tag-widget .tag-server-busy {
 	display: none;
 	position: absolute;
+	top: -0.4em;
+	right: 0.1em;
+}
+
+.tag-widget.expanded .tag-server-busy {
 	top: 0;
-	left: 0;
+	right: 0.4em;
+}
+
+.tag-widget .note-wrapper {
+	display: block;
+	font-style: italic;
+	padding-right: 0.4em;
+}
+
+.tag-widget .note-wrapper.no-note {
+	display: inline;
+	font-style: inherit;
+	padding-right: 0;
+}
+
+.tag-widget .admin-buttons .note-wrapper:before {
+	content: 'Note: ';
+}
+
+.tag-widget .admin-buttons a:before,
+.tag-widget .admin-buttons .note-wrapper.no-note a:before {
+	content: '[';
+}
+
+.tag-widget .admin-buttons a:after,
+.tag-widget .admin-buttons .note-wrapper.no-note a:after {
+	content: ']';
+}
+
+.tag-widget .admin-buttons .note-wrapper a:before,
+.tag-widget .admin-buttons .note-wrapper a:after,
+.tag-widget .admin-buttons .note-wrapper.no-note:before {
+	content: '';
+}
+
+.tag-widget .tag-entry {
+	display: none;
+	margin-left: -1.8em;
+	margin-right: 2.4em;
+}
+
+.tag-widget.expanded .tag-entry {
+	display: inline;
 }
 
 .tag-widget .working + .tag-server-busy {
 	display: block;
 }
 
-div.tag-widget [listen=context] {
+.tag-widget div.tags {
+	display: inline;
+	position: relative;
+	right: 1em !important;
+	top: 0.8em;
+	margin-left: 1em;
+}
+
+div.tag-widget [context=related] {
 	font-style: italic;
 	font-weight: bold;
 }
 
-.tag-display[listen=user] li.p,
-.tag-display[listen=user] li.t,
-.tag-display[listen=user] li.s,
-.tag-display[listen=top]  li.s {
+.s1, .t2 {
+	font-variant: small-caps;
+}
+
+.tag-display[context=user] li.p,
+.tag-display[context=user] li.t,
+.tag-display[context=user] li.s,
+.tag-display[context=top]  li.s {
 	display: none;
 }
 
+.briefarticle .tag-widget.body-widget,
 .tag-widget.stub,
 .tag-display.stub,
 .tag-display.no-tags,
-.tag-display[listen=user].no-visible-tags {
+.tag-display[context=related].no-tags,
+.tag-display[context=user].no-visible-tags {
+	display: none !important;
+}
+
+.tag-widget .tag-display[context=user] {
 	display: none;
+}
+
+.tag-widget.expanded .tag-display[context=user] {
+	display: inline;
+}
+
+.tag-display[context=signoff] > ul > li.w {
+	background-color: red !important;
 }

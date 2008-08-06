@@ -154,6 +154,11 @@ cmdrtaco dot net but be forgiving of beta code!
 [% END # form.skipmenu %]
 [% Slash.getAd(6) %]
 <div id="firehoselist">
+<script type="text/javascript">
+$(function(){
+	$('#firehoselist').click(firehose_click_tag)
+});
+</script>
 [% itemstext %]
 [% page = page || "0" %]
 </div>
