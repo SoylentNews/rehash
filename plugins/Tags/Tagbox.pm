@@ -66,7 +66,6 @@ sub new {
 	bless($self, $class);
 	$self->{virtual_user} = $user;
 	$self->sqlConnect();
-warn "Tagbox new calling init";
 
 	$self->init();
 	$self->init_tagfilters();
@@ -85,7 +84,6 @@ sub isInstalled {
 
 sub init {
 	my($self) = @_;
-warn "Tagbox init";
 	# by default, nothing to init
 }
 
@@ -465,6 +463,7 @@ sub feed_newtags_filter {
 		my $gtid_ar = ref($self->{filter_gtid})
 			? $self->{filter_gtid} : [ $self->{filter_gtid} ];
 		my $all_gtid_str = join(',', sort { $a <=> $b } @$gtid_ar);
+		my %all_globjids = ( map { ($_->{globjid}, 1) } @$tags_ar );
 		my $all_globjids_str = join(',', sort { $a <=> $b } keys %all_globjids);
 		if ($all_gtid_str && $all_globjids_str) {
 			my $globjids_wanted_ar = $self->sqlSelectColArrayref(

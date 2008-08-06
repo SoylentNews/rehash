@@ -30,7 +30,6 @@ sub new {
 	$self->{virtual_user} = $user;
 	$self->sqlConnect() or return undef;
 
-warn "Utility new, can=" . ($self->can('init') ? 1 : 0);
 	if ($self->can('init')) {
 		# init should return TRUE for success, else
 		# we abort
@@ -45,7 +44,6 @@ warn "Utility new, can=" . ($self->can('init') ? 1 : 0);
 		}
 	}
 
-warn "Utility initing _querylog";
 	$self->{_querylog} = { };
 
 	return $self;
@@ -348,7 +346,7 @@ sub _querylog_enabled {
 	my($self) = @_;
 
 	return 0 unless dbAvailable();
-use Carp; if (!exists $self->{_querylog}) { confess "no ql" }
+use Carp; if (!exists $self->{_querylog}) { Carp::cluck "no ql" }
 	return $self->{_querylog}{enabled}
 		if defined $self->{_querylog}{enabled}
 			&& $self->{_querylog}{next_check_time} > time;

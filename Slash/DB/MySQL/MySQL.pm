@@ -323,7 +323,6 @@ sub _whereFormkey {
 ########################################################
 sub init {
 	my($self) = @_;
-warn "MySQL init";
 	# These are here to remind us of what exists
 	$self->{_codeBank} = {};
 
