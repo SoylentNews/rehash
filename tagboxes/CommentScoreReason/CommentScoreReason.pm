@@ -39,6 +39,7 @@ use base 'Slash::Tagbox';
 sub init {
 	my($self) = @_;
 
+	my $tagsdb = getObject('Slash::Tags');
 	my $moddb = getObject('Slash::TagModeration');
 	$self->{reasons} = $moddb->getReasons();
 	$self->{reason_tagnameid} = { };
@@ -113,7 +114,7 @@ sub run {
 		# neediness changes.  If this was done by an admin, neediness
 		# changes a lot.
 		my $tagnameid = $tag->{tagnameid};
-		my $reason = $tagnameid_reasons{$tagnameid};
+		my $reason = $self->{reason_tagnameid}{$tagnameid};
 		my $dir = 0;
 		if ($reason->{val} > 0 || $tagnameid == $self->{nodid} || $tagnameid == $self->{metanodid}) {
 			$dir = 1;
@@ -159,7 +160,7 @@ sub run {
 		# comment's score (and reason).  Only continue processing if
 		# this is an actual moderation.
 		my $tagnameid = $tag->{tagnameid};
-		my $reason = $tagnameid_reasons{$tagnameid};
+		my $reason = $self->{reason_tagnameid}{$tagnameid};
 		next unless $reason;
 		if ($reason->{val} < 0) {
 			$keep_karma_bonus = 0 if --$karma_bonus_downmods_left < 0;
