@@ -1864,7 +1864,7 @@ sub tildeEd {
 			$story023_default{nexus}{$tid} = 3;
 		} elsif ($prefs{story_full_best_nexus}{$tid}) {
 			$story023_default{nexus}{$tid} = 2;
-		} elsif ($prefs{story_brief_best_nexus}) {
+		} elsif ($prefs{story_brief_best_nexus}{$tid}) {
 			$story023_default{nexus}{$tid} = 1;
 		} else {
 			# If brief_sectional_mainpage is set, then all
