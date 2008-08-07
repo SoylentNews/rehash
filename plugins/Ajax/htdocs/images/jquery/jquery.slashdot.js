@@ -73,7 +73,7 @@ jQuery.fn.extend({
 		[ pass, fail ] = separate(this, $.isFunction(f) ? f : function(e){
 			return $(e).is(f)
 		});
-		return [ $(pass), $(fail) ]
+		return [ this.pushStack(pass), this.pushStack(fail) ]
 	}
 
 });
@@ -210,7 +210,10 @@ function values( dict ){
 
 
 function separate( list, fn ){
-	var answer = { true: [], false: [] };
+	var answer = {};
+	answer[true] = [];
+	answer[false] = [];
+
 	$.each(list_as_array(list), function(i, elem){
 		answer[!!fn.apply(elem, [elem, i])].push(elem)
 	})
