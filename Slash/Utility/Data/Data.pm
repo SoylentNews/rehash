@@ -81,6 +81,7 @@ our @EXPORT  = qw(
 	decode_entities
 	ellipsify
 	emailValid
+	email_to_domain
 	encryptPassword
 	findWords
 	fixHref
@@ -3369,6 +3370,14 @@ sub addDomainTags {
 	$html =~ s{</a>}{}gi;
 
 	return $html;
+}
+
+sub email_to_domain {
+	my($email) = @_;
+	my $emailuri = URI->new($email);
+	my $emailhost = '';
+	$emailhost = $emailuri->host() if $emailuri && $emailuri->can('host');
+	return $emailhost ? fullhost_to_domain($emailhost) : undef;
 }
 
 sub fullhost_to_domain {
