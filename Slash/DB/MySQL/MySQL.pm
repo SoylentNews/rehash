@@ -1549,6 +1549,68 @@ sub deleteUser {
 	return $rows;
 }
 
+
+########################################################
+# Get user info from the users table.
+sub getUserCrossSiteAuthenticate {
+	my($self, $site, $params, $user) = @_;
+	$user ||= getCurrentUser();
+	my $gSkin = getCurrentSkin();
+
+	return unless $site->{host} eq $gSkin->{hostname};
+
+	# XXX skip_tstamp_rand is testing
+	unless ($site->{skip_tstamp_rand}) {
+		return unless $params->{tstamp} && $params->{'rand'};
+
+		return unless ( ($params->{tstamp} + 60) >= time() );
+
+		$self->sqlInsert('xsite_auth_log', {
+			site    => $site->{site},
+			ts      => $params->{tstamp},
+			nonce   => $params->{'rand'}
+		}) or return;
+	}
+
+	my $new = 0;
+	my $uid = $self->sqlSelect('uid', 'users_param',
+		"name=" . $self->sqlQuote($site->{auth_param_name}) .
+		" AND value=" . $self->sqlQuote($params->{user_id})
+	);
+
+	if (!$uid) {
+		my $newnick = sprintf($site->{user_name_format}, $params->{shortname} || $params->{user_id});
+		my $matchname = nick2matchname($newnick);
+		my $email = '';
+
+		# no email for now, so skip checks for email (and matchname;
+		# we don't care if someone already has an "sfpudge", that
+		# should not stop us from making a "SF:pudge")
+		$uid = $self->createUser(
+			$matchname, '', $newnick, { skipchecks => 1 }
+		);
+		$new = 1;
+
+		if ($uid) {
+			# XXX consider disallowing these accounts from
+			# authenticating on other domains
+			my $data = {};
+			$data->{creation_ipid} = $user->{ipid};
+			$data->{ $site->{auth_param_name} } = $params->{user_id};
+			$data->{acl}{nopasswd} = 1;
+			$self->setUser($uid, $data);
+		}
+	}
+
+	return unless $uid; # dunno!
+
+	my $logtoken = $self->getLogToken($uid, 1);
+
+	# return UID alone in scalar context
+	return wantarray ? ($uid, $logtoken, $new) : $uid;
+}
+
+
 ########################################################
 # Get user info from the users table.
 sub getUserAuthenticate {
@@ -2386,21 +2448,25 @@ sub existsUid {
 # while this is going on, we won't end up with a half created user.
 # -Brian
 sub createUser {
-	my($self, $matchname, $email, $newuser) = @_;
-	return unless $matchname && $email && $newuser;
+	my($self, $matchname, $email, $newuser, $opts) = @_;
+	return unless $matchname && $newuser;
+	$opts ||= {};
+	return if !$email && !$opts->{skipchecks};
 
 	$email =~ s/\s//g; # strip whitespace from emails
 
-	return if ($self->sqlSelect(
-		"uid", "users",
-		"matchname=" . $self->sqlQuote($matchname)
-	))[0] || $self->existsEmail($email);
+	if (!$opts->{skipchecks}) {
+		return if ($self->sqlSelect(
+			"uid", "users",
+			"matchname=" . $self->sqlQuote($matchname)
+		))[0] || $self->existsEmail($email);
+	}
 
 	$self->sqlDo("SET AUTOCOMMIT=0");
 
 	$self->sqlInsert("users", {
 		uid		=> undef,
-		realemail	=> $email,
+		realemail	=> $email || '',
 		nickname	=> $newuser,
 		matchname	=> $matchname,
 		seclev		=> 1,

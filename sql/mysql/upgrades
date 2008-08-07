@@ -5442,3 +5442,11 @@ UPDATE vars SET value = 'T_2_5_0_214' WHERE name = 'cvs_tag_currentcode';
 
 # for plugins/FireHose
 ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment","discussion","project") default 'submission';
+
+DROP TABLE IF EXISTS xsite_auth_log;
+CREATE TABLE xsite_auth_log (
+	site VARCHAR(30) DEFAULT '' NOT NULL,
+	ts DATETIME DEFAULT '0000-00-00 00:00' NOT NULL,
+	nonce VARCHAR(30) DEFAULT '' NOT NULL,
+	UNIQUE KEY (site,ts,nonce)
+) TYPE=InnoDB;

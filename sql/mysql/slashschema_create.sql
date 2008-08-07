@@ -1554,6 +1554,15 @@ CREATE TABLE vars (
 	PRIMARY KEY (name)
 ) TYPE=InnoDB;
 
+DROP TABLE IF EXISTS xsite_auth_log;
+CREATE TABLE xsite_auth_log (
+	site VARCHAR(30) DEFAULT '' NOT NULL,
+	ts DATETIME DEFAULT '0000-00-00 00:00' NOT NULL,
+	nonce VARCHAR(30) DEFAULT '' NOT NULL,
+	UNIQUE KEY (site,ts,nonce)
+) TYPE=InnoDB;
+
+
 #ALTER TABLE backup_blocks ADD FOREIGN KEY (bid) REFERENCES blocks(bid);
 #ALTER TABLE comment_text ADD FOREIGN KEY (cid) REFERENCES comments(cid);
 #ALTER TABLE discussions ADD FOREIGN KEY (topic) REFERENCES topics(tid);
