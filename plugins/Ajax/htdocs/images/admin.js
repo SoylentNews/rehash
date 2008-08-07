@@ -319,7 +319,7 @@ function firehose_open_note(id) {
 }
 
 function firehose_save_note(id) {
-  var $entry = $('#firehose-'+id);
+	var $entry = $('#firehose-'+id);
 
 	var note_text = $entry.find('#note-input-'+id).val();
 	$entry.find('.note-wrapper')[note_text ? 'removeClass' : 'addClass']('no-note');
