@@ -22,7 +22,7 @@ our @EXPORT = qw(
 	basefile basename dirname
 	syntax_check %CONFIG
 	@BIN_EXT $BIN_EXT $BIN_RE
-	myprint myexit mysystem
+	myprint myexit mysystem myask
 );
 
 our @BIN_EXT = qw(gz tgz bz2 gif jpg png ico);
@@ -244,6 +244,14 @@ sub myprint {
 sub myexit {
 	print STDERR join "\n", @_, '' if @_;
 	exit;
+}
+
+sub myask {
+	local $| = 1;
+	print        join "\n", @_, '' if @_;
+	print "Continue? [yN] ";
+	my $ans = <>;
+	return $ans =~ /^y/i ? 1 : 0;
 }
 
 sub mysystem {
