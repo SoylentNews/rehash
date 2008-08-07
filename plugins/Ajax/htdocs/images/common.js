@@ -189,8 +189,6 @@ function tagsToggleStoryDiv(id, is_admin, type) {
 }
 
 function tagsHideBody(id) {
-	//close_tag_widget('#firehoselist > #firehose-'+id+' #tag-widget-'+id);
-
 	$('#toggletags-body-'+id).setClass('tagshide');		// Make the body of the tagbox vanish
 	$('#tagbox-title-'+id).setClass('tagtitleclosed');	// Make the title of the tagbox change back to regular
 	$('#tagbox-'+id).setClass('tags');			// Make the tagbox change back to regular.
@@ -206,8 +204,6 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 		if (fh_is_admin) {
 			firehose_get_admin_extras(id);
 		}
-
-		//open_tag_widget('#firehoselist > #firehose-'+id+' #tag-widget-'+id, 'fetch-tags-now')
 	}
 
 	//alert("Tags show body / Type: " + type );
@@ -440,17 +436,17 @@ function toggle_firehose_body(id, is_admin) {
 		fhbody.className = "body";
 		fh.className = "article" + usertype;
 		if (is_admin)
-			tagsShowBody(id, is_admin, '', "firehose");
+			firehose_toggle_tagui_to(true, fh);
 	} else if (fhbody.className == "body") {
 		fhbody.className = "hide";
 		fh.className = "briefarticle" + usertype;
-		//close_tag_widget($(fh).find('#tag-widget-'+id));
 		/*if (is_admin)
 			tagsHideBody(id);*/
 	} else if (fhbody.className == "hide") {
 		fhbody.className = "body";
 		fh.className = "article" + usertype;
-		//open_tag_widget($(fh).find('#tag-widget-'+id), 'fetch-tags-now');
+		if (is_admin)
+			firehose_toggle_tagui_to(true, fh);
 		/*if (is_admin)
 			tagsShowBody(id, is_admin, '', "firehose"); */
 	}
@@ -694,37 +690,36 @@ function firehose_remove_tab(tabid) {
 
 var $related_trigger = $();
 
-function firehose_toggle_tagui( toggle ) {
+function firehose_toggle_tagui_to( if_expanded, selector ){
+	var	$server = $(selector).nearest_parent('[tag-server]'),
+		$widget = $server.find('.tag-widget.body-widget'),
+		id	= $server.attr('tag-server');
+
 	setFirehoseAction();
+	$server.find('.tag-widget').each(function(){ this.set_context() });
 
-	var $toggle = $(toggle), $widget = $(toggle.parentNode), $server = $(toggle).nearest_parent('[tag-server]');
-	var id = $server.attr('tag-server');
+	$widget.toggleClassTo('expanded', if_expanded);
 
-	var button_text;
-
-	$widget.each(function(){
-		this.set_context()
-	});
-
-	var expanded = $widget.toggleClass('expanded').hasClass('expanded');
-
-	if ( expanded ) {
-		button_text = '[-]';
+	var toggle_text;
+	if ( if_expanded ){
 		$server.each(function(){ this.fetch_tags() });
 		if ( fh_is_admin )
 			firehose_get_admin_extras(id);
-		$widget.find('.tag-entry:visible:first').each(function(){
-			this.focus()
-		});
+		$widget.find('.tag-entry:visible:first').each(function(){ this.focus() });
+
+		toggle_text = '[-]';
 	} else {
-		button_text = '[+]';
+		toggle_text = '[+]';
 	}
 
-	$('.button', toggle).text(button_text);
-	$server
-		.find('#toggletags-body-'+id)
-			.toggleClassTo('tagshide', !expanded)
-			.toggleClassTo('tagbody', expanded);
+	$widget.find('a.edit-toggle .button').text(toggle_text);
+	$server.find('#toggletags-body-'+id)
+		.toggleClassTo('tagshide', !if_expanded)
+		.toggleClassTo('tagbody', if_expanded);
+}
+
+function firehose_toggle_tagui( toggle ) {
+	firehose_toggle_tagui_to( ! $(toggle.parentNode).hasClass('expanded'), toggle );
 }
 
 function firehose_click_tag( event ) {
@@ -852,6 +847,8 @@ function firehose_init_tagui( parents ){
 				})
 				.find('.tag-widget')
 	)
+	// ...and finally, pull the menu off the datatype entry
+	.find('[context=system] li.d .tmenu').remove()
 }
 // firehose functions end
 
@@ -1088,8 +1085,8 @@ function firehose_handle_update() {
 		firehose_get_next_updates();
 	}
 
-	// XXX temporary admin-only access to the unfinished tag-wiget
-	if ( fh_is_admin && $('.tag-widget:first').length ) {
+	// XXX temporary admin-only access to the tag-wiget
+	if ( fh_is_admin ) {
 		firehose_init_tagui(
 			$('#firehoselist > [class*=article]:not([tag-server])')
 				.each(function(){

@@ -390,8 +390,14 @@ function $init_tag_displays( selector, options ){
 
 $init_tag_displays.menu_templates = {
 	user:	'! x',
-	top:	'_ # ! )'
+	top:	'! x',
+	system: '! x'
 }
+
+$(function(){
+	if ( fh_is_admin )
+		$init_tag_displays.menu_templates.top = '_ # ! )'
+});
 
 
 function cached_user_tags( selector ){
@@ -509,23 +515,37 @@ function normalize_tag_commands( commands, excludes ){
 }
 
 
-function slide_context_display( display ){
+function position_context_display( display, if_animate ){
 	try {
 		var $display = $(display);
 		var display_width = $display.children('ul:first').width();
+
+		var css_settings = {
+			width: display_width
+		}
+
 
 		var $entry = $display.nearest_parent('[tag-server]');
 		var left_edge = $entry.offset().left;
 		var right_edge = left_edge + $entry.width();
 
+		// XXX do this in CSS instead
+		var MIN_RIGHT_BUFFER = 20;
+
 		var align_to = $related_trigger.offset().left;
 		if ( align_to + display_width > right_edge )
 			align_to = right_edge - display_width;
-		align_to -= 20;
+		align_to = Math.max(left_edge, align_to-MIN_RIGHT_BUFFER);
 
 		var distance = align_to - $display.offset().left;
-		$display.css({width: display_width});
-		$display.animate({left: '+='+distance});
+
+		if ( !if_animate )
+			css_settings.left = align_to - $display.offsetParent().offset().left;
+
+		$display.css(css_settings);
+
+		if ( if_animate )
+			$display.animate({left: '+='+distance});
 	} catch ( e ) {
 	}
 
@@ -573,6 +593,9 @@ var tag_widget_fns = {
 					extraParams: {
 						op:		'tags_list_tagnames'
 					}
+				})
+				.result(function(){
+					$(this).parent().trigger("onsubmit")
 				});
 		return this
 	},
@@ -616,7 +639,7 @@ var tag_widget_fns = {
 						$this.slideDown(100);
 
 					$this.queue(function(){
-						slide_context_display(this).dequeue();
+						position_context_display(this, had_tags).dequeue();
 					});
 				}
 
@@ -712,7 +735,9 @@ function $init_tag_widgets( selector, options ){
 	'underscore'
  */
 
-var context_triggers = map_list_to_set(['submission','journal','bookmark','feed','story','vendor','misc','comment','discussion']);
+var data_types = ['submission','journal','bookmark','feed','story','vendor','misc','comment','discussion'];
+
+var context_triggers = map_list_to_set(data_types);
 
 var well_known_tags = {};
 
@@ -725,6 +750,7 @@ $(function(){
 	//update_class_map(well_known_tags, 'e', YAHOO.slashdot.storyOpts);
 	update_class_map(well_known_tags, 'y p', ['nod']);
 	update_class_map(well_known_tags, 'x p', ['nix']);
+	update_class_map(well_known_tags, 'd', data_types);
 
 	if ( fh_is_admin )
 		update_class_map(well_known_tags, 'w p', ['signed', 'unsigned', 'signoff']);

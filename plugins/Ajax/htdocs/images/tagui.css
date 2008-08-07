@@ -52,6 +52,13 @@ div.tag-widget .tag-display ul {
 	margin-right: 1.5em;
 }
 
+span.tag {
+	margin: -4px;
+	border: 4px solid transparent;
+	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+}
+
 .tag-display span.tag, .tag-widget .admin-buttons {
 	font-family: Optima, sans serif;
 }
@@ -64,7 +71,6 @@ div.tag-widget .tag-display ul {
 	font-style: italic;
 }
 
-.tag-display[context=user] span.tag:hover,
 .tag-display[context=signoff] span.tag:hover {
 	background-color: inherit;
 }
@@ -75,7 +81,8 @@ div.tag-widget .tag-display ul {
 
 .tag-display span.tag:hover {
 	cursor: arrow;
-	background-color: lightgray;
+	color: white;
+	background-color: #066;
 }
 
 .nod-nix-reasons .tag-display span.tag:hover {
@@ -94,12 +101,12 @@ div.tag-widget .tag-display ul.tmenu {
 .tag-display > h1.legend {
 	display: none;
 	position: absolute;
+	color: white;
+	background-color: lightgray;
 	top: -1em;
 	left: 0.3em;
 	width: 9em;
 	text-align: left;
-	-moz-opacity: 0.5;
-	opacity: 0.5;
 	z-index: 2;
 }
 
@@ -109,12 +116,11 @@ div.tag-widget .tag-display ul.tmenu {
 }
 
 .tag-display:hover {
-	border-top: 4px solid lightgray;
+	background-color: lightgray;
 }
 
-.tag-display[context=related]:hover {
-	border-top: inherit;
-	border-bottom: 4px solid lightgray outset;
+.nod-nix-reasons .tag-display:hover {
+	background-color: inherit;
 }
 
 .tag-display:hover h1.legend {
@@ -255,6 +261,12 @@ div.tag-widget [context=related] {
 	display: none;
 }
 
+.tag-display[context=top] li.u,
+.tag-display[context=system] li.u,
+.tag-display[context=related] li.u {
+	text-decoration: underline;
+}
+
 .briefarticle .tag-widget.body-widget,
 .tag-widget.stub,
 .tag-display.stub,
@@ -264,11 +276,13 @@ div.tag-widget [context=related] {
 	display: none !important;
 }
 
-.tag-widget .tag-display[context=user] {
+.tag-widget .tag-display[context=user],
+.tag-widget .tag-display[context=top] {
 	display: none;
 }
 
-.tag-widget.expanded .tag-display[context=user] {
+.tag-widget.expanded .tag-display[context=user],
+.tag-widget.expanded .tag-display[context=top] {
 	display: inline;
 }
 
