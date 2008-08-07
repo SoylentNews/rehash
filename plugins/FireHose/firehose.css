@@ -403,7 +403,7 @@ div.storylinks ul {padding-right: 60% !important}
 
 .story .date, .story a.skin {color: #699 !important;}
 .future .date, .future a.skin {color: #c99 !important;}
-.firehose .date, .firehose a.skin {color: #777 !important;}
+.firehose .date, .firehose a.skin, .firehose span.skin, .firehose span.reason {color: #777 !important;}
 
 .article .generaltitle, .briefarticle .generaltitle { min-height: 25px; position: relative; background-image: url('//images.slashdot.org/fh_btr_s.png') !important; background-position: top right !important;}
 .briefarticle .generaltitle .title { background-image: url('//images.slashdot.org/fh_br_s.png') !important; background-position: bottom right !important;}
