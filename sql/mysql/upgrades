@@ -5433,12 +5433,12 @@ INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fhpopularity_
 # 2008-07-16
 UPDATE vars SET value = 'T_2_5_0_213' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 # 2008-07-31
 UPDATE vars SET value = 'T_2_5_0_214' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # for plugins/FireHose
 ALTER TABLE firehose MODIFY type ENUM("submission","journal","bookmark","feed","story","vendor","misc", "comment","discussion","project") default 'submission';
@@ -5450,3 +5450,8 @@ CREATE TABLE xsite_auth_log (
 	nonce VARCHAR(30) DEFAULT '' NOT NULL,
 	UNIQUE KEY (site,ts,nonce)
 ) TYPE=InnoDB;
+
+
+# 2008-08-07
+UPDATE vars SET value = 'T_2_5_0_215' WHERE name = 'cvs_tag_currentcode';
+
