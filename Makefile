@@ -1,5 +1,5 @@
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 # $Id$
 
@@ -35,15 +35,21 @@ GROUP = nobody
 CP = cp
 INSTALL = install
 UNAME = `uname`
+MAKE = make -s
 
-# Plugins (any directory in plugins/)
-PLUGINS = `find . -name CVS -prune -o -type d -name [a-zA-Z]\* -maxdepth 1 -print`
+# Subdirectories excl. CVS in the current directory (like plugins/ or tagboxes/)
+SUBDIRS = `find . -maxdepth 1 -name CVS -prune -o -type d -name [a-zA-Z]\* -print`
 
 # Perl scripts, grouped by directory.
-BINFILES = `find bin -name CVS -prune -o -name [a-zA-Z]\* -type f -print`
-SBINFILES = `find sbin -name CVS -prune -o -name [a-zA-Z]\* -type f -print`
-THEMEFILES = `find themes -name CVS -prune -o -name [a-zA-z]\*.pl -print`
-PLUGINFILES = `find plugins -name CVS -prune -o -name [a-zA-Z]\*.pl -print`
+BINFILES = `find bin -name CVS -prune -o -name .git -prune -o -name [a-zA-Z]\* -type f -print`
+SBINFILES = `find sbin -name CVS -prune -o -name .git -prune -o -name [a-zA-Z]\* -type f -print`
+THEMEFILES = `find themes -name CVS -prune -o -name .git -prune -o -name [a-zA-z]\*.pl -print`
+PLUGINFILES = `find plugins themes/*/plugins -name CVS -prune -o -name .git -prune -o -name [a-zA-Z]\*.pl -print`
+TAGBOXFILES = `find tagboxes themes/*/tagboxes -name CVS -prune -o -name .git -prune -o -name [a-zA-Z]\*.pl -print`
+PLUGINSTALL = `find . -name CVS -prune -o -name .git -prune -o -type d -print | egrep 'plugins/[a-zA-Z]+$$'`
+TAGINSTALL = `find . -name CVS -prune -o -name .git -prune -o -type d -print | egrep 'tagboxes/[a-zA-Z]+$$'`
+PLUGINDIRS = `find . -name CVS -prune -o -name .git -prune -o -type d -print | egrep 'plugins$$'`
+TAGBOXDIRS = `find . -name CVS -prune -o -name .git -prune -o -type d -print | egrep 'tagboxes$$'`
 
 # What do we use to invoke perl?
 REPLACEWITH = `$(PERL) -MConfig -e 'print quotemeta($$Config{startperl})' | sed 's/@/\\@/g'`
@@ -57,7 +63,7 @@ INSTALLSITEARCH=`$(PERL) -MConfig -e 'print "$(BUILDROOT)/$$Config{installsitear
 INSTALLSITELIB=`$(PERL) -MConfig -e 'print "$(BUILDROOT)/$$Config{installsitelib}"'`
 INSTALLMAN3DIR=`$(PERL) -MConfig -e 'print "$(BUILDROOT)/$$Config{installman3dir}"'`
 
-.PHONY : all plugins slash install
+.PHONY : all pluginsandtagboxes slash install
 
 #   install the shared object file into Apache 
 # We should run a script on the binaries to get the right
@@ -66,33 +72,36 @@ INSTALLMAN3DIR=`$(PERL) -MConfig -e 'print "$(BUILDROOT)/$$Config{installman3dir
 slash:
 	@echo "=== INSTALLING SLASH MODULES ==="
 	@if [ ! "$(RPM)" ] ; then \
-		(cd Slash; $(PERL) Makefile.PL; make install UNINST=1); \
+		(cd Slash; $(PERL) Makefile.PL; $(MAKE) install UNINST=1); \
 	else \
 		echo " - Performing an RPM build"; \
-		(cd Slash; $(PERL) Makefile.PL INSTALLSITEARCH=$(INSTALLSITEARCH) INSTALLSITELIB=$(INSTALLSITELIB) INSTALLMAN3DIR=$(INSTALLMAN3DIR); make install UNINST=1); \
+		(cd Slash; $(PERL) Makefile.PL INSTALLSITEARCH=$(INSTALLSITEARCH) INSTALLSITELIB=$(INSTALLSITELIB) INSTALLMAN3DIR=$(INSTALLMAN3DIR); $(MAKE) install UNINST=1); \
 	fi
 
-plugins: 
-	@echo "=== INSTALLING SLASH PLUGINS ==="
-	@(cd plugins; \
-	 for a in $(PLUGINS); do \
-	 	(cd $$a; \
+pluginsandtagboxes:
+	@echo "=== INSTALLING SLASH PLUGINS AND TAGBOXES ==="
+	@(pluginstall=$(PLUGINSTALL); \
+	taginstall=$(TAGINSTALL); \
+	for f in $$pluginstall $$taginstall; do \
+		(cd $$f; \
 		 echo == $$PWD; \
 		 if [ -f Makefile.PL ]; then \
 		 	if [ ! "$(RPM)" ] ; then \
 				$(PERL) Makefile.PL; \
-				make install UNINST=1;\
+				$(MAKE) install UNINST=1;\
+				$(MAKE) realclean; \
 			else \
 				echo " - Performing an RPM build."; \
 				$(PERL) Makefile.PL INSTALLSITEARCH=$(INSTALLSITEARCH) INSTALLSITELIB=$(INSTALLSITELIB) INSTALLMAN3DIR=$(INSTALLMAN3DIR); \
-				make install UNINST=1; \
+				$(MAKE) install UNINST=1; \
+				$(MAKE) realclean; \
 			fi; \
 		 fi); \
 	done)
 
 all: install
 
-install: slash plugins
+install: slash pluginsandtagboxes
 
 	# Create all necessary directories.
 	$(INSTALL) -d \
@@ -100,11 +109,10 @@ install: slash plugins
 		$(SLASH_PREFIX)/httpd/ \
 		$(SLASH_PREFIX)/themes/ \
 		$(SLASH_PREFIX)/plugins/ \
+		$(SLASH_PREFIX)/tagboxes/ \
 		$(SLASH_PREFIX)/sbin \
 		$(SLASH_PREFIX)/sql/ \
-		$(SLASH_PREFIX)/sql/mysql/ \
-		$(SLASH_PREFIX)/sql/oracle/ \
-		$(SLASH_PREFIX)/sql/postgresql
+		$(SLASH_PREFIX)/sql/mysql/
 
 	# Quick hack to avoid the need for "cp -ruv" which breaks under FreeBSD
 	# is to just copy the directories now. We may end up copying over a file
@@ -112,25 +120,34 @@ install: slash plugins
 	# section of the Makefile would need to be rewritten to do this sanely
 	# and there just isn't the time for that right now.
 	#
-	# Install the plugins...(will also install kruft like CVS/ and blib/
-	# directories if they are around. Maybe a smarter copying procedure
-	# is called for, here?)
+	# Install the plugins and tagboxes.  Will also install kruft like CVS/
+	# and blib/ directories if they are around. Maybe a smarter copying
+	# procedure is called for, here?)
 	# 
 	# Note: Many users of Slash have taken to symlinking the plugins and themes
 	# directories into $(SLASH_PREFIX) from their checked-out CVS trees. We
 	# should try to check for this in the future and behave accordingly.
+	# (Update, 2006-05-06: no, we're not going to check for that.  Editing a
+	# CVS checkout is great, but push it live with a 'make install' please.)
 	#
 	# OpenBSD needs "-R" here instead of "-rv".  Its manpage notes:
 	# Historic versions of the cp utility had a -r option.  This implementation
 	# supports that option; however, its use is strongly discouraged, as it
 	# does not correctly copy special files, symbolic links or FIFOs. 
 	#
-	(cd plugins; make clean) 
-	$(CP) -rv plugins/* $(SLASH_PREFIX)/plugins
-	# Now all other themes
-	$(CP) -rv themes/* $(SLASH_PREFIX)/themes
+	@(pluginstall=$(PLUGINSTALL); \
+	taginstall=$(TAGINSTALL); \
+	for f in $$pluginstall; do \
+		($(CP) -r $$f $(SLASH_PREFIX)/plugins); \
+	done; \
+	for f in $$taginstall; do \
+		($(CP) -r $$f $(SLASH_PREFIX)/tagboxes); \
+	done)
+
+	# Now all the themes
+	$(CP) -r themes/* $(SLASH_PREFIX)/themes
 	
-	# Insure we use the proper Perl interpreter and prefix in all scripts that 
+	# Ensure we use the proper Perl interpreter and prefix in all scripts that 
 	# we install. Note the use of Perl as opposed to dirname(1) and basename(1)
 	# which may or may not exist on any given system.
 	(replacewith=$(REPLACEWITH); \
@@ -138,14 +155,14 @@ install: slash plugins
 	 sbinfiles=$(SBINFILES); \
 	 themefiles=$(THEMEFILES); \
 	 pluginfiles=$(PLUGINFILES); \
+	 tagboxfiles=$(TAGBOXFILES); \
 	 if [ "$$replacewith" != "\#\!\/usr\/bin\/perl" ]; then \
 	 	replace=1; \
 		replacestr='(using $(PERL))'; \
 	 else \
 	 	replace=0; \
 	 fi; \
-	 for f in $$binfiles $$sbinfiles $$themefiles $$pluginfiles; do \
-		echo "Installing '$$f' in $(SLASH_PREFIX)/$$d $$replacestr"; \
+	 for f in $$binfiles $$sbinfiles $$themefiles $$pluginfiles $$tagboxfiles; do \
 		n=$(SLASH_PREFIX)/$$f; \
 		$(INSTALL) -d $(SLASH_PREFIX)/$$d; \
 	 	if [ $$replace ]; then \
@@ -160,8 +177,6 @@ install: slash plugins
 
 	$(CP) sql/mysql/slashschema_create.sql $(SLASH_PREFIX)/sql/mysql/schema.sql
 	$(CP) sql/mysql/defaults.sql $(SLASH_PREFIX)/sql/mysql/defaults.sql
-	$(CP) sql/oracle/slashschema_create.sql $(SLASH_PREFIX)/sql/oracle/schema.sql
-	$(CP) sql/postgresql/slashschema_create.sql $(SLASH_PREFIX)/sql/postgresql/schema.sql
 
 	# This needs BSD support (and Solaris)...
 	# ... and the $(SLASH_PREFIX) section is a really ugly hack, too.
@@ -219,14 +234,12 @@ install: slash plugins
 		-o								\
 		\( -name CVS -type d   -o   -name .#* -type f \)		\
 			-a \( -prune						\
-				-exec echo "(cleaning out {})" \;		\
 				-exec $(RM_RF) {} \; \)				\
 		2> /dev/null ;							\
 	else									\
 	find $(SLASH_PREFIX)							\
 		\( -name CVS -type d   -o   -name .#* -type f \)		\
 			-a \( -prune						\
-				-exec echo "(cleaning out {})" \;		\
 				-exec $(RM_RF) {} \; \)				\
 		2> /dev/null ;							\
 	fi
@@ -238,6 +251,7 @@ install: slash plugins
 	chown -R $(USER):$(GROUP) $(SLASH_PREFIX)/bin
 	chown -R $(USER):$(GROUP) $(SLASH_PREFIX)/sql
 	chown -R $(USER):$(GROUP) $(SLASH_PREFIX)/plugins
+	chown -R $(USER):$(GROUP) $(SLASH_PREFIX)/tagboxes
 # Add a @ to suppress output of the echo's
 	@echo "+--------------------------------------------------------+"; \
 	echo "| All done.                                              |"; \
@@ -252,16 +266,17 @@ install: slash plugins
 	echo "| Thanks for installing Slash.                           |"; \
 	echo "+--------------------------------------------------------+"; \
 
-
 reload: install
 	apachectl stop
 	apachectl start
 
 #   cleanup
+# We need this to remove Makefile.old's as well, and *.xs.orig
 clean:
-	(cd Slash; if [ ! -f Makefile ]; then perl Makefile.PL; fi; make clean)
+	(cd Slash; if [ ! -f Makefile ]; then perl Makefile.PL; fi; $(MAKE) clean)
 	(rm Slash/Apache/Apache.xs Slash/Apache/User/User.xs)
-	(cd plugins; make clean)
+	(cd plugins; $(MAKE) clean)
+	(cd tagboxes; $(MAKE) clean)
 	find ./ | grep \# | xargs rm
 
 dist: $(DISTVNAME).tar$(SUFFIX)
@@ -280,7 +295,7 @@ distdir :
 	-e "manicopy(maniread(),'$(DISTVNAME)', '$(DIST_CP)');"
 
 manifest :
-	(cd Slash; make distclean)
+	(cd Slash; $(MAKE) distclean)
 	$(PERL) -MExtUtils::Manifest -e 'ExtUtils::Manifest::mkmanifest'
 
 rpm :
