@@ -817,7 +817,7 @@ function firehose_handle_nodnix( commands ){
 
 function firehose_handle_comment_nodnix( commands ){
 	return $.map(commands, function( cmd ){
-		var match = /^([-!]*)(nod|nix)$/.match(cmd);
+		var match = /^([-!]*)(nod|nix)$/.exec(cmd);
 		if ( match ) {
 			return match[1] + 'meta' + match[2]
 		}
