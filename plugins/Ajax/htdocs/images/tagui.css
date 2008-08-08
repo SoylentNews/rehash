@@ -1,66 +1,326 @@
-div.tag-widget .tag-display ul {
-	list-style: none;
+span.tag, .tmenu, .tag-display, .tag-display-set, .tag-widget,
+.tag-display ul, .tag-display li, .tag-display h1.legend,
+.tag-widget .edit-toggle, .tag-widget .related {
+	user-select: none;
+	-moz-user-select: none;
+	cursor: pointer;
+}
+
+.tag-entry {
+	user-select: text;
+	-moz-user-select: text;
+	cursor: text;
+}
+
+
+.tag-display span.tag,
+.tag-widget .admin-buttons {
+	font-family: Optima, sans serif;
+}
+
+/* style tags based on what they are */
+/* ...for everyone */
+.bang > span.tag > .punct { font-weight: bold }
+.minus > .tag { text-decoration: line-through; background-color: inherit !important; }
+.not-saved > .tag { color: darkgray; background-color: inherit !important; }
+
+/* only for admins */
+.adminmode[tag-server] .s1 > .tag,
+.adminmode[tag-server] .t2 > .tag {
+	font-weight: bold;
+	font-variant: small-caps;
+}
+.adminmode[tag-server] .pound > .tag { font-weight: bold }
+.adminmode[tag-server] .descriptive > .tag { color: orange }
+.adminmode[tag-server] .ignore > .tag { color: darkgray }
+
+/* tag "suggestions" look different than tags actually applied */
+.tag-display[context=related] span.tag {
+	font-style: italic;
+	font-weight: bold;
+}
+
+div.tag-display ul, div.tag-display li {
+	display: inline;
+	list-style: none inherit none !important;
+}
+
+/* your personal tags hidden if that tag already in top|system... */
+.tag-display[context=user] li.p,
+.tag-display[context=user] li.t,
+.tag-display[context=user] li.s,
+.tag-display[context=top]  li.s {
+	display: none;
+}
+
+/* but style the tag that hid yours, so you know */
+.tag-display[context=top] li.u,
+.tag-display[context=system] li.u,
+.tag-display[context=related] li.u {
+	text-decoration: underline;
+}
+
+.tag-display[context=signoff] .w span.tag {
+	background-color: #ff4949 !important;
+}
+
+.tag-display[context=signoff] .w:hover span.tag {
+	background-color: #f00 !important;
+}
+
+.tag-display li:hover span.tag {
+	cursor: arrow;
+	color: white;
+	background-color: #066;
+}
+
+div.tag-display,
+div.tag-display > h1.legend,
+div.tag-widget {
+	width: auto !important;
+}
+
+/* round edges */
+.tag-display ul,
+.tag-display span.tag,
+.tag-display .tmenu,
+.tag-display .tmenu li,
+.tag-display h1.legend {
+	border: 0 solid transparent;
+	-moz-border-radius: 0.4em;
+	-webkit-border-radius: 0.4em;
+}
+
+/* padding so hover highlighting is bigger than the contents */
+div.tag-display > ul,
+#contents div.tag-display > ul,
+div.tag-display .tmenu li span,
+#contents div.tag-display .tmenu li span {
+	padding: 0.1em 0.5em !important;
+	margin: -0.1em -0.5em !important;
+}
+
+div.tag-display .tmenu li span,
+#contents div.tag-display .tmenu li span {
+	text-align: center;
+	min-width: 1.5em;
+}
+
+div.tag-display span.tag,
+div.tag-display .tmenu,
+div.tag-display > h1.legend,
+#contents div.tag-display > h1.legend {
+	padding: 0.1em 0.3em !important;
+	margin: -0.1em -0.3em !important;
+}
+
+div.tag-display .tmenu {
 	padding: 0;
 }
 
-.bang { text-decoration: outline }
-.pound { font-weight: bold }
-.descriptive { color: orange }
-.ignore { color: darkgray }
-
-.tag-display span.tag.not-saved { color: gray }
-
-div.tag-widget .tag-display li {
-	display: inline;
-	padding: 0 0.25em 0 0.25em !important;
-	margin: 0 !important;
+/* give the menus something to position against */
+.tag-display > ul > li {
+	position: relative;
 }
 
-div.tag-widget .tag-display ul {
-	display: inline;
-	padding: 0 !important;
-	margin: 0 !important;
+/* tag menus are hidden by default... */
+.tag-display .tmenu {
+	display: none;
+	position: absolute;
+	top: -1.2em;
+	right: -0.1em;
+	font-size: 110%;
+	color: #066;
+	background-color: white;
+
+	opacity: 0.5;
+	-moz-opacity: 0.5;
+}
+
+/* ...until you mouse over element to which they are attached */
+.tag-display li:hover ul.tmenu {
+	display: block;
+}
+
+/* the menu item itself */
+.tag-display .tmenu > li:hover {
+	opacity: 1;
+	color: white;
+	background-color: black !important;
+}
+
+/* separate tags, also menu items */
+div.tag-display > ul > li,
+div.tag-display .tmenu > li {
+	margin-left: 0 !important;
+}
+
+div.tag-display + div.tag-display {
+	margin-left: 0.5em !important;
+}
+
+div.tag-display .tmenu > li + li,
+div.tag-display > ul > li + li {
+	margin-left: 0.25em !important;
 }
 
 
-.tag-display-set, .tag-display, .tag, .tmenu, h1.legend {
-	user-select: none;
+.tag-display > h1.legend {
+	display: none;
+	position: absolute;
+
+	top: -1.6em;
+	left: -0.2em;
+
+	color: #066;
+	background-color: white;
+	opacity: 0.85;
+
+	font-size: 125% !important;
+	text-align: left;
+	text-transform: capitalize;
 }
 
-.tag-display {
+.tag-display:hover > h1.legend {
+	display: block;
+}
+
+.tag-display h1.legend {
+	-moz-border-radius-bottomleft: 0;
+	-moz-border-radius-bottomright: 0;
+	-webkit-border-bottom-left-radius: 0em;
+	-webkit-border-bottom-right-radius: 0em;
+}
+
+.tag-display[context=related] > h1.legend {
+	bottom: -2em !important;
+	top: inherit;
+
+	-moz-border-radius-bottomleft: 0.4em;
+	-moz-border-radius-bottomright: 0.4em;
+	-webkit-border-bottom-left-radius: 0.4em;
+	-webkit-border-bottom-right-radius: 0.4em;
+
+	-moz-border-radius-topleft: 0;
+	-moz-border-radius-topright: 0;
+	-webkit-border-top-left-radius: 0;
+	-webkit-border-top-right-radius: 0;
+}
+
+/* ...that's everything _in_ a tag-display... now let's do the display itself */
+
+div.tag-display {
 	display: inline;
 	position: relative;
-	padding-left: 0.25em;
+	margin-left: 0 !important;
 }
+
+.tag-display:hover > ul {
+	background-color: #dfdfdf;
+}
+
+.tag-display[context=system] li.d:hover ul.tmenu, /* no menus for data-type tags */
+.tag-display li.not-saved:hover ul.tmenu, /* no menus for newly added tags */
+.tag-widget.stub,
+.tag-display.stub,
+.tag-display.no-tags,
+.tag-display[context=related].no-tags,
+.tag-display[context=user].no-visible-tags {
+	display: none !important;
+}
+
+.tag-widget .tag-display[context=user],
+.tag-widget .tag-display[context=top] {
+	display: none;
+}
+
+.tag-widget.expanded .tag-display[context=user],
+.tag-widget.expanded .tag-display[context=top] {
+	display: inline;
+}
+
 
 .tag-display[context=related] {
 	display: block;
-	position: relative;
 	text-align: left;
-	width: auto;
 }
 
-.tag-display-set.stack, .tag-display-set.stack .tag-display {
-	display: block;
+
+.tag-display-set.train {
+	display: inline;
+	margin-right: 1em;
 }
 
-.tag-display-set.train, .tag-display-set.train .tag-display {
+.tag-widget.expanded .tag-display-set.train {
+	padding-right: 1em;
+}
+
+
+.tag-widget .tag-entry {
+	display: none;
+	margin-left: -2em;
+	margin-right: 2em;
+}
+
+.tag-widget.expanded .tag-entry {
 	display: inline;
 }
 
-.tag-display-set.train {
-	margin-right: 1.5em;
+.tag-widget .working + .tag-server-busy {
+	display: block;
 }
 
-span.tag {
-	margin: -4px;
-	border: 4px solid transparent;
-	-moz-border-radius: 0.3em;
-	-webkit-border-radius: 0.3em;
+.tag-widget .tag-server-busy {
+	display: none;
+	position: absolute;
 }
 
-.tag-display span.tag, .tag-widget .admin-buttons {
-	font-family: Optima, sans serif;
+.tag-widget.expanded .tag-server-busy {
+	top: 0;
+	right: 1.2em;
+}
+
+.tag-editor {
+	display: none;
+	position: relative;
+}
+
+.tag-widget.expanded .tag-editor {
+	display: inline;
+}
+
+.tag-widget {
+	display: block;
+	position: absolute;
+	background-color: transparent;
+}
+
+
+/* firehose-specific [to the end of the file] */
+
+#firehose .tag-widget.body-widget {
+	right: -0.5em;
+	bottom: 6px;
+	z-index: 10;
+	padding: 0 0.4em 0 0.8em;
+	text-align: right;
+}
+
+#firehose .tag-widget.body-widget.expanded {
+	right: 0;
+}
+
+.tag-widget .note-wrapper {
+	display: block;
+	font-style: italic;
+	padding-right: 0.4em;
+	margin: 0 1em 0.5em 0;
+}
+
+.tag-widget .note-wrapper.no-note {
+	display: inline;
+	font-style: inherit;
+	padding-right: 0;
 }
 
 .tag-widget .admin-buttons {
@@ -71,136 +331,8 @@ span.tag {
 	font-style: italic;
 }
 
-.tag-display[context=signoff] span.tag:hover {
-	background-color: inherit;
-}
-
 .tag-widget .admin-buttons a {
 	text-decoration: none;
-}
-
-.tag-display span.tag:hover {
-	cursor: arrow;
-	color: white;
-	background-color: #066;
-}
-
-.nod-nix-reasons .tag-display span.tag:hover {
-	color: black;
-	background-color: inherit;
-}
-
-div.tag-widget .tag-display ul.tmenu {
-	display: none;
-	position: absolute;
-	top: -9px;
-	right: -2px;
-}
-
-
-.tag-display > h1.legend {
-	display: none;
-	position: absolute;
-	color: white;
-	background-color: lightgray;
-	top: -1em;
-	left: 0.3em;
-	width: 9em;
-	text-align: left;
-	z-index: 2;
-}
-
-.tag-display[context=related] > h1.legend {
-	bottom: -2em !important;
-	top: inherit;
-}
-
-.tag-display:hover {
-	background-color: lightgray;
-}
-
-.nod-nix-reasons .tag-display:hover {
-	background-color: inherit;
-}
-
-.tag-display:hover h1.legend {
-	display: block;
-}
-
-
-.tag-display > ul > li {
-	position: relative;
-}
-
-div.tag-widget .tag-display > ul > li:hover ul.tmenu {
-	display: inline;
-}
-
-div.tag-widget.sorting .tag-display > ul > li:hover ul.tmenu {
-	display: none;
-}
-
-div.tag-widget .tmenu > li {
-	font-size: 110%;
-	padding: 0 0.2em !important;
-	margin: 0 !important;
-	color: darkgreen;
-	cursor: arrow;
-}
-
-.tag-editor {
-	display: inline;
-	position: relative;
-}
-
-div.tag-widget .tmenu > li:hover {
-	color: white;
-	background-color: black !important;
-}
-
-.tag-widget {
-	display: block;
-	position: absolute;
-	right: 0;
-	bottom: 6px;
-	z-index: 10;
-	background-color: transparent;
-	padding: 0 0.4em 0 0.8em;
-	min-width: 6em;
-	text-align: right;
-}
-
-.tag-widget.nod-nix-reasons {
-	position: relative;
-	bottom: 0;
-	color: inherit;
-	background-color: inherit;
-	text-align: inherit;
-	padding-left: 0.8em;
-}
-
-.tag-widget .tag-server-busy {
-	display: none;
-	position: absolute;
-	top: -0.4em;
-	right: 0.1em;
-}
-
-.tag-widget.expanded .tag-server-busy {
-	top: 0;
-	right: 0.4em;
-}
-
-.tag-widget .note-wrapper {
-	display: block;
-	font-style: italic;
-	padding-right: 0.4em;
-}
-
-.tag-widget .note-wrapper.no-note {
-	display: inline;
-	font-style: inherit;
-	padding-right: 0;
 }
 
 .tag-widget .admin-buttons .note-wrapper:before {
@@ -223,20 +355,6 @@ div.tag-widget .tmenu > li:hover {
 	content: '';
 }
 
-.tag-widget .tag-entry {
-	display: none;
-	margin-left: -1.8em;
-	margin-right: 2.4em;
-}
-
-.tag-widget.expanded .tag-entry {
-	display: inline;
-}
-
-.tag-widget .working + .tag-server-busy {
-	display: block;
-}
-
 .tag-widget div.tags {
 	display: inline;
 	position: relative;
@@ -245,47 +363,33 @@ div.tag-widget .tmenu > li:hover {
 	margin-left: 1em;
 }
 
-div.tag-widget [context=related] {
-	font-style: italic;
-	font-weight: bold;
-}
-
-.s1, .t2 {
-	font-variant: small-caps;
-}
-
-.tag-display[context=user] li.p,
-.tag-display[context=user] li.t,
-.tag-display[context=user] li.s,
-.tag-display[context=top]  li.s {
-	display: none;
-}
-
-.tag-display[context=top] li.u,
-.tag-display[context=system] li.u,
-.tag-display[context=related] li.u {
-	text-decoration: underline;
-}
-
-.briefarticle .tag-widget.body-widget,
-.tag-widget.stub,
-.tag-display.stub,
-.tag-display.no-tags,
-.tag-display[context=related].no-tags,
-.tag-display[context=user].no-visible-tags {
+.briefarticle .tag-widget.body-widget {
 	display: none !important;
 }
 
-.tag-widget .tag-display[context=user],
-.tag-widget .tag-display[context=top] {
-	display: none;
+
+/* nod/nix suggestion bar */
+
+.tag-widget.nod-nix-reasons {
+	position: relative;
+	bottom: 0;
+	color: inherit;
+	background-color: inherit;
+	text-align: inherit;
+	padding-left: 0.8em;
+
+	z-index: 10;
 }
 
-.tag-widget.expanded .tag-display[context=user],
-.tag-widget.expanded .tag-display[context=top] {
-	display: inline;
+div.article div.title div.nod-nix-reasons span.tag {
+	color: white;
 }
 
-.tag-display[context=signoff] > ul > li.w {
-	background-color: red !important;
+.nod-nix-reasons .tag-display li:hover span.tag {
+	color: white;
+	background-color: black;
+}
+
+.nod-nix-reasons .tag-display:hover ul {
+	background-color: inherit;
 }

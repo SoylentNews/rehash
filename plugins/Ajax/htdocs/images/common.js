@@ -734,7 +734,7 @@ function firehose_click_tag( event ) {
 		command = 'nix';
 	} else if ( $target.is('.tag') ) {
 		command = $target.text();
-	} else if ( $target.parent().is('.tmenu') ) {
+	} else if ( $target.nearest_parent('.tmenu').length ) {
 		var op = $target.text();
 		var $tag = $target.nearest_parent(':has(span.tag)').find('.tag');
 		$related_trigger = $tag;
@@ -830,7 +830,7 @@ function firehose_init_tagui( parents ){
 	$init_tag_widgets(
 		$(parents)
 			.append('<div class="tag-widget nod-nix-reasons stub">' +
-					'<div class="tag-display stub" context="related" />' +
+					'<div class="tag-display stub" context="related" label="why" />' +
 				'</div>')
 			.nearest_parent('[tag-server]')
 				.each(function(){
@@ -847,8 +847,6 @@ function firehose_init_tagui( parents ){
 				})
 				.find('.tag-widget')
 	)
-	// ...and finally, pull the menu off the datatype entry
-	.find('[context=system] li.d .tmenu').remove()
 }
 // firehose functions end
 

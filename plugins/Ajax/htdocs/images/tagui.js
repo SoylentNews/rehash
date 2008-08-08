@@ -161,6 +161,10 @@ function bare_tag( t ) {
 	}
 }
 
+function markup_tag( t ) {
+	return t.replace(/^([^a-zA-Z]+)/, '<span class="punct">$1</span>')
+}
+
 
 function form_submit_tags( form, options ){
 	var $input = $('.tag-entry:input', form);
@@ -246,11 +250,12 @@ var tag_display_fns = {
 		var new_tags_seen = {};
 		var new_tags = $.map(tags, function(t){
 			var bt = bare_tag(t);
+			var mt = markup_tag(t);
 			if ( bt in update_map )
-				$(update_map[bt]).html(t);
+				$(update_map[bt]).html(mt);
 			else if ( !(bt in new_tags_seen) ) {
 				new_tags_seen[bt] = true;
-				return t
+				return mt
 			}
 		});
 
@@ -360,7 +365,7 @@ function $init_tag_displays( selector, options ){
 
 			var menu_template = join_wrap(
 				$this.attr('menu') || $init_tag_displays.menu_templates[$this.attr('context')] || '',
-				'<li>', '</li>',
+				'<li><span>', '</span></li>',
 				'<ul class="tmenu">', '</ul>'
 			);
 			$this.removeAttr('menu');
@@ -776,7 +781,8 @@ var css_classes_for_prefix = {
 	'!': 'bang',
 	'#': 'pound',
 	')': 'descriptive',
-	'_': 'ignore'
+	'_': 'ignore',
+	'-': 'minus'
 };
 
 function static_css_classes_for( tag ){
