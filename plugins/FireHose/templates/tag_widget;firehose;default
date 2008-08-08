@@ -55,8 +55,8 @@ __template__
 	[% END %]
 	[%# the disclosure triangle %]
 <a class="edit-toggle"
-	[%- IF user.tags_canwrite_stories	%] href="#" onclick="firehose_toggle_tagui(this), false"
-	[%- ELSIF user.is_anon			%] href="#" onclick="show_login_box(), false"
+	[%- IF user.tags_canwrite_stories	%] href="#" onclick="firehose_toggle_tagui(this); return false"
+	[%- ELSIF user.is_anon			%] href="#" onclick="show_login_box(); return false"
 	[%- ELSE				%] href="[% gSkin.rootdir %]/subscribe.pl"
 	[%- END %]><span class="button">[+]</span></a>
 <div class="tag-display-set train">
@@ -70,6 +70,7 @@ __template__
 			&& ! Slash.db.hasUserSignedStory(item.srcid, user.uid)- %]
 			[%- PROCESS tag_display
 				context = "signoff"
+				nomenu = 1
 				label = "signoff"
 				tags = ["unsigned"]
 				attributes = 'stoid="' _ item.srcid _ '"'
@@ -84,7 +85,7 @@ __template__
 </form>
 [%# the suggestions bar %]
 <div class="related">
-	[% PROCESS tag_display context = "related" label = "suggestions" tags = [] attributes = '' %]
+	[% PROCESS tag_display context = "related" nomenu = 1 label = "suggestions" tags = [] attributes = '' %]
 </div>
 [% ELSE %]
 </div>

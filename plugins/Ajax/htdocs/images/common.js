@@ -665,12 +665,20 @@ function firehose_fix_up_down(id, new_state) {
 	if ( $updown.length && ! $updown.hasClass(new_state) ) {
 		// We found the capsule, and it's state needs to be fixed.
 		$updown.setClass(new_state);
-
-		// When ad admin nixes something, it should collapse and get out of the way.
-		if ((fh_is_admin || firehose_settings.metamod) && (new_state=='voteddown' || $('#title-'+id).is(':contains("Comment:")')) )
-			firehose_collapse_entry(id);
 	}
 }
+
+function firehose_click_nodnix_reason( event ) {
+	var $entry = $(event.target).nearest_parent('[tag-server]');
+	var id = $entry.attr('tag-server');
+
+	if ( (fh_is_admin || firehose_settings.metamod) && ($('#updown-'+id).hasClass('voteddown') || $entry.is('[type=comment]')) ) {
+		firehose_collapse_entry(id)
+	}
+
+	return true
+}
+
 
 function firehose_remove_tab(tabid) {
 	setFirehoseAction();
@@ -765,9 +773,10 @@ function firehose_click_tag( event ) {
 				this.submit_tags(command, { fade_remove: 400, classes: 'not-saved'})
 			});
 		}
+		return false
 	}
 
-	return false
+	return true
 }
 
 function firehose_handle_context_triggers( commands ){
@@ -788,41 +797,52 @@ function firehose_handle_context_triggers( commands ){
 }
 
 
-function firehose_handle_nodnix( commands ){
+function firehose_handle_nodnix( commands, options ){
+	var context = options && options.context;
+
 	if ( commands.length ) {
 		var $reasons = $('.nod-nix-reasons', this);
-		function nodnix_context( context ){
+		function nodnix_context( ctx ){
 			$reasons.each(function(){
-				this.set_context(context)
+				this.set_context(ctx)
 			})
 		}
 
-		nodnix_context(undefined);
-
-		var tag_server = this;
+		var context_not_set=true, tag_server=this;
 		$.each(commands.slice(0).reverse(), function(i, cmd){
 			if ( cmd=='nod' || cmd=='nix' ) {
+				nodnix_context(context || cmd);
+				context_not_set = false;
 				firehose_fix_up_down(
 					tag_server.getAttribute('tag-server'),
 					{ nod:'votedup', nix:'voteddown' }[cmd]
 				);
-				nodnix_context(cmd);
 				return false
 			}
 		})
+
+		if ( context_not_set )
+			nodnix_context(undefined);
 	}
 
 	return commands
 }
 
 function firehose_handle_comment_nodnix( commands ){
-	return $.map(commands, function( cmd ){
+	var tag_server = this;
+	var handled_underlying = false;
+
+	return $.map(commands.reverse(), function( cmd ){
 		var match = /^([-!]*)(nod|nix)$/.exec(cmd);
 		if ( match ) {
-			return match[1] + 'meta' + match[2]
+			cmd = match[1] + 'meta' + match[2];
+			if ( !handled_underlying && !match[1] ) {
+				firehose_handle_nodnix.apply(tag_server, [[ match[2] ], { context: cmd }]);
+				handled_underlying = true;
+			}
 		}
 		return cmd
-	})
+	}).reverse()
 }
 
 
@@ -830,8 +850,10 @@ function firehose_init_tagui( parents ){
 	$init_tag_widgets(
 		$(parents)
 			.append('<div class="tag-widget nod-nix-reasons stub">' +
-					'<div class="tag-display stub" context="related" label="why" />' +
+					'<div class="tag-display stub" nomenu="nomenu" context="related" label="why" />' +
 				'</div>')
+			.find('.tag-display')
+				.click(firehose_click_nodnix_reason)
 			.nearest_parent('[tag-server]')
 				.each(function(){
 					var $this	= $(this);

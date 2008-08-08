@@ -67,13 +67,12 @@ function firehose_handle_admin_commands( commands ){
 		$.post('/ajax.pl', {
 			op:	'admin_signoff',
 			resky:	reskey_static,
-			stoid:	$cookie.attr('stoid'),
+			stoid:	$cookie.attr('stoid')
 		}, function(){
 			signoff_tag_server.mark_busy(false)
 		});
 
 		$('[context=signoff]', this).remove();
-		everything_else.push('signed')
 	}
 
 	if ( hold )

@@ -47,8 +47,9 @@ var suggestions_for_context = {
 	nod: '[% IF postags.size %][% FOR postag IN postags %][% postag %] [% END %][% ELSE %]fresh funny insightful interesting maybe[% END %]',
 	nix: '[% IF negtags.size %][% FOR negtag IN negtags %][% negtag %] [% END %][% ELSE %]binspam dupe notthebest offtopic slownewsday stale stupid[% END %]',
 	story: 'neverdisplay',
-	default: 'hold quik back typo dupe',
-	unsigned: 'signed'
+	'default': 'hold quik back typo dupe',
+	metanod: 'insightful interesting informative funny underrated',
+	metanix: 'offtopic flamebait troll redundant overrated'
 }
 </script>
 

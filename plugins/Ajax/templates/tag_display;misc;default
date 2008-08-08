@@ -8,6 +8,8 @@ tags	        = array of initial tags
 label	        = optional display legend, e.g., "My Tags"
 class           = additional class(es)
 attributes      = additional attributes, e.g., 'stoid="247"'
+nomenu
+menu
 __title__
 Useless title to template
 __page__
@@ -21,8 +23,9 @@ __seclev__
 __template__
 [% sep = '' -%]
 <div class="tag-display stub[% IF class %] [% class %][% END %]"
-	[%- IF context %] context="[% context %]"[%END %]
+	[%- IF context %] context="[% context %]"[% END -%]
 	[%- IF label %] label="[% label %]"[% END -%]
+	[%- IF nomenu %] nomenu="nomenu"[% ELSIF menu %] menu="[% menu %]"[% END -%]
 	[%- IF attributes %] [% attributes %][% END %]>
 	[%- IF tags.size -%]
 		[%- FOR t = tags -%]

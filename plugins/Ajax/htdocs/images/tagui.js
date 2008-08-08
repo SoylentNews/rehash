@@ -353,6 +353,19 @@ var tag_display_fns = {
 
 }; // tag_display_fns
 
+
+function markup_menu( label ){
+	var css_class;
+	if ( label in css_classes_for_prefix )
+		css_class = css_classes_for_prefix[label];
+	else if ( label == 'x' )
+		css_class = css_classes_for_prefix['-'];
+	else
+		css_class = label;
+	return '<li class="'+css_class+'"><span>'+label+'</span></li>'
+}
+
+
 function $init_tag_displays( selector, options ){
 	options = options || {};
 
@@ -363,12 +376,22 @@ function $init_tag_displays( selector, options ){
 		.each(function(){
 			var $this = $(this);
 
-			var menu_template = join_wrap(
-				$this.attr('menu') || $init_tag_displays.menu_templates[$this.attr('context')] || '',
-				'<li><span>', '</span></li>',
-				'<ul class="tmenu">', '</ul>'
-			);
-			$this.removeAttr('menu');
+			var menu_items = '';
+			if ( $this.is('[nomenu]') ) {
+				$this.removeAttr('nomenu').removeAttr('menu')
+			} else if ( $this.is('[menu]') ) {
+				menu_items = $this.attr('menu');
+				$this.removeAttr('menu');
+			} else
+				menu_items = $init_tag_displays.default_menu;
+
+			var menu_template = menu_items ? (
+					'<ul class="tmenu">' +
+					$.map(list_as_array(menu_items), function(label){
+						return markup_menu(label)
+					}).join('') +
+					'</ul>'
+				) : '';
 
 			var t, legend = (t=$this.attr('label')) ? '<h1 class="legend">' + t + '</h1>' : '';
 			$this.removeAttr('label');
@@ -393,15 +416,11 @@ function $init_tag_displays( selector, options ){
 	return $tag_displays
 }
 
-$init_tag_displays.menu_templates = {
-	user:	'! x',
-	top:	'! x',
-	system: '! x'
-}
+$init_tag_displays.default_menu = '! x';
 
 $(function(){
 	if ( fh_is_admin )
-		$init_tag_displays.menu_templates.top = '_ # ! )'
+		$init_tag_displays.default_menu = '_ # ) ! x'
 });
 
 
@@ -535,12 +554,12 @@ function position_context_display( display, if_animate ){
 		var right_edge = left_edge + $entry.width();
 
 		// XXX do this in CSS instead
-		var MIN_RIGHT_BUFFER = 20;
+		var PADDING = 20;
 
 		var align_to = $related_trigger.offset().left;
 		if ( align_to + display_width > right_edge )
 			align_to = right_edge - display_width;
-		align_to = Math.max(left_edge, align_to-MIN_RIGHT_BUFFER);
+		align_to = Math.max(left_edge+PADDING, align_to-PADDING);
 
 		var distance = align_to - $display.offset().left;
 
@@ -606,29 +625,24 @@ var tag_widget_fns = {
 	},
 
 
-	set_context: function( context ){
+	set_context: function( context, force ){
 		var suggested_tags = '';
 		if ( context ) {
-			if ( !(context in suggestions_for_context) && context in context_triggers )
-				context = 'default';
+			if ( context == this._current_context && !force ) {
+				context = '';
+			} else {
+				if ( !(context in suggestions_for_context) && context in context_triggers )
+					context = (this._current_context != 'default') ? 'default' : '';
 
-			if ( context in suggestions_for_context )
-				suggested_tags = suggestions_for_context[context];
+				if ( context in suggestions_for_context )
+					suggested_tags = suggestions_for_context[context];
+			}
 		}
 
 		suggested_tags = list_as_array(suggested_tags);
 		var has_tags = suggested_tags.length != 0;
 
-		var $nodnix, $others;
-		[ $nodnix, $others ] = $('.ready[context=related]', this).separate(function( elem ){
-			return $(elem).is(':has(.nod-nix-reasons)')
-		})
-
-		$nodnix.each(function(){
-			this.set_tags(suggested_tags)
-		});
-
-		$others
+		$('.ready[context=related]', this)
 			.each(function(){
 				var $this = $(this);
 
@@ -649,6 +663,9 @@ var tag_widget_fns = {
 				}
 
 			});
+
+		this._current_context = context;
+
 		return this
 	},
 
@@ -753,8 +770,8 @@ $(function(){
 	//update_class_map(well_known_tags, 'e', YAHOO.slashdot.actionTags);
 	//update_class_map(well_known_tags, 'e', YAHOO.slashdot.fhitemOpts);
 	//update_class_map(well_known_tags, 'e', YAHOO.slashdot.storyOpts);
-	update_class_map(well_known_tags, 'y p', ['nod']);
-	update_class_map(well_known_tags, 'x p', ['nix']);
+	update_class_map(well_known_tags, 'y p', ['nod', 'metanod']);
+	update_class_map(well_known_tags, 'x p', ['nix', 'metanix']);
 	update_class_map(well_known_tags, 'd', data_types);
 
 	if ( fh_is_admin )

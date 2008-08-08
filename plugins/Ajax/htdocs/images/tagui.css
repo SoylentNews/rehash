@@ -1,15 +1,21 @@
-span.tag, .tmenu, .tag-display, .tag-display-set, .tag-widget,
+.tag-widget, .tag-entry {
+	user-select: text;
+	-moz-user-select: text;
+}
+
+span.tag, .tmenu, .tag-display, .tag-display-set,
 .tag-display ul, .tag-display li, .tag-display h1.legend,
-.tag-widget .edit-toggle, .tag-widget .related {
+.edit-toggle, .tag-widget .related {
 	user-select: none;
 	-moz-user-select: none;
+}
+
+span.tag, .tmenu, .tag-display ul, .tag-display li, .edit-toggle {
 	cursor: pointer;
 }
 
 .tag-entry {
-	user-select: text;
-	-moz-user-select: text;
-	cursor: text;
+	cursor: text !important;
 }
 
 
@@ -51,6 +57,26 @@ div.tag-display ul, div.tag-display li {
 .tag-display[context=user] li.s,
 .tag-display[context=top]  li.s {
 	display: none;
+}
+
+.tmenu li.minus,
+.tmenu li.ignore,
+.tmenu li.pound,
+.tmenu li.descriptive {
+	display: none;
+}
+
+li.u > .tmenu li.minus,
+li.u > .tmenu li.descriptive,
+li.t > .tmenu li.pound,
+li.t > .tmenu li.ignore,
+li.t > .tmenu li.descriptive {
+	display: inline;
+}
+
+/* no menus for newly added tags */
+.tag-display li.not-saved .tmenu li {
+	display: none !important;
 }
 
 /* but style the tag that hid yours, so you know */
@@ -219,8 +245,6 @@ div.tag-display {
 	background-color: #dfdfdf;
 }
 
-.tag-display[context=system] li.d:hover ul.tmenu, /* no menus for data-type tags */
-.tag-display li.not-saved:hover ul.tmenu, /* no menus for newly added tags */
 .tag-widget.stub,
 .tag-display.stub,
 .tag-display.no-tags,
@@ -229,13 +253,11 @@ div.tag-display {
 	display: none !important;
 }
 
-.tag-widget .tag-display[context=user],
-.tag-widget .tag-display[context=top] {
+.tag-widget .tag-display[context=user] {
 	display: none;
 }
 
-.tag-widget.expanded .tag-display[context=user],
-.tag-widget.expanded .tag-display[context=top] {
+.tag-widget.expanded .tag-display[context=user] {
 	display: inline;
 }
 
@@ -277,7 +299,7 @@ div.tag-display {
 
 .tag-widget.expanded .tag-server-busy {
 	top: 0;
-	right: 1.2em;
+	right: 0.4em;
 }
 
 .tag-editor {

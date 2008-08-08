@@ -257,6 +257,8 @@ bottom: -1em;
 right: 0;
 }
 
+div.briefarticle[type=comment] .title a span { background: transparent !important }
+
 /* Icons and imagery for articles */
 
 .edit
