@@ -162,7 +162,7 @@ sub nickFix {
 sub nick2matchname {
 	my($nick) = @_;
 	$nick = lc $nick;
-	$nick =~ s/[^:a-zA-Z0-9]//g;
+	$nick =~ s/[^a-zA-Z0-9]//g;
 	return $nick;
 }
 
