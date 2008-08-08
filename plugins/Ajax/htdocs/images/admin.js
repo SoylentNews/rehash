@@ -26,8 +26,7 @@ function um_set_settings(behavior) {
 function firehose_handle_admin_commands( commands ){
 	var neverdisplay, hold, signoff;
 
-	var admin_commands, everything_else;
-	[ admin_commands, everything_else ] = separate(commands, function(cmd){
+	var non_admin_commands = separate(commands, function(cmd){
 		var is_admin = true;
 		switch ( cmd ) {
 			case 'neverdisplay':	neverdisplay = true; break;
@@ -41,12 +40,12 @@ function firehose_handle_admin_commands( commands ){
 				is_admin = false;
 		}
 		return is_admin
-	});
+	})[1];
 
 	var id = this.getAttribute('tag-server');
 
 	if ( neverdisplay && confirm("Set story to neverdisplay?") ) {
-		everything_else.push('neverdisplay');
+		non_admin_commands.push('neverdisplay');
 
 		var nd_tag_server = this.mark_busy(true);
 		$.post('/ajax.pl', {
@@ -76,12 +75,12 @@ function firehose_handle_admin_commands( commands ){
 	}
 
 	if ( hold )
-		everything_else.push('hold');
+		non_admin_commands.push('hold');
 
 	if ( hold || signoff )
 		firehose_collapse_entry(id);
 
-	return everything_else
+	return non_admin_commands
 }
 
 

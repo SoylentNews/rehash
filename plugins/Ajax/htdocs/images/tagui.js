@@ -10,8 +10,8 @@ var tag_server_fns = {
 			// work backwards so 'notify' context is last
 			while ( tuples.length >= 2 ) {
 				var data = tuples.pop();
-				var context_name, context = tuples.pop();
-				[ context_name ] = context.split(':');
+				var context = tuples.pop();
+				var context_name = context.split(':')[0];
 
 				$listeners.filter('[context*=' + context_name + ']').each(function(){
 					if ( this.receive_broadcast )
@@ -244,7 +244,7 @@ var tag_display_fns = {
 		// no other call adds tags (except by calling _me_)
 
 		// the intersection of the requested vs. existing tags are the ones I can update in-place
-		var update_map; [ update_map ] = this.map_tags(tags = list_as_array(tags));
+		var update_map = this.map_tags(tags = list_as_array(tags))[0];
 
 		// update in-place the ones we can; build a list of the ones we can't ($.map returns a js array)
 		var new_tags_seen = {};
@@ -298,8 +298,11 @@ var tag_display_fns = {
 		// when called without an argument, removes all tags, otherwise
 		//   tags to remove may be specified by string, an array, or the result of a previous call to map_tags
 		var if_remove_all;
-		if ( !tags || tags.length )
-			[ tags, if_remove_all ] = this.map_tags(tags);
+		if ( !tags || tags.length ) {
+			var mapped = this.map_tags(tags);
+			tags = mapped[0];
+			if_remove_all = mapped[1];
+		}
 
 		var $remove_li = $(values(tags)).parent();
 
@@ -324,9 +327,9 @@ var tag_display_fns = {
 	// like remove_tags() followed by update_tags(tags) except order preserving for existing tags
 	set_tags: function( tags, options ){
 		var allowed_tags = map_list_to_set(tags = list_as_array(tags), bare_tag);
-		var removed_tags; [ removed_tags ] = this.map_tags(function(bt){
+		var removed_tags = this.map_tags(function(bt){
 			return !(bt in allowed_tags)
-		});
+		})[0];
 
 		return this
 			.remove_tags(removed_tags, options)

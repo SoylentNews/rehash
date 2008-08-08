@@ -69,11 +69,10 @@ jQuery.fn.extend({
 	},
 
 	separate: function( f ){
-		var pass, fail;
-		[ pass, fail ] = separate(this, $.isFunction(f) ? f : function(e){
+		var sublists = separate(this, $.isFunction(f) ? f : function(e){
 			return $(e).is(f)
 		});
-		return [ this.pushStack(pass), this.pushStack(fail) ]
+		return [ this.pushStack(sublists[0]), this.pushStack(sublists[0]) ]
 	}
 
 });
