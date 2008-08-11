@@ -24,30 +24,12 @@ LONG DESCRIPTION.
 =cut
 
 use strict;
-use DBIx::Password;
 use Slash;
 use Slash::Display;
-use Slash::Utility;
 
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
-
-########################################################
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'Remarks'};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect;
-
-	return $self;
-}
 
 ########################################################
 sub getRemarks {

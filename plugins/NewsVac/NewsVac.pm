@@ -75,17 +75,16 @@ use HTTP::Cookies;
 use XML::RSS;
 
 use Slash::Display;
-use Slash::Utility;
 
 our $VERSION = $Slash::Constants::VERSION;
 
 use vars qw($callback_ref);
 
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use base 'Slash::Plugin';
 
 # We use custom descriptions with derivative names since we are using
 # variants based on the 1.x scheme, for now.
+# XXX these and most of what's in new() and maybe Reset() should be in init()
 my %nvdescriptions = (
 	'authornames' => sub {
 		$_[0]->sqlSelectMany(

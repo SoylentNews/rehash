@@ -37,9 +37,8 @@ package Slash::Tagbox;
 use strict;
 use Slash;
 use Slash::Display;
-use Slash::Utility;
-use Slash::DB::Utility;
 use Apache::Cookie;
+
 use base 'Slash::DB::Utility';
 use base 'Slash::DB::MySQL';
 
@@ -50,41 +49,27 @@ our $VERSION = $Slash::Constants::VERSION;
 # FRY: And where would a giant nerd be? THE LIBRARY!
 
 #################################################################
-sub new {
-	my($class, $user) = @_;
-
-	return undef unless $class->isInstalled();
-
-	# Note that getTagboxes() would call back to this new() function
-	# if the tagbox objects have not yet been created -- but the
-	# no_objects option prevents that.  See getTagboxes() for details.
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	my %self_hash = %{ $class->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
-	my $self = \%self_hash;
-	return undef if !$self || !keys %$self;
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	$self->init();
-	$self->init_tagfilters();
-
-	return $self;
-}
 
 sub isInstalled {
 	my($class) = @_;
 	my $constants = getCurrentStatic();
-        return undef if !$constants->{plugin}{Tags};
-        my($tagbox_name) = $class =~ /(\w+)$/;
-        return undef if !$constants->{tagbox}{$tagbox_name};
-        return 1;
+	return undef if !$constants->{plugin}{Tags};
+	my($tagbox_name) = $class =~ /(\w+)$/;
+	return undef if !$constants->{tagbox}{$tagbox_name};
+	return 1;
 }
 
 sub init {
 	my($self) = @_;
-	# by default, nothing to init
+	$self->SUPER::init() if $self->can('SUPER::init');
+
+	my %self_hash = %{ $self->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
+	for my $key (keys %self_hash) {
+		$self->{$key} = $self_hash{$key};
+	}
+
+	$self->init_tagfilters();
+	1;
 }
 
 sub init_tagfilters {

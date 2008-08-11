@@ -28,8 +28,7 @@ use strict;
 use Slash;
 use Slash::Utility::Environment;
 
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 

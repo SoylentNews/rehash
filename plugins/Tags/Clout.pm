@@ -7,19 +7,22 @@ package Slash::Clout;
 use strict;
 use warnings;
 use Slash;
-use Slash::Utility;
 use Slash::Tags;
 #use Slash::Clout::Describe;
 #use Slash::Clout::Vote;
 #use Slash::Clout::Moderate;
 
 use base 'Slash::DB::Utility';
-use base 'Slash::DB';
+use base 'Slash::DB'; # hm, should this be Slash::DB::MySQL? either way it should be documented why. -Jamie
 
 our $VERSION = $Slash::Constants::VERSION;
 
 sub init {
 	my($self) = @_;
+
+warn "Clout.pm calling SUPER::init for $self: " . ($self->can('SUPER::init') ? 1 : 0);
+	$self->SUPER::init() if $self->can('SUPER::init');
+warn "Clout.pm called SUPER::init for $self";
 
 	$self->{months_back} = 2; # default
 	my $slashdb = getCurrentDB();

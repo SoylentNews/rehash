@@ -33,14 +33,14 @@ More to come.
 =cut
 
 use strict;
-use base qw(Slash::Messages::DB::MySQL);
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::Constants ':messages';
 use Slash::Display;
 use Slash::Utility;
 
-our $VERSION = $Slash::Constants::VERSION;
+use base 'Slash::Messages::DB::MySQL';
 
+our $VERSION = $Slash::Constants::VERSION;
 
 #========================================================================
 

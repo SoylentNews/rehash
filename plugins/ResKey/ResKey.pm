@@ -41,29 +41,13 @@ use strict;
 use Slash;
 use Slash::Constants ':reskey';
 use Slash::ResKey::Key;
-use Slash::Utility;
 
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use base 'Slash::Plugin';
 
 our($AUTOLOAD);
 our $VERSION = $Slash::Constants::VERSION;
 
 our $DEBUG = 0;
-
-#========================================================================
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'ResKey'};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-
-	return $self;
-}
 
 #========================================================================
 sub key {

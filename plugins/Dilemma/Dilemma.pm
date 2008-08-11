@@ -10,29 +10,13 @@ package Slash::Dilemma;
 use strict;
 use Time::HiRes;
 use Safe;
-use Storable qw( freeze thaw dclone );
-use Slash::Utility;
-use Slash::DB::Utility;
-use base 'Slash::DB::Utility';
+use Storable qw( nfreeze thaw dclone );
+
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
 # ZOIDBERG: Friends! Help! A guinea pig tricked me!
-
-#################################################################
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{Dilemma};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	return $self;
-}
 
 #################################################################
 sub getActiveTournaments {
@@ -432,7 +416,7 @@ sub setAgents {
 		delete $new_hr->{code};
 		delete $new_hr->{species_name};
 		if (defined $new_hr->{memory}) {
-			my $frozen_memory = freeze(\$new_hr->{memory});
+			my $frozen_memory = nfreeze(\$new_hr->{memory});
 			# Agents can't save memories longer than a certain
 			# limit;  those that try get BRAIN-WIPED.  Mwoohaha.
 			$frozen_memory = "" if length($frozen_memory) > 10_000;

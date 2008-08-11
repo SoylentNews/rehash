@@ -6,14 +6,11 @@ package Slash::ScheduleShifts;
 
 use strict;
 use Date::Calc qw(Add_Delta_Days);
-use DBIx::Password;
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::Constants qw(:messages);
 use Slash::Utility;
 
-use base 'Exporter';
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use base 'Slash::Plugin';
 
 use constant SHIFT_DEFAULT		=> -2;
 use constant SHIFT_NOTSET		=> -1;
@@ -34,16 +31,8 @@ sub getDayOfWeekOffset {
 }
 
 
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'ScheduleShifts'};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect;
+sub init {
+	my($self) = @_;
 
 	my $static_shift_defs = getCurrentStatic('shift_definitions');
 
@@ -62,7 +51,7 @@ sub new {
 	}
 	$self->{shift_types} = [ keys %{ $self->{shift_defs} } ];
 
-	return $self;
+	1;
 }
 
 

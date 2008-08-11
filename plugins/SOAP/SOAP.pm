@@ -6,12 +6,10 @@ package Slash::SOAP;
 
 use strict;
 use Slash;
-use Slash::Utility;
+
+use base 'Slash::Plugin';
 
 use vars qw( $ERROR );
-use base 'Exporter';
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
 
 our $VERSION = $Slash::Constants::VERSION;
 
@@ -30,21 +28,6 @@ Slash::SOAP - SOAP access for Slash
 This plugin provides helper methods for using SOAP with other plugins.
 
 =cut
-
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $slashdb = getCurrentDB();
-	my $plugins = $slashdb->getDescriptions('plugins');
-	return unless $plugins->{'SOAP'};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect;
-
-	return $self;
-}
 
 sub returnError {
 	my($self, $error) = @_;

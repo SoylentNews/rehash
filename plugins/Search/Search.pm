@@ -5,28 +5,12 @@
 package Slash::Search;
 
 use strict;
-use Slash::Utility;
-use Slash::DB::Utility;
-use base 'Slash::DB::Utility';
+
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
 # FRY: And where would a giant nerd be? THE LIBRARY!
-
-#################################################################
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'Search'};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	return $self;
-}
 
 ####################################################################################
 # This has been changed. Since we no longer delete comments

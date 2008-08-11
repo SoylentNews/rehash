@@ -6,27 +6,10 @@ package Slash::YASS;
 
 use strict;
 use Slash;
-use Slash::Utility;
-use Slash::DB::Utility;
 
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
-
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'YASS'};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect;
-
-	return $self;
-}
 
 sub getSidsURLs {
 	my ($self) = @_;

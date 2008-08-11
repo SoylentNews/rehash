@@ -5,31 +5,12 @@
 package Slash::Rating;
 
 use strict;
-use DBIx::Password;
 use Slash;
 use Slash::Constants;
-use Slash::Utility;
-use Slash::DB::Utility;
 
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
-
-#Right, this is not needed at the moment but will be in the near future
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'Rating'};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect;
-
-	return $self;
-}
 
 sub create_comment_vote {
 	my ($data) = @_;
