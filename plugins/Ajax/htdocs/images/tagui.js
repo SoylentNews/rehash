@@ -369,24 +369,21 @@ function markup_menu( label ){
 }
 
 
-function $init_tag_displays( selector, options ){
+function $init_tag_displays( $stubs, options ){
 	options = options || {};
 
-	var $tag_displays = $(selector);
-
-	// <div context="user" label="My Tags">tag1 tag2 tag3</div>
-	$tag_displays
+	$stubs
 		.each(function(){
 			var $this = $(this);
 
+			var init_data = $this.metadata({type:'attr', name:'init'});
+			$this.removeAttr('init');
+
 			var menu_items = '';
-			if ( $this.is('[nomenu]') ) {
-				$this.removeAttr('nomenu').removeAttr('menu')
-			} else if ( $this.is('[menu]') ) {
-				menu_items = $this.attr('menu');
-				$this.removeAttr('menu');
-			} else
+			if ( init_data.menu === undefined || init_data.menu === true )
 				menu_items = $init_tag_displays.default_menu;
+			else if ( init_data.menu )
+				menu_items = init_data.menu;
 
 			var menu_template = menu_items ? (
 					'<ul class="tmenu">' +
@@ -396,8 +393,7 @@ function $init_tag_displays( selector, options ){
 					'</ul>'
 				) : '';
 
-			var t, legend = (t=$this.attr('label')) ? '<h1 class="legend">' + t + '</h1>' : '';
-			$this.removeAttr('label');
+			var legend = init_data.legend ? '<h1 class="legend">' + init_data.legend + '</h1>' : '';
 
 			var tags = $this.text();
 			$this.html(legend+'<ul></ul>');
@@ -405,18 +401,23 @@ function $init_tag_displays( selector, options ){
 			$.extend(
 				this,
 				tag_display_fns,
-				{ tag_display_data: {
-					menu_template:	menu_template,
-					$list_el:	$this.find('ul')
-				} },
+				{
+					tag_display_data: {
+						menu_template:	menu_template,
+						$list_el:	$this.find('ul')
+					}
+				},
 				options
 			);
-			$this.addClass('tag-display ready no-tags dirty').removeClass('stub');
+
+			$this.mapClass({
+				'tag-display-stub': 'tag-display ready no-tags dirty'
+			})
 
 			if ( tags ) this.set_tags(tags);
 		})
 
-	return $tag_displays
+	return $stubs
 }
 
 $init_tag_displays.default_menu = '! x';
@@ -584,7 +585,7 @@ var gFocusedText;
 var tag_widget_fns = {
 
 	init: function(){
-		$init_tag_displays($('.tag-display.stub, [context]:not([class])', this));
+		$init_tag_displays($('.tag-display-stub', this));
 
 		$(this)
 			.find('.tag-entry')
@@ -668,68 +669,35 @@ var tag_widget_fns = {
 			});
 
 		this._current_context = context;
-
-		return this
-	},
-
-
-	open: function(){
-		// $(this).nearest_parent('[tag-server]').addClass('tagging');
-		$(this)	.filter(':hidden')
-				.slideDown(100)
-				.find(':text:visible:first')
-					.each(function(){
-						this.focus()
-					});
-		return this
-	},
-
-
-	close: function(){
-		// $(this).nearest_parent('[tag-server]').removeClass('tagging');
-		$(this)
-			.filter(':visible')
-			.slideUp(100);
 		return this
 	}
 
 }; // tag_widget_fns
 
-
-function open_tag_widget( selector, fetch ){
-	var $widgets = $init_tag_widgets($(selector).filter(':hidden'));
-
-	if ( fetch ) {
-		$widgets.nearest_parent('[tag-server]')
-			.each(function(){
-				this.fetch_tags()
-			})
-	}
-
-	return $widgets.each(function(){this.open()})
-}
-
-function close_tag_widget( selector ){
-	return $(selector).filter(':visible').each(function(){this.close()})
-}
-
-function $init_tag_widgets( selector, options ){
+function $init_tag_widgets( $stubs, options ){
 	options = options || {};
 
-	var $tag_widgets = $(selector);
+	$stubs
+		.each(function(){
+			var $this = $(this);
 
-	$tag_widgets
-		.filter('.stub')
-			.each(function(){
-				$.extend(
-					this,
-					tag_widget_fns,
-					options
-				).init()
-			})
-			.removeClass('stub');
+			var init_data = $this.metadata({type:'attr', name:'init'});
+			$this.removeAttr('init');
 
-	return $tag_widgets
+			var local_state = { tag_widget_data: {} };
+			if ( init_data.context_timeout )
+				local_state.tag_widget_data.context_timeout = init_data.context_timeout;
+
+			$.extend(
+				this,
+				tag_widget_fns,
+				local_state,
+				options
+			).init()
+		})
+		.mapClass({'tag-widget-stub': 'tag-widget'});
+
+	return $stubs
 }
 
 
@@ -760,26 +728,36 @@ function $init_tag_widgets( selector, options ){
 	'underscore'
  */
 
-var data_types = ['submission','journal','bookmark','feed','story','vendor','misc','comment','discussion'];
 
-var context_triggers = map_list_to_set(data_types);
-
-var well_known_tags = {};
+var context_triggers, well_known_tags;
 
 $(function(){
+	var data_types = [
+		'submission',
+		'journal',
+		'bookmark',
+		'feed',
+		'story',
+		'vendor',
+		'misc',
+		'comment',
+		'discussion',
+		'project'
+	];
+
+	context_triggers = map_list_to_set(data_types);
+
+
+	well_known_tags = {};
 	update_class_map(well_known_tags, 's1', YAHOO.slashdot.sectionTags);
 	update_class_map(well_known_tags, 't2', YAHOO.slashdot.topicTags);
-	//update_class_map(well_known_tags, 'f', YAHOO.slashdot.feedbackTags);
-	//update_class_map(well_known_tags, 'e', YAHOO.slashdot.actionTags);
-	//update_class_map(well_known_tags, 'e', YAHOO.slashdot.fhitemOpts);
-	//update_class_map(well_known_tags, 'e', YAHOO.slashdot.storyOpts);
 	update_class_map(well_known_tags, 'y p', ['nod', 'metanod']);
 	update_class_map(well_known_tags, 'x p', ['nix', 'metanix']);
 	update_class_map(well_known_tags, 'd', data_types);
 
 	if ( fh_is_admin )
 		update_class_map(well_known_tags, 'w p', ['signed', 'unsigned', 'signoff']);
-})
+});
 
 function update_class_map( css_class_map, css_class, tags ){
 	var sp_css_class = ' ' + css_class;
@@ -905,4 +883,10 @@ function recompute_css_classes( root ){
 					! $this.is(':has(li.u:not(.t,.s,.p))')
 				)
 			})
+}
+
+function init_tagui_styles( $entries ){
+	$entries.each(function(){
+		recompute_css_classes(this)
+	})
 }

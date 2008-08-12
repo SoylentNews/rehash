@@ -644,7 +644,7 @@ function firehose_up_down(id, dir, type) {
 
 	var $server = $('#firehoselist > [tag-server='+id+']');
 	$server
-		.find('.tag-widget:not(.stub)')
+		.find('.tag-widget')
 			.each(function(){
 				++found_widgets;
 				this.set_context(new_context)
@@ -846,29 +846,34 @@ function firehose_handle_comment_nodnix( commands ){
 }
 
 
-function firehose_init_tagui( parents ){
-	$init_tag_widgets(
-		$(parents)
-			.append('<div class="tag-widget nod-nix-reasons stub">' +
-					'<div class="tag-display stub" nomenu="nomenu" context="related" label="why" />' +
-				'</div>')
-			.find('.tag-display')
-				.click(firehose_click_nodnix_reason)
-			.nearest_parent('[tag-server]')
-				.each(function(){
-					var $this	= $(this);
-					var id		= $this.attr('tag-server');
-					var is_comment	= $this.attr('type') == 'comment';
+function firehose_init_tagui(){
+	var $new_entries = $('#firehoselist > [class*=article]:not([tag-server])')
+		.each(function(){
+			var $this = $(this), id = firehose_id_of(this);
 
-					if ( fh_is_admin )
-						this.command_pipeline.push(firehose_handle_admin_commands)
-					this.command_pipeline.push(
-						firehose_handle_context_triggers,
-						is_comment ? firehose_handle_comment_nodnix : firehose_handle_nodnix
-					);
-				})
-				.find('.tag-widget')
-	)
+			install_tag_server(this, id);
+
+			if ( fh_is_admin )
+				this.command_pipeline.push(firehose_handle_admin_commands);
+
+			this.command_pipeline.push(
+				firehose_handle_context_triggers,
+				($this.attr('type') == 'comment')
+					? firehose_handle_comment_nodnix
+					: firehose_handle_nodnix
+			);
+
+			$this
+				.find('.title')
+					.append('<div class="tag-widget-stub nod-nix-reasons" init="context_timeout:15000">' +
+							'<div class="tag-display-stub" context="related" init="legend:\'why\', menu:false" />' +
+						'</div>')
+					.find('.tag-display')
+						.click(firehose_click_nodnix_reason)
+		});
+
+	$init_tag_widgets($new_entries.find('.tag-widget-stub'));
+	init_tagui_styles($new_entries)
 }
 // firehose functions end
 
@@ -1105,16 +1110,11 @@ function firehose_handle_update() {
 		firehose_get_next_updates();
 	}
 
-	// XXX temporary admin-only access to the tag-wiget
-	if ( fh_is_admin ) {
-		firehose_init_tagui(
-			$('#firehoselist > [class*=article]:not([tag-server])')
-				.each(function(){
-					install_tag_server(this, firehose_id_of(this))
-				})
-				.find('.title')
-		)
-	}
+	// dispFireHose has temporary rules restricting who gets the new tagui
+	// we don't need to duplicate those rules here, just look at the DOM to see
+	// temporary, until open to all users
+	if ( $('.tag-widget-stub:first').length )
+		firehose_init_tagui();
 
 	if ( focused_text_field )
 		focused_text_field.triggerHandler('focus');

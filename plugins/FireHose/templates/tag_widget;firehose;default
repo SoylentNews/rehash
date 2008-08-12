@@ -34,7 +34,7 @@ __template__
 		<div id="toggletags-message-[% id %]" class="message"></div>
 	</div>
 [% END %]
-<div id="tag-widget-[% id %]" class="tag-widget body-widget stub">
+<div id="tag-widget-[% id %]" class="tag-widget-stub body-widget" init="context_timeout:15000">
 	[% IF user.is_admin && !user.firehose_usermode %]
 	<span class="admin-buttons">
 		[%# the note %]
@@ -60,21 +60,21 @@ __template__
 	[%- ELSE				%] href="[% gSkin.rootdir %]/subscribe.pl"
 	[%- END %]><span class="button">[+]</span></a>
 <div class="tag-display-set train">
-	[% PROCESS tag_display context = "top" label = "top&nbsp;tags" tags = [] %]
-	[% PROCESS tag_display context = "system" label = "system&nbsp;tags" tags = tags_top %]
+	<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'"></div>
+	<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">
+	[%- IF tags_top.size -%]
+		[%- sep = ''; FOR t = tags_top -%]
+			[%- sep %][% t.split(':').0 -%]
+		[%- sep = ' '; END -%]
+	[%- END -%]
+	</div>
 [% IF user.tags_canwrite_stories %]
-	[% PROCESS tag_display context = "user" label = "my&nbsp;tags" tags = [] attributes = '' %]
+	<div class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></div>
 	[% IF item.type == "story" -%]
 		[%- IF constants.signoff_use
 			&& ((user.is_admin && !user.firehose_usermode) || user.acl.signoff_allowed)
-			&& ! Slash.db.hasUserSignedStory(item.srcid, user.uid)- %]
-			[%- PROCESS tag_display
-				context = "signoff"
-				nomenu = 1
-				label = "signoff"
-				tags = ["unsigned"]
-				attributes = 'stoid="' _ item.srcid _ '"'
-			-%]
+			&& ! Slash.db.hasUserSignedStory(item.srcid, user.uid) -%]
+			<div class="tag-display-stub" context="signoff" stoid="[% item.srcid %]" init="legend:'signoff', menu:false">unsigned</div>
 		[%- END -%]
 	[%- END %]
 </div>
@@ -85,7 +85,7 @@ __template__
 </form>
 [%# the suggestions bar %]
 <div class="related">
-	[% PROCESS tag_display context = "related" nomenu = 1 label = "suggestions" tags = [] attributes = '' %]
+	<div class="tag-display-stub" context="related" init="legend:'suggestions', menu:false"></div>
 </div>
 [% ELSE %]
 </div>
