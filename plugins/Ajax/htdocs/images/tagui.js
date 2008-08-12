@@ -364,6 +364,8 @@ function markup_menu( label ){
 	var css_class;
 	if ( label in css_classes_for_prefix )
 		css_class = css_classes_for_prefix[label];
+	else if ( label[0] in css_classes_for_prefix )
+		css_class = css_classes_for_prefix[ label[0] ];
 	else if ( label == 'x' )
 		css_class = css_classes_for_prefix['-'];
 	else
@@ -423,11 +425,11 @@ function $init_tag_displays( $stubs, options ){
 	return $stubs
 }
 
-$init_tag_displays.default_menu = '! x';
+$init_tag_displays.default_menu = 'x !';
 
 $(function(){
 	if ( fh_is_admin )
-		$init_tag_displays.default_menu = '_ # ) ! x'
+		$init_tag_displays.default_menu = 'x ! # ## _ )'
 });
 
 

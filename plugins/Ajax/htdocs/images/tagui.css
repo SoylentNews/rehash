@@ -61,19 +61,25 @@ div.tag-display ul, div.tag-display li {
 	display: none;
 }
 
-.tmenu li.minus,
-.tmenu li.ignore,
-.tmenu li.pound,
-.tmenu li.descriptive {
+div.tag-display .tmenu li {
+	text-align: center;
+	display: block;
+	min-width: 1em;
+}
+
+div.tag-display .tmenu li.minus,
+div.tag-display .tmenu li.ignore,
+div.tag-display .tmenu li.pound,
+div.tag-display .tmenu li.descriptive {
 	display: none;
 }
 
-li.u > .tmenu li.minus,
-li.u > .tmenu li.descriptive,
-li.t > .tmenu li.pound,
-li.t > .tmenu li.ignore,
-li.t > .tmenu li.descriptive {
-	display: inline;
+div.tag-display li.u > .tmenu li.minus,
+div.tag-display li.u > .tmenu li.descriptive,
+div.tag-display li.t > .tmenu li.pound,
+div.tag-display li.t > .tmenu li.ignore,
+div.tag-display li.t > .tmenu li.descriptive {
+	display: block;
 }
 
 /* no menus for newly added tags */
@@ -142,13 +148,6 @@ div.tag-display > h1.legend,
 	margin: -0.1em -0.3em !important;
 }
 
-div.tag-display .tmenu li,
-#contents div.tag-display .tmenu li {
-	text-align: center;
-	display: block;
-	min-width: 1em;
-}
-
 div.tag-display .tmenu li span,
 #contents div.tag-display .tmenu li span {
 	text-align: center;
@@ -167,7 +166,7 @@ div.tag-display .tmenu {
 .tag-display .tmenu {
 	display: none;
 	position: absolute;
-	top: -1.2em;
+	top: -0.6em;
 	right: -0.1em;
 	font-size: 110%;
 	color: #066;
