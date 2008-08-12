@@ -927,7 +927,7 @@ function recompute_css_classes( root ){
 				var $this = $(this);
 				$this.toggleClassTo(
 					'no-visible-tags',
-					! $this.is(':has(li.u:not(.t,.s,.p))')
+					! $this.is(':has(li.u:not(.t,.s,.p,.minus))')
 				)
 			})
 }
