@@ -11022,9 +11022,10 @@ sub _getUser_do_selects {
 			} else {
 				my $this_info = $clout_info->{$clid};
 				my $clout_obj = getObject($this_info->{class}, { db_type => 'reader' });
-				$this_clout = $clout_obj->getUserClout($answer);
+				$this_clout = $clout_obj->getUserClout($answer) if $clout_obj;
 			}
-			$answer->{clout}{ $clout_types->{$clid} } = $this_clout;
+			$answer->{clout}{ $clout_types->{$clid} } = $this_clout
+				if defined($this_clout);
 		}
 	} elsif (ref($params) eq 'ARRAY' && @$params) {
 		my $param_list = join(",", map { $self->sqlQuote($_) } @$params);
