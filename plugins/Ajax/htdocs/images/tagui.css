@@ -75,7 +75,9 @@ li.t > .tmenu li.descriptive {
 }
 
 /* no menus for newly added tags */
-.tag-display li.not-saved .tmenu li {
+.tag-display li.not-saved .tmenu,
+.tag-display[context=signoff] .tmenu,
+.tag-display li.d .tmenu {
 	display: none !important;
 }
 
@@ -86,6 +88,12 @@ li.t > .tmenu li.descriptive {
 	text-decoration: underline;
 }
 
+.tag-display li:hover span.tag {
+	cursor: arrow;
+	color: white;
+	background-color: #066;
+}
+
 .tag-display[context=signoff] .w span.tag {
 	background-color: #ff4949 !important;
 }
@@ -94,15 +102,13 @@ li.t > .tmenu li.descriptive {
 	background-color: #f00 !important;
 }
 
-.tag-display li:hover span.tag {
-	cursor: arrow;
-	color: white;
-	background-color: #066;
+/* no mouse over highlight for datatypes */
+.tag-display li.d:hover span.tag {
+	color: inherit;
+	background-color: inherit;
 }
 
-div.tag-display,
-div.tag-display > h1.legend,
-div.tag-widget {
+div.tag-display > h1.legend {
 	width: auto !important;
 }
 
@@ -126,18 +132,24 @@ div.tag-display .tmenu li span,
 	margin: -0.1em -0.5em !important;
 }
 
-div.tag-display .tmenu li span,
-#contents div.tag-display .tmenu li span {
-	text-align: center;
-	min-width: 1.5em;
-}
-
 div.tag-display span.tag,
 div.tag-display .tmenu,
 div.tag-display > h1.legend,
 #contents div.tag-display > h1.legend {
 	padding: 0.1em 0.3em !important;
 	margin: -0.1em -0.3em !important;
+}
+
+div.tag-display .tmenu li,
+#contents div.tag-display .tmenu li {
+	text-align: center;
+	display: block;
+	min-width: 1em;
+}
+
+div.tag-display .tmenu li span,
+#contents div.tag-display .tmenu li span {
+	text-align: center;
 }
 
 div.tag-display .tmenu {
@@ -168,9 +180,22 @@ div.tag-display .tmenu {
 	display: block;
 }
 
+/* no hover menus for datatypes */
+.tag-display li.d:hover ul.tmenu {
+	display: none;
+}
+
 /* the menu item itself */
+.tag-display .tmenu {
+	border: 1px solid transparent;
+}
+
+.tag-display .tmenu:hover {
+	opacity: 0.9;
+	border: 1px solid lightgray;
+}
+
 .tag-display .tmenu > li:hover {
-	opacity: 1;
 	color: white;
 	background-color: black !important;
 }

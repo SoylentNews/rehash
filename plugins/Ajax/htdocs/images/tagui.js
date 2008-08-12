@@ -162,7 +162,11 @@ function bare_tag( t ) {
 }
 
 function markup_tag( t ) {
-	return t.replace(/^([^a-zA-Z]+)/, '<span class="punct">$1</span>')
+	try {
+		return t.replace(/^([^a-zA-Z]+)/, '<span class="punct">$1</span>')
+	} catch (e) {
+		return t
+	}
 }
 
 
