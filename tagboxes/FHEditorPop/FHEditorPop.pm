@@ -79,6 +79,8 @@ sub feed_newtags {
 	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
 	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
 	my $maybeid    = $tagsdb->getTagnameidCreate('maybe');
+	my $metanodid  = $tagsdb->getTagnameidCreate('metanod');
+	my $metanixid  = $tagsdb->getTagnameidCreate('metanix');
 	my $admins = $self->getAdmins();
 	for my $uid (keys %$admins) {
 		$admins->{$uid}{seclev} = $tagsdb->getUser($uid, 'seclev');
@@ -87,7 +89,8 @@ sub feed_newtags {
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
 		next unless $tag_hr->{tagnameid} == $upvoteid || $tag_hr->{tagnameid} == $downvoteid
-			|| $tag_hr->{tagnameid} == $maybeid;
+			|| $tag_hr->{tagnameid} == $maybeid
+			|| $tag_hr->{tagnameid} == $metanodid || $tag_hr->{tagnameid} == $metanixid;
 		my $seclev = exists $admins->{ $tag_hr->{uid} }
 			? $admins->{ $tag_hr->{uid} }{seclev}
 			: 1;
@@ -205,6 +208,8 @@ sub run {
 	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
 	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
 	my $maybeid    = $tagsdb->getTagnameidCreate('maybe') || 0;
+	my $metanodid  = $tagsdb->getTagnameidCreate('metanod');
+	my $metanixid  = $tagsdb->getTagnameidCreate('metanix');
 	my $admins = $self->getAdmins();
 	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0, $options);
 	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
@@ -292,7 +297,9 @@ sub run {
 	if ($fhitem->{type} eq 'comment') {
 		for my $tag_hr (@$tags_ar) {
 			if ( (     $tag_hr->{tagnameid} == $upvoteid
-				|| $tag_hr->{tagnameid} == $downvoteid )
+				|| $tag_hr->{tagnameid} == $downvoteid
+				|| $tag_hr->{tagnameid} == $metanodid
+				|| $tag_hr->{tagnameid} == $metanixid )
 			    && $admins->{ $tag_hr->{uid} }
 			) {
 				$popularity = -50 if $popularity > -50;
