@@ -182,9 +182,8 @@ function form_submit_tags( form, options ){
 }
 
 
-function animate_wiggle( selector ){
-	var $list = $(selector);
-	$list
+function animate_wiggle( $selector ){
+	$selector
 		.animate({left: '-=3px'}, 20)
 		.animate({left: '+=6px'}, 20)
 		.animate({left: '-=6px'}, 20)
