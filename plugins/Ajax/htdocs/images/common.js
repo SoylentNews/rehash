@@ -696,7 +696,7 @@ function firehose_remove_tab(tabid) {
 // firehose + tagui
 //
 
-var $related_trigger = $();
+var $related_trigger = $().filter();
 
 function firehose_toggle_tagui_to( if_expanded, selector ){
 	var	$server = $(selector).nearest_parent('[tag-server]'),
@@ -781,11 +781,12 @@ function firehose_click_tag( event ) {
 
 function firehose_handle_context_triggers( commands ){
 	var context;
-	$.each(commands.slice(0).reverse(), function(i, command){
-		if ( command in context_triggers ) {
-			context = command;
-			return false
+	commands = $.map(commands, function(cmd){
+		if ( cmd in context_triggers ) {
+			context = cmd;
+			cmd = null;
 		}
+		return cmd
 	});
 
 	$('.tag-widget:not(.nod-nix-reasons)', this)

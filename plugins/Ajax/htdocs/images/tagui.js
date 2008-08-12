@@ -543,44 +543,63 @@ function normalize_tag_commands( commands, excludes ){
 }
 
 
-function position_context_display( display, if_animate ){
-	try {
-		var $display = $(display);
-		var display_width = $display.children('ul:first').width();
+function $position_context_display( $display ){
+	var RIGHT_PADDING = 18;
 
-		var css_settings = {
-			width: display_width
+	var $entry = $display.nearest_parent('[tag-server]');
+	var left_edge = $entry.offset().left;
+	var right_edge = left_edge + $entry.width() - RIGHT_PADDING;
+
+	var global_align = $related_trigger.offset().left;
+	global_align = Math.max(left_edge, global_align);
+
+	var need_minimal_fix = true;
+	if ( $display.nearest_parent(':hidden').length==0 ) {
+		try {
+			var display_width = $display.children('ul:first').width();
+			$display.css({
+				right: '',
+				width: display_width
+			});
+
+			global_align = Math.max(
+				left_edge,
+				Math.min(right_edge-display_width, global_align)
+			);
+			var distance = global_align - $display.offset().left;
+			if ( distance )
+				$display.animate({left: '+='+distance});
+
+			need_minimal_fix = false;
+		} catch (e) {
 		}
-
-
-		var $entry = $display.nearest_parent('[tag-server]');
-		var left_edge = $entry.offset().left;
-		var right_edge = left_edge + $entry.width();
-
-		// XXX do this in CSS instead
-		var PADDING = 20;
-
-		var align_to = $related_trigger.offset().left;
-		if ( align_to + display_width > right_edge )
-			align_to = right_edge - display_width;
-		align_to = Math.max(left_edge+PADDING, align_to-PADDING);
-
-		var distance = align_to - $display.offset().left;
-
-		if ( !if_animate )
-			css_settings.left = align_to - $display.offsetParent().offset().left;
-
-		$display.css(css_settings);
-
-		if ( if_animate )
-			$display.animate({left: '+='+distance});
-	} catch ( e ) {
 	}
+
+	if ( need_minimal_fix )
+		try {
+			var BROKEN_NEGATIVE_MARGIN_CALCULATION = -10;
+
+			// we may not be visible, so can't trust offsetParent() on ourself
+			// better get it from our parent
+			var x_adjust = -$display.parent().offsetParent().offset().left;
+			$display.css({
+				left: global_align + x_adjust + BROKEN_NEGATIVE_MARGIN_CALCULATION,
+				right: right_edge + x_adjust
+			});
+		} catch (e) {
+		};
 
 	return $display
 }
 
+function $queue_reposition( $display, if_only_width ){
+	return $display.queue(function(){
+		$position_context_display($display, if_only_width).dequeue()
+	})
+}
+
 var gFocusedText;
+var $previous_context_trigger = $().filter();
 
 var tag_widget_fns = {
 
@@ -630,45 +649,73 @@ var tag_widget_fns = {
 
 
 	set_context: function( context, force ){
-		var suggested_tags = '';
 		if ( context ) {
-			if ( context == this._current_context && !force ) {
+			if ( context == this._current_context
+				&& (!$previous_context_trigger.length || $related_trigger[0] === $previous_context_trigger[0])
+				&& !force ) {
 				context = '';
 			} else {
 				if ( !(context in suggestions_for_context) && context in context_triggers )
 					context = (this._current_context != 'default') ? 'default' : '';
 
-				if ( context in suggestions_for_context )
-					suggested_tags = suggestions_for_context[context];
 			}
 		}
 
-		suggested_tags = list_as_array(suggested_tags);
-		var has_tags = suggested_tags.length != 0;
+		// cancel any existing timeout... the context to be hidden is going away
+		if ( this._context_timeout ) {
+			clearTimeout(this._context_timeout);
+			this._context_timeout = null;
+		}
 
-		$('.ready[context=related]', this)
-			.each(function(){
-				var $this = $(this);
+		// only have to set_tags on the display if the context really is changing
+		if ( context != this._current_context ) {
+			var context_tags = [];
+			if ( context && context in suggestions_for_context )
+				context_tags = list_as_array(suggestions_for_context[context]);
 
-				var had_tags = $this.find('span.tag').length != 0;
+			var has_tags = context_tags.length != 0;
 
-				if ( had_tags != has_tags )
-					$this.slideUp(100);
+			$('.ready[context=related]', this)
+				.each(function(){
+					var display = this;
+					var $display = $(display);
 
-				this.set_tags(suggested_tags);
+					var had_tags = $display.find('span.tag').length != 0;
 
-				if ( has_tags ) {
-					if ( !had_tags )
-						$this.slideDown(100);
-
-					$this.queue(function(){
-						position_context_display(this, had_tags).dequeue();
+					// animations are automatically queued...
+					if ( had_tags < has_tags )
+						$display.css('display', 'none');
+					else if ( had_tags > has_tags )
+						$display.slideUp(400);
+					// ...when regular code needs to synchronize with animation
+					$display.queue(function(){
+						// I have to queue that code up myself
+						$(display.set_tags(context_tags)).dequeue()
 					});
-				}
+					if ( has_tags ) {
+						$queue_reposition($display);
+						if ( !had_tags )
+							$queue_reposition($display.slideDown(400));
+					}
+				});
 
-			});
+			this._current_context = context;
+		} else if ( $previous_context_trigger.length
+			&& $previous_context_trigger[0] !== $related_trigger[0] ) {
 
-		this._current_context = context;
+			$position_context_display($('.ready[context=related]', this));
+		}
+
+		$previous_context_trigger = $related_trigger;
+
+		// if there's a context to hide, and hiding on a timeout is requested...
+		if ( context && this.tag_widget_data.context_timeout ) {
+			var widget = this;
+			this._context_timeout = setTimeout(function(){
+				widget.set_context()
+			}, this.tag_widget_data.context_timeout);
+		}
+
 		return this
 	}
 
