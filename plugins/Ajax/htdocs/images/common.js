@@ -869,7 +869,7 @@ function firehose_init_tagui(){
 					.append('<div class="tag-widget-stub nod-nix-reasons" init="context_timeout:15000">' +
 							'<div class="tag-display-stub" context="related" init="legend:\'why\', menu:false" />' +
 						'</div>')
-					.find('.tag-display')
+					.find('.tag-display-stub')
 						.click(firehose_click_nodnix_reason)
 		});
 
