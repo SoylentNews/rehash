@@ -34,7 +34,7 @@ var tag_server_fns = {
 	},
 
 
-	_tags_via_ajax: function( tag_cmds, options ){
+	_ajax_request: function( tag_cmds, options ){
 
 		var feedback_options = $.extend(
 			{},
@@ -109,12 +109,12 @@ var tag_server_fns = {
 
 
 	fetch_tags: function( options ){
-		return this._tags_via_ajax('', options)
+		return this._ajax_request('', options)
 	},
 
 
 	submit_tags: function( tag_cmds, options ){
-		return this._tags_via_ajax(tag_cmds, options)
+		return this._ajax_request(tag_cmds, options)
 	},
 
 

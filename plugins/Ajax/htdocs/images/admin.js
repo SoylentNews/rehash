@@ -26,52 +26,36 @@ function um_set_settings(behavior) {
 function firehose_handle_admin_commands( commands ){
 	var neverdisplay, hold, signoff;
 
-	var non_admin_commands = separate(commands, function(cmd){
-		var is_admin = true;
+	var non_admin_commands = $.map(commands, function(cmd){
+		var user_cmd = null;
 		switch ( cmd ) {
 			case 'neverdisplay':	neverdisplay = true; break;
 			case 'hold':		hold = true; break;
-			case 'signed':
-			case 'unsigned':
-			case 'signoff':
-				signoff = 'true';
-				break;
+			case 'signoff':		signoff = true; break;
 			default:
-				is_admin = false;
+				user_cmd = cmd
 		}
-		return is_admin
-	})[1];
+		return user_cmd
+	});
 
 	var id = this.getAttribute('tag-server');
-
 	if ( neverdisplay && confirm("Set story to neverdisplay?") ) {
 		non_admin_commands.push('neverdisplay');
-
-		var nd_tag_server = this.mark_busy(true);
-		$.post('/ajax.pl', {
+		this._ajax_request('', {
 			op:	'admin_neverdisplay',
-			resky:	reskey_static,
 			stoid:	'',
-			fhid:	id
-		}, function(){
-			nd_tag_server.mark_busy(false);
-			firehose_remove_entry(id)
+			fhid:	id,
+			ajax:	{ success: function(){ firehose_remove_entry(id) } }
 		});
 	}
 
 	if ( signoff ) {
-		var $cookie = $('[stoid]', this);
-		var stoid = $cookie.attr('stoid');
-		var signoff_tag_server = this.mark_busy(true);
-		$.post('/ajax.pl', {
+		var signoff_tag_server = this;
+		this._ajax_request('', {
 			op:	'admin_signoff',
-			resky:	reskey_static,
-			stoid:	$cookie.attr('stoid')
-		}, function(){
-			signoff_tag_server.mark_busy(false)
+			stoid:	$('[stoid]', this).attr('stoid'),
+			ajax:	{ success: function(){ $('[context=signoff]', signoff_tag_server).remove() } }
 		});
-
-		$('[context=signoff]', this).remove();
 	}
 
 	if ( hold )
