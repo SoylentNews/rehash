@@ -22,6 +22,7 @@ LONG DESCRIPTION.
 =head1 EXPORTED FUNCTIONS
 
 =cut
+
 use strict;
 use DBIx::Password;
 use Slash;

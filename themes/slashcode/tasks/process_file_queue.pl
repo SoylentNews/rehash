@@ -69,7 +69,7 @@ sub handleFileCmd {
 			slashdLog("About to create thumb $path$thumb");
 			system("$convert -size 260x194  $path$name  -resize '130x97>'  -bordercolor transparent  -border 48 -gravity center -crop 130x97+0+0 -page +0+0 -colors 256 -depth 8 -compress BZip $path$thumb");
 
-			if($constants->{optipng} && $suffix eq "png") {
+			if ($constants->{optipng} && $suffix eq "png") {
 				system("$constants->{optipng} -q $path$thumb");
 			}
 			my $data = {
