@@ -249,9 +249,9 @@ sub myexit {
 sub myask {
 	local $| = 1;
 	print        join "\n", @_, '' if @_;
-	print "Continue? [yN] ";
+	print "Continue? [Yn] ";
 	my $ans = <>;
-	return $ans =~ /^y/i ? 1 : 0;
+	return $ans =~ /^n/i ? 0 : 1;
 }
 
 sub mysystem {
