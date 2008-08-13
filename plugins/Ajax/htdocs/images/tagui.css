@@ -102,6 +102,10 @@ div.tag-display li.t > .tmenu li.descriptive {
 	background-color: #066;
 }
 
+.tag-display[context=signoff] {
+	padding-left: 0.5em;
+}
+
 .tag-display[context=signoff] .w span.tag {
 	background-color: #ff4949 !important;
 }
@@ -205,10 +209,6 @@ div.tag-display .tmenu {
 div.tag-display > ul > li,
 div.tag-display .tmenu > li {
 	margin-left: 0 !important;
-}
-
-div.tag-display + div.tag-display {
-	margin-left: 0.5em !important;
 }
 
 div.tag-display .tmenu > li + li,
