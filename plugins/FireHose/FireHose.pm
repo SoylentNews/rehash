@@ -24,6 +24,7 @@ LONG DESCRIPTION.
 =cut
 use strict;
 use DBIx::Password;
+use Slash;
 use Slash::Display;
 use Slash::Utility;
 use Slash::Slashboxes;
@@ -1739,7 +1740,8 @@ sub ajaxGetAdminExtras {
 sub setSectionTopicsFromTagstring {
 	my($self, $id, $tagstring) = @_;
 	my $constants = getCurrentStatic();
-
+	
+	print STDERR "sstft $id: $tagstring\n";
 	my @tags = split(/\s+/, $tagstring);
 	my $data = {};
 
