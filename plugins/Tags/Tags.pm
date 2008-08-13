@@ -1357,6 +1357,7 @@ sub ajaxSetGetCombinedTags {
 				lc $form->{tags};
 
 			$base_writer->setSectionTopicsFromTagstring($form->{id}, $added_tags);
+			$base_item = $base_writer->getFireHose($form->{id});
 		};
 	} else {
 		my $current_tags_array = $tags_reader->getTagsByNameAndIdArrayref($table, $item_id, { uid => $uid, include_private => 1 });
