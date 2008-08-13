@@ -1,0 +1,34 @@
+__section__
+default
+__description__
+To get something on this list, make sure it is in tagnames_param for
+posneg='+' or '-', and popup='1'.
+
+__title__
+Useless title to template
+__page__
+firehose
+__lang__
+en_US
+__name__
+init_tagui
+__seclev__
+10000
+__template__
+[% tags_reader = Slash.getObject('Slash::Tags', { db_type => 'reader' });
+   postags = tags_reader.getPositivePopupTags.sort;
+   negtags = tags_reader.getNegativePopupTags.sort;
+ -%]
+<script type="text/javascript">
+var suggestions_for_context = {
+	nod: '[% IF postags.size %][% FOR postag IN postags %][% postag %] [% END %][% ELSE %]fresh funny insightful interesting maybe[% END %]',
+	nix: '[% IF negtags.size %][% FOR negtag IN negtags %][% negtag %] [% END %][% ELSE %]binspam dupe notthebest offtopic slownewsday stale stupid[% END %]',
+	story: 'neverdisplay',
+	'default': 'hold quik back typo dupe',
+	metanod: 'insightful interesting informative funny underrated',
+	metanix: 'offtopic flamebait troll redundant overrated'
+}
+</script>
+
+__version__
+$Id$

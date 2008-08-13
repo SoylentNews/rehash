@@ -95,6 +95,7 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
 %]
 [% PROCESS titlebar title="$constants.sitename Firehose $refresh_text" %]
 [% PROCESS autocomplete %]
+[% IF user.is_subscriber || user.is_admin ; PROCESS init_tagui ; END -%]
 <div class="submenu">
 <div id="message_area">
 </div>
