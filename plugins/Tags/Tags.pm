@@ -2044,7 +2044,7 @@ sub listTagnamesByPrefix_cache {
 
 sub getPrivateTagnames {
 	my ($self) = @_;
-	my $user = getCurrentUser;
+	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
 	my @private_tags = ();

@@ -63,6 +63,7 @@ sub init {
 	my($self) = @_;
 	$self->SUPER::init() if $self->can('SUPER::init');
 
+	my($tagbox_name) = $class =~ /(\w+)$/;
 	my %self_hash = %{ $self->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
 	for my $key (keys %self_hash) {
 		$self->{$key} = $self_hash{$key};
