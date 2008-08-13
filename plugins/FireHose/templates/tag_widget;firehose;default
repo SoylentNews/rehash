@@ -45,12 +45,14 @@ __template__
 				<input type="button" value="save" onclick="firehose_save_note('[% item.id %]')">
 			</span>
 			[%# the note button %]
+			<span class="admin-note">
 			<a id="note-text-[% item.id %]" href="#" onclick="firehose_open_note('[% item.id %]'); return false">
 				[%- IF !item.note  %]N[% END -%][% item.note | strip_literal -%]
 			</a>
+			</span>
 		</div>
 		[%# the history button %]
-		<span id="taghist-[% id %]"><a href="#" onclick="tagsHistory('[% id %]','firehose'); return false">H</a></span>
+		<span class="history-button" id="taghist-[% id %]"><a href="#" onclick="tagsHistory('[% id %]','firehose'); return false">H</a></span>
 	</span>
 	[% END %]
 	[%# the disclosure triangle %]
