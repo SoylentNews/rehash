@@ -1352,7 +1352,7 @@ sub ajaxSetGetCombinedTags {
 		if ( $user->{is_admin} && $type eq 'firehose' ) {
 			my $added_tags =
 				join ' ',
-				map { $1 unless /^-(.+)/ }
+				grep { /^[^-]/ }
 				split /\s+/,
 				lc $form->{tags};
 
