@@ -26,7 +26,7 @@ my $dsnmods = {
 # with getCurrentDB().
 
 sub new {
-	my($class, $user) = @_;
+	my($class, $user, @extra_args) = @_;
 	if ($class->can('isInstalled')) {
 		return undef unless $class->isInstalled();
 	}
@@ -54,7 +54,7 @@ sub new {
 		# this will invoke DB.pm's init() method a few lines
 		# down in just a moment.
 		if ($self->can('init')) {
-			return undef unless $self->init();
+			return undef unless $self->init(@extra_args);
 		}
 
 		$self->sqlConnect() or return undef;;

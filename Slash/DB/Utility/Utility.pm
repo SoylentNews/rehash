@@ -22,7 +22,7 @@ my $query_ref_regex = qr{(HASH|ARRAY|SCALAR|GLOB|CODE|LVALUE|IO|REF)\(0x[0-9a-f]
 # Generic methods for libraries.
 ########################################################
 sub new {
-	my($class, $user, @args) = @_;
+	my($class, $user, @extra_args) = @_;
 	if ($class->can('isInstalled')) {
 		return undef unless $class->isInstalled();
 	}
@@ -34,7 +34,7 @@ sub new {
 	if ($self->can('init')) {
 		# init should return TRUE for success, else
 		# we abort
-		return undef unless $self->init(@args);
+		return undef unless $self->init(@extra_args);
 
 		if (exists $self->{'_where'}) {
 			my $where = '';

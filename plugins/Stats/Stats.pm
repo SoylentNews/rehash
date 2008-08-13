@@ -19,7 +19,7 @@ use base 'Slash::Plugin';
 our $VERSION = $Slash::Constants::VERSION;
 
 sub init {
-	my($self) = @_;
+	my($self, $options) = @_;
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	
