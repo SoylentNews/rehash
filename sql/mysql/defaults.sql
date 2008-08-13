@@ -199,6 +199,7 @@ INSERT INTO discussion_kinds (dkid, name) VALUES (4, 'journal-story');
 INSERT INTO discussion_kinds (dkid, name) VALUES (5, 'poll');
 INSERT INTO discussion_kinds (dkid, name) VALUES (6, 'submission');
 INSERT INTO discussion_kinds (dkid, name) VALUES (7, 'feed');
+INSERT INTO discussion_kinds (dkid, name) VALUES (8, 'project');
 
 #
 # Dumping data for table 'dst'
@@ -223,6 +224,7 @@ INSERT INTO globj_types VALUES (NULL, 'urls');
 INSERT INTO globj_types VALUES (NULL, 'submissions');
 INSERT INTO globj_types VALUES (NULL, 'journals');
 INSERT INTO globj_types VALUES (NULL, 'comments');
+INSERT INTO globj_types VALUES (NULL, 'projects');
 
 
 #

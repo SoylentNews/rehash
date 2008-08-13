@@ -735,6 +735,7 @@ CREATE TABLE pollvoters (
 DROP TABLE IF EXISTS projects;
 CREATE TABLE projects (
 	id mediumint UNSIGNED NOT NULL auto_increment,
+	uid mediumint UNSIGNED NOT NULL DEFAULT 0,
 	unixname varchar(24) NOT NULL DEFAULT '',
 	textname varchar(64) NOT NULL DEFAULT '',
 	url_id INT(10) UNSIGNED NOT NULL DEFAULT 0,
