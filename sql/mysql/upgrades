@@ -5470,3 +5470,5 @@ CREATE TABLE projects (
 
 INSERT INTO globj_types VALUES (NULL, 'projects');
 INSERT INTO discussion_kinds (dkid, name) VALUES (NULL, 'project');
+
+INSERT IGNORE INTO vars (name, value, description) VALUES ('optipng', '', 'path to optipng if it is to be used for compressing thumbnails');

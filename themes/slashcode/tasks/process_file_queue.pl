@@ -25,7 +25,7 @@ $task{$me}{code} = sub {
 	if (!$constants->{imagemagick_convert}) {
 		slashdLog("no imagemagick convert location specified, exiting");
 	}
-	
+
 	my $file_queue_cmds = [];
 	my $cmd;
 	while (!$task_exit_flag) {
@@ -68,6 +68,10 @@ sub handleFileCmd {
 
 			slashdLog("About to create thumb $path$thumb");
 			system("$convert -size 260x194  $path$name  -resize '130x97>'  -bordercolor transparent  -border 48 -gravity center -crop 130x97+0+0 -page +0+0 -colors 256 -depth 8 -compress BZip $path$thumb");
+
+			if($constants->{optipng} && $suffix eq "png") {
+				system("$constants->{optipng} -q $path$thumb");
+			}
 			my $data = {
 				stoid => $cmd->{stoid} || 0,
 				fhid  => $cmd->{fhid} || 0 ,
@@ -89,10 +93,16 @@ sub handleFileCmd {
 				fhid  => $cmd->{fhid} || 0,
 				name => "$path$thumbsm"
 			};
+			if ($constants->{optipng} && $suffix eq "png") {
+				system("$constants->{optipng} -q $path$thumbsm");
+			}
 			addFile($data);
 
 			slashdLog("About to create thumblg $path$thumblg");
-			system("$convert $path$name  -resize '425x344>' -colors 256 -depth 8 -compress BZip $path$thumblg");
+			system("$convert $path$name  -resize '309x250>' -colors 256 -depth 8 -compress BZip $path$thumblg");
+			if ($constants->{optipng} && $suffix eq "png") {
+				system("$constants->{optipng} -q $path$thumblg");
+			}
 			$data = {
 				stoid => $cmd->{stoid} || 0,
 				fhid  => $cmd->{fhid} || 0,
@@ -173,6 +183,9 @@ sub uploadFile {
 			system("$convert $file $filepng");
 		}
 		$file = $filepng;
+		if ($constants->{optipng}) {
+			system("$constants->{optipng} -q $filepng");
+		}
 	}
 
 	if ($story->{sid}) {

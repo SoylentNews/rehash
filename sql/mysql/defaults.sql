@@ -1019,6 +1019,7 @@ INSERT INTO vars (name, value, description) VALUES ('nick_regex', '^[a-zA-Z_][ a
 INSERT INTO vars (name, value, description) VALUES ('nick_maxlen', '20', 'Max length of nickname, should correspond with schema for users.nickname');
 INSERT INTO vars (name, value, description) VALUES ('no_prerendered_stories','0','Turn off use of prerendered stories in display');
 INSERT INTO vars (name, value, description) VALUES ('offer_insecure_login_link','0','Offer the user the \'totally insecure but very convenient\' index.pl login link');
+INSERT IGNORE INTO vars (name, value, description) VALUES ('optipng', '', 'path to optipng if it is to be used for compressing thumbnails');
 INSERT INTO vars (name, value, description) VALUES ('organise_stories','','organise story blocks');
 INSERT INTO vars (name, value, description) VALUES ('panic','0','0:Normal, 1:No frills, 2:Essentials only');
 INSERT INTO vars (name, value, description) VALUES ('poll_cache','0','On home page, cache and display default poll for users (if false, is extra hits to database)');
