@@ -12793,15 +12793,21 @@ sub logCommentPromotion {
 sub createProject {
 	my($self, $data) = @_;
 	$self->sqlInsert("projects", $data);
+	my $pid = $self->getLastInsertId();
+	return $pid;
 }
 
 sub getProject {
 	my $answer = _genericGetCache({
-		table		=> 'topics',
-		table_prime	=> 'tid',
+		table		=> 'projects',
+		table_prime	=> 'id',
 		arguments	=> \@_,
 	});
 	return $answer;
+}
+
+sub setProject {
+	_genericSet('projects', 'id', '', @_);
 }
 
 sub getProjectByName {

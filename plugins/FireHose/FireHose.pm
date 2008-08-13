@@ -22,10 +22,8 @@ LONG DESCRIPTION.
 =head1 EXPORTED FUNCTIONS
 
 =cut
-
 use strict;
 use DBIx::Password;
-use Slash;
 use Slash::Display;
 use Slash::Utility;
 use Slash::Slashboxes;
@@ -337,6 +335,61 @@ sub createItemFromSubmission {
 
 }
 
+sub createItemFromProject {
+	my($self, $id) = @_;
+	my $constants = getCurrentStatic();
+	my $proj = $self->getProject($id);
+	my $globjid = $self->getGlobjidCreate("projects", $proj->{id});
+	my $midpop = $self->getEntryPopularityForColorLevel(5);
+
+	my $data = {
+		uid		=> $proj->{uid},
+		title		=> $proj->{textname},
+		srcid		=> $proj->{id},
+		type		=> "project",
+		url_id		=> $proj->{url_id},
+		globjid		=> $globjid,
+		srcname		=> $proj->{srcname},
+		introtext 	=> $proj->{description},
+		public		=> "yes",
+		editorpop	=> $midpop,
+		popularity	=> $midpop,
+		createtime	=> $proj->{createtime}
+	};
+	my $firehose_id = $self->createFireHose($data);
+	my $discussion_id = $self->createDiscussion({
+		uid		=> 0,
+		kind		=> 'project',
+		title		=> $proj->{textname},
+		commentstatus	=> 'logged_in',
+		url		=> "$constants->{rootdir}/firehose.pl?op=view&id=$firehose_id"
+	});
+
+	if ($discussion_id) {
+		$self->setFireHose($firehose_id, {
+			discussion	=> $discussion_id,
+		});
+	}
+	return $firehose_id;
+}
+
+sub updateItemFromProject {
+	my($self, $id);
+	my $proj = $self->getProject($id);
+	if ($proj && $proj->{id}) {
+		my $item = $self->getFireHoseByTypeSrcid("projects", $proj->{id});
+		if ($item && $item->{id}) {
+			my $data = {
+				uid		=> $proj->{uid},
+				url_id		=> $proj->{url_id},
+				title 		=> $proj->{textname},
+				introtext 	=> $proj->{description},
+				createtime	=> $proj->{createtime}
+			};
+			$self->setFireHose($item->{id}, $data);
+		}
+	}
+}
 sub updateItemFromStory {
 	my($self, $id) = @_;
 	my $constants = getCurrentStatic();
@@ -1933,7 +1986,7 @@ sub getAndSetOptions {
 	$opts 	        ||= {};
 	my $options 	= {};
 
-	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1, misc => 1, comment => 1 };
+	my $types = { feed => 1, bookmark => 1, submission => 1, journal => 1, story => 1, vendor => 1, misc => 1, comment => 1, project => 1 };
 	my $tabtypes = { tabsection => 1, tabpopular => 1, tabrecent => 1, tabuser => 1, metamod => 1};
 
 	my $tabtype = '';
