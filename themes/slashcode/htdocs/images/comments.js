@@ -2411,7 +2411,11 @@ function isUnread(cid) {
 		(
 			(displaymode[cid] != 'hidden')
 				&&
-			(parseInt(comments[cid]['read']) == 0)
+			(
+				(parseInt(comments[cid]['read']) == 0)
+					&&
+				!read_comments[cid]
+			)
 				&&
 			(comments[cid]['points'] > -2)
 		)
