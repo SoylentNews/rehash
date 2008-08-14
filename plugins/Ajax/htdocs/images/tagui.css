@@ -63,7 +63,7 @@ div.tag-display ul, div.tag-display li {
 
 div.tag-display .tmenu li {
 	text-align: center;
-	display: inline-block;
+	margin: 0 !important;
 }
 
 div.tag-display .tmenu li.minus,
@@ -144,7 +144,6 @@ div.tag-display .tmenu li span,
 }
 
 div.tag-display span.tag,
-div.tag-display .tmenu,
 div.tag-display > h1.legend,
 #contents div.tag-display > h1.legend {
 	padding: 0.1em 0.3em !important;
@@ -156,9 +155,6 @@ div.tag-display .tmenu li span,
 	text-align: center;
 }
 
-div.tag-display .tmenu {
-	padding: 0;
-}
 
 /* give the menus something to position against */
 .tag-display > ul > li {
@@ -169,14 +165,18 @@ div.tag-display .tmenu {
 .tag-display .tmenu {
 	display: none;
 	position: absolute;
-	top: -0.6em;
-	right: -0.1em;
-	font-size: 110%;
-	color: #066;
-	background-color: white;
+	top: -2.15em;
+	right: -.3em;
+	font-size: 85%;
+	color: #fff;
+	background-color: #066;
 
 	opacity: 0.5;
 	-moz-opacity: 0.5;
+	padding: 0 .3em 0 .2em !important;
+	text-align: center;
+	margin:0 !important;
+
 }
 
 /* ...until you mouse over element to which they are attached */
@@ -190,13 +190,8 @@ div.tag-display .tmenu {
 }
 
 /* the menu item itself */
-.tag-display .tmenu {
-	border: 1px solid transparent;
-}
-
 .tag-display .tmenu:hover {
 	opacity: 0.9;
-	border: 1px solid lightgray;
 }
 
 .tag-display .tmenu > li:hover {
@@ -220,14 +215,14 @@ div.tag-display > ul > li + li {
 	display: none;
 	position: absolute;
 
-	top: -1.6em;
+	top: -2.2em;
 	left: -0.2em;
 
-	color: #066;
+	color: #444;
 	background-color: white;
 	opacity: 0.85;
 
-	font-size: 125% !important;
+	font-size: 85% !important;
 	text-align: left;
 	text-transform: capitalize;
 }
