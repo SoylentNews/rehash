@@ -21,43 +21,14 @@ use strict;
 
 use Slash;
 use Slash::DB;
+use Slash::Utility::Comments;
 use Slash::Utility::Environment;
-use Slash::Tagbox;
 
 use Data::Dumper;
 
 our $VERSION = $Slash::Constants::VERSION;
 
-use base 'Slash::DB::Utility';	# first for object init stuff, but really
-				# needs to be second!  figure it out. -- pudge
-use base 'Slash::DB::MySQL';
-
-sub new {
-	my($class, $user) = @_;
-
-	return undef if !$class->isInstalled();
-
-	# Note that getTagboxes() would call back to this new() function
-	# if the tagbox objects have not yet been created -- but the
-	# no_objects option prevents that.  See getTagboxes() for details.
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	my %self_hash = %{ getObject('Slash::Tagbox')->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
-	my $self = \%self_hash;
-	return undef if !$self || !keys %$self;
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	return $self;
-}
-
-sub isInstalled {
-	my($class) = @_;
-	my $constants = getCurrentStatic();
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	return $constants->{plugin}{Tags} && $constants->{tagbox}{$tagbox_name} || 0;
-}
+use base 'Slash::Plugin';
 
 sub feed_newtags {
 	my($self, $tags_ar) = @_;
@@ -202,6 +173,16 @@ sub run {
 		}
 	}
 
+	# Also, admins may get reduced upvote clout.
+	if ($constants->{firehose_adminupclout} && $constants->{firehose_adminupclout} != 1) {
+		my $admins = $tagsdb->getAdmins();
+		for my $tag_hr (@$tags_ar) {
+			$tag_hr->{total_clout} *= $constants->{firehose_adminupclout}
+				if    $tag_hr->{tagnameid} == $upvoteid
+				   && $admins->{ $tag_hr->{uid} };
+		}
+	}
+
 	# Early in a globj's lifetime, if there have been few votes,
 	# upvotes count for more, and downvotes for less.
 	my($up_mult, $down_mult) = (1, 1);
@@ -288,6 +269,18 @@ sub getStartingColorLevel {
 			# This firehose entry gets the minimum color level of 
 			# all its nexuses.
 			$color_level = $this_color_level if $this_color_level < $color_level;
+		}
+	} elsif ($type eq "comments") {
+		my $comment = $self->getComment($target_id);
+		my $score = constrain_score($comment->{points} + $comment->{tweak});
+		if ($score >= 3) {
+			$color_level = 4;
+		} elsif ($score == 2) {
+			$color_level = 5
+		} elsif ($score >= 0) {
+			$color_level = 6
+		} else {
+			$color_level = 7;
 		}
 	}
 	return($color_level, $extra_pop);

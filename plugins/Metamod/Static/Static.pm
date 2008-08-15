@@ -7,24 +7,13 @@ package Slash::Metamod::Static;
 use strict;
 use Slash::Utility;
 
-use base 'Exporter';
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use base 'Slash::Metamod';
 
 our $VERSION = $Slash::Constants::VERSION;
 
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $constants = getCurrentStatic();
-	return unless $constants->{plugin}{Metamod} && $constants->{m2};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	return $self;
+sub isInstalled {
+	my($class) = @_;
+	return Slash::MetaMod->isInstalled();
 }
 
 ########################################################

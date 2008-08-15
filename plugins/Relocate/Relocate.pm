@@ -5,33 +5,21 @@
 package Slash::Relocate;
 
 use strict;
-use DBIx::Password;
-use Slash;
-use Slash::Utility;
-use HTML::TokeParser ();
 use Digest::MD5 'md5_hex';
+use HTML::TokeParser ();
+use Slash;
 
-use base 'Slash::DB::Utility';
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
-sub new {
-	my($class, $user) = @_;
+sub init {
+	my($self) = @_;
 
-	return unless $class->isInstalled();
+	$self->{_table} = 'links';
+	$self->{_prime} = 'id';
 
-	my $self = bless({}, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect;
-	$self->{'_table'} = "links";
-	$self->{'_prime'} = "id";
-
-	return $self;
-}
-
-sub isInstalled {
-	my $constants = getCurrentStatic();
-	return $constants->{plugin}{Relocate} || 0;
+	1;
 }
 
 sub create {

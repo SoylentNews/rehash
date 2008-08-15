@@ -7,31 +7,17 @@ package Slash::Metamod;
 use strict;
 use Date::Format qw(time2str);
 use Slash;
-use Slash::Utility;
-use Slash::DB::Utility;
+use Slash::Utility::Environment;
 
-use base 'Exporter';
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
-sub new {
-	my($class, $user) = @_;
-
-	return undef unless $class->isInstalled();
-
-	my $self = { };
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	return $self;
-}
-
 sub isInstalled {
+	my($class) = @_;
 	my $constants = getCurrentStatic();
-	return $constants->{plugin}{Metamod} && $constants->{m2};
+	return 0 if ! $constants->{m2};
+	return $class->SUPER::isInstalled();
 }
 
 ########################################################

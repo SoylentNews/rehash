@@ -5,31 +5,14 @@
 package Slash::Journal;
 
 use strict;
-use DBIx::Password;
+
 use Slash;
 use Slash::Constants qw(:messages);
-use Slash::Utility;
+use Slash::Utility::Environment;
 
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
-
-# On a side note, I am not sure if I liked the way I named the methods either.
-# -Brian
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'Journal'};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect;
-
-	return $self;
-}
 
 sub set {
 	my($self, $id, $values) = @_;

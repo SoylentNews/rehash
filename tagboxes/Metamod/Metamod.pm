@@ -22,32 +22,16 @@ use strict;
 use Slash;
 use Slash::DB;
 use Slash::Utility::Environment;
-use Slash::Tagbox;
 
 use Data::Dumper;
 
 our $VERSION = $Slash::Constants::VERSION;
 
-use base 'Slash::DB::Utility';	# first for object init stuff, but really
-				# needs to be second!  figure it out. -- pudge
-use base 'Slash::DB::MySQL';
+use base 'Slash::Tagbox';
 
-sub new {
-	my($class, $user) = @_;
-
-	return undef if !$class->isInstalled();
-
-	# Note that getTagboxes() would call back to this new() function
-	# if the tagbox objects have not yet been created -- but the
-	# no_objects option prevents that.  See getTagboxes() for details.
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	my %self_hash = %{ getObject('Slash::Tagbox')->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
-	my $self = \%self_hash;
-	return undef if !$self || !keys %$self;
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
+sub init {
+        my($self) = @_;
+        $self->SUPER::init() if $self->can('SUPER::init');
 
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
@@ -73,14 +57,7 @@ sub new {
 		}
 	}
 
-	return $self;
-}
-
-sub isInstalled {
-	my($class) = @_;
-	my $constants = getCurrentStatic();
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	return $constants->{plugin}{Tags} && $constants->{tagbox}{$tagbox_name} || 0;
+	1;
 }
 
 sub feed_newtags {

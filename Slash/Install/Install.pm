@@ -19,10 +19,13 @@ our $VERSION = $Slash::Constants::VERSION;
 
 sub new {
 	my($class, $user) = @_;
+	return undef unless $class->isInstalled();
 	my $self = {};
 	bless($self, $class);
 	$self->{virtual_user} = $user;
 	$self->sqlConnect;
+	return undef unless $self->init();
+
 	# XXX Anyone know why this is called directly?  We use $self->{slashdb}
 	# at a number of places below and I can't figure out why we don't just
 	# use getCurrentDB(). -- jamie

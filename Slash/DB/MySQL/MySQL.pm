@@ -3,21 +3,26 @@
 # and COPYING for more information, or see http://slashcode.com/.
 
 package Slash::DB::MySQL;
+
 use strict;
+
 use Socket;
 use Digest::MD5 'md5_hex';
 use Time::HiRes;
 use Time::Local;
 use Date::Format qw(time2str);
 use Data::Dumper;
-use Slash::Utility;
 use Storable qw(thaw nfreeze);
 use URI ();
+
+use Slash::Utility;
 use Slash::Custom::ParUserAgent;
+use Slash::Constants ':messages';
+
 use vars qw($_proxy_port);
+
 use base 'Slash::DB';
 use base 'Slash::DB::Utility';
-use Slash::Constants ':messages';
 
 our $VERSION = $Slash::Constants::VERSION;
 
@@ -298,48 +303,7 @@ sub _whereFormkey {
 	return $where;
 };
 
-
-
-
-# XXX I don't think this method is used anywhere.  Also, I'm
-# really sure these "Notes" are about five years out of date.
-# Can we delete this code? - Jamie, August 2006
-# (It's used in Slash::DB::Utility::new)
-
 ########################################################
-# Notes:
-#  formAbuse, use defaults as ENV, be able to override
-#  	(pudge idea).
-#  description method cleanup. (done)
-#  fetchall_rowref vs fetch the hashses and push'ing
-#  	them into an array (good arguments for both)
-#	 break up these methods into multiple classes and
-#   use the dB classes to override methods (this
-#   could end up being very slow though since the march
-#   is kinda slow...).
-#	 the getAuthorEdit() methods need to be refined
-########################################################
-
-########################################################
-sub init {
-	my($self) = @_;
-	# These are here to remind us of what exists
-	$self->{_codeBank} = {};
-
-	$self->{_boxes} = {};
-	$self->{_sectionBoxes} = {};
-
-	$self->{_comment_text} = {};
-	$self->{_comment_text_full} = {};
-
-	$self->{_story_comm} = {};
-
-	# Do all cache elements contain '_cache_' in it, if so, we should
-	# probably perform a delete on anything matching, here.
-}
-
-
-
 
 # XXX I'm pretty sure these next 3 methods can be eliminated
 # from the code. Or, they can actually be written properly and
@@ -1206,10 +1170,7 @@ sub createSubmission {
 	$data->{subnetid} = getCurrentUser('subnetid');
 	$data->{email} = delete $submission->{email} || '';
 	$data->{email} = $self->truncateStringForCharColumn($data->{email}, 'submissions', 'email');
-	my $emailuri = URI->new($data->{email});
-	my $emailhost = "";
-	$emailhost = $emailuri->host() if $emailuri && $emailuri->can("host");
-	$data->{emaildomain} = fullhost_to_domain($emailhost);
+	$data->{emaildomain} = email_to_domain($data->{email});
 	$data->{emaildomain} = $self->truncateStringForCharColumn($data->{emaildomain}, 'submissions', 'emaildomain');
 	$data->{uid} = delete $submission->{uid} || getCurrentStatic('anonymous_coward_uid');
 	$data->{'-time'} = delete $submission->{'time'};
@@ -2512,7 +2473,7 @@ sub createUser {
 	# ...users start out as registered...
 	my $constants = getCurrentStatic();
 
-	my $initdomain = fullhost_to_domain($email);
+	my $initdomain = email_to_domain($email);
 	$self->setUser($uid, {
 		'registered'		=> 1,
 		'expiry_comm'		=> $constants->{min_expiry_comm},
@@ -2520,7 +2481,7 @@ sub createUser {
 		'user_expiry_comm'	=> $constants->{min_expiry_comm},
 		'user_expiry_days'	=> $constants->{min_expiry_days},
 		initdomain		=> $initdomain,
-		created_ipid		=> getCurrentUser('ipid'),
+		created_ipid		=> getCurrentUser('ipid') || '',
 	});
 
 	$self->sqlDo("COMMIT");
@@ -11021,7 +10982,7 @@ sub _getUser_do_selects {
 				$this_clout = $clout_hr->{$clid};
 			} else {
 				my $this_info = $clout_info->{$clid};
-				my $clout_obj = getObject($this_info->{class}, { db_type => 'reader' });
+				my $clout_obj = getObject($this_info->{class}, { db_type => 'reader' }); warn "no obj for '$this_info->{class}'" unless $clout_obj;
 				$this_clout = $clout_obj->getUserClout($answer) if $clout_obj;
 			}
 			$answer->{clout}{ $clout_types->{$clid} } = $this_clout
@@ -12847,7 +12808,17 @@ sub DESTROY {
 	# Slash::DB::Utility).
 	$self->_querylog_writecache;
 
-	$self->SUPER::DESTROY if $self->can("SUPER::DESTROY"); # up up up up up up
+	# Slash::Tagbox, a subclass of MySQL.pm, does this too:
+	#	$self->{_dbh}->disconnect if $self->{_dbh} && !$ENV{GATEWAY_INTERFACE};
+	# I'm not sure why we don't do that here instead.  I'm not sure
+	# how often it actually happens that a MySQL.pm is destroyed by
+	# slashd, and I don't know exactly how DBI.pm handles disconnects
+	# for its connect_cached pool, but if DESTROY is called, wouldn't
+	# it make sense to help mysqld manage its connections by releasing
+	# a dbh?
+	# - jamie 2008/08/04
+
+	$self->SUPER::DESTROY if $self->can("SUPER::DESTROY");
 }
 
 

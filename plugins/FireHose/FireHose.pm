@@ -24,12 +24,6 @@ LONG DESCRIPTION.
 =cut
 
 use strict;
-use DBIx::Password;
-use Slash;
-use Slash::Display;
-use Slash::Utility;
-use Slash::Slashboxes;
-use Slash::Tags;
 use Data::JavaScript::Anon;
 use Date::Calc qw(Days_in_Month Add_Delta_YMD);
 use POSIX qw(ceil);
@@ -37,8 +31,13 @@ use LWP::UserAgent;
 use URI;
 use Time::HiRes;
 
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use Slash;
+use Slash::Display;
+use Slash::Utility;
+use Slash::Slashboxes;
+use Slash::Tags;
+
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 

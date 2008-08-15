@@ -3,6 +3,8 @@
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 
+# This tagbox is outdated, superceded by FireHoseScores
+
 package Slash::Tagbox::FHPopularity2;
 
 =head1 NAME
@@ -22,38 +24,12 @@ use strict;
 use Slash;
 use Slash::DB;
 use Slash::Utility::Environment;
-use Slash::Tagbox;
 
 use Data::Dumper;
 
 our $VERSION = $Slash::Constants::VERSION;
 
-use base 'Slash::DB::Utility';	# first for object init stuff, but really
-				# needs to be second!  figure it out. -- pudge
-use base 'Slash::DB::MySQL';
-
-sub new {
-	my($class, $user) = @_;
-
-	my $plugin = getCurrentStatic('plugin');
-	return undef if !$plugin->{Tags} || !$plugin->{FireHose};
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	my $tagbox = getCurrentStatic('tagbox');
-	return undef if !$tagbox->{$tagbox_name};
-
-	# Note that getTagboxes() would call back to this new() function
-	# if the tagbox objects have not yet been created -- but the
-	# no_objects option prevents that.  See getTagboxes() for details.
-	my %self_hash = %{ getObject('Slash::Tagbox')->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
-	my $self = \%self_hash;
-	return undef if !$self || !keys %$self;
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	return $self;
-}
+use base 'Slash::Tagbox';
 
 sub feed_newtags {
 	my($self, $tags_ar) = @_;

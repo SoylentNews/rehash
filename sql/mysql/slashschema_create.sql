@@ -1317,7 +1317,7 @@ CREATE TABLE urls (
 	validatedtitle VARCHAR(255),
 	tags_top VARCHAR(255) DEFAULT '' NOT NULL,
 	popularity float DEFAULT '0' NOT NULL,
-	anon_bookmarks MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL
+	anon_bookmarks MEDIUMINT UNSIGNED DEFAULT 0 NOT NULL,
 	PRIMARY KEY (url_id),
 	UNIQUE url_digest (url_digest),
 	INDEX bfu (believed_fresh_until)

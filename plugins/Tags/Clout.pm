@@ -7,19 +7,32 @@ package Slash::Clout;
 use strict;
 use warnings;
 use Slash;
-use Slash::Utility;
+use Slash::Utility::Environment;
 use Slash::Tags;
 #use Slash::Clout::Describe;
 #use Slash::Clout::Vote;
 #use Slash::Clout::Moderate;
 
-use base 'Slash::DB::Utility';
-use base 'Slash::DB';
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
+sub isInstalled {
+	my($class) = @_;
+	my $constants = getCurrentStatic();
+	return 0 if ! $constants->{plugin}{Tags};
+	my $slashdb = getCurrentDB();
+	my $clout_info = $slashdb->getCloutInfo();
+	for my $id (keys %$clout_info) {
+		return 1 if $clout_info->{$id}{class} eq $class;
+	}
+	return 0;
+}
+
 sub init {
 	my($self) = @_;
+
+	$self->SUPER::init() if $self->can('SUPER::init');
 
 	$self->{months_back} = 2; # default
 	my $slashdb = getCurrentDB();

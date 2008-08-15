@@ -2,16 +2,45 @@
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 
+# The base class for all tagbox classes.  Each tagbox should be a
+# direct subclass of Slash::Tagbox.
+
+# This class's object creation methods are class methods:
+#	new() - checks isInstalled() and calls getTagboxes(no_objects) to initialize $self
+#	isInstalled() - self-evident
+#	getTagboxes() - pulls in data from tagboxes table, returns it as base hash
+#	DESTROY() - disconnect the dbh
+#
+# Its utility/convenience methods are these object methods:
+#	getTagboxesNosyForGlobj()
+#	userKeysNeedTagLog()
+#	logDeactivatedTags()
+#	logUserChange()
+#	getMostImportantTagboxAffectedIDs()
+#	addFeederInfo() - add a row to tagboxlog_feeder, later read by getMostImportantTagboxAffectedIDs()
+#	forceFeederRecalc() - like addFeederInfo() but forced
+#	markTagboxLogged
+#	markTagboxRunComplete
+#
+# An important object method worth mentioning is:
+#	getTagboxTags() - recursively fetches tags of interest to a tagbox;
+#		designed to be generic enough for almost any tagbox
+#
+# These are the main four methods of the tagbox API:
+#	feed_newtags() - more likely a subclass will override feed_newtags_process
+#	feed_deactivatedtags()
+#	feed_userchanges()
+#	run()
+
 package Slash::Tagbox;
 
 use strict;
 use Slash;
 use Slash::Display;
-use Slash::Utility;
-use Slash::DB::Utility;
+use Slash::Utility::Environment;
 use Apache::Cookie;
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+
+use base 'Slash::Plugin';
 
 use Data::Dumper;
 
@@ -20,20 +49,46 @@ our $VERSION = $Slash::Constants::VERSION;
 # FRY: And where would a giant nerd be? THE LIBRARY!
 
 #################################################################
+
 sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{Tags};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	return $self;
+	my($class, $user, @extra_args) = @_;
+	my $self = $class->SUPER::new($user, @extra_args);
+	$self->init_tagfilters();
+	$self;
 }
 
+sub isInstalled {
+	my($class) = @_;
+	my $constants = getCurrentStatic();
+	return undef if !$constants->{plugin}{Tags};
+	return 1 if $class eq 'Slash::Tagbox';
+	my($tagbox_name) = $class =~ /(\w+)$/;
+	return undef if !$constants->{tagbox}{$tagbox_name};
+	return 1;
+}
+
+sub init {
+	my($self) = @_;
+	$self->SUPER::init() if $self->can('SUPER::init');
+
+	my $class = ref $self;
+	if ($class ne 'Slash::Tagbox') {
+		my($tagbox_name) = $class =~ /(\w+)$/;
+		my %self_hash = %{ $self->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
+		for my $key (keys %self_hash) {
+			$self->{$key} = $self_hash{$key};
+		}
+	}
+
+	1;
+}
+
+sub init_tagfilters {
+	my($self) = @_;
+	# by default, filter out nothing
+}
+
+#################################################################
 #################################################################
 
 # Return information about tagboxes, from the 'tagboxes' and
@@ -56,6 +111,8 @@ sub new {
 # improvement (specifically, if the variant fields
 # last_tagid_logged, last_userchange_logged, or last_run_completed
 # are not needed, it will be much faster not to request them).
+
+# This is a class method, not an object method.
 
 { # closure XXX this won't work with multiple sites, fix
 my $tagboxes = undef;
@@ -104,18 +161,15 @@ sub getTagboxes {
 		# the getObject() below calls new() on each tagbox class,
 		# which calls getTagboxes() with no_objects set.
 		if (!$options->{no_objects}) {
-#print STDERR "tagboxes a: " . Dumper($tagboxes);
 			for my $hr (@$tagboxes) {
 				my $object = getObject("Slash::Tagbox::$hr->{name}");
 				$hr->{object} = $object;
 			}
-#print STDERR "tagboxes b: " . Dumper($tagboxes);
 			# If any object failed to be created for some reason,
 			# that tagbox never gets returned.
 			$tagboxes = [ grep { $_->{object} } @$tagboxes ];
 		}
 	}
-#print STDERR "tagboxes c: " . Dumper($tagboxes);
 
 	# If one or more fields were asked for, then some of the
 	# data in the other fields may not be current since we
@@ -129,7 +183,6 @@ sub getTagboxes {
 	# others.
 	if ($id) {
 		my @tb_tmp;
-#print STDERR "tb: " . Dumper($tb);
 		if ($id =~ /^\d+$/) {
 			@tb_tmp = grep { $_->{tbid} == $id } @$tb;
 		} else {
@@ -267,7 +320,8 @@ sub getTagboxTags {
 	warn "no tbid for $self" if !$tbid;
 	$extra_levels ||= 0;
 	my $type = $options->{type} || $self->getTagboxes($tbid, 'affected_type')->{affected_type};
-#print STDERR "getTagboxTags($tbid, $affected_id, $extra_levels), type=$type\n";
+	$self->debug_log("getTagboxTags(%d, %d, %d), type=%s",
+		$tbid, $affected_id, $extra_levels, $type);
 	my $hr_ar = [ ];
 	my $colname = ($type eq 'user') ? 'uid' : 'globjid';
 	my $max_time_clause = '';
@@ -282,24 +336,34 @@ sub getTagboxTags {
 		'tags',
 		"$colname=$affected_id $max_time_clause",
 		'ORDER BY tagid');
+	$self->debug_log("colname=%s pre_filter hr_ar=%d",
+		$colname, scalar(@$hr_ar));
+	$hr_ar = $self->feed_newtags_filter($hr_ar);
+	$self->debug_log("colname=%s post_filter hr_ar=%d",
+		$colname, scalar(@$hr_ar));
 
 	# If extra_levels were requested, fetch them.  
 	my $old_colname = $colname;
 	while ($extra_levels) {
-#print STDERR "el $extra_levels\n";
+		$self->debug_log("el %d", $extra_levels);
 		my $new_colname = ($old_colname eq 'uid') ? 'globjid' : 'uid';
 		my %new_ids = ( map { ($_->{$new_colname}, 1) } @$hr_ar );
 		my $new_ids = join(',', sort { $a <=> $b } keys %new_ids);
-#print STDERR "hr_ar=" . scalar(@$hr_ar) . " with $colname=$affected_id\n";
+		$self->debug_log("hr_ar=%d with %s=%s",
+			scalar(@$hr_ar), $colname, $affected_id);
 		$hr_ar = $self->sqlSelectAllHashrefArray(
 			'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
 			'tags',
 			"$new_colname IN ($new_ids) $max_time_clause",
 			'ORDER BY tagid');
-#print STDERR "new_colname=$new_colname new_ids=" . scalar(keys %new_ids) . " (" . substr($new_ids, 0, 20) . ") hr_ar=" . scalar(@$hr_ar) . "\n";
+		$self->debug_log("new_colname=%s pre_filter hr_ar=%d",
+			$new_colname, scalar(@$hr_ar));
+		$hr_ar = $self->feed_newtags_filter($hr_ar);
+		$self->debug_log("new_colname=%s new_ids=%d (%.20s) hr_ar=%d",
+			$new_colname, scalar(keys %new_ids), $new_ids, scalar(@$hr_ar));
 		$old_colname = $new_colname;
 		--$extra_levels;
-#print STDERR "el $extra_levels\n";
+		$self->debug_log("el %d", $extra_levels);
 	}
 	$self->addGlobjEssentialsToHashrefArray($hr_ar);
 	return $hr_ar;
@@ -318,7 +382,7 @@ sub forceFeederRecalc {
 		-created_at =>	'NOW()',
 		tbid =>		$tbid,
 		affected_id =>	$affected_id,
-		importance =>	9999,
+		importance =>	999999,
 		tagid =>	undef,
 		tdid =>		undef,
 		tuid =>		undef,
@@ -343,10 +407,164 @@ sub markTagboxRunComplete {
 		"tbid=$affected_hr->{tbid}");
 }
 
+sub info_log {
+	my($self, $format, @args) = @_;
+	my $caller = join ',', (caller(1))[3,4];
+	main::tagboxLog("%s $format", $caller, @args);
+}
+
+sub debug_log {
+	my($self, $format, @args) = @_;
+	if ($self->{debug} > 0) {
+		my $caller = join ',', (caller(1))[3,4];
+		main::tagboxLog("%s $format", $caller, @args);
+	}
+}
+
 #################################################################
+#################################################################
+
+sub feed_newtags {
+	my($self, $tags_ar) = @_;
+	$tags_ar = $self->feed_newtags_filter($tags_ar);
+	$self->feed_newtags_pre($tags_ar);
+
+	my $ret_ar = $self->feed_newtags_process($tags_ar);
+
+	$self->feed_newtags_post($ret_ar);
+	return $ret_ar;
+}
+
+sub feed_newtags_filter {
+	my($self, $tags_ar) = @_;
+
+	# If the tagbox wants only still-active tags, eliminate any
+	# inactivated tags.
+	if ($self->{filter_activeonly}) {
+		$tags_ar = [ grep { $_->{inactivated} } @$tags_ar ];
+	}
+
+	# If a tagnameid filter is in place, eliminate any tags with
+	# tagnames not on the list.
+	if ($self->{filter_tagnameid}) {
+		my $tagnameid_ar = ref($self->{filter_tagnameid})
+			? $self->{filter_tagnameid} : [ $self->{filter_tagnameid} ];
+		my %tagnameid_wanted = ( map { ($_, 1) } @$tagnameid_ar );
+		$tags_ar = [ grep { $tagnameid_wanted{ $_->{tagnameid} } } @$tags_ar ];
+	}
+
+	# If a gtid filter is in place, eliminate any tags on globjs
+	# not of those type(s).
+	if ($self->{filter_gtid}) {
+		my $gtid_ar = ref($self->{filter_gtid})
+			? $self->{filter_gtid} : [ $self->{filter_gtid} ];
+		my $all_gtid_str = join(',', sort { $a <=> $b } @$gtid_ar);
+		my %all_globjids = ( map { ($_->{globjid}, 1) } @$tags_ar );
+		my $all_globjids_str = join(',', sort { $a <=> $b } keys %all_globjids);
+		if ($all_gtid_str && $all_globjids_str) {
+			my $globjids_wanted_ar = $self->sqlSelectColArrayref(
+				'globjid',
+				'globjs',
+				"globjid IN ($all_globjids_str)
+				 AND gtid IN ($all_gtid_str)");
+			my %globjid_wanted = ( map { ($_, 1) } @$globjids_wanted_ar );
+			$tags_ar = [ grep { $globjid_wanted{ $_->{globjid} } } @$tags_ar ];
+		} else {
+			$tags_ar = [ ];
+		}
+	}
+
+	return $tags_ar;
+}
+
+sub feed_newtags_pre {
+	my($self, $tags_ar) = @_;
+	# XXX only if debugging is on
+	# XXX note in log here, instead of feed_d_pre, if tdid's present
+	my $count = scalar(@$tags_ar);
+	if ($count < 9) {
+		$self->info_log("filtered tags '%s'",
+			 join(' ', map { $_->{tagid} } @$tags_ar));
+	} else {
+		$self->info_log("%d filtered tags '%s ... %s'",
+			scalar(@$tags_ar), $tags_ar->[0]{tagid}, $tags_ar->[-1]{tagid});
+	}
+}
+
+sub feed_newtags_post {
+	my($self, $ret_ar) = @_;
+	# XXX only if debugging is on
+	$self->info_log("returning %d", scalar(@$ret_ar));
+}
+
+sub feed_newtags_process {
+	my($self, $tags_ar) = @_;
+	# by default, add importance of 1 for each tag that made it through filtering
+	my $ret_ar = [ ];
+	for my $tag_hr (@$tags_ar) {
+		my $ret_hr = {
+			affected_id =>  $tag_hr->{globjid},
+			importance =>   1,
+		};
+		# Both new tags and deactivated tags are considered important.
+		# Pass along either the tdid or the tagid field, depending on
+		# which type each hashref indicates.
+		if ($tag_hr->{tdid})    { $ret_hr->{tdid}  = $tag_hr->{tdid}  }
+		else                    { $ret_hr->{tagid} = $tag_hr->{tagid} }
+		push @$ret_ar, $ret_hr;
+	}
+	return $ret_ar;
+}
+
+#################################################################
+
+sub feed_deactivatedtags {
+	my($self, $tags_ar) = @_;
+	$self->feed_deactivatedtags_pre($tags_ar);
+
+	# by default, just pass along to feed_newtags (which will have to
+	# check $tags_ar->[]{tdid} to determine whether the changes were
+	# really new tags or just deactivated tags)
+	return $self->feed_newtags($tags_ar);
+}
+
+sub feed_deactivatedtags_pre {
+	my($self, $tags_ar) = @_;
+	main::tagboxLog("$self->{name}->feed_deactivatedtags called: tags_ar='"
+		. join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
+}
+
+#################################################################
+
+sub feed_userchanges {
+	my($self, $users_ar) = @_;
+	$self->feed_userchanges_pre($users_ar);
+
+	# by default, do not care about any user changes
+	return [ ];
+}
+
+sub feed_userchanges_pre {
+	my($self, $users_ar) = @_;
+	main::tagboxLog("$self->{name}->feed_userchanges called: users_ar='"
+		. join(' ', map { $_->{tuid} } @$users_ar) .  "'");
+}
+
+#################################################################
+
+sub run {
+	my($self, $affected_id) = @_;
+	warn "Slash::Tagbox::run($affected_id) not overridden, called for $self";
+	return undef;
+}
+
+#################################################################
+#################################################################
+
 sub DESTROY {
 	my($self) = @_;
 	$self->{_dbh}->disconnect if $self->{_dbh} && !$ENV{GATEWAY_INTERFACE};
+	$self->SUPER::DESTROY if $self->can("SUPER::DESTROY");
 }
 
 1;

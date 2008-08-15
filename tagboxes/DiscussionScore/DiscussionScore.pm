@@ -30,38 +30,7 @@ use Data::Dumper;
 
 our $VERSION = $Slash::Constants::VERSION;
 
-use base 'Slash::DB::Utility';	# first for object init stuff, but really
-				# needs to be second!  figure it out. -- pudge
-use base 'Slash::DB::MySQL';
-
-sub new {
-	my($class, $user) = @_;
-
-	return undef unless $class->isInstalled();
-
-	# Note that getTagboxes() would call back to this new() function
-	# if the tagbox objects have not yet been created -- but the
-	# no_objects option prevents that.  See getTagboxes() for details.
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	my %self_hash = %{ getObject('Slash::Tagbox')->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
-	my $self = \%self_hash;
-	return undef if !$self || !keys %$self;
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	return $self;
-}
-
-sub isInstalled {
-	my($class) = @_;
-	my $constants = getCurrentStatic();
-	return undef if !$constants->{plugin}{Tags} || !$constants->{plugin}{TagModeration};
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	return undef if !$constants->{tagbox}{$tagbox_name};
-	return 1;
-}
+use base 'Slash::Tagbox';
 
 sub get_cidglobjid_to_discglobjid_hr {
 	my($self, $globjids_ar) = @_;

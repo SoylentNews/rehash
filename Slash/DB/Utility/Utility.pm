@@ -22,20 +22,22 @@ my $query_ref_regex = qr{(HASH|ARRAY|SCALAR|GLOB|CODE|LVALUE|IO|REF)\(0x[0-9a-f]
 # Generic methods for libraries.
 ########################################################
 sub new {
-	my($class, $user, @args) = @_;
-	my $self = {};
-	my $where;
+	my($class, $user, @extra_args) = @_;
+	if ($class->can('isInstalled')) {
+		return undef unless $class->isInstalled();
+	}
 
+	my $self = {};
 	bless($self, $class);
 	$self->{virtual_user} = $user;
-	$self->sqlConnect() or return undef;
 
 	if ($self->can('init')) {
 		# init should return TRUE for success, else
 		# we abort
-		return unless $self->init(@args);
+		return undef unless $self->init(@extra_args);
 
 		if (exists $self->{'_where'}) {
+			my $where = '';
 			for (keys %{ $self->{'_where'} }) {
 				$where .= "$_=$self->{'_where'}{$_} AND ";
 			}
@@ -43,8 +45,7 @@ sub new {
 			$self->{_wheresql} = $where;
 		}
 	}
-
-	$self->{_querylog} = { };
+	$self->sqlConnect() or return undef;
 
 	return $self;
 }
@@ -54,6 +55,40 @@ sub new {
 # to check $constants->{plugin}{Foo}.
 sub isInstalled {
 	return 1;
+}
+
+# Many of our database classes use multiple base classes, for example,
+# MySQL.pm does:
+#       use base 'Slash::DB';
+#       use base 'Slash::DB::Utility';
+# Many of our optional (plugin) classes do this:
+#       use base 'Slash::DB::Utility';
+#       use base 'Slash::DB::MySQL';
+# along with a code comment suggesting maybe this should be changed.
+# (But it hasn't been changed in years, and has been copy-and-pasted
+# so many times it would require a great deal of testing to change now.)
+#
+# The Slash code just uses perl's stock multiple inheritance, which
+# means a SUPER::foo() call will only invoke the first base class.
+# So most of our database classes, when initialized, will invoke
+# Slash::DB::Utility::init(), and MySQL.pm will invoke Slash::DB::init().
+# Long story short, any initialization common to all database classes
+# should be done both here and in DB.pm.
+
+sub init {
+	my($self) = @_;
+	# Consider clearing any existing fields matching /_cache_/ too.
+	my @fields_to_clear = qw(
+		_querylog       _codeBank
+		_boxes          _sectionBoxes
+		_comment_text   _comment_text_full
+		_story_comm
+	);
+	for my $field (@fields_to_clear) {
+		$self->{$field} = { };
+	}
+	$self->SUPER::init() if $self->can('SUPER::init');
+	1;
 }
 
 ##################################################################
@@ -346,6 +381,11 @@ sub _querylog_enabled {
 	my($self) = @_;
 
 	return 0 unless dbAvailable();
+	if (!exists $self->{_querylog}) {
+		use Carp;
+		Carp::cluck "no ql for $self, perhaps SUPER::init was not called correctly?";
+		$self->{_querylog} = { };
+	}
 	return $self->{_querylog}{enabled}
 		if defined $self->{_querylog}{enabled}
 			&& $self->{_querylog}{next_check_time} > time;

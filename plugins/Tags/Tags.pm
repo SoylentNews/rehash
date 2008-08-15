@@ -5,39 +5,17 @@
 package Slash::Tags;
 
 use strict;
+use Apache::Cookie;
 use Date::Format qw( time2str );
 use Slash;
 use Slash::Display;
-use Slash::Utility;
-use Slash::DB::Utility;
-#use Slash::Clout;
-use Apache::Cookie;
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use Slash::Utility::Environment;
+
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
 # FRY: And where would a giant nerd be? THE LIBRARY!
-
-#################################################################
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	return undef unless $class->isInstalled();
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	return $self;
-}
-
-sub isInstalled {
-	my($class) = @_;
-	my $constants = getCurrentStatic();
-	return $constants->{plugin}{Tags} || 0;
-}
 
 ########################################################
 

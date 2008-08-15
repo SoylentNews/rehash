@@ -26,23 +26,37 @@ my $dsnmods = {
 # with getCurrentDB().
 
 sub new {
-	my($class, $user) = @_;
+	my($class, $user, @extra_args) = @_;
+	if ($class->can('isInstalled')) {
+		return undef unless $class->isInstalled();
+	}
+
 	my $dsn = DBIx::Password::getDriver($user);
 	if (my $modname = $dsnmods->{$dsn}) {
 		my $dbclass = ($ENV{GATEWAY_INTERFACE})
 			? "Slash::DB::$modname"
 			: "Slash::DB::Static::$modname";
-#use Carp; Carp::cluck("$$ Slash::DB->new evaling 'use $dbclass'");
 		eval "use $dbclass"; die $@ if $@;
 
-		# Bless into the class we're *really* wanting -- thebrain
+		# Slash::DB->new() returns an object of the preferred
+		# database class, never of its own class.  (Since
+		# Slash hasn't ever really supported Postgres, this
+		# will be Slash::DB::MySQL or Slash::DB::Static::MySQL.)
 		my $self = bless {
 			virtual_user		=> $user,
 			db_driver		=> $dsn,
-			# See setPrepareMethod below -- thebrain
 			_dbh_prepare_method	=> 'prepare_cached'
 		}, $dbclass;
-		$self->sqlConnect();
+
+		# Call (presumably) (one of the) MySQL.pm init()
+		# methods.  See init() below for details.
+		# this will invoke DB.pm's init() method a few lines
+		# down in just a moment.
+		if ($self->can('init')) {
+			return undef unless $self->init(@extra_args);
+		}
+
+		$self->sqlConnect() or return undef;;
 		return $self;
 	} elsif ($dsn) {
 		die "Database $dsn unsupported! (virtual user '$user')";
@@ -58,6 +72,40 @@ sub new {
 # So we define our own here.
 
 sub isInstalled {
+	1;
+}
+
+# Many of our database classes use multiple base classes, for example,
+# MySQL.pm does:
+#	use base 'Slash::DB';
+#	use base 'Slash::DB::Utility';
+# Most of our optional (plugin) classes currently do this:
+#	use base 'Slash::DB::Utility';
+#	use base 'Slash::DB::MySQL';
+# along with a code comment suggesting maybe this should be changed.
+# (But it hasn't been changed in years, and has been copy-and-pasted
+# so many times it would require a great deal of testing to change now.)
+#
+# The Slash code just uses perl's stock multiple inheritance, which
+# means a SUPER::foo() call will only invoke the first base class.
+# So most of our database classes, when initialized, will invoke
+# Slash::DB::Utility::init(), and MySQL.pm will invoke Slash::DB::init().
+# Long story short, any initialization common to all database classes
+# should be done both here and in Utility.pm.
+
+sub init {
+	my($self) = @_;
+	# Consider clearing any existing fields matching /_cache_/ too.
+	my @fields_to_clear = qw(
+		_querylog	_codeBank
+		_boxes		_sectionBoxes
+		_comment_text	_comment_text_full
+		_story_comm
+	);
+	for my $field (@fields_to_clear) {
+		$self->{$field} = { };
+	}
+	$self->SUPER::init() if $self->can('SUPER::init');
 	1;
 }
 

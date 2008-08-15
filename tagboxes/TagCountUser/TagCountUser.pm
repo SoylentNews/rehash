@@ -22,42 +22,12 @@ use strict;
 use Slash;
 use Slash::DB;
 use Slash::Utility::Environment;
-use Slash::Tagbox;
 
 use Data::Dumper;
 
 our $VERSION = $Slash::Constants::VERSION;
 
-use base 'Slash::DB::Utility';	# first for object init stuff, but really
-				# needs to be second!  figure it out. -- pudge
-use base 'Slash::DB::MySQL';
-
-sub new {
-	my($class, $user) = @_;
-
-	return if !$class->isInstalled();
-
-	# Note that getTagboxes() would call back to this new() function
-	# if the tagbox objects have not yet been created -- but the
-	# no_objects option prevents that.  See getTagboxes() for details.
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	my %self_hash = %{ getObject('Slash::Tagbox')->getTagboxes($tagbox_name, undef, { no_objects => 1 }) };
-	my $self = \%self_hash;
-	return undef if !$self || !keys %$self;
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	return $self;
-}
-
-sub isInstalled {
-	my($class) = @_;
-	my $constants = getCurrentStatic();
-	my($tagbox_name) = $class =~ /(\w+)$/;
-	return $constants->{plugin}{Tags} && $constants->{tagbox}{$tagbox_name} || 0;
-}
+use base 'Slash::Tagbox';
 
 sub feed_newtags {
 	my($self, $tags_ar) = @_;
@@ -111,10 +81,9 @@ sub feed_userchanges {
 
 sub run {
 	my($self, $affected_id) = @_;
-	my $tagboxdb = getObject('Slash::Tagbox');
-	my $user_tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
-	main::tagboxLog("TagCountUser->run called for $affected_id, ar count " . scalar(@$user_tags_ar));
-	my $count = grep { !defined $_->{inactivated} } @$user_tags_ar;
+	my $tagboxdb = getObject('Slash::Tagbox', { db_type => 'reader' });
+	my $count = $tagboxdb->sqlCount('tags', "uid=$affected_id AND inactivated IS NULL");
+	main::tagboxLog("TagCountUser->run called for $affected_id, count $count");
 	$self->setUser($affected_id, { tag_count => $count });
 }
 

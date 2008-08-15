@@ -39,7 +39,7 @@ CREATE TABLE tagname_cache (
 	tagname		VARCHAR(64) NOT NULL,
 	weight		FLOAT UNSIGNED DEFAULT 0.0 NOT NULL,
 	PRIMARY KEY tagnameid (tagnameid),
-	UNIQUE tagname (tagname),
+	UNIQUE tagname (tagname)
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS tagname_params;

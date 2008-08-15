@@ -51,10 +51,11 @@ $task{$me}{code} = sub {
 		# adding to it until it has shrunk to a more efficient size.
 
 		my $feederlog_rows = $tagboxdb->sqlCount('tagboxlog_feeder');
+		my $activity_feeder = undef;
 		if ($feederlog_rows < $feederlog_largerows) {
 
 			# Insert into tagboxlog_feeder
-			my $activity_feeder = update_feederlog($exclude_behind);
+			$activity_feeder = update_feederlog($exclude_behind);
 			sleep 2;
 			last if $task_exit_flag;
 
@@ -109,7 +110,7 @@ sub update_feederlog {
 		"globjid > $last_globjid_logged",
 		"ORDER BY globjid ASC LIMIT $max_rows_per_tagbox");
 	if ($new_globjs_ar && @$new_globjs_ar) {
-		my $tagbox_wants = { };
+		my %tagbox_wants = ( );
 		for my $globj_hr (@$new_globjs_ar) {
 			my @tbids = $tagboxdb->getTagboxesNosyForGlobj($globj_hr);
 			for my $tbid (@tbids) {
@@ -117,7 +118,7 @@ sub update_feederlog {
 				push @{ $tagbox_wants{$tbid} }, $globj_hr->{globjid};
 			}
 		}
-		for my $tbid (keys %$tagbox_wants) {
+		for my $tbid (keys %tagbox_wants) {
 			my $feeder_ar = [ ];
 			for my $globjid (@{ $tagbox_wants{$tbid} }) {
 				push @$feeder_ar, {
@@ -374,6 +375,7 @@ if ($affected_hr->{tbid} == 17) {
 my $feeder_ar = $tagboxdb->sqlSelectAllHashrefArray('*', 'tagboxlog_feeder', "tbid=17 AND affected_id=$affected_hr->{affected_id}", 'ORDER BY tfid');
 print STDERR "r_t_u rows for tbid=17 id=$affected_hr->{affected_id}: " . Dumper($feeder_ar)
 }
+if (! $tagbox->{object}) { die "no object for tbid=$affected_hr->{tbid}: " . Dumper($tagbox) }
 			$tagbox->{object}->run($affected_hr->{affected_id});
 			$tagboxdb->markTagboxRunComplete($affected_hr);
 			last if time() >= $run_until || $task_exit_flag;

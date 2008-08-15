@@ -5,14 +5,11 @@
 package Slash::Blob;
 
 use strict;
-use DBIx::Password;
-use Slash;
-use Slash::Utility;
 use MIME::Types;
 use Digest::MD5 'md5_hex';
+use Slash;
 
-use base 'Exporter';
-use base 'Slash::DB::Utility';
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
@@ -32,20 +29,13 @@ my %mimetype_overrides = (
 	xls  => 'application/ms-excel',
 );
 
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
+sub init {
+	my($self) = @_;
 
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'Blob'};
+	$self->{_table} = 'blobs';
+	$self->{_prime} = 'id';
 
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect;
-	$self->{'_table'} = "blobs";
-	$self->{'_prime'} = "id";
-
-	return $self;
+	1;
 }
 
 sub create {

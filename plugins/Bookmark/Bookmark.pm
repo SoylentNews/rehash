@@ -24,13 +24,10 @@ LONG DESCRIPTION.
 =cut
 
 use strict;
-use DBIx::Password;
 use Slash;
 use Slash::Display;
-use Slash::Utility;
 
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Utility::VERSION;
 

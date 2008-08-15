@@ -1,9 +1,8 @@
 package Slash::SearchToo;
 
 use strict;
-use Slash::Utility;
-use Slash::DB::Utility;
-use base 'Slash::DB::Utility';
+
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
@@ -30,17 +29,12 @@ sub new {
 	if (!$self) {
 		warn "Could not get $api_class: $@";
 		$self = {};
-		bless($self, $class);
+		bless($self, $class); # XXX I don't understand why SearchToo *re*blesses this object here
 		$self->{virtual_user} = $user;
 		$self->sqlConnect();
 	}
 
 	return $self;
-}
-
-sub isInstalled {
-	my $constants = getCurrentStatic();
-	return $constants->{plugin}{SearchToo} || 0;
 }
 
 #################################################################

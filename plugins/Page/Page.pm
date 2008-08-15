@@ -5,43 +5,17 @@
 package Slash::Page;
 
 use strict;
+use Data::Dumper;
 use Slash;
 use Slash::Display;
-use Slash::Utility;
-use Data::Dumper;
 
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
 #################################################################
-# Ok, so we want a nice module to do the front page and utilise 
-# subsections. We also want to scrap the old way of doign things.
-# I now present to you ... Page
-# Patrick 'CaptTofu' Galbraith
-# 6.9.02
-
-#################################################################
-
-sub new {
-	my($class, $user) = @_;
-
-	my $self = {};
-
-	my $slashdb   = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $form      = getCurrentForm();
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'Page'};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect;
-
-	return $self;
-}
+# An alternative to index.pl, originally written by
+# Patrick 'CaptTofu' Galbraith, June 9, 2002
 
 #################################################################
 

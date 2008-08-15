@@ -8,29 +8,9 @@ use strict;
 
 use Slash 2.003;	# require Slash 2.3
 
-use base "Slash::DB::Utility";
-use base "Slash::DB::MySQL";
-
-use Slash::Utility;
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
-
-########################################################
-
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'Email'};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect;
-
-	return $self;
-}
-
 
 ########################################################
 

@@ -5,31 +5,19 @@
 package Slash::HumanConf;
 
 use strict;
-#use GD;
-use Slash;
-use Slash::Utility;
-use Slash::DB::Utility;
 
-use base 'Slash::DB::Utility';
-use base 'Slash::DB::MySQL';
+use Slash;
+use Slash::Utility::Environment;
+
+use base 'Slash::Plugin';
 
 our $VERSION = $Slash::Constants::VERSION;
 
-sub new {
-	my($class, $user) = @_;
-	my $self = {};
-
-	my $plugin = getCurrentStatic('plugin');
-	return unless $plugin->{'HumanConf'};
-
+sub isInstalled {
+	my($class) = @_;
 	my $constants = getCurrentStatic();
-	return undef unless $constants->{hc};
-
-	bless($self, $class);
-	$self->{virtual_user} = $user;
-	$self->sqlConnect();
-
-	return $self;
+	return 0 if ! $constants->{hc};
+	return $class->SUPER::isInstalled();
 }
 
 sub _formnameNeedsHC {

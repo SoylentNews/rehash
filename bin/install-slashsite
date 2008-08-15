@@ -1,11 +1,12 @@
 #!/usr/bin/perl -w
 # This code is a part of Slash, and is released under the GPL.
-# Copyright 1997-2003 by Open Source Development Network. See README
+# Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
 
-# This is the uber install script.
-# -Brian (brian@tangent.org)
+# This is the script to install a website running Slash.  It should
+# not be run until Slash has been installed with 'make install'.
+# See INSTALL file for details.  Original version by Brian "Krow"
+# Aker (brian@tangent.org)
 
 use strict;
 use Config '%Config';
@@ -26,7 +27,7 @@ my $PROGNAME = basename($0);
 
 my %opts;
 # Remember to doublecheck these match usage()!
-usage('Options used incorrectly') unless getopts('hvu:a:e:g:o:p:n:H:L:T:P:R', \%opts);
+usage('Options used incorrectly') unless getopts('hvfu:H:n:xRL:i:T:P:a:e:p:o:g:', \%opts);
 usage() if !$opts{'u'} and ($opts{'h'} or !keys %opts);
 # if invoked with both -u and -h, call usage() later, after we load Slash::Install
 version() if $opts{'v'};
@@ -37,7 +38,7 @@ my $prefix_site = "$SLASH_PREFIX/site";
 my(	$owner, $owner_id, $group, $group_id, $password,
 	$sitename, $username, $realname, $email, $dbh, @create, $sql,
 	@sql, $hostname, $hostname_f, $host_noport, $httpd, %slash_sites,
-	$driver, $theme, $symlink
+	$driver, $theme, $symlink, $include
 );
 
 my %drivers = (
@@ -92,7 +93,10 @@ END { $dbh->disconnect if $dbh }
 chomp($hostname_f = `hostname -f`) if $^O eq 'linux';
 unless ($opts{'H'}) {
 	print "
-What is hostname of your Slash site
+Feel free to ^C this script at any time up to when you see the
+'last chance to abort' prompt.  If you do, no changes will be made.
+
+What is the hostname of your Slash site
 (e.g., www.slashdot.org)? [$hostname_f] ";
 	chomp($hostname = <STDIN>);
 	$hostname ||= $hostname_f;
@@ -102,7 +106,7 @@ What is hostname of your Slash site
 ($host_noport = $hostname) =~ s/:.+$//;
 
 unless ($opts{'o'}) {
-	print "\nWhat user would you like to run your Slash site as? [nobody] ";
+	print "\nWhat unix user would you like to run your Slash site as? [nobody] ";
 	chomp($owner = <STDIN>);
 	$owner ||= 'nobody';
 } else {
@@ -119,7 +123,7 @@ unless ($opts{'g'}) {
 	my $tmpgroup;
 	$tmpgroup = getgrgid($owner_id) if $Config{d_getgrent};
 	$tmpgroup = defined($tmpgroup) ? $tmpgroup : 'nobody';
-	print "\nWhat group would you like to run your Slash site under? [$tmpgroup] ";
+	print "\nWhat unix group would you like to run your Slash site under? [$tmpgroup] ";
 	chomp($group = <STDIN>);
 	$group ||= $tmpgroup;
 } else {
@@ -209,7 +213,7 @@ if ($opts{'P'}) {
 	push @plugins, @default_plugins if @default_plugins;
 } else {
 	my %order_to_name = ( );
-	print "\nPlease select which plugins you would like ('*' marks the default and minimum).\n";
+	print "\nPlugins:\n";
 	for my $key (@all_plugins) {
 		my $c = " ";
 		if ($themes->{$theme}{plugin}{$plugins->{$key}{name}}) {
@@ -219,7 +223,12 @@ if ($opts{'P'}) {
 		$order_to_name{$plugins->{$key}{order}} = $key;
 	}
 	my $select = 'a';
-	print "Hit 'a' to select all, otherwise select comma separated numbers or 'q' to quit\n";
+	print "Please select which plugins you would like ('*' marks the default and minimum).\n";
+	print "Note that some optional plugins may have additional system requirements:\n";
+	print "if you select any beyond the default, you must look over their\n";
+	print "$SLASH_PREFIX/plugins/*/README* files.\n";
+	print "Enter 'a' to select all (which is probably a bad idea). Better, enter\n";
+	print "comma-separated numbers, or 'q' for none.\n";
 	while ($select ne 'q'){
 		chomp($select = <STDIN>);
 		if ($select =~ /^[\d ,]+$/) {
@@ -283,12 +292,12 @@ print "Plugins selected: " . join(" ", sort keys %{$themes->{$theme}{plugin}}) .
 if (!$Config{d_symlink}) {
 	$symlink = 0;
 } elsif ($opts{'L'}) {
-	$symlink = $opts{'L'} =~ /^n/i ? 0 : 1;
+	$symlink = $opts{'L'};
 } else {
 	print "
-Would you like to install all the files as symlinks
-to the original?  (If not, each file will be copied to
-your Slash directories). [Y] ";
+Would you like to install all the files as symlinks to the original?
+(This is recommended.  If not, each file will be copied to your
+Slash directories). [Y] ";
 	chomp(my $ans = <STDIN>);
 	$ans ||= 'Y';
 	$symlink = $ans =~ /^\s*[Yy]/;
@@ -296,9 +305,7 @@ your Slash directories). [Y] ";
 
 
 unless ($opts{'a'}) {
-	print "
-Create a name for the site's admin account (8 characters
-or less). [$owner] ";
+	print "Create a name for the site's admin account. [$owner] ";
 	chomp($username = <STDIN>);
 	$username ||= $owner;
 } else {
@@ -324,6 +331,15 @@ unless ($opts{'e'}) {
 } else {
 	$email = $opts{'e'};
 }
+
+unless ($opts{'f'}) {
+	print "\nThis is your last chance to abort installation.\n";
+	print "Hit return to install or press ^C now to abort: ";
+	my $line = <STDIN>;
+	$line = ''; # avoid a warning about var only used once
+}
+
+print "\nInstalling...\n";
 
 my $trgst = '';
 
@@ -367,8 +383,8 @@ while (<$dump>) {
 	next unless /^INSERT/;
 	chomp;
 	s/;$//;
-	s/www\.example\.com/$hostname/g;
-	s/admin\@example\.com/$email/g;
+	s/\badmin\@example\.com\b/$email/g;
+	s/\bwww\.example\.com\b/$hostname/g;
 	s|/usr/local/slash|$SLASH_PREFIX|g;
 	if ($driver eq 'oracle') {
 		# With this we can almost use the MySQL dump verbatim
@@ -382,6 +398,16 @@ while (<$dump>) {
 }
 
 close $dump;
+
+# We start this whole process by turning off foreign key
+# constraints -- since we will be adding data in an order
+# not guaranteed to match those constraints.  When all
+# the data is inserted, we can turn them back on.
+
+$dbh->do("SET FOREIGN_KEY_CHECKS = 0");
+
+# Now process all the SQL.
+
 for my $cmd (@sql) {
 	next unless $cmd;
 	my $rows_affected = $dbh->do($cmd);
@@ -396,6 +422,7 @@ DBIx::Password user '$opts{u}' lacks CREATE and/or DROP permissions.
 Fix this, or whatever the problem is, and rerun $PROGNAME.
 Failed command: $cmd
 EOT
+			exit 1;
 		}
 		# It's OK if a DROP TABLE does nothing, that just means
 		# the table wasn't there to begin with.
@@ -441,6 +468,19 @@ $slashdb->setUser($uid, {
 	seclev => 10000
 });
 
+if ($opts{'i'}) {
+	$include = $opts{'i'};
+	my @stats = stat($include);
+	if ($stats[7] eq '') {
+		print "Warning: Requested include '$include' does not appear to exist";
+	}
+	$include = "\n    Include $include\n";
+} else {
+	$include = '';
+}
+
+$dbh->do("SET FOREIGN_KEY_CHECKS = 1");
+
 # Now, lets update slash.sites
 my $sites = gensym();
 if (open($sites, "< $SLASH_PREFIX/slash.sites\0")) {
@@ -476,8 +516,9 @@ $dbh->disconnect;
 install_message();
 
 sub apache_site_conf {
-	my $host_port = $hostname;
-	$host_port .= ":80" unless $host_port =~ /:/;
+	my $host_port = '';
+	$host_port = $opts{'x'} ? '*' : $hostname;
+	$host_port .= ':80' unless $host_port =~ /:/;
 	my $text = qq|
 # note that if your site's path is a symlink, the
 # path listed here is most likely the actual path;
@@ -498,7 +539,7 @@ sub apache_site_conf {
 
     PerlSetupEnv On
     PerlSetEnv TZ GMT
-
+$include
     SlashVirtualUser $opts{'u'}
 
     # this directive will compile all the templates
@@ -506,28 +547,54 @@ sub apache_site_conf {
     # and template_cache_size is 0.  Set to On/Off.
     # Default is off since most sites don't need it
     # much and startup performance, as well as
-    # memory usage, degrades when it is On.
+    # memory usage, degrades when it is On...
+    # setting template_cache_size to 100 or so is
+    # probably a lot better
     SlashCompileTemplates Off
-    
-    PerlAccessHandler  Slash::Apache::Banlist
-    PerlAccessHandler  Slash::Apache::User
-    PerlCleanupHandler Slash::Apache::Log
-    PerlCleanupHandler Slash::Apache::Log::UserLog
+ 
+    ########################
+
+    # First Apache phase:  post-read-request
 
     # if you have a frontend/backend setup and have X-Forwarded-For
     # headers (such as from mod_proxy_add_forward), use this
     # to properly populate remote_ip for formkeys etc.
     #PerlPostReadRequestHandler Slash::Apache::ProxyRemoteAddr
 
+    # Second Apache phase:  URI translation
+
     # this directive will redirect non-logged-in users to
     # index.shtml if they request the home page; turn it
     # on to help increase performance or if you are using something
-    # other then index.pl for the index
+    # other than index.pl for the index
     PerlTransHandler Slash::Apache::IndexHandler
-
-    # this directive will enable you to display user's pages
-    # with /~username
+    # this directive will display a user's pages at /~username
     PerlTransHandler Slash::Apache::User::userdir_handler
+
+    # Third Apache phase:  header parsing
+
+    # Fourth Apache phase:  access control
+    PerlAccessHandler  Slash::Apache::Banlist
+    PerlAccessHandler  Slash::Apache::User
+
+    # Fifth Apache phase:  authentication
+        
+    # Sixth Apache phase:  authorization
+        
+    # Seventh Apache phase:  MIME type checking
+
+    # Eighth Apache phase:  fixups
+
+    # Ninth Apache phase:  response, aka content handler:
+    # Apache::Registry and whatever else is in the slash.conf file
+
+    # Tenth Apache phase:  logging
+
+    # Eleventh Apache phase:  cleanup
+    PerlCleanupHandler Slash::Apache::Log
+    PerlCleanupHandler Slash::Apache::Log::UserLog
+
+    ########################
 
     # this can be used to preload your .pl scripts in the parent,
     # saving both startup time and memory in the child
@@ -537,7 +604,7 @@ sub apache_site_conf {
     <Perl>
         # if you need to debug, temporarily turn this on
         # \$Apache::Registry::Debug = 4;
-        my \@pls     = qw(index comments article users journal search metamod);
+        my \@pls     = qw(index comments article users journal search ajax firehose);
         my \$vhost   = '$host_noport';
         my \$docroot = '$prefix_site/$sitename/htdocs';
         my \$r       = Apache::RegistryLoader->new;
@@ -551,10 +618,11 @@ sub apache_site_conf {
     DirectoryIndex index.pl index.shtml
     ErrorDocument 404 /404.pl
 
-    AddType text/xml .rdf
-    AddType text/xml .rss
     AddType text/xml .xml
-    AddType text/xml .wml
+    AddType application/rss+xml .rdf
+    AddType application/rss+xml .rss
+    AddType application/atom+xml .atom
+    AddType text/vnd.wap.wml .wml
 
     # change default of "iso-8859-1" here (to, for example, utf-8)
     # if you change "content_type_webpage" in vars, and vice versa
@@ -593,6 +661,9 @@ during the install.  Some plugins do INSERT IGNOREs which may fail and
 that is harmless, notably the Search plugin if SOAP is not installed,
 which will report that the soap_methods table does not exist.)
 
+If you installed optional plugins, remember to read their README files,
+if any.
+
 You will need to edit your httpd.conf file to have it Include the
 Slash file that (in turn) Includes this site's .conf data.  Assuming
 this is the first Slash site you've installed for this Apache, you
@@ -605,24 +676,7 @@ if you know what you're doing, edit):
 
 	$prefix_site/$sitename/$sitename.conf
 
-You may want to take a look at it. If you are using virtual hosting by
-hostname you may also need to add a NameVirtualHost to your httpd.conf.
-
-If you do not have your Slash site in the root of the web server (e.g.,
-"http://www.example.com/mysite/" instead of "http://mysite.example.com/"),
-you will need to adjust the rootdir, rdfimage, imagedir, absolutedir,
-and cookiepath variables, and you also need to change your Apache config
-appropriately.  These are all in the "vars" table of your database.
-
-To restart apache do:
-
-	apachectl stop
-	apachectl start
-
-Have fun with your new site. You should also consider registering it:
-
-	http://slashcode.com/sites.pl
-
+Now you can continue with step 6 of the INSTALL file directions.
 
 |;
 	print $text
@@ -663,12 +717,17 @@ Main options:
 	-h	Help (this message)
 	-v	Version
 	-u	Virtual user
+	-f	Skip 'last chance' prompt (force installation -- combine
+		this with the other opts below to eliminate interaction)
 
 Site options:
 	-H	Hostname
 	-n	Site name
+	-x	Use '*' as VirtualHost name (boolean)
 	-R	Reuse hostname as site name (boolean)
-	-L	Install files in htdocs/ and tasks/ using symlinks [y/n]
+	-L	Install files in htdocs/ and tasks/ using symlinks (boolean)
+	-i	Include the specified file into the site configuration
+	-T	Theme to use
 	-P	Comma-separated list of plugin names$sample_plugins
 		("ALL"/"DEFAULT" avoid prompt, do what you'd expect)
 
@@ -689,7 +748,7 @@ sub version {
 $PROGNAME $VERSION
 
 This code is a part of Slash, and is released under the GPL.
-Copyright 1997-2003 by Open Source Development Network. See README
+Copyright 1997-2005 by Open Source Technology Group. See README
 and COPYING for more information, or see http://slashcode.com/.
 
 EOT
