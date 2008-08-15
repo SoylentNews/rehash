@@ -16,6 +16,7 @@ __template__
 [% IF form.metamod %]
 <div id="metamodwrap">
 [% END %]
+[% IF user.is_subscriber || user.is_admin ; PROCESS init_tagui ; END -%]
 [% firehose = Slash.getObject("Slash::FireHose"); %]
 [% IF env.script_name == "/firehose.pl" || form.ssi %]
 <script type="text/javascript">
@@ -95,7 +96,6 @@ YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
 %]
 [% PROCESS titlebar title="$constants.sitename Firehose $refresh_text" %]
 [% PROCESS autocomplete %]
-[% IF user.is_subscriber || user.is_admin ; PROCESS init_tagui ; END -%]
 <div class="submenu">
 <div id="message_area">
 </div>
