@@ -847,8 +847,11 @@ function firehose_handle_comment_nodnix( commands ){
 }
 
 
-function firehose_init_tagui(){
-	var $new_entries = $('#firehoselist > [class*=article]:not([tag-server])')
+function firehose_init_tagui( $new_entries ){
+	if ( ! $new_entries || ! $new_entries.length )
+		$new_entries = $('#firehoselist > [class*=article]:not([tag-server])');
+
+	$new_entries
 		.each(function(){
 			var $this = $(this), id = firehose_id_of(this);
 
