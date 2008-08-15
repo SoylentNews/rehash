@@ -31,7 +31,13 @@ function firehose_handle_admin_commands( commands ){
 		switch ( cmd ) {
 			case 'neverdisplay':	neverdisplay = true; break;
 			case 'hold':		hold = true; break;
-			case 'unsigned':	signoff = true; break;
+
+			case 'signed':
+			case 'signoff':
+			case 'unsigned':
+				signoff = true;
+				break;
+
 			default:
 				user_cmd = cmd
 		}
