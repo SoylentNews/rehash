@@ -39,9 +39,9 @@ function firehose_handle_admin_commands( commands ){
 				break;
 
 			default:
-				user_cmd = cmd
+				user_cmd = cmd;
 		}
-		return user_cmd
+		return user_cmd;
 	});
 
 	var id = this.getAttribute('tag-server');
@@ -51,7 +51,7 @@ function firehose_handle_admin_commands( commands ){
 			op:	'admin_neverdisplay',
 			stoid:	'',
 			fhid:	id,
-			ajax:	{ success: function(){ firehose_remove_entry(id) } }
+			ajax:	{ success: function(){ firehose_remove_entry(id); } }
 		});
 	}
 
@@ -60,17 +60,19 @@ function firehose_handle_admin_commands( commands ){
 		this._ajax_request('', {
 			op:	'admin_signoff',
 			stoid:	$('[stoid]', this).attr('stoid'),
-			ajax:	{ success: function(){ $('[context=signoff]', signoff_tag_server).remove() } }
+			ajax:	{ success: function(){ $('[context=signoff]', signoff_tag_server).remove(); } }
 		});
 	}
 
-	if ( hold )
+	if ( hold ) {
 		non_admin_commands.push('hold');
+	}
 
-	if ( hold || signoff )
+	if ( hold || signoff ) {
 		firehose_collapse_entry(id);
+	}
 
-	return non_admin_commands
+	return non_admin_commands;
 }
 
 
@@ -106,19 +108,19 @@ function adminTagsCommands(id, type) {
 
 	var params = {};
 	type = type || "stories";
-	params['op'] = 'tags_admin_commands';
+	params.op = 'tags_admin_commands';
 	if (type == "stories") {
-		params['sidenc'] = id;
+		params.sidenc = id;
 	} else if (type == "urls") {
-		params['id'] = id;
+		params.id = id;
 	} else if (type == "firehose") {
-		params['id'] = id;
+		params.id = id;
 	}
-	params['type'] = type;
+	params.type = type;
 	var tags_admin_commands_el = $dom('tags_admin_commands-' + id);
-	params['commands'] = tags_admin_commands_el.value;
+	params.commands = tags_admin_commands_el.value;
 	var reskeyel = $dom('admin_commands-reskey-' + id);
-	params['reskey'] = reskeyel.value;
+	params.reskey = reskeyel.value;
 	ajax_update(params, 'tags-admin-' + id);
 
 	toggletags_message_el.innerHTML = 'Commands executed.';
@@ -127,12 +129,12 @@ function adminTagsCommands(id, type) {
 function tagsHistory(id, type) {
 	var params = {};
 	type = type || "stories";
-	params['type'] = type;
-	params['op'] = 'tags_history';
+	params.type = type;
+	params.op = 'tags_history';
 	if (type == "stories") {
-		params['sidenc'] = id;
+		params.sidenc = id;
 	} else if (type == "urls" || type == "firehose") {
-		params['id'] = id;
+		params.id = id;
 	}
 	var tagshistid = "taghist-" + id;
 	var popupid    = "taghistory-" + id;
@@ -151,27 +153,27 @@ function remarks_create() {
 	}
 
 	var params = {};
-	params['op']     = 'remarks_create';
-	params['remark'] = remark.value;
-	params['reskey'] = reskey.value;
+	params.op     = 'remarks_create';
+	params.remark = remark.value;
+	params.reskey = reskey.value;
 	remarks_max = $dom('remarks_max');
 	if (remarks_max && remarks_max.value) {
-		params['limit'] = remarks_max.value;
+		params.limit = remarks_max.value;
 	}
 	ajax_update(params, 'remarks_whole');
 }
 
 function remarks_fetch(secs, limit) {
 	var params = {};
-	params['op'] = 'remarks_fetch';
-	params['limit'] = limit;
+	params.op = 'remarks_fetch';
+	params.limit = limit;
 	// run it every 30 seconds; don't need to call again
 	ajax_periodic_update(secs, params, 'remarks_table');
 }
 
 function remarks_popup() {
 	var params = {};
-	params['op'] = 'remarks_config';
+	params.op = 'remarks_config';
 	var title = "Remarks Config ";
 	var buttons = createPopupButtons('<a href="#" onclick="closePopup(\'remarksconfig-popup\', 1); return false">[X]</a>');
 	title = title + buttons;
@@ -186,18 +188,18 @@ function remarks_config_save() {
 	var min_priority = $dom('remarks_min_priority');
 	var limit = $dom('remarks_limit');
 	var filter = $dom('remarks_filter');
-	params['op'] = 'remarks_config_save';
+	params.op = 'remarks_config_save';
 	if (!reskey && !reskey.value) {
 		return false;
 	} 
 	if (min_priority) {
-		params['min_priority'] = min_priority.value;
+		params.min_priority = min_priority.value;
 	}
 	if (limit) {
-		params['limit'] = limit.value;
+		params.limit = limit.value;
 	}
 	if (filter) {
-		params['filter'] = filter.value;
+		params.filter = filter.value;
 	}
 	var message = $dom('remarksconfig-message');
 	if (message) {
@@ -238,7 +240,7 @@ function console_update(use_fh_interval, require_fh_timeout) {
 	if(use_fh_interval) {
 		interval = getFirehoseUpdateInterval(); 
 	}
-	setTimeout(function(){console_update(use_fh_interval, fh_is_timed_out)}, interval * 2);
+	setTimeout(function(){console_update(use_fh_interval, fh_is_timed_out);}, interval * 2);
 }
 
 function firehose_usage() {
@@ -251,7 +253,7 @@ function make_spelling_correction(misspelled_word, form_element) {
 	var selected_key   = "select_" + form_element + '_' + misspelled_word;
 	var selected_index = document.forms.slashstoryform.elements[selected_key].selectedIndex;
 	
-	if (selected_index == 0) {
+	if (selected_index === 0) {
 		return(0);
 	}
 
@@ -259,8 +261,8 @@ function make_spelling_correction(misspelled_word, form_element) {
 	if (selected_index >= 1) {
 		if (selected_index == 1) {
 			var params = {};
-			params['op'] = 'admin_learnword';
-			params['word'] = misspelled_word;
+			params.op = 'admin_learnword';
+			params.word = misspelled_word;
 			ajax_update(params);
 		}
 		else {
@@ -302,7 +304,7 @@ function firehose_open_note(id) {
 
 	$entry.find('.note-wrapper').removeClass('no-note');
 	$entry.find('#note-form-'+id).removeClass('hide');
-	$entry.find('#note-input-'+id).each(function(){this.focus()});
+	$entry.find('#note-input-'+id).each(function(){this.focus();});
 	$entry.find('#note-text-'+id).addClass('hide');
 }
 
@@ -341,7 +343,7 @@ function firehose_get_and_post(id) {
 		id:	id
 	}, 'postform-'+id, {
 		onComplete: function() {
-			$dom('postform-'+id).submit()
+			$dom('postform-'+id).submit();
 		}
 	});
 }
@@ -350,7 +352,7 @@ function appendToBodytext(text) {
 	$('#admin-bodytext').each(function(){
 		this.className = "show";
 		this.value += text;
-	})
+	});
 }
 
 function appendToMedia(text) {
