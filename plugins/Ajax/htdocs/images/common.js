@@ -725,7 +725,7 @@ function firehose_toggle_tagui_to( if_expanded, selector ){
 
 	$widget.toggleClassTo('expanded', if_expanded);
 
-	var toggle_text;
+	var toggle_button={}, toggle_div={};
 	if ( if_expanded ){
 		$server.each(function(){ this.fetch_tags(); });
 		if ( fh_is_admin ) {
@@ -733,15 +733,15 @@ function firehose_toggle_tagui_to( if_expanded, selector ){
 		}
 		$widget.find('.tag-entry:visible:first').each(function(){ this.focus(); });
 
-		toggle_text = '[-]';
+		toggle_button['+'] = (toggle_button.collapse = 'expand');
+		toggle_div['+'] = (toggle_div.tagshide = 'tagbody');
 	} else {
-		toggle_text = '[+]';
+		toggle_button['+'] = (toggle_button.expand = 'collapse');
+		toggle_div['+'] = (toggle_div.tagbody = 'tagshide');
 	}
 
-	$widget.find('a.edit-toggle .button').text(toggle_text);
-	$server.find('#toggletags-body-'+id).
-		toggleClassTo('tagshide', !if_expanded).
-		toggleClassTo('tagbody', if_expanded);
+	$widget.find('a.edit-toggle .button').mapClass(toggle_button);
+	$server.find('#toggletags-body-'+id).mapClass(toggle_div);
 }
 
 function firehose_toggle_tagui( toggle ) {
