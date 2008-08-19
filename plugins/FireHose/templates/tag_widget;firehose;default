@@ -3,7 +3,6 @@ default
 __description__
 This builds a tag-widget bound to a containing firehose entry.
 
-tags_top
 __title__
 Useless title to template
 __page__
@@ -60,14 +59,8 @@ __template__
 	[%- ELSE				%] href="[% gSkin.rootdir %]/subscribe.pl"
 	[%- END %]><span class="button collapse"></span></a>
 <div class="tag-display-set train">
-	<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'"></div>
-	<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">
-	[%- IF tags_top.size -%]
-		[%- sep = ''; FOR t = tags_top -%]
-			[%- sep %][% t.split(':').0 -%]
-		[%- sep = ' '; END -%]
-	[%- END -%]
-	</div>
+	<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% top_tags %]</div>
+	<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% system_tags %]</div>
 [% IF user.tags_canwrite_stories %]
 	<div class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></div>
 	[% IF item.type == "story" -%]

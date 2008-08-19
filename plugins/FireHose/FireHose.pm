@@ -1057,10 +1057,14 @@ sub fetchItemText {
 	if ($user->{is_admin}) {
 		$firehose->setFireHoseSession($item->{id});
 	}
+
+	my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($id, 'firehose');
 	my $data = {
 		item		=> $item,
 		mode		=> "bodycontent",
-		tags_top	=> $tags_top,
+		tags_top	=> $tags_top,		# old-style
+		top_tags	=> $tags->{top},	# new-style
+		system_tags	=> $tags->{'system'},	# new-style
 	};
 
 	my $slashdb = getCurrentDB();
@@ -1443,10 +1447,13 @@ sub ajaxFireHoseGetUpdates {
 				push @$updates, ["add", $_->{id}, slashDisplay("daybreak", { options => $opts, cur_day => $_->{day}, last_day => $_->{last_day}, id => "firehose-day-$_->{day}", fh_page => $base_page }, { Return => 1, Page => "firehose" }) ];
 			} else {
 				$update_data->{new}++;
+				my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($_->{id}, 'firehose');
 				my $data = {
 					mode => $curmode,
 					item => $item,
-					tags_top => $tags_top,
+					tags_top => $tags_top,			# old-style
+					top_tags => $tags->{top},		# new-style
+					system_tags => $tags->{'system'},	# new-style
 					vote => $votes->{$item->{globjid}},
 					options => $opts
 				};
@@ -1902,7 +1909,9 @@ sub dispFireHose {
 	my $retval = slashDisplay('dispFireHose', {
 		item			=> $item,
 		mode			=> $options->{mode},
-		tags_top		=> $options->{tags_top},
+		tags_top		=> $options->{tags_top},	# old-style
+		top_tags		=> $options->{top_tags},	# new-style
+		system_tags		=> $options->{system_tags},	# new-style
 		options			=> $options->{options},
 		vote			=> $options->{vote},
 		bodycontent_include	=> $options->{bodycontent_include},
@@ -2708,6 +2717,7 @@ sub listView {
 		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime && $_->{createtime} lt $now;
 		my $item =  $firehose_reader->getFireHose($_->{id});
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
+		my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($_->{id}, 'firehose');
 		if ($_->{day}) {
 			my $day = $_->{day};
 			$day =~ s/ \d{2}:\d{2}:\d{2}$//;
@@ -2717,7 +2727,9 @@ sub listView {
 			slashProf("firehosedisp");
 			$itemstext .= $self->dispFireHose($item, {
 				mode			=> $curmode,
-				tags_top		=> $tags_top,
+				tags_top		=> $tags_top,		# old-style
+				top_tags		=> $tags->{top},	# new-style
+				system_tags		=> $tags->{'system'},	# new-style
 				options			=> $options,
 				vote			=> $votes->{$item->{globjid}},
 				bodycontent_include	=> $user->{is_anon} 

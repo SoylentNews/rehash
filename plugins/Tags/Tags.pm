@@ -1333,12 +1333,12 @@ sub ajaxSetGetCombinedTags {
 	# XXX TO DO: handle other types here, setting $base_item appropriately
 
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	if (!$globjid || $globjid !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
+	if (!$globjid || $globjid !~ /^\d+$/ || !$tags_reader) {
 		return getData('error', {}, 'tags');
 	}
 	my($table, $item_id) = $tags_reader->getGlobjTarget($globjid);
 
-	my $uid = $user->{uid};
+	my $uid = $user && $user->{uid} || 0;
 
 	# if we have to execute commands, do them _before_ we fetch any tag lists
 	my $user_tags = '';
@@ -1359,7 +1359,7 @@ sub ajaxSetGetCombinedTags {
 			$base_writer->setSectionTopicsFromTagstring($form->{id}, $added_tags);
 			$base_item = $base_writer->getFireHose($form->{id});
 		};
-	} else {
+	} elsif ( ! $form->{global_tags_only} ) {
 		my $current_tags_array = $tags_reader->getTagsByNameAndIdArrayref($table, $item_id, { uid => $uid, include_private => 1 });
 		$user_tags = join ' ', sort map { $_->{tagname} } @$current_tags_array;
 	}
@@ -1385,12 +1385,40 @@ sub ajaxSetGetCombinedTags {
 		$topic_tags = $topic->{keyword};
 	}
 
-	# my $vote_tags = $tags_reader->getUserNodNixForGlobj($globjid, $uid);
-
 	# XXX how to get the system tags?
 	my $system_tags = $datatype_tag . ' ' . $section_tag . ' ' . $topic_tags;
 
-	return '<user>' . $user_tags . '<top>'. $top_tags . '<system>' . $system_tags;
+	my $response = '<system>' . $system_tags . '<top>'. $top_tags;
+	$response .= '<user>' . $user_tags unless $form->{global_tags_only};
+
+	return $response;
+}
+
+sub setGetCombinedTags {
+	my($self, $id, $type, $user, $commands) = @_;
+
+	my $slashdb = getCurrentDB();
+	my $constants = getCurrentStatic();
+
+	my $options = {
+		'id'	=> $id,
+		'type'	=> $type,
+	};
+	$options->{global_tags_only} = 1 unless $user;
+	$options->{tags} = $commands if $commands;
+
+	my @tuples = split /<([\w:]*)>/, ajaxSetGetCombinedTags($slashdb, $constants, $user, $options);
+	shift @tuples; # bogus empty first elem when capturing separators
+
+	my $response = {};
+	while ( @tuples ) {
+		my $key = shift @tuples;
+		$response->{$key} = shift @tuples || '' if $key;
+#print STDERR "key => $key; value => $response->{$key}\n";
+	}
+#print STDERR "---------\n";
+
+	return $response;
 }
 
 {
