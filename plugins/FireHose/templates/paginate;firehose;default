@@ -31,7 +31,7 @@ __template__
 <div class="menu" [% IF ulid %]id="[% ulid %]"[% END %]>
 [% END %]
 [% IF form.metamod %]
-	You are welcome to do <a href="#" onclick="firehose_more(); return false">more than 10</a> metamods per day.
+	You are welcome to do <a href="#" onclick="firehose_more(); return false">more than 10</a> metamods per day but note that those votes will weigh less.
 [% ELSE %]
 [% IF options.duration == 7 && !options.startdate %]
 	[% day = Slash.db.getDay(0);
