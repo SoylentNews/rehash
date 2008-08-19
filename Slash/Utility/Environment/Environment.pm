@@ -1588,7 +1588,7 @@ sub prepareUser {
 			@headers{map lc, keys %headers} = values %headers;
 			my $ua = $r->headers_in->{'user-agent'};
 			if ($ua =~ /MSIE (\d+)/) {
-				$d2 = 'none';# if $1 < 7;
+				$d2 = 'none' if $1 < 7;
 			}
 		}
 		$user->{discussion2} = $d2;
@@ -2471,8 +2471,8 @@ sub errorLog {
 
 	if ($ENV{GATEWAY_INTERFACE} && (my $r = Apache->request)) {
 		$errors[0] = $ENV{SCRIPT_NAME} . $errors[0];
-		$errors[-1] .= "\n";
-		$r->log_error($_) for @errors;
+		#$errors[-1] .= "\n";
+		$r->log_error(join ' ;; ', @errors); # for @errors;
 	} else {
 		$errors[0] = 'Error' . $errors[0];
 		print STDERR $_, "\n" for @errors;
