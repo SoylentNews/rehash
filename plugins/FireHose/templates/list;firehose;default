@@ -16,7 +16,7 @@ __template__
 [% IF form.metamod %]
 <div id="metamodwrap">
 [% END %]
-[% IF user.is_subscriber || user.is_admin ; PROCESS init_tagui ; END -%]
+[% PROCESS init_tagui -%]
 [% firehose = Slash.getObject("Slash::FireHose"); %]
 [% IF env.script_name == "/firehose.pl" || form.ssi %]
 <script type="text/javascript">
@@ -209,12 +209,10 @@ cmdrtaco dot net but be forgiving of beta code!
 
 fh_ticksize = 15;
 firehose_slider_init();
-[% IF user.is_subscriber || user.is_admin %]
 $(function(){
 	$('#firehoselist').click(firehose_click_tag);
 	firehose_init_tagui();
 });
-[% END %]
 
 
 

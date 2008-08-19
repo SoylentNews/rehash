@@ -873,8 +873,15 @@ function firehose_handle_comment_nodnix( commands ){
 
 function firehose_init_tagui( $new_entries ){
 	if ( ! $new_entries || ! $new_entries.length ) {
-		$new_entries = $('#firehoselist > [class*=article]:not([tag-server])');
+		var $firehoselist = $('#firehoselist');
+		if ( $firehoselist.length ) {
+			$new_entries = $firehoselist.children('[id^=firehose-][class*=article]');
+		} else {
+			$new_entries = $('[id^=firehose-][class*=article]');
+		}
 	}
+
+	$new_entries = $new_entries.filter(':not([tag-server])');
 
 	$new_entries.
 		each(function(){
@@ -1172,12 +1179,7 @@ function firehose_handle_update() {
 		firehose_get_next_updates();
 	}
 
-	// dispFireHose has temporary rules restricting who gets the new tagui
-	// we don't need to duplicate those rules here, just look at the DOM to see
-	// temporary, until open to all users
-	if ( $('.tag-widget-stub:first').length ) {
-		firehose_init_tagui();
-	}
+	firehose_init_tagui();
 
 	if ( focused_text_field ) {
 		$(focused_text_field).triggerHandler('focus');

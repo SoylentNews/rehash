@@ -28,16 +28,13 @@ __template__
 		[% firehosetext %]
 	</div>
 </div>
-[% IF user.is_subscriber || user.is_admin %]
 [% PROCESS init_tagui %]
 <script type="text/javascript">
 $(function(){
 	firehose_init_tagui(
 		$('#firehose > .view > .head > [id^=firehose-]')
-			.click(firehose_click_tag)
-	)
+			.click(firehose_click_tag) );
 });
 </script>
-[% END %]
 __version__
 $Id$
