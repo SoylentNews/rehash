@@ -676,6 +676,7 @@ var tag_widget_fns = {
 
 
 	set_context: function( context, force ){
+		var widget = this;
 		if ( context ) {
 			if ( context == this._current_context &&
 				(!$previous_context_trigger.length ||
@@ -720,7 +721,11 @@ var tag_widget_fns = {
 					// ...when regular code needs to synchronize with animation
 					$display.queue(function(){
 						// I have to queue that code up myself
-						$(display.set_tags(context_tags)).dequeue();
+						display.set_tags(context_tags, { classes: 'suggestion' });
+						if ( has_tags && widget.modify_context ) {
+							widget.modify_context(display, context);
+						}
+						$display.dequeue();
 					});
 					if ( has_tags ) {
 						$queue_reposition($display);
@@ -741,7 +746,6 @@ var tag_widget_fns = {
 
 		// if there's a context to hide, and hiding on a timeout is requested...
 		if ( context && this.tag_widget_data.context_timeout ) {
-			var widget = this;
 			this._context_timeout = setTimeout(function(){
 				widget.set_context();
 			}, this.tag_widget_data.context_timeout);

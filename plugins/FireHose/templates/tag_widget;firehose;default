@@ -51,8 +51,6 @@ __template__
 			</a>
 			</span>
 		</div>
-		[%# the history button %]
-		<span class="history-button" id="taghist-[% id %]"><a href="#" onclick="tagsHistory('[% id %]','firehose'); return false">H</a></span>
 	</span>
 	[% END %]
 	[%# the disclosure triangle %]

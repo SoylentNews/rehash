@@ -19,18 +19,53 @@ function um_set_settings(behavior) {
 	}, 'links-vendors-content');
 }
 
+function tagsHistory(id, type) {
+	var params = {};
+	type = type || "stories";
+	params.type = type;
+	params.op = 'tags_history';
+	if (type == "stories") {
+		params.sidenc = id;
+	} else if (type == "urls" || type == "firehose") {
+		params.id = id;
+	}
+
+	var $entry = $('#firehose-'+id);
+	var $widget = $('#tag-widget-'+id, $entry[0]);
+
+	// hang the pop-up from the first available of:
+	var $positioners =
+		$widget.find('.history-button').		// the history button
+			add($related_trigger).			// whatever you clicked
+			add($widget.find('.edit-toggle')).	// the disclosure triangle
+			add($entry.find('#updown-'+id));	// the nod/nix capsule
+
+	var popupid    = "taghistory-" + id;
+	var title      = "History ";
+	var buttons    = createPopupButtons("<a href=\"#\" onclick=\"return false\">[?]</a></span><span><a href=\"#\" onclick=\"closePopup('" + popupid + "-popup'); return false\">[X]</a>");
+	title = title + buttons;
+	createPopup(getXYForSelector($positioners), title, popupid);
+	ajax_update(params, "taghistory-" + id + "-contents");
+}
+
 //
 // firehose + admin + tagui
 //
 
+function firehose_admin_context( display ){
+	display.update_tags('history', { order: 'prepend' });
+}
+
 function firehose_handle_admin_commands( commands ){
-	var neverdisplay, hold, signoff;
+	var neverdisplay, hold, signoff, history;
 
 	var non_admin_commands = $.map(commands, function(cmd){
 		var user_cmd = null;
 		switch ( cmd ) {
 			case 'neverdisplay':	neverdisplay = true; break;
 			case 'hold':		hold = true; break;
+
+			case 'history':		history = true; break;
 
 			case 'signed':
 			case 'signoff':
@@ -70,6 +105,10 @@ function firehose_handle_admin_commands( commands ){
 
 	if ( hold || signoff ) {
 		firehose_collapse_entry(id);
+	}
+
+	if ( history ) {
+		tagsHistory(id, 'firehose');
 	}
 
 	return non_admin_commands;
@@ -126,25 +165,6 @@ function adminTagsCommands(id, type) {
 	toggletags_message_el.innerHTML = 'Commands executed.';
 }
 
-function tagsHistory(id, type) {
-	var params = {};
-	type = type || "stories";
-	params.type = type;
-	params.op = 'tags_history';
-	if (type == "stories") {
-		params.sidenc = id;
-	} else if (type == "urls" || type == "firehose") {
-		params.id = id;
-	}
-	var tagshistid = "taghist-" + id;
-	var popupid    = "taghistory-" + id;
-	var title      = "History ";
-	var buttons    = createPopupButtons("<a href=\"#\" onclick=\"return false\">[?]</a></span><span><a href=\"#\" onclick=\"closePopup('" + popupid + "-popup'); return false\">[X]</a>");
-	title = title + buttons;
-	createPopup(getXYForId(tagshistid), title, popupid);
-	ajax_update(params, "taghistory-" + id + "-contents");
-}
-
 function remarks_create() {
 	var reskey = $dom('remarks_reskey');
 	var remark = $dom('remarks_new');
@@ -177,7 +197,7 @@ function remarks_popup() {
 	var title = "Remarks Config ";
 	var buttons = createPopupButtons('<a href="#" onclick="closePopup(\'remarksconfig-popup\', 1); return false">[X]</a>');
 	title = title + buttons;
-	createPopup(getXYForId('remarks_table'), title + buttons, 'remarksconfig');
+	createPopup(getXYForSelector('#remarks_table'), title + buttons, 'remarksconfig');
 	ajax_update(params, 'remarksconfig-contents');
 	
 }

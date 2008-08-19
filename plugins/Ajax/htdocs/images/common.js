@@ -132,13 +132,16 @@ function moveByXY(div, x, y) {
 	}
 }
 
-function getXYForId(id, addWidth, addHeight) {
-	var div = $('#'+id);
-	var offset = div.offset();
-	if (addWidth) { offset.left += div.attr('offsetWidth'); }
-	if (addHeight) { offset.top += div.attr('offsetHeight'); }
-	return [ offset.left, offset.top ];
+function getXYForSelector( selector, addWidth, addHeight ){
+	var $elem = $(selector);
+	var dX = addWidth ? $elem.attr('offsetWidth') : 0;
+	var dY = addHeight ? $elem.attr('offsetHeight') : 0;
+
+	var o = $elem.offset();
+	return [ o.left+dX, o.top+dY ];
 }
+
+// function getXYForId(id, addWidth, addHeight){ return getXYForSelector('#'+id, addWidth, addHeight); }
 
 function firehose_id_of( expr ) {
 	try {
@@ -898,7 +901,16 @@ function firehose_init_tagui( $new_entries ){
 						click(firehose_click_nodnix_reason);
 		});
 
-	$init_tag_widgets($new_entries.find('.tag-widget-stub'));
+	var $widgets = $init_tag_widgets($new_entries.find('.tag-widget-stub'));
+
+	if ( fh_is_admin ) {
+		$widgets.
+			filter('.body-widget').
+				each(function(){
+					this.modify_context = firehose_admin_context;
+				});
+	}
+
 	init_tagui_styles($new_entries);
 }
 // firehose functions end
@@ -1456,7 +1468,7 @@ function vendorStoryPopup() {
 			closePopup("vendorStory-26-popup");
 		}
 	};
-	createPopup(getXYForId('sponsorlinks', 0, 0), title, "vendorStory-" + id, "Loading", "", closepopup );
+	createPopup(getXYForSelector('#sponsorlinks'), title, "vendorStory-" + id, "Loading", "", closepopup );
 	var params = {};
 	params.op = 'getTopVendorStory';
 	params.skid = id;
@@ -1481,7 +1493,7 @@ function vendorStoryPopup2() {
 			closePopup("vendorStory-26-popup");
 		}
 	};
-	createPopup(getXYForId('sponsorlinks2', 0, 0), title, "vendorStory-" + id, "Loading", "", closepopup );
+	createPopup(getXYForSelector('#sponsorlinks'), title, "vendorStory-" + id, "Loading", "", closepopup );
 	var params = {};
 	params.op = 'getTopVendorStory';
 	params.skid = id;
