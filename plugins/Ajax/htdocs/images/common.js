@@ -821,9 +821,7 @@ function firehose_handle_context_triggers( commands ){
 }
 
 
-function firehose_handle_nodnix( commands, options ){
-	var context = options && options.context;
-
+function firehose_handle_nodnix( commands ){
 	if ( commands.length ) {
 		var $reasons = $('.nod-nix-reasons', this);
 		var nodnix_context = function( ctx ){
@@ -832,15 +830,14 @@ function firehose_handle_nodnix( commands, options ){
 			});
 		};
 
-		var context_not_set=true, tag_server=this;
+		var tag_server=this, context_not_set=true;
 		$.each(commands.slice(0).reverse(), function(i, cmd){
 			if ( cmd=='nod' || cmd=='nix' ) {
-				nodnix_context(context || cmd);
+				nodnix_context(cmd);
 				context_not_set = false;
 				firehose_fix_up_down(
 					tag_server.getAttribute('tag-server'),
-					{ nod:'votedup', nix:'voteddown' }[cmd]
-				);
+					{ nod:'votedup', nix:'voteddown' }[cmd] );
 				return false;
 			}
 		});
@@ -854,20 +851,31 @@ function firehose_handle_nodnix( commands, options ){
 }
 
 function firehose_handle_comment_nodnix( commands ){
-	var tag_server = this;
-	var handled_underlying = false;
-
-	return $.map(commands.reverse(), function( cmd ){
-		var match = /^([\-!]*)(nod|nix)$/.exec(cmd);
-		if ( match ) {
-			cmd = match[1] + 'meta' + match[2];
-			if ( !handled_underlying && !match[1] ) {
-				firehose_handle_nodnix.apply(tag_server, [[ match[2] ], { context: cmd }]);
-				handled_underlying = true;
+	if ( commands.length ) {
+		var tag_server=this, handled_underlying=false;
+		commands = $.map(commands.reverse(), function( cmd ){
+			var match = /^([\-!]*)(nod|nix)$/.exec(cmd);
+			if ( match ) {
+				var modifier = match[1], vote = match[2];
+				cmd = modifier + 'meta' + vote;
+				if ( !handled_underlying && !modifier ) {
+					var id = tag_server.getAttribute('tag-server');
+					firehose_fix_up_down(
+						id,
+						{ nod:'votedup', nix:'voteddown' }[vote] );
+					firehose_collapse_entry(id);
+					handled_underlying = true;
+				}
 			}
-		}
-		return cmd;
-	}).reverse();
+			return cmd;
+		}).reverse();
+
+		$('.nod-nix-reasons', this).each(function(){
+			this.set_context(undefined);
+		});
+	}
+
+	return commands;
 }
 
 
