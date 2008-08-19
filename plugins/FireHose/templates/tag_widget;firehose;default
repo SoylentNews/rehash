@@ -57,8 +57,8 @@ __template__
 	[% END %]
 	[%# the disclosure triangle %]
 <a class="edit-toggle"
-	[%- IF user.tags_canwrite_stories	%] href="#" onfocus="this.blur()" onclick="this.blur(); firehose_toggle_tagui(this); return false"
-	[%- ELSIF user.is_anon			%] href="#" onfocus="this.blur()" onclick="this.blur(); show_login_box(); return false"
+	[%- IF user.tags_canwrite_stories	%] href="#" onclick="this.blur(); firehose_toggle_tagui(this); return false"
+	[%- ELSIF user.is_anon			%] href="#" onclick="this.blur(); show_login_box(); return false"
 	[%- ELSE				%] href="[% gSkin.rootdir %]/subscribe.pl"
 	[%- END %]><span class="button collapse"></span></a>
 <div class="tag-display-set train">
