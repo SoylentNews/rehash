@@ -300,8 +300,7 @@ div.tag-display {
 
 .tag-widget .tag-entry {
 	display: none;
-	margin-left: -2em;
-	margin-right: 2em;
+	margin-right: 0.4em;
 }
 
 .tag-widget.expanded .tag-entry {
@@ -318,13 +317,12 @@ div.tag-display {
 }
 
 .tag-widget.expanded .tag-server-busy {
-	top: 0;
-	right: 0.4em;
+	top: 0.5em;
+	right: 0.25em;
 }
 
 .tag-editor {
 	display: none;
-	position: relative;
 }
 
 .tag-widget.expanded .tag-editor {

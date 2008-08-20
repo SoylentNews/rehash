@@ -792,7 +792,7 @@ function firehose_click_tag( event ) {
 		} else {
 			// otherwise, send it the server to be processed
 			$server.each(function(){
-				this.submit_tags(command, { fade_remove: 400, classes: 'not-saved'});
+				this.submit_tags(command, { fade_remove: 400, order: 'prepend', classes: 'not-saved'});
 			});
 		}
 		return false;
