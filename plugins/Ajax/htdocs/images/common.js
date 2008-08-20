@@ -1057,7 +1057,7 @@ function json_update(response) {
 
 
 function firehose_handle_update() {
-	var focus = new $.TextSelection(gFocusedText);
+	var saved_selection = new $.TextSelection(gFocusedText);
 	var $menu = $('.ac_results:visible');
 
 	if (firehose_updates.length > 0) {
@@ -1190,7 +1190,7 @@ function firehose_handle_update() {
 
 	firehose_init_tagui();
 
-	$(focus.restore().field()).focus();
+	saved_selection.restore().focus();
 	$menu.show();
 }
 

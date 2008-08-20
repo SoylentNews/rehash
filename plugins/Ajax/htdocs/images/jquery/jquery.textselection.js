@@ -1,102 +1,88 @@
 ;(function($){
 
-// private
-
-function set_selection( el, r ){
-	if ( el.createTextRange ) {
-		var tr = el.createTextRange();
-		tr.collapse(true);
-		tr.moveStart('character', r.selectionStart);
-		tr.moveEnd('character', r.selectionEnd);
-		tr.select();
-	} else if ( el.setSelectionRange ) {
-		el.setSelectionRange(r.selectionStart, r.selectionEnd);
-	} else if ( el.selectionStart !== undefined ) {
-		el.selectionStart =	r.selectionStart;
-		el.selectionEnd =	r.selectionEnd;
-	}
-}
-
-function get_selection( el ){
-	if ( el.selectionStart !== undefined ) {
-
-		return {
-			selectionStart:	el.selectionStart,
-			selectionEnd:	el.selectionEnd
-		};
-
-	} else if ( el.createTextRange ) {
-		var START=true, END=false;
-		var end_point = function( at_start ){
-			var tr = document.selection.createRange();
-			if ( tr.compareEndPoints('StartToEnd', tr) ) {
-				tr.collapse(at_start);
-			}
-			return tr.getBookmark().charCodeAt(2)-2;
-		};
-
-		return {
-			selectionStart:	end_point(START),
-			selectionEnd:	end_point(END)
-		};
-	}
-}
-
 // constructor
 $.TextSelection = function( el, r ){
-	this._pull(el);
-	if ( r ) {
-		this.range(r);
-		this._push(el);
+	spull(this, el);
+	if ( r ) { spush(this.range(r)); }
+};
+
+// public 'class' methods
+$.TextSelection.get = function( el ){
+	if ( el ) {
+		if ( el.selectionStart !== undefined ) {
+			return {
+				selectionStart:	el.selectionStart,
+				selectionEnd:	el.selectionEnd
+			};
+		} else if ( el.createTextRange ) {
+			var START=true, END=false;
+			var bound = function( at_start ){
+				var tr = document.selection.createRange();
+				if ( tr.compareEndPoints('StartToEnd', tr) ) {
+					tr.collapse(at_start);
+				}
+				return tr.getBookmark().charCodeAt(2)-2;
+			};
+			return {
+				selectionStart:	bound(START),
+				selectionEnd:	bound(END)
+			};
+		}
 	}
 };
 
-// private shortcut
-var Ts = $.TextSelection;
-
-// 'class' functions
-Ts.set = function( el, r ){
-	set_selection(el, r);
-};
-
-Ts.get = function( el ){
-	return get_selection(el);
-};
-
-
-
-// methods
-Ts.prototype = {
-	_pull: function( el ){
-		this._r = Ts.get((this._el=el));
-		return this;
-	},
-	_push: function( el ){
-		if ( el && this._r ) {
-			Ts.set(el, this._r);
+$.TextSelection.set = function( el, r ){
+	if ( el && r ) {
+		if ( el.createTextRange ) {
+			var tr = el.createTextRange();
+			tr.collapse(true);
+			tr.moveStart('character', r.selectionStart);
+			tr.moveEnd('character', r.selectionEnd);
+			tr.select();
+		} else if ( el.setSelectionRange ) {
+			el.setSelectionRange(r.selectionStart, r.selectionEnd);
+		} else if ( el.selectionStart !== undefined ) {
+			el.selectionStart =	r.selectionStart;
+			el.selectionEnd =	r.selectionEnd;
 		}
-		return this;
-	},
+	}
+};
+
+
+// private
+function spull( ts, el ){
+	ts._r = $.TextSelection.get(ts._el=(el||ts._el));
+	return ts;
+}
+
+function spush( ts, el ){
+	$.TextSelection.set(el || ts._el, ts._r);
+	return ts;
+}
+
+
+
+// public instance methods
+$.TextSelection.prototype = {
 	field: function( el ){
-		if ( el ) {
-			return this._pull(el);
-		} else {
-			return this._el;
-		}
+		return el ? spull(this, el) : this._el;
 	},
-	range: function( r ){
+	range: function( r, dont_select ){
 		if ( r ) {
 			this._r = r;
-			return this._push(this._el);
+			return dont_select ? this : spush(this);
 		} else {
 			return this._r;
 		}
 	},
+	focus: function(){
+		$(this._el).focus();
+	},
 	save: function( el ){
-		return this._pull(el ? el : this._el);
+		return spull(this, el);
 	},
 	restore: function(){
-		return this._push(this._el);
+		return spush(this);
 	}
 };
 
