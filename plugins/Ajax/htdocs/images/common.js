@@ -1057,7 +1057,8 @@ function json_update(response) {
 
 
 function firehose_handle_update() {
-	var focused_text_field = gFocusedText;
+	var focus = new $.TextSelection(gFocusedText);
+	var $menu = $('.ac_results:visible');
 
 	if (firehose_updates.length > 0) {
 		var el = firehose_updates.pop();
@@ -1189,9 +1190,8 @@ function firehose_handle_update() {
 
 	firehose_init_tagui();
 
-	if ( focused_text_field ) {
-		$(focused_text_field).triggerHandler('focus');
-	}
+	$(focus.restore().field()).focus();
+	$menu.show();
 }
 
 function firehose_adjust_window(onscreen) {
