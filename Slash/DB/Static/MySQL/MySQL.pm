@@ -1084,6 +1084,17 @@ sub getSkinInfo {
 	return \%index;
 }
 
+sub getSkinIndex {
+	my($self) = @_;
+	my @skins;
+	my $skins = $self->getSkins;
+	foreach (sort {$skins->{$a}{title} cmp $skins->{$b}{title}} keys %$skins) {
+		next if $skins->{$_}{skinindex} eq "no";
+		push @skins, $skins->{$_};
+	}
+	return \@skins;
+}
+
 # XXXSRCID This needs to actually be, like, written.
 sub recalcAL2 {
         my($self, $srcid) = @_;
