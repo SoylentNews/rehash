@@ -44,10 +44,10 @@ function get_selection( el ){
 
 // constructor
 $.TextSelection = function( el, r ){
-	this.from(el);
+	this._pull(el);
 	if ( r ) {
 		this.range(r);
-		this.apply_to(el);
+		this._push(el);
 	}
 };
 
