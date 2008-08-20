@@ -34,6 +34,7 @@ htdoc=htdocs/images/common.js
 htdoc=htdocs/images/nodnix.js
 htdoc=htdocs/images/jquery/jquery-1.2.6.js
 htdoc=htdocs/images/jquery/jquery.metadata.js
+htdoc=htdocs/images/jquery/jquery.textselection.js
 htdoc=htdocs/images/jquery/jquery.autocomplete.js
 htdoc=htdocs/images/jquery/ui.core.js
 htdoc=htdocs/images/jquery/ui.sortable.js
