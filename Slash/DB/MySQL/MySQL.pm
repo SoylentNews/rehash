@@ -1557,20 +1557,20 @@ sub getUserCrossSiteAuthenticate {
 	$user ||= getCurrentUser();
 	my $gSkin = getCurrentSkin();
 
-	return unless $site->{host} eq $gSkin->{hostname};
+	errorLog("xsite: wrong host"), return unless $site->{host} eq $gSkin->{hostname};
 
-	# XXX skip_tstamp_rand is testing
-	unless ($site->{skip_tstamp_rand}) {
-		return unless $params->{tstamp} && $params->{'rand'};
+	errorLog("xsite: no timestamp/nonce"), return unless $params->{tstamp} && $params->{'rand'};
 
-		return unless ( ($params->{tstamp} + 60) >= time() );
+	errorLog("xsite: expired timestamp"), return unless ( ($params->{tstamp} + 60) >= time() );
 
-		$self->sqlInsert('xsite_auth_log', {
-			site    => $site->{site},
-			ts      => $params->{tstamp},
-			nonce   => $params->{'rand'}
-		}) or return;
-	}
+	unless ($self->sqlInsert('xsite_auth_log', {
+		site    => $site->{site},
+		ts      => $params->{tstamp},
+		nonce   => $params->{'rand'}
+	})) {
+		errorLog("xsite: duplicate nonce");
+		return;
+	};
 
 	my $new = 0;
 	my $uid = $self->sqlSelect('uid', 'users_param',
