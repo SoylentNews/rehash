@@ -364,7 +364,7 @@ div.tag-display {
 }
 
 .tag-widget .admin-buttons {
-	padding-right: 2.7em;
+	padding-right: 0.7em;
 }
 
 .tag-widget .admin-buttons .note-input {
@@ -432,4 +432,13 @@ div.article div.title div.nod-nix-reasons span.tag {
 
 .nod-nix-reasons .tag-display:hover ul {
 	background-color: inherit;
+}
+
+.note-flag {
+	position: absolute;
+	right: 6em;
+}
+
+.note-flag.no-note {
+	opacity: 0;
 }

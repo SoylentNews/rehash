@@ -899,6 +899,16 @@ function firehose_init_tagui( $new_entries ){
 
 			if ( fh_is_admin ) {
 				this.command_pipeline.push(firehose_handle_admin_commands);
+
+				var $note_flag = $this.find('.title h3').
+					append('<span class="note-flag">note</span>').
+					find('.note-flag').
+					attr('title', "don't click; I am not a button");
+
+				var $note_wrapper = $this.find('.note-wrapper');
+				if ( ! $note_wrapper.length || $note_wrapper.hasClass('no-note') ) {
+					$note_flag.addClass('no-note');
+				}
 			}
 
 			this.command_pipeline.push(

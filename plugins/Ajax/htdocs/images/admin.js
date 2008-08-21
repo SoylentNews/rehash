@@ -332,7 +332,7 @@ function firehose_save_note(id) {
 	var $entry = $('#firehose-'+id);
 
 	var note_text = $entry.find('#note-input-'+id).val();
-	$entry.find('.note-wrapper')[note_text ? 'removeClass' : 'addClass']('no-note');
+	$entry.find('.note-flag, .note-wrapper').toggleClassTo('no-note', !note_text);
 
 	ajax_update({
 		op:	'firehose_save_note',
