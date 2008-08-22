@@ -16,13 +16,35 @@ Slash::Utility - Generic Perl routines for Slash
 
 =head1 DESCRIPTION
 
-Slash::Utility comprises methods that are safe
-to call both within and without Apache.
+The Slash::Utility::Xyz classes all EXPORT their own functions.  For
+example, 'package main; use Slash::Utility::Environment;' will allow
+Slash::Utility::Environment::getCurrentStatic() to be called as
+main::getCurrentStatic(), effectively making it a global function.
 
+And unlike what some might consider "best practices," Slash exports
+quite a few functions, over 170 at current count.  Since Slash is an
+application, not a library, we consider this to be best.  We find
+	if (isAnon($comment->{uid}))
+more readable than
+	if (Slash::Utility::Environment::isAnon($comment->{uid}))
+and it seems appropriate to us.
+
+So, 'use Slash::Utility;' is nothing but a convenient way to import
+_all_ the Slash::Utility::Xyz functions into the 'use'rs namespace.
+
+These functions are safe to call either within mod_perl/Apache or not.
+
+Note that 'use Slash;' will pull in a few of the most commonly used
+functions such as getCurrentStatic(), so if your code is simple,
+maybe you won't need to specify 'use Slash::Utility;'.
+
+(Query to pudge:  would it make sense to you to push the @EXPORT
+groupings up from Slash::Utility to Slash and just eliminate
+Slash::Utility altogether?  I don't much care either way. -Jamie)
 
 =head1 FUNCTIONS
 
-Unless otherwise noted, they are publically available functions.
+Unless otherwise noted, they are publicly available functions.
 
 =cut
 

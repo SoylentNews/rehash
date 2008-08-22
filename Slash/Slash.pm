@@ -22,7 +22,7 @@ Slash is the code that runs Slashdot.
 
 =cut
 
-use strict;  # ha ha ha ha ha!
+use strict;
 use Symbol 'gensym';
 
 use Slash::Constants ':people';
@@ -39,6 +39,24 @@ our $VERSION = $Slash::Constants::VERSION;
 our @EXPORT  = qw(
 	getData gensym displayStory displayRelatedStories dispStory
 	getOlderStories getOlderDays getOlderDaysFromDay
+
+	getCurrentAnonymousCoward
+	getCurrentCookie
+	getCurrentDB
+	getCurrentForm
+	getCurrentMenu
+	getCurrentSkin
+	getCurrentStatic
+	getCurrentUser
+	getCurrentVirtualUser
+	getCurrentCache
+
+	getObject
+
+	isAnon
+	isAdmin
+	isSubscriber
+
 );
 
 
@@ -519,7 +537,7 @@ Returns data snippet with all necessary data interpolated.
 Gets little snippets of data, determined by the value parameter, from
 a data template. A data template is a colletion of data snippets
 in one template, which are grouped together for efficiency. Each
-script can have it's own data template (specified by the PAGE
+script can have its own data template (specified by the PAGE
 parameter). If PAGE is unspecified, snippets will be retrieved from
 the last page visited by the user as determined by Slash::Apache::User.
 
