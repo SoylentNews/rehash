@@ -23,15 +23,16 @@ Slash is the code that runs Slashdot.
 =cut
 
 use strict;
+
 use Symbol 'gensym';
+use File::Spec::Functions;
+use Time::HiRes;
+use Time::Local;
 
 use Slash::Constants ':people';
 use Slash::DB;
 use Slash::Display;
 use Slash::Utility;
-use File::Spec::Functions;
-use Time::Local;
-use Time::HiRes;
 
 use base 'Exporter';
 
