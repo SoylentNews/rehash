@@ -129,7 +129,7 @@ sub update_feederlog {
 					tuid =>		undef,
 				};
 			}
-			insert_feederlog($tbid, $feeder_ar);
+			insert_feederlog($tagboxes->{tbid}, $feeder_ar);
 		}
 		$tagboxdb->setVar('tags_tagbox_lastglobjid', $new_globjs_ar->[-1]{globjid});
 	}
