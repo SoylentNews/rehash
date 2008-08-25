@@ -1,0 +1,221 @@
+<html>
+<head>
+	<title>Unit Tests: api.js</title>
+
+	<script src="../jquery/jquery-1.2.6.js" type="text/javascript"></script>
+	<link href="http://dev.jquery.com/view/trunk/qunit/testsuite.css" rel="stylesheet" type="text/css" media="screen">
+	<script src="http://dev.jquery.com/view/trunk/qunit/testrunner.js" type="text/javascript"></script>
+
+	<script src="../api.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+(function($){
+
+$(function(){
+
+module('API');
+
+test('no jquery', function(){
+	var test_api = new API('test', {
+		foo: function( t_elem, cn ){
+			$(t_elem).addClass(cn);
+		},
+		bar: function( t_elem, cn ){
+			$(t_elem).removeClass(cn);
+		}
+	});
+
+	var test = test_api.api();
+
+	var $dog = $('#dog'), dog = $dog[0];
+	test(dog);
+	ok(dog.test && dog.test.foo, 'construct through api object');
+	dog.test.foo('chicken');
+	ok($dog.hasClass('chicken'), 'apply through elem');
+	ok( !$dog.test && !$dog.test__foo, 'api not available on jQuery');
+});
+
+
+test('no ctors, expando denied', function(){
+	var test0_api = new API('test0', {
+		foo: function( t_elem, cn ){
+			$(t_elem).addClass(cn);
+		},
+		bar: function( t_elem, cn ){
+			$(t_elem).removeClass(cn);
+		}
+	}, false);
+
+	var test0 = test0_api.api();
+	test0_api.extend_jquery();
+
+	test0.foo($('#dog')[0], 'green');
+	ok($('#dog').hasClass('green'), 'call through api object');
+
+	var $list = $('#dog, #fish, #cat').test0__foo('blue');
+	ok($list.filter('.blue').length==3, 'call through jQuery selection');
+	ok(! $list.test0__bar('blue').filter('.blue').length, 'jQuery return when called through jQuery selection');
+});
+
+test('no ctors, expando allowed', function(){
+	var test1_api = new API('test1', {
+		foo: function( t_elem, cn ){
+			var defaultColor = t_elem.test1 && t_elem.test1.defaults && t_elem.test1.defaults.colorClass;
+			cn = cn || defaultColor || 'wrong';
+			$(t_elem).addClass(cn);
+		},
+		bar: function( t_elem, cn ){
+			$(t_elem).removeClass(cn);
+		},
+		defaults: {
+			colorClass: 'orange'
+		}
+	});
+
+	var test1 = test1_api.api();
+	test1_api.extend_jquery();
+
+	var $dog = $('#dog'), dog = $dog[0];
+	test1(dog);
+	ok(dog.test1, 'constructor form extends element');
+	ok(dog.test1.foo, '...and adds proxies to the extension');
+	dog.test1.foo('test1');
+	ok($dog.hasClass('test1'), '...that work!');
+
+	var $fish = $('#fish'), fish = $fish[0];
+	test1_api.construct(fish);
+	ok(fish.test1, 'api.construct extends element');
+	ok(fish.test1.foo, '...and adds proxies to the extension');
+	fish.test1.foo('test1');
+	ok($fish.hasClass('test1'), '...that work!');
+
+	var $cat = $('#cat'), cat = $cat[0];
+	$cat.test1();
+	ok(cat.test1, 'construction through jQuery selection extends element');
+	ok(cat.test1.foo, '...and adds proxies to the extension');
+	cat.test1.foo('test1');
+	ok($fish.hasClass('test1'), '...that work!');
+
+	var $all = $('#main > div').test1__foo('apples');
+	ok($all.filter('.apples').length==4, 'applying through jQuery affects _all_ elements');
+});
+
+test('no ctors, expando allowed, use options', function(){
+	var test2_api = new API('test2', {
+		foo: function( t_elem, cn ){
+			var defaultColor = t_elem.test2 &&
+						t_elem.test2.defaults &&
+						t_elem.test2.defaults.colorClass ||
+						test2.defaults.colorClass;
+
+			cn = cn || defaultColor || 'wrong';
+			$(t_elem).addClass(cn);
+		},
+		bar: function( t_elem, cn ){
+			$(t_elem).removeClass(cn);
+		},
+		defaults: {
+			colorClass: 'test2'
+		}
+	});
+
+	var test2 = test2_api.api();
+	test2_api.extend_jquery();
+
+	var $dog = $('#dog'), dog = $dog[0];
+	test2(dog);
+	ok(! dog.test2.defaults, 'constructor form extends element, but not with defaults');
+	dog.test2.foo();
+	ok($dog.hasClass('test2'), 'but methods see api.defaults');
+
+	var $fish = $('#fish'), fish = $fish[0];
+	test2_api.construct(fish, { defaults: { colorClass: 'orange'} });
+	ok(fish.test2.defaults, 'constructor extends element with options');
+	fish.test2.foo();
+	ok($fish.hasClass('orange'), 'and methods see instance.defaults');
+
+	var $list = $('#cat, #car'), cat=$list[0], car=$list[1];
+	$list.test2({ defaults: {colorClass: 'purple'} });
+	ok(cat.test2.defaults && car.test2.defaults, 'construction through jQuery selection extends all elements with options');
+	ok(cat.test2.defaults !== car.test2.defaults, '...cloned so they are not ===');
+
+	test2.defaults.colorClass = 'banjo';
+	var $all = $('#main > div').test2__foo();
+
+	ok($dog.is('.banjo'), 'applying through jQuery gets options right per elem (no default)');
+	ok($fish.is('.orange:not(.test2)'), 'applying through jQuery gets options right per elem (individually set)');
+	ok($(cat).is('.purple'), 'applying through jQuery gets options right per elem (jQuery set)');
+	ok($(car).is('.purple'), 'applying through jQuery gets options right per elem (jQuery set)');
+});
+
+test('with ctors (expando required), with options', function(){
+	var test3_api = new API('test3', {
+		foo: function( t_elem, cn ){
+			var defaultColor = t_elem.test3 &&
+						t_elem.test3.defaults &&
+						t_elem.test3.defaults.colorClass ||
+						test3.defaults.colorClass;
+
+			cn = cn || defaultColor || 'wrong';
+			$(t_elem).addClass(cn);
+		},
+		bar: function( t_elem, cn ){
+			$(t_elem).removeClass(cn);
+		},
+		defaults: {
+			colorClass: 'test3'
+		}
+	}, function(elem, x, y, z){
+		var options = {};
+		if ( x !== undefined ) {
+			elem.test3.x = x;
+		}
+		if ( y !== undefined ) {
+			options.y = y;
+		}
+		if ( z !== undefined ) {
+			options.z = z;
+		}
+		return options;
+	});
+
+	var test3 = test3_api.api();
+	test3_api.extend_jquery();
+
+	var $list = $('#fish, #dog, #cat, #car');
+	var $mammals = $list.filter('#dog, #cat');
+	var $cat = $('#cat'), cat = $cat[0], $dog = $('#dog'), dog = $dog[0];
+	$mammals.test3('fur', 'live birth', 'breath air');
+	equals(dog.test3.x, 'fur', 'constructor called, installs properties');
+
+	$list.test3__foo('blue');
+	ok($dog.hasClass('blue'), 'jQuery call hits elements with the expando');
+	ok(!$('#fish').hasClass('blue'), '...and misses those without');
+});
+
+test('regressions', function(){
+});
+
+
+
+
+
+});
+
+})(jQuery);
+</script>
+
+</head>
+<body>
+	<h1>Unit Tests: api.js</h1>
+	<h2 id="banner"></h2>
+	<h2 id="userAgent"></h2>
+	<ol id="tests"></ol>
+	<div id="main">
+		<div id='fish' class='fish'></div>
+		<div id='dog' class='dog'></div>
+		<div id='cat' class='cat'></div>
+		<div id='car'></div>
+	</div>
+</body>
+</html>
