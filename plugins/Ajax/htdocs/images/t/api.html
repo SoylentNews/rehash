@@ -16,16 +16,17 @@ $(function(){
 module('API');
 
 test('no jquery', function(){
-	var test_api = new API('test', {
-		foo: function( t_elem, cn ){
-			$(t_elem).addClass(cn);
-		},
-		bar: function( t_elem, cn ){
-			$(t_elem).removeClass(cn);
+	var test = new API({
+		name: 'test',
+		element_api: {
+			foo: function( t_elem, cn ){
+				$(t_elem).addClass(cn);
+			},
+			bar: function( t_elem, cn ){
+				$(t_elem).removeClass(cn);
+			}
 		}
 	});
-
-	var test = test_api.api();
 
 	var $dog = $('#dog'), dog = $dog[0];
 	test(dog);
@@ -37,17 +38,19 @@ test('no jquery', function(){
 
 
 test('no ctors, expando denied', function(){
-	var test0_api = new API('test0', {
-		foo: function( t_elem, cn ){
-			$(t_elem).addClass(cn);
+	var test0 = new API({
+		name: 'test0',
+		element_api: {
+			foo: function( t_elem, cn ){
+				$(t_elem).addClass(cn);
+			},
+			bar: function( t_elem, cn ){
+				$(t_elem).removeClass(cn);
+			}
 		},
-		bar: function( t_elem, cn ){
-			$(t_elem).removeClass(cn);
-		}
-	}, false);
-
-	var test0 = test0_api.api();
-	test0_api.extend_jquery();
+		element_constructor: false,
+		extend_jquery_wrapper: true
+	});
 
 	test0.foo($('#dog')[0], 'green');
 	ok($('#dog').hasClass('green'), 'call through api object');
@@ -58,22 +61,25 @@ test('no ctors, expando denied', function(){
 });
 
 test('no ctors, expando allowed', function(){
-	var test1_api = new API('test1', {
-		foo: function( t_elem, cn ){
-			var defaultColor = t_elem.test1 && t_elem.test1.defaults && t_elem.test1.defaults.colorClass;
-			cn = cn || defaultColor || 'wrong';
-			$(t_elem).addClass(cn);
+	var test1 = new API({
+		name: 'test1',
+		element_api: {
+			foo: function( t_elem, cn ){
+				var defaultColor = t_elem.test1 && t_elem.test1.defaults && t_elem.test1.defaults.colorClass;
+				cn = cn || defaultColor || 'wrong';
+				$(t_elem).addClass(cn);
+			},
+			bar: function( t_elem, cn ){
+				$(t_elem).removeClass(cn);
+			}
 		},
-		bar: function( t_elem, cn ){
-			$(t_elem).removeClass(cn);
+		api: {
+			defaults: {
+				colorClass: 'orange'
+			}
 		},
-		defaults: {
-			colorClass: 'orange'
-		}
+		extend_jquery_wrapper: true
 	});
-
-	var test1 = test1_api.api();
-	test1_api.extend_jquery();
 
 	var $dog = $('#dog'), dog = $dog[0];
 	test1(dog);
@@ -82,45 +88,41 @@ test('no ctors, expando allowed', function(){
 	dog.test1.foo('test1');
 	ok($dog.hasClass('test1'), '...that work!');
 
-	var $fish = $('#fish'), fish = $fish[0];
-	test1_api.construct(fish);
-	ok(fish.test1, 'api.construct extends element');
-	ok(fish.test1.foo, '...and adds proxies to the extension');
-	fish.test1.foo('test1');
-	ok($fish.hasClass('test1'), '...that work!');
-
 	var $cat = $('#cat'), cat = $cat[0];
 	$cat.test1();
 	ok(cat.test1, 'construction through jQuery selection extends element');
 	ok(cat.test1.foo, '...and adds proxies to the extension');
 	cat.test1.foo('test1');
-	ok($fish.hasClass('test1'), '...that work!');
+	ok($cat.hasClass('test1'), '...that work!');
 
 	var $all = $('#main > div').test1__foo('apples');
 	ok($all.filter('.apples').length==4, 'applying through jQuery affects _all_ elements');
 });
 
 test('no ctors, expando allowed, use options', function(){
-	var test2_api = new API('test2', {
-		foo: function( t_elem, cn ){
-			var defaultColor = t_elem.test2 &&
-						t_elem.test2.defaults &&
-						t_elem.test2.defaults.colorClass ||
-						test2.defaults.colorClass;
+	var test2 = new API({
+		name: 'test2',
+		element_api: {
+			foo: function( t_elem, cn ){
+				var defaultColor = t_elem.test2 &&
+							t_elem.test2.defaults &&
+							t_elem.test2.defaults.colorClass ||
+							test2.defaults.colorClass;
 
-			cn = cn || defaultColor || 'wrong';
-			$(t_elem).addClass(cn);
+				cn = cn || defaultColor || 'wrong';
+				$(t_elem).addClass(cn);
+			},
+			bar: function( t_elem, cn ){
+				$(t_elem).removeClass(cn);
+			}
 		},
-		bar: function( t_elem, cn ){
-			$(t_elem).removeClass(cn);
+		api: {
+			defaults: {
+				colorClass: 'test2'
+			}
 		},
-		defaults: {
-			colorClass: 'test2'
-		}
+		extend_jquery_wrapper: true
 	});
-
-	var test2 = test2_api.api();
-	test2_api.extend_jquery();
 
 	var $dog = $('#dog'), dog = $dog[0];
 	test2(dog);
@@ -129,7 +131,7 @@ test('no ctors, expando allowed, use options', function(){
 	ok($dog.hasClass('test2'), 'but methods see api.defaults');
 
 	var $fish = $('#fish'), fish = $fish[0];
-	test2_api.construct(fish, { defaults: { colorClass: 'orange'} });
+	test2(fish, { defaults: { colorClass: 'orange'} });
 	ok(fish.test2.defaults, 'constructor extends element with options');
 	fish.test2.foo();
 	ok($fish.hasClass('orange'), 'and methods see instance.defaults');
@@ -149,38 +151,42 @@ test('no ctors, expando allowed, use options', function(){
 });
 
 test('with ctors (expando required), with options', function(){
-	var test3_api = new API('test3', {
-		foo: function( t_elem, cn ){
-			var defaultColor = t_elem.test3 &&
-						t_elem.test3.defaults &&
-						t_elem.test3.defaults.colorClass ||
-						test3.defaults.colorClass;
+	var test3 = new API({
+		name: 'test3',
+		element_api: {
+			foo: function( t_elem, cn ){
+				var defaultColor = t_elem.test3 &&
+							t_elem.test3.defaults &&
+							t_elem.test3.defaults.colorClass ||
+							test3.defaults.colorClass;
 
-			cn = cn || defaultColor || 'wrong';
-			$(t_elem).addClass(cn);
+				cn = cn || defaultColor || 'wrong';
+				$(t_elem).addClass(cn);
+			},
+			bar: function( t_elem, cn ){
+				$(t_elem).removeClass(cn);
+			}
 		},
-		bar: function( t_elem, cn ){
-			$(t_elem).removeClass(cn);
+		api: {
+			defaults: {
+				colorClass: 'test3'
+			}
 		},
-		defaults: {
-			colorClass: 'test3'
-		}
-	}, function(elem, x, y, z){
-		var options = {};
-		if ( x !== undefined ) {
-			elem.test3.x = x;
-		}
-		if ( y !== undefined ) {
-			options.y = y;
-		}
-		if ( z !== undefined ) {
-			options.z = z;
-		}
-		return options;
+		element_constructor: function(elem, x, y, z){
+			var options = {};
+			if ( x !== undefined ) {
+				elem.test3.x = x;
+			}
+			if ( y !== undefined ) {
+				options.y = y;
+			}
+			if ( z !== undefined ) {
+				options.z = z;
+			}
+			return options;
+		},
+		extend_jquery_wrapper: true
 	});
-
-	var test3 = test3_api.api();
-	test3_api.extend_jquery();
 
 	var $list = $('#fish, #dog, #cat, #car');
 	var $mammals = $list.filter('#dog, #cat');
@@ -191,6 +197,36 @@ test('with ctors (expando required), with options', function(){
 	$list.test3__foo('blue');
 	ok($dog.hasClass('blue'), 'jQuery call hits elements with the expando');
 	ok(!$('#fish').hasClass('blue'), '...and misses those without');
+});
+
+test('globals, deny jQuery wrapper', function(){
+	window.Test4 = new API({
+		name: 'test4',
+		element_api: {
+			foo: function( t_elem, cn ){
+				$(t_elem).addClass(cn);
+			},
+			bar: function( t_elem, cn ){
+				$(t_elem).removeClass(cn);
+			}
+		},
+		extend_jquery: 'Test4'
+	});
+
+	var $dog = $('#dog'), dog = $dog[0];
+	$.Test4(dog);
+	ok(dog.test4 && dog.test4.foo, 'construct through jQuery global');
+	dog.test4.foo('chicken');
+	ok($dog.hasClass('chicken'), 'apply through elem');
+	ok( !$dog.test4 && !$dog.test4__foo, 'api not available on jQuery');
+
+	var $fish = $('#fish'), fish = $fish[0];
+	Test4(fish);
+	ok(fish.test4 && fish.test4.foo, 'construct through window global');
+	fish.test4.foo('chicken');
+	ok($fish.hasClass('chicken'), 'apply through elem');
+	ok( !$fish.test4 && !$fish.test4__foo, 'api not available on jQuery');
+
 });
 
 test('regressions', function(){

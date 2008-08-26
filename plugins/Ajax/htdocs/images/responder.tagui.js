@@ -1,9 +1,12 @@
 (function($){
 
-if ( ! window.TagUI ) {
+if ( window.TagUI === undefined ) {
 	window.TagUI = {};
 }
-var tag_responder = new API('tag_responder', {
+
+window.TagUI.tag_responder = new API({
+	name: 'tag_responder',
+	element_api: {
 		ready: function( r_elem, if_ready ){
 			var $r_elem = $(r_elem), ready_class = 'ready';
 			if ( if_ready === undefined ) {
@@ -25,15 +28,12 @@ var tag_responder = new API('tag_responder', {
 			return r_elem;
 		}
 	},
-	// constructor
-	function( r_elem, fn, signals, if_ready ){
+	element_constructor: function( r_elem, fn, signals, if_ready ){
 		r_elem.
 			tag_responder.bind(fn, signals).
 			tag_responder.ready(if_ready===undefined?true:if_ready);
-	}
-);
-
-TagUI.tag_responder = tag_responder.api();
-tag_responder.extend_jquery();
+	},
+	extend_jquery_wrapper: true
+});
 
 })(jQuery);

@@ -18,14 +18,15 @@ $(function(){
 module('tag_responder');
 
 test('general', function(){
-	ok(TagUI && $.isFunction(TagUI.tag_responder), 'available from TagUI namespace');
+
+	ok(TagUI, 'TagUI namespace exists');
+	ok(TagUI.tag_responder, '...and has the tag_responder component');
+	ok($.isFunction(TagUI.tag_responder), '...which is a function');
 
 	var $cat = $('#cat'), cat = $cat[0];
 
 	TagUI.tag_responder(cat, function( signals, data, options ){
-		$('#output').append('<p>'+
-			((signals=='badkitty') ? 'meow' : 'purr') +
-			'</p>');
+		$('#output').text((signals=='badkitty') ? 'meow' : 'purr');
 	}, 'badkitty goodkitty');
 
 	ok(cat.tag_responder && cat.tag_responder.handle_signal, 'constructor installs handler');

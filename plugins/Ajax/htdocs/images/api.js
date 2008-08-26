@@ -24,7 +24,7 @@ function proxy_fn( obj, fn ){
 // attach any number of functions to obj such that, for each function, fn, in api_defn
 //	obj.fn(a, b, c) ==> api_defn.fn(elem, a, b, c){ this===elem }
 // e.g., elem.tag_server.ajax(a, b, c) ==> tag_server_api.ajax(elem, a, b, c){ this===elem }
-function attach_api(api_defn, elem, obj){
+function attach_element_api(api_defn, elem, obj){
 	obj = obj || elem;
 	$.each(api_defn, function(fn_name, fn){
 		if ( $.isFunction(fn) ) {
@@ -34,63 +34,59 @@ function attach_api(api_defn, elem, obj){
 	return obj;
 }
 
-var API = (window.API = function( name, api_defn, ctor ){
-	this.name = function(){ return name; };
-	this.api_defn = api_defn;
+var API = (window.API = function( o ){
+	var api_object = function(){};
 
-	if ( ctor === undefined || $.isFunction(ctor) ) {
-		if ( ! ctor ) {
-			this.no_inner_ctor = true;
-		}
+	var e_ctor = o.element_constructor;
+	var e_ctor_is_fn = $.isFunction(e_ctor);
 
-		this.ctor = function( elem ){
-			// two steps, so ctor may use api already bound to obj
-			var obj = (elem[name] = attach_api(api_defn, elem, elem[name]||{}));
-			var ctor_ext = ctor ? ctor.apply(elem, arguments) : clone(arguments[1]);
-			if ( ctor_ext ) {
-				$.extend(obj, ctor_ext);
+	var xe_ctor = undefined;
+
+	if ( o.element_api && (e_ctor === undefined || e_ctor_is_fn) ) {
+		xe_ctor = function( elem ){
+			// two steps, so e_ctor may use api already bound to obj
+			var obj = (elem[o.name] = attach_element_api(o.element_api, elem, elem[o.name]||{}));
+			var extra = e_ctor ? e_ctor.apply(elem, arguments) : clone(arguments[1]);
+			if ( extra ) {
+				$.extend(obj, extra);
 			}
 			return obj;
 		};
-		$.extend(this.ctor, api_defn||{});
+		api_object = xe_ctor;
 	}
-});
 
-API.prototype = {
-	api: function(){
-		return this.ctor || this.api_defn;
-	},
-	construct: function( elem /*, a, b, c */ ){
-		if ( this.ctor ) {
-			this.ctor.apply(this, arguments);
-		}
-		return elem;
-	},
-	extend_jquery: function( j_ctor ){
-		var api = this;
-		var api_name = this.name();
+	// o.element_api first, so the general api can override same-named functions
+	$.extend(api_object, o.element_api||{}, o.api||{});
+
+	// extend $ if requested
+	if ( o.extend_jquery ) {
+		$[typeof o.extend_jquery === 'string' ? o.extend_jquery : o.name] = api_object;
+	}
+
+	// extend $.fn if requested and if we have an element api
+	if ( o.element_api && o.extend_jquery_wrapper ) {
+		var j_ctor = $.isFunction(o.extend_jquery_wrapper) ? o.extend_jquery_wrapper : undefined;
 
 		// constructor
 		// $().tag_server(opts) ==> n * tag_server_api.construct(elem, opts);
-		if ( api.ctor && (j_ctor === undefined || $.isFunction(j_ctor)) ) {
-			$.fn[api_name] = j_ctor ? j_ctor : function(){
-				var args = arguments;
-				return this.each(function(){
-					// must apply to unwrap args
-					proxy_fn(this, api.ctor).apply(this, args);
-				});
-			};
-		}
+		$.fn[o.name] = j_ctor ? j_ctor : function(){
+			var args = arguments;
+			return this.each(function(){
+				// must apply to unwrap args
+				proxy_fn(this, xe_ctor).apply(this, args);
+			});
+		};
+
 		// other member functions
 		// $().tag_server__ajax(opts) ==> n * s_elem.tag_server.ajax(opts)
-		$.each(api.api_defn, function( fn_name, fn ){
+		$.each(o.element_api, function( fn_name, fn ){
 			if ( $.isFunction(fn) ) {
-				$.fn[api_name + '__' + fn_name] = api.ctor && !api.no_inner_ctor ?
-					// if api has a ctor, we can expect elements to have been extended, e.g., elem.tag_server
+				$.fn[o.name + '__' + fn_name] = xe_ctor && e_ctor_is_fn ?
+					// if api has a e_ctor, we can expect elements to have been extended, e.g., elem.tag_server
 					function(){
 						var args = arguments;
 						return this.each(function(){
-							var fn_proxy = this[api_name] && this[api_name][fn_name];
+							var fn_proxy = this[o.name] && this[o.name][fn_name];
 							if ( fn_proxy ) {
 								fn_proxy.apply(this, args);
 							}
@@ -107,6 +103,8 @@ API.prototype = {
 			}
 		});
 	}
-};
+
+	return api_object;
+});
 
 })(jQuery);
