@@ -229,6 +229,31 @@ test('globals, deny jQuery wrapper', function(){
 
 });
 
+test("handling of 'this'", function(){
+
+	var test5 = new API({
+		name: 'test5',
+		element_api: {
+			this_should_be_elem: function( elem ){
+				ok(this===elem, 'this === elem, for element based calls');
+			},
+			this_should_be_global: function( elem ){
+				ok(this===test5, 'this === global, for global based calls');
+			}
+		},
+		extend_jquery_wrapper: true,
+		extend_jquery: true
+	});
+
+	var $dog = $('#dog'), dog = $dog[0];
+	test5.this_should_be_global(dog);
+	$dog.test5__this_should_be_elem();
+	$.test5.this_should_be_global(dog);
+	test5(dog);
+	dog.test5.this_should_be_elem();
+
+});
+
 test('regressions', function(){
 });
 
