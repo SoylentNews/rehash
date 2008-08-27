@@ -67,7 +67,7 @@ END %]
 [% IF divwrapper %]
 <div id="firehose-[% item.id %]"[% IF item.type %] type="[% item.type %]"[% END %] class="[% IF mode == "full" %]article[% ELSE %]briefarticle[% END %][% IF adminmode == 1 %] adminmode[% ELSE %] usermode[% END %]">
 [% END %]
-	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode options = options %]
+	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode options = options link_url = link_url %]
 	[% title_type = item.type == "story" ? "story" : "firehose" %]
 	[% PROCESS titlebar h3id="title-" _ item.id id="" future = future title_type = title_type title_type_id = "ttype-" _ item.id options = options %]
 [% END %]
@@ -121,7 +121,7 @@ END %]
 			<li class="more"><b>
 			[% link_url = firehose.linkFireHose(item) %]
 			[% IF item.discussion || item.type == "comment" %]
-				<a href="[% link_url %]">Read More</a>
+				<a href="[% link_url %]">[% IF form.metamod %]Context[% ELSE %]Read More[% END %]</a>
 			[% ELSE %]
 				Nothing More
 			[% END %]
