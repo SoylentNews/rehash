@@ -53,7 +53,11 @@ IF item.type == "comment";
 	title = "<span class='skin'>Comment:</span> " _ item.title _ " <span class='reason'>(Score " _ score _ reason _ ")</span>";
 END;
 onclick = "onclick=\"toggle_firehose_body('$item.id', $adminmode); return false\"";
-title_href="$gSkin.rootdir/firehose.pl?op=view&amp;id=$item.id";
+IF !link_url;
+	link_url = firehose.linkFireHose(item);
+END;
+title_href=link_url;
+
 IF form.index;
 	onclick="";
 	IF item.type == "story";
