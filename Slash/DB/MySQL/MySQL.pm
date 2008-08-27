@@ -12624,11 +12624,14 @@ sub updateSubMemory {
 
 	my $user = getCurrentUser();
 
+	return if !$submatch;
+
 	my $noid = $self->sqlSelect('noid','submissions_notes',
 		'submatch=' . $self->sqlQuote($submatch));
 
+
 	$self->sqlInsert('submissions_notes', {
-       		submatch        => $submatch,
+		submatch        => $submatch,
 		subnote         => $subnote,
 		uid             => $user->{uid},
                 '-time'         => 'NOW()',
