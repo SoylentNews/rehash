@@ -1868,7 +1868,11 @@ sub listTagnamesActive {
 
 	# This seems like a horrendous query, but I _think_ it will run
 	# in acceptable time, even under fairly heavy load.
+	# (But see below, in listTagnamesRecent, for a possible
+	# optimization.)
+
 	# Round off time to the last minute.
+
 	my $now_ut = $self->getTime({ unix_format => 1 });
 	my $next_minute_ut = int($now_ut/60+1)*60;
 	my $next_minute_q = $self->sqlQuote( time2str( '%Y-%m-%d %H:%M:00', $next_minute_ut, 'GMT') );
@@ -1972,21 +1976,49 @@ sub listTagnamesRecent {
 	my $seconds =         $options->{seconds}         || (3600*6);
 	my $include_private = $options->{include_private} || 0;
 	my $private_clause = $include_private ? '' : " AND private='no'";
-	my $recent_ar = $self->sqlSelectColArrayref(
-		'DISTINCT tagnames.tagname',
-		"users_info,
-		 tags LEFT JOIN tag_params
-		 	ON (tags.tagid=tag_params.tagid AND tag_params.name='tag_clout'),
-		 tagnames LEFT JOIN tagname_params
-			ON (tagnames.tagnameid=tagname_params.tagnameid AND tagname_params.name='tag_clout')",
-		"tagnames.tagnameid=tags.tagnameid
-		 AND inactivated IS NULL $private_clause
+
+	# Previous versions of this method grabbed tagname string along
+	# with tagnameid, and did a LEFT JOIN on tagname_params to exclude
+	# tagname_params with tagname_clout=0.  Its performance was
+	# acceptable up to about 50K tags, on the order of 1 tag insert/sec
+	# at the time interval used.  But performance fell off a cliff
+	# somewhere before 300K tags.  So I'm optimizing this to do an
+	# initial select of more-raw data from the DB and then do a
+	# second and third select to grab the full data set needed.
+	# Early testing suggests this runs at least 10x faster.
+	# - Jamie 2008-08-28
+
+	my $tagnameids_ar = $self->sqlSelectColArrayref(
+		'DISTINCT tags.tagnameid',
+		"tags LEFT JOIN tag_params
+			ON (tags.tagid=tag_params.tagid AND tag_params.name='tag_clout')",
+		"inactivated IS NULL
+		 $private_clause
 		 AND tags.created_at >= DATE_SUB(NOW(), INTERVAL $seconds SECOND)
 		 AND (tag_params.value IS NULL OR tag_params.value > 0)
-		 AND (tagname_params.value IS NULL OR tagname_params.value > 0)
-		 AND tags.uid=users_info.uid AND users_info.tag_clout > 0",
-		'ORDER BY tagnames.tagname'
+		 AND tags.uid=users_info.uid AND users_info.tag_clout > 0"
 	);
+
+	# Eliminate any tagnameid's with a reduced tagname_clout.
+	# This is probably smaller than the list of distinct tagnames
+	# used in the past n hours, so it's probably faster (and should
+	# never be noticeably slower) to grab them all and do a difference
+	# on the two lists in perl instead of SQL.
+	# XXX Not sure whether it's the best thing here to exclude all
+	# tagnames with even slightly-reduced clout, but I think so.
+	# Those tagnames probably aren't ones that would be valuable to
+	# see in a list of recent tags.
+	my $tagnameids_noclout_ar = $self->sqlSelectColArrayref(
+		'tagnameid',
+		'tagname_params',
+		"name='tag_clout' AND value+0 < 1");
+	my %noclout = ( map { $_, 1 } @$tagnameids_noclout_ar );
+	$tagnameids_ar = grep { ! $noclout{$_} } @$tagnameids_ar;
+
+	# Get the tagnames for those id's.
+	my $tagnameids_str = join(',', sort { $a <=> $b } @$tagnameids_ar);
+	my $recent_ar = $self->sqlSelectColArrayref('tagname', 'tagnames',
+		"tagnameid IN ($tagnameids_str)");
 	@$recent_ar = sort tagnameorder @$recent_ar;
 	return $recent_ar;
 }

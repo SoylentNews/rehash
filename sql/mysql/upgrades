@@ -5374,7 +5374,6 @@ UPDATE vars SET value = 'T_2_5_0_209' WHERE name = 'cvs_tag_currentcode';
 
 # for plugins/FireHose
 # INSERT INTO ajax_ops VALUES (NULL, 'tags_get_top_firehose', 'Slash::FireHose', 'ajaxGetFireHoseTagsTop', 'ajax_tags_write', 'createuse');
-
 ALTER TABLE firehose ADD COLUMN neediness float NOT NULL default '0' AFTER editorpop;
 ALTER TABLE firehose ADD INDEX neediness (neediness);
 
@@ -5478,4 +5477,7 @@ UPDATE vars SET value = 'T_2_5_0_216' WHERE name = 'cvs_tag_currentcode';
 UPDATE vars SET value = 'T_2_5_0_217' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
+
+# for plugins/Tags
+ALTER TABLE tagname_params ADD INDEX name (name);
 

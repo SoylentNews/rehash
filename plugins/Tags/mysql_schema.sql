@@ -1,7 +1,3 @@
-#
-# $Id$
-#
-
 DROP TABLE IF EXISTS tags;
 CREATE TABLE tags (
 	tagid		int UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -51,7 +47,8 @@ CREATE TABLE tagname_params (
 	tagnameid	int UNSIGNED NOT NULL,
 	name		VARCHAR(32) DEFAULT '' NOT NULL,
 	value		VARCHAR(64) DEFAULT '' NOT NULL,
-	UNIQUE tagname_name (tagnameid, name)
+	UNIQUE tagname_name (tagnameid, name),
+	KEY name (name)
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS tagcommand_adminlog;
