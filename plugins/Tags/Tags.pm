@@ -1990,7 +1990,7 @@ sub listTagnamesRecent {
 
 	my $tagnameids_ar = $self->sqlSelectColArrayref(
 		'DISTINCT tags.tagnameid',
-		"tags LEFT JOIN tag_params
+		"users_info, tags LEFT JOIN tag_params
 			ON (tags.tagid=tag_params.tagid AND tag_params.name='tag_clout')",
 		"inactivated IS NULL
 		 $private_clause
@@ -2013,7 +2013,7 @@ sub listTagnamesRecent {
 		'tagname_params',
 		"name='tag_clout' AND value+0 < 1");
 	my %noclout = ( map { $_, 1 } @$tagnameids_noclout_ar );
-	$tagnameids_ar = grep { ! $noclout{$_} } @$tagnameids_ar;
+	$tagnameids_ar = [ grep { ! $noclout{$_} } @$tagnameids_ar ];
 
 	# Get the tagnames for those id's.
 	my $tagnameids_str = join(',', sort { $a <=> $b } @$tagnameids_ar);
