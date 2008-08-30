@@ -12,25 +12,37 @@ en_US
 __name__
 futurestorybox
 __template__
-<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" WIDTH="100%">
-
+<table cellspacing="0" cellpadding="2">
 [% futuretoday = Slash.timeCalc(Slash.db.getTime, "%Y-%m-%d", 0);
    MACRO futurestorywrite(story, nohref) BLOCK;
    futuretext  = "";
    futuretime  = "";
-   futurecolor = "#FFFFFF";
-
-   IF story.displaystatus > 0;
-	futurecolor = "#CCCCCC";
-   ELSIF story.displaystatus < 0;
-	futurecolor = "#999999";
+   futureclass = "story_main";
+   class_prefix = "";
+   IF constants.signoff_use;
+   	IF !user_signoffs.${story.stoid} && !user_signoffs.${story.stoid}.cnt;
+		class_prefix = "ns_";
+	ELSIF story_signoffs.${story.stoid}.cnt < needed_signoffs;
+		class_prefix = "ss_";
+	END;
    END;
+  
+   IF !story.displaystatus;
+        futureclass = "story_main";
+   ELSIF story.displaystatus > 0;
+	futureclass = "story_sec";
+   ELSIF story.displaystatus < 0;
+	futureclass = "story_nd";
+	class_prefix = "";
+   END;
+
+   futureclass = class_prefix _ futureclass;
 
    IF nohref;
 	futuretext = story.title;
    ELSE;
 	futuretext = BLOCK -%]
-<A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A>
+<a href="[% gSkin.rootdir %]/admin.pl?op=edit&amp;sid=[% story.sid %]">[% story.title %]</a>
 	[%- END;
    END;
 
@@ -40,27 +52,25 @@ __template__
 	futuretime = Slash.timeCalc(story.time, "%H:%M %Y-%m-%d", 0);
    END;
 
-   # match FONT stuff to fancybox, bgcolor stuff to listStories
    -%]
-<TR><TD BGCOLOR="[% futurecolor %]"><FONT FACE="[% constants.mainfontface %]" SIZE="1">
-	[% futuretext %] [% futuretime %]
-</FONT></TD></TR>
+	<tr class="[% futureclass %] ps_[% story.primaryskid %]"><td[% IF present.stoid == story.stoid %] class="curstory"[% END %]>
+		[% futuretext %] <em>[% futuretime %]</em> 
+	</td></tr>
 [%- END %]
 
-
-[% FOREACH story = future;
-	futurestorywrite(story);
-END;
-futurestorywrite(present, 1);
-FOREACH story = otherpresent;
-	futurestorywrite(story);
-END;
-FOREACH story = past;
-	futurestorywrite(story);
-END %]
-
-</TABLE>
-
+[% IF future.size; FOREACH story = future;
+	futurestorywrite(story) IF story;
+END; END;
+futurestorywrite(present,0) IF present;
+IF past.size; FOREACH story = past;
+	futurestorywrite(story) IF story;
+END; END;
+IF pastextras.size; FOREACH story = pastextras;
+	IF !user_signoffs.${story.stoid} && !user_signoffs.${story.stoid}.cnt;
+		futurestorywrite(story) IF story;
+	END;
+END; END %]
+</table>
 __seclev__
 10000
 __version__

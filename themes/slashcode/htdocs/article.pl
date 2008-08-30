@@ -83,20 +83,6 @@ sub main {
 			$title = "$gSkin->{hostname} | $story->{title}";
 		}
 
-		my $authortext;
-		if ($user->{is_admin} ) {
-			my $future = $reader->getStoryByTimeAdmin('>', $story, 3);
-			$future = [ reverse @$future ];
-			my $past = $reader->getStoryByTimeAdmin('<', $story, 3);
-			my $current = $reader->getStoryByTimeAdmin('=', $story, 20);
-			unshift @$past, @$current;
-
-			$authortext = slashDisplay('futurestorybox', {
-				past	=> $past,
-				future	=> $future,
-			}, { Return => 1 });
-		}
-
 		# set things up to use the <LINK> tag in the header
 		my %stories;
 		my $prev_next_linkrel = '';
@@ -185,7 +171,6 @@ sub main {
 			section_block		=> $reader->getBlock($SECT->{section}),
 			show_poll		=> $pollbooth ? 1 : 0,
 			story			=> $story,
-			authortext		=> $authortext,
 			stories			=> \%stories,
 		});
 

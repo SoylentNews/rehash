@@ -341,7 +341,7 @@ sub showAdminTodo {
 	my $days = $pb_reader->getPollDaysOld();
 	if ($days > 3 ) {
 		$text .= "<b><a href=\"" . $gSkin->{rootdir} . "/pollBooth.pl\">Poll</a> has not been updated in $days days</b><br>";
-		$text .= '<a href="#" onclick=\'firehose_set_options("setfhfilter", "poll hold")\'>View current poll submissions</a><br><hr>';
+		$text .= '<a href="#" onclick=\'firehose_set_options("setfhfilter", "polls hold")\'>View current poll submissions</a><br><hr>';
 	}
 	if ($text) {
 		slashDisplay('sidebox', {
@@ -392,23 +392,24 @@ sub showStoryAdminBox {
 		$storysignoffcnt	= $self->getSignoffCountHashForStoids($stoid_list);
 	}
 
-
-	my $authortext = slashDisplay('futurestorybox', {
+	my $needed_signoffs = $self->getActiveAdminCount;
+	my $futurestorybox = slashDisplay('futurestorybox', {
 		pastextras	  => $extras,
 		past		  => $past,
 		present		  => $storyref,
 		future		  => $future,
 		user_signoffs 	  => $usersignoffs,
 		story_signoffs	  => $storysignoffcnt,
+		needed_signoffs	  => $needed_signoffs,
 	}, { Return => 1 });
 
-	return $authortext if $options->{contents_only};
+	return $futurestorybox if $options->{contents_only};
 	
 	$updater = getData('storyadminbox_js', {}, "admin") if $options->{updater}; 
 	slashDisplay('sidebox', {
 		updater 	=> $updater,
 		title 		=> 'Story Admin',
-		contents	=> $authortext,
+		contents	=> $futurestorybox,
 		name 		=> 'storyadmin',
 	}, { Return => 1});
 }
@@ -644,6 +645,34 @@ sub ajax_learnword {
 	if (!$rows) {
 		errorLog("Spellcheck: personal dictionary not updated.");
 	}
+}
+
+sub getStoryThumbLargeLink {
+	my($self, $id, $stoid) = @_;
+	my $file = $self->getStaticFile($id);
+	my $full_name = $file->{name};
+	$full_name =~ s/(-thumb[^.]*)\././g;
+	my $thumb_lg_name = $full_name;
+	$thumb_lg_name =~ s/\./-thumblg./;
+
+	my $stoid_q = $self->sqlQuote($stoid);
+	my $name_q = $self->sqlQuote($full_name);
+
+	my $full_img = $self->sqlSelectHashref("*", "static_files", "stoid=$stoid_q AND name = $name_q");
+
+	$name_q = $self->sqlQuote($thumb_lg_name);
+	my $thumb_lg_img = $self->sqlSelectHashref("*", "static_files", "stoid=$stoid_q AND name = $name_q");
+
+	if ($full_img && $full_img->{sfid} && $thumb_lg_img && $thumb_lg_img->{sfid}) {
+		if ($full_img->{height} > $thumb_lg_img->{height} || $full_img->{width} > $thumb_lg_img->{height}) {
+			return getData('thumb_link_large', { full_img => $full_img, thumb_img => $thumb_lg_img });
+		} else {
+			return getData('thumb_link_large', { thumb_img => $thumb_lg_img });
+		}
+	}
+
+
+
 }
 
 sub DESTROY {
