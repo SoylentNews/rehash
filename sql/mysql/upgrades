@@ -5474,13 +5474,14 @@ UPDATE vars SET value = 'T_2_5_0_216' WHERE name = 'cvs_tag_currentcode';
 # 2008-08-21
 UPDATE vars SET value = 'T_2_5_0_217' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 # for plugins/Tags
 ALTER TABLE tagname_params ADD INDEX name (name);
 
 # 2008-08-28
 UPDATE vars SET value = 'T_2_5_0_218' WHERE name = 'cvs_tag_currentcode';
+
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
