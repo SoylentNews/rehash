@@ -22,15 +22,142 @@ Slash::Tagbox::DiscussionScore - track comment scores within discussions
 use strict;
 
 use Slash;
-use Slash::DB;
-use Slash::Utility::Environment;
-use Slash::Tagbox;
-
-use Data::Dumper;
 
 our $VERSION = $Slash::Constants::VERSION;
 
 use base 'Slash::Tagbox';
+
+sub isInstalled {
+	my($self) = @_;
+	return 0; # XXX not functional yet
+	my $constants = getCurrentStatic();
+	return 0 if ! $constants->{plugin}{TagModeration};
+	return $self->SUPER::isInstalled();
+}
+
+sub init {
+	my($self) = @_;
+
+	$self->SUPER::init() if $self->can('SUPER::init');
+
+	# Initialize reason-related fields:
+	#
+	# $self->{reasons}{$id} is a hashref of the modreasons row with
+	# that id, for all reasons including Normal.
+	# $self->{reason_ids} is an arrayref of only the reasons with
+	# a nonzero val (i.e. excluding Normal).
+	# $self->{reason_tagnameid}{$id} is a hashref of the modreasons
+	# row with that _tagnameid_, for nonzero vals.
+
+	my $tagsdb = getObject('Slash::Tags');
+	my $moddb = getObject('Slash::TagModeration');
+	$self->{reasons} = $moddb->getReasons();
+	$self->{reason_tagnameid} = { };
+	$self->{reason_ids} = [
+		grep { $self->{reasons}{$_}{val} != 0 }
+		keys %{$self->{reasons}}
+	];
+	for my $id (@{$self->{reason_ids}}) {
+		my $name = lc $self->{reasons}{$id}{name};
+		my $tagnameid = $tagsdb->getTagnameidCreate($name);
+		$self->{reason_tagnameid}{$tagnameid} = $self->{reasons}{$id};
+	}
+
+	# Initialize $self->{metamod} and {metanix}.
+
+	for my $tagname (qw( metanod metanix )) {
+		my $tagnameid = $tagsdb->getTagnameidCreate($tagname);
+		$self->{"${tagname}id"} = $tagnameid;
+	}
+
+	1;
+}
+
+sub get_affected_type   { 'globj' }
+sub get_clid            { 'moderate' }
+
+	# DiscussionScore wants to know about each comment globj as
+	# soon as it is created, not waiting until the first tag is
+	# applied to it.
+sub get_nosy_gtids      { 'comments' }
+
+sub init_tagfilters {
+	my($self) = @_;
+
+	# DiscussionScore only cares about active tags.
+
+	$self->{filter_activeonly} = 1;
+
+	# DiscussionScore only cares about tags on comments.
+
+	$self->{filter_gtid} = $self->getGlobjTypes()->{comments};
+
+	# DiscussionScore only cares about tagnames that are
+	# (non-0-val) moderation reasons, plus nod, nix,
+	# metanod and metanix.
+
+	$self->{filter_tagnameid} = [ ];
+	for my $tagnameid (keys %{ $self->{reason_tagnameid} }) {
+		push @{ $self->{filter_tagnameid} }, $tagnameid;
+	}
+	for my $tagname (qw( nod nix metanod metanix )) {
+		push @{ $self->{filter_tagnameid} }, $self->{"${tagname}id"};
+	}
+
+}
+
+# For now (and the near future) all users' moderation clouts are '1',
+# so this method no longer does anything that the superclass's doesn't.
+
+#sub feed_newtags {
+#	my($self, $tags_ar) = @_;
+#	my $constants = getCurrentStatic();
+#
+#	my $user_cache = { };
+#
+#	my $ret_ar = [ ];
+#	for my $tag_hr (@$tags_ar) {
+#		# This tag was applied to a comment.  Get the globjid of the
+#		# discussion of that comment.
+#		my $cidglobjid = $tag_hr->{globjid};
+#		my $discglobjid = $cidglobjid_to_discglobjid_hr->{ $cidglobjid };
+#		next unless $discglobjid;
+#
+#		# Find the moderation clout of the tagging user.
+#		my $uid = $tag_hr->{uid};
+#		if (!$user_cache->{$uid}) {
+#			$user_cache->{$uid} = $self->getUser($uid);
+#		}
+#		my $user = $user_cache->{$uid};
+#
+#		my $ret_hr = {
+#			affected_id =>	$discglobjid,
+#			importance =>	$user->{clout}{moderation},
+#		};
+#		# We identify this little chunk of importance by either
+#		# tagid or tdid depending on whether the source data had
+#		# the tdid field (which tells us whether feed_newtags was
+#		# "really" called via feed_deactivatedtags).
+#		if ($tag_hr->{tdid})	{ $ret_hr->{tdid}  = $tag_hr->{tdid}  }
+#		else			{ $ret_hr->{tagid} = $tag_hr->{tagid} }
+#		push @$ret_ar, $ret_hr;
+#	}
+#	return [ ] if !@$ret_ar;
+#
+#	main::tagboxLog("DiscussionScore->feed_newtags returning " . scalar(@$ret_ar));
+#	return $ret_ar;
+#}
+
+sub run_process {
+	my($self, $affected_id) = @_;
+	my $constants = getCurrentStatic();
+	my $moddb = getObject('Slash::TagModeration');
+
+#	$self->sqlUpdate('comments', {
+#			f4 =>	$new_serious_score,
+#			f5 =>	$new_funny_score,
+#		}, "cid='$cid'");
+}
 
 sub get_cidglobjid_to_discglobjid_hr {
 	my($self, $globjids_ar) = @_;
@@ -69,84 +196,6 @@ sub get_cidglobjid_to_discglobjid_hr {
 		$cidglobjid_to_discglobjid_hr->{$cidglobjid} = $discglobjid;
 	}
 	return $cid_to_cidglobjid_hr;
-}
-
-sub feed_newtags {
-	my($self, $tags_ar) = @_;
-	my $constants = getCurrentStatic();
-	if (scalar(@$tags_ar) < 9) {
-		main::tagboxLog("DiscussionScore->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
-	} else {
-		main::tagboxLog("DiscussionScore->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
-	}
-	my $tagsdb = getObject('Slash::Tags');
-
-	# Only tags on comments matter to this tagbox.  Get the mapping from
-	# each comment's globjid to its discussion's globjid.
-	my $cidglobjid_to_discglobjid_hr = $self->get_cidglobjid_to_discglobjid_hr([
-		map { $_->{globjid} } @$tags_ar
-	]);
-
-	my $user_cache = { };
-
-	my $ret_ar = [ ];
-	for my $tag_hr (@$tags_ar) {
-		# This tag was applied to a comment.  Get the globjid of the
-		# discussion of that comment.
-		my $cidglobjid = $tag_hr->{globjid};
-		my $discglobjid = $cidglobjid_to_discglobjid_hr->{ $cidglobjid };
-		next unless $discglobjid;
-
-		# Find the moderation clout of the tagging user.
-		my $uid = $tag_hr->{uid};
-		if (!$user_cache->{$uid}) {
-			$user_cache->{$uid} = $self->getUser($uid);
-		}
-		my $user = $user_cache->{$uid};
-
-		my $ret_hr = {
-			affected_id =>	$discglobjid,
-			importance =>	$user->{clout}{moderation},
-		};
-		# We identify this little chunk of importance by either
-		# tagid or tdid depending on whether the source data had
-		# the tdid field (which tells us whether feed_newtags was
-		# "really" called via feed_deactivatedtags).
-		if ($tag_hr->{tdid})	{ $ret_hr->{tdid}  = $tag_hr->{tdid}  }
-		else			{ $ret_hr->{tagid} = $tag_hr->{tagid} }
-		push @$ret_ar, $ret_hr;
-	}
-	return [ ] if !@$ret_ar;
-
-	main::tagboxLog("DiscussionScore->feed_newtags returning " . scalar(@$ret_ar));
-	return $ret_ar;
-}
-
-sub feed_deactivatedtags {
-	my($self, $tags_ar) = @_;
-	main::tagboxLog("DiscussionScore->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
-	my $ret_ar = $self->feed_newtags($tags_ar);
-	main::tagboxLog("DiscussionScore->feed_deactivatedtags returning " . scalar(@$ret_ar));
-	return $ret_ar;
-}
-
-sub feed_userchanges {
-	my($self, $users_ar) = @_;
-
-	# XXX Fix this to take user moderation clout changes into account.
-
-	return [ ];
-}
-
-sub run {
-	my($self, $affected_id) = @_;
-	my $constants = getCurrentStatic();
-	my $moddb = getObject('Slash::TagModeration');
-
-#	$self->sqlUpdate('comments', {
-#			f4 =>	$new_serious_score,
-#			f5 =>	$new_funny_score,
-#		}, "cid='$cid'");
 }
 
 1;

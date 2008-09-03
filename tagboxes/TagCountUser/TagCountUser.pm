@@ -3,6 +3,16 @@
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 
+# This tagbox's output isn't yet used anywhere and was basically
+# written as a proof-of-concept.  It doesn't really hurt anything
+# but we might end up removing it.
+#
+# Maybe it could be retooled to generate more-useful information
+# for each user, like median tags applied per globj, number of
+# unique tagnames, ratio of common to uncommon tagnames, etc.
+# I'm not exactly sure what the use of that would be but I can
+# see that having more value.
+
 package Slash::Tagbox::TagCountUser;
 
 =head1 NAME
@@ -20,22 +30,21 @@ Slash::Tagbox::TagCountUser - simple tagbox to count users' active tags
 use strict;
 
 use Slash;
-use Slash::DB;
-use Slash::Utility::Environment;
-
-use Data::Dumper;
 
 our $VERSION = $Slash::Constants::VERSION;
 
 use base 'Slash::Tagbox';
 
-sub feed_newtags {
+sub init_tagfilters {
+	my($self) = @_;
+	$self->{filter_activeonly} = 1;
+}
+
+sub get_affected_type	{ 'user' }
+sub get_clid		{ 'describe' }
+
+sub feed_newtags_process {
 	my($self, $tags_ar) = @_;
-	if (scalar(@$tags_ar) < 9) {
-		main::tagboxLog("TagCountUser->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
-	} else {
-		main::tagboxLog("TagCountUser->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
-	}
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
                 # affected_id and importance work the same whether this is
@@ -59,31 +68,10 @@ sub feed_newtags {
 	return $ret_ar;
 }
 
-sub feed_deactivatedtags {
-	my($self, $tags_ar) = @_;
-	if (scalar(@$tags_ar) < 9) {
-		main::tagboxLog("TagCountUser->feed_deactivatedtags called for tags '" . join(' ', map { $_->{tdid} } @$tags_ar) . "'");
-	} else {
-		main::tagboxLog("TagCountUser->feed_deactivatedtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tdid} . " ... " . $tags_ar->[-1]{tdid});
-	}
-	return $self->feed_newtags($tags_ar);
-}
-
-sub feed_userchanges {
-	my($self, $users_ar) = @_;
-	if (scalar(@$users_ar) < 9) {
-		main::tagboxLog("TagCountUser->feed_userchanges called for changes '" . join(' ', map { $_->{tuid} } @$users_ar) . "'");
-	} else {
-		main::tagboxLog("TagCountUser->feed_userchanges called for " . scalar(@$users_ar) . " changes " . $users_ar->[0]{tuid} . " ... " . $users_ar->[-1]{tuid});
-	}
-	return [ ];
-}
-
-sub run {
-	my($self, $affected_id) = @_;
-	my $tagboxdb = getObject('Slash::Tagbox', { db_type => 'reader' });
-	my $count = $tagboxdb->sqlCount('tags', "uid=$affected_id AND inactivated IS NULL");
-	main::tagboxLog("TagCountUser->run called for $affected_id, count $count");
+sub run_process {
+	my($self, $affected_id, $tags_ar) = @_;
+	my $count = $self->sqlCount('tags', "uid=$affected_id AND inactivated IS NULL");
+	$self->info_log("uid %d count %d", $affected_id, $count);
 	$self->setUser($affected_id, { tag_count => $count });
 }
 

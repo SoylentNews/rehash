@@ -22,85 +22,55 @@ Slash::Tagbox::FHPopularity - keep track of popularity of firehose entries
 use strict;
 
 use Slash;
-use Slash::DB;
-use Slash::Utility::Environment;
-
-use Data::Dumper;
 
 our $VERSION = $Slash::Constants::VERSION;
 
 use base 'Slash::Tagbox';
 
-sub feed_newtags {
+sub init {
+	my($self) = @_;
+	$self->SUPER::init();
+	my $tagsdb = getObject('Slash::Tags');
+	$self->{maybeid} = $tagsdb->getTagnameidCreate('maybe');
+        my $admins = $self->getAdmins();
+	$self->{admins} = {
+		map { ($_, 1) }
+		grep { $tagsdb->getUser($_, 'seclev') >= 100 }
+		keys %$admins
+	};
+}
+
+sub get_affected_type	{ 'globj' }
+sub get_clid		{ 'vote' }
+
+sub init_tagfilters {
+	my($self) = @_;
+
+	$self->{filter_activeonly}	= 1;
+	$self->{filter_firehoseonly}	= 1;
+	$self->{filter_tagnameid}	= [ @{$self}{qw( nodid nixid maybeid )} ];
+}
+
+sub feed_newtags_process {
 	my($self, $tags_ar) = @_;
 	my $constants = getCurrentStatic();
-	if (scalar(@$tags_ar) < 9) {
-		main::tagboxLog("FHPopularity->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
-	} else {
-		main::tagboxLog("FHPopularity->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
-	}
-	my $tagsdb = getObject('Slash::Tags');
-
-	# The algorithm of the importance of tags to this tagbox is simple.
-	# 'nod', 'nix', and sometimes 'maybe' are important.  Other tags are not.
-	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
-	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
-	my $maybeid    = $tagsdb->getTagnameidCreate('maybe');
 
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
-		next unless $tag_hr->{tagnameid} == $upvoteid || $tag_hr->{tagnameid} == $downvoteid
-			|| $tag_hr->{tagnameid} == $maybeid;
 		my $ret_hr = {
 			affected_id =>	$tag_hr->{globjid},
 			importance =>	1,
 		};
-		# We identify this little chunk of importance by either
-		# tagid or tdid depending on whether the source data had
-		# the tdid field (which tells us whether feed_newtags was
-		# "really" called via feed_deactivatedtags).
 		if ($tag_hr->{tdid})	{ $ret_hr->{tdid}  = $tag_hr->{tdid}  }
 		else			{ $ret_hr->{tagid} = $tag_hr->{tagid} }
 		push @$ret_ar, $ret_hr;
 	}
-	return [ ] if !@$ret_ar;
 
-	# Tags applied to globjs that have a firehose entry associated
-	# are important.  Other tags are not.
-	my %globjs = ( map { $_->{affected_id}, 1 } @$ret_ar );
-	my $globjs_str = join(', ', sort keys %globjs);
-	my $fh_globjs_ar = $self->sqlSelectColArrayref(
-		'globjid',
-		'firehose',
-		"globjid IN ($globjs_str)");
-	return [ ] if !@$fh_globjs_ar; # if no affected globjs have firehose entries, short-circuit out
-	my %fh_globjs = ( map { $_, 1 } @$fh_globjs_ar );
-	$ret_ar = [ grep { $fh_globjs{ $_->{affected_id} } } @$ret_ar ];
-
-	main::tagboxLog("FHPopularity->feed_newtags returning " . scalar(@$ret_ar));
 	return $ret_ar;
-}
-
-sub feed_deactivatedtags {
-	my($self, $tags_ar) = @_;
-	main::tagboxLog("FHPopularity->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
-	my $ret_ar = $self->feed_newtags($tags_ar);
-	main::tagboxLog("FHPopularity->feed_deactivatedtags returning " . scalar(@$ret_ar));
-	return $ret_ar;
-}
-
-sub feed_userchanges {
-	my($self, $users_ar) = @_;
-	my $constants = getCurrentStatic();
-	main::tagboxLog("FHPopularity->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'");
-
-	# XXX need to fill this in
-
-	return [ ];
 }
 
 sub run {
-	my($self, $affected_id, $options) = @_;
+	my($self, $affected_id, $tags_ar, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
@@ -159,39 +129,32 @@ sub run {
 	$popularity = $firehose->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 
 	# Add up nods and nixes.
-	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
-	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
-	my $maybeid    = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
-	my $admins = $self->getAdmins();
-	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0, $options);
-	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
+# XXX make an option?
+#	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
+
 	my($n_admin_maybes, $n_admin_nixes, $maybe_pop_delta) = (0, 0, 0);
 	for my $tag_hr (@$tags_ar) {
 		next if $options->{starting_only};
-		next if $tag_hr->{inactivated};
 		my $sign = 0;
-		$sign =  1 if $tag_hr->{tagnameid} == $upvoteid   && !$options->{downvote_only};
-		$sign = -1 if $tag_hr->{tagnameid} == $downvoteid && !$options->{upvote_only};
+		$sign =  1 if $tag_hr->{tagnameid} == $self->{nodid} && !$options->{downvote_only};
+		$sign = -1 if $tag_hr->{tagnameid} == $self->{nixid} && !$options->{upvote_only};
 		next unless $sign;
-		my $seclev = exists $admins->{ $tag_hr->{uid} }
-			? $admins->{ $tag_hr->{uid} }{seclev}
-			: 1;
+		my $is_admin = $self->{admins}{ $tag_hr->{uid} } || 0;
 		my $extra_pop = $tag_hr->{total_clout} * $sign;
-		if ($seclev > 1 && $sign == 1) {
+		if ($is_admin && $sign == 1) {
 			# If this admin nod comes with a 'maybe', don't change
 			# popularity yet;  save it up and wait to see if any
 			# admins end up 'nix'ing.
 			if (grep {
-				     $_->{tagnameid} == $maybeid
+				     $_->{tagnameid} == $self->{maybeid}
 				&&   $_->{uid}       == $tag_hr->{uid}
 				&&   $_->{globjid}   == $tag_hr->{globjid}
-				&& ! $_->{inactivated}
 			} @$tags_ar) {
 				++$n_admin_maybes;
 				$maybe_pop_delta += $extra_pop;
 				$extra_pop = 0;
 			}
-		} elsif ($seclev > 1 && $sign == -1) {
+		} elsif ($is_admin && $sign == -1) {
 			++$n_admin_nixes;
 		}
 		$popularity += $extra_pop;
@@ -216,7 +179,7 @@ sub run {
 	if ($options->{return_only}) {
 		return $popularity;
 	}
-	main::tagboxLog("FHPopularity->run setting $fhid ($affected_id) to $popularity");
+	$self->info_log('setting %d (%d) to %f', $fhid, $affected_id, $popularity);
 	$firehose_db->setFireHose($fhid, { popularity => $popularity });
 }
 

@@ -69,22 +69,13 @@ ALTER TABLE users_info ADD COLUMN tag_clout FLOAT UNSIGNED NOT NULL DEFAULT 1.0 
 CREATE TABLE tagboxes (
 	tbid			smallint UNSIGNED NOT NULL AUTO_INCREMENT,
 	name			VARCHAR(32) DEFAULT '' NOT NULL,
-	affected_type		ENUM('user', 'globj') NOT NULL,
-	clid			smallint UNSIGNED NOT NULL,
 	weight			FLOAT UNSIGNED DEFAULT 1.0 NOT NULL,
 	last_run_completed	datetime,
 	last_tagid_logged	int UNSIGNED NOT NULL,
 	last_tdid_logged	int UNSIGNED NOT NULL,
 	last_tuid_logged	int UNSIGNED NOT NULL,
-	nosy_gtids		varchar(255) DEFAULT '' NOT NULL,
 	PRIMARY KEY tbid (tbid),
 	UNIQUE name (name)
-) TYPE=InnoDB;
-
-CREATE TABLE tagbox_userkeyregexes (
-	name			varchar(32) NOT NULL,
-	userkeyregex		varchar(255) NOT NULL,
-	UNIQUE name_regex (name, userkeyregex)
 ) TYPE=InnoDB;
 
 CREATE TABLE tagboxlog_feeder (

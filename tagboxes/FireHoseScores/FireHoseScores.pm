@@ -20,117 +20,83 @@ Slash::Tagbox::FireHoseScores - update scores on firehose entries
 use strict;
 
 use Slash;
-use Slash::DB;
-use Slash::Utility::Comments;
-use Slash::Utility::Environment;
-
-use Data::Dumper;
+use Slash::Utility::Comments; # XXX needed?
 
 our $VERSION = $Slash::Constants::VERSION;
 
 use base 'Slash::Plugin';
 
-sub feed_newtags {
-	my($self, $tags_ar) = @_;
-	my $constants = getCurrentStatic();
-	if (scalar(@$tags_ar) < 9) {
-		main::tagboxLog("FireHoseScores->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
-	} else {
-		main::tagboxLog("FireHoseScores->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
-	}
-	my $tagsdb = getObject('Slash::Tags');
-
-	# The algorithm of the importance of tags to this tagbox is simple.
-	# 'nod' and 'nix' are important.  Other tags are not.
-	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
-	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
-
-	my $ret_ar = [ ];
-	for my $tag_hr (@$tags_ar) {
-		next unless $tag_hr->{tagnameid} == $upvoteid || $tag_hr->{tagnameid} == $downvoteid;
-		my $ret_hr = {
-			affected_id =>	$tag_hr->{globjid},
-			importance =>	1,
-		};
-		# We identify this little chunk of importance by either
-		# tagid or tdid depending on whether the source data had
-		# the tdid field (which tells us whether feed_newtags was
-		# "really" called via feed_deactivatedtags).
-		if ($tag_hr->{tdid})	{ $ret_hr->{tdid}  = $tag_hr->{tdid}  }
-		else			{ $ret_hr->{tagid} = $tag_hr->{tagid} }
-		push @$ret_ar, $ret_hr;
-	}
-	return [ ] if !@$ret_ar;
-
-	# Tags applied to globjs that have a firehose entry associated
-	# are important.  Other tags are not.
-	my %globjs = ( map { $_->{affected_id}, 1 } @$ret_ar );
-	my $globjs_str = join(', ', sort keys %globjs);
-	my $fh_globjs_ar = $self->sqlSelectColArrayref(
-		'globjid',
-		'firehose',
-		"globjid IN ($globjs_str)");
-	return [ ] if !@$fh_globjs_ar; # if no affected globjs have firehose entries, short-circuit out
-	my %fh_globjs = ( map { $_, 1 } @$fh_globjs_ar );
-	$ret_ar = [ grep { $fh_globjs{ $_->{affected_id} } } @$ret_ar ];
-
-	main::tagboxLog("FireHoseScores->feed_newtags returning " . scalar(@$ret_ar));
-	return $ret_ar;
+sub init {
+	my($self) = @_;
+	return 0 if ! $self->SUPER::init();
+	my $slashdb = getCurrentDB();
+	$self->{nodornixid}     = {(
+		$self->{nodid},         1,
+		$self->{nixid},         1,
+	)};
+	my $admins = $self->getAdmins();
+	$self->{admins} = {
+		map { ($_, 1) }
+		grep { $slashdb->getUser($_, 'seclev') >= 100 }
+		keys %$admins
+	};
+	1;
 }
 
-sub feed_deactivatedtags {
-	my($self, $tags_ar) = @_;
-	main::tagboxLog("FireHoseScores->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
-	my $ret_ar = $self->feed_newtags($tags_ar);
-	main::tagboxLog("FireHoseScores->feed_deactivatedtags returning " . scalar(@$ret_ar));
-	return $ret_ar;
+sub init_tagfilters {
+	my($self) = @_;
+	$self->{filter_activeonly} = 1;
+	$self->{filter_firehoseonly} = 1;
+	$self->{filter_tagnameid} = [ @{$self}{qw( nodid nixid )} ];
 }
 
-sub feed_userchanges {
-	my($self, $users_ar) = @_;
-	my $constants = getCurrentStatic();
-	my $tagsdb = getObject('Slash::Tags');
-	main::tagboxLog("FireHoseScores->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'");
+sub get_affected_type	{ 'globj' }
+sub get_clid		{ 'vote' }
+sub get_userkeyregex	{ qr{^tag_clout$} }
 
-	my %max_tuid = ( );
-	my %uid_change_sum = ( );
-	my %globj_change = ( );
-	for my $hr (@$users_ar) {
-		next unless $hr->{user_key} eq 'tag_clout';
-		$max_tuid{$hr->{uid}} ||= $hr->{tuid};
-		$max_tuid{$hr->{uid}}   = $hr->{tuid}
-			if $max_tuid{$hr->{uid}} < $hr->{tuid};
-		$uid_change_sum{$hr->{uid}} ||= 0; 
-		$uid_change_sum{$hr->{uid}} += abs(($hr->{value_old} || 1) - $hr->{value_new});
-	}
-	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
-	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
-	for my $uid (keys %uid_change_sum) {
-		my $tags_ar = $tagsdb->getAllTagsFromUser($uid);
-		for my $tag_hr (@$tags_ar) {
-			next unless $tag_hr->{tagnameid} == $upvoteid || $tag_hr->{tagnameid} == $downvoteid;
-			$globj_change{$tag_hr->{globjid}}{max_tuid} ||= $max_tuid{$uid};
-			$globj_change{$tag_hr->{globjid}}{max_tuid}   = $max_tuid{$uid}
-				if $globj_change{$tag_hr->{globjid}}{max_tuid} < $max_tuid{$uid};
-			$globj_change{$tag_hr->{globjid}}{sum} ||= 0;
-			$globj_change{$tag_hr->{globjid}}{sum} += $uid_change_sum{$uid};
-		}       
-	} 
-	my $ret_ar = [ ];
-	for my $globjid (sort { $a <=> $b } keys %globj_change) {
-		push @$ret_ar, {
-			tuid =>         $globj_change{$globjid}{max_tuid},
-			affected_id =>  $globjid,
-			importance =>   $globj_change{$globjid}{sum},
-		};      
-	}
-
-	main::tagboxLog("FireHoseScores->feed_userchanges returning " . scalar(@$ret_ar));
-	return $ret_ar;
-}
+# XXX handle
+#sub feed_userchanges_process {
+#	my($self, $users_ar) = @_;
+#	my $constants = getCurrentStatic();
+#	my $tagsdb = getObject('Slash::Tags');
+#
+#	my %max_tuid = ( );
+#	my %uid_change_sum = ( );
+#	my %globj_change = ( );
+#	for my $hr (@$users_ar) {
+#		next unless $hr->{user_key} eq 'tag_clout';
+#		$max_tuid{$hr->{uid}} ||= $hr->{tuid};
+#		$max_tuid{$hr->{uid}}   = $hr->{tuid}
+#			if $max_tuid{$hr->{uid}} < $hr->{tuid};
+#		$uid_change_sum{$hr->{uid}} ||= 0;
+#		$uid_change_sum{$hr->{uid}} += abs(($hr->{value_old} || 1) - $hr->{value_new});
+#	}
+#	for my $uid (keys %uid_change_sum) {
+#		my $tags_ar = $tagsdb->getAllTagsFromUser($uid);
+#		for my $tag_hr (@$tags_ar) {
+#			next unless $tag_hr->{tagnameid} == $self->{nodid} || $tag_hr->{tagnameid} == $self->{nixid};
+#			$globj_change{$tag_hr->{globjid}}{max_tuid} ||= $max_tuid{$uid};
+#			$globj_change{$tag_hr->{globjid}}{max_tuid}   = $max_tuid{$uid}
+#				if $globj_change{$tag_hr->{globjid}}{max_tuid} < $max_tuid{$uid};
+#			$globj_change{$tag_hr->{globjid}}{sum} ||= 0;
+#			$globj_change{$tag_hr->{globjid}}{sum} += $uid_change_sum{$uid};
+#		}
+#	}
+#	my $ret_ar = [ ];
+#	for my $globjid (sort { $a <=> $b } keys %globj_change) {
+#		push @$ret_ar, {
+#			tuid =>         $globj_change{$globjid}{max_tuid},
+#			affected_id =>  $globjid,
+#			importance =>   $globj_change{$globjid}{sum},
+#		};
+#	}
+#
+#	main::tagboxLog("FireHoseScores->feed_userchanges returning " . scalar(@$ret_ar));
+#	return $ret_ar;
+#}
 
 sub run {
-	my($self, $affected_id, $options) = @_;
+	my($self, $affected_id, $tags_ar, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
@@ -146,40 +112,37 @@ sub run {
 
 	if ($options->{starting_only}) {
 		return $popularity if $options->{return_only};
-		main::tagboxLog(sprintf("FireHoseScores->run setting %d (%d) to %.6f STARTING_ONLY",
-			$fhid, $affected_id, $popularity));
+		$self->info_log("FireHoseScores->run setting %d (%d) to %.6f STARTING_ONLY",
+			$fhid, $affected_id, $popularity);
 		return $firehose_db->setFireHose($fhid, { popularity => $popularity });
 	}
 
-	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0, $options);
+#	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0, $options);
+# XXX make automatic?
 	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
 
 	# Add up nods and nixes.
 
 	# Some basic facts first.
-	my $upvoteid   = $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname}   || 'nod');
-	my $downvoteid = $tagsdb->getTagnameidCreate($constants->{tags_downvote_tagname} || 'nix');
 	my $n_votes = scalar
-		grep { $_->{tagnameid} == $upvoteid || $_->{tagnameid} == $downvoteid }
+		grep { $_->{tagnameid} == $self->{nodid} || $_->{tagnameid} == $self->{nixid} }
 		@$tags_ar;
 
 	# Admins may get reduced downvote clout.
 	if ($constants->{firehose_admindownclout} && $constants->{firehose_admindownclout} != 1) {
-		my $admins = $tagsdb->getAdmins();
 		for my $tag_hr (@$tags_ar) {
 			$tag_hr->{total_clout} *= $constants->{firehose_admindownclout}
-				if    $tag_hr->{tagnameid} == $downvoteid
-				   && $admins->{ $tag_hr->{uid} };
+				if    $tag_hr->{tagnameid} == $self->{nixid}
+				   && $self->{admins}{ $tag_hr->{uid} };
 		}
 	}
 
 	# Also, admins may get reduced upvote clout.
 	if ($constants->{firehose_adminupclout} && $constants->{firehose_adminupclout} != 1) {
-		my $admins = $tagsdb->getAdmins();
 		for my $tag_hr (@$tags_ar) {
 			$tag_hr->{total_clout} *= $constants->{firehose_adminupclout}
-				if    $tag_hr->{tagnameid} == $upvoteid
-				   && $admins->{ $tag_hr->{uid} };
+				if    $tag_hr->{tagnameid} == $self->{nodid}
+				   && $self->{admins}{ $tag_hr->{uid} };
 		}
 	}
 
@@ -202,13 +165,13 @@ sub run {
 	my $udc_cache = { };
 	for my $tag_hr (@$tags_ar) {
 		my $sign = 0;
-		$sign =  1 if $tag_hr->{tagnameid} == $upvoteid   && !$options->{downvote_only};
-		$sign = -1 if $tag_hr->{tagnameid} == $downvoteid && !$options->{upvote_only};
+		$sign =  1 if $tag_hr->{tagnameid} == $self->{nodid}   && !$options->{downvote_only};
+		$sign = -1 if $tag_hr->{tagnameid} == $self->{nixid} && !$options->{upvote_only};
 		next unless $sign;
 		my $grace_mult = ($sign == 1) ? $up_mult : $down_mult;
 		my $extra_pop = $tag_hr->{total_clout} * $sign * $grace_mult;
-		my $udc_mult = get_udc_mult($tag_hr->{created_at_ut}, $udc_cache);
-#main::tagboxLog(sprintf("extra_pop for %d: %.6f * %.6f * %.6f", $tag_hr->{tagid}, $extra_pop, $udc_mult, $grace_mult));
+		my $udc_mult = $self->get_udc_mult($tag_hr->{created_at_ut}, $udc_cache);
+#$self->info_log("extra_pop for %d: %.6f * %.6f * %.6f", $tag_hr->{tagid}, $extra_pop, $udc_mult, $grace_mult);
 		$extra_pop *= $udc_mult;
 		$popularity += $extra_pop;
 	}
@@ -225,8 +188,7 @@ sub run {
 	if ($options->{return_only}) {
 		return $popularity;
 	}
-	main::tagboxLog(sprintf("FireHoseScores->run setting %d (%d) to %.6f",
-		$fhid, $affected_id, $popularity));
+	$self->info_log("setting %d (%d) to %.6f", $fhid, $affected_id, $popularity);
 	$firehose_db->setFireHose($fhid, { popularity => $popularity });
 }
 
@@ -289,13 +251,11 @@ sub getStartingColorLevel {
 { # closure
 my $udc_mult_cache = { };
 sub get_udc_mult {
-	my($time, $cache) = @_;
+	my($self, $time, $cache) = @_;
 
 	# Round off time to the nearest 10 second interval, for caching.
 	$time = int($time/10+0.5)*10;
 	if (defined($udc_mult_cache->{$time})) {
-#		main::tagboxLog(sprintf("get_udc_mult %0.3f time %d cached",
-#			$udc_mult_cache->{$time}, $time));
 		return $udc_mult_cache->{$time};
 	}
 
@@ -322,16 +282,16 @@ sub get_udc_mult {
 		# This shouldn't happen on a site with any reasonable amount of
 		# up and down voting, unless the tags_udc task has failed to run
 		# for the past hour or two.  If it does happen, punt.
-		main::tagboxLog(sprintf("get_udc_mult punting prev %d %.6f cur %d %.6f next %d %.6f time %d thru %.6f prevw %.6f curw %.6f nextw %.6f",
+		$self->info_log("punting prev %d %.6f cur %d %.6f next %d %.6f time %d thru %.6f prevw %.6f curw %.6f nextw %.6f",
 			$prevhour, $cache->{$prevhour}, $curhour, $cache->{$curhour}, $nexthour,  $cache->{$nexthour},
-			$time, $thru_frac, $prevweight, $curweight, $nextweight));
+			$time, $thru_frac, $prevweight, $curweight, $nextweight);
 		$udc = $constants->{tagbox_firehosescores_udcbasis};
 	}
 	my $udc_mult = $constants->{tagbox_firehosescores_udcbasis}/$udc;
 	my $max_mult = $constants->{tagbox_firehosescores_maxudcmult} || 5;
 	$udc_mult = $max_mult if $udc_mult > $max_mult;
-#	main::tagboxLog(sprintf("get_udc_mult %0.3f time %d p %.3f c %.3f n %.3f th %.3f pw %.3f cw %.3f nw %.3f udc %.3f\n",
-#		$udc_mult, $time, $prevudc, $curudc, $nextudc, $thru_frac, $prevweight, $curweight, $nextweight, $udc));
+#	$self->info_log("%0.3f time %d p %.3f c %.3f n %.3f th %.3f pw %.3f cw %.3f nw %.3f udc %.3f\n",
+#		$udc_mult, $time, $prevudc, $curudc, $nextudc, $thru_frac, $prevweight, $curweight, $nextweight, $udc);
 	$udc_mult_cache->{$time} = $udc_mult;
 	return $udc_mult;
 }

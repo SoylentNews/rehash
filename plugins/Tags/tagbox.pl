@@ -2,14 +2,48 @@
 # This code is a part of Slash, and is released under the GPL.
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
-# $Id$
+
+# Two nontrivial improvements I'd like to make:
+#
+# (1)  Right now, each tagbox only keeps track of a single number,
+# tagid, to indicate how far it has progressed in processing tagging
+# activity.  (The other two fields, tdid and tuid, are ephemeral;
+# rewinding tagid eliminates the need to check those two.)
+#
+# It would be nice to be able to rewind a tagbox to have it do
+# reprocessing of old tags, and still have it keep reasonably near
+# real-time on processing new tags as they arrive.  This would make
+# testing changes to a tagbox's algorithm much easier.  The first
+# problem is that this would require a mildly tricky tracking of three
+# numbers: one tagid indicating how far its "real-time" processing
+# has gotten and two tagids bracketing its "old/archive" processing.
+#
+# The second is that, while I'm reasonably happy with how the
+# $feederlog_ok check should strike a balance between keeping up with
+# real-time and limiting table size for overall performance, I'm not
+# yet convinced it would always perform well under stress, and this
+# would need to be tested.  Also, it might be desirable to (by default)
+# add each "old/archive" feederlog row with a reduced importance field,
+# but that only increases my concern for the need to test.
+#
+# (2)  Multi-processing.  See comment at the top of sbin/slashd re
+# getting tasks to run on different machines;  that would almost
+# certainly be a prerequisite to implementing this feature.  After
+# that's done, an additional change could allow multiple tagbox.pl
+# child processes to run (on the same machine or different machines),
+# each taking its own set of one or more tagboxes.  It would probably
+# be best to designate one the "primary tagbox.pl" which handles
+# tagbox-nonspecific responsibilities like inserting nosy feederlog
+# entries (and the primary might as well insert all the feederlog
+# rows for that matter).  But each tagbox would only have its run() --
+# the most CPU-intensive routine -- called by whichever tagbox.pl it
+# was assigned to.
 
 use strict;
 
 use Slash;
 use Slash::Constants ':slashd';
 use Slash::Display;
-use Slash::Utility;
 
 use Data::Dumper;
 
@@ -43,6 +77,7 @@ $task{$me}{code} = sub {
 	my $exclude_behind = 1;
 	my $max_activity_for_run = 10;
 	my $feederlog_largerows = $constants->{tags_feederlog_largerows} || 50_000;
+	my($feederlog_ok, $next_feederlog_check) = (1, 0);
 	while (!$task_exit_flag) {
 
 		$exclude_behind = ! $exclude_behind;
@@ -50,18 +85,45 @@ $task{$me}{code} = sub {
 		# If tagboxlog_feeder has grown too large, temporarily exclude
 		# adding to it until it has shrunk to a more efficient size.
 
-		my $feederlog_rows = $tagboxdb->sqlCount('tagboxlog_feeder');
 		my $activity_feeder = undef;
-		if ($feederlog_rows < $feederlog_largerows) {
+		if (time > $next_feederlog_check) {
+			my $was_ok = $feederlog_ok;
+			my $feederlog_rows = $tagboxdb->sqlCount('tagboxlog_feeder');
+			$feederlog_ok = $feederlog_rows < $feederlog_largerows ? 1 : 0;
+			if ($feederlog_rows < $feederlog_largerows * 0.8) {
+				# Table is nice and small.  Check less often.
+				$next_feederlog_check = time + 600;
+			} elsif ($feederlog_ok) {
+				# Table is under the size limit.  Check periodically.
+				$next_feederlog_check = time + 180;
+			} else {
+				# Table is oversize and we will take special measures
+				# to shrink it.  Check frequently to see if we can
+				# return to normal behavior.
+				$next_feederlog_check = time + 20;
+			}
+			if (!$feederlog_ok || $was_ok != $feederlog_ok) {
+				# XXX We might want to keep track of the
+				# UNIX_TIMESTAMP(created_at) for the last tag seen by
+				# update_feederlog and for the current MAX(tagid),
+				# and log the difference here, so we can grep to see
+				# how far behind tagbox.pl ever gets.  I believe a
+				# 'SELECT MAX(tagid) FROM tags' would have a
+				# worst-case that's much faster than
+				# 'SELECT COUNT(*) FROM tagboxlog_feeder'.
+				tagboxLog("tagbox.pl feederlog at $feederlog_rows rows, was $was_ok, is $feederlog_ok");
+			}
+		}
+		if ($feederlog_ok) {
 
 			# Insert into tagboxlog_feeder
 			$activity_feeder = update_feederlog($exclude_behind);
-			sleep 2;
+			sleep 1;
 			last if $task_exit_flag;
 
 			# If there was a great deal of feeder activity, there is
-			# likely to be more yet to do, and it may obsolete the
-			# results we'd get by calling run() right now.
+			# likely to be more yet to do, and those additions might
+			# obsolete the results we'd get by calling run() right now.
 			if ($activity_feeder > 10) {
 				tagboxLog("tagbox.pl re-updating feederlog, activity $activity_feeder");
 				next;
@@ -69,18 +131,19 @@ $task{$me}{code} = sub {
 
 		}
 
-		# Run tagboxes (based on tagboxlog_feeder)
-		my $force_overnight = $feederlog_rows < $feederlog_largerows ? 0 : 1;
+		# Run tagboxes (based on tagboxlog_feeder).
+		# If the feederlog is oversize, we pretend it is "overnight" to
+		# force more run()s than usual, to shrink it down.
+		my $force_overnight = ! $feederlog_ok;
 		my $activity_run = run_tagboxes_until(time() + 30, $force_overnight);
-		sleep 2;
 		last if $task_exit_flag;
 
-		# If nothing's going on, ease up more (not that it probably
+		# If nothing's going on, ease up some (not that it probably
 		# matters much, since if nothing's going on both of the
 		# above should be doing reasonably fast SELECTs).
 		if (!$activity_feeder && !$activity_run) {
-			tagboxLog('tagbox.pl sleeping 10');
-			sleep 10;
+			tagboxLog('tagbox.pl sleeping 3');
+			sleep 3;
 		}
 		last if $task_exit_flag;
 
@@ -139,7 +202,7 @@ sub update_feederlog {
 	# If this is called with $exclude_behind set, ignore tagboxes
 	# which are too far behind other tagboxes.  For this purpose,
 	# only last_tagid_logged is examined, since the other two are
-	# expired and don't generally hold much data.
+	# expired regularly and thus don't generally hold much data.
 	my $max_max_tagid = 0;
 	if ($exclude_behind) {
 		for my $tagbox (@$tagboxes) {
@@ -219,7 +282,7 @@ sub update_feederlog {
 	my $clout_types = $tagsdb->getCloutTypes();
 	for my $tagbox (@$tagboxes) {
 
-main::tagboxLog("update_feederlog name=$tagbox->{name} tbid=$tagbox->{tbid} objtbid=$tagbox->{object}{tbid} last=$tagbox->{last_tagid_logged}");
+		$tagbox->{object}->info_log("last=$tagbox->{last_tagid_logged}");
 
 		my @tags_copy = @$tags_ar;
 		my $clout_type = $clout_types->{ $tagbox->{clid} };
@@ -243,11 +306,10 @@ main::tagboxLog("update_feederlog name=$tagbox->{name} tbid=$tagbox->{tbid} objt
 				$feeder_ar = undef;
 				$feeder_ar = $tagbox->{object}->feed_newtags($tags_this_tagbox_ar);
 				# XXX optimize by consolidating here: sum importances, max tagids
-main::tagboxLog("update_feederlog name=$tagbox->{name} inserting " . ($feeder_ar ? scalar(@$feeder_ar) : 'none') . ' based on ' . scalar(@$tags_this_tagbox_ar) . ' tags');
 				insert_feederlog($tagbox, $feeder_ar) if $feeder_ar;
 				# XXX The previous insert and this update should be wrapped
 				# in a transaction.
-				$tagboxdb->markTagboxLogged($tagbox->{tbid},
+				$tagbox->{object}->markTagboxLogged(
 					{ last_tagid_logged => $max_tagid_this });
 			}
 		}
@@ -288,7 +350,7 @@ main::tagboxLog("update_feederlog name=$tagbox->{name} inserting " . ($feeder_ar
 				insert_feederlog($tagbox, $feeder_ar) if $feeder_ar;
 				# XXX The previous insert and this update should be wrapped
 				# in a transaction.
-				$tagboxdb->markTagboxLogged($tagbox->{tbid},
+				$tagbox->{object}->markTagboxLogged(
 					{ last_tdid_logged => $max_tdid_this });
 			}
 		}
@@ -313,7 +375,7 @@ main::tagboxLog("update_feederlog name=$tagbox->{name} inserting " . ($feeder_ar
 				insert_feederlog($tagbox, $feeder_ar) if $feeder_ar;
 				# XXX The previous insert and this update should be wrapped
 				# in a transaction.
-				$tagboxdb->markTagboxLogged($tagbox->{tbid},
+				$tagbox->{object}->markTagboxLogged(
 					{ last_tuid_logged => $max_tuid_this });
 			}
 		}
@@ -328,10 +390,9 @@ main::tagboxLog("update_feederlog name=$tagbox->{name} inserting " . ($feeder_ar
 }
 
 sub insert_feederlog {
-	my($tagbox, $feeder_ar) = @_;
+	my($tagbox_hr, $feeder_ar) = @_;
 	for my $feeder_hr (@$feeder_ar) {
-{ my $fstr = Dumper($feeder_hr); $fstr =~ s/\s+/ /g; main::tagboxLog("addFeederInfo: tbid=$tagbox->{tbid} f: $fstr"); }
-		$tagboxdb->addFeederInfo($tagbox->{tbid}, $feeder_hr);
+		$tagbox_hr->{object}->addFeederInfo($feeder_hr);
 	}
 }
 
@@ -349,9 +410,10 @@ sub run_tagboxes_until {
 	while (time() < $run_until && !$task_exit_flag) {
 		my $cur_count = 10;
 		my $cur_minweightsum = 1;
+		my $try_to_reduce_rowcount = 0;
 
-		# If it's "overnight" (as defined in vars), purge the feeder log
-		# further down.
+		# If it's "overnight" (as defined in vars, or determined by
+		# tags_feederlog_largerows), purge some feeder log rows.
 		my $is_overnight = $force_overnight;
 		if (!$is_overnight) {
 			my $gmhour = (gmtime)[2];
@@ -362,26 +424,30 @@ sub run_tagboxes_until {
 		if ($is_overnight) {
 			$cur_count = 50;
 			$cur_minweightsum = $overnight_sum;
+			$try_to_reduce_rowcount = 1;
 		}
 
-		my $affected_ar = $tagboxdb->getMostImportantTagboxAffectedIDs($cur_count, $cur_minweightsum);
+		my $affected_ar = $tagboxdb->getMostImportantTagboxAffectedIDs({
+			num			=> $cur_count,
+			min_weightsum		=> $cur_minweightsum,
+			try_to_reduce_rowcount	=> $try_to_reduce_rowcount,
+		});
 		return $activity if !$affected_ar || !@$affected_ar;
+
+		# XXX We should really define a Slash::Tagbox::run_multi, and group the
+		# returned $affected_hr's by tbid and pass each group in at once.
 
 		$activity = 1;
 		for my $affected_hr (@$affected_ar) {
-			my $tagbox = $tagboxdb->getTagboxes($affected_hr->{tbid}, [qw( object )]);
-#my $ad = Dumper($affected_hr); $ad =~ s/\s+/ /g; my $tb = Dumper($tagbox); $tb =~ s/\s+/ /g; print STDERR "r_t_u affected_hr: $ad tagbox: $tb\n";
-if ($affected_hr->{tbid} == 17) {
-my $feeder_ar = $tagboxdb->sqlSelectAllHashrefArray('*', 'tagboxlog_feeder', "tbid=17 AND affected_id=$affected_hr->{affected_id}", 'ORDER BY tfid');
-print STDERR "r_t_u rows for tbid=17 id=$affected_hr->{affected_id}: " . Dumper($feeder_ar)
-}
-if (! $tagbox->{object}) { die "no object for tbid=$affected_hr->{tbid}: " . Dumper($tagbox) }
-			$tagbox->{object}->run($affected_hr->{affected_id});
+			my $tagbox_obj = $tagboxdb->getTagboxObject($affected_hr->{tbid});
+
+			$tagbox_obj->run($affected_hr->{affected_id});
+
 			$tagboxdb->markTagboxRunComplete($affected_hr);
 			last if time() >= $run_until || $task_exit_flag;
 		}
 
-		Time::HiRes::sleep(0.2);
+		Time::HiRes::sleep(0.1);
 	}
 	return $activity;
 }

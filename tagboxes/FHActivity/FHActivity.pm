@@ -20,84 +20,22 @@ Slash::Tagbox::FHActivity - keep track of activity of firehose entries
 use strict;
 
 use Slash;
-use Slash::DB;
-use Slash::Utility::Environment;
-use Slash::Tagbox;
-
-use Data::Dumper;
 
 our $VERSION = $Slash::Constants::VERSION;
 
 use base 'Slash::Tagbox';
 
-sub feed_newtags {
-	my($self, $tags_ar) = @_;
-	my $constants = getCurrentStatic();
-	if (scalar(@$tags_ar) < 9) {
-		main::tagboxLog("FHActivity->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
-	} else {
-		main::tagboxLog("FHActivity->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
-	}
-	my $tagsdb = getObject('Slash::Tags');
+sub get_affected_type	{ 'globj' }
+sub get_clid		{ 'vote' }
 
-	# The algorithm of the importance of tags to this tagbox is simple.
-	# Each unique user-globjid pair adds 1 to importance of that globjid.
+sub init_tagfilters {
+	my($self) = @_;
 
-	my $ret_ar = [ ];
-	my %seen = ( );
-	for my $tag_hr (@$tags_ar) {
-		next if $seen{$tag_hr->{uid}}{$tag_hr->{globjid}};
-		my $ret_hr = {
-			affected_id =>	$tag_hr->{globjid},
-			importance =>	1,
-		};
-		# We identify this little chunk of importance by either
-		# tagid or tdid depending on whether the source data had
-		# the tdid field (which tells us whether feed_newtags was
-		# "really" called via feed_deactivatedtags).
-		if ($tag_hr->{tdid})	{ $ret_hr->{tdid}  = $tag_hr->{tdid}  }
-		else			{ $ret_hr->{tagid} = $tag_hr->{tagid} }
-		push @$ret_ar, $ret_hr;
-		$seen{$tag_hr->{uid}}{$tag_hr->{globjid}} = 1;
-	}
-	return [ ] if !@$ret_ar;
-
-	# Tags applied to globjs that have a firehose entry associated
-	# are important.  Other tags are not.
-	my %globjs = ( map { ($_->{affected_id}, 1) } @$ret_ar );
-	my $globjs_str = join(', ', sort keys %globjs);
-	my $fh_globjs_ar = $self->sqlSelectColArrayref(
-		'globjid',
-		'firehose',
-		"globjid IN ($globjs_str)");
-	return [ ] if !@$fh_globjs_ar; # if no affected globjs have firehose entries, short-circuit out
-	my %fh_globjs = ( map { ($_, 1) } @$fh_globjs_ar );
-	$ret_ar = [ grep { $fh_globjs{ $_->{affected_id} } } @$ret_ar ];
-
-	main::tagboxLog("FHActivity->feed_newtags returning " . scalar(@$ret_ar));
-	return $ret_ar;
+	$self->{filter_firehoseonly} = 1;
 }
 
-sub feed_deactivatedtags {
-	my($self, $tags_ar) = @_;
-	main::tagboxLog("FHActivity->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
-	my $ret_ar = $self->feed_newtags($tags_ar);
-	main::tagboxLog("FHActivity->feed_deactivatedtags returning " . scalar(@$ret_ar));
-	return $ret_ar;
-}
-
-sub feed_userchanges {
-	my($self, $users_ar) = @_;
-	my $constants = getCurrentStatic();
-	main::tagboxLog("FHActivity->feed_userchanges called: users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "'");
-
-	# XXX need to fill this in, and check FirstMover feed_userchanges too
-
-	return [ ];
-}
-
-sub run {
-	my($self, $affected_id) = @_;
+sub run_process {
+	my($self, $affected_id, $tags_ar) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
@@ -121,7 +59,7 @@ sub run {
 	# There's also 'feed' and 'submission' which don't get additions.
 
 	# Add up unique users who have tagged this globjid.
-	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
+#	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
 	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
 	my %user_clout = ( map { ($_->{uid}, $_->{user_clout}) } @$tags_ar );
 	for my $uid (keys %user_clout) {
@@ -132,8 +70,8 @@ sub run {
 	my $affected_id_q = $self->sqlQuote($affected_id);
 	my $fhid = $self->sqlSelect('id', 'firehose', "globjid = $affected_id_q");
 	my $firehose_db = getObject('Slash::FireHose');
-	warn "Slash::Tagbox::FHActivity->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
-	main::tagboxLog("FHActivity->run setting $fhid ($affected_id) to $activity");
+warn "Slash::Tagbox::FHActivity->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
+	$self->info_log("setting %d (%d) to %f", $fhid, $affected_id, $activity);
 	$firehose_db->setFireHose($fhid, { activity => $activity });
 }
 

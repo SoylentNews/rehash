@@ -3,6 +3,11 @@
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 
+# XXX This tagbox doesn't really have an appropriate "affected_id".
+# (Maybe this'd be the first tagbox with _tagname_ as affected_id.
+# Or maybe its affected_id is always 0 or something.)
+# So its run() may not want to do the usual getTagboxTags.
+
 package Slash::Tagbox::RecentTags;
 
 =head1 NAME
@@ -20,30 +25,39 @@ Slash::Tagbox::RecentTags - update the Recent Tags slashbox
 use strict;
 
 use Slash;
-use Slash::DB;
-use Slash::Utility::Environment;
-
-use Data::Dumper;
 
 our $VERSION = $Slash::Constants::VERSION;
 
 use base 'Slash::Tagbox';
 
-sub feed_newtags {
-	my($self, $tags_ar) = @_;
+sub init {
+	my($self) = @_;
+	return 0 if ! $self->SUPER::init();
+
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
-	my $seconds_back = $constants->{tagbox_recenttags_secondsback};
-	my $exclude_tagnames = $constants->{tagbox_top_excludetagnames} || 'yes no';
-	my %exclude_tagnameid = (
+	$self->{exclude_tagnameids} = {
 		map { ($tagsdb->getTagnameidCreate($_), 1) }
-		split / /, $exclude_tagnames
-	);
-	if (scalar(@$tags_ar) < 4) {
-		main::tagboxLog("RecentTags->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
-	} else {
-		main::tagboxLog("RecentTags->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
-	}
+                split / /, $constants->{tagbox_top_excludetagnames} || 'yes no'
+	};
+}
+
+sub init_tagfilters {
+	my($self) = @_;
+
+	$self->{only_firehose} = 1;
+
+	# would be nice to be able to _ex_clude tagnameids here
+}
+
+sub get_affected_type	{ 'globj' }
+sub get_clid		{ 'describe' }
+
+sub feed_newtags_process {
+	my($self, $tags_ar) = @_;
+	my $constants = getCurrentStatic();
+	my $seconds_back = $constants->{tagbox_recenttags_secondsback};
+	my $firehosedb = getObject('Slash::FireHose', { db_type => 'reader' });
 
 	my $ret_ar = [ ];
 	for my $tag_hr (@$tags_ar) {
@@ -52,10 +66,9 @@ sub feed_newtags {
 		my $seconds_old = time - $tag_hr->{created_at_ut};
 		next if $seconds_old > $seconds_back;
 		# Tags that the Top tagbox excludes aren't important.
-		next if $exclude_tagnameid{ $tag_hr->{tagnameid} };
+		next if $self->{exclude_tagnameids}{ $tag_hr->{tagnameid} };
 		# Tags on a hose item under the minslice aren't important.
 		my $minslice = $constants->{tagbox_recenttags_minslice} || 4;
-		my $firehosedb = getObject('Slash::FireHose', { db_type => 'reader' });
 		my $firehose_id = $firehosedb->getFireHoseIdFromGlobjid($tag_hr->{globjid});
 		next unless $firehose_id;
 		my $firehose = $firehosedb->getFireHose($firehose_id);
@@ -80,24 +93,10 @@ sub feed_newtags {
 	return $ret_ar;
 }
 
-sub feed_deactivatedtags {
-	my($self, $tags_ar) = @_;
-	main::tagboxLog("RecentTags->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "'");
-	my $ret_ar = $self->feed_newtags($tags_ar);
-	main::tagboxLog("RecentTags->feed_deactivatedtags returning " . scalar(@$ret_ar));
-	return $ret_ar;
-}
+# tags_ar is kind of irrelevant here
 
-sub feed_userchanges {
-	my($self, $users_ar) = @_;
-	my $constants = getCurrentStatic();
-	my $tagsdb = getObject('Slash::Tags');
-	main::tagboxLog("RecentTags->feed_userchanges called (oddly); returning blank");
-	return [ ];
-}
-
-sub run {
-	my($self, $affected_id) = @_;
+sub run_process {
+	my($self, $affected_id, $tags_ar) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
@@ -135,7 +134,7 @@ sub run {
 		$block .= qq{<li><a href="/tags/$tagname">$tagname</a></li>};
 	}
 	$block .= '</ul>';
-	main::tagboxLog("RecentTags->run setting Recent Tags to '@$tagnames_ar' (" . length($block) . " chars)");
+	$self->info_log("setting Recent Tags to '%s' (%d chars)", join(' ', @$tagnames_ar), length($block));
 	$self->setBlock('activetags', { block => $block });
 }
 

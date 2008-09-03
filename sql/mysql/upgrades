@@ -5485,3 +5485,7 @@ UPDATE vars SET value = 'T_2_5_0_218' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+# for plugins/Tags
+ALTER TABLE tagboxes DROP COLUMN affected_type, DROP COLUMN clid, DROP COLUMN nosy_gtids;
+DROP TABLE tagbox_userkeyregexes;
+

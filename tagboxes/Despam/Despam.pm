@@ -20,11 +20,6 @@ Slash::Tagbox::Despam - Reduce (firehose) spam
 use strict;
 
 use Slash;
-use Slash::DB;
-use Slash::Utility::Environment;
-use Slash::Tagbox;
-
-use Data::Dumper;
 
 our $VERSION = $Slash::Constants::VERSION;
 
@@ -32,96 +27,60 @@ use base 'Slash::Tagbox';
 
 sub init {
 	my($self) = @_;
-	$self->SUPER::init() if $self->can('SUPER::init');
+	return 0 if ! $self->SUPER::init();
 
-	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
-	$self->{spamid}		= $tagsdb->getTagnameidCreate('binspam');
-	return undef unless $self->{spamid};
-	$self->{upvoteid}	= $tagsdb->getTagnameidCreate($constants->{tags_upvote_tagname} || 'nod');
+	$self->{binspamid}	= $tagsdb->getTagnameidCreate('binspam');
+	$self->{upvoteid}	= $self->{nodid};
 	$self->{recalc_tbids}	= undef;
+	my $admins = $tagsdb->getAdmins();
+	$self->{admin_in_str}	= join(',',
+					sort { $a <=> $b }
+					grep { $admins->{$_}{seclev} >= 100 }
+					keys %$admins);
+	return 0 if ! $self->{admin_in_str};
+
 	1;
 }
 
-sub feed_newtags {
-	my($self, $tags_ar) = @_;
-	my $constants = getCurrentStatic();
-	if (scalar(@$tags_ar) < 9) {
-		main::tagboxLog("Despam->feed_newtags called for tags '" . join(' ', map { $_->{tagid} } @$tags_ar) . "'");
-	} else {
-		main::tagboxLog("Despam->feed_newtags called for " . scalar(@$tags_ar) . " tags " . $tags_ar->[0]{tagid} . " ... " . $tags_ar->[-1]{tagid});
-	}
+sub get_affected_type	{ 'globj' }
+sub get_clid		{ 'describe' }
 
-	my $slashdb = getCurrentDB();
-	my $admins = $slashdb->getAdmins();
+sub init_tagfilters {
+	my($self) = @_;
 
-	my $ret_ar = [ ];
-	for my $tag_hr (@$tags_ar) {
-		# All admin binspam tags are equally important.
-		# All other tags are equally unimportant :)
-		next unless $tag_hr->{tagnameid} == $self->{spamid} && $admins->{ $tag_hr->{uid} };
-		my $ret_hr = {
-			tagid =>	$tag_hr->{tagid},
-			affected_id =>	$tag_hr->{globjid},
-			importance =>	1,
-		};
-		push @$ret_ar, $ret_hr;
-	}
-	main::tagboxLog("Despam->feed_newtags A " . scalar(@$ret_ar) . ": '@$ret_ar'");
-	return [ ] if !@$ret_ar;
+	# Despam only cares about active tags.
 
-	# Tags applied to globjs that have a firehose entry associated
-	# are important.  Other tags are not.
-	my %globjs = ( map { $_->{affected_id}, 1 } @$ret_ar );
-	my $globjs_str = join(', ', sort keys %globjs);
-	my $fh_globjs_ar = $self->sqlSelectColArrayref(
-		'globjid',
-		'firehose',
-		"globjid IN ($globjs_str)");
-	main::tagboxLog("Despam->feed_newtags B " . scalar(@$fh_globjs_ar) . ": '@$fh_globjs_ar'");
-	return [ ] if !@$fh_globjs_ar; # if no affected globjs have firehose entries, short-circuit out
-	my %fh_globjs = ( map { $_, 1 } @$fh_globjs_ar );
-	$ret_ar = [ grep { $fh_globjs{ $_->{affected_id} } } @$ret_ar ];
+	$self->{filter_activeonly} = 1;
 
-	main::tagboxLog("Despam->feed_newtags returning " . scalar(@$ret_ar) . ": '@$ret_ar'");
-	return $ret_ar;
+	# Despam only cares about tags on globjs in the hose.
+
+	$self->{filter_firehoseonly} = 1;
+
+	# Despam only cares about binspam tags.
+
+	$self->{filter_tagnameid} = $self->{binspamid};
+
+	# And Despam only cares about those tags from admins.
+
+	my $admins = $self->getAdmins();
+	$self->{filter_uid} = [ sort { $a <=> $b } keys %$admins ];
+
 }
 
-sub feed_deactivatedtags {
-	my($self, $tags_ar) = @_;
-	main::tagboxLog("Despam->feed_deactivatedtags called: tags_ar='" . join(' ', map { $_->{tagid} } @$tags_ar) .  "', calling feed_newtags");
-	my $ret_ar = $self->feed_newtags($tags_ar);
-        main::tagboxLog("Despam->feed_deactivatedtags returning " . scalar(@$ret_ar));
-	return $ret_ar;
-}
-
-sub feed_userchanges {
-	my($self, $users_ar) = @_;
-	main::tagboxLog("Despam->feed_userchanges called (oddly): users_ar='" . join(' ', map { $_->{tuid} } @$users_ar) .  "', returning nothing");
-	return [ ];
-}
-
-sub run {
-	my($self, $affected_id, $options) = @_;
+sub run_process {
+	my($self, $affected_id, $tags_ar) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
 	my $firehose_db = getObject('Slash::FireHose');
 	my $slashdb = getCurrentDB();
 
-	# Get the list of admin uids.
-	my $admins = $tagsdb->getAdmins();
-	my $admin_in_str = join(',',
-		sort { $a <=> $b }
-		grep { $admins->{$_}{seclev} >= 100 }
-		keys %$admins);
-	return unless $admin_in_str;
-
 	# Get info about the firehose item that may have been tagged.
 	my $affected_id_q = $self->sqlQuote($affected_id);
 	my $fhid = $self->sqlSelect('DISTINCT id', 'firehose', "globjid = $affected_id_q");
 	if (!$fhid || !$firehose_db) {
-		main::tagboxLog("Slash::Tagbox::Despam->run bad data, fhid='$fhid' db='$firehose_db'");
+		$self->info_log("bad data, fhid='%d' db='%s'", $fhid, $firehose_db);
 		return ;
 	}
 	my $fhitem = $firehose_db->getFireHose($fhid);
@@ -146,11 +105,12 @@ sub run {
 	# an admin.  It may be zero (if forceFeederRecalc was called, or if
 	# an old binspam tag was deactivated).  Even one admin binspam tag
 	# is enough to mark the individual item as binspam.
+	# XXX these tags are going to be in $tags_ar, re-SELECTing is redundant
 	my $binspam_count_globjid = $slashdb->sqlCount(
 		'tags',
 		"globjid=$affected_id
-		 AND tagnameid=$self->{spamid}
-		 AND uid IN ($admin_in_str)
+		 AND tagnameid=$self->{binspamid}
+		 AND uid IN ($self->{admin_in_str})
 		 AND inactivated IS NULL");
 	my $is_spam = ($binspam_count_globjid > 0);
 
@@ -182,12 +142,13 @@ sub run {
 	# has amassed in total (where "contributor" can be an ipid or uid).
 	my $binspam_tagid_globj_hr = { };
 	if ($check_type) {
+		# XXX these tags are going to be in $tags_ar, just SELECT the globjids in firehose, see all_globjid_ar below
 		$binspam_tagid_globj_hr = $slashdb->sqlSelectAllKeyValue(
 			'tags.tagid, tags.globjid',
 			"tags, firehose$table_clause",
 			"tags.globjid = firehose.globjid
-			 AND tags.tagnameid = $self->{spamid}
-			 AND tags.uid IN ($admin_in_str)
+			 AND tags.tagnameid = $self->{binspamid}
+			 AND tags.uid IN ($self->{admin_in_str})
 			 AND tags.inactivated IS NULL
 			 AND $where_clause");
 	}
@@ -205,11 +166,11 @@ sub run {
 		$is_spam = $mark_srcid = 1;
 	}
 
-	main::tagboxLog(sprintf("%s->run uid=%d ipid=%s check_type=%s affected_id=%d srcid=%s count=%d is_spam=%d mark_srcid=%d tagids: '%s'",
-		ref($self), ($submitter_uid || '0'), ($submitter_ipid || 'none'),
+	$self->info_log("uid=%d ipid=%s check_type=%s affected_id=%d srcid=%s count=%d is_spam=%d mark_srcid=%d tagids: '%s'",
+		($submitter_uid || '0'), ($submitter_ipid || 'none'),
 		(defined($check_type) ? $check_type : 'undef'),
 		$affected_id, $srcid, $binspam_count, $is_spam, $mark_srcid,
-		join(' ', sort { $a <=> $b } keys %$binspam_tagid_globj_hr)));
+		join(' ', sort { $a <=> $b } keys %$binspam_tagid_globj_hr));
 
 	#			is_spam=0	is_spam=1	mark_srcid=1
 	#
@@ -248,25 +209,24 @@ sub run {
 			$globjids_mark_spam{$globjid} = 1;
 		}
 	}
-	
+
 	# Convert that list of globjids to firehose ids.
 	my $globjid_in_str = join(',', sort { $a <=> $b } keys %globjids_mark_spam);
 	my $fhid_mark_spam_hr = $slashdb->sqlSelectAllKeyValue(
 		'id, globjid',
 		'firehose',
 		"globjid IN ($globjid_in_str)");
-	main::tagboxLog(sprintf("%s->run globjids '%s' -> fhids '%s'",
-		ref($self),
+	$self->info_log("globjids '%s' -> fhids '%s'",
 		join(' ', sort { $a <=> $b } keys %globjids_mark_spam),
-		join(' ', sort { $a <=> $b } keys %$fhid_mark_spam_hr)));
+		join(' ', sort { $a <=> $b } keys %$fhid_mark_spam_hr));
 
 	# Loop on all the fhids required to be changed, setting or
 	# clearing them as appropriate.
 	for my $fhid (sort { $a <=> $b } keys %$fhid_mark_spam_hr) {
 		my $globjid = $fhid_mark_spam_hr->{$fhid};
 		my $rows = $firehose_db->setFireHose($fhid, { is_spam => ($is_spam ? 'yes' : 'no') });
-		main::tagboxLog(sprintf("%s->run marked fhid %d (%d) as is_spam=%d rows=%s",
-			ref($self), $fhid, $globjid, $is_spam, $rows));
+		$self->info_log("marked fhid %d (%d) as is_spam=%d rows=%s",
+			$fhid, $globjid, $is_spam, $rows);
 		if ($rows > 0) {
 			# If this firehose item's spam status changed, either way, its
 			# scores now need to be recalculated immediately.
@@ -281,8 +241,7 @@ sub run {
 			# Force the recalculations of their scores.
 			for my $tbid (@{$self->{recalc_tbids}}) {
 				$tagboxdb->forceFeederRecalc($tbid, $globjid);
-				main::tagboxLog(sprintf("%s->run force recalc tbid=%d globjid=%d",
-					ref($self), $tbid, $globjid));
+				$self->info_log("force recalc tbid=%d globjid=%d", $tbid, $globjid);
 			}
 			# Add this change to the daily stats.
 			my $statsSave = getObject('Slash::Stats::Writer');
@@ -294,8 +253,8 @@ sub run {
 	# If appropriate, mark the submitter's uid or ipid as a spammer
 	# and mark _all_ their submissions as binspam.
 	if ($mark_srcid && $check_type) {
-		main::tagboxLog(sprintf("%s->run marking spammer AL2 srcid=%s",
-			ref($self), $srcid));
+		$self->info_log("marking spammer AL2 srcid=%s", $srcid);
+		# XXX put 1183959 into a constant for goshsakes
 		$slashdb->setAL2($srcid, { spammer => 1 }, { adminuid => 1183959 });
 	}
 }
