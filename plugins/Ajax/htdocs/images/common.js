@@ -486,7 +486,7 @@ function toggleFirehoseTagbox(id) {
 
 function firehose_set_options(name, value) {
 	if (firehose_user_class == 0) {
-		return false;
+		return;
 	}
 	if (name == "color" && value === undefined) {
 		return;

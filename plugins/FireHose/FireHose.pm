@@ -2061,6 +2061,7 @@ sub getAndSetOptions {
 			my ($y, $m, $d) = $form->{issue} =~ /(\d{4})(\d{2})(\d{2})/;
 			$options->{startdate} = "$y-$m-$d";
 			$options->{issue} = $form->{issue};
+			$options->{duration} = 1;
 
 		} else {
 			$form->{issue} = "";
@@ -2532,8 +2533,8 @@ sub getInitTabtypeOptions {
 			} else {
 				$set_option->{duration} = -1;
 			}
+			$set_option->{startdate} = "";
 		}
-		$set_option->{startdate} = "";
 	} elsif (($name eq "tabpopular" || $name eq "tabrecent") && !$day_specified) {
 		if ($vol->{story_vol} > 25) {
 			$set_option->{duration} = 7;
@@ -3046,11 +3047,38 @@ sub js_anon_dump {
 
 sub genFireHoseParams {
 	my($self, $options, $data) = @_;
+	my $user = getCurrentUser();
+	my $form = getCurrentForm();
+
 	$data ||= {};
 	my @params;
 
-	foreach my $label (qw(fhfilter color orderdir orderby startdate duration mode)) {
+	my $params = {
+		fhfilter 	=> 0,
+		color		=> 0,
+		orderdir	=> 0,
+		orderby		=> 0,
+		issue		=> 1,
+		startdate	=> 1,
+		duration	=> 1,
+		mode		=> 0,
+	};
+	if ($user->{is_anon}) {
+		my ($label, $value) = @_;
+		if($options->{sel_tabtype} || $form->{tabtype}) {
+			$label = "tabtype";
+			$value = $form->{tabtype} || $options->{sel_tabtype};
+			$value = strip_paramattr($value);
+			push @params, "$label=$value";
+		}
+		$value = strip_paramattr($form->{section});
+		$label = "section";
+		push @params, "$label=$value";
+	}
 
+	foreach my $label (keys %$params) {
+
+		next if $user->{is_anon} && $params->{$label} == 0;
 		my $value = defined $data->{$label} ? $data->{$label} : $options->{$label};
 		if ($label eq "startdate") {
 			$value =~s /-//g;
