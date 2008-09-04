@@ -5,6 +5,7 @@
 package Slash::Search;
 
 use strict;
+use Slash::Utility;
 
 use base 'Slash::Plugin';
 

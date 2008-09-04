@@ -57,7 +57,6 @@ our @EXPORT  = qw(
 	isAnon
 	isAdmin
 	isSubscriber
-
 );
 
 

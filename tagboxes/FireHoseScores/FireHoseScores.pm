@@ -20,7 +20,7 @@ Slash::Tagbox::FireHoseScores - update scores on firehose entries
 use strict;
 
 use Slash;
-use Slash::Utility::Comments; # XXX needed?
+use Slash::Utility::Comments; # constrain_score(), maybe other things
 
 our $VERSION = $Slash::Constants::VERSION;
 

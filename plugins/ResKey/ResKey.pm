@@ -39,7 +39,7 @@ use warnings;
 use strict;
 
 use Slash;
-use Slash::Utility::Environment;
+use Slash::Utility;
 use Slash::Constants ':reskey';
 use Slash::ResKey::Key;
 

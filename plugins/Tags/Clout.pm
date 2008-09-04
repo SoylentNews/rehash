@@ -7,7 +7,7 @@ package Slash::Clout;
 use strict;
 use warnings;
 use Slash;
-use Slash::Utility::Environment;
+use Slash::Utility;
 use Slash::Tags;
 #use Slash::Clout::Describe;
 #use Slash::Clout::Vote;

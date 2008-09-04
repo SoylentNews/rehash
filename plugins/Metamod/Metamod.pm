@@ -7,7 +7,7 @@ package Slash::Metamod;
 use strict;
 use Date::Format qw(time2str);
 use Slash;
-use Slash::Utility::Environment;
+use Slash::Utility;
 
 use base 'Slash::Plugin';
 

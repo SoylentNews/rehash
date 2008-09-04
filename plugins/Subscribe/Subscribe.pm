@@ -6,7 +6,7 @@ package Slash::Subscribe;
 
 use strict;
 use Slash;
-use Slash::Utility::Environment;
+use Slash::Utility;
 
 use base 'Slash::Plugin';
 

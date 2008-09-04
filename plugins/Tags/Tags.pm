@@ -9,7 +9,7 @@ use Apache::Cookie;
 use Date::Format qw( time2str );
 use Slash;
 use Slash::Display;
-use Slash::Utility::Environment;
+use Slash::Utility;
 
 use base 'Slash::Plugin';
 

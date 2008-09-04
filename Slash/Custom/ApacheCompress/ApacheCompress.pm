@@ -64,7 +64,7 @@ sub handler {
     $fh = Apache::File->new($filename);
   }
   unless ($fh) {
-    warn "Cannot open file";
+    warn "Cannot open file: $!";
     return SERVER_ERROR;
   }
   

@@ -44,7 +44,7 @@ Slash::Utility altogether?  I don't much care either way. -Jamie)
 
 =head1 FUNCTIONS
 
-Unless otherwise noted, they are publicly available functions.
+Unless otherwise noted, they are publically available functions.
 
 =cut
 
