@@ -1,23 +1,146 @@
 <html>
 <head>
-	<title>Unit Tests: api.js</title>
+	<title>Unit Tests: base.js</title>
 
 	<script src="../jquery/jquery-1.2.6.js" type="text/javascript"></script>
 	<link href="http://dev.jquery.com/view/trunk/qunit/testsuite.css" rel="stylesheet" type="text/css" media="screen">
 	<script src="http://dev.jquery.com/view/trunk/qunit/testrunner.js" type="text/javascript"></script>
 
-	<script src="../api.js" type="text/javascript"></script>
+	<script src="../slash.util.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 (function($){
 
 $(function(){
 
-module('API');
+function not_ok( m ){
+	ok(false, m);
+}
+
+module('slash.util.js');
+
+test('api basics', function(){
+	ok(Slash, 'Slash name-space exists');
+	ok(Slash.Util, 'Slash.Util name-space exists');
+	ok(Slash.Util.Package, 'Slash.Util.Package exists');
+	ok($.isFunction(Slash.Util.Package), '...and it\'s a function');
+
+	var A = {
+		api: {
+			A_ok: function( m ){
+				ok(true, m);
+			}
+		}
+	};
+
+	var stemA = new Slash.Util.Package(A);
+	ok(true, 'survived a call to new Slash.Util.Package(A)');
+	ok(stemA, 'new Slash.Util.Package(A) produces an object');
+	ok(!$.isFunction(stemA), '...not itself a constructor');
+	stemA.A_ok('...and it has a top-level callable member');
+
+	var B = {
+		api: {
+			B_ok: function( m ){
+				ok(true, m);
+			}
+		},
+		jquery: true
+	};
+
+	var stemB = new Slash.Util.Package(B);
+	ok(true, 'survived a call to new Slash.Util.Package(B)');
+	ok(!$.B_ok, 'nothing added to jQuery because no stem name was provided');
+
+	var C = {
+		named: 'test0_C',
+		api: {
+			C_ok: function( m ){
+				ok(true, m);
+			}
+		},
+		jquery: true
+	};
+
+	var stemC = new Slash.Util.Package(C);
+	ok(true, 'survived a call to new Slash.Util.Package(C)');
+	ok($.test0_c, 'looks like it added something to jQuery');
+	($.test0_c.C_ok || not_ok)('...good!  It\'s a callable function');
+});
+
+test('basic element_api', function(){
+
+	var A = {
+		named: 'test1_A',
+		element_api: {
+			A_ok: function( element, message ){
+				ok(true, message);
+			}
+		},
+		jquery: true
+	};
+
+	var stemA = new Slash.Util.Package(A);
+	ok(stemA, 'new Slash.Util.Package(A) produces an object');
+	stemA.A_ok(null, '...with top-level callable member');
+	ok($.test1_a, 'appears to have added something to jQuery');
+	$.test1_a.A_ok(null, '...good!  It\'s a callable function');
+	ok($.isFunction($.test1_a), 'the stem is an element constructor');
+	ok($.isFunction($.fn.test1_a), 'and is also available on selections');
+
+	var $cat = $('#cat'), cat = $cat[0];
+	stemA.test1_A(cat);
+	ok(true, 'survived a call to the element constructor');
+	ok(cat.test1_a, 'stemmed');
+	ok(cat.test1_a.A_ok, 'added our API');
+	cat.test1_a.A_ok('and it works');
+
+	var $dog = $('#dog'), dog = $dog[0];
+	$dog.test1_a();
+	ok(true, 'survived calling the constructor from a selection');
+	ok(dog.test1_a, 'and it stemmed the selected elements');
+	$dog.test1_a__A_ok('functions work from a selection');
+	dog.test1_a.A_ok('functions work from an element');
+});
+
+test('element_api applied to elements', function(){
+
+	var api_A_description = { named: 'test',
+		element_api: {
+			ok_this: function( elem, message ){
+				ok(true, message);
+				ok(elem===this, "...and 'this' set to elem");
+			},
+			ok_api: function( elem, message ){
+				ok(true, message);
+				ok(elem!==this, "...and 'this' not set to elem");
+			}
+		}
+	};
+
+	var root1 = new Slash.Util.Package(api_A_description);
+	ok(!$.test, 'not installed on jQuery');
+	ok(!$.fn.test, 'not installed on jQuery wrapper');
+	ok($.isFunction(root1), 'api object doubles as constructor');
+	ok($.isFunction(root1.test), 'namespace doubles as contructor');
+
+	var $dog = $('#dog'), dog = $dog[0];
+	var e = root1(dog);
+	ok(e===dog.test, 'constructor returns element.namespace');
+	ok(dog.test.ok_this, '...with API installed');
+	dog.test.ok_this('callable directly from the object');
+	root1.ok_api(dog, 'callable on an element from the api object');
+
+	var $cat = $('#cat'), cat = $cat[0];
+	root1.ok_api(cat, 'callable from the api object even for non-constructed elements');
+
+	ok(!cat.test, 'api not directly callable on non-constructed elements');
+	root1.test(cat);
+	ok(cat.test && cat.test.ok_this, 'installed via namespace constructor, ok');
+});
 
 test('no jquery', function(){
-	var test = new API({
-		name: 'test',
+	var test = new Slash.Util.Package({ named: 'test',
 		element_api: {
 			foo: function( t_elem, cn ){
 				$(t_elem).addClass(cn);
@@ -38,8 +161,7 @@ test('no jquery', function(){
 
 
 test('no ctors, expando denied', function(){
-	var test0 = new API({
-		name: 'test0',
+	var test0 = new Slash.Util.Package({ named: 'test0',
 		element_api: {
 			foo: function( t_elem, cn ){
 				$(t_elem).addClass(cn);
@@ -49,20 +171,19 @@ test('no ctors, expando denied', function(){
 			}
 		},
 		element_constructor: false,
-		extend_jquery_wrapper: true
+		jquery: true
 	});
 
 	test0.foo($('#dog')[0], 'green');
 	ok($('#dog').hasClass('green'), 'call through api object');
 
-	var $list = $('#dog, #fish, #cat').test0__foo('blue');
+	var $list = $('#dog, #fish, #cat'); $list.test0(); $list.test0__foo('blue');
 	ok($list.filter('.blue').length==3, 'call through jQuery selection');
 	ok(! $list.test0__bar('blue').filter('.blue').length, 'jQuery return when called through jQuery selection');
 });
 
 test('no ctors, expando allowed', function(){
-	var test1 = new API({
-		name: 'test1',
+	var test1 = new Slash.Util.Package({ named: 'test1',
 		element_api: {
 			foo: function( t_elem, cn ){
 				var defaultColor = t_elem.test1 && t_elem.test1.defaults && t_elem.test1.defaults.colorClass;
@@ -78,7 +199,7 @@ test('no ctors, expando allowed', function(){
 				colorClass: 'orange'
 			}
 		},
-		extend_jquery_wrapper: true
+		jquery: true
 	});
 
 	var $dog = $('#dog'), dog = $dog[0];
@@ -96,12 +217,11 @@ test('no ctors, expando allowed', function(){
 	ok($cat.hasClass('test1'), '...that work!');
 
 	var $all = $('#main > div').test1__foo('apples');
-	ok($all.filter('.apples').length==4, 'applying through jQuery affects _all_ elements');
+	equals($all.filter('.apples').length, 2, 'applying through jQuery affects only those elements on which we\'ve run the constructor');
 });
 
 test('no ctors, expando allowed, use options', function(){
-	var test2 = new API({
-		name: 'test2',
+	var test2 = new Slash.Util.Package({ named: 'test2',
 		element_api: {
 			foo: function( t_elem, cn ){
 				var defaultColor = t_elem.test2 &&
@@ -121,7 +241,7 @@ test('no ctors, expando allowed, use options', function(){
 				colorClass: 'test2'
 			}
 		},
-		extend_jquery_wrapper: true
+		jquery: true
 	});
 
 	var $dog = $('#dog'), dog = $dog[0];
@@ -151,8 +271,7 @@ test('no ctors, expando allowed, use options', function(){
 });
 
 test('with ctors (expando required), with options', function(){
-	var test3 = new API({
-		name: 'test3',
+	var test3 = new Slash.Util.Package({ named: 'test3',
 		element_api: {
 			foo: function( t_elem, cn ){
 				var defaultColor = t_elem.test3 &&
@@ -185,7 +304,7 @@ test('with ctors (expando required), with options', function(){
 			}
 			return options;
 		},
-		extend_jquery_wrapper: true
+		jquery: true
 	});
 
 	var $list = $('#fish, #dog, #cat, #car');
@@ -200,8 +319,7 @@ test('with ctors (expando required), with options', function(){
 });
 
 test('globals, deny jQuery wrapper', function(){
-	window.Test4 = new API({
-		name: 'test4',
+	window.Test4 = new Slash.Util.Package({ named: 'test4',
 		element_api: {
 			foo: function( t_elem, cn ){
 				$(t_elem).addClass(cn);
@@ -210,29 +328,33 @@ test('globals, deny jQuery wrapper', function(){
 				$(t_elem).removeClass(cn);
 			}
 		},
-		extend_jquery: 'Test4'
+		jquery: {
+			api: true,
+			element_api: false
+		}
 	});
 
 	var $dog = $('#dog'), dog = $dog[0];
-	$.Test4(dog);
+	$.test4(dog);
 	ok(dog.test4 && dog.test4.foo, 'construct through jQuery global');
 	dog.test4.foo('chicken');
 	ok($dog.hasClass('chicken'), 'apply through elem');
-	ok( !$dog.test4 && !$dog.test4__foo, 'api not available on jQuery');
+	ok($dog.test4, 'api available top level jQuery');
+	ok(!$dog.test4__foo, 'api not available on jQuery selection');
 
 	var $fish = $('#fish'), fish = $fish[0];
 	Test4(fish);
 	ok(fish.test4 && fish.test4.foo, 'construct through window global');
 	fish.test4.foo('chicken');
 	ok($fish.hasClass('chicken'), 'apply through elem');
-	ok( !$fish.test4 && !$fish.test4__foo, 'api not available on jQuery');
+	ok($fish.test4, 'api available top level jQuery');
+	ok(!$fish.test4__foo, 'api not available on jQuery selection');
 
 });
 
 test("handling of 'this'", function(){
 
-	var test5 = new API({
-		name: 'test5',
+	var test5 = new Slash.Util.Package({ named: 'test5',
 		element_api: {
 			this_should_be_elem: function( elem ){
 				ok(this===elem, 'this === elem, for element based calls');
@@ -241,8 +363,7 @@ test("handling of 'this'", function(){
 				ok(this===test5, 'this === global, for global based calls');
 			}
 		},
-		extend_jquery_wrapper: true,
-		extend_jquery: true
+		jquery: true
 	});
 
 	var $dog = $('#dog'), dog = $dog[0];
@@ -252,6 +373,48 @@ test("handling of 'this'", function(){
 	test5(dog);
 	dog.test5.this_should_be_elem();
 
+});
+
+test('with_packages', function(){
+	ok(Slash.Util, 'API module makes or extends Slash.Util');
+	ok(Slash.Util.if_object, 'which contains the function "if_object"');
+
+	try {
+		ok(!if_object, 'good, no function "if_object" available"');
+	} catch ( e0 ) {
+		ok(true, 'if_object is so not defined I had to catch an exception!');
+	}
+	(function(){
+		ok(true, 'introducing a new scope');
+		eval(Slash.Util.Package.with_packages('Slash.Util'));
+		ok(true, 'survived with_packages eval');
+		ok(if_object!==undefined, 'good, now "if_object" is available directly');
+		ok(if_object({}), '...and it even works!');
+	})();
+	try {
+		ok(!if_object, 'good, it\'s gone now because it was only made available where I did it');
+	} catch ( e1 ) {
+		ok(true, 'exceptionally good, it\'s gone now because it was only made available where I did it');
+	}
+});
+
+test('ensure_namespace', function(){
+	ok(Slash.Util, 'API module makes or extends Slash.Util');
+	ok(Slash.Util.clone, 'which contains the function clone');
+
+	var utils = Slash.Util.ensure_namespace('Slash.Util');
+	ok(true, 'survived a call to Slash.Util.ensure_namespace');
+	ok(utils === Slash.Util, 'ensure_namespace returns the final link when it exists');
+	ok(utils.clone, 'and didn\'t do anything silly like replacing it');
+	var dummy = utils.ensure_namespace('Slash.Util.Able.Baker.Charlie.Dummy');
+	ok(utils.Able.Baker.Charlie.Dummy, 'wow!  it made a deep namespace');
+	ok(dummy === utils.Able.Baker.Charlie.Dummy, 'yeah, the return was to the last element, this time created');
+	ok(dummy === utils.ensure_namespace('Slash.Util.Able.Baker.Charlie.Dummy'), 'idempotent');
+
+	(function(){
+		Slash.Util.ensure_namespace('Superduper');
+	})();
+	ok(Superduper, 'namespaces aren\'t blocked by function boundaries');
 });
 
 test('regressions', function(){

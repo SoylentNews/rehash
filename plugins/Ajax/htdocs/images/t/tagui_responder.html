@@ -6,35 +6,39 @@
 	<link href="http://dev.jquery.com/view/trunk/qunit/testsuite.css" rel="stylesheet" type="text/css" media="screen">
 	<script src="http://dev.jquery.com/view/trunk/qunit/testrunner.js" type="text/javascript"></script>
 
-	<script src="../api.js" type="text/javascript"></script>
-	<script src="../jquery/jquery.slashdot.js" type="text/javascript"></script>
-	<script src="../responder.tagui.js" type="text/javascript"></script>
+	<script src="../slash.util.js" type="text/javascript"></script>
+	<script src="../slash.tagui.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 (function($){
 
 $(function(){
 
-module('tag_responder');
+module('TagUI.Responder');
 
 test('general', function(){
 
-	ok(TagUI, 'TagUI namespace exists');
-	ok(TagUI.tag_responder, '...and has the tag_responder component');
-	ok($.isFunction(TagUI.tag_responder), '...which is a function');
+	ok(Slash.TagUI, 'Slash.TagUI namespace exists');
+	var TagUI = Slash.TagUI;
+
+	ok(TagUI.Responder, '...and has the Responder component');
+	ok($.isFunction(TagUI.Responder), '...which is a function');
 
 	var $cat = $('#cat'), cat = $cat[0];
 
-	TagUI.tag_responder(cat, function( signals, data, options ){
-		$('#output').text((signals=='badkitty') ? 'meow' : 'purr');
-	}, 'badkitty goodkitty');
+	TagUI.Responder(cat, {
+		fn: function( signals, data, options ){
+			$('#output').text((signals=='badkitty') ? 'meow' : 'purr');
+		},
+		signals: 'badkitty goodkitty'
+	});
 
-	ok(cat.tag_responder && cat.tag_responder.handle_signal, 'constructor installs handler');
-	cat.tag_responder.handle('goodkitty');
+	ok(cat.tagui_responder && cat.tagui_responder.handle_signal, 'constructor installs handler');
+	cat.tagui_responder.handle('goodkitty');
 	ok($('#output').is(':contains("purr")'), 'handler functions');
 
 	// simulate server's way of doing it
-	$('#main .ready[signal*=badkitty]').tag_responder__handle('badkitty');
+	$('#main .ready[signal*=badkitty]').tagui_responder__handle('badkitty');
 	ok($('#output').is(':contains("meow")'), 'handler functions when called through selection');
 });
 

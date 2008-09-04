@@ -1,0 +1,89 @@
+<html>
+<head>
+	<title>Unit Tests: broadcaster.tagui.js</title>
+
+	<script src="../jquery/jquery-1.2.6.js" type="text/javascript"></script>
+	<link href="http://dev.jquery.com/view/trunk/qunit/testsuite.css" rel="stylesheet" type="text/css" media="screen">
+	<script src="http://dev.jquery.com/view/trunk/qunit/testrunner.js" type="text/javascript"></script>
+
+	<script src="../slash.util.js" type="text/javascript"></script>
+	<script src="../slash.tagui.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+(function($){
+
+$(function(){
+
+function not_ok( m ){
+	ok(false, m);
+}
+
+eval(Slash.Util.Package.with_packages('Slash.Util'));
+
+module('TagUI.Broadcaster');
+
+test('general', function(){
+
+	ok(Slash.TagUI, 'Slash.TagUI namespace exists');
+	var TagUI = Slash.TagUI;
+
+	ok(TagUI.Broadcaster, '...and has the Broadcaster component');
+	ok($.isFunction(TagUI.Broadcaster), '...which is a function');
+	var $main = $('#main').tagui_broadcaster(), main=$main[0];
+	ok(true, 'survived jQuery initializer');
+	ok(main===$('#main')[0], 'returned the selection');
+	ok(main.tagui_broadcaster, 'whose elements appear to have the broadcaster stem attached');
+	ok(main.tagui_broadcaster.broadcast, 'decorated with the broadcaster api');
+
+	var count = 0;
+	var signal_received;
+	var handle_signal = function( signals, data ){
+		signals = qw.as_string(signals);
+		data = qw.as_string(data);
+		var prefix = this.id + ': ';
+		signal_received = signals;
+		ok(count++<2, prefix + signals + ' ('+data+'). caught: '+count+'. (max 2 -- one per receiver)');
+		$(this).text(prefix + signals + ' ; ' + data);
+	};
+
+	var $cat = $('#cat'), cat = $cat[0];
+	var $dog = $('#dog'), dog = $dog[0];
+
+	TagUI.Responder(cat, { fn: handle_signal, signals: 'badkitty goodkitty' });
+	TagUI.Responder(dog, { fn: handle_signal, signals: 'goodboy badkitty' });
+
+	//$('body, #main').tagui_broadcaster__broadcast('goodkitty', 'here\'s a treat');
+	main.tagui_broadcaster.broadcast('goodkitty', 'here\'s a treat');
+	equals(count, 1, 'exactly one response means only #main broadcast, only cat responded');
+	equals(signal_received, 'goodkitty', 'and the right signal was received');
+
+	count = 0;
+	$('body, #main').tagui_broadcaster__broadcast('badkitty', 'git the kitty!');
+	//main.tagui_broadcaster.broadcast('badkitty', 'git the kitty!');
+	equals(count, 2, 'exactly two responses means only #main broadcast, both dog and cat responded')
+});
+
+
+
+test('regressions', function(){
+});
+
+});
+
+})(jQuery);
+</script>
+
+</head>
+<body>
+	<h1>Unit Tests: broadcaster.tagui.js</h1>
+	<h2 id="banner"></h2>
+	<h2 id="userAgent"></h2>
+	<ol id="tests"></ol>
+	<div id="main">
+		<div id='fish' class='fish'></div>
+		<div id='dog' class='dog'></div>
+		<div id='cat' class='cat'></div>
+		<div id='car'></div>
+	</div>
+</body>
+</html>
