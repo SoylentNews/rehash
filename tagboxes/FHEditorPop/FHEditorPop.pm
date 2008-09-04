@@ -131,7 +131,7 @@ sub run_process {
 		}
 	} elsif ($type eq "comments") {
 		my $comment = $self->getComment($target_id);
-		my $score = constrain_score($comment->{points} + $comment->{tweak});
+		my $score = Slash::Utility::Comments::constrain_score($comment->{points} + $comment->{tweak});
 		   if ($score >= 3) {	$color_level = 4 }
 		elsif ($score >= 2) {	$color_level = 5 }
 		elsif ($score >= 1) {	$color_level = 6 }
@@ -141,8 +141,8 @@ sub run_process {
 
 	# Add up nods and nixes.
 
-# XXX add this automatically?
-#	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
+	# XXX add this automatically?
+	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
 
 	my $udc_cache = { };
 	my($n_admin_maybes, $n_admin_nixes, $maybe_pop_delta) = (0, 0, 0);

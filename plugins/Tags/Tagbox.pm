@@ -222,6 +222,7 @@ sub getTagboxes {
 		# might re-invoke getTagboxes().)
 		for my $hr (@$tagboxes) {
 			my $class = "Slash::Tagbox::$hr->{name}";
+			Slash::Utility::Environment::loadClass($class);
 			$hr->{affected_type} = $class->get_affected_type();
 			$hr->{userkeyregex} = $class->get_userkeyregex();
 			$hr->{clid} = $class->get_clid();
@@ -452,9 +453,10 @@ sub getTagboxTags {
 		$max_time_clause = " AND created_at <= $mtq";
 	}
 	$hr_ar = $self->sqlSelectAllHashrefArray(
-		'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
-		'tags',
-		"$colname=$affected_id $max_time_clause",
+		'tags.*, tagname, UNIX_TIMESTAMP(created_at) AS created_at_ut',
+		'tags, tagnames',
+		"tags.tagnameid=tagnames.tagnameid
+		 AND $colname=$affected_id $max_time_clause",
 		'ORDER BY tagid');
 	$self->debug_log("colname=%s pre_filter hr_ar=%d",
 		$colname, scalar(@$hr_ar));
@@ -471,9 +473,10 @@ sub getTagboxTags {
 		my $new_ids = join(',', sort { $a <=> $b } keys %new_ids);
 
 		$hr_ar = $self->sqlSelectAllHashrefArray(
-			'*, UNIX_TIMESTAMP(created_at) AS created_at_ut',
-			'tags',
-			"$new_colname IN ($new_ids) $max_time_clause",
+			'tags.*, tagname, UNIX_TIMESTAMP(created_at) AS created_at_ut',
+			'tags, tagnames',
+			"tags.tagnameid=tagnames.tagnameid
+			 AND $new_colname IN ($new_ids) $max_time_clause",
 			'ORDER BY tagid');
 
 		$self->debug_log("new_colname=%s pre_filter hr_ar=%d new_ids=%d (%.20s)",
@@ -555,16 +558,19 @@ sub markTagboxRunComplete {
 
 sub info_log {
 	my($self, $format, @args) = @_;
-	my $caller = join ',', (caller(1))[3,4];
-	main::tagboxLog("%s $format", $caller, @args);
+	my $caller_sub_full = (caller(1))[3];
+	my($caller_sub) = $caller_sub_full =~ /::([^:]+)$/;
+	my $class = ref($self);
+	main::tagboxLog(sprintf("%s %s $format", $class, $caller_sub, @args));
 }
 
 sub debug_log {
 	my($self, $format, @args) = @_;
-	if ($self->{debug} > 0) {
-		my $caller = join ',', (caller(1))[3,4];
-		main::tagboxLog("%s $format", $caller, @args);
-	}
+	return if !$self->{debug};
+	my $caller_sub_full = (caller(1))[3];
+	my($caller_sub) = $caller_sub_full =~ /::([^:]+)$/;
+	my $class = ref($self);
+	main::tagboxLog(sprintf("%s %s $format", $class, $caller_sub, @args));
 }
 
 #################################################################

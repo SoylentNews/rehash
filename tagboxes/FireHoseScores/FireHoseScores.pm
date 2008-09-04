@@ -24,7 +24,7 @@ use Slash::Utility::Comments; # XXX needed?
 
 our $VERSION = $Slash::Constants::VERSION;
 
-use base 'Slash::Plugin';
+use base 'Slash::Tagbox';
 
 sub init {
 	my($self) = @_;

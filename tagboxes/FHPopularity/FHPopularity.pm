@@ -129,8 +129,8 @@ sub run {
 	$popularity = $firehose->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 
 	# Add up nods and nixes.
-# XXX make an option?
-#	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
+	# XXX make an option?
+	$tagsdb->addCloutsToTagArrayref($tags_ar, 'vote');
 
 	my($n_admin_maybes, $n_admin_nixes, $maybe_pop_delta) = (0, 0, 0);
 	for my $tag_hr (@$tags_ar) {

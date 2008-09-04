@@ -1264,7 +1264,7 @@ sub ajaxProcessAdminTags {
 	my $tagboxes = $tagboxdb->getTagboxes();
 	for my $tagbox_hr (@$tagboxes) {
 		next if $tagbox_hr->{affected_type} eq 'user';
-		$tagboxdb->forceFeederRecalc($tagbox_hr->{tbid}, $globjid);
+		$tagbox_hr->{object}->forceFeederRecalc($globjid);
 	}
 
 	my $tags_admin_str = "Performed commands: '@commands'.";
