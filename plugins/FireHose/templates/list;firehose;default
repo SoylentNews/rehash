@@ -180,6 +180,7 @@ cmdrtaco dot net but be forgiving of beta code!
 	[% END %]
 
 	var firehose_action_time = 0;
+	var firehose_user_class = [% user.is_anon ? 0 : 1 %];
 	[% IF options.pagesize == "large" && !form.metamod %]
 	firehose_more_increment = 15;
 	[% END %]
