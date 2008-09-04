@@ -435,10 +435,11 @@ div.article div.title div.nod-nix-reasons span.tag {
 }
 
 .note-flag {
+	color: white !important;
 	position: absolute;
 	right: 6em;
 }
 
 .note-flag.no-note {
-	opacity: 0;
+	display: none;
 }

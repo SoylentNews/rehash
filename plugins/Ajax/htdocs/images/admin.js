@@ -372,9 +372,9 @@ function firehose_save_note(id) {
 		op:	'firehose_save_note',
 		note:	note_text,
 		id:	id
-	}, 'note-text-'+id);
+	});
 	$entry.find('#note-form-'+id).addClass('hide');
-	$entry.find('#note-text-'+id).removeClass('hide');
+	$entry.find('#note-text-'+id).text(note_text || 'Note').removeClass('hide');
 
 	return $entry;
 }
