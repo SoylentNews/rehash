@@ -189,6 +189,13 @@ sub run_process {
 		}
 	}
 
+	# If this is a comment, it normally only shows up for an editor if
+	# it's one of a select few.
+	if ($fhitem->{type} eq 'comment'
+		&& !$self->showCommentToEditors($target_id)) {
+		$popularity = -50 if $popularity > -50;
+	}
+
 	# If more than a certain number of users have tagged this item with
 	# public non-voting tags and its popularity is low, there may be a
 	# bad reason why.  Boost its editor score up so that an editor sees
@@ -239,6 +246,19 @@ sub run_process {
 	}
 	$self->info_log("setting %d (%d) to %.6f", $fhid, $affected_id, $popularity);
 	$firehose->setFireHose($fhid, { editorpop => $popularity });
+}
+
+# XXX hex_percent should be a library function, it's used by CommentScoreReason too
+
+sub showCommentToEditors {
+	my($self, $cid) = @_;
+	my $constants = getCurrentStatic();
+
+	# Hash its cid;  if the last 4 hex digits interpreted as a fraction are
+	# within the range determined, add it to the hose.
+	my $percent = $constants->{tagbox_fheditorpop_needypercent} || 3;
+	my $hex_percent = int(hex(substr(md5_hex($cid), -4)) * 100 / 65536);
+	return $hex_percent < $percent;
 }
 
 { # closure

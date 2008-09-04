@@ -220,6 +220,8 @@ sub run_process {
 		}, "cid='$cid'");
 }
 
+# XXX hex_percent should be a library function, it's used by FHEditorPop too
+
 sub addCommentToHoseIfAppropriate {
 	my($self, $firehose, $globjid, $cid, $neediness, $score) = @_;
 	my $constants = getCurrentStatic();
