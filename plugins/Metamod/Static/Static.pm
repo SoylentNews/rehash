@@ -13,7 +13,7 @@ our $VERSION = $Slash::Constants::VERSION;
 
 sub isInstalled {
 	my($class) = @_;
-	return Slash::MetaMod->isInstalled();
+	return Slash::Metamod->isInstalled();
 }
 
 ########################################################

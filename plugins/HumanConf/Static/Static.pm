@@ -37,7 +37,7 @@ sub init {
 
 sub isInstalled {
 	my($class) = @_;
-	return Slash::HumanConf::isInstalled('Slash::HumanConf') ? 1 : 0;
+	return Slash::HumanConf->isInstalled();
 }
 
 sub getPoolSize {

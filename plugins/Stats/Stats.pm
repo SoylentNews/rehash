@@ -13,7 +13,7 @@ Slash::Stats - Stats plugin for Slash
 use strict;
 use LWP::UserAgent;
 use Slash;
-use Slash::Utility::Environment;
+use Slash::Utility;
 
 use base 'Slash::Plugin';
 
@@ -231,6 +231,10 @@ sub init {
 	1;
 }
 
+sub isInstalled {
+	my($class) = @_;
+	return $class->SUPER::isInstalled();
+}
 
 ########################################################
 sub getAL2Counts {

@@ -5480,7 +5480,6 @@ ALTER TABLE tagname_params ADD INDEX name (name);
 # 2008-08-28
 UPDATE vars SET value = 'T_2_5_0_218' WHERE name = 'cvs_tag_currentcode';
 
-
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
 # SLASHDOT LAST UPDATED HERE
@@ -5490,6 +5489,6 @@ ALTER TABLE tagboxes DROP COLUMN affected_type, DROP COLUMN clid, DROP COLUMN no
 DROP TABLE tagbox_userkeyregexes;
 
 # for tagboxes/FHEditorPop
-INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fheditorpop_needypercent', '3', 'Percentage of all comments which show up in an editor's hose (should be <= tagbox_csr_needinesspercent)');
+INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fheditorpop_needypercent', '3', 'Percentage of all comments which show up in an editor\'s hose (should be <= tagbox_csr_needinesspercent)');
 
 UPDATE ajax_ops where op="firehose_get_updates" set rekskey_name='ajax_base'
