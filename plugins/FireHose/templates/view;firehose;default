@@ -31,9 +31,12 @@ __template__
 [% PROCESS init_tagui %]
 <script type="text/javascript">
 $(function(){
-	firehose_init_tagui(
+	var $entries = firehose_init_tagui(
 		$('#firehose > .view > .head > [id^=firehose-]')
 			.click(firehose_click_tag) );
+	if ( fh_is_admin ) {
+		firehose_init_note_flags($entries);
+	}
 });
 </script>
 __version__

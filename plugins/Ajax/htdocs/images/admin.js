@@ -319,20 +319,54 @@ function firehose_reject (el) {
 	firehose_remove_entry(el.value);
 }
 
-function firehose_open_note(id) {
-	var $entry = $('#firehose-'+id);
+function firehose_init_note_flags( $entries ){
+	// set up the "note flag"
+	return $entries.each(function(){
+		var $entry = $(this), id = firehose_id_of(this);
+		var $note = $entry.find('.note-wrapper');
+		var note_text='', no_note = ! $note.length || $note.hasClass('no-note');
+		if ( ! no_note ) {
+			note_text = $note.find('.admin-note a').text().replace(/^\s*(.*\S)\s*$/, "$1");
+		}
 
-	$entry.find('.note-wrapper').removeClass('no-note');
-	$entry.find('#note-form-'+id).removeClass('hide');
-	$entry.find('#note-input-'+id).each(function(){this.focus();});
-	$entry.find('#note-text-'+id).addClass('hide');
+		var $note_flag = $entry.find('.title h3').
+			append('<span class="note-flag">note</span>').
+			find('.note-flag').
+			attr('title', note_text).
+			click(function(){
+				firehose_open_note($entry)
+			});
+
+		if ( no_note ) {
+			$note_flag.addClass('no-note');
+		}
+	});
+}
+
+function firehose_open_note( expr ) {
+	if ( typeof expr === 'string' || typeof expr === 'number' ) {
+		expr = '#firehose-' + expr;
+	}
+	return $(expr).each(function(){
+		var $entry = $(this), id = firehose_id_of(this);
+		if ( $entry.is('[class^=brief]') ) {
+			toggle_firehose_body(id, true);
+		}
+		$entry.find('.note-wrapper').removeClass('no-note');
+		$entry.find('#note-form-'+id).removeClass('hide');
+		$entry.find('#note-input-'+id).each(function(){this.focus();});
+		$entry.find('#note-text-'+id).addClass('hide');
+	});
 }
 
 function firehose_save_note(id) {
 	var $entry = $('#firehose-'+id);
 
-	var note_text = $entry.find('#note-input-'+id).val();
-	$entry.find('.note-flag, .note-wrapper').toggleClassTo('no-note', !note_text);
+	var note_text = $entry.find('#note-input-'+id).val().replace(/^\s*(.*\S)\s*$/, "$1");
+	$entry.find('.note-flag, .note-wrapper').
+		toggleClassTo('no-note', !note_text).
+		filter('.note-flag').
+			attr('title', note_text);
 
 	ajax_update({
 		op:	'firehose_save_note',
@@ -341,6 +375,8 @@ function firehose_save_note(id) {
 	}, 'note-text-'+id);
 	$entry.find('#note-form-'+id).addClass('hide');
 	$entry.find('#note-text-'+id).removeClass('hide');
+
+	return $entry;
 }
 
 function firehose_get_admin_extras(id) {

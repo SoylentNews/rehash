@@ -211,7 +211,10 @@ fh_ticksize = 15;
 firehose_slider_init();
 $(function(){
 	$('#firehoselist').click(firehose_click_tag);
-	firehose_init_tagui();
+	var $entries = firehose_init_tagui();
+	if ( fh_is_admin ) {
+		firehose_init_note_flags($entries);
+	}
 });
 
 

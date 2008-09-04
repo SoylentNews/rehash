@@ -936,7 +936,7 @@ function firehose_init_tagui( $new_entries ){
 				});
 	}
 
-	init_tagui_styles($new_entries);
+	return init_tagui_styles($new_entries);
 }
 // firehose functions end
 
@@ -1198,7 +1198,11 @@ function firehose_handle_update() {
 		firehose_get_next_updates();
 	}
 
-	firehose_init_tagui();
+	var $new_entries = firehose_init_tagui();
+	if ( fh_is_admin ) {
+		firehose_init_note_flags($new_entries);
+	}
+
 
 	saved_selection.restore().focus();
 	$menu.show();

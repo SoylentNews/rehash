@@ -968,7 +968,7 @@ function recompute_css_classes( root ){
 }
 
 function init_tagui_styles( $entries ){
-	$entries.each(function(){
+	return $entries.each(function(){
 		recompute_css_classes(this);
 	});
 }
