@@ -477,6 +477,7 @@ function toggle_firehose_body(id, is_admin) {
 		/*if (is_admin)
 			tagsShowBody(id, is_admin, '', "firehose"); */
 	}
+	return false;
 }
 
 function toggleFirehoseTagbox(id) {
@@ -484,6 +485,7 @@ function toggleFirehoseTagbox(id) {
 }
 
 function firehose_set_options(name, value) {
+	return false if firehose_user_class == 0;
 	if (name == "color" && value === undefined) {
 		return;
 	}
@@ -1879,7 +1881,13 @@ function firehose_more() {
 	if (((firehose_item_count + firehose_more_increment) >= 200) && !fh_is_admin) {
 		$('#firehose_more').hide();
 	}
-	firehose_set_options('more_num', firehose_settings.more_num);
+	if (firehose_user_class) {
+		alert('calling set options');
+		firehose_set_options('more_num', firehose_settings.more_num);
+	} else {
+		alert('anon calling get updates');
+		firehose_get_updates({ oneupdate: 1 });
+	}
 }
 
 function firehose_get_onscreen() {
