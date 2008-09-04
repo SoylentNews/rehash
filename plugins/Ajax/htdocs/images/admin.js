@@ -326,7 +326,7 @@ function firehose_init_note_flags( $entries ){
 		var $note = $entry.find('.note-wrapper');
 		var note_text='', no_note = ! $note.length || $note.hasClass('no-note');
 		if ( ! no_note ) {
-			note_text = $note.find('.admin-note a').text().replace(/^\s*(.*\S)\s*$/, "$1");
+			note_text = $.trim($note.find('.admin-note a').text());
 		}
 
 		var $note_flag = $entry.find('.title h3').
@@ -362,7 +362,7 @@ function firehose_open_note( expr ) {
 function firehose_save_note(id) {
 	var $entry = $('#firehose-'+id);
 
-	var note_text = $entry.find('#note-input-'+id).val().replace(/^\s*(.*\S)\s*$/, "$1");
+	var note_text = $.trim($entry.find('#note-input-'+id).val());
 	$entry.find('.note-flag, .note-wrapper').
 		toggleClassTo('no-note', !note_text).
 		filter('.note-flag').

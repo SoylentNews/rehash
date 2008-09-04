@@ -781,7 +781,10 @@ function firehose_click_tag( event ) {
 	if ( command ) {
 		var $server = $target.nearest_parent('[tag-server]');
 
-		if ( event.shiftKey ) {
+		if ( firehose_user_class !== undefined && !firehose_user_class ) {
+			show_login_box();
+			return true;
+		} else if ( event.shiftKey ) {
 			// if the shift key is down, append the tag to the edit field
 			$server.find('.tag-entry:text:visible:first').each(function(){
 				if ( this.value ) {
