@@ -40,6 +40,16 @@ sub new {
 	return $self;
 }
 
+sub isInstalled {
+	my($class) = @_;
+	# Slash::SearchToo is subclassed by Slash::SearchToo::Indexer
+	# and that's subclassed as well.  But all the subclasses are
+	# installed if and only if Slash::SearchToo is.  So override
+	# the default check.
+	my $constants = getCurrentStatic();
+	return $constants->{plugin}{SearchToo};
+}
+
 #################################################################
 # these may be implemeted in backend modules
 sub getOps {
