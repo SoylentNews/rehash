@@ -485,7 +485,9 @@ function toggleFirehoseTagbox(id) {
 }
 
 function firehose_set_options(name, value) {
-	return false if firehose_user_class == 0;
+	if (firehose_user_class == 0) {
+		return false;
+	}
 	if (name == "color" && value === undefined) {
 		return;
 	}
@@ -1882,10 +1884,8 @@ function firehose_more() {
 		$('#firehose_more').hide();
 	}
 	if (firehose_user_class) {
-		alert('calling set options');
 		firehose_set_options('more_num', firehose_settings.more_num);
 	} else {
-		alert('anon calling get updates');
 		firehose_get_updates({ oneupdate: 1 });
 	}
 }
