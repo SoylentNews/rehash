@@ -722,33 +722,40 @@ function firehose_remove_tab(tabid) {
 
 var $related_trigger = $().filter();
 
+var kExpanded=true, kCollapsed=false;
+
 function firehose_toggle_tagui_to( if_expanded, selector ){
 	var	$server = $(selector).nearest_parent('[tag-server]'),
+		id	= $server.attr('tag-server'),
 		$widget = $server.find('.tag-widget.body-widget'),
-		id	= $server.attr('tag-server');
+		toggle	= if_expanded != $widget.hasClass('expanded');
 
-	setFirehoseAction();
-	$server.find('.tag-widget').each(function(){ this.set_context(); });
+	if ( toggle ) {
+		setFirehoseAction();
+		$server.find('.tag-widget').each(function(){ this.set_context(); });
 
-	$widget.toggleClassTo('expanded', if_expanded);
+		$widget.toggleClassTo('expanded', if_expanded);
 
-	var toggle_button={}, toggle_div={};
-	if ( if_expanded ){
-		$server.each(function(){ this.fetch_tags(); });
-		if ( fh_is_admin ) {
-			firehose_get_admin_extras(id);
+		var toggle_button={}, toggle_div={};
+		if ( if_expanded ){
+			$server.each(function(){ this.fetch_tags(); });
+			if ( fh_is_admin ) {
+				firehose_get_admin_extras(id);
+			}
+			$widget.find('.tag-entry:visible:first').each(function(){ this.focus(); });
+
+			toggle_button['+'] = (toggle_button.collapse = 'expand');
+			toggle_div['+'] = (toggle_div.tagshide = 'tagbody');
+		} else {
+			toggle_button['+'] = (toggle_button.expand = 'collapse');
+			toggle_div['+'] = (toggle_div.tagbody = 'tagshide');
 		}
-		$widget.find('.tag-entry:visible:first').each(function(){ this.focus(); });
 
-		toggle_button['+'] = (toggle_button.collapse = 'expand');
-		toggle_div['+'] = (toggle_div.tagshide = 'tagbody');
-	} else {
-		toggle_button['+'] = (toggle_button.expand = 'collapse');
-		toggle_div['+'] = (toggle_div.tagbody = 'tagshide');
+		$widget.find('a.edit-toggle .button').mapClass(toggle_button);
+		$server.find('#toggletags-body-'+id).mapClass(toggle_div);
 	}
 
-	$widget.find('a.edit-toggle .button').mapClass(toggle_button);
-	$server.find('#toggletags-body-'+id).mapClass(toggle_div);
+	return $widget;
 }
 
 function firehose_toggle_tagui( toggle ) {
@@ -756,8 +763,7 @@ function firehose_toggle_tagui( toggle ) {
 }
 
 function firehose_click_tag( event ) {
-	var $target = $(event.target);
-	var command='';
+	var $target = $(event.target), command='', $menu;
 
 	$related_trigger = $target;
 
@@ -767,7 +773,7 @@ function firehose_click_tag( event ) {
 		command = 'nix';
 	} else if ( $target.is('.tag') ) {
 		command = $target.text();
-	} else if ( $target.nearest_parent('.tmenu').length ) {
+	} else if ( ($menu = $target.nearest_parent('.tmenu')).length ) {
 		var op = $target.text();
 		var $tag = $target.nearest_parent(':has(span.tag)').find('.tag');
 		$related_trigger = $tag;
@@ -775,18 +781,36 @@ function firehose_click_tag( event ) {
 		var tag = $tag.text();
 		command = normalize_tag_menu_command(tag, op);
 	} else {
-		$related_target = $().filter();
+		$related_trigger = $().filter();
 	}
 
 	if ( command ) {
-		var $server = $target.nearest_parent('[tag-server]');
-
+		// No!  You no hurt Dr. Jones!  You log-in first!
 		if ( firehose_user_class !== undefined && !firehose_user_class ) {
 			show_login_box();
 			return true;
-		} else if ( event.shiftKey ) {
-			// if the shift key is down, append the tag to the edit field
-			$server.find('.tag-entry:text:visible:first').each(function(){
+		}
+
+		var $server = $target.nearest_parent('[tag-server]');
+
+		// Make sure the user sees some feedback...
+		if ( $menu || event.shiftKey ) {
+			// for a menu command or copying a tag into edit field, open the tagui
+			var $widget = firehose_toggle_tagui_to(kExpanded, $server);
+
+			// the menu is hover css, you did the command, so the menu should go away
+			// but you're still hovering
+			if ( $menu ) {
+				// so explicitly hide the menu
+				$menu.hide();
+				// Yikes! that makes it permanently gone; so undo at our earliest convenience
+				setTimeout(function(){ $menu.removeAttr('style'); });
+				// it can't immediately re-pop because you no longer qualify for the hover
+			}
+		}
+
+		if ( event.shiftKey ) { // if the shift key is down, append the tag to the edit field
+			$widget.find('.tag-entry:text:visible:first').each(function(){
 				if ( this.value ) {
 					var last_char = this.value[ this.value.length-1 ];
 					if ( '-^#!)_ '.indexOf(last_char) == -1 ) {
@@ -796,8 +820,7 @@ function firehose_click_tag( event ) {
 				this.value += command;
 				this.focus();
 			});
-		} else {
-			// otherwise, send it the server to be processed
+		} else { // otherwise, send it the server to be processed
 			$server.each(function(){
 				this.submit_tags(command, { fade_remove: 400, order: 'prepend', classes: 'not-saved'});
 			});
