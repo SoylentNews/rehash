@@ -631,13 +631,16 @@ sub _do_filter_firehoseonly {
 	if ($self->{filter_firehoseonly}) {
 		my %globjs = ( map { $_->{globjid}, 1 } @$tags_ar );
 		my $globjs_str = join(', ', sort keys %globjs);
-		my $fh_globjs_ar = $self->sqlSelectColArrayref(
-			'globjid',
-			'firehose',
-			"globjid IN ($globjs_str)");
+		my $fh_globjs_ar = [ ];
+		if ($globjs_str) {
+			$fh_globjs_ar = $self->sqlSelectColArrayref(
+				'globjid',
+				'firehose',
+				"globjid IN ($globjs_str)");
+		}
 		return [ ] if !@$fh_globjs_ar; # if no affected globjs have firehose entries, short-circuit out
 		my %fh_globjs = ( map { $_, 1 } @$fh_globjs_ar );
-		$tags_ar = [ grep { $fh_globjs{ $_->{affected_id} } } @$tags_ar ];
+		$tags_ar = [ grep { $fh_globjs{ $_->{globjid} } } @$tags_ar ];
 	}
 	return $tags_ar;
 }
