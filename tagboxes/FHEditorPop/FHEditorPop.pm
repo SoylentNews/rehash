@@ -19,6 +19,8 @@ Slash::Tagbox::FHEditorPop - keep track of popularity of firehose for editors
 
 use strict;
 
+use Digest::MD5 'md5_hex';
+
 use Slash;
 
 our $VERSION = $Slash::Constants::VERSION;
