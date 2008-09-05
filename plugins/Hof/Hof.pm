@@ -5,6 +5,7 @@
 package Slash::Hof;
 
 use strict;
+use Slash::Utility;
 
 use base 'Slash::Plugin';
 
