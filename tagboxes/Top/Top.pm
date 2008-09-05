@@ -28,6 +28,7 @@ use base 'Slash::Tagbox';
 sub init_tagfilters {
 	my($self) = @_;
 	$self->{filter_activeonly} = 1;
+	$self->{filter_publiconly} = 1;
 }
 
 sub get_affected_type	{ 'globj' }

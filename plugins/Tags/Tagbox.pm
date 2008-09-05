@@ -497,13 +497,7 @@ sub getTagboxTags {
 
 sub gtt_filter {
 	my($self, $tags_ar) = @_;
-
-	$tags_ar = $self->_do_filter_activeonly($tags_ar);
-	$tags_ar = $self->_do_filter_tagnameid($tags_ar);
-	$tags_ar = $self->_do_filter_gtid($tags_ar);
-	$tags_ar = $self->_do_filter_uid($tags_ar);
-
-	return $tags_ar;
+	return $self->_do_default_filter($tags_ar);
 }
 
 sub addFeederInfo {
@@ -561,20 +555,35 @@ sub info_log {
 	my $caller_sub_full = (caller(1))[3];
 	my($caller_sub) = $caller_sub_full =~ /::([^:]+)$/;
 	my $class = ref($self);
-	main::tagboxLog(sprintf("%s %s $format", $class, $caller_sub, @args));
+	my $msg = sprintf("%s %s $format", $class, $caller_sub, @args);
+	if (defined &main::tagboxLog) {
+		main::tagboxLog($msg);
+	} else {
+		print STDERR scalar(gmtime) . " $msg";
+	}
 }
 
 sub debug_log {
 	my($self, $format, @args) = @_;
 	return if !$self->{debug};
-	my $caller_sub_full = (caller(1))[3];
-	my($caller_sub) = $caller_sub_full =~ /::([^:]+)$/;
-	my $class = ref($self);
-	main::tagboxLog(sprintf("%s %s $format", $class, $caller_sub, @args));
+	$self->info_log($format, @args);
 }
 
 #################################################################
 #################################################################
+
+sub _do_default_filter {
+	my($self, $tags_ar) = @_;
+
+	$tags_ar = $self->_do_filter_activeonly($tags_ar);
+	$tags_ar = $self->_do_filter_publiconly($tags_ar);
+	$tags_ar = $self->_do_filter_firehoseonly($tags_ar);
+	$tags_ar = $self->_do_filter_tagnameid($tags_ar);
+	$tags_ar = $self->_do_filter_gtid($tags_ar);
+	$tags_ar = $self->_do_filter_uid($tags_ar);
+
+	return $tags_ar;
+}
 
 # "activeonly" is the simplest and ironically the trickiest of the
 # filters.  Its mission is simply:  if the tagbox wants only
@@ -599,6 +608,17 @@ sub _do_filter_activeonly {
 			   !$_->{inactivated}
 			||  $_->{tdid}
 		} @$tags_ar ];
+	}
+	return $tags_ar;
+}
+
+# "publiconly", if a tagbox has set that option, only allows tags
+# with private='no'
+
+sub _do_filter_publiconly {
+	my($self, $tags_ar) = @_;
+	if ($self->{filter_publiconly}) {
+		$tags_ar = [ grep { $_->{private} eq 'no' } @$tags_ar ];
 	}
 	return $tags_ar;
 }
@@ -692,13 +712,7 @@ sub feed_newtags {
 
 sub feed_newtags_filter {
 	my($self, $tags_ar) = @_;
-
-	$tags_ar = $self->_do_filter_activeonly($tags_ar);
-	$tags_ar = $self->_do_filter_tagnameid($tags_ar);
-	$tags_ar = $self->_do_filter_gtid($tags_ar);
-	$tags_ar = $self->_do_filter_uid($tags_ar);
-
-	return $tags_ar;
+	return $self->_do_default_filter($tags_ar);
 }
 
 sub feed_newtags_pre {
@@ -825,11 +839,11 @@ sub feed_userchanges_pre {
 #################################################################
 
 sub run {
-	my($self, $affected_id) = @_;
+	my($self, $affected_id, $options) = @_;
 	$self->run_pre($affected_id);
 	my $tags_ar = $self->run_gettags($affected_id);
 	$tags_ar = $self->run_filter($tags_ar);
-	$self->run_process($affected_id, $tags_ar);
+	$self->run_process($affected_id, $tags_ar, $options);
 }
 
 sub run_pre {
@@ -849,13 +863,7 @@ sub run_gettags {
 
 sub run_filter {
 	my($self, $tags_ar) = @_;
-
-	$tags_ar = $self->_do_filter_activeonly($tags_ar);
-	$tags_ar = $self->_do_filter_tagnameid($tags_ar);
-	$tags_ar = $self->_do_filter_gtid($tags_ar);
-	$tags_ar = $self->_do_filter_uid($tags_ar);
-
-	return $tags_ar;
+	return $self->_do_default_filter($tags_ar);
 }
 
 sub run_process {

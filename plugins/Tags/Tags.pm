@@ -2109,7 +2109,7 @@ sub getPrivateTagnames {
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 
-	my @private_tags = ();
+	my @private_tags = qw( metanod metanix );
 	push @private_tags, ($constants->{tags_upvote_tagname} || "nod");
 	push @private_tags, ($constants->{tags_downvote_tagname} || "nix");
 	if ($user->{is_admin}) {

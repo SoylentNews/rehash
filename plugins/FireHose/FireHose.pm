@@ -52,6 +52,7 @@ sub createFireHose {
 	$data->{body_length} = $data->{bodytext} ? length($data->{bodytext}) : 0;
 	$data->{word_count} = countWords($data->{introtext}) + countWords($data->{bodytext});
 	$data->{mediatype} ||= "none";
+	$data->{email} ||= '';
 
 	my $text_data = {};
 	$text_data->{title} = delete $data->{title};
@@ -172,7 +173,7 @@ sub createItemFromComment {
 		for my $tbname (qw( FHPopularity FHEditorPop CommentScoreReason )) {
 			my $tagbox = $tagboxdb->getTagboxes($tbname);
 			next unless $tagbox;
-			$tagboxdb->forceFeederRecalc($tagbox->{tbid}, $globjid);
+			$tagbox->{object}->forceFeederRecalc($globjid);
 		}
 	}
 

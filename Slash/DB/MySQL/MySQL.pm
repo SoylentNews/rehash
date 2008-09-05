@@ -8503,7 +8503,7 @@ sub _getMCDStats_percentify {
 # prettier compromise.  I'm just saying. - Jamie
 sub autoUrl {
 	my($self, $section, @data) = @_;
-	my $data = @data ? join(' ', @data) : '';
+	my $data = @data ? join(' ', map { $_ || '' } @data) : '';
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
 

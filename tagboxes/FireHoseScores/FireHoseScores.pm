@@ -95,14 +95,14 @@ sub get_userkeyregex	{ qr{^tag_clout$} }
 #	return $ret_ar;
 #}
 
-sub run {
+sub run_process {
 	my($self, $affected_id, $tags_ar, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
 	my $firehose_db = getObject('Slash::FireHose');
 	my $fhid = $firehose_db->getFireHoseIdFromGlobjid($affected_id);
-	warn "Slash::Tagbox::FireHoseScores->run bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
+	warn "Slash::Tagbox::FireHoseScores->run_process bad data, fhid='$fhid' db='$firehose_db'" if !$fhid || !$firehose_db;
 	my $fhitem = $firehose_db->getFireHose($fhid);
 
 	# Some target types gain popularity.
@@ -112,7 +112,7 @@ sub run {
 
 	if ($options->{starting_only}) {
 		return $popularity if $options->{return_only};
-		$self->info_log("FireHoseScores->run setting %d (%d) to %.6f STARTING_ONLY",
+		$self->info_log("setting %d (%d) to %.6f STARTING_ONLY",
 			$fhid, $affected_id, $popularity);
 		return $firehose_db->setFireHose($fhid, { popularity => $popularity });
 	}

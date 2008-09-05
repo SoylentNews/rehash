@@ -45,7 +45,7 @@ sub init {
 sub init_tagfilters {
 	my($self) = @_;
 
-	$self->{only_firehose} = 1;
+	$self->{filter_firehoseonly} = 1;
 
 	# would be nice to be able to _ex_clude tagnameids here
 }

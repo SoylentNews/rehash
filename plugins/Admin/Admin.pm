@@ -5,6 +5,7 @@
 package Slash::Admin;
 
 use strict;
+use Slash;
 use Slash::Utility;
 use Slash::Display;
 

@@ -19,7 +19,7 @@ Slash::Tagbox::Despam - Reduce (firehose) spam
 
 use strict;
 
-use Slash;
+use Slash::Utility;
 
 our $VERSION = $Slash::Constants::VERSION;
 
@@ -240,7 +240,8 @@ sub run_process {
 			}
 			# Force the recalculations of their scores.
 			for my $tbid (@{$self->{recalc_tbids}}) {
-				$tagboxdb->forceFeederRecalc($tbid, $globjid);
+				my $tagbox_hr = $tagboxdb->getTagboxes($tbid);
+				$tagbox_hr->{object}->forceFeederRecalc($globjid);
 				$self->info_log("force recalc tbid=%d globjid=%d", $tbid, $globjid);
 			}
 			# Add this change to the daily stats.
