@@ -5,7 +5,7 @@
 package Slash::PollBooth;
 
 use strict;
-use Slash;
+use Slash::Utility;
 use Slash::Constants qw(:people :messages);
 
 use base 'Slash::Plugin';

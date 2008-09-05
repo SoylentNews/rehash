@@ -16,6 +16,8 @@ our $VERSION = $Slash::Constants::VERSION;
 sub init {
 	my($self) = @_;
 
+	return 0 if ! $self->SUPER::init();
+
 	$self->{_table} = 'links';
 	$self->{_prime} = 'id';
 
