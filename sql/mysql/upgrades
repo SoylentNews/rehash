@@ -5491,7 +5491,7 @@ DROP TABLE tagbox_userkeyregexes;
 # for tagboxes/FHEditorPop
 INSERT IGNORE INTO vars (name, value, description) VALUES ('tagbox_fheditorpop_needypercent', '3', 'Percentage of all comments which show up in an editor\'s hose (should be <= tagbox_csr_needinesspercent)');
 
-UPDATE ajax_ops where op="firehose_get_updates" set rekskey_name='ajax_base'
+UPDATE ajax_ops set reskey_name='ajax_base' where op="firehose_get_updates";
 
 # 2008-09-04
 UPDATE vars SET value = 'T_2_5_0_219' WHERE name = 'cvs_tag_currentcode';
