@@ -30,15 +30,20 @@ function tagsHistory(id, type) {
 		params.id = id;
 	}
 
-	var $entry = $('#firehose-'+id);
-	var $widget = $('#tag-widget-'+id, $entry[0]);
+	var $positioners;
+	if ( type == 'firehose' ) {
+		var $entry = $('#firehose-'+id);
+		var $widget = $('#tag-widget-'+id, $entry[0]);
 
-	// hang the pop-up from the first available of:
-	var $positioners =
-		$widget.find('.history-button').		// the history button
-			add($related_trigger).			// whatever you clicked
-			add($widget.find('.edit-toggle')).	// the disclosure triangle
-			add($entry.find('#updown-'+id));	// the nod/nix capsule
+		// hang the pop-up from the first available of:
+		$positioners =
+			$widget.find('.history-button').		// the history button
+				add($related_trigger).			// whatever you clicked
+				add($widget.find('.edit-toggle')).	// the disclosure triangle
+				add($entry.find('#updown-'+id));	// the nod/nix capsule
+	} else {
+		$positioners = $('#taghist-'+id);
+	}
 
 	var popupid    = "taghistory-" + id;
 	var title      = "History ";
