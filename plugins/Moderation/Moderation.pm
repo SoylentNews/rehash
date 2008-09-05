@@ -6,7 +6,7 @@ package Slash::Moderation;
 
 use strict;
 use Date::Format qw(time2str);
-use Slash;
+use Slash::Utility;
 use Slash::Display;
 
 use base 'Slash::Plugin';
