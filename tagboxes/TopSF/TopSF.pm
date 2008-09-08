@@ -3,15 +3,15 @@
 # Copyright 1997-2005 by Open Source Technology Group. See README
 # and COPYING for more information, or see http://slashcode.com/.
 
-package Slash::Tagbox::Top;
+package Slash::Tagbox::TopSF;
 
 =head1 NAME
 
-Slash::Tagbox::Top - update the top n tags on a globj
+Slash::Tagbox::TopSF - update the top n tags on a globj
 
 =head1 SYNOPSIS
 
-	my $tagbox_tcu = getObject("Slash::Tagbox::Top");
+	my $tagbox_tcu = getObject("Slash::Tagbox::TopSF");
 	my $feederlog_ar = $tagbox_tcu->feed_newtags($users_ar);
 	$tagbox_tcu->run($affected_globjid);
 
@@ -30,13 +30,18 @@ sub init_tagfilters {
 
 	$self->{filter_activeonly} = 1;
 	$self->{filter_publiconly} = 1;
+	$self->{filter_firehoseonly} = 1;
 
-	# Not interested in tags on sf.net project globjs.
+	# Only interested in tags from sf.net users.
+	$self->{filter_uid} = $self->sqlSelectColArrayref(
+		'uid',
+		'users',
+		"matchname LIKE 'sf%' AND nickname LIKE 'SF:%'",
+		'ORDER BY uid') || [ ];
+
+	# Only interested in tags on sf.net project globjs
 	my $types = $self->getGlobjTypes();
-	$self->{filter_gtid} = [
-		map { $types->{$_} }
-		grep { $_ ne 'projects' }
-		keys %$types ];
+	$self->{filter_gtid} = $types->{projects};
 }
 
 sub get_affected_type	{ 'globj' }
@@ -74,6 +79,13 @@ sub run_process {
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 
 	my($type, $target_id) = $tagsdb->getGlobjTarget($affected_id);
+
+	my $firehose = getObject('Slash::FireHose');
+	my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
+	if (!$fhid) {
+		$self->info_log("error, no fhid for %d", $affected_id);
+		return ;
+	}
 
 	# Get the list of tags applied to this object.  If we're doing
 	# URL popularity, that's only the tags within the past few days.
@@ -135,69 +147,20 @@ sub run_process {
 	# Eliminate tagnames below the minimum score required, and
 	# those that didn't make it to the top 5
 	# XXX the "4" below (aka "top 5") is hardcoded currently, should be a var
-	my $minscore1 = $constants->{tagbox_top_minscore_urls};
-	my $minscore2 = $constants->{tagbox_top_minscore_stories};
+	my $minscore = $constants->{tagbox_topsf_minscore};
 
-	my $plugin = getCurrentStatic('plugin');
-	if ($plugin->{FireHose}) {
-		my $firehose = getObject('Slash::FireHose');
-		my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
-		my @top = ( );
-		if ($fhid) {
-			@top =  grep { $scores{$_} >= $minscore1 }
-				grep { !$nontop{$_} }
-				sort {
-					$scores{$b} <=> $scores{$a}
-					||
-					$a cmp $b
-				} keys %scores;
-			$#top = 4 if $#top > 4;
-			$firehose->setFireHose($fhid, { toptags => join(' ', @top) });
-			$self->info_log("%d with %d tags, setFireHose %d to '%s' >= %d",
-				$affected_id, scalar(@$tags_ar), $fhid, join(' ', @top), $minscore);
-		}
-	}
-
-	if ($type eq 'stories') {
-
-		my @top = grep { $scores{$_} >= $minscore2 }
-			grep { !$nontop{$_} }
-			sort {
-				$scores{$b} <=> $scores{$a}
-				||
-				$a cmp $b
-			} keys %scores;
-		$#top = 4 if $#top > 4;
-		$self->setStory($target_id, { tags_top => join(' ', @top) });
-		main::tagboxLog("Top->run $affected_id with " . scalar(@$tags_ar) . " tags, setStory $target_id to '@top'");
-
-	} elsif ($type eq 'urls') {
-
-		# For a URL, calculate a numeric popularity score based
-		# on (most of) its tags and store that in the popularity
-		# field.
-		#
-		# (I think this code is obsolete...? - Jamie 2006/11/29)
-
-		my %tags_pos = map { $_, 1 } split(/\|/, $constants->{tagbox_top_urls_tags_pos} || "");
-		my %tags_neg = map { $_, 1 } split(/\|/, $constants->{tagbox_top_urls_tags_neg} || "");
-
-		my $pop = 0;
-		for my $tag (@$tags_ar) {
-			my $tagname = $tag->{tagname};
-			my $is_pos = $tags_pos{$tagname};
-			my $is_neg = $tags_neg{$tagname};
-			my $mult = 1;
-			$mult =  1.5 if $is_pos && !$is_neg;
-			$mult = -1.0 if $is_neg && !$is_pos;
-			$mult =  0   if $is_pos &&  $is_neg;
-			$pop += $mult * $tag->{total_clout};
-		}
-
-		$self->setUrl($target_id, { popularity => $pop });
-		main::tagboxLog("Top->run $affected_id with " . scalar(@$tags_ar) . " tags, setUrl $target_id to pop=$pop");
-
-	}
+	my @top = grep { $scores{$_} >= $minscore }
+		grep { !$nontop{$_} }
+		sort {
+			$scores{$b} <=> $scores{$a}
+			||
+			$a cmp $b
+		} keys %scores;
+	$#top = 4 if $#top > 4;
+	my $toptags = join ' ', @top;
+	$firehose->setFireHose($fhid, { toptags => $toptage });
+	$self->info_log("%d with %d tags, setFireHose %d to '%s' >= %d",
+		$affected_id, scalar(@$tags_ar), $fhid, $toptags, $minscore);
 
 }
 

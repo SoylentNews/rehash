@@ -1,0 +1,3 @@
+name=TopSF
+description=Update the top n tags on a globj associated with sf.net
+mysql_dump=mysql_dump.sql
