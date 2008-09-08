@@ -366,7 +366,7 @@ sub setTag {
 				my $tbid = $tagbox_hr->{tbid};
 				my $affected = $tagbox_hr->{affected_type} eq 'user'
 					? $uid : $globjid;
-				$tagboxdb->addFeederInfo($tbid, {
+				$tagbox_hr->{object}->addFeederInfo({
 					affected_id =>	$affected,
 					importance =>	1,
 					tagid =>	$id,
