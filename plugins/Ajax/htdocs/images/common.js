@@ -485,7 +485,7 @@ function toggleFirehoseTagbox(id) {
 }
 
 function firehose_set_options(name, value) {
-	if (firehose_user_class == 0) {
+	if (firehose_user_class === 0) {
 		return;
 	}
 	if (name == "color" && value === undefined) {
@@ -1027,6 +1027,10 @@ function json_handler(transport) {
 }
 
 function json_update(response) {
+	if ( ! response ) {
+		return;
+	}
+
 	if (response.eval_first) {
 		try {
 /*jslint evil: true */

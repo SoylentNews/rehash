@@ -569,6 +569,10 @@ function normalize_tag_commands( commands, excludes ){
 
 
 function $position_context_display( $display ){
+	if ( ! $related_trigger || ! $related_trigger.length ) {
+		return;
+	}
+
 	var RIGHT_PADDING = 18;
 
 	var $entry = $display.nearest_parent('[tag-server]');
@@ -736,7 +740,9 @@ var tag_widget_fns = {
 				});
 
 			this._current_context = context;
-		} else if ( $previous_context_trigger.length &&
+		} else if ( context &&
+			$related_trigger.length &&
+			$previous_context_trigger.length &&
 			$previous_context_trigger[0] !== $related_trigger[0] ) {
 
 			$position_context_display($('.ready[context=related]', this));
