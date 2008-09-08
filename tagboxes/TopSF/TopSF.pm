@@ -128,12 +128,6 @@ sub run_process {
 		$scores{$opp} -= $orig_score;
 	}
 
-	my @top = sort {
-		$scores{$b} <=> $scores{$a}
-		||
-		$a cmp $b
-	} keys %scores;
-
 	# Eliminate tagnames in a given list, and their opposites.
 	my %nontop = ( map { ($_, 1) }
 		grep { $_ }
