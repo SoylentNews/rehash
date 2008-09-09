@@ -420,20 +420,24 @@ sub getMostImportantTagboxAffectedIDs {
 	my $num = $options->{num} || 10;
 	my $min_weightsum = $options->{min_weightsum} || 1;
 
+	my $sum_imp_weight = 'SUM(importance*weight)';
 	if ($options->{try_to_reduce_rowcount}) {
-		# XXX instead of sum_imp_weight, factor in COUNT(*)
-	} else {
-		return $self->sqlSelectAllHashrefArray(
-			'tagboxes.tbid,
-			 affected_id,
-			 MAX(tfid) AS max_tfid,
-			 SUM(importance*weight) AS sum_imp_weight',
-			'tagboxes, tagboxlog_feeder',
-			'tagboxes.tbid=tagboxlog_feeder.tbid',
-			"GROUP BY tagboxes.tbid, affected_id
-			 HAVING sum_imp_weight >= $min_weightsum
-			 ORDER BY sum_imp_weight DESC LIMIT $num");
+		# Factor row count into the weight, because the main
+		# goal here is to eliminate as many rows as possible.
+		$sum_imp_weight = 'SUM(GREATEST(LEAST(importance*weight, 0.5), 2) + 1)';
 	}
+	$sum_imp_weight .= ' AS sum_imp_weight';
+
+	return $self->sqlSelectAllHashrefArray(
+		"tagboxes.tbid,
+		 affected_id,
+		 MAX(tfid) AS max_tfid,
+		 $sum_imp_weight",
+		'tagboxes, tagboxlog_feeder',
+		'tagboxes.tbid=tagboxlog_feeder.tbid',
+		"GROUP BY tagboxes.tbid, affected_id
+		 HAVING sum_imp_weight >= $min_weightsum
+		 ORDER BY sum_imp_weight DESC LIMIT $num");
 }
 
 sub getTagboxTags {
