@@ -1,0 +1,54 @@
+#!/usr/bin/perl -w
+
+use strict;
+use File::Basename;
+use Getopt::Std;
+use Slash;
+use Slash::Utility;
+use Data::Dumper;
+
+# This script converts Firehose from old-style (pre-Sept 2008)
+# to new-style (June 2008), this allows stories to be excluded
+# from the mainpage, and appear in multiple sections just as 
+# stories were able to do on index utilizing story_topics_rendered.
+# A new firehose_topics_rendered table is added as well as a nexuslist
+# column in firehose to track this information
+#
+# Script usage: convertFirehoseDBto200809 -u <virtuser>
+
+use vars qw( $constants $slashdb $stories $nonstories $firehose);
+my $PROGNAME = basename($0);
+
+my (%opts);
+
+die('Options used incorrectly') unless getopts('hu:', \%opts);
+die "Username required ie: convertFirehoseDBto200809 -u <virtuser>" unless $opts{u};
+
+createEnvironment($opts{u});
+$constants = getCurrentStatic();
+$slashdb = getCurrentDB();
+$firehose = getObject("Slash::FireHose");
+
+# First convert stories
+$stories = $slashdb->sqlSelectAllHashrefArray("id,srcid", "firehose", "type='story'", "order by id desc");
+
+foreach (@$stories) {
+	if ($_->{srcid}) {
+		my $tids = $slashdb->sqlSelectColArrayref("tid", "story_topics_rendered", "stoid = '$_->{srcid}'");
+		$firehose->setTopicsRenderedForStory($_->{srcid}, $tids);
+	} else {
+		warn "no srcid for story with firehose id of: $_->{id}\n";
+	}
+}
+
+# Then convert non-stories
+$nonstories = $slashdb->sqlSelectAllHashrefArray("id,primaryskid", "firehose", "type!='story'", "order by id desc");
+
+foreach (@$nonstories) {
+	my $ps = $_->{primaryskid};
+	if (!$ps) {
+		$ps = $constants->{mainpage_skid};
+		$firehose->setFireHose($_->{id}, { primaryskid => $ps });
+	}
+	$firehose->setTopicsRenderedBySkidForItem($_->{id}, $ps);
+}

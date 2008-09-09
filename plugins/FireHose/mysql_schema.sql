@@ -30,6 +30,7 @@ CREATE TABLE firehose (
 	ipid varchar(32) NOT NULL default '',
 	subnetid varchar(32) NOT NULL default '',
 	category varchar(30) NOT NULL default '',
+	nexuslist varchar(32) NOT NULL default '',
 	last_update TIMESTAMP,
 	signoffs VARCHAR(255) NOT NULL DEFAULT '',
 	stoid MEDIUMINT UNSIGNED DEFAULT '0',
@@ -51,6 +52,14 @@ CREATE TABLE firehose_ogaspt (
 	globjid		int(10) unsigned NOT NULL default '0',
 	pubtime		datetime NOT NULL default '0000-00-00 00:00:00',
 	PRIMARY KEY	(globjid)
+) TYPE=InnoDB;
+
+DROP TABLE IF EXISTS firehose_topics_rendered;
+CREATE TABLE firehose_topics_rendered (
+	id MEDIUMINT UNSIGNED NOT NULL,
+	tid SMALLINT(5) UNSIGNED NOT NULL,
+	UNIQUE id_tid (tid, skid),
+	INDEX skid_tid (skid, tid)
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_text;

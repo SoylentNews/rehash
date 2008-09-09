@@ -86,6 +86,16 @@ sub createFireHose {
 	}
 	$self->sqlDo('SET AUTOCOMMIT=1');
 
+	# set topics rendered appropriately
+	if ($ok) {
+		if ($data->{type} eq "story") {
+			my $tids = $self->sqlSelectColArrayref("tid", "story_topics_rendered", "stoid='$data->{srcid}'");
+			$self->setTopicsRenderedForStory($data->{srcid}, $tids);
+		} else {
+			$self->setTopicsRenderedBySkidForItem($text_data->{id}, $data->{primaryskid});
+		}
+	}
+
 	return $text_data->{id};
 }
 
@@ -430,6 +440,42 @@ sub updateItemFromStory {
 		}
 	}
 }
+sub setTopicsRenderedBySkidForItem {
+	my($self, $id, $primaryskid) = @_;
+	my $constants = getCurrentStatic();
+	my $skin = $self->getSkin($primaryskid);
+
+	# if no primaryskid assign to mainpage skid
+	my $nexus = $skin && $skin->{nexus} ? $skin->{nexus} : $constants->{mainpage_skid};
+
+	$self->sqlDelete("firehose_topics_rendered", "id = $id");
+	$self->sqlInsert("firehose_topics_rendered", { id => $id, tid => $nexus });
+	$self->setFireHose($id, { nexuslist => " $skin->{nexus} " });
+}
+
+sub setTopicsRenderedForStory {
+	my($self, $stoid, $tids) = @_;
+	my $the_tids = [ @$tids ]; # Copy tids so any changes we make don't affect the caller
+	my $constants = getCurrentStatic();
+	my $story = $self->getStory($stoid, "", 1);
+	if ($story) {
+		@$the_tids = grep { $_ != $constants->{mainpage_nexus_tid}  } @$the_tids if $story->{offmainpage};
+		my $globjid = $self->getGlobjidCreate("stories", $story->{stoid});
+		my $id = $self->getFireHoseIdFromGlobjid($globjid);
+		my @nexus_topics;
+		if ($id) {
+			$self->sqlDelete("firehose_topics_rendered", "id = $id");
+			foreach (@$the_tids) {
+				$self->sqlInsert("firehose_topics_rendered", { id => $id, tid => $_});
+			}
+			my $tree = $self->getTopicTree();
+			@nexus_topics = grep { $tree->{$_}->{nexus} } @$the_tids;
+			my $nexus_list = join ' ', @nexus_topics;
+			$nexus_list = " $nexus_list ";
+			$self->setFireHose($id, { nexuslist => $nexus_list });
+		}
+	}
+}
 
 sub createItemFromStory {
 	my($self, $id) = @_;
@@ -672,18 +718,40 @@ sub getFireHoseEssentials {
 					my $cur_opt = $options->{"$prefix$base"};
 					$cur_opt = [$cur_opt] if !ref $cur_opt;
 					my $notlab;
-					if (@$cur_opt == 1) {
-					     $notlab = $not ? "!" : "";
-					     my $quoted_opt = $self->sqlQuote($cur_opt->[0]);
-					     push @where, "$base $notlab=$quoted_opt";
-					} elsif (@$cur_opt > 1) {
-					     $notlab = $not ? "NOT" : "";
 
-					     my $quote_string = join ',', map {$self->sqlQuote($_)} @$cur_opt;
-					     push @where, "$base $notlab IN  ($quote_string)";
+					if (@$cur_opt == 1) {
+						$notlab = $not ? "!" : "";
+						my $quoted_opt = $self->sqlQuote($cur_opt->[0]);
+						push @where, "$base $notlab=$quoted_opt";
+					} elsif (@$cur_opt > 1) {
+						$notlab = $not ? "NOT" : "";
+						my $quote_string = join ',', map {$self->sqlQuote($_)} @$cur_opt;
+						push @where, "$base $notlab IN  ($quote_string)";
 					}
 
 				}
+			}
+		}
+
+		if ($options->{nexus}) {
+			$tables	.= ", firehose_topics_rendered";
+			push @where, "firehose.id = firehose_topics_rendered.id ";
+			my $cur_opt = $options->{nexus};
+			if (@$cur_opt == 1) {
+				push @where, "firehose_topics_rendered.tid = $cur_opt->[0]";
+			} elsif (@$cur_opt > 1) {
+				my $quote_string = join ',', map {$self->sqlQuote($_)} @$cur_opt;
+			}
+		}
+
+		if ($options->{not_nexus}) {
+			my %want_nexus = ();
+			%want_nexus = grep { !$want_nexus{$_} } @{$options->{nexus}} if $options->{nexus};
+			my $cur_opt = $options->{not_nexus};
+			foreach (@$cur_opt) {
+				next if $want_nexus{$_}; # skip exclusion if we explicitly asked for this nexus
+				my $quoted = $self->sqlQuote(" $_ ");
+				push @where, "nexuslist not like $quoted";
 			}
 		}
 
@@ -740,7 +808,7 @@ sub getFireHoseEssentials {
 	my $where = (join ' AND ', @where) || '';
 
 	my $other = '';
-	$other = 'GROUP BY firehose.id' if $options->{tagged_by_uid};
+	$other = 'GROUP BY firehose.id' if $options->{tagged_by_uid} || $options->{nexus};
 
 	my $count_other = $other;
 	my $offset;
@@ -752,7 +820,6 @@ sub getFireHoseEssentials {
 		$limit_str = "LIMIT $offset $fetch_size" unless $options->{nolimit};
 		$other .= " ORDER BY $options->{orderby} $options->{orderdir} $limit_str";
 	}
-
 
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
 	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
@@ -1748,8 +1815,7 @@ sub ajaxGetAdminExtras {
 sub setSectionTopicsFromTagstring {
 	my($self, $id, $tagstring) = @_;
 	my $constants = getCurrentStatic();
-	
-	print STDERR "sstft $id: $tagstring\n";
+
 	my @tags = split(/\s+/, $tagstring);
 	my $data = {};
 
@@ -1832,6 +1898,17 @@ sub setFireHose {
 #{ use Data::Dumper; my $dstr = Dumper($data); $dstr =~ s/\s+/ /g; print STDERR "setFireHose A rows=$rows for id=$id_q data: $dstr\n"; }
 	$rows += $self->sqlUpdate('firehose_text', $text_data, "id=$id_q") if keys %$text_data;
 #{ use Data::Dumper; my $dstr = Dumper($text_data); $dstr =~ s/\s+/ /g; print STDERR "setFireHose B rows=$rows for id=$id_q data: $dstr\n"; }
+
+	if (defined $data->{primaryskid}) {
+		my $type = $data->{type};
+		if (!$type) {
+			my $item = $self->getFireHose($id);
+			$type = $item->{type};
+		}
+		if ($type ne "story") {
+			$self->setTopicsRenderedBySkidForItem($id, $data->{primaryskid});
+		}
+	}
 
 	if ($mcd && $constants->{firehose_mcd_disp}) {
 		 $mcd->delete("$mcdkey:$id", 3);
@@ -2154,7 +2231,7 @@ sub getAndSetOptions {
 	}
 
 	if ($tabtype) {
-		$form->{fhfilter} = "$the_skin->{name} $form->{fhfilter}" if $the_skin->{skid} != $constants->{mainpage_skid};
+		$form->{fhfilter} = "$the_skin->{name} $form->{fhfilter}" if $the_skin->{skid} != $constants->{mainpage_skid} || $tabtype eq "tabsection";
 	}
 
 
@@ -2303,7 +2380,7 @@ sub getAndSetOptions {
 	my $fh_ops = $self->splitOpsFromString($fhfilter);
 
 	my $skins = $self->getSkins();
-	my %skin_names = map { $skins->{$_}{name} => $_ } keys %$skins;
+	my %skin_nexus = map { $skins->{$_}{name} => $skins->{$_}{nexus} } keys %$skins;
 
 	my %categories = map { ($_, $_) } (qw(hold quik),
 		(ref $constants->{submit_categories}
@@ -2328,8 +2405,8 @@ sub getAndSetOptions {
 			push @{$fh_options->{$not."type"}}, $_;
 		} elsif ($user->{is_admin} && $categories{$_} && !defined $fh_options->{category}) {
 			$fh_options->{category} = $_;
-		} elsif ($skin_names{$_} && !defined $fh_options->{primaryskid}) {
-				push @{$fh_options->{$not."primaryskid"}}, $skin_names{$_};
+		} elsif ($skin_nexus{$_}) {
+				push @{$fh_options->{$not."nexus"}}, $skin_nexus{$_};
 		} elsif ($user->{is_admin} && $_ eq "rejected") {
 			$fh_options->{rejected} = "yes";
 		} elsif ($_ eq "accepted") {
@@ -2369,6 +2446,13 @@ sub getAndSetOptions {
 		}
 	}
 
+	# Pull out any excluded nexuses we're explicitly asking for
+	if ($fh_options->{nexus} && $fh_options->{not_nexus}) {
+		my %want_nexus = map { $_ => 1 } @{$fh_options->{nexus}};
+		@{$fh_options->{not_nexus}} = grep { !$want_nexus{$_} } @{$fh_options->{not_nexus}};
+		delete $fh_options->{not_nexus} if @{$fh_options->{not_nexus}} == 0;
+	}
+
 	if ($form->{color} && $colors->{$form->{color}}) {
 		$fh_options->{color} = $form->{color};
 	}
@@ -2397,7 +2481,7 @@ sub getAndSetOptions {
 
 	if (!$user->{is_anon} && !$opts->{no_set} && !$form->{index}) {
 		my $data_change = {};
-		my @skip_options_save = qw(uid not_uid type not_type primaryskid not_primaryskid smalldevices);
+		my @skip_options_save = qw(uid not_uid type not_type nexus not_nexus primaryskid not_primaryskid smalldevices);
 		if ($firehose_page eq 'user') {
 			push @skip_options_save, "nothumbs", "nocolors", "pause", "mode", "orderdir", "orderby", "fhfilter", "color";
 		}

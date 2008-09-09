@@ -1188,7 +1188,7 @@ sub createSubmission {
 	# The next line makes sure that we get any section_extras in the DB - Brian
 	$self->setSubmission($subid, $submission) if $subid && keys %$submission;
 
-	if ($constants->{plugin}{FireHose}) {
+	if ($constants->{plugin}{FireHose} && $subid) {
 		my $firehose = getObject("Slash::FireHose");
 		my $firehose_id = $firehose->createItemFromSubmission($subid);
 
@@ -9960,6 +9960,7 @@ sub getStoriesTopicsRenderedHash {
 # Pass in $chosen_hr to save a query.
 sub setStoryRenderedFromChosen {
 	my($self, $stoid, $chosen_hr, $info) = @_;
+	my $constants = getCurrentStatic();
 
 	$self->setStory_delete_memcached_by_stoid([ $stoid ]);
 	$chosen_hr ||= $self->getStoryTopicsChosen($stoid);
@@ -9983,6 +9984,11 @@ sub setStoryRenderedFromChosen {
 
 	my $rendered_tids = [ keys %$rendered_hr ];
 	$self->setStory_delete_memcached_by_tid($rendered_tids);
+
+	if ($constants->{plugin}{FireHose}) {
+		my $firehose = getObject("Slash::FireHose");
+		$firehose->setTopicsRenderedForStory($stoid, $rendered_tids);
+	}
 
 	return($primaryskid, $tids);
 }

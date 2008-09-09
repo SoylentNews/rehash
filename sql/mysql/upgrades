@@ -5497,3 +5497,26 @@ UPDATE vars SET value = 'T_2_5_0_219' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+DROP TABLE IF EXISTS firehose_topics_rendered;
+CREATE TABLE firehose_topics_rendered (
+	id MEDIUMINT UNSIGNED NOT NULL,
+	tid SMALLINT(5) UNSIGNED NOT NULL,
+	UNIQUE id_tid (id, tid),
+	INDEX tid_id (tid, id)
+) TYPE=InnoDB;
+
+ALTER TABLE firehose ADD COLUMN nexuslist varchar(32) NOT NULL DEFAULT '';
+
+###################################################################
+# Read the comments at the top of utils/convertFirehoseData200809 #
+# to learn about converting firehose data to use new code in this #
+# tag.  You can run this sql and run the conversion before        #
+# installing the new code w/o breaking current functionality      #
+#                                                                 #
+# Code after this point will expect and rely on the data created  #
+# by this utility existing                                        #
+#                                                                 #
+# To run this utility:                                            #
+# convertFirehoseData200809 -u <virtual_user>                     #
+###################################################################
+
