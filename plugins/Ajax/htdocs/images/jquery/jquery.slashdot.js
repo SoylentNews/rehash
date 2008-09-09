@@ -1,12 +1,5 @@
 // slashdot.jquery.js: jquery-related general utilities we wrote ourselves
 
-;$(function(){
-	$.ajaxSetup({
-		url:	'/ajax.pl',
-		type:	'POST'
-	});
-});
-
 function $dom( id ) {
 	return document.getElementById(id);
 }

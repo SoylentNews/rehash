@@ -9,6 +9,13 @@
 	scrollWindowToFirehose scrollWindowToId viewWindowLeft getOffsetTop firehoseIsInWindow
 	isInWindow viewWindowTop viewWindowBottom firehose_set_cur firehose_get_onscreen */
 
+;$(function(){
+	$.ajaxSetup({
+		url:	'/ajax.pl',
+		type:	'POST'
+	});
+});
+
 var reskey_static = '';
 
 // global settings, but a firehose might use a local settings object instead
@@ -979,11 +986,14 @@ function ajax_update(request_params, id, handlers, options) {
 	}
 
 	var opts = {
-		url: options.request_url || '/ajax.pl',
 		data: request_params,
 		type: 'POST',
 		contentType: 'application/x-www-form-urlencoded'
 	};
+
+	if ( options.request_url ) {
+		opts.url = options.request_url;
+	}
 
 	if ( options.async_off ) {
 		opts.async = false;
