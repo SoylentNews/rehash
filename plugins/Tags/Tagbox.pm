@@ -506,8 +506,7 @@ sub gtt_filter {
 
 sub addFeederInfo {
 	my($self, $info_hr) = @_;
-	# XXX make this a debug_log at some point, we don't need this much info
-	$self->info_log("tbid=%d affected_id=%d importance=%f",
+	$self->debug_log("tbid=%d affected_id=%d importance=%f",
 		$self->{tbid}, $info_hr->{affected_id}, $info_hr->{importance});
 	$info_hr->{-created_at} = 'NOW()';
 	$info_hr->{tbid} = $self->{tbid};
@@ -855,7 +854,7 @@ sub run {
 
 sub run_pre {
 	my($self, $affected_id) = @_;
-	$self->info_log("id %d", $affected_id);
+	$self->debug_log("id %d", $affected_id);
 }
 
 sub run_gettags {

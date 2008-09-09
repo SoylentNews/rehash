@@ -89,7 +89,15 @@ $task{$me}{code} = sub {
 		if (time > $next_feederlog_check) {
 			my $was_ok = $feederlog_ok;
 			my $feederlog_rows = $tagboxdb->sqlCount('tagboxlog_feeder');
-			$feederlog_ok = $feederlog_rows < $feederlog_largerows ? 1 : 0;
+			if ($was_ok) {
+				# To move from "OK" to "not OK", the row count
+				# must exceed the given limit.
+				$feederlog_ok = $feederlog_rows <= $feederlog_largerows ? 1 : 0;
+			} else {
+				# To move from "not OK" to "OK", the row count
+				# must be 10% below the given limit.
+				$feederlog_ok = $feederlog_rows < 0.9 * $feederlog_largerows ? 1 : 0;
+			}
 			if ($feederlog_rows < $feederlog_largerows * 0.8) {
 				# Table is nice and small.  Check less often.
 				$next_feederlog_check = time + 600;
@@ -286,6 +294,7 @@ sub update_feederlog {
 
 		my @tags_copy = @$tags_ar;
 		my $clout_type = $clout_types->{ $tagbox->{clid} };
+		# don't duplicate effort, many tagboxes will share the same clout type
 		$tagsdb->addCloutsToTagArrayref(\@tags_copy, $clout_type);
 
 		my $feeder_ar;
@@ -447,7 +456,7 @@ sub run_tagboxes_until {
 			last if time() >= $run_until || $task_exit_flag;
 		}
 
-		Time::HiRes::sleep(0.1);
+		Time::HiRes::sleep(0.01);
 	}
 	return $activity;
 }

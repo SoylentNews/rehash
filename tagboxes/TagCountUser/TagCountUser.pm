@@ -68,8 +68,16 @@ sub feed_newtags_process {
 	return $ret_ar;
 }
 
+sub run_gettags {
+	my($self, $affected_id) = @_;
+	# This tagbox doesn't use the usual getTagboxTags to get its
+	# info, it's much simpler.  So as an optimization, skip it.
+	return [ ];
+}
+
 sub run_process {
 	my($self, $affected_id, $tags_ar) = @_;
+	# Note, $tags_ar will be empty (see run_gettags).
 	my $count = $self->sqlCount('tags', "uid=$affected_id AND inactivated IS NULL");
 	$self->info_log("uid %d count %d", $affected_id, $count);
 	$self->setUser($affected_id, { tag_count => $count });
