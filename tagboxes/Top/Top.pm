@@ -154,7 +154,7 @@ sub run_process {
 			$#top = 4 if $#top > 4;
 			$firehose->setFireHose($fhid, { toptags => join(' ', @top) });
 			$self->info_log("%d with %d tags, setFireHose %d to '%s' >= %d",
-				$affected_id, scalar(@$tags_ar), $fhid, join(' ', @top), $minscore);
+				$affected_id, scalar(@$tags_ar), $fhid, join(' ', @top), $minscore1);
 		}
 	}
 
