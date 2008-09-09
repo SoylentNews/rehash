@@ -440,6 +440,26 @@ Package({ named: 'Slash.Util.Algorithm',
 
 // Yes, I could phrase this as a Package; but I don't need to, here.
 $.fn.extend({
+	nearest_parent: function( selector ) {
+		var answer = this.map(function(){
+			var match;
+
+			var $this = $(this);
+			if ( $this.is(selector) )
+				match = this;
+
+			$this.parents().each(function(){
+				if ( $(this).is(selector) ) {
+					match = this;
+					return false
+				}
+			});
+
+			return match
+		});
+
+		return this.pushStack($.unique(answer))
+	},
 	setClass: function( cn ) {
 		var fn = $.isFunction(cn) ? cn : function(){ return cn; };
 		return this.each(function(){

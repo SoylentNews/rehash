@@ -1,0 +1,104 @@
+body {
+	margin: 1in;
+}
+
+h1, h2, h3, h4, h5, h6, span.tag, .legend {
+	font-family: Optima, Arial, Helvetica, sans serif;
+}
+
+div.basic-tagui {
+	font-size: 90%;
+	margin-left: 1em;
+}
+
+.legend {
+	display: none;
+	position: absolute;
+	top: 1.2em;
+	opacity: 0.8;
+}
+
+.tag-display > ul > li + li,
+.tag-display + .tag-display {
+	margin-left: 0.25em;
+}
+
+.tag,
+.tag-display > ul,
+.tag-display > ul > li,
+.tmenu > ul,
+.tmenu > ul > li {
+	display: inline-block;
+	list-style: none;
+	padding: 0;
+}
+
+.tag-display, .tag-display > ul > li {
+	display: inline-block;
+	position: relative;
+}
+
+.tag-display li:hover span.tag {
+	cursor: arrow;
+	color: white;
+	background-color: orange;
+}
+
+/* round edges */
+.tag-display ul,
+.tag-display span.tag,
+.tag-display .tmenu,
+.tag-display .tmenu li {
+	border: 0 solid transparent;
+	-moz-border-radius: 0.4em;
+	-webkit-border-radius: 0.4em;
+}
+
+a.tag-display:hover > ul {
+	background-color: #dfdfdf;
+}
+
+a.tag-display:hover .legend {
+	display: inline-block;
+}
+
+/* tag menus are hidden by default... */
+.tmenu {
+	display: none;
+	position: absolute;
+	top: -1.25em;
+	right: -0.25em;
+	color: #fff;
+	background-color: orange;
+	white-space:nowrap;
+	opacity: 0.5;
+	-moz-opacity: 0.5;
+	padding: 0 .3em 0 .2em;
+	text-align: center;
+	margin:0 !important;
+
+}
+
+/* padding so hover highlighting is bigger than the contents */
+.tag-display span.tag,
+.tag-display > ul,
+.tmenu > ul  {
+	padding: 0.1em 0.5em;
+	margin: -0.1em -0.5em;
+}
+
+/* ...until you mouse over element to which they are attached */
+.tag-display li:hover .tmenu {
+	display: inline-block;
+}
+
+/* the menu item itself */
+a.tmenu:hover {
+	opacity: 0.9;
+	-moz-opacity: 0.9;
+}
+
+a.tmenu li:hover {
+	color: white;
+	background-color: black;
+}
