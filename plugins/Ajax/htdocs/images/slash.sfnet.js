@@ -1,7 +1,7 @@
 // SourceForge specific JS.  Hostile environment assumed.
 
 Slash.Util.ensure_namespace('SFX');
-SFX.jQuery = jQuery.noConflict(true);
+SFX.jQuery = jQuery /* .noConflict(true) */;
 
 (function($){
 
