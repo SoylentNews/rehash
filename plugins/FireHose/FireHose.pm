@@ -430,8 +430,11 @@ sub updateItemFromStory {
 				word_count	=> $story->{word_count},
 				thumb		=> $story->{thumb},
 			};
-			if (defined $story->{mediatype}) {
-				if (!$story->{mediatype}) {
+			$data->{offmainpage} = "no";
+			$data->{offmainpage} = "yes" if defined $story->{offmainpage} && $story->{offmainpage};
+
+			if(defined $story->{mediatype}) {
+				if(!$story->{mediatype}) {
 					$data->{mediatype} = "none";
 				} else {
 					$data->{mediatype} = $story->{mediatype};
@@ -448,11 +451,11 @@ sub setTopicsRenderedBySkidForItem {
 	my $skin = $self->getSkin($primaryskid);
 
 	# if no primaryskid assign to mainpage skid
-	my $nexus = $skin && $skin->{nexus} ? $skin->{nexus} : $constants->{mainpage_skid};
+	my $nexus = $skin && $skin->{nexus} ? $skin->{nexus} : $constants->{mainpage_nexus_tid};
 
 	$self->sqlDelete("firehose_topics_rendered", "id = $id");
 	$self->sqlInsert("firehose_topics_rendered", { id => $id, tid => $nexus });
-	$self->setFireHose($id, { nexuslist => " $skin->{nexus} " });
+	$self->setFireHose($id, { nexuslist => " $nexus " });
 }
 
 sub setTopicsRenderedForStory {
@@ -461,7 +464,6 @@ sub setTopicsRenderedForStory {
 	my $constants = getCurrentStatic();
 	my $story = $self->getStory($stoid, "", 1);
 	if ($story) {
-		@$the_tids = grep { $_ != $constants->{mainpage_nexus_tid}  } @$the_tids if $story->{offmainpage};
 		my $globjid = $self->getGlobjidCreate("stories", $story->{stoid});
 		my $id = $self->getFireHoseIdFromGlobjid($globjid);
 		my @nexus_topics;
@@ -513,8 +515,17 @@ sub createItemFromStory {
 			discussion	=> $story->{discussion},
 			thumb		=> $story->{thumb},
 		};
+<<<<<<< HEAD:plugins/FireHose/FireHose.pm
 		if (defined $story->{mediatype}) {
 			if (!$story->{mediatype}) {
+=======
+
+		$data->{offmainpage} = "no";
+		$data->{offmainpage} = "yes" if defined $story->{offmainpage} && $story->{offmainpage};
+
+		if(defined $story->{mediatype}) {
+			if(!$story->{mediatype}) {
+>>>>>>> Many firehose updates to include fixes for section handling code:plugins/FireHose/FireHose.pm
 				$data->{mediatype} = "none";
 			} else {
 				$data->{mediatype} = $story->{mediatype};
@@ -587,6 +598,7 @@ sub getFireHoseEssentials {
 			if ($options->{duration} && $options->{duration} >= 0) {
 				$opts{dayduration} = $options->{duration};
 			}
+
 
 			$opts{records_max}	= $fetch_size             unless $options->{nolimit};
 			$opts{records_start}	= $options->{offset}      if $options->{offset};
@@ -671,6 +683,10 @@ sub getFireHoseEssentials {
 		if ($options->{createtime_subscriber_future}) {
 			my $future_secs = $constants->{subscribe_future_secs};
 			push @where, "createtime <= DATE_ADD(NOW(), INTERVAL $future_secs SECOND)";
+		}
+
+		if ($options->{offmainpage}) {
+			push @where, 'offmainpage=' . $self->sqlQuote($options->{offmainpage});
 		}
 
 	if (!$doublecheck) {
@@ -2348,7 +2364,7 @@ sub getAndSetOptions {
 
 	if ($form->{index}) {
 		$mode = "fulltitle";
-		if (getCurrentSkin()->{nexus} != $constants->{mainpage_nexus_tid}) {
+		if ($the_skin->{nexus} != $constants->{mainpage_nexus_tid}) {
 			$mode = "full";
 		}
 	}
@@ -2452,7 +2468,14 @@ sub getAndSetOptions {
 		}
 	}
 
+	# push all necessary nexuses on if we want stories show as brief
+	if ($constants->{brief_sectional_mainpage} && $tabtype eq "tabsection" && $the_skin->{nexus} == $constants->{mainpage_nexus_tid}) {
+		my $nexus_children = $self->getMainpageDisplayableNexuses();
+		push @{$fh_options->{nexus}}, @$nexus_children;
+		$fh_options->{offmainpage} = "no";
+	}
 	# Pull out any excluded nexuses we're explicitly asking for
+
 	if ($fh_options->{nexus} && $fh_options->{not_nexus}) {
 		my %want_nexus = map { $_ => 1 } @{$fh_options->{nexus}};
 		@{$fh_options->{not_nexus}} = grep { !$want_nexus{$_} } @{$fh_options->{not_nexus}};
@@ -2464,15 +2487,14 @@ sub getAndSetOptions {
 	}
 
 	if ($form->{index}) {
+		$options->{index} = 1;
 		$options->{skipmenu} = 1;
-		$options->{skippop} = 1;
 		if (!$form->{issue} && getCurrentSkin()->{nexus} != $constants->{mainpage_nexus_tid}) {
 			$options->{duration} = -1;
 			$options->{startdate} = '';
 		}
 		$options->{color} = 'black';
-		$options->{nocolors} = 1;
-		if (getCurrentSkin()->{nexus} == $constants->{mainpage_nexus_tid}) {
+		if ($the_skin->{nexus} == $constants->{mainpage_nexus_tid}) {
 			$options->{mixedmode} = 1;
 			$options->{mode} = 'fulltitle';
 		} else {
@@ -2487,7 +2509,7 @@ sub getAndSetOptions {
 
 	if (!$user->{is_anon} && !$opts->{no_set} && !$form->{index}) {
 		my $data_change = {};
-		my @skip_options_save = qw(uid not_uid type not_type nexus not_nexus primaryskid not_primaryskid smalldevices);
+		my @skip_options_save = qw(uid not_uid type not_type nexus not_nexus primaryskid not_primaryskid smalldevices mainpage);
 		if ($firehose_page eq 'user') {
 			push @skip_options_save, "nothumbs", "nocolors", "pause", "mode", "orderdir", "orderby", "fhfilter", "color";
 		}
@@ -3153,6 +3175,7 @@ sub genFireHoseParams {
 		startdate	=> 1,
 		duration	=> 1,
 		mode		=> 0,
+		index		=> 1,
 	};
 	if ($user->{is_anon}) {
 		my ($label, $value) = @_;
@@ -3170,6 +3193,7 @@ sub genFireHoseParams {
 	foreach my $label (keys %$params) {
 
 		next if $user->{is_anon} && $params->{$label} == 0;
+		next if !defined $data->{$label} && !defined $options->{$label};
 		my $value = defined $data->{$label} ? $data->{$label} : $options->{$label};
 		if ($label eq "startdate") {
 			$value =~s /-//g;
