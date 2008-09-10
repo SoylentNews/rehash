@@ -870,10 +870,15 @@ sub userdir_handler {
 			$r->filename($constants->{basedir} . '/users.pl');
 
 		} elsif ($op eq 'bookmarks') {
-			$r->args("op=showbookmarks&nick=$nick&uid=$uid");
-			$r->uri('/users.pl');
-			$r->filename($constants->{basedir} . '/users.pl');
-		
+                        if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)]) {
+                                $r->args("nick=$nick&dp=bookmarks&uid=$uid");
+                                $r->uri('/users2.pl');
+                                $r->filename($constants->{basedir} . '/users2.pl');
+                        } else {
+			        $r->args("op=showbookmarks&nick=$nick&uid=$uid");
+			        $r->uri('/users.pl');
+			        $r->filename($constants->{basedir} . '/users.pl');
+		        }
 		} elsif ($op eq 'firehose') {
 			my $filter = fixparam("\"user:$nick_orig\"");
 			$r->args("op=userfirehose&uid=$uid");

@@ -5524,3 +5524,7 @@ ALTER TABLE firehose ADD COLUMN offmainpage ENUM('no','yes') NOT NULL DEFAULT 'n
 # For plugins/Metamod and plugins/Firehose
 # if you want to use firehose for metamoderation set this to 1 otherwise set to 0
 INSERT INTO vars (name, value, description) VALUES ('metamod_use_firehose', '0', 'Use firehose for metamodding');
+
+# For U2
+INSERT INTO user_event_types VALUES (4, 'Bookmarks');
+INSERT INTO user_event_types VALUES (5, 'Friends');

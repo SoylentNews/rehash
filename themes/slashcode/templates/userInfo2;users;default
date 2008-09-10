@@ -139,6 +139,8 @@ __template__
                 [% IF latest_comments.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/comments">Comments</a></li>[% END %]
                 [% IF latest_journals.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/journal">Journals</a></li>[% END %]
                 [% IF latest_submissions.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/submissions">Submissions</a></li>[% END %]
+                [% IF latest_bookmarks.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/bookmarks">Bookmarks</a></li>[% END %]
+                [% IF latest_friends.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/friends">Friends</a></li>[% END %]
                 </ul>
         </div>
 
@@ -190,6 +192,38 @@ __template__
         </div>
         [% END %]
 
+        [% IF latest_bookmarks.size != 0 %]
+        <div class="block" id="latest_bookmarks">
+                <div class="title" id="latest_bookmarks_title">
+                        <h4>Latest Bookmarks</h4>
+                </div>
+
+                <div class="content" id="latest_bookmarks_content">
+                        <ul>
+                        [% FOREACH bid = latest_bookmarks.keys.sort %]
+                        <li><a href="[% latest_bookmarks.$bid.url %]">[% latest_bookmarks.$bid.title %]</a></li>
+                        [% END %]
+                        </ul>
+                </div>
+        </div>
+        [% END %]
+
+        [% IF latest_friends.size != 0 %]
+        <div class="block" id="latest_friends">
+                <div class="title" id="latest_friends_title">
+                        <h4>Latest Friends</h4>
+                </div>
+
+                <div class="content" id="latest_friends_content">
+                        <ul>
+                        [% FOREACH fid = latest_friends.keys.sort %]
+                        <li><a href="[% constants.absolutedir_secure %]/~[% latest_friends.$fid.nickname %]">[% latest_friends.$fid.nickname %]</a></li>
+                        [% END %]
+                        </ul>
+                </div>
+        </div>
+        [% END %]
+
         </div>
 
         <div id="yui-main">
@@ -197,6 +231,8 @@ __template__
 
                 [% IF data_pane == 'journal' %]
                 [% ELSIF data_pane == 'submissions' %]
+                [% ELSIF data_pane == 'bookmarks' %]
+                [% ELSIF data_pane == 'friends' %]
                 [% ELSE %]
                         [% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
                 [% END %]

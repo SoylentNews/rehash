@@ -1399,6 +1399,28 @@ sub showInfo {
                                 = $reader->sqlSelect("id, title", "firehose_text", "id = $submission_block");
                 }
 
+                # Latest bookmarks
+                my $bookmark_blocks = $reader->sqlSelectAllHashref(
+                        'uid', 'bid, uid, block', 'user_event_blocks', "uid = $uid and code = 4");
+
+                @block_ids = split(/,/, $bookmark_blocks->{$uid}->{block});
+
+                my %latest_bookmarks;
+                foreach my $bookmark_block (@block_ids) {
+                        ($latest_bookmarks{$bookmark_block}->{id}, $latest_bookmarks{$bookmark_block}->{title})
+                                = $reader->sqlSelect("url_id, title", "bookmarks", "bookmark_id = $bookmark_block");
+
+                        $latest_bookmarks{$bookmark_block}->{url} =
+                                $reader->sqlSelect("url", "urls", "url_id = " . $latest_bookmarks{$bookmark_block}->{id});
+                }
+
+                # Latest friends
+                my $latest_friends = $reader->sqlSelectAllHashref('person', 'person', 'people', "uid = $uid");
+                foreach my $friend_id (keys %$latest_friends) {
+                        $latest_friends->{$friend_id}->{nickname} =
+                                $reader->sqlSelect("nickname", "users", "uid = $friend_id");
+                }
+
                 # Latest event
                 my @latest_event_index = $reader->sqlSelect("event, code", "user_events", "uid = $uid", "order by date desc limit 1");
 
@@ -1450,6 +1472,8 @@ sub showInfo {
                         latest_comments         => \%latest_comments,
                         latest_journals         => \%latest_journals,
                         latest_submissions      => \%latest_submissions,
+                        latest_bookmarks        => \%latest_bookmarks,
+                        latest_friends          => $latest_friends,
                         latest_event            => $latest_event,
                         data_pane               => $form->{dp},
 		}, { Page => 'users', Skin => 'default'});
