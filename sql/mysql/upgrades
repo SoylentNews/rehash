@@ -5497,6 +5497,7 @@ UPDATE vars SET value = 'T_2_5_0_219' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+# for plugins/FireHose
 DROP TABLE IF EXISTS firehose_topics_rendered;
 CREATE TABLE firehose_topics_rendered (
 	id MEDIUMINT UNSIGNED NOT NULL,
@@ -5504,9 +5505,7 @@ CREATE TABLE firehose_topics_rendered (
 	UNIQUE id_tid (id, tid),
 	INDEX tid_id (tid, id)
 ) TYPE=InnoDB;
-
-ALTER TABLE firehose ADD COLUMN nexuslist varchar(32) NOT NULL DEFAULT '';
-ALTER TABLE firehose ADD COLUMN offmainpage ENUM('no','yes') NOT NULL DEFAULT 'no';
+ALTER TABLE firehose ADD COLUMN nexuslist varchar(32) NOT NULL DEFAULT '' AFTER category, ADD COLUMN offmainpage ENUM('no','yes') NOT NULL DEFAULT 'no';
 
 ###################################################################
 # Read the comments at the top of utils/convertFirehoseData200809 #
@@ -5521,10 +5520,11 @@ ALTER TABLE firehose ADD COLUMN offmainpage ENUM('no','yes') NOT NULL DEFAULT 'n
 # convertFirehoseData200809 -u <virtual_user>                     #
 ###################################################################
 
-# For plugins/Metamod and plugins/Firehose
+# for plugins/Metamod and plugins/FireHose
 # if you want to use firehose for metamoderation set this to 1 otherwise set to 0
 INSERT INTO vars (name, value, description) VALUES ('metamod_use_firehose', '0', 'Use firehose for metamodding');
 
-# For U2
+# for User2
 INSERT INTO user_event_types VALUES (4, 'Bookmarks');
 INSERT INTO user_event_types VALUES (5, 'Friends');
+

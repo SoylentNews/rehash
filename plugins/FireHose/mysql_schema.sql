@@ -39,7 +39,7 @@ CREATE TABLE firehose (
 	srcname VARCHAR(32) NOT NULL DEFAULT '',
 	thumb MEDIUMINT UNSIGNED,
 	mediatype enum("text", "none", "video", "image", "audio") default "none" NOT NULL,
-	offmainpage ENUM('no','yes') NOT NULL DEFAULT 'no';
+	offmainpage ENUM('no','yes') NOT NULL DEFAULT 'no',
 	PRIMARY KEY (id),
 	UNIQUE globjid (globjid),
 	KEY createtime (createtime),
