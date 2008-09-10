@@ -140,9 +140,7 @@ __template__
 			END;
 		   END;
 		%]
-		[% IF user.is_anon %]
-			<a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a>
-		[% END %]
+		<a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a>
 		<span class="busy" style="display:none"><img src="[% constants.imagedir %]/spinner2.gif"></span>
 		[% IF !contentsonly %]
 		</span>
