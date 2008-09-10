@@ -12211,10 +12211,15 @@ sub setGlobjAdminnote {
 
 sub addGlobjTargetsToHashrefArray {
 	my($self, $ar) = @_;
+	my @globjids =
+		map { $_->{globjid} }
+		grep { $_->{globjid} && !$_->{globj_type} } # skip if already added
+		@$ar;
+	my $target = $self->getGlobjTargets(\@globjids);
 	for my $hr (@$ar) {
 		next unless $hr->{globjid}; # skip if bogus data
 		next if $hr->{globj_type};  # skip if already added
-		my($type, $target_id) = $self->getGlobjTarget($hr->{globjid});
+		my($type, $target_id) = @{ $target->{ $hr->{globjid} } };
 		next unless $type;          # skip if bogus data
 		$hr->{globj_type} = $type;
 		$hr->{globj_target_id} = $target_id;
@@ -12264,8 +12269,6 @@ sub addGlobjEssentialsToHashrefArray {
 	$self->_addGlobjEssentials_journals($ar, \%data);
 	$self->_addGlobjEssentials_comments($ar, \%data);
 
-#use Data::Dumper; print STDERR "data: " . Dumper(\%data);
-
 	# Scan over the arrayref and insert the information from %data
 	# for each object.
 
@@ -12308,7 +12311,7 @@ sub _addGlobjEssentials_urls {
 	my($self, $ar, $data_hr) = @_;
 	my $constants = getCurrentStatic();
 	my $urls_hr = _addGlobjEssentials_getids($ar, 'urls');
-	my @url_ids = sort { $a <=> $b } keys %$urls_hr;
+	my @url_ids = keys %$urls_hr;
 	my $id_str = join(',', @url_ids);
 	my $urldata_hr = $id_str
 		? $self->sqlSelectAllHashref('url_id',
@@ -12345,7 +12348,7 @@ sub _addGlobjEssentials_submissions {
 	my($self, $ar, $data_hr) = @_;
 	my $skins = $self->getSkins();
 	my $submissions_hr = _addGlobjEssentials_getids($ar, 'submissions');
-	my @subids = sort { $a <=> $b } keys %$submissions_hr;
+	my @subids = keys %$submissions_hr;
 	my $subid_str = join(',', @subids);
 	my $submissiondata_hr = $subid_str
 		? $self->sqlSelectAllHashref('subid',
