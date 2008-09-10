@@ -949,9 +949,13 @@ sub getUserFireHoseVotesForGlobjs {
 		 AND uid = $uid_q AND tagnameid IN ($upid,$dnid,$metaupid,$metadnid)"
 	);
 
-	foreach (keys %$results) {
-		$results->{$_} = "up" if $results->{$_} == $upid || $results->{$_} == $metaupid;
-		$results->{$_} = "down" if $results->{$_} == $dnid || $results->{$_} == $metadnid;
+	for my $globjid (keys %$results) {
+		my $tnid = $results->{$globjid};
+		if ($tnid == $upid || $tnid == $metaupid) {
+			$results->{$globjid} = "up";
+		} elsif ($tnid == $dnid || $tnid == $metadnid) {
+			$results->{$globjid} = "down";
+		}
 	}
 	return $results;
 }
