@@ -5506,12 +5506,13 @@ CREATE TABLE firehose_topics_rendered (
 ) TYPE=InnoDB;
 
 ALTER TABLE firehose ADD COLUMN nexuslist varchar(32) NOT NULL DEFAULT '';
+ALTER TABLE firehose ADD COLUMN offmainpage ENUM('no','yes') NOT NULL DEFAULT 'no';
 
 ###################################################################
 # Read the comments at the top of utils/convertFirehoseData200809 #
 # to learn about converting firehose data to use new code in this #
-# tag.  You can run this sql and run the conversion before        #
-# installing the new code w/o breaking current functionality      #
+# tag.  You should run this utility after the sql above is        #
+# executed and the code for this tag is installed.                #
 #                                                                 #
 # Code after this point will expect and rely on the data created  #
 # by this utility existing                                        #
