@@ -74,7 +74,7 @@ sub main {
 
 	if ($op ne "rss") {
 		my $title = "$constants->{sitename} - Firehose";
-		if ($gSkin->{name} eq "idle") {
+		if ($gSkin->{name} && $gSkin->{name} eq "idle") {
 			$title = "$gSkin->{hostname} - Firehose";
 		}
 		if ($op eq "metamod") {

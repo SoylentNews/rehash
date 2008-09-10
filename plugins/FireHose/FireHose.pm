@@ -402,6 +402,7 @@ sub updateItemFromProject {
 		}
 	}
 }
+
 sub updateItemFromStory {
 	my($self, $id) = @_;
 	my $constants = getCurrentStatic();
@@ -429,8 +430,8 @@ sub updateItemFromStory {
 				word_count	=> $story->{word_count},
 				thumb		=> $story->{thumb},
 			};
-			if(defined $story->{mediatype}) {
-				if(!$story->{mediatype}) {
+			if (defined $story->{mediatype}) {
+				if (!$story->{mediatype}) {
 					$data->{mediatype} = "none";
 				} else {
 					$data->{mediatype} = $story->{mediatype};
@@ -440,6 +441,7 @@ sub updateItemFromStory {
 		}
 	}
 }
+
 sub setTopicsRenderedBySkidForItem {
 	my($self, $id, $primaryskid) = @_;
 	my $constants = getCurrentStatic();
@@ -511,8 +513,8 @@ sub createItemFromStory {
 			discussion	=> $story->{discussion},
 			thumb		=> $story->{thumb},
 		};
-		if(defined $story->{mediatype}) {
-			if(!$story->{mediatype}) {
+		if (defined $story->{mediatype}) {
+			if (!$story->{mediatype}) {
 				$data->{mediatype} = "none";
 			} else {
 				$data->{mediatype} = $story->{mediatype};
@@ -3150,7 +3152,7 @@ sub genFireHoseParams {
 	};
 	if ($user->{is_anon}) {
 		my ($label, $value) = @_;
-		if($options->{sel_tabtype} || $form->{tabtype}) {
+		if ($options->{sel_tabtype} || $form->{tabtype}) {
 			$label = "tabtype";
 			$value = $form->{tabtype} || $options->{sel_tabtype};
 			$value = strip_paramattr($value);
