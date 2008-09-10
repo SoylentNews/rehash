@@ -414,7 +414,7 @@ $task{$me}{code} = sub {
 		});
 
 		if ($constants->{plugin}{FireHose}) {
-			gen_firehose_static($virtual_user, "index_firehose.shtml", $gSkin->{name}, "", {  skipmenu => 1, });
+			gen_firehose_static($virtual_user, "index_firehose.shtml", $gSkin->{name}, "", {  index => 1});
 			if ($base ne "firehose") {
 				gen_firehose_static($virtual_user, "firehose.shtml", $gSkin->{name}, "", { fhfilter => " ", duration => "7", mode => 'fulltitle', mixedmode => '1', setfield => '1', color => "blue", nodates => '1'  });
 			}
@@ -444,7 +444,6 @@ $task{$me}{code} = sub {
 			if ($base eq "firehose") {
 				$extra_args = " anonval=$constants->{firehose_anonval_param}" if $constants->{firehose_anonval_param};
 			}
-
 			prog2file(
 				"$basedir/$index_handler", 
 				"$basedir/$skinname/$base.shtml", {
@@ -453,7 +452,7 @@ $task{$me}{code} = sub {
 					handle_err =>	0
 			});
 			if ($constants->{plugin}{FireHose}) {
-				gen_firehose_static($virtual_user, "index_firehose.shtml", $skin->{name}, $skinname, { skipmenu => 1, skippop => 1, fhfilter => "'story $skin->{name}'", duration => "7", mode => 'fulltitle', mixedmode => '1', setfield => '1', color => "black", index => "1", nocolors => "1"  });
+				gen_firehose_static($virtual_user, "index_firehose.shtml", $skin->{name}, $skinname, { index =>"1"});
 				if ($base ne "firehose") {
 					gen_firehose_static($virtual_user, "firehose.shtml", $skin->{name}, $skinname, { duration => "7", mode => 'fulltitle', mixedmode => '1', setfield => '1', color => "blue", nodates => '1', fhfilter => "'$skin->{name}'" });
 				}
