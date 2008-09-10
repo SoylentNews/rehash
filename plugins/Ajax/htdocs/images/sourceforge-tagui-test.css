@@ -6,7 +6,7 @@ h1, h2, h3, h4, h5, h6, span.tag, .legend {
 	font-family: Optima, Arial, Helvetica, sans serif;
 }
 
-div.basic-tagui {
+div.sfnet-basic-tagui {
 	font-size: 90%;
 	margin-left: 1em;
 }
@@ -18,52 +18,52 @@ div.basic-tagui {
 	opacity: 0.8;
 }
 
-.tag-display > ul > li + li,
-.tag-display + .tag-display {
+.sfnet-tag-display > ul > li + li,
+.sfnet-tag-display + .sfnet-tag-display {
 	margin-left: 0.25em;
 }
 
-.tag,
-.tag-display > ul,
-.tag-display > ul > li,
-.tmenu > ul,
-.tmenu > ul > li {
+span.tag,
+.sfnet-tag-display > ul,
+.sfnet-tag-display > ul > li,
+.sfnet-tag-menu > ul,
+.sfnet-tag-menu > ul > li {
 	display: inline-block;
 	list-style: none;
 	padding: 0;
 }
 
-.tag-display, .tag-display > ul > li {
+.sfnet-tag-display, .sfnet-tag-display > ul > li {
 	display: inline-block;
 	position: relative;
 }
 
-.tag-display li:hover span.tag {
+.sfnet-tag-display li:hover span.tag {
 	cursor: arrow;
 	color: white;
 	background-color: orange;
 }
 
 /* round edges */
-.tag-display ul,
-.tag-display span.tag,
-.tag-display .tmenu,
-.tag-display .tmenu li {
+.sfnet-tag-display ul,
+.sfnet-tag-display span.tag,
+.sfnet-tag-display .sfnet-tag-menu,
+.sfnet-tag-display .sfnet-tag-menu li {
 	border: 0 solid transparent;
 	-moz-border-radius: 0.4em;
 	-webkit-border-radius: 0.4em;
 }
 
-a.tag-display:hover > ul {
+.sfnet-tag-display:hover > ul {
 	background-color: #dfdfdf;
 }
 
-a.tag-display:hover .legend {
+.sfnet-tag-display:hover .legend {
 	display: inline-block;
 }
 
 /* tag menus are hidden by default... */
-.tmenu {
+.sfnet-tag-menu {
 	display: none;
 	position: absolute;
 	top: -1.25em;
@@ -80,25 +80,25 @@ a.tag-display:hover .legend {
 }
 
 /* padding so hover highlighting is bigger than the contents */
-.tag-display span.tag,
-.tag-display > ul,
-.tmenu > ul  {
+.sfnet-tag-display span.tag,
+.sfnet-tag-display > ul,
+.sfnet-tag-menu > ul  {
 	padding: 0.1em 0.5em;
 	margin: -0.1em -0.5em;
 }
 
 /* ...until you mouse over element to which they are attached */
-.tag-display li:hover .tmenu {
+.sfnet-tag-display li:hover .sfnet-tag-menu {
 	display: inline-block;
 }
 
 /* the menu item itself */
-a.tmenu:hover {
+.sfnet-tag-menu:hover {
 	opacity: 0.9;
 	-moz-opacity: 0.9;
 }
 
-a.tmenu li:hover {
+.sfnet-tag-menu li:hover {
 	color: white;
 	background-color: black;
 }

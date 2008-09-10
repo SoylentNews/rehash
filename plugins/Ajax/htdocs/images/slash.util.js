@@ -93,7 +93,7 @@ function clone( o ){
 }
 
 function accumulate( initial_value, accumulate_fn, collection /* [, collection]+ */ ){
-	var others = $.makeArray(arguments).slice(3);
+	var others = Array.prototype.slice.call(arguments, 3);
 	var if_others = others.length > 0;
 
 	var o = initial_value;
