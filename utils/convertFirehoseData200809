@@ -8,11 +8,11 @@ use Slash::Utility;
 use Data::Dumper;
 
 # This script converts Firehose from old-style (pre-Sept 2008)
-# to new-style (June 2008), this allows stories to be excluded
+# to new-style (Sept 2008), this allows stories to be excluded
 # from the mainpage, and appear in multiple sections just as 
 # stories were able to do on index utilizing story_topics_rendered.
-# A new firehose_topics_rendered table is added as well as a nexuslist
-# column in firehose to track this information
+# A new firehose_topics_rendered table is added as well as the nexuslist and offmainpage
+# columns in firehose to track this information
 #
 # Script usage: convertFirehoseDBto200809 -u <virtuser>
 
@@ -39,6 +39,13 @@ foreach (@$stories) {
 	} else {
 		warn "no srcid for story with firehose id of: $_->{id}\n";
 	}
+}
+
+# Next add offmainpage flag as appropriate in firehose table
+my $offmainpage_stories = $slashdb->sqlSelectColArrayref('stoid', 'story_param', "name='offmainpage' and value='1'");
+if (@$offmainpage_stories >= 1) {
+	my $stoid_list = join ',', @$offmainpage_stories;
+	$slashdb->sqlUpdate('firehose', { offmainpage => "yes"}, "type='story' and srcid in($stoid_list)");
 }
 
 # Then convert non-stories
