@@ -178,6 +178,9 @@ cmdrtaco dot net but be forgiving of beta code!
 	[% ELSIF fh_page == "users.pl" %]
 		firehose_settings.pageval = 2;
 	[% END %]
+	[% IF options.index %]
+		firehose_settings.index = 1;
+	[% END %]
 
 	var firehose_action_time = 0;
 	var firehose_user_class = [% user.is_anon ? 0 : 1 %];
@@ -209,7 +212,9 @@ cmdrtaco dot net but be forgiving of beta code!
 	[% END %]
 
 fh_ticksize = 15;
+[% IF !user.is_anon %]
 firehose_slider_init();
+[% END %]
 $(function(){
 	$('#firehoselist').click(firehose_click_tag);
 	var $entries = firehose_init_tagui();
