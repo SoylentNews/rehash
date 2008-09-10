@@ -280,7 +280,11 @@ new Package({ named: 'Slash.TagUI',
 				this.append(TagUI.basic_tagui(prefix)).
 					tagui__init().
 					tagui_markup__auto_refresh_styles().
-					tagui_server().
+					tagui_server({
+						id: function( s_elem ){
+							return $(s_elem).find('.sd-url:first').text();
+						}
+					}).
 					tagui_server__fetch_tags().
 					click(Command.simple_click);
 
@@ -753,7 +757,7 @@ function compute_tag_styles( $displays, signal_styles, static_styles_fn ){
 	// e.g., a tag that appears in both the user and system displays gets css classes 'u s'
 	var signals_done={}, styles={}, signals_remaining=keys(signal_styles).length;
 	$displays.filter('.ready[class*=respond-]:not(.no-tags)').each(function(){
-		var $display=$(this), signal=$display.tagui_responder.signals();
+		var $display=$(this), signal=$display.tagui_responder__signals();
 		if ( (signal in signal_styles) && !(signal in signals_done) ) {
 			update_tag_styles(styles, signal_styles[signal], $display.tagui__tags());
 			signals_done[signal] = true;
@@ -1377,18 +1381,23 @@ function $init_tag_widgets( $stubs, options ){
 
 (function(){ // SourceForge specific
 
-var host = simple_host() || 'localhost';
-var allowed = {
-	'sf.net':		true,
-	'sourceforge.net':	true,
-	'localhost':		true
+var sfx = Slash.Util.ensure_namespace('SFX');
+sfx.init_slash_ui = function(){
+	for ( var i=0; i<arguments.length; ++i ) {
+		switch ( arguments[i] ) {
+			case 'd2':
+				$('.sd-d2-root').each(function(){
+					var $this = $(this);
+					var inner_url = $this.find('.sd-url').text() || window.location;
+					// pudge: more here
+				});
+				break;
+			case 'tags':
+				$('.sd-tagui-root').tagui__build_sourceforge_ui('sfnet');
+				break;
+		}
+	}
 };
-
-if ( allowed[host] ) {
-	$(function(){
-		$('.sd-ajax').tagui__build_sourceforge_ui('sfnet');
-	});
-}
 
 })();
 

@@ -11,6 +11,13 @@
 	<script type="application/javascript" src="slash.util.js"></script>
 	<script type="application/javascript" src="slash.tagui.js"></script>
 	<link type="text/css" rel="stylesheet" href="sourceforge-tagui-test.css">
+
+<script type="application/javascript">
+$(function(){
+	SFX.init_slash_ui('tags');
+})
+</script>
+
 </head>
 <body>
 	<h1>SourceForge TagUI Test</h1>
@@ -18,14 +25,16 @@
 	Testing Slashdot TagUI code when used from a non-Slashdot context.
 	</p>
 
-	<div id="project-1153007" class="sd-ajax">
+	<div class="sd-tagui-root">
+		<span class="sd-url">1153007</span>
 		<h3>Project 1153007</h3>
 		<p>
 		Here's a simulated project entry.
 		</p>
 	</div>
 
-	<div id="project-1152717" class="sd-ajax">
+	<div class="sd-tagui-root">
+		<span class="sd-url">1152717</span>
 		<h3>Project 1152717</h3>
 		<p>
 		Look, we can do more than one on a page.
