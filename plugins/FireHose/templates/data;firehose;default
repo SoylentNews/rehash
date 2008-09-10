@@ -107,10 +107,6 @@ __template__
 		[% IF !contentsonly %]
 		<span id="firehose_more">
 		[% END %]
-		[% IF !need_label;
-			label = "more &rsaquo;";
-		   END;
-		%]
 		[% IF day_label && day_count && options.duration != -1;
 			IF need_day_label;
 				label = $day_label _ " ";
