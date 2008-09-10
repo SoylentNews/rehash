@@ -31,7 +31,7 @@ IF item.primaryskid && item.primaryskid != form.primaryskid && item.primaryskid 
 		IF form.index;
 			index_add = "index_";
 		END;
-		the_skin_title = '<a href="' _ the_skin.rootdir _ '/' _ the_skin.name _ '/' _ index_add _ 'firehose.shtml" title="Filter to '_ the_skin.title _'" class="skin">' _ the_skin.title _ ":</a> ";
+		the_skin_title = '<a href="' _ the_skin.rootdir _ '" title="Filter to '_ the_skin.title _'" class="skin">' _ the_skin.title _ ":</a> ";
 	ELSE;
 		the_skin_title = '<a href="' _ gSkin.rootdir _ "/" _ fh_page _ '?fhfilter=' _ the_skin.name _ '" title="Filter to '_ the_skin.title _'" class="skin">' _ the_skin.title _ ":</a> ";
 	END;
