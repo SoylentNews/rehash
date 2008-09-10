@@ -23,7 +23,7 @@ __template__
 	[% fh = Slash.getObject("Slash::FireHose");
 	   link_url = fh.linkFireHose(item);
 	%]
-	<a href="[% link_url %]"><img src="[% constants.imagedir %][% file.name %]" alt="thumbnail" [% IF file.width; "width='$file.width'"; IF file.height; " height='$file.height'"; END; %] [% IF item.media %]onclick="firehose_get_media_popup('[% item.id %]'); return false;"[% END %]></a><br>[% IF item.media %]<a href="[% link_url %]" onclick="firehose_get_media_popup('[% item.id %]')">[% END %]<br>[% IF item.media %]<a href="[% link_url %]" onclick="firehose_get_media_popup('[% item.id %]'); return false;">Watch</a>[% END %][% END %]
+	<a href="[% link_url %]"><img src="[% constants.imagedir %][% file.name %]" alt="thumbnail" [% IF file.width; "width='$file.width'"; IF file.height; " height='$file.height'"; END; %] [% IF item.media && item.mediatype == "video" %]onclick="firehose_get_media_popup('[% item.id %]'); return false;"[% END %]></a><br>[% IF item.media && item.mediatype == "video"%]<a href="[% link_url %]" onclick="firehose_get_media_popup('[% item.id %]')">[% END %]<br>[% IF item.media && item.mediatype == "video" %]<a href="[% link_url %]" onclick="firehose_get_media_popup('[% item.id %]'); return false;">Watch</a>[% END %][% END %]
 							 
 [% ELSIF user.noicons || user.simpledesign || user.lowbandwidth %]
 	[ <a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]">[% topic.textname %]</a> ]
