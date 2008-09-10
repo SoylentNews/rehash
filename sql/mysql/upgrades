@@ -5521,3 +5521,6 @@ ALTER TABLE firehose ADD COLUMN offmainpage ENUM('no','yes') NOT NULL DEFAULT 'n
 # convertFirehoseData200809 -u <virtual_user>                     #
 ###################################################################
 
+# For plugins/Metamod and plugins/Firehose
+# if you want to use firehose for metamoderation set this to 1 otherwise set to 0
+INSERT INTO vars (name, value, description) VALUES ('metamod_use_firehose', '0', 'Use firehose for metamodding');

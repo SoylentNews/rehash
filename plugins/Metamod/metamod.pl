@@ -18,7 +18,7 @@ sub main {
 	my $op = getCurrentForm('op') || '';
 	my $section = $slashdb->getSection($form->{section});
 
-	if ($user->{is_subscriber} && $constants->{plugin}{FireHose}) {
+	if ($constants->{plugin}{FireHose} && $constants->{metamod_use_firehose}) {
 		redirect("$constants->{rootdir}/firehose.pl?op=metamod");
 	}
 

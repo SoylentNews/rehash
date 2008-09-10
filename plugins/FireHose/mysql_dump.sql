@@ -41,3 +41,4 @@ INSERT INTO firehose_tab VALUES (2,0,'Slashdot','story','createtime','DESC','bla
 INSERT INTO firehose_tab VALUES (3,0,'Journals','journal','createtime','DESC','blue','full');
 INSERT INTO firehose_tab VALUES (4,0,'User','"user:{nickname}"','createtime','DESC','black','full');
 
+INSERT INTO vars (name, value, description) VALUES ('metamod_use_firehose', '0', 'Use firehose for metamodding');
