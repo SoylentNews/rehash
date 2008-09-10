@@ -515,17 +515,12 @@ sub createItemFromStory {
 			discussion	=> $story->{discussion},
 			thumb		=> $story->{thumb},
 		};
-<<<<<<< HEAD:plugins/FireHose/FireHose.pm
-		if (defined $story->{mediatype}) {
-			if (!$story->{mediatype}) {
-=======
 
 		$data->{offmainpage} = "no";
 		$data->{offmainpage} = "yes" if defined $story->{offmainpage} && $story->{offmainpage};
 
 		if(defined $story->{mediatype}) {
 			if(!$story->{mediatype}) {
->>>>>>> Many firehose updates to include fixes for section handling code:plugins/FireHose/FireHose.pm
 				$data->{mediatype} = "none";
 			} else {
 				$data->{mediatype} = $story->{mediatype};
