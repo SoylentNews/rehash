@@ -438,6 +438,8 @@ Package({ named: 'Slash.Util.Algorithm',
 	exports: 'each accumulate keys values rotate_list'
 });
 
+Slash.jQuery = $;
+
 // Yes, I could phrase this as a Package; but I don't need to, here.
 $.fn.extend({
 	nearest_parent: function( selector ) {

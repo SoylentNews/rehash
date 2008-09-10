@@ -1379,26 +1379,4 @@ function $init_tag_widgets( $stubs, options ){
 
 })();
 
-(function(){ // SourceForge specific
-
-var sfx = Slash.Util.ensure_namespace('SFX');
-sfx.init_slash_ui = function(){
-	for ( var i=0; i<arguments.length; ++i ) {
-		switch ( arguments[i] ) {
-			case 'd2':
-				$('.sd-d2-root').each(function(){
-					var $this = $(this);
-					var inner_url = $this.find('.sd-url').text() || window.location;
-					// pudge: more here
-				});
-				break;
-			case 'tags':
-				$('.sd-tagui-root').tagui__build_sourceforge_ui('sfnet');
-				break;
-		}
-	}
-};
-
-})();
-
-})(jQuery);
+})(Slash.jQuery);
