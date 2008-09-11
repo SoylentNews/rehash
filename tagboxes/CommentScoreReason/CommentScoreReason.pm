@@ -201,8 +201,8 @@ sub run_process {
 	my $new_score = $points_orig + $mod_score_sum;
 	my $new_karma_bonus = ($karma_bonus eq 'yes' && $keep_karma_bonus) ? 1 : 0;
 
-	$self->debug_log("setting cid %d to score: %d, %s kb %d->%d",
-		$cid, $new_score, $reasons->{$current_reason_mode}{name}, $karma_bonus, $new_karma_bonus);
+	$self->info_log("cid %d to score: %d, %s kb %d->%d, neediness %.1f",
+		$cid, $new_score, $reasons->{$current_reason_mode}{name}, $karma_bonus, $new_karma_bonus, $neediness);
 
 	if ($firehose) {
 		my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
