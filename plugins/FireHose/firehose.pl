@@ -23,6 +23,7 @@ sub main {
 	my $user      = getCurrentUser();
 	my $form      = getCurrentForm();
 	my $gSkin     = getCurrentSkin();
+	my $firehose  = getObject("Slash::FireHose");
 
 	my $anonval = $constants->{firehose_anonval_param} || "";
 
@@ -82,6 +83,10 @@ sub main {
 		}
 		if ($form->{index}) {
 			$title = "$constants->{sitename} - $constants->{slogan}";
+		}
+		if ($form->{op} eq "view") {
+			my $item = $firehose->getFireHose($form->{id});
+			$title = "$constants->{sitename} - $item->{title}" if $item && $item->{title};
 		}
 		header($title, '') or return;
 	}
