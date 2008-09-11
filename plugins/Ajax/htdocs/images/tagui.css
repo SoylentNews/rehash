@@ -21,7 +21,8 @@ span.tag, .tmenu, .tag-display ul, .tag-display li, .edit-toggle {
 
 .tag-display span.tag,
 .tag-widget .admin-buttons {
-	font-family: Optima, sans serif;
+	font-family: arial, sans serif;
+	color: #666;
 }
 
 /* style tags based on what they are */
@@ -147,7 +148,7 @@ div.tag-display span.tag,
 div.tag-display > h1.legend,
 #contents div.tag-display > h1.legend {
 	padding: 0.1em 0.3em !important;
-	margin: -0.1em -0.3em !important;
+	margin: -0.1em -0.1em !important;
 }
 
 div.tag-display .tmenu li span,
@@ -165,7 +166,7 @@ div.tag-display .tmenu li span,
 .tag-display .tmenu {
 	display: none;
 	position: absolute;
-	top: -2.15em;
+	top: -2em;
 	right: -.3em;
 	font-size: 85%;
 	color: #fff;
