@@ -40,6 +40,23 @@ sub init {
 		grep { $slashdb->getUser($_, 'seclev') >= 100 }
 		keys %$admins
 	};
+
+	# XXX See CommentScoreReason.pm, we should consolidate code
+
+	my $tagsdb = getObject('Slash::Tags');
+	my $moddb = getObject('Slash::TagModeration');
+	$self->{reasons} = $moddb->getReasons();
+	$self->{reason_tagnameid} = { };
+	$self->{reason_ids} = [
+		grep { $self->{reasons}{$_}{val} != 0 }
+		keys %{$self->{reasons}}
+	];
+	for my $id (@{$self->{reason_ids}}) {
+		my $name = lc $self->{reasons}{$id}{name};
+		my $tagnameid = $tagsdb->getTagnameidCreate($name);
+		$self->{reason_tagnameid}{$tagnameid} = $self->{reasons}{$id};
+	}
+
 	1;
 }
 
@@ -48,6 +65,7 @@ sub init_tagfilters {
 	$self->{filter_activeonly} = 1;
 	$self->{filter_firehoseonly} = 1;
 	$self->{filter_tagnameid} = [ @{$self}{qw( nodid nixid )} ];
+	push @{ $self->{filter_tagnameid} }, keys %{ $self->{reason_tagnameid} };
 }
 
 sub get_affected_type	{ 'globj' }
@@ -237,7 +255,7 @@ sub getStartingColorLevel {
 		my $score = constrain_score($comment->{points} + $comment->{tweak});
 		if ($score >= 5) {
 			$color_level = 4;
-		} elsif ($score >= 3) {
+		} elsif ($score >= 4) {
 			$color_level = 5
 		} elsif ($score >= 1) {
 			$color_level = 6
