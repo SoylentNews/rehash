@@ -12,7 +12,8 @@ SFX.init_slash_ui = function(){
 				$('.sd-d2-root').each(function(){
 					var $this = $(this);
 					var inner_url = $this.find('.sd-key-url').text() || window.location;
-					// pudge: more here
+					// pudge: more here --- fix up "outer" url
+					$this.load('http://... ..&url='+encodeURI(inner_url)+'&... ...');
 				});
 				break;
 			case 'tags':
