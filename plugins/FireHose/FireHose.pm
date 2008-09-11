@@ -147,18 +147,10 @@ sub createItemFromComment {
 	my $globjid = $self->getGlobjidCreate("comments", $cid);
 	my $score = constrain_score($comment->{points} + $comment->{tweak});
 
-	# Set initial popularity scores, but we'll be forcing a quick
-	# recalculation of them.
+	# Set initial popularity scores -- we'll be forcing a quick
+	# recalculation of them so these scores don't much matter.
 	my($popularity, $editorpop, $neediness);
-	if ($score >= 3) {
-		$popularity = $self->getEntryPopularityForColorLevel(4);
-	} elsif ($score == 2) {
-		$popularity = $self->getEntryPopularityForColorLevel(5);
-	} elsif ($score >= 0) {
-		$popularity = $self->getEntryPopularityForColorLevel(6);
-	} else {
-		$popularity = $self->getEntryPopularityForColorLevel(7);
-	}
+	$popularity = $self->getEntryPopularityForColorLevel(5);
 	$editorpop = $self->getEntryPopularityForColorLevel(5);
 	$neediness = $self->getEntryPopularityForColorLevel(5);
 

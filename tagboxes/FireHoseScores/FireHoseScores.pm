@@ -235,11 +235,11 @@ sub getStartingColorLevel {
 	} elsif ($type eq "comments") {
 		my $comment = $self->getComment($target_id);
 		my $score = constrain_score($comment->{points} + $comment->{tweak});
-		if ($score >= 3) {
+		if ($score >= 5) {
 			$color_level = 4;
-		} elsif ($score == 2) {
+		} elsif ($score >= 3) {
 			$color_level = 5
-		} elsif ($score >= 0) {
+		} elsif ($score >= 1) {
 			$color_level = 6
 		} else {
 			$color_level = 7;
