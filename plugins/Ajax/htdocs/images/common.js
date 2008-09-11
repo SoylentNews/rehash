@@ -12,7 +12,8 @@
 ;$(function(){
 	$.ajaxSetup({
 		url:	'/ajax.pl',
-		type:	'POST'
+		type:	'POST',
+		contentType: 'application/x-www-form-urlencoded'
 	});
 });
 
@@ -986,9 +987,7 @@ function ajax_update(request_params, id, handlers, options) {
 	}
 
 	var opts = {
-		data: request_params,
-		type: 'POST',
-		contentType: 'application/x-www-form-urlencoded'
+		data: request_params
 	};
 
 	if ( options.request_url ) {

@@ -9,12 +9,9 @@ SFX.init_slash_ui = function(){
 	for ( var i=0; i<arguments.length; ++i ) {
 		switch ( arguments[i] ) {
 			case 'd2':
-				$('.sd-d2-root').each(function(){
-					var $this = $(this);
-					var inner_url = $this.find('.sd-key-url').text() || window.location;
-					// pudge: more here --- fix up "outer" url
-					$this.load('http://... ..&url='+encodeURI(inner_url)+'&... ...');
-				});
+				var d2 = $('#sd-d2-root');
+				var inner_url = d2.find('.sd-key-url').text() || window.location;
+				d2.load('//sourceforge.net/slashdot/slashdot-it.pl?op=discuss&div=1&url='+encodeURI(inner_url));
 				break;
 			case 'tags':
 				$('.sd-tagui-root').tagui__build_sourceforge_ui('sfnet');
