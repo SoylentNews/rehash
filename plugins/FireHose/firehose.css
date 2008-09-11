@@ -156,6 +156,12 @@ padding-top:0.9em;}
 
 /* Articles */
 .imgspace { min-height: 100% !important; }
+.article { margin-top: 1em }
+.watch{position:absolute; z-index: 1000; top: 0; width:130px;height:97px;text-indent:-99999px;background:url(//images.slashdot.org/icon_play.png) no-repeat center;}
+div.article div.body div.topic{position:relative;float:right;margin:0 0 .3em .5em;}
+div.storylinks{margin:0 0 1.5em; display: inline; }
+div.briefarticle div.storylinks {display: block;}
+div.article {margin-top: 1em}
 
 .storylinks
 {
@@ -166,7 +172,6 @@ padding-top:0.9em;}
 
 .storylinks li.more { margin-left: -1.8em !important; }
 .storylinks li.comments {border-left: 1px solid #ccc; padding-left: 1em !important}
-#firehoselist { padding: 1em 0 0 0; }
 #firehoselist, #firehose #message, .firemenu { margin-right: 18.5em; }
 #metamodwrap #firehoselist, #firehose #metamodwrap #message { margin-right: 0em; }
 #users #firehoselist, #users #firehose #message, #users .firemenu { margin-right: 0em; }
