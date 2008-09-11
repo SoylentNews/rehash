@@ -2,7 +2,7 @@ body {
 	margin: 1in;
 }
 
-.sd-url {
+[class^=sd-key] {
 	display: none;
 }
 

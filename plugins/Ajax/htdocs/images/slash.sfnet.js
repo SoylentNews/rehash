@@ -11,7 +11,7 @@ SFX.init_slash_ui = function(){
 			case 'd2':
 				$('.sd-d2-root').each(function(){
 					var $this = $(this);
-					var inner_url = $this.find('.sd-url').text() || window.location;
+					var inner_url = $this.find('.sd-key-url').text() || window.location;
 					// pudge: more here
 				});
 				break;

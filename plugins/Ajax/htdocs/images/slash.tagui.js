@@ -282,7 +282,7 @@ new Package({ named: 'Slash.TagUI',
 					tagui_markup__auto_refresh_styles().
 					tagui_server({
 						id: function( s_elem ){
-							return $(s_elem).find('.sd-url:first').text();
+							return $(s_elem).find('[class*=sd-key]:first').text();
 						}
 					}).
 					tagui_server__fetch_tags().
