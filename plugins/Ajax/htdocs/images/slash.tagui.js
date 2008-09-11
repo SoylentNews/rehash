@@ -244,18 +244,6 @@ new Package({ named: 'Slash.TagUI',
 		},
 		init: function( $new_entries, options ){
 			return $new_entries.tagui__init(options);
-		},
-		basic_tagui: function( prefix ){
-			prefix = prefix ? prefix + '-' : '';
-			return '<div class="' + prefix + 'basic-tagui">' +
-				$.map(['user', 'top', 'system'], function( k ){
-					return '<span class="' + prefix + 'tag-display-stub respond-' + k + '"></span>';
-				}).join('') +
-				'</div>';
-		},
-		build_sourceforge_ui: function( entry_elem, prefix ){
-			$(entry_elem).tagui__build_sourceforge_ui(prefix);
-			return entry_elem;
 		}
 	},
 	jquery: {
@@ -274,32 +262,6 @@ new Package({ named: 'Slash.TagUI',
 				options = options || {};
 				this.find('[class*=tag-display-stub]').tagui_display(options.for_display);
 				this.find('[class*=tag-widget-stub]').tagui_widget(options.for_widget);
-				return this;
-			},
-			build_sourceforge_ui: function( prefix ){
-				this.append(TagUI.basic_tagui(prefix)).
-					tagui__init().
-					tagui_markup__auto_refresh_styles().
-					tagui_server({
-						id: function( s_elem ){
-							return $(s_elem).find('[class*=sd-key]:first').text();
-						}
-					}).
-					tagui_server__fetch_tags().
-					click(Command.simple_click);
-
-				// basic_tagui() doesn't produce legends, but we want them anyway.
-				var $entries = this;
-				$.each({
-					user:	'My Tags',
-					top:	'Top Tags',
-					system:	'System Tags'
-				}, function( k, v ){
-					$entries.
-						find('[class*=tag-display].respond-'+k).
-						prepend('<span class="legend">'+v+'</span>');
-				});
-
 				return this;
 			}
 		}
@@ -1186,6 +1148,10 @@ function animate_wiggle( $selector ){
 
 
 function $position_context_display( $display ){
+	if ( ! $related_trigger || ! $related_trigger.length ) {
+		return;
+	}
+
 	var RIGHT_PADDING = 18;
 
 	var $entry = $display.nearest_parent('.tag-server');
@@ -1329,7 +1295,9 @@ function set_widget_context( context, force, $related_trigger ){
 			});
 
 		w._current_context = context;
-	} else if ( $previous_context_trigger.length &&
+	} else if ( context &&
+		$related_trigger.length &&
+		$previous_context_trigger.length &&
 		$previous_context_trigger[0] !== $related_trigger[0] ) {
 
 		$position_context_display($('.ready.respond-related', this));
