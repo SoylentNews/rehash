@@ -290,7 +290,7 @@ sub update_feederlog {
 	my $clout_types = $tagsdb->getCloutTypes();
 	for my $tagbox (@$tagboxes) {
 
-		$tagbox->{object}->info_log("last=$tagbox->{last_tagid_logged}");
+		$tagbox->{object}->debug_log("last=$tagbox->{last_tagid_logged}");
 
 		my @tags_copy = @$tags_ar;
 		my $clout_type = $clout_types->{ $tagbox->{clid} };

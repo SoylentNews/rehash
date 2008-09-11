@@ -723,10 +723,11 @@ sub feed_newtags_filter {
 
 sub feed_newtags_pre {
 	my($self, $tags_ar) = @_;
-	# XXX only if debugging is on
 	# XXX note in log here, instead of feed_d_pre, if tdid's present
 	my $count = scalar(@$tags_ar);
-	if ($count < 9) {
+	if ($count < 1) {
+		$self->debug_log('filtered tags none');
+	} elsif ($count < 9) {
 		$self->info_log("filtered tags '%s'",
 			 join(' ', map { $_->{tagid} } @$tags_ar));
 	} else {
@@ -737,8 +738,11 @@ sub feed_newtags_pre {
 
 sub feed_newtags_post {
 	my($self, $ret_ar) = @_;
-	# XXX only if debugging is on
-	$self->info_log("returning %d", scalar(@$ret_ar));
+	if (!@$ret_ar) {
+		$self->debug_log('returning 0');
+	} else {
+		$self->info_log("returning %d", scalar(@$ret_ar));
+	}
 }
 
 sub feed_newtags_process {
