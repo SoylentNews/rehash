@@ -78,6 +78,12 @@ function firehose_handle_admin_commands( commands ){
 				signoff = true;
 				break;
 
+			case 'binspam':
+				if ( $(this).is(':not([type=feed])') ) {
+					user_cmd = cmd;
+				}
+				break;
+
 			default:
 				user_cmd = cmd;
 		}
