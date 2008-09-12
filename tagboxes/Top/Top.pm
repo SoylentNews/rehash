@@ -35,7 +35,7 @@ sub init_tagfilters {
 	my $types = $self->getGlobjTypes();
 	$self->{filter_gtid} = [
 		map { $types->{$_} }
-		grep { $_ ne 'projects' }
+		grep { $_ !~ /^\d+$/ && $_ ne 'projects' }
 		keys %$types ];
 }
 

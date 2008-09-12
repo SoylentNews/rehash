@@ -139,9 +139,11 @@ sub run_process {
 		my $tagnameid = $tag->{tagnameid};
 		my $reason = $self->{reason_tagnameid}{$tagnameid};
 		my $dir = 0;
-		if ($reason->{val} > 0 || $tagnameid == $self->{nodid} || $tagnameid == $self->{metanodid}) {
+		if ($reason && $reason->{val} > 0
+			|| $tagnameid == $self->{nodid} || $tagnameid == $self->{metanodid}) {
 			$dir = 1;
-		} elsif ($reason->{val} < 0 || $tagnameid == $self->{nixid} || $tagnameid == $self->{metanixid}) {
+		} elsif ($reason && $reason->{val} < 0
+			|| $tagnameid == $self->{nixid} || $tagnameid == $self->{metanixid}) {
 			$dir = -1;
 		}
 		if (!$dir) {
@@ -202,9 +204,11 @@ sub run_process {
 	my $new_karma_bonus = ($karma_bonus eq 'yes' && $keep_karma_bonus) ? 1 : 0;
 
 	$self->info_log("cid %d to score: %d, %s kb %d->%d, neediness %.1f",
-		$cid, $new_score, $reasons->{$current_reason_mode}{name}, $karma_bonus, $new_karma_bonus, $neediness);
+		$cid, $new_score, $reasons->{$current_reason_mode}{name}, ($karma_bonus eq 'yes' ? 1 : 0), $new_karma_bonus, $neediness);
 
 	if ($firehose) {
+		# If it's already in the hose, don't try to re-create it --
+		# that may cause unnecessary score recalculations.
 		my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
 		if (!$fhid) {
 			$fhid = $self->addCommentToHoseIfAppropriate($firehose,

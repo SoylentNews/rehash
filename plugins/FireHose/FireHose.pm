@@ -145,7 +145,6 @@ sub createItemFromComment {
 	my $comment = $self->getComment($cid);
 	my $text = $self->getCommentText($cid);
 	my $globjid = $self->getGlobjidCreate("comments", $cid);
-	my $score = constrain_score($comment->{points} + $comment->{tweak});
 
 	# Set initial popularity scores -- we'll be forcing a quick
 	# recalculation of them so these scores don't much matter.
