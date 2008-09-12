@@ -2456,7 +2456,8 @@ sub getAndSetOptions {
 	}
 
 	# push all necessary nexuses on if we want stories show as brief
-	if ($constants->{brief_sectional_mainpage} && $tabtype eq "tabsection" && $the_skin->{nexus} == $constants->{mainpage_nexus_tid}) {
+	if ($constants->{brief_sectional_mainpage} && $the_skin->{nexus} == $constants->{mainpage_nexus_tid} && 
+		$options->{fhfilter} eq "$the_skin->{name} story") {
 		my $nexus_children = $self->getMainpageDisplayableNexuses();
 		push @{$fh_options->{nexus}}, @$nexus_children;
 		$fh_options->{offmainpage} = "no";
