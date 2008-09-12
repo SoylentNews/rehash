@@ -207,16 +207,19 @@ function map_classes( elem, fn ){
 	elem.className = $.map(qw(elem.className), fn).join(' ');
 }
 
-function un_stub( stub_elem ){
-	var re_display = /((.*)tag-.*)-stub/, prefix;
+function un_stub( stub_elem, needed ){
+	var re_display = /((.*)tag-.*)-stub/, found, prefix;
 	map_classes(stub_elem, function( cn ){
 		var M = re_display.exec(cn);
 		if ( M ) {
 			prefix = M[2];
-			return M[1];
+			return (found = M[1]);
 		}
 		return cn;
 	});
+	if ( needed && ! found ) {
+		$(stub_elem).addClass(needed);
+	}
 	return prefix;
 }
 
@@ -358,7 +361,7 @@ function signals( r_elem ){
 	var more_new_signals = Array.prototype.slice.call(arguments, 1);
 	var new_signals = [], first_new_signal = more_new_signals.shift();
 	if ( if_defined(first_new_signal) ) {
-		new_signals = new_signals.concat(first_new_signal).concat(more_new_signals);
+		new_signals = new_signals.concat(qw(first_new_signal)).concat(more_new_signals);
 	}
 
 	var old_signals = classes_to_signals(r_elem.className);
@@ -897,7 +900,7 @@ new Package({ named: 'Slash.TagUI.Display',
 			addClass('no-tags').
 			removeAttr('init');
 
-		var prefix = un_stub(d_elem);
+		var prefix = un_stub(d_elem, 'tag-display');
 
 		var menu = o_d.menu || Display.defaults.menu;
 		var ext = {
@@ -1339,7 +1342,7 @@ function $init_tag_widgets( $stubs, options ){
 				options ).
 				init();
 
-			un_stub(this);
+			un_stub(this, 'tag-widget');
 		});
 
 	return $stubs;

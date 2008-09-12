@@ -38,7 +38,7 @@ test('general', function(){
 	ok($('#output').is(':contains("purr")'), 'handler functions');
 
 	// simulate server's way of doing it
-	$('#main .ready[signal*=badkitty]').tagui_responder__handle('badkitty');
+	$('#main .ready.respond-badkitty').tagui_responder__handle('badkitty');
 	ok($('#output').is(':contains("meow")'), 'handler functions when called through selection');
 });
 

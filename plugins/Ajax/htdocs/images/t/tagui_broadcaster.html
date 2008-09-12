@@ -52,14 +52,18 @@ test('general', function(){
 	TagUI.Responder(cat, { fn: handle_signal, signals: 'badkitty goodkitty' });
 	TagUI.Responder(dog, { fn: handle_signal, signals: 'goodboy badkitty' });
 
-	//$('body, #main').tagui_broadcaster__broadcast('goodkitty', 'here\'s a treat');
-	main.tagui_broadcaster.broadcast('goodkitty', 'here\'s a treat');
+	equals($('[class*=respond-].ready').length, 2, 'responder attributes look right');
+	$cat.tagui_responder__handle('goodkitty', 'testing handle_signal');
+
+	signal_received = '';
+	count = 0;
+
+	$('body, #main').tagui_broadcaster__broadcast('goodkitty', 'here\'s a treat');
 	equals(count, 1, 'exactly one response means only #main broadcast, only cat responded');
 	equals(signal_received, 'goodkitty', 'and the right signal was received');
 
 	count = 0;
 	$('body, #main').tagui_broadcaster__broadcast('badkitty', 'git the kitty!');
-	//main.tagui_broadcaster.broadcast('badkitty', 'git the kitty!');
 	equals(count, 2, 'exactly two responses means only #main broadcast, both dog and cat responded')
 });
 
