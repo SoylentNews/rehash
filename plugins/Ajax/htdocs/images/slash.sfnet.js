@@ -5,6 +5,37 @@ SFX.jQuery = jQuery /* .noConflict(true) */;
 
 (function($){
 
+function sfnet_canonical_project_url( url ){
+	url = url || '' + window.location;
+	var project_name, url = url.split(/\/+/);
+	if ( ! url[0] ) { url.shift(); }
+	if ( /:$/.test(url[0]) ) { url.shift(); }
+	if ( /\.net$/.test(url[0]) ) { url.shift(); }
+	if ( url[0] === 'projects' ) {
+		return "http://sourceforge.net/projects/" + url[1];
+	}
+}
+
+var re_key = /sd-key-(.*)/;
+
+function get_sd_key( elem ){
+	var key = {}, $key = $(elem).find('[class*=sd-key-]:first');
+	if ( $key.length ) {
+		key.key = $key.text();
+		$.each(Slash.Util.qw($key.attr('class')), function( cn ){
+			var M = re_key.exec(cn);
+			if ( M ) {
+				key.key_type = M[1];
+				return false;
+			}
+		});
+	} else if ( (key.key = sfnet_canonical_project_url()) ) {
+		key.key_type = "url";
+	}
+
+	return key;
+}
+
 function simple_tagui_markup( prefix ){
 	prefix = prefix ? prefix + '-' : '';
 	return '<div class="' + prefix + 'basic-tagui">' +
@@ -28,7 +59,7 @@ function install_tagui( expr, prefix ){
 		tagui_markup__auto_refresh_styles().
 		tagui_server({
 			id: function( s_elem ){
-				return $(s_elem).find('[class*=sd-key]:first').text() || window.location;
+				return get_sd_key(s_elem).key;
 			}
 		}).
 		tagui_server__fetch_tags().
@@ -54,8 +85,11 @@ SFX.install_slash_ui = function(){
 		switch ( arguments[i] ) {
 			case 'd2':
 				var d2 = $('#sd-d2-root');
-				var inner_url = d2.find('.sd-key-url').text() || window.location;
-				d2.load('//sourceforge.net/slashdot/slashdot-it.pl?op=discuss&div=1&url='+encodeURI(inner_url));
+				var key = get_sd_key(d2);
+				if ( key.key_type === 'url' ) {
+					var inner_url = key.key;
+					d2.load('//sourceforge.net/slashdot/slashdot-it.pl?op=discuss&div=1&url='+encodeURI(inner_url));
+				}
 				break;
 			case 'tags':
 				install_tagui('.sd-tagui-root', 'sfnet');
