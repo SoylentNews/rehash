@@ -3,6 +3,12 @@
 Slash.Util.ensure_namespace('SFX');
 SFX.jQuery = jQuery /* .noConflict(true) */;
 
+function $dom( id ) {
+	return document.getElementById(id);
+}
+
+
+
 (function($){
 
 function sfnet_canonical_project_url( url ){
@@ -81,6 +87,12 @@ function install_tagui( expr, prefix ){
 
 
 SFX.install_slash_ui = function(){
+	$.ajaxSetup({
+		url:	'/ajax.pl',
+		type:	'POST',
+		contentType: 'application/x-www-form-urlencoded'
+	});
+
 	for ( var i=0; i<arguments.length; ++i ) {
 		switch ( arguments[i] ) {
 			case 'd2':
