@@ -37,7 +37,7 @@ function after_update( $new_entries, state ){
 // Slash.Firehose.TagUI private implementation details
 
 function firehose_toggle_tagui_to( if_expanded, selector ){
-	var	$entry	= $(selector).nearest_parent('[tag-server]'),
+	var	$entry	= $(selector).nearest_parent('.tag-server'),
 		$widget = $entry.find('.tag-widget.body-widget'),
 		id	= $entry.attr('tag-server');
 
@@ -74,7 +74,7 @@ var $related_trigger = $().filter();
 function form_submit_tags( form, options ){
 	var $input = $('.tag-entry:input', form);
 	$related_trigger = $input;
-	$(form).nearest_parent('[tag-server]').
+	$(form).nearest_parent('.tag-server').
 		each(function(){
 			var tag_cmds = $input.val();
 			$input.val('');
@@ -83,8 +83,7 @@ function form_submit_tags( form, options ){
 }
 
 function firehose_click_tag( event ) {
-	var $target = $(event.target);
-	var command='';
+	var $target = $(event.target), command='', $menu;
 
 	$related_trigger = $target;
 
@@ -106,11 +105,32 @@ function firehose_click_tag( event ) {
 	}
 
 	if ( command ) {
-		Firehose.set_action();
-		var $s_elem = $target.nearest_parent('[tag-server]');
+		// No!  You no hurt Dr. Jones!  You log-in first!
+		if ( firehose_user_class !== undefined && !firehose_user_class ) {
+			show_login_box();
+			return true;
+		}
 
-		if ( event.shiftKey ) {
-			// if the shift key is down, append the tag to the edit field
+		Firehose.set_action();
+		var $s_elem = $target.nearest_parent('.tag-server');
+
+		// Make sure the user sees some feedback...
+		if ( $menu || event.shiftKey ) {
+			// for a menu command or copying a tag into edit field, open the tagui
+			var $widget = firehose_toggle_tagui_to(kExpanded, $s_elem);
+
+			// the menu is hover css, you did the command, so the menu should go away
+			// but you're still hovering
+			if ( $menu ) {
+				// so explicitly hide the menu
+				$menu.hide();
+				// Yikes! that makes it permanently gone; so undo at our earliest convenience
+				setTimeout(function(){ $menu.removeAttr('style'); });
+				// it can't immediately re-pop because you no longer qualify for the hover
+			}
+		}
+
+		if ( event.shiftKey ) { // if the shift key is down, append the tag to the edit field
 			$s_elem.find('.tag-entry:text:visible:first').each(function(){
 				if ( this.value ) {
 					var last_char = this.value[ this.value.length-1 ];
@@ -121,8 +141,7 @@ function firehose_click_tag( event ) {
 				this.value += command;
 				this.focus();
 			});
-		} else {
-			// otherwise, send it the server to be processed
+		} else { // otherwise, send it the server to be processed
 			$s_elem.each(function(){
 				this.tagui_server.submit_tags(command, { fade_remove: 400, order: 'prepend', classes: 'not-saved'});
 			});
@@ -217,7 +236,7 @@ function firehose_tag_feedback( signal, data ){
 	function if_have( k ){ return k in tags || 'meta'+k in tags; }
 	function if_busy( depth ){ return depth>0; }
 
-	var $entry = tr._$entry || (tr._$entry = $(this).nearest_parent('[tag-server]'));
+	var $entry = tr._$entry || (tr._$entry = $(this).nearest_parent('.tag-server'));
 
 	var depth, was_busy=if_busy(depth = tr._busy_depth || 0);
 	switch ( signal ) {
@@ -249,7 +268,7 @@ function firehose_tag_feedback( signal, data ){
 
 function firehose_click_nodnix_reason( event ) {
 	Firehose.set_action();
-	var $entry = $(event.target).nearest_parent('[tag-server]');
+	var $entry = $(event.target).nearest_parent('.tag-server');
 	var id = $entry.attr('tag-server');
 
 	if ( (fh_is_admin || firehose_settings.metamod) && ($('#updown-'+id).hasClass('voteddown') || $entry.is('[type=comment]')) ) {
@@ -269,7 +288,7 @@ function firehose_init_tagui( $new_entries ){
 			$new_entries = $('[id^=firehose-][class*=article]');
 		}
 	}
-	$new_entries = $new_entries.filter(':not([tag-server])');
+	$new_entries = $new_entries.filter(':not(.tag-server)');
 
 	var pipeline = [ firehose_handle_context_triggers ];
 	if ( fh_is_admin ) {
@@ -286,7 +305,7 @@ function firehose_init_tagui( $new_entries ){
 		}).
 		find('.title').
 			append('<div class="tag-widget-stub nod-nix-reasons" init="context_timeout:15000">' +
-					'<div class="tag-display-stub" signal="related" init="legend:\'why\', menu:false" />' +
+					'<div class="tag-display-stub respond-related" init="legend:\'why\', menu:false" />' +
 				'</div>').
 			find('.tag-display-stub').
 				click(firehose_click_nodnix_reason);
