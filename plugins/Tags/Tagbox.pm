@@ -553,9 +553,9 @@ sub markTagboxRunComplete {
 		"tbid=$affected_hr->{tbid}");
 }
 
-sub info_log {
+sub _generic_log {
 	my($self, $format, @args) = @_;
-	my $caller_sub_full = (caller(1))[3];
+	my $caller_sub_full = (caller(2))[3];
 	my($caller_sub) = $caller_sub_full =~ /::([^:]+)$/;
 	my $class = ref($self);
 	my $msg = sprintf("%s %s $format", $class, $caller_sub, @args);
@@ -566,10 +566,15 @@ sub info_log {
 	}
 }
 
+sub info_log {
+	my($self, $format, @args) = @_;
+	$self->_generic_log($format, @args);
+}
+
 sub debug_log {
 	my($self, $format, @args) = @_;
 	return if !$self->{debug};
-	$self->info_log($format, @args);
+	$self->_generic_log($format, @args);
 }
 
 #################################################################
