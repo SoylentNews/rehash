@@ -12151,7 +12151,7 @@ sub getGlobjTarget {
 }
 
 # Given an arrayref of globjids, returns a hashref where each key is a
-# globjid and its value is an arrayref of its gtid,target_id.
+# globjid and its value is an arrayref of its globj_type,target_id.
 # XXX should memcached
 
 sub getGlobjTargets {
@@ -12161,8 +12161,9 @@ sub getGlobjTargets {
 	my $target_hr = { };
 	my $in_str = join(',', grep /^\d+$/, @$globjid_ar);
 	my $ar_ar = $self->sqlSelectAll('globjid, gtid, target_id', 'globjs', "globjid IN ($in_str)");
+	my $types = $self->getGlobjTypes;
 	for my $ar (@$ar_ar) {
-		$target_hr->{ $ar->[0] } = [ $ar->[1], $ar->[2] ];
+		$target_hr->{ $ar->[0] } = [ $types->{ $ar->[1] }, $ar->[2] ];
 	}
 	return $target_hr;
 }
@@ -12217,10 +12218,10 @@ sub addGlobjTargetsToHashrefArray {
 		@$ar;
 	my $target = $self->getGlobjTargets(\@globjids);
 	for my $hr (@$ar) {
-		next unless $hr->{globjid}; # skip if bogus data
-		next if $hr->{globj_type};  # skip if already added
+		next unless $hr->{globjid};	# skip if bogus data
+		next if $hr->{globj_type};	# skip if already added
 		my($type, $target_id) = @{ $target->{ $hr->{globjid} } };
-		next unless $type;          # skip if bogus data
+		next unless $type;		# skip if bogus data
 		$hr->{globj_type} = $type;
 		$hr->{globj_target_id} = $target_id;
 	}
