@@ -12,7 +12,7 @@ function $dom( id ) {
 (function($){
 
 function sfnet_canonical_project_url( url ){
-	url = url || '' + window.location;
+	url = url || window.location.href;
 	var project_name, url = url.split(/\/+/);
 	if ( ! url[0] ) { url.shift(); }
 	if ( /:$/.test(url[0]) ) { url.shift(); }
