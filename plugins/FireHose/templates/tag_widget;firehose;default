@@ -62,7 +62,7 @@ __template__
 		[%# the tag input field %]
 		<form class="tag-editor" onsubmit="form_submit_tags(this, {fade_remove: 400, order: 'prepend', classes:'not-saved'}); return false">
 			<input class="tag-entry" type="text" size="10">
-			<span class="tag-server-busy"><img src="[% constants.imagedir %]/spinner2.gif"></span>
+			<span class="tag-server-busy"><img src="[% constants.imagedir %]/spinner[% IF !featured %]2[% ENDIF %].gif"></span>
 		</form>
 		[%# the tag 'bars' %]
 		<div class="tag-display-set train">
