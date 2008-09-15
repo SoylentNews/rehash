@@ -127,7 +127,7 @@ sub run_process {
 	# mark it as having been done, and log it.
 
 	my $change_str = $self->apply_change($change_delta);
-	$self->set_maxtagid_seen($new_max);
+	$self->set_maxtagid_seen($affected_id, $new_max);
 	$self->info_log("change for %d (%d) from %f to %f: %s",
 		$fhid, $affected_id, $prev_max, $new_max, $change_str);
 }
@@ -162,12 +162,10 @@ sub get_delta {
 
 	my $delta = { };
 
-	my $metamod_reader = getObject('Slash::Metamod::Static', { db_type => 'reader' });
-	my $up_csq = $metamod_reader->getM2Consequences($upfrac);
-	my $down_csq = $metamod_reader->getM2Consequences(1 - $upfrac);
+	my $up_csq = $self->getM2Consequences($upfrac);
+	my $down_csq = $self->getM2Consequences(1 - $upfrac);
 	for my $tag_hr (@tags) {
 		my $id = $tag_hr->{tagnameid};
-		next unless grep { $_ == $id } @{$self->{care_ids}};
 		my $uid = $tag_hr->{uid};
 		for my $key (qw(
 			tokens karma
