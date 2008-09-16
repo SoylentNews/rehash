@@ -12426,10 +12426,10 @@ sub _addGlobjEssentials_projects {
 		? $self->sqlSelectAllHashref('id',
 			'id, url, textname, createtime',
 			'projects, urls',
-			"id IN ($id_str) AND projects.url_id=urls.url_id");
+			"id IN ($id_str) AND projects.url_id=urls.url_id")
 		: { };
 	for my $id (@project_ids) {
-		my $globjid = $projects_hr->{$cid};
+		my $globjid = $projects_hr->{$id};
 		$data_hr->{$globjid}{url} = $projectdata_hr->{$id}{url};
 		$data_hr->{$globjid}{title} = $projectdata_hr->{$id}{textname};
 		$data_hr->{$globjid}{created_at} = $projectdata_hr->{$id}{createtime};
