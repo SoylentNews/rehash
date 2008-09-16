@@ -12264,11 +12264,17 @@ sub addGlobjEssentialsToHashrefArray {
 
 	my %data = ( );
 
-	$self->_addGlobjEssentials_stories($ar, \%data);
-	$self->_addGlobjEssentials_urls($ar, \%data);
+	# Some of these are not written (yet).
 	$self->_addGlobjEssentials_submissions($ar, \%data);
 	$self->_addGlobjEssentials_journals($ar, \%data);
+	$self->_addGlobjEssentials_urls($ar, \%data);
+#	$self->_addGlobjEssentials_feeds($ar, \%data);
+	$self->_addGlobjEssentials_stories($ar, \%data);
+#	$self->_addGlobjEssentials_vendors($ar, \%data);
+#	$self->_addGlobjEssentials_miscs($ar, \%data);
 	$self->_addGlobjEssentials_comments($ar, \%data);
+#	$self->_addGlobjEssentials_discussions($ar, \%data);
+	$self->_addGlobjEssentials_projects($ar, \%data);
 
 	# Scan over the arrayref and insert the information from %data
 	# for each object.
@@ -12407,6 +12413,26 @@ sub _addGlobjEssentials_comments {
 		$data_hr->{$globjid}{url} = "$constants->{rootdir}/comments.pl?sid=$commentdata_hr->{$cid}{sid}&cid=$cid";
 		$data_hr->{$globjid}{title} = $commentdata_hr->{$cid}{subject};
 		$data_hr->{$globjid}{created_at} = $commentdata_hr->{$cid}{date};
+	}
+}
+
+sub _addGlobjEssentials_projects {
+	my($self, $ar, $data_hr) = @_;
+	my $constants = getCurrentStatic();
+	my $projects_hr = _addGlobjEssentials_getids($ar, 'projects');
+	my @project_ids = sort { $a <=> $b } keys %$projects_hr;
+	my $id_str = join(',', @project_ids);
+	my $projectdata_hr = $id_str
+		? $self->sqlSelectAllHashref('id',
+			'id, url, textname, createtime',
+			'projects, urls',
+			"id IN ($id_str) AND projects.url_id=urls.url_id");
+		: { };
+	for my $id (@project_ids) {
+		my $globjid = $projects_hr->{$cid};
+		$data_hr->{$globjid}{url} = $projectdata_hr->{$id}{url};
+		$data_hr->{$globjid}{title} = $projectdata_hr->{$id}{textname};
+		$data_hr->{$globjid}{created_at} = $projectdata_hr->{$id}{createtime};
 	}
 }
 

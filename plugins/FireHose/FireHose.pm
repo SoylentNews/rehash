@@ -3245,6 +3245,25 @@ sub setSkinVolume {
 	my($self, $data) = @_;
 	$self->sqlReplace("firehose_skin_volume", $data);
 }
+
+sub getProjectsChangedSince {
+	my($self, $ts, $options) = @_;
+	my $ts_q = $self->sqlQuote($ts);
+	my $max_num = defined($options->{max_num}) ? $options->{max_num} : 10;
+
+	my $hr_ar = $self->sqlSelectAllHashrefArray(
+		'firehose.id, firehose.globjid, firehose.toptags',
+		'firehose, discussions',
+		"firehose.type='project'
+		 AND firehose.discussion = discussions.id
+		 AND (firehose.last_update >= $ts_q OR discussions.last_update >= $ts_q)",
+		"ORDER BY GREATEST(firehose.last_update, discussions.last_update) DESC
+		 LIMIT $max_num");
+	$self->addGlobjEssentialsToHashrefArray($hr_ar);
+
+	return $hr_ar;
+}
+
 1;
 
 __END__
