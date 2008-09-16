@@ -424,8 +424,8 @@ sub updateItemFromStory {
 			$data->{offmainpage} = "no";
 			$data->{offmainpage} = "yes" if defined $story->{offmainpage} && $story->{offmainpage};
 
-			if(defined $story->{mediatype}) {
-				if(!$story->{mediatype}) {
+			if (defined $story->{mediatype}) {
+				if (!$story->{mediatype}) {
 					$data->{mediatype} = "none";
 				} else {
 					$data->{mediatype} = $story->{mediatype};
@@ -510,8 +510,8 @@ sub createItemFromStory {
 		$data->{offmainpage} = "no";
 		$data->{offmainpage} = "yes" if defined $story->{offmainpage} && $story->{offmainpage};
 
-		if(defined $story->{mediatype}) {
-			if(!$story->{mediatype}) {
+		if (defined $story->{mediatype}) {
+			if (!$story->{mediatype}) {
 				$data->{mediatype} = "none";
 			} else {
 				$data->{mediatype} = $story->{mediatype};
@@ -584,7 +584,6 @@ sub getFireHoseEssentials {
 			if ($options->{duration} && $options->{duration} >= 0) {
 				$opts{dayduration} = $options->{duration};
 			}
-
 
 			$opts{records_max}	= $fetch_size             unless $options->{nolimit};
 			$opts{records_start}	= $options->{offset}      if $options->{offset};
