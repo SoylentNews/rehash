@@ -5492,11 +5492,6 @@ UPDATE ajax_ops set reskey_name='ajax_base' where op="firehose_get_updates";
 # 2008-09-04
 UPDATE vars SET value = 'T_2_5_0_219' WHERE name = 'cvs_tag_currentcode';
 
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
 # for plugins/FireHose
 DROP TABLE IF EXISTS firehose_topics_rendered;
 CREATE TABLE firehose_topics_rendered (
@@ -5532,3 +5527,7 @@ INSERT INTO user_event_types VALUES (5, 'Friends');
 # 2008-09-11
 UPDATE vars SET value = 'T_2_5_0_220' WHERE name = 'cvs_tag_currentcode';
 
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
