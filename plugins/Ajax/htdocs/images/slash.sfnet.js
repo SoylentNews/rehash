@@ -79,8 +79,13 @@ function install_tagui( $roots, authenticated ){
 				return get_sd_key(s_elem).key;
 			}
 		}).
-		tagui_server__fetch_tags().
-		click(Slash.TagUI.Command.simple_click);
+		tagui_server__fetch_tags();
+
+	if ( authenticated ) {
+		$roots.click(Slash.TagUI.Command.simple_click);
+
+		// install edit field
+	}
 
 	// simple_tagui_markup() doesn't produce legends, but we want them anyway.
 	$.each({
@@ -113,8 +118,8 @@ function if_auth( fn ){
 	var authenticated = /* check cookie */ true;
 
 	if ( authenticated ) {
-		fn(kAuthenticated);
 		// previously authenticated
+		fn(kAuthenticated);
 	} else {
 		$.ajax({
 			//url:     '/slashdot/auth.pl',
