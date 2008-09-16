@@ -152,8 +152,20 @@ by using the 'feedback' menus.  Please send comments to hose at
 cmdrtaco dot net but be forgiving of beta code!
 </p>
 [% END %]
-[% END # form.skipmenu %]
+[% END # form.skipmenu %] 
 [% IF !form.index; Slash.getAd(6); END %]
+<script type="text/javascript">
+        //<![CDATA[
+        $(document).ready(function(){
+                if (ad6 == "active") {
+                		$('.article:first, #firehoselist div:first').css('margin-right','110px');
+                		$('#firehose #message').css('margin-right','355px');
+                		$('#fad6').css("position","absolute").css("top","0").css("right","0").css("z-index","10000");
+                		$('#slashboxes').css("margin-top","320px");
+                		}
+         });
+        //]]>
+</script>
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
