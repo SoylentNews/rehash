@@ -11,6 +11,15 @@ function $dom( id ) {
 
 (function($){
 
+var kAuthenticated=true, kNotAuthenticated=false;
+
+var re_key = /sd-key-(.*)/;
+var root_d2_selector = '#sd-d2-root';
+var root_tagui_selector = '.sd-tagui-root';
+var sfnet_prefix = 'sfnet';
+
+
+
 function sfnet_canonical_project_url( url ){
 	url = url || window.location.href;
 	var project_name, url = url.split(/\/+/);
@@ -21,8 +30,6 @@ function sfnet_canonical_project_url( url ){
 		return "http://sourceforge.net/projects/" + url[1];
 	}
 }
-
-var re_key = /sd-key-(.*)/;
 
 function get_sd_key( elem ){
 	var key = {}, $key = $(elem).find('[class*=sd-key-]:first');
@@ -51,10 +58,14 @@ function simple_tagui_markup( prefix ){
 		'</div>';
 }
 
-function install_tagui( expr, prefix ){
-	var tagui_markup = simple_tagui_markup(prefix);
+function install_tagui( $roots, authenticated ){
+	/* do something different if ! authenticated? */
 
-	var $selection = $(expr).
+	Slash.TagUI.Server.need_cross_domain();
+
+	var tagui_markup = simple_tagui_markup(sfnet_prefix);
+
+	$roots.
 		each(function(){
 			var $this = $(this);
 			if ( ! $this.find('.sd-tags-here').replaceWith(tagui_markup).length ) {
@@ -77,14 +88,51 @@ function install_tagui( expr, prefix ){
 		top:	'Top Tags',
 		system:	'System Tags'
 	}, function( k, v ){
-		$selection.
+		$roots.
 			find('[class*=tag-display].respond-'+k).
 			prepend('<span class="legend">'+v+'</span>');
 	});
 
-	return $selection;
+	return $roots;
 }
 
+function install_d2( d2, authenticated ){
+	/* do something different if ! authenticated? */
+	d2.each(function(){
+		var key = get_sd_key(this);
+		if ( key.key_type === 'url' ) {
+			var inner_url = key.key;
+			$(this).load('//sourceforge.net/slashdot/slashdot-it.pl?op=discuss&div=1&url='+encodeURI(inner_url));
+		}
+	});
+	return d2;
+}
+
+function if_auth( fn ){
+	var authenticated = /* check cookie */ true;
+
+	if ( authenticated ) {
+		fn(kAuthenticated);
+		// previously authenticated
+	} else {
+		$.ajax({
+			url:	'/auth.pl',
+			type:	'POST',
+			error:	function(){
+				// not authenticated, but you can still run "read-only"
+				fn(kNotAuthenticated);
+			},
+			success: function(){
+				// set cookie (first, to reduce possible extra AJAX calls)
+				// ...
+
+				// fully authenticated
+				fn(kAuthenticated);
+			}
+		});
+	}
+	/* do not return a value: we can't promise a synchronous answer */
+}
 
 SFX.install_slash_ui = function(){
 	$.ajaxSetup({
@@ -93,21 +141,18 @@ SFX.install_slash_ui = function(){
 		contentType: 'application/x-www-form-urlencoded'
 	});
 
+	var $tagui_roots, $d2_roots;
 	for ( var i=0; i<arguments.length; ++i ) {
 		switch ( arguments[i] ) {
-			case 'd2':
-				var d2 = $('#sd-d2-root');
-				var key = get_sd_key(d2);
-				if ( key.key_type === 'url' ) {
-					var inner_url = key.key;
-					d2.load('//sourceforge.net/slashdot/slashdot-it.pl?op=discuss&div=1&url='+encodeURI(inner_url));
-				}
-				break;
-			case 'tags':
-				install_tagui('.sd-tagui-root', 'sfnet');
-				break;
+			case 'd2':	$d2_roots = $(root_d2_selector);	break;
+			case 'tags':	$tagui_roots = $(root_tagui_selector);	break;
 		}
 	}
+
+	if_auth(function( authenticated ){
+		if ( $d2_roots && $d2_roots.length )		{ install_d2($d2_roots, authenticated); }
+		if ( $tagui_roots && $tagui_roots.length )	{ install_tagui($tagui_roots, authenticated); }
+	});
 };
 
 })(SFX.jQuery);
