@@ -135,6 +135,9 @@ __template__
 				END;
 			END;
 		   END;
+		   IF !label;
+			label = "More &raquo;";
+		   END;
 		%]
 		<a href="#" onclick="[% extra_onclick %] firehose_more(); return false;">[% label %]</a>
 		<span class="busy" style="display:none"><img src="[% constants.imagedir %]/spinner2.gif"></span>
