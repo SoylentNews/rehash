@@ -102,7 +102,8 @@ function install_d2( d2, authenticated ){
 		var key = get_sd_key(this);
 		if ( key.key_type === 'url' ) {
 			var inner_url = key.key;
-			$(this).load('//sourceforge.net/slashdot/slashdot-it.pl?op=discuss&div=1&url='+encodeURI(inner_url));
+			//$(this).load('/slashdot/slashdot-it.pl?op=discuss&div=1&url='+encodeURI(inner_url));
+			$(this).load('/slashdot-it.pl?op=discuss&div=1&d=961785');
 		}
 	});
 	return d2;
@@ -116,16 +117,14 @@ function if_auth( fn ){
 		// previously authenticated
 	} else {
 		$.ajax({
-			url:	'/auth.pl',
-			type:	'POST',
-			error:	function(){
+			//url:     '/slashdot/auth.pl',
+			url:     '/auth.pl',
+			type:    'POST',
+			error:   function(){
 				// not authenticated, but you can still run "read-only"
 				fn(kNotAuthenticated);
 			},
 			success: function(){
-				// set cookie (first, to reduce possible extra AJAX calls)
-				// ...
-
 				// fully authenticated
 				fn(kAuthenticated);
 			}
@@ -135,12 +134,6 @@ function if_auth( fn ){
 }
 
 SFX.install_slash_ui = function(){
-	$.ajaxSetup({
-		url:	'/ajax.pl',
-		type:	'POST',
-		contentType: 'application/x-www-form-urlencoded'
-	});
-
 	var $tagui_roots, $d2_roots;
 	for ( var i=0; i<arguments.length; ++i ) {
 		switch ( arguments[i] ) {

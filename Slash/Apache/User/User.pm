@@ -261,7 +261,10 @@ sub handler {
 			}
 		}
 
-		my($tmpuid, $value) = eatUserCookie($logtoken || ($cookies->{user} && $cookies->{user}->value));
+		my($tmpuid, $value) = eatUserCookie(($cookies->{slashdot_user} && $cookies->{slashdot_user}->value)
+			|| $logtoken
+			|| ($cookies->{user} && $cookies->{user}->value)
+		);
 		my $cookvalue;
 		if ($tmpuid && $tmpuid > 0 && !isAnon($tmpuid)) {
 			# if it's not a temp logtoken it's a regular logtoken

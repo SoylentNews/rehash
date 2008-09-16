@@ -1,7 +1,7 @@
-var comments;
+var comments = {};
 var root_comments = [];
-var noshow_comments;
-var pieces_comments;
+var noshow_comments = [];
+var pieces_comments = [];
 var placeholder_comments = [];
 var placeholder_no_update = {};
 var abbrev_comments = {};
