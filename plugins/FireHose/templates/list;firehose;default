@@ -152,7 +152,7 @@ by using the 'feedback' menus.  Please send comments to hose at
 cmdrtaco dot net but be forgiving of beta code!
 </p>
 [% END %]
-[% END # form.skipmenu %] 
+[% END # form.skipmenu %]
 [% Slash.getAd(6) %]
 [% IF form.index %]
 <script type="text/javascript">
