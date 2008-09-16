@@ -154,6 +154,7 @@ cmdrtaco dot net but be forgiving of beta code!
 [% END %]
 [% END # form.skipmenu %] 
 [% Slash.getAd(6) %]
+[% IF form.index %]
 <script type="text/javascript">
 	//<![CDATA[
 	$(document).ready(function(){
@@ -166,6 +167,7 @@ cmdrtaco dot net but be forgiving of beta code!
 	});
 	//]]>
 </script>
+[% END %]
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
