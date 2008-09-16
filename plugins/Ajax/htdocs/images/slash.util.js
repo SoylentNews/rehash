@@ -1,5 +1,18 @@
 (function($){
 
+// global setup
+
+$.ajaxSetup({
+	url:	'/ajax.pl',
+	type:	'POST',
+	contentType: 'application/x-www-form-urlencoded'
+});
+
+ensure_namespace('Slash').jQuery = $;
+
+
+// code to be exported
+
 function if_defined( expr ){
 	return expr !== undefined;
 }
@@ -437,8 +450,6 @@ Package({ named: 'Slash.Util.Algorithm',
 	},
 	exports: 'each accumulate keys values rotate_list'
 });
-
-Slash.jQuery = $;
 
 // Yes, I could phrase this as a Package; but I don't need to, here.
 $.fn.extend({

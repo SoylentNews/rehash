@@ -1,5 +1,15 @@
 // slashdot.jquery.js: jquery-related general utilities we wrote ourselves
 
+// global setup
+
+$.ajaxSetup({
+	url:	'/ajax.pl',
+	type:	'POST',
+	contentType: 'application/x-www-form-urlencoded'
+});
+
+// code to be exported
+
 function $dom( id ) {
 	return document.getElementById(id);
 }
