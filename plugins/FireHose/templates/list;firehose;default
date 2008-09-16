@@ -153,7 +153,7 @@ cmdrtaco dot net but be forgiving of beta code!
 </p>
 [% END %]
 [% END # form.skipmenu %]
-[% Slash.getAd(6) %]
+[% IF !form.index; Slash.getAd(6); END %]
 <div id="firehoselist">
 [% itemstext %]
 [% page = page || "0" %]
