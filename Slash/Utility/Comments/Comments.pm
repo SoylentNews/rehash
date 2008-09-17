@@ -2156,7 +2156,7 @@ EOT
 
 	my $class = $comment->{class}; 
 	my $classattr = $discussion2 ? qq[ class="$class"] : '';
-	my $contain = $class eq 'full' ? ' contain' : '';
+	my $contain = $class eq 'full' && $discussion2 ? ' contain' : '';
 
 	my $head = $discussion2 ? <<EOT1 : <<EOT2;
 			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return setFocusComment($comment->{cid})">$comment->{subject}</a>
