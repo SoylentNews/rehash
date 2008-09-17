@@ -13,41 +13,11 @@ function $dom( id ) {
 
 var kAuthenticated=true, kNotAuthenticated=false;
 
-var re_key = /sd-key-(.*)/;
 var root_d2_selector = '#sd-d2-root';
 var root_tagui_selector = '.sd-tagui-root';
 var sfnet_prefix = 'sfnet';
 
 
-
-function sfnet_canonical_project_url( url ){
-	url = url || window.location.href;
-	var project_name, url = url.split(/\/+/);
-	if ( ! url[0] ) { url.shift(); }
-	if ( /:$/.test(url[0]) ) { url.shift(); }
-	if ( /\.net$/.test(url[0]) ) { url.shift(); }
-	if ( url[0] === 'projects' ) {
-		return "http://sourceforge.net/projects/" + url[1];
-	}
-}
-
-function get_sd_key( elem ){
-	var key = {}, $key = $(elem).find('[class*=sd-key-]:first');
-	if ( $key.length ) {
-		key.key = $key.text();
-		$.each(Slash.Util.qw($key.attr('class')), function( cn ){
-			var M = re_key.exec(cn);
-			if ( M ) {
-				key.key_type = M[1];
-				return false;
-			}
-		});
-	} else if ( (key.key = sfnet_canonical_project_url()) ) {
-		key.key_type = "url";
-	}
-
-	return key;
-}
 
 function simple_tagui_markup( prefix ){
 	prefix = prefix ? prefix + '-' : '';
@@ -74,11 +44,7 @@ function install_tagui( $roots, authenticated ){
 		}).
 		tagui__init().
 		tagui_markup__auto_refresh_styles().
-		tagui_server({
-			id: function( s_elem ){
-				return get_sd_key(s_elem).key;
-			}
-		}).
+		tagui_server().
 		tagui_server__fetch_tags();
 
 	if ( authenticated ) {
@@ -104,7 +70,7 @@ function install_tagui( $roots, authenticated ){
 function install_d2( d2, authenticated ){
 	/* do something different if ! authenticated? */
 	d2.each(function(){
-		var key = get_sd_key(this);
+		var key = Slash.Util.find_reference_key(this);
 		if ( key.key_type === 'url' ) {
 			var inner_url = key.key;
 			//$(this).load('/slashdot/slashdot-it.pl?op=discuss&div=1&url='+encodeURI(inner_url));

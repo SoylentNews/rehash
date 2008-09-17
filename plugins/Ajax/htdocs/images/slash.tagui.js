@@ -427,12 +427,6 @@ new Package({ named: 'Slash.TagUI.Server',
 				dataType:	'jsonp'
 			};
 		},
-		guess_id: function( s_elem ){
-			var M = /(\d+)$/.exec($(s_elem).attr('id'));
-			if ( M ) {
-				return M[1];
-			}
-		},
 		defaults: {
 			command_feedback: {
 				order:		'append',
@@ -466,29 +460,24 @@ new Package({ named: 'Slash.TagUI.Server',
 		options = options || {};
 		Broadcaster(s_elem);
 
-		var id = options.id || Server.guess_id(s_elem);
-		if ( if_fn(id) ) {
-			id = id.apply(s_elem, [s_elem]);
+		var key = options.key, key_type = options.key_type;
+		if ( if_fn(key) ) {
+			key = key.call(s_elem, s_elem);
+		} else if ( ! key ) {
+			var k = find_reference_key(s_elem);
+			key = k.key;
+			key_type = k.key_type;
 		}
 
 		$(s_elem).addClass('tag-server');
 		var ext = {};
 		if ( options.command_pipeline ) { ext.command_pipeline = options.command_pipeline; }
 		if ( options.defaults ) { ext.defaults = options.defaults; }
-		if ( if_defined(id) ) {
-			ext.id = id;
-			var defaults = {
-				request_data: {
-					id: id
-				}
-			};
-			if ( ! ext.defaults ) {
-				ext.defaults = defaults;
-			} else if ( ! ext.defaults.request_data ) {
-				ext.defaults.request_data = defaults.request_data;
-			} else if ( if_undefined(ext.defaults.request_data.id) ) {
-				ext.defaults.request_data.id = id;
-			}
+		if ( if_defined(key) ) {
+			if ( ! ext.defaults ) ext.defaults = { };
+			if ( ! ext.defaults.request_data ) ext.defaults.request_data = { };
+			ext.key = (ext.defaults.request_data.key = key);
+			ext.key_type = (ext.defaults.request_data.key_type = key_type);
 		}
 		return ext;
 	},
