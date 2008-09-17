@@ -100,6 +100,10 @@ sub run_process {
 	# Get some basic information about the tag array we're processing.
 
 #	my $tags_ar = $tagboxdb->getTagboxTags($self->{tbid}, $affected_id, 0);
+	if (!@$tags_ar) {
+		$self->info_log("error, empty tags_ar for %d, skipping", $affected_id);
+		return ;
+	}
 
 	my $prev_max = $self->get_maxtagid_seen($affected_id);
 	my $new_max = $tags_ar->[-1]{tagid};

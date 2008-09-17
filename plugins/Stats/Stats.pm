@@ -21,6 +21,9 @@ our $VERSION = $Slash::Constants::VERSION;
 
 sub init {
 	my($self, $options) = @_;
+
+	return 0 if ! $self->SUPER::init($options);
+
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 	
@@ -229,11 +232,6 @@ sub init {
 	}
 
 	1;
-}
-
-sub isInstalled {
-	my($class) = @_;
-	return $class->SUPER::isInstalled();
 }
 
 ########################################################
@@ -1075,8 +1073,8 @@ sub getSummaryStats {
 
 	push @where, 'op = ' . $self->sqlQuote($options->{op}) if $options->{op};
 	push @where, 'skid = ' . $self->sqlQuote($options->{skid}) if $options->{skid};
-	push @where, 'query_string LIKE ' . $self->sqlQuote($options->{qs_like});
-	push @where, 'query_string NOT LIKE ' . $self->sqlQuote($options->{qs_not_like});
+	push @where, 'query_string LIKE ' . $self->sqlQuote($options->{qs_like}) if $options->{qs_like};
+	push @where, 'query_string NOT LIKE ' . $self->sqlQuote($options->{qs_not_like}) if $options->{qs_not_like};
 
 	my $where = join ' AND ', @where;
 	my $table_suffix = $options->{table_suffix} || '';
