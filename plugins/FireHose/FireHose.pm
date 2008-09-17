@@ -1427,7 +1427,7 @@ sub ajaxFireHoseGetUpdates {
 
 	slashProfInit();
 
-	my $update_data = { removals => 0, items => 0, updates => 0, new => 0 };
+	my $update_data = { removals => 0, items => 0, updates => 0, new => 0, updated_tags => {} };
 
 	$options->{content_type} = 'application/json';
 	my $firehose = getObject("Slash::FireHose");
@@ -1504,12 +1504,14 @@ sub ajaxFireHoseGetUpdates {
 					my $url 	= $slashdb->getUrl($item->{url_id});
 					my $the_user  	= $slashdb->getUser($item->{uid});
 					$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user, options => $opts }, { Return => 1 });
-					$html->{"tags-top-$_->{id}"} = slashDisplay("firehose_tags_top", { tags_top => $tags_top, id => $_->{id}, item => $item }, { Return => 1 });
 					my $introtext = $item->{introtext};
 					slashDisplay("formatHoseIntro", { introtext => $introtext, url => $url, $item => $item }, { Return => 1 });
 					$html->{"text-$_->{id}"} = $introtext;
 					$html->{"fhtime-$_->{id}"} = timeCalc($item->{createtime});
 					$html->{"topic-$_->{id}"} = slashDisplay("dispTopicFireHose", { item => $item, adminmode => $adminmode }, { Return => 1});
+
+					$update_data->{updated_tags}{$_->{id}}{top_tags} = $item->{toptags};
+					$update_data->{updated_tags}{$_->{id}}{system_tags} = $firehose->getFireHoseSystemTags($item);
 					$update_data->{updates}++;
 					# updated
 				}
@@ -2617,6 +2619,7 @@ sub getInitTabtypeOptions {
 	my($self, $name) = @_;
 	my $gSkin = getCurrentSkin();
 	my $form = getCurrentForm();
+	my $constants = getCurrentStatic();
 	my $vol = $self->getSkinVolume($gSkin->{skid});
 	my $day_specified = $form->{startdate} || $form->{issue};
 	my $set_option;
@@ -2624,7 +2627,9 @@ sub getInitTabtypeOptions {
 	$vol ||= { story_vol => 0, other_vol => 0};
 
 	if ($name eq "tabsection") {
-		$set_option->{mixedmode} = "1";
+		if ($gSkin->{skid} == $constants->{mainpage_skid}) {
+			$set_option->{mixedmode} = "1";
+		}
 		$set_option->{mode} = "full";
 		if (!$day_specified) {
 			if ($vol->{story_vol} > 25) {
@@ -2648,7 +2653,25 @@ sub getInitTabtypeOptions {
 	}
 	return $set_option;
 }
-
+sub getFireHoseSystemTags {
+	my($self, $item) = @_;
+	my $constants = getCurrentStatic();
+	my @system_tags;
+	push @system_tags, $item->{type};
+	if ($item->{primaryskid}) {
+		if ($item->{primaryskid} == $constants->{mainpage_skid}) {
+			push @system_tags, "mainpage";
+		} else {
+			my $the_skin = $self->getSkin($item->{primaryskid});
+			push @system_tags, "$the_skin->{name}";
+		}
+	}
+	if ($item->{tid}) {
+		my $the_topic = $self->getTopic($item->{tid});
+		push @system_tags, "$the_topic->{keyword}";
+	}
+	return join ' ', @system_tags;
+}
 sub getFireHoseTagsTop {
 	my($self, $item) = @_;
 	my $user 	= getCurrentUser();
@@ -2670,9 +2693,13 @@ sub getFireHoseTagsTop {
 		push @$tags_top, $item->{type};
 	}
 
-	if ($item->{primaryskid} && $item->{primaryskid} != $constants->{mainpage_skid}) {
-		my $the_skin = $self->getSkin($item->{primaryskid});
-		push @$tags_top, "$the_skin->{name}:2";
+	if ($item->{primaryskid}) {
+		if ($item->{primaryskid} == $constants->{mainpage_skid}) {
+			push @$tags_top, "mainpage:2";
+		} else {
+			my $the_skin = $self->getSkin($item->{primaryskid});
+			push @$tags_top, "$the_skin->{name}:2";
+		}
 	}
 	if ($item->{tid}) {
 		my $the_topic = $self->getTopic($item->{tid});
