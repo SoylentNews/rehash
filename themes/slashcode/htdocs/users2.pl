@@ -1415,10 +1415,53 @@ sub showInfo {
                 }
 
                 # Latest friends
-                my $latest_friends = $reader->sqlSelectAllHashref('person', 'person', 'people', "uid = $uid");
+                my $latest_friends = $reader->sqlSelectAllHashref('person', 'person', 'people', "uid = $uid", "order by id limit 5");
                 foreach my $friend_id (keys %$latest_friends) {
                         $latest_friends->{$friend_id}->{nickname} =
                                 $reader->sqlSelect("nickname", "users", "uid = $friend_id");
+                }
+
+                # Latest tags
+                my $latest_tags =
+                        $reader->sqlSelectAllHashref('tagid',
+                                                     'tagid, tagnameid, globjid',
+                                                     'tags',
+                                                     "uid = $uid and private = 'no'",
+                                                     "order by tagid desc limit 5");
+
+                my $globj_types =
+                        $reader->sqlSelectAllHashref('gtid', 'gtid, maintable', 'globj_types');
+
+                foreach my $tagid (keys %$latest_tags) {
+                        $latest_tags->{$tagid}->{tagname} =
+                                $reader->sqlSelect('tagname', 'tagnames', 'tagnameid = ' . $latest_tags->{$tagid}->{tagnameid});
+
+                        my $globj =
+                                $reader->sqlSelectAllHashref('globjid',
+                                                             'globjid, gtid, target_id',
+                                                             'globjs',
+                                                             'globjid = ' . $latest_tags->{$tagid}->{globjid});
+                        $latest_tags->{$tagid}->{target_id} = $globj->{$latest_tags->{$tagid}->{globjid}}->{target_id};
+                        $latest_tags->{$tagid}->{gtid} = $globj->{$latest_tags->{$tagid}->{globjid}}->{gtid};
+                        $latest_tags->{$tagid}->{maintable} = $globj_types->{$latest_tags->{$tagid}->{gtid}}->{maintable};
+
+                        if ($latest_tags->{$tagid}->{maintable} eq 'stories') {
+                                $latest_tags->{$tagid}->{target} =
+                                        $reader->sqlSelect('sid', 'stories', 'stoid = ' . $latest_tags->{$tagid}->{target_id});
+
+                                $latest_tags->{$tagid}->{title} =
+                                        $reader->sqlSelect('title', 'story_text', 'stoid = ' . $latest_tags->{$tagid}->{target_id});
+                        } elsif ($latest_tags->{$tagid}->{maintable} eq 'urls') {
+                                ($latest_tags->{$tagid}->{title}, $latest_tags->{$tagid}->{target})
+                                        = $reader->sqlSelect('initialtitle, url', 'urls', 'url_id = ' . $latest_tags->{$tagid}->{target_id});
+                        } elsif ($latest_tags->{$tagid}->{maintable} eq 'submissions') {
+                                $latest_tags->{$tagid}->{target} =
+                                        $reader->sqlSelect('id', 'firehose', "uid = $uid and globjid = " . $latest_tags->{$tagid}->{globjid});
+
+                                $latest_tags->{$tagid}->{title} =
+                                        $reader->sqlSelect('subj', 'submissions', 'subid = ' . $latest_tags->{$tagid}->{target_id});
+
+                        }
                 }
 
                 # Latest event
@@ -1474,6 +1517,7 @@ sub showInfo {
                         latest_submissions      => \%latest_submissions,
                         latest_bookmarks        => \%latest_bookmarks,
                         latest_friends          => $latest_friends,
+                        latest_tags             => $latest_tags,
                         latest_event            => $latest_event,
                         data_pane               => $form->{dp},
 		}, { Page => 'users', Skin => 'default'});

@@ -141,6 +141,7 @@ __template__
                 [% IF latest_submissions.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/submissions">Submissions</a></li>[% END %]
                 [% IF latest_bookmarks.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/bookmarks">Bookmarks</a></li>[% END %]
                 [% IF latest_friends.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/friends">Friends</a></li>[% END %]
+                [% IF latest_tags.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/tags">Tags</a></li>[% END %]
                 </ul>
         </div>
 
@@ -224,6 +225,30 @@ __template__
         </div>
         [% END %]
 
+        [% IF latest_tags.size != 0 %]
+        <div class="block" id="latest_tags">
+                <div class="title" id="latest_tags_title">
+                        <h4>Latest Tags</h4>
+                </div>  
+                
+                <div class="content" id="latest_tags_content">
+                        <ul>
+                        [% FOREACH tid = latest_tags.keys.sort %]
+                                <li>
+                                [% IF latest_tags.$tid.maintable == 'stories' %]
+                                        <a href="/article.pl?sid=[% latest_tags.$tid.target %]">[% latest_tags.$tid.tagname %]</a>
+                                [% ELSIF latest_tags.$tid.maintable == 'urls' %]
+                                        <a href="[% latest_tags.$tid.target %]">[% latest_tags.$tid.tagname %]</a>
+                                [% ELSE %] 
+                                        <a href="[% constants.absolutedir_secure %]/firehose.pl?op=view&id=[% latest_tags.$tid.target %]">[% latest_tags.$tid.tagname %]</a>
+                                [% END %]
+                                </li>
+                        [% END %]
+                        </ul>
+                </div>
+        </div>
+        [% END %]
+
         </div>
 
         <div id="yui-main">
@@ -233,6 +258,7 @@ __template__
                 [% ELSIF data_pane == 'submissions' %]
                 [% ELSIF data_pane == 'bookmarks' %]
                 [% ELSIF data_pane == 'friends' %]
+                [% ELSIF data_pane == 'tags' %]
                 [% ELSE %]
                         [% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
                 [% END %]
