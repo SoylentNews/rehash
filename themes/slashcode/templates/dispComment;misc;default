@@ -23,7 +23,7 @@ __name__
 dispComment
 __template__
 [% IF !options.noshow_show %]
-<li id="tree_[% cid %]" class="comment[% IF class == 'full' %] contain[% END %]">
+<li id="tree_[% cid %]" class="comment[% IF class == 'full' && discussion2 %] contain[% END %]">
 <div id="comment_status_[% cid %]" class="commentstatus"></div>
 <div id="comment_[% cid %]"[% IF discussion2 %] class="[% class %]"[% END %]>
 [% END; IF !options.noshow %]
