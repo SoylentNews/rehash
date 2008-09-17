@@ -2126,6 +2126,7 @@ sub editHome {
 	my $sd_check = $user_edit->{simpledesign} ? $constants->{markup_checked_attribute} : '';
 	my $i_check = $user_edit->{noicons}	? $constants->{markup_checked_attribute} : '';
 	my $w_check = $user_edit->{willing}	? $constants->{markup_checked_attribute} : '';
+	my $beta_check = $user_edit->{index_beta} ? $constants->{markup_checked_attribute} : '';
 
 	my $tilde_ed = tildeEd($user_edit);
 
@@ -2138,6 +2139,7 @@ sub editHome {
 		w_check			=> $w_check,
 		lb_check		=> $lb_check,
 		sd_check		=> $sd_check,
+		beta_check		=> $beta_check,
 		tilde_ed		=> $tilde_ed,
 		note			=> $note,
 	});
@@ -3047,6 +3049,7 @@ sub saveHome {
 		simpledesign	=> ($form->{simpledesign} ? 1 : 0),
 		noicons		=> ($form->{noicons} ? 1 : 0),
 		willing		=> ($form->{willing} ? 1 : 0),
+		index_beta	=> ($form->{index_beta} ? 1 : 0),
 	};
 
 	if (defined $form->{tzcode} && defined $form->{tzformat}) {

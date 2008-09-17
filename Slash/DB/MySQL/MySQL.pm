@@ -12258,7 +12258,6 @@ sub addGlobjEssentialsToHashrefArray {
 	# Add the fields globj_type and globj_target_id to each object.
 	# If this was already done, this runs very quickly.
 	$self->addGlobjTargetsToHashrefArray($ar);
-
 	# Select all the needed information about each object and drop it
 	# into %data.
 
@@ -12424,7 +12423,7 @@ sub _addGlobjEssentials_projects {
 	my $id_str = join(',', @project_ids);
 	my $projectdata_hr = $id_str
 		? $self->sqlSelectAllHashref('id',
-			'id, url, textname, createtime',
+			'id, url, textname, projects.createtime',
 			'projects, urls',
 			"id IN ($id_str) AND projects.url_id=urls.url_id")
 		: { };

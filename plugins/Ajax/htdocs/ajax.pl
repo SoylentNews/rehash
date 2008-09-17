@@ -973,6 +973,7 @@ sub saveModalPrefs {
 			willing		=> ($params{willing}	     ? 1 : 0),
 			tags_turnedoff	=> ($params{showtags}	     ? undef : 1),
 			opt_osdn_navbar => ($params{opt_osdn_navbar} ? 1 : 0),
+			index_beta	=> ($params{index_beta} ? 1 : 0 ),
 		};
 
 		if (defined $params{tzcode} && defined $params{tzformat}) {

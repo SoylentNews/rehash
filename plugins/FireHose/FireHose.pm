@@ -3275,15 +3275,21 @@ sub setSkinVolume {
 sub getProjectsChangedSince {
 	my($self, $ts, $options) = @_;
 	my $ts_q = $self->sqlQuote($ts);
+	if ($ts =~ /^\d+$/) {
+		#convert from unixtime if necessary
+		$ts = $self->sqlSelect("from_unixtime($ts)");
+	}
+	$ts_q = $self->sqlQuote($ts);
 	my $max_num = defined($options->{max_num}) ? $options->{max_num} : 10;
 
 	my $hr_ar = $self->sqlSelectAllHashrefArray(
-		'firehose.id, firehose.globjid, firehose.toptags',
-		'firehose, discussions',
+		'firehose.id AS firehose_id, firehose.globjid, firehose.toptags, discussions.commentcount, GREATEST(firehose.last_update, discussions.last_update) AS last_update, unixname AS name',
+		'firehose, discussions, projects',
 		"firehose.type='project'
 		 AND firehose.discussion = discussions.id
+		 AND projects.id = firehose.srcid
 		 AND (firehose.last_update >= $ts_q OR discussions.last_update >= $ts_q)",
-		"ORDER BY GREATEST(firehose.last_update, discussions.last_update) DESC
+		"ORDER BY GREATEST(firehose.last_update, discussions.last_update) ASC
 		 LIMIT $max_num");
 	$self->addGlobjEssentialsToHashrefArray($hr_ar);
 
