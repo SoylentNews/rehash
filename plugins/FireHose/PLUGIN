@@ -7,6 +7,7 @@ firehosecss=../Ajax/htdocs/images/tagui.css
 firehosecss=../Ajax/htdocs/images/jquery/jquery.autocomplete.css
 css=htdocs/firehose.css
 htdoc=firehose.pl
+htdoc=index2.pl
 mysql_dump=mysql_dump.sql
 mysql_schema=mysql_schema.sql
 requiresplugin=Tags

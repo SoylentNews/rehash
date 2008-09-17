@@ -18,7 +18,7 @@ __template__
 [% END %]
 [% PROCESS init_tagui -%]
 [% firehose = Slash.getObject("Slash::FireHose"); %]
-[% IF env.script_name == "/firehose.pl" || form.ssi %]
+[% IF env.script_name == "/firehose.pl" || env.script_name == "/index2.pl" || form.ssi %]
 <script type="text/javascript">
   YAHOO.slashdot.SlashBoxApp = function()
     {
