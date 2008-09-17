@@ -1328,6 +1328,19 @@ function firehose_get_updates_handler(transport) {
 		processed = processed + 1;
 		firehose_handle_update();
 	}
+	if ( response.updated_tags ) {
+		var $tag_servers = $('[tag-server]');
+		$.each(response.updated_tags, function( id, tags ){
+			var updates = '';
+			if ( tags.system_tags !== undefined )	{ updates += '<system>' + tags.system_tags; }
+			if ( tags.top_tags !== undefined )	{ updates += '<top>' + tags.top_tags; }
+			if ( updates ) {
+				$tag_servers.filter('[tag-server='+id+']').each(function(){
+					this.broadcast_tag_lists(updates);
+				});
+			}
+		});
+	}
 }
 
 function firehose_get_item_idstring() {
