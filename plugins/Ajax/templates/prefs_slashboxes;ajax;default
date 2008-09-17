@@ -17,13 +17,18 @@ __template__
 <input type="hidden" name="uid" value="[% user.uid %]">
 <input type="hidden" name="refreshable" value="">
 
+
                 [% IF tabbed == 1 %]
-                <ul class="mod_menu">
-			<li><a href="" onclick="getModalPrefs('home', 'Homepage', 1); return false;">Homepage</a></li>
-			<li class="selected">Slashboxes</li>
-			<li><a href="" onclick="getModalPrefs('sectional', 'Sectional Display', 1); return false;">Sections</a></li>
-			<li><a href="" onclick="getModalPrefs('authors', 'Authors', 1); return false;">Authors</a></li>
-                </ul>
+                <div style="margin-top: 1em; text-align: center;">
+                &nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('home', 'Homepage', 1); return false;">Homepage</a>
+                &nbsp;|&nbsp;
+                <span style="font-weight: bold; text-decoration: none; font-size: 14px; color: #ccc">Slashboxes</span>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('sectional', 'Sectional Display', 1); return false;">Sections</a>
+                &nbsp;|&nbsp;
+                <a href="" style="font-weight: bold; text-decoration: none; font-size: 14px;" onclick="getModalPrefs('authors', 'Authors', 1); return false;">Authors</a>
+                </div>
                 [% END %]
 
                 <p>
