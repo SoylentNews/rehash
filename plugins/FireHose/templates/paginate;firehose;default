@@ -18,6 +18,7 @@ __template__
 [% fh_page = fh_page || "firehose.pl" %]
 [% day_page = fh_page %]
 [% IF fh_page == "users.pl"; day_page = "firehose.pl"; END %]
+[% IF form.index; day_page = "index2.pl"; END %]
 [% idle_submit_plug = "";
    IF gSkin.name == "idle";
    	idle_submit_plug = '<span class="nbutton" style="margin-left: 1em"><p><b><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '">Submit Idle Story</a></b></p></span>';
