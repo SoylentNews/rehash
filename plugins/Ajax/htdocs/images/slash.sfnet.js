@@ -11,6 +11,8 @@ function $dom( id ) {
 
 (function($){
 
+var isAuthenticated = /* check cookie */ true;
+
 var kAuthenticated=true, kNotAuthenticated=false;
 
 var root_d2_selector = '#sd-d2-root';
@@ -81,27 +83,58 @@ function install_d2( d2, authenticated ){
 }
 
 function if_auth( fn ){
-	var authenticated = /* check cookie */ true;
-
-	if ( authenticated ) {
+	if ( isAuthenticated ) {
 		// previously authenticated
 		fn(kAuthenticated);
 	} else {
+		auth_call(fn);
+	}
+	/* do not return a value: we can't promise a synchronous answer */
+}
+
+function auth_call( fn, params ) {
+	if ( !params ) {
+		params = {};
+	}
+	// XXX this at some point may need to be context-dependent
+	params.group_id = $('span.sd-key-group-id').text();
+
+	get_token(function( token_text ) {
 		$.ajax({
 			//url:     '/slashdot/auth.pl',
 			url:     '/auth.pl',
+			data:    { token : token_text },
 			type:    'POST',
 			error:   function(){
 				// not authenticated, but you can still run "read-only"
 				fn(kNotAuthenticated);
 			},
-			success: function(){
-				// fully authenticated
-				fn(kAuthenticated);
+			success: function( transport ){
+				var response = eval_response(transport);
+				if (response && response.success) {
+					isAuthenticated = true;
+					fn(kAuthenticated);
+				} else {
+					isAuthenticated = false;
+					fn(kNotAuthenticated);
+				}
 			}
 		});
+	}, params );
+}
+
+function get_token( fn, params ) {
+	// params.group_id is required, at a minimum
+	if ( !fn || !params || !params.group_id ) {
+		return;
 	}
-	/* do not return a value: we can't promise a synchronous answer */
+
+	$.ajax({
+		url:      'XXX', // XXX!
+		type:     'POST',
+		data:     params,
+		complete: function( token_text ){ fn(token_text); }
+	});
 }
 
 SFX.install_slash_ui = function(){
