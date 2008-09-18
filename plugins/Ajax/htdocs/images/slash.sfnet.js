@@ -68,14 +68,14 @@ function install_tagui( $roots, authenticated ){
 }
 
 function install_d2( d2, authenticated ){
-	/* do something different if ! authenticated? */
 	d2.each(function(){
 		var key = Slash.Util.find_reference_key(this);
+		var inner_url = '';
 		if ( key.key_type === 'url' ) {
-			var inner_url = key.key;
-			//$(this).load('/slashdot/slashdot-it.pl?op=discuss&div=1&url='+encodeURI(inner_url));
-			$(this).load('/slashdot-it.pl?op=discuss&div=1&d=961785');
+			inner_url = key.key || '';
 		}
+		//$(this).load('/slashdot/slashdot-it.pl?op=discuss&div=1&url='+encodeURI(inner_url));
+		$(this).load('/slashdot-it.pl?op=discuss&printdiv=1&url='+encodeURI(inner_url));
 	});
 	return d2;
 }
