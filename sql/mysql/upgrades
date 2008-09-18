@@ -5531,5 +5531,10 @@ UPDATE vars SET value = 'T_2_5_0_220' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
-#For plugins/FireHose
+# For plugins/FireHose
 INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum, ie_cond) VALUES ('stylesheet','text/css','screen, projection','firehose.css','','','index2','no','',2,0, '');
+
+
+# 2008-09-17
+UPDATE vars SET value = 'T_2_5_0_221' WHERE name = 'cvs_tag_currentcode';
+
