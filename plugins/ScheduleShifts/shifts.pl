@@ -119,7 +119,7 @@ sub getDaddyList {
 		if ($form->{text} && $item->{title} eq 'now') {
 			http_send({ content_type => 'text/plain' });
 			my $send = $email . $extra;
-			$send =~ s/, /\n/g;
+			#$send =~ s/, /\n/g;
 			print $send;
 			return;
 		}
