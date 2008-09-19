@@ -11,8 +11,9 @@ function $dom( id ) {
 
 (function($){
 
-var isAuthenticated = /* check cookie */ true;
+var kTesting = true;
 
+var isAuthenticated = kTesting ? true : false;
 var kAuthenticated=true, kNotAuthenticated=false;
 
 var root_d2_selector = '#sd-d2-root';
@@ -99,6 +100,10 @@ function auth_call( fn, params ) {
 	// XXX this at some point may need to be context-dependent
 	params.group_id = $('span.sd-key-group-id').text();
 
+	if (kTesting) {
+		fn(kAuthenticated);
+	}
+
 	get_token(function( token_text ) {
 		$.ajax({
 			//url:     '/slashdot/auth.pl',
@@ -126,6 +131,11 @@ function auth_call( fn, params ) {
 function get_token( fn, params ) {
 	// params.group_id is required, at a minimum
 	if ( !fn || !params || !params.group_id ) {
+		return;
+	}
+
+	if (kTesting) {
+		fn();
 		return;
 	}
 
