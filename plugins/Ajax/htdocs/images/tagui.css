@@ -266,8 +266,6 @@ div.tag-display {
 	background-color: #dfdfdf;
 }
 
-.tag-widget-stub,
-.tag-display-stub,
 .tag-display.no-tags,
 .tag-display[context=related].no-tags,
 .tag-display[context=user].no-visible-tags {
