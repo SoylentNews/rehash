@@ -1759,22 +1759,6 @@ function saveModalPrefs() {
 	ajax_update(params, '', handlers);
 }
 
-function ajaxSaveSlashboxes() {
-	ajax_update({
-		op:	'page_save_user_boxes',
-		reskey:	reskey_static,
-		bids:	$('#slashboxes div.title').map(function(){
-				return this.id.slice(0,-6);
-			}).get().join(',')
-	});
-}
-
-function ajaxRemoveSlashbox( id ) {
-	if ( $('#slashboxes > #'+id).remove().size() ) {
-		ajaxSaveSlashboxes();
-	}
-}
-
 function displayModalPrefHelp(id) {
 	var el = $('#'+id);
 	el.css('display', el.css('display')!='none' ? 'none' : 'block');

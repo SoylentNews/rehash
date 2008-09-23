@@ -19,35 +19,6 @@ __template__
 [% PROCESS init_tagui -%]
 [% firehose = Slash.getObject("Slash::FireHose"); %]
 [% IF env.script_name == "/firehose.pl" || env.script_name == "/index2.pl" || form.ssi %]
-<script type="text/javascript">
-  YAHOO.slashdot.SlashBoxApp = function()
-    {
-      return {
-          init: function()
-            {
-              var slashboxes_container = document.getElementById('slashboxes');
-              var block_titles = YAHOO.util.Dom.getElementsByClassName('title', 'div', slashboxes_container);
-
-              for ( i=0; i<block_titles.length; ++i)
-                {
-                  var inner_title = block_titles[i];
-                  var sb = inner_title.parentNode;
-                  // var inner_title = YAHOO.util.Dom.getElementsByClassName('title', 'div', sb)[0];
-                  
-                  if ( ! sb.id )
-                    sb.id = inner_title.id + "-container";
-
-                  var dd = new YAHOO.slashdot.SlashBox(sb.id, "slashboxes");
-                  dd.setHandleElId(inner_title.id);
-                  dd.setXConstraint(0,0);
-                }
-              // var t0 = new YAHOO.util.DDTarget("slashboxes", "slashboxes");
-            }
-        };
-    } ();
-
-YAHOO.util.Event.addListener(window, "load", YAHOO.slashdot.SlashBoxApp.init);
-</script>
 [% ua = env.HTTP_USER_AGENT %]
 <div id="slashboxes">
 [% Slash.getAd(2) %]
