@@ -744,17 +744,15 @@ sub getFireHoseEssentials {
 				push @where, "firehose_topics_rendered.tid = $cur_opt->[0]";
 			} elsif (@$cur_opt > 1) {
 				my $quote_string = join ',', map {$self->sqlQuote($_)} @$cur_opt;
+				push @where, "firehose_topics_rendered.tid in ($quote_string)";
 			}
 		}
 
 		if ($options->{not_nexus}) {
-			my %want_nexus = ();
-			%want_nexus = grep { !$want_nexus{$_} } @{$options->{nexus}} if $options->{nexus};
 			my $cur_opt = $options->{not_nexus};
 			foreach (@$cur_opt) {
-				next if $want_nexus{$_}; # skip exclusion if we explicitly asked for this nexus
-				my $quoted = $self->sqlQuote(" $_ ");
-				push @where, "nexuslist not like $quoted";
+				my $quoted = $self->sqlQuote("% $_ %");
+				push @where, "nexuslist NOT LIKE $quoted";
 			}
 		}
 
@@ -827,6 +825,7 @@ sub getFireHoseEssentials {
 #print STDERR "[\nSELECT $columns\nFROM   $tables\nWHERE  $where\n$other\n]\n";
 	my $hr_ar = $self->sqlSelectAllHashrefArray($columns, $tables, $where, $other);
 
+
 	if ($fetch_extra && @$hr_ar == $fetch_size) {
 		$fetch_extra = pop @$hr_ar;
 		($day_num, $day_label, $day_count) = $self->getNextDayAndCount(
@@ -840,6 +839,8 @@ sub getFireHoseEssentials {
 		$count = @$rows;
 	} else {
 		$count = $self->sqlSelect("count(*)", $tables, $where, $count_other);
+		my $rows = $self->sqlSelectAllHashrefArray("count(*)", $tables, $where, $count_other);
+		$count = @$rows;
 	}
 
 
@@ -901,7 +902,8 @@ sub getNextDayAndCount {
 
 	my $where = join ' AND ', @$where_ar, "createtime $it_cmp $i_time_q", "createtime $bt_cmp $border_time_q";
 
-	my $day_count = $self->sqlSelect("count(*)", $tables, $where, $other);
+	my $rows = $self->sqlSelectAllHashrefArray("count(*)", $tables, $where, $other);
+	my $day_count = @$rows;
 
 	my $day_labels = getOlderDaysFromDay($item_day, 0, 0, { skip_add_today => 1, show_future_days => 1, force => 1 });
 
@@ -2456,18 +2458,20 @@ sub getAndSetOptions {
 	}
 
 	# push all necessary nexuses on if we want stories show as brief
-	if ($constants->{brief_sectional_mainpage} && $the_skin->{nexus} == $constants->{mainpage_nexus_tid} && 
+	if ($constants->{brief_sectional_mainpage} && $the_skin->{nexus} == $constants->{mainpage_nexus_tid} &&
 		$options->{fhfilter} eq "$the_skin->{name} story") {
 		my $nexus_children = $self->getMainpageDisplayableNexuses();
 		push @{$fh_options->{nexus}}, @$nexus_children;
+
+		push @{$fh_options->{not_nexus}}, (split /,/, $user->{story_never_nexus}) if $user->{story_never_nexus};
 		$fh_options->{offmainpage} = "no";
 	}
 	# Pull out any excluded nexuses we're explicitly asking for
 
 	if ($fh_options->{nexus} && $fh_options->{not_nexus}) {
-		my %want_nexus = map { $_ => 1 } @{$fh_options->{nexus}};
-		@{$fh_options->{not_nexus}} = grep { !$want_nexus{$_} } @{$fh_options->{not_nexus}};
-		delete $fh_options->{not_nexus} if @{$fh_options->{not_nexus}} == 0;
+		my %not_nexus = map { $_ => 1 } @{$fh_options->{not_nexus}};
+		@{$fh_options->{nexus}} = grep { !$not_nexus{$_} } @{$fh_options->{nexus}};
+		delete $fh_options->{nexus} if @{$fh_options->{nexus}} == 0;
 	}
 
 	if ($form->{color} && $colors->{$form->{color}}) {
