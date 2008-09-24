@@ -30,6 +30,7 @@ __template__
 </div>
 [% PROCESS init_tagui %]
 <script type="text/javascript">
+var firehose_user_class = [% user.is_anon ? 0 : 1 %];
 $(function(){
 	var $entries = firehose_init_tagui(
 		$('#firehose > .view > .head > [id^=firehose-]')
