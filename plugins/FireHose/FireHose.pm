@@ -1360,68 +1360,6 @@ sub ajaxSaveFirehoseTab {
 }
 
 
-sub ajaxGetUserFirehose {
-	my($slashdb, $constants, $user, $form) = @_;
-	my $id = $form->{id};
-	my $globjid;
-
-	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-	my $firehose_reader = getObject('Slash::FireHose', {db_type => 'reader'});
-
-	my $item = $firehose_reader->getFireHose($id);
-	if ($item) {
-		$globjid = $item->{globjid};
-	}
-#	print STDERR "ajaxGetUserFirehose id: $id globjid: $globjid\n\n";
-#print STDERR scalar(localtime) . " ajaxGetUserFirehose for stoid=$stoid sidenc=$sidenc tr=$tags_reader\n";
-	if (!$globjid || $globjid !~ /^\d+$/ || $user->{is_anon} || !$tags_reader) {
-		return getData('error', {}, 'tags');
-	}
-	my $uid = $user->{uid};
-
-	my $tags_ar = $tags_reader->getTagsByGlobjid($globjid, { uid => $uid });
-	my @tags = sort  map { $_->{tagname} } @$tags_ar;
-#print STDERR scalar(localtime) . " ajaxGetUserFirehose for stoid=$stoid uid=$uid tags: '@tags' tags_ar: " . Dumper($tags_ar);
-
-	my @newtagspreload = @tags;
-	push @newtagspreload,
-		grep { $tags_reader->tagnameSyntaxOK($_) }
-		split /[\s,]+/,
-		($form->{newtagspreloadtext} || '');
-	my $newtagspreloadtext = join ' ', @newtagspreload;
-	#print STDERR "ajaxGetUserFirehose $newtagspreloadtext\n\n";
-
-	my $template;
-	if ( $form->{no_markup} ) {
-		$template = 'combined_tags';
-	} elsif ( $form->{nodnix} ) {
-		$template = 'tagsnodnixuser';
-	} else {
-		$template = 'tagsfirehosedivuser';
-	}
-
-	return slashDisplay($template, {
-		id =>		$id,
-		user_tags =>	$newtagspreloadtext,
-	}, { Return => 1 });
-}
-
-sub ajaxGetAdminFirehose {
-	my($slashdb, $constants, $user, $form) = @_;
-	my $id = $form->{id};
-
-	if (!$id || !$user->{is_admin}) {
-		return getData('error', {}, 'tags');
-	}
-
-	return slashDisplay('tagsfirehosedivadmin', {
-		id =>		$id,
-		tags_admin_str =>	'',
-	}, { Return => 1 });
-}
-
-
-
 sub ajaxFireHoseGetUpdates {
 	my($slashdb, $constants, $user, $form, $options) = @_;
 	my $gSkin = getCurrentSkin();
@@ -1719,41 +1657,6 @@ sub ajaxUpDownFirehose {
 		html	=> $html,
 		value	=> $value
 	});
-}
-
-sub ajaxCreateForFirehose {
-	my($slashdb, $constants, $user, $form, $options) = @_;
-	$options->{content_type} = 'application/json';
-	my $id = $form->{id};
-	my $tags = getObject('Slash::Tags');
-	my $tagsstring = $form->{tags};
-	my $firehose = getObject('Slash::FireHose');
-
-	if (!$id || $user->{is_anon} || !$tags) {
-		return getData('error', {}, 'tags');
-	}
-	my $item = $firehose->getFireHose($id);
-	if (!$item || !$item->{globjid}) {
-		return getData('error', {}, 'tags');
-	}
-	my($table, $itemid) = $tags->getGlobjTarget($item->{globjid});
-	if (!$itemid || !$table) {
-		return getData('error', {}, 'tags');
-	}
-	my $newtagspreloadtext = $tags->setTagsForGlobj($itemid, $table, $tagsstring);
-
-	if ($user->{is_admin}) {
-		$firehose->setSectionTopicsFromTagstring($id, $tagsstring);
-	}
-
-	my $retval = slashDisplay('tagsfirehosedivuser', {
-		id =>		$id,
-		content =>	$newtagspreloadtext,
-	}, { Return => 1 });
-
-#print STDERR scalar(localtime) . " ajaxCreateForFirehose 4 for id=$id tagnames='@tagnames' newtagspreloadtext='$newtagspreloadtext' returning: $retval\n";
-
-	return $retval;
 }
 
 sub ajaxGetFormContents {

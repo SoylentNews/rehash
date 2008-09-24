@@ -14,8 +14,6 @@ __seclev__
 10000
 __template__
 <div class="view">
-	[% PROCESS autocomplete %]
-	[% PROCESS nodnix_menus %]
 	[% IF user.is_anon;
 	   	this_fhid = form.id | fixparam;
 	   	PROCESS userlogin_cover

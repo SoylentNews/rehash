@@ -45,18 +45,13 @@ __template__
 <script src="[% constants.imagedir %]/tag-ui.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/slider.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% END -%]
-<script src="[% constants.imagedir %]/yui/connection.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/yui/datasource-beta.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/yui/autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/calendar.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/sd_autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/sd_calendar.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/slash.article-info.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% IF user.currentPage == "firehose" -%]
 <script src="[% constants.imagedir %]/slash.boxes.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% END -%]
 <script src="[% constants.imagedir %]/common.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/nodnix.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% IF user.is_admin -%]
 <script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% END %]

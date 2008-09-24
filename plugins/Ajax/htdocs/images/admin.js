@@ -149,33 +149,6 @@ function admin_submit_memory(fhid) {
 	}, 'sub_mem_message-'+fhid);
 }
 
-function adminTagsCommands(id, type) {
-	var toggletags_message_id = '#toggletags-message-' + id;
-	var toggletags_message_el = jQuery(toggletags_message_id)[0];
-	if (toggletags_message_el) {
-		toggletags_message_el.innerHTML = 'Executing commands...';
-	}
-
-	var params = {};
-	type = type || "stories";
-	params.op = 'tags_admin_commands';
-	if (type == "stories") {
-		params.sidenc = id;
-	} else if (type == "urls") {
-		params.id = id;
-	} else if (type == "firehose") {
-		params.id = id;
-	}
-	params.type = type;
-	var tags_admin_commands_el = $dom('tags_admin_commands-' + id);
-	params.commands = tags_admin_commands_el.value;
-	var reskeyel = $dom('admin_commands-reskey-' + id);
-	params.reskey = reskeyel.value;
-	ajax_update(params, 'tags-admin-' + id);
-
-	toggletags_message_el.innerHTML = 'Commands executed.';
-}
-
 function remarks_create() {
 	var reskey = $dom('remarks_reskey');
 	var remark = $dom('remarks_new');

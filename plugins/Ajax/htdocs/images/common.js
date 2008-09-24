@@ -9,6 +9,8 @@
 	scrollWindowToFirehose scrollWindowToId viewWindowLeft getOffsetTop firehoseIsInWindow
 	isInWindow viewWindowTop viewWindowBottom firehose_set_cur firehose_get_onscreen */
 
+YAHOO.namespace('slashdot');
+
 ;$(function(){
 	$.ajaxSetup({
 		url:	'/ajax.pl',
@@ -238,71 +240,6 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 	$('#tagbox-'+id).setClass("tags");			// Make the tagbox change to the slashbox class
 	$('#tagbox-title-'+id).setClass("tagtitleopen");	// Make the title of the tagbox change to white-on-green
 	$('#toggletags-body-'+id).setClass("tagbody");		// Make the body of the tagbox visible
-
-	// If there is a tags-user div, and it hasn't been filled, fill it.
-	var $tagsuser = $('#tags-user-' + id);
-	if ( $tagsuser.length ) {
-		if ($tagsuser.html() === "") {
-			// The tags-user-123 div is empty, and needs to be
-			// filled with the tags this user has already
-			// specified for this story, and a reskey to allow
-			// the user to enter more tags.
-			$tagsuser.html("Retrieving...");
-			var params = {};
-			if (type == "stories") {
-				params.op = 'tags_get_user_story';
-				params.sidenc = id;
-			} else if (type == "urls") {
-				//alert('getting user urls ' + id);
-				params.op = 'tags_get_user_urls';
-				params.id = id;
-			} else if (type == "firehose") {
-				params.op = 'tags_get_user_firehose';
-				params.id = id;
-			}
-			params.newtagspreloadtext = newtagspreloadtext;
-			var handlers = {
-				onComplete: function() {
-					$dom('newtags-'+id).focus();
-				}
-			};
-			ajax_update(params, 'tags-user-' + id, handlers);
-			//alert('after ajax_update ' + tagsuserid);
-
-			// Also fill the admin div.  Note that if the user
-			// is not an admin, this call will not actually
-			// return the necessary form (which couldn't be
-			// submitted anyway).  The is_admin parameter just
-			// saves us an ajax call to find that out, if the
-			// user is not actually an admin.
-			if (is_admin) {
-				var tagsadminid = 'tags-admin-' + id;
-				params = {};
-				if (type == "stories") {
-					params.op = 'tags_get_admin_story';
-					params.sidenc = id;
-				} else if (type == "urls") {
-					params.op = 'tags_get_admin_url';
-					params.id = id;
-				} else if (type == "firehose") {
-					params.op = 'tags_get_admin_firehose';
-					params.id = id;
-				}
-				ajax_update(params, tagsadminid);
-			}
-
-		} else {
-			if (newtagspreloadtext) {
-				// The box was already open but it was requested
-				// that we append some text to the user text.
-				// We can't do that by passing it in, so do it
-				// manually now.
-				var textinput = $dom('newtags-'+id);
-				textinput.value += ' ' + newtagspreloadtext;
-				textinput.focus();
-			}
-		}
-	}
 }
 
 function tagsOpenAndEnter(id, tagname, is_admin, type) {
@@ -310,142 +247,12 @@ function tagsOpenAndEnter(id, tagname, is_admin, type) {
 	tagsShowBody(id, is_admin, tagname, type);
 }
 
-function completer_renameMenu( s, params ) {
-	if ( s ) {
-		params._sourceEl.innerHTML = s;
-	}
-}
-
-function completer_setTag( s, params ) {
-	createTag(s, params._id, params._type);
-	var tagField = document.getElementById('newtags-'+params._id);
-	if ( tagField ) {
-		var end_char = tagField.value.slice(-1);
-		if ( end_char.length && end_char != " " ) {
-			tagField.value += " ";
-		}
-		tagField.value += s;
-	}
-}
-
-function completer_handleNeverDisplay( s, params ) {
-	if ( s == "neverdisplay" ) {
-		admin_neverdisplay("", "firehose", params._id);
-	}
-}
-
-function completer_save_tab(s, params) {
-	firehose_save_tab(params._id);
-}
-
-function clickCompleter( obj, id, is_admin, type, tagDomain, customize ) {
-	return attachCompleter(obj, id, is_admin, type, tagDomain, customize);
-}
-
-function focusCompleter( obj, id, is_admin, type, tagDomain, customize ) {
-	if ( navigator.vendor !== undefined ) {
-		var vendor = navigator.vendor.toLowerCase();
-		if ( vendor.indexOf("apple") != -1 ||
-				vendor.indexOf("kde") != -1 ) {
-			return false;
-		}
-	}
-
-	return attachCompleter(obj, id, is_admin, type, tagDomain, customize);
-}
-
-function attachCompleter( obj, id, is_admin, type, tagDomain, customize ) {
-	if ( customize === undefined ) {
-		customize = {};
-	}
-	customize._id = id;
-	customize._is_admin = is_admin;
-	customize._type = type;
-	if ( tagDomain !== 0 && customize.queryOnAttach === undefined ) {
-		customize.queryOnAttach = true;
-	}
-
-	if ( !YAHOO.slashdot.gCompleterWidget ) {
-		YAHOO.slashdot.gCompleterWidget = new YAHOO.slashdot.AutoCompleteWidget();
-	}
-
-	YAHOO.slashdot.gCompleterWidget.attach(obj, customize, tagDomain);
-	return false;
-}
-
 function reportError(request) {
 	// replace with something else
 	alert("error");
 }
 
-function createTag(tag, id, type) {
-	var params = {};
-	params.id = id;
-	params.type = type;
-	if ( fh_is_admin && ("_#)^*".indexOf(tag[0]) != -1) ) {
-	  params.op = 'tags_admin_commands';
-	  params.reskey = $('#admin_commands-reskey-' + id).val();
-	  params.command = tag;
-	} else {
-	  params.op = 'tags_create_tag';
-	  params.reskey = reskey_static;
-	  params.name = tag;
-	  if ( fh_is_admin && (tag == "hold") ) {
-	    firehose_collapse_entry(id);
-	  }
-	}
-	ajax_update(params, '');
-}
-
-function tagsCreateForStory(id) {
-	var status = $('#toggletags-message-'+id).html('Saving tags...');
-
-	ajax_update({
-		op: 'tags_create_for_story',
-		sidenc: id,
-		tags: $('#newtags-'+id).val(),
-		reskey: $('#newtags-reskey-'+id).val()
-	}, 'tags-user-' + id);
-
-	// XXX How to determine failure here?
-	status.html('Tags saved.');
-}
-
-function tagsCreateForUrl(id) {
-	var status = $('#toggletags-message-'+id).html('Saving tags...');
-
-	ajax_update({
-		op:	'tags_create_for_url',
-		id:	id,
-		tags:	$('#newtags-'+id).val(),
-		reskey:	$('#newtags-reskey-'+id).val()
-	}, 'tags-user-' + id);
-
-	// XXX How to determine failure here?
-	status.html('Tags saved.');
-}
-
 //Firehose functions begin
-function setOneTopTagForFirehose(id, newtag) {
-	ajax_update({
-		op: 'firehose_update_one_tag',
-		id: id,
-		tags: newtag
-	});
-}
-function tagsCreateForFirehose(id) {
-	var status = $('#toggletags-message-'+id).html('Saving tags...');
-
-	ajax_update({
-		op:	'tags_create_for_firehose',
-		id:	id,
-		tags:	$('#newtags-'+id).val(),
-		reskey:	$('#newtags-reskey-'+id).val()
-	}, 'tags-user-'+id);
-
-	status.html('Tags saved.');
-}
-
 function toggle_firehose_body(id, is_admin) {
 	var params = {};
 	setFirehoseAction();
@@ -1785,17 +1592,6 @@ function toggle_filter_prefs() {
 		}
 	}
 
-}
-
-function admin_signoff(stoid, type, id) {
-	var params = {};
-	params.op = 'admin_signoff';
-	params.stoid = stoid;
-	params.reskey = reskey_static;
-	ajax_update(params, 'signoff_' + stoid);
-	if (type == "firehose") {
-		firehose_collapse_entry(id);
-	}
 }
 
 function scrollWindowToFirehose(fhid) {
