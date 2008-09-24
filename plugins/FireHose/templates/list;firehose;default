@@ -199,17 +199,26 @@ fh_ticksize = 15;
 firehose_slider_init();
 [% END %]
 $(function(){
-	$('#firehose-filter').autocomplete('/ajax.pl', {
-		loadingClass:		'working',
-		multiple:		true,
-		multipleSeparator:	' ',
-		minChars:		3,
-		autoFill:		true,
-		max:			25,
-		extraParams: {
-			op:	'tags_list_tagnames'
-		}
-	});
+	$('#firehose-filter').
+		focus(function(event){
+			gFocusedText = this;
+		}).
+		blur(function(event){
+			if ( gFocusedText === this ) {
+				gFocusedText = null;
+			}
+		}).
+		autocomplete('/ajax.pl', {
+			loadingClass:		'working',
+			multiple:		true,
+			multipleSeparator:	' ',
+			minChars:		3,
+			autoFill:		true,
+			max:			25,
+			extraParams: {
+				op:	'tags_list_tagnames'
+			}
+		});
 
 	$('#firehoselist').click(firehose_click_tag);
 	var $entries = firehose_init_tag_ui();

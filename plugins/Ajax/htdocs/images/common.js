@@ -871,7 +871,10 @@ function json_update(response) {
 		var new_value = response.value;
 		for (id in new_value) {
 			if ( new_value.hasOwnProperty(id) ) {
-				$('#'+id).val(new_value[id]);
+				var elem = $dom(id);
+				if ( elem !== gFocusedText ) {
+					$(elem).val(new_value[id]);
+				}
 			}
 		}
 	}
