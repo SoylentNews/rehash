@@ -20,23 +20,97 @@ var root_d2_selector = '#sd-d2-root';
 var root_tagui_selector = '.sd-tagui-root';
 var sfnet_prefix = 'sfnet';
 
+function handle_tag_click( event ){
+	var $target = $(event.target), command='', $menu;
+
+	if ( $target.is('.tag') ) {
+		command = $target.text();
+	} else if ( ($menu = $target.nearest_parent('[class*=tag-menu]')).length ) {
+		var op = $target.text();
+		var $tag = $target.nearest_parent(':has(span.tag)').find('span.tag');
+		var tag = $tag.text();
+		command = normalize_tag_menu_command(tag, op);
+	}
+
+	if ( command ) {
+		$target.nearest_parent('.tag-server').
+			tagui_server__submit_tags(command);
+		return false;
+	}
+
+	return true;
+}
+
+function handle_toggle_click( event ){
+	this.blur();
+
+	var	$target	= $(event.target).nearest_parent('a'),
+		$twisty	= $target.children(),
+		$form	= $target.next();
+
+	$twisty.toggleClasses('collapse', 'expand');
+	$form[ $twisty.is('.expand') ? 'show' : 'hide' ]();
+	return false;
+}
 
 
-function simple_tagui_markup( prefix ){
+
+function make_tag_displays( prefix, displays ){
+	return $.map(displays, function( k ){
+		return '<span class="'+prefix+'tag-display-stub respond-'+k+'"></span>';
+	}).join('');
+}
+
+function make_tag_editor( prefix ){
+	return ['<a class="', 'tag-edit-toggle" href="#">' +
+			'<span class="', 'button collapse"></span>' +
+		'</a>' +
+		'<form class="', 'tag-form" style="display:none">' +
+			'<input class="', 'tag-input" type="text" size="10">' +
+			'<span class="', 'tag-server-busy">' +
+				'<img src="http://images.slashdot.org/spinner2.gif">' +
+			'</span>' +
+		'</form>'].join(prefix);
+}
+
+function simple_tagui_markup( prefix, if_authenticated ){
 	prefix = prefix ? prefix + '-' : '';
-	return '<div class="' + prefix + 'basic-tagui">' +
-		$.map(['user', 'top', 'system'], function( k ){
-			return '<span class="' + prefix + 'tag-display-stub respond-' + k + '"></span>';
-		}).join('') +
+
+	var displays = ['top', 'system'], editor_if_any = '';
+	if ( if_authenticated ) {
+		displays.unshift('user');
+		editor_if_any = make_tag_editor(prefix);
+	}
+
+	return	'<div class="'+prefix+'basic-tagui">' +
+			editor_if_any +
+			make_tag_displays(prefix, displays) +
 		'</div>';
 }
 
-function install_tagui( $roots, authenticated ){
+function install_tagui( $roots, if_authenticated ){
 	/* do something different if ! authenticated? */
 
-	Slash.TagUI.Server.need_cross_domain();
+	var	Server	= Slash.TagUI.Server,
+		Markup	= Slash.TagUI.Markup,
+		Command	= Slash.TagUI.Command,
+		qw	= Slash.Util.qw;
 
-	var tagui_markup = simple_tagui_markup(sfnet_prefix);
+	Server.need_cross_domain();
+	Markup.add_style_triggers(['nod', 'metanod'], 'y p');
+	Markup.add_style_triggers(['nix', 'metanix'], 'x p');
+
+	var tagui_markup = simple_tagui_markup(sfnet_prefix, if_authenticated);
+
+	var allowed_ops = [];
+	switch ( if_authenticated ) {
+		case 3: allowed_ops = allowed_ops.concat('#');			// admin
+		case 2: allowed_ops = allowed_ops.concat('_');			// owner
+		case 1: case true: allowed_ops = allowed_ops.concat('!', 'x');	// logged-in
+		default:							// anon
+	}
+
+	var command_pipeline = [ Command.allow_ops(allowed_ops) ];
 
 	$roots.
 		each(function(){
@@ -45,15 +119,36 @@ function install_tagui( $roots, authenticated ){
 				$this.append(tagui_markup);
 			}
 		}).
-		tagui__init().
+		tagui__init({
+			for_display: {
+				for_display: {
+					menu: qw.as_string(allowed_ops)
+				}
+			}
+		}).
 		tagui_markup__auto_refresh_styles().
 		tagui_server().
-		tagui_server__fetch_tags();
+		tagui_server__fetch_tags().
+		each(function(){
+			this.tagui_server.command_pipeline = command_pipeline;
+		});
 
-	if ( authenticated ) {
-		$roots.click(Slash.TagUI.Command.simple_click);
-
-		// install edit field
+	if ( if_authenticated ) {
+		$roots.
+			click(handle_tag_click).
+			find('[class*=tag-form]').
+				submit(function(){
+					var	$this = $(this),
+						$input = $this.find(':input'),
+						commands = $input.val();
+					$input.val('');
+					$this.
+						nearest_parent('.tag-server').
+							tagui_server__submit_tags(commands);
+				}).
+			end().
+			find('[class*=tag-edit-toggle]').
+				click(handle_toggle_click);
 	}
 
 	// simple_tagui_markup() doesn't produce legends, but we want them anyway.

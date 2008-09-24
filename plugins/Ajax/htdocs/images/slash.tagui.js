@@ -983,30 +983,25 @@ new Package({ named: 'Slash.TagUI.Command',
 		normalize_nodnix:		normalize_nodnix,
 		normalize_tag_commands:		normalize_tag_commands,
 		normalize_tag_menu_command:	normalize_tag_menu_command,
-		simple_click: function( event ){
-			var $target = $(event.target), command='', $menu;
-
-			if ( $target.is('.tag') ) {
-				command = $target.text();
-			} else if ( ($menu = $target.nearest_parent('[class*=tag-menu]')).length ) {
-				var op = $target.text();
-				var $tag = $target.nearest_parent(':has(span.tag)').find('span.tag');
-				var tag = $tag.text();
-				command = normalize_tag_menu_command(tag, op);
-			}
-
-			if ( command ) {
-				$target.nearest_parent('.tag-server').
-					tagui_server__submit_tags(command);
-				return true;
-			}
-
-			return false;
-		}
+		allow_ops:			allow_ops
 	}
 });
 
 // Slash.TagUI.Command private implementation details
+
+re_op = /^([\A_]+)/;
+
+function allow_ops( ops ){
+	var allowed = qw.as_set(ops);
+	return function( commands ){
+		return $.map(commands, function( cmd ){
+			var M = re_op.exec(cmd);
+			if ( !M || (M[1] in allowed) ) {
+				return cmd;
+			}
+		});
+	}
+}
 
 function normalize_tag_menu_command( tag, op ){
 	if ( op == "x" ) {

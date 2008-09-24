@@ -10,9 +10,15 @@ h1, h2, h3, h4, h5, h6, span.tag, .legend {
 	font-family: Optima, Arial, Helvetica, sans serif;
 }
 
+.sfnet-tag-form, .sfnet-tag-input {
+	display: inline;
+}
+
 div.sfnet-basic-tagui {
 	font-size: 90%;
 	margin-left: 1em;
+	position: relative;
+	width: auto;
 }
 
 .legend {
@@ -26,6 +32,7 @@ div.sfnet-basic-tagui {
 .sfnet-tag-display + .sfnet-tag-display {
 	margin-left: 0.25em;
 }
+
 
 span.tag,
 .sfnet-tag-display > ul,
@@ -106,3 +113,16 @@ span.tag,
 	color: white;
 	background-color: black;
 }
+
+.sfnet-tag-server-busy {
+	position: absolute;
+	display: none;
+	left: -1.5em;
+	top: 0.22em;
+}
+
+.p span.tag, .no-visible-tags { display: none; }
+
+/* Toggle */
+.expand {background:transparent url(http://images.slashdot.org/login-arrow-expanded.gif) no-repeat scroll 0% 50%; padding: 8px;}
+.collapse {background:transparent url(http://images.slashdot.org/login-arrow-collapsed.gif) no-repeat scroll 0% 50%; padding: 8px;}

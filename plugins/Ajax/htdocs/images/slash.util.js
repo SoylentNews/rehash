@@ -54,7 +54,7 @@ function if_inherits_string_like(obj){
 }
 
 function if_inherits_array_iteration(obj){
-	return if_inherits_method(obj, 'join') || if_inherits_jquery(obj);
+	return if_inherits_property(obj, 'length');
 }
 
 
@@ -131,11 +131,14 @@ function values(obj){
 }
 
 function rotate_list(list, n){
-	if ( list.length && if_inherits_method(list, 'slice') ) {
+	if ( list.length > 1 ) {
 		var N = list.length;
 		n = ((n===undefined ? 1 : n) % N + N) % N;
-		return list.slice(n).concat(list.slice(0,n));
+		var	prefix = Array.prototype.slice.call(list, n),
+			suffix = Array.prototype.slice.call(list, 0, n);
+		return prefix.concat(suffix);
 	}
+	return list;
 }
 
 function qw_as_array( qw ){
@@ -314,7 +317,7 @@ function Package( o ){
 		}
 		// $(expr).jstem_name()
 		var je_api = oj.element_api;
-		var defn_jstem_fn = je_api && if_fn(oj.element_constructor) || if_fn(oj.stem_function);
+		var defn_jstem_fn = if_fn(oj.element_constructor) || if_fn(oj.stem_function);
 		var je_ctor = if_fn(defn_jstem_fn) || e_ctor && jproxy_free_fn(e_ctor);
 		if ( je_ctor ) {
 			$.fn[jstem_name] = je_ctor;
