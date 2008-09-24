@@ -142,6 +142,7 @@ __template__
                 [% IF latest_bookmarks.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/bookmarks">Bookmarks</a></li>[% END %]
                 [% IF latest_friends.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/friends">Friends</a></li>[% END %]
                 [% IF latest_tags.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/tags">Tags</a></li>[% END %]
+                [% IF admin_flag %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]">Admin</a></li>[% END %]
                 </ul>
         </div>
 
@@ -254,7 +255,9 @@ __template__
         <div id="yui-main">
                 <div class="yui-b">
 
-                [% IF data_pane == 'journal' %]
+                [% IF data_pane == '' && admin_flag %]
+                        [% admin_block %]
+                [% ELSIF data_pane == 'journal' %]
                 [% ELSIF data_pane == 'submissions' %]
                 [% ELSIF data_pane == 'bookmarks' %]
                 [% ELSIF data_pane == 'friends' %]
