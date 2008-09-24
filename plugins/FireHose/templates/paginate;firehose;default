@@ -21,7 +21,7 @@ __template__
 [% IF form.index; day_page = "index2.pl"; END %]
 [% idle_submit_plug = "";
    IF gSkin.name == "idle";
-   	idle_submit_plug = '<span class="nbutton" style="margin-left: 1em"><p><b><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '">Submit Idle Story</a></b></p></span>';
+	idle_submit_plug = '<span style="margin-left: 1em"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '" class="vbutton bg_666666 rd_5">Submit Idle Story</a></span>';
    END;
 
 %]
