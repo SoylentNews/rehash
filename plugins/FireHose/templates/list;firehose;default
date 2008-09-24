@@ -94,7 +94,7 @@ __template__
      END;
   %]
                         [% PROCESS datewidget id='fhcalendar' init='firehose_calendar_init' date=startdate start_mode = start_mode %]
-<label><input type="text" class="slashdot-tag-completer" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="24" autocomplete="off" onfocus="focusCompleter(this,'[% id %]','[% user.is_admin && !user.firehose_usermode %]','firehose-filter', 0)" id="firehose-filter"></label>
+<label><input type="text" class="slashdot-tag-completer" name="fhfilter" value="[% options.fhfilter | strip_attribute %]" size="24" autocomplete="off" id="firehose-filter"></label>
 <div id="colorsliderbg">
         <div id="colorsliderthumb"><img src="[% constants.imagedir %]/slidethumb.png" alt="Filter firehose to" id="fh_slider_img" title="Filter firehose to"></div>
 </div>
@@ -199,6 +199,18 @@ fh_ticksize = 15;
 firehose_slider_init();
 [% END %]
 $(function(){
+	$('#firehose-filter').autocomplete('/ajax.pl', {
+		loadingClass:		'working',
+		multiple:		true,
+		multipleSeparator:	' ',
+		minChars:		3,
+		autoFill:		true,
+		max:			25,
+		extraParams: {
+			op:	'tags_list_tagnames'
+		}
+	});
+
 	$('#firehoselist').click(firehose_click_tag);
 	var $entries = firehose_init_tag_ui();
 	if ( fh_is_admin ) {
