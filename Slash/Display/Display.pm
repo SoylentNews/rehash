@@ -228,7 +228,9 @@ sub slashDisplay {
 
 	my $show_comm = $constants->{template_show_comments} ? 1 : 0;
 	$show_comm &&= 0 if $opt->{Nocomm} && $constants->{template_show_comments} < 2;
-	$out = "\n\n<span class=\"start-template\"$tmpl_span_attrs></span>\n\n$out\n\n<span class=\"end-template\"$tmpl_span_attrs></span>\n\n"
+	# still having some problems with span, disabling for now -- pudge 2008-09-23
+	$out = "\n\n<!-- start template: $TEMPNAME -->\n\n$out\n\n<!-- end template: $TEMPNAME -->\n\n"
+#	$out = "\n\n<span class=\"start-template\"$tmpl_span_attrs></span>\n\n$out\n\n<span class=\"end-template\"$tmpl_span_attrs></span>\n\n"
 		if $show_comm;
 
 	if ($err) {
