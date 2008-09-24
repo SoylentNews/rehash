@@ -20,6 +20,11 @@ my $start_time = Time::HiRes::time;
 	my $slashdb	= getCurrentDB();
 	my $reader	= getObject('Slash::DB', { db_type => 'reader' });
 	my $script = $ENV{SCRIPT_NAME};
+	if (!$user->{is_anon} && defined $form->{usebeta}) {
+		my $index_beta = $form->{usebeta} eq "1" ? 1 : 0;
+		$slashdb->setUser($user->{uid}, { index_beta => $index_beta });
+		$user->{index_beta} = $index_beta;
+	}
 	$script = "/index2.pl" if $user->{index_beta};
 
 	if ($form->{op} && $form->{op} eq 'userlogin' && !$user->{is_anon}
