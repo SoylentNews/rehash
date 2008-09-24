@@ -39,14 +39,14 @@ __template__
 
                 [% IF user.discussion2 && user.discussion2 == "slashdot" %]
                 	[% # i know the logic here is backward, but it still makes the most sense to me! -- pudge %]
-                        <input type="checkbox" id="d2_keybindings_switch" name="d2_keybindings_switch"[% constants.markup_checked_attribute IF !user.d2_keybindings_switch %] onclick="d2_keybindings_off = $('#d2_keybindings_switch').attr('checked') ? 0 : 1">&nbsp;<b>Enable Dynamic Discussion Keybindings</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussion_keys');" class="help">?</a>
+                        <input type="checkbox" id="d2_keybindings_switch" name="d2_keybindings_switch"[% constants.markup_checked_attribute IF !user.d2_keybindings_switch %] onclick="D2.d2_keybindings_off($('#d2_keybindings_switch').attr('checked') ? 0 : 1)">&nbsp;<b>Enable Dynamic Discussion Keybindings</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussion_keys');" class="help">?</a>
                         <br>
                         <div id="modalprefhelp_discussion_keys" class="modalprefhelp" style="display: none;">
                                 Toggle to enable <a href="http://slashdot.org/faq/com-mod.shtml#cm128">Discussion 2 keybindings</a>.
                         </div>
                         <br>
 
-                        <input type="checkbox" id="d2_reverse_switch" name="d2_reverse_switch"[% constants.markup_checked_attribute IF user.d2_reverse_switch %] onclick="d2_reverse_shift = $('#d2_reverse_switch').attr('checked') ? 1 : 0">&nbsp;<b>Collapse Comments After Reading</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussion_shift_key');" class="help">?</a>
+                        <input type="checkbox" id="d2_reverse_switch" name="d2_reverse_switch"[% constants.markup_checked_attribute IF user.d2_reverse_switch %] onclick="D2.d2_reverse_shift($('#d2_reverse_switch').attr('checked') ? 1 : 0)">&nbsp;<b>Collapse Comments After Reading</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussion_shift_key');" class="help">?</a>
                         <br>
                         <div id="modalprefhelp_discussion_shift_key" class="modalprefhelp" style="display: none;">
                                 Collapse a comment when you navigate away from it when using the <a href="http://slashdot.org/faq/com-mod.shtml#cm128">Discussion 2 keybindings</a>.

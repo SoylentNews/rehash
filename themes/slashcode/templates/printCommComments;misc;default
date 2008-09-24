@@ -42,9 +42,9 @@ __template__
 	<script type="text/javascript">
 <!--
 [%- IF gSkin.name != 'idle' %]
-	d2_keybindings_disable[191] = 1;[% END # turn off '/' key %]
-	window.onscroll = d2act;
-	boxStatus(1);
+	D2.d2_keybindings_disable()[191] = 1;[% END # turn off '/' key %]
+	window.onscroll = D2.d2act;
+	D2.boxStatus(1);
 [% Slash.jsSelectComments(Slash.db, constants, user, { sid => sid, cid => cid }, gSkin) %]
 //-->
 	</script>
@@ -113,7 +113,7 @@ __template__
 <div id="discussion_buttons">
 
 [% IF discussion2 %]
-<span class="nbutton"><p><b><a href="#" onclick="ajaxFetchComments(0,1); return false"><span id="more_comments_num_a" class="hide">Get More Comments</span></a></b></p></span>
+<span class="nbutton"><p><b><a href="#" onclick="D2.ajaxFetchComments(0,1); return false"><span id="more_comments_num_a" class="hide">Get More Comments</span></a></b></p></span>
 [% END %]
 
 [% IF discussion2 && !user.state.discussion_archived && !user.state.discussion_future_nopost %]
@@ -123,7 +123,7 @@ __template__
 	op           => 'reply',
 	subject      => 'Reply',
 	subject_only => 1,
-	onclick      => (discussion2 ? "replyTo(0); return false;" : '')
+	onclick      => (discussion2 ? "D2.replyTo(0); return false;" : '')
 }) %]</b></p></span>
 [% END %]
 
@@ -153,21 +153,21 @@ __template__
 [% IF discussion2 %]
 	<script type="text/javascript">
 <!--
-		currents['hidden']   = [% user.state.comments.totals.hidden  || 0 %];
-		currents['full']     = [% user.state.comments.totals.full    || 0 %];
-		currents['oneline']  = [% user.state.comments.totals.oneline || 0 %];
-		// currents_total = [% (user.state.comments.totals.hidden || 0 ) + (user.state.comments.totals.full || 0) + (user.state.comments.totals.oneline || 0)  %];
+		D2.currents()['hidden']   = [% user.state.comments.totals.hidden  || 0 %];
+		D2.currents()['full']     = [% user.state.comments.totals.full    || 0 %];
+		D2.currents()['oneline']  = [% user.state.comments.totals.oneline || 0 %];
+		// D2.currents_total([% (user.state.comments.totals.hidden || 0 ) + (user.state.comments.totals.full || 0) + (user.state.comments.totals.oneline || 0)  %]);
 
-		abbrev_comments      = {};
-		noshow_comments      = [[% user.state.comments.noshow.join(',') %]];
-		pieces_comments      = [[% user.state.comments.pieces.join(',') %]];
-		init_hiddens         = [[% user.state.comments.hiddens.join(',') %]];
+		D2.abbrev_comments({});
+		D2.noshow_comments([[% user.state.comments.noshow.join(',') %]]);
+		D2.pieces_comments([[% user.state.comments.pieces.join(',') %]]);
+		D2.init_hiddens([[% user.state.comments.hiddens.join(',') %]]);
 
-		finishLoading();
+		D2.finishLoading();
 
 [% UNLESS user.state.discussion_archived || user.state.discussion_future_nopost %]
-		if (thresh_totals[6][6][1] == 0) {
-			replyTo(0, 1);
+		if (D2.thresh_totals()[6][6][1] == 0) {
+			D2.replyTo(0, 1);
 		}
 [% END %]
 

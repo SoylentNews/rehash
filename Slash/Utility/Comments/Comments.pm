@@ -431,9 +431,6 @@ sub jsSelectComments {
 		$comments = $comments_new;
 	}
 
-	my($max_cid) = sort { $b <=> $a } keys %$comments;
-	$max_cid ||= -1;
-
 	my $anon_comments = Data::JavaScript::Anon->anon_dump($comments);
 	my $anon_roots    = Data::JavaScript::Anon->anon_dump(\@roots);
 	my $anon_rootsh   = Data::JavaScript::Anon->anon_dump(\%roots_hash);
@@ -452,13 +449,13 @@ sub jsSelectComments {
 		my $total = $slashdb->countCommentsBySid($id);
 		$total -= $d2_seen_0 =~ tr/,//; # total
 		$total--; # off by one
-		$extra .= "d2_seen = '$d2_seen_0';\nmore_comments_num = $total;\n";
+		$extra .= "D2.d2_seen('$d2_seen_0');\nD2.more_comments_num($total);\n";
 	}
 	if ($user->{d2_keybindings_switch}) {
-		$extra .= "d2_keybindings_off = 1;\n";
+		$extra .= "D2.d2_keybindings_off(1);\n";
 	}
 	if ($user->{d2_reverse_switch}) {
-		$extra .= "d2_reverse_shift = 1;\n";
+		$extra .= "D2.d2_reverse_shift(1);\n";
 	}
 
 	# maybe also check if this ad should be running with some other var?
@@ -470,30 +467,29 @@ sub jsSelectComments {
 	 &&  $constants->{run_ads_inline_comments}
 	) {
 		(my $url = $constants->{run_ads_inline_comments}) =~ s/<topic>/$gSkin->{name}/g;
-		$extra .= "adTimerUrl = '$url';\n";
+		$extra .= "D2.adTimerUrl('$url');\n";
 	}
 #slashProf("", "jsSelectComments");
 
 	return <<EOT;
-comments = $anon_comments;
+D2.comments($anon_comments);
 
-thresh_totals = $anon_thresh;
+D2.thresh_totals($anon_thresh);
 
-root_comment = $root_comment;
-root_comments = $anon_roots;
-root_comments_hash = $anon_rootsh;
-max_cid = $max_cid;
+D2.root_comment($root_comment);
+D2.root_comments($anon_roots);
+D2.root_comments_hash($anon_rootsh);
 
-d2_comment_order = $user->{d2_comment_order};
-user_uid = $user->{uid};
-user_is_anon = $user->{is_anon};
-user_is_admin = $user->{is_admin};
-user_is_subscriber = $user->{is_subscriber};
-user_threshold = $threshold;
-user_highlightthresh = $highlightthresh;
-user_d2asp = $user->{state}{d2asp};
+D2.d2_comment_order($user->{d2_comment_order});
+D2.user_uid($user->{uid});
+D2.user_is_anon($user->{is_anon});
+D2.user_is_admin($user->{is_admin});
+D2.user_is_subscriber($user->{is_subscriber});
+D2.user_threshold($threshold);
+D2.user_highlightthresh($highlightthresh);
+D2.user_d2asp($user->{state}{d2asp});
 
-discussion_id = $id;
+D2.discussion_id($id);
 
 $extra
 EOT
@@ -1200,7 +1196,7 @@ sub printComments {
 
 		if (@abbrev) {
 			my $abbrev_comments = join ',', map { "$_:$comments->{$_}{abbreviated}" } @abbrev;
-			$comment_html =~ s|abbrev_comments      = {};|abbrev_comments      = {$abbrev_comments};|;
+			$comment_html =~ s|D2\.abbrev_comments\({}\);|D2.abbrev_comments({$abbrev_comments});|;
 		}
 	}
 
@@ -1956,7 +1952,7 @@ sub _hard_dispComment {
 		my $readtext = 'Read the rest of this comment...';
 		my $link;
 		if ($discussion2) {
-			$link = qq'<a class="readrest" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return readRest($comment->{cid})">$readtext</a>';
+			$link = qq'<a class="readrest" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return D2.readRest($comment->{cid})">$readtext</a>';
 		} else {
 			$link = linkComment({
 				sid	=> $comment->{sid},
@@ -2071,7 +2067,7 @@ EOT
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
 			subject_only => 1,
-			onclick	=> ($discussion2 ? "replyTo($comment->{cid}); return false;" : '')
+			onclick	=> ($discussion2 ? "D2.replyTo($comment->{cid}); return false;" : '')
 		}) . '</b></p></span>') unless $user->{state}{discussion_archived};
 
 		push @link, (qq'<span class="nbutton"><p><b>' . linkComment({
@@ -2080,7 +2076,7 @@ EOT
 			pid	=> $comment->{original_pid},
 			subject	=> 'Parent',
 			subject_only => 1,
-			onclick	=> ($discussion2 ? "return selectParent($comment->{original_pid})" : '')
+			onclick	=> ($discussion2 ? "return D2.selectParent($comment->{original_pid})" : '')
 		}, 1) . '</b></p></span>') if $comment->{original_pid};
 
 #use Data::Dumper; print STDERR "_hard_dispComment createSelect can_mod='$can_mod' disc_arch='$user->{state}{discussion_archived}' modd_arch='$constants->{comments_moddable_archived}' cid='$comment->{cid}' reasons: " . Dumper($reasons);
@@ -2159,7 +2155,7 @@ EOT
 	my $contain = $class eq 'full' && $discussion2 ? ' contain' : '';
 
 	my $head = $discussion2 ? <<EOT1 : <<EOT2;
-			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return setFocusComment($comment->{cid})">$comment->{subject}</a>
+			<h4><a id="comment_link_$comment->{cid}" name="comment_link_$comment->{cid}" href="$gSkin->{rootdir}/comments.pl?sid=$comment->{sid}&amp;cid=$comment->{cid}" onclick="return D2.setFocusComment($comment->{cid})">$comment->{subject}</a>
 EOT1
 			<h4><a name="$comment->{cid}">$comment->{subject}</a>
 EOT2

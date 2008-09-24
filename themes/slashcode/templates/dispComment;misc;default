@@ -30,7 +30,7 @@ __template__
 	<div id="comment_top_[% cid %]" class="commentTop [% has_read ? 'oldcomment' : 'newcomment' %]">
 		<div class="title">
 			[% IF discussion2 %]
-			<h4><a id="comment_link_[% cid %]" name="comment_link_[% cid %]" href="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]" onclick="return setFocusComment([% cid %])">[% subject %]</a>
+			<h4><a id="comment_link_[% cid %]" name="comment_link_[% cid %]" href="[% gSkin.rootdir %]/comments.pl?sid=[% sid %]&amp;cid=[% cid %]" onclick="return D2.setFocusComment([% cid %])">[% subject %]</a>
 			[% ELSE %]
 			<h4><a name="[% cid %]">[% subject %]</a>
 			[%- END %]
@@ -52,7 +52,7 @@ __template__
 	[% IF comment_shrunk;
 		readtext = 'Read the rest of this comment...';
 		IF discussion2;
-			linkComment = "<a class=\"readrest\" href=\"" _ gSkin.rootdir _ "/comments.pl?sid=$sid&amp;cid=$cid\" onclick=\"return readRest($cid)\">$readtext</a>";
+			linkComment = "<a class=\"readrest\" href=\"" _ gSkin.rootdir _ "/comments.pl?sid=$sid&amp;cid=$cid\" onclick=\"return D2.readRest($cid)\">$readtext</a>";
 		ELSE;
 			linkComment = Slash.linkComment({
 				sid     => sid,

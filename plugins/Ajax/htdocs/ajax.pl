@@ -296,7 +296,7 @@ sub submitReply {
 		my $max_duration = $options->{rkey}->max_duration;
 		if (defined($max_duration) && length($max_duration)) {
 			$max_duration = 0 if $max_duration > 60;
-			$to_dump{eval_last} = "submitCountdown($pid,$max_duration);"
+			$to_dump{eval_last} = "D2.submitCountdown($pid,$max_duration);"
 		}
 	}
 
@@ -337,7 +337,7 @@ sub previewReply {
 	my $max_duration = $options->{rkey}->max_duration;
 	if (defined($max_duration) && length($max_duration)) {
 		$max_duration = 0 if $max_duration > 60;
-		$to_dump{eval_last} = "submitCountdown($pid,$max_duration);"
+		$to_dump{eval_last} = "D2.submitCountdown($pid,$max_duration);"
 	}
 
 #use Data::Dumper; print STDERR Dumper \%to_dump; 
@@ -378,7 +378,7 @@ sub replyForm {
 	}
 
 	$options->{content_type} = 'application/json';
-	$to_dump{eval_first} = "comment_body_reply[$pid] = '$pid_reply';" if $pid_reply;
+	$to_dump{eval_first} = "D2.comment_body_reply()[$pid] = '$pid_reply';" if $pid_reply;
 
 #use Data::Dumper; print STDERR Dumper \%to_dump; 
 
@@ -595,17 +595,17 @@ sub fetchComments {
 		update_data        => \%data,
 		html               => \%html,
 		html_append_substr => \%html_append_substr,
-		eval_first         => "d2_comment_order = $user->{d2_comment_order};"
+		eval_first         => "D2.d2_comment_order($user->{d2_comment_order});"
 	);
 
 	if ($d2_seen_0) {
 		my $total = $slashdb->countCommentsBySid($id);
 		$total -= $d2_seen_0 =~ tr/,//; # total
 		$total--; # off by one
-		$to_dump{eval_first} .= "d2_seen = '$d2_seen_0'; updateMoreNum($total);";
+		$to_dump{eval_first} .= "D2.d2_seen('$d2_seen_0'); D2.updateMoreNum($total);";
 	}
 	if (@$placeholders) {
-		$to_dump{eval_first} .= "placeholder_no_update = " . Data::JavaScript::Anon->anon_dump({ map { $_ => 1 } @$placeholders }) . ';';
+		$to_dump{eval_first} .= "D2.placeholder_no_update(" . Data::JavaScript::Anon->anon_dump({ map { $_ => 1 } @$placeholders }) . ');';
 	}
 	writeLog($id);
 #print STDERR "\n\n\n", Data::JavaScript::Anon->anon_dump(\%to_dump), "\n\n\n";

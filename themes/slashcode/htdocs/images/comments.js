@@ -1,3 +1,5 @@
+(function($){
+
 var comments = {};
 var root_comments = [];
 var noshow_comments = [];
@@ -338,7 +340,7 @@ function kidHiddens(cid, kidhiddens) {
 		else
 			return kidhiddens + 1;
 	} else if (kidhiddens) {
-		var kidstring = '<a href="#" onclick="revealKids(' + cid + '); return false">' + kidhiddens;
+		var kidstring = '<a href="#" onclick="D2.revealKids(' + cid + '); return false">' + kidhiddens;
 		if (kidhiddens == 1) {
 			kidstring += ' hidden comment</a>';
 		} else {
@@ -1214,7 +1216,7 @@ function replyTo(pid, nofocus) {
 				// just don't do it
 				if (reply_link.length) {
 					reply_link_html[pid] = reply_link.html();
-					reply_link.html('<p><b><a href="#" onclick="cancelReply(' + pid + '); return false;">Cancel Reply</a></b></p>');
+					reply_link.html('<p><b><a href="#" onclick="D2.cancelReply(' + pid + '); return false;">Cancel Reply</a></b></p>');
 				}
 			}
 			if (!nofocus)
@@ -1699,266 +1701,6 @@ function boundsToDimensions( bounds, scaleFactor ) {
 	}
 
 	return sizes;
-}
-
-Y_UNITS_IN_PIXELS = 20;
-
-ABBR_BAR = 0;
-HIDE_BAR = 1;
-
-
-YAHOO.namespace("slashdot");
-
-YAHOO.slashdot.ThresholdWidget = function( initialOrientation ) {
-	this.PANEL_KINDS = [ "full", "abbr", "hide" ];
-	this.displayRange = [6, -1];
-	this.constraintRange = [6, -1];
-	this.getEl_cache = new Object();
-
-	this.orientations = new Object();
-	this.orientations["Y"] = { axis:"Y", startPos:"top", endPos:"bottom", getPos:YAHOO.util.Dom.getY, units:"px", scale:Y_UNITS_IN_PIXELS };
-	this.orientations["X"] = { axis:"X", startPos:"left", endPos:"right", getPos:YAHOO.util.Dom.getX, units:"%", scale:(100.0 / (this.displayRange[0]-this.displayRange[1])) };
-	this.orientations["X"].other = this.orientations["Y"];
-	this.orientations["Y"].other = this.orientations["X"];
-
-	if ( initialOrientation === undefined )
-		initialOrientation = "Y";
-	this.orient = this.orientations[initialOrientation];
-
-	function initBar( id, whichBar, parentWidget ) {
-		id = "ccw-"+id+"-bar";
-
-		var el = YAHOO.util.Dom.get(id+"-pos");
-
-		var dd = new YAHOO.slashdot.ThresholdBar(el, "ccw", {scroll:false});
-		dd.setOuterHandleElId(id+"-tab");
-		dd.setHandleElId(id);
-		dd.whichBar = whichBar;
-		dd.parentWidget = parentWidget;
-
-		return dd;
-	}
-
-	var abbrBar = initBar("abbr", ABBR_BAR, this);
-	var hideBar = initBar("hide", HIDE_BAR, this);
-
-	this.dragBars = [ abbrBar, hideBar ];
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype = new Object();
-
-YAHOO.slashdot.ThresholdWidget.prototype._getEl = function( id ) {
-	var el = this.getEl_cache[id];
-	if ( el === undefined )
-		el = this.getEl_cache[id] = YAHOO.util.Dom.get(id);
-	return el;
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype.setTHT = function( T, HT ) {
-	this._setTs(pinToRange(this.constraintRange, [HT, T]));
-	updateTotals();
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype.getTHT = function() {
-	return this.displayedTs.slice().reverse();
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype.stepTHT = function( threshold, step ) {
-	var ts = this.displayedTs.slice();
-	ts[threshold] += step;
-	this._setTs(pinToRange(this.constraintRange, ts));
-	updateTotals();
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype.setCounts = function( counts ) {
-	// counts is an array: [ num-hidden, num-abbreviated, num-full ]
-	if ( counts === undefined )
-		counts = this._requestCounts();
-
-	this._getEl("currentHidden").innerHTML = counts[0];
-	this._getEl("currentOneline").innerHTML = counts[1];
-	this._getEl("currentFull").innerHTML = counts[2];
-}
-
-
-YAHOO.slashdot.ThresholdWidget.prototype._requestCounts = function() {
-	return getSliderTotals(this.displayedTs[HIDE_BAR], this.displayedTs[ABBR_BAR]);
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype._onBarStartDrag = function( whichBar ) {
-	YAHOO.util.Dom.addClass(this._getEl("ccw-control"), "ccw-active");
-	this.preDragTs = this.displayedTs.slice();
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype._onBarEndDrag = function( whichBar ) {
-	YAHOO.util.Dom.removeClass(this._getEl("ccw-control"), "ccw-active");
-
-	var deltas = this.displayedTs.slice();
-	for ( var i=0; i<deltas.length; ++i )
-		deltas[i] -= this.preDragTs[i];
-
-	changeTHT(deltas[HIDE_BAR], deltas[ABBR_BAR]);
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype.setOrientation = function( newAxis ) {
-	if ( newAxis != this.orient.axis ) {
-		var o = this.orient = this.orientations[newAxis];
-		for ( var i=0; i<this.PANEL_KINDS.length; ++i ) {
-			var prefix = "ccw-"+this.PANEL_KINDS[i];
-			var panel = this._getEl(prefix+"-panel").style;
-			if ( i != 0 ) panel[ o.other.startPos ] = 0;
-			if ( i != this.PANEL_KINDS.length-1 ) panel[ o.other.endPos ] = 0;
-
-			this._getEl(prefix+"-phrase").style.display = "inline";
-			this._getEl(prefix+"-count-pos").style.top = 0;
-		}
-		this._setTs();
-		// setOrientation can rewrite our totals for us, even if they
-		// are different from defaults, so let's set them again
-		// sure they are correct
-		updateTotals();
-	}
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype._scaleToPixels = function() {
-	return this._getEl("ccw-control").scrollWidth / 100.0;
-}
-
-YAHOO.slashdot.ThresholdWidget.prototype._setTs = function( newTs, draggingBar ) {
-	var w = this;
-	var o = w.orient;
-
-	function fixPanel( id, newDims ) {
-		var prefix = "ccw-"+id;
-		var countText = w._getEl(prefix+"-count-text").style;
-		if ( newDims.size == 0 )
-			countText.display = "none";
-		else {
-			countText.display = "block";
-			if ( o.axis == "Y" )
-				w._getEl(prefix+"-count-pos").style.top = (newDims.size/2) + o.units;
-			else
-				w._getEl(prefix+"-phrase").style.display = (newDims.size>o.scale) ? "inline" : "none";
-		}
-
-		var panel = w._getEl(prefix+"-panel").style;
-		if ( newDims.start !== undefined ) panel[ o.startPos ] = newDims.start + o.units;
-		if ( newDims.stop !== undefined ) panel[ o.endPos ] = newDims.stop + o.units;
-	}
-
-	if ( newTs === undefined )
-		newTs = this.displayedTs;
-
-	if ( draggingBar !== undefined ) {
-		var pin = draggingBar==ABBR_BAR ? Math.min : Math.max;
-		var other = 1-draggingBar;
-		newTs[other] = pin(newTs[draggingBar], this.preDragTs[other]);
-	}
-	this.displayedTs = newTs;
-
-	for ( i=ABBR_BAR; i<=HIDE_BAR; ++i )
-		if ( i != draggingBar )
-			this.dragBars[i].setPosFromT(newTs[i]);
-
-	var dims = boundsToDimensions(partitionedRange(this.displayRange, newTs), o.scale);
-	delete dims[0].start;
-	delete dims[ dims.length-1 ].stop;
-
-	for ( var i=0; i<this.PANEL_KINDS.length; ++i )
-		fixPanel(this.PANEL_KINDS[i], dims[i]);
-
-	this.setCounts(this._requestCounts());
-    	return newTs;
-}
-
-
-
-
-YAHOO.slashdot.ThresholdBar = function( barElId, sGroup, config ) {
-	if ( barElId )
-		this.init(barElId, sGroup, config);
-}
-
-YAHOO.extend(YAHOO.slashdot.ThresholdBar, YAHOO.util.DD);
-
-YAHOO.slashdot.ThresholdBar.prototype.posToT = function( pos ) {
-	var el = this.getEl();
-	if ( el.style.display != "block" )
-		return null;
-
-	var w = this.parentWidget;
-	var o = w.orient;
-	var widgetStart = o.getPos(w._getEl("ccw-control"));
-
-	if ( pos === undefined )
-	  pos = o.getPos(el);
-
-	var scale = o.scale;
-	if ( o.units != "px" )
-		scale *= w._scaleToPixels();
-	return w.displayRange[0] - Math.round((pos - widgetStart) / scale);
-}
-
-YAHOO.slashdot.ThresholdBar.prototype.setPosFromT = function( x ) {
-	if ( this.posToT() != x ) {
-		var w = this.parentWidget;
-		var o = w.orient;
-		var elStyle = this.getEl().style;
-		elStyle[ o.startPos ] = ((w.displayRange[0]-x) * o.scale) + o.units;
-		elStyle[ o.other.startPos ] = 0;
-		elStyle.display = "block";
-	}
-}
-
-YAHOO.slashdot.ThresholdBar.prototype.fixConstraints = function() {
-	var w = this.parentWidget;
-	var o = w.orient;
-
-	var scale = o.scale;
-	if ( o.units != "px" )
-		scale *= w._scaleToPixels();
-
-	this.resetConstraints();
-	this[ "set" + o.other.axis + "Constraint" ](0, 0);
-
-	var thisT = this.draggingTs[this.whichBar];
-	var availableSpace = boundsToDimensions(partitionedRange(w.constraintRange, [thisT]), scale);
-	this[ "set" + o.axis + "Constraint" ](availableSpace[0].size+1, availableSpace[1].size+1, scale);
-}
-
-YAHOO.slashdot.ThresholdBar.prototype.startDrag = function( x, y ) {
-	var w = this.parentWidget;
-	w._onBarStartDrag(this.whichBar);
-	this.draggingTs = w.displayedTs.slice();
-	this.fixConstraints();
-}
-
-YAHOO.slashdot.ThresholdBar.prototype.onDrag = function( e ) {
-	var newT = this.posToT();
-	if ( this.draggingTs[this.whichBar] != newT ) {
-		this.draggingTs[this.whichBar] = newT;
-		this.draggingTs = this.parentWidget._setTs(this.draggingTs, this.whichBar);
-	}
-}
-
-YAHOO.slashdot.ThresholdBar.prototype.endDrag = function( e ) {
-	this.parentWidget._onBarEndDrag(this.whichBar);
-	updateTotals();
-}
-
-YAHOO.slashdot.ThresholdBar.prototype.alignElWithMouse = function( el, iPageX, iPageY ) {
-	var w = this.parentWidget;
-	var o = w.orient;
-
-	var oCoord = this.getTargetCoord(iPageX, iPageY);
-	var newThreshold = this.posToT( oCoord[ o.axis.toLowerCase() ] );
-	this.setPosFromT(newThreshold);
-
-	var newPos = YAHOO.util.Dom.getXY(el);
-	oCoord = { x:newPos[0], y:newPos[1] };
-
-	this.cachePosition(oCoord.x, oCoord.y);
-	this.autoScroll(oCoord.x, oCoord.y, el.offsetHeight, el.offsetWidth);
 }
 
 
@@ -2511,11 +2253,11 @@ function reduceThresholdPrint(highlight) {
 
 	var html = '<div>\
 <p>There are no more comments available at Score:--SCORE--, but there might be more at Score:--SCORE1--.</p><p>Would you like to lower your threshold for \
-<input type="button" value="this" onclick="reduceThreshold(--HIGHLIGHT--,1)"> ';
+<input type="button" value="this" onclick="D2.reduceThreshold(--HIGHLIGHT--,1)"> ';
 	if (!user_is_anon)
-		html = html + '<input type="button" value="all"  onclick="reduceThreshold(--HIGHLIGHT--)"> ';
+		html = html + '<input type="button" value="all"  onclick="D2.reduceThreshold(--HIGHLIGHT--)"> ';
 	html = html + 'discussion(s)?<br>\
-<input type="button" value="No Thanks" onclick="reduceThreshold(-1)">\
+<input type="button" value="No Thanks" onclick="D2.reduceThreshold(-1)">\
 </p>\
 \
 <p><i>(Remember that you can always adjust these controls with the slider widget \
@@ -2532,3 +2274,338 @@ visible to the --LEFTORTOP-- of the discussion.)</i></p>\
 	$('#modal_box_content').html(html);
 }
 
+var packageObj = {
+	// methods
+	ajaxFetchComments:      ajaxFetchComments,
+	boxStatus:              boxStatus,
+	cancelReply:            cancelReply,
+	d2act:                  d2act,
+	doModerate:             doModerate,
+	editReply:              editReply,
+	finishLoading:          finishLoading,
+	previewReply:           previewReply,
+	quoteReply:             quoteReply,
+	readRest:               readRest,
+	reduceThreshold:        reduceThreshold,
+	replyTo:                replyTo,
+	revealKids:             revealKids,
+	selectParent:           selectParent,
+	setFocusComment:        setFocusComment,
+	submitCountdown:        submitCountdown,
+	submitReply:            submitReply,
+	toggleDisplayOptions:   toggleDisplayOptions,
+	updateMoreNum:          updateMoreNum,
+	updateTotals:           updateTotals,
+
+	// YAHOO widget
+	boundsToDimensions:     boundsToDimensions,
+	changeTHT:              changeTHT,
+	getSliderTotals:        getSliderTotals,
+	partitionedRange:       partitionedRange,
+	pinToRange:             pinToRange
+};
+
+Slash.Util.qw.each('\
+	abbrev_comments \
+	adTimerUrl \
+	comment_body_reply \
+	comments \
+	currents \
+	d2_comment_order \
+	d2_keybindings_disable \
+	d2_keybindings_off \
+	d2_reverse_shift \
+	d2_seen \
+	discussion_id \
+	init_hiddens \
+	more_comments_num \
+	noshow_comments \
+	pieces_comments \
+	placeholder_no_update \
+	root_comment \
+	root_comments \
+	root_comments_hash \
+	thresh_totals \
+	user_d2asp \
+	user_highlightthresh \
+	user_is_admin \
+	user_is_anon \
+	user_is_subscriber \
+	user_threshold \
+	user_uid \
+	', function(){
+	packageObj[this] = eval('(function(v){ if (v===undefined) return '+this+'; '+this+'=v;})');
+});
+
+Slash.Util.Package({
+	named: 'Slash.Discussion',
+	api: packageObj
+});
+
+})(Slash.jQuery); // (function($){
+
+
+var D2 = Slash.Discussion;
+
+
+// yahoo begin
+Y_UNITS_IN_PIXELS = 20;
+
+ABBR_BAR = 0;
+HIDE_BAR = 1;
+
+
+YAHOO.namespace("slashdot");
+
+YAHOO.slashdot.ThresholdWidget = function( initialOrientation ) {
+	this.PANEL_KINDS = [ "full", "abbr", "hide" ];
+	this.displayRange = [6, -1];
+	this.constraintRange = [6, -1];
+	this.getEl_cache = new Object();
+
+	this.orientations = new Object();
+	this.orientations["Y"] = { axis:"Y", startPos:"top", endPos:"bottom", getPos:YAHOO.util.Dom.getY, units:"px", scale:Y_UNITS_IN_PIXELS };
+	this.orientations["X"] = { axis:"X", startPos:"left", endPos:"right", getPos:YAHOO.util.Dom.getX, units:"%", scale:(100.0 / (this.displayRange[0]-this.displayRange[1])) };
+	this.orientations["X"].other = this.orientations["Y"];
+	this.orientations["Y"].other = this.orientations["X"];
+
+	if ( initialOrientation === undefined )
+		initialOrientation = "Y";
+	this.orient = this.orientations[initialOrientation];
+
+	function initBar( id, whichBar, parentWidget ) {
+		id = "ccw-"+id+"-bar";
+
+		var el = YAHOO.util.Dom.get(id+"-pos");
+
+		var dd = new YAHOO.slashdot.ThresholdBar(el, "ccw", {scroll:false});
+		dd.setOuterHandleElId(id+"-tab");
+		dd.setHandleElId(id);
+		dd.whichBar = whichBar;
+		dd.parentWidget = parentWidget;
+
+		return dd;
+	}
+
+	var abbrBar = initBar("abbr", ABBR_BAR, this);
+	var hideBar = initBar("hide", HIDE_BAR, this);
+
+	this.dragBars = [ abbrBar, hideBar ];
+}
+
+YAHOO.slashdot.ThresholdWidget.prototype = new Object();
+
+YAHOO.slashdot.ThresholdWidget.prototype._getEl = function( id ) {
+	var el = this.getEl_cache[id];
+	if ( el === undefined )
+		el = this.getEl_cache[id] = YAHOO.util.Dom.get(id);
+	return el;
+}
+
+YAHOO.slashdot.ThresholdWidget.prototype.setTHT = function( T, HT ) {
+	this._setTs(D2.pinToRange(this.constraintRange, [HT, T]));
+	D2.updateTotals();
+}
+
+YAHOO.slashdot.ThresholdWidget.prototype.getTHT = function() {
+	return this.displayedTs.slice().reverse();
+}
+
+YAHOO.slashdot.ThresholdWidget.prototype.stepTHT = function( threshold, step ) {
+	var ts = this.displayedTs.slice();
+	ts[threshold] += step;
+	this._setTs(D2.pinToRange(this.constraintRange, ts));
+	D2.updateTotals();
+}
+
+YAHOO.slashdot.ThresholdWidget.prototype.setCounts = function( counts ) {
+	// counts is an array: [ num-hidden, num-abbreviated, num-full ]
+	if ( counts === undefined )
+		counts = this._requestCounts();
+
+	this._getEl("currentHidden").innerHTML = counts[0];
+	this._getEl("currentOneline").innerHTML = counts[1];
+	this._getEl("currentFull").innerHTML = counts[2];
+}
+
+
+YAHOO.slashdot.ThresholdWidget.prototype._requestCounts = function() {
+	return D2.getSliderTotals(this.displayedTs[HIDE_BAR], this.displayedTs[ABBR_BAR]);
+}
+
+YAHOO.slashdot.ThresholdWidget.prototype._onBarStartDrag = function( whichBar ) {
+	YAHOO.util.Dom.addClass(this._getEl("ccw-control"), "ccw-active");
+	this.preDragTs = this.displayedTs.slice();
+}
+
+YAHOO.slashdot.ThresholdWidget.prototype._onBarEndDrag = function( whichBar ) {
+	YAHOO.util.Dom.removeClass(this._getEl("ccw-control"), "ccw-active");
+
+	var deltas = this.displayedTs.slice();
+	for ( var i=0; i<deltas.length; ++i )
+		deltas[i] -= this.preDragTs[i];
+
+	D2.changeTHT(deltas[HIDE_BAR], deltas[ABBR_BAR]);
+}
+
+YAHOO.slashdot.ThresholdWidget.prototype.setOrientation = function( newAxis ) {
+	if ( newAxis != this.orient.axis ) {
+		var o = this.orient = this.orientations[newAxis];
+		for ( var i=0; i<this.PANEL_KINDS.length; ++i ) {
+			var prefix = "ccw-"+this.PANEL_KINDS[i];
+			var panel = this._getEl(prefix+"-panel").style;
+			if ( i != 0 ) panel[ o.other.startPos ] = 0;
+			if ( i != this.PANEL_KINDS.length-1 ) panel[ o.other.endPos ] = 0;
+
+			this._getEl(prefix+"-phrase").style.display = "inline";
+			this._getEl(prefix+"-count-pos").style.top = 0;
+		}
+		this._setTs();
+		// setOrientation can rewrite our totals for us, even if they
+		// are different from defaults, so let's set them again
+		// sure they are correct
+		D2.updateTotals();
+	}
+}
+
+YAHOO.slashdot.ThresholdWidget.prototype._scaleToPixels = function() {
+	return this._getEl("ccw-control").scrollWidth / 100.0;
+}
+
+YAHOO.slashdot.ThresholdWidget.prototype._setTs = function( newTs, draggingBar ) {
+	var w = this;
+	var o = w.orient;
+
+	function fixPanel( id, newDims ) {
+		var prefix = "ccw-"+id;
+		var countText = w._getEl(prefix+"-count-text").style;
+		if ( newDims.size == 0 )
+			countText.display = "none";
+		else {
+			countText.display = "block";
+			if ( o.axis == "Y" )
+				w._getEl(prefix+"-count-pos").style.top = (newDims.size/2) + o.units;
+			else
+				w._getEl(prefix+"-phrase").style.display = (newDims.size>o.scale) ? "inline" : "none";
+		}
+
+		var panel = w._getEl(prefix+"-panel").style;
+		if ( newDims.start !== undefined ) panel[ o.startPos ] = newDims.start + o.units;
+		if ( newDims.stop !== undefined ) panel[ o.endPos ] = newDims.stop + o.units;
+	}
+
+	if ( newTs === undefined )
+		newTs = this.displayedTs;
+
+	if ( draggingBar !== undefined ) {
+		var pin = draggingBar==ABBR_BAR ? Math.min : Math.max;
+		var other = 1-draggingBar;
+		newTs[other] = pin(newTs[draggingBar], this.preDragTs[other]);
+	}
+	this.displayedTs = newTs;
+
+	for ( i=ABBR_BAR; i<=HIDE_BAR; ++i )
+		if ( i != draggingBar )
+			this.dragBars[i].setPosFromT(newTs[i]);
+
+	var dims = D2.boundsToDimensions(D2.partitionedRange(this.displayRange, newTs), o.scale);
+	delete dims[0].start;
+	delete dims[ dims.length-1 ].stop;
+
+	for ( var i=0; i<this.PANEL_KINDS.length; ++i )
+		fixPanel(this.PANEL_KINDS[i], dims[i]);
+
+	this.setCounts(this._requestCounts());
+	return newTs;
+}
+
+
+
+
+YAHOO.slashdot.ThresholdBar = function( barElId, sGroup, config ) {
+	if ( barElId )
+		this.init(barElId, sGroup, config);
+}
+
+YAHOO.extend(YAHOO.slashdot.ThresholdBar, YAHOO.util.DD);
+
+YAHOO.slashdot.ThresholdBar.prototype.posToT = function( pos ) {
+	var el = this.getEl();
+	if ( el.style.display != "block" )
+		return null;
+
+	var w = this.parentWidget;
+	var o = w.orient;
+	var widgetStart = o.getPos(w._getEl("ccw-control"));
+
+	if ( pos === undefined )
+	  pos = o.getPos(el);
+
+	var scale = o.scale;
+	if ( o.units != "px" )
+		scale *= w._scaleToPixels();
+	return w.displayRange[0] - Math.round((pos - widgetStart) / scale);
+}
+
+YAHOO.slashdot.ThresholdBar.prototype.setPosFromT = function( x ) {
+	if ( this.posToT() != x ) {
+		var w = this.parentWidget;
+		var o = w.orient;
+		var elStyle = this.getEl().style;
+		elStyle[ o.startPos ] = ((w.displayRange[0]-x) * o.scale) + o.units;
+		elStyle[ o.other.startPos ] = 0;
+		elStyle.display = "block";
+	}
+}
+
+YAHOO.slashdot.ThresholdBar.prototype.fixConstraints = function() {
+	var w = this.parentWidget;
+	var o = w.orient;
+
+	var scale = o.scale;
+	if ( o.units != "px" )
+		scale *= w._scaleToPixels();
+
+	this.resetConstraints();
+	this[ "set" + o.other.axis + "Constraint" ](0, 0);
+
+	var thisT = this.draggingTs[this.whichBar];
+	var availableSpace = D2.boundsToDimensions(D2.partitionedRange(w.constraintRange, [thisT]), scale);
+	this[ "set" + o.axis + "Constraint" ](availableSpace[0].size+1, availableSpace[1].size+1, scale);
+}
+
+YAHOO.slashdot.ThresholdBar.prototype.startDrag = function( x, y ) {
+	var w = this.parentWidget;
+	w._onBarStartDrag(this.whichBar);
+	this.draggingTs = w.displayedTs.slice();
+	this.fixConstraints();
+}
+
+YAHOO.slashdot.ThresholdBar.prototype.onDrag = function( e ) {
+	var newT = this.posToT();
+	if ( this.draggingTs[this.whichBar] != newT ) {
+		this.draggingTs[this.whichBar] = newT;
+		this.draggingTs = this.parentWidget._setTs(this.draggingTs, this.whichBar);
+	}
+}
+
+YAHOO.slashdot.ThresholdBar.prototype.endDrag = function( e ) {
+	this.parentWidget._onBarEndDrag(this.whichBar);
+	D2.updateTotals();
+}
+
+YAHOO.slashdot.ThresholdBar.prototype.alignElWithMouse = function( el, iPageX, iPageY ) {
+	var w = this.parentWidget;
+	var o = w.orient;
+
+	var oCoord = this.getTargetCoord(iPageX, iPageY);
+	var newThreshold = this.posToT( oCoord[ o.axis.toLowerCase() ] );
+	this.setPosFromT(newThreshold);
+
+	var newPos = YAHOO.util.Dom.getXY(el);
+	oCoord = { x:newPos[0], y:newPos[1] };
+
+	this.cachePosition(oCoord.x, oCoord.y);
+	this.autoScroll(oCoord.x, oCoord.y, el.offsetHeight, el.offsetWidth);
+}
+// yahoo end
