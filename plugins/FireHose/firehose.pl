@@ -135,12 +135,15 @@ sub view {
 			$firehose->setFireHoseSession($item->{id});
 		}
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
+		my $system_tags = $firehose_reader->getFireHoseSystemTags($item);
 		my $discussion = $item->{discussion};
 
 		my $firehosetext = $firehose_reader->dispFireHose($item, {
 			mode			=> 'full',
 			view_mode		=> 1,
 			tags_top		=> $tags_top,
+			top_tags		=> $item->{toptags},
+			system_tags		=> $system_tags,
 			options			=> $options,
 			nostorylinkwrapper	=> $discussion ? 1 : 0,
 			vote			=> $vote
