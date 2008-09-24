@@ -129,7 +129,7 @@ cmdrtaco dot net but be forgiving of beta code!
 <script type="text/javascript">
 	//<![CDATA[
 	$(document).ready(function(){
-		if (ad6 == "active") {
+		if (typeof(ad6) != "undefined" && ad6 == "active") {
 			$('.article:first, #firehoselist div:first').css('margin-right','110px');
 			$('#firehose #message').css('margin-right','355px');
 			$('#fad6').css("position","absolute").css("top","0").css("right","0").css("z-index","10000");
