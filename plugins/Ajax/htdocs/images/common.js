@@ -1303,6 +1303,22 @@ function firehose_get_next_updates() {
 function firehose_get_updates_handler(transport) {
 	$('.busy').hide();
 	var response = eval_response(transport);
+
+	var updated_tags = response.update_data.updated_tags;
+	if ( updated_tags ) {
+		var $tag_servers = $('[tag-server]');
+		$.each(updated_tags, function( id, tags ){
+			var updates = '';
+			if ( tags.system_tags !== undefined )	{ updates += '<system>' + tags.system_tags; }
+			if ( tags.top_tags !== undefined )	{ updates += '<top>' + tags.top_tags; }
+			if ( updates ) {
+				$tag_servers.filter('[tag-server='+id+']').each(function(){
+					this.broadcast_tag_lists(updates);
+				});
+			}
+		});
+	}
+
 	var processed = 0;
 	firehose_removals = response.update_data.removals;
 	firehose_ordered = response.ordered;
@@ -1327,19 +1343,6 @@ function firehose_get_updates_handler(transport) {
 		firehose_removed_first = 0;
 		processed = processed + 1;
 		firehose_handle_update();
-	}
-	if ( response.updated_tags ) {
-		var $tag_servers = $('[tag-server]');
-		$.each(response.updated_tags, function( id, tags ){
-			var updates = '';
-			if ( tags.system_tags !== undefined )	{ updates += '<system>' + tags.system_tags; }
-			if ( tags.top_tags !== undefined )	{ updates += '<top>' + tags.top_tags; }
-			if ( updates ) {
-				$tag_servers.filter('[tag-server='+id+']').each(function(){
-					this.broadcast_tag_lists(updates);
-				});
-			}
-		});
 	}
 }
 
