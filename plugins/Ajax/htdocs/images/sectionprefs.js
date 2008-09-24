@@ -67,3 +67,5 @@ function reportError(request) {
 	// replace with something else
 	alert("error");
 }
+
+;

@@ -1928,3 +1928,5 @@ function firehose_get_onscreen() {
 	$('#firehoselist').children().each(function() { if(isInWindow(this)){ onscreen.push(this.id);} });
 	return onscreen;
 }
+
+;

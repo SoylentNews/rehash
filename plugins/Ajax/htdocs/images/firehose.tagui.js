@@ -1,4 +1,4 @@
-(function($){
+;(function($){
 /*jslint evil:true */
 eval(Slash.Util.Package.with_packages('Slash.Util'));
 /*jslint evil:false */

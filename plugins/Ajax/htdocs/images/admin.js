@@ -429,3 +429,5 @@ function appendToMedia(text) {
 		obj.value = obj.value  + text;
 	}
 }
+
+;

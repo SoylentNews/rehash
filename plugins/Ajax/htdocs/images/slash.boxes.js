@@ -1,4 +1,4 @@
-(function($){
+;(function($){
 
 function save_slashbox_positions(){
 	ajax_update({

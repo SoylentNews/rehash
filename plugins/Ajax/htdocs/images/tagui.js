@@ -978,3 +978,5 @@ function init_tagui_styles( $entries ){
 		recompute_css_classes(this);
 	});
 }
+
+;

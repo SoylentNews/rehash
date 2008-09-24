@@ -1,4 +1,4 @@
-(function($){
+;(function($){
 /*jslint evil:true */
 // bring names from Slash.Util, etc., into scope, e.g., Package
 eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
