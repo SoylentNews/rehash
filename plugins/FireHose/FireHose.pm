@@ -1921,13 +1921,10 @@ sub setFireHose {
 		}
 	}
 
-	if ($mcd && $constants->{firehose_mcd_disp}) {
-		 $mcd->delete("$mcdkey:$id", 3);
-		 my $keys = $self->genFireHoseMCDAllKeys($id);
-		 foreach (@$keys) {
-			$mcd->delete($_, 3);
-		 }
-
+	if ($mcd) {
+		$mcd->delete("$mcdkey:$id", 3);
+		my $keys = $self->genFireHoseMCDAllKeys($id);
+		$mcd->delete($_, 3) for @$keys;
 	}
 
 	my $searchtoo = getObject('Slash::SearchToo');
@@ -1944,7 +1941,7 @@ sub setFireHose {
 
 # This generates the key for memcaching dispFireHose results
 # if no key is returned no caching or fetching from cache will
-# take place
+# take place in dispFireHose.
 
 sub genFireHoseMCDKey {
 	my($self, $id, $options) = @_;
@@ -1956,21 +1953,25 @@ sub genFireHoseMCDKey {
 	my $mcd = $self->getMCD();
 	my $mcdkey;
 
-	return if $gSkin->{skid} != $constants->{mainpage_skid};
-	return if !$constants->{firehose_mcd_disp};
+	return '' if $gSkin->{skid} != $constants->{mainpage_skid};
+	return '' if !$constants->{firehose_mcd_disp};
 
-	if ($mcd && !$options->{nodates} && !$options->{nobylines} && !$options->{nocolors} && !$options->{nothumbs} && !$form->{skippop} && !$form->{index} && !$options->{vote} && !$user->{is_admin}) {
+	if ($mcd
+		&& !$options->{nodates} && !$options->{nobylines} && !$options->{nocolors}
+		&& !$options->{nothumbs} && !$options->{vote}
+		&& !$form->{skippop} && !$form->{index}
+		&& !$user->{is_admin}) {
 		$mcdkey = "$self->{_mcd_keyprefix}:dispfirehose-$options->{mode}:$id";
 	}
 	return $mcdkey;
-
 }
 
 sub genFireHoseMCDAllKeys {
 	my($self, $id) = @_;
-	my $keys = [];
+	my $constants = getCurrentStatic();
+	return [ ] if !$constants->{firehose_mcd_disp};
+	my $keys = [ ];
 	my $mcd = $self->getMCD();
-	my $mcdkey;
 	if ($mcd) {
 		foreach my $mode (qw(full fulltitle)) {
 			push @$keys, "$self->{_mcd_keyprefix}:dispfirehose-$mode:$id";
@@ -1979,9 +1980,9 @@ sub genFireHoseMCDAllKeys {
 	return $keys;
 }
 
-
 sub dispFireHose {
 	my($self, $item, $options) = @_;
+	my $constants = getCurrentStatic();
 	$options ||= {};
 	my $mcd = $self->getMCD();
 	my $mcdkey;
@@ -2010,7 +2011,8 @@ sub dispFireHose {
 	if ($mcd) {
 		$mcdkey = $self->genFireHoseMCDKey($item->{id}, $options);
 		if ($mcdkey) {
-			$mcd->set($mcdkey, $retval, 180);
+			my $exptime = $constants->{firehose_memcached_disp_exptime} || 180;
+			$mcd->set($mcdkey, $retval, $exptime);
 		}
 	}
 	return $retval;

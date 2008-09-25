@@ -5522,18 +5522,14 @@ INSERT INTO vars (name, value, description) VALUES ('metamod_use_firehose', '0',
 INSERT INTO user_event_types VALUES (4, 'Bookmarks');
 INSERT INTO user_event_types VALUES (5, 'Friends');
 
-
 # 2008-09-11
 UPDATE vars SET value = 'T_2_5_0_220' WHERE name = 'cvs_tag_currentcode';
-
 
 # For plugins/FireHose
 INSERT INTO css (rel, type, media, file, title, skin, page, admin, theme, ctid, ordernum, ie_cond) VALUES ('stylesheet','text/css','screen, projection','firehose.css','','','index2','no','',2,0, '');
 
-
 # 2008-09-17
 UPDATE vars SET value = 'T_2_5_0_221' WHERE name = 'cvs_tag_currentcode';
-
 
 # PUDGE LAST UPDATED HERE
 
@@ -5542,4 +5538,7 @@ UPDATE vars SET value = 'T_2_5_0_221' WHERE name = 'cvs_tag_currentcode';
 # SLASHDOT LAST UPDATED HERE
 
 INSERT INTO vars (name, value, description) VALUES ('index_new_user_beta', '0', 'Use index beta for new users?');
+
+# For plugins/FireHose
+INSERT INTO vars (name, value, description) VALUES ('firehose_memcached_disp_exptime', '180', 'Seconds to cache firehose display');
 
