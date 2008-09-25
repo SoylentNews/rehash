@@ -37,8 +37,8 @@ sub init {
 	# XXX set these 4 to be hashes and change all the grep{}s to hash lookups
 	$self->{modup_ids} = [ ];
 	$self->{moddown_ids} = [ ];
-	$self->{metamodup_ids} = [   $self->{upvoteid},   $self->{metanodid} ];
-	$self->{metamoddown_ids} = [ $self->{downvoteid}, $self->{metanixid} ];
+	$self->{metamodup_ids} = [   $self->{nodid}, $self->{metanodid} ];
+	$self->{metamoddown_ids} = [ $self->{nixid}, $self->{metanixid} ];
 
 	my $moddb = getObject('Slash::TagModeration');
 	$self->{reasons} = $moddb->getReasons();
