@@ -5556,3 +5556,6 @@ CREATE TABLE tagcommand_adminlog_sfnet (
 	KEY tagnameid_globjid (tagnameid, globjid)
 ) TYPE=InnoDB;
 
+# 2008-09-25
+UPDATE vars SET value = 'T_2_5_0_222' WHERE name = 'cvs_tag_currentcode';
+
