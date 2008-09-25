@@ -33,7 +33,7 @@ function tagsHistory(id, type) {
 	var $positioners;
 	if ( type == 'firehose' ) {
 		var $entry = $('#firehose-'+id);
-		var $widget = $('#tag-widget-'+id, $entry[0]);
+		var $widget = $entry.find('div.tag-widget.body-widget:first');
 
 		// hang the pop-up from the first available of:
 		$positioners =
@@ -105,7 +105,7 @@ function firehose_handle_admin_commands( commands ){
 		var signoff_tag_server = this;
 		this._ajax_request('', {
 			op:	'admin_signoff',
-			stoid:	$('[stoid]', this).attr('stoid'),
+			stoid:	this.article_info('stoid'),
 			ajax:	{ success: function(){ $('[context=signoff]', signoff_tag_server).remove(); } }
 		});
 	}
@@ -303,7 +303,9 @@ function firehose_reject (el) {
 	firehose_remove_entry(el.value);
 }
 
-function firehose_init_note_flags( $entries ){
+function firehose_init_note_flags(){
+	var $entries = $(document).article_info__find_articles(':not(:has(.title h3 span.note-flag))');
+
 	// set up the "note flag"
 	return $entries.each(function(){
 		var $entry = $(this), id = firehose_id_of(this);

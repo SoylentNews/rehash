@@ -76,7 +76,7 @@ function find_key( elem ){
 
 function $find_info_blocks( $list ){
 	return $list.map(function(){
-		return $(this).find_nearest(select_info_blocks, 'down', 'up').get();
+		return $(this).find_nearest(select_info_blocks, 'self', 'down', 'up').get();
 	});
 }
 

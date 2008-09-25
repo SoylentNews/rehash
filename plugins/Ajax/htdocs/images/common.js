@@ -724,6 +724,27 @@ function firehose_handle_comment_nodnix( commands ){
 }
 
 
+function tag_ui_init_new_articles(){
+	if ( $('#firehose').length ) {
+		return firehose_init_tag_ui();
+	}
+
+	var $new_articles = $(document).article_info__find_articles(':not(:has(span.sd-info-block .tag-ui))');
+	$new_articles.
+		each(function(){
+			install_tag_server(this);
+		});
+	$init_tag_widgets($new_articles.find('.tag-widget-stub'));
+	init_tag_ui_styles($new_articles);
+	$new_articles.article_info('tag-ui', true);
+	return $new_articles;
+}
+
+$(function(){
+	tag_ui_init_new_articles();
+});
+
+
 function firehose_init_tag_ui( $new_entries ){
 	if ( ! $new_entries || ! $new_entries.length ) {
 		var $firehoselist = $('#firehoselist');

@@ -281,21 +281,19 @@ sub displayStory {
 		}
 		$return =~ s/\Q__TIME_TAG__\E/$atstorytime/;
 
-		if ($constants->{plugin}{Tags}
-			&&  $user->{tags_canread_stories}
-			&& !$user->{tags_turnedoff}
-			&& (!$options->{dispmode} || $options->{dispmode} ne 'brief')) {
+		#if ($constants->{plugin}{Tags}
+		#	&&  $user->{tags_canread_stories}
+		#	&& !$user->{tags_turnedoff}
+		#	&& (!$options->{dispmode} || $options->{dispmode} ne 'brief')) {
 
-			my @tags_top = split / /, ($story->{tags_top} || '');
-			my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-			my @tags_example = $tags_reader->getExampleTagsForStory($story);
-			$return .= slashDisplay('tagsstorydivtagbox', {
-				story		=>  $story,
-				tags_top	=> \@tags_top,
-				tags_example	=> \@tags_example,
-			}, { Return => 1 });
+		#	$return .= slashDisplay('tag_ui_widget', {
+		#		user		=> $user,
+		#		item		=> $story,
+		#		key		=> $stoid,
+		#		key_type	=> 'stoid',
+		#	}, { Return => 1 });
 
-		}
+		#}
 	}
 
 	return $return;

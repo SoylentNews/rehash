@@ -761,6 +761,12 @@ var tag_widget_fns = {
 		}
 
 		return this;
+	},
+	toggle_widget: function( twisty ){
+		var $twisty = $(twisty);
+		var if_expanding = $twisty.is('.collapse');
+
+		$twisty.mapClass({'collapse':'expand', 'expand':'collapse'});
 	}
 
 }; // tag_widget_fns

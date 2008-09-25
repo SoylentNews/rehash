@@ -894,23 +894,6 @@ sub getTagnameSfnetadmincmds {
 		$where_clause);
 }
 
-sub getExampleTagsForStory {
-	my($self, $story) = @_;
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $cur_time = $slashdb->getTime();
-	my @examples = split / /,
-		$constants->{tags_stories_examples};
-	my $chosen_ar = $self->getTopiclistForStory($story->{stoid});
-	$#$chosen_ar = 3 if $#$chosen_ar > 3; # XXX should be a var
-	my $tree = $self->getTopicTree();
-	push @examples,
-		grep { $self->tagnameSyntaxOK($_) }
-		map { $tree->{$_}{keyword} }
-		@$chosen_ar;
-	return @examples;
-}
-
 sub removeTagnameFromIndexTop {
 	my($self, $tagname) = @_;
 	my $tagid = $self->getTagnameidCreate($tagname);
@@ -1078,11 +1061,13 @@ sub ajaxSetGetCombinedTags {
 	if ( $key_type eq 'url' ) {
 		$key = $firehose->getFireHoseIdFromUrl($key);
 		$key_type = 'firehose-id';
+	} elsif ( $key_type eq 'sid' ) {
+		$key = $slashdb->getStoidFromSidOrStoid($key);
+		$key_type = 'stoid';
 	}
 
-	if ( $key_type eq 'sid' ) {
-		my $stoid = $slashdb->getStoidFromSidOrStoid($key);
-		$globjid = $slashdb->getGlobjidFromTargetIfExists('stories', $stoid);
+	if ( $key_type eq 'stoid' ) {
+		$globjid = $slashdb->getGlobjidFromTargetIfExists('stories', $key);
 		$firehose_id = $firehose->getFireHoseIdFromGlobjid($globjid);
 		$firehose_item = $firehose->getFireHose($firehose_id);
 	} elsif ( $key_type eq 'firehose-id' ) {

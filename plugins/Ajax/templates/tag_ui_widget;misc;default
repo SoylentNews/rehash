@@ -1,0 +1,65 @@
+__section__
+default
+__description__
+A default tag widget that should work anywhere.
+
+user
+item
+key
+key_type
+__title__
+__page__
+misc
+__lang__
+en_US
+__name__
+tag_ui_widget
+__seclev__
+10000
+__template__
+[% IF user.tags_canread_stories %]
+[%# the tag-widget itself %]
+<div class="tag-widget-stub body-widget" init="context_timeout:15000">
+
+	[%# the disclosure triangle %]
+	<a class="edit-toggle"
+	[%  IF user.tags_canwrite_stories	%] href="#" onclick="this.blur(); this.parentNode.toggle_widget(this); return false"
+	[%- ELSIF user.is_anon			%] href="#" onclick="this.blur(); show_login_box(); return false"
+	[%- ELSE				%] href="[% gSkin.rootdir %]/subscribe.pl"
+	[%- END %]>
+		<span class="button collapse"></span>
+	</a>
+
+	[% IF user.tags_canwrite_stories %]
+	[%# the tag input field %]
+	<form class="tag-editor" onsubmit="form_submit_tags(this, {fade_remove: 400, order: 'prepend', classes:'not-saved'}); return false">
+		<input class="tag-entry" type="text" size="10">
+		<span class="tag-server-busy"><img src="[% constants.imagedir %]/spinner[% IF !featured %]2[% END %].gif"></span>
+	</form>
+	[% END %]
+
+	[%# the tag 'bars' %]
+	<div class="tag-display-set train">
+		[% IF user.tags_canwrite_stories %]
+		<div class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></div>
+		[% END %]
+		[%  tags_reader = Slash.getObject('Slash::Tags'); tags = tags_reader.setGetCombinedTags(key, key_type); %]
+		<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</div>
+		<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% tags.system %]</div>
+		[%- IF item.type == "story" &&
+			constants.signoff_use &&
+			((user.is_admin && !user.firehose_usermode) || user.acl.signoff_allowed) &&
+			! Slash.db.hasUserSignedStory(item.srcid, user.uid) -%]
+			<div class="tag-display-stub" context="signoff" init="legend:'signoff', menu:false">unsigned</div>
+		[%- END -%]
+	</div>
+	[% IF user.tags_canwrite_stories %]
+	[%# the suggestions bar %]
+	<div class="related">
+		<div class="tag-display-stub" context="related" init="legend:'suggestions', menu:false"></div>
+	</div>
+	[% END %]
+</div>
+[% END %]
+__version__
+$Id$

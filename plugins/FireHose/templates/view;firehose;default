@@ -30,11 +30,9 @@ __template__
 <script type="text/javascript">
 var firehose_user_class = [% user.is_anon ? 0 : 1 %];
 $(function(){
-	var $entries = firehose_init_tag_ui(
-		$('#firehose > .view > .head > [id^=firehose-]')
-			.click(firehose_click_tag) );
+	$().article_info__find_articles().click(firehose_click_tag);
 	if ( fh_is_admin ) {
-		firehose_init_note_flags($entries);
+		firehose_init_note_flags();
 	}
 });
 </script>

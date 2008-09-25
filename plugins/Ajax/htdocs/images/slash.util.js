@@ -458,16 +458,16 @@ Package({ named: 'Slash.Util.Algorithm',
 // Yes, I could phrase this as a Package; but I don't need to, here.
 $.fn.extend({
 	find_nearest: function( selector ){
-		var args = arguments, N = Math.min(3, args.length);
+		var args = arguments, N = Math.min(4, args.length);
 		var answer = this.map(function(){
-			var $this = $(this);
-			if ( $this.is(selector) ) {
-				return this;
-			}
-
-			var match;
+			var $this = $(this), match, $matches;
 			for ( var i=1; i<N && !match; ++i ) {
 				switch ( args[i] ) {
+					case 'self':
+						if ( $this.is(selector) ) {
+							return this;
+						}
+						break;
 					case 'up':
 						$this.parents().each(function(){
 							if ( $(this).is(selector) ) {
@@ -477,7 +477,10 @@ $.fn.extend({
 						});
 						break;
 					case 'down':
-						match = $this.find(selector)[0];
+						$matches = $this.find(selector);
+						if ( $matches.length ) {
+							match = $matches.get()
+						}
 						break;
 				}
 			}
@@ -486,7 +489,7 @@ $.fn.extend({
 		return this.pushStack($.unique(answer))
 	},
 	nearest_parent: function( selector ){
-		return this.find_nearest(selector, 'up');
+		return this.find_nearest(selector, 'self', 'up');
 	},
 	setClass: function( cn ) {
 		var fn = $.isFunction(cn) ? cn : function(){ return cn; };

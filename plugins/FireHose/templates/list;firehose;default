@@ -221,9 +221,8 @@ $(function(){
 		});
 
 	$('#firehoselist').click(firehose_click_tag);
-	var $entries = firehose_init_tag_ui();
 	if ( fh_is_admin ) {
-		firehose_init_note_flags($entries);
+		firehose_init_note_flags();
 	}
 });
 

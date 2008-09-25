@@ -1,0 +1,24 @@
+__section__
+default
+__description__
+__title__
+__page__
+firehose
+__lang__
+en_US
+__name__
+nodnix_capsule
+__seclev__
+10000
+__template__
+[% IF user.tags_canread_stories && !form.skipvote && !options.nothumbs && !skipvote %]
+[%# the nod/nix 'capsule' %]
+<div class="tags">
+	<span id="updown-[% item.id %]" class="vote[% IF vote == 'down' %]ddown[% ELSIF vote == 'up' %]dup[% END %]">
+		<a href="#" class="up" title="Vote this item up">+</a>
+		<a href="#" class="down" title="Vote this item down">-</a>
+	</span>
+</div>
+[% END %]
+__version__
+$Id$
