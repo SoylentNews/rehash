@@ -1643,7 +1643,6 @@ sub processAdminCommand {
 					my $uids_str = join(',', @uids_changed);
 					my $user_min = $self->sqlSelect('MIN(tagid)', 'tags',
 						"uid IN ($uids_str)");
-					$new_min_tagid = $user_min if $user_min < $new_min_tagid;
 				}
 			}
 		} else {
@@ -1655,8 +1654,6 @@ sub processAdminCommand {
 			for my $tag (@tags) {
 				$self->setTag($tag->{tagid}, { tag_clout => 0 });
 			}
-			$new_min_tagid = $self->sqlSelect('MIN(tagid)', 'tags',
-				"tagnameid=$tagnameid AND globjid=$globjid");
 			if ($new_user_clout < 1) {
 				my $uids = $self->sqlSelectColArrayref('uid', 'tags',
 					"tagnameid=$tagnameid AND inactivated IS NULL
@@ -1666,15 +1663,10 @@ sub processAdminCommand {
 					for my $uid (@$uids) {
 						my $max_clout = $self->getAdminCommandMaxClout($uid);
 						$max_clout = $new_user_clout if $new_user_clout < $max_clout;
-						push @uids_changed, $uid
-							if $self->setUser($uid, {
-								-tag_clout => "LEAST(tag_clout, $max_clout)"
-							});
+						$self->setUser($uid, {
+							-tag_clout => "LEAST(tag_clout, $max_clout)"
+						});
 					}
-					my $uids_str = join(',', @uids_changed);
-					my $user_min = $self->sqlSelect('MIN(tagid)', 'tags',
-						"uid IN ($uids_str)");
-					$new_min_tagid = $user_min if $user_min < $new_min_tagid;
 				}
 			}
 		}
@@ -1682,6 +1674,7 @@ sub processAdminCommand {
 
 	$self->logAdminCommand($type, $tagname, $globjid);
 
+	my $tagboxdb = getObject('Slash::Tagbox');
 	my $tagboxes = $tagboxdb->getTagboxes();
 	for my $tagbox_hr (@$tagboxes) {
 		my $field = $tagbox_hr->{affected_type} . 'id';
@@ -1741,6 +1734,7 @@ sub processSfnetadminCommand {
 		$self->setTag($tag->{tagid}, { tag_clout => 0 });
 	}
 	$self->logSfnetadminCommand($type, $tagname, $globjid);
+	my $tagboxdb = getObject('Slash::Tagbox');
 	my $tagboxes = $tagboxdb->getTagboxes();
 	for my $tagbox_hr (@$tagboxes) {
 		my $field = $tagbox_hr->{affected_type} . 'id';
