@@ -142,7 +142,7 @@ __template__
                 [% IF latest_bookmarks.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/bookmarks">Bookmarks</a></li>[% END %]
                 [% IF latest_friends.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/friends">Friends</a></li>[% END %]
                 [% IF latest_tags.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/tags">Tags</a></li>[% END %]
-                [% IF admin_flag %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]">Admin</a></li>[% END %]
+                [% IF user.is_admin %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]">Admin</a></li>[% END %]
                 </ul>
         </div>
 
