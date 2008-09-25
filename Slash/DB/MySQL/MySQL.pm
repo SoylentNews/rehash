@@ -2482,6 +2482,7 @@ sub createUser {
 		'user_expiry_days'	=> $constants->{min_expiry_days},
 		initdomain		=> $initdomain,
 		created_ipid		=> getCurrentUser('ipid') || '',
+		index_beta		=> $constants->{index_new_user_beta} ? 1 : 0,
 	});
 
 	$self->sqlDo("COMMIT");
