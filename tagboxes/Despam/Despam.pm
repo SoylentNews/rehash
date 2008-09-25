@@ -28,6 +28,7 @@ use base 'Slash::Tagbox';
 sub init {
 	my($self) = @_;
 	return 0 if ! $self->SUPER::init();
+	my $constants = getCurrentStatic();
 
 	my $tagsdb = getObject('Slash::Tags');
 	$self->{binspamid}	= $tagsdb->getTagnameidCreate('binspam');
@@ -39,6 +40,15 @@ sub init {
 					grep { $admins->{$_}{seclev} >= 100 }
 					keys %$admins);
 	return 0 if ! $self->{admin_in_str};
+
+	$self->{uid_never_spammer} = {( map { $_, 1 } keys %$admins )};
+	$self->{uid_never_spammer}{ $constants->{anonymous_coward_uid} } = 1;
+	if ($constants->{plugin}{Bookmarks}) {
+		my $feed_uid_ar = $tagsdb->sqlSelectColArrayref('DISTINCT uid', 'bookmark_feeds');
+		for my $uid (@$feed_uid_ar) {
+			$self->{uid_never_spammer}{$uid} = 1;
+		}
+	}
 
 	1;
 }
@@ -120,6 +130,12 @@ sub run_process {
 	my($check_type, $srcid, $table_clause, $where_clause) = (undef, undef);
 	if (!isAnon($submitter_uid)) {
 		# Logged-in user, check by uid.
+		# Some users can't be marked as spammers;  if this is one of
+		# those, we can abort now.
+		if ($self->{uid_never_spammer}{$submitter_uid}) {
+			$self->info_log("not marking uid=%d as spammer", $submitter_uid);
+			return ;
+		}
 		$check_type = 'uid';
 		$srcid = $submitter_uid;
 		$table_clause = '';
@@ -222,11 +238,12 @@ sub run_process {
 
 	# Loop on all the fhids required to be changed, setting or
 	# clearing them as appropriate.
-	for my $fhid (sort { $a <=> $b } keys %$fhid_mark_spam_hr) {
-		my $globjid = $fhid_mark_spam_hr->{$fhid};
-		my $rows = $firehose_db->setFireHose($fhid, { is_spam => ($is_spam ? 'yes' : 'no') });
+	my $hose_changes = 0;
+	for my $mark_fhid (sort { $a <=> $b } keys %$fhid_mark_spam_hr) {
+		my $mark_globjid = $fhid_mark_spam_hr->{$mark_fhid};
+		my $rows = $firehose_db->setFireHose($mark_fhid, { is_spam => ($is_spam ? 'yes' : 'no') });
 		$self->info_log("marked fhid %d (%d) as is_spam=%d rows=%s",
-			$fhid, $globjid, $is_spam, $rows);
+			$mark_fhid, $mark_globjid, $is_spam, $rows);
 		if ($rows > 0) {
 			# If this firehose item's spam status changed, either way, its
 			# scores now need to be recalculated immediately.
@@ -241,13 +258,14 @@ sub run_process {
 			# Force the recalculations of their scores.
 			for my $tbid (@{$self->{recalc_tbids}}) {
 				my $tagbox_hr = $tagboxdb->getTagboxes($tbid);
-				$tagbox_hr->{object}->forceFeederRecalc($globjid);
-				$self->info_log("force recalc tbid=%d globjid=%d", $tbid, $globjid);
+				$tagbox_hr->{object}->forceFeederRecalc($mark_globjid);
+				$self->info_log("force recalc tbid=%d globjid=%d", $tbid, $mark_globjid);
 			}
 			# Add this change to the daily stats.
 			my $statsSave = getObject('Slash::Stats::Writer');
 			$statsSave->addStatDaily('firehose_binspam_despam',
 				$is_spam ? '+1' : '-1');
+			$hose_changes++;
 		}
 	}
 
@@ -255,6 +273,19 @@ sub run_process {
 	# and mark _all_ their submissions as binspam.
 	if ($mark_srcid && $check_type) {
 		$self->info_log("marking spammer AL2 srcid=%s", $srcid);
+		if ($constants->{plugin}{Remarks}) {
+			my $al2 = $self->getAL2($srcid);
+			if (!$al2->{spammer}) {
+				my $last_uid = $tags_ar->[-1]{uid};
+				my $last_nick = $self->getUser($last_uid, 'nickname');
+				my $nick = strip_notags($last_nick);
+				my $last_ut = $tags_ar->[-1]{created_at_ut};
+				my $remarkdb = getObject('Slash::Remarks');
+				$remarkdb->createRemark(sprintf(
+					"Marking srcid %s spammer for %d binspam tags (last was %d secs ago by %s), and marking %d hose items",
+					$srcid, $binspam_count, time-$last_ut, $nick, $hose_changes ));
+			}
+		}
 		# XXX put 1183959 into a constant for goshsakes
 		$slashdb->setAL2($srcid, { spammer => 1 }, { adminuid => 1183959 });
 	}
