@@ -1055,6 +1055,8 @@ sub getM2Text {
 	my($mmr, $options) = @_;
 
 	my $constants = getCurrentStatic();
+	return '' if $constants->{m1_pluginname} eq 'TagModeration';
+
 	my $consensus = $constants->{m2_consensus};
 
 	# %$mmr is a hashref whose keys are dates, "yyyy-mm-dd".
