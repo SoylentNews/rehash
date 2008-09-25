@@ -166,6 +166,8 @@ sub createTag {
 		# a tag_clout in tagname_params.
 		my $admincmds_ar = $self->getTagnameAdmincmds(
 			$tag->{tagnameid}, $tag->{globjid});
+		# XXX Also, if the tag is on a project, check
+		# getTagnameSfnetadmincmds();
 		# Any negative admin command means clout must be set to 0.
 		if (grep { $_->{cmdtype} =~ /^[_#]/ } @$admincmds_ar) {
 			my $count = $self->sqlInsert('tag_params', {
@@ -908,6 +910,17 @@ sub getTagnameAdmincmds {
 		$where_clause);
 }
 
+sub getTagnameSfnetadmincmds {
+	my($self, $tagnameid, $globjid) = @_;
+	return [ ] if !$tagnameid || !$globjid;
+	my $where_clause = "tagnameid=$tagnameid AND globjid=$globjid";
+	return $self->sqlSelectAllHashrefArray(
+		"tagnameid, globjid, cmdtype, created_at,
+		 UNIX_TIMESTAMP(created_at) AS created_at_ut",
+		'tagcommand_adminlog_sfnet',
+		$where_clause);
+}
+
 sub getExampleTagsForStory {
 	my($self, $story) = @_;
 	my $slashdb = getCurrentDB();
@@ -961,7 +974,7 @@ sub adminPseudotagnameSyntaxOK {
 sub sfnetadminPseudotagnameSyntaxOK {
 	my($self, $command) = @_;
 	my($type, $tagname) = $self->getTypeAndTagnameFromAdminCommand($command);
-	return 0 if !$type || $type ne '_'; # only command sfnetadmins get is '_'
+	return 0 if !$type || $type ne '_'; # only command sfnetadmins get is '_', for now
 	return $self->tagnameSyntaxOK($tagname);
 }
 
@@ -1592,9 +1605,6 @@ sub processAdminCommand {
 
 	my $new_user_clout = 1-$user_clout_reduction;
 
-	my %uid_changed = ( );
-	my %globjid_changed = ( );
-
 	if ($type eq '*') {
 		# Asterisk means admin is saying this tagname is "OK",
 		# which (at least so far, 2007/12) means it is not
@@ -1675,7 +1685,7 @@ sub processAdminCommand {
 	my $tagboxes = $tagboxdb->getTagboxes();
 	for my $tagbox_hr (@$tagboxes) {
 		my $field = $tagbox_hr->{affected_type} . 'id';
-		$tagbox_hr->{object}->forceFeederRecalc($tagbox_hr->{$field});
+		$tagbox_hr->{object}->forceFeederRecalc($globjid);
 	}
 
 	return $tagnameid;
@@ -1709,7 +1719,49 @@ sub getAdminCommandMaxClout {
 	return $max_clout;
 }
 
+sub processSfnetadminCommand {
+	my($self, $c, $id, $table) = @_;
+
+	return 0 if $table ne 'projects';
+
+	my($type, $tagname) = $self->getTypeAndTagnameFromAdminCommand($c);
+	return 0 if !$type || $type ne '_';
+
+	my $user = getCurrentUser();
+	return 0 if ! $self->sfuserIsAdminOnProject($user->{uid}, $id);
+
+	my $constants = getCurrentStatic();
+	my $tagnameid = $self->getTagnameidCreate($tagname);
+
+	my $globjid = $self->getGlobjidCreate($table, $id);
+
+	my $tags_ar = $self->getTagsByNameAndIdArrayref($table, $id, { include_private => 1 });
+	my @tags = grep { $_->{tagnameid} == $tagnameid } @$tags_ar;
+	for my $tag (@tags) {
+		$self->setTag($tag->{tagid}, { tag_clout => 0 });
+	}
+	$self->logSfnetadminCommand($type, $tagname, $globjid);
+	my $tagboxes = $tagboxdb->getTagboxes();
+	for my $tagbox_hr (@$tagboxes) {
+		my $field = $tagbox_hr->{affected_type} . 'id';
+		$tagbox_hr->{object}->forceFeederRecalc($globjid);
+	}
+}
+
 } # closure
+
+sub sfuserIsAdminOnProject {
+	my($self, $uid, $project_id) = @_;
+
+	# XXX For now, my belief is that only sf.net project admins
+	# will be allowed to submit _ commands, and only on their
+	# own projects, so any such commands by definition will be
+	# authorized.  There's no great way to fill in the logic of
+	# this method at the moment, but in the future we may need
+	# to find a way.  - Jamie 2008-09-25
+
+	return 1;
+}
 
 sub getTypeAndTagnameFromAdminCommand {
 	my($self, $c) = @_;
@@ -1731,6 +1783,19 @@ sub logAdminCommand {
 		globjid =>	$globjid || undef,
 		adminuid =>	getCurrentUser('uid'),
 		-created_at =>	'NOW()',
+	});
+}
+
+sub logSfnetadminCommand {
+	my($self, $type, $tagname, $globjid) = @_;
+	return 0 if !$globjid;
+	my $tagnameid = $self->getTagnameidFromNameIfExists($tagname);
+	$self->sqlInsert('tagcommand_adminlog_sfnet', {
+		cmdtype =>		$type,
+		tagnameid =>		$tagnameid,
+		globjid =>		$globjid || undef,
+		sfnetadminuid =>	getCurrentUser('uid'),
+		-created_at =>		'NOW()',
 	});
 }
 

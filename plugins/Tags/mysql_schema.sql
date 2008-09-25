@@ -64,6 +64,19 @@ CREATE TABLE tagcommand_adminlog (
 	KEY tagnameid_globjid (tagnameid, globjid)
 ) TYPE=InnoDB;
 
+DROP TABLE IF EXISTS tagcommand_adminlog_sfnet;
+CREATE TABLE tagcommand_adminlog_sfnet (
+	id		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	cmdtype		VARCHAR(6) NOT NULL,
+	tagnameid	int UNSIGNED NOT NULL,
+	globjid		int UNSIGNED DEFAULT NULL,
+	sfnetadminuid	mediumint UNSIGNED NOT NULL,
+	created_at	datetime NOT NULL,
+	PRIMARY KEY id (id),
+	KEY created_at (created_at),
+	KEY tagnameid_globjid (tagnameid, globjid)
+) TYPE=InnoDB;
+
 ALTER TABLE users_info ADD COLUMN tag_clout FLOAT UNSIGNED NOT NULL DEFAULT 1.0 AFTER created_at;
 
 CREATE TABLE tagboxes (

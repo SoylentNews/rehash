@@ -5539,6 +5539,20 @@ UPDATE vars SET value = 'T_2_5_0_221' WHERE name = 'cvs_tag_currentcode';
 
 INSERT INTO vars (name, value, description) VALUES ('index_new_user_beta', '0', 'Use index beta for new users?');
 
-# For plugins/FireHose
+# for plugins/FireHose
 INSERT INTO vars (name, value, description) VALUES ('firehose_memcached_disp_exptime', '180', 'Seconds to cache firehose display');
+
+# for plugins/Tags
+DROP TABLE IF EXISTS tagcommand_adminlog_sfnet;
+CREATE TABLE tagcommand_adminlog_sfnet (
+	id		int UNSIGNED NOT NULL AUTO_INCREMENT,
+	cmdtype		VARCHAR(6) NOT NULL,
+	tagnameid	int UNSIGNED NOT NULL,
+	globjid		int UNSIGNED DEFAULT NULL,
+	sfnetadminuid	mediumint UNSIGNED NOT NULL,
+	created_at	datetime NOT NULL,
+	PRIMARY KEY id (id),
+	KEY created_at (created_at),
+	KEY tagnameid_globjid (tagnameid, globjid)
+) TYPE=InnoDB;
 
