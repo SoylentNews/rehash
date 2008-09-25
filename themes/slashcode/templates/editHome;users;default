@@ -44,11 +44,9 @@ __template__
 <input type="hidden" name="formname" value="edithome">
 <input type="hidden" name="op" value="savehome">
 <input type="hidden" name="uid" value="[% user_edit.uid %]">
-		[% IF user.is_admin %]
 		<label>
 			<input type="checkbox" name="index_beta" [% beta_check %]> Use Beta Index
 		</label>
-		[% END %]
 
 		<label>
 			Current Date/Time

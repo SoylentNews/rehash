@@ -36,11 +36,9 @@ __template__
                         beta_check = constants.markup_checked_attribute;
                 END;
 		%]
-		[% IF user.is_admin %]
 		<label>
 			<input type="checkbox" name="index_beta" [% beta_check %]> Use Beta Index
 		</label>
-		[% END %]
 
                 <label>Date/Time Format</label>
                 [%
