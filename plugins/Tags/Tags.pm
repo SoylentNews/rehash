@@ -958,6 +958,13 @@ sub adminPseudotagnameSyntaxOK {
 	return $self->tagnameSyntaxOK($tagname);
 }
 
+sub sfnetadminPseudotagnameSyntaxOK {
+	my($self, $command) = @_;
+	my($type, $tagname) = $self->getTypeAndTagnameFromAdminCommand($command);
+	return 0 if !$type || $type ne '_'; # only command sfnetadmins get is '_'
+	return $self->tagnameSyntaxOK($tagname);
+}
+
 sub ajaxGetUserStory {
 	my($self, $constants, $user, $form) = @_;
 
@@ -1068,6 +1075,15 @@ sub setTagsForGlobj {
 			$tag_string;
 		for my $c (@admin_commands) {
 			$self->processAdminCommand($c, $id, $table);
+		}
+	} elsif ($options->{is_sfnetadmin}) {
+		my @admin_commands =
+			grep { $tags->sfnetadminPseudotagnameSyntaxOK($_) }
+			map { lc }
+			split /[\s,]+/,
+			$tag_string;
+		for my $c (@admin_commands) {
+			$self->processSfnetadminCommand($c, $id, $table);
 		}
 	}
 
@@ -1554,7 +1570,9 @@ sub ajaxListTagnames {
 }
 
 { # closure
+
 my @clout_reduc_map = qw(  0.15  0.50  0.90  0.99  1.00  ); # should be a var
+
 sub processAdminCommand {
 	my($self, $c, $id, $table) = @_;
 
@@ -1574,9 +1592,9 @@ sub processAdminCommand {
 
 	my $new_user_clout = 1-$user_clout_reduction;
 
-	my $new_min_tagid = 0;
+	my %uid_changed = ( );
+	my %globjid_changed = ( );
 
-#print STDERR "type '$type' s=$systemwide for c '$c' new_clout '$new_user_clout' for table $table id $id\n";
 	if ($type eq '*') {
 		# Asterisk means admin is saying this tagname is "OK",
 		# which (at least so far, 2007/12) means it is not
@@ -1593,25 +1611,19 @@ sub processAdminCommand {
 		# their full clout.
 		my $tags_ar = $self->getTagsByNameAndIdArrayref($table, $id);
 		my @tags = grep { $_->{tagnameid} == $tagnameid } @$tags_ar;
-#print STDERR "tags_ar '@$tags_ar' tags '@tags'\n";
 		for my $tag (@tags) {
-#print STDERR "setting $tag->{tagid} to 0\n";
 			$self->setTag($tag->{tagid}, { tag_clout => 0 });
 		}
 	} else {
 		if ($systemwide) {
 			$self->setTagname($tagnameid, { tag_clout => 0 });
-			$new_min_tagid = $self->sqlSelect('MIN(tagid)', 'tags',
-				"tagnameid=$tagnameid");
 			if ($new_user_clout < 1) {
 				my $uids = $self->sqlSelectColArrayref('uid', 'tags',
 					"tagnameid=$tagnameid AND inactivated IS NULL");
-#print STDERR "systemwide uids: '@$uids'\n";
 				if (@$uids) {
 					my @uids_changed = ( );
 					for my $uid (@$uids) {
 						my $max_clout = $self->getAdminCommandMaxClout($uid);
-#print STDERR "systemwide maxclout=$max_clout for uid=$uid\n";
 						$max_clout = $new_user_clout if $new_user_clout < $max_clout;
 						push @uids_changed, $uid
 							if $self->setUser($uid, {
@@ -1660,8 +1672,11 @@ sub processAdminCommand {
 
 	$self->logAdminCommand($type, $tagname, $globjid);
 
-	# XXX this part isn't gonna work since tagboxes
-	$self->setLastscanned($new_min_tagid);
+	my $tagboxes = $tagboxdb->getTagboxes();
+	for my $tagbox_hr (@$tagboxes) {
+		my $field = $tagbox_hr->{affected_type} . 'id';
+		$tagbox_hr->{object}->forceFeederRecalc($tagbox_hr->{$field});
+	}
 
 	return $tagnameid;
 }
