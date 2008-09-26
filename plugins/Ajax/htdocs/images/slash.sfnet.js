@@ -17,7 +17,7 @@ var isAuthenticated = kTesting ? true : false;
 var kAuthenticated=true, kNotAuthenticated=false;
 
 var root_d2_selector = '#sd-d2-root';
-var root_tagui_selector = '.sd-tagui-root';
+var root_tag_ui_selector = '.sd-tag-ui-root';
 var sfnet_prefix = 'sfnet';
 
 function handle_tag_click( event ){
@@ -34,7 +34,7 @@ function handle_tag_click( event ){
 
 	if ( command ) {
 		$target.nearest_parent('.tag-server').
-			tagui_server__submit_tags(command);
+			tag_ui_server__submit_tags(command);
 		return false;
 	}
 
@@ -73,7 +73,7 @@ function make_tag_editor( prefix ){
 		'</form>'].join(prefix);
 }
 
-function simple_tagui_markup( prefix, if_authenticated ){
+function simple_tag_ui_markup( prefix, if_authenticated ){
 	prefix = prefix ? prefix + '-' : '';
 
 	var displays = ['top', 'system'], editor_if_any = '';
@@ -82,13 +82,13 @@ function simple_tagui_markup( prefix, if_authenticated ){
 		editor_if_any = make_tag_editor(prefix);
 	}
 
-	return	'<div class="'+prefix+'basic-tagui">' +
+	return	'<div class="'+prefix+'basic-tag-ui">' +
 			editor_if_any +
 			make_tag_displays(prefix, displays) +
 		'</div>';
 }
 
-function install_tagui( $roots, if_authenticated ){
+function install_tag_ui( $roots, if_authenticated ){
 	/* do something different if ! authenticated? */
 
 	var	Server	= Slash.TagUI.Server,
@@ -100,7 +100,7 @@ function install_tagui( $roots, if_authenticated ){
 	Markup.add_style_triggers(['nod', 'metanod'], 'y p');
 	Markup.add_style_triggers(['nix', 'metanix'], 'x p');
 
-	var tagui_markup = simple_tagui_markup(sfnet_prefix, if_authenticated);
+	var tag_ui_markup = simple_tag_ui_markup(sfnet_prefix, if_authenticated);
 
 	var allowed_ops = [];
 	switch ( if_authenticated ) {
@@ -115,22 +115,22 @@ function install_tagui( $roots, if_authenticated ){
 	$roots.
 		each(function(){
 			var $this = $(this);
-			if ( ! $this.find('.sd-tags-here').replaceWith(tagui_markup).length ) {
-				$this.append(tagui_markup);
+			if ( ! $this.find('.sd-tags-here').replaceWith(tag_ui_markup).length ) {
+				$this.append(tag_ui_markup);
 			}
 		}).
-		tagui__init({
+		tag_ui__init({
 			for_display: {
 				for_display: {
 					menu: qw.as_string(allowed_ops)
 				}
 			}
 		}).
-		tagui_markup__auto_refresh_styles().
-		tagui_server().
-		tagui_server__fetch_tags().
+		tag_ui_markup__auto_refresh_styles().
+		tag_ui_server().
+		tag_ui_server__fetch_tags().
 		each(function(){
-			this.tagui_server.command_pipeline = command_pipeline;
+			this.tag_ui_server.command_pipeline = command_pipeline;
 		});
 
 	if ( if_authenticated ) {
@@ -144,14 +144,14 @@ function install_tagui( $roots, if_authenticated ){
 					$input.val('');
 					$this.
 						nearest_parent('.tag-server').
-							tagui_server__submit_tags(commands);
+							tag_ui_server__submit_tags(commands);
 				}).
 			end().
 			find('[class*=tag-edit-toggle]').
 				click(handle_toggle_click);
 	}
 
-	// simple_tagui_markup() doesn't produce legends, but we want them anyway.
+	// simple_tag_ui_markup() doesn't produce legends, but we want them anyway.
 	$.each({
 		user:	'My Tags',
 		top:	'Top Tags',
@@ -243,17 +243,17 @@ function get_token( fn, params ) {
 }
 
 SFX.install_slash_ui = function(){
-	var $tagui_roots, $d2_roots;
+	var $tag_ui_roots, $d2_roots;
 	for ( var i=0; i<arguments.length; ++i ) {
 		switch ( arguments[i] ) {
-			case 'd2':	$d2_roots = $(root_d2_selector);	break;
-			case 'tags':	$tagui_roots = $(root_tagui_selector);	break;
+			case 'd2':	$d2_roots = $(root_d2_selector);		break;
+			case 'tags':	$tag_ui_roots = $(root_tag_ui_selector);	break;
 		}
 	}
 
 	if_auth(function( authenticated ){
 		if ( $d2_roots && $d2_roots.length )		{ install_d2($d2_roots, authenticated); }
-		if ( $tagui_roots && $tagui_roots.length )	{ install_tagui($tagui_roots, authenticated); }
+		if ( $tag_ui_roots && $tag_ui_roots.length )	{ install_tag_ui($tag_ui_roots, authenticated); }
 	});
 };
 

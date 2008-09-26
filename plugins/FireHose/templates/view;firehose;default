@@ -28,11 +28,11 @@ __template__
 		[% firehosetext %]
 	</div>
 </div>
-[% PROCESS init_tagui %]
+[% PROCESS init_tag_ui %]
 <script type="text/javascript">
 var firehose_user_class = [% user.is_anon ? 0 : 1 %];
 $(function(){
-	var $entries = firehose_init_tagui(
+	var $entries = firehose_init_tag_ui(
 		$('#firehose > .view > .head > [id^=firehose-]')
 			.click(firehose_click_tag) );
 	if ( fh_is_admin ) {

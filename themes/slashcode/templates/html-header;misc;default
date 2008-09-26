@@ -42,7 +42,7 @@ __template__
 <script src="[% constants.imagedir %]/jquery/ui.sortable.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/jquery/jquery.textselection.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/jquery/jquery.autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
-<script src="[% constants.imagedir %]/tagui.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/tag-ui.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/slider.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% END -%]
 <script src="[% constants.imagedir %]/yui/connection.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>

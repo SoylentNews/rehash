@@ -1,4 +1,4 @@
-; // tagui.js
+; // tag-ui.js
 
 var context_triggers, well_known_tags;
 
@@ -973,7 +973,7 @@ function recompute_css_classes( root ){
 			});
 }
 
-function init_tagui_styles( $entries ){
+function init_tag_ui_styles( $entries ){
 	return $entries.each(function(){
 		recompute_css_classes(this);
 	});

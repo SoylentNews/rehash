@@ -54,7 +54,7 @@ function tagsHistory(id, type) {
 }
 
 //
-// firehose + admin + tagui
+// firehose + admin + tag_ui
 //
 
 function firehose_admin_context( display ){

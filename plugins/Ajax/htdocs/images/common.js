@@ -2,7 +2,7 @@
 ; // $Id$
 
 /*global setFirehoseAction firehose_get_updates tagsHideBody tagsShowBody attachCompleter createTag
-	firehose_remove_all_items firehose_fix_up_down firehose_toggle_tagui_to ajax_update json_handler
+	firehose_remove_all_items firehose_fix_up_down firehose_toggle_tag_ui_to ajax_update json_handler
 	json_update firehose_reorder firehose_get_next_updates getFirehoseUpdateInterval run_before_update
 	firehose_play firehose_add_update_timerid firehose_collapse_entry firehose_slider_end
 	firehose_slider_set_color vendorStoryPopup vendorStoryPopup2 firehose_save_tab check_logged_in
@@ -469,7 +469,7 @@ function toggle_firehose_body(id, is_admin) {
 		fhbody.className = "body";
 		fh.className = "article" + usertype;
 		if (is_admin) {
-			firehose_toggle_tagui_to(true, fh);
+			firehose_toggle_tag_ui_to(true, fh);
 		}
 	} else if (fhbody.className == "body") {
 		fhbody.className = "hide";
@@ -480,7 +480,7 @@ function toggle_firehose_body(id, is_admin) {
 		fhbody.className = "body";
 		fh.className = "article" + usertype;
 		if (is_admin) {
-			firehose_toggle_tagui_to(true, fh);
+			firehose_toggle_tag_ui_to(true, fh);
 		}
 		/*if (is_admin)
 			tagsShowBody(id, is_admin, '', "firehose"); */
@@ -725,14 +725,14 @@ function firehose_remove_tab(tabid) {
 
 
 //
-// firehose + tagui
+// firehose + tag_ui
 //
 
 var $related_trigger = $().filter();
 
 var kExpanded=true, kCollapsed=false;
 
-function firehose_toggle_tagui_to( if_expanded, selector ){
+function firehose_toggle_tag_ui_to( if_expanded, selector ){
 	var	$server = $(selector).nearest_parent('[tag-server]'),
 		id	= $server.attr('tag-server'),
 		$widget = $server.find('.tag-widget.body-widget'),
@@ -766,8 +766,8 @@ function firehose_toggle_tagui_to( if_expanded, selector ){
 	return $widget;
 }
 
-function firehose_toggle_tagui( toggle ) {
-	firehose_toggle_tagui_to( ! $(toggle.parentNode).hasClass('expanded'), toggle );
+function firehose_toggle_tag_ui( toggle ) {
+	firehose_toggle_tag_ui_to( ! $(toggle.parentNode).hasClass('expanded'), toggle );
 }
 
 function firehose_click_tag( event ) {
@@ -803,8 +803,8 @@ function firehose_click_tag( event ) {
 
 		// Make sure the user sees some feedback...
 		if ( $menu || event.shiftKey ) {
-			// for a menu command or copying a tag into edit field, open the tagui
-			var $widget = firehose_toggle_tagui_to(kExpanded, $server);
+			// for a menu command or copying a tag into edit field, open the tag_ui
+			var $widget = firehose_toggle_tag_ui_to(kExpanded, $server);
 
 			// the menu is hover css, you did the command, so the menu should go away
 			// but you're still hovering
@@ -917,7 +917,7 @@ function firehose_handle_comment_nodnix( commands ){
 }
 
 
-function firehose_init_tagui( $new_entries ){
+function firehose_init_tag_ui( $new_entries ){
 	if ( ! $new_entries || ! $new_entries.length ) {
 		var $firehoselist = $('#firehoselist');
 		if ( $firehoselist.length ) {
@@ -974,7 +974,7 @@ function firehose_init_tagui( $new_entries ){
 				});
 	}
 
-	return init_tagui_styles($new_entries);
+	return init_tag_ui_styles($new_entries);
 }
 // firehose functions end
 
@@ -1240,7 +1240,7 @@ function firehose_handle_update() {
 		firehose_get_next_updates();
 	}
 
-	var $new_entries = firehose_init_tagui();
+	var $new_entries = firehose_init_tag_ui();
 	if ( fh_idle_skin ) { firehose_init_idle($new_entries); }
 	if ( fh_is_admin ) { firehose_init_note_flags($new_entries); }
 

@@ -1,13 +1,13 @@
 <html>
 <head>
-	<title>Unit Tests: broadcaster.tagui.js</title>
+	<title>Unit Tests: TagUI.Broadcaster</title>
 
 	<script src="../jquery/jquery-1.2.6.js" type="text/javascript"></script>
 	<link href="http://dev.jquery.com/view/trunk/qunit/testsuite.css" rel="stylesheet" type="text/css" media="screen">
 	<script src="http://dev.jquery.com/view/trunk/qunit/testrunner.js" type="text/javascript"></script>
 
 	<script src="../slash.util.js" type="text/javascript"></script>
-	<script src="../slash.tagui.js" type="text/javascript"></script>
+	<script src="../slash.tag-ui.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 (function($){
@@ -29,11 +29,11 @@ test('general', function(){
 
 	ok(TagUI.Broadcaster, '...and has the Broadcaster component');
 	ok($.isFunction(TagUI.Broadcaster), '...which is a function');
-	var $main = $('#main').tagui_broadcaster(), main=$main[0];
+	var $main = $('#main').tag_ui_broadcaster(), main=$main[0];
 	ok(true, 'survived jQuery initializer');
 	ok(main===$('#main')[0], 'returned the selection');
-	ok(main.tagui_broadcaster, 'whose elements appear to have the broadcaster stem attached');
-	ok(main.tagui_broadcaster.broadcast, 'decorated with the broadcaster api');
+	ok(main.tag_ui_broadcaster, 'whose elements appear to have the broadcaster stem attached');
+	ok(main.tag_ui_broadcaster.broadcast, 'decorated with the broadcaster api');
 
 	var count = 0;
 	var signal_received;
@@ -53,17 +53,17 @@ test('general', function(){
 	TagUI.Responder(dog, { fn: handle_signal, signals: 'goodboy badkitty' });
 
 	equals($('[class*=respond-].ready').length, 2, 'responder attributes look right');
-	$cat.tagui_responder__handle('goodkitty', 'testing handle_signal');
+	$cat.tag_ui_responder__handle('goodkitty', 'testing handle_signal');
 
 	signal_received = '';
 	count = 0;
 
-	$('body, #main').tagui_broadcaster__broadcast('goodkitty', 'here\'s a treat');
+	$('body, #main').tag_ui_broadcaster__broadcast('goodkitty', 'here\'s a treat');
 	equals(count, 1, 'exactly one response means only #main broadcast, only cat responded');
 	equals(signal_received, 'goodkitty', 'and the right signal was received');
 
 	count = 0;
-	$('body, #main').tagui_broadcaster__broadcast('badkitty', 'git the kitty!');
+	$('body, #main').tag_ui_broadcaster__broadcast('badkitty', 'git the kitty!');
 	equals(count, 2, 'exactly two responses means only #main broadcast, both dog and cat responded')
 });
 
@@ -79,7 +79,7 @@ test('regressions', function(){
 
 </head>
 <body>
-	<h1>Unit Tests: broadcaster.tagui.js</h1>
+	<h1>Unit Tests: TagUI.Broadcaster</h1>
 	<h2 id="banner"></h2>
 	<h2 id="userAgent"></h2>
 	<ol id="tests"></ol>

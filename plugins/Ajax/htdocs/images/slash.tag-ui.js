@@ -7,14 +7,14 @@ eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
 /* Note: If you're reading this in BBEdit or any other browser that supports "folds", you may want
    to start by collapsing all folds so you just see the eight top-level components.
 
-   Requires: jquery, slash.util.js; non-Slashdot installations will want tagui.core.css
+   Requires: jquery, slash.util.js; non-Slashdot installations will want sfnet-tag-ui.css
 
 
 
    Description:
 
    This file implements the bulk of the _generic_ tag ui.  For Slashdot, specifics are to be found
-   in firehose.tagui.js.  For anyone else, this file (and its prerequisites) should be enough to
+   in firehose.tag-ui.js.  For anyone else, this file (and its prerequisites) should be enough to
    have a working tag ui (modulo, as of this writing, actually getting tags from a server).
 
 
@@ -29,7 +29,7 @@ eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
 
    or, once installed, through the element itself, e.g.,
 
-	from_elem.tagui_broadcaster.broadcast(signal, data, options)
+	from_elem.tag_ui_broadcaster.broadcast(signal, data, options)
 
    The package itself is the element constructor.  So installing onto from_elem usually looks like
    this:
@@ -39,26 +39,26 @@ eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
    The element-based components install their API into jQuery selections as well, so the previous
    examples could also be rendered as:
 
-	var $broadcasters = $('.i-want-to-broadcast').tagui_broadcaster(construction_options);
-	$broadcasters.tagui_broadcaster__broadcast(signal, data, broadcast_options);
+	var $broadcasters = $('.i-want-to-broadcast').tag_ui_broadcaster(construction_options);
+	$broadcasters.tag_ui_broadcaster__broadcast(signal, data, broadcast_options);
 
    The element itself is extended only by a single member (per interface), e.g., a display element
    will have:
 
-	elem.tagui_display
-	elem.tagui_responder	// because displays are also responders
+	elem.tag_ui_display
+	elem.tag_ui_responder	// because displays are also responders
 
-   Functions of the Display component hang from the tagui_display "stem", as well as any element
+   Functions of the Display component hang from the tag_ui_display "stem", as well as any element
    specific data needed by Display.  Unfortunately, we can't play the same proxy games with jQuery,
    so the stem name is rolled into the function names:
 
-	$(elem).tagui_display__set_tags(tags, options); // vs.
-	elem.tagui_display.set_tags(tags, options);
+	$(elem).tag_ui_display__set_tags(tags, options); // vs.
+	elem.tag_ui_display.set_tags(tags, options);
 
    The jQuery versions of the functions apply to every selected element that has the interface
    installed, or to every element in the case of the constructors or a "free API" call, e.g.,
 
-	$(expr).tagui__tags()
+	$(expr).tag_ui__tags()
 
    ...is part of the free (non-element-bound) API, and so applies to every element in $(expr).
 
@@ -69,19 +69,19 @@ eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
 	Slash.TagUI.Responder.bind(r_elem, fn, signals);	// TagUI.Responder.bind
 
 	// via an (already "constructed") element
-	r_elem.tagui_responder.bind(fn, signals);		// tagui_responder.bind
+	r_elem.tag_ui_responder.bind(fn, signals);		// tag_ui_responder.bind
 
 	// ...and for packages that, like Responder, enable jQuery
 	// via the jQuery global
-	$.tagui_responder.bind(r_elem, fn, signals);		// tagui_responder.bind
+	$.tag_ui_responder.bind(r_elem, fn, signals);		// tag_ui_responder.bind
 
 	// via a jQuery selection, for every eligible element it contains
-	$(expr).tagui_responder__bind(fn, signals);		// tagui_responder__bind
+	$(expr).tag_ui_responder__bind(fn, signals);		// tag_ui_responder__bind
 
 	// constructor forms
 	Slash.TagUI.Responder(r_elem, options);			// TagUI.Responder
-	$.tagui_responder(r_elem, options);			// tagui_responder
-	$(expr).tagui_responder(options);			// tagui_responder
+	$.tag_ui_responder(r_elem, options);			// tag_ui_responder
+	$(expr).tag_ui_responder(options);			// tag_ui_responder
 
    "Free" API calls are available:
 
@@ -90,7 +90,7 @@ eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
 
 	// ...and for packages that, like Markup, enable jQuery
 	// via the jQuery global
-	$.tagui_markup.add_style_triggers(tags, styles);	// tagui_markup.add_style_triggers
+	$.tag_ui_markup.add_style_triggers(tags, styles);	// tag_ui_markup.add_style_triggers
 
 
 
@@ -100,23 +100,23 @@ eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
 
    In a view listing a number of entries, e.g., a Firehose view of articles, where tags within an
    entry are connected to that entry --- here's how the tag ui is implemented: the entry itself
-   becomes a tagui_server.  When it fetches or submits tags, it notifies components beneath it (DOM
-   descendants) via the tagui_broadcaster methods.  Those descendants will include displays, which
+   becomes a tag_ui_server.  When it fetches or submits tags, it notifies components beneath it (DOM
+   descendants) via the tag_ui_broadcaster methods.  Those descendants will include displays, which
    will update their contained tags at this notification, and other custom responders, e.g.,
    something to start and stop a "busy spinner", or, in the case of the Firehose, to update the vote
    displayed by the nod/nix "capsule".
 
-   Any code can submit new tags or tag-commands by finding the tagui_server and calling its methods
+   Any code can submit new tags or tag-commands by finding the tag_ui_server and calling its methods
    directly, e.g.,
 
-	$(this).nearest_parent('.tag-server').tagui_server__submit_tags('slownewsday');
+	$(this).nearest_parent('.tag-server').tag_ui_server__submit_tags('slownewsday');
 
    Typically, you will do this from a custom click handler (see Slash.Firehose.TagUI.click_handler).
    You might also do it from a form or text input.
 
    ..............................................................Command, and the "command pipeline"
 
-   Before actually submitting any commands across AJAX, the tagui_server first sends the commands
+   Before actually submitting any commands across AJAX, the tag_ui_server first sends the commands
    through a pipeline of filters, which can add, remove, or alter those commands.  That pipeline is
    empty by default.  You fill it with whatever you want.  Some filters are provided (see Command).
    The Firehose uses this mechanism, for example, to notice commands masquerading as tags, e.g,
@@ -147,7 +147,7 @@ eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
    entirely; supply your own; and easily control them on a per-display basis or (less easily) on a
    tag-by-tag basis.  The "meaning" of the menus is up to your code.  The Firehose default (via its
    click handler) is to submit a command based on the menu label and the underlying tag, e.g., the
-   'x' menu item on the tag 'apple' asks the corresponding tagui_server to submit_tags('-apple').
+   'x' menu item on the tag 'apple' asks the corresponding tag_ui_server to submit_tags('-apple').
    This simple rule means the Firehose only needs a single click handler for the entire page ... at
    least for submitting tag-commands.  The appearance and behavior of the menus is entirely defined
    by CSS.
@@ -169,9 +169,9 @@ eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
 
    .......................................................................applications of the tag ui
 
-   The simplest scenario for the tagui is that you've set up the static styles to your liking, and
+   The simplest scenario for the tag_ui is that you've set up the static styles to your liking, and
    then produce a single read-only display populated with tags at template time, and calling the
-   tagui__init function, from jQuery, on the new entries as they are added to the window.  The next
+   tag_ui__init function, from jQuery, on the new entries as they are added to the window.  The next
    step up is adding a server to each entry, allowing the display to be filled dynamically, upon
    request.  Then adding a click handler to act on the tags and/or a text field to add new tags.
    Then widgets to supply additional context-sensitive commands; and command handlers to separate
@@ -179,7 +179,7 @@ eval(Slash.Util.Package.with_packages('Slash.Util', 'Slash.Util.Algorithm'));
 
    Some Final Notes:
 
-   The tagui components that are actually attached to elements automatically benefit from the loose
+   The tag_ui components that are actually attached to elements automatically benefit from the loose
    coupling afforded by the DOM.  A single server serves only those elements beneath it.  Any
    element can just "look up" (with nearest_parent('.tag-server')) to find its server.  Responders
    (for instance, displays) can be added or removed at any time.  All such components support
@@ -231,10 +231,10 @@ function un_stub( stub_elem, needed ){
 new Package({ named: 'Slash.TagUI',
 	api: {
 		tags: function( selector ){
-			return $(selector).tagui__tags();
+			return $(selector).tag_ui__tags();
 		},
 		cached_user_tags: function( selector ){
-			return $(selector).tagui__cached_user_tags();
+			return $(selector).tag_ui__cached_user_tags();
 		},
 		bare_tag: function( tag ){
 			try {
@@ -246,7 +246,7 @@ new Package({ named: 'Slash.TagUI',
 			}
 		},
 		init: function( $new_entries, options ){
-			return $new_entries.tagui__init(options);
+			return $new_entries.tag_ui__init(options);
 		}
 	},
 	jquery: {
@@ -259,12 +259,12 @@ new Package({ named: 'Slash.TagUI',
 				return qw(tags);
 			},
 			cached_user_tags: function(){
-				return this.find('[class*=tag-display].ready.respond-user').tagui__tags();
+				return this.find('[class*=tag-display].ready.respond-user').tag_ui__tags();
 			},
 			init: function( options ){
 				options = options || {};
-				this.find('[class*=tag-display-stub]').tagui_display(options.for_display);
-				this.find('[class*=tag-widget-stub]').tagui_widget(options.for_widget);
+				this.find('[class*=tag-display-stub]').tag_ui_display(options.for_display);
+				this.find('[class*=tag-widget-stub]').tag_ui_widget(options.for_widget);
 				return this;
 			}
 		}
@@ -297,12 +297,12 @@ new Package({ named: 'Slash.TagUI.Responder',
 			return r_elem;
 		},
 		bind: function( r_elem, fn, _signals ){
-			r_elem.tagui_responder.handle_signal = fn;
+			r_elem.tag_ui_responder.handle_signal = fn;
 			signals(r_elem, _signals);
 			return r_elem;
 		},
 		handle: function( r_elem, signals, data, options ){
-			var fn = r_elem.tagui_responder && r_elem.tagui_responder.handle_signal;
+			var fn = r_elem.tag_ui_responder && r_elem.tag_ui_responder.handle_signal;
 			if ( fn ) {
 				fn.apply(r_elem, [signals, data, options]);
 			}
@@ -311,8 +311,8 @@ new Package({ named: 'Slash.TagUI.Responder',
 	},
 	stem_function: function( r_elem, o ){
 		r_elem.
-			tagui_responder.bind(o.fn, o.signals).
-			tagui_responder.ready(!if_defined_false(o.if_ready));
+			tag_ui_responder.bind(o.fn, o.signals).
+			tag_ui_responder.ready(!if_defined_false(o.if_ready));
 		return o.defaults ? { defaults: o.defaults } : undefined;
 	},
 	jquery: true
@@ -389,7 +389,7 @@ new Package({ named: 'Slash.TagUI.Broadcaster',
 				var selector = '.ready.respond-'+M[2];
 				var $r_list = arguments[4]; // list of responders
 				$r_list = $r_list && $r_list.filter(selector) || $(selector, b_elem);
-				$r_list.tagui_responder__handle(signal, data, options);
+				$r_list.tag_ui_responder__handle(signal, data, options);
 			}
 			return b_elem;
 		},
@@ -506,7 +506,7 @@ new Package({ named: 'Slash.TagUI.Server',
 // Slash.TagUI.Server private implementation details
 // this is the one function that handles all three of the public entry-points
 function ajax( s_elem, commands, options ){
-	var ts = s_elem.tagui_server;
+	var ts = s_elem.tag_ui_server;
 
 	if ( (commands = qw(commands)).length > 0 &&
 		ts.command_pipeline &&
@@ -568,7 +568,7 @@ function ajax( s_elem, commands, options ){
 function resolve_defaults( s_elem, caller_opts ){
 	var answer = {};
 	var class_opts = Server.defaults;
-	var this_opts = s_elem.tagui_server && s_elem.tagui_server.defaults || {};
+	var this_opts = s_elem.tag_ui_server && s_elem.tag_ui_server.defaults || {};
 	caller_opts = caller_opts || {};
 	for ( var k in class_opts ) {
 		answer[k] = $.extend({}, class_opts[k], this_opts[k]||{}, caller_opts[k]||{});
@@ -577,7 +577,7 @@ function resolve_defaults( s_elem, caller_opts ){
 }
 
 function resolve_callback( s_elem, caller_opts, callback_name ){
-	var elem_ajax = s_elem.tagui_server && s_elem.tagui_server.defaults && s_elem.tagui_server.defaults.ajax || {};
+	var elem_ajax = s_elem.tag_ui_server && s_elem.tag_ui_server.defaults && s_elem.tag_ui_server.defaults.ajax || {};
 	var caller_ajax = caller_opts && caller_opts.ajax || {};
 
 	return if_fn(caller_ajax[callback_name]) || if_fn(elem_ajax[callback_name]);
@@ -601,7 +601,7 @@ new Package({ named: 'Slash.TagUI.Markup',
 		},
 		refresh_styles: refresh_tag_styles_in_entry,
 		auto_refresh_styles: function( server_elem ){
-			$(server_elem).tagui_markup__auto_refresh_styles();
+			$(server_elem).tag_ui_markup__auto_refresh_styles();
 		},
 		markup_tag: function( tag ){
 			try {
@@ -619,10 +619,10 @@ new Package({ named: 'Slash.TagUI.Markup',
 			auto_refresh_styles: function(){
 				this.append('<span class="auto-refresh-styles" style="display: none"></span>').
 					find('.auto-refresh-styles').
-					tagui_responder({
+					tag_ui_responder({
 						signals: 'ajaxSuccess',
 						fn: function(){
-							$(this).nearest_parent('.tag-server').tagui_markup__refresh_styles();
+							$(this).nearest_parent('.tag-server').tag_ui_markup__refresh_styles();
 						}
 					});
 				return this;
@@ -711,9 +711,9 @@ function compute_tag_styles( $displays, signal_styles, static_styles_fn ){
 	// e.g., a tag that appears in both the user and system displays gets css classes 'u s'
 	var signals_done={}, styles={}, signals_remaining=keys(signal_styles).length;
 	$displays.filter('.ready[class*=respond-]:not(.no-tags)').each(function(){
-		var $display=$(this), signal=$display.tagui_responder__signals();
+		var $display=$(this), signal=$display.tag_ui_responder__signals();
 		if ( (signal in signal_styles) && !(signal in signals_done) ) {
-			update_tag_styles(styles, signal_styles[signal], $display.tagui__tags());
+			update_tag_styles(styles, signal_styles[signal], $display.tag_ui__tags());
 			signals_done[signal] = true;
 			return --signals_remaining!==0;
 		}
@@ -807,9 +807,9 @@ new Package({ named: 'Slash.TagUI.Display',
 						new_tags,
 						'<li class="p"><span class="tag">',
 						'</span></li>')).
-					append(d_elem.tagui_display._menu_template);
+					append(d_elem.tag_ui_display._menu_template);
 
-				d_elem.tagui_display._$list_el[options.order]($new_elems);
+				d_elem.tag_ui_display._$list_el[options.order]($new_elems);
 
 				// add in a list of the actual .tag elements we created from scratch
 				$changed_tags = $changed_tags.add( $new_elems.find('span.tag') );
@@ -868,8 +868,8 @@ new Package({ named: 'Slash.TagUI.Display',
 			})[0];
 
 			return d_elem.
-				tagui_display.remove_tags(removed_tags, options).
-				tagui_display.update_tags(tags, options);
+				tag_ui_display.remove_tags(removed_tags, options).
+				tag_ui_display.update_tags(tags, options);
 		}
 	},
 	element_constructor: function( d_elem, o ){
@@ -881,7 +881,7 @@ new Package({ named: 'Slash.TagUI.Display',
 
 		Responder(d_elem, $.extend({
 			fn: function( signal, tags, options ){
-				return this.tagui_display.set_tags(tags, options);
+				return this.tag_ui_display.set_tags(tags, options);
 			}
 		}, o_r));
 
@@ -905,10 +905,10 @@ new Package({ named: 'Slash.TagUI.Display',
 			ext.defaults = o_d.defaults;
 		}
 
-		$.extend(d_elem.tagui_display, ext);
+		$.extend(d_elem.tag_ui_display, ext);
 
 		if ( o_d.tags ) {
-			d_elem.tagui_display.set_tags(o_d.tags);
+			d_elem.tag_ui_display.set_tags(o_d.tags);
 		}
 	},
 	jquery: true
@@ -1221,7 +1221,7 @@ function init(){
 
 
 function set_widget_context( context, force, $related_trigger ){
-	var w_elem = this, w = w_elem.tagui_widget;
+	var w_elem = this, w = w_elem.tag_ui_widget;
 
 	if ( context ) {
 		if ( context == w._current_context &&
@@ -1253,7 +1253,7 @@ function set_widget_context( context, force, $related_trigger ){
 
 		$('.ready.respond-related', this)
 			.each(function(){
-				var d_elem = this, d = d_elem.tagui_display;
+				var d_elem = this, d = d_elem.tag_ui_display;
 				var $display = $(d_elem);
 
 				var had_tags = $display.find('span.tag').length !== 0;

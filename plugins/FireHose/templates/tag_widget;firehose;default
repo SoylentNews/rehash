@@ -56,7 +56,7 @@ __template__
 		</span>
 		[% END %]
 		[%# the disclosure triangle %]
-		<a class="edit-toggle" href="#" onclick="this.blur(); firehose_toggle_tagui(this); return false">
+		<a class="edit-toggle" href="#" onclick="this.blur(); firehose_toggle_tag_ui(this); return false">
 			<span class="button collapse"></span>
 		</a>
 		[%# the tag input field %]

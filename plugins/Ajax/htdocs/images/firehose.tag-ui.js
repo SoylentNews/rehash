@@ -7,9 +7,9 @@ eval(Slash.Util.Package.with_packages('Slash.Util'));
 Package({ named: 'Slash.Firehose.TagUI',
 	api: {
 		click_handler:	firehose_click_tag,
-		init_entries:	firehose_init_tagui,
-		toggle:		firehose_toggle_tagui,
-		toggle_to:	firehose_toggle_tagui_to,
+		init_entries:	firehose_init_tag_ui,
+		toggle:		firehose_toggle_tag_ui,
+		toggle_to:	firehose_toggle_tag_ui_to,
 		form_submit:	form_submit_tags,
 		before_update:	before_update,
 		after_update:	after_update
@@ -27,7 +27,7 @@ function before_update(){
 }
 
 function after_update( $new_entries, state ){
-	firehose_init_tagui($new_entries);
+	firehose_init_tag_ui($new_entries);
 	state.selection.restore().focus();
 	state.$menu.show();
 }
@@ -36,7 +36,7 @@ function after_update( $new_entries, state ){
 
 // Slash.Firehose.TagUI private implementation details
 
-function firehose_toggle_tagui_to( if_expanded, selector ){
+function firehose_toggle_tag_ui_to( if_expanded, selector ){
 	var	$entry	= $(selector).nearest_parent('.tag-server'),
 		$widget = $entry.find('.tag-widget.body-widget'),
 		id	= $entry.attr('tag-server');
@@ -65,8 +65,8 @@ function firehose_toggle_tagui_to( if_expanded, selector ){
 	$entry.find('#toggletags-body-'+id).mapClass(toggle_div);
 }
 
-function firehose_toggle_tagui( toggle ) {
-	firehose_toggle_tagui_to( ! $(toggle.parentNode).hasClass('expanded'), toggle );
+function firehose_toggle_tag_ui( toggle ) {
+	firehose_toggle_tag_ui_to( ! $(toggle.parentNode).hasClass('expanded'), toggle );
 }
 
 var $related_trigger = $().filter();
@@ -78,7 +78,7 @@ function form_submit_tags( form, options ){
 		each(function(){
 			var tag_cmds = $input.val();
 			$input.val('');
-			this.tagui_server.submit_tags(tag_cmds, options);
+			this.tag_ui_server.submit_tags(tag_cmds, options);
 		});
 }
 
@@ -116,8 +116,8 @@ function firehose_click_tag( event ) {
 
 		// Make sure the user sees some feedback...
 		if ( $menu || event.shiftKey ) {
-			// for a menu command or copying a tag into edit field, open the tagui
-			var $widget = firehose_toggle_tagui_to(kExpanded, $s_elem);
+			// for a menu command or copying a tag into edit field, open the tag_ui
+			var $widget = firehose_toggle_tag_ui_to(kExpanded, $s_elem);
 
 			// the menu is hover css, you did the command, so the menu should go away
 			// but you're still hovering
@@ -143,7 +143,7 @@ function firehose_click_tag( event ) {
 			});
 		} else { // otherwise, send it the server to be processed
 			$s_elem.each(function(){
-				this.tagui_server.submit_tags(command, { fade_remove: 400, order: 'prepend', classes: 'not-saved'});
+				this.tag_ui_server.submit_tags(command, { fade_remove: 400, order: 'prepend', classes: 'not-saved'});
 			});
 		}
 		return false;
@@ -181,12 +181,12 @@ function firehose_handle_nodnix( commands ){
 		var context_not_set = true;
 		var nodnix_context = function( ctx ){
 			$reasons.each(function(){
-				this.tagui_widget.set_context(ctx);
+				this.tag_ui_widget.set_context(ctx);
 			});
 			context_not_set = false;
 		};
 
-		var tagui_server=this, context_not_set=true;
+		var tag_ui_server=this, context_not_set=true;
 		$.each(commands.slice(0).reverse(), function(i, cmd){
 			if ( cmd=='nod' || cmd=='nix' ) {
 				nodnix_context(cmd);
@@ -230,7 +230,7 @@ function firehose_handle_comment_nodnix( commands ){
 }
 
 function firehose_tag_feedback( signal, data ){
-	var tr = this.tagui_responder;
+	var tr = this.tag_ui_responder;
 	var tags;
 
 	function if_have( k ){ return k in tags || 'meta'+k in tags; }
@@ -279,7 +279,7 @@ function firehose_click_nodnix_reason( event ) {
 }
 
 
-function firehose_init_tagui( $new_entries ){
+function firehose_init_tag_ui( $new_entries ){
 	if ( ! $new_entries || ! $new_entries.length ) {
 		var $firehoselist = $('#firehoselist');
 		if ( $firehoselist.length ) {
@@ -296,9 +296,9 @@ function firehose_init_tagui( $new_entries ){
 	}
 
 	$new_entries.
-		tagui_server(firehose_id_of, pipeline, { request_data: { reskey: reskey_static } }).
+		tag_ui_server(firehose_id_of, pipeline, { request_data: { reskey: reskey_static } }).
 		each(function(){
-			this.tagui_server.command_pipeline.push(
+			this.tag_ui_server.command_pipeline.push(
 				($(this).attr('type') == 'comment') ?
 					firehose_handle_comment_nodnix :
 					firehose_handle_nodnix );
@@ -316,13 +316,13 @@ function firehose_init_tagui( $new_entries ){
 		$new_entries.
 			find('.body-widget').
 				each(function(){
-					this.tagui_widget.modify_context = firehose_admin_context;
+					this.tag_ui_widget.modify_context = firehose_admin_context;
 				});
 	}
 
 	$new_entries.
 		find('.tag-server-busy').
-			tagui_responder(firehose_tag_feedback, 'user ajaxStart ajaxSuccess ajaxComplete');
+			tag_ui_responder(firehose_tag_feedback, 'user ajaxStart ajaxSuccess ajaxComplete');
 
 	$new_entries.
 		find('.tag-entry').

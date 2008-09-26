@@ -16,7 +16,7 @@ __template__
 [% IF form.metamod %]
 <div id="metamodwrap">
 [% END %]
-[% PROCESS init_tagui -%]
+[% PROCESS init_tag_ui -%]
 [% firehose = Slash.getObject("Slash::FireHose"); %]
 [% IF env.script_name == "/firehose.pl" || env.script_name == "/index2.pl" || form.ssi %]
 [% ua = env.HTTP_USER_AGENT %]
@@ -202,7 +202,7 @@ firehose_slider_init();
 [% END %]
 $(function(){
 	$('#firehoselist').click(firehose_click_tag);
-	var $entries = firehose_init_tagui();
+	var $entries = firehose_init_tag_ui();
 	if ( fh_is_admin ) {
 		firehose_init_note_flags($entries);
 	}

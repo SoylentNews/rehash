@@ -271,6 +271,7 @@ function Package( o ){
 	var estem_name = (root_name.length > 1 ? root_name.slice(-1) : []).
 		concat(stem_name).
 		join('_').
+		replace(/([^A-Z_$])([A-Z])/g, '$1_$2').
 		toLowerCase();
 
 	var e_api = stem_name && o.element_api;

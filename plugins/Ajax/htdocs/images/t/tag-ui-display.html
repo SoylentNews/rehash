@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>Unit Tests: display.tagui.js</title>
+	<title>Unit Tests: TagUI.Display</title>
 
 	<script src="../jquery/jquery-1.2.6.js" type="text/javascript"></script>
 	<link href="http://dev.jquery.com/view/trunk/qunit/testsuite.css" rel="stylesheet" type="text/css" media="screen">
@@ -8,7 +8,7 @@
 
 	<script src="../slash.util.js" type="text/javascript"></script>
 	<script src="../jquery/jquery.metadata.js" type="text/javascript"></script>
-	<script src="../slash.tagui.js" type="text/javascript"></script>
+	<script src="../slash.tag-ui.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 (function($){
@@ -27,33 +27,33 @@ test('basic', function(){
 	ok(TagUI.Display, 'It also has the Display component');
 	ok($.isFunction(TagUI.Display), '...which is a function');
 
-	ok($.tagui_display.metadata, 'jQuery has my global api');
+	ok($.tag_ui_display.metadata, 'jQuery has my global api');
 
 	var $dog = $('#dog'), dog = $dog[0];
-	$.tagui_display(dog, { for_responder: { signals: 'user' } });
-	ok(dog.tagui_display, 'construction installed tagui_display');
-	ok(dog.tagui_responder, '...and tagui_responder');
-	ok(dog.tagui_display.set_tags, 'tagui_display has api functions');
-	ok(dog.tagui_responder.ready, '...and so does tagui_responder');
-	ok($dog.is('.ready.respond-user'), 'tagui_responder attributes look right');
-	ok($dog.is('.tag-display.no-tags:not(.tag-display-stub)'), 'tagui_display attributes look right');
-	dog.tagui_display.set_tags('alpha beta gamma delta');
+	$.tag_ui_display(dog, { for_responder: { signals: 'user' } });
+	ok(dog.tag_ui_display, 'construction installed tag_ui_display');
+	ok(dog.tag_ui_responder, '...and tag_ui_responder');
+	ok(dog.tag_ui_display.set_tags, 'tag_ui_display has api functions');
+	ok(dog.tag_ui_responder.ready, '...and so does tag_ui_responder');
+	ok($dog.is('.ready.respond-user'), 'tag_ui_responder attributes look right');
+	ok($dog.is('.tag-display.no-tags:not(.tag-display-stub)'), 'tag_ui_display attributes look right');
+	dog.tag_ui_display.set_tags('alpha beta gamma delta');
 	equals($dog.find('span.tag').length, 4, 'right number of tags');
 	ok($dog.is(':not(.no-tags)'), 'empty status removed');
 
-	$('#main .ready.respond-user').tagui_responder__handle('user', 'horse canary');
+	$('#main .ready.respond-user').tag_ui_responder__handle('user', 'horse canary');
 	ok(true, 'lived through a signal');
 	equals($dog.find('span.tag').length, 2, 'right number of tags');
 	ok($dog.is(':not(.no-tags)'), 'still marked non-empty');
 
-	ok($.tagui_display.metadata, 'global jquery api installed');
-	var tags = $.tagui.tags(dog);
+	ok($.tag_ui_display.metadata, 'global jquery api installed');
+	var tags = $.tag_ui.tags(dog);
 	equals(tags.length, 2, 'global tags returned a two slot array');
 
-	var tags = qw.as_string($.tagui.tags(dog).sort());
+	var tags = qw.as_string($.tag_ui.tags(dog).sort());
 	equals(tags, 'canary horse', 'and they\'re the right tags, to boot');
 
-	$('#main .ready.respond-user').tagui_responder__handle('user');
+	$('#main .ready.respond-user').tag_ui_responder__handle('user');
 	equals($dog.find('span.tag').length, 0, 'tags successfully cleared');
 	ok($dog.is('.no-tags'), 'correctly marked empty');
 });
@@ -74,7 +74,7 @@ test('regressions', function(){
 
 </head>
 <body>
-	<h1>Unit Tests: display.tagui.js</h1>
+	<h1>Unit Tests: TagUI.Display</h1>
 	<h2 id="banner"></h2>
 	<h2 id="userAgent"></h2>
 	<ol id="tests"></ol>
