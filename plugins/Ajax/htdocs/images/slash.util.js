@@ -482,6 +482,7 @@ Package({ named: 'Slash.Util.Algorithm',
 // Yes, I could phrase this as a Package; but I don't need to, here.
 $.fn.extend({
 	find_nearest: function( selector ){
+		var N = Math.min(3, arguments.length);
 		var answer = this.map(function(){
 			var $this = $(this);
 			if ( $this.is(selector) ) {
@@ -489,7 +490,7 @@ $.fn.extend({
 			}
 
 			var match;
-			for ( var i=1; i<=3 && !match; ++i ) {
+			for ( var i=1; i<N && !match; ++i ) {
 				switch ( arguments[i] ) {
 					case 'up':
 						$this.parents().each(function(){
