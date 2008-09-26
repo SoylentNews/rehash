@@ -2085,7 +2085,7 @@ EOT
 			createSelect("reason_$comment->{cid}", $reasons, {
 				'return'	=> 1,
 				nsort		=> 1, 
-				onchange	=> ($discussion2 ? 'return doModerate(this)' : '')
+				onchange	=> ($discussion2 ? 'return D2.doModerate(this)' : '')
 			}) . "</div>" if $can_mod
 				&& ( !$user->{state}{discussion_archived}
 					|| $constants->{comments_moddable_archived} );
