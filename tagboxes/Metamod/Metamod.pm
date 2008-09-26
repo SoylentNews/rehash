@@ -132,7 +132,7 @@ sub run_process {
 
 	my $change_str = $self->apply_change($change_delta);
 	$self->set_maxtagid_seen($affected_id, $new_max);
-	$self->info_log("change for %d (%d) from %f to %f: %s",
+	$self->info_log("change for %d (%d) from %d to %d: %s",
 		$fhid, $affected_id, $prev_max, $new_max, $change_str);
 }
 
@@ -247,6 +247,7 @@ sub get_change {
 
 sub apply_change {
 	my($self, $change_delta) = @_;
+	my @changes = ( );
 	$change_delta ||= { };
 	for my $uid (sort { $a <=> $b } keys %$change_delta) {
 		my $update_hr = { };
@@ -259,10 +260,15 @@ sub apply_change {
 		)) {
 			next unless $change_delta->{$uid}{$field};
 			$update_hr->{"-$field"} = "ROUND($field $change_delta->{$uid}{$field})";
+			my $abbrev = $field;
+			$abbrev =~ s/([a-z])([a-z0-9]+)(_|$)/$1/g;
+			push @changes, "$abbrev$change_delta->{$uid}{$field}";
 		}
 		my $rows = $self->setUser($uid, $update_hr);
-		main::tagboxLog("Metamod->run changed $rows rows for $uid: " . join(" ", sort keys %$update_hr));
+		$self->debug_log("changed %d rows for %d: %s",
+			$rows, $uid, join(" ", sort keys %$update_hr));
 	}
+	return join '', @changes;
 }
 
 # Return two numbers:  the fraction of upvotes (0.0 = total agreement on down,
