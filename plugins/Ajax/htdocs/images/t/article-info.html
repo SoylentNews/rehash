@@ -1,0 +1,86 @@
+<html>
+<head>
+	<title>Unit Tests: slash.article-info.js</title>
+
+	<script src="../jquery/jquery-1.2.6.js" type="text/javascript"></script>
+	<link href="http://dev.jquery.com/view/trunk/qunit/testsuite.css" rel="stylesheet" type="text/css" media="screen">
+	<script src="http://dev.jquery.com/view/trunk/qunit/testrunner.js" type="text/javascript"></script>
+
+	<script src="../slash.util.js" type="text/javascript"></script>
+	<script src="../slash.article-info.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+(function($){
+
+$(function(){
+
+function not_ok( m ){
+	ok(false, m);
+}
+
+module('slash.article-info.js');
+
+test('api basics', function(){
+	ok(Slash, 'Slash name-space exists');
+	ok(Slash.ArticleInfo, 'Slash.ArticleInfo exists');
+	ok($.isFunction(Slash.ArticleInfo), '...and it\'s a function');
+	ok($.fn.article_info, 'exists on jQuery prototype, too');
+	ok($.isFunction($.fn.article_info), '...and it\'s a function');
+
+	var $articles = $('#main').article_info__find_articles();
+	ok(true, 'survived a call $.fn.article_info__find_articles()');
+	equals($articles.length, 4, 'and it returned the right number of articles');
+});
+
+
+test('regressions', function(){
+});
+
+
+
+
+
+});
+
+})(jQuery);
+</script>
+
+<style type="text/css">
+[class^=sd-key-] { display: none }
+</style>
+
+</head>
+<body>
+	<h1>Unit Tests: api.js</h1>
+	<h2 id="banner"></h2>
+	<h2 id="userAgent"></h2>
+	<ol id="tests"></ol>
+	<div id="main">
+		<div id='fish' class='fish'>
+			<span class="sd-info-block" style="display: none"></span>
+		</div>
+		<div id='dog' class='dog'>
+			<span class="sd-info-block" style="display: none"></span>
+		</div>
+		<div id='cat' class='cat'>
+			<span class="sd-info-block" style="display: none"></span>
+		</div>
+		<div id='car'>
+			<span class="sd-key-floozberry-flop">jmMoxqRz+8</span>
+			<span class="sd-key-url">jmMoxqRz+8</span>
+			<div>
+				<span class="sd-key-firehose-id">388</span>
+			</div>
+		</div>
+		<div id='boat'>
+			<div>
+				<div>
+					<span class="sd-info-block" style="display: none">
+						<span class="scope">#boat</span>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
