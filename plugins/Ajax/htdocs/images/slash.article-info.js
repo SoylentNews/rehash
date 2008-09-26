@@ -76,15 +76,7 @@ function find_key( elem ){
 
 function $find_info_blocks( $list ){
 	return $list.map(function(){
-		var $this = $(this);
-		if ( $this.is(select_info_blocks) ) {
-			return this;
-		}
-		var $children = $this.find(select_info_blocks);
-		if ( $children.length ) {
-			return $children.get();
-		}
-		return $this.nearest_parent(select_info_blocks).get();
+		return $(this).find_nearest(select_info_blocks, 'down', 'up').get();
 	});
 }
 
