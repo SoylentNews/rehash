@@ -66,6 +66,11 @@ END %]
 [% IF full %]
 [% IF divwrapper %]
 <div id="firehose-[% item.id %]"[% IF item.type %] type="[% item.type %]"[% END %] class="[% IF mode == "full" %]article[% ELSE %]briefarticle[% END %][% IF adminmode == 1 %] adminmode[% ELSE %] usermode[% END %]">
+<span class="sd-info-block" style="display: none">
+	<span class="sd-key-firehose-id">[% item.id %]</span>
+	<span class="type">[% item.type %]</span>
+	[% IF user.is_admin %]<span class="stoid">[% item.srcid %]</span>[% END %]
+</span>
 [% END %]
 	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode options = options link_url = link_url %]
 	[% title_type = item.type == "story" ? "story" : "firehose" %]
