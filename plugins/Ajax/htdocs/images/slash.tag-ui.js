@@ -460,24 +460,17 @@ new Package({ named: 'Slash.TagUI.Server',
 		options = options || {};
 		Broadcaster(s_elem);
 
-		var key = options.key, key_type = options.key_type;
-		if ( if_fn(key) ) {
-			key = key.call(s_elem, s_elem);
-		} else if ( ! key ) {
-			var k = find_reference_key(s_elem);
-			key = k.key;
-			key_type = k.key_type;
-		}
+		var key_tuple = Slash.ArticleInfo.key(s_elem);
 
 		$(s_elem).addClass('tag-server');
 		var ext = {};
 		if ( options.command_pipeline ) { ext.command_pipeline = options.command_pipeline; }
 		if ( options.defaults ) { ext.defaults = options.defaults; }
-		if ( if_defined(key) ) {
+		if ( if_defined(key_tuple) ) {
 			if ( ! ext.defaults ) ext.defaults = { };
 			if ( ! ext.defaults.request_data ) ext.defaults.request_data = { };
-			ext.key = (ext.defaults.request_data.key = key);
-			ext.key_type = (ext.defaults.request_data.key_type = key_type);
+			ext.key = (ext.defaults.request_data.key = key_tuple.key);
+			ext.key_type = (ext.defaults.request_data.key_type = key_tuple.key_type);
 		}
 		return ext;
 	},

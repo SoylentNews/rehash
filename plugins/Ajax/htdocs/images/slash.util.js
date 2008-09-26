@@ -217,29 +217,6 @@ function splice_string( s, offset, length, replacement ){
 	return s;
 }
 
-var re_key_class = /sd-key-(.*)/;
-var re_key_id = /^([^-]+)-.*(\d+)$/;
-
-function find_reference_key( elem ){
-	var M, key = {}, $key = $(elem).find('[class*=sd-key-]:first');
-	if ( $key.length ) {
-		key.key = $key.text();
-		$.each(Slash.Util.qw($key.attr('className')), function( i, cn ){
-			if ( (M = re_key_class.exec(cn)) ) {
-				key.key_type = M[1];
-				return false;
-			}
-		});
-	} else if ( (M = re_key_id.exec($(elem).attr('id'))) ) {
-		key.key_type = M[1];
-		key.key = M[2];
-	} else if ( (key.key = window.location.href) ) {
-		key.key_type = "url";
-	}
-
-	return key;
-}
-
 function ensure_namespace( path ){
 	if ( path.join ) {
 		path = path.slice(0);
@@ -459,12 +436,11 @@ Package({ named: 'Slash.Util',
 	     // if_array_like:		if_inherits_array_iteration,
 		clone:			clone,
 		splice_string:		splice_string,
-		find_reference_key:	find_reference_key,
 		ensure_namespace:	ensure_namespace
 	},
 	exports: 'if_defined if_undefined if_defined_false if_object if_fn ' +
 		 'if_string_like ' +
-		 'clone splice_string find_reference_key ' +
+		 'clone splice_string ' +
 		 'Package if_inherits qw'
 });
 
