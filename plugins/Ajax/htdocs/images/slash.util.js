@@ -506,26 +506,11 @@ $.fn.extend({
 			}
 			return match;
 		});
-	},
-	nearest_parent: function( selector ){
-		var answer = this.map(function(){
-			var $this = $(this);
-			if ( $this.is(selector) ) {
-				return this;
-			}
-
-			var match;
-			$this.parents().each(function(){
-				if ( $(this).is(selector) ) {
-					match = this;
-					return false
-				}
-			});
-
-			return match
-		});
 
 		return this.pushStack($.unique(answer))
+	},
+	nearest_parent: function( selector ){
+		return this.find_nearest(selector, 'up');
 	},
 	setClass: function( cn ) {
 		var fn = $.isFunction(cn) ? cn : function(){ return cn; };
