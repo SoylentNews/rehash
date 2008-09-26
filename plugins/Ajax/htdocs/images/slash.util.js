@@ -481,14 +481,40 @@ Package({ named: 'Slash.Util.Algorithm',
 
 // Yes, I could phrase this as a Package; but I don't need to, here.
 $.fn.extend({
-	nearest_parent: function( selector ) {
+	find_nearest: function( selector ){
 		var answer = this.map(function(){
-			var match;
-
 			var $this = $(this);
-			if ( $this.is(selector) )
-				match = this;
+			if ( $this.is(selector) ) {
+				return this;
+			}
 
+			var match;
+			for ( var i=1; i<=3 && !match; ++i ) {
+				switch ( arguments[i] ) {
+					case 'up':
+						$this.parents().each(function(){
+							if ( $(this).is(selector) ) {
+								match = this;
+								return false;
+							}
+						});
+						break;
+					case 'down':
+						match = $this.find(selector)[0];
+						break;
+				}
+			}
+			return match;
+		});
+	},
+	nearest_parent: function( selector ){
+		var answer = this.map(function(){
+			var $this = $(this);
+			if ( $this.is(selector) ) {
+				return this;
+			}
+
+			var match;
 			$this.parents().each(function(){
 				if ( $(this).is(selector) ) {
 					match = this;

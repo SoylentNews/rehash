@@ -52,12 +52,12 @@ jQuery.fn.extend({
 
 	nearest_parent: function( selector ) {
 		var answer = this.map(function(){
-			var match;
-
 			var $this = $(this);
-			if ( $this.is(selector) )
-				match = this;
+			if ( $this.is(selector) ) {
+				return this;
+			}
 
+			var match;
 			$this.parents().each(function(){
 				if ( $(this).is(selector) ) {
 					match = this;
