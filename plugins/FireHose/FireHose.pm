@@ -1134,7 +1134,7 @@ sub fetchItemText {
 		$firehose->setFireHoseSession($item->{id});
 	}
 
-	my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($id, 'firehose');
+	my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($id, 'firehose-id');
 	my $data = {
 		item		=> $item,
 		mode		=> "bodycontent",
@@ -1525,7 +1525,7 @@ sub ajaxFireHoseGetUpdates {
 				push @$updates, ["add", $_->{id}, slashDisplay("daybreak", { options => $opts, cur_day => $_->{day}, last_day => $_->{last_day}, id => "firehose-day-$_->{day}", fh_page => $base_page }, { Return => 1, Page => "firehose" }) ];
 			} else {
 				$update_data->{new}++;
-				my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($_->{id}, 'firehose');
+				my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($_->{id}, 'firehose-id');
 				my $data = {
 					mode => $curmode,
 					item => $item,
@@ -2849,7 +2849,7 @@ sub listView {
 		$maxtime = $_->{createtime} if $_->{createtime} gt $maxtime && $_->{createtime} lt $now;
 		my $item =  $firehose_reader->getFireHose($_->{id});
 		my $tags_top = $firehose_reader->getFireHoseTagsTop($item);
-		my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($_->{id}, 'firehose');
+		my $tags = getObject("Slash::Tags", { db_type => 'reader' })->setGetCombinedTags($_->{id}, 'firehose-id');
 		if ($_->{day}) {
 			my $day = $_->{day};
 			$day =~ s/ \d{2}:\d{2}:\d{2}$//;

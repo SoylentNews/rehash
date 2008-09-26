@@ -60,11 +60,14 @@ var tag_server_fns = {
 			},
 			options );
 
+		var key = Slash.ArticleInfo.key(this);
+
 		var server_params = $.extend(
 			{},
 			{ // default params for the server-side handler
 				op:		'tags_setget_combined',
-				id:		$(this).attr('tag-server'),
+				key:		key.key,
+				key_type:	key.key_type,
 				reskey:		reskey_static,
 				limit_fetch:	''
 			},

@@ -1328,16 +1328,27 @@ sub getUserNodNixForGlobj {
 sub ajaxSetGetCombinedTags {
 	my($slashdb, $constants, $user, $form) = @_;
 
-	my $type = $form->{type} || 'firehose';
+	my $key = $form->{key};
+	my $key_type = $form->{key_type};
 
-	my ($base_item, $base_writer);
-	my $globjid;
-	if ( $type eq 'firehose' ) {
-		$base_writer = getObject('Slash::FireHose');
-		$base_item = $base_writer->getFireHose($form->{id});
-		$globjid = $base_item->{globjid} if $base_item;
+	my $firehose = getObject('Slash::FireHose');
+	my ($globjid, $firehose_id, $firehose_item);
+
+	if ( $key_type eq 'url' ) {
+		$key = $firehose->getFireHoseIdFromUrl($key);
+		$key_type = 'firehose-id';
 	}
-	# XXX TO DO: handle other types here, setting $base_item appropriately
+
+	if ( $key_type eq 'sid' ) {
+		my $stoid = $slashdb->getStoidFromSidOrStoid($key);
+		$globjid = $slashdb->getGlobjidFromTargetIfExists('stories', $stoid);
+		$firehose_id = $firehose->getFireHoseIdFromGlobjid($globjid);
+		$firehose_item = $firehose->getFireHose($firehose_id);
+	} elsif ( $key_type eq 'firehose-id' ) {
+		$firehose_item = $firehose->getFireHose($key);
+		$globjid = $firehose_item->{globjid} if $firehose_item;
+		$firehose_id = $key;
+	}
 
 	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 	if (!$globjid || $globjid !~ /^\d+$/ || !$tags_reader) {
@@ -1356,43 +1367,43 @@ sub ajaxSetGetCombinedTags {
 			tagname_required => 1,
 			include_private => 1
 		});
-		if ( $user->{is_admin} && $type eq 'firehose' ) {
+		if ( $user->{is_admin} && $firehose_id ) {
 			my $added_tags =
 				join ' ',
 				grep { /^[^-]/ }
 				split /\s+/,
 				lc $form->{tags};
 
-			$base_writer->setSectionTopicsFromTagstring($form->{id}, $added_tags);
-			$base_item = $base_writer->getFireHose($form->{id});
+			$firehose->setSectionTopicsFromTagstring($firehose_id , $added_tags);
+			$firehose_item = $firehose->getFireHose($firehose_id);
 		};
 	} elsif ( ! $form->{global_tags_only} ) {
 		my $current_tags_array = $tags_reader->getTagsByNameAndIdArrayref($table, $item_id, { uid => $uid, include_private => 1 });
 		$user_tags = join ' ', sort map { $_->{tagname} } @$current_tags_array;
 	}
 
-	my $datatype_tag = $base_item ? $base_item->{type} : '';
-	my $top_tags = $base_item ? $base_item->{toptags} : '';
+	my ($datatype_tag, $top_tags, $section_tag, $topic_tags);
+	if ( $firehose_item ) {
+		$datatype_tag = $firehose_item->{type};
+		$top_tags = $firehose_item->{toptags};
 
-	my $section_tag = '';
-	my $s = $base_item->{primaryskid};
-	if ( $s ) {
-		if ( $s != $constants->{mainpage_skid} ) {
-			my $skin = $base_writer->getSkin($s);
-			$section_tag = $skin->{name};
-		} else {
-			$section_tag = 'mainpage';
+		my $skid = $firehose_item->{primaryskid};
+		if ( $skid ) {
+			if ( $skid != $constants->{mainpage_skid} ) {
+				my $skin = $firehose->getSkin($skid);
+				$section_tag = $skin->{name};
+			} else {
+				$section_tag = 'mainpage';
+			}
+		}
+
+		my $tid = $firehose_item->{tid};
+		if ( $tid ) {
+			my $topic = $firehose->getTopic($tid);
+			$topic_tags = $topic->{keyword};
 		}
 	}
 
-	my $topic_tags = '';
-	my $t = $base_item->{tid};
-	if ( $t ) {
-		my $topic = $base_writer->getTopic($t);
-		$topic_tags = $topic->{keyword};
-	}
-
-	# XXX how to get the system tags?
 	my $system_tags = $datatype_tag . ' ' . $section_tag . ' ' . $topic_tags;
 
 	my $response = '<system>' . $system_tags . '<top>'. $top_tags;
@@ -1402,14 +1413,14 @@ sub ajaxSetGetCombinedTags {
 }
 
 sub setGetCombinedTags {
-	my($self, $id, $type, $user, $commands) = @_;
+	my($self, $key, $key_type, $user, $commands) = @_;
 
 	my $slashdb = getCurrentDB();
 	my $constants = getCurrentStatic();
 
 	my $options = {
-		'id'	=> $id,
-		'type'	=> $type,
+		'key'		=> $key,
+		'key_type'	=> $key_type,
 	};
 	$options->{global_tags_only} = 1 unless $user;
 	$options->{tags} = $commands if $commands;
@@ -1419,8 +1430,8 @@ sub setGetCombinedTags {
 
 	my $response = {};
 	while ( @tuples ) {
-		my $key = shift @tuples;
-		$response->{$key} = shift @tuples || '' if $key;
+		my $k = shift @tuples;
+		$response->{$k} = shift @tuples || '' if $k;
 #print STDERR "key => $key; value => $response->{$key}\n";
 	}
 #print STDERR "---------\n";
