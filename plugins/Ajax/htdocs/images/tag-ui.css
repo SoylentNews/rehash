@@ -346,6 +346,7 @@ div.tag-widget {
 	z-index: 10;
 	padding: 0 0.4em 0 0.8em;
 	text-align: right;
+	margin-left:15em;
 }
 
 #firehose div.tag-widget-stub.body-widget.expanded,
