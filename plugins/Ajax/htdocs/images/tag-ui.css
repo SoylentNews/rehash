@@ -256,6 +256,7 @@ div.tag-display > ul > li + li {
 
 /* ...that's everything _in_ a tag-display... now let's do the display itself */
 
+div.tag-display-stub,
 div.tag-display {
 	display: inline;
 	position: relative;
@@ -328,7 +329,8 @@ div.tag-display {
 	display: inline;
 }
 
-.tag-widget {
+div.tag-widget-stub,
+div.tag-widget {
 	display: block;
 	position: absolute;
 	background-color: transparent;
@@ -337,7 +339,8 @@ div.tag-display {
 
 /* firehose-specific [to the end of the file] */
 
-#firehose .tag-widget.body-widget {
+#firehose div.tag-widget-stub.body-widget,
+#firehose div.tag-widget.body-widget {
 	right: -0.5em;
 	bottom: 6px;
 	z-index: 10;
@@ -345,7 +348,8 @@ div.tag-display {
 	text-align: right;
 }
 
-#firehose .tag-widget.body-widget.expanded {
+#firehose div.tag-widget-stub.body-widget.expanded,
+#firehose div.tag-widget.body-widget.expanded {
 	right: 0;
 }
 
@@ -402,6 +406,7 @@ div.tag-display {
 	margin-left: 1em;
 }
 
+.briefarticle .tag-widget-stub.body-widget,
 .briefarticle .tag-widget.body-widget {
 	display: none !important;
 }
