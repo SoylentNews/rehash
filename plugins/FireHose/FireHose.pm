@@ -2018,7 +2018,8 @@ sub getAndSetOptions {
 	my $mode = $form->{mode} || $user->{firehose_mode} || '';
 	$mode = "fulltitle" if $mode eq "mixed";
 
-	my $pagesize = $pagesizes->{$form->{pagesize}} ? $form->{pagesize} : $user->{firehose_pagesize} || "small";
+	my $pagesize = $form->{pagesize} && $pagesizes->{$form->{pagesize}}
+		? $form->{pagesize} : $user->{firehose_pagesize} || "small";
 	$options->{pagesize} = $pagesize;
 
 	$mode = $mode && $modes->{$mode} ? $mode : "fulltitle";

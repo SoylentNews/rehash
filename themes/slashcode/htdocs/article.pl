@@ -79,7 +79,7 @@ sub main {
 		my $SECT = $reader->getSection($story->{section});
 		# This should be a getData call for title
 		my $title = "$constants->{sitename} | $story->{title}";
-		if ($gSkin->{name} eq "idle") {
+		if ($gSkin->{name} && $gSkin->{name} eq "idle") {
 			$title = "$gSkin->{hostname} | $story->{title}";
 		}
 

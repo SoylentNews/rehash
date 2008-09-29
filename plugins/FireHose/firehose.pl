@@ -84,7 +84,7 @@ sub main {
 		if ($form->{index}) {
 			$title = "$constants->{sitename} - $constants->{slogan}";
 		}
-		if ($form->{op} eq "view") {
+		if ($form->{op} && $form->{op} eq "view") {
 			my $item = $firehose->getFireHose($form->{id});
 			$title = "$constants->{sitename} - $item->{title}" if $item && $item->{title};
 		}
