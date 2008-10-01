@@ -105,7 +105,7 @@ function firehose_handle_admin_commands( commands ){
 		var signoff_tag_server = this;
 		this._ajax_request('', {
 			op:	'admin_signoff',
-			stoid:	this.article_info('stoid'),
+			stoid:	$(this).article_info('stoid'),
 			ajax:	{ success: function(){ $('[context=signoff]', signoff_tag_server).remove(); } }
 		});
 	}
