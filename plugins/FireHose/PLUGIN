@@ -21,6 +21,7 @@ template=templates/dispFireHose;firehose;default
 template=templates/dispTopicFireHose;misc;default
 template=templates/fhadvprefpane;misc;default
 template=templates/fireHoseForm;misc;default
+template=templates/firehosehead;misc;default
 template=templates/firehose_pages;misc;default
 template=templates/firehose_tabs;misc;default
 template=templates/firehose_usage;misc;default

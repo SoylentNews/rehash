@@ -380,7 +380,7 @@ sub updateItemFromProject {
 	my($self, $id);
 	my $proj = $self->getProject($id);
 	if ($proj && $proj->{id}) {
-		my $item = $self->getFireHoseByTypeSrcid("projects", $proj->{id});
+		my $item = $self->getFireHoseByTypeSrcid("project", $proj->{id});
 		if ($item && $item->{id}) {
 			my $data = {
 				uid		=> $proj->{uid},
@@ -2452,7 +2452,7 @@ sub getAndSetOptions {
 		}
 
 		$options->{duration} ||= 1;
-		if ($user->{is_subscriber} && !$no_saved) {
+		if ($user->{is_subscriber} && (!$no_saved || $form->{index})) {
 			$options->{createtime_subscriber_future} = 1;
 		} else {
 			$options->{createtime_no_future} = 1;
@@ -2500,11 +2500,11 @@ sub getFireHoseLimitSize {
 		if ($user->{is_admin}) {
 			$limit = $pagesize eq "large" ? 50 : 25;
 		} else {
-			$limit = $pagesize eq "large" ? 25 : 15;
+			$limit = $pagesize eq "large" ? 20 : 15;
 		}
 	} else {
 		$limit = $user->{is_admin} ? 50 :
-			$pagesize eq "large" ? 30 : 25;
+			$pagesize eq "large" ? 30 : 20;
 	}
 
 	$limit = 10 if $forcesmall || $form->{metamod};

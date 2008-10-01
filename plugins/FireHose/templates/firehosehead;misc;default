@@ -1,0 +1,49 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+firehosehead
+__seclev__
+10000
+__template__
+[% this_message = BLOCK; PROCESS rand_mesg; END %]
+[% IF this_message || user.points > 0  %]
+	[% IF this_message %]<p>[% this_message %]</p>[% END %]
+	[% IF !user.is_anon && user.points > 0 %]
+	<p>
+	You have <strong>[% user.points %] <a href="[% gSkin.rootdir %]/moderation.shtml">Moderator</a>
+	Point[% user.points == 1 ? "!</strong> Use it or lose it!" : "s!</strong> Use 'em or lose 'em!" %]
+	</p>
+	[% END %]
+	[% messages = Slash.getObject("Slash::Messages");
+	IF messages;
+		message_count = messages.getWebCount();
+		IF message_count.total
+			%]You have <b>[%
+			IF message_count.unread
+				%]<a href="[% gSkin.rootdir %]/messages.pl?op=list">[%
+			END;
+			message_count.unread
+			%] new message[% message_count.unread == 1 ? "" : "s";
+			IF message_count.unread
+				%]</a>[%
+			END
+			%]</b> waiting for you, and <b>[%
+			IF message_count.read
+				%]<a href="[% gSkin.rootdir %]/messages.pl?op=list">[%
+			END;
+			message_count.read %] old message[% message_count.read == 1 ? "" : "s";
+			IF message_count.read
+				%]</a>[%
+			END
+		%]</b>.<br>[%
+		END;
+	END %]
+[% END %]

@@ -34,7 +34,7 @@ __template__
 		[% IF form.metamod %]
 			Meta-Moderation
 		[% ELSE %]
-			[% PROCESS rand_mesg %]
+			[% PROCESS firehosehead %]
 		[% END %]
 		</p>
 	</div>

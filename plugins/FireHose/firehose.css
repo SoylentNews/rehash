@@ -1,3 +1,9 @@
+/* Slashboxes */
+div #slashboxes {
+	width: 18.25em;
+}
+
+
 /* Reset */
 .article .title, .article h3, .article .generaltitle, .briefarticle .title, .briefarticle h3, .briefarticle .generaltitle { background: transparent !important; }
 
@@ -144,7 +150,7 @@ ul.menu#fhtablist li.active:before, .paginate .active:before { content: ""; }
 /* Pagination */
 .daybreak,
 .paginate { background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x; }
-.paginate { margin-right: 18.5em; }
+.paginate { margin-right: 19.5em; }
 #metamodwrap .paginate { margin-right: 0em}
 #users .paginate { margin-right: 0em; }
 
@@ -172,7 +178,7 @@ div.article {margin-top: 1em}
 
 .storylinks li.more { margin-left: -1.8em !important; }
 .storylinks li.comments {border-left: 1px solid #ccc; padding-left: 1em !important}
-#firehoselist, #firehose #message, .firemenu { margin-right: 18.5em; }
+#firehoselist, #firehose #message, .firemenu { margin-right: 19.5em; }
 #metamodwrap #firehoselist, #firehose #metamodwrap #message { margin-right: 0em; }
 #users #firehoselist, #users #firehose #message, #users .firemenu { margin-right: 0em; }
 .admin #firehoselist, .admin #firehose #message, .admin .firemenu { margin-right: 0; }
@@ -408,7 +414,7 @@ div.storylinks ul {padding-right: 60% !important}
 .future {color: #fff; background-color: #900; }
 .firehose {background-color: #ddd; }
 
-.story .date, .story a.skin {color: #699 !important;}
+.story .date, .story .skin {color: #8DC7C0; !important;}
 .future .date, .future a.skin {color: #c99 !important;}
 .firehose .date, .firehose a.skin, .firehose span.skin, .firehose span.reason {color: #777 !important;}
 
@@ -419,9 +425,8 @@ div.storylinks ul {padding-right: 60% !important}
 .generaltitle a {text-decoration: none}
 
 .tagshide div {display: none}
-.generaltitle h3 a {z-index: 4 !important; position: relative !important;}
-.firehose .generaltitle h3 a {color: #066 !important}
-.firehose h3 a.skin {color: #777 !important;}
+.generaltitle h3 a {z-index: 4 !important; position: relative !important; font-size: 123%}
+.generaltitle h3 a.skin {color: #8dc7c0 !important;}
 .briefarticle h3, .article h3 {font-size: 100% !important; padding: .25em 50px 0 58px !important; min-height: 22px !important; display: block !important;}
 .briefarticle h3 {padding-right: .3em !important}
 .briefarticle .novote h3 {padding: .25em .3em  0 1em !important; margin: 0 !important}
