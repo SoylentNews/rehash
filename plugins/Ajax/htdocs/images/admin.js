@@ -101,7 +101,7 @@ function firehose_handle_admin_commands( commands ){
 		});
 	}
 
-	if ( signoff ) {
+	if ( signoff && ! $(this).article_info('awaiting-thumbnail') ) {
 		var signoff_tag_server = this;
 		this._ajax_request('', {
 			op:	'admin_signoff',
