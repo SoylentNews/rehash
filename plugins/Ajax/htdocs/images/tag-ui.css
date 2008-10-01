@@ -329,11 +329,23 @@ div.tag-display {
 	display: inline;
 }
 
+
+
 div.tag-widget-stub,
 div.tag-widget {
 	display: block;
 	position: absolute;
 	background-color: transparent;
+}
+
+
+
+div.head div.tag-widget-stub,
+{
+	display: block;
+	background-color: transparent;
+	margin-left:10em;
+	margin-top:2.8em;
 }
 
 
