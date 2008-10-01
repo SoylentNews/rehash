@@ -1141,6 +1141,7 @@ sub fetchItemText {
 		tags_top	=> $tags_top,		# old-style
 		top_tags	=> $tags->{top},	# new-style
 		system_tags	=> $tags->{'system'},	# new-style
+		datatype_tags	=> $tags->{'datatype'},	# new-style
 	};
 
 	my $slashdb = getCurrentDB();
@@ -1470,6 +1471,7 @@ sub ajaxFireHoseGetUpdates {
 					tags_top => $tags_top,			# old-style
 					top_tags => $tags->{top},		# new-style
 					system_tags => $tags->{'system'},	# new-style
+					datatype_tags => $tags->{'datatype'},	# new-style
 					vote => $votes->{$item->{globjid}},
 					options => $opts
 				};
@@ -2766,6 +2768,7 @@ sub listView {
 				tags_top		=> $tags_top,		# old-style
 				top_tags		=> $tags->{top},	# new-style
 				system_tags		=> $tags->{'system'},	# new-style
+				datatype_tags		=> $tags->{'datatype'},	# new-style
 				options			=> $options,
 				vote			=> $votes->{$item->{globjid}},
 				bodycontent_include	=> $user->{is_anon} 

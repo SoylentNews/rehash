@@ -75,6 +75,7 @@ __template__
 				! Slash.db.hasUserSignedStory(item.srcid, user.uid) -%]
 				<div class="tag-display-stub" context="signoff" stoid="[% item.srcid %]" init="legend:'signoff', menu:false">unsigned</div>
 			[%- END -%]
+			<div class="tag-display-stub" context="datatype" init="legend:'type&nbsp;tag'">[% datatype_tags %]</div>
 		</div>
 		[%# the suggestions bar %]
 		<div class="related">

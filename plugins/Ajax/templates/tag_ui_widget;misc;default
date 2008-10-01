@@ -18,6 +18,7 @@ __seclev__
 10000
 __template__
 [% IF user.tags_canread_stories %]
+[%  tags_reader = Slash.getObject('Slash::Tags'); tags = tags_reader.setGetCombinedTags(key, key_type); %]
 [%# the tag-widget itself %]
 <div class="tag-widget-stub body-widget" init="context_timeout:15000">
 
@@ -43,7 +44,6 @@ __template__
 		[% IF user.tags_canwrite_stories %]
 		<div class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></div>
 		[% END %]
-		[%  tags_reader = Slash.getObject('Slash::Tags'); tags = tags_reader.setGetCombinedTags(key, key_type); %]
 		<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</div>
 		<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% tags.system %]</div>
 		[%- IF item.type == "story" &&
@@ -52,6 +52,7 @@ __template__
 			! Slash.db.hasUserSignedStory(item.srcid, user.uid) -%]
 			<div class="tag-display-stub" context="signoff" init="legend:'signoff', menu:false">unsigned</div>
 		[%- END -%]
+		<div class="tag-display-stub" context="datatype" init="legend:'type&nbsp;tag'">[% tags.datatype %]</div>
 	</div>
 	[% IF user.tags_canwrite_stories %]
 	[%# the suggestions bar %]

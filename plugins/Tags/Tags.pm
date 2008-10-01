@@ -1130,9 +1130,9 @@ sub ajaxSetGetCombinedTags {
 		}
 	}
 
-	my $system_tags = $datatype_tag . ' ' . $section_tag . ' ' . $topic_tags;
+	my $system_tags = $section_tag . ' ' . $topic_tags;
 
-	my $response = '<system>' . $system_tags . '<top>'. $top_tags;
+	my $response = '<datatype>' . $datatype_tag . '<system>' . $system_tags . '<top>'. $top_tags;
 	$response .= '<user>' . $user_tags unless $form->{global_tags_only};
 
 	return $response;
