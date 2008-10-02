@@ -235,7 +235,7 @@ sub pause {
 	my($form, $slashdb, $user, $constants) = @_;
 	$user->{state}{page_adless} = 1;
 	titlebar("100%", "Thanks!");
-	my $thanksblock = getBlock('subscriber_plug', 'block');
+	my $thanksblock = $slashdb->getBlock('subscriber_plug', 'block');
 	slashDisplay('pause', { thanksblock => $thanksblock });
 }
 

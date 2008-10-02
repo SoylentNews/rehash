@@ -23,9 +23,19 @@ to do now is take advantage of that and
 If you haven't already, you'll want to read about
 <a href="/faq/subscriptions.shtml#ss1600">the other cool subscriber advantages</a>.
 
+[% IF user.is_anon %]
+<p>You don't seem to be logged in at the moment (maybe you're already
+logged-in over on
+<a href="https:[% constants.rootdir %]/">the secure side</a>?) --
+but once you log in, your user page will display your current subscriber
+status, and the Subscription menu item will let you edit your settings.
+[% ELSE %]
 <p>For details on your current subscriber status, you may check
 <a href="/~[% user.nickname | strip_paramattr %]">your user page</a>
-at any time.
+at any time, and the
+<a href="/subscribe.pl">Subscription</a> menu item above will let you
+edit your settings..
+[% END %]
 
 [% thanksblock %]
 
