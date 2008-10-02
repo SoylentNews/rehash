@@ -9,6 +9,11 @@
 use strict;
 
 use Date::Calc qw(Add_Delta_Days);
+use HTML::FormatText;
+use HTML::TreeBuilder;
+use MIME::Parser;
+use URI::Escape;
+use URI::Find;
 
 use Slash 2.003;	# require Slash 2.3.x
 use Slash::Constants qw(:web);
@@ -74,14 +79,126 @@ sub setLCR {
 
 
 sub createRemark {
-	my($slashdb, $constants, $user, $form, $gSkin, $schedule) = @_;
+	my($slashdb, $constants, $user, $form, $gSkin, $schedule, $remark) = @_;
 
-	my($remark) = $form->{remark};
+	$remark ||= $form->{remark};
 	my $remarks = getObject('Slash::Remarks');
 	$remarks->createRemark($remark, { type => 'system' });
 	1;
 }
 
+{my @types = map { qr{^$_$} } qw(text/plain text/.?html text/.+);
+sub formatRemarkFromEmail {
+	my($text) = @_;
+	return if !$text || $text eq '1';
+
+	# parse out the mail pieces
+	my $parser = new MIME::Parser;
+	$parser->output_to_core(1);
+	my $entity = $parser->parse_data($text);
+	if (!$parser) {
+		errorLog("Daddy Mail: parse failed");
+		return;
+	}
+
+	my $subject = $entity->head->get('Subject');
+	$subject =~ s/^\s*\[DP\]\s*//;
+	$subject = '(no subject)' unless length $subject;
+
+	my $body;
+	my @parts = $entity->parts;
+	if (@parts == 0) {
+		$body = $entity;
+	} elsif (@parts == 1) {
+		$body = $parts[0];
+	} else {
+		OUTER: for my $type (@types) {
+			for my $part (@parts) {
+				if ($part->effective_type =~ $type) {
+					$body = $part;
+					last OUTER;
+				}
+			}
+		}
+	}
+
+	my $remark   = join '', @{$body->body};
+	my $type     = $body->effective_type;
+	my $encoding = $body->head->get('Content-Transfer-Encoding') || '';
+
+	# this really should have been taken care of in the module ...
+	$encoding =~ s/\s+$//s;
+
+	# decode
+	if ($encoding eq 'base64') {
+		require MIME::Base64;
+		$remark = MIME::Base64::decode_base64($remark);
+	} elsif ($encoding eq 'quoted-printable') {
+		require MIME::QuotedPrint;
+		$remark = MIME::QuotedPrint::decode_qp($remark);
+	}
+
+	# smart check, and dumb check, to see if this is HTML
+	if ($type =~ m|/.?html$| || $remark =~ /<html.*>/si) {
+		my $tree = HTML::TreeBuilder->new->parse($remark);
+		my $formatter = HTML::FormatText->new;
+		$remark = $formatter->format($tree);
+
+		$remark =~ s/\[(?:IMAGE)\]//g;
+
+	} else {
+		# has to be a recognized type
+		$remark = '' unless grep { $type =~ $_ } @types;
+	}
+
+	# now pull out the URLs, if they are Slashdot URLs
+	my @uris;
+	my $find = URI::Find->new(sub {
+		my($uri, $uri_text) = @_;
+		if ($uri->can('scheme') && $uri->scheme =~ /^https?$/ &&
+			$uri->host =~ /(^|\W)slashdot\.org$/) {
+			push @uris, $uri;
+			return 'U' . ($#uris + 1);
+		}
+		return $uri_text;
+	});
+
+	$find->find(\$remark);
+
+	# reformat the URLs
+	my @uri_str;
+	for my $uri (@uris) {
+		$uri->host('slashdot.org');
+		my $sid;
+		if ($uri->path =~ m|^/(?:\w+)/(\d+/\d+/\d+/\d+)\.shtml|) {
+			$sid = $1;
+		} elsif ($uri->path eq '/article.pl' && $uri->query =~ m|sid=(\d+/\d+/\d+/\d+)|) {
+			$sid = $1;
+		}
+		if ($sid) {
+			$uri->scheme('https');
+#			$uri->path('/admin.pl');
+#			$uri->query("op=edit&sid=$sid");
+			$uri->path('/article.pl');
+			$uri->query("sid=$sid");
+
+			push @uri_str, $uri->as_string;
+		}
+	}
+
+	# finish up
+	$remark =~ s/\n--\s*\n.*$//s;
+
+	for ($subject, $remark) {
+		s/\s+/ /sg;
+		s/\s$//s;
+	}
+
+	my $final = sprintf "DP/%s: %s", substr($subject, 0, 35),
+		join('; ', @uri_str, $remark);
+
+	return $final;
+}}
 
 sub getDaddyList {
 	my($slashdb, $constants, $user, $form, $gSkin, $schedule) = @_;
@@ -98,7 +215,22 @@ sub getDaddyList {
 
 	my $editors = $schedule->getEditors;
 	my $all = join ', ', map { "<$_->{realemail}>" } grep { $_->{realemail} } @$editors;
+	# yeah it's lame we're hardcoding this, oh well -- pudge
 	my $extra = ', <pudge@slashdot.org>, <jamie@slashdot.org>';
+
+	# we're kinda hijacking things here, using this for something it's not normally
+	# used for.  sue me! -- pudge
+	if ($form->{text}) {
+		my $remark = formatRemarkFromEmail($form->{text});
+		createRemark(@_, $remark) if $remark;
+
+		http_send({ content_type => 'text/plain' });
+		my $send = $all . $extra;
+		#$send =~ s/, /\n/g;
+		print $send;
+		return;
+	}
+
 
 	for (0 .. $#{$shift_types}) {
 		my $shift = $shift_types->[$_];
@@ -114,14 +246,6 @@ sub getDaddyList {
 			($nickname, $email) = ($daddy->{nickname}, "<$daddy->{realemail}>");
 		} else {
 			($nickname, $email) = ('unassigned', $all);
-		}
-
-		if ($form->{text} && $item->{title} eq 'now') {
-			http_send({ content_type => 'text/plain' });
-			my $send = $email . $extra;
-			#$send =~ s/, /\n/g;
-			print $send;
-			return;
 		}
 
 		$item->{description} = "$nickname $email";
