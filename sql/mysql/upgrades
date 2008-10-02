@@ -5559,9 +5559,9 @@ UPDATE vars SET value = 'T_2_5_0_222' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
-# 2008-10-02
-UPDATE vars SET value = 'T_2_5_0_223' WHERE name = 'cvs_tag_currentcode';
-
 # for plugins/Subscribe
 INSERT INTO blocks (bid, block, seclev, type, description, skin, ordernum, title, portal, url, rdf, retrieve) VALUES ('subscriber_plug', '', 10000, 'static', 'Plug for subscribers', 'mainpage', 0, 'Subscriber plug', 0, NULL, '', 0);
+
+# 2008-10-02
+UPDATE vars SET value = 'T_2_5_0_223' WHERE name = 'cvs_tag_currentcode';
 
