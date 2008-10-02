@@ -2061,23 +2061,40 @@ EOT
 		&& $comment->{nickname} ne "-") { # this last test probably useless
 		my @link = ( );
 
-		push @link, (qq'<span id="reply_link_$comment->{cid}" class="nbutton"><p><b>' . linkComment({
+		my ($prefix, $a_id, $a_class, $suffix) = ('', '', '', '');
+		my $is_idle = $gSkin->{name} eq 'idle';
+		if ( $is_idle ) {
+			$a_class = 'vbutton bg_666666 rd_5';
+			$a_id = "reply_link_$comment->{cid}";
+		} else {
+			$prefix = qq'<span id="reply_link_$comment->{cid}" class="nbutton"><p><b>';
+			$suffix = qq'</b></p></span>'
+		}
+
+		push @link, ($prefix . linkComment({
+			a_id	=> $a_id,
+			a_class	=> $a_class,
 			sid	=> $comment->{sid},
 			pid	=> $comment->{cid},
 			op	=> 'Reply',
 			subject	=> 'Reply to This',
 			subject_only => 1,
 			onclick	=> ($discussion2 ? "D2.replyTo($comment->{cid}); return false;" : '')
-		}) . '</b></p></span>') unless $user->{state}{discussion_archived};
+		}) . $suffix) unless $user->{state}{discussion_archived};
 
-		push @link, (qq'<span class="nbutton"><p><b>' . linkComment({
+		if ( ! $is_idle ) {
+			$prefix = qq'<span class="nbutton"><p><b>';
+		}
+
+		push @link, ($prefix . linkComment({
+			a_class	=> $a_class,
 			sid	=> $comment->{sid},
 			cid	=> $comment->{original_pid},
 			pid	=> $comment->{original_pid},
 			subject	=> 'Parent',
 			subject_only => 1,
 			onclick	=> ($discussion2 ? "return D2.selectParent($comment->{original_pid})" : '')
-		}, 1) . '</b></p></span>') if $comment->{original_pid};
+		}, 1) . $suffix) if $comment->{original_pid};
 
 #use Data::Dumper; print STDERR "_hard_dispComment createSelect can_mod='$can_mod' disc_arch='$user->{state}{discussion_archived}' modd_arch='$constants->{comments_moddable_archived}' cid='$comment->{cid}' reasons: " . Dumper($reasons);
 
