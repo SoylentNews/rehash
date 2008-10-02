@@ -146,7 +146,8 @@ sub newUser {
 			my $user_send = $slashdb->getUser($uid);
 			_sendMailPasswd(@_, $user_send);
 			header(getData('newuserhead')) or return;
-			print getData('newuser_msg', { uid => $uid });
+			my $thanksblock = $slashdb->getBlock('subscriber_plug', 'block');
+			slashDisplay('newuser_msg', { thanksblock => $thanksblock });
 			footer();
 			return;
 		} else {

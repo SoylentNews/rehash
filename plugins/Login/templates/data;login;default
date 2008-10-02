@@ -94,16 +94,6 @@ __template__
 	<p>Feel free to contact [% constants.adminmail_ban %] if you have questions.
 	Mention that your proxy is at <tt>[% unencoded_ip %]</tt> on port <tt>[% port %]</tt>.
 
-[% CASE 'newuser_msg' %]
-	[% title = BLOCK %]User [% form.newusernick | strip_literal %] created[% END %]
-	[% PROCESS titlebar title=title width="100%" %]
-	<b>email</b>=[% form.email | strip_literal %]<br>
-	<b>user id</b>=[% uid %]<br>
-	<b>nick</b>=[% form.newusernick | strip_literal %]<br>
-	<b>passwd</b>=mailed to [% form.email | strip_literal %]<br>
-	<p>Once you receive your password, you can
-	<a href="[% constants.real_rootdir %]/login.pl">log in and set your account up.</a>
-
 [% CASE 'email_exists' %]
 	The email address "[% (form.realemail || form.email) | strip_literal %]"
 	already exists in our user database. If you've forgotten your password
