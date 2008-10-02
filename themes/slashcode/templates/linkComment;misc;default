@@ -7,8 +7,14 @@ Create a link to a comment
 * commentsort = user's comment sorting pref
 * mode = user's mode pref
 * comment = make link to only one comment, not whole story (i.e., include cid= in link)
+* a_id = element id, i.e., <a id="[% a_id %]" ...>
+* a_class = element class, i.e,  <a class="[% a_class %]" ...>
 
 Also included are all the individual elements of the comment and its poster: sid, cid, pid, date, subject, uid, points, lastmod, reason, nickname, fakeemail, homepage, sig
+
+We only display links to user pages on nicknames to admins because it
+would be distracting for other users.
+
 __title__
 
 __page__
@@ -18,31 +24,38 @@ en_US
 __name__
 linkComment
 __template__
-[% USE Slash %]
-[% subject = color? "<FONT COLOR=\"$color\">$subject</FONT>" : subject %]
-<A HREF="[% constants.rootdir %]/comments.pl?sid=[% sid %]&amp;op=[% op %]&amp;threshold=[% threshold %]&amp;commentsort=[% commentsort %]&amp;mode=[% mode %][% IF startat %]&amp;startat=[% startat %][% END %][% IF user.state.tid %]&amp;tid=[% user.state.tid %][% END %][% IF comment %]&amp;cid=[% cid %][% ELSE %]&amp;pid=[% pid %][% IF cid %]#[% cid %][% END %][% END %]">[% subject %]</A>
+<a[% IF a_id %] id="[% a_id %]"[% END %][% IF a_class %] class="[% a_class %]"[% END %] href="[% gSkin.rootdir %]/comments.pl?sid=[% sid;
+IF op.defined                                 %]&amp;op=[% op; END;
+IF threshold.defined                          %]&amp;threshold=[% threshold; END;
+IF commentsort.defined                        %]&amp;commentsort=[% commentsort; END;
+IF mode.defined                               %]&amp;mode=[% mode; END;
+IF (user.state.no_d2 || no_d2)                %]&amp;no_d2=1[% END;
+IF startat                                    %]&amp;startat=[% startat; END;
+IF (user.state.tid && constants.tids_in_urls) %]&amp;tid=[% user.state.tid; END;
+IF comment
+	%]&amp;cid=[% cid;
+ELSE;
+	IF pid %]&amp;pid=[% pid; END;
+	IF cid %]#[% cid; END;
+END %]"[% IF onclick %] onclick="[% onclick %]"[% END 
+%]>[% subject %]</a>
 
-[% IF !comment.subjectonly %]
-
-[% IF nickname %]
-	[% # XXX why admin-only link to nickname? %]
-	[% IF adminflag %]
-	by <A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;fieldname=nickname&amp;userfield=[% nickname %]">[% nickname %]</A>
-
-	[% ELSE %]
-	by [% nickname %]
+[% IF !subject_only %]
+	[% IF nickname %]
+		[% IF adminflag %]
+			by <a href="[% gSkin.rootdir %]/users.pl?op=userinfo&amp;fieldname=nickname&amp;userfield=[% nickname %]">[% nickname %]</a>
+		[% ELSE %]
+			by [% nickname %]
+		[% END %]
 	[% END %]
 
-[% END %]
+	[% IF !user.noscores && points.defined %]
+		(Score:[% points %])
+	[% END %]
 
-[% IF !user.noscores && points.defined %]
-	<FONT SIZE="-1">(Score:[% points %])</FONT>
-[% END %]
-
-[% IF date %]
-	<FONT SIZE="-1">[% Slash.timeCalc(time) %]</FONT>
-[% END %]
-
+	[% IF date %]
+		[% Slash.timeCalc(time) %]
+	[% END %]
 [% END %]
 
 __seclev__
