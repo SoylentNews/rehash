@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+use warnings;
+use strict;
+
+use Slash::Test shift || 'slash';
+
+my $slashdb = getCurrentDB();
+my $ids = $slashdb->sqlSelectColArrayref(
+	'journals.id', 'journals',
+	'journals.id NOT IN (SELECT firehose.srcid FROM firehose WHERE firehose.type = "journal")'
+);
+
+my $firehose = getObject("Slash::FireHose");
+printf STDERR "Importing %d journals\n", scalar(@$ids);
+
+my $i = 0;
+local $| = 0;
+for my $id (@$ids) {
+	printf "\r%d", ++$i;
+	$firehose->createUpdateItemFromJournal($id);
+}
+
+print "\nDone\n";

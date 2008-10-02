@@ -113,11 +113,11 @@ sub createUpdateItemFromJournal {
 		if ($itemid) {
 			my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
 			$self->setFireHose($itemid, {
-				introtext => $introtext,
-				title => $journal->{description},
-				tid => $journal->{tid},
-				discussion => $journal->{discussion},
-				word_count => countWords($introtext)
+				introtext   => $introtext,
+				title       => $journal->{description},
+				tid         => $journal->{tid},
+				discussion  => $journal->{discussion},
+				word_count  => countWords($introtext)
 			});
 
 		} else {
@@ -190,35 +190,43 @@ sub createItemFromJournal {
 	my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
 	if ($journal) {
 		my $globjid = $self->getGlobjidCreate("journals", $journal->{id});
-		my $publicize = $journal->{promotetype} eq 'publicize';
-		my $color_lvl = $publicize ? 5 : 6;
+
+		my $publicize  = $journal->{promotetype} eq 'publicize';
+		my $publish    = $journal->{promotetype} eq 'publish';
+		my $color_lvl  = $publicize ? 5 : $publish ? 6 : 7; # post == 7
+		my $editor_lvl = $publicize ? 5 : $publish ? 6 : 8; # post == 8
+		my $public     = ($publish || $publicize) ? 'yes' : 'no';
 		my $popularity = $self->getEntryPopularityForColorLevel($color_lvl);
+		my $editorpop  = $self->getEntryPopularityForColorLevel($editor_lvl);
+
 		my $type = $user->{acl}{vendor} ? "vendor" : "journal";
+
 		my $data = {
-			title 			=> $journal->{description},
-			globjid 		=> $globjid,
-			uid 			=> $journal->{uid},
-			attention_needed 	=> "yes",
-			public 			=> "yes",
-			introtext 		=> $introtext,
-			popularity		=> $popularity,
-			editorpop		=> $popularity,
-			tid			=> $journal->{tid},
-			srcid			=> $id,
-			discussion		=> $journal->{discussion},
-			type			=> $type,
-			ipid			=> $user->{ipid},
-			subnetid		=> $user->{subnetid},
+                        title                   => $journal->{description},
+                        globjid                 => $globjid,
+                        uid                     => $journal->{uid},
+                        attention_needed        => "yes",
+                        public                  => $public,
+                        introtext               => $introtext,
+                        popularity              => $popularity,
+                        editorpop               => $editorpop,
+                        tid                     => $journal->{tid},
+                        srcid                   => $id,
+                        discussion              => $journal->{discussion},
+                        type                    => $type,
+                        ipid                    => $user->{ipid},
+                        subnetid                => $user->{subnetid},
+			createtime              => $journal->{date}
 		};
 		$self->createFireHose($data);
 		if ($publicize && !isAnon($journal->{uid})) {
 			my $constants = getCurrentStatic();
 			my $tags = getObject('Slash::Tags');
 			$tags->createTag({
-				uid		=> $journal->{uid},
-				name		=> $constants->{tags_upvote_tagname},
-				globjid		=> $globjid,
-				private		=> 1,
+                                uid             => $journal->{uid},
+                                name            => $constants->{tags_upvote_tagname},
+                                globjid         => $globjid,
+                                private         => 1,
 			});
 		}
 	}
