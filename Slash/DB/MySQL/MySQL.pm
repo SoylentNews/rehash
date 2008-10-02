@@ -12220,6 +12220,7 @@ sub addGlobjTargetsToHashrefArray {
 	my $target = $self->getGlobjTargets(\@globjids);
 	for my $hr (@$ar) {
 		next unless $hr->{globjid};	# skip if bogus data
+		next unless $target->{ $hr->{globjid} }; # skip if globj missing (?!)
 		next if $hr->{globj_type};	# skip if already added
 		my($type, $target_id) = @{ $target->{ $hr->{globjid} } };
 		next unless $type;		# skip if bogus data
