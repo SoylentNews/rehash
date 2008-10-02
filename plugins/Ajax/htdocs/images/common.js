@@ -1752,4 +1752,71 @@ function firehose_get_onscreen() {
 	return onscreen;
 }
 
+
+function getSeconds () {
+	return new Date().getTime()/1000;
+}
+
+
+// ads!  ads!  ads!
+var adTimerSeen   = {};
+var adTimerSecs   = 0;
+var adTimerClicks = 0;
+var adTimerInsert = 0;
+
+function inlineAdReset(id) {
+	if (id !== undefined)
+		adTimerSeen[id] = 2;
+	adTimerSecs   = getSeconds();
+	adTimerClicks = 0;
+	adTimerInsert = 0;
+}
+
+
+function inlineAdVisibles() {
+	var $visible_ads = $('.inlinead').filter(function(){ if ( isInWindow(this) ) return this; });
+	return $visible_ads.length;
+}
+
+
+function inlineAdCheckTimer(id, url, clickMax, secsMax) {
+	if (!url || !id)
+		return;
+
+	if (adTimerSeen[id] && adTimerSeen[id] == 2)
+		return 0;
+
+	// ignore clicks if adTimerClicksMax == 0
+	if (clickMax > 0 && !adTimerSeen[id])
+		inlineAdClick(id);
+
+	var ad = 0;
+	if (clickMax > 0 && adTimerClicks >= clickMax)
+		ad = 1;
+	else {
+		var secs = getSeconds() - adTimerSecs;
+		if (secs >= secsMax)
+			ad = 1;
+	}
+
+	if (!ad)
+		return 0;
+
+	inlineAdInsertId(id);
+}
+
+
+function inlineAdClick(id) {
+	//adTimerSeen[id] = adTimerSeen[id] || 1;
+	adTimerClicks = adTimerClicks + 1;
+}
+
+
+function inlineAdInsertId(id) {
+	if (id !== undefined)
+		adTimerInsert = id;
+	return adTimerInsert;
+}
+
+
 ;

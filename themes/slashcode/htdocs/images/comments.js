@@ -74,14 +74,9 @@ var meta_down = 0;
 var d2_seen = '';
 var low_bandwidth = 0;
 
-var adTimerSecs;
-var adTimerClicks;
-var adTimerInsert;
-var adTimerSecsMax   = 90;
-var adTimerClicksMax = 8;
-var adTimerSeen = {};
-var adTimerUrl  = '';
-resetAdTimer();
+var adTimerSecsMax   = 30;
+var adTimerClicksMax = 0;
+var adTimerUrl       = '';
 
 var agt = navigator.userAgent.toLowerCase();
 var is_firefox = (agt.indexOf("firefox") != -1);
@@ -179,7 +174,7 @@ function setFocusComment(cid, alone, no_ads) {
 	if (abscid == cid) { // expanding == selecting
 		setCurrentComment(cid);
 		if (!no_ads)
-			checkAdTimer(cid);
+			inlineAdCheckTimer(cid, adTimerUrl, adTimerClicksMax, adTimerSecsMax);
 	}
 
 
@@ -229,6 +224,8 @@ function setFocusComment(cid, alone, no_ads) {
 
 	if (was_hidden)
 		updateHiddens([abscid]);
+
+	inlineAdInsert(inlineAdInsertId());
 
 	return false;
 }
@@ -941,20 +938,7 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 				}
 			}
 
-			if (adTimerInsert) {
-				var tree = $('#tree_' + adTimerInsert);
-				if (tree.length) {
-					var adcall = '<iframe src="' + adTimerUrl + '" height="110" width="740" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe>';
-					var html = '<li id="comment_ad_' + adTimerInsert + '" class="inlinead"> ' + adcall +'  </li>';
-
-					var commtree = $('#commtree_' + adTimerInsert);
-					if (commtree.length)
-						commtree.prepend(html);
-					else
-						tree.append('<ul id="commtree_' + adTimerInsert + '">' + html + '</ul>');
-					resetAdTimer();
-				}
-			}
+			inlineAdInsert(inlineAdInsertId());
 		}
 	};
 
@@ -1704,48 +1688,26 @@ function boundsToDimensions( bounds, scaleFactor ) {
 }
 
 
-function checkAdTimer (cid) {
-	if (!adTimerUrl || !cid)
-		return;
-
-	if (adTimerSeen[cid] && adTimerSeen[cid] == 2)
+function inlineAdInsert(cid) {
+	if (!cid)
 		return 0;
 
-	if (!adTimerSeen[cid])
-		clickAdTimer(cid);
+	if (inlineAdVisibles())
+		return 0;
 
-	var ad = 0;
-	if (adTimerClicks >= adTimerClicksMax)
-		ad = 1;
-	else {
-		var secs = getSeconds() - adTimerSecs;
-		if (secs >= adTimerSecsMax)
-			ad = 1;
+	var tree = $('#tree_' + cid);
+	if (tree.length) {
+		var adcall = '<iframe src="' + adTimerUrl + '" height="110" width="740" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe>';
+		var html = '<li id="comment_ad_' + cid + '" class="inlinead"> ' + adcall +'  </li>';
+
+		var commtree = $('#commtree_' + cid);
+		if (commtree.length)
+			commtree.prepend(html);
+		else
+			tree.append('<ul id="commtree_' + cid + '">' + html + '</ul>');
+		inlineAdReset(cid);
 	}
-
-	if (!ad)
-		return 0;
-
-	adTimerInsert = cid;
 }
-
-function resetAdTimer () {
-	if (adTimerInsert)
-		adTimerSeen[adTimerInsert] = 2;
-	adTimerInsert = 0;
-	adTimerSecs   = getSeconds();
-	adTimerClicks = 0;
-}
-
-function clickAdTimer (cid) {
-	adTimerSeen[cid] = adTimerSeen[cid] || 1;
-	adTimerClicks = adTimerClicks + 1;
-}
-
-function getSeconds () {
-	return new Date().getTime()/1000;
-}
-
 
 function setCurrentComment (cid) {
 	if (!cid)
