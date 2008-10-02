@@ -841,16 +841,8 @@ sub getFireHoseEssentials {
 		);
 	}
 
-	my $count;
-	if ($options->{tagged_by_uid}) {
-		my $rows = $self->sqlSelectAllHashrefArray("count(*)", $tables, $where, $count_other);
-		$count = @$rows;
-	} else {
-		$count = $self->sqlSelect("count(*)", $tables, $where, $count_other);
-		my $rows = $self->sqlSelectAllHashrefArray("count(*)", $tables, $where, $count_other);
-		$count = @$rows;
-	}
-
+	my $rows = $self->sqlSelectAllHashrefArray("count(*)", $tables, $where, $count_other);
+	my $count = @$rows;
 
 	my $page_size = $ps || 1;
 	$results->{records_pages} ||= ceil($count / $page_size);
