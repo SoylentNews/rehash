@@ -52,6 +52,7 @@ sub main {
 	};
 
 	$op = 'pause' if $form->{merchant_return_link};
+	$user->{state}{page_adless} = 1 if $op eq 'pause';
 
 	if ($user->{is_anon} && $op !~ /^(paypal|makepayment|pause)$/) {
 		my $rootdir = getCurrentSkin('rootdir');
@@ -233,7 +234,6 @@ sub makepayment {
 
 sub pause {
 	my($form, $slashdb, $user, $constants) = @_;
-	$user->{state}{page_adless} = 1;
 	titlebar("100%", "Thanks!");
 	my $thanksblock = $slashdb->getBlock('subscriber_plug', 'block');
 	slashDisplay('pause', { thanksblock => $thanksblock });

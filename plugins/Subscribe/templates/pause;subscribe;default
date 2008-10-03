@@ -34,7 +34,7 @@ status, and the Subscription menu item will let you edit your settings.
 <a href="/~[% user.nickname | strip_paramattr %]">your user page</a>
 at any time, and the
 <a href="/subscribe.pl">Subscription</a> menu item above will let you
-edit your settings..
+edit your settings.
 [% END %]
 
 [% thanksblock %]
