@@ -25,6 +25,11 @@ span.tag, .tmenu, .tag-display ul, .tag-display li, .edit-toggle {
 	color: #666;
 }
 
+div.head .tag-display span.tag,
+div.head .tag-widget .admin-buttons {
+       color: #fff;
+}
+
 /* style tags based on what they are */
 /* ...for everyone */
 .bang > span.tag > .punct { font-weight: bold }
