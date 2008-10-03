@@ -733,6 +733,7 @@ function tag_ui_init_new_articles(){
 		click(firehose_click_tag).
 		each(function(){
 			install_tag_server(this);
+			this.command_pipeline.push(firehose_handle_context_triggers);
 		});
 	$init_tag_widgets($new_articles.find('.tag-widget-stub'));
 	init_tag_ui_styles($new_articles);
