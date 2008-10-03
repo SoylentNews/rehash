@@ -416,11 +416,14 @@ div.storylinks ul {padding-right: 60% !important}
 .briefarticle .generaltitle .title { background-image: url('//images.slashdot.org/fh_br_s.png') !important; background-position: bottom right !important;}
 .briefarticle .story a {color: #fff;}
 .briefarticle h3 a {#555}
+
+#firehose div.generaltitle h3 a, #console div.generaltitle h3 a { color: #555; }
+#firehose .story div.generaltitle h3 a, #firehose .future div.generaltitle h3 a, #console .story div.generaltitle h3 a, #console .future div.generaltitle h3 a { color: #fff; }
 .generaltitle a {text-decoration: none}
 
 .tagshide div {display: none}
-.generaltitle h3 a {z-index: 4 !important; position: relative !important; font-size: 123%}
-.generaltitle h3 a.skin {color: #8dc7c0 !important;}
+.future h3 a, .story h3 a {z-index: 4 !important; position: relative !important; font-size: 123%}
+.story h3 a.skin {color: #8dc7c0 !important;}
 .briefarticle h3, .article h3 {font-size: 100% !important; padding: .25em 50px 0 58px !important; min-height: 22px !important; display: block !important;}
 .briefarticle h3 {padding-right: .3em !important}
 .briefarticle .novote h3 {padding: .25em .3em  0 1em !important; margin: 0 !important}
