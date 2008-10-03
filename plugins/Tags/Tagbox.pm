@@ -581,9 +581,9 @@ sub debug_log {
 #################################################################
 
 sub _do_default_filter {
-	my($self, $tags_ar) = @_;
+	my($self, $tags_ar, $options) = @_;
 
-	$tags_ar = $self->_do_filter_activeonly($tags_ar);
+	$tags_ar = $self->_do_filter_activeonly($tags_ar) unless $options->{deactivated_ok};
 	$tags_ar = $self->_do_filter_publiconly($tags_ar);
 	$tags_ar = $self->_do_filter_firehoseonly($tags_ar);
 	$tags_ar = $self->_do_filter_tagnameid($tags_ar);
@@ -777,18 +777,36 @@ sub feed_newtags_process {
 
 sub feed_deactivatedtags {
 	my($self, $tags_ar) = @_;
+	$tags_ar = $self->feed_deactivatedtags_filter($tags_ar);
 	$self->feed_deactivatedtags_pre($tags_ar);
 
 	# by default, just pass along to feed_newtags (which will have to
 	# check $tags_ar->[]{tdid} to determine whether the changes were
 	# really new tags or just deactivated tags)
-	return $self->feed_newtags($tags_ar);
+	my $ret_ar = $self->feed_newtags_process($tags_ar);
+
+	$self->feed_deactivatedtags_post($ret_ar);
+	return $ret_ar;
 }
 
 sub feed_deactivatedtags_pre {
 	my($self, $tags_ar) = @_;
 	$self->info_log("tagids='%s'",
 		join(' ', map { $_->{tagid} } @$tags_ar) );
+}
+
+sub feed_deactivatedtags_filter {
+	my($self, $tags_ar) = @_;
+	return $self->_do_default_filter($tags_ar, { deactivated_ok => 1 });
+}
+
+sub feed_deactivatedtags_post {
+	my($self, $ret_ar) = @_;
+	if (!@$ret_ar) {
+		$self->debug_log('returning 0');
+	} else {
+		$self->info_log("returning %d", scalar(@$ret_ar));
+	}
 }
 
 #################################################################
