@@ -1,9 +1,3 @@
-/* Slashboxes */
-div #slashboxes {
-	width: 18.25em;
-}
-
-
 /* Reset */
 .article .title, .article h3, .article .generaltitle, .briefarticle .title, .briefarticle h3, .briefarticle .generaltitle { background: transparent !important; }
 
