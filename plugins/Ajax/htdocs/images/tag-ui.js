@@ -763,10 +763,19 @@ var tag_widget_fns = {
 		return this;
 	},
 	toggle_widget: function( twisty ){
-		var $twisty = $(twisty);
-		var if_expanding = $twisty.is('.collapse');
+		var $tag_widget = $(twisty).
+			find('.button').
+				toggleClasses('expand', 'collapse').
+				nearest_parent('.tag-widget').
+					toggleClass('expanded');
 
-		$twisty.mapClass({'collapse':'expand', 'expand':'collapse'});
+		if ( $tag_widget.is('.expanded') ) {
+			$tag_widget.
+				nearest_parent('[tag-server]').
+					each(function(){
+						this.fetch_tags();
+					});
+		}
 	}
 
 }; // tag_widget_fns

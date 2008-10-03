@@ -601,9 +601,8 @@ function firehose_click_tag( event ) {
 
 	if ( command ) {
 		// No!  You no hurt Dr. Jones!  You log-in first!
-		if ( firehose_user_class !== undefined && !firehose_user_class ) {
-			show_login_box();
-			return true;
+		if ( ! check_logged_in() ) {
+			return false;
 		}
 
 		var $server = $target.nearest_parent('[tag-server]');
@@ -731,6 +730,7 @@ function tag_ui_init_new_articles(){
 
 	var $new_articles = $(document).article_info__find_articles(':not(:has(span.sd-info-block .tag-ui))');
 	$new_articles.
+		click(firehose_click_tag).
 		each(function(){
 			install_tag_server(this);
 		});
