@@ -119,9 +119,9 @@ sub createUpdateItemFromJournal {
 				discussion  => $journal->{discussion},
 				word_count  => countWords($introtext)
 			});
-
+			return $itemid;
 		} else {
-			$self->createItemFromJournal($id);
+			return $self->createItemFromJournal($id);
 		}
 	}
 }
@@ -218,7 +218,7 @@ sub createItemFromJournal {
                         subnetid                => $user->{subnetid},
 			createtime              => $journal->{date}
 		};
-		$self->createFireHose($data);
+		my $id = $self->createFireHose($data);
 		if ($publicize && !isAnon($journal->{uid})) {
 			my $constants = getCurrentStatic();
 			my $tags = getObject('Slash::Tags');
@@ -229,8 +229,8 @@ sub createItemFromJournal {
                                 private         => 1,
 			});
 		}
+		return $id;
 	}
-
 }
 
 sub createUpdateItemFromBookmark {
