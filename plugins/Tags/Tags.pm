@@ -715,6 +715,7 @@ sub getAllTagsFromUser {
 	$self->addTagnameDataToHashrefArray($ar);
 	$self->addGlobjTargetsToHashrefArray($ar);
 	for my $hr (@$ar) {
+		next unless $hr->{globj_type}; # XXX throw warning?
 		if ($hr->{globj_type} eq 'stories') {
 			$hr->{story} = $self->getStory($hr->{globj_target_id});
 		} elsif ($hr->{globj_type} eq 'urls') {
