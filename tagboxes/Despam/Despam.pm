@@ -43,7 +43,7 @@ sub init {
 
 	$self->{uid_never_spammer} = {( map { $_, 1 } keys %$admins )};
 	$self->{uid_never_spammer}{ $constants->{anonymous_coward_uid} } = 1;
-	if ($constants->{plugin}{Bookmarks}) {
+	if ($constants->{plugin}{Bookmark}) {
 		my $feed_uid_ar = $tagsdb->sqlSelectColArrayref('DISTINCT uid', 'bookmark_feeds');
 		for my $uid (@$feed_uid_ar) {
 			$self->{uid_never_spammer}{$uid} = 1;
