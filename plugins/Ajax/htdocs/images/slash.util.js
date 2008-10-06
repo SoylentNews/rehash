@@ -458,20 +458,26 @@ Package({ named: 'Slash.Util.Algorithm',
 // Yes, I could phrase this as a Package; but I don't need to, here.
 $.fn.extend({
 	find_nearest: function( selector ){
-		var args = arguments, N = Math.min(4, args.length);
+		var args = arguments, N = Math.min(5, args.length);
 		var answer = this.map(function(){
 			var $this = $(this), match, $matches;
 			for ( var i=1; i<N && !match; ++i ) {
+				var up_selector = selector;
 				switch ( args[i] ) {
 					case 'self':
 						if ( $this.is(selector) ) {
 							return this;
 						}
 						break;
+					case 'up>':
+						up_selector += ', :has(>' + selector + ')';
 					case 'up':
 						$this.parents().each(function(){
-							if ( $(this).is(selector) ) {
-								match = this;
+							var $this = $(this);
+							if ( $this.is(up_selector) ) {
+								match = $this.is(selector) ?
+									this :
+									$('> '+selector, this)[0];
 								return false;
 							}
 						});
