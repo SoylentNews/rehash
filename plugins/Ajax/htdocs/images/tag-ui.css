@@ -363,7 +363,8 @@ div.head div.tag-widget-stub,
 	z-index: 10;
 	padding: 0 0.4em 0 0.8em;
 	text-align: right;
-	margin-left:15em;
+	/*margin-left:15em;*/
+	left:10em;
 }
 
 #firehose div.tag-widget-stub.body-widget.expanded,
