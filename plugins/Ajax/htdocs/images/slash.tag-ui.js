@@ -236,6 +236,7 @@ new Package({ named: 'Slash.TagUI',
 		cached_user_tags: function( selector ){
 			return $(selector).tag_ui__cached_user_tags();
 		},
+		filter_tags_by_name: filter_tags_by_name,
 		bare_tag: function( tag ){
 			try {
 				// XXX what are the real requirements for a tag?
@@ -271,6 +272,15 @@ new Package({ named: 'Slash.TagUI',
 	},
 	exports: 'tags cached_user_tags bare_tag'
 });
+
+function filter_tags_by_name( $tags, allowed_names ){
+	var allowed = qw.as_set(allowed_names);
+	return $tags.filter(function(){
+		if ( $(this).text() in allowed ) {
+			return this;
+		}
+	});
+}
 
 })();
 /*jslint evil:true */
