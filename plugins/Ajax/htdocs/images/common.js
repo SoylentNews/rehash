@@ -1810,4 +1810,192 @@ function inlineAdInsertId(id) {
 }
 
 
-;
+;(function($){
+
+//
+// Firehose Floating Slashbox Ad
+//
+
+
+var	MODE_HIDDEN			= 0,
+	MODE_PINNED_TO_TOP		= 1,
+	MODE_PINNED_TO_BOTTOM		= 2,
+	MODE_ALIGNED_TO_SLASHBOXES	= 3,
+	MODE_ALIGNED_TO_ARTICLE		= 4,
+	current_mode			= MODE_ALIGNED_TO_SLASHBOXES,
+	css_for_mode = [
+		{	// MODE_HIDDEN
+			position: 'absolute',
+			top: '',
+			bottom: ''
+		},
+		{	// MODE_PINNED_TO_TOP
+			position: 'fixed',
+			top: 0,
+			bottom: ''
+		},
+		{	// MODE_PINNED_TO_BOTTOM
+			position: 'fixed',
+			top: '',
+			bottom: 0
+		},
+		{	// MODE_ALIGNED_TO_SLASHBOXES
+			position: 'absolute',
+			top: '',
+			bottom: ''
+		},
+		{	// MODE_ALIGNED_TO_ARTICLE
+			position: 'absolute',
+			top: '',
+			bottom: ''
+		}
+	],
+	name_for_mode = [
+		'MODE_HIDDEN',
+		'MODE_PINNED_TO_TOP',
+		'MODE_PINNED_TO_BOTTOM',
+		'MODE_ALIGNED_TO_SLASHBOXES',
+		'MODE_ALIGNED_TO_ARTICLE'
+	];
+
+var	AD_HEIGHT=300,
+	AD_WIDTH=300,
+	MAGNETIC_RANGE=7,
+	$ad_position,		// 300x300 div that holds the current (if any) ad
+	$current_article=$([]),	// the article to which that ad is attached
+
+		// elements that provide relative bounds for positioning the ad
+	$slashboxes,		// the container in which the ad floats
+	$sentinel_slashbox;	// upper bound: (the top of this) non-drawing div after the last slashbox
+
+$(function(){
+	var $firehose = $('#firehose');
+	$slashboxes = $firehose.find('> #slashboxes').
+		append(
+			'<div id="floating-slashbox-ad" style="display:block; position:absolute; height:'+AD_HEIGHT+'px; width:'+AD_WIDTH+'px;" />' +
+			'<div id="slashboxes-sentinel" style="width:300px; height:1px" />'
+		);
+	$sentinel_slashbox = $slashboxes.find('#slashboxes-sentinel');
+	$ad_position = $slashboxes.find('#floating-slashbox-ad');
+
+	$(window).scroll(fix_ad_position);
+});
+
+function set_mode( new_mode, new_top ){
+	if ( new_mode != current_mode ) {
+		// console.log(name_for_mode[current_mode]+' --> '+name_for_mode[new_mode]);
+
+		if ( current_mode != MODE_HIDDEN )
+			$ad_position.hide();
+
+		$ad_position.css(css_for_mode[new_mode]);
+
+		if ( new_mode == MODE_ALIGNED_TO_ARTICLE )
+			$ad_position.css('top', new_top);
+
+		if ( new_mode != MODE_HIDDEN )
+			$ad_position.show();
+
+		current_mode = new_mode;
+	}
+}
+
+function set_ad_size( new_height, new_width ){
+	AD_HEIGHT = new_height;
+	set_mode(MODE_HIDDEN);
+	$ad_position.css({height: new_height, width: new_width});
+	fix_ad_position();
+}
+
+function set_current_ad_attach_article( ad_content, $article ){
+	remove_current_ad();
+	if ( $article )
+		$current_article = $article;
+	if ( ad_content )
+		$ad_position.append(ad_content);
+	set_mode(MODE_ALIGNED_TO_SLASHBOXES);
+	fix_ad_position();
+}
+
+function detach_current_ad_from_article(){
+	$current_article = $([]);
+	fix_ad_position();
+}
+
+function remove_current_ad(){
+	set_mode(MODE_HIDDEN);
+	$ad_position.empty();
+	$current_article = $([]);
+}
+
+function fix_ad_position(){
+	//if ( ! $sentinel_slashbox.is(':last-child') ) {
+	//	$slashboxes.append($sentinel_slashbox);
+	//}
+
+	var	$footer		= $('#firehose > #fh-pag-div'),
+		space_top	= $sentinel_slashbox.offset().top,
+		space_bottom	= $footer.offset().top + $footer.height(),
+
+		detached	= $current_article.length == 0,
+
+		article_top	= detached ? space_top : $current_article.offset().top,
+		article_bottom	= article_top + (detached ? 0 : $current_article.height()),
+
+		window_top	= window.pageYOffset,
+		window_bottom	= window_top + window.innerHeight,
+
+		magnetic_top	= window_top + MAGNETIC_RANGE,
+		magnetic_bottom	= window_bottom - MAGNETIC_RANGE,
+
+		ad_top		= Math.max(space_top, Math.min(article_top, space_bottom-AD_HEIGHT)),
+		ad_bottom	= ad_top + AD_HEIGHT;
+
+	if ( ! detached && (article_top > window_bottom || article_bottom < window_top) )
+		set_mode(MODE_HIDDEN);
+
+	else if ( ad_top <= magnetic_top )
+		set_mode(MODE_PINNED_TO_TOP);
+
+	else if ( ad_bottom >= magnetic_bottom && (window_bottom-space_top)>AD_HEIGHT )
+		set_mode(MODE_PINNED_TO_BOTTOM);
+
+	else if ( ad_bottom >= magnetic_bottom )
+		set_mode(MODE_ALIGNED_TO_SLASHBOXES);
+
+	else
+		set_mode(MODE_ALIGNED_TO_ARTICLE, ad_top - $slashboxes.offset().top);
+}
+
+
+Slash.Util.Package({ named: 'Slash.Firehose.floating_slashbox_ad',
+	api: {
+		is_visible:		function(){ return current_mode != MODE_HIDDEN; },
+		detach:			detach_current_ad_from_article,
+		remove:			remove_current_ad,
+		current_article:	function(){ return $current_article; },
+		set_size:		set_ad_size
+	},
+	stem_function: set_current_ad_attach_article
+});
+
+Slash.Firehose.articles_on_screen = function(){
+	var	window_top = window.pageYOffset,
+		window_bottom = window_top + window.innerHeight;
+
+	return $('#firehose > #firehoselist').
+		article_info__find_articles().
+		filter(':visible').
+			filter(function(){
+				var $this=$(this), top=$this.offset().top, bottom=top+$this.height();
+				if ( top < window_bottom && bottom > window_top )
+					return this;
+			});
+}
+
+Slash.Firehose.choose_article_for_next_ad = function(){
+	var $articles = Slash.Firehose.articles_on_screen();
+	return $articles.eq( Math.floor(Math.random()*$articles.length) );
+}
+
+})(Slash.jQuery);
