@@ -186,6 +186,16 @@ function firehose_id_of( expr ) {
 	return undefined;
 }
 
+function article_moved( article ){
+	var data = article ? $(article).nextAll(':visible').andSelf() : null;
+	$('#firehoselist').trigger('articlesMoved', data);
+}
+
+function article_removed( article ){
+	var next_article = article ? $(article).next(':visible')[0] : null;
+	article_moved(next_article);
+}
+
 function firehose_toggle_advpref() {
 	$('#fh_advprefs').toggleClass('hide');
 }
@@ -222,6 +232,7 @@ function tagsHideBody(id) {
 	$('#tagbox-title-'+id).setClass('tagtitleclosed');	// Make the title of the tagbox change back to regular
 	$('#tagbox-'+id).setClass('tags');			// Make the tagbox change back to regular.
 	$('#toggletags-button-'+id).html('[+]');		// Toggle the button back.
+	article_moved($('#firehose-'+id)[0]);
 }
 
 function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
@@ -240,6 +251,7 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 	$('#tagbox-'+id).setClass("tags");			// Make the tagbox change to the slashbox class
 	$('#tagbox-title-'+id).setClass("tagtitleopen");	// Make the title of the tagbox change to white-on-green
 	$('#toggletags-body-'+id).setClass("tagbody");		// Make the body of the tagbox visible
+	article_moved($('#firehose-'+id)[0]);
 }
 
 function tagsOpenAndEnter(id, tagname, is_admin, type) {
@@ -292,11 +304,13 @@ function toggle_firehose_body(id, is_admin) {
 		/*if (is_admin)
 			tagsShowBody(id, is_admin, '', "firehose"); */
 	}
+	article_moved(fh);
 	return false;
 }
 
 function toggleFirehoseTagbox(id) {
 	$('#fhtagbox-'+id).toggleClasses('tagbox', 'hide');
+	article_moved($('#firehose-'+id)[0]);
 }
 
 function firehose_set_options(name, value) {
@@ -456,7 +470,8 @@ function firehose_set_options(name, value) {
 }
 
 function firehose_remove_all_items() {
-	$('#firehoselist').children().remove();
+	$('#firehoselist').empty();
+	article_moved();
 }
 
 
@@ -568,6 +583,7 @@ function firehose_toggle_tag_ui_to( if_expanded, selector ){
 
 		$widget.find('a.edit-toggle .button').mapClass(toggle_button);
 		$server.find('#toggletags-body-'+id).mapClass(toggle_div);
+		article_moved($server[0]);
 	}
 
 	return $widget;
@@ -994,6 +1010,7 @@ function firehose_handle_update() {
 			myAnim.onComplete.subscribe(function() {
 				var fh_node = $dom(fh);
 				if (fh_node) {
+					article_moved(fh_node);
 					fh_node.style.height = "";
 					if (fh_idle_skin) {
 						$("h3 a[class!='skin']", fh_node).click(function(){
@@ -1040,6 +1057,7 @@ function firehose_handle_update() {
 					myAnim.onComplete.subscribe(function() {
 						var elem = this.getEl();
 						if (elem && elem.parentNode) {
+							article_removed(elem);
 							elem.parentNode.removeChild(elem);
 						}
 					});
@@ -1087,22 +1105,25 @@ function firehose_adjust_window(onscreen) {
 }
 
 function firehose_reorder() {
-	var onscreen = firehose_get_onscreen();
 	if (firehose_ordered) {
 		var fhlist = $('#firehoselist');
 		if (fhlist) {
 			firehose_item_count = firehose_ordered.length;
+			var moved = false;
 			for (i = 0; i < firehose_ordered.length; ++i) {
 				if (!/^\d+$/.test(firehose_ordered[i])) {
 					--firehose_item_count;
 				}
-				$('#firehose-'+firehose_ordered[i]).appendTo(fhlist);
+				if ( $('#firehose-'+firehose_ordered[i]).appendTo(fhlist).length ) {
+					moved = true;
+				}
 				if ( firehose_future[firehose_ordered[i]] ) {
 					$('#ttype-'+firehose_ordered[i]).setClass('future');
 				} else {
 					$('#ttype-'+firehose_ordered[i]+'.future').setClass('story');
 				}
 			}
+			if ( moved ) article_moved();
 			var newtitle = document.title;
 			if (/\(\d+\)/.test(newtitle)) {
 				newtitle = newtitle.replace(/(\(\d+\))/,"(" + firehose_item_count + ")");
@@ -1297,6 +1318,7 @@ function firehose_remove_entry(id) {
 		myAnim.duration = 0.5;
 		myAnim.onComplete.subscribe(function() {
 			var el = this.getEl();
+			article_moved(el);
 			el.parentNode.removeChild(el);
 		});
 		myAnim.animate();
@@ -1817,180 +1839,176 @@ function inlineAdInsertId(id) {
 //
 
 
-var	MODE_HIDDEN			= 0,
-	MODE_PINNED_TO_TOP		= 1,
-	MODE_PINNED_TO_BOTTOM		= 2,
-	MODE_ALIGNED_TO_SLASHBOXES	= 3,
-	MODE_ALIGNED_TO_ARTICLE		= 4,
-	current_mode			= MODE_ALIGNED_TO_SLASHBOXES,
-	css_for_mode = [
-		{	// MODE_HIDDEN
-			position: 'absolute',
-			top: '',
-			bottom: ''
-		},
-		{	// MODE_PINNED_TO_TOP
-			position: 'fixed',
-			top: 0,
-			bottom: ''
-		},
-		{	// MODE_PINNED_TO_BOTTOM
-			position: 'fixed',
-			top: '',
-			bottom: 0
-		},
-		{	// MODE_ALIGNED_TO_SLASHBOXES
-			position: 'absolute',
-			top: '',
-			bottom: ''
-		},
-		{	// MODE_ALIGNED_TO_ARTICLE
-			position: 'absolute',
-			top: '',
-			bottom: ''
-		}
-	],
-	name_for_mode = [
-		'MODE_HIDDEN',
-		'MODE_PINNED_TO_TOP',
-		'MODE_PINNED_TO_BOTTOM',
-		'MODE_ALIGNED_TO_SLASHBOXES',
-		'MODE_ALIGNED_TO_ARTICLE'
-	];
+var	AD_HEIGHT = 300, AD_WIDTH = 300,
 
-var	AD_HEIGHT=300,
-	AD_WIDTH=300,
-	MAGNETIC_RANGE=7,
+	current_mode = { has_content: false },
 	$ad_position,		// 300x300 div that holds the current (if any) ad
-	$current_article=$([]),	// the article to which that ad is attached
-
-		// elements that provide relative bounds for positioning the ad
-	$slashboxes,		// the container in which the ad floats
-	$sentinel_slashbox;	// upper bound: (the top of this) non-drawing div after the last slashbox
+	$current_article,	// the article to which that ad is attached
+	$slashboxes;		// the container in which the ad floats
 
 $(function(){
 	var $firehose = $('#firehose');
 	$slashboxes = $firehose.find('> #slashboxes').
-		append(
-			'<div id="floating-slashbox-ad" style="display:block; position:absolute; height:'+AD_HEIGHT+'px; width:'+AD_WIDTH+'px;" />' +
-			'<div id="slashboxes-sentinel" style="width:300px; height:1px" />'
-		);
-	$sentinel_slashbox = $slashboxes.find('#slashboxes-sentinel');
+		append('<div id="floating-slashbox-ad" style="display:none; position:absolute; height:'+AD_HEIGHT+'px; width:'+AD_WIDTH+'px;" />');
 	$ad_position = $slashboxes.find('#floating-slashbox-ad');
 
 	$(window).scroll(fix_ad_position);
+	$('#firehoselist').bind('articlesMoved', fix_ad_position);
 });
 
-function set_mode( new_mode, new_top ){
-	if ( new_mode != current_mode ) {
-		// console.log(name_for_mode[current_mode]+' --> '+name_for_mode[new_mode]);
+function if_same_mode( a, b ){
+	return	(!a.has_content && !b.has_content) ||
+		(
+			(a.has_content == b.has_content) &&
+			(a.is_in_window == b.is_in_window) &&
+			(a.top == b.top) &&
+			(a.pinned == b.pinned)
+		);
+}
 
-		if ( current_mode != MODE_HIDDEN )
+function set_mode( next ){
+	var cur = current_mode;
+
+	if ( ! if_same_mode(cur, next) ) {
+		if ( next.has_content ) {
+			if ( cur.has_content && (next.is_in_window || cur.is_in_window) ) {
+				$ad_position.animate({top: next.top}, 'fast');
+			} else {
+				$ad_position.hide().css({top: next.top});
+				if ( !cur.has_content ) {
+					$ad_position.fadeIn('fast');
+				} else {
+					$ad_position.show();
+				}
+			}
+		} else {
 			$ad_position.hide();
+		}
 
-		$ad_position.css(css_for_mode[new_mode]);
+		var event_name;
+		if ( cur.has_content != next.has_content ) {
+			event_name = next.has_content ? 'adInserted' : 'adRemoved';
+		} else if ( cur.pinned != next.pinned ) {
+			event_name = 'adPinnedTo' + next.pinned;
+		} else if ( cur.is_in_window != next.is_in_window ) {
+			event_name = next.is_in_window ? 'adMovedIntoWindow' : 'adMovedOutOfWindow';
+		} else if ( cur.top != next.top ) {
+			event_name = 'adMoved';
+		}
 
-		if ( new_mode == MODE_ALIGNED_TO_ARTICLE )
-			$ad_position.css('top', new_top);
+		current_mode = next;
 
-		if ( new_mode != MODE_HIDDEN )
-			$ad_position.show();
-
-		current_mode = new_mode;
+		if ( event_name ) {
+			$ad_position.trigger(event_name);
+		}
 	}
 }
 
-function set_ad_size( new_height, new_width ){
-	AD_HEIGHT = new_height;
-	set_mode(MODE_HIDDEN);
-	$ad_position.css({height: new_height, width: new_width});
-	fix_ad_position();
-}
-
-function set_current_ad_attach_article( ad_content, $article ){
-	remove_current_ad();
-	if ( $article )
-		$current_article = $article;
-	if ( ad_content )
-		$ad_position.append(ad_content);
-	set_mode(MODE_ALIGNED_TO_SLASHBOXES);
-	fix_ad_position();
-}
-
-function detach_current_ad_from_article(){
-	$current_article = $([]);
-	fix_ad_position();
-}
-
 function remove_current_ad(){
-	set_mode(MODE_HIDDEN);
-	$ad_position.empty();
-	$current_article = $([]);
+	if ( current_mode.has_content ) {
+		set_mode({ has_content: false });
+		$ad_position.empty();
+		$current_article = null;
+	}
+}
+
+function set_current_ad( ad_content, $article ){
+	if ( ad_content && $article && $article.length==1 ) {
+		remove_current_ad();
+		current_mode.will_have_content = true;
+		$current_article = $article;
+		$ad_position.append(ad_content);
+		fix_ad_position();
+	}
 }
 
 function fix_ad_position(){
-	//if ( ! $sentinel_slashbox.is(':last-child') ) {
-	//	$slashboxes.append($sentinel_slashbox);
-	//}
+	if ( current_mode.has_content || current_mode.will_have_content ) {
+		var	$footer		= $('#firehose > #fh-pag-div'),
+			space_top	= $slashboxes.offset().top + $slashboxes.height(),
+			space_bottom	= $footer.offset().top + $footer.height(),
+			article_top	= $current_article.offset().top,
+			window_top	= window.pageYOffset,
+			window_bottom	= window_top + window.innerHeight,
+			ad_top		= Math.max(space_top, Math.min(article_top, space_bottom-AD_HEIGHT)),
+			next_mode	= {	has_content:	true,
+						is_in_window:	!( ad_top > window_bottom || ad_top + AD_HEIGHT < window_top ),
+						top:		ad_top - $slashboxes.offset().top
+					};
 
-	var	$footer		= $('#firehose > #fh-pag-div'),
-		space_top	= $sentinel_slashbox.offset().top,
-		space_bottom	= $footer.offset().top + $footer.height(),
+		if ( ad_top == article_top ) {
+			next_mode.pinned = 'Article';
+		} else if ( ad_top < article_top ) {
+			next_mode.pinned = 'Bottom';
+		} else if ( ad_top > (article_top + $current_article.height()) ) {
+			next_mode.pinned = 'TopDisconnected';
+		} else {
+			next_mode.pinned = 'Top';
+		}
 
-		detached	= $current_article.length == 0,
-
-		article_top	= detached ? space_top : $current_article.offset().top,
-		article_bottom	= article_top + (detached ? 0 : $current_article.height()),
-
-		window_top	= window.pageYOffset,
-		window_bottom	= window_top + window.innerHeight,
-
-		magnetic_top	= window_top + MAGNETIC_RANGE,
-		magnetic_bottom	= window_bottom - MAGNETIC_RANGE,
-
-		ad_top		= Math.max(space_top, Math.min(article_top, space_bottom-AD_HEIGHT)),
-		ad_bottom	= ad_top + AD_HEIGHT;
-
-	if ( ! detached && (article_top > window_bottom || article_bottom < window_top) )
-		set_mode(MODE_HIDDEN);
-
-	else if ( ad_top <= magnetic_top )
-		set_mode(MODE_PINNED_TO_TOP);
-
-	else if ( ad_bottom >= magnetic_bottom && (window_bottom-space_top)>AD_HEIGHT )
-		set_mode(MODE_PINNED_TO_BOTTOM);
-
-	else if ( ad_bottom >= magnetic_bottom )
-		set_mode(MODE_ALIGNED_TO_SLASHBOXES);
-
-	else
-		set_mode(MODE_ALIGNED_TO_ARTICLE, ad_top - $slashboxes.offset().top);
+		set_mode(next_mode);
+	}
 }
 
 
 Slash.Util.Package({ named: 'Slash.Firehose.floating_slashbox_ad',
 	api: {
-		is_visible:		function(){ return current_mode != MODE_HIDDEN; },
-		detach:			detach_current_ad_from_article,
+		is_visible:		function(){ return current_mode.has_content && current_mode.is_in_window; },
 		remove:			remove_current_ad,
 		current_article:	function(){ return $current_article; },
-		set_size:		set_ad_size
+		is_pinned_to:		function(){ return current_mode.pinned; },
+		bind:			function(){ return $ad_position.bind.apply($ad_position, arguments); },
+		unbind:			function(){ return $ad_position.unbind.apply($ad_position, arguments); }
 	},
-	stem_function: set_current_ad_attach_article
+	stem_function: set_current_ad
 });
 
 Slash.Firehose.articles_on_screen = function(){
 	var	window_top = window.pageYOffset,
-		window_bottom = window_top + window.innerHeight;
+		window_bottom = window_top + window.innerHeight,
+		lo,	// index within the jQuery selection of the first article visible on the screen
+		hi=0;	// index one beyond the last article visible on the screen
 
-	return $('#firehose > #firehoselist').
+	var $articles = $('#firehose > #firehoselist').
 		article_info__find_articles().
-		filter(':visible').
-			filter(function(){
-				var $this=$(this), top=$this.offset().top, bottom=top+$this.height();
-				if ( top < window_bottom && bottom > window_top )
-					return this;
-			});
+			filter(':visible').
+				// examine articles in order until I _know_ no further articles can be on screen
+				each(function(){
+					var $this=$(this), this_top=$this.offset().top;
+					// hi is the index of this article
+
+					if ( this_top >= window_bottom ) {
+						// ...then this article, and all that follow must be entirely below the screen
+						// the last article on screen (if any) must be the previous one (at hi-1)
+						return false;
+					}
+
+					// until we find the first on-screen article...
+					if ( lo === undefined ) {
+						var this_bottom = this_top + $this.height();
+
+						// we know this_top is above window_bottom, so...
+						if ( this_bottom > window_top ) {
+							// ...then _this_ article must be (the first) on screen
+							lo = hi;
+						}
+
+						if ( this_bottom >= window_bottom ) {
+							// ...then we must be the _only_ article on screen
+							++hi; // starting one past this article, everything is below the screen
+							return false;
+						}
+					}
+					++hi;
+				});
+
+	if ( lo === undefined ) {
+		return $([]);
+	} else if ( lo===0 && hi==$articles.length ) {
+		return $articles;
+	} else {
+		return $(Array.prototype.slice.call($articles, lo, hi));
+	}
 }
 
 Slash.Firehose.choose_article_for_next_ad = function(){
