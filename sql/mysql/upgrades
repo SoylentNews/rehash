@@ -5566,6 +5566,6 @@ UPDATE vars SET value = 'T_2_5_0_223' WHERE name = 'cvs_tag_currentcode';
 # SLASHDOT LAST UPDATED HERE
 
 # for plugins/Journal
-ALTER TABLE journals_text ADD COLUMN introtext TEXT DEFAULT '' NOT NULL;
+ALTER TABLE journals_text ADD COLUMN introtext TEXT NOT NULL;
 
 

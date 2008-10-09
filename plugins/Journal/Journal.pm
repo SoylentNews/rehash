@@ -36,7 +36,7 @@ sub set {
 	}
 
 	$j2{article}   = delete $j1{article};
-	$j2{introtext} = $self->getIntrotext(0, $j2{article});
+	$j2{introtext} = $self->getIntrotext(0, $j2{article}) if $j2{article};
 	$j1{"-last_update"} = 'now()';
 
 	$self->sqlUpdate('journals', \%j1, "id=$id") if keys %j1;
@@ -185,7 +185,7 @@ sub create {
 	my($id) = $self->getLastInsertId({ table => 'journals', prime => 'id' });
 	return unless $id;
 
-	my $introtext = $self->getIntrotext(0, $article);
+	my $introtext = $self->getIntrotext(0, $article) || '';
 	$self->sqlInsert("journals_text", {
 		id        => $id,
 		article   => $article,

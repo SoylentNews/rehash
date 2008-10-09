@@ -27,7 +27,7 @@ DROP TABLE IF EXISTS journals_text;
 CREATE TABLE journals_text (
 	id MEDIUMINT UNSIGNED NOT NULL,
 	article TEXT NOT NULL,
-	introtext TEXT NOT NULL DEFAULT '',
+	introtext TEXT NOT NULL,
 	PRIMARY KEY (id)
 );
 
