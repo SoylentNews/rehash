@@ -74,7 +74,7 @@ var meta_down = 0;
 var d2_seen = '';
 var low_bandwidth = 0;
 
-var adTimerSecsMax   = 30;
+var adTimerSecsMax   = 15;
 var adTimerClicksMax = 0;
 var adTimerUrl       = '';
 
