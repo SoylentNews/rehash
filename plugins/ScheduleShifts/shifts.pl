@@ -87,7 +87,6 @@ sub createRemark {
 	1;
 }
 
-{my @types = map { qr{^$_$} } qw(text/plain text/.?html text/.+);
 sub formatRemarkFromEmail {
 	my($text) = @_;
 	return if !$text || $text eq '1';
@@ -104,6 +103,8 @@ sub formatRemarkFromEmail {
 	my $subject = $entity->head->get('Subject');
 	$subject =~ s/^\s*\[DP\]\s*//;
 	$subject = '(no subject)' unless length $subject;
+
+	my @types = map { qr{^$_$} } qw(text/plain text/.?html text/.+);
 
 	my $body;
 	my @parts = $entity->parts;
@@ -198,7 +199,7 @@ sub formatRemarkFromEmail {
 		join('; ', @uri_str, $remark);
 
 	return $final;
-}}
+}
 
 sub getDaddyList {
 	my($slashdb, $constants, $user, $form, $gSkin, $schedule) = @_;
