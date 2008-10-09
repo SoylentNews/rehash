@@ -56,8 +56,8 @@ sub displaySlashboxes {
 		next if $user->{lowbandwidth} && !($bid =~ $constants->{lowbandwidth_bids_regex} );
 		if ($bid eq 'mysite') {
 			$return .= portalsidebox(
-				getData('userboxhead'),
-				$user->{mylinks} || getData('userboxdefault'),
+				getData('userboxhead', {}, 'index'),
+				$user->{mylinks} || getData('userboxdefault', {}, 'index'),
 				$bid,
 				'',
 				$getblocks
@@ -65,7 +65,7 @@ sub displaySlashboxes {
 
 		} elsif ($bid =~ /_more$/ && $older_stories_essentials) {
 			$return .= portalsidebox(
-				getData('morehead'),
+				getData('morehead', {}, 'index'),
 				getOlderStories($older_stories_essentials, $skin,
 					{ first_date => $other->{first_date}, last_date => $other->{last_date} }),
 				$bid,
@@ -109,7 +109,7 @@ sub displaySlashboxes {
 			# We only display if the person has friends with data
 			if ($articles && @$articles) {
 				$return .= portalsidebox(
-					getData('friends_journal_head'),
+					getData('friends_journal_head', {}, 'index'),
 					slashDisplay('friendsview', { articles => $articles }, { Return => 1, Page => 'index' }),
 					$bid,
 					"$gSkin->{rootdir}/my/journal/friends",
