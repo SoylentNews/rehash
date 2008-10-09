@@ -72,7 +72,7 @@ var is_ie = ua.match("/MSIE/");
 var fh_adTimerSecsMax   = 15;
 var fh_adTimerClicksMax = 0;
 var fh_adTimerUrl       = '';
-adTimerUrl = '/images/iframe/firehose.html'; // testing
+fh_adTimerUrl = '/images/iframe/firehose.html'; // testing
 
 
 function createPopup(xy, titlebar, name, contents, message, onmouseout) {
@@ -1871,7 +1871,7 @@ function inlineAdFirehose() {
 	var $system = $article.find('[context=system]');
 	var topic = $system.find('.t2:not(.s1)').tag_ui__tags().join(',');
 	var skin  = $system.find('.s1').tag_ui__tags()[0];
-	var adUrl = adBaseUrl + '?skin=' + (skin || 'mainpage');
+	var adUrl = fh_adTimerUrl + '?skin=' + (skin || 'mainpage');
 	if (topic)
 		adUrl = adUrl + '&topic=' + topic;
 
