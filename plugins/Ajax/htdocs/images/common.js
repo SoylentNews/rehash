@@ -68,6 +68,11 @@ var fh_slider_init_set = 0;
 var ua=navigator.userAgent;
 var is_ie = ua.match("/MSIE/");
 
+// ads
+var fh_adTimerSecsMax   = 15;
+var fh_adTimerClicksMax = 0;
+var fh_adTimerUrl       = '';
+adTimerUrl = '/images/iframe/firehose.html'; // testing
 
 
 function createPopup(xy, titlebar, name, contents, message, onmouseout) {
@@ -1077,6 +1082,7 @@ function firehose_handle_update() {
 		setTimeout(firehose_handle_update, wait_interval);
 	} else {
 		firehose_reorder();
+		inlineAdFirehose();
 		firehose_get_next_updates();
 	}
 
@@ -1776,6 +1782,7 @@ var adTimerSeen   = {};
 var adTimerSecs   = 0;
 var adTimerClicks = 0;
 var adTimerInsert = 0;
+var adTimerUrl    = '/images/iframe/firehose.html';
 
 function inlineAdReset(id) {
 	if (id !== undefined)
@@ -1783,6 +1790,19 @@ function inlineAdReset(id) {
 	adTimerSecs   = getSeconds();
 	adTimerClicks = 0;
 	adTimerInsert = 0;
+}
+
+
+function inlineAdClick(id) {
+	//adTimerSeen[id] = adTimerSeen[id] || 1;
+	adTimerClicks = adTimerClicks + 1;
+}
+
+
+function inlineAdInsertId(id) {
+	if (id !== undefined)
+		adTimerInsert = id;
+	return adTimerInsert;
 }
 
 
@@ -1794,7 +1814,7 @@ function inlineAdVisibles() {
 
 function inlineAdCheckTimer(id, url, clickMax, secsMax) {
 	if (!url || !id)
-		return;
+		return 0;
 
 	if (adTimerSeen[id] && adTimerSeen[id] == 2)
 		return 0;
@@ -1815,20 +1835,45 @@ function inlineAdCheckTimer(id, url, clickMax, secsMax) {
 	if (!ad)
 		return 0;
 
-	inlineAdInsertId(id);
+	return inlineAdInsertId(id);
 }
 
 
-function inlineAdClick(id) {
-	//adTimerSeen[id] = adTimerSeen[id] || 1;
-	adTimerClicks = adTimerClicks + 1;
-}
+function inlineAdFirehose() {
+	if (!fh_is_admin)
+		return 0; // testing
 
+	var $article = Slash.Firehose.choose_article_for_next_ad();
+	var id = $article.article_info__get_key().key;
+	if (!id)
+		return 0;
 
-function inlineAdInsertId(id) {
-	if (id !== undefined)
-		adTimerInsert = id;
-	return adTimerInsert;
+	// we need to remove the existing ad from the hash so it can be re-used
+	var old_id = inlineAdInsertId();
+
+	if (! inlineAdCheckTimer(id, fh_adTimerUrl, fh_adTimerClicksMax, fh_adTimerSecsMax))
+		return 0;
+
+	// XXX after N seconds we still want to replace this ad
+	if (Slash.Firehose.floating_slashbox_ad.is_visible())
+		return 0;
+
+	var $system = $article.find('[context=system]');
+	var topic = $system.find('.t2:not(.s1)').tag_ui__tags().join(',');
+	var skin  = $system.find('.s1').tag_ui__tags()[0];
+	var adUrl = adBaseUrl + '?skin=' + (skin || 'mainpage');
+	if (topic)
+		adUrl = adUrl + '&topic=' + topic;
+
+	var ad_content = '<iframe src="' + adUrl + '" height="300" width="300" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe>';
+
+	Slash.Firehose.floating_slashbox_ad(ad_content, $article);
+
+	inlineAdReset(id);
+	if (old_id)
+		adTimerSeen[old_id] = 0;
+
+	return id;
 }
 
 
