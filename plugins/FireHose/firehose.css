@@ -1,3 +1,8 @@
+/* Slashboxes */
+div #slashboxes {
+       width: 23em;
+}
+
 /* Reset */
 .article .title, .article h3, .article .generaltitle, .briefarticle .title, .briefarticle h3, .briefarticle .generaltitle { background: transparent !important; }
 
@@ -144,7 +149,7 @@ ul.menu#fhtablist li.active:before, .paginate .active:before { content: ""; }
 /* Pagination */
 .daybreak,
 .paginate { background: #666 url('//images.slashdot.org/block-title-bg.png') repeat-x; }
-.paginate { margin-right: 19.5em; }
+.paginate { margin-right: 25em; }
 #metamodwrap .paginate { margin-right: 0em}
 #users .paginate { margin-right: 0em; }
 
@@ -172,7 +177,7 @@ div.article {margin-top: 1em}
 
 .storylinks li.more { margin-left: -1.8em !important; }
 .storylinks li.comments {border-left: 1px solid #ccc; padding-left: 1em !important}
-#firehoselist, #firehose #message, .firemenu { margin-right: 19.5em; }
+#firehoselist, #firehose #message, .firemenu, #console { margin-right: 25em; }
 #metamodwrap #firehoselist, #firehose #metamodwrap #message { margin-right: 0em; }
 #users #firehoselist, #users #firehose #message, #users .firemenu { margin-right: 0em; }
 .admin #firehoselist, .admin #firehose #message, .admin .firemenu { margin-right: 0; }
