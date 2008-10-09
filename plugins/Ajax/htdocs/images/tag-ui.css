@@ -3,6 +3,14 @@
 	-moz-user-select: text;
 }
 
+/* for unregistered users*/
+.tag-widget-stub span.button.collapse {
+        position:absolute;
+        margin-top:-1.6em;
+        margin-left:7em;
+}
+
+
 span.tag, .tmenu, .tag-display, .tag-display-set,
 .tag-display ul, .tag-display li, .tag-display h1.legend,
 .edit-toggle, .tag-widget .related {
