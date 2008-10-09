@@ -98,7 +98,7 @@ __template__
 
                 <tr>
                 <td><b>Console Messages</b></td>
-                <td><input type="checkbox" name="console_message_toggle" CHECKED></td>
+                <td><input type="checkbox" name="console_message_toggle"[% constants.markup_checked_attribute %]></td>
                 </tr>
 
                 <tr>

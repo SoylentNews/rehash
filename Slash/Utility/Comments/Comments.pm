@@ -2061,9 +2061,9 @@ EOT
 		&& $comment->{nickname} ne "-") { # this last test probably useless
 		my @link = ( );
 
-		my ($prefix, $a_id, $a_class, $suffix) = ('', '', '', '');
+		my($prefix, $a_id, $a_class, $suffix) = ('', '', '', '');
 		my $is_idle = $gSkin->{name} eq 'idle';
-		if ( $is_idle ) {
+		if ($is_idle) {
 			$a_class = 'vbutton bg_666666 rd_5';
 			$a_id = "reply_link_$comment->{cid}";
 		} else {
@@ -2082,7 +2082,7 @@ EOT
 			onclick	=> ($discussion2 ? "D2.replyTo($comment->{cid}); return false;" : '')
 		}) . $suffix) unless $user->{state}{discussion_archived};
 
-		if ( ! $is_idle ) {
+		if (! $is_idle) {
 			$prefix = qq'<span class="nbutton"><p><b>';
 		}
 
