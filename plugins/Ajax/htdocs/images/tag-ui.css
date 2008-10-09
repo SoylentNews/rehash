@@ -474,3 +474,7 @@ div.article div.title div.nod-nix-reasons span.tag {
 .note-flag.no-note {
 	display: none;
 }
+
+a.edit-toggle {
+	text-decoration:none;
+}
