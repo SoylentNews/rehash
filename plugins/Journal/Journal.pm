@@ -59,7 +59,7 @@ sub getsByUid {
 	$where .= " AND journals.id = $id" if $id;
 
 	my $answer = $self->sqlSelectAll(
-		'date, article, description, journals.id, posttype, tid, discussion, introtext',
+		'date, article, description, journals.id, posttype, tid, discussion',
 		'journals, journals_text',
 		$where,
 		$order
@@ -113,7 +113,7 @@ sub getsByUids {
 	my $journal_ids_found_list = join(',', @journal_ids_found);
 	my $columns =	$t_o	? 'id, description'
 				: 'date, article, description, journals.id,
-				   posttype, tid, discussion, journals.uid, introtext';
+				   posttype, tid, discussion, journals.uid';
 	my $tables =	$t_o	? 'journals'
 				: 'journals, journals_text';
 	my $where =	$t_o	? "journals.id IN ($journal_ids_found_list)"
