@@ -30,7 +30,7 @@ __template__
                         <input type="hidden" name="uid" value="[% user.uid %]">
                         <input type="hidden" name="name" value="[% user.nickname | strip_attribute %]">
 
-                        <input type="checkbox" name="test_code"[% constants.markup_checked_attribute IF user.test_code %]>&nbsp;<b>Enable Test Code</b>
+                        <input type="checkbox" id="test_code" name="test_code"[% constants.markup_checked_attribute IF user.test_code %]>&nbsp;<label for="test_code"><b>Enable Test Code</b></label>
 
                         [% IF constants.slashbox_whatsplaying %]
                                 <h3>User Info</h3>
@@ -45,7 +45,7 @@ __template__
                                 nospell_check = constants.markup_checked_attribute;
                         END %]
 
-                        <input type="checkbox" name="no_spell"[% nospell_check %]>&nbsp;<b>Disable Spellchecker</b>
+                        <input type="checkbox" id="no_spell" name="no_spell"[% nospell_check %]>&nbsp;<label for="no_spell"><b>Disable Spellchecker</b></label>
 
                         <br><br>
 
@@ -54,7 +54,7 @@ __template__
                                 s_mod_check = constants.markup_checked_attribute;
                         END %]
 
-                        <input type="checkbox" name="mod_with_comm" [% s_mod_check %]></b>&nbsp;<b>Show Moderations in User Comment Listing</b>
+                        <input type="checkbox" id="mod_with_comm" name="mod_with_comm" [% s_mod_check %]></b>&nbsp;<label for="mod_with_comm"><b>Show Moderations in User Comment Listing</b></label>
 
                         <br><br>
 
@@ -63,7 +63,7 @@ __template__
                                 s_m2_check = constants.markup_checked_attribute;
                         END %]
 
-                        <input type="checkbox" name="m2_with_mod" [% s_m2_check %]>&nbsp;<b>Show Metamoderation in User Moderation Listing</b>
+                        <input type="checkbox" id="m2_with_mod" name="m2_with_mod" [% s_m2_check %]>&nbsp;<label for="m2_with_mod"><b>Show Metamoderation in User Moderation Listing</b></label>
 
                         <br><br>
 
@@ -72,7 +72,7 @@ __template__
                                 s_m2c_check = constants.markup_checked_attribute;
                         END %]
 
-                        <input type="checkbox" name="m2_with_mod_on_comm" [% s_m2c_check %]>&nbsp;<b>Show Metamoderation in Comment Moderation Listing</b>
+                        <input type="checkbox" id="m2_with_mod_on_comm" name="m2_with_mod_on_comm" [% s_m2c_check %]>&nbsp;<label for="m2_with_mod_on_comm"><b>Show Metamoderation in Comment Moderation Listing</b></label>
 
                         <br><br>
 

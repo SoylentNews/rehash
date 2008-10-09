@@ -82,7 +82,7 @@ __template__
                 END
                 %]
 
-                <input type="checkbox" name="simpledesign"[% sd_check %]> <b>Simple Design</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_simpledesign');" class="help">?</a>
+                <label><input type="checkbox" name="simpledesign"[% sd_check %]> <b>Simple Design</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_simpledesign');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_simpledesign" class="modalprefhelp" style="display: none;">
                         Simplifies the design of [% constants.sitename %] to strip away some of the excesses of the UI.
@@ -96,7 +96,7 @@ __template__
                 END
                 %]
 
-                <input type="checkbox" name="lowbandwidth"[% lb_check %]> <b>Low Bandwidth</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_lowbandwidth');" class="help">?</a>
+                <label><input type="checkbox" name="lowbandwidth"[% lb_check %]> <b>Low Bandwidth</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_lowbandwidth');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_lowbandwidth" class="modalprefhelp" style="display: none;">
                         Reduces the size of pages for people with slower network connections
@@ -110,7 +110,7 @@ __template__
                 END
                 %]
 
-                <input type="checkbox" name="noicons"[% i_check %]> <b>No Icons</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_noicons');" class="help">?</a>
+                <label><input type="checkbox" name="noicons"[% i_check %]> <b>No Icons</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_noicons');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_noicons" class="modalprefhelp" style="display: none;">
                         Disable topic icon images on stories.
@@ -132,7 +132,7 @@ __template__
                 END
                 %]
 
-                <input type="checkbox" name="willing"[% w_check %]> <b>Willing to Moderate</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_moderate');" class="help">?</a>
+                <label><input type="checkbox" name="willing"[% w_check %]> <b>Willing to Moderate</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_moderate');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_moderate" class="modalprefhelp" style="display: none;">
                         By default all users are willing to Moderate. Uncheck this if you aren't interested.
@@ -146,7 +146,7 @@ __template__
                 END
                 %]
 
-                <input type="checkbox" name="showtags"[%tag_check %]> <b>Show Tags</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_showtags');" class="help">?</a>
+                <label><input type="checkbox" name="showtags"[%tag_check %]> <b>Show Tags</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_showtags');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_showtags" class="modalprefhelp" style="display: none;">
                         Turn this off to ignore all tags.
@@ -160,7 +160,7 @@ __template__
                 END
                 %]
 
-                <input type="checkbox" name="opt_osdn_navbar"[% osdn_navbar_check %]> <b>OSTG Navbar</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_ostg');" class="help">?</a>
+                <label><input type="checkbox" name="opt_osdn_navbar"[% osdn_navbar_check %]> <b>OSTG Navbar</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_ostg');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_ostg" class="modalprefhelp" style="display: none;">
                         Turn this on to display the OSTG nav bar at the top of the screen.

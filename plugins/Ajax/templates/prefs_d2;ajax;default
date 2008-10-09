@@ -29,7 +29,7 @@ __template__
 <table width="100%">
         <tr>
         <td valign="middle">
-                <input type="checkbox" name="discussion2"[% constants.markup_checked_attribute IF user.discussion2 == 'slashdot'  %] onclick="void(document.forms['modal_prefs'].refreshable.value=1);">&nbsp;<b>Enable Dynamic Discussions</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussions');" class="help">?</a>
+                <input id="discussion2" type="checkbox" name="discussion2"[% constants.markup_checked_attribute IF user.discussion2 == 'slashdot'  %] onclick="void(document.forms['modal_prefs'].refreshable.value=1);">&nbsp;<label for="discussion2"><b>Enable Dynamic Discussions</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussions');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_discussions" class="modalprefhelp" style="display: none;">
                         Toggle between Discussion 2 and the classic discussion system.
@@ -39,14 +39,14 @@ __template__
 
                 [% IF user.discussion2 && user.discussion2 == "slashdot" %]
                 	[% # i know the logic here is backward, but it still makes the most sense to me! -- pudge %]
-                        <input type="checkbox" id="d2_keybindings_switch" name="d2_keybindings_switch"[% constants.markup_checked_attribute IF !user.d2_keybindings_switch %] onclick="D2.d2_keybindings_off($('#d2_keybindings_switch').attr('checked') ? 0 : 1)">&nbsp;<b>Enable Dynamic Discussion Keybindings</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussion_keys');" class="help">?</a>
+                        <input type="checkbox" id="d2_keybindings_switch" name="d2_keybindings_switch"[% constants.markup_checked_attribute IF !user.d2_keybindings_switch %] onclick="D2.d2_keybindings_off($('#d2_keybindings_switch').attr('checked') ? 0 : 1)">&nbsp;<label for="d2_keybindings_switch"><b>Enable Dynamic Discussion Keybindings</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussion_keys');" class="help">?</a>
                         <br>
                         <div id="modalprefhelp_discussion_keys" class="modalprefhelp" style="display: none;">
                                 Toggle to enable <a href="http://slashdot.org/faq/com-mod.shtml#cm128">Discussion 2 keybindings</a>.
                         </div>
                         <br>
 
-                        <input type="checkbox" id="d2_reverse_switch" name="d2_reverse_switch"[% constants.markup_checked_attribute IF user.d2_reverse_switch %] onclick="D2.d2_reverse_shift($('#d2_reverse_switch').attr('checked') ? 1 : 0)">&nbsp;<b>Collapse Comments After Reading</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussion_shift_key');" class="help">?</a>
+                        <input type="checkbox" id="d2_reverse_switch" name="d2_reverse_switch"[% constants.markup_checked_attribute IF user.d2_reverse_switch %] onclick="D2.d2_reverse_shift($('#d2_reverse_switch').attr('checked') ? 1 : 0)">&nbsp;<label for="d2_reverse_switch"><b>Collapse Comments After Reading</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_discussion_shift_key');" class="help">?</a>
                         <br>
                         <div id="modalprefhelp_discussion_shift_key" class="modalprefhelp" style="display: none;">
                                 Collapse a comment when you navigate away from it when using the <a href="http://slashdot.org/faq/com-mod.shtml#cm128">Discussion 2 keybindings</a>.
@@ -77,7 +77,7 @@ __template__
 
                 <br>
 
-                <input type="checkbox" name="nosigs"[% s_check %]>&nbsp;<b>Disable Sigs</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sigs');" class="help">?</a>
+                <input type="checkbox" id="nosigs" name="nosigs"[% s_check %]>&nbsp;<label for="nosigs"><b>Disable Sigs</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_sigs');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_sigs" class="modalprefhelp" style="display: none;">
                         Strip sig quotes from comments.
@@ -89,7 +89,7 @@ __template__
                 IF user.noscores;
                         n_check = constants.markup_checked_attribute;
                 END %]
-                <input type="checkbox" name="noscores"[% n_check %]>&nbsp;<b>Do Not Display Scores</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_scores');" class="help">?</a>
+                <input type="checkbox" id="noscores" name="noscores"[% n_check %]>&nbsp;<label for="noscores"><b>Do Not Display Scores</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_scores');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_scores" class="modalprefhelp" style="display: none;">
                         Hide scores. They still <b>apply</b>, but you just don't see them.
@@ -107,9 +107,9 @@ __template__
                 </div>
 
                 <div>
-                <input type="radio" name="domaintags" [% domaintags.0 %] value=0> Never show link domains<br>
-                <input type="radio" name="domaintags" [% domaintags.1 %] value=1> Show the links domain only in recommended situations<br>
-                <input type="radio" name="domaintags" [% domaintags.2 %] value=2> Always show link domains
+                <label><input type="radio" name="domaintags" [% domaintags.0 %] value=0> Never show link domains</label><br>
+                <label><input type="radio" name="domaintags" [% domaintags.1 %] value=1> Show the links domain only in recommended situations</label><br>
+                <label><input type="radio" name="domaintags" [% domaintags.2 %] value=2> Always show link domains</label>
                 </div>
 
         </td>

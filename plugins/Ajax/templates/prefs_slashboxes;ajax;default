@@ -43,7 +43,7 @@ __template__
                                 <tr valign="top" align="left">
                         [% END %]
                                 <td>
-                                <input type="checkbox" name="showbox_[% bid | strip_attribute %]"[% section_descref.$bid.checked %]>
+                                <label><input type="checkbox" name="showbox_[% bid | strip_attribute %]"[% section_descref.$bid.checked %]>
                                 <a href="/users.pl?op=previewbox&amp;bid=[% bid | strip_paramattr %]">
                                 [% IF bid == 'srandblock' %]
                                         Semi-Random Box
@@ -52,7 +52,7 @@ __template__
                                 [% ELSE %]
                                         [% section_descref.$bid.title || bid %]
                                 [% END %]
-                                </a>
+                                </a></label>
                                 </td>
                         [% IF loop.index % 3 == 2 %]
                                 </tr>

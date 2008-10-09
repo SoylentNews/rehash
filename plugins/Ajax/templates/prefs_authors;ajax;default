@@ -42,10 +42,10 @@ __template__
                                 <tr>
                         [% END %]
                         <td>
-                        <input type="checkbox" name="aid[% aid %]"
+                        <label><input type="checkbox" name="aid[% aid %]"
                         [% IF story_never_author.$aid > 0 %] checked[%END %]>
                         [% author_hr.$aid | strip_literal %]
-                        </td>
+                        </label></td>
                         [% IF loop.index % 3 == 2 %]
                                 </tr>
                         [% END %]        

@@ -47,7 +47,7 @@ in now</a>, or <a href="[% gSkin.rootdir %]/users.pl">Create an Account</a>.
 						<input type="text" name="postersubj_[% pid %]" id="postersubj_[% pid %]" value="[% form.postersubj | strip_attribute %]" size="50" maxlength="50">
 						[% UNLESS user.is_anon %]
 							[%- IF constants.allow_anonymous && user.karma > -1 && (discussion.commentstatus == 'enabled' || discussion.commentstatus == 'logged_in') -%]
-									<input type="checkbox" name="postanon_[% pid %]" id="postanon_[% pid %]"> Post Anonymously
+									<label><input type="checkbox" name="postanon_[% pid %]" id="postanon_[% pid %]"> Post Anonymously</label>
 							[%- END %]
 						[% END %]
 					</h3>

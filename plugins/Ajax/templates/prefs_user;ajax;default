@@ -59,7 +59,7 @@ __template__
                         <b>AIM</b>&nbsp;<input type="text" name="aim" value="[% user.aim | strip_attribute %]" size="40">
                         <br>
 
-                        <span style="padding-left: 15px;"><input type="checkbox" name="aimdisplay" value="1"[% IF user.aimdisplay %] checked="checked" [% END %]>&nbsp;<b>Do not make this AIM nick public</b></span>
+                        <span style="padding-left: 15px;"><label><input type="checkbox" name="aimdisplay" value="1"[% IF user.aimdisplay %] checked="checked" [% END %]>&nbsp;<b>Do not make this AIM nick public</label></b></span>
 
                         &nbsp;<p><br>
 

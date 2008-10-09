@@ -51,9 +51,9 @@ __template__
                 emaildisplay.${user.emaildisplay} = constants.markup_checked_attribute;
         END %]
         <blockquote><div>
-        <input type="radio" name="emaildisplay" [% emaildisplay.0 %] value=0> Do not display an e-mail address.<br>
-        <input type="radio" name="emaildisplay" [% emaildisplay.1 %] value=1> Show your email address with weekly updating spam armoring.<br>
-        <input type="radio" name="emaildisplay" [% emaildisplay.2 %] value=2> Show your real email address without cowering behind childish anonymity or obfuscation.
+        <label><input type="radio" name="emaildisplay" [% emaildisplay.0 %] value=0> Do not display an e-mail address.</label><br>
+        <label><input type="radio" name="emaildisplay" [% emaildisplay.1 %] value=1> Show your email address with weekly updating spam armoring.</label><br>
+        <label><input type="radio" name="emaildisplay" [% emaildisplay.2 %] value=2> Show your real email address without cowering behind childish anonymity or obfuscation.</label>
         </div></blockquote>
 
         [% IF user.karma > constants.goodkarma;
@@ -62,7 +62,7 @@ __template__
                         b_check = constants.markup_checked_attribute;
                 END %]
                 <input type="hidden" name="nobonus_present" value="1">
-                <b><input type="checkbox" name="nobonus"[% b_check %]>&nbsp;No Karma Bonus</b><a href="#" onclick="displayModalPrefHelp('modalprefhelp_karma');" class="help">?</a>
+                <label><input type="checkbox" name="nobonus"[% b_check %]>&nbsp;<b>No Karma Bonus</b></label><a href="#" onclick="displayModalPrefHelp('modalprefhelp_karma');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_karma" class="modalprefhelp" style="display: none;">
                         Normally users with high karma post at Score: 2, but you can choose to post down in the Score: 1 gutters with the rest of the user population with this option.
@@ -76,7 +76,7 @@ __template__
                         sb_check = constants.markup_checked_attribute;
                 END %]
                 <input type="hidden" name="nosubscriberbonus_present" value="1">
-                <b><input type="checkbox" name="nosubscriberbonus"[% sb_check %]>&nbsp;No Subscriber Bonus</b>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_subscriber');" class="help">?</a>
+                <label><input type="checkbox" name="nosubscriberbonus"[% sb_check %]>&nbsp;<b>No Subscriber Bonus</b></label>&nbsp;<a href="#" onclick="displayModalPrefHelp('modalprefhelp_subscriber');" class="help">?</a>
                 <br>
                 <div id="modalprefhelp_subscriber" class="modalprefhelp" style="display: none;">
                         Our paying subscribers are allowed to post at Score: 2, but if you think that this is unnecessary, then you can turn it off.
