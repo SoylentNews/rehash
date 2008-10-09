@@ -187,8 +187,10 @@ sub createItemFromJournal {
 	my $user = getCurrentUser();
 	my $journal_db = getObject("Slash::Journal");
 	my $journal = $journal_db->get($id);
-	my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
+	my $bodytext  = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
+	my $introtext = $journal->{introtext} || $bodytext;
 	if ($journal) {
+		my $constants = getCurrentStatic();
 		my $globjid = $self->getGlobjidCreate("journals", $journal->{id});
 
 		my $publicize  = $journal->{promotetype} eq 'publicize';
@@ -202,33 +204,34 @@ sub createItemFromJournal {
 		my $type = $user->{acl}{vendor} ? "vendor" : "journal";
 
 		my $data = {
-                        title                   => $journal->{description},
-                        globjid                 => $globjid,
-                        uid                     => $journal->{uid},
-                        attention_needed        => "yes",
-                        public                  => $public,
-                        introtext               => $introtext,
-                        popularity              => $popularity,
-                        editorpop               => $editorpop,
-                        tid                     => $journal->{tid},
-                        srcid                   => $id,
-                        discussion              => $journal->{discussion},
-                        type                    => $type,
-                        ipid                    => $user->{ipid},
-                        subnetid                => $user->{subnetid},
+			title                   => $journal->{description},
+			globjid                 => $globjid,
+			uid                     => $journal->{uid},
+			attention_needed        => "yes",
+			public                  => $public,
+			introtext               => $introtext,
+			bodytext		=> $bodytext,
+			popularity              => $popularity,
+			editorpop               => $editorpop,
+			tid                     => $journal->{tid},
+			srcid                   => $id,
+			discussion              => $journal->{discussion},
+			type                    => $type,
+			ipid                    => $user->{ipid},
+			subnetid                => $user->{subnetid},
 			createtime              => $journal->{date}
 		};
+
 		my $id = $self->createFireHose($data);
-		if ($publicize && !isAnon($journal->{uid})) {
-			my $constants = getCurrentStatic();
-			my $tags = getObject('Slash::Tags');
-			$tags->createTag({
-                                uid             => $journal->{uid},
-                                name            => $constants->{tags_upvote_tagname},
-                                globjid         => $globjid,
-                                private         => 1,
-			});
-		}
+
+		my $tags = getObject('Slash::Tags');
+		$tags->createTag({
+			uid             => $journal->{uid},
+			name            => $constants->{tags_upvote_tagname},
+			globjid         => $globjid,
+			private         => 1,
+		});
+
 		return $id;
 	}
 }

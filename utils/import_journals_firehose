@@ -3,18 +3,19 @@ use warnings;
 use strict;
 
 use Slash::Test shift || 'slash';
+my $limit = shift || 100;
 
 my $slashdb = getCurrentDB();
 my $ids = $slashdb->sqlSelectColArrayref(
 	'journals.id', 'journals',
-	'journals.id NOT IN (SELECT firehose.srcid FROM firehose WHERE firehose.type = "journal") LIMIT 10'
+	'journals.id NOT IN (SELECT firehose.srcid FROM firehose WHERE firehose.type = "journal") LIMIT ' . $limit
 );
 
 my $firehose = getObject("Slash::FireHose");
+local $| = 1;
 printf STDERR "Importing %d journals\n", scalar(@$ids);
 
 my $i = 0;
-local $| = 0;
 my %ids;
 for my $id (@$ids) {
 	printf "\r%d", ++$i;

@@ -35,7 +35,8 @@ sub set {
 		}
 	}
 
-	$j2{article}  = delete $j1{article};
+	$j2{article}   = delete $j1{article};
+	$j2{introtext} = $self->getIntrotext(0, $j2{article});
 	$j1{"-last_update"} = 'now()';
 
 	$self->sqlUpdate('journals', \%j1, "id=$id") if keys %j1;
@@ -58,7 +59,7 @@ sub getsByUid {
 	$where .= " AND journals.id = $id" if $id;
 
 	my $answer = $self->sqlSelectAll(
-		'date, article, description, journals.id, posttype, tid, discussion',
+		'date, article, introtext, description, journals.id, posttype, tid, discussion',
 		'journals, journals_text',
 		$where,
 		$order
@@ -111,7 +112,7 @@ sub getsByUids {
 	my @journal_ids_found = sort keys %$journals_hr;
 	my $journal_ids_found_list = join(',', @journal_ids_found);
 	my $columns =	$t_o	? 'id, description'
-				: 'date, article, description, journals.id,
+				: 'date, article, introtext, description, journals.id,
 				   posttype, tid, discussion, journals.uid';
 	my $tables =	$t_o	? 'journals'
 				: 'journals, journals_text';
@@ -184,9 +185,11 @@ sub create {
 	my($id) = $self->getLastInsertId({ table => 'journals', prime => 'id' });
 	return unless $id;
 
+	my $introtext = $self->getIntrotext(0, $article);
 	$self->sqlInsert("journals_text", {
-		id		=> $id,
-		article 	=> $article,
+		id        => $id,
+		article   => $article,
+		introtext => $introtext
 	});
 
 	my($date) = $self->sqlSelect('date', 'journals', "id=$id");
@@ -375,6 +378,7 @@ sub get {
 	my($self, $id, $val) = @_;
 	my $answer;
 
+	# XXX I have no idea what this does ... what is "comment"?
 	if ((ref($val) eq 'ARRAY')) {
 		# the grep was failing before, is this right?
 		my @articles = grep /^comment$/, @$val;
@@ -384,17 +388,18 @@ sub get {
 			$answer = $self->sqlSelectHashref($values, 'journals', "id=$id");
 		}
 		if (@articles) {
-			$answer->{comment} = $self->sqlSelect('article', 'journals', "id=$id");
+			$answer->{comment} = $self->sqlSelect('article', 'journals_text', "id=$id");
 		}
 	} elsif ($val) {
-		if ($val eq 'article') {
-			($answer) = $self->sqlSelect('article', 'journals', "id=$id");
+		if ($val eq 'article' || $val eq 'introtext') {
+			($answer) = $self->sqlSelect($val, 'journals_text', "id=$id");
 		} else {
 			($answer) = $self->sqlSelect($val, 'journals', "id=$id");
 		}
 	} else {
 		$answer = $self->sqlSelectHashref('*', 'journals', "id=$id");
 		($answer->{article}) = $self->sqlSelect('article', 'journals_text', "id=$id");
+		($answer->{introtext}) = $self->sqlSelect('introtext', 'journals_text', "id=$id");
 	}
 
 	return $answer;
@@ -533,6 +538,10 @@ sub createStoryFromJournal {
 	$self->logJournalTransfer($src_journal->{id}, 0, $stoid);
 }
 
+# this is kindof a "dumb" split for stories, we do a smarter split for
+# firehose (see getIntrotext), but it can't be rejoined into intro/body
+# like this one can -- pudge
+
 sub splitJournalTextForStory {
 	my($self, $text) = @_;
 	my($intro, $body) = split(/<br>|<\/p>/i, $text, 2);
@@ -662,6 +671,49 @@ sub updateTransferredJournalDiscussions {
 		}
 	}
 }
+
+
+{
+my $linebreak = qr{(?:
+	<br>\s*<br> |
+	</?p> |
+	</(?:
+		div | (?:block)?quote | [oud]l
+	)>
+)}x;
+my $min_chars = 50;
+my $max_chars = 500;
+
+sub getIntrotext {
+	my($self, $id, $article) = @_;
+	return unless $id || $article;
+
+	my $article = $self->get($id);
+	return unless $article;
+
+	my $strip_art = balanceTags(
+		strip_mode($article->{article}, $article->{posttype}),
+		{ deep_nesting => 1 }
+	);
+
+	my $intro;
+	if (length($strip_art) < $min_chars) {
+		$intro = $strip_art;
+	} else {
+		$strip_art =~ m/^(.{$min_chars,$max_chars})?$linebreak/s;
+		$intro = $1;
+	}
+	if (!$intro) {
+		$intro = chopEntity($strip_art, $max_chars);
+		local $Slash::Utility::Data::approveTag::admin = 1;
+		$intro = strip_html($intro);
+		$intro = balanceTags($intro, { admin => 1 });
+		$intro = addDomainTags($intro);
+	}
+
+	return $intro;
+} }
+
 
 
 sub DESTROY {
