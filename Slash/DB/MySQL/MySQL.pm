@@ -1542,13 +1542,14 @@ sub getUserCrossSiteAuthenticate {
 	if (!$uid) {
 		my $newnick = sprintf($site->{user_name_format}, $params->{shortname} || $params->{user_id});
 		my $matchname = nick2matchname($newnick);
-		my $email = '';
+		my $email = $params->{shortname}
+			? sprintf($site->{email_format}, $params->{shortname})
+			: '';
 
-		# no email for now, so skip checks for email (and matchname;
-		# we don't care if someone already has an "sfpudge", that
-		# should not stop us from making a "SF:pudge")
+		# for matchname, we don't care if someone already has an
+		# "sfpudge", that should not stop us from making a "SF:pudge"
 		$uid = $self->createUser(
-			$matchname, '', $newnick, { skipchecks => 1 }
+			$matchname, $email, $newnick, { skipchecks => 1 }
 		);
 		$new = 1;
 
