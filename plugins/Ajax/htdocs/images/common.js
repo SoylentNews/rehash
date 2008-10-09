@@ -1838,6 +1838,16 @@ function inlineAdCheckTimer(id, url, clickMax, secsMax) {
 	return inlineAdInsertId(id);
 }
 
+// TODO: remove this jQuery method when integration is complete and this method is really provided by Slash.TagUI
+(function($){
+$.fn.tag_ui__tags = function(){
+	var tags = {};
+	this.find('span.tag').each(function(){
+		tags[ $(this).text() ] = true;
+	});
+	return Slash.Util.qw(tags);
+}
+})(Slash.jQuery);
 
 function inlineAdFirehose() {
 	if (!fh_is_admin)
