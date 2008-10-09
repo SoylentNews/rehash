@@ -1844,7 +1844,7 @@ function inlineAdFirehose() {
 		return 0; // testing
 
 	var $article = Slash.Firehose.choose_article_for_next_ad();
-	var id = $article.article_info__get_key().key;
+	var id = $article.article_info__key().key;
 	if (!id)
 		return 0;
 
