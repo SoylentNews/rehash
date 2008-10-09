@@ -36,7 +36,7 @@ sub set {
 	}
 
 	$j2{article}   = delete $j1{article};
-	$j2{introtext} = $self->getIntrotext(0, $j2{article}) if $j2{article};
+	$j2{introtext} = $self->getIntrotext($id, $j2{article}) if $j2{article};
 	$j1{"-last_update"} = 'now()';
 
 	$self->sqlUpdate('journals', \%j1, "id=$id") if keys %j1;
@@ -59,7 +59,7 @@ sub getsByUid {
 	$where .= " AND journals.id = $id" if $id;
 
 	my $answer = $self->sqlSelectAll(
-		'date, article, introtext, description, journals.id, posttype, tid, discussion',
+		'date, article, description, journals.id, posttype, tid, discussion, introtext',
 		'journals, journals_text',
 		$where,
 		$order
@@ -112,8 +112,8 @@ sub getsByUids {
 	my @journal_ids_found = sort keys %$journals_hr;
 	my $journal_ids_found_list = join(',', @journal_ids_found);
 	my $columns =	$t_o	? 'id, description'
-				: 'date, article, introtext, description, journals.id,
-				   posttype, tid, discussion, journals.uid';
+				: 'date, article, description, journals.id,
+				   posttype, tid, discussion, journals.uid, introtext';
 	my $tables =	$t_o	? 'journals'
 				: 'journals, journals_text';
 	my $where =	$t_o	? "journals.id IN ($journal_ids_found_list)"
@@ -185,7 +185,7 @@ sub create {
 	my($id) = $self->getLastInsertId({ table => 'journals', prime => 'id' });
 	return unless $id;
 
-	my $introtext = $self->getIntrotext(0, $article) || '';
+	my $introtext = $self->getIntrotext(0, $article, $posttype) || '';
 	$self->sqlInsert("journals_text", {
 		id        => $id,
 		article   => $article,
@@ -685,14 +685,18 @@ my $min_chars = 50;
 my $max_chars = 500;
 
 sub getIntrotext {
-	my($self, $id, $article) = @_;
-	return unless $id || $article;
+	my($self, $id, $bodytext, $posttype) = @_;
+	return unless $id || $bodytext;
 
-	my $article = $self->get($id);
-	return unless $article;
+	if ($id && (!$bodytext || !$posttype)) {
+		my $article = $self->get($id);
+		$bodytext ||= $article->{article};
+		$posttype ||= $article->{posttype};
+	}
+	return unless $bodytext && $posttype;
 
 	my $strip_art = balanceTags(
-		strip_mode($article->{article}, $article->{posttype}),
+		strip_mode($bodytext, $posttype),
 		{ deep_nesting => 1 }
 	);
 
