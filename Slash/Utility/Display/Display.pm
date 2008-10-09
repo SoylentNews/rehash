@@ -1323,8 +1323,8 @@ sub _hard_linkComment {
 	my $subject = $linkdata->{subject};
 
 	my $display = qq|<a |;
-	$display .= qq|id=$linkdata->{id} |    if $linkdata->{id};
-	$display .= qq|id=$linkdata->{class} | if $linkdata->{class};
+	$display .= qq|id="$linkdata->{id}" |    if $linkdata->{id};
+	$display .= qq|class="$linkdata->{class}" | if $linkdata->{class};
 	$display .= qq|href="$gSkin->{rootdir}/comments.pl?sid=$linkdata->{sid}|;
 	$display .= "&amp;op=$linkdata->{op}" if defined($linkdata->{op});
 	$display .= "&amp;threshold=$linkdata->{threshold}" if defined($linkdata->{threshold});
