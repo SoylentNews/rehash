@@ -95,6 +95,20 @@ __template__
                 	</td>
                 	</tr>
         	[% END %]
+
+                <tr>
+                <td><b>Console Messages</b></td>
+                <td><input type="checkbox" name="console_message_toggle" CHECKED></td>
+                </tr>
+
+                <tr>
+                <td><b>Console Messages Via</b></td>
+                <td><select name="console_message_transfer">
+                        <option value="1">Remarks</option>
+                        <option value="2">Messages</option>
+                    </select>
+                </td>
+                </tr>
         	</table>
 	[% END %]
 
