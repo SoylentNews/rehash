@@ -1902,8 +1902,7 @@ var	AD_HEIGHT = 300, AD_WIDTH = 300,
 	$slashboxes;		// the container in which the ad floats
 
 $(function(){
-	var $firehose = $('#firehose');
-	$slashboxes = $firehose.find('> #slashboxes').
+	$slashboxes = $('#slashboxes').
 		append('<div id="floating-slashbox-ad" style="display:none; position:absolute; height:'+AD_HEIGHT+'px; width:'+AD_WIDTH+'px;" />');
 	$ad_position = $slashboxes.find('#floating-slashbox-ad');
 
@@ -1980,22 +1979,30 @@ function set_current_ad( ad_content, $article ){
 function fix_ad_position(){
 	if ( current_mode.has_content || current_mode.will_have_content ) {
 		var	$footer		= $('#firehose > #fh-pag-div'),
-			space_top	= $slashboxes.offset().top + $slashboxes.height(),
-			space_bottom	= $footer.offset().top + $footer.height(),
-			article_top	= $current_article.offset().top,
+			footer		= $footer.offset(),
+			footer_height	= $footer.height(),
+			slashboxes	= $slashboxes.offset(),
+			article		= $current_article.offset();
+
+		if ( ! footer || ! slashboxes || ! article ) {
+			return;
+		}
+
+		var	space_top	= slashboxes.top + $slashboxes.height(),
+			space_bottom	= footer.top + footer_height,
 			window_top	= window.pageYOffset,
 			window_bottom	= window_top + window.innerHeight,
-			ad_top		= Math.max(space_top, Math.min(article_top, space_bottom-AD_HEIGHT)),
+			ad_top		= Math.max(space_top, Math.min(article.top, space_bottom-AD_HEIGHT)),
 			next_mode	= {	has_content:	true,
 						is_in_window:	!( ad_top > window_bottom || ad_top + AD_HEIGHT < window_top ),
-						top:		ad_top - $slashboxes.offset().top
+						top:		ad_top - slashboxes.top
 					};
 
-		if ( ad_top == article_top ) {
+		if ( ad_top == article.top ) {
 			next_mode.pinned = 'Article';
-		} else if ( ad_top < article_top ) {
+		} else if ( ad_top < article.top ) {
 			next_mode.pinned = 'Bottom';
-		} else if ( ad_top > (article_top + $current_article.height()) ) {
+		} else if ( ad_top > (article.top + $current_article.height()) ) {
 			next_mode.pinned = 'TopDisconnected';
 		} else {
 			next_mode.pinned = 'Top';
