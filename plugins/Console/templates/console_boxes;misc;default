@@ -1,0 +1,28 @@
+__section__
+default
+__description__
+Console slashboxes
+__title__
+
+__page__
+misc
+__lang__
+en_US
+__name__
+console_boxes
+__seclev__
+10000
+__template__
+[% authorbox %]
+<span id="admintodo-wrap"></span>
+[% storyadmin %]
+[% tagnamesbox %]
+[% perfbox %]
+[% Slash.sidebox("Firehose Usage", ' ', "firehose_usage", 1) %]
+	<script type="text/javascript">
+		console_updating = 1;
+		console_update([% IF constants.plugin.FireHose %]1[% ELSE %]0[% END %]);
+		[% IF constants.plugin.FireHose %]
+		firehose_usage();
+		[% END %]
+	</script>

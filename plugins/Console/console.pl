@@ -39,7 +39,7 @@ sub main {
 		$op = 'default';
 	}
 
-	header('Console', '', { admin => 1 }) or return;
+	header('Console', '', {  }) or return;
 
 	$ops{$op}->($slashdb, $constants, $user, $form, $gSkin);
 
@@ -52,11 +52,6 @@ sub display {
 	my $remarks   = getObject('Slash::Remarks');
 	my $remarkstext = $remarks->displayRemarksTable({ max => 10, print_whole => 1 });
 
-	my $admindb 	= getObject('Slash::Admin');
-	my $storyadmin 	= $admindb->showStoryAdminBox("");
-	my $perfbox	= $admindb->showPerformanceBox();
-	my $authorbox	= $admindb->showAuthorActivityBox();
-	my $admintodo	= $admindb->showAdminTodo();
 	my $firehosebox = "";
 	if ($constants->{plugin}{FireHose}) {
 		my $firehose = getObject("Slash::FireHose");
@@ -71,11 +66,7 @@ sub display {
 
 	slashDisplay('display', {
 		remarks 	=> $remarkstext,
-		storyadmin 	=> $storyadmin,
-		perfbox		=> $perfbox,
-		authorbox	=> $authorbox,
 		firehosebox	=> $firehosebox,
-		tagnamesbox	=> $tagnamesbox,
 	});
 
 }

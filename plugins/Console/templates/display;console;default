@@ -12,12 +12,9 @@ __name__
 display
 __template__
 <div id="slashboxes">
-	[% authorbox %]
-	<span id="admintodo-wrap"></span>
-	[% storyadmin %]
-	[% tagnamesbox %]
-	[% perfbox %]
-	[% Slash.sidebox("Firehose Usage", ' ', "firehose_usage", 1) %]
+	[% console = Slash.getObject("Slash::Console");
+	   console.consoleBoxes();
+	%]
 </div>
 <div id="console">
 	[% remarks %]
@@ -40,13 +37,6 @@ __template__
 	<iframe name="submitframe" id="submitiframe" src="[% gSkin.rootdir %]/submit.pl?op=list&amp;nowrapper=1&amp;fromconsole=1" width="100%" height="800"></iframe>
 	[% END %]
 	</div>
-	<script type="text/javascript">
-		console_updating = 1;
-		console_update([% IF constants.plugin.FireHose %]1[% ELSE %]0[% END %]);
-		[% IF constants.plugin.FireHose %]
-		firehose_usage();
-		[% END %]
-	</script>
 </div>
 __seclev__
 10000

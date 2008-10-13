@@ -2780,8 +2780,14 @@ sub listView {
 		}
 		$i++;
 	}
-	my $Slashboxes = displaySlashboxes($gSkin);
-	my $refresh_options;
+	my $Slashboxes = "";
+	if ($user->{state}{firehose_page} eq "console") {
+		my $console = getObject("Slash::Console");
+		$Slashboxes = $console->consoleBoxes();;
+	} else {
+		$Slashboxes = displaySlashboxes($gSkin);
+	}
+		my $refresh_options;
 	$refresh_options->{maxtime} = $maxtime;
 	if (uc($options->{orderdir}) eq "ASC") {
 		$refresh_options->{insert_new_at} = "bottom";
