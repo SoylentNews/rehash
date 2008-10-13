@@ -704,8 +704,7 @@ sub getIntrotext {
 	if (length($strip_art) < $min_chars) {
 		$intro = $strip_art;
 	} else {
-		$strip_art =~ m/^(.{$min_chars,$max_chars})?$linebreak/s;
-		$intro = $1;
+		$intro = $1 if $strip_art =~ m/^(.{$min_chars,$max_chars})?$linebreak/s;
 	}
 	if (!$intro) {
 		$intro = chopEntity($strip_art, $max_chars);
