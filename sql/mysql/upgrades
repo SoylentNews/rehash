@@ -5581,3 +5581,11 @@ CREATE TABLE shill_ids (
 );
 INSERT INTO shill_ids VALUES (1, 'Admin');
 INSERT INTO shill_ids VALUES (2, 'Thinkgeek');
+
+# for plugins/Zoo
+INSERT INTO vars (name, value, description) VALUES ('badge_icon_ext', 'gif', 'Badge icon extension ("gif" or "png", probably)');
+INSERT INTO vars (name, value, description) VALUES ('badge_icon_size', '15', 'Badge icon height/width');
+# for Slashdot ...
+#INSERT INTO vars (name, value, description) VALUES ('badge_icon_ext', 'png', 'Badge icon extension ("gif" or "png", probably)');
+#INSERT INTO vars (name, value, description) VALUES ('badge_icon_size', '16', 'Badge icon height/width');
+
