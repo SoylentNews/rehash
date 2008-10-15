@@ -270,46 +270,45 @@ function reportError(request) {
 }
 
 //Firehose functions begin
-function toggle_firehose_body(id, is_admin) {
-	var params = {};
+function toggle_firehose_body( id, is_admin ) {
 	setFirehoseAction();
-	params.op = 'firehose_fetch_text';
-	params.id = id;
-	var fhbody = $dom('fhbody-'+id);
-	var fh = $dom('firehose-'+id);
 
-	var usertype = fh_is_admin ? " adminmode" : " usermode";
-	if (fhbody.className == "empty") {
-		var handlers = {
-			onComplete: function() {
-				if(firehoseIsInWindow(id)) {
-					scrollWindowToFirehose(id);
-				}
-				firehose_get_admin_extras(id);
-			}
-		};
-		params.reskey = reskey_static;
-		ajax_update(params, 'fhbody-'+id, is_admin ? handlers : null);
-		fhbody.className = "body";
-		fh.className = "article" + usertype;
-		if (is_admin) {
-			firehose_toggle_tag_ui_to(true, fh);
-		}
-	} else if (fhbody.className == "body") {
-		fhbody.className = "hide";
-		fh.className = "briefarticle" + usertype;
-		/*if (is_admin)
-			tagsHideBody(id);*/
-	} else if (fhbody.className == "hide") {
-		fhbody.className = "body";
-		fh.className = "article" + usertype;
-		if (is_admin) {
-			firehose_toggle_tag_ui_to(true, fh);
-		}
-		/*if (is_admin)
-			tagsShowBody(id, is_admin, '', "firehose"); */
+	var	$article	= $('#firehose-'+id),
+		body_id		= 'fhbody-'+id,
+		$body		= $article.find('#'+body_id),
+		usertype	= fh_is_admin ? " adminmode" : "usermode",
+		if_empty	= $body.is('.empty'),
+		if_show		= if_empty || $body.is('.hide');
+
+	if ( if_empty ) {
+		ajax_update({	op:	'firehose_fetch_text',
+				id:	id,
+				reskey:	reskey_static
+			},
+			body_id,
+			is_admin ? {	onComplete: function() {
+						if( firehoseIsInWindow(id) ) {
+							scrollWindowToFirehose(id);
+						}
+						firehose_get_admin_extras(id);
+					}
+				} :
+				null
+		);
 	}
-	article_moved(fh);
+
+	if ( if_show ) {
+		$body.setClass('body');
+		$article.setClass('article' + usertype);
+		if ( is_admin ) {
+			firehose_toggle_tag_ui_to(true, $article);
+		}
+	} else {
+		$body.setClass('hide');
+		$article.setClass('briefarticle' + usertype);
+	}
+
+	article_moved($article[0]);
 	return false;
 }
 
