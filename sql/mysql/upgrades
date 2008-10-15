@@ -5573,7 +5573,7 @@ UPDATE vars SET value = 'T_2_5_0_224' WHERE name = 'cvs_tag_currentcode';
 
 # For Thinkgeek related stuff
 ALTER TABLE users ADD COLUMN shill_id TINYINT UNSIGNED DEFAULT 0 NOT NULL;
-UPDATE users SET shill_id = 1 WHERE seclev = 10000;
+UPDATE users SET shill_id = 1 WHERE seclev = 10000 OR author = 1;
 DROP TABLE IF EXISTS shill_ids;
 CREATE TABLE shill_ids (
         shill_id TINYINT UNSIGNED DEFAULT 0 NOT NULL PRIMARY KEY,
