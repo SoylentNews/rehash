@@ -849,6 +849,10 @@ function ajax_update(request_params, id, handlers, options) {
 		opts.complete = handlers.onComplete;
 	}
 
+	if ( handlers && handlers.onError ) {
+		opts.error = handlers.onError;
+	}
+
 	jQuery.ajax(opts);
 }
 
@@ -1230,7 +1234,13 @@ function firehose_get_updates(options) {
 	}
 
 	$('.busy').show();
-	ajax_update(params, '', { onComplete: firehose_get_updates_handler });
+	ajax_update(params, '', { onComplete: firehose_get_updates_handler, onError: firehose_updates_error_handler });
+}
+
+function firehose_updates_error_handler(XMLHttpRequest, textStatus, errorThrown) {
+	if (fh_is_admin) {
+		firehose_update_failed_modal();
+	}
 }
 
 function setFirehoseAction() {
@@ -1271,9 +1281,15 @@ function run_before_update() {
 	var secs = getSecsSinceLastFirehoseAction();
 	if (secs > inactivity_timeout) {
 		fh_is_timed_out = 1;
-		$('#message_area').html("Automatic updates have been slowed due to inactivity");
-		//firehose_pause();
+		firehose_inactivity_modal();
 	}
+}
+
+function firehose_inactivity_modal() {
+	$('#preference_title').html('Firehose Paused due to inactivity');
+	show_modal_box();
+	$('#modal_box_content').html("<a href='#' onclick='setFirehoseAction();hide_modal_box()'>Click to unpause</a>");
+	show_modal_box();
 }
 
 function firehose_play() {
@@ -1594,6 +1610,17 @@ function firehose_get_media_popup(id) {
 		op:	'firehose_get_media',
 		id:	id
 	}, 'modal_box_content');
+}
+
+function firehose_reinit_updates() {
+	fh_is_updating = 0;
+	firehose_add_update_timerid(setTimeout(firehose_get_updates, 5000));
+}
+
+function firehose_update_failed_modal() {
+	$('#preference_title').html('Firehose updates failed');
+	$('#modal_box_content').html('Update failed or timed out.  <a href="#" onclick="firehose_reinit_updates();hide_modal_box();">Click to retry</a>');
+	show_modal_box();
 }
 
 function saveModalPrefs() {
