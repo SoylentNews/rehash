@@ -309,6 +309,8 @@ function toggle_firehose_body( id, is_admin ) {
 	}
 
 	article_moved($article[0]);
+	inlineAdFirehose( if_show && $article );
+
 	return false;
 }
 
@@ -1081,7 +1083,6 @@ function firehose_handle_update() {
 		setTimeout(firehose_handle_update, wait_interval);
 	} else {
 		firehose_reorder();
-		inlineAdFirehose();
 		firehose_get_next_updates();
 	}
 
@@ -1762,6 +1763,8 @@ function firehose_more() {
 	} else {
 		firehose_get_updates({ oneupdate: 1 });
 	}
+
+	inlineAdFirehose();
 }
 
 function firehose_get_onscreen() {
@@ -1848,11 +1851,15 @@ $.fn.tag_ui__tags = function(){
 }
 })(Slash.jQuery);
 
-function inlineAdFirehose() {
+function inlineAdFirehose($article) {
 	if (!fh_is_admin)
 		return 0; // testing
 
-	var $article = Slash.Firehose.choose_article_for_next_ad();
+	if (!$article)
+		$article = Slash.Firehose.choose_article_for_next_ad();
+	if (!$article)
+		return 0;
+
 	var id = $article.article_info__key().key;
 	if (!id)
 		return 0;
@@ -1863,7 +1870,6 @@ function inlineAdFirehose() {
 	if (! inlineAdCheckTimer(id, fh_adTimerUrl, fh_adTimerClicksMax, fh_adTimerSecsMax))
 		return 0;
 
-	// XXX after N seconds we still want to replace this ad
 	if (Slash.Firehose.floating_slashbox_ad.is_visible())
 		return 0;
 
