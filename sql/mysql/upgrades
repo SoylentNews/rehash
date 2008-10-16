@@ -5589,3 +5589,8 @@ INSERT INTO vars (name, value, description) VALUES ('badge_icon_size', '15', 'Ba
 #INSERT INTO vars (name, value, description) VALUES ('badge_icon_ext', 'png', 'Badge icon extension ("gif" or "png", probably)');
 #INSERT INTO vars (name, value, description) VALUES ('badge_icon_size', '16', 'Badge icon height/width');
 
+# adding ie-version specific css for www.slashdot.org
+INSERT INTO `css` VALUES
+(NULL,'stylesheet','text/css','screen/projection','ie6.css','','','','no','',3,1,'lt IE 7','no'),
+(NULL,'stylesheet','text/css','screen/projection','ie7.css','','','','no','',3,1,'IE 7','no'),
+(NULL,'stylesheet','text/css','screen/projection','ie8.css','','','','no','',3,1,'gte IE 8','no');
