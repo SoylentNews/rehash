@@ -5594,3 +5594,7 @@ INSERT INTO `css` VALUES
 (NULL,'stylesheet','text/css','screen/projection','ie6.css','','','','no','',3,1,'lt IE 7','no'),
 (NULL,'stylesheet','text/css','screen/projection','ie7.css','','','','no','',3,1,'IE 7','no'),
 (NULL,'stylesheet','text/css','screen/projection','ie8.css','','','','no','',3,1,'gte IE 8','no');
+
+# 2008-10-16
+UPDATE vars SET value = 'T_2_5_0_225' WHERE name = 'cvs_tag_currentcode';
+
