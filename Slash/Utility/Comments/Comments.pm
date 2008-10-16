@@ -2137,32 +2137,42 @@ EOT
 	}
 	unless ($user->{is_anon} || isAnon($comment->{uid}) || $comment->{uid} == $user->{uid}) {
 		my $person = $comment->{uid};
+		my $zooicon = qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;type=friend&amp;uid=$person">|
+			. qq|<img src="$constants->{imagedir}/__IMG__.$constants->{badge_icon_ext}" alt="__TITLE__" title="__TITLE__" |
+			. qq|width="$constants->{badge_icon_size}" height="$constants->{badge_icon_size}"></a></span>|;
 		if (!$user->{people}{FRIEND()}{$person} && !$user->{people}{FOE()}{$person} && !$user->{people}{FAN()}{$person} && !$user->{people}{FREAK()}{$person} && !$user->{people}{FOF()}{$person} && !$user->{people}{EOF()}{$person}) {
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;type=friend&amp;uid=$person"><img src="$constants->{imagedir}/neutral.gif" alt="Alter Relationship" title="Alter Relationship"></a></span>|;
+				($zoosphere_display .= $zooicon) =~ s/__IMG__/neutral/g;
+				$zoosphere_display =~ s/__TITLE__/Alter Relationship/g;
 		} else {
 			if ($user->{people}{FRIEND()}{$person}) {
 				my $title = $user->{people}{people_bonus_friend} ? "Friend ($user->{people}{people_bonus_friend})" : "Friend";
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img src="$constants->{imagedir}/friend.gif" alt="$title" title="$title"></a></span>|;
+				($zoosphere_display .= $zooicon) =~ s/__IMG__/friend/g;
+				$zoosphere_display =~ s/__TITLE__/$title/g;
 			}
 			if ($user->{people}{FOE()}{$person}) {
 				my $title = $user->{people}{people_bonus_foe} ? "Foe ($user->{people}{people_bonus_foe})" : "Foe";
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img src="$constants->{imagedir}/foe.gif" alt="$title" title="$title"></a></span>|;
+				($zoosphere_display .= $zooicon) =~ s/__IMG__/foe/g;
+				$zoosphere_display =~ s/__TITLE__/$title/g;
 			}
 			if ($user->{people}{FAN()}{$person}) {
 				my $title = $user->{people}{people_bonus_fan} ? "Fan ($user->{people}{people_bonus_fan})" : "Fan";
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img src="$constants->{imagedir}/fan.gif" alt="$title" title="$title"></a></span>|;
+				($zoosphere_display .= $zooicon) =~ s/__IMG__/fan/g;
+				$zoosphere_display =~ s/__TITLE__/$title/g;
 			}
 			if ($user->{people}{FREAK()}{$person}) {
 				my $title = $user->{people}{people_bonus_freak} ? "Freak ($user->{people}{people_bonus_freak})" : "Freak";
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img src="$constants->{imagedir}/freak.gif" alt="$title" title="$title"></a></span>|;
+				($zoosphere_display .= $zooicon) =~ s/__IMG__/freak/g;
+				$zoosphere_display =~ s/__TITLE__/$title/g;
 			}
 			if ($user->{people}{FOF()}{$person}) {
 				my $title = $user->{people}{people_bonus_fof} ? "Friend of a Friend ($user->{people}{people_bonus_fof})" : "Friend of a Friend";
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img src="$constants->{imagedir}/fof.gif" alt="$title" title="$title"></a></span>|;
+				($zoosphere_display .= $zooicon) =~ s/__IMG__/fof/g;
+				$zoosphere_display =~ s/__TITLE__/$title/g;
 			}
 			if ($user->{people}{EOF()}{$person}) {
 				my $title = $user->{people}{people_bonus_eof} ? "Foe of a Friend ($user->{people}{people_bonus_eof})" : "Foe of a Friend";
-				$zoosphere_display .= qq|<span class="zooicon"><a href="$gSkin->{rootdir}/zoo.pl?op=check&amp;uid=$person"><img src="$constants->{imagedir}/eof.gif" alt="$title" title="$title"></a></span>|;
+				($zoosphere_display .= $zooicon) =~ s/__IMG__/eof/g;
+				$zoosphere_display =~ s/__TITLE__/$title/g;
 			}
 		}
 	}
