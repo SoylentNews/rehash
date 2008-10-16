@@ -444,7 +444,7 @@ $init_tag_displays.default_menu = 'x !';
 
 $(function(){
 	if ( fh_is_admin ) {
-		$init_tag_displays.default_menu = 'x ! # ## _ )';
+		$init_tag_displays.default_menu = 'x ! # ## ^';
 	}
 });
 
