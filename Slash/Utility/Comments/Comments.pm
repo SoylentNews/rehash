@@ -2166,13 +2166,17 @@ EOT
 			}
 			if ($user->{people}{FOF()}{$person}) {
 				my $title = $user->{people}{people_bonus_fof} ? "Friend of a Friend ($user->{people}{people_bonus_fof})" : "Friend of a Friend";
-				($zoosphere_display .= $zooicon) =~ s/__IMG__/fof/g;
-				$zoosphere_display =~ s/__TITLE__/$title/g;
+				(my $tmp = $zooicon) =~ s/__IMG__/fof/g;
+				$tmp =~ s/__TITLE__/$title/g;
+				$tmp =~ s/width="\d+" /width="$constants->{badge_icon_size_wide}" /g;
+				$zoosphere_display .= $tmp;
 			}
 			if ($user->{people}{EOF()}{$person}) {
 				my $title = $user->{people}{people_bonus_eof} ? "Foe of a Friend ($user->{people}{people_bonus_eof})" : "Foe of a Friend";
-				($zoosphere_display .= $zooicon) =~ s/__IMG__/eof/g;
-				$zoosphere_display =~ s/__TITLE__/$title/g;
+				(my $tmp = $zooicon) =~ s/__IMG__/eof/g;
+				$tmp =~ s/__TITLE__/$title/g;
+				$tmp =~ s/width="\d+" /width="$constants->{badge_icon_size_wide}" /g;
+				$zoosphere_display .= $tmp;
 			}
 		}
 	}

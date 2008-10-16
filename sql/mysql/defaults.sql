@@ -768,6 +768,7 @@ INSERT INTO vars (name, value, description) VALUES ('authors_unlimited','100','S
 INSERT INTO vars (name, value, description) VALUES ('backup_db_user','','The virtual user of the database that the code should use for intensive database access that may bring down the live site. If you don\'t know what this is for, you should leave it blank.');
 INSERT INTO vars (name, value, description) VALUES ('badge_icon_ext', 'gif', 'Badge icon extension ("gif" or "png", probably)');
 INSERT INTO vars (name, value, description) VALUES ('badge_icon_size', '15', 'Badge icon height/width');
+INSERT INTO vars (name, value, description) VALUES ('badge_icon_size_wide', '15', 'Badge icon width for wide icons');
 INSERT INTO vars (name, value, description) VALUES ('badkarma','-10','Users get penalized for posts if karma is below this value');
 INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_ip','40','Warn admin if an ip specifies password incorrectly this many times in one day');
 INSERT INTO vars (name, value, description) VALUES ('bad_password_warn_subnet','60','Warn admin if a subnet specifies password incorrectly this many times in one day');

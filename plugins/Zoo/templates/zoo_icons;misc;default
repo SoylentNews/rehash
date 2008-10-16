@@ -48,11 +48,11 @@ __template__
 		[% END %]
 		[% IF user.people.${Slash.FOF}.$person && implied != Slash.FOF %]
 			[% IF bonus && user.people_bonus_freak; zootitle = "Friend of Friend ($user.people_bonus_fof)"; ELSE; zootitle = "Friend of Friend"; END; %]
-			<span class="zooicon"><a href="[% gSkin.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><img src="[% constants.imagedir %]/fof.[% constants.badge_icon_ext %]" alt="[% zootitle %]" title="[% zootitle %]" width="[% constants.badge_icon_size %]" height="[% constants.badge_icon_size %]"></a></span>
+			<span class="zooicon"><a href="[% gSkin.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><img src="[% constants.imagedir %]/fof.[% constants.badge_icon_ext %]" alt="[% zootitle %]" title="[% zootitle %]" width="[% constants.badge_icon_size_wide %]" height="[% constants.badge_icon_size %]"></a></span>
 		[% END %]
 		[% IF user.people.${Slash.EOF}.$person && implied != Slash.EOF %]
 			[% IF bonus && user.people_bonus_freak; zootitle = "Foe of Friend ($user.people_bonus_eof)"; ELSE; zootitle = "Foe of Friend"; END; %]
-			<span class="zooicon"><a href="[% gSkin.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><img src="[% constants.imagedir %]/eof.[% constants.badge_icon_ext %]" alt="[% zootitle %]" title="[% zootitle %]" width="[% constants.badge_icon_size %]" height="[% constants.badge_icon_size %]"></a></span>
+			<span class="zooicon"><a href="[% gSkin.rootdir %]/zoo.pl?op=check&amp;uid=[% person %]"><img src="[% constants.imagedir %]/eof.[% constants.badge_icon_ext %]" alt="[% zootitle %]" title="[% zootitle %]" width="[% constants.badge_icon_size_wide %]" height="[% constants.badge_icon_size %]"></a></span>
 		[% END %]
 	[% END %]
 [% END %]
