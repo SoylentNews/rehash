@@ -107,9 +107,9 @@ __template__
                 </div>
 
                 <div>
-                <label><input type="radio" name="domaintags" [% domaintags.0 %] value=0> Never show link domains</label><br>
-                <label><input type="radio" name="domaintags" [% domaintags.1 %] value=1> Show the links domain only in recommended situations</label><br>
-                <label><input type="radio" name="domaintags" [% domaintags.2 %] value=2> Always show link domains</label>
+                <label><input type="radio" name="domaintags" value="0"[% domaintags.0 %]> Never show link domains</label><br>
+                <label><input type="radio" name="domaintags" value="1"[% domaintags.1 %]> Show the links domain only in recommended situations</label><br>
+                <label><input type="radio" name="domaintags" value="2"[% domaintags.2 %]> Always show link domains</label>
                 </div>
 
         </td>

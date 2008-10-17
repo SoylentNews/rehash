@@ -47,7 +47,7 @@ __template__
 		<td>All Sections</td>
 		<td>&nbsp;</td>
 		[% FOREACH value = [ 1 2 3 4 5] -%]
-			<td align="center"><label><input type="radio" name="nexus_master" value="[% value %]" onclick="masterChange(this); return true;"[% IF master_value != "" && master_value == value; constants.markup_checked_attribute; END; %]></label></td>
+			<td align="center"><label><input type="radio" name="nexus_master" value="[% value %]" onclick="masterChange(this); return true;"[% constants.markup_checked_attribute IF (master_value != "" && master_value == value) %]></label></td>
 		[%- END %]
 	</tr>
 [% FOREACH nexustid = nexustid_order %]
@@ -59,7 +59,7 @@ __template__
 		<td align="left">[% nexusref.$nexustid | strip_literal %]</td>
 [% FOREACH value = [ 0 1 2 3 4 5] -%]
 		<td align="center"><input type="radio" name="nexustid[% nexustid %]" value="[% value %]"
-			[%- IF story023_default.nexus.$nexustid == value; constants.markup_checked_attribute; END %] onclick="individualChange(this); return true;"></td>
+			onclick="individualChange(this); return true;"[%- constants.markup_checked_attribute IF story023_default.nexus.$nexustid == value %]></td>
 [%- END %]
 	</tr>
 [%- END -%]

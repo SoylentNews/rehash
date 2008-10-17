@@ -37,7 +37,7 @@ __template__
                 END;
 		%]
 		<label>
-			<input type="checkbox" name="index_beta" [% beta_check %]> Use Beta Index
+			<input type="checkbox" name="index_beta"[% beta_check %]> Use Beta Index
 		</label>
 
                 <label>Date/Time Format</label>

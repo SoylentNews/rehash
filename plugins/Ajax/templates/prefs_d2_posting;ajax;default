@@ -51,9 +51,9 @@ __template__
                 emaildisplay.${user.emaildisplay} = constants.markup_checked_attribute;
         END %]
         <blockquote><div>
-        <label><input type="radio" name="emaildisplay" [% emaildisplay.0 %] value=0> Do not display an e-mail address.</label><br>
-        <label><input type="radio" name="emaildisplay" [% emaildisplay.1 %] value=1> Show your email address with weekly updating spam armoring.</label><br>
-        <label><input type="radio" name="emaildisplay" [% emaildisplay.2 %] value=2> Show your real email address without cowering behind childish anonymity or obfuscation.</label>
+        <label><input type="radio" name="emaildisplay" value="0"[% emaildisplay.0 %]> Do not display an e-mail address.</label><br>
+        <label><input type="radio" name="emaildisplay" value="1"[% emaildisplay.1 %]> Show your email address with weekly updating spam armoring.</label><br>
+        <label><input type="radio" name="emaildisplay" value="2"[% emaildisplay.2 %]> Show your real email address without cowering behind childish anonymity or obfuscation.</label>
         </div></blockquote>
 
         [% IF user.karma > constants.goodkarma;

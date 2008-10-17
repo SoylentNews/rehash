@@ -54,7 +54,7 @@ __template__
                                 s_mod_check = constants.markup_checked_attribute;
                         END %]
 
-                        <input type="checkbox" id="mod_with_comm" name="mod_with_comm" [% s_mod_check %]></b>&nbsp;<label for="mod_with_comm"><b>Show Moderations in User Comment Listing</b></label>
+                        <input type="checkbox" id="mod_with_comm" name="mod_with_comm"[% s_mod_check %]></b>&nbsp;<label for="mod_with_comm"><b>Show Moderations in User Comment Listing</b></label>
 
                         <br><br>
 
@@ -63,7 +63,7 @@ __template__
                                 s_m2_check = constants.markup_checked_attribute;
                         END %]
 
-                        <input type="checkbox" id="m2_with_mod" name="m2_with_mod" [% s_m2_check %]>&nbsp;<label for="m2_with_mod"><b>Show Metamoderation in User Moderation Listing</b></label>
+                        <input type="checkbox" id="m2_with_mod" name="m2_with_mod"[% s_m2_check %]>&nbsp;<label for="m2_with_mod"><b>Show Metamoderation in User Moderation Listing</b></label>
 
                         <br><br>
 
@@ -72,7 +72,7 @@ __template__
                                 s_m2c_check = constants.markup_checked_attribute;
                         END %]
 
-                        <input type="checkbox" id="m2_with_mod_on_comm" name="m2_with_mod_on_comm" [% s_m2c_check %]>&nbsp;<label for="m2_with_mod_on_comm"><b>Show Metamoderation in Comment Moderation Listing</b></label>
+                        <input type="checkbox" id="m2_with_mod_on_comm" name="m2_with_mod_on_comm"[% s_m2c_check %]>&nbsp;<label for="m2_with_mod_on_comm"><b>Show Metamoderation in Comment Moderation Listing</b></label>
 
                         <br><br>
 

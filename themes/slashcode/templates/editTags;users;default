@@ -4,7 +4,7 @@ __description__
 Edit preferences
 
 * title = passed to titlebar
-* opts = arrayref of hashrefs, one hashref per user option
+* user_edit = user to edit
 
 __title__
 
@@ -13,7 +13,7 @@ users
 __lang__
 en_US
 __name__
-editMiscOpts
+editTags
 __template__
 [% orig_title = title %]
 <div id="slashboxes">
@@ -23,38 +23,34 @@ __template__
 </div>
 [% title = orig_title %]
 <div id="users-blocks">
-[% PROCESS prefs_titlebar tab_selected='misc' %]
+[% PROCESS prefs_titlebar tab_selected='tags' %]
 <div class="generalbody">
 [% IF note %]	
 	<div class="message">
 		[% note %]
 	</div>
 [% END %]	
-[%# admin_block %]
 
 	<form action="[% env.script_name %]" method="post">
 		<fieldset>
 			<legend>Edit Options</legend>
 				[% PROCESS formkey_tag %]
 
-			<input type="hidden" name="formname" value="editmiscopts">
-			<input type="hidden" name="op" value="savemiscopts">
+			<input type="hidden" name="formname" value="edittags">
+			<input type="hidden" name="op" value="savetags">
 
 <table align="center" width="100%">
 	<tr>
 		<td>
 
-[%# Only checkboxes are supported for now. %]
-[% FOREACH opt = opts %]
-	<p><b>[% opt.short_desc %]</b>
+	<p><b>Show Tags</b>
 	<br>
-	&nbsp;&nbsp;&nbsp;<input type="radio" name="opt_[% opt.name %]" value="0"
-		[% constants.markup_checked_attribute IF !opt.checked %]>&nbsp;Off
-	&nbsp;&nbsp;&nbsp;<input type="radio" name="opt_[% opt.name %]" value="1"
-		[% constants.markup_checked_attribute IF opt.checked %]>&nbsp;On
-		<div class="notes">[% opt.long_desc %]</div>
+	&nbsp;&nbsp;&nbsp;<input type="radio" name="showtags" value="0"
+		[% constants.markup_checked_attribute IF user_edit.tags_turnedoff %]>&nbsp;Off
+	&nbsp;&nbsp;&nbsp;<input type="radio" name="showtags" value="1"
+		[% constants.markup_checked_attribute IF !user_edit.tags_turnedoff %]>&nbsp;On
+		<div class="notes">(Turn this off to ignore all tags.)</div>
 	</p>
-[% END %]
 
 		<input type="submit" value="Save" class="button">
 		</td>

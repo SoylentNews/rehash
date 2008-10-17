@@ -11,53 +11,82 @@ en_US
 __name__
 journaledit
 __template__
-[% USE Slash %]
-<TABLE>
-	<TR VALIGN="TOP"><TD>
-		<FORM ACTION="[% env.script_name %]" METHOD="POST" ENCTYPE="application/x-www-form-urlencoded">
+			<form action="[% env.script_name %]" method="post" enctype="application/x-www-form-urlencoded">
+				<fieldset>
+					<legend>Edit Journal Entry</legend>
+					<input type="hidden" name="id" value="[% article.id %]">
+					<input type="hidden" name="state" value="editing">
+					<input type="hidden" name="preview" value="active">
+					[% PROCESS reskey_tag %]
 
-		<INPUT TYPE="hidden" NAME="id" VALUE="[% article.id %]">
-		<INPUT TYPE="hidden" NAME="state" VALUE="editing">
-		<INPUT TYPE="hidden" NAME="preview" VALUE="active">
-		<INPUT TYPE="hidden" NAME="formkey" VALUE="[% form.formkey %]">
+					[% PROCESS formLabel value => "Subject" %]
+					[% PROCESS formNote note => "This is required" %]
+					<input type="text" name="description" size="60" maxlength="60" value="[% article.description | strip_attribute %]">
+					[% PROCESS formLabel value => "Journal Topic", comment => "";
+					   def_topic = article.tid || constants.journal_default_topic;
+					   Slash.selectTopic('tid', def_topic, '', 1) %]
 
-		[% PROCESS formLabel value => "Subject", comment => "This is required" %]
-		<INPUT TYPE="text" NAME="description" SIZE="60" MAXLENGTH="60" VALUE="[% article.description | strip_attribute %]">
-
-		[% PROCESS formLabel value => "Journal Topic", comment => "";
-		   def_topic = article.tid || constants.journal_default_topic;
-		   Slash.selectTopic('tid', def_topic, '', 1) %]
-
-	[% IF !article.discussion %]
-		[% PROCESS formLabel value => "Comments", comment => "Comments cannot be disabled once enabled" %]
- 		[% jds = Slash.db.getDescriptions("commentcodes");
- 		   def_jd = form.journal_discuss.defined
- 		   	? form.journal_discuss
- 		   	: article.id
- 		   		? 'disabled'
- 		   		: user.journal_discuss || 'disabled';
-		   Slash.createSelect("journal_discuss", jds, def_jd, 1) %]
-	[% ELSE %]
-		[% PROCESS formLabel value => "Comments", comment => "Comments are enabled" %]
-	[% END %]
-
-		[% PROCESS formLabel value => "Entry", comment => "This will go down on your permanent record" %]
-		<TEXTAREA WRAP="virtual" NAME="article" ROWS="[% user.textarea_rows || constants.textarea_rows %]" COLS="[% user.textarea_cols || constants.textarea_cols %]">[% article.article | strip_literal %]</TEXTAREA>
-		<P>
-		<INPUT TYPE="submit" NAME="op" value="preview">
-	[% IF form.preview || article.id %]
-		<INPUT TYPE="submit" NAME="op" VALUE="save">
-	[% END %]
-		[% format_select %]
-		</FORM>
-	</TD></TR>
-	<TR><TD>
-		Allowed HTML: 
-		<FONT SIZE="1">
-			&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
-		</FONT>
-	</TD></TR>
-</TABLE>
+					[% IF !article.discussion %]
+						[% PROCESS formLabel value => "Comments" %]
+						[% PROCESS formNote note => "Comments cannot be disabled once enabled" %]
+				 		[% jdcodename = (user.is_subscriber || user.is_admin) ? 'commentcodes_extended' : 'commentcodes';
+ 						   jds = Slash.db.getDescriptions(jdcodename);
+ 						   def_jd = form.journal_discuss.defined
+ 						   	? form.journal_discuss
+ 						   	: article.id
+ 		   					? 'disabled'
+ 						   		: user.journal_discuss || 'disabled';
+						   Slash.createSelect("journal_discuss", jds, def_jd, 1) %]
+					[% ELSE %]
+						[% PROCESS formLabel value => "Comments" %]
+						[% PROCESS formNote note => "Comments are enabled" %]
+					[% END %]
+					[% PROCESS formLabel value => "Entry" %]
+					<textarea wrap="virtual" name="article" rows="[% user.textarea_rows || constants.textarea_rows %]" cols="[% user.textarea_cols || constants.textarea_cols %]">[% article.article | strip_literal %]</textarea>
+					<br>
+					[% format_select %]
+					<br>
+					[% IF constants.journal_allow_journal2submit %]
+							[% submit_note = "<ul>";
+							   submit_note = submit_note _ "<li>Comments must be enabled</li>";
+							   submit_note = submit_note _ "<li>Discussion cannot be deleted (though journal can be)</li>";
+							   submit_note = submit_note _ "<li>Anyone will be allowed to post comments</li>";
+						 	   submit_note = submit_note _ "</ul>";
+							%]
+							[% IF constants.plugin.FireHose;
+								sel_promotetype = form.promotetype || article.promotetype || "publish";
+							   ELSE;
+								sel_promotetype = form.promotetype || article.promotetype || "publicize";
+							   END %]
+							<input type="radio" name="promotetype" value="publicize"[% constants.markup_checked_attribute IF sel_promotetype == "publish" %]> <b>Publicize</b>: Submit this story to be posted to the [% constants.sitename %] front page<br>
+							[% IF constants.plugin.FireHose && article.promotetype != "publicize" %]
+							<input type="radio" name="promotetype" value="publish"[% constants.markup_checked_attribute IF sel_promotetype == "publish" %]> <b>Publish</b>: Share this with other [% constants.sitename %] users<br>
+							[% END %]
+							[% IF article.promotetype != "publish" && article.promotetype != "publicize" %]
+							<input type="radio" name="promotetype" value="post"[% constants.markup_checked_attribute IF sel_promotetype == "post" %]> <b>Post</b>: Pay no attention to my musings<br>
+							[% END %]
+							
+							[% PROCESS formNote note => "Publicize or Publish this Journal? If you do this: $submit_note" %]
+					<br>
+					[% END %]
+					[% IF form.url_id %]
+						<input type="hidden" name="url_id" value="[% form.url_id | strip_attribute %]">
+					[% END %]
+					<input type="submit" name="op" value="preview" class="button">
+				[% IF form.preview || article.id %]
+					<input type="submit" name="op" value="save" class="button">
+				[% END %]
+				</fieldset>
+			</form>
+		<div class="notes">
+			<b>Allowed HTML</b><br>
+				&lt;[% constants.approvedtags.join("&gt;			&lt;") %]&gt;
+			[% IF constants.approvedtags.grep("ECODE").0 %]
+				(Use "ECODE" instead of "PRE" or "CODE".)
+			[% END %]
+			<br>
+			<b>URLs</b> <code>&lt;URL:http://example.com/&gt;</code> will auto-link a URL
+		</div>
 
 __seclev__
 100

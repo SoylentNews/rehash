@@ -1,0 +1,63 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+misc
+__lang__
+en_US
+__name__
+bookmark
+__seclev__
+10000
+__template__
+[% title = "Bookmark a page" %]
+[% PROCESS titlebar %]
+<form method="post" action="bookmark.pl">
+[% PROCESS reskey_tag %]
+<input type="hidden" name="state" value="bookmarking">
+<table class="data" width="100%">
+[% IF errors.reskey %]
+	<tr class="data_hl1">
+		<td colspan="2">[% errors.reskey %]<br></td>
+	</tr>
+[% END %]
+<tr class="data_hl1">
+	<td>Title</td><td><input name="title" size="60" value="[% form.title | strip_attribute %]" type="text"> [% IF form.op == "save" && !form.title %](required)[% END %]</td>
+</tr>
+<tr class="data_hl1">
+	<td>Url</td>
+	<td>
+		[% IF fudgedurl && !errors.invalidurl %]
+			[% displayurl = fudgedurl %]
+			[% IF displayurl.length > 80; displayurl = Slash.chopEntity(displayurl, 80) _ "..."; END %]
+			[% displayurl | strip_literal %]
+			<input name="url" size="60" value="[% fudgedurl | strip_attribute %]" type="hidden">
+		[% ELSE %]
+			<input name="url" size="60" value="[% form.url | strip_attribute %]" type="text"> [% IF (form.url && !fudgedurl) || errors.invalidurl %]Invalid URL [% IF errors.noscheme %]no scheme (ie http://)[% END %][% END %] [% IF form.op == "save" && !form.url %] (required)[% END %] [% IF errors.badscheme %] Bad scheme: only [% b_schemes = constants.bookmark_allowed_schemes; b_schemes.replace('\|',' '); b_scheme %] links allowed [% END %]
+		[% END %]
+	</td>
+</tr>
+<tr class="data_hl1">
+	<td>Tags</td>
+	<td><input name="tags" size="60" type="text" value="[% tags_string | strip_attribute %]"> [% IF form.op == "save" && !form.tags %](required)[% END %]</td>
+</tr>
+<tr class="data_hl1">
+	<td valign="top">Next</td>
+	<td>
+		<input type="radio" name="redirect" value="bookmark"[% constants.markup_checked_attribute IF (!form.redirect || form.redirect == "bookmark") %]>Return to bookmark
+		<input type="radio" name="redirect" value="journal"[% constants.markup_checked_attribute IF form.redirect == "journal" %]>Journal about this
+		<input type="radio" name="redirect" value="submit"[% constants.markup_checked_attribute IF form.redirect == "submit" %]>Submit to [% constants.sitename %]
+		</td>
+</tr>
+<tr class="data_hl1">
+	<td></td>
+	<td><input type="submit" name="op" value="save"> <a href="[% gSkin.rootdir %]/faq/tags.shtml#tags300">[Help]</a></td>
+</tr>
+</table>
+</form>
+[% PROCESS bookmarktext %]
+__version__
+$Id$

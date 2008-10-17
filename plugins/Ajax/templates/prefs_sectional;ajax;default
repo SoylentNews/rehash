@@ -75,7 +75,7 @@ You have the ability to choose how much or how little content you  want to see f
 		<td style="padding-left: 5px;"><b>All Sections</b></td>
 		<td>&nbsp;</td>
 		[% FOREACH value = [ 1 2 3 4 5] -%]
-			<td align="center"><label><input type="radio" name="nexus_master" value="[% value %]" onclick="masterChange(this); return true;"[% IF master_value != "" && master_value == value; constants.markup_checked_attribute; END; %]></label></td>
+			<td align="center"><label><input type="radio" name="nexus_master" value="[% value %]" onclick="masterChange(this); return true;"[% constants.markup_checked_attribute IF (master_value != "" && master_value == value) %]></label></td>
 		[%- END %]
 	</tr>
 [% FOREACH nexustid = nexustid_order %]
@@ -87,7 +87,7 @@ You have the ability to choose how much or how little content you  want to see f
 		<td align="left" style="padding-left: 5px;"><b>[% nexusref.$nexustid | strip_literal %]</b></td>
 [% FOREACH value = [ 0 1 2 3 4 5] -%]
 		<td align="center"><label><input type="radio" name="nexustid[% nexustid %]" value="[% value %]"
-			[%- IF story023_default.nexus.$nexustid == value; constants.markup_checked_attribute; END %] onclick="individualChange(this); return true;"></label></td>
+			onclick="individualChange(this); return true;"[%- constants.markup_checked_attribute IF story023_default.nexus.$nexustid == value %]></label></td>
 [%- END %]
 	</tr>
 [%- END -%]
