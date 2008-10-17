@@ -68,7 +68,7 @@ function make_tag_editor( prefix ){
 		'<form class="', 'tag-form" style="display:none">' +
 			'<input class="', 'tag-input" type="text" size="10">' +
 			'<span class="', 'tag-server-busy">' +
-				'<img src="http://images.slashdot.org/spinner2.gif">' +
+				'<img src="http://images.slashdot.org/spinner2.gif" alt="Loading ...">' +
 			'</span>' +
 		'</form>'].join(prefix);
 }
