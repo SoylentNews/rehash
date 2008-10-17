@@ -366,15 +366,15 @@ div.storylinks ul {padding-right: 60% !important}
 .pop7 { background-color: #306; }
 .pop8 { background-color: #000; }*/
 
-.pop0 { background-image: url('//images.slashdot.org/pop0.png'); }
-.pop1 { background-image: url('//images.slashdot.org/pop1.png'); }
-.pop2 { background-image: url('//images.slashdot.org/pop2.png'); }
-.pop3 { background-image: url('//images.slashdot.org/pop3.png'); }
-.pop4 { background-image: url('//images.slashdot.org/pop4.png'); }
-.pop5 { background-image: url('//images.slashdot.org/pop5.png'); }
-.pop6 { background-image: url('//images.slashdot.org/pop6.png'); }
-.pop7 { background-image: url('//images.slashdot.org/pop7.png'); }
-.pop8 { background-image: url('//images.slashdot.org/pop8.png'); }
+.pop0 { background-image: url('//images.slashdot.org/pop0.png'); background-position: left top; }
+.pop1 { background-image: url('//images.slashdot.org/pop1.png'); background-position: left top; }
+.pop2 { background-image: url('//images.slashdot.org/pop2.png'); background-position: left top; }
+.pop3 { background-image: url('//images.slashdot.org/pop3.png'); background-position: left top; }
+.pop4 { background-image: url('//images.slashdot.org/pop4.png'); background-position: left top; }
+.pop5 { background-image: url('//images.slashdot.org/pop5.png'); background-position: left top; }
+.pop6 { background-image: url('//images.slashdot.org/pop6.png'); background-position: left top; }
+.pop7 { background-image: url('//images.slashdot.org/pop7.png'); background-position: left top; }
+.pop8 { background-image: url('//images.slashdot.org/pop8.png'); background-position: left top; }
 
 .briefarticle .pop0 span { background-image: url('//images.slashdot.org/pop0b.png'); }
 .briefarticle .pop1 span  { background-image: url('//images.slashdot.org/pop1b.png'); }
