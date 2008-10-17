@@ -276,6 +276,7 @@ function toggle_firehose_body( id, is_admin ) {
 	var	$article	= $('#firehose-'+id),
 		body_id		= 'fhbody-'+id,
 		$body		= $article.find('#'+body_id),
+		$h3 		=  $article.find('h3');
 		usertype	= fh_is_admin ? " adminmode" : "usermode",
 		if_empty	= $body.is('.empty'),
 		if_show		= if_empty || $body.is('.hide');
@@ -300,11 +301,13 @@ function toggle_firehose_body( id, is_admin ) {
 	if ( if_show ) {
 		$body.setClass('body');
 		$article.setClass('article' + usertype);
+		$h3.find('a img')).hide("fast");
 		if ( is_admin ) {
 			firehose_toggle_tag_ui_to(true, $article);
 		}
 	} else {
 		$body.setClass('hide');
+		$h3.find('a img')).show("fast");
 		$article.setClass('briefarticle' + usertype);
 	}
 
@@ -1023,11 +1026,11 @@ function firehose_handle_update() {
 					article_moved(fh_node);
 					fh_node.style.height = "";
 					if (fh_idle_skin) {
-						$("h3 a[class!='skin']", fh_node).click(function(){
+						/* $("h3 a[class!='skin']", fh_node).click(function(){
 							var h3 = $(this).parent('h3');
 							h3.next('div.hid').and(h3.find('a img')).toggle("fast");
 							return false;
-						});
+						}); */
 					}
 				}
 			});
