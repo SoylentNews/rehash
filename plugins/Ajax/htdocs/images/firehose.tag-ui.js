@@ -380,7 +380,7 @@ $(function(){
 
 	if ( fh_is_admin ) {
 		add_style_triggers(['signed', 'unsigned', 'signoff'], 'w p');
-		Slash.TagUI.Display.defaults.menu = 'x ! # ## ^';
+		Slash.TagUI.Display.defaults.menu = 'x ! # ## _ ^';
 	}
 });
 
