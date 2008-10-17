@@ -304,7 +304,7 @@ function firehose_reject (el) {
 }
 
 function firehose_init_note_flags(){
-	var $entries = $(document).article_info__find_articles(':not(:has(.title h3 span.note-flag))');
+	var $entries = $(document).article_info__find_articles(':not(:has(.generaltitle > span.note-flag))');
 
 	// set up the "note flag"
 	return $entries.each(function(){
@@ -315,7 +315,7 @@ function firehose_init_note_flags(){
 			note_text = $.trim($note.find('.admin-note a').text());
 		}
 
-		var $note_flag = $entry.find('.title h3').
+		var $note_flag = $entry.find('.generaltitle').
 			append('<span class="note-flag">note</span>').
 			find('.note-flag').
 			attr('title', note_text).

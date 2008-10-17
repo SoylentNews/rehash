@@ -465,16 +465,6 @@ div.article div.title div.nod-nix-reasons span.tag {
 	background-color: inherit;
 }
 
-.note-flag {
-	color: white !important;
-	position: absolute;
-	right: 6em;
-}
-
-.note-flag.no-note {
-	display: none;
-}
-
 a.edit-toggle {
 	text-decoration:none;
 }
