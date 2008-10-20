@@ -1,3 +1,4 @@
+
 .tag-widget, .tag-entry {
 	user-select: text;
 	-moz-user-select: text;
@@ -79,6 +80,7 @@ div.tag-display .tmenu li {
 	margin: 0 !important;
 }
 
+
 div.tag-display .tmenu li.minus,
 div.tag-display .tmenu li.ignore,
 div.tag-display .tmenu li.pound,
@@ -150,9 +152,8 @@ div.tag-display > h1.legend {
 
 /* padding so hover highlighting is bigger than the contents */
 div.tag-display > ul,
-#contents div.tag-display > ul,
-div.tag-display .tmenu li span,
-#contents div.tag-display .tmenu li span {
+#contents div.tag-display > ul
+{
 	padding: 0.1em 0.5em !important;
 	margin: -0.1em -0.5em !important;
 }
@@ -179,8 +180,8 @@ div.tag-display .tmenu li span,
 .tag-display .tmenu {
 	display: none;
 	position: absolute;
-	top: -2em;
-	right: -.3em;
+	top:-1.75em;
+	right: .5em;
 	font-size: 85%;
 	color: #fff;
 	background-color: #066;
@@ -192,6 +193,28 @@ div.tag-display .tmenu li span,
 	margin:0 !important;
 
 }
+
+div.tag-display .tmenu {
+	-moz-border-radius-bottomleft:0pt;
+	-moz-border-radius-bottomright:0pt;
+	-webkit-border-bottomleft:0pt;
+	-webkit-border-bottomright:0pt;
+}
+
+
+div.tag-display .tmenu li span,
+#contents div.tag-display .tmenu li span {
+
+margin:-0.1em -0.25em !important;
+padding:0.5em 0.25em !important;
+
+/*
+	padding: 0.1em 0.5em !important;
+	margin: -0.1em -0.5em !important;
+*/
+}
+
+
 
 /* ...until you mouse over element to which they are attached */
 .tag-display li:hover ul.tmenu {
@@ -408,11 +431,25 @@ div.head div.tag-widget-stub,
 	content: 'Note: ';
 }
 
+
+
+/*
+.tag-widget .admin-buttons a:before,
+.tag-widget .admin-buttons .note-wrapper.no-note a:before {
+	content: '[';
+}
+
+.tag-widget .admin-buttons a:after,
+.tag-widget .admin-buttons .note-wrapper.no-note a:after {
+	content: ']';
+}
+*/
 .tag-widget .admin-buttons .note-wrapper a:before,
 .tag-widget .admin-buttons .note-wrapper a:after,
 .tag-widget .admin-buttons .note-wrapper.no-note:before {
 	content: '';
 }
+
 
 .tag-widget div.tags {
 	display: inline;
