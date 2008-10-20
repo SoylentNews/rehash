@@ -883,10 +883,17 @@ sub userdir_handler {
 			        $r->filename($constants->{basedir} . '/users.pl');
 		        }
 		} elsif ($op eq 'firehose') {
-			my $filter = fixparam("\"user:$nick_orig\"");
-			$r->args("op=userfirehose&uid=$uid");
-			$r->uri('/users.pl');
-			$r->filename($constants->{basedir} . '/users.pl');
+                        if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)]) {
+				my $filter = fixparam("\"user:$nick_orig\"");
+				$r->args("dp=firehose&uid=$uid");
+				$r->uri('/users2.pl');
+				$r->filename($constants->{basedir} . '/users2.pl');
+			} else {
+				my $filter = fixparam("\"user:$nick_orig\"");
+				$r->args("op=userfirehose&uid=$uid");
+				$r->uri('/users.pl');
+				$r->filename($constants->{basedir} . '/users.pl');
+			}
 
 		} else {
                         if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)]) {
