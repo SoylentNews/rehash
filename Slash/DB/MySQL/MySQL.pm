@@ -471,12 +471,13 @@ sub getCSSValuesHashForCol {
 }
 
 sub getCSS {
-	my($self) = @_;
+	my($self, $layout) = @_;
 	my $user = getCurrentUser();
 	my $page = $user->{currentPage};
 	my $skin = getCurrentSkin('name');
 	my $admin = $user->{is_admin};
 	my $theme = ($user->{simpledesign} || $user->{pda}) ? "light" : $user->{css_theme};
+	$layout ||= '';
 	my $constants = getCurrentStatic();
 
 	my $expire_time = $constants->{css_expire} || 3600;
@@ -490,19 +491,22 @@ sub getCSS {
 	my $css_pages_ref	= $self->{_css_pages_cache};
 	my $css_skins_ref	= $self->{_css_skins_cache};
 	my $css_themes_ref	= $self->{_css_themes_cache};
+	my $css_layouts_ref	= $self->{_css_layouts_cache};
 
 	$css_pages_ref = $self->getCSSValuesHashForCol('page') if !$css_pages_ref;
 	$css_skins_ref = $self->getCSSValuesHashForCol('skin')   if !$css_skins_ref;
 	$css_themes_ref= $self->getCSSValuesHashForCol('theme') if !$css_themes_ref;
+	$css_layouts_ref= $self->getCSSValuesHashForCol('layout') if !$css_layouts_ref;
 
 	my $lowbandwidth = ($user->{lowbandwidth} || $user->{pda}) ? "yes" : "no";
 
 	$page   = '' if !$css_pages_ref->{$page};
 	$skin   = '' if !$css_skins_ref->{$skin};
 	$theme  = '' if !$css_themes_ref->{$theme};
+	$layout = '' if !$css_layouts_ref->{$layout};
 
-	return $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}
-		if exists $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth};
+	return $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout}
+		if exists $css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout};
 
 	my @clauses;
 
@@ -520,6 +524,9 @@ sub getCSS {
 	push @clauses, $theme_in;
 
 	push @clauses, "lowbandwidth='$lowbandwidth'" if $lowbandwidth eq "no";
+
+	my $layout_q = $self->sqlQuote($layout);
+	push @clauses, "layout=$layout_q";
 
 	my $where = "css.ctid=css_type.ctid AND ";
 	$where .= join ' AND ', @clauses;
