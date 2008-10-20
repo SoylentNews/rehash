@@ -142,6 +142,7 @@ __template__
                 [% IF latest_bookmarks.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/bookmarks">Bookmarks</a></li>[% END %]
                 [% IF latest_friends.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/friends">Friends</a></li>[% END %]
                 [% IF latest_tags.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/tags">Tags</a></li>[% END %]
+                <li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/firehose">Firehose</a></li>
                 [% IF user.is_admin %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]">Admin</a></li>[% END %]
                 </ul>
         </div>
@@ -262,7 +263,12 @@ __template__
                 [% ELSIF data_pane == 'bookmarks' %]
                 [% ELSIF data_pane == 'friends' %]
                 [% ELSIF data_pane == 'tags' %]
-                [% ELSE %]
+		[% ELSIF data_pane == 'firehose';
+			fh = Slash.getObject("Slash::FireHose");
+			fhbox = fh.listView({ fh_page => 'users.pl'});
+			fhbox;
+			
+                 ELSE %]
                         [% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
                 [% END %]
 

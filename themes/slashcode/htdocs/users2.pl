@@ -1487,6 +1487,17 @@ sub showInfo {
                         $latest_event->{text} =
                                 $reader->sqlSelect("introtext", "firehose_text", "id = " . $latest_event->{key});
                 }
+		if ($form->{dp} && $form->{dp} == "firehose") {
+			$form->{listonly} = 1;
+			$form->{mode} = "full";
+			$form->{color} = "black";
+			$form->{orderby} = "createtime";
+			$form->{orderdir} = "DESC";
+			$form->{skipmenu} = 1;
+			$form->{duration} = -1;
+			$form->{fhfilter} = "\"user:$requested_user->{nickname}\"";
+			$form->{pause} = 1;
+		}
 
                 $latest_event->{code} = $latest_event_index[1];                
 
