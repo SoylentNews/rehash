@@ -255,22 +255,28 @@ __template__
 
         <div id="yui-main">
                 <div class="yui-b">
-
-                [% IF data_pane == '' && admin_flag %]
-                        [% admin_block %]
-                [% ELSIF data_pane == 'journal' %]
-                [% ELSIF data_pane == 'submissions' %]
-                [% ELSIF data_pane == 'bookmarks' %]
-                [% ELSIF data_pane == 'friends' %]
-                [% ELSIF data_pane == 'tags' %]
-		[% ELSIF data_pane == 'firehose';
-			fh = Slash.getObject("Slash::FireHose");
-			fhbox = fh.listView({ fh_page => 'users.pl'});
-			fhbox;
+			<div class="yui-gf">
+				<div  class="yui-u first">
+					[% PROCESS mainmenu %]
+				</div>
+				<div class="yui-u">
+                			[% IF data_pane == '' && admin_flag %]
+			                        [% admin_block %]
+			                [% ELSIF data_pane == 'journal' %]
+			                [% ELSIF data_pane == 'submissions' %]
+			                [% ELSIF data_pane == 'bookmarks' %]
+			                [% ELSIF data_pane == 'friends' %]
+			                [% ELSIF data_pane == 'tags' %]
+					[% ELSIF data_pane == 'firehose';
+						fh = Slash.getObject("Slash::FireHose");
+						fhbox = fh.listView({ fh_page => 'users.pl'});
+						fhbox;
 			
-                 ELSE %]
-                        [% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
-                [% END %]
+			                 ELSE %]
+                        			[% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
+			                [% END %]
+				</div>
+			</div>
 
                 </div>
         </div>
