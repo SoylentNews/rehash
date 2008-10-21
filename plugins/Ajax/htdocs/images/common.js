@@ -1951,7 +1951,7 @@ $(function(){
 
 	$ad_position.
 		bind('adArticleRemoved', function(){
-			set_current_ad($current_ad.next(':visible'));
+			set_current_ad($current_article.next(':visible'));
 		});
 });
 
@@ -2011,7 +2011,7 @@ function set_mode( next ){
 
 function set_current_ad( $new_article, new_ad ){
 	var	have_new_article	= $new_article && $new_article.length,
-		clear_all		= !$new_article && !new_ad;
+		clear_all		= !have_new_article && !new_ad;
 
 	if ( !current_mode.has_content && !new_ad ) {
 		return;
@@ -2136,7 +2136,7 @@ Slash.Firehose.articles_on_screen = function(){
 Slash.Firehose.choose_article_for_next_ad = function(){
 	var $articles = Slash.Firehose.articles_on_screen();
 	// omit the first article (when we have more than one) if it starts above the screen
-	if ( ($articles.length > 1) && ($articles[0].offset().top < window.pageYOffset) ) {
+	if ( ($articles.length > 1) && ($articles.offset().top < window.pageYOffset) ) {
 		$articles = $articles.filter(':gt(0)');
 	}
 	return $articles.eq( Math.floor(Math.random()*$articles.length) );
