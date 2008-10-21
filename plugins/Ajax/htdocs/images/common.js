@@ -191,14 +191,17 @@ function firehose_id_of( expr ) {
 	return undefined;
 }
 
-function article_moved( article ){
+function after_article_moved( article ){
 	var data = article ? $(article).nextAll(':visible').andSelf() : null;
 	$('#firehoselist').trigger('articlesMoved', data);
 }
 
-function article_removed( article ){
+function before_article_removed( article, if_also_trigger_moved ){
 	var next_article = article ? $(article).next(':visible')[0] : null;
-	article_moved(next_article);
+	$('#firehoselist').trigger('beforeArticleRemoved', article);
+	if ( if_also_trigger_moved ) {
+		after_article_moved(next_article);
+	}
 }
 
 function firehose_toggle_advpref() {
@@ -237,7 +240,7 @@ function tagsHideBody(id) {
 	$('#tagbox-title-'+id).setClass('tagtitleclosed');	// Make the title of the tagbox change back to regular
 	$('#tagbox-'+id).setClass('tags');			// Make the tagbox change back to regular.
 	$('#toggletags-button-'+id).html('[+]');		// Toggle the button back.
-	article_moved($('#firehose-'+id)[0]);
+	after_article_moved($('#firehose-'+id)[0]);
 }
 
 function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
@@ -256,7 +259,7 @@ function tagsShowBody(id, is_admin, newtagspreloadtext, type) {
 	$('#tagbox-'+id).setClass("tags");			// Make the tagbox change to the slashbox class
 	$('#tagbox-title-'+id).setClass("tagtitleopen");	// Make the title of the tagbox change to white-on-green
 	$('#toggletags-body-'+id).setClass("tagbody");		// Make the body of the tagbox visible
-	article_moved($('#firehose-'+id)[0]);
+	after_article_moved($('#firehose-'+id)[0]);
 }
 
 function tagsOpenAndEnter(id, tagname, is_admin, type) {
@@ -311,7 +314,7 @@ function toggle_firehose_body( id, is_admin ) {
 		$article.setClass('briefarticle' + usertype);
 	}
 
-	article_moved($article[0]);
+	after_article_moved($article[0]);
 	inlineAdFirehose( if_show && $article );
 
 	return false;
@@ -319,7 +322,7 @@ function toggle_firehose_body( id, is_admin ) {
 
 function toggleFirehoseTagbox(id) {
 	$('#fhtagbox-'+id).toggleClasses('tagbox', 'hide');
-	article_moved($('#firehose-'+id)[0]);
+	after_article_moved($('#firehose-'+id)[0]);
 }
 
 function firehose_set_options(name, value) {
@@ -480,7 +483,7 @@ function firehose_set_options(name, value) {
 
 function firehose_remove_all_items() {
 	$('#firehoselist').empty();
-	article_moved();
+	after_article_moved();
 }
 
 
@@ -592,7 +595,7 @@ function firehose_toggle_tag_ui_to( if_expanded, selector ){
 
 		$widget.find('a.edit-toggle .button').mapClass(toggle_button);
 		$server.find('#toggletags-body-'+id).mapClass(toggle_div);
-		article_moved($server[0]);
+		after_article_moved($server[0]);
 	}
 
 	return $widget;
@@ -1023,7 +1026,7 @@ function firehose_handle_update() {
 			myAnim.onComplete.subscribe(function() {
 				var fh_node = $dom(fh);
 				if (fh_node) {
-					article_moved(fh_node);
+					after_article_moved(fh_node);
 					fh_node.style.height = "";
 					if (fh_idle_skin) {
 						/* $("h3 a[class!='skin']", fh_node).click(function(){
@@ -1070,7 +1073,7 @@ function firehose_handle_update() {
 					myAnim.onComplete.subscribe(function() {
 						var elem = this.getEl();
 						if (elem && elem.parentNode) {
-							article_removed(elem);
+							before_article_removed(elem, true);
 							elem.parentNode.removeChild(elem);
 						}
 					});
@@ -1136,7 +1139,7 @@ function firehose_reorder() {
 					$('#ttype-'+firehose_ordered[i]+'.future').setClass('story');
 				}
 			}
-			if ( moved ) article_moved();
+			if ( moved ) after_article_moved();
 			var newtitle = document.title;
 			if (/\(\d+\)/.test(newtitle)) {
 				newtitle = newtitle.replace(/(\(\d+\))/,"(" + firehose_item_count + ")");
@@ -1343,7 +1346,7 @@ function firehose_remove_entry(id) {
 		myAnim.duration = 0.5;
 		myAnim.onComplete.subscribe(function() {
 			var el = this.getEl();
-			article_moved(el);
+			after_article_moved(el);
 			el.parentNode.removeChild(el);
 		});
 		myAnim.animate();
@@ -1912,7 +1915,7 @@ function inlineAdFirehose($article) {
 
 	var ad_content = '<iframe src="' + adUrl + '" height="300" width="300" frameborder="0" border="0" scrolling="no" marginwidth="0" marginheight="0"></iframe>';
 
-	Slash.Firehose.floating_slashbox_ad(ad_content, $article);
+	Slash.Firehose.floating_slashbox_ad($article, ad_content);
 
 	inlineAdReset(id);
 	if (old_id)
@@ -1942,8 +1945,21 @@ $(function(){
 	$ad_position = $slashboxes.find('#floating-slashbox-ad');
 
 	$(window).scroll(fix_ad_position);
-	$('#firehoselist').bind('articlesMoved', fix_ad_position);
+	$('#firehoselist').
+		bind('articlesMoved', fix_ad_position).
+		bind('beforeArticleRemoved', notice_article_removed);
+
+	$ad_position.
+		bind('adArticleRemoved', function(){
+			set_current_ad($current_ad.next(':visible'));
+		});
 });
+
+function notice_article_removed( event, removed_article ){
+	if ( current_mode.has_content && $current_article[0]===removed_article ) {
+		$ad_position.trigger('adArticleRemoved');
+	}
+}
 
 function if_same_mode( a, b ){
 	return	(!a.has_content && !b.has_content) ||
@@ -1993,21 +2009,30 @@ function set_mode( next ){
 	}
 }
 
-function remove_current_ad(){
-	if ( current_mode.has_content ) {
+function set_current_ad( $new_article, new_ad ){
+	var	have_new_article	= $new_article && $new_article.length,
+		clear_all		= !$new_article && !new_ad;
+
+	if ( !current_mode.has_content && !new_ad ) {
+		return;
+	}
+
+	if ( clear_all || new_ad ) {
 		set_mode({ has_content: false });
 		$ad_position.empty();
-		$current_article = null;
 	}
-}
 
-function set_current_ad( ad_content, $article ){
-	if ( ad_content && $article && $article.length==1 ) {
-		remove_current_ad();
-		current_mode.will_have_content = true;
-		$current_article = $article;
-		$ad_position.append(ad_content);
+	if ( !clear_all ) {
+		if ( new_ad ) {
+			current_mode.will_have_content = true;
+			$ad_position.append(new_ad);
+		}
+		if ( have_new_article ) {
+			$current_article = $($new_article[0]);
+		}
 		fix_ad_position();
+	} else {
+		$current_article = null;
 	}
 }
 
@@ -2051,7 +2076,7 @@ function fix_ad_position(){
 Slash.Util.Package({ named: 'Slash.Firehose.floating_slashbox_ad',
 	api: {
 		is_visible:		function(){ return current_mode.has_content && current_mode.is_in_window; },
-		remove:			remove_current_ad,
+		remove:			function(){ set_current_ad() },
 		current_article:	function(){ return $current_article; },
 		is_pinned_to:		function(){ return current_mode.pinned; },
 		bind:			function(){ return $ad_position.bind.apply($ad_position, arguments); },
@@ -2110,6 +2135,10 @@ Slash.Firehose.articles_on_screen = function(){
 
 Slash.Firehose.choose_article_for_next_ad = function(){
 	var $articles = Slash.Firehose.articles_on_screen();
+	// omit the first article (when we have more than one) if it starts above the screen
+	if ( ($articles.length > 1) && ($articles[0].offset().top < window.pageYOffset) ) {
+		$articles = $articles.filter(':gt(0)');
+	}
 	return $articles.eq( Math.floor(Math.random()*$articles.length) );
 }
 
