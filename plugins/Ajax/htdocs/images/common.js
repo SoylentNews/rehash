@@ -1932,14 +1932,16 @@ function inlineAdFirehose($article) {
 //
 
 
-var	AD_HEIGHT = 300, AD_WIDTH = 300,
+var	AD_HEIGHT = 300, AD_WIDTH = 300, FOOTER_PADDING = 5,
 
 	current_mode = { has_content: false },
 	$ad_position,		// 300x300 div that holds the current (if any) ad
 	$current_article,	// the article to which that ad is attached
-	$slashboxes;		// the container in which the ad floats
+	$slashboxes,		// the container in which the ad floats
+	$footer;
 
 $(function(){
+	$footer = $('#ft');
 	$slashboxes = $('#slashboxes').
 		append('<div id="floating-slashbox-ad" style="display:none; position:absolute; height:'+AD_HEIGHT+'px; width:'+AD_WIDTH+'px;" />');
 	$ad_position = $slashboxes.find('#floating-slashbox-ad');
@@ -2038,9 +2040,7 @@ function set_current_ad( $new_article, new_ad ){
 
 function fix_ad_position(){
 	if ( current_mode.has_content || current_mode.will_have_content ) {
-		var	$footer		= $('#firehose > #fh-pag-div'),
-			footer		= $footer.offset(),
-			footer_height	= $footer.height(),
+		var	footer		= $footer.offset(),
 			slashboxes	= $slashboxes.offset(),
 			article		= $current_article.offset();
 
@@ -2049,7 +2049,7 @@ function fix_ad_position(){
 		}
 
 		var	space_top	= slashboxes.top + $slashboxes.height(),
-			space_bottom	= footer.top + footer_height,
+			space_bottom	= footer.top - FOOTER_PADDING,
 			window_top	= window.pageYOffset,
 			window_bottom	= window_top + window.innerHeight,
 			ad_top		= Math.max(space_top, Math.min(article.top, space_bottom-AD_HEIGHT)),
