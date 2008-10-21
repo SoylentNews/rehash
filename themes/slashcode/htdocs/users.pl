@@ -912,6 +912,7 @@ sub showFireHose {
 	$form->{fhfilter} = "\"user:$user_edit->{nickname}\"";
 	$form->{pause} = 1;
 	$form->{listonly} = 1;
+	$form->{legacy} = 1;
 
 	my $fhbox = $firehose->listView({ fh_page => 'users.pl'});
 	slashDisplay("userFireHose", { firehosebox => $fhbox, uid => $uid, useredit => $user_edit });
