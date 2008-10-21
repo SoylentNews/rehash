@@ -2028,7 +2028,7 @@ function set_current_ad( $new_article, new_ad ){
 			$ad_position.append(new_ad);
 		}
 		if ( have_new_article ) {
-			$current_article = $($new_article[0]);
+			$current_article = $new_article.eq(0);
 		}
 		fix_ad_position();
 	} else {

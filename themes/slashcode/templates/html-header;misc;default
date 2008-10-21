@@ -40,6 +40,7 @@ __template__
 [% IF user.currentPage == "firehose" || user.currentPage == "console" -%]
 <script src="[% constants.imagedir %]/jquery/ui.core.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/jquery/ui.sortable.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
+<script src="[% constants.imagedir %]/jquery/jquery.cornflex.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/jquery/jquery.textselection.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/jquery/jquery.autocomplete.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 <script src="[% constants.imagedir %]/yui/slider.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
