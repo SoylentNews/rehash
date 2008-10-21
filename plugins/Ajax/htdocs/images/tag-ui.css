@@ -408,6 +408,16 @@ div.head div.tag-widget-stub,
 	left:10em;
 }
 
+
+#firehose div.tag-widget.body-widget span {
+/*
+	border:1px solid #000; /* safari bug */
+	white-space:nowrap;
+*/
+}
+
+
+
 #firehose div.tag-widget-stub.body-widget.expanded,
 #firehose div.tag-widget.body-widget.expanded {
 	right: 0;
@@ -455,6 +465,7 @@ div.head div.tag-widget-stub,
 	content: ']';
 }
 */
+
 .tag-widget .admin-buttons .note-wrapper a:before,
 .tag-widget .admin-buttons .note-wrapper a:after,
 .tag-widget .admin-buttons .note-wrapper.no-note:before {
