@@ -152,8 +152,7 @@ div.tag-display > h1.legend {
 
 /* padding so hover highlighting is bigger than the contents */
 div.tag-display > ul,
-#contents div.tag-display > ul
-{
+#contents div.tag-display > ul {
 	padding: 0.1em 0.5em !important;
 	margin: -0.1em -0.5em !important;
 }
@@ -163,6 +162,7 @@ div.tag-display > h1.legend,
 #contents div.tag-display > h1.legend {
 	padding: 0.1em 0.3em !important;
 	margin: -0.1em -0.1em !important;
+	color:#333;
 }
 
 div.tag-display .tmenu li span,
@@ -180,7 +180,7 @@ div.tag-display .tmenu li span,
 .tag-display .tmenu {
 	display: none;
 	position: absolute;
-	top:-1.75em;
+	top:-2em;
 	right: .5em;
 	font-size: 85%;
 	color: #fff;
@@ -194,26 +194,37 @@ div.tag-display .tmenu li span,
 
 }
 
-div.tag-display .tmenu {
-	-moz-border-radius-bottomleft:0pt;
-	-moz-border-radius-bottomright:0pt;
-	-webkit-border-bottomleft:0pt;
-	-webkit-border-bottomright:0pt;
+/*www.*/
+div.tag-display .tmenu
+{
+padding-bottom:0.05em !important;
+}
+
+/*idle.*/
+div.yui-b div.tag-display .tmenu
+{
+padding-bottom:0.5em !important;
+padding-top:0.3em !important;
 }
 
 
+
+/*www.*/
 div.tag-display .tmenu li span,
-#contents div.tag-display .tmenu li span {
-
+#contents div.tag-display .tmenu li span
+{
 margin:-0.1em -0.25em !important;
-padding:0.5em 0.25em !important;
-
-/*
-	padding: 0.1em 0.5em !important;
-	margin: -0.1em -0.5em !important;
-*/
+padding:0 0.55em 0.45em !important;
 }
 
+
+/*idle.*/
+div.yui-b div.tag-display .tmenu li span,
+div.yui-b #contents div.tag-display .tmenu li span
+{
+margin:-0.1em -0.25em !important;
+padding:0 0.55em 0.45em !important;
+}
 
 
 /* ...until you mouse over element to which they are attached */
