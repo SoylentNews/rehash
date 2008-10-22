@@ -533,7 +533,7 @@ sub getCSS {
 
 	my $css = $self->sqlSelectAllHashrefArray("rel,type,media,file,title,ie_cond", "css, css_type", $where, "ORDER BY css_type.ordernum, css.ordernum");
 
-	$css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth} = $css;
+	$css_ref->{$skin}{$page}{$admin}{$theme}{$lowbandwidth}{$layout} = $css;
 	return $css;
 }
 
