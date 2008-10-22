@@ -410,13 +410,13 @@ sub fetchComments {
 
 	my $cids          = [ grep { defined && /^\d+$/ } ($form->{_multi}{cids} ? @{$form->{_multi}{cids}} : $form->{cids}) ];
 	my $id            = $form->{discussion_id} || 0;
-	my $cid           = $form->{cid} || 0; # root id
+	my $base_comment  = $form->{cid} || 0; # root id
 	my $d2_seen       = $form->{d2_seen};
 	my $placeholders  = [ grep { defined && /^\d+$/ } ($form->{_multi}{placeholders}  ? @{$form->{_multi}{placeholders}}  : $form->{placeholders}) ];
 	my $read_comments = [ grep { defined && /^\d+$/ } ($form->{_multi}{read_comments} ? @{$form->{_multi}{read_comments}} : $form->{read_comments}) ];
 
 	$user->{state}{ajax_accesslog_op} = "ajax_comments_fetch";
-#use Data::Dumper; print STDERR Dumper [ $form, $cids, $id, $cid, $d2_seen, $read_comments ];
+#use Data::Dumper; print STDERR Dumper [ $form, $cids, $id, $base_comment, $d2_seen, $read_comments ];
 	return unless $id;
 
 	$slashdb->saveCommentReadLog($read_comments, $id, $user->{uid}) if @$read_comments;
@@ -446,12 +446,21 @@ sub fetchComments {
 
 	my($comments) = selectComments(
 		$discussion,
-		$cid,
+		$base_comment,
 		\%select_options,
 	);
 
-	# XXX error?
-	return unless $comments && keys %$comments;
+	while ($base_comment && (!$comments || keys(%$comments) < 2)) {
+		my $comment = $slashdb->getComment($base_comment);
+		$base_comment = $comment->{pid};
+		($comments) = selectComments(
+			$discussion,
+			$base_comment,
+			\%select_options,
+		);
+	}
+
+	return unless $comments && keys(%$comments) > 1;
 
 	my $d2_seen_0 = $comments->{0}{d2_seen} || '';
 	#delete $comments->{0}; # non-comment data
@@ -606,6 +615,9 @@ sub fetchComments {
 	}
 	if (@$placeholders) {
 		$to_dump{eval_first} .= "D2.placeholder_no_update(" . Data::JavaScript::Anon->anon_dump({ map { $_ => 1 } @$placeholders }) . ');';
+	}
+	if ($base_comment) {
+		$to_dump{eval_first} .= "D2.base_comment($base_comment);";
 	}
 	writeLog($id);
 #print STDERR "\n\n\n", Data::JavaScript::Anon->anon_dump(\%to_dump), "\n\n\n";

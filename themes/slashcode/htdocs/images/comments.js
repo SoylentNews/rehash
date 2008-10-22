@@ -50,6 +50,7 @@ var ajaxCommentsWaitQueue = [];
 var boxStatusQueue = [];
 var comment_body_reply = [];
 var root_comment = 0;
+var base_comment = 0; // for which "more" comments to fetch
 var discussion_id = 0;
 
 var user_is_subscriber = 0;
@@ -787,8 +788,8 @@ function ajaxFetchComments(cids, option, thresh, highlight) {
 
 // we could use this in future if we want to restrict "More" to
 // the cid's thread when possible
-//	if (root_comment)
-//		params['cid']     = root_comment;
+	if (base_comment)
+		params['cid']     = base_comment;
 	params['discussion_id']   = discussion_id;
 
 	var abbrev = {};
@@ -1415,6 +1416,8 @@ function finishLoading() {
 		}
 		scrollWindowTo(this_cid);
 	}
+
+	base_comment = root_comment;
 
 	//setTimeout('ajaxFetchComments()', 10*1000);
 }
@@ -2284,6 +2287,7 @@ Slash.Util.qw.each('\
 	noshow_comments \
 	pieces_comments \
 	placeholder_no_update \
+	base_comment \
 	root_comment \
 	root_comments \
 	root_comments_hash \
