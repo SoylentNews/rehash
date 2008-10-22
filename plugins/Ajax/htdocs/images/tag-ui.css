@@ -305,9 +305,10 @@ div.tag-display > ul > li + li {
 
 div.tag-display-stub,
 div.tag-display {
-	display: inline;
+	display: inline !important;
 	position: relative;
 	margin-left: 0 !important;
+	/*	border:1px dotted #000;	*//*	troubleshooting safari		*/
 }
 
 .tag-display:hover > ul {
@@ -336,7 +337,11 @@ div.tag-display {
 
 
 .tag-display-set.train {
+
+	display: inline !important;
+
 	margin-right: 1em;
+	/*	border:1px dotted #000;	*//*	troubleshooting safari		*/
 }
 
 .tag-widget.expanded .tag-display-set.train {
@@ -409,9 +414,7 @@ div.head div.tag-widget-stub,
 }
 
 
-#firehose div.tag-widget.body-widget span {
 
-}
 
 
 
@@ -513,3 +516,10 @@ div.article div.title div.nod-nix-reasons span.tag {
 a.edit-toggle {
 	text-decoration:none;
 }
+
+
+
+div.tag-display.ready.dirty  { /* !FIXING safari tag widget bug on idle. */
+border-top:1px solid transparnt !important;
+}
+
