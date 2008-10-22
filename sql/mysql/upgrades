@@ -5602,3 +5602,5 @@ UPDATE vars SET value = 'T_2_5_0_225' WHERE name = 'cvs_tag_currentcode';
 
 ALTER TABLE css ADD layout VARCHAR(16) DEFAULT '';
 ALTER TABLE css ADD INDEX layout (layout);
+
+# for Slashdot run latest set of changes from /themes/slashdot/sql/mysql/upgrades here
