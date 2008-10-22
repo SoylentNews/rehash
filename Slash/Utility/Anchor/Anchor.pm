@@ -156,8 +156,8 @@ sub header {
 
 	# This is ALWAYS displayed. Let the template handle the title
 	# of the whole webpage itself.
-	my $template_vars = { title => $data->{title} };
-	# Other data that the template may want:  the text for the
+	my $template_vars = { title => $data->{title}, extra_options => $options };
+        # Other data that the template may want:  the text for the
 	# meta-description tag, and if a story is being displayed,
 	# the title of the story.
 	for my $key (qw( meta_desc story_title )) {

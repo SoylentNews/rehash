@@ -865,12 +865,18 @@ sub userdir_handler {
 			$r->filename($constants->{basedir} . '/journal.pl');
 
 		} elsif ($op eq 'tags') {
-			my $args = "op=showtags&nick=$nick&uid=$uid";
-			# XXX "!" is a 'reserved' char in URI, escape it here?
-			$args .= "&tagname=$extra" if $extra;
-			$r->args($args);
-			$r->uri('/users.pl');
-			$r->filename($constants->{basedir} . '/users.pl');
+                        if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)]) {
+                                $r->args("nick=$nick&dp=tags&uid=$uid");
+                                $r->uri('/users2.pl');
+                                $r->filename($constants->{basedir} . '/users2.pl');
+                        } else {
+			        my $args = "op=showtags&nick=$nick&uid=$uid";
+			        # XXX "!" is a 'reserved' char in URI, escape it here?
+			        $args .= "&tagname=$extra" if $extra;
+			        $r->args($args);
+			        $r->uri('/users.pl');
+			        $r->filename($constants->{basedir} . '/users.pl');
+                        }
 
 		} elsif ($op eq 'bookmarks') {
                         if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)]) {

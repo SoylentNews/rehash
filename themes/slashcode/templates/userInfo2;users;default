@@ -18,7 +18,7 @@ __template__
                 <div class="yui-b">
                         <div class="block" id="user_bio">
                                 <div class="title" id="user_bio_title">
-                                        <h4>User Bio</h4>
+                                        <h4>[% useredit.nickname %] ([% useredit.uid %])</h4>
                                 </div>
 
                                 <div class="content" id="user_bio_content">
@@ -126,9 +126,9 @@ __template__
                 </div>
 
                 <div class="article" id="marquee_content">
-                        <h3>[% latest_event.subject %]</h3>
+                        <h3>[% latest_thing.subject %]</h3>
                         <div class="body">
-                                [% latest_event.text %]
+                                [% latest_thing.body %]
                         </div>
                 </div>
 
@@ -136,14 +136,13 @@ __template__
 
         <div class="nav">
                 <ul class="menu" id="tablist">
-                [% IF latest_comments.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/comments">Comments</a></li>[% END %]
-                [% IF latest_journals.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/journal">Journals</a></li>[% END %]
-                [% IF latest_submissions.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/submissions">Submissions</a></li>[% END %]
-                [% IF latest_bookmarks.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/bookmarks">Bookmarks</a></li>[% END %]
-                [% IF latest_friends.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/friends">Friends</a></li>[% END %]
-                [% IF latest_tags.size != 0 %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/tags">Tags</a></li>[% END %]
-                <li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/firehose">Firehose</a></li>
-                [% IF user.is_admin %]<li><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]">Admin</a></li>[% END %]
+                [% IF latest_comments.size != 0 %]<li[% IF data_pane == 'comments' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/comments">Comments</a></li>[% END %]
+                [% IF latest_journals.size != 0 %]<li[% IF data_pane == 'journal' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/journal">Journals</a></li>[% END %]
+                [% IF latest_submissions.size != 0 %]<li[% IF data_pane == 'submissions' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/submissions">Submissions</a></li>[% END %]
+                [% IF latest_bookmarks.size != 0 %]<li[% IF data_pane == 'bookmarks' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/bookmarks">Bookmarks</a></li>[% END %]
+                [% IF latest_friends.size != 0 %]<li[% IF data_pane == 'friends' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/friends">Friends</a></li>[% END %]
+                [% IF latest_tags.size != 0 %]<li[% IF data_pane == 'tags' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/tags">Tags</a></li>[% END %]
+                [% IF user.is_admin %]<li[% IF data_pane == '' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]">Admin</a></li>[% END %]
                 </ul>
         </div>
 
@@ -151,7 +150,7 @@ __template__
         [% IF latest_comments.size != 0 %]
         <div class="block" id="latest_comments">
                 <div class="title" id="latest_comments_title">
-                        <h4>Latest Comments</h4>
+                        <h4>Comments</h4>
                 </div>
                 <div class="content" id="latest_comments_content">
                         <ul>
@@ -166,7 +165,7 @@ __template__
         [% IF latest_journals.size != 0 %]
         <div class="block" id="latest_journals">
                 <div class="title" id="latest_journals_titles">
-                        <h4>Latest Journal Entries</h4>
+                        <h4>Journal Entries</h4>
                 </div>
 
                 <div class="content" id="latest_journals_content">
@@ -182,7 +181,7 @@ __template__
         [% IF latest_submissions.size != 0 %]
         <div class="block" id="latest_submissions">
                 <div class="title" id="latest_submissions_title">
-                        <h4>Latest Submissions</h4>
+                        <h4>Submissions</h4>
                 </div>
 
                 <div class="content" id="latest_submissions_content">
@@ -198,7 +197,7 @@ __template__
         [% IF latest_bookmarks.size != 0 %]
         <div class="block" id="latest_bookmarks">
                 <div class="title" id="latest_bookmarks_title">
-                        <h4>Latest Bookmarks</h4>
+                        <h4>Bookmarks</h4>
                 </div>
 
                 <div class="content" id="latest_bookmarks_content">
@@ -214,7 +213,7 @@ __template__
         [% IF latest_friends.size != 0 %]
         <div class="block" id="latest_friends">
                 <div class="title" id="latest_friends_title">
-                        <h4>Latest Friends</h4>
+                        <h4>Friends</h4>
                 </div>
 
                 <div class="content" id="latest_friends_content">
@@ -227,28 +226,37 @@ __template__
         </div>
         [% END %]
 
-        [% IF latest_tags.size != 0 %]
+        [% IF taghist.size != 0%]
         <div class="block" id="latest_tags">
                 <div class="title" id="latest_tags_title">
-                        <h4>Latest Tags</h4>
-                </div>  
-                
+                        <h4>Tags</h4>
+                </div>
+        
                 <div class="content" id="latest_tags_content">
                         <ul>
-                        [% FOREACH tid = latest_tags.keys.sort %]
+                        [% taglimit = 0 %]
+                        [% FOREACH tag=tagshist %]
+                               [% NEXT IF !user.is_admin && tag.private == 1 %]
                                 <li>
-                                [% IF latest_tags.$tid.maintable == 'stories' %]
-                                        <a href="/article.pl?sid=[% latest_tags.$tid.target %]">[% latest_tags.$tid.tagname %]</a>
-                                [% ELSIF latest_tags.$tid.maintable == 'urls' %]
-                                        <a href="[% latest_tags.$tid.target %]">[% latest_tags.$tid.tagname %]</a>
-                                [% ELSE %] 
-                                        <a href="[% constants.absolutedir_secure %]/firehose.pl?op=view&id=[% latest_tags.$tid.target %]">[% latest_tags.$tid.tagname %]</a>
+                                [% IF tag.globj_type == "stories" %]
+                                        <a href="/article.pl?sid=[% tag.story.sid %]">
+                                [% ELSIF tag.globj_type == "urls" %]
+                                        <a href="[% tag.url.url %]">
+                                [% ELSIF tag.globj_type == "journals" %]
+                                        [% nick = Slash.db.getUser(tag.journal.uid, 'nickname') %]
+                                        <a href="[% gSkin.rootdir %]/~[% nick | fixparam %]/journal/[% tag.journal.id %]/">
+                                [% ELSIF tag.globj_type == "submissions" %]
+                                        <a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% tag.submission.subid %]">
                                 [% END %]
+                                [% tag.tagname %]</a>
+                                &nbsp;([% tag.globj_type %])
                                 </li>
+                                [% taglimit = taglimit + 1 %]
+                                [% LAST IF taglimit == 5 %]
                         [% END %]
                         </ul>
                 </div>
-        </div>
+        </div>          
         [% END %]
 
         </div>

@@ -28,8 +28,6 @@ sub main {
 	my $postflag = $user->{state}{post};
 	my $op = lc($form->{op});
 
-        return if (!$user->{is_admin});
-
 	# savepasswd is a special case, because once it's called, you
 	# have to reload the form, and you don't want to do any checks if
 	# you've just saved.
@@ -1074,7 +1072,8 @@ sub showInfo {
 	# showInfo's header information is delayed until here, because
 	# the target user's info is not available until here.
 	vislenify($requested_user);
-	header(getMessage('user_header', { useredit => $requested_user, fieldkey => $fieldkey })) or return;
+        my $msg = getMessage('user_header', { useredit => $requested_user, fieldkey => $fieldkey });
+        header($msg, '', { shill_id => $user->{shill_id} }) or return;
 	# This is a hardcoded position, bad idea and should be fixed -Brian
 	# Yeah, we should pull this into a template somewhere...
 	print getMessage('note', { note => $hr->{note} }) if defined $hr->{note};
@@ -1359,51 +1358,87 @@ sub showInfo {
 
 		my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 		my $tagshist = [];
-		if ($tags_reader && $user->{is_admin}) {
+		if ($tags_reader) {
 			$tagshist = $tags_reader->getAllTagsFromUser($requested_user->{uid}, { orderby => 'created_at', orderdir => 'DESC', limit => 30, include_private => 1 });
 		}
 
-                # Latest comments
-                my $comment_blocks = $reader->sqlSelectAllHashref(
-                        'uid', 'bid, uid, block', 'user_event_blocks', "uid = $uid and code = 1");
-
-                my @block_ids = split(/,/, $comment_blocks->{$uid}->{block});
-
-                my %latest_comments;
-                foreach my $comment_block (@block_ids) {
-                        ($latest_comments{$comment_block}->{sid}, $latest_comments{$comment_block}->{subject})
-                                = $reader->sqlSelect("sid, subject", "comments", "cid = $comment_block");
+                my $latest_comments = 
+                        $reader->sqlSelectAllHashref('cid',
+                                                     "sid, cid, subject, UNIX_TIMESTAMP(date) as date",
+                                                     'comments',
+                                                     "uid = $uid",
+                                                     'order by date desc limit 5');
+        
+                my $latest_comment;
+                foreach my $latest_id (keys %$latest_comments) {
+                        my ($id, $ts) = ($latest_id, $latest_comments->{$latest_id}{'date'});
+                        ($latest_comment->{'id'}, $latest_comment->{'ts'}) = ($id, $ts) if $ts > $latest_comment->{'ts'};
                 }
 
-                # Latest journals
-                my $journal_blocks = $reader->sqlSelectAllHashref(
-                        'uid', 'bid, uid, block', 'user_event_blocks', "uid = $uid and code = 2");
+                my $latest_journals =
+                        $reader->sqlSelectAllHashref('id',
+                                                     'id, description, UNIX_TIMESTAMP(date) as date',
+                                                     'journals',
+                                                     "uid = $uid and promotetype = 'publish'",
+                                                     'order by date desc limit 5');
 
-                @block_ids = split(/,/, $journal_blocks->{$uid}->{block});
-
-                my %latest_journals;
-                foreach my $journal_block (@block_ids) {
-                        ($latest_journals{$journal_block}->{id}, $latest_journals{$journal_block}->{desc})
-                                = $reader->sqlSelect("id, description", "journals", "discussion = $journal_block");
+                my $latest_journal;
+                foreach my $latest_id (keys %$latest_journals) {
+                        my ($id, $ts) = ($latest_id, $latest_journals->{$latest_id}{'date'});
+                        ($latest_journal->{'id'}, $latest_journal->{'ts'}) = ($id, $ts) if $ts > $latest_journal->{'ts'};
                 }
 
-                # Latest submissions
-                my $submissions_blocks = $reader->sqlSelectAllHashref(
-                        'uid', 'bid, uid, block', 'user_event_blocks', "uid = $uid and code = 3");
+                my $latest_submissions =
+                        $reader->sqlSelectAllHashref('id',
+                                                     'id, UNIX_TIMESTAMP(createtime) as date',
+                                                     'firehose',
+                                                     "uid = $uid and rejected = 'no' and (type = 'submission' or type = 'feed')",
+                                                     'order by createtime desc limit 5');
 
-                @block_ids = split(/,/, $submissions_blocks->{$uid}->{block});
-
-                my %latest_submissions;
-                foreach my $submission_block (@block_ids) {
-                        ($latest_submissions{$submission_block}->{id}, $latest_submissions{$submission_block}->{title})
-                                = $reader->sqlSelect("id, title", "firehose_text", "id = $submission_block");
+                foreach my $latest_subid (keys %$latest_submissions) {
+                        ($latest_submissions->{$latest_subid}{'title'}, $latest_submissions->{$latest_subid}{'introtext'}) =
+                                $reader->sqlSelect('title, introtext',
+                                                   'firehose_text',
+                                                   "id = $latest_subid");
                 }
 
-                # Latest bookmarks
+                my $latest_submission;
+                foreach my $latest_id (keys %$latest_submissions) {
+                        my ($id, $ts) = ($latest_id, $latest_submissions->{$latest_id}{'date'});
+                        ($latest_submission->{'id'}, $latest_submission->{'ts'}) = ($id, $ts) if $ts > $latest_submission->{'ts'};
+                }
+
+                my $latest_thing;
+                if (($latest_comment->{'ts'} > $latest_journal->{'ts'}) &&
+                    ($latest_comment->{'ts'} > $latest_submission->{'ts'})) {
+                        my $id = $latest_comment->{'id'};
+                        $latest_thing->{'type'} = 'comment';
+                        $latest_thing->{'id'} = $id;
+                        $latest_thing->{'sid'} = $latest_comments->{$id}{'sid'};
+                        $latest_thing->{'subject'} = $latest_comments->{$id}{'subject'};
+                        $latest_thing->{'body'} = $reader->sqlSelect('comment', 'comment_text', "cid = $id");
+
+                } elsif (($latest_journal->{'ts'} > $latest_comment->{'ts'}) &&
+                         ($latest_journal->{'ts'} > $latest_submission->{'ts'})) {
+                        my $id = $latest_journal->{'id'};
+                        $latest_thing->{'type'} = 'journal';
+                        $latest_thing->{'id'} = $id;
+                        $latest_thing->{'subject'} = $latest_journals->{$id}{'description'};
+                        $latest_thing->{'body'} = $reader->sqlSelect('article', 'journals_text', "id = $id");
+
+                } elsif (($latest_submission->{'ts'} > $latest_comment->{'ts'}) &&
+                         ($latest_submission->{'ts'} > $latest_journal->{'ts'})) {
+                        my $id = $latest_submission->{'id'};
+                        $latest_thing->{'type'} = 'submission';
+                        $latest_thing->{'id'} = $id;
+                        $latest_thing->{'subject'} = $latest_submissions->{$id}{'title'};
+                        $latest_thing->{'body'} = $latest_submissions->{$id}{'introtext'};
+                }
+
                 my $bookmark_blocks = $reader->sqlSelectAllHashref(
                         'uid', 'bid, uid, block', 'user_event_blocks', "uid = $uid and code = 4");
 
-                @block_ids = split(/,/, $bookmark_blocks->{$uid}->{block});
+                my @block_ids = split(/,/, $bookmark_blocks->{$uid}->{block});
 
                 my %latest_bookmarks;
                 foreach my $bookmark_block (@block_ids) {
@@ -1414,79 +1449,12 @@ sub showInfo {
                                 $reader->sqlSelect("url", "urls", "url_id = " . $latest_bookmarks{$bookmark_block}->{id});
                 }
 
-                # Latest friends
                 my $latest_friends = $reader->sqlSelectAllHashref('person', 'person', 'people', "uid = $uid", "order by id limit 5");
                 foreach my $friend_id (keys %$latest_friends) {
                         $latest_friends->{$friend_id}->{nickname} =
                                 $reader->sqlSelect("nickname", "users", "uid = $friend_id");
                 }
 
-                # Latest tags
-                my $latest_tags =
-                        $reader->sqlSelectAllHashref('tagid',
-                                                     'tagid, tagnameid, globjid',
-                                                     'tags',
-                                                     "uid = $uid and private = 'no'",
-                                                     "order by tagid desc limit 5");
-
-                my $globj_types =
-                        $reader->sqlSelectAllHashref('gtid', 'gtid, maintable', 'globj_types');
-
-                foreach my $tagid (keys %$latest_tags) {
-                        $latest_tags->{$tagid}->{tagname} =
-                                $reader->sqlSelect('tagname', 'tagnames', 'tagnameid = ' . $latest_tags->{$tagid}->{tagnameid});
-
-                        my $globj =
-                                $reader->sqlSelectAllHashref('globjid',
-                                                             'globjid, gtid, target_id',
-                                                             'globjs',
-                                                             'globjid = ' . $latest_tags->{$tagid}->{globjid});
-                        $latest_tags->{$tagid}->{target_id} = $globj->{$latest_tags->{$tagid}->{globjid}}->{target_id};
-                        $latest_tags->{$tagid}->{gtid} = $globj->{$latest_tags->{$tagid}->{globjid}}->{gtid};
-                        $latest_tags->{$tagid}->{maintable} = $globj_types->{$latest_tags->{$tagid}->{gtid}}->{maintable};
-
-                        if ($latest_tags->{$tagid}->{maintable} eq 'stories') {
-                                $latest_tags->{$tagid}->{target} =
-                                        $reader->sqlSelect('sid', 'stories', 'stoid = ' . $latest_tags->{$tagid}->{target_id});
-
-                                $latest_tags->{$tagid}->{title} =
-                                        $reader->sqlSelect('title', 'story_text', 'stoid = ' . $latest_tags->{$tagid}->{target_id});
-                        } elsif ($latest_tags->{$tagid}->{maintable} eq 'urls') {
-                                ($latest_tags->{$tagid}->{title}, $latest_tags->{$tagid}->{target})
-                                        = $reader->sqlSelect('initialtitle, url', 'urls', 'url_id = ' . $latest_tags->{$tagid}->{target_id});
-                        } elsif ($latest_tags->{$tagid}->{maintable} eq 'submissions') {
-                                $latest_tags->{$tagid}->{target} =
-                                        $reader->sqlSelect('id', 'firehose', "uid = $uid and globjid = " . $latest_tags->{$tagid}->{globjid});
-
-                                $latest_tags->{$tagid}->{title} =
-                                        $reader->sqlSelect('subj', 'submissions', 'subid = ' . $latest_tags->{$tagid}->{target_id});
-
-                        }
-                }
-
-                # Latest event
-                my @latest_event_index = $reader->sqlSelect("event, code", "user_events", "uid = $uid", "order by date desc limit 1");
-
-                my $latest_event;
-                if ($latest_event_index[1] == 1) {
-                        ($latest_event->{key}, $latest_event->{subject}) =
-                                $reader->sqlSelect("cid, subject", "comments", "uid = $uid and cid = " . $latest_event_index[0]);
-
-                        $latest_event->{text} =
-                                $reader->sqlSelect("comment, comment_text", "id = " . $latest_event->{key});
-                } elsif ($latest_event_index[1] == 2) {
-                        ($latest_event->{key}, $latest_event->{subject}) =
-                                $reader->sqlSelect("id, description", "journals", "uid = $uid and discussion = " . $latest_event_index[0]);
-
-                        $latest_event->{text} =
-                                $reader->sqlSelect("article", "journals_text", "id = " . $latest_event->{key});
-                } else {
-                        ($latest_event->{key}, $latest_event->{subject}) =
-                                $reader->sqlSelect("id, title", "firehose_text", "id = " . $latest_event_index[0]);
-
-                        $latest_event->{text} =
-                                $reader->sqlSelect("introtext", "firehose_text", "id = " . $latest_event->{key});
-                }
 		if ($form->{dp} && $form->{dp} == "firehose") {
 			$form->{listonly} = 1;
 			$form->{mode} = "full";
@@ -1498,8 +1466,6 @@ sub showInfo {
 			$form->{fhfilter} = "\"user:$requested_user->{nickname}\"";
 			$form->{pause} = 1;
 		}
-
-                $latest_event->{code} = $latest_event_index[1];                
 
 		slashDisplay('userInfo2', {
 			title			=> $title,
@@ -1523,13 +1489,12 @@ sub showInfo {
 			subcount		=> $subcount,
 			metamods		=> $metamods,
 			tagshist		=> $tagshist,
-                        latest_comments         => \%latest_comments,
-                        latest_journals         => \%latest_journals,
-                        latest_submissions      => \%latest_submissions,
+                        latest_comments         => $latest_comments,
+                        latest_journals         => $latest_journals,
+                        latest_submissions      => $latest_submissions,
                         latest_bookmarks        => \%latest_bookmarks,
                         latest_friends          => $latest_friends,
-                        latest_tags             => $latest_tags,
-                        latest_event            => $latest_event,
+                        latest_thing            => $latest_thing,
                         data_pane               => $form->{dp},
 		}, { Page => 'users', Skin => 'default'});
 	}
