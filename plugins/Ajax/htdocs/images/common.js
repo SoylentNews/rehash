@@ -487,44 +487,7 @@ function firehose_remove_all_items() {
 }
 
 
-function firehose_up_down(id, dir, type) {
-	if (!check_logged_in()) { return; }
-
-	setFirehoseAction();
-	var meta = 0;
-	if (type && type == "comment") {
-		meta = 1;
-	}
-	ajax_update({
-		op:	'firehose_up_down',
-		id:	id,
-		reskey:	reskey_static,
-		dir:	dir,
-		meta:	meta
-	}, '', { onComplete: json_handler });
-
-
-	// We changed the tags outside the notice of the tag widget (if any).
-	// If there is one, we need to tell it.  Look for the tag widget.
-	var new_context = {'+':'nod', '-':'nix'}[dir];
-	var found_widgets = 0;
-
-	var $server = $('#firehoselist > [tag-server='+id+']');
-	$server.find('.tag-widget').
-			each(function(){
-				++found_widgets;
-				this.set_context(new_context);
-			});
-
-	if ( found_widgets ) {
-		$server[0].fetch_tags();
-	} else {
-		// No tag widget; we have to call directly...
-		firehose_fix_up_down(id, {'+':'votedup', '-':'voteddown'}[dir]);
-	}
-}
-
-function firehose_fix_up_down(id, new_state) {
+function firehose_fix_up_down( id, new_state ){
 	// Find the (possibly) affected +/- capsule.
 	var $updown = $('#updown-'+id);
 
