@@ -803,7 +803,7 @@ function firehose_init_tag_ui( $new_entries ){
 					firehose_handle_nodnix );
 
 			$this.
-				find('.title').
+				find('> h3').
 					append('<div class="tag-widget-stub nod-nix-reasons" init="context_timeout:15000">' +
 							'<div class="tag-display-stub" context="related" init="legend:\'why\', menu:false" />' +
 						'</div>').

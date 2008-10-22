@@ -573,7 +573,7 @@ function normalize_tag_commands( commands, excludes ){
 
 function $position_context_display( $display ){
 	if ( ! $related_trigger || ! $related_trigger.length ) {
-		return;
+		return $display;
 	}
 
 	var RIGHT_PADDING = 18;
@@ -627,7 +627,8 @@ function $position_context_display( $display ){
 
 function $queue_reposition( $display, if_only_width ){
 	return $display.queue(function(){
-		$position_context_display($display, if_only_width).dequeue();
+		$position_context_display($display, if_only_width);
+		$(this).dequeue();
 	});
 }
 
