@@ -410,10 +410,7 @@ div.head div.tag-widget-stub,
 
 
 #firehose div.tag-widget.body-widget span {
-/*
-	border:1px solid #000; /* safari bug */
-	white-space:nowrap;
-*/
+
 }
 
 
