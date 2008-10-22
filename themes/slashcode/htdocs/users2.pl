@@ -3441,7 +3441,7 @@ sub getMessage {
 	$hashref ||= {};
 	$hashref->{value} = $value;
 	return slashDisplay('messages', $hashref,
-		{ Return => 1, Nocomm => $nocomm });
+		{ Return => 1, Nocomm => $nocomm, Page => 'users' });
 }
 
 #################################################################
@@ -3452,7 +3452,7 @@ sub getError {
 	$hashref ||= {};
 	$hashref->{value} = $value;
 	return slashDisplay('errors', $hashref,
-		{ Return => 1, Nocomm => $nocomm });
+		{ Return => 1, Nocomm => $nocomm, Page => 'users' });
 }
 
 #################################################################
@@ -3463,7 +3463,7 @@ sub getTitle {
 	$hashref ||= {};
 	$hashref->{value} = $value;
 	return slashDisplay('titles', $hashref,
-		{ Return => 1, Nocomm => $nocomm });
+		{ Return => 1, Nocomm => $nocomm, Page => 'users' });
 }
 
 #################################################################
