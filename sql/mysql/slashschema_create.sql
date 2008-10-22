@@ -398,7 +398,7 @@ CREATE TABLE css (
 	ordernum int(11) DEFAULT '0',
 	ie_cond VARCHAR(16) DEFAULT '',
 	lowbandwidth ENUM('no','yes') DEFAULT 'no',
-	layout VARCHAR(16) DEFAULT '';
+	layout VARCHAR(16) DEFAULT '',
 	PRIMARY KEY  (csid),
 	KEY ctid (ctid),
 	KEY page_skin (page,skin),
