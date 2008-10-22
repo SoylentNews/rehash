@@ -166,9 +166,15 @@ sub createTag {
 		# a tag_clout in tagname_params.
 		my $admincmds_ar = $self->getTagnameAdmincmds(
 			$tag->{tagnameid}, $tag->{globjid});
+		for my $opp_tagnameid (@$opp_tagnameids) {
+			my $opp_ar = $self->getTagnameAdmincmds(
+				$opp_tagnameid, $tag->{globjid});
+			push @$admincmds_ar, @$opp_ar;
+		}
 		# XXX Also, if the tag is on a project, check
-		# getTagnameSfnetadmincmds();
-		# Any negative admin command means clout must be set to 0.
+		# getTagnameSfnetadmincmds().
+		# Any negative admin command, to either this tagname or
+		# its opposite, means clout must be set to 0.
 		if (grep { $_->{cmdtype} =~ /^[_#]/ } @$admincmds_ar) {
 			my $count = $self->sqlInsert('tag_params', {
 				tagid =>	$tagid,
@@ -1332,6 +1338,10 @@ sub processAdminCommand {
 
 	my $constants = getCurrentStatic();
 	my $tagnameid = $self->getTagnameidCreate($tagname);
+	my $opp_tagnameids = $self->getOppositeTagnameids($tagnameid);
+	my %affected_tagnameid = (
+		map { ( $_, 1 ) } ( $tagnameid, @$opp_tagnameids )
+	);
 
 	my $systemwide = $type =~ /^\$/ ? 1 : 0;
 	my $globjid = $systemwide ? undef : $self->getGlobjidCreate($table, $id);
@@ -1353,12 +1363,13 @@ sub processAdminCommand {
 		# descriptive.  Mnemonic: ")" looks like "D"
 		$self->setTagname($tagnameid, { descriptive => 1 });
 	} elsif ($type eq '^') {
-		# Set individual clouts to 0 for tags of this name on
-		# this story that have already been applied.  Future
-		# tags of this name on this story will apply with
-		# their full clout.
+		# Set individual clouts to 0 for tags of this name
+		# (and its opposite) on this story that have already
+		# been applied.  Future tags of this name (or its
+		# opposite) on this story will apply with their full
+		# clout.
 		my $tags_ar = $self->getTagsByNameAndIdArrayref($table, $id);
-		my @tags = grep { $_->{tagnameid} == $tagnameid } @$tags_ar;
+		my @tags = grep { $affected_tagnameid{ $_->{tagnameid} } } @$tags_ar;
 		for my $tag (@tags) {
 			$self->setTag($tag->{tagid}, { tag_clout => 0 });
 		}
@@ -1388,8 +1399,9 @@ sub processAdminCommand {
 			# applied to this story (that's the way we're doing it now,
 			# though I'm not ecstatic about it and it may change).
 			my $tags_ar = $self->getTagsByNameAndIdArrayref($table, $id, { include_private => 1 });
-			my @tags = grep { $_->{tagnameid} == $tagnameid } @$tags_ar;
-			for my $tag (@tags) {
+			my $opp_tagnameids = $self->getOppositeTagnameids($tagnameid);
+			my @tags_to_zero = grep { $affected_tagnameid{ $_->{tagnameid} } } @$tags_ar;
+			for my $tag (@tags_to_zero) {
 				$self->setTag($tag->{tagid}, { tag_clout => 0 });
 			}
 			if ($new_user_clout < 1) {
