@@ -706,13 +706,12 @@ sub getIntrotext {
 	} else {
 		$intro = $1 if $strip_art =~ m/^(.{$min_chars,$max_chars})?$linebreak/s;
 	}
-	if (!$intro) {
-		$intro = chopEntity($strip_art, $max_chars);
-		local $Slash::Utility::Data::approveTag::admin = 1;
-		$intro = strip_html($intro);
-		$intro = balanceTags($intro, { admin => 1 });
-		$intro = addDomainTags($intro);
-	}
+
+	$intro ||= chopEntity($strip_art, $max_chars);
+	local $Slash::Utility::Data::approveTag::admin = 1;
+	$intro = strip_html($intro);
+	$intro = balanceTags($intro, { admin => 1 });
+	$intro = addDomainTags($intro);
 
 	return $intro;
 } }
