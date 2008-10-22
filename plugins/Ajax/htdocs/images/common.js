@@ -72,7 +72,7 @@ var is_ie = ua.match("/MSIE/");
 var fh_adTimerSecsMax   = 15;
 var fh_adTimerClicksMax = 0;
 var fh_adTimerUrl       = '';
-fh_adTimerUrl = '/images/iframe/firehose.html'; // testing
+//fh_adTimerUrl = '/images/iframe/firehose.html'; // testing
 
 
 function createPopup(xy, titlebar, name, contents, message, onmouseout) {
@@ -1780,7 +1780,6 @@ var adTimerSeen   = {};
 var adTimerSecs   = 0;
 var adTimerClicks = 0;
 var adTimerInsert = 0;
-var adTimerUrl    = '/images/iframe/firehose.html';
 
 function inlineAdReset(id) {
 	if (id !== undefined)
@@ -1848,8 +1847,8 @@ $.fn.tag_ui__tags = function(){
 })(Slash.jQuery);
 
 function inlineAdFirehose($article) {
-	if (!fh_is_admin)
-		return 0; // testing
+	if (!fh_adTimerUrl)
+		return 0;
 
 	if (!$article)
 		$article = Slash.Firehose.choose_article_for_next_ad();

@@ -194,6 +194,10 @@ cmdrtaco dot net but be forgiving of beta code!
 		firehose_play();
 	[% END %]
 
+[% IF constants.run_ads && !user.state.page_adless && !user.state.page_buying && user.currentSkin != 'admin' && (user.is_admin) # || user.currentPage == 'index2') %]
+	fh_adTimerUrl = '/images/iframe/firehose.html';
+[% END %]
+
 fh_ticksize = 15;
 [% IF !user.is_anon %]
 firehose_slider_init();
