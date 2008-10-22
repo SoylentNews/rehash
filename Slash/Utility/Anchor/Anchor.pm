@@ -432,22 +432,28 @@ sub ssiHeadFoot {
 	my $user = getCurrentUser();
 	my $slashdb = getCurrentDB();
 	my $gSkin = getCurrentSkin();
+
 	(my $dir = $gSkin->{rootdir}) =~ s|^(?:https?:)?//[^/]+||;
 	my $hostname = $gSkin->{hostname};
 	my $page = $options->{Page} || $user->{currentPage} || 'misc';
 
 	# if there's a special .inc header for this page, use it, else it's
 	# business as usual.
-	$page = '' unless ($page ne 'misc' && 
+	$page = '' unless ($page ne 'misc' && (
 		$slashdb->existsTemplate({
 			name	=> $headorfoot,
 		        skin	=> $gSkin->{name},
 	        	page	=> $user->{currentPage} 
-		}) 
+		}) ||
+
+		$slashdb->existsTemplate({
+			name 	=> $headorfoot,
+			skin	=> "default",
+			page	=> $user->{currentPage},
+		}))
 
 	);
 	
-
 	my $ssiheadorfoot = 'ssi' . substr($headorfoot, 0, 4);
 
 	slashDisplay($ssiheadorfoot, {
