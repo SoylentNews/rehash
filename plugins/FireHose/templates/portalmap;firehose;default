@@ -16,7 +16,6 @@ portalmap
 __template__
 
 [% title %]
-<span class="closebox" onClick="Slash.Boxes.remove('[% bid %]-container')"></span>
 
 __seclev__
 500
