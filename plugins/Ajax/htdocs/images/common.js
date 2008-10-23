@@ -1427,14 +1427,23 @@ function firehose_open_tab(id) {
 }
 
 function firehose_save_tab(id) {
+	var	$tab		= $('#fhtab-'+id),
+		new_name	= $tab.find('#tab-input-'+id).val(),
+		$title		= $tab.find('#tab-text-'+id),
+		$saved		= $title.children().remove(); // please ... think of the children
+	// let's not wait for a server response to reflect the name-change
+	$title.text(new_name).append($saved);
+
+	// XXX: I'm having problems where the server occasionaly refuses,
+	//	resets the title, and gives no explanation as to why
 	ajax_update({
 		op:		'firehose_save_tab',
-		tabname:	$('#tab-input-'+id).val(),
+		tabname:	new_name,
 		section:	firehose_settings.section,
 		tabid:		id
 	}, '',  { onComplete: json_handler });
-	$('#tab-form-'+id).setClass('hide');
-	$('#tab-text-'+id).removeClass();
+	$tab.find('#tab-form-'+id).setClass('hide');
+	$title.removeClass();
 }
 var logged_in   = 1;
 var login_cover = 0;
