@@ -530,7 +530,7 @@ sub _read_and_unlink_cchp_file {
 sub gen_firehose_static {
 	my($vu, $filename, $section, $skinname, $opts) = @_;
 	my $constants = getCurrentStatic();
-	my $fargs = "virtual_user=$vu ssi=yes section='$section'";
+	my $fargs = "virtual_user=$vu taskgen=1 section='$section'";
 	my $basedir = $constants->{basedir};
 	$skinname .= "/" if $skinname;
 

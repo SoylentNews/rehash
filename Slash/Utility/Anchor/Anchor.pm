@@ -114,7 +114,7 @@ sub header {
 	$data = { title => $data } unless ref($data) eq 'HASH';
 	$data->{title} = strip_notags($data->{title} || '');
 
-	unless ($form->{ssi}) {
+	unless ($form->{ssi} || $form->{taskgen}) {
 		my $r = Apache->request;
 
 		$r->content_type($constants->{content_type_webpage}
