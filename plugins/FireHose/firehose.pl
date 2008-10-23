@@ -80,6 +80,7 @@ sub main {
 		}
 		if ($op eq "metamod") {
 			$title = "$constants->{sitename} - Metamod";
+			$form->{metamod} = 1;
 		}
 		if ($form->{index}) {
 			$title = "$constants->{sitename} - $constants->{slogan}";
@@ -112,7 +113,6 @@ sub metamod {
 	my $firehose = getObject("Slash::FireHose");
 	$form->{tabtype} 	= "metamod";
 	$form->{skipmenu} 	= 1;
-	$form->{metamod} 	= 1;
 	$form->{pause} 		= 1;
 	$form->{no_saved} 	= 1;
 	print $firehose->listView();
