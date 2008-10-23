@@ -63,6 +63,8 @@ sub main {
 
 	my $title;
 	$title = "$constants->{sitename} - $constants->{slogan}";
+	$form->{'index'} = 1;
+	$form->{no_saved} = 1;
 	header($title, '') or return;
 
 
@@ -75,8 +77,6 @@ sub main {
 sub list {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 	slashProfInit();
-	$form->{'index'} = 1;
-	$form->{no_saved} = 1;
 	my $firehose = getObject("Slash::FireHose");
 	print $firehose->listView();
 	slashProfEnd();
