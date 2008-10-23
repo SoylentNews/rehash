@@ -3494,7 +3494,7 @@ sub getUserAdmin {
 		) ? 1 : 0;
 	my $authoredit_flag = ($user->{seclev} >= 10000) ? 1 : 0;
 	my $sectionref = $reader->getDescriptions('skins');
-	$sectionref->{''} = getData('all_sections');
+	$sectionref->{''} = getData('all_sections', undef, 'users');
 
 	$field ||= 'uid';
 	if ($field eq 'uid') {
