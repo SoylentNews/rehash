@@ -1455,6 +1455,21 @@ sub showInfo {
                                 $reader->sqlSelect("nickname", "users", "uid = $friend_id");
                 }
 
+                # Datapanes should be caluclated elsewhere. This is a temp kludge.
+                my $friends_datapane;
+                if ($form->{dp} eq 'friends') {
+                        my $zoo = getObject('Slash::Zoo');
+                        my $people = $zoo->getRelationships($uid, 1);
+
+                        if (@$people) {     
+                                $friends_datapane = slashDisplay('plainlist', {
+                                        people          => $people,
+                                        nickname        => $nick
+                                        }, { Page => 'zoo', Return => 1 }
+                                );
+                        }
+                }
+
 		if ($form->{dp} && $form->{dp} == "firehose") {
 			$form->{listonly} = 1;
 			$form->{mode} = "full";

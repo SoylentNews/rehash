@@ -268,11 +268,18 @@ __template__
 				<div class="yui-u">
                 			[% IF data_pane == '' && admin_flag %]
 			                        [% admin_block %]
+
 			                [% ELSIF data_pane == 'journal' %]
+
 			                [% ELSIF data_pane == 'submissions' %]
+
 			                [% ELSIF data_pane == 'bookmarks' %]
+
 			                [% ELSIF data_pane == 'friends' %]
+                                                [% friends_datapane %]
+
 			                [% ELSIF data_pane == 'tags' %]
+
 					[% ELSIF data_pane == 'firehose';
 						fh = Slash.getObject("Slash::FireHose");
 						fhbox = fh.listView({ fh_page => 'users.pl'});
