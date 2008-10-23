@@ -49,7 +49,7 @@ __template__
 				[%# the note button %]
 				<span class="admin-note">
 				<a id="note-text-[% item.id %]" href="#" onclick="firehose_open_note('[% item.id %]'); return false">
-					[%- IF !item.note  %]Note[% END -%][% item.note | strip_literal -%]
+					[%- IF !item.note  %]<img src="/images/sic_notes.png" alt="Notes">[% END -%][% item.note | strip_literal -%]
 				</a>
 				</span>
 			</div>
