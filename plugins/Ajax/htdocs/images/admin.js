@@ -304,24 +304,24 @@ function firehose_reject (el) {
 }
 
 function firehose_init_note_flags(){
-	var $entries = $(document).article_info__find_articles(':not(:has(.generaltitle > span.note-flag))');
+	var $entries = $(document).article_info__find_articles(':not(:has(> h3 > span.note-flag))');
 
 	// set up the "note flag"
 	return $entries.each(function(){
-		var $entry = $(this), id = firehose_id_of(this);
+		var $entry = $(this);
 		var $note = $entry.find('.note-wrapper');
 		var note_text='', no_note = ! $note.length || $note.hasClass('no-note');
 		if ( ! no_note ) {
 			note_text = $.trim($note.find('.admin-note a').text());
 		}
 
-		var $note_flag = $entry.find('.generaltitle').
+		var $note_flag = $entry.find('> h3').
 			append('<span class="note-flag">note</span>').
 			find('.note-flag').
-			attr('title', note_text).
-			click(function(){
-				firehose_open_note($entry)
-			});
+				attr('title', note_text).
+				click(function(){
+					firehose_open_note($entry)
+				});
 
 		if ( no_note ) {
 			$note_flag.addClass('no-note');
@@ -333,16 +333,17 @@ function firehose_open_note( expr ) {
 	if ( typeof expr === 'string' || typeof expr === 'number' ) {
 		expr = '#firehose-' + expr;
 	}
-	return $(expr).each(function(){
-		var $entry = $(this), id = firehose_id_of(this);
-		if ( $entry.is('[class^=brief]') ) {
-			toggle_firehose_body(id, true);
-		}
-		$entry.find('.note-wrapper').removeClass('no-note');
-		$entry.find('#note-form-'+id).removeClass('hide');
-		$entry.find('#note-input-'+id).each(function(){this.focus();});
-		$entry.find('#note-text-'+id).addClass('hide');
-	});
+	return $(expr).
+		each(function(){
+			var $entry = $(this), id = firehose_id_of(this);
+			if ( $entry.is('[class^=brief]') ) {
+				toggle_firehose_body(id, true);
+			}
+			$entry.find('.note-wrapper').removeClass('no-note');
+			$entry.find('#note-form-'+id).removeClass('hide');
+			$entry.find('#note-input-'+id).each(function(){this.focus();});
+			$entry.find('#note-text-'+id).addClass('hide');
+		});
 }
 
 function firehose_save_note(id) {
