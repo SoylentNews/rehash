@@ -1073,7 +1073,7 @@ sub showInfo {
 	# the target user's info is not available until here.
 	vislenify($requested_user);
         my $msg = getMessage('user_header', { useredit => $requested_user, fieldkey => $fieldkey });
-        header($msg, '', { shill_id => $user->{shill_id} }) or return;
+        header($msg, '', { shill_id => $requested_user->{shill_id} }) or return;
 	# This is a hardcoded position, bad idea and should be fixed -Brian
 	# Yeah, we should pull this into a template somewhere...
 	print getMessage('note', { note => $hr->{note} }) if defined $hr->{note};
