@@ -48,17 +48,13 @@ __template__
 				</span>
 				[%# the note button %]
 				<span class="admin-note">
-				<a id="note-text-[% item.id %]" href="#" onclick="firehose_open_note('[% item.id %]'); return false">
-					[%- IF !item.note  %]<img src="/images/sic_notes.png" alt="Notes">[% END -%][% item.note | strip_literal -%]
-				</a>
+					<a id="note-text-[% item.id %]" href="#" onclick="firehose_open_note('[% item.id %]'); return false">[%- IF !item.note  %]<img src="/images/sic_notes.png" alt="Note">[% END -%][% item.note | strip_literal -%]</a>
 				</span>
 			</div>
 		</span>
 		[% END %]
 		[%# the disclosure triangle %]
-		<a class="edit-toggle" href="#" onclick="this.blur(); firehose_toggle_tag_ui(this); return false">
-			<span class="button collapse"></span>
-		</a>
+		<a class="edit-toggle" href="#" onclick="this.blur(); firehose_toggle_tag_ui(this); return false"><span class="button collapse"></span></a>
 		[%# the tag input field %]
 		<form class="tag-editor" onsubmit="form_submit_tags(this, {fade_remove: 400, order: 'prepend', classes:'not-saved'}); return false">
 			<input class="tag-entry" type="text" size="10">

@@ -409,16 +409,6 @@ div.head div.tag-widget-stub,
 	content: 'Note: ';
 }
 
-.tag-widget .admin-buttons a:before,
-.tag-widget .admin-buttons .note-wrapper.no-note a:before {
-	content: '[';
-}
-
-.tag-widget .admin-buttons a:after,
-.tag-widget .admin-buttons .note-wrapper.no-note a:after {
-	content: ']';
-}
-
 .tag-widget .admin-buttons .note-wrapper a:before,
 .tag-widget .admin-buttons .note-wrapper a:after,
 .tag-widget .admin-buttons .note-wrapper.no-note:before {
