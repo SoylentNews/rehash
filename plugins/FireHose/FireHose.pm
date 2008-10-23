@@ -1313,7 +1313,7 @@ sub ajaxSaveNoteFirehose {
 		my $firehose = getObject("Slash::FireHose");
 		$firehose->setFireHose($id, { note => $note });
 	}
-	return $note || "Note";
+	return $note || "<img src='//images.slashdot.org/sic_notes.png' alt='Note'>";
 }
 
 sub ajaxSaveFirehoseTab {
