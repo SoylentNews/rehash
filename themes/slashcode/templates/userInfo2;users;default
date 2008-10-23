@@ -139,7 +139,7 @@ __template__
                 [% IF latest_submissions.size != 0 %]<li[% IF data_pane == 'submissions' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/submissions">Submissions</a></li>[% END %]
                 [% IF latest_bookmarks.size != 0 %]<li[% IF data_pane == 'bookmarks' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/bookmarks">Bookmarks</a></li>[% END %]
                 [% IF latest_friends.size != 0 %]<li[% IF data_pane == 'friends' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/friends">Friends</a></li>[% END %]
-                [% IF latest_tags.size != 0 %]<li[% IF data_pane == 'tags' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/tags">Tags</a></li>[% END %]
+                [% IF taghist.size != 0 %]<li[% IF data_pane == 'tags' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/tags">Tags</a></li>[% END %]
                 [% IF user.is_admin %]<li[% IF data_pane == '' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]">Admin</a></li>[% END %]
                 </ul>
         </div>
