@@ -61,18 +61,16 @@ __template__
 			<span class="tag-server-busy"><img src="[% constants.imagedir %]/spinner[% IF !featured %]2[% END %].gif"></span>
 		</form>
 		[%# the tag 'bars' %]
-		<div class="tag-display-set train">
-			<div class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></div>
-			<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% top_tags %]</div>
-			<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% system_tags %]</div>
-			[%- IF item.type == "story" &&
-				constants.signoff_use &&
-				((user.is_admin && !user.firehose_usermode) || user.acl.signoff_allowed) &&
-				! Slash.db.hasUserSignedStory(item.srcid, user.uid) -%]
-				<div class="tag-display-stub" context="signoff" stoid="[% item.srcid %]" init="legend:'signoff', menu:false">unsigned</div>
-			[%- END -%]
-			<div class="tag-display-stub" context="datatype" init="legend:'type&nbsp;tag'">[% datatype_tags %]</div>
-		</div>
+		<div class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></div>
+		<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% top_tags %]</div>
+		<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% system_tags %]</div>
+		[%- IF item.type == "story" &&
+			constants.signoff_use &&
+			((user.is_admin && !user.firehose_usermode) || user.acl.signoff_allowed) &&
+			! Slash.db.hasUserSignedStory(item.srcid, user.uid) -%]
+			<div class="tag-display-stub" context="signoff" stoid="[% item.srcid %]" init="legend:'signoff', menu:false">unsigned</div>
+		[%- END -%]
+		<div class="tag-display-stub" context="datatype" init="legend:'type&nbsp;tag'">[% datatype_tags %]</div>
 		[%# the suggestions bar %]
 		<div class="related">
 			<div class="tag-display-stub" context="related" init="legend:'suggestions', menu:false"></div>

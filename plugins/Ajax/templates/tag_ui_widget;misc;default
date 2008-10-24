@@ -40,20 +40,18 @@ __template__
 	[% END %]
 
 	[%# the tag 'bars' %]
-	<div class="tag-display-set train">
-		[% IF user.tags_canwrite_stories %]
-		<div class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></div>
-		[% END %]
-		<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</div>
-		<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% tags.system %]</div>
-		[%- IF item.type == "story" &&
-			constants.signoff_use &&
-			((user.is_admin && !user.firehose_usermode) || user.acl.signoff_allowed) &&
-			! Slash.db.hasUserSignedStory(item.srcid, user.uid) -%]
-			<div class="tag-display-stub" context="signoff" init="legend:'signoff', menu:false">unsigned</div>
-		[%- END -%]
-		<div class="tag-display-stub" context="datatype" init="legend:'type&nbsp;tag'">[% tags.datatype %]</div>
-	</div>
+	[% IF user.tags_canwrite_stories %]
+	<div class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></div>
+	[% END %]
+	<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</div>
+	<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% tags.system %]</div>
+	[%- IF item.type == "story" &&
+		constants.signoff_use &&
+		((user.is_admin && !user.firehose_usermode) || user.acl.signoff_allowed) &&
+		! Slash.db.hasUserSignedStory(item.srcid, user.uid) -%]
+		<div class="tag-display-stub" context="signoff" init="legend:'signoff', menu:false">unsigned</div>
+	[%- END -%]
+	<div class="tag-display-stub" context="datatype" init="legend:'type&nbsp;tag'">[% tags.datatype %]</div>
 	[% IF user.tags_canwrite_stories %]
 	[%# the suggestions bar %]
 	<div class="related">
