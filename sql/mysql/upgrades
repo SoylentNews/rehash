@@ -5608,3 +5608,6 @@ UPDATE vars SET value = 'T_2_5_0_226' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
 
+# 2008-10-24
+UPDATE vars SET value = 'T_2_5_0_227' WHERE name = 'cvs_tag_currentcode';
+
