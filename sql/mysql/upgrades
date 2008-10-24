@@ -5596,8 +5596,6 @@ INSERT INTO vars (name, value, description) VALUES ('badge_icon_size_wide', '15'
 # 2008-10-16
 UPDATE vars SET value = 'T_2_5_0_225' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 ALTER TABLE css ADD layout VARCHAR(16) DEFAULT '';
@@ -5605,6 +5603,8 @@ ALTER TABLE css ADD INDEX layout (layout);
 
 # for Slashdot run latest set of changes from /themes/slashdot/sql/mysql/upgrades here
 
-# 2008-10-232
+# 2008-10-23
 UPDATE vars SET value = 'T_2_5_0_226' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
