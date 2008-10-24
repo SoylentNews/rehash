@@ -15,6 +15,7 @@ __seclev__
 10000
 __template__
 [% IF user.tags_canread_stories %]
+	[%  tags_reader = Slash.getObject('Slash::Tags'); tags = tags_reader.setGetCombinedTags(item.id, 'firehose-id'); %]
 	[%# the nod/nix 'capsule' %]
 	[% IF !form.skipvote && !options.nothumbs && !skipvote %]
 	<div class="tags">
@@ -27,13 +28,6 @@ __template__
 
 	[% IF user.tags_canwrite_stories %]
 	[%# if you can tag... %]
-	<div class="tagshide" id="toggletags-body-[% id %]">
-		[% IF user.is_admin && !user.firehose_usermode %]
-		<div id="tags-admin-[% id %]" class="tagadmin"></div>
-		<div id="admin-extras-[% item.id %]" class="tagadminextra"><a href="#" onclick="firehose_get_admin_extras('[% item.id %]'); return false">Get extras</a></div>
-		[% END %]
-		<div id="toggletags-message-[% id %]" class="message"></div>
-	</div>
 
 	[%# the tag-widget itself %]
 	<div id="tag-widget-[% id %]" class="tag-widget-stub body-widget" init="context_timeout:15000">
@@ -62,15 +56,15 @@ __template__
 		</form>
 		[%# the tag 'bars' %]
 		<div class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></div>
-		<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% top_tags %]</div>
-		<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% system_tags %]</div>
+		<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</div>
+		<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% tags.system %]</div>
 		[%- IF item.type == "story" &&
 			constants.signoff_use &&
 			((user.is_admin && !user.firehose_usermode) || user.acl.signoff_allowed) &&
 			! Slash.db.hasUserSignedStory(item.srcid, user.uid) -%]
 			<div class="tag-display-stub" context="signoff" stoid="[% item.srcid %]" init="legend:'signoff', menu:false">unsigned</div>
 		[%- END -%]
-		<div class="tag-display-stub" context="datatype" init="legend:'type&nbsp;tag'">[% datatype_tags %]</div>
+		<div class="tag-display-stub" context="datatype" init="legend:'type&nbsp;tag'">[% tags.datatype %]</div>
 		[%# the suggestions bar %]
 		<div class="related">
 			<div class="tag-display-stub" context="related" init="legend:'suggestions', menu:false"></div>
@@ -85,10 +79,8 @@ __template__
 		[%- ELSE				%] href="[% gSkin.rootdir %]/subscribe.pl"
 		[%- END %]><span class="button collapse"></span></a>
 		[%# the tag 'bars' %]
-		<div class="tag-display-set train">
-			<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% top_tags %]</div>
-			<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% system_tags %]</div>
-		</div>
+		<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</div>
+		<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% tags.system %]</div>
 	</div>
 	[% END %]
 [% END %]

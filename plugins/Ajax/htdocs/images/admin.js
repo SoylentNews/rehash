@@ -58,71 +58,62 @@ function tagsHistory(id, type) {
 //
 
 function firehose_admin_context( display ){
-	display.update_tags('history', { order: 'prepend' });
+	display.update_tags('extras history', { order: 'prepend' });
 }
 
 function firehose_handle_admin_commands( commands ){
-	var neverdisplay, hold, signoff, history;
+	var id = this.getAttribute('tag-server');
 
-	var non_admin_commands = $.map(commands, function(cmd){
+	return $.map(commands, function(cmd){
 		var user_cmd = null;
 		switch ( cmd ) {
-			case 'neverdisplay':	neverdisplay = true; break;
-			case 'hold':		hold = true; break;
+			case 'extras':
+				firehose_get_admin_extras(id);
+				break;
 
-			case 'history':		history = true; break;
+			case 'history':
+				tagsHistory(id, 'firehose');
+				break;
+
+			case 'neverdisplay':
+				if ( confirm("Set story to neverdisplay?") ) {
+					non_admin_commands.push('neverdisplay');
+					this._ajax_request('', {
+						op:	'admin_neverdisplay',
+						stoid:	'',
+						fhid:	id,
+						ajax:	{ success: function(){ firehose_remove_entry(id); } }
+					});
+				}
+				break;
 
 			case 'signed':
 			case 'signoff':
 			case 'unsigned':
-				signoff = true;
+				if ( ! $(this).article_info('awaiting-thumbnail') ) {
+					var signoff_tag_server = this;
+					this._ajax_request('', {
+						op:	'admin_signoff',
+						stoid:	$(this).article_info('stoid'),
+						ajax:	{ success: function(){ $('[context=signoff]', signoff_tag_server).remove(); } }
+					});
+				}
+				firehose_collapse_entry(id);
 				break;
 
 			case 'binspam':
-				if ( $(this).is(':not([type=feed])') ) {
-					user_cmd = cmd;
-				}
-				break;
-
+				if ( $(this).is('[type=feed]') )
+					break;
+				/* else fall through */
+			case 'hold':
+				firehose_collapse_entry(id);
+				/* fall through */
 			default:
 				user_cmd = cmd;
+				break;
 		}
 		return user_cmd;
 	});
-
-	var id = this.getAttribute('tag-server');
-	if ( neverdisplay && confirm("Set story to neverdisplay?") ) {
-		non_admin_commands.push('neverdisplay');
-		this._ajax_request('', {
-			op:	'admin_neverdisplay',
-			stoid:	'',
-			fhid:	id,
-			ajax:	{ success: function(){ firehose_remove_entry(id); } }
-		});
-	}
-
-	if ( signoff && ! $(this).article_info('awaiting-thumbnail') ) {
-		var signoff_tag_server = this;
-		this._ajax_request('', {
-			op:	'admin_signoff',
-			stoid:	$(this).article_info('stoid'),
-			ajax:	{ success: function(){ $('[context=signoff]', signoff_tag_server).remove(); } }
-		});
-	}
-
-	if ( hold ) {
-		non_admin_commands.push('hold');
-	}
-
-	if ( hold || signoff ) {
-		firehose_collapse_entry(id);
-	}
-
-	if ( history ) {
-		tagsHistory(id, 'firehose');
-	}
-
-	return non_admin_commands;
 }
 
 
