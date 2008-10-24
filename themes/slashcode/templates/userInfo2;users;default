@@ -276,7 +276,7 @@ __template__
        	                                [% friends_datapane %]
 
 				[% ELSIF data_pane == 'tags' %]
-                                        [% PROCESS usertaghistory tagshist = tagshist %]
+                                        [% PROCESS usertaghistory tagshist = tagshist notitle = 1 %]
 
 				[% ELSIF data_pane == 'firehose';
 					fh = Slash.getObject("Slash::FireHose");
