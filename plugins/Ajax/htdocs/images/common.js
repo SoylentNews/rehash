@@ -303,7 +303,7 @@ function toggle_firehose_body( id, is_admin ) {
 
 	if ( if_show ) {
 		$body.setClass('body');
-		$article.setClass('article' + usertype);
+		$article.setClass('article ' + usertype);
 		$h3.find('a img').hide("fast");
 		if ( is_admin ) {
 			firehose_toggle_tag_ui_to(true, $article);
@@ -311,9 +311,8 @@ function toggle_firehose_body( id, is_admin ) {
 	} else {
 		$body.setClass('hide');
 		$h3.find('a img').show("fast");
-		$article.setClass('briefarticle' + usertype);
+		$article.setClass('briefarticle ' + usertype);
 	}
-
 	after_article_moved($article[0]);
 	inlineAdFirehose( if_show && $article );
 
