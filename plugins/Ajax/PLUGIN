@@ -57,4 +57,5 @@ template=templates/prefs_authors;ajax;default
 template=templates/prefs_main;ajax;default
 template=templates/prefs_admin;ajax;default
 template=templates/sectionpref;ajax;default
+template=templates/init_tag_ui;misc;default
 template=templates/tag_ui_widget;misc;default
