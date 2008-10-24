@@ -132,6 +132,7 @@ div.tag-display li.t > .tmenu li.descriptive {
 	background-color: inherit;
 }
 
+div.tag-display,
 div.tag-display > h1.legend {
 	width: auto !important;
 }

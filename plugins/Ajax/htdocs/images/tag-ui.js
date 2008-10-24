@@ -586,12 +586,11 @@ function $position_context_display( $display ){
 	global_align = Math.max(left_edge, global_align);
 
 	var need_minimal_fix = true;
-	if ( $display.nearest_parent(':hidden').length===0 ) {
+	if ( $display.is(':visible') ) {
 		try {
 			var display_width = $display.children('ul:first').width();
 			$display.css({
-				right: '',
-				width: display_width
+				right: ''
 			});
 
 			global_align = Math.max(
