@@ -134,14 +134,14 @@ __template__
 
         <div class="nav">
                 <ul class="menu" id="tablist">
-                <li[% IF data_pane == 'firehose' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/firehose:">Firehose</a></li>
-                [% IF latest_comments.size != 0 %]<li[% IF data_pane == 'comments' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/comments">Comments</a></li>[% END %]
-                [% IF latest_journals.size != 0 %]<li[% IF data_pane == 'journal' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/journal">Journals</a></li>[% END %]
-                [% IF latest_submissions.size != 0 %]<li[% IF data_pane == 'submissions' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/submissions">Submissions</a></li>[% END %]
-                [% IF latest_bookmarks.size != 0 %]<li[% IF data_pane == 'bookmarks' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/bookmarks">Bookmarks</a></li>[% END %]
-                [% IF latest_friends.size != 0 %]<li[% IF data_pane == 'friends' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/friends">Friends</a></li>[% END %]
-                [% IF tagshist.size != 0 %]<li[% IF data_pane == 'tags' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]/tags">Tags</a></li>[% END %]
-                [% IF user.is_admin %]<li[% IF data_pane == '' %] class="active"[% END %]><a href="[% constants.absolutedir_secure %]/^[% useredit.nickname %]">Admin</a></li>[% END %]
+                <li[% IF data_pane == 'firehose' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/firehose">Firehose</a></li>
+                [% IF latest_comments.size != 0 %]<li[% IF data_pane == 'comments' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/comments">Comments</a></li>[% END %]
+                [% IF latest_journals.size != 0 %]<li[% IF data_pane == 'journal' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/journal">Journals</a></li>[% END %]
+                [% IF latest_submissions.size != 0 %]<li[% IF data_pane == 'submissions' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/submissions">Submissions</a></li>[% END %]
+                [% IF latest_bookmarks.size != 0 %]<li[% IF data_pane == 'bookmarks' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/bookmarks">Bookmarks</a></li>[% END %]
+                [% IF latest_friends.size != 0 %]<li[% IF data_pane == 'friends' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/friends">Friends</a></li>[% END %]
+                [% IF tagshist.size != 0 %]<li[% IF data_pane == 'tags' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/tags">Tags</a></li>[% END %]
+                [% IF user.is_admin %]<li[% IF data_pane == '' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]">Admin</a></li>[% END %]
                 </ul>
         </div>
 
@@ -154,7 +154,7 @@ __template__
                 <div class="content" id="latest_comments_content">
                         <ul>
                         [% FOREACH cid = latest_comments.keys.sort %]
-                        <li><a href="[% constants.absolutedir_secure %]/comments.pl?sid=[% latest_comments.$cid.sid %]&cid=[% cid %]">[% latest_comments.$cid.subject %]</a></li>
+                        <li><a href="[% gSkin.rootdir %]/comments.pl?sid=[% latest_comments.$cid.sid %]&cid=[% cid %]">[% latest_comments.$cid.subject %]</a></li>
                         [% END %]
                         </ul>
                 </div>
@@ -170,7 +170,7 @@ __template__
                 <div class="content" id="latest_journals_content">
                         <ul>
                         [% FOREACH jid = latest_journals.keys.sort %]
-                        <li><a href="[% constants.absolutedir_secure %]/~[% useredit.nickname %]/journal/[% latest_journals.$jid.id %]">[% latest_journals.$jid.desc %]</a><br></li>
+                        <li><a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/journal/[% latest_journals.$jid.id %]">[% latest_journals.$jid.desc %]</a><br></li>
                         [% END %]
                         </ul>
                 </div>
@@ -186,7 +186,7 @@ __template__
                 <div class="content" id="latest_submissions_content">
                         <ul>
                         [% FOREACH sid = latest_submissions.keys.sort %]
-                        <li><a href="[% constants.absolutedir_secure %]/firehose.pl?op=view&id=[% latest_submissions.$sid.id %]">[% latest_submissions.$sid.title %]</a></li>
+                        <li><a href="[% gSkin.rootdir %]/firehose.pl?op=view&id=[% latest_submissions.$sid.id %]">[% latest_submissions.$sid.title %]</a></li>
                         [% END %]
                         </ul>
                 </div>
@@ -218,7 +218,7 @@ __template__
                 <div class="content" id="latest_friends_content">
                         <ul>
                         [% FOREACH fid = latest_friends.keys.sort %]
-                        <li><a href="[% constants.absolutedir_secure %]/~[% latest_friends.$fid.nickname %]">[% latest_friends.$fid.nickname %]</a></li>
+                        <li><a href="[% gSkin.rootdir %]/~[% latest_friends.$fid.nickname %]">[% latest_friends.$fid.nickname %]</a></li>
                         [% END %]
                         </ul>
                 </div>
@@ -276,6 +276,7 @@ __template__
        	                                [% friends_datapane %]
 
 				[% ELSIF data_pane == 'tags' %]
+                                        [% PROCESS usertaghistory tagshist = tagshist %]
 
 				[% ELSIF data_pane == 'firehose';
 					fh = Slash.getObject("Slash::FireHose");

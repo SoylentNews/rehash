@@ -1510,6 +1510,7 @@ sub showInfo {
                         latest_bookmarks        => \%latest_bookmarks,
                         latest_friends          => $latest_friends,
                         latest_thing            => $latest_thing,
+                        friends_datapane        => $friends_datapane,
                         data_pane               => $form->{dp},
 		}, { Page => 'users', Skin => 'default'});
 	}
