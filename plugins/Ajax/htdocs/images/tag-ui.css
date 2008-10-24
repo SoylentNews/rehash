@@ -56,7 +56,6 @@ div.head .tag-widget .admin-buttons {
 
 /* tag "suggestions" look different than tags actually applied */
 .tag-display[context=related] li.suggestion span.tag {
-	font-style: italic;
 	font-weight: bold;
 }
 
