@@ -62,9 +62,9 @@ function firehose_admin_context( display ){
 }
 
 function firehose_handle_admin_commands( commands ){
-	var id = this.getAttribute('tag-server');
+	var entry=this, $entry=$(entry), id=$entry.attr('tag-server');
 
-	return $.map(commands, function(cmd){
+	return $.map(commands, function( cmd ){
 		var user_cmd = null;
 		switch ( cmd ) {
 			case 'extras':
@@ -78,7 +78,7 @@ function firehose_handle_admin_commands( commands ){
 			case 'neverdisplay':
 				if ( confirm("Set story to neverdisplay?") ) {
 					non_admin_commands.push('neverdisplay');
-					this._ajax_request('', {
+					entry._ajax_request('', {
 						op:	'admin_neverdisplay',
 						stoid:	'',
 						fhid:	id,
@@ -90,19 +90,18 @@ function firehose_handle_admin_commands( commands ){
 			case 'signed':
 			case 'signoff':
 			case 'unsigned':
-				if ( ! $(this).article_info('awaiting-thumbnail') ) {
-					var signoff_tag_server = this;
-					this._ajax_request('', {
+				if ( ! $entry.article_info('awaiting-thumbnail') ) {
+					entry._ajax_request('', {
 						op:	'admin_signoff',
-						stoid:	$(this).article_info('stoid'),
-						ajax:	{ success: function(){ $('[context=signoff]', signoff_tag_server).remove(); } }
+						stoid:	$entry.article_info('stoid'),
+						ajax:	{ success: function(){ $('[context=signoff]', entry).remove(); } }
 					});
 				}
 				firehose_collapse_entry(id);
 				break;
 
 			case 'binspam':
-				if ( $(this).is('[type=feed]') )
+				if ( $entry.is('[type=feed]') )
 					break;
 				/* else fall through */
 			case 'hold':
