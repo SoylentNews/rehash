@@ -887,7 +887,9 @@ sub userdir_handler {
 
 		} elsif ($op eq 'tags') {
                         if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)]) {
-                                $r->args("nick=$nick&dp=tags&uid=$uid");
+                                my $args = "nick=$nick&dp=tags&uid=$uid";
+                                $args .= "&tagname=$extra" if $extra;
+                                $r->args($args);
                                 $r->uri('/users2.pl');
                                 $r->filename($constants->{basedir} . '/users2.pl');
                         } else {

@@ -1765,6 +1765,7 @@ sub showTags {
                         useredit        => $user_edit,
                         tagname         => $tagname,
                         tags            => $tags_ar,
+                        notitle         => 1,
                 }, { Page => 'users', Return => 1 });
         } else {
                 my $tags_hr = $tags_reader->getGroupedTagsFromUser($user_edit->{uid});
