@@ -233,25 +233,11 @@ __template__
         
                 <div class="content" id="latest_tags_content">
                         <ul>
-                        [% taglimit = 0 %]
-                        [% FOREACH tag=tagshist %]
-                               [% NEXT IF !user.is_admin && tag.private == 1 %]
+                        [% FOREACH tag = tagshist.keys.sort %]
+                               [% NEXT IF !user.is_admin && tagshist.$tag.0.private == 1 %]
                                 <li>
-                                [% IF tag.globj_type == "stories" %]
-                                        <a href="/article.pl?sid=[% tag.story.sid %]">
-                                [% ELSIF tag.globj_type == "urls" %]
-                                        <a href="[% tag.url.url %]">
-                                [% ELSIF tag.globj_type == "journals" %]
-                                        [% nick = Slash.db.getUser(tag.journal.uid, 'nickname') %]
-                                        <a href="[% gSkin.rootdir %]/~[% nick | fixparam %]/journal/[% tag.journal.id %]/">
-                                [% ELSIF tag.globj_type == "submissions" %]
-                                        <a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% tag.submission.subid %]">
-                                [% END %]
-                                [% tag.tagname %]</a>
-                                &nbsp;([% tag.globj_type %])
+                                <a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/tags/[% tagshist.$tag.0.tagname %]">[% tagshist.$tag.0.tagname %]</a>&nbsp;([% tagshist.$tag.0.globj_type %])
                                 </li>
-                                [% taglimit = taglimit + 1 %]
-                                [% LAST IF taglimit == 5 %]
                         [% END %]
                         </ul>
                 </div>

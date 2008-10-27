@@ -1357,9 +1357,9 @@ sub showInfo {
 		}
 
 		my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-		my $tagshist = [];
+		my $tagshist;
 		if ($tags_reader) {
-			$tagshist = $tags_reader->getAllTagsFromUser($requested_user->{uid}, { orderby => 'created_at', orderdir => 'DESC', limit => 30, include_private => 1 });
+			$tagshist = $tags_reader->getGroupedTagsFromUser($requested_user->{uid}, { orderby => 'created_at', orderdir => 'DESC', limit => 5, include_private => 1 });
 		}
 
                 my $latest_comments = 
