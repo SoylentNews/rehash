@@ -1470,6 +1470,9 @@ sub showInfo {
                         }
                 }
 
+                my $tags_datapane;
+                $tags_datapane = showTags() if ($form->{dp} eq 'tags');
+
 		if ($form->{dp} && $form->{dp} == "firehose") {
 			$form->{listonly} = 1;
 			$form->{mode} = "full";
@@ -1511,6 +1514,7 @@ sub showInfo {
                         latest_friends          => $latest_friends,
                         latest_thing            => $latest_thing,
                         friends_datapane        => $friends_datapane,
+                        tags_datapane           => $tags_datapane,
                         data_pane               => $form->{dp},
 		}, { Page => 'users', Skin => 'default'});
 	}
@@ -1725,34 +1729,58 @@ sub saveTags {
 
 #####################################################################
 sub showTags {
-	my($hr) = @_;
-	my $user = getCurrentUser();
-	my $form = getCurrentForm();
-	my $slashdb = getCurrentDB();
-	my $constants = getCurrentStatic();
-	my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+        my($hr) = @_;
+        my $user = getCurrentUser();
+        my $form = getCurrentForm();
+        my $slashdb = getCurrentDB();
+        my $constants = getCurrentStatic();
+        my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 
-	my($uid, $user_edit);
-	if ($form->{uid} || $form->{nick}) {
-		$uid = $form->{uid} || $tags_reader->getUserUID($form->{nick});
-		$user_edit = $tags_reader->getUser($uid);
-	}
-	if (!$user_edit || $user_edit->{is_anon}) {
-		$uid = $user->{uid};
-		$user_edit = $user;
-	}
-	my $nickname = $user_edit->{nickname};
+        my $tagname = $form->{tagname} || '';
+        $tagname = '' if !$tags_reader->tagnameSyntaxOK($tagname);
 
-	if (!$constants->{plugin}{Tags}) {
-		print getError('bad_op', { op => $form->{op}});
-		return;
-	}
+        my($uid, $user_edit);
+        if ($form->{uid} || $form->{nick}) {
+                $uid = $form->{uid} || $tags_reader->getUserUID($form->{nick});
+                $user_edit = $tags_reader->getUser($uid);
+        }
+        if (!$user_edit || $user_edit->{is_anon}) {
+                $uid = $user->{uid};
+                $user_edit = $user;
+        }
+        my $nickname = $user_edit->{nickname};
 
-	my $tags_ar = $tags_reader->getGroupedTagsFromUser($user_edit->{uid});
-	slashDisplay('usertags', {
-		useredit	=> $user_edit,
-		tags_grouped	=> $tags_ar,
-	});
+        if (!$constants->{plugin}{Tags}) {
+                print getError('bad_op', { op => $form->{op}});
+                return;
+        }
+
+        my $tagnameid = $tags_reader->getTagnameidFromNameIfExists($tagname);
+        if ($tagnameid) {
+                # Show all user's tags for one particular tagname.
+                my $tags_hr = $tags_reader->getGroupedTagsFromUser($user_edit->{uid},
+                        { tagnameid => $tagnameid });
+                my $tags_ar = $tags_hr->{$tagname} || [ ];
+                return slashDisplay('usertagsforname', {
+                        useredit        => $user_edit,
+                        tagname         => $tagname,
+                        tags            => $tags_ar,
+                }, { Page => 'users', Return => 1 });
+        } else {
+                my $tags_hr = $tags_reader->getGroupedTagsFromUser($user_edit->{uid});
+                my $num_tags = 0;
+                for my $tn (keys %$tags_hr) {
+                        $num_tags += scalar @{ $tags_hr->{$tn} };
+                }
+                # Show all user's tagnames, with links to show all
+                # tags for each particular tagname.
+                my $tagname_ar = [ sort keys %$tags_hr ];
+                return slashDisplay('usertagnames', {
+                        useredit        => $user_edit,
+                        tagnames        => $tagname_ar,
+                        notitle         => 1,
+                }, { Page => 'users', Return => 1 });
+        }
 }
 
 #################################################################
