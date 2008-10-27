@@ -19,10 +19,3 @@ __template__
 [% tagnamesbox %]
 [% perfbox %]
 [% Slash.sidebox("Firehose Usage", ' ', "firehose_usage", 1) %]
-	<script type="text/javascript">
-		console_updating = 1;
-		console_update([% IF constants.plugin.FireHose %]1[% ELSE %]0[% END %]);
-		[% IF constants.plugin.FireHose %]
-		firehose_usage();
-		[% END %]
-	</script>
