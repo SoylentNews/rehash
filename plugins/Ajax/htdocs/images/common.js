@@ -767,7 +767,7 @@ function firehose_init_tag_ui( $new_entries ){
 			$this.
 				find('> h3').
 					append('<div class="tag-widget-stub nod-nix-reasons" init="context_timeout:15000">' +
-							'<div class="tag-display-stub" context="related" init="legend:\'why\', menu:false" />' +
+							'<div class="tag-display-stub" context="related" init="menu:false" />' +
 						'</div>').
 					find('.tag-display-stub').
 						click(firehose_click_nodnix_reason);

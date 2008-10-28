@@ -305,7 +305,7 @@ function firehose_init_tag_ui( $new_entries ){
 		}).
 		find('.title').
 			append('<div class="tag-widget-stub nod-nix-reasons" init="context_timeout:15000">' +
-					'<div class="tag-display-stub respond-related" init="legend:\'why\', menu:false" />' +
+					'<div class="tag-display-stub respond-related" init="menu:false" />' +
 				'</div>').
 			find('.tag-display-stub').
 				click(firehose_click_nodnix_reason);
