@@ -134,7 +134,7 @@ __template__
 
         <div class="nav">
                 <ul class="menu" id="tablist">
-                <li[% IF data_pane == 'firehose' || (data_pane = '' && !user.is_admin) %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/firehose">Firehose</a></li>
+                <li[% IF data_pane == 'firehose' || (data_pane == '' && !user.is_admin) %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/firehose">Firehose</a></li>
                 [% IF latest_comments.size != 0 %]<li[% IF data_pane == 'comments' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/comments">Comments</a></li>[% END %]
                 [% IF latest_journals.size != 0 %]<li[% IF data_pane == 'journal' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/journal">Journals</a></li>[% END %]
                 [% IF latest_submissions.size != 0 %]<li[% IF data_pane == 'submissions' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% useredit.nickname %]/submissions">Submissions</a></li>[% END %]
@@ -249,7 +249,7 @@ __template__
         <div id="yui-main">
                 <div class="yui-b">
 			<div class="yui-u maincol">
-                		[% IF data_pane == '' && admin_flag %]
+                		[% IF data_pane == '' && user.is_admin %]
 		                        [% admin_block %]
 
 		                [% ELSIF data_pane == 'journal' %]
@@ -264,7 +264,7 @@ __template__
 				[% ELSIF data_pane == 'tags' %]
                                         [% tags_datapane %] 
 
-				[% ELSIF data_pane == 'firehose';
+				[% ELSIF data_pane == 'firehose' || (data_pane == '' && !user.is_admin);
 					fh = Slash.getObject("Slash::FireHose");
 					fhbox = fh.listView({ fh_page => 'users.pl'});
 					fhbox;
