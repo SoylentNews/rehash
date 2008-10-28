@@ -1370,6 +1370,7 @@ sub showInfo {
                                                      'order by date desc limit 5');
         
                 my $latest_comment;
+                $latest_comment->{'ts'} = 0;
                 foreach my $latest_id (keys %$latest_comments) {
                         my ($id, $ts) = ($latest_id, $latest_comments->{$latest_id}{'date'});
                         ($latest_comment->{'id'}, $latest_comment->{'ts'}) = ($id, $ts) if $ts > $latest_comment->{'ts'};
@@ -1383,6 +1384,7 @@ sub showInfo {
                                                      'order by date desc limit 5');
 
                 my $latest_journal;
+                $latest_journal->{ts} = 0;
                 foreach my $latest_id (keys %$latest_journals) {
                         my ($id, $ts) = ($latest_id, $latest_journals->{$latest_id}{'date'});
                         ($latest_journal->{'id'}, $latest_journal->{'ts'}) = ($id, $ts) if $ts > $latest_journal->{'ts'};
@@ -1403,6 +1405,7 @@ sub showInfo {
                 }
 
                 my $latest_submission;
+                $latest_submission->{ts} = 0;
                 foreach my $latest_id (keys %$latest_submissions) {
                         my ($id, $ts) = ($latest_id, $latest_submissions->{$latest_id}{'date'});
                         ($latest_submission->{'id'}, $latest_submission->{'ts'}) = ($id, $ts) if $ts > $latest_submission->{'ts'};
