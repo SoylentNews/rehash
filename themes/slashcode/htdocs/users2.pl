@@ -1488,6 +1488,8 @@ sub showInfo {
 			$form->{pause} = 1;
 		}
 
+                my $data_pane = $form->{dp};
+
 		slashDisplay('userInfo2', {
 			title			=> $title,
 			uid			=> $uid,
@@ -1518,7 +1520,7 @@ sub showInfo {
                         latest_thing            => $latest_thing,
                         friends_datapane        => $friends_datapane,
                         tags_datapane           => $tags_datapane,
-                        data_pane               => $form->{dp},
+                        data_pane               => $data_pane,
 		}, { Page => 'users', Skin => 'default'});
 	}
 
