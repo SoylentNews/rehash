@@ -59,8 +59,8 @@ DROP TABLE IF EXISTS firehose_topics_rendered;
 CREATE TABLE firehose_topics_rendered (
 	id MEDIUMINT UNSIGNED NOT NULL,
 	tid SMALLINT(5) UNSIGNED NOT NULL,
-	UNIQUE id_tid (tid, skid),
-	INDEX skid_tid (skid, tid)
+	 UNIQUE id_tid (id, tid),
+        INDEX tid_id (tid, id)
 ) TYPE=InnoDB;
 
 DROP TABLE IF EXISTS firehose_text;
