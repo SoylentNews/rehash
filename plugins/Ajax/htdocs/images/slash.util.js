@@ -8,8 +8,6 @@ $.ajaxSetup({
 	contentType: 'application/x-www-form-urlencoded'
 });
 
-ensure_namespace('Slash').jQuery = $;
-
 
 // code to be exported
 
@@ -240,6 +238,8 @@ function ensure_namespace( path ){
 		return name_space;
 	}
 }
+
+ensure_namespace('Slash').jQuery = $;
 
 
 function Package( o ){
