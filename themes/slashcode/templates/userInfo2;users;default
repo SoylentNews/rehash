@@ -196,7 +196,7 @@ __template__
         [% IF latest_bookmarks.size != 0 %]
         <div class="block" id="latest_bookmarks">
                 <div class="title" id="latest_bookmarks_title">
-                        <h4>Bookmarks </h4>
+                        <h4>Bookmarks</h4>
                 </div>
 
                 <div class="content" id="latest_bookmarks_content">
