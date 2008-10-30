@@ -5565,8 +5565,6 @@ ALTER TABLE journals_text ADD COLUMN introtext TEXT NOT NULL;
 # 2008-10-09
 UPDATE vars SET value = 'T_2_5_0_224' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
-
 # For Thinkgeek related stuff
 ALTER TABLE users ADD COLUMN shill_id TINYINT UNSIGNED DEFAULT 0 NOT NULL;
 UPDATE users SET shill_id = 1 WHERE seclev = 10000 OR author = 1;
@@ -5596,24 +5594,17 @@ INSERT INTO vars (name, value, description) VALUES ('badge_icon_size_wide', '15'
 # 2008-10-16
 UPDATE vars SET value = 'T_2_5_0_225' WHERE name = 'cvs_tag_currentcode';
 
-
-
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-# SLASHDOT LAST UPDATED HERE
-
-
 ALTER TABLE css ADD layout VARCHAR(16) DEFAULT '';
 ALTER TABLE css ADD INDEX layout (layout);
 
-
 # for Slashdot run latest set of changes from /themes/slashdot/sql/mysql/upgrades here
-
 
 # 2008-10-23
 UPDATE vars SET value = 'T_2_5_0_226' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
+# PUDGE LAST UPDATED HERE
 
 # Fixing incorrectly defined media types in 'css' table
 UPDATE css SET media="screen, projection" WHERE media="screen/projection";
@@ -5621,10 +5612,16 @@ UPDATE css SET media="screen, projection" WHERE media="screen/projection";
 # 2008-10-24
 UPDATE vars SET value = 'T_2_5_0_227' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHDOT LAST UPDATED HERE
+
 # for plugins/Bookmark
 ALTER TABLE bookmark_feeds ADD COLUMN nofilter TINYINT UNSIGNED DEFAULT 0 NOT NULL;
 
 # for plugins/Tags
 UPDATE tagname_params SET name='tagname_clout' WHERE name='tag_clout';
 UPDATE tagname_params SET value=0 WHERE name='tagname_clout' AND value+0 < 0.001;
+
+
+# 2008-10-30
+UPDATE vars SET value = 'T_2_5_0_228' WHERE name = 'cvs_tag_currentcode';
 
