@@ -396,4 +396,9 @@ function appendToMedia(text) {
 	}
 }
 
-;
+$(function(){
+	// edit icons positioning fix
+	if( $.browser.safari || $.browser.opera ) {
+		$('.edit a').css('margin-top','0pt');
+	}
+});
