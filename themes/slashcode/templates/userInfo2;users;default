@@ -196,13 +196,13 @@ __template__
         [% IF latest_bookmarks.size != 0 %]
         <div class="block" id="latest_bookmarks">
                 <div class="title" id="latest_bookmarks_title">
-                        <h4>Bookmarks</h4>
+                        <h4>Bookmarks </h4>
                 </div>
 
                 <div class="content" id="latest_bookmarks_content">
                         <ul>
-                        [% FOREACH bid = latest_bookmarks.keys.sort %]
-                        <li><a href="[% latest_bookmarks.$bid.url %]">[% latest_bookmarks.$bid.title %]</a></li>
+                        [% FOREACH bid = latest_bookmarks %]
+                        <li><a href="[% bid.url %]">[% bid.initialtitle %]</a></li>
                         [% END %]
                         </ul>
                 </div>

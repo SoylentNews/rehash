@@ -95,6 +95,17 @@ sub getBookmark {
 	$self->sqlSelectHashref("*", "bookmarks", "bookmark_id=$id_q");
 }
 
+sub getRecentBookmarksByUid {
+        my($self, $uid, $limit) = @_;
+        $limit ||= 50;
+
+        return $self->sqlSelectAllHashrefArray("*", "bookmarks, urls",
+                "uid = $uid && bookmarks.url_id = urls.url_id",
+                "ORDER BY bookmarks.createdtime DESC LIMIT $limit"
+        );
+
+}
+
 1;
 
 __END__

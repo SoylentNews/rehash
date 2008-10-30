@@ -1411,6 +1411,13 @@ sub showInfo {
                         ($latest_submission->{'id'}, $latest_submission->{'ts'}) = ($id, $ts) if $ts > $latest_submission->{'ts'};
                 }
 
+                # Latest bookmarks
+                my $bookmarks_reader = getObject('Slash::Bookmark');
+                my $latest_bookmarks;
+                if ($bookmarks_reader) {
+                        $latest_bookmarks = $bookmarks_reader->getRecentBookmarksByUid($uid, 5);
+                }
+
                 my $latest_thing;
                 if (($latest_comment->{'ts'} > $latest_journal->{'ts'}) &&
                     ($latest_comment->{'ts'} > $latest_submission->{'ts'})) {
@@ -1436,20 +1443,6 @@ sub showInfo {
                         $latest_thing->{'id'} = $id;
                         $latest_thing->{'subject'} = $latest_submissions->{$id}{'title'};
                         $latest_thing->{'body'} = $latest_submissions->{$id}{'introtext'};
-                }
-
-                my $bookmark_blocks = $reader->sqlSelectAllHashref(
-                        'uid', 'bid, uid, block', 'user_event_blocks', "uid = $uid and code = 4");
-
-                my @block_ids = split(/,/, $bookmark_blocks->{$uid}->{block});
-
-                my %latest_bookmarks;
-                foreach my $bookmark_block (@block_ids) {
-                        ($latest_bookmarks{$bookmark_block}->{id}, $latest_bookmarks{$bookmark_block}->{title})
-                                = $reader->sqlSelect("url_id, title", "bookmarks", "bookmark_id = $bookmark_block");
-
-                        $latest_bookmarks{$bookmark_block}->{url} =
-                                $reader->sqlSelect("url", "urls", "url_id = " . $latest_bookmarks{$bookmark_block}->{id});
                 }
 
                 my $latest_friends = $reader->sqlSelectAllHashref('person', 'person', 'people', "uid = $uid", "order by id limit 5");
@@ -1515,7 +1508,7 @@ sub showInfo {
                         latest_comments         => $latest_comments,
                         latest_journals         => $latest_journals,
                         latest_submissions      => $latest_submissions,
-                        latest_bookmarks        => \%latest_bookmarks,
+                        latest_bookmarks        => $latest_bookmarks,
                         latest_friends          => $latest_friends,
                         latest_thing            => $latest_thing,
                         friends_datapane        => $friends_datapane,
