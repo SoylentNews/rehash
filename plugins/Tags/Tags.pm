@@ -622,12 +622,12 @@ sub addCloutsToTagArrayref {
 		'tagid, value', 'tag_params',
 		"tagid IN ($tagids_in_str) AND name='tag_clout'");
 
-	# Pull values from tagname params named 'tag_clout'
+	# Pull values from tagname params named 'tagname_clout'
 	my $tagname_clout_hr = { };
 	my %tagnameid = map { ($_->{tagnameid}, 1) } @$ar;
 	for my $tagnameid (keys %tagnameid) {
 		my $tn_data = $self->getTagnameDataFromId($tagnameid);
-		$tagname_clout_hr->{$tagnameid} = $tn_data->{tag_clout} || 1;
+		$tagname_clout_hr->{$tagnameid} = defined($tn_data->{tagname_clout}) ? $tn_data->{tagname_clout} : 1;
 	}
 
 	# Record which clout type each tagname uses
