@@ -128,9 +128,40 @@ sub run_process {
 		map { ($_, $tags_reader->getOppositeTagname($_)) }
 		@{$tags_reader->getExcludedTags}
 	);
+
 	# Eliminate tagnames that are just the author's name.
 	my @names = map { lc } @{ $tags_reader->getAuthorNames() };
 	for my $name (@names) { $nontop{$name} = 1 }
+
+	# Tagnames that begin with an author's name are half as likely
+	# to appear on the homepage.
+	my $author_regex_str = join '|', @names;
+	my $author_prefix_regex = qr{^($author_regex_str)};
+	for my $tagname (keys %scores) {
+		$scores{$tagname} *= 0.5 if $tagname =~ $author_prefix_regex;
+	}
+
+	# Long tagnames are less likely to appear on the homepage.
+	for my $tagname (keys %scores) {
+		my $l = length($tagname);
+		next if $l <= 8;
+		my $length_mod = 1;
+		if ($l <= 12) {
+			# 8 < length <= 12, very mild penalty
+			$length_mod = 1.00 + (1.00-0.90)*( 8 - $l)/(12- 8);
+		} elsif ($l <= 30) {
+			# 12 < length <= 30, increasing penalty
+			$length_mod = 0.90 + (0.90-0.25)*(12 - $l)/(30-12);
+		} elsif ($l <= 40) {
+			# 30 < length <= 40, severe penalty
+			$length_mod = 0.25 + (0.25-0.05)*(30 - $l)/(40-30);
+		} else {
+			# 40 < length <= 64, very severe penalty (REALLY hard
+			# to get these on the homepage)
+			$length_mod = 0.05 + (0.05-0.01)*(40 - $l)/(64-40);
+		}
+		$scores{$tagname} *= $length_mod;
+	}
 
 	# Eliminate tagnames below the minimum score required, and
 	# those that didn't make it to the top 5
