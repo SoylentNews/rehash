@@ -5621,7 +5621,7 @@ UPDATE css SET media="screen, projection" WHERE media="screen/projection";
 # 2008-10-24
 UPDATE vars SET value = 'T_2_5_0_227' WHERE name = 'cvs_tag_currentcode';
 
-# For plugins/Bookmarks
+# for plugins/Bookmark
 ALTER TABLE bookmark_feeds ADD COLUMN nofilter TINYINT UNSIGNED DEFAULT 0 NOT NULL;
 
 # for plugins/Tags
