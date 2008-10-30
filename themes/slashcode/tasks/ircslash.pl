@@ -356,6 +356,7 @@ my %cmds = (
 	re		=> \&cmd_re,
 	d		=> \&cmd_roll,
 
+	amihere		=> \&cmd_ha,
 	amiherenow	=> \&cmd_ha,
 	amibacknow	=> \&cmd_ha,
 );

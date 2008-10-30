@@ -106,14 +106,14 @@ sub createUpdateItemFromJournal {
 	if ($journal) {
 		my $globjid = $self->getGlobjidCreate("journals", $journal->{id});
 		my $globjid_q = $self->sqlQuote($globjid);
-		# XXX does this next line depend on the primary key being the
-		# first column returned by "SELECT *"? If I read that right,
-		# that's non-intuitive; we should select id by name instead. -Jamie
-		my($itemid) = $self->sqlSelect("*", "firehose", "globjid=$globjid_q");
+		my($itemid) = $self->sqlSelect("id", "firehose", "globjid=$globjid_q");
 		if ($itemid) {
-			my $introtext = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
+			my $bodytext  = balanceTags(strip_mode($journal->{article}, $journal->{posttype}), { deep_nesting => 1 });
+			my $introtext = $journal->{introtext} || $bodytext;
+
 			$self->setFireHose($itemid, {
 				introtext   => $introtext,
+				bodytext    => $bodytext,
 				title       => $journal->{description},
 				tid         => $journal->{tid},
 				discussion  => $journal->{discussion},

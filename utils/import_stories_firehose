@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+use warnings;
+use strict;
+
+use Slash::Test shift || 'slash';
+my $limit = shift;
+local $| = 1;
+
+my $firehose = getObject("Slash::FireHose");
+printf STDERR "Fetching IDs ...\n";
+
+my $slashdb = getCurrentDB();
+my $ids = $slashdb->sqlSelectColArrayref('stoid', 'stories', '', ($limit ? "LIMIT $limit" : ()));
+my $i = 0;
+my %ids;
+
+printf STDERR "\nImporting %d stories\n", scalar(@$ids);
+for my $id (@$ids) {
+	printf "\r%d", ++$i;
+	my $globjid = $slashdb->getGlobjidCreate("stories", $id);
+	my $fhid;
+	$fhid = $firehose->getFireHoseIdFromGlobjid($globjid) if $globjid;
+
+	$ids{$id} = $firehose->createItemFromStory($id) unless $fhid;
+}
+printf STDERR "\nImported %d stories\n", scalar(keys %ids);
+
+my $string = join '; ', map { "$_:$ids{$_}" } sort { $a <=> $b } keys %ids;
+print "\n$string\nDone\n";

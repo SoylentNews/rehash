@@ -3,24 +3,29 @@ use warnings;
 use strict;
 
 use Slash::Test shift || 'slash';
-my $limit = shift || 100;
-
-my $slashdb = getCurrentDB();
-my $ids = $slashdb->sqlSelectColArrayref(
-	'journals.id', 'journals',
-	'journals.id NOT IN (SELECT firehose.srcid FROM firehose WHERE firehose.type = "journal") LIMIT ' . $limit
-);
+my $limit = shift;
+local $| = 1;
 
 my $firehose = getObject("Slash::FireHose");
-local $| = 1;
-printf STDERR "Importing %d journals\n", scalar(@$ids);
+my $journal  = getObject("Slash::Journal");
+printf STDERR "Fetching IDs ...\n";
 
+my $slashdb = getCurrentDB();
+my $ids = $slashdb->sqlSelectColArrayref('id', 'journals', '', ($limit ? "LIMIT $limit" : ()));
 my $i = 0;
 my %ids;
+
+printf STDERR "\nImporting %d journals\n", scalar(@$ids);
 for my $id (@$ids) {
 	printf "\r%d", ++$i;
+	my $introtext = $journal->getIntrotext($id);
+	$journal->sqlUpdate('journals_text',
+		{ introtext => $introtext },
+		"id = " . $journal->sqlQuote($id)
+	);
 	$ids{$id} = $firehose->createUpdateItemFromJournal($id);
 }
+printf STDERR "\nImported %d journals\n", scalar(keys %ids);
 
-my $string = join ';', map { "$_:$ids{$_}" } @$ids;
+my $string = join '; ', map { "$_:$ids{$_}" } @$ids;
 print "\n$string\nDone\n";

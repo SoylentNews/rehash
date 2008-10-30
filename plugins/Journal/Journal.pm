@@ -42,6 +42,7 @@ sub set {
 	$self->sqlUpdate('journals', \%j1, "id=$id") if keys %j1;
 	$self->sqlUpdate('journals_text', \%j2, "id=$id") if $j2{article};
 	if ($constants->{plugin}{FireHose}) {
+		# XXX: this will not work with HumanConf!
 		my $reskey = getObject('Slash::ResKey');
 		my $rkey = $reskey->key('submit', { nostate => 1 });
 		if ($rkey && $rkey->createuse) {
@@ -196,6 +197,7 @@ sub create {
 	my $slashdb = getCurrentDB();
 	$slashdb->setUser($user->{uid}, { journal_last_entry_date => $date });
 	if ($constants->{plugin}{FireHose}) {
+		# XXX: this will not work with HumanConf!
 		my $reskey = getObject('Slash::ResKey');
 		my $rkey = $reskey->key('submit', { nostate => 1 });
 		if ($rkey && $rkey->createuse) {
@@ -228,7 +230,7 @@ sub remove {
 		# if has been submitted as story or submission, don't
 		# delete the discussion
 		if ($journal->{promotetype} eq 'publicize' || $journal->{promotetype} eq "publish") {
-			my $kind = $self->getDiscussion($journal->{discussion}, 'kind');
+			my $kind = $self->getDiscussion($journal->{discussion}, 'dkid');
 			my $kinds = $self->getDescriptions('discussion_kinds');
 			# set to disabled only if the journal has not been
 			# converted to a journal-story (it will get re-enabled
