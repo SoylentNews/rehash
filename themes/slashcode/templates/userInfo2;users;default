@@ -23,7 +23,7 @@ __template__
 
                                 <div class="content" id="user_bio_content">
                                         [%
-                                '<a href="'; gSkin.rootdir; '/~';
+                                '<a href="'; gSkin.rootdir; '/^';
                                 useredit.nickname | strip_paramattr; '/">';
                                 useredit.nickname | strip_literal; '</a> ';
                                 PROCESS zoo_icons person=useredit.uid implied="";
