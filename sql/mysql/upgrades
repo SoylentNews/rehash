@@ -5621,7 +5621,9 @@ ALTER TABLE bookmark_feeds ADD COLUMN nofilter TINYINT UNSIGNED DEFAULT 0 NOT NU
 UPDATE tagname_params SET name='tagname_clout' WHERE name='tag_clout';
 UPDATE tagname_params SET value=0 WHERE name='tagname_clout' AND value+0 < 0.001;
 
-
 # 2008-10-30
 UPDATE vars SET value = 'T_2_5_0_228' WHERE name = 'cvs_tag_currentcode';
+
+# for plugins/Bookmark
+ALTER TABLE bookmarks CHANGE COLUMN url_id url_id INT UNSIGNED NOT NULL;
 
