@@ -5626,5 +5626,36 @@ ALTER TABLE bookmarks CHANGE COLUMN url_id url_id INT UNSIGNED NOT NULL;
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
-# SLASHDOT LAST UPDATED HERE
+CREATE TABLE firehose_view(
+	id mediumint(8) unsigned NOT NULL auto_increment,
+	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	viewname VARCHAR(16) NOT NULL DEFAULT 'unnamed',
+	useparentfilter ENUM("no","yes") DEFAULT "yes",
+	tab_display ENUM("no","yes") DEFAULT "no",
+	options_edit ENUM("no","yes") DEFAULT "no",
+	admin_maxitems tinyint NOT NULL DEFAULT -1,
+	maxitems tinyint NOT NULL DEFAULT -1,
+	seclev mediumint UNSIGNED NOT NULL DEFAULT '0',
+	filter VARCHAR(255) NOT NULL DEFAULT '',
+	orderby ENUM("popularity","createtime", "editorpop", "activity", "neediness", "") DEFAULT "createtime",
+	orderdir ENUM("ASC", "DESC", "") DEFAULT "DESC",
+	color VARCHAR(16) NOT NULL DEFAULT '',
+	duration ENUM("7","-1","") DEFAULT '',
+	mode ENUM ("full","fulltitle", "") DEFAULT "",
+	mixedmode ENUM("1","0","") DEFAULT "",
+	pause ENUM("1","0","") DEFAULT "";
+
+	PRIMARY KEY (id),
+	UNIQUE id_viewname(id,viewname)
+);
+
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "metamod", "no", "comment", "neediness", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 1,"1");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "userjournal", "no", '"author:{nickname}" journal', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "usersubmission", "no", '"author:{nickname}" submission', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "userbookmark", "no", '"author:{nickname}" bookmark', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "userfirehose", "no", '"user:{nickname}"', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "stories", "yes", 'story', "createtime", "DESC", "black", "-1", "full", "1", "yes", "yes", 30, 30, 0,"");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "recent", "yes", '-story', "createtime", "DESC", "blue", "7", "fulltitle", "0", "yes", "yes", 50, 30, 0,"");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "popular", "yes", '-story', "createtime", "DESC", "black", "7", "full", "1", "yes", "yes", 50, 30, 0,"");
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "daddypants", "yes", 'unsigned', "createtime", "DESC", "indigo", "-1", "fulltitle", "1", "yes", "yes", 50, 30, 100,"");
 
