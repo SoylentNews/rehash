@@ -56,7 +56,7 @@ sub display {
 	if ($constants->{plugin}{FireHose}) {
 		my $firehose = getObject("Slash::FireHose");
 		local $user->{state}{firehose_page} = 'console';
-		$firehosebox = $firehose->listView({ fh_page => 'console.pl'});
+		$firehosebox = $firehose->listView({ fh_page => 'console.pl', view => 'daddypants'});
 	}
 	my $tagnamesbox = '';
 	my $tags = getObject('Slash::Tags');

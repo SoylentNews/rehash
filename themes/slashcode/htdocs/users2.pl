@@ -895,16 +895,10 @@ sub showFireHose {
 		tab_selected	=> $user_edit->{uid} == $user->{uid} ? 'me' : 'otheruser',
 	});
 	
-	$form->{mode} = "full";
-	$form->{color} = "black";
-	$form->{orderby} = "createtime";
-	$form->{orderdidr} = "DESC";
 	$form->{skipmenu} = 1;
-	$form->{duration} = -1;
-	$form->{fhfilter} = "\"user:$user_edit->{nickname}\"";
 	$form->{pause} = 1;
 
-	my $fhbox = $firehose->listView({ fh_page => 'users.pl'});
+	my $fhbox = $firehose->listView({ fh_page => 'users.pl', tab => 'userfirehose', user_view => $user_edit });
 	slashDisplay("userFireHose", { firehosebox => $fhbox, uid => $uid, useredit => $user_edit });
 }
 
@@ -1478,9 +1472,6 @@ sub showInfo {
 			$form->{orderby} = "createtime";
 			$form->{orderdir} = "DESC";
 			$form->{skipmenu} = 1;
-			$form->{duration} = -1;
-			$form->{fhfilter} = "\"user:$requested_user->{nickname}\"";
-			$form->{pause} = 1;
 		}
 
                 my $data_pane = $form->{dp};

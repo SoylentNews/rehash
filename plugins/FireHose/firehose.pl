@@ -115,7 +115,7 @@ sub metamod {
 	$form->{skipmenu} 	= 1;
 	$form->{pause} 		= 1;
 	$form->{no_saved} 	= 1;
-	print $firehose->listView();
+	print $firehose->listView({ view => 'metamod'});
 }
 
 

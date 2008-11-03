@@ -252,12 +252,21 @@ __template__
                 		[% IF data_pane == '' && user.is_admin %]
 		                        [% admin_block %]
 
-		                [% ELSIF data_pane == 'journal' %]
+		                [% ELSIF data_pane == 'journal';
+					fh = Slash.getObject("Slash::FireHose");
+					fhbox = fh.listView({ fh_page => 'users.pl', view => 'userjournal', user_view => useredit });
+					fhbox;
 
-		                [% ELSIF data_pane == 'submissions' %]
+		                   ELSIF data_pane == 'submissions';
+					fh = Slash.getObject("Slash::FireHose");
+					fhbox = fh.listView({ fh_page => 'users.pl', view => 'usersubmission', user_view => useredit });
+					fhbox;
 
-		                [% ELSIF data_pane == 'bookmarks' %]
-	
+		                   ELSIF data_pane == 'bookmarks';
+					fh = Slash.getObject("Slash::FireHose");
+					fhbox = fh.listView({ fh_page => 'users.pl', view => 'userbookmark', user_view => useredit });
+					fhbox;
+				%]	
 		                [% ELSIF data_pane == 'friends' %]
        	                                [% friends_datapane %]
 
@@ -266,7 +275,7 @@ __template__
 
 				[% ELSIF data_pane == 'firehose' || (data_pane == '' && !user.is_admin);
 					fh = Slash.getObject("Slash::FireHose");
-					fhbox = fh.listView({ fh_page => 'users.pl'});
+					fhbox = fh.listView({ fh_page => 'users.pl', view => 'userfirehose', user_view => useredit });
 					fhbox;
 		
 		                 ELSE %]

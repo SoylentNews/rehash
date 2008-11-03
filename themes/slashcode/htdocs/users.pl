@@ -914,7 +914,7 @@ sub showFireHose {
 	$form->{listonly} = 1;
 	$form->{legacy} = 1;
 
-	my $fhbox = $firehose->listView({ fh_page => 'users.pl'});
+	my $fhbox = $firehose->listView({ fh_page => 'users.pl', tab => 'userfirehose', user_view => $user_edit });
 	slashDisplay("userFireHose", { firehosebox => $fhbox, uid => $uid, useredit => $user_edit });
 }
 
