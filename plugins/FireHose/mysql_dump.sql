@@ -44,3 +44,25 @@ INSERT INTO firehose_tab VALUES (3,0,'Journals','journal','createtime','DESC','b
 INSERT INTO firehose_tab VALUES (4,0,'User','"user:{nickname}"','createtime','DESC','black','full');
 
 INSERT INTO vars (name, value, description) VALUES ('metamod_use_firehose', '0', 'Use firehose for metamodding');
+
+
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "metamod", "no", "comment", "neediness", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 1,"1");
+
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "userjournal", "no", '"author:{nickname}" journal', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "usersubmission", "no", '"author:{nickname}" submission', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "userbookmark", "no", '"author:{nickname}" bookmark', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "userfirehose", "no", '"user:{nickname}"', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "stories", "yes", 'story', "createtime", "DESC", "black", "-1", "full", "1", "yes", "yes", 30, 30, 0,"");
+
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "recent", "yes", '-story', "createtime", "DESC", "blue", "7", "fulltitle", "0", "yes", "yes", 50, 30, 0,"");
+
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "popular", "yes", '-story', "createtime", "DESC", "black", "7", "full", "1", "yes", "yes", 50, 30, 0,"");
+
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "daddypants", "yes", 'unsigned', "createtime", "DESC", "indigo", "-1", "fulltitle", "1", "yes", "yes", 50, 30, 100,"");
+
+
+

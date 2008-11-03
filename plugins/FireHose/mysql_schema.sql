@@ -87,6 +87,32 @@ CREATE TABLE firehose_tab(
 	UNIQUE uid_tabname(uid,tabname)
 ) TYPE=InnoDB;
 
+DROP TABLE IF EXISTS firehose_view;
+CREATE TABLE firehose_view(
+	id mediumint(8) unsigned NOT NULL auto_increment,
+	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
+	viewname VARCHAR(16) NOT NULL DEFAULT 'unnamed',
+	useparentfilter ENUM("no","yes") DEFAULT "yes",
+	tab_display ENUM("no","yes") DEFAULT "no",
+	options_edit ENUM("no","yes") DEFAULT "no",
+	admin_maxitems tinyint NOT NULL DEFAULT -1,
+	maxitems tinyint NOT NULL DEFAULT -1,
+	seclev mediumint UNSIGNED NOT NULL DEFAULT '0',
+
+	filter VARCHAR(255) NOT NULL DEFAULT '',
+	orderby ENUM("popularity","createtime", "editorpop", "activity", "neediness", "") DEFAULT "createtime",
+	orderdir ENUM("ASC", "DESC", "") DEFAULT "DESC",
+	color VARCHAR(16) NOT NULL DEFAULT '',
+	duration ENUM("7","-1","") DEFAULT '',
+	mode ENUM ("full","fulltitle", "") DEFAULT "",
+	mixedmode ENUM("1","0","") DEFAULT "",
+	pause ENUM("1","0","") DEFAULT "";
+
+	PRIMARY KEY (id),
+	UNIQUE id_viewname(id,viewname)
+);
+
+
 DROP TABLE IF EXISTS firehose_update_log;
 CREATE TABLE firehose_update_log(
 	id mediumint(8) unsigned NOT NULL auto_increment,
