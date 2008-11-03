@@ -78,7 +78,7 @@ sub list {
 	my($slashdb, $constants, $user, $form, $gSkin) = @_;
 	slashProfInit();
 	my $firehose = getObject("Slash::FireHose");
-	print $firehose->listView();
+	print $firehose->listView({ view => 'stories'});
 	slashProfEnd();
 }
 
