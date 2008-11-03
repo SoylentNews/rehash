@@ -324,7 +324,7 @@ function toggleFirehoseTagbox(id) {
 	after_article_moved($('#firehose-'+id)[0]);
 }
 
-function firehose_set_options(name, value) {
+function firehose_set_options(name, value, context) {
 	if (firehose_user_class === 0) {
 		return;
 	}
@@ -343,6 +343,7 @@ function firehose_set_options(name, value) {
 	];
 	var params = {};
 	params.setting_name = name;
+	params.context = context;
 	params.op = 'firehose_set_options';
 	params.reskey = reskey_static;
 	var theForm = document.forms.firehoseform;
