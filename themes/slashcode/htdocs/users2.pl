@@ -1469,6 +1469,8 @@ sub showInfo {
                 my $tags_datapane;
                 $tags_datapane = showTags() if ($form->{dp} eq 'tags');
 
+                $form->{dp} = "firehose" if (!$user->{is_admin} && !$form->{dp});
+
 		if ($form->{dp} && $form->{dp} == "firehose") {
 			$form->{listonly} = 1;
 			$form->{mode} = "full";
