@@ -4,13 +4,21 @@ use strict;
 
 use Slash::Test shift || 'slash';
 my $limit = shift;
+my $offset = shift;
 local $| = 1;
 
 my $firehose = getObject("Slash::FireHose");
 printf STDERR "Fetching IDs ...\n";
 
 my $slashdb = getCurrentDB();
-my $ids = $slashdb->sqlSelectColArrayref('stoid', 'stories', '', ($limit ? "LIMIT $limit" : ()));
+my $limitstr;
+if ($limit && $offset) {
+	$limitstr = "LIMIT $offset,$limit";
+} elsif ($limit) {
+	$limitstr = "LIMIT $limit";
+}
+
+my $ids = $slashdb->sqlSelectColArrayref('stoid', 'stories', '', ($limitstr || ()));
 my $i = 0;
 my %ids;
 
@@ -20,6 +28,7 @@ for my $id (@$ids) {
 	my $globjid = $slashdb->getGlobjidCreate("stories", $id);
 	my $fhid;
 	$fhid = $firehose->getFireHoseIdFromGlobjid($globjid) if $globjid;
+#	$ids{$id} = $fhid;
 
 	$ids{$id} = $firehose->createItemFromStory($id) unless $fhid;
 }

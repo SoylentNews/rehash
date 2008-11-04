@@ -4,6 +4,7 @@ use strict;
 
 use Slash::Test shift || 'slash';
 my $limit = shift;
+my $offset = shift;
 local $| = 1;
 
 my $firehose = getObject("Slash::FireHose");
@@ -11,7 +12,14 @@ my $journal  = getObject("Slash::Journal");
 printf STDERR "Fetching IDs ...\n";
 
 my $slashdb = getCurrentDB();
-my $ids = $slashdb->sqlSelectColArrayref('id', 'journals', '', ($limit ? "LIMIT $limit" : ()));
+my $limitstr;
+if ($limit && $offset) {
+	$limitstr = "LIMIT $offset,$limit";
+} elsif ($limit) {
+	$limitstr = "LIMIT $limit";
+}
+
+my $ids = $slashdb->sqlSelectColArrayref('id', 'journals', '', ($limitstr || ()));
 my $i = 0;
 my %ids;
 
@@ -27,5 +35,5 @@ for my $id (@$ids) {
 }
 printf STDERR "\nImported %d journals\n", scalar(keys %ids);
 
-my $string = join '; ', map { "$_:$ids{$_}" } @$ids;
+my $string = join '; ', map { "$_:$ids{$_}" } sort { $a <=> $b } keys %ids;
 print "\n$string\nDone\n";
