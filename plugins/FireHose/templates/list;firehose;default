@@ -13,6 +13,44 @@ list
 __seclev__
 10000
 __template__
+[%# this stuff will move later -- pudge %]
+[% IF options.view == "usersubmission" AND ((user.uid == options.user_view_uid) || user.is_admin);
+	submission_list = Slash.db.getSubmissionsByUID(options.user_view_uid);
+	submission_count = 0;
+	submission_reject = 0;
+	submission_pend = 0;
+	submission_hash = {};
+	FOR submission = submission_list;
+		submission_count = submission_count + 1;
+		IF submission.del == 0;
+			submission_pend = submission_pend + 1;
+		ELSIF submission.del == 1;
+			submission_reject = submission_reject + 1;
+		END;
+		submission_hash.${submission.subid} = submission;
+	END;
+	submission_accept = submission_count - (submission_reject + submission_pend) %]
+<h4>Submission Summary:
+[% submission_pend %] pending,
+[% submission_reject %] rejected,
+[% submission_accept %] accepted ([%
+	submission_count;
+	" total, ";
+	USE format;
+	percentage = format('%.2f');
+	percentage((100 * submission_accept) / (submission_accept + submission_reject + submission_pend))
+%]% accepted)</h4>
+
+
+[% ELSIF options.view == "userjournal" AND ((user.uid == options.user_view_uid) || user.is_admin) %]
+<h4>
+	<a href="[% gSkin.rootdir %]/journal.pl?op=list">Manage Journal Entries</a>
+	<a href="[% gSkin.rootdir %]/journal.pl?op=editprefs">Edit Journal Preferences</a>
+</h4>
+
+[% END %]
+
+
 [% IF form.metamod %]
 <div id="metamodwrap">
 [% END %]

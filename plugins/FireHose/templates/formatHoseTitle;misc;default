@@ -123,6 +123,17 @@ ELSE;
 	END;
         title = pop_str _ title;
 END;
+
+IF options.view == "usersubmission";
+	this_submission = Slash.db.getSubmission(item.srcid);
+	IF this_submission.del == 0;
+		title = title _ ' (pending)';
+	ELSIF this_submission.del == 1;
+		title = title _ ' (rejected)';
+	ELSIF this_submission.del == 2;
+		title = title _ ' (accepted)';
+	END;
+END;
 	%]
 [% IF showtitle; title; END; %]
 __seclev__
