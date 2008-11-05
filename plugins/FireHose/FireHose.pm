@@ -1251,7 +1251,8 @@ sub ajaxRemoveUserTab {
 	my $firehose = getObject("Slash::FireHose");
 	my $opts = $firehose->getAndSetOptions();
 	my $html = {};
-	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts, section => $form->{section} }, { Return => 1});
+	my $views = $firehose->getUserViews({ tab_display => "yes"});
+	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts, section => $form->{section}, views => $views }, { Return => 1});
 
 	return Data::JavaScript::Anon->anon_dump({
 		html	=> $html
@@ -1262,7 +1263,10 @@ sub ajaxRemoveUserTab {
 sub genSetOptionsReturn {
 	my($slashdb, $constants, $user, $form, $options, $opts) = @_;
 	my $data = {};
-	$data->{html}->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts, section => $form->{section}  }, { Return => 1});
+	
+	my $firehose = getObject("Slash::FireHose");
+	my $views = $firehose->getUserViews({ tab_display => "yes"});
+	$data->{html}->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts, section => $form->{section}, views => $views  }, { Return => 1});
 	$data->{html}->{fhoptions} = slashDisplay("firehose_options", { nowrapper => 1, options => $opts }, { Return => 1});
 	$data->{html}->{fhadvprefpane} = slashDisplay("fhadvprefpane", { options => $opts }, { Return => 1});
 
@@ -1356,7 +1360,8 @@ sub ajaxSaveFirehoseTab {
 
 	my $opts = $firehose->getAndSetOptions();
 	my $html = {};
-	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts, section => $form->{section} }, { Return => 1});
+	my $views = $firehose->getUserViews({ tab_display => "yes"});
+	$html->{fhtablist} = slashDisplay("firehose_tabs", { nodiv => 1, tabs => $opts->{tabs}, options => $opts, section => $form->{section}, views => $views }, { Return => 1});
 	$html->{message_area} = $message;
 	return Data::JavaScript::Anon->anon_dump({
 		html	=> $html
@@ -2066,6 +2071,26 @@ sub getAndSetGlobalOptions {
 	return $options;
 }
 
+sub getUserViews {
+	my($self, $options) = @_;
+	my $user = getCurrentUser();
+
+	my ($where, @where);
+
+	my @uids = (0);
+
+	if($options->{tab_display}) {
+		push @where, "tab_display=" . $self->sqlQuote($options->{tab_display});
+	}
+
+	if (!$user->{is_anon}) {
+		push @uids, $user->{uid};
+		push @where, "uid in (" . (join ',', @uids) . ")";
+	}
+
+	$where = join ' AND ', @where;
+	return $self->sqlSelectAllHashrefArray("*","firehose_view", $where, "ORDER BY uid, id");
+}
 
 sub getUserViewByName {
 	my($self, $name, $options) = @_;
@@ -2160,6 +2185,10 @@ sub getAndSetOptions {
 	}
 
 	my $view;
+
+	if ($opts->{initial} && !$tab && !defined $opts->{fhfilter} && !defined $form->{fhfilter} && !$form->{view}) {
+		$opts->{view} = "stories";
+	}
 
 	if ($opts->{view} || $form->{view}) {
 		my $viewname = $opts->{view} || $form->{view};
@@ -2909,6 +2938,8 @@ sub listView {
 		day_count => $day_count
 	};
 
+	my $views = $self->getUserViews({ tab_display => "yes"});
+
 	slashDisplay("list", {
 		itemstext		=> $itemstext,
 		itemnum			=> $itemnum,
@@ -2925,7 +2956,8 @@ sub listView {
 		search_results		=> $results,
 		featured		=> $featured,
 		section			=> $section,
-		firehose_more_data 	=> $firehose_more_data
+		firehose_more_data 	=> $firehose_more_data,
+		views			=> $views,
 	}, { Page => "firehose", Return => 1 });
 }
 
