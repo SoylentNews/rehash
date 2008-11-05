@@ -29,6 +29,9 @@ var firehose_settings = {};
   firehose_settings.color = '';
   firehose_settings.orderby = '';
   firehose_settings.orderdir = '';
+  firehose_settings.view = '';
+  firehose_settings.tab = '';
+  firehose_settings.base_filter = '';
 
   firehose_settings.issue = '';
   firehose_settings.is_embedded = 0;
@@ -381,6 +384,18 @@ function firehose_set_options(name, value, context) {
 
 	if (name == "setfhfilter") {
 		firehose_settings.fhfilter = value;
+		firehose_settings.page = 0;
+		firehose_settings.more_num = 0;
+	}
+
+	if (name == "view") {
+		params.viewchanged = 1;
+		firehose_settings.page = 0;
+		firehose_settings.more_num = 0;
+	}
+	
+	if (name == "tab") {
+		params.tabchanged = 1;
 		firehose_settings.page = 0;
 		firehose_settings.more_num = 0;
 	}
