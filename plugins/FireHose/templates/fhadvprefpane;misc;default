@@ -43,9 +43,9 @@ END;
         <tr>
                 <td>
                 [% IF options.mode == "fulltitle" || !options.mode %]
-                        <span id="advabbrev" onclick="firehose_set_options('mode','full')"><a href="#" style="text-decoration: none; color: black;">Headlines</a></span>
+                        <span id="advabbrev" onclick="firehose_set_options('mode','full','global')"><a href="#" style="text-decoration: none; color: black;">Headlines</a></span>
                 [% ELSE %]
-                        <span id="advfull"  onclick="firehose_set_options('mode','fulltitle')"><a href="#" style="text-decoration: none; color: black;">Full Article</a></span>
+                        <span id="advfull"  onclick="firehose_set_options('mode','fulltitle','global')"><a href="#" style="text-decoration: none; color: black;">Full Article</a></span>
                 [% END %]
                 </td>
 
@@ -57,9 +57,9 @@ END;
         <tr>
                 <td>
                 [% IF options.orderdir == "ASC" %]
-                        <span id="advdesc"  onclick="firehose_set_options('orderdir','DESC')"><a href="#" style="text-decoration: none; color: black;">Ascending</a></span>
+                        <span id="advdesc"  onclick="firehose_set_options('orderdir','DESC','global')"><a href="#" style="text-decoration: none; color: black;">Ascending</a></span>
                 [% ELSE %]
-                        <span id="advasc" onclick="firehose_set_options('orderdir','ASC')"><a href="#" style="text-decoration: none; color: black;">Descending</a></span>
+                        <span id="advasc" onclick="firehose_set_options('orderdir','ASC','global')"><a href="#" style="text-decoration: none; color: black;">Descending</a></span>
                 [% END %]
                 </td>
 
@@ -71,9 +71,9 @@ END;
         <tr>
                 <td>
                 [% IF options.orderby == "popularity" || options.orderby == "editorpop" || options.orderby == "popularity2" %]
-                        <span id="advpopularity" onclick="firehose_set_options('orderby','createtime')"><a href="#" style="text-decoration: none; color: black;">Popularity</a></span>
+                        <span id="advpopularity" onclick="firehose_set_options('orderby','createtime','global')"><a href="#" style="text-decoration: none; color: black;">Popularity</a></span>
                 [% ELSE  %]
-                <span id="advtime" onclick="firehose_set_options('orderby','popularity')"><a href="#" style="text-decoration: none; color: black;">Time</a></span>
+                <span id="advtime" onclick="firehose_set_options('orderby','popularity','global')"><a href="#" style="text-decoration: none; color: black;">Time</a></span>
                 [% END %]
                 </td>
 
@@ -85,7 +85,7 @@ END;
 
 <br>
 
-<input type="checkbox" name="nodates" onchange="firehose_set_options('nodates', !this.checked)"[% constants.markup_checked_attribute IF !options.nodates %]> <b>Dates</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nodates'); return false" title="Click To Expand Help" class="help">?</a>
+<input type="checkbox" name="nodates" onchange="firehose_set_options('nodates', !this.checked,'global')"[% constants.markup_checked_attribute IF !options.nodates %]> <b>Dates</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nodates'); return false" title="Click To Expand Help" class="help">?</a>
 <br>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_nodates" class="modalprefhelp" style="display: none;">
@@ -95,7 +95,7 @@ END;
 
 <br>
 
-<input type="checkbox" name="nobylines" onchange="firehose_set_options('nobylines', !this.checked)"[% constants.markup_checked_attribute IF !options.nobylines %]> <b>Bylines</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nobylines'); return false" title="Click To Expand Help" class="help">?</a>
+<input type="checkbox" name="nobylines" onchange="firehose_set_options('nobylines', !this.checked,'global')"[% constants.markup_checked_attribute IF !options.nobylines %]> <b>Bylines</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nobylines'); return false" title="Click To Expand Help" class="help">?</a>
 <br>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_nobylines" class="modalprefhelp" style="display: none;">
@@ -105,7 +105,7 @@ END;
 
 <br>
 
-<input type="checkbox" name="nothumbs" onchange="firehose_set_options('nothumbs', !this.checked)"[% constants.markup_checked_attribute IF !options.nothumbs %]> <b>Thumbs</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nothumbs'); return false" title="Click To Expand Help" class="help">?</a>
+<input type="checkbox" name="nothumbs" onchange="firehose_set_options('nothumbs', !this.checked,'global')"[% constants.markup_checked_attribute IF !options.nothumbs %]> <b>Thumbs</b> <a href="#" onclick="displayModalPrefHelp('modalprefhelp_nothumbs'); return false" title="Click To Expand Help" class="help">?</a>
 <br>
 <div style="padding-left: 10px;">
         <div id="modalprefhelp_nothumbs" class="modalprefhelp" style="display: none;">
@@ -115,26 +115,26 @@ END;
 
 <br>
 
-<input type="checkbox" name="nocolors" onchange="firehose_set_options('nocolors', !this.checked)"[% constants.markup_checked_attribute IF !options.nocolors %]> <b>Color Swatches</b>
+<input type="checkbox" name="nocolors" onchange="firehose_set_options('nocolors', !this.checked, 'global')"[% constants.markup_checked_attribute IF !options.nocolors %]> <b>Color Swatches</b>
 
 <br><br>
 
-<input type="checkbox" name="mixedmode" onchange="firehose_set_options('mixedmode', this.checked)"[% constants.markup_checked_attribute IF options.mixedmode %]> <b>Expand Top Rated</b>
+<input type="checkbox" name="mixedmode" onchange="firehose_set_options('mixedmode', this.checked, 'global')"[% constants.markup_checked_attribute IF options.mixedmode %]> <b>Expand Top Rated</b>
 
 <br><br>
 
-<input type="checkbox" name="nocommentcount" onchange="firehose_set_options('nocommentcnt', !this.checked)"[% constants.markup_checked_attribute IF !options.nocommentcnt %]> <b>Show comment count for abbreviated</b>
+<input type="checkbox" name="nocommentcount" onchange="firehose_set_options('nocommentcnt', !this.checked, 'global')"[% constants.markup_checked_attribute IF !options.nocommentcnt %]> <b>Show comment count for abbreviated</b>
 
 <br><br>
 
 [% default = options.pagesize || "small" %]
-<b>Page size</b> [% Slash.createSelect('pagesize', { 'small' => 'Small', 'large' => 'Large'}, { default => default, onchange => "firehose_set_options('pagesize',this.options[this.selectedIndex].value)", return => 1} ) %]
+<b>Page size</b> [% Slash.createSelect('pagesize', { 'small' => 'Small', 'large' => 'Large'}, { default => default, onchange => "firehose_set_options('pagesize',this.options[this.selectedIndex].value, 'global')", return => 1} ) %]
 
 <br><br>
 
 [% IF user.is_admin %]
         <input type="hidden" name="setusermode" value="1">
-        <input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked)"[% constants.markup_checked_attribute IF options.firehose_usermode %]> <b>User Mode</b>
+        <input type="checkbox" value="1" name="firehose_usermode" onchange="firehose_set_options('firehose_usermode', this.checked, 'global')"[% constants.markup_checked_attribute IF options.firehose_usermode %]> <b>User Mode</b>
 
 <br><br>
 [% END %]
