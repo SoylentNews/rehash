@@ -29,9 +29,9 @@ END;
         <tr>
                 <td>
                 [% IF paused %]
-                        <span id="advplay" onclick="firehose_play()"><a href="#" style="text-decoration: none; color: black;">Paused</a></span>
+                        <span id="advplay" onclick="firehose_play('global')"><a href="#" style="text-decoration: none; color: black;">Paused</a></span>
                 [% ELSE %]
-                        <span id="advpause" onclick="firehose_pause()"><a href="#" style="text-decoration: none; color: black;">Updating</a></span>
+                        <span id="advpause" onclick="firehose_pause('global')"><a href="#" style="text-decoration: none; color: black;">Updating</a></span>
                 [% END %]
                 </td>
 
