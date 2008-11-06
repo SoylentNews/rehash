@@ -31,6 +31,7 @@ var firehose_settings = {};
   firehose_settings.orderdir = '';
   firehose_settings.view = '';
   firehose_settings.tab = '';
+  firehose_settings.fhfilter  = '';
   firehose_settings.base_filter = '';
 
   firehose_settings.issue = '';
@@ -350,7 +351,7 @@ function firehose_set_options(name, value, context) {
 	params.op = 'firehose_set_options';
 	params.reskey = reskey_static;
 	var theForm = document.forms.firehoseform;
-	if (name == "firehose_usermode") {
+	if (name == "usermode") {
 		value = value ? 1 : 0;
 		params.setusermode = 1;
 		params[name] = value;
@@ -1276,10 +1277,11 @@ function firehose_inactivity_modal() {
 	show_modal_box();
 }
 
-function firehose_play() {
+function firehose_play(context) {
+	alert("FHFILTER1" + firehose_settings.fhfilter);
 	fh_play = 1;
 	setFirehoseAction();
-	firehose_set_options('pause', '0');
+	firehose_set_options('pause', '0', context);
 	$('#message_area').html('');
 	$('#pauseorplay').html('Updated');
 	$('#play').setClass('hide');
@@ -1290,12 +1292,12 @@ function is_firehose_playing() {
   return fh_play==1;
 }
 
-function firehose_pause() {
+function firehose_pause(context) {
 	fh_play = 0;
 	$('#pause').setClass('hide');
 	$('#play').setClass('show');
 	$('#pauseorplay').html('Paused');
-	firehose_set_options('pause', '1');
+	firehose_set_options('pause', '1', context);
 }
 
 function firehose_add_update_timerid(timerid) {
