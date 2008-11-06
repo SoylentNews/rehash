@@ -1278,7 +1278,6 @@ function firehose_inactivity_modal() {
 }
 
 function firehose_play(context) {
-	alert("FHFILTER1" + firehose_settings.fhfilter);
 	fh_play = 1;
 	setFirehoseAction();
 	firehose_set_options('pause', '0', context);
