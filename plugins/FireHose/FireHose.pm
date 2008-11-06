@@ -2270,7 +2270,7 @@ sub getAndSetOptions {
 
 	} else {
 		# handle non-initial pageload
-		 $options->{fhfilter} = $form->{fhfilter} if defined $form->{fhfilter};
+		$options->{fhfilter} = $form->{fhfilter} if defined $form->{fhfilter};
 		
 		if ($f_change && defined $form->{fhfilter}) {
 			my $fhfilter = $form->{fhfilter};
