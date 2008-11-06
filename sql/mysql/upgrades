@@ -5602,8 +5602,6 @@ ALTER TABLE css ADD INDEX layout (layout);
 # 2008-10-23
 UPDATE vars SET value = 'T_2_5_0_226' WHERE name = 'cvs_tag_currentcode';
 
-# PUDGE LAST UPDATED HERE
-
 # Fixing incorrectly defined media types in 'css' table
 UPDATE css SET media="screen, projection" WHERE media="screen/projection";
 
@@ -5661,4 +5659,10 @@ INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, 
 INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "popular", "yes", '-story', "createtime", "DESC", "black", "7", "full", "1", "yes", "yes", 50, 30, 0,"");
 INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "daddypants", "yes", 'unsigned', "createtime", "DESC", "indigo", "-1", "fulltitle", "1", "yes", "yes", 50, 30, 100,"");
 
+# PUDGE LAST UPDATED HERE
+
 UPDATE firehose_view SET filter="-story" WHERE viewname="popular";
+
+# 2008-11-06
+UPDATE vars SET value = 'T_2_5_0_229' WHERE name = 'cvs_tag_currentcode';
+
