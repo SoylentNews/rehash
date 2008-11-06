@@ -2123,7 +2123,7 @@ sub getSystemViewByName {
 }
 
 sub applyViewOptions {
-	my($self, $view, $options) = @_;
+	my($self, $view, $options, $second) = @_;
 	my $gSkin = getCurrentSkin();
 
 	$options->{view} = $view->{viewname};
@@ -2135,10 +2135,9 @@ sub applyViewOptions {
 		$options->{tab} = "";
 		$options->{tab_ref} = "";
 	} else {
-		if(!defined $options->{fhfilter}) {
-			# Set skin as base filter
-			$options->{fhfilter} = $gSkin->{name};
-		}
+		# Set skin as base filter
+		$options->{fhfilter} = $gSkin->{name};
+		
 		$options->{base_filter} = $options->{fhfilter};
 		$options->{fhfilter} = "$options->{fhfilter} $view->{filter}";
 	}
@@ -2150,6 +2149,54 @@ sub applyViewOptions {
 	return $options;
 }
 
+sub genUntitledTab {
+	my($self, $user_tabs, $options) = @_;
+	my $user = getCurrentUser();
+
+	my $tab_compare = {
+		filter 		=> "fhfilter"
+	};
+
+	my $tab_match = 0;
+	foreach my $tab (@$user_tabs) {
+
+		my $this_tab_compare;
+		%$this_tab_compare = %$tab_compare;
+
+		my $equal = 1;
+
+		foreach (keys %$this_tab_compare) {
+			$options->{$this_tab_compare->{$_}} ||= "";
+			if ($tab->{$_} ne $options->{$this_tab_compare->{$_}}) {
+				$equal = 0;
+			}
+		}
+
+		if ($options->{tab} eq $tab->{tabname}) {
+			$tab->{active} = 1;
+		}
+		
+		if ($equal) {
+			$tab_match = 1;
+		}
+	}
+
+	if (!$tab_match) {
+		my $data = {};
+		foreach (keys %$tab_compare) {
+			$data->{$_} = $options->{$tab_compare->{$_}} || '';
+		}
+		if (!$user->{is_anon}) {
+			$self->createOrReplaceUserTab($user->{uid}, "untitled", $data);
+		}
+		$user_tabs = $self->getUserTabs();
+		foreach (@$user_tabs) {
+			$_->{active} = 1 if $_->{tabname} eq "untitled" 
+		}
+	}
+	return $user_tabs;
+}
+
 
 sub getAndSetOptions {
 	my($self, $opts) = @_;
@@ -2158,6 +2205,11 @@ sub getAndSetOptions {
 	my $constants 	= getCurrentStatic();
 	my $form 	= getCurrentForm();
 	my $gSkin	= getCurrentSkin();
+
+	my ($f_change, $v_change, $t_change);
+	if (!$opts->{initial}) {
+		($f_change, $v_change, $t_change) = ($form->{filterchanged}, $form->{viewchanged}, $form->{tabchanged});
+	}
 	
 	my $validator = $self->getOptionsValidator();
 
@@ -2218,7 +2270,32 @@ sub getAndSetOptions {
 
 	} else {
 		# handle non-initial pageload
-		$options->{fhfilter} = $form->{fhfilter} if defined $form->{fhfilter};
+		 $options->{fhfilter} = $form->{fhfilter} if defined $form->{fhfilter};
+		
+		if ($f_change && defined $form->{fhfilter}) {
+			my $fhfilter = $form->{fhfilter};
+
+			$options->{fhfilter} = $fhfilter;
+			$options->{base_filter} = $fhfilter;
+
+			if (defined $user_tab_filters{$fhfilter}) {
+				$form->{tab} = $user_tab_filters{$fhfilter};
+			} else {
+				$form->{tab} = '';
+			} 
+			$opts->{tab} = '';
+			$opts->{view} = '';
+			$form->{view} = '';
+		}
+
+		if($t_change && defined $form->{tab}) {
+			my $ret_tab = $user_tab_by_name{$form->{tab}}; 
+			$options->{tab} = $form->{tab};
+			$options->{tab_ref} = $ret_tab;
+			$options->{base_filter} = $ret_tab->{filter};
+			$options->{fhfilter} = $ret_tab->{filter}
+		}
+		
 		if($form->{view}) {
 			my $view = $self->getUserViewByName($form->{view});
 			if($view) {
@@ -2226,7 +2303,7 @@ sub getAndSetOptions {
 				$options->{viewref} = $view;
 			} 
 		}	
-		$options->{tab} = $form->{tab} if $form->{tab};
+		$options->{tab} = $form->{tab} if $form->{tab} && !$t_change;
 	}
 
 	$options->{global} = $global_opts;
@@ -2297,7 +2374,6 @@ sub getAndSetOptions {
 		$options->{color} = $form->{color};
 	}
 
-	# XXX Check this
 	if ($form->{orderby}) {
 		if ($form->{orderby} eq "popularity") {
 			if ($user->{is_admin} && !$user->{firehose_usermode}) {
@@ -2340,72 +2416,8 @@ sub getAndSetOptions {
 		$skin_prefix = "$the_skin->{name} ";
 	}
 	
-	# XXX Check need for a user: view / tab	
+	$user_tabs = $self->genUntitledTab($user_tabs, $options);	
 
-	my $tab_compare = {
-		filter 		=> "fhfilter"
-	};
-
-	# XXX Check need for tab-matching
-	my $tab_match = 0;
-	foreach my $tab (@$user_tabs) {
-
-		my $this_tab_compare;
-		%$this_tab_compare = %$tab_compare;
-
-		my $equal = 1;
-
-		foreach (keys %$this_tab_compare) {
-			$options->{$this_tab_compare->{$_}} ||= "";
-			if ($tab->{$_} ne $options->{$this_tab_compare->{$_}}) {
-				$equal = 0;
-			}
-		}
-
-		if ($options->{tab} eq $tab->{tabname}) {
-			$tab->{active} = 1;
-		}
-		
-		if ($equal) {
-			$tab_match = 1;
-		}
-	}
-
-	if (!$tab_match) {
-		my $data = {};
-		foreach (keys %$tab_compare) {
-			$data->{$_} = $options->{$tab_compare->{$_}} || '';
-		}
-		if (!$user->{is_anon}) {
-			$self->createOrReplaceUserTab($user->{uid}, "untitled", $data);
-		}
-		$user_tabs = $self->getUserTabs();
-		foreach (@$user_tabs) {
-			$_->{active} = 1 if $_->{tabname} eq "untitled" 
-		}
-	}
-
-	# Check this
-	#if (defined $form->{tab}) {
-	#	my $tabnames_hr = {};
-	#	foreach (@$user_tabs) {
-	#		$tabnames_hr->{$_->{tabname}} = $_;
-	#	}
-	#	if ($tabnames_hr->{$form->{tab}}) {
-	#		my $curtab = $tabnames_hr->{$form->{tab}};
-	#		$options->{color} = $curtab->{color};
-	#		$fhfilter = $options->{fhfilter} = $curtab->{filter};
-	#
-	#		$_->{active} = $_->{tabname} eq $form->{tab} ? 1 : 0  foreach @$user_tabs;
-	#	}
-	#}
-
-	if ($form->{index}) {
-		$mode = "fulltitle";
-		if ($the_skin->{nexus} != $constants->{mainpage_nexus_tid}) {
-			$mode = "full";
-		}
-	}
 
 	if ($user->{is_admin} && $form->{setusermode}) {
 		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "0" });
@@ -2429,15 +2441,6 @@ sub getAndSetOptions {
 
 	$fhfilter =~ s/^\s+|\s+$//g;
 
-	# XXX Revisit Later
-	# if ($form->{index}) {
-	#	$fhfilter = "story";
-	#	my $gSkin = getCurrentSkin();
-	#	if ($gSkin->{nexus} != $constants->{mainpage_nexus_tid}) {
-	#		$fhfilter .= " $gSkin->{name}";
-	#	}
-	#}
-	
 	if ($fhfilter =~ /\{nickname\}/) {
 		if (!$opts->{user_view}) {
 			if ($form->{user_view_uid}) {
@@ -2515,7 +2518,6 @@ sub getAndSetOptions {
 		}
 	}
 
-	# XXX Check nexus handling
 	# push all necessary nexuses on if we want stories show as brief
 	if ($constants->{brief_sectional_mainpage} && $the_skin->{nexus} == $constants->{mainpage_nexus_tid} &&
 		$options->{fhfilter} eq "$the_skin->{name} story") {
@@ -2538,22 +2540,6 @@ sub getAndSetOptions {
 
 	$fh_options->{color} = $color;
 
-	if ($form->{index}) {
-		$options->{index} = 1;
-		$options->{skipmenu} = 1;
-		if (!$form->{issue} && getCurrentSkin()->{nexus} != $constants->{mainpage_nexus_tid}) {
-			$options->{duration} = -1;
-			$options->{startdate} = '';
-		}
-		$options->{color} = 'black';
-		if ($the_skin->{nexus} == $constants->{mainpage_nexus_tid}) {
-			$options->{mixedmode} = 1;
-			$options->{mode} = 'fulltitle';
-		} else {
-			$options->{mode} = 'full';
-			$options->{mixedmode} = 0;
-		}
-	}
 
 	foreach (keys %$fh_options) {
 		$options->{$_} = $fh_options->{$_};
@@ -2604,6 +2590,27 @@ sub getAndSetOptions {
 		$options->{not_id} = $form->{not_id};
 	}
 
+	if ($v_change) {
+		$self->applyViewOptions($options->{viewref}, $options)
+	}
+	
+	if ($form->{index}) {
+		$options->{index} = 1;
+		$options->{pause} = 1;
+		$options->{skipmenu} = 1;
+		if (!$form->{issue} && getCurrentSkin()->{nexus} != $constants->{mainpage_nexus_tid}) {
+			$options->{duration} = -1;
+			$options->{startdate} = '';
+		}
+		$options->{color} = 'black';
+		if ($the_skin->{nexus} == $constants->{mainpage_nexus_tid}) {
+			$options->{mixedmode} = 1;
+			$options->{mode} = 'fulltitle';
+		} else {
+			$options->{mode} = 'full';
+			$options->{mixedmode} = 0;
+		}
+	}
 
 	if ($form->{more_num} && $form->{more_num} =~ /^\d+$/) {
 		$options->{more_num} = $form->{more_num};
@@ -2616,28 +2623,42 @@ sub getAndSetOptions {
 	}
 
 	$options->{smalldevices} = 1 if $self->shouldForceSmall();
-	$options->{limit} = $self->getFireHoseLimitSize($options->{mode}, $pagesize, $options->{smalldevices});
+	$options->{limit} = $self->getFireHoseLimitSize($options->{mode}, $pagesize, $options->{smalldevices}, $options);
 	
 	return $options;
 }
 
 sub getFireHoseLimitSize {
-	my($self, $mode, $pagesize, $forcesmall) = @_;
+	my($self, $mode, $pagesize, $forcesmall, $options) = @_;
 	my $user = getCurrentUser();
 	my $constants = getCurrentStatic();
 	my $form = getCurrentForm();
 
 	my $limit;
 
-	if ($mode eq "full") {
+	if ($options->{view} && $options->{viewref}) {
+		my $limit;
 		if ($user->{is_admin}) {
-			$limit = $pagesize eq "large" ? 50 : 25;
+			$limit = $options->{viewref}{admin_maxitems};
 		} else {
-			$limit = $pagesize eq "large" ? 20 : 15;
+			$limit = $options->{viewref}{maxitems};
 		}
-	} else {
-		$limit = $user->{is_admin} ? 50 :
+		if ($mode eq "full") {
+			$limit = int($limit /= 2);
+		}
+	}
+
+	if (!$limit) {
+		if ($mode eq "full") {
+			if ($user->{is_admin}) {
+				$limit = $pagesize eq "large" ? 50 : 25;
+			} else {
+				$limit = $pagesize eq "large" ? 20 : 15;
+			}
+		} else {
+			$limit = $user->{is_admin} ? 50 :
 			$pagesize eq "large" ? 30 : 20;
+		}
 	}
 
 	$limit = 10 if $forcesmall || $form->{metamod};
