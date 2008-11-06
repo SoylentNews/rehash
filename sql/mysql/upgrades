@@ -5626,6 +5626,8 @@ ALTER TABLE bookmarks CHANGE COLUMN url_id url_id INT UNSIGNED NOT NULL;
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+
+# For plugins/FireHose
 CREATE TABLE firehose_view(
 	id mediumint(8) unsigned NOT NULL auto_increment,
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
@@ -5659,3 +5661,4 @@ INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, 
 INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "popular", "yes", '-story', "createtime", "DESC", "black", "7", "full", "1", "yes", "yes", 50, 30, 0,"");
 INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "daddypants", "yes", 'unsigned', "createtime", "DESC", "indigo", "-1", "fulltitle", "1", "yes", "yes", 50, 30, 100,"");
 
+UPDATE firehose_view SET filter="-story" WHERE viewname="popular";
