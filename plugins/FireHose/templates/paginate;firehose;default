@@ -19,9 +19,13 @@ __template__
 [% day_page = fh_page %]
 [% IF fh_page == "users.pl"; day_page = "firehose.pl"; END %]
 [% IF form.index; day_page = "index2.pl"; END %]
-[% idle_submit_plug = "";
-   IF gSkin.name == "idle";
-	idle_submit_plug = '<span style="margin-left: 1em"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '" class="vbutton bg_666666 rd_5">Submit Idle Story</a></span>';
+[% submit_plug = "";
+   IF options.view == "userjournal";
+	submit_plug = '<span style="margin-left: 1em"><a href="' _ gSkin.rootdir _ '/journal.pl?op=edit" class="vbutton bg_666666 rd_5">Write in Journal</a></span>';
+   ELSIF options.view == "usersubmission";
+	submit_plug = '<span style="margin-left: 1em"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '" class="vbutton bg_666666 rd_5">Submit Story</a></span>';
+   ELSIF gSkin.name == "idle";
+	submit_plug = '<span style="margin-left: 1em"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '" class="vbutton bg_666666 rd_5">Submit Idle Story</a></span>';
    END;
 
 %]
@@ -146,7 +150,7 @@ __template__
 
 	[% END %]
 [% END %]
-[% idle_submit_plug %]
+[% submit_plug %]
 [% END %]
 
 [% IF !contentsonly %]

@@ -57,7 +57,15 @@ __template__
 		[%# the tag 'bars' %]
 		<div class="tag-display-stub" context="user" init="legend:'my&nbsp;tags'"></div>
 		<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</div>
-		<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% tags.system %]</div>
+		<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% tags.system;
+IF options.view == "usersubmission";
+	this_submission = Slash.db.getSubmission(item.srcid);
+	SWITCH this_submission.del;
+		CASE 0; ' pending';
+		CASE 1; ' rejected';
+		CASE 2; ' accepted';
+	END;
+END %]</div>
 		[%- IF item.type == "story" &&
 			constants.signoff_use &&
 			((user.is_admin && !user.firehose_usermode) || user.acl.signoff_allowed) &&
@@ -80,7 +88,15 @@ __template__
 		[%- END %]><span class="button collapse"></span></a>
 		[%# the tag 'bars' %]
 		<div class="tag-display-stub" context="top" init="legend:'top&nbsp;tags'">[% tags.top %]</div>
-		<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% tags.system %]</div>
+		<div class="tag-display-stub" context="system" init="legend:'system&nbsp;tags'">[% tags.system;
+IF options.view == "usersubmission";
+	this_submission = Slash.db.getSubmission(item.srcid);
+	SWITCH this_submission.del;
+		CASE 0; ' pending';
+		CASE 1; ' rejected';
+		CASE 2; ' accepted';
+	END;
+END %]</div>
 	</div>
 	[% END %]
 [% END %]

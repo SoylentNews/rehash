@@ -10,46 +10,45 @@ __lang__
 en_US
 __name__
 dispFireHose
-__seclev__
-10000
 __template__
-[% 
-    firehose = Slash.getObject("Slash::FireHose");
-    pop_val = firehose.getPopLevelForPopularity(item.userpop);
-    nofollow = 1;
-    IF item.type == "story";
-    	nofollow = 0;
-    END;
+[%
+	firehose = Slash.getObject("Slash::FireHose");
+	pop_val = firehose.getPopLevelForPopularity(item.userpop);
 
-    mode = mode || "fulltitle";
-    divwrapper = 1;
-    storylinkwrapper = 1;
-    full = 1;
-    bodywrapper = 1;
-    bodycontent = 1;
-    future = 0;
+	nofollow = 1;
+	IF item.type == "story";
+	   nofollow = 0;
+	END;
+
+	mode = mode || "fulltitle";
+	divwrapper = 1;
+	storylinkwrapper = 1;
+	full = 1;
+	bodywrapper = 1;
+	bodycontent = 1;
+	future = 0;
     IF item.type == "story";
-    	story = Slash.db.getStory(item.srcid);
+	story = Slash.db.getStory(item.srcid);
 	future = story.is_future;
     END;
-    IF mode == "fulltitle";
-    	IF !bodycontent_include;
-	    	bodycontent = 0;
+	IF mode == "fulltitle";
+		IF !bodycontent_include;
+			bodycontent = 0;
+		END;
+	ELSIF mode == "bodycontent";
+		divwrapper = 0;
+		full = 0;
+		bodywrapper = 0;
 	END;
-    ELSIF mode == "bodycontent";
-        divwrapper = 0;
-	full = 0;
-	bodywrapper = 0;
-    END;
-    IF nodivwrapper;
-        divwrapper = 0;
-    END;
-    IF nostorylinkwrapper;
-        storylinkwrapper = 0;
-    END;
+	IF nodivwrapper;
+		divwrapper = 0;
+	END;
+	IF nostorylinkwrapper;
+		storylinkwrapper = 0;
+	END;
     IF user.is_admin;
-    	adminmode = 1;
-        IF options.firehose_usermode.defined;
+	adminmode = 1;
+	IF options.firehose_usermode.defined;
 		IF options.firehose_usermode;
 			adminmode = 0;
 		END;
@@ -57,95 +56,162 @@ __template__
 		adminmode = 0;
 	END;
     END;
+
+	IF item.thumb;
+		thumbfile = Slash.db.getStaticFile(item.thumb);
+	END;
+	IF item.type == "story";
+		story = Slash.db.getStory(item.srcid);
+		future = story.is_future;
+	END;
+	IF item.discussion;
+		disc = Slash.db.getDiscussion(item.discussion);
+	END;
+
+
+	the_user = Slash.db.getUser(item.uid);
+	the_skin = Slash.db.getSkin(item.primaryskid);
+
+	fh_page = fh_page || "firehose.pl";
+	IF item.primaryskid && item.primaryskid != gSkin.skid && item.primaryskid != constants.mainpage_skid && item.type == "story";
+		IF user.is_anon;
+			index_add = "";
+			IF form.index;
+				index_add = "index_";
+			END;
+		END;
+	END;
+
+	topic = Slash.db.getTopic(item.tid);
+
+	IF item.url_id;
+		the_url = Slash.db.getUrl(item.url_id);
+	END;
 %]
 [% hasimage = item.tid || (item.thumb && item.type == "story") || (adminmode && item.type == "submission") %]
 [% IF item.url_id;
 	url = Slash.db.getUrl(item.url_id);
 END %]
 [% the_user = Slash.db.getUser(item.uid) %]
-[% IF full %]
+[%
+   link_url = firehose.linkFireHose(item);
+ %]
 [% IF divwrapper %]
-<div id="firehose-[% item.id %]"[% IF item.type %] type="[% item.type %]"[% END %] class="[% IF mode == "full" %]article[% ELSE %]briefarticle[% END %][% IF adminmode == 1 %] adminmode[% ELSE %] usermode[% END %]">
+<div id="firehose-[% item.id %]"[% IF item.type %] type="[% item.type %]"[% END %] class="[% IF mode == "full" %]article[% ELSE %]briefarticle[% END %][% IF adminmode == 1 %] adminmode[% ELSE %] usermode[% END %][% IF !form.skipvote && !options.nothumbs && !skipvote && !featured %] thumbs[% END %]">
 <span class="sd-info-block" style="display: none">
 	<span class="sd-key-firehose-id">[% item.id %]</span>
 	<span class="type">[% item.type %]</span>
 	[% IF user.is_admin %]<span class="stoid">[% item.srcid %]</span>[% END %]
 </span>
 [% END %]
+
+[% IF !form.skipvote && !options.nothumbs && !skipvote && !featured %]
+	<span id="updown-[% item.id %]" class="vote[% IF vote == "down" %]ddown[% ELSIF vote == "up" %]dup[% END %]">
+	  <a href="#" class="up" title="Vote this item up">+</a>
+	  <a href="#" class="down" title="Vote this item down">-</a>
+	</span>
+[% END %]
 	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode options = options link_url = link_url %]
-	[% title_type = item.type == "story" ? "story" : "firehose" %]
-	[% PROCESS titlebar h3id="title-" _ item.id id="" future = future title_type = title_type title_type_id = "ttype-" _ item.id options = options %]
-[% END %]
-	[% IF bodywrapper;
-		Slash.getData('byline', { adminmode => adminmode, item => item, the_user => the_user }, 'firehose');
-	%]
-	<div class="[% IF bodycontent && mode == "fulltitle" %]hide[% ELSIF bodycontent %]body[% ELSE %]empty[% END %]" id="fhbody-[% item.id %]"  [% IF !hasimage  %]style="min-height: auto !important; "[% END %]>
-	[% END %]
-		[% IF hasimage %]
-		<div class="topic" id="topic-[% item.id %]">
-			[% IF bodycontent %]
-			[% PROCESS dispTopicFireHose item = item %]
-			[% END %]
-		</div>
-		[% END %]
-		<div id="text-[% item.id %]" class="intro">
-			[% IF bodycontent;
-	   		   introtext = item.introtext;
-			   # set introtext with extra data we want
-			   PROCESS formatHoseIntro; 
-			%]
-			[% introtext %]
-			[% IF view_mode %]
-				[% IF item.bodytext %]
-					[% item.bodytext %]
+						[% title_type = "firehose" %]
+						[% IF item.type == "story";
+							title_type = "story";
+							IF future;
+								title_type = "future";
+							END;
+						   END;
+						%]
+						<h3 class="[% title_type %]">
+							[% IF item.thumb && thumbfile && !featured %]
+								<a href="[% gSkin.rootdir %]/firehose.pl?op=view&amp;id=[% item.id %]"><img src="[% constants.imagedir %][% thumbfile.name %] " height="25" width="30" alt="Screenshot-sm"></a>
+
+							[% END %]
+							[% title %]
+							[% IF adminmode %]
+								<form id="postform-[% item.id %]" method="post" action="[% gSkin.rootdir %]/admin.pl" class="edit">
+									<a href="[% gSkin.rootdir %]/firehose.pl?op=edit&amp;id=[% item.id %]" title="Preview the editable version of this">Edit</a>
+								</form>
+							[% END %]
+				[% IF item.discussion && featured;
+						skin = gSkin;
+						IF item.type == "story"; skin = Slash.db.getSkin(item.primaryskid); END %]
+							<span class="vballoon-marquee rd_5">
+								<span>Comments:</span>
+								<a href="[% skin.rootdir %]/comments.pl?sid=[% item.discussion %]" id="commentcnt-[% item.id %]" title="Comment on this">[% disc.commentcount || 0 %]</a>
+							</span>
 				[% END %]
-				[% IF item.media %]
-				<div class="media">
-					[% item.media %]
-				</div>
+						</h3>
+							[% Slash.getData('byline', { adminmode => adminmode, item => item, the_user => the_user }, 'firehose');	%]
+							<div class="[% IF bodycontent && mode == 'fulltitle' %]hide[% ELSIF bodycontent %]body[% ELSE %]hide[% END %]" id="fhbody-[% item.id %]"[% IF !hasimage %] style="min-height: auto !important;"[% END %]>
+								[% IF item.thumb && ((!featured) || (featured && !item.media)) %]
+								<span class="media">
+									[% PROCESS dispTopicFireHose item = item %]
+								</span>
+								[% ELSIF item.tid && topic.image && !featured %]
+								<span class="media topic">
+									[% PROCESS dispTopicFireHose item = item %]
+								</span>
+								[% END %]
+									[% IF item.type == "journal" %]
+										[% IF (options.view == "userjournal" || view_mode) && item.bodytext %]
+											<div class="bodytext">[% item.bodytext %]</div>
+										[% ELSE %]
+											<div id="text-[% item.id %]">
+											[% introtext = item.introtext;
+											    PROCESS formatHoseIntro;
+											   introtext;
+											%]</div>
+										[% END %]
+									[% ELSE # item.type == "journal" %]
+
+										<div id="text-[% item.id %]">
+										[% introtext = item.introtext;
+										    PROCESS formatHoseIntro;
+										    introtext;
+										%]</div>
+										[% IF view_mode && item.bodytext %]
+										<div class="bodytext">[% item.bodytext %]</div>
+										[% END;
+									END # item.type == "journal" %]
+
+									[% IF (view_mode || featured) && item.media %]
+									<p>
+									[% IF item.media %]
+									<div class="media">
+										[% item.media %]
+									</div>
+									[% END %]
+									</p>
+									[% END %]
+
+									[% IF user.is_admin && !user.firehose_usermode %]
+									<div class="tagshide" id="toggletags-body-[% id %]">
+										<div id="admin-extras-[% item.id %]" class="tagadminextra"></div>
+									</div>
+									[% END %]
+
+									[% PROCESS tag_widget id = item.id  top_tags = top_tags system_tags = system_tags vote = vote options = options item = item skipvote = 1; %]
+
+									<span class="reader">
+									<a href="[% link_url %]" class="more">Read More</a>
+									<span class="commentcnt"> <a href="[% skin.rootdir %]/comments.pl?sid=[% item.discussion %]" id="commentcnt-[% item.id %]">[% disc.commentcount || 0 %]</a> comments</span>
+									</span>
+
+							</div>
+				[% IF item.discussion && !featured  && disc.commentcount;
+						skin = gSkin;
+						IF item.type == "story"; skin = Slash.db.getSkin(item.primaryskid); END %]
+							<span class="vballoon-firehoselist rd_5">
+								<span>Comments:</span>
+								<a href="[% skin.rootdir %]/comments.pl?sid=[% item.discussion %]" id="commentcnt-[% item.id %]">[% disc.commentcount || 0 %]</a>
+							</span>
+
 				[% END %]
-			[% END %]
-			[% END %]
-		</div>
-	[% IF bodywrapper %]
-	</div>
-	[% END %]
-			[% IF adminmode && bodycontent %]
-			<form id="postform-[% item.id %]" method="post" action="[% gSkin.rootdir %]/admin.pl" class="edit">
-			<div><a href="[% gSkin.rootdir %]/firehose.pl?op=edit&amp;id=[% item.id %]" title="Preview the editable version of this">Edit Preview</a></div>
-			</form>
-			[% END %]
-[% IF full %]
-		[% IF (future || item.type=="story") %]<div class="whitewash">[% END %]
-		[% PROCESS tag_widget id = item.id  top_tags = top_tags system_tags = system_tags vote = vote options = options item = item %]
-		[% IF (future || item.type=="story") %]</div>[% END %]
-[% IF divwrapper; IF storylinkwrapper %]
-<div class="storylinks">
-	<div>
-		<ul>
-			<li class="more"><b>
-			[% link_url = firehose.linkFireHose(item) %]
-			[% IF item.discussion || item.type == "comment" %]
-				<a href="[% link_url %]">[% IF form.metamod %]Context[% ELSE %]Read More[% END %]</a>
-			[% ELSE %]
-				Nothing More
-			[% END %]
-				</b>
-			</li>
-			[% IF item.discussion;
-			   disc = Slash.db.getDiscussion(item.discussion); %]
-			<li class="comments[% IF !disc.commentcount || options.nocommentcnt %] nocomment[% END %]">
-				[% skin = gSkin %]
-				[% IF item.type == "story"; skin = Slash.db.getSkin(item.primaryskid); END %]
-				<a href="[% skin.rootdir %]/comments.pl?sid=[% item.discussion %]" id="commentcnt-[% item.id %]">[% disc.commentcount %]</a> <span>comment[% IF disc.commentcount != 1 %]s[% END %]</span>
-			</li>
-			[% END %]
-		</ul>
-	</div>
+
+						<hr>
+[% IF divwrapper %]
 </div>
 [% END %]
-</div>
-[% END %]
-[% END %]
+__seclev__
+10000
 __version__
 $Id$

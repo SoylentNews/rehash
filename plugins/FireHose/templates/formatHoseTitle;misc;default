@@ -124,14 +124,10 @@ ELSE;
         title = pop_str _ title;
 END;
 
-IF options.view == "usersubmission";
-	this_submission = Slash.db.getSubmission(item.srcid);
-	IF this_submission.del == 0;
-		title = title _ ' (pending)';
-	ELSIF this_submission.del == 1;
-		title = title _ ' (rejected)';
-	ELSIF this_submission.del == 2;
-		title = title _ ' (accepted)';
+IF options.view == "userjournal";
+	IF options.user_view_uid == user.uid;
+		title = title _ ' [ <a href="' _ gSkin.rootdir _ '/journal.pl?op=edit&amp;id=' _ item.srcid _ '">Edit</a> ';
+		title = title _ ' | <a href="' _ gSkin.rootdir _ '/journal.pl?op=removemeta&amp;id=' _ item.srcid _ '">Delete</a> ] ';
 	END;
 END;
 	%]
