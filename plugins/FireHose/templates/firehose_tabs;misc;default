@@ -15,6 +15,7 @@ __seclev__
 10000
 __template__
 [% fh = Slash.getObject("Slash::FireHose"); %]
+
 [% rss_options = { "fhfilter" => "fhfilter", "orderdir" => "orderdir", "orderby" => "orderby", color => "color", "duration" => "duration" } %]
 [% rss_param_str = "" %]
 [% IF !user.is_anon %]
@@ -65,7 +66,7 @@ END %]
 
 	[% FOREACH tab = tabs %]
 		[% this_tab_active = 0 %]
-		<li id="fhtab-[% tab.tabid %]"[% IF tab.active && !active_set; active_set = 1; this_tab_active = 1; %] class="active"[% END %]>
+		<li id="fhtab-[% tab.tabid %]"[% IF options.tab == tab.tabname && !active_set; active_set = 1; this_tab_active = 1; %] class="active"[% END %]>
 		[% IF this_tab_active %]<span id="tab-form-[% tab.tabid %]" class="hide"><input type="text" id="tab-input-[% tab.tabid %]" size="12" value="[% tab.tabname | strip_literal %]"></span>[% END %]
 		<a href="[% IF this_tab_active %]#[% ELSE %]?tab=[% tab.tabname | strip_attribute %][% END %]" id="tab-text-[% tab.tabid %]" onClick="[% IF this_tab_active %]firehose_open_tab('[% tab.tabid %]');[% ELSE %]firehose_set_options('tab','[% tab.tabname %]');[% END %] return false;" [% IF this_tab_active %]title="Edit this tab"[% END %]>[% tab.tabname | strip_literal %][% IF this_tab_active %]<img src="[% constants.imagedir %]/sic_edit.png" alt="Edit">[% END %]</a>
 		[% IF this_tab_active && rss_param_str %]<a href="[% Slash.root2abs() %]/firehose.pl?op=rss&amp;content_type=rss[% rss_param_str %]&amp;logtoken=[% Slash.getPublicLogToken() | strip_paramattr %]" title="RSS for [% tab.tabname | strip_literal %]"><img src="[% constants.imagedir %]/feed.png" alt="rss"></a>[% END %]
