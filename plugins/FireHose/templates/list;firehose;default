@@ -14,7 +14,7 @@ __seclev__
 10000
 __template__
 [%# this stuff may move later -- pudge %]
-[% IF options.view == "usersubmission" AND ((user.uid == options.user_view_uid) || user.is_admin);
+[% IF options.view == "usersubmission";
 	submission_list = Slash.db.getSubmissionsByUID(options.user_view_uid);
 	submission_count = 0;
 	submission_reject = 0;
@@ -42,7 +42,7 @@ __template__
 %]% accepted)</h4>
 
 
-[% ELSIF options.view == "userjournal" AND ((user.uid == options.user_view_uid) || user.is_admin) %]
+[% ELSIF options.view == "userjournal" AND (user.uid == options.user_view_uid) %]
 <h4>
 	<a href="[% gSkin.rootdir %]/journal.pl?op=list">Manage Journal Entries</a> |
 	<a href="[% gSkin.rootdir %]/journal.pl?op=editprefs">Edit Journal Preferences</a>
