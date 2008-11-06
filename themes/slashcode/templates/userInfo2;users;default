@@ -251,6 +251,17 @@ __template__
 			<div class="yui-u maincol">
                 		[% IF data_pane == '' && user.is_admin %]
 		                        [% admin_block %]
+                                        <p>
+                                        [%
+                                        IF constants.m2;
+                                                m2_listing = form.m2_listing.defined ? form.m2_listing : user.show_m2_listing;
+                                                "<h3>Recent M2s</h3>";
+                                                PROCESS listMetamods
+                                                        m2_listing = m2_listing
+                                                        metamods = metamods
+                                                        the_user = useredit;
+                                        END;
+                                        %]
 
 		                [% ELSIF data_pane == 'journal';
 					fh = Slash.getObject("Slash::FireHose");
