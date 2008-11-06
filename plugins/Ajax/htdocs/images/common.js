@@ -381,21 +381,25 @@ function firehose_set_options(name, value, context) {
 		}
 		firehose_settings.page = 0;
 		firehose_settings.more_num = 0;
+		params.filterchanged = 1;
 	}
 
 	if (name == "setfhfilter") {
 		firehose_settings.fhfilter = value;
 		firehose_settings.page = 0;
 		firehose_settings.more_num = 0;
+		params.filterchanged = 1;
 	}
 
 	if (name == "view") {
+		firehose_settings.view = value;	
 		params.viewchanged = 1;
 		firehose_settings.page = 0;
 		firehose_settings.more_num = 0;
 	}
 	
 	if (name == "tab") {
+		firehose_settings.tab = value;	
 		params.tabchanged = 1;
 		firehose_settings.page = 0;
 		firehose_settings.more_num = 0;
