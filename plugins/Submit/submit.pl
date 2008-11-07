@@ -18,7 +18,8 @@ sub main {
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
 	my $form = getCurrentForm();
-
+	
+	slashProfInit();
 	my $submiss_view = $constants->{submiss_view} || $user->{is_admin};
 
 	my %ops = (
@@ -73,9 +74,12 @@ sub main {
 		}
 	) or return;
 
+	slashProf("submit-op");
 	$ops{$op}[FUNCTION]->($constants, $slashdb, $user, $form);
+	slashProf("","submit-op");
 
 	footer();
+	slashProfEnd();
 }
 
 #################################################################
@@ -129,12 +133,16 @@ sub deleteSubmissions {
 sub blankForm {
 	my($constants, $slashdb, $user, $form) = @_;
 	print getData('submit_body_open');
+	slashProf("pendingsubs");
 	yourPendingSubmissions($constants, $slashdb, $user, $form, { skip_submit_body => 1 });
+	slashProf("","pendingsubs");
 
 	my $reskey = getObject('Slash::ResKey');
 	my $rkey = $reskey->key('submit');
 	if ($rkey->create) {
+		slashProf("displayForm");
 		displayForm($user->{nickname}, $user->{fakeemail}, $form->{skin}, getData('defaulthead'));
+		slashProf("", "displayForm");
 	} else {
 		print $rkey->errstr;
 	}		
