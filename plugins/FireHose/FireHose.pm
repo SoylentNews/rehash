@@ -2603,6 +2603,11 @@ sub getAndSetOptions {
 			$options->{duration} = -1;
 			$options->{startdate} = '';
 		}
+		if (!$form->{issue} && getCurrentSkin()->{nexus} == $constants->{mainpage_nexus_tid}) {
+			$options->{duration} = 7;
+			$options->{startdate} = '';
+		}
+		
 		$options->{color} = 'black';
 		if ($the_skin->{nexus} == $constants->{mainpage_nexus_tid}) {
 			$options->{mixedmode} = 1;
