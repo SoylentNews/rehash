@@ -2129,8 +2129,9 @@ sub applyViewOptions {
 	$options->{view} = $view->{viewname};
 	$options->{viewref} = $view;
 
-	if ($options->{useparentfilter} eq "no") {
-		$options->{fhfilter} = "";
+
+	if ($view->{useparentfilter} eq "no") {
+		$options->{fhfilter} = "$view->{filter}";
 		$options->{basefilter} = "";
 		$options->{tab} = "";
 		$options->{tab_ref} = "";
