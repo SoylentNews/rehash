@@ -421,7 +421,7 @@ function firehose_set_options(name, value, context) {
 			}
 		}
 	}
-	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs") {
+	if (name == "mode" || name == "firehose_usermode" || name == "tab" || name == "mixedmode" || name == "nocolors" || name == "nothumbs" || name == "view") {
 		// blur out then remove items
 		if (name == "mode") {
 			fh_view_mode = value;
