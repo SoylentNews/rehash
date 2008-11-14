@@ -525,3 +525,9 @@ div.tag-display.ready.dirty  { /* !FIXING safari tag widget bug on idle. */
 border-top:1px solid transparnt !important;
 }
 
+
+
+
+/* trying to fix opera */
+div.tag-display ul, div.tag-display li {display: inline-block;}
+
