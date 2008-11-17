@@ -533,7 +533,7 @@ sub previewSlashbox {
 		title		=> $title,
 		block 		=> $block,
 		is_editable	=> $is_editable,
-	});
+	}, { Page => 'users' });
 
 	print portalbox($constants->{fancyboxwidth}, $block->{title},
 		$block->{block}, '', $block->{url});
@@ -792,7 +792,7 @@ sub showSubmissions {
 		nickmatch_flag		=> ($user->{uid} == $uid ? 1 : 0),
 		stories 		=> $stories,
 		storycount 		=> $storycount,
-	});
+	}, { Page => 'users' });
 }
 
 #################################################################
@@ -867,7 +867,7 @@ sub showComments {
 		reasons			=> $mod_reader->getReasons(),
 		karma_flag		=> 0,
 		admin_flag		=> $user->{is_admin},
-	});
+	}, { Page => 'users' });
 }
 
 sub noUser {
@@ -992,12 +992,12 @@ sub showInfo {
 				$uid = $requested_user->{uid};
 				$nick = $requested_user->{nickname};
 				if ((my $conflict_id = $reader->getUserUID($id)) && $form->{userinfo}) {
-					#slashDisplay('showInfoConflict', {
-						#op		=> 'userinfo',
-						#id		=> $uid,
-						#nick		=> $nick,
-						#conflict_id	=> $conflict_id
-					#});
+					slashDisplay('showInfoConflict', {
+						op		=> 'userinfo',
+						id		=> $uid,
+						nick		=> $nick,
+						conflict_id	=> $conflict_id
+					}, { Page => 'users' });
 					return 1;
 				}
 			}
@@ -1297,24 +1297,24 @@ sub showInfo {
 	my $uid_hoursback = $constants->{istroll_uid_hours} || 72;
 
 	if ($requested_user->{nonuid}) {
-		#slashDisplay('netIDInfo', {
-			#title			=> $title,
-			#id			=> $id,
-			#useredit		=> $requested_user,
-			#commentstruct		=> $commentstruct || [],
-			#commentcount		=> $commentcount,
-			#min_comment		=> $min_comment,
-			#admin_flag		=> $admin_flag,
-			#admin_block		=> $admin_block,
-			#netid			=> $netid,
-			#netid_vis		=> $netid_vis,
-			#reasons			=> $mod_reader->getReasons(),
-			#subcount		=> $subcount,
-			#submissions		=> $submissions,
-			#hr_hours_back		=> $ipid_hoursback,
-			#cids_to_mods		=> $cids_to_mods,
-			#comment_time		=> $comment_time
-		#});
+		slashDisplay('netIDInfo', {
+			title			=> $title,
+			id			=> $id,
+			useredit		=> $requested_user,
+			commentstruct		=> $commentstruct || [],
+			commentcount		=> $commentcount,
+			min_comment		=> $min_comment,
+			admin_flag		=> $admin_flag,
+			admin_block		=> $admin_block,
+			netid			=> $netid,
+			netid_vis		=> $netid_vis,
+			reasons			=> $mod_reader->getReasons(),
+			subcount		=> $subcount,
+			submissions		=> $submissions,
+			hr_hours_back		=> $ipid_hoursback,
+			cids_to_mods		=> $cids_to_mods,
+			comment_time		=> $comment_time
+		}, { Page => 'users' });
 
 	} else {
 		if (! $requested_user->{uid}) {
