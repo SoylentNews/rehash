@@ -1350,122 +1350,74 @@ sub showInfo {
 			$metamods = $metamod_reader->getMetamodlogForUser($uid, 30);
 		}
 
+		my $users2 = getObject('Slash::Users2', { db_type => 'reader' });
+
+		# Tags slashbox
 		my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 		my $tagshist;
 		if ($tags_reader) {
-			$tagshist = $tags_reader->getGroupedTagsFromUser($requested_user->{uid}, { orderby => 'created_at', orderdir => 'DESC', limit => 5, include_private => 1 });
+			$tagshist = $tags_reader->getGroupedTagsFromUser($requested_user->{uid}, { orderby => 'created_at', orderdir => 'DESC', include_private => 1 });
 		}
 
-                my $latest_comments = 
-                        $reader->sqlSelectAllHashref('cid',
-                                                     "sid, cid, subject, UNIX_TIMESTAMP(date) as date",
-                                                     'comments',
-                                                     "uid = $uid",
-                                                     'order by date desc limit 5');
-        
-                my $latest_comment;
-                $latest_comment->{'ts'} = 0;
-                foreach my $latest_id (keys %$latest_comments) {
-                        my ($id, $ts) = ($latest_id, $latest_comments->{$latest_id}{'date'});
-                        ($latest_comment->{'id'}, $latest_comment->{'ts'}) = ($id, $ts) if $ts > $latest_comment->{'ts'};
+		# Comments slashbox
+		my $latest_comments = $users2->getLatestComments($uid);
+
+		# Journals slashbox
+		my $latest_journals = $users2->getLatestJournals($uid);
+
+		# Submissions slashbox
+		my $latest_submissions = $users2->getLatestSubmissions($uid);
+
+		# Bookmarks slashbox
+		my $bookmarks_reader = getObject('Slash::Bookmark');
+		my $latest_bookmarks = $bookmarks_reader->getRecentBookmarksByUid($uid, 5);
+
+		# Friends slashbox
+		my $latest_friends = $users2->getLatestFriends($uid);
+
+		# Relationship pane
+		my $relations_datapane;
+                if ($form->{dp} && $form->{dp} =~ /^(?:friends|fans|freaks|foes|fof|eof|all)$/) {
+			# Need better use of Zoo constants here.
+			my %relations = (
+                                friends => 1,
+                                freaks  => 2,
+                                fans    => 3,
+                                foes    => 4,
+                                fof     => 5,
+                                eof     => 6,
+                                all     => undef,
+                        );
+
+			$relations_datapane =
+				$users2->getRelations($uid, $relations{$form->{dp}}, $nick, $user->{uid});
+		}
+
+		# Tags pane
+		my $tags_datapane;
+                if ($form->{dp} && $form->{dp} eq 'tags') {
+                        $tags_datapane =
+				$users2->getTagsDatapane($uid, $requested_user, $user->{is_admin});
                 }
 
-                my $latest_journals =
-                        $reader->sqlSelectAllHashref('id',
-                                                     'id, description, UNIX_TIMESTAMP(date) as date',
-                                                     'journals',
-                                                     "uid = $uid and promotetype = 'publish'",
-                                                     'order by date desc limit 5');
-
-                my $latest_journal;
-                $latest_journal->{ts} = 0;
-                foreach my $latest_id (keys %$latest_journals) {
-                        my ($id, $ts) = ($latest_id, $latest_journals->{$latest_id}{'date'});
-                        ($latest_journal->{'id'}, $latest_journal->{'ts'}) = ($id, $ts) if $ts > $latest_journal->{'ts'};
+		# Bookmarks pane
+		my $bookmarks_datapane;
+                if ($form->{dp} && $form->{dp} eq 'bookmarks') {
+                        $bookmarks_datapane =
+				$users2->getBookmarksDatapane($uid, $requested_user);
                 }
 
-                my $latest_submissions =
-                        $reader->sqlSelectAllHashref('id',
-                                                     'id, UNIX_TIMESTAMP(createtime) as date',
-                                                     'firehose',
-                                                     "uid = $uid and rejected = 'no' and (type = 'submission' or type = 'feed')",
-                                                     'order by createtime desc limit 5');
+		# Set up default view (remove marquee for subsections)
+		my $main_view = 0;
+                my $marquee;
+                if (!$form->{dp}) {
+                        $main_view = 1;
+                        $form->{dp} = "firehose" if (!$user->{is_admin});
+			# Marquee is the "latest thing"
+			$marquee = $users2->getMarquee($latest_comments, $latest_journals, $latest_submissions);
+		}
 
-                foreach my $latest_subid (keys %$latest_submissions) {
-                        ($latest_submissions->{$latest_subid}{'title'}, $latest_submissions->{$latest_subid}{'introtext'}) =
-                                $reader->sqlSelect('title, introtext',
-                                                   'firehose_text',
-                                                   "id = $latest_subid");
-                }
-
-                my $latest_submission;
-                $latest_submission->{ts} = 0;
-                foreach my $latest_id (keys %$latest_submissions) {
-                        my ($id, $ts) = ($latest_id, $latest_submissions->{$latest_id}{'date'});
-                        ($latest_submission->{'id'}, $latest_submission->{'ts'}) = ($id, $ts) if $ts > $latest_submission->{'ts'};
-                }
-
-                # Latest bookmarks
-                my $bookmarks_reader = getObject('Slash::Bookmark');
-                my $latest_bookmarks;
-                if ($bookmarks_reader) {
-                        $latest_bookmarks = $bookmarks_reader->getRecentBookmarksByUid($uid, 5);
-                }
-
-                my $latest_thing;
-                if (($latest_comment->{'ts'} > $latest_journal->{'ts'}) &&
-                    ($latest_comment->{'ts'} > $latest_submission->{'ts'})) {
-                        my $id = $latest_comment->{'id'};
-                        $latest_thing->{'type'} = 'comment';
-                        $latest_thing->{'id'} = $id;
-                        $latest_thing->{'sid'} = $latest_comments->{$id}{'sid'};
-                        $latest_thing->{'subject'} = $latest_comments->{$id}{'subject'};
-                        $latest_thing->{'body'} = $reader->sqlSelect('comment', 'comment_text', "cid = $id");
-
-                } elsif (($latest_journal->{'ts'} > $latest_comment->{'ts'}) &&
-                         ($latest_journal->{'ts'} > $latest_submission->{'ts'})) {
-                        my $id = $latest_journal->{'id'};
-                        $latest_thing->{'type'} = 'journal';
-                        $latest_thing->{'id'} = $id;
-                        $latest_thing->{'subject'} = $latest_journals->{$id}{'description'};
-                        $latest_thing->{'body'} = $reader->sqlSelect('article', 'journals_text', "id = $id");
-
-                } elsif (($latest_submission->{'ts'} > $latest_comment->{'ts'}) &&
-                         ($latest_submission->{'ts'} > $latest_journal->{'ts'})) {
-                        my $id = $latest_submission->{'id'};
-                        $latest_thing->{'type'} = 'submission';
-                        $latest_thing->{'id'} = $id;
-                        $latest_thing->{'subject'} = $latest_submissions->{$id}{'title'};
-                        $latest_thing->{'body'} = $latest_submissions->{$id}{'introtext'};
-                }
-
-                my $latest_friends = $reader->sqlSelectAllHashref('person', 'person', 'people', "uid = $uid", "order by id limit 5");
-                foreach my $friend_id (keys %$latest_friends) {
-                        $latest_friends->{$friend_id}->{nickname} =
-                                $reader->sqlSelect("nickname", "users", "uid = $friend_id");
-                }
-
-                # Datapanes should be caluclated elsewhere. This is a temp kludge.
-                my $friends_datapane;
-                if ($form->{dp} eq 'friends') {
-                        my $zoo = getObject('Slash::Zoo');
-                        my $people = $zoo->getRelationships($uid, 1);
-
-                        if (@$people) {     
-                                $friends_datapane = slashDisplay('plainlist', {
-                                        people          => $people,
-                                        nickname        => $nick
-                                        }, { Page => 'zoo', Return => 1 }
-                                );
-                        }
-                }
-
-                my $tags_datapane;
-                $tags_datapane = showTags() if ($form->{dp} eq 'tags');
-
-                $form->{dp} = "firehose" if (!$user->{is_admin} && !$form->{dp});
-
-		if ($form->{dp} && $form->{dp} == "firehose") {
+		if ($form->{dp} && $form->{dp} eq 'firehose') {
 			$form->{listonly} = 1;
 			$form->{mode} = "full";
 			$form->{color} = "black";
@@ -1474,9 +1426,7 @@ sub showInfo {
 			$form->{skipmenu} = 1;
 		}
 
-                my $data_pane = $form->{dp};
-
-		slashDisplay('userInfo2', {
+		slashDisplay('u2MainView', {
 			title			=> $title,
 			uid			=> $uid,
 			useredit		=> $requested_user,
@@ -1503,10 +1453,12 @@ sub showInfo {
                         latest_submissions      => $latest_submissions,
                         latest_bookmarks        => $latest_bookmarks,
                         latest_friends          => $latest_friends,
-                        latest_thing            => $latest_thing,
-                        friends_datapane        => $friends_datapane,
-                        tags_datapane           => $tags_datapane,
-                        data_pane               => $data_pane,
+			marquee                 => $marquee,
+			relations_datapane      => $relations_datapane,
+			tags_datapane           => $tags_datapane,
+			tags_grouped            => $bookmarks_datapane,
+			data_pane               => $form->{dp},
+			main_view               => $main_view,
 		}, { Page => 'users', Skin => 'default'});
 	}
 
