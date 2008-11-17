@@ -340,6 +340,9 @@ template=templates/fileLink;misc;default
 template=templates/imageLink;misc;default
 template=templates/help_main;misc;default
 template=templates/help_anon;misc;default
+template=templates/u2MainView;users;default
+template=templates/u2Menu;users;default
+template=templates/u2UserBio;users;default
 
 misc=misc/spamarmors
 plugin=Admin
@@ -357,3 +360,4 @@ plugin=Search
 plugin=Submit
 plugin=Stats
 plugin=Zoo
+plugin=Users2

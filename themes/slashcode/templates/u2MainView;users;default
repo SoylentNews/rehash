@@ -1,0 +1,299 @@
+__section__
+default
+__description__
+Display user's info
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+u2MainView
+__template__
+[% orig_title = title %]
+
+[% IF main_view %]
+<div class="head">
+        <div class="yui-b">
+                [% PROCESS u2UserBio useredit=useredit %]
+        </div>
+
+        <div class="article" id="marquee_content">
+                <h3>[% marquee.subject %]</h3>
+                <div class="body">
+                        [% marquee.body %]
+                </div>
+        </div>
+</div>
+[% END %]
+
+[% PROCESS u2Menu 
+        data_pane=data_pane
+        comments_size=latest_comments.size
+        journals_size=latest_journals.size
+        submissions_size=latest_submissions.size
+        bookmarks_size=latest_bookmarks.size
+        tagshist_size=tagshist.size
+        is_admin=user.is_admin
+        nickname=useredit.nickname
+%]
+
+<div class="yui-b" id="userboxes">
+        [% IF !main_view; PROCESS u2UserBio useredit=useredit; END; %]
+
+        [% IF latest_comments.size != 0 %]
+        <div class="block" id="latest_comments">
+                <div class="title" id="latest_comments_title">
+                        <h4>Comments</h4>
+                </div>
+                <div class="content" id="latest_comments_content">
+                        <ul>
+                        [% FOREACH cid = latest_comments.keys.sort %]
+                        <li><a href="[% gSkin.rootdir %]/comments.pl?sid=[% latest_comments.$cid.sid %]&cid=[% cid %]">[% latest_comments.$cid.subject %]</a></li>
+                        [% END %]
+                        </ul>
+                </div>
+        </div>
+        [% END %]
+
+        [% IF latest_journals.size != 0 %]
+        <div class="block" id="latest_journals">
+                <div class="title" id="latest_journals_title">
+                        <h4>Journal Entries</h4>
+                </div>
+
+                <div class="content" id="latest_journals_content">
+                        <ul>
+                        [% FOREACH jid = latest_journals.keys.sort %]
+                        <li><a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/journal/[% latest_journals.$jid.id %]">[% latest_journals.$jid.description %]</a><br></li>
+                        [% END %]
+                        </ul>
+                </div>
+        </div>
+        [% END %]
+
+        [% IF latest_submissions.size != 0 %]
+        <div class="block" id="latest_submissions">
+                <div class="title" id="latest_submissions_title">
+                        <h4>Submissions</h4>
+                </div>
+
+                <div class="content" id="latest_submissions_content">
+                        <ul>
+                        [% FOREACH sid = latest_submissions.keys.sort %]
+                        <li><a href="[% gSkin.rootdir %]/firehose.pl?op=view&id=[% latest_submissions.$sid.id %]">[% latest_submissions.$sid.title %]</a></li>
+                        [% END %]
+                        </ul>
+                </div>
+        </div>
+        [% END %]
+
+        [% IF latest_bookmarks.size != 0 %]
+        <div class="block" id="latest_bookmarks">
+                <div class="title" id="latest_bookmarks_title">
+                        <h4>Bookmarks </h4>
+                </div>
+
+                <div class="content" id="latest_bookmarks_content">
+                        <ul>
+                        [% FOREACH bid = latest_bookmarks %]
+                        <li><a href="[% bid.url %]">[% bid.initialtitle %]</a></li>
+                        [% END %]
+                        </ul>
+                </div>
+        </div>
+        [% END %]
+
+        [% IF latest_friends.size != 0 %]
+        <div class="block" id="latest_friends">
+                <div class="title" id="latest_friends_title">
+                        <h4>Friends</h4>
+                </div>
+
+                <div class="content" id="latest_friends_content">
+                        <ul>
+                        [% FOREACH fid = latest_friends.keys.sort %]
+                        <li><a href="[% gSkin.rootdir %]/~[% latest_friends.$fid.nickname %]">[% latest_friends.$fid.nickname %]</a></li>
+                        [% END %]
+                        </ul>
+                </div>
+        </div>
+        [% END %]
+
+        [% IF tagshist.size > 2 %]
+        <div class="block" id="latest_tags">
+                <div class="title" id="latest_tags_title">
+                        <h4>Tags</h4>
+                </div>
+
+                <div class="content" id="latest_tags_content">
+                        <ul>
+                        [% tags_counter = 0 %]
+                        [% FOREACH tag = tagshist.keys %]
+                               [% LAST IF tags_counter == 5 %]
+                               [% NEXT IF !user.is_admin && tagshist.$tag.0.private == 1 %] 
+                                <li>
+                                <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/tags/[% tagshist.$tag.0.tagname %]">[% tagshist.$tag.0.tagname %]</a>&nbsp;([% tagshist.$tag.0.globj_type %])
+                                </li>
+                                [% tags_counter = tags_counter + 1 %]
+                        [% END %]
+                        </ul>
+                </div>
+        </div>
+        [% END %]
+
+</div>
+
+
+<div id="yui-main">
+        <div class="yui-b">
+
+        [% IF data_pane == '' && admin_flag %]
+                [% admin_block %]
+                <p>
+                [%
+                IF constants.m2;
+                        mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
+                        mod_options.need_m2_form = 1;
+                        mod_options.need_m2_button = 1;
+                        mod_options.meta_mod_only = 1;
+                END;
+
+                m1_classname = "Slash::" _ constants.m1_pluginname;
+                moddb = Slash.getObject(m1_classname);
+                IF moddb; moddb.dispModCommentLog('uid', useredit.uid, mod_options); END;
+
+                IF !constants.m1_admin_show_mods_with_comments;
+                        mod_options.title = "Moderations performed on $thisnickname's comments";
+                        mod_options.hr_hours_back = hr_hours_back;
+
+                        IF moddb; moddb.dispModCommentLog('cuid', useredit.uid, mod_options); END;
+                END;
+
+                IF constants.m2;
+                        m2_listing = form.m2_listing.defined ? form.m2_listing : user.show_m2_listing;
+                        IF m2_listing;
+                                "<h3>Recent M2s</h3>";
+                                PROCESS listMetamods
+                                        m2_listing = m2_listing
+                                        metamods = metamods
+                                        the_user = useredit;
+                        END;
+                END;
+
+                '<p>';
+
+                IF user.is_admin && tagshist && tagshist.size > 0;
+                        "<h3>Recent Tags</h3>";
+                        '<table class="data" width="100%">';
+                        '<tr class="data_head"><th>Tag</th><th>Object</th><th>Time</th></tr>';
+                        toggle = 0;
+                        FOREACH tag = tagshist.keys.sort;
+                                '<tr class="data_hl'; toggle ? "2" : "1"; '">';
+                                '<td>'; tagshist.$tag.0.tagname; '</td>';
+                                '<td>';
+                                IF tagshist.$tag.0.globj_type == "stories";
+                                        PROCESS linkStory dynamic=1 sid=tagshist.$tag.0.story.sid text=tagshist.$tag.0.story.title title=tagshist.$tag.0.story.title;
+                                ELSIF tagshist.$tag.0.globj_type == "urls";
+                                        '<a href="';
+                                        tagshist.$tag.0.url.url;
+                                        '">'; tagshist.$tag.0.url.bookmark.title || tagshist.$tag.0.url.validtitle || tagshist.$tag.0.url.initialtitle | strip_literal;
+                                        '</a>';
+                                ELSIF tagshist.$tag.0.globj_type == "journals";
+                                        nick = Slash.db.getUser(tagshist.$tag.0.journal.uid, 'nickname');
+                                        '<a href="';
+                                        gSkin.rootdir;
+                                        '/~';
+                                        nick | fixparam;
+                                        '/journal/';
+                                        tagshist.$tag.0.journal.id;
+                                        '/">';
+                                        tagshist.$tag.0.journal.description | strip_literal;
+                                        '</a>';
+                                ELSIF tagshist.$tag.0.globj_type == "submissions";
+                                        '<a href="';
+                                        gSkin.rootdir;
+                                        '/submit.pl?op=viewsub&amp;subid=';
+                                        tagshist.$tag.0.submission.subid;
+                                        '">';
+                                        tagshist.$tag.0.submission.subj | strip_literal;
+                                        '</a>';
+                                END;
+                                '&nbsp;('; tagshist.$tag.0.globj_type; ')';
+                                '</td>';
+                                '<td>'; Slash.timeCalc(tagshist.$tag.0.created_at); '</td>';
+                                '</tr>';
+                                toggle = !toggle;
+                        END;
+                        '</table>';
+                END;
+                %]
+        [% ELSIF data_pane == 'journal' %]
+        
+        [% ELSIF data_pane == 'submissions' %]
+                [% PROCESS listSubmissions admin_flag=admin_flag submissions=submissions %]
+
+        [% ELSIF data_pane == 'bookmarks' %]
+                <p>
+                <a href="[% gSkin.rootdir %]/bookmark.pl/?op=showbookmarks&recent=1">Recent</a> |
+                <a href="[% gSkin.rootdir %]/bookmark.pl/?op=showbookmarks&popular=1">Popular</a>
+                <p>
+
+                <div><table border="0" cellpadding="0" cellspacing="0" width="100%" class="tagslist">
+                [% FOREACH tagname = tags_grouped.keys.sort;
+                        FOREACH tag = tags_grouped.$tagname %]
+                                <tr>[% IF loop.first %]<td class="tagname" valign="top">[% tagname | strip_html %]</td>[% ELSE %]<td>&nbsp;</td>[% END %]
+                                <td>&nbsp;</td>
+                                <td valign="top">
+                                        [% IF tag.globj_type == "stories" %]
+                                                [% PROCESS linkStory dynamic=1 sid=tag.story.sid text=tag.story.title title=tag.story.title %]
+                                        [% ELSIF tag.globj_type == "urls" %]
+                                                <a href="[% tag.url.url %]">[% tag.url.bookmark.title || tag.url.validtitle || tag.url.initialtitle | strip_html %]</a>
+                                        [% END %]
+                                </td>
+                                </tr>
+                        [% END;
+                END %]
+                </table></div>
+        
+        [% ELSIF (data_pane == 'friends') ||
+                 (data_pane == 'fans')    ||
+                 (data_pane == 'freaks')  ||
+                 (data_pane == 'foes')    ||
+                 (data_pane == 'fof')     ||
+                 (data_pane == 'eof')     ||
+                 (data_pane == 'all') %]
+                <p>
+                <div id="friendsmenu">
+                        <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/friends">Friends</a> |
+                        <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/fans">Fans</a> |
+                        <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/foes">Foes</a> |
+                        <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/freaks">Freaks</a> |
+                        <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/friends/friends">Friends of Friends</a> |
+                        <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/friends/foes">Foes of Friends</a>
+                        </ul>
+                </div>
+                [% relations_datapane %]
+
+        [% ELSIF data_pane == 'tags' %]
+                [% tags_datapane %]
+
+        [% ELSIF data_pane == 'firehose' || (data_pane == '' && !user.is_admin);
+                fh = Slash.getObject("Slash::FireHose");
+                fhbox = fh.listView({ fh_page => 'users.pl'});
+                fhbox;
+
+        ELSE %]
+                [% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
+        [% END %]
+        </div>
+</div>
+
+
+[% title = orig_title %]
+
+__seclev__
+500
+__version__

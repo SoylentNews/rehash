@@ -1,0 +1,31 @@
+__section__
+default
+__description__
+Display user's info
+
+__title__
+
+__page__
+users
+__lang__
+en_US
+__name__
+u2Menu
+__template__
+
+<div class="nav">
+<ul class="menu" id="tablist">
+<li[% IF data_pane == 'firehose' || (data_pane == '' && !is_admin) %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% nickname %]/firehose">Firehose</a></li>
+[% IF comments_size != 0 %]<li[% IF data_pane == 'comments' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% nickname %]/comments">Comments</a></li>[% END %]
+[% IF journals_size != 0 %]<li[% IF data_pane == 'journal' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% nickname %]/journal">Journals</a></li>[% END %]
+[% IF submissions_size != 0 %]<li[% IF data_pane == 'submissions' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% nickname %]/submissions">Submissions</a></li>[% END %]
+[% IF bookmarks_size != 0 %]<li[% IF data_pane == 'bookmarks' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% nickname %]/bookmarks">Bookmarks</a></li>[% END %]
+<li[% IF data_pane == 'friends' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% nickname %]/friends">Friends</a></li>
+[% IF tagshist_size > 2 %]<li[% IF data_pane == 'tags' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% nickname %]/tags">Tags</a></li>[% END %]
+[% IF is_admin %]<li[% IF data_pane == '' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/^[% nickname %]">Admin</a></li>[% END %]
+</ul>
+</div>
+
+__seclev__
+500
+__version__
