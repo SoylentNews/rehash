@@ -841,25 +841,30 @@ sub userdir_handler {
                         }
 		} elsif ($op =~ /^(?:friends|fans|freaks|foes|zoo)$/) {
                         if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)]) {
-                                my $args = "nick=$nick&dp=friends&uid=$uid";
+                        	my $args = "nick=$nick&uid=$uid&dp=";
                                 $extra .= '/' . $more;
 
                                 if ($op eq 'friends' && $extra =~ s/^friends\///) {
-                                        $args =~ s/friends/fof/;
+                                        $op =~ s/friends/fof/;
                                 } elsif ($op eq 'friends' && $extra =~ s/^foes\///) {
-                                        $args =~ s/friends/eof/;
+                                        $op =~ s/friends/eof/;
                                 } elsif ($op eq 'zoo') {
-                                        $args =~ s/zoo/all/;
+                                        $op =~ s/zoo/all/;
                                 }
 
                                 if ($extra =~ m{^ (rss|atom) /?$}x) {
+                                        my $args = "nick=$nick&uid=$uid&op=$op";
                                         $args .= "&content_type=$1";
-                                }
 
-                                $r->args($args);
-                                $r->uri('/users2.pl');
-                                $r->filename($constants->{basedir} . '/users2.pl');
-                        } else {
+                                        $r->args($args);
+                                        $r->uri('/zoo.pl');
+                                        $r->filename($constants->{basedir} . '/zoo.pl');
+                                } else {
+                                        $r->args($args . $op);
+                                        $r->uri('/users2.pl');
+                                        $r->filename($constants->{basedir} . '/users2.pl');
+                                }
+			} else {
 			        my $args = "op=$op&nick=$nick&uid=$uid";
 			        $extra .= '/' . $more;
 
