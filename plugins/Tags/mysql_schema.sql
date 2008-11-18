@@ -183,4 +183,13 @@ CREATE TABLE globjs_viewed (
 	UNIQUE globjid_uid (globjid, uid)
 ) TYPE=InnoDB;
 
+CREATE TABLE globjs_viewed_archived (
+	gvid		int UNSIGNED NOT NULL,
+	globjid		int UNSIGNED NOT NULL,
+	uid		mediumint UNSIGNED NOT NULL,
+	viewed_at	datetime NOT NULL,
+	PRIMARY KEY (gvid),
+	UNIQUE globjid_uid (globjid, uid)
+) TYPE=InnoDB;
+
 
