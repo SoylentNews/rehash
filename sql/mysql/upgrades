@@ -5676,3 +5676,5 @@ CREATE TABLE globjs_viewed_archived (
 	UNIQUE globjid_uid (globjid, uid)
 ) TYPE=InnoDB;
 
+# For plugins/Users2
+INSERT INTO vars (name, value, description) VALUES ('u2','0','Toggle on/off Users2');
