@@ -233,23 +233,25 @@ sub remove {
 	$self->sqlDelete("journals_text", "id=$id");
 
 	if ($journal->{discussion}) {
-		my $slashdb = getCurrentDB();
+#		my $slashdb = getCurrentDB();
 		# if has been submitted as story or submission, don't
 		# delete the discussion
-		if ($journal->{promotetype} eq 'publicize' || $journal->{promotetype} eq "publish") {
-			my $kind = $self->getDiscussion($journal->{discussion}, 'dkid');
-			my $kinds = $self->getDescriptions('discussion_kinds');
-			# set to disabled only if the journal has not been
-			# converted to a journal-story (it will get re-enabled
-			# later if it is converted to a journal-story)
-			if ($kinds->{$kind} eq 'journal') {
-				$slashdb->setDiscussion($journal->{discussion}, {
-					commentstatus	=> 'disabled',
-				});
-			}
-		} else {
-			$slashdb->deleteDiscussion($journal->{discussion});
-		}
+#		my $kind = $self->getDiscussion($journal->{discussion}, 'dkid');
+#		my $kinds = $self->getDescriptions('discussion_kinds');
+
+		# discussions can be re-used in the hose and stories ...
+		# just leave it alone entirely -- pudge 2008-11-17
+
+		# set to disabled only if the journal has not been
+		# converted to a journal-story (it will get re-enabled
+		# later if it is converted to a journal-story)
+#		if ($kinds->{$kind} eq 'journal') {
+#			$slashdb->setDiscussion($journal->{discussion}, {
+#				commentstatus	=> 'disabled',
+#			});
+#		} else {
+#			$slashdb->deleteDiscussion($journal->{discussion});
+#		}
 	}
 
 	my $date = $self->sqlSelect('MAX(date)', 'journals', "uid=$uid");
