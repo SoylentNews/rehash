@@ -30,7 +30,7 @@ __template__
 		submission_hash.${submission.subid} = submission;
 	END;
 	submission_accept = submission_count - (submission_reject + submission_pend) %]
-<h4>Submission Summary:
+<div id="message"><div class="content">Submission Summary:
 [% submission_pend %] pending,
 [% submission_reject %] rejected,
 [% submission_accept %] accepted ([%
@@ -39,14 +39,14 @@ __template__
 	USE format;
 	percentage = format('%.2f');
 	percentage((100 * submission_accept) / (submission_accept + submission_reject + submission_pend))
-%]% accepted)</h4>
+%]% accepted)</div></div>
 
 
 [% ELSIF options.view == "userjournal" AND (user.uid == options.user_view_uid) %]
-<h4>
+<div id="message"><div class="content">
 	<a href="[% gSkin.rootdir %]/journal.pl?op=list">Manage Journal Entries</a> |
 	<a href="[% gSkin.rootdir %]/journal.pl?op=editprefs">Edit Journal Preferences</a>
-</h4>
+</div></div>
 
 [% END %]
 
