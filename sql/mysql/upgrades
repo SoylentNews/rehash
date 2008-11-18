@@ -5622,9 +5622,6 @@ UPDATE vars SET value = 'T_2_5_0_228' WHERE name = 'cvs_tag_currentcode';
 # for plugins/Bookmark
 ALTER TABLE bookmarks CHANGE COLUMN url_id url_id INT UNSIGNED NOT NULL;
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
-
 # For plugins/FireHose
 CREATE TABLE firehose_view(
 	id mediumint(8) unsigned NOT NULL auto_increment,
@@ -5665,6 +5662,10 @@ UPDATE firehose_view SET filter="-story" WHERE viewname="popular";
 
 # 2008-11-06
 UPDATE vars SET value = 'T_2_5_0_229' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
 
 # for plugins/Tags
 CREATE TABLE globjs_viewed_archived (
