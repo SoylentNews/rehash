@@ -152,7 +152,13 @@ __template__
 
         [% IF data_pane == '' && admin_flag %]
                 [% admin_block %]
+
                 <p>
+
+                [% PROCESS u2AdminListComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
+
+                <p>
+
                 [%
                 IF constants.m2;
                         mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
@@ -276,9 +282,7 @@ __template__
                 fhbox = fh.listView({ fh_page => 'users.pl'});
                 fhbox;
 
-        ELSE %]
-                [% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
-        [% END %]
+        END %]
         </div>
 </div>
 
