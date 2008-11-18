@@ -1705,6 +1705,10 @@ sub ajaxGetAdminExtras {
 		$num_with_ipid = $slashdb->countSubmissionsFromIPID($item->{ipid});
 		$accepted_from_ipid = $slashdb->countSubmissionsFromIPID($item->{ipid}, { del => 2});
 	}
+	
+	if ($user->{is_admin}) {
+		$firehose->setFireHoseSession($item->{id});
+	}
 
 	my $the_user = $slashdb->getUser($item->{uid});
 
