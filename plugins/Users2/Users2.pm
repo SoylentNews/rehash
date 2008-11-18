@@ -129,14 +129,14 @@ sub getTagsDatapane {
         }
 }
 
-sub getBookmarksDatapane {
-        my($self, $uid, $requested_user) = @_;
+#sub getBookmarksDatapane {
+#        my($self, $uid, $requested_user) = @_;
 
-        my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-        my $tags_ar =
-		$tags_reader->getGroupedTagsFromUser($uid, { type => "urls", only_bookmarked => 1 });
-        return $tags_ar;
-}
+#        my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
+#        my $tags_ar =
+#		$tags_reader->getGroupedTagsFromUser($uid, { type => "urls", only_bookmarked => 1 });
+#        return $tags_ar;
+#}
 
 sub getRelations {
         my($self, $requested_uid, $relation, $nick, $user_uid) = @_;

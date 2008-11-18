@@ -1401,11 +1401,11 @@ sub showInfo {
                 }
 
 		# Bookmarks pane
-		my $bookmarks_datapane;
-                if ($form->{dp} && $form->{dp} eq 'bookmarks') {
-                        $bookmarks_datapane =
-				$users2->getBookmarksDatapane($uid, $requested_user);
-                }
+		#my $bookmarks_datapane;
+                #if ($form->{dp} && $form->{dp} eq 'bookmarks') {
+                        #$bookmarks_datapane =
+				#$users2->getBookmarksDatapane($uid, $requested_user);
+                #}
 
 		# Set up default view (remove marquee for subsections)
 		my $main_view = 0;
@@ -1456,7 +1456,7 @@ sub showInfo {
 			marquee                 => $marquee,
 			relations_datapane      => $relations_datapane,
 			tags_datapane           => $tags_datapane,
-			tags_grouped            => $bookmarks_datapane,
+			#tags_grouped            => $bookmarks_datapane,
 			data_pane               => $form->{dp},
 			main_view               => $main_view,
 		}, { Page => 'users', Skin => 'default'});
