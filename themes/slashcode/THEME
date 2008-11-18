@@ -343,6 +343,7 @@ template=templates/help_anon;misc;default
 template=templates/u2MainView;users;default
 template=templates/u2Menu;users;default
 template=templates/u2UserBio;users;default
+template=templates/u2CommentsDatapane;users;default
 
 misc=misc/spamarmors
 plugin=Admin
