@@ -2591,9 +2591,12 @@ sub getAndSetOptions {
 		$options->{duration} = 1;
 	}
 
+	$options->{not_id} = $opts->{not_id} if $opts->{not_id};
 	if ($form->{not_id} && $form->{not_id} =~ /^\d+$/) {
 		$options->{not_id} = $form->{not_id};
 	}
+
+	
 
 	if ($v_change) {
 		$self->applyViewOptions($options->{viewref}, $options)
