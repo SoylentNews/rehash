@@ -2274,6 +2274,9 @@ sub getAndSetOptions {
 		}
 
 	} else {
+		# set only global options
+		$options->{$_} = $global_opts->{$_} foreach qw(nocommentcnt nobylines nodates nothumbs nomarquee nocolors noslashboxes);
+
 		# handle non-initial pageload
 		$options->{fhfilter} = $form->{fhfilter} if defined $form->{fhfilter};
 		
