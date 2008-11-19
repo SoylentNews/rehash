@@ -43,106 +43,15 @@ __template__
 <div class="yui-b" id="userboxes">
         [% IF !main_view; PROCESS u2UserBio useredit=useredit; END; %]
 
-        [% IF latest_comments.size != 0 %]
-        <div class="block" id="latest_comments">
-                <div class="title" id="latest_comments_title">
-                        <h4>Comments</h4>
-                </div>
-                <div class="content" id="latest_comments_content">
-                        <ul>
-                        [% FOREACH cid = latest_comments.keys.sort %]
-                        <li><a href="[% gSkin.rootdir %]/comments.pl?sid=[% latest_comments.$cid.sid %]&cid=[% cid %]">[% latest_comments.$cid.subject %]</a></li>
-                        [% END %]
-                        </ul>
-                </div>
-        </div>
-        [% END %]
-
-        [% IF latest_journals.size != 0 %]
-        <div class="block" id="latest_journals">
-                <div class="title" id="latest_journals_title">
-                        <h4>Journal Entries</h4>
-                </div>
-
-                <div class="content" id="latest_journals_content">
-                        <ul>
-                        [% FOREACH jid = latest_journals.keys.sort %]
-                        <li><a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/journal/[% latest_journals.$jid.id %]">[% latest_journals.$jid.description %]</a><br></li>
-                        [% END %]
-                        </ul>
-                </div>
-        </div>
-        [% END %]
-
-        [% IF latest_submissions.size != 0 %]
-        <div class="block" id="latest_submissions">
-                <div class="title" id="latest_submissions_title">
-                        <h4>Submissions</h4>
-                </div>
-
-                <div class="content" id="latest_submissions_content">
-                        <ul>
-                        [% FOREACH sid = latest_submissions.keys.sort %]
-                        <li><a href="[% gSkin.rootdir %]/firehose.pl?op=view&id=[% latest_submissions.$sid.id %]">[% latest_submissions.$sid.title %]</a></li>
-                        [% END %]
-                        </ul>
-                </div>
-        </div>
-        [% END %]
-
-        [% IF latest_bookmarks.size != 0 %]
-        <div class="block" id="latest_bookmarks">
-                <div class="title" id="latest_bookmarks_title">
-                        <h4>Bookmarks </h4>
-                </div>
-
-                <div class="content" id="latest_bookmarks_content">
-                        <ul>
-                        [% FOREACH bid = latest_bookmarks %]
-                        <li><a href="[% bid.url %]">[% bid.initialtitle %]</a></li>
-                        [% END %]
-                        </ul>
-                </div>
-        </div>
-        [% END %]
-
-        [% IF latest_friends.size != 0 %]
-        <div class="block" id="latest_friends">
-                <div class="title" id="latest_friends_title">
-                        <h4>Friends</h4>
-                </div>
-
-                <div class="content" id="latest_friends_content">
-                        <ul>
-                        [% FOREACH fid = latest_friends.keys.sort %]
-                        <li><a href="[% gSkin.rootdir %]/~[% latest_friends.$fid.nickname %]">[% latest_friends.$fid.nickname %]</a></li>
-                        [% END %]
-                        </ul>
-                </div>
-        </div>
-        [% END %]
-
-        [% IF tagshist.size > 2 %]
-        <div class="block" id="latest_tags">
-                <div class="title" id="latest_tags_title">
-                        <h4>Tags</h4>
-                </div>
-
-                <div class="content" id="latest_tags_content">
-                        <ul>
-                        [% tags_counter = 0 %]
-                        [% FOREACH tag = tagshist.keys %]
-                               [% LAST IF tags_counter == 5 %]
-                               [% NEXT IF !user.is_admin && tagshist.$tag.0.private == 1 %] 
-                                <li>
-                                <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/tags/[% tagshist.$tag.0.tagname %]">[% tagshist.$tag.0.tagname %]</a>&nbsp;([% tagshist.$tag.0.globj_type %])
-                                </li>
-                                [% tags_counter = tags_counter + 1 %]
-                        [% END %]
-                        </ul>
-                </div>
-        </div>
-        [% END %]
+        [% PROCESS u2UserBoxes
+                latest_comments=latest_comments
+                latest_journals=latest_journals
+                latest_submissions=latest_submissions
+                latest_bookmarks=latest_bookmarks
+                latest_friends=latest_friends
+                tagshist=tagshist
+                is_admin=user.is_admin
+        %]
 
 </div>
 
