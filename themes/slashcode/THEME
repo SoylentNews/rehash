@@ -345,6 +345,7 @@ template=templates/u2Menu;users;default
 template=templates/u2UserBio;users;default
 template=templates/u2CommentsDatapane;users;default
 template=templates/u2AdminListComments;users;default
+template=templates/u2UserBoxes;users;default
 
 misc=misc/spamarmors
 plugin=Admin

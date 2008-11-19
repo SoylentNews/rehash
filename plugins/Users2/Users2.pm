@@ -90,6 +90,96 @@ sub getLatestFriends {
         return $friends;
 }
 
+sub getLatestBookmarks {
+        my($self, $uid, $latest_journals, $latest_submissions) = @_;
+
+        # Get the latest n bookmarks. These could be contained in journals and
+        # submissions, so we want journal size + submissions size + 5.
+        my $num_bookmarks = scalar(keys %$latest_journals) + scalar(keys %$latest_submissions) + 5;
+        my $uid_q = $self->sqlQuote($uid);
+        my $bookmarks_reader = getObject('Slash::Bookmark');
+        my $latest_bookmarks = $bookmarks_reader->getRecentBookmarksByUid($uid_q, $num_bookmarks);
+
+        # Make bookmarks unique against journals
+        my $bookmark_count = 0;
+        foreach my $bookmark (@$latest_bookmarks) {
+                foreach my $journal (keys %$latest_journals) {
+                        if ($bookmark->{initialtitle} eq $latest_journals->{$journal}->{description}) {
+                                delete @$latest_bookmarks[$bookmark_count];
+                                last;
+                        }
+                }
+                ++$bookmark_count;
+        }
+
+        # Make bookmarks unique against submissions
+        $bookmark_count = 0;
+        foreach my $bookmark (@$latest_bookmarks) {
+                foreach my $submission (keys %$latest_submissions) {
+                        if ($bookmark->{initialtitle} eq $latest_submissions->{$submission}->{title}) {
+                                delete @$latest_bookmarks[$bookmark_count];
+                                last;
+                        }
+                }
+                ++$bookmark_count;
+        }
+
+        return $latest_bookmarks;
+}
+
+sub getCommentsDatapane {
+        my($self, $uid, $user, $requested_user) = @_;
+        my $commentstruct = [];
+        my $form = getCurrentForm();
+        my $constants = getCurrentStatic();
+
+        my $min_comment = $form->{min_comment} || 0;
+        $min_comment = 0 unless $user->{seclev} > $constants->{comments_more_seclev}
+                || $constants->{comments_more_seclev} == 2 && $user->{is_subscriber};
+        my $comments_wanted = $user->{show_comments_num} || $constants->{user_comment_display_default};
+        my $commentcount = $self->countCommentsByUID($uid);
+        my $comments = $self->getCommentsByUID($uid, $comments_wanted, $min_comment) if $commentcount;
+
+        if (ref($comments) eq 'ARRAY') {
+                my $kinds = $self->getDescriptions('discussion_kinds');
+                for my $comment (@$comments) {
+                       # This works since $sid is numeric.
+                       $comment->{replies} = $self->countCommentsBySidPid($comment->{sid}, $comment->{cid});
+
+                # This is ok, since with all luck we will not be hitting the DB
+                # ...however, the "sid" parameter here must be the string
+                # based SID from either the "stories" table or from
+                # pollquestions.
+                my $discussion = $self->getDiscussion($comment->{sid});
+
+                        if ($kinds->{ $discussion->{dkid} } =~ /^journal(?:-story)?$/) {
+                                $comment->{type} = 'journal';
+                        } elsif ($kinds->{ $discussion->{dkid} } eq 'poll') {
+                                $comment->{type} = 'poll';
+                        } else {
+                                $comment->{type} = 'story';
+                        }
+                        $comment->{disc_title}  = $discussion->{title};
+                        $comment->{url} = $discussion->{url};
+                }
+        }
+
+        my $mod_reader = getObject("Slash::$constants->{m1_pluginname}", { db_type => 'reader' });
+        my $datapane = slashDisplay('u2CommentsDatapane', {
+                nick           => $requested_user->{nickname},
+                useredit       => $requested_user,
+                nickmatch_flag => ($user->{uid} == $uid ? 1 : 0),
+                commentstruct  => $comments,
+                commentcount   => $commentcount,
+                min_comment    => $min_comment,
+                reasons        => $mod_reader->getReasons(),
+                karma_flag     => 0,
+                admin_flag     => $user->{is_admin},
+        }, { Page => 'users', Return => 1});
+
+        return $datapane;
+}
+
 sub getTagsDatapane {
         my($self, $uid, $requested_user, $private) = @_;
 
@@ -129,15 +219,6 @@ sub getTagsDatapane {
                 }, { Page => 'users', Return => 1 });
         }
 }
-
-#sub getBookmarksDatapane {
-#        my($self, $uid, $requested_user) = @_;
-
-#        my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
-#        my $tags_ar =
-#		$tags_reader->getGroupedTagsFromUser($uid, { type => "urls", only_bookmarked => 1 });
-#        return $tags_ar;
-#}
 
 sub getRelations {
         my($self, $requested_uid, $relation, $nick, $user_uid) = @_;

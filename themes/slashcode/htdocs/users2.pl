@@ -1371,8 +1371,8 @@ sub showInfo {
 		my $latest_submissions = $users2->getLatestSubmissions($uid);
 
 		# Bookmarks slashbox
-		my $bookmarks_reader = getObject('Slash::Bookmark');
-		my $latest_bookmarks = $bookmarks_reader->getRecentBookmarksByUid($uid, 5);
+		my $latest_bookmarks =
+                        $users2->getLatestBookmarks($uid, $latest_journals, $latest_submissions);
 
 		# Friends slashbox
 		my $latest_friends = $users2->getLatestFriends($uid);
@@ -1401,13 +1401,6 @@ sub showInfo {
                         $tags_datapane =
 				$users2->getTagsDatapane($uid, $requested_user, $user->{is_admin});
                 }
-
-		# Bookmarks pane
-		#my $bookmarks_datapane;
-                #if ($form->{dp} && $form->{dp} eq 'bookmarks') {
-                        #$bookmarks_datapane =
-				#$users2->getBookmarksDatapane($uid, $requested_user);
-                #}
 
                 # Comments
                 my $comments_datapane;
@@ -1469,7 +1462,6 @@ sub showInfo {
                         comments_datapane       => $comments_datapane,
 			relations_datapane      => $relations_datapane,
 			tags_datapane           => $tags_datapane,
-			#tags_grouped            => $bookmarks_datapane,
 			data_pane               => $form->{dp},
 			main_view               => $main_view,
 			not_fhid		=> $not_fhid,
