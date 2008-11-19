@@ -1884,9 +1884,12 @@ function inlineAdFirehose($article) {
 	if (!fh_adTimerUrl)
 		return 0;
 
-	if (!$article)
+	if ($article)
+		$article = Slash.Firehose.at_or_below_ad_space($article);
+	else
 		$article = Slash.Firehose.choose_article_for_next_ad();
-	if (!$article)
+
+	if (!$article || !$article.length)
 		return 0;
 
 	var id = $article.article_info__key().key;
@@ -2142,12 +2145,16 @@ Slash.Firehose.articles_on_screen = function(){
 	}
 }
 
+Slash.Firehose.at_or_below_ad_space = function( $articles ){
+	var min_top = Math.max(window.pageYOffset, $slashboxes.offset().top + $slashboxes.height());
+	return $articles.filter(function(){
+		return $(this).offset().top >= min_top;
+	});
+
+}
+
 Slash.Firehose.choose_article_for_next_ad = function(){
-	var $articles = Slash.Firehose.articles_on_screen();
-	// omit the first article (when we have more than one) if it starts above the screen
-	if ( ($articles.length > 1) && ($articles.offset().top < window.pageYOffset) ) {
-		$articles = $articles.filter(':gt(0)');
-	}
+	var Fh=Slash.Firehose, $articles=Fh.at_or_below_ad_space(Fh.articles_on_screen());
 	return $articles.eq( Math.floor(Math.random()*$articles.length) );
 }
 
