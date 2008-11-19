@@ -5679,3 +5679,7 @@ CREATE TABLE globjs_viewed_archived (
 
 # For plugins/Users2
 INSERT INTO vars (name, value, description) VALUES ('u2','0','Toggle on/off Users2');
+
+# For plugins/FireHose
+INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "usertag", "no", '"user:{nickname}" "tag:{tag}"', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
+UPDATE firehose_view SET mixedmode="" WHERE viewname="daddypants";
