@@ -910,11 +910,13 @@ sub showInfo {
 	my $id = $hr->{uid} || 0;
 
 	my $reader = getObject('Slash::DB', { db_type => 'reader' });
+	my $fh_reader = getObject('Slash::FireHose', { db_type => 'reader' });
 	my $slashdb = getCurrentDB();
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 	my $user = getCurrentUser();
-
+	
+	$user->{state}{firehose_page} = "user";
 
 	my $admin_flag = ($user->{is_admin}) ? 1 : 0;
 	my($title, $admin_block, $fieldkey) = ('', '', '');
@@ -1416,14 +1418,18 @@ sub showInfo {
 		# Set up default view (remove marquee for subsections)
 		my $main_view = 0;
                 my $marquee;
+		my $not_fhid;
                 if (!$form->{dp}) {
                         $main_view = 1;
                         $form->{dp} = "firehose" if (!$user->{is_admin});
 			# Marquee is the "latest thing"
 			$marquee = $users2->getMarquee($latest_comments, $latest_journals, $latest_submissions);
+			$not_fhid = $users2->getMarqueeFireHoseId($marquee);
 		}
 
-		if ($form->{dp} && $form->{dp} eq 'firehose') {
+		if ( (!$form->{dp} && !$user->{is_admin})  ||
+		     ($form->{dp} eq 'firehose' || $form->{dp} eq 'journal' || $form->{dp} eq 'submissions' || $form->{dp} eq 'bookmarks' || $form->{dp} eq 'usertag')) {
+
 			$form->{listonly} = 1;
 			$form->{mode} = "full";
 			$form->{color} = "black";
@@ -1466,6 +1472,7 @@ sub showInfo {
 			#tags_grouped            => $bookmarks_datapane,
 			data_pane               => $form->{dp},
 			main_view               => $main_view,
+			not_fhid		=> $not_fhid,
 		}, { Page => 'users', Skin => 'default'});
 	}
 

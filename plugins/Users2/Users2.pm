@@ -4,6 +4,7 @@ use strict;
 use DBIx::Password;
 use Slash;
 use Slash::Constants qw(:messages);
+use Slash::Display;
 use Slash::Utility;
 
 use vars qw($VERSION);
@@ -227,6 +228,22 @@ sub getMarquee {
         }
 
         return $latest_thing;
+}
+
+sub getMarqueeFireHoseId {
+	my($self, $marquee) = @_;
+	my $fhid;
+	if ($marquee && $marquee->{type}) {
+		if ($marquee->{type} eq "submission") {
+			$fhid = $marquee->{id};
+		} elsif ($marquee->{type} eq "journal" || $marquee->{type} eq "comment") {
+			my $fh_reader = getObject("Slash::FireHose", { db_type => "reader" });
+			my $item = $fh_reader->getFireHoseByTypeSrcid($marquee->{type}, $marquee->{id});
+			$fhid = $item->{id} if $item;
+
+		}
+	}
+	return $fhid;
 }
 
 sub DESTROY {
