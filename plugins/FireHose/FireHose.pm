@@ -631,10 +631,18 @@ sub getFireHoseEssentials {
 	my @where;
 	my $tables = 'firehose';
 	my $filter_globjids;
-	if ($options->{tagged_by_uid} && (!$doublecheck || $options->{ignore_nix})) {
-		my $tag_by_uid_q = $self->sqlQuote($options->{tagged_by_uid});
+	my $tags = getObject('Slash::Tags');
+
+	if ($options->{tagged_as} || $options->{tagged_by_uid}) {
 		$tables .= ', tags';
 		push @where, 'tags.globjid=firehose.globjid';
+	}
+	if($options->{tagged_as}) {
+		my $tag_id = $tags->getTagnameidFromNameIfExists($options->{tagged_as}) || 0;
+		push @where, "tags.tagnameid = $tag_id";
+	}
+	if ($options->{tagged_by_uid} && (!$doublecheck || $options->{ignore_nix})) {
+		my $tag_by_uid_q = $self->sqlQuote($options->{tagged_by_uid});
 		push @where, "tags.uid = $tag_by_uid_q";
 
 		if ($options->{ignore_nix}) {
@@ -645,7 +653,6 @@ sub getFireHoseEssentials {
 		} elsif ($options->{tagged_positive} || $options->{tagged_negative} || $options->{tagged_non_negative}) {
 			my $labels;
 			my $not = '';
-			my $tags = getObject('Slash::Tags');
 
 			if ($options->{tagged_positive}) {
 				$labels = $tags->getPositiveTags;
@@ -820,7 +827,7 @@ sub getFireHoseEssentials {
 	my $where = (join ' AND ', @where) || '';
 
 	my $other = '';
-	$other = 'GROUP BY firehose.id' if $options->{tagged_by_uid} || $options->{nexus};
+	$other = 'GROUP BY firehose.id' if $options->{tagged_by_uid} || $options->{tagged_as} || $options->{nexus};
 
 	my $count_other = $other;
 	my $offset;
@@ -2212,6 +2219,7 @@ sub getAndSetOptions {
 	my $gSkin	= getCurrentSkin();
 
 	my ($f_change, $v_change, $t_change);
+
 	if (!$opts->{initial}) {
 		($f_change, $v_change, $t_change) = ($form->{filterchanged}, $form->{viewchanged}, $form->{tabchanged});
 	}
@@ -2464,6 +2472,13 @@ sub getAndSetOptions {
 		$fhfilter =~ s/\{nickname\}/$the_nickname/g;
 		$options->{fhfilter} =~ s/\{nickname\}/$the_nickname/g;
 		$options->{base_filter} =~ s/\{nickname\}/$the_nickname/g;
+	}
+
+	if ($fhfilter =~ /\{tag}/) {
+		my $the_tag = $opts->{tag} || $form->{tagname};
+		$fhfilter =~ s/\{tag\}/$the_tag/g;
+		$options->{fhfilter} =~ s/\{tag\}/$the_tag/g;
+		$options->{base_filter} =~ s/\{tag\}/$the_tag/g;
 	}	
 	
 	my $fh_ops = $self->splitOpsFromString($fhfilter);
@@ -2514,6 +2529,10 @@ sub getAndSetOptions {
 			$fh_options->{tagged_by_uid} = $uid;
 			$fh_options->{tagged_non_negative} = 1;
 #			$fh_options->{ignore_nix} = 1;
+		} elsif (/^tag:/) {
+			my $tag = $_;
+			$tag =~s/tag://g;
+			$fh_options->{tagged_as} = $tag;
 		} else {
 			if (!defined $fh_options->{filter}) {
 				$fh_options->{filter} = $_;
