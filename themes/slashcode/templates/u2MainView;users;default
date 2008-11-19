@@ -64,7 +64,7 @@ __template__
 
                 <p>
 
-                [% PROCESS u2AdminListComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
+                [% IF commentstruct.size; PROCESS u2AdminListComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time; END; %]
 
                 <p>
 
