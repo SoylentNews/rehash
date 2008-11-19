@@ -91,7 +91,7 @@ DROP TABLE IF EXISTS firehose_view;
 CREATE TABLE firehose_view(
 	id mediumint(8) unsigned NOT NULL auto_increment,
 	uid MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
-	viewname VARCHAR(16) NOT NULL DEFAULT 'unnamed',
+	viewname VARCHAR(24) NOT NULL DEFAULT 'unnamed',
 	useparentfilter ENUM("no","yes") DEFAULT "yes",
 	tab_display ENUM("no","yes") DEFAULT "no",
 	options_edit ENUM("no","yes") DEFAULT "no",

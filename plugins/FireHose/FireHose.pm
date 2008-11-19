@@ -2518,6 +2518,17 @@ sub getAndSetOptions {
 				$uid ||= $user->{uid};
 			}
 			push @{$fh_options->{$not."uid"}}, $uid;
+		} elsif (/^authorfriend:(.*)$/ && $constants->{plugin}{Zoo}) {
+			my $uid;
+			my $nick = $1;
+			if ($nick) {
+				$uid = $self->getUserUID($nick);
+				$uid ||= $user->{uid};
+			}
+			my $zoo = getObject("Slash::Zoo");
+			my $friends = $zoo->getFriendsUIDs($uid);
+			$friends = [-1], if @$friends < 1;   # No friends, pass a UID that won't match
+			push @{$fh_options->{$not."uid"}}, @$friends;
 		} elsif (/^user:/) {
 			my $nick = $_;
 			$nick =~ s/user://g;
