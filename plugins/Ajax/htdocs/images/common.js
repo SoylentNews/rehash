@@ -589,6 +589,9 @@ function firehose_toggle_tag_ui( toggle ) {
 }
 
 function firehose_click_tag( event ) {
+	// _any_ click can trigger, but click-specific ad will win
+	setTimeout(function(){ inlineAdFirehose(); }, 0);
+
 	var $target = $(event.target), command='', $menu;
 
 	$related_trigger = $target;
@@ -1936,7 +1939,7 @@ var	AD_HEIGHT = 300, AD_WIDTH = 300, FOOTER_PADDING = 5,
 $(function(){
 	$footer = $('#ft');
 	$slashboxes = $('#slashboxes').
-		append('<div id="floating-slashbox-ad" style="display:none; position:absolute; height:'+AD_HEIGHT+'px; width:'+AD_WIDTH+'px;" />');
+		append('<div id="floating-slashbox-ad" />');
 	$ad_position = $slashboxes.find('#floating-slashbox-ad');
 
 	$(window).scroll(fix_ad_position);
@@ -1961,7 +1964,6 @@ function if_same_mode( a, b ){
 		(
 			(a.has_content == b.has_content) &&
 			(a.is_in_window == b.is_in_window) &&
-			(a.top == b.top) &&
 			(a.pinned == b.pinned)
 		);
 }
@@ -1969,20 +1971,32 @@ function if_same_mode( a, b ){
 function set_mode( next ){
 	var cur = current_mode;
 
+	// if it's actually a change...
 	if ( ! if_same_mode(cur, next) ) {
-		if ( next.has_content ) {
-			if ( cur.has_content && (next.is_in_window || cur.is_in_window) ) {
-				$ad_position.animate({top: next.top}, 'fast');
-			} else {
-				$ad_position.hide().css({top: next.top});
-				if ( !cur.has_content ) {
-					$ad_position.fadeIn('fast');
-				} else {
-					$ad_position.show();
-				}
-			}
-		} else {
+		if ( ! next.has_content ) {
 			$ad_position.hide();
+		} else if ( cur.pinned != next.pinned ) {
+			$ad_position.hide();
+
+			var next_class = next.pinned || '';
+			if ( next.pinned == 'Article' ) {
+				$current_article.
+					prepend($ad_position).
+					css('overflow', 'visible');
+			} else if ( next.pinned == 'Bottom' ) {
+				$slashboxes.after($ad_position);
+				next_class += ' yui_b';
+			} else {
+				$slashboxes.append($ad_position);
+			}
+
+			$ad_position.setClass(next_class);
+
+			if ( !cur.has_content ) {
+				$ad_position.fadeIn('fast');
+			} else {
+				$ad_position.show();
+			}
 		}
 
 		var event_name;
@@ -2051,7 +2065,9 @@ function fix_ad_position(){
 						top:		ad_top - slashboxes.top
 					};
 
-		if ( ad_top == article.top ) {
+		if ( space_bottom - space_top < AD_HEIGHT ) {
+			next_mode.pinned = 'SqueezedOut';
+		} else if ( ad_top == article.top ) {
 			next_mode.pinned = 'Article';
 		} else if ( ad_top < article.top ) {
 			next_mode.pinned = 'Bottom';
