@@ -133,51 +133,6 @@ sub saveBookmark {
 		}
 	}
 
-        if (!$user->{is_anon}) {
-                my $events = $slashdb->sqlSelectAllHashref(
-                        'eid', 'eid, date', 'user_events', "uid = " . $user->{uid}  . " and code = 4");
-
-                # Delete the oldest event for this user if they already have 5 events.
-                if ((scalar keys %$events) == 5) {
-                        my $eid = [sort keys %$events]->[0];
-                        $slashdb->sqlDelete('user_events', "uid = " . $user->{uid}  . " and code = 4 and eid = $eid");
-                }
-
-                # Insert event
-                $slashdb->sqlInsert('user_events', {
-                        code  => 4,
-                        uid   => $user->{uid},
-                        event => $bookmark_id,
-                        -date  => 'NOW()',
-                });
-
-                # Create/update event block
-                my $event_blocks = $slashdb->sqlSelectAllHashref(
-                        'uid', 'bid, uid, block', 'user_event_blocks', "uid = " . $user->{uid} . " and code = 4");
-
-                # New block
-                if (!%$event_blocks) {
-                        $slashdb->sqlInsert('user_event_blocks', {
-                                code  => 4,
-                                uid   => $user->{uid},
-                                block => $bookmark_id
-                        });
-                } else {
-                        my @blocks = split(/,/, $event_blocks->{$user->{uid}}->{block});
-
-                        # Remove oldest event from this block
-                        if (scalar @blocks == 5) {
-                                @blocks = @blocks[1 .. 4];
-                        }
-
-                        # Append new event
-                        $blocks[$#blocks + 1] = $bookmark_id;
-                        my $new_blocks = join(",", @blocks);
-
-                        $slashdb->sqlUpdate('user_event_blocks', { block => $new_blocks }, "uid = " . $user->{uid} . " and code = 4");
-                }
-        }
-
 	my $tags = getObject('Slash::Tags');
 
 	$tags->setTagsForGlobj($url_id, "urls", $form->{tags});
