@@ -239,17 +239,17 @@ __template__
 
         [% ELSIF data_pane == 'journal';
                 fh = Slash.getObject("Slash::FireHose");
-                fhbox = fh.listView({ fh_page => 'users.pl', view => 'userjournal', user_view => useredit });
+		fhbox = fh.listView({ fh_page => 'users.pl', view => 'userjournal', user_view => useredit, not_id => not_fhid });
                 fhbox;
 
            ELSIF data_pane == 'submissions';
                 fh = Slash.getObject("Slash::FireHose");
-                fhbox = fh.listView({ fh_page => 'users.pl', view => 'usersubmission', user_view => useredit });
+                fhbox = fh.listView({ fh_page => 'users.pl', view => 'usersubmission', user_view => useredit, not_id => not_fhid });
                 fhbox;
 
            ELSIF data_pane == 'bookmarks';
                 fh = Slash.getObject("Slash::FireHose");
-                fhbox = fh.listView({ fh_page => 'users.pl', view => 'userbookmark', user_view => useredit });
+                fhbox = fh.listView({ fh_page => 'users.pl', view => 'userbookmark', user_view => useredit, not_id => not_fhid });
                 fhbox;
         %]
         [% ELSIF (data_pane == 'friends') ||
@@ -279,9 +279,13 @@ __template__
 
         [% ELSIF data_pane == 'firehose' || (data_pane == '' && !user.is_admin);
                 fh = Slash.getObject("Slash::FireHose");
-                fhbox = fh.listView({ fh_page => 'users.pl'});
+		fhbox = fh.listView({ fh_page => 'users.pl', view => 'userfirehose', user_view => useredit, not_id => not_fhid });
                 fhbox;
-
+	%]
+        [% ELSIF data_pane == 'usertag';
+                fh = Slash.getObject("Slash::FireHose");
+		fhbox = fh.listView({ fh_page => 'users.pl', view => 'usertag', user_view => useredit, not_id => not_fhid, tag => form.tagname });
+                fhbox;
         END %]
         </div>
 </div>
