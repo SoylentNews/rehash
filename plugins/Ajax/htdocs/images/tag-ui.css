@@ -535,6 +535,7 @@ border-top:1px solid transparnt !important;
 
 
 
-/* trying to fix opera */
+/* trying to fix opera */ /*commented out because this breaks ff2*/
+/*
 div.tag-display ul, div.tag-display li {display: inline-block;}
-
+*/
