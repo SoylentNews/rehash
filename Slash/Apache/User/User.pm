@@ -944,9 +944,15 @@ sub userdir_handler {
 			}
 
 		} elsif ($op eq 'amigos') {
-			$r->args("op=friendview&nick=$nick&uid=$uid");
-			$r->uri('/journal.pl');
-			$r->filename($constants->{basedir} . '/journal.pl');
+			if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2}) {
+				$r->args("nick=$nick&uid=$uid&dp=journalfriends");
+				$r->uri('/users2.pl');
+				$r->filename($constants->{basedir} . '/users2.pl');
+			} else {
+				$r->args("op=friendview&nick=$nick&uid=$uid");
+				$r->uri('/journal.pl');
+				$r->filename($constants->{basedir} . '/journal.pl');
+			}
 
 		} elsif ($op eq 'tags') {
 			if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2}) {
