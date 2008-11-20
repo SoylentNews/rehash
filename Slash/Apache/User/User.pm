@@ -851,7 +851,6 @@ sub userdir_handler {
 
 			} else {
 				my $args = "op=display&nick=$nick&uid=$uid";
-				$extra .= '/' . $more;
 				if ($extra =~ /^(\d+)\/$/) {
 					$args .= "&id=$1";
 				} elsif ($extra =~ s/^friends\///) {
