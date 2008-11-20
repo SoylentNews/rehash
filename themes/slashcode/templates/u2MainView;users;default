@@ -81,7 +81,9 @@ __template__
                 IF moddb; moddb.dispModCommentLog('uid', useredit.uid, mod_options); END;
 
                 IF !constants.m1_admin_show_mods_with_comments;
-                        mod_options.title = "Moderations performed on $thisnickname's comments";
+                        mod_options.title = "Moderations performed on";
+                        mod_options.title = mod_options.title _ nickname | strip_literal;
+                        mod_options.title = mod_options.title _ "'s comments";
                         mod_options.hr_hours_back = hr_hours_back;
 
                         IF moddb; moddb.dispModCommentLog('cuid', useredit.uid, mod_options); END;
@@ -175,12 +177,13 @@ __template__
                  (data_pane == 'all') %]
                 <p>
                 <div id="friendsmenu">
-                        <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/friends">Friends</a> |
-                        <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/fans">Fans</a> |
-                        <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/foes">Foes</a> |
-                        <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/freaks">Freaks</a> |
-                        <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/friends/friends">Friends of Friends</a> |
-                        <a href="[% gSkin.rootdir %]/~[% useredit.nickname %]/friends/foes">Foes of Friends</a>
+                        <ul>
+                        <li><a href="[% gSkin.rootdir %]/~[% useredit.nickname | strip_paramattr %]/friends">Friends</a></li>
+                        <li><a href="[% gSkin.rootdir %]/~[% useredit.nickname | strip_paramattr %]/fans">Fans</a></li>
+                        <li><a href="[% gSkin.rootdir %]/~[% useredit.nickname | strip_paramattr %]/foes">Foes</a></li>
+                        <li><a href="[% gSkin.rootdir %]/~[% useredit.nickname | strip_paramattr %]/freaks">Freaks</a></li>
+                        <li><a href="[% gSkin.rootdir %]/~[% useredit.nickname | strip_paramattr %]/friends/friends">Friends of Friends</a></li>
+                        <li><a href="[% gSkin.rootdir %]/~[% useredit.nickname | strip_paramattr %]/friends/foes">Foes of Friends</a></li>
                         </ul>
                 </div>
                 [% relations_datapane %]
