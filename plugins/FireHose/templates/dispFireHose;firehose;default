@@ -152,7 +152,7 @@ END %]
 								</span>
 								[% END %]
 									[% IF item.type == "journal" %]
-										[% IF (options.view == "userjournal" || view_mode) && item.bodytext %]
+										[% IF (options.view.match('^userjournal') || view_mode) && item.bodytext %]
 											<div class="bodytext">[% item.bodytext %]</div>
 										[% ELSE %]
 											<div id="text-[% item.id %]">

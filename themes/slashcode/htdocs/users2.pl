@@ -1421,7 +1421,7 @@ sub showInfo {
 		}
 
 		if ( (!$form->{dp} && !$user->{is_admin})  ||
-		     ($form->{dp} eq 'firehose' || $form->{dp} eq 'journal' || $form->{dp} eq 'submissions' || $form->{dp} eq 'bookmarks' || $form->{dp} eq 'usertag')) {
+		     ($form->{dp} eq 'firehose' || $form->{dp} =~ /^journal/ || $form->{dp} eq 'submissions' || $form->{dp} eq 'bookmarks' || $form->{dp} eq 'usertag')) {
 
 			$form->{listonly} = 1;
 			$form->{mode} = "full";

@@ -637,7 +637,7 @@ sub getFireHoseEssentials {
 		$tables .= ', tags';
 		push @where, 'tags.globjid=firehose.globjid';
 	}
-	if($options->{tagged_as}) {
+	if ($options->{tagged_as}) {
 		my $tag_id = $tags->getTagnameidFromNameIfExists($options->{tagged_as}) || 0;
 		push @where, "tags.tagnameid = $tag_id";
 	}
