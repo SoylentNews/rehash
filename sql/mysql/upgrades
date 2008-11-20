@@ -5661,8 +5661,6 @@ UPDATE firehose_view SET filter="-story" WHERE viewname="popular";
 # 2008-11-06
 UPDATE vars SET value = 'T_2_5_0_229' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # for plugins/Tags
@@ -5689,4 +5687,6 @@ INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, 
 # skipping _230 because i goofed
 # 2008-11-20
 UPDATE vars SET value = 'T_2_5_0_231' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
 
