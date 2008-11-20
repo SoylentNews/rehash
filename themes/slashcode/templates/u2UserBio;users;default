@@ -15,7 +15,7 @@ __template__
 [% tilde = '^'; IF constants.u2; tilde = '~'; END; %]
 <div class="block" id="user_bio">
         <div class="title" id="user_bio_title">
-                <h4>[% useredit.nickname %] ([% useredit.uid %])</h4>
+                <h4>[% useredit.nickname | strip_paramattr %] ([% useredit.uid %])</h4>
         </div>
 
         <div class="content" id="user_bio_content">
@@ -121,7 +121,7 @@ __template__
                         '/zoo.pl?op=check&uid=';
                         useredit.uid;
                         '">Change your relationship with ';
-                        useredit.nickname;
+                        useredit.nickname | strip_paramattr;
                         '</a></b>';
                 END;
         %]        
