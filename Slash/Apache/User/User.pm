@@ -956,11 +956,16 @@ sub userdir_handler {
 
 		} elsif ($op eq 'tags') {
 			if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2}) {
-				my $args = "nick=$nick&dp=usertag&uid=$uid";
-				$args .= "&tagname=$extra" if $extra;
-				$r->args($args);
 				$r->uri('/users2.pl');
 				$r->filename($constants->{basedir} . '/users2.pl');
+				my $args;
+				if ($extra) {
+					my $args = "nick=$nick&dp=usertag&uid=$uid";
+					$args .= "&tagname=$extra" if $extra;
+				} else {
+					$args = "op=userinfo&uid=$uid&nick=$nick&dp=tags";		
+				}
+				$r->args($args);
 			} else {
 				my $args = "op=showtags&nick=$nick&uid=$uid";
 				# XXX "!" is a 'reserved' char in URI, escape it here?
