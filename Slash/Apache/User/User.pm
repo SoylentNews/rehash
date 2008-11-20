@@ -837,7 +837,7 @@ sub userdir_handler {
 			if (
 				($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2})
 						&&
-				!($extra !~ m{^ (rss|atom) /?$}x || $extra =~ /^(\d+)\/$/)
+				!($extra =~ m{^ (rss|atom) /?$}x || $extra =~ /^(\d+)\/$/)
 			) {
 				my $args = "nick=$nick&uid=$uid&dp=journal";
 
