@@ -151,6 +151,11 @@ __template__
 		fhbox = fh.listView({ fh_page => 'users.pl', view => 'userjournal', user_view => useredit, not_id => not_fhid });
                 fhbox;
 
+           ELSIF data_pane == 'journalfriends';
+                fh = Slash.getObject("Slash::FireHose");
+                fhbox = fh.listView({ fh_page => 'users.pl', view => 'userjournalfriends', user_view => useredit, not_id => not_fhid });
+                fhbox;
+
            ELSIF data_pane == 'submissions';
                 fh = Slash.getObject("Slash::FireHose");
                 fhbox = fh.listView({ fh_page => 'users.pl', view => 'usersubmission', user_view => useredit, not_id => not_fhid });
