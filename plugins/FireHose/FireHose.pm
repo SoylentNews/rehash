@@ -197,7 +197,7 @@ sub createItemFromJournal {
 		my $publish    = $journal->{promotetype} eq 'publish';
 		my $color_lvl  = $publicize ? 5 : $publish ? 6 : 7; # post == 7
 		my $editor_lvl = $publicize ? 5 : $publish ? 6 : 8; # post == 8
-		my $public     = ($publish || $publicize) ? 'yes' : 'no';
+		my $public     = 'yes';
 		my $popularity = $self->getEntryPopularityForColorLevel($color_lvl);
 		my $editorpop  = $self->getEntryPopularityForColorLevel($editor_lvl);
 

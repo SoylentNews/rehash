@@ -262,6 +262,15 @@ sub remove {
 	}
 	my $slashdb = getCurrentDB();
 	$slashdb->setUser($uid, { -journal_last_entry_date => $date });
+
+	if (getCurrentStatic()->{plugin}{FireHose}) {
+		$slashdb->sqlUpdate('firehose',
+			{ public => 'no' },
+			"type='journal' AND srcid=$id"
+		);
+	}
+
+
 	return $count;
 }
 
