@@ -1403,10 +1403,10 @@ sub showInfo {
                 }
 
                 # Comments
-                my $comments_datapane;
-                if ($form->{dp} && $form->{dp} eq 'comments') {
-                         $comments_datapane = $users2->getCommentsDatapane($uid, $user, $requested_user);
-                }
+                #my $comments_datapane;
+                #if ($form->{dp} && $form->{dp} eq 'comments') {
+                         #$comments_datapane = $users2->getCommentsDatapane($uid, $user, $requested_user);
+                #}
 
 		# Set up default view (remove marquee for subsections)
 		my $main_view = 0;
@@ -1459,7 +1459,7 @@ sub showInfo {
                         latest_bookmarks        => $latest_bookmarks,
                         latest_friends          => $latest_friends,
 			marquee                 => $marquee,
-                        comments_datapane       => $comments_datapane,
+                        #comments_datapane       => $comments_datapane,
 			relations_datapane      => $relations_datapane,
 			tags_datapane           => $tags_datapane,
 			data_pane               => $form->{dp},

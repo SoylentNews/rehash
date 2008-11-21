@@ -64,10 +64,6 @@ __template__
 
                 <p>
 
-                [% IF commentstruct.size; PROCESS u2AdminListComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time; END; %]
-
-                <p>
-
                 [%
                 IF constants.m2;
                         mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
@@ -192,7 +188,7 @@ __template__
                 [% tags_datapane %]
 
         [% ELSIF data_pane == 'comments' %]
-                [% comments_datapane %]
+                [% PROCESS u2ListComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
 
         [% ELSIF data_pane == 'firehose' || (data_pane == '' && !user.is_admin);
                 fh = Slash.getObject("Slash::FireHose");
