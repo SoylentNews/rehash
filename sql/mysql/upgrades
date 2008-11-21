@@ -5661,8 +5661,6 @@ UPDATE firehose_view SET filter="-story" WHERE viewname="popular";
 # 2008-11-06
 UPDATE vars SET value = 'T_2_5_0_229' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 # SLASHDOT LAST UPDATED HERE
 
 # for plugins/Tags
@@ -5685,3 +5683,10 @@ ALTER TABLE firehose_view MODIFY COLUMN viewname VARCHAR(24) DEFAULT 'unnamed';
 INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, orderdir, color, duration, mode, mixedmode, tab_display, options_edit, admin_maxitems, maxitems, seclev, pause) VALUES (NULL, 0, "userjournalfriends", "no", '"authorfriend:{nickname}" journal', "createtime", "DESC", "black", "-1", "full", "0", "no", "no", 20, 20, 0,"1");
 
 # PUDGE LAST UPDATED HERE
+
+# skipping _230 because i goofed
+# 2008-11-20
+UPDATE vars SET value = 'T_2_5_0_231' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHCODE/USEPERL LAST UPDATED HERE
+

@@ -94,7 +94,14 @@ div.tag-display li.t > .tmenu li.pound,
 div.tag-display li.t > .tmenu li.ignore,
 div.tag-display li.t > .tmenu li.descriptive {
 	display: inline-block;
+/*text-decoration:none !important;*/
 }
+
+div.tag-display li.u {
+text-decoration:none !important;
+}
+
+
 
 /* no menus for newly added tags */
 .tag-display li.not-saved .tmenu,
@@ -525,3 +532,10 @@ div.tag-display.ready.dirty  { /* !FIXING safari tag widget bug on idle. */
 border-top:1px solid transparnt !important;
 }
 
+
+
+
+/* trying to fix opera */ /*commented out because this breaks ff2*/
+/*
+div.tag-display ul, div.tag-display li {display: inline-block;}
+*/
