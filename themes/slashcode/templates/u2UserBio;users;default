@@ -15,8 +15,8 @@ __template__
 [% tilde = '^'; IF constants.u2; tilde = '~'; END; %]
 <div class="block" id="user_bio">
         <div class="title" id="user_bio_title">
-                <h4>[% useredit.nickname | strip_literal %] ([% useredit.uid %])</h4>
-        </div>
+        	<h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]" style="text-decoration:none;">[% useredit.nickname | strip_literal %] ([% useredit.uid %])</a> [% PROCESS zoo_icons person=useredit.uid implied="" %]</h4>
+	</div>
 
         <div class="content" id="user_bio_content">
         [%
