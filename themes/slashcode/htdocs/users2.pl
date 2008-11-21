@@ -1358,7 +1358,7 @@ sub showInfo {
 		my $tags_reader = getObject('Slash::Tags', { db_type => 'reader' });
 		my $tagshist;
 		if ($tags_reader) {
-			$tagshist = $tags_reader->getGroupedTagsFromUser($requested_user->{uid}, { orderby => 'created_at', orderdir => 'DESC', include_private => 1 });
+			$tagshist = $tags_reader->getGroupedTagsFromUser($requested_user->{uid}, { orderby => 'created_at', orderdir => 'DESC', include_private => 1, limit => 100 });
 		}
 
 		# Comments slashbox
