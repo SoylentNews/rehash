@@ -97,6 +97,7 @@ IF options.view == "usersubmission";
 		CASE 2; ' accepted';
 	END;
 END %]</div>
+		<div class="tag-display-stub" context="datatype" init="legend:'type&nbsp;tag'">[% tags.datatype %]</div>
 	</div>
 	[% END %]
 [% END %]
