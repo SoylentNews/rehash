@@ -30,7 +30,7 @@ __template__
 		submission_hash.${submission.subid} = submission;
 	END;
 	submission_accept = submission_count - (submission_reject + submission_pend) %]
-<div id="message"><div class="content">Submission Summary:
+<div id="message"><div class="content"><p>Submission Summary:
 [% submission_pend %] pending,
 [% submission_reject %] rejected,
 [% submission_accept %] accepted ([%
@@ -39,7 +39,7 @@ __template__
 	USE format;
 	percentage = format('%.2f');
 	percentage((100 * submission_accept) / (submission_accept + submission_reject + submission_pend))
-%]% accepted)</div></div>
+%]% accepted)</p></div></div>
 
 
 [% ELSIF options.view == "userjournal" AND (user.uid == options.user_view_uid) %]
