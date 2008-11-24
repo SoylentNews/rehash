@@ -1117,7 +1117,7 @@ sub showInfo {
 
 		$title = getTitle('user_netID_user_title', $data);
 
-		$admin_block = getUserAdmin($netid, $fieldkey, 0) if ($form->{dp} && $form->{dp} eq 'admin' && $admin_flag); 
+		$admin_block = getUserAdmin($netid, $fieldkey, 0) if ($form->{dp} && $form->{dp} eq 'admin' && $admin_flag);
 
 		if ($form->{fieldname}) {
 			if ($form->{fieldname} eq 'ipid') {
