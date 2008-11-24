@@ -21,7 +21,8 @@ __template__
         <div class="content" id="user_bio_content">
         [%
                 IF user.uid == useredit.uid OR user.is_admin;
-                        IF useredit.realname; useredit.realname | strip_literal; ELSE; '(no real name given)<br>'; END;
+                        IF useredit.realname; useredit.realname | strip_literal; ELSE; '(no real name given); END;
+			'<br>';
                         '<a href="mailto:';
                         useredit.realemail | strip_paramattr; '">';
                         Slash.ellipsify(Slash.strip_literal(useredit.realemail)); '</a>';
