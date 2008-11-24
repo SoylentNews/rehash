@@ -1414,7 +1414,7 @@ sub showInfo {
 			$not_fhid = $users2->getMarqueeFireHoseId($marquee);
 		}
 
-		if ($form->{dp} eq 'firehose' || $form->{dp} =~ /^journal/ || $form->{dp} eq 'submissions' || $form->{dp} eq 'bookmarks' || $form->{dp} eq 'usertag') {
+		if ($main_view || $form->{dp} eq 'firehose' || $form->{dp} =~ /^journal/ || $form->{dp} eq 'submissions' || $form->{dp} eq 'bookmarks' || $form->{dp} eq 'usertag') {
 
 			$form->{listonly} = 1;
 			$form->{mode} = "full";

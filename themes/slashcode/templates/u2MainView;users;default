@@ -29,7 +29,8 @@ __template__
 </div>
 [% END %]
 
-[% PROCESS u2Menu 
+[% PROCESS u2Menu
+	main_view=main_view
         data_pane=data_pane
         comments_size=latest_comments.size
         journals_size=latest_journals.size

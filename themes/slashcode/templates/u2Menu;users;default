@@ -15,7 +15,8 @@ __template__
 [% tilde = '^'; IF constants.u2; tilde = '~'; END; %]
 <div class="nav">
 <ul class="menu" id="tablist">
-<li[% IF data_pane == 'firehose' || data_pane == '' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/firehose">Firehose</a></li>
+<li[% IF main_view %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]">[% nickname | strip_literal %]</a></li>
+<li[% IF data_pane == 'firehose' && !main_view %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/firehose">Firehose</a></li>
 [% IF comments_size != 0 %]<li[% IF data_pane == 'comments' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/comments">Comments</a></li>[% END %]
 [% IF journals_size != 0 %]<li[% IF data_pane == 'journal' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/journal">Journals</a></li>[% END %]
 [% IF submissions_size != 0 %]<li[% IF data_pane == 'submissions' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/submissions">Submissions</a></li>[% END %]
