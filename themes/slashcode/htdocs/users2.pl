@@ -1117,7 +1117,7 @@ sub showInfo {
 
 		$title = getTitle('user_netID_user_title', $data);
 
-		$admin_block = getUserAdmin($netid, $fieldkey, 0) if $admin_flag;
+		$admin_block = getUserAdmin($netid, $fieldkey, 0) if ($form->{dp} && $form->{dp} eq 'admin' && $admin_flag); 
 
 		if ($form->{fieldname}) {
 			if ($form->{fieldname} eq 'ipid') {
@@ -1157,7 +1157,7 @@ sub showInfo {
 			}
 		}	
 	} else {
-		$admin_block = getUserAdmin($id, $fieldkey, 1) if $admin_flag;
+		$admin_block = getUserAdmin($id, $fieldkey, 1) if ($form->{dp} && $form->{dp} eq 'admin' && $admin_flag);
 
 		$commentcount      = $reader->countCommentsByUID($requested_user->{uid});
 		$commentcount_time = $reader->countCommentsByUID($requested_user->{uid}, { cid_at_or_after => $cid_for_time_period });
@@ -1402,26 +1402,19 @@ sub showInfo {
 				$users2->getTagsDatapane($uid, $requested_user, $user->{is_admin});
                 }
 
-                # Comments
-                #my $comments_datapane;
-                #if ($form->{dp} && $form->{dp} eq 'comments') {
-                         #$comments_datapane = $users2->getCommentsDatapane($uid, $user, $requested_user);
-                #}
-
 		# Set up default view (remove marquee for subsections)
 		my $main_view = 0;
                 my $marquee;
 		my $not_fhid;
-                if (!$form->{dp}) {
+                if ((!$form->{dp}) || ($form->{dp} eq 'admin' && !$user->{is_admin})) {
                         $main_view = 1;
-                        $form->{dp} = "firehose" if (!$user->{is_admin});
+                        $form->{dp} = 'firehose';
 			# Marquee is the "latest thing"
 			$marquee = $users2->getMarquee($latest_comments, $latest_journals, $latest_submissions);
 			$not_fhid = $users2->getMarqueeFireHoseId($marquee);
 		}
 
-		if ( (!$form->{dp} && !$user->{is_admin})  ||
-		     ($form->{dp} eq 'firehose' || $form->{dp} =~ /^journal/ || $form->{dp} eq 'submissions' || $form->{dp} eq 'bookmarks' || $form->{dp} eq 'usertag')) {
+		if ($form->{dp} eq 'firehose' || $form->{dp} =~ /^journal/ || $form->{dp} eq 'submissions' || $form->{dp} eq 'bookmarks' || $form->{dp} eq 'usertag') {
 
 			$form->{listonly} = 1;
 			$form->{mode} = "full";
@@ -1459,7 +1452,6 @@ sub showInfo {
                         latest_bookmarks        => $latest_bookmarks,
                         latest_friends          => $latest_friends,
 			marquee                 => $marquee,
-                        #comments_datapane       => $comments_datapane,
 			relations_datapane      => $relations_datapane,
 			tags_datapane           => $tags_datapane,
 			data_pane               => $form->{dp},

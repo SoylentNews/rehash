@@ -59,7 +59,7 @@ __template__
 <div id="yui-main">
         <div class="yui-b">
 
-        [% IF data_pane == '' && admin_flag %]
+        [% IF data_pane == 'admin' && admin_flag %]
                 [% admin_block %]
 
                 <p>
@@ -98,7 +98,7 @@ __template__
 
                 '<p>';
 
-                IF user.is_admin && tagshist && tagshist.size > 0;
+                IF tagshist && tagshist.size > 0;
                         "<h3>Recent Tags</h3>";
                         '<table class="data" width="100%">';
                         '<tr class="data_head"><th>Tag</th><th>Object</th><th>Time</th></tr>';
@@ -190,7 +190,7 @@ __template__
         [% ELSIF data_pane == 'comments' %]
                 [% PROCESS u2ListComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
 
-        [% ELSIF data_pane == 'firehose' || (data_pane == '' && !user.is_admin);
+        [% ELSIF data_pane == 'firehose' || data_pane == '';
                 fh = Slash.getObject("Slash::FireHose");
 		fhbox = fh.listView({ fh_page => 'users.pl', view => 'userfirehose', user_view => useredit, not_id => not_fhid });
                 fhbox;

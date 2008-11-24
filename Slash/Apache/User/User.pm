@@ -996,6 +996,11 @@ sub userdir_handler {
 				$r->uri('/users.pl');
 				$r->filename($constants->{basedir} . '/users.pl');
 			}
+		} elsif (($op eq 'admin' && $constants->{u2}) ||
+			 ($op eq 'admin' && $saveuri =~ m[^/(?:%5[eE]|\^)(.+)])) {
+			$r->args("nick=$nick&dp=admin&uid=$uid");
+                        $r->uri('/users2.pl');
+                        $r->filename($constants->{basedir} . '/users2.pl');
 
 		} else {
 			if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2}) {

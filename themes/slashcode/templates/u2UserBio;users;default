@@ -20,14 +20,9 @@ __template__
 
         <div class="content" id="user_bio_content">
         [%
-                '<a href="'; gSkin.rootdir; '/'; tilde;
-                useredit.nickname | strip_paramattr; '/">';
-                useredit.nickname | strip_literal; '</a> ';
-                PROCESS zoo_icons person=useredit.uid implied="";
-
                 IF user.uid == useredit.uid OR user.is_admin;
-                        '<br>'; IF useredit.realname; useredit.realname | strip_literal; ELSE; '(no real name given)'; END;
-                        '<br><a href="mailto:';
+                        IF useredit.realname; useredit.realname | strip_literal; ELSE; '(no real name given)<br>'; END;
+                        '<a href="mailto:';
                         useredit.realemail | strip_paramattr; '">';
                         Slash.ellipsify(Slash.strip_literal(useredit.realemail)); '</a>';
                         '<br>';
