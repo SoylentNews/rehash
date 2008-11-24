@@ -959,7 +959,7 @@ sub userdir_handler {
 				$r->filename($constants->{basedir} . '/users2.pl');
 				my $args;
 				if ($extra) {
-					my $args = "nick=$nick&dp=usertag&uid=$uid";
+					$args = "op=userinfo&nick=$nick&dp=usertag&uid=$uid";
 					$args .= "&tagname=$extra" if $extra;
 				} else {
 					$args = "op=userinfo&uid=$uid&nick=$nick&dp=tags";		
