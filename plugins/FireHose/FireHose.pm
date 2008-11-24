@@ -2683,14 +2683,13 @@ sub getFireHoseLimitSize {
 	my $limit;
 
 	if ($options->{view} && $options->{viewref}) {
-		my $limit;
 		if ($user->{is_admin}) {
 			$limit = $options->{viewref}{admin_maxitems};
 		} else {
 			$limit = $options->{viewref}{maxitems};
 		}
 		if ($mode eq "full") {
-			$limit = int($limit /= 2);
+			$limit = int($limit / 2);
 		}
 	}
 
