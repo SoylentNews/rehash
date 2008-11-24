@@ -5688,5 +5688,13 @@ UPDATE vars SET value = 'T_2_5_0_231' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
+UPDATE firehose SET public="yes" WHERE type="journal";
+
+create temporary table firehose_deletedjournal (id int unsigned not null primary key);
+insert ignore into firehose_deletedjournal select firehose.id from firehose left join journals on (firehose.srcid=journals.id) where firehose.type='journal' and journals.id is null;
+update firehose, firehose_deletedjournal set firehose.public='no' where firehose.id=firehose_deletedjournal.id;
+drop table firehose_deletedjournal;
+
 # SLASHDOT LAST UPDATED HERE
+
 
