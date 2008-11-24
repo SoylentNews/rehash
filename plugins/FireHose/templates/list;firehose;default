@@ -232,7 +232,7 @@ cmdrtaco dot net but be forgiving of beta code!
 		firehose_play();
 	[% END %]
 
-[% IF 0 && constants.run_ads && (user.is_admin || user.employee) %]
+[% IF 0 && constants.run_ads && !user.state.page_adless && !user.state.page_buying %]
 	fh_adTimerUrl = '/images/iframe/firehose.html';
 [% END %]
 
