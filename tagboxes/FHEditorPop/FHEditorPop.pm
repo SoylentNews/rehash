@@ -102,9 +102,12 @@ sub run_process {
 	} elsif ($type eq "journals") {
 		my $journal = getObject("Slash::Journal");
 		my $j = $journal->get($target_id);
-		$color_level = $j->{promotetype} && $j->{promotetype} eq 'publicize'
-			? 5  # requested to be publicized
-			: 6; # not requested
+		my $publicize = $j->{promotetype} && $j->{promotetype} eq 'publicize';
+		my $publish = $j->{promotetype} && $j->{promotetype} eq 'publish';
+		# Depending on whether the journal author asked for it to be
+		# publicized, published, or merely posted, its starting color
+		# for editors will be blue, indigo, or black.
+		$color_level = $publicize ? 5 : $publish ? 6 : 8;
 	} elsif ($type eq 'urls') {
 		$extra_pop = $self->sqlCount('bookmarks', "url_id=$target_id_q") || 0;
 		$color_level = $self->sqlCount("firehose", "type='feed' AND url_id=$target_id")
