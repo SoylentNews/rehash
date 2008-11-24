@@ -37,8 +37,9 @@ __template__
 	[% END %]
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
 	by [% IF adminmode && item.type != "story" %]
+		<a href="[% gSkin.rootdir %]/~[ the_user.nickname | strip_paramattr %]">
 		[% the_user.nickname | strip_literal %]
-		(<a href="[% gSkin.rootdir %]/users.pl?uid=[% the_user.uid %]">[% the_user.uid %]</a>)
+		([% the_user.uid %])</a>
 	[% END %]
 	[% IF extras && num_from_uid != '0' %]
 		([% accepted_from_uid %]/[% num_from_uid %]) 
