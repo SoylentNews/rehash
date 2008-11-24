@@ -39,7 +39,6 @@ __template__
                                 '(email not shown publicly)';
                         END;
                 ELSE;
-                        '<br>&nbsp;&nbsp;';
                         IF useredit.fakeemail;
                                 '<a href="mailto:';
                                 useredit.fakeemail | strip_paramattr; '">';
