@@ -1121,10 +1121,10 @@ function firehose_reorder() {
 				}
 				if ( firehose_future[firehose_ordered[i]] ) {
 					$('#ttype-'+firehose_ordered[i]).setClass('future');
-					$('#firehose-'+firehose_ordered[i] + "h3").setClass('future');
+					$('#firehose-'+firehose_ordered[i] + " h3").setClass('future');
 				} else {
 					$('#ttype-'+firehose_ordered[i]+'.future').setClass('story');
-					$('#firehose-'+firehose_ordered[i] + "h3.future").setClass('story');
+					$('#firehose-'+firehose_ordered[i] + " h3.future").setClass('story');
 				}
 			}
 			if ( moved ) after_article_moved();
