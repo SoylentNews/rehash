@@ -245,7 +245,7 @@ sub run_process {
 #	my $hex_percent = int(hex(substr(md5_hex($cid), -4)) * 100 / 65536);
 #	return 0 if $hex_percent >= $percent;
 #
-#	$fhid = $firehose->createItemFromComment($cid);
+#	$fhid = $firehose->createUpdateItemFromComment($cid);
 #
 #	return $fhid;
 #}

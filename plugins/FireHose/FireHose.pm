@@ -140,6 +140,24 @@ sub getFireHoseColors {
 	return $colors;
 }
 
+sub createUpdateItemFromComment {
+	my($self, $cid) = @_;
+	my $comment = $self->getComment($cid);
+	my $text = $self->getCommentText($cid);
+	
+	my $item = $self->getFireHoseByTypeSrcid("comment", $cid);
+	my $fhid;
+
+	if ($item && $item->{id}) {
+		# update item or do nothing
+		$fhid = $item->{id};
+	} else {
+		$fhid = $self->createItemFromComment($cid);
+	}
+	return $fhid;
+	
+}
+
 sub createItemFromComment {
 	my($self, $cid) = @_;
 	my $comment = $self->getComment($cid);
@@ -168,6 +186,17 @@ sub createItemFromComment {
 		discussion	=> $comment->{sid},
 	};
 	my $fhid = $self->createFireHose($data);
+
+	if (!isAnon($comment->{uid})) {
+		my $constants = getCurrentStatic();
+		my $tags = getObject('Slash::Tags');
+		$tags->createTag({
+			uid			=> $comment->{uid},
+			name			=> $constants->{tags_upvote_tagname},
+			globjid			=> $globjid,
+			private			=> 1,
+		});
+	}
 
 	my $tagboxdb = getObject('Slash::Tagbox');
 	if ($tagboxdb) {

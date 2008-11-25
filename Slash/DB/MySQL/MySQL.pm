@@ -346,6 +346,7 @@ sub getBadgeDescriptions {
 sub createComment {
 	my($self, $comment) = @_;
 	return -1 unless dbAvailable("write_comments");
+	my $constants = getCurrentStatic();
 	my $comment_text = $comment->{comment};
 	delete $comment->{comment};
 	$comment->{signature} = md5_hex($comment_text);
@@ -431,6 +432,11 @@ sub createComment {
 	my $searchtoo = getObject('Slash::SearchToo');
 	if ($searchtoo) {
 #		$searchtoo->storeRecords(comments => $cid, { add => 1 });
+	}
+
+	my $firehose = getObject('Slash::FireHose');
+	if ($firehose && !isAnon($comment->{uid})) {
+		$firehose->createUpdateItemFromComment($cid);
 	}
 
 	return $cid;
