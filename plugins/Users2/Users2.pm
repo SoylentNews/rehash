@@ -193,7 +193,8 @@ sub getTagsDatapane {
         if ($tagnameid) {
 		# Show all user's tags for one particular tagname.
 		my $tags_hr =
-			$tags_reader->getGroupedTagsFromUser($uid, { tagnameid => $tagnameid });
+			$tags_reader->getGroupedTagsFromUser($uid, { tagnameid => $tagnameid },
+				{ limit => 5000, orderby => 'tagid', orderdir => 'DESC' });
                 my $tags_ar = $tags_hr->{$tagname} || [ ];
                 return slashDisplay('usertagsforname', {
                         useredit => $requested_user,
@@ -203,7 +204,8 @@ sub getTagsDatapane {
                 }, { Page => 'users', Return => 1 });
         } else {
                 my $tags_hr =
-			$tags_reader->getGroupedTagsFromUser($uid, { include_private => $private });
+			$tags_reader->getGroupedTagsFromUser($uid, { include_private => $private },
+				{ limit => 5000, orderby => 'tagid', orderdir => 'DESC' });
                 my $num_tags = 0;
                 for my $tn (keys %$tags_hr) {
                         $num_tags += scalar @{ $tags_hr->{$tn} };
