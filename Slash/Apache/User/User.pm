@@ -633,23 +633,17 @@ sub userdir_handler {
 			} elsif ($logged_in) {
 				$found_the_op = 1;
 				if ($op eq 'journal') {
-					if ($constants->{u2}) {
-						$r->args("op=userinfo&dp=journal");
-						$r->uri('/users2.pl');
-						$r->filename($constants->{basedir} . '/users2.pl');
+					my $args;
+					if ($extra =~ /^\d+$/) {
+						$args = "id=$extra&op=edit";
+					} elsif ($extra eq 'friends') {
+						$args = "op=friendview";
 					} else {
-						my $args;
-						if ($extra =~ /^\d+$/) {
-							$args = "id=$extra&op=edit";
-						} elsif ($extra eq 'friends') {
-							$args = "op=friendview";
-						} else {
-							$args = "op=list";
-						}
-						$r->args($args);
-						$r->uri('/journal.pl');
-						$r->filename($constants->{basedir} . '/journal.pl');
+						$args = "op=list";
 					}
+					$r->args($args);
+					$r->uri('/journal.pl');
+					$r->filename($constants->{basedir} . '/journal.pl');
 
 				} elsif ($op eq 'discussions') {
 					$r->args("op=personal_index");
@@ -663,48 +657,25 @@ sub userdir_handler {
 					$r->filename($constants->{basedir} . '/messages.pl');
 
 				} elsif ($op =~ /^(?:friends|fans|freaks|foes|zoo)$/) {
-					if ($constants->{u2}) {
-						$extra .= '/';
+					my $args = "op=$op";
+					$extra .= '/';
 
-						if ($op eq 'friends' && $extra =~ s/^friends\///) {
-							$op =~ s/friends/fof/;
-						} elsif ($op eq 'friends' && $extra =~ s/^foes\///) {
-							$op =~ s/friends/eof/;
-						} elsif ($op eq 'zoo') {
-							$op =~ s/zoo/all/;
-						}
-
-						my $args = "op=userinfo&dp=$op";
-						$r->args($args);
-						$r->uri('/users2.pl');
-						$r->filename($constants->{basedir} . '/users2.pl');
-					} else {
-						my $args = "op=$op";
-						$extra .= '/';
-
-						if ($op eq 'friends' && $extra =~ s/^friends\///) {
-							$args =~ s/friends/fof/;
-						} elsif ($op eq 'friends' && $extra =~ s/^foes\///) {
-							$args =~ s/friends/eof/;
-						} elsif ($op eq 'zoo') {
-							$args =~ s/zoo/all/;
-						}
-
-						$r->args($args);
-						$r->uri('/zoo.pl');
-						$r->filename($constants->{basedir} . '/zoo.pl');
+					if ($op eq 'friends' && $extra =~ s/^friends\///) {
+						$args =~ s/friends/fof/;
+					} elsif ($op eq 'friends' && $extra =~ s/^foes\///) {
+						$args =~ s/friends/eof/;
+					} elsif ($op eq 'zoo') {
+						$args =~ s/zoo/all/;
 					}
+
+					$r->args($args);
+					$r->uri('/zoo.pl');
+					$r->filename($constants->{basedir} . '/zoo.pl');
 
 				} elsif ($op eq 'comments') {
-					if ($constants->{u2}) {
-						$r->args("op=userinfo&dp=comments");
-						$r->uri('/users2.pl');
-						$r->filename($constants->{basedir} . '/users2.pl');
-					} else {
-						$r->args("op=editcomm");
-						$r->uri('/users.pl');
-						$r->filename($constants->{basedir} . '/users.pl');
-					}
+					$r->args("op=editcomm");
+					$r->uri('/users.pl');
+					$r->filename($constants->{basedir} . '/users.pl');
 
 				} elsif ($op eq 'homepage') {
 					$r->args("op=edithome");
@@ -732,42 +703,23 @@ sub userdir_handler {
 					$r->filename($constants->{basedir} . '/journal.pl');
 
 				} elsif ($op eq 'tags') {
-					if ($constants->{u2}) {
-						$r->args("op=userinfo&dp=tags");
-						$r->uri('/users2.pl');
-						$r->filename($constants->{basedir} . '/users2.pl');
-					} else {
-						my $args = 'op=showtags';
-						# XXX "!" is a 'reserved' char in URI, escape it here?
-						$args .= "&tagname=$extra" if $extra;
-						$r->args($args);
-						$r->uri('/users.pl');
-						$r->filename($constants->{basedir} . '/users.pl');
-					}
+					my $args = 'op=showtags';
+					# XXX "!" is a 'reserved' char in URI, escape it here?
+					$args .= "&tagname=$extra" if $extra;
+					$r->args($args);
+					$r->uri('/users.pl');
+					$r->filename($constants->{basedir} . '/users.pl');
 
 				} elsif ($op eq 'bookmarks') {
-					if ($constants->{u2}) {
-						$r->args("op=userinfo&dp=bookmarks");
-						$r->uri('/users2.pl');
-						$r->filename($constants->{basedir} . '/users2.pl');
-					} else {
-						$r->args("op=showbookmarks");
-						$r->uri('/users.pl');
-						$r->filename($constants->{basedir} . '/users.pl');
-					}
+					$r->args("op=showbookmarks");
+					$r->uri('/users.pl');
+					$r->filename($constants->{basedir} . '/users.pl');
 
 				} elsif ($op eq 'firehose') {
-					if ($constants->{u2}) {
-						my $filter = fixparam("user:");
-						$r->args("op=userinfo&dp=firehose");
-						$r->uri('/users2.pl');
-						$r->filename($constants->{basedir} . '/users2.pl');
-					} else {
-						my $filter = fixparam("user:");
-						$r->args("op=userfirehose");
-						$r->uri('users.pl');
-						$r->filename($constants->{basedir} . '/users.pl');
-					}
+					my $filter = fixparam("user:");
+					$r->args("op=userfirehose");
+					$r->uri('users.pl');
+					$r->filename($constants->{basedir} . '/users.pl');
 
 				} elsif ($op eq 'preferences') {
 					$r->args("op=displayprefs");
