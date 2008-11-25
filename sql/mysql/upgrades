@@ -5698,3 +5698,5 @@ drop table firehose_deletedjournal;
 # SLASHDOT LAST UPDATED HERE
 
 
+# For plugins/FireHose
+UPDATE firehose_view SET mode="fulltitle" where viewname="usertag";

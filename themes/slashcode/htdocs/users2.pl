@@ -1417,10 +1417,6 @@ sub showInfo {
 		if ($main_view || $form->{dp} eq 'firehose' || $form->{dp} =~ /^journal/ || $form->{dp} eq 'submissions' || $form->{dp} eq 'bookmarks' || $form->{dp} eq 'usertag') {
 
 			$form->{listonly} = 1;
-			$form->{mode} = "full";
-			$form->{color} = "black";
-			$form->{orderby} = "createtime";
-			$form->{orderdir} = "DESC";
 			$form->{skipmenu} = 1;
 		}
 
