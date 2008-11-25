@@ -46,6 +46,7 @@ __template__
 
         [% PROCESS u2UserBoxes
                 latest_comments=latest_comments
+		reasons=reasons
                 latest_journals=latest_journals
                 latest_submissions=latest_submissions
                 latest_bookmarks=latest_bookmarks
