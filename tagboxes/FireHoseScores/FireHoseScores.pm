@@ -194,6 +194,10 @@ sub run_process {
 		$popularity += $extra_pop;
 	}
 
+	# If color level was set to black, none of the nods matter, it just never
+	# shows up.
+	$popularity = -50 if $color_level = 8;
+
 	# If this is spam, or contains a spam URL, its score goes way down.
 	if ($fhitem->{is_spam} eq 'yes' || $firehose_db->itemHasSpamURL($fhitem)) {
 		my $max = defined($constants->{firehose_spam_score})
@@ -254,14 +258,19 @@ sub getStartingColorLevel {
 			$color_level = $this_color_level if $this_color_level < $color_level;
 		}
 	} elsif ($type eq "comments") {
-		my $comment = $self->getComment($target_id);
-		my $score = constrain_score($comment->{points} + $comment->{tweak});
-		if ($score >= 5) {
-			$color_level = 5;
-		} elsif ($score >= 2) {
-			$color_level = 6
+		if (0) {
+			my $comment = $self->getComment($target_id);
+			my $score = constrain_score($comment->{points} + $comment->{tweak});
+			if ($score >= 5) {
+				$color_level = 5;
+			} elsif ($score >= 2) {
+				$color_level = 6
+			} else {
+				$color_level = 7;
+			}
 		} else {
-			$color_level = 7;
+			# temporary measure
+			$color_level = 8;
 		}
 	}
 	return($color_level, $extra_pop);

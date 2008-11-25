@@ -166,9 +166,12 @@ sub run_process {
 		$top_entry_score = $firehose->getEntryPopularityForColorLevel(1);
 	}
 	$neediness *= $top_entry_score/$base_neediness;
-	# If we are only doing a certain percentage of neediness here,
-	# this would be the place to hash the comment cid with salt and
-	# drop its score to -50 unless it randomly qualified.
+
+	# Only a certain percentage of comments are allowed to be needy.
+	my $percent = $constants->{tagbox_csr_needinesspercent} || 5;
+	my $hex_percent = int(hex(substr(md5_hex($cid), -4)) * 100 / 65536);
+	$neediness = -50 if $hex_percent >= $percent;
+
 	# Minimum neediness is -50.
 	$neediness = -50 if $neediness < -50;
 
@@ -207,14 +210,14 @@ sub run_process {
 		$cid, $new_score, $reasons->{$current_reason_mode}{name}, ($karma_bonus eq 'yes' ? 1 : 0), $new_karma_bonus, $neediness);
 
 	if ($firehose) {
-		# If it's already in the hose, don't try to re-create it --
-		# that may cause unnecessary score recalculations.
 		my $fhid = $firehose->getFireHoseIdFromGlobjid($affected_id);
-		if (!$fhid) {
-			$fhid = $self->addCommentToHoseIfAppropriate($firehose,
-				$affected_id, $cid, $neediness, $new_score);
+		if ($fhid) {
+			$firehose->setFireHose($fhid, { neediness => $neediness });
+		} else {
+			# For now, this tagbox is no longer responsible for adding
+			# needy comments to the hose;  we assume they're already
+			# there, and if not, we ignore.
 		}
-		$firehose->setFireHose($fhid, { neediness => $neediness }) if $fhid;
 	}
 
 	$self->sqlUpdate('comments', {
@@ -226,26 +229,26 @@ sub run_process {
 
 # XXX hex_percent should be a library function, it's used by FHEditorPop too
 
-sub addCommentToHoseIfAppropriate {
-	my($self, $firehose, $globjid, $cid, $neediness, $score) = @_;
-	my $constants = getCurrentStatic();
-
-	my $fhid = 0;
-
-	# If neediness exceeds a threshold, the comment has a chance of appearing.
-	my $min = $constants->{tagbox_csr_minneediness} || 138;
-	return 0 if $neediness < $min;
-
-	# Hash its cid;  if the last 4 hex digits interpreted as a fraction are
-	# within the range determined, add it to the hose.
-	my $percent = $constants->{tagbox_csr_needinesspercent} || 5;
-	my $hex_percent = int(hex(substr(md5_hex($cid), -4)) * 100 / 65536);
-	return 0 if $hex_percent >= $percent;
-
-	$fhid = $firehose->createItemFromComment($cid);
-
-	return $fhid;
-}
+#sub addCommentToHoseIfAppropriate {
+#	my($self, $firehose, $globjid, $cid, $neediness, $score) = @_;
+#	my $constants = getCurrentStatic();
+#
+#	my $fhid = 0;
+#
+#	# If neediness exceeds a threshold, the comment has a chance of appearing.
+#	my $min = $constants->{tagbox_csr_minneediness} || 138;
+#	return 0 if $neediness < $min;
+#
+#	# Hash its cid;  if the last 4 hex digits interpreted as a fraction are
+#	# within the range determined, add it to the hose.
+#	my $percent = $constants->{tagbox_csr_needinesspercent} || 5;
+#	my $hex_percent = int(hex(substr(md5_hex($cid), -4)) * 100 / 65536);
+#	return 0 if $hex_percent >= $percent;
+#
+#	$fhid = $firehose->createItemFromComment($cid);
+#
+#	return $fhid;
+#}
 
 1;
 

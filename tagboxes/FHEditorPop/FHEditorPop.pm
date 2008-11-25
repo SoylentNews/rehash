@@ -135,12 +135,16 @@ sub run_process {
 			$color_level = $this_color_level if $this_color_level < $color_level;
 		}
 	} elsif ($type eq "comments") {
-		my $comment = $self->getComment($target_id);
-		my $score = Slash::Utility::Comments::constrain_score($comment->{points} + $comment->{tweak});
-		   if ($score >= 3) {	$color_level = 4 }
-		elsif ($score >= 2) {	$color_level = 5 }
-		elsif ($score >= 1) {	$color_level = 6 }
-		else {			$color_level = 7 }
+		if (0) {
+			my $comment = $self->getComment($target_id);
+			my $score = Slash::Utility::Comments::constrain_score($comment->{points} + $comment->{tweak});
+			   if ($score >= 3) {	$color_level = 4 }
+			elsif ($score >= 2) {	$color_level = 5 }
+			elsif ($score >= 1) {	$color_level = 6 }
+			else {			$color_level = 7 }
+		} else {
+			$color_level = 8;
+		}
 	}
 	$popularity = $firehose->getEntryPopularityForColorLevel($color_level) + $extra_pop;
 
@@ -193,6 +197,10 @@ sub run_process {
 			$popularity += $maybe_pop_delta * $frac;
 		}
 	}
+
+	# If color level was set to black, none of the nods matter, it just never
+	# shows up.
+	$popularity = -50 if $color_level = 8;
 
 	# If this is a comment, it normally only shows up for an editor if
 	# it's one of a select few.
