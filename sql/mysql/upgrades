@@ -5700,3 +5700,6 @@ drop table firehose_deletedjournal;
 
 # For plugins/FireHose
 UPDATE firehose_view SET mode="fulltitle" where viewname="usertag";
+
+# For plugins/Users2
+ALTER TABLE shill_ids ADD COLUMN extra VARCHAR(40) DEFAULT ''  NOT NULL;

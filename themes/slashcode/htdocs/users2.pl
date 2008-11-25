@@ -1068,8 +1068,13 @@ sub showInfo {
 	# showInfo's header information is delayed until here, because
 	# the target user's info is not available until here.
 	vislenify($requested_user);
+	$requested_user->{shill_info} = $reader->getShillInfo($requested_user->{shill_id});
         my $msg = getMessage('user_header', { useredit => $requested_user, fieldkey => $fieldkey });
-        header($msg, '', { shill_id => $requested_user->{shill_id}, U2 => 1 }) or return;
+        header($msg, '', {
+		shill_id   => $requested_user->{shill_id},
+		shill_info => $requested_user->{shill_info},
+		U2         => 1
+	}) or return;
 	# This is a hardcoded position, bad idea and should be fixed -Brian
 	# Yeah, we should pull this into a template somewhere...
 	print getMessage('note', { note => $hr->{note} }) if defined $hr->{note};

@@ -12842,6 +12842,14 @@ sub _getStorySelfLink {
 	return $story_link_ar->[0];
 }
 
+sub getShillInfo {
+        my($self, $shill_id) = @_;
+        my $shill_id_q = $self->sqlQuote($shill_id);
+
+        return $self->sqlSelectHashref('user, extra', 'shill_ids', "shill_id=$shill_id_q");
+
+}
+
 ########################################################
 sub DESTROY {
 	my($self) = @_;
