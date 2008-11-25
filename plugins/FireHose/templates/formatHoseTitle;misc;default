@@ -124,7 +124,7 @@ ELSE;
         title = pop_str _ title;
 END;
 
-IF options.view == "userjournal";
+IF item.type == "journal";
 	IF options.user_view_uid == user.uid;
 		title = title _ ' [ <a href="' _ gSkin.rootdir _ '/journal.pl?op=edit&amp;id=' _ item.srcid _ '">Edit</a> ';
 		title = title _ ' | <a href="' _ gSkin.rootdir _ '/journal.pl?op=removemeta&amp;id=' _ item.srcid _ '">Delete</a> ] ';
