@@ -126,8 +126,8 @@ END;
 
 IF item.type == "journal";
 	IF options.user_view_uid == user.uid;
-		title = title _ ' [ <a href="' _ gSkin.rootdir _ '/journal.pl?op=edit&amp;id=' _ item.srcid _ '">Edit</a> ';
-		title = title _ ' | <a href="' _ gSkin.rootdir _ '/journal.pl?op=removemeta&amp;id=' _ item.srcid _ '">Delete</a> ] ';
+		title = title _ '<span class="journal_edit"><a href="' _ gSkin.rootdir _ '/journal.pl?op=edit&amp;id=' _ item.srcid _ '">Edit</a></span> ';
+		title = title _ '<span class="journal_delete"><a href="' _ gSkin.rootdir _ '/journal.pl?op=removemeta&amp;id=' _ item.srcid _ '">Delete</a></span>';
 	END;
 END;
 	%]
