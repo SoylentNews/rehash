@@ -2438,7 +2438,7 @@ sub getAndSetOptions {
 	if ($user->{is_admin} && $form->{setusermode}) {
 		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "0" });
 	}
-	
+
 	foreach (qw(nodates nobylines nothumbs nocolors noslashboxes nomarquee)) {
 		if ($form->{setfield}) {
 			if (defined $form->{$_}) {
@@ -2446,7 +2446,7 @@ sub getAndSetOptions {
 			}
 		}
 	}
-	
+
 	my $page = $form->{page} || 0;
 	$options->{page} = $page;
 	if ($page) {
