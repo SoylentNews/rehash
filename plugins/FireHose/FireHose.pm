@@ -2438,16 +2438,15 @@ sub getAndSetOptions {
 	if ($user->{is_admin} && $form->{setusermode}) {
 		$self->setUser($user->{uid}, { firehose_usermode => $form->{firehose_usermode} ? 1 : "0" });
 	}
-
+	
 	foreach (qw(nodates nobylines nothumbs nocolors noslashboxes nomarquee)) {
 		if ($form->{setfield}) {
 			if (defined $form->{$_}) {
 				$options->{$_} = $form->{$_} ? 1 : 0;
 			}
 		}
-		$options->{$_} = defined $form->{$_};
 	}
-
+	
 	my $page = $form->{page} || 0;
 	$options->{page} = $page;
 	if ($page) {
@@ -2474,7 +2473,7 @@ sub getAndSetOptions {
 		$options->{base_filter} =~ s/\{nickname\}/$the_nickname/g;
 	}
 
-	if ($fhfilter =~ /\{tag}/) {
+	if ($fhfilter =~ /\{tag\}/) {
 		my $the_tag = $opts->{tag} || $form->{tagname};
 		$fhfilter =~ s/\{tag\}/$the_tag/g;
 		$options->{fhfilter} =~ s/\{tag\}/$the_tag/g;
@@ -2670,7 +2669,7 @@ sub getAndSetOptions {
 
 	$options->{smalldevices} = 1 if $self->shouldForceSmall();
 	$options->{limit} = $self->getFireHoseLimitSize($options->{mode}, $pagesize, $options->{smalldevices}, $options);
-	
+
 	return $options;
 }
 
