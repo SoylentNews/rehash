@@ -21,7 +21,25 @@ __template__
         <div class="content" id="latest_comments_content">
                 <ul>
                 [% FOREACH cid = latest_comments.keys.sort %]
-                        <li><a href="[% gSkin.rootdir %]/comments.pl?sid=[% latest_comments.$cid.sid %]&cid=[% cid %]">[% latest_comments.$cid.subject %]</a></li>
+			[%
+                        reason_num = '';
+                        reason_text = '';
+                        IF latest_comments.$cid.points > 1;
+                                reason_num = latest_comments.$cid.reason;
+                                reason_text = reasons.$reason_num.name;
+                        END;
+                        %]
+                        <li><a href="[% gSkin.rootdir %]/comments.pl?sid=[% latest_comments.$cid.sid %]&cid=[% cid %]">[% latest_comments.$cid.subject %]</a>
+			[%
+                        IF latest_comments.$cid.points > 1;
+                                '&nbsp;(Score:';latest_comments.$cid.points;
+                                IF reason_text != 'Normal';
+                                        ',&nbsp;';reason_text;
+                                END;
+                                ')';
+                        END;
+                        %]
+			</li>
                 [% END %]
                 </ul>
         </div>

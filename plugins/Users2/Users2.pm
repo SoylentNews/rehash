@@ -34,7 +34,7 @@ sub getLatestComments {
 	my $uid_q = $self->sqlQuote($uid);
         return $self->sqlSelectAllHashref(
                 'cid',
-                "sid, cid, subject, UNIX_TIMESTAMP(date) as date",
+                "sid, cid, subject, points, reason, UNIX_TIMESTAMP(date) as date",
                 'comments',
                 "uid = $uid_q",
                 'order by date desc limit 5');
