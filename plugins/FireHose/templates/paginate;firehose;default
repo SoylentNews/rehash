@@ -22,10 +22,10 @@ __template__
 [% submit_plug = "";
    IF options.view.match('^userjournal');
 	submit_plug = '<span style="margin-left: 1em"><a href="' _ gSkin.rootdir _ '/journal.pl?op=edit" class="vbutton bg_666666 rd_5">Write in Journal</a></span>';
-   ELSIF options.view == "usersubmission";
-	submit_plug = '<span style="margin-left: 1em"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '" class="vbutton bg_666666 rd_5">Submit Story</a></span>';
    ELSIF gSkin.name == "idle";
 	submit_plug = '<span style="margin-left: 1em"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '" class="vbutton bg_666666 rd_5">Submit Idle Story</a></span>';
+   ELSE; #ELSIF options.view == "usersubmission";
+	submit_plug = '<span style="margin-left: 1em"><a href="' _ gSkin.rootdir _ '/submit.pl?primaryskid=' _ gSkin.skid _ '" class="vbutton bg_666666 rd_5">Submit Story</a></span>';
    END;
 
 %]
