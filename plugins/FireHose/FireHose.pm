@@ -3109,7 +3109,7 @@ sub ajaxFirehoseListTabs {
 
 sub splitOpsFromString {
 	my ($self, $str) = @_;
-	my @fh_ops_orig = map { lc($_) } split((/\s+|"/), $str);
+	my @fh_ops_orig = map { lc($_) } split(/(\s+|")/, $str);
 	my @fh_ops;
 
 	my $in_quotes = 0;
