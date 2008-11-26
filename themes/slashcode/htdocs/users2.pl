@@ -384,6 +384,10 @@ sub main {
 	}
 
 	# Figure out what the op really is.
+	if ($gSkin->{skid} == 36 && (! $form->{op} && ! ($form->{uid} || $form->{nick}))) {
+		# Default to ThinkGeek user if we're in the ThinkGeek skin
+		$form->{uid} = 1387321;
+	}
 	$op = 'userinfo' if (! $form->{op} && ($form->{uid} || $form->{nick}));
 	$op ||= $user->{is_anon} ? 'userlogin' : 'userinfo';
 	if ($user->{is_anon} && ( ($ops->{$op}{seclev} > 0) || ($op =~ /^newuserform|mailpasswdform|displayform$/) )) {

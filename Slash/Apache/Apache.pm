@@ -381,7 +381,7 @@ sub IndexHandler {
 		my $basedir = $constants->{basedir};
 
 		# $USER_MATCH defined above
-		if ($dbon && ($is_user || $has_daypass)) {
+		if ($dbon && ($is_user || $has_daypass || $gSkin->{index_handler} =~ /^users/)) {
 			$r->uri("/$gSkin->{index_handler}");
 			$r->filename("$basedir/$gSkin->{index_handler}");
 			return OK;
