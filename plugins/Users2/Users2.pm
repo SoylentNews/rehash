@@ -95,10 +95,10 @@ sub getLatestBookmarks {
 
         # Get the latest n bookmarks. These could be contained in journals and
         # submissions, so we want journal size + submissions size + 5.
-        my $num_bookmarks = scalar(keys %$latest_journals) + scalar(keys %$latest_submissions) + 5;
+        #my $num_bookmarks = scalar(keys %$latest_journals) + scalar(keys %$latest_submissions) + 5;
         my $uid_q = $self->sqlQuote($uid);
         my $bookmarks_reader = getObject('Slash::Bookmark');
-        my $latest_bookmarks = $bookmarks_reader->getRecentBookmarksByUid($uid_q, $num_bookmarks);
+        my $latest_bookmarks = $bookmarks_reader->getRecentBookmarksByUid($uid_q, 5);
 
         # Make bookmarks unique against journals
         my $bookmark_count = 0;
