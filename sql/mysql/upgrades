@@ -5695,8 +5695,6 @@ insert ignore into firehose_deletedjournal select firehose.id from firehose left
 update firehose, firehose_deletedjournal set firehose.public='no' where firehose.id=firehose_deletedjournal.id;
 drop table firehose_deletedjournal;
 
-# SLASHDOT LAST UPDATED HERE
-
 # For plugins/FireHose
 UPDATE firehose_view SET mode="fulltitle" where viewname="usertag";
 
@@ -5706,6 +5704,8 @@ ALTER TABLE shill_ids ADD COLUMN extra VARCHAR(40) DEFAULT '' NOT NULL;
 # 2008-11-25
 UPDATE vars SET value = 'T_2_5_0_232' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHDOT LAST UPDATED HERE
+
 # for plugins/FireHose
 ALTER TABLE firehose ADD INDEX uid (uid);
 
@@ -5713,3 +5713,7 @@ UPDATE menus SET value=REPLACE(value, '/~', '[% constants.real_rootdir %]/~') WH
 
 # For plugins/Users2
 ALTER TABLE shill_ids ADD COLUMN skid SMALLINT DEFAULT '0' NOT NULL;
+
+# 2008-11-26
+UPDATE vars SET value = 'T_2_5_0_233' WHERE name = 'cvs_tag_currentcode';
+
