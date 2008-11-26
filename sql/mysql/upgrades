@@ -5703,3 +5703,7 @@ UPDATE firehose_view SET mode="fulltitle" where viewname="usertag";
 
 # For plugins/Users2
 ALTER TABLE shill_ids ADD COLUMN extra VARCHAR(40) DEFAULT ''  NOT NULL;
+
+# 2008-11-25
+UPDATE vars SET value = 'T_2_5_0_232' WHERE name = 'cvs_tag_currentcode';
+
