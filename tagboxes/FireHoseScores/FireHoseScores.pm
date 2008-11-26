@@ -196,7 +196,7 @@ sub run_process {
 
 	# If color level was set to black, none of the nods matter, it just never
 	# shows up.
-	$popularity = -50 if $color_level = 8;
+	$popularity = -50 if $color_level == 8;
 
 	# If this is spam, or contains a spam URL, its score goes way down.
 	if ($fhitem->{is_spam} eq 'yes' || $firehose_db->itemHasSpamURL($fhitem)) {

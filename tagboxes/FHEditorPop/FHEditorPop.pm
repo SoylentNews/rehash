@@ -200,7 +200,7 @@ sub run_process {
 
 	# If color level was set to black, none of the nods matter, it just never
 	# shows up.
-	$popularity = -50 if $color_level = 8;
+	$popularity = -50 if $color_level == 8;
 
 	# If this is a comment, it normally only shows up for an editor if
 	# it's one of a select few.
