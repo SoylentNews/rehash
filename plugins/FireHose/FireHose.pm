@@ -184,6 +184,7 @@ sub createItemFromComment {
 		editorpop	=> $editorpop,
 		globjid		=> $globjid,
 		discussion	=> $comment->{sid},
+		createtime	=> $comment->{date},
 	};
 	my $fhid = $self->createFireHose($data);
 
