@@ -688,7 +688,7 @@ sub getFireHoseEssentials {
 				$labels = $tags->getPositiveTags;
 				$labels = ['nod'] unless @$labels;
 			} else { # tagged_non_negative || tagged_negative
-				$labels = $tags->getNegativeTags;
+				$labels = $tags->getFirehoseExcludeTags;
 				$labels = ['nix'] unless @$labels;
 				$not = 'NOT' if $options->{tagged_non_negative};
 			}

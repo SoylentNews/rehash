@@ -2234,6 +2234,11 @@ sub getExcludedTags {
 	return $self->getTagnamesByParam('exclude', '1');
 }
 
+sub getFirehoseExcludeTags {
+	my($self) = @_;
+	return $self->getTagnamesByParam('fh_exclude', '1');
+}
+
 sub getNegativeTags {
 	my($self) = @_;
 	return $self->getTagnamesByParam('posneg', '-');
