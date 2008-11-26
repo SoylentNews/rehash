@@ -18,77 +18,105 @@ __template__
 [% uid = uid || user.uid %]
 
 [% IF user.uid == uid && !user.is_anon;
-	title = title || "$user.nickname (This is you!)";
-	url_nick = user.nickname | fixparam;
-	PROCESS titlebar title=title width="100%";
+	thisnickname = user.nickname | strip_literal;
+	title = title || "$thisnickname (This is you!)";
+	url_nick = user.nickname | strip_paramattr;
+	PROCESS titlebar title=title;
 ELSE;
-	url_nick = useredit.nickname | fixparam;
+	thisnickname = useredit.nickname | strip_literal;
+	url_nick = useredit.nickname | strip_paramattr;
 	zi = PROCESS zoo_icons person=uid implied="";
-	title = title
-		|| "<A HREF=\"/~$url_nick/\"><FONT COLOR=\"#FFFFFF\">"
-			_ useredit.nickname _ " ($uid)</FONT></A> "
-			_ zi;
-	PROCESS titlebar title=title width="100%";
+	title = title ||
+		"<a href=\"$constants.real_rootdir/~$url_nick/\">$thisnickname ($uid)</a> $zi";
+	PROCESS titlebar title=title;
 END %]
 
 [% tabs = [ ];
 IF user.uid == uid;
 	tabs = [
-		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
+		{ link = "$constants.real_rootdir/~$url_nick/",	label = "Info",		sel_label = "info" },
 	];
 	IF constants.plugin.Journal; tabs.push(
-		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
+		{ link = "$constants.real_rootdir/~$url_nick/journal/",label = "Journal",	sel_label = "journal" },
+	); END;
+	IF constants.plugin.FireHose; tabs.push(
+		{ link = "$constants.real_rootdir/~$url_nick/firehose/",label = "Firehose",	sel_label = "firehose" },
 	); END;
 	IF constants.plugin.Messages; tabs.push(
-		{ link = "/my/inbox",		label = "Messages",	sel_label = "messages" },
+		{ link = "$constants.real_rootdir/my/inbox/",		label = "Messages",	sel_label = "messages" },
 	); END;
 	IF constants.plugin.Zoo; tabs.push(
-		{ link = "/my/friends",		label = "Friends",	sel_label = "friends" },
+		{ link = "$constants.real_rootdir/my/friends/",	label = "Friends",	sel_label = "friends" },
 	); tabs.push(
-		{ link = "/my/fans",		label = "Fans",		sel_label = "fans" },
+		{ link = "$constants.real_rootdir/my/fans/",		label = "Fans",		sel_label = "fans" },
 	); tabs.push(
-		{ link = "/my/foes",		label = "Foes",		sel_label = "foes" },
+		{ link = "$constants.real_rootdir/my/foes/",		label = "Foes",		sel_label = "foes" },
 	); tabs.push(
-		{ link = "/my/freaks",		label = "Freaks",	sel_label = "freaks" },
+		{ link = "$constants.real_rootdir/my/freaks/",		label = "Freaks",	sel_label = "freaks" },
+	); END;
+	IF constants.plugin.Tags; tabs.push(
+		{ link = "$constants.real_rootdir/my/tags/",		label = "Tags",		sel_label = "tags" },
+	); END;
+	IF constants.plugin.Bookmark; tabs.push(
+		{ link = "$constants.real_rootdir/my/bookmarks/",	label = "Bookmarks",	sel_label = "bookmarks" },
 	); END;
 ELSIF user.is_anon;
 	tabs = [
-		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
+		{ link = "$constants.real_rootdir/~$url_nick/",	label = "Info",		sel_label = "info" },
 	];
 	IF constants.plugin.Journal; tabs.push(
-		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
+		{ link = "$constants.real_rootdir/~$url_nick/journal/",label = "Journal",	sel_label = "journal" },
+	); END;
+	IF constants.plugin.FireHose; tabs.push(
+		{ link = "$constants.real_rootdir/~$url_nick/firehose/",label = "Firehose",	sel_label = "firehose" },
 	); END;
 	IF constants.plugin.Zoo; tabs.push(
-		{ link = "/~$url_nick/friends",	label = "Friends",	sel_label = "friends" },
+		{ link = "$constants.real_rootdir/~$url_nick/friends/",label = "Friends",	sel_label = "friends" },
 	); tabs.push(
-		{ link = "/~$url_nick/fans",	label = "Fans",		sel_label = "fans" },
+		{ link = "$constants.real_rootdir/~$url_nick/fans/",	label = "Fans",		sel_label = "fans" },
 	); tabs.push(
-		{ link = "/~$url_nick/foes",	label = "Foes",		sel_label = "foes" },
+		{ link = "$constants.real_rootdir/~$url_nick/foes/",	label = "Foes",		sel_label = "foes" },
 	); tabs.push(
-		{ link = "/~$url_nick/freaks",	label = "Freaks",	sel_label = "freaks" },
+		{ link = "$constants.real_rootdir/~$url_nick/freaks/",	label = "Freaks",	sel_label = "freaks" },
+	); END;
+	IF constants.plugin.Tags; tabs.push(
+		{ link = "$constants.real_rootdir/~$url_nick/tags/",	label = "Tags",		sel_label = "tags" },
+	); END;
+	IF constants.plugin.Bookmark; tabs.push(
+		{ link = "$constants.real_rootdir/~$url_nick/bookmarks/",	label = "Bookmarks",	sel_label = "bookmarks" },
 	); END;
 ELSE;
 	tabs = [
-		{ link = "/~$url_nick",		label = "Info",		sel_label = "info" },
+		{ link = "$constants.real_rootdir/~$url_nick/",	label = "Info",		sel_label = "info" },
 	];
 	IF constants.plugin.Zoo; tabs.push(
-		{ link = "/zoo.pl?op=check&uid=$uid", label = "Relation", sel_label = "relation" },
+		{ link = "/zoo.pl?op=check&amp;uid=$uid", label = "Relation", sel_label = "relation" },
 	); END;
 	IF constants.plugin.Journal; tabs.push(
-		{ link = "/~$url_nick/journal",	label = "Journal",	sel_label = "journal" },
+		{ link = "$constants.real_rootdir/~$url_nick/journal/",label = "Journal",	sel_label = "journal" },
+	); END;
+	IF constants.plugin.FireHose; tabs.push(
+		{ link = "$constants.real_rootdir/~$url_nick/firehose/",label = "Firehose",	sel_label = "firehose" },
 	); END;
 	IF constants.plugin.Zoo; tabs.push(
-		{ link = "/~$url_nick/friends",	label = "Friends",	sel_label = "friends" },
+		{ link = "$constants.real_rootdir/~$url_nick/friends/",label = "Friends",	sel_label = "friends" },
 	); tabs.push(
-		{ link = "/~$url_nick/fans",	label = "Fans",		sel_label = "fans" },
+		{ link = "$constants.real_rootdir/~$url_nick/fans/",	label = "Fans",		sel_label = "fans" },
 	); tabs.push(
-		{ link = "/~$url_nick/foes",	label = "Foes",		sel_label = "foes" },
+		{ link = "$constants.real_rootdir/~$url_nick/foes/",	label = "Foes",		sel_label = "foes" },
 	); tabs.push(
-		{ link = "/~$url_nick/freaks",	label = "Freaks",	sel_label = "freaks" },
+		{ link = "$constants.real_rootdir/~$url_nick/freaks/",	label = "Freaks",	sel_label = "freaks" },
 	); END;
-END;
-
-PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected %]
+	IF constants.plugin.Tags; tabs.push(
+		{ link = "$constants.real_rootdir/~$url_nick/tags/",	label = "Tags",		sel_label = "tags" },
+	); END;
+	IF constants.plugin.Bookmark; tabs.push(
+		{ link = "$constants.real_rootdir/~$url_nick/bookmarks/", label = "Bookmarks",	sel_label = "bookmarks" },
+	); END;
+END %]
+<div id="usermenu">
+[% PROCESS tabbedmenu tabs=tabs color='white' justify='left' tab_selected=tab_selected %]
+</div>
 
 __seclev__
 10000

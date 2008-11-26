@@ -12405,7 +12405,7 @@ sub _addGlobjEssentials_journals {
 		my $fixnick = $journaldata_hr->{$id}{nickname};
 if (!defined $fixnick) { print STDERR scalar(gmtime) . " _addGlobjEssentials_journals no nick for journal $id\n"; }
 		$fixnick = fixparam($fixnick || '');
-		$data_hr->{$globjid}{url} = "$constants->{rootdir}/~$fixnick/journal/$id";
+		$data_hr->{$globjid}{url} = "$constants->{real_rootdir}/~$fixnick/journal/$id";
 		$data_hr->{$globjid}{title} = $journaldata_hr->{$id}{description};
 		$data_hr->{$globjid}{created_at} = $journaldata_hr->{$id}{date};
 	}

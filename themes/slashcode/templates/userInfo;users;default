@@ -15,11 +15,12 @@ Display user's info
 * admin_flag = boolean for whether to display admin stuff
 	(no real need for this, could just use user.is_admin)
 * fieldkey = the field key used to decide what we're looking at
-* reasons = hashref from $slashdb->getReasons()
+* reasons = hashref from $moddb->getReasons()
 * lastjournal = last journal posted
-* modval = modval for current uid
-* trollpoint = trollpoint for current uid
-* hr_hours_back = number of hours back to show a <HR> for
+* hr_hours_back = number of hours back to show a <hr> for
+* cids_to_mods = hashref keyed by cid containing arrays of moderations done to that cid
+* comment_time = number of days back we are limiting the comments shown to.  If 0 or undefined we're showing comments sequentially w/o time limits
+
 __title__
 
 __page__
@@ -29,147 +30,109 @@ en_US
 __name__
 userInfo
 __template__
-[% USE Slash %]
-[% PROCESS user_titlebar tab_selected='info' %]
-
+[% orig_title = title %]
+<div id="slashboxes">
+[% PROCESS userboxes %]
+</div>
+[% title = orig_title %]
+<div id="users-blocks">
 [% IF nickmatch_flag %]
 
-<P>This is <B>your</B> User Info page.  There are thousands more, but
-this one is yours.  You most likely are not so interested in yourself,
-and probably would be more interested in the Preferences links you see
-up top there, where you can customize [% constants.sitename %],
-change your password, or just click pretty widgets to kill time.
-
-[% IF ! useredit.registered %]
-<P>This account is currently expired. Please <A HREF="[% constants.rootdir %]/users.pl?op=validateuser">re-register</A> at your earliest opportunity.<BR><P>
-[% END %]
-
-<P><HR></P>
+		[% IF ! useredit.registered %]
+			<div id="message">
+				<div class="content">
+					<p>This account is currently expired. Please <a href="[% gSkin.rootdir %]/users.pl?op=validateuser">re-register</a> at your earliest opportunity.</p>
+				</div>
+			</div>
+		[% END %]
 
 [% END %]
-
-[% IF admin_flag %]
-[% admin_block %]
-[% END %]
-
-[% IF lastjournal %]
-<P>Last journal entry:
-<B><A HREF="[% constants.rootdir %]/~[% useredit.nick_plain | fixparam %]/journal/">[%
-lastjournal.description | strip_notags %]</A></B>,
-[% Slash.timeCalc(useredit.journal_last_entry_date) %]
-([% lastjournal.commentcount || 0 %] comment[% IF lastjournal.commentcount != 1 %]s[% END %])
-<P>[% lastjournal.article_shrunk %]
-[% ELSE %]
-<P><I>(No journal entries.)</I>
-[% END %]
-
-<BR>[% Slash.createMenu("journal", { style => "oldstyle" }) %]
-
-</TD>
-
-[% PROCESS maintable_td %]&nbsp;</TD>
-[% PROCESS maintable_td mt_width=(constants.fancyboxwidth + 10) mt_height="1" mt_valign="TOP" mt_align="CENTER" -%]
-[% PROCESS userboxes %]
-</TD>
-[% PROCESS maintable_tr_end %]
-
-[% PROCESS maintable_tr %]
-[% PROCESS maintable_td mt_valign="TOP" mt_colspan="4" %]
-
-[% IF commentcount > 0 %]
-	[% commenttitle =
-		  ((min_comment == 0) ? "" : "$commentstruct.size of ")
-		_ "$useredit.nickname's "
-		_ ((commentstruct.size == commentcount || min_comment > 0)
-			? ""
-			: "Latest $commentstruct.size of $commentcount ")
-		_ "Comment"
-		_ (commentcount == 1 ? "" : "s") %]
-	[% PROCESS titlebar width="100%" title = commenttitle %]
-	<P><TABLE BORDER="0" WIDTH="100%">
-
-	[% n = min_comment %]
-	[% FOREACH comment = commentstruct;
-
-		n = n + 1;
-		replies = comment.replies ? 'Replies:' _ comment.replies : '';
-		score = 'Score:' _ comment.pts;
-		reasonnum = comment.reason;
-		reasontext = reasonnum ? ', ' _ reasons.$reasonnum.name : '';
-		IF comment.type == 'poll';
-			label = 'Poll: ';
-		ELSIF comment.type == 'journal';
-			label = 'Journal Discussion: ';
-		ELSE;
-			label = '';
-		END;
-		label = label _ comment.disc_title;
-
-		'<TR>';
-		'<TD VALIGN="TOP">';
-			IF min_comment > 0; '<B>'; n; '</B> '; END;
-			'<A HREF="';
-				constants.rootdir;
-				'/comments.pl?sid='; comment.sid;
-				'&amp;cid='; comment.cid;
-			'">';
-			comment.subj;
-			'</A>&nbsp;';
-		'</TD>';
-		'<TD VALIGN="TOP"><NOBR>&nbsp;'; Slash.timeCalc(comment.cdate); '</NOBR></TD>';
-		'<TD VALIGN="TOP"><NOBR>&nbsp;'; replies; '</NOBR></TD>';
-		'<TD VALIGN="TOP"><NOBR>&nbsp;'; score; reasontext; '</NOBR></TD>';
-		'</TR>';
-		'<TR><TD VALIGN="TOP" COLSPAN="4"><FONT SIZE="2">';
-			'&nbsp;&nbsp;&nbsp;attached to <A HREF="';
-				comment.url;
-			'">'; label; '</A>';
-		'</FONT></TD></TR>';
-
-	END %]
-	</TABLE>
-	[% IF commentcount > n
-		&& (user.seclev > constants.comments_more_seclev
-			|| (constants.comments_more_seclev == 2 && user.is_subscriber)) %]
-		<P><A HREF="[% constants.rootdir %]/users.pl?op=userinfo&amp;nick=[% useredit.nick_plain | fixparam %]&amp;min_comment=[% n %]"
-		>More Comments...</A>
+[% PROCESS user_titlebar tab_selected='info' %]
+	<div class="generalbody">
+	[% IF nickmatch_flag %]
+		<p>
+			This is <b>your</b> User Info page.  There are thousands more, but this one is yours.  You most likely are not so interested in yourself, and probably would be more interested in the Preferences links you see up top there, where you can customize [% constants.sitename %], change your password, or just click pretty widgets to kill time.
+		</p>
 	[% END %]
-[% ELSE %]
-	<B>[% useredit.nickname | strip_literal %] has yet to post any comments.</B>
-[% END %]
-<P>
+	</div>
+	[% IF admin_flag %]
+	[% PROCESS titlebar title="Admin options" %]
+		[% admin_block %]
+	[% END %]
+	<div class="generalbody">
+	[% IF lastjournal %]
+	[% PROCESS titlebar title="Last Journal Entry" %]
+			[% Slash.createMenu("journal", style => "tabbed") %]
+			<b>
+				<a href="[% constants.real_rootdir %]/~[% useredit.nick_plain | strip_paramattr %]/journal/">
+					[% lastjournal.description | strip_notags %]
+				</a>
+			</b>,
+			[% Slash.timeCalc(useredit.journal_last_entry_date) %]
+			([% lastjournal.commentcount || 0 %] comment[% IF lastjournal.commentcount != 1 %]s[% END %])
+			[% IF lastjournal.article_shrunk %]
+				<p>
+					[% lastjournal.article_shrunk; END %]
+				</p>
+			[% ELSE %]
+				<p>
+					<i>
+						(No journal entries.)
+					</i>
+				</p>
+			[% END %]
 
-[% IF admin_flag %]
-        [% mod_options.hr_hours_back = hr_hours_back %]
-	<P><TABLE BORDER=0 ALIGN="CENTER">
-	<TR><TD ALIGN="CENTER">Modval for uid: [% modval %]   Trollpoint for uid: [% trollpoint %]</TD></TR>
-	<TR><TD ALIGN="CENTER">Moderations performed by [% useredit.nickname %]:</TD></TR>
-	<TR><TD ALIGN="CENTER">[% Slash.moderatorCommentLog('uid', useredit.uid, mod_options) %]</TD></TR>
-	<TR><TD ALIGN="CENTER">&nbsp;<BR>Moderations performed on [% useredit.nickname %]'s comments:</TD></TR>
-	<TR><TD ALIGN="CENTER">[% Slash.moderatorCommentLog('cuid', useredit.uid, mod_options) %]</TD></TR>
-	</TABLE>
-[% END %]
 
-[% IF stories %]
-<P>
-[% IF storycount > constants.user_submitter_display_default;
-	storytitle = useredit.nickname _ "'s Latest " _ form.min _ ' Accepted Stories';
-ELSE;
-	storytitle = useredit.nickname _ "'s " _ storycount _ ' Accepted Stor';
-	IF storycount > 1;
-		storytitle = storytitle _ 'ies';
-	ELSE;
-		storytitle = storytitle _ 'y';
-	END;
-END; %]
-[% PROCESS titlebar width = "100%" title = storytitle %]
-<P>
-[% n = 0 %]
-[% FOREACH story = stories %]
-        [% n = n + 1 %]
-                <A HREF="[% constants.rootdir %]/article.pl?sid=[% story.sid %]">[% story.title %]</A> on [% Slash.timeCalc(story.time) %]<BR>
-[% END %]
-[% END %]
+	</div>
+</div>
+<div id="users-lists">
+			[% PROCESS listComments admin_flag=admin_flag commentstruct=commentstruct commentcount=commentcount min_comment=min_comment reasons=reasons cids_to_mods=cids_to_mods type="user" useredit=useredit comment_time=comment_time %]
+        		[% thisnickname = useredit.nickname | strip_literal %]
+			[% IF admin_flag;
+       				mod_options.title = "Moderations performed by $thisnickname";
+				IF constants.m2;
+					mod_options.show_m2s = form.show_m2s.defined ? form.show_m2s : user.m2_with_mod;
+					mod_options.need_m2_form = 1;
+					mod_options.need_m2_button = 1;
+					mod_options.meta_mod_only = 1;
+				END;
+
+				m1_classname = "Slash::" _ constants.m1_pluginname;
+				moddb = Slash.getObject(m1_classname);
+				IF moddb; moddb.dispModCommentLog('uid', useredit.uid, mod_options); END;
+
+				IF !constants.m1_admin_show_mods_with_comments;
+        				mod_options.title = "Moderations performed on $thisnickname's comments";
+					mod_options.hr_hours_back = hr_hours_back;
+
+					IF moddb; moddb.dispModCommentLog('cuid', useredit.uid, mod_options); END;
+				END;
+
+				IF constants.m2;
+				m2_title = "$thisnickname's Recent M2s";
+				m2_listing = form.m2_listing.defined ? form.m2_listing : user.show_m2_listing;
+				PROCESS listMetamods
+					title = m2_title 
+					m2_listing = m2_listing 
+					metamods = metamods 
+					the_user = useredit;
+				END;
+			END;
+
+			IF submissions.size > 0;
+				IF admin_flag or useredit.uid == user.uid;
+					title = "$thisnickname's Recent Submissions";
+				ELSE;
+					title = "$thisnickname's Recently Accepted Submissions";
+				END;
+				PROCESS listSubmissions title=title admin_flag=admin_flag submissions=submissions;
+			END;
+
+			IF user.is_admin && tagshist && tagshist.size > 0;
+				title = "$thisnickname's Recent Tags";
+				PROCESS usertaghistory tagshist = tagshist title = title;
+			END %]
+</div>
 
 __seclev__
 500

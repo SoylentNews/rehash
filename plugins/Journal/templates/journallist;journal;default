@@ -11,39 +11,53 @@ en_US
 __name__
 journallist
 __template__
-[% USE Slash %]
+[% showform = !user.is_anon && (uid == user.uid);
+   IF showform;
+       reskey = Slash.getObject('Slash::ResKey');
+       rkey = reskey.key('journal');
+       IF !rkey.create;  # didn't work, bail
+           showform = 0;
+       END;
+   END;
+%]
 
-[% showopts = !user.is_anon && (uid == user.uid) %]
-[%# No need to provide general options here, that's what the
-    Preferences tab is for. We do show the option to edit/delete
-    individual entries though. - Jamie %]
-[%# PROCESS journaloptions IF showopts %]
-
-[%# And having a second titlebar looks wrong to me... - Jamie %]
+[%# Having a second titlebar looks wrong to me... - Jamie %]
+[%# also this nickname must be run through strip_literal if used -- pudge %]
 [%# PROCESS titlebar title => "$nickname's Journal Entries", width => "100%" %]
-<P>
 
-[% IF showopts %]<FORM METHOD="POST" ACTION="[% constants.rootdir %]/journal.pl">
-<INPUT TYPE="hidden" NAME="op" VALUE="remove">[% END %]
-<TABLE WIDTH="90%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
-  <TR>
-    <TH ALIGN="LEFT">Journal Entry</TH>
-    <TH ALIGN="LEFT">Date</TH>
-  </TR>
-[% FOREACH article = articles %]
-  <TR>
-    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% nickname | fixparam %]/journal/[% article.0 %]"><B>[% article.2 %]</B></A></TD>
-    <TD VALIGN="TOP"><EM>[% Slash.timeCalc(article.1) %]</EM></TD>
-[%- IF showopts %]
-    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/journal.pl?op=edit&amp;id=[% article.0 %]">[edit]</A></TD>
-    <TD VALIGN="TOP" ALIGN="CENTER"><INPUT TYPE="checkbox" NAME="del_[% article.0 %]" VALUE="1"></TD>
-[%- END %]
-  </TR>
+[% IF showform %]
+		<form method="post" action="[% gSkin.rootdir %]/journal.pl">
+			<fieldset>
+				<legend>List of Journal Entries</legend>
+				<input type="hidden" name="op" value="remove">
+				[% PROCESS reskey_tag %]
 [% END %]
-[%- IF showopts %]<TR><TD COLSPAN="3">&nbsp;</TD><TD ALIGN="CENTER"><INPUT TYPE="submit" VALUE="Delete Articles"></TD></TR>[% END -%]
-</TABLE>
-[% IF showopts %]</FORM>[% END %]
-
+<table width="90%" border="0" cellpadding="2" cellspacing="0">
+	<tr>
+		<th align="left">Journal Entry</th>
+		<th align="left">Date</th>
+	</tr>
+[% FOREACH article = articles %]
+	<tr>
+		<td valign="top"><a href="[% constants.real_rootdir %]/~[% nickname | strip_paramattr %]/journal/[% article.0 %]"><b>[% article.2 %]</b></a></td>
+		<td valign="top"><em>[% Slash.timeCalc(article.1) %]</em></td>
+	[%- IF showform %]
+		<td valign="top"><a href="[% gSkin.rootdir %]/journal.pl?op=edit&amp;id=[% article.0 %]">[edit]</a></td>
+		<td valign="top" align="center"><input type="checkbox" name="del_[% article.0 %]" value="1"></td>
+	[%- END %]
+	</tr>
+[% END %]
+[%- IF showform %]
+	<tr>
+		<td colspan="3">&nbsp;</td>
+		<td align="center"><input type="submit" value="Delete Articles"></td>
+	</tr>
+[% END -%]
+</table>
+	[% IF showform %]
+			</fieldset>
+		</form>
+	[% END %]
 __seclev__
 100
 __version__

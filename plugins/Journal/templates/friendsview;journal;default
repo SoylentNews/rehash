@@ -11,55 +11,34 @@ en_US
 __name__
 friendsview
 __template__
-[% USE Slash %]
-<BR>
-<TABLE WIDTH="95%" BORDER="0" CELLPADDING="0" CELLSPACING="0">
-[% FOREACH diatribe = articles %]
-	[% topic = diatribe.topic %]
-	[% image = Slash.db.getTopicImageBySection(topic, constants.section) %]
-	<TR><TD>
-		[% PROCESS titlebar title => diatribe.description, width => "90%" %]
-		<TABLE WIDTH="90%" BORDER="0" CELLPADDING="0" CELLSPACING="0"> <TR>
-			<TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP">
-				<B>Posted by <A HREF="[% constants.rootdir %]/~[% diatribe.nickname | fixparam %]/journal/">[% diatribe.nickname %]</A> [% user.aton %]
-				<I>[% Slash.timeCalc(diatribe.date) %]</I> (<A HREF="[% constants.rootdir %]/~[% diatribe.nickname | fixparam %]/journal/[% diatribe.id %]">#[% diatribe.id %]</A>)
-			</TD>
-			<TD BGCOLOR="[% user.bg.2 %]" VALIGN="TOP" ALIGN="RIGHT">
-				&nbsp;
-				[% IF diatribe.discussion %]
-					<A HREF="[% constants.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</A>
-				[% END %]
-			</TD>
-		</TR>
-		<TR>
-			<TD COLSPAN="2">
-			[%# at some point, this needs to be linked to the topic lookup by discussion %]
-			<IMG SRC="[% constants.imagedir %]/topics/[% image.image %]" ALT="[% topic.alttext %]" WIDTH="[% image.width %]" HEIGHT="[% image.height %]" ALIGN="RIGHT">
-			[% diatribe.article %]
-			</TD>
-		</TR>
-		</TABLE>
+<div id="journalgeneric">
+[% FOREACH diatribe = articles; topic = diatribe.topic %]
+	<div class="article">
+		<div class="title">
+			<h3>[% diatribe.description %]</h3>
+		</div>
+		<div class="details">
+			Posted by <a href="[% constants.real_rootdir %]/~[% diatribe.nickname | strip_paramattr %]/journal/">[% diatribe.nickname | strip_literal %]</a> [% user.aton %]
+			<i>[% Slash.timeCalc(diatribe.date) %]</i> (<a href="[% constants.real_rootdir %]/~[% diatribe.nickname | strip_paramattr %]/journal/[% diatribe.id %]">#[% diatribe.id %]</a>)
+			[% IF diatribe.discussion %]
+				<br>
+				<a href="[% gSkin.rootdir %]/comments.pl?sid=[% diatribe.discussion %]">[% diatribe.commentcount %] Comment[% diatribe.commentcount != 1 ? "s" : "" %]</a>
+			[% END %]
+		</div>
 
-	<BR><BR>
+		<div class="body">
+			<div class="topic">
+				<a href="[% gSkin.rootdir %]/search.pl?tid=[% topic.tid %]"><img src="[% constants.imagedir %]/topics/[% topic.image %]" width="[% topic.width %]" height="[% topic.height %]" alt="[% topic.textname %]"></a>
+			</div>
+			<div class="intro">[% diatribe.article %]</div>
+		</div>
+	</div>
 [% END %]
+</div>
 
-	[% back = back || 0 %]
-	[% IF (back > -1) || forward %]
-		<TR VALIGN="TOP">
-			<TD ALIGN="RIGHT" COLSPAN="2"><FONT SIZE="1">
-				[% IF forward %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=friendview&amp;uid=[% uid %]&amp;start=[% forward %]">&lt; Previous  [% constants.journal_default_display %] entries</A>
-				[% END %]
-				[% IF (back > -1) && forward %]
-					|
-				[% END %]
-				[% IF (back > -1) %]
-					<A HREF="[% constants.rootdir %]/journal.pl?op=friendview&amp;uid=[% uid %]&amp;start=[% back %]">Next [% constants.journal_default_display %] entries &gt;</A>
-				[% END %]
-			</FONT></TD>
-		</TR>
-	[% END %]
-</TABLE>
+<div class="journalpage">
+	[% PROCESS pagination %]
+</div>
 
 __seclev__
 500

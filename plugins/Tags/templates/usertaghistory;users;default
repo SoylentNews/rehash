@@ -27,7 +27,7 @@ __template__
 						<a href="[% tag.url.url %]" rel="nofollow">[% tag.url.bookmark.title || tag.url.validtitle || tag.url.initialtitle | strip_literal %]</a>
 					[% ELSIF tag.globj_type == "journals" %]
 						[% nick = Slash.db.getUser(tag.journal.uid, 'nickname') %]
-						<a href="[% gSkin.rootdir %]/~[% nick | fixparam %]/journal/[% tag.journal.id %]/">[% tag.journal.description | strip_literal %]</a>
+						<a href="[% constants.real_rootdir %]/~[% nick | fixparam %]/journal/[% tag.journal.id %]/">[% tag.journal.description | strip_literal %]</a>
 					[% ELSIF tag.globj_type == "submissions" %]
 						<a href="[% gSkin.rootdir %]/submit.pl?op=viewsub&amp;subid=[% tag.submission.subid %]">[% tag.submission.subj | strip_literal %]</a>
 					[% END %]

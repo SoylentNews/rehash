@@ -19,86 +19,98 @@ __template__
 [% linkrels = [] %]
 
 [% tmp = BLOCK -%]
-<LINK REL="top"       TITLE="[% constants.slogan | strip_attribute %]" HREF="[% constants.real_rootdir %]/" >
+<link rel="top"       title="[% constants.slogan | strip_attribute %]" href="[% constants.real_rootdir %]/" >
 [%- END;
    linkrels.push(tmp) %]
-
 [% tmp = BLOCK -%]
-<LINK REL="search"    TITLE="Search [% constants.sitename | strip_attribute %]" HREF="[% constants.rootdir %]/search.pl">
+<link rel="search"    title="Search [% constants.sitename | strip_attribute %]" href="[% gSkin.rootdir %]/search.pl">
 [%- END;
    linkrels.push(tmp) %]
 
-
-
-[% tmp = BLOCK -%]
-<LINK REL="alternate" TITLE="[% constants.sitename | strip_attribute %] RSS" HREF="[% constants.real_rootdir %]/[% Slash.sitename2filename(constants.real_section) %].rss" TYPE="application/rss+xml">
-[%- END;
-   linkrels.push(tmp) %]
-
-[% SECT = Slash.db.getSection(user.currentSection);
-   IF constants.real_section != SECT.section;
-	tmp = BLOCK -%]
-<LINK REL="alternate" TITLE="[% constants.sitename | strip_attribute %] ([% SECT.title | strip_attribute %]) RSS" HREF="[% constants.rootdir %]/[% Slash.sitename2filename(SECT.section) %].rss" TYPE="application/rss+xml">
-	[%- END;
-   linkrels.push(tmp);
-END %]
-
-
-
+[% # XXXSKIN fix! %]
 [% IF link.section;
 	tmp = BLOCK;
-	myurl = link.section.rootdir || "${constants.rootdir}/${link.section.section}" -%]
-<LINK REL="parent"    TITLE="[% link.section.title | strip_attribute %]" HREF="[% myurl %]/">
+	myurl = link.section.rootdir || "${gSkin.rootdir}/${link.section.section}" -%]
+<link rel="parent"    title="[% link.section.title | strip_attribute %]" href="[% myurl %]/">
 	[%- END;
    linkrels.push(tmp);
 END %]
 
 
 
-[% IF env.script_name.search('article\.pl');
+[% IF env.script_name.search('index\.pl');
 	IF link.prev; tmp = BLOCK -%]
-<LINK REL="prev"      TITLE="[% link.prev.title | strip_attribute %]" HREF="[% constants.rootdir %]/article.pl?sid=[% link.prev.sid %]">
+<link rel="prev"      title="[% link.prev.title | strip_attribute %]" href="[% link.prev.url %]">
 	[%- END; linkrels.push(tmp); END;
 	    IF link.next; tmp = BLOCK -%]
-<LINK REL="next"      TITLE="[% link.next.title | strip_attribute %]" HREF="[% constants.rootdir %]/article.pl?sid=[% link.next.sid %]">
+<link rel="next"      title="[% link.next.title | strip_attribute %]" href="[% link.next.url %]">
+	[%- END; linkrels.push(tmp); END;
+
+
+
+ELSIF env.script_name.search('article\.pl');
+	IF link.prev; tmp = BLOCK -%]
+<link rel="prev"      title="[% link.prev.title | strip_attribute %]" href="[% gSkin.rootdir %]/article.pl?sid=[% link.prev.sid %]">
+	[%- END; linkrels.push(tmp); END;
+	    IF link.next; tmp = BLOCK -%]
+<link rel="next"      title="[% link.next.title | strip_attribute %]" href="[% gSkin.rootdir %]/article.pl?sid=[% link.next.sid %]">
 	[%- END; linkrels.push(tmp); END;
 	    # author is uid
 	    IF link.author; tmp = BLOCK -%]
-<LINK REL="author"    HREF="[% constants.rootdir %]/search.pl?op=stories&amp;author=[% link.author %]">
+<link rel="author"    href="[% gSkin.rootdir %]/search.pl?op=stories&amp;author=[% link.author %]">
 	[%- END; linkrels.push(tmp); END;
 	    IF constants.plugin.Print; tmp = BLOCK -%]
-<LINK REL="alternate" TITLE="Print Article" HREF="[% constants.rootdir %]/print.pl?sid=[% story.sid %]">
+<link rel="alternate" title="Print Article" href="[% gSkin.rootdir %]/print.pl?sid=[% story.sid %]">
 	[%- END; linkrels.push(tmp); END;
 
 
 
 ELSIF env.script_name.search('journal\.pl');
 	IF link.uid && link.nickname; tmp = BLOCK -%]
-<LINK REL="author"    TITLE="[% link.nickname | strip_attribute %]" HREF="[% constants.rootdir %]/~[% link.nickname | fixparam %]/">
+<link rel="author"    title="[% link.nickname | strip_attribute %]" href="[% constants.real_rootdir %]/~[% link.nickname | strip_paramattr %]/">
 	[%- END; linkrels.push(tmp); tmp = BLOCK -%]
-<LINK REL="alternate" TITLE="Journal of [% link.nickname | strip_attribute %] RSS" HREF="[% constants.real_rootdir %]/journal.pl?op=display&amp;uid=[% link.uid %]&amp;content_type=rss" TYPE="application/rss+xml">
+<link rel="alternate" title="[% link.nickname | strip_attribute %]'s Journal RSS" href="[% PROCESS rsslink_journal rsslink_style = 'journal' %]" type="application/rss+xml">
+	[%- END; linkrels.push(tmp); tmp = BLOCK -%]
+<link rel="alternate" title="[% link.nickname | strip_attribute %]'s Friends' Journals RSS" href="[% PROCESS rsslink_journal rsslink_style = 'journalfriends' %]" type="application/rss+xml">
 	[%- END; linkrels.push(tmp); END;
 
 	IF constants.journal_top;
 		IF constants.journal_top_recent; tmp = BLOCK -%]
-<LINK REL="alternate" TITLE="Most Recent Journals RSS" HREF="[% constants.real_rootdir %]/journal.pl?op=top&amp;content_type=rss" TYPE="application/rss+xml">
+<link rel="alternate" title="Most Recent Journals RSS" href="[% constants.real_rootdir %]/journal.pl?op=top&amp;content_type=rss" type="application/rss+xml">
 		[%- END; linkrels.push(tmp); END;
 		    IF constants.journal_top_posters; tmp = BLOCK -%]
-<LINK REL="alternate" TITLE="Most Active Journals RSS" HREF="[% constants.real_rootdir %]/journal.pl?op=top&amp;type=count&amp;content_type=rss" TYPE="application/rss+xml">
+<link rel="alternate" title="Most Active Journals RSS" href="[% constants.real_rootdir %]/journal.pl?op=top&amp;type=count&amp;content_type=rss" type="application/rss+xml">
 		[%- END; linkrels.push(tmp); END;
 		    IF constants.journal_top_friend; tmp = BLOCK -%]
-<LINK REL="alternate" TITLE="Most Befriended Journals RSS" HREF="[% constants.real_rootdir %]/journal.pl?op=top&amp;type=friends&amp;content_type=rss" TYPE="application/rss+xml">
+<link rel="alternate" title="Most Befriended Journals RSS" href="[% constants.real_rootdir %]/journal.pl?op=top&amp;type=friends&amp;content_type=rss" type="application/rss+xml">
 		[%- END; linkrels.push(tmp); END;
 	END;
 
 
+ELSIF env.script_name.search('messages\.pl');
+	IF !user.is_anon; tmp = BLOCK -%]
+<link rel="alternate" title="[% constants.sitename | strip_attribute %] Messages RSS" href="[% constants.real_rootdir %]/my/inbox/rss/[% Slash.getPublicLogToken() | fixparam %]" type="application/rss+xml">
+	[%- END; linkrels.push(tmp); END;
+ELSIF env.script_name.search('bookmark\.pl');
+	tmp = BLOCK -%]
+<link rel="alternate" title="[% constants.sitename | strip_attribute %] Popular Bookmarks" href="[% gSkin.rootdir %]/bookmarks_popular.rss" type="application/rss+xml">
+	[%- END; linkrels.push(tmp); 
+	tmp = BLOCK -%]
+<link rel="alternate" title="[% constants.sitename | strip_attribute %] Recent Bookmarks" href="[% gSkin.rootdir %]/bookmarks_recent.rss" type="application/rss+xml">
+	[%- END; linkrels.push(tmp);
 
 ELSE; # default author link, where author is a nickname
 	    IF link.author; tmp = BLOCK -%]
-<LINK REL="author"    TITLE="[% link.author | strip_attribute %]" HREF="[% constants.rootdir %]/~[% link.author | fixparam %]/">
+<link rel="author"    title="[% link.author | strip_attribute %]" href="[% constants.real_rootdir %]/~[% link.author | strip_paramattr %]/">
 	[%- END; linkrels.push(tmp); END;
 
 END %]
+
+
+[% tmp = BLOCK -%]
+<link rel="alternate" title="[% constants.sitename | strip_attribute %] RSS" href="[% PROCESS rsslink %]" type="application/rss+xml">
+[%- END;
+   linkrels.push(tmp) %]
 
 
 

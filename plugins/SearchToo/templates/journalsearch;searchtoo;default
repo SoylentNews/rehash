@@ -1,0 +1,32 @@
+__section__
+default
+__description__
+
+__title__
+
+__page__
+searchtoo
+__lang__
+en_US
+__name__
+journalsearch
+__template__
+[% FOREACH journal=results.records %]
+	<b><a href="[% constants.real_rootdir %]/~[% journal.nickname | strip_paramattr %]/journal/[% journal.id %]">[% journal.description %]</a></b><br>
+	On [% Slash.timeCalc(journal.date) %]<br>
+	[% shorten( Slash.strip_notags(journal.article) ) %]<br>
+	
+	Author: <a href="[% constants.real_rootdir %]/~[% journal.nickname | strip_paramattr %]/">[% journal.nickname | strip_literal %]</a>
+	[% IF journal.score %]<br>
+	Score: ([% journal.score %])
+	[% END %]
+	
+	<p>
+[% END %]
+[% PROCESS pagination %]
+<p>
+
+__seclev__
+100
+__version__
+$Id$

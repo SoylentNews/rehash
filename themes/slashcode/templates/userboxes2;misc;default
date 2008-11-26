@@ -13,53 +13,17 @@ misc
 __lang__
 en_US
 __name__
-userboxes
+userboxes2
 __template__
 [%
-    IF user.is_admin && stoid;
-    story_info = "";
-		IF hits;
-			story_info = 'This story has been viewed ' _ hits _ ' times.<br><br>';
-		END;
-		IF constants.signoff_use;
-   			admin = Slash.getObject("Slash::Admin");
-   			IF admin;
-   				story_info = story_info _ admin.showSignoffBox(story.stoid, { contents_only => 1, use_title_for_header => 1 } );
-			END;
-		END;
-		IF story_info;
-			Slash.sidebox("Story Info", story_info, "story_info", 1);
-		END;
-	END;
 
 IF !useredit; useredit = user; END;
-
-IF user.is_anon;
-
-	# The user we're displaying this page for is not logged in.
-	# Show the login block.
-
-	title = "$constants.sitename Log In";
-	IF form.sid;
-		contents = BLOCK %]
-			[% PROCESS userlogin
-				return_url = "$gSkin.rootdir/article.pl?sid=$form.sid" %]
-		[% END;
-	ELSE;
-		contents = BLOCK %]
-			[% PROCESS userlogin %]
-		[% END;
-	END;
-	Slash.sidebox(title, contents, "userlogin", 1);
-
-END;
 
 IF !useredit.is_anon;
 
 	# First box:  general user info
 
-	title = useredit.nickname | strip_literal;
-	title = title _ " ($useredit.uid)";
+	title = 'User Bio';
 	contents = BLOCK;
 		'<a href="'; constants.real_rootdir; '/~';
 			useredit.nickname | strip_paramattr; '/">';
@@ -159,48 +123,23 @@ IF !useredit.is_anon;
 	END;
 	Slash.sidebox(title, contents, "user-info", 1);
 
-	# Second box:  info about moderation, if applicable
-	# Note this applies to the current user, not the user
-	# being examined.
+        # Latest comments box
+        contents = '';
+        FOREACH cid = latest_comments.keys.sort;
+                contents = contents _ '<a href="' _ constants.absolutedir_secure _ '/comments.pl?sid=' _ latest_comments.$cid.sid _ '&cid=' _ cid _'">' _ latest_comments.$cid.subject _ '</a><br>';
+        END;
+        title = 'Latest Comments';
+        Slash.sidebox(title, contents, "user-info", 1);
 
-	IF user.points || user.is_admin;
-		title = "Moderation";
-		contents = BLOCK %]
-<a href="[% constants.real_rootdir %]/~[% user.nickname | strip_paramattr %]/">You</a>
-have moderator access
-[% IF user.is_admin %](because you're an admin)[% END %]
-and <b>[% user.points %]</b> point[% user.points == 1 ? '' : 's' %]
-[%- IF user.points && user.lastgranted %] (expire on [%
-	hours = constants.mod_stir_hours || (constants.stir * 24);
-	hours = hours * 3600;
-	hours = hours + user.off_set;
-	Slash.timeCalc(user.lastgranted, "%Y-%m-%d", hours); %])[% END %].
-[% IF user.points > 0 %]
-Welcome to those of you just joining: <b>please</b>
-read the <a href="[% gSkin.rootdir %]/moderation.shtml">moderator guidelines</a>
-for instructions.
-<ul>
-	<li>You can't post &amp; moderate the same discussion.</li>
-	<li>Concentrate on promoting more than demoting.</li>
-	<li>Browse at -1 to keep an eye out for abuses.</li>
-	<li><a href="mailto:[% constants.adminmail | strip_attribute %]">Mail the admin</a> URLs showing abuse (the cid link please!).</li>
-</ul>
-[% END %]
-		[% END;
-		Slash.sidebox(title, contents, "moderation", 1);
-	END;
+        # Latest journals box
+        contents = '';
+        FOREACH jid = latest_journals.keys.sort;
+                contents = contents _ '<a href="' _ constants.absolutedir_secure _ '/~' _ useredit.nickname _ '/journal/' _ latest_journals.$jid.id _ '">' _ latest_journals.$jid.desc _ '</a><br>';
+        END; 
+        title = 'Latest Journal Entries';
+        Slash.sidebox(title, contents, "user-info", 1);
 
-	# Third box:  user space, if applicable
-	# Again, this is for the current user, not the edited user.
-
-	IF user.mylinks
-		&& (!user.slashboxes || user.slashboxes.search("mysite"));
-		title = "User Space";
-		contents = user.mylinks;
-		Slash.sidebox(title, contents, "mylinks", 1);
-	END;
 END %]
-
 
 __seclev__
 1000

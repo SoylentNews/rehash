@@ -1176,7 +1176,7 @@ sub createMenu {
 		my $nick_fix = fixparam($ll_nick);
 		my $nick_attribute = strip_attribute($ll_nick);
 		push @$menu_items, {
-			value =>	"$gSkin->{rootdir}/~$nick_fix",
+			value =>	"$gSkin->{real_rootdir}/~$nick_fix",
 			label =>	"~$nick_attribute ($user->{lastlookuid})",
 			sel_label =>	"otheruser",
 			menuorder =>	99999,

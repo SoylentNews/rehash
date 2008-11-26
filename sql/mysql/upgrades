@@ -5709,3 +5709,5 @@ UPDATE vars SET value = 'T_2_5_0_232' WHERE name = 'cvs_tag_currentcode';
 # for plugins/FireHose
 ALTER TABLE firehose ADD INDEX uid (uid);
 
+UPDATE menus SET value=REPLACE(value, '/~', '[% constants.real_rootdir %]/~') WHERE menu='users' AND value REGEXP '^/~';
+

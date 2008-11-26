@@ -54,7 +54,7 @@ __template__
         <div class="content" id="latest_journals_content">
                 <ul>
                 [% FOREACH jid = latest_journals.keys.sort %]
-                        <li><a href="[% gSkin.rootdir %]/~[% useredit.nickname | strip_paramattr %]/journal/[% latest_journals.$jid.id %]">[% latest_journals.$jid.description %]</a><br></li>
+                        <li><a href="[% constants.real_rootdir %]/~[% useredit.nickname | strip_paramattr %]/journal/[% latest_journals.$jid.id %]">[% latest_journals.$jid.description %]</a><br></li>
                 [% END %]
                 </ul>
         </div>
@@ -106,7 +106,7 @@ __template__
         <div class="content" id="latest_friends_content">
                 <ul>
                 [% FOREACH fid = latest_friends.keys.sort %]
-                        <li><a href="[% gSkin.rootdir %]/~[% latest_friends.$fid.nickname %]">[% latest_friends.$fid.nickname %]</a></li>
+                        <li><a href="[% constants.real_rootdir %]/~[% latest_friends.$fid.nickname %]">[% latest_friends.$fid.nickname %]</a></li>
                 [% END %]
                 </ul>
         </div>
@@ -126,7 +126,7 @@ __template__
                         [% LAST IF tags_counter == 5 %]
                         [% NEXT IF !is_admin && tagshist.$tag.0.private == 1 %] 
                         <li>
-                        <a href="[% gSkin.rootdir %]/~[% useredit.nickname | strip_paramattr %]/tags/[% tagshist.$tag.0.tagname %]">[% tagshist.$tag.0.tagname %]</a>&nbsp;([% tagshist.$tag.0.globj_type %])
+                        <a href="[% constants.real_rootdir %]/~[% useredit.nickname | strip_paramattr %]/tags/[% tagshist.$tag.0.tagname %]">[% tagshist.$tag.0.tagname %]</a>&nbsp;([% tagshist.$tag.0.globj_type %])
                         </li>
                         [% tags_counter = tags_counter + 1 %]
                 [% END %]

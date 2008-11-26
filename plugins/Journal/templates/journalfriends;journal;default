@@ -14,34 +14,47 @@ en_US
 __name__
 journalfriends
 __template__
-[% USE Slash %]
+[% showform = !user.is_anon && !search;
+   IF showform;
+       reskey = Slash.getObject('Slash::ResKey');
+       rkey = reskey.key('zoo');
+       IF !rkey.create;  # didn't work, bail
+           showform = 0;
+       END;
+   END;
+%]
+
+
 [% IF search; nickstrip = form.nickname | strip_literal; END %]
 [% PROCESS titlebar
 	title => (search ? "User Search Results for \"$nickstrip\"" : "Your Friends"),
 	width => "100%"
 %]
 
-[% IF !user.is_anon && !search %]<FORM METHOD="POST" ACTION="[% constants.rootdir %]/zoo.pl">
-<INPUT TYPE="hidden" NAME="op" VALUE="delete">
-<INPUT TYPE="hidden" NAME="type" VALUE="friend">[% END %]
-<TABLE WIDTH="100%" BORDER="0" CELLPADDING="2" CELLSPACING="0">
+[% IF showform %]<form method="post" action="[% gSkin.rootdir %]/zoo.pl">
+<fieldset>
+	<legend>Latest from your friends</legend>
+[% PROCESS reskey_tag %]
+<input type="hidden" name="op" value="delete">
+<input type="hidden" name="type" value="friend">[% END %]
+<table width="100%" border="0" cellpadding="2" cellspacing="0">
 [% FOREACH friend = friends %]
-    <TR><TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% friend.0 | fixparam %]/">[% friend.0 %]</A></TD>
+    <tr><td valign="top"><a href="[% constants.real_rootdir %]/~[% friend.0 | strip_paramattr %]/">[% friend.0 %]</a></td>
 [% IF friend.2 %]
-    <TD VALIGN="TOP"><A HREF="[% constants.rootdir %]/~[% friend.0 | fixparam %]/journal/"><B>[% friend.3 %]</B></A></TD>
-    <TD VALIGN="TOP"><EM>[% Slash.timeCalc(friend.2) %]</EM></TD>
+    <td valign="top"><a href="[% constants.real_rootdir %]/~[% friend.0 | strip_paramattr %]/journal/"><b>[% friend.3 %]</b></a></td>
+    <td valign="top"><em>[% Slash.timeCalc(friend.2) %]</em></td>
 [% ELSE %]
-    <TD VALIGN="TOP">&nbsp;</TD>
-    <TD VALIGN="TOP"><EM>User has no journal entries.</EM></TD>
+    <td valign="top">&nbsp;</td>
+    <td valign="top"><em>User has no journal entries.</em></td>
 [% END %]
-[% IF !user.is_anon && !search %]     <TD VALIGN="TOP" ALIGN="CENTER"><INPUT TYPE="checkbox" NAME="del_[% friend.1 %]" VALUE="1"></TD>
+[% IF showform %]     <td valign="top" align="center"><input type="checkbox" name="del_[% friend.1 %]" value="1"></td>
 [% END %]
-</TR>
+</tr>
 [% END %]
-[% IF !user.is_anon && !search %]<TR><TD COLSPAN="3">&nbsp;</TD><TD ALIGN="CENTER"><INPUT TYPE="submit" VALUE="Remove Friends"></TD></TR>[% END %]
-</TABLE>
-[% IF !user.is_anon && !search %]</FORM>[% END %]
-<BR><BR>
+[% IF showform %]<tr><td colspan="3">&nbsp;</td><td align="center"><input type="submit" value="Remove Friends"></td></tr>[% END %]
+</table>
+[% IF showform %]</fieldset></form>[% END %]
+<br><br>
 
 [% PROCESS searchusers %]
 

@@ -1,0 +1,48 @@
+__description__
+peer weight viewing for admins
+
+nickname = hashref, uid to nickname
+
+uidsA = arrayref of uids in order of decreasing weight
+ordA = ordinal position of each uid
+weightA = hashref, uid to weight
+
+uidsB = arrayref of uids in order of decreasing weight
+ordB = ordinal position of each uid
+weightB = hashref, uid to weight
+
+__title__
+Peer weights
+__section__
+default
+__page__
+admin
+__lang__
+en_US
+__name__
+peer_weights
+__seclev__
+10000
+__template__
+<table class="data">
+
+<tr><th colspan="3">tagpeerval</th><th colspan="3">tagpeerval2</th></tr>
+
+[% FOREACH uidA IN uidsA;
+	i = loop.index;
+	uidB = uidsB.$i %]
+<tr class="data_hl1">
+<td>[% ordA.$uidA %].</td>
+<td><a href="[% constants.real_rootdir %]/~[% nickname.$uidA | strip_paramattr %]">[% nickname.$uidA | strip_nohtml %]</a></td>
+<td>[% weightA.$uidA %]</td>
+<td>[% ordB.$uidB %].</td>
+<td><a href="[% constants.real_rootdir %]/~[% nickname.$uidB | strip_paramattr %]">[% nickname.$uidB | strip_nohtml %]</a></td>
+<td>[% weightB.$uidB %]</td>
+</tr>
+[% END %]
+
+</table>
+
+__version__
+$Id$
+
