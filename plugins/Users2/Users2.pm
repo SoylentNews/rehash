@@ -329,6 +329,35 @@ sub getMarqueeFireHoseId {
 	return $fhid;
 }
 
+sub truncateMarquee {
+        my($self, $marquee, $len) = @_;
+
+        my $text;
+        my $linebreak = qr{(?:
+                <br>\s*<br> |
+                </?p> |
+                </(?:
+                        div | (?:block)?quote | [oud]l
+                )>
+        )}x;
+        my $min_chars = 50;
+        my $max_chars = $len || 1000;
+
+        if (length($marquee) < $min_chars) {
+                $text = $marquee;
+        } else {
+                $text = $1 if $marquee =~ m/^(.{$min_chars,$max_chars})?$linebreak/s;
+        }
+
+        $text ||= chopEntity($marquee, $max_chars);
+        local $Slash::Utility::Data::approveTag::admin = 1;
+        $text = strip_html($text);
+        $text = balanceTags($text, { admin => 1 });
+        $text = addDomainTags($text);
+
+        return $text;
+}
+
 sub DESTROY {
 	my($self) = @_;
 	$self->{_dbh}->disconnect if !$ENV{GATEWAY_INTERFACE} && $self->{_dbh};
