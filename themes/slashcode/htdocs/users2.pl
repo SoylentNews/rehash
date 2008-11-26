@@ -1371,15 +1371,15 @@ sub showInfo {
 			# This prevents the slashbox from being populated with only private tags,
 			# which leaves it visible but empty for non-admins.
 			my $all_private = 1;
-                        if ($tagshist && !$user->{is_admin}) {
-                                foreach my $tag (keys %$tagshist) {
-                                        if (!$tagshist->{$tag}->[0]->{private}) {
-                                                $all_private = 0;
-                                                last;
-                                        }
-                                }
-                        $tagshist = '' if ($all_private);
-                        }
+			if ($tagshist && !$user->{is_admin}) {
+				foreach my $tag (keys %$tagshist) {
+					if (!$tagshist->{$tag}->[0]->{private}) {
+						$all_private = 0;
+						last;
+					}
+				}
+				$tagshist = '' if ($all_private);
+			}
 		}
 
 		# Comments slashbox
