@@ -5711,3 +5711,5 @@ ALTER TABLE firehose ADD INDEX uid (uid);
 
 UPDATE menus SET value=REPLACE(value, '/~', '[% constants.real_rootdir %]/~') WHERE menu='users' AND value REGEXP '^/~';
 
+# For plugins/Users2
+ALTER TABLE shill_ids ADD COLUMN skid SMALLINT DEFAULT '0' NOT NULL;

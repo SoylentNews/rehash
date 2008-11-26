@@ -24,6 +24,7 @@ sub main {
 	my $form      = getCurrentForm();
 	my $gSkin     = getCurrentSkin();
 	my $firehose  = getObject("Slash::FireHose");
+	my $reader    = getObject('Slash::DB', { db_type => 'reader' });
 
 	my $anonval = $constants->{firehose_anonval_param} || "";
 
@@ -87,7 +88,21 @@ sub main {
 		}
 		if ($form->{op} && $form->{op} eq "view") {
 			my $item = $firehose->getFireHose($form->{id});
-			$title = "$constants->{sitename} - $item->{title}" if $item && $item->{title};
+			if ($item && $item->{id}) {
+				$title = "$constants->{sitename} - $item->{title}" if $item->{title};
+				my $author = $reader->getUser($item->{uid});
+				if ($author->{shill_id}) {
+					my $shill = $reader->getShillInfo($author->{shill_id});
+					if ($shill->{skid} && $shill->{skid} != $gSkin->{skid}) {
+						my $shill_skin = $reader->getSkin($shill->{skid});
+						if ($shill_skin && $shill_skin->{rootdir} ne $gSkin->{rootdir}) {
+							redirect("$shill_skin->{rootdir}$ENV{REQUEST_URI}");
+							return;
+						}
+					}
+				} 
+			}
+				
 		}
 		header($title, '') or return;
 	}
