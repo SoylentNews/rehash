@@ -12,10 +12,11 @@ en_US
 __name__
 u2UserBoxes
 __template__
+[% tilde = '^'; IF constants.u2; tilde = '~'; END; %]
 [% IF latest_comments.size != 0 %]
 <div class="block" id="latest_comments">
         <div class="title" id="latest_comments_title">
-                <h4>Comments</h4>
+                <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/comments">Comments</a></h4>
         </div>
 
         <div class="content" id="latest_comments_content">
@@ -49,7 +50,7 @@ __template__
 [% IF latest_journals.size != 0 %]
 <div class="block" id="latest_journals">
         <div class="title" id="latest_journals_title">
-                <h4>Journal Entries</h4>
+                <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/journal">Journal Entries</a></h4>
         </div>
         <div class="content" id="latest_journals_content">
                 <ul>
@@ -64,7 +65,7 @@ __template__
 [% IF latest_submissions.size != 0 %]
 <div class="block" id="latest_submissions">
         <div class="title" id="latest_submissions_title">
-                <h4>Submissions</h4>
+                <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/submissions">Submissions</a></h4>
         </div>
 
         <div class="content" id="latest_submissions_content">
@@ -80,7 +81,7 @@ __template__
 [% IF latest_bookmarks.size != 0 %]
 <div class="block" id="latest_bookmarks">
         <div class="title" id="latest_bookmarks_title">
-                <h4>Bookmarks </h4>
+                <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/bookmarks">Bookmarks</a></h4>
         </div>
 
         <div class="content" id="latest_bookmarks_content">
@@ -100,7 +101,7 @@ __template__
 [% IF latest_friends.size != 0 %]
 <div class="block" id="latest_friends">
         <div class="title" id="latest_friends_title">
-                <h4>Friends</h4>
+                <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/friends">Friends</a></h4>
         </div>
 
         <div class="content" id="latest_friends_content">
@@ -116,7 +117,7 @@ __template__
 [% IF tagshist.size > 2 %]
 <div class="block" id="latest_tags">
         <div class="title" id="latest_tags_title">
-                <h4>Tags</h4>
+                <h4><a href="[% gSkin.rootdir %]/[% tilde; useredit.nickname | strip_paramattr %]/tags">Tags</a></h4>
         </div>
 
         <div class="content" id="latest_tags_content">
