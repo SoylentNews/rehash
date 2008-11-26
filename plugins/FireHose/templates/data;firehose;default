@@ -38,7 +38,7 @@ __template__
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
 	by [% IF adminmode && item.type != "story" %]
 		[% IF Slash.isAnon(the_user.uid) %][% the_user.nickname | strip_literal %]
-		[% ELSE %]<a href="[% gSkin.rootdir %]/~[ the_user.nickname | strip_paramattr %]">[% the_user.nickname | strip_literal %] ([% the_user.uid %])</a>
+		[% ELSE %]<a href="[% gSkin.rootdir %]/~[% the_user.nickname | strip_paramattr %]">[% the_user.nickname | strip_literal %] ([% the_user.uid %])</a>
 		[% END %]
 	[% END %]
 	[% IF extras && num_from_uid != '0' %]
@@ -53,7 +53,7 @@ __template__
 			[% IF the_user.homepage %]<a href="[% the_user.homepage %]"[% rnf %]>[% END %][% the_user.nickname %][% IF the_user.homepage %]</a>[% END %]
 		[% ELSE %]
 			[% IF Slash.isAnon(the_user.uid) %][% the_user.nickname | strip_literal %]
-			[% ELSE %]<a href="[% gSkin.rootdir %]/~[ the_user.nickname | strip_paramattr %]">[% the_user.nickname | strip_literal %]</a>
+			[% ELSE %]<a href="[% gSkin.rootdir %]/~[% the_user.nickname | strip_paramattr %]">[% the_user.nickname | strip_literal %]</a>
 			[% END %]
 		[% END %]
 	[% END %]
