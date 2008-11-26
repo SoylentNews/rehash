@@ -1125,8 +1125,6 @@ sub ajaxSetGetCombinedTags {
 			if ( $skid != $constants->{mainpage_skid} ) {
 				my $skin = $firehose->getSkin($skid);
 				$section_tag = $skin->{name};
-			} else {
-				$section_tag = 'mainpage';
 			}
 		}
 
