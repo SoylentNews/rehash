@@ -142,7 +142,8 @@ text-decoration:none !important;
 }
 
 div.tag-display,
-div.tag-display > h1.legend {
+div.tag-display > h1.legend,
+div.tag-display > ul {
 	width: auto !important;
 }
 
@@ -314,9 +315,10 @@ div.tag-display > ul > li + li {
 
 div.tag-display-stub,
 div.tag-display {
-	display: inline !important;
+	display: inline;
 	position: relative;
 	margin-left: 0 !important;
+	overflow: hidden;
 	/*	border:1px dotted #000;	*//*	troubleshooting safari		*/
 }
 

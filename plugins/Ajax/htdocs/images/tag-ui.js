@@ -571,68 +571,8 @@ function normalize_tag_commands( commands, excludes ){
 }
 
 
-function $position_context_display( $display ){
-	if ( ! $related_trigger || ! $related_trigger.length ) {
-		return $display;
-	}
-
-	var RIGHT_PADDING = 18;
-
-	var $entry = $display.nearest_parent('[tag-server]');
-	var left_edge = $entry.offset().left;
-	var right_edge = left_edge + $entry.width() - RIGHT_PADDING;
-
-	var global_align = $related_trigger.offset().left;
-	global_align = Math.max(left_edge, global_align);
-
-	var need_minimal_fix = true;
-	if ( $display.is(':visible') ) {
-		try {
-			var display_width = $display.children('ul:first').width();
-			$display.css({
-				right: ''
-			});
-
-			global_align = Math.max(
-				left_edge,
-				Math.min(right_edge-display_width, global_align) );
-			var distance = global_align - $display.offset().left;
-			if ( distance ) {
-				$display.animate({left: '+='+distance});
-			}
-
-			need_minimal_fix = false;
-		} catch (e0) {
-		}
-	}
-
-	if ( need_minimal_fix ) {
-		try {
-			var BROKEN_NEGATIVE_MARGIN_CALCULATION = -10;
-
-			// we may not be visible, so can't trust offsetParent() on ourself
-			// better get it from our parent
-			var x_adjust = -$display.parent().offsetParent().offset().left;
-			$display.css({
-				left: global_align + x_adjust + BROKEN_NEGATIVE_MARGIN_CALCULATION,
-				right: right_edge + x_adjust
-			});
-		} catch (e1) {
-		}
-	}
-
-	return $display;
-}
-
-function $queue_reposition( $display, if_only_width ){
-	return $display.queue(function(){
-		$position_context_display($display, if_only_width);
-		$(this).dequeue();
-	});
-}
-
 var gFocusedText;
-var $previous_context_trigger = $().filter();
+var $previous_context_trigger = $([]);
 
 var tag_widget_fns = {
 
@@ -684,11 +624,13 @@ var tag_widget_fns = {
 
 	set_context: function( context, force ){
 		var widget = this;
+		var new_trigger = !$previous_context_trigger.length || ($previous_context_trigger[0] !== $related_trigger[0]);
+		var new_context = context != this._current_context;
+
 		if ( context ) {
-			if ( context == this._current_context &&
-				(!$previous_context_trigger.length ||
-					$related_trigger[0] === $previous_context_trigger[0]) && !force ) {
+			if ( !new_context && !new_trigger && !force ) {
 				context = '';
+				new_context = true;
 			} else {
 				if ( !(context in suggestions_for_context) && context in context_triggers ) {
 					context = (this._current_context != 'default') ? 'default' : '';
@@ -703,52 +645,65 @@ var tag_widget_fns = {
 			this._context_timeout = null;
 		}
 
-		// only have to set_tags on the display if the context really is changing
-		if ( context != this._current_context ) {
+		// only have to set_tags on the display if the something really changed
+		if ( new_context || new_trigger ) {
 			var context_tags = [];
 			if ( context && context in suggestions_for_context ) {
 				context_tags = list_as_array(suggestions_for_context[context]);
 			}
-
-			var has_tags = context_tags.length !== 0;
 
 			$('.ready[context=related]', this)
 				.each(function(){
 					var display = this;
 					var $display = $(display);
 
-					var had_tags = $display.find('span.tag').length !== 0;
-
-					// animations are automatically queued...
-					if ( had_tags < has_tags ) {
-						$display.css('display', 'none');
-					} else if ( had_tags > has_tags ) {
+					if ( $display.find('span.tag').length ) {
 						$display.slideUp(400);
 					}
-					// ...when regular code needs to synchronize with animation
-					$display.queue(function(){
-						// I have to queue that code up myself
-						display.set_tags(context_tags, { classes: 'suggestion' });
-						if ( has_tags && widget.modify_context ) {
-							widget.modify_context(display, context);
-						}
-						$display.dequeue();
-					});
-					if ( has_tags ) {
-						$queue_reposition($display);
-						if ( !had_tags ) {
-							$queue_reposition($display.slideDown(400));
-						}
+
+
+
+					if ( context_tags.length ) {
+						var	$parent		= $display.parent(),
+							global_left	= $related_trigger.offset().left,
+							parent_left	= $parent.offset().left,
+							max_left	= $parent.width(),
+							best_left	= global_left - parent_left;
+
+						$display.queue(function(){
+							// ...when regular code needs to synchronize with animation
+							// I have to queue that code up myself
+
+							// if display had no tags before, $display.hide() would silently fail, because it's already hidden
+							// so hide the widget itself while we make the changes
+							$parent.hide();
+							display.set_tags(context_tags, { classes: 'suggestion' });
+							if ( widget.modify_context ) {
+								widget.modify_context(display, context);
+							}
+
+							// now hide() will work, so hide the display (child) instead of the widget (parent)
+							// but we can't _really_ hide it, because we need to ask its width
+							$display.show().css('height', '0');
+							$parent.show();
+							try {
+								max_left -= $display.find('ul').width();
+							} catch ( e0 ) {
+							}
+
+							$display.hide();
+							$display.css({
+								height:		'',
+								left:		Math.min(best_left, max_left)
+							});
+
+							$display.slideDown(400);
+							$display.dequeue();
+						});
 					}
 				});
 
 			this._current_context = context;
-		} else if ( context &&
-			$related_trigger.length &&
-			$previous_context_trigger.length &&
-			$previous_context_trigger[0] !== $related_trigger[0] ) {
-
-			$position_context_display($('.ready[context=related]', this));
 		}
 
 		$previous_context_trigger = $related_trigger;
