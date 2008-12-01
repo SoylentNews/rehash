@@ -74,6 +74,7 @@ $task{$me}{code} = sub {
 	}
 	tagboxLog('tagbox.pl starting');
 
+	my $sleeps_in_a_row = 0;
 	my $exclude_behind = 1;
 	my $max_activity_for_run = 10;
 	my $feederlog_largerows = $constants->{tags_feederlog_largerows} || 50_000;
@@ -134,6 +135,7 @@ $task{$me}{code} = sub {
 			# obsolete the results we'd get by calling run() right now.
 			if ($activity_feeder > 10) {
 				tagboxLog("tagbox.pl re-updating feederlog, activity $activity_feeder");
+				$sleeps_in_a_row = 0;
 				next;
 			}
 
@@ -149,8 +151,11 @@ $task{$me}{code} = sub {
 		# If nothing's going on, ease up some (not that it probably
 		# matters much, since if nothing's going on both of the
 		# above should be doing reasonably fast SELECTs).
-		if (!$activity_feeder && !$activity_run) {
-			tagboxLog('tagbox.pl sleeping 3');
+		if ($activity_feeder || $activity_run) {
+			$sleeps_in_a_row = 0;
+		} else {
+			++$sleeps_in_a_row;
+			tagboxLog('tagbox.pl sleeping 3') if $sleeps_in_a_row % 100 == 1;
 			sleep 3;
 		}
 		last if $task_exit_flag;
