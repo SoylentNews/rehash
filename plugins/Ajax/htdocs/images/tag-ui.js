@@ -1031,6 +1031,7 @@ YAHOO.slashdot.topicTags = ["keyword",
 	update_class_map(well_known_tags, 't2', YAHOO.slashdot.topicTags);
 	update_class_map(well_known_tags, 'y p', ['nod', 'metanod']);
 	update_class_map(well_known_tags, 'x p', ['nix', 'metanix']);
+	update_class_map(well_known_tags, 'p', ['mainpage']);	// Rob requests 'mainpage' never show its face
 	update_class_map(well_known_tags, 'd', data_types);
 
 	if ( fh_is_admin ) {
