@@ -444,8 +444,8 @@ sub handler {
 		}
 	}
 	if ($redirect_to_nonssl) {
-		# User is not authorized to connect to the SSL webserver.
-		# Redirect them to the non-SSL URL.
+		# User is not authorized to connect to the SSL webserver,
+		# so redirect them to the non-SSL URL.
 		my $newloc = $uri;
 		$newloc .= "?" . $r->args if $r->args;
 		$r->err_header_out(Location =>
