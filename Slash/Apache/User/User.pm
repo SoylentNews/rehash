@@ -540,6 +540,74 @@ sub userLogin {
 	}
 }
 
+
+{
+my %ops_my = (
+	inbox           => { args => 'op=list', uri => 'messages.pl' },
+	# XXX change messages to be same as /inbox, move this to /my/preferences/messages
+	messages        => { args => 'op=display_prefs', uri => 'messages.pl' },
+	comments        => { args => 'op=editcomm' },
+	homepage        => { args => 'op=edithome' },
+	password        => { args => 'op=changeprefs', uri => 'login.pl' },
+	logout          => { args => 'op=userclose', uri => 'login.pl' },
+	misc            => { args => 'op=editmiscopts' },
+	amigos          => { args => 'op=friendview', uri => 'journal.pl' },
+	bookmarks       => { args => 'op=showbookmarks' },
+	firehose        => { args => 'op=userfirehose' },
+	preferences     => { args => 'op=displayprefs', uri => 'preferences.pl' },
+	tags            => { args => 'op=showtags' },
+	journal         => { args => 'op=list', uri => 'journal.pl' },
+
+	friends         => { args => 'op=friends', uri  => 'zoo.pl' },
+	fans            => { args => 'op=fans', uri  => 'zoo.pl' },
+	freaks          => { args => 'op=freaks', uri  => 'zoo.pl' },
+	foes            => { args => 'op=foes', uri  => 'zoo.pl' },
+	zoo             => { args => 'op=all', uri  => 'zoo.pl' },
+
+	default         => { args => 'op=edituser' }
+);
+$ops_my{$_}{uri} ||= 'users.pl' for (keys %ops_my);
+
+my %ops_u = (
+	pubkey          => { args => 'nick=__NICK__&uid=__UID__', uri  => 'pubkey.pl' },
+	submissions     => { args => 'nick=__NICK__&uid=__UID__&op=usersubmissions' },
+	comments        => { args => 'nick=__NICK__&uid=__UID__&op=usercomments' },
+	amigos          => { args => 'nick=__NICK__&uid=__UID__&op=friendview', uri  => 'journal.pl' },
+	bookmarks       => { args => 'nick=__NICK__&uid=__UID__&op=showbookmarks' },
+	firehose        => { args => 'uid=__UID__&op=userfirehose' },
+	journal         => { args => 'nick=__NICK__&uid=__UID__&op=display' },
+	tags            => { args => 'nick=__NICK__&uid=__UID__&op=showtags' },
+
+	friends         => { args => 'nick=__NICK__&uid=__UID__&op=friends', uri  => 'zoo.pl' },
+	fans            => { args => 'nick=__NICK__&uid=__UID__&op=fans', uri  => 'zoo.pl' },
+	freaks          => { args => 'nick=__NICK__&uid=__UID__&op=freaks', uri  => 'zoo.pl' },
+	foes            => { args => 'nick=__NICK__&uid=__UID__&op=foes', uri  => 'zoo.pl' },
+	zoo             => { args => 'nick=__NICK__&uid=__UID__&op=all', uri  => 'zoo.pl' },
+
+	default         => { args => 'nick=__NICK__&uid=__UID__' },
+);
+$ops_u{$_}{uri} ||= 'users.pl' for (keys %ops_u);
+
+my %ops_u2 = (
+	submissions     => { args => 'nick=__NICK__&uid=__UID__&dp=submissions' },
+	comments        => { args => 'nick=__NICK__&uid=__UID__&dp=comments' },
+	amigos          => { args => 'nick=__NICK__&uid=__UID__&dp=journalfriends' },
+	bookmarks       => { args => 'nick=__NICK__&uid=__UID__&dp=bookmarks' },
+	firehose        => { args => 'uid=__UID__&dp=firehose' },
+	admin           => { args => 'nick=__NICK__&uid=__UID__&dp=admin' },
+	journal         => { args => 'nick=__NICK__&uid=__UID__&dp=journal' },
+	tags            => { args => 'nick=__NICK__&uid=__UID__&dp=tags&op=userinfo' },
+
+	friends         => { args => 'nick=__NICK__&uid=__UID__&dp=friends' },
+	fans            => { args => 'nick=__NICK__&uid=__UID__&dp=fans' },
+	freaks          => { args => 'nick=__NICK__&uid=__UID__&dp=freaks' },
+	foes            => { args => 'nick=__NICK__&uid=__UID__&dp=foes' },
+	zoo             => { args => 'nick=__NICK__&uid=__UID__&dp=all' },
+
+	default         => { args => 'nick=__NICK__&uid=__UID__' }
+);
+$ops_u2{$_}{uri} ||= 'users2.pl' for (keys %ops_u2);
+
 ########################################################
 # XXX May want to rename this, since it's being used for a user's
 # prefs/info pages (/my/foo) and for the global handlers too (/foo).
@@ -616,128 +684,53 @@ sub userdir_handler {
 		my $logged_in = $r->header_in('Cookie') =~ $USER_MATCH;
 		my $try_login = !$logged_in && $logtoken;
 
-		my $found_the_op = 0;
+		my($r_args, $r_uri);
+
 		if ($logged_in || $try_login) {
+			my $r_op = $ops_my{$op};
+			$r_op ||= $ops_my{default};
+			($r_args, $r_uri) = @{$r_op}{qw(args uri)};
+
 			if ($op eq 'inbox') {
-				$found_the_op = 1;
-				my $args = 'op=list';
 				if ($extra =~ m{^ (rss|atom) /? $}x) {
-					$args .= '_rss';
-					$args .= "&logtoken=$logtoken" if $try_login;
-					$args .= "&content_type=$1";
+					$r_args .= '_rss';
+					$r_args .= "&logtoken=$logtoken" if $try_login;
+					$r_args .= "&content_type=$1";
 				}
 
-				$r->args($args);
-				$r->uri('/messages.pl');
-				$r->filename($constants->{basedir} . '/messages.pl');
 			} elsif ($logged_in) {
-				$found_the_op = 1;
 				if ($op eq 'journal') {
-					my $args;
-					if ($extra =~ /^\d+$/) {
-						$args = "id=$extra&op=edit";
-					} elsif ($extra eq 'friends') {
-						$args = "op=friendview";
-					} else {
-						$args = "op=list";
+					$extra .= '/';
+					if ($extra =~ /^(\d+)\/$/) {
+						$r_args = "id=$1&op=edit";
+					} elsif ($extra =~ s/^friends\///) {
+						$r_args = "op=friendview";
 					}
-					$r->args($args);
-					$r->uri('/journal.pl');
-					$r->filename($constants->{basedir} . '/journal.pl');
-
-				} elsif ($op eq 'discussions') {
-					$r->args("op=personal_index");
-					$r->uri('/comments.pl');
-					$r->filename($constants->{basedir} . '/comments.pl');
-
-
-				} elsif ($op eq 'messages') { # XXX change to be same as /inbox, move this to /my/preferences/messages
-					$r->args("op=display_prefs");
-					$r->uri('/messages.pl');
-					$r->filename($constants->{basedir} . '/messages.pl');
 
 				} elsif ($op =~ /^(?:friends|fans|freaks|foes|zoo)$/) {
-					my $args = "op=$op";
 					$extra .= '/';
-
-					if ($op eq 'friends' && $extra =~ s/^friends\///) {
-						$args =~ s/friends/fof/;
-					} elsif ($op eq 'friends' && $extra =~ s/^foes\///) {
-						$args =~ s/friends/eof/;
-					} elsif ($op eq 'zoo') {
-						$args =~ s/zoo/all/;
+					if ($op eq 'friends') {
+						if ($extra =~ s/^friends\///) {
+							$r_args =~ s/friends/fof/;
+						} elsif ($extra =~ s/^foes\///) {
+							$r_args =~ s/friends/eof/;
+						}
 					}
 
-					$r->args($args);
-					$r->uri('/zoo.pl');
-					$r->filename($constants->{basedir} . '/zoo.pl');
-
-				} elsif ($op eq 'comments') {
-					$r->args("op=editcomm");
-					$r->uri('/users.pl');
-					$r->filename($constants->{basedir} . '/users.pl');
-
-				} elsif ($op eq 'homepage') {
-					$r->args("op=edithome");
-					$r->uri('/users.pl');
-					$r->filename($constants->{basedir} . '/users.pl');
-
-				} elsif ($op eq 'password') {
-					$r->args("op=changeprefs");
-					$r->uri('/login.pl');
-					$r->filename($constants->{basedir} . '/login.pl');
-
-				} elsif ($op eq 'logout') {
-					$r->args("op=userclose");
-					$r->uri('/login.pl');
-					$r->filename($constants->{basedir} . '/login.pl');
-
-				} elsif ($op eq 'misc') {
-					$r->args("op=editmiscopts");
-					$r->uri('/users.pl');
-					$r->filename($constants->{basedir} . '/users.pl');
-
-				} elsif ($op eq 'amigos') {
-					$r->args("op=friendview");
-					$r->uri('/journal.pl');
-					$r->filename($constants->{basedir} . '/journal.pl');
-
 				} elsif ($op eq 'tags') {
-					my $args = 'op=showtags';
 					# XXX "!" is a 'reserved' char in URI, escape it here?
-					$args .= "&tagname=$extra" if $extra;
-					$r->args($args);
-					$r->uri('/users.pl');
-					$r->filename($constants->{basedir} . '/users.pl');
-
-				} elsif ($op eq 'bookmarks') {
-					$r->args("op=showbookmarks");
-					$r->uri('/users.pl');
-					$r->filename($constants->{basedir} . '/users.pl');
-
-				} elsif ($op eq 'firehose') {
-					my $filter = fixparam("user:");
-					$r->args("op=userfirehose");
-					$r->uri('users.pl');
-					$r->filename($constants->{basedir} . '/users.pl');
-
-				} elsif ($op eq 'preferences') {
-					$r->args("op=displayprefs");
-					$r->uri('/preferences.pl');
-					$r->filename($constants->{basedir} . '/preferences.pl');
-
-				} else {
-					$r->args("op=edituser");
-					$r->uri('/users.pl');
-					$r->filename($constants->{basedir} . '/users.pl');
+					$r_args .= "&tagname=$extra" if $extra;
 				}
 			}
 
+		} else {
+			undef $r_args;
+			$r_uri = 'login.pl';
 		}
-		if (!$found_the_op) {
-			$r->uri('/login.pl');
-			$r->filename($constants->{basedir} . '/login.pl');
-		}
+
+		$r->args($r_args) if defined($r_args);
+		$r->uri('/' . $r_uri);
+		$r->filename($constants->{basedir} . '/' . $r_uri);
 
 		return OK;
 
@@ -770,207 +763,84 @@ sub userdir_handler {
 		my $nick_orig = $nick;
 		$nick = fixparam($nick);	# make safe to pass back to script
 
-		# maybe we should refactor this code a bit ...
-		# have a hash that points op to args and script name -- pudge
-		# e.g.:
-		# my %ops = ( journal => ['/journal.pl', 'op=display'], ... );
-		# $r->args($ops{$op}[1] . "&nick=$nick");
-		# $r->uri($ops{$op}[0]);
-		# $r->filename($constants->{basedir} . $ops{$op}[0]);
+		my($r_args, $r_uri);
 
 		if (!$uid) {
-			$r->args("op=no_user");
-			$r->uri('/users.pl');
-			$r->filename($constants->{basedir} . '/users.pl');
-
-		} elsif ($op eq 'journal') {
-			$extra .= '/' . $more;
-
-			if (
-				($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2})
-						&&
-				!($extra =~ m{^ (rss|atom) /?$}x || $extra =~ /^(\d+)\/$/)
-			) {
-				my $args = "nick=$nick&uid=$uid&dp=journal";
-
-				if ($extra =~ s/^friends\///) { # show hose in friend view
-					$args .= 'friends';
-				}
-
-				$r->args($args);
-				$r->uri('/users2.pl');
-				$r->filename($constants->{basedir} . '/users2.pl');
-
-			} else {
-				my $args = "op=display&nick=$nick&uid=$uid";
-				if ($extra =~ /^(\d+)\/$/) {
-					$args .= "&id=$1";
-				} elsif ($extra =~ s/^friends\///) {
-					$args =~ s/display/friendview/;
-				}
-				if ($extra =~ m{^ (rss|atom) / ? $}x) {
-					$args .= "&logtoken=$logtoken" if $logtoken;
-					$args .= "&content_type=$1";
-				}
-
-				$args .= "&$query";
-				$r->args($args);
-				$r->uri('/journal.pl');
-				$r->filename($constants->{basedir} . '/journal.pl');
-			}
-		} elsif ($op eq 'discussions') {
-			$r->args("op=creator_index&nick=$nick&uid=$uid");
-			$r->uri('/comments.pl');
-			$r->filename($constants->{basedir} . '/comments.pl');
-
-		} elsif ($op eq 'pubkey') {
-			$r->args("nick=$nick&uid=$uid");
-			$r->uri('/pubkey.pl');
-			$r->filename($constants->{basedir} . '/pubkey.pl');
-
-		} elsif ($op eq 'submissions') {
-			if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2}) {
-				$r->args("nick=$nick&dp=submissions&uid=$uid");
-				$r->uri('/users2.pl');
-				$r->filename($constants->{basedir} . '/users2.pl');
-			} else {
-				$r->args("nick=$nick&op=usersubmissions&uid=$uid");
-				$r->uri('/users.pl');
-				$r->filename($constants->{basedir} . '/users.pl');
-			}
-		} elsif ($op eq 'comments') {
-			if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2}) {
-				$r->args("nick=$nick&dp=comments&uid=$uid");
-				$r->uri('/users2.pl');
-				$r->filename($constants->{basedir} . '/users2.pl');
-			} else {
-				$r->args("nick=$nick&op=usercomments&uid=$uid");
-				$r->uri('/users.pl');
-				$r->filename($constants->{basedir} . '/users.pl');
-			}
-		} elsif ($op =~ /^(?:friends|fans|freaks|foes|zoo)$/) {
-			if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2}) {
-				my $args = "nick=$nick&uid=$uid&dp=";
-				$extra .= '/' . $more;
-
-				if ($op eq 'friends' && $extra =~ s/^friends\///) {
-					$op =~ s/friends/fof/;
-				} elsif ($op eq 'friends' && $extra =~ s/^foes\///) {
-					$op =~ s/friends/eof/;
-				} elsif ($op eq 'zoo') {
-					$op =~ s/zoo/all/;
-				}
-
-				if ($extra =~ m{^ (rss|atom) /?$}x) {
-					my $args = "nick=$nick&uid=$uid&op=$op";
-					$args .= "&content_type=$1";
-
-					$r->args($args);
-					$r->uri('/zoo.pl');
-					$r->filename($constants->{basedir} . '/zoo.pl');
-				} else {
-					$r->args($args . $op);
-					$r->uri('/users2.pl');
-					$r->filename($constants->{basedir} . '/users2.pl');
-				}
-			} else {
-				my $args = "op=$op&nick=$nick&uid=$uid";
-				$extra .= '/' . $more;
-
-				if ($op eq 'friends' && $extra =~ s/^friends\///) {
-					$args =~ s/friends/fof/;
-				} elsif ($op eq 'friends' && $extra =~ s/^foes\///) {
-					$args =~ s/friends/eof/;
-				} elsif ($op eq 'zoo') {
-					$args =~ s/zoo/all/;
-				}
-
-				if ($extra =~ m{^ (rss|atom) /?$}x) {
-					$args .= "&content_type=$1";
-				}
-
-				$r->args($args);
-				$r->uri('/zoo.pl');
-				$r->filename($constants->{basedir} . '/zoo.pl');
-			}
-
-		} elsif ($op eq 'amigos') {
-			if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2}) {
-				$r->args("nick=$nick&uid=$uid&dp=journalfriends");
-				$r->uri('/users2.pl');
-				$r->filename($constants->{basedir} . '/users2.pl');
-			} else {
-				$r->args("op=friendview&nick=$nick&uid=$uid");
-				$r->uri('/journal.pl');
-				$r->filename($constants->{basedir} . '/journal.pl');
-			}
-
-		} elsif ($op eq 'tags') {
-			if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2}) {
-				$r->uri('/users2.pl');
-				$r->filename($constants->{basedir} . '/users2.pl');
-				my $args;
-				if ($extra) {
-					$args = "op=userinfo&nick=$nick&dp=usertag&uid=$uid";
-					$args .= "&tagname=$extra" if $extra;
-				} else {
-					$args = "op=userinfo&uid=$uid&nick=$nick&dp=tags";		
-				}
-				$r->args($args);
-			} else {
-				my $args = "op=showtags&nick=$nick&uid=$uid";
-				# XXX "!" is a 'reserved' char in URI, escape it here?
-				$args .= "&tagname=$extra" if $extra;
-				$r->args($args);
-				$r->uri('/users.pl');
-				$r->filename($constants->{basedir} . '/users.pl');
-			}
-
-		} elsif ($op eq 'bookmarks') {
-			if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2}) {
-				$r->args("nick=$nick&dp=bookmarks&uid=$uid");
-				$r->uri('/users2.pl');
-				$r->filename($constants->{basedir} . '/users2.pl');
-			} else {
-				$r->args("op=showbookmarks&nick=$nick&uid=$uid");
-				$r->uri('/users.pl');
-				$r->filename($constants->{basedir} . '/users.pl');
-			}
-		} elsif ($op eq 'firehose') {
-			if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2}) {
-				my $filter = fixparam("\"user:$nick_orig\"");
-				$r->args("dp=firehose&uid=$uid");
-				$r->uri('/users2.pl');
-				$r->filename($constants->{basedir} . '/users2.pl');
-			} else {
-				my $filter = fixparam("\"user:$nick_orig\"");
-				$r->args("op=userfirehose&uid=$uid");
-				$r->uri('/users.pl');
-				$r->filename($constants->{basedir} . '/users.pl');
-			}
-		} elsif (($op eq 'admin' && $constants->{u2}) ||
-			 ($op eq 'admin' && $saveuri =~ m[^/(?:%5[eE]|\^)(.+)])) {
-			$r->args("nick=$nick&dp=admin&uid=$uid");
-                        $r->uri('/users2.pl');
-                        $r->filename($constants->{basedir} . '/users2.pl');
+			$r_args = 'op=no_user';
+			$r_uri  = 'users.pl';
 
 		} else {
-			if ($saveuri =~ m[^/(?:%5[eE]|\^)(.+)] || $constants->{u2}) {
-				$r->args("nick=$nick&uid=$uid");
-				$r->uri('/users2.pl');
-				$r->filename($constants->{basedir} . '/users2.pl');
-			} else {
-				$r->args("nick=$nick&uid=$uid");
-				$r->uri('/users.pl');
-				$r->filename($constants->{basedir} . '/users.pl');
+			my $r_op = $ops_u{$op};
+			my $u2 = 0;
+			if ($constants->{u2} || $saveuri =~ m[^/(?:%5[eE]|\^)(.+)]) {
+				$r_op = $ops_u2{$op} if $ops_u2{$op};
+				$u2 = 1;
+			}
+			$r_op ||= $u2 ? $ops_u2{default} : $ops_u{default};
+			($r_args, $r_uri) = @{$r_op}{qw(args uri)};
+
+			# special cases for handling $extra
+			if ($op eq 'journal') {
+				$extra .= '/' . $more;
+				if ($u2 && !($extra =~ m{ (?:rss|atom) /?$}x || $extra =~ /^(\d+)\/$/)) {
+					# show hose in friend view (op=journalfriends)
+					$r_args .= 'friends' if $extra =~ /^friends\//;
+				} else {
+					 # override u2 for rss|atom and \d
+					($r_args, $r_uri) = @{ $ops_u{journal} }{ qw(args uri) };
+
+					if ($extra =~ /^(\d+)\/$/) {
+						$r_args .= "&id=$1";
+					} elsif ($extra =~ s/^friends\///) {
+						$r_args =~ s/display/friendview/;
+					}
+					if ($extra =~ m{^ (rss|atom) / ? $}x) {
+						$r_args .= "&logtoken=$logtoken" if $logtoken;
+						$r_args .= "&content_type=$1";
+					}
+
+					$r_args .= "&$query";
+				}
+
+			} elsif ($op =~ /^(?:friends|fans|freaks|foes|zoo)$/) {
+				$extra .= '/' . $more;
+				if ($u2 && $extra =~ m{ (?:rss|atom) /?$}x) {
+					 # override u2 for rss|atom and \d
+					($r_args, $r_uri) = @{ $ops_u{journal} }{ qw(args uri) };
+				}
+
+				if ($op eq 'friends') {
+					if ($extra =~ s/^friends\///) {
+						$r_args =~ s/friends/fof/;
+					} elsif ($extra =~ s/^foes\///) {
+						$r_args =~ s/friends/eof/;
+					}
+				}
+
+				if ($extra =~ m{^ (rss|atom) /?$}x) {
+					$r_args .= "&content_type=$1";
+				}
+
+
+			} elsif ($op eq 'tags') {
+				$r_args =~ s/dp=tags/dp=usertag/ if $u2 && $extra;
+				# XXX "!" is a 'reserved' char in URI, escape it here?
+				$r_args .= "&tagname=$extra" if $extra;
 			}
 		}
+
+		$r_args =~ s/__NICK__/$nick/;
+		$r_args =~ s/__UID__/$uid/;
+
+		$r->args($r_args) if defined($r_args);
+		$r->uri('/' . $r_uri);
+		$r->filename($constants->{basedir} . '/' . $r_uri);
 
 		return OK;
 	}
 
 	return DECLINED;
-}
+} }
 
 
 
