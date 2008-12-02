@@ -70,7 +70,7 @@ row_class_3 = "data_hl3";
 		[% PROCESS titlebar width="100%" title = commenttitle max_min_button = extra -%]
 		[% max_min_button = "" %]
 	[% END %]
-	<table width="100%" border="0" cellpadding="3" cellspacing="0" class="data">
+	<table width="98%" border="0" cellpadding="3" cellspacing="0" class="data listComments">
 	<tr class="data_head">
 		[% IF type=="netid"; total_cols = total_cols + 1; %]<th>User</th>[% END %]
 		<th>Subject[% IF admin_flag %]<span class="admin_data_label"> / Moderator</span>[% END %]</th>
