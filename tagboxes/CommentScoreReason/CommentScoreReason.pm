@@ -206,6 +206,15 @@ sub run_process {
 	my $new_score = $points_orig + $mod_score_sum;
 	my $new_karma_bonus = ($karma_bonus eq 'yes' && $keep_karma_bonus) ? 1 : 0;
 
+	if ($options->{return_only}) {
+		return {
+			score =>	$new_score,
+			karma_bonus =>	$new_karma_bonus,
+			reason =>	$current_reason_mode,
+			neediness =>	$neediness,
+		};
+	}
+
 	$self->info_log("cid %d to score: %d, %s kb %d->%d, neediness %.1f",
 		$cid, $new_score, $reasons->{$current_reason_mode}{name}, ($karma_bonus eq 'yes' ? 1 : 0), $new_karma_bonus, $neediness);
 
