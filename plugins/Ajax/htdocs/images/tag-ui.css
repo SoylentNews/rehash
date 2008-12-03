@@ -541,3 +541,14 @@ border-top:1px solid transparnt !important;
 /*
 div.tag-display ul, div.tag-display li {display: inline-block;}
 */
+
+
+/*Opera tag bugs*/
+div.tag-widget.opera div.tag-display li {/*ensures the damn pop up things stay with its parents and don't "run away"*/
+display: inline-block
+}
+
+div.tag-widget.opera {/*fixing spacing between this widget and article*/
+padding-top:18px;
+margin-top:-16px;
+}
