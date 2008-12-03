@@ -1885,7 +1885,7 @@ function inlineAdFirehose($article) {
 		return 0;
 
 	if ($article)
-		$article = Slash.Firehose.at_or_below_ad_space($article);
+		$article = Slash.Firehose.ready_ad_space($article);
 	else
 		$article = Slash.Firehose.choose_article_for_next_ad();
 
@@ -1937,9 +1937,14 @@ var	AD_HEIGHT = 300, AD_WIDTH = 300, FOOTER_PADDING = 5,
 	$ad_position,		// 300x300 div that holds the current (if any) ad
 	$current_article,	// the article to which that ad is attached
 	$slashboxes,		// the container in which the ad floats
-	$footer;
+	$footer,
+
+	ready_for_new_ad;	// is the current ad (if any) old enough to be replaced
+				// i.e., has it been shown for at least 30 seconds
 
 $(function(){
+	ready_for_new_ad = true;
+
 	$footer = $('#ft');
 	$slashboxes = $('#slashboxes, #userboxes').
 		eq(0).
@@ -1953,7 +1958,9 @@ $(function(){
 
 	$ad_position.
 		bind('adArticleRemoved', function(){
-			set_current_ad($current_article.next(':visible'));
+			if ( ! ready_for_new_ad ) {
+				set_current_ad($current_article.next(':visible'));
+			}
 		});
 });
 
@@ -2023,6 +2030,10 @@ function set_mode( next ){
 }
 
 function set_current_ad( $new_article, new_ad ){
+	if ( new_ad && ! ready_for_new_ad ) {
+		return;
+	}
+
 	var	have_new_article	= $new_article && $new_article.length,
 		clear_all		= !have_new_article && !new_ad;
 
@@ -2037,6 +2048,8 @@ function set_current_ad( $new_article, new_ad ){
 
 	if ( !clear_all ) {
 		if ( new_ad ) {
+			ready_for_new_ad = false;
+			setTimeout(function(){ ready_for_new_ad=true; }, 30000);
 			current_mode.will_have_content = true;
 			$ad_position.append(new_ad);
 		}
@@ -2146,21 +2159,26 @@ Slash.Firehose.articles_on_screen = function(){
 	}
 }
 
-Slash.Firehose.at_or_below_ad_space = function( $articles ){
+// filter $articles to only those adjacent to available space for an ad
+// return empty list if none, or if not enough time has yet passed to place a new ad
+Slash.Firehose.ready_ad_space = function( $articles ){
+	var $result = $([]);
 	try {
-		var min_top = Math.max(window.pageYOffset, $slashboxes.offset().top + $slashboxes.height());
-		return $articles.filter(function(){
-			return $(this).offset().top >= min_top;
-		});
+		if ( ready_for_new_ad ) {
+			var min_top = Math.max(window.pageYOffset, $slashboxes.offset().top + $slashboxes.height());
+			$result = $articles.filter(function(){
+				return $(this).offset().top >= min_top;
+			});
+		}
 	} catch ( e ) {
 		// don't throw
 	}
 		// just tell the caller no articles supplied are at or below ad-space
-	return $([]);
+	return $result;
 }
 
 Slash.Firehose.choose_article_for_next_ad = function(){
-	var Fh=Slash.Firehose, $articles=Fh.at_or_below_ad_space(Fh.articles_on_screen());
+	var Fh=Slash.Firehose, $articles=Fh.ready_ad_space(Fh.articles_on_screen());
 	return $articles.eq( Math.floor(Math.random()*$articles.length) );
 }
 
