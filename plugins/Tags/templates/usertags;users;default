@@ -24,7 +24,7 @@ __template__
    PROCESS user_titlebar tab_selected='tags' %]
 
 [% IF user.tags_canread_stories && tags_grouped.keys.size %]
-<div><table border="0" cellpadding="0" cellspacing="0" width="100%" class="tagslist">
+<div><table class="tagslist">
 [% FOREACH tagname = tags_grouped.keys.sort;
         tagname_shown = 0;
 	FOREACH tag = tags_grouped.$tagname %]
