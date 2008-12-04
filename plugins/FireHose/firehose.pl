@@ -244,7 +244,7 @@ sub rss {
 	}
 	xmlDisplay($form->{content_type} => {
 		channel => {
-			title		=> "$constants->{sitename} Firehose",
+			title		=> "$constants->{sitename} Firehose - Filtered to  '$options->{fhfilter}'",
 			'link'		=> "$gSkin->{absolutedir}/firehose.pl",
 			descriptions 	=> "$constants->{sitename} Firehose"
 		},
