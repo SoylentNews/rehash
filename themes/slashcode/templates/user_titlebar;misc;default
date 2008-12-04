@@ -55,7 +55,7 @@ IF user.uid == uid;
 		{ link = "$constants.real_rootdir/my/freaks/",		label = "Freaks",	sel_label = "freaks" },
 	); END;
 	IF constants.plugin.Tags; tabs.push(
-		{ link = "$constants.real_rootdir/my/tags/",		label = "Tags",		sel_label = "tags" },
+		{ link = "$constants.real_rootdir/~$url_nick/tags/",		label = "Tags",		sel_label = "tags" },
 	); END;
 	IF constants.plugin.Bookmark; tabs.push(
 		{ link = "$constants.real_rootdir/my/bookmarks/",	label = "Bookmarks",	sel_label = "bookmarks" },
