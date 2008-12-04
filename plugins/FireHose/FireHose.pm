@@ -304,7 +304,8 @@ sub createUpdateItemFromBookmark {
 			activity 	=> $activity,
 			public 		=> "yes",
 			type		=> $type,
-			srcid		=> $id
+			srcid		=> $id,
+			createtime	=> $bookmark->{createdtime},
 		};
 		$data->{introtext} = $options->{introtext} if $options->{introtext};
 		if ($type eq "feed") {
