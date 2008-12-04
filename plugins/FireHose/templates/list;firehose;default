@@ -30,7 +30,7 @@ __template__
 		submission_hash.${submission.subid} = submission;
 	END;
 	submission_accept = submission_count - (submission_reject + submission_pend) %]
-<div id="message"><div class="content"><p>Submission Summary:
+<div id="message"><div class="content"><p class="submissions">Submission Summary:
 [% submission_pend %] pending,
 [% submission_reject %] rejected,
 [% submission_accept %] accepted ([%
@@ -42,10 +42,13 @@ __template__
 %]% accepted)</p></div></div>
 
 
-[% ELSIF options.view == "userjournal" AND (user.uid == options.user_view_uid) %]
+[% ELSIF options.view == "userjournal" %]
 <div id="message"><div class="content">
-	<a href="[% gSkin.rootdir %]/journal.pl?op=list">Manage Journal Entries</a> |
-	<a href="[% gSkin.rootdir %]/journal.pl?op=editprefs">Edit Journal Preferences</a>
+	[% IF user.uid == options.user_view_uid -%]
+	<a href="[% constants.real_rootdir %]/journal.pl?op=list">Manage Journal Entries</a> |
+	<a href="[% constants.real_rootdir %]/journal.pl?op=editprefs">Edit Journal Preferences</a> |
+	[%- END %]
+	<a href="[% constants.real_rootdir %]/~[% user.nickname | strip_paramattr %]/journal/friends">[% user.nickname | strip_literal %]'s Friends' Journals</a>
 </div></div>
 
 [% END %]

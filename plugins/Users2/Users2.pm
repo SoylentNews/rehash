@@ -330,7 +330,7 @@ sub getMarqueeFireHoseId {
 }
 
 sub truncateMarquee {
-        my($self, $marquee, $len) = @_;
+        my($self, $marquee) = @_;
 
         my $text;
         my $linebreak = qr{(?:
@@ -340,22 +340,30 @@ sub truncateMarquee {
                         div | (?:block)?quote | [oud]l
                 )>
         )}x;
-        my $min_chars = 50;
-        my $max_chars = $len || 1000;
+	my $min_chars = 50;
+        my $max_chars = 1500;
+        my $orig_len = length($marquee->{body});
 
-        if (length($marquee) < $min_chars) {
-                $text = $marquee;
+	if (length($marquee->{body}) < $min_chars) {
+                $text = $marquee->{body};
         } else {
-                $text = $1 if $marquee =~ m/^(.{$min_chars,$max_chars})?$linebreak/s;
+                $text = $1 if $marquee->{body} =~ m/^(.{$min_chars,$max_chars})?$linebreak/s;
         }
 
-        $text ||= chopEntity($marquee, $max_chars);
+        $text ||= chopEntity($marquee->{body}, $max_chars);
         local $Slash::Utility::Data::approveTag::admin = 1;
         $text = strip_html($text);
         $text = balanceTags($text, { admin => 1 });
         $text = addDomainTags($text);
 
-        return $text;
+        $marquee->{body} = $text;
+
+        if ($orig_len > length($text)) {
+                $marquee->{truncated} = 1;
+        }
+
+        return $marquee;
+
 }
 
 sub DESTROY {

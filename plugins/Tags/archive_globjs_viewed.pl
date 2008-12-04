@@ -19,7 +19,7 @@ $task{$me}{code} = sub {
 
 	my $min_gvid = $slashdb->sqlSelect('MIN(gvid)', 'globjs_viewed');
 	my $max_gvid = $min_gvid + 50_000;
-	my $where_clause = "gvid < $max_gvid AND viewed_at < DATE_SUB(NOW(), INTERVAL 6 MONTH)";
+	my $where_clause = "gvid < $max_gvid AND viewed_at < DATE_SUB(NOW(), INTERVAL 3 MONTH)";
 
 	my $old_arch_size = $slashdb->sqlSelect('COUNT(*)', 'globjs_viewed_archived');
 	$slashdb->sqlDo("INSERT IGNORE INTO globjs_viewed_archived

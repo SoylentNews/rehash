@@ -1432,6 +1432,7 @@ sub showInfo {
                         $form->{dp} = 'firehose';
 			# Marquee is the "latest thing"
 			$marquee = $users2->getMarquee($latest_comments, $latest_journals, $latest_submissions);
+			$marquee = $users2->truncateMarquee($marquee);
 			$not_fhid = $users2->getMarqueeFireHoseId($marquee);
 		}
 
