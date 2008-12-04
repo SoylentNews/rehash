@@ -22,7 +22,7 @@ __template__
 	ELSIF name == "submissions";
 		filter = '"author: ' _ useredit.nickname _ '" submission';
 	ELSIF name == "bookmarks";
-		filter = '"author: ' _ useredit.nickname _ '" bookmark';
+		filter = '"user: ' _ useredit.nickname _ '" bookmark';
 	ELSIF name == "firehose";
 		filter = '"user: ' _ useredit.nickname _ '"';
 	ELSIF name == "usertag";
