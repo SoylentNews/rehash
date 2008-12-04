@@ -347,6 +347,7 @@ template=templates/u2CommentsDatapane;users;default
 template=templates/u2AdminListComments;users;default
 template=templates/u2UserBoxes;users;default
 template=templates/u2ListComments;users;default
+template=templates/u2_rsslink;users;default
 
 misc=misc/spamarmors
 plugin=Admin

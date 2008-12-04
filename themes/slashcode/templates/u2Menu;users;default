@@ -15,14 +15,14 @@ __template__
 [% tilde = '^'; IF constants.u2; tilde = '~'; END; %]
 <div class="nav">
 <ul class="menu" id="tablist">
-<li[% IF main_view %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]">[% nickname | strip_literal %]</a></li>
-<li[% IF data_pane == 'firehose' && !main_view %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/firehose">Firehose</a></li>
+<li[% IF main_view %] class="active"[% active = 1; ELSE; active = 0; END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]">[% nickname | strip_literal %]</a>[% IF active; PROCESS u2_rsslink useredit=useredit name="firehose"; END %]</li>
+<li[% IF data_pane == 'firehose' && !main_view %] class="active"[% active=1; ELSE; active = 0; END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/firehose">Firehose</a>[% IF active; PROCESS u2_rsslink useredit=useredit name="firehose"; END;%]</li>
 [% IF comments_size != 0 %]<li[% IF data_pane == 'comments' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/comments">Comments</a></li>[% END %]
-[% IF journals_size != 0 %]<li[% IF data_pane == 'journal' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/journal">Journals</a></li>[% END %]
-[% IF submissions_size != 0 %]<li[% IF data_pane == 'submissions' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/submissions">Submissions</a></li>[% END %]
-[% IF bookmarks_size != 0 %]<li[% IF data_pane == 'bookmarks' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/bookmarks">Bookmarks</a></li>[% END %]
+[% IF journals_size != 0 %]<li[% IF data_pane == 'journal' %] class="active"[% active = 1; ELSE; active=0; END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/journal">Journals</a> [% IF active; PROCESS u2_rsslink useredit=useredit name="journal"; END; %]</li>[% END %]
+[% IF submissions_size != 0 %]<li[% IF data_pane == 'submissions' %] class="active"[% active = 1; ELSE; active=0; END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/submissions">Submissions</a>[% IF active; PROCESS u2_rsslink useredit=useredit name="submissions"; END %]</li>[% END %]
+[% IF bookmarks_size != 0 %]<li[% IF data_pane == 'bookmarks' %] class="active"[% active = 1; ELSE; active=0; END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/bookmarks">Bookmarks</a>[% IF active; PROCESS u2_rsslink useredit=useredit name="bookmarks"; END %]</li>[% END %]
 <li[% IF data_pane == 'friends' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/friends">Friends</a></li>
-[% IF tagshist_size > 2 || data_pane == "usertag" %]<li[% IF data_pane == 'tags' || data_pane == 'usertag' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/tags">Tags</a></li>[% END %]
+[% IF tagshist_size > 2 || data_pane == "usertag" %]<li[% IF data_pane == 'tags' || data_pane == 'usertag' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/tags">Tags</a>[% IF data_pane == 'usertag'; PROCESS u2_rsslink useredit=useredit name="usertag"; END; %]</li>[% END %]
 [% IF is_admin %]<li[% IF data_pane == 'admin' %] class="active"[% END %]><a href="[% gSkin.rootdir %]/[% tilde; nickname | strip_paramattr %]/admin">Admin</a></li>[% END %]
 </ul>
 </div>

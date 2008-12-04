@@ -1,0 +1,39 @@
+__section__
+default
+__description__
+You should describe stuff here.
+__title__
+Useless title to template
+__page__
+users
+__lang__
+en_US
+__name__
+u2_rsslink
+__seclev__
+10000
+__template__
+[% IF !user.is_anon;
+	filter_str = "";
+	IF name == "journal";
+		filter = '"author: ' _ useredit.nickname _ '" journal';
+	ELSIF name == "journalfriends";
+		filter = '"authorfriend: ' _ useredit.nickname _ '" journal';
+	ELSIF name == "submissions";
+		filter = '"author: ' _ useredit.nickname _ '" submission';
+	ELSIF name == "bookmarks";
+		filter = '"author: ' _ useredit.nickname _ '" bookmark';
+	ELSIF name == "firehose";
+		filter = '"user: ' _ useredit.nickname _ '"';
+	ELSIF name == "usertag";
+		filter = '"user: ' _ useredit.nickname _ '" "tag:' _ form.tagname _ '"';
+	END;
+
+	filter_str = "fhfilter=" _ Slash.strip_paramattr(filter);
+	
+	rss_param_str = "&amp;orderdir=DESC&amp;orderby=createtime&amp;color=black&amp;duration=-1&amp;startdate=";
+	rss_param_str = filter_str _ rss_param_str;
+	rss_link = Slash.root2abs() _ "/firehose.pl?op=rss&amp;content_type=rss&amp;" _ rss_param_str _ "&amp;logtoken=" _ Slash.strip_paramattr(Slash.getPublicLogToken());
+	%]
+	<a href="[% rss_link %]"><img src="[% constants.imagedir %]/feed.png" alt="RSS for [% alt %]"></a>
+[% END %]
