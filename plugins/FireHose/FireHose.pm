@@ -266,6 +266,13 @@ sub createItemFromJournal {
 	}
 }
 
+sub getUserBookmarkForUrl {
+	my($self, $uid, $url_id) = @_;
+	my $uid_q = $self->sqlQuote($uid);
+	my $url_id_q = $self->sqlQuote($url_id);
+	return $self->sqlSelectHashref("*", "bookmarks", "uid=$uid_q and url_id=$url_id_q");
+}
+
 sub createUpdateItemFromBookmark {
 	my($self, $id, $options) = @_;
 	$options ||= {};
