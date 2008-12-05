@@ -97,7 +97,7 @@ sub populate_tags_udc {
 	my $comments_gtid = $tags_reader->getGlobjTypes()->{comments} || 5;
 	my $tags_ar = $tags_reader->sqlSelectAllHashrefArray(
 		'tags.*',
-		'tags NATURAL JOIN globjids',
+		'tags NATURAL JOIN globjs',
 		"created_at BETWEEN FROM_UNIXTIME($hour) AND DATE_ADD(FROM_UNIXTIME($hour), INTERVAL 3599 SECOND)
 		 AND tagnameid IN ($dnid, $upid)
 		 AND inactivated IS NULL
