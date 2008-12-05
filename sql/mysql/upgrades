@@ -5716,4 +5716,9 @@ ALTER TABLE shill_ids ADD COLUMN skid SMALLINT DEFAULT '0' NOT NULL;
 UPDATE vars SET value = 'T_2_5_0_233' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHDOT LAST UPDATED HERE
+
 UPDATE firehose_view SET filter='"user:{nickname}" bookmark' WHERE viewname="userbookmark";
+
+# 2008-12-04
+UPDATE vars SET value = 'T_2_5_0_234' WHERE name = 'cvs_tag_currentcode';
+
