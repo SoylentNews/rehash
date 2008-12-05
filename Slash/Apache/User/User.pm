@@ -575,7 +575,7 @@ my %ops_u = (
 	amigos          => { args => 'nick=__NICK__&uid=__UID__&op=friendview', uri  => 'journal.pl' },
 	bookmarks       => { args => 'nick=__NICK__&uid=__UID__&op=showbookmarks' },
 	firehose        => { args => 'uid=__UID__&op=userfirehose' },
-	journal         => { args => 'nick=__NICK__&uid=__UID__&op=display' },
+	journal         => { args => 'nick=__NICK__&uid=__UID__&op=display', uri => 'journal.pl' },
 	tags            => { args => 'nick=__NICK__&uid=__UID__&op=showtags' },
 
 	friends         => { args => 'nick=__NICK__&uid=__UID__&op=friends', uri  => 'zoo.pl' },
