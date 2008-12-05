@@ -110,7 +110,7 @@ sub init_tagfilters {
 }
 
 sub run_process {
-	my($self, $affected_id, $tags_ar) = @_;
+	my($self, $affected_id, $tags_ar, $options) = @_;
 	my $constants = getCurrentStatic();
 	my $tagsdb = getObject('Slash::Tags');
 	my $tagboxdb = getObject('Slash::Tagbox');
