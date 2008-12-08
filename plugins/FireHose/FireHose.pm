@@ -1839,7 +1839,7 @@ sub setFireHose {
 	}
 
 	if (!exists($data->{last_update}) && !exists($data->{-last_update})) {
-		my @non_trivial = grep {!/^(activity|toptags)$/} keys %$data;
+		my @non_trivial = grep {!/^activity$/} keys %$data;
 		if (@non_trivial > 0) {
 			$data->{-last_update} = 'NOW()';
 		} else {
