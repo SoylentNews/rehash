@@ -5686,8 +5686,6 @@ INSERT INTO firehose_view (id, uid, viewname, useparentfilter, filter, orderby, 
 # 2008-11-20
 UPDATE vars SET value = 'T_2_5_0_231' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHCODE/USEPERL LAST UPDATED HERE
-
 UPDATE firehose SET public="yes" WHERE type="journal";
 
 create temporary table firehose_deletedjournal (id int unsigned not null primary key);
@@ -5715,10 +5713,11 @@ ALTER TABLE shill_ids ADD COLUMN skid SMALLINT DEFAULT '0' NOT NULL;
 # 2008-11-26
 UPDATE vars SET value = 'T_2_5_0_233' WHERE name = 'cvs_tag_currentcode';
 
-# SLASHDOT LAST UPDATED HERE
-
 UPDATE firehose_view SET filter='"user:{nickname}" bookmark' WHERE viewname="userbookmark";
 
 # 2008-12-04
 UPDATE vars SET value = 'T_2_5_0_234' WHERE name = 'cvs_tag_currentcode';
 
+# SLASHCODE/USEPERL LAST UPDATED HERE
+
+# SLASHDOT LAST UPDATED HERE
