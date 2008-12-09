@@ -667,7 +667,6 @@ var tag_widget_fns = {
 						var	$parent		= $display.parent(),
 							global_left	= $related_trigger.offset().left,
 							parent_left	= $parent.offset().left,
-							max_left	= $parent.width(),
 							best_left	= global_left - parent_left;
 
 						$display.queue(function(){
@@ -687,14 +686,15 @@ var tag_widget_fns = {
 							$display.show().css('height', '0');
 							$parent.show();
 							try {
-								max_left -= $display.find('ul').width();
+								var max_left = $parent.width() - $display.find('ul').width();
+								best_left = Math.min(best_left, max_left);
 							} catch ( e0 ) {
 							}
 
 							$display.hide();
 							$display.css({
 								height:		'',
-								left:		Math.min(best_left, max_left)
+								left:		best_left
 							});
 
 							$display.slideDown(400);
