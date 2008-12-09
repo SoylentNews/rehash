@@ -252,17 +252,6 @@ $(function(){
 			if ( gFocusedText === this ) {
 				gFocusedText = null;
 			}
-		}).
-		autocomplete('/ajax.pl', {
-			loadingClass:		'working',
-			multiple:		true,
-			multipleSeparator:	' ',
-			minChars:		3,
-			autoFill:		true,
-			max:			25,
-			extraParams: {
-				op:	'tags_list_tagnames'
-			}
 		});
 
 	$('#firehoselist').click(firehose_click_tag);
