@@ -890,7 +890,12 @@ sub getFireHoseEssentials {
 	}
 
 	my $rows = $self->sqlSelectAllHashrefArray("count(*)", $tables, $where, $count_other);
-	my $count = @$rows;
+	my $row_num = @$rows;
+
+	my $count = $row_num;
+	if ($row_num == 1 && !$count_other) {
+		$count = $rows->[0]->{"count(*)"};
+	}
 
 	my $page_size = $ps || 1;
 	$results->{records_pages} ||= ceil($count / $page_size);
@@ -950,8 +955,13 @@ sub getNextDayAndCount {
 
 	my $where = join ' AND ', @$where_ar, "createtime $it_cmp $i_time_q", "createtime $bt_cmp $border_time_q";
 
-	my $rows = $self->sqlSelectAllHashrefArray("count(*)", $tables, $where, $other);
-	my $day_count = @$rows;
+	my $rows = $self->sqlSelectAllHashrefArray("firehose.id", $tables, $where, $other);
+	my $row_num = @$rows;
+	my $day_count = $row_num;
+	
+	if ($row_num == 1 && !$other) {
+		$day_count = $rows->[0]->{'count(*)'};
+	}
 
 	my $day_labels = getOlderDaysFromDay($item_day, 0, 0, { skip_add_today => 1, show_future_days => 1, force => 1 });
 
