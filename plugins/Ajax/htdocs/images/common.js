@@ -448,6 +448,10 @@ function firehose_set_options(name, value, context) {
 	}
 	}
 
+	if (name == "view" || name == "tab") {
+		$('#firehoselist').html("<h1 class='loading_msg'>Loading New Items</h1>");
+	}
+
 	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" || name == "issue" || name == "pagesize") {
 		params[name] = value;
 		if (name == "startdate") {
@@ -953,6 +957,9 @@ function firehose_handle_update() {
 	var saved_selection = new $.TextSelection(gFocusedText);
 	var $menu = $('.ac_results:visible');
 
+	var add_behind_scenes = $("#firehoselist .loading_msg").length;
+	if (add_behind_scenes) { $('.busy').show(); }
+
 	if (firehose_updates.length > 0) {
 		var el = firehose_updates.pop();
 		var fh = 'firehose-' + el[1];
@@ -987,6 +994,10 @@ function firehose_handle_update() {
 				}
 			} else {
 				$('#firehoselist').prepend(el[2]);
+			}
+
+			if (add_behind_scenes) {
+				need_animate = 0;
 			}
 
 			var toheight = 50;
@@ -1063,7 +1074,7 @@ function firehose_handle_update() {
 					need_animate = 0;
 				}
 
-				if ((firehose_removals < 10 ) || !need_animate) {
+				if ((firehose_removals < 10 ) && !add_behind_scenes ) {
 					myAnim.onComplete.subscribe(function() {
 						var elem = this.getEl();
 						if (elem && elem.parentNode) {
@@ -1081,12 +1092,23 @@ function firehose_handle_update() {
 				}
 			}
 		}
-		if(!need_animate) {
-			wait_interval = 10;
+		if(!need_animate || add_behind_scenes) {
+			wait_interval = 0;
 		}
+		
+		//console.log("Wait: " + wait_interval);
 		setTimeout(firehose_handle_update, wait_interval);
 	} else {
 		firehose_reorder();
+		if (add_behind_scenes) {
+			$('#firehoselist .loading_msg').each(function() { if(this && this.parentNode) { this.parentNode.removeChild(this);} });
+			if (elem && elem.parentNode) {
+				elem.parentNode.removeChild(elem);
+			}
+			$('#firehoselist').show('slow');
+			$('.busy').hide();
+
+		}
 		firehose_get_next_updates();
 	}
 
@@ -1197,6 +1219,10 @@ function firehose_get_updates_handler(transport) {
 		firehose_updates_size = firehose_updates.length;
 		firehose_removed_first = 0;
 		processed = processed + 1;
+		if ($('#firehoselist .loading_msg').length) {
+			$('#firehoselist').hide();
+			$('#firehoselist .loading_msg').show();
+		}
 		firehose_handle_update();
 	}
 }
