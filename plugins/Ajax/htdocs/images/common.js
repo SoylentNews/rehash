@@ -40,6 +40,7 @@ var firehose_settings = {};
   firehose_settings.section = 0;
   firehose_settings.more_num = 0;
   firehose_settings.metamod = 0;
+  firehose_settings.admin_filters = 0;
 
 // Settings to port out of settings object
   firehose_item_count = 0;

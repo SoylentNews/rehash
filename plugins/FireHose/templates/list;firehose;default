@@ -205,6 +205,9 @@ cmdrtaco dot net but be forgiving of beta code!
 	[% IF options.index %]
 		firehose_settings.index = 1;
 	[% END %]
+	[% IF options.admin_filters %]
+		firehose_settings.admin_filters = 1;
+	[% END %]
 
 	var firehose_action_time = 0;
 	var firehose_user_class = [% user.is_anon ? 0 : 1 %];

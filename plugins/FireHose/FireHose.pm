@@ -846,7 +846,7 @@ sub getFireHoseEssentials {
 		push @where, 'rejected = ' . $self->sqlQuote($options->{rejected});
 	}
 
-	if (defined $options->{category} || $user->{is_admin}) {
+	if (defined $options->{category} || ($user->{is_admin} && $options->{admin_filters})) {
 		$options->{category} ||= '';
 		push @where, 'category = ' . $self->sqlQuote($options->{category});
 	}
@@ -2637,19 +2637,23 @@ sub getAndSetOptions {
 	}
 
 	$options->{public} = "yes";
+
+	if ($options->{view} eq "daddypants" || $form->{admin_filters}) {
+		$options->{admin_filters} = 1;
+	}
+
 	if ($adminmode) {
 		# $options->{attention_needed} = "yes";
-		if ($firehose_page ne "user") {
+		if ($options->{admin_filters}) {
 			$options->{accepted} = "no" if !$options->{accepted};
 			$options->{rejected} = "no" if !$options->{rejected};
 		}
 		$options->{duration} ||= -1;
 	} else  {
 		if ($firehose_page ne "user") {
-			$options->{accepted} = "no" if !$options->{accepted};
+			# $options->{accepted} = "no" if !$options->{accepted};
 		}
 
-		$options->{duration} ||= 1;
 		if ($user->{is_subscriber} && (!$no_saved || $form->{index})) {
 			$options->{createtime_subscriber_future} = 1;
 		} else {
