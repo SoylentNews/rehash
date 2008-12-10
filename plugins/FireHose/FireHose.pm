@@ -1507,7 +1507,14 @@ sub ajaxFireHoseGetUpdates {
 				if (!$item->{day}) {
 					my $url 	= $slashdb->getUrl($item->{url_id});
 					my $the_user  	= $slashdb->getUser($item->{uid});
-					$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user, options => $opts }, { Return => 1 });
+					$item->{atstorytime} = '__TIME_TAG__';
+					my $title = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user, options => $opts }, { Return => 1 });
+					
+					my $atstorytime;
+					$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
+					$title =~ s/\Q__TIME_TAG__\E/$atstorytime/;
+					$html->{"title-$_->{id}"} = $title;
+
 					my $introtext = $item->{introtext};
 					slashDisplay("formatHoseIntro", { introtext => $introtext, url => $url, $item => $item }, { Return => 1 });
 					$html->{"text-$_->{id}"} = $introtext;
@@ -1928,12 +1935,14 @@ sub genFireHoseMCDKey {
 	return '' if $gSkin->{skid} != $constants->{mainpage_skid};
 	return '' if !$constants->{firehose_mcd_disp};
 
+	my $index = $form->{index} ? 1 : 0;
+
 	if ($mcd
 		&& !$options->{nodates} && !$options->{nobylines} && !$options->{nocolors}
 		&& !$options->{nothumbs} && !$options->{vote}
-		&& !$form->{skippop} && !$form->{index}
+		&& !$form->{skippop} 
 		&& !$user->{is_admin}) {
-		$mcdkey = "$self->{_mcd_keyprefix}:dispfirehose-$options->{mode}:$id";
+		$mcdkey = "$self->{_mcd_keyprefix}:dispfirehose-$options->{mode}:$id:$index";
 	}
 	return $mcdkey;
 }
@@ -1944,9 +1953,12 @@ sub genFireHoseMCDAllKeys {
 	return [ ] if !$constants->{firehose_mcd_disp};
 	my $keys = [ ];
 	my $mcd = $self->getMCD();
+	
 	if ($mcd) {
 		foreach my $mode (qw(full fulltitle)) {
-			push @$keys, "$self->{_mcd_keyprefix}:dispfirehose-$mode:$id";
+			foreach my $index (qw(0 1)) {
+				push @$keys, "$self->{_mcd_keyprefix}:dispfirehose-$mode:$id:$index";
+			}
 		}
 	}
 	return $keys;
@@ -1955,38 +1967,48 @@ sub genFireHoseMCDAllKeys {
 sub dispFireHose {
 	my($self, $item, $options) = @_;
 	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
 	$options ||= {};
 	my $mcd = $self->getMCD();
 	my $mcdkey;
-	if ($mcd) {
-		$mcdkey = $self->genFireHoseMCDKey($item->{id}, $options);
-		my $cached;
-		if ($mcdkey) {
-			$cached = $mcd->get("$mcdkey");
-		}
-		return $cached if $cached;
-	}
-
-	my $retval = slashDisplay('dispFireHose', {
-		item			=> $item,
-		mode			=> $options->{mode},
-		tags_top		=> $options->{tags_top},	# old-style
-		top_tags		=> $options->{top_tags},	# new-style
-		system_tags		=> $options->{system_tags},	# new-style
-		options			=> $options->{options},
-		vote			=> $options->{vote},
-		bodycontent_include	=> $options->{bodycontent_include},
-		nostorylinkwrapper	=> $options->{nostorylinkwrapper},
-		view_mode		=> $options->{view_mode}
-	}, { Page => "firehose",  Return => 1 });
+	my $retval;
 
 	if ($mcd) {
 		$mcdkey = $self->genFireHoseMCDKey($item->{id}, $options);
 		if ($mcdkey) {
-			my $exptime = $constants->{firehose_memcached_disp_exptime} || 180;
-			$mcd->set($mcdkey, $retval, $exptime);
+			$retval = $mcd->get("$mcdkey");
 		}
 	}
+
+	$item->{atstorytime} = "__TIME_TAG__"; 
+
+	if (!$retval) {  # No cache hit
+		$retval = slashDisplay('dispFireHose', {
+			item			=> $item,
+			mode			=> $options->{mode},
+			tags_top		=> $options->{tags_top},	# old-style
+			top_tags		=> $options->{top_tags},	# new-style
+			system_tags		=> $options->{system_tags},	# new-style
+			options			=> $options->{options},
+			vote			=> $options->{vote},
+			bodycontent_include	=> $options->{bodycontent_include},
+			nostorylinkwrapper	=> $options->{nostorylinkwrapper},
+			view_mode		=> $options->{view_mode}
+		}, { Page => "firehose",  Return => 1 });
+
+		if ($mcd) {
+			$mcdkey = $self->genFireHoseMCDKey($item->{id}, $options);
+			if ($mcdkey) {
+				my $exptime = $constants->{firehose_memcached_disp_exptime} || 180;
+				$mcd->set($mcdkey, $retval, $exptime);
+			}
+		}
+	}
+
+	my $atstorytime;
+	$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
+	$retval =~ s/\Q__TIME_TAG__\E/$atstorytime/;
+
 	return $retval;
 }
 
