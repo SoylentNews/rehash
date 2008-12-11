@@ -94,7 +94,7 @@ title = title _ " " _ '<span class="date';
 IF options.nodates; 
 	title = title _ " hide"; 
 END;
-title = title _ '">' _ Slash.timeCalc(item.createtime, "%Y-%m-%d %H:%M") _  "</span> <span class=\"nickname";
+title = title _ '">' _ item.atstorytime _  "</span> <span class=\"nickname";
 IF options.nobylines; 
 	title = title _ " hide"; 
 END;
