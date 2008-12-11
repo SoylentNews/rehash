@@ -1968,27 +1968,17 @@ function inlineAdFirehose($article) {
 var	AD_HEIGHT = 300, AD_WIDTH = 300,
 
 	$ad_position,		// 300x300 div that holds the current (if any) ad
-	$ad_target_article,	// the article to which that ad is attached
+	ad_target_article,	// the article to which that ad is attached
 	$ad_offset_parent,	// the container in which the ad _position_ floats (between articles)
 	$slashboxes,		// the container (sort of) in which the ad content actually appears (though not as a child) 
 	$footer,
 
 	is_ad_locked;		// ad must be shown for at least 30 seconds
 
-/* OK, new design.
-	#floating-slashbox-ad _only_ exists while there is an ad in place
-	we still track the "current article", because if the minimum lifetime has expired
-		deleting that article should delete the ad as well
-	we never re-parent the ad: when created, we insert as the previous sibling of the
-		provided article
-	best would be if the CSS knows to limit vertical position at top and bottom
-	you cannot move an ad to point to a different article
- */
-
 $(function(){
 	is_ad_locked = false;
 	$ad_position = $([]);
-	$ad_target_article = $([]);
+	ad_target_article = null;
 
 	$footer = $('#ft');
 	$slashboxes = $('#slashboxes, #userboxes').eq(0);
@@ -1999,19 +1989,20 @@ $(function(){
 });
 
 function notice_article_removed( event, removed_article ){
-	if ( $ad_target_article.index(removed_article) != -1 ) {
+	if ( ad_target_article === removed_article ) {
 		remove_ad();
 	}
 }
 
 function remove_ad(){
+	ad_target_article = null;
+
 	if ( is_ad_locked ) {
 		return false;
 	}
 
 	$ad_position.remove();
 	$ad_position = $([]);
-	$ad_target_article = $([]);
 	return true;
 }
 
@@ -2020,13 +2011,15 @@ function insert_ad( $article, ad ){
 		return;
 	}
 
-	$ad_target_article = $article.before('<div id="floating-slashbox-ad" class="Article" />');
-	$ad_position = $ad_target_article.prev();
-	$ad_position.append(ad);
+	ad_target_article = $article[0];
+	$ad_position = $article.
+		before('<div id="floating-slashbox-ad" class="No" />').
+		prev().
+			append(ad);
 
 	setTimeout(function(){
 		is_ad_locked = false;
-		if ( ! $ad_target_article.length ) {
+		if ( ! ad_target_article ) {
 			remove_ad();
 		}
 	}, 30000);
