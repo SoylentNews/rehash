@@ -2288,6 +2288,8 @@ sub getAndSetOptions {
 	my $form 	= getCurrentForm();
 	my $gSkin	= getCurrentSkin();
 
+	my $mainpage = 0;
+
 	my ($f_change, $v_change, $t_change);
 
 	if (!$opts->{initial}) {
@@ -2570,6 +2572,9 @@ sub getAndSetOptions {
 		} elsif ($user->{is_admin} && $validator->{categories}{$_} && !defined $fh_options->{category}) {
 			$fh_options->{category} = $_;
 		} elsif ($skin_nexus{$_}) {
+				if (!$not && $skin_nexus{$_} == $constants->{mainpage_nexus_tid}) {
+					$mainpage =1;
+				}
 				push @{$fh_options->{$not."nexus"}}, $skin_nexus{$_};
 		} elsif ($user->{is_admin} && $_ eq "rejected") {
 			$fh_options->{rejected} = "yes";
@@ -2626,8 +2631,7 @@ sub getAndSetOptions {
 	}
 
 	# push all necessary nexuses on if we want stories show as brief
-	if ($constants->{brief_sectional_mainpage} && $the_skin->{nexus} == $constants->{mainpage_nexus_tid} &&
-		$options->{fhfilter} eq "$the_skin->{name} story") {
+	if ($constants->{brief_sectional_mainpage} && $the_skin->{nexus} == $constants->{mainpage_nexus_tid} && $mainpage) {
 		my $nexus_children = $self->getMainpageDisplayableNexuses();
 		push @{$fh_options->{nexus}}, @$nexus_children;
 
@@ -2743,7 +2747,7 @@ sub getAndSetOptions {
 
 	$options->{smalldevices} = 1 if $self->shouldForceSmall();
 	$options->{limit} = $self->getFireHoseLimitSize($options->{mode}, $pagesize, $options->{smalldevices}, $options);
-
+	
 	return $options;
 }
 
