@@ -699,54 +699,6 @@ sub saveSub {
 	yourPendingSubmissions($constants, $slashdb, $user, $form, { skip_submit_body => 1 });
 	print getData("submit_body_close");
 
-        if (!$user->{is_anon}) {
-                my $events = $slashdb->sqlSelectAllHashref(
-                        'eid', 'eid, date', 'user_events', "uid = $uid and code = 3");
-
-                # Delete the oldest event for this user if they already have 5 events.
-                if ((scalar keys %$events) == 5) {
-                        my $eid = [sort keys %$events]->[0];
-                        $slashdb->sqlDelete('user_events', "uid = $uid and code = 3 and eid = $eid");
-                }
-
-                my $submission_id =
-                        $slashdb->sqlSelect("id", "firehose", "uid = $uid and srcid = " . $messagesub->{subid} . " and type = 'submission'");
-
-                # Insert event
-                $slashdb->sqlInsert('user_events', {
-                        code  => 3,
-                        uid   => $uid,
-                        event => $submission_id,
-                        -date  => 'NOW()',
-                });
-
-                # Create/update event block
-                my $event_blocks = $slashdb->sqlSelectAllHashref(
-                        'uid', 'bid, uid, block', 'user_event_blocks', "uid = $uid and code = 3");
-
-                # New block
-                if (!%$event_blocks) {
-                        $slashdb->sqlInsert('user_event_blocks', {
-                                code  => 3,
-                                uid   => $uid,
-                                block => $submission_id,
-                         });
-                } else {
-                        my @blocks = split(/,/, $event_blocks->{$uid}->{block});
-
-                        # Remove oldest event from this block
-                        if (scalar @blocks == 5) {
-                                @blocks = @blocks[1 .. 4];
-                        }
-
-                        # Append new event
-                        $blocks[$#blocks + 1] = $submission_id;
-                        my $new_blocks = join(",", @blocks);
-
-                        $slashdb->sqlUpdate('user_event_blocks', { block => $new_blocks }, "uid = $uid and code = 3");
-                }
-        }
-
 	return(1);
 }
 
