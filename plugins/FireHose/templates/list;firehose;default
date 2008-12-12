@@ -47,8 +47,8 @@ __template__
 	[% IF user.uid == options.user_view_uid -%]
 	<a href="[% constants.real_rootdir %]/journal.pl?op=list">Manage Journal Entries</a> |
 	<a href="[% constants.real_rootdir %]/journal.pl?op=editprefs">Edit Journal Preferences</a> |
-	[%- END %]
-	<a href="[% constants.real_rootdir %]/~[% user.nickname | strip_paramattr %]/journal/friends">[% user.nickname | strip_literal %]'s Friends' Journals</a>
+	[%- END; this_user_nickname = Slash.db.getUser(options.user_view_uid, 'nickname') # options.user_view is not always there ... %]
+	<a href="[% constants.real_rootdir %]/~[% this_user_nickname | strip_paramattr %]/journal/friends">[% this_user_nickname | strip_literal %]'s Friends' Journals</a>
 </div></div>
 
 [% END %]
