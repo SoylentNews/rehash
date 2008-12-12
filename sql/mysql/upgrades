@@ -5720,11 +5720,11 @@ UPDATE vars SET value = 'T_2_5_0_234' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 
-# SLASHDOT LAST UPDATED HERE
-
 # for plugins/FireHose
 ALTER TABLE firehose ADD INDEX last_update (last_update);
 
 # 2008-12-11
 UPDATE vars SET value = 'T_2_5_0_235' WHERE name = 'cvs_tag_currentcode';
+
+# SLASHDOT LAST UPDATED HERE
 
