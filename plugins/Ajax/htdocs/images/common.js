@@ -40,6 +40,7 @@ var firehose_settings = {};
   firehose_settings.section = 0;
   firehose_settings.more_num = 0;
   firehose_settings.metamod = 0;
+  firehose_settings.admin_filters = 0;
 
 // Settings to port out of settings object
   firehose_item_count = 0;
@@ -445,6 +446,10 @@ function firehose_set_options(name, value, context) {
 			firehose_remove_all_items();
 		}
 	}
+	}
+
+	if (name == "view" || name == "tab") {
+		$('#firehoselist').html("<h1 class='loading_msg'>Loading New Items</h1>");
 	}
 
 	if (name == "color" || name == "tab" || name == "pause" || name == "startdate" || name == "duration" || name == "issue" || name == "pagesize") {
@@ -952,6 +957,9 @@ function firehose_handle_update() {
 	var saved_selection = new $.TextSelection(gFocusedText);
 	var $menu = $('.ac_results:visible');
 
+	var add_behind_scenes = $("#firehoselist .loading_msg").length;
+	if (add_behind_scenes) { $('.busy').show(); }
+
 	if (firehose_updates.length > 0) {
 		var el = firehose_updates.pop();
 		var fh = 'firehose-' + el[1];
@@ -968,7 +976,14 @@ function firehose_handle_update() {
 					need_animate = 0;
 				}
 			} else if (firehose_after[el[1]] && $('#firehose-' + firehose_after[el[1]]).size()) {
-				$('#firehose-' + firehose_after[el[1]]).before(el[2]);
+
+				// don't insert a new article between the floating slashbox ad and its article
+				var $landmark = $('#firehose-' + firehose_after[el[1]]), $prev = $landmark.prev();
+				if ( $prev.is('#floating-slashbox-ad') ) {
+					$landmark = $prev;
+				}
+
+				$landmark.before(el[2]);
 				if (!isInWindow($dom('title-'+ firehose_after[el[1]]))) {
 					need_animate = 0;
 				}
@@ -979,6 +994,10 @@ function firehose_handle_update() {
 				}
 			} else {
 				$('#firehoselist').prepend(el[2]);
+			}
+
+			if (add_behind_scenes) {
+				need_animate = 0;
 			}
 
 			var toheight = 50;
@@ -1055,7 +1074,7 @@ function firehose_handle_update() {
 					need_animate = 0;
 				}
 
-				if ((firehose_removals < 10 ) || !need_animate) {
+				if ((firehose_removals < 10 ) && !add_behind_scenes ) {
 					myAnim.onComplete.subscribe(function() {
 						var elem = this.getEl();
 						if (elem && elem.parentNode) {
@@ -1073,12 +1092,23 @@ function firehose_handle_update() {
 				}
 			}
 		}
-		if(!need_animate) {
-			wait_interval = 10;
+		if(!need_animate || add_behind_scenes) {
+			wait_interval = 0;
 		}
+		
+		//console.log("Wait: " + wait_interval);
 		setTimeout(firehose_handle_update, wait_interval);
 	} else {
 		firehose_reorder();
+		if (add_behind_scenes) {
+			$('#firehoselist .loading_msg').each(function() { if(this && this.parentNode) { this.parentNode.removeChild(this);} });
+			if (elem && elem.parentNode) {
+				elem.parentNode.removeChild(elem);
+			}
+			$('#firehoselist').show('slow');
+			$('.busy').hide();
+
+		}
 		firehose_get_next_updates();
 	}
 
@@ -1189,6 +1219,10 @@ function firehose_get_updates_handler(transport) {
 		firehose_updates_size = firehose_updates.length;
 		firehose_removed_first = 0;
 		processed = processed + 1;
+		if ($('#firehoselist .loading_msg').length) {
+			$('#firehoselist').hide();
+			$('#firehoselist .loading_msg').show();
+		}
 		firehose_handle_update();
 	}
 }
@@ -1931,184 +1965,149 @@ function inlineAdFirehose($article) {
 //
 
 
-var	AD_HEIGHT = 300, AD_WIDTH = 300, FOOTER_PADDING = 5,
+var	AD_HEIGHT = 300, AD_WIDTH = 300,
 
-	current_mode = { has_content: false },
 	$ad_position,		// 300x300 div that holds the current (if any) ad
-	$current_article,	// the article to which that ad is attached
-	$slashboxes,		// the container in which the ad floats
+	ad_target_article,	// the article to which that ad is attached
+	$ad_offset_parent,	// the container in which the ad _position_ floats (between articles)
+	$slashboxes,		// the container (sort of) in which the ad content actually appears (though not as a child) 
 	$footer,
 
-	ready_for_new_ad;	// is the current ad (if any) old enough to be replaced
-				// i.e., has it been shown for at least 30 seconds
+	is_ad_locked;		// ad must be shown for at least 30 seconds
 
 $(function(){
-	ready_for_new_ad = true;
+	is_ad_locked = false;
+	$ad_position = $([]);
+	ad_target_article = null;
 
 	$footer = $('#ft');
-	$slashboxes = $('#slashboxes, #userboxes').
-		eq(0).
-		append('<div id="floating-slashbox-ad" />');
-	$ad_position = $slashboxes.find('#floating-slashbox-ad');
+	$slashboxes = $('#slashboxes, #userboxes').eq(0);
 
-	$(window).scroll(fix_ad_position);
 	$('#firehoselist').
 		bind('articlesMoved', fix_ad_position).
 		bind('beforeArticleRemoved', notice_article_removed);
-
-	$ad_position.
-		bind('adArticleRemoved', function(){
-			if ( ! ready_for_new_ad ) {
-				set_current_ad($current_article.next(':visible'));
-			}
-		});
 });
 
 function notice_article_removed( event, removed_article ){
-	if ( current_mode.has_content && $current_article[0]===removed_article ) {
-		$ad_position.trigger('adArticleRemoved');
+	if ( ad_target_article === removed_article ) {
+		remove_ad();
 	}
 }
 
-function if_same_mode( a, b ){
-	return	(!a.has_content && !b.has_content) ||
-		(
-			(a.has_content == b.has_content) &&
-			(a.is_in_window == b.is_in_window) &&
-			(a.pinned == b.pinned)
-		);
-}
+function remove_ad(){
+	ad_target_article = null;
 
-function set_mode( next ){
-	var cur = current_mode;
-
-	// if it's actually a change...
-	if ( ! if_same_mode(cur, next) ) {
-		if ( ! next.has_content ) {
-			$ad_position.hide();
-		} else if ( cur.pinned != next.pinned ) {
-			$ad_position.hide();
-
-			var next_class = next.pinned || '';
-			if ( next.pinned == 'Article' ) {
-				$current_article.
-					prepend($ad_position).
-					css('overflow', 'visible');
-			} else if ( next.pinned == 'Bottom' ) {
-				$slashboxes.after($ad_position);
-				next_class += ' yui_b';
-			} else {
-				$slashboxes.append($ad_position);
-			}
-
-			$ad_position.setClass(next_class);
-
-			if ( !cur.has_content ) {
-				$ad_position.fadeIn('fast');
-			} else {
-				$ad_position.show();
-			}
-		}
-
-		var event_name;
-		if ( cur.has_content != next.has_content ) {
-			event_name = next.has_content ? 'adInserted' : 'adRemoved';
-		} else if ( cur.pinned != next.pinned ) {
-			event_name = 'adPinnedTo' + next.pinned;
-		} else if ( cur.is_in_window != next.is_in_window ) {
-			event_name = next.is_in_window ? 'adMovedIntoWindow' : 'adMovedOutOfWindow';
-		} else if ( cur.top != next.top ) {
-			event_name = 'adMoved';
-		}
-
-		current_mode = next;
-
-		if ( event_name ) {
-			$ad_position.trigger(event_name);
-		}
+	if ( is_ad_locked ) {
+		return false;
 	}
+
+	$ad_position.remove();
+	$ad_position = $([]);
+	return true;
 }
 
-function set_current_ad( $new_article, new_ad ){
-	if ( new_ad && ! ready_for_new_ad ) {
+function insert_ad( $article, ad ){
+	if ( !ad || !$article || $article.length != 1 || !remove_ad() ) {
 		return;
 	}
 
-	var	have_new_article	= $new_article && $new_article.length,
-		clear_all		= !have_new_article && !new_ad;
+	ad_target_article = $article[0];
+	$ad_position = $article.
+		before('<div id="floating-slashbox-ad" class="No" />').
+		prev().
+			append(ad);
 
-	if ( !current_mode.has_content && !new_ad ) {
-		return;
-	}
-
-	if ( clear_all || new_ad ) {
-		set_mode({ has_content: false });
-		$ad_position.empty();
-	}
-
-	if ( !clear_all ) {
-		if ( new_ad ) {
-			ready_for_new_ad = false;
-			setTimeout(function(){ ready_for_new_ad=true; }, 30000);
-			current_mode.will_have_content = true;
-			$ad_position.append(new_ad);
+	setTimeout(function(){
+		is_ad_locked = false;
+		if ( ! ad_target_article ) {
+			remove_ad();
 		}
-		if ( have_new_article ) {
-			$current_article = $new_article.eq(0);
-		}
-		fix_ad_position();
-	} else {
-		$current_article = null;
+	}, 30000);
+	is_ad_locked = true;
+
+	if ( ! $ad_offset_parent ) {
+		$ad_offset_parent = $article.offsetParent();
 	}
+
+	fix_ad_position();
+	$ad_position.fadeIn('fast');
+}
+
+function nearest_article_edge(){
+	// Why not just ask for the offset of $ad_position?
+	// ...because $ad_position may be absolutely positioned already
+
+	var $article = $ad_position.next();
+	var pos = $article.offset();
+	if ( pos !== undefined ) {
+		return pos.top;
+	}
+
+	$article = $ad_position.prev();
+	pos = $other.offset();
+	if ( pos !== undefined ) {
+		return pos.top + $article.height();
+	}
+
+	return 0;
+}
+
+function pin( lo, n, hi ){
+	// return n', the nearest value to n such that lo<=n'<=hi
+
+	if ( hi < lo ) return { value: undefined, description: 'Empty' };	// pin-range is empty, there is no n' such that lo<=n'<=hi
+	if ( n <= lo ) return { value: lo, description: 'Min' };
+	if ( n <= hi ) return { value: n, description: 'No' };
+	return { value: hi, description: 'Max' };
 }
 
 function fix_ad_position(){
-	if ( current_mode.has_content || current_mode.will_have_content ) {
+	if ( $ad_position.length ) {
 		var	footer		= $footer.offset(),
-			slashboxes	= $slashboxes.offset(),
-			article		= $current_article.offset();
+			slashboxes	= $slashboxes.offset();
 
-		if ( ! footer || ! slashboxes || ! article ) {
+		if ( ! footer || ! slashboxes ) {
 			return;
 		}
 
-		var	space_top	= slashboxes.top + $slashboxes.height(),
-			space_bottom	= footer.top - FOOTER_PADDING,
-			window_top	= window.pageYOffset,
-			window_bottom	= window_top + window.innerHeight,
-			ad_top		= Math.max(space_top, Math.min(article.top, space_bottom-AD_HEIGHT)),
-			next_mode	= {	has_content:	true,
-						is_in_window:	!( ad_top > window_bottom || ad_top + AD_HEIGHT < window_top ),
-						top:		ad_top - slashboxes.top
-					};
+		var	min_top		= slashboxes.top + $slashboxes.height(),
+			max_top		= footer.top - AD_HEIGHT,
+			pinned_top	= pin(min_top, nearest_article_edge(), max_top),
 
-		if ( space_bottom - space_top < AD_HEIGHT ) {
-			next_mode.pinned = 'SqueezedOut';
-		} else if ( ad_top == article.top ) {
-			next_mode.pinned = 'Article';
-		} else if ( ad_top < article.top ) {
-			next_mode.pinned = 'Bottom';
-		} else if ( ad_top > (article.top + $current_article.height()) ) {
-			next_mode.pinned = 'TopDisconnected';
-		} else {
-			next_mode.pinned = 'Top';
+			prev_top	= $ad_position.offset().top,
+			prev_class	= $ad_position.attr('className'),
+			prev_pinned	= prev_class !== 'No',
+
+			next_top	= pinned_top.value,
+			next_class	= pinned_top.description,
+			next_pinned	= next_class !== 'No',
+			next_css	= {};
+
+		if ( prev_pinned > next_pinned ) {
+			// if we're un-pinning the ad, clear our explicit 'top' setting
+			next_css.top = '';
+		} else if ( next_pinned && (!prev_pinned || prev_top!=next_top) ) {
+			// else if we're becoming pinned or are already pinned, but need a different top
+			next_css.top = '' + (next_top - $ad_offset_parent.offset().top) + 'px';
 		}
 
-		set_mode(next_mode);
+		if ( next_css.top !== undefined ) {
+			$ad_position.css(next_css);
+		}
+
+		if ( prev_class != next_class ) {
+			$ad_position.setClass(next_class);
+		}
 	}
 }
 
 
 Slash.Util.Package({ named: 'Slash.Firehose.floating_slashbox_ad',
 	api: {
-		is_visible:		function(){ return current_mode.has_content && current_mode.is_in_window; },
-		remove:			function(){ set_current_ad() },
-		current_article:	function(){ return $current_article; },
-		is_pinned_to:		function(){ return current_mode.pinned; },
-		bind:			function(){ return $ad_position.bind.apply($ad_position, arguments); },
-		unbind:			function(){ return $ad_position.unbind.apply($ad_position, arguments); }
+		is_visible:		function(){ return isInWindow($ad_position.children().get(0)); },
+		remove:			function(){ remove_ad() },
 	},
-	stem_function: set_current_ad
+	stem_function: insert_ad
 });
 
 Slash.Firehose.articles_on_screen = function(){
@@ -2164,7 +2163,7 @@ Slash.Firehose.articles_on_screen = function(){
 Slash.Firehose.ready_ad_space = function( $articles ){
 	var $result = $([]);
 	try {
-		if ( ready_for_new_ad ) {
+		if ( !is_ad_locked ) {
 			var min_top = Math.max(window.pageYOffset, $slashboxes.offset().top + $slashboxes.height());
 			$result = $articles.filter(function(){
 				return $(this).offset().top >= min_top;

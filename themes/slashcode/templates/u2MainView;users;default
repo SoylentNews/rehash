@@ -16,36 +16,35 @@ __template__
 
 [% IF main_view %]
 <div class="head">
-        <div class="yui-b">
-                [% PROCESS u2UserBio useredit=useredit %]
-        </div>
+	<div class="yui-b">
+		[% PROCESS u2UserBio useredit=useredit %]
+	</div>
 
 	<div class="article" id="marquee_content">
-                [% IF !marquee.body %]
-                        <h3>[% useredit.nickname | strip_literal %] doesn't seem to be particularly active.</h3>
-                [% ELSE %]
-                        <h3>[% marquee.subject %]</h3>
-                        <div class="body">
-                                [% marquee.body %]
+	[% IF !marquee.body %]
+		<h3>[% useredit.nickname | strip_literal %] doesn't seem to be particularly active.</h3>
+	[% ELSE %]
+		<h3>[% marquee.subject %]</h3>
+		<div class="body">
+			[% marquee.body %]
+			[% IF marquee.truncated %]&nbsp;...<p>[% END %]
+		</div>
+	[% END %]
 
-                                [% IF marquee.truncated;
-                                        ' ...<p>';
-                                        '<a href="';
+	[%
+	'<br><a href="';
 
-                                        IF marquee.type == 'journal';
-                                                constants.real_rootdir; '/~'; useredit.nickname | strip_paramattr; '/journal/'; marquee.id;
-                                        ELSIF marquee.type == 'submission';
-                                                gSkin.rootdir; '/firehose.pl?op=view&id='; marquee.id;
-                                        ELSIF marquee.type == 'comment';
-                                                gSkin.rootdir; '/comments.pl?sid='; marquee.sid; '&cid='; marquee.id;
-                                        END;
+	IF marquee.type == 'journal';
+		constants.real_rootdir; '/~'; useredit.nickname | strip_paramattr; '/journal/'; marquee.id;
+	ELSIF marquee.type == 'submission';
+		gSkin.rootdir; '/firehose.pl?op=view&id='; marquee.id;
+	ELSIF marquee.type == 'comment';
+		gSkin.rootdir; '/comments.pl?sid='; marquee.sid; '&cid='; marquee.id;
+	END;
 
-                                        '">(Continues)</a>';
-                                END %]
-
-                        </div>
-                [% END %]
-        </div>
+	'">Read More</a>';
+	%]
+	</div>
 </div>
 [% END %]
 

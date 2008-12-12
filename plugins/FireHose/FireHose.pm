@@ -846,7 +846,7 @@ sub getFireHoseEssentials {
 		push @where, 'rejected = ' . $self->sqlQuote($options->{rejected});
 	}
 
-	if (defined $options->{category} || $user->{is_admin}) {
+	if (defined $options->{category} || ($user->{is_admin} && $options->{admin_filters})) {
 		$options->{category} ||= '';
 		push @where, 'category = ' . $self->sqlQuote($options->{category});
 	}
@@ -890,7 +890,12 @@ sub getFireHoseEssentials {
 	}
 
 	my $rows = $self->sqlSelectAllHashrefArray("count(*)", $tables, $where, $count_other);
-	my $count = @$rows;
+	my $row_num = @$rows;
+
+	my $count = $row_num;
+	if ($row_num == 1 && !$count_other) {
+		$count = $rows->[0]->{"count(*)"};
+	}
 
 	my $page_size = $ps || 1;
 	$results->{records_pages} ||= ceil($count / $page_size);
@@ -950,8 +955,13 @@ sub getNextDayAndCount {
 
 	my $where = join ' AND ', @$where_ar, "createtime $it_cmp $i_time_q", "createtime $bt_cmp $border_time_q";
 
-	my $rows = $self->sqlSelectAllHashrefArray("count(*)", $tables, $where, $other);
-	my $day_count = @$rows;
+	my $rows = $self->sqlSelectAllHashrefArray("firehose.id", $tables, $where, $other);
+	my $row_num = @$rows;
+	my $day_count = $row_num;
+	
+	if ($row_num == 1 && !$other) {
+		$day_count = $rows->[0]->{'count(*)'};
+	}
 
 	my $day_labels = getOlderDaysFromDay($item_day, 0, 0, { skip_add_today => 1, show_future_days => 1, force => 1 });
 
@@ -1497,7 +1507,14 @@ sub ajaxFireHoseGetUpdates {
 				if (!$item->{day}) {
 					my $url 	= $slashdb->getUrl($item->{url_id});
 					my $the_user  	= $slashdb->getUser($item->{uid});
-					$html->{"title-$_->{id}"} = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user, options => $opts }, { Return => 1 });
+					$item->{atstorytime} = '__TIME_TAG__';
+					my $title = slashDisplay("formatHoseTitle", { adminmode => $adminmode, item => $item, showtitle => 1, url => $url, the_user => $the_user, options => $opts }, { Return => 1 });
+					
+					my $atstorytime;
+					$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
+					$title =~ s/\Q__TIME_TAG__\E/$atstorytime/;
+					$html->{"title-$_->{id}"} = $title;
+
 					my $introtext = $item->{introtext};
 					slashDisplay("formatHoseIntro", { introtext => $introtext, url => $url, $item => $item }, { Return => 1 });
 					$html->{"text-$_->{id}"} = $introtext;
@@ -1839,7 +1856,7 @@ sub setFireHose {
 	}
 
 	if (!exists($data->{last_update}) && !exists($data->{-last_update})) {
-		my @non_trivial = grep {!/^(activity|toptags)$/} keys %$data;
+		my @non_trivial = grep {!/^activity$/} keys %$data;
 		if (@non_trivial > 0) {
 			$data->{-last_update} = 'NOW()';
 		} else {
@@ -1918,12 +1935,14 @@ sub genFireHoseMCDKey {
 	return '' if $gSkin->{skid} != $constants->{mainpage_skid};
 	return '' if !$constants->{firehose_mcd_disp};
 
+	my $index = $form->{index} ? 1 : 0;
+
 	if ($mcd
 		&& !$options->{nodates} && !$options->{nobylines} && !$options->{nocolors}
 		&& !$options->{nothumbs} && !$options->{vote}
-		&& !$form->{skippop} && !$form->{index}
+		&& !$form->{skippop} 
 		&& !$user->{is_admin}) {
-		$mcdkey = "$self->{_mcd_keyprefix}:dispfirehose-$options->{mode}:$id";
+		$mcdkey = "$self->{_mcd_keyprefix}:dispfirehose-$options->{mode}:$id:$index";
 	}
 	return $mcdkey;
 }
@@ -1934,9 +1953,12 @@ sub genFireHoseMCDAllKeys {
 	return [ ] if !$constants->{firehose_mcd_disp};
 	my $keys = [ ];
 	my $mcd = $self->getMCD();
+	
 	if ($mcd) {
 		foreach my $mode (qw(full fulltitle)) {
-			push @$keys, "$self->{_mcd_keyprefix}:dispfirehose-$mode:$id";
+			foreach my $index (qw(0 1)) {
+				push @$keys, "$self->{_mcd_keyprefix}:dispfirehose-$mode:$id:$index";
+			}
 		}
 	}
 	return $keys;
@@ -1945,38 +1967,48 @@ sub genFireHoseMCDAllKeys {
 sub dispFireHose {
 	my($self, $item, $options) = @_;
 	my $constants = getCurrentStatic();
+	my $user = getCurrentUser();
 	$options ||= {};
 	my $mcd = $self->getMCD();
 	my $mcdkey;
-	if ($mcd) {
-		$mcdkey = $self->genFireHoseMCDKey($item->{id}, $options);
-		my $cached;
-		if ($mcdkey) {
-			$cached = $mcd->get("$mcdkey");
-		}
-		return $cached if $cached;
-	}
-
-	my $retval = slashDisplay('dispFireHose', {
-		item			=> $item,
-		mode			=> $options->{mode},
-		tags_top		=> $options->{tags_top},	# old-style
-		top_tags		=> $options->{top_tags},	# new-style
-		system_tags		=> $options->{system_tags},	# new-style
-		options			=> $options->{options},
-		vote			=> $options->{vote},
-		bodycontent_include	=> $options->{bodycontent_include},
-		nostorylinkwrapper	=> $options->{nostorylinkwrapper},
-		view_mode		=> $options->{view_mode}
-	}, { Page => "firehose",  Return => 1 });
+	my $retval;
 
 	if ($mcd) {
 		$mcdkey = $self->genFireHoseMCDKey($item->{id}, $options);
 		if ($mcdkey) {
-			my $exptime = $constants->{firehose_memcached_disp_exptime} || 180;
-			$mcd->set($mcdkey, $retval, $exptime);
+			$retval = $mcd->get("$mcdkey");
 		}
 	}
+
+	$item->{atstorytime} = "__TIME_TAG__"; 
+
+	if (!$retval) {  # No cache hit
+		$retval = slashDisplay('dispFireHose', {
+			item			=> $item,
+			mode			=> $options->{mode},
+			tags_top		=> $options->{tags_top},	# old-style
+			top_tags		=> $options->{top_tags},	# new-style
+			system_tags		=> $options->{system_tags},	# new-style
+			options			=> $options->{options},
+			vote			=> $options->{vote},
+			bodycontent_include	=> $options->{bodycontent_include},
+			nostorylinkwrapper	=> $options->{nostorylinkwrapper},
+			view_mode		=> $options->{view_mode}
+		}, { Page => "firehose",  Return => 1 });
+
+		if ($mcd) {
+			$mcdkey = $self->genFireHoseMCDKey($item->{id}, $options);
+			if ($mcdkey) {
+				my $exptime = $constants->{firehose_memcached_disp_exptime} || 180;
+				$mcd->set($mcdkey, $retval, $exptime);
+			}
+		}
+	}
+
+	my $atstorytime;
+	$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
+	$retval =~ s/\Q__TIME_TAG__\E/$atstorytime/;
+
 	return $retval;
 }
 
@@ -2255,6 +2287,8 @@ sub getAndSetOptions {
 	my $constants 	= getCurrentStatic();
 	my $form 	= getCurrentForm();
 	my $gSkin	= getCurrentSkin();
+
+	my $mainpage = 0;
 
 	my ($f_change, $v_change, $t_change);
 
@@ -2538,6 +2572,9 @@ sub getAndSetOptions {
 		} elsif ($user->{is_admin} && $validator->{categories}{$_} && !defined $fh_options->{category}) {
 			$fh_options->{category} = $_;
 		} elsif ($skin_nexus{$_}) {
+				if (!$not && $skin_nexus{$_} == $constants->{mainpage_nexus_tid}) {
+					$mainpage = 1;
+				}
 				push @{$fh_options->{$not."nexus"}}, $skin_nexus{$_};
 		} elsif ($user->{is_admin} && $_ eq "rejected") {
 			$fh_options->{rejected} = "yes";
@@ -2594,8 +2631,7 @@ sub getAndSetOptions {
 	}
 
 	# push all necessary nexuses on if we want stories show as brief
-	if ($constants->{brief_sectional_mainpage} && $the_skin->{nexus} == $constants->{mainpage_nexus_tid} &&
-		$options->{fhfilter} eq "$the_skin->{name} story") {
+	if ($constants->{brief_sectional_mainpage} && $the_skin->{nexus} == $constants->{mainpage_nexus_tid} && $mainpage) {
 		my $nexus_children = $self->getMainpageDisplayableNexuses();
 		push @{$fh_options->{nexus}}, @$nexus_children;
 
@@ -2637,19 +2673,23 @@ sub getAndSetOptions {
 	}
 
 	$options->{public} = "yes";
+
+	if ($options->{view} eq "daddypants" || $form->{admin_filters}) {
+		$options->{admin_filters} = 1;
+	}
+
 	if ($adminmode) {
 		# $options->{attention_needed} = "yes";
-		if ($firehose_page ne "user") {
+		if ($options->{admin_filters}) {
 			$options->{accepted} = "no" if !$options->{accepted};
 			$options->{rejected} = "no" if !$options->{rejected};
 		}
 		$options->{duration} ||= -1;
 	} else  {
 		if ($firehose_page ne "user") {
-			$options->{accepted} = "no" if !$options->{accepted};
+			# $options->{accepted} = "no" if !$options->{accepted};
 		}
 
-		$options->{duration} ||= 1;
 		if ($user->{is_subscriber} && (!$no_saved || $form->{index})) {
 			$options->{createtime_subscriber_future} = 1;
 		} else {
@@ -2926,7 +2966,7 @@ sub listView {
 	my $featured;
 
 	if ($gSkin->{name} eq "idle" && !$user->{firehose_nomarquee}) {
-		my $featured_ops ={ primaryskid => $gSkin->{skid}, type => "story", limit => 1, orderby => 'createtime', orderdir => 'DESC'};
+		my $featured_ops = { primaryskid => $gSkin->{skid}, type => "story", limit => 1, orderby => 'createtime', orderdir => 'DESC'};
 
 		if ($user->{is_subscriber}) {
 			$featured_ops->{createtime_subscriber_future} = 1;

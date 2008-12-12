@@ -21,7 +21,7 @@ __template__
 
         <div class="content" id="latest_comments_content">
                 <ul>
-                [% FOREACH cid = latest_comments.keys.sort %]
+                [% FOREACH cid = latest_comments.keys.sort.reverse %]
 			[%
                         reason_num = '';
                         reason_text = '';
@@ -54,7 +54,7 @@ __template__
         </div>
         <div class="content" id="latest_journals_content">
                 <ul>
-                [% FOREACH jid = latest_journals.keys.sort %]
+                [% FOREACH jid = latest_journals.keys.sort.reverse %]
                         <li><a href="[% constants.real_rootdir %]/~[% useredit.nickname | strip_paramattr %]/journal/[% latest_journals.$jid.id %]">[% latest_journals.$jid.description %]</a><br></li>
                 [% END %]
                 </ul>
@@ -70,7 +70,7 @@ __template__
 
         <div class="content" id="latest_submissions_content">
                 <ul>
-                [% FOREACH sid = latest_submissions.keys.sort %]
+                [% FOREACH sid = latest_submissions.keys.sort.reverse %]
                         <li><a href="[% gSkin.rootdir %]/firehose.pl?op=view&id=[% latest_submissions.$sid.id %]">[% latest_submissions.$sid.title %]</a></li>
                 [% END %]
                 </ul>
