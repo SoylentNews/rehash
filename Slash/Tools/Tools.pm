@@ -20,7 +20,7 @@ our $VERSION = '2.005001';
 our @EXPORT = qw(
 	pmpath pathpm pmpathsrc counterpart srcfile installfile basefile
 	basefile basename dirname
-	syntax_check %CONFIG $MAIN_REPO
+	syntax_check %CONFIG
 	@BIN_EXT $BIN_EXT $BIN_RE
 	myprint myexit mysystem myask
 );
@@ -28,7 +28,6 @@ our @EXPORT = qw(
 our @BIN_EXT = qw(gz tgz bz2 gif jpg png ico);
 our $BIN_EXT = join '|', @BIN_EXT;
 our $BIN_RE  = qr/\.(?:$BIN_EXT)$/;
-our $MAIN_REPO = 'master';
 
 my(%cache);
 # if cache gets stale, you can use force => 0, or heck, just
