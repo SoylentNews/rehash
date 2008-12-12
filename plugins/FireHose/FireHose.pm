@@ -1512,7 +1512,7 @@ sub ajaxFireHoseGetUpdates {
 					
 					my $atstorytime;
 					$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
-					$title =~ s/\Q__TIME_TAG__\E/$atstorytime/;
+					$title =~ s/\Q__TIME_TAG__\E/$atstorytime/g;
 					$html->{"title-$_->{id}"} = $title;
 
 					my $introtext = $item->{introtext};
@@ -2007,7 +2007,7 @@ sub dispFireHose {
 
 	my $atstorytime;
 	$atstorytime = $user->{aton} . ' ' . timeCalc($item->{'createtime'});
-	$retval =~ s/\Q__TIME_TAG__\E/$atstorytime/;
+	$retval =~ s/\Q__TIME_TAG__\E/$atstorytime/g;
 
 	return $retval;
 }

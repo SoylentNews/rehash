@@ -75,7 +75,7 @@ __template__
 	[% IF extras && adminmode && num_with_ipid != '0' %]
 		([% accepted_from_ipid %]/[% num_with_ipid %])
 	[% END %]
-	[% user.aton %] <span id="fhtime-[% item.id %]">[% Slash.timeCalc(item.createtime) %]</span></b>
+	<span id="fhtime-[% item.id %]">[% item.atstorytime %]</span></b>
 	[% IF item.type == "comment" %]
 		(<a href="[% gSkin.rootdir %]/comments.pl?sid=[% item.discussion %]&amp;cid=[% item.srcid %]">#[% item.srcid %]</a>)
 	[% END %]
