@@ -2573,7 +2573,7 @@ sub getAndSetOptions {
 			$fh_options->{category} = $_;
 		} elsif ($skin_nexus{$_}) {
 				if (!$not && $skin_nexus{$_} == $constants->{mainpage_nexus_tid}) {
-					$mainpage =1;
+					$mainpage = 1;
 				}
 				push @{$fh_options->{$not."nexus"}}, $skin_nexus{$_};
 		} elsif ($user->{is_admin} && $_ eq "rejected") {
@@ -2747,7 +2747,7 @@ sub getAndSetOptions {
 
 	$options->{smalldevices} = 1 if $self->shouldForceSmall();
 	$options->{limit} = $self->getFireHoseLimitSize($options->{mode}, $pagesize, $options->{smalldevices}, $options);
-	
+
 	return $options;
 }
 
@@ -2966,7 +2966,7 @@ sub listView {
 	my $featured;
 
 	if ($gSkin->{name} eq "idle" && !$user->{firehose_nomarquee}) {
-		my $featured_ops ={ primaryskid => $gSkin->{skid}, type => "story", limit => 1, orderby => 'createtime', orderdir => 'DESC'};
+		my $featured_ops = { primaryskid => $gSkin->{skid}, type => "story", limit => 1, orderby => 'createtime', orderdir => 'DESC'};
 
 		if ($user->{is_subscriber}) {
 			$featured_ops->{createtime_subscriber_future} = 1;
