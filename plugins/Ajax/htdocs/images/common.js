@@ -594,10 +594,13 @@ function firehose_toggle_tag_ui( toggle ) {
 }
 
 function firehose_click_tag( event ) {
-	// _any_ click can trigger, but click-specific ad will win
-	setTimeout(function(){ inlineAdFirehose(); }, 0);
+	var $target = $(event.target), command = '', $menu;
 
-	var $target = $(event.target), command='', $menu;
+	// skip for non-JS hrefs
+	if (! $(target).find_nearest('a[href]:not([href=#])', 'self', 'up').length) {
+		// _any_ click can trigger, but click-specific ad will win
+		setTimeout(function(){ inlineAdFirehose(); }, 0);
+	}
 
 	$related_trigger = $target;
 
