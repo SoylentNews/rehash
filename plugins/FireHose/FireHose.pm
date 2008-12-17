@@ -1929,6 +1929,8 @@ sub genFireHoseMCDKey {
 	my $form = getCurrentForm();
 	my $constants = getCurrentStatic();
 
+	my $opts = $options->{options} || {};
+
 	my $mcd = $self->getMCD();
 	my $mcdkey;
 
@@ -1938,8 +1940,8 @@ sub genFireHoseMCDKey {
 	my $index = $form->{index} ? 1 : 0;
 
 	if ($mcd
-		&& !$options->{nodates} && !$options->{nobylines} && !$options->{nocolors}
-		&& !$options->{nothumbs} && !$options->{vote}
+		&& !$opts->{nodates} && !$opts->{nobylines} && !$opts->{nocolors}
+		&& !$opts->{nothumbs} && !$options->{vote}
 		&& !$form->{skippop} 
 		&& !$user->{is_admin}) {
 		$mcdkey = "$self->{_mcd_keyprefix}:dispfirehose-$options->{mode}:$id:$index";
