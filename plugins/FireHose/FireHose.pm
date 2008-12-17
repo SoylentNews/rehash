@@ -2566,7 +2566,7 @@ sub getAndSetOptions {
 			$not = "not_";
 			$_ =~ s/^-//g;
 		}
-		if ($validator->{type}->{$_} && !defined $fh_options->{type}) {
+		if ($validator->{type}->{$_}) {
 			push @{$fh_options->{$not."type"}}, $_;
 		} elsif ($user->{is_admin} && $validator->{categories}{$_} && !defined $fh_options->{category}) {
 			$fh_options->{category} = $_;
@@ -2747,6 +2747,8 @@ sub getAndSetOptions {
 	$options->{smalldevices} = 1 if $self->shouldForceSmall();
 	$options->{limit} = $self->getFireHoseLimitSize($options->{mode}, $pagesize, $options->{smalldevices}, $options);
 
+#use Data::Dumper;
+#print STDERR Dumper($options);	
 	return $options;
 }
 
