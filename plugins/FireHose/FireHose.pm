@@ -1995,7 +1995,8 @@ sub dispFireHose {
 			vote			=> $options->{vote},
 			bodycontent_include	=> $options->{bodycontent_include},
 			nostorylinkwrapper	=> $options->{nostorylinkwrapper},
-			view_mode		=> $options->{view_mode}
+			view_mode		=> $options->{view_mode},
+			featured		=> $options->{featured}
 		}, { Page => "firehose",  Return => 1 });
 
 		if ($mcd) {

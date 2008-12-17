@@ -111,7 +111,7 @@ END %]
 	  <a href="#" class="down" title="Vote this item down">-</a>
 	</span>
 [% END %]
-	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode options = options link_url = link_url %]
+	[% PROCESS formatHoseTitle the_user = the_user item = item url = url adminmode=adminmode options = options link_url = link_url featured = featured %]
 						[% title_type = "firehose" %]
 						[% IF item.type == "story";
 							title_type = "story";

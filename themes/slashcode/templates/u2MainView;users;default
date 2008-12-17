@@ -22,9 +22,10 @@ __template__
 
 	[% IF firehose_marquee.defined %]
 		[% IF firehose_marquee && firehose_marquee.id %]
+		<a name="articles"></a>
 			[% fh = Slash.getObject("Slash::FireHose") %]
 			[% item = fh.getFireHose(firehose_marquee.id) %]
-			[% fh.dispFireHose(item, { mode => 'full', featured => 1}) %]
+			[% fh.dispFireHose(item, { mode => "item", tags_top => fh.getFireHoseTagsTop(item), options => options, bodycontent_include => 1, featured => 1}) %]
 		
 		[% ELSE %]
 		<h3>[% useredit.nickname | strip_literal %] doesn't seem to be particularly active.</h3>
