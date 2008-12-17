@@ -1177,15 +1177,21 @@ sub showInfo {
 
 		# Set up default view (remove marquee for subsections)
 		my $main_view = 0;
-                my $marquee;
+		my $marquee;
+		my $firehose_marquee;
 		my $not_fhid;
-                if ((!$form->{dp}) || ($form->{dp} eq 'admin' && !$user->{is_admin})) {
-                        $main_view = 1;
-                        $form->{dp} = 'firehose';
+		if ((!$form->{dp}) || ($form->{dp} eq 'admin' && !$user->{is_admin})) {
+			$main_view = 1;
+			$form->{dp} = 'firehose';
 			# Marquee is the "latest thing"
 			$marquee = $users2->getMarquee($latest_comments, $latest_journals, $latest_submissions);
+			$firehose_marquee = $users2->getFireHoseMarquee($requested_user->{uid});
 			#$marquee = $users2->truncateMarquee($marquee);
-			$not_fhid = $users2->getMarqueeFireHoseId($marquee);
+			if ($firehose_marquee) {
+				$not_fhid = $firehose_marquee->{id};
+			} else {
+				$not_fhid = $users2->getMarqueeFireHoseId($marquee);
+			}
 		}
 
 		if ($main_view || $form->{dp} eq 'firehose' || $form->{dp} =~ /^journal/ || $form->{dp} eq 'submissions' || $form->{dp} eq 'bookmarks' || $form->{dp} eq 'usertag') {
@@ -1216,11 +1222,12 @@ sub showInfo {
 			subcount		=> $subcount,
 			metamods		=> $metamods,
 			tagshist		=> $tagshist,
-                        latest_comments         => $latest_comments,
-                        latest_journals         => $latest_journals,
-                        latest_submissions      => $latest_submissions,
-                        latest_bookmarks        => $latest_bookmarks,
-                        latest_friends          => $latest_friends,
+			latest_comments         => $latest_comments,
+			latest_journals         => $latest_journals,
+			latest_submissions      => $latest_submissions,
+			latest_bookmarks        => $latest_bookmarks,
+			latest_friends          => $latest_friends,
+			firehose_marquee	=> $firehose_marquee,
 			marquee                 => $marquee,
 			relations_datapane      => $relations_datapane,
 			tags_datapane           => $tags_datapane,

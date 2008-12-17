@@ -313,6 +313,26 @@ sub getMarquee {
         return $latest_thing;
 }
 
+sub getFireHoseMarquee {
+	my ($self, $uid) = @_;
+	my $fh = getObject("Slash::FireHose");
+
+	my $fhe_opts = {
+		type 		=> ['journal','submission','comment'], 
+		orderby 	=> 'createtime', 
+		orderdir 	=> 'DESC', 
+		color 		=> 'black',
+		duration 	=> '-1',
+		limit		=> 1,
+		uid		=> $uid
+	};
+
+	my($items, $results, $count, $future_count, $day_num, $day_label, $day_count) = $fh->getFireHoseEssentials($fhe_opts);
+
+	return @$items >=1 ? $items->[0]: 0;
+}
+
+
 sub getMarqueeFireHoseId {
 	my($self, $marquee) = @_;
 	my $fhid;

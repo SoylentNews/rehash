@@ -20,31 +20,43 @@ __template__
 		[% PROCESS u2UserBio useredit=useredit %]
 	</div>
 
-	<div class="article" id="marquee_content">
-	[% IF !marquee.body %]
+	[% IF firehose_marquee.defined %]
+		[% IF firehose_marquee && firehose_marquee.id %]
+			[% fh = Slash.getObject("Slash::FireHose") %]
+			[% item = fh.getFireHose(firehose_marquee.id) %]
+			[% fh.dispFireHose(item, { mode => 'full', featured => 1}) %]
+		
+		[% ELSE %]
 		<h3>[% useredit.nickname | strip_literal %] doesn't seem to be particularly active.</h3>
+		[% END %]
 	[% ELSE %]
-		<h3>[% marquee.subject %]</h3>
-		<div class="body">
-			[% marquee.body %]
-			[% IF marquee.truncated %]&nbsp;...<p>[% END %]
+	<div class="article" id="marquee_content">
+		[% IF !marquee.body %]
+			<h3>[% useredit.nickname | strip_literal %] doesn't seem to be particularly active.</h3>
+		[% ELSE %]
+			<h3>[% marquee.subject %]</h3>
+			<div class="body">
+				[% marquee.body %]
+				[% IF marquee.truncated %]&nbsp;...<p>[% END %]
+			</div>
+		[% END %]
+	
+
+		[%
+		'<br><a href="';
+
+		IF marquee.type == 'journal';
+			constants.real_rootdir; '/~'; useredit.nickname | strip_paramattr; '/journal/'; marquee.id;
+		ELSIF marquee.type == 'submission';
+			gSkin.rootdir; '/firehose.pl?op=view&id='; marquee.id;
+		ELSIF marquee.type == 'comment';
+			gSkin.rootdir; '/comments.pl?sid='; marquee.sid; '&cid='; marquee.id;
+		END;
+	
+		'">Read More</a>';
+		%]
 		</div>
 	[% END %]
-
-	[%
-	'<br><a href="';
-
-	IF marquee.type == 'journal';
-		constants.real_rootdir; '/~'; useredit.nickname | strip_paramattr; '/journal/'; marquee.id;
-	ELSIF marquee.type == 'submission';
-		gSkin.rootdir; '/firehose.pl?op=view&id='; marquee.id;
-	ELSIF marquee.type == 'comment';
-		gSkin.rootdir; '/comments.pl?sid='; marquee.sid; '&cid='; marquee.id;
-	END;
-
-	'">Read More</a>';
-	%]
-	</div>
 </div>
 [% END %]
 
