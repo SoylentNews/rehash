@@ -71,7 +71,7 @@ IF !link_url;
 END;
 title_href=link_url;
 
-IF form.index || featured;
+IF form.index || featured || view_mode;
 	onclick="";
 	IF item.type == "story";
 		story = Slash.db.getStory(item.srcid);
