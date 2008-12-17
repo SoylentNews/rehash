@@ -29,16 +29,15 @@ __template__
 	[% ELSIF item.type == "story" %]
 		Posted
 	[% ELSIF item.type == "bookmark" %]
-		Bookmark
 	[% ELSIF item.type == "feed" %]
 		From feed
 	[% ELSIF item.type != "comment" %]
 		Submitted
 	[% END %]
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
-	by [% IF adminmode && item.type != "story" %]
+	[% IF item != "bookmark %]by [% END %][% IF adminmode && item.type != "story" && item.type != "bookmark" %]
 		[% IF Slash.isAnon(the_user.uid) %][% the_user.nickname | strip_literal %]
-		[% ELSE %]<a href="[% constants.real_rootdir %]/~[% the_user.nickname | strip_paramattr %]">[% the_user.nickname | strip_literal %] ([% the_user.uid %])</a>
+		[% ELSIF item.type != "bookmark" %]<a href="[% constants.real_rootdir %]/~[% the_user.nickname | strip_paramattr %]">[% the_user.nickname | strip_literal %] ([% the_user.uid %])</a>
 		[% END %]
 	[% END %]
 	[% IF extras && num_from_uid != '0' %]

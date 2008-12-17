@@ -5727,4 +5727,4 @@ UPDATE vars SET value = 'T_2_5_0_235' WHERE name = 'cvs_tag_currentcode';
 # PUDGE LAST UPDATED HERE
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
-
+UPDATE firehose_view SET mode="fulltitle" WHERE viewname="userbookmark";
