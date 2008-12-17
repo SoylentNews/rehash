@@ -318,7 +318,7 @@ sub getFireHoseMarquee {
 	my $fh = getObject("Slash::FireHose");
 
 	my $fhe_opts = {
-		type 		=> ['journal','submission','comment'], 
+		type 		=> ['journal', 'submission', 'comment', 'feed'], 
 		orderby 	=> 'createtime', 
 		orderdir 	=> 'DESC', 
 		color 		=> 'black',
