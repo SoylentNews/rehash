@@ -205,7 +205,7 @@ cmdrtaco dot net but be forgiving of beta code!
 	[% IF options.index %]
 		firehose_settings.index = 1;
 	[% END %]
-	[% IF options.admin_filters %]
+	[% IF options.admin_filters || env.script_name == "/console.pl" %]
 		firehose_settings.admin_filters = 1;
 	[% END %]
 
