@@ -457,6 +457,7 @@ background-position:center top;
 .nocolors { background: transparent url('//images.slashdot.org/fh_btl_s.png') no-repeat scroll left top !important;}
 .briefarticle .nocolors h3 { background: transparent url('//images.slashdot.org/fh_bl_s.png') no-repeat scroll left bottom !important;}
 #firehoselist {position: relative}
+.nodates .date, .nobylines .nickname, .noicons .topicicon { display: none }
 
 /* nodmenu */
 #nod-user-tags, #nix-user-tags {display: none; position: absolute; top:-55px; width:500px;}

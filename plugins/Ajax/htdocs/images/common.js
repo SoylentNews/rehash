@@ -370,7 +370,11 @@ function firehose_set_options(name, value, context) {
 		}
 
 		if (classname) {
-			$('#firehoselist .'+classname).setClass(classname + value ? ' hide' : '');
+			if (value) {
+				$('#firehoselist .'+classname).addClass('hide');
+			} else {
+				$('#firehoselist .'+classname).removeClass('hide').css('display','inline');
+			}
 		}
 	}
 

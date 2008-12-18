@@ -91,13 +91,7 @@ IF item.url_id;
         title = title _ "<span class=\"external\"><a href=\"" _ url.url _ "\" $rnf title=\"External link - " _ url.url _ "\" target=\"_blank\">[-&gt;]</a></span>";
 END;
 title = title _ " " _ '<span class="date';
-IF options.nodates; 
-	title = title _ " hide"; 
-END;
 title = title _ '">' _ item.atstorytime _  "</span> <span class=\"nickname";
-IF options.nobylines; 
-	title = title _ " hide"; 
-END;
 title = title _ "\">" _ item.name _ "</span>";
 	
 firehose = Slash.getObject("Slash::FireHose");

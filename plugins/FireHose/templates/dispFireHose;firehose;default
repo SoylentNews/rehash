@@ -143,11 +143,11 @@ END %]
 							[% Slash.getData('byline', { adminmode => adminmode, item => item, the_user => the_user }, 'firehose');	%]
 							<div class="[% IF bodycontent && mode == 'fulltitle' %]hide[% ELSIF bodycontent %]body[% ELSE %]hide[% END %]" id="fhbody-[% item.id %]"[% IF !hasimage %] style="min-height: auto !important;"[% END %]>
 								[% IF item.thumb && ((!featured) || (featured && !item.media)) %]
-								<span class="media">
+								<span class="media topicicon">
 									[% PROCESS dispTopicFireHose item = item %]
 								</span>
 								[% ELSIF item.tid && topic.image && !featured %]
-								<span class="media topic">
+								<span class="media topic topicicon">
 									[% PROCESS dispTopicFireHose item = item %]
 								</span>
 								[% END %]

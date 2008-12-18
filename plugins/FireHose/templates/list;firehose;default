@@ -13,6 +13,13 @@ list
 __seclev__
 10000
 __template__
+[%
+   hide_topic_icons = 0;
+   IF user.noicons || user.simpledesign || user.lowbandwidth || user.pda;
+      hide_topic_icons = 1;
+   END;
+%]
+
 [%# this stuff may move later -- pudge %]
 [% IF options.view == "usersubmission";
 	submission_list = Slash.db.getSubmissionsByUID(options.user_view_uid);
@@ -178,7 +185,8 @@ cmdrtaco dot net but be forgiving of beta code!
 	//]]>
 </script>
 [% END %]
-<div id="firehoselist">
+
+<div id="firehoselist" [% IF options.nobylines || options.nodates || hide_topic_icons %]class="[% IF options.nobylines %]nobylines [% END %][% IF options.nodates %]nodates[% END %] [% IF hide_topic_icons %] noicons[% END %]"[% END %]>
 [% itemstext %]
 [% page = page || "0" %]
 </div>

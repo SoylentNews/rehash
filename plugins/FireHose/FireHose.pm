@@ -1940,7 +1940,7 @@ sub genFireHoseMCDKey {
 	my $index = $form->{index} ? 1 : 0;
 
 	if ($mcd
-		&& !$opts->{nodates} && !$opts->{nobylines} && !$opts->{nocolors}
+		&& !$opts->{nocolors}
 		&& !$opts->{nothumbs} && !$options->{vote}
 		&& !$form->{skippop} 
 		&& !$user->{is_admin}) {
