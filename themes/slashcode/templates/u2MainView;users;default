@@ -194,6 +194,12 @@ __template__
                 fhbox;
 
            ELSIF data_pane == 'bookmarks';
+		'<div id="friendsmenu">';
+                	'<ul>';
+                	'<li><a href="'; constants.real_rootdir; '/bookmark.pl/?op=showbookmarks&recent=1">Recent</a></li>';
+                	'<li><a href="'; constants.real_rootdir; '/bookmark.pl/?op=showbookmarks&popular=1">Popular</a></li>';
+                	'</ul>';
+                '</div>';
                 fh = Slash.getObject("Slash::FireHose");
                 fhbox = fh.listView({ fh_page => 'users.pl', view => 'userbookmark', user_view => useredit, not_id => not_fhid });
                 fhbox;
