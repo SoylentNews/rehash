@@ -597,7 +597,7 @@ function firehose_click_tag( event ) {
 	var $target = $(event.target), command = '', $menu;
 
 	// skip for non-JS hrefs
-	if (! $(target).find_nearest('a[href]:not([href=#])', 'self', 'up').length) {
+	if (! $target.find_nearest('a[href]:not([href=#])', 'self', 'up').length) {
 		// _any_ click can trigger, but click-specific ad will win
 		setTimeout(function(){ inlineAdFirehose(); }, 0);
 	}
