@@ -5728,3 +5728,38 @@ UPDATE vars SET value = 'T_2_5_0_235' WHERE name = 'cvs_tag_currentcode';
 
 # SLASHCODE/USEPERL LAST UPDATED HERE
 UPDATE firehose_view SET mode="fulltitle" WHERE viewname="userbookmark";
+
+# We've let stale templates build up for too long:
+DELETE FROM templates WHERE name='alllist' AND page='zoo' AND skin='default';
+DELETE FROM templates WHERE name='autocomplete' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='combined_tags' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='commentreply' AND page='messages' AND skin='default';
+DELETE FROM templates WHERE name='d2prefs' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='data' AND page='unsubscribe' AND skin='default';
+DELETE FROM templates WHERE name='firehose_tags_top' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='form' AND page='unsubscribe' AND skin='default';
+DELETE FROM templates WHERE name='init_tag_ui' AND page='firehose' AND skin='default';
+DELETE FROM templates WHERE name='init_tagui' AND page='firehose' AND skin='default';
+DELETE FROM templates WHERE name='listpolls' AND page='pollBooth' AND skin='polls';
+DELETE FROM templates WHERE name='miniAdminMenu' AND page='users' AND skin='default';
+DELETE FROM templates WHERE name='moderation' AND page='comments' AND skin='default';
+DELETE FROM templates WHERE name='nodnix_menus' AND page='firehose' AND skin='default';
+DELETE FROM templates WHERE name='printCommentsNone' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='reject' AND page='firehose' AND skin='default';
+DELETE FROM templates WHERE name='reject_firehose' AND page='firehose' AND skin='default';
+DELETE FROM templates WHERE name='skinindexd' AND page='misc' AND skin='backslash';
+DELETE FROM templates WHERE name='skinindexd' AND page='misc' AND skin='entertainment';
+DELETE FROM templates WHERE name='skinindexd' AND page='misc' AND skin='news';
+DELETE FROM templates WHERE name='skinindexd' AND page='misc' AND skin='sfauth';
+DELETE FROM templates WHERE name='skinindexd' AND page='misc' AND skin='vendors';
+DELETE FROM templates WHERE name='slashd_log' AND page='admin' AND skin='default';
+DELETE FROM templates WHERE name='slashdot_it' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='submit' AND page='slashdot-it' AND skin='default';
+DELETE FROM templates WHERE name='tag_display' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='tag_widget' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='tagsfirehosedivadmin' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='tagsfirehosedivtagbox' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='tagsfirehosedivuser' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='tagsnodnixuser' AND page='misc' AND skin='default';
+DELETE FROM templates WHERE name='tagstack' AND page='firehose' AND skin='default';
+DELETE FROM templates WHERE name='topicsearch' AND page='search' AND skin='default';
