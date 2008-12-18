@@ -5747,11 +5747,6 @@ DELETE FROM templates WHERE name='nodnix_menus' AND page='firehose' AND skin='de
 DELETE FROM templates WHERE name='printCommentsNone' AND page='misc' AND skin='default';
 DELETE FROM templates WHERE name='reject' AND page='firehose' AND skin='default';
 DELETE FROM templates WHERE name='reject_firehose' AND page='firehose' AND skin='default';
-DELETE FROM templates WHERE name='skinindexd' AND page='misc' AND skin='backslash';
-DELETE FROM templates WHERE name='skinindexd' AND page='misc' AND skin='entertainment';
-DELETE FROM templates WHERE name='skinindexd' AND page='misc' AND skin='news';
-DELETE FROM templates WHERE name='skinindexd' AND page='misc' AND skin='sfauth';
-DELETE FROM templates WHERE name='skinindexd' AND page='misc' AND skin='vendors';
 DELETE FROM templates WHERE name='slashd_log' AND page='admin' AND skin='default';
 DELETE FROM templates WHERE name='slashdot_it' AND page='misc' AND skin='default';
 DELETE FROM templates WHERE name='submit' AND page='slashdot-it' AND skin='default';
