@@ -21,7 +21,7 @@ __template__
 [% fh = Slash.getObject("Slash::FireHose")
    sections = fh.getFireHoseSections;
 %]
-<ul>
+<ul id="firehose-sections">
 	[% FOREACH fh_section= sections %]
 		[% NEXT IF section.display == "no" %]
 		[% link_loc = gskin.rootdir _ "/firehose.pl?section=" _ section.section_name %]

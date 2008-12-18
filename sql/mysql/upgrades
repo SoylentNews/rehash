@@ -5785,3 +5785,5 @@ CREATE TABLE firehose_section(
 	UNIQUE uid_section_filter(uid,section_filter)
 	
 );
+
+INSERT INTO ajax_ops VALUES (NULL, 'firehose_save_section_menu', 'Slash::FireHose', 'ajaxSaveFireHoseSections', 'ajax_user_static', 'use');

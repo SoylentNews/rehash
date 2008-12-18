@@ -149,6 +149,11 @@ sub getFireHoseSections {
 	}
 }
 
+sub ajaxSaveFireHoseSections {
+	my($slashdb, $constants, $user, $form, $options) = @_;
+	$slashdb->setUser($user->{uid}, {firehose_section_order => $form->{fsids}});
+}
+
 sub getFireHoseSectionBySkid {
 	my($self, $skid) = @_;
 	my $skid_q = $self->sqlQuote($skid);
