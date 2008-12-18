@@ -26,7 +26,6 @@ __template__
 		[% firehosetext %]
 	</div>
 </div>
-[% PROCESS init_tag_ui %]
 <script type="text/javascript">
 var firehose_user_class = [% user.is_anon ? 0 : 1 %];
 $(function(){

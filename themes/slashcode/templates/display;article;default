@@ -19,7 +19,6 @@ en_US
 __name__
 display
 __template__
-[% PROCESS init_tag_ui %]
 <div id="slashboxes">
 [% UNLESS user.lowbandwidth %]
 [% PROCESS userboxes hits = story.hits stoid = story.stoid; %]

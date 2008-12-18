@@ -443,7 +443,7 @@ function $init_tag_displays( $stubs, options ){
 $init_tag_displays.default_menu = 'x !';
 
 $(function(){
-	if ( fh_is_admin ) {
+	if ( tag_admin ) {
 		$init_tag_displays.default_menu = 'x ! # ## _ ^';
 	}
 });
@@ -1034,7 +1034,7 @@ YAHOO.slashdot.topicTags = ["keyword",
 	update_class_map(well_known_tags, 'p', ['mainpage']);	// Rob requests 'mainpage' never show its face
 	update_class_map(well_known_tags, 'd p', data_types);
 
-	if ( fh_is_admin ) {
+	if ( tag_admin ) {
 		update_class_map(well_known_tags, 'w p', ['signed', 'unsigned', 'signoff']);
 		update_class_map(well_known_tags, 'd', ['unknown']);	// Tags.pm debugging
 	} else {

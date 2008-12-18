@@ -749,40 +749,25 @@ function firehose_handle_comment_nodnix( commands ){
 }
 
 
-function tag_ui_init_new_articles(){
-	if ( $('#firehose').length ) {
-		return firehose_init_tag_ui();
-	}
-
-	var $new_articles = $(document).article_info__find_articles(':not(:has(span.sd-info-block .tag-ui))');
-	$new_articles.
-		click(firehose_click_tag).
-		each(function(){
-			install_tag_server(this);
-			this.command_pipeline.push(firehose_handle_context_triggers);
-		});
-	$init_tag_widgets($new_articles.find('.tag-widget-stub'));
-	init_tag_ui_styles($new_articles);
-	$new_articles.article_info('tag-ui', true);
-	return $new_articles;
-}
-
 $(function(){
-	tag_ui_init_new_articles();
+	firehose_init_tag_ui();
+	$('#firehoselist').click(firehose_click_tag);	// if no #firehoselist, install click handler per article
 });
 
 
 function firehose_init_tag_ui( $new_entries ){
+	var $firehoselist = $('#firehoselist');
+
 	if ( ! $new_entries || ! $new_entries.length ) {
-		var $firehoselist = $('#firehoselist');
 		if ( $firehoselist.length ) {
 			$new_entries = $firehoselist.children('[id^=firehose-][class*=article]');
 		} else {
-			$new_entries = $('[id^=firehose-][class*=article]');
+			$new_entries = $('[class*=article]');
 		}
 	}
 
 	$new_entries = $new_entries.filter(':not([tag-server])');
+	var have_nodnix = $new_entries.children('[id^=updown-]').length;
 
 	$new_entries.
 		each(function(){
@@ -790,28 +775,35 @@ function firehose_init_tag_ui( $new_entries ){
 
 			install_tag_server(this, id);
 
-			if ( fh_is_admin ) {
+			if ( tag_admin ) {
 				this.command_pipeline.push(firehose_handle_admin_commands);
 			}
 
-			this.command_pipeline.push(
-				firehose_handle_context_triggers,
-				($this.attr('type') == 'comment') ?
-					firehose_handle_comment_nodnix :
-					firehose_handle_nodnix );
+			this.command_pipeline.push(firehose_handle_context_triggers);
 
-			$this.
-				find('> h3').
-					append('<div class="tag-widget-stub nod-nix-reasons" init="context_timeout:15000">' +
-							'<div class="tag-display-stub" context="related" init="menu:false" />' +
-						'</div>').
-					find('.tag-display-stub').
-						click(firehose_click_nodnix_reason);
+			if ( have_nodnix ) {
+				// install nod/nix handling only if I see the nod/nix buttons
+				this.command_pipeline.push(
+					($this.attr('type') == 'comment') ?
+						firehose_handle_comment_nodnix :
+						firehose_handle_nodnix);
+				$this.
+					find('> h3').
+						append('<div class="tag-widget-stub nod-nix-reasons" init="context_timeout:15000">' +
+								'<div class="tag-display-stub" context="related" init="menu:false" />' +
+							'</div>').
+						find('.tag-display-stub').
+							click(firehose_click_nodnix_reason);
+			}
 		});
+
+	if ( ! $firehoselist.length ) {
+		$new_entries.click(firehose_click_tag);
+	}
 
 	var $widgets = $init_tag_widgets($new_entries.find('.tag-widget-stub'));
 
-	if ( fh_is_admin ) {
+	if ( tag_admin ) {
 		$widgets.
 			filter('.body-widget').
 				each(function(){

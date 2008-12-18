@@ -55,6 +55,7 @@ __template__
 [% IF user.is_admin -%]
 <script src="[% constants.imagedir %]/admin.js?[% constants.cvs_tag_currentcode %]" type="text/javascript"></script>
 [% END %]
+[% PROCESS init_tag_ui %]
 [% PROCESS ajax_reskey_tag reskey_label => 'reskey_static', reskey_name => 'ajax_user_static', reskey_tag_js => 2 %]
 [% END # constants.plugin.Ajax %]
 __seclev__

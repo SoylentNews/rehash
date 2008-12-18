@@ -33,7 +33,6 @@ template=templates/paginate;firehose;default
 template=templates/portalmap;firehose;default
 template=templates/reject_firehose;misc;default
 template=templates/tag_widget;firehose;default
-template=templates/init_tag_ui;firehose;default
 task=firehose_reject_old.pl
 task=firehose_track_volume.pl
 task=firehose_backend.pl

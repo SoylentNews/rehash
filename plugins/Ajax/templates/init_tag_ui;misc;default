@@ -15,9 +15,11 @@ init_tag_ui
 __seclev__
 10000
 __template__
+[% IF !user.state.init_tag_ui_already_processed %]
 [% tags_reader = Slash.getObject('Slash::Tags', { db_type => 'reader' });
    postags = tags_reader.getPositivePopupTags.sort;
    negtags = tags_reader.getNegativePopupTags.sort;
+   user.state.init_tag_ui_already_processed = 1;
  -%]
 <script type="text/javascript">
 var suggestions_for_context = {
@@ -29,8 +31,10 @@ var suggestions_for_context = {
 [% END %]
 	metanod: 'insightful interesting informative funny underrated',
 	metanix: 'offtopic flamebait troll redundant overrated'
-}
+};
+var tag_admin = [% IF user.is_admin %]true[% ELSE %]false[% END %];
 </script>
+[% END %]
 
 __version__
 $Id$
