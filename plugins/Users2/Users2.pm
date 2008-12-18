@@ -60,7 +60,7 @@ sub getLatestSubmissions {
                 'id',
                 'id, UNIX_TIMESTAMP(createtime) as date',
                 'firehose',
-                "uid = $uid_q and rejected = 'no' and (type = 'submission' or type = 'feed')",
+                "uid = $uid_q and (type = 'submission' or type = 'feed')",
                 'order by createtime desc limit 5');
 
         foreach my $subid (keys %$submissions) {
