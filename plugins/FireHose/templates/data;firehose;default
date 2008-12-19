@@ -35,7 +35,7 @@ __template__
 		Submitted
 	[% END %]
 	[%- IF adminmode && item.type == "submission" %]</a>[% END -%]
-	[% IF item != "bookmark %]by [% END %][% IF adminmode && item.type != "story" && item.type != "bookmark" %]
+	[% IF item != "bookmark" %]by [% END %][% IF adminmode && item.type != "story" && item.type != "bookmark" %]
 		[% IF Slash.isAnon(the_user.uid) %][% the_user.nickname | strip_literal %]
 		[% ELSIF item.type != "bookmark" %]<a href="[% constants.real_rootdir %]/~[% the_user.nickname | strip_paramattr %]">[% the_user.nickname | strip_literal %] ([% the_user.uid %])</a>
 		[% END %]
