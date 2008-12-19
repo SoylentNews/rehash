@@ -5758,3 +5758,6 @@ DELETE FROM templates WHERE name='tagsfirehosedivuser' AND page='misc' AND skin=
 DELETE FROM templates WHERE name='tagsnodnixuser' AND page='misc' AND skin='default';
 DELETE FROM templates WHERE name='tagstack' AND page='firehose' AND skin='default';
 DELETE FROM templates WHERE name='topicsearch' AND page='search' AND skin='default';
+
+# 2008-12-18
+UPDATE vars SET value = 'T_2_5_0_236' WHERE name = 'cvs_tag_currentcode';
