@@ -199,7 +199,7 @@ sub updateArchivedDiscussions {
 	# Close expired submission discussions
 	$count += $self->sqlUpdate(
 		"firehose, discussions",
-		{ 'firehose.type' => 'archived' },
+		{ 'discussions.type' => 'archived' },
 		"firehose.type = 'submission'
 		 AND firehose.accepted = 'yes'
 		 AND firehose.discussion IS NOT NULL
