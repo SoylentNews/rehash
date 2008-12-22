@@ -71,7 +71,7 @@ IF !useredit.is_anon;
 			'<br><a href="mailto:';
 				useredit.realemail | strip_paramattr; '">';
 				Slash.ellipsify(Slash.strip_literal(useredit.realemail)); '</a>';
-			'<br>&nbsp;&nbsp;';
+			'<br>';
 			IF useredit.fakeemail;
 				IF useredit.fakeemail == useredit.realemail;
 					'(shown without obfuscation)';
@@ -85,7 +85,7 @@ IF !useredit.is_anon;
 			END;
 		ELSE;
 			# Looking at someone else; show fake email info.
-			'<br>&nbsp;&nbsp;';
+			'<br>';
 			IF useredit.fakeemail;
 				'<a href="mailto:';
 					useredit.fakeemail | strip_paramattr; '">';
