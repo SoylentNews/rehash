@@ -552,3 +552,14 @@ div.tag-widget.opera {/*fixing spacing between this widget and article*/
 padding-top:18px;
 margin-top:-16px;
 }
+
+div.tag-widget.opera div.tag-display.ready.dirty h1.legend {
+/*
+top:0px !important;
+left:0px !important;
+position:relative !important;
+float:left !important;
+clear:none !important;
+*/
+display:none;
+}
