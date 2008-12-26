@@ -563,3 +563,10 @@ clear:none !important;
 */
 display:none;
 }
+
+
+
+div.tag-widget.safari div.tag-display {
+	display:inline-block;
+	padding:20px 0 0;
+}
